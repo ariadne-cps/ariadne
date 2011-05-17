@@ -72,7 +72,7 @@ typedef Matrix<Interval> IntervalMatrix;
 typedef VectorRange<IntervalVector> IntervalVectorRange;
 
 
-std::ostream& operator<<(std::ostream& os, const NonlinearConstraint& c) {
+std::ostream& operator<<(std::ostream& os, const RealNonlinearConstraint& c) {
     static const Float inf = Ariadne::inf<Float>();
     if(c.bounds().lower()==c.bounds().upper()) { return os << c.function() << "==" << c.bounds().upper(); }
     if(c.bounds().upper()==inf) { return os << c.bounds().lower() << "<=" << c.function(); }
@@ -82,15 +82,15 @@ std::ostream& operator<<(std::ostream& os, const NonlinearConstraint& c) {
 
 
 
-Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<NonlinearConstraint>& constraints) const
+Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<IntervalNonlinearConstraint>& constraints) const
 {
     if(constraints.empty()) { return make_pair(!domain.empty(),domain.centre()); }
 
-    RealVectorFunction function(constraints.size());
+    IntervalVectorFunction function;
     Box bounds(constraints.size());
 
     for(uint i=0; i!=constraints.size(); ++i) {
-        function.set(i,constraints[i].function());
+        function[i]=constraints[i].function();
         bounds[i]=constraints[i].bounds();
     }
     return this->feasible(domain,function,bounds);
@@ -185,7 +185,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Interval
         }
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
 
-        //Pair<Box,Box> sd=solver.split(List<NonlinearConstraint>(1u,constraint),d);
+        //Pair<Box,Box> sd=solver.split(List<RealNonlinearConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<Box,Box> sd=d.split();
         Point nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
@@ -245,7 +245,7 @@ bool has_nan(const Box& domain) {
     return false;
 }
 
-bool ConstraintSolver::reduce(Box& domain, const List<NonlinearConstraint>& constraints) const
+bool ConstraintSolver::reduce(Box& domain, const List<IntervalNonlinearConstraint>& constraints) const
 {
     static const bool USE_BOX_REDUCE = false;
 
@@ -455,7 +455,7 @@ bool ConstraintSolver::box_reduce(Box& domain, const IntervalScalarFunctionInter
 
 namespace {
 
-void compute_monotonicity(Box& domain, const NonlinearConstraint& constraint) {
+void compute_monotonicity(Box& domain, const RealNonlinearConstraint& constraint) {
 /*
     static const uint n = domain.size();
 

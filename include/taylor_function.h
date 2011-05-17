@@ -535,10 +535,10 @@ bool refines(const VectorTaylorFunction&, const VectorTaylorFunction&);
 bool disjoint(const VectorTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction intersection(const VectorTaylorFunction&, const VectorTaylorFunction&);
 ScalarTaylorFunction compose(const RealScalarFunction&, const VectorTaylorFunction&);
-ScalarTaylorFunction compose(const IntervalScalarFunctionInterface&, const VectorTaylorFunction&);
+ScalarTaylorFunction compose(const IntervalScalarFunction&, const VectorTaylorFunction&);
 ScalarTaylorFunction compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
-VectorTaylorFunction compose(const IntervalVectorFunctionInterface&, const VectorTaylorFunction&);
+VectorTaylorFunction compose(const IntervalVectorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction compose(const RealVectorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint);
 VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint, Float);
@@ -863,6 +863,7 @@ class VectorTaylorFunctionElementReference
     void operator=(const VectorTaylorFunctionElementReference& x) { this->_c->set(this->_i,x._c->get(x._i)); }
     void operator=(const ScalarTaylorFunction& x) { this->_c->set(this->_i,x); }
     const TaylorModel<Interval>& model() const { return this->_c->_models[this->_i]; }
+    Float error() const { return this->_c->_models[this->_i].error(); }
     void set_error(const Float& e) { this->_c->_models[this->_i].set_error(e); }
     void sweep() { this->_c->_models[this->_i].sweep(); }
     template<class X> X evaluate(const Vector<X>& x) const { return this->_c->get(this->_i).evaluate(x); }
@@ -884,7 +885,9 @@ class TaylorFunctionFactory
     ScalarTaylorFunction create(const IntervalVector& domain, const IntervalScalarFunctionInterface& function) const;
     VectorTaylorFunction create(const IntervalVector& domain, const IntervalVectorFunctionInterface& function) const;
     ScalarTaylorFunction create_zero(const IntervalVector& domain) const;
+    ScalarTaylorFunction create_constant(const IntervalVector& domain, Interval c) const;
     ScalarTaylorFunction create_coordinate(const IntervalVector& domain, uint k) const;
+    VectorTaylorFunction create_zero(uint i, const IntervalVector& domain) const;
     VectorTaylorFunction create_identity(const IntervalVector& domain) const;
   private:
     ScalarTaylorFunction* _create(const IntervalVector& domain, const IntervalScalarFunctionInterface& function) const;

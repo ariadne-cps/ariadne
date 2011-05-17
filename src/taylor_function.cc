@@ -1526,7 +1526,7 @@ compose(const RealVectorFunction& g, const VectorTaylorFunction& f)
 }
 
 VectorTaylorFunction
-compose(const IntervalVectorFunctionInterface& g, const VectorTaylorFunction& f)
+compose(const IntervalVectorFunction& g, const VectorTaylorFunction& f)
 {
     return VectorTaylorFunction(f.domain(),g.evaluate(f.models()));
 }

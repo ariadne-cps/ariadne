@@ -55,6 +55,7 @@ class ConstraintSet;
 class BoundedConstraintSet;
 class ConstrainedImageSet;
 
+class Grid;
 
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief A set defined as the image of a box under a continuous function.
@@ -109,13 +110,13 @@ class ConstraintSet
     //! \brief Construct from a polyhedron.
     ConstraintSet(const Polyhedron& p);
     //! \brief Construct from a list of constraints.
-    ConstraintSet(const List<NonlinearConstraint>& c);
+    ConstraintSet(const List<RealNonlinearConstraint>& c);
     //! \brief The codomain of the set.
     const Vector<Interval>& codomain() const { return this->_codomain; }
     //! \brief The function used to define the set.
     const RealVectorFunction& function() const { return this->_function; };
     //! \brief The \a i<sup>th</sup> constraint \f$g_i(x)\in c_i\f$.
-    NonlinearConstraint constraint(uint i) const { return NonlinearConstraint(this->_function[i],this->_codomain[i]); }
+    RealNonlinearConstraint constraint(uint i) const { return RealNonlinearConstraint(this->_function[i],this->_codomain[i]); }
     //! \brief The number of constraints.
     uint number_of_constraints() const { return this->_codomain.size(); };
 
@@ -150,7 +151,7 @@ class BoundedConstraintSet
     //! \brief Construct the preimage of \a C under \a g.
     BoundedConstraintSet(const Vector<Interval>& D, const RealVectorFunction& g, const Vector<Interval>& C);
     //! \brief Construct the restriction of \a D under the constraints \a c.
-    BoundedConstraintSet(const Vector<Interval>& D, const List<NonlinearConstraint>& c);
+    BoundedConstraintSet(const Vector<Interval>& D, const List<RealNonlinearConstraint>& c);
     //! \brief The domain of the set.
     const Vector<Interval>& domain() const { return this->_domain; }
     //! \brief The codomain of the set.
@@ -158,7 +159,7 @@ class BoundedConstraintSet
     //! \brief The function used to define the set.
     const RealVectorFunction& function() const { return this->_function; };
     //! \brief The \a i<sup>th</sup> constraint \f$g_i(x)\in c_i\f$.
-    NonlinearConstraint constraint(uint i) const { return NonlinearConstraint(this->_function[i],this->_codomain[i]); }
+    RealNonlinearConstraint constraint(uint i) const { return RealNonlinearConstraint(this->_function[i],this->_codomain[i]); }
     //! \brief The number of constraints.
     uint number_of_constraints() const { return this->_codomain.size(); };
 
@@ -182,7 +183,7 @@ class ConstrainedImageSet
 {
     Box _domain;
     RealVectorFunction _function;
-    List< NonlinearConstraint > _constraints;
+    List< RealNonlinearConstraint > _constraints;
   public:
     //! \brief Construct the set with zero-dimensional parameterisation in zero dimensions with no constraints.
     ConstrainedImageSet() : _domain(), _function() { }
@@ -192,12 +193,12 @@ class ConstrainedImageSet
     ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn) : _domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn, using constraint \a c.
-    ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn, const NonlinearConstraint& c) : _domain(dom), _function(fn), _constraints(1u,c) {
+    ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn, const RealNonlinearConstraint& c) : _domain(dom), _function(fn), _constraints(1u,c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn);
         ARIADNE_ASSERT_MSG(dom.size()==c.function().argument_size(),"dom="<<dom<<", c="<<c);
     }
     //! \brief Construct the image of \a dom under \a fn, using constraints \a c.
-    ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn, const List<NonlinearConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
+    ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn, const List<RealNonlinearConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn.
     ConstrainedImageSet(const List<Interval>& dom, const List<RealScalarFunction>& fn) : _domain(dom), _function(fn) {
@@ -211,13 +212,13 @@ class ConstrainedImageSet
     //! \brief The function used to define the set.
     const RealVectorFunction& function() const { return this->_function; };
     //! \brief The function used to define the set.
-    const List<NonlinearConstraint>& constraints() const { return this->_constraints; };
+    const List<RealNonlinearConstraint>& constraints() const { return this->_constraints; };
     //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.
     uint number_of_parameters() const { return this->_domain.size(); };
     //! \brief The number of constraints.
     uint number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The \a i<sup>th</sup> constraint.
-    NonlinearConstraint const& constraint(uint i) const { return this->_constraints[i]; }
+    RealNonlinearConstraint const& constraint(uint i) const { return this->_constraints[i]; }
 
     //! \brief Apply the function \f$h\f$ to obtain the set \f$h\circ f(D\cap g^{-1}(C))\f$.
     void apply(const RealVectorFunction& h) {
@@ -225,24 +226,14 @@ class ConstrainedImageSet
     }
 
     //! \brief Introduce a new constraint of the form \f$g(y)\in [c_l,c_u]\f$.
-    void new_parameter_constraint(const NonlinearConstraint& c) {
+    void new_parameter_constraint(const RealNonlinearConstraint& c) {
         ARIADNE_ASSERT_MSG(c.function().argument_size()==this->domain().size(),*this<<", "<<c);
         this->_constraints.append(c); }
 
     //! \brief Introduce a new constraint of the form \f$g(y)\in [c_l,c_u]\f$.
-    void new_space_constraint(const NonlinearConstraint& c) {
+    void new_space_constraint(const RealNonlinearConstraint& c) {
         ARIADNE_ASSERT_MSG(c.function().argument_size()==this->_function.result_size(),*this<<", "<<c);
-        this->_constraints.append(NonlinearConstraint(compose(c.function(),_function),c.bounds())); }
-
-    //! \brief Introduce a new constraint of the form \f$g(y)\in [c_l,c_u]\f$.
-    void new_parameter_constraint(const RealScalarFunction& g, const Interval& C) {
-        ARIADNE_ASSERT_MSG(g.argument_size()==this->domain().size(),*this<<", "<<g<<" in "<<C);
-        this->_constraints.append(NonlinearConstraint(g,C)); }
-
-    //! \brief Introduce a new constraint of the form \f$g(x)\in [c_l,c_u]\f$.
-    void new_space_constraint(const RealScalarFunction& g, const Interval& C) {
-        ARIADNE_ASSERT_MSG(g.argument_size()==this->_function.result_size(),*this<<", "<<g<<" in "<<C);
-        this->_constraints.append(NonlinearConstraint(compose(g,_function),C)); }
+        this->_constraints.append(RealNonlinearConstraint(compose(c.function(),_function),c.bounds())); }
 
     ConstrainedImageSet* clone() const { return new ConstrainedImageSet(*this); }
     uint dimension() const { return this->_function.result_size(); }
@@ -267,13 +258,12 @@ class ConstrainedImageSet
     void adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
-    tribool satisfies(const NonlinearConstraint& c) const;
+    tribool satisfies(const RealNonlinearConstraint& c) const;
 
     //! \brief Draw to a canvas.
     void draw(CanvasInterface&) const;
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;
-
   private:
     void affine_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
     void subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
@@ -281,6 +271,127 @@ class ConstrainedImageSet
 };
 
 
-} // namespace Ariadne
+class IntervalConstrainedImageSet;
+std::ostream& operator<<(std::ostream&, const IntervalConstrainedImageSet&);
+
+//! \ingroup GeometryModule ExactSetSubModule
+//! \brief A set defined as the image of the intersection of a box \f$D\f$ and a constraint set \f$g^{-1}(C)\f$ under a function \f$f\f$.
+//! In other words, \f$S=f(D\cap g^{-1}(C))\f$.
+class IntervalConstrainedImageSet
+    : public LocatedSetInterface, public DrawableInterface
+{
+    IntervalVector _domain;
+    Box _reduced_domain;
+    IntervalVectorFunction _function;
+    List< IntervalScalarFunction > _negative_constraints;
+    List< IntervalScalarFunction > _zero_constraints;
+  public:
+    //! \brief Construct the set with zero-dimensional parameterisation in zero dimensions with no constraints.
+    IntervalConstrainedImageSet() : _domain(), _function() { }
+    //! \brief Construct the box \a dom.
+    IntervalConstrainedImageSet(const Box& dom)
+        : _domain(dom), _reduced_domain(dom)
+        , _function(static_cast<IntervalVectorFunctionInterface const&>(RealVectorFunction::identity(dom.size()))) { }
+    //! \brief Construct the image of \a dom under \a fn.
+    IntervalConstrainedImageSet(const Vector<Interval>& dom, const IntervalVectorFunction& fn) : _domain(dom), _reduced_domain(dom), _function(fn) {
+        ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
+
+    //! \brief The domain of the set.
+    const IntervalVector& domain() const { return this->_domain; }
+    //! \brief The function used to define the set.
+    const IntervalVectorFunction& function() const { return this->_function; };
+    const List<IntervalNonlinearConstraint> constraints() const;
+    const List<IntervalScalarFunction>& negative_constraints() const { return this->_negative_constraints; };
+    const List<IntervalScalarFunction>& zero_constraints() const { return this->_zero_constraints; };
+    //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.
+    uint number_of_parameters() const { return this->_domain.size(); };
+    //! \brief The number of constraints.
+    uint number_of_constraints() const { return this->_negative_constraints.size() + this->_zero_constraints.size(); };
+    uint number_of_negative_constraints() const { return this->_negative_constraints.size(); };
+    uint number_of_zero_constraints() const { return this->_zero_constraints.size(); };
+    //! \brief The \a i<sup>th</sup> constraint.
+    IntervalNonlinearConstraint const& constraint(uint i) const;
+    IntervalScalarFunction const& negative_constraint(uint i) const { return this->_negative_constraints[i]; }
+    IntervalScalarFunction const& zero_constraint(uint i) const { return this->_zero_constraints[i]; }
+
+    //! \brief Apply the function \f$h\f$ to obtain the set \f$h\circ f(D\cap g^{-1}(C))\f$.
+    void apply(const IntervalVectorFunction& h) {
+        this->_function=compose(h,this->_function); }
+
+    //! \brief Introduce a new constraint of the form \f$g(s) \leq 0\f$.
+    void new_negative_parameter_constraint(const IntervalScalarFunction& g) {
+        ARIADNE_ASSERT_MSG(g.argument_size()==this->domain().size(),*this<<", "<<g);
+        this->_negative_constraints.append(g); }
+
+    //! \brief Introduce a new constraint of the form \f$g(s) = 0\f$.
+    void new_zero_parameter_constraint(const IntervalScalarFunction& g) {
+        ARIADNE_ASSERT_MSG(g.argument_size()==this->domain().size(),*this<<", "<<g);
+        this->_zero_constraints.append(g); }
+
+    //! \brief Introduce a new constraint of the form \f$g(x) \leq 0\f$.
+    void new_negative_space_constraint(const IntervalScalarFunction& g) {
+        ARIADNE_ASSERT_MSG(g.argument_size()==this->domain().size(),*this<<", "<<g);
+        this->_negative_constraints.append(compose(g,this->_function)); }
+
+    //! \brief Introduce a new constraint of the form \f$g(x) = 0\f$.
+    void new_zero_space_constraint(const IntervalScalarFunction& g) {
+        ARIADNE_ASSERT_MSG(g.argument_size()==this->domain().size(),*this<<", "<<g);
+        this->_zero_constraints.append(compose(g,this->_function)); }
+
+    //! \brief Introduce a new constraint of the form \f$g(s)\in [c_l,c_u]\f$.
+    void new_parameter_constraint(const IntervalNonlinearConstraint& c) {
+        ARIADNE_ASSERT_MSG(c.function().argument_size()==this->number_of_parameters(),*this<<", "<<c);
+        ARIADNE_NOT_IMPLEMENTED;
+    }
+
+    //! \brief Introduce a new constraint of the form \f$g(x)\in [c_l,c_u]\f$.
+    void new_space_constraint(const IntervalNonlinearConstraint& c) {
+        ARIADNE_ASSERT_MSG(c.function().argument_size()==this->dimension(),*this<<", "<<c);
+        ARIADNE_NOT_IMPLEMENTED;
+    }
+
+    IntervalConstrainedImageSet* clone() const { return new IntervalConstrainedImageSet(*this); }
+    uint dimension() const { return this->_function.result_size(); }
+
+    IntervalVectorFunction constraint_function() const;
+    IntervalVector constraint_bounds() const;
+
+    //! \brief Reduce the size of the domain by constraint propagation, if possible.
+    void reduce();
+    //! \brief A coarse over-approximation to the set. Computed by taking the interval evaluation \f$h(D)\f$.
+    Box bounding_box() const;
+    //! \brief Construct an affine over-approximation
+    AffineSet affine_over_approximation() const;
+    //! \brief Construct an affine approximation, with undefined accuracy.
+    AffineSet affine_approximation() const;
+    //! \brief Split into two pieces by subdividing along a coordinate direction.
+    Pair<IntervalConstrainedImageSet,IntervalConstrainedImageSet> split() const;
+    //! \brief Split into two pieces by subdividing along the \a j<sup>th</sup> coordinate direction.
+    Pair<IntervalConstrainedImageSet,IntervalConstrainedImageSet> split(uint j) const;
+
+    //! \brief Test if the set is empty.
+    tribool empty() const;
+    //! \brief Test if the set is a strict subset of a box.
+    tribool inside(const Box& bx) const;
+    //! \brief Test if the set is disjoint from a box.
+    tribool disjoint(const Box&) const;
+    //! \brief Test if the set overlaps (intersects the interior of) a box.
+    tribool overlaps(const Box&) const;
+    //! \brief Adjoin an outer approximation to a paving.
+    void adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+
+    //! \brief Test if the set satisfies the state constraint at all points.
+    tribool satisfies(const IntervalNonlinearConstraint& c) const;
+
+    //! \brief Draw to a canvas.
+    void draw(CanvasInterface&) const;
+    //! \brief Write to an output stream.
+    std::ostream& write(std::ostream&) const;
+};
+
+
+
+} //namespace Ariadne
+
 
 #endif

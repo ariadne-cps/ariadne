@@ -103,6 +103,7 @@ class ScalarFunction<Interval>
     ScalarFunction<Interval>(ScalarFunctionInterface<Interval>* fptr) : _ptr(fptr) { }
     ScalarFunction<Interval>(shared_ptr< ScalarFunctionInterface<Interval> > fptr) : _ptr(fptr) { }
     ScalarFunction<Interval>(const ScalarFunctionInterface<Interval>& fref) : _ptr(fref._clone()) { }
+    ScalarFunction<Interval>(const ScalarFunction<Real>& f);
 
     const ScalarFunctionInterface<Interval>* raw_pointer() const { return this->_ptr.operator->(); }
     operator const ScalarFunctionInterface<Interval>& () const { return *this->_ptr; }
@@ -145,10 +146,11 @@ class ScalarFunction<Real>
 
     ScalarFunction<Real>(ScalarFunctionInterface<Real>* fptr) : _ptr(fptr) { }
     const ScalarFunctionInterface<Real>* raw_pointer() const { return this->_ptr.operator->(); }
+    const shared_ptr< ScalarFunctionInterface<Real> > shared_pointer() const { return this->_ptr; }
     operator const ScalarFunctionInterface<Real>& () const { return *this->_ptr; }
 
     operator ScalarFunction<Float> () const { return ScalarFunction<Float>(this->_ptr); }
-    operator ScalarFunction<Interval> () const { return ScalarFunction<Interval>(this->_ptr); }
+    //operator ScalarFunction<Interval> () const { return ScalarFunction<Interval>(this->_ptr); }
 
     Nat argument_size() const { return this->_ptr->argument_size(); }
     template<class X> X evaluate(const Vector<X>& x) const { return this->_ptr->evaluate(x); }
@@ -183,10 +185,15 @@ class ScalarFunction<Real>
 };
 
 
+inline ScalarFunction<Interval>::ScalarFunction(const ScalarFunction<Real>& f)
+    : _ptr(boost::dynamic_pointer_cast< ScalarFunctionInterface<Real>  >(f.shared_pointer())) { }
+
 // FIXME: This conversion to a RealScalarFunction is a hack. The kind of derivative available should
 // depend on the function type, and not require casting.
 inline ScalarFunction<Interval> ScalarFunction<Interval>::derivative(uint j) const {
     return ScalarFunction<Interval>(static_cast<const ScalarFunction<Interval>&>(boost::dynamic_pointer_cast< ScalarFunctionInterface<Real> >(_ptr)->derivative(j))); }
+
+ScalarFunction<Interval> restrict(ScalarFunction<Interval> const& f, const IntervalVector& dom);
 
 inline Float evaluate_approx(const ScalarFunction<Real>& f, const Vector<Float>& x) { return f(x); }
 inline Interval evaluate(const ScalarFunction<Real>& f, const Vector<Interval>& x) { return f(x); }
@@ -267,6 +274,7 @@ class VectorFunction<Interval>
   public:
     static VectorFunction<Interval> identity(Nat n);
 
+    VectorFunction<Interval>();
     VectorFunction<Interval>(const List<ScalarFunction<Interval> >& lf);
     VectorFunction<Interval>(const List<ScalarFunction<Real> >& lf);
     VectorFunction<Interval>(Nat n, const ScalarFunction<Interval>& f);
@@ -295,6 +303,23 @@ class VectorFunction<Interval>
   private:
     shared_ptr< VectorFunctionInterface<Interval> > _ptr;
 };
+
+ScalarFunction<Interval> operator+(const ScalarFunction<Interval>& f);
+ScalarFunction<Interval> operator-(const ScalarFunction<Interval>& f);
+ScalarFunction<Interval> operator+(const ScalarFunction<Interval>& f1, const ScalarFunction<Interval>& f2);
+ScalarFunction<Interval> operator-(const ScalarFunction<Interval>& f1, const ScalarFunction<Interval>& f2);
+ScalarFunction<Interval> operator+(const ScalarFunction<Interval>& f1, const Interval& c2);
+ScalarFunction<Interval> operator+(const Interval& c1, const ScalarFunction<Interval>& f2);
+ScalarFunction<Interval> operator-(const ScalarFunction<Interval>& f1, const Interval& c2);
+ScalarFunction<Interval> operator-(const Interval& c1, const ScalarFunction<Interval>& f2);
+ScalarFunction<Interval> compose(const ScalarFunction<Interval>& f, const VectorFunction<Interval>& g);
+VectorFunction<Interval> compose(const VectorFunction<Interval>& f, const VectorFunction<Interval>& g);
+
+VectorFunction<Interval> join(const VectorFunction<Interval>& f1, const VectorFunction<Interval>& f2);
+VectorFunction<Interval> join(const VectorFunction<Interval>& f1, const ScalarFunction<Interval>& f2);
+
+inline Interval evaluate(const ScalarFunction<Interval>& f, const Vector<Interval>& x) { return f(x); }
+inline Vector<Interval> evaluate(const VectorFunction<Interval>& f, const Vector<Interval>& x) { return f(x); }
 
 
 template<class X>
@@ -429,7 +454,6 @@ inline List< ScalarFunction<Real> > operator,(const List< ScalarFunction<Real> >
     return (vf1,ScalarFunction<Real>::constant(vf1.back().argument_size(),c2)); }
 
 inline std::ostream& operator<<(std::ostream& os, const VectorFunction<Real>& f) { return f.write(os); }
-
 
 
 //! \ingroup FunctionModule

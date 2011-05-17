@@ -39,6 +39,7 @@ ARIADNE_SRC = \
 	taylor_set.cc \
 	grid_set.cc \
 	affine_set.cc \
+	enclosure.cc \
 	map_evolver.cc \
 	vector_field_evolver.cc \
 	discretiser.cc \

@@ -137,15 +137,15 @@ class Vector
     //! \brief The number of elements of the vector.
     size_t size() const { return this->_ary.size(); }
     //! \brief A reference to the value stored in the \a i<sup>th</sup> element.
-    X& at(size_t i) { ARIADNE_PRECONDITION(i<this->size()); return (*this)[i]; }
+    X& at(size_t i) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return (*this)[i]; }
     //! \brief Get the value stored in the \a i<sup>th</sup> element.
-    const X& get(size_t i) const { ARIADNE_PRECONDITION(i<this->size()); return (*this)[i]; }
+    const X& get(size_t i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return (*this)[i]; }
     //! \brief Set the value stored in the \a i<sup>th</sup> element to \a x.
-    template<class T> void set(size_t i, const T& x) { ARIADNE_PRECONDITION(i<this->size()); (*this)[i] = x; }
+    template<class T> void set(size_t i, const T& x) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); (*this)[i] = x; }
     //! \brief C-style subscripting operator.
-    X& operator[](size_t i) { ARIADNE_PRECONDITION(i<this->size()); return this->_ary[i]; }
+    X& operator[](size_t i) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return this->_ary[i]; }
     //! \brief C-style constant subscripting operator.
-    const X& operator[](size_t i) const { ARIADNE_PRECONDITION(i<this->size()); return this->_ary[i]; }
+    const X& operator[](size_t i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return this->_ary[i]; }
     //@}
 
 #ifdef DOXYGEN

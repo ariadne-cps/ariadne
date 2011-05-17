@@ -293,10 +293,10 @@ void export_scalar_function()
     scalar_function_class.def("__rsub__", &__rsub__<RealScalarFunction,RealScalarFunction,Real>);
     scalar_function_class.def("__rmul__", &__rmul__<RealScalarFunction,RealScalarFunction,Real>);
     scalar_function_class.def("__rdiv__", &__rdiv__<RealScalarFunction,RealScalarFunction,Real>);
-    scalar_function_class.def("__eq__", &__eq__<NonlinearConstraint,RealScalarFunction,Interval>);
-    scalar_function_class.def("__eq__", &__eq__<NonlinearConstraint,RealScalarFunction,Real>);
-    scalar_function_class.def("__le__", &__le__<NonlinearConstraint,RealScalarFunction,Real>);
-    scalar_function_class.def("__ge__", &__ge__<NonlinearConstraint,RealScalarFunction,Real>);
+    scalar_function_class.def("__eq__", &__eq__<RealNonlinearConstraint,RealScalarFunction,Interval>);
+    scalar_function_class.def("__eq__", &__eq__<RealNonlinearConstraint,RealScalarFunction,Real>);
+    scalar_function_class.def("__le__", &__le__<RealNonlinearConstraint,RealScalarFunction,Real>);
+    scalar_function_class.def("__ge__", &__ge__<RealNonlinearConstraint,RealScalarFunction,Real>);
     scalar_function_class.def(self_ns::str(self));
 
     scalar_function_class.def("constant", (RealScalarFunction(*)(uint,Real)) &RealScalarFunction::constant);

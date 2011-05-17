@@ -226,11 +226,11 @@ class HybridEnclosure
     //! \brief Introduce a new independent variable with domain \a ivl.
     void new_variable(Interval ivl, EnclosureVariableType);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$. \deprecated
-    void new_constraint(DiscreteEvent e, NonlinearConstraint c);
+    void new_constraint(DiscreteEvent e, IntervalNonlinearConstraint c);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.
-    void new_state_constraint(DiscreteEvent e, NonlinearConstraint c);
+    void new_state_constraint(DiscreteEvent e, IntervalNonlinearConstraint c);
     //! \brief Introduces a new constraint \f$C\f$ on \f$s\f$.
-    void new_parameter_constraint(DiscreteEvent e, NonlinearConstraint c);
+    void new_parameter_constraint(DiscreteEvent e, IntervalNonlinearConstraint c);
     //! \brief Introduces the new invariant (progress predicate) \f$c(x)\leq0\f$.
     void new_invariant(DiscreteEvent e, RealScalarFunction c);
     //! \brief Introduces the new invariant (progress predicate) \f$c(x)\leq0\f$.
@@ -249,7 +249,7 @@ class HybridEnclosure
     //! \brief Tests whether the set is empty.
     tribool empty() const;
     //! \brief Tests whether the set satisfies the constraint \a c.
-    tribool satisfies(NonlinearConstraint c) const;
+    tribool satisfies(RealNonlinearConstraint c) const;
 
     //! \brief Returns a bounding box for the set. Computed by a simple interval evaluation of \f$f(D)\f$.
     HybridBox bounding_box() const;
@@ -291,7 +291,7 @@ class HybridEnclosure
     void _apply_flow_step(VectorIntervalFunction phi, ScalarIntervalFunction elps);
     void _check() const; // Check that set is well-formed.
     // Compute constraints of the set
-    List<NonlinearConstraint> constraints() const;
+    List<IntervalNonlinearConstraint> constraints() const;
 
 };
 

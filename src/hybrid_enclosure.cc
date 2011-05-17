@@ -277,7 +277,7 @@ void HybridEnclosure::new_guard(DiscreteEvent event, RealScalarFunction constrai
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, NonlinearConstraint constraint) {
+void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, IntervalNonlinearConstraint constraint) {
     ARIADNE_ASSERT_MSG(constraint.function().argument_size()==parameter_domain().size(),
                        "constraint "<<constraint<<" is incompatible with parameter domain "<<parameter_domain());
     ScalarIntervalFunction function(this->_set.domain(),constraint.function(),this->space_function().sweeper());
@@ -294,10 +294,10 @@ void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, NonlinearCon
     }
 }
 
-void HybridEnclosure::new_state_constraint(DiscreteEvent event, NonlinearConstraint constraint) {
+void HybridEnclosure::new_state_constraint(DiscreteEvent event, IntervalNonlinearConstraint constraint) {
     ARIADNE_ASSERT_MSG(constraint.function().argument_size()==dimension(),
                        "constraint "<<constraint<<" is incompatible with dimension "<<dimension());
-    NonlinearConstraint parameter_constraint(compose(constraint.function(),this->_set.function()).real_function(),constraint.bounds());
+    IntervalNonlinearConstraint parameter_constraint(compose(constraint.function(),this->_set.function()).real_function(),constraint.bounds());
     this->new_parameter_constraint(event,parameter_constraint);
 }
 
@@ -478,13 +478,13 @@ tribool HybridEnclosure::disjoint(const HybridBox& hbx) const {
     else { return true; }
 }
 
-tribool HybridEnclosure::satisfies(NonlinearConstraint c) const
+tribool HybridEnclosure::satisfies(RealNonlinearConstraint c) const
 {
     return this->continuous_state_set().satisfies(c);
 }
 
 
-List<NonlinearConstraint> HybridEnclosure::constraints() const {
+List<IntervalNonlinearConstraint> HybridEnclosure::constraints() const {
     return this->continuous_state_set().constraints();
 }
 

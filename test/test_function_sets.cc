@@ -92,6 +92,9 @@ class TestConstrainedImageSet
         ARIADNE_TEST_ASSERT(set.disjoint(Box(2, 1.0,1.25, 1.0,1.25)));
         ARIADNE_TEST_ASSERT(set.overlaps(Box(2, -1.0,-0.875, 1.375,1.625)));
         ARIADNE_TEST_PRINT(f(Point(2,0.375,-0.375)));
+
+        IntervalConstrainedImageSet idisc(IntervalVector((Interval(-2,+2),Interval(-2,+2))),IntervalVectorFunction((x[0],x[1])));
+
     }
 
     void test_disjoint() {
@@ -256,8 +259,8 @@ class TestConstrainedImageSet
         RealScalarFunction y=RealScalarFunction::coordinate(2,1);
         uint acc = 2u;
 
-        //test_draw("ellipse",ConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t),(s*s+t*t<=0.75)),acc+1u);
-        test_draw("concave",ConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,1.0*s*s+t),(2*s+0.25*s*s+t-2.0<=0)),acc);
+        test_draw("ellipse",ConstrainedImageSet(Box(2,-1.0,1.0,-1.0,1.0),(2*s+t,s+t),(s*s+t*t<=0.75)),acc+1u);
+        //test_draw("concave",ConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,1.0*s*s+t),(2*s+0.25*s*s+t-2.0<=0)),acc);
     }
 };
 

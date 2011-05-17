@@ -58,7 +58,7 @@ class TestConstraintSolver
     void test_empty_reduce_inequality() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         Box D(2, 0.0,1.0, 0.0,1.0);
-        List<NonlinearConstraint> c;
+        List<RealNonlinearConstraint> c;
         c.append(4.0<=2*x[0]+x[1]);
 
         ConstraintSolver propagator;
@@ -72,7 +72,7 @@ class TestConstraintSolver
     void test_empty_reduce_equality() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         Box D(2, 0.0,1.0, 0.0,1.0);
-        List<NonlinearConstraint> c;
+        List<RealNonlinearConstraint> c;
         c.append(2*x[0]+x[1]==4);
 
         ConstraintSolver propagator;
@@ -86,7 +86,7 @@ class TestConstraintSolver
     void test_empty_reduce_mixed() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         Box D(2, 0.0,0.25, 0.0, 2.0);
-        List<NonlinearConstraint> c;
+        List<RealNonlinearConstraint> c;
         c.append(x[1]<=1);
         c.append(x[0]+x[1]==2);
 
@@ -101,7 +101,7 @@ class TestConstraintSolver
     void test_empty_hull_reduce() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         Box D(2, 0.0,0.25, 0.0, 2.0);
-        List<NonlinearConstraint> c;
+        List<RealNonlinearConstraint> c;
         c.append(x[1]<=1);
         c.append(x[0]+x[1]==2);
 
@@ -117,7 +117,7 @@ class TestConstraintSolver
     void test_empty_box_reduce() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         Box D(2, 0.0,0.25, 0.0, 2.0);
-        List<NonlinearConstraint> c;
+        List<RealNonlinearConstraint> c;
         c.append(x[1]<=1);
         c.append(x[0]+x[1]==2);
 
@@ -137,7 +137,7 @@ class TestConstraintSolver
     void test_hull_reduce() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         Box D(2, 0.0,2.0, 0.0,2.0);
-        List<NonlinearConstraint> c;
+        List<RealNonlinearConstraint> c;
         c.append(-2.0<=2*x[0]+x[1]<=1.0);
 
         ConstraintSolver propagator;
@@ -150,7 +150,7 @@ class TestConstraintSolver
     void test_box_reduce() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         Box D(2, 0.0,2.0, 0.0,2.0);
-        NonlinearConstraint c=(-2.0<=2*x[0]+x[1]<=1.0);
+        RealNonlinearConstraint c=(-2.0<=2*x[0]+x[1]<=1.0);
 
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
@@ -165,7 +165,7 @@ class TestConstraintSolver
     void test_monotone_reduce() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         Box D(2, 0.0,2.0, 0.0,2.0);
-        NonlinearConstraint c=(-2.0<=2*x[0]+x[1]<=1.0);
+        RealNonlinearConstraint c=(-2.0<=2*x[0]+x[1]<=1.0);
 
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;

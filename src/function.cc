@@ -34,6 +34,7 @@
 #include "function_mixin.h"
 #include "function_mixin.tcc"
 
+#include "taylor_function.h"
 
 namespace Ariadne {
 
@@ -62,6 +63,16 @@ ScalarFunction<Real> make_function(const Expression<Real>& expr, const List< Var
 
 Matrix<Interval> VectorFunctionInterface<Interval>::jacobian(const Vector<Interval>& x) const {
     return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
+
+template<class R, class X> ScalarFunction<R> function_cast(const ScalarFunction<X>& f) {
+    return f.operator ScalarFunction<R>();
+}
+
+template<class R, class X> VectorFunction<R> function_cast(const VectorFunction<X>& f) {
+    return VectorFunction<R>(f.raw_pointer()->clone());
+}
+
+
 
 
 //! A function defined by a formula
@@ -663,7 +674,7 @@ class CombinedFunctionBody
 
 
 
-//------------------------ RealScalarFunction -----------------------------------//
+//------------------------ FloatScalarFunction -----------------------------------//
 
 FloatScalarFunction::ScalarFunction(Nat n)
     : _ptr(new ScalarPolynomialFunctionBody(Polynomial<Float>::constant(n,Float(0.0))))
@@ -671,10 +682,45 @@ FloatScalarFunction::ScalarFunction(Nat n)
 }
 
 
+//------------------------ IntervalScalarFunction -----------------------------------//
+
 IntervalScalarFunction::ScalarFunction(Nat n)
     : _ptr(new ScalarPolynomialFunctionBody(Polynomial<Interval>::constant(n,Interval(0.0))))
 {
 }
+
+IntervalScalarFunction restrict(IntervalScalarFunction const& f, IntervalVector const& D)
+{
+    return restrict(dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer()),D);
+}
+
+IntervalScalarFunction operator-(IntervalScalarFunction const& f)
+{
+    return -dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer());
+}
+
+IntervalScalarFunction operator+(IntervalScalarFunction const& f1, IntervalScalarFunction const& f2)
+{
+    return dynamic_cast<ScalarTaylorFunction const&>(*f1.raw_pointer())+dynamic_cast<ScalarTaylorFunction const&>(*f2.raw_pointer());
+}
+
+IntervalScalarFunction operator-(IntervalScalarFunction const& f1, IntervalScalarFunction const& f2)
+{
+    return dynamic_cast<ScalarTaylorFunction const&>(*f1.raw_pointer())-dynamic_cast<ScalarTaylorFunction const&>(*f2.raw_pointer());
+}
+
+IntervalScalarFunction operator-(IntervalScalarFunction const& f, Interval const& c)
+{
+    return dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer())-c;
+}
+
+IntervalScalarFunction operator-(Interval const& c, IntervalScalarFunction const& f)
+{
+    return c-dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer());
+}
+
+
+//------------------------ RealScalarFunction -----------------------------------//
 
 RealScalarFunction RealScalarFunction::zero(Nat n)
 {
@@ -971,6 +1017,11 @@ RealScalarFunction embed(const RealScalarFunction& f, uint k) {
 typedef VectorOfScalarFunctionBody<Real> VectorOfRealScalarFunction;
 typedef VectorOfScalarFunctionBody<Interval> VectorOfIntervalScalarFunction;
 
+IntervalVectorFunction::VectorFunction()
+    : _ptr(new VectorOfScalarFunctionBody<Interval>(0u,IntervalScalarFunction()))
+{
+}
+
 IntervalVectorFunction::VectorFunction(Nat rs, const IntervalScalarFunction& sf)
     : _ptr(new VectorOfScalarFunctionBody<Interval>(rs,sf))
 {
@@ -984,6 +1035,17 @@ IntervalVectorFunction::VectorFunction(const List<RealScalarFunction>& lsf)
     for(uint i=0; i!=lsf.size(); ++i) {
         vec->set(i,lsf[i]);
     }
+}
+
+IntervalScalarFunction compose(const IntervalScalarFunction& f, const IntervalVectorFunction& g) {
+    ARIADNE_ASSERT(f.argument_size()==g.result_size());
+    return compose(f,dynamic_cast<VectorTaylorFunction const&>(*g.raw_pointer()));
+}
+
+
+IntervalVectorFunction join(IntervalVectorFunction const& f1, const IntervalVectorFunction& f2)
+{
+    return join(dynamic_cast<VectorTaylorFunction const&>(*f1.raw_pointer()),dynamic_cast<VectorTaylorFunction const&>(*f2.raw_pointer()));
 }
 
 

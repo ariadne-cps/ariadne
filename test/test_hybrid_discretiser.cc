@@ -95,7 +95,7 @@ void TestHybridDiscretiser::test_hybrid_time() const
     // Set up the evaluators
     EvolverType evolver(parameters,factory);
     HybridDiscretiser< EnclosureType > discrete_evolver(evolver);
-
+    discrete_evolver.verbosity=9;
 
     // Set up the vector field
     RealScalarFunction zero=RealScalarFunction::constant(2,0.0);

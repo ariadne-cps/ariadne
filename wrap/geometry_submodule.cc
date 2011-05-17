@@ -365,8 +365,8 @@ void export_constrained_image_set()
     constrained_image_set_class.def("number_of_parameters", &ConstrainedImageSet::number_of_parameters);
     constrained_image_set_class.def("number_of_constraints", &ConstrainedImageSet::number_of_constraints);
     constrained_image_set_class.def("apply", &ConstrainedImageSet::apply);
-    constrained_image_set_class.def("new_space_constraint", (void(ConstrainedImageSet::*)(const NonlinearConstraint&))&ConstrainedImageSet::new_space_constraint);
-    constrained_image_set_class.def("new_parameter_constraint", (void(ConstrainedImageSet::*)(const NonlinearConstraint&))&ConstrainedImageSet::new_parameter_constraint);
+    constrained_image_set_class.def("new_space_constraint", (void(ConstrainedImageSet::*)(const RealNonlinearConstraint&))&ConstrainedImageSet::new_space_constraint);
+    constrained_image_set_class.def("new_parameter_constraint", (void(ConstrainedImageSet::*)(const RealNonlinearConstraint&))&ConstrainedImageSet::new_parameter_constraint);
     //constrained_image_set_class.def("outer_approximation", &ConstrainedImageSet::outer_approximation);
     constrained_image_set_class.def("affine_approximation", &ConstrainedImageSet::affine_approximation);
     //constrained_image_set_class.def("affine_over_approximation", &ConstrainedImageSet::affine_over_approximation);

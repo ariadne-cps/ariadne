@@ -68,7 +68,10 @@ typedef ScalarFunction<Interval> IntervalScalarFunction;
 template<class X> class VectorFunction;
 typedef VectorFunction<Interval> IntervalVectorFunction;
 
-class NonlinearConstraint;
+template<class X, class R> class NonlinearConstraint;
+typedef NonlinearConstraint<Real,Float> RealNonlinearConstraint;
+typedef NonlinearConstraint<Interval,Float> IntervalNonlinearConstraint;
+
 template<class X> class TaylorModel;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
@@ -80,6 +83,7 @@ template<class BS> class ListSet;
 class Grid;
 class GridTreeSet;
 
+typedef NonlinearConstraint<ScalarTaylorFunction,Float> TaylorNonlinearConstraint;
 
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class TaylorConstrainedImageSet
@@ -102,11 +106,11 @@ class TaylorConstrainedImageSet
     //! \brief Construct the set with parameter domain \a d and image function \a f.
     explicit TaylorConstrainedImageSet(const IntervalVector& d, const IntervalVectorFunction& f, Sweeper swp);
     //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.
-    explicit TaylorConstrainedImageSet(const IntervalVector& d, const IntervalVectorFunction& f, const List<NonlinearConstraint>& c, Sweeper swp);
+    explicit TaylorConstrainedImageSet(const IntervalVector& d, const IntervalVectorFunction& f, const List<IntervalNonlinearConstraint>& c, Sweeper swp);
     //! \brief Construct the set with domain \a d, image function \a f, negative constraints \a g and equality constraints \a h.
     explicit TaylorConstrainedImageSet(const IntervalVector& d, const IntervalVectorFunction& f, const IntervalVectorFunction& g, const IntervalVectorFunction& h, Sweeper swp);
     //! \brief Construct a set with a single constraint \a c. \deprecated Use a list of constraints instead
-    explicit TaylorConstrainedImageSet(const IntervalVector& d, const IntervalVectorFunction& f, const NonlinearConstraint& c, Sweeper swp);
+    explicit TaylorConstrainedImageSet(const IntervalVector& d, const IntervalVectorFunction& f, const IntervalNonlinearConstraint& c, Sweeper swp);
 
     explicit TaylorConstrainedImageSet(const VectorTaylorFunction& tf);
 
@@ -155,9 +159,9 @@ class TaylorConstrainedImageSet
 */
 
     //! \brief Introduces the constraint \f$c\f$ applied to the state \f$x=f(s)\f$.
-    void new_state_constraint(NonlinearConstraint c);
+    void new_state_constraint(IntervalNonlinearConstraint c);
     //! \brief Introduces the constraint \f$c\f$ applied to the parameter \f$s\f$.
-    void new_parameter_constraint(NonlinearConstraint c);
+    void new_parameter_constraint(IntervalNonlinearConstraint c);
 
     //! \brief Introduces the constraint \f$g(s) \leq 0\f$.
     void new_negative_constraint(IntervalScalarFunction g);
@@ -171,7 +175,7 @@ class TaylorConstrainedImageSet
     //! \brief The functions \f$h\f$ defining the equality constraints \f$h(x) = 0\f$.
     const List<ScalarTaylorFunction>& zero_constraints() const;
     //! \brief All equality and inequality constraints.
-    List<NonlinearConstraint> constraints() const;
+    List<IntervalNonlinearConstraint> constraints() const;
 
     //! \brief The number of negative constraints.
     uint number_of_constraints() const;
@@ -191,7 +195,7 @@ class TaylorConstrainedImageSet
     tribool satisfies(IntervalScalarFunction g) const;
     //! \brief Tests if the set satisfies the constraint \a c. Returns \c true if all points in the set satisfy
     //! the constraint, and \c false if no points in the set satisfy the constraint.
-    virtual tribool satisfies(NonlinearConstraint c) const;
+    virtual tribool satisfies(IntervalNonlinearConstraint c) const;
 
     //! \brief The dimension of the set.
     uint dimension() const;

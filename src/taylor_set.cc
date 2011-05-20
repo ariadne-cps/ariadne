@@ -59,6 +59,8 @@
 #ifdef HAVE_CAIRO_H
 #include <cairo/cairo.h>
 #endif // HAVE_CAIRO_H
+#include <boost/concept_check.hpp>
+#include <include/operators.h>
 
 
 namespace Ariadne {
@@ -1165,13 +1167,17 @@ void TaylorConstrainedImageSet::adjoin_outer_approximation_to(GridTreeSet& pavin
     }
 }
 
+void
+_subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const TaylorConstrainedImageSet& set, const IntervalVector& subdomain,
+                                           uint depth, const FloatVector& errors, uint splittings);
+
 void TaylorConstrainedImageSet::subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
 {
     Vector<Float> errors(paving.dimension());
     for(uint i=0; i!=errors.size(); ++i) {
         errors[i]=paving.grid().lengths()[i]/(1<<depth);
     }
-    this->_subdivision_adjoin_outer_approximation_to(paving,this->domain(),depth,errors);
+    _subdivision_adjoin_outer_approximation_to(paving,*this,this->domain(),depth,errors,0u);
 }
 
 IntervalProcedure make_procedure(const IntervalScalarFunctionInterface& f);
@@ -1519,23 +1525,25 @@ std::ostream& TaylorConstrainedImageSet::write(std::ostream& os) const {
 
 
 
-void TaylorConstrainedImageSet::
-_subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const IntervalVector& subdomain,
-                                           uint depth, const FloatVector& errors) const
+void 
+_subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const TaylorConstrainedImageSet& set, const IntervalVector& subdomain,
+                                           uint depth, const FloatVector& errors, uint splittings)
 {
     // How small an over-approximating box needs to be relative to the cell size
     static const double RELATIVE_SMALLNESS=0.5;
+    static const uint MAXIMUM_SPLITTINGS = 18;
 
+    //std::cerr<<"subdomain="<<subdomain<<"; "<<"depth="<<depth<<" splittings="<<splittings<<"\n";
     typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
 
-    for(const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+    for(const_iterator iter=set.negative_constraints().begin(); iter!=set.negative_constraints().end(); ++iter) {
         const ScalarTaylorFunction& constraint=*iter;;
         Interval constraint_range=constraint.evaluate(subdomain);
         if(constraint_range.lower() > 0.0) {
             return;
         }
     }
-    for(const_iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
+    for(const_iterator iter=set.zero_constraints().begin(); iter!=set.zero_constraints().end(); ++iter) {
         const ScalarTaylorFunction& constraint=*iter;
         Interval constraint_range=constraint.evaluate(subdomain);
         if(constraint_range.lower() > 0.0 || constraint_range.upper() < 0.0 ) {
@@ -1543,22 +1551,25 @@ _subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const IntervalVecto
         }
     }
 
-    Box range=evaluate(this->_function,subdomain);
+    Box range=evaluate(set.function(),subdomain);
+
+    Array<Float> radii(set.dimension());
+    for(uint i=0; i!=radii.size(); ++i) { radii[i]=range[i].radius()-set.function()[i].error(); }
     bool small=true;
     for(uint i=0; i!=range.size(); ++i) {
-        if(range[i].radius()>errors[i]*RELATIVE_SMALLNESS) {
+        if(radii[i]>errors[i]*RELATIVE_SMALLNESS) {
             small=false;
             break;
         }
     }
 
-    if(small) {
+    if(small || splittings==MAXIMUM_SPLITTINGS) {
         gts.adjoin_outer_approximation(range,depth);
     } else {
         Vector<Interval> subdomain1,subdomain2;
         make_lpair(subdomain1,subdomain2)=Ariadne::split(subdomain);
-        this->_subdivision_adjoin_outer_approximation_to(gts,subdomain1,depth,errors);
-        this->_subdivision_adjoin_outer_approximation_to(gts,subdomain2,depth,errors);
+        _subdivision_adjoin_outer_approximation_to(gts,set,subdomain1,depth,errors,splittings+1u);
+        _subdivision_adjoin_outer_approximation_to(gts,set,subdomain2,depth,errors,splittings+1u);
     }
 }
 

@@ -309,7 +309,6 @@ class TaylorConstrainedImageSet
     std::ostream& write(std::ostream&) const;
   private:
     void _check() const;
-    void _subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const Vector<Interval>& subdomain, uint depth, const Vector<Float>& errors) const;
     void _solve_zero_constraints();
     RealVectorFunction real_function() const;
   private:

@@ -228,13 +228,14 @@ MonolithicHybridAutomaton::locations() const
 Set<DiscreteEvent>
 MonolithicHybridAutomaton::events(DiscreteLocation location) const
 {
-    return join(this->mode(location)._invariants.keys(), this->mode(location)._transitions.keys());
+    //return join(this->mode(location)._invariants.keys(), this->mode(location)._transitions.keys());
+    return this->mode(location)._transitions.keys();
 }
 
 EventKind
 MonolithicHybridAutomaton::event_kind(DiscreteLocation location, DiscreteEvent event) const
 {
-    ARIADNE_ASSERT(this->has_guard(location,event));
+    ARIADNE_ASSERT_MSG(this->has_guard(location,event) || this->has_invariant(location,event),"No event "<<event<<" in location "<<location);
     const Mode& mode = this->_modes[location];
     if(mode._invariants.has_key(event)) { return mode._invariants[event]._kind; }
     else { return mode._transitions[event]._kind; }
@@ -243,7 +244,7 @@ MonolithicHybridAutomaton::event_kind(DiscreteLocation location, DiscreteEvent e
 RealScalarFunction
 MonolithicHybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const
 {
-    ARIADNE_ASSERT(this->has_invariant(location,event));
+    ARIADNE_ASSERT_MSG(this->has_invariant(location,event),"No invariant "<<event<<" in location "<<location);
     const Mode& mode = this->_modes[location];
     return mode._invariants[event]._guard;
 }
@@ -252,7 +253,7 @@ MonolithicHybridAutomaton::invariant_function(DiscreteLocation location, Discret
 RealScalarFunction
 MonolithicHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const
 {
-    ARIADNE_ASSERT(this->has_guard(location,event));
+    ARIADNE_ASSERT_MSG(this->has_guard(location,event),"No guard "<<event<<" in location "<<location);
     const Mode& mode = this->_modes[location];
     return mode._transitions[event]._guard;
 }

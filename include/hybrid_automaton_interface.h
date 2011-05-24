@@ -39,6 +39,7 @@ class HybridTime;
 class HybridSpace;
 class HybridGrid;
 class DiscreteEvent;
+
 class DiscreteLocation;
 
 template<class T> class Space;
@@ -53,6 +54,22 @@ static const EventKind permissive = PERMISSIVE;
 static const EventKind urgent = URGENT;
 static const EventKind impact = IMPACT;
 
+class SystemSpecificationError : public std::runtime_error {
+  public:
+    SystemSpecificationError(const std::string& what) : std::runtime_error(what) { }
+};
+
+class OverspecifiedSystemError : public SystemSpecificationError {
+  public:
+    OverspecifiedSystemError(const std::string& what) : SystemSpecificationError(what) { }
+};
+
+class UnderspecifiedSystemError : public SystemSpecificationError {
+  public:
+    UnderspecifiedSystemError(const std::string& what) : SystemSpecificationError(what) { }
+};
+
+
 
 //! \ingroup SystemModule
 //! \brief Base interface for hybrid systems, to allow different types to be used in evolution routines.
@@ -64,26 +81,17 @@ class HybridAutomatonInterface {
     typedef HybridSpace StateSpaceType;
 
   public:
-    //@{
-    //! \name Data access and queries.
-
     //! \brief Virtual destructor.
     virtual ~HybridAutomatonInterface() { }
 
-    //! \brief Test if the hybrid automaton has a discrete mode \a location.
+    //@{
+    //! \name Data access and queries.
+
+    //@{
+    //! \name Methods for testing and extracting the discrete dynamics.
+
+    //! \brief Test if the hybrid automaton has a valid discrete mode \a location.
     virtual bool has_mode(DiscreteLocation location) const = 0;
-
-    //! \brief Test if the hybrid automaton has an invariant or guard constraint in the \a location labelled by \a event.
-    virtual bool has_guard(DiscreteLocation location, DiscreteEvent event) const = 0;
-
-    //! \brief Test if the hybrid automaton has a discrete transition in \a source due to \a event.
-    virtual bool has_transition(DiscreteLocation source, DiscreteEvent event) const = 0;
-
-    //! \brief The dimension of the state spacec in the given \a location.
-    virtual uint dimension(DiscreteLocation location) const = 0;
-
-    //! \brief The dynamic valid in the mode \a location.
-    virtual RealVectorFunction dynamic_function(DiscreteLocation location) const = 0;
 
     //! \brief The set of all events possible in the given \a location.
     virtual Set<DiscreteEvent> events(DiscreteLocation location) const = 0;
@@ -91,11 +99,31 @@ class HybridAutomatonInterface {
     //! \brief The kind (permissive, urgent etc) of the event.
     virtual EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const = 0;
 
-    //! \brief The constraint function defining the condition \f$c(x)\geq0\f$ under which a transition occurs or progress is interrupted.
-    virtual RealScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const = 0;
+    //! \brief Test if the hybrid automaton has an invariant or guard constraint in the \a location labelled by \a event.
+    virtual bool has_guard(DiscreteLocation location, DiscreteEvent event) const = 0;
+
+    //! \brief Test if the hybrid automaton has a discrete transition in \a source due to \a event.
+    virtual bool has_transition(DiscreteLocation source, DiscreteEvent event) const = 0;
 
     //! \brief The target location of \a event starting in the \a source location.
     virtual DiscreteLocation target(DiscreteLocation source, DiscreteEvent event) const = 0;
+
+    //@}
+
+    //@{
+    //! \name Methods for extracting the continuous dynamics.
+
+    //! \brief The dimension of the state spacec in the given \a location.
+    virtual uint dimension(DiscreteLocation location) const = 0;
+
+    //! \brief The dynamic valid in the mode \a location.
+    virtual RealVectorFunction dynamic_function(DiscreteLocation location) const = 0;
+
+    //! \brief The constraint function defining the invariant or time-can-progress predicate \f$p(x)\leq0\f$.
+    virtual RealScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const = 0;
+
+    //! \brief The constraint function defining the condition \f$c(x)\geq0\f$ under which a transition occurs.
+    virtual RealScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const = 0;
 
     //! \brief The dynamic valid in the mode \a location.
     virtual RealVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const = 0;

@@ -49,11 +49,18 @@ typedef std::string String;
 class Integer;
 class Real;
 
-typedef String Identifier;
+class Identifier : public String
+{
+  public:
+    Identifier() : String() { }
+    Identifier(const char* cstr) : String(cstr) { }
+    Identifier(const String& str) : String(str) { }
+};
 
 class UntypedVariable;
 template<class T> class ExtendedVariable;
 template<class T> class Variable;
+template<class T> class LetVariable;
 template<class T> class DottedVariable;
 template<class T> class PrimedVariable;
 
@@ -63,10 +70,12 @@ template<class LHS,class RHS> class Assignment;
 
 // Simplifying typedefs
 typedef Variable<String> StringVariable;
+typedef Constant<String> StringConstant;
 typedef PrimedVariable<String> PrimedStringVariable;
 typedef Variable<Integer> IntegerVariable;
 typedef PrimedVariable<Integer> PrimedIntegerVariable;
 typedef ExtendedVariable<Real> ExtendedRealVariable;
+typedef LetVariable<Real> LetRealVariable;
 typedef DottedVariable<Real> DottedRealVariable;
 typedef PrimedVariable<Real> PrimedRealVariable;
 typedef Variable<Real> RealVariable;
@@ -78,16 +87,29 @@ template<class T> class Constant
 {
   public:
     template<class X> explicit Constant(const String& str, const X& value)
-        : _name_ptr(new String(str)), _value_ptr(new T(value)) { }
+        : _name_ptr(new Identifier(str)), _value_ptr(new T(value)) { }
     //explicit Constant(const String& str, const T& value)
     //    : _name_ptr(new String(str)), _value_ptr(new T(value)) { }
-    const String& name() const { return *_name_ptr; }
+    const Identifier& name() const { return *_name_ptr; }
     const T& value() const { return *_value_ptr; }
     bool operator==(const Constant<T>& other) const {
         if(this->name()==other.name()) { assert(this->value()==other.value()); return true; } else { return false; } }
   private:
-    shared_ptr<String> _name_ptr;
+    shared_ptr<Identifier> _name_ptr;
     shared_ptr<T> _value_ptr;
+};
+
+template<> class Constant<String>
+{
+  public:
+    explicit Constant(const String& value) : _value(value) { }
+    const Identifier& name() const { return static_cast<const Identifier&>(_value); }
+    const String& value() const { return _value; }
+    operator const String& () const { return _value; }
+    bool operator==(const Constant<String>& other) const {
+        return (this->value()==other.value()); }
+  private:
+    String _value;
 };
 
 enum VariableType { type_bool, type_tribool, type_enumerated, type_string, type_integer, type_real };
@@ -97,7 +119,7 @@ enum VariableCategory { simple, dotted, primed };
 //! A named variable of unknown type.
 class UntypedVariable {
   public:
-    const String& name() const { return *_name_ptr; }
+    const Identifier& name() const { return *_name_ptr; }
     const VariableType& type() const { return this->_type; }
     bool operator==(const UntypedVariable& other) const {
         return (this->name()==other.name()) && (this->_category==other._category); }
@@ -118,10 +140,10 @@ class UntypedVariable {
         return "Unknown";
     }
   protected:
-    explicit UntypedVariable(const std::string& nm, VariableType tp, VariableCategory cat=simple)
-        : _name_ptr(new std::string(nm)), _type(tp), _category(cat) { }
+    explicit UntypedVariable(const String& nm, VariableType tp, VariableCategory cat=simple)
+        : _name_ptr(new Identifier(nm)), _type(tp), _category(cat) { }
   private:
-    shared_ptr<std::string> _name_ptr;
+    shared_ptr<Identifier> _name_ptr;
     VariableType _type;
     VariableCategory _category;
 };
@@ -161,43 +183,66 @@ template<class T> class ExtendedVariable
         : UntypedVariable(nm, variable_type<T>(), cat) { }
 };
 
+template<class R, class D, class T=void> struct EnableIfRealDouble { };
+template<class T> struct EnableIfRealDouble<Real,double,T> { typedef T Type; };
+
 //! \ingroup ExpressionModule
 //! A named variable of type \a T.
 template<class T> class Variable
     : public ExtendedVariable<T>
 {
+    typedef Assignment< Variable<T>, Expression<T> > AssignmentType;
   public:
     explicit Variable(const String& nm) : ExtendedVariable<T>(nm) { }
-    inline Assignment< Variable<T>, Expression<T> > operator=(const T& e) const;
-    inline Assignment< Variable<T>, Expression<T> > operator=(const Variable<T>& e) const;
-    inline Assignment< Variable<T>, Expression<T> > operator=(const Expression<T>& e) const;
+    Variable<T> const& base() const { return *this; }
+    inline AssignmentType operator=(const T& e) const;
+    inline AssignmentType operator=(const Constant<T>& cnst) const;
+    inline AssignmentType operator=(const Variable<T>& e) const;
+    inline AssignmentType operator=(const Expression<T>& e) const;
+    template<class D> inline typename EnableIfRealDouble<T,D,AssignmentType>::Type operator=(D e) const;
 };
 
-template<> class Variable<Real>
-    : public ExtendedVariable<Real>
+
+
+template<class T> LetVariable<T> let(const Variable<T>&);
+
+template<class T> class LetVariable
+    : public ExtendedVariable<T>
 {
-    typedef Real T;
+    typedef Assignment< Variable<T>, Expression<T> > AssignmentType;
   public:
-    explicit Variable(const String& nm) : ExtendedVariable<T>(nm) { }
-    inline Assignment< Variable<T>, Expression<T> > operator=(const double& e) const;
-    inline Assignment< Variable<T>, Expression<T> > operator=(const T& e) const;
-    inline Assignment< Variable<T>, Expression<T> > operator=(const Variable<T>& e) const;
-    inline Assignment< Variable<T>, Expression<T> > operator=(const Expression<T>& e) const;
+    friend LetVariable<T> let<>(const Variable<T>&);
+    Variable<T> base() const { return Variable<T>(this->name()); }
+    inline AssignmentType operator=(const T& val) const;
+    inline AssignmentType operator=(const Constant<T>& cnst) const;
+    inline AssignmentType operator=(const Variable<T>& var) const;
+    inline AssignmentType operator=(const Expression<T>& expr) const;
+    template<class D> inline typename EnableIfRealDouble<T,D,AssignmentType>::Type operator=(D e) const;
+  private:
+    explicit LetVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),simple) { }
 };
+
+template<class T> inline LetVariable<T> let(const Variable<T>& var) {
+    return LetVariable<T>(var); }
+
 
 
 DottedVariable<Real> dot(const Variable<Real>&);
 
+template<class T> class DottedVariable;
+
 template<class T> class DottedVariable
     : public ExtendedVariable<T>
 {
+    typedef Assignment< DottedVariable<T>, Expression<T> > AssignmentType;
   public:
     friend DottedVariable<Real> dot(const Variable<Real>&);
     Variable<T> base() const { return Variable<T>(this->name()); }
-    inline Assignment< DottedVariable<T>, Expression<T> > operator=(const double& e) const;
-    inline Assignment< DottedVariable<T>, Expression<T> > operator=(const T& e) const;
-    inline Assignment< DottedVariable<T>, Expression<T> > operator=(const Variable<T>& e) const;
-    inline Assignment< DottedVariable<T>, Expression<T> > operator=(const Expression<T>& e) const;
+    inline AssignmentType operator=(const T& e) const;
+    inline AssignmentType operator=(const Constant<T>& cnst) const;
+    inline AssignmentType operator=(const Variable<T>& e) const;
+    inline AssignmentType operator=(const Expression<T>& e) const;
+    template<class D> inline typename EnableIfRealDouble<T,D,AssignmentType>::Type operator=(D e) const;
   private:
     explicit DottedVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),dotted) { }
 };
@@ -215,10 +260,11 @@ template<class T> class PrimedVariable
   public:
     friend PrimedVariable<T> next<>(const Variable<T>&);
     Variable<T> base() const { return Variable<T>(this->name()); }
-    inline AssignmentType operator=(const double& val) const;
     inline AssignmentType operator=(const T& val) const;
+    inline AssignmentType operator=(const Constant<T>& cnst) const;
     inline AssignmentType operator=(const Variable<T>& var) const;
     inline AssignmentType operator=(const Expression<T>& expr) const;
+    template<class D> inline typename EnableIfRealDouble<T,D,AssignmentType>::Type operator=(D e) const;
   private:
     explicit PrimedVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),primed) { }
 };

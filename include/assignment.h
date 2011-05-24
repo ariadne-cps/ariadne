@@ -74,7 +74,7 @@ typedef Expression<Real> RealExpression;
 typedef Expression<bool> DiscretePredicate;
 typedef Expression<tribool> ContinuousPredicate;
 
-typedef String Identifier;
+class Identifier;
 typedef Set<UntypedVariable> VariableSet;
 typedef Set< Variable<Real> > RealVariableSet;
 
@@ -95,6 +95,10 @@ struct Assignment
         : lhs(a.lhs), rhs(a.rhs) { }
     Assignment(const LHS& l, const RHS& r) : lhs(l), rhs(r) { }
     operator List< Assignment<LHS,RHS> >() const { return List< Assignment<LHS,RHS> >(1u,*this); }
+    const LHS& variable() const { return this->lhs; }
+    const RHS& expression() const { return this->rhs; }
+    const LHS& left_hand_size() const { return this->lhs; }
+    const RHS& right_hand_size() const { return this->rhs; }
     LHS lhs; RHS rhs;
 };
 
@@ -111,6 +115,10 @@ Variable<T>::operator=(const T& val) const {
     return Assignment< Variable<T>, Expression<T> >(*this,Expression<T>(val)); }
 
 template<class T> inline Assignment< Variable<T>, Expression<T> >
+Variable<T>::operator=(const Constant<T>& cnst) const {
+    return Assignment< Variable<T>, Expression<T> >(*this,Expression<T>(cnst)); }
+
+template<class T> inline Assignment< Variable<T>, Expression<T> >
 Variable<T>::operator=(const Variable<T>& var) const {
     return Assignment< Variable<T>, Expression<T> >(*this,Expression<T>(var)); }
 
@@ -118,32 +126,19 @@ template<class T> inline Assignment< Variable<T>, Expression<T> >
 Variable<T>::operator=(const Expression<T>& expr) const {
     return Assignment< Variable<T>, Expression<T> >(*this,Expression<T>(expr)); }
 
-
-inline Assignment< Variable<Real>, Expression<Real> >
-Variable<Real>::operator=(const double& val) const {
-    return Assignment< Variable<Real>, Expression<Real> >(*this,Expression<Real>(val)); }
-
-inline Assignment< Variable<Real>, Expression<Real> >
-Variable<Real>::operator=(const Real& val) const {
-    return Assignment< Variable<Real>, Expression<Real> >(*this,Expression<Real>(val)); }
-
-inline Assignment< Variable<Real>, Expression<Real> >
-Variable<Real>::operator=(const Variable<Real>& var) const {
-    return Assignment< Variable<Real>, Expression<Real> >(*this,Expression<Real>(var)); }
-
-inline Assignment< Variable<Real>, Expression<Real> >
-Variable<Real>::operator=(const Expression<Real>& expr) const {
-    return Assignment< Variable<Real>, Expression<Real> >(*this,Expression<Real>(expr)); }
+template<class T> template<class D> inline typename EnableIfRealDouble<T,D,Assignment< Variable<T>, Expression<T> > >::Type
+Variable<T>::operator=(D c) const {
+    return this->operator=(Real(c)); }
 
 
-
-template<class T> inline Assignment< PrimedVariable<T>, Expression<T> >
-PrimedVariable<T>::operator=(const double& val) const {
-    return Assignment< PrimedVariable<T>, Expression<T> >(*this,Expression<T>(val)); }
 
 template<class T> inline Assignment< PrimedVariable<T>, Expression<T> >
 PrimedVariable<T>::operator=(const T& val) const {
     return Assignment< PrimedVariable<T>, Expression<T> >(*this,Expression<T>(val)); }
+
+template<class T> inline Assignment< PrimedVariable<T>, Expression<T> >
+PrimedVariable<T>::operator=(const Constant<T>& cnst) const {
+    return Assignment< PrimedVariable<T>, Expression<T> >(*this,Expression<T>(cnst)); }
 
 template<class T> inline Assignment< PrimedVariable<T>, Expression<T> >
 PrimedVariable<T>::operator=(const Variable<T>& var) const {
@@ -153,14 +148,18 @@ template<class T> inline Assignment< PrimedVariable<T>, Expression<T> >
 PrimedVariable<T>::operator=(const Expression<T>& expr) const {
     return Assignment< PrimedVariable<T>, Expression<T> >(*this,Expression<T>(expr)); }
 
+template<class T> template<class D> inline typename EnableIfRealDouble<T,D,Assignment< PrimedVariable<T>, Expression<T> > >::Type
+PrimedVariable<T>::operator=(D c) const {
+    return this->operator=(Real(c)); }
 
-template<class T> inline Assignment< DottedVariable<T>, Expression<T> >
-DottedVariable<T>::operator=(const double& val) const {
-    return Assignment< DottedVariable<T>, Expression<T> >(*this,Expression<T>(T(val))); }
 
 template<class T> inline Assignment< DottedVariable<T>, Expression<T> >
 DottedVariable<T>::operator=(const T& val) const {
     return Assignment< DottedVariable<T>, Expression<T> >(*this,Expression<T>(val)); }
+
+template<class T> inline Assignment< DottedVariable<T>, Expression<T> >
+DottedVariable<T>::operator=(const Constant<T>& cnst) const {
+    return Assignment< DottedVariable<T>, Expression<T> >(*this,Expression<T>(cnst)); }
 
 template<class T> inline Assignment< DottedVariable<T>, Expression<T> >
 DottedVariable<T>::operator=(const Variable<T>& var) const {
@@ -170,17 +169,33 @@ template<class T> inline Assignment< DottedVariable<T>, Expression<T> >
 DottedVariable<T>::operator=(const Expression<T>& expr) const {
     return Assignment< DottedVariable<T>, Expression<T> >(*this,Expression<T>(expr)); }
 
+template<class T> template<class D> inline typename EnableIfRealDouble<T,D,Assignment< DottedVariable<T>, Expression<T> > >::Type
+DottedVariable<T>::operator=(D c) const {
+    return this->operator=(Real(c)); }
 
+template<class LHS, class RHS> List<Identifier> left_hand_sides(const List<Assignment<LHS,RHS> >& assignments) {
+    List<Identifier> result;
+    result.reserve(assignments.size());
+    for(typename List< Assignment<LHS,RHS> >::const_iterator assignment_iter=assignments.begin();
+        assignment_iter!=assignments.end(); ++assignment_iter)
+    {
+        result.append(assignment_iter->lhs.base().name());
+    }
+    return result;
+}
 
 // Simplifying typedefs
 typedef Assignment<IntegerVariable,IntegerExpression> IntegerAssignment;
-typedef Assignment<PrimedIntegerVariable,IntegerExpression> IntegerUpdate;
+typedef Assignment<PrimedIntegerVariable,IntegerExpression> PrimedIntegerAssignment;
 typedef Assignment<StringVariable,StringExpression> StringAssignment;
-typedef Assignment<PrimedStringVariable,StringExpression> StringUpdate;
+typedef Assignment<PrimedStringVariable,StringExpression> PrimedStringAssignment;
 typedef Assignment<RealVariable,RealExpression> RealAssignment;
 typedef Assignment<PrimedRealVariable,RealExpression> PrimedRealAssignment;
 typedef Assignment<DottedRealVariable,RealExpression> DottedRealAssignment;
 
+// Deprecated
+typedef Assignment<PrimedIntegerVariable,IntegerExpression> IntegerUpdate;
+typedef Assignment<PrimedStringVariable,StringExpression> StringUpdate;
 
 
 

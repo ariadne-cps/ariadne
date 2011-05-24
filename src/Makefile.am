@@ -49,6 +49,7 @@ ARIADNE_SRC = \
 	hybrid_enclosure.cc \
 	hybrid_automaton-monolithic.cc \
 	hybrid_automaton-composite.cc \
+	hybrid_automaton-restrictive.cc \
 	hybrid_evolver.cc \
 	hybrid_discretiser.cc \
 	hybrid_reachability_analyser.cc

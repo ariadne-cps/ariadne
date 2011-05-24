@@ -620,6 +620,42 @@ X _compute(Operator op, const X& x) {
 
 
 
+String evaluate(const Expression<String>& e, const StringValuation& x) {
+    const ExpressionInterface<String>* eptr=e._raw_pointer();
+    const ConstantExpression<String>* cptr=dynamic_cast<const ConstantExpression<String>*>(eptr);
+    if(cptr) { return cptr->value(); }
+    const VariableExpression<String>* vptr=dynamic_cast<const VariableExpression<String>*>(eptr);
+    if(vptr) { return x[vptr->variable()]; }
+    ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" to a String using variables "<<x);
+}
+
+Integer evaluate(const Expression<Integer>& e, const IntegerValuation& x) {
+    const ExpressionInterface<Integer>* eptr=e._raw_pointer();
+    const BinaryExpression<Integer>* bptr=dynamic_cast<const BinaryExpression<Integer>*>(eptr);
+    if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
+    const UnaryExpression<Integer>* uptr=dynamic_cast<const UnaryExpression<Integer>*>(eptr);
+    if(uptr) { return _compute(uptr->_op,evaluate(uptr->_arg,x)); }
+    const ConstantExpression<Integer>* cptr=dynamic_cast<const ConstantExpression<Integer>*>(eptr);
+    if(cptr) { return cptr->value(); }
+    const VariableExpression<Integer>* vptr=dynamic_cast<const VariableExpression<Integer>*>(eptr);
+    if(vptr) { return x[vptr->variable()]; }
+    ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" to an Integer using variables "<<x);
+}
+
+Boolean evaluate(const Expression<Boolean>& e, const StringValuation& x) {
+    const ExpressionInterface<Boolean>* eptr=e._raw_pointer();
+    const BinaryExpression<Boolean>* bptr=dynamic_cast<const BinaryExpression<Boolean,Operator>*>(eptr);
+    if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
+    const UnaryExpression<Boolean>* uptr=dynamic_cast<const UnaryExpression<Boolean>*>(eptr);
+    if(uptr) { return _compute(uptr->_op,evaluate(uptr->_arg,x)); }
+    const ConstantExpression<Boolean>* cptr=dynamic_cast<const ConstantExpression<Boolean>*>(eptr);
+    if(cptr) { return cptr->value(); }
+    const BinaryExpression<Boolean,Operator,String>* bsptr=dynamic_cast<const BinaryExpression<Boolean,Operator,String>*>(eptr);
+    if(bsptr) { return _compare(bsptr->_op,evaluate(bsptr->_arg1,x),evaluate(bsptr->_arg2,x)); }
+    ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" to a Boolean using variables "<<x);
+}
+
+
 
 
 Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& x) {
@@ -636,29 +672,6 @@ Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& x) {
     if(bzptr) { return _compare(bsptr->_op,evaluate(bzptr->_arg1,x),evaluate(bzptr->_arg2,x)); }
     ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" to a Boolean using variables "<<x);
 }
-
-String evaluate(const Expression<String>& e, const DiscreteValuation& x) {
-    const ExpressionInterface<String>* eptr=e._raw_pointer();
-    const ConstantExpression<String>* cptr=dynamic_cast<const ConstantExpression<String>*>(eptr);
-    if(cptr) { return cptr->value(); }
-    const VariableExpression<String>* vptr=dynamic_cast<const VariableExpression<String>*>(eptr);
-    if(vptr) { return x[vptr->variable()]; }
-    ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" to a String using variables "<<x);
-}
-
-Integer evaluate(const Expression<Integer>& e, const DiscreteValuation& x) {
-    const ExpressionInterface<Integer>* eptr=e._raw_pointer();
-    const BinaryExpression<Integer>* bptr=dynamic_cast<const BinaryExpression<Integer>*>(eptr);
-    if(bptr) { return _compute(bptr->_op,evaluate(bptr->_arg1,x),evaluate(bptr->_arg2,x)); }
-    const UnaryExpression<Integer>* uptr=dynamic_cast<const UnaryExpression<Integer>*>(eptr);
-    if(uptr) { return _compute(uptr->_op,evaluate(uptr->_arg,x)); }
-    const ConstantExpression<Integer>* cptr=dynamic_cast<const ConstantExpression<Integer>*>(eptr);
-    if(cptr) { return cptr->value(); }
-    const VariableExpression<Integer>* vptr=dynamic_cast<const VariableExpression<Integer>*>(eptr);
-    if(vptr) { return x[vptr->variable()]; }
-    ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" to an Integer using variables "<<x);
-}
-
 
 template<class X> Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<X>& x) {
     const ExpressionInterface<Tribool>* eptr=e._raw_pointer();

@@ -58,8 +58,8 @@ template<class T> struct Space
   public:
     //! \brief The trivial space \f$\R^0\f$.
     Space() : _variables() { }
-    Space(const Set<String>& vs) : _variables(vs.begin(),vs.end()) { }
-    Space(const List<String>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(VariableType(vl[i])); } }
+    Space(const Set<Identifier>& vs) : _variables(vs.begin(),vs.end()) { }
+    Space(const List<Identifier>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(VariableType(vl[i])); } }
     Space(const List<VariableType>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(vl[i]); } }
 
     bool operator==(const Space<T>& other) const { return this->_variables==other._variables; }

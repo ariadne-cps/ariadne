@@ -41,41 +41,100 @@
 
 namespace Ariadne {
 
+typedef std::string String;
+
+// Sequencing operators to make Valuation objects or objects convertible to Valuations.
+template<class X> inline Map<Identifier,X> operator|(const Variable<X>& v, const X& c) { Map<Identifier,X> r; r.insert(v.name(),c); return r; }
+template<class X> inline Map<Identifier,X> operator|(const Variable<X>& v, const Constant<X>& c) { Map<Identifier,X> r; r.insert(v.name(),c); return r; }
+template<class K, class V> inline  Map<K,V> operator,(const Map<K,V>& m1, const Map<K,V>& m2) {
+    Map<K,V> r=m1; for(typename Map<K,V>::const_iterator iter=m2.begin(); iter!=m2.end(); ++iter) { r.insert(*iter); } return r; }
+Map<Identifier,String> inline operator|(const Variable<String>& v, const char* c) { return v|String(c); }
+
+template<class V, class X=V> class Valuation;
+typedef Valuation<String> StringValuation;
+typedef Valuation<Integer> IntegerValuation;
+
+template<class V, class X>
+class Valuation
+{
+  public:
+    typedef typename Map<Identifier,X>::const_iterator const_iterator;
+    typedef V Type;
+    typedef X ValueType;
+  public:
+    Valuation() { }
+    Valuation(const Map<Identifier,ValueType>& m) : _values(m) { }
+    void insert(const Variable<Type>& v, const ValueType& s) { this->_values.insert(v.name(),s); }
+    void set(const Variable<Type>& v, const ValueType& s) { this->_values[v.name()]=s; }
+    const ValueType& get(const Variable<Type>& v) const { return _values[v.name()]; }
+    const ValueType& operator[](const Variable<Type>& v) const { return _values[v.name()]; }
+    ValueType& operator[](const Variable<Type>& v) { return _values[v.name()]; }
+    const Map<Identifier,ValueType>& values() const { return _values; }
+    Set<Identifier> defined() const { return _values.keys(); }
+    const_iterator begin() const { return _values.begin(); }
+    const_iterator end() const { return _values.end(); }
+  public:
+    Map<Identifier,ValueType> _values;
+};
+
+template<class V, class X> bool operator==(const Valuation<V,X>& v1, const Valuation<V,X>& v2) {
+    bool identical = true;
+    const Map<Identifier,X>& v1sm=v1.values();
+    const Map<Identifier,X>& v2sm=v2.values();
+    typename Map<Identifier,X>::const_iterator v1iter=v1sm.begin();
+    typename Map<Identifier,X>::const_iterator v2iter=v2sm.begin();
+
+    while(v1iter!=v1sm.end() && v2iter!=v2sm.end()) {
+        if(v1iter->first==v2iter->first) {
+            if(v1iter->second != v2iter->second) { return false; }
+            ++v1iter; ++v2iter;
+        } else if(v1iter->first<v2iter->first) {
+            identical=false; ++v1iter;
+        } else {
+            identical=false; ++v2iter;
+        }
+    }
+    if(v1iter!=v1sm.end() || v2iter!=v2sm.end()) { identical=false; }
+    if(!identical) { ARIADNE_THROW(std::runtime_error,"operator==(DiscreteLocation,DiscreteLocation)",
+                                   "Valuations "<<v1<<" and "<<v2<<" are not identical, but no values differ."); }
+    return true;
+}
+
+
 
 //! \brief
-class DiscreteValuation {
-    typedef std::string StringType;
-    typedef int IntegerType;
+class DiscreteValuation
+    : public Valuation<String>, public Valuation<Integer>
+{
+    typedef String StringType;
+    typedef Integer IntegerType;
   public:
-    void set(const Variable<String>& v, const StringType& s) { this->_string_values[v.name()]=s; }
-    void set(const Variable<Integer>& v, const IntegerType& n) { this->_integer_values[v.name()]=n; }
-    const StringType& get(const Variable<String>& v) const { return _string_values[v.name()]; }
-    const IntegerType& get(const Variable<Integer>& v) const { return _integer_values[v.name()]; }
-    const StringType& operator[](const Variable<String>& v) const { return _string_values[v.name()]; }
-    const IntegerType& operator[](const Variable<Integer>& v) const { return _integer_values[v.name()]; }
-    const Map<Identifier,StringType>& string_values() const { return _string_values; }
-    const Map<Identifier,IntegerType>& integer_values() const { return _integer_values; }
-  public:
-    Map<Identifier,StringType> _string_values;
-    Map<Identifier,IntegerType> _integer_values;
+    DiscreteValuation() { }
+    DiscreteValuation(const Map<Identifier,StringType>& sm) : Valuation<String>(sm) { }
+    DiscreteValuation(const Map<Identifier,IntegerType>& zm) : Valuation<Integer>(zm) { }
+    DiscreteValuation(const Map<Identifier,StringType>& sm,const Map<Identifier,IntegerType>& zm) : Valuation<String>(sm), Valuation<Integer>(zm) { }
+    using Valuation<String>::insert; using Valuation<Integer>::insert;
+    using Valuation<String>::get; using Valuation<Integer>::get;
+    using Valuation<String>::set; using Valuation<Integer>::set;
+    using Valuation<String>::operator[]; using Valuation<Integer>::operator[];
+    const Map<Identifier,StringType>& string_values() const { return Valuation<String>::values(); }
+    const Map<Identifier,IntegerType>& integer_values() const { return Valuation<Integer>::values(); }
 };
 
+inline bool operator==(const DiscreteValuation& v1, const DiscreteValuation& v2) {
+    return static_cast<const StringValuation&>(v1)==static_cast<const StringValuation&>(v2)
+        && static_cast<const IntegerValuation&>(v1)==static_cast<const IntegerValuation&>(v2); }
 
-template<class X> class ContinuousValuation {
+template<class X>
+class ContinuousValuation
+    : public Valuation<Real,X>
+{
   public:
     typedef X RealType;
-    void set(const Variable<Real>& v, const RealType& x) { this->_real_values[v.name()]=x; }
-    const RealType& get(const Variable<Real>& v) const { return _real_values[v.name()]; }
-    Map<Identifier,RealType>& real_values() { return _real_values; }
-    const Map<Identifier,RealType>& real_values() const { return _real_values; }
-    RealType& operator[](const Variable<Real>& v) { return _real_values[v.name()]; }
-    const RealType& operator[](const Variable<Real>& v) const { return _real_values[v.name()]; }
-  private:
-    Map<Identifier,RealType> _real_values;
 };
 
 
-template<class X> class Valuation
+template<class X> class HybridValuation
     : public DiscreteValuation
     , public ContinuousValuation<X>
 {
@@ -89,12 +148,14 @@ template<class X> class Valuation
 };
 
 inline std::ostream& operator<<(std::ostream& os, const DiscreteValuation& val) {
-    char sep='{';
+    const char open='('; const char mid='|'; char const close=')';
+    //const char open='{'; const char mid=':'; char const close='}';
+    char sep=open;
     for(Map<Identifier,DiscreteValuation::StringType>::const_iterator iter=val.string_values().begin(); iter!=val.string_values().end(); ++iter) {
-        os << sep << iter->first << ":" << iter->second; sep=','; }
+        os << sep << iter->first << mid << iter->second; sep=','; }
     for(Map<Identifier,DiscreteValuation::IntegerType>::const_iterator iter=val.integer_values().begin(); iter!=val.integer_values().end(); ++iter) {
-        os << sep << iter->first << ":" << iter->second; }
-    return os << '}';
+        os << sep << iter->first << mid << iter->second; }
+    return os << close;
 }
 
 template<class X> inline std::ostream& operator<<(std::ostream& os, const ContinuousValuation<X>& val) {
@@ -102,20 +163,20 @@ template<class X> inline std::ostream& operator<<(std::ostream& os, const Contin
 }
 
 template<class X> inline std::ostream& operator<<(std::ostream& os, const Valuation<X>& val) {
-    char sep='{';
-    for(Map<Identifier,DiscreteValuation::StringType>::const_iterator iter=val._string_values.begin(); iter!=val._string_values.end(); ++iter) {
-        os << sep << iter->first << ":" << iter->second; sep=','; }
-    for(Map<Identifier,DiscreteValuation::IntegerType>::const_iterator iter=val._integer_values.begin(); iter!=val._integer_values.end(); ++iter) {
-        os << sep << iter->first << ":" << iter->second; }
-    for(typename Map<Identifier,X>::const_iterator iter=val._real_values.begin(); iter!=val._real_values.end(); ++iter) {
-        os << sep << iter->first << ":" << iter->second; }
-    return os << '}';
+    const char open='('; const char mid ='|'; const char close=')'; const char sep=',';
+    //const char open='{'; const char mid=':'; char const close='}'; char const sep=",";
+    os << open;
+    for(typename Map<Identifier,X>::const_iterator iter=val.values().begin(); iter!=val.values().end(); ++iter) {
+        if(iter!=val.values().begin()) { os << sep; }
+        os << iter->first << mid << iter->second;
+    }
+    return os << close;
 }
 
 
-
-String evaluate(const Expression<String>&, const DiscreteValuation&);
-Integer evaluate(const Expression<Integer>&, const DiscreteValuation&);
+Boolean evaluate(const Expression<Boolean>&, const StringValuation&);
+String evaluate(const Expression<String>&, const StringValuation&);
+Integer evaluate(const Expression<Integer>&, const IntegerValuation&);
 Boolean evaluate(const Expression<Boolean>&, const DiscreteValuation&);
 template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>&);
 template<class X> Tribool evaluate(const Expression<Tribool>&, const ContinuousValuation<X>&);

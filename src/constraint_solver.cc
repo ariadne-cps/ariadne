@@ -49,8 +49,6 @@ inline Sweeper default_sweeper() { return Sweeper(); }
 
 static const double error =  1e-2;
 
-enum Sign { NEGATIVE=-1, ZERO=0, POSITIVE=+1 };
-
 Sign sign(const Float& x) {
     if(x>0) { return NEGATIVE; }
     else if(x<0) {  return POSITIVE; }

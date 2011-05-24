@@ -51,10 +51,11 @@ int main(int argc, const char* argv[])
     MonolithicHybridAutomaton watertank_system;
 
     /// Create four discrete states
-    AtomicDiscreteLocation l1(1);
-    AtomicDiscreteLocation l2(2);
-    AtomicDiscreteLocation l3(3);
-    AtomicDiscreteLocation l4(4);
+    StringVariable loc("q");
+    DiscreteLocation l1(loc|"1");
+    DiscreteLocation l2(loc|"2");
+    DiscreteLocation l3(loc|"3");
+    DiscreteLocation l4(loc|"4");
 
     /// Create the discrete events
     DiscreteEvent e12(12);

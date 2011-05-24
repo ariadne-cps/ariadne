@@ -54,13 +54,17 @@ class Integer;
 class Real;
 class EnumeratedValue;
 
-typedef String Identifier;
+class Identifier;
 
 class UntypedVariable;
 template<class T> class Variable;
 template<class T> class Space;
 template<class T> class Expression;
 template<class LHS,class RHS> class Assignment;
+
+template<class T, class V> class Valuation;
+typedef Valuation<String,String> StringValuation;
+typedef Valuation<Integer,Integer> IntegerValuation;
 
 class DiscreteValuation;
 template<class X> class ContinuousValuation;
@@ -243,8 +247,8 @@ bool identical(const Expression<Real>& e1, const Expression<Real>& e2);
 template<class R> inline std::ostream& operator<<(std::ostream& os, const Expression<R>& e) { return e._ptr->write(os); }
 
 Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& q);
-String evaluate(const Expression<String>& e, const DiscreteValuation& q);
-Integer evaluate(const Expression<Integer>& e, const DiscreteValuation& q);
+String evaluate(const Expression<String>& e, const StringValuation& q);
+Integer evaluate(const Expression<Integer>& e, const IntegerValuation& q);
 
 template<class X> Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<X>& x);
 template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>& x);

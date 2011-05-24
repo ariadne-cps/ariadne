@@ -66,7 +66,7 @@ void
 MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
                                     RealVectorFunction dynamic)
 {
-    List<String> names;
+    List<Identifier> names;
     for(uint i=0; i!=dynamic.result_size(); ++i) {
         std::stringstream ss;
         ss << "x" << i;
@@ -165,7 +165,7 @@ MonolithicHybridAutomaton::has_guard(DiscreteLocation source, DiscreteEvent even
 {
     if(!this->has_mode(source)) { return false; }
     const Mode& mode = this->_modes[source];
-    return mode._invariants.has_key(event) || mode._transitions.has_key(event);
+    return mode._transitions.has_key(event);
 }
 
 bool
@@ -241,12 +241,20 @@ MonolithicHybridAutomaton::event_kind(DiscreteLocation location, DiscreteEvent e
 }
 
 RealScalarFunction
+MonolithicHybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const
+{
+    ARIADNE_ASSERT(this->has_invariant(location,event));
+    const Mode& mode = this->_modes[location];
+    return mode._invariants[event]._guard;
+}
+
+
+RealScalarFunction
 MonolithicHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const
 {
     ARIADNE_ASSERT(this->has_guard(location,event));
     const Mode& mode = this->_modes[location];
-    if(mode._invariants.has_key(event)) { return mode._invariants[event]._guard; }
-    else { return mode._transitions[event]._guard; }
+    return mode._transitions[event]._guard;
 }
 
 

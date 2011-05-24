@@ -167,7 +167,7 @@ class MonolithicHybridAutomaton
     struct Mode {
         Mode(DiscreteLocation q, RealSpace s, RealVectorFunction f);
         DiscreteLocation _location;
-        List<String> _variable_names;
+        List<Identifier> _variable_names;
         RealVectorFunction _dynamic;
         Map< DiscreteEvent, Invariant >  _invariants;
         Map< DiscreteEvent, Transition >  _transitions;
@@ -275,7 +275,10 @@ class MonolithicHybridAutomaton
     //! \brief The kind (permissive, urgent etc) of the event.
     virtual EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const;
 
-    //! \brief The constraint function defining the condition \f$c(x)\geq0\f$ under which a transition occurs or progress is interrupted.
+    //! \brief The constraint function defining the invariant or time-can-progress predicate \f$p(x)\leq0\f$.
+    virtual RealScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
+
+    //! \brief The constraint function defining the condition \f$c(x)\geq0\f$ under which a transition occurs.
     virtual RealScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The target location of \a event starting in the \a source location.

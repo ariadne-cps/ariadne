@@ -42,6 +42,9 @@
 #include "graphics.h"
 #include "logging.h"
 
+
+#include "hybrid_automaton-composite.h"
+
 #include "test.h"
 
 using namespace Ariadne;
@@ -524,8 +527,8 @@ TestContraintHybridEvolver::affine_flow_system() {
 
     RealVariable x("x");
     RealVariable y("y");
-    AtomicDiscreteLocation upwards("upwards");
-    AtomicDiscreteLocation downwards("downwards");
+    StringConstant upwards("upwards");
+    StringConstant downwards("downwards");
     DiscreteEvent changeup("changeup");
     DiscreteEvent changedown("changedown");
     DiscreteEvent block("block");
@@ -535,7 +538,7 @@ TestContraintHybridEvolver::affine_flow_system() {
     affine.new_mode(downwards,(dot(x)=1.0,dot(y)=-1.0));
 
     affine.new_urgent_guard(upwards,changedown,y>=2.0);
-    affine.new_invariant(downwards,block,y>=-2.0);
+    affine.new_invariant(downwards,y>=-2.0,block);
     affine.new_permissive_guard(downwards,changeup,y<=-1.5);
     affine.new_transition(upwards,changedown,downwards,(next(x)=x+1,next(y)=y));
     affine.new_transition(downwards,changeup,upwards,(next(x)=x+1,next(y)=y));
@@ -560,7 +563,7 @@ TestContraintHybridEvolver::test_flow_only() const
     evolver_ptr->parameters().maximum_step_size=0.5;
     CompositeHybridAutomaton system=affine_flow_system();
 
-    AtomicDiscreteLocation upwards("upwards");
+    DiscreteLocation upwards("upwards");
     DiscreteLocation initial_location(upwards);
     const double r=0.125;
     Box initial_box(2,-r,+r, -r,+r);
@@ -583,7 +586,7 @@ TestContraintHybridEvolver::test_splitting_on_urgent_event() const
     evolver_ptr->parameters().maximum_step_size=2.0;
     CompositeHybridAutomaton system=affine_flow_system();
 
-    AtomicDiscreteLocation upwards("upwards");
+    DiscreteLocation upwards("upwards");
     DiscreteLocation initial_location(upwards);
     const double r=0.125;
     Box initial_box(2,-r,+r, -r,+r);
@@ -608,7 +611,7 @@ TestContraintHybridEvolver::test_affine_flow_system() const
     ARIADNE_TEST_PRINT(system);
 
 
-    AtomicDiscreteLocation upwards("upwards");
+    DiscreteLocation upwards("upwards");
     DiscreteLocation initial_location(upwards);
     double r=0.125;
     Box initial_box(2,-r,+r, -r,+r);

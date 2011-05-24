@@ -231,9 +231,6 @@ void export_formula()
     real_space_class.def("index", &RealSpace::index);
     real_space_class.def(self_ns::str(self));
 
-    def("variable",(RealVariable(*)(const String& s)) &variable<Real>);
-    def("variables",(RealSpace(*)(const List<String>& s)) &variables<Real>);
-
     from_python<RealSpace>();
 
     class_<RealExpression> real_expression_class("RealExpression", init<RealExpression>());
@@ -363,7 +360,7 @@ void export_hybrid_automaton()
     hybrid_automaton_class.def("guard_function", &MonolithicHybridAutomaton::guard_function);
     hybrid_automaton_class.def("reset_function", &MonolithicHybridAutomaton::reset_function);
     hybrid_automaton_class.def("new_mode",(void(MonolithicHybridAutomaton::*)(DiscreteLocation,RealVectorFunction)) &MonolithicHybridAutomaton::new_mode, return_value_policy<reference_existing_object>());
-    hybrid_automaton_class.def("new_invariant",(void(MonolithicHybridAutomaton::*)(DiscreteLocation,DiscreteEvent,RealScalarFunction)) &MonolithicHybridAutomaton::new_invariant);
+    hybrid_automaton_class.def("new_invariant",(void(MonolithicHybridAutomaton::*)(DiscreteLocation,RealScalarFunction,DiscreteEvent)) &MonolithicHybridAutomaton::new_invariant);
     hybrid_automaton_class.def("new_transition",(void(MonolithicHybridAutomaton::*)(DiscreteLocation,DiscreteEvent,DiscreteLocation,RealVectorFunction,RealScalarFunction,EventKind)) &MonolithicHybridAutomaton::new_transition);
     hybrid_automaton_class.def(self_ns::str(self));
 

@@ -192,7 +192,7 @@ template<class T> struct Let {
     List< Assignment<Variable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
 };
 template<class T> inline Let<T> let(const List<Variable<T> >& lhs) { return Let<T>(lhs); }
-template<class T> inline List< Assignment<Variable<T>, Expression<T> > > let<T>::operator=(const List<Expression<T> >& rhs) {
+template<class T> inline List< Assignment<Variable<T>, Expression<T> > > Let<T>::operator=(const List<Expression<T> >& rhs) {
     assert(this->_lhs.size()==rhs.size());
     List< Assignment<Variable<T>,Expression<T> > > result;
     for(uint i=0; i!=rhs.size(); ++i) { result.append(let(this->_lhs[i])=rhs[i]); }

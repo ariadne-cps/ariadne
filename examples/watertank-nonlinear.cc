@@ -83,10 +83,13 @@ int main()
     /// Set the system parameters
     double a = 0.065;
     double b = 0.3;
-    double T = 4.0;
+    Real T = 4.0;
     double hmin = 5.5;
     double Delta = 0.05;
     double hmax = 8.0;
+
+    Real zero = 0;
+    Real one = 1;
 
     double tmax = 80.0;
     int jmax = 6;
@@ -95,13 +98,13 @@ int main()
     /// Build the Hybrid System
 
     /// Create a HybridAutomton object
-    MonolithicHybridAutomaton watertank_system;
+    HybridAutomaton watertank_system;
 
     /// Create four discrete states
-    DiscreteLocation l1("q1");
-    DiscreteLocation l2("q2");
-    DiscreteLocation l3("q3");
-    DiscreteLocation l4("q4");
+    DiscreteLocation l1("q","1");
+    DiscreteLocation l2("q","2");
+    DiscreteLocation l3("q","3");
+    DiscreteLocation l4("q","4");
 
     /// Create the discrete events
     DiscreteEvent e12("e12");
@@ -112,23 +115,19 @@ int main()
     DiscreteEvent i4("i4");
 
     /// Coordinates
-    RealScalarFunction x=RealScalarFunction::coordinate(3,0);
-    RealScalarFunction y=RealScalarFunction::coordinate(3,1);
-    RealScalarFunction t=RealScalarFunction::coordinate(3,2);
-
+    RealVariable x("x");
+    RealVariable y("y");
+    RealVariable t("t");
     /// Create the dynamics
 
-    RealScalarFunction zero=RealScalarFunction::constant(3,0.0);
-    RealScalarFunction one=RealScalarFunction::constant(3,1.0);
-
     /// The dynamic for an opening valve
-    RealVectorFunction opening_d((-a*Ariadne::sqrt(x)+b*y,one/T,one));
+    RealExpressions opening_d((-a*Ariadne::sqrt(x)+b*y,1/T,one));
     /// The dynamic for a closing valve
-    RealVectorFunction closing_d((-a*Ariadne::sqrt(x)+b*y,-one/T,one));
+    RealExpressions closing_d((-a*Ariadne::sqrt(x)+b*y,-1/T,one));
     /// The dynamic for an opened valve
-    RealVectorFunction opened_d((-a*Ariadne::sqrt(x)+b,zero,one));
+    RealExpressions opened_d((-a*Ariadne::sqrt(x)+b,zero,one));
     /// The dynamic for an opened valve
-    RealVectorFunction closed_d((-a*Ariadne::sqrt(x),zero,one));
+    RealExpressions closed_d((-a*Ariadne::sqrt(x),zero,one));
 
     cout << "opening dynamic = " << opening_d << endl << endl;
     cout << "closing dynamic = " << closing_d << endl << endl;
@@ -136,44 +135,44 @@ int main()
     cout << "closed dynamic = " << closed_d << endl << endl;
 
     /// Create the resets
-    RealVectorFunction reset_y_zero((x,0,t));
+    RealExpressions reset_y_zero((x,zero,t));
     cout << "reset_y_zero=" << reset_y_zero << endl << endl;
-    RealVectorFunction reset_y_one((x,1,t));
+    RealExpressions reset_y_one((x,one,t));
     cout << "reset_y_one=" << reset_y_one << endl << endl;
 
     /// Create the guards.
-    /// Guards are true when f(x) = Ax + b > 0
-    RealScalarFunction guard12(y-1);
+    /// Guards are true when f(x) >= 0
+    ContinuousPredicate guard12(y-1>=0);
     cout << "guard12=" << guard12 << endl << endl;
-    RealScalarFunction guard23(x-(hmax-Delta));
+    ContinuousPredicate guard23(x-(hmax-Delta)>=0);
     cout << "guard23=" << guard23 << endl << endl;
-    RealScalarFunction guard34(-y);
+    ContinuousPredicate guard34(-y>=0);
     cout << "guard34=" << guard34 << endl << endl;
-    RealScalarFunction guard41(-x+(hmin+Delta));
+    ContinuousPredicate guard41(-x+(hmin+Delta)>=0);
     cout << "guard41=" << guard41 << endl << endl;
 
     /// Create the invariants.
-    /// Invariants are true when f(x) = Ax + b < 0
+    /// Invariants are true when f(x) <= 0
     /// forced transitions do not need an explicit invariant,
     /// we need only the invariants for location 2 and 4
-    RealScalarFunction inv2(x-(hmax+Delta));
+    ContinuousPredicate inv2(x-(hmax+Delta)<=0);
     cout << "inv2=" << inv2 << endl << endl;
-    RealScalarFunction inv4(-x+(hmin-Delta));
+    ContinuousPredicate inv4(-x+(hmin-Delta)<=0);
     cout << "inv4=" << inv4 << endl << endl;
 
     /// Build the automaton
-    watertank_system.new_mode(l1,opening_d);
-    watertank_system.new_mode(l2,opened_d);
-    watertank_system.new_mode(l3,closing_d);
-    watertank_system.new_mode(l4,closed_d);
+    watertank_system.new_mode(l1,dot((x,y,t))=opening_d);
+    watertank_system.new_mode(l2,dot((x,y,t))=opened_d);
+    watertank_system.new_mode(l3,dot((x,y,t))=closing_d);
+    watertank_system.new_mode(l4,dot((x,y,t))=closed_d);
 
-    watertank_system.new_invariant(l2,i2,inv2);
-    watertank_system.new_invariant(l4,i2,inv4);
+    watertank_system.new_invariant(l2,inv2,i2);
+    watertank_system.new_invariant(l4,inv4,i2);
 
-    watertank_system.new_transition(l1,e12,l2,reset_y_one,guard12,urgent);
-    watertank_system.new_transition(l2,e23,l3,reset_y_one,guard23,permissive);
-    watertank_system.new_transition(l3,e34,l4,reset_y_zero,guard34,urgent);
-    watertank_system.new_transition(l4,e41,l1,reset_y_zero,guard41,permissive);
+    watertank_system.new_transition(l1,e12,l2,next((x,y,t))=reset_y_one,guard12,urgent);
+    watertank_system.new_transition(l2,e23,l3,next((x,y,t))=reset_y_one,guard23,permissive);
+    watertank_system.new_transition(l3,e34,l4,next((x,y,t))=reset_y_zero,guard34,urgent);
+    watertank_system.new_transition(l4,e41,l1,next((x,y,t))=reset_y_zero,guard41,permissive);
 
 
     /// Finished building the automaton

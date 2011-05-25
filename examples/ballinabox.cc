@@ -41,18 +41,18 @@ int main(int argc, const char* argv[])
     Real ay = 0.5;  // Coefficient of restitution for bounces with horizontal walls
 
     /// Set the position and velocity functions.
-    RealScalarFunction x=RealScalarFunction::coordinate(4,0); // X position
-    RealScalarFunction vx=RealScalarFunction::coordinate(4,1); // X velocity
-    RealScalarFunction y=RealScalarFunction::coordinate(4,2); // Y position
-    RealScalarFunction vy=RealScalarFunction::coordinate(4,3); // Y velocity
+    RealVariable x("x"); // X position
+    RealVariable vx("vx"); // X velocity
+    RealVariable y("y"); // Y position
+    RealVariable vy("vy"); // Y velocity
 
     /// Build the Hybrid System
 
     /// Create a HybridAutomton object
-    MonolithicHybridAutomaton ball;
+    HybridAutomaton ball;
 
     /// Create the discrete states
-    DiscreteLocation free("free");
+    DiscreteLocation free;
 
     /// Create the discrete events
     DiscreteEvent b_yu("b_yu"); // When the ball bounced on the upper boundary for y
@@ -61,25 +61,25 @@ int main(int argc, const char* argv[])
     DiscreteEvent b_xl("b_xl"); // When the ball bounced on the lower boundary for x
 
     /// Create the dynamics
-    RealVectorFunction free_d((vx,0,vy,0));
+    DottedRealAssignments free_d((dot(x)=vx,dot(vx)=0,dot(y)=vy,dot(vy)=0));
 
     /// Create the resets
-    RealVectorFunction x_r((x,-ax*vx,y,vy)); // Bounces on a boundary for x
-    RealVectorFunction y_r((x,vx,y,-ay*vy)); // Bounces on a boundary for y
+    PrimedRealAssignments x_r((next(x)=x,next(vx)=-ax*vx,next(y)=y,next(vy)=vy)); // Bounces on a boundary for x
+    PrimedRealAssignments y_r((next(x)=x,next(vx)=vx,next(y)=y,next(vy)=-ay*vy)); // Bounces on a boundary for y
 
     /// Create the guards
     /// Guards are true when g(x) > 0
-    RealScalarFunction xu_g(x-1); // For when the upper boundary for x is reached
-    RealScalarFunction xl_g(-1-x); // For when the lower boundary for x is reached
-    RealScalarFunction yu_g(y-1); // For when the upper boundary for y is reached
-    RealScalarFunction yl_g(-1-y); // For when the lower boundary for y is reached
+    ContinuousPredicate xu_g(x>=1); // For when the upper boundary for x is reached
+    ContinuousPredicate xl_g(x<=-1); // For when the lower boundary for x is reached
+    ContinuousPredicate yu_g(y>=1);// For when the upper boundary for y is reached
+    ContinuousPredicate yl_g(y<=-1); // For when the lower boundary for y is reached
 
-    ball.new_mode(free,free_d);
+    ball.new_mode(free_d);
 
-    ball.new_transition(free,b_yu,free,y_r,yu_g,impact); // Bounces on the upper boundary for y
-    ball.new_transition(free,b_xu,free,x_r,xu_g,impact); // Bounces on the upper boundary for x
-	ball.new_transition(free,b_yl,free,y_r,yl_g,impact); // Bounces on the lower boundary for y
-    ball.new_transition(free,b_xl,free,x_r,xl_g,impact); // Bounces on the lower boundary for x
+    ball.new_transition(b_yu,y_r,yu_g,impact); // Bounces on the upper boundary for y
+    ball.new_transition(b_xu,x_r,xu_g,impact); // Bounces on the upper boundary for x
+	ball.new_transition(b_yl,y_r,yl_g,impact); // Bounces on the lower boundary for y
+    ball.new_transition(b_xl,x_r,xl_g,impact); // Bounces on the lower boundary for x
 
     /// Finished building the automaton
 

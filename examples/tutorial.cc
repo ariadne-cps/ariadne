@@ -95,9 +95,9 @@ CompositeHybridAutomaton create_heating_system()
     RealConstant Ton_lower("Ton_lower",14.875);
 
     // Create the discrete states
-    AtomicDiscreteLocation on("on");
-    AtomicDiscreteLocation off("off");
-    AtomicDiscreteLocation ok("ok");
+    StringVariable heating("heating");
+    StringConstant on("on");
+    StringConstant off("off");
 
     // Create the discrete events
     DiscreteEvent switch_on("switch_on");
@@ -109,19 +109,20 @@ CompositeHybridAutomaton create_heating_system()
     RealVariable t("t");
 
     // Create the heater subsystem
-    AtomicHybridAutomaton heater;
-    heater.new_mode( on, (dot(T)=P+K*(Tav-Tamp*Ariadne::cos(2.0*pi*t)-T)) );
-    heater.new_mode( off, (dot(T)=K*(Tav-Tamp*Ariadne::cos(2.0*pi*t)-T)) );
-    heater.new_invariant( off, switch_on, T<=Ton_lower );
-    heater.new_transition( off, switch_on, T<=Ton_upper, on, next(T)=T );
-    heater.new_transition( on, switch_off, T>=Toff, off, next(T)=T, urgent );
+    HybridAutomaton heater;
+    heater.new_mode( heating|on, (dot(T)=P+K*(Tav-Tamp*Ariadne::cos(2.0*pi*t)-T)) );
+    heater.new_mode( heating|off, (dot(T)=K*(Tav-Tamp*Ariadne::cos(2.0*pi*t)-T)) );
+    heater.new_invariant( heating|off, T<=Ton_lower, switch_on );
+    heater.new_transition( (heating|off), switch_on, (heating|on), (next(T)=T), T<=Ton_upper, permissive );
+    heater.new_transition( (heating|on), switch_off, heating|off, (next(T)=T), T>=Toff, urgent );
 
     // Create the clock subsystem
-    AtomicHybridAutomaton clock;
-    clock.new_mode( ok, (dot(t)=1.0) );
-    clock.new_transition( ok, midnight, t>=1.0, ok, next(t)=0.0, urgent );
+    HybridAutomaton clock;
+    clock.new_mode( (dot(t)=1.0) );
+    clock.new_transition( midnight, next(t)=0.0, t>=1.0, urgent );
 
     CompositeHybridAutomaton heating_system((clock,heater));
+    std::cout << "heating_system=" << heating_system << "\n";
 
     return heating_system;
 }
@@ -146,9 +147,10 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
 {
 
     // Redefine the two discrete states
-    AtomicDiscreteLocation ok("ok");
-    AtomicDiscreteLocation on("on");
-    AtomicDiscreteLocation off("off");
+    AtomicDiscreteVariable clock("clock");
+    StringVariable heater("heater");
+    DiscreteLocation heating_off(StringVariable("heating")|"off");
+    DiscreteLocation heating_on(StringVariable("heating")|"on");
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
@@ -158,7 +160,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     // Define the initial set
     Box initial_box(2, 0.0,0.015625, 16.0,16.0625);
     //Box initial_box(2, 0.0,0.015625, 18.0,18.0625);
-    HybridEnclosureType initial((ok,off),initial_box);
+    HybridEnclosureType initial(heating_off,initial_box);
 
     // Set the maximum evolution time
     HybridTime evolution_time(1.5,4);
@@ -172,9 +174,9 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     plot("tutorial-reach_evolve.png",Box(2, 0.0,1.0, 14.0,21.0),
          Colour(0.0,0.5,1.0), reach, Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve);
     plot("tutorial-reach_evolve-off.png",Box(2, 0.0,1.0, 14.0,21.0),
-         Colour(0.0,0.5,1.0), reach[(ok,off)], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[(on,ok)]);
+         Colour(0.0,0.5,1.0), reach[heating_off], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[heating_on]);
     plot("tutorial-reach_evolve-on.png",Box(2, 0.0,1.0, 14.0,21.0),
-         Colour(0.0,0.5,1.0), reach[(ok,on)], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[(on,ok)]);
+         Colour(0.0,0.5,1.0), reach[heating_on], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[heating_on]);
     cout << "done." << endl;
 
     // Compute the orbit.

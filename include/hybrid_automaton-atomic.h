@@ -35,6 +35,9 @@ namespace Ariadne {
 
 class AtomicHybridAutomaton;
 
+typedef StringVariable AtomicDiscreteVariable;
+typedef StringConstant AtomicDiscreteLocation;
+
 //! \ingroup SystemModule
 //! \brief A hybrid automaton, comprising continuous-time behaviour
 //! at each discrete mode, coupled by instantaneous discrete transitions.
@@ -151,6 +154,16 @@ class AtomicHybridAutomaton
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     void new_transition(StringConstant source,
                         DiscreteEvent event,
+                        ContinuousPredicate const& guard,
+                        StringConstant target,
+                        List<PrimedRealAssignment> const& reset,
+                        EventKind urgency=urgent) {
+        this->HybridAutomaton::new_transition(this->_variable|source,event,this->_variable|target,reset,guard,urgency);
+    }
+
+    //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
+    void new_transition(StringConstant source,
+                        DiscreteEvent event,
                         StringConstant target,
                         List<PrimedRealAssignment> const& reset,
                         ContinuousPredicate const& guard,
@@ -187,6 +200,11 @@ class AtomicHybridAutomaton
 
 
     //@}
+
+    //! \brief The variable used to define the discrete component.
+    const StringVariable& variable() const {
+        return this->_variable; }
+
     //! \brief The discrete mode with given discrete state.
     const DiscreteMode& mode(StringConstant location) const {
         return this->HybridAutomaton::mode(this->_variable|location); }
@@ -203,6 +221,10 @@ class AtomicHybridAutomaton
     std::ostream& write(std::ostream& os) const {
         return this->HybridAutomaton::write(os); }
 };
+
+inline DiscreteLocation operator|(const AtomicHybridAutomaton& ha, const AtomicDiscreteLocation& q) {
+    return ha.variable() | q;
+}
 
 inline std::ostream& operator<<(std::ostream& os, const AtomicHybridAutomaton& ha) {
     return ha.write(os);

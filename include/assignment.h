@@ -71,6 +71,8 @@ typedef Expression<String> StringExpression;
 typedef Expression<Integer> IntegerExpression;
 typedef Expression<Real> RealExpression;
 
+typedef List<RealExpression> RealExpressions;
+
 typedef Expression<bool> DiscretePredicate;
 typedef Expression<tribool> ContinuousPredicate;
 
@@ -126,8 +128,17 @@ template<class T> inline Assignment< Variable<T>, Expression<T> >
 Variable<T>::operator=(const Expression<T>& expr) const {
     return Assignment< Variable<T>, Expression<T> >(*this,Expression<T>(expr)); }
 
-template<class T> template<class D> inline typename EnableIfRealDouble<T,D,Assignment< Variable<T>, Expression<T> > >::Type
+template<class T> template<class D> inline typename EnableIfRealBuiltin<T,D,Assignment< Variable<T>, Expression<T> > >::Type
 Variable<T>::operator=(D c) const {
+    return this->operator=(Real(c)); }
+
+
+template<class T> inline Assignment< Variable<T>, Expression<T> >
+LetVariable<T>::operator=(const T& c) const {
+    return Assignment< Variable<T>, Expression<T> >(this->base(),Expression<T>(c)); }
+
+template<class T> template<class D> inline typename EnableIfRealBuiltin<T,D,Assignment< Variable<T>, Expression<T> > >::Type
+LetVariable<T>::operator=(D c) const {
     return this->operator=(Real(c)); }
 
 
@@ -148,7 +159,7 @@ template<class T> inline Assignment< PrimedVariable<T>, Expression<T> >
 PrimedVariable<T>::operator=(const Expression<T>& expr) const {
     return Assignment< PrimedVariable<T>, Expression<T> >(*this,Expression<T>(expr)); }
 
-template<class T> template<class D> inline typename EnableIfRealDouble<T,D,Assignment< PrimedVariable<T>, Expression<T> > >::Type
+template<class T> template<class D> inline typename EnableIfRealBuiltin<T,D,Assignment< PrimedVariable<T>, Expression<T> > >::Type
 PrimedVariable<T>::operator=(D c) const {
     return this->operator=(Real(c)); }
 
@@ -169,9 +180,62 @@ template<class T> inline Assignment< DottedVariable<T>, Expression<T> >
 DottedVariable<T>::operator=(const Expression<T>& expr) const {
     return Assignment< DottedVariable<T>, Expression<T> >(*this,Expression<T>(expr)); }
 
-template<class T> template<class D> inline typename EnableIfRealDouble<T,D,Assignment< DottedVariable<T>, Expression<T> > >::Type
+template<class T> template<class D> inline typename EnableIfRealBuiltin<T,D,Assignment< DottedVariable<T>, Expression<T> > >::Type
 DottedVariable<T>::operator=(D c) const {
     return this->operator=(Real(c)); }
+
+
+
+template<class T> struct Let {
+    const List< Variable<T> >& _lhs;
+    Let(const List< Variable<T> >& lhs) : _lhs(lhs) { }
+    List< Assignment<Variable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
+};
+template<class T> inline Let<T> let(const List<Variable<T> >& lhs) { return Let<T>(lhs); }
+template<class T> inline List< Assignment<Variable<T>, Expression<T> > > let<T>::operator=(const List<Expression<T> >& rhs) {
+    assert(this->_lhs.size()==rhs.size());
+    List< Assignment<Variable<T>,Expression<T> > > result;
+    for(uint i=0; i!=rhs.size(); ++i) { result.append(let(this->_lhs[i])=rhs[i]); }
+    return result;
+}
+
+template<class T> struct Dot {
+    const List< Variable<T> >& _lhs;
+    Dot(const List< Variable<T> >& lhs) : _lhs(lhs) { }
+    List< Assignment<DottedVariable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
+};
+template<class T> inline Dot<T> dot(const List<Variable<T> >& lhs) { return Dot<T>(lhs); }
+template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > Dot<T>::operator=(const List<Expression<T> >& rhs) {
+    assert(this->_lhs.size()==rhs.size());
+    List< Assignment<DottedVariable<T>,Expression<T> > > result;
+    for(uint i=0; i!=rhs.size(); ++i) { result.append(dot(this->_lhs[i])=rhs[i]); }
+    return result;
+}
+
+template<> struct Dot<void> {
+    const List<Identifier>& _lhs;
+    Dot(const List<Identifier>& lhs) : _lhs(lhs) { }
+    template<class T> List< Assignment<DottedVariable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
+};
+inline Dot<void> dot(const List<String>& lhs) { return Dot<void>(lhs); }
+template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > Dot<void>::operator=(const List<Expression<T> >& rhs) {
+    List< Assignment<DottedVariable<T>,Expression<T> > > result;
+    for(uint i=0; i!=rhs.size(); ++i) { result.append(DottedVariable<T>(this->_lhs[i])=rhs[i]); }
+    return result;
+}
+
+template<class T> struct Primed {
+    const List< Variable<T> >& _lhs;
+    Primed(const List< Variable<T> >& lhs) : _lhs(lhs) { }
+    List< Assignment<PrimedVariable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
+};
+template<class T> inline Primed<T> next(const List<Variable<T> >& lhs) { return Primed<T>(lhs); }
+template<class T> inline List< Assignment<PrimedVariable<T>, Expression<T> > > Primed<T>::operator=(const List<Expression<T> >& rhs) {
+    assert(this->_lhs.size()==rhs.size());
+    List< Assignment<PrimedVariable<T>,Expression<T> > > result;
+    for(uint i=0; i!=rhs.size(); ++i) { result.append(next(this->_lhs[i])=rhs[i]); }
+    return result;
+}
 
 template<class LHS, class RHS> List<Identifier> left_hand_sides(const List<Assignment<LHS,RHS> >& assignments) {
     List<Identifier> result;
@@ -184,6 +248,7 @@ template<class LHS, class RHS> List<Identifier> left_hand_sides(const List<Assig
     return result;
 }
 
+
 // Simplifying typedefs
 typedef Assignment<IntegerVariable,IntegerExpression> IntegerAssignment;
 typedef Assignment<PrimedIntegerVariable,IntegerExpression> PrimedIntegerAssignment;
@@ -193,9 +258,10 @@ typedef Assignment<RealVariable,RealExpression> RealAssignment;
 typedef Assignment<PrimedRealVariable,RealExpression> PrimedRealAssignment;
 typedef Assignment<DottedRealVariable,RealExpression> DottedRealAssignment;
 
-// Deprecated
-typedef Assignment<PrimedIntegerVariable,IntegerExpression> IntegerUpdate;
-typedef Assignment<PrimedStringVariable,StringExpression> StringUpdate;
+typedef List<PrimedStringAssignment> PrimedStringAssignments;
+typedef List<RealAssignment> RealAssignments;
+typedef List<DottedRealAssignment> DottedRealAssignments;
+typedef List<PrimedRealAssignment> PrimedRealAssignments;
 
 
 

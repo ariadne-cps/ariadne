@@ -297,6 +297,11 @@ class HybridAutomaton
         this->_new_mode(location,auxiliary,List<DottedRealAssignment>());
     }
 
+    //! \brief Adds a discrete mode to the automaton.
+    void new_mode(List<DottedRealAssignment> const& dynamic) {
+        this->_new_mode(DiscreteLocation(),List<RealAssignment>(),dynamic);
+    }
+
 
     //! \brief Adds a new internal/output event with a given enabling \a guard condition and triggering \a invariant.
     void new_action(DiscreteLocation location,
@@ -348,12 +353,24 @@ class HybridAutomaton
         this->_new_update(source,event,target,List<PrimedRealAssignment>());
     }
 
+    //! \brief Adds a reset to an automaton with a single mode.
+    void new_update(DiscreteEvent event,
+                    List<PrimedRealAssignment> const& reset) {
+        this->_new_update(DiscreteLocation(),event,DiscreteLocation(),List<PrimedRealAssignment>());
+    }
+
     //! \brief Adds a reset to the automaton. (Same as new_update.)
     void new_reset(DiscreteLocation source,
                    DiscreteEvent event,
                    DiscreteLocation target,
                    List<PrimedRealAssignment> const& reset) {
         this->_new_update(source,event,target,reset);
+    }
+
+    //! \brief Adds a reset to an automaton with a single mode.
+    void new_reset(DiscreteEvent event,
+                    List<PrimedRealAssignment> const& reset) {
+        this->_new_update(DiscreteLocation(),event,DiscreteLocation(),List<PrimedRealAssignment>());
     }
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
@@ -370,7 +387,7 @@ class HybridAutomaton
                         const List<PrimedRealAssignment>& reset,
                         const ContinuousPredicate& guard,
                         EventKind kind=urgent) {
-        if(kind==urgent) { this->_new_action(source,!guard,event,guard,kind); }
+        if(kind==urgent || kind==impact) { this->_new_action(source,!guard,event,guard,kind); }
         else if(kind==permissive) { this->_new_action(source,ContinuousPredicate(true),event,guard,kind); }
         else { ARIADNE_FAIL_MSG("Unhandled event kind "<<kind); }
         this->_new_update(source,event,target,reset);
@@ -382,6 +399,16 @@ class HybridAutomaton
                         DiscreteEvent event,
                         DiscreteLocation target,
                         ContinuousPredicate const& guard,
+                        EventKind kind=urgent) {
+        this->new_transition(source,event,target,List<PrimedRealAssignment>(),guard,kind);
+    }
+
+    //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
+    //! The reset is trivial. This form is for the case that there are no continuous state variables in the new location.
+    void new_transition(DiscreteLocation source,
+                        DiscreteEvent event,
+                        ContinuousPredicate const& guard,
+                        DiscreteLocation target,
                         EventKind kind=urgent) {
         this->new_transition(source,event,target,List<PrimedRealAssignment>(),guard,kind);
     }
@@ -401,6 +428,14 @@ class HybridAutomaton
                         DiscreteEvent event,
                         DiscreteLocation target) {
         this->_new_update(source,event,target,List<PrimedRealAssignment>());
+    }
+
+    //! \brief Adds a discrete transition for an automaton with a single mode.
+    void new_transition(DiscreteEvent event,
+                        List<PrimedRealAssignment> const & reset,
+                        ContinuousPredicate const& guard,
+                        EventKind kind=urgent) {
+        this->new_transition(DiscreteLocation(),event,DiscreteLocation(),reset,guard,kind);
     }
 
     //@}

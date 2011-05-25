@@ -85,12 +85,12 @@ int main()
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to
     // check non-blockingness of urgent actions.
-    valve.new_invariant(open,start_closing,height<=hmax);
-    valve.new_invariant(opening,start_closing,height<=hmax);
-    valve.new_invariant(opening,finished_opening,alpha<=1.0);
-    valve.new_invariant(closed,start_opening,height>=hmin);
-    valve.new_invariant(closing,start_opening,height>=hmin);
-    valve.new_invariant(closing,finished_closing,alpha>=0.0);
+    valve.new_invariant(open,height<=hmax,start_closing);
+    valve.new_invariant(opening,height<=hmax,start_closing);
+    valve.new_invariant(opening,alpha<=1.0,finished_opening);
+    valve.new_invariant(closed,height>=hmin,start_opening);
+    valve.new_invariant(closing,height>=hmin,start_opening);
+    valve.new_invariant(closing,alpha>=0.0,finished_closing);
 
     valve.new_transition(closed,start_opening,opening,(next(alpha)=alpha),height<=hmin);
     valve.new_transition(closing,start_opening,opening,(next(alpha)=alpha),height<=hmin);
@@ -129,9 +129,9 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
-    DiscreteLocation initial_location=(draining,opening);
+    DiscreteLocation initial_location=(tank|draining,valve|opening);
     Box initial_box(2, 0.0,0.00, 0.0,0.00);
-    HybridEnclosureType initial_enclosure(DiscreteLocation((draining,opening)),initial_box);
+    HybridEnclosureType initial_enclosure(DiscreteLocation((tank|draining,valve|opening)),initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.1);
 
     HybridTime evolution_time(80.0,5);

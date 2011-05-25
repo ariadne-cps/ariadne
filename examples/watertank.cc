@@ -23,6 +23,7 @@
 
 #include <cstdarg>
 #include "ariadne.h"
+#include <boost/concept_check.hpp>
 
 using namespace Ariadne;
 
@@ -38,86 +39,86 @@ int main(int argc, const char* argv[])
     DRAWING_ACCURACY = 0;
 
     /// Set the system parameters
-    Real a = -0.02;
-    Real b = 0.3;
-    Real T = 4.0;
-    Real hmin = 5.5;
-    Real Delta = 0.05;
-    Real hmax = 8.0;
+    RealConstant a("a",-0.02);
+    RealConstant b("b", 0.3);
+    RealConstant T("T",4.0);
+    RealConstant hmin("hmin",5.5);
+    RealConstant Delta("Delta",0.05);
+    RealConstant hmax("hmax",8.0);
 
     /// Build the Hybrid System
 
     /// Create a HybridAutomton object
-    MonolithicHybridAutomaton watertank_system;
+    HybridAutomaton watertank_system;
 
     /// Create four discrete states
-    StringVariable loc("q");
-    DiscreteLocation l1(loc|"1");
-    DiscreteLocation l2(loc|"2");
-    DiscreteLocation l3(loc|"3");
-    DiscreteLocation l4(loc|"4");
+    StringVariable valve("valve");
+    DiscreteLocation opening(valve|"opening");
+    DiscreteLocation open(valve|"open");
+    DiscreteLocation closing(valve|"closing");
+    DiscreteLocation closed(valve|"closed");
 
     /// Create the discrete events
-    DiscreteEvent e12(12);
-    DiscreteEvent e23(23);
-    DiscreteEvent i2("i2");
-    DiscreteEvent e34(34);
-    DiscreteEvent e41(41);
-    DiscreteEvent i4("i4");
+    DiscreteEvent finish_opening("finish_opening");
+    DiscreteEvent start_closing("start_closing");
+    DiscreteEvent must_start_closing("must_start_closing");
+    DiscreteEvent finish_closing("finish_closing");
+    DiscreteEvent start_opening("start_opening");
+    DiscreteEvent must_start_opening("must_start_opening");
 
     // Create coordinate functions in two variables.
-    RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
-    RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
+    RealVariable height("height");
+    RealVariable aperture("aperture");
 
     /// Create the dynamics
-    RealVectorFunction dynamic1((a*x0+b*x1,1/T));
-    cout << "dynamic1 = " << dynamic1 << endl << endl;
-    RealVectorFunction dynamic2((a*x0+b,0));
-    cout << "dynamic2 = " << dynamic2 << endl << endl;
-    RealVectorFunction dynamic3((a*x0+b*x1,-1/T));
-    cout << "dynamic3 = " << dynamic3 << endl << endl;
-    RealVectorFunction dynamic4((a*x0,0));
-    cout << "dynamic4 = " << dynamic4 << endl << endl;
+    DottedRealAssignment tank_dynamic(dot(height)=a*height+b*aperture);
+    DottedRealAssignment valve_opening_dynamic(dot(aperture)=1/T);
+    DottedRealAssignment valve_closing_dynamic(dot(aperture)=-1/T);
+    DottedRealAssignment valve_constant_dynamic(dot(aperture)=0.0);
+    RealAssignment valve_open_dynamic(let(aperture)=1.0);
+    RealAssignment valve_closed_dynamic(let(aperture)=0.0);
 
     /// Create the resets
-    RealVectorFunction reset_y_zero((x0,0));
-    cout << "reset_y_zero=" << reset_y_zero << endl << endl;
-    RealVectorFunction reset_y_one((x0,1));
-    cout << "reset_y_one=" << reset_y_one << endl << endl;
+    PrimedRealAssignment tank_reset(next(height)=height);
+    PrimedRealAssignment valve_reset(next(aperture)=aperture);
+    PrimedRealAssignment valve_open_reset(next(aperture)=1.0);
+    PrimedRealAssignment valve_closed_reset(next(aperture)=0.0);
+    cout << "tank_reset=" << tank_reset << endl << endl;
+    cout << "valve_reset=" << valve_reset << endl << endl;
 
     /// Create the guards.
     /// Guards are true when g(x) >= 0
-    RealScalarFunction guard12(x1-1);
-    cout << "guard12=" << guard12 << endl << endl;
-    RealScalarFunction guard23(x0+(-hmax+Delta));
-    cout << "guard23=" << guard23 << endl << endl;
-    RealScalarFunction guard34(-x1);
-    cout << "guard34=" << guard34 << endl << endl;
-    RealScalarFunction guard41(-x0+(hmin+Delta));
-    cout << "guard41=" << guard41 << endl << endl;
+    ContinuousPredicate finish_opening_guard(aperture>=1);
+    cout << "finish_opening_guard=" << finish_opening_guard << endl << endl;
+    ContinuousPredicate start_closing_guard(aperture>=hmax-Delta);
+    cout << "start_closing_guard=" << start_closing_guard << endl << endl;
+    ContinuousPredicate finish_closing_guard(aperture<=0);
+    cout << "finish_closing_guard=" << finish_closing_guard << endl << endl;
+    ContinuousPredicate start_opening_guard(aperture<=hmin+Delta);
+    cout << "start_opening_guard=" << start_opening_guard << endl << endl;
 
     /// Create the invariants.
     /// Invariants are true when c(x) <= 0
     /// Urgent transitions do not need an explicit invariant,
     /// we need only the invariants for location 2 and 4
-    RealScalarFunction inv2(x0+(-hmax - Delta));
-    cout << "inv2=" << inv2 << endl << endl;
-    RealScalarFunction inv4(-x0+(hmin - Delta));
-    cout << "inv4=" << inv4 << endl << endl;
+    ContinuousPredicate start_closing_invariant(height<=hmax + Delta);
+    cout << "start_closing_invariant=" << start_closing_invariant << endl << endl;
+    ContinuousPredicate start_opening_invariant(height>=hmin - Delta);
+    cout << "start_opening_invariant=" << start_opening_invariant << endl << endl;
 
     /// Build the automaton
-    watertank_system.new_mode(l1,dynamic1);
-    watertank_system.new_mode(l2,dynamic2);
-    watertank_system.new_mode(l3,dynamic3);
-    watertank_system.new_mode(l4,dynamic4);
+    watertank_system.new_mode(opening,(tank_dynamic,valve_opening_dynamic));
+    watertank_system.new_mode(open,(tank_dynamic,valve_constant_dynamic));
+    watertank_system.new_mode(closing,(tank_dynamic,valve_closing_dynamic));
+    watertank_system.new_mode(closed,(tank_dynamic,valve_constant_dynamic));
 
-    watertank_system.new_invariant(l2,i2,inv2);
-    watertank_system.new_invariant(l4,i4,inv4);
+    watertank_system.new_invariant(open,start_closing_invariant,must_start_closing);
+    watertank_system.new_invariant(closed,start_closing_invariant,must_start_closing);
 
-    watertank_system.new_transition(l1,e12,l2,reset_y_one,guard12,urgent);
-    watertank_system.new_transition(l2,e23,l3,reset_y_one,guard23,permissive);
-    watertank_system.new_transition(l3,e34,l4,reset_y_zero,guard34,urgent);
-    watertank_system.new_transition(l4,e41,l1,reset_y_zero,guard41,permissive);
+    watertank_system.new_transition(opening,finish_opening,open,(tank_reset,valve_open_reset),finish_opening_guard,urgent);
+    watertank_system.new_transition(open,start_closing,closing,(tank_reset,valve_reset),start_closing_guard,permissive);
+    watertank_system.new_transition(closing,finish_closing,closed,(tank_reset,valve_closed_reset),finish_closing_guard,urgent);
+    watertank_system.new_transition(closed,start_opening,opening,(tank_reset,valve_reset),start_opening_guard,permissive);
 
     /// Finished building the automaton
 
@@ -143,7 +144,7 @@ int main(int argc, const char* argv[])
     std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
 
     Box initial_box(2, 6.0,6.001, 1.0,1.001);
-    EnclosureType initial_enclosure(l2,initial_box);
+    EnclosureType initial_enclosure(open,initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.3);
 
     HybridTime evolution_time(80.0,10);

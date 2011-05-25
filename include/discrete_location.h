@@ -41,6 +41,7 @@ class DiscreteLocation
   public:
     DiscreteLocation() : StringValuation() { }
     explicit DiscreteLocation(const std::string& str) : StringValuation() { this->insert(StringVariable("q"),str); }
+    explicit DiscreteLocation(const std::string& var,const std::string& val) : StringValuation() { this->insert(StringVariable(var),val); }
     explicit DiscreteLocation(const int& num) : StringValuation() { this->insert(StringVariable("q"),to_str(num)); }
     DiscreteLocation(const Map<Identifier,String>& sm) : StringValuation(sm) { }
     void adjoin(const DiscreteLocation& loc) { this->_values.adjoin(loc._values); }

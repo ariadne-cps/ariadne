@@ -61,8 +61,8 @@ int main(int argc,char *argv[])
     }
 
     /// Set the system parameters
-    double a = 0.02;
-    double r = 1.25;
+    Real a("0.02");
+    Real r("1.25");
     double Rif = 5.67;
     double Kp = 15;
 
@@ -83,53 +83,66 @@ int main(int argc,char *argv[])
     RealScalarFunction delta=RealScalarFunction::coordinate(5,3); // sensor error
     RealScalarFunction t=RealScalarFunction::coordinate(5,4); // time
 
-    // Constants
-    RealScalarFunction one=RealScalarFunction::constant(5,1.0);
-    RealScalarFunction zero=RealScalarFunction::constant(5,0.0);
+    RealVariable water("water"); // Water level
+    RealVariable aperture("aperture"); // Valve aperture
+    RealVariable pressure("pressure"); // Input pressure
+    RealVariable error("error"); // Sensor error
+    RealVariable time("time"); // Time
+
 
     /// Build the Hybrid System
 
     /// Create a HybridAutomton object
-    MonolithicHybridAutomaton watertank_system;
+    HybridAutomaton watertank_system;
 
-    /// Create four discrete states
-    DiscreteLocation l1(1);      // Zero saturated
-    DiscreteLocation l2(2);      // Not saturated
-    DiscreteLocation l3(3);      // One saturated
+    /// Create discrete states
+    DiscreteLocation zero_saturated("zero_saturated");      // Zero saturated
+    DiscreteLocation not_saturated("not_saturated");      // Not saturated
+    DiscreteLocation one_saturated("one_saturated");      // One saturated
 
     /// Create the discrete events
-    DiscreteEvent e12(12);
-    DiscreteEvent e21(21);
-    DiscreteEvent e23(23);
-    DiscreteEvent e32(32);
+    DiscreteEvent event_zero_to_not("e0?");
+    DiscreteEvent event_not_to_zero("e?0");
+    DiscreteEvent event_not_to_one("e?1");
+    DiscreteEvent event_one_to_not("e1?");
 
     /// Create the dynamics
 
-    RealVectorFunction zerosaturated_d((-a*x+b*y,-y/r,zero,zero,one));
-    RealVectorFunction notsaturated_d((-a*x+b*y,-y/r*(Kp*(Rif-x-delta)-y),zero,zero,one));
-    RealVectorFunction onesaturated_d((-a*x+b*y,(1-y)/r,zero,zero,one));
+    DottedRealAssignment dwater(dot(water)=-a*water+pressure*aperture);
+    DottedRealAssignment dpressure(dot(pressure)=0);
+    DottedRealAssignment derror(dot(error)=0);
+    DottedRealAssignment dtime(dot(time)=1);
 
-    cout << "zero-saturated dynamic = " << zerosaturated_d << "\n\n";
-    cout << "not-saturated dynamic = " << notsaturated_d << "\n\n";
-    cout << "one-saturated dynamic = " << onesaturated_d << "\n\n";
+    DottedRealAssignment daperture_zero( dot(aperture) = -aperture/r );
+    DottedRealAssignment daperture_not( dot(aperture) = -aperture/r*(Kp*(Rif-water-error)-aperture) );
+    DottedRealAssignment daperture_one( dot(aperture) = (1-aperture)/r );
+
+    DottedRealAssignments zero_saturated_dynamic((dwater,daperture_zero,dpressure,derror,dtime));
+    DottedRealAssignments not_saturated_dynamic((dwater,daperture_not,dpressure,derror,dtime));
+    DottedRealAssignments one_saturated_dynamic((dwater,daperture_one,dpressure,derror,dtime));
+    //RealVectorFunction notsaturated_d((-a*x+b*y,-y/r*(Kp*(Rif-x-delta)-y),zero,zero,one));
+    //RealVectorFunction onesaturated_d((-a*x+b*y,(1-y)/r,zero,zero,one));
+
+    cout << "zero-saturated dynamic = " << zero_saturated_dynamic << "\n\n";
+    cout << "not-saturated dynamic = " << not_saturated_dynamic << "\n\n";
+    cout << "one-saturated dynamic = " << one_saturated_dynamic << "\n\n";
 
     /// Create the resets
-    IdentityFunction reset_id(5);
+    PrimedRealAssignments reset_id((next(water)=water,next(aperture)=aperture,next(pressure)=pressure,next(error)=error,next(time)=time));
     cout << "reset_id="<< reset_id << endl << endl;
 
     /// Create the guards.
-    /// Guards are true when f(x) = Ax + b > 0
     /// x <= Rif - Delta
-    ScalarAffineFunction guard12(Vector<Float>(5, -1.0,0.0,0.0,-1.0,0.0),Rif);
+    ContinuousPredicate guard12(water<=Rif-error);
     cout << "guard12=" << guard12 << endl << endl;
     /// x >= Rif - Delta
-    ScalarAffineFunction guard21(Vector<Float>(5, 1.0,0.0,0.0,1.0,0.0),-Rif);
+    ContinuousPredicate guard21(water>=Rif-error);
     cout << "guard21=" << guard21 << endl << endl;
     /// x <= Rif - 1/Kp - Delta
-    ScalarAffineFunction guard23(Vector<Float>(5, -1.0,0.0,0.0,-1.0,0.0),(Rif-1.0/Kp));
+    ContinuousPredicate guard23(water<=Rif-1/Kp-error);
     cout << "guard23=" << guard23 << endl << endl;
     /// x >= Rif - 1/Kp - Delta
-    ScalarAffineFunction guard32(Vector<Float>(5, 1.0,0.0,0.0,1.0,0.0),(1.0/Kp - Rif));
+    ContinuousPredicate guard32(water>=Rif-1/Kp-error);
     cout << "guard32=" << guard32 << endl << endl;
 
     /// Create the invariants.
@@ -138,14 +151,14 @@ int main(int argc,char *argv[])
     /// hence we do not need invariants
 
     /// Build the automaton
-    watertank_system.new_mode(l1,zerosaturated_d);
-    watertank_system.new_mode(l2,notsaturated_d);
-    watertank_system.new_mode(l3,onesaturated_d);
+    watertank_system.new_mode(zero_saturated,zero_saturated_dynamic);
+    watertank_system.new_mode(not_saturated,not_saturated_dynamic);
+    watertank_system.new_mode(one_saturated,one_saturated_dynamic);
 
-    watertank_system.new_transition(l1,e12,l2,reset_id,guard12,urgent);
-    watertank_system.new_transition(l2,e21,l1,reset_id,guard21,urgent);
-    watertank_system.new_transition(l2,e23,l3,reset_id,guard23,urgent);
-    watertank_system.new_transition(l3,e32,l2,reset_id,guard32,urgent);
+    watertank_system.new_transition(zero_saturated,event_zero_to_not,not_saturated,reset_id,guard12,urgent);
+    watertank_system.new_transition(not_saturated,event_not_to_zero,zero_saturated,reset_id,guard21,urgent);
+    watertank_system.new_transition(not_saturated,event_not_to_one,one_saturated,reset_id,guard23,urgent);
+    watertank_system.new_transition(one_saturated,event_one_to_not,not_saturated,reset_id,guard32,urgent);
 
     /// Finished building the automaton
 
@@ -179,19 +192,19 @@ int main(int argc,char *argv[])
     Vector<Float> lengths(5, 0.25, 1.0, 1.0, 1.0, 1.0);
     Grid grid(lengths);
     HybridGrid hg;
-    hg.insert(l1,grid);
-    hg.insert(l2,grid);
-    hg.insert(l3,grid);
+    hg.insert(zero_saturated,grid);
+    hg.insert(not_saturated,grid);
+    hg.insert(one_saturated,grid);
     HybridGridTreeSet hgts(hg);
     uint grid_depth = 9;
     uint grid_height = 8;
 
-    std::cout << "Computing timed evolution starting from location l3, x = 0.0, y = 1.0 for " << skip_time << " seconds" << std::endl;
+    std::cout << "Computing timed evolution starting from location one_saturated, x = 0.0, y = 1.0 for " << skip_time << " seconds" << std::endl;
     for(double b=bmin ; b < bmax+bstep ; b += bstep) {
         for(double d=-Delta ; d < Delta+dstep ; d += dstep) {
             cout << "b = "<< b <<", Delta = "<<d<<std::endl;
             Box initial_box(5, 0.0,0.0, 1.0,1.0, b,b, d,d, 0.0,0.0);
-            HybridEnclosureType initial_enclosure(l3,initial_box);
+            HybridEnclosureType initial_enclosure(one_saturated,initial_box);
             OrbitType result = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
             cout<<"Orbit.final=" << result.final() << endl;
             /*cout<<"Adjoining result to the grid..."<<std::flush;
@@ -220,7 +233,7 @@ int main(int argc,char *argv[])
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;
-    initial_set[l1]=result.final()[l1][0].range();
+    initial_set[zero_saturated]=result.final()[zero_saturated][0].range();
 
     HybridTime reach_time((total_time-skip_time),4);
 
@@ -252,7 +265,7 @@ int main(int argc,char *argv[])
     g1 << *lower_reach_set_ptr;
 
     g1.write("watertank-dominato-time");
-//    g2.write("watertank-dominato-time-l2");
+//    g2.write("watertank-dominato-time-not_saturated");
 
     OrbitType orbit = evolver.timed_evolution(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS,true);
     EnclosureListType final = orbit.final();
@@ -314,8 +327,8 @@ int main(int argc,char *argv[])
 //        cout << i << " elements removed. " << endl;
         cout << " final set after clearing = " << final << endl << endl;
         reach.clear();
-        //     std::cout << "final set[l1] = " << final[l1] << endl;
-        // std::cout << "final set[l1][0] = " << final[l1][0].bounding_box() << endl  << endl;
+        //     std::cout << "final set[zero_saturated] = " << final[zero_saturated] << endl;
+        // std::cout << "final set[zero_saturated][0] = " << final[zero_saturated][0].bounding_box() << endl  << endl;
         xmin=100.0;
         xmax=-100.0;
         for(const_iterator iter=final.begin(); iter != final.end(); ++iter) {
@@ -362,11 +375,11 @@ int main(int argc,char *argv[])
     std::cout << "done." << std::endl;
     plot("watertank-upper_reach1",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
 
-    std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
+    std::cout << "Computing evolution starting from location zero_saturated, x = 0.0, y = 0.0" << std::endl;
 
     Box initial_box2(2, 0.0,0.001, 0.0,0.001);
     HybridImageSet initial_set2;
-    initial_set2[l1]=initial_box2;
+    initial_set2[zero_saturated]=initial_box2;
 
     plot("watertank-initial_set2",bounding_box, Colour(0.0,0.5,1.0), initial_set2);
 

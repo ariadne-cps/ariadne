@@ -8,13 +8,12 @@ LDADD = ../src/libariadne.la $(LIBS)
 bin_PROGRAMS= \
 	tutorial \
 	bouncingball \
-	bouncingball-compositional \
 	ballinabox \
 	watertank \
+	watertank-compositional \
 	watertank-time \
 	watertank-proportional \
 	watertank-nonlinear \
-	watertank-compositional \
 	3bouncingballs \
 	rectifier \
 	cmos_inverter_analoginput \

@@ -383,6 +383,9 @@ Expression<Real> derivative(const Expression<Real>& e, const Variable<Real>& v);
 template<class X> Affine<X> affine(const Expression<Real>&, const Space<Real>&);
 template<class X> Polynomial<X> polynomial(const Expression<Real>&, const Space<Real>&);
 
+template<class X> List< Expression<X> > operator,(const Variable<X>& v, const X& c) {
+    return Expression<X>(v),Expression<X>(c); }
+
 } // namespace Ariadne
 
 #endif /* ARIADNE_EXPRESSION_H */

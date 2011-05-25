@@ -38,41 +38,30 @@ int main(int argc, const char* argv[])
     Real g = 9.8;
 
     /// Set the position and velocity functions.
-    RealScalarFunction x=RealScalarFunction::coordinate(2,0);
-    RealScalarFunction v=RealScalarFunction::coordinate(2,1);
+    RealVariable x("x");
+    RealVariable v("v");
 
     /// Build the Hybrid System
 
     /// Create a HybridAutomton object
-    MonolithicHybridAutomaton ball;
+    HybridAutomaton ball;
 
-    /// Create four discrete states
-    DiscreteLocation freefall("freefall");
+    /// Create the discrete location
+    //DiscreteLocation freefall(StringVariable("ball")|"freefall");
+    DiscreteLocation freefall;
     cout << "location = " << freefall << endl << endl;
 
     /// Create the discrete events
     DiscreteEvent bounce("bounce");
     cout << "event = " << bounce << endl << endl;
 
-    /// Create the dynamics
-    RealVectorFunction dynamic((v,-g));
-    cout << "dynamic = " << dynamic << endl << endl;
-
-    /// Create the resets
-    RealVectorFunction reset((x,-a*v));
-    cout << "reset=" << reset << endl << endl;
-
-    /// Create the guards.
-    /// Guards are true when g(x) > 0
-    RealScalarFunction guard(-x);
-    cout << "guard=" << guard << endl << endl;
-
     /// Build the automaton
-    ball.new_mode(freefall,dynamic);
-    ball.new_transition(freefall,bounce,freefall,reset,guard,impact);
+    ball.new_mode(freefall,(dot(x)=v,dot(v)=-g));
+    ball.new_guard(freefall,bounce,x<=0,impact);
+    ball.new_update(freefall,bounce,freefall,(next(x)=x,next(v)=-a*v));
     /// Finished building the automaton
 
-    cout << "Automaton = " << ball << endl << endl;
+    cout << "Ball = " << ball << endl << endl;
     /// Compute the system evolution
 
     /// Create a GeneralHybridEvolver object

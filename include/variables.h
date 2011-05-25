@@ -183,8 +183,9 @@ template<class T> class ExtendedVariable
         : UntypedVariable(nm, variable_type<T>(), cat) { }
 };
 
-template<class R, class D, class T=void> struct EnableIfRealDouble { };
-template<class T> struct EnableIfRealDouble<Real,double,T> { typedef T Type; };
+template<class R, class D, class T=void> struct EnableIfRealBuiltin { };
+template<class T> struct EnableIfRealBuiltin<Real,int,T> { typedef T Type; };
+template<class T> struct EnableIfRealBuiltin<Real,double,T> { typedef T Type; };
 
 //! \ingroup ExpressionModule
 //! A named variable of type \a T.
@@ -199,7 +200,7 @@ template<class T> class Variable
     inline AssignmentType operator=(const Constant<T>& cnst) const;
     inline AssignmentType operator=(const Variable<T>& e) const;
     inline AssignmentType operator=(const Expression<T>& e) const;
-    template<class D> inline typename EnableIfRealDouble<T,D,AssignmentType>::Type operator=(D e) const;
+    template<class D> inline typename EnableIfRealBuiltin<T,D,AssignmentType>::Type operator=(D e) const;
 };
 
 
@@ -217,7 +218,7 @@ template<class T> class LetVariable
     inline AssignmentType operator=(const Constant<T>& cnst) const;
     inline AssignmentType operator=(const Variable<T>& var) const;
     inline AssignmentType operator=(const Expression<T>& expr) const;
-    template<class D> inline typename EnableIfRealDouble<T,D,AssignmentType>::Type operator=(D e) const;
+    template<class D> inline typename EnableIfRealBuiltin<T,D,AssignmentType>::Type operator=(D e) const;
   private:
     explicit LetVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),simple) { }
 };
@@ -242,7 +243,7 @@ template<class T> class DottedVariable
     inline AssignmentType operator=(const Constant<T>& cnst) const;
     inline AssignmentType operator=(const Variable<T>& e) const;
     inline AssignmentType operator=(const Expression<T>& e) const;
-    template<class D> inline typename EnableIfRealDouble<T,D,AssignmentType>::Type operator=(D e) const;
+    template<class D> inline typename EnableIfRealBuiltin<T,D,AssignmentType>::Type operator=(D e) const;
   private:
     explicit DottedVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),dotted) { }
 };
@@ -264,7 +265,7 @@ template<class T> class PrimedVariable
     inline AssignmentType operator=(const Constant<T>& cnst) const;
     inline AssignmentType operator=(const Variable<T>& var) const;
     inline AssignmentType operator=(const Expression<T>& expr) const;
-    template<class D> inline typename EnableIfRealDouble<T,D,AssignmentType>::Type operator=(D e) const;
+    template<class D> inline typename EnableIfRealBuiltin<T,D,AssignmentType>::Type operator=(D e) const;
   private:
     explicit PrimedVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),primed) { }
 };

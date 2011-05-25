@@ -47,23 +47,23 @@ int main(int argc, char** argv)
     Real Ax = 60.0/pow(rtime,5);         Real Bx = -150.0/pow(rtime,4);       Real Cx = 100.0/pow(rtime,3);
 
     // Variables
-    RealScalarFunction x=RealScalarFunction::coordinate(3,0);
-    RealScalarFunction vx=RealScalarFunction::coordinate(3,1);
-    RealScalarFunction t=RealScalarFunction::coordinate(3,2);
+    RealVariable x("x");
+    RealVariable vx("vx");
+    RealVariable t("t");
 
-    RealScalarFunction dot_t((1.0));
+    RealExpression dot_t((1.0));
 
     // Algebraic expression for the reference trajectory
-    RealScalarFunction xd = Ax*t*t*t*t*t + Bx*t*t*t*t + Cx*t*t*t;
+    RealExpression xd = Ax*t*t*t*t*t + Bx*t*t*t*t + Cx*t*t*t;
     std::cout << "Algebraic expression for xd = " << xd << std::endl;
 
 //   return 1;
 
     // First and second derivatives of the reference trajectory
-    RealScalarFunction dot_xd = 5.0*Ax*t*t*t*t + 4.0*Bx*t*t*t + 3.0*Cx*t*t;
+    RealExpression dot_xd = 5.0*Ax*t*t*t*t + 4.0*Bx*t*t*t + 3.0*Cx*t*t;
     std::cout << "Expression for dot xd = " << dot_xd << std::endl;
 
-    RealScalarFunction ddot_xd = 20.0*Ax*t*t*t + 12.0*Bx*t*t + 6.0*Cx*t;
+    RealExpression ddot_xd = 20.0*Ax*t*t*t + 12.0*Bx*t*t + 6.0*Cx*t;
     std::cout << "Expression for dot dot xd = " << ddot_xd << std::endl;
 
 
@@ -77,32 +77,33 @@ int main(int argc, char** argv)
     Real xc = 19.5;
 
     // Dynamics for mode free
-    RealScalarFunction dot_x = vx;
-    RealScalarFunction dot_vx = ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x);
+    RealExpression dot_x = vx;
+    RealExpression dot_vx = ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x);
     std::cout << "Expression for dot vx = " << dot_vx << std::endl;
 
     // Dynamics for mode contact
-    RealScalarFunction cdot_vx = ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x) + kFx * ke * (xc - x); // * cos(phi);
+    RealExpression cdot_vx = ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x) + kFx * ke * (xc - x); // * cos(phi);
 
     //
     // Definition of the Hybrid Automaton for the Robot Arm
     //
-    MonolithicHybridAutomaton robotarm("RobotArm");
+    HybridAutomaton robotarm_automaton;
 
     // First mode: free run
-    AtomicDiscreteLocation free("free");
-    RealVectorFunction free_dyn((vx,ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x),1.0));
+    StringVariable robotarm("robot_arm");
+    DiscreteLocation free(robotarm|"free");
+    DottedRealAssignments free_dyn(( dot(x)=vx, dot(vx) = ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x), dot(t)=1.0));
     std::cout << "free_dyn = " << free_dyn << std::endl;
-    robotarm.new_mode(free, free_dyn);
+    robotarm_automaton.new_mode(free, free_dyn);
 
     // Second mode: contact
-    AtomicDiscreteLocation contact("contact");
-    robotarm.new_mode(contact, RealVectorFunction((vx,ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x) + kFx * ke * (xc - x),1.0)));
+    DiscreteLocation contact(robotarm|"contact");
+    robotarm_automaton.new_mode(contact, (dot(x)=vx,dot(vx)=ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x) + kFx * ke * (xc - x),dot(t)=1.0));
 
     // transition from free to contact
     DiscreteEvent f2c("f2c");
-    RealVectorFunction reset_id((x,vx,t));
-    robotarm.new_transition(free, f2c, contact, reset_id, RealScalarFunction(x - xc), urgent);
+    PrimedRealAssignments reset_id( (next(x)=x,next(vx)=vx,next(t)=t) );
+    robotarm_automaton.new_transition(free, f2c, contact, reset_id, (x >= xc), urgent);
 
     std::cout << "RobotArm = " << std::endl;
     std::cout << robotarm << std::endl << std::endl;
@@ -128,13 +129,13 @@ int main(int argc, char** argv)
     cout << "initial_box=" << initial_box << endl;
 
 
-    HybridEnclosureType initial_set(AtomicDiscreteLocation("free"), initial_box);
+    HybridEnclosureType initial_set(free, initial_box);
     cout << "initial_set=" << initial_set << endl << endl;
 
     Semantics semantics=UPPER_SEMANTICS;
 
     // Compute the reachable sets
-    Orbit<HybridEnclosureType> orbit = evolver.orbit(robotarm,initial_set,HybridTime(time,steps),semantics);
+    Orbit<HybridEnclosureType> orbit = evolver.orbit(robotarm_automaton,initial_set,HybridTime(time,steps),semantics);
     cout << std::endl;
 
     cout << "\norbit.final=\n" << orbit.final() << endl << endl;

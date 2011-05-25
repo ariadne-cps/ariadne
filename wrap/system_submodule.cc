@@ -146,7 +146,7 @@ void export_formula()
     string_expression_class.def(self_ns::str(self));
 
     class_<PrimedStringVariable> string_next_variable_class("PrimedStringVariable", no_init);
-    string_next_variable_class.def("__lshift__", (StringUpdate(PrimedStringVariable::*)(const StringExpression&)const) &StringExpression::operator=);
+    string_next_variable_class.def("__lshift__", (PrimedStringAssignment(PrimedStringVariable::*)(const StringExpression&)const) &StringExpression::operator=);
     string_next_variable_class.def(self_ns::str(self));
 
     def("next", (PrimedStringVariable(*)(const StringVariable&)) &next);
@@ -171,7 +171,7 @@ void export_formula()
     integer_variable_class.def(self_ns::str(self));
 
     class_<PrimedIntegerVariable> integer_next_variable_class("PrimedIntegerVariable", no_init);
-    integer_next_variable_class.def("__lshift__", (IntegerUpdate(PrimedIntegerVariable::*)(const IntegerExpression&)const) &PrimedIntegerVariable::operator=);
+    integer_next_variable_class.def("__lshift__", (PrimedIntegerAssignment(PrimedIntegerVariable::*)(const IntegerExpression&)const) &PrimedIntegerVariable::operator=);
     integer_next_variable_class.def(self_ns::str(self));
 
     def("next", (PrimedIntegerVariable(*)(const IntegerVariable&)) &next);
@@ -271,11 +271,11 @@ void export_formula()
     dotted_real_assignment_class.def(self_ns::str(self));
     class_<PrimedRealAssignment> primed_real_assignment_class("PrimedRealAssignment",no_init);
     primed_real_assignment_class.def(self_ns::str(self));
-    class_<StringUpdate> primed_string_assignment_class("PrimedStringAssignment",no_init);
+    class_<PrimedStringAssignment> primed_string_assignment_class("PrimedStringAssignment",no_init);
     primed_string_assignment_class.def(self_ns::str(self));
     class_<IntegerAssignment> integer_assignment_class("IntegerAssignment",no_init);
     integer_assignment_class.def(self_ns::str(self));
-    class_<IntegerUpdate> primed_integer_assignment_class("PrimedIntegerAssignment",no_init);
+    class_<PrimedIntegerAssignment> primed_integer_assignment_class("PrimedIntegerAssignment",no_init);
     primed_integer_assignment_class.def(self_ns::str(self));
 
     typedef Variable<Tribool> TriboolVariable;

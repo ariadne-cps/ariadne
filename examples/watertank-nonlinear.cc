@@ -26,6 +26,14 @@
 
 using namespace Ariadne;
 
+Figure& operator<<(Figure& fig, const ListSet<HybridEnclosure>& set) {
+    for(ListSet<HybridEnclosure>::const_iterator set_iter=set.begin(); set_iter!=set.end(); ++set_iter) {
+        fig << set_iter->continuous_state_set(); } return fig; }
+
+Figure& operator<<(Figure& fig, const HybridGridTreeSet& set) {
+    for(Map<DiscreteLocation,GridTreeSet>::const_iterator loc_iter=set.locations_begin(); loc_iter!=set.locations_end(); ++loc_iter) {
+        fig << loc_iter->second; } return fig; }
+
 /// Function for plotting the orbit and reachability set
 template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
@@ -211,9 +219,9 @@ int main()
     std::cout << "Orbit.reach.size()="<<orbit.reach().size()<<std::endl;
     std::cout << "Orbit.final.size()="<<orbit.final().size()<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
-    plot("watertank-nonlinear-orbit-tx", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
-    plot("watertank-nonlinear-orbit-ty", 2,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
-    plot("watertank-nonlinear-orbit-xy", 0,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit, -1);
+    plot("watertank-nonlinear-orbit-tx", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), orbit.reach(), -1);
+    plot("watertank-nonlinear-orbit-ty", 2,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit.reach(), -1);
+    plot("watertank-nonlinear-orbit-xy", 0,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit.reach(), -1);
     // textplot("watertank-nonlinear-orbit", orbit);
     // textplot("watertank-nonlinear-final", orbit.final());
 

@@ -383,8 +383,28 @@ Expression<Real> derivative(const Expression<Real>& e, const Variable<Real>& v);
 template<class X> Affine<X> affine(const Expression<Real>&, const Space<Real>&);
 template<class X> Polynomial<X> polynomial(const Expression<Real>&, const Space<Real>&);
 
-template<class X> List< Expression<X> > operator,(const Variable<X>& v, const X& c) {
-    return Expression<X>(v),Expression<X>(c); }
+// Sequencing operators for making lists
+template<class X, class T> struct IsExpression : public False { };
+template<class X> struct IsExpression< X, X > : public True { };
+template<class X> struct IsExpression< X, Constant<X> > : public True { };
+template<class X> struct IsExpression< X, Variable<X> > : public True { };
+template<class X> struct IsExpression< X, Expression<X> > : public True { };
+template<class X, class T1, class T2, class R> struct EnableIfExpressions : public EnableIf< And<IsExpression<X,T1>,IsExpression<X,T2> >, R> { };
+
+template<class T1, class T2> inline
+typename EnableIfExpressions< Real, T1, T2, List<Expression<Real> > >::Type
+operator,(const T1& e1, const T2& e2) {
+    List< Expression<Real> > r; r.append(e1); r.append(e2); return r; }
+
+template<class T> inline
+typename EnableIf< IsExpression<Real,T>, List<Expression<Real> > >::Type
+operator,(int c, const T& e) {
+    List< Expression<Real> > r; r.append(Expression<Real>(c)); r.append(Expression<Real>(e)); return r; }
+
+template<class X, class T> inline
+typename EnableIf< IsExpression<X,T>, List<Expression<X> > >::Type
+operator,(List<Expression<X> > l, const T& e) {
+    List< Expression<X> > r(l); r.append(Expression<Real>(e)); return r; }
 
 } // namespace Ariadne
 

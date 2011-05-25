@@ -76,6 +76,8 @@ int main(int argc, const char* argv[])
     dp[3] = 0.0001; /// Load capacitance, Cl
     dp[4] = 1000.0; /// Load resistance, Rl
 
+    RealConstant pi_c("pi",pi<Real>());
+
     /// Introduces the global parameters
     Real TIME_LIMIT = 1.0/frequency;
 //    float TIME_LIMIT = 0.0042;
@@ -91,20 +93,20 @@ int main(int argc, const char* argv[])
     /// Build the Hybrid System
 
     /// Create a MonolithicHybridAutomaton object
-    MonolithicHybridAutomaton rectifier;
+    AtomicHybridAutomaton rectifier("rectifier");
 
     // Create the coordinates
-    RealScalarFunction t=RealScalarFunction::coordinate(3,0); // Time // Input voltage
-    RealScalarFunction vi=RealScalarFunction::coordinate(3,1); // Input voltage
-    RealScalarFunction vo=RealScalarFunction::coordinate(3,2); // Output voltage
+    RealVariable t("t"); // Time
+    RealVariable vi("Vin"); // Input voltage
+    RealVariable vo("Vout"); // Output voltage
 
-    RealScalarFunction one=RealScalarFunction::constant(3,1.0);
+    Real one=1;
 
     /// Create the discrete states
-    AtomicDiscreteLocation offoff(1);
-    AtomicDiscreteLocation onoff(2);
-    AtomicDiscreteLocation offon(3);
-    AtomicDiscreteLocation onon(4);
+    AtomicDiscreteLocation offoff("offoff");
+    AtomicDiscreteLocation onoff("onoff");
+    AtomicDiscreteLocation offon("offon");
+    AtomicDiscreteLocation onon("onon");
 
     /// Create the discrete events
     DiscreteEvent resettime(1);
@@ -113,31 +115,30 @@ int main(int argc, const char* argv[])
     /// Create the resets
 
     /// Reset the time (t^=0,vi^=vi,vo^=vo)
-    VectorAffineFunction resettime_r(Matrix<Real>(3,3,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0),
-                               Vector<Real>(3,0.0,0.0,0.0));
+    PrimedRealAssignments resettime_r( next((t,vi,vo)) = (0,vi,vo) );
     /// Do nothing (t^=t,vi^=vi,vo^=vo)
-    IdentityFunction noop_r(3);
+    PrimedRealAssignments noop_r( next((t,vi,vo)) = (t,vi,vo) );
 
     /// Create the guards
-
+    Real f=dp[1];
     /// Guard for the reset of time (t>=1/f)
-    ScalarAffineFunction resettime_g(Vector<Real>(3,1.0,0.0,0.0),-1/dp[1]);
+    ContinuousPredicate resettime_g( t>=1/f );
     /// Guard for the jump from onoff to offoff (vi-vo<=0)
-    ScalarAffineFunction onoff_offoff_g(Vector<Real>(3,0.0,-1.0,1.0),0.0);
+    ContinuousPredicate onoff_offoff_g( vi<=vo );
     /// Guard for the jump from offon to offoff (-vi-vo<=0)
-    ScalarAffineFunction offon_offoff_g(Vector<Real>(3,0.0,1.0,1.0),0.0);
+    ContinuousPredicate offon_offoff_g( vi+vo>=0 );
     /// Guard for the jump from offoff to onoff (vi-vo>=0)
-    ScalarAffineFunction offoff_onoff_g(Vector<Real>(3,0.0,1.0,-1.0),0.0);
+    ContinuousPredicate offoff_onoff_g( vi>=vo );
     /// Guard for the jump from onon to onoff (-vi-vo<=0)
-    ScalarAffineFunction onon_onoff_g(Vector<Real>(3,0.0,1.0,1.0),0.0);
+    ContinuousPredicate onon_onoff_g( vi+vo>=0 );
     /// Guard for the jump from offoff to offon (-vi-vo>=0)
-    ScalarAffineFunction offoff_offon_g(Vector<Real>(3,0.0,-1.0,-1.0),0.0);
+    ContinuousPredicate offoff_offon_g( vi+vo<=0 );
     /// Guard for the jump from onon to offon (vi-vo<=0)
-    ScalarAffineFunction onon_offon_g(Vector<Real>(3,0.0,-1.0,1.0),0.0);
+    ContinuousPredicate onon_offon_g( vi<=vo );
     /// Guard for the jump from offon to onon (vi-vo>=0)
-    ScalarAffineFunction offon_onon_g(Vector<Real>(3,0.0,1.0,-1.0),0.0);
+    ContinuousPredicate offon_onon_g( vi>=vo );
     /// Guard for the jump from onoff to onon (-vi-vo>=0)
-    ScalarAffineFunction onoff_onon_g(Vector<Real>(3,0.0,-1.0,-1.0),0.0);
+    ContinuousPredicate onoff_onon_g( vi+vo<=0 );
 
     /// Build the automaton
 
@@ -145,22 +146,23 @@ int main(int argc, const char* argv[])
 
     /// Dynamics for the case of both diodes being off
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)
-    RealVectorFunction offoff_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)));
+    DottedRealAssignments offoff_d( dot((t,vi,vo)) = (one,amplitude*2*pi_c*frequency*Ariadne::cos(2*pi_c*frequency*t),-vo/(Rl*Cl)) );
     /// Dynamics for the case of the first diode being on, the second being off
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)
-    RealVectorFunction onoff_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)));
+    RealExpressions onoff_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)));
     /// Dynamics for the case of the first diode being off, the second being on
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-(vi+vo)/(Ron*Cl)
-    RealVectorFunction offon_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)+(vo-vi)/(Ron*Cl)));
+    RealExpressions offon_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)+(vo-vi)/(Ron*Cl)));
     /// Dynamics for the case of both diodes being on
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-2*vo/(Ron*Cl)
-    RealVectorFunction onon_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)-2.0*vo/(Ron*Cl)));
+    RealExpressions onon_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)-2.0*vo/(Ron*Cl)));
 
+    List<RealVariable> space( (t,vi,vo) );
     /// Locations
     rectifier.new_mode(offoff,offoff_d);
-    rectifier.new_mode(onoff,onoff_d);
-    rectifier.new_mode(offon,offon_d);
-    rectifier.new_mode(onon,onon_d);
+    rectifier.new_mode(onoff,dot(space)=onoff_d);
+    rectifier.new_mode(offon,dot(space)=offon_d);
+    rectifier.new_mode(onon,dot(space)=onon_d);
     /// OffOff events
     rectifier.new_transition(offoff,resettime,offoff,resettime_r,resettime_g,urgent);
     rectifier.new_transition(offoff,jump1,onoff,noop_r,offoff_onoff_g,urgent);
@@ -203,7 +205,7 @@ int main(int argc, const char* argv[])
     std::cout << "Computing evolution..." << std::endl;
 
     Box initial_box(3, 0.0, 0.0, 0.0,0.0, 0.8*dp[0],0.8*dp[0]);
-    HybridEnclosureType initial_enclosure(offoff,initial_box);
+    HybridEnclosureType initial_enclosure(rectifier|offoff,initial_box);
 
 //    Box initial_box(3, 0.002836,0.002836, 3.110529,3.110529, 3.110529,3.110529);
 //    HybridEnclosureType initial_enclosure(onoff,initial_box);

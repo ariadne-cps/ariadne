@@ -23,6 +23,7 @@
 
 #include <cstdarg>
 #include "ariadne.h"
+#include <include/hybrid_set.h>
 
 using namespace Ariadne;
 
@@ -36,15 +37,12 @@ outer_approximation(const EnclosureListType& hls,
                     const HybridGrid& hgr,
                     const int accuracy)
 {
-    HybridGridTreeSet result;
+    HybridGridTreeSet result(hgr);
     for(EnclosureListType::const_iterator
             iter=hls.begin(); iter!=hls.end(); ++iter)
         {
-            DiscreteLocation loc=iter->first;
-            const ContinuousEnclosureType& es=iter->second;
-            if(result.find(loc)==result.locations_end()) {
-                result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
-            }
+            DiscreteLocation loc=iter->location();
+            const ContinuousEnclosureType& es=iter->continuous_state_set();
             GridTreeSet& gts=result[loc];
             gts.adjoin_outer_approximation(ImageSet(es.bounding_box()),accuracy);
             //gts.adjoin_outer_approximation(ModelSet<ES>(es),accuracy);
@@ -189,12 +187,8 @@ int main(int argc,char *argv[])
     Box graphic_box(2, 18.0,skip_time, 5.0,6.0);
     Array<uint> tx(2,4,0);
 
-    Vector<Float> lengths(5, 0.25, 1.0, 1.0, 1.0, 1.0);
-    Grid grid(lengths);
-    HybridGrid hg;
-    hg.insert(zero_saturated,grid);
-    hg.insert(not_saturated,grid);
-    hg.insert(one_saturated,grid);
+    HybridScaling scaling( (water|0.25, aperture|1.0, pressure|1.0, error|1.0, time|1.0) );
+    HybridGrid hg(watertank_system.state_space(),scaling);
     HybridGridTreeSet hgts(hg);
     uint grid_depth = 9;
     uint grid_height = 8;

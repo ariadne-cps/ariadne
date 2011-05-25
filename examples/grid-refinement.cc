@@ -169,9 +169,6 @@ int main()
     analyser.parameters().maximum_grid_depth=2;
     std::cout <<  analyser.parameters() << std::endl;
 
-    // Set the grid
-    watertank_system.set_grid(Grid(Vector<Float>(2, 1.0, 0.1)));
-
     HybridTime reach_time(80.0,5);
 
     double eps = 1.0/4.0;

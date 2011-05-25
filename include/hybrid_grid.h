@@ -57,10 +57,11 @@ class HybridScalingInterface
 class HybridScaling
     : public HybridScalingInterface
 {
-    Map<String,Float> _scalings;
+    Map<Identifier,Float> _scalings;
   public:
     HybridScaling() : _scalings() { }
     HybridScaling(const HybridScalingInterface& hsc) : _scalings(dynamic_cast<const HybridScaling&>(hsc)._scalings) { }
+    HybridScaling(const Map<Identifier,Float>& scalings) : _scalings(scalings) { }
     void set_scaling(const RealVariable& var, Float res) { ARIADNE_ASSERT(res>0.0); _scalings[var.name()]=res; }
     virtual HybridScaling* clone() const { return new HybridScaling(*this); }
     virtual Float scaling(const DiscreteLocation& loc, const RealVariable& var) const {
@@ -68,7 +69,8 @@ class HybridScaling
     virtual std::ostream& write(std::ostream& os) const { return os << "HybridScaling( " << this->_scalings << " )"; }
 };
 
-
+Map<Identifier,Float> inline operator|(const RealVariable& var, double scal) {
+    Map<Identifier,Float> res; res.insert(var.name(),Float(scal)); return res; }
 
 //! \ingroup HybridModule
 //! \brief A grid in a hybrid space

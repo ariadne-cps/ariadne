@@ -228,6 +228,7 @@ template<class T> struct Primed {
     const List< Variable<T> >& _lhs;
     Primed(const List< Variable<T> >& lhs) : _lhs(lhs) { }
     List< Assignment<PrimedVariable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
+    List< Assignment<PrimedVariable<T>, Expression<T> > > operator=(const List<Variable<T> >&);
 };
 template<class T> inline Primed<T> next(const List<Variable<T> >& lhs) { return Primed<T>(lhs); }
 template<class T> inline List< Assignment<PrimedVariable<T>, Expression<T> > > Primed<T>::operator=(const List<Expression<T> >& rhs) {
@@ -236,6 +237,8 @@ template<class T> inline List< Assignment<PrimedVariable<T>, Expression<T> > > P
     for(uint i=0; i!=rhs.size(); ++i) { result.append(next(this->_lhs[i])=rhs[i]); }
     return result;
 }
+template<class T> inline List< Assignment<PrimedVariable<T>, Expression<T> > > Primed<T>::operator=(const List<Variable<T> >& rhs) {
+    return this->operator=(List<Expression<T> >(rhs)); }
 
 template<class LHS, class RHS> List<Identifier> left_hand_sides(const List<Assignment<LHS,RHS> >& assignments) {
     List<Identifier> result;

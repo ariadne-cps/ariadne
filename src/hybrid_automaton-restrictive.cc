@@ -332,7 +332,7 @@ RestrictiveDiscreteMode HybridSystem::compute_mode(const DiscreteLocation& locat
     mode.dynamic = filter(this->_dotted_assignments,location);
 
     Set<Identifier> discrete_variables = location.defined();
-    Set<Identifier> state_variables = make_set(left_hand_sides(mode.dynamic));
+    Set<Identifier> state_variables = make_set(names(left_hand_sides(mode.dynamic)));
 
     // Extract the disabled events
     FinitarySet<DiscreteEvent> disabled_events = filter_join(this->_disabled_events,location);

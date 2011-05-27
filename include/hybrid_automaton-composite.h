@@ -227,9 +227,6 @@ class HybridAutomaton
     typedef HybridSpace StateSpaceType;
 
   private:
-    //! \brief The discrete variables used by the automaton.
-    List<StringVariable> _discrete_variables;
-
     //! \brief The list of the hybrid automaton's discrete modes.
     Map< DiscreteLocation, DiscreteMode > _modes;
 
@@ -443,42 +440,14 @@ class HybridAutomaton
     //@{
     //! \name Data access and queries.
 
-    //! \brief The discrete variables used by the automaton.
-    const List<StringVariable>& discrete_variables() const;
-
     //! \brief The modes of the automaton.
     Map<DiscreteLocation,DiscreteMode> const& modes() const;
 
     //! \brief The set of discrete locations.
     Set<DiscreteLocation> locations() const;
 
-    //! \brief The discrete events corresponding to an invariant in \a source.
-    Set<DiscreteEvent> invariant_events(DiscreteLocation source) const;
-
-    //! \brief The discrete events corresponding to a transition \a source.
-    Set<DiscreteEvent> transition_events(DiscreteLocation source) const;
-
-    //! \brief The discrete events corresponding to an invariant \a source.
-    Set<DiscreteEvent> blocking_events(DiscreteLocation source) const;
-
-    //! \brief The discrete events corresponding to an urgent transition in \a source.
-    Set<DiscreteEvent> urgent_events(DiscreteLocation source) const;
-
-    //! \brief The discrete events corresponding to an permissive transitions in \a source.
-    Set<DiscreteEvent> permissive_events(DiscreteLocation source) const;
-
-
-    //! \brief Test if the hybrid automaton has a discrete mode with the given \a location.
-    bool has_mode(DiscreteLocation location) const;
-
-    //! \brief Tests if the automaton has an invariant or transition corresponding to the given location and event.
-    bool has_guard(DiscreteLocation, DiscreteEvent) const;
-
-    //! \brief Test if the hybrid automaton has a discrete transition starting from the given location with the given event.
-    bool has_transition(DiscreteLocation source, DiscreteEvent event) const;
-
-    //! \brief Test if the hybrid automaton has an invariant (either explicit or from an urgent transition) with the given \a event label in \a location.
-    bool has_invariant(DiscreteLocation location, DiscreteEvent event) const;
+    //! \brief Test if the hybrid automaton has a discrete mode with the given exact \a location.
+    bool has_location(DiscreteLocation location) const;
 
 
     //! \brief The discrete mode with given discrete state.
@@ -490,50 +459,62 @@ class HybridAutomaton
     //@{
     //! \name Access for compositional hybrid automata.
 
-    //! \brief The target location when the \a event occurs in the \a source location.
-    DiscreteLocation target_location(DiscreteLocation source, DiscreteEvent event) const;
     //! \brief The state (dotted) variables in the given location.
     List<RealVariable> state_variables(DiscreteLocation location) const;
     //! \brief The auxiliary (algebraic/output) variables in the given location.
     List<RealVariable> auxiliary_variables(DiscreteLocation location) const;
+    //! \brief The input variables in the given location.
+    Set<RealVariable> input_variables(DiscreteLocation location) const;
+    //! \brief The target location when the \a event occurs in the \a source location.
+    DiscreteLocation target_location(DiscreteLocation source, DiscreteEvent event) const;
     //! \brief The algebraic equations valid in the given location.
     List<RealAssignment> auxiliary_assignments(DiscreteLocation location) const;
     //! \brief The differential equations valid in the given location.
     List<DottedRealAssignment> dynamic_assignments(DiscreteLocation location) const;
-    //! \brief The differential equations valid in the given location.
-    List<PrimedRealAssignment> reset_assignments(DiscreteLocation source, DiscreteEvent event) const;
     //! \brief The invariant predicates valid in the given location.
     ContinuousPredicate invariant_predicate(DiscreteLocation location, DiscreteEvent action) const;
     //! \brief The guard predicate for the given event in the given location.
     ContinuousPredicate guard_predicate(DiscreteLocation location, DiscreteEvent event) const;
+    //! \brief The differential equations valid in the given location.
+    List<PrimedRealAssignment> reset_assignments(DiscreteLocation source, DiscreteEvent event) const;
     //@}
 
     //@{
     //! \name Functions for conformance to HybridAutomatonInterface
 
-    HybridSpace state_space() const;
+    virtual HybridSpace state_space() const;
     //! \brief The continuous state space in the given location.
-    RealSpace continuous_state_space(DiscreteLocation) const;
+    virtual RealSpace continuous_state_space(DiscreteLocation) const;
     //! \brief The dimension of the continuous state space in the given location.
-    uint dimension(DiscreteLocation) const;
+    virtual uint dimension(DiscreteLocation) const;
 
+    //! \brief Test if the hybrid automaton has a discrete mode corresponding to the given location.
+    virtual bool has_mode(DiscreteLocation location) const;
+    //! \brief Test if the hybrid automaton has an invariant (either explicit or from an urgent transition) with the given \a event label in \a location.
+    virtual bool has_invariant(DiscreteLocation location, DiscreteEvent event) const;
+    //! \brief Tests if the automaton has an invariant or transition corresponding to the given location and event.
+    virtual bool has_guard(DiscreteLocation, DiscreteEvent) const;
+    //! \brief Test if the hybrid automaton has a discrete transition starting from the given location with the given event.
+    virtual bool has_transition(DiscreteLocation source, DiscreteEvent event) const;
     //! \brief The events which are active in the given location.
-    Set<DiscreteEvent> events(DiscreteLocation) const;
+    virtual Set<DiscreteEvent> events(DiscreteLocation) const;
+
+
+    //! \brief The type of the event (urgent, permissive, impact etc).
+    virtual EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The target for \a event from location \a source. Returns \a source if \a event is not present.
-    DiscreteLocation target(DiscreteLocation location, DiscreteEvent event) const;
+    virtual DiscreteLocation target(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The function outputting the auxiliary variables \f$y=h(x)\f$ in the location.
-    RealVectorFunction auxiliary_function(DiscreteLocation location) const;
+    virtual RealVectorFunction auxiliary_function(DiscreteLocation location) const;
     //! \brief The function outputting the differential equations \f$\dot{x}=f(x)\f$ in the location.
-    RealVectorFunction dynamic_function(DiscreteLocation location) const;
-    //! \brief The reset function \f$x'=r(x)\f$ for the given event.
-    RealVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual RealVectorFunction dynamic_function(DiscreteLocation location) const;
     //! \brief The invariant function \f$i(x)\leq 0\f$ corresponding to the given event.
-    RealScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual RealScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The guard function \f$g(x)\geq 0\f$ corresponding to the given event.
-    RealScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
-    //! \brief The type of the event (urgent, permissive, impact etc).
-    EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const;
+    virtual RealScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
+    //! \brief The reset function \f$x'=r(x)\f$ for the given event.
+    virtual RealVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
 
     //@}
 
@@ -542,7 +523,8 @@ class HybridAutomaton
 };
 
 inline std::ostream& operator<<(std::ostream& os, const HybridAutomaton& ha) {
-    return ha.write(os); }
+    return ha.write(os);
+}
 
 
 
@@ -579,10 +561,6 @@ class CompositeHybridAutomaton
     const HybridAutomaton& component(uint i) const;
     //@}
 
-    // The signatures of these methods are wrong.
-    //const Set<DiscreteMode> modes() const;
-    //const Set<DiscreteTransition> transitions(DiscreteLocation location) const;
-
     //@{
     //! \name Methods for finding the modes, transitions and events of the composite automaton.
 
@@ -590,10 +568,10 @@ class CompositeHybridAutomaton
     DiscreteMode const& mode(DiscreteLocation) const;
     //! \brief Tests if the automaton has a mode corresponding to the given location.
     bool has_mode(DiscreteLocation) const;
-    //! \brief Tests if the automaton has an invariant or transition corresponding to the given location and event.
-    bool has_guard(DiscreteLocation, DiscreteEvent) const;
     //! \brief Tests if the automaton has an invariant corresponding to the given location and event.
     bool has_invariant(DiscreteLocation, DiscreteEvent) const;
+    //! \brief Tests if the automaton has an invariant or transition corresponding to the given location and event.
+    bool has_guard(DiscreteLocation, DiscreteEvent) const;
     //! \brief Tests if the automaton has a transition corresponding to the given location and event.
     bool has_transition(DiscreteLocation, DiscreteEvent) const;
 
@@ -614,6 +592,9 @@ class CompositeHybridAutomaton
     //! \brief The dependent continuous variables which are not state variables in the location.
     //! These variables are defined by algebraic equations.
     List<RealVariable> auxiliary_variables(DiscreteLocation) const;
+    //! \brief The continuous variables which are not state or auxiliary variables in the location,
+    //! but are required in one of the dynamic equations, constraints or resets.
+    Set<RealVariable> input_variables(DiscreteLocation) const;
 
     //! \brief The algebraic equations valid in the location, ordered so that the defining equation for a variable
     //! occurs before any equation using that variable.

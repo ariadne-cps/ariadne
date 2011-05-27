@@ -240,17 +240,16 @@ template<class T> inline List< Assignment<PrimedVariable<T>, Expression<T> > > P
 template<class T> inline List< Assignment<PrimedVariable<T>, Expression<T> > > Primed<T>::operator=(const List<Variable<T> >& rhs) {
     return this->operator=(List<Expression<T> >(rhs)); }
 
-template<class LHS, class RHS> List<Identifier> left_hand_sides(const List<Assignment<LHS,RHS> >& assignments) {
-    List<Identifier> result;
+template<class LHS, class RHS> List<typename LHS::BaseType> left_hand_sides(const List<Assignment<LHS,RHS> >& assignments) {
+    List<typename LHS::BaseType> result;
     result.reserve(assignments.size());
     for(typename List< Assignment<LHS,RHS> >::const_iterator assignment_iter=assignments.begin();
         assignment_iter!=assignments.end(); ++assignment_iter)
     {
-        result.append(assignment_iter->lhs.base().name());
+        result.append(assignment_iter->lhs.base());
     }
     return result;
 }
-
 
 // Simplifying typedefs
 typedef Assignment<IntegerVariable,IntegerExpression> IntegerAssignment;

@@ -52,6 +52,15 @@ bool operator==(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
 bool operator!=(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
 bool operator<(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
 
+inline bool are_distinguishable(const DiscreteLocation& location1, const DiscreteLocation& location2) {
+    for(Map<Identifier,String>::const_iterator iter1=location1._values.begin(); iter1!=location1._values.end(); ++iter1) {
+        if(location2._values.has_key(iter1->first) && location2._values[iter1->first] != iter1->second) {
+            return true;
+        }
+    }
+    return false;
+}
+
 inline bool is_restriction(const DiscreteLocation& partial_location, const DiscreteLocation& full_location) {
     for(Map<Identifier,String>::const_iterator value_iter=partial_location._values.begin(); value_iter!=partial_location._values.end(); ++value_iter) {
         if(!full_location._values.has_key(value_iter->first) || full_location[StringVariable(value_iter->first)]!=value_iter->second) {

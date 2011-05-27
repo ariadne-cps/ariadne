@@ -196,6 +196,7 @@ template<class T> class Variable
 {
     typedef Assignment< Variable<T>, Expression<T> > AssignmentType;
   public:
+    typedef Variable<T> BaseType;
     explicit Variable(const String& nm) : ExtendedVariable<T>(nm) { }
     Variable<T> const& base() const { return *this; }
     inline AssignmentType operator=(const T& e) const;
@@ -215,6 +216,7 @@ template<class T> class LetVariable
 {
     typedef Assignment< Variable<T>, Expression<T> > AssignmentType;
   public:
+    typedef Variable<T> BaseType;
     friend LetVariable<T> let<>(const Variable<T>&);
     Variable<T> base() const { return Variable<T>(this->name()); }
     inline AssignmentType operator=(const T& val) const;
@@ -240,6 +242,7 @@ template<class T> class DottedVariable
 {
     typedef Assignment< DottedVariable<T>, Expression<T> > AssignmentType;
   public:
+    typedef Variable<T> BaseType;
     friend DottedVariable<Real> dot(const Variable<Real>&);
     Variable<T> base() const { return Variable<T>(this->name()); }
     inline AssignmentType operator=(const T& e) const;
@@ -262,6 +265,7 @@ template<class T> class PrimedVariable
 {
     typedef Assignment< PrimedVariable<T>, Expression<T> > AssignmentType;
   public:
+    typedef Variable<T> BaseType;
     friend PrimedVariable<T> next<>(const Variable<T>&);
     Variable<T> base() const { return Variable<T>(this->name()); }
     inline AssignmentType operator=(const T& val) const;

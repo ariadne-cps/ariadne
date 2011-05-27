@@ -179,12 +179,12 @@ HybridAutomaton::~HybridAutomaton()
 }
 
 HybridAutomaton::HybridAutomaton()
-    : _discrete_variables()
+    : _modes()
 {
 }
 
 HybridAutomaton::HybridAutomaton(const List<StringVariable>& discrete_variables)
-    : _discrete_variables(discrete_variables)
+    : _modes()
 {
 }
 
@@ -197,8 +197,12 @@ HybridAutomaton::_new_mode(DiscreteLocation location,
                            const List<RealAssignment>& auxiliary,
                            const List<DottedRealAssignment>& dynamic)
 {
-    if(this->has_mode(location)) {
-        throw SystemSpecificationError("The hybrid automaton already has a mode with the given id");
+    for(Map<DiscreteLocation,DiscreteMode>::const_iterator mode_iter=this->_modes.begin(); mode_iter!=this->_modes.end(); ++mode_iter) {
+        if(!are_distinguishable(location,mode_iter->first)) {
+            ARIADNE_THROW(SystemSpecificationError,"HybridAutomaton::new_mode",
+                          "Location "<<location<<" is indistinguishable from location "<<mode_iter->first<<
+                          " in hybrid automaton with locations "<<this->locations());
+        }
     }
 
     Set<UntypedVariable> defined_variables;
@@ -249,13 +253,17 @@ HybridAutomaton::_new_action(DiscreteLocation location,
                              ContinuousPredicate guard,
                              EventKind kind)
 {
-    if(!this->has_mode(location)) {
-        ARIADNE_THROW(SystemSpecificationError,"HybridAutomaton::new_invariant",
+    if(!this->has_location(location)) {
+        ARIADNE_THROW(SystemSpecificationError,"HybridAutomaton::new_action",
                       "mode "<<location<<" is not a location of the automaton with locations "<<this->locations());
     }
     DiscreteMode& mode=this->_modes.value(location);
+    if(mode._kinds.has_key(event)) {
+        ARIADNE_THROW(SystemSpecificationError,"HybridAutomaton::new_action",
+                      "Even "<<event<<" is already defined in mode "<<mode);
+    }
     mode._invariants.insert(event,invariant);
-    mode._guards.insert(event,guard);
+//     mode._guards.insert(event,guard);
     mode._kinds.insert(event,kind);
 }
 
@@ -266,41 +274,53 @@ HybridAutomaton::_new_update(DiscreteLocation source,
                              DiscreteLocation target,
                              List<PrimedRealAssignment> const& reset)
 {
-    if(!this->has_mode(source)) {
+    if(!this->has_location(source)) {
         ARIADNE_THROW(SystemSpecificationError,"HybridAutomaton::new_reset",
                       "Source mode "<<source<<" is not a location of the automaton with locations "<<this->locations());
     }
 
-    if(!this->has_mode(target)) {
+    if(!this->has_location(target)) {
         ARIADNE_THROW(SystemSpecificationError,"HybridAutomaton::new_reset",
                       "Target mode "<<target<<" is not a location of the automaton with locations "<<this->locations());
     }
 
     DiscreteMode& source_mode=this->mode(source); // Non-constant since we may wish to update input variables
-    Set<RealVariable> target_state_variables(this->state_variables(target));
+    if(source_mode._targets.has_key(event)) {
+        ARIADNE_THROW(SystemSpecificationError,"HybridAutomaton::new_update",
+                      "Update for event "<<event<<" is already defined in mode "<<source);
+    }
 
-    for(uint i=0; i!=reset.size(); ++i) {
-        if(!target_state_variables.contains(reset[i].lhs.base())) {
-            ARIADNE_THROW(SystemSpecificationError,"HybridAutomaton::new_transition",
+    if(!unique_elements(left_hand_sides(reset))) {
+        ARIADNE_THROW(SystemSpecificationError,"HybridAutomaton::new_update",
+                      "reset "<<reset<<" for event "<<event<<" in source "<<source<<
+                      "overspecifies variables "<<duplicate_elements(left_hand_sides(reset)));
+    }
+
+    List<RealVariable> target_state_space=this->state_variables(target);
+    Set<RealVariable> target_state_variables(target_state_space);
+    Set<RealVariable> reset_variables(left_hand_sides(reset));
+
+    // A component is only allowed to reset variables which are state variables in the target location
+    if(!subset(reset_variables,target_state_variables)) {
+        ARIADNE_THROW(SystemSpecificationError,"HybridAutomaton::new_update",
                           "reset "<<reset<<" for event "<<event<<" in source "<<source<<
-                          " specifies variable "<<reset[i].lhs.base().name()<<
-                          " which is not a state variable "<<this->state_variables(target)<<" of the target location "<<target);
+                          " specifies variables "<<difference(reset_variables,target_state_variables)<<
+                          " which is not a state variable "<<target_state_variables<<" of the target location "<<target);
+    }
+
+    List<PrimedRealAssignment> implicit_reset;
+    for(List<RealVariable>::const_iterator var_iter=target_state_space.begin(); var_iter!=target_state_space.end(); ++var_iter) {
+        if(!reset_variables.contains(*var_iter)) {
+            implicit_reset.append(next(*var_iter)=Expression<Real>(*var_iter));
         }
     }
 
-    source_mode._targets.insert(event,target);
-    source_mode._resets.insert(event,reset);
+    source_mode._resets.insert(event,catenate(reset,implicit_reset));
 }
 
 
 
 
-
-const List<StringVariable>&
-HybridAutomaton::discrete_variables() const
-{
-    return this->_discrete_variables;
-}
 
 Set<DiscreteLocation>
 HybridAutomaton::locations() const
@@ -309,43 +329,13 @@ HybridAutomaton::locations() const
 }
 
 
-Set<DiscreteEvent>
-HybridAutomaton::transition_events(DiscreteLocation q) const
+
+
+bool
+HybridAutomaton::has_location(DiscreteLocation location) const
 {
-    return this->mode(q)._targets.keys();
+    return this->_modes.has_key(location);
 }
-
-
-
-Set<DiscreteEvent>
-HybridAutomaton::invariant_events(DiscreteLocation q) const
-{
-    ARIADNE_NOT_IMPLEMENTED;
-    return join(this->mode(q)._invariants.keys(),this->mode(q)._guards.keys());
-}
-
-Set<DiscreteEvent>
-HybridAutomaton::blocking_events(DiscreteLocation q) const
-{
-    ARIADNE_NOT_IMPLEMENTED;
-    return this->mode(q)._invariants.keys();
-}
-
-Set<DiscreteEvent>
-HybridAutomaton::urgent_events(DiscreteLocation q) const
-{
-    ARIADNE_NOT_IMPLEMENTED;
-    return this->mode(q)._guards.keys();
-}
-
-Set<DiscreteEvent>
-HybridAutomaton::permissive_events(DiscreteLocation q) const
-{
-    ARIADNE_NOT_IMPLEMENTED;
-    return this->mode(q)._guards.keys();
-}
-
-
 
 bool
 HybridAutomaton::has_mode(DiscreteLocation location) const
@@ -457,6 +447,41 @@ HybridAutomaton::auxiliary_variables(DiscreteLocation location) const {
     const DiscreteMode& mode=this->mode(location);
     for(uint i=0; i!=mode._auxiliary.size(); ++i) {
         result.append(mode._auxiliary[i].lhs);
+    }
+    return result;
+}
+
+Set<RealVariable>
+HybridAutomaton::input_variables(DiscreteLocation location) const {
+    Set<UntypedVariable> used;
+    Set<RealVariable> defined;
+    const DiscreteMode& mode=this->mode(location);
+    for(List<RealAssignment>::const_iterator iter=mode._auxiliary.begin(); iter!=mode._auxiliary.end(); ++iter) {
+        defined.insert(iter->lhs.base());
+        used.adjoin(iter->rhs.arguments());
+    }
+    for(List<DottedRealAssignment>::const_iterator iter=mode._dynamic.begin(); iter!=mode._dynamic.end(); ++iter) {
+        defined.insert(iter->lhs.base());
+        used.adjoin(iter->rhs.arguments());
+    }
+    for(Map<DiscreteEvent,ContinuousPredicate>::const_iterator iter=mode._invariants.begin(); iter!=mode._invariants.end(); ++iter) {
+        used.adjoin(iter->second.arguments());
+    }
+    for(Map<DiscreteEvent,ContinuousPredicate>::const_iterator iter=mode._guards.begin(); iter!=mode._guards.end(); ++iter) {
+        used.adjoin(iter->second.arguments());
+    }
+    for(Map<DiscreteEvent,List<PrimedRealAssignment> >::const_iterator iter=mode._resets.begin(); iter!=mode._resets.end(); ++iter) {
+        const List<PrimedRealAssignment>& reset=iter->second;
+        for(List<PrimedRealAssignment>::const_iterator iter=reset.begin(); iter!=reset.end(); ++iter) {
+            used.adjoin(iter->rhs.arguments());
+        }
+    }
+    Set<RealVariable> result;
+    for(Set<UntypedVariable>::const_iterator iter=used.begin(); iter!=used.end(); ++iter) {
+        RealVariable var(iter->name());
+        if(!defined.contains(var)) {
+            result.insert(var);
+        }
     }
     return result;
 }
@@ -641,6 +666,17 @@ CompositeHybridAutomaton::has_mode(DiscreteLocation location) const {
         }
     }
     return true;
+}
+
+bool
+CompositeHybridAutomaton::has_invariant(DiscreteLocation location, DiscreteEvent event) const
+{
+    for(uint i=0; i!=this->_components.size(); ++i) {
+        if(this->_components[i].has_invariant(location,event)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool
@@ -1234,6 +1270,10 @@ CompositeHybridAutomaton parallel_composition(const List<HybridAutomaton>& compo
     return CompositeHybridAutomaton(components);
 }
 
-
-
+HybridAutomaton flatten(const CompositeHybridAutomaton& composite_automaton, const List<DiscreteLocation>& locations)
+{
+    ARIADNE_NOT_IMPLEMENTED;
 }
+
+
+} // namespace Ariadne

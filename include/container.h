@@ -248,6 +248,21 @@ template<class K, class V> Map<K,V> restrict_keys(const std::map<K,V>& m, const 
     return result;
 }
 
+template<class T> bool unique_elements(const std::vector<T>& lst) {
+    Set<T> found;
+    for(typename std::vector<T>::const_iterator iter=lst.begin(); iter!=lst.end(); ++iter) {
+        if(found.contains(*iter)) { return false; } else { found.insert(*iter); } }
+    return true;
+}
+
+template<class T> Set<T> duplicate_elements(const std::vector<T>& lst) {
+    Set<T> result; Set<T> found;
+    for(typename std::vector<T>::const_iterator iter=lst.begin(); iter!=lst.end(); ++iter) {
+        if(found.contains(*iter)) { result.insert(*iter); } else { found.insert(*iter); } }
+    return result;
+}
+
+
 template<class T> inline Array<T> make_array(const T& t) { return Array<T>(1u,t); }
 template<class T> inline Array<T> make_array(const std::vector<T>& vec) { return Array<T>(vec.begin(),vec.end()); }
 template<class T> inline Array<T> make_array(const Array<T>& ary) { return Array<T>(ary); }

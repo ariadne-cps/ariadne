@@ -123,8 +123,8 @@ void TestSimpleHybridEvolver::test_all() const {
 void TestSimpleHybridEvolver::test_flow() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
-
-    HybridBox initial(q,Box(2, -0.125,0.125, -0.125,0.125));
+    RealSpace space=automaton.continuous_state_space(q);
+    HybridBox initial(q,space,Box(2, -0.125,0.125, -0.125,0.125));
     HybridTime time(2.5,3);
 
     evolver_ptr->parameters().maximum_step_size=1.0;
@@ -148,8 +148,9 @@ void TestSimpleHybridEvolver::test_flow() const {
 void TestSimpleHybridEvolver::test_exact_final_time() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
+    RealSpace space=automaton.continuous_state_space(q);
 
-    HybridBox initial(q,Box(2, -0.125,0.125, -0.125,0.125));
+    HybridBox initial(q,space,Box(2, -0.125,0.125, -0.125,0.125));
     HybridTime time(2.0,1);
 
     evolver_ptr->parameters().maximum_step_size=1.0;
@@ -175,7 +176,8 @@ void TestSimpleHybridEvolver::test_maximum_steps() const {
     //automaton.new_transition(e,q,q,(x0-1.5,x1),x0-0.5,urgent);
     // FIXME: Change so that hitting coordinate guard is not an error.
 
-    HybridBox initial(q,Box(2, -0.125,0.125, -0.125,0.125));
+    RealSpace space=automaton.continuous_state_space(q);
+    HybridBox initial(q,space,Box(2, -0.125,0.125, -0.125,0.125));
     HybridTime time(1.0,1);
 
     evolver_ptr->parameters().maximum_step_size=1.0;
@@ -203,7 +205,8 @@ void TestSimpleHybridEvolver::test_urgent_event() const {
     //automaton.new_transition(e,q,q,(x0-1.5,x1),x0-0.5,urgent);
     // FIXME: Change so that hitting coordinate guard is not an error.
 
-    HybridBox initial(q,Box(2, -0.125,0.125, -0.125,0.125));
+    RealSpace space=automaton.continuous_state_space(q);
+    HybridBox initial(q,space,Box(2, -0.125,0.125, -0.125,0.125));
     HybridTime time(1.0,2);
 
     evolver_ptr->parameters().maximum_step_size=1.0;
@@ -230,7 +233,8 @@ void TestSimpleHybridEvolver::test_empty_interior() const {
     automaton.new_mode(q,(c,c/2));
     automaton.new_transition(q,e,q,(x0-2,x1),x0-1,urgent);
 
-    HybridBox initial(q,Box(2, -0.125,0.25, -0.125,0.125));
+    RealSpace space=automaton.continuous_state_space(q);
+    HybridBox initial(q,space,Box(2, -0.125,0.25, -0.125,0.125));
     HybridTime time(2.0,3);
 
     evolver_ptr->parameters().maximum_step_size=2.0;
@@ -256,7 +260,8 @@ void TestSimpleHybridEvolver::test_partial_event() const {
     //automaton.new_transition(q,e,q,(x0-2,x1),x0-2,urgent);
     //FIXME: Need to allow domain of TaylorFunction to have empty interior
 
-    HybridBox initial(q,Box(2, -0.125,0.25, -0.125,0.125));
+    RealSpace space=automaton.continuous_state_space(q);
+    HybridBox initial(q,space,Box(2, -0.125,0.25, -0.125,0.125));
     HybridTime time(2.0,3);
 
     evolver_ptr->parameters().maximum_step_size=2.0;
@@ -284,7 +289,8 @@ void TestSimpleHybridEvolver::test_step_size_event() const {
     automaton.new_mode(q,(c,c/2));
     automaton.new_transition(q,e,q,(x0-2,x1),x0-2.0,urgent);
 
-    HybridBox initial(q,Box(2, -0.125,0.125, -0.125,0.125));
+    RealSpace space=automaton.continuous_state_space(q);
+    HybridBox initial(q,space,Box(2, -0.125,0.125, -0.125,0.125));
     HybridTime time(1.0,3);
 
     evolver_ptr->parameters().maximum_step_size=2.0;
@@ -308,7 +314,8 @@ void TestSimpleHybridEvolver::test_initially_active_event() const {
     automaton.new_mode(q,(c,c));
     automaton.new_transition(q,e,q,(x0+1,x1),-x0,urgent);
 
-    HybridBox initial(q,Box(2, -1.625,-1.375, -0.125,0.125));
+    RealSpace space=automaton.continuous_state_space(q);
+    HybridBox initial(q,space,Box(2, -1.625,-1.375, -0.125,0.125));
     HybridTime time(1.0,4);
 
     evolver_ptr->parameters().maximum_step_size=2.0;
@@ -334,7 +341,8 @@ void TestSimpleHybridEvolver::test_initially_active_attracting_event() const {
     automaton.new_mode(q,(-0.5*c,c));
     automaton.new_transition(q,e,q,(x0+1.0,x1),-x0-x1*1.0/256,urgent);
 
-    HybridBox initial(q,Box(2, -0.125,0.25, -0.125,0.125));
+    RealSpace space=automaton.continuous_state_space(q);
+    HybridBox initial(q,space,Box(2, -0.125,0.25, -0.125,0.125));
     HybridTime time(1.0,4);
 
     evolver_ptr->parameters().maximum_step_size=2.0;
@@ -356,7 +364,8 @@ void TestSimpleHybridEvolver::test_initially_active_repelling_event() const {
     automaton.new_mode(q,(+0.5*c,c));
     automaton.new_transition(q,e,q,(x0+1,x1),-x0,urgent);
 
-    HybridBox initial(q,Box(2, -0.125,0.25, -0.125,0.125));
+    RealSpace space=automaton.continuous_state_space(q);
+    HybridBox initial(q,space,Box(2, -0.125,0.25, -0.125,0.125));
     HybridTime time(1.0,2);
 
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
@@ -377,7 +386,8 @@ void TestSimpleHybridEvolver::test_impact() const {
     automaton.new_transition(q,e,q,(x0,x1-2),x0-1,impact);
     //automaton.new_transition(q,e,q,(x0+0.001*x1-0.0004,x1-2),x0-1,urgent);
 
-    HybridBox initial(q,Box(2, 0.4375,0.5625, 0.9375,1.0625));
+    RealSpace space=automaton.continuous_state_space(q);
+    HybridBox initial(q,space,Box(2, 0.4375,0.5625, 0.9375,1.0625));
     HybridTime time(2.0,3);
 
     evolver_ptr->parameters().maximum_step_size=2.0;
@@ -398,7 +408,8 @@ void TestSimpleHybridEvolver::test_tangency() const {
     automaton.new_mode(q,(c,z));
     automaton.new_transition(q,e,q,(x0,x1-1),x1-sqr(x0),urgent);
 
-    HybridBox initial(q,Box(2, -1.125,-0.875, -0.25,0.25));
+    RealSpace space=automaton.continuous_state_space(q);
+    HybridBox initial(q,space,Box(2, -1.125,-0.875, -0.25,0.25));
     HybridTime time(2.0,3);
 
     evolver_ptr->parameters().maximum_step_size=2.0;
@@ -427,7 +438,8 @@ void TestSimpleHybridEvolver::test_simultaneous_events() const {
     automaton.new_transition(q,e1,q,(x0-1,x1-2),x0-1.0,urgent);
     automaton.new_transition(q,e2,q,(x0-2,x1-1),x1-1.0,urgent);
 
-    HybridBox initial(q,Box(2, -0.25,0.125, -0.125,0.25));
+    RealSpace space=automaton.continuous_state_space(q);
+    HybridBox initial(q,space,Box(2, -0.25,0.125, -0.125,0.25));
     HybridTime time(2.5,4);
 
     evolver_ptr->parameters().maximum_step_size=4.0;
@@ -451,7 +463,8 @@ void TestSimpleHybridEvolver::test_creep() const {
     automaton.new_mode(q,(c,c));
     automaton.new_transition(q,e,q,(x0-1,x1),x0-1.0,urgent);
 
-    HybridBox initial(q,Box(2, -0.25,0.125, -0.125,0.25));
+    RealSpace space=automaton.continuous_state_space(q);
+    HybridBox initial(q,space,Box(2, -0.25,0.125, -0.125,0.25));
     HybridTime time(1.5,4);
 
     evolver_ptr->parameters().maximum_step_size=1.0;
@@ -462,7 +475,7 @@ void TestSimpleHybridEvolver::test_creep() const {
     ARIADNE_TEST_PRINT(HybridEnclosure(*orbit.final().begin()).bounding_box());
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
-    ARIADNE_TEST_BINARY_PREDICATE(subset,HybridEnclosure(*orbit.final().begin()),HybridBox(q,Box(2, 0.24,0.635, 1.365,1.76)));
+    ARIADNE_TEST_BINARY_PREDICATE(subset,HybridEnclosure(*orbit.final().begin()),HybridBox(q,space,Box(2, 0.24,0.635, 1.365,1.76)));
 
     plot(cstr("test_"+evolver_name+"-creep"),Box(2, -1.5,+1.5, -0.5, +3.5),
          guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
@@ -478,7 +491,8 @@ void TestSimpleHybridEvolver::test_unwind() const {
     //automaton.new_transition(q,e,q,(x0-3,x1-1),x0-1,urgent);
     automaton.new_transition(q,e,q,(x0-3,x1-1),x0-x1/16-1,urgent);
 
-    HybridBox initial(q,Box(2, -0.25,0.125, -0.125,0.25));
+    RealSpace space=automaton.continuous_state_space(q);
+    HybridBox initial(q,space,Box(2, -0.25,0.125, -0.125,0.25));
     HybridTime time(3.0,4);
 
     evolver_ptr->parameters().maximum_step_size=2.0;
@@ -494,6 +508,8 @@ void TestSimpleHybridEvolver::test_unwind() const {
          final_set_colour,orbit.final(),
          initial_set_colour,orbit.initial());
 }
+
+/*
 
 class TestContraintHybridEvolver
 {
@@ -659,6 +675,8 @@ TestContraintHybridEvolver::test_affine_flow_system() const
     ARIADNE_TEST_EQUAL(orbit.final().size(),1u);
     plot("test_constraint_hybrid_evolver-affine-t=8",Box(2, -1.0,11.0, -6.0, 6.0), Colour(0.75,0.75,0.75),Box(2,-1.0,11.0,-2.0,-1.5),Colour(0.25,0.25,0.5),orbit.reach(),Colour(0.5,0.5,0.75),orbit.final(),Colour(0.5,0.5,0.75),orbit.initial());
 }
+
+*/
 
 /*
 class TestHybridEvolution

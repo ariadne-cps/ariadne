@@ -104,6 +104,8 @@ class MonolithicHybridSpace
 
     MonolithicHybridSpace() : _locations() { }
 
+    explicit MonolithicHybridSpace(const Map< DiscreteLocation, RealSpace >& locations) : _locations(locations) { }
+
     MonolithicHybridSpace* clone() const { return new MonolithicHybridSpace(*this); }
 
     void new_location(const DiscreteLocation& q, const RealSpace& spc) { this->_locations.insert(q,spc); }

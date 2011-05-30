@@ -223,6 +223,11 @@ BoundedConstraintSet intersection(const ConstraintSet& set, const Box& bound) {
 
 
 
+BoundedConstraintSet::BoundedConstraintSet(const Box& bx)
+    : _domain(bx), _function(RealVectorFunction(0u,bx.dimension())), _codomain()
+{
+}
+
 BoundedConstraintSet::BoundedConstraintSet(const Vector<Interval>& dom, const RealVectorFunction& fn, const Vector<Interval>& codom)
     : _domain(dom), _function(fn), _codomain(codom)
 {

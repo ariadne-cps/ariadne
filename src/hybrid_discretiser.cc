@@ -185,8 +185,8 @@ HybridDiscretiser<HES>::
 _enclosure(const BasicSetType& initial_set) const
 {
     return this->_evolver_ptr->enclosure(initial_set.box());
-    ContinuousEnclosureType continuous_enclosure(initial_set.second.box(),default_sweeper());
-    return EnclosureType(initial_set.first,continuous_enclosure);
+    ContinuousEnclosureType continuous_enclosure(initial_set.continuous_state_set().box(),default_sweeper());
+    return EnclosureType(initial_set.location(),initial_set.space(),continuous_enclosure);
 }
 
 template<class HES>

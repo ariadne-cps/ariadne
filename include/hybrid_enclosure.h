@@ -54,7 +54,6 @@ typedef VectorFunction<Real> RealVectorFunction;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
 class TaylorConstrainedImageSet;
-class HybridEnclosure;
 class Box;
 class Grid;
 class GridTreeSet;
@@ -63,8 +62,11 @@ class DiscreteEvent;
 class Figure;
 class CanvasInterface;
 
+template<class X> class Space;
+typedef Space<Real> RealSpace;
 template<class ES> class ListSet;
 template<class ES> class HybridListSet;
+class HybridEnclosure;
 template<> class ListSet<HybridEnclosure>;
 
 template<class BS> class HybridBasicSet;
@@ -125,6 +127,7 @@ class HybridEnclosure
   private:
     DiscreteLocation _location;
     List<DiscreteEvent> _events;
+    List<Identifier> _space;
     TaylorConstrainedImageSet _set;
     ScalarTaylorFunction _time;
     ScalarTaylorFunction _dwell_time;
@@ -133,17 +136,16 @@ class HybridEnclosure
     //! \brief An empty enclosure.
     HybridEnclosure();
     //! \brief An enclosure corresponding to a box \a s in location \a q.
-    HybridEnclosure(const DiscreteLocation& q, const Box& bx, const TaylorFunctionFactory& fac);
-    HybridEnclosure(const std::pair<DiscreteLocation,Box>& hbx, const TaylorFunctionFactory& fac);
+    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Box& bx, const TaylorFunctionFactory& fac);
     HybridEnclosure(const HybridBox& hbx, const TaylorFunctionFactory& fac);
     //! \brief An enclosure corresponding to a box \a s in location \a q, using a default function factory class.
-    HybridEnclosure(const DiscreteLocation& q, const Box& bx);
+    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Box& bx);
     //! \brief An enclosure constructed from a continuous state set and a location.
     HybridEnclosure(const Pair<DiscreteLocation,ContinuousStateSetType>&);
     //! \brief An enclosure constructed from a continuous state set and a location with evolution time equal to zero.
-    HybridEnclosure(const DiscreteLocation&, const ContinuousStateSetType&);
+    HybridEnclosure(const DiscreteLocation&, const RealSpace& spc, const ContinuousStateSetType&);
     //! \brief An enclosure constructed from a continuous state set, an evolution time and a location.
-    HybridEnclosure(const DiscreteLocation&, const ContinuousStateSetType&, const ScalarTaylorFunction& time);
+    HybridEnclosure(const DiscreteLocation&, const RealSpace& spc, const ContinuousStateSetType&, const ScalarTaylorFunction& time);
     //! \brief Destructor.
     ~HybridEnclosure();
     //! \brief Create a dynamically-allocated copy.
@@ -151,6 +153,8 @@ class HybridEnclosure
 
     //! \brief The current location.
     const DiscreteLocation& location() const;
+    //! \brief The Euclidean space of the location.
+    const RealSpace& space() const;
     //! \brief The list of previous events.
     const List<DiscreteEvent>& previous_events() const;
     //! \brief The number of independent parameters.
@@ -185,7 +189,7 @@ class HybridEnclosure
 
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
-    void apply_reset(DiscreteEvent e, DiscreteLocation q, RealVectorFunction r);
+    void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, RealVectorFunction r);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s),tau(s))) and tau'(s)=tau(s)+eps(xi(s),tau(s))
     void apply_spacetime_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& eps);
     //! \brief Apply the reach step \xi'(s) = phi(xi(s),t-tau(s)) and tau'(s)=tau(s)+t for 0<=t<=eps(xi(s),tau(s))

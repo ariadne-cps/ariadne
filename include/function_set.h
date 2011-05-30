@@ -152,6 +152,8 @@ class BoundedConstraintSet
     BoundedConstraintSet(const Vector<Interval>& D, const RealVectorFunction& g, const Vector<Interval>& C);
     //! \brief Construct the restriction of \a D under the constraints \a c.
     BoundedConstraintSet(const Vector<Interval>& D, const List<RealNonlinearConstraint>& c);
+    //! \brief Construct the box \a D.
+    BoundedConstraintSet(const Box& bx);
     //! \brief The domain of the set.
     const Vector<Interval>& domain() const { return this->_domain; }
     //! \brief The codomain of the set.

@@ -69,10 +69,10 @@ class TestHybridReachabilityAnalyser
     typedef HybridEnclosureType::ContinuousStateSetType ContinuousEnclosureType;
 
     HybridReachabilityAnalyser analyser;
-    MonolithicHybridAutomaton system;
+    HybridAutomaton system;
     Grid grid;
     Interval bound;
-    HybridImageSet initial_set;
+    HybridBoundedConstraintSet initial_set;
     HybridTime reach_time;
 
   public:
@@ -103,17 +103,18 @@ class TestHybridReachabilityAnalyser
         std::cout<<std::setprecision(20);
         std::cerr<<std::setprecision(20);
         std::clog<<std::setprecision(20);
-        DiscreteLocation location(1);
+        DiscreteLocation location(StringVariable("q")|"1");
 
+        RealVariable x("x");
+        RealVariable y("y");
         Matrix<Float> A=Matrix<Float>("[-0.5,-1.0;1.0,-0.5]");
         Vector<Float> b=Vector<Float>("[0.0,0.0]");
         VectorAffineFunction aff(A,b);
-        system.new_mode(location,aff);
+        system.new_mode(location,(dot(x)=-0.5*x-1.0*y,dot(y)=1.0*x-0.5*y) );
         cout << "Done building system\n";
 
         //ImageSet initial_box(make_box("[1.99,2.01]x[-0.01,0.01]"));
-        ImageSet initial_box(make_box("[2.01,2.02]x[0.01,0.02]"));
-        initial_set[location]=initial_box;
+        initial_set=HybridBox(location,(x.in(2.01,2.02),y.in(0.01,0.02)));
         cout << "Done creating initial set\n" << endl;
 
         cout << "system=" << system << endl;
@@ -179,7 +180,7 @@ class TestHybridReachabilityAnalyser
 
         const GridTreeSet& upper_evolve=upper_evolve_set[loc];
         const GridTreeSet& upper_reach=upper_reach_set[loc];
-        ImageSet& initial=initial_set[loc];
+        BoundedConstraintSet const& initial=initial_set[loc];
         //cout << "Reached " << upper_reach.size() << " cells out of " << upper_reach.capacity() << endl << endl;
         plot("test_reachability_analyser-map_upper_reach_evolve.png",bounding_box,upper_evolve,upper_reach,initial);
     }

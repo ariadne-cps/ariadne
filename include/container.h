@@ -270,6 +270,7 @@ template<class T> inline Array<T> make_array(const Array<T>& ary) { return Array
 template<class T> inline List<T> make_list(const T& t) { return List<T>(1u,t); }
 template<class T> inline List<T> make_list(const std::vector<T>& vec) { return List<T>(vec); }
 template<class T> inline List<T> make_list(const Array<T>& ary) { return List<T>(ary); }
+template<class T> inline List<T> make_list(const Set<T>& set) { return List<T>(set.begin(),set.end()); }
 
 
 } // namespace Ariadne

@@ -51,11 +51,11 @@ ARIADNE_SRC = \
 	hybrid_automaton-composite.cc \
 	hybrid_automaton-restrictive.cc \
 	hybrid_evolver.cc \
-	hybrid_discretiser.cc \
 	hybrid_reachability_analyser.cc
 
 EXTRAS_SRC = \
 	runge_kutta_integrator.cc \
+	hybrid_discretiser.cc \
 	geometry.cc \
 	zonotope.cc \
 	polytope.cc \

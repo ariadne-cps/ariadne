@@ -1045,7 +1045,13 @@ IntervalScalarFunction compose(const IntervalScalarFunction& f, const IntervalVe
 
 IntervalVectorFunction join(IntervalVectorFunction const& f1, const IntervalVectorFunction& f2)
 {
-    return join(dynamic_cast<VectorTaylorFunction const&>(*f1.raw_pointer()),dynamic_cast<VectorTaylorFunction const&>(*f2.raw_pointer()));
+    if(dynamic_cast<VectorTaylorFunction const*>(f1.raw_pointer())) {
+        return join(dynamic_cast<VectorTaylorFunction const&>(*f1.raw_pointer()),dynamic_cast<VectorTaylorFunction const&>(*f2.raw_pointer()));
+    }
+    VectorOfIntervalScalarFunction r(f1.result_size()+f2.result_size(),f1.argument_size());
+    for(uint i=0; i!=f1.result_size(); ++i) { r[i]=f1[i]; }
+    for(uint i=0; i!=f2.result_size(); ++i) { r[i+f1.result_size()]=f2[i]; }
+    return r;
 }
 
 

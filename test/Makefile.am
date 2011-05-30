@@ -51,12 +51,14 @@ check_PROGRAMS = \
 	test_hybrid_automaton \
 	test_hybrid_evolver \
 	test_hybrid_evolution \
-	test_hybrid_discretiser \
 	test_hybrid_reachability_analyser
 
 EXTRA_TESTS = \
 	test_textplot \
 	test_misc
+
+UNUSED_TESTS = \
+	test_hybrid_discretiser
 
 tests: $(check_PROGRAMS)
 profiles: $(bin_PROGRAMS)

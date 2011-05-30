@@ -33,7 +33,6 @@
 
 #include "hybrid_set_interface.h"
 #include "evolver_interface.h"
-#include "discretiser_interface.h"
 #include "reachability_analyser_interface.h"
 
 #include "orbit.h"
@@ -61,7 +60,6 @@ class HybridGridTreeSet;
 class HybridGridTreeSet;
 
 template<class ES> class HybridListSet;
-template<class ES> class HybridDiscretiser;
 
 class HybridEvolverInterface;
 

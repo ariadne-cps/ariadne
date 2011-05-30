@@ -30,6 +30,7 @@
 #include "taylor_function.h"
 #include "box.h"
 #include "grid_set.h"
+#include "expression_set.h"
 #include "hybrid_time.h"
 #include "discrete_event.h"
 #include "discrete_location.h"
@@ -79,46 +80,41 @@ HybridEnclosure::~HybridEnclosure() {
 }
 
 HybridEnclosure::HybridEnclosure()
-    : _location(""), _events(), _set(), _time(), _dwell_time(), _variables()
+    : _location(""), _events(), _space(), _set(), _time(), _dwell_time(), _variables()
 {
 }
 
-HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Box& box, const TaylorFunctionFactory& factory)
-    : _location(location), _events(), _set(box,factory.sweeper()),
+HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& space,
+                                 const Box& box, const TaylorFunctionFactory& factory)
+    : _location(location), _events(), _space(space.variable_names()), _set(box,factory.sweeper()),
       _time(_set.domain(),factory.sweeper()), _dwell_time(_time),
       _variables(box.dimension(),INITIAL)
 {
 }
 
-HybridEnclosure::HybridEnclosure(const std::pair<DiscreteLocation,Box>& hbox, const TaylorFunctionFactory& factory)
-    : _location(hbox.first), _events(), _set(hbox.second,factory.sweeper()),
-      _time(_set.domain(),factory.sweeper()), _dwell_time(_time),
-      _variables(hbox.second.dimension(),INITIAL)
-{
-}
-
 HybridEnclosure::HybridEnclosure(const HybridBox& hbox, const TaylorFunctionFactory& factory)
-    : _location(hbox.first), _events(), _set(hbox.second,factory),
+    : _location(hbox.location()), _events(), _space(hbox.space().variable_names()), _set(hbox.continuous_state_set(),factory),
       _time(_set.domain(),factory.sweeper()), _dwell_time(_time),
-      _variables(hbox.second.dimension(),INITIAL)
+      _variables(hbox.continuous_state_set().dimension(),INITIAL)
 {
 }
 
-HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const Box& box)
-    : _location(location), _events(), _set(box,ThresholdSweeper(std::numeric_limits<float>::epsilon())),
+
+HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& spc, const Box& box)
+    : _location(location), _events(), _space(spc.variable_names()), _set(box,ThresholdSweeper(std::numeric_limits<float>::epsilon())),
       _time(_set.domain(),ThresholdSweeper(std::numeric_limits<float>::epsilon())), _dwell_time(_time),
       _variables(box.dimension(),INITIAL)
 {
 }
 
-HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const ContinuousStateSetType& set)
-    : _location(location), _events(), _set(set), _time(ScalarIntervalFunction::zero(_set.domain(),_set.sweeper())), _dwell_time(_time),
+HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& spc, const ContinuousStateSetType& set)
+    : _location(location), _events(), _space(spc.variable_names()), _set(set), _time(ScalarIntervalFunction::zero(_set.domain(),_set.sweeper())), _dwell_time(_time),
       _variables(catenate(List<EnclosureVariableType>(set.dimension(),INITIAL),List<EnclosureVariableType>(set.number_of_parameters()-set.dimension(),UNKNOWN)))
 {
 }
 
-HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const ContinuousStateSetType& set, const ScalarTaylorFunction& time)
-    : _location(location), _events(), _set(set),
+HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& spc, const ContinuousStateSetType& set, const ScalarTaylorFunction& time)
+    : _location(location), _events(), _space(spc.variable_names()), _set(set),
       _time(Ariadne::restrict(time,set.domain())), _dwell_time(set.domain(),time.sweeper()),
       _variables(catenate(List<EnclosureVariableType>(set.dimension(),INITIAL),List<EnclosureVariableType>(set.number_of_parameters()-set.dimension(),UNKNOWN)))
 {
@@ -225,7 +221,7 @@ HybridEnclosure::parameter_domain() const
 HybridBox
 HybridEnclosure::bounding_box() const
 {
-    return HybridBox(this->_location,this->space_bounding_box());
+    return HybridBox(this->_location,this->_space,this->space_bounding_box());
 }
 
 
@@ -304,11 +300,12 @@ void HybridEnclosure::new_state_constraint(DiscreteEvent event, IntervalNonlinea
 
 
 
-void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealVectorFunction map)
+void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealSpace space, RealVectorFunction map)
 {
-    ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"*this="<<*this<<", event="<<event<<", target="<<target<<", map="<<map);
+    ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"*this="<<*this<<", event="<<event<<", space="<<space<<", target="<<target<<", map="<<map);
     this->_events.append(event);
     this->_location=target;
+    this->_space=space.variable_names();
     this->_set.apply_map(map);
     this->_dwell_time=0.0;
 }

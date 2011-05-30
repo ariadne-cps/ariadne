@@ -62,6 +62,10 @@ template<class T> struct Space
     Space(const List<Identifier>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(VariableType(vl[i])); } }
     Space(const List<VariableType>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(vl[i]); } }
 
+    explicit Space(const List<String>& vnl) { for(uint i=0; i!=vnl.size(); ++i) { this->append(VariableType(vnl[i])); } }
+    explicit Space(const String& vn) { this->append(VariableType(vn)); }
+
+
     bool operator==(const Space<T>& other) const { return this->_variables==other._variables; }
 
     SizeType size() const { return _variables.size(); }
@@ -72,7 +76,7 @@ template<class T> struct Space
     const VariableType variable(SizeType i) const { return VariableType(_variables.at(i)); }
 
     //! \brief A list giving ordered variables.
-    List<String> variable_names() const { return this->_variables; }
+    List<Identifier> variable_names() const { return this->_variables; }
     //! \brief A list giving ordered variables.
     List<VariableType> variables() const { return this->_variables; }
     //! \brief A map giving the index of a given variable.

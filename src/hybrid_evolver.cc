@@ -338,12 +338,13 @@ _extract_transitions(DiscreteLocation const& location,
         EventKind event_kind=system.event_kind(location,event);
         RealScalarFunction guard_function=system.guard_function(location,event);
         RealScalarFunction guard_flow_derivative_function=lie_derivative(guard_function,dynamic);
-        RealVectorFunction reset_function; DiscreteLocation target;
+        RealVectorFunction reset_function; DiscreteLocation target; RealSpace target_space;
         if(is_activating(event_kind)) {
             reset_function=system.reset_function(location,event);
             target=system.target(location,event);
+            target_space=system.continuous_state_space(target);
         }
-        TransitionData transition_data={event,event_kind,guard_function,guard_flow_derivative_function,target,reset_function};
+        TransitionData transition_data={event,event_kind,guard_function,guard_flow_derivative_function,target,reset_function,target_space};
         transitions.insert(event,transition_data);
     }
     return transitions;
@@ -410,7 +411,7 @@ _process_initial_events(EvolutionData& evolution_data,
                         // Put the immediate jump set in the reached sets, since it does not occur in the flowable set
                         ARIADNE_LOG(2,"  "<<event<<": "<<transition.event_kind<<", immediate\n");
                         evolution_data.reach_sets.append(immediate_jump_set);
-                        immediate_jump_set.apply_reset(event,transition.target,transition.reset_function);
+                        immediate_jump_set.apply_reset(event,transition.target,transition.target_space,transition.reset_function);
                         ARIADNE_LOG(4,"immediate_jump_set="<<immediate_jump_set<<"\n");
                         evolution_data.intermediate_sets.append(immediate_jump_set);
                         evolution_data.initial_sets.append(immediate_jump_set);
@@ -1225,7 +1226,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
         for(List<HybridEnclosure>::iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
             HybridEnclosure& jump_set=*jump_set_iter;
             if(!definitely(jump_set.empty())) {
-                jump_set.apply_reset(event,transitions[event].target,transitions[event].reset_function);
+                jump_set.apply_reset(event,transitions[event].target,transitions[event].target_space,transitions[event].reset_function);
                 evolution_data.initial_sets.append(jump_set);
                 _step_data.events.insert(event);
                 ARIADNE_LOG(6, "jump_set="<<jump_set<<"\n");

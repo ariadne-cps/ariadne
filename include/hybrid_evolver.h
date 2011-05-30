@@ -470,6 +470,8 @@ struct TransitionData
     DiscreteLocation target;
     //! \brief The reset function \f$x'=r(x)\f$ of the transition.
     RealVectorFunction reset_function;
+    //! \brief The state space in the target location.
+    RealSpace target_space;
     //TransitionData() { }
     //TransitionData(DiscreteLocation t, RealScalarFunction g, RealVectorFunction r)
     //    : target(t), guard_function(g), reset_function(r) { }

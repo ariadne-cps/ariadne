@@ -84,19 +84,19 @@ void TestHybridEvolution::test() const {
 };
 
 void TestHybridEvolution::test_bouncing_ball() const {
-    MonolithicHybridAutomaton bouncing_ball;
-    RealScalarFunction c=RealScalarFunction::constant(2,1.0);
-    RealScalarFunction x=RealScalarFunction::coordinate(2,0);
-    RealScalarFunction v=RealScalarFunction::coordinate(2,1);
+    HybridAutomaton bouncing_ball;
+    Real one(1);
+    RealVariable x("x");
+    RealVariable v("v");
 
     Real lambda=0.5;
-    bouncing_ball.new_mode(q,(v,-c));
-    bouncing_ball.new_transition(q,e,q,(x,-lambda*v),-x,impact);
+    bouncing_ball.new_mode(q,(dot(x)=v,dot(v)=-one));
+    bouncing_ball.new_transition(q,e,q,(next(x)=x,next(v)=-lambda*v),x<=0,impact);
     ARIADNE_TEST_PRINT(bouncing_ball);
 
     double height=2.0;
     double radius=1.0/64;
-    HybridBox initial(q,Box(2, height-radius,height+radius, -radius,+radius));
+    HybridBox initial(q,bouncing_ball.continuous_state_space(q),Box(2, height-radius,height+radius, -radius,+radius));
     HybridTime time(4.5,3);
 
     Orbit<HybridEnclosure> orbit=evolver.orbit(bouncing_ball,initial,time,UPPER_SEMANTICS);
@@ -109,7 +109,7 @@ void TestHybridEvolution::test_bouncing_ball() const {
     }
 
 
-    HybridBox expected_orbit_final_bounding_box=HybridBox(q,Box(2, 0.12,0.13, -0.04,0.04));
+    HybridBox expected_orbit_final_bounding_box=HybridBox(q,(x.in(0.12,0.13),v.in(-0.04,0.04)));
     for(ListSet<HybridEnclosure>::const_iterator iter=orbit_final.begin(); iter!=orbit_final.end(); ++iter) {
         const HybridEnclosure& orbit_final_set=*iter;
         ARIADNE_TEST_PRINT(orbit_final_set.bounding_box());
@@ -136,10 +136,10 @@ void TestHybridEvolution::test_water_tank() const {
     Real lambda(0.02);
     Real rate(0.3);
 
-    RealScalarFunction height=RealScalarFunction::coordinate(2,0);
-    RealScalarFunction aperture=RealScalarFunction::coordinate(2,1);
-    RealScalarFunction zero=RealScalarFunction::constant(2,0.0);
-    RealScalarFunction one=RealScalarFunction::constant(2,1.0);
+    RealVariable height("height");
+    RealVariable aperture("aperture");
+    Real zero(0);
+    Real one(1);
 
     DiscreteLocation open("open");
     DiscreteLocation opening("opening");
@@ -152,23 +152,23 @@ void TestHybridEvolution::test_water_tank() const {
     DiscreteEvent finished_closing("finished_closing");
 
     // Create the tank object
-    MonolithicHybridAutomaton watertank;
+    HybridAutomaton watertank;
 
-    watertank.new_mode(open,(-lambda*height+rate*aperture,0));
-    watertank.new_mode(closed,(-lambda*height+rate*aperture,0));
-    watertank.new_mode(opening,(-lambda*height+rate*aperture,1/T));
-    watertank.new_mode(closing,(-lambda*height+rate*aperture,-1/T));
+    watertank.new_mode(open,dot((height,aperture))=(-lambda*height+rate*aperture,zero));
+    watertank.new_mode(closed,dot((height,aperture))=(-lambda*height+rate*aperture,zero));
+    watertank.new_mode(opening,dot((height,aperture))=(-lambda*height+rate*aperture,1/T));
+    watertank.new_mode(closing,dot((height,aperture))=(-lambda*height+rate*aperture,-1/T));
 
-    watertank.new_transition(closed,start_opening,opening,(height,aperture),hmin-height,urgent);
-    watertank.new_transition(open,start_closing,closing,(height,aperture),height-hmax,urgent);
-    watertank.new_transition(opening,finished_opening,open,(height,aperture),aperture-1,urgent);
-    watertank.new_transition(closing,finished_closing,closed,(height,aperture),-aperture,urgent);
+    watertank.new_transition(closed,start_opening,opening,next((height,aperture))=(height,aperture),height<=hmin,urgent);
+    watertank.new_transition(open,start_closing,closing,next((height,aperture))=(height,aperture),height>=hmax,urgent);
+    watertank.new_transition(opening,finished_opening,open,next((height,aperture))=(height,aperture),aperture>=1,urgent);
+    watertank.new_transition(closing,finished_closing,closed,next((height,aperture))=(height,aperture),aperture<=0,urgent);
 
     ARIADNE_TEST_PRINT(watertank);
 
     DiscreteLocation initial_location=opening;
     Box initial_box(2, 0.0,0.05, 0.0,0.01);
-    HybridBox initial(initial_location,initial_box);
+    HybridBox initial(initial_location,(0<=height<=0.05,0.0<=aperture<=0.01));
 
     //HybridTime evolution_time(80.0,5);
     HybridTime evolution_time(80.0,8);
@@ -182,7 +182,7 @@ void TestHybridEvolution::test_water_tank() const {
     }
     HybridEnclosure final_enclosure=HybridEnclosure(*orbit.final().begin());
     ARIADNE_TEST_PRINT(final_enclosure.bounding_box());
-    ARIADNE_TEST_BINARY_PREDICATE(subset,final_enclosure,HybridBox(open,Box(2, 7.7,8.0, 0.999,1.001)));
+    ARIADNE_TEST_BINARY_PREDICATE(subset,final_enclosure,HybridBox(open,(height.in(7.7,8.0),aperture.in(0.999,1.001))));
 
     Box bounding_box(2, -0.1,9.1, -0.3,1.3);
     plot("test_hybrid_evolution-water_tank",bounding_box,

@@ -26,13 +26,16 @@
  */
 
 #ifndef ARIADNE_EXPRESSION_SET_H
-#define ARIADNE_FUNCTION_SET_H
+#define ARIADNE_EXPRESSION_SET_H
 
 #include <iosfwd>
 
 #include <boost/shared_ptr.hpp>
 
 #include "expression.h"
+#include "space.h"
+#include "function_set.h"
+#include "formula.h"
 #include <boost/iterator/iterator_concepts.hpp>
 
 namespace Ariadne {
@@ -162,6 +165,8 @@ class ExpressionBox {
     ExpressionBox(const List<RealExpressionInterval>& lst) {
         for(uint i=0; i!=lst.size(); ++i) { _intervals[lst[i]._variable]=RealInterval(lst[i]._lower,lst[i]._upper); } 
     }
+    RealSpace space() const { return RealSpace(make_list(_intervals.keys())); }
+    Box euclidean_box() const;
     const RealInterval& operator[](const RealVariable& v) const { return this->_intervals[v]; }
     friend std::ostream& operator<<(std::ostream& os, const ExpressionBox& ebx) {
         return os << ebx._intervals; }
@@ -173,6 +178,10 @@ inline Box euclidean_box(const ExpressionBox& ebx, const List<RealVariable>& spc
         bx[i]=Interval(ebx[spc[i]]);
     }
     return bx;
+}
+
+inline Box ExpressionBox::euclidean_box() const {
+    return Ariadne::euclidean_box(*this,this->space().variables());
 }
 
 //! \ingroup GeometryModule ExactSetSubModule
@@ -217,7 +226,10 @@ inline BoundedConstraintSet euclidean_set(const ExpressionSet& set, const RealSp
     return BoundedConstraintSet(domain,constraints);
 }
 
+
+
 } //namespace Ariadne
+
 
 
 #endif

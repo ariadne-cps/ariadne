@@ -64,10 +64,7 @@ template<class BS> class HybridBasicSet;
 
 typedef HybridBasicSet<Point> HybridPoint;
 typedef HybridBasicSet<Box> HybridBox;
-typedef HybridBasicSet<TaylorConstrainedImageSet> HybridTaylorConstrainedImageSet;
 typedef HybridBasicSet<InterpolatedCurve> HybridInterpolatedCurve;
-typedef ListSet<TaylorConstrainedImageSet> TaylorConstrainedImageSetList;
-typedef ListSet<HybridTaylorConstrainedImageSet> HybridTaylorConstrainedImageSetList;
 
 template<class ES> std::ostream& operator<<(std::ostream&, const Orbit<ES>&);
 

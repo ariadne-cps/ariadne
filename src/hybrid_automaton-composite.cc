@@ -542,7 +542,12 @@ HybridAutomaton::guard_predicate(DiscreteLocation location, DiscreteEvent event)
 
 
 HybridSpace HybridAutomaton::state_space() const {
-    ARIADNE_NOT_IMPLEMENTED;
+    MonolithicHybridSpace space;
+    for(Map<DiscreteLocation,DiscreteMode>::const_iterator iter=this->_modes.begin(); iter!=this->_modes.end(); ++iter) {
+        const DiscreteLocation& loc=iter->first;
+        space.new_location(loc,this->continuous_state_space(loc));
+    }
+    return space;
 }
 
 Set<DiscreteEvent> HybridAutomaton::events(DiscreteLocation location) const {

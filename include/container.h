@@ -60,6 +60,9 @@ template<class T> inline bool subset(const std::set<T>& s1, const std::set<T>& s
 template<class T> inline bool disjoint(const std::set<T>& s1, const std::set<T>& s2) {
     for(typename std::set<T>::iterator iter=s1.begin(); iter!=s1.end(); ++iter) {
         if(contains(s2,*iter)) { return false; } } return true; }
+template<class T> inline bool disjoint(const std::set<T>& s1, const std::vector<T>& l2) {
+    for(typename std::vector<T>::const_iterator iter=l2.begin(); iter!=l2.end(); ++iter) {
+        if(contains(s1,*iter)) { return false; } } return true; }
 template<class T> inline std::set<T>& insert(std::set<T>& r, const T& t) {
     r.insert(t); return r; }
 template<class T> inline std::set<T>& adjoin(std::set<T>& r, const std::set<T>& s) {
@@ -76,6 +79,9 @@ template<class T> inline std::set<T> join(const std::set<T>& s1, const std::set<
     std::set<T> r(s1); adjoin(r,s2); return r; }
 template<class T> inline std::set<T> intersection(const std::set<T>& s1, const std::set<T>& s2) {
     std::set<T> r(s1); restrict(r,s2); return r; }
+template<class T> inline std::set<T> intersection(const std::set<T>& s1, const std::vector<T>& l2) {
+    std::set<T> r; for(typename std::vector<T>::const_iterator iter=l2.begin(); iter!=l2.end(); ++iter) {
+        if(contains(s1,*iter)) { r.insert(*iter); } } return r; }
 template<class T> inline std::set<T> difference(const std::set<T>& s1, const std::set<T>& s2) {
     std::set<T> r(s1); remove(r,s2); return r; }
 template<class K,class V,class C> inline bool has_key(const std::map<K,V,C>& m, const K& k) {
@@ -140,6 +146,23 @@ template<class T>
 inline List<T> operator,(const std::vector<T>& v, const T& t) {
     List<T> r(v); r.push_back(t); return r; }
 
+template<class T> class LinkedList
+    : public std::list<T>
+{
+  public:
+    LinkedList() : std::list<T>() { }
+    LinkedList(unsigned int n) : std::list<T>(n) { }
+    LinkedList(unsigned int n, const T& t) : std::vector<T>(n,t) { }
+    LinkedList(const std::list<T>& l) : std::list<T>(l) { }
+    template<class X> LinkedList(const List<X>& l) : std::list<T>(l.begin(),l.end()) { }
+    template<class X> LinkedList(const LinkedList<X>& l) : std::list<T>(l.begin(),l.end()) { }
+    template<class I> LinkedList(const I& b, const I& e) : std::list<T>(b,e) { }
+    // Conversion constructor from an value to a single-element list.
+    void append(const T& t) { this->push_back(t); }
+    void append(const LinkedList<T>& t) { for(unsigned int i=0; i!=t.size(); ++i) { this->push_back(t[i]); } }
+    void concatenate(const LinkedList<T>& t) { for(unsigned int i=0; i!=t.size(); ++i) { this->push_back(t[i]); } }
+};
+
 template<class T> class Set
     : public std::set<T>
 {
@@ -168,6 +191,10 @@ template<class T> class Set
             if(this->contains(*iter)) { return false; } } return true; }
     Set<T>& adjoin(const std::set<T>& s) {
         for(typename std::set<T>::const_iterator iter=s.begin(); iter!=s.end(); ++iter) { this->insert(*iter); } return *this; }
+    Set<T>& remove(const T& t) {
+        typename std::set<T>::iterator iter=this->find(t);
+        if(iter!=this->end()) { this->erase(iter); }
+        return *this; }
     Set<T>& remove(const std::set<T>& s) {
         typename std::set<T>::iterator iter=this->begin();
         while(iter!=this->end()) { if(s.find(*iter)!=s.end()) { this->erase(iter++); } else { ++iter; } }
@@ -190,6 +217,7 @@ template<class T> inline Set<T> make_set(const std::vector<T>& lst) {
 
 template<class T> inline std::ostream& operator<<(std::ostream& os, const Set<T>& s) {
     return os<<static_cast<const std::set<T>&>(s); }
+
 
 template<class K, class V> class Map
     : public std::map<K,V>

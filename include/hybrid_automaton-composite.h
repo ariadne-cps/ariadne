@@ -226,7 +226,8 @@ class HybridAutomaton
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
 
-  private:
+    static List<RealAssignment> sort(const List<RealAssignment>& auxiliary);
+
     //! \brief The list of the hybrid automaton's discrete modes.
     Map< DiscreteLocation, DiscreteMode > _modes;
 
@@ -294,11 +295,25 @@ class HybridAutomaton
         this->_new_mode(location,auxiliary,List<DottedRealAssignment>());
     }
 
+    //! \brief Adds a discrete mode to the automaton without any dynamics.
+    void new_mode(DiscreteLocation location) {
+        this->_new_mode(location,List<RealAssignment>(),List<DottedRealAssignment>());
+    }
+
+    //! \brief Adds a discrete mode to the automaton.
+    void new_mode(List<RealAssignment> const& auxiliary, List<DottedRealAssignment> const& dynamic) {
+        this->_new_mode(DiscreteLocation(),auxiliary,dynamic);
+    }
+
     //! \brief Adds a discrete mode to the automaton.
     void new_mode(List<DottedRealAssignment> const& dynamic) {
         this->_new_mode(DiscreteLocation(),List<RealAssignment>(),dynamic);
     }
 
+    //! \brief Adds a discrete mode to the automaton.
+    void new_mode(List<RealAssignment> const& auxiliary) {
+        this->_new_mode(DiscreteLocation(),auxiliary,List<DottedRealAssignment>());
+    }
 
     //! \brief Adds a new internal/output event with a given enabling \a guard condition and triggering \a invariant.
     void new_action(DiscreteLocation location,
@@ -454,6 +469,9 @@ class HybridAutomaton
     const DiscreteMode& mode(DiscreteLocation location) const;
     DiscreteMode& mode(DiscreteLocation location);
 
+    //! \brief Checks validity of the mode for the given \a location.
+    //! Only checks for underspecified dynamics; overspecification is determined at build-time.
+    void check_mode(DiscreteLocation location) const;
     //@}
 
     //@{

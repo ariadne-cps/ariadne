@@ -57,6 +57,7 @@ TestHybridSystem::test()
     ARIADNE_TEST_CALL(test_static_analysis());
 }
 
+
 void
 TestHybridSystem::test_build_hybrid_system()
 {
@@ -180,6 +181,18 @@ class TestHybridAutomaton {
   public:
     void test();
 
+    void test_distinct_modes();
+    void test_overspecified_dynamic();
+    void test_algebraic_loops();
+    void test_nonexitsent_mode();
+    void test_multiple_guard();
+    void test_multiple_transition();
+    void test_overspecified_reset();
+
+    void test_underspecified_mode();
+    void test_underspecified_reset();
+
+
     void test_build_hybrid_system();
     void test_build_atomic_hybrid_automaton();
     void test_build_intensional_hybrid_automaton();
@@ -193,10 +206,202 @@ TestHybridAutomaton::test()
 {
     std::clog<<std::boolalpha;
     std::cerr<<std::boolalpha;
+    ARIADNE_TEST_CALL(test_distinct_modes());
+    ARIADNE_TEST_CALL(test_overspecified_dynamic());
+    ARIADNE_TEST_CALL(test_algebraic_loops());
+    ARIADNE_TEST_CALL(test_nonexitsent_mode());
+    ARIADNE_TEST_CALL(test_multiple_guard());
+    ARIADNE_TEST_CALL(test_multiple_transition());
+    ARIADNE_TEST_CALL(test_overspecified_reset());
+
+    ARIADNE_TEST_CALL(test_underspecified_mode());
+    ARIADNE_TEST_CALL(test_underspecified_reset());
+    return;
     ARIADNE_TEST_CALL(test_build_hybrid_system());
     ARIADNE_TEST_CALL(test_build_atomic_hybrid_automaton());
     ARIADNE_TEST_CALL(test_static_analysis());
 }
+
+
+void
+TestHybridAutomaton::test_distinct_modes()
+{
+    HybridAutomaton system;
+    StringVariable q1("q1");
+    StringVariable q2("q2");
+    ARIADNE_TEST_EXECUTE(system.new_mode(q1|"s1"));
+    ARIADNE_TEST_EXECUTE(system.new_mode(q1|"s2"));
+    ARIADNE_TEST_THROWS(system.new_mode(q2|"s3"),IndistinguishableModeError);
+}
+
+void
+TestHybridAutomaton::test_overspecified_dynamic()
+{
+    HybridAutomaton system;
+    RealVariable x("x");
+    RealVariable y("y");
+    ARIADNE_TEST_EXECUTE( system.new_mode( (x=y),(dot(y)=x) ) );
+    ARIADNE_TEST_THROWS( system.new_mode( (x=1,x=2) ),SystemSpecificationError);
+    ARIADNE_TEST_THROWS( system.new_mode( (dot(x)=1,dot(x)=0) ),SystemSpecificationError);
+    ARIADNE_TEST_THROWS( system.new_mode( (x=1),(dot(x)=0) ),SystemSpecificationError);
+}
+
+void
+TestHybridAutomaton::test_algebraic_loops()
+{
+    HybridAutomaton system;
+    RealVariable x("x");
+    RealVariable y("y");
+    RealVariable z("z");
+    ARIADNE_TEST_THROWS( HybridAutomaton().new_mode( (x=y+1,y=x) ),AlgebraicLoopError);
+    ARIADNE_TEST_THROWS( HybridAutomaton().new_mode( (x=2*x+1) ),AlgebraicLoopError);
+    ARIADNE_TEST_EXECUTE( HybridAutomaton().new_mode( (x=y,y=z) ) );
+    ARIADNE_TEST_EXECUTE( HybridAutomaton().new_mode( (x=y,y=z),(dot(z)=x+y+z) ) );
+}
+
+void
+TestHybridAutomaton::test_nonexitsent_mode()
+{
+    HybridAutomaton system;
+    StringVariable q("q");
+    StringVariable r("r");
+    DiscreteEvent e("e");
+    RealVariable x("x");
+    ARIADNE_TEST_EXECUTE( system.new_mode( (q|"1"),(dot(x)=0) ) );
+    ARIADNE_TEST_EXECUTE( system.new_mode( (q|"2",r|"1") ) );
+    ARIADNE_TEST_EXECUTE( system.new_mode( (q|"2",r|"2") ) );
+    ARIADNE_TEST_PRINT( system );
+    ARIADNE_TEST_THROWS( system.new_action( (q|"2"), e, x>=0 ), NonExistentModeError );
+    ARIADNE_TEST_THROWS( system.new_transition( (q|"1"), e, (q|"3") ), NonExistentModeError );
+    ARIADNE_TEST_THROWS( system.new_transition( (q|"3"), e, (q|"1") ), NonExistentModeError );
+    ARIADNE_TEST_THROWS( system.new_transition( (q|"1"), e, (q|"1",r|"2") ), NonExistentModeError );
+    ARIADNE_TEST_EXECUTE( system.new_transition( (q|"1"), e, (q|"2",r|"1") ) );
+    ARIADNE_TEST_EXECUTE( system.new_transition( (q|"1"), e, (q|"2",r|"1") ) );
+}
+
+void
+TestHybridAutomaton::test_multiple_guard()
+{
+    HybridAutomaton system;
+    StringVariable q("q");
+    DiscreteLocation q1(q|"1");
+    DiscreteLocation q2(q|"2");
+    DiscreteEvent e1("e1");
+    DiscreteEvent e2("e2");
+    RealVariable x("x");
+    RealVariable y("y");
+    ARIADNE_TEST_EXECUTE( system.new_mode( q1,(dot(x)=1,dot(y)=1) ) );
+    ARIADNE_TEST_EXECUTE( system.new_mode( q2,(dot(x)=2) ) );
+    ARIADNE_TEST_EXECUTE( system.new_action( q1, x<=0.125, e1, x>=0 ) );
+    ARIADNE_TEST_EXECUTE( system.new_action( q2, x<=0.125, e1, x>=0 ) );
+    ARIADNE_TEST_EXECUTE( system.new_action( q1, y<=0.125, e2, y>=0 ) );
+    ARIADNE_TEST_THROWS( system.new_action( q1, x+y<=0.125, e1, x+y>=0 ), MultipleGuardError );
+}
+
+void
+TestHybridAutomaton::test_multiple_transition()
+{
+    HybridAutomaton system;
+    StringVariable q("q");
+    DiscreteLocation q1(q|"1");
+    DiscreteLocation q2(q|"2");
+    DiscreteEvent e1("e1");
+    DiscreteEvent e2("e2");
+    RealVariable x("x");
+    ARIADNE_TEST_EXECUTE( system.new_mode( q1,(dot(x)=1) ) );
+    ARIADNE_TEST_EXECUTE( system.new_mode( q2,(dot(x)=2) ) );
+    ARIADNE_TEST_EXECUTE( system.new_transition( q1, e1, q1, (prime(x)=x) ) );
+    ARIADNE_TEST_EXECUTE( system.new_transition( q2, e1, q1, (prime(x)=x) ) );
+    ARIADNE_TEST_EXECUTE( system.new_transition( q1, e2, q1, (prime(x)=x) ) );
+    ARIADNE_TEST_THROWS( system.new_transition( q1, e1, q2, (prime(x)=x) ), MultipleTransitionError );
+}
+
+void
+TestHybridAutomaton::test_overspecified_reset()
+{
+    HybridAutomaton system;
+    StringVariable q("q");
+    DiscreteLocation q1(q|"1");
+    DiscreteEvent e1("e1");
+    DiscreteEvent e2("e2");
+    DiscreteEvent e3("e3");
+    DiscreteEvent e4("e4");
+    DiscreteEvent e5("e5");
+    RealVariable x("x");
+    RealVariable y("y");
+    RealVariable z("z");
+    ARIADNE_TEST_EXECUTE( system.new_mode( q1,(x=1), (dot(y)=1) ) );
+    ARIADNE_TEST_EXECUTE( system.new_transition( q1, e1, q1 ) ); // OK, underspecified
+    ARIADNE_TEST_EXECUTE( system.new_transition( q1, e2, q1, (prime(y)=y+1) ) );
+    ARIADNE_TEST_EXECUTE( system.new_transition( q1, e3, q1, (prime(y)=y+1,prime(z)=x) ) ); // OK, z in another component
+    ARIADNE_TEST_THROWS( system.new_transition( q1, e4, q1, (prime(x)=x+1) ), OverspecifiedResetError );
+    ARIADNE_TEST_THROWS( system.new_transition( q1, e5, q1, (prime(y)=2*x+4,prime(y)=2*(x+2)) ), OverspecifiedResetError );
+}
+
+void
+TestHybridAutomaton::test_underspecified_mode()
+{
+    HybridAutomaton system;
+    StringVariable q("q");
+    DiscreteLocation qs(q|"s");
+    DiscreteLocation q1(q|"1");
+    DiscreteLocation q2(q|"2");
+    DiscreteLocation q3(q|"3");
+    DiscreteLocation q4(q|"4");
+    DiscreteLocation q5(q|"5");
+    DiscreteEvent e("e");
+    RealVariable x("x");
+    RealVariable y("y");
+    RealVariable z("z");
+
+    // The following mode should be valid
+    ARIADNE_TEST_EXECUTE( system.new_mode( qs,(x=y+1),(dot(y)=x+y ) ) );
+    ARIADNE_TEST_EXECUTE( system.new_action( qs, x+y<=1, e, x+y>=0 ) );
+    ARIADNE_TEST_EXECUTE( system.new_update( qs, e, qs, (prime(y)=x+y) ) );
+    ARIADNE_TEST_EXECUTE( system.check_mode( qs ) );
+
+    // Test invalidity of the following modes
+    ARIADNE_TEST_EXECUTE( system.new_mode( q1,(x=y) ) );
+    ARIADNE_TEST_THROWS( system.check_mode( q1 ), UnderspecifiedDynamicError );
+    ARIADNE_TEST_EXECUTE( system.new_mode( q2,(dot(x)=x+y) ) );
+    ARIADNE_TEST_THROWS( system.check_mode( q2 ), UnderspecifiedDynamicError );
+    ARIADNE_TEST_EXECUTE( system.new_mode( q3,(dot(x)=x) ) );
+    ARIADNE_TEST_EXECUTE( system.new_action( q3, y<=1, e, x>=0 ) );
+    ARIADNE_TEST_THROWS( system.check_mode( q3 ), UnderspecifiedConstraintError );
+    ARIADNE_TEST_EXECUTE( system.new_mode( q4,(dot(x)=x) ) );
+    ARIADNE_TEST_EXECUTE( system.new_action( q4, x<=1, e, y>=0 ) );
+    ARIADNE_TEST_THROWS( system.check_mode( q4 ), UnderspecifiedConstraintError );
+    ARIADNE_TEST_EXECUTE( system.new_mode( q5,(dot(x)=x) ) );
+    ARIADNE_TEST_EXECUTE( system.new_update( q5, e, q5, (prime(x)=y) ) );
+    ARIADNE_TEST_THROWS( system.check_mode( q5 ), UnderspecifiedResetError );
+}
+
+void
+TestHybridAutomaton::test_underspecified_reset()
+{
+    HybridAutomaton system;
+    StringVariable q("q");
+    DiscreteLocation q1(q|"1");
+    DiscreteLocation q2(q|"2");
+    DiscreteLocation q3(q|"3");
+    DiscreteLocation qt(q|"t");
+    DiscreteEvent e("e");
+    RealVariable x("x");
+    RealVariable y("y");
+    RealVariable z("z");
+
+    ARIADNE_TEST_EXECUTE( system.new_mode( qt,(x=1),(dot(y)=1) ) );
+    ARIADNE_TEST_EXECUTE( system.new_mode( q1,(dot(x)=x) ) );
+    ARIADNE_TEST_EXECUTE( system.new_mode( q2,(dot(x)=x) ) );
+    ARIADNE_TEST_EXECUTE( system.new_mode( q3,(dot(x)=x) ) );
+    ARIADNE_TEST_EXECUTE( system.new_update( q1, e, qt, (next(y)=1) ) );
+    ARIADNE_TEST_EXECUTE( system.check_mode( q1 ) );
+    ARIADNE_TEST_EXECUTE( system.new_update( q2, e, qt ) );
+    ARIADNE_TEST_THROWS( system.check_mode( q2 ), UnderspecifiedResetError );
+    ARIADNE_TEST_EXECUTE( system.new_update( q3, e, qt, (next(y)=1,prime(z)=1) ) );
+    ARIADNE_TEST_THROWS( system.check_mode( q3 ), UnderspecifiedDynamicError );
+}
+
 
 
 void
@@ -451,7 +656,7 @@ TestHybridAutomaton::test_build_intensional_hybrid_automaton()
 
 
 int main() {
-    ARIADNE_TEST_CALL(TestHybridAutomaton().test_build_atomic_hybrid_automaton());
+    //ARIADNE_TEST_CALL(TestHybridAutomaton().test_build_atomic_hybrid_automaton());
     ARIADNE_TEST_CALL(TestHybridAutomaton().test());
 
     //ARIADNE_TEST_CALL(TestHybridSystem().test());

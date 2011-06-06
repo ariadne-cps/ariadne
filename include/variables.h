@@ -159,7 +159,7 @@ inline std::ostream& UntypedVariable::write(std::ostream& os) const {
     switch(this->_category) {
         case simple: os << this->name(); break;
         case dotted: os << "dot("<<this->name()<<")"; break;
-        case primed: os << "next("<<this->name()<<")"; break;
+        case primed: os << "prime("<<this->name()<<")"; break;
     }
     //os << ":" << name(this->_type);
     return os;
@@ -258,6 +258,7 @@ inline DottedVariable<Real> dot(const Variable<Real>& var) {
     return DottedVariable<Real>(var); }
 
 
+template<class T> PrimedVariable<T> prime(const Variable<T>&);
 template<class T> PrimedVariable<T> next(const Variable<T>&);
 
 template<class T> class PrimedVariable
@@ -266,7 +267,7 @@ template<class T> class PrimedVariable
     typedef Assignment< PrimedVariable<T>, Expression<T> > AssignmentType;
   public:
     typedef Variable<T> BaseType;
-    friend PrimedVariable<T> next<>(const Variable<T>&);
+    friend PrimedVariable<T> prime<>(const Variable<T>&);
     Variable<T> base() const { return Variable<T>(this->name()); }
     inline AssignmentType operator=(const T& val) const;
     inline AssignmentType operator=(const Constant<T>& cnst) const;
@@ -277,8 +278,10 @@ template<class T> class PrimedVariable
     explicit PrimedVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),primed) { }
 };
 
-template<class T> inline PrimedVariable<T> next(const Variable<T>& var) {
+template<class T> inline PrimedVariable<T> prime(const Variable<T>& var) {
     return PrimedVariable<T>(var); }
+template<class T> inline PrimedVariable<T> next(const Variable<T>& var) {
+    return prime(var); }
 
 template<class T> inline List< Variable<T> > operator,(const Variable<T>& v1, const Variable<T>& v2) {
     List< Variable<T> > r; r.append(v1); r.append(v2); return r; }

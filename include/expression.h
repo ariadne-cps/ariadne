@@ -406,6 +406,9 @@ typename EnableIf< IsExpression<X,T>, List<Expression<X> > >::Type
 operator,(List<Expression<X> > l, const T& e) {
     List< Expression<X> > r(l); r.append(Expression<Real>(e)); return r; }
 
+bool is_constant(const Expression<Tribool>& e, const Boolean& c);
+bool is_variable(const Expression<Real>& e, const Identifier& v);
+
 } // namespace Ariadne
 
 #endif /* ARIADNE_EXPRESSION_H */

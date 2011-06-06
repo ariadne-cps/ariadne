@@ -59,14 +59,69 @@ class SystemSpecificationError : public std::runtime_error {
     SystemSpecificationError(const std::string& what) : std::runtime_error(what) { }
 };
 
+class NonExistentModeError : public SystemSpecificationError {
+  public:
+    NonExistentModeError(const std::string& what) : SystemSpecificationError(what) { }
+};
+
+class IndistinguishableModeError : public SystemSpecificationError {
+  public:
+    IndistinguishableModeError(const std::string& what) : SystemSpecificationError(what) { }
+};
+
+class DuplicateEventError : public SystemSpecificationError {
+  public:
+    DuplicateEventError(const std::string& what) : SystemSpecificationError(what) { }
+};
+
+class MultipleGuardError : public SystemSpecificationError {
+  public:
+    MultipleGuardError(const std::string& what) : SystemSpecificationError(what) { }
+};
+
+class MultipleTransitionError : public SystemSpecificationError {
+  public:
+    MultipleTransitionError(const std::string& what) : SystemSpecificationError(what) { }
+};
+
+class AlgebraicLoopError : public SystemSpecificationError {
+  public:
+    AlgebraicLoopError(const std::string& what) : SystemSpecificationError(what) { }
+};
+
 class OverspecifiedSystemError : public SystemSpecificationError {
   public:
     OverspecifiedSystemError(const std::string& what) : SystemSpecificationError(what) { }
 };
 
+class OverspecifiedDynamicError : public OverspecifiedSystemError {
+  public:
+    OverspecifiedDynamicError(const std::string& what) : OverspecifiedSystemError(what) { }
+};
+
+class OverspecifiedResetError : public OverspecifiedSystemError {
+  public:
+    OverspecifiedResetError(const std::string& what) : OverspecifiedSystemError(what) { }
+};
+
 class UnderspecifiedSystemError : public SystemSpecificationError {
   public:
     UnderspecifiedSystemError(const std::string& what) : SystemSpecificationError(what) { }
+};
+
+class UnderspecifiedDynamicError : public UnderspecifiedSystemError {
+  public:
+    UnderspecifiedDynamicError(const std::string& what) : UnderspecifiedSystemError(what) { }
+};
+
+class UnderspecifiedConstraintError : public UnderspecifiedSystemError {
+  public:
+    UnderspecifiedConstraintError(const std::string& what) : UnderspecifiedSystemError(what) { }
+};
+
+class UnderspecifiedResetError : public UnderspecifiedSystemError {
+  public:
+    UnderspecifiedResetError(const std::string& what) : UnderspecifiedSystemError(what) { }
 };
 
 

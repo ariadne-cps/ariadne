@@ -79,6 +79,7 @@ test_multi_index_SOURCES=test_multi_index.cc
 test_expansion_SOURCES=test_expansion.cc
 test_polynomial_SOURCES=test_polynomial.cc
 test_differential_SOURCES=test_differential.cc
+test_procedure_SOURCES=test_procedure.cc
 test_taylor_model_SOURCES=test_taylor_model.cc
 test_taylor_function_SOURCES=test_taylor_function.cc
 test_function_sets_SOURCES=test_function_sets.cc

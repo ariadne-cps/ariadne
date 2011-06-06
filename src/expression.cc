@@ -772,6 +772,20 @@ template Expression<Real> substitute(const Expression<Real>& e, const Variable<R
 template Expression<Real> substitute(const Expression<Real>& e, const List< Assignment< Variable<Real>, Expression<Real> > >& c);
 template Expression<Tribool> substitute(const Expression<Tribool>& e, const List< Assignment< Variable<Real>, Expression<Real> > >& c);
 
+bool is_constant(const Expression<Tribool>& e, const Boolean& c) {
+    const ExpressionInterface<Tribool>* eptr=e._raw_pointer();
+    const ConstantExpression<Tribool>* cptr=dynamic_cast<const ConstantExpression<Tribool>*>(eptr);
+    if(cptr==0) { return false; }
+    return (cptr->value()==c);
+}
+
+bool is_variable(const Expression<Real>& e, const Identifier& v) {
+    const ExpressionInterface<Real>* eptr=e._raw_pointer();
+    const VariableExpression<Real>* cptr=dynamic_cast<const VariableExpression<Real>*>(eptr);
+    if(cptr==0) { return false; }
+    return (cptr->name()==v);
+}
+
 namespace {
 
 template<class X> inline Expression<X> _simplify(const Expression<X>& e) {
@@ -1071,6 +1085,7 @@ List< Formula<Real> > formula(const List< Expression<Real> >& out, const List< A
     }
     return res;
 }
+
 
 
 } // namespace Ariadne

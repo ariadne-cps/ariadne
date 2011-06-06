@@ -158,7 +158,7 @@ int test_case_counter = 0;
     }                                                                   \
 
 
-/*! \brief Tries to evaluate \a expression, writing the expression and the result to standard ouput. Writes a diagnostic report to standard error if an exception is thrown., prints the result and gives a diagnostic if an exception is thrown. */
+/*! \brief Tries to evaluate \a expression, writing the expression and the result to standard ouput. Writes a diagnostic report to standard error if an exception is thrown. */
 #define ARIADNE_TEST_EVALUATE(expression)                               \
     {                                                                   \
         std::cout << #expression << ": " << std::flush;                 \

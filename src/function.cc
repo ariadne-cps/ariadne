@@ -35,6 +35,7 @@
 #include "function_mixin.tcc"
 
 #include "taylor_function.h"
+#include <boost/concept_check.hpp>
 
 namespace Ariadne {
 
@@ -117,7 +118,6 @@ struct VectorFormulaFunction
 
 inline VectorFunction<Real> function(uint n, List< Formula<Real> > f) { return new VectorFormulaFunction<Real>(n,f); }
 
-
 //! A constant function f(x)=c
 struct ScalarConstantFunctionBody
     : ScalarFunctionMixin<ScalarConstantFunctionBody,Real>
@@ -152,7 +152,7 @@ struct ScalarCoordinateFunctionBody
         if(j==_index) { return new ScalarConstantFunctionBody(_argument_size,1.0); }
         else { return new ScalarConstantFunctionBody(_argument_size,0.0); } }
     virtual std::ostream& repr(std::ostream& os) const { return os << "x"<<this->_index; }
-    virtual std::ostream& write(std::ostream& os) const { return os << "F["<<this->_argument_size<<"](x"<<this->_index<<")"; }
+    virtual std::ostream& write(std::ostream& os) const { return os << "IF["<<this->_argument_size<<"](x"<<this->_index<<")"; }
     template<class X> void _compute(X& r, const Vector<X>& x) const { r=x[_index]; }
 };
 
@@ -190,7 +190,7 @@ template<class Op> struct UnaryFunctionBody
     virtual std::ostream& repr(std::ostream& os) const {
         return os << _op << "(" << _arg.raw_pointer() << ")"; }
     virtual std::ostream& write(std::ostream& os) const {
-        return os << "F["<<this->argument_size()<<"](" << this <<")"; }
+        return os << "UF["<<this->argument_size()<<"](" << this <<")"; }
 
     template<class R, class A> void _compute(R& r, const A& x) const { r=_op(_arg.evaluate(x)); }
 
@@ -235,7 +235,7 @@ template<class Op> struct BinaryFunctionBody
     virtual std::ostream& repr(std::ostream& os) const {
         return os << '(' << _arg1.raw_pointer() << symbol(_op.code()) << _arg2.raw_pointer() << ')'; }
     virtual std::ostream& write(std::ostream& os) const {
-        return os << "F["<<this->argument_size()<<"]("<< this <<")"; }
+        return os << "BF["<<this->argument_size()<<"]("<< this <<")"; }
 
     template<class R, class A> void _compute(R& r, const A& x) const { r=_op(_arg1.evaluate(x),_arg2.evaluate(x)); }
 
@@ -270,7 +270,7 @@ template<> struct BinaryFunctionBody<Pow>
     virtual std::ostream& repr(std::ostream& os) const {
         return os << "pow(" << _arg1.raw_pointer() << "," << _arg2 << ")"; }
     virtual std::ostream& write(std::ostream& os) const {
-        return os << "F["<<this->argument_size()<<"]("<< this <<")"; }
+        return os << "BF["<<this->argument_size()<<"]("<< this <<")"; }
 
     template<class R, class A> void _compute(R& r, const A& x) const { r=pow(_arg1.evaluate(x),_arg2); }
 
@@ -279,6 +279,21 @@ template<> struct BinaryFunctionBody<Pow>
     Int _arg2;
 };
 
+
+Formula<Real> formula(const ScalarFunction<Real>& f) {
+    const ScalarFunctionInterface<Real>& fi=f;
+    const ScalarFormulaFunction<Real>* ff=dynamic_cast<const ScalarFormulaFunction<Real>*>(&fi);
+    if(ff) { return ff->_formula; }
+    const ScalarConstantFunctionBody* cf=dynamic_cast<const ScalarConstantFunctionBody*>(&fi);
+    const ScalarCoordinateFunctionBody* indf=dynamic_cast<const ScalarCoordinateFunctionBody*>(&fi);
+    const BinaryFunctionBody<Add>* bfa=dynamic_cast<const BinaryFunctionBody<Add>*>(&fi);
+    const BinaryFunctionBody<Mul>* bfm=dynamic_cast<const BinaryFunctionBody<Mul>*>(&fi);
+    if(cf) { return Formula<Real>::constant(cf->_value); }
+    if(indf) { return Formula<Real>::coordinate(indf->_index); }
+    if(bfa) { return formula(bfa->_arg1)+formula(bfa->_arg2); }
+    if(bfm) { return formula(bfm->_arg1)*formula(bfm->_arg2); }
+    ARIADNE_FAIL_MSG("Cannot compute formula for function "<<f<<"\n");
+}
 
 
 
@@ -669,6 +684,21 @@ class CombinedFunctionBody
     RealVectorFunction _f2;
 };
 
+
+Vector< Formula<Real> > formula(const VectorFunction<Real>& f) {
+    const VectorFunctionInterface<Real>& fi=f;
+    const VectorFormulaFunction<Real>* ff;
+    const VectorOfScalarFunctionBody<Real>* vf;
+    if( (vf=dynamic_cast<const VectorOfScalarFunctionBody<Real>*>(&fi)) ) {
+        Vector< Formula<Real> > r(vf->result_size());
+        for(uint i=0; i!=r.size(); ++i) { r[i]=formula((*vf)[i]); }
+        return r;
+    } else if( (ff=dynamic_cast<const VectorFormulaFunction<Real>*>(&fi)) ) {
+        return ff->_formulae;
+    } else {
+        ARIADNE_FAIL_MSG("Cannot compute formula for function "<<f<<"\n");
+    }
+}
 
 
 

@@ -43,6 +43,7 @@ namespace Ariadne {
 typedef uint Nat;
 template<class X> class Formula;
 
+
 struct ProcedureInstruction
 {
     explicit ProcedureInstruction(Operator o, size_t a) : op(o), arg(a) { }
@@ -94,6 +95,7 @@ class Vector< Procedure<X> > {
     Vector<Nat> _results;
   public:
     Nat result_size() const { return _results.size(); }
+    Nat temporaries_size() const { return _instructions.size(); }
     void new_instruction(Operator o, Nat a) { _instructions.append(ProcedureInstruction(o,a)); }
     void new_instruction(Operator o, Nat a, int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
     void new_instruction(Operator o, Nat a1, Nat a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
@@ -126,6 +128,38 @@ template<class X, class T> void _execute(List<T>& v, const List<ProcedureInstruc
             case COS:  v.append(cos(v[instruction.arg])); break;
             case TAN:  v.append(tan(v[instruction.arg])); break;
             case ATAN:  v.append(atan(v[instruction.arg])); break;
+            default:   ARIADNE_FAIL_MSG("Unrecognised operator "<<instruction.op);
+        }
+    }
+}
+
+// \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
+template<class X, class T> void _compute(List<T>& v, const List<ProcedureInstruction>& p, const List<X>& c, const Vector<T>& x)
+{
+    T z=x[0]*0;
+    ARIADNE_ASSERT(v.size()==p.size());
+    for(size_t i=0; i!=p.size(); ++i) {
+        const ProcedureInstruction& instruction=p[i];
+        switch(instruction.op) {
+            case CNST: v[i]=(z+c[instruction.arg]); break;
+            case IND:  v[i]=(x[instruction.arg]); break;
+            case ADD:  v[i]=(v[instruction.arg1]+v[instruction.arg2]); break;
+            case SUB:  v[i]=(v[instruction.arg1]-v[instruction.arg2]); break;
+            case MUL:  v[i]=(v[instruction.arg1]*v[instruction.arg2]); break;
+            case DIV:  v[i]=(v[instruction.arg1]/v[instruction.arg2]); break;
+            case POW:  v[i]=(pow(v[instruction.arg],instruction.np)); break;
+            case ABS:  v[i]=(abs(v[instruction.arg])); break;
+            case POS:  v[i]=(pos(v[instruction.arg])); break;
+            case NEG:  v[i]=(neg(v[instruction.arg])); break;
+            case REC:  v[i]=(rec(v[instruction.arg])); break;
+            case SQR:  v[i]=(sqr(v[instruction.arg])); break;
+            case SQRT: v[i]=(sqrt(v[instruction.arg])); break;
+            case EXP:  v[i]=(exp(v[instruction.arg])); break;
+            case LOG:  v[i]=(log(v[instruction.arg])); break;
+            case SIN:  v[i]=(sin(v[instruction.arg])); break;
+            case COS:  v[i]=(cos(v[instruction.arg])); break;
+            case TAN:  v[i]=(tan(v[instruction.arg])); break;
+            case ATAN:  v[i]=(atan(v[instruction.arg])); break;
             default:   ARIADNE_FAIL_MSG("Unrecognised operator "<<instruction.op);
         }
     }

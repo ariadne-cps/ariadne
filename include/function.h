@@ -455,6 +455,7 @@ inline List< ScalarFunction<Real> > operator,(const List< ScalarFunction<Real> >
 
 inline std::ostream& operator<<(std::ostream& os, const VectorFunction<Real>& f) { return f.write(os); }
 
+Vector< Formula<Real> > formula(const VectorFunction<Real>& f);
 
 //! \ingroup FunctionModule
 //! \brief A scalar function of the form \f$f(x)=c\f$.

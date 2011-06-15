@@ -196,7 +196,7 @@ IntegratorBase::flow_step(const RealVectorFunction& vf, const IntervalVector& dx
 VectorTaylorFunction
 TaylorIntegrator::flow_step(const RealVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
 {
-    ARIADNE_LOG(3,"PicardIntegrator::flow_step(RealVectorFunction vf, IntervalVector dx, Float h, IntervalVector bx)\n");
+    ARIADNE_LOG(3,"TaylorIntegrator::flow_step(RealVectorFunction vf, IntervalVector dx, Float h, IntervalVector bx)\n");
     ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
     const uint nx=dx.size();
     Sweeper sweeper(new ThresholdSweeper(this->_sweep_threshold));
@@ -239,7 +239,143 @@ TaylorIntegrator::flow_step(const RealVectorFunction& f, const IntervalVector& d
 }
 
 
+} // namespace Ariadne
+#include "graded.h"
+#include "procedure.h"
+namespace Ariadne {
 
+
+template<class F> Graded< Differential<Interval> > flow(const F& f, const Interval& c, Nat M, Nat N) {
+    Differential<Interval> x=make_differential_variable(1u,M,c,0u);
+    Graded< Differential<Interval> > y=make_graded(x);
+    Graded< Differential<Interval> > t=create_graded(x);
+
+    for(Nat n=0; n!=N; ++n) {
+        t=f(y);
+        y=antidifferential(t);
+    }
+
+    return y;
+}
+
+Vector< Graded< Differential<Interval> > > flow(const Vector< Procedure<Real> >& f, const Vector<Interval>& c, Nat M, Nat N) {
+    Graded< Differential<Interval> > null;
+    Vector< Graded< Differential<Interval> > > y(f.result_size(),null);
+    Vector< Graded< Differential<Interval> > > fy(f.result_size(),null);
+    List< Graded< Differential<Interval> > > t(f.temporaries_size(),null);
+    for(Nat i=0; i!=y.size(); ++i) {
+        y[i]=Graded< Differential<Interval> >(Differential<Interval>::variable(y.size(),M,c[i],i));
+    }
+
+    for(Nat n=0; n!=N; ++n) {
+        Ariadne::compute(f,fy,t,y);
+        for(Nat i=0; i!=y.size(); ++i) {
+            y[i]=antidifferential(fy[i]);
+        }
+    }
+
+    return y;
+}
+
+class FormulaFunction;
+typedef Differential<Interval> IntervalDifferential;
+typedef Polynomial<Interval> IntervalPolynomial;
+typedef Graded<IntervalDifferential> GradedIntervalDifferential;
+bool operator<(const MultiIndex& a1, const MultiIndex& a2);
+
+VectorTaylorFunction
+TaylorSeriesIntegrator::flow_step(const RealVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
+{
+    Vector<RealFormula> ff = formula(f);
+    RealVectorProcedure p(ff);
+    std::cerr<<"proc="<<p<<"\n";
+    Vector<IntervalPolynomial> phi = this->flow_step(p,dx,h,bx);
+    std::cerr<<"phi="<<phi<<"\n";
+
+}
+
+
+template<class X> inline void append(Polynomial<X>& p, const MultiIndex& a1, const uint a2, const X& c) {
+    MultiIndex a(a1.size()+1);
+    for(uint i=0; i!=a1.size(); ++i) { a[i]=a1[i]; }
+    a[a1.size()]=a2;
+    p.expansion().append(a,c);
+}
+
+inline Vector<GradedIntervalDifferential> graded_variables(int so, const IntervalVector& x) {
+    Vector<GradedIntervalDifferential> r(x.size(),GradedIntervalDifferential());
+    for(uint i=0; i!=x.size(); ++i) {
+        r[i]=GradedIntervalDifferential(IntervalDifferential::variable(x.size(),so,x[i],i));
+    }
+    return r;
+}
+
+Vector<IntervalPolynomial>
+TaylorSeriesIntegrator::flow_step(const RealVectorProcedure& p, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
+{
+    ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_step(RealVectorFunction vf, IntervalVector dx, Float h, IntervalVector bx)\n");
+    ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
+    const uint nx=dx.size();
+    Sweeper sweeper(new ThresholdSweeper(this->_sweep_threshold));
+
+    IntervalVector cx=midpoint(dx);
+    IntervalVector ax=cx+Interval(0,h)*evaluate(p,bx);
+    ax=cx+Interval(0,h)*evaluate(p,ax);
+
+    const uint so = this->_spacial_order;
+    const uint to = this->_maximum_temporal_order;
+
+    GradedIntervalDifferential null;
+    Vector<GradedIntervalDifferential> arg(nx,null);
+    List<GradedIntervalDifferential> tmp(p.temporaries_size(),null);
+    Vector<GradedIntervalDifferential> phia(p.result_size(),null); // The flow derivatives evaluated over the flow line of the centre
+    Vector<GradedIntervalDifferential> phib(p.result_size(),null); // The flow derivatives evaluated over the bounding box
+    Vector<GradedIntervalDifferential> phic(p.result_size(),null); // The flow derivatives evaluated at the centre
+    Vector<GradedIntervalDifferential> phid(p.result_size(),null); // The flow derivatives evaluated over the initial spacial domain
+
+    phia=Ariadne::flow(p,ax,so,to);
+    std::cerr<<"phia="<<phia<<"\n";
+    phib=Ariadne::flow(p,bx,so,to);
+    std::cerr<<"phib="<<phib<<"\n";
+    phic=Ariadne::flow(p,cx,so,to);
+    std::cerr<<"phic="<<phic<<"\n";
+    phid=Ariadne::flow(p,dx,so,to);
+    std::cerr<<"phid="<<phid<<"\n";
+
+    const uint N=to; const uint M=so;
+    Vector< GradedIntervalDifferential > res(nx,GradedIntervalDifferential(List<IntervalDifferential>(to+1u,IntervalDifferential(nx,so))));
+    std::cerr<<"res="<<res<<"\n";
+    for(uint i=0; i!=nx; ++i) {
+        for(uint j=0; j!=N; ++j) {
+            for(Differential<Interval>::const_iterator iter=phic[i][j].begin(); iter!=phic[i][j].end(); ++iter) {
+                res[i][j].expansion().append(iter->key(),iter->data());
+            }
+            for(Differential<Interval>::const_iterator iter=phia[i][j].begin(); iter!=phia[i][j].end(); ++iter) {
+                if(iter->key().degree()==M) { res[i][j].expansion().append(iter->key(),iter->data()); }
+            }
+        }
+        for(Differential<Interval>::const_iterator iter=phid[i][N].begin(); iter!=phid[i][N].end(); ++iter) {
+            res[i][N].expansion().append(iter->key(),iter->data());
+        }
+        for(Differential<Interval>::const_iterator iter=phib[i][N].begin(); iter!=phib[i][N].end(); ++iter) {
+            if(iter->key().degree()==M) { res[i][N].expansion().append(iter->key(),iter->data()); }
+        }
+    }
+    std::cerr<<"res="<<res<<"\n";
+
+    Vector<IntervalPolynomial> pr(nx,IntervalPolynomial(nx+1u));
+    for(uint i=0; i!=nx; ++i) {
+        Polynomial<Interval>& polynomial=pr[i];
+        for(uint j=0; j<=to; ++j) {
+            const Expansion<Interval>& expansion=res[i][j].expansion();
+            for(Expansion<Interval>::const_iterator iter=expansion.begin(); iter!=expansion.end(); ++iter) {
+                append(polynomial,iter->key(),j,iter->data());
+            }
+        }
+    }
+
+    return pr;
+}
 
 template<class X> void truncate(Differential<X>& x, uint spacial_order, uint temporal_order) {
     uint n=x.argument_size()-1;

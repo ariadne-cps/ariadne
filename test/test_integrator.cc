@@ -137,14 +137,17 @@ class TestIntegrator
 
 int main(int argc, const char **argv) {
     int verbosity=get_verbosity(argc,argv);
+
     ARIADNE_TEST_PRINT("Testing TaylorIntegrator");
     TaylorIntegrator taylor_integrator(16,1e-6,1e-16);
     taylor_integrator.verbosity=verbosity;
     TestIntegrator(taylor_integrator).test();
+
     ARIADNE_TEST_PRINT("Testing AffineIntegrator");
     AffineIntegrator affine_integrator(1e-6, 6);
     affine_integrator.verbosity=verbosity;
     TestIntegrator(affine_integrator).test();
+
     std::cerr<<"INCOMPLETE "<<std::flush;
     return ARIADNE_TEST_FAILURES;
 }

@@ -40,9 +40,13 @@
 
 namespace Ariadne {
 
+class Real;
 class Interval;
 template<class X> class Vector;
 template<class X> class Differential;
+template<class X> class Procedure;
+template<class X> class Polynomial;
+typedef Vector< Procedure<Real> > RealVectorProcedure;
 typedef Vector< Differential<Interval> > IntervalDifferentialVector;
 class TaylorFunctionFactory;
 typedef shared_ptr<const TaylorFunctionFactory> FunctionFactoryPointer;
@@ -119,6 +123,41 @@ class TaylorIntegrator
 
     virtual VectorTaylorFunction
     flow_step(const RealVectorFunction& vector_field,
+              const IntervalVector& state_domain,
+              const Float& time_step,
+              const IntervalVector& bounding_box) const;
+
+    using IntegratorBase::flow_step;
+};
+
+//! \brief An integrator which computes the Taylor series of the flow function with remainder term.
+class TaylorSeriesIntegrator
+    : public IntegratorBase
+{
+    uint _maximum_temporal_order;
+    uint _spacial_order;
+    double _sweep_threshold;
+  public:
+    TaylorSeriesIntegrator() : IntegratorBase(1e-4), _maximum_temporal_order(6), _spacial_order(2), _sweep_threshold(1e-8) { }
+    TaylorSeriesIntegrator(uint maxto, double e, double sw=0.0) : IntegratorBase(e), _maximum_temporal_order(maxto), _sweep_threshold(sw) {
+        if(_sweep_threshold==0.0) { _sweep_threshold=e; } }
+    // Set the sweep threshold of the Taylor model.
+    // Note: This method may be removed or modified in the future.
+    //! \brief The order of the method in time.
+    void set_spacial_order(uint m) { this->_spacial_order=m; }
+    void set_maximum_temporal_order(uint n) { this->_maximum_temporal_order=n; }
+    uint maximum_temporal_order() const { return this->_maximum_temporal_order; }
+    void set_sweep_threshold(double lt) { _sweep_threshold = lt; }
+    virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
+
+    virtual VectorTaylorFunction
+    flow_step(const RealVectorFunction& vector_field,
+              const IntervalVector& state_domain,
+              const Float& time_step,
+              const IntervalVector& bounding_box) const;
+
+    virtual Vector< Polynomial<Interval> >
+    flow_step(const RealVectorProcedure& vector_field,
               const IntervalVector& state_domain,
               const Float& time_step,
               const IntervalVector& bounding_box) const;

@@ -56,8 +56,10 @@ template<class X> class FormulaNode;
 //! each node being an atomic operation.
 template<class X>
 class Formula {
+    typedef uint I;
   public:
     typedef typename X::NumericType NumericType;
+    typedef I IndexType;
   public:
     ~Formula() { --_root->count; if(_root->count==0) { delete _root; } }
     explicit Formula() : _root(new FormulaNode<X>(0.0)) { ++_root->count; }
@@ -68,7 +70,7 @@ class Formula {
     Formula<X>& operator=(const X& c) { --_root->count; if(_root->count==0) { delete _root; } _root=new FormulaNode<X>(c); ++_root->count; return *this; }
     static Formula<X> constant(const X& c);
     static Formula<X> constant(double c);
-    static Formula<X> coordinate(uint j);
+    static Formula<X> coordinate(const I& j);
     static Vector< Formula<X> > identity(uint n);
     const FormulaNode<X>* raw_ptr() const { return _root; }
   public:
@@ -121,7 +123,7 @@ template<class X> inline Formula<X> make_formula(Operator op, const Formula<X>& 
 
 template<class X> inline Formula<X> Formula<X>::constant(const X& c) { return Formula<X>(new FormulaNode<X>(c)); }
 template<class X> inline Formula<X> Formula<X>::constant(double c) { return Formula<X>(new FormulaNode<X>(c)); }
-template<class X> inline Formula<X> Formula<X>::coordinate(uint j) { return Formula<X>(new FormulaNode<X>(j)); }
+template<class X> inline Formula<X> Formula<X>::coordinate(const I& j) { return Formula<X>(new FormulaNode<X>(j)); }
 template<class X> inline Vector< Formula<X> > Formula<X>::identity(uint n) {
     Vector< Formula<X> > r(n); for(uint i=0; i!=n; ++i) { r[i]=Formula<X>::coordinate(i); } return r; }
 

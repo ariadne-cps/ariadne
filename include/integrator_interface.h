@@ -74,6 +74,14 @@ class IntegratorInterface
               const IntervalVector& state_domain,
               const Float& suggested_time_step) const = 0;
 
+    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,h]\f$ where \f$h\f$ is the \a time_step
+    //! and \a state_bounding_box is a bound for the trajectories.
+    virtual VectorTaylorFunction
+    flow_step(const RealVectorFunction& vector_field,
+              const IntervalVector& state_domain,
+              const Float& time_step,
+              const IntervalVector& state_bounding_box) const = 0;
+
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
     virtual VectorTaylorFunction
     flow(const RealVectorFunction& vector_field,

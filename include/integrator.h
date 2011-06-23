@@ -69,7 +69,7 @@ class IntegratorBase
     //! \brief Set the class which constructs functions for representing the flow.
     void set_function_factory(const TaylorFunctionFactory& factory);
 
-    
+
     virtual Pair<Float,IntervalVector>
     flow_bounds(const RealVectorFunction& vector_field,
                 const IntervalVector& state_domain,
@@ -139,7 +139,7 @@ class TaylorSeriesIntegrator
     double _sweep_threshold;
   public:
     TaylorSeriesIntegrator() : IntegratorBase(1e-4), _maximum_temporal_order(6), _spacial_order(2), _sweep_threshold(1e-8) { }
-    TaylorSeriesIntegrator(uint maxto, double e, double sw=0.0) : IntegratorBase(e), _maximum_temporal_order(maxto), _sweep_threshold(sw) {
+    TaylorSeriesIntegrator(uint so, uint maxto, double e, double sw=0.0) : IntegratorBase(e), _maximum_temporal_order(maxto), _spacial_order(so), _sweep_threshold(sw) {
         if(_sweep_threshold==0.0) { _sweep_threshold=e; } }
     // Set the sweep threshold of the Taylor model.
     // Note: This method may be removed or modified in the future.
@@ -156,8 +156,8 @@ class TaylorSeriesIntegrator
               const Float& time_step,
               const IntervalVector& bounding_box) const;
 
-    virtual Vector< Polynomial<Interval> >
-    flow_step(const RealVectorProcedure& vector_field,
+    virtual Vector< Differential<Interval> >
+    flow_diff(const RealVectorProcedure& vector_field,
               const IntervalVector& state_domain,
               const Float& time_step,
               const IntervalVector& bounding_box) const;

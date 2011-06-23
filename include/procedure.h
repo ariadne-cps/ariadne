@@ -42,6 +42,8 @@ namespace Ariadne {
 
 typedef uint Nat;
 template<class X> class Formula;
+template<class X> class Graded;
+
 
 
 struct ProcedureInstruction

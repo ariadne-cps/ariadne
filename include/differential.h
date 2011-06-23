@@ -509,9 +509,7 @@ Differential<X>& operator*=(Differential<X>& x, const R& c)
 {
     typedef typename Differential<X>::iterator iterator;
     if(c==0) {
-        X zero=x.begin()->data(); zero*=0;
         x.clear();
-        x[MultiIndex(x.argument_size())]=zero;
     } else {
         for(iterator iter=x.begin(); iter!=x.end(); ++iter) {
             static_cast<X&>(iter->data())*=c;

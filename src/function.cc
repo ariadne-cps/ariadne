@@ -286,11 +286,15 @@ Formula<Real> formula(const ScalarFunction<Real>& f) {
     if(ff) { return ff->_formula; }
     const ScalarConstantFunctionBody* cf=dynamic_cast<const ScalarConstantFunctionBody*>(&fi);
     const ScalarCoordinateFunctionBody* indf=dynamic_cast<const ScalarCoordinateFunctionBody*>(&fi);
+    const UnaryFunctionBody<Neg>* ufn=dynamic_cast<const UnaryFunctionBody<Neg>*>(&fi);
     const BinaryFunctionBody<Add>* bfa=dynamic_cast<const BinaryFunctionBody<Add>*>(&fi);
+    const BinaryFunctionBody<Sub>* bfs=dynamic_cast<const BinaryFunctionBody<Sub>*>(&fi);
     const BinaryFunctionBody<Mul>* bfm=dynamic_cast<const BinaryFunctionBody<Mul>*>(&fi);
     if(cf) { return Formula<Real>::constant(cf->_value); }
     if(indf) { return Formula<Real>::coordinate(indf->_index); }
+    if(ufn) { return -formula(ufn->_arg); }
     if(bfa) { return formula(bfa->_arg1)+formula(bfa->_arg2); }
+    if(bfs) { return formula(bfs->_arg1)-formula(bfs->_arg2); }
     if(bfm) { return formula(bfm->_arg1)*formula(bfm->_arg2); }
     ARIADNE_FAIL_MSG("Cannot compute formula for function "<<f<<"\n");
 }

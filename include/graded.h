@@ -126,6 +126,7 @@ template<> std::ostream& operator<<(std::ostream& os, const Graded<Interval>& g)
     return os;
 }
 
+template<class X> Void compute(X& r, const Neg&, const X& a) { return neg(r,a); }
 template<class X> Void compute(X& r, const Add&, const X& a1, const X& a2) { return add(r,a1,a2); }
 template<class X> Void compute(X& r, const Sub&, const X& a1, const X& a2) { return sub(r,a1,a2); }
 template<class X> Void compute(X& r, const Mul&, const X& a1, const X& a2) { return mul(r,a1,a2); }
@@ -136,16 +137,17 @@ template<class X> Void compute(X& r, const Exp&, const X& a) { return exp(r,a); 
 template<class X> Void compute(X& r, const Log&, const X& a) { return log(r,a); }
 template<class X> Void compute(X& r, const Rec&, const X& a) { return rec(r,a); }
 
-
 template<class A, class B> Graded<A>& operator+=(Graded<A>& a, const B& c) {
-    if(a.degree()==1) { a[0]+=c; } return a; }
+    ARIADNE_ASSERT(a.size()>0); if(a.degree()==0) { a[0]+=c; } return a; }
 template<class A, class B> Graded<A>& operator*=(Graded<A>& a, const B& c) {
     a.back()*=c; return a; }
 
 template<class A, class B> Graded<A> operator+(const Graded<A>& a, const B& c) {
-    Graded<A> r(a); r+=c; return r;  }
-template<class A> Graded<A> operator*(const Graded<A>& a, int c) {
+    Graded<A> r(a); r[0]+=c; return r;  }
+template<class A, class B> Graded<A> operator*(const Graded<A>& a, const B& c) {
     Graded<A> r(a); r*=c; return r;  }
+template<class A> Graded<A> operator*(const Graded<A>& a, int c) {
+    Graded<A> r(a); if(c==0) { for(uint i=0; i!=r.size(); ++i) { r[i]*=c; } } else { r*=c; } return r;  }
 
 template<class A> ClosureExpression<Neg,Graded<A> > operator-(const Graded<A>& a) {
     return make_expression(Neg(),a); }
@@ -157,6 +159,8 @@ template<class A> ClosureExpression<Mul,Graded<A>,Graded<A> > operator*(const Gr
     return make_expression(Mul(),a1,a2); }
 template<class A> ClosureExpression<Div,Graded<A>,Graded<A> > operator/(const Graded<A>& a1, const Graded<A>& a2) {
     return make_expression(Div(),a1,a2); }
+template<class A> ClosureExpression<Neg,Graded<A> > neg(const Graded<A>& a) {
+    return make_expression(Neg(),a); }
 template<class A> ClosureExpression<Sqr,Graded<A> > sqr(const Graded<A>& a) {
     return make_expression(Sqr(),a); }
 template<class A> ClosureExpression<Sqrt,Graded<A> > sqrt(const Graded<A>& a) {
@@ -169,13 +173,17 @@ template<class A> ClosureExpression<Rec,Graded<A> > rec(const Graded<A>& a) {
     return make_expression(Rec(),a); }
 
 template<class A> Graded<A> pos(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
-template<class A> Graded<A> neg(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> abs(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> pow(const Graded<A>& a, int n) { ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> sin(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> cos(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> tan(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> atan(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
+
+template<class A> Void neg(Graded<A>& r, const Graded<A>& a) {
+    ARIADNE_ASSERT(r.degree()+1u == a.degree());
+    r.append(-a.back());
+}
 
 template<class A> Void add(Graded<A>& r, const Graded<A>& a1, const Graded<A>& a2) {
     ARIADNE_ASSERT(r.degree()+1u == a1.degree());
@@ -214,7 +222,6 @@ template<class A> Void div(Graded<A>& r, const Graded<A>& a1, const Graded<A>& a
 }
 
 template<class A> Void sqr(Graded<A>& r, const Graded<A>& a) {
-    std::cerr<<"r="<<r<<" a="<<a<<"\n";
     ARIADNE_ASSERT(r.size() < a.size());
     r.append(create(a[0]));
     Nat d = r.degree();
@@ -294,12 +301,6 @@ template<class A> ClosureExpression<AntiDiff,Graded<A> > antidifferential(const 
 }
 
 
-template<class T>
-Vector< Polynomial<T> > flow(const Vector< Procedure<T> >& vf, Vector<T>& dom)
-{
-    List< Polynomial<T> > intermediates(vf._instructions.size(), Polynomial<T>(dom.size()));
-}
-
 Pair<List<Float>,Float> midpoint_error(const Graded<Interval>& x) {
     List<Float> m(x.degree()+1);
     Float e;
@@ -322,114 +323,10 @@ struct Function {
     template<class X> X operator()(const X& x) const { return x; }
 };
 
-Float eval(const Graded<Float>& p, const Float& x) {
-    Nat d=p.degree();
-    Float r=p[d];
-    for(uint i=0; i!=d; ++i) {
-        r=r*x+p[d-i-1];
-    }
-    std::cerr<<"eval("<<p<<","<<x<<")="<<r<<"\n";
-    return r;
-}
-
-
 
 template<class A> void compute(const Vector< Procedure<Real> >& p, Vector< Graded<A> >& r, List< Graded<A> >& t, const Vector< Graded<A> >& a) {
     _compute(t,p._instructions,p._constants,a);
     for(uint i=0; i!=p._results.size(); ++i) { r[i]=t[p._results[i]]; }
-}
-
-template<class A> Vector< Graded<A> > integrate(const Vector< Procedure<Real> >& p, const Vector<A>& x) {
-    Vector< Graded<A> > arg(x.size(),create(x[0]));
-    for(uint i=0; i!=x.size(); ++i) { arg[i]=Graded<A>(x[i]); }
-    std::cerr<< "x0="<<arg <<"\n";
-
-    List< Graded<A> > tmp(p.temporaries_size());
-     Vector< Graded<A> > res(p.result_size(),create(x[0]));
-
-    const uint N = 6;
-
-    for(uint n=0; n!=N; ++n) {
-        std::cerr<<"arg="<<arg<<"\n";
-        compute(p,res,tmp,arg);
-        std::cerr<<"    tmp="<<tmp<<"\n";
-        std::cerr<<"  res="<<res<<"\n";
-        for(uint i=0; i!=arg.size(); ++i) {
-            arg[i]=antidifferential(res[i]);
-        }
-    }
-    std::cerr<<"arg="<<arg<<"\n";
-
-    return arg;
-}
-
-Vector< Graded< Differential<Interval> > > integrate(const Vector< Procedure<Real> >& p, const Vector<Interval>& x) {
-    const uint M = 2;
-    const uint N = 6;
-    Vector< Graded<Differential<Interval> > > arg(x.size(),Differential<Interval>(x.size(),M));
-    //for(uint i=0; i!=x.size(); ++i) { arg[i]=Differential<Interval>::variable(x.size(),M,x[i],i); }
-    for(uint i=0; i!=x.size(); ++i) { arg[i]=Differential<Interval>::constant(x.size(),M,x[i]); }
-
-    Graded< Differential<Interval> > null;
-
-    List< Graded<Differential<Interval> > > tmp(p.temporaries_size(),null);
-    Vector< Graded<Differential<Interval> > > res(p.result_size(),null);
-
-    std::cerr<< "arg="<<arg <<"\n";
-    std::cerr<< "tmp="<<tmp <<"\n";
-    std::cerr<< "res="<<res <<"\n";
-
-    for(uint n=0; n!=N; ++n) {
-        std::cerr<<"arg="<<arg<<"\n";
-        compute(p,res,tmp,arg);
-        std::cerr<<"    tmp="<<tmp<<"\n";
-        std::cerr<<"  res="<<res<<"\n";
-        for(uint i=0; i!=arg.size(); ++i) {
-            arg[i]=antidifferential(res[i]);
-        }
-    }
-    std::cerr<<"arg="<<arg<<"\n";
-
-    return arg;
-}
-
-
-Vector< Graded< Differential<Interval> > > flow(const Vector< Procedure<Real> >& p, const Vector<Interval>& x) {
-    const uint M = 2;
-    const uint N = 6;
-
-    const uint AS = x.size();
-
-    IntervalVector D=x;
-    IntervalVector C=midpoint(x);
-
-    //IntervalVector B=D;
-    //IntervalVector A=C;
-
-    Graded< Differential<Interval> > null;
-    List< Graded<Differential<Interval> > > tmp(p.temporaries_size(),null);
-    Vector< Graded<Differential<Interval> > > res(p.result_size(),null);
-
-    Vector< Graded<Differential<Interval> > > arg(x.size(),Differential<Interval>(x.size(),M));
-    for(uint i=0; i!=x.size(); ++i) { arg[i]=Differential<Interval>::variable(x.size(),M,D[i],i); }
-
-
-    std::cerr<< "arg="<<arg <<"\n";
-    std::cerr<< "tmp="<<tmp <<"\n";
-    std::cerr<< "res="<<res <<"\n";
-
-    for(uint n=0; n!=N; ++n) {
-        std::cerr<<"arg="<<arg<<"\n";
-        compute(p,res,tmp,arg);
-        std::cerr<<"    tmp="<<tmp<<"\n";
-        std::cerr<<"  res="<<res<<"\n";
-        for(uint i=0; i!=arg.size(); ++i) {
-            arg[i]=antidifferential(res[i]);
-        }
-    }
-    std::cerr<<"arg="<<arg<<"\n";
-
-    return arg;
 }
 
 } // namespace Ariadne

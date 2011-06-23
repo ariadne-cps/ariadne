@@ -26,6 +26,7 @@
 #include <sstream>
 #include <string>
 
+#include "polynomial.h"
 #include "integrator.h"
 #include "function.h"
 #include "taylor_function.h"
@@ -115,7 +116,9 @@ class TestIntegrator
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
         ARIADNE_TEST_PRINT(flow.errors());
+        ARIADNE_TEST_PRINT((flow-expected_flow).sweep(GradedSweeper(3)));
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-3);
+
     };
 
     void test_logistic() {
@@ -137,6 +140,11 @@ class TestIntegrator
 
 int main(int argc, const char **argv) {
     int verbosity=get_verbosity(argc,argv);
+
+    ARIADNE_TEST_PRINT("Testing TaylorSeriesIntegrator");
+    TaylorSeriesIntegrator taylor_series_integrator(2,6,1e-8,1e-16);
+    taylor_series_integrator.verbosity=verbosity;
+    TestIntegrator(taylor_series_integrator).test();
 
     ARIADNE_TEST_PRINT("Testing TaylorIntegrator");
     TaylorIntegrator taylor_integrator(16,1e-6,1e-16);

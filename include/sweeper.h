@@ -80,20 +80,20 @@ class Sweeper {
     shared_ptr<const SweeperInterface> _ptr;
 };
 
-template<class SWP> class SweeperBase 
+template<class SWP> class SweeperBase
     : public virtual SweeperInterface
 {
     virtual SweeperInterface* _clone() const;
-    virtual bool _discard(const MultiIndex& a, const Float& x) const; 
+    virtual bool _discard(const MultiIndex& a, const Float& x) const;
     virtual void _sweep(Expansion<Float>& p, Float& e) const;
     virtual void _sweep(Expansion<Float>& p) const;
 };
 
 
 template<class SWP>
-SweeperInterface* SweeperBase<SWP>::_clone() const 
-{ 
-    return new SWP(static_cast<const SWP&>(*this)); 
+SweeperInterface* SweeperBase<SWP>::_clone() const
+{
+    return new SWP(static_cast<const SWP&>(*this));
 }
 
 template<class SWP>
@@ -155,10 +155,18 @@ class ThresholdSweeper : public SweeperBase<ThresholdSweeper> {
 //! \brief A sweeper class which does not discard any terms at all.
 class TrivialSweeper : public SweeperBase<TrivialSweeper> {
   public:
-    inline bool discard(const MultiIndex& a, const Float& x) const { return true; }
+    inline bool discard(const MultiIndex& a, const Float& x) const { return false; }
   private:
     virtual void _sweep(Expansion<Float>& p, Float& e) const { }
     virtual void _write(std::ostream& os) const { os << "TrivialSweeper"; }
+};
+
+//! \brief A sweeper class which only discards the zero term.
+class NullSweeper : public SweeperBase<NullSweeper> {
+  public:
+    inline bool discard(const MultiIndex& a, const Float& x) const { return x==0.0; }
+  private:
+    virtual void _write(std::ostream& os) const { os << "NullSweeper"; }
 };
 
 //! \brief A sweeper class which discards non-affine terms.

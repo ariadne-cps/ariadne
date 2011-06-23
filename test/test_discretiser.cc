@@ -182,7 +182,7 @@ void TestDiscretiser::test_continuous_time() const
     Grid grid(2);
 
     // Set up the evaluators
-    TaylorIntegrator integrator(4,1e-4);
+    TaylorPicardIntegrator integrator(4,1e-4);
     VectorFieldEvolver evolver(parameters,integrator);
     Discretiser< VectorField, EnclosureType > discretiser(evolver);
 

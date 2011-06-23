@@ -74,7 +74,7 @@ VectorFieldEvolver::VectorFieldEvolver(const EvolutionParametersType& p, const I
     : _parameters(new EvolutionParametersType(p))
     , _integrator(i.clone())
 {
-    ARIADNE_ASSERT_MSG(dynamic_cast<const TaylorIntegrator*>(&i),"Only TaylorIntegrator supported by VectorFieldEvolver\n");
+    ARIADNE_ASSERT_MSG(dynamic_cast<const TaylorPicardIntegrator*>(&i),"Only TaylorPicardIntegrator supported by VectorFieldEvolver\n");
 }
 
 
@@ -237,7 +237,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
     // Compute flow model
     // TODO: Modify this for general integrator interface
-    TaylorIntegrator const* taylor_integrator=dynamic_cast<const TaylorIntegrator*>(this->_integrator.operator->());
+    TaylorPicardIntegrator const* taylor_integrator=dynamic_cast<const TaylorPicardIntegrator*>(this->_integrator.operator->());
     FlowModelType flow_model=taylor_integrator->flow_step(dynamic,current_set_bounds,step_size,flow_bounds);
     //FlowModelType flow_model=this->_integrator->flow_step(dynamic,current_set_bounds,step_size,flow_bounds);
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");

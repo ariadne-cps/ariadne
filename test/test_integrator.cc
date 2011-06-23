@@ -146,8 +146,8 @@ int main(int argc, const char **argv) {
     taylor_series_integrator.verbosity=verbosity;
     TestIntegrator(taylor_series_integrator).test();
 
-    ARIADNE_TEST_PRINT("Testing TaylorIntegrator");
-    TaylorIntegrator taylor_integrator(16,1e-6,1e-16);
+    ARIADNE_TEST_PRINT("Testing TaylorPicardIntegrator");
+    TaylorPicardIntegrator taylor_integrator(16,1e-6,1e-16);
     taylor_integrator.verbosity=verbosity;
     TestIntegrator(taylor_integrator).test();
 

@@ -104,14 +104,14 @@ class IntegratorBase
 
 
 //! \brief An integrator which uses a validated Picard iteration on Taylor models.
-class TaylorIntegrator
+class TaylorPicardIntegrator
     : public IntegratorBase
 {
     uint _maximum_temporal_order;
     double _sweep_threshold;
   public:
-    TaylorIntegrator() : IntegratorBase(1e-4), _sweep_threshold(1e-8) { }
-    TaylorIntegrator(uint maxto, double e, double sw=0.0) : IntegratorBase(e), _maximum_temporal_order(maxto), _sweep_threshold(sw) {
+    TaylorPicardIntegrator() : IntegratorBase(1e-4), _sweep_threshold(1e-8) { }
+    TaylorPicardIntegrator(uint maxto, double e, double sw=0.0) : IntegratorBase(e), _maximum_temporal_order(maxto), _sweep_threshold(sw) {
         if(_sweep_threshold==0.0) { _sweep_threshold=e; } }
     // Set the sweep threshold of the Taylor model.
     // Note: This method may be removed or modified in the future.
@@ -119,7 +119,7 @@ class TaylorIntegrator
     void set_maximum_temporal_order(uint m) { this->_maximum_temporal_order=m; }
     uint maximum_temporal_order() const { return this->_maximum_temporal_order; }
     void set_sweep_threshold(double lt) { _sweep_threshold = lt; }
-    virtual TaylorIntegrator* clone() const { return new TaylorIntegrator(*this); }
+    virtual TaylorPicardIntegrator* clone() const { return new TaylorPicardIntegrator(*this); }
 
     virtual VectorTaylorFunction
     flow_step(const RealVectorFunction& vector_field,

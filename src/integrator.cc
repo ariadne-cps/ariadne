@@ -194,9 +194,9 @@ IntegratorBase::flow_step(const RealVectorFunction& vf, const IntervalVector& dx
 }
 
 VectorTaylorFunction
-TaylorIntegrator::flow_step(const RealVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
+TaylorPicardIntegrator::flow_step(const RealVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
 {
-    ARIADNE_LOG(3,"TaylorIntegrator::flow_step(RealVectorFunction vf, IntervalVector dx, Float h, IntervalVector bx)\n");
+    ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(RealVectorFunction vf, IntervalVector dx, Float h, IntervalVector bx)\n");
     ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
     const uint nx=dx.size();
     Sweeper sweeper(new ThresholdSweeper(this->_sweep_threshold));

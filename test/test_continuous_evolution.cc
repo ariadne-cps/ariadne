@@ -100,7 +100,7 @@ void TestContinuousEvolution::test() const
     parameters.maximum_step_size=step_size;
 
     // Set up the evaluators
-    TaylorIntegrator integrator(14,1e-4,1e-12);
+    TaylorPicardIntegrator integrator(14,1e-4,1e-12);
     VectorFieldEvolver evolver(parameters,integrator);
 
     // Define the initial box
@@ -163,7 +163,7 @@ void TestContinuousEvolution::failure_test() const
     parameters.maximum_step_size=step_size;
 
     // Set up the evaluators
-    TaylorIntegrator integrator(6,1e-6,1e-10);
+    TaylorPicardIntegrator integrator(6,1e-6,1e-10);
     VectorFieldEvolver evolver(parameters,integrator);
 
     // Define the initial box

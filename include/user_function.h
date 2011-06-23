@@ -82,6 +82,7 @@ template<class T> class ScalarUserFunction
       private:
         Vector<Real> _p;
       public:
+        typedef uint SizeType;
         Representation(const Vector<Real>& p) : _p(p) { }
 
         template<class R, class A> inline void _compute(R& r, const A& a) const { T::compute(r,a,_p); }
@@ -155,6 +156,7 @@ template<class T> class VectorUserFunction
         : public VectorFunctionMixin< VectorUserFunction<T>::Representation, Real >
     {
       public:
+        typedef uint SizeType;
         Representation(const Vector<Real>& p) : _p(p) { }
 
         virtual Representation* clone() const { return new Representation(*this); }

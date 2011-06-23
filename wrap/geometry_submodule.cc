@@ -384,7 +384,7 @@ void export_constrained_image_set()
 void export_hybrid_box()
 {
     class_<HybridBox> hybrid_box_class("HybridBox",init<HybridBox>());
-    hybrid_box_class.def(init<DiscreteLocation,Box>());
+    hybrid_box_class.def(init<DiscreteLocation,RealSpace,Box>());
     hybrid_box_class.def("location",&HybridBox::location,return_value_policy<copy_const_reference>());
     hybrid_box_class.def("continuous_state_set",&HybridBox::continuous_state_set,return_value_policy<copy_const_reference>());
     hybrid_box_class.def(self_ns::str(self));
@@ -396,8 +396,8 @@ void export_hybrid_constrained_image_set()
 
     class_<HybridConstrainedImageSet>
         hybrid_constrained_image_set_class("HybridConstrainedImageSet",init<HybridConstrainedImageSet>());
-    hybrid_constrained_image_set_class.def(init<DiscreteLocation,Box>());
-    //hybrid_constrained_image_set_class.def(init<DiscreteLocation,ConstrainedImageSet>());
+    hybrid_constrained_image_set_class.def(init<DiscreteLocation,RealSpace,Box>());
+    hybrid_constrained_image_set_class.def(init<DiscreteLocation,RealSpace,ConstrainedImageSet>());
     hybrid_constrained_image_set_class.def(self_ns::str(self));
 }
 

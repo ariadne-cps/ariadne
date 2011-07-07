@@ -67,10 +67,10 @@ TestHybridSet::test_hybrid_grid_set()
     Figure fig;
     hg.has_location(loc);
     g=hg[loc];
-    
+
     hgts.has_location(loc);
     GridTreeSet const& gtscr = hgts[loc];
-    GridTreeSet& gtsr = hgts[loc]; 
+    GridTreeSet& gtsr = hgts[loc];
     draw(fig,hgts);
 }
 
@@ -89,9 +89,12 @@ TestHybridSet::test_hybrid_list_set()
     Box bx3=make_box("[1,2]x[2,3]");
     Box bx4=make_box("[4,5]x[5,6]");
     Box bx5=make_box("[6,7]x[8,9]");
-    ARIADNE_TEST_EXECUTE(hls[loc1].adjoin(bx1));
-    ARIADNE_TEST_FAIL(hls[loc1].adjoin(bx3)); // Should fail due to incompatible dimensions
-    ARIADNE_TEST_EXECUTE(hls[loc2].adjoin(bx4));
+    ARIADNE_TEST_EXECUTE(hls.adjoin(loc1,spc1,bx1));
+    ARIADNE_TEST_FAIL(hls.adjoin(loc1,bx3)); // Should fail due to incompatible dimensions
+    ARIADNE_TEST_FAIL(hls.adjoin(loc2,bx3)); // Should fail due to unspecified space
+    ARIADNE_TEST_EXECUTE(hls.adjoin(loc2,spc2,bx3));
+    ARIADNE_TEST_EXECUTE(hls.adjoin(loc2,bx4));
+    ARIADNE_TEST_PRINT(hls);
     ARIADNE_TEST_EXECUTE(hls.adjoin(HybridBox(loc1,spc1,bx2)));
     ARIADNE_TEST_EXECUTE(hls.adjoin(loc2,bx5));
 

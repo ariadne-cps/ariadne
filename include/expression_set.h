@@ -147,23 +147,24 @@ inline RealExpressionLowerHalfspace operator<=(const Real& l, const RealVariable
     return RealExpressionLowerHalfspace(l,v);
 }
 
-inline RealExpressionLowerHalfspace operator>=(const RealVariable& v, const Real& l) {
-    return RealExpressionLowerHalfspace(l,v);
-}
-
 inline RealExpressionUpperHalfspace operator<=(const RealVariable& v, const Real& u) {
     return RealExpressionUpperHalfspace(v,u);
 }
 
-inline RealExpressionUpperHalfspace operator>=(const Real& u, const RealVariable& v) {
-    return RealExpressionUpperHalfspace(v,u);
-}
+inline RealExpressionLowerHalfspace operator>=(const RealVariable& v, const Real& l) { return l <= v; }
+
+inline RealExpressionUpperHalfspace operator>=(const Real& u, const RealVariable& v) { return v <= u; }
+
+inline RealExpressionLowerHalfspace operator>=(const RealVariable& v, double l) { return Real(l) <= v; }
+inline RealExpressionLowerHalfspace operator<=(double l, const RealVariable& v) { return Real(l) <= v; }
+inline RealExpressionUpperHalfspace operator<=(const RealVariable& v, double u) { return v <= Real(u); }
+inline RealExpressionUpperHalfspace operator>=(double u, const RealVariable& v) { return v <= Real(u); }
 
 class ExpressionBox {
     Map<RealVariable,RealInterval> _intervals;
   public:
     ExpressionBox(const List<RealExpressionInterval>& lst) {
-        for(uint i=0; i!=lst.size(); ++i) { _intervals[lst[i]._variable]=RealInterval(lst[i]._lower,lst[i]._upper); } 
+        for(uint i=0; i!=lst.size(); ++i) { _intervals[lst[i]._variable]=RealInterval(lst[i]._lower,lst[i]._upper); }
     }
     RealSpace space() const { return RealSpace(make_list(_intervals.keys())); }
     Box euclidean_box() const;

@@ -989,8 +989,8 @@ CompositeHybridAutomaton::invariant_predicate(DiscreteLocation location, Discret
     ContinuousPredicate result(true);
     for(uint i=0; i!=this->_components.size(); ++i) {
         ContinuousPredicate guard=this->_components[i].invariant_predicate(location,event);
-        if(result==true || guard==false) { result=guard; }
-        else if(guard==true || result==false) { }
+        if(is_constant(result,true) || is_constant(guard,false)) { result=guard; }
+        else if(is_constant(guard,true) || is_constant(result,false)) { }
         else { result = result && guard; }
     }
     return result;
@@ -1002,8 +1002,8 @@ CompositeHybridAutomaton::guard_predicate(DiscreteLocation location, DiscreteEve
     ContinuousPredicate result(true);
     for(uint i=0; i!=this->_components.size(); ++i) {
         ContinuousPredicate guard=this->_components[i].guard_predicate(location,event);
-        if(result==true || guard==false) { result=guard; }
-        else if(guard==true || result==false) { }
+        if(is_constant(result,true) || is_constant(guard,false)) { result=guard; }
+        else if(is_constant(guard,true) || is_constant(result,false)) { }
         else { result = result && guard; }
     }
     return result;

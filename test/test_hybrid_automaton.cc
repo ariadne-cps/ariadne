@@ -184,7 +184,7 @@ class TestHybridAutomaton {
     void test_distinct_modes();
     void test_overspecified_dynamic();
     void test_algebraic_loops();
-    void test_nonexitsent_mode();
+    void test_nonexistent_mode();
     void test_multiple_guard();
     void test_multiple_transition();
     void test_overspecified_reset();
@@ -209,7 +209,7 @@ TestHybridAutomaton::test()
     ARIADNE_TEST_CALL(test_distinct_modes());
     ARIADNE_TEST_CALL(test_overspecified_dynamic());
     ARIADNE_TEST_CALL(test_algebraic_loops());
-    ARIADNE_TEST_CALL(test_nonexitsent_mode());
+    ARIADNE_TEST_CALL(test_nonexistent_mode());
     ARIADNE_TEST_CALL(test_multiple_guard());
     ARIADNE_TEST_CALL(test_multiple_transition());
     ARIADNE_TEST_CALL(test_overspecified_reset());
@@ -260,7 +260,7 @@ TestHybridAutomaton::test_algebraic_loops()
 }
 
 void
-TestHybridAutomaton::test_nonexitsent_mode()
+TestHybridAutomaton::test_nonexistent_mode()
 {
     HybridAutomaton system;
     StringVariable q("q");
@@ -275,7 +275,6 @@ TestHybridAutomaton::test_nonexitsent_mode()
     ARIADNE_TEST_THROWS( system.new_transition( (q|"1"), e, (q|"3") ), NonExistentModeError );
     ARIADNE_TEST_THROWS( system.new_transition( (q|"3"), e, (q|"1") ), NonExistentModeError );
     ARIADNE_TEST_THROWS( system.new_transition( (q|"1"), e, (q|"1",r|"2") ), NonExistentModeError );
-    ARIADNE_TEST_EXECUTE( system.new_transition( (q|"1"), e, (q|"2",r|"1") ) );
     ARIADNE_TEST_EXECUTE( system.new_transition( (q|"1"), e, (q|"2",r|"1") ) );
 }
 

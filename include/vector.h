@@ -323,7 +323,7 @@ operator-(const VectorExpression<V>& ve) { return VectorNegation<V>(ve()); }
 
 template<class V1, class V2> inline
 typename EnableIfDefined< typename Arithmetic<typename V1::ValueType,typename V2::ValueType>::ResultType, VectorSum< V1, V2 > >::Type
-operator+(const VectorExpression<V1>& v1, const VectorExpression<V2>& v2) { return VectorSum<V1,V2>(v1(),v2()); }   
+operator+(const VectorExpression<V1>& v1, const VectorExpression<V2>& v2) { return VectorSum<V1,V2>(v1(),v2()); }
 
 template<class V1, class V2> inline
 typename EnableIf< IsDefined<typename Arithmetic<typename V1::ValueType,typename V2::ValueType>::ResultType>, VectorDifference< V1, V2 > >::Type

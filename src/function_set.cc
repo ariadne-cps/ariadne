@@ -818,8 +818,8 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r,
 } // namespace
 
 
-void 
-constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box& d, const IntervalVectorFunction& f, const IntervalVectorFunction& g, const IntervalVector& c, int e) 
+void
+constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box& d, const IntervalVectorFunction& f, const IntervalVectorFunction& g, const IntervalVector& c, int e)
 {
     ARIADNE_ASSERT(p.dimension()==f.result_size());
 
@@ -920,7 +920,7 @@ namespace Ariadne {
 
 typedef tribool Tribool;
 typedef unsigned int Nat;
-typedef std::ostream& OutputStream;
+typedef std::ostream OutputStream;
 
 template<class SF> struct FunctionTraits;
 template<class X> struct FunctionTraits< ScalarFunction<X> > { typedef VectorFunction<X> VectorFunctionType; };

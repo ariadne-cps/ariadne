@@ -179,6 +179,21 @@ operator<<(std::ostream& os, const clone_on_copy_ptr<T>& ptr) {
 }
 
 
+template<class T> class counted_pointer;
+
+template<class T>
+class counted_pointer<const T>
+{
+    const T* _ptr;
+  public:
+    counted_pointer(const T* p) : _ptr(p) { assert(p!=0); ++_ptr->count; }
+    counted_pointer(const counted_pointer<const T>& p) : _ptr(p._ptr) { ++_ptr->count; }
+    counted_pointer<const T>& operator=(const counted_pointer<const T>& p) {
+        if(_ptr!=p._ptr) { --_ptr->count; if(_ptr->count==0) { delete _ptr; } _ptr=p._ptr; ++_ptr->count; } return *this; }
+    ~counted_pointer() { --_ptr->count; if(_ptr->count==0) { delete _ptr; } }
+    const T* operator->() const { return _ptr; }
+};
+
 } // namespace Ariadne
 
 #endif // ARIADNE_POINTER_H

@@ -35,7 +35,7 @@
 
 namespace Ariadne {
 
-template<class R, class Op=Operator, class A1=R, class A2=A1> class BinaryExpression
+template<class R, class Op=OperatorCode, class A1=R, class A2=A1> class BinaryExpression
     : public ExpressionInterface<R>
 {
   public:
@@ -46,7 +46,7 @@ template<class R, class Op=Operator, class A1=R, class A2=A1> class BinaryExpres
     BinaryExpression(Op op, shared_ptr< const ExpressionInterface<A1> > expr1, shared_ptr< const ExpressionInterface<A2> > expr2)
         : _op(op), _arg1(expr1), _arg2(expr2)  { }
     virtual String operator_name() const { return name(_op); }
-    virtual Operator type() const { return static_cast<Operator>(_op); }
+    virtual OperatorCode type() const { return static_cast<OperatorCode>(_op); }
     virtual BinaryExpression<R,Op,A1,A2>* clone() const { return new BinaryExpression<R,Op,A1,A2>(_op,_arg1._ptr,_arg2._ptr); }
     virtual Set<String> arguments() const { return join(this->_arg1.arguments(),this->_arg2.arguments()); }
     virtual std::ostream& write(std::ostream& os) const {

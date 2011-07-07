@@ -81,7 +81,6 @@ typedef Set<UntypedVariable> VariableSet;
 typedef Set< Variable<Real> > RealVariableSet;
 
 
-template<class T> class Expression;
 
 
 

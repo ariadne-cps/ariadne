@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 
     Box bx2d(2); bx2d[0]=Interval(0.2,0.4); bx2d[1]=Interval(0.2,0.5);
     Box bx3d(3); bx3d[0]=Interval(0.2,0.4); bx3d[1]=Interval(0.2,0.5); bx3d[2]=Interval(0.2,0.7);
-    g.set_projection_map(ProjectionFunction(2,3,1));
+    g.set_projection(3,0,1);
     g.set_bounding_box(bx3d.bounding_box());
     g.draw(bx3d);
     g.write("test_graphics-bx3");

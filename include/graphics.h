@@ -66,7 +66,6 @@ class Figure
   public:
     ~Figure();
     Figure();
-    void set_projection_map(const ProjectionFunction&);
     void set_projection_map(const PlanarProjectionMap&);
     void set_bounding_box(const Box&);
 

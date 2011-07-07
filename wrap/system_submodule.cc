@@ -228,15 +228,14 @@ void export_formula()
     class_<RealSpace> real_space_class("RealSpace", init<RealSpace>());
     real_space_class.def("dimension", &RealSpace::dimension);
     real_space_class.def("variable", &RealSpace::variable);
-    real_space_class.def("index", &RealSpace::index);
+    real_space_class.def("index", (RealSpace::SizeType(RealSpace::*)(const String&)const) &RealSpace::index);
+    real_space_class.def("index", (RealSpace::SizeType(RealSpace::*)(const RealVariable&)const) &RealSpace::index);
     real_space_class.def(self_ns::str(self));
 
     from_python<RealSpace>();
 
     class_<RealExpression> real_expression_class("RealExpression", init<RealExpression>());
-    real_expression_class.def("subexpressions", &RealExpression::subexpressions);
-    real_expression_class.def("substitute", &RealExpression::substitute<Real>);
-    real_expression_class.def("simplify", &RealExpression::simplify);
+    real_expression_class.def("simplify", (RealExpression(*)(const RealExpression&)) &simplify);
     real_expression_class.def("__pos__", &__pos__<RealExpression,RealExpression>);
     real_expression_class.def("__neg__", &__neg__<RealExpression,RealExpression>);
     real_expression_class.def("__add__", &__add__<RealExpression,RealExpression,RealExpression>);

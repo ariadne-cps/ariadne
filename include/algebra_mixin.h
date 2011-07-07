@@ -91,7 +91,7 @@ template<class A, class X> class SymbolicAlgebraMixin
 {
     virtual SymbolicAlgebraMixin<A,X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
     virtual SymbolicAlgebraMixin<A,X>* _clone() const { return new A(static_cast<const A&>(*this)); }
-    virtual SymbolicAlgebraMixin<A,X>* _apply(Operator op) { return new A(op,static_cast<const A&>(*this)); }
+    virtual SymbolicAlgebraMixin<A,X>* _apply(OperatorCode op) { return new A(op,static_cast<const A&>(*this)); }
 };
 
 template<class A> inline typename EnableIfAlgebra<A>::Type operator+(const A& a) { A r=a; return r; }

@@ -40,11 +40,13 @@
 
 namespace Ariadne {
 
+class Identifier;
 
 template<class T> class Set;
 
 typedef bool Boolean;
 typedef tribool Tribool;
+typedef unsigned int Nat;
 typedef std::string String;
 class Integer;
 class Real;

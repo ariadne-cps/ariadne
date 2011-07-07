@@ -80,6 +80,14 @@ template<class T> struct Space
     //! \brief A list giving ordered variables.
     List<VariableType> variables() const { return this->_variables; }
     //! \brief A map giving the index of a given variable.
+    Map<Identifier,SizeType> indices_from_names() const {
+        Map<Identifier,SizeType> indices;
+        for(uint i=0; i!=this->_variables.size(); ++i) {
+            ARIADNE_ASSERT_MSG(!indices.has_key(_variables[i]),"Repeated variable "<<_variables[i]<<" in space "<<_variables)
+            indices.insert(this->_variables[i].name(),i);
+        }
+        return indices; }
+    //! \brief A map giving the index of a given variable.
     Map<VariableType,SizeType> indices() const {
         Map<VariableType,SizeType> indices;
         for(uint i=0; i!=this->_variables.size(); ++i) {
@@ -91,13 +99,18 @@ template<class T> struct Space
     //! \brief Tests if the variable \a v is in the space.
     bool contains(const VariableType& v) const {
         for(uint i=0; i!=_variables.size(); ++i) {
-            if(v==_variables[i]) { return true; } }
+            if(v.name()==_variables[i]) { return true; } }
         return false; }
     //! \brief The index of the named variable \a v.
     SizeType index(const VariableType& v) const {
         for(uint i=0; i!=_variables.size(); ++i) {
             if(v.name()==_variables[i]) { return i; } }
         ARIADNE_ASSERT_MSG(false,"Variable "<<v<<" is not in the Space "<<*this);
+        return _variables.size(); }
+    SizeType index(const String& n) const {
+        for(uint i=0; i!=_variables.size(); ++i) {
+            if(n==_variables[i]) { return i; } }
+        ARIADNE_ASSERT_MSG(false,"Variable named "<<n<<" is not in the Space "<<*this);
         return _variables.size(); }
     //! \brief Append the named variable \a v to the variables defining the space; ignores if the variable is already in the space.
     Space<T>& insert(const VariableType& v) {

@@ -266,24 +266,26 @@ class HybridListSet
     //using std::map< DiscreteLocation,ListSet<ES> >::insert;
 
     //using std::map<DiscreteLocation,ListSet<ES> >::operator[];
-    ListSet<ES>& operator[](const DiscreteLocation& q) {
-        return this->_locations[q].second; }
+    //ListSet<ES>& operator[](const DiscreteLocation& q) {
+    //    return this->_locations[q].second; }
     const ListSet<ES>& operator[](const DiscreteLocation& q) const {
         ARIADNE_ASSERT_MSG(this->find(q)!=this->locations_end(),(*this)<<" has no location "<<q);
         return this->find(q)->second->second; }
 
     void insert(const DiscreteLocation& loc, const RealSpace& spc) {
         this->_locations.insert(loc, make_pair(spc,ListSet<ES>())); }
+    void adjoin(const DiscreteLocation& loc, const RealSpace& spc, const ES& es) {
+        locations_iterator loc_iter=this->_locations.find(loc);
+        if(loc_iter!=this->_locations.end()) {
+            ARIADNE_ASSERT_MSG(loc_iter->second.first==spc,
+                               "Space "<<loc_iter->second.first<<" of location "<<loc_iter->first<<" differs from "<<spc); }
+        else { this->insert(loc,spc); loc_iter=this->_locations.find(loc); }
+        loc_iter->second.second.adjoin(es); }
     void adjoin(const DiscreteLocation& loc, const ES& es) {
         ARIADNE_ASSERT_MSG(this->_locations.find(loc)!=this->_locations.end(),(*this)<<" has no location "<<loc);
         this->_locations[loc].second.adjoin(es); }
     void adjoin(const HybridBasicSet<ES>& hes) {
-        locations_iterator loc_iter=this->_locations.find(hes.location());
-        if(loc_iter!=this->_locations.end()) {
-            ARIADNE_ASSERT_MSG(loc_iter->second.first==hes.space(),
-                               "Space "<<loc_iter->second.first<<" of location "<<loc_iter->first<<" differs from that of "<<hes); }
-        else { this->insert(hes.location(),hes.space()); loc_iter=this->_locations.find(hes.location()); }
-        loc_iter->second.second.adjoin(hes.continuous_state_set()); }
+        this->adjoin(hes.location(),hes.space(),hes.continuous_state_set()); }
     void adjoin(const HybridListSet<ES>& hls) {
         for(locations_const_iterator _loc_iter=hls.locations_begin();
             _loc_iter!=hls.locations_end(); ++_loc_iter) {
@@ -527,7 +529,7 @@ class HybridGridTreeSet
         HybridListSet<Box> result;
         for(const_iterator iter=this->begin();
             iter!=this->end(); ++iter) {
-            result[iter->first].adjoin(iter->third.box()); }
+            result.adjoin(iter->first,iter->third.box()); }
         return result; }
 
     //!

@@ -1,7 +1,8 @@
-phony: lib lib-extras
+phony: lib lib-hybrid lib-extras
 
 lib: libariadne.la libcalculus.la
 lib-extras: libariadne-extras.la
+lib-hybrid: libariadne-hybrid.la
 
 AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 
@@ -9,7 +10,7 @@ INCLUDES = -iquote$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
 LIBS =  $(CAIRO_LIBS) $(GTK_LIBS)
 LDADD =  $(LIBS)
 
-ARIADNE_SRC = \
+ARIADNE_KERNEL_SRC = \
 	integer.cc \
 	rational.cc \
 	float.cc \
@@ -20,6 +21,7 @@ ARIADNE_SRC = \
 	differential.cc \
 	affine.cc \
 	polynomial.cc \
+	operators.cc \
 	expression.cc \
 	function.cc \
 	algebra.cc \
@@ -44,7 +46,9 @@ ARIADNE_SRC = \
 	vector_field_evolver.cc \
 	discretiser.cc \
 	logging.cc \
-	graphics.cc \
+	graphics.cc
+
+ARIADNE_HYBRID_SRC = \
 	hybrid_set.cc \
 	hybrid_enclosure.cc \
 	hybrid_automaton-monolithic.cc \
@@ -52,6 +56,8 @@ ARIADNE_SRC = \
 	hybrid_automaton-restrictive.cc \
 	hybrid_evolver.cc \
 	hybrid_reachability_analyser.cc
+
+ARIADNE_SRC = $(ARIADNE_KERNEL_SRC) $(ARIADNE_HYBRID_SRC)
 
 EXTRAS_SRC = \
 	runge_kutta_integrator.cc \
@@ -75,8 +81,9 @@ CALCULUS_SRC = \
 	taylor_set.cc  \
 	taylor_function.cc
 
-lib_LTLIBRARIES = libariadne.la libariadne-extras.la libcalculus.la
+lib_LTLIBRARIES = libariadne.la libariadne-hybrid.la libariadne-extras.la libcalculus.la
 libariadne_la_SOURCES = $(ARIADNE_SRC)
+libariadne_hybrid_la_SOURCES = $(ARIADNE_HYBRID_SRC)
 libariadne_extras_la_SOURCES = $(EXTRAS_SRC)
 libcalculus_la_SOURCES = $(CALCULUS_SRC)
 nodist_EXTRA_libariadne_la_SOURCES = dummy.cc

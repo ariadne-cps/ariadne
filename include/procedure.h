@@ -48,10 +48,10 @@ template<class X> class Graded;
 
 struct ProcedureInstruction
 {
-    explicit ProcedureInstruction(Operator o, size_t a) : op(o), arg(a) { }
-    explicit ProcedureInstruction(Operator o, size_t a1, size_t a2) : op(o), arg1(a1), arg2(a2) { }
-    explicit ProcedureInstruction(Operator o, size_t a, int n) : op(o), arg(a), np(n) { }
-    Operator op;
+    explicit ProcedureInstruction(OperatorCode o, size_t a) : op(o), arg(a) { }
+    explicit ProcedureInstruction(OperatorCode o, size_t a1, size_t a2) : op(o), arg1(a1), arg2(a2) { }
+    explicit ProcedureInstruction(OperatorCode o, size_t a, int n) : op(o), arg(a), np(n) { }
+    OperatorCode op;
     union {
         struct { size_t arg; int np; };
         struct { size_t arg1; size_t arg2; };
@@ -74,9 +74,9 @@ class Procedure {
     List<X> _constants;
     List<ProcedureInstruction> _instructions;
   public:
-    void new_unary_instruction(Operator o, size_t a) { _instructions.append(ProcedureInstruction(o,a)); }
-    void new_binary_instruction(Operator o, size_t a1, size_t a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
-    void new_power_instruction(Operator o, size_t a, int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
+    void new_unary_instruction(OperatorCode o, size_t a) { _instructions.append(ProcedureInstruction(o,a)); }
+    void new_binary_instruction(OperatorCode o, size_t a1, size_t a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
+    void new_power_instruction(OperatorCode o, size_t a, int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
   public:
 };
 
@@ -98,9 +98,9 @@ class Vector< Procedure<X> > {
   public:
     Nat result_size() const { return _results.size(); }
     Nat temporaries_size() const { return _instructions.size(); }
-    void new_instruction(Operator o, Nat a) { _instructions.append(ProcedureInstruction(o,a)); }
-    void new_instruction(Operator o, Nat a, int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
-    void new_instruction(Operator o, Nat a1, Nat a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
+    void new_instruction(OperatorCode o, Nat a) { _instructions.append(ProcedureInstruction(o,a)); }
+    void new_instruction(OperatorCode o, Nat a, int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
+    void new_instruction(OperatorCode o, Nat a1, Nat a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
     void set_return(Nat i, Nat a) { _results[i]=a; }
 };
 
@@ -203,23 +203,23 @@ template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<Procedure
     // POSTCONDITION: No nan's get propagated to x
 }
 
-template<class X> size_t _convert(List<ProcedureInstruction>& p, List<X>& c, const FormulaNode<X>* f, Map<const FormulaNode<X>*,size_t>& ind) {
+template<class X> size_t _convert(List<ProcedureInstruction>& p, List<X>& c, const Expression<X>& f, Map<const Void*,size_t>& ind) {
     typedef ProcedureInstruction PI;
-    if(ind.has_key(f)) { return ind[f]; }
-    switch(f->op) { // Can't use simple evaluate (above) as we need to pass the cache to subformulae
-        case CNST: p.append(PI(CNST,c.size())); c.append(*f->val); break;
-        case IND: p.append(PI(IND,f->ind)); break;
+    if(ind.has_key(f.node_ptr())) { return ind[f.node_ptr()]; }
+    switch(f.op()) { // Can't use simple evaluate (above) as we need to pass the cache to subformulae
+        case CNST: p.append(PI(CNST,c.size())); c.append(f.val()); break;
+        case IND: p.append(PI(IND,f.ind())); break;
         case ADD: case SUB: case MUL: case DIV:
-            p.append(PI(f->op,_convert(p,c,f->arg1,ind),_convert(p,c,f->arg2,ind))); break;
+            p.append(PI(f.op(),_convert(p,c,f.arg1(),ind),_convert(p,c,f.arg2(),ind))); break;
         case POW:
-            p.append(PI(f->op,_convert(p,c,f->arg,ind),f->np)); break;
+            p.append(PI(f.op(),_convert(p,c,f.arg(),ind),f.num())); break;
         case NEG: case REC: case SQR: case SQRT:
         case EXP: case LOG: case SIN: case COS: case TAN: case ATAN:
-            p.append(PI(f->op,_convert(p,c,f->arg,ind))); break;
+            p.append(PI(f.op(),_convert(p,c,f.arg(),ind))); break;
         default: assert(false);
     }
     const size_t num=p.size()-1;
-    ind.insert(f,num);
+    ind.insert(f.node_ptr(),num);
     return num;
 }
 
@@ -259,8 +259,8 @@ Procedure<X>::Procedure()
 template<class X>
 Procedure<X>::Procedure(const Formula<X>& f)
 {
-    Map<const FormulaNode<X>*, size_t> ind;
-    _convert(this->_instructions,this->_constants,f.raw_ptr(), ind);
+    Map<const Void*, size_t> ind;
+    _convert(this->_instructions,this->_constants,f, ind);
 }
 
 template<class X>
@@ -268,8 +268,8 @@ Procedure<X>::Procedure(const Expansion<X>& e)
 {
     Vector< Formula<X> > id=Formula<X>::identity(e.argument_size());
     Formula<X> f=horner_evaluate(e,id);
-    Map<const FormulaNode<X>*, size_t> ind;
-    _convert(this->_instructions,this->_constants,f.raw_ptr(), ind);
+    Map<const Void*, size_t> ind;
+    _convert(this->_instructions,this->_constants,f, ind);
 }
 
 // \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
@@ -300,12 +300,12 @@ template<class X>
 Vector< Procedure<X> >::Vector(const Vector< Formula<X> >& f)
     : _results(f.size(),0u)
 {
-    Map<const FormulaNode<X>*, size_t> ind;
+    Map<const Void*, size_t> ind;
     for(size_t i=0; i!=f.size(); ++i) {
-        _convert(this->_instructions,this->_constants,f[i].raw_ptr(), ind);
+        _convert(this->_instructions,this->_constants,f[i], ind);
     }
     for(Nat i=0; i!=f.size(); ++i) {
-        this->_results[i]=ind[f[i].raw_ptr()];
+        this->_results[i]=ind[f[i].node_ptr()];
     }
 }
 

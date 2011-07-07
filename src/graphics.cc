@@ -108,11 +108,6 @@ void Figure::set_projection(uint as, uint ix, uint iy)
     this->_data->projection=PlanarProjectionMap(as,ix,iy);
 }
 
-void Figure::set_projection_map(const ProjectionFunction& pf)
-{
-    this->_data->projection=PlanarProjectionMap(pf.argument_size(),pf.p(0),pf.p(1));
-}
-
 void Figure::set_projection_map(const PlanarProjectionMap& p)
 {
     this->_data->projection=p;

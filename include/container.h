@@ -236,6 +236,8 @@ template<class K, class V> class Map
         return this->std::map<K,V>::operator[](k); }
     const V& operator[](const K& k) const { typename std::map<K,V>::const_iterator p=this->find(k);
         assert(p!=this->end()); return p->second; }
+    const V& get(const K& k) const { typename std::map<K,V>::const_iterator p=this->find(k);
+        assert(p!=this->end()); return p->second; }
     bool has_key(const K& k) const {
         return this->find(k)!=this->end(); }
     V& value(const K& k) {

@@ -1,11 +1,15 @@
 SED_COMMAND="
-s/Synaps::dyadic/Dyadic/g
+s/\bAriadne:://g
 
-s/\blong long int\b/llint/g
-s/\bunsigned long int\b/ulint/g
-s/\blong int\b/lint/g
-s/\bunsigned int\b/uint/g
+s/\bvoid\b/Void/g
+s/\bbool\b/Bool/g
+s/\btribool\b/Tribool/g
 
+s/\blong long int\b/LLInt/g
+s/\bunsigned long int\b/LNat/g
+s/\blong int\b/LInt/g
+s/\bunsigned int\b/Nat/g
+s/\bint\b/Int/g
 
 s/__gmp_expr<__gmpf_value, __gmpf_value>/MPFloat/g
 s/__gmp_expr<__gmpq_value, __gmpq_value>/Rational/g
@@ -14,6 +18,7 @@ s/__gmp_expr<__mpz_struct \[1\], __mpz_struct \[1\]>/Integer/g
 s/__gmp_expr<__mpq_struct \[1\], __mpq_struct \[1\]>/Rational/g
 
 s/Ariadne:://g
+s/ >/>/g
 
 s/std::vector/vector/g
 s/std::pair/pair/g
@@ -21,32 +26,25 @@ s/std::pair/pair/g
 s/boost::numeric:://g
 s/boost::logic:://g
 s/boost::python:://g
+
 s/\,\ basic_row_major<unsigned int\, int>//g
 s/\,\ unbounded_array<Dyadic\,\ std::allocator<Dyadic\ >\ >//g
 s/\,\ unbounded_array<Rational\,\ std::allocator<Rational\ >\ >//g
 s/\,\ unbounded_array<Interval<Dyadic\ >\,\ std::allocator<Interval<Dyadic\ >\ >\ >//g
 s/\,\ unbounded_array<Interval<Rational\ >\,\ std::allocator<Interval<Rational\ >\ >\ >//g
-s/ >/>/g
 s/basic_ostream<char, std::char_traits<char>>/ostream/g
 s/, std::allocator<.*[a-z]>//g
-
-s/typename\ ES::real_type/R/g
-s/typename\ traits<R,\ R>::approximate_arithmetic_type/A/g
-
-s/Float<double>/Float64/g
-s/Float<mpfr>/FloatMP/g
-s/ApproximateFloat<Float64>/ApproximateFloat64/g
-s/ApproximateFloat<Float64>/ApproximateFloatMP/g
-s/Interval<Float64>/Interval64/g
-s/Interval<FloatMP>/IntervalMP/g
 
 s/__gmp_expr<__mpq_struct \[1\], __mpq_struct \[1\]>/Rational/g
 
 s/std::basic_string<char, std::char_traits<char>>/String/g
-s/std::basic_string<char, std::char_traits<char>, std::allocator<char>>/string/g
-s/std::basic_string<_CharT, _Traits, _Alloc>/string/g
+s/std::basic_string<char, std::char_traits<char>, std::allocator<char>>/String/g
+s/std::basic_string<_CharT, _Traits, _Alloc>/String/g
+s/std::basic_ostream<char>/OutputStream/g
 s/\[with _CharT = char, _Traits = std::char_traits<char>, _Alloc = std::allocator<char>\]//g
-s/_CharT/char/g
+s/_CharT/Char/g
+
+s/std::basic_string<char>/String/g
 
 s/Variable<String>/StringVariable/g
 s/Variable<Integer>/IntegerVariable/g

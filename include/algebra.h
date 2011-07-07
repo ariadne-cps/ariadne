@@ -146,7 +146,7 @@ template<class X> class SymbolicAlgebra
     SymbolicAlgebra(const SymbolicAlgebraInterface<X>& a) : _ptr(a._clone()) { }
     SymbolicAlgebra(const SymbolicAlgebra<X>& a) : _ptr(a._ptr->_clone()) { }
     //! \brief Create the representation of the operator \a op applied to \a a.
-    SymbolicAlgebra(Operator op, const SymbolicAlgebra<X>& a) : _ptr(a._ptr->_apply(op)) { }
+    SymbolicAlgebra(OperatorCode op, const SymbolicAlgebra<X>& a) : _ptr(a._ptr->_apply(op)) { }
     SymbolicAlgebra<X>& operator=(int c) { *this = this->create(); this->iadd(c); return *this; }
     SymbolicAlgebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
     SymbolicAlgebra<X>& operator=(const Algebra<X>& a) { this->_ptr=boost::shared_ptr< AlgebraInterface<X> >(a._ptr->_clone()); return *this; }

@@ -225,7 +225,7 @@ void TestContinuousEvolution::failure_test() const
     // cout << "reach_set=" << hybrid_reach_set << endl;
     std::cout << "Plotting..." << std::flush;
     fig.clear(); fig.set_bounding_box(orbit.reach().bounding_box());
-    fig.set_projection_map(ProjectionFunction(2,3,0));
+    fig.set_projection(2,0,1);
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(red) << orbit.final();
     fig << fill_colour(blue) << initial_set;

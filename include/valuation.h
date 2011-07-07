@@ -67,6 +67,8 @@ class Valuation
     void insert(const Variable<Type>& v, const ValueType& s) { this->_values.insert(v.name(),s); }
     void set(const Variable<Type>& v, const ValueType& s) { this->_values[v.name()]=s; }
     const ValueType& get(const Variable<Type>& v) const { return _values[v.name()]; }
+    const ValueType& operator[](const Identifier& nm) const { return _values[nm]; }
+    ValueType& operator[](const Identifier& nm) { return _values[nm]; }
     const ValueType& operator[](const Variable<Type>& v) const { return _values[v.name()]; }
     ValueType& operator[](const Variable<Type>& v) { return _values[v.name()]; }
     const Map<Identifier,ValueType>& values() const { return _values; }
@@ -116,7 +118,8 @@ class DiscreteValuation
     using Valuation<String>::insert; using Valuation<Integer>::insert;
     using Valuation<String>::get; using Valuation<Integer>::get;
     using Valuation<String>::set; using Valuation<Integer>::set;
-    using Valuation<String>::operator[]; using Valuation<Integer>::operator[];
+    const String& operator[](const Variable<String>& v) const { return this->Valuation<String>::operator[](v); }
+    const Integer& operator[](const Variable<Integer>& v) const { return this->Valuation<Integer>::operator[](v); }
     const Map<Identifier,StringType>& string_values() const { return Valuation<String>::values(); }
     const Map<Identifier,IntegerType>& integer_values() const { return Valuation<Integer>::values(); }
 };

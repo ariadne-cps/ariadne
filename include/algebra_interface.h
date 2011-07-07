@@ -145,7 +145,7 @@ template<class X> class SymbolicAlgebraInterface
     virtual SymbolicAlgebraInterface<X>* _clone() const = 0;
     virtual SymbolicAlgebraInterface<X>* _create() const = 0;
 
-    virtual SymbolicAlgebraInterface<X>* _apply(Operator op) = 0;
+    virtual SymbolicAlgebraInterface<X>* _apply(OperatorCode op) = 0;
 };
 
 

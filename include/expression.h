@@ -69,6 +69,8 @@ template<class X> class ContinuousValuation;
 
 template<class X> class ScalarFunction;
 template<class X> class Vector;
+template<class X> class Formula;
+
 
 //! The sign of a numerical value.
 enum Sign { NEGATIVE=-1, ZERO=0, POSITIVE=+1 };
@@ -126,12 +128,9 @@ class Expression {
     //! \brief Construct an expression from a variable.
     Expression(const Variable<X>& v);
 
-    Expression(OperatorCode op, const Expression<X>& arg);
-    Expression(OperatorCode op, const Expression<X>& arg1, int num);
-    Expression(OperatorCode op, const Expression<X>& arg1, const Expression<X>& arg2);
-    template<class A> Expression(OperatorCode op, const Expression<A>& arg1, const Expression<A>& arg2);
   public:
-    OperatorCode op() const;
+    const Operator& op() const;
+    OperatorCode code() const;
     OperatorKind kind() const;
     const X& val() const;
     const V& var() const;
@@ -153,11 +152,10 @@ class Expression {
 template<class X>
 struct ExpressionNode {
     mutable uint count;
-    OperatorCode op;
-    OperatorKind knd;
+    Operator op;
     virtual ~ExpressionNode();
-    explicit ExpressionNode(OperatorCode o) : count(0u), op(o), knd(kind(op)) { }
-    explicit ExpressionNode(OperatorCode o, OperatorKind k) : count(0u), op(o), knd(k) { }
+    explicit ExpressionNode(const Operator& o) : count(0u), op(o) { }
+    explicit ExpressionNode(OperatorCode cd, OperatorKind knd) : count(0u), op(cd,knd) { }
 };
 
 template<class X> struct ConstantExpressionNode : public ExpressionNode<X> {
@@ -170,35 +168,36 @@ template<class X> struct VariableExpressionNode : public ExpressionNode<X> {
 };
 template<class X, class A=X> struct UnaryExpressionNode : public ExpressionNode<X> {
     Expression<A> arg;
-    UnaryExpressionNode(OperatorCode op, Expression<A> const& a) : ExpressionNode<X>(op,UNARY), arg(a) { }
-    UnaryExpressionNode(OperatorCode op, OperatorKind knd, Expression<A> const& a) : ExpressionNode<X>(op,knd), arg(a) { }
+    UnaryExpressionNode(const Operator& op, Expression<A> const& a) : ExpressionNode<X>(op), arg(a) { }
 };
 template<class X, class A1=X, class A2=A1> struct BinaryExpressionNode {
     Expression<X> arg1; Expression<X> arg2;
 };
 template<class X> struct BinaryExpressionNode<X> : public ExpressionNode<X> {
     Expression<X> arg1; Expression<X> arg2;
-    BinaryExpressionNode(OperatorCode op, Expression<X> const& a1, Expression<X> const& a2)
-        : ExpressionNode<X>(op,BINARY), arg1(a1), arg2(a2) { }
+    BinaryExpressionNode(const Operator& op, Expression<X> const& a1, Expression<X> const& a2)
+        : ExpressionNode<X>(op), arg1(a1), arg2(a2) { }
 };
 template<class X> struct BinaryExpressionNode<typename Logic<X>::Type,X,X> : public ExpressionNode<typename Logic<X>::Type> {
     typedef typename Logic<X>::Type R; typedef X A;
     Expression<A> arg1; Expression<A> arg2;
-    BinaryExpressionNode(OperatorCode op, Expression<A> const& a1, Expression<A> const& a2)
-        : ExpressionNode<R>(op,COMPARISON), arg1(a1), arg2(a2) { }
+    BinaryExpressionNode(const Operator& op, Expression<A> const& a1, Expression<A> const& a2)
+        : ExpressionNode<R>(op), arg1(a1), arg2(a2) { }
 };
 template<class R, class A=R, class N=Int> struct ScalarExpressionNode : public UnaryExpressionNode<R,A> {
     N num;
-    ScalarExpressionNode(OperatorCode op, Expression<R> const& a, N n)
-        : UnaryExpressionNode<R,A>(op,SCALAR,a), num(n) { }
+    ScalarExpressionNode(const Operator& op, Expression<R> const& a, N n)
+        : UnaryExpressionNode<R,A>(op,a), num(n) { }
 };
 
 template<class X> ExpressionNode<X>::~ExpressionNode() { }
 
-template<class X> OperatorCode Expression<X>::op() const {
+template<class X> const Operator& Expression<X>::op() const {
     return node_ptr()->op; }
+template<class X> OperatorCode Expression<X>::code() const {
+    return node_ptr()->op.code(); }
 template<class X> OperatorKind Expression<X>::kind() const {
-    return node_ptr()->knd; }
+    return node_ptr()->op.kind(); }
 template<class X> const X& Expression<X>::val() const {
     return static_cast<const ConstantExpressionNode<X>*>(node_ptr())->val; }
 template<class X> const Identifier& Expression<X>::var() const {
@@ -222,16 +221,11 @@ template<class X> inline Expression<X>::Expression(const X& c) : _root(new Const
 template<class X> inline Expression<X>::Expression(const Identifier& v) : _root(new VariableExpressionNode<X>(v)) { }
 template<class X> inline Expression<X>::Expression(const Constant<X>& c): _root(new ConstantExpressionNode<X>(c.value())) { };
 template<class X> inline Expression<X>::Expression(const Variable<X>& v) : _root(new VariableExpressionNode<X>(v.name())) { }
-template<class X> inline Expression<X>::Expression(OperatorCode op, const Expression<X>& arg)
-    : _root(new UnaryExpressionNode<X>(op,arg)) { }
-template<class X> inline Expression<X>::Expression(OperatorCode op, const Expression<X>& arg1, const Expression<X>& arg2)
-    : _root(new BinaryExpressionNode<X>(op,arg1,arg2)) { }
-template<class X> inline Expression<X>::Expression(OperatorCode op, const Expression<X>& arg, Int n)
-    : _root(new ScalarExpressionNode<X,X,Int>(op,arg,n)) { }
-template<class X> template<class A> inline Expression<X>::Expression(OperatorCode op, const Expression<A>& arg1, const Expression<A>& arg2)
-    : _root(new BinaryExpressionNode<X,A>(op,arg1,arg2)) { }
 
 
+template<class R> inline
+Expression<R> make_expression(const R& c) {
+    return Expression<R>(new ConstantExpressionNode<R>(c)); }
 template<class R, class A> inline
 Expression<R> make_expression(OperatorCode op, const Expression<A>& e) {
     return Expression<R>(new UnaryExpressionNode<R,A>(op,e)); }
@@ -311,14 +305,6 @@ template<class X> OutputStream& operator<<(std::ostream& os, const Expression<X>
 //! \related Expression
 
 
-template<class R, class A> struct Get { typedef Identifier I; R operator()(const I& v, const Map<I,A>& x) { assert(false); } };
-template<class R> struct Get<R,R> { typedef Identifier I; R operator()(const I& v, const Map<I,R>& x) { return x[v]; } };
-
-template<class X, class A> struct EvaluationResult { typedef X Type; };
-template<class Y> struct EvaluationResult<Real,Y> { typedef Y Type; };
-template<> struct EvaluationResult<Real,String> { typedef Real Type; };
-template<> struct EvaluationResult<Real,Integer> { typedef Real Type; };
-
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
 template<class A>
 typename Logic<A>::Type
@@ -337,13 +323,12 @@ evaluate(const Expression<typename Logic<A>::Type>& e, const Map<Identifier,A>& 
 
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
 template<class X>
-typename EvaluationResult<X,X>::Type
+X
 evaluate(const Expression<X>& e, const Map<Identifier,X>& x)
 {
-    typedef typename EvaluationResult<X,X>::Type R;
     switch(e.kind()) {
         case VARIABLE: return x[e.var()];
-        case NULLARY: return static_cast<R>(e.val());
+        case NULLARY: return e.val();
         case UNARY: return compute(e.op(),evaluate(e.arg(),x));
         case BINARY: return compute(e.op(),evaluate(e.arg1(),x),evaluate(e.arg2(),x));
         case SCALAR: return compute(e.op(),evaluate(e.arg(),x),e.num());
@@ -382,28 +367,6 @@ template<class R> Set<Identifier> arguments(const Expression<R>& e)
     }
 }
 
-//! \brief Convert the expression with index type \c I to one with variables indexed by \a J.
-template<class X> const Expression<X>&
-cached_convert(const Expression<X>& e, const Map<Identifier,Nat>& v, Map< const Void*, Expression<X> >& cache)
-{
-    const ExpressionNode<X>* eptr=e.node_ptr();
-    if(cache.has_key(eptr)) { return cache.get(eptr); }
-    switch(e.kind()) {
-        case VARIABLE: return insert( cache, eptr, Expression<X>(v[e.var()]) );
-        case NULLARY: return insert( cache, eptr, Expression<X>(e.val()) );
-        case UNARY: return insert( cache, eptr, Expression<X>(e.op(),convert(e.arg(),v)));
-        case BINARY: return insert( cache, eptr, Expression<X>(e.op(),convert(e.arg1(),v),convert(e.arg2(),v)) );
-        default: ARIADNE_FAIL_MSG("Cannot convert expression "<<e<<" to use variables "<<v<<"\n");
-    }
-}
-
-//! \brief Convert the expression with index type \c I to one with variables indexed by \a J.
-template<class X> Expression<X> convert(const Expression<X>& e, const Map<Identifier,Nat>& v)
-{
-    Map< const Void*, Expression<X> > cache;
-    return cached_convert(e,v,cache);
-}
-
 
 //! \brief Returns \a true if the expression\a e is syntactically equal to the constant \a c.
 template<class X> Bool is_constant(const Expression<X>& e, const X& c) {
@@ -439,6 +402,26 @@ template<class X> Expression<X> simplify(const Expression<X>& e);
 //! \brief Tests whether two expressions are identical.
 template<class X> Bool identical(const Expression<X>& e1, const Expression<X>& e2);
 
+//! \brief Returns true if the expressions are mutual negations.
+//!
+//! Currently can only test for pairs of the form (a1<=a2; a1>=a2),  (a1<=a2; a2<=a1)
+//! or (a1>=a2; a2>=a1).
+Bool opposite(Expression<Tribool> p, Expression<Tribool> q);
+
+//! \brief Given \a sign when the predicate \a p is true.
+Expression<Real> indicator(Expression<Tribool> p, Sign sign=POSITIVE);
+
+//! \brief Substitute all occurrences of variable \a v of type \c Y with constant value \a c.
+template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c);
+
+//! \brief Substitute all occurrences of variable \a v of type \c Y with expression value \a se.
+template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Expression<Y>& se);
+
+template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
+
+//! \brief Convert the expression in named variables to a formula in numbered coordinates.
+Formula<Real> formula(const Expression<Real>& e, const Map<Identifier,Nat>& v);
+
 
 //@}
 
@@ -455,29 +438,9 @@ template<class X> Tribool evaluate(const Expression<Tribool>& e, const Continuou
 template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>& x);
 //template<class X> X evaluate(const Expression<Real>& e, const Map<ExtendedVariable<Real>,X>& x);
 
-//! \brief Convert a real expression with index type Identifier to one with variables indexed by Nat.
-Formula<Real> formula(const Expression<Real>& e, const Space<Real>& spc);
-
 Formula<Real> formula(const Expression<Real>& e, const List< Variable<Real> >& vars);
 Formula<Real> formula(const Expression<Real>& res, const List< Assignment< Variable<Real>, Expression<Real> > >& aux, const Space<Real> spc);
 List< Formula<Real> > formula(const List< Expression<Real> >& res, const List< Assignment< Variable<Real>, Expression<Real> > >& aux, const Space<Real> spc);
-
-//! \related Expression \brief Returns true if the expressions are mutual negations.
-//!
-//! Currently can only test for pairs of the form (a1<=a2; a1>=a2),  (a1<=a2; a2<=a1)
-//! or (a1>=a2; a2>=a1).
-Bool opposite(Expression<Tribool> p, Expression<Tribool> q);
-
-//! \brief Given \a sign when the predicate \a p is true.
-Expression<Real> indicator(Expression<Tribool> p, Sign sign=POSITIVE);
-
-//! \brief Substitute all occurrences of variable \a v of type \c Y with constant value \a c.
-template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c);
-
-template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
-
-//! \brief Substitute all occurrences of variable \a v of type \c Y with expression value \a se.
-template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Expression<Y>& se);
 
 
 ScalarFunction<Real> make_function(const Expression<Real>& e, const Space<Real>& s);

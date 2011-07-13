@@ -57,23 +57,12 @@ enum OperatorKind {
     NULLARY,
     UNARY,
     BINARY,
+    TERNARY,
     SCALAR,
-    UNARY_PREDICATE,
     COMPARISON
 };
 
-inline std::ostream& operator<<(std::ostream& os, const OperatorKind& knd) {
-  switch(knd) {
-      case VARIABLE: return os << "VARIABLE";
-      case COORDINATE: return os << "VARIABLE";
-      case NULLARY: return os << "NULLARY";
-      case UNARY: return os << "UNARY";
-      case BINARY: return os << "BINARY";
-      case SCALAR: return os << "SCALAR";
-      case UNARY_PREDICATE: return os << "UNARY_PREDICATE";
-      case COMPARISON: return os << "COMPARISON";
-    }
-}
+OutputStream& operator<<(OutputStream& os, const OperatorKind& knd);
 
 enum OperatorCode {
     CNST,  // A constant value
@@ -123,108 +112,26 @@ enum OperatorCode {
     DISJ=-9    // Compare disjointness
 };
 
-std::ostream& operator<<(std::ostream&, const OperatorCode& op);
+OutputStream& operator<<(OutputStream&, const OperatorCode& op);
+const char* name(const OperatorCode& op);
+const char* symbol(const OperatorCode& op);
 
-
-inline const char* symbol(const OperatorCode& op) {
-    switch(op) {
-        case POS:  return "+"; break;
-        case NEG:  return "-"; break;
-        case ADD:  return "+"; break;
-        case SUB:  return "-"; break;
-        case MUL:  return "*"; break;
-        case DIV:  return "/"; break;
-        case POW:  return "^"; break;
-        case SADD: return "+"; break;
-        case SMUL: return "*"; break;
-        case NOT:  return "!"; break;
-        case AND:  return "&"; break;
-        case OR:   return "|"; break;
-        case EQ:  return "=="; break;
-        case NEQ: return "!="; break;
-        case LEQ: return "<="; break;
-        case GEQ: return ">="; break;
-        case LT:  return "<"; break;
-        case GT:  return ">"; break;
-        default: assert(false);
-    }
-}
-
-inline const char* name(const OperatorCode& op) {
-    switch(op) {
-        case CNST: return "cnst"; break;
-        case VAR:  return "var"; break;
-        case IND:  return "ind"; break;
-        case POS:  return "pos"; break;
-        case NEG:  return "neg"; break;
-        case REC:  return "rec"; break;
-        case ADD:  return "add"; break;
-        case SUB:  return "sub"; break;
-        case MUL:  return "mul"; break;
-        case DIV:  return "div"; break;
-        case POW:  return "pow"; break;
-        case NOT:  return "not"; break;
-        case AND:  return "and"; break;
-        case OR:   return "or"; break;
-        case XOR:  return "xor"; break;
-        case IMPL: return "impl"; break;
-        case ABS:  return "abs"; break;
-        case MAX:  return "max"; break;
-        case MIN:  return "min"; break;
-        case SQR:  return "sqr"; break;
-        case SQRT: return "sqrt"; break;
-        case EXP:  return "exp"; break;
-        case LOG:  return "log"; break;
-        case SIN:  return "sin"; break;
-        case COS:  return "cos"; break;
-        case TAN:  return "tan"; break;
-        case ASIN:  return "asin"; break;
-        case ACOS:  return "acos"; break;
-        case ATAN:  return "atan"; break;
-        case ITOR:  return "itor"; break;
-        case PULL: return "pull"; break;
-        case PUSH: return "push"; break;
-        case SGN:  return "sgn"; break;
-        case EQ:   return "eq"; break;
-        case NEQ:  return "neq"; break;
-        case GEQ:  return "geq"; break;
-        case LEQ:  return "leq"; break;
-        case GT:   return "lt"; break;
-        case LT:   return "gt"; break;
-        case SUBS:   return "subs"; break;
-        default: return "UNKNOWN";
-    }
-}
-
-inline std::ostream& operator<<(std::ostream& os, const OperatorCode& op) {
-    return os << name(op);
-}
-
-inline OperatorKind kind(OperatorCode op) {
-    switch(op) {
-        case CNST:
-            return NULLARY;
-        case IND:
-            return COORDINATE;
-        case VAR:
-            return VARIABLE;
-        case ADD: case SUB: case MUL: case DIV:
-            return BINARY;
-        case NEG: case REC:
-            return UNARY;
-        default:
-            assert(false);
-    }
-}
+OperatorKind kind(OperatorCode op);
 
 class Operator {
     OperatorCode _code;
+    OperatorKind _kind;
   public:
-    template<class OP> Operator(const OP& op) : _code(op.code()) { }
+    Operator(OperatorCode c, OperatorKind k) : _code(c), _kind(k) { }
+    Operator(OperatorCode c) : _code(c), _kind(Ariadne::kind(_code)) { }
+    template<class OP> Operator(const OP& op) : _code(op.code()), _kind(op.kind()) { }
+
     operator OperatorCode () const { return _code; }
+    OperatorCode code() const { return _code; }
+    OperatorKind kind() const { return _kind; }
 };
 
-template<class R, class A> R compare(OperatorCode op, const A& x1, const A& x2) {
+template<class R, class A> inline R compare(OperatorCode op, const A& x1, const A& x2) {
     switch(op) {
         case EQ: return x1==x2;
         case NEQ: return x1!=x2;
@@ -239,10 +146,10 @@ template<> inline Bool compare(OperatorCode op, const String& x1, const String& 
     switch(op) {
         case EQ: return x1==x2;
         case NEQ: return x1!=x2;
-       default: ARIADNE_FAIL_MSG("Cannot compute comparison "<<op<<" on "<<x1<<" and "<<x2);
+        default: ARIADNE_FAIL_MSG("Cannot compute comparison "<<op<<" on "<<x1<<" and "<<x2);
     }
 }
-template<class X> X compute(OperatorCode op, const X& x) {
+template<class X> inline X compute(OperatorCode op, const X& x) {
     switch(op) {
         case NEG: return -x;
         case REC: return 1/x;
@@ -279,7 +186,7 @@ template<> inline String compute(OperatorCode op, const String& x) {
         default: ARIADNE_FAIL_MSG("Cannot compute "<<op<<" on "<<x);
     }
 }
-template<class X> X compute(OperatorCode op, const X& x1, const X& x2) {
+template<class X> inline X compute(OperatorCode op, const X& x1, const X& x2) {
     switch(op) {
         case ADD: return x1+x2;
         case SUB: return x1-x2;
@@ -316,7 +223,7 @@ template<> inline Integer compute(OperatorCode op, const Integer& x1, const Inte
     }
 }
 
-template<class X> X compute(OperatorCode op, const X& x, Int n) {
+template<class X> inline X compute(OperatorCode op, const X& x, Int n) {
     switch(op) {
         case POW: return pow(x,n);
         default: ARIADNE_FAIL_MSG("Cannot compute "<<op<<" on "<<x<<" and "<<n);
@@ -351,7 +258,7 @@ struct Gtr {
         return (x1==x2) ? indeterminate : tribool(x1>x2); }
     Tribool operator()(const Interval& x1, const Interval& x2) const {
         if(x1.lower()>x2.upper()) { return true; } else if(x1.upper()<x2.lower()) { return false; } else { return indeterminate; } }
-    OperatorCode code() const { return GT; }
+    OperatorCode code() const { return GT; } OperatorKind kind() const { return COMPARISON; }
 };
 
 struct Less {
@@ -363,138 +270,145 @@ struct Less {
         return (x1==x2) ? indeterminate : tribool(x1<x2); }
     Tribool operator()(const Interval& x1, const Interval& x2) const {
         if(x1.lower()>x2.upper()) { return false; } else if(x1.upper()<x2.lower()) { return true; } else { return indeterminate; } }
-    OperatorCode code() const { return LT; }
+    OperatorCode code() const { return LT; } OperatorKind kind() const { return COMPARISON; }
 };
 
 struct Geq {
     template<class T1, class T2> bool operator()(const T1& a1, const T2& a2) const { return a1 >= a2; }
-    OperatorCode code() const { return GEQ; }
+    OperatorCode code() const { return GEQ; } OperatorKind kind() const { return COMPARISON; }
 };
 
 struct Leq {
     template<class T1, class T2> bool operator()(const T1& a1, const T2& a2) const { return a1 <= a2; }
-    OperatorCode code() const { return LEQ; }
+    OperatorCode code() const { return LEQ; } OperatorKind kind() const { return COMPARISON; }
 };
 
 struct Equal {
     template<class T1, class T2> bool operator()(const T1& a1, const T2& a2) const { return a1 == a2; }
-    OperatorCode code() const { return EQ; }
+    OperatorCode code() const { return EQ; } OperatorKind kind() const { return COMPARISON; }
 };
 
 struct Unequal {
     template<class T1, class T2> bool operator()(const T1& a1, const T2& a2) const { return a1 != a2; }
-    OperatorCode code() const { return NEQ; }
+    OperatorCode code() const { return NEQ; } OperatorKind kind() const { return COMPARISON; }
 };
 
 struct AndOp {
     template<class T> T operator()(const T& a1, const T& a2) const { return a1 && a2; }
-    OperatorCode code() const { return AND; } };
+    OperatorCode code() const { return AND; } OperatorKind kind() const { return BINARY; }
+};
 struct OrOp {
     template<class T> T operator()(const T& a1, const T& a2) const { return a1 || a2; }
-    OperatorCode code() const { return OR; } };
+    OperatorCode code() const { return OR; } OperatorKind kind() const { return BINARY; }
+};
 struct NotOp {
     template<class T> T operator()(const T& a) const { return !a; }
-    OperatorCode code() const { return NOT; } };
-
+    OperatorCode code() const { return NOT; } OperatorKind kind() const { return UNARY; }
+}; 
 struct Add {
-    OperatorCode code() const { return ADD; }
+    OperatorCode code() const { return ADD; } OperatorKind kind() const { return BINARY; }
     template<class T> T operator()(const T& a1, const T& a2) const { return a1+a2; }
     template<class X,class D> D derivative(const X& a1, const D& d1, const X& a2, const D& d2) const {
         return d1+d2; }
 };
 struct Sub {
-    OperatorCode code() const { return SUB; }
+    OperatorCode code() const { return SUB; } OperatorKind kind() const { return BINARY; }
     template<class T> T operator()(const T& a1, const T& a2) const { return a1-a2; }
     template<class X,class D> D derivative(const X& a1, const D& d1, const X& a2, const D& d2) const {
         return d1-d2; }
 };
 struct Mul {
-    OperatorCode code() const { return MUL; }
+    OperatorCode code() const { return MUL; } OperatorKind kind() const { return BINARY; }
     template<class T> T operator()(const T& a1, const T& a2) const { return a1*a2; }
     template<class X,class D> D derivative(const X& a1, const D& d1, const X& a2, const D& d2) const {
         return a2*d1+a1*d2; }
 };
 struct Div {
-    OperatorCode code() const { return DIV; }
+    OperatorCode code() const { return DIV; } OperatorKind kind() const { return BINARY; }
     template<class T> T operator()(const T& a1, const T& a2) const { return a1/a2; }
     template<class X,class D> D derivative(const X& a1, const D& d1, const X& a2, const D& d2) const {
         return (d1-a1*(a1/a2))/a2; }
 };
 
 struct Pow {
-    OperatorCode code() const { return DIV; }
+    OperatorCode code() const { return POW; } OperatorKind kind() const { return SCALAR; }
     template<class T, class N> T operator()(const T& a, const N& n) const { return pow(a,n); }
 };
 struct Fma {
-    OperatorCode code() const { return FMA; }
+    OperatorCode code() const { return FMA; } OperatorKind kind() const { return TERNARY; }
     template<class T, class S> T operator()(const T& a1, const S& a2, const S& a3) const { return a1*a2+a3; }
 };
 
 struct Pos {
-    OperatorCode code() const { return POS; }
+    OperatorCode code() const { return POS; } OperatorKind kind() const { return UNARY; }
     template<class T> T operator()(const T& a) const { return a; }
     template<class X,class D> D derivative(const X& a, const D& d) const { return d; }
 };
 struct Neg {
-    OperatorCode code() const { return NEG; }
+    OperatorCode code() const { return NEG; } OperatorKind kind() const { return UNARY; }
     template<class T> T operator()(const T& a) const { return -(a); }
     template<class X,class D> D derivative(const X& a, const D& d) const { return -d; }
 };
 struct Rec {
-    OperatorCode code() const { return REC; }
+    OperatorCode code() const { return REC; } OperatorKind kind() const { return UNARY; }
     template<class T> T operator()(const T& a) const { return rec(a); }
     template<class X,class D> D derivative(const X& a, const D& d) const { return d/(-sqr(a)); }
 };
 struct Sqr {
-    OperatorCode code() const { return SQR; }
+    OperatorCode code() const { return SQR; } OperatorKind kind() const { return UNARY; }
     template<class T> T operator()(const T& a) const { return sqr(a); }
     template<class X,class D> D derivative(const X& a, const D& d) const { return (2*a)*d; }
 };
 struct Sqrt {
-    OperatorCode code() const { return SQRT; }
+    OperatorCode code() const { return SQRT; } OperatorKind kind() const { return UNARY; }
     template<class T> T operator()(const T& a) const { return sqrt(a); }
     template<class X,class D> D derivative(const X& a, const D& d) const { return d/(2*sqrt(a)); }
 };
 struct Exp {
-    OperatorCode code() const { return EXP; }
+    OperatorCode code() const { return EXP; } OperatorKind kind() const { return UNARY; }
     template<class T> T operator()(const T& a) const { return exp(a); }
     template<class X,class D> D derivative(const X& a, const D& d) const { return exp(a)*d; }
 };
 struct Log {
-    OperatorCode code() const { return LOG; }
+    OperatorCode code() const { return LOG; } OperatorKind kind() const { return UNARY; }
     template<class T> T operator()(const T& a) const { return log(a); }
     template<class X,class D> D derivative(const X& a, const D& d) const { return d/a; }
 };
 struct Sin {
-    OperatorCode code() const { return SIN; }
+    OperatorCode code() const { return SIN; } OperatorKind kind() const { return UNARY; }
     template<class T> T operator()(const T& a) const { return sin(a); }
     template<class X,class D> D derivative(const X& a, const D& d) const { return cos(a)*d; }
 };
 struct Cos {
-    OperatorCode code() const { return COS; }
+    OperatorCode code() const { return COS; } OperatorKind kind() const { return UNARY; }
     template<class T> T operator()(const T& a) const { return cos(a); }
     template<class X,class D> D derivative(const X& a, const D& d) const { return (-sin(a))*d; }
 };
 struct Tan {
-    OperatorCode code() const { return TAN; }
+    OperatorCode code() const { return TAN; } OperatorKind kind() const { return UNARY; }
     template<class T> T operator()(const T& a) const { return tan(a); }
     template<class X,class D> D derivative(const X& a, const D& d) const { return rec(sqr(cos(a)))*d; }
 };
+struct Atan {
+    OperatorCode code() const { return ATAN; } OperatorKind kind() const { return UNARY; }
+    template<class T> T operator()(const T& a) const { return atan(a); }
+    template<class X,class D> D derivative(const X& a, const D& d) const { return rec(1+sqr(a))*d; }
+};
 
 struct Max {
-    OperatorCode code() const { return MAX; }
+    OperatorCode code() const { return MAX; } OperatorKind kind() const { return BINARY; }
     template<class T> T operator()(const T& a1, const T& a2) const { return max(a1,a2); }
     template<class X,class D> D derivative(const X& a1, const D& d1, const X& a2, const D& d2) const { return a1>=a2 ? d1 : d2; }
 };
 
 struct Min {
-    OperatorCode code() const { return MIN; }
+    OperatorCode code() const { return MIN; } OperatorKind kind() const { return BINARY; }
     template<class T> T operator()(const T& a1, const T& a2) const { return min(a1,a2); }
     template<class X,class D> D derivative(const X& a1, const D& d1, const X& a2, const D& d2) const { return a1<=a2 ? d1 : d2; }
 };
 
 struct Abs {
-    OperatorCode code() const { return MAX; }
+    OperatorCode code() const { return MAX; } OperatorKind kind() const { return BINARY; }
     template<class T> T operator()(const T& a) const { return abs(a); }
     template<class X,class D> D derivative(const X& a, const D& d) const { return a>=0 ? a : -a; }
 };
@@ -539,9 +453,6 @@ inline std::ostream& operator<<(std::ostream& os, const Min& op) { return os << 
 inline std::ostream& operator<<(std::ostream& os, const Abs& op) { return os << "abs"; }
 
 inline std::ostream& operator<<(std::ostream& os, const Sgn& op) { return os << "sgn"; }
-
-template<class X> class Formula;
-template<class X> class Expression;
 
 
 } // namespace Ariadne

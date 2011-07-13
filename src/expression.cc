@@ -43,6 +43,27 @@ template class Expression<String>;
 template class Expression<Integer>;
 template class Expression<Real>;
 
+const Formula<Real>& cached_formula(const Expression<Real>& e, const Map<Identifier,Nat>& v, Map< const Void*, Formula<Real> >& cache)
+{
+    const ExpressionNode<Real>* eptr=e.node_ptr();
+    if(cache.has_key(eptr)) { return cache.get(eptr); }
+    switch(e.kind()) {
+        case VARIABLE: return insert( cache, eptr, make_formula<Real>(v[e.var()]) );
+        case NULLARY: return insert( cache, eptr, make_formula<Real>(e.val()) );
+        case UNARY: return insert( cache, eptr, make_formula<Real>(e.op(),cached_formula(e.arg(),v,cache)));
+        case BINARY: return insert( cache, eptr, make_formula<Real>(e.op(),cached_formula(e.arg1(),v,cache),cached_formula(e.arg2(),v,cache)) );
+        case SCALAR: return insert( cache, eptr, make_formula<Real>(e.op(),cached_formula(e.arg(),v,cache),e.num()) );
+        default: ARIADNE_FAIL_MSG("Cannot convert expression "<<e<<" to use variables "<<v<<"\n");
+    }
+}
+
+//! \brief Convert the expression with index type \c I to one with variables indexed by \a J.
+Formula<Real> formula(const Expression<Real>& e, const Map<Identifier,Nat>& v)
+{
+    Map< const Void*, Formula<Real> > cache;
+    return cached_formula(e,v,cache);
+}
+
 
 
 /*
@@ -328,7 +349,6 @@ template Set<Identifier> arguments(const Expression<Real>& e);
 
 
 
-template Expression<Real> convert(const Expression<Real>& e, const Map<Identifier,Nat>& s);
 
 
 
@@ -346,10 +366,10 @@ template<class X, class I, class Y> Expression<X> substitute(const Expression<X>
             Y* yptr=0;
             const Expression<Y>& c1=e.cmp1(yptr);
             const Expression<Y>& c2=e.cmp2(yptr);
-            return Expression<X>(e.op(),substitute(c1,v,s),substitute(c2,v,s)); }
-        case BINARY: return Expression<X>(e.op(),substitute(e.arg1(),v,s),substitute(e.arg2(),v,s));
-        case UNARY: return Expression<X>(e.op(),substitute(e.arg(),v,s));
-        case NULLARY: return Expression<X>(e.val());
+            return make_expression<X>(e.op(),substitute(c1,v,s),substitute(c2,v,s)); }
+        case BINARY: return make_expression<X>(e.op(),substitute(e.arg1(),v,s),substitute(e.arg2(),v,s));
+        case UNARY: return make_expression<X>(e.op(),substitute(e.arg(),v,s));
+        case NULLARY: return make_expression<X>(e.val());
         case VARIABLE: return _substitute_variable(e.var(),v,e,s);
         default: ARIADNE_FAIL_MSG("Cannot substitute "<<s<<" for a named variable "<<v<<" in an unknown expression "<<e<<"\n");
     }

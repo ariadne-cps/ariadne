@@ -89,7 +89,8 @@ class Formula {
     static Formula<X> coordinate(Nat i);
     static Vector< Formula<X> > identity(Nat n);
   public:
-    OperatorCode op() const;
+    const Operator& op() const;
+    OperatorCode code() const;
     OperatorKind kind() const;
     const X& val() const;
     const I& ind() const;
@@ -107,11 +108,10 @@ template<class X> OutputStream& operator<<(OutputStream& os, const Formula<X>& f
 template<class X>
 struct FormulaNode {
     mutable uint count;
-    OperatorCode op;
-    OperatorKind knd;
+    Operator op;
     virtual ~FormulaNode();
-    explicit FormulaNode(OperatorCode o) : count(0u), op(o), knd(kind(op)) { }
-    explicit FormulaNode(OperatorCode o, OperatorKind k) : count(0u), op(o), knd(k) { }
+    explicit FormulaNode(const Operator& o) : count(0u), op(o) { }
+    explicit FormulaNode(OperatorCode cd, OperatorKind knd) : count(0u), op(cd,knd) { }
 };
 
 template<class X> struct ConstantFormulaNode : public FormulaNode<X> {
@@ -125,40 +125,41 @@ template<class X> struct IndexFormulaNode : public FormulaNode<X> {
 };
 template<class X, class A=X> struct UnaryFormulaNode : public FormulaNode<X> {
     Formula<X> arg;
-    UnaryFormulaNode(OperatorCode op, Formula<X> const& a) : FormulaNode<X>(op,UNARY), arg(a) { }
-    UnaryFormulaNode(OperatorCode op, OperatorKind knd, Formula<A> const& a) : FormulaNode<X>(op,knd), arg(a) { }
+    UnaryFormulaNode(const Operator& op, Formula<X> const& a) : FormulaNode<X>(op), arg(a) { }
 };
 template<class X, class A1=X, class A2=A1> struct BinaryFormulaNode {
     Formula<X> arg1; Formula<X> arg2;
 };
 template<class X> struct BinaryFormulaNode<X> : public FormulaNode<X> {
     Formula<X> arg1; Formula<X> arg2;
-    BinaryFormulaNode(OperatorCode op, Formula<X> const& a1, Formula<X> const& a2)
-        : FormulaNode<X>(op,BINARY), arg1(a1), arg2(a2) { }
+    BinaryFormulaNode(const Operator& op, Formula<X> const& a1, Formula<X> const& a2)
+        : FormulaNode<X>(op), arg1(a1), arg2(a2) { }
 };
 template<class X> struct ScalarFormulaNode : public UnaryFormulaNode<X> {
     Int num;
-    ScalarFormulaNode(OperatorCode op, Formula<X> const& a, Int n)
-        : UnaryFormulaNode<X>(op,SCALAR,a), num(n) { }
+    ScalarFormulaNode(const Operator& op, Formula<X> const& a, Int n)
+        : UnaryFormulaNode<X>(op,a), num(n) { }
 };
 
 template<class X> FormulaNode<X>::~FormulaNode() { }
 
-template<class X> OperatorCode Formula<X>::op() const {
+template<class X> inline const Operator& Formula<X>::op() const {
     return node_ptr()->op; }
-template<class X> OperatorKind Formula<X>::kind() const {
-    return node_ptr()->knd; }
-template<class X> const X& Formula<X>::val() const {
+template<class X> inline OperatorCode Formula<X>::code() const {
+    return node_ptr()->op.code(); }
+template<class X> inline OperatorKind Formula<X>::kind() const {
+    return node_ptr()->op.kind(); }
+template<class X> inline const X& Formula<X>::val() const {
     return static_cast<const ConstantFormulaNode<X>*>(node_ptr())->val; }
-template<class X> const Index& Formula<X>::ind() const {
+template<class X> inline const Index& Formula<X>::ind() const {
     return static_cast<const IndexFormulaNode<X>*>(node_ptr())->ind; }
-template<class X> const Formula<X>& Formula<X>::arg() const {
+template<class X> inline const Formula<X>& Formula<X>::arg() const {
     return static_cast<const UnaryFormulaNode<X>*>(node_ptr())->arg; }
-template<class X> const Int& Formula<X>::num() const {
+template<class X> inline const Int& Formula<X>::num() const {
     return static_cast<const ScalarFormulaNode<X>*>(node_ptr())->num; }
-template<class X> const Formula<X>& Formula<X>::arg1() const {
+template<class X> inline const Formula<X>& Formula<X>::arg1() const {
     return static_cast<const BinaryFormulaNode<X>*>(node_ptr())->arg1; }
-template<class X> const Formula<X>& Formula<X>::arg2() const {
+template<class X> inline const Formula<X>& Formula<X>::arg2() const {
     return static_cast<const BinaryFormulaNode<X>*>(node_ptr())->arg2; }
 
 
@@ -179,34 +180,34 @@ template<class X, class R> inline Formula<X> make_formula(const R& c) {
     return new ConstantFormulaNode<X>(static_cast<X>(c)); }
 template<class X> inline Formula<X> make_formula(Nat j) {
     return new IndexFormulaNode<X>(j); }
-template<class X> inline Formula<X> make_formula(OperatorCode op, const Formula<X>& arg) {
+template<class X> inline Formula<X> make_formula(const Operator& op, const Formula<X>& arg) {
     return new UnaryFormulaNode<X>(op,arg); }
-template<class X> inline Formula<X> make_formula(OperatorCode op, const Formula<X>& arg1, const Formula<X>& arg2) {
+template<class X> inline Formula<X> make_formula(const Operator& op, const Formula<X>& arg1, const Formula<X>& arg2) {
     return new BinaryFormulaNode<X>(op,arg1,arg2); }
-template<class X> inline Formula<X> make_formula(OperatorCode op, const Formula<X>& arg, Int num) {
+template<class X> inline Formula<X> make_formula(const Operator& op, const Formula<X>& arg, Int num) {
     return new ScalarFormulaNode<X>(op,arg,num); }
 
 template<class X> inline Formula<X>& operator+=(Formula<X>& f1, const Formula<X>& f2) { Formula<X> r=f1+f2; return f1=r; }
 template<class X> inline Formula<X>& operator*=(Formula<X>& f1, const Formula<X>& f2) { Formula<X> r=f1*f2; return f1=r; }
 
-template<class X> inline Formula<X> operator+(const Formula<X>& f) { return make_formula(POS,f); }
-template<class X> inline Formula<X> operator-(const Formula<X>& f) { return make_formula(NEG,f); }
-template<class X> inline Formula<X> operator+(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(ADD,f1,f2); }
-template<class X> inline Formula<X> operator-(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(SUB,f1,f2); }
-template<class X> inline Formula<X> operator*(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(MUL,f1,f2); }
-template<class X> inline Formula<X> operator/(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(DIV,f1,f2); }
+template<class X> inline Formula<X> operator+(const Formula<X>& f) { return make_formula(Pos(),f); }
+template<class X> inline Formula<X> operator-(const Formula<X>& f) { return make_formula(Neg(),f); }
+template<class X> inline Formula<X> operator+(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(Add(),f1,f2); }
+template<class X> inline Formula<X> operator-(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(Sub(),f1,f2); }
+template<class X> inline Formula<X> operator*(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(Mul(),f1,f2); }
+template<class X> inline Formula<X> operator/(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(Div(),f1,f2); }
 
-template<class X> inline Formula<X> neg(const Formula<X>& f) { return make_formula(NEG,f); }
-template<class X> inline Formula<X> rec(const Formula<X>& f) { return make_formula(REC,f); }
-template<class X> inline Formula<X> sqr(const Formula<X>& f) { return make_formula(SQR,f); }
-template<class X> inline Formula<X> pow(const Formula<X>& f, int n) { return make_formula(POW,f,n); }
-template<class X> inline Formula<X> sqrt(const Formula<X>& f) { return make_formula(SQRT,f); }
-template<class X> inline Formula<X> exp(const Formula<X>& f) { return make_formula(EXP,f); }
-template<class X> inline Formula<X> log(const Formula<X>& f) { return make_formula(LOG,f); }
-template<class X> inline Formula<X> sin(const Formula<X>& f) { return make_formula(SIN,f); }
-template<class X> inline Formula<X> cos(const Formula<X>& f) { return make_formula(COS,f); }
-template<class X> inline Formula<X> tan(const Formula<X>& f) { return make_formula(TAN,f); }
-template<class X> inline Formula<X> atan(const Formula<X>& f) { return make_formula(ATAN,f); }
+template<class X> inline Formula<X> neg(const Formula<X>& f) { return make_formula(Neg(),f); }
+template<class X> inline Formula<X> rec(const Formula<X>& f) { return make_formula(Rec(),f); }
+template<class X> inline Formula<X> sqr(const Formula<X>& f) { return make_formula(Sqr(),f); }
+template<class X> inline Formula<X> pow(const Formula<X>& f, int n) { return make_formula(Pow(),f,n); }
+template<class X> inline Formula<X> sqrt(const Formula<X>& f) { return make_formula(Sqrt(),f); }
+template<class X> inline Formula<X> exp(const Formula<X>& f) { return make_formula(Exp(),f); }
+template<class X> inline Formula<X> log(const Formula<X>& f) { return make_formula(Log(),f); }
+template<class X> inline Formula<X> sin(const Formula<X>& f) { return make_formula(Sin(),f); }
+template<class X> inline Formula<X> cos(const Formula<X>& f) { return make_formula(Cos(),f); }
+template<class X> inline Formula<X> tan(const Formula<X>& f) { return make_formula(Tan(),f); }
+template<class X> inline Formula<X> atan(const Formula<X>& f) { return make_formula(Atan(),f); }
 
 template<class X, class R> inline typename EnableIfNumeric<R,Formula<X> >::Type operator+(Formula<X> f, R c) { return f + make_formula<X>(c); }
 template<class X, class R> inline typename EnableIfNumeric<R,Formula<X> >::Type operator-(Formula<X> f, R c) { return f - make_formula<X>(c); }
@@ -221,7 +222,7 @@ template<class X, class R> inline typename EnableIfNumeric<R,Formula<X> >::Type&
 
 
 // Make a constant of type T with value c based on a prototype vector v
-template<class X, class T> T make_constant(const X& c, const Vector<T>& v) {
+template<class X, class T> inline T make_constant(const X& c, const Vector<T>& v) {
     assert(v.size()!=0); return v[0]*0+c;
 }
 
@@ -251,7 +252,7 @@ template<class X, class T> const T& cached_evaluate(const Formula<X>& f, const V
     }
 }
 
-template<class X, class T> T cached_evaluate(const Formula<X>& f, const Vector<T>& v) {
+template<class X, class T> inline T cached_evaluate(const Formula<X>& f, const Vector<T>& v) {
     Map<const void*,T> cache;
     return cached_evaluate(f.handle(),v,cache);
 }
@@ -340,6 +341,11 @@ template<class X> OutputStream& operator<<(std::ostream& os, const Formula<X>& f
             }
     }
 }
+
+// Declare conversion operators from an expression
+template<class X> class Expression;
+template<class X> class Space;
+Formula<Real> formula(const Expression<Real>& e, const Space<Real>& spc);
 
 //! \ingroup FunctionModule
 //! \brief Convert a power-series expansion into a formula using a version of Horner's rule.

@@ -113,7 +113,7 @@ struct VectorFormulaFunction
     virtual SizeType argument_size() const { return this->_argument_size; }
     virtual ScalarFormulaFunction<X>* _get(uint i) const { return new ScalarFormulaFunction<X>(this->_argument_size,this->_formulae[i]); }
     virtual std::ostream& write(std::ostream& os) const { return os << "F[R"<<this->argument_size()<<"->R"<<this->result_size()<<"]("<<this->_formulae<<")"; }
-    template<class Y> void _compute(Vector<Y>& r, const Vector<Y>& x) const { r=Ariadne::map_evaluate(this->_formulae,x); }
+    template<class Y> void _compute(Vector<Y>& r, const Vector<Y>& x) const { r=Ariadne::cached_evaluate(this->_formulae,x); }
 };
 
 inline VectorFunction<Real> function(uint n, List< Formula<Real> > f) { return new VectorFormulaFunction<Real>(n,f); }

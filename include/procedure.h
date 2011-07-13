@@ -203,23 +203,21 @@ template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<Procedure
     // POSTCONDITION: No nan's get propagated to x
 }
 
-template<class X> size_t _convert(List<ProcedureInstruction>& p, List<X>& c, const Expression<X>& f, Map<const Void*,size_t>& ind) {
-    typedef ProcedureInstruction PI;
-    if(ind.has_key(f.node_ptr())) { return ind[f.node_ptr()]; }
-    switch(f.op()) { // Can't use simple evaluate (above) as we need to pass the cache to subformulae
-        case CNST: p.append(PI(CNST,c.size())); c.append(f.val()); break;
-        case IND: p.append(PI(IND,f.ind())); break;
-        case ADD: case SUB: case MUL: case DIV:
-            p.append(PI(f.op(),_convert(p,c,f.arg1(),ind),_convert(p,c,f.arg2(),ind))); break;
-        case POW:
-            p.append(PI(f.op(),_convert(p,c,f.arg(),ind),f.num())); break;
-        case NEG: case REC: case SQR: case SQRT:
-        case EXP: case LOG: case SIN: case COS: case TAN: case ATAN:
-            p.append(PI(f.op(),_convert(p,c,f.arg(),ind))); break;
+template<class X> size_t _convert(List<ProcedureInstruction>& p, List<X>& c, const Formula<X>& f, Map<const Void*,size_t>& cache) {
+    if(cache.has_key(f.node_ptr())) { return cache[f.node_ptr()]; }
+    switch(f.kind()) { // Can't use simple evaluate (above) as we need to pass the cache to subformulae
+        case COORDINATE: p.append(ProcedureInstruction(IND,f.ind())); break;
+        case NULLARY: p.append(ProcedureInstruction(CNST,c.size())); c.append(f.val()); break;
+        case BINARY:
+            p.append(ProcedureInstruction(f.op(),_convert(p,c,f.arg1(),cache),_convert(p,c,f.arg2(),cache))); break;
+        case UNARY:
+            p.append(ProcedureInstruction(f.op(),_convert(p,c,f.arg(),cache))); break;
+        case SCALAR:
+            p.append(ProcedureInstruction(f.op(),_convert(p,c,f.arg(),cache),f.num())); break;
         default: assert(false);
     }
     const size_t num=p.size()-1;
-    ind.insert(f.node_ptr(),num);
+    cache.insert(f.node_ptr(),num);
     return num;
 }
 

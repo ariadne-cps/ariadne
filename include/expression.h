@@ -92,13 +92,6 @@ template<> struct Logic<Real> { typedef Tribool Type; };
 
 template<class X> struct ExpressionNode;
 
-struct Index {
-    Nat _i;
-  public:
-    explicit Index(Nat i) : _i(i) { }
-    operator Nat () const { return _i; }
-};
-
 template<class D, class X, class T=Void> struct EnableIfDoubleReal { };
 template<class T> struct EnableIfDoubleReal<double,Real,T> { typedef T Type; };
 
@@ -115,7 +108,6 @@ template<class T> struct EnableIfDoubleReal<double,Real,T> { typedef T Type; };
 //! Formulae may be manipulated symbolically.
 template<class X>
 class Expression {
-    typedef Index I;
     typedef Identifier V;
   public:
     typedef X ConstantType;
@@ -127,8 +119,6 @@ class Expression {
     Expression();
     //! \brief Construct an expression from a value.
     Expression(const X& c);
-    //! \brief Construct an expression from an index.
-    Expression(const Index& i);
     //! \brief Construct an expression from a name.
     Expression(const Identifier& v);
     //! \brief Construct an expression from a constant.
@@ -144,7 +134,6 @@ class Expression {
     OperatorCode op() const;
     OperatorKind kind() const;
     const X& val() const;
-    const I& ind() const;
     const V& var() const;
     const Expression<X>& arg() const;
     const Int& num() const;
@@ -175,10 +164,6 @@ template<class X> struct ConstantExpressionNode : public ExpressionNode<X> {
     X val;
     ConstantExpressionNode(const X& v) : ExpressionNode<X>(CNST,NULLARY), val(v) { }
 };
-template<class X> struct IndexExpressionNode : public ExpressionNode<X> {
-    Index ind;
-    IndexExpressionNode(const Index& i) : ExpressionNode<X>(IND,COORDINATE), ind(i) { }
-};
 template<class X> struct VariableExpressionNode : public ExpressionNode<X> {
     Identifier var;
     VariableExpressionNode(const Identifier& v) : ExpressionNode<X>(VAR,VARIABLE), var(v) { }
@@ -205,7 +190,7 @@ template<class X> struct BinaryExpressionNode<typename Logic<X>::Type,X,X> : pub
 template<class R, class A=R, class N=Int> struct ScalarExpressionNode : public UnaryExpressionNode<R,A> {
     N num;
     ScalarExpressionNode(OperatorCode op, Expression<R> const& a, N n)
-        : UnaryExpressionNode<R,A>(op,POWER,a), num(n) { }
+        : UnaryExpressionNode<R,A>(op,SCALAR,a), num(n) { }
 };
 
 template<class X> ExpressionNode<X>::~ExpressionNode() { }
@@ -216,8 +201,6 @@ template<class X> OperatorKind Expression<X>::kind() const {
     return node_ptr()->knd; }
 template<class X> const X& Expression<X>::val() const {
     return static_cast<const ConstantExpressionNode<X>*>(node_ptr())->val; }
-template<class X> const Index& Expression<X>::ind() const {
-    return static_cast<const IndexExpressionNode<X>*>(node_ptr())->ind; }
 template<class X> const Identifier& Expression<X>::var() const {
     return static_cast<const VariableExpressionNode<X>*>(node_ptr())->var; }
 template<class X> const Expression<X>& Expression<X>::arg() const {
@@ -236,7 +219,6 @@ template<class R> template<class A> const Expression<A>& Expression<R>::cmp2(A*)
 
 template<class X> inline Expression<X>::Expression() : _root(new ConstantExpressionNode<X>(X())) { }
 template<class X> inline Expression<X>::Expression(const X& c) : _root(new ConstantExpressionNode<X>(c)) { }
-template<class X> inline Expression<X>::Expression(const Index& i) : _root(new IndexExpressionNode<X>(i)) { }
 template<class X> inline Expression<X>::Expression(const Identifier& v) : _root(new VariableExpressionNode<X>(v)) { }
 template<class X> inline Expression<X>::Expression(const Constant<X>& c): _root(new ConstantExpressionNode<X>(c.value())) { };
 template<class X> inline Expression<X>::Expression(const Variable<X>& v) : _root(new VariableExpressionNode<X>(v.name())) { }
@@ -292,10 +274,8 @@ template<class X> OutputStream& operator<<(std::ostream& os, const Expression<X>
         case CNST:
             os << f.val(); return os;
             //if(f.val()==0.0) { return os << 0.0; } if(abs(f.val())<1e-4) { os << std::fixed << f.val(); } else { os << f.val(); } return os;
-        case IND:
-            return os << "x[" << f.ind() << "]";
         case VAR:
-            return os << "[" << f.var() << "]";
+            return os << f.var();
         case ADD:
             return os << f.arg1() << '+' << f.arg2();
         case SUB:
@@ -366,54 +346,12 @@ evaluate(const Expression<X>& e, const Map<Identifier,X>& x)
         case NULLARY: return static_cast<R>(e.val());
         case UNARY: return compute(e.op(),evaluate(e.arg(),x));
         case BINARY: return compute(e.op(),evaluate(e.arg1(),x),evaluate(e.arg2(),x));
-        case POWER: return compute(e.op(),evaluate(e.arg(),x),e.num());
-        default: ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" on "<<x<<"\n");
-    }
-}
-
-template<class X, class R> X make_constant(const Vector<X>& v, const R& c) {
-    ARIADNE_ASSERT(v.size()!=0);
-    return v[0]*0+c;
-}
-
-//! \brief Evaluate an expression in numbered coordinates on a vector of a compatible type.
-template<class Y>
-Y evaluate(const Expression<Real>& e, const Vector<Y>& x)
-{
-    switch(e.kind()) {
-        case COORDINATE: return x[e.ind()];
-        case NULLARY: return make_constant(x,e.val());
-        case UNARY: return compute(e.op(),evaluate(e.arg(),x));
-        case BINARY: return compute(e.op(),evaluate(e.arg1(),x),evaluate(e.arg2(),x));
-        default: ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" on "<<x<<"\n");
-    }
-}
-
-template<class Y> Y& cached_evaluate(const Expression<Real>& e, const Vector<Y>& x, Map<const void*,Y>& cache) {
-    ExpressionNode<Real> const* eptr=e.node_ptr();
-    if(cache.has_key(eptr)) { return cache[eptr]; }
-    switch(e.kind()) {
-        case COORDINATE: return cache[eptr]=x[e.ind()];
-        case NULLARY: return cache[eptr]=make_constant(x,e.val());
-        case UNARY: return cache[eptr]=compute(e.op(),cached_evaluate(e.arg(),x,cache));
-        case BINARY: return cache[eptr]=compute(e.op(),cached_evaluate(e.arg1(),x,cache),cached_evaluate(e.arg2(),x,cache));
+        case SCALAR: return compute(e.op(),evaluate(e.arg(),x),e.num());
         default: ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" on "<<x<<"\n");
     }
 }
 
 
-//! \brief Extract the arguments of expression \a e.
-template<class R> Set<Identifier> arguments(const Expression<R>& e)
-{
-    typedef Identifier I;
-    switch(e.kind()) {
-        case VARIABLE: return Set<I>(e.var());
-        case NULLARY: return Set<I>();
-        case UNARY: return arguments(e.arg());
-        case BINARY: return join(arguments(e.arg1()),arguments(e.arg2()));
-        default: ARIADNE_FAIL_MSG("Cannot compute arguments of expression "<<e<<"\n");
-    }
-}
 
 template<class R> Set<UntypedVariable> Expression<R>::arguments() const {
     const Expression<R>& e=*this;
@@ -432,8 +370,17 @@ template<class R> Set<UntypedVariable> Expression<R>::arguments() const {
     }
 }
 
-template<class I, class X, class J> inline X& insert(Map<I,X>& m, const J& k, const X& v) {
-    return m.std::map<I,X>::insert(std::make_pair(k,v)).first->second; }
+//! \brief Extract the arguments of expression \a e.
+template<class R> Set<Identifier> arguments(const Expression<R>& e)
+{
+    switch(e.kind()) {
+        case VARIABLE: return Set<Identifier>(e.var());
+        case NULLARY: return Set<Identifier>();
+        case UNARY: return arguments(e.arg());
+        case BINARY: return join(arguments(e.arg1()),arguments(e.arg2()));
+        default: ARIADNE_FAIL_MSG("Cannot compute arguments of expression "<<e<<"\n");
+    }
+}
 
 //! \brief Convert the expression with index type \c I to one with variables indexed by \a J.
 template<class X> const Expression<X>&
@@ -470,10 +417,18 @@ template<class X, class R> Bool is_constant(const Expression<X>& e, const R& c) 
     return is_constant(e,static_cast<X>(c));
 }
 
-//! \brief Returns \a true if the expression\a e is syntactically equal to the constant \a c.
-template<class X> Bool is_variable(const Expression<X>& e, const Identifier& v) {
+//! \brief Returns \a true if the expression \a e is syntactically equal to the variable with name \a vn.
+template<class X> Bool is_variable(const Expression<X>& e, const Identifier& vn) {
     switch(e.op()) {
-        case VAR: return e.var()==v;
+        case VAR: return e.var()==vn;
+        default: return false;
+    }
+}
+
+//! \brief Returns \a true if the expression \a e is syntactically equal to the variable \a v.
+template<class X> Bool is_variable(const Expression<X>& e, const Variable<X>& v) {
+    switch(e.op()) {
+        case VAR: return e.var()==v.name();
         default: return false;
     }
 }
@@ -483,9 +438,6 @@ template<class X> Expression<X> simplify(const Expression<X>& e);
 
 //! \brief Tests whether two expressions are identical.
 template<class X> Bool identical(const Expression<X>& e1, const Expression<X>& e2);
-
-//! \brief Compute the derivative of expression \a e with respect to the variable \a v.
-template<class R, class I> Expression<R> derivative(const Expression<R>& e, const I& v);
 
 
 //@}
@@ -527,19 +479,9 @@ template<class X, class Y> Expression<X> substitute(const Expression<X>& e, cons
 //! \brief Substitute all occurrences of variable \a v of type \c Y with expression value \a se.
 template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Expression<Y>& se);
 
-template<class X> class Affine;
-template<class X> class Polynomial;
-
-template<class X> Affine<X> affine(const Formula<Real>&);
-template<class X> Polynomial<X> polynomial(const Formula<Real>&);
-
-inline Expression<Real> derivative(const Expression<Real>& e, const Variable<Real>& v) {
-    return derivative(e,v.name());
-}
 
 ScalarFunction<Real> make_function(const Expression<Real>& e, const Space<Real>& s);
 
-Bool is_variable(const Expression<Real>& e, const Identifier& v);
 
 //@}
 

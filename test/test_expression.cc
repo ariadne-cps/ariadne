@@ -60,14 +60,6 @@ class TestExpression {
         //ARIADNE_TEST_EQUAL(evaluate(g,v),Real(227));
     }
 
-    void test_derivative() {
-        ARIADNE_TEST_CONSTRUCT(RealExpression,g,(x+3*y*z*z));
-        ARIADNE_TEST_PRINT(derivative(g,y));
-        ARIADNE_TEST_PRINT(derivative(g,z));
-        //ARIADNE_TEST_EQUAL(derivative(g,y),3*z*z);
-        //ARIADNE_TEST_EQUAL(derivative(g,z),6*y*z);
-    }
-
     void test_function()
     {
         // Test to ensure that constants are handled correctly.

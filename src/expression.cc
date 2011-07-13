@@ -321,8 +321,6 @@ template Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuatio
 template Real evaluate(const Expression<Real>& e, const ContinuousValuation<Real>& x);
 
 
-template Float evaluate(const Expression<Real>& e, const Vector<Float>& x);
-
 
 template Set<Identifier> arguments(const Expression<Boolean>& e);
 template Set<Identifier> arguments(const Expression<Tribool>& e);
@@ -482,74 +480,6 @@ template Expression<Real> simplify(const Expression<Real>& e);
 template Expression<Tribool> simplify(const Expression<Tribool>& e);
 
 
-Expression<Real> _derivative(const Expression<Real>& e, const Variable<Real>& v)
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-template<class X, class D> D compute_derivative(OperatorCode, X,D) { ARIADNE_NOT_IMPLEMENTED; }
-template<class X, class D> D compute_derivative(OperatorCode, X,D,X,D) { ARIADNE_NOT_IMPLEMENTED; }
-
-Expression<Real> _derivative(const Expression<Real>& e, const Identifier& v)
-{
-    typedef Real R;
-    typedef Identifier I;
-    switch( e.kind() ) {
-        case VARIABLE:
-            if(e.var()==v) { return Expression<R>(static_cast<R>(1)); }
-        case NULLARY:
-            return Expression<R>(static_cast<R>(0));
-        case UNARY:
-            return compute_derivative(e.op(),e.arg(),derivative(e.arg(),v));
-        case BINARY:
-            return compute_derivative(e.op(),e.arg1(),derivative(e.arg1(),v),e.arg2(),derivative(e.arg2(),v));
-        default:
-            ARIADNE_THROW(std::runtime_error,"derivative(RealExpression,RealVariable)",
-                          "Cannot compute derivative of "<<e<<"\n");
-    }
-}
-
-
-template<class R> Expression<R> _derivative(const Expression<R>& f, const Nat& j)
-{
-    switch(f.op()) {
-        case IND:
-            if(f.ind()==j) { return Expression<R>(1.0); }
-        case CNST:
-            return Expression<R>(0.0);
-        case ADD:
-            return derivative(f.arg1(),j)+derivative(f.arg2(),j);
-        case SUB:
-            return derivative(f.arg1(),j)-derivative(f.arg2(),j);
-        case MUL:
-            return f.arg1()*derivative(f.arg2(),j)+derivative(f.arg1(),j)*f.arg2();
-        case DIV:
-            return derivative(f.arg1() * rec(f.arg2()),j);
-        case NEG:
-            return  - derivative(f.arg(),j);
-        case REC:
-            return  - derivative(f.arg(),j) * rec(sqr(f.arg()));
-        case SQR:
-            return static_cast<R>(2) * derivative(f.arg(),j) * f.arg();
-        case EXP:
-            return derivative(f.arg(),j) * f.arg();
-        case LOG:
-            return derivative(f.arg(),j) * rec(f.arg());
-        case SIN:
-            return derivative(f.arg(),j) * cos(f.arg());
-        case COS:
-            return -derivative(f.arg(),j) * sin(f.arg());
-        case TAN:
-            return derivative(f.arg(),j) * (static_cast<R>(1)-sqr(f.arg()));
-        default:
-            ARIADNE_THROW(std::runtime_error,"derivative(Expression<R>,I)",
-                          "Cannot compute derivative of "<<f<<"\n");
-    }
-}
-
-template<class R, class I> Expression<R> derivative(const Expression<R>& f, const I& j) { return _derivative(f,j); }
-
-template Expression<Real> derivative(const Expression< Real >&, const Nat&);
 
 Expression<Real> indicator(Expression<Tribool> e, Sign sign) {
     Tribool value;
@@ -559,8 +489,6 @@ Expression<Real> indicator(Expression<Tribool> e, Sign sign) {
             if(value==true) { return Expression<Real>(+1.0); }
             else if(value==false) {  return Expression<Real>(-1.0); }
             else { return Expression<Real>(0.0); }
-        case IND:
-            return Expression<Real>(Index(e.ind()));
         case VAR:
             return Expression<Real>(Variable<Real>(e.var()));
         case GEQ: case GT:
@@ -652,7 +580,7 @@ Formula<Real> formula(const Expression<Real>& e, const Space<Real>& spc)
     typedef Real X;
     typedef Identifier I;
     switch(e.kind()) {
-        case POWER: return make_formula(e.op(),formula(e.arg(),spc),e.num());
+        case SCALAR: return make_formula(e.op(),formula(e.arg(),spc),e.num());
         case BINARY: return make_formula(e.op(),formula(e.arg1(),spc),formula(e.arg2(),spc));
         case UNARY: return make_formula(e.op(),formula(e.arg1(),spc),formula(e.arg2(),spc));
         case NULLARY: return Formula<X>::constant(e.val());

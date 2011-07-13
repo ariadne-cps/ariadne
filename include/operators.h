@@ -57,7 +57,7 @@ enum OperatorKind {
     NULLARY,
     UNARY,
     BINARY,
-    POWER,
+    SCALAR,
     UNARY_PREDICATE,
     COMPARISON
 };
@@ -69,7 +69,7 @@ inline std::ostream& operator<<(std::ostream& os, const OperatorKind& knd) {
       case NULLARY: return os << "NULLARY";
       case UNARY: return os << "UNARY";
       case BINARY: return os << "BINARY";
-      case POWER: return os << "POWER";
+      case SCALAR: return os << "SCALAR";
       case UNARY_PREDICATE: return os << "UNARY_PREDICATE";
       case COMPARISON: return os << "COMPARISON";
     }

@@ -47,13 +47,15 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Series;
 
-template<class X, class T> struct enable_if_scalar { typedef T Type; };
-template<class X, class T> struct enable_if_scalar<Vector<X>,T> { };
-template<class X, class T> struct enable_if_scalar<Matrix<X>,T> { };
-template<class X, class T> struct enable_if_vector { };
-template<class X, class T> struct enable_if_vector<Vector<X>,T> { typedef T Type; };
-template<class X, class T> struct enable_if_matrix { };
-template<class X, class T> struct enable_if_matrix<Matrix<X>,T> { typedef T Type; };
+template<class X, class T> struct EnableIfScalar { typedef T Type; };
+template<class X, class T> struct EnableIfScalar<Vector<X>,T> { };
+template<class X, class T> struct EnableIfScalar<Matrix<X>,T> { };
+template<class X, class T> struct EnableIfVector { };
+template<class X, class T> struct EnableIfVector<Vector<X>,T> { typedef T Type; };
+template<class X, class T> struct EnableIfMatrix { };
+template<class X, class T> struct EnableIfMatrix<Matrix<X>,T> { typedef T Type; };
+
+
 
 template<class X> class SecondDifferential;
 
@@ -201,66 +203,70 @@ const X FirstDifferential<X>::_zero=X(0);
 
 
 template<class X, class R>
-typename enable_if_scalar<R,FirstDifferential<X>&>::Type
+typename EnableIfNumeric<R,FirstDifferential<X>&>::Type
 operator+=(FirstDifferential<X>& x, const R& c)
 {
     x._value+=static_cast<X>(c);
+    return x;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,FirstDifferential<X>&>::Type
+typename EnableIfNumeric<R,FirstDifferential<X>&>::Type
 operator-=(FirstDifferential<X>& x, const R& c)
 {
-    x._value+=static_cast<X>(c);
+    x._value-=static_cast<X>(c);
+    return x;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,FirstDifferential<X>&>::Type
+typename EnableIfNumeric<R,FirstDifferential<X>&>::Type
 operator*=(FirstDifferential<X>& x, const R& c)
 {
     x._value*=static_cast<X>(c);
     x._gradient*=static_cast<X>(c);
+    return x;
 }
 
 
 template<class X, class R>
-typename enable_if_scalar<R,FirstDifferential<X>&>::Type
+typename EnableIfNumeric<R,FirstDifferential<X>&>::Type
 operator/=(FirstDifferential<X>& x, const R& c)
 {
     x._value/=static_cast<X>(c);
     x._gradient/=static_cast<X>(c);
+    return x;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,FirstDifferential<X> >::Type
+typename EnableIfNumeric<R,FirstDifferential<X> >::Type
 operator+(const FirstDifferential<X>& x, const R& c)
 {
     FirstDifferential<X> r(x); r+=X(c); return r;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,FirstDifferential<X> >::Type
+typename EnableIfNumeric<R,FirstDifferential<X> >::Type
 operator+(const R& c, const FirstDifferential<X>& x)
 {
     FirstDifferential<X> r(x); r+=X(c); return r;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,FirstDifferential<X> >::Type
+typename EnableIfNumeric<R,FirstDifferential<X> >::Type
 operator-(const FirstDifferential<X>& x, const R& c)
 {
     FirstDifferential<X> r(x); r-=X(c); return r;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,FirstDifferential<X> >::Type
+typename EnableIfNumeric<R,FirstDifferential<X> >::Type
 operator-(const R& c, const FirstDifferential<X>& x)
 {
     FirstDifferential<X> r(-x); r+=X(c); return r;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,FirstDifferential<X> >::Type
+typename EnableIfNumeric<R,FirstDifferential<X> >::Type
 operator*(const FirstDifferential<X>& x, const R& c)
 {
     FirstDifferential<X> r(x); r*=X(c); return r;
@@ -274,21 +280,21 @@ operator*(const FirstDifferential<X>& x, const int& c)
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,FirstDifferential<X> >::Type
+typename EnableIfNumeric<R,FirstDifferential<X> >::Type
 operator*(const R& c, const FirstDifferential<X>& x)
 {
     FirstDifferential<X> r(x); r*=X(c); return r;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,FirstDifferential<X> >::Type
+typename EnableIfNumeric<R,FirstDifferential<X> >::Type
 operator/(const FirstDifferential<X>& x, const R& c)
 {
     FirstDifferential<X> r(x); r/=X(c); return r;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,FirstDifferential<X> >::Type
+typename EnableIfNumeric<R,FirstDifferential<X> >::Type
 operator/(const R& c, const FirstDifferential<X>& x)
 {
     FirstDifferential<X> r(rec(x)); r*=X(c); return r;
@@ -317,6 +323,15 @@ FirstDifferential<X>& operator*=(FirstDifferential<X>& x, const FirstDifferentia
     x._gradient *= y._value;
     x._gradient += x._value * y._gradient;
     x._value *= y._value;
+    return x;
+}
+
+template<class X>
+FirstDifferential<X>& operator/=(FirstDifferential<X>& x, const FirstDifferential<X>& y)
+{
+    x._value /= y._value;
+    x._gradient -= x._value * y._gradient;
+    x._gradient /= y._value;
     return x;
 }
 
@@ -480,6 +495,61 @@ FirstDifferential<X> tan(const FirstDifferential<X>& x)
     return FirstDifferential<X>( tan_val, sqr_sec_val*x._gradient );
 }
 
+template<class X>
+FirstDifferential<X> asin(const FirstDifferential<X>& x)
+{
+    X asin_val = asin(x._value);
+    X d_asin_val = rec(sqrt(1.0-sqr(x._value)));
+    return FirstDifferential<X>( asin_val, d_asin_val*x._gradient );
+}
+
+template<class X>
+FirstDifferential<X> acos(const FirstDifferential<X>& x)
+{
+    X acos_val = acos(x._value);
+    X d_acos_val = neg(rec(sqrt(1.0-sqr(x._value))));
+    return FirstDifferential<X>( acos_val, d_acos_val*x._gradient );
+}
+
+template<class X>
+FirstDifferential<X> atan(const FirstDifferential<X>& x)
+{
+    X atan_val = atan(x._value);
+    X d_atan_val = rec(1+sqr(x._value));
+    return FirstDifferential<X>( atan_val, d_atan_val*x._gradient );
+}
+
+
+template<class X> 
+bool
+operator>=(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
+{
+    return x._value>=y._value;
+}
+
+
+template<class X> 
+bool
+operator<=(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
+{
+    return x._value<=y._value;
+}
+
+
+template<class X, class R> 
+typename EnableIfNumeric<R,bool>::Type
+operator>=(const FirstDifferential<X>& x, const R& c)
+{
+    return x._value>=static_cast<X>(c);
+}
+
+
+template<class X, class R> 
+typename EnableIfNumeric<R,bool>::Type
+operator<=(const FirstDifferential<X>& x, const R& c)
+{
+    return x._value<=static_cast<X>(c);
+}
 
 
 
@@ -641,21 +711,21 @@ const X SecondDifferential<X>::_zero=X(0);
 
 
 template<class X, class R>
-typename enable_if_scalar<R,SecondDifferential<X>&>::Type
+typename EnableIfNumeric<R,SecondDifferential<X>&>::Type
 operator+=(SecondDifferential<X>& x, const R& c)
 {
     x._value+=static_cast<X>(c);
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,SecondDifferential<X>&>::Type
+typename EnableIfNumeric<R,SecondDifferential<X>&>::Type
 operator-=(SecondDifferential<X>& x, const R& c)
 {
-    x._value+=static_cast<X>(c);
+    x._value-=static_cast<X>(c);
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,SecondDifferential<X>&>::Type
+typename EnableIfNumeric<R,SecondDifferential<X>&>::Type
 operator*=(SecondDifferential<X>& x, const R& c)
 {
     x._value*=static_cast<X>(c);
@@ -665,7 +735,7 @@ operator*=(SecondDifferential<X>& x, const R& c)
 
 
 template<class X, class R>
-typename enable_if_scalar<R,SecondDifferential<X>&>::Type
+typename EnableIfNumeric<R,SecondDifferential<X>&>::Type
 operator/=(SecondDifferential<X>& x, const R& c)
 {
     x._value/=static_cast<X>(c);
@@ -674,56 +744,57 @@ operator/=(SecondDifferential<X>& x, const R& c)
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,SecondDifferential<X> >::Type
+typename EnableIfNumeric<R,SecondDifferential<X> >::Type
 operator+(const SecondDifferential<X>& x, const R& c)
 {
     SecondDifferential<X> r(x); r+=X(c); return r;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,SecondDifferential<X> >::Type
+typename EnableIfNumeric<R,SecondDifferential<X> >::Type
 operator+(const R& c, const SecondDifferential<X>& x)
 {
     SecondDifferential<X> r(x); r+=X(c); return r;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,SecondDifferential<X> >::Type
+typename EnableIfNumeric<R,SecondDifferential<X> >::Type
 operator-(const SecondDifferential<X>& x, const R& c)
 {
     SecondDifferential<X> r(x); r-=X(c); return r;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,SecondDifferential<X> >::Type
+typename EnableIfNumeric<R,SecondDifferential<X> >::Type
 operator-(const R& c, const SecondDifferential<X>& x)
 {
     SecondDifferential<X> r(-x); r+=X(c); return r;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,SecondDifferential<X> >::Type
+
+typename EnableIfNumeric<R,SecondDifferential<X> >::Type
 operator*(const SecondDifferential<X>& x, const R& c)
 {
     SecondDifferential<X> r(x); r*=X(c); return r;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,SecondDifferential<X> >::Type
+typename EnableIfNumeric<R,SecondDifferential<X> >::Type
 operator*(const R& c, const SecondDifferential<X>& x)
 {
     SecondDifferential<X> r(x); r*=X(c); return r;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,SecondDifferential<X> >::Type
+typename EnableIfNumeric<R,SecondDifferential<X> >::Type
 operator/(const SecondDifferential<X>& x, const R& c)
 {
     SecondDifferential<X> r(x); r/=X(c); return r;
 }
 
 template<class X, class R>
-typename enable_if_scalar<R,SecondDifferential<X> >::Type
+typename EnableIfNumeric<R,SecondDifferential<X> >::Type
 operator/(const R& c, const SecondDifferential<X>& x)
 {
     SecondDifferential<X> r(rec(x)); r*=X(c); return r;

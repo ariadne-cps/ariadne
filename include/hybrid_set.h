@@ -39,11 +39,11 @@
 #include "stlio.h"
 #include "container.h"
 #include "function_set.h"
-#include "expression_set.h"
 #include "list_set.h"
 #include "grid_set.h"
 #include "curve.h"
 
+#include "expression_set.h"
 
 #include "hybrid_set_interface.h"
 #include "hybrid_space.h"
@@ -60,9 +60,10 @@ namespace Ariadne {
 class HybridGridTreeSet;
 class HybridBoundedConstraintSet;
 
-template<class X> class ExpressionInterval;
-typedef ExpressionInterval<Real> RealExpressionInterval;
-class ExpressionBox;
+
+class VariableInterval;
+class VariableBox;
+class ExpressionSet;
 
 
 template<class HBS> class HybridBasicSetExpression { };
@@ -77,6 +78,23 @@ template<class ES> class ListSet< HybridBasicSet<ES> >;
 
 template<class DS, class HBS> class HybridSetConstIterator;
 
+
+class HybridSet
+{
+    DiscreteLocation _location;
+    Map< RealVariable, RealInterval> _bounds;
+    List< ContinuousPredicate > _constraints;
+  public:
+    HybridSet() { }
+    HybridSet(const DiscreteLocation& loc, const List<RealVariableInterval>& bnd, const List<ContinuousPredicate>& cnstr = List<ContinuousPredicate>());
+    DiscreteLocation location() const { return this->_location; }
+    Set<RealVariable> variables() const { return this->_bounds.keys(); };
+    Map<RealVariable,RealInterval> const& bounds() const { return this->_bounds; };
+    List<ContinuousPredicate> const& constraints() const { return this->_constraints; };
+    BoundedConstraintSet continuous_state_set(const RealSpace&) const;
+};
+OutputStream& operator<<(OutputStream& os, const HybridSet& hs);
+VectorTaylorFunction make_identity(const RealBox& bx, const Sweeper& swp);
 
 template<class BS>
 class HybridBasicSet
@@ -100,8 +118,7 @@ template<> class HybridBasicSet<Box> {
   public:
     HybridBasicSet() : _location(), _space(), _set() { }
     HybridBasicSet(const DiscreteLocation& q, const RealSpace& spc, const Box& bx) : _location(q), _space(spc), _set(bx) { }
-    HybridBasicSet(const DiscreteLocation& q, const List<RealExpressionInterval>& lst);
-    HybridBasicSet(const DiscreteLocation& q, const ExpressionBox& bx);
+    HybridBasicSet(const DiscreteLocation& q, const List<RealVariableInterval>& bnds);
     const DiscreteLocation& location() const { return this->_location; }
     const RealSpace& space() const { return this->_space; }
     const Box& continuous_state_set() const { return this->_set; }

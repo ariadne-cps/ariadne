@@ -22,7 +22,6 @@ ARIADNE_KERNEL_SRC = \
 	affine.cc \
 	polynomial.cc \
 	operators.cc \
-	expression.cc \
 	function.cc \
 	algebra.cc \
 	taylor_model.cc  \
@@ -49,6 +48,8 @@ ARIADNE_KERNEL_SRC = \
 	graphics.cc
 
 ARIADNE_HYBRID_SRC = \
+	expression.cc \
+	expression_set.cc \
 	hybrid_set.cc \
 	hybrid_enclosure.cc \
 	hybrid_automaton-monolithic.cc \

@@ -189,7 +189,7 @@ template<class R, class D, class T=void> struct EnableIfRealBuiltin { };
 template<class T> struct EnableIfRealBuiltin<Real,int,T> { typedef T Type; };
 template<class T> struct EnableIfRealBuiltin<Real,double,T> { typedef T Type; };
 
-template<class X> class ExpressionInterval;
+class RealVariableInterval;
 
 //! \ingroup ExpressionModule
 //! A named variable of type \a T.
@@ -205,7 +205,7 @@ template<class T> class Variable
     inline AssignmentType operator=(const Constant<T>& cnst) const;
     inline AssignmentType operator=(const Variable<T>& e) const;
     inline AssignmentType operator=(const Expression<T>& e) const;
-    inline ExpressionInterval<T> in(const T& l, const T& u);
+    template<class XL, class XU> inline RealVariableInterval in(const XL& l, const XU& u);
     template<class D> inline typename EnableIfRealBuiltin<T,D,AssignmentType>::Type operator=(D e) const;
 };
 

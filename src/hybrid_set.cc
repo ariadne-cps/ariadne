@@ -21,12 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "real.h"
+
+#include "expression_set.h"
+#include "function_set.h"
+
 #include "hybrid_space.h"
 #include "hybrid_time.h"
 #include "hybrid_set.h"
 #include "hybrid_orbit.h"
 #include "hybrid_automaton_interface.h"
 #include <boost/concept_check.hpp>
+#include <include/rounding.h>
 
 namespace Ariadne {
 
@@ -133,19 +139,89 @@ void draw(CanvasInterface& graphic, const Orbit<HybridPoint>& orbit)
 }
 
 
-
-
-HybridBasicSet<Box>::HybridBasicSet(const DiscreteLocation& q, const List<RealExpressionInterval>& lst)
-    : _location(q), _space(), _set(lst.size())
-{
-    for(uint i=0; i!=lst.size(); ++i) {
-        this->_space.append(lst[i].variable());
-//         this->_set[i]=Interval(lst[i].lower(),lst[i].upper());
+Map<RealVariable,RealInterval> make_map(const List<RealVariableInterval>& b) {
+    Map<RealVariable,RealInterval> res;
+    for(uint i=0; i!=b.size(); ++i) {
+        res.insert(b[i].variable(),RealInterval(b[i].lower(),b[i].upper()));
     }
+    return res;
 }
+
+HybridSet::HybridSet(const DiscreteLocation& q, const List<RealVariableInterval>& b, const List<ContinuousPredicate>& c)
+    : _location(q), _bounds(make_map(b)), _constraints(c)
+{
+}
+
+OutputStream& operator<<(OutputStream& os, const HybridSet& hs) {
+    return os << "HybridSet( " << hs.location() << ", " << hs.bounds() << ", " << hs.constraints() << ")";
+}
+
+Interval make_domain(const RealInterval& ivl) {
+    rounding_mode_t rnd=get_rounding_mode();
+    Interval dom_lower_ivl=Interval(ivl.lower());
+    Interval dom_upper_ivl=Interval(ivl.upper());
+    Float dom_lower=dom_lower_ivl.lower();
+    Float dom_upper=dom_upper_ivl.upper();
+    set_rounding_downward();
+    float flt_dom_lower=numeric_cast<double>(dom_lower);
+    while(double(flt_dom_lower)>dom_lower) {
+        flt_dom_lower-=std::numeric_limits<float>::min();
+    }
+    dom_lower=flt_dom_lower;
+    set_rounding_upward();
+    float flt_dom_upper=numeric_cast<double>(dom_upper);
+    while(double(flt_dom_upper)<dom_upper) {
+        flt_dom_upper+=std::numeric_limits<float>::min();
+    }
+    dom_upper=flt_dom_upper;
+    set_rounding_mode(rnd);
+    return Interval(dom_lower,dom_upper);
+}
+
+
+VectorTaylorFunction make_identity(const RealBox& bx, const Sweeper& swp) {
+    IntervalVector dom(bx.dimension());
+    FloatVector errs(bx.dimension());
+
+    for(uint i=0; i!=bx.dimension(); ++i) {
+        Interval dom_lower_ivl=numeric_cast<Interval>(bx[i].lower());
+        Interval dom_upper_ivl=numeric_cast<Interval>(bx[i].upper());
+        // Convert to single-precision values
+        Float dom_lower_flt=numeric_cast<float>(bx[i].lower());
+        Float dom_upper_flt=numeric_cast<float>(bx[i].upper());
+        set_rounding_upward();
+        Float err=max( max(dom_upper_ivl.upper()-dom_upper_flt,dom_upper_flt-dom_upper_ivl.lower()),
+                       max(dom_lower_ivl.upper()-dom_lower_flt,dom_lower_flt-dom_lower_ivl.lower()) );
+        set_rounding_to_nearest();
+        dom[i]=Interval(dom_lower_flt,dom_upper_flt);
+        errs[i]=err;
+    }
+
+    VectorTaylorFunction res=VectorTaylorFunction::identity(dom,swp);
+    for(uint i=0; i!=bx.dimension(); ++i) {
+        res[i]=res[i]+Interval(-errs[i],+errs[i]);
+    }
+
+    return res;
+};
 
 // Map<DiscreteLocation,ConstrainedImageSet> HybridBoundedConstraintSet::_sets;
 // HybridSpace HybridBoundedConstraintSet::_space;
+
+HybridBasicSet<Box>::HybridBasicSet(const DiscreteLocation& q, const List<RealVariableInterval>& b)
+    : _location(q), _space(), _set(b.size())
+{
+    List<Identifier> variables;
+    for(uint i=0; i!=b.size(); ++i) {
+        Interval bl=b[i].lower();
+        Interval bu=b[i].upper();
+        ARIADNE_ASSERT_MSG(bl.lower()==bl.upper(),"Cannot convert "<<Real(b[i].lower())<<" exactly to a Float.");
+        ARIADNE_ASSERT_MSG(bu.lower()==bu.upper(),"Cannot convert "<<b[i].upper()<<" exactly to a Float.");
+        _set[i]=Interval(numeric_cast<Float>(b[i].lower()),numeric_cast<Float>(b[i].upper()));
+        variables.append(b[i].variable().name());
+    }
+    _space=RealSpace(variables);
+}
 
 HybridBoundedConstraintSet::HybridBoundedConstraintSet()
     : _sets(), _spaces()

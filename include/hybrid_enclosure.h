@@ -44,6 +44,8 @@
 
 namespace Ariadne {
 
+class RealBox;
+
 class Interval;
 template<class X> class Vector;
 template<class X> class LinearProgram;
@@ -72,6 +74,7 @@ template<> class ListSet<HybridEnclosure>;
 template<class BS> class HybridBasicSet;
 typedef HybridBasicSet<Box> HybridBox;
 class HybridGridTreeSet;
+class HybridSet;
 
 typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
@@ -135,6 +138,9 @@ class HybridEnclosure
   public:
     //! \brief An empty enclosure.
     HybridEnclosure();
+    //! \brief An enclosure corresponding to a box \a bx in location \a q with constraints \a cnstr.
+    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const RealBox& bx, const List<RealScalarFunction>& cnstr, TaylorFunctionFactory& fac);
+    HybridEnclosure(const RealSpace& space, const HybridSet& set, const TaylorFunctionFactory& factory);
     //! \brief An enclosure corresponding to a box \a s in location \a q.
     HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Box& bx, const TaylorFunctionFactory& fac);
     HybridEnclosure(const HybridBox& hbx, const TaylorFunctionFactory& fac);

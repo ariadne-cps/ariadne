@@ -51,6 +51,11 @@ template<> inline double numeric_cast(const Interval& a) { return a.get_d(); }
 template<> inline Float numeric_cast(const Interval& a) { return a.midpoint(); }
 template<> inline Interval numeric_cast(const Float& a) { return Interval(a); }
 
+template<> inline float numeric_cast(const double& a) { return a; }
+template<> inline float numeric_cast(const Float& a) { return a.get_d(); }
+template<> inline float numeric_cast(const Interval& a) { return a.get_d(); }
+template<> inline float numeric_cast(const Real& a) { return a.get_d(); }
+
 //! \ingroup NumericModule \related Float
 //! \brief Converts \a e to an object of type \a X, which may either be an
 //! \c Float or \c Interval, with the semantics that \a e denotes and error bound.

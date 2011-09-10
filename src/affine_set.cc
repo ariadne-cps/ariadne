@@ -534,10 +534,6 @@ AffineSet::robust_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) 
     _adjoin_outer_approximation_to(paving,lp,bounding_cell,depth);
 }
 
-template<> float numeric_cast<>(const Float& x) {
-    double d = x.get_d(); return (std::fabs(d)<std::numeric_limits<float>::epsilon()) ? 0.0 : d;
-}
-
 List<Point2d>
 AffineSet::boundary(uint xind, uint yind) const
 {

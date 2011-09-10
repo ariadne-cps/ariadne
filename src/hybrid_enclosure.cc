@@ -30,7 +30,6 @@
 #include "taylor_function.h"
 #include "box.h"
 #include "grid_set.h"
-#include "expression_set.h"
 #include "hybrid_time.h"
 #include "discrete_event.h"
 #include "discrete_location.h"
@@ -82,6 +81,26 @@ HybridEnclosure::~HybridEnclosure() {
 HybridEnclosure::HybridEnclosure()
     : _location(""), _events(), _space(), _set(), _time(), _dwell_time(), _variables()
 {
+}
+
+HybridEnclosure::HybridEnclosure(const RealSpace& space,
+                                 const HybridSet& set,
+                                 const TaylorFunctionFactory& factory)
+    : _location(set.location()), _events(), _space(space.variable_names()), _set(),
+      _time(), _dwell_time(),
+      _variables(space.dimension(),INITIAL)
+{
+    Map<RealVariable,RealInterval> const& var_bnds=set.bounds();
+    RealBox bnds(var_bnds.size());
+    for(uint i=0; i!=bnds.dimension(); ++i) { bnds[i]=var_bnds[space[i]]; }
+    this->_set=TaylorConstrainedImageSet(make_identity(bnds,factory.sweeper()));
+    List<ContinuousPredicate> const& constraints=set.constraints();
+    for(uint i=0; i!=constraints.size(); ++i) {
+        IntervalScalarFunction fc = make_function(indicator(constraints[i],NEGATIVE),space);
+        this->new_constraint(DiscreteEvent("?"),fc<=0);
+    }
+    _time=ScalarTaylorFunction(_set.domain(),factory.sweeper());
+    _dwell_time=_time;
 }
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& space,
@@ -297,6 +316,10 @@ void HybridEnclosure::new_state_constraint(DiscreteEvent event, IntervalNonlinea
     this->new_parameter_constraint(event,parameter_constraint);
 }
 
+
+void HybridEnclosure::new_constraint(DiscreteEvent event, IntervalNonlinearConstraint constraint) {
+    this->new_state_constraint(event,constraint);
+}
 
 
 

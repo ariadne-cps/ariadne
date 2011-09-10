@@ -313,7 +313,7 @@ template<class X> OutputStream& operator<<(std::ostream& os, const Formula<X>& f
             os << f.val(); return os;
             //if(f.val()==0.0) { return os << 0.0; } if(abs(f.val())<1e-4) { os << std::fixed << f.val(); } else { os << f.val(); } return os;
         case IND:
-            return os << f.ind();
+            return os << "x" << f.ind();
         case ADD:
             return os << f.arg1() << '+' << f.arg2();
         case SUB:

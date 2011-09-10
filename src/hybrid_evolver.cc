@@ -171,11 +171,23 @@ Set<DiscreteEvent> activating_events(const Map<DiscreteEvent,TransitionData>& tr
 Orbit<HybridEnclosure>
 HybridEvolverBase::
 orbit(const HybridAutomatonInterface& system,
-      const HybridBox& initial,
+      const HybridBox& initial_box,
       const HybridTime& time,
       Semantics semantics) const
 {
-    return this->orbit(system,HybridEnclosure(initial,this->function_factory()),time,semantics);
+    return this->orbit(system,HybridEnclosure(initial_box,this->function_factory()),time,semantics);
+}
+
+Orbit<HybridEnclosure>
+HybridEvolverBase::
+orbit(const HybridAutomatonInterface& system,
+      const HybridSet& initial_set,
+      const HybridTime& time,
+      Semantics semantics) const
+{
+    std::cerr<<"initial_set="<<initial_set<<"\n";
+    std::cerr<<"initial_enclosure="<<HybridEnclosure(system.continuous_state_space(initial_set.location()),initial_set,this->function_factory())<<"\n";
+    return this->orbit(system,HybridEnclosure(system.continuous_state_space(initial_set.location()),initial_set,this->function_factory()),time,semantics);
 }
 
 
@@ -259,6 +271,12 @@ HybridEvolverBase::EnclosureType
 HybridEvolverBase::enclosure(const HybridBox& initial_box) const
 {
     return HybridEnclosure(initial_box,this->function_factory());
+}
+
+HybridEvolverBase::EnclosureType
+HybridEvolverBase::enclosure(const SystemType& sys, const HybridSet& initial_set) const
+{
+    return HybridEnclosure(sys.continuous_state_space(initial_set.location()),initial_set,this->function_factory());
 }
 
 

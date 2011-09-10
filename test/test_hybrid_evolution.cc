@@ -167,8 +167,8 @@ void TestHybridEvolution::test_water_tank() const {
     ARIADNE_TEST_PRINT(watertank);
 
     DiscreteLocation initial_location=opening;
-    Box initial_box(2, 0.0,0.05, 0.0,0.01);
-    HybridBox initial(initial_location,(0<=height<=0.05,0.0<=aperture<=0.01));
+    HybridBox initial_box(initial_location,(0<=height<=0.05,0.0<=aperture<=0.01));
+    HybridSet initial(initial_location,(0<=height<=0.05,0.0<=aperture<=0.01));
 
     //HybridTime evolution_time(80.0,5);
     HybridTime evolution_time(80.0,8);

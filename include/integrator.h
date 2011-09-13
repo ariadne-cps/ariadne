@@ -78,7 +78,7 @@ class IntegratorBase
     virtual VectorTaylorFunction
     flow_step(const RealVectorFunction& vector_field,
               const IntervalVector& state_domain,
-              const Float& suggested_time_step) const;
+              Float& suggested_time_step) const;
 
     virtual VectorTaylorFunction
     flow(const RealVectorFunction& vector_field,

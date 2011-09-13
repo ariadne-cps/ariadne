@@ -44,7 +44,6 @@ check_PROGRAMS = \
 	test_solvers \
 	test_discrete_evolution \
 	test_continuous_evolution \
-	test_discretiser \
 	test_graphics \
 	test_serialization \
 	test_hybrid_set \
@@ -94,7 +93,6 @@ test_constraint_solver_SOURCES=test_constraint_solver.cc
 test_solvers_SOURCES=test_solvers.cc
 test_discrete_evolution_SOURCES=test_discrete_evolution.cc
 test_continuous_evolution_SOURCES=test_continuous_evolution.cc
-test_discretiser_SOURCES=test_discretiser.cc
 test_hybrid_set_SOURCES=test_hybrid_set.cc
 test_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
 test_hybrid_evolver_SOURCES=test_hybrid_evolver.cc
@@ -110,5 +108,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_integrator test_discretiser
+XFAIL_TESTS =
 testsubdir = ./

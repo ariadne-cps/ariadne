@@ -47,6 +47,10 @@ struct FlowBoundsException : public std::runtime_error {
     FlowBoundsException(const std::string& what) : std::runtime_error(what) { }
 };
 
+struct FlowTimeStepException : public std::runtime_error {
+    FlowTimeStepException(const std::string& what) : std::runtime_error(what) { }
+};
+
 //! \ingroup SolverModule EvaluationModule
 //! \brief Interface for integrating differential equations of the form \f$\dot{x}=f(x)\f$.
 class IntegratorInterface
@@ -66,16 +70,18 @@ class IntegratorInterface
     virtual Pair<Float,IntervalVector>
     flow_bounds(const RealVectorFunction& vector_field,
                 const IntervalVector& state_domain,
-                const Float& suggested_time_step) const = 0;
+                const Float& maximum_time_step) const = 0;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,h]\f$ where \f$h\f$ is a time step based on \a suggested_time_step.
+    //! The value of \a suggested_time_step is overwritten with the actual time step used.
     virtual VectorTaylorFunction
     flow_step(const RealVectorFunction& vector_field,
               const IntervalVector& state_domain,
-              const Float& suggested_time_step) const = 0;
+              Float& suggested_time_step) const = 0;
 
-    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,h]\f$ where \f$h\f$ is the \a time_step
+    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,h]\f$ where \f$h\f$ is the \a time_step used,
     //! and \a state_bounding_box is a bound for the trajectories.
+    //! Throws a FlowTimeStepException if the flow cannot be computed sufficiently accurately for the given time step.
     virtual VectorTaylorFunction
     flow_step(const RealVectorFunction& vector_field,
               const IntervalVector& state_domain,

@@ -228,18 +228,13 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     //ARIADNE_ASSERT(initial_time_bounding_box.width() <= maximum_step_size);
 
 
-    // Compute flow bounds and find flow bounding box
-    Vector<Interval> flow_bounds;
-    Float step_size;
-    make_lpair(step_size,flow_bounds)=this->_integrator->flow_bounds(dynamic,current_set_bounds,maximum_step_size);
-    ARIADNE_LOG(4,"step_size = "<<step_size<<"\n");
-    ARIADNE_LOG(4,"flow_bounds = "<<flow_bounds<<"\n");
-
     // Compute flow model
     // TODO: Modify this for general integrator interface
     TaylorPicardIntegrator const* taylor_integrator=dynamic_cast<const TaylorPicardIntegrator*>(this->_integrator.operator->());
-    FlowModelType flow_model=taylor_integrator->flow_step(dynamic,current_set_bounds,step_size,flow_bounds);
+    Float step_size=maximum_step_size;
+    FlowModelType flow_model=taylor_integrator->flow_step(dynamic,current_set_bounds,step_size);
     //FlowModelType flow_model=this->_integrator->flow_step(dynamic,current_set_bounds,step_size,flow_bounds);
+    ARIADNE_LOG(4,"step_size = "<<step_size<<"\n");
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
     FlowModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,step_size);
     ARIADNE_LOG(6,"flow_step_model = "<<flow_step_model<<"\n");

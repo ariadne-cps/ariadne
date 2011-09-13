@@ -139,6 +139,7 @@ IntegratorBase::flow_bounds(const RealVectorFunction& vf, const IntervalVector& 
 
 
 
+
 VectorTaylorFunction
 IntegratorBase::flow(const RealVectorFunction& vf, const IntervalVector& dx0, const Real& tmax) const
 {
@@ -148,12 +149,21 @@ IntegratorBase::flow(const RealVectorFunction& vf, const IntervalVector& dx0, co
     const uint n=dx0.size(); // Dimension of the state space
     VectorTaylorFunction flow_function=this->function_factory().create(dx0,IdentityFunction(dx0.size()));
     Float t=0.0;
+    VectorTaylorFunction step_function;
     while(t<tmax) {
         IntervalVector dx=flow_function.range();
         Float h=tmax-t;
         IntervalVector bx;
         make_lpair(h,bx) = this->flow_bounds(vf,dx,h);
-        VectorTaylorFunction step_function=this->flow_step(vf,dx,h,bx);
+        bool flow_successfully_computed=false;
+        while(!flow_successfully_computed) {
+            try {
+                step_function=this->flow_step(vf,dx,h,bx);
+                flow_successfully_computed=true;
+            } catch(FlowTimeStepException e) {
+                h/=2;
+            }
+        }
         step_function=partial_evaluate(step_function,n,h);
         flow_function=compose(step_function,flow_function);
         t=t+h;
@@ -174,7 +184,9 @@ IntegratorBase::flow(const RealVectorFunction& vf, const IntervalVector& dx0, co
     Float h;
     IntervalVector bx;
     make_lpair(h,bx) = this->flow_bounds(vf,dx,dtw);
-    ARIADNE_ASSERT_MSG(dtw==h,"Width of time interval "<<dt<<" cannot be covered in a single flow step; maximum flow step "<<h<<" over domain "<<dx);
+    if(dtw!=h) {
+        ARIADNE_THROW(FlowTimeStepException,"IntegratorBase::flow","Width of time interval "<<dt<<" cannot be covered in a single flow step; maximum flow step "<<h<<" over domain "<<dx);
+    }
     VectorTaylorFunction step=this->flow_step(vf,dx,h,bx);
     ScalarTaylorFunction time=this->function_factory().create(IntervalVector(1u,dt),CoordinateFunction(1,0))-dt.lower();
     VectorTaylorFunction flow=compose(step,combine(evolve,time));
@@ -184,13 +196,19 @@ IntegratorBase::flow(const RealVectorFunction& vf, const IntervalVector& dx0, co
 
 
 VectorTaylorFunction
-IntegratorBase::flow_step(const RealVectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
+IntegratorBase::flow_step(const RealVectorFunction& vf, const IntervalVector& dx, Float& h) const
 {
     ARIADNE_LOG(3,"IntegratorBase::flow_step(RealVectorFunction vf, IntervalVector dx, Float hmax)\n");
-    Float h;
+    Float hmax=h;
     IntervalVector bx;
     make_lpair(h,bx)=this->flow_bounds(vf,dx,hmax);
-    return this->flow_step(vf,dx,h,bx);
+    while(true) {
+        try {
+            return this->flow_step(vf,dx,h,bx);
+        } catch(FlowTimeStepException e) {
+            h/=2;
+        }
+    }
 }
 
 VectorTaylorFunction
@@ -226,7 +244,7 @@ TaylorPicardIntegrator::flow_step(const RealVectorFunction& f, const IntervalVec
     }
 
     if(phi.error()>this->maximum_error()) {
-        ARIADNE_WARN("Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
+        ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
     }
 
     VectorTaylorFunction res(nx,ScalarTaylorFunction::zero(dom,sweeper));

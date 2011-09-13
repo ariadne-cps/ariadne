@@ -39,10 +39,18 @@
 
 namespace Ariadne {
 
-IntegratorBase::IntegratorBase(double e)
-    :  _maximum_error(e), _lipschitz_tolerance(0.5), _function_factory_ptr(new TaylorFunctionFactory(Sweeper()))
+IntegratorBase::IntegratorBase(MaximumError e, LipschitzConstant l)
+    :  _maximum_error(e), _lipschitz_tolerance(l), _function_factory_ptr(new TaylorFunctionFactory(Sweeper()))
 {
-    assert(e>0.0);
+    ARIADNE_PRECONDITION(e>0.0);
+    ARIADNE_PRECONDITION(l>0.0)
+}
+
+IntegratorBase::IntegratorBase(MaximumError e, LipschitzConstant l, GlobalSweepThreshold s)
+    :  _maximum_error(e), _lipschitz_tolerance(l), _function_factory_ptr(new TaylorFunctionFactory(ThresholdSweeper(s)))
+{
+    ARIADNE_PRECONDITION(e>0.0);
+    ARIADNE_PRECONDITION(l>0.0);
 }
 
 void
@@ -256,6 +264,16 @@ TaylorPicardIntegrator::flow_step(const RealVectorFunction& f, const IntervalVec
 
 }
 
+void TaylorPicardIntegrator::write(std::ostream& os) const {
+    SweeperInterface const& sweeper = dynamic_cast<const TaylorFunctionFactory&>(this->function_factory()).sweeper();
+    os << "TaylorPicardIntegrator"
+       << "(maximum_error = " << this->maximum_error()
+       << ", lipschitz_tolerance = " << this->lipschitz_tolerance()
+       << ", global_sweep_threshold = " << dynamic_cast<const ThresholdSweeper&>(sweeper).sweep_threshold()
+       << ", local_sweep_threshold = " << this->sweep_threshold()
+       << ", maximum_temporal_order = " << this->maximum_temporal_order()
+       << " )";
+}
 
 } // namespace Ariadne
 #include "graded.h"
@@ -413,6 +431,16 @@ TaylorSeriesIntegrator::flow_diff(const RealVectorProcedure& p, const IntervalVe
 
 }
 
+void TaylorSeriesIntegrator::write(std::ostream& os) const {
+    os << "TaylorSeriesIntegrator"
+       << "( function_factory = " << this->function_factory()
+       << ", maximum_error = " << this->maximum_error()
+       << ", lipschitz_tolerance = " << this->lipschitz_tolerance()
+       << ", maximum_temporal_order = " << this->maximum_temporal_order()
+       << " )";
+}
+
+
 template<class X> void truncate(Differential<X>& x, uint spacial_order, uint temporal_order) {
     uint n=x.argument_size()-1;
     typename Differential<X>::iterator write_iter=x.begin();
@@ -494,6 +522,15 @@ AffineIntegrator::flow_step(const RealVectorFunction& f, const IntervalVector& d
     return res;
 }
 
+void AffineIntegrator::write(std::ostream& os) const {
+    os << "AffineIntegrator"
+       << "( function_factory = " << this->function_factory()
+       << ", maximum_error = " << this->maximum_error()
+       << ", lipschitz_tolerance = " << this->lipschitz_tolerance()
+       << ", spacial_order = " << this->spacial_order()
+       << ", temporal_order = " << this->temporal_order()
+       << " )";
+}
 
 
 

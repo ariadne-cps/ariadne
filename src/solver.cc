@@ -817,4 +817,31 @@ IntervalNewtonSolver::implicit(const RealScalarFunction& f,
     return hnew;
 }
 
+
+
+void IntervalNewtonSolver::write(std::ostream& os) const
+{
+    os << "IntervalNewtonSolver"
+       << "( maximum_error=" << this->maximum_error()
+       << ", maximum_number_of_steps=" << this->maximum_number_of_steps()
+       << " )";
+}
+
+void KrawczykSolver::write(std::ostream& os) const
+{
+    os << "KrawczykSolver"
+       << "( maximum_error=" << this->maximum_error()
+       << ", maximum_number_of_steps=" << this->maximum_number_of_steps()
+       << " )";
+}
+
+void FactoredKrawczykSolver::write(std::ostream& os) const
+{
+    os << "FactoredKrawczykSolver"
+       << "( maximum_error=" << this->maximum_error()
+       << ", maximum_number_of_steps=" << this->maximum_number_of_steps()
+       << " )";
+}
+
+
 } // namespace Ariadne

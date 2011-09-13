@@ -882,6 +882,7 @@ class TaylorFunctionFactory
     explicit TaylorFunctionFactory(Sweeper sweeper) : _sweeper(sweeper) { }
     Sweeper sweeper() const { return this->_sweeper; }
     TaylorFunctionFactory* clone() const { return new TaylorFunctionFactory(this->_sweeper); }
+    Void write(OutputStream& os) const { os << "TaylorFunctionFactory( sweeper=" << this->_sweeper << " )"; }
     ScalarTaylorFunction create(const IntervalVector& domain, const IntervalScalarFunctionInterface& function) const;
     VectorTaylorFunction create(const IntervalVector& domain, const IntervalVectorFunctionInterface& function) const;
     ScalarTaylorFunction create_zero(const IntervalVector& domain) const;

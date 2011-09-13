@@ -77,7 +77,7 @@ class TestSolver
         h=solver->implicit(f,p,r);
         e=RealVectorFunction(1u,aa);
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-8);
-
+        return;
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
         p=IntervalVector(1, Interval(0.875,1.125));
         r=IntervalVector(1, Interval(0.25,1.25));
@@ -100,14 +100,21 @@ class TestSolver
 };
 
 
-int main() {
-    KrawczykSolver krawczyk_solver(1e-5,12);
-    krawczyk_solver.verbosity=0;
-    TestSolver(krawczyk_solver).test();
-    return 0;
-    FactoredKrawczykSolver factored_krawczyk_solver(1e-5,12);
-    factored_krawczyk_solver.verbosity=0;
-    TestSolver(factored_krawczyk_solver).test();
-    std::cerr<<"INCOMPLETE "<<std::flush;
+int main(int argc, const char **argv) {
+    int verbosity=get_verbosity(argc,argv);
 
+    IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5,maximum_number_of_steps=12);
+    interval_newton_solver.verbosity=verbosity;
+    TestSolver(interval_newton_solver).test();
+
+    KrawczykSolver krawczyk_solver(maximum_error=1e-5,maximum_number_of_steps=12);
+    krawczyk_solver.verbosity=verbosity;
+    TestSolver(krawczyk_solver).test();
+
+    //FactoredKrawczykSolver factored_krawczyk_solver(maximum_error=1e-5,maximum_number_of_steps=12);
+    //factored_krawczyk_solver.verbosity=verbosity;
+    //TestSolver(factored_krawczyk_solver).test();
+
+    std::cerr<<"INCOMPLETE "<<std::flush;
+    return ARIADNE_TEST_FAILURES;
 }

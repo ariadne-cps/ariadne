@@ -36,6 +36,7 @@
 #include "function_interface.h"
 
 #include "logging.h"
+#include "attribute.h"
 #include "pointer.h"
 #include "container.h"
 #include "numeric.h"
@@ -112,8 +113,11 @@ class IntervalNewtonSolver
   public:
     /*! \brief Constructor. */
     IntervalNewtonSolver(double max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
+    IntervalNewtonSolver(MaximumError max_error, MaximumNumberOfSteps max_steps) : SolverBase(max_error,max_steps) { }
     /*! \brief Cloning operator. */
     virtual IntervalNewtonSolver* clone() const { return new IntervalNewtonSolver(*this); }
+    /*! \brief Write to an output stream. */
+    virtual void write(std::ostream& os) const;
 
     using SolverBase::implicit;
 
@@ -140,8 +144,11 @@ class KrawczykSolver
   public:
     /*! \brief Constructor. */
     KrawczykSolver(double max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
+    KrawczykSolver(MaximumError max_error, MaximumNumberOfSteps max_steps) : SolverBase(max_error,max_steps) { }
     /*! \brief Cloning operator. */
     virtual KrawczykSolver* clone() const { return new KrawczykSolver(*this); }
+    /*! \brief Write to an output stream. */
+    virtual void write(std::ostream& os) const;
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
     virtual VectorTaylorFunction implicit_step(const RealVectorFunction& f, const VectorTaylorFunction& p, const VectorTaylorFunction& x) const;
@@ -164,8 +171,11 @@ class FactoredKrawczykSolver
   public:
     /*! \brief Constructor. */
     FactoredKrawczykSolver(double max_error, uint max_steps) : KrawczykSolver(max_error,max_steps) { }
+    FactoredKrawczykSolver(MaximumError max_error, MaximumNumberOfSteps max_steps) : KrawczykSolver(max_error,max_steps) { }
     /*! \brief Cloning operator. */
     virtual FactoredKrawczykSolver* clone() const { return new FactoredKrawczykSolver(*this); }
+    /*! \brief Write to an output stream. */
+    virtual void write(std::ostream& os) const;
   public:
     /*! \brief A single step of the modified Krawczyk contractor. */
     virtual Vector<Interval>

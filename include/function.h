@@ -577,6 +577,7 @@ class FunctionFactory<Interval>
     inline VectorFunction<Interval> create(const IntervalVector& d, const VectorFunctionInterface<Interval>& f) const;
     inline ScalarFunction<Interval> create_zero(const IntervalVector& d) const;
     inline VectorFunction<Interval> create_identity(const IntervalVector& d) const;
+    friend OutputStream& operator<<(OutputStream& os, const FunctionFactory<Interval>& factory);
 };
 
 inline ScalarFunction<Interval> FunctionFactoryInterface<Interval>::create(const IntervalVector& domain, const ScalarFunctionInterface<Interval>& function) const {
@@ -596,6 +597,9 @@ inline ScalarFunction<Interval> FunctionFactory<Interval>::create_zero(const Int
     return this->_ptr->create_zero(domain); }
 inline VectorFunction<Interval> FunctionFactory<Interval>::create_identity(const IntervalVector& domain) const {
     return this->_ptr->create_identity(domain); }
+
+inline OutputStream& operator<<(OutputStream& os, const FunctionFactory<Interval>& factory) {
+    factory._ptr->write(os); return os; }
 
 } // namespace Ariadne
 

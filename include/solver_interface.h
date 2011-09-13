@@ -85,6 +85,9 @@ class SolverInterface
     virtual ~SolverInterface() { };
     /*! \brief Make a dynamically-allocated copy. */
     virtual SolverInterface* clone() const = 0;
+    /*! \brief Write to an output stream. */
+    virtual void write(std::ostream& os) const = 0;
+
 
     /*! \brief The maximum permissible error of the solution. */
     virtual double maximum_error() const = 0;
@@ -114,6 +117,9 @@ class SolverInterface
     virtual Set< Vector<Interval> > solve_all(const RealVectorFunction& f,const Vector<Interval>& pt) const = 0;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const SolverInterface& solver) {
+    solver.write(os); return os;
+}
 
 } // namespace Ariadne
 

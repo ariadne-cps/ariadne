@@ -100,7 +100,8 @@ void TestContinuousEvolution::test() const
     parameters.maximum_step_size=step_size;
 
     // Set up the evaluators
-    TaylorPicardIntegrator integrator(14,1e-4,1e-12);
+    TaylorPicardIntegrator integrator(maximum_error=1e-4,lipschitz_constant=0.5,global_sweep_threshold=1e-8,
+                                      local_sweep_threshold=1e-12,maximum_temporal_order=14);
     VectorFieldEvolver evolver(parameters,integrator);
 
     // Define the initial box
@@ -163,7 +164,8 @@ void TestContinuousEvolution::failure_test() const
     parameters.maximum_step_size=step_size;
 
     // Set up the evaluators
-    TaylorPicardIntegrator integrator(6,1e-6,1e-10);
+    TaylorPicardIntegrator integrator(maximum_error=1e-6,lipschitz_constant=0.5,global_sweep_threshold=1e-8,
+                                      local_sweep_threshold=1e-10,maximum_temporal_order=6);
     VectorFieldEvolver evolver(parameters,integrator);
 
     // Define the initial box

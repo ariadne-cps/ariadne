@@ -61,7 +61,7 @@ class SolverWrapper
         return this->get_override("implicit")(); }
     Set< IntervalVector > solve_all(const RealVectorFunction& f, const IntervalVector& bx) const {
         return this->get_override("solve_all")(); }
-    std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
+    void write(std::ostream&) const { this->get_override("write")(); }
 };
 
 
@@ -77,7 +77,7 @@ class IntegratorWrapper
         this->get_override("set_maximum_error")(); }
     Pair<Float,IntervalVector> flow_bounds(const RealVectorFunction&,const IntervalVector&,const Float&) const {
         return this->get_override("flow_bounds")(); }
-    VectorTaylorFunction flow_step(const RealVectorFunction&,const IntervalVector&,const Float&) const {
+    VectorTaylorFunction flow_step(const RealVectorFunction&,const IntervalVector&,Float&) const {
         return this->get_override("flow_step")(); }
     VectorTaylorFunction flow_step(const RealVectorFunction&,const IntervalVector&,const Float&,const IntervalVector&) const {
         return this->get_override("flow_step")(); }
@@ -85,8 +85,8 @@ class IntegratorWrapper
         return this->get_override("flow")(); }
     VectorTaylorFunction flow(const RealVectorFunction&,const IntervalVector&,const Interval&) const {
         return this->get_override("flow")(); }
-//    std::ostream& write(std::ostream&) const {
-//        return this->get_override("write")(); }
+    void write(std::ostream&) const {
+        this->get_override("write")(); }
 };
 
 
@@ -114,7 +114,7 @@ void export_integrator()
     integrator_wrapper_class.def("flow",(VectorTaylorFunction(IntegratorInterface::*)(const RealVectorFunction&,const IntervalVector&,const Interval&)const)&IntegratorInterface::flow);
     integrator_wrapper_class.def("flow",(VectorTaylorFunction(IntegratorInterface::*)(const RealVectorFunction&,const IntervalVector&,const Real&)const)&IntegratorInterface::flow);
     integrator_wrapper_class.def("flow_bounds",(Pair<Float,IntervalVector>(IntegratorInterface::*)(const RealVectorFunction&,const IntervalVector&,const Float&)const)&IntegratorInterface::flow_bounds);
-    integrator_wrapper_class.def("flow_step",(VectorTaylorFunction(IntegratorInterface::*)(const RealVectorFunction&,const IntervalVector&,const Float&)const)&IntegratorInterface::flow_step);
+    integrator_wrapper_class.def("flow_step",(VectorTaylorFunction(IntegratorInterface::*)(const RealVectorFunction&,const IntervalVector&,Float&)const)&IntegratorInterface::flow_step);
     integrator_wrapper_class.def("flow_step",(VectorTaylorFunction(IntegratorInterface::*)(const RealVectorFunction&,const IntervalVector&,const Float&,const IntervalVector&)const)&IntegratorInterface::flow_step);
 
     class_<RungeKutta4Integrator > runge_kutta_4_integrator_class("RungeKutta4Integrator",init<double>());

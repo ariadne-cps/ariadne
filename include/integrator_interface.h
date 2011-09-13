@@ -62,6 +62,9 @@ class IntegratorInterface
     /*! \brief Make a dynamically-allocated copy. */
     virtual IntegratorInterface* clone() const = 0;
 
+    /*! \brief Write to an output stream. */
+    virtual void write(std::ostream& os) const = 0;
+
     /*! \brief Set the maximum allowable error in the flow. */
     virtual void set_maximum_error(double) = 0;
 
@@ -102,6 +105,9 @@ class IntegratorInterface
 
 };
 
+inline std::ostream& operator<<(std::ostream& os, const IntegratorInterface& integrator) {
+    integrator.write(os); return os;
+}
 
 
 } // namespace Ariadne

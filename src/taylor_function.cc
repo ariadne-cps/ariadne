@@ -1445,14 +1445,29 @@ operator-(const VectorTaylorFunction& f, const Vector<Interval>& c)
 VectorTaylorFunction
 operator*(const Matrix<Float>& A, const VectorTaylorFunction& f)
 {
-    return VectorTaylorFunction(f.domain(),Vector<IntervalTaylorModel>(A*f.models()));
+    ARIADNE_PRECONDITION(A.column_size()==f.size());
+    Vector<IntervalTaylorModel> models(A.row_size(),IntervalTaylorModel(f.argument_size(),f.sweeper()));
+    for(size_t i=0; i!=A.row_size(); ++i) {
+        for(size_t j=0; j!=A.column_size(); ++j) {
+            models[i] += A.get(i,j) * f.model(j);
+        }
+    }
+    return VectorTaylorFunction(f.domain(),models);
 }
 
 VectorTaylorFunction
 operator*(const Matrix<Interval>& A, const VectorTaylorFunction& f)
 {
-    return VectorTaylorFunction(f.domain(),Vector<IntervalTaylorModel>(A*f.models()));
+    ARIADNE_PRECONDITION(A.column_size()==f.size());
+    Vector<IntervalTaylorModel> models(A.row_size(),IntervalTaylorModel(f.argument_size(),f.sweeper()));
+    for(size_t i=0; i!=A.row_size(); ++i) {
+        for(size_t j=0; j!=A.column_size(); ++j) {
+            models[i] += A.get(i,j) * f.model(j);
+        }
+    }
+    return VectorTaylorFunction(f.domain(),models);
 }
+
 
 VectorTaylorFunction
 operator-(const VectorTaylorFunction& f1, const RealVectorFunction& f2) {

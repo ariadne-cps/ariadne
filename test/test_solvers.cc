@@ -74,14 +74,16 @@ class TestSolver
         p=IntervalVector(1, Interval(-0.25,0.25));
         r=IntervalVector(1, Interval(-2.0,2.0));
         f=RealVectorFunction(1u,x-a);
+        ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         e=RealVectorFunction(1u,aa);
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-8);
-        return;
+
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
         p=IntervalVector(1, Interval(0.875,1.125));
         r=IntervalVector(1, Interval(0.25,1.25));
         f=RealVectorFunction(1u,(x*x+1)*x-a);
+        ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         bb=RealScalarFunction(aa-Real(p[0].midpoint()))/Real(p[0].radius());
         e=RealVectorFunction( 1u, 0.682328+bb*(0.0521547+bb*(-0.0023232+bb*0.000147778)) );
@@ -91,6 +93,7 @@ class TestSolver
         p=IntervalVector(1, Interval(-0.25,0.25));
         r=IntervalVector(1, Interval(0.25,2.0));
         f=RealVectorFunction(1u,4*x+x*x-a-4);
+        ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         bb=RealScalarFunction(aa-Real(p[0].midpoint()))/Real(p[0].radius());
         e=RealVectorFunction( 1u, 0.828427+bb*(0.0441942+bb*(-0.000345267+bb*0.00000539468)) );
@@ -105,15 +108,16 @@ int main(int argc, const char **argv) {
 
     IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5,maximum_number_of_steps=12);
     interval_newton_solver.verbosity=verbosity;
-    TestSolver(interval_newton_solver).test();
+    TestSolver(interval_newton_solver).test_solve();
+    ARIADNE_TEST_WARN("IntervalNewtonSolver cannot solve for implicit functions.");
 
     KrawczykSolver krawczyk_solver(maximum_error=1e-5,maximum_number_of_steps=12);
     krawczyk_solver.verbosity=verbosity;
     TestSolver(krawczyk_solver).test();
 
-    //FactoredKrawczykSolver factored_krawczyk_solver(maximum_error=1e-5,maximum_number_of_steps=12);
-    //factored_krawczyk_solver.verbosity=verbosity;
-    //TestSolver(factored_krawczyk_solver).test();
+    FactoredKrawczykSolver factored_krawczyk_solver(maximum_error=1e-5,maximum_number_of_steps=12);
+    factored_krawczyk_solver.verbosity=verbosity;
+    TestSolver(factored_krawczyk_solver).test();
 
     std::cerr<<"INCOMPLETE "<<std::flush;
     return ARIADNE_TEST_FAILURES;

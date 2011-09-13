@@ -706,13 +706,15 @@ KrawczykSolver::implicit_step(const RealVectorFunction& f,
     const uint np=p.size();
     const uint nx=x.size();
     Matrix<Interval> I=Matrix<Interval>::identity(nx);
-    ARIADNE_LOG(4,"  Contracting "<<x<<"\n");
+    ARIADNE_LOG(4,"  Contracting x="<<x<<"\n");
+    ARIADNE_LOG(4,"    p="<<p<<"\n");
+    ARIADNE_LOG(4,"    f="<<f<<"\n");
     //ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
     VectorTaylorFunction mx(x);
     for(uint i=0; i!=mx.size(); ++i) { mx[i].set_error(0.0); }
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
     Vector<Float> ex(nx);
-    for(uint i=0; i!=nx; ++i) { ex[i]=+x[i].error(); }
+    for(uint i=0; i!=nx; ++i) { ex[i]=x[i].error(); }
     ARIADNE_LOG(5,"    ex="<<ex<<"\n");
     VectorTaylorFunction fm=evaluate(f,join(p,mx));
     ARIADNE_LOG(5,"    f(p,mx)="<<fm<<"\n");
@@ -723,7 +725,9 @@ KrawczykSolver::implicit_step(const RealVectorFunction& f,
     Matrix<Interval> J=project(f.jacobian(join(rp,rx)),range(0,nx),range(np,np+nx));
     ARIADNE_LOG(5,"    D2f(r)="<<J<<"\n");
     Matrix<Interval> M=inverse(midpoint(J));
-    ARIADNE_LOG(5,"    inverse(D2f(m))="<<M<<"\n");
+    ARIADNE_LOG(5,"    inverse(D2f(m))=M="<<M<<"\n");
+    ARIADNE_LOG(5,"    M*f(p,mx)="<<M*fm<<"\n");
+    ARIADNE_LOG(5,"    (I-M*J) * (ex*Interval(-1,+1))="<<(I-M*J)<<"*"<<(ex*Interval(-1,+1))<<"="<<(I-M*J) * (ex*Interval(-1,+1))<<"\n");
     VectorTaylorFunction dx= M*fm - (I-M*J) * (ex*Interval(-1,+1));
     ARIADNE_LOG(5,"    dx="<<dx<<"\n");
     VectorTaylorFunction nwx= mx - dx;

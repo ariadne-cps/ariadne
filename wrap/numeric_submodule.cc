@@ -136,8 +136,8 @@ void export_tribool() {
 
 }
 
-std::string __repr__(Float x) { 
-    std::stringstream ss; ss<<std::setprecision(17)<<x.v; return ss.str(); 
+std::string __repr__(Float x) {
+    std::stringstream ss; ss<<std::setprecision(17)<<x.v; return ss.str();
 }
 
 
@@ -182,6 +182,12 @@ void export_float()
     implicitly_convertible<double,Float>();
 
     def("set_output_precision", &set_output_precision);
+
+    def("min",(Float(*)(Float,Float)) &Ariadne::min);
+    def("max",(Float(*)(Float,Float)) &Ariadne::max);
+    def("abs", (Float(*)(Float)) &Ariadne::abs);
+
+    def("pow",(Float(*)(Float,int)) &Ariadne::pow);
 
     def("rec",(Float(*)(Float)) &Ariadne::rec);
     def("sqr",(Float(*)(Float)) &Ariadne::sqr);
@@ -250,13 +256,13 @@ void export_real()
     real_class.def(self <= self);
     real_class.def(self > self);
     real_class.def(self < self);
-    
+
     implicitly_convertible<int,Real>();
     implicitly_convertible<double,Real>();
 }
 
 std::string __repr__(Interval ivl) {
-    std::stringstream ss; ss<<std::setprecision(17)<<"{"<<ivl.lower().v<<":"<<ivl.upper().v<<"}"; return ss.str(); 
+    std::stringstream ss; ss<<std::setprecision(17)<<"{"<<ivl.lower().v<<":"<<ivl.upper().v<<"}"; return ss.str();
 }
 
 void export_interval()
@@ -344,6 +350,8 @@ void export_interval()
     def("disjoint", (IIPRED) &disjoint);
     def("subset", (IIPRED) &subset);
     def("intersection", (IIFUN) &intersection);
+
+    def("hull", (IIFUN) &hull);
 
     def("mag", (Float(*)(Interval)) &mag);
 

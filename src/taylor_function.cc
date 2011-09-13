@@ -1392,6 +1392,30 @@ operator-(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
     }
 }
 
+VectorTaylorFunction
+operator*(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2)
+{
+    ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
+    if(f1.domain()==f2.domain()) {
+        return VectorTaylorFunction(f1.domain(),Vector<IntervalTaylorModel>(f1.models()*f2.model()));
+    } else {
+        Box new_domain=intersection(f1.domain(),f2.domain());
+        return operator*(restrict(f1,new_domain),restrict(f2,new_domain));
+    }
+}
+
+VectorTaylorFunction
+operator*(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2)
+{
+    ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
+    if(f1.domain()==f2.domain()) {
+        return VectorTaylorFunction(f1.domain(),Vector<IntervalTaylorModel>(f1.model()*f2.models()));
+    } else {
+        Box new_domain=intersection(f1.domain(),f2.domain());
+        return operator*(restrict(f1,new_domain),restrict(f2,new_domain));
+    }
+}
+
 
 
 VectorTaylorFunction

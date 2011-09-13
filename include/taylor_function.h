@@ -713,6 +713,10 @@ class VectorTaylorFunction
     friend VectorTaylorFunction operator+(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
     /*! \brief Subtraction. */
     friend VectorTaylorFunction operator-(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
+    /*! \brief Multiplication. */
+    friend VectorTaylorFunction operator*(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2);
+    /*! \brief Multiplication. */
+    friend VectorTaylorFunction operator*(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2);
 
     /*! \brief Addition of a constant. */
     friend VectorTaylorFunction operator+(const VectorTaylorFunction& f, const Vector<Float>& c);

@@ -228,6 +228,7 @@ ScalarFunction<Real> operator*(const Real&, const ScalarFunction<Real>&);
 ScalarFunction<Real> operator/(const Real&, const ScalarFunction<Real>&);
 
 ScalarFunction<Real> pow(const ScalarFunction<Real>&, int);
+ScalarFunction<Real> neg(const ScalarFunction<Real>&);
 ScalarFunction<Real> rec(const ScalarFunction<Real>&);
 ScalarFunction<Real> sqr(const ScalarFunction<Real>&);
 ScalarFunction<Real> sqrt(const ScalarFunction<Real>&);
@@ -308,15 +309,41 @@ ScalarFunction<Interval> operator+(const ScalarFunction<Interval>& f);
 ScalarFunction<Interval> operator-(const ScalarFunction<Interval>& f);
 ScalarFunction<Interval> operator+(const ScalarFunction<Interval>& f1, const ScalarFunction<Interval>& f2);
 ScalarFunction<Interval> operator-(const ScalarFunction<Interval>& f1, const ScalarFunction<Interval>& f2);
+ScalarFunction<Interval> operator*(const ScalarFunction<Interval>& f1, const ScalarFunction<Interval>& f2);
+ScalarFunction<Interval> operator/(const ScalarFunction<Interval>& f1, const ScalarFunction<Interval>& f2);
 ScalarFunction<Interval> operator+(const ScalarFunction<Interval>& f1, const Interval& c2);
 ScalarFunction<Interval> operator+(const Interval& c1, const ScalarFunction<Interval>& f2);
 ScalarFunction<Interval> operator-(const ScalarFunction<Interval>& f1, const Interval& c2);
 ScalarFunction<Interval> operator-(const Interval& c1, const ScalarFunction<Interval>& f2);
+ScalarFunction<Interval> operator*(const ScalarFunction<Interval>& f1, const Interval& c2);
+ScalarFunction<Interval> operator*(const Interval& c1, const ScalarFunction<Interval>& f2);
+ScalarFunction<Interval> operator/(const ScalarFunction<Interval>& f1, const Interval& c2);
+ScalarFunction<Interval> operator/(const Interval& c1, const ScalarFunction<Interval>& f2);
+ScalarFunction<Interval> pow(const ScalarFunction<Interval>& f, Int n);
+ScalarFunction<Interval> neg(const ScalarFunction<Interval>& f);
+ScalarFunction<Interval> rec(const ScalarFunction<Interval>& f);
+ScalarFunction<Interval> sqr(const ScalarFunction<Interval>& f);
+ScalarFunction<Interval> sqrt(const ScalarFunction<Interval>& f);
+ScalarFunction<Interval> exp(const ScalarFunction<Interval>& f);
+ScalarFunction<Interval> log(const ScalarFunction<Interval>& f);
+ScalarFunction<Interval> sin(const ScalarFunction<Interval>& f);
+ScalarFunction<Interval> cos(const ScalarFunction<Interval>& f);
+ScalarFunction<Interval> tan(const ScalarFunction<Interval>& f);
+
+VectorFunction<Interval> operator*(const ScalarFunction<Interval>& sf, const Vector<Interval>& e);
+VectorFunction<Interval> operator+(const VectorFunction<Interval>& f1, const VectorFunction<Interval>& f2);
+VectorFunction<Interval> operator-(const VectorFunction<Interval>& f1, const VectorFunction<Interval>& f2);
+VectorFunction<Interval> operator*(const VectorFunction<Interval>& vf, const ScalarFunction<Interval>& sf);
+VectorFunction<Interval> operator*(const ScalarFunction<Interval>& sf, const VectorFunction<Interval>& vf);
+
+VectorFunction<Interval> join(const ScalarFunction<Interval>& f1, const ScalarFunction<Interval>& f2);
+VectorFunction<Interval> join(const ScalarFunction<Interval>& f1, const VectorFunction<Interval>& f2);
+VectorFunction<Interval> join(const VectorFunction<Interval>& f1, const ScalarFunction<Interval>& f2);
+VectorFunction<Interval> join(const VectorFunction<Interval>& f1, const VectorFunction<Interval>& f2);
+
 ScalarFunction<Interval> compose(const ScalarFunction<Interval>& f, const VectorFunction<Interval>& g);
 VectorFunction<Interval> compose(const VectorFunction<Interval>& f, const VectorFunction<Interval>& g);
-
-VectorFunction<Interval> join(const VectorFunction<Interval>& f1, const VectorFunction<Interval>& f2);
-VectorFunction<Interval> join(const VectorFunction<Interval>& f1, const ScalarFunction<Interval>& f2);
+ScalarFunction<Interval> lie_derivative(const ScalarFunction<Interval>& g, const VectorFunction<Interval>& f);
 
 inline Interval evaluate(const ScalarFunction<Interval>& f, const Vector<Interval>& x) { return f(x); }
 inline Vector<Interval> evaluate(const VectorFunction<Interval>& f, const Vector<Interval>& x) { return f(x); }

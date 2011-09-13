@@ -723,7 +723,7 @@ IntervalScalarFunction::ScalarFunction(Nat n)
 {
 }
 
-IntervalScalarFunction restrict(IntervalScalarFunction const& f, IntervalVector const& D)
+IntervalScalarFunction restrict(IntervalScalarFunction const& f, IntervalVector const& D) 
 {
     return restrict(dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer()),D);
 }
@@ -743,6 +743,26 @@ IntervalScalarFunction operator-(IntervalScalarFunction const& f1, IntervalScala
     return dynamic_cast<ScalarTaylorFunction const&>(*f1.raw_pointer())-dynamic_cast<ScalarTaylorFunction const&>(*f2.raw_pointer());
 }
 
+IntervalScalarFunction operator*(IntervalScalarFunction const& f1, IntervalScalarFunction const& f2)
+{
+    return dynamic_cast<ScalarTaylorFunction const&>(*f1.raw_pointer())*dynamic_cast<ScalarTaylorFunction const&>(*f2.raw_pointer());
+}
+
+IntervalScalarFunction operator/(IntervalScalarFunction const& f1, IntervalScalarFunction const& f2)
+{
+    return dynamic_cast<ScalarTaylorFunction const&>(*f1.raw_pointer())/dynamic_cast<ScalarTaylorFunction const&>(*f2.raw_pointer());
+}
+
+IntervalScalarFunction operator+(Interval const& c, IntervalScalarFunction const& f)
+{
+    return c+dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer());
+}
+
+IntervalScalarFunction operator+(IntervalScalarFunction const& f, Interval const& c)
+{
+    return dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer())+c;
+}
+
 IntervalScalarFunction operator-(IntervalScalarFunction const& f, Interval const& c)
 {
     return dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer())-c;
@@ -751,6 +771,107 @@ IntervalScalarFunction operator-(IntervalScalarFunction const& f, Interval const
 IntervalScalarFunction operator-(Interval const& c, IntervalScalarFunction const& f)
 {
     return c-dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer());
+}
+
+IntervalScalarFunction operator*(IntervalScalarFunction const& f, Interval const& c)
+{
+    return dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer())*c;
+}
+
+IntervalScalarFunction operator*(Interval const& c, IntervalScalarFunction const& f)
+{
+    return c*dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer());
+}
+
+IntervalScalarFunction operator/(IntervalScalarFunction const& f, Interval const& c)
+{
+    return dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer())/c;
+}
+
+IntervalScalarFunction operator/(Interval const& c, IntervalScalarFunction const& f)
+{
+    return c/dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer());
+}
+
+ScalarFunction<Interval> pow(const ScalarFunction<Interval>& f, int n)
+{
+    return pow(dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer()),n);
+}
+
+IntervalScalarFunction neg(IntervalScalarFunction const& f)
+{
+    return neg(dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer()));
+}
+
+IntervalScalarFunction rec(IntervalScalarFunction const& f)
+{
+    return rec(dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer()));
+}
+
+IntervalScalarFunction sqr(IntervalScalarFunction const& f)
+{
+    return sqr(dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer()));
+}
+
+IntervalScalarFunction sqrt(IntervalScalarFunction const& f)
+{
+    return sqrt(dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer()));
+}
+
+IntervalScalarFunction exp(IntervalScalarFunction const& f)
+{
+    return exp(dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer()));
+}
+
+IntervalScalarFunction log(IntervalScalarFunction const& f)
+{
+    return log(dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer()));
+}
+
+IntervalScalarFunction sin(IntervalScalarFunction const& f)
+{
+    return sin(dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer()));
+}
+
+IntervalScalarFunction cos(IntervalScalarFunction const& f)
+{
+    return cos(dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer()));
+}
+
+IntervalScalarFunction tan(IntervalScalarFunction const& f)
+{
+    return tan(dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer()));
+}
+
+
+IntervalVectorFunction operator*(IntervalScalarFunction const& f, IntervalVector const& v)
+{
+    ScalarTaylorFunction const& stf=dynamic_cast<ScalarTaylorFunction const&>(*f.raw_pointer());
+    VectorTaylorFunction r(v.size(),stf.domain(),stf.sweeper());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=stf*v[i];
+    }
+    return r;
+}
+
+IntervalVectorFunction operator+(IntervalVectorFunction const& f1, IntervalVectorFunction const& f2)
+{
+    return dynamic_cast<VectorTaylorFunction const&>(*f1.raw_pointer())+dynamic_cast<VectorTaylorFunction const&>(*f2.raw_pointer());
+}
+
+IntervalVectorFunction operator-(IntervalVectorFunction const& f1, IntervalVectorFunction const& f2)
+{
+    return dynamic_cast<VectorTaylorFunction const&>(*f1.raw_pointer())-dynamic_cast<VectorTaylorFunction const&>(*f2.raw_pointer());
+}
+
+IntervalVectorFunction operator*(IntervalVectorFunction const& vf, IntervalScalarFunction const& sf)
+{
+    return dynamic_cast<VectorTaylorFunction const&>(*vf.raw_pointer())*dynamic_cast<ScalarTaylorFunction const&>(*sf.raw_pointer());
+}
+
+IntervalVectorFunction operator*(IntervalScalarFunction const& sf, IntervalVectorFunction const& vf)
+{
+    return dynamic_cast<ScalarTaylorFunction const&>(*sf.raw_pointer())*dynamic_cast<VectorTaylorFunction const&>(*vf.raw_pointer());
 }
 
 
@@ -1005,6 +1126,9 @@ RealScalarFunction pow(const RealScalarFunction& f, Int n)
     return make_binary_function(Pow(),f,n);
 }
 
+RealScalarFunction neg(const RealScalarFunction& f) {
+    return make_unary_function(Neg(),f); }
+
 RealScalarFunction rec(const RealScalarFunction& f) {
     return make_unary_function(Rec(),f); }
 
@@ -1077,9 +1201,42 @@ IntervalScalarFunction compose(const IntervalScalarFunction& f, const IntervalVe
 }
 
 
+IntervalVectorFunction join(IntervalScalarFunction const& f1, const IntervalScalarFunction& f2)
+{
+    if(dynamic_cast<ScalarTaylorFunction const*>(f1.raw_pointer()) && dynamic_cast<ScalarTaylorFunction const*>(f2.raw_pointer())) {
+        return join(dynamic_cast<ScalarTaylorFunction const&>(*f1.raw_pointer()),dynamic_cast<ScalarTaylorFunction const&>(*f2.raw_pointer()));
+    }
+    VectorOfIntervalScalarFunction r(2u,f1.argument_size());
+    r[0]=f1;
+    r[1]=f2;
+    return r;
+}
+
+IntervalVectorFunction join(IntervalScalarFunction const& f1, const IntervalVectorFunction& f2)
+{
+    if(dynamic_cast<ScalarTaylorFunction const*>(f1.raw_pointer()) && dynamic_cast<VectorTaylorFunction const*>(f2.raw_pointer())) {
+        return join(dynamic_cast<ScalarTaylorFunction const&>(*f1.raw_pointer()),dynamic_cast<VectorTaylorFunction const&>(*f2.raw_pointer()));
+    }
+    VectorOfIntervalScalarFunction r(1u+f2.result_size(),f1.argument_size());
+    r[0]=f1;
+    for(uint i=0; i!=f2.result_size(); ++i) { r[i+1u]=f2[i]; }
+    return r;
+}
+
+IntervalVectorFunction join(IntervalVectorFunction const& f1, const IntervalScalarFunction& f2)
+{
+    if(dynamic_cast<VectorTaylorFunction const*>(f1.raw_pointer()) && dynamic_cast<ScalarTaylorFunction const*>(f2.raw_pointer())) {
+        return join(dynamic_cast<VectorTaylorFunction const&>(*f1.raw_pointer()),dynamic_cast<ScalarTaylorFunction const&>(*f2.raw_pointer()));
+    }
+    VectorOfIntervalScalarFunction r(f1.result_size()+1u,f1.argument_size());
+    for(uint i=0; i!=f1.result_size(); ++i) { r[i]=f1[i]; }
+    r[f1.result_size()]=f2;
+    return r;
+}
+
 IntervalVectorFunction join(IntervalVectorFunction const& f1, const IntervalVectorFunction& f2)
 {
-    if(dynamic_cast<VectorTaylorFunction const*>(f1.raw_pointer())) {
+    if(dynamic_cast<VectorTaylorFunction const*>(f1.raw_pointer()) && dynamic_cast<VectorTaylorFunction const*>(f2.raw_pointer())) {
         return join(dynamic_cast<VectorTaylorFunction const&>(*f1.raw_pointer()),dynamic_cast<VectorTaylorFunction const&>(*f2.raw_pointer()));
     }
     VectorOfIntervalScalarFunction r(f1.result_size()+f2.result_size(),f1.argument_size());

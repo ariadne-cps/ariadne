@@ -274,7 +274,7 @@ TestInterval::test_constructors()
     // Default constructor
     Interval ivld2;
     if(ivld2.lower()>ivld2.upper()) {
-        cerr << "Warning: Interval default constructor returns an empty set\n";
+        ARIADNE_TEST_WARN("Interval default constructor returns an empty set.");
     } else {
         ARIADNE_TEST_ASSERT((bool)(ivld2==Interval(zero,zero)));
     }
@@ -352,7 +352,7 @@ void TestInterval::test_input()
     iss >> ivl1;
     ivl2=Interval(0.39999999999999997,0.60000000000000009);
     if(!equal(ivl1,ivl2)) {
-        cerr << "Warning: Interval string constructor returns an approximate interval, not an outwardly rounded interval.\n";
+        ARIADNE_TEST_WARN("Interval string constructor returns an approximate interval, not an outwardly rounded interval.");
     }
 }
 

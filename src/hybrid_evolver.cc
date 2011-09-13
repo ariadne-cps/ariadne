@@ -185,8 +185,8 @@ orbit(const HybridAutomatonInterface& system,
       const HybridTime& time,
       Semantics semantics) const
 {
-    std::cerr<<"initial_set="<<initial_set<<"\n";
-    std::cerr<<"initial_enclosure="<<HybridEnclosure(system.continuous_state_space(initial_set.location()),initial_set,this->function_factory())<<"\n";
+    ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
+    ARIADNE_LOG(3,"initial_enclosure="<<HybridEnclosure(system.continuous_state_space(initial_set.location()),initial_set,this->function_factory())<<"\n");
     return this->orbit(system,HybridEnclosure(system.continuous_state_space(initial_set.location()),initial_set,this->function_factory()),time,semantics);
 }
 

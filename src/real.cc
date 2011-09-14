@@ -32,6 +32,11 @@
 
 namespace Ariadne {
 
+namespace{
+static const double _pi_up=3.1415926535897936;
+static const double _pi_approx=3.1415926535897931;
+static const double _pi_down=3.1415926535897931;
+}
 
 Real::~Real() { }
 Real::Real() : _ivl() { }
@@ -64,6 +69,8 @@ Real operator/(const Real& x, const Real& y) { return Real(static_cast<Interval>
 
 Float mag(const Real& x) { return mag(static_cast<Interval>(x)); }
 
+const Real pi=Real(_pi_down,_pi_approx,_pi_up);
+
 Real abs(const Real& x) { return Real(abs(static_cast<Interval>(x))); }
 Real pos(const Real& x) { return Real(pos(static_cast<Interval>(x))); }
 Real neg(const Real& x) { return Real(neg(static_cast<Interval>(x))); }
@@ -78,7 +85,6 @@ Real pow(const Real& x, int n) { return Real(pow(static_cast<Interval>(x),n)); }
 Real sqrt(const Real& x) { return Real(sqrt(static_cast<Interval>(x))); }
 Real exp(const Real& x) { return Real(exp(static_cast<Interval>(x))); }
 Real log(const Real& x) { return Real(log(static_cast<Interval>(x))); }
-template<> Real pi<>() { return Real(pi<Interval>()); }
 Real sin(const Real& x) { return Real(sin(static_cast<Interval>(x))); }
 Real cos(const Real& x) { return Real(cos(static_cast<Interval>(x))); }
 Real tan(const Real& x) { return Real(tan(static_cast<Interval>(x))); }

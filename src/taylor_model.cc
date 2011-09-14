@@ -1790,11 +1790,11 @@ IntervalTaylorModel sin(const IntervalTaylorModel& x) {
     IntervalTaylorModel r(x.argument_size(),x.sweeper());
     IntervalTaylorModel t(x.argument_size(),x.sweeper());
 
-    Float two_pi=2*pi<Float>();
-    int n=integer_cast<int>(floor(x.value()/two_pi + 0.5));
-    y=x-(n*2*Ariadne::pi<Interval>());
+    Float two_pi_approx=2*pi_approx;
+    int n=integer_cast<int>(floor(x.value()/two_pi_approx + 0.5));
+    y=x-(n*2*pi_ivl);
 
-    if(y.error()>two_pi/2) {
+    if(y.error()>two_pi_approx/2) {
         r.error()=1.0;
     } else {
         _mul(s,y,y);
@@ -1827,10 +1827,10 @@ IntervalTaylorModel cos(const IntervalTaylorModel& x) {
     IntervalTaylorModel r(x.argument_size(),x.sweeper());
     IntervalTaylorModel t(x.argument_size(),x.sweeper());
 
-    Float two_pi=2*pi<Float>();
+    Float two_pi=2*pi_approx;
     int n=integer_cast<int>(floor(x.value()/two_pi + 0.5));
 
-    y=x-2*n*pi<Interval>();
+    y=x-2*n*pi_ivl;
 
     if(y.error()>two_pi/2) {
         r.error()=1.0;

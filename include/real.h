@@ -47,7 +47,6 @@ class Float;
 class Interval;
 class Real;
 
-template<class X> X pi();
 template<class X> X inf();
 
 class RealBody;
@@ -202,6 +201,9 @@ inline tribool operator< (const Real& x, double y) { return static_cast<Interval
 //!  \brief A floating-point bound for |x|.
 Float mag(const Real& x);
 
+//!  \brief The constant pi.
+extern const Real pi;
+
 //!  \brief The absolute value function \c |x|.
 Real abs(const Real& x);
 //!  \brief The unary plus function \c +x.
@@ -230,8 +232,6 @@ Real sqrt(const Real& x);
 Real exp(const Real& x);
 //!  \brief The natural logarithm function.
 Real log(const Real& x);
-//!  \brief The constant \a pi.
-template<> Real pi<>();
 //!  \brief The sine function.
 Real sin(const Real& x);
 //!  \brief The cosine function.

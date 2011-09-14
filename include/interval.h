@@ -48,7 +48,6 @@ class Float;
 class Interval;
 class Real;
 
-template<class X> X pi();
 template<class X> X inf();
 
 
@@ -249,6 +248,8 @@ Interval mul(Float,Interval);
 Interval div(Interval, Float);
 Interval div(Float, Interval);
 
+extern const Interval pi_ivl;
+
 inline Interval neg_ivl(Float);
 inline Interval rec_ivl(Float);
 inline Interval add_ivl(Float, Float);
@@ -270,7 +271,6 @@ Interval exp(Interval);
 //! Requires \c I.lower()>0 .
 Interval log(Interval);
 
-template<> Interval pi<Interval>();
 //! \related Interval \brief Sine function. Yields an over-approximation to \f$\{ \sin{x} \mid x\in I\}\f$.
 Interval sin(Interval);
 //! \related Interval \brief Cosine function. Yields an over-approximation to \f$\{ \sin{x} \mid x\in I\}\f$.

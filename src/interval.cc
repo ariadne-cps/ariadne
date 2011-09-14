@@ -37,7 +37,6 @@ namespace Ariadne {
 
 namespace {
 static const double pi_up=3.1415926535897936;
-static const double pi_approx=3.1415926535897931;
 static const double pi_down=3.1415926535897931;
 inline double _add_down(volatile double x, volatile double y) { set_rounding_downward(); return x+y; }
 inline double _add_up(volatile double x, volatile double y) { set_rounding_upward(); return x+y; }
@@ -51,6 +50,7 @@ inline Float cos_down(Float x) { set_rounding_downward(); Float y=cos_rnd(x); re
 inline Float cos_up(Float x) { set_rounding_upward(); Float y=cos_rnd(x); return y; }
 } // namespace
 
+const Interval pi_ivl=Interval(pi_down,pi_up);
 
 
 
@@ -339,15 +339,10 @@ Interval log(Interval i)
 }
 
 
-template<> Interval pi<Interval>()
-{
-    return Interval(pi_down,pi_up);
-}
-
 
 Interval sin(Interval i)
 {
-    return cos(i-pi<Interval>()/2);
+    return cos(i-pi_ivl/2);
 }
 
 Interval cos(Interval i)

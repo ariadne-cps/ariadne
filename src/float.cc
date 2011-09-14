@@ -57,17 +57,17 @@
 namespace Ariadne {
 
 
-static const double quarter_pi_up=0.78539816339744839;
-static const double half_pi_up=1.5707963267948968;
-static const double pi_up=3.1415926535897936;
-static const double pi_down=3.1415926535897931;
+static const double _quarter_pi_up=0.78539816339744839;
+static const double _half_pi_up=1.5707963267948968;
+static const double _pi_up=3.1415926535897936;
+static const double _pi_down=3.1415926535897931;
 
-static const double quarter_pi_approx=0.78539816339744828;
-static const double half_pi_approx=1.5707963267948966;
-static const double pi_approx=3.1415926535897931;
-static const double two_pi_approx=6.2831853071795862;
-static const double sqrt2_approx=0.70710678118654757;
-static const double log2_approx=0.6931471805599453094;
+static const double _quarter_pi_approx=0.78539816339744828;
+static const double _half_pi_approx=1.5707963267948966;
+static const double _pi_approx=3.1415926535897931;
+static const double _two_pi_approx=6.2831853071795862;
+static const double _sqrt2_approx=0.70710678118654757;
+static const double _log2_approx=0.6931471805599453094;
 
 
 
@@ -179,10 +179,10 @@ double exp_rnd(double x)
     // and dy/dw = -2r/(w-r)^2, so if r<0 we need to under-approximate w
 
     if(x==0.0) { return 1.0; }
-    double n=std::floor(x/log2_approx+0.5);
+    double n=std::floor(x/_log2_approx+0.5);
     volatile double r,s,t,w,y;
     volatile double log2;
-    log2=(n>0.0) ? next_opp(log2_approx) : next_rnd(log2_approx);
+    log2=(n>0.0) ? next_opp(_log2_approx) : next_rnd(_log2_approx);
     r=x+(-n)*log2;
 
     ARIADNE_ASSERT_MSG(r>=-0.4, " r = "<<r<<", x = "<<x);
@@ -237,7 +237,7 @@ double log_rnd(double x) {
     volatile double y,z,s,t,w,ly;
 
     y=frexp(x,&n);
-    if(y<sqrt2_approx) { y*=2; --n; }
+    if(y<_sqrt2_approx) { y*=2; --n; }
 
     if(y>=1.0) {
         t=-1-y;
@@ -254,7 +254,7 @@ double log_rnd(double x) {
         ly=2*z*w;
     }
 
-    volatile double log2rnd=next_rnd(log2_approx);
+    volatile double log2rnd=next_rnd(_log2_approx);
 
 
     return log2rnd*n+ly;
@@ -262,19 +262,19 @@ double log_rnd(double x) {
 
 double pi_rnd() {
     switch(get_rounding_mode()) {
-        case to_nearest: return pi_approx;
-        case downward: return pi_down;
-        case upward: return pi_up;
-        default: return pi_approx;
+        case to_nearest: return _pi_approx;
+        case downward: return _pi_down;
+        case upward: return _pi_up;
+        default: return _pi_approx;
     }
 }
 
 double pi_opp() {
     switch(get_rounding_mode()) {
-        case to_nearest: return pi_approx;
-        case downward: return pi_up;
-        case upward: return pi_down;
-        default: return pi_approx;
+        case to_nearest: return _pi_approx;
+        case downward: return _pi_up;
+        case upward: return _pi_down;
+        default: return _pi_approx;
     }
 }
 
@@ -285,9 +285,9 @@ double sin_rnd(double x) {
     volatile double half_pi_rnd=two_pi_rnd/4;
     volatile double half_pi_opp=two_pi_opp/4;
 
-    int q = (long int)(std::floor(x/quarter_pi_approx)) % 8;
+    int q = (long int)(std::floor(x/_quarter_pi_approx)) % 8;
     if(q<-4) { q+=8; } if(q>=4) { q-=8; }
-    volatile double n=-std::floor(x/two_pi_approx+0.5);
+    volatile double n=-std::floor(x/_two_pi_approx+0.5);
 
     volatile double y,w,s;
 
@@ -299,7 +299,7 @@ double sin_rnd(double x) {
     // Scale onto interval from -pi to pi
     if(want_opposite) { y=-x+(-n)*(two_pi_corr); y=-y; } else { y=x+n*two_pi_corr; }
 
-    assert(-two_pi_approx<=y && y<=two_pi_approx);
+    assert(-_two_pi_approx<=y && y<=_two_pi_approx);
 
 
     switch(q) {
@@ -371,7 +371,7 @@ double cos_rnd(double x) {
         y=sub_opp(mul_opp(n_rnd+1,pi_opp),x);
     }
 
-    int q = (long int)(std::floor(y/quarter_pi_approx)) % 8;
+    int q = (long int)(std::floor(y/_quarter_pi_approx)) % 8;
     assert(q<=4);
 
     volatile double w,c;
@@ -395,7 +395,7 @@ double cos_rnd(double x) {
 
     volatile double z=0.0;
 
-    ARIADNE_ASSERT(-two_pi_approx<=y && y<=two_pi_approx);
+    ARIADNE_ASSERT(-_two_pi_approx<=y && y<=_two_pi_approx);
     switch(q) {
     case -4: { w = +y + 2*half_pi_rnd; w=+w; w=max(w,z); c=neg_cos_rnd_series(w); break; }
     case -3: { w = +y + 1*half_pi_rnd; w=-w; w=max(w,z); c=neg_sin_rnd_series(w); break; }
@@ -474,14 +474,14 @@ double tan_rnd(double x) {
 
     volatile double y,q,r,s,t,u,v;
 
-    double n=std::floor(x/pi_approx+0.5);
+    double n=std::floor(x/_pi_approx+0.5);
 
-    volatile double pi_corr=(n>=0) ? next_opp(pi_approx) : next_rnd(pi_approx);
+    volatile double pi_corr=(n>=0) ? next_opp(_pi_approx) : next_rnd(_pi_approx);
     y=x-n*pi_corr;
 
 
-    ARIADNE_ASSERT(y>=-pi_up/2);
-    ARIADNE_ASSERT(y<=+pi_up/2);
+    ARIADNE_ASSERT(y>=-_pi_up/2);
+    ARIADNE_ASSERT(y<=+_pi_up/2);
 
     // Use the double-angle formula tan(2x) = tan(x)/(1-tan^2(x))
     // Note that the function y/(1-y^2) is monotone increasing for |y|<1
@@ -508,8 +508,8 @@ double tan_rnd(double x) {
 
 double tan_rnd_series(double x) {
     // Need |x|<=pi/8
-    ARIADNE_ASSERT(x>=-pi_up/8);
-    ARIADNE_ASSERT(x<=+pi_up/8);
+    ARIADNE_ASSERT(x>=-_pi_up/8);
+    ARIADNE_ASSERT(x<=+_pi_up/8);
 
     // Numerators of Taylor coefficients
     static const int64_t cn[13]={

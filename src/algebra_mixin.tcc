@@ -376,8 +376,8 @@ sin(const A& x)
     A s=z;
     A r=z;
 
-    Float two_pi_approx=2*pi<Float>();
-    X two_pi=2*pi<X>();
+    Float two_pi_approx=2*pi_approx;
+    X two_pi=2*pi;
     int n=integer_cast<int>(floor(x.average()/two_pi_approx + 0.5));
     y=x-n*two_pi;
 
@@ -414,8 +414,8 @@ cos(const A& x)
     A s=z;
     A r=z;
 
-    Float two_pi_approx=2*pi<Float>();
-    X two_pi=2*pi<X>();
+    Float two_pi_approx=2*pi_approx;
+    X two_pi=2*pi;
     int n=integer_cast<int>(floor(x.average()/two_pi_approx + 0.5));
 
     y=x-n*two_pi;

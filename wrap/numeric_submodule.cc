@@ -233,6 +233,8 @@ void export_rational()
 }
 #endif
 
+Real pi_function() { return pi; }
+
 void export_real()
 {
     class_<Real> real_class("Real",init<Real>());
@@ -256,6 +258,8 @@ void export_real()
     real_class.def(self <= self);
     real_class.def(self > self);
     real_class.def(self < self);
+
+    def("pi", (Real(*)()) &pi_function);
 
     implicitly_convertible<int,Real>();
     implicitly_convertible<double,Real>();

@@ -44,7 +44,6 @@ namespace Ariadne {
 
 class Real;
 
-template<class X> X pi();
 template<class X> X inf();
 
 using std::min;
@@ -123,7 +122,6 @@ inline Float mx() { return std::numeric_limits<double>::max(); }
 inline Float eps() { return std::numeric_limits<double>::epsilon(); }
 
 // General constants
-template<> inline Float pi<Float>() { return 3.1415926535897931; }
 template<> inline Float inf<Float>() { return std::numeric_limits<double>::infinity(); }
 
 // Checking whether a Float is not-a-number
@@ -186,6 +184,9 @@ inline Float sqrt(Float x) { return std::sqrt(x.v); }
 inline Float exp(Float x) { return std::exp(x.v); }
 //! \related Float \brief The logarithm function. Not guaranteed to be correctly rounded. Also available with \c _rnd suffix.
 inline Float log(Float x) { return std::log(x.v); }
+
+//! \related Float \brief The nearest floating-point approximation to the constant \a pi.
+static const Float pi_approx=Float(3.1415926535897931);
 
 //! \related Float \brief The sine function. Not guaranteed to be correctly rounded. Also available with \c _rnd suffix.
 inline Float sin(Float x) { return std::sin(x.v); }

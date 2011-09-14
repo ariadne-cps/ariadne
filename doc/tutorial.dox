@@ -40,9 +40,9 @@ The system represents a heating system used to control the temperature in a room
 The system has two discrete modes, \f$\textsc{On}\f$ and \f$\textsc{Off}\f$, representing the state of the heater. There are three events, \f$\textsc{TurnOn}\f$, \f$\textsc{TurnOff}\f$ and \f$\textsc{Midnight}\f$; the first two representing switching the heater, and the last being a reset of the clock at the beginning of a new day.
 
 The system has two continuous variables, \em temperature \f$T\f$ and \em time-of-day \f$\tau\f$.
-The system is described by three parameters, the heater power \f$H\f$, the insulation level \f$K\f$, the average external temperature \f$T_E\f$, the amplitude of the temperature fluctuations \f$T_A\f$.
+The system is described by three parameters, the heater power \f$P\f$, the insulation level \f$K\f$, the average external temperature \f$T_\mathrm{av}\f$, the amplitude of the external temperature fluctuations \f$T_\mathrm{amp}\f$.
 
-\f[ \dot{T} = H + K(T_E + T_A\cos(2\pi t) - T); \quad \dot{t}=1. \f]
+\f[ \dot{T} = P + K(T_\mathrm{av} + T_\mathrm{amp}\cos(2\pi t) - T); \quad \dot{t}=1. \f]
 
 The heater is turned on whenever the temperature falls below \f$T_{\textsc{On}}\f$, and is turned off whenever the temperature rises above \f$T_{\textsc{Off}}\f$.
 
@@ -59,7 +59,7 @@ Declare the constants which are used by the system.
 \until RealConstant Ton_lower
 
 Declare the discrete states of the components
-\until AtomicDiscreteLocation ok
+\until StringConstant off("off");
 
 Create the discrete events which occur during the evolution
 \until DiscreteEvent midnight
@@ -68,22 +68,23 @@ Declare the system variables.
 \until RealVariable t
 
 Create the heater subsystem
-\until AtomicHybridAutomaton heater
+\skipline HybridAutomaton heater
 Create the two modes of evolution
-\until heater.new_mode
-\until heater.new_mode
-Create the two invariants which the evolution must satisfy
-\until heater.new_invariant
-\until heater.new_invariant
-Create the two transitions which determine the switching
-\until heater.new_transition
-\until heater.new_transition
+\line heater.new_mode
+\line heater.new_mode
+Create the invariant which the evolution must satisfy
+\line heater.new_invariant
+Create a transition with permissive guard for turning the heater on
+\line heater.new_transition
+Create a transition with urgent guard for turning the heater off
+\line heater.new_transition
 
 Create the clock subsystem
-
+\skipline HybridAutomaton clock
 \until clock.new_transition
 
-
+Create the composite system
+\skipline CompositeHybridAutomaton heating_system
 
 End of function
 
@@ -103,22 +104,21 @@ We now compute the evolution of the system.
 \until {
 
 Define the intial set and evolution time.
-
-\skipline // Define the initial set
-\until evolution_time
-
-Compute the reachable and evolved sets.
-
-\skipline evolver.reach_evolve
+\skipline HybridSet initial_set
+\skipline HybridTime evolution_time
 
 Compute the trajectories parameterised by time.
-
 \skipline evolver.orbit
 
-Write the sets to standard output and to a file.
-
+Write the trajectories to standard output and to a file.
 \skipline write
 \skipline plot
+
+Compute the reachable and evolved sets.
+\skipline HybridEnclosureList reach,evolve
+\skipline evolver.reach_evolve
+
+
 
 End of function
 
@@ -172,8 +172,10 @@ End of function.
 
 \skipline main(
 \skipline {
-\skipline // Create
-\until }
+\skipline create_heating_system
+\skipline create_evolver
+\skipline compute_evolution
+\skipline }
 */
 
 /*!

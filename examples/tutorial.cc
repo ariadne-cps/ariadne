@@ -38,9 +38,6 @@ using namespace Ariadne;
 
 typedef GeneralHybridEvolver HybridEvolverType;
 
-const Float pi_flt = Ariadne::pi<Float>();
-const Interval pi_ivl = Ariadne::pi<Interval>();
-
 // The automaton has two modes, both
 // with two variables, room_temperature and time_of_day
 // The dynamics is given by the differential equations
@@ -80,8 +77,6 @@ const Interval pi_ivl = Ariadne::pi<Interval>();
 
 CompositeHybridAutomaton create_heating_system()
 {
-    RealConstant pi("pi",Ariadne::pi<Real>());
-
     // Set the system dynamic parameters
     RealConstant P("P",4.0);
     RealConstant K("K",1.0);
@@ -157,14 +152,16 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
-    typedef GeneralHybridEvolver::EnclosureListType HybridEnclosureListType;
+    typedef GeneralHybridEvolver::EnclosureListType HybridEnclosureList;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
 
+    // Set the initial set.
     HybridSet initial_set(heating_off, (16.0<=T<=16.0625,0.0<=t<=0.015625) );
     cout << "initial_set="<<initial_set<<"\n";
-
+    // Compute the initial set as a validated enclosure.
     HybridEnclosure initial_enclosure = evolver.enclosure(heating_system,initial_set);
     cout << "initial_enclosure="<<initial_enclosure<<"\n";
+
     // Set the maximum evolution time
     HybridTime evolution_time(1.5,4);
 
@@ -183,10 +180,11 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
 
 
 
+    cout << "initial_enclosure="<<initial_enclosure<<"\n";
     // Compute reachable and evolved sets
     cout << "Computing reach and evolve sets... " << flush;
-    HybridEnclosureListType reach,evolve;
-    make_lpair(reach,evolve) =evolver.reach_evolve(heating_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    HybridEnclosureList reach,evolve;
+    make_lpair(reach,evolve) = evolver.reach_evolve(heating_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     cout << "done." << endl;
     // Write the orbit to standard output and plot.
     cout << "Plotting reach and evolve sets... " << flush;
@@ -313,7 +311,6 @@ int main()
 
     // Create the analyser classes
     HybridEvolverType evolver=create_evolver();
-    HybridReachabilityAnalyser reachability_analysier();//evolver);
     std::cerr<<evolver<<"\n";
 
     // Compute the system evolution

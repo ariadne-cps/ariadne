@@ -90,6 +90,11 @@ class TestExpression {
         ARIADNE_TEST_PRINT(f3);
         ARIADNE_TEST_EQUAL(f3.evaluate(tv), tc+tx+tc*ty);
 
+        RealExpression e4=exp(c+x);
+        RealScalarFunction f4=make_function(e4,(x,y,z));
+        ARIADNE_TEST_PRINT(f4);
+        ARIADNE_TEST_EQUAL(f4.evaluate(tv), exp(tc+tx));
+
         //ARIADNE_TEST_EVALUATE(RealVectorFunction((x+y,y+z*z),(x,y,z))[0]);
         //ARIADNE_TEST_EQUAL(RealVectorFunction((x+y,y+z*z),(x,y,z))[0],RealScalarFunction(x+y,(x,y,z)));
 

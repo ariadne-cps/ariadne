@@ -602,7 +602,7 @@ Formula<Real> formula(const Expression<Real>& e, const Space<Real>& spc)
     switch(e.kind()) {
         case SCALAR: return make_formula(e.op(),formula(e.arg(),spc),e.num());
         case BINARY: return make_formula(e.op(),formula(e.arg1(),spc),formula(e.arg2(),spc));
-        case UNARY: return make_formula(e.op(),formula(e.arg1(),spc),formula(e.arg2(),spc));
+        case UNARY: return make_formula(e.op(),formula(e.arg(),spc));
         case NULLARY: return Formula<X>::constant(e.val());
         case VARIABLE: return Formula<X>::coordinate(spc.index(e.var()));
         default: ARIADNE_FAIL_MSG("Cannot compute formula for expression "<<e.op()<<"of kind "<<e.kind()<<" in space "<<spc);

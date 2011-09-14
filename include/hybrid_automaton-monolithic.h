@@ -308,9 +308,14 @@ class MonolithicHybridAutomaton
 
     //@}
 
+    //! \brief Write to an output stream.
+    std::ostream& write(std::ostream&) const;
+
 };
 
-std::ostream& operator<<(std::ostream& os, const MonolithicHybridAutomaton& ha);
+inline std::ostream& operator<<(std::ostream& os, const MonolithicHybridAutomaton& ha) {
+    return ha.write(os);
+}
 
 
 } // namespace Ariadne

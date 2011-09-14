@@ -297,8 +297,9 @@ MonolithicHybridAutomaton::state_space() const
 
 
 std::ostream&
-operator<<(std::ostream& os, const MonolithicHybridAutomaton& automaton)
+MonolithicHybridAutomaton::write(std::ostream& os) const
 {
+    MonolithicHybridAutomaton const& automaton = *this;
     typedef MonolithicHybridAutomaton::Mode Mode;
     typedef MonolithicHybridAutomaton::Transition Transition;
     typedef MonolithicHybridAutomaton::Invariant Invariant;

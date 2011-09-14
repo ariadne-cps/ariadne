@@ -192,9 +192,22 @@ class HybridAutomatonInterface {
     //! \brief The continuous state space in the \a location.
     virtual RealSpace continuous_state_space(DiscreteLocation location) const = 0;
 
+
+    //@}
+
+    //@{
+    //! \name Input/output methods
+
+    //! \brief Write to an output stream.
+    virtual std::ostream& write(std::ostream& os) const = 0;
     //@}
 
 };
+
+inline std::ostream& operator<<(std::ostream& os, const HybridAutomatonInterface& ha) {
+    ha.write(os);
+    return os;
+}
 
 inline std::ostream& operator<<(std::ostream& os, const EventKind& evk) {
     switch(evk) {

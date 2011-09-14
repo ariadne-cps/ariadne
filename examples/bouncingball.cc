@@ -80,14 +80,13 @@ int main(int argc, const char* argv[])
 
     std::cout << "Computing evolution starting from location l1, x = 2.0, v = 0.0" << std::endl;
 
-    Box initial_box(2, 1.99,2.0, 0.0,0.01);
-    EnclosureType initial_enclosure(freefall,initial_box);
     Box bounding_box(2, -0.1,2.1, -10.1,10.1);
 
+    HybridSet initial_set(freefall,(2.0<=x<=2.0,v.in(0.0,0.0)));
     HybridTime evolution_time(1.5,4);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(ball,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(ball,initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     //std::cout << "Orbit="<<orbit<<std::endl;

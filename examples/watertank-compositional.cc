@@ -127,17 +127,15 @@ int main()
     typedef GeneralHybridEvolver::OrbitType OrbitType;
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
-    std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
-
+    std::cout << "Computing evolution starting from location l2, x = 0.0, y = 0.0" << std::endl;
     DiscreteLocation initial_location=(tank|draining,valve|opening);
-    Box initial_box(2, 0.0,0.00, 0.0,0.00);
-    HybridEnclosureType initial_enclosure(DiscreteLocation((tank|draining,valve|opening)),initial_box);
+    HybridSet initial_set((tank|draining,valve|opening),(height==0.0,alpha==0.0));
     Box bounding_box(2, -0.1,9.1, -0.1,1.1);
 
     HybridTime evolution_time(80.0,5);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(watertank_system,initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;

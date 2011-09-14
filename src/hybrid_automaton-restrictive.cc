@@ -453,7 +453,6 @@ DiscretePredicate make_predicate(const DiscreteLocation& q) {
     for( ; iter!=q.end(); ++iter) {
         p=p && (StringVariable(iter->first)==iter->second);
     }
-    std::cerr<<"q="<<q<<" p="<<p<<"\n";
     return p;
 }
 
@@ -462,7 +461,6 @@ List<PrimedStringAssignment> make_update(const DiscreteLocation& q) {
     for(DiscreteLocation::const_iterator iter=q.begin(); iter!=q.end(); ++iter) {
         u.append(next(StringVariable(iter->first))=iter->second);
     }
-    std::cerr<<"q="<<q<<" u="<<u<<"\n";
     return u;
 }
 

@@ -560,7 +560,6 @@ HybridEnclosure::kuhn_recondition()
             }
         }
     }
-    std::cerr<<"dependencies="<<dependencies<<"\n";
     Array< Pair<Float,Nat> > column_max_dependencies(this->number_of_parameters());
     for(uint j=0; j!=dependencies.column_size(); ++j) {
         column_max_dependencies[j] = make_pair(Float(0.0),Nat(j));
@@ -568,9 +567,7 @@ HybridEnclosure::kuhn_recondition()
             column_max_dependencies[j].first=std::max(column_max_dependencies[j].first,dependencies[i][j]);
         }
     }
-    std::cerr<<"column_max_dependencies="<<column_max_dependencies<<"\n";
     std::sort(column_max_dependencies.begin(),column_max_dependencies.end(),std::greater< Pair<Float,Nat> >());
-    std::cerr<<"column_max_dependencies="<<column_max_dependencies<<"\n";
 
     Array<Nat> kept_parameters(number_of_kept_parameters);
     Array<Nat> discarded_parameters(number_of_discarded_parameters);
@@ -578,7 +575,6 @@ HybridEnclosure::kuhn_recondition()
     for(uint j=0; j!=number_of_discarded_parameters; ++j) { discarded_parameters[j]=column_max_dependencies[number_of_kept_parameters+j].second; }
     std::sort(kept_parameters.begin(),kept_parameters.end());
     std::sort(discarded_parameters.begin(),discarded_parameters.end());
-    std::cerr<<"kept_parameters="<<kept_parameters<<"\n";
 
     Vector<IntervalTaylorModel> new_models(models.size(),IntervalTaylorModel(number_of_kept_parameters+number_of_error_parameters,this->_set.sweeper()));
     for(uint i=0; i!=this->dimension(); ++i) {
@@ -717,7 +713,6 @@ draw(FigureInterface& figure, const ListSet<HybridEnclosure>& hels) {
 ListSet<HybridEnclosure::ContinuousStateSetType>
 ListSet<HybridEnclosure>::operator[](const DiscreteLocation& loc) const
 {
-    std::cerr<<"ListSet<HybridEnclosure>::operator[](const DiscreteLocation& loc)\n";
     ListSet<HybridEnclosure::ContinuousStateSetType> result;
     for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         if(iter->location()==loc) {

@@ -34,6 +34,7 @@
 #include "hybrid_automaton_interface.h"
 #include <boost/concept_check.hpp>
 #include <include/rounding.h>
+#include <include/assignment.h>
 
 namespace Ariadne {
 
@@ -173,6 +174,20 @@ HybridSet::HybridSet(const DiscreteLocation& q, const RealExpressionSet& s)
 {
 }
 
+Projection2d projection(const RealSpace& spc, const Variables2d& axes);
+
+BoundedConstraintSet HybridSet::continuous_state_set(const RealSpace& spc) const {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+void HybridSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {
+    if(q.contains(this->location())) {
+        Set<RealVariable> variables=this->variables();
+        RealSpace space(List<RealVariable>(variables.begin(),variables.end()));
+        this->continuous_state_set(space).draw(c,projection(space,p));
+    }
+}
+
 OutputStream& operator<<(OutputStream& os, const HybridSet& hs) {
     return os << "HybridSet( " << hs.location() << ", " << hs.bounds() << ", " << hs.constraints() << ")";
 }
@@ -194,6 +209,13 @@ HybridBasicSet<Box>::HybridBasicSet(const DiscreteLocation& q, const List<RealVa
     }
     _space=RealSpace(variables);
 }
+
+void HybridBasicSet<Box>::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {
+    if(q.contains(this->location())) {
+        this->continuous_state_set().draw(c,projection(this->space(),p));
+    }
+}
+
 
 HybridBoundedConstraintSet::HybridBoundedConstraintSet()
     : _sets(), _spaces()

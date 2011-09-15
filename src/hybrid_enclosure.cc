@@ -661,7 +661,7 @@ HybridEnclosure::_check() const
     check_subset(reduced_domain,this->_dwell_time.domain(),"dwell time");
 }
 
-void HybridEnclosure::draw(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes) const
+void HybridEnclosure::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const
 {
     Projection2d projection(this->dimension(),this->space().index(axes.x_variable()),this->space().index(axes.x_variable()));
     this->continuous_state_set().draw(canvas,projection);

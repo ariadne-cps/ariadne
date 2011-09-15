@@ -22,7 +22,7 @@
  */
 
 /*! \file graphics.h
- *  \brief Graphics class for drawting and outputting figures.
+ *  \brief Graphics class for drawing and outputting shapes in Euclidean space.
  */
 
 #ifndef ARIADNE_GRAPHICS_H
@@ -57,6 +57,19 @@ inline FillStyle fill_style(bool s) { return FillStyle(s); }
 inline FillOpacity fill_opacity(double o) { return FillOpacity(o); }
 inline FillColour fill_colour(const Colour& c) { return FillColour(c); }
 inline FillColour fill_colour(double r, double g, double b) { return FillColour(Colour(r,g,b)); }
+
+struct GraphicsProperties {
+    GraphicsProperties()
+        : line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_opacity(1.0), fill_colour(white) { }
+    GraphicsProperties(bool ls, double lw, Colour lc, bool fs, double fo, Colour fc)
+        : line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_opacity(fo), fill_colour(fc) { }
+    bool line_style;
+    double line_width;
+    Colour line_colour;
+    bool fill_style;
+    double fill_opacity;
+    Colour fill_colour;
+};
 
 
 //! \brief Class for plotting figures.
@@ -113,6 +126,7 @@ inline Figure& operator<<(Figure& g, const FillStyle& fs) { g.set_fill_style(fs)
 inline Figure& operator<<(Figure& g, const FillOpacity& fo) { g.set_fill_opacity(fo); return g; }
 inline Figure& operator<<(Figure& g, const FillColour& fc) { g.set_fill_colour(fc); return g; }
 
+inline void draw(Figure& fig, const DrawableInterface& shape) { fig.draw(shape); }
 inline Figure& operator<<(Figure& fig, const DrawableInterface& shape) { fig.draw(shape); return fig; }
 
 template<class SET> void plot(const char* filename, const SET& set) {

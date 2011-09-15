@@ -52,18 +52,16 @@ static const int TOP_MARGIN = 10;
 static const int RIGHT_MARGIN = 10;
 
 
-struct GraphicsProperties {
-    GraphicsProperties()
-        : line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_opacity(1.0), fill_colour(white) { }
-    GraphicsProperties(bool ls, double lw, Colour lc, bool fs, double fo, Colour fc)
-        : line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_opacity(fo), fill_colour(fc) { }
-    bool line_style;
-    double line_width;
-    Colour line_colour;
-    bool fill_style;
-    double fill_opacity;
-    Colour fill_colour;
-};
+std::string str(Float x) {
+    std::stringstream ss;
+    ss << x;
+    return ss.str();
+}
+
+std::ostream& operator<<(std::ostream& os, const DrawableInterface& drawable) {
+    return drawable.write(os);
+}
+
 
 
 struct GraphicsObject {
@@ -219,14 +217,15 @@ class CairoCanvas
     friend class Figure;
   private:
     cairo_t *cr;
-    uint ix; uint iy; // The indices of the variables plotted on the x and y axes
     double lw; // The line width in pixels
     Colour lc,fc; // The line and fill colours
     double fo; // The fill opacity
   public:
     ~CairoCanvas();
-    CairoCanvas(const Projection2d& projection, const ImageSize2d& size, const Box2d& bounds);
-    CairoCanvas(cairo_t *c, uint i, uint j);
+    CairoCanvas(const ImageSize2d& size, const Box2d& bounds);
+    CairoCanvas(cairo_t *c);
+    void initialise(std::string x, std::string y, double xl, double xu, double yl, double yu);
+    void finalise();
     void move_to(double x, double y) { cairo_move_to (cr, x, y); }
     void line_to(double x, double y) { cairo_line_to (cr, x, y); }
     void circle(double x, double y, double r) { cairo_arc (cr, x, y, r, 0, 2*M_PI); }
@@ -238,7 +237,6 @@ class CairoCanvas
     void set_fill_opacity(double o) { fo=o; }
     void set_fill_colour(double r, double g, double b) { fc=Colour(r,g,b); }
 
-    Projection2d projection() const;
     Vector2d scaling() const;
     Box2d bounds() const;
   public:
@@ -254,14 +252,14 @@ CairoCanvas::~CairoCanvas()
     cairo_destroy(cr);
 }
 
-CairoCanvas::CairoCanvas(cairo_t *c, uint i, uint j)
-    : cr(c), ix(i), iy(j), lw(1.0), lc(0,0,0), fc(1,1,1), fo(1.0)
+CairoCanvas::CairoCanvas(cairo_t *c)
+    : cr(c), lw(1.0), lc(0,0,0), fc(1,1,1), fo(1.0)
 {
 }
 
 // TODO: This function is incomplete and not ready for use
-CairoCanvas::CairoCanvas(const Projection2d& projection, const ImageSize2d& size, const Box2d& bounds)
-    : cr(0), ix(projection.i), iy(projection.j), lw(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0), fo(1.0)
+CairoCanvas::CairoCanvas(const ImageSize2d& size, const Box2d& bounds)
+    : cr(0), lw(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0), fo(1.0)
 {
     //std::cerr<<"Figure::write(filename="<<cfilename<<")\n";
     cairo_surface_t *surface;
@@ -271,11 +269,6 @@ CairoCanvas::CairoCanvas(const Projection2d& projection, const ImageSize2d& size
 
     surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
     cr = cairo_create (surface);
-}
-
-PlanarProjectionMap CairoCanvas::projection() const
-{
-    return PlanarProjectionMap(0u,ix,iy);
 }
 
 Vector2d CairoCanvas::scaling() const
@@ -314,72 +307,14 @@ void CairoCanvas::stroke()
 
 
 
-std::string str(Float x) {
-    std::stringstream ss;
-    ss << x;
-    return ss.str();
-}
-
-
-
-std::ostream& operator<<(std::ostream& os, const DrawableInterface& drawable) {
-    return drawable.write(os);
-}
-
 
 // TODO: Use generic canvas routines; move cairo-specific functionality
 // into CairoCanvas class.
-void Figure::_paint_all(CanvasInterface& canvas) const
+void CairoCanvas::initialise(std::string x, std::string y, double xl, double xu, double yl, double yu)
 {
-    //std::cerr<<"Figure::_paint_all(canvas)\n";
 
-    Box bounding_box=this->_data->bounding_box;
-    const PlanarProjectionMap proj=this->_data->projection;
-    const std::vector<GraphicsObject>& objects=this->_data->objects;
 
-    uint dimension=proj.n;
-
-   // Test if there are no objects to be drawn
-    if(objects.empty()) {
-        return;
-    }
-
-    // Don't attempt to compute a bounding box, as this relies on
-    // a drawable object having one. Instead, the bounding box must be
-    // specified explicitly
-    if(bounding_box.dimension()==0) {
-        bounding_box=Box(proj.n,Interval(-1,1));
-/*
-        if(objects.empty()) {
-            bounding_box=Box(proj.n,Interval(-1,1));
-        } else {
-            bounding_box=objects[0].shape_ptr->bounding_box();
-            for(uint i=1; i!=objects.size(); ++i) {
-                bounding_box=hull(bounding_box,objects[i].shape_ptr->bounding_box());
-            }
-        }
-*/
-    }
-
-    //std::cerr << "bounding_box="<<bounding_box<<"\n";
-
-    // Check projection and bounding box have same values.
-    // If the bounding box dimension is 2, assume these are the bounds on the projected variables.
-    // Project the bounding box onto the canvas
-    Box2d bbox;
-    //if(bounding_box.dimension()==2) {
-    //    proj=PlanarProjectionMap(2,0,1);
-    //}
-
-    ARIADNE_ASSERT_MSG(bounding_box.dimension()==proj.n,"bounding_box="<<static_cast<const DrawableInterface&>(bounding_box)<<", projection="<<proj);
-    ARIADNE_ASSERT(bounding_box.dimension()>proj.i);
-    ARIADNE_ASSERT(bounding_box.dimension()>proj.j);
-    bbox.xl=numeric_cast<double>(bounding_box[proj.i].lower());
-    bbox.xu=numeric_cast<double>(bounding_box[proj.i].upper());
-    bbox.yl=numeric_cast<double>(bounding_box[proj.j].lower());
-    bbox.yu=numeric_cast<double>(bounding_box[proj.j].upper());
-
-    CairoCanvas& cairo_canvas=dynamic_cast<CairoCanvas&>(canvas);
+    CairoCanvas& cairo_canvas=*this;
     cairo_t *cr=cairo_canvas.cr;
 
     const ImageSize2d drawing_size = cairo_canvas.size_in_pixels();
@@ -398,61 +333,6 @@ void Figure::_paint_all(CanvasInterface& canvas) const
     cairo_set_source_rgb (cr, 1,1,1);
     cairo_paint (cr);
 
-    // Save unclipped state and canvas coordinates
-    cairo_save (cr);
-
-    // Set clipping region
-    cairo_move_to (cr, left_margin, top_margin+drawing_height);
-    cairo_line_to (cr, left_margin+drawing_width, top_margin+drawing_height);
-    cairo_line_to (cr, left_margin+drawing_width, top_margin);
-    cairo_line_to (cr, left_margin, top_margin);
-    cairo_line_to (cr, left_margin, top_margin+drawing_height);
-
-    // Fill clipping region with a very light colour to indicate where figure
-    // should be drawn
-    cairo_set_source_rgb(cr, 0.95,1.00,0.95);
-    cairo_fill_preserve (cr);
-    cairo_clip (cr);
-    cairo_new_path (cr);
-
-    //std::cerr<<"cw="<<canvas_width<<" lm="<<left_margin<<" dw="<<drawing_width<<" rm="<<right_margin<<" xl="<<bbox.xl<<" xu="<<bbox.xu<<"\n";
-    //std::cerr<<"ch="<<canvas_height<<"tm="<<top_margin<<" dw="<<drawing_height<<" bm="<<bottom_margin<<" yl="<<bbox.yl<<" yu="<<bbox.yu<<"\n";
-
-    // compute device to user coordinate transformation
-    double ctr0=left_margin;
-    double ctr1=top_margin;
-    double sc0=(drawing_width)/(bbox.xu-bbox.xl);
-    double sc1=-(drawing_height)/(bbox.yu-bbox.yl);
-    double utr0=(-bbox.xl);
-    double utr1=(-bbox.yu);
-
-    // Scale to user coordinates
-    cairo_translate(cr, ctr0, ctr1);
-    cairo_scale (cr, sc0,sc1);
-    cairo_translate(cr, utr0, utr1);
-
-
-    // Draw shapes
-    for(uint i=0; i!=objects.size(); ++i) {
-        const DrawableInterface* shape_ptr=objects[i].shape_ptr.operator->();
-        if(shape_ptr->dimension()==0) { break; } // The dimension may be equal to two for certain empty sets.
-        ARIADNE_ASSERT_MSG(dimension==shape_ptr->dimension(),
-                           "Shape "<<*shape_ptr<<", dimension="<<shape_ptr->dimension()<<", bounding_box="<<static_cast<const DrawableInterface&>(bounding_box));
-        //const double& lw=objects[i].line_width;
-        //canvas.set_line_width(lw);
-        //canvas.set_line_width(objects[i].properties.line_width);
-        canvas.set_fill_opacity(objects[i].properties.fill_opacity);
-        const Colour& lc=objects[i].properties.line_colour;
-        const Colour& fc=objects[i].properties.fill_colour;
-        canvas.set_fill_colour(fc.red, fc.green, fc.blue);
-        canvas.set_line_colour(lc.red, lc.green, lc.blue);
-        shape_ptr->draw(canvas,this->_data->projection);
-    }
-
-
-    // Restore canvas coordinates and unclipped state
-    cairo_restore (cr);
-
     // Set text font
     cairo_select_font_face (cr, "roman",CAIRO_FONT_SLANT_NORMAL,CAIRO_FONT_WEIGHT_NORMAL);
     cairo_set_font_size (cr, 30);
@@ -461,10 +341,10 @@ void Figure::_paint_all(CanvasInterface& canvas) const
     cairo_set_source_rgb (cr, 0., 0., 0.);
 
     // Get axis label text
-    std::string text_xl=str(bbox.xl);
-    std::string text_xu=str(bbox.xu);
-    std::string text_yl=str(bbox.yl);
-    std::string text_yu=str(bbox.yu);
+    std::string text_xl=str(xl);
+    std::string text_xu=str(xu);
+    std::string text_yl=str(yl);
+    std::string text_yu=str(yu);
 
     // Write axis labels
     cairo_text_extents_t te;
@@ -482,7 +362,55 @@ void Figure::_paint_all(CanvasInterface& canvas) const
     cairo_move_to(cr, left_margin-te.width-6, top_margin+te.height+2);
     cairo_show_text (cr, text_yu.c_str());
 
-    // Draw bounding box
+
+    // Save unclipped state and canvas coordinates
+    cairo_save (cr);
+
+    // Set clipping region
+    cairo_move_to (cr, left_margin, top_margin+drawing_height);
+    cairo_line_to (cr, left_margin+drawing_width, top_margin+drawing_height);
+    cairo_line_to (cr, left_margin+drawing_width, top_margin);
+    cairo_line_to (cr, left_margin, top_margin);
+    cairo_line_to (cr, left_margin, top_margin+drawing_height);
+
+    // Fill clipping region with a very light colour to indicate where figure
+    // should be drawn
+    cairo_set_source_rgb(cr, 0.95,1.00,0.95);
+    cairo_fill_preserve (cr);
+    cairo_clip (cr);
+    cairo_new_path (cr);
+
+    //std::cerr<<"cw="<<canvas_width<<" lm="<<left_margin<<" dw="<<drawing_width<<" rm="<<right_margin<<" xl="<<xl<<" xu="<<xu<<"\n";
+    //std::cerr<<"ch="<<canvas_height<<"tm="<<top_margin<<" dw="<<drawing_height<<" bm="<<bottom_margin<<" yl="<<yl<<" yu="<<yu<<"\n";
+
+    // compute device to user coordinate transformation
+    double ctr0=left_margin;
+    double ctr1=top_margin;
+    double sc0=(drawing_width)/(xu-xl);
+    double sc1=-(drawing_height)/(yu-yl);
+    double utr0=(-xl);
+    double utr1=(-yu);
+
+    // Scale to user coordinates
+    cairo_translate(cr, ctr0, ctr1);
+    cairo_scale (cr, sc0,sc1);
+    cairo_translate(cr, utr0, utr1);
+}
+
+void CairoCanvas::finalise()
+{
+    cairo_t *cr=this->cr;
+
+    // Restore canvas coordinates and unclipped state
+    cairo_restore (cr);
+
+    const ImageSize2d drawing_size = this->size_in_pixels();
+    const int drawing_width = drawing_size.nx;
+    const int drawing_height = drawing_size.ny;
+
+    const int left_margin = LEFT_MARGIN;
+    const int top_margin = TOP_MARGIN;
+
     cairo_set_line_width (cr, 2.0);
     cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
     cairo_move_to (cr, left_margin, top_margin+drawing_height);
@@ -491,6 +419,58 @@ void Figure::_paint_all(CanvasInterface& canvas) const
     cairo_line_to (cr, left_margin, top_margin);
     cairo_line_to (cr, left_margin, top_margin+drawing_height);
     cairo_stroke (cr);
+}
+
+
+void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties) {
+    canvas.set_fill_opacity(properties.fill_opacity);
+    const Colour& line_colour=properties.line_colour;
+    const Colour& fill_colour=properties.fill_colour;
+    canvas.set_fill_colour(fill_colour.red, fill_colour.green, fill_colour.blue);
+    canvas.set_line_colour(line_colour.red, line_colour.green, line_colour.blue);
+}
+
+inline std::ostream& operator<<(std::ostream& os, const Box& bx) { return os << static_cast<const IntervalVector&>(bx); }
+
+void Figure::_paint_all(CanvasInterface& canvas) const
+{
+    Box bounding_box=this->_data->bounding_box;
+    const PlanarProjectionMap projection=this->_data->projection;
+    const std::vector<GraphicsObject>& objects=this->_data->objects;
+
+    uint dimension=projection.argument_size();
+
+    // Don't attempt to compute a bounding box, as this relies on
+    // a drawable object having one. Instead, the bounding box must be
+    // specified explicitly
+    if(bounding_box.dimension()==0) {
+        bounding_box=Box(dimension,Interval(-1,1));
+    }
+
+    // Check projection and bounding box have same values.
+    ARIADNE_ASSERT_MSG(bounding_box.dimension()==projection.argument_size(),"bounding_box="<<bounding_box<<", projection="<<projection);
+    ARIADNE_ASSERT(bounding_box.dimension()>projection.x_coordinate());
+    ARIADNE_ASSERT(bounding_box.dimension()>projection.y_coordinate());
+
+    // Project the bounding box onto the canvas
+    double xl=numeric_cast<double>(bounding_box[projection.x_coordinate()].lower());
+    double xu=numeric_cast<double>(bounding_box[projection.x_coordinate()].upper());
+    double yl=numeric_cast<double>(bounding_box[projection.y_coordinate()].lower());
+    double yu=numeric_cast<double>(bounding_box[projection.y_coordinate()].upper());
+
+    canvas.initialise("x","y",xl,xu,yl,yu);
+
+    // Draw shapes
+    for(uint i=0; i!=objects.size(); ++i) {
+        const DrawableInterface& shape=objects[i].shape_ptr.operator*();
+        if(shape.dimension()==0) { break; } // The dimension may be equal to two for certain empty sets.
+        ARIADNE_ASSERT_MSG(dimension==shape.dimension(),
+                           "Shape "<<shape<<", dimension="<<shape.dimension()<<", bounding_box="<<bounding_box);
+        set_properties(canvas, objects[i].properties);
+        shape.draw(canvas,this->_data->projection);
+    }
+
+    canvas.finalise();
 }
 
 
@@ -511,11 +491,9 @@ Figure::write(const char* cfilename, uint drawing_width, uint drawing_height) co
     const int canvas_width = drawing_width+LEFT_MARGIN+RIGHT_MARGIN;
     const int canvas_height = drawing_height+BOTTOM_MARGIN+TOP_MARGIN;;
 
-    const PlanarProjectionMap& projection=this->_data->projection;
-
     surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
     cr = cairo_create (surface);
-    CairoCanvas canvas(cr,projection.i,projection.j);
+    CairoCanvas canvas(cr);
 
     this->_paint_all(canvas);
 
@@ -540,7 +518,6 @@ paint (GtkWidget      *widget,
     cairo_t *cr;
 
     Figure* figure=static_cast<Figure*>(gdata);
-    PlanarProjectionMap projection=figure->get_projection_map();
 
     //gint canvas_width  = widget->allocation.width;
     //gint canvas_height = widget->allocation.height;
@@ -549,7 +526,7 @@ paint (GtkWidget      *widget,
     cr = gdk_cairo_create (widget->window);
 
     // Draw Cairo objects
-    CairoCanvas canvas(cr,projection.i,projection.j);
+    CairoCanvas canvas(cr);
     figure->_paint_all(canvas);
 }
 

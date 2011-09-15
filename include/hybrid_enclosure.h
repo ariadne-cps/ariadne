@@ -286,7 +286,7 @@ class HybridEnclosure
     void kuhn_recondition();
 
     //! \brief Draws onto a canvas.
-    virtual void draw(CanvasInterface&, const DiscreteLocation&, const Variables2d&) const;
+    virtual void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;
     //! \brief Write an abbreviated representation to an output stream.

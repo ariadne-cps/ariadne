@@ -2252,14 +2252,6 @@ inline std::ostream& operator<<(std::ostream& os, const GridCell& gridPavingCell
         ", Box: " << gridPavingCell.box() << " )";
 }
 
-inline void draw(FigureInterface& fig, const GridCell& cell) {
-    fig.draw(cell.box());
-}
-
-inline FigureInterface& operator<<(FigureInterface& fig, const GridCell& cell) {
-    fig.draw(cell.box()); return fig;
-}
-
 
 /*************************************FRIENDS OF GridTreeCursor*****************************************/
 

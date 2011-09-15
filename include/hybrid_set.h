@@ -80,6 +80,7 @@ template<class DS, class HBS> class HybridSetConstIterator;
 
 
 class HybridSet
+    : public HybridDrawableInterface
 {
     DiscreteLocation _location;
     Map< RealVariable, RealInterval> _bounds;
@@ -88,11 +89,13 @@ class HybridSet
     HybridSet() { }
     HybridSet(const DiscreteLocation& loc, const List<RealVariableInterval>& bnd, const List<ContinuousPredicate>& cnstr = List<ContinuousPredicate>());
     HybridSet(const DiscreteLocation& loc, const RealExpressionSet& set);
-    DiscreteLocation location() const { return this->_location; }
+    HybridSet* clone() const { return new HybridSet(*this); }
+    DiscreteLocation const& location() const { return this->_location; }
     Set<RealVariable> variables() const { return this->_bounds.keys(); };
     Map<RealVariable,RealInterval> const& bounds() const { return this->_bounds; };
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; };
     BoundedConstraintSet continuous_state_set(const RealSpace&) const;
+    void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
 };
 OutputStream& operator<<(OutputStream& os, const HybridSet& hs);
 
@@ -124,7 +127,9 @@ class HybridBasicSet
 
 typedef HybridBasicSet<Box> HybridBox;
 
-template<> class HybridBasicSet<Box> {
+template<> class HybridBasicSet<Box>
+    : public HybridDrawableInterface
+{
     DiscreteLocation _location;
     RealSpace _space;
     Box _set;
@@ -136,6 +141,8 @@ template<> class HybridBasicSet<Box> {
     const RealSpace& space() const { return this->_space; }
     const Box& continuous_state_set() const { return this->_set; }
     const Interval& operator[](const RealVariable& v) const { return this->_set[this->_space.index(v)]; }
+    HybridBasicSet<Box>* clone() const { return new HybridBasicSet<Box>(*this); }
+    void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
     friend std::ostream& operator<<(std::ostream& os, const HybridBox& hbx) {
         return os << "(" << hbx.location() << ", " << hbx.space() << ", " << hbx.continuous_state_set() << ")"; }
 };
@@ -726,7 +733,7 @@ void
 draw(FigureInterface& figure, const HybridGridTreeSet& hgts) {
     for(HybridGridTreeSet::const_iterator iter=hgts.begin();
             iter!=hgts.end(); ++iter) {
-        draw(figure,iter->third);
+        draw(figure,iter->third.box());
     }
 }
 

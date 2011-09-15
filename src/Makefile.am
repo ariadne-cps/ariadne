@@ -57,7 +57,8 @@ ARIADNE_HYBRID_SRC = \
 	hybrid_automaton-restrictive.cc \
 	hybrid_simulator.cc \
 	hybrid_evolver.cc \
-	hybrid_reachability_analyser.cc
+	hybrid_reachability_analyser.cc \
+	hybrid_graphics.cc
 
 ARIADNE_SRC = $(ARIADNE_KERNEL_SRC) $(ARIADNE_HYBRID_SRC)
 

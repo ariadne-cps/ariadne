@@ -33,6 +33,7 @@ typedef unsigned int uint;
 namespace Ariadne {
 
 template<class R, class A> inline R numeric_cast(const A&);
+template<class T> class Set;
 
 struct Vector2d;
 struct Point2d;
@@ -41,13 +42,6 @@ struct Box2d;
 class Box;
 class Colour;
 
-class Real;
-template<class T> class Variable;
-typedef Variable<Real> RealVariable;
-template<class T> class Space;
-typedef Space<Real> RealSpace;
-class DiscreteLocation;
-
 class DrawableInterface;
 class FigureInterface;
 class CanvasInterface;
@@ -55,14 +49,13 @@ class CanvasInterface;
 struct PlanarProjectionMap {
     uint n, i, j;
     PlanarProjectionMap(uint nn, uint ii, uint jj) : n(nn), i(ii), j(jj) { }
+    uint argument_size() const { return n; }
     uint x_coordinate() const { return i; }
     uint y_coordinate() const { return j; }
 };
 inline std::ostream& operator<<(std::ostream& os, const PlanarProjectionMap& p) {
     return os << "P<R"<<p.n<<";R2>[x"<<p.i<<",x"<<p.j<<"]"; }
 typedef PlanarProjectionMap Projection2d;
-
-struct Variables2d;
 
 //! \ingroup GraphicsModule
 //! \brief Base interface for plotting and drawing classes.
@@ -85,8 +78,12 @@ class FigureInterface {
     virtual Colour get_fill_colour() const = 0;
     virtual void draw(const DrawableInterface&) = 0;
 };
-
 inline void draw(FigureInterface& fig, const DrawableInterface& shape) { fig.draw(shape); }
+inline FigureInterface& operator<<(FigureInterface& fig, const DrawableInterface& shape) { fig.draw(shape); return fig; }
+
+class Figure;
+void draw(Figure& fig, const DrawableInterface& shape);
+Figure& operator<<(Figure& fig, const DrawableInterface& shape);
 
 //! \ingroup GraphicsModule
 //! \brief Interface to two-dimensional drawing canvas with the ability to draw polyhedra.
@@ -94,6 +91,9 @@ class CanvasInterface {
   public:
     //! \brief Destructor
     virtual ~CanvasInterface() { };
+
+    virtual void initialise(std::string x, std::string y, double lx, double ux, double ly, double uy) = 0;
+    virtual void finalise() = 0;
 
     //! \brief Move the current initial point for a line to the point \a (x,y).
     virtual void move_to(double x, double y) = 0;
@@ -143,6 +143,18 @@ class DrawableInterface {
     virtual std::ostream& write(std::ostream& os) const { return os << "Drawable"; }
 };
 
+
+
+
+class Real;
+template<class T> class Variable;
+typedef Variable<Real> RealVariable;
+template<class T> class Space;
+typedef Space<Real> RealSpace;
+class DiscreteLocation;
+
+struct Variables2d;
+
 //! \ingroup GraphicsModule
 //! \brief Base interface for drawable objects
 class HybridDrawableInterface {
@@ -151,12 +163,8 @@ class HybridDrawableInterface {
     virtual ~HybridDrawableInterface() { }
     //! brief Make a dynamically-allocated copy.
     virtual HybridDrawableInterface* clone() const = 0;
-    //! brief The dimension of the object in Euclidean space
-    virtual const DiscreteLocation& location() const = 0;
-    //! brief The variables of the continuous space.
-    virtual const RealSpace space() const = 0;
     //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
-    virtual void draw(CanvasInterface& c, const DiscreteLocation& q, const Variables2d& v) const = 0;
+    virtual void draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& v) const = 0;
     //! brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const { return os << "Drawable"; }
 };

@@ -109,7 +109,7 @@ class AffineSet
 
     List<Point2d> boundary(uint xc, uint yc) const;
 
-    virtual void draw(CanvasInterface&) const;
+    virtual void draw(CanvasInterface&, const Projection2d& p) const;
     virtual std::ostream& write(std::ostream& os) const;
 
   private:

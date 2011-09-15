@@ -952,7 +952,7 @@ class GridTreeSubset : public DrawableInterface {
     //! \name Input/Output
 
     /*! \brief Draw on a two-dimensional canvas. */
-    void draw(CanvasInterface& canvas) const;
+    void draw(CanvasInterface& canvas, const Projection2d& projection) const;
 
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;

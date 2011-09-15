@@ -120,7 +120,7 @@ enum EnclosureVariableType { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, 
 //! it is safe to remove a constraint \f$g_e(x_{i-1})\leq0\f$ and
 //! replace it with the constraint \f$g_e(x_i)\leq 0\f$.
 class HybridEnclosure
-    : public DrawableInterface
+    : public HybridDrawableInterface
     , public Loggable
 {
     friend class SimpleHybridEvolver;
@@ -160,7 +160,7 @@ class HybridEnclosure
     //! \brief The current location.
     const DiscreteLocation& location() const;
     //! \brief The Euclidean space of the location.
-    const RealSpace& space() const;
+    const RealSpace space() const;
     //! \brief The list of previous events.
     const List<DiscreteEvent>& previous_events() const;
     //! \brief The number of independent parameters.
@@ -286,7 +286,7 @@ class HybridEnclosure
     void kuhn_recondition();
 
     //! \brief Draws onto a canvas.
-    virtual void draw(CanvasInterface&) const;
+    virtual void draw(CanvasInterface&, const DiscreteLocation&, const Variables2d&) const;
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;
     //! \brief Write an abbreviated representation to an output stream.

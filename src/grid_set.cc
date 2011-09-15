@@ -1622,9 +1622,9 @@ tribool GridTreeSubset::overlaps( const BinaryTreeNode* pCurrentNode, const Grid
     return result;
 }
 
-void GridTreeSubset::draw(CanvasInterface& theGraphic) const {
+void GridTreeSubset::draw(CanvasInterface& theGraphic, const Projection2d& theProjection) const {
     for(GridTreeSubset::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        iter->box().draw(theGraphic);
+        iter->box().draw(theGraphic,theProjection);
     }
 }
 
@@ -2795,19 +2795,19 @@ GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& the
     return resultSet;
 }
 
-void draw(CanvasInterface& theGraphic, const GridCell& theGridCell) {
-    theGridCell.box().draw(theGraphic);
+void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const GridCell& theGridCell) {
+    theGridCell.box().draw(theGraphic,theProjection);
 }
 
-void draw(CanvasInterface& theGraphic, const GridTreeSet& theGridTreeSet) {
+void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const GridTreeSet& theGridTreeSet) {
     for(GridTreeSet::const_iterator iter=theGridTreeSet.begin(); iter!=theGridTreeSet.end(); ++iter) {
-        iter->box().draw(theGraphic);
+        iter->box().draw(theGraphic,theProjection);
     }
 }
 
-void draw(CanvasInterface& theGraphic, const CompactSetInterface& theSet) {
+void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const CompactSetInterface& theSet) {
     static const int DRAWING_DEPTH=16;
-    draw(theGraphic,outer_approximation(theSet,Grid(theSet.dimension()),DRAWING_DEPTH));
+    draw(theGraphic,theProjection,outer_approximation(theSet,Grid(theSet.dimension()),DRAWING_DEPTH));
 }
 
 } // namespace Ariadne

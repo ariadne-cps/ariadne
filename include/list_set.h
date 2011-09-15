@@ -147,9 +147,9 @@ class ListSet
      *
      *  The ListSet template does not implement the DrawableInterface to avoid a dependency on the box.h header file.
      */
-    void draw(CanvasInterface& c) const {
+    void draw(CanvasInterface& c, const Projection2d& p) const {
         for(uint i=0; i!=this->size(); ++i) {
-            (*this)[i].draw(c);
+            (*this)[i].draw(c,p);
         }
     }
 

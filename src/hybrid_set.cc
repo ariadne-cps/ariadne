@@ -37,6 +37,13 @@
 
 namespace Ariadne {
 
+struct Variables2d {
+    RealVariable _x,_y;
+    Variables2d(const RealVariable& x, const RealVariable& y) : _x(x), _y(y) { }
+    RealVariable const& x_variable() const { return this->_x; };
+    RealVariable const& y_variable() const { return this->_y; };
+};
+
 
 
 Orbit<HybridPoint>::Orbit(const HybridPoint& hpt)
@@ -132,10 +139,18 @@ final() const
     return this->_data->final;
 }
 
-void draw(CanvasInterface& graphic, const Orbit<HybridPoint>& orbit)
+template<class BS> void draw(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
+{
+    if(set.location()==location) {
+        Projection2d projection(set.continuous_state_set().dimension(),set.space().index(axes.x_variable()),set.space().index(axes.y_variable()));
+        set.continuous_state_set().draw(canvas,projection);
+    }
+}
+
+void draw(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const Orbit<HybridPoint>& orbit)
 {
     for(uint i=0; i<=orbit.size(); ++i) {
-        orbit.curve(i).draw(graphic);
+        draw(canvas,location,axes,orbit.curves()[i]);
     }
 }
 

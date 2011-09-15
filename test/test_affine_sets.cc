@@ -54,7 +54,7 @@ struct Polytope2d
     virtual Polytope2d* clone() const { return new Polytope2d(*this); }
     virtual uint dimension() const { return 2u; }
 
-    virtual void draw(CanvasInterface& canvas) const {
+    virtual void draw(CanvasInterface& canvas, const Projection2d& p) const {
         if(points.size()==1) { canvas.dot(points[0].x,points[0].y); return; }
         canvas.move_to(points[0].x,points[0].y);
         for(uint i=1; i!=points.size(); ++i) {

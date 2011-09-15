@@ -64,10 +64,8 @@ Box Point::bounding_box() const {
     return r;
 }
 
-void Point::draw(CanvasInterface& canv) const {
-    uint ix=canv.x_coordinate();
-    uint iy=canv.y_coordinate();
-    canv.dot(approx_cast<double>((*this)[ix]),approx_cast<double>((*this)[iy]));
+void Point::draw(CanvasInterface& canv, const Projection2d& proj) const {
+    canv.dot(numeric_cast<double>((*this)[proj.x_coordinate()]),numeric_cast<double>((*this)[proj.y_coordinate()]));
 }
 
 Point make_point(const std::string& str)

@@ -188,9 +188,9 @@ RealBoundedConstraintSet::write(std::ostream& os) const
 }
 
 void
-RealBoundedConstraintSet::draw(CanvasInterface& os) const
+RealBoundedConstraintSet::draw(CanvasInterface& c, const Projection2d& p) const
 {
-    return ConstrainedImageSet(BoundedConstraintSet(approximation(this->domain()),this->function(),approximation(this->codomain()))).draw(os);
+    return ConstrainedImageSet(BoundedConstraintSet(approximation(this->domain()),this->function(),approximation(this->codomain()))).draw(c,p);
 }
 
 
@@ -274,9 +274,9 @@ ImageSet::bounding_box() const
 
 
 void
-ImageSet::draw(CanvasInterface& canvas) const
+ImageSet::draw(CanvasInterface& canvas, const Projection2d& projection) const
 {
-    return ConstrainedImageSet(this->domain(),this->function()).draw(canvas);
+    return ConstrainedImageSet(this->domain(),this->function()).draw(canvas,projection);
 }
 
 
@@ -438,9 +438,9 @@ BoundedConstraintSet::write(std::ostream& os) const
 }
 
 void
-BoundedConstraintSet::draw(CanvasInterface& os) const
+BoundedConstraintSet::draw(CanvasInterface& canvas, const Projection2d& projection) const
 {
-    return ConstrainedImageSet(*this).draw(os);
+    return ConstrainedImageSet(*this).draw(canvas,projection);
 }
 
 ConstrainedImageSet image(const BoundedConstraintSet& set, const RealVectorFunction& function) {
@@ -1016,22 +1016,22 @@ constraint_adjoin_outer_approximation_to(GridTreeSet& p, int e) const
     Ariadne::constraint_adjoin_outer_approximation_to(p,d,f,g,c,e);
 }
 
-void draw(CanvasInterface& cnvs, const ConstrainedImageSet& set, uint depth)
+void draw(CanvasInterface& cnvs, const Projection2d& proj, const ConstrainedImageSet& set, uint depth)
 {
     if( depth==0) {
-        set.affine_approximation().draw(cnvs);
+        set.affine_approximation().draw(cnvs,proj);
     } else {
         Pair<ConstrainedImageSet,ConstrainedImageSet> split=set.split();
-        draw(cnvs,split.first,depth-1u);
-        draw(cnvs,split.second,depth-1u);
+        draw(cnvs,proj,split.first,depth-1u);
+        draw(cnvs,proj,split.second,depth-1u);
     }
 }
 
 void
-ConstrainedImageSet::draw(CanvasInterface& cnvs) const
+ConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
 {
     static const uint DEPTH = 0;
-    Ariadne::draw(cnvs,*this,DEPTH);
+    Ariadne::draw(cnvs,proj,*this,DEPTH);
 }
 
 
@@ -1339,22 +1339,22 @@ tribool IntervalConstrainedImageSet::satisfies(const IntervalNonlinearConstraint
 }
 
 
-void draw(CanvasInterface& cnvs, const IntervalConstrainedImageSet& set, uint depth)
+void draw(CanvasInterface& cnvs, const Projection2d& proj, const IntervalConstrainedImageSet& set, uint depth)
 {
     if( depth==0) {
-        set.affine_approximation().draw(cnvs);
+        set.affine_approximation().draw(cnvs,proj);
     } else {
         Pair<IntervalConstrainedImageSet,IntervalConstrainedImageSet> split=set.split();
-        draw(cnvs,split.first,depth-1u);
-        draw(cnvs,split.second,depth-1u);
+        draw(cnvs,proj,split.first,depth-1u);
+        draw(cnvs,proj,split.second,depth-1u);
     }
 }
 
 void
-IntervalConstrainedImageSet::draw(CanvasInterface& cnvs) const
+IntervalConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
 {
     static const uint DEPTH = 0;
-    Ariadne::draw(cnvs,*this,DEPTH);
+    Ariadne::draw(cnvs,proj,*this,DEPTH);
 }
 
 

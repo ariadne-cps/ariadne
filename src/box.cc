@@ -125,9 +125,9 @@ Box widen(const Box& bx) {
     return result;
 }
 
-void Box::draw(CanvasInterface& c) const
+void Box::draw(CanvasInterface& c, const Projection2d& p) const
 {
-    uint ix=c.x_coordinate(); uint iy=c.y_coordinate();
+    uint ix=p.x_coordinate(); uint iy=p.y_coordinate();
     Interval x=(*this)[ix]; Interval y=(*this)[iy];
     c.move_to(approx_cast<double>(x.lower()),approx_cast<double>(y.lower()));
     c.line_to(approx_cast<double>(x.upper()),approx_cast<double>(y.lower()));

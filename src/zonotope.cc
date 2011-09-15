@@ -850,9 +850,9 @@ struct angle_less {
     }
 };
 
-void Zonotope::draw(CanvasInterface& c) const {
+void Zonotope::draw(CanvasInterface& c, const Projection2d& p) const {
     const Zonotope& z=*this;
-    uint ix=c.x_coordinate(); uint iy=c.y_coordinate();
+    uint ix=p.x_coordinate(); uint iy=p.y_coordinate();
 
     const Vector<Float>& zc=z.centre();
     const Matrix<Float>& zg=z.generators();

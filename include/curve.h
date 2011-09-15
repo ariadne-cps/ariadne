@@ -146,7 +146,7 @@ class InterpolatedCurve
     /*! \brief A dynamically-allocated copy. */
     virtual InterpolatedCurve* clone() const;
     /*! \brief Draw on a two-dimensional canvas. */
-    virtual void draw(CanvasInterface& c) const;
+    virtual void draw(CanvasInterface& c, const Projection2d& p) const;
     /*! \brief A bounding box for the curve. */
     virtual Box bounding_box() const;
 

@@ -714,9 +714,9 @@ AffineSet::boundary(uint xind, uint yind) const
 
 }
 
-void AffineSet::draw(CanvasInterface& canvas) const {
+void AffineSet::draw(CanvasInterface& canvas, const Projection2d& projection) const {
     //std::cerr<<"AffineSet::draw: "<<*this<<"\n";
-    List<Point2d> boundary=this->boundary(canvas.x_coordinate(),canvas.y_coordinate());
+    List<Point2d> boundary=this->boundary(projection.x_coordinate(),projection.y_coordinate());
 
     if(boundary.empty()) { return; }
     if(boundary.size()==1) { canvas.dot(boundary[0].x,boundary[0].y); }

@@ -66,7 +66,7 @@ class Point
     virtual std::ostream& write(std::ostream& os) const {
         return os << static_cast<const Vector<Float>&>(*this); }
 
-    virtual void draw(CanvasInterface& c) const;
+    virtual void draw(CanvasInterface& c, const Projection2d& p) const;
     virtual Box bounding_box() const;
 };
 

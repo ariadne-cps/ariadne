@@ -295,15 +295,15 @@ class TaylorConstrainedImageSet
     Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> split(uint k) const;
 
     //! \brief Draw to a canvas.
-    void draw(CanvasInterface&) const;
+    void draw(CanvasInterface& c, const Projection2d& p) const;
     //! \brief Draw the bounding box to a canvas. Useful to obtain a quick and rough
     //! image or when all else fails.
-    void box_draw(CanvasInterface&) const;
+    void box_draw(CanvasInterface&, const Projection2d& p) const;
     //! \brief Draw the to a canvas by splitting into small enough pieces that
     //! affine over-approximations yield a good image.
-    void affine_draw(CanvasInterface&, uint=1u) const;
+    void affine_draw(CanvasInterface&, const Projection2d& p, uint=1u) const;
     //! \brief Draw the to a canvas by over-approximating on a grid.
-    void grid_draw(CanvasInterface&, uint=1u) const;
+    void grid_draw(CanvasInterface&, const Projection2d& p, uint=1u) const;
 
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;

@@ -205,9 +205,6 @@ void Figure::clear() {
     this->_data->objects.clear();
 }
 
-uint CanvasInterface::x_coordinate() const { return this->projection().i; }
-uint CanvasInterface::y_coordinate() const { return this->projection().j; }
-
 struct ImageSize2d {
     uint nx,ny;
     ImageSize2d(uint _nx,uint _ny) : nx(_nx), ny(_ny) { }
@@ -449,7 +446,7 @@ void Figure::_paint_all(CanvasInterface& canvas) const
         const Colour& fc=objects[i].properties.fill_colour;
         canvas.set_fill_colour(fc.red, fc.green, fc.blue);
         canvas.set_line_colour(lc.red, lc.green, lc.blue);
-        shape_ptr->draw(canvas);
+        shape_ptr->draw(canvas,this->_data->projection);
     }
 
 

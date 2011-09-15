@@ -201,7 +201,7 @@ class Box
     std::pair<Box,Box> split(uint i) const { return Ariadne::split(*this,i); };
 
     //! \brief Draw on a canvas.
-    virtual void draw(CanvasInterface& c) const;
+    virtual void draw(CanvasInterface& c, const Projection2d& p) const;
 
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const {

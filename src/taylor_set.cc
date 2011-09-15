@@ -1439,29 +1439,29 @@ TaylorConstrainedImageSet TaylorConstrainedImageSet::restriction(const Vector<In
 }
 
 
-void TaylorConstrainedImageSet::draw(CanvasInterface& canvas) const {
+void TaylorConstrainedImageSet::draw(CanvasInterface& canvas, const Projection2d& projection) const {
     switch(DRAWING_METHOD) {
         case BOX_DRAW:
-            this->box_draw(canvas);
+            this->box_draw(canvas,projection);
             break;
         case AFFINE_DRAW:
             //if(this->number_of_zero_constraints()!=0) { this->box_draw(canvas); }
-            this->affine_draw(canvas,DRAWING_ACCURACY);
+            this->affine_draw(canvas,projection,DRAWING_ACCURACY);
             break;
         case GRID_DRAW:
-            this->grid_draw(canvas);
+            this->grid_draw(canvas,projection);
             break;
         default:
             ARIADNE_WARN("Unknown drawing method\n");
     }
 }
 
-void TaylorConstrainedImageSet::box_draw(CanvasInterface& canvas) const {
+void TaylorConstrainedImageSet::box_draw(CanvasInterface& canvas, const Projection2d& projection) const {
     this->reduce();
-    Box(this->_function(this->_reduced_domain)).draw(canvas);
+    Box(this->_function(this->_reduced_domain)).draw(canvas,projection);
 }
 
-void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accuracy) const {
+void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, const Projection2d& projection, uint accuracy) const {
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->_reduced_domain,this->_domain),*this);
 
     // Bound the maximum number of splittings allowed to draw a particular set.
@@ -1513,17 +1513,17 @@ void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, uint accura
 
     for(uint n=0; n!=subdomains.size(); ++n) {
         try {
-            this->restriction(subdomains[n]).affine_over_approximation().draw(canvas);
+            this->restriction(subdomains[n]).affine_over_approximation().draw(canvas,projection);
         } catch(...) {
-            this->restriction(subdomains[n]).box_draw(canvas);
+            this->restriction(subdomains[n]).box_draw(canvas,projection);
         }
     }
 };
 
 
-void TaylorConstrainedImageSet::grid_draw(CanvasInterface& canvas, uint accuracy) const {
+void TaylorConstrainedImageSet::grid_draw(CanvasInterface& canvas, const Projection2d& projection, uint accuracy) const {
     // TODO: Project to grid first
-    this->outer_approximation(Grid(this->dimension()),accuracy).draw(canvas);
+    this->outer_approximation(Grid(this->dimension()),accuracy).draw(canvas,projection);
 }
 
 Map<List<DiscreteEvent>,RealScalarFunction> pretty(const Map<List<DiscreteEvent>,ScalarTaylorFunction>& constraints) {

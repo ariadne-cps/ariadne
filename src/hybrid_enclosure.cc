@@ -75,6 +75,13 @@ List<String> variable_names(const List<EnclosureVariableType>& vt) {
     return result;
 }
 
+struct Variables2d {
+    RealVariable _x,_y;
+    Variables2d(const RealVariable& x, const RealVariable& y) : _x(x), _y(y) { }
+    RealVariable const& x_variable() const { return this->_x; };
+    RealVariable const& y_variable() const { return this->_y; };
+};
+
 
 //-------------- HybridEnclosure -----------------------------------------//
 
@@ -151,6 +158,12 @@ HybridEnclosure::HybridEnclosure(const Pair<DiscreteLocation,ContinuousStateSetT
 
 HybridEnclosure* HybridEnclosure::clone() const {
     return new HybridEnclosure(*this);
+}
+
+const RealSpace
+HybridEnclosure::space() const
+{
+    return RealSpace(this->_space);
 }
 
 List<DiscreteEvent> const&
@@ -648,9 +661,10 @@ HybridEnclosure::_check() const
     check_subset(reduced_domain,this->_dwell_time.domain(),"dwell time");
 }
 
-void HybridEnclosure::draw(CanvasInterface& canvas) const
+void HybridEnclosure::draw(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes) const
 {
-    this->continuous_state_set().draw(canvas);
+    Projection2d projection(this->dimension(),this->space().index(axes.x_variable()),this->space().index(axes.x_variable()));
+    this->continuous_state_set().draw(canvas,projection);
 }
 
 std::ostream& operator<<(std::ostream& os, const Representation< List<ScalarIntervalFunction> >& fns_repr)

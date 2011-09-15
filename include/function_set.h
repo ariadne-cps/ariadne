@@ -140,7 +140,7 @@ class RealBoundedConstraintSet
     tribool inside(const Box&) const;
     Box bounding_box() const;
     std::ostream& write(std::ostream&) const;
-    void draw(CanvasInterface&) const;
+    void draw(CanvasInterface&,const Projection2d&) const;
 };
 
 
@@ -177,7 +177,7 @@ class ImageSet
     tribool overlaps(const Box&) const;
     tribool inside(const Box&) const;
     Box bounding_box() const;
-    void draw(CanvasInterface&) const;
+    void draw(CanvasInterface&,const Projection2d&) const;
     std::ostream& write(std::ostream&) const;
 };
 
@@ -262,7 +262,7 @@ class BoundedConstraintSet
     tribool inside(const Box&) const;
     Box bounding_box() const;
     std::ostream& write(std::ostream&) const;
-    void draw(CanvasInterface&) const;
+    void draw(CanvasInterface&,const Projection2d&) const;
 };
 
 
@@ -352,7 +352,7 @@ class ConstrainedImageSet
     tribool satisfies(const RealNonlinearConstraint& c) const;
 
     //! \brief Draw to a canvas.
-    void draw(CanvasInterface&) const;
+    void draw(CanvasInterface&,const Projection2d&) const;
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;
   private:
@@ -475,7 +475,7 @@ class IntervalConstrainedImageSet
     tribool satisfies(const IntervalNonlinearConstraint& c) const;
 
     //! \brief Draw to a canvas.
-    void draw(CanvasInterface&) const;
+    void draw(CanvasInterface&,const Projection2d&) const;
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;
 };

@@ -118,9 +118,9 @@ InterpolatedCurve::bounding_box() const
 }
 
 void
-InterpolatedCurve::draw(CanvasInterface& c) const
+InterpolatedCurve::draw(CanvasInterface& c, const Projection2d& p) const
 {
-    uint xi=c.x_coordinate(); uint yi=c.y_coordinate();
+    uint xi=p.x_coordinate(); uint yi=p.y_coordinate();
     const_iterator iter=this->begin();
     const Point& pt=iter->second;
     c.move_to(pt[xi],pt[yi]);

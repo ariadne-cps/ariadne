@@ -211,7 +211,7 @@ class Zonotope
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;
     /*! \brief Draw on a canvas. */
-    void draw(CanvasInterface& c) const;
+    void draw(CanvasInterface& c, const Projection2d& p) const;
     //@}
 };
 

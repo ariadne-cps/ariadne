@@ -99,7 +99,7 @@ class Polytope
     virtual tribool overlaps(const Box& bx) const;
     virtual tribool inside(const Box& bx) const;
     virtual Box bounding_box() const;
-    virtual void draw(CanvasInterface& c) const;
+    virtual void draw(CanvasInterface& c, const Projection2d& p) const;
     virtual std::ostream& write(std::ostream& os) const;
 
     //! \brief The convex hull of two polytopes.

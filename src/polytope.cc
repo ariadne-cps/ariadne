@@ -276,8 +276,8 @@ apply(const ProjectionFunction& map, const InterpolatedCurve& curve)
 }
 
 
-void Polytope::draw(CanvasInterface& c) const {
-    uint xi=c.x_coordinate(); uint yi=c.y_coordinate();
+void Polytope::draw(CanvasInterface& c, const Projection2d& p) const {
+    uint xi=p.x_coordinate(); uint yi=p.y_coordinate();
     ARIADNE_ASSERT(max(xi,yi)<this->dimension());
 
     Polytope pr(2);

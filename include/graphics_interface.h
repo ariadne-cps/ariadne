@@ -41,6 +41,13 @@ struct Box2d;
 class Box;
 class Colour;
 
+class Real;
+template<class T> class Variable;
+typedef Variable<Real> RealVariable;
+template<class T> class Space;
+typedef Space<Real> RealSpace;
+class DiscreteLocation;
+
 class DrawableInterface;
 class FigureInterface;
 class CanvasInterface;
@@ -48,11 +55,14 @@ class CanvasInterface;
 struct PlanarProjectionMap {
     uint n, i, j;
     PlanarProjectionMap(uint nn, uint ii, uint jj) : n(nn), i(ii), j(jj) { }
+    uint x_coordinate() const { return i; }
+    uint y_coordinate() const { return j; }
 };
 inline std::ostream& operator<<(std::ostream& os, const PlanarProjectionMap& p) {
     return os << "P<R"<<p.n<<";R2>[x"<<p.i<<",x"<<p.j<<"]"; }
-
 typedef PlanarProjectionMap Projection2d;
+
+struct Variables2d;
 
 //! \ingroup GraphicsModule
 //! \brief Base interface for plotting and drawing classes.
@@ -85,11 +95,6 @@ class CanvasInterface {
     //! \brief Destructor
     virtual ~CanvasInterface() { };
 
-    //! The index of the variable used for the x-coordinate. (Deprecated)
-    uint x_coordinate() const;
-    //! The index of the variable used for the y-coordinate. (Deprecated)
-    uint y_coordinate() const;
-
     //! \brief Move the current initial point for a line to the point \a (x,y).
     virtual void move_to(double x, double y) = 0;
     //! \brief Create a line segment from the current point to the point \a (x,y).
@@ -112,8 +117,6 @@ class CanvasInterface {
     //! \brief Set the colour of subsequent regions to be filled.
     virtual void set_fill_colour(double r, double g, double b) = 0;
 
-    //! \brief The projection giving the x- and y- variables.
-    virtual Projection2d projection() const = 0;
     //! \brief The scaling of the figure, in user units per pixel.
     virtual Vector2d scaling() const = 0;
     //! brief The lower and upper bounds of the x- and y- coordinates of the drawing region.
@@ -133,9 +136,27 @@ class DrawableInterface {
     //! brief Make a dynamically-allocated copy.
     virtual DrawableInterface* clone() const = 0;
     //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
-    virtual void draw(CanvasInterface& c) const = 0;
+    virtual void draw(CanvasInterface& c, const Projection2d& p) const = 0;
     //! brief The dimension of the object in Euclidean space
     virtual uint dimension() const = 0;
+    //! brief Write to an output stream.
+    virtual std::ostream& write(std::ostream& os) const { return os << "Drawable"; }
+};
+
+//! \ingroup GraphicsModule
+//! \brief Base interface for drawable objects
+class HybridDrawableInterface {
+  public:
+    //! brief Virtual destructor.
+    virtual ~HybridDrawableInterface() { }
+    //! brief Make a dynamically-allocated copy.
+    virtual HybridDrawableInterface* clone() const = 0;
+    //! brief The dimension of the object in Euclidean space
+    virtual const DiscreteLocation& location() const = 0;
+    //! brief The variables of the continuous space.
+    virtual const RealSpace space() const = 0;
+    //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
+    virtual void draw(CanvasInterface& c, const DiscreteLocation& q, const Variables2d& v) const = 0;
     //! brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const { return os << "Drawable"; }
 };

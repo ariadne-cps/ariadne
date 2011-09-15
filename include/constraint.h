@@ -53,7 +53,7 @@ class NonlinearConstraint {
     R _upper_bound;
 };
 
-typedef NonlinearConstraint<Real,Float> RealNonlinearConstraint;
+typedef NonlinearConstraint<Real,Real> RealNonlinearConstraint;
 typedef NonlinearConstraint<Interval,Float> IntervalNonlinearConstraint;
 
 inline RealNonlinearConstraint operator<=(const Float& c, const RealScalarFunction& f) {

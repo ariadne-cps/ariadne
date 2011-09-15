@@ -65,6 +65,139 @@ template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; ret
 typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
 
+
+
+RealBox::RealBox(const IntervalVector& bx) : _ary(bx.size()) {
+    for(uint i=0; i!=bx.size(); ++i) {
+        this->_ary[i]=RealInterval(Real(bx[i].lower()),Real(bx[i].upper()));
+    }
+}
+
+Box under_approximation(const RealBox& rbx) {
+    Box bx(rbx.size());
+    for(uint i=0; i!=bx.size(); ++i) {
+        bx[i]=under_approximation(rbx[i]);
+    }
+    return bx;
+}
+
+Box over_approximation(const RealBox& rbx) {
+    Box bx(rbx.size());
+    for(uint i=0; i!=bx.size(); ++i) {
+        bx[i]=over_approximation(rbx[i]);
+    }
+    return bx;
+}
+
+Box approximation(const RealBox& rbx) {
+    Box bx(rbx.size());
+    for(uint i=0; i!=bx.size(); ++i) {
+        bx[i]=approximation(rbx[i]);
+    }
+    return bx;
+}
+
+
+
+
+RealBoundedConstraintSet::RealBoundedConstraintSet(const RealBox& bx)
+    : _domain(bx), _function(RealVectorFunction(0u,bx.dimension())), _codomain()
+{
+}
+
+RealBoundedConstraintSet::RealBoundedConstraintSet(const RealBox& dom, const RealVectorFunction& fn, const RealBox& codom)
+    : _domain(dom), _function(fn), _codomain(codom)
+{
+    ARIADNE_ASSERT(codom.size()==fn.result_size());
+    ARIADNE_ASSERT(dom.size()==fn.argument_size());
+}
+
+RealBoundedConstraintSet::RealBoundedConstraintSet(const RealBox& dom, const List<RealNonlinearConstraint>& c)
+    : _domain(dom), _function(c.size(),dom.size()), _codomain(c.size())
+{
+    for(uint i=0; i!=c.size(); ++i) {
+        ARIADNE_ASSERT(_domain.size()==c[i].function().argument_size());
+        _function[i]=c[i].function();
+        _codomain[i]=RealInterval(c[i].lower_bound(),c[i].upper_bound());
+    }
+}
+
+RealBoundedConstraintSet*
+RealBoundedConstraintSet::clone() const
+{
+    return new RealBoundedConstraintSet(*this);
+}
+
+
+uint
+RealBoundedConstraintSet::dimension() const
+{
+    return this->_domain.size();
+}
+
+
+tribool
+RealBoundedConstraintSet::disjoint(const Box& bx) const
+{
+    Box domain=over_approximation(this->domain());
+    if(Ariadne::disjoint(domain,bx)) { return true; }
+    Box codomain=over_approximation(this->codomain());
+    return ConstrainedImageSet(Ariadne::intersection(bx,domain),this->function()).disjoint(codomain);
+}
+
+
+tribool
+RealBoundedConstraintSet::overlaps(const Box& bx) const
+{
+    if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
+    Box domain=under_approximation(this->domain());
+    Box codomain=under_approximation(this->codomain());
+    return ConstrainedImageSet(Ariadne::intersection(bx,domain),this->function()).overlaps(codomain);
+}
+
+
+tribool
+RealBoundedConstraintSet::covers(const Box& bx) const
+{
+    Box domain=under_approximation(this->domain());
+    Box codomain=under_approximation(this->codomain());
+    if(!Ariadne::covers(domain,bx)) { return false; }
+    return Box(this->function().evaluate(bx)).inside(codomain);
+}
+
+tribool
+RealBoundedConstraintSet::inside(const Box& bx) const
+{
+    if(Ariadne::inside(over_approximation(this->domain()),bx)) { return true; }
+    return indeterminate;
+}
+
+Box
+RealBoundedConstraintSet::bounding_box() const
+{
+    Box result=over_approximation(this->_domain);
+    result.widen();
+    return result;
+}
+
+
+std::ostream&
+RealBoundedConstraintSet::write(std::ostream& os) const
+{
+    return os << "RealBoundedConstraintSet( domain=" << this->domain() << ", function=" << this->function() << ", codomain=" << this->codomain() << ")";
+}
+
+void
+RealBoundedConstraintSet::draw(CanvasInterface& os) const
+{
+    return ConstrainedImageSet(BoundedConstraintSet(approximation(this->domain()),this->function(),approximation(this->codomain()))).draw(os);
+}
+
+
+
+
+
+
 Interval emulrng(const FloatVector& x, const FloatVector& z) {
     Interval r=mul_ivl(x[0],z[0]);
     for(uint i=0; i!=x.size(); ++i) { r=hull(mul_ivl(x[i],z[i]),r); }
@@ -263,7 +396,7 @@ tribool
 BoundedConstraintSet::disjoint(const Box& bx) const
 {
     if(Ariadne::disjoint(this->domain(),bx)) { return true; }
-    return ConstrainedImageSet(Ariadne::intersection(bx,Box(this->domain())),this->function()).disjoint(this->codomain());
+    return ConstrainedImageSet(Ariadne::intersection(static_cast<const IntervalVector&>(bx),this->domain()),this->function()).disjoint(this->codomain());
 }
 
 
@@ -271,7 +404,7 @@ tribool
 BoundedConstraintSet::overlaps(const Box& bx) const
 {
     if(Ariadne::disjoint(this->domain(),bx)) { return false; }
-    return ConstrainedImageSet(Ariadne::intersection(bx,Box(this->domain())),this->function()).overlaps(this->codomain());
+    return ConstrainedImageSet(Ariadne::intersection(static_cast<const IntervalVector&>(bx),this->domain()),this->function()).overlaps(this->codomain());
 }
 
 

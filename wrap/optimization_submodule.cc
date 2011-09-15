@@ -91,7 +91,7 @@ void export_interior_point_solver()
 
 void export_constraint_solver()
 {
-    class_<RealNonlinearConstraint> real_nonlinear_constraint_class("RealNonlinearConstraint",init<Float,RealScalarFunction,Float>());
+    class_<RealNonlinearConstraint> real_nonlinear_constraint_class("RealNonlinearConstraint",init<Real,RealScalarFunction,Real>());
     real_nonlinear_constraint_class.def(self_ns::str(self));
 
     class_<IntervalNonlinearConstraint> interval_nonlinear_constraint_class("IntervalNonlinearConstraint",init<Float,IntervalScalarFunction,Float>());

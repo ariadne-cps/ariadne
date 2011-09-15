@@ -61,9 +61,9 @@ class HybridGridTreeSet;
 class HybridBoundedConstraintSet;
 
 
-class VariableInterval;
-class VariableBox;
-class ExpressionSet;
+class RealVariableInterval;
+class RealVariableBox;
+class RealExpressionSet;
 
 
 template<class HBS> class HybridBasicSetExpression { };
@@ -87,6 +87,7 @@ class HybridSet
   public:
     HybridSet() { }
     HybridSet(const DiscreteLocation& loc, const List<RealVariableInterval>& bnd, const List<ContinuousPredicate>& cnstr = List<ContinuousPredicate>());
+    HybridSet(const DiscreteLocation& loc, const RealExpressionSet& set);
     DiscreteLocation location() const { return this->_location; }
     Set<RealVariable> variables() const { return this->_bounds.keys(); };
     Map<RealVariable,RealInterval> const& bounds() const { return this->_bounds; };
@@ -94,7 +95,6 @@ class HybridSet
     BoundedConstraintSet continuous_state_set(const RealSpace&) const;
 };
 OutputStream& operator<<(OutputStream& os, const HybridSet& hs);
-VectorTaylorFunction make_identity(const RealBox& bx, const Sweeper& swp);
 
 template<class BS>
 class HybridBasicSet

@@ -44,7 +44,7 @@ class Box;
 class GridTreeSet;
 
 template<class X, class R> class NonlinearConstraint;
-typedef NonlinearConstraint<Real,Float> RealNonlinearConstraint;
+typedef NonlinearConstraint<Real,Real> RealNonlinearConstraint;
 typedef NonlinearConstraint<Interval,Float> IntervalNonlinearConstraint;
 
 template<class X> class Procedure;

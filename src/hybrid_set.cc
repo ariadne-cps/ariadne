@@ -152,58 +152,14 @@ HybridSet::HybridSet(const DiscreteLocation& q, const List<RealVariableInterval>
 {
 }
 
+HybridSet::HybridSet(const DiscreteLocation& q, const RealExpressionSet& s)
+    : _location(q), _bounds(s.bounds()), _constraints(s.constraints())
+{
+}
+
 OutputStream& operator<<(OutputStream& os, const HybridSet& hs) {
     return os << "HybridSet( " << hs.location() << ", " << hs.bounds() << ", " << hs.constraints() << ")";
 }
-
-Interval make_domain(const RealInterval& ivl) {
-    rounding_mode_t rnd=get_rounding_mode();
-    Interval dom_lower_ivl=Interval(ivl.lower());
-    Interval dom_upper_ivl=Interval(ivl.upper());
-    Float dom_lower=dom_lower_ivl.lower();
-    Float dom_upper=dom_upper_ivl.upper();
-    set_rounding_downward();
-    float flt_dom_lower=numeric_cast<double>(dom_lower);
-    while(double(flt_dom_lower)>dom_lower) {
-        flt_dom_lower-=std::numeric_limits<float>::min();
-    }
-    dom_lower=flt_dom_lower;
-    set_rounding_upward();
-    float flt_dom_upper=numeric_cast<double>(dom_upper);
-    while(double(flt_dom_upper)<dom_upper) {
-        flt_dom_upper+=std::numeric_limits<float>::min();
-    }
-    dom_upper=flt_dom_upper;
-    set_rounding_mode(rnd);
-    return Interval(dom_lower,dom_upper);
-}
-
-
-VectorTaylorFunction make_identity(const RealBox& bx, const Sweeper& swp) {
-    IntervalVector dom(bx.dimension());
-    FloatVector errs(bx.dimension());
-
-    for(uint i=0; i!=bx.dimension(); ++i) {
-        Interval dom_lower_ivl=numeric_cast<Interval>(bx[i].lower());
-        Interval dom_upper_ivl=numeric_cast<Interval>(bx[i].upper());
-        // Convert to single-precision values
-        Float dom_lower_flt=numeric_cast<float>(bx[i].lower());
-        Float dom_upper_flt=numeric_cast<float>(bx[i].upper());
-        set_rounding_upward();
-        Float err=max( max(dom_upper_ivl.upper()-dom_upper_flt,dom_upper_flt-dom_upper_ivl.lower()),
-                       max(dom_lower_ivl.upper()-dom_lower_flt,dom_lower_flt-dom_lower_ivl.lower()) );
-        set_rounding_to_nearest();
-        dom[i]=Interval(dom_lower_flt,dom_upper_flt);
-        errs[i]=err;
-    }
-
-    VectorTaylorFunction res=VectorTaylorFunction::identity(dom,swp);
-    for(uint i=0; i!=bx.dimension(); ++i) {
-        res[i]=res[i]+Interval(-errs[i],+errs[i]);
-    }
-
-    return res;
-};
 
 // Map<DiscreteLocation,ConstrainedImageSet> HybridBoundedConstraintSet::_sets;
 // HybridSpace HybridBoundedConstraintSet::_space;

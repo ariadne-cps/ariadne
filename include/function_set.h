@@ -58,6 +58,95 @@ class ConstrainedImageSet;
 class Grid;
 
 //! \ingroup GeometryModule ExactSetSubModule
+//! \brief An exact interval in \f$\mathbb{R}\f$.
+class RealInterval {
+    Real _lower, _upper;
+  public:
+    RealInterval() : _lower(-1), _upper(+1) { }
+    RealInterval(const Real& l, const Real& u) : _lower(l), _upper(u) { }
+    const Real& lower() const { return _lower; }
+    const Real& upper() const { return _upper; }
+    const Real midpoint() const { return (_lower+_upper)/2; }
+    const Real radius() const { return (_upper-_lower)/2; }
+};
+inline OutputStream& operator<<(OutputStream& os, const RealInterval& ivl) {
+    return os << "{" << ivl.lower() << ":" << ivl.upper() << "}";
+}
+inline Interval under_approximation(const RealInterval& rivl) {
+    return Interval(Interval(rivl.lower()).upper(),Interval(rivl.upper()).lower());
+}
+inline Interval over_approximation(const RealInterval& rivl) {
+    return Interval(Interval(rivl.lower()).lower(),Interval(rivl.upper()).upper());
+}
+inline Interval approximation(const RealInterval& rivl) {
+    return Interval(Float(rivl.lower()),Float(rivl.upper()));
+}
+
+
+//! \ingroup GeometryModule ExactSetSubModule
+//! \brief An exact coordinate-aligned box in \f$\mathbb{R}^n\f$.
+class RealBox {
+    Array<RealInterval> _ary;
+  public:
+    RealBox() : _ary() { }
+    explicit RealBox(const IntervalVector& iv);
+    RealBox(const List<RealInterval>& t) : _ary(t.begin(),t.end()) { }
+    RealBox(Nat n, const RealInterval& ivl) : _ary(n,ivl) { }
+    Nat size() const { return _ary.size(); }
+    Nat dimension() const { return _ary.size(); }
+    RealInterval const& operator[](Nat i) const { return _ary[i]; }
+    RealInterval& operator[](Nat i) { return _ary[i]; }
+    friend OutputStream& operator<<(OutputStream& os, const RealBox& bx) { return os << bx._ary; }
+};
+Box under_approximation(const RealBox& rbx);
+Box over_approximation(const RealBox& rbx);
+Box approximation(const RealBox& rbx);
+
+
+//! \ingroup GeometryModule ExactSetSubModule
+//! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
+//! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
+class RealBoundedConstraintSet
+    : public SetInterface
+    , public DrawableInterface
+{
+    RealBox _domain;
+    RealVectorFunction _function;
+    RealBox _codomain;
+  public:
+    //! \brief Construct the preimage of \a C under \a g.
+    RealBoundedConstraintSet(const RealBox& D, const RealVectorFunction& g, const RealBox& C);
+    //! \brief Construct the restriction of \a D under the constraints \a c.
+    RealBoundedConstraintSet(const RealBox& D, const List<RealNonlinearConstraint>& c);
+    //! \brief Construct the box \a D.
+    RealBoundedConstraintSet(const RealBox& bx);
+    //! \brief The domain of the set.
+    const RealBox& domain() const { return this->_domain; }
+    //! \brief The codomain of the set.
+    const RealBox& codomain() const { return this->_codomain; }
+    //! \brief The function used to define the set.
+    const RealVectorFunction& function() const { return this->_function; };
+    //! \brief The \a i<sup>th</sup> constraint \f$g_i(x)\in c_i\f$.
+    RealNonlinearConstraint constraint(uint i) const {
+        return RealNonlinearConstraint(this->_codomain[i].lower(),this->_function[i],this->_codomain[i].upper()); }
+    //! \brief The number of constraints.
+    uint number_of_constraints() const { return this->_codomain.size(); };
+
+    RealBoundedConstraintSet* clone() const;
+    uint dimension() const;
+    tribool disjoint(const Box&) const;
+    tribool overlaps(const Box&) const;
+    tribool covers(const Box&) const;
+    tribool inside(const Box&) const;
+    Box bounding_box() const;
+    std::ostream& write(std::ostream&) const;
+    void draw(CanvasInterface&) const;
+};
+
+
+
+
+//! \ingroup GeometryModule ExactSetSubModule
 //! \brief A set defined as the image of a box under a continuous function.
 //! The set is described as \f$S=h(D) = \{ h(s) \mid s \in D\}\f$ where \f$D\f$ is the domain and \f$h\f$ the function.
 class ImageSet
@@ -203,14 +292,14 @@ class ConstrainedImageSet
     ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn, const List<RealNonlinearConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn.
-    ConstrainedImageSet(const List<Interval>& dom, const List<RealScalarFunction>& fn) : _domain(dom), _function(fn) {
+    ConstrainedImageSet(const List<Interval>& dom, const List<RealScalarFunction>& fn) : _domain(Vector<Interval>(dom)), _function(fn) {
         ARIADNE_ASSERT_MSG(_domain.size()==_function.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Convert from a bounded constraint set.
     ConstrainedImageSet(const BoundedConstraintSet& set);
     //! \brief Convert from an image set.
     ConstrainedImageSet(const ImageSet& set);
     //! \brief The domain of the set.
-    const Vector<Interval>& domain() const { return this->_domain; }
+    const Box& domain() const { return this->_domain; }
     //! \brief The function used to define the set.
     const RealVectorFunction& function() const { return this->_function; };
     //! \brief The function used to define the set.

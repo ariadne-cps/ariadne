@@ -34,11 +34,16 @@
 #include "variables.h"
 #include "expression.h"
 #include "float.h"
+#include "real.h"
 
 
 namespace Ariadne {
 
 class Real;
+class RealInterval;
+
+class RealBox;
+class RealBoundedConstraintSet;
 
 class Box;
 class BoundedConstraintSet;
@@ -55,29 +60,6 @@ class RealVariableBox;
 class ExpressionConstraintSet;
 
 
-class RealInterval {
-    Real _lower, _upper;
-  public:
-    RealInterval() : _lower(-1), _upper(+1) { }
-    RealInterval(const Real& l, const Real& u) : _lower(l), _upper(u) { }
-    const Real& lower() const { return _lower; }
-    const Real& upper() const { return _upper; }
-};
-inline OutputStream& operator<<(OutputStream& os, const RealInterval& ivl) {
-    return os << "{" << ivl.lower() << ":" << ivl.upper() << "}";
-}
-
-class RealBox {
-    Array<RealInterval> _ary;
-  public:
-    RealBox(const List<RealInterval>& t) : _ary(t.begin(),t.end()) { }
-    RealBox(Nat n, const RealInterval& ivl) : _ary(n,ivl) { }
-    Nat dimension() const { return _ary.size(); }
-    RealInterval const& operator[](Nat i) const { return _ary[i]; }
-    RealInterval& operator[](Nat i) { return _ary[i]; }
-    friend OutputStream& operator<<(OutputStream& os, const RealBox& bx) { return os << bx._ary; }
-};
-
 
 struct RealVariableLowerInterval {
     Real _lower; RealVariable _variable;
@@ -90,28 +72,26 @@ struct RealVariableLowerInterval {
 struct RealVariableUpperInterval {
     RealVariable _variable; Real _upper;
     RealVariableUpperInterval(const RealVariable& v, const Real& u) : _variable(v), _upper(u)  { }
-    const RealVariable& variable() const { return _variable; }  
+    const RealVariable& variable() const { return _variable; }
     Real upper() const { return _upper; }
     operator Expression<Tribool>() const { return ( RealExpression(this->_variable) <= Real(this->_upper) ); }
 };
 
 
 class RealVariableInterval {
-    typedef Real X;
-    typedef Real R;
   private:
-    X _lower;
-    Variable<R> _variable;
-    X _upper;
+    Real _lower;
+    Variable<Real> _variable;
+    Real _upper;
   public:
-    RealVariableInterval(const X& l, const Variable<R>& v, const X& u)
+    RealVariableInterval(const Real& l, const Variable<Real>& v, const Real& u)
         : _lower(l), _variable(v), _upper(u) { ARIADNE_ASSERT_MSG(l<=u,"Interval("<<l<<","<<u<<") not provably nonempty"); }
     RealVariableInterval(const RealVariableLowerInterval& lv)
         : _lower(lv._lower), _variable(lv._variable), _upper(infty) { }
     RealVariableInterval(const RealVariableUpperInterval& vu)
         : _lower(-infty), _variable(vu._variable), _upper(vu._upper) { }
-    Variable<R> const& variable() const { return this->_variable; }
-    const Interval interval() const { return Interval(this->_lower,this->_upper); }
+    Variable<Real> const& variable() const { return this->_variable; }
+    const RealInterval interval() const;
     const Real lower() const { return this->_lower; }
     const Real upper() const { return this->_upper; }
 };
@@ -160,13 +140,16 @@ inline RealVariableInterval operator==(const RealVariable& v, double x) { return
 inline RealVariableInterval operator==(double x, const RealVariable& v) { return Real(x)==v; }
 
 class RealVariableBox {
-    Map<RealVariable,Interval> _bounds;
+    Map<RealVariable,RealInterval> _bounds;
   public:
     RealVariableBox(const List<RealVariableInterval>& lst);
+    RealVariableBox(const Map<RealVariable,RealInterval>& bnds) : _bounds(bnds) { }
     Set<RealVariable> variables() const { return _bounds.keys(); }
-    const Interval& operator[](const RealVariable& v) const { return this->_bounds[v]; }
-    Box box(const List<RealVariable>& spc) const;
-    friend Box euclidean_set(const RealVariableBox& ebx, const List<RealVariable>& spc);
+    Map<RealVariable,RealInterval> bounds() const { return this->_bounds; }
+    const RealInterval& operator[](const RealVariable& v) const { return this->_bounds[v]; }
+    RealBox box(const List<RealVariable>& spc) const;
+    friend RealBox euclidean_set(const RealVariableBox& ebx, const List<RealVariable>& spc);
+    friend Box approximate_euclidean_set(const RealVariableBox& set, const RealSpace& space);
     friend OutputStream& operator<<(OutputStream& os, const RealVariableBox& ebx);
 };
 
@@ -175,17 +158,19 @@ class RealVariableBox {
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief A set defined as the image of a box under a continuous function.
 //! The set is described as \f$S=h(D) = \{ h(s) \mid s \in D\}\f$ where \f$D\f$ is the domain and \f$h\f$ the function.
-class ExpressionSet
+class RealExpressionSet
 {
-    Map<RealVariable,Interval> _bounds;
+    Map<RealVariable,RealInterval> _bounds;
     List<ContinuousPredicate> _constraints;
   public:
-    ExpressionSet(const List<RealVariableInterval>& domain);
-    ExpressionSet(const List<RealVariableInterval>& domain, const List<ContinuousPredicate>& constraints);
-    Map<RealVariable,Interval> bounds() const { return this->_bounds; }
+    RealExpressionSet(const List<RealVariableInterval>& domain);
+    RealExpressionSet(const List<RealVariableInterval>& domain, const List<ContinuousPredicate>& constraints);
+    RealExpressionSet(const RealVariableBox& box) : _bounds(box.bounds()) { }
+    Map<RealVariable,RealInterval> bounds() const { return this->_bounds; }
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; }
-    friend BoundedConstraintSet euclidean_set(const ExpressionSet& set, const RealSpace& space);
-    friend std::ostream& operator<<(std::ostream& os, const ExpressionSet& eset);
+    friend RealBoundedConstraintSet euclidean_set(const RealExpressionSet& set, const RealSpace& space);
+    friend BoundedConstraintSet approximate_euclidean_set(const RealExpressionSet& set, const RealSpace& space);
+    friend std::ostream& operator<<(std::ostream& os, const RealExpressionSet& eset);
 };
 
 

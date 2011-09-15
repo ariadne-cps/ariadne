@@ -47,6 +47,9 @@
 
 namespace Ariadne {
 
+VectorTaylorFunction make_identity(const RealBox& bx, const Sweeper& swp);
+
+
 std::string str(const EnclosureVariableType& evt) {
     switch (evt) {
         case INITIAL: return "x";

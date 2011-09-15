@@ -17,10 +17,10 @@ bin_PROGRAMS= \
 	3bouncingballs \
 	rectifier \
 	cmos_inverter_analoginput \
-	grid-refinement \
 	robotarm-verification
 
 #	multipleguards
+#	grid-refinement \
 #	coconut_demo
 
 tutorial_SOURCES = tutorial.cc

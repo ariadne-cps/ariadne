@@ -11,9 +11,8 @@ using namespace Ariadne;
 template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
     Figure fig;
-    Array<uint> xy(2,xaxis,yaxis);
 
-    fig.set_projection_map(ProjectionFunction(xy,numVariables));
+    fig.set_projection(numVariables,xaxis,yaxis);
     fig.set_bounding_box(bbox);
 
     // If the grid must be shown
@@ -76,7 +75,7 @@ int main(int argc, const char* argv[])
     dp[3] = 0.0001; /// Load capacitance, Cl
     dp[4] = 1000.0; /// Load resistance, Rl
 
-    RealConstant pi_c("pi",pi<Real>());
+    RealConstant pi_c("pi",pi);
 
     /// Introduces the global parameters
     Real TIME_LIMIT = 1.0/frequency;
@@ -146,16 +145,16 @@ int main(int argc, const char* argv[])
 
     /// Dynamics for the case of both diodes being off
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)
-    DottedRealAssignments offoff_d( dot((t,vi,vo)) = (one,amplitude*2*pi_c*frequency*Ariadne::cos(2*pi_c*frequency*t),-vo/(Rl*Cl)) );
+    DottedRealAssignments offoff_d( dot((t,vi,vo)) = (one,amplitude*2*pi*frequency*Ariadne::cos(2*pi*frequency*t),-vo/(Rl*Cl)) );
     /// Dynamics for the case of the first diode being on, the second being off
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)
-    RealExpressions onoff_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)));
+    RealExpressions onoff_d((one,amplitude*2.0*pi*frequency*Ariadne::cos(2.0*pi*frequency*t),-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)));
     /// Dynamics for the case of the first diode being off, the second being on
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-(vi+vo)/(Ron*Cl)
-    RealExpressions offon_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)+(vo-vi)/(Ron*Cl)));
+    RealExpressions offon_d((one,amplitude*2.0*pi*frequency*Ariadne::cos(2.0*pi*frequency*t),-vo/(Rl*Cl)+(vo-vi)/(Ron*Cl)));
     /// Dynamics for the case of both diodes being on
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-2*vo/(Ron*Cl)
-    RealExpressions onon_d((one,amplitude*2.0*pi<Real>()*frequency*Ariadne::cos(2.0*pi<Real>()*frequency*t),-vo/(Rl*Cl)-2.0*vo/(Ron*Cl)));
+    RealExpressions onon_d((one,amplitude*2.0*pi*frequency*Ariadne::cos(2.0*pi*frequency*t),-vo/(Rl*Cl)-2.0*vo/(Ron*Cl)));
 
     List<RealVariable> space( (t,vi,vo) );
     /// Locations
@@ -204,19 +203,19 @@ int main(int argc, const char* argv[])
 
     std::cout << "Computing evolution..." << std::endl;
 
-    Box initial_box(3, 0.0, 0.0, 0.0,0.0, 0.8*dp[0],0.8*dp[0]);
-    HybridEnclosureType initial_enclosure(rectifier|offoff,initial_box);
+    RealVariableBox initial_box((t==0.0, vi==0.0, vo==0.8*dp[0]));
+    HybridSet initial_set(rectifier|offoff,initial_box);
 
 //    Box initial_box(3, 0.002836,0.002836, 3.110529,3.110529, 3.110529,3.110529);
 //    HybridEnclosureType initial_enclosure(onoff,initial_box);
 
-    std::cout << "Initial set=" << initial_enclosure << std::endl;
+    std::cout << "Initial set=" << initial_set << std::endl;
 
     HybridTime evolution_time(TIME_LIMIT,TRAN_LIMIT);
 
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(rectifier,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(rectifier,initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;

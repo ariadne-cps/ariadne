@@ -31,34 +31,14 @@ int main()
 {
 
     /// Set the system parameters
-    double a = -0.02;
-    double b = 0.3;
-    double T = 1.5;
-    double hmin = 5.55;
-    double Delta = 0.05;
-    double hmax = 5.70;
-    double tmax = 20.0;
-    int dmax = 15;
-
-    double A1[9]={a,b,0,
-                  0,0,0,
-                  0,0,0};
-    double b1[3]={0,1.0/T,1.0};
-
-    double A2[9]={a,  0.0,0.0,
-                  0.0,0.0,0.0,
-                  0.0,0.0,0.0};
-    double b2[3]={b,0.0,1.0};
-
-    double A3[9]={a,b,0,
-                  0,0,0,
-                  0,0,0};
-    double b3[3]={0,-1.0/T,1.0};
-
-    double A4[9]={a,  0.0,0.0,
-                  0.0,0.0,0.0,
-                  0.0,0.0,0.0};
-    double b4[3]={0.0,0.0,1.0};
+    Real a = -0.02;
+    Real b = 0.3;
+    Real T = 1.5;
+    Real hmin = 5.55;
+    Real Delta = 0.05;
+    Real hmax = 5.70;
+    Real tmax = 20.0;
+    Int dmax = 15;
 
     /// Build the Hybrid System
 
@@ -166,22 +146,22 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 5.0, y = 1.0, t = 0.0" << std::endl;
 
-    Box initial_box(3, 5.0,5.001, 1.0,1.001, 0.0,0.001);
-    HybridEnclosureType initial_enclosure(l2,initial_box);
-    Box bounding_box(3, -0.1,9.1, -0.1,1.1, -0.1,tmax+0.1);
+    RealVariableBox initial_box((5.0<=RealVariable("x")<=5.001, 1.0<=RealVariable("y")<=1.001, 0.0<=RealVariable("t")<=0.001));
+    HybridSet initial_set(l2,initial_box);
+    Box bounding_box(3, -0.1,9.1, -0.1,1.1, -0.1,numeric_cast<double>(tmax)+0.1);
 
     HybridTime evolution_time(tmax,dmax);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(watertank_system,initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit="<<orbit<<std::endl;
     Figure g;
-    Box graphic_box(2, -0.1,tmax+0.1, 4.1,6.1);
+    Box graphic_box(2, -0.1,numeric_cast<double>(tmax)+0.1, 4.1,6.1);
     g.set_bounding_box(graphic_box);
     Array<uint> p(2,2,0);
-    g.set_projection_map(ProjectionFunction(p,3));
+    g.set_projection_map(PlanarProjectionMap(3,2,0));
 
     g << fill_colour(Colour(0.0,0.5,1.0));
     g << orbit;

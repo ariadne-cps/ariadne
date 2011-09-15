@@ -143,26 +143,20 @@ int main(int argc, const char* argv[])
     typedef GeneralHybridEvolverType::EnclosureListType EnclosureListType;
     typedef GeneralHybridEvolverType::OrbitType OrbitType;
 
-    std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
-
-    ExpressionSet initial_eset( (6.0<=height<=6.01, aperture.in(1.0,1.001)),(height+aperture<=8.0) );
-    BoundedConstraintSet initial_fset = euclidean_set(initial_eset,(height,aperture));
-    std::cout << initial_eset << "\n" << initial_fset << "\n";
-    Box initial_box(2, 6.0,6.001, 1.0,1.001);
-    EnclosureType initial_enclosure(open,initial_box);
-    Box bounding_box(2, -0.1,9.1, -0.1,1.3);
-
+    HybridSet initial_set(opening,(height==0.0, aperture==0.0));
+    std::cout << "Initial set = " << initial_set << "\n" ;
     HybridTime evolution_time(80.0,10);
-    {char c; std::cin>>c; }
+    std::cout << "Evolution time = "  << evolution_time << "\n" ;
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,LOWER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(watertank_system,initial_set,evolution_time,LOWER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final_size="<<orbit.final().size()<<std::endl;
     std::cout << "Orbit.reach_size="<<orbit.reach().size()<<std::endl;
 
     std::cout << "Plotting orbit... "<<std::flush;
+    Box bounding_box(2, -0.1,9.1, -0.1,1.3);
     plot("watertank-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
 

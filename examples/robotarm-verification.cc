@@ -124,18 +124,18 @@ int main(int argc, char** argv)
     std::cout << "Evolution parameters:" << evolver.parameters() << std::endl;
 
     // Define the initial box
-    Box initial_box(3, 0.0,0.0, 0.0,0.0, 0.0,0.0);
+    RealVariableBox initial_box((x==0.0,vx==0.0,t==0.0));
 
     cout << "initial_box=" << initial_box << endl;
 
 
-    HybridEnclosureType initial_set(free, initial_box);
+    HybridSet initial_set(free, initial_box);
     cout << "initial_set=" << initial_set << endl << endl;
 
     Semantics semantics=UPPER_SEMANTICS;
 
     // Compute the reachable sets
-    Orbit<HybridEnclosureType> orbit = evolver.orbit(robotarm_automaton,initial_set,HybridTime(time,steps),semantics);
+    Orbit<HybridEnclosure> orbit = evolver.orbit(robotarm_automaton,initial_set,HybridTime(time,steps),semantics);
     cout << std::endl;
 
     cout << "\norbit.final=\n" << orbit.final() << endl << endl;
@@ -148,7 +148,7 @@ int main(int argc, char** argv)
     std::cout << "Plotting..." << std::flush;
     Figure fig;
     // Plotting x
-    fig.set_projection_map(PlanarProjectionMap(3,2,0));
+    fig.set_projection(3,2,0);
     fig.set_bounding_box(Box(3, 0.0,10.0, 0.0, 1.0, 0.0,time));
     fig << line_style(true) << fill_colour(cyan);
     fig << orbit;

@@ -72,7 +72,7 @@ class Figure
     PlanarProjectionMap get_projection_map() const;
     Box get_bounding_box() const;
 
-    void set_projection(uint, uint, uint);
+    void set_projection(uint as, uint ix, uint iy);
 
     void set_line_style(bool);
     void set_line_width(double);

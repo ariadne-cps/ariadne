@@ -150,11 +150,6 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     RealVariable T("T");
     RealVariable t("t");
 
-    // Declare the type to be used for the system evolution
-    typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
-    typedef GeneralHybridEvolver::EnclosureListType HybridEnclosureList;
-    typedef GeneralHybridEvolver::OrbitType OrbitType;
-
     // Set the initial set.
     HybridSet initial_set(heating_off, (16.0<=T<=16.0625,0.0<=t<=0.015625) );
     cout << "initial_set="<<initial_set<<"\n";
@@ -167,7 +162,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
 
     // Compute the orbit.
     cout << "Computing orbit... " << flush;
-    OrbitType orbit = evolver.orbit(heating_system,initial_set,evolution_time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit = evolver.orbit(heating_system,initial_set,evolution_time,UPPER_SEMANTICS);
     cout << "done." << endl;
 
     // Write the orbit to standard output and plot.
@@ -183,7 +178,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     cout << "initial_enclosure="<<initial_enclosure<<"\n";
     // Compute reachable and evolved sets
     cout << "Computing reach and evolve sets... " << flush;
-    HybridEnclosureList reach,evolve;
+    ListSet<HybridEnclosure> reach,evolve;
     make_lpair(reach,evolve) = evolver.reach_evolve(heating_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     cout << "done." << endl;
     // Write the orbit to standard output and plot.

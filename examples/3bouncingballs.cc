@@ -30,8 +30,7 @@ using namespace Ariadne;
 template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
     Figure fig;
-    Array<uint> xy(2,xaxis,yaxis);
-    fig.set_projection_map(ProjectionFunction(xy,numVariables));
+    fig.set_projection(numVariables,xaxis,yaxis);
     fig.set_bounding_box(bbox);
 
     // If the grid must be shown
@@ -315,7 +314,8 @@ int main()
 //    Box initial_box(12, 2.0,2.0, table_y,table_y, 4.0,4.0,table_y,table_y, 6.0,6.0,table_y,table_y, 4.0,4.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0);
 //    GeneralHybridEvolver::EnclosureType initial_enclosure(all_on_pre12collision,initial_box);
     Box initial_box(12, 1.0,1.0, table_y,table_y, 2.0,2.0, table_y,table_y, 3.0,3.0,table_y,table_y, 9.0,9.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0);
-    GeneralHybridEvolver::EnclosureType initial_enclosure(all_on_pre12collision,initial_box);
+    RealSpace initial_space=balls.continuous_state_space(all_on_pre12collision);
+    HybridSet initial_set(all_on_pre12collision,RealVariableBox(initial_space,RealBox(initial_box)));
 
 
     /// Shows the automaton
@@ -342,7 +342,7 @@ int main()
     HybridTime evol_limits(EVOL_TIME,EVOL_TRANS);
 
     std::cout << "Computing orbit... " << std::flush;
-    GeneralHybridEvolver::OrbitType orbit = evolver.orbit(balls,initial_enclosure,evol_limits,UPPER_SEMANTICS);
+    GeneralHybridEvolver::OrbitType orbit = evolver.orbit(balls,initial_set,evol_limits,UPPER_SEMANTICS);
 
     std::cout << std::endl << "Orbit.final.size()="<<orbit.final().size()<<std::endl;
 

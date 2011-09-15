@@ -38,9 +38,8 @@ Figure& operator<<(Figure& fig, const HybridGridTreeSet& set) {
 template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
     Figure fig;
-    Array<uint> xy(2,xaxis,yaxis);
 
-    fig.set_projection_map(ProjectionFunction(xy,numVariables));
+    fig.set_projection_map(PlanarProjectionMap(numVariables,xaxis,yaxis));
     fig.set_bounding_box(bbox);
 
     // If the grid must be shown
@@ -204,16 +203,16 @@ int main()
     typedef GeneralHybridEvolver::OrbitType OrbitType;
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
-    std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
+    std::cout << "Computing evolution starting from location l2, x = 6.0, y = 1.0" << std::endl;
 
-    Box initial_box(3, 6.0,6.0, 1.0,1.0, 0.0000,0.0000);
-    HybridEnclosureType initial_enclosure(l2,initial_box);
+    RealVariableBox initial_box((x==6.0, y==1.0, t==0.0000));
+    HybridSet initial_set(l2,initial_box);
     Box bounding_box(3, 0.0,10.0, -0.1,1.1, 0.0,tmax);
 
     HybridTime evolution_time(tmax,jmax);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,LOWER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(watertank_system,initial_set,evolution_time,LOWER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.reach.size()="<<orbit.reach().size()<<std::endl;
@@ -232,19 +231,19 @@ int main()
     analyser.verbosity=5;
     std::cout <<  analyser.parameters() << std::endl;
 
-    HybridImageSet initial_set;
-    initial_set[l2]=initial_box;
-
     HybridTime reach_time(64.0,6);
 
+    std::cout << "Omitting computation of global upper and lower reach set." << std::endl;
+
+/*
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
     // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
+
     std::cout << "Computing lower reach set... " << std::flush;
     HybridGridTreeSet lower_reach_set = analyser.lower_reach(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
     plot("watertank-nonlinear-lower_reach1", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), lower_reach_set, -1);
-/*
     // Compute evolved sets and reach sets using upper semantics.
     // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
     // as necessary to keep the local errors reasonable. The accumulated global error may be very large.

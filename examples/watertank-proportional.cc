@@ -197,9 +197,9 @@ int main(int argc,char *argv[])
     for(double b=bmin ; b < bmax+bstep ; b += bstep) {
         for(double d=-Delta ; d < Delta+dstep ; d += dstep) {
             cout << "b = "<< b <<", Delta = "<<d<<std::endl;
-            Box initial_box(5, 0.0,0.0, 1.0,1.0, b,b, d,d, 0.0,0.0);
-            HybridEnclosureType initial_enclosure(one_saturated,initial_box);
-            OrbitType result = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+            RealVariableBox initial_box((water==0.0, aperture==1.0, pressure==b, error==d, time==0.0));
+            HybridSet initial_set(one_saturated,initial_box);
+            OrbitType result = evolver.orbit(watertank_system,initial_set,evolution_time,UPPER_SEMANTICS);
             cout<<"Orbit.final=" << result.final() << endl;
             /*cout<<"Adjoining result to the grid..."<<std::flush;
             hgts.adjoin(outer_approximation(result.reach(),hgts.grid(),grid_depth));

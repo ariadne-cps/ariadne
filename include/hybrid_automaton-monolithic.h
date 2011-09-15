@@ -204,6 +204,8 @@ class MonolithicHybridAutomaton
     //!
     //!   \param state is the mode's discrete state.
     //!   \param dynamic is the mode's vector field.
+    //!
+    //! The variables are given default names x0, x1 etc.
     void new_mode(DiscreteLocation state,
                   RealVectorFunction dynamic);
 

@@ -144,6 +144,7 @@ class RealVariableBox {
   public:
     RealVariableBox(const List<RealVariableInterval>& lst);
     RealVariableBox(const Map<RealVariable,RealInterval>& bnds) : _bounds(bnds) { }
+    RealVariableBox(const RealSpace& spc, const RealBox& bx);
     Set<RealVariable> variables() const { return _bounds.keys(); }
     Map<RealVariable,RealInterval> bounds() const { return this->_bounds; }
     const RealInterval& operator[](const RealVariable& v) const { return this->_bounds[v]; }

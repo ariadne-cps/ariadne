@@ -104,6 +104,14 @@ RealVariableBox::RealVariableBox(const List<RealVariableInterval>& lst)
     }
 }
 
+RealVariableBox::RealVariableBox(const RealSpace& spc, const RealBox& bx)
+{
+    ARIADNE_ASSERT(spc.size()==bx.size());
+    for(uint i=0; i!=spc.size(); ++i) {
+        _bounds.insert(spc[i],bx[i]);
+    }
+}
+
 RealBox RealVariableBox::box(const List<RealVariable>& spc) const {
     const RealVariableBox& ebx = *this;
     RealBox bx(spc.size());

@@ -88,6 +88,7 @@ int main(int argc, const char* argv[])
 
     /// Create a GeneralHybridEvolver object
     GeneralHybridEvolverType evolver;
+    typedef GeneralHybridEvolver::OrbitType OrbitType;
     evolver.verbosity=evolver_verbosity;
 
     /// Set the evolution parameters
@@ -97,21 +98,16 @@ int main(int argc, const char* argv[])
     //evolver.parameters().maximum_step_size = 1.0/16;
     std::cout <<  evolver.parameters() << std::endl;
 
-    // Declare the type to be used for the system evolution
-    typedef GeneralHybridEvolverType::EnclosureType EnclosureType;
-    typedef GeneralHybridEvolverType::EnclosureListType EnclosureListType;
-    typedef GeneralHybridEvolverType::OrbitType OrbitType;
-
     std::cout << "Computing evolution..." << std::endl;
 
-    Box initial_box(4, 0.48,0.52, 2.5,2.5, 0.78,0.81, 1.0,1.0);
-    EnclosureType initial_enclosure(free,initial_box);
+    RealVariableBox initial_box((0.48<=x<=0.52, 2.5<=vx<=2.5, 0.78<=y<=0.81, 1.0<=vy<=1.0));
+    HybridSet initial_set(free,initial_box);
     Box bounding_box(4, -1.0,1.0, -10.0,10.0, -1.0,1.0, -10.0,10.0);
 
     HybridTime evolution_time(10.0,3);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(ball,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(ball,initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final()="<<orbit.final()<<std::endl;

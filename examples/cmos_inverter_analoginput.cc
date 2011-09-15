@@ -16,9 +16,7 @@ using namespace Ariadne;
 template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
     Figure fig;
-    Array<uint> xy(2,xaxis,yaxis);
-
-    fig.set_projection_map(ProjectionFunction(xy,numVariables));
+    fig.set_projection(numVariables,xaxis,yaxis);
     fig.set_bounding_box(bbox);
 
     // If the grid must be shown
@@ -133,31 +131,31 @@ int main()
 
     /// Function for the behavior of the system in the nMOS linear mode, pMOS subthreshold mode (Vi >= Vth, Vo <= Vi-Vth)
     /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl*((Vi-Vth)*Vo-Vo^2/2) + Id0/Cl*e^((-Vi-Vth+Vdd)/(nVT)) )
-    RealVectorFunction nl_pt_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl*((vi-Vth)*vo-vo*vo/2)+Id0/Cl*Ariadne::exp((-vi-Vth+Vdd)/nVT)));
+    RealVectorFunction nl_pt_d((one,2.0*pi*freq*Vdd*Ariadne::cos(2.0*pi*freq*t),-beta_n*Sn/Cl*((vi-Vth)*vo-vo*vo/2)+Id0/Cl*Ariadne::exp((-vi-Vth+Vdd)/nVT)));
 
     /// Function for the behavior of the system in the nMOS saturation mode, pMOS subthreshold mode (Vi >= Vdd-Vth, Vo >= Vi-Vth)
     /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + Id0/Cl*e^((-Vi-Vth+Vdd)/(nVT)) )
-    RealVectorFunction ns_pt_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl/2*((vi-Vth)*(vi-Vth))+Id0/Cl*Ariadne::exp((-vi-Vth+Vdd)/nVT)));
+    RealVectorFunction ns_pt_d((one,2.0*pi*freq*Vdd*Ariadne::cos(2.0*pi*freq*t),-beta_n*Sn/Cl/2*((vi-Vth)*(vi-Vth))+Id0/Cl*Ariadne::exp((-vi-Vth+Vdd)/nVT)));
 
     /// Function for the behavior of the system in the nMOS subthreshold mode, pMOS linear mode (Vi <= Vth, Vo >= Vi+Vth)
     /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -Id0/Cl*e^((Vi-Vth)/(nVT)) + beta_p*Sp/Cl*((Vi-Vdd+Vth)*(Vo-Vdd)-(Vo-Vdd)^2/2) )
-    RealVectorFunction nt_pl_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-Id0/Cl*Ariadne::exp((vi-Vth)/nVT)+beta_p*Sp/Cl*((vi-Vdd+Vth)*(vo-Vdd)-(vo-Vdd)*(vo-Vdd)/2)));
+    RealVectorFunction nt_pl_d((one,2.0*pi*freq*Vdd*Ariadne::cos(2.0*pi*freq*t),-Id0/Cl*Ariadne::exp((vi-Vth)/nVT)+beta_p*Sp/Cl*((vi-Vdd+Vth)*(vo-Vdd)-(vo-Vdd)*(vo-Vdd)/2)));
 
     /// Function for the behavior of the system in the nMOS subthreshold mode, pMOS saturation mode (Vi <= Vth, Vo <= Vi+Vth)
     /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -Id0/Cl*e^((Vi-Vth)/(nVT)) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
-    RealVectorFunction nt_ps_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-Id0/Cl*Ariadne::exp((vi-Vth)/nVT)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
+    RealVectorFunction nt_ps_d((one,2.0*pi*freq*Vdd*Ariadne::cos(2.0*pi*freq*t),-Id0/Cl*Ariadne::exp((vi-Vth)/nVT)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
 
     /// Function for the behavior of the system in the nMOS linear mode, pMOS saturation mode (Vth <= Vi <= Vdd-Vth, Vo <= Vi-Vth)
     /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl*((Vi-Vth)*Vo-Vo^2/2) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
-    RealVectorFunction nl_ps_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl*((vi-Vth)*vo-vo*vo/2)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
+    RealVectorFunction nl_ps_d((one,2.0*pi*freq*Vdd*Ariadne::cos(2.0*pi*freq*t),-beta_n*Sn/Cl*((vi-Vth)*vo-vo*vo/2)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
 
     /// Function for the behavior of the system in the nMOS saturation mode, pMOS linear mode (Vth <= Vi <= Vdd-Vth, Vo >= Vi+Vth)
     /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + beta_p*Sp/Cl*((Vi-Vdd+Vth)*(Vo-Vdd)-(Vo-Vdd)^2/2) )
-    RealVectorFunction ns_pl_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl/2*(vi-Vth)*(vi-Vth)*(1+lambda*vo)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
+    RealVectorFunction ns_pl_d((one,2.0*pi*freq*Vdd*Ariadne::cos(2.0*pi*freq*t),-beta_n*Sn/Cl/2*(vi-Vth)*(vi-Vth)*(1+lambda*vo)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
 
     /// Function for the behavior of the system in the nMOS saturation mode, pMOS saturation mode (Vth <= Vi <= Vdd-Vth, Vi-Vth <= Vo <= Vi+Vth)
     /// (t' = 1; Vi' = 2*pi*f*Vdd*cos(2*pi*f*t); Vo' = -beta_n*Sn/Cl/2*(Vi-Vth)^2 * (1+lambda*Vo) + beta_p*Sp/Cl/2*(Vi-Vdd+Vth)^2 * (1-lambda*(Vo-Vdd)) )
-    RealVectorFunction ns_ps_d((one,2.0*pi<Real>()*freq*Vdd*Ariadne::cos(2.0*pi<Real>()*freq*t),-beta_n*Sn/Cl/2*(vi-Vth)*(vi-Vth)*(1+lambda*vo)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
+    RealVectorFunction ns_ps_d((one,2.0*pi*freq*Vdd*Ariadne::cos(2.0*pi*freq*t),-beta_n*Sn/Cl/2*(vi-Vth)*(vi-Vth)*(1+lambda*vo)+beta_p*Sp/Cl/2*(vi-Vdd+Vth)*(vi-Vdd+Vth)*(1-lambda*(vo-Vdd))));
 
     /// Function for the behavior of the system in the "rising" or "falling" support locations
     /// (t' = 0; Vi' = 0; Vo'=0 )
@@ -285,14 +283,13 @@ int main()
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     Box initial_box(3, 0.0,0.0, 0.0,0.0, 0.0,0.0);
-    HybridEnclosureType initial_enclosure(nt_ps,initial_box);
-//    Box initial_box(3, 0.161699,0.161699, 0.850000,0.850000, 0.246241,0.246241);
-//    HybridEnclosureType initial_enclosure(nl_pt,initial_box);
+    RealSpace initial_space=inverter.continuous_state_space(nt_ps);
+    HybridSet initial_set(nt_ps,RealVariableBox(initial_space,RealBox(initial_box)));
 
     HybridTime evolution_time(EVOL_TIME,EVOL_TRANS);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(inverter,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(inverter,initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final="<<orbit.final().size()<<std::endl;

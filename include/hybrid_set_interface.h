@@ -45,7 +45,7 @@ class Box;
 class HybridSpace;
 template<class BS> class HybridBasicSet;
 
-typedef HybridBasicSet<Point> HybridPoint;
+class HybridPoint;
 typedef HybridBasicSet<Box> HybridBox;
 typedef Map<DiscreteLocation,Box> HybridBoxes;
 

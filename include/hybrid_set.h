@@ -96,6 +96,19 @@ class HybridSet
 };
 OutputStream& operator<<(OutputStream& os, const HybridSet& hs);
 
+class HybridPoint
+    : public Tuple<DiscreteLocation,RealSpace,Point>
+{
+  public:
+    HybridPoint() : Tuple<DiscreteLocation,RealSpace,Point>(DiscreteLocation(),RealSpace(),Point()) { }
+    HybridPoint(const DiscreteLocation& q, const RealSpace& spc, const Point& pt) : Tuple<DiscreteLocation,RealSpace,Point>(q,spc,pt) { }
+    //HybridPoint(const DiscreteLocation& q, const FloatValuation& val);
+    const DiscreteLocation& location() const { return this->first; }
+    const RealSpace& space() const { return this->second; }
+    const Point& point() const { return this->third; }
+    const Point& real_values() const { return this->third; }
+};
+
 template<class BS>
 class HybridBasicSet
     : public Tuple<DiscreteLocation,RealSpace,BS>

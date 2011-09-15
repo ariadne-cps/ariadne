@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "hybrid_set.h"
+
 #include "real.h"
 
 #include "expression_set.h"
@@ -28,7 +30,6 @@
 
 #include "hybrid_space.h"
 #include "hybrid_time.h"
-#include "hybrid_set.h"
 #include "hybrid_orbit.h"
 #include "hybrid_automaton_interface.h"
 #include <boost/concept_check.hpp>
@@ -39,7 +40,7 @@ namespace Ariadne {
 
 
 Orbit<HybridPoint>::Orbit(const HybridPoint& hpt)
-    : _curves(new std::vector<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(hpt.continuous_state_set()))))
+    : _curves(new std::vector<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(hpt.point()))))
 { }
 
 uint
@@ -55,13 +56,13 @@ Orbit<HybridPoint>::curve(uint m) const
 }
 
 void
-Orbit<HybridPoint>::insert(HybridTime ht, HybridPoint& hpt)
+Orbit<HybridPoint>::insert(HybridTime ht, const HybridPoint& hpt)
 {
     ARIADNE_ASSERT((uint)ht.discrete_time()<=this->size());
     if(this->size()==(uint)ht.discrete_time()) {
-        this->_curves->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(hpt.continuous_state_set())));
+        this->_curves->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(hpt.point())));
     } else {
-        (*this->_curves)[ht.discrete_time()].third.insert(ht.continuous_time(),hpt.continuous_state_set());
+        (*this->_curves)[ht.discrete_time()].third.insert(ht.continuous_time(),hpt.point());
     }
 }
 

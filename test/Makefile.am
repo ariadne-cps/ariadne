@@ -48,6 +48,7 @@ check_PROGRAMS = \
 	test_serialization \
 	test_hybrid_set \
 	test_hybrid_automaton \
+	test_hybrid_simulator \
 	test_hybrid_evolver \
 	test_hybrid_evolution \
 	test_hybrid_reachability_analyser
@@ -95,6 +96,7 @@ test_discrete_evolution_SOURCES=test_discrete_evolution.cc
 test_continuous_evolution_SOURCES=test_continuous_evolution.cc
 test_hybrid_set_SOURCES=test_hybrid_set.cc
 test_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
+test_hybrid_simulator_SOURCES=test_hybrid_simulator.cc
 test_hybrid_evolver_SOURCES=test_hybrid_evolver.cc
 test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
 test_hybrid_discretiser_SOURCES=test_hybrid_discretiser.cc

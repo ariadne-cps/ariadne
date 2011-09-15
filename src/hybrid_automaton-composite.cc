@@ -159,7 +159,7 @@ RealVectorFunction reset_function(
     List<PrimedRealAssignment> const& primed)
 {
     List<RealExpression> results(primed.size(),RealExpression(0.0));
-    for(uint i=0; i!=primed.size(); ++i) { results[space.index(primed[i].lhs.base())]=substitute(primed[i].rhs,algebraic); }
+    for(uint i=0; i!=primed.size(); ++i) { results[i]=substitute(primed[i].rhs,algebraic); }
 
     return RealVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
 }

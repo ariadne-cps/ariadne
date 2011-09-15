@@ -62,7 +62,7 @@ class HybridTime;
 class DiscreteLocation;
 template<class BS> class HybridBasicSet;
 
-typedef HybridBasicSet<Point> HybridPoint;
+class HybridPoint;
 typedef HybridBasicSet<Box> HybridBox;
 typedef HybridBasicSet<InterpolatedCurve> HybridInterpolatedCurve;
 
@@ -73,7 +73,7 @@ class Orbit<HybridPoint>
 {
   public:
     Orbit(const HybridPoint& hpt);
-    void insert(HybridTime ht, HybridPoint& hpt);
+    void insert(HybridTime ht, const HybridPoint& hpt);
     uint size() const;
     const InterpolatedCurve& curve(uint m) const;
     const std::vector<HybridInterpolatedCurve>& curves() const { return *this->_curves; }

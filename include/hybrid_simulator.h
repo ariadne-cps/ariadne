@@ -28,41 +28,35 @@
 #ifndef ARIADNE_HYBRID_SIMULATOR_H
 #define ARIADNE_HYBRID_SIMULATOR_H
 
-//#include "evolver_base.h"
 #include "logging.h"
 
 namespace Ariadne {
 
-class SimulationToolboxInterface;
 class HybridPoint;
-class HybridSystem;
+class HybridTime;
+class HybridAutomatonInterface;
 
 template<class T> class Orbit;
-template<class System> class Simulator;
 
 
 
 /*! \brief A class for computing the evolution of a hybrid system.
  */
-template<>
-class Simulator<HybridSystem>
-//    : public EvolverBase<HybridSystem, HybridPoint>
+class HybridSimulator
     : public Loggable
 {
     typedef HybridPoint EnclosureType;
+    double _step_size;
   public:
 
     //! \brief Default constructor.
-    Simulator();
-
-    /*! \brief Make a dynamically-allocated copy. */
-    Simulator<HybridSystem>* clone() const;
-
+    HybridSimulator();
+    void set_step_size(double h);
 
     //@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<HybridPoint> orbit(const HybridSystem& system, const HybridPoint& initial_point, const HybridTime& time) const;
+    Orbit<HybridPoint> orbit(const HybridAutomatonInterface& system, const HybridPoint& initial_point, const HybridTime& time) const;
 };
 
 

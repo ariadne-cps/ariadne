@@ -55,6 +55,7 @@ ARIADNE_HYBRID_SRC = \
 	hybrid_automaton-monolithic.cc \
 	hybrid_automaton-composite.cc \
 	hybrid_automaton-restrictive.cc \
+	hybrid_simulator.cc \
 	hybrid_evolver.cc \
 	hybrid_reachability_analyser.cc
 

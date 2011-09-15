@@ -72,6 +72,7 @@ class Valuation
     const ValueType& operator[](const Variable<Type>& v) const { return _values[v.name()]; }
     ValueType& operator[](const Variable<Type>& v) { return _values[v.name()]; }
     const Map<Identifier,ValueType>& values() const { return _values; }
+    Map<Identifier,ValueType>& values() { return _values; }
     Set<Identifier> defined() const { return _values.keys(); }
     const_iterator begin() const { return _values.begin(); }
     const_iterator end() const { return _values.end(); }
@@ -148,6 +149,8 @@ template<class X> class HybridValuation
     using ContinuousValuation<X>::get;
     using DiscreteValuation::operator[];
     using ContinuousValuation<X>::operator[];
+    const Map<Identifier,X>& real_values() const { return this->ContinuousValuation<X>::values(); }
+    Map<Identifier,X>& real_values() { return this->ContinuousValuation<X>::values(); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const DiscreteValuation& val) {

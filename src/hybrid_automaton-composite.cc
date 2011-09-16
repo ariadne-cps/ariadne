@@ -354,13 +354,13 @@ HybridAutomaton::has_mode(DiscreteLocation location) const
 bool
 HybridAutomaton::has_transition(DiscreteLocation source, DiscreteEvent event) const
 {
-   return this->_modes.has_key(source) && this->_modes[source]._targets.has_key(event);
+   return this->has_mode(source) && this->mode(source)._targets.has_key(event);
 }
 
 bool
 HybridAutomaton::has_invariant(DiscreteLocation source, DiscreteEvent event) const
 {
-   return this->_modes.has_key(source) && this->_modes[source]._invariants.has_key(event);
+   return this->has_mode(source) && this->mode(source)._invariants.has_key(event);
 }
 
 
@@ -558,7 +558,7 @@ HybridAutomaton::dynamic_assignments(DiscreteLocation location) const {
 List<PrimedRealAssignment>
 HybridAutomaton::reset_assignments(DiscreteLocation source, DiscreteEvent event) const {
     if(this->has_transition(source,event)) {
-        return this->_modes[source]._resets[event];
+        return this->mode(source)._resets[event];
     } else {
         List<PrimedRealAssignment> nonjump_assignments;
         List<RealVariable> state_variables=this->state_variables(source);

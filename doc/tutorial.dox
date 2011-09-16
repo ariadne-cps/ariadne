@@ -115,7 +115,7 @@ Write the trajectories to standard output and to a file.
 \skipline plot
 
 Compute the reachable and evolved sets.
-\skipline HybridEnclosureList reach,evolve
+\skipline reach,evolve
 \skipline evolver.reach_evolve
 
 

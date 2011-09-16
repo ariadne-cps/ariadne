@@ -134,6 +134,7 @@ class ContinuousValuation
     : public Valuation<Real,X>
 {
   public:
+    ContinuousValuation(const Map<Identifier,X>& rm) : Valuation<Real,X>(rm) { }
     typedef X RealType;
 };
 
@@ -143,6 +144,10 @@ template<class X> class HybridValuation
     , public ContinuousValuation<X>
 {
   public:
+    HybridValuation(const Map<Identifier,String>& sm, const Map<Identifier,X>& rm) :
+        DiscreteValuation(sm), ContinuousValuation<X>(rm) { }
+    HybridValuation(const StringValuation& sv, const Map<Identifier,X>& rm) :
+        DiscreteValuation(sv.values()), ContinuousValuation<X>(rm) { }
     using DiscreteValuation::set;
     using ContinuousValuation<X>::set;
     using DiscreteValuation::get;

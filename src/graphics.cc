@@ -310,7 +310,7 @@ void CairoCanvas::stroke()
 
 // TODO: Use generic canvas routines; move cairo-specific functionality
 // into CairoCanvas class.
-void CairoCanvas::initialise(std::string x, std::string y, double xl, double xu, double yl, double yu)
+void CairoCanvas::initialise(std::string text_x, std::string text_y, double xl, double xu, double yl, double yu)
 {
 
 
@@ -354,6 +354,9 @@ void CairoCanvas::initialise(std::string x, std::string y, double xl, double xu,
     cairo_text_extents (cr, text_xu.c_str(), &te);
     cairo_move_to(cr, left_margin+drawing_width-te.width-4, top_margin+drawing_height+4+te.height);
     cairo_show_text (cr, text_xu.c_str());
+    cairo_text_extents (cr, text_x.c_str(), &te);
+    cairo_move_to(cr, left_margin+drawing_width/2-te.width/2-3, top_margin+drawing_height+4+te.height);
+    cairo_show_text (cr, text_x.c_str());
 
     cairo_text_extents (cr, text_yl.c_str(), &te);
     cairo_move_to(cr, left_margin-te.width-6, top_margin+drawing_height+2);
@@ -361,6 +364,9 @@ void CairoCanvas::initialise(std::string x, std::string y, double xl, double xu,
     cairo_text_extents (cr, text_yu.c_str(), &te);
     cairo_move_to(cr, left_margin-te.width-6, top_margin+te.height+2);
     cairo_show_text (cr, text_yu.c_str());
+    cairo_text_extents (cr, text_y.c_str(), &te);
+    cairo_move_to(cr, left_margin-te.width-6, top_margin+drawing_height/2+te.height+2);
+    cairo_show_text (cr, text_y.c_str());
 
 
     // Save unclipped state and canvas coordinates
@@ -458,7 +464,9 @@ void Figure::_paint_all(CanvasInterface& canvas) const
     double yl=numeric_cast<double>(bounding_box[projection.y_coordinate()].lower());
     double yu=numeric_cast<double>(bounding_box[projection.y_coordinate()].upper());
 
-    canvas.initialise("x","y",xl,xu,yl,yu);
+    std::string tx=std::string("x")+str(projection.x_coordinate());
+    std::string ty=std::string("x")+str(projection.y_coordinate());
+    canvas.initialise(tx,ty,xl,xu,yl,yu);
 
     // Draw shapes
     for(uint i=0; i!=objects.size(); ++i) {

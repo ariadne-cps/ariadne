@@ -32,6 +32,8 @@
 #include "box.h"
 #include "geometry2d.h"
 #include "discrete_location.h"
+#include "function_set.h"
+#include "expression_set.h"
 #include "hybrid_graphics.h"
 
 #ifdef HAVE_GTK_H
@@ -71,9 +73,9 @@ void draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const
 
 void paint(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes, const List<HybridGraphicsObject>& objects) {
     for(uint i=0; i!=objects.size(); ++i) {
-        const HybridDrawableInterface* shape_ptr=objects[i].shape_ptr.operator->();
+        const HybridDrawableInterface& shape=*objects[i].shape_ptr;
         set_properties(canvas, objects[i].properties);
-        shape_ptr->draw(canvas,locations,axes);
+        shape.draw(canvas,locations,axes);
     }
 }
 
@@ -86,6 +88,11 @@ HybridFigure::HybridFigure()
 {
 }
 
+void HybridFigure::set_bounds(const Map<RealVariable,RealInterval>& b) {
+    for(Map<RealVariable,RealInterval>::const_iterator iter=b.begin(); iter!=b.end(); ++iter) {
+        bounds.insert(iter->first,approximation(iter->second));
+    }
+}
 
 
 
@@ -169,7 +176,7 @@ void HybridFigure::_paint_all(CanvasInterface& canvas) const
 
     // Draw shapes
     for(uint i=0; i!=objects.size(); ++i) {
-        const HybridDrawableInterface& shape=objects[i].shape_ptr.operator*();
+        const HybridDrawableInterface& shape=*objects[i].shape_ptr;
         set_properties(canvas, objects[i].properties);
         shape.draw(canvas,this->locations,this->axes);
     }

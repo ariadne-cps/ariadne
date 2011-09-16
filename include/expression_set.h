@@ -33,6 +33,7 @@
 #include "container.h"
 #include "variables.h"
 #include "expression.h"
+#include "assignment.h"
 #include "float.h"
 #include "real.h"
 
@@ -58,8 +59,6 @@ typedef Space<Real> RealSpace;
 class RealVariableInterval;
 class RealVariableBox;
 class ExpressionConstraintSet;
-
-
 
 struct RealVariableLowerInterval {
     Real _lower; RealVariable _variable;

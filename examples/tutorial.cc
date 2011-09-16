@@ -27,8 +27,10 @@
 #include "ariadne.h"
 
 #include "hybrid_automaton-composite.h"
-#include "hybrid_evolver.h"
 #include "hybrid_set.h"
+#include "hybrid_evolver.h"
+#include "hybrid_simulator.h"
+#include "hybrid_graphics.h"
 
 template<class T> void write(const char* filename, const T& t) {
     std::ofstream ofs(filename); ofs << t; ofs.close();
@@ -86,7 +88,7 @@ CompositeHybridAutomaton create_heating_system()
     // Set the system control parameters
     RealConstant Tmax("Tmax",23.0);
     RealConstant Tmin("Tmin",14.0);
-    RealConstant Toff("Toff",22.0);
+    RealConstant Toff("Toff",21.0);
     RealConstant Ton_upper("Ton_upper",15.125);
     RealConstant Ton_lower("Ton_lower",14.875);
 
@@ -118,7 +120,7 @@ CompositeHybridAutomaton create_heating_system()
     clock.new_transition( midnight, next(t)=0.0, t>=1.0, urgent );
 
     CompositeHybridAutomaton heating_system((clock,heater));
-    std::cout << "heating_system=" << heating_system << "\n";
+    std::cout << "heating_system=" << heating_system << "\n" << "\n";
 
     return heating_system;
 }
@@ -133,7 +135,7 @@ HybridEvolverType create_evolver()
     //evolver.parameters().maximum_step_size = 0.125;
     evolver.parameters().maximum_step_size = 0.5;
     evolver.verbosity=1;
-    cout <<  evolver.parameters() << endl;
+    cout <<  evolver.parameters() << endl << endl;
 
     return evolver;
 }
@@ -150,44 +152,67 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     RealVariable T("T");
     RealVariable t("t");
 
+
+    // Create a simulator object.
+    HybridSimulator simulator;
+    simulator.set_step_size(0.03125);
+
+    // Set an initial point for the simulation
+    HybridPoint initial_point(heating_off, (t|0.0,T|18.0) );
+    cout << "initial_point=" << initial_point << endl;
+    // Set the maximum simulation time
+    HybridTime simulation_time(6.5,9);
+    cout << "simulation_time=" << simulation_time << endl;
+
+    // Compute a simulation trajectory
+    cout << "Computing simulation trajectory... \n" << flush;
+    Orbit<HybridPoint> trajectory = simulator.orbit(heating_system,initial_point,simulation_time);
+    cout << "    done." << endl;
+    // Write the simulation trajectory to standard output and plot.
+    cout << "Writing simulation trajectory... " << flush;
+    write("tutorial-trajectory.txt",trajectory);
+    cout << "done." << endl;
+    cout << "Plotting simulation trajectory... " << flush;
+    hplot("tutorial-trajectory.png",(0.0<=t<=1.0,14.0<=T<=23.0), Colour(0.0,0.5,1.0), trajectory);
+    cout << "done." << endl << endl;
+
+
     // Set the initial set.
     HybridSet initial_set(heating_off, (16.0<=T<=16.0625,0.0<=t<=0.015625) );
-    cout << "initial_set="<<initial_set<<"\n";
+    cout << "initial_set=" << initial_set << endl;
     // Compute the initial set as a validated enclosure.
     HybridEnclosure initial_enclosure = evolver.enclosure(heating_system,initial_set);
-    cout << "initial_enclosure="<<initial_enclosure<<"\n";
+    cout << "initial_enclosure="<<initial_enclosure << endl << endl;
 
     // Set the maximum evolution time
     HybridTime evolution_time(1.5,4);
+    cout << "evolution_time=" << evolution_time << endl;
 
-    // Compute the orbit.
-    cout << "Computing orbit... " << flush;
+    // Compute a validated orbit.
+    cout << "Computing orbit... \n" << flush;
     Orbit<HybridEnclosure> orbit = evolver.orbit(heating_system,initial_set,evolution_time,UPPER_SEMANTICS);
-    cout << "done." << endl;
-
-    // Write the orbit to standard output and plot.
+    cout << "    done." << endl;
+    // Write the validated orbit to standard output and plot.
     cout << "Writing orbit... " << flush;
     write("tutorial-orbit.txt",orbit);
     cout << "done." << endl;
     cout << "Plotting orbit... " << flush;
-    plot("tutorial-orbit.png",Box(2, 0.0,1.0, 14.0,21.0), Colour(0.0,0.5,1.0), orbit);
-    cout << "done." << endl;
+    plot("tutorial-orbit.png",Box(2, 0.0,1.0, 14.0,23.0), Colour(0.0,0.5,1.0), orbit);
+    cout << "done." << endl << endl;
 
 
-
-    cout << "initial_enclosure="<<initial_enclosure<<"\n";
     // Compute reachable and evolved sets
-    cout << "Computing reach and evolve sets... " << flush;
+    cout << "Computing reach and evolve sets... \n" << flush;
     ListSet<HybridEnclosure> reach,evolve;
     make_lpair(reach,evolve) = evolver.reach_evolve(heating_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
-    cout << "done." << endl;
+    cout << "    done." << endl;
     // Write the orbit to standard output and plot.
     cout << "Plotting reach and evolve sets... " << flush;
-    plot("tutorial-reach_evolve.png",Box(2, 0.0,1.0, 14.0,21.0),
+    plot("tutorial-reach_evolve.png",Box(2, 0.0,1.0, 14.0,23.0),
          Colour(0.0,0.5,1.0), reach, Colour(0.0,0.25,0.5), initial_enclosure, Colour(0.25,0.0,0.5), evolve);
-    plot("tutorial-reach_evolve-off.png",Box(2, 0.0,1.0, 14.0,21.0),
+    plot("tutorial-reach_evolve-off.png",Box(2, 0.0,1.0, 14.0,23.0),
          Colour(0.0,0.5,1.0), reach[heating_off], Colour(0.0,0.25,0.5), initial_enclosure, Colour(0.25,0.0,0.5), evolve[heating_on]);
-    plot("tutorial-reach_evolve-on.png",Box(2, 0.0,1.0, 14.0,21.0),
+    plot("tutorial-reach_evolve-on.png",Box(2, 0.0,1.0, 14.0,23.0),
          Colour(0.0,0.5,1.0), reach[heating_on], Colour(0.0,0.25,0.5), initial_enclosure, Colour(0.25,0.0,0.5), evolve[heating_on]);
     cout << "done." << endl;
 

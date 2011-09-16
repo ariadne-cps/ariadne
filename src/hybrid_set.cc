@@ -32,35 +32,29 @@
 #include "hybrid_time.h"
 #include "hybrid_orbit.h"
 #include "hybrid_automaton_interface.h"
+#include "graphics.h"
+#include "hybrid_graphics.h"
 #include <boost/concept_check.hpp>
 #include <include/rounding.h>
 #include <include/assignment.h>
 
 namespace Ariadne {
 
-struct Variables2d {
-    RealVariable _x,_y;
-    Variables2d(const RealVariable& x, const RealVariable& y) : _x(x), _y(y) { }
-    RealVariable const& x_variable() const { return this->_x; };
-    RealVariable const& y_variable() const { return this->_y; };
-};
-
-
 
 Orbit<HybridPoint>::Orbit(const HybridPoint& hpt)
-    : _curves(new std::vector<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(hpt.point()))))
+    : _curves_ptr(new std::vector<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(hpt.point()))))
 { }
 
 uint
 Orbit<HybridPoint>::size() const
 {
-    return this->_curves->size();
+    return this->_curves_ptr->size();
 }
 
 const InterpolatedCurve&
 Orbit<HybridPoint>::curve(uint m) const
 {
-    return (*this->_curves)[m].third;
+    return (*this->_curves_ptr)[m].third;
 }
 
 void
@@ -68,9 +62,9 @@ Orbit<HybridPoint>::insert(HybridTime ht, const HybridPoint& hpt)
 {
     ARIADNE_ASSERT((uint)ht.discrete_time()<=this->size());
     if(this->size()==(uint)ht.discrete_time()) {
-        this->_curves->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(hpt.point())));
+        this->_curves_ptr->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(hpt.point())));
     } else {
-        (*this->_curves)[ht.discrete_time()].third.insert(ht.continuous_time(),hpt.point());
+        (*this->_curves_ptr)[ht.discrete_time()].third.insert(ht.continuous_time(),hpt.point());
     }
 }
 
@@ -140,6 +134,23 @@ final() const
     return this->_data->final;
 }
 
+
+void Orbit<HybridEnclosure>::draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+template<>
+std::ostream&
+operator<<(std::ostream& os, const Orbit< HybridEnclosure >& orb)
+{
+    os << "Orbit(\n  initial=" << orb.initial()
+       << "\n  intermediate=" << orb.intermediate()
+       << "\n  reach=" << orb.reach()
+       << "\n  final=" << orb.final()
+       << ")\n";
+    return os;
+}
+
 template<class BS> void draw(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
 {
     if(set.location()==location) {
@@ -148,13 +159,19 @@ template<class BS> void draw(CanvasInterface& canvas, const DiscreteLocation& lo
     }
 }
 
-void draw(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const Orbit<HybridPoint>& orbit)
-{
-    for(uint i=0; i<=orbit.size(); ++i) {
-        draw(canvas,location,axes,orbit.curves()[i]);
+void Orbit<HybridPoint>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
+    const Orbit<HybridPoint>& orbit=*this;
+    for(uint i=0; i!=orbit._curves_ptr->size(); ++i) {
+        HybridInterpolatedCurve const& hcurve=this->_curves_ptr->at(i);
+        if(locations.empty() || locations.contains(hcurve.location())) {
+            RealSpace const& space=hcurve.space();
+            if(space.contains(axes.x_variable()) && space.contains(axes.y_variable())) {
+                Projection2d projection(space.dimension(),space.index(axes.x_variable()),space.index(axes.y_variable()));
+                hcurve.continuous_state_set().draw(canvas,projection);
+            }
+        }
     }
 }
-
 
 Map<RealVariable,RealInterval> make_map(const List<RealVariableInterval>& b) {
     Map<RealVariable,RealInterval> res;
@@ -194,6 +211,35 @@ OutputStream& operator<<(OutputStream& os, const HybridSet& hs) {
 
 // Map<DiscreteLocation,ConstrainedImageSet> HybridBoundedConstraintSet::_sets;
 // HybridSpace HybridBoundedConstraintSet::_space;
+
+HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& x)
+    : Tuple<DiscreteLocation,RealSpace,Point>(q,RealSpace(),Point(x.size()))
+{
+    uint i=0; 
+    for(Map<Identifier,Real>::const_iterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
+        this->second.append(RealVariable(iter->first));
+        this->third[i]=numeric_cast<Float>(iter->second);
+    }
+}
+
+HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,Float>& x)
+    : Tuple<DiscreteLocation,RealSpace,Point>(q,RealSpace(),Point(x.size()))
+{
+    uint i=0;
+    for(Map<Identifier,Float>::const_iterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
+        this->second.append(RealVariable(iter->first));
+        this->third[i]=iter->second;
+    }
+}
+
+Map<RealVariable,Float> HybridPoint::values() const {
+    Map<RealVariable,Float> r;
+    for(uint i=0; i!=this->second.dimension(); ++i) {
+        r.insert(this->second[i],this->third[i]);
+    }
+    return r;
+}
+
 
 HybridBasicSet<Box>::HybridBasicSet(const DiscreteLocation& q, const List<RealVariableInterval>& b)
     : _location(q), _space(), _set(b.size())

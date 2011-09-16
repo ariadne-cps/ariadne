@@ -60,7 +60,15 @@ void HybridSimulator::set_step_size(double h)
 }
 
 
-Point make_point(const HybridPoint& hpt, const RealSpace& spc) { assert(hpt.space()==spc); return hpt.point(); }
+Point make_point(const HybridPoint& hpt, const RealSpace& spc) {
+    if(hpt.space()==spc) { return hpt.point(); }
+    Map<RealVariable,Float> values=hpt.values();
+    Point pt(spc.dimension());
+    for(uint i=0; i!=pt.size(); ++i) {
+        pt[i]=values[spc.variable(i)];
+    }
+    return pt;
+}
 
 inline Float evaluate(const ScalarFunction<Real>& f, const Vector<Float>& x) { return f(x); }
 inline Vector<Float> evaluate(const VectorFunction<Real>& f, const Vector<Float>& x) { return f(x); }
@@ -78,13 +86,14 @@ Orbit<HybridPoint>
 HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint& init_pt, const HybridTime& tmax) const
 {
     HybridTime t(0.0,0);
-    Orbit<HybridPoint> orbit(init_pt);
     Float h=this->_step_size;
 
     DiscreteLocation location=init_pt.location();
     RealSpace space=system.continuous_state_space(location);
     Point point=make_point(init_pt,space);
     Point next_point;
+
+    Orbit<HybridPoint> orbit(HybridPoint(location,space,point));
 
     RealVectorFunction dynamic=system.dynamic_function(location);
     Map<DiscreteEvent,RealScalarFunction> guards=guard_functions(system,location);
@@ -104,7 +113,6 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint
         if(enabled) {
             DiscreteLocation target=system.target(location,event);
             RealVectorFunction reset=system.reset_function(location,event);
-
             location=target;
             space=system.continuous_state_space(location);
             next_point=reset(point);

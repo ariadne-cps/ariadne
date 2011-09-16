@@ -161,12 +161,8 @@ class HybridDrawableInterface {
   public:
     //! brief Virtual destructor.
     virtual ~HybridDrawableInterface() { }
-    //! brief Make a dynamically-allocated copy.
-    virtual HybridDrawableInterface* clone() const = 0;
     //! brief Draw the object on the canvas \a c using line segments and fill/stroke commands.
     virtual void draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& v) const = 0;
-    //! brief Write to an output stream.
-    virtual std::ostream& write(std::ostream& os) const { return os << "Drawable"; }
 };
 
 

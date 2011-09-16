@@ -37,15 +37,19 @@
 #include "graphics_interface.h"
 #include "graphics.h"
 
+#include "expression_set.h"
+
 typedef unsigned int uint;
 
 namespace Ariadne {
 
+class RealInterval;
+
 struct HybridGraphicsObject {
     HybridGraphicsObject(const GraphicsProperties& gp, const HybridDrawableInterface& sh)
-        : properties(gp), shape_ptr(sh.clone()) { }
+        : properties(gp), shape_ptr(&sh) { }
     GraphicsProperties properties;
-    shared_ptr<const HybridDrawableInterface> shape_ptr;
+    const HybridDrawableInterface* shape_ptr;
 };
 
 struct Variables2d {
@@ -66,7 +70,9 @@ class HybridFigure
 
     void set_locations(const List<DiscreteLocation>& l) { locations=Set<DiscreteLocation>(l); }
     void set_bounds(const RealVariable& x, const Float& l, const Float& u) { bounds.insert(x,Interval(l,u)); }
+    void set_bounds(const RealVariable& x, const Interval& ivl) { bounds.insert(x,ivl); }
     void set_bounds(const Map<RealVariable,Interval>& b) { bounds=b; };
+    void set_bounds(const Map<RealVariable,RealInterval>& b);
     void set_axes(const RealVariable& x, const RealVariable& y) { axes=Variables2d(x,y); }
 
     void set_line_style(bool ls) { properties.line_style=ls; }
@@ -108,7 +114,15 @@ inline HybridFigure& operator<<(HybridFigure& g, const FillStyle& fs) { g.set_fi
 inline HybridFigure& operator<<(HybridFigure& g, const FillOpacity& fo) { g.set_fill_opacity(fo); return g; }
 inline HybridFigure& operator<<(HybridFigure& g, const FillColour& fc) { g.set_fill_colour(fc); return g; }
 
+inline void hdraw(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); }
 inline HybridFigure& operator<<(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); return fig; }
+
+Interval approximation(const RealInterval& rivl);
+
+template<class SET1>
+void hplot(const char* filename, const List<RealVariableInterval>& bbox, const Colour& fc1, const SET1& set1) {
+    HybridFigure g; for(uint i=0; i!=bbox.size(); ++i) { g.set_bounds(bbox[i].variable(),approximation(bbox[i].interval())); }
+    g.set_axes(bbox[0].variable(),bbox[1].variable()); g.set_fill_colour(fc1); hdraw(g,set1); g.write(filename); }
 
 } // namespace Ariadne
 

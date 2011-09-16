@@ -105,11 +105,13 @@ class HybridPoint
   public:
     HybridPoint() : Tuple<DiscreteLocation,RealSpace,Point>(DiscreteLocation(),RealSpace(),Point()) { }
     HybridPoint(const DiscreteLocation& q, const RealSpace& spc, const Point& pt) : Tuple<DiscreteLocation,RealSpace,Point>(q,spc,pt) { }
-    //HybridPoint(const DiscreteLocation& q, const FloatValuation& val);
+    HybridPoint(const DiscreteLocation& q, const Map<Identifier,Float>& val);
+    HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& val);
     const DiscreteLocation& location() const { return this->first; }
     const RealSpace& space() const { return this->second; }
     const Point& point() const { return this->third; }
     const Point& real_values() const { return this->third; }
+    Map<RealVariable,Float> values() const;
 };
 
 template<class BS>

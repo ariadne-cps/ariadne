@@ -51,7 +51,8 @@ check_PROGRAMS = \
 	test_hybrid_simulator \
 	test_hybrid_evolver \
 	test_hybrid_evolution \
-	test_hybrid_reachability_analyser
+	test_hybrid_reachability_analyser \
+	test_hybrid_graphics
 
 EXTRA_TESTS = \
 	test_textplot \
@@ -101,6 +102,7 @@ test_hybrid_evolver_SOURCES=test_hybrid_evolver.cc
 test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
 test_hybrid_discretiser_SOURCES=test_hybrid_discretiser.cc
 test_hybrid_reachability_analyser_SOURCES=test_hybrid_reachability_analyser.cc
+test_hybrid_graphics_SOURCES=test_hybrid_graphics.cc
 test_serialization_SOURCES=test_serialization.cc
 test_graphics_SOURCES=test_graphics.cc
 test_textplot_SOURCES=test_textplot.cc

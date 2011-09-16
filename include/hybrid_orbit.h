@@ -70,16 +70,22 @@ template<class ES> std::ostream& operator<<(std::ostream&, const Orbit<ES>&);
 
 template<>
 class Orbit<HybridPoint>
+    : public HybridDrawableInterface
 {
   public:
     Orbit(const HybridPoint& hpt);
     void insert(HybridTime ht, const HybridPoint& hpt);
     uint size() const;
     const InterpolatedCurve& curve(uint m) const;
-    const std::vector<HybridInterpolatedCurve>& curves() const { return *this->_curves; }
+    const std::vector<HybridInterpolatedCurve>& curves() const { return *this->_curves_ptr; }
+    void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const;
   private:
-    boost::shared_ptr<std::vector<HybridInterpolatedCurve> > _curves;
+    boost::shared_ptr<std::vector<HybridInterpolatedCurve> > _curves_ptr;
 };
+
+template<>
+std::ostream&
+operator<<(std::ostream& os, const Orbit< HybridPoint >& orb);
 
 template<>
 class Orbit<HybridGridCell>
@@ -104,6 +110,7 @@ class Orbit<HybridGridCell>
 
 template<>
 class Orbit<HybridEnclosure>
+//    : public HybridDrawableInterface
 {
   public:
     typedef HybridEnclosure EnclosureType;
@@ -122,6 +129,8 @@ class Orbit<HybridEnclosure>
     EnclosureListType const& reach() const { return this->_reach; }
     EnclosureListType const& intermediate() const { return this->_intermediate; }
     EnclosureListType const& final() const { return this->_final; }
+
+    void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const;
   private:
     EnclosureType _initial;
     EnclosureListType _reach;
@@ -131,7 +140,8 @@ class Orbit<HybridEnclosure>
 
 template<>
 std::ostream&
-operator<<(std::ostream& os, const Orbit< HybridPoint >& orb);
+operator<<(std::ostream& os, const Orbit< HybridEnclosure >& orb);
+
 
 } // namespace Ariadne
 

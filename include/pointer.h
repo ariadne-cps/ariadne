@@ -31,11 +31,13 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/intrusive_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 
 namespace Ariadne {
 
 
+using boost::weak_ptr;
 using boost::scoped_ptr;
 using boost::shared_ptr;
 using boost::intrusive_ptr;

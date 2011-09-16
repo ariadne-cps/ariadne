@@ -426,6 +426,7 @@ class HybridSetConstIterator
 //! \ingroup HybridModule
 //! A set comprising a %GridTreeSet in each location.
 class HybridGridTreeSet
+    : public HybridDrawableInterface
 {
   public:
     HybridGrid _hgrid;
@@ -636,6 +637,11 @@ class HybridGridTreeSet
     //!
     std::ostream& write(std::ostream& os) const {
         return os << this->_map;
+    }
+
+    //!
+    void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d&v) const {
+        ARIADNE_NOT_IMPLEMENTED;
     }
 
     //!

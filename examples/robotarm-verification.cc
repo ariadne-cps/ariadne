@@ -146,10 +146,10 @@ int main(int argc, char** argv)
     // cout << "evolve_set=" << hybrid_evolve_set << endl;
     // cout << "reach_set=" << hybrid_reach_set << endl;
     std::cout << "Plotting..." << std::flush;
-    Figure fig;
+    HybridFigure fig;
     // Plotting x
-    fig.set_projection(3,2,0);
-    fig.set_bounding_box(Box(3, 0.0,10.0, 0.0, 1.0, 0.0,time));
+    fig.set_axes(Axes2d(0.0<=x<=10.0,0.0<=vx<=1.0));
+    fig.set_bounds(t,0.0,time);
     fig << line_style(true) << fill_colour(cyan);
     fig << orbit;
 //    fig << fill_colour(red) << orbit.final();

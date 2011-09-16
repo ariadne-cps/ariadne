@@ -164,7 +164,7 @@ int main()
     g.set_projection_map(PlanarProjectionMap(3,2,0));
 
     g << fill_colour(Colour(0.0,0.5,1.0));
-    g << orbit;
+    g << orbit.reach()[l1] << orbit.reach()[l2] << orbit.reach()[l3] << orbit.reach()[l4];
     g.write("watertank-time-orbit");
 /*
     std::cout << "Computing reach set using GeneralHybridEvolver... " << std::flush;

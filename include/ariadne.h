@@ -73,5 +73,6 @@ using std::ofstream; using std::ifstream;
 
 #include "serialization.h"
 #include "graphics.h"
+#include "hybrid_graphics.h"
 
 #endif

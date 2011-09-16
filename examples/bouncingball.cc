@@ -91,7 +91,7 @@ int main(int argc, const char* argv[])
 
     //std::cout << "Orbit="<<orbit<<std::endl;
     std::cout << "Orbit.final()="<<orbit.final()<<std::endl;
-    plot("bouncingball-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
+    plot("bouncingball-orbit",Axes2d(-0.1<=x<=2.1,-10.1<=v<=10.1), Colour(0.0,0.5,1.0), orbit);
 
     //textplot("ball-orbit.txt",orbit);
 

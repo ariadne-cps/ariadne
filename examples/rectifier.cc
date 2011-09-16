@@ -220,14 +220,14 @@ int main(int argc, const char* argv[])
 
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
 
-    Box graphic_box(2,0.0,1.0/dp[1],-dp[0],dp[0]);
-    Box graphic_box2(2,-dp[0],dp[0],2.0,dp[0]);
+    Axes2d graphic_axes(0.0<=t<=1.0/dp[1],-dp[0]<=vi<=dp[0]);
+    Axes2d graphic_axes2(-dp[0]<=t<=dp[0],2.0<=vi<=dp[0]);
 
     std::cout << "Plotting results..." << std::flush;
 
-    plot("rectifier_orbit_t_vin", 0, 1, 3, graphic_box, Colour(0.0,0.5,1.0), orbit, -1);
-    plot("rectifier_orbit_t_vout", 0, 2, 3, graphic_box, Colour(0.0,0.5,1.0), orbit, -1);
-    plot("rectifier_orbit_vin_vout", 1, 2, 3, graphic_box2, Colour(0.0,0.5,1.0), orbit, -1);
+    plot("rectifier_orbit_t_vin", graphic_axes, Colour(0.0,0.5,1.0), orbit);
+    plot("rectifier_orbit_t_vout", graphic_axes, Colour(0.0,0.5,1.0), orbit);
+    plot("rectifier_orbit_vin_vout", graphic_axes2, Colour(0.0,0.5,1.0), orbit);
 
 
 /*

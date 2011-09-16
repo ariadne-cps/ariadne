@@ -26,6 +26,7 @@
 
 #include <cstdarg>
 #include "ariadne.h"
+#include <include/hybrid_graphics.h>
 
 using namespace Ariadne;
 
@@ -111,7 +112,7 @@ int main(int argc, const char* argv[])
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final()="<<orbit.final()<<std::endl;
-    Array<uint> xy(4,0,2);
-    plot("ballinabox-orbit",PlanarProjectionMap(4,0,2),bounding_box, Colour(0.0,0.5,1.0), orbit);
+    Axes2d axes(-1.0<=x<=1.0,-1.0<=y<=1.0);
+    plot("ballinabox-orbit",axes, Colour(0.0,0.5,1.0), orbit);
 
 }

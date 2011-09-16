@@ -156,8 +156,8 @@ int main(int argc, const char* argv[])
     std::cout << "Orbit.reach_size="<<orbit.reach().size()<<std::endl;
 
     std::cout << "Plotting orbit... "<<std::flush;
-    Box bounding_box(2, -0.1,9.1, -0.1,1.3);
-    plot("watertank-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
+    Axes2d axes(-0.1<=height<=9.1,-0.1<=aperture<=1.3);
+    plot("watertank-orbit",axes, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
 
 
@@ -171,7 +171,7 @@ int main(int argc, const char* argv[])
     }
     std::cout << "done." << std::endl;
 
-    plot("watertank-reach",bounding_box, Colour(0.0,0.5,1.0), hgts);
+    plot("watertank-reach",axes, Colour(0.0,0.5,1.0), hgts);
 
 
 /*

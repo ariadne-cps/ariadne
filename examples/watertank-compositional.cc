@@ -43,7 +43,7 @@ int main()
 
     // Declare the system variables
     RealVariable height("height");
-    RealVariable alpha("alpha");
+    RealVariable aperture("aperture");
 
     // Create the tank object
     AtomicHybridAutomaton tank("tank");
@@ -52,9 +52,9 @@ int main()
     AtomicDiscreteLocation draining("draining");
 
     // The water level is always given by the same dynamic
-    // The inflow is controlled by the valve alpha, the outflow depends on the
+    // The inflow is controlled by the valve aperture, the outflow depends on the
     // pressure, which is proportional to the water height.
-    tank.new_mode(draining,(dot(height)=-lambda*height+rate*alpha));
+    tank.new_mode(draining,(dot(height)=-lambda*height+rate*aperture));
 
 
 
@@ -74,34 +74,34 @@ int main()
 
     AtomicHybridAutomaton valve("valve");
 
-    // Since alpha is a known constant when the valve is open or closed,
-    // specify alpha by an algebraic equation.
-    valve.new_mode(open,(alpha=+1.0));
-    valve.new_mode(closed,(alpha=-1.0));
+    // Since aperture is a known constant when the valve is open or closed,
+    // specify aperture by an algebraic equation.
+    valve.new_mode(open,(aperture=+1.0));
+    valve.new_mode(closed,(aperture=-1.0));
     // Specify the differential equation for how the valve opens/closes.
-    valve.new_mode(opening,(dot(alpha)=+1.0/T));
-    valve.new_mode(closing,(dot(alpha)=-1.0/T));
+    valve.new_mode(opening,(dot(aperture)=+1.0/T));
+    valve.new_mode(closing,(dot(aperture)=-1.0/T));
 
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to
     // check non-blockingness of urgent actions.
     valve.new_invariant(open,height<=hmax,start_closing);
     valve.new_invariant(opening,height<=hmax,start_closing);
-    valve.new_invariant(opening,alpha<=1.0,finished_opening);
+    valve.new_invariant(opening,aperture<=1.0,finished_opening);
     valve.new_invariant(closed,height>=hmin,start_opening);
     valve.new_invariant(closing,height>=hmin,start_opening);
-    valve.new_invariant(closing,alpha>=0.0,finished_closing);
+    valve.new_invariant(closing,aperture>=0.0,finished_closing);
 
-    valve.new_transition(closed,start_opening,opening,(next(alpha)=alpha),height<=hmin);
-    valve.new_transition(closing,start_opening,opening,(next(alpha)=alpha),height<=hmin);
-    valve.new_transition(open,start_closing,closing,(next(alpha)=alpha),height>=hmax);
-    valve.new_transition(opening,start_closing,closing,(next(alpha)=alpha),height>=hmax);
+    valve.new_transition(closed,start_opening,opening,(next(aperture)=aperture),height<=hmin);
+    valve.new_transition(closing,start_opening,opening,(next(aperture)=aperture),height<=hmin);
+    valve.new_transition(open,start_closing,closing,(next(aperture)=aperture),height>=hmax);
+    valve.new_transition(opening,start_closing,closing,(next(aperture)=aperture),height>=hmax);
 
     // Set the transitions for when the valve finished opening.
-    // Since alpha is defined by an algebraic equation in the new mode,
+    // Since aperture is defined by an algebraic equation in the new mode,
     // it may not be specified in the reset.
-    valve.new_transition(opening,finished_opening,open,alpha>=1.0);
-    valve.new_transition(closing,finished_closing,closed,alpha<=0.0);
+    valve.new_transition(opening,finished_opening,open,aperture>=1.0);
+    valve.new_transition(closing,finished_closing,closed,aperture<=0.0);
 
 
     CompositeHybridAutomaton watertank_system((tank,valve));
@@ -129,8 +129,7 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 0.0" << std::endl;
     DiscreteLocation initial_location=(tank|draining,valve|opening);
-    HybridSet initial_set((tank|draining,valve|opening),(height==0.0,alpha==0.0));
-    Box bounding_box(2, -0.1,9.1, -0.1,1.1);
+    HybridSet initial_set((tank|draining,valve|opening),(height==0.0,aperture==0.0));
 
     HybridTime evolution_time(80.0,5);
 
@@ -140,7 +139,8 @@ int main()
 
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
     std::cout << "Plotting orbit... "<<std::flush;
-    plot("watertank_compositional-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
+    Axes2d axes(-0.1<=height<=9.1, -0.1<=aperture<=1.1);
+    plot("watertank_compositional-orbit",axes, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
 
 }

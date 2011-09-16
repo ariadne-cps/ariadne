@@ -209,7 +209,10 @@ template<class T> class Variable
     template<class D> inline typename EnableIfRealBuiltin<T,D,AssignmentType>::Type operator=(D e) const;
 };
 
-
+class TimeVariable : public Variable<Real> {
+  public:
+    TimeVariable() : Variable<Real>(" t ") { }
+};
 
 template<class T> LetVariable<T> let(const Variable<T>&);
 

@@ -60,9 +60,16 @@ struct ImageSize2d {
     ImageSize2d(uint _nx,uint _ny) : nx(_nx), ny(_ny) { }
 };
 
-Projection2d projection(const RealSpace& spc, const Variables2d& axes) {
-    return Projection2d(spc.dimension(),spc.index(axes.x_variable()),spc.index(axes.y_variable()));
+bool valid_axes(const RealSpace& space, const Variables2d& axes) {
+    return ( (axes.x_variable().name()==TimeVariable().name()) || space.contains(axes.x_variable()) ) && space.contains(axes.y_variable());
 }
+
+Projection2d projection(const RealSpace& space, const Variables2d& axes) {
+    uint x_index = (axes.x_variable()==TimeVariable()) ? space.dimension() : space.index(axes.x_variable());
+    uint y_index = space.index(axes.y_variable());
+    return Projection2d(space.dimension(),x_index,y_index);
+}
+
 
 
 void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties);

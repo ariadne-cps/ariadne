@@ -59,6 +59,7 @@ struct Variables2d {
     RealVariable y_variable() const { return RealVariable(_y); }
 };
 
+bool valid_axes(const RealSpace& space, const Variables2d& axes);
 Projection2d projection(const RealSpace& spc, const Variables2d& axes);
 
 //! \brief Class for plotting figures of hybrid sets.
@@ -92,7 +93,7 @@ class HybridFigure
     double get_fill_opacity() const { return properties.fill_opacity; }
     Colour get_fill_colour() const { return properties.fill_colour; }
 
-    void draw(const HybridDrawableInterface& shape) { objects.append(HybridGraphicsObject(this->properties,shape)); } 
+    void draw(const HybridDrawableInterface& shape) { objects.append(HybridGraphicsObject(this->properties,shape)); }
     void clear() { objects.clear(); }
 
     void write(const char* filename, uint nx, uint ny) const;

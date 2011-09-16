@@ -122,11 +122,11 @@ InterpolatedCurve::draw(CanvasInterface& c, const Projection2d& p) const
 {
     uint xi=p.x_coordinate(); uint yi=p.y_coordinate();
     const_iterator iter=this->begin();
-    const Point& pt=iter->second;
+    FloatVector pt=join(iter->second,iter->first);
     c.move_to(pt[xi],pt[yi]);
     while(iter!=this->end()) {
         ++iter;
-        const Point& pt=iter->second;
+        pt=join(iter->second,iter->first);
         c.line_to(pt[xi],pt[yi]);
     }
     if(this->begin()->second==(this->end())->second) {

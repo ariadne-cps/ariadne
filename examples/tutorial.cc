@@ -151,7 +151,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     DiscreteLocation heating_on(StringVariable("heating")|"on");
     RealVariable T("T");
     RealVariable t("t");
-
+    TimeVariable time;
 
     // Create a simulator object.
     HybridSimulator simulator;
@@ -161,7 +161,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     HybridPoint initial_point(heating_off, (t|0.0,T|18.0) );
     cout << "initial_point=" << initial_point << endl;
     // Set the maximum simulation time
-    HybridTime simulation_time(6.5,9);
+    HybridTime simulation_time(8.0,9);
     cout << "simulation_time=" << simulation_time << endl;
 
     // Compute a simulation trajectory
@@ -173,12 +173,12 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     write("tutorial-trajectory.txt",trajectory);
     cout << "done." << endl;
     cout << "Plotting simulation trajectory... " << flush;
-    hplot("tutorial-trajectory.png",(0.0<=t<=1.0,14.0<=T<=23.0), Colour(0.0,0.5,1.0), trajectory);
+    hplot("tutorial-trajectory.png",(0.0<=time<=8.0,14.0<=T<=23.0), Colour(0.0,0.5,1.0), trajectory);
     cout << "done." << endl << endl;
 
 
     // Set the initial set.
-    HybridSet initial_set(heating_off, (16.0<=T<=16.0625,0.0<=t<=0.015625) );
+    HybridSet initial_set(heating_off, (18.0<=T<=18.0625,0.0<=t<=0.015625) );
     cout << "initial_set=" << initial_set << endl;
     // Compute the initial set as a validated enclosure.
     HybridEnclosure initial_enclosure = evolver.enclosure(heating_system,initial_set);

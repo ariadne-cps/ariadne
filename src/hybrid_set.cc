@@ -37,6 +37,7 @@
 #include <boost/concept_check.hpp>
 #include <include/rounding.h>
 #include <include/assignment.h>
+#include <include/graphics_interface.h>
 
 namespace Ariadne {
 
@@ -62,7 +63,7 @@ Orbit<HybridPoint>::insert(HybridTime ht, const HybridPoint& hpt)
 {
     ARIADNE_ASSERT((uint)ht.discrete_time()<=this->size());
     if(this->size()==(uint)ht.discrete_time()) {
-        this->_curves_ptr->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(hpt.point())));
+        this->_curves_ptr->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(Float(ht.continuous_time()),hpt.point())));
     } else {
         (*this->_curves_ptr)[ht.discrete_time()].third.insert(ht.continuous_time(),hpt.point());
     }
@@ -159,15 +160,16 @@ template<class BS> void draw(CanvasInterface& canvas, const DiscreteLocation& lo
     }
 }
 
+
+
 void Orbit<HybridPoint>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
     const Orbit<HybridPoint>& orbit=*this;
     for(uint i=0; i!=orbit._curves_ptr->size(); ++i) {
         HybridInterpolatedCurve const& hcurve=this->_curves_ptr->at(i);
         if(locations.empty() || locations.contains(hcurve.location())) {
             RealSpace const& space=hcurve.space();
-            if(space.contains(axes.x_variable()) && space.contains(axes.y_variable())) {
-                Projection2d projection(space.dimension(),space.index(axes.x_variable()),space.index(axes.y_variable()));
-                hcurve.continuous_state_set().draw(canvas,projection);
+            if(valid_axes(space,axes)) {
+                hcurve.continuous_state_set().draw(canvas,projection(space,axes));
             }
         }
     }
@@ -215,7 +217,7 @@ OutputStream& operator<<(OutputStream& os, const HybridSet& hs) {
 HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& x)
     : Tuple<DiscreteLocation,RealSpace,Point>(q,RealSpace(),Point(x.size()))
 {
-    uint i=0; 
+    uint i=0;
     for(Map<Identifier,Real>::const_iterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
         this->second.append(RealVariable(iter->first));
         this->third[i]=numeric_cast<Float>(iter->second);

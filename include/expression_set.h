@@ -90,6 +90,7 @@ class RealVariableInterval {
     RealVariableInterval(const RealVariableUpperInterval& vu)
         : _lower(-infty), _variable(vu._variable), _upper(vu._upper) { }
     Variable<Real> const& variable() const { return this->_variable; }
+    const Interval approximate_interval() const;
     const RealInterval interval() const;
     const Real lower() const { return this->_lower; }
     const Real upper() const { return this->_upper; }

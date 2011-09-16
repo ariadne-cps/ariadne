@@ -124,37 +124,6 @@ class TestHybridReachabilityAnalyser
 
     }
 
-    template<class S> void plot(const char* name, const Box& bounding_box, const S& set) {
-        Figure g;
-        g.set_bounding_box(bounding_box);
-        g << fill_colour(white) << bounding_box << line_style(true);
-        g << fill_colour(blue) << set;
-        g.write(name);
-    }
-
-    template<class S, class IS> void plot(const char* name, const Box& bounding_box, const S& set, const IS& initial_set) {
-        Figure g;
-        g.set_bounding_box(bounding_box);
-        g << fill_colour(white) << bounding_box;
-        g << line_style(true);
-        g << fill_colour(red) << set;
-        g << fill_colour(blue);
-        g << initial_set;
-        g.write(name);
-    }
-
-    template<class ES, class RS, class IS> void plot(const char* name, const Box& bounding_box,
-                                                     const ES& evolve_set, const RS& reach_set, const IS& initial_set) {
-        Figure g;
-        g.set_bounding_box(bounding_box);
-        g << fill_colour(white) << bounding_box;
-        g << line_style(true);
-        g << fill_colour(green) << reach_set;
-        g << fill_colour(red) << evolve_set;
-        g << fill_colour(blue) << initial_set;
-        g.write(name);
-    }
-
     void test_lower_reach_evolve() {
         DiscreteLocation loc(1);
         Box bounding_box(2,bound);
@@ -164,9 +133,10 @@ class TestHybridReachabilityAnalyser
         HybridGridTreeSet hybrid_lower_reach=analyser.lower_reach(system,initial_set,reach_time);
         GridTreeSet& lower_evolve=hybrid_lower_evolve[loc];
         GridTreeSet& lower_reach=hybrid_lower_reach[loc];
+        BoundedConstraintSet const& initial=initial_set[loc];
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
         cout << "Reached " << lower_reach.size() << " cells " << endl << endl;
-        plot("test_reachability_analyser-map_lower_reach_evolve.png",bounding_box,lower_evolve,lower_reach,initial_set);
+        plot("test_reachability_analyser-map_lower_reach_evolve.png",bounding_box,lower_evolve,lower_reach,initial);
     }
 
     void test_upper_reach_evolve() {

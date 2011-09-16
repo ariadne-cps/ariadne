@@ -711,56 +711,6 @@ HybridSetConstIterator<DS,HBS>::increment_loc()
 template<class A> void serialize(A& archive, HybridGridTreeSet& set, const unsigned int version) {
     archive & static_cast<std::map<DiscreteLocation,GridTreeSet>&>(set); }
 
-template<class BS> inline
-void
-draw(FigureInterface& figure, const HybridBasicSet<BS>& hs) {
-    draw(figure,hs.continuous_state_set());
-}
-
-
-
-template<class DS> inline
-void
-draw(FigureInterface& figure, const std::map<DiscreteLocation,DS>& hds) {
-    for(typename std::map<DiscreteLocation,DS>::const_iterator _loc_iter=hds.begin();
-        _loc_iter!=hds.end(); ++_loc_iter) {
-        draw(figure,_loc_iter->second);
-        //figure.draw(_loc_iter->second);
-        //figure << _loc_iter->second;
-    }
-}
-
-inline
-void
-draw(FigureInterface& figure, const HybridGridTreeSet& hgts) {
-    for(HybridGridTreeSet::const_iterator iter=hgts.begin();
-            iter!=hgts.end(); ++iter) {
-        draw(figure,iter->third.box());
-    }
-}
-
-inline
-void
-draw(FigureInterface& figure, const HybridBoundedConstraintSet& hbcs) {
-    Set<DiscreteLocation> locations=hbcs.locations();
-    for(Set<DiscreteLocation>::const_iterator iter=locations.begin();
-            iter!=locations.end(); ++iter) {
-        draw(figure,hbcs[*iter]);
-    }
-}
-
-inline FigureInterface& operator<<(FigureInterface& figure, const HybridBoundedConstraintSet& hs) {
-    draw(figure,hs); return figure;
-}
-
-template<class BS> inline FigureInterface& operator<<(FigureInterface& figure, const HybridBasicSet<BS>& hs) {
-    draw(figure,hs); return figure;
-}
-
-template<class DS> inline FigureInterface& operator<<(FigureInterface& figure, const std::map<DiscreteLocation,DS>& hs) {
-    draw(figure,hs); return figure;
-}
-
 
 } // namespace Ariadne
 

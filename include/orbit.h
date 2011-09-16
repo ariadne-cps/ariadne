@@ -64,6 +64,7 @@ template<class E> class Orbit {
 typedef double Time;
 
 template<class ES> class Orbit;
+template<class ES> std::ostream& operator<<(std::ostream&, const Orbit<ES>&);
 
 template<class BS> class ListSet;
 class Point;
@@ -72,7 +73,6 @@ class Grid;
 class GridCell;
 class GridTreeSet;
 
-template<class ES> std::ostream& operator<<(std::ostream&, const Orbit<ES>&);
 
 template<>
 class Orbit<Point>

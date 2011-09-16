@@ -41,6 +41,7 @@
 #include "hybrid_evolver.h"
 #include "graphics_interface.h"
 #include "graphics.h"
+#include "hybrid_graphics.h"
 #include "logging.h"
 
 #include "test.h"
@@ -118,7 +119,7 @@ void TestHybridEvolution::test_bouncing_ball() const {
     ARIADNE_TEST_PRINT(orbit.final().size());
     ARIADNE_TEST_PRINT(expected_orbit_final_bounding_box);
 
-    Box bounding_box(2, -0.5,+2.5, -4.0, +4.0);
+    Axes2d bounding_box(-0.5<=x<=+2.5,-4.0<=v<=+4.0);
     plot("test_hybrid_evolution-bouncing_ball",bounding_box,
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
@@ -184,7 +185,7 @@ void TestHybridEvolution::test_water_tank() const {
     ARIADNE_TEST_PRINT(final_enclosure.bounding_box());
     ARIADNE_TEST_BINARY_PREDICATE(subset,final_enclosure,HybridBox(open,(height.in(7.7,8.0),aperture.in(0.999,1.001))));
 
-    Box bounding_box(2, -0.1,9.1, -0.3,1.3);
+    Axes2d bounding_box(-0.1<=height<=9.1, -0.3<=aperture<=+1.3);
     plot("test_hybrid_evolution-water_tank",bounding_box,
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),

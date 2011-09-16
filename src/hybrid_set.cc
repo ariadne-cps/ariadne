@@ -69,6 +69,18 @@ Orbit<HybridPoint>::insert(HybridTime ht, const HybridPoint& hpt)
     }
 }
 
+void Orbit<HybridPoint>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
+    const Orbit<HybridPoint>& orbit=*this;
+    for(uint i=0; i!=orbit._curves_ptr->size(); ++i) {
+        HybridInterpolatedCurve const& hcurve=this->_curves_ptr->at(i);
+        if(locations.empty() || locations.contains(hcurve.location())) {
+            RealSpace const& space=hcurve.space();
+            if(valid_axis_variables(space,axes)) {
+                hcurve.continuous_state_set().draw(canvas,projection(space,axes));
+            }
+        }
+    }
+}
 
 template<>
 std::ostream&
@@ -76,6 +88,7 @@ operator<<(std::ostream& os, const Orbit< HybridPoint >& orb)
 {
     return os << orb.curves();
 }
+
 
 
 struct Orbit<HybridGridCell>::Data {
@@ -136,8 +149,9 @@ final() const
 }
 
 
+
 void Orbit<HybridEnclosure>::draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
-    ARIADNE_NOT_IMPLEMENTED;
+    this->reach().draw(c,l,v);
 }
 
 template<>
@@ -152,28 +166,11 @@ operator<<(std::ostream& os, const Orbit< HybridEnclosure >& orb)
     return os;
 }
 
-template<class BS> void draw(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
-{
-    if(set.location()==location) {
-        Projection2d projection(set.continuous_state_set().dimension(),set.space().index(axes.x_variable()),set.space().index(axes.y_variable()));
-        set.continuous_state_set().draw(canvas,projection);
-    }
-}
 
 
 
-void Orbit<HybridPoint>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
-    const Orbit<HybridPoint>& orbit=*this;
-    for(uint i=0; i!=orbit._curves_ptr->size(); ++i) {
-        HybridInterpolatedCurve const& hcurve=this->_curves_ptr->at(i);
-        if(locations.empty() || locations.contains(hcurve.location())) {
-            RealSpace const& space=hcurve.space();
-            if(valid_axes(space,axes)) {
-                hcurve.continuous_state_set().draw(canvas,projection(space,axes));
-            }
-        }
-    }
-}
+
+
 
 Map<RealVariable,RealInterval> make_map(const List<RealVariableInterval>& b) {
     Map<RealVariable,RealInterval> res;
@@ -182,6 +179,8 @@ Map<RealVariable,RealInterval> make_map(const List<RealVariableInterval>& b) {
     }
     return res;
 }
+
+
 
 HybridSet::HybridSet(const DiscreteLocation& q, const List<RealVariableInterval>& b, const List<ContinuousPredicate>& c)
     : _location(q), _bounds(make_map(b)), _constraints(c)
@@ -192,8 +191,6 @@ HybridSet::HybridSet(const DiscreteLocation& q, const RealExpressionSet& s)
     : _location(q), _bounds(s.bounds()), _constraints(s.constraints())
 {
 }
-
-Projection2d projection(const RealSpace& spc, const Variables2d& axes);
 
 BoundedConstraintSet HybridSet::continuous_state_set(const RealSpace& spc) const {
     ARIADNE_NOT_IMPLEMENTED;
@@ -243,6 +240,7 @@ Map<RealVariable,Float> HybridPoint::values() const {
 }
 
 
+
 HybridBasicSet<Box>::HybridBasicSet(const DiscreteLocation& q, const List<RealVariableInterval>& b)
     : _location(q), _space(), _set(b.size())
 {
@@ -258,11 +256,20 @@ HybridBasicSet<Box>::HybridBasicSet(const DiscreteLocation& q, const List<RealVa
     _space=RealSpace(variables);
 }
 
+template<class BS> void draw(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
+{
+    if(set.location()==location) {
+        Projection2d projection(set.continuous_state_set().dimension(),set.space().index(axes.x_variable()),set.space().index(axes.y_variable()));
+        set.continuous_state_set().draw(canvas,projection);
+    }
+}
+
 void HybridBasicSet<Box>::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {
     if(q.contains(this->location())) {
         this->continuous_state_set().draw(c,projection(this->space(),p));
     }
 }
+
 
 
 HybridBoundedConstraintSet::HybridBoundedConstraintSet()

@@ -110,7 +110,7 @@ class Orbit<HybridGridCell>
 
 template<>
 class Orbit<HybridEnclosure>
-//    : public HybridDrawableInterface
+    : public HybridDrawableInterface
 {
   public:
     typedef HybridEnclosure EnclosureType;

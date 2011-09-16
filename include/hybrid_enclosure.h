@@ -316,6 +316,7 @@ class HybridGridTreeSet;
 
 template<>
 class ListSet<HybridEnclosure>
+    : public HybridDrawableInterface
 {
   public:
     typedef List<HybridEnclosure>::iterator iterator;
@@ -335,6 +336,8 @@ class ListSet<HybridEnclosure>
     iterator end() { return _list.end(); }
     const_iterator begin() const { return _list.begin(); }
     const_iterator end() const { return _list.end(); }
+    void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
+        for(uint i=0; i!=_list.size(); ++i) { _list[i].draw(c,l,v); } }
 
     friend std::ostream& operator<<(std::ostream& os, const ListSet<HybridEnclosure>& hls);
   private:
@@ -346,7 +349,6 @@ inline std::ostream& operator<<(std::ostream& os, const ListSet<HybridEnclosure>
 }
 
 HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, int d);
-void draw(FigureInterface& figure, const ListSet<HybridEnclosure>& he);
 
 
 } // namespace Ariadne

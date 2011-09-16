@@ -104,20 +104,20 @@ CompositeHybridAutomaton create_heating_system()
 
     // Declare the system variables.
     RealVariable T("T");
-    RealVariable t("t");
+    RealVariable C("C");
 
     // Create the heater subsystem
     HybridAutomaton heater;
-    heater.new_mode( heating|on, (dot(T)=P+K*(Tav-Tamp*Ariadne::cos(2.0*pi*t)-T)) );
-    heater.new_mode( heating|off, (dot(T)=K*(Tav-Tamp*Ariadne::cos(2.0*pi*t)-T)) );
+    heater.new_mode( heating|on, (dot(T)=P+K*(Tav-Tamp*Ariadne::cos(2.0*pi*C)-T)) );
+    heater.new_mode( heating|off, (dot(T)=K*(Tav-Tamp*Ariadne::cos(2.0*pi*C)-T)) );
     heater.new_invariant( heating|off, T<=Ton_lower, switch_on );
     heater.new_transition( (heating|off), switch_on, (heating|on), (next(T)=T), T<=Ton_upper, permissive );
     heater.new_transition( (heating|on), switch_off, heating|off, (next(T)=T), T>=Toff, urgent );
 
     // Create the clock subsystem
     HybridAutomaton clock;
-    clock.new_mode( (dot(t)=1.0) );
-    clock.new_transition( midnight, next(t)=0.0, t>=1.0, urgent );
+    clock.new_mode( (dot(C)=1.0) );
+    clock.new_transition( midnight, next(C)=0.0, C>=1.0, urgent );
 
     CompositeHybridAutomaton heating_system((clock,heater));
     std::cout << "heating_system=" << heating_system << "\n" << "\n";
@@ -150,7 +150,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     DiscreteLocation heating_off(StringVariable("heating")|"off");
     DiscreteLocation heating_on(StringVariable("heating")|"on");
     RealVariable T("T");
-    RealVariable t("t");
+    RealVariable C("C");
     TimeVariable time;
 
     // Create a simulator object.
@@ -158,7 +158,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     simulator.set_step_size(0.03125);
 
     // Set an initial point for the simulation
-    HybridPoint initial_point(heating_off, (t|0.0,T|18.0) );
+    HybridPoint initial_point(heating_off, (C|0.0,T|18.0) );
     cout << "initial_point=" << initial_point << endl;
     // Set the maximum simulation time
     HybridTime simulation_time(8.0,9);
@@ -173,19 +173,19 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     write("tutorial-trajectory.txt",trajectory);
     cout << "done." << endl;
     cout << "Plotting simulation trajectory... " << flush;
-    hplot("tutorial-trajectory.png",(0.0<=time<=8.0,14.0<=T<=23.0), Colour(0.0,0.5,1.0), trajectory);
+    plot("tutorial-trajectory.png",Axes2d(0.0<=time<=8.0,14.0<=T<=23.0), Colour(0.0,0.5,1.0), trajectory);
     cout << "done." << endl << endl;
 
 
     // Set the initial set.
-    HybridSet initial_set(heating_off, (18.0<=T<=18.0625,0.0<=t<=0.015625) );
+    HybridSet initial_set(heating_off, (T==17.0,0.0<=C<=1.0/1024) );
     cout << "initial_set=" << initial_set << endl;
     // Compute the initial set as a validated enclosure.
     HybridEnclosure initial_enclosure = evolver.enclosure(heating_system,initial_set);
     cout << "initial_enclosure="<<initial_enclosure << endl << endl;
 
     // Set the maximum evolution time
-    HybridTime evolution_time(1.5,4);
+    HybridTime evolution_time(3.0,4);
     cout << "evolution_time=" << evolution_time << endl;
 
     // Compute a validated orbit.
@@ -197,7 +197,8 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     write("tutorial-orbit.txt",orbit);
     cout << "done." << endl;
     cout << "Plotting orbit... " << flush;
-    plot("tutorial-orbit.png",Box(2, 0.0,1.0, 14.0,23.0), Colour(0.0,0.5,1.0), orbit);
+    plot("tutorial-orbit.png",Axes2d(0.0<=C<=1.0,14.0<=T<=23.0), Colour(0.0,0.5,1.0), orbit);
+    plot("tutorial-orbit-time.png",Axes2d(0.0<=time<=3.0,14.0<=T<=23.0), Colour(0.0,0.5,1.0), orbit);
     cout << "done." << endl << endl;
 
 
@@ -208,12 +209,15 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     cout << "    done." << endl;
     // Write the orbit to standard output and plot.
     cout << "Plotting reach and evolve sets... " << flush;
-    plot("tutorial-reach_evolve.png",Box(2, 0.0,1.0, 14.0,23.0),
+    plot("tutorial-reach_evolve.png",Axes2d(0.0<=C<=1.0,14.0<=T<=23.0),
          Colour(0.0,0.5,1.0), reach, Colour(0.0,0.25,0.5), initial_enclosure, Colour(0.25,0.0,0.5), evolve);
+
+/*
     plot("tutorial-reach_evolve-off.png",Box(2, 0.0,1.0, 14.0,23.0),
-         Colour(0.0,0.5,1.0), reach[heating_off], Colour(0.0,0.25,0.5), initial_enclosure, Colour(0.25,0.0,0.5), evolve[heating_on]);
+         Colour(0.0,0.5,1.0), reach[heating_off], Colour(0.25,0.0,0.5), evolve[heating_on]);
     plot("tutorial-reach_evolve-on.png",Box(2, 0.0,1.0, 14.0,23.0),
          Colour(0.0,0.5,1.0), reach[heating_on], Colour(0.0,0.25,0.5), initial_enclosure, Colour(0.25,0.0,0.5), evolve[heating_on]);
+*/
     cout << "done." << endl;
 
 

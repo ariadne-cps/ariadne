@@ -34,12 +34,13 @@
 #include "list_set.h"
 #include "evolution_parameters.h"
 #include "orbit.h"
+#include "graphics_interface.h"
+#include "graphics.h"
 #include "hybrid_automaton.h"
 #include "hybrid_time.h"
 #include "hybrid_set.h"
 #include "hybrid_evolver.h"
-#include "graphics_interface.h"
-#include "graphics.h"
+#include "hybrid_graphics.h"
 #include "logging.h"
 
 
@@ -53,6 +54,8 @@ using namespace std;
 int evolver_verbosity=0;
 
 
+RealVariable v0=RealVariable("x0");
+RealVariable v1=RealVariable("x1");
 RealScalarFunction z=RealScalarFunction::constant(2,0.0);
 RealScalarFunction c=RealScalarFunction::constant(2,1.0);
 RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
@@ -137,7 +140,7 @@ void TestSimpleHybridEvolver::test_flow() const {
 
     ARIADNE_TEST_PRINT(orbit);
 
-    plot(cstr("test_"+evolver_name+"-flow"),Box(2, -0.5,+3.5, -1.0, +3.0),
+    plot(cstr("test_"+evolver_name+"-flow"),Axes2d(-0.5,v0,+3.5, -1.0,v1, +3.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -160,7 +163,7 @@ void TestSimpleHybridEvolver::test_exact_final_time() const {
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),2u);
 
-    plot(cstr("test_"+evolver_name+"-exact_final_time"),Box(2, -0.5,+3.5, -1.0, +3.0),
+    plot(cstr("test_"+evolver_name+"-exact_final_time"),Axes2d(-0.5,v0,+3.5, -1.0,v1,+3.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -188,9 +191,9 @@ void TestSimpleHybridEvolver::test_maximum_steps() const {
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),1u);
 
-    Box bounding_box(2, -1.5,+2.5, -1.0, +3.0);
-    plot(cstr("test_"+evolver_name+"-maximum_steps"),bounding_box,
-         guard_set_colour,BoundedConstraintSet(bounding_box,x0+x1/16-0.5>=0),
+    Axes2d axes(-1.5,space[0],+2.5, -1.0,space[1],+3.0);
+    plot(cstr("test_"+evolver_name+"-maximum_steps"),axes,
+         //guard_set_colour,BoundedConstraintSet(bounding_box,x0+x1/16-0.5>=0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -217,9 +220,9 @@ void TestSimpleHybridEvolver::test_urgent_event() const {
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),2u);
 
-    Box bounding_box(2, -1.5,+2.5, -1.0, +3.0);
-    plot(cstr("test_"+evolver_name+"-urgent_event"),bounding_box,
-         guard_set_colour,BoundedConstraintSet(bounding_box,x0+x1/16-0.5>=0),
+    Axes2d axes(-1.5,space[0],+2.5, -1.0,space[1],+3.0);
+    plot(cstr("test_"+evolver_name+"-urgent_event"),axes,
+         //guard_set_colour,BoundedConstraintSet(bounding_box,x0+x1/16-0.5>=0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -244,8 +247,8 @@ void TestSimpleHybridEvolver::test_empty_interior() const {
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),2u);
 
-    plot(cstr("test_"+evolver_name+"-empty_interior"),Box(2, -1.5,+2.5, -1.0, +3.0),
-         guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
+    plot(cstr("test_"+evolver_name+"-empty_interior"),Axes2d(-1.5,space[0],+2.5, -1.0,space[1],+3.0),
+         //guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -271,9 +274,9 @@ void TestSimpleHybridEvolver::test_partial_event() const {
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),2u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),2u);
 
-    Box bounding_box(2, -1.5,+2.5, -1.0, +3.0);
-    plot(cstr("test_"+evolver_name+"-partial_event"),bounding_box,
-         guard_set_colour,BoundedConstraintSet(bounding_box,x0-x1/16-2>=0),
+    Axes2d axes(-1.5,v0,+2.5, -1.0,v1,+3.0);
+    plot(cstr("test_"+evolver_name+"-partial_event"),axes,
+         //guard_set_colour,BoundedConstraintSet(bounding_box,x0-x1/16-2>=0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -300,8 +303,8 @@ void TestSimpleHybridEvolver::test_step_size_event() const {
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),1u);
 
-    plot(cstr("test_"+evolver_name+"-step_size_event"),Box(2, -0.5,+2.5, -1.0, +3.0),
-         guard_set_colour,Box(2,2.0,8.0,-8.0,+8.0),
+    plot(cstr("test_"+evolver_name+"-step_size_event"),Axes2d(-0.5,v0,+2.5, -1.0,v1,+3.0),
+         //guard_set_colour,Box(2,2.0,8.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -326,8 +329,8 @@ void TestSimpleHybridEvolver::test_initially_active_event() const {
     // There should be two components of the reachable set which come from initially active events, and one from flowing
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
 
-    plot(cstr("test_"+evolver_name+"-initially_active"),Box(2, -2.0,+2.0, -1.0, +2.0),
-         guard_set_colour,Box(2,-8.0,0.0,-8.0,+8.0),
+    plot(cstr("test_"+evolver_name+"-initially_active"),Axes2d(-2.0,v0,+2.0, -1.0,v1,+2.0),
+         //guard_set_colour,Box(2,-8.0,0.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -349,8 +352,8 @@ void TestSimpleHybridEvolver::test_initially_active_attracting_event() const {
 
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
 
-    plot(cstr("test_"+evolver_name+"-initially_active_attracting"),Box(2, -1.0,+2.0, -1.0, +2.0),
-         guard_set_colour,Box(2,-1.0,0.0,-8.0,+8.0),
+    plot(cstr("test_"+evolver_name+"-initially_active_attracting"),Axes2d(-1.0,v0,+2.0, -1.0,v1,+2.0),
+         //guard_set_colour,Box(2,-1.0,0.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -370,8 +373,8 @@ void TestSimpleHybridEvolver::test_initially_active_repelling_event() const {
 
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
 
-    plot(cstr("test_"+evolver_name+"-initially_active_repelling"),Box(2, -1.0,+2.0, -1.0, +2.0),
-         guard_set_colour,Box(2,-1.0,0.0,-8.0,+8.0),
+    plot(cstr("test_"+evolver_name+"-initially_active_repelling"),Axes2d(-1.0,v0,+2.0, -1.0,v1,+2.0),
+         //guard_set_colour,Box(2,-1.0,0.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -395,8 +398,8 @@ void TestSimpleHybridEvolver::test_impact() const {
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
     //ARIADNE_TEST_CHECK(orbit.final().size(),2u);
 
-    plot(cstr("test_"+evolver_name+"-impact"),Box(2, -3.0,+2.0, -4.0, +2.0),
-         guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
+    plot(cstr("test_"+evolver_name+"-impact"),Axes2d(-3.0,v0,+2.0, -4.0,v1,+2.0),
+         //guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -419,9 +422,9 @@ void TestSimpleHybridEvolver::test_tangency() const {
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
     ARIADNE_TEST_PRINT(orbit);
 
-    Box bounding_box(2, -2.0,+2.0, -2.0, +1.0);
-    plot(cstr("test_"+evolver_name+"-tangency"),bounding_box,
-         guard_set_colour,BoundedConstraintSet(bounding_box,x1-x0*x0>=0),
+    Axes2d axes(-2.0,v0,+2.0, -2.0,v1,+1.0);
+    plot(cstr("test_"+evolver_name+"-tangency"),axes,
+         //guard_set_colour,BoundedConstraintSet(bounding_box,x1-x0*x0>=0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -447,9 +450,9 @@ void TestSimpleHybridEvolver::test_simultaneous_events() const {
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),2u);
 
-    plot(cstr("test_"+evolver_name+"-simultaneous_events"),Box(2, -3.0,+2.0, -3.0, +2.0),
-         guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
-         guard_set_colour,Box(2,-8.0,+8.0,1.0,8.0),
+    plot(cstr("test_"+evolver_name+"-simultaneous_events"),Axes2d(-3.0,v0,+2.0, -3.0,v1,+2.0),
+         //guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
+         //guard_set_colour,Box(2,-8.0,+8.0,1.0,8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -477,8 +480,8 @@ void TestSimpleHybridEvolver::test_creep() const {
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
     ARIADNE_TEST_BINARY_PREDICATE(subset,HybridEnclosure(*orbit.final().begin()),HybridBox(q,space,Box(2, 0.24,0.635, 1.365,1.76)));
 
-    plot(cstr("test_"+evolver_name+"-creep"),Box(2, -1.5,+1.5, -0.5, +3.5),
-         guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
+    plot(cstr("test_"+evolver_name+"-creep"),Axes2d(-1.5,v0,+1.5, -0.5,v1,+3.5),
+         //guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -500,9 +503,9 @@ void TestSimpleHybridEvolver::test_unwind() const {
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
 
-    Box bounding_box(2, -2.5,+1.5, -0.5, +2.5);
-    plot(cstr("test_"+evolver_name+"-unwind"),bounding_box,
-         guard_set_colour,BoundedConstraintSet(bounding_box,x0-x1/16-1>=0),
+    Axes2d axes(-2.5,v0,+1.5, -0.5,v1,+2.5);
+    plot(cstr("test_"+evolver_name+"-unwind"),axes,
+         //guard_set_colour,BoundedConstraintSet(bounding_box,x0-x1/16-1>=0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),

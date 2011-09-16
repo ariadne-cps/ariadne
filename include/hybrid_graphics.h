@@ -59,8 +59,20 @@ struct Variables2d {
     RealVariable y_variable() const { return RealVariable(_y); }
 };
 
-bool valid_axes(const RealSpace& space, const Variables2d& axes);
-Projection2d projection(const RealSpace& spc, const Variables2d& axes);
+Interval approximate_interval(const RealVariableInterval&);
+
+struct Axes2d {
+    Axes2d(const RealVariableInterval x, const RealVariableInterval& y)
+            : variables(x.variable(),y.variable()), bounds() {
+        bounds.insert(x.variable(),x.approximate_interval());
+        bounds.insert(y.variable(),y.approximate_interval()); }
+    Axes2d(double xl, const RealVariable& x, double xu, double yl, const RealVariable& y, double yu)
+            : variables(x,y), bounds() {
+        bounds.insert(x,Interval(xl,xu));
+        bounds.insert(y,Interval(yl,yu)); }
+    Variables2d variables;
+    Map<RealVariable,Interval> bounds;
+};
 
 //! \brief Class for plotting figures of hybrid sets.
 class HybridFigure
@@ -70,11 +82,12 @@ class HybridFigure
     HybridFigure();
 
     void set_locations(const List<DiscreteLocation>& l) { locations=Set<DiscreteLocation>(l); }
+    void set_axes(const Axes2d& axes) { bounds=axes.bounds; variables=axes.variables; }
     void set_bounds(const RealVariable& x, const Float& l, const Float& u) { bounds.insert(x,Interval(l,u)); }
     void set_bounds(const RealVariable& x, const Interval& ivl) { bounds.insert(x,ivl); }
     void set_bounds(const Map<RealVariable,Interval>& b) { bounds=b; };
     void set_bounds(const Map<RealVariable,RealInterval>& b);
-    void set_axes(const RealVariable& x, const RealVariable& y) { axes=Variables2d(x,y); }
+    void set_variables(const RealVariable& x, const RealVariable& y) { variables=Variables2d(x,y); }
 
     void set_line_style(bool ls) { properties.line_style=ls; }
     void set_line_width(double lw) { properties.line_width=lw; }
@@ -101,9 +114,10 @@ class HybridFigure
   public:
     void _paint_all(CanvasInterface& canvas) const; // Writes all shapes to the canvas
   private:
+  public:
     Map<RealVariable,Interval> bounds;
     Set<DiscreteLocation> locations;
-    Variables2d axes;
+    Variables2d variables;
     GraphicsProperties properties;
     List<HybridGraphicsObject> objects;
 };
@@ -115,15 +129,47 @@ inline HybridFigure& operator<<(HybridFigure& g, const FillStyle& fs) { g.set_fi
 inline HybridFigure& operator<<(HybridFigure& g, const FillOpacity& fo) { g.set_fill_opacity(fo); return g; }
 inline HybridFigure& operator<<(HybridFigure& g, const FillColour& fc) { g.set_fill_colour(fc); return g; }
 
-inline void hdraw(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); }
+inline void draw(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); }
 inline HybridFigure& operator<<(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); return fig; }
 
 Interval approximation(const RealInterval& rivl);
 
 template<class SET1>
-void hplot(const char* filename, const List<RealVariableInterval>& bbox, const Colour& fc1, const SET1& set1) {
-    HybridFigure g; for(uint i=0; i!=bbox.size(); ++i) { g.set_bounds(bbox[i].variable(),approximation(bbox[i].interval())); }
-    g.set_axes(bbox[0].variable(),bbox[1].variable()); g.set_fill_colour(fc1); hdraw(g,set1); g.write(filename); }
+void plot(const char* filename, const Axes2d& axes, const SET1& set1) {
+    HybridFigure g; g.set_axes(axes); draw(g,set1); g.write(filename); }
+
+template<class SET1,class SET2>
+void plot(const char* filename, const Axes2d& axes, const SET1& set1, const SET2& set2) {
+    HybridFigure g; g.set_axes(axes); draw(g,set1); g.write(filename); }
+
+template<class SET1,class SET2,class SET3>
+void plot(const char* filename, const Axes2d& axes, const SET1& set1, const SET2& set2, const SET3& set3) {
+    HybridFigure g; g.set_axes(axes); draw(g,set1); draw(g,set2); draw(g,set3); g.write(filename); }
+
+template<class SET1,class SET2,class SET3,class SET4>
+void plot(const char* filename, const Axes2d& axes, const SET1& set1, const SET2& set2, const SET3& set3, const SET4& set4) {
+    HybridFigure g; g.set_axes(axes); draw(g,set1); draw(g,set2); draw(g,set3); draw(g,set4); g.write(filename); }
+
+
+template<class SET1>
+void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1) {
+    HybridFigure g; g.set_axes(axes); std::cerr<<g.bounds<<"\n"; g.set_fill_colour(fc1); draw(g,set1); g.write(filename); }
+
+template<class SET1,class SET2>
+void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2) {
+    HybridFigure g; g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.write(filename); }
+
+template<class SET1,class SET2,class SET3>
+void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
+          const Colour& fc3, const SET3& set3) {
+    HybridFigure g; g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
+    g.set_fill_colour(fc3); draw(g,set3); g.write(filename); }
+
+template<class SET1,class SET2,class SET3,class SET4>
+void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
+          const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4) {
+    HybridFigure g;  g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
+    g.set_fill_colour(fc3); draw(g,set3); g.set_fill_colour(fc4); draw(g,set4); g.write(filename); }
 
 } // namespace Ariadne
 

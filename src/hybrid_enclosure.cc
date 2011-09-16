@@ -663,8 +663,12 @@ HybridEnclosure::_check() const
 
 void HybridEnclosure::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const
 {
-    Projection2d projection(this->dimension(),this->space().index(axes.x_variable()),this->space().index(axes.x_variable()));
-    this->continuous_state_set().draw(canvas,projection);
+    Projection2d proj=Ariadne::projection(this->space(),axes);
+    if(proj.x_coordinate()==this->dimension()) {
+        TaylorConstrainedImageSet(this->_set.reduced_domain(),join(this->_set.function(),this->time_function()),this->constraints(),this->_set.sweeper()).draw(canvas,proj);
+    } else {
+        this->continuous_state_set().draw(canvas,proj);
+    }
 }
 
 std::ostream& operator<<(std::ostream& os, const Representation< List<ScalarIntervalFunction> >& fns_repr)
@@ -681,6 +685,7 @@ std::ostream& HybridEnclosure::write(std::ostream& os) const
               << "( variables = " << variable_names(this->_variables)
               << ", events=" << this->_events
               << ", location=" << this->_location
+              << ", space=" << this->space()
               << ", range=" << this->_set.function()(this->_set.domain())
               << ", domain=" << this->_set.domain()
               << ", subdomain=" << this->_set.reduced_domain()

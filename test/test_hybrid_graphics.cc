@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
     hfig.set_bounds(x,-8,8);
     hfig.set_bounds(y,-8,8);
     hfig.set_bounds(z,-8,8);
-    hfig.set_axes(x,y);
+    hfig.set_variables(x,y);
 
     hfig << FillColour(1,0,0) << hbx1;
     hfig << FillColour(0,1,0) << hbx2;

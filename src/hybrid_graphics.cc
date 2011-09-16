@@ -60,13 +60,14 @@ struct ImageSize2d {
     ImageSize2d(uint _nx,uint _ny) : nx(_nx), ny(_ny) { }
 };
 
-bool valid_axes(const RealSpace& space, const Variables2d& axes) {
-    return ( (axes.x_variable().name()==TimeVariable().name()) || space.contains(axes.x_variable()) ) && space.contains(axes.y_variable());
+bool valid_axis_variables(const RealSpace& space, const Variables2d& variables) {
+    return ( (variables.x_variable().name()==TimeVariable().name()) || space.contains(variables.x_variable()) ) && space.contains(variables.y_variable());
 }
 
-Projection2d projection(const RealSpace& space, const Variables2d& axes) {
-    uint x_index = (axes.x_variable()==TimeVariable()) ? space.dimension() : space.index(axes.x_variable());
-    uint y_index = space.index(axes.y_variable());
+Projection2d projection(const RealSpace& space, const Variables2d& variables) {
+    ARIADNE_ASSERT(valid_axis_variables(space,variables));
+    uint x_index = (variables.x_variable()==TimeVariable()) ? space.dimension() : space.index(variables.x_variable());
+    uint y_index = space.index(variables.y_variable());
     return Projection2d(space.dimension(),x_index,y_index);
 }
 
@@ -74,15 +75,15 @@ Projection2d projection(const RealSpace& space, const Variables2d& axes) {
 
 void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties);
 
-void draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes, const HybridDrawableInterface& shape) {
-    shape.draw(canvas,locations,axes);
+void draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const HybridDrawableInterface& shape) {
+    shape.draw(canvas,locations,variables);
 }
 
-void paint(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes, const List<HybridGraphicsObject>& objects) {
+void paint(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const List<HybridGraphicsObject>& objects) {
     for(uint i=0; i!=objects.size(); ++i) {
         const HybridDrawableInterface& shape=*objects[i].shape_ptr;
         set_properties(canvas, objects[i].properties);
-        shape.draw(canvas,locations,axes);
+        shape.draw(canvas,locations,variables);
     }
 }
 
@@ -91,7 +92,7 @@ HybridFigure::~HybridFigure() {
 
 
 HybridFigure::HybridFigure()
-    : axes(RealVariable("x"),RealVariable("y"))
+    : variables(RealVariable("x"),RealVariable("y"))
 {
 }
 
@@ -174,18 +175,18 @@ HybridFigure::write(const char* cfilename, uint drawing_width, uint drawing_heig
 void HybridFigure::_paint_all(CanvasInterface& canvas) const
 {
     // Project the bounding box onto the canvas
-    double xl=numeric_cast<double>(bounds[axes.x_variable()].lower());
-    double xu=numeric_cast<double>(bounds[axes.x_variable()].upper());
-    double yl=numeric_cast<double>(bounds[axes.y_variable()].lower());
-    double yu=numeric_cast<double>(bounds[axes.y_variable()].upper());
+    double xl=numeric_cast<double>(bounds[variables.x_variable()].lower());
+    double xu=numeric_cast<double>(bounds[variables.x_variable()].upper());
+    double yl=numeric_cast<double>(bounds[variables.y_variable()].lower());
+    double yu=numeric_cast<double>(bounds[variables.y_variable()].upper());
 
-    canvas.initialise(axes.x_variable().name(),axes.y_variable().name(),xl,xu,yl,yu);
+    canvas.initialise(variables.x_variable().name(),variables.y_variable().name(),xl,xu,yl,yu);
 
     // Draw shapes
     for(uint i=0; i!=objects.size(); ++i) {
         const HybridDrawableInterface& shape=*objects[i].shape_ptr;
         set_properties(canvas, objects[i].properties);
-        shape.draw(canvas,this->locations,this->axes);
+        shape.draw(canvas,this->locations,this->variables);
     }
 
     canvas.finalise();

@@ -71,7 +71,7 @@ TestHybridSet::test_hybrid_grid_set()
     hgts.has_location(loc);
     GridTreeSet const& gtscr = hgts[loc];
     GridTreeSet& gtsr = hgts[loc];
-    draw(fig,hgts);
+    draw(fig,hgts[loc]);
 }
 
 

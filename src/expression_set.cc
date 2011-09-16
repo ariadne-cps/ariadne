@@ -92,6 +92,10 @@ const RealInterval RealVariableInterval::interval() const {
     return RealInterval(this->_lower,this->_upper);
 }
 
+const Interval RealVariableInterval::approximate_interval() const {
+    return approximation(this->interval());
+}
+
 OutputStream& operator<<(OutputStream& os, const RealVariableInterval& eivl) {
     return os << eivl.variable() << ".in(" << eivl.lower() << "," << eivl.upper() << ")";
 }

@@ -41,6 +41,7 @@
 #include "hybrid_set.h"
 
 #include "hybrid_enclosure.h"
+#include "hybrid_orbit.h"
 #include "hybrid_automaton_interface.h"
 #include "evolver_interface.h"
 #include "evolver_base.h"
@@ -71,7 +72,7 @@ class HybridEvolverInterface
     //! \brief Make a dynamically-allocated copy.
     virtual HybridEvolverInterface* clone() const = 0;
     //! \brief Evolution starting in a box.
-    //! HACK: Provided since HybridEnclosure needs a Sweeper to initialise. 
+    //! HACK: Provided since HybridEnclosure needs a Sweeper to initialise.
     virtual Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_enclosure,const TimeType& time,Semantics semantics) const = 0;
     virtual Orbit<EnclosureType> orbit(const SystemType& system, const HybridBox& initial_box,const TimeType& time,Semantics semantics) const = 0;
     virtual Orbit<EnclosureType> orbit(const SystemType& system, const HybridSet& initial_set,const TimeType& time,Semantics semantics) const = 0;

@@ -1189,7 +1189,7 @@ IntervalVectorFunction::VectorFunction(const List<RealScalarFunction>& lsf)
 {
     ARIADNE_ASSERT(lsf.size()>0);
     this->_ptr=shared_ptr<IntervalVectorFunctionInterface>(new VectorOfIntervalScalarFunction(lsf.size(),lsf[0].argument_size()));
-    VectorOfIntervalScalarFunction* vec = static_cast<VectorOfIntervalScalarFunction*>(this->_ptr.operator->());
+    VectorOfIntervalScalarFunction* vec = dynamic_cast<VectorOfIntervalScalarFunction*>(this->_ptr.operator->());
     for(uint i=0; i!=lsf.size(); ++i) {
         vec->set(i,lsf[i]);
     }
@@ -1270,7 +1270,7 @@ RealVectorFunction::VectorFunction(const List<RealScalarFunction>& lsf)
 {
     ARIADNE_ASSERT(lsf.size()>0);
     this->_ptr=shared_ptr<RealVectorFunctionInterface>(new VectorOfRealScalarFunction(lsf.size(),lsf[0].argument_size()));
-    VectorOfRealScalarFunction* vec = static_cast<VectorOfRealScalarFunction*>(this->_ptr.operator->());
+    VectorOfRealScalarFunction* vec = dynamic_cast<VectorOfRealScalarFunction*>(this->_ptr.operator->());
     for(uint i=0; i!=lsf.size(); ++i) {
         vec->set(i,lsf[i]);
     }
@@ -1280,7 +1280,7 @@ RealVectorFunction::VectorFunction(Nat as, const List< Formula<Real> >& le)
 {
     ARIADNE_ASSERT(le.size()>0);
     this->_ptr=shared_ptr<RealVectorFunctionInterface>(new VectorOfRealScalarFunction(le.size(),as));
-    VectorOfRealScalarFunction* vec = static_cast<VectorOfRealScalarFunction*>(this->_ptr.operator->());
+    VectorOfRealScalarFunction* vec = dynamic_cast<VectorOfRealScalarFunction*>(this->_ptr.operator->());
     for(uint i=0; i!=le.size(); ++i) {
         vec->set(i,function(as,le[i]));
     }
@@ -1290,7 +1290,7 @@ RealVectorFunction::VectorFunction(const Vector< Polynomial<Real> >& p)
 {
     ARIADNE_ASSERT(p.size()>0);
     this->_ptr=shared_ptr<RealVectorFunctionInterface>(new VectorOfRealScalarFunction(p.size(),p[0].argument_size()));
-    VectorOfRealScalarFunction* vec = static_cast<VectorOfRealScalarFunction*>(this->_ptr.operator->());
+    VectorOfRealScalarFunction* vec = dynamic_cast<VectorOfRealScalarFunction*>(this->_ptr.operator->());
     for(uint i=0; i!=p.size(); ++i) {
         vec->set(i,RealScalarFunction(p[i]));
     }
@@ -1479,12 +1479,12 @@ void VectorAffineFunction::_check_type(const RealVectorFunctionInterface* pointe
 
 const Matrix<Real> VectorAffineFunction::A() const
 {
-    return static_cast<const VectorAffineFunctionBody*>(this->raw_pointer())->A();
+    return dynamic_cast<const VectorAffineFunctionBody*>(this->raw_pointer())->A();
 }
 
 const Vector<Real> VectorAffineFunction::b() const
 {
-    return static_cast<const VectorAffineFunctionBody*>(this->raw_pointer())->b();
+    return dynamic_cast<const VectorAffineFunctionBody*>(this->raw_pointer())->b();
 }
 
 
@@ -1526,7 +1526,7 @@ ProjectionFunction::ProjectionFunction(uint m, uint n, const Array<uint>& p)
 
 const uint ProjectionFunction::p(uint i) const
 {
-    return static_cast<const ProjectionFunctionBody*>(this->raw_pointer())->p(i);
+    return dynamic_cast<const ProjectionFunctionBody*>(this->raw_pointer())->p(i);
 }
 
 void ProjectionFunction::_check_type(const RealVectorFunctionInterface* pointer) const {

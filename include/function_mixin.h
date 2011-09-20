@@ -46,7 +46,7 @@ template<class T, class X> class VectorFunctionMixin { };
 
 template<class F>
 class ScalarFunctionMixin<F,Float>
-    : public ScalarFunctionInterface<Float>
+    : public virtual ScalarFunctionInterface<Float>
 {
   private:
     template<class X> X _base_evaluate(const Vector<X>& x) const {
@@ -67,7 +67,7 @@ class ScalarFunctionMixin<F,Float>
 // A wrapper for classes with non-static _compute and _compute_approx methods
 template<class F>
 class ScalarFunctionMixin<F,Interval>
-    : public ScalarFunctionInterface<Interval>
+    : public virtual ScalarFunctionInterface<Interval>
 {
   private:
     template<class X> X _base_evaluate(const Vector<X>& x) const {
@@ -93,7 +93,7 @@ class ScalarFunctionMixin<F,Interval>
 // A wrapper for classes with non-static _compute and _compute_approx methods
 template<class F>
 class ScalarFunctionMixin<F,Real>
-    : public ScalarFunctionInterface<Real>
+    : public virtual ScalarFunctionInterface<Real>
 {
   private:
     template<class X> X _base_evaluate(const Vector<X>& x) const {
@@ -125,7 +125,7 @@ class ScalarFunctionMixin<F,Real>
 
 template<class F>
 class VectorFunctionMixin<F,Float>
-    : public VectorFunctionInterface<Float>
+    : public virtual VectorFunctionInterface<Float>
 {
   private:
     template<class X> Vector<X> _base_evaluate(const Vector<X>& a) const {
@@ -143,7 +143,7 @@ class VectorFunctionMixin<F,Float>
 
 template<class F>
 class VectorFunctionMixin<F,Interval>
-    : public VectorFunctionInterface<Interval>
+    : public virtual VectorFunctionInterface<Interval>
 {
   private:
     template<class X> Vector<X> _base_evaluate(const Vector<X>& a) const {
@@ -167,7 +167,7 @@ class VectorFunctionMixin<F,Interval>
 // A wrapper for classes with non-static _compute methods
 template<class F>
 class VectorFunctionMixin<F,Real>
-    : public VectorFunctionInterface<Real>
+    : public virtual VectorFunctionInterface<Real>
 {
   private:
     template<class X> Vector<X> _base_evaluate(const Vector<X>& a) const {

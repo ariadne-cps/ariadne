@@ -153,7 +153,7 @@ template<class X> inline X compute(OperatorCode op, const X& x) {
     switch(op) {
         case NEG: return -x;
         case REC: return 1/x;
-        case SQRT: return exp(x);
+        case SQRT: return sqrt(x);
         case EXP: return exp(x);
         case LOG: return log(x);
         case SIN: return sin(x);
@@ -304,7 +304,7 @@ struct OrOp {
 struct NotOp {
     template<class T> T operator()(const T& a) const { return !a; }
     OperatorCode code() const { return NOT; } OperatorKind kind() const { return UNARY; }
-}; 
+};
 struct Add {
     OperatorCode code() const { return ADD; } OperatorKind kind() const { return BINARY; }
     template<class T> T operator()(const T& a1, const T& a2) const { return a1+a2; }

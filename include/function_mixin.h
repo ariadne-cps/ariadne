@@ -44,6 +44,8 @@ typedef Algebra<Real> RealAlgebra;
 template<class T, class X> class ScalarFunctionMixin { };
 template<class T, class X> class VectorFunctionMixin { };
 
+template<class T> T* heap_copy(const T& t) { return new T(t); }
+
 template<class F>
 class ScalarFunctionMixin<F,Float>
     : public virtual ScalarFunctionInterface<Float>

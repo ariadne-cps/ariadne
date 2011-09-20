@@ -29,7 +29,7 @@
 #include "differential.h"
 #include "taylor_model.h"
 #include "function.h"
-#include "taylor_function.h"
+#include "function_model.h"
 
 namespace {
 
@@ -37,11 +37,10 @@ using namespace Ariadne;
 
 typedef unsigned int uint;
 
-
 void
 solve_all(Set< Vector<Interval> >& r,
           const SolverInterface& s,
-          const RealVectorFunction& f,
+          const IntervalVectorFunction& f,
           const Vector<Interval>& ix)
 {
     uint verbosity=s.verbosity;
@@ -290,17 +289,18 @@ newton_implicit(const Vector<IntervalTaylorModel>& f)
     return h;
 }
 
-VectorTaylorFunction
-newton_implicit(const VectorTaylorFunction& f)
+/*
+IntervalVectorFunctionModel
+newton_implicit(const IntervalVectorFunctionModel& f)
 {
     ARIADNE_ASSERT_MSG(f.argument_size()>f.result_size(),"f.argument_size()<=f.result_size() in implicit(f): f="<<f);
     uint fas=f.argument_size();
     uint has=f.argument_size()-f.result_size();
     Vector<Interval> hdom=project(f.domain(),range(0,has));
     Vector<Interval> hcodom=project(f.domain(),range(has,fas));
-    return VectorTaylorFunction(hdom,scale(newton_implicit(f.models()),hcodom));
+    return IntervalVectorFunctionModel(hdom,scale(newton_implicit(f.models()),hcodom));
 }
-
+*/
 
 
 } // namespace
@@ -308,6 +308,8 @@ newton_implicit(const VectorTaylorFunction& f)
 
 
 namespace Ariadne {
+
+FunctionModelFactoryInterface<Interval>* make_default_taylor_function_factory();
 
 inline Vector<Interval> operator*(const Matrix<Interval>& A, const Vector<Interval>& v) {
     ARIADNE_PRECONDITION(A.column_size()==v.size());
@@ -319,20 +321,35 @@ inline Vector<Interval> operator*(const Matrix<Interval>& A, const Vector<Interv
 inline Vector<Interval> operator*(const Matrix<Interval>& A, const VectorSum< Vector<Interval>, Vector<Interval> >& v) {
     return A*Vector<Interval>(v); }
 
-VectorTaylorFunction evaluate(const RealVectorFunction& f,const VectorTaylorFunction& x) {
-    for(uint i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].domain()==x[0].domain()); }
-    Vector<IntervalTaylorModel> m(x.size());
+/*
+IntervalVectorFunctionModel evaluate(const IntervalVectorFunction& f,const IntervalVectorFunctionModel& x) {
+    for(uint i=0; i!=x.result_size(); ++i) { ARIADNE_ASSERT(x[i].domain()==x[0].domain()); }
+    Vector<IntervalTaylorModel> m(x.result_size());
     for(uint i=0; i!=m.size(); ++i) { m[i]=x[i].model(); }
     m=f.evaluate(m);
-    VectorTaylorFunction r(m.size());
-    for(uint i=0; i!=r.size(); ++i) { r[i]=ScalarTaylorFunction(x[0].domain(),m[i]); }
+    IntervalVectorFunctionModel r(m.size());
+    for(uint i=0; i!=r.result_size(); ++i) { r[i]=IntervalScalarFunctionModel(x[0].domain(),m[i]); }
+    return r;
+}
+*/
+
+IntervalVectorFunctionModel operator*(const Matrix<Float>& A,const IntervalVectorFunctionModel& v) {
+    ARIADNE_ASSERT(v.size()!=0);
+    IntervalVectorFunctionModel r(A.row_size(),v[0].create_zero());
+    for(uint i=0; i!=r.size(); ++i) {
+        IntervalScalarFunctionModel t=r[i];
+        for(uint j=0; j!=v.size(); ++j) {
+            t+=ExactFloat(A[i][j])*v[j];
+        }
+        r[i]=t;
+    }
     return r;
 }
 
-VectorTaylorFunction product(const Matrix<Float>& A,const VectorTaylorFunction& v) {
-    VectorTaylorFunction r(A.row_size());
+IntervalVectorFunctionModel operator*(const Matrix<Interval>& A,const IntervalVectorFunctionModel& v) {
+    IntervalVectorFunctionModel r(A.row_size(),v[0].create_zero());
     for(uint i=0; i!=r.size(); ++i) {
-        ScalarTaylorFunction t(v.domain(),v.sweeper());
+        IntervalScalarFunctionModel t=r[i];
         for(uint j=0; j!=v.size(); ++j) {
             t+=A[i][j]*v[j];
         }
@@ -341,19 +358,7 @@ VectorTaylorFunction product(const Matrix<Float>& A,const VectorTaylorFunction& 
     return r;
 }
 
-VectorTaylorFunction product(const Matrix<Interval>& A,const VectorTaylorFunction& v) {
-    VectorTaylorFunction r(A.row_size());
-    for(uint i=0; i!=r.size(); ++i) {
-        ScalarTaylorFunction t(v.domain(),v.sweeper());
-        for(uint j=0; j!=v.size(); ++j) {
-            t+=A[i][j]*v[j];
-        }
-        r[i]=t;
-    }
-    return r;
-}
-
-Float radius(const VectorTaylorFunction& x) {
+Float radius(const IntervalVectorFunctionModel& x) {
     Float r=0.0;
     for(uint i=0; i!=x.size(); ++i) { r=std::max(r,x[i].error()); }
     return r;
@@ -367,7 +372,7 @@ class DifferenceFunction
     : public VectorFunctionTemplate<DifferenceFunction>
 {
   public:
-    DifferenceFunction(const RealVectorFunction& f) : fptr(f.clone()) { }
+    DifferenceFunction(const IntervalVectorFunction& f) : fptr(f.clone()) { }
     virtual DifferenceFunction* clone() const { return new DifferenceFunction(*this); }
     virtual uint result_size() const { return fptr->result_size(); }
     virtual uint argument_size() const { return fptr->argument_size(); }
@@ -375,23 +380,23 @@ class DifferenceFunction
     template<class Res, class Args> void _compute(Res& r, const Args& a) const { r=fptr->evaluate(a)-a; }
     template<class Res, class Args> void _compute_approx(Res& r, const Args& a) const { _compute(r,a); }
   private:
-    boost::shared_ptr<RealVectorFunction> fptr;
+    boost::shared_ptr<IntervalVectorFunction> fptr;
 };
 */
 
 
 SolverBase::SolverBase(double max_error, uint max_steps)
-  : _max_error(max_error), _max_steps(max_steps), _function_factory_ptr(new TaylorFunctionFactory(Sweeper()))
+  : _max_error(max_error), _max_steps(max_steps), _function_factory_ptr(make_default_taylor_function_factory())
 {
 }
 
 void
-SolverBase::set_function_factory(const TaylorFunctionFactory& factory)
+SolverBase::set_function_factory(const FunctionModelFactoryInterface<Interval>& factory)
 {
-    this->_function_factory_ptr=FunctionFactoryPointer(factory.clone());
+    this->_function_factory_ptr=shared_ptr< FunctionModelFactoryInterface<Interval> >(factory.clone());
 }
 
-const TaylorFunctionFactory&
+const FunctionModelFactoryInterface<Interval>&
 SolverBase::function_factory() const
 {
     return *this->_function_factory_ptr;
@@ -399,7 +404,7 @@ SolverBase::function_factory() const
 
 
 Vector<Interval>
-SolverBase::solve(const RealVectorFunction& f,
+SolverBase::solve(const IntervalVectorFunction& f,
                   const Vector<Interval>& ix) const
 {
     Set< Vector<Interval> > r;
@@ -409,7 +414,7 @@ SolverBase::solve(const RealVectorFunction& f,
 }
 
 Set< Vector<Interval> >
-SolverBase::solve_all(const RealVectorFunction& f,
+SolverBase::solve_all(const IntervalVectorFunction& f,
                       const Vector<Interval>& ix) const
 {
     Set< Vector<Interval> > r;
@@ -420,7 +425,7 @@ SolverBase::solve_all(const RealVectorFunction& f,
 
 
 Vector<Interval>
-SolverBase::zero(const RealVectorFunction& f,
+SolverBase::zero(const IntervalVectorFunction& f,
                  const Vector<Interval>& ix) const
 {
     const double& e=this->maximum_error();
@@ -462,28 +467,30 @@ SolverBase::zero(const RealVectorFunction& f,
 
 
 Vector<Interval>
-SolverBase::fixed_point(const RealVectorFunction& f, const Vector<Interval>& pt) const
+SolverBase::fixed_point(const IntervalVectorFunction& f, const Vector<Interval>& pt) const
 {
     ARIADNE_NOT_IMPLEMENTED;
     //return Vector<Interval>(this->zero(DifferenceFunction(f),pt));
 }
 
 
-VectorTaylorFunction
-SolverBase::implicit(const RealVectorFunction& f,
+IntervalVectorFunctionModel
+SolverBase::implicit(const IntervalVectorFunction& f,
                       const Vector<Interval>& ip,
                       const Vector<Interval>& ix) const
 {
+    ARIADNE_LOG(4,"SolverBase::implicit(IntervalVectorFunction f, IntervalVector ip, IntervalVector ix)\n");
+    ARIADNE_LOG(5,"f="<<f<<"\n");
     ARIADNE_ASSERT(f.result_size()==ix.size());
     ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
 
     const uint nx=ix.size();
     const double err=this->maximum_error();
 
-    VectorTaylorFunction p(this->function_factory().create(ip,IdentityFunction(ip.size())));
-    VectorTaylorFunction x(this->function_factory().create(ip,VectorConstantFunction(RealVector(ix),ip.size())));
-    VectorTaylorFunction nwx(nx);
-    VectorTaylorFunction fnwx(f.result_size());
+    IntervalVectorFunctionModel p(this->function_factory().create_identity(ip));
+    IntervalVectorFunctionModel x(this->function_factory().create(ip,VectorConstantFunction(RealVector(ix),ip.size())));
+    IntervalVectorFunctionModel nwx(this->function_factory().create_zeros(x.size(),ip));
+    IntervalVectorFunctionModel fnwx(this->function_factory().create_zeros(f.result_size(),ip));
 
     uint steps_remaining=this->maximum_number_of_steps();
     uint number_unrefined=nx;
@@ -509,7 +516,7 @@ SolverBase::implicit(const RealVectorFunction& f,
         }
 
         if( (number_unrefined==0) && (radius(nwx)<err) && (radius(fnwx)<err) ) {
-            return VectorTaylorFunction(nwx);
+            return IntervalVectorFunctionModel(nwx);
         }
 
         x=intersection(nwx,x);
@@ -521,49 +528,31 @@ SolverBase::implicit(const RealVectorFunction& f,
 
 }
 
-ScalarTaylorFunction
-SolverBase::implicit(const RealScalarFunction& f,
-                      const Vector<Interval>& ip,
-                      const Interval& ix) const
-{
-    VectorTaylorFunction res=this->implicit(RealVectorFunction(1u,f),ip,Vector<Interval>(1u,ix));
-    return res[0];
-}
-
-
-ScalarTaylorFunction implicit(const ScalarTaylorFunction& f);
-IntervalTaylorModel implicit(const IntervalTaylorModel& f);
-
-
-ScalarTaylorFunction
+IntervalScalarFunctionModel
 SolverBase::implicit(const IntervalScalarFunction& f,
                       const Vector<Interval>& ip,
                       const Interval& ix) const
 {
-    ScalarTaylorFunction tf=this->function_factory().create(join(ip,ix),f);
-    return Ariadne::implicit(tf);
-}
-
-ScalarTaylorFunction
-SolverBase::implicit(const ScalarTaylorFunction& tf,
-                      const Vector<Interval>& ip,
-                      const Interval& ix) const
-{
-    ARIADNE_ASSERT(subset(join(ip,ix),tf.domain()));
-    return Ariadne::implicit(tf);
+    ARIADNE_LOG(4,"SolverBase::implicit(IntervalScalarFunction f, IntervalVector ip, Interval ix)\n");
+    ARIADNE_LOG(5,"f="<<f<<"\n");
+    IntervalVectorFunctionModel res=this->implicit(IntervalVectorFunction(1u,f),ip,Vector<Interval>(1u,ix));
+    return res[0];
 }
 
 
 
-ScalarTaylorFunction implicit(const ScalarTaylorFunction& f) {
+
+/*
+IntervalScalarFunctionModel implicit(const IntervalScalarFunctionModel& f) {
     Vector<Interval> h_domain=project(f.domain(),range(0u,f.argument_size()-1u));
     Interval h_codomain=f.domain()[f.argument_size()-1u];
     IntervalTaylorModel h_model=implicit(f.model());
     ARIADNE_ASSERT(h_model.argument_size()+1==f.model().argument_size());
     IntervalTaylorModel hrs_model=h_model.rescale(Interval(-1,+1),h_codomain);
     ARIADNE_ASSERT(hrs_model.argument_size()+1==f.model().argument_size());
-    return ScalarTaylorFunction(h_domain,hrs_model);
+    return IntervalScalarFunctionModel(h_domain,hrs_model);
 }
+*/
 
 IntervalTaylorModel
 implicit(const IntervalTaylorModel& f) {
@@ -616,7 +605,7 @@ implicit(const IntervalTaylorModel& f) {
 
 
 Vector<Interval>
-IntervalNewtonSolver::step(const RealVectorFunction& f,
+IntervalNewtonSolver::step(const IntervalVectorFunction& f,
                            const Vector<Interval>& x) const
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
@@ -638,7 +627,7 @@ IntervalNewtonSolver::step(const RealVectorFunction& f,
 }
 
 Vector<Interval>
-KrawczykSolver::step(const RealVectorFunction& f,
+KrawczykSolver::step(const IntervalVectorFunction& f,
                      const Vector<Interval>& x) const
 {
     Matrix<Interval> I=Matrix<Interval>::identity(x.size());
@@ -664,7 +653,7 @@ KrawczykSolver::step(const RealVectorFunction& f,
 
 
 Vector<Interval>
-FactoredKrawczykSolver::step(const RealVectorFunction& f,
+FactoredKrawczykSolver::step(const IntervalVectorFunction& f,
                              const Vector<Interval>& x) const
 {
     Matrix<Interval> I=Matrix<Interval>::identity(x.size());
@@ -690,19 +679,19 @@ FactoredKrawczykSolver::step(const RealVectorFunction& f,
 }
 
 
-VectorTaylorFunction
-IntervalNewtonSolver::implicit_step(const RealVectorFunction& f,
-                            const VectorTaylorFunction& p,
-                            const VectorTaylorFunction& x) const
+IntervalVectorFunctionModel
+IntervalNewtonSolver::implicit_step(const IntervalVectorFunction& f,
+                            const IntervalVectorFunctionModel& p,
+                            const IntervalVectorFunctionModel& x) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-VectorTaylorFunction
-KrawczykSolver::implicit_step(const RealVectorFunction& f,
-                              const VectorTaylorFunction& p,
-                              const VectorTaylorFunction& x) const
-{   
+IntervalVectorFunctionModel
+KrawczykSolver::implicit_step(const IntervalVectorFunction& f,
+                              const IntervalVectorFunctionModel& p,
+                              const IntervalVectorFunctionModel& x) const
+{
     const uint np=p.size();
     const uint nx=x.size();
     Matrix<Interval> I=Matrix<Interval>::identity(nx);
@@ -710,13 +699,13 @@ KrawczykSolver::implicit_step(const RealVectorFunction& f,
     ARIADNE_LOG(4,"    p="<<p<<"\n");
     ARIADNE_LOG(4,"    f="<<f<<"\n");
     //ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
-    VectorTaylorFunction mx(x);
+    IntervalVectorFunctionModel mx(x);
     for(uint i=0; i!=mx.size(); ++i) { mx[i].set_error(0.0); }
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
     Vector<Float> ex(nx);
     for(uint i=0; i!=nx; ++i) { ex[i]=x[i].error(); }
     ARIADNE_LOG(5,"    ex="<<ex<<"\n");
-    VectorTaylorFunction fm=evaluate(f,join(p,mx));
+    IntervalVectorFunctionModel fm=compose(f,join(p,mx));
     ARIADNE_LOG(5,"    f(p,mx)="<<fm<<"\n");
     Vector<Interval> rp(np);
     for(uint i=0; i!=np; ++i) { rp[i]=p[i].range(); }
@@ -728,22 +717,25 @@ KrawczykSolver::implicit_step(const RealVectorFunction& f,
     ARIADNE_LOG(5,"    inverse(D2f(m))=M="<<M<<"\n");
     ARIADNE_LOG(5,"    M*f(p,mx)="<<M*fm<<"\n");
     ARIADNE_LOG(5,"    (I-M*J) * (ex*Interval(-1,+1))="<<(I-M*J)<<"*"<<(ex*Interval(-1,+1))<<"="<<(I-M*J) * (ex*Interval(-1,+1))<<"\n");
-    VectorTaylorFunction dx= M*fm - (I-M*J) * (ex*Interval(-1,+1));
+    IntervalVectorFunctionModel dx= M*fm - (I-M*J) * (ex*Interval(-1,+1));
     ARIADNE_LOG(5,"    dx="<<dx<<"\n");
-    VectorTaylorFunction nwx= mx - dx;
+    IntervalVectorFunctionModel nwx= mx - dx;
     ARIADNE_LOG(5,"    nwx="<<nwx<<"\n");
     return nwx;
 }
 
 
-ScalarTaylorFunction
-IntervalNewtonSolver::implicit(const RealScalarFunction& f,
+IntervalScalarFunctionModel
+IntervalNewtonSolver::implicit(const IntervalScalarFunction& f,
                                const Vector<Interval>& ip,
                                const Interval& ix) const
 {
+    ARIADNE_LOG(4,"IntervalNewtonSolver::implicit(IntervalScalarFunction f, IntervalVector ip, Interval ix)\n");
+    ARIADNE_LOG(5,"  f="<<f<<"\n");
     ARIADNE_ASSERT_MSG(f.argument_size()==ip.size()+1u,"f="<<f<<", ip="<<ip<<", ix="<<ix<<"\n");
     const uint n=ip.size();
-    RealScalarFunction df=f.derivative(n);
+    IntervalScalarFunction df=f.derivative(n);
+    ARIADNE_LOG(5,"  df="<<df<<"\n");
 
     Vector<Interval> mp=midpoint(ip);
     Interval dfmpix=df(join(mp,ix));
@@ -769,9 +761,13 @@ IntervalNewtonSolver::implicit(const RealScalarFunction& f,
         }
     }
 
-    ScalarTaylorFunction h=this->function_factory().create(ip,ScalarConstantFunction(ip.size(),Real(midpoint(x))));
-    VectorTaylorFunction id=this->function_factory().create(ip,IdentityFunction(ip.size()));
-    ScalarTaylorFunction dh;
+    IntervalScalarFunctionModel h=this->function_factory().create_constant(ip,ExactFloat(midpoint(x)));
+    IntervalVectorFunctionModel id=this->function_factory().create_identity(ip);
+    IntervalScalarFunctionModel dh=this->function_factory().create_zero(ip);
+
+    ARIADNE_LOG(5,"\n  h="<<h<<"\n");
+    ARIADNE_LOG(5,"\n  id="<<id<<"\n");
+    ARIADNE_LOG(5,"\n  dh="<<dh<<"\n");
 
     for(uint i=0; i!=this->maximum_number_of_steps(); ++i) {
         dh=compose(f,join(id,h))/df(join(mp,Interval(h.value())));
@@ -783,7 +779,7 @@ IntervalNewtonSolver::implicit(const RealScalarFunction& f,
     }
     ARIADNE_LOG(4," happrox="<<h<<"\n");
 
-    h.error()+=mag(dh.range())*4;
+    h.set_error(h.error()+mag(dh.range())*4);
     Interval dfipix=df(join(ip,h.range()));
     if(dfipix.lower()<=0.0 && dfipix.upper()>=0.0) {
         ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver",
@@ -795,14 +791,14 @@ IntervalNewtonSolver::implicit(const RealScalarFunction& f,
     Interval herr=Interval(-h.error(),+h.error());
     Float sf=mag(1-dfipix/dfmpmx);
     Interval dherr=(1-dfipix/dfmpmx)*herr;
-    ScalarTaylorFunction hnew=h;
+    IntervalScalarFunctionModel hnew=h;
     hnew.clobber();
     dh=compose(f,join(id,hnew));
     hnew=hnew-dh+dherr;
     if(refines(hnew,h)) { return hnew; }
 
     // Try one more step using larger error
-    hnew.error()+=mag(dh.range())*4;
+    hnew.set_error(hnew.error()+mag(dh.range())*4);
     h=hnew;
     dfmpmx=df(join(mp,Interval(h.value())));
     herr=Interval(-h.error(),+h.error());

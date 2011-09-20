@@ -1,4 +1,4 @@
-/***************************************************************************
+    /***************************************************************************
  *            vector.h
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
@@ -176,6 +176,8 @@ class Vector
 
     //! \brief Join (catenate, make the direct sum of) two vectors.
     friend template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2);
+    //! \brief Join (catenate, make the direct sum of) three vectors.
+    friend template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3);
     //! \brief Join a vector and a scalar.
     friend template<class X> Vector<X> join(const Vector<X>& v1, const X& s2);
     //! \brief Join a scalar and a vector.
@@ -437,10 +439,33 @@ Vector<X> join(const X& s1, const X& s2)
     return r;
 }
 
+template<class X>
+Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3)
+{
+    if(v1.size()==0) { return join(v2,v3); }
+    size_t n1=v1.size();
+    size_t n2=v2.size();
+    size_t n3=v3.size();
+    Vector<X> r(n1+n2+n3,v1[0]);
+    project(r,range(0,n1))=v1;
+    project(r,range(n1,n1+n2))=v2;
+    project(r,range(n1+n2,n1+n2+n3))=v3;
+    return r;
+}
+
 template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const X& s3) {
     Vector<X> r(v1.size()+v2.size()+1u,s3);
     for(uint i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     for(uint i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
+    return r;
+}
+
+template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3, const X& s4) {
+    Vector<X> r(v1.size()+v2.size()+v3.size()+1u);
+    for(uint i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
+    for(uint i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
+    for(uint i=0; i!=v3.size(); ++i) { r[v1.size()+v2.size()+i]=v3[i]; }
+    r[r.size()-1]=s4;
     return r;
 }
 

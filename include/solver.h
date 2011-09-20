@@ -44,10 +44,7 @@
 namespace Ariadne {
 
 template<class X> class Vector;
-class ScalarTaylorFunction;
-class VectorTaylorFunction;
-class TaylorFunctionFactory;
-typedef shared_ptr<const TaylorFunctionFactory> FunctionFactoryPointer;
+template<class X> class FunctionModelFactoryInterface;
 
 /*! \ingroup \ingroup Solvers
  *  \brief %Common functionality for solving (nonlinear) equations.
@@ -70,37 +67,33 @@ class SolverBase
     void set_maximum_number_of_steps(uint max_steps) { this->_max_steps=max_steps; };
 
     /*! \brief The class which constructs functions for the implicit function solver. */
-    const TaylorFunctionFactory& function_factory() const;
+    const FunctionModelFactoryInterface<Interval>& function_factory() const;
     /*! \brief Set the class which constructs functions for the implicit function solver. */
-    void set_function_factory(const TaylorFunctionFactory& factory);
+    void set_function_factory(const FunctionModelFactoryInterface<Interval>& factory);
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Vector<Interval> zero(const RealVectorFunction& f,const Vector<Interval>& pt) const;
+    virtual Vector<Interval> zero(const IntervalVectorFunction& f,const Vector<Interval>& pt) const;
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Vector<Interval> fixed_point(const RealVectorFunction& f,const Vector<Interval>& pt) const;
+    virtual Vector<Interval> fixed_point(const IntervalVectorFunction& f,const Vector<Interval>& pt) const;
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Vector<Interval> solve(const RealVectorFunction& f,const Vector<Interval>& pt) const;
+    virtual Vector<Interval> solve(const IntervalVectorFunction& f,const Vector<Interval>& pt) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual VectorTaylorFunction implicit(const RealVectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
+    virtual IntervalVectorFunctionModel implicit(const IntervalVectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual ScalarTaylorFunction implicit(const RealScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
-    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual ScalarTaylorFunction implicit(const IntervalScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
-    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. (Temporary fix unitil implicit can use IntervalScalarFunction) */
-    virtual ScalarTaylorFunction implicit(const ScalarTaylorFunction& f, const Vector<Interval>& par, const Interval& ix) const;
+    virtual IntervalScalarFunctionModel implicit(const IntervalScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Set< Vector<Interval> > solve_all(const RealVectorFunction& f,const Vector<Interval>& pt) const;
+    virtual Set< Vector<Interval> > solve_all(const IntervalVectorFunction& f,const Vector<Interval>& pt) const;
   protected:
     /*! \brief Perform one iterative step of the contractor. */
-    virtual Vector<Interval> step(const RealVectorFunction& f,const Vector<Interval>& pt) const = 0;
+    virtual Vector<Interval> step(const IntervalVectorFunction& f,const Vector<Interval>& pt) const = 0;
     /*! \brief Perform one iterative step of the contractor. */
-    virtual VectorTaylorFunction implicit_step(const RealVectorFunction& f,const VectorTaylorFunction& p,const VectorTaylorFunction& x) const = 0;
+    virtual IntervalVectorFunctionModel implicit_step(const IntervalVectorFunction& f,const IntervalVectorFunctionModel& p,const IntervalVectorFunctionModel& x) const = 0;
   private:
     double _max_error;
     uint _max_steps;
-    FunctionFactoryPointer _function_factory_ptr;
+    shared_ptr< FunctionModelFactoryInterface<Interval> > _function_factory_ptr;
 };
 
 
@@ -122,12 +115,12 @@ class IntervalNewtonSolver
     using SolverBase::implicit;
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
-    virtual VectorTaylorFunction implicit_step(const RealVectorFunction& f, const VectorTaylorFunction& p, const VectorTaylorFunction& x) const;
+    virtual IntervalVectorFunctionModel implicit_step(const IntervalVectorFunction& f, const IntervalVectorFunctionModel& p, const IntervalVectorFunctionModel& x) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual ScalarTaylorFunction implicit(const RealScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
+    virtual IntervalScalarFunctionModel implicit(const IntervalScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
   public:
     virtual Vector<Interval>
-    step(const RealVectorFunction& f,
+    step(const IntervalVectorFunction& f,
          const Vector<Interval>& pt) const;
 
 
@@ -151,12 +144,12 @@ class KrawczykSolver
     virtual void write(std::ostream& os) const;
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
-    virtual VectorTaylorFunction implicit_step(const RealVectorFunction& f, const VectorTaylorFunction& p, const VectorTaylorFunction& x) const;
+    virtual IntervalVectorFunctionModel implicit_step(const IntervalVectorFunction& f, const IntervalVectorFunctionModel& p, const IntervalVectorFunctionModel& x) const;
 
   public:
     /*! \brief A single step of the Krawczyk contractor. */
     virtual Vector<Interval>
-    step(const RealVectorFunction& f,
+    step(const IntervalVectorFunction& f,
           const Vector<Interval>& pt) const;
 };
 
@@ -179,7 +172,7 @@ class FactoredKrawczykSolver
   public:
     /*! \brief A single step of the modified Krawczyk contractor. */
     virtual Vector<Interval>
-    step(const RealVectorFunction& f,
+    step(const IntervalVectorFunction& f,
           const Vector<Interval>& pt) const;
 };
 

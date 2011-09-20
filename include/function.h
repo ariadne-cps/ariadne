@@ -41,6 +41,7 @@
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
+#include "differential.h"
 
 class D;
 namespace Ariadne {
@@ -117,7 +118,7 @@ class ScalarFunction<Interval>
     template<class X> Vector<X> gradient(const Vector<X>& x) const {
         return this->evaluate(Differential<X>::variables(1u,x)).gradient(); }
 
-    ScalarFunction<Interval> derivative(uint j) const;
+    ScalarFunction<Interval> derivative(uint j) const { return this->_ptr->derivative(j); }
 
     std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
 
@@ -188,10 +189,8 @@ class ScalarFunction<Real>
 inline ScalarFunction<Interval>::ScalarFunction(const ScalarFunction<Real>& f)
     : _ptr(boost::dynamic_pointer_cast< ScalarFunctionInterface<Real>  >(f.shared_pointer())) { }
 
-// FIXME: This conversion to a RealScalarFunction is a hack. The kind of derivative available should
-// depend on the function type, and not require casting.
-inline ScalarFunction<Interval> ScalarFunction<Interval>::derivative(uint j) const {
-    return ScalarFunction<Interval>(static_cast<const ScalarFunction<Interval>&>(boost::dynamic_pointer_cast< ScalarFunctionInterface<Real> >(_ptr)->derivative(j))); }
+
+
 
 ScalarFunction<Interval> restrict(ScalarFunction<Interval> const& f, const IntervalVector& dom);
 

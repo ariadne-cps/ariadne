@@ -129,14 +129,16 @@ class copy_on_copy_ptr
     mutable T* _ptr;
   public:
     ~copy_on_copy_ptr() { delete _ptr; _ptr=0; }
+    copy_on_copy_ptr()
+        : _ptr(0u) { }
     template<class S> copy_on_copy_ptr(S* pointer)
         : _ptr(pointer) { }
     copy_on_copy_ptr(const copy_on_copy_ptr<T>& other)
-        : _ptr(new T(other._ptr)) { }
+        : _ptr(other._ptr?other._ptr->_clone():other._ptr) { }
     template<class S> copy_on_copy_ptr<T>& operator=(S* pointer) {
         delete _ptr; _ptr=pointer; return *this; }
     copy_on_copy_ptr<T>& operator=(const copy_on_copy_ptr<T>& other) {
-        if(_ptr!=other._ptr) { delete _ptr; _ptr=new T(other._ptr); } return *this; }
+        if(_ptr!=other._ptr) { delete _ptr; _ptr=other._ptr?other._ptr->_clone():other._ptr; } return *this; }
     const T& operator*() const { return *_ptr; }
     const T* operator->() const { return _ptr; }
     T& operator*() { return *_ptr; }
@@ -148,7 +150,7 @@ class copy_on_copy_ptr
 
 template<class T> std::ostream&
 operator<<(std::ostream& os, const copy_on_copy_ptr<T>& ptr) {
-    return os<<"<"<<ptr.address()<<">("<<ptr.value()<<")";
+    return os<<"<"<<ptr.address()<<">";
 }
 
 template<class T>
@@ -158,14 +160,15 @@ class clone_on_copy_ptr
     mutable T* _ptr;
   public:
     ~clone_on_copy_ptr() { delete _ptr; _ptr=0; }
+    clone_on_copy_ptr() : _ptr() { }
     template<class S> clone_on_copy_ptr(S* pointer)
         : _ptr(pointer) { }
     clone_on_copy_ptr(const clone_on_copy_ptr<T>& other)
-        : _ptr(other._ptr->clone()) { }
+        : _ptr(other._ptr?other._ptr->_clone():other._ptr) { }
     template<class S> clone_on_copy_ptr<T>& operator=(S* pointer) {
         delete _ptr; _ptr=pointer; return *this; }
-    copy_on_copy_ptr<T>& operator=(const clone_on_copy_ptr<T>& other) {
-        if(_ptr!=other._ptr) { delete _ptr; _ptr=other._ptr->clone(); } return *this; }
+    clone_on_copy_ptr<T>& operator=(const clone_on_copy_ptr<T>& other) {
+        if(_ptr!=other._ptr) { delete _ptr; _ptr=other._ptr?other._ptr->_clone():other._ptr; } return *this; }
     const T& operator*() const { return *_ptr; }
     const T* operator->() const { return _ptr; }
     T& operator*() { return *_ptr; }
@@ -177,7 +180,7 @@ class clone_on_copy_ptr
 
 template<class T> std::ostream&
 operator<<(std::ostream& os, const clone_on_copy_ptr<T>& ptr) {
-    return os<<"<"<<ptr.address()<<">("<<ptr.value()<<")";
+    return os<<"<"<<ptr.address()<<">";
 }
 
 

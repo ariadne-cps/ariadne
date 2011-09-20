@@ -38,6 +38,7 @@
 #include "taylor_function.h"
 
 #include "../src/function_mixin.tcc"
+#include <include/taylor_function.h>
 
 #define VOLATILE ;
 
@@ -99,6 +100,11 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const IntervalSc
     Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d,swp);
     this->_model=f.evaluate(x);
     this->_model.sweep();
+}
+
+ScalarTaylorFunction::ScalarTaylorFunction(const IntervalScalarFunctionModel& f) {
+     ARIADNE_ASSERT_MSG(dynamic_cast<const ScalarTaylorFunction*>(f._ptr.operator->())," f="<<f);
+     *this=dynamic_cast<const ScalarTaylorFunction&>(*f._ptr);
 }
 
 
@@ -171,6 +177,11 @@ ScalarTaylorFunction* ScalarTaylorFunction::_clone() const
 ScalarTaylorFunction* ScalarTaylorFunction::_create() const
 {
     return new ScalarTaylorFunction(this->domain(),this->_model.sweeper());
+}
+
+VectorFunctionModelInterface<Interval>* ScalarTaylorFunction::_create_vector(Nat i) const
+{
+    return new VectorTaylorFunction(i,this->domain(),this->_model.sweeper());
 }
 
 
@@ -873,6 +884,20 @@ VectorTaylorFunction* VectorTaylorFunction::_create() const
     return new VectorTaylorFunction(this->result_size(), ScalarTaylorFunction(this->domain(),this->_models[0].sweeper()));
 }
 
+VectorTaylorFunction* VectorTaylorFunction::_create_identity() const
+{
+    Sweeper sweeper=this->_models[0].sweeper();
+    VectorTaylorFunction* result = new VectorTaylorFunction(this->domain().size(), ScalarTaylorFunction(this->domain(),sweeper));
+    for(uint i=0; i!=result->size(); ++i) { (*result)[i]=ScalarTaylorFunction::coordinate(this->domain(),i,sweeper); }
+    return result;
+}
+
+Void VectorTaylorFunction::adjoin(const ScalarTaylorFunction& sf)
+{
+    ARIADNE_ASSERT_MSG(sf.domain()==this->domain(),"sf="<<sf);
+    this->_models=join(this->_models,sf.model());
+}
+
 
 
 
@@ -1192,6 +1217,12 @@ VectorTaylorFunction::jacobian(const Vector<Interval>& x) const
     return J;
 }
 
+Void
+VectorTaylorFunction::restrict(const Vector<Interval>& x)
+{
+    *this=Ariadne::restrict(*this,x);
+}
+
 
 VectorTaylorFunction
 join(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2)
@@ -1249,19 +1280,25 @@ combine(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
 VectorTaylorFunction
 embed(const VectorTaylorFunction& f, const Interval& d)
 {
-    return VectorTaylorFunction(join(f.domain(),d),embed(f.models(),1u));
+    return embed(IntervalVector(),f,IntervalVector(1u,d));
 }
 
 VectorTaylorFunction
 embed(const VectorTaylorFunction& f, const Vector<Interval>& d)
 {
-    return VectorTaylorFunction(join(f.domain(),d),embed(f.models(),d.size()));
+    return embed(IntervalVector(),f,d);
 }
 
 VectorTaylorFunction
 embed(const Vector<Interval>& d, const VectorTaylorFunction& f)
 {
-    return VectorTaylorFunction(join(d,f.domain()),embed(d.size(),f.models()));
+    return embed(d,f,IntervalVector());
+}
+
+VectorTaylorFunction
+embed(const Vector<Interval>& d1, const VectorTaylorFunction& f, const Vector<Interval>& d2)
+{
+    return VectorTaylorFunction(join(d1,f.domain(),d2),embed(embed(d1.size(),f.models()),d2.size()));
 }
 
 VectorTaylorFunction
@@ -1746,6 +1783,10 @@ TaylorFunctionFactory::create_identity(const IntervalVector& domain) const
     return VectorTaylorFunction::identity(domain,this->_sweeper);
 }
 
+
+FunctionModelFactoryInterface<Interval>* make_default_taylor_function_factory() {
+    return new TaylorFunctionFactory(Sweeper());
+}
 
 /*
 latexstream&

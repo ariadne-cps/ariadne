@@ -45,6 +45,7 @@ class TestSolver
         : solver(s.clone()) { }
 
     int test() {
+        ARIADNE_TEST_PRINT(*solver);
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_implicit());
         return 0;
@@ -67,7 +68,7 @@ class TestSolver
         RealScalarFunction bb;
         IntervalVector p,r;
         RealVectorFunction f;
-        VectorTaylorFunction h;
+        IntervalVectorFunctionModel h;
         RealVectorFunction e;
 
         // Test solution of x-a=0. This should be very easy to solve.
@@ -76,7 +77,9 @@ class TestSolver
         f=RealVectorFunction(1u,x-a);
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
+        ARIADNE_TEST_PRINT(h);
         e=RealVectorFunction(1u,aa);
+        ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-8);
 
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
@@ -112,6 +115,7 @@ int main(int argc, const char **argv) {
     ARIADNE_TEST_WARN("IntervalNewtonSolver cannot solve for implicit functions.");
 
     KrawczykSolver krawczyk_solver(maximum_error=1e-5,maximum_number_of_steps=12);
+    ARIADNE_TEST_PRINT(krawczyk_solver.function_factory());
     krawczyk_solver.verbosity=verbosity;
     TestSolver(krawczyk_solver).test();
 

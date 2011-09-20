@@ -61,7 +61,7 @@ class FlowFunctionPatch
     Float step_size() const { return this->time_domain().upper(); }
     Interval time_domain() const { return this->domain()[this->domain().size()-1]; }
     IntervalVector space_domain() const { return project(this->domain(),Ariadne::range(0,this->domain().size()-1)); }
-    IntervalVector codomain() const { return this->VectorIntervalFunction::codomain(); }
+    IntervalVector const codomain() const { return this->VectorIntervalFunction::codomain(); }
 };
 
 //! \brief Interface for hybrid evolvers using HybridEnclosure as the enclosure type.

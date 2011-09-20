@@ -192,23 +192,6 @@ template<class X> inline Matrix<X>& operator+=(Matrix<X>& A, const DiagonalMatri
 
 
 
-template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3) {
-    Vector<X> r(v1.size()+v2.size()+v3.size());
-    for(uint i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
-    for(uint i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
-    for(uint i=0; i!=v3.size(); ++i) { r[v1.size()+v2.size()+i]=v3[i]; }
-    return r;
-}
-
-template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3, const X& s4) {
-    Vector<X> r(v1.size()+v2.size()+v3.size()+1u);
-    for(uint i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
-    for(uint i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
-    for(uint i=0; i!=v3.size(); ++i) { r[v1.size()+v2.size()+i]=v3[i]; }
-    r[r.size()-1]=s4;
-    return r;
-}
-
 
 template<class X> Vector< Differential<X> > second_derivative(const IntervalVectorFunction& f, const Vector<X>& x) {
     Vector< Differential<X> > d=Differential<X>::variables(f.result_size(),f.argument_size(),2);

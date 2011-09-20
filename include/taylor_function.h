@@ -36,6 +36,7 @@
 
 #include "function_interface.h"
 #include "function_mixin.h"
+#include "function_model.h"
 
 namespace Ariadne {
 
@@ -108,6 +109,7 @@ pair<ScalarTaylorFunction,ScalarTaylorFunction> split(const ScalarTaylorFunction
 // Embed the variable in a space of higher dimension
 ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const Interval& d2);
 ScalarTaylorFunction embed(const Vector<Interval>& d1, const ScalarTaylorFunction& tv2);
+ScalarTaylorFunction embed(const Vector<Interval>& d1, const ScalarTaylorFunction& tv2, const Vector<Interval>& d3);
 
 // Antidifferentiation operator
 ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, uint k, Float c);
@@ -139,7 +141,7 @@ class VectorTaylorFunctionElementReference;
  * \sa Expansion, TaylorModel, VectorTaylorFunction, TaylorConstrainedImageSet.
  */
 class ScalarTaylorFunction
-    : public ScalarFunctionMixin<ScalarTaylorFunction, Interval>
+    : public ScalarFunctionModelMixin<ScalarTaylorFunction, Interval>
 {
     typedef Interval NumericType;
     typedef Vector<Interval> DomainType;
@@ -165,6 +167,7 @@ class ScalarTaylorFunction
     //! \brief Construct a ScalarTaylorFunction over the domain \a d, based on the scaled model \a m.
     explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel<Interval>& m);
     explicit ScalarTaylorFunction(const DomainType& d, const Expansion<Float>& p, const Float& e, const Sweeper& swp);
+    ScalarTaylorFunction(const ScalarFunctionModel<Interval>& f);
 
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the function \a f.
     explicit ScalarTaylorFunction(const DomainType& d, const IntervalScalarFunction& f, Sweeper swp);
@@ -237,6 +240,8 @@ class ScalarTaylorFunction
     Float& value() { return this->_model.value(); }
     //! \brief The constant term in the expansion.
     const Float& value() const { return this->_model.value(); }
+    //! \brief The gradient at the centre of the domain.
+    const Float gradient_value(Nat i) const { return this->_model.gradient(i)/this->_domain[i].radius(); }
     //! \brief A polynomial representation.
     Polynomial<Interval> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.
@@ -407,10 +412,11 @@ class ScalarTaylorFunction
     //@}
 
   public:
-    ScalarTaylorFunction& clobber() { this->_model.clobber(); return *this; }
+    Void clobber() { this->_model.clobber(); }
   private:
     friend class TaylorFunctionFactory;
     friend class ScalarFunctionMixin<ScalarTaylorFunction, Interval>;
+    friend class ScalarFunctionModelMixin<ScalarTaylorFunction, Interval>;
     template<class T> void _compute(T& r, const Vector<T>& a) const {
         typedef typename T::NumericType R;
         r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
@@ -419,6 +425,7 @@ class ScalarTaylorFunction
     ScalarTaylorFunction* _derivative(uint j) const;
     ScalarTaylorFunction* _clone() const;
     ScalarTaylorFunction* _create() const;
+    VectorFunctionModelInterface<Interval>* _create_vector(uint i) const;
 };
 
 template<> struct Arithmetic<Float,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
@@ -521,6 +528,8 @@ inline ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const Vector<
     return ScalarTaylorFunction(join(tv1.domain(),dom2),embed(tv1.model(),dom2.size())); }
 inline ScalarTaylorFunction embed(const Vector<Interval>& dom1, const ScalarTaylorFunction& tv2) {
     return ScalarTaylorFunction(join(dom1,tv2.domain()),embed(dom1.size(),tv2.model())); }
+inline ScalarTaylorFunction embed(const Vector<Interval>& dom1, const ScalarTaylorFunction& tv2,const Vector<Interval>& dom3) {
+    return ScalarTaylorFunction(join(join(dom1,tv2.domain()),dom3),embed(embed(dom1.size(),tv2.model()),dom3.size())); }
 
 
 
@@ -530,6 +539,7 @@ VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, con
 VectorTaylorFunction embed(const VectorTaylorFunction& tv1, const Vector<Interval>& d2);
 VectorTaylorFunction embed(const VectorTaylorFunction& tv1, const Interval& d2);
 VectorTaylorFunction embed(const Vector<Interval>& d1, const VectorTaylorFunction& tv2);
+VectorTaylorFunction embed(const Vector<Interval>& d1, const VectorTaylorFunction& tv2,const Vector<Interval>& d3);
 VectorTaylorFunction restrict(const VectorTaylorFunction&, const Vector<Interval>& bx);
 bool refines(const VectorTaylorFunction&, const VectorTaylorFunction&);
 bool disjoint(const VectorTaylorFunction&, const VectorTaylorFunction&);
@@ -558,7 +568,7 @@ VectorTaylorFunction unchecked_compose(const VectorTaylorFunction&, const Vector
  *  See also TaylorModel, ScalarTaylorFunction, VectorTaylorFunction.
  */
 class VectorTaylorFunction
-    : public VectorFunctionMixin<VectorTaylorFunction,Interval>
+    : public VectorFunctionModelMixin<VectorTaylorFunction,Interval>
 {
     friend class VectorTaylorFunctionElementReference;
 
@@ -686,6 +696,10 @@ class VectorTaylorFunction
 
     /*! \brief Truncate terms higher than \a bd. */
     VectorTaylorFunction& truncate(const MultiIndexBound& bd);
+    /*! \brief Restrict to a subdomain. */
+    Void restrict(const IntervalVector& d);
+    //! \brief Adjoin a scalar function.
+    Void adjoin(const ScalarTaylorFunction& sf);
 
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;
@@ -777,6 +791,7 @@ class VectorTaylorFunction
     virtual ScalarTaylorFunction* _get(uint i) const { return new ScalarTaylorFunction(this->_domain,this->_models[i]); }
     virtual VectorTaylorFunction* _clone() const;
     virtual VectorTaylorFunction* _create() const;
+    virtual VectorTaylorFunction* _create_identity() const;
   private:
     friend class VectorFunctionMixin<VectorTaylorFunction,Interval>;
     friend class TaylorFunctionFactory;
@@ -879,7 +894,7 @@ class VectorTaylorFunctionElementReference
 
 
 class TaylorFunctionFactory
-    : public FunctionFactoryInterface<Interval>
+    : public FunctionModelFactoryInterface<Interval>
 {
     Sweeper _sweeper;
   public:

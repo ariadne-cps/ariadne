@@ -49,17 +49,17 @@ class SolverWrapper
     double maximum_error() const { return this->get_override("maximum_error")(); }
     void set_maximum_number_of_steps(uint) { this->get_override("set_maximum_number_of_steps")(); }
     uint maximum_number_of_steps() const { return this->get_override("maximum_number_of_steps")(); }
-    IntervalVector zero(const RealVectorFunction& f, const IntervalVector& bx) const {
+    IntervalVector zero(const IntervalVectorFunction& f, const IntervalVector& bx) const {
         return this->get_override("zero")(); }
-    IntervalVector fixed_point(const RealVectorFunction& f, const IntervalVector& bx) const {
+    IntervalVector fixed_point(const IntervalVectorFunction& f, const IntervalVector& bx) const {
         return this->get_override("fixed_point")(); }
-    IntervalVector solve(const RealVectorFunction& f, const IntervalVector& bx) const {
+    IntervalVector solve(const IntervalVectorFunction& f, const IntervalVector& bx) const {
         return this->get_override("solve")(); }
-    VectorTaylorFunction implicit(const RealVectorFunction& f, const IntervalVector& pd, const IntervalVector& bx) const {
+    IntervalVectorFunctionModel implicit(const IntervalVectorFunction& f, const IntervalVector& pd, const IntervalVector& bx) const {
         return this->get_override("implicit")(); }
-    ScalarTaylorFunction implicit(const RealScalarFunction& f, const IntervalVector& pd, const Interval& ivl) const {
+    IntervalScalarFunctionModel implicit(const IntervalScalarFunction& f, const IntervalVector& pd, const Interval& ivl) const {
         return this->get_override("implicit")(); }
-    Set< IntervalVector > solve_all(const RealVectorFunction& f, const IntervalVector& bx) const {
+    Set< IntervalVector > solve_all(const IntervalVectorFunction& f, const IntervalVector& bx) const {
         return this->get_override("solve_all")(); }
     void write(std::ostream&) const { this->get_override("write")(); }
 };
@@ -96,10 +96,10 @@ class IntegratorWrapper
 void export_solver()
 {
     class_<SolverWrapper, boost::noncopyable> solver_wrapper_class("SolverInterface");
-    solver_wrapper_class.def("solve",pure_virtual((IntervalVector(SolverInterface::*)(const RealVectorFunction&,const IntervalVector&)const) &SolverInterface::solve));
-    solver_wrapper_class.def("implicit",pure_virtual((VectorTaylorFunction(SolverInterface::*)(const RealVectorFunction&,const IntervalVector&,const IntervalVector&)const) &SolverInterface::implicit));
-    solver_wrapper_class.def("implicit",pure_virtual((ScalarTaylorFunction(SolverInterface::*)(const RealScalarFunction&,const IntervalVector&,const Interval&)const) &SolverInterface::implicit));
-    solver_wrapper_class.def("solve_all",pure_virtual((Set< IntervalVector >(SolverInterface::*)(const RealVectorFunction&,const IntervalVector&)const) &SolverInterface::solve_all));
+    solver_wrapper_class.def("solve",pure_virtual((IntervalVector(SolverInterface::*)(const IntervalVectorFunction&,const IntervalVector&)const) &SolverInterface::solve));
+    solver_wrapper_class.def("implicit",pure_virtual((IntervalVectorFunctionModel(SolverInterface::*)(const IntervalVectorFunction&,const IntervalVector&,const IntervalVector&)const) &SolverInterface::implicit));
+    solver_wrapper_class.def("implicit",pure_virtual((IntervalScalarFunctionModel(SolverInterface::*)(const IntervalScalarFunction&,const IntervalVector&,const Interval&)const) &SolverInterface::implicit));
+    solver_wrapper_class.def("solve_all",pure_virtual((Set< IntervalVector >(SolverInterface::*)(const IntervalVectorFunction&,const IntervalVector&)const) &SolverInterface::solve_all));
     //solver_wrapper_class.def(self_ns::str(self));
 
     class_<IntervalNewtonSolver, bases<SolverInterface> > interval_newton_solver_class("IntervalNewtonSolver",init<double,unsigned int>());

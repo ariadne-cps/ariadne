@@ -669,6 +669,10 @@ inline tribool operator<=(Interval i1, Interval i2) {
     else { return indeterminate; }
 }
 
+inline ExactFloat::operator Interval() const {
+    return Interval(this->_x);
+}
+
 template<class A> void serialize(A& a, Interval& ivl, const uint version) {
     a & ivl.lower() & ivl.upper(); }
 

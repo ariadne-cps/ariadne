@@ -358,6 +358,14 @@ inline Float rad_up(Float x, Float y) {
     Float r=sub_rnd(y,x)/2; set_rounding_mode(rounding_mode); return r; }
 
 class Interval;
+class ExactFloat {
+    Float _x;
+  public:
+    explicit ExactFloat(const Float& x) : _x(x) { }
+    operator Interval() const;
+};
+
+class Interval;
 inline Interval sqr_ivl(Float x);
 inline Interval rec_ivl(Float x);
 inline Interval add_ivl(Float x, Float y);

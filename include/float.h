@@ -362,8 +362,11 @@ class ExactFloat {
     Float _x;
   public:
     explicit ExactFloat(const Float& x) : _x(x) { }
+    Float value() const { return _x; }
     operator Interval() const;
 };
+inline std::ostream& operator<<(std::ostream& os, const ExactFloat& x) {
+    return os << x.value(); }
 
 class Interval;
 inline Interval sqr_ivl(Float x);

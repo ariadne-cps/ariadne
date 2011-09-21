@@ -68,6 +68,14 @@ inline RealNonlinearConstraint operator>=(const RealScalarFunction& f, const Flo
     return RealNonlinearConstraint(f,Interval(c,+inf<Float>()));
 }
 
+inline RealNonlinearConstraint operator<=(const RealScalarFunction& f, const Real& c) {
+    return RealNonlinearConstraint(Real(-inf<Float>()),f,c);
+}
+
+inline RealNonlinearConstraint operator>=(const RealScalarFunction& f, const Real& c) {
+    return RealNonlinearConstraint(c,f,Real(+inf<Float>()));
+}
+
 inline RealNonlinearConstraint operator<=(const RealScalarFunction& f, double c) {
     return RealNonlinearConstraint(f,Interval(-inf<Float>(),c));
 }

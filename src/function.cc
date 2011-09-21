@@ -1246,6 +1246,7 @@ IntervalVectorFunction join(IntervalVectorFunction const& f1, const IntervalVect
 }
 
 
+
 RealVectorFunction::VectorFunction(VectorFunctionInterface<Real>* fptr)
     : _ptr(fptr)
 {

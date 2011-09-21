@@ -167,7 +167,9 @@ class ScalarTaylorFunction
     //! \brief Construct a ScalarTaylorFunction over the domain \a d, based on the scaled model \a m.
     explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel<Interval>& m);
     explicit ScalarTaylorFunction(const DomainType& d, const Expansion<Float>& p, const Float& e, const Sweeper& swp);
+
     ScalarTaylorFunction(const ScalarFunctionModel<Interval>& f);
+    ScalarTaylorFunction& operator=(const ScalarFunctionModel<Interval>& f);
 
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the function \a f.
     explicit ScalarTaylorFunction(const DomainType& d, const IntervalScalarFunction& f, Sweeper swp);
@@ -444,7 +446,8 @@ inline tribool operator<(const ScalarTaylorFunction& x, const Float& c) {
 inline tribool operator>(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)>0; }
 inline tribool operator<(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)<0; }
 
-ScalarTaylorFunction operator-(const ScalarTaylorFunction& f1, const RealScalarFunction& f2);
+inline ScalarTaylorFunction operator-(const ScalarTaylorFunction& f1, const RealScalarFunction& f2) {
+    return f1+ScalarTaylorFunction(f1.domain(),f2,f1.sweeper()); }
 
 ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f, const Interval& c);
 ScalarTaylorFunction& operator-=(ScalarTaylorFunction& f, const Interval& c);
@@ -911,6 +914,7 @@ class TaylorFunctionFactory
     ScalarTaylorFunction create_constant(const IntervalVector& domain, Interval c) const;
     ScalarTaylorFunction create_coordinate(const IntervalVector& domain, uint k) const;
     VectorTaylorFunction create_zero(uint i, const IntervalVector& domain) const;
+    ScalarTaylorFunction create_identity(const Interval& domain) const;
     VectorTaylorFunction create_identity(const IntervalVector& domain) const;
   private:
     ScalarTaylorFunction* _create(const IntervalVector& domain, const IntervalScalarFunctionInterface& function) const;

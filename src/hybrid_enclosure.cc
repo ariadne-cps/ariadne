@@ -47,6 +47,14 @@
 
 namespace Ariadne {
 
+ScalarTaylorFunction operator+(const ScalarTaylorFunction& f1, const IntervalScalarFunctionModel& f2) {
+    return f1+ScalarTaylorFunction(f1.domain(),f2,f1.sweeper()); }
+ScalarTaylorFunction operator-(const IntervalScalarFunctionModel& f1, const ScalarTaylorFunction& f2) {
+    return ScalarTaylorFunction(f2.domain(),f1,f2.sweeper())-f2; }
+ScalarTaylorFunction unchecked_compose(const IntervalScalarFunctionModel& f, const VectorTaylorFunction& g) {
+    return ScalarTaylorFunction(unchecked_compose(f,IntervalVectorFunctionModel(g))); }
+
+
 VectorTaylorFunction make_identity(const RealBox& bx, const Sweeper& swp);
 
 
@@ -190,13 +198,13 @@ HybridEnclosure::dwell_time_function() const
     return this->_dwell_time;
 }
 
-void HybridEnclosure::set_time_function(const ScalarIntervalFunction& time_function)
+void HybridEnclosure::set_time_function(const IntervalScalarFunctionModel& time_function)
 {
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->parameter_domain(),time_function.domain()),
                        "Domain of "<<time_function<<" does not contain parameter domain "<<this->parameter_domain());
     ARIADNE_ASSERT_MSG(this->parameter_domain()==time_function.domain(),
                        "Domain of "<<time_function<<" does not equal parameter domain "<<this->parameter_domain());
-    this->_time=time_function;
+    this->_time=dynamic_cast<const ScalarTaylorFunction&>(time_function.reference());
 }
 
 IntervalVector
@@ -276,7 +284,7 @@ void HybridEnclosure::new_variable(Interval ivl, EnclosureVariableType vt)
     this->_variables.append(vt);
 }
 
-void HybridEnclosure::new_invariant(DiscreteEvent event, RealScalarFunction constraint) {
+void HybridEnclosure::new_invariant(DiscreteEvent event, IntervalScalarFunction constraint) {
     ScalarIntervalFunction constraint_wrt_params=compose(constraint,this->_set.function());
     Interval range=constraint_wrt_params.evaluate(this->_set.domain());
     if(range.upper()>=0.0) {
@@ -285,27 +293,15 @@ void HybridEnclosure::new_invariant(DiscreteEvent event, RealScalarFunction cons
     }
 }
 
-void HybridEnclosure::new_invariant(DiscreteEvent event, ScalarIntervalFunction constraint) {
-    ScalarIntervalFunction constraint_wrt_params=unchecked_compose(constraint,this->_set.function());
-    Interval range=constraint_wrt_params.evaluate(this->_set.domain());
-    if(range.upper()>=0.0) {
-        //this->_constraint_events.push_back((this->_events,event));
-        this->_set.new_negative_constraint(constraint_wrt_params);
-    }
-}
 
-void HybridEnclosure::new_activation(DiscreteEvent event, RealScalarFunction constraint) {
+void HybridEnclosure::new_activation(DiscreteEvent event, IntervalScalarFunction constraint) {
     //this->_constraint_events.push_back((this->_events,event));
-    this->_set.new_negative_constraint(compose(-constraint,this->_set.function()));
+    this->_set.new_negative_constraint(-compose(constraint,this->_set.function()));
 }
 
-void HybridEnclosure::new_guard(DiscreteEvent event, RealScalarFunction constraint) {
+void HybridEnclosure::new_guard(DiscreteEvent event, IntervalScalarFunction constraint) {
     //this->_constraint_events.push_back((this->_events,event));
     this->_set.new_zero_constraint(compose(constraint,this->_set.function()));
-}
-
-void HybridEnclosure::new_guard(DiscreteEvent event, RealScalarFunction constraint, ScalarIntervalFunction crossing_time) {
-    ARIADNE_NOT_IMPLEMENTED;
 }
 
 void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, IntervalNonlinearConstraint constraint) {
@@ -338,8 +334,7 @@ void HybridEnclosure::new_constraint(DiscreteEvent event, IntervalNonlinearConst
 }
 
 
-
-void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealSpace space, RealVectorFunction map)
+void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealSpace space, const IntervalVectorFunction& map)
 {
     ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"*this="<<*this<<", event="<<event<<", space="<<space<<", target="<<target<<", map="<<map);
     this->_events.append(event);
@@ -349,7 +344,7 @@ void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, 
     this->_dwell_time=0.0;
 }
 
-void HybridEnclosure::apply_spacetime_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& elps)
+void HybridEnclosure::apply_spacetime_evolve_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& elps)
 {
     // xi'(s) = phi(xi(s),eps(s)) where range(eps) in [0,h]
     // tau'(s) = tau(s)+eps(s)
@@ -360,7 +355,7 @@ void HybridEnclosure::apply_spacetime_evolve_step(const VectorIntervalFunction& 
     this->apply_evolve_step(phi,delta);
 }
 
-void HybridEnclosure::apply_spacetime_reach_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& elps)
+void HybridEnclosure::apply_spacetime_reach_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& elps)
 {
     // xi'(s,t) = phi(xi(s),t) for t in [0,h] with constraint t<=eps(s) where range(eps) in [0,h]
     // tau'(s) = tau(s)+t
@@ -371,7 +366,8 @@ void HybridEnclosure::apply_spacetime_reach_step(const VectorIntervalFunction& p
     this->apply_reach_step(phi,delta);
 }
 
-void HybridEnclosure::apply_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& elps)
+
+void HybridEnclosure::apply_evolve_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& elps)
 {
     // xi'(s) = phi(xi(s),eps(s)) where range(eps) in [0,h]
     // tau'(s) = tau(s)+eps(s)
@@ -383,7 +379,7 @@ void HybridEnclosure::apply_evolve_step(const VectorIntervalFunction& phi, const
     this->_set.apply_parameter_flow_step(phi,elps);
 }
 
-void HybridEnclosure::apply_finishing_evolve_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& omega)
+void HybridEnclosure::apply_finishing_evolve_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& omega)
 {
     // xi'(s) = phi(xi(s),omega(s)-tau(s)) where range(omega-tau) in [0,h]
     // tau'(s) = tau(s)+eps(s)
@@ -397,7 +393,7 @@ void HybridEnclosure::apply_finishing_evolve_step(const VectorIntervalFunction& 
 }
 
 
-void HybridEnclosure::apply_reach_step(const VectorIntervalFunction& phi, const ScalarIntervalFunction& elps)
+void HybridEnclosure::apply_reach_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& elps)
 {
     // xi'(s,t) = phi(xi(s),t) for t in [0,h] with constraint t<=eps(s) where range(eps) in [0,h]
     // tau'(s) = tau(s)+t
@@ -419,7 +415,7 @@ void HybridEnclosure::apply_reach_step(const VectorIntervalFunction& phi, const 
     }
 }
 
-void HybridEnclosure::apply_full_reach_step(const VectorIntervalFunction& phi)
+void HybridEnclosure::apply_full_reach_step(const IntervalVectorFunctionModel& phi)
 {
     // xi'(s,t) = phi(xi(s),t) for t in [0,h] with constraint t<=eps(s) where range(eps) in [0,h]
     // tau'(s) = tau(s)+t
@@ -444,12 +440,8 @@ void HybridEnclosure::bound_time(Real tmax) {
     }
 }
 
-void HybridEnclosure::bound_time(RealScalarFunction tmax) {
-    this->_set.new_negative_constraint(this->_time-ScalarIntervalFunction(this->_set.domain(),tmax,this->_time.sweeper()));
-}
-
-void HybridEnclosure::bound_time(ScalarIntervalFunction tmax) {
-    this->_set.new_negative_constraint(this->_time-tmax);
+void HybridEnclosure::bound_time(IntervalScalarFunction tmax) {
+    this->_set.new_negative_constraint(this->_time-this->_set.function_factory().create(this->_set.domain(),tmax));
 }
 
 void HybridEnclosure::set_time(Real time)
@@ -457,7 +449,7 @@ void HybridEnclosure::set_time(Real time)
     this->_set.new_zero_constraint(this->_time-Interval(time));
 }
 
-void HybridEnclosure::set_time(RealScalarFunction time)
+void HybridEnclosure::set_time(IntervalScalarFunction time)
 {
     this->_set.new_zero_constraint(this->_time-ScalarIntervalFunction(this->_set.domain(),time,this->_time.sweeper()));
 }
@@ -468,7 +460,7 @@ void HybridEnclosure::set_maximum_time(DiscreteEvent event, Float final_time)
     this->_set.new_negative_constraint(this->_time-final_time); // Deprecated
 }
 
-void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ScalarIntervalFunction constraint) {
+void HybridEnclosure::new_time_step_bound(DiscreteEvent event, IntervalScalarFunction constraint) {
     ARIADNE_NOT_IMPLEMENTED; // Deprecated
 }
 

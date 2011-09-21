@@ -106,6 +106,7 @@ TestSimpleHybridEvolver::TestSimpleHybridEvolver(const HybridEvolverInterface& e
 }
 
 void TestSimpleHybridEvolver::test_all() const {
+    ARIADNE_TEST_PRINT(*evolver_ptr);
     ARIADNE_TEST_CALL(test_flow());
     ARIADNE_TEST_CALL(test_exact_final_time());
     ARIADNE_TEST_CALL(test_maximum_steps());
@@ -133,7 +134,6 @@ void TestSimpleHybridEvolver::test_flow() const {
     evolver_ptr->parameters().maximum_step_size=1.0;
 
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);
-
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
     ARIADNE_TEST_CHECK_WARN(orbit.intermediate().size(),2u);
@@ -1064,7 +1064,7 @@ void TestHybridEvolver::test() {
 
 int main(int argc, const char* argv[])
 {
-    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+    int evolver_verbosity=get_verbosity(argc,argv);
 
     DRAWING_METHOD = AFFINE_DRAW; DRAWING_ACCURACY = 2u;
 

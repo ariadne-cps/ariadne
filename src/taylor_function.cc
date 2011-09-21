@@ -72,6 +72,9 @@ void _set_scaling(ScalarTaylorFunction& x, const Interval& ivl, uint j)
 
 
 
+ScalarFunctionModel<Interval>& ScalarFunctionModel<Interval>::operator=(const ScalarTaylorFunction& f) {
+    this->_ptr=clone_on_copy_ptr< ScalarFunctionModelInterface<Interval> >(new ScalarTaylorFunction(f)); return *this;
+}
 
 
 ScalarTaylorFunction::ScalarTaylorFunction()
@@ -105,6 +108,11 @@ ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const IntervalSc
 ScalarTaylorFunction::ScalarTaylorFunction(const IntervalScalarFunctionModel& f) {
      ARIADNE_ASSERT_MSG(dynamic_cast<const ScalarTaylorFunction*>(f._ptr.operator->())," f="<<f);
      *this=dynamic_cast<const ScalarTaylorFunction&>(*f._ptr);
+}
+
+ScalarTaylorFunction& ScalarTaylorFunction::operator=(const IntervalScalarFunctionModel& f)
+{
+    return (*this)=ScalarTaylorFunction(this->domain(),f,this->sweeper());
 }
 
 
@@ -232,6 +240,7 @@ bool ScalarTaylorFunction::operator==(const ScalarTaylorFunction& tv) const
 }
 
 
+
 ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const ScalarTaylorFunction& y) {
     ARIADNE_ASSERT(subset(x.domain(),y.domain()));
     if(x.domain()==y.domain()) { x._model+=y._model; }
@@ -306,10 +315,6 @@ ScalarTaylorFunction operator/(const ScalarTaylorFunction& x1, const ScalarTaylo
     else {
         ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
         return ScalarTaylorFunction(domain,restrict(x1,domain)._model/restrict(x2,domain)._model);}
-}
-
-ScalarTaylorFunction operator-(const ScalarTaylorFunction& f1, const RealScalarFunction& f2) {
-    return f1 - ScalarTaylorFunction(f1.domain(),f2,f1.sweeper());
 }
 
 
@@ -1786,9 +1791,21 @@ TaylorFunctionFactory::create_zero(const IntervalVector& domain) const
 }
 
 ScalarTaylorFunction
+TaylorFunctionFactory::create_constant(const IntervalVector& domain, Interval value) const
+{
+    return ScalarTaylorFunction::constant(domain,value,this->_sweeper);
+}
+
+ScalarTaylorFunction
 TaylorFunctionFactory::create_coordinate(const IntervalVector& domain, uint k) const
 {
     return ScalarTaylorFunction::coordinate(domain,k,this->_sweeper);
+}
+
+ScalarTaylorFunction
+TaylorFunctionFactory::create_identity(const Interval& domain) const
+{
+    return ScalarTaylorFunction::identity(domain,this->_sweeper);
 }
 
 VectorTaylorFunction

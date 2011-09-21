@@ -342,7 +342,6 @@ VectorFunction<Interval> join(const VectorFunction<Interval>& f1, const VectorFu
 
 ScalarFunction<Interval> compose(const ScalarFunction<Interval>& f, const VectorFunction<Interval>& g);
 VectorFunction<Interval> compose(const VectorFunction<Interval>& f, const VectorFunction<Interval>& g);
-ScalarFunction<Interval> lie_derivative(const ScalarFunction<Interval>& g, const VectorFunction<Interval>& f);
 
 inline Interval evaluate(const ScalarFunction<Interval>& f, const Vector<Interval>& x) { return f(x); }
 inline Vector<Interval> evaluate(const VectorFunction<Interval>& f, const Vector<Interval>& x) { return f(x); }

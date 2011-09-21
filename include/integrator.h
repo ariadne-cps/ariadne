@@ -48,10 +48,11 @@ template<class X> class Vector;
 template<class X> class Differential;
 template<class X> class Procedure;
 template<class X> class Polynomial;
-typedef Vector< Procedure<Real> > RealVectorProcedure;
+typedef Vector< Procedure<Interval> > IntervalVectorProcedure;
 typedef Vector< Differential<Interval> > IntervalDifferentialVector;
-class TaylorFunctionFactory;
-typedef shared_ptr<const TaylorFunctionFactory> FunctionFactoryPointer;
+template<class X> class FunctionModelFactoryInterface;
+typedef FunctionModelFactoryInterface<Interval> IntervalFunctionModelFactoryInterface;
+typedef shared_ptr<const IntervalFunctionModelFactoryInterface> FunctionFactoryPointer;
 
 class Sweeper;
 
@@ -89,33 +90,33 @@ class IntegratorBase
     double maximum_error() const  { return this->_maximum_error; }
 
     //! \brief The class which constructs functions for representing the flow.
-    const TaylorFunctionFactory& function_factory() const;
+    const IntervalFunctionModelFactoryInterface& function_factory() const;
     //! \brief Set the class which constructs functions for representing the flow.
-    void set_function_factory(const TaylorFunctionFactory& factory);
+    void set_function_factory(const IntervalFunctionModelFactoryInterface& factory);
 
 
     virtual Pair<Float,IntervalVector>
-    flow_bounds(const RealVectorFunction& vector_field,
+    flow_bounds(const IntervalVectorFunction& vector_field,
                 const IntervalVector& state_domain,
                 const Float& suggested_time_step) const;
 
-    virtual VectorTaylorFunction
-    flow_step(const RealVectorFunction& vector_field,
+    virtual IntervalVectorFunctionModel
+    flow_step(const IntervalVectorFunction& vector_field,
               const IntervalVector& state_domain,
               Float& suggested_time_step) const;
 
-    virtual VectorTaylorFunction
-    flow(const RealVectorFunction& vector_field,
+    virtual IntervalVectorFunctionModel
+    flow(const IntervalVectorFunction& vector_field,
          const IntervalVector& state_domain,
          const Real& time) const;
 
-    virtual VectorTaylorFunction
-    flow(const RealVectorFunction& vector_field,
+    virtual IntervalVectorFunctionModel
+    flow(const IntervalVectorFunction& vector_field,
          const IntervalVector& state_domain,
          const Interval& time_domain) const;
 
-    virtual VectorTaylorFunction
-    flow_step(const RealVectorFunction& vector_field,
+    virtual IntervalVectorFunctionModel
+    flow_step(const IntervalVectorFunction& vector_field,
               const IntervalVector& state_domain,
               const Float& suggested_time_step,
               const IntervalVector& bounding_box) const = 0;
@@ -134,7 +135,8 @@ class TaylorPicardIntegrator
     uint _maximum_temporal_order;
   public:
     //! \brief Constructor.
-    TaylorPicardIntegrator(MaximumError err, LipschitzConstant lip, GlobalSweepThreshold gswp, LocalSweepThreshold lswp, MaximumTemporalOrder maxto)
+    TaylorPicardIntegrator(MaximumError err, LipschitzConstant lip, GlobalSweepThreshold gswp,
+                           LocalSweepThreshold lswp, MaximumTemporalOrder maxto)
         : IntegratorBase(err,lip,gswp), _sweep_threshold(lswp), _maximum_temporal_order(maxto) { }
 
     //! \brief The order of the method in time.
@@ -147,8 +149,8 @@ class TaylorPicardIntegrator
     virtual TaylorPicardIntegrator* clone() const { return new TaylorPicardIntegrator(*this); }
     virtual void write(std::ostream& os) const;
 
-    virtual VectorTaylorFunction
-    flow_step(const RealVectorFunction& vector_field,
+    virtual IntervalVectorFunctionModel
+    flow_step(const IntervalVectorFunction& vector_field,
               const IntervalVector& state_domain,
               const Float& time_step,
               const IntervalVector& bounding_box) const;
@@ -160,13 +162,14 @@ class TaylorPicardIntegrator
 class TaylorSeriesIntegrator
     : public IntegratorBase
 {
+    double _sweep_threshold;
     uint _maximum_temporal_order;
     uint _spacial_order;
-    double _sweep_threshold;
   public:
     //! \brief Constructor.
-    TaylorSeriesIntegrator(MaximumError err, LipschitzConstant lip, GlobalSweepThreshold swp, SpacialOrder so, MaximumTemporalOrder maxto)
-        : IntegratorBase(err,lip,swp), _maximum_temporal_order(maxto), _spacial_order(so) { }
+    TaylorSeriesIntegrator(MaximumError err, LipschitzConstant lip, GlobalSweepThreshold gswp,
+                           LocalSweepThreshold lswp, SpacialOrder so, MaximumTemporalOrder maxto)
+        : IntegratorBase(err,lip,gswp), _sweep_threshold(lswp), _maximum_temporal_order(maxto), _spacial_order(so) { }
 
     //! \brief The order of the method in space.
     uint spacial_order() const { return this->_spacial_order; }
@@ -181,14 +184,14 @@ class TaylorSeriesIntegrator
     virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
     virtual void write(std::ostream& os) const;
 
-    virtual VectorTaylorFunction
-    flow_step(const RealVectorFunction& vector_field,
+    virtual IntervalVectorFunctionModel
+    flow_step(const IntervalVectorFunction& vector_field,
               const IntervalVector& state_domain,
               const Float& time_step,
               const IntervalVector& bounding_box) const;
 
     virtual Vector< Differential<Interval> >
-    flow_diff(const RealVectorProcedure& vector_field,
+    flow_diff(const IntervalVectorProcedure& vector_field,
               const IntervalVector& state_domain,
               const Float& time_step,
               const IntervalVector& bounding_box) const;
@@ -217,8 +220,8 @@ class AffineIntegrator
     virtual AffineIntegrator* clone() const { return new AffineIntegrator(*this); }
     virtual void write(std::ostream& os) const;
 
-    virtual VectorTaylorFunction
-    flow_step(const RealVectorFunction& vector_field,
+    virtual IntervalVectorFunctionModel
+    flow_step(const IntervalVectorFunction& vector_field,
               const IntervalVector& state_domain,
               const Float& time_step,
               const IntervalVector& bounding_box) const;

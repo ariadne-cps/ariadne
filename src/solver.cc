@@ -309,7 +309,7 @@ newton_implicit(const IntervalVectorFunctionModel& f)
 
 namespace Ariadne {
 
-FunctionModelFactoryInterface<Interval>* make_default_taylor_function_factory();
+FunctionModelFactoryInterface<Interval>* make_taylor_function_factory();
 
 inline Vector<Interval> operator*(const Matrix<Interval>& A, const Vector<Interval>& v) {
     ARIADNE_PRECONDITION(A.column_size()==v.size());
@@ -386,7 +386,7 @@ class DifferenceFunction
 
 
 SolverBase::SolverBase(double max_error, uint max_steps)
-  : _max_error(max_error), _max_steps(max_steps), _function_factory_ptr(make_default_taylor_function_factory())
+  : _max_error(max_error), _max_steps(max_steps), _function_factory_ptr(make_taylor_function_factory())
 {
 }
 

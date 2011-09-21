@@ -61,6 +61,9 @@ typedef VectorFunctionInterface<Interval> IntervalVectorFunctionInterface;
 typedef ScalarFunctionModel<Interval> IntervalScalarFunctionModel;
 typedef VectorFunctionModel<Interval> IntervalVectorFunctionModel;
 
+template<class X> class FunctionModelFactory;
+typedef FunctionModelFactory<Interval> IntervalFunctionModelFactory;
+
 template<> class ScalarFunctionModelInterface<Interval>
     : public virtual ScalarFunctionInterface<Interval>
 {
@@ -87,6 +90,7 @@ template<> class ScalarFunctionModelInterface<Interval>
     virtual Void restrict(const IntervalVector& d) = 0;
 
     virtual ScalarFunctionModelInterface<Interval>* _derivative(Nat j) const = 0;
+    virtual ScalarFunctionModelInterface<Interval>* _antiderivative(Nat j) const = 0;
 
     virtual Tribool _refines(const ScalarFunctionModelInterface<Interval>& f) const = 0;
     virtual Tribool _disjoint(const ScalarFunctionModelInterface<Interval>& f) const = 0;
@@ -110,6 +114,8 @@ template<class F> class ScalarFunctionModelMixin<F,Interval>
         return new F(static_cast<const F&>(*this)); }
     Float const _norm() const {
         return norm(static_cast<const F&>(*this)); }
+    ScalarFunctionModelInterface<Interval>* _antiderivative(Nat j) const {
+        return new F(antiderivative(static_cast<const F&>(*this),j)); }
     ScalarFunctionModelInterface<Interval>* _apply(OperatorCode op) const {
         return new F(this->apply(op)); }
     ScalarFunctionModelInterface<Interval>* _embed(const IntervalVector& d1, const IntervalVector& d2) const {
@@ -160,6 +166,8 @@ template<> class ScalarFunctionModel<Interval>
 };
 
 inline Float norm(const ScalarFunctionModel<Interval>& f) { return f._ptr->_norm(); }
+inline ScalarFunctionModel<Interval> derivative(const ScalarFunctionModel<Interval>& f, Nat j) { return f._ptr->_derivative(j); }
+inline ScalarFunctionModel<Interval> antiderivative(const ScalarFunctionModel<Interval>& f, Nat j) { return f._ptr->_antiderivative(j); }
 
 inline ScalarFunctionModel<Interval> embed(const IntervalVector& d1, const ScalarFunctionModel<Interval>& f, const IntervalVector& d2) {
     return f._ptr->_embed(d1,d2); }
@@ -227,7 +235,10 @@ template<> class VectorFunctionModelInterface<Interval>
     virtual IntervalVector const& domain() const = 0;
     virtual IntervalVector const range() const = 0;
     virtual IntervalVector const codomain() const = 0;
+    virtual Vector<Float> const errors() const = 0;
+    virtual Float const error() const = 0;
 
+    virtual Float const _norm() const = 0;
 
     virtual VectorFunctionModelInterface<Interval>* _clone() const = 0;
     virtual VectorFunctionModelInterface<Interval>* _create_identity() const = 0;
@@ -239,6 +250,7 @@ template<> class VectorFunctionModelInterface<Interval>
     virtual Void _adjoin(const ScalarFunctionModelInterface<Interval>& f2) = 0;
     virtual ScalarFunctionModelInterface<Interval>* _compose(const ScalarFunctionInterface<Interval>& f) const = 0;
     virtual VectorFunctionModelInterface<Interval>* _compose(const VectorFunctionInterface<Interval>& f) const = 0;
+    virtual VectorFunctionModelInterface<Interval>* _partial_evaluate(Nat j, const Interval& c) const = 0;
     virtual Void restrict(const IntervalVector& d) = 0;
 };
 
@@ -258,6 +270,8 @@ template<class F> class VectorFunctionModelMixin<F,Interval>
         if(!dynamic_cast<const typename F::ScalarFunctionType*>(&sf)) {
             ARIADNE_FAIL_MSG("Cannot set element of VectorFunctionModel "<<*this<<" to "<<sf<<"\n"); }
         static_cast<F&>(*this).F::set(i,dynamic_cast<const ScalarFunctionType&>(sf)); }
+    Float const _norm() const {
+         return norm(static_cast<const F&>(*this)); }
     VectorFunctionModelInterface<Interval>* _embed(const IntervalVector& d1, const IntervalVector& d2) const {
         return heap_copy(embed(d1,static_cast<const F&>(*this),d2)); }
     Void _adjoin(const ScalarFunctionModelInterface<Interval>& f) {
@@ -270,6 +284,8 @@ template<class F> class VectorFunctionModelMixin<F,Interval>
         return heap_copy(compose(f,static_cast<const F&>(*this))); }
     VectorFunctionModelInterface<Interval>* _compose(const VectorFunctionInterface<Interval>& f) const {
         return heap_copy(compose(f,static_cast<const F&>(*this))); }
+    VectorFunctionModelInterface<Interval>* _partial_evaluate(Nat j, const Interval& c) const {
+        return heap_copy(partial_evaluate(static_cast<const F&>(*this),j,c)); }
 };
 
 template<class X> class VectorFunctionModelElement {
@@ -278,9 +294,13 @@ template<class X> class VectorFunctionModelElement {
     operator const ScalarFunctionModel<X> () const;
     VectorFunctionModelElement(VectorFunctionModel<X>* p, Nat i) : _p(p), _i(i) { }
     VectorFunctionModelElement<X>& operator=(const ScalarFunctionModel<X>& sf) { _p->set(_i,sf); return *this; }
+    VectorFunctionModelElement<X>& operator=(const VectorFunctionModelElement<X>& sf) { return this->operator=(static_cast<ScalarFunctionModel<X>const>(sf)); }
     Void clobber() { ScalarFunctionModel<Interval> sf=_p->get(_i); sf.clobber(); _p->set(_i,sf); }
     Void set_error(Float e) const { ScalarFunctionModel<Interval> sf=_p->get(_i); sf.set_error(e); _p->set(_i,sf); }
 };
+template<class X> inline OutputStream& operator<<(OutputStream& os, const VectorFunctionModelElement<X>& function) {
+    return os << static_cast< const ScalarFunctionModel<X> >(function);
+}
 
 template<> class VectorFunctionModel<Interval>
 {
@@ -293,6 +313,9 @@ template<> class VectorFunctionModel<Interval>
     inline VectorFunctionModel(const VectorFunctionModelInterface<Interval>& f) : _ptr(f._clone()) { }
     inline VectorFunctionModel(const VectorFunctionModel<Interval>& f) : _ptr(f._ptr) { }
     inline operator const VectorFunctionModelInterface<Interval>& () const { return *_ptr; }
+    inline operator VectorFunction<Interval> () const { return VectorFunction<Interval>(*_ptr); }
+    inline const VectorFunctionModelInterface<Interval>& reference() const { return *_ptr; }
+    inline VectorFunctionModelInterface<Interval>& reference() { return *_ptr; }
     inline VectorFunctionModel<Interval> create_identity() const { return this->_ptr->_create_identity(); }
     inline Nat result_size() const { return this->_ptr->result_size(); }
     inline Nat argument_size() const { return this->_ptr->argument_size(); }
@@ -304,10 +327,15 @@ template<> class VectorFunctionModel<Interval>
     inline IntervalVector const& domain() const { return this->_ptr->domain(); }
     inline IntervalVector const range() const { return this->_ptr->range(); }
     inline IntervalVector const codomain() const { return this->_ptr->codomain(); }
+    inline Vector<Float> const errors() const { return this->_ptr->errors(); }
+    inline Float const error() const { return this->_ptr->error(); }
 
     inline Void restrict(const IntervalVector& d) { this->_ptr->restrict(d); }
 
 };
+
+inline Float norm(const VectorFunctionModel<Interval>& f) {
+    return f._ptr->_norm(); }
 inline VectorFunctionModel<Interval> embed(const IntervalVector& d1, const VectorFunctionModel<Interval>& f, const IntervalVector& d2) {
     return f._ptr->_embed(d1,d2); }
 inline VectorFunctionModel<Interval> restrict(const VectorFunctionModel<Interval>& f, const IntervalVector& d) {
@@ -334,6 +362,8 @@ inline Vector<Interval> evaluate(const VectorFunction<Interval>& f, const Vector
 inline ScalarFunctionModel<Interval> compose(const ScalarFunction<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_compose(f); }
 inline VectorFunctionModel<Interval> compose(const VectorFunction<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_compose(f); }
 
+inline VectorFunctionModel<Interval> compose(const VectorFunctionModel<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_compose(f); }
+
 inline VectorFunctionModel<Interval> operator-(const VectorFunctionModel<Interval>& f1, const VectorFunctionInterface<Interval>& f2) {
     return f1-compose(f2,f1.create_identity()); }
 
@@ -344,15 +374,22 @@ inline VectorFunctionModel<Interval> join(const VectorFunctionModel<Interval>& f
 inline VectorFunctionModel<Interval> join(const VectorFunctionModel<Interval>& f1, const VectorFunctionModel<Interval>& f2) {
     return f1._ptr->_join(f2); }
 
-inline VectorFunctionModel<Interval> combine(const ScalarFunctionModel<Interval>& f1, const ScalarFunctionModel<Interval>& f2);
-inline VectorFunctionModel<Interval> combine(const ScalarFunctionModel<Interval>& f1, const VectorFunctionModel<Interval>& f2);
-inline VectorFunctionModel<Interval> combine(const VectorFunctionModel<Interval>& f1, const ScalarFunctionModel<Interval>& f2);
+inline VectorFunctionModel<Interval> combine(const ScalarFunctionModel<Interval>& f1, const ScalarFunctionModel<Interval>& f2) {
+    return VectorFunctionModel<Interval>(1,f1)._ptr->_combine(VectorFunctionModel<Interval>(1,f2)); };;
+inline VectorFunctionModel<Interval> combine(const ScalarFunctionModel<Interval>& f1, const VectorFunctionModel<Interval>& f2) {
+    return VectorFunctionModel<Interval>(1,f1)._ptr->_combine(f2); };;
+inline VectorFunctionModel<Interval> combine(const VectorFunctionModel<Interval>& f1, const ScalarFunctionModel<Interval>& f2) {
+    return f1._ptr->_combine(VectorFunctionModel<Interval>(1,f2)); };
 inline VectorFunctionModel<Interval> combine(const VectorFunctionModel<Interval>& f1, const VectorFunctionModel<Interval>& f2) {
     return f1._ptr->_combine(f2); }
 
 inline VectorFunctionModel<Interval> intersection(const VectorFunctionModel<Interval>& f1, const VectorFunctionModel<Interval>& f2) {
     ARIADNE_ASSERT_MSG(f1.size()==f2.size(),"intersection(f1,f2): f1="<<f1<<", f2="<<f2<<")");
     VectorFunctionModel<Interval> r=+f1; for(uint i=0; i!=r.size(); ++i) { r[i]=intersection(f1[i],f2[i]); } return r; }
+
+inline VectorFunctionModel<Interval> partial_evaluate(const VectorFunctionModel<Interval>& f, Nat j, const Interval& c) {
+    return f._ptr->_partial_evaluate(j,c); }
+
 
 template<class X> VectorFunctionModelElement<X>::operator const ScalarFunctionModel<X> () const {
     return _p->get(_i); }
@@ -371,6 +408,7 @@ template<> class FunctionModelFactoryInterface<Interval>
     inline ScalarFunctionModel<Interval> create_zero(const IntervalVector& domain) const;
     inline VectorFunctionModel<Interval> create_zeros(Nat result_size, const IntervalVector& domain) const;
     inline ScalarFunctionModel<Interval> create_constant(const IntervalVector& domain, const Interval& value) const;
+    inline ScalarFunctionModel<Interval> create_coordinate(const IntervalVector& domain, Nat index) const;
     inline VectorFunctionModel<Interval> create_identity(const IntervalVector& domain) const;
   private:
     virtual ScalarFunctionModelInterface<Interval>* _create(const IntervalVector& domain, const ScalarFunctionInterface<Interval>& function) const = 0;
@@ -408,6 +446,8 @@ VectorFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_ze
     return this->_create(domain,RealVectorFunction(result_size,domain.size())); }
 ScalarFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_constant(const IntervalVector& domain, const Interval& value) const {
     return ScalarFunctionModel<Interval>(this->_create(domain,RealScalarFunction::zero(domain.size())))+value; };
+ScalarFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_coordinate(const IntervalVector& domain, Nat index) const {
+    return ScalarFunctionModel<Interval>(this->_create(domain,RealScalarFunction::coordinate(domain.size(),index))); };
 VectorFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_identity(const IntervalVector& domain) const {
     return this->_create(domain,RealVectorFunction::identity(domain.size())); };
 

@@ -40,8 +40,9 @@ template<class X> class Vector;
 typedef Vector<Interval> IntervalVector;
 
 template<class X> class VectorFunction;
-typedef VectorFunction<Real> RealVectorFunction;
-class VectorTaylorFunction;
+typedef VectorFunction<Interval> IntervalVectorFunction;
+template<class X> class VectorFunctionModel;
+typedef VectorFunctionModel<Interval> IntervalVectorFunctionModel;
 
 struct FlowBoundsException : public std::runtime_error {
     FlowBoundsException(const std::string& what) : std::runtime_error(what) { }
@@ -71,35 +72,35 @@ class IntegratorInterface
     //! \brief Compute a pair \a (h,B) consisting of a bound \a B for the flow
     //! starting in the \a state_domain for time step \a h.
     virtual Pair<Float,IntervalVector>
-    flow_bounds(const RealVectorFunction& vector_field,
+    flow_bounds(const IntervalVectorFunction& vector_field,
                 const IntervalVector& state_domain,
                 const Float& maximum_time_step) const = 0;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,h]\f$ where \f$h\f$ is a time step based on \a suggested_time_step.
     //! The value of \a suggested_time_step is overwritten with the actual time step used.
-    virtual VectorTaylorFunction
-    flow_step(const RealVectorFunction& vector_field,
+    virtual IntervalVectorFunctionModel
+    flow_step(const IntervalVectorFunction& vector_field,
               const IntervalVector& state_domain,
               Float& suggested_time_step) const = 0;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,h]\f$ where \f$h\f$ is the \a time_step used,
     //! and \a state_bounding_box is a bound for the trajectories.
     //! Throws a FlowTimeStepException if the flow cannot be computed sufficiently accurately for the given time step.
-    virtual VectorTaylorFunction
-    flow_step(const RealVectorFunction& vector_field,
+    virtual IntervalVectorFunctionModel
+    flow_step(const IntervalVectorFunction& vector_field,
               const IntervalVector& state_domain,
               const Float& time_step,
               const IntervalVector& state_bounding_box) const = 0;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
-    virtual VectorTaylorFunction
-    flow(const RealVectorFunction& vector_field,
+    virtual IntervalVectorFunctionModel
+    flow(const IntervalVectorFunction& vector_field,
          const IntervalVector& state_domain,
          const Real& time) const = 0;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
-    virtual VectorTaylorFunction
-    flow(const RealVectorFunction& vector_field,
+    virtual IntervalVectorFunctionModel
+    flow(const IntervalVectorFunction& vector_field,
          const IntervalVector& state_domain,
          const Interval& time_domain) const = 0;
 

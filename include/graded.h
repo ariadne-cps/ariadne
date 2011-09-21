@@ -324,7 +324,7 @@ struct Function {
 };
 
 
-template<class A> void compute(const Vector< Procedure<Real> >& p, Vector< Graded<A> >& r, List< Graded<A> >& t, const Vector< Graded<A> >& a) {
+template<class X, class A> void compute(const Vector< Procedure<X> >& p, Vector< Graded<A> >& r, List< Graded<A> >& t, const Vector< Graded<A> >& a) {
     _compute(t,p._instructions,p._constants,a);
     for(uint i=0; i!=p._results.size(); ++i) { r[i]=t[p._results[i]]; }
 }

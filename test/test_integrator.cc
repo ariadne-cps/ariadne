@@ -33,7 +33,7 @@
 #include "vector.h"
 
 #include "test.h"
-    
+
 using namespace Ariadne;
 using namespace std;
 
@@ -62,6 +62,7 @@ class TestIntegrator
     }
 
     int test() {
+        ARIADNE_TEST_PRINT(*integrator_ptr);
         ARIADNE_TEST_CALL(test_constant_derivative());
         ARIADNE_TEST_CALL(test_quadratic_flow());
         ARIADNE_TEST_CALL(test_linear());
@@ -80,11 +81,11 @@ class TestIntegrator
 
     void test_constant_derivative() {
         RealVectorFunction f=(o*2,o*3);
+        ARIADNE_TEST_PRINT(f);
         IntervalVector d=(Interval(0.0,1.0),Interval(-0.5,1.5));
         Float h=0.25;
-        VectorTaylorFunction flow=integrator_ptr->flow_step(f,d,h);
+        IntervalVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
         RealVectorFunction expected_flow( (x0+2*t,y0+3*t) );
-        ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
         ARIADNE_TEST_PRINT(flow.errors());
@@ -95,7 +96,7 @@ class TestIntegrator
         RealVectorFunction f=(o,x);
         IntervalVector d=(Interval(0.0,1.0),Interval(-0.5,1.5));
         Float h=0.25;
-        VectorTaylorFunction flow=integrator_ptr->flow_step(f,d,h);
+        IntervalVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
         RealVectorFunction expected_flow( (x0+t,y0+x0*t+t*t/2) );
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
@@ -108,7 +109,7 @@ class TestIntegrator
         RealVectorFunction f=(x,-y);
         IntervalVector d=(Interval(-0.25,0.25),Interval(-0.25,0.25));
         Float h=0.25;
-        VectorTaylorFunction flow=integrator_ptr->flow_step(f,d,h);
+        IntervalVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
         RealVectorFunction expected_flow( (x0*(1+t+t*t/2+t*t*t/6+t*t*t*t/24),y0*(1-t+t*t/2-t*t*t/6+t*t*t*t/24)) );
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
@@ -121,13 +122,13 @@ class TestIntegrator
         RealVectorFunction f=(-0.5*x-y,x-0.5*y);
         IntervalVector d=(Interval(0.75,1.25),Interval(-0.25,0.25));
         Float h=0.25;
-        VectorTaylorFunction flow=integrator_ptr->flow_step(f,d,h);
+        IntervalVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
         RealVectorFunction expected_flow( (exp(-0.5*t)*(x0*cos(t)-y0*sin(t)),exp(-0.5*t)*(x0*sin(t)+y0*cos(t))) );
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
         ARIADNE_TEST_PRINT(flow.errors());
-        ARIADNE_TEST_PRINT((flow-expected_flow).sweep(GradedSweeper(3)));
+        ARIADNE_TEST_PRINT(dynamic_cast<VectorTaylorFunction&>((flow-expected_flow).reference()).sweep(GradedSweeper(3)));
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-3);
 
     };
@@ -158,21 +159,21 @@ class TestIntegrator
         Float h=0.5;
         //IntervalVector d(1u,Interval(-0.125,+0.125));
         //Float h=0.125;
-        VectorTaylorFunction flow=integrator_ptr->flow_step(f,d,h);
+        IntervalVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
+        VectorTaylorFunction taylor_flow=dynamic_cast<VectorTaylorFunction&>(flow.reference());
         //RealVectorFunction expected_flow( (x0+x0*(1-x0)*t+x0*(1-x0)*(1-2*x0)/2*t*t, y0+t) );
         //RealVectorFunction expected_flow(1u, (x0+x0*(1-x0)*t+x0*(1-x0)*(1-2*x0)/2*t*t) );
         RealVectorFunction expected_flow(1u, flowf );
         ARIADNE_TEST_PRINT(*integrator_ptr);
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
-        ARIADNE_TEST_PRINT(flow.sweeper());
         ARIADNE_TEST_PRINT(expected_flow);
-        ARIADNE_TEST_PRINT(flow.errors());
-        ARIADNE_TEST_PRINT(flow-expected_flow);
-        ARIADNE_TEST_PRINT((flow-expected_flow).sweep(GradedSweeper(3)));
-        ARIADNE_TEST_PRINT((flow-expected_flow).sweep(ThresholdSweeper(1e-10)));
-        ARIADNE_TEST_BINARY_PREDICATE(operator<,flow.error(),0.01);
-        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),0.01+0.004);
+        ARIADNE_TEST_PRINT(taylor_flow.errors());
+        ARIADNE_TEST_PRINT(taylor_flow-expected_flow);
+        ARIADNE_TEST_PRINT((taylor_flow-expected_flow).sweep(GradedSweeper(3)));
+        ARIADNE_TEST_PRINT((taylor_flow-expected_flow).sweep(ThresholdSweeper(1e-10)));
+        ARIADNE_TEST_BINARY_PREDICATE(operator<,taylor_flow.error(),0.01);
+        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(taylor_flow-expected_flow),0.01+0.004);
     };
 };
 
@@ -181,7 +182,7 @@ int main(int argc, const char **argv) {
 
     ARIADNE_TEST_PRINT("Testing TaylorSeriesIntegrator");
     TaylorSeriesIntegrator taylor_series_integrator(
-            maximum_error=1e-8,lipschitz_constant=0.5,global_sweep_threshold=1e-16,spacial_order=2,maximum_temporal_order=6);
+            maximum_error=1e-8,lipschitz_constant=0.5,global_sweep_threshold=1e-10,local_sweep_threshold=1e-16,spacial_order=2,maximum_temporal_order=6);
     taylor_series_integrator.verbosity=verbosity;
     TestIntegrator(taylor_series_integrator).test();
 
@@ -192,13 +193,12 @@ int main(int argc, const char **argv) {
     ARIADNE_TEST_PRINT(taylor_picard_integrator);
     taylor_picard_integrator.verbosity=verbosity;
     TestIntegrator(taylor_picard_integrator).test();
-    return  ARIADNE_TEST_FAILURES;
-
 
     ARIADNE_TEST_PRINT("Testing AffineIntegrator");
     AffineIntegrator affine_integrator(1e-6, 6);
     affine_integrator.verbosity=verbosity;
-    TestIntegrator(affine_integrator).test_affine();
+    //TestIntegrator(affine_integrator).test_affine();
+    ARIADNE_TEST_WARN("AffineIntegrator does not work correctly.");
 
     std::cerr<<"INCOMPLETE "<<std::flush;
     return ARIADNE_TEST_FAILURES;

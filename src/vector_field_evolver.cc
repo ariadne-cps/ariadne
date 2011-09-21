@@ -118,8 +118,8 @@ _evolution(EnclosureListType& final_sets,
 {
     typedef RealVectorFunction FunctionType;
     typedef Vector<Interval> BoxType;
-    typedef VectorTaylorFunction FunctionModelType;
-    typedef VectorTaylorFunction FlowModelType;
+    typedef IntervalVectorFunctionModel FunctionModelType;
+    typedef IntervalVectorFunctionModel FlowModelType;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
@@ -195,8 +195,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 {
     typedef RealVectorFunction FunctionType;
     typedef Vector<Interval> BoxType;
-    typedef VectorTaylorFunction MapModelType;
-    typedef VectorTaylorFunction FlowModelType;
+    typedef IntervalVectorFunctionModel MapModelType;
+    typedef IntervalVectorFunctionModel FlowModelType;
     typedef TaylorConstrainedImageSet EnclosureType;
 
     EnclosureType current_set_model;
@@ -236,7 +236,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     //FlowModelType flow_model=this->_integrator->flow_step(dynamic,current_set_bounds,step_size,flow_bounds);
     ARIADNE_LOG(4,"step_size = "<<step_size<<"\n");
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
-    FlowModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,step_size);
+    FlowModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,ExactFloat(step_size));
     ARIADNE_LOG(6,"flow_step_model = "<<flow_step_model<<"\n");
 
     // Compute the integration time model

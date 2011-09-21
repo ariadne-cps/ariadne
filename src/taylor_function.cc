@@ -774,6 +774,20 @@ VectorTaylorFunction::VectorTaylorFunction(uint k, const ScalarTaylorFunction& f
 {
 }
 
+VectorTaylorFunction::VectorTaylorFunction(const IntervalVectorFunctionModel& f)
+    : _domain(), _models()
+{
+    ARIADNE_ASSERT(dynamic_cast<const VectorTaylorFunction*>(&f.reference()));
+    *this = dynamic_cast<const VectorTaylorFunction&>(f.reference());
+}
+
+VectorTaylorFunction& VectorTaylorFunction::operator=(const IntervalVectorFunctionModel& f)
+{
+    ARIADNE_ASSERT(dynamic_cast<const VectorTaylorFunction*>(&f.reference()));
+    *this = dynamic_cast<const VectorTaylorFunction&>(f.reference());
+    return *this;
+}
+
 
 VectorTaylorFunction substitute(const VectorTaylorFunction& f, uint k, const ScalarTaylorFunction& h) {
     ARIADNE_ASSERT_MSG(f.argument_size()==h.argument_size()+1u,"f="<<f<<", k="<<k<<", h="<<h);
@@ -950,7 +964,7 @@ VectorTaylorFunction::polynomial() const
     return compose(p,s);
 }
 
-Vector<Float>
+Vector<Float> const
 VectorTaylorFunction::errors() const
 {
     Vector<Float> e(this->result_size());
@@ -960,7 +974,7 @@ VectorTaylorFunction::errors() const
     return e;
 }
 
-Float
+Float const
 VectorTaylorFunction::error() const
 {
     Float e=0.0;
@@ -1784,8 +1798,12 @@ TaylorFunctionFactory::create_identity(const IntervalVector& domain) const
 }
 
 
-FunctionModelFactoryInterface<Interval>* make_default_taylor_function_factory() {
+FunctionModelFactoryInterface<Interval>* make_taylor_function_factory() {
     return new TaylorFunctionFactory(Sweeper());
+}
+
+FunctionModelFactoryInterface<Interval>* make_taylor_function_factory(double sweep_threshold) {
+    return new TaylorFunctionFactory(ThresholdSweeper(sweep_threshold));
 }
 
 /*

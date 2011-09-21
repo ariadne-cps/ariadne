@@ -617,6 +617,9 @@ class VectorTaylorFunction
     /*! \brief Construct from a vector expression. */
     template<class E> explicit VectorTaylorFunction(const VectorExpression<E>& ve);
 
+    explicit VectorTaylorFunction (const VectorFunctionModel<Interval>& f);
+    VectorTaylorFunction& operator=(const VectorFunctionModel<Interval>& f);
+
     /*! \brief Equality operator. */
     bool operator==(const VectorTaylorFunction& p) const;
     /*! \brief Inequality operator. */
@@ -688,9 +691,9 @@ class VectorTaylorFunction
     /*! \brief Convert to an interval polynomial. */
     Vector< Polynomial<Interval> > polynomial() const;
     /*! \brief The vector of roundoff/truncation errors of each component. */
-    Vector< Float > errors() const;
+    Vector< Float > const errors() const;
     /*! \brief The maximum roundoff/truncation error of the components. */
-    Float error() const;
+    Float const error() const;
     //! \brief A multivalued function equal to the model on the domain.
     IntervalVectorFunction function() const;
 

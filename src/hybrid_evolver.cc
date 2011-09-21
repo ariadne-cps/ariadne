@@ -466,7 +466,7 @@ _compute_flow(RealVectorFunction dynamic,
     // more accurate, and the time domain might be used explicitly for the domain
     // of the resulting set.
     Float step_size=maximum_step_size;
-    VectorIntervalFunction flow_model=integrator.flow_step(dynamic,initial_box,step_size);
+    VectorIntervalFunction flow_model=static_cast<VectorIntervalFunction>(integrator.flow_step(dynamic,initial_box,step_size));
     ARIADNE_LOG(6,"twosided_flow_model="<<flow_model<<"\n");
     IntervalVector flow_domain=flow_model.domain();
     ARIADNE_ASSERT(step_size==flow_domain[flow_domain.size()-1u].upper());

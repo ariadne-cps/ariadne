@@ -92,11 +92,11 @@ int main(int argc, const char* argv[])
     /// Guards are true when g(x) >= 0
     ContinuousPredicate finish_opening_guard(aperture>=1);
     cout << "finish_opening_guard=" << finish_opening_guard << endl << endl;
-    ContinuousPredicate start_closing_guard(aperture>=hmax-Delta);
+    ContinuousPredicate start_closing_guard(height>=hmax-Delta);
     cout << "start_closing_guard=" << start_closing_guard << endl << endl;
     ContinuousPredicate finish_closing_guard(aperture<=0);
     cout << "finish_closing_guard=" << finish_closing_guard << endl << endl;
-    ContinuousPredicate start_opening_guard(aperture<=hmin+Delta);
+    ContinuousPredicate start_opening_guard(height<=hmin+Delta);
     cout << "start_opening_guard=" << start_opening_guard << endl << endl;
 
     /// Create the invariants.
@@ -143,7 +143,8 @@ int main(int argc, const char* argv[])
     typedef GeneralHybridEvolverType::EnclosureListType EnclosureListType;
     typedef GeneralHybridEvolverType::OrbitType OrbitType;
 
-    HybridSet initial_set(opening,(height==0.0, aperture==0.0));
+    //HybridSet initial_set(opening,(height==0.0, aperture==0.0));
+    HybridSet initial_set(opening,(0.0<=height<=1.0/256, 0.0<=aperture<=1.0/256));
     std::cout << "Initial set = " << initial_set << "\n" ;
     HybridTime evolution_time(80.0,10);
     std::cout << "Evolution time = "  << evolution_time << "\n" ;

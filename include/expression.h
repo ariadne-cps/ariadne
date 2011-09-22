@@ -261,6 +261,15 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, const Expres
 //! \name Input / output operations.
 //! \related Expression
 
+template<class X> OutputStream& operator<<(std::ostream& os, const Expression<X>& f);
+template<class X> inline std::ostream& _write_comparison(std::ostream& os, const Expression<X>& f) {
+    ARIADNE_FAIL_MSG("Comparison must return a logical type."); }
+template<> inline std::ostream& _write_comparison(std::ostream& os, const Expression<Tribool>& f) {
+    Real* real_ptr=0; return os << "(" << f.cmp1(real_ptr) << symbol(f.op()) << f.cmp2(real_ptr) << ")"; }
+template<> inline std::ostream& _write_comparison(std::ostream& os, const Expression<Bool>& f) {
+    String* string_ptr=0; return os << "(" << f.cmp1(string_ptr) << symbol(f.op()) << f.cmp2(string_ptr) << ")"; }
+//FIXME: Distinguish String and Integer comparisons
+
 //! \brief Write to an output stream
 template<class X> OutputStream& operator<<(std::ostream& os, const Expression<X>& f) {
     switch(f.op()) {
@@ -292,7 +301,8 @@ template<class X> OutputStream& operator<<(std::ostream& os, const Expression<X>
             switch(f.kind()) {
                 case UNARY: return os << f.op() << "(" << f.arg() << ")";
                 case BINARY: return os << f.op() << "(" << f.arg1() << "," << f.arg2() << ")";
-                case COMPARISON: return os << "(" << f.arg1() << symbol(f.op()) << f.arg2() << ")";
+                // FIXME: Type-cast comparison arguments correctly
+                case COMPARISON: return _write_comparison(os,f); 
                 default: ARIADNE_FAIL_MSG("Cannot output expression with operator "<<f.op()<<" of kind "<<f.kind()<<"\n");
             }
     }

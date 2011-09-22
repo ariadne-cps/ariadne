@@ -281,6 +281,16 @@ void HybridBasicSet<Box>::draw(CanvasInterface& c, const Set<DiscreteLocation>& 
 }
 
 
+void HybridGridTreeSet::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axis_variables) const {
+    for(locations_const_iterator loc_iter=this->locations_begin(); loc_iter!=this->locations_end(); ++loc_iter) {
+        if(locations.empty() || locations.contains(loc_iter->first)) {
+            RealSpace const& space=this->space(loc_iter->first);
+            Projection2d projection(space.dimension(),space.index(axis_variables.x_variable()),space.index(axis_variables.y_variable()));
+            loc_iter->second.draw(canvas,projection);
+        }
+    }
+}
+
 
 HybridBoundedConstraintSet::HybridBoundedConstraintSet()
     : _sets(), _spaces()

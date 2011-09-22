@@ -640,9 +640,7 @@ class HybridGridTreeSet
     }
 
     //!
-    void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d&v) const {
-        ARIADNE_NOT_IMPLEMENTED;
-    }
+    void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d&v) const;
 
     //!
     friend inline std::ostream&

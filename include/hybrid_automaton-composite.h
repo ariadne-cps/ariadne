@@ -400,7 +400,7 @@ class HybridAutomaton
                         const ContinuousPredicate& guard,
                         EventKind kind=urgent) {
         if(kind==urgent || kind==impact) { this->_new_action(source,!guard,event,guard,kind); }
-        else if(kind==permissive) { this->_new_action(source,ContinuousPredicate(true),event,guard,kind); }
+        else if(kind==permissive) { this->_new_guard_(source,event,guard,kind); }
         else { ARIADNE_FAIL_MSG("Unhandled event kind "<<kind); }
         this->_new_update(source,event,target,reset);
     }

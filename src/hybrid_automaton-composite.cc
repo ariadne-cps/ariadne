@@ -242,6 +242,7 @@ void HybridAutomaton::_new_invariant_(DiscreteLocation location, ContinuousPredi
 {
     DiscreteMode& mode=this->_modes.value(location);
     mode._invariants.insert(event,invariant);
+    mode._kinds.insert(event,INVARIANT);
 }
 
 void HybridAutomaton::_new_guard_(DiscreteLocation location, DiscreteEvent event, ContinuousPredicate guard, EventKind kind)
@@ -601,7 +602,7 @@ HybridSpace HybridAutomaton::state_space() const {
 
 Set<DiscreteEvent> HybridAutomaton::events(DiscreteLocation location) const {
     const DiscreteMode& mode=this->mode(location);
-    return join(mode._guards.keys(),mode._targets.keys());
+    return join(join(mode._invariants.keys(),mode._guards.keys()),mode._targets.keys());
 }
 
 uint HybridAutomaton::dimension(DiscreteLocation location) const {

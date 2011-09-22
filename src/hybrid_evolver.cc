@@ -355,6 +355,7 @@ HybridEvolverBase::
 _extract_transitions(DiscreteLocation const& location,
                      HybridAutomatonInterface const& system) const
 {
+    ARIADNE_LOG(2,"HybridEvolverBase::_extract_transitions(...)\n");
     const RealVectorFunction& dynamic=system.dynamic_function(location);
 
     Map<DiscreteEvent,TransitionData> transitions;
@@ -364,17 +365,25 @@ _extract_transitions(DiscreteLocation const& location,
     {
         DiscreteEvent event=*event_iter;
         EventKind event_kind=system.event_kind(location,event);
-        RealScalarFunction guard_function=system.guard_function(location,event);
-        RealScalarFunction guard_flow_derivative_function=lie_derivative(guard_function,dynamic);
+        ARIADNE_LOG(5,"event="<<event<<", kind="<<event_kind<<"\n");
+        RealScalarFunction constraint_function;
+        if(is_activating(event_kind)) {
+            constraint_function=system.guard_function(location,event);
+        } else {
+            constraint_function=system.invariant_function(location,event);
+        }
+        ARIADNE_LOG(5,"constraint_function="<<constraint_function<<"\n");
+        RealScalarFunction constraint_flow_derivative_function=lie_derivative(constraint_function,dynamic);
         RealVectorFunction reset_function; DiscreteLocation target; RealSpace target_space;
         if(is_activating(event_kind)) {
             reset_function=system.reset_function(location,event);
             target=system.target(location,event);
             target_space=system.continuous_state_space(target);
         }
-        TransitionData transition_data={event,event_kind,guard_function,guard_flow_derivative_function,target,reset_function,target_space};
+        TransitionData transition_data={event,event_kind,constraint_function,constraint_flow_derivative_function,target,reset_function,target_space};
         transitions.insert(event,transition_data);
     }
+    ARIADNE_LOG(3,"transitions="<<transitions<<"\n");
     return transitions;
 }
 

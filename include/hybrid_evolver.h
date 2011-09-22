@@ -150,7 +150,7 @@ class HybridEvolverBase
     void set_parameters(const EvolutionParametersType& parameters);
 
     /*! \brief The class which constructs functions for the enclosures. */
-    const TaylorFunctionFactory& function_factory() const;
+    const FunctionFactoryType& function_factory() const;
     /*! \brief Set the class which constructs functions for the enclosures. */
     void set_function_factory(const FunctionFactoryType& factory);
 

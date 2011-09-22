@@ -197,7 +197,8 @@ void TestHybridEvolution::test_water_tank() const {
 
 int main(int argc, const char* argv[])
 {
-    if(argc>1) { evolver_verbosity=atoi(argv[1]); }
+    int evolver_verbosity=get_verbosity(argc,argv);
+
     GeneralHybridEvolver evolver;
     evolver.verbosity=evolver_verbosity;
     evolver.parameters().maximum_step_size=1./32;

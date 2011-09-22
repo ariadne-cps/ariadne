@@ -36,13 +36,12 @@
 #include "function.h"
 #include "procedure.h"
 
-#include "taylor_model.h"
+#include "function_model.h"
 #include "taylor_function.h"
 
 #include "box.h"
 
 #include "function_set.h"
-#include "taylor_set.h"
 #include "affine_set.h"
 
 #include "list_set.h"
@@ -61,16 +60,13 @@
 #ifdef HAVE_CAIRO_H
 #include <cairo/cairo.h>
 #endif // HAVE_CAIRO_H
+#include <boost/concept_check.hpp>
+#include <include/operators.h>
 
-#ifdef ARIADNE_UNDEFINED
 
 namespace Ariadne {
 
 static const uint verbosity = 0u;
-
-DrawingMethod DRAWING_METHOD=AFFINE_DRAW;
-DiscretisationMethod DISCRETISATION_METHOD=SUBDIVISION_DISCRETISE;
-unsigned int DRAWING_ACCURACY=1u;
 
 template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; return ss.str(); }
 
@@ -80,43 +76,94 @@ typedef Vector<Interval> IntervalVector;
 void constraint_adjoin_outer_approximation(GridTreeSet&, const Box& domain, const IntervalVectorFunction& function, const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
 
 
+namespace {
 
-
-IntervalTaylorModel& operator-=(IntervalTaylorModel& tm, const MultiIndex& a) {
-    for(IntervalTaylorModel::iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-        iter->key()-=a;
+Interval make_domain(const RealInterval& ivl) {
+    rounding_mode_t rnd=get_rounding_mode();
+    Interval dom_lower_ivl=Interval(ivl.lower());
+    Interval dom_upper_ivl=Interval(ivl.upper());
+    Float dom_lower=dom_lower_ivl.lower();
+    Float dom_upper=dom_upper_ivl.upper();
+    set_rounding_downward();
+    float flt_dom_lower=numeric_cast<double>(dom_lower);
+    while(double(flt_dom_lower)>dom_lower) {
+        flt_dom_lower-=std::numeric_limits<float>::min();
     }
-    return tm;
+    dom_lower=flt_dom_lower;
+    set_rounding_upward();
+    float flt_dom_upper=numeric_cast<double>(dom_upper);
+    while(double(flt_dom_upper)<dom_upper) {
+        flt_dom_upper+=std::numeric_limits<float>::min();
+    }
+    dom_upper=flt_dom_upper;
+    set_rounding_mode(rnd);
+    return Interval(dom_lower,dom_upper);
 }
+
+
+IntervalVectorFunctionModel make_identity(const RealBox& bx, const IntervalFunctionModelFactoryInterface& fac) {
+    IntervalVector dom(bx.dimension());
+    FloatVector errs(bx.dimension());
+
+    for(uint i=0; i!=bx.dimension(); ++i) {
+        Interval dom_lower_ivl=numeric_cast<Interval>(bx[i].lower());
+        Interval dom_upper_ivl=numeric_cast<Interval>(bx[i].upper());
+        // Convert to single-precision values
+        Float dom_lower_flt=numeric_cast<float>(bx[i].lower());
+        Float dom_upper_flt=numeric_cast<float>(bx[i].upper());
+        set_rounding_upward();
+        Float err=max( max(dom_upper_ivl.upper()-dom_upper_flt,dom_upper_flt-dom_upper_ivl.lower()),
+                       max(dom_lower_ivl.upper()-dom_lower_flt,dom_lower_flt-dom_lower_ivl.lower()) );
+        set_rounding_to_nearest();
+        dom[i]=Interval(dom_lower_flt,dom_upper_flt);
+        errs[i]=err;
+    }
+
+    IntervalVectorFunctionModel res=fac.create_identity(dom);
+    for(uint i=0; i!=bx.dimension(); ++i) {
+        res[i]=res[i]+Interval(-errs[i],+errs[i]);
+    }
+
+    return res;
+};
 
 // TODO: Make more efficient
 inline void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
     for(uint i=0; i!=r.size(); ++i) { r[i]=a[i]; }
 }
+} // namespace
+
+Pair<IntervalScalarFunctionModel,IntervalScalarFunctionModel> split(const IntervalScalarFunctionModel& f, Nat k) {
+    Pair<IntervalVector,IntervalVector> domains=split(f.domain(),k);
+    return make_pair(restrict(f,domains.first),restrict(f,domains.second));
+}
+
+Pair<IntervalVectorFunctionModel,IntervalVectorFunctionModel> split(const IntervalVectorFunctionModel& f, Nat k) {
+    Pair<IntervalVector,IntervalVector> domains=split(f.domain(),k);
+    return make_pair(restrict(f,domains.first),restrict(f,domains.second));
+}
 
 
 void Enclosure::_check() const {
     ARIADNE_ASSERT_MSG(this->_function.argument_size()==this->domain().size(),*this);
-    for(List<ScalarTaylorFunction>::const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+    for(List<IntervalScalarFunctionModel>::const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
         ARIADNE_ASSERT_MSG(iter->argument_size()==this->domain().size(),*this);
     }
-    for(List<ScalarTaylorFunction>::const_iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
+    for(List<IntervalScalarFunctionModel>::const_iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
         ARIADNE_ASSERT_MSG(iter->argument_size()==this->domain().size(),*this);
     }
 }
 
-Sweeper Enclosure::sweeper() const {
-    return this->_function.sweeper();
+IntervalFunctionModelFactoryInterface const&
+Enclosure::function_factory() const {
+    return *this->_function_factory_ptr;
 }
 
-TaylorFunctionFactory Enclosure::function_factory() const {
-    return TaylorFunctionFactory(this->sweeper());
-}
-
+/*
 // FIXME: What if solving for constraint leaves domain?
 void Enclosure::_solve_zero_constraints() {
     this->_check();
-    for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ) {
+    for(List<IntervalScalarFunctionModel>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ) {
         const Vector<Interval>& domain=this->domain();
         const IntervalTaylorModel& model=iter->model();
         const uint k=model.argument_size()-1u;
@@ -141,16 +188,16 @@ void Enclosure::_solve_zero_constraints() {
         if(is_first_order && !is_zeroth_order) {
             const Vector<Interval> new_domain=project(domain,range(0,k));
             IntervalTaylorModel substitution_model=-zeroth_order/first_order;
-            this->_function=VectorTaylorFunction(new_domain,Ariadne::substitute(this->_function.models(),k,substitution_model));
-            for(List<ScalarTaylorFunction>::iterator constraint_iter=this->_constraints.begin();
+            this->_function=this->function_factory().create(new_domain,Ariadne::substitute(this->_function.models(),k,substitution_model));
+            for(List<IntervalScalarFunctionModel>::iterator constraint_iter=this->_constraints.begin();
                     constraint_iter!=this->_constraints.end(); ++constraint_iter) {
-                ScalarTaylorFunction& constraint=*constraint_iter;
-                constraint=ScalarTaylorFunction(new_domain,Ariadne::substitute(constraint.model(),k,substitution_model));
+                IntervalScalarFunctionModel& constraint=*constraint_iter;
+                constraint=this->function_factory().create(new_domain,Ariadne::substitute(constraint.model(),k,substitution_model));
             }
-            for(List<ScalarTaylorFunction>::iterator constraint_iter=this->_equations.begin();
+            for(List<IntervalScalarFunctionModel>::iterator constraint_iter=this->_equations.begin();
                     constraint_iter!=this->_equations.end(); ++constraint_iter) {
-                ScalarTaylorFunction& constraint=*constraint_iter;
-                constraint=ScalarTaylorFunction(new_domain,Ariadne::substitute(constraint.model(),k,substitution_model));
+                IntervalScalarFunctionModel& constraint=*constraint_iter;
+                constraint=this->function_factory().create(new_domain,Ariadne::substitute(constraint.model(),k,substitution_model));
             }
             // Since we are using an std::vector, assign iterator to next element
             iter=this->_equations.erase(iter);
@@ -161,7 +208,7 @@ void Enclosure::_solve_zero_constraints() {
         }
     }
 }
-
+*/
 
 Enclosure::Enclosure()
     : _domain(), _function(), _reduced_domain(), _is_fully_reduced(true)
@@ -173,7 +220,20 @@ Enclosure* Enclosure::clone() const
     return new Enclosure(*this);
 }
 
-Enclosure::Enclosure(const Box& box, Sweeper sweeper)
+Enclosure::Enclosure(const RealBoundedConstraintSet& set, const IntervalFunctionModelFactoryInterface& factory)
+    : _function_factory_ptr(factory.clone())
+{
+    this->_function=make_identity(set.domain(),this->function_factory());
+    this->_domain=this->_function.domain();
+    for(uint i=0; i!=set.number_of_constraints(); ++i) {
+        this->new_state_constraint(set.constraint(i));
+    }
+    this->_reduced_domain=this->_domain;
+    this->_is_fully_reduced=true;
+}
+
+Enclosure::Enclosure(const Box& box, const IntervalFunctionModelFactoryInterface& factory)
+    : _function_factory_ptr(factory.clone())
 {
     // Ensure domain elements have nonempty radius
     const float min_float=std::numeric_limits<float>::min();
@@ -195,15 +255,15 @@ Enclosure::Enclosure(const Box& box, Sweeper sweeper)
     if(proper_coordinates.size()==0) { this->_domain=IntervalVector(1u,Interval(-1,+1)); }
 
 
-    this->_function=VectorTaylorFunction(box.dimension(),this->_domain,sweeper);
+    this->_function=this->function_factory().create_zeros(box.dimension(),this->_domain);
     uint j=0;
     proper_coordinates.append(box.dimension());
     for(uint i=0; i!=box.dimension(); ++i) {
         if(proper_coordinates[j]==i) {
-            this->_function[i]=ScalarTaylorFunction::coordinate(this->_domain,j,sweeper);
+            this->_function[i]=this->function_factory().create_coordinate(this->_domain,j);
             ++j;
         } else {
-            this->_function[i]=ScalarTaylorFunction::constant(this->_domain,box[i],sweeper);
+            this->_function[i]=this->function_factory().create_constant(this->_domain,box[i]);
         }
     }
     this->_reduced_domain=this->_domain;
@@ -211,20 +271,17 @@ Enclosure::Enclosure(const Box& box, Sweeper sweeper)
 }
 
 
-Enclosure::Enclosure(const Box& box, const TaylorFunctionFactory& factory)
-{
-    *this = Enclosure(box,factory.sweeper());
-}
-
-Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& function, Sweeper sweeper)
+Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& function, const IntervalFunctionModelFactoryInterface& factory)
+    : _function_factory_ptr(factory.clone())
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
     this->_domain=domain;
-    this->_function=VectorTaylorFunction(this->_domain,function,sweeper);
+    this->_function=this->function_factory().create(this->_domain,function);
     this->_reduced_domain=this->_domain;
 }
 
-Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& function, const List<RealNonlinearConstraint>& constraints, Sweeper sweeper)
+Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& function, const List<IntervalNonlinearConstraint>& constraints, const IntervalFunctionModelFactoryInterface& factory)
+    : _function_factory_ptr(factory.clone())
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
     const double min=std::numeric_limits<double>::min();
@@ -235,18 +292,18 @@ Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction&
         }
     }
 
-    this->_function=VectorTaylorFunction(this->_domain,function,sweeper);
+    this->_function=this->function_factory().create(this->_domain,function);
 
     for(uint i=0; i!=constraints.size(); ++i) {
         ARIADNE_ASSERT_MSG(domain.size()==constraints[i].function().argument_size(),"domain="<<domain<<", constraint="<<constraints[i]);
         if(constraints[i].bounds().singleton()) {
-            this->new_equality_constraint(constraints[i].function()-Real(constraints[i].bounds().midpoint()));
+            this->new_equality_constraint(constraints[i].function()-Interval(constraints[i].bounds().midpoint()));
         } else {
             if(constraints[i].bounds().lower()>-inf<Float>()) {
-                this->new_negative_constraint(Real(constraints[i].bounds().lower())-constraints[i].function());
+                this->new_negative_constraint(Interval(constraints[i].bounds().lower())-constraints[i].function());
             }
             if(constraints[i].bounds().upper()<+inf<Float>()) {
-                this->new_negative_constraint(constraints[i].function()-Real(constraints[i].bounds().upper()));
+                this->new_negative_constraint(constraints[i].function()-Interval(constraints[i].bounds().upper()));
             }
         }
     }
@@ -256,13 +313,14 @@ Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction&
 
 }
 
-Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& function, const RealNonlinearConstraint& constraint, Sweeper sweeper)
+Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& function, const IntervalNonlinearConstraint& constraint, const IntervalFunctionModelFactoryInterface& factory)
+    : _function_factory_ptr(factory.clone())
 {
-    *this=Enclosure(domain,function,make_list(constraint),sweeper);
+    *this=Enclosure(domain,function,make_list(constraint),factory);
 }
 
-Enclosure::Enclosure(const VectorTaylorFunction& taylor_function)
-    : _domain(taylor_function.domain()), _function(taylor_function), _reduced_domain(_domain), _is_fully_reduced(true)
+Enclosure::Enclosure(const IntervalVectorFunctionModel& function, const IntervalFunctionModelFactoryInterface& fac)
+    : _domain(function.domain()), _function(function), _function_factory_ptr(fac.clone()), _reduced_domain(_domain), _is_fully_reduced(true)
 {
 }
 
@@ -280,15 +338,16 @@ tribool Enclosure::satisfies(IntervalScalarFunction constraint) const
 }
 
 
-void Enclosure::substitute(uint j, ScalarTaylorFunction v)
+/*
+void Enclosure::substitute(uint j, IntervalScalarFunctionModel v)
 {
     ARIADNE_ASSERT_MSG(v.argument_size()+1u==this->number_of_parameters(),
                        "number_of_parameters="<<this->number_of_parameters()<<", variable="<<v);
                        this->_function = Ariadne::substitute(this->_function,j,v);
-                       for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+                       for(List<IntervalScalarFunctionModel>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
                            *iter = Ariadne::substitute(*iter,j,v);
                        }
-                       for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
+                       for(List<IntervalScalarFunctionModel>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
                            *iter = Ariadne::substitute(*iter,j,v);
                        }
 
@@ -298,14 +357,15 @@ void Enclosure::substitute(uint j, ScalarTaylorFunction v)
 void Enclosure::substitute(uint j, Float c)
 {
     this->_function = Ariadne::partial_evaluate(this->_function,j,c);
-    for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+    for(List<IntervalScalarFunctionModel>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
         *iter = Ariadne::partial_evaluate(*iter,j,c);
     }
-    for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
+    for(List<IntervalScalarFunctionModel>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
         *iter = Ariadne::partial_evaluate(*iter,j,c);
     }
     this->_check();
 }
+*/
 
 void Enclosure::new_parameter(Interval ivl)
 {
@@ -323,7 +383,7 @@ void Enclosure::new_parameter(Interval ivl)
 
 void Enclosure::new_variable(Interval ivl)
 {
-    ScalarTaylorFunction variable_function = ScalarTaylorFunction::identity(ivl,this->sweeper());
+    IntervalScalarFunctionModel variable_function = this->function_factory().create_identity(ivl);
     this->_domain=join(this->_domain,ivl);
     this->_reduced_domain=join(this->_reduced_domain,ivl);
     this->_function=combine(this->_function,variable_function);
@@ -339,7 +399,7 @@ void Enclosure::new_variable(Interval ivl)
 void Enclosure::apply_map(IntervalVectorFunction map)
 {
     ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", map="<<map);
-    VectorTaylorFunction& function=this->_function;
+    IntervalVectorFunctionModel& function=this->_function;
     function=compose(map,function);
     this->_check();
 }
@@ -347,11 +407,11 @@ void Enclosure::apply_map(IntervalVectorFunction map)
 void Enclosure::apply_flow(IntervalVectorFunction flow, Interval time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
-    this->_function=compose(flow,combine(this->_function,VectorTaylorFunction::identity(Vector<Interval>(1u,time),this->sweeper())));
-    for(List<ScalarTaylorFunction>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+    this->_function=compose(flow,combine(this->_function,this->function_factory().create_identity(Vector<Interval>(1u,time))));
+    for(List<IntervalScalarFunctionModel>::iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
         *iter=embed(*iter,time);
     }
-    for(List<ScalarTaylorFunction>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
+    for(List<IntervalScalarFunctionModel>::iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
         *iter=embed(*iter,time);
     }
     this->_check();
@@ -360,7 +420,7 @@ void Enclosure::apply_flow(IntervalVectorFunction flow, Interval time)
 void Enclosure::apply_flow_step(IntervalVectorFunction flow, Float time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
-    this->_function=compose(flow,join(this->_function,ScalarTaylorFunction::constant(this->_function.domain(),time,this->sweeper())));
+    this->_function=compose(flow,join(this->_function,this->function_factory().create_constant(this->_function.domain(),time)));
     this->_check();
 }
 
@@ -376,15 +436,15 @@ void Enclosure::apply_parameter_flow_step(IntervalVectorFunction flow, IntervalS
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     ARIADNE_ASSERT_MSG(time.argument_size()==this->number_of_parameters(),"number_of_parameters="<<this->number_of_parameters()<<", time="<<time);
-    this->_function=compose(flow,join(this->_function,ScalarTaylorFunction(this->_function.domain(),time,this->sweeper())));
+    this->_function=compose(flow,join(this->_function,this->function_factory().create(this->_function.domain(),time)));
     this->_check();
 }
 
-void Enclosure::new_state_constraint(RealNonlinearConstraint constraint) {
+void Enclosure::new_state_constraint(IntervalNonlinearConstraint constraint) {
     this->_is_fully_reduced=false;
     Float infty=+inf<Float>();
     Interval interval=constraint.bounds();
-    ScalarTaylorFunction composed_function=compose(constraint.function(),this->_function);
+    IntervalScalarFunctionModel composed_function=compose(constraint.function(),this->_function);
     if(interval.lower()==0.0 && interval.upper()==0.0) {
         this->new_zero_constraint(composed_function);
     } else if(interval.lower()==0.0 && interval.upper()==infty) {
@@ -396,7 +456,7 @@ void Enclosure::new_state_constraint(RealNonlinearConstraint constraint) {
     }
 }
 
-void Enclosure::new_parameter_constraint(RealNonlinearConstraint constraint) {
+void Enclosure::new_parameter_constraint(IntervalNonlinearConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->number_of_parameters());
     this->_is_fully_reduced=false;
     Float infty=+inf<Float>();
@@ -416,36 +476,35 @@ void Enclosure::new_parameter_constraint(RealNonlinearConstraint constraint) {
 void Enclosure::new_negative_constraint(IntervalScalarFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
     this->_is_fully_reduced=false;
-    this->_constraints.append(ScalarTaylorFunction(this->domain(),constraint,this->sweeper()));
+    this->_constraints.append(this->function_factory().create(this->domain(),constraint));
 }
 
 void Enclosure::new_equality_constraint(IntervalScalarFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
     this->_is_fully_reduced=false;
-    this->_equations.append(ScalarTaylorFunction(this->domain(),constraint,this->sweeper()));
+    this->_equations.append(this->function_factory().create(this->domain(),constraint));
 }
 
 void Enclosure::new_zero_constraint(IntervalScalarFunction constraint) {
     ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
     this->_is_fully_reduced=false;
-    this->_equations.append(ScalarTaylorFunction(this->domain(),constraint,this->sweeper()));
+    this->_equations.append(this->function_factory().create(this->domain(),constraint));
 }
 
 
-
-List<ScalarTaylorFunction> const&
+List<IntervalScalarFunctionModel> const&
 Enclosure::negative_constraints() const {
     return this->_constraints;
 }
 
-List<ScalarTaylorFunction> const&
+List<IntervalScalarFunctionModel> const&
 Enclosure::zero_constraints() const {
     return this->_equations;
 }
 
-List<RealNonlinearConstraint>
+List<IntervalNonlinearConstraint>
 Enclosure::constraints() const {
-    List<RealNonlinearConstraint> result;
+    List<IntervalNonlinearConstraint> result;
     for(uint i=0; i!=this->_constraints.size(); ++i) {
         result.append(this->_constraints[i]<=0.0);
     }
@@ -468,11 +527,11 @@ uint Enclosure::number_of_zero_constraints() const {
     return this->_equations.size();
 }
 
-ScalarTaylorFunction Enclosure::negative_constraint(uint i) const {
+IntervalScalarFunctionModel Enclosure::negative_constraint(uint i) const {
     return this->_constraints[i];
 }
 
-ScalarTaylorFunction Enclosure::zero_constraint(uint i) const {
+IntervalScalarFunctionModel Enclosure::zero_constraint(uint i) const {
     return this->_equations[i];
 }
 
@@ -491,16 +550,12 @@ IntervalVector Enclosure::codomain() const {
     return Box(this->_function.range()).bounding_box();
 }
 
-VectorTaylorFunction const&  Enclosure::function() const {
+IntervalVectorFunctionModel const& Enclosure::function() const {
     return this->_function;
 }
 
-VectorTaylorFunction Enclosure::taylor_function() const {
+IntervalVectorFunctionModel const& Enclosure::space_function() const {
     return this->_function;
-}
-
-RealVectorFunction Enclosure::real_function() const {
-    return RealVectorFunction(Vector< Polynomial<Real> >(this->_function.polynomial()));
 }
 
 uint Enclosure::dimension() const {
@@ -525,7 +580,7 @@ Point Enclosure::centre() const {
 
 
 tribool
-Enclosure::satisfies(RealNonlinearConstraint c) const
+Enclosure::satisfies(IntervalNonlinearConstraint c) const
 {
     Enclosure copy=*this;
     copy.new_state_constraint(c);
@@ -576,7 +631,7 @@ tribool Enclosure::subset(const Box& bx) const
 tribool Enclosure::disjoint(const Box& bx) const
 {
     ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Enclosure::subset(Box): self="<<*this<<", box="<<bx);
-    List<RealNonlinearConstraint> constraints=this->constraints();
+    List<IntervalNonlinearConstraint> constraints=this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
     contractor.reduce(this->_reduced_domain,constraints);
 
@@ -584,15 +639,15 @@ tribool Enclosure::disjoint(const Box& bx) const
 
     const Box test_domain=this->_reduced_domain;
     for(uint i=0; i!=bx.dimension(); ++i) {
-        constraints.append(ScalarTaylorFunction(this->_function[i]) >= bx[i].lower());
-        constraints.append(ScalarTaylorFunction(this->_function[i]) <= bx[i].upper());
+        constraints.append(IntervalScalarFunctionModel(this->_function[i]) >= bx[i].lower());
+        constraints.append(IntervalScalarFunctionModel(this->_function[i]) <= bx[i].upper());
     }
     return !contractor.feasible(test_domain,constraints).first;
 }
 
 void Enclosure::reduce() const
 {
-    List<RealNonlinearConstraint> constraints=this->constraints();
+    List<IntervalNonlinearConstraint> constraints=this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
     contractor.reduce(this->_reduced_domain,constraints);
 
@@ -608,7 +663,7 @@ void Enclosure::reduce() const
 /*
     // Remove redundant constraints
     uint j=0;
-    List<ScalarTaylorFunction>& mutable_constraints=const_cast<List<ScalarTaylorFunction>&>(this->_constraints);
+    List<IntervalScalarFunctionModel>& mutable_constraints=const_cast<List<IntervalScalarFunctionModel>&>(this->_constraints);
     for(uint i=0; i!=mutable_constraints.size(); ++i) {
         if(mutable_constraints[i](this->_reduced_domain).upper()<0.0) { redundant_constraints.append(i); }
         else { if(i>j) { mutable_constraints[j]=mutable_constraints[j]; } ++j; }
@@ -689,30 +744,16 @@ Enclosure::splitting_index_zeroth_order() const
     return jmax;
 }
 
+Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const IntervalVector& dom);
 
-Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const IntervalVector& dom)
+
+Matrix<Float> nonlinearities_zeroth_order(const IntervalVectorFunctionModel& f, const IntervalVector& dom)
 {
-    const uint m=f.result_size();
-    const uint n=f.argument_size();
-    VectorTaylorFunction g=restrict(f,dom);
-
-    Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
-    MultiIndex a;
-    for(uint i=0; i!=m; ++i) {
-        const IntervalTaylorModel& tm=g.model(i);
-        for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-            a=iter->key();
-            if(a.degree()>1) {
-                for(uint j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
-                }
-            }
-        }
-    }
-
-    return nonlinearities;
+    ARIADNE_ASSERT(dynamic_cast<const VectorTaylorFunction*>(f.raw_pointer()));
+    return nonlinearities_zeroth_order(dynamic_cast<const VectorTaylorFunction&>(*f.raw_pointer()),dom);
 }
 
+/*
 Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& f, const IntervalVector& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
@@ -782,8 +823,10 @@ Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface&
 
     return nonlinearities;
 }
+*/
 
-Pair<uint,double> nonlinearity_index_and_error(const VectorTaylorFunction& function, const IntervalVector domain) {
+Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunctionModel& function, const IntervalVector domain)
+{
     Matrix<Float> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
@@ -843,8 +886,6 @@ Enclosure::split_first_order() const
 
     if(jmax_in_row_imax==nonlinearities.column_size()) { ARIADNE_THROW(std::runtime_error, "split_first_order", "No need to split"); }
 
-    //std::cerr<<"nonlinearities="<<nonlinearities<<"\nsplit_on_parameter="<<jmax_in_row_imax<<"\n\n\n";
-
     return this->split(jmax_in_row_imax);
 }
 
@@ -855,7 +896,6 @@ Enclosure::split() const
     return this->split_zeroth_order();
 }
 
-
 Pair<Enclosure,Enclosure>
 Enclosure::split(uint d) const
 {
@@ -863,30 +903,30 @@ Enclosure::split(uint d) const
     Vector<Interval> subdomain1,subdomain2;
     make_lpair(subdomain1,subdomain2)=Ariadne::split(this->_function.domain(),d);
 
-    VectorTaylorFunction function1,function2;
+    IntervalVectorFunctionModel function1,function2;
     make_lpair(function1,function2)=Ariadne::split(this->_function,d);
 
     Pair<Enclosure,Enclosure>
-    result=make_pair(Enclosure(function1.domain(),function1,function1.sweeper()),
-                     Enclosure(function2.domain(),function2,function2.sweeper()));
+    result=make_pair(Enclosure(function1.domain(),function1,this->function_factory()),
+                     Enclosure(function2.domain(),function2,this->function_factory()));
     Enclosure& result1=result.first;
     Enclosure& result2=result.second;
 
-    ScalarTaylorFunction constraint1,constraint2;
-    for(List<ScalarTaylorFunction>::const_iterator iter=this->_constraints.begin();
+    IntervalScalarFunctionModel constraint1,constraint2;
+    for(List<IntervalScalarFunctionModel>::const_iterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
-        const ScalarTaylorFunction& constraint=*iter;
+        const IntervalScalarFunctionModel& constraint=*iter;
         make_lpair(constraint1,constraint2)=Ariadne::split(constraint,d);
         result1._constraints.append(constraint1);
         result2._constraints.append(constraint2);
     }
 
-    ScalarTaylorFunction equation1,equation2;
-    for(List<ScalarTaylorFunction>::const_iterator iter=this->_equations.begin();
+    IntervalScalarFunctionModel equation1,equation2;
+    for(List<IntervalScalarFunctionModel>::const_iterator iter=this->_equations.begin();
         iter!=this->_equations.end(); ++iter)
     {
-        const ScalarTaylorFunction& equation=*iter;
+        const IntervalScalarFunctionModel& equation=*iter;
         make_lpair(equation1,equation1)=Ariadne::split(equation,d);
         result1._equations.append(equation1);
         result2._equations.append(equation1);
@@ -900,13 +940,9 @@ Enclosure::split(uint d) const
 
 
 
-RealScalarFunction make_function(const ScalarTaylorFunction& stf) {
-    return RealScalarFunction(stf.polynomial())+Real(Interval(-stf.error(),+stf.error()));
-}
-
-void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const VectorTaylorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
+void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const IntervalVectorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
 {
-    Sweeper sweeper = fg.sweeper();
+    TaylorFunctionFactory taylor_factory(ThresholdSweeper(1e-8));
 
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
@@ -945,14 +981,14 @@ void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box&
 
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
-        ScalarTaylorFunction xg=ScalarTaylorFunction::zero(d,sweeper);
+        ScalarTaylorFunction xg=taylor_factory.create_zero(d);
         Interval cnst=0.0;
         for(uint j=0; j!=n; ++j) {
-            xg = xg - (x[j]-x[n+j])*ScalarTaylorFunction(d,fg[j],sweeper);
+            xg = xg - (x[j]-x[n+j])*taylor_factory.create(d,fg[j]);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(uint i=0; i!=m; ++i) {
-            xg = xg - (x[2*n+i]-x[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i,sweeper);
+            xg = xg - (x[2*n+i]-x[2*n+m+i])*taylor_factory.create_coordinate(d,i);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
         xg = (cnst) + xg;
@@ -1043,7 +1079,7 @@ double IMAGE_MULTIPLE_OF_CELL = 1;
 typedef Procedure<Interval> IntervalProcedure;
 
 // Adjoin an over-approximation to the solution of $f(dom)$ such that $g(D) in C$ to the paving p, looking only at solutions in b.
-void constraint_adjoin_outer_approximation_to(GridTreeSet& paving, const Box& domain, const VectorTaylorFunction& f, const VectorTaylorFunction& g, const Box& codomain, const GridCell& cell, int max_dpth, uint splt, const List<IntervalProcedure>& procedures)
+void constraint_adjoin_outer_approximation_to(GridTreeSet& paving, const Box& domain, const IntervalVectorFunctionModel& f, const IntervalVectorFunctionModel& g, const Box& codomain, const GridCell& cell, int max_dpth, uint splt, const List<IntervalProcedure>& procedures)
 {
     const uint m=domain.size();
     const uint nf=f.result_size();
@@ -1173,19 +1209,20 @@ void Enclosure::adjoin_outer_approximation_to(GridTreeSet& paving, int depth) co
     }
 }
 
+void
+_subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const Enclosure& set, const IntervalVector& subdomain,
+                                           uint depth, const FloatVector& errors, uint splittings);
+
 void Enclosure::subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
 {
     Vector<Float> errors(paving.dimension());
     for(uint i=0; i!=errors.size(); ++i) {
         errors[i]=paving.grid().lengths()[i]/(1<<depth);
     }
-    this->_subdivision_adjoin_outer_approximation_to(paving,this->domain(),depth,errors);
+    _subdivision_adjoin_outer_approximation_to(paving,*this,this->domain(),depth,errors,0u);
 }
 
-IntervalProcedure make_procedure(const IntervalScalarFunctionInterface& f) {
-    Formula<Interval> e=f.evaluate(Formula<Interval>::identity(f.argument_size()));
-    return Procedure<Interval>(e);
-}
+IntervalProcedure make_procedure(const IntervalScalarFunctionInterface& f);
 
 void Enclosure::constraint_adjoin_outer_approximation_to(GridTreeSet& p, int acc) const
 {
@@ -1193,15 +1230,15 @@ void Enclosure::constraint_adjoin_outer_approximation_to(GridTreeSet& p, int acc
     ARIADNE_LOG(7,"  set="<<*this<<", grid="<<p.grid()<<", depth="<<acc<<"\n");
     ARIADNE_ASSERT(p.dimension()==this->dimension());
     const Box& d=this->domain();
-    const VectorTaylorFunction& f=this->function();
+    const IntervalVectorFunctionModel& f=this->function();
 
-    VectorTaylorFunction g(this->_constraints.size()+this->_equations.size(),d,this->sweeper());
+    IntervalVectorFunctionModel g=this->function_factory().create_zeros(this->_constraints.size()+this->_equations.size(),d);
     uint i=0;
-    for(List<ScalarTaylorFunction>::const_iterator citer=this->_constraints.begin(); citer!=this->_constraints.end(); ++citer) {
+    for(List<IntervalScalarFunctionModel>::const_iterator citer=this->_constraints.begin(); citer!=this->_constraints.end(); ++citer) {
         g.set(i,*citer);
         ++i;
     }
-    for(List<ScalarTaylorFunction>::const_iterator eiter=this->_equations.begin(); eiter!=this->_equations.end(); ++eiter) {
+    for(List<IntervalScalarFunctionModel>::const_iterator eiter=this->_equations.begin(); eiter!=this->_equations.end(); ++eiter) {
         g.set(i,*eiter);
         ++i;
     }
@@ -1227,11 +1264,11 @@ void Enclosure::optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& p,
 {
     ARIADNE_ASSERT(p.dimension()==this->dimension());
     const Box& d=this->domain();
-    VectorTaylorFunction f=this->function();
+    IntervalVectorFunctionModel f=this->function();
 
-    VectorTaylorFunction g(this->_constraints.size(),d,this->sweeper());
+    IntervalVectorFunctionModel g=this->function_factory().create_zeros(this->_constraints.size(),d);
     uint i=0;
-    for(List<ScalarTaylorFunction>::const_iterator citer=this->_constraints.begin(); citer!=this->_constraints.end(); ++citer) {
+    for(List<IntervalScalarFunctionModel>::const_iterator citer=this->_constraints.begin(); citer!=this->_constraints.end(); ++citer) {
         g.set(i,*citer);
         ++i;
     }
@@ -1243,7 +1280,7 @@ void Enclosure::optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& p,
     const uint l=(d.size()+f.result_size()+g.result_size())*2;
     Point x(l); for(uint k=0; k!=l; ++k) { x[k]=1.0/l; }
 
-    VectorTaylorFunction fg=join(f,g);
+    IntervalVectorFunctionModel fg=join(f,g);
 
     Ariadne::optimal_constraint_adjoin_outer_approximation_to(p,d,fg,c,b,x,y,e);
 
@@ -1276,7 +1313,7 @@ void Enclosure::affine_adjoin_outer_approximation_to(GridTreeSet& paving, int de
 
     const double max_error=BASIC_ERROR/(1<<depth);
 
-    VectorTaylorFunction fg(this->dimension()+this->number_of_constraints(),this->domain(),this->sweeper());
+    IntervalVectorFunctionModel fg=this->function_factory().create_zeros(this->dimension()+this->number_of_constraints(),this->domain());
     for(uint i=0; i!=this->dimension(); ++i) { fg[i]=this->_function[i]; }
     for(uint i=0; i!=this->_constraints.size(); ++i) { fg[i+this->dimension()]=this->_constraints[i]; }
     for(uint i=0; i!=this->_equations.size(); ++i) { fg[i+this->dimension()+this->_constraints.size()]=this->_equations[i]; }
@@ -1326,7 +1363,7 @@ recondition()
     List<uint> large_error_indices;
 
     for(uint i=0; i!=this->_function.result_size(); ++i) {
-        Float error=this->_function[i].model().error();
+        Float error=this->_function.get(i).error();
         if(error > MAXIMUM_ERROR) {
             large_error_indices.append(i);
         }
@@ -1334,7 +1371,7 @@ recondition()
 
     IntervalVector error_domains(large_error_indices.size());
     for(uint i=0; i!=large_error_indices.size(); ++i) {
-        Float error=this->_function[large_error_indices[i]].model().error();
+        Float error=this->_function.get(large_error_indices[i]).error();
         error_domains[i]=Interval(-error,+error);
     }
     error_domains=IntervalVector(large_error_indices.size(),Interval(-1,+1));
@@ -1351,10 +1388,10 @@ recondition()
     }
 
     for(uint i=0; i!=large_error_indices.size(); ++i) {
-        Float error=this->_function[large_error_indices[i]].model().error();
+        Float error=this->_function.get(large_error_indices[i]).error();
         if(error > MAXIMUM_ERROR) {
             this->_function[i].set_error(0.0);
-            this->_function[i] = this->_function[i] + ScalarTaylorFunction::coordinate(this->_domain,k,this->sweeper())*error;
+            this->_function[i] = this->_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*Interval(error);
             ++k;
         }
     }
@@ -1372,17 +1409,17 @@ void Enclosure::restrict(const Vector<Interval>& subdomain)
     result._domain=subdomain;
     result._reduced_domain=Ariadne::intersection(static_cast<const Vector<Interval>&>(result._reduced_domain),subdomain);
     result._function=Ariadne::restrict(result._function,subdomain);
-    ScalarTaylorFunction new_constraint;
-    for(List<ScalarTaylorFunction>::iterator iter=result._constraints.begin();
+    IntervalScalarFunctionModel new_constraint;
+    for(List<IntervalScalarFunctionModel>::iterator iter=result._constraints.begin();
         iter!=result._constraints.end(); ++iter)
     {
-        ScalarTaylorFunction& constraint=*iter;
+        IntervalScalarFunctionModel& constraint=*iter;
         constraint=Ariadne::restrict(constraint,subdomain);
     }
-    for(List<ScalarTaylorFunction>::iterator iter=result._equations.begin();
+    for(List<IntervalScalarFunctionModel>::iterator iter=result._equations.begin();
         iter!=result._equations.end(); ++iter)
     {
-        ScalarTaylorFunction& equation=*iter;
+        IntervalScalarFunctionModel& equation=*iter;
         equation=Ariadne::restrict(equation,subdomain);
     }
     this->reduce();
@@ -1396,29 +1433,30 @@ Enclosure Enclosure::restriction(const Vector<Interval>& subdomain) const
 }
 
 
-void Enclosure::draw(CanvasInterface& canvas) const {
+void Enclosure::draw(CanvasInterface& canvas, const Projection2d& projection) const {
     switch(DRAWING_METHOD) {
         case BOX_DRAW:
-            this->box_draw(canvas);
+            this->box_draw(canvas,projection);
             break;
         case AFFINE_DRAW:
             //if(this->number_of_zero_constraints()!=0) { this->box_draw(canvas); }
-            this->affine_draw(canvas,DRAWING_ACCURACY);
+            this->affine_draw(canvas,projection,DRAWING_ACCURACY);
             break;
         case GRID_DRAW:
-            this->grid_draw(canvas);
+            this->grid_draw(canvas,projection);
             break;
         default:
             ARIADNE_WARN("Unknown drawing method\n");
     }
 }
 
-void Enclosure::box_draw(CanvasInterface& canvas) const {
+void Enclosure::box_draw(CanvasInterface& canvas, const Projection2d& projection) const {
     this->reduce();
-    Box(this->_function(this->_reduced_domain)).draw(canvas);
+    Box(this->_function(this->_reduced_domain)).draw(canvas,projection);
 }
 
-void Enclosure::affine_draw(CanvasInterface& canvas, uint accuracy) const {
+
+void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& projection, uint accuracy) const {
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->_reduced_domain,this->_domain),*this);
 
     // Bound the maximum number of splittings allowed to draw a particular set.
@@ -1435,7 +1473,7 @@ void Enclosure::affine_draw(CanvasInterface& canvas, uint accuracy) const {
         return;
     }
 
-    VectorTaylorFunction fg(this->dimension()+this->number_of_constraints(),this->domain(),this->sweeper());
+    IntervalVectorFunctionModel fg=this->function_factory().create_zeros(this->dimension()+this->number_of_constraints(),this->domain());
     for(uint i=0; i!=this->dimension(); ++i) { fg[i]=this->_function[i]; }
     for(uint i=0; i!=this->_constraints.size(); ++i) { fg[i+this->dimension()]=this->_constraints[i]; }
     for(uint i=0; i!=this->_equations.size(); ++i) { fg[i+this->dimension()+this->_constraints.size()]=this->_equations[i]; }
@@ -1470,27 +1508,19 @@ void Enclosure::affine_draw(CanvasInterface& canvas, uint accuracy) const {
 
     for(uint n=0; n!=subdomains.size(); ++n) {
         try {
-            this->restriction(subdomains[n]).affine_over_approximation().draw(canvas);
+            this->restriction(subdomains[n]).affine_over_approximation().draw(canvas,projection);
         } catch(...) {
-            this->restriction(subdomains[n]).box_draw(canvas);
+            this->restriction(subdomains[n]).box_draw(canvas,projection);
         }
     }
 };
 
 
-void Enclosure::grid_draw(CanvasInterface& canvas, uint accuracy) const {
+void Enclosure::grid_draw(CanvasInterface& canvas, const Projection2d& projection, uint accuracy) const {
     // TODO: Project to grid first
-    this->outer_approximation(Grid(this->dimension()),accuracy).draw(canvas);
+    this->outer_approximation(Grid(this->dimension()),accuracy).draw(canvas,projection);
 }
 
-Map<List<DiscreteEvent>,RealScalarFunction> pretty(const Map<List<DiscreteEvent>,ScalarTaylorFunction>& constraints) {
-    Map<List<DiscreteEvent>,RealScalarFunction> result;
-    for(Map<List<DiscreteEvent>,ScalarTaylorFunction>::const_iterator iter=constraints.begin();
-    iter!=constraints.end(); ++iter) {
-        result.insert(iter->first,iter->second.real_function());
-    }
-    return result;
-}
 
 
 
@@ -1505,6 +1535,10 @@ template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
 template<class T> std::ostream& operator<<(std::ostream& os, const Representation< List<T> >& repr) {
     const List<T>& lst=*repr.pointer; os << "["; for(uint i=0; i!=lst.size(); ++i) { if(i!=0) { os << ","; } lst[i].repr(os); } os << "]"; return os; }
 
+const IntervalScalarFunctionModel& repr(const IntervalScalarFunctionModel& f) { return f; }
+const IntervalVectorFunctionModel& repr(const IntervalVectorFunctionModel& f) { return f; }
+const List<IntervalScalarFunctionModel>& repr(const List<IntervalScalarFunctionModel>& f) { return f; }
+
 std::ostream& Enclosure::write(std::ostream& os) const {
     const bool LONG_FORMAT=false;
 
@@ -1512,7 +1546,7 @@ std::ostream& Enclosure::write(std::ostream& os) const {
         os << "Enclosure"
            << "(\n  domain=" << this->domain()
            << ",\n  range=" << this->bounding_box()
-           << ",\n  function=" << this->taylor_function()
+           << ",\n  function=" << this->function()
            << ",\n  negative_constraints=" << this->_constraints
            << ",\n  zero_constraints=" << this->_equations
            << "\n)\n";
@@ -1520,7 +1554,7 @@ std::ostream& Enclosure::write(std::ostream& os) const {
         os << "Enclosure"
            << "( domain=" << this->domain()
            << ", range=" << this->bounding_box()
-           << ", function=" << repr(this->taylor_function())
+           << ", function=" << repr(this->function())
            << ", negative_constraints=" << repr(this->_constraints)
            << ", zero_constraints=" << repr(this->_equations)
            << ")";
@@ -1530,55 +1564,61 @@ std::ostream& Enclosure::write(std::ostream& os) const {
 
 
 
-void Enclosure::
-_subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const IntervalVector& subdomain,
-                                           uint depth, const FloatVector& errors) const
+void
+_subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const Enclosure& set, const IntervalVector& subdomain,
+                                           uint depth, const FloatVector& errors, uint splittings)
 {
     // How small an over-approximating box needs to be relative to the cell size
     static const double RELATIVE_SMALLNESS=0.5;
+    static const uint MAXIMUM_SPLITTINGS = 18;
 
-    typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
+    //std::cerr<<"subdomain="<<subdomain<<"; "<<"depth="<<depth<<" splittings="<<splittings<<"\n";
+    typedef List<IntervalScalarFunctionModel>::const_iterator const_iterator;
 
-    for(const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
-        const ScalarTaylorFunction& constraint=*iter;;
+    for(const_iterator iter=set.negative_constraints().begin(); iter!=set.negative_constraints().end(); ++iter) {
+        const IntervalScalarFunctionModel& constraint=*iter;;
         Interval constraint_range=constraint.evaluate(subdomain);
         if(constraint_range.lower() > 0.0) {
             return;
         }
     }
-    for(const_iterator iter=this->_equations.begin(); iter!=this->_equations.end(); ++iter) {
-        const ScalarTaylorFunction& constraint=*iter;
+    for(const_iterator iter=set.zero_constraints().begin(); iter!=set.zero_constraints().end(); ++iter) {
+        const IntervalScalarFunctionModel& constraint=*iter;
         Interval constraint_range=constraint.evaluate(subdomain);
         if(constraint_range.lower() > 0.0 || constraint_range.upper() < 0.0 ) {
             return;
         }
     }
 
-    Box range=evaluate(this->_function,subdomain);
+    Box range=evaluate(set.function(),subdomain);
+
+    Array<Float> radii(set.dimension());
+    for(uint i=0; i!=radii.size(); ++i) { radii[i]=range[i].radius()-set.function()[i].error(); }
     bool small=true;
     for(uint i=0; i!=range.size(); ++i) {
-        if(range[i].radius()>errors[i]*RELATIVE_SMALLNESS) {
+        if(radii[i]>errors[i]*RELATIVE_SMALLNESS) {
             small=false;
             break;
         }
     }
 
-    if(small) {
+    if(small || splittings==MAXIMUM_SPLITTINGS) {
         gts.adjoin_outer_approximation(range,depth);
     } else {
         Vector<Interval> subdomain1,subdomain2;
         make_lpair(subdomain1,subdomain2)=Ariadne::split(subdomain);
-        this->_subdivision_adjoin_outer_approximation_to(gts,subdomain1,depth,errors);
-        this->_subdivision_adjoin_outer_approximation_to(gts,subdomain2,depth,errors);
+        _subdivision_adjoin_outer_approximation_to(gts,set,subdomain1,depth,errors,splittings+1u);
+        _subdivision_adjoin_outer_approximation_to(gts,set,subdomain2,depth,errors,splittings+1u);
     }
 }
 
 
+/*
 AffineSet
 Enclosure::affine_approximation() const
 {
     this->_check();
-    typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
+    typedef List<IntervalScalarFunctionModel>::const_iterator const_iterator;
 
     const uint nx=this->dimension();
     const uint np=this->number_of_parameters();
@@ -1591,7 +1631,7 @@ Enclosure::affine_approximation() const
     Vector<Float> h(nx);
     Matrix<Float> G(nx,np);
     for(uint i=0; i!=nx; ++i) {
-        ScalarTaylorFunction component=set._function[i];
+        IntervalScalarFunctionModel component=set._function[i];
         h[i]=component.model().value();
         for(uint j=0; j!=np; ++j) {
             G[i][j]=component.model().gradient(j);
@@ -1604,7 +1644,7 @@ Enclosure::affine_approximation() const
 
     for(const_iterator iter=set._constraints.begin();
             iter!=set._constraints.end(); ++iter) {
-        const ScalarTaylorFunction& constraint=*iter;
+        const IntervalScalarFunctionModel& constraint=*iter;
         b=-constraint.model().value();
         for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
         result.new_inequality_constraint(a,b);
@@ -1612,14 +1652,16 @@ Enclosure::affine_approximation() const
 
     for(const_iterator iter=set._equations.begin();
             iter!=set._equations.end(); ++iter) {
-        const ScalarTaylorFunction& constraint=*iter;
+        const IntervalScalarFunctionModel& constraint=*iter;
         b=-constraint.model().value();
         for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
         result.new_equality_constraint(a,b);
     }
     return result;
 }
+*/
 
+/*
 struct IntervalAffineModel {
     Float _c; Vector<Float> _g; Float _e;
     IntervalAffineModel(Float c, const Vector<Float>& g, Float e) : _c(c), _g(g), _e(e) { }
@@ -1640,6 +1682,8 @@ IntervalAffineModel _affine_model(const IntervalTaylorModel& tm) {
     set_rounding_to_nearest();
     return result;
 }
+*/
+
 
 AffineSet
 Enclosure::affine_over_approximation() const
@@ -1653,28 +1697,32 @@ Enclosure::affine_over_approximation() const
     const uint np=this->number_of_parameters();
 
     AffineSweeper affine_sweeper;
-    Enclosure set(*this);
+    VectorTaylorFunction function=dynamic_cast<const VectorTaylorFunction&>(this->_function.reference());
+    List<ScalarTaylorFunction> constraints, equations;
+    for(uint i=0; i!=nc; ++i) { constraints.append(dynamic_cast<const ScalarTaylorFunction&>(this->_constraints[i].reference())); }
+    for(uint i=0; i!=neq; ++i) { equations.append(dynamic_cast<const ScalarTaylorFunction&>(this->_equations[i].reference())); }
+
     for(uint i=0; i!=nx; ++i) {
-        const_cast<IntervalTaylorModel&>(set._function.models()[i]).sweep(affine_sweeper);
+        const_cast<IntervalTaylorModel&>(function.models()[i]).sweep(affine_sweeper);
     }
     for(uint i=0; i!=nc; ++i) {
-        const_cast<IntervalTaylorModel&>(set._constraints[i].model()).sweep(affine_sweeper);
+        const_cast<IntervalTaylorModel&>(constraints[i].model()).sweep(affine_sweeper);
     }
     for(uint i=0; i!=neq; ++i) {
-        const_cast<IntervalTaylorModel&>(set._equations[i].model()).sweep(affine_sweeper);
+        const_cast<IntervalTaylorModel&>(equations[i].model()).sweep(affine_sweeper);
         // Code below introduces artificial error into equality constraints to make them inequality constraints
         //const_cast<IntervalTaylorModel&>(set._equations[i].model()).error()+=std::numeric_limits<float>::epsilon();
     }
 
     // Compute the number of values with a nonzero error
     uint nerr=0;
-    for(uint i=0; i!=nx; ++i) { if(set.function()[i].error()>0.0) { ++nerr; } }
+    for(uint i=0; i!=nx; ++i) { if(function[i].error()>0.0) { ++nerr; } }
 
     Vector<Float> h(nx);
     Matrix<Float> G(nx,np+nerr);
     uint ierr=0; // The index where the error bound should go
     for(uint i=0; i!=nx; ++i) {
-        ScalarTaylorFunction component=set._function[i];
+        ScalarTaylorFunction component=function[i];
         h[i]=component.model().value();
         for(uint j=0; j!=np; ++j) {
             G[i][j]=component.model().gradient(j);
@@ -1690,16 +1738,16 @@ Enclosure::affine_over_approximation() const
     Vector<Float> a(np+nerr, 0.0);
     Float b;
 
-    for(const_iterator iter=set._constraints.begin();
-            iter!=set._constraints.end(); ++iter) {
+    for(const_iterator iter=constraints.begin();
+            iter!=constraints.end(); ++iter) {
         const ScalarTaylorFunction& constraint=*iter;
         b=sub_up(constraint.model().error(),constraint.model().value());
         for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
         result.new_inequality_constraint(a,b);
     }
 
-    for(const_iterator iter=set._equations.begin();
-            iter!=set._equations.end(); ++iter) {
+    for(const_iterator iter=equations.begin();
+            iter!=equations.end(); ++iter) {
         const ScalarTaylorFunction& constraint=*iter;
         for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
         if(constraint.model().error()==0.0) {
@@ -1717,12 +1765,13 @@ Enclosure::affine_over_approximation() const
     return result;
 }
 
+
 Enclosure product(const Enclosure& set, const Interval& ivl) {
-    typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
+    typedef List<IntervalScalarFunctionModel>::const_iterator const_iterator;
 
-    VectorTaylorFunction new_function=combine(set.taylor_function(),ScalarTaylorFunction::identity(ivl,set.sweeper()));
+    IntervalVectorFunctionModel new_function=combine(set.function(),set.function_factory().create_identity(ivl));
 
-    Enclosure result(new_function.domain(),new_function,new_function.sweeper());
+    Enclosure result(new_function.domain(),new_function,set.function_factory());
     for(const_iterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
         result._constraints.append(embed(*iter,ivl));
     }
@@ -1734,15 +1783,15 @@ Enclosure product(const Enclosure& set, const Interval& ivl) {
 }
 
 Enclosure product(const Enclosure& set, const Box& bx) {
-    return product(set,Enclosure(bx,set.sweeper()));
+    return product(set,Enclosure(bx,set.function_factory()));
 }
 
 Enclosure product(const Enclosure& set1, const Enclosure& set2) {
-    typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
+    typedef List<IntervalScalarFunctionModel>::const_iterator const_iterator;
 
-    VectorTaylorFunction new_function=combine(set1.taylor_function(),set2.taylor_function());
+    IntervalVectorFunctionModel new_function=combine(set1.function(),set2.function());
 
-    Enclosure result(new_function.domain(),new_function,new_function.sweeper());
+    Enclosure result(new_function.domain(),new_function,set1.function_factory());
     for(const_iterator iter=set1._constraints.begin(); iter!=set1._constraints.end(); ++iter) {
         result._constraints.append(embed(*iter,set2.domain()));
     }
@@ -1765,14 +1814,13 @@ Enclosure apply(const IntervalVectorFunction& function, const Enclosure& set) {
     return result;
 }
 
-Enclosure unchecked_apply(const VectorTaylorFunction& function, const Enclosure& set) {
+Enclosure unchecked_apply(const IntervalVectorFunctionModel& function, const Enclosure& set) {
     Enclosure result(set);
-    const VectorTaylorFunction& space_function=result.function();
-    const_cast<VectorTaylorFunction&>(space_function)=Ariadne::unchecked_compose(function,set.function());
+    const IntervalVectorFunctionModel& space_function=result.function();
+    const_cast<IntervalVectorFunctionModel&>(space_function)=Ariadne::unchecked_compose(function,set.function());
     return result;
 }
 
 } // namespace Ariadne
 
 
-#endif /* ARIADNE_UNDEFINED */

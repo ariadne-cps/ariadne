@@ -40,6 +40,9 @@
 #include "box.h"
 #include <boost/concept_check.hpp>
 
+
+#ifndef ARIADNE_ENCLOSURE_H
+
 namespace Ariadne {
 
 //! \related TaylorConstrainedImageSet \brief The possible types of method used to draw a nonlinear set.
@@ -56,6 +59,14 @@ enum DiscretisationMethod { SUBDIVISION_DISCRETISE, AFFINE_DISCRETISE, CONSTRAIN
 //! \related TaylorConstrainedImageSet \brief The type of method currently used to discretise a nonlinear set.
 //! HACK: May be replaced by more advanced functionality in the future.
 extern DiscretisationMethod DISCRETISATION_METHOD;
+
+} // namespace Ariadne
+
+#endif
+
+
+
+namespace Ariadne {
 
 class Float;
 class Interval;

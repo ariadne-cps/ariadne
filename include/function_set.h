@@ -42,7 +42,6 @@
 #include "graphics_interface.h"
 
 #include "box.h"
-#include "taylor_function.h"
 
 namespace Ariadne {
 

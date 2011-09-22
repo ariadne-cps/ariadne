@@ -606,11 +606,14 @@ compose(const RealScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
 std::ostream&
 ScalarTaylorFunction::write(std::ostream& os) const
 {
+/*
     os << "ScalarTaylorFunction"<< this->domain()
        << "(" << midpoint(this->polynomial());
     if(this->error()>0.0) { os << "+/-" << this->error(); }
     os <<  ")";
     return os;
+*/
+    return os << "ScalarTaylorFunction(d=" << this->domain() << ", p~(" << midpoint(this->polynomial()) << "), e=" << this->error() << ", m=" << this->model() << ")";
 }
 
 std::ostream&
@@ -751,7 +754,6 @@ jacobian(const Vector<ScalarTaylorFunction>& tv, const Vector<Interval>& x)
     }
     Vector< Expansion<Float> > p=expansion(tv);
     Vector< Differential<Interval> > d=evaluate(p,s);
-    //std::cerr<<"  x="<<x<<"\n  p="<<p<<"\n"<<"  s="<<s<<"\n  p.s="<<d<<"\n  J="<<d.jacobian()<<"\n"<<std::endl;
     return d.jacobian();
 }
 

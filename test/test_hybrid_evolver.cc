@@ -130,7 +130,6 @@ void TestSimpleHybridEvolver::test_flow() const {
     RealSpace space=automaton.continuous_state_space(q);
     HybridBox initial(q,space,Box(2, -0.125,0.125, -0.125,0.125));
     HybridTime time(2.5,3);
-
     evolver_ptr->parameters().maximum_step_size=1.0;
 
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(automaton,initial,time,UPPER_SEMANTICS);

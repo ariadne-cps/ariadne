@@ -852,11 +852,6 @@ Vector< Polynomial<Interval> > polynomial(const VectorTaylorFunction& tfn);
 List< Polynomial<Interval> > polynomials(const List<ScalarTaylorFunction>& tfns);
 
 // Sanitised output
-template<class T, class D=Void> struct Representation;
-template<class T, class D> struct Representation { const T* pointer; D data; };
-template<class T> struct Representation<T> { const T* pointer; };
-template<class T> Representation<T> repr(const T& t) { Representation<T> r={&t}; return r; }
-template<class T, class D> Representation<T,D> repr(const T& t, const D& d) { Representation<T,D> r={&t,d}; return r; }
 std::ostream& operator<<(std::ostream&, const Representation<ScalarTaylorFunction>&);
 std::ostream& operator<<(std::ostream&, const Representation<VectorTaylorFunction>&);
 template<class F> struct ModelsRepresentation { const F* pointer; double threshold; };

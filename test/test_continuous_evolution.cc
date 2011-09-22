@@ -29,7 +29,7 @@
 #include "matrix.h"
 #include "function.h"
 #include "taylor_function.h"
-#include "taylor_set.h"
+#include "enclosure.h"
 #include "box.h"
 #include "list_set.h"
 #include "evolution_parameters.h"
@@ -88,7 +88,7 @@ void TestContinuousEvolution::test() const
 {
     // cout << __PRETTY_FUNCTION__ << endl;
 
-    typedef TaylorConstrainedImageSet EnclosureType;
+    typedef Enclosure EnclosureType;
 
     // Set up the evolution parameters and grid
     Float time(3.0);
@@ -118,18 +118,18 @@ void TestContinuousEvolution::test() const
     RealVectorFunction vdp((x,mu*(1-x*x)*xp-x));
 
     VectorField vanderpol(vdp);
+    ARIADNE_TEST_PRINT(vanderpol);
 
 
     // Over-approximate the initial set by a grid cell
-    EnclosureType initial_set(initial_box,Sweeper());
-    // cout << "initial_set=" << initial_set << endl << endl;
+    TaylorFunctionFactory function_factory(ThresholdSweeper(1e-10));
+    EnclosureType initial_set(initial_box,function_factory);
+    ARIADNE_TEST_PRINT(initial_set);
 
     Semantics semantics=UPPER_SEMANTICS;
 
     // Compute the reachable sets
-    ListSet<EnclosureType> evolve_set,reach_set;
     Orbit<EnclosureType> orbit = evolver.orbit(vanderpol,initial_set,time,semantics);
-
     ARIADNE_TEST_PRINT(orbit);
 
     // Print the intial, evolve and reach sets
@@ -152,7 +152,7 @@ void TestContinuousEvolution::failure_test() const
 
     // cout << __PRETTY_FUNCTION__ << endl;
 
-    typedef TaylorConstrainedImageSet EnclosureType;
+    typedef Enclosure EnclosureType;
 
     // Set up the evolution parameters and grid
     Float time(0.5);
@@ -178,7 +178,8 @@ void TestContinuousEvolution::failure_test() const
     VectorUserFunction<FailOne> failone(p);
     VectorField failone_vf(failone);
 
-    EnclosureType initial_set(initial_box,Sweeper());
+    TaylorFunctionFactory function_factory(ThresholdSweeper(1e-10));
+    EnclosureType initial_set(initial_box,function_factory);
     // cout << "initial_set=" << initial_set << endl << endl;
 
     Semantics semantics=UPPER_SEMANTICS;
@@ -209,7 +210,7 @@ void TestContinuousEvolution::failure_test() const
     VectorField failtwo_vf(failtwo);
 
     Box initial_box2(3, 0.0,0.0, 1.0,1.0, 1.0,1.0);
-    initial_set = EnclosureType(initial_box2,Sweeper());
+    initial_set = EnclosureType(initial_box2,function_factory);
 
     time = 1.5;
 

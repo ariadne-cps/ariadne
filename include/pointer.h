@@ -160,7 +160,7 @@ class clone_on_copy_ptr
     mutable T* _ptr;
   public:
     ~clone_on_copy_ptr() { delete _ptr; _ptr=0; }
-    clone_on_copy_ptr() : _ptr() { }
+    clone_on_copy_ptr() : _ptr(0) { }
     template<class S> clone_on_copy_ptr(S* pointer)
         : _ptr(pointer) { }
     clone_on_copy_ptr(const clone_on_copy_ptr<T>& other)

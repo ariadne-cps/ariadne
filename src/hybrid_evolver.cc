@@ -21,14 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <typeinfo>
 
 #include "numeric.h"
 #include "vector.h"
 #include "polynomial.h"
 #include "function.h"
 #include "function_model.h"
-#include "taylor_model.h"
-#include "taylor_function.h"
 #include "grid_set.h"
 #include "hybrid_time.h"
 #include "hybrid_automaton_interface.h"
@@ -272,11 +271,10 @@ HybridEvolverBase::set_function_factory(const FunctionFactoryType& factory)
     this->_function_factory_ptr=shared_ptr<FunctionFactoryType>(factory.clone());
 }
 
-//const HybridEvolverBase::FunctionFactoryType&
-const TaylorFunctionFactory&
+const HybridEvolverBase::FunctionFactoryType&
 HybridEvolverBase::function_factory() const
 {
-    return dynamic_cast<const TaylorFunctionFactory&>(*this->_function_factory_ptr);
+    return*this->_function_factory_ptr;
 }
 
 HybridEvolverBase::EnclosureType
@@ -784,6 +782,7 @@ _apply_guard(List<HybridEnclosure>& sets,
              const CrossingData crossing_data,
              const Semantics semantics) const
 {
+    ARIADNE_LOG(2,"HybridEvolverBase::_apply_guard(...)\n");
     static const uint SUBDIVISIONS_FOR_DEGENERATE_CROSSING = 2;
     const DiscreteEvent event=transition_data.event;
     const IntervalScalarFunction& guard_function=transition_data.guard_function;
@@ -864,7 +863,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                         for(uint i=0; i!=n; ++i) {
                             Float alpha=Float(i+1)/n;
                             IntervalScalarFunctionModel intermediate_guard
-                                = compose( guard_function, unchecked_compose( flow, join(starting_state, alpha*elapsed_time) ) );
+                                = compose( guard_function, unchecked_compose( flow, join(starting_state, ExactFloat(alpha)*elapsed_time) ) );
                             set.new_parameter_constraint(event, intermediate_guard <= 0);
                         }
                         break;
@@ -1085,6 +1084,9 @@ _apply_evolution_step(EvolutionData& evolution_data,
 
     _apply_reach_step(reach_sets.front(),flow,timing_data);
     _apply_evolve_step(evolve_sets.front(),flow,timing_data);
+
+    ARIADNE_LOG(8,"flow_reach_set="<<reach_sets.front()<<"\n")
+    ARIADNE_LOG(8,"flow_evolve_set="<<evolve_sets.front()<<"\n")
 
     // Apply constraints on reach and evolve sets due to invariants and urgent guards
     for(Set<DiscreteEvent>::const_iterator event_iter=blocking_events.begin();
@@ -1391,7 +1393,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         result.finishing_kind=BEFORE_FINAL_TIME;
         Float sf=1.0;
         while(remaining_time_range.upper()*sf>step_size) { sf /= 2; }
-        temporal_evolution_time= sf*(ExactFloat(final_time)-time_identity);
+        temporal_evolution_time= ExactFloat(sf)*(ExactFloat(final_time)-time_identity);
     } else { // remaining_time_range.lower()>step_size)
         // As far as timing goes, perform the evolution over a full time step
         result.step_kind=CONSTANT_EVOLUTION_TIME;
@@ -1417,8 +1419,9 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         for(Map<DiscreteEvent,CrossingData>::iterator crossing_iter=crossings.begin();
             crossing_iter!=crossings.end(); ++crossing_iter)
         {
-            ARIADNE_LOG(6,"  Event "<<crossing_iter->first<<": "<<crossing_iter->second.crossing_kind<<", "<<crossing_iter->second.crossing_time.range()<<"\n");
+            ARIADNE_LOG(6,"  Event "<<crossing_iter->first<<": "<<crossing_iter->second.crossing_kind<<"\n");
             if(crossing_iter->second.crossing_kind==TRANSVERSE_CROSSING) {
+                ARIADNE_LOG(6,"  crossing_time_range="<<crossing_iter->second.crossing_time.range()<<"\n");
                 const IntervalScalarFunctionModel& crossing_time=crossing_iter->second.crossing_time;
                 Interval crossing_time_range=crossing_time.range();
                 if(Ariadne::is_blocking(transitions[crossing_iter->first].event_kind) && crossing_time_range.upper()<=step_size) {
@@ -1482,7 +1485,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         }
     }
 
-    IntervalScalarFunctionModel evolution_time = embed(spacial_evolution_time,time_domain) * embed(space_domain,temporal_evolution_time/step_size);
+    IntervalScalarFunctionModel evolution_time = embed(spacial_evolution_time,time_domain) * embed(space_domain,temporal_evolution_time/ExactFloat(step_size));
     IntervalScalarFunctionModel finishing_time=evolution_time+time_coordinate;
 
     ARIADNE_LOG(7,"evolution_time="<<(evolution_time)<<"\n");
@@ -1508,7 +1511,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             //   a=1-h/2(tmax-tmin);  b=h(tmax-tmin/2)/(tmax-tmin) = (2tmax-tmin)a
             Float h=result.step_size; Float tmin=starting_time_range.lower(); Float tmax=starting_time_range.upper();
             Float a=1-((h/2)/(tmax-tmin)); Float b=h*(tmax-tmin/2)/(tmax-tmin);
-            result.parameter_dependent_finishing_time=a*starting_time_function+b;
+            result.parameter_dependent_finishing_time=ExactFloat(a)*starting_time_function+ExactFloat(b);
         }
         ARIADNE_LOG(7,"Unwinding to time "<<result.parameter_dependent_finishing_time<<"\n");
         result.parameter_dependent_evolution_time=result.parameter_dependent_finishing_time-starting_time_function;

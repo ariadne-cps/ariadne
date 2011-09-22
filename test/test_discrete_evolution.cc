@@ -31,7 +31,7 @@
 #include "differential.h"
 #include "function.h"
 #include "taylor_function.h"
-#include "taylor_set.h"
+#include "enclosure.h"
 #include "box.h"
 #include "zonotope.h"
 #include "list_set.h"
@@ -62,7 +62,7 @@ void TestMapEvolver::test() const
 {
     cout << __PRETTY_FUNCTION__ << endl;
 
-    typedef TaylorConstrainedImageSet EnclosureType;
+    typedef Enclosure EnclosureType;
 
     // Set up the evolution parameters and grid
     IteratedMap::TimeType time(3);
@@ -108,7 +108,7 @@ void TestMapEvolver::test() const
 
 
     // Over-approximate the initial set by a grid cell
-    EnclosureType initial_set(initial_box,Sweeper());
+    EnclosureType initial_set(initial_box,TaylorFunctionFactory(ThresholdSweeper(1e-10)));
     cout << "initial_set=" << initial_set << endl << endl << endl;
 
 

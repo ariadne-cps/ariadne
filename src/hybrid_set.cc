@@ -38,6 +38,7 @@
 #include <include/rounding.h>
 #include <include/assignment.h>
 #include <include/graphics_interface.h>
+#include <include/function_set.h>
 
 namespace Ariadne {
 
@@ -192,8 +193,17 @@ HybridSet::HybridSet(const DiscreteLocation& q, const RealExpressionSet& s)
 {
 }
 
-BoundedConstraintSet HybridSet::continuous_state_set(const RealSpace& spc) const {
-    ARIADNE_NOT_IMPLEMENTED;
+RealBoundedConstraintSet HybridSet::continuous_state_set(const RealSpace& space) const {
+    ARIADNE_ASSERT_MSG(this->_bounds.size()==space.dimension()," set="<<*this<<", space="<<space<<"\n");
+    RealBox domain(this->_bounds.size());
+    for(uint i=0; i!=domain.size(); ++i) {
+        domain[i]=_bounds[space[i]];
+    }
+    List< RealNonlinearConstraint> constraints;
+    for(uint i=0; i!=this->_constraints.size(); ++i) {
+        constraints.append( make_function(indicator(this->_constraints[i],POSITIVE),space) <= 0 );
+    }
+    return RealBoundedConstraintSet(domain,constraints);
 }
 
 void HybridSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {

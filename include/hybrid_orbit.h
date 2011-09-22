@@ -38,7 +38,6 @@
 #include "numeric.h"
 #include "graphics_interface.h"
 #include "function_set.h"
-#include "taylor_set.h"
 #include "hybrid_enclosure.h"
 
 #include "orbit.h"

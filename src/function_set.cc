@@ -27,6 +27,7 @@
 #include "logging.h"
 #include "polynomial.h"
 #include "function.h"
+#include "taylor_function.h"
 #include "procedure.h"
 #include "function_set.h"
 #include "affine_set.h"

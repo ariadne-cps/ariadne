@@ -24,7 +24,7 @@
 #include "hybrid_discretiser.h"
 
 #include "stlio.h"
-#include "taylor_set.h"
+#include "enclosure.h"
 #include "function_set.h"
 #include "grid_set.h"
 #include "hybrid_evolver.h"
@@ -36,7 +36,7 @@
 
 namespace Ariadne {
 
-inline Sweeper default_sweeper() { return Sweeper(); }
+IntervalFunctionModelFactoryInterface* make_taylor_function_factory();
 
 template<class ES>
 HybridGridTreeSet
@@ -64,22 +64,19 @@ outer_approximation(const ListSet<HybridBasicSet<ES> >& hls,
 
 
 
-template<>
 HybridGridTreeSet
-outer_approximation(const ListSet< HybridBasicSet<TaylorConstrainedImageSet> >& hls,
-//outer_approximation(const HybridListSet< TaylorConstrainedImageSet >& hls,
+outer_approximation(const ListSet< HybridEnclosure >& hls,
                     const HybridGrid& grid,
                     const int accuracy)
 {
-    typedef TaylorConstrainedImageSet ES;
     HybridGridTreeSet result(grid);
     //for(typename HybridListSet<ES>::const_iterator
-    for(ListSet< HybridBasicSet<ES> >::const_iterator
+    for(ListSet< HybridEnclosure >::const_iterator
             iter=hls.begin(); iter!=hls.end(); ++iter)
         {
-            HybridBasicSet<ES> hes(*iter);
+            HybridEnclosure hes(*iter);
             DiscreteLocation loc=hes.location();
-            const ES& es=hes.continuous_state_set();
+            const Enclosure& es=hes.continuous_state_set();
             GridTreeSet& gts=result[loc];
             gts.adjoin(es.outer_approximation(gts.grid(),accuracy));
             //gts.adjoin_outer_approximation(ModelSet<ES>(es),accuracy);
@@ -185,7 +182,7 @@ HybridDiscretiser<HES>::
 _enclosure(const BasicSetType& initial_set) const
 {
     return this->_evolver_ptr->enclosure(initial_set.box());
-    ContinuousEnclosureType continuous_enclosure(initial_set.continuous_state_set().box(),default_sweeper());
+    ContinuousEnclosureType continuous_enclosure(initial_set.continuous_state_set().box(),*make_taylor_function_factory());
     return EnclosureType(initial_set.location(),initial_set.space(),continuous_enclosure);
 }
 

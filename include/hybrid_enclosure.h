@@ -36,7 +36,7 @@
 #include <boost/smart_ptr.hpp>
 #include "discrete_location.h"
 #include "discrete_event.h"
-#include "taylor_set.h"
+#include "enclosure.h"
 #include "graphics_interface.h"
 #include "container.h"
 #include "box.h"
@@ -53,9 +53,13 @@ template<class X> class ScalarFunction;
 typedef ScalarFunction<Interval> IntervalScalarFunction;
 template<class X> class VectorFunction;
 typedef VectorFunction<Interval> IntervalVectorFunction;
-class ScalarTaylorFunction;
-class VectorTaylorFunction;
-class TaylorConstrainedImageSet;
+template<class X> class ScalarFunctionModel;
+typedef ScalarFunctionModel<Interval> IntervalScalarFunctionModel;
+template<class X> class VectorFunctionModel;
+typedef VectorFunctionModel<Interval> IntervalVectorFunctionModel;
+template<class X> class FunctionModelFactoryInterface;
+typedef FunctionModelFactoryInterface<Interval> IntervalFunctionModelFactoryInterface;
+class Enclosure;
 class Box;
 class Grid;
 class GridTreeSet;
@@ -79,8 +83,6 @@ class HybridSet;
 typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
 
-typedef ScalarTaylorFunction ScalarIntervalFunction;
-typedef VectorTaylorFunction VectorIntervalFunction;
 
 enum EnclosureVariableType { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
 
@@ -127,24 +129,24 @@ class HybridEnclosure
     friend class SimpleHybridEvolver;
     friend class ConstraintHybridEvolver;
   public:
-    typedef TaylorConstrainedImageSet ContinuousStateSetType;
+    typedef Enclosure ContinuousStateSetType;
   private:
     DiscreteLocation _location;
     List<DiscreteEvent> _events;
     List<Identifier> _space;
-    TaylorConstrainedImageSet _set;
-    ScalarTaylorFunction _time;
-    ScalarTaylorFunction _dwell_time;
+    Enclosure _set;
+    IntervalScalarFunctionModel _time;
+    IntervalScalarFunctionModel _dwell_time;
     List<EnclosureVariableType> _variables;
   public:
     //! \brief An empty enclosure.
     HybridEnclosure();
     //! \brief An enclosure corresponding to a box \a bx in location \a q with constraints \a cnstr.
-    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const RealBox& bx, const List<IntervalScalarFunction>& cnstr, TaylorFunctionFactory& fac);
-    HybridEnclosure(const RealSpace& space, const HybridSet& set, const TaylorFunctionFactory& factory);
+    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const RealBox& bx, const List<RealScalarFunction>& cnstr, IntervalFunctionModelFactoryInterface& fac);
+    HybridEnclosure(const RealSpace& space, const HybridSet& set, const IntervalFunctionModelFactoryInterface& factory);
     //! \brief An enclosure corresponding to a box \a s in location \a q.
-    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Box& bx, const TaylorFunctionFactory& fac);
-    HybridEnclosure(const HybridBox& hbx, const TaylorFunctionFactory& fac);
+    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Box& bx, const IntervalFunctionModelFactoryInterface& fac);
+    HybridEnclosure(const HybridBox& hbx, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief An enclosure corresponding to a box \a s in location \a q, using a default function factory class.
     HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Box& bx);
     //! \brief An enclosure constructed from a continuous state set and a location.
@@ -152,7 +154,7 @@ class HybridEnclosure
     //! \brief An enclosure constructed from a continuous state set and a location with evolution time equal to zero.
     HybridEnclosure(const DiscreteLocation&, const RealSpace& spc, const ContinuousStateSetType&);
     //! \brief An enclosure constructed from a continuous state set, an evolution time and a location.
-    HybridEnclosure(const DiscreteLocation&, const RealSpace& spc, const ContinuousStateSetType&, const ScalarTaylorFunction& time);
+    HybridEnclosure(const DiscreteLocation&, const RealSpace& spc, const ContinuousStateSetType&, const IntervalScalarFunction& time);
     //! \brief Destructor.
     ~HybridEnclosure();
     //! \brief Create a dynamically-allocated copy.
@@ -162,6 +164,8 @@ class HybridEnclosure
     const DiscreteLocation& location() const;
     //! \brief The Euclidean space of the location.
     const RealSpace space() const;
+    //! \brief The factory used to create functions.
+    const IntervalFunctionModelFactoryInterface& function_factory() const;
     //! \brief The list of previous events.
     const List<DiscreteEvent>& previous_events() const;
     //! \brief The number of independent parameters.
@@ -175,11 +179,11 @@ class HybridEnclosure
     //! \brief The continuous state set.
     const IntervalVector parameter_domain() const;
     //! \brief The function related to space.
-    const VectorIntervalFunction& space_function() const;
+    const IntervalVectorFunctionModel& space_function() const;
     //! \brief The function related to time.
-    const ScalarIntervalFunction& time_function() const;
+    const IntervalScalarFunctionModel& time_function() const;
     //! \brief The function giving the time since the last event.
-    const ScalarIntervalFunction& dwell_time_function() const;
+    const IntervalScalarFunctionModel& dwell_time_function() const;
 
     //! \brief Set the evolution time function to \a omega.
     void set_time_function(const IntervalScalarFunctionModel& omega);

@@ -27,8 +27,7 @@
 #include "stlio.h"
 #include "vector.h"
 #include "function.h"
-#include "taylor_function.h"
-#include "taylor_set.h"
+#include "enclosure.h"
 #include "orbit.h"
 #include "evolution_parameters.h"
 

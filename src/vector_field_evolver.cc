@@ -27,8 +27,7 @@
 #include "stlio.h"
 #include "vector.h"
 #include "function.h"
-#include "taylor_function.h"
-#include "taylor_set.h"
+#include "enclosure.h"
 #include "orbit.h"
 #include "evolution_parameters.h"
 
@@ -197,7 +196,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     typedef Vector<Interval> BoxType;
     typedef IntervalVectorFunctionModel MapModelType;
     typedef IntervalVectorFunctionModel FlowModelType;
-    typedef TaylorConstrainedImageSet EnclosureType;
+    typedef Enclosure EnclosureType;
 
     EnclosureType current_set_model;
     TimeType current_time;
@@ -225,15 +224,12 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     Vector<Interval> current_set_bounds=current_set_model.bounding_box();
     ARIADNE_LOG(4,"current_set_bounds = "<<current_set_bounds<<"\n");
 
-    //ARIADNE_ASSERT(initial_time_bounding_box.width() <= maximum_step_size);
-
 
     // Compute flow model
     // TODO: Modify this for general integrator interface
     TaylorPicardIntegrator const* taylor_integrator=dynamic_cast<const TaylorPicardIntegrator*>(this->_integrator.operator->());
     Float step_size=maximum_step_size;
     FlowModelType flow_model=taylor_integrator->flow_step(dynamic,current_set_bounds,step_size);
-    //FlowModelType flow_model=this->_integrator->flow_step(dynamic,current_set_bounds,step_size,flow_bounds);
     ARIADNE_LOG(4,"step_size = "<<step_size<<"\n");
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
     FlowModelType flow_step_model=partial_evaluate(flow_model,flow_model.domain().size()-1u,ExactFloat(step_size));
@@ -243,8 +239,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     TimeType next_time=current_time+step_size;
     ARIADNE_LOG(6,"next_time = "<<next_time<<"\n");
     // Compute the flow tube (reachable set) model and the final set
-    //std::cerr<<"flow_model.argument_size()="<<flow_model.argument_size()<<"\n";
-    //std::cerr<<"product(current_set_model,Interval(0,step_size))="<<product(current_set_model,Interval(0,step_size))<<"\n";
+    ARIADNE_LOG(6,"product = "<<product(current_set_model,Interval(0.0,step_size))<<"\n");
     EnclosureType reach_set_model=apply(flow_model,product(current_set_model,Interval(0.0,step_size)));
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
     EnclosureType next_set_model=apply(flow_step_model,current_set_model);

@@ -94,7 +94,7 @@ class HybridSet
     Set<RealVariable> variables() const { return this->_bounds.keys(); };
     Map<RealVariable,RealInterval> const& bounds() const { return this->_bounds; };
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; };
-    BoundedConstraintSet continuous_state_set(const RealSpace&) const;
+    RealBoundedConstraintSet continuous_state_set(const RealSpace&) const;
     void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
 };
 OutputStream& operator<<(OutputStream& os, const HybridSet& hs);

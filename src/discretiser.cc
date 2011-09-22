@@ -24,9 +24,10 @@
 #include "discretiser.h"
 
 #include "stlio.h"
-#include "taylor_set.h"
+#include "function.h"
+#include "enclosure.h"
 #include "orbit.h"
-#include "function_set.h"
+#include "taylor_function.h"
 #include "grid_set.h"
 #include "map.h"
 #include "vector_field.h"
@@ -85,7 +86,7 @@ typename Discretiser<Sys,ES>::EnclosureType
 Discretiser<Sys,ES>::
 _enclosure(const BasicSetType& initial_set) const
 {
-    return EnclosureType(initial_set.box(),default_sweeper());
+    return EnclosureType(initial_set.box(),TaylorFunctionFactory(Sweeper()));
 }
 
 template<class Sys, class ES>
@@ -119,8 +120,8 @@ _discretise(const Orbit<EnclosureType>& continuous_orbit,
 
 }
 
-template class Discretiser<VectorField,TaylorConstrainedImageSet>;
-template class Discretiser<IteratedMap,TaylorConstrainedImageSet>;
+template class Discretiser<VectorField,Enclosure>;
+template class Discretiser<IteratedMap,Enclosure>;
 
 
 

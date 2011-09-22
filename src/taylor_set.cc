@@ -125,7 +125,7 @@ VectorTaylorFunction make_identity(const RealBox& bx, const Sweeper& swp) {
 };
 
 
-IntervalTaylorModel& operator-=(IntervalTaylorModel& tm, const MultiIndex& a) {
+inline IntervalTaylorModel& operator-=(IntervalTaylorModel& tm, const MultiIndex& a) {
     for(IntervalTaylorModel::iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         iter->key()-=a;
     }
@@ -662,7 +662,7 @@ void TaylorConstrainedImageSet::reduce() const
 }
 
 
-Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunctionInterface& function, const IntervalVector& domain)
+Pair<uint,double> lipschitz_index_and_error(const VectorTaylorFunction& function, const IntervalVector& domain)
 {
     Matrix<Interval> jacobian=function.jacobian(domain);
 
@@ -1045,7 +1045,7 @@ void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box&
 
 }
 
-
+namespace {
 Float widths(const IntervalVector& bx) {
     Float res=0.0;
     for(uint i=0; i!=bx.size(); ++i) {
@@ -1081,6 +1081,7 @@ Float average_width(const IntervalVector& bx) {
 
 static uint COUNT_TESTS=0u;
 double IMAGE_MULTIPLE_OF_CELL = 1;
+}
 
 typedef Procedure<Interval> IntervalProcedure;
 

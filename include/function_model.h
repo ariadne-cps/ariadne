@@ -86,6 +86,7 @@ template<> class ScalarFunctionModelInterface<Interval>
     virtual Float const _norm() const = 0;
 
     virtual ScalarFunctionModelInterface<Interval>* _apply(OperatorCode op) const = 0;
+    virtual Interval _unchecked_evaluate(const Vector<Interval>& x) const = 0;
 
     virtual ScalarFunctionModelInterface<Interval>* _clone() const = 0;
     virtual ScalarFunctionModelInterface<Interval>* _create() const = 0;
@@ -122,6 +123,8 @@ template<class F> class ScalarFunctionModelMixin<F,Interval>
         return new F(antiderivative(static_cast<const F&>(*this),j)); }
     ScalarFunctionModelInterface<Interval>* _apply(OperatorCode op) const {
         return new F(this->apply(op)); }
+    Interval _unchecked_evaluate(const Vector<Interval>& x) const {
+        return unchecked_evaluate(static_cast<const F&>(*this),x); }
     ScalarFunctionModelInterface<Interval>* _embed(const IntervalVector& d1, const IntervalVector& d2) const {
         return new F(embed(d1,static_cast<const F&>(*this),d2)); }
     Tribool _refines(const ScalarFunctionModelInterface<Interval>& f) const {
@@ -149,7 +152,7 @@ template<> class ScalarFunctionModel<Interval>
     ScalarFunctionModel(ScalarFunctionModelInterface<Interval>* p) : _ptr(p) { }
     ScalarFunctionModel(const ScalarFunctionModel<Interval>& f) : _ptr(f._ptr) { }
     ScalarFunctionModel(const ScalarFunctionModelInterface<Interval>& f) : _ptr(f._clone()) { }
-    ScalarFunctionModel(const ScalarFunction<Interval>& f);
+    ScalarFunctionModel(const ScalarFunction<Interval>& f) : _ptr(dynamic_cast<ScalarFunctionModelInterface<Interval>*>(f.raw_pointer()->_clone())) { }
     operator ScalarFunction<Interval>() const { return ScalarFunction<Interval>(this->_ptr->_clone()); }
     operator ScalarFunctionModelInterface<Interval>& () { return *_ptr; }
     operator const ScalarFunctionModelInterface<Interval>& () const { return *_ptr; }
@@ -273,8 +276,11 @@ template<> class VectorFunctionModelInterface<Interval>
     virtual VectorFunctionModelInterface<Interval>* _join(const VectorFunctionModelInterface<Interval>& f2) const = 0;
     virtual VectorFunctionModelInterface<Interval>* _combine(const VectorFunctionModelInterface<Interval>& f2) const = 0;
     virtual Void _adjoin(const ScalarFunctionModelInterface<Interval>& f2) = 0;
+    virtual Vector<Interval> _unchecked_evaluate(const Vector<Interval>& x) const = 0;
     virtual ScalarFunctionModelInterface<Interval>* _compose(const ScalarFunctionInterface<Interval>& f) const = 0;
     virtual VectorFunctionModelInterface<Interval>* _compose(const VectorFunctionInterface<Interval>& f) const = 0;
+    virtual ScalarFunctionModelInterface<Interval>* _unchecked_compose(const ScalarFunctionInterface<Interval>& f) const = 0;
+    virtual VectorFunctionModelInterface<Interval>* _unchecked_compose(const VectorFunctionInterface<Interval>& f) const = 0;
     virtual VectorFunctionModelInterface<Interval>* _partial_evaluate(Nat j, const Interval& c) const = 0;
     virtual Void restrict(const IntervalVector& d) = 0;
 };
@@ -305,10 +311,16 @@ template<class F> class VectorFunctionModelMixin<F,Interval>
         return heap_copy(join(static_cast<const F&>(*this),dynamic_cast<const F&>(f))); }
     VectorFunctionModelInterface<Interval>* _combine(const VectorFunctionModelInterface<Interval>& f) const {
         return heap_copy(combine(static_cast<const F&>(*this),dynamic_cast<const F&>(f))); }
+    Vector<Interval> _unchecked_evaluate(const Vector<Interval>& x) const {
+        return unchecked_evaluate(static_cast<const F&>(*this),x); }
     ScalarFunctionModelInterface<Interval>* _compose(const ScalarFunctionInterface<Interval>& f) const {
         return heap_copy(compose(f,static_cast<const F&>(*this))); }
     VectorFunctionModelInterface<Interval>* _compose(const VectorFunctionInterface<Interval>& f) const {
         return heap_copy(compose(f,static_cast<const F&>(*this))); }
+    ScalarFunctionModelInterface<Interval>* _unchecked_compose(const ScalarFunctionInterface<Interval>& f) const {
+        return heap_copy(unchecked_compose(dynamic_cast<const ScalarFunctionType&>(f),static_cast<const F&>(*this))); }
+    VectorFunctionModelInterface<Interval>* _unchecked_compose(const VectorFunctionInterface<Interval>& f) const {
+        return heap_copy(unchecked_compose(dynamic_cast<const F&>(f),static_cast<const F&>(*this))); }
     VectorFunctionModelInterface<Interval>* _partial_evaluate(Nat j, const Interval& c) const {
         return heap_copy(partial_evaluate(static_cast<const F&>(*this),j,c)); }
 };
@@ -394,11 +406,14 @@ inline VectorFunctionModel<Interval> operator-(const Vector<Interval>& c1, const
 inline Interval evaluate(const ScalarFunction<Interval>& f, const Vector<Interval>& x);
 inline Vector<Interval> evaluate(const VectorFunction<Interval>& f, const Vector<Interval>& x);
 
+inline Interval unchecked_evaluate(const ScalarFunctionModel<Interval>& f, const Vector<Interval>& x) { return f._ptr->_unchecked_evaluate(x); }
+inline Vector<Interval> unchecked_evaluate(const VectorFunctionModel<Interval>& f, const Vector<Interval>& x) { return f._ptr->_unchecked_evaluate(x); }
+
 inline ScalarFunctionModel<Interval> compose(const ScalarFunction<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_compose(f); }
 inline VectorFunctionModel<Interval> compose(const VectorFunction<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_compose(f); }
 
-inline ScalarFunctionModel<Interval> unchecked_compose(const ScalarFunctionModel<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_compose(f); }
-inline VectorFunctionModel<Interval> unchecked_compose(const VectorFunctionModel<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_compose(f); }
+inline ScalarFunctionModel<Interval> unchecked_compose(const ScalarFunctionModel<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_unchecked_compose(f); }
+inline VectorFunctionModel<Interval> unchecked_compose(const VectorFunctionModel<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_unchecked_compose(f); }
 
 //inline VectorFunctionModel<Interval> compose(const VectorFunctionModel<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_compose(f); }
 
@@ -509,7 +524,7 @@ VectorFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_id
 
 
 
-    
+
 } // namespace Ariadne
 
 #endif

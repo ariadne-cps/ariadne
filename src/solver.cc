@@ -223,7 +223,7 @@ Vector<IntervalTaylorModel> _implicit5(const Vector<IntervalTaylorModel>& f, uin
                     --number_non_contracting;
                 }
                 if(disjoint(h_new,h)) {
-                    ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<IntervalTaylorModel> f)",
+                    ARIADNE_THROW(NoSolutionException,"implicit(Vector<IntervalTaylorModel> f)",
                                 "(with f="<<f<<"): Application of Newton solver to "<<h<<" yields "<<h_new<<
                                 " which is disjoint. No solution");
                 }
@@ -237,7 +237,7 @@ Vector<IntervalTaylorModel> _implicit5(const Vector<IntervalTaylorModel>& f, uin
     if(number_non_contracting==0) {
         return h;
     } else {
-        ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<IntervalTaylorModel>)",
+        ARIADNE_THROW(UnknownSolutionException,"implicit(Vector<IntervalTaylorModel>)",
                       "Could not verify solution of implicit function to "<<h<<"\n");
     }
 }
@@ -261,7 +261,7 @@ newton_implicit(const Vector<IntervalTaylorModel>& f)
         D2finv=inverse(D2f);
     }
     catch(...) {
-        ARIADNE_THROW(ImplicitFunctionException,
+        ARIADNE_THROW(SingularJacobianException,
                       "implicit(Vector<IntervalTaylorModel>)",
                       "Jacobian "<<D2f<<" is not invertible");
     }
@@ -568,7 +568,7 @@ implicit(const IntervalTaylorModel& f) {
     IntervalTaylorModel g=derivative(f,has);
     Interval g_range=g.range();
     if(g_range.lower()<=0 && g_range.upper()>=0) {
-        ARIADNE_THROW(ImplicitFunctionException,
+        ARIADNE_THROW(SingularJacobianException,
                       "implicit(IntervalTaylorModel)",
                       "derivative "<<g_range<<" is not invertible");
     }
@@ -730,27 +730,60 @@ IntervalNewtonSolver::implicit(const IntervalScalarFunction& f,
                                const Vector<Interval>& ip,
                                const Interval& ix) const
 {
-    ARIADNE_LOG(4,"IntervalNewtonSolver::implicit(IntervalScalarFunction f, IntervalVector ip, Interval ix)\n");
-    ARIADNE_LOG(5,"  f="<<f<<"\n");
-    ARIADNE_ASSERT_MSG(f.argument_size()==ip.size()+1u,"f="<<f<<", ip="<<ip<<", ix="<<ix<<"\n");
+    ARIADNE_LOG(4,"IntervalNewtonSolver::implicit(IntervalScalarFunction f, IntervalVector P, Interval X)\n");
+    ARIADNE_LOG(5,"f="<<f<<"\n");
+    ARIADNE_LOG(5,"P="<<ip<<"\n");
+    ARIADNE_LOG(5,"X="<<std::setprecision(17)<<ix<<"\n");
+    ARIADNE_ASSERT_MSG(f.argument_size()==ip.size()+1u,"f="<<f<<", P="<<ip<<", X="<<ix<<"\n");
     const uint n=ip.size();
     IntervalScalarFunction df=f.derivative(n);
-    ARIADNE_LOG(5,"  df="<<df<<"\n");
+    ARIADNE_LOG(5,"df="<<df<<"\n");
 
-    Vector<Interval> mp=midpoint(ip);
-    Interval dfmpix=df(join(mp,ix));
-
-    if(dfmpix.lower()<=0.0 && dfmpix.upper()>=0.0) {
-        ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver","df(x,[y])="<<dfmpix<<" which contains zero.");
+    // Simple check to see if there is definitely no solution
+    Interval fipix=evaluate(f,join(ip,ix));
+    ARIADNE_LOG(5,"f(P,X)="<<fipix<<"\n");
+    ARIADNE_LOG(5,"f(p,X)="<<f(join(IntervalVector(midpoint(ip)),ix))<<"="<<hull((Interval)f(join(midpoint(ip),ix.lower())),f(join(midpoint(ip),ix.upper())))<<"\n");
+    if(fipix.lower()>0.0 || fipix.upper()<0.0) {
+        ARIADNE_THROW(NoSolutionException,"IntervalNewtonSolver","f(P,X)="<<fipix<<" which does not contain zero.");
     }
 
+    // Simple test of nonsingularity of Jacobian
+    Interval dfipix=evaluate(df,join(ip,ix));
+    ARIADNE_LOG(5,"df(P,X)="<<dfipix<<"\n");
+    if(dfipix.lower()<=0.0 && dfipix.upper()>=0.0) {
+        ARIADNE_THROW(SingularJacobianException,"IntervalNewtonSolver","df(P,X)="<<dfipix<<" which contains zero.");
+    }
+
+    // Test to see if there is a solution f(mid(P),x)=0
+    IntervalVector mp=midpoint(ip);
     Interval x=ix;
     bool validated=false;
     for(uint i=0; i!=this->maximum_number_of_steps(); ++i) {
         Interval mx=Interval(midpoint(x));
-        Interval nx=mx-f(join(mp,mx))/df(join(mp,x));
+        Interval nx=mx-evaluate(f,join(mp,mx))/evaluate(df,join(mp,x));
         if(disjoint(nx,x)) {
-            ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver","No solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix);
+            ARIADNE_LOG(1,"Any solution of f(p,x)=0 with f="<<f<<", p in "<<ip<<" and x in "<<ix<<" has p!=midpoint(P)="<<mp<<"\n");
+            break;
+        }
+        if(subset(nx,x)) {
+            validated=true;
+            x=nx;
+            if(x.radius()<this->maximum_error()) { break; }
+        } else {
+            x=intersection(x,nx);
+        }
+    }
+
+    // Test to see if we can use Newton's method to prove no solutions
+    x=ix;
+    validated=false;
+    for(uint i=0; i!=this->maximum_number_of_steps(); ++i) {
+        Interval mx=Interval(midpoint(x));
+        Interval nx=mx-evaluate(f,join(ip,mx))/evaluate(df,join(ip,x));
+        if(disjoint(nx,x)) {
+            ARIADNE_LOG(1,"Proved using the Interval Newton method no solutions of f(p,x)=0 with f="<<f<<", p in "<<ip<<"and x in "<<ix<<"\n");
+            ARIADNE_THROW(NoSolutionException,"IntervalNewtonSolver",
+                        " No solutions of f(p,x)=0 with f="<<f<<", p in "<<ip<<"and x in "<<ix<<"\n");
         }
         if(subset(nx,x)) {
             validated=true;
@@ -765,54 +798,65 @@ IntervalNewtonSolver::implicit(const IntervalScalarFunction& f,
     IntervalVectorFunctionModel id=this->function_factory().create_identity(ip);
     IntervalScalarFunctionModel dh=this->function_factory().create_zero(ip);
 
-    ARIADNE_LOG(5,"\n  h="<<h<<"\n");
-    ARIADNE_LOG(5,"\n  id="<<id<<"\n");
-    ARIADNE_LOG(5,"\n  dh="<<dh<<"\n");
+    ARIADNE_LOG(5,"h="<<h<<"\n");
+    ARIADNE_LOG(5,"id="<<id<<"\n");
+    ARIADNE_LOG(5,"dh="<<dh<<"\n");
 
     for(uint i=0; i!=this->maximum_number_of_steps(); ++i) {
-        dh=compose(f,join(id,h))/df(join(mp,Interval(h.value())));
+        Interval dfmprh=unchecked_evaluate(df,join(mp,Interval(h.value())));
+        ARIADNE_LOG(7,"df(p,range(h))="<<dfmprh<<"\n");
+        IntervalScalarFunctionModel fidh=unchecked_compose(f,join(id,h));
+        ARIADNE_LOG(7,"f(p,h(p))="<<fidh<<"\n");
+        dh=fidh/dfmprh;
         h=h-dh;
         h.clobber();
         Float herr=norm(dh);
-        ARIADNE_LOG(6,"  dh="<<dh.range()<<"\n h="<<h<<"\n");
+        ARIADNE_LOG(6,"dh="<<dh.range()<<"\n");
+        ARIADNE_LOG(6,"h="<<h<<"\n");
         if(herr<this->maximum_error()/2) { break; }
     }
-    ARIADNE_LOG(4," happrox="<<h<<"\n");
+    ARIADNE_LOG(4,"happrox="<<h<<"\n");
 
     h.set_error(h.error()+mag(dh.range())*4);
-    Interval dfipix=df(join(ip,h.range()));
+    ARIADNE_LOG(5,"df="<<df<<"\n");
+    ARIADNE_LOG(5,"join(ip,h.range())="<<join(ip,h.range())<<"\n");
+    dfipix=unchecked_evaluate(df,join(ip,h.range()));
     if(dfipix.lower()<=0.0 && dfipix.upper()>=0.0) {
-        ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver",
+        ARIADNE_THROW(SingularJacobianException,"IntervalNewtonSolver",
                       "Cannot verify approximate solution solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix<<" since range of derivative contains zero.");
     }
 
     // Try to verify implicit function
-    Interval dfmpmx=df(join(mp,Interval(h.value())));
+    Interval dfmpmx=unchecked_evaluate(df,join(mp,Interval(h.value())));
     Interval herr=Interval(-h.error(),+h.error());
     Float sf=mag(1-dfipix/dfmpmx);
     Interval dherr=(1-dfipix/dfmpmx)*herr;
+    ARIADNE_LOG(5,"h="<<h<<"\n");
     IntervalScalarFunctionModel hnew=h;
     hnew.clobber();
-    dh=compose(f,join(id,hnew));
+    ARIADNE_LOG(5,"mid(h)="<<hnew<<"\n");
+    dh=unchecked_compose(f,join(id,hnew));
+    ARIADNE_LOG(5,"dh="<<dh<<"\n");
     hnew=hnew-dh+dherr;
+    ARIADNE_LOG(5,"hnew="<<hnew<<"\n");
     if(refines(hnew,h)) { return hnew; }
 
     // Try one more step using larger error
     hnew.set_error(hnew.error()+mag(dh.range())*4);
     h=hnew;
-    dfmpmx=df(join(mp,Interval(h.value())));
+    dfmpmx=unchecked_evaluate(df,join(mp,Interval(h.value())));
     herr=Interval(-h.error(),+h.error());
-    dfipix=df(join(ip,h.range()));
+    dfipix=unchecked_evaluate(df,join(ip,h.range()));
     sf=mag(1-dfipix/dfmpmx);
     dherr=(1-dfipix/dfmpmx)*herr;
     hnew=h;
     hnew.clobber();
-    dh=compose(f,join(id,hnew));
+    dh=unchecked_compose(f,join(id,hnew));
     hnew=hnew-dh+dherr;
 
     if(!refines(hnew,h)) {
-        ARIADNE_THROW(ImplicitFunctionException,"IntervalNewtonSolver",
-                      "Cannot verify approximate solution solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix<<" since range of derivative contains zero.");
+        ARIADNE_THROW(UnknownSolutionException,"IntervalNewtonSolver",
+                      "Cannot verify approximate solution solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix<<".");
     }
     return hnew;
 }

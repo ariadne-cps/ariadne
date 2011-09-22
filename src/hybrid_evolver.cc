@@ -329,8 +329,8 @@ _log_summary(const EvolutionData& evolution_data, HybridEnclosure const& startin
     Interval starting_time_range=starting_set.time_range();
     Interval starting_dwell_time_range=starting_set.dwell_time_range();
     ARIADNE_LOG(1,"\r"
-            <<"#w="<<std::setw(4)<<std::left<<evolution_data.working_sets.size()+1u
-            <<"#r="<<std::setw(4)<<std::left<<evolution_data.reach_sets.size()
+            <<"#w="<<std::setw(4)<<std::left<<evolution_data.initial_sets.size()+1u
+            <<"#r="<<std::setw(5)<<std::left<<evolution_data.reach_sets.size()
             <<"#f="<<std::setw(4)<<std::left<<evolution_data.final_sets.size()
             <<"#e="<<std::setw(3)<<std::left<<starting_set.previous_events().size()
             <<" #p="<<std::setw(2)<<std::left<<starting_set.number_of_parameters()
@@ -568,7 +568,13 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 crossing_time=solver.implicit(compose(guard,flow),flow_spacial_domain,flow_time_domain);
                 crossings[event]=CrossingData(TRANSVERSE_CROSSING,crossing_time);
             }
-            catch(const ImplicitFunctionException& e) {
+            catch(const UnknownSolutionException& e) {
+                // If the crossing time cannot be computed, then we can still
+                // use the fact that the crossing occurs as soon as $g(x(t))=0$.
+                ARIADNE_LOG(0,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                crossings[event]=CrossingData(INCREASING_CROSSING);
+            }
+            catch(const SolverException& e) {
                 // If the crossing time cannot be computed, then we can still
                 // use the fact that the crossing occurs as soon as $g(x(t))=0$.
                 ARIADNE_LOG(0,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
@@ -576,6 +582,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             }
             catch(const std::runtime_error& e) {
                 ARIADNE_LOG(0,"Unexpected error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                ARIADNE_FAIL_MSG("ERROR!!");
                 crossings[event]=CrossingData(INCREASING_CROSSING);
             }
         } else if(derivative_range.upper()<0.0) {
@@ -637,7 +644,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                     crossings[event]=CrossingData(GRAZING_CROSSING);
                     crossings[event].critical_time=critical_time;
                 }
-                catch(const ImplicitFunctionException& e) {
+                catch(const SolverException& e) {
                     ARIADNE_LOG(0,"Error in computing critical time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                     crossings[event]=CrossingData(CONCAVE_CROSSING);
                 }

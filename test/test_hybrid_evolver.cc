@@ -1071,7 +1071,7 @@ int main(int argc, const char* argv[])
     evolver.verbosity=evolver_verbosity;
     //TestSimpleHybridEvolver(evolver,"general_hybrid_evolver").test_unwind();
     //TestSimpleHybridEvolver(evolver,"general_hybrid_evolver").test_transverse_only();
-    TestSimpleHybridEvolver(evolver,"general_hybrid_evolver").test_all();
+    ARIADNE_TEST_CALL(TestSimpleHybridEvolver(evolver,"general_hybrid_evolver").test_all());
 
     std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;

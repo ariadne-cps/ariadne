@@ -58,11 +58,9 @@ typedef ScalarFunctionModel<Interval> IntervalScalarFunctionModel;
 template<class X> class VectorFunctionModel;
 typedef VectorFunctionModel<Interval> IntervalVectorFunctionModel;
 
+class SolverInterface;
 
-struct ImplicitFunctionException : public std::runtime_error {
-    ImplicitFunctionException(const std::string& what) : std::runtime_error(what) { }
-};
-
+//! \relates SolverInterface \brief An exception occurring in the solution of a (parameterised) algebraic equation.
 class SolverException : public std::runtime_error
 {
   public:
@@ -70,6 +68,16 @@ class SolverException : public std::runtime_error
     SolverException(const std::string& what) : std::runtime_error(what) { }
 };
 
+//! \relates SolverInterface \brief It cannot be shown that there is no solution to a (parameterised) algebraic equation,
+//! \brief but no solution can be found by the solver.
+class UnknownSolutionException : public SolverException
+{
+  public:
+    UnknownSolutionException(const char* what) : SolverException(what) { }
+    UnknownSolutionException(const std::string& what) : SolverException(what) { }
+};
+
+//! \relates SolverInterface \brief There are no solutions to a (parameterised) algebraic equation in the domain.
 class NoSolutionException : public SolverException
 {
   public:
@@ -77,47 +85,60 @@ class NoSolutionException : public SolverException
     NoSolutionException(const std::string& what) : SolverException(what) { }
 };
 
+//! \relates SolverInterface \brief The solutions to a (parameterised) algebraic equation are degenerate due to the Jacobian being singular.
+class SingularJacobianException : public SolverException
+{
+  public:
+    SingularJacobianException(const char* what) : SolverException(what) { }
+    SingularJacobianException(const std::string& what) : SolverException(what) { }
+};
+
 
 
 //! \ingroup SolverModule EvaluationModule
 //! \brief %Interface for solving (nonlinear) equations.
+//! \sa SolverException
 class SolverInterface
     : public Loggable
 {
   public:
-    /*! \brief Virtual destructor. */
+    //! \brief Virtual destructor.
     virtual ~SolverInterface() { };
-    /*! \brief Make a dynamically-allocated copy. */
+    //! \brief Make a dynamically-allocated copy.
     virtual SolverInterface* clone() const = 0;
-    /*! \brief Write to an output stream. */
+    //! \brief Write to an output stream.
     virtual void write(std::ostream& os) const = 0;
 
 
-    /*! \brief The maximum permissible error of the solution. */
+    //! \brief The maximum permissible error of the solution.
     virtual double maximum_error() const = 0;
-    /*! \brief Set the maximum error. */
+    //! \brief Set the maximum error.
     virtual void set_maximum_error(double max_error) = 0;
 
-    /*! \brief The maximum number of steps allowed before the method must quit. */
+    //! \brief The maximum number of steps allowed before the method must quit.
     virtual uint maximum_number_of_steps() const = 0;
-    /*! \brief Set the maximum number of steps. */
+    //! \brief Set the maximum number of steps.
     virtual void set_maximum_number_of_steps(uint max_steps) = 0;
 
-    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
+    //! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt.
     virtual Vector<Interval> zero(const IntervalVectorFunction& f,const Vector<Interval>& pt) const = 0;
-    /*! \brief Solve \f$f(x)=x\f$, starting in the interval point \a pt. */
+    //! \brief Solve \f$f(x)=x\f$, starting in the interval point \a pt.
     virtual Vector<Interval> fixed_point(const IntervalVectorFunction& f,const Vector<Interval>& pt) const = 0;
 
-    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. Throws a SolverException if there is not a unique solution. */
+    //! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. Throws a SolverException if there is not a unique solution.
     virtual Vector<Interval> solve(const IntervalVectorFunction& f,const Vector<Interval>& pt) const = 0;
-    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
+    //! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix.
     virtual IntervalVectorFunctionModel implicit(const IntervalVectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const = 0;
-    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
+    //! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix.
+    //! If \f$D_2f(a,x)\neq 0\f$ for \f$(a,x)\in A\times X\f$, then any solution is guaranteed to be unique.
+    //! If there is a continuous branch of solutions \f$x=h(a)\f$ such that \f$h(a)\in X\f$ for some parameter values,
+    //! but \f$h(a)\not\in X\f$ for others, then \f$h\f$ is a valid result for the function.
+    //! May throw a NoSolutionException, but \em only if there are no solutions to \f$f(a,x)=0\f$ in \f$A\times X\f$.
     virtual IntervalScalarFunctionModel implicit(const IntervalScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const = 0;
 
-    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. Returns a set of boxes for which it can be <em>proved</em> that
-     *  a solution exists in the box. This means that some solutions may be omitted if they are not sufficiently robust.
-     */
+    //! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. Returns a set of boxes for which it can be <em>proved</em> that
+    //! a solution exists in the box. This means that some solutions may be omitted if they are not sufficiently robust.
+    //!
     virtual Set< Vector<Interval> > solve_all(const IntervalVectorFunction& f,const Vector<Interval>& pt) const = 0;
 };
 

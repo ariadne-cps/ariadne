@@ -394,7 +394,7 @@ ScalarTaylorFunction extend(const ScalarTaylorFunction& tv, const Vector<Interva
 Interval
 evaluate(const ScalarTaylorFunction& f, const Vector<Interval>& x) {
     if(!subset(x,f.domain())) {
-        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
+        ARIADNE_THROW(DomainException,std::setprecision(17)<<"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
     }
     return unchecked_evaluate(f,x);
 }

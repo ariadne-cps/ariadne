@@ -113,6 +113,7 @@ Real::Real(const std::string& str)
     Rational q;
     bool decimal_point=false;
     uint decimal_places=0;
+    int sign=1;
     const char* c_ptr=str.c_str();
     while(*c_ptr != 0) {
         const char& c=*c_ptr;
@@ -128,6 +129,8 @@ Real::Real(const std::string& str)
             if(decimal_point) {
                 ++decimal_places;
             }
+        } else if(c=='-' && c_ptr==str.c_str()) {
+            sign=-1;
         } else {
             ARIADNE_THROW(std::runtime_error,"Real(String)","invalid symbol '"<<c<<"' in string literal \""<<str<<"\"");
         }
@@ -136,7 +139,7 @@ Real::Real(const std::string& str)
     for(uint i=0; i!=decimal_places; ++i) {
         q=q/10;
     }
-    *this=Real(q);
+    *this=Real(sign*q);
 }
 
 Real::Real(const Rational& q)

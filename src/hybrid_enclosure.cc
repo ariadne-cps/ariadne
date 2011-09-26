@@ -704,7 +704,7 @@ std::ostream& HybridEnclosure::write(std::ostream& os) const
               << ", time="<< (this->_time) << ")";
 }
 
-std::ostream& HybridEnclosure::repr(std::ostream& os) const
+std::ostream& HybridEnclosure::print(std::ostream& os) const
 {
     return os << "HybridEnclosure"
               << "( events=" << this->_events
@@ -716,6 +716,18 @@ std::ostream& HybridEnclosure::repr(std::ostream& os) const
               << ", #negative=" << this->_set.negative_constraints().size()
               << ", #zero=" << this->_set.zero_constraints().size()
               << ", time_range="<<this->time_range() << ")";
+}
+
+std::ostream& HybridEnclosure::repr(std::ostream& os) const
+{
+    return os << "HybridEnclosure"
+              << "( " << this->_location
+              << ", " << this->_set.domain()
+              << ", " << this->_set.reduced_domain()
+              << ", " << this->_set.space_function()
+              << ", " << this->_set.negative_constraints()
+              << ", " << this->_set.zero_constraints()
+              << ", " << this->time_function() << ")";
 }
 
 

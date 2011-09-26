@@ -291,6 +291,8 @@ class HybridEnclosure
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;
     //! \brief Write an abbreviated representation to an output stream.
+    std::ostream& print(std::ostream&) const;
+    //! \brief Write a full representation to an output stream which can be used in a constructor.
     std::ostream& repr(std::ostream&) const;
   private:
   public:
@@ -332,6 +334,7 @@ class ListSet<HybridEnclosure>
             this->adjoin(*iter); } }
     void append(const HybridEnclosure& hes) { this->_list.append(hes); }
     size_t size() const { return _list.size(); }
+    const HybridEnclosure& operator[](uint i) const { return _list[i]; }
     ListSet<HybridEnclosure::ContinuousStateSetType> operator[](const DiscreteLocation& loc) const;
     iterator begin() { return _list.begin(); }
     iterator end() { return _list.end(); }

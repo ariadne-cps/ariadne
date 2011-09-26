@@ -153,11 +153,11 @@ void plot(const char* filename, const Axes2d& axes, const SET1& set1, const SET2
 
 template<class SET1>
 void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1) {
-    HybridFigure g; g.set_axes(axes); std::cerr<<g.bounds<<"\n"; g.set_fill_colour(fc1); draw(g,set1); g.write(filename); }
+    HybridFigure g; g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.write(filename); }
 
 template<class SET1,class SET2>
 void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2) {
-    HybridFigure g; g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.write(filename); }
+    HybridFigure g; g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2); g.write(filename); }
 
 template<class SET1,class SET2,class SET3>
 void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,

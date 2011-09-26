@@ -91,7 +91,7 @@ Vector<X> ediv(const Vector<X>& x, const Vector<XX>& z) {
 
 inline
 Interval eivl(const FloatVector& x) {
-    Interval r(x[0]); for(uint i=0; i!=x.size(); ++i) { r=hull(r,x[i]); } return r;
+    ARIADNE_ASSERT(x.size()>0); Interval r(x[0]); for(uint i=0; i!=x.size(); ++i) { r=hull(r,x[i]); } return r;
 }
 
 // Compute S+=ADA^T, where D is diagonal and S is symmetric.
@@ -434,6 +434,7 @@ contains_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVect
     }
 
     // Construct the function g_e(x) = g_{e_i}(x)
+    ARIADNE_ASSERT(g.result_size()>0);
     IntervalVectorFunction ge(equality_constraints.size(),g[0]);
     IntervalVector ce(equality_constraints.size());
     for(uint i=0; i!=ge.result_size(); ++i) {
@@ -1861,7 +1862,7 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<Feasib
     std::ostream& write(std::ostream& os) const { return os << "KuhnTuckerFunctionBody"; }
 
     template<class X> void _compute(Vector<X>& res, const Vector<X>& arg) const {
-        const X zero=arg[0]*0.0;
+        const X zero=arg[0].zero_element();
         const uint l=2*(m+n);
         assert(arg.size()==l+m+l+1);
         Vector<X> x(project(arg,range(0u,l)));

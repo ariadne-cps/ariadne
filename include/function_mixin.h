@@ -131,7 +131,7 @@ class VectorFunctionMixin<F,Float>
 {
   private:
     template<class X> Vector<X> _base_evaluate(const Vector<X>& a) const {
-        Vector<X> r(this->result_size(),a[0]*0.0); static_cast<const F*>(this)->_compute(r,a); return r; }
+        Vector<X> r(this->result_size(),a.zero_element()); static_cast<const F*>(this)->_compute(r,a); return r; }
   protected:
     VectorFunctionMixin() { }
   public:
@@ -149,7 +149,7 @@ class VectorFunctionMixin<F,Interval>
 {
   private:
     template<class X> Vector<X> _base_evaluate(const Vector<X>& a) const {
-        Vector<X> r(this->result_size(),a[0]*0.0); static_cast<const F*>(this)->_compute(r,a); return r; }
+        Vector<X> r(this->result_size(),a.zero_element()); static_cast<const F*>(this)->_compute(r,a); return r; }
   protected:
     VectorFunctionMixin() { }
   public:
@@ -173,7 +173,7 @@ class VectorFunctionMixin<F,Real>
 {
   private:
     template<class X> Vector<X> _base_evaluate(const Vector<X>& a) const {
-        Vector<X> r(this->result_size(),a[0]*0.0); static_cast<const F*>(this)->_compute(r,a); return r; }
+        Vector<X> r(this->result_size(),a.zero_element()); static_cast<const F*>(this)->_compute(r,a); return r; }
   protected:
     VectorFunctionMixin() { }
   public:

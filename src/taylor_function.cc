@@ -563,9 +563,9 @@ prod(const Matrix<Interval>& A,
 {
     ARIADNE_ASSERT(x.size()>0);
     ARIADNE_ASSERT(A.column_size()==x.size());
-    for(uint i=1; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
+    for(uint i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x.zero_element().argument_size()); }
 
-    Vector<ScalarTaylorFunction> r(A.row_size(),ScalarTaylorFunction(x[0].domain(),x[0].sweeper()));
+    Vector<ScalarTaylorFunction> r(A.row_size(),x.zero_element());
     for(uint i=0; i!=A.row_size(); ++i) {
         for(uint j=0; j!=A.column_size(); ++j) {
             //r[i]+=A[i][j]*x[j];
@@ -592,10 +592,10 @@ compose(const RealScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
 {
     ARIADNE_ASSERT(f.argument_size()==g.size());
     for(uint i=0; i!=g.size(); ++i) {
-        ARIADNE_ASSERT(g[0].domain()==g[i].domain());
+        ARIADNE_ASSERT(g.zero_element().domain()==g[i].domain());
     }
 
-    Vector<Interval> gdomain=g[0].domain();
+    Vector<Interval> gdomain=g.zero_element().domain();
     Vector<IntervalTaylorModel> gmodels(g.size());
     for(uint i=0; i!=g.size(); ++i) { gmodels[i]=g[i].model(); }
 
@@ -684,7 +684,7 @@ bool
 check(const Vector<ScalarTaylorFunction>& tv)
 {
     for(uint i=0; i!=tv.size(); ++i) {
-        if(tv[0].domain()!=tv[i].domain()) { return false; }
+        if(tv.zero_element().domain()!=tv[i].domain()) { return false; }
     }
     return true;
 }
@@ -744,7 +744,7 @@ Matrix<Interval>
 jacobian(const Vector<ScalarTaylorFunction>& tv, const Vector<Interval>& x)
 {
     ARIADNE_ASSERT(check(tv));
-    const Vector<Interval>& dom=tv[0].domain();
+    const Vector<Interval>& dom=tv.zero_element().domain();
     const uint n=dom.size();
     Vector< Differential<Interval> > s(n,n,1u);
     for(uint j=0; j!=n; ++j) {
@@ -876,8 +876,8 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<ScalarTaylorFunction>& v
     : _domain(), _models(v.size())
 {
     ARIADNE_ASSERT(v.size()>0);
-    for(uint i=1; i!=v.size(); ++i) { ARIADNE_ASSERT(v[i].domain()==v[0].domain()); }
-    this->_domain=v[0].domain();
+    for(uint i=0; i!=v.size(); ++i) { ARIADNE_ASSERT(v[i].domain()==v.zero_element().domain()); }
+    this->_domain=v.zero_element().domain();
     for(uint i=0; i!=v.size(); ++i) {
         this->_models[i]=v[i].model();
     }
@@ -902,12 +902,12 @@ VectorTaylorFunction* VectorTaylorFunction::_clone() const
 
 VectorTaylorFunction* VectorTaylorFunction::_create() const
 {
-    return new VectorTaylorFunction(this->result_size(), ScalarTaylorFunction(this->domain(),this->_models[0].sweeper()));
+    return new VectorTaylorFunction(this->result_size(), ScalarTaylorFunction(this->domain(),this->sweeper()));
 }
 
 VectorTaylorFunction* VectorTaylorFunction::_create_identity() const
 {
-    Sweeper sweeper=this->_models[0].sweeper();
+    Sweeper sweeper=this->sweeper();
     VectorTaylorFunction* result = new VectorTaylorFunction(this->domain().size(), ScalarTaylorFunction(this->domain(),sweeper));
     for(uint i=0; i!=result->size(); ++i) { (*result)[i]=ScalarTaylorFunction::coordinate(this->domain(),i,sweeper); }
     return result;
@@ -1016,7 +1016,7 @@ VectorTaylorFunction::operator!=(const VectorTaylorFunction& p2) const
 Sweeper
 VectorTaylorFunction::sweeper() const
 {
-    return this->_models[0].sweeper();
+    ARIADNE_ASSERT(this->size()>0); return this->_models[0].sweeper();
 }
 
 

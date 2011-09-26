@@ -2350,7 +2350,7 @@ Vector<IntervalTaylorModel>
 partial_evaluate(const Vector<IntervalTaylorModel>& tv, uint k, Float c)
 {
     // FIXME: Fails if tv.size()==0
-    Vector<IntervalTaylorModel> r(tv.size(),IntervalTaylorModel::zero(tv[0].argument_size(),tv[0].sweeper()));
+    Vector<IntervalTaylorModel> r(tv.size(),IntervalTaylorModel::zero(tv.zero_element().argument_size(),tv.zero_element().sweeper()));
     for(uint i=0; i!=r.size(); ++i) {
         r[i]=partial_evaluate(tv[i],k,c);
     }
@@ -2360,7 +2360,7 @@ partial_evaluate(const Vector<IntervalTaylorModel>& tv, uint k, Float c)
 Vector<IntervalTaylorModel>
 partial_evaluate(const Vector<IntervalTaylorModel>& tv, uint k, Interval c)
 {
-    Vector<IntervalTaylorModel> r(tv.size(),IntervalTaylorModel::zero(tv[0].argument_size(),tv[0].sweeper()));
+    Vector<IntervalTaylorModel> r(tv.size(),IntervalTaylorModel::zero(tv.zero_element().argument_size(),tv.zero_element().sweeper()));
     for(uint i=0; i!=r.size(); ++i) {
         r[i]=partial_evaluate(tv[i],k,c);
     }
@@ -2672,15 +2672,15 @@ Vector<IntervalTaylorModel> embed(uint as, const Vector<IntervalTaylorModel>& x)
 }
 
 Vector<IntervalTaylorModel> combine(const Vector<IntervalTaylorModel>& x1, const Vector<IntervalTaylorModel>& x2) {
-    return join(embed(x1,x2[0].argument_size()),embed(x1[0].argument_size(),x2));
+    return join(embed(x1,x2.zero_element().argument_size()),embed(x1.zero_element().argument_size(),x2));
 }
 
 Vector<IntervalTaylorModel> combine(const Vector<IntervalTaylorModel>& x1, const IntervalTaylorModel& x2) {
-    return join(embed(x1,x2.argument_size()),embed(x1[0].argument_size(),x2));
+    return join(embed(x1,x2.argument_size()),embed(x1.zero_element().argument_size(),x2));
 }
 
 Vector<IntervalTaylorModel> combine(const IntervalTaylorModel& x1, const Vector<IntervalTaylorModel>& x2) {
-    return join(embed(x1,x2[0].argument_size()),embed(x1.argument_size(),x2));
+    return join(embed(x1,x2.zero_element().argument_size()),embed(x1.argument_size(),x2));
 }
 
 Vector<IntervalTaylorModel> combine(const IntervalTaylorModel& x1, const IntervalTaylorModel& x2) {
@@ -2939,7 +2939,7 @@ Matrix<Interval>
 jacobian(const Vector<IntervalTaylorModel>& f, const Vector<Interval>& d)
 {
     uint rs=f.size();
-    uint as=f[0].argument_size();
+    uint as=f.zero_element().argument_size();
     Matrix<Interval> J(rs,as);
     for(uint i=0; i!=rs; ++i) {
         for(IntervalTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
@@ -2973,7 +2973,7 @@ Matrix<Float>
 jacobian_value(const Vector<IntervalTaylorModel>& f)
 {
     uint rs=f.size();
-    uint as=f[0].argument_size();
+    uint as=f.zero_element().argument_size();
     Matrix<Float> J(rs,as);
     MultiIndex a(as);
     for(uint i=0; i!=rs; ++i) {
@@ -2989,7 +2989,7 @@ Matrix<Float>
 jacobian2_value(const Vector<IntervalTaylorModel>& f)
 {
     const uint rs=f.size();
-    const uint fas=f[0].argument_size();
+    const uint fas=f.zero_element().argument_size();
     const uint has=fas-rs;
     Matrix<Float> J(rs,rs);
     MultiIndex a(fas);
@@ -3008,7 +3008,7 @@ Matrix<Interval>
 jacobian_range(const Vector<IntervalTaylorModel>& f)
 {
     uint rs=f.size();
-    uint as=f[0].argument_size();
+    uint as=f.zero_element().argument_size();
     Matrix<Interval> J(rs,as);
     for(uint i=0; i!=rs; ++i) {
         for(IntervalTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
@@ -3031,7 +3031,7 @@ Matrix<Interval>
 jacobian2_range(const Vector<IntervalTaylorModel>& f)
 {
     uint rs=f.size();
-    uint fas=f[0].argument_size();
+    uint fas=f.zero_element().argument_size();
     uint has=fas-rs;
     Matrix<Interval> J(rs,rs);
     for(uint i=0; i!=rs; ++i) {
@@ -3083,12 +3083,12 @@ _compose1(const Vector<IntervalTaylorModel>& x,
 {
     //std::cerr<<"compose1"<<std::endl;
     ARIADNE_ASSERT(x.size()>0);
-    ARIADNE_ASSERT(ys.size()==x[0].argument_size());
-    for(uint i=1; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
-    for(uint i=1; i!=ys.size(); ++i) { ARIADNE_ASSERT_MSG(ys[i].argument_size()==ys[0].argument_size(),"ys="<<ys); }
+    ARIADNE_ASSERT(ys.size()==x.zero_element().argument_size());
+    for(uint i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x.zero_element().argument_size()); }
+    for(uint i=0; i!=ys.size(); ++i) { ARIADNE_ASSERT_MSG(ys[i].argument_size()==ys.zero_element().argument_size(),"ys="<<ys); }
 
-    uint as=ys[0].argument_size();
-    Sweeper swp=ys[0].sweeper();
+    uint as=ys.zero_element().argument_size();
+    Sweeper swp=ys.zero_element().sweeper();
 
     Vector<IntervalTaylorModel> r(x.size(),IntervalTaylorModel(as,swp));
     IntervalTaylorModel t(as,swp);
@@ -3116,8 +3116,8 @@ _compose2(const Vector<IntervalTaylorModel>& x,
     //std::cerr<<"compose2"<<std::endl;
     uint yrs=ys.size();
     uint xas=ys.size();
-    uint as=ys[0].argument_size();
-    Sweeper sweeper=ys[0].sweeper();
+    uint as=ys.zero_element().argument_size();
+    Sweeper sweeper=ys.zero_element().sweeper();
 
     Array<uchar> max_power(ys.size());
     for(uint j=0; j!=ys.size(); ++j) { max_power[j]=1; }

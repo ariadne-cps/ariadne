@@ -817,7 +817,7 @@ evaluate(const Differential<X>& y, const Vector<Y>& x)
     uint ms=x.size();
     ARIADNE_ASSERT(d>=1);
 
-    Y zero = x[0]; zero*=0;
+    Y zero = x.zero_element();
     Y one = zero; one+=1;
 
     // Use inefficient brute-force approach with lots of storage...
@@ -998,6 +998,8 @@ class Vector< Differential<X> >
 
     const Differential<X>& operator[](size_t i) const { return this->_ary[i]; }
     NonAssignableDifferential<X>& operator[](size_t i) { return _ary[i]; }
+
+    const Differential<X> zero_element() const { ARIADNE_ASSERT(this->size()>0); return Differential<X>(this->argument_size(),this->degree()); }
 
     Differential<X>& at(size_t i) { return this->_ary[i]; }
     const Differential<X>& get(size_t i) const { return this->_ary[i]; }

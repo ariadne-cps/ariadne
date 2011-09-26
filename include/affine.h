@@ -63,7 +63,7 @@ class Affine
     explicit Affine(uint n) : _c(0), _g(n) { }
     explicit Affine(const Vector<X>& g, const X& c) : _c(c), _g(g) { }
     explicit Affine(uint as, double c, double g0, ...) : _c(static_cast<X>(c)), _g(as) {
-        _g[0]=static_cast<X>(g0); va_list args; va_start(args,g0);
+        ARIADNE_ASSERT(as>=2); _g[0]=static_cast<X>(g0); va_list args; va_start(args,g0);
         for(uint i=1; i!=as; ++i) { _g[i]=static_cast<X>(va_arg(args,double)); } }
     template<class XX> explicit Affine(const Affine<XX>& aff)
         : _c(aff.b()), _g(aff.a()) { }
@@ -91,7 +91,7 @@ class Affine
     uint argument_size() const { return this->_g.size(); }
 
     template<class Y> Y evaluate(const Vector<Y>& x) const {
-        Y r=this->_c+x[0]*0; for(uint j=0; j!=this->_g.size(); ++j) { r+=this->_g[j]*x[j]; } return r; }
+        Y r=x.zero_element(); for(uint j=0; j!=this->_g.size(); ++j) { r+=this->_g[j]*x[j]; } return r; }
 
     const X& derivative(uint j) const { return this->_g[j]; }
   private:

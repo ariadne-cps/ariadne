@@ -483,7 +483,7 @@ template<class X> Expansion<X> Expansion<X>::variable(unsigned int n, unsigned i
 template<class X, class Y>
 Y evaluate(const Expansion<X>& x, const Vector<Y>& y)
 {
-    Y zero = y[0]; zero*=0;
+    Y zero = y.zero_element(); zero*=0;
     Y one = zero; one+=1;
 
     Y r=zero;

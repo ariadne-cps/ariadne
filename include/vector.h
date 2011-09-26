@@ -146,6 +146,8 @@ class Vector
     X& operator[](size_t i) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return this->_ary[i]; }
     //! \brief C-style constant subscripting operator.
     const X& operator[](size_t i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return this->_ary[i]; }
+    //! \brief The zero of the ring containing the Vector's elements. This may be dependent on class parameters.
+    const X zero_element() const { if(this->size()!=0) { return (*this)[0]*0; } else { return X(); } }
     //@}
 
 #ifdef DOXYGEN
@@ -246,6 +248,7 @@ template<class V> struct VectorContainerRange
     size_t size() const { return _rng.size(); }
     ValueType operator[](size_t i) const { return _v[i+_rng.start()]; }
     ValueType& operator[](size_t i) { return _v[i+_rng.start()]; }
+    const ValueType zero_element() const { return _v.zero_element(); }
     void set(size_t i, const ValueType& x) { _v[i+_rng.start()]=x; }
     template<class VE> VectorContainerRange<V>& operator=(const VectorExpression<VE>& ve) {
         ARIADNE_PRECONDITION(this->size()==ve().size());
@@ -260,6 +263,7 @@ template<class V> struct VectorNegation
     typedef typename V::ValueType ValueType;
     size_t size() const { return _v.size(); }
     ValueType operator[](size_t i) const { return -_v[i]; }
+    const ValueType zero_element() const { return _v.zero_element(); }
 };
 
 template<class V1, class V2> struct VectorSum
@@ -270,6 +274,7 @@ template<class V1, class V2> struct VectorSum
     typedef typename Arithmetic<typename V1::ValueType, typename V2::ValueType>::ResultType ValueType;
     size_t size() const { return _v1.size(); }
     ValueType operator[](size_t i) const { return _v1[i]+_v2[i]; }
+    const ValueType zero_element() const { return _v1.zero_element(); }
 };
 
 template<class V1, class V2> struct VectorDifference
@@ -280,6 +285,7 @@ template<class V1, class V2> struct VectorDifference
     typedef typename Arithmetic<typename V1::ValueType, typename V2::ValueType>::ResultType ValueType;
     size_t size() const { return _v1.size(); }
     ValueType operator[](size_t i) const { return _v1[i]-_v2[i]; }
+    const ValueType zero_element() const { return _v1.zero_element(); }
 };
 
 template<class V1, class X2> struct VectorScalarProduct
@@ -290,6 +296,7 @@ template<class V1, class X2> struct VectorScalarProduct
     typedef typename Arithmetic<typename V1::ValueType, X2>::ResultType ValueType;
     size_t size() const { return _v1.size(); }
     ValueType operator[](size_t i) const { return _v1[i]*_x2; }
+    const ValueType zero_element() const { return ValueType(_v1.zero_element()*_x2); }
 };
 
 template<class V> class IsVector< VectorRange<V> > : public True { };

@@ -282,7 +282,7 @@ evaluate(const DenseDifferential<X>& y, const Vector<X>& x)
     uint ms=x.size();
     ARIADNE_ASSERT(d>=1);
 
-    X zero = x[0]; zero*=0;
+    X zero = x.zero_element();
     X one = zero; one+=1;
 
     // Use inefficient brute-force approach with lots of storage...
@@ -320,7 +320,7 @@ evaluate(const DenseDifferential<X>& y, const Vector<Y>& x)
     uint ms=x.size();
     ARIADNE_ASSERT(d>=1);
 
-    Y zero = x[0]; zero*=0;
+    Y zero = x.zero_element();
     Y one = zero; one+=1;
 
     // Use inefficient brute-force approach with lots of storage...

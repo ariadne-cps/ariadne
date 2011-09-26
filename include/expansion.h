@@ -581,7 +581,7 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
 {
     typedef typename Expansion<X>::const_iterator const_iterator;
     const uint n=e.argument_size();
-    const Y z=x[0]*0; // The zero element of the ring Y
+    const Y z=x.zero_element(); // The zero element of the ring Y
     if(e.number_of_nonzeros()==0) { return z; }
 
     Array< Y > r(e.argument_size(),z); // An Array of "registers" containing working p(x[0],...,x[k])
@@ -650,7 +650,7 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
 template<class X, class Y>
 Y power_evaluate(const Expansion<X>& e, const Vector<Y>& y)
 {
-    Y zero = y[0]; zero*=0;
+    Y zero = y.zero_element();
     Y one = zero; one+=1;
 
     Y r=zero;

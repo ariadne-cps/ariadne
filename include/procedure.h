@@ -107,7 +107,7 @@ class Vector< Procedure<X> > {
 // \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
 template<class X, class T> void _execute(List<T>& v, const List<ProcedureInstruction>& p, const List<X>& c, const Vector<T>& x)
 {
-    T z=x[0]*0;
+    T z=x.zero_element();
     for(size_t i=0; i!=p.size(); ++i) {
         const ProcedureInstruction& instruction=p[i];
         switch(instruction.op) {
@@ -138,7 +138,7 @@ template<class X, class T> void _execute(List<T>& v, const List<ProcedureInstruc
 // \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
 template<class X, class T> void _compute(List<T>& v, const List<ProcedureInstruction>& p, const List<X>& c, const Vector<T>& x)
 {
-    T z=x[0]*0;
+    T z=x.zero_element();
     ARIADNE_ASSERT(v.size()==p.size());
     for(size_t i=0; i!=p.size(); ++i) {
         const ProcedureInstruction& instruction=p[i];

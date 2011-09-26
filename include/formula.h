@@ -223,7 +223,12 @@ template<class X, class R> inline typename EnableIfNumeric<R,Formula<X> >::Type&
 
 // Make a constant of type T with value c based on a prototype vector v
 template<class X, class T> inline T make_constant(const X& c, const Vector<T>& v) {
-    assert(v.size()!=0); return v[0]*0+c;
+    return v.zero_element()+c;
+}
+
+// Make a constant of type T with value c based on a prototype vector v
+template<class X, class T> inline Formula<T> make_constant(const X& c, const Vector< Formula<T> >& v) {
+    return Formula<T>::constant(c);
 }
 
 template<class X, class T> T evaluate(const Formula<X>& f, const Vector<T>& x) {

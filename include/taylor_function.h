@@ -869,7 +869,7 @@ std::ostream& operator<<(std::ostream&,const PolynomialRepresentation<VectorTayl
 
 template<class E> VectorTaylorFunction::VectorTaylorFunction(const VectorExpression<E>& ve) : _domain(), _models(ve().size())
 {
-    if(ve().size()!=0) { this->_domain=ve()[0].domain(); }
+    if(ve().size()!=0) { this->_domain=ve().zero_element().domain(); }
     for(uint i=0; i!=ve().size(); ++i) { this->set(i,ve()[i]); }
 }
 

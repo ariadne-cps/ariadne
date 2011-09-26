@@ -133,7 +133,7 @@ struct ScalarConstantFunctionBody
     virtual std::ostream& repr(std::ostream& os) const { return os << this->_value; }
     virtual std::ostream& write(std::ostream& os) const { return os << "CF["<<this->_argument_size<<"]("<<Float(this->_value)<<")"; }
     template<class X> void _compute(X& r, const Vector<X>& x) const {
-        if(x.size()==0) { r=_value; } else { r=x[0]*0+_value; } }
+        r=x.zero_element()+_value; }
 };
 
 
@@ -318,7 +318,7 @@ struct ScalarAffineFunctionBody
     virtual std::ostream& repr(std::ostream& os) const { return os << Affine<Float>(_affine); }
     virtual std::ostream& write(std::ostream& os) const { return os << "AF["<<this->argument_size()<<"]("<<Affine<Float>(_affine)<<")"; }
     template<class X> void _compute(X& r, const Vector<X>& x) const {
-        r=x[0]*0+_affine.value(); for(uint j=0; j!=argument_size(); ++j) { r+=_affine.gradient(j)*x[j]; } }
+        r=x.zero_element()+_affine.value(); for(uint j=0; j!=argument_size(); ++j) { r+=_affine.gradient(j)*x[j]; } }
     Affine<Real> _affine;
 };
 
@@ -500,7 +500,7 @@ struct VectorPolynomialFunctionBody
     VectorPolynomialFunctionBody(const Vector< Polynomial<Real> >& p) : _polynomials(p) { }
 
     virtual SizeType result_size() const { return _polynomials.size(); }
-    virtual SizeType argument_size() const { return _polynomials[0].argument_size(); }
+    virtual SizeType argument_size() const { return _polynomials.zero_element().argument_size(); }
     virtual RealScalarFunction operator[](uint i) const { return RealScalarFunction(this->_polynomials[i]); }
     virtual std::ostream& write(std::ostream& os) const { return os << _polynomials; }
     template<class R, class A> void _compute(R& r, const A& x) const { r=Ariadne::evaluate(_polynomials,x); }
@@ -1290,7 +1290,7 @@ RealVectorFunction::VectorFunction(Nat as, const List< Formula<Real> >& le)
 RealVectorFunction::VectorFunction(const Vector< Polynomial<Real> >& p)
 {
     ARIADNE_ASSERT(p.size()>0);
-    this->_ptr=shared_ptr<RealVectorFunctionInterface>(new VectorOfRealScalarFunction(p.size(),p[0].argument_size()));
+    this->_ptr=shared_ptr<RealVectorFunctionInterface>(new VectorOfRealScalarFunction(p.size(),p.zero_element().argument_size()));
     VectorOfRealScalarFunction* vec = dynamic_cast<VectorOfRealScalarFunction*>(this->_ptr.operator->());
     for(uint i=0; i!=p.size(); ++i) {
         vec->set(i,RealScalarFunction(p[i]));

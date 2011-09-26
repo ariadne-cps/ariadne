@@ -90,6 +90,7 @@ void
 AffineSet::new_inequality_constraint(const Vector<Float>& a, const Float& b)
 {
     // Re-write the constraint ax<=b as b-ax>=0
+    ARIADNE_ASSERT(this->_function.size()>0);
     ARIADNE_ASSERT_MSG(a.size()==this->_function[0].argument_size(),"a="<<a<<" f="<<this->_function);
     Affine<Float> c(a.size());
     c=-b;
@@ -103,6 +104,7 @@ void
 AffineSet::new_equality_constraint(const Vector<Float>& a, const Float& b)
 {
     // Re-write the constraint ax<=b as b-ax>=0
+    ARIADNE_ASSERT(this->_function.size()>0);
     ARIADNE_ASSERT_MSG(a.size()==this->_function[0].argument_size(),"a="<<a<<" f="<<this->_function);
     Affine<Float> c(a.size());
     c=-b;
@@ -151,6 +153,7 @@ AffineSet::dimension() const
 uint
 AffineSet::number_of_parameters() const
 {
+    ARIADNE_ASSERT(this->_function.size()>0);
     return this->_function[0].argument_size();
 }
 

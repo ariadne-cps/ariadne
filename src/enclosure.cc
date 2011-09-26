@@ -601,13 +601,13 @@ tribool Enclosure::empty() const
 
     for(uint i=0; i!=this->_constraints.size(); ++i) {
         if(this->_constraints[i](this->_reduced_domain).lower()>0.0) {
-            this->_reduced_domain[0] = Interval(1,-1);
+            if(this->_reduced_domain.size()>0) { this->_reduced_domain[0] = Interval(1,-1); }
             return true;
         }
     }
     for(uint i=0; i!=this->_equations.size(); ++i) {
         if(!contains(this->_equations[i](this->_reduced_domain),0.0)) {
-            this->_reduced_domain[0] = Interval(1,-1);
+            if(this->_reduced_domain.size()>0) { this->_reduced_domain[0] = Interval(1,-1); }
             return true;
         }
     }

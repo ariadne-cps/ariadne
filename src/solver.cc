@@ -144,7 +144,7 @@ Matrix<Float>
 jacobian2_value(const Vector<IntervalTaylorModel>& f)
 {
     const uint rs=f.size();
-    const uint fas=f[0].argument_size();
+    const uint fas=f.zero_element().argument_size();
     const uint has=fas-rs;
     Matrix<Float> J(rs,rs);
     MultiIndex a(fas);
@@ -161,7 +161,7 @@ Matrix<Interval>
 jacobian2_range(const Vector<IntervalTaylorModel>& f)
 {
     uint rs=f.size();
-    uint fas=f[0].argument_size();
+    uint fas=f.zero_element().argument_size();
     uint has=fas-rs;
     Matrix<Interval> J(rs,rs);
     for(uint i=0; i!=rs; ++i) {
@@ -186,9 +186,9 @@ jacobian2_range(const Vector<IntervalTaylorModel>& f)
 Vector<IntervalTaylorModel> _implicit5(const Vector<IntervalTaylorModel>& f, uint n)
 {
     //std::cerr<<__FUNCTION__<<std::endl;
-    uint rs=f.size(); uint fas=f[0].argument_size(); uint has=fas-rs;
+    uint rs=f.size(); uint fas=f.zero_element().argument_size(); uint has=fas-rs;
 
-    Sweeper sweeper = f[0].sweeper();
+    Sweeper sweeper = f.zero_element().sweeper();
     Vector<Interval> domain_h(rs,Interval(-1,+1));
     Vector<IntervalTaylorModel> id=IntervalTaylorModel::variables(has,sweeper);
     Vector<IntervalTaylorModel> h=IntervalTaylorModel::constants(has,domain_h,sweeper);
@@ -247,11 +247,11 @@ newton_implicit(const Vector<IntervalTaylorModel>& f)
 {
     // Check that the arguments are suitable
     ARIADNE_ASSERT(f.size()>0);
-    for(uint i=1; i!=f.size(); ++i) { ARIADNE_ASSERT(f[i].argument_size()==f[0].argument_size()); }
+    for(uint i=0; i!=f.size(); ++i) { ARIADNE_ASSERT(f[i].argument_size()==f.zero_element().argument_size()); }
 
     // Set some useful size constants
     const uint rs=f.size();
-    const uint fas=f[0].argument_size();
+    const uint fas=f.zero_element().argument_size();
     const uint has=fas-rs;
 
     // Check to see if a solution exists
@@ -267,11 +267,11 @@ newton_implicit(const Vector<IntervalTaylorModel>& f)
     }
 
     uint number_of_steps=6;
-    Vector<IntervalTaylorModel> id=IntervalTaylorModel::variables(has,f[0].sweeper());
+    Vector<IntervalTaylorModel> id=IntervalTaylorModel::variables(has,f.zero_element().sweeper());
     Vector<IntervalTaylorModel> h=_implicit5(f,number_of_steps);
 
     // Perform proper Newton step improvements
-    Vector<Interval> domain_h(h[0].argument_size(),Interval(-1,+1));
+    Vector<Interval> domain_h(h.zero_element().argument_size(),Interval(-1,+1));
     for(uint i=0; i!=3; ++i) {
         D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
         clobber(h);
@@ -283,7 +283,7 @@ newton_implicit(const Vector<IntervalTaylorModel>& f)
     // Check that the result has the correct sizes.
     ARIADNE_ASSERT(h.size()==f.size());
     for(uint i=0; i!=h.size(); ++i) {
-        ARIADNE_ASSERT(h[0].argument_size()+f.size()==f[i].argument_size());
+        ARIADNE_ASSERT(h.zero_element().argument_size()+f.size()==f[i].argument_size());
     }
 
     return h;
@@ -323,6 +323,7 @@ inline Vector<Interval> operator*(const Matrix<Interval>& A, const VectorSum< Ve
 
 /*
 IntervalVectorFunctionModel evaluate(const IntervalVectorFunction& f,const IntervalVectorFunctionModel& x) {
+    ARIADNE_ASSERT(x.size()!=0);
     for(uint i=0; i!=x.result_size(); ++i) { ARIADNE_ASSERT(x[i].domain()==x[0].domain()); }
     Vector<IntervalTaylorModel> m(x.result_size());
     for(uint i=0; i!=m.size(); ++i) { m[i]=x[i].model(); }
@@ -347,6 +348,7 @@ IntervalVectorFunctionModel operator*(const Matrix<Float>& A,const IntervalVecto
 }
 
 IntervalVectorFunctionModel operator*(const Matrix<Interval>& A,const IntervalVectorFunctionModel& v) {
+    ARIADNE_ASSERT(v.size()!=0);
     IntervalVectorFunctionModel r(A.row_size(),v[0].create_zero());
     for(uint i=0; i!=r.size(); ++i) {
         IntervalScalarFunctionModel t=r[i];

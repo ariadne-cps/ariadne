@@ -603,6 +603,7 @@ class Vector< FirstDifferential<X> >
     void set(uint i, const FirstDifferential<X>& d) const { _ary[i]=d; }
     const FirstDifferential<X>& operator[](uint i) const { return _ary[i]; }
     FirstDifferential<X>& operator[](uint i) { return _ary[i]; }
+    const FirstDifferential<X> zero_element() const { return FixedDifferential(this->argument_size()); }
 
     Vector<X> value() const {
         Vector<X> r(this->result_size());

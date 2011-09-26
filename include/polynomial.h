@@ -414,8 +414,8 @@ Y evaluate(const Polynomial<X>& p, const Vector<Y>& x)
 template<class X, class Y> inline
 Vector<Y> evaluate(const Vector< Polynomial<X> >& p, const Vector<Y>& x)
 {
-    ARIADNE_ASSERT(p.size()>0 && p[0].argument_size()==x.size());
-    Y zero = x[0]; zero*=0;
+    ARIADNE_ASSERT(p.size()>0 && p.zero_element().argument_size()==x.size());
+    Y zero = x.zero_element(); zero*=0;
     Vector<Y> r(p.size(),zero);
     for(uint i=0; i!=p.size(); ++i) {
         r[i]=evaluate(p[i],x);

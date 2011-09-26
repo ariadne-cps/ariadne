@@ -115,7 +115,7 @@ int main(int argc, const char* argv[])
     watertank_system.new_mode(closed,(tank_dynamic,valve_constant_dynamic));
 
     watertank_system.new_invariant(open,start_closing_invariant,must_start_closing);
-    watertank_system.new_invariant(closed,start_closing_invariant,must_start_closing);
+    watertank_system.new_invariant(closed,start_opening_invariant,must_start_opening);
 
     watertank_system.new_transition(opening,finish_opening,open,(tank_reset,valve_open_reset),finish_opening_guard,urgent);
     watertank_system.new_transition(open,start_closing,closing,(tank_reset,valve_reset),start_closing_guard,permissive);
@@ -136,6 +136,7 @@ int main(int argc, const char* argv[])
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.5;
     evolver.parameters().maximum_step_size = 2.5;
+    evolver.parameters().maximum_spacial_error = 1e-3;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
@@ -157,8 +158,12 @@ int main(int argc, const char* argv[])
     std::cout << "Orbit.reach_size="<<orbit.reach().size()<<std::endl;
 
     std::cout << "Plotting orbit... "<<std::flush;
-    Axes2d axes(-0.1<=height<=9.1,-0.1<=aperture<=1.3);
-    plot("watertank-orbit",axes, Colour(0.0,0.5,1.0), orbit);
+    Axes2d height_aperture_axes(-0.1<=height<=9.1,-0.1<=aperture<=1.3);
+    plot("watertank-orbit", height_aperture_axes, Colour(0.0,0.5,1.0), orbit, Colour(0.0,1.0,1.0), orbit.final());//, Colour(1.0,0.0,0.0),orbit.final()[9]
+    Axes2d time_height_axes(0<=TimeVariable()<=80,-0.1<=height<=9.1);
+    plot("watertank-height", time_height_axes, Colour(0.0,0.5,1.0), orbit, Colour(0.0,1.0,1.0), orbit.final());
+    Axes2d time_aperture_axes(0<=TimeVariable()<=80,-0.1<=aperture<=1.31);
+    plot("watertank-aperture", time_aperture_axes, Colour(0.0,0.5,1.0), orbit, Colour(0.0,1.0,1.0), orbit.final());
     std::cout << "done." << std::endl;
 
 
@@ -172,7 +177,7 @@ int main(int argc, const char* argv[])
     }
     std::cout << "done." << std::endl;
 
-    plot("watertank-reach",axes, Colour(0.0,0.5,1.0), hgts);
+    plot("watertank-reach", height_aperture_axes, Colour(0.0,0.5,1.0), hgts);
 
 
 /*

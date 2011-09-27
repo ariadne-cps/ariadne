@@ -207,7 +207,7 @@ RealBoundedConstraintSet HybridSet::continuous_state_set(const RealSpace& space)
 }
 
 void HybridSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {
-    if(q.contains(this->location())) {
+    if(q.empty() || q.contains(this->location())) {
         Set<RealVariable> variables=this->variables();
         RealSpace space(List<RealVariable>(variables.begin(),variables.end()));
         this->continuous_state_set(space).draw(c,projection(space,p));
@@ -275,7 +275,7 @@ template<class BS> void draw(CanvasInterface& canvas, const DiscreteLocation& lo
 }
 
 void HybridBasicSet<Box>::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {
-    if(q.contains(this->location())) {
+    if(q.empty() || q.contains(this->location())) {
         this->continuous_state_set().draw(c,projection(this->space(),p));
     }
 }

@@ -30,6 +30,8 @@
 
 namespace Ariadne {
 
+typedef void Void;
+
 struct True { static const bool value = true; };
 struct False { static const bool value = false; };
 

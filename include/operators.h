@@ -153,6 +153,7 @@ template<class X> inline X compute(OperatorCode op, const X& x) {
     switch(op) {
         case NEG: return -x;
         case REC: return 1/x;
+        case SQR: return sqr(x);
         case SQRT: return sqrt(x);
         case EXP: return exp(x);
         case LOG: return log(x);

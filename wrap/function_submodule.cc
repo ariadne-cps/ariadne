@@ -269,10 +269,8 @@ void export_scalar_function()
     class_<RealScalarFunction>
         scalar_function_class("ScalarFunction", init<RealScalarFunction>());
     scalar_function_class.def(init<uint>());
-    scalar_function_class.def(init< Polynomial<Real> >());
     scalar_function_class.def("argument_size", &RealScalarFunction::argument_size);
     scalar_function_class.def("derivative", &RealScalarFunction::derivative);
-    scalar_function_class.def("polynomial", &RealScalarFunction::polynomial);
     scalar_function_class.def("__call__", (Interval(RealScalarFunction::*)(const Vector<Interval>&)const)&RealScalarFunction::operator() );
     scalar_function_class.def("__call__", (Float(RealScalarFunction::*)(const Vector<Float>&)const)&RealScalarFunction::operator() );
     scalar_function_class.def("__call__", (IntervalDifferential(RealScalarFunction::*)(const Vector<IntervalDifferential>&)const)&RealScalarFunction::evaluate );
@@ -304,7 +302,7 @@ void export_scalar_function()
     scalar_function_class.staticmethod("constant");
     scalar_function_class.staticmethod("coordinate");
 
-    def("evaluate_approx", (Float(*)(const RealScalarFunction&,const Vector<Float>&)) &evaluate_approx);
+    def("evaluate", (Float(*)(const RealScalarFunction&,const Vector<Float>&)) &evaluate);
     def("evaluate", (Interval(*)(const RealScalarFunction&,const Vector<Interval>&)) &evaluate);
 
     def("derivative", (RealScalarFunction(RealScalarFunction::*)(uint)const) &RealScalarFunction::derivative);
@@ -319,8 +317,6 @@ void export_scalar_function()
     def("cos", (RealScalarFunction(*)(const RealScalarFunction&)) &cos);
     def("tan", (RealScalarFunction(*)(const RealScalarFunction&)) &tan);
 
-    typedef Polynomial<Real> RealPolynomial;
-    implicitly_convertible<RealPolynomial,RealScalarFunction>();
 }
 
 void export_vector_function()
@@ -342,12 +338,10 @@ void export_vector_function()
     vector_function_class.def("jacobian", (Matrix<Float>(RealVectorFunction::*)(const Vector<Float>&)const) &RealVectorFunction::jacobian);
     vector_function_class.def(self_ns::str(self));
 
-    vector_function_class.def("constant", (RealVectorFunction(*)(uint,Vector<Real>)) &RealVectorFunction::constant);
     vector_function_class.def("identity", (RealVectorFunction(*)(uint)) &RealVectorFunction::identity);
-    vector_function_class.staticmethod("constant");
     vector_function_class.staticmethod("identity");
 
-    def("evaluate_approx", (Vector<Float>(*)(const RealVectorFunction&,const Vector<Float>&)) &evaluate_approx);
+    def("evaluate", (Vector<Float>(*)(const RealVectorFunction&,const Vector<Float>&)) &evaluate);
     def("evaluate", (Vector<Interval>(*)(const RealVectorFunction&,const Vector<Interval>&)) &evaluate);
 
     def("join", (RealVectorFunction(*)(const RealScalarFunction&, const RealScalarFunction&)) &join);

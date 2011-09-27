@@ -158,7 +158,7 @@ IntegratorBase::flow(const IntervalVectorFunction& vf, const IntervalVector& dx0
     ARIADNE_LOG(2,"vf="<<vf<<"\n");
     ARIADNE_LOG(2,"dom(x0)="<<dx0<<" tmax="<<tmax<<"\n");
     const uint n=dx0.size(); // Dimension of the state space
-    IntervalVectorFunctionModel flow_function=this->function_factory().create(dx0,IdentityFunction(dx0.size()));
+    IntervalVectorFunctionModel flow_function=this->function_factory().create_identity(dx0);
     Float t=0.0;
     IntervalVectorFunctionModel step_function;
     while(t<tmax) {
@@ -198,7 +198,7 @@ IntegratorBase::flow(const IntervalVectorFunction& vf, const IntervalVector& dx0
         ARIADNE_THROW(FlowTimeStepException,"IntegratorBase::flow","Width of time interval "<<dt<<" cannot be covered in a single flow step; maximum flow step "<<h<<" over domain "<<dx);
     }
     IntervalVectorFunctionModel step=this->flow_step(vf,dx,h,bx);
-    IntervalScalarFunctionModel time=this->function_factory().create(IntervalVector(1u,dt),CoordinateFunction(1,0))-ExactFloat(dt.lower());
+    IntervalScalarFunctionModel time=this->function_factory().create_identity(dt)-ExactFloat(dt.lower());
     IntervalVectorFunctionModel flow=compose(step,combine(evolve,time));
     return flow;
 }

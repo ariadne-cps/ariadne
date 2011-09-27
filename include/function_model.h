@@ -37,6 +37,9 @@
 #include "function.h"
 
 #include "operators.h"
+#include "numeric.h"
+#include "vector.h"
+#include "matrix.h"
 
 namespace Ariadne {
 
@@ -162,7 +165,7 @@ template<> class ScalarFunctionModel<Interval>
     ScalarFunctionModel<Interval> create_zero() const { return this->_ptr->_create(); }
     ScalarFunctionModel<Interval>& operator=(const Float& c) { return this->operator=(c); }
     ScalarFunctionModel<Interval>& operator=(const Interval& c);
-    ScalarFunctionModel<Interval>& operator=(const ScalarFunction<Interval>& f) { (*this)=this->_ptr->_create()+f; return *this; }
+    ScalarFunctionModel<Interval>& operator=(const ScalarFunction<Interval>& f);
     ScalarFunctionModel<Interval>& operator=(const ScalarTaylorFunction& f);
     inline Nat argument_size() const { return this->_ptr->argument_size(); }
     template<class XX> inline XX operator()(const Vector<XX>& v) const { return this->_ptr->evaluate(v); }
@@ -181,6 +184,8 @@ template<> class ScalarFunctionModel<Interval>
     inline ScalarFunctionModel<Interval> apply(Operator op) const { return this->_ptr->_apply(op); }
     inline Void restrict(const IntervalVector& d) { this->_ptr->restrict(d); }
 };
+
+// inline ScalarFunctionModel<Interval>& ScalarFunctionModel<Interval>::operator=(const ScalarFunction<Interval>& f) { (*this)=this->_ptr->_create()+f; return *this; }
 
 inline Float norm(const ScalarFunctionModel<Interval>& f) { return f._ptr->_norm(); }
 inline ScalarFunctionModel<Interval> derivative(const ScalarFunctionModel<Interval>& f, Nat j) { return f._ptr->_derivative(j); }
@@ -370,8 +375,7 @@ template<> class VectorFunctionModel<Interval>
     inline IntervalVector const codomain() const { return this->_ptr->codomain(); }
     inline Vector<Float> const errors() const { return this->_ptr->errors(); }
     inline Float const error() const { return this->_ptr->error(); }
-    inline Matrix<Interval> const jacobian(const Vector<Interval>& x) const {
-        return this->_ptr->evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
+    inline Matrix<Interval> const jacobian(const Vector<Interval>& x) const { return this->_ptr->jacobian(x); }
 
     inline Void restrict(const IntervalVector& d) { this->_ptr->restrict(d); }
 
@@ -403,8 +407,8 @@ inline VectorFunctionModel<Interval> operator-(const VectorFunctionModel<Interva
 inline VectorFunctionModel<Interval> operator+(const Vector<Interval>& c1, const VectorFunctionModel<Interval>& f2);
 inline VectorFunctionModel<Interval> operator-(const Vector<Interval>& c1, const VectorFunctionModel<Interval>& f2);
 
-inline Interval evaluate(const ScalarFunction<Interval>& f, const Vector<Interval>& x);
-inline Vector<Interval> evaluate(const VectorFunction<Interval>& f, const Vector<Interval>& x);
+inline Interval evaluate(const ScalarFunctionModel<Interval>& f, const Vector<Interval>& x) { return f._ptr->evaluate(x); }
+inline Vector<Interval> evaluate(const VectorFunctionModel<Interval>& f, const Vector<Interval>& x) { return f._ptr->evaluate(x); }
 
 inline Interval unchecked_evaluate(const ScalarFunctionModel<Interval>& f, const Vector<Interval>& x) { return f._ptr->_unchecked_evaluate(x); }
 inline Vector<Interval> unchecked_evaluate(const VectorFunctionModel<Interval>& f, const Vector<Interval>& x) { return f._ptr->_unchecked_evaluate(x); }
@@ -472,6 +476,7 @@ template<> class FunctionModelFactoryInterface<Interval>
     inline ScalarFunctionModel<Interval> create_constant(const IntervalVector& domain, const Interval& value) const;
     inline ScalarFunctionModel<Interval> create_constant(const IntervalVector& domain, const Float& value) const;
     inline ScalarFunctionModel<Interval> create_constant(const IntervalVector& domain, double value) const;
+    inline VectorFunctionModel<Interval> create_constants(const IntervalVector& domain, const Vector<Interval>& values) const;
     inline ScalarFunctionModel<Interval> create_coordinate(const IntervalVector& domain, Nat index) const;
     inline ScalarFunctionModel<Interval> create_identity(const Interval& domain) const;
     inline VectorFunctionModel<Interval> create_identity(const IntervalVector& domain) const;
@@ -508,13 +513,15 @@ namespace Ariadne {
 ScalarFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_zero(const IntervalVector& domain) const {
     return this->_create(domain,RealScalarFunction::zero(domain.size())); }
 VectorFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_zeros(Nat result_size, const IntervalVector& domain) const {
-    return this->_create(domain,RealVectorFunction(result_size,domain.size())); }
+    return this->_create(domain,RealVectorFunction::zeros(result_size,domain.size())); }
 ScalarFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_constant(const IntervalVector& domain, double value) const {
     return this->create_constant(domain,numeric_cast<Interval>(value)); }
 ScalarFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_constant(const IntervalVector& domain, const Float& value) const {
     return this->create_constant(domain,numeric_cast<Interval>(value)); }
 ScalarFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_constant(const IntervalVector& domain, const Interval& value) const {
     return ScalarFunctionModel<Interval>(this->_create(domain,RealScalarFunction::zero(domain.size())))+value; };
+VectorFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_constants(const IntervalVector& domain, const Vector<Interval>& values) const {
+    return VectorFunctionModel<Interval>(this->_create(domain,RealVectorFunction::zeros(values.size(),domain.size())))+values; };
 ScalarFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_coordinate(const IntervalVector& domain, Nat index) const {
     return ScalarFunctionModel<Interval>(this->_create(domain,RealScalarFunction::coordinate(domain.size(),index))); };
 ScalarFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_identity(const Interval& domain) const {

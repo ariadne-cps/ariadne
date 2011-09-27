@@ -85,6 +85,7 @@ class Formula {
     Formula<X>& operator=(const X& c);
     Formula<X>& operator=(double c);
   public:
+    static Formula<X> zero();
     template<class R> static Formula<X> constant(const R& c);
     static Formula<X> coordinate(Nat i);
     static Vector< Formula<X> > identity(Nat n);
@@ -169,8 +170,10 @@ template<class X> inline Formula<X>::Formula(const Index& i) : _root(new IndexFo
 template<class X> inline Formula<X>& Formula<X>::operator=(const X& c) { return *this=Formula(c); }
 template<class X> inline Formula<X>& Formula<X>::operator=(double c) { return *this=Formula<X>(static_cast<X>(c)); }
 
+template<class X> inline Formula<X> Formula<X>::zero() {
+    return new ConstantFormulaNode<X>(numeric_cast<X>(0)); }
 template<class X> template<class R> inline Formula<X> Formula<X>::constant(const R& c) {
-    return new ConstantFormulaNode<X>(static_cast<X>(c)); }
+    return new ConstantFormulaNode<X>(numeric_cast<X>(c)); }
 template<class X> inline Formula<X> Formula<X>::coordinate(Nat j) {
     return new IndexFormulaNode<X>(Index(j)); }
 template<class X> inline Vector< Formula<X> > Formula<X>::identity(Nat n) {
@@ -222,8 +225,13 @@ template<class X, class R> inline typename EnableIfNumeric<R,Formula<X> >::Type&
 
 
 // Make a constant of type T with value c based on a prototype vector v
-template<class X, class T> inline T make_constant(const X& c, const Vector<T>& v) {
-    return v.zero_element()+c;
+template<class X, class T> inline T make_constant(const X& c, const Vector<T>& v, typename EnableIf< Not< IsNumeric<T> >, Void >::Type* =0 ) {
+    return v.zero_element()+numeric_cast<typename T::NumericType>(c);
+}
+
+// Make a constant of type T with value c based on a prototype vector v
+template<class X, class T> inline T make_constant(const X& c, const Vector<T>& v, typename EnableIf<IsNumeric<T>,Void>::Type* = 0) {
+    return v.zero_element()+numeric_cast<T>(c);
 }
 
 // Make a constant of type T with value c based on a prototype vector v
@@ -278,8 +286,8 @@ template<class X> Formula<X> derivative(const Formula<X>& f, uint j)
         case CNST:
             return Formula<X>(0.0);
         case IND:
-            if(f.ind()==j) { return Formula<Real>(1.0); }
-            else { return Formula<Real>(0.0); }
+            if(f.ind()==j) { return Formula<X>(1.0); }
+            else { return Formula<X>(0.0); }
         case ADD:
             return derivative(f.arg1(),j)+derivative(f.arg2(),j);
         case SUB:

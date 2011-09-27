@@ -107,9 +107,6 @@ class TestHybridReachabilityAnalyser
 
         RealVariable x("x");
         RealVariable y("y");
-        Matrix<Float> A=Matrix<Float>("[-0.5,-1.0;1.0,-0.5]");
-        Vector<Float> b=Vector<Float>("[0.0,0.0]");
-        VectorAffineFunction aff(A,b);
         system.new_mode(location,(dot(x)=-0.5*x-1.0*y,dot(y)=1.0*x-0.5*y) );
         cout << "Done building system\n";
 

@@ -30,6 +30,7 @@
 #include "taylor_model.h"
 #include "differential.h"
 #include "function.h"
+#include "polynomial.h"
 
 #include "test.h"
 using std::cout; using std::cerr; using std::endl;
@@ -204,11 +205,11 @@ void TestTaylorModel::test_range()
 {
     IntervalTaylorModel x0 = IntervalTaylorModel::variable(2,0,swp);
     IntervalTaylorModel x1 = IntervalTaylorModel::variable(2,1,swp);
-    
+
     // Test range of cubic, which should be exact
     IntervalTaylorModel t1 = x0*x0*x0+x0;
     ARIADNE_TEST_ASSERT(t1.range()==Interval(-2,+2));
-    
+
     // Test range of quadratic, which could be exact, but need not be
     IntervalTaylorModel t2 = x0*x0+x0;
     ARIADNE_TEST_BINARY_PREDICATE(subset,t2.range(),Interval(-2,+2));

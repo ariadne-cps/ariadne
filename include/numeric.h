@@ -82,6 +82,13 @@ template<> struct IsNumeric<Rational> { static const bool value = true; };
 
 template<class X, class T> struct EnableIfNumeric : EnableIf<IsNumeric<X>,T> { };
 
+template<class FROM, class TO> struct IsSafelyConvertible : public False { };
+template<> struct IsSafelyConvertible<Real,Real> : public True { };
+template<> struct IsSafelyConvertible<Real,Interval> : public True { };
+template<> struct IsSafelyConvertible<Real,Float> : public True { };
+template<> struct IsSafelyConvertible<Interval,Interval> : public True { };
+template<> struct IsSafelyConvertible<Interval,Float> : public True { };
+template<> struct IsSafelyConvertible<Float,Float> : public True { };
 
 // Type deduction for numerical arithmetic
 template<class X1, class X2> struct Arithmetic { };

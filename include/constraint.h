@@ -125,6 +125,10 @@ inline IntervalNonlinearConstraint operator==(const IntervalScalarFunction& f, c
     return IntervalNonlinearConstraint(c,f,c);
 }
 
+inline IntervalNonlinearConstraint operator==(const IntervalScalarFunction& f, double c) {
+    return IntervalNonlinearConstraint(Float(c),f,Float(c));
+}
+
 inline IntervalNonlinearConstraint operator<=(const IntervalScalarFunction& f1, const IntervalScalarFunction& f2) {
     return (f1-f2) <= 0;
 }

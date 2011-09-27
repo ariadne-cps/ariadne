@@ -490,7 +490,7 @@ SolverBase::implicit(const IntervalVectorFunction& f,
     const double err=this->maximum_error();
 
     IntervalVectorFunctionModel p(this->function_factory().create_identity(ip));
-    IntervalVectorFunctionModel x(this->function_factory().create(ip,VectorConstantFunction(RealVector(ix),ip.size())));
+    IntervalVectorFunctionModel x(this->function_factory().create_constants(ip,ix));
     IntervalVectorFunctionModel nwx(this->function_factory().create_zeros(x.size(),ip));
     IntervalVectorFunctionModel fnwx(this->function_factory().create_zeros(f.result_size(),ip));
 
@@ -537,7 +537,7 @@ SolverBase::implicit(const IntervalScalarFunction& f,
 {
     ARIADNE_LOG(4,"SolverBase::implicit(IntervalScalarFunction f, IntervalVector ip, Interval ix)\n");
     ARIADNE_LOG(5,"f="<<f<<"\n");
-    IntervalVectorFunctionModel res=this->implicit(IntervalVectorFunction(1u,f),ip,Vector<Interval>(1u,ix));
+    IntervalVectorFunctionModel res=this->implicit(IntervalVectorFunction(List<IntervalScalarFunction>(1u,f)),ip,Vector<Interval>(1u,ix));
     return res[0];
 }
 

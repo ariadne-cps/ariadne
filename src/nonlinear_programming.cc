@@ -435,7 +435,7 @@ contains_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVect
 
     // Construct the function g_e(x) = g_{e_i}(x)
     ARIADNE_ASSERT(g.result_size()>0);
-    IntervalVectorFunction ge(equality_constraints.size(),g[0]);
+    IntervalVectorFunction ge(equality_constraints.size(),g.argument_size());
     IntervalVector ce(equality_constraints.size());
     for(uint i=0; i!=ge.result_size(); ++i) {
         ge[i]=g[equality_constraints[i]];
@@ -1395,7 +1395,7 @@ check_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
     if(definitely(result)) {
         if(equalities.empty()) { ARIADNE_LOG(2,"feasible\n"); return true; }
 
-        IntervalVectorFunction h(equalities.size(),g[2]);
+        IntervalVectorFunction h(equalities.size(),g.argument_size());
         FloatVector c(equalities.size());
         for(uint i=0; i!=equalities.size(); ++i) {
             h[i] = g[equalities[i]];
@@ -1476,7 +1476,7 @@ validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector 
 
     if(equalities.empty()) { ARIADNE_LOG(2,"feasible\n"); return true; }
 
-    IntervalVectorFunction h(equalities.size(),g[2]);
+    IntervalVectorFunction h(equalities.size(),g.argument_size());
     FloatVector c(equalities.size());
     for(uint i=0; i!=equalities.size(); ++i) {
         h[i] = g[equalities[i]];

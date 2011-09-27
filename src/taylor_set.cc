@@ -541,10 +541,6 @@ VectorTaylorFunction TaylorConstrainedImageSet::taylor_function() const {
     return this->_function;
 }
 
-RealVectorFunction TaylorConstrainedImageSet::real_function() const {
-    return RealVectorFunction(Vector< Polynomial<Real> >(this->_function.polynomial()));
-}
-
 uint TaylorConstrainedImageSet::dimension() const {
     return this->_function.result_size();
 }
@@ -941,10 +937,6 @@ TaylorConstrainedImageSet::split(uint d) const
 
 
 
-
-RealScalarFunction make_function(const ScalarTaylorFunction& stf) {
-    return RealScalarFunction(stf.polynomial())+Real(Interval(-stf.error(),+stf.error()));
-}
 
 void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const VectorTaylorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
 {
@@ -1525,15 +1517,6 @@ void TaylorConstrainedImageSet::affine_draw(CanvasInterface& canvas, const Proje
 void TaylorConstrainedImageSet::grid_draw(CanvasInterface& canvas, const Projection2d& projection, uint accuracy) const {
     // TODO: Project to grid first
     this->outer_approximation(Grid(this->dimension()),accuracy).draw(canvas,projection);
-}
-
-Map<List<DiscreteEvent>,RealScalarFunction> pretty(const Map<List<DiscreteEvent>,ScalarTaylorFunction>& constraints) {
-    Map<List<DiscreteEvent>,RealScalarFunction> result;
-    for(Map<List<DiscreteEvent>,ScalarTaylorFunction>::const_iterator iter=constraints.begin();
-    iter!=constraints.end(); ++iter) {
-        result.insert(iter->first,iter->second.real_function());
-    }
-    return result;
 }
 
 

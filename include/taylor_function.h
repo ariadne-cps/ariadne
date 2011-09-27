@@ -248,8 +248,6 @@ class ScalarTaylorFunction
     Polynomial<Interval> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.
     IntervalScalarFunction function() const;
-    //! \brief A multivalued function equal to the model on the domain.
-    RealScalarFunction real_function() const;
 
     //! \brief Set the error of the expansion.
     void set_error(const Float& ne) { this->_model.set_error(ne); }

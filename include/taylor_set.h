@@ -321,7 +321,6 @@ class TaylorConstrainedImageSet
   private:
     void _check() const;
     void _solve_zero_constraints();
-    RealVectorFunction real_function() const;
   private:
     friend TaylorConstrainedImageSet product(const TaylorConstrainedImageSet&, const Interval&);
     friend TaylorConstrainedImageSet product(const TaylorConstrainedImageSet&, const Box&);

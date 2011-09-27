@@ -28,15 +28,16 @@
 #define ARIADNE_FUNCTION_INTERFACE_H
 
 #include <iosfwd>
-#include <iostream>
-#include "numeric.h"
-#include "pointer.h"
 
 namespace Ariadne {
 
 typedef std::ostream OutputStream;
 
+static const int SMOOTH=255;
+
 typedef void Void;
+typedef unsigned int Nat;
+typedef int Int;
 
 class Float;
 class Interval;
@@ -51,8 +52,6 @@ template<class X> class Algebra;
 
 typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
-
-static const int SMOOTH=255;
 
 template<class X> class ScalarFunctionInterface;
 template<class X> class VectorFunctionInterface;
@@ -80,7 +79,7 @@ class ScalarFunctionInterface<Void>
 {
   public:
     //! \brief The type used to describe the number of argument variables.
-    typedef unsigned int SizeType;
+    typedef Nat SizeType;
 
     //! \brief Virtual destructor.
     virtual ~ScalarFunctionInterface() { };
@@ -117,10 +116,12 @@ class ScalarFunctionInterface<Float>
     //! \brief Evaluate the function over a vector of elements of an algebra.
     virtual Algebra<Float> evaluate(const Vector< Algebra<Float> >& x) const = 0;
 
+    Vector<Float> gradient(const Vector<Float>& x) const;
+
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<Float> derivative(uint i) const;
+    inline ScalarFunction<Float> derivative(Nat i) const;
   private:
-    virtual ScalarFunctionInterface<Float>* _derivative(uint i) const = 0;
+    virtual ScalarFunctionInterface<Float>* _derivative(Nat i) const = 0;
   public:
     virtual ScalarFunctionInterface<Float>* _clone() const = 0;
 };
@@ -133,8 +134,6 @@ class ScalarFunctionInterface<Interval>
     : public ScalarFunctionInterface<Float>
 {
   public:
-    //! \brief The type used to describe the number of argument variables.
-    typedef unsigned int SizeType;
 
     inline ScalarFunction<Interval> clone() const;
 
@@ -153,11 +152,14 @@ class ScalarFunctionInterface<Interval>
     //! \brief Apply the function to an algebra.
     virtual Algebra<Interval> evaluate(const Vector< Algebra<Interval> >& x) const = 0;
 
+    using ScalarFunctionInterface<Float>::gradient;
+    Vector<Interval> gradient(const Vector<Interval>& x) const;
+
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<Interval> derivative(uint i) const;
+    inline ScalarFunction<Interval> derivative(Nat i) const;
   private:
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    virtual ScalarFunctionInterface<Interval>* _derivative(uint i) const = 0;
+    virtual ScalarFunctionInterface<Interval>* _derivative(Nat i) const = 0;
   public:
     virtual ScalarFunctionInterface<Interval>* _clone() const = 0;
 };
@@ -183,10 +185,10 @@ class ScalarFunctionInterface<Real>
     virtual Algebra<Real> evaluate(const Vector< Algebra<Real> >& x) const = 0;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<Real> derivative(uint i) const;
+    inline ScalarFunction<Real> derivative(Nat i) const;
   private:
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    virtual ScalarFunctionInterface<Real>* _derivative(uint i) const = 0;
+    virtual ScalarFunctionInterface<Real>* _derivative(Nat i) const = 0;
   public:
     virtual ScalarFunctionInterface<Real>* _clone() const = 0;
 };
@@ -206,7 +208,7 @@ class VectorFunctionInterface<Void>
 {
   public:
     //! \brief The type used to describe the number of argument variables.
-    typedef unsigned int SizeType;
+    typedef Nat SizeType;
 
     //! \brief Virtual destructor.
     virtual ~VectorFunctionInterface() { };
@@ -241,10 +243,12 @@ class VectorFunctionInterface<Float>
     //! \brief Apply the function to an algebra.
     virtual Vector< Algebra<Float> > evaluate(const Vector< Algebra<Float> >& x) const = 0;
 
+    Matrix<Float> jacobian(const Vector<Float>& x) const;
+
     //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<Float> operator[](uint i) const;
+    inline ScalarFunction<Float> operator[](Nat i) const;
   public:
-    virtual ScalarFunctionInterface<Float>* _get(uint i) const = 0;
+    virtual ScalarFunctionInterface<Float>* _get(Nat i) const = 0;
     virtual VectorFunctionInterface<Float>* _clone() const = 0;
 };
 
@@ -270,12 +274,13 @@ class VectorFunctionInterface<Interval>
     //! \brief Apply the function to an algebra.
     virtual Vector< Algebra<Interval> > evaluate(const Vector< Algebra<Interval> >& x) const = 0;
 
+    using VectorFunctionInterface<Float>::jacobian;
     Matrix<Interval> jacobian(const Vector<Interval>& x) const;
 
     //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<Interval> operator[](uint i) const;
+    inline ScalarFunction<Interval> operator[](Nat i) const;
   public:
-    virtual ScalarFunctionInterface<Interval>* _get(uint i) const = 0;
+    virtual ScalarFunctionInterface<Interval>* _get(Nat i) const = 0;
     virtual VectorFunctionInterface<Interval>* _clone() const = 0;
 
 };
@@ -298,9 +303,9 @@ class VectorFunctionInterface<Real>
     virtual Vector< Algebra<Real> > evaluate(const Vector< Algebra<Real> >& x) const = 0;
 
     //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<Real> operator[](uint i) const;
+    inline ScalarFunction<Real> operator[](Nat i) const;
   public:
-    virtual ScalarFunctionInterface<Real>* _get(uint i) const = 0;
+    virtual ScalarFunctionInterface<Real>* _get(Nat i) const = 0;
     virtual VectorFunctionInterface<Real>* _clone() const = 0;
 };
 

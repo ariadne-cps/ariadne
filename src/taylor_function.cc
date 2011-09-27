@@ -227,12 +227,6 @@ ScalarTaylorFunction::function() const
     return new ScalarTaylorFunction(*this);
 }
 
-RealScalarFunction
-ScalarTaylorFunction::real_function() const
-{
-    return RealScalarFunction(Polynomial<Real>(this->polynomial()));
-}
-
 
 bool ScalarTaylorFunction::operator==(const ScalarTaylorFunction& tv) const
 {

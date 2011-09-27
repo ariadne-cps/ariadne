@@ -213,7 +213,7 @@ ImageSet::ImageSet()
 
 ImageSet::ImageSet(const Vector<Interval>& dom)
     : _domain(dom),
-      _function(IdentityFunction(dom.size()))
+      _function(RealVectorFunction::identity(dom.size()))
 {
 }
 
@@ -298,12 +298,14 @@ ConstraintSet::ConstraintSet(const Vector<Interval>& codom, const RealVectorFunc
 }
 
 ConstraintSet::ConstraintSet(const List<RealNonlinearConstraint>& c)
-    : _codomain(c.size()), _function(c.size())
+    : _codomain(c.size()), _function()
 {
-    uint d=0u;
-    if(!c.empty()) { d=c[0].function().argument_size(); }
-    for(uint i=0; i!=c.size(); ++i) {
-        ARIADNE_ASSERT(c[i].function().argument_size()==d);
+    uint m=c.size();
+    uint n=0u;
+    if(!c.empty()) { n=c[0].function().argument_size(); }
+    _function=RealVectorFunction(m,n);
+    for(uint i=0; i!=m; ++i) {
+        ARIADNE_ASSERT(c[i].function().argument_size()==n);
         _function[i]=c[i].function();
         _codomain[i]=c[i].bounds();
     }
@@ -457,7 +459,7 @@ ConstrainedImageSet image(const BoundedConstraintSet& set, const RealVectorFunct
 
 
 ConstrainedImageSet::ConstrainedImageSet(const BoundedConstraintSet& set)
-    : _domain(set.domain()), _function(IdentityFunction(set.dimension()))
+    : _domain(set.domain()), _function(RealVectorFunction::identity(set.dimension()))
 {
     for(uint i=0; i!=set.number_of_constraints(); ++i) {
         this->new_parameter_constraint(RealNonlinearConstraint(set.function()[i],set.codomain()[i]));
@@ -1079,7 +1081,7 @@ const List<IntervalNonlinearConstraint> IntervalConstrainedImageSet::constraints
 
 IntervalVectorFunction IntervalConstrainedImageSet::constraint_function() const
 {
-    IntervalVectorFunction result(this->number_of_constraints(),IntervalScalarFunction());
+    IntervalVectorFunction result(this->number_of_constraints(),this->number_of_parameters());
     for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
         result[i]=this->_negative_constraints[i];
     }

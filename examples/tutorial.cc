@@ -110,7 +110,7 @@ CompositeHybridAutomaton create_heating_system()
     HybridAutomaton heater;
     heater.new_mode( heating|on, (dot(T)=P+K*(Tav-Tamp*Ariadne::cos(2.0*pi*C)-T)) );
     heater.new_mode( heating|off, (dot(T)=K*(Tav-Tamp*Ariadne::cos(2.0*pi*C)-T)) );
-    heater.new_invariant( heating|off, T<=Ton_lower, switch_on );
+    heater.new_invariant( heating|off, T>=Ton_lower, switch_on );
     heater.new_transition( (heating|off), switch_on, (heating|on), (next(T)=T), T<=Ton_upper, permissive );
     heater.new_transition( (heating|on), switch_off, heating|off, (next(T)=T), T>=Toff, urgent );
 
@@ -327,7 +327,7 @@ void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& h
 
 
 
-int main()
+int main(int argc, const char* argv[])
 {
     // Create the system
     CompositeHybridAutomaton heating_system=create_heating_system();

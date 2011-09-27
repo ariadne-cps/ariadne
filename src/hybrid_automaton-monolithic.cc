@@ -228,8 +228,8 @@ MonolithicHybridAutomaton::locations() const
 Set<DiscreteEvent>
 MonolithicHybridAutomaton::events(DiscreteLocation location) const
 {
-    //return join(this->mode(location)._invariants.keys(), this->mode(location)._transitions.keys());
-    return this->mode(location)._transitions.keys();
+    return join(this->mode(location)._invariants.keys(), this->mode(location)._transitions.keys());
+    //return this->mode(location)._transitions.keys();
 }
 
 EventKind

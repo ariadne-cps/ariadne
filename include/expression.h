@@ -302,7 +302,7 @@ template<class X> OutputStream& operator<<(std::ostream& os, const Expression<X>
                 case UNARY: return os << f.op() << "(" << f.arg() << ")";
                 case BINARY: return os << f.op() << "(" << f.arg1() << "," << f.arg2() << ")";
                 // FIXME: Type-cast comparison arguments correctly
-                case COMPARISON: return _write_comparison(os,f); 
+                case COMPARISON: return _write_comparison(os,f);
                 default: ARIADNE_FAIL_MSG("Cannot output expression with operator "<<f.op()<<" of kind "<<f.kind()<<"\n");
             }
     }
@@ -601,8 +601,8 @@ template<class R> Expression<R> make_expression(double c) { return Expression<R>
 
 inline Expression<Real> operator+(Expression<Real> e, double c) { return e + make_expression<Real>(c); }
 inline Expression<Real> operator-(Expression<Real> e, double c) { return e - make_expression<Real>(c); }
-inline Expression<Real> operator*(Expression<Real> e, double c) { return e - make_expression<Real>(c); }
-inline Expression<Real> operator/(Expression<Real> e, double c) { return e - make_expression<Real>(c); }
+inline Expression<Real> operator*(Expression<Real> e, double c) { return e * make_expression<Real>(c); }
+inline Expression<Real> operator/(Expression<Real> e, double c) { return e / make_expression<Real>(c); }
 inline Expression<Real> operator+(double c, Expression<Real> e) { return make_expression<Real>(c) + e; }
 inline Expression<Real> operator-(double c, Expression<Real> e) { return make_expression<Real>(c) - e; }
 inline Expression<Real> operator*(double c, Expression<Real> e) { return make_expression<Real>(c) * e; }

@@ -57,7 +57,6 @@ VectorTaylorFunction __getslice__(const VectorTaylorFunction& tf, int start, int
     return VectorTaylorFunction(tf.domain(),Vector<IntervalTaylorModel>(project(tf.models(),range(start,stop))));
 }
 
-
 template<>
 struct from_python<MultiIndex> {
     from_python() {
@@ -85,12 +84,19 @@ struct from_python< Expansion<T> > {
     from_python() {
         boost::python::converter::registry::push_back(&convertible,&construct,boost::python::type_id< Expansion<T> >()); }
     static void* convertible(PyObject* obj_ptr) {
-        if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
+        if (!PyDict_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)data)->storage.bytes;
+        void* storage = ((boost::python::converter::rvalue_from_python_storage< Expansion<T> >*)data)->storage.bytes;
         Expansion<T> r;
         boost::python::dict dct=boost::python::extract<boost::python::dict>(obj_ptr);
-        boost::python::list lst=dct.values();
+        boost::python::list lst=dct.items();
+        MultiIndex a;
+        if(len(lst)!=0) {
+            boost::python::tuple tup=boost::python::extract<boost::python::tuple>(lst[0]);
+            a=boost::python::extract<MultiIndex>(tup[0]);
+            r=Expansion<T>(a.size());
+            r.reserve(len(lst));
+        }
         for(int i=0; i!=len(lst); ++i) {
             boost::python::tuple tup=boost::python::extract<boost::python::tuple>(lst[i]);
             MultiIndex a=boost::python::extract<MultiIndex>(tup[0]);
@@ -98,24 +104,27 @@ struct from_python< Expansion<T> > {
             r.append(a,c);
         }
         new (storage) Expansion<T>(r);
-        r.unique_sort();
+        //r.unique_sort();
         data->convertible = storage;
     }
 };
 
 
-template<>
-struct from_python< Vector<IntervalTaylorModel> > {
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id< Vector<IntervalTaylorModel> >()); }
+template<class X>
+struct from_python< Vector<X> >
+{
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id< Vector<X> >()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-        boost::python::list lst=extract<boost::python::list>(obj_ptr);
-        Vector<IntervalTaylorModel>* tms_ptr = new (storage) Vector<IntervalTaylorModel>(len(lst));
-        for(int i=0; i!=len(lst); ++i) { (*tms_ptr)[i]=extract<IntervalTaylorModel>(lst[i]); }
+        list lst=extract<list>(obj_ptr);
+        void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*) data)->storage.bytes;
+        Vector<X> res(len(lst));
+        for(uint i=0; i!=res.size(); ++i) { res[i]=extract<X>(lst[i]); }
+        new (storage) Vector<X>(res);
         data->convertible = storage;
     }
 };
+
 
 template<>
 struct from_python<VectorTaylorFunction> {
@@ -124,13 +133,80 @@ struct from_python<VectorTaylorFunction> {
     static void* convertible(PyObject* obj_ptr) {
         if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,boost::python::converter::rvalue_from_python_stage1_data* data) {
-        void* storage = ((boost::python::converter::rvalue_from_python_storage<MultiIndex>*)data)->storage.bytes;
+        void* storage = ((boost::python::converter::rvalue_from_python_storage<VectorTaylorFunction>*)data)->storage.bytes;
         list lst=extract<boost::python::list>(obj_ptr);
         VectorTaylorFunction* tf_ptr = new (storage) VectorTaylorFunction(len(lst));
         for(uint i=0; i!=tf_ptr->result_size(); ++i) { tf_ptr->set(i,extract<ScalarTaylorFunction>(lst[i])); }
         data->convertible = storage;
     }
 };
+
+
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Float>& repr);
+
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Interval>& repr);
+
+template<class X> std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Expansion<X> >& repr) {
+    const Expansion<X>& exp=repr.reference();
+    for(typename Expansion<X>::const_iterator iter=exp.begin(); iter!=exp.end(); ++iter) {
+        os << (iter==exp.begin()?'{':',') << "(";
+        for(uint j=0; j!=iter->key().size(); ++j) {
+            if(j!=0) { os << ','; } os << int(iter->key()[j]);
+        }
+        os << "):" << python_representation(iter->data());
+    }
+    os << "}";
+    return os;
+}
+
+template std::ostream& operator<<(std::ostream&, const PythonRepresentation< Expansion<Float> >&);
+template std::ostream& operator<<(std::ostream&, const PythonRepresentation< Expansion<Interval> >&);
+
+template<class X> std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Vector<X> >& repr) {
+    const Vector<X>& vec=repr.reference();
+    os << "[";
+    for(uint i=0; i!=vec.size(); ++i) {
+        if(i!=0) { os << ","; }
+        os << python_representation(vec[i]);
+    }
+    os << "]";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Sweeper>& repr) {
+    const Sweeper& swp=repr.reference();
+    const SweeperInterface* swp_ptr = &static_cast<const SweeperInterface&>(swp);
+    if(dynamic_cast<const ThresholdSweeper*>(swp_ptr)) {
+        os << "ThresholdSweeper(" << dynamic_cast<const ThresholdSweeper*>(swp_ptr)->sweep_threshold() << ")";
+    } else {
+        os << swp;
+    }
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ScalarTaylorFunction>& repr) {
+    const ScalarTaylorFunction& stf=repr.reference();
+    os << std::setprecision(17);
+    os << "ScalarTaylorFunction"
+       << "(" << python_representation(stf.domain())
+       << "," << python_representation(stf.expansion())
+       << "," << python_representation(stf.error())
+       << "," << python_representation(stf.sweeper())
+       << ")";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<VectorTaylorFunction>& repr) {
+    const VectorTaylorFunction& vtf=repr.reference();
+    os << std::setprecision(17);
+    os << "VectorTaylorFunction"
+       << "(" << python_representation(vtf.domain())
+       << "," << python_representation(vtf.expansions())
+       << "," << python_representation(vtf.errors())
+       << "," << python_representation(vtf.sweeper())
+       << ")";
+    return os;
+}
 
 List<MultiIndex> keys(const IntervalTaylorModel& tm) {
     List<MultiIndex> r;
@@ -150,6 +226,22 @@ Interval _range3(const IntervalTaylorModel&);
 
 Sweeper make_threshold_sweeper(double x) { return new ThresholdSweeper(x); }
 Sweeper make_graded_sweeper(uint n) { return new GradedSweeper(n); }
+
+void export_expansion()
+{
+    from_python< Expansion<Float> >();
+    from_python< Expansion<Interval> >();
+    from_python< Vector< Expansion<Float> > >();
+
+    class_< ExpansionValue<Float> > expansion_value_class("ExpansionValue", init<MultiIndex,Float>());
+    // TODO: Add get/set for data
+    // TODO: Use property for key
+    //expansion_value_class.add_property("key", (MultiIndex const&(ExpansionValue<Float>::*)()const)&ExpansionValue<Float>::key);
+    expansion_value_class.def("key", (const MultiIndex&(ExpansionValue<Float>::*)()const)&ExpansionValue<Float>::key, return_value_policy<copy_const_reference>());
+    expansion_value_class.def(self_ns::str(self));
+
+}
+
 
 void export_sweeper()
 {
@@ -179,15 +271,6 @@ void export_taylor_model()
     typedef RealScalarFunction FI;
 
 
-
-    class_< ExpansionValue<Float> > expansion_value_class("ExpansionValue", init<MultiIndex,Float>());
-    // TODO: Add get/set for data
-    // TODO: Use property for key
-    //expansion_value_class.add_property("key", (MultiIndex const&(ExpansionValue<Float>::*)()const)&ExpansionValue<Float>::key);
-    expansion_value_class.def("key", (const MultiIndex&(ExpansionValue<Float>::*)()const)&ExpansionValue<Float>::key, return_value_policy<copy_const_reference>());
-    expansion_value_class.def(self_ns::str(self));
-
-    
     class_<IntervalTaylorModel> taylor_model_class("IntervalTaylorModel", init<IntervalTaylorModel>());
     taylor_model_class.def( init< N,Sweeper >());
     taylor_model_class.def("keys", (List<MultiIndex>(*)(const IntervalTaylorModel&))&keys);
@@ -296,6 +379,7 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def(init<IntervalVector,IntervalTaylorModel>());
     scalar_taylor_function_class.def(init< IntervalVector,Sweeper >());
     scalar_taylor_function_class.def(init< IntervalVector, const RealScalarFunction&,Sweeper >());
+    scalar_taylor_function_class.def(init< IntervalVector, Expansion<Float>, Float, Sweeper >());
     scalar_taylor_function_class.def("error", (const Float&(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::error, return_value_policy<copy_const_reference>());
     scalar_taylor_function_class.def("set_error", (void(ScalarTaylorFunction::*)(const Float&)) &ScalarTaylorFunction::set_error);
     scalar_taylor_function_class.def("argument_size", &ScalarTaylorFunction::argument_size);
@@ -346,6 +430,7 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def(self>self);
     scalar_taylor_function_class.def(self<self);
     scalar_taylor_function_class.def(self_ns::str(self));
+    scalar_taylor_function_class.def("__repr__",&__repr__<ScalarTaylorFunction>);
     scalar_taylor_function_class.def("__mul__",&__mul__< VectorTaylorFunction, ScalarTaylorFunction, Vector<Float> >);
 
     //scalar_taylor_function_class.def("__str__",(std::string(*)(const ScalarTaylorFunction&)) &__str__);
@@ -364,6 +449,7 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def("__call__", (Interval(ScalarTaylorFunction::*)(const Vector<Interval>&)const) &ScalarTaylorFunction::evaluate);
     scalar_taylor_function_class.def("evaluate", (Float(ScalarTaylorFunction::*)(const Vector<Float>&)const) &ScalarTaylorFunction::evaluate);
     scalar_taylor_function_class.def("evaluate", (Interval(ScalarTaylorFunction::*)(const Vector<Interval>&)const) &ScalarTaylorFunction::evaluate);
+    //scalar_taylor_function_class.def("gradient", (Vector<Interval>(ScalarTaylorFunction::*)(const Vector<Interval>&)const) &ScalarTaylorFunction::gradient);
     scalar_taylor_function_class.def("function", (RealScalarFunction(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::function);
     scalar_taylor_function_class.def("polynomial", (Polynomial<Interval>(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::polynomial);
     scalar_taylor_function_class.def("set", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint j, const Interval&)) &partial_evaluate);
@@ -447,6 +533,7 @@ void export_vector_taylor_function()
 
     class_<VectorTaylorFunction> vector_taylor_function_class("VectorTaylorFunction", init<VectorTaylorFunction>());
     vector_taylor_function_class.def( init< IntervalVector,const RealVectorFunction&,Sweeper >());
+    vector_taylor_function_class.def(init< IntervalVector, Vector< Expansion<Float> >, Vector<Float>, Sweeper >());
     vector_taylor_function_class.def( init< Vector<ScalarTaylorFunction> >());
     vector_taylor_function_class.def("__len__", &VectorTaylorFunction::result_size);
     vector_taylor_function_class.def("result_size", &VectorTaylorFunction::result_size);
@@ -478,11 +565,13 @@ void export_vector_taylor_function()
     vector_taylor_function_class.def(self+=self);
     vector_taylor_function_class.def(self-=self);
     vector_taylor_function_class.def(self_ns::str(self));
+    vector_taylor_function_class.def("__repr__",&__repr__<VectorTaylorFunction>);
     vector_taylor_function_class.def("clobber", (VectorTaylorFunction&(VectorTaylorFunction::*)()) &VectorTaylorFunction::clobber,return_value_policy<reference_existing_object>());
     vector_taylor_function_class.def("__call__", (FloatVector(VectorTaylorFunction::*)(const Vector<Float>&)const) &VectorTaylorFunction::evaluate);
     vector_taylor_function_class.def("__call__", (IntervalVector(VectorTaylorFunction::*)(const IntervalVector&)const) &VectorTaylorFunction::evaluate);
     vector_taylor_function_class.def("evaluate", (FloatVector(VectorTaylorFunction::*)(const Vector<Float>&)const) &VectorTaylorFunction::evaluate);
     vector_taylor_function_class.def("evaluate", (IntervalVector(VectorTaylorFunction::*)(const IntervalVector&)const) &VectorTaylorFunction::evaluate);
+    //vector_taylor_function_class.def("jacobian", (Vector<Interval>(ScalarTaylorFunction::*)(const Vector<Interval>&)const) &ScalarTaylorFunction::gradient);
     vector_taylor_function_class.def("polynomial", (Vector< Polynomial<Interval> >(VectorTaylorFunction::*)()const) &VectorTaylorFunction::polynomial);
     vector_taylor_function_class.def("function", (RealVectorFunction(VectorTaylorFunction::*)()const) &VectorTaylorFunction::function);
 
@@ -536,6 +625,7 @@ void export_vector_taylor_function()
 
 void calculus_submodule()
 {
+    export_expansion();
     export_sweeper();
     export_taylor_model();
     export_scalar_taylor_function();

@@ -395,6 +395,26 @@ R __le__(const A1& a1, const A2& a2) { return static_cast<R>(a1<=a2); }
 template<class T> std::string __cstr__(const T& t) {
     std::stringstream ss; ss << t; return ss.str(); }
 
+template<class T> std::string __crepr__(const T& t) {
+    std::stringstream ss; ss << representation(t); return ss.str(); }
+
+
+template<class T> struct PythonRepresentation {
+    const T* pointer;
+    PythonRepresentation(const T& t) : pointer(&t) { }
+    const T& reference() const { return *pointer; }
+};
+
+template<class T> PythonRepresentation<T>
+python_representation(const T& t) {
+    return PythonRepresentation<T>(t); }
+
+template<class T> std::string __repr__(const T& t) {
+    std::stringstream ss;
+    ss << std::setprecision(17) << std::showpoint;
+    ss << PythonRepresentation<T>(t);
+    return ss.str();
+}
 
 template<class T>
 void export_array(const char* name)

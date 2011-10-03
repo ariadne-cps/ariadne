@@ -1530,7 +1530,7 @@ template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
 }
 
 template<class T> std::ostream& operator<<(std::ostream& os, const Representation< List<T> >& repr) {
-    const List<T>& lst=*repr.pointer; os << "["; for(uint i=0; i!=lst.size(); ++i) { if(i!=0) { os << ","; } lst[i].repr(os); } os << "]"; return os; }
+    const List<T>& lst=*repr.pointer; os << "["; for(uint i=0; i!=lst.size(); ++i) { if(i!=0) { os << ","; } os << representation(lst[i]); } os << "]"; return os; }
 
 std::ostream& TaylorConstrainedImageSet::write(std::ostream& os) const {
     const bool LONG_FORMAT=false;
@@ -1547,9 +1547,9 @@ std::ostream& TaylorConstrainedImageSet::write(std::ostream& os) const {
         os << "TaylorConstrainedImageSet"
            << "( domain=" << this->domain()
            << ", range=" << this->bounding_box()
-           << ", function=" << repr(this->taylor_function())
-           << ", negative_constraints=" << repr(this->_constraints)
-           << ", zero_constraints=" << repr(this->_equations)
+           << ", function=" << representation(this->taylor_function())
+           << ", negative_constraints=" << representation(this->_constraints)
+           << ", zero_constraints=" << representation(this->_equations)
            << ")";
 
     } return os;

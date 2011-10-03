@@ -44,12 +44,25 @@ make_differential(const uint& as, const uint& d, const boost::python::object& ob
     DIFF* result=new DIFF(as,d);
     Array<X> data;
     read_array(data,obj);
+    std::cerr<<"polynomial_data_size("<<as<<","<<d<<")="<<compute_polynomial_data_size(1u,as,d)<<"\n";
+    std::cerr<<"data="<<data<<"\n";
     assert(data.size()==compute_polynomial_data_size(1u,as,d));
     MultiIndex i(as);
     const X* ptr=data.begin();
     while(i.degree()<=d) {
-        result[i]=*ptr; ++i; ++ptr;
+        //result[i]=*ptr; ++i; ++ptr;
+        result->expansion().append(i,*ptr); ++i; ++ptr;
     }
+    return result;
+}
+
+template<class DIFF>
+DIFF*
+make_sparse_differential(const boost::python::object& obj,const uint& d)
+{
+    typedef typename DIFF::ValueType X;
+    Expansion<X> expansion = boost::python::extract< Expansion<X> >(obj);
+    DIFF* result=new DIFF(expansion,d);
     return result;
 }
 
@@ -92,6 +105,19 @@ template<class C, class I, class J, class X> inline
 void matrix_set_item(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
 
 
+namespace Ariadne {
+
+template<class X> std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Expansion<X> >& repr);
+
+template<class X> std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Differential<X> >& repr) {
+    const Differential<X>& diff=repr.reference();
+    os << python_name<X>("Differential") << "(" << python_representation(diff.expansion()) << "," << diff.degree() << ")";
+    //os << python_name<X>("Differential") << "(" << diff.argument_size() << "," << diff.degree() << "," << python_representation(diff.expansion()) << ")";
+    return os;
+}
+
+}
+
 
 
 template<class DIFF>
@@ -105,8 +131,10 @@ void export_differential(const char* name)
 
 
     class_<D> differential_class(name);
-    //differential_class.def("__init__", make_constructor(&make_differential<X>) );
+    //differential_class.def("__init__", make_constructor(&make_differential<D>) );
+    differential_class.def("__init__", make_constructor(&make_sparse_differential<D>) );
     differential_class.def( init< uint, uint >());
+    differential_class.def( init< Expansion<X>, uint >());
     differential_class.def("__getitem__", &get_item<D,MultiIndex,X>);
     differential_class.def("__setitem__",&set_item<D,MultiIndex,X>);
     differential_class.def(-self);
@@ -129,6 +157,8 @@ void export_differential(const char* name)
     differential_class.def(self*=X());
     differential_class.def(self/=X());
     differential_class.def(self_ns::str(self));
+    //differential_class.def("__repr__", (std::string(*)(const D&)) &__repr__);
+    differential_class.def("__repr__", &__repr__<D>);
 
     differential_class.def("value",&D::value,return_value_policy<copy_const_reference>());
     differential_class.def("gradient",(Vector<X>(D::*)()const)&D::gradient);
@@ -196,7 +226,7 @@ export_differential_vector(const char* name)
 
     def("compose",(D(*)(const D&,const DV&))&compose);
     def("compose",(DV(*)(const DV&,const DV&))&compose);
-    
+
     def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
 }
 

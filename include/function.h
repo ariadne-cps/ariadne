@@ -198,7 +198,6 @@ ScalarFunction<Real> tan(const ScalarFunction<Real>&);
 
 
 
-ScalarFunction<Interval> operator-(const ScalarFunction<Interval>&, const ScalarFunction<Interval>&);
 
 //! \ingroup FunctionModule
 //! \brief A vector function which can only be evaluated approximately, \f$f:\F^n\rightarrow\F^m\f$.
@@ -297,6 +296,7 @@ Formula<Real> formula(const ScalarFunction<Real>& f);
 Vector< Formula<Real> > formula(const VectorFunction<Real>& f);
 
 
+ScalarFunction<Interval> operator-(const ScalarFunction<Interval>&, const ScalarFunction<Interval>&);
 VectorFunction<Interval> join(const VectorFunction<Interval>& f1, const VectorFunction<Interval>& f2);
 ScalarFunction<Interval> compose(const ScalarFunction<Interval>& f, const VectorFunction<Interval>& g);
 VectorFunction<Interval> compose(const VectorFunction<Interval>& f, const VectorFunction<Interval>& g);

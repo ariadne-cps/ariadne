@@ -407,6 +407,8 @@ class ScalarTaylorFunction
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream& os) const;
+    /*! \brief Write a full representation to an output stream. */
+    std::ostream& repr(std::ostream& os) const;
     //! \brief Write to an output stream.
     friend std::ostream& operator<<(std::ostream& os, const ScalarTaylorFunction& x);
     //@}
@@ -639,8 +641,10 @@ class VectorTaylorFunction
     const Vector<Float> centre() const;
     /*! \brief The range of the Taylor model. */
     const Vector<Interval> range() const;
-    /*! \brief The data used to define the centre of the Taylor model. */
+    /*! \brief The data used to define the Taylor models. */
     const Vector< TaylorModel<Interval> >& models() const;
+    /*! \brief The data used to define the centre of the Taylor models. */
+    const Vector< Expansion<Float> > expansions() const;
 
     /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
     const TaylorModel<Interval>& model(uint i) const;
@@ -707,6 +711,9 @@ class VectorTaylorFunction
 
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;
+
+    /*! \brief Write a full representation to an output stream. */
+    std::ostream& repr(std::ostream& os) const;
 
     /*! \brief Inplace addition. */
     friend VectorTaylorFunction& operator+=(VectorTaylorFunction& f, const VectorTaylorFunction& g);

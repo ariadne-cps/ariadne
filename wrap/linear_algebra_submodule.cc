@@ -142,6 +142,21 @@ struct from_python< Matrix<X> >
     }
 };
 
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Float>& repr);
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Interval>& repr);
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Rational>& repr);
+
+template<class X> std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Vector<X> >& repr) {
+    Vector<X> const& v=repr.reference();
+    os << "["; for(uint i=0; i!=v.size(); ++i) { if(i!=0) { os << ","; } os << python_representation(v[i]); } os << "]"; return os;
+}
+
+template<class X> std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Matrix<X> >& repr) {
+    Matrix<X> const& A=repr.reference();
+    os << "["; for(uint i=0; i!=A.row_size(); ++i) { if(i!=0) { os << ","; } os << "["; for(uint j=0; j!=A.column_size(); ++j) {
+        if(j!=0) { os << ","; } os << python_representation(A[i][j]); } os << "]"; } os << "]"; return os;
+}
+
 
 } // namespace Ariadne
 
@@ -162,7 +177,7 @@ void export_vector_class(class_<Vector<X> >& vector_class)
     vector_class.def("__pos__", &__pos__< Vector<X>, Vector<X> >);
     vector_class.def("__neg__", &__neg__< Vector<X>, Vector<X> >);
     vector_class.def("__str__",&__cstr__< Vector<X> >);
-    vector_class.def("__repr__",&__cstr__< Vector<X> >);
+    vector_class.def("__repr__",&__repr__< Vector<X> >);
     vector_class.def("unit",&Vector<X>::unit);
     vector_class.def("basis",&Vector<X>::basis);
     vector_class.staticmethod("unit");
@@ -244,8 +259,6 @@ template<> void export_vector<Interval>()
 
 
 
-
-
 template<class X>
 void export_matrix_class(class_<Matrix<X> >& matrix_class)
 {
@@ -261,7 +274,7 @@ void export_matrix_class(class_<Matrix<X> >& matrix_class)
     matrix_class.def("__pos__", &__pos__< Matrix<X>, Matrix<X> >);
     matrix_class.def("__neg__", &__neg__< Matrix<X>, Matrix<X> >);
     matrix_class.def("__str__",&__cstr__< Matrix<X> >);
-    matrix_class.def("__repr__",&__cstr__<Matrix<X> >);
+    matrix_class.def("__repr__",&__repr__<Matrix<X> >);
 
     def("norm",(X(*)(const Matrix<X>&)) &norm);
     def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);

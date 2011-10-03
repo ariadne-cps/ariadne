@@ -1073,7 +1073,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
 
     if(definitely(starting_set_empty)) {
         IntervalVector reduced_domain=starting_set.continuous_state_set().reduced_domain();
-        ARIADNE_WARN("empty starting_set "<<repr(starting_set)<<"\n");
+        ARIADNE_WARN("empty starting_set "<<representation(starting_set)<<"\n");
         return;
     }
     //ARIADNE_ASSERT_MSG(!definitely(starting_set.empty()),"starting_set="<<repr(starting_set)<<"\n");

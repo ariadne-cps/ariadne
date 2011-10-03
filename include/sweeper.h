@@ -29,6 +29,7 @@
 #define ARIADNE_SWEEPER_H
 
 #include "macros.h"
+#include "attribute.h"
 #include "multi_index.h"
 #include "expansion.h"
 
@@ -141,6 +142,9 @@ void SweeperBase<SWP>::_sweep(Expansion<Float>& p) const
     p.resize(curr-p.begin());
 }
 
+struct SweepThreshold : Attribute<double> { SweepThreshold(double v) : Attribute(v) { } };
+static const Generator<SweepThreshold> sweep_threshold = Generator<SweepThreshold>();
+
 //! \brief A sweeper class which discards terms whose absolute value is smaller than a threshold.
 class ThresholdSweeper : public SweeperBase<ThresholdSweeper> {
     double _sweep_threshold;
@@ -149,7 +153,7 @@ class ThresholdSweeper : public SweeperBase<ThresholdSweeper> {
     Float sweep_threshold() const { return _sweep_threshold; }
     inline bool discard(const MultiIndex& a, const Float& x) const { return abs(x) < this->_sweep_threshold; }
   private:
-    virtual void _write(std::ostream& os) const { os << "ThresholdSweeper( threshold="<<this->_sweep_threshold<<" )"; };
+    virtual void _write(std::ostream& os) const { os << "ThresholdSweeper( sweep_threshold="<<this->_sweep_threshold<<" )"; };
 };
 
 //! \brief A sweeper class which does not discard any terms at all.

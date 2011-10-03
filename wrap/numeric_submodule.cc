@@ -86,6 +86,29 @@ struct interval_from_python_str {
     }
 };
 */
+
+
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Float>& x) {
+    return os << x.reference();
+}
+
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Interval>& x) {
+    return os << "{" << x.reference().lower() << ":" << x.reference().upper() << "}";
+}
+
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Integer>& x) {
+    return os << x.reference();
+}
+
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Rational>& x) {
+    return os << "Rational(" << x.reference().get_num() << "," << x.reference().get_den() << ")";
+}
+
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Real>& x) {
+    return os << "Real(" << x.reference() << ")";
+}
+
+
 } // namespace Ariadne
 
 
@@ -136,9 +159,6 @@ void export_tribool() {
 
 }
 
-std::string __repr__(Float x) {
-    std::stringstream ss; ss<<std::setprecision(17)<<x.v; return ss.str();
-}
 
 
 void export_float()
@@ -148,7 +168,7 @@ void export_float()
     float_class.def(init<Float>());
     float_class.def(init<Real>());
     float_class.def(boost::python::self_ns::str(self));
-    float_class.def("__repr__", (std::string(*)(Float))&__repr__);
+    float_class.def("__repr__", &__repr__<Float>);
 
     float_class.def(+self);
     float_class.def(-self);
@@ -208,9 +228,11 @@ void export_float()
 #ifdef HAVE_GMPXX_H
 void export_integer()
 {
-    class_<Integer> integer_class("Integer",init<int>());
+    class_<Integer> integer_class("Integer");
+    integer_class.def(init<int>());
+    integer_class.def(init<Integer>());
     integer_class.def(boost::python::self_ns::str(self));
-    integer_class.def(boost::python::self_ns::repr(self));
+    integer_class.def("__repr__", &__repr__<Integer>);
     integer_class.def("__less__",(bool(*)(const mpz_class&, const mpz_class&)) &operator<);
 
     implicitly_convertible<int,Integer>();
@@ -221,10 +243,12 @@ void export_integer()
 #ifdef HAVE_GMPXX_H
 void export_rational()
 {
-    class_<Rational> rational_class("Rational",init<int,int>());
+    class_<Rational> rational_class("Rational");
+    rational_class.def(init<int,int>());
     rational_class.def(init<int>());
+    rational_class.def(init<Rational>());
     rational_class.def(boost::python::self_ns::str(self));
-    rational_class.def(boost::python::self_ns::repr(self));
+    rational_class.def("__repr__", &__repr__<Rational>);
     rational_class.def("__less__",(bool(*)(const Rational&, const Rational&)) &operator<);
 
     implicitly_convertible<int,Rational>();
@@ -237,14 +261,15 @@ Real pi_function() { return pi; }
 
 void export_real()
 {
-    class_<Real> real_class("Real",init<Real>());
+    class_<Real> real_class("Real");
     real_class.def(init<double>());
     real_class.def(init<Float>());
     real_class.def(init<Interval>());
+    real_class.def(init<Real>());
     real_class.def(init<std::string>());
     real_class.def("radius", &Interval::radius);
     real_class.def(boost::python::self_ns::str(self));
-    real_class.def(boost::python::self_ns::repr(self));
+    real_class.def("__repr__", &__repr__<Real>);
 
     real_class.def(+self);
     real_class.def(-self);
@@ -265,9 +290,6 @@ void export_real()
     implicitly_convertible<double,Real>();
 }
 
-std::string __repr__(Interval ivl) {
-    std::stringstream ss; ss<<std::setprecision(17)<<"{"<<ivl.lower().v<<":"<<ivl.upper().v<<"}"; return ss.str();
-}
 
 void export_interval()
 {
@@ -335,7 +357,7 @@ void export_interval()
     interval_class.def("contains", (bool(*)(Interval,Float)) &contains);
     interval_class.def("empty", (bool(Interval::*)()const) &Interval::empty);
     interval_class.def(boost::python::self_ns::str(self));
-    interval_class.def("__repr__", (std::string(*)(Interval))&__repr__);
+    interval_class.def("__repr__", &__repr__<Interval>);
 
     implicitly_convertible<int,Interval>();
     implicitly_convertible<double,Interval>();

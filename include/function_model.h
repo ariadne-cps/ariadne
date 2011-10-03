@@ -454,12 +454,9 @@ template<class X> VectorFunctionModelElement<X>::operator const ScalarFunctionMo
 
 
 
-// Sanitised output
-template<class T, class D=Void> struct Representation;
-template<class T, class D> struct Representation { const T* pointer; D data; };
-template<class T> struct Representation<T> { const T* pointer; };
-template<class T> Representation<T> repr(const T& t) { Representation<T> r={&t}; return r; }
-template<class T, class D> Representation<T,D> repr(const T& t, const D& d) { Representation<T,D> r={&t,d}; return r; }
+// Exact output
+template<class T> struct Representation { const T* pointer; Representation(const T& t) : pointer(&t) { } };
+template<class T> Representation<T> representation(const T& t) { return Representation<T>(t); }
 
 template<class X> class FunctionModelFactoryInterface;
 

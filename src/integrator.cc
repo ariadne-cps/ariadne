@@ -49,7 +49,7 @@ IntegratorBase::IntegratorBase(MaximumError e, LipschitzConstant l)
     ARIADNE_PRECONDITION(l>0.0)
 }
 
-IntegratorBase::IntegratorBase(MaximumError e, LipschitzConstant l, GlobalSweepThreshold s)
+IntegratorBase::IntegratorBase(MaximumError e, SweepThreshold s, LipschitzConstant l)
     :  _maximum_error(e), _lipschitz_tolerance(l), _function_factory_ptr(make_taylor_function_factory(s))
 {
     ARIADNE_PRECONDITION(e>0.0);
@@ -227,7 +227,7 @@ TaylorPicardIntegrator::flow_step(const IntervalVectorFunction& f, const Interva
     ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(IntervalVectorFunction vf, IntervalVector dx, Float h, IntervalVector bx)\n");
     ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
     const uint nx=dx.size();
-    Sweeper sweeper(new ThresholdSweeper(this->_sweep_threshold));
+    Sweeper sweeper(new ThresholdSweeper(this->_step_sweep_threshold));
 
     IntervalVector dom=join(dx,Interval(-h,h));
     ARIADNE_LOG(7,"dom="<<dom<<"\n");
@@ -251,7 +251,7 @@ TaylorPicardIntegrator::flow_step(const IntervalVectorFunction& f, const Interva
         if(last_step) { break; }
     }
 
-    if(phi.error()>this->maximum_error()) {
+    if(phi.error()>this->step_maximum_error()) {
         ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
     }
 
@@ -267,9 +267,10 @@ TaylorPicardIntegrator::flow_step(const IntervalVectorFunction& f, const Interva
 void TaylorPicardIntegrator::write(std::ostream& os) const {
     os << "TaylorPicardIntegrator"
        << "(maximum_error = " << this->maximum_error()
+       << ", function_factory = " << this->function_factory()
        << ", lipschitz_tolerance = " << this->lipschitz_tolerance()
-       << ", global_function_factory = " << this->function_factory()
-       << ", local_sweep_threshold = " << this->sweep_threshold()
+       << ", step_maximum_error = " << this->step_maximum_error()
+       << ", step_sweep_threshold = " << this->step_sweep_threshold()
        << ", maximum_temporal_order = " << this->maximum_temporal_order()
        << " )";
 }
@@ -314,6 +315,7 @@ Vector< Graded< Differential<Interval> > > flow(const Vector< Procedure<Interval
 }
 
 class FormulaFunction;
+typedef Procedure<Interval> IntervalProcedure;
 typedef Differential<Interval> IntervalDifferential;
 typedef Polynomial<Interval> IntervalPolynomial;
 typedef Graded<IntervalDifferential> GradedIntervalDifferential;
@@ -339,66 +341,55 @@ Vector<IntervalFormula> formula(const IntervalVectorFunction& f) {
     return f.evaluate(IntervalFormula::identity(f.argument_size()));
 }
 
-IntervalVectorFunctionModel
-TaylorSeriesIntegrator::flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
+void flow_init(const Vector<IntervalProcedure>& p,
+               Vector<GradedIntervalDifferential>& fy, List<GradedIntervalDifferential>& t, Vector<GradedIntervalDifferential>& y,
+               const Vector<Interval>& d, uint so)
 {
-    Vector<IntervalFormula> ff = formula(f);
-    Vector< Procedure<Interval> > p(ff);
-    ARIADNE_LOG(4,"proc="<<p<<"\n");
-
-    Vector<IntervalDifferential> dphi = this->flow_diff(p,dx,h,bx);
-    ARIADNE_LOG(4,"dphi="<<dphi<<"\n");
-
-    const uint nx=dx.size();
-    Sweeper sweeper(new ThresholdSweeper(this->_sweep_threshold));
-
-    Vector<IntervalTaylorModel> tmid(nx+1,IntervalTaylorModel(nx+1,sweeper));
-    for(uint i=0; i!=nx; ++i) { tmid[i]=IntervalTaylorModel::variable(nx+1,i,sweeper)*dx[i].radius(); }
-    tmid[nx]=(IntervalTaylorModel::variable(nx+1,nx,sweeper)+1)*(h/2);
-    tmid[nx]=(IntervalTaylorModel::variable(nx+1,nx,sweeper))*(h);
-
-    Vector<IntervalTaylorModel> tmphi(nx,IntervalTaylorModel(nx+1,sweeper));
-    for(uint i=0; i!=nx; ++i) { tmphi[i]=evaluate(dphi[i].expansion(),tmid); }
-    //IntervalVectorFunctionModel tphi(join(dx,Interval(0,h)),tmphi);
-    VectorTaylorFunction tphi(join(dx,Interval(-h,h)),tmphi);
-    ARIADNE_LOG(4,"phi="<<tphi<<"\n");
-
-    return tphi;
+    Graded< Differential<Interval> > null;
+    y=Vector< Graded< Differential<Interval> > >(p.result_size(),null);
+    fy=Vector< Graded< Differential<Interval> > >(p.result_size(),null);
+    t=List< Graded< Differential<Interval> > >(p.temporaries_size(),null);
+    for(Nat i=0; i!=y.size(); ++i) {
+        y[i]=Graded< Differential<Interval> >(Differential<Interval>::variable(y.size(),so,d[i],i));
+    }
 }
 
-
-Vector<IntervalDifferential>
-TaylorSeriesIntegrator::flow_diff(const IntervalVectorProcedure& p, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
+void flow_iterate(const Vector<IntervalProcedure>& p,
+                  Vector<GradedIntervalDifferential>& fy, List<GradedIntervalDifferential>& t, Vector<GradedIntervalDifferential>& y)
 {
-    ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_step(IntervalVectorFunction vf, IntervalVector dx, Float h, IntervalVector bx)\n");
-    ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
-    const uint nx=dx.size();
+    Ariadne::compute(p,fy,t,y);
+    for(Nat i=0; i!=y.size(); ++i) {
+        y[i]=antidifferential(fy[i]);
+    }
+}
 
-    IntervalVector cx=midpoint(dx);
-    IntervalVector ax=cx+Interval(0,h)*evaluate(p,bx);
-    ax=cx+Interval(0,h)*evaluate(p,ax);
+/*
+Vector< Graded< Differential<Interval> > > flow(const Vector< Procedure<Interval> >& f, const Vector<Interval>& c, Nat M, Nat N) {
+    Graded< Differential<Interval> > null;
+    Vector< Graded< Differential<Interval> > > y(f.result_size(),null);
+    Vector< Graded< Differential<Interval> > > fy(f.result_size(),null);
+    List< Graded< Differential<Interval> > > t(f.temporaries_size(),null);
+    for(Nat i=0; i!=y.size(); ++i) {
+        y[i]=Graded< Differential<Interval> >(Differential<Interval>::variable(y.size(),M,c[i],i));
+    }
 
-    const uint so = this->_spacial_order;
-    const uint to = this->_maximum_temporal_order;
+    for(Nat n=0; n!=N; ++n) {
+        Ariadne::compute(f,fy,t,y);
+        for(Nat i=0; i!=y.size(); ++i) {
+            y[i]=antidifferential(fy[i]);
+        }
+    }
 
-    GradedIntervalDifferential null;
-    Vector<GradedIntervalDifferential> arg(nx,null);
-    List<GradedIntervalDifferential> tmp(p.temporaries_size(),null);
-    Vector<GradedIntervalDifferential> dphia(p.result_size(),null); // The flow derivatives evaluated over the flow line of the centre
-    Vector<GradedIntervalDifferential> dphib(p.result_size(),null); // The flow derivatives evaluated over the bounding box
-    Vector<GradedIntervalDifferential> dphic(p.result_size(),null); // The flow derivatives evaluated at the centre
-    Vector<GradedIntervalDifferential> dphid(p.result_size(),null); // The flow derivatives evaluated over the initial spacial domain
+    return y;
+}
+*/
 
-    dphic=Ariadne::flow(p,cx,so,to);
-    ARIADNE_LOG(6,"dphic="<<dphic<<"\n");
-    dphid=Ariadne::flow(p,dx,so,to);
-    ARIADNE_LOG(6,"dphid="<<dphid<<"\n");
-    dphia=Ariadne::flow(p,ax,so,to);
-    ARIADNE_LOG(6,"dphia="<<dphia<<"\n");
-    dphib=Ariadne::flow(p,bx,so,to);
-    ARIADNE_LOG(6,"dphib="<<dphib<<"\n");
-
-    Vector< GradedIntervalDifferential > gdphi(nx,GradedIntervalDifferential(List<IntervalDifferential>(to+1u,IntervalDifferential(nx,so))));
+Vector<IntervalDifferential> flow_differential(Vector<GradedIntervalDifferential> const& dphia, Vector<GradedIntervalDifferential> const& dphib,
+                                               Vector<GradedIntervalDifferential> const& dphic, Vector<GradedIntervalDifferential> const& dphid,
+                                               uint so, uint to, int verbosity=0)
+{
+    uint nx=dphia.size();
+    Vector<GradedIntervalDifferential> gdphi(nx,GradedIntervalDifferential(List<IntervalDifferential>(to+1u,IntervalDifferential(nx,so))));
     for(uint i=0; i!=nx; ++i) {
         for(uint j=0; j!=to; ++j) {
             for(Differential<Interval>::const_iterator iter=dphic[i][j].begin(); iter!=dphic[i][j].end(); ++iter) {
@@ -430,7 +421,225 @@ TaylorSeriesIntegrator::flow_diff(const IntervalVectorProcedure& p, const Interv
 
     ARIADNE_LOG(4,"dphi="<<dphi<<"\n");
     return dphi;
+}
 
+VectorTaylorFunction flow_function(const Vector<IntervalDifferential>& dphi, const IntervalVector& dx, const Float& h, double swpt, int verbosity=0) {
+    Sweeper sweeper(new ThresholdSweeper(swpt));
+    const uint nx=dphi.size();
+
+    Vector<IntervalTaylorModel> tmid(nx+1,IntervalTaylorModel(nx+1,sweeper));
+    for(uint i=0; i!=nx; ++i) { tmid[i]=IntervalTaylorModel::variable(nx+1,i,sweeper)*dx[i].radius(); }
+    tmid[nx]=(IntervalTaylorModel::variable(nx+1,nx,sweeper)+1)*(h/2);
+    tmid[nx]=(IntervalTaylorModel::variable(nx+1,nx,sweeper))*(h);
+
+    Vector<IntervalTaylorModel> tmphi(nx,IntervalTaylorModel(nx+1,sweeper));
+    for(uint i=0; i!=nx; ++i) { tmphi[i]=evaluate(dphi[i].expansion(),tmid); }
+    //IntervalVectorFunctionModel tphi(join(dx,Interval(0,h)),tmphi);
+    VectorTaylorFunction tphi(join(dx,Interval(-h,h)),tmphi);
+
+    return tphi;
+}
+
+IntervalVectorFunctionModel
+series_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx,
+                 double max_err, double swpt, uint init_so, uint init_to, uint max_so, uint max_to, uint verbosity)
+{
+    static const double TRY_SPACIAL_ORDER_INCREASE_FACTOR=4;
+
+    Vector<IntervalFormula> ff = formula(f);
+    Vector< Procedure<Interval> > p(ff);
+    ARIADNE_LOG(4,"p="<<p<<"\n");
+
+    IntervalVector cx=midpoint(dx);
+    IntervalVector ax=cx+Interval(0,h)*evaluate(p,bx);
+    ax=cx+Interval(0,h)*evaluate(p,ax);
+
+    uint so=init_so;
+    uint to=init_to;
+
+    uint nso=0;
+    uint nto=0;
+
+    Vector<GradedIntervalDifferential> dphia,fdphia,dphib,fdphib,dphic,fdphic,dphid,fdphid;
+    List<GradedIntervalDifferential> tdphia,tdphib,tdphic,tdphid;
+    Vector<GradedIntervalDifferential> ndphia,nfdphia,ndphib,nfdphib,ndphic,nfdphic,ndphid,nfdphid;
+    List<GradedIntervalDifferential> ntdphia,ntdphib,ntdphic,ntdphid;
+
+    flow_init(p,fdphia,tdphia,dphia,ax,so);
+    flow_init(p,fdphib,tdphib,dphib,bx,so);
+    flow_init(p,fdphic,tdphic,dphic,cx,so);
+    flow_init(p,fdphid,tdphid,dphid,dx,so);
+
+    for(uint i=0; i!=to; ++i) {
+        Ariadne::flow_iterate(p,fdphia,tdphia,dphia);
+        Ariadne::flow_iterate(p,fdphib,tdphib,dphib);
+        Ariadne::flow_iterate(p,fdphic,tdphic,dphic);
+        Ariadne::flow_iterate(p,fdphid,tdphid,dphid);
+    }
+
+    Vector<IntervalDifferential> dphi=flow_differential(dphia,dphib,dphic,dphid,so,to,verbosity);
+    ARIADNE_LOG(5,"dphi="<<dphi<<"\n");
+
+    VectorTaylorFunction tphi=flow_function(dphi,dx,h,swpt,verbosity);
+    ARIADNE_LOG(5,"phi="<<tphi<<"\n");
+
+    Float old_error=tphi.error()*TRY_SPACIAL_ORDER_INCREASE_FACTOR*2;
+
+    while(tphi.error()>max_err && (so<max_so || to<max_to) ) {
+        uint nnz=0; for(uint i=0; i!=tphi.size(); ++i) { nnz+=tphi.model(i).number_of_nonzeros(); }
+        ARIADNE_LOG(3,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<tphi.error()<<"\n");
+
+        if( (so<max_so) && (tphi.error()*TRY_SPACIAL_ORDER_INCREASE_FACTOR > old_error) ) {
+            // try increasing spacial degree
+            if(nto==0) {
+                // Initialise higher spacial order
+                nso=so+1;
+                nto=to-1;
+
+                flow_init(p,nfdphia,ntdphia,ndphia,ax,nso);
+                flow_init(p,nfdphib,ntdphib,ndphib,bx,nso);
+                flow_init(p,nfdphic,ntdphic,ndphic,cx,nso);
+                flow_init(p,nfdphid,ntdphid,ndphid,dx,nso);
+
+                for(uint i=0; i!=nto; ++i) {
+                    Ariadne::flow_iterate(p,nfdphia,ntdphia,ndphia);
+                    Ariadne::flow_iterate(p,nfdphib,ntdphib,ndphib);
+                    Ariadne::flow_iterate(p,nfdphic,ntdphic,ndphic);
+                    Ariadne::flow_iterate(p,nfdphid,ntdphid,ndphid);
+                }
+            }
+            while(nto+1<to) {
+                ++nto;
+                Ariadne::flow_iterate(p,nfdphia,ntdphia,ndphia);
+                Ariadne::flow_iterate(p,nfdphib,ntdphib,ndphib);
+                Ariadne::flow_iterate(p,nfdphic,ntdphic,ndphic);
+                Ariadne::flow_iterate(p,nfdphid,ntdphid,ndphid);
+            }
+            Vector<IntervalDifferential> ndphi=flow_differential(ndphia,ndphib,ndphic,ndphid,nso,nto,verbosity);
+            VectorTaylorFunction ntphi=flow_function(ndphi,dx,h,swpt,verbosity);
+
+            uint nnnz=0; for(uint i=0; i!=tphi.size(); ++i) { nnnz+=tphi.model(i).number_of_nonzeros(); }
+            ARIADNE_LOG(3,"nso="<<nso<<" nto="<<nto<<" nnnz="<<nnnz<<" nerr="<<ntphi.error()<<"\n");
+
+            if(ntphi.error()<tphi.error()) {
+                dphia=ndphia; dphib=ndphib; dphic=ndphic; dphid=ndphid;
+                fdphia=nfdphia; fdphib=nfdphib; fdphic=nfdphic; fdphid=nfdphid;
+                tdphia=ntdphia; tdphib=ntdphib; tdphic=ntdphic; tdphid=ntdphid;
+                dphi=ndphi;
+                tphi=ntphi;
+                so=nso;
+                to=nto;
+                nso=0;
+                nto=0;
+            }
+        }
+
+        old_error=tphi.error();
+
+        ++to;
+        Ariadne::flow_iterate(p,fdphia,tdphia,dphia);
+        Ariadne::flow_iterate(p,fdphib,tdphib,dphib);
+        Ariadne::flow_iterate(p,fdphic,tdphic,dphic);
+        Ariadne::flow_iterate(p,fdphid,tdphid,dphid);
+        dphi=flow_differential(dphia,dphib,dphic,dphid,so,to,verbosity);
+        tphi=flow_function(dphi,dx,h,swpt,verbosity);
+    }
+    uint nnz=0; for(uint i=0; i!=tphi.size(); ++i) { nnz+=tphi.model(i).number_of_nonzeros(); }
+    ARIADNE_LOG(2,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<tphi.error()<<"\n");
+    ARIADNE_LOG(4,"phi="<<tphi<<"\n");
+    return tphi;
+}
+
+IntervalVectorFunctionModel
+TaylorSeriesIntegrator::flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
+{
+    IntervalVectorFunctionModel tphi=Ariadne::series_flow_step(f,dx,h,bx,
+        this->step_maximum_error(),this->step_sweep_threshold(),
+        this->minimum_spacial_order(),this->minimum_temporal_order(),
+        this->maximum_spacial_order(),this->maximum_temporal_order(),this->verbosity);
+
+    if(tphi.error()>this->step_maximum_error()) {
+        ARIADNE_THROW(FlowTimeStepException,"TaylorSeriesIntegrator::flow_step",
+                      "Integration of "<<f<<" over "<<dx<<" for time "<<h<<" has error "<<tphi.errors()<<
+                      " using spacial order "<<this->maximum_spacial_order()<<" and temporal order "<<this->maximum_temporal_order()<<
+                      ", which exceeds maximum single-step error "<<this->step_maximum_error()<<"\n");
+    }
+
+    return tphi;
+}
+
+Pair<Float,IntervalVector>
+TaylorSeriesIntegrator::flow_bounds(const IntervalVectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
+{
+    ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_bounds(IntervalVectorFunction vf, IntervalVector dx, Float hmax)\n");
+    ARIADNE_ASSERT_MSG(vf.result_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
+    ARIADNE_ASSERT_MSG(vf.argument_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
+    ARIADNE_ASSERT(hmax>0);
+
+    // Set up constants of the method.
+    // TODO: Better estimates of constants
+    const double INITIAL_MULTIPLIER=2.0;
+    const double MULTIPLIER=1.125;
+    const double BOX_RADIUS_MULTIPLIER=1.25;
+    const uint EXPANSION_STEPS=8;
+    const uint REDUCTION_STEPS=8;
+    const uint REFINEMENT_STEPS=4;
+
+    IntervalVector delta=(dx-midpoint(dx))*(BOX_RADIUS_MULTIPLIER-1);
+
+    Float hmin=hmax/(1<<REDUCTION_STEPS);
+    Float h=hmax;
+    ARIADNE_LOG(4,"hmax="<<hmax<<"\n");
+
+    bool success=false;
+    IntervalVector bx,nbx,df;
+    Interval ih(0,h);
+
+    while(!success) {
+        ARIADNE_ASSERT_MSG(h>=hmin," h="<<h<<", hmin="<<hmin);
+        bx=dx+INITIAL_MULTIPLIER*ih*vf.evaluate(dx)+delta;
+        for(uint i=0; i!=EXPANSION_STEPS; ++i) {
+            df=vf.evaluate(bx);
+            nbx=dx+delta+ih*df;
+            if(subset(nbx,bx)) {
+                success=true;
+                break;
+            } else {
+                bx=dx+delta+MULTIPLIER*ih*df;
+            }
+        }
+        if(!success) {
+            h/=2;
+            ih=Interval(0,h);
+        }
+    }
+
+    ARIADNE_ASSERT(subset(nbx,bx));
+
+    IntervalVector vfbx;
+    vfbx=vf.evaluate(bx);
+
+    for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
+        bx=nbx;
+        vfbx=vf.evaluate(bx);
+        nbx=dx+delta+ih*vfbx;
+        ARIADNE_ASSERT_MSG(subset(nbx,bx),std::setprecision(20)<<"refinement "<<i<<": "<<nbx<<" is not a inside of "<<bx);
+    }
+
+
+    // Check result of operation
+    // We use subset rather than inner subset here since the bound may touch
+    ARIADNE_ASSERT(subset(nbx,bx));
+
+    bx=nbx;
+
+
+    ARIADNE_ASSERT(subset(dx,bx));
+
+    ARIADNE_ASSERT_MSG(subset(dx+h*vf.evaluate(bx),bx),
+        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<vf.evaluate(bx)<<"\nd+hf(b)="<<IntervalVector(dx+h*vf.evaluate(bx))<<"\nb="<<bx<<"\n");
+
+    return std::make_pair(h,bx);
 }
 
 void TaylorSeriesIntegrator::write(std::ostream& os) const {
@@ -438,9 +647,12 @@ void TaylorSeriesIntegrator::write(std::ostream& os) const {
        << "( function_factory = " << this->function_factory()
        << ", maximum_error = " << this->maximum_error()
        << ", lipschitz_tolerance = " << this->lipschitz_tolerance()
-       << ", sweep_threshold = " << this->sweep_threshold()
+       << ", step_maximum_error = " << this->step_maximum_error()
+       << ", step_sweep_threshold = " << this->step_sweep_threshold()
+       << ", minimum_spacial_order = " << this->minimum_spacial_order()
+       << ", minimum_temporal_order = " << this->minimum_temporal_order()
        << ", maximum_temporal_order = " << this->maximum_temporal_order()
-       << ", spacial_order = " << this->spacial_order()
+       << ", maximum_spacial_order = " << this->maximum_spacial_order()
        << " )";
 }
 

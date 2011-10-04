@@ -66,6 +66,8 @@ class IntegratorInterface
     /*! \brief Write to an output stream. */
     virtual void write(std::ostream& os) const = 0;
 
+    /*! \brief Get the maximum allowable error in the flow. */
+    virtual double maximum_error() const = 0;
     /*! \brief Set the maximum allowable error in the flow. */
     virtual void set_maximum_error(double) = 0;
 

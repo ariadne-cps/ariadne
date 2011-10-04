@@ -182,14 +182,17 @@ int main(int argc, const char **argv) {
 
     ARIADNE_TEST_PRINT("Testing TaylorSeriesIntegrator");
     TaylorSeriesIntegrator taylor_series_integrator(
-            maximum_error=1e-8,lipschitz_constant=0.5,global_sweep_threshold=1e-10,local_sweep_threshold=1e-16,spacial_order=2,maximum_temporal_order=6);
+            maximum_error=1e-6,sweep_threshold=1e-10,lipschitz_constant=0.5,
+            step_maximum_error=1e-8,step_sweep_threshold=1e-12,
+            minimum_spacial_order=1,minimum_temporal_order=4,
+            maximum_spacial_order=3,maximum_temporal_order=8);
     taylor_series_integrator.verbosity=verbosity;
     TestIntegrator(taylor_series_integrator).test();
 
     ARIADNE_TEST_PRINT("Testing TaylorPicardIntegrator");
-    TaylorPicardIntegrator taylor_picard_integrator(maximum_error=1e-16,lipschitz_constant=0.5,
-                                                    global_sweep_threshold=1e-10,local_sweep_threshold=1e-16,
-                                                    maximum_temporal_order=16);
+    TaylorPicardIntegrator taylor_picard_integrator(
+            maximum_error=1e-6,sweep_threshold=1e-10,lipschitz_constant=0.5,
+            step_maximum_error=1e-8,step_sweep_threshold=1e-12, maximum_temporal_order=16);
     ARIADNE_TEST_PRINT(taylor_picard_integrator);
     taylor_picard_integrator.verbosity=verbosity;
     TestIntegrator(taylor_picard_integrator).test();

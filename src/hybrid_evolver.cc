@@ -474,9 +474,10 @@ _compute_flow(RealVectorFunction dynamic,
               const Float& maximum_step_size) const
 {
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_flow(...)\n");
-    TaylorPicardIntegrator integrator(maximum_error=this->parameters().flow_accuracy,lipschitz_constant=0.5,
-                                      global_sweep_threshold=this->parameters().flow_accuracy,local_sweep_threshold=this->parameters().flow_accuracy/1024.0,
-                                      maximum_temporal_order=32);
+    TaylorPicardIntegrator picard_integrator(maximum_error=this->parameters().flow_accuracy);
+    TaylorSeriesIntegrator series_integrator(maximum_error=this->parameters().flow_accuracy);
+
+    IntegratorInterface& integrator=picard_integrator;
     // Compute flow and actual time step size used
     //
     // The Integrator classes compute the flow as a function on a symmetrical

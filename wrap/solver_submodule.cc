@@ -75,6 +75,8 @@ class IntegratorWrapper
         this->get_override("set_temporal_order")(); }
     void set_maximum_error(double) {
         this->get_override("set_maximum_error")(); }
+    double maximum_error() const {
+        this->get_override("maximum_error")(); }
     Pair<Float,IntervalVector> flow_bounds(const IntervalVectorFunction&,const IntervalVector&,const Float&) const {
         return this->get_override("flow_bounds")(); }
     IntervalVectorFunctionModel flow_step(const IntervalVectorFunction&,const IntervalVector&,Float&) const {

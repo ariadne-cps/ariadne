@@ -45,9 +45,11 @@ template<class T> class Generator {
 };
 
 struct MaximumError : Attribute<double> { MaximumError(double v) : Attribute(v) { } };
+struct SweepThreshold : Attribute<double> { SweepThreshold(double v) : Attribute(v) { } };
 struct MaximumNumberOfSteps : Attribute<double> { MaximumNumberOfSteps(double v) : Attribute(v) { } };
 
 static const Generator<MaximumError> maximum_error = Generator<MaximumError>();
+static const Generator<SweepThreshold> sweep_threshold = Generator<SweepThreshold>();
 static const Generator<MaximumNumberOfSteps> maximum_number_of_steps = Generator<MaximumNumberOfSteps>();
 
 } // namespace Ariadne

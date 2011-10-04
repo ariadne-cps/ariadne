@@ -57,20 +57,24 @@ typedef shared_ptr<const IntervalFunctionModelFactoryInterface> FunctionFactoryP
 class Sweeper;
 
 struct LipschitzConstant : Attribute<double> { LipschitzConstant(double v) : Attribute(v) { } };
-struct MaximumTemporalOrder : Attribute<uint> { MaximumTemporalOrder(uint v) : Attribute(v) { } };
-struct MaximumSpacialOrder : Attribute<uint> { MaximumSpacialOrder(uint v) : Attribute(v) { } };
-struct TemporalOrder : Attribute<uint> { TemporalOrder(uint v) : Attribute(v) { } };
+struct StepMaximumError : Attribute<double> { StepMaximumError(double v) : Attribute(v) { } };
+struct StepSweepThreshold : Attribute<double> { StepSweepThreshold(double v) : Attribute(v) { } };
 struct SpacialOrder : Attribute<uint> { SpacialOrder(uint v) : Attribute(v) { } };
-struct LocalSweepThreshold : Attribute<double> { LocalSweepThreshold(double v) : Attribute(v) { } };
-struct GlobalSweepThreshold : Attribute<double> { GlobalSweepThreshold(double v) : Attribute(v) { } };
+struct TemporalOrder : Attribute<uint> { TemporalOrder(uint v) : Attribute(v) { } };
+struct MinimumSpacialOrder : Attribute<uint> { MinimumSpacialOrder(uint v) : Attribute(v) { } };
+struct MinimumTemporalOrder : Attribute<uint> { MinimumTemporalOrder(uint v) : Attribute(v) { } };
+struct MaximumSpacialOrder : Attribute<uint> { MaximumSpacialOrder(uint v) : Attribute(v) { } };
+struct MaximumTemporalOrder : Attribute<uint> { MaximumTemporalOrder(uint v) : Attribute(v) { } };
 
 static const Generator<LipschitzConstant> lipschitz_constant = Generator<LipschitzConstant>();
-static const Generator<MaximumTemporalOrder> maximum_temporal_order = Generator<MaximumTemporalOrder>();
-static const Generator<MaximumSpacialOrder> maximum_spacial_order = Generator<MaximumSpacialOrder>();
-static const Generator<TemporalOrder> temporal_order = Generator<TemporalOrder>();
+static const Generator<StepMaximumError> step_maximum_error = Generator<StepMaximumError>();
+static const Generator<StepSweepThreshold> step_sweep_threshold = Generator<StepSweepThreshold>();
 static const Generator<SpacialOrder> spacial_order = Generator<SpacialOrder>();
-static const Generator<LocalSweepThreshold> local_sweep_threshold = Generator<LocalSweepThreshold>();
-static const Generator<GlobalSweepThreshold> global_sweep_threshold = Generator<GlobalSweepThreshold>();
+static const Generator<TemporalOrder> temporal_order = Generator<TemporalOrder>();
+static const Generator<MinimumTemporalOrder> minimum_temporal_order = Generator<MinimumTemporalOrder>();
+static const Generator<MinimumSpacialOrder> minimum_spacial_order = Generator<MinimumSpacialOrder>();
+static const Generator<MaximumSpacialOrder> maximum_spacial_order = Generator<MaximumSpacialOrder>();
+static const Generator<MaximumTemporalOrder> maximum_temporal_order = Generator<MaximumTemporalOrder>();
 
 class IntegratorBase
     : public IntegratorInterface
@@ -78,16 +82,16 @@ class IntegratorBase
 {
   protected:
     //! \brief Construct from an error bound for a single step, a constant describing the maximum Lh allowed, and a sweep threshold for the global evolution.
-    IntegratorBase(MaximumError e, LipschitzConstant l, GlobalSweepThreshold swp);
+    IntegratorBase(MaximumError e, SweepThreshold swp, LipschitzConstant l);
     IntegratorBase(MaximumError e, LipschitzConstant l);
   public:
     //! \brief A threshold for the error estimate of the approximation.
     virtual void set_maximum_error(double e) { assert(e>0.0); this->_maximum_error=e; }
+    virtual double maximum_error() const  { return this->_maximum_error; }
     //! \brief The fraction L(f)*h used for a time step.
     //! The convergence of the Picard iteration is approximately Lf*h.
     void set_lipschitz_tolerance(double lt) { _lipschitz_tolerance = lt; }
     double lipschitz_tolerance() const { return this->_lipschitz_tolerance; }
-    double maximum_error() const  { return this->_maximum_error; }
 
     //! \brief The class which constructs functions for representing the flow.
     const IntervalFunctionModelFactoryInterface& function_factory() const;
@@ -131,20 +135,29 @@ class IntegratorBase
 class TaylorPicardIntegrator
     : public IntegratorBase
 {
-    double _sweep_threshold;
+    double _step_maximum_error;
+    double _step_sweep_threshold;
     uint _maximum_temporal_order;
   public:
+    //! \brief Default constructor.
+    TaylorPicardIntegrator(MaximumError err)
+        : IntegratorBase(err,SweepThreshold(err/1024),LipschitzConstant(0.5))
+        , _step_maximum_error(err/128), _step_sweep_threshold(err/(1024*128)), _maximum_temporal_order(16) { }
+
     //! \brief Constructor.
-    TaylorPicardIntegrator(MaximumError err, LipschitzConstant lip, GlobalSweepThreshold gswp,
-                           LocalSweepThreshold lswp, MaximumTemporalOrder maxto)
-        : IntegratorBase(err,lip,gswp), _sweep_threshold(lswp), _maximum_temporal_order(maxto) { }
+    TaylorPicardIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip,
+                           StepMaximumError lerr, StepSweepThreshold lswp, MaximumTemporalOrder maxto)
+        : IntegratorBase(err,swp,lip), _step_maximum_error(lerr), _step_sweep_threshold(lswp), _maximum_temporal_order(maxto) { }
 
     //! \brief The order of the method in time.
     uint maximum_temporal_order() const { return this->_maximum_temporal_order; }
     void set_maximum_temporal_order(uint m) { this->_maximum_temporal_order=m; }
-    //! \brief  Set the sweep threshold of the Taylor model.
-    double sweep_threshold() const { return this->_sweep_threshold; }
-    void set_sweep_threshold(double lt) { _sweep_threshold = lt; }
+    //! \brief  Set the sweep threshold of the Taylor model for a single step.
+    double step_sweep_threshold() const { return this->_step_sweep_threshold; }
+    void set_step_sweep_threshold(double lt) { _step_sweep_threshold = lt; }
+    //! \brief  Set the maximum error of a single step.
+    double step_maximum_error() const { return this->_step_maximum_error; }
+    void set_step_maximum_error(double e) { _step_maximum_error = e; }
 
     virtual TaylorPicardIntegrator* clone() const { return new TaylorPicardIntegrator(*this); }
     virtual void write(std::ostream& os) const;
@@ -162,36 +175,60 @@ class TaylorPicardIntegrator
 class TaylorSeriesIntegrator
     : public IntegratorBase
 {
-    double _sweep_threshold;
+    double _step_maximum_error;
+    double _step_sweep_threshold;
+    uint _minimum_spacial_order;
+    uint _minimum_temporal_order;
+    uint _maximum_spacial_order;
     uint _maximum_temporal_order;
-    uint _spacial_order;
   public:
     //! \brief Constructor.
-    TaylorSeriesIntegrator(MaximumError err, LipschitzConstant lip, GlobalSweepThreshold gswp,
-                           LocalSweepThreshold lswp, SpacialOrder so, MaximumTemporalOrder maxto)
-        : IntegratorBase(err,lip,gswp), _sweep_threshold(lswp), _maximum_temporal_order(maxto), _spacial_order(so) { }
+    TaylorSeriesIntegrator(MaximumError err)
+        : IntegratorBase(err,SweepThreshold(err/1024),LipschitzConstant(0.5)), _step_maximum_error(err/128), _step_sweep_threshold(err/(128*1024))
+        , _minimum_spacial_order(1), _minimum_temporal_order(4), _maximum_spacial_order(4), _maximum_temporal_order(12) { }
+
+    //! \brief Constructor.
+    TaylorSeriesIntegrator(MaximumError err, SweepThreshold swp)
+        : IntegratorBase(err,swp,LipschitzConstant(0.5)), _step_maximum_error(err/128), _step_sweep_threshold(swp/1024)
+        , _minimum_spacial_order(1), _minimum_temporal_order(4), _maximum_spacial_order(4), _maximum_temporal_order(12) { }
+
+    //! \brief Constructor.
+    TaylorSeriesIntegrator(MaximumError err, SweepThreshold gswp, LipschitzConstant lip,
+                           StepMaximumError lerr, StepSweepThreshold lswp,
+                           MinimumSpacialOrder minso, MinimumTemporalOrder minto,
+                           MaximumSpacialOrder maxso, MaximumTemporalOrder maxto)
+        : IntegratorBase(err,gswp,lip), _step_maximum_error(lerr), _step_sweep_threshold(lswp)
+        , _minimum_spacial_order(minso), _minimum_temporal_order(minto), _maximum_spacial_order(maxso), _maximum_temporal_order(maxto) { }
 
     //! \brief The order of the method in space.
-    uint spacial_order() const { return this->_spacial_order; }
-    void set_spacial_order(uint n) { this->_spacial_order=n; }
+    uint minimum_spacial_order() const { return this->_minimum_spacial_order; }
+    void set_minimum_spacial_order(uint n) { this->_minimum_spacial_order=n; }
+    //! \brief The order of the method in space.
+    uint minimum_temporal_order() const { return this->_minimum_temporal_order; }
+    void set_minimum_temporal_order(uint m) { this->_minimum_temporal_order=m; }
+    //! \brief The maximum order of the method in time.
+    uint maximum_spacial_order() const { return this->_maximum_spacial_order; }
+    void set_maximum_spacial_order(uint n) { this->_maximum_spacial_order=n; }
     //! \brief The maximum order of the method in time.
     uint maximum_temporal_order() const { return this->_maximum_temporal_order; }
     void set_maximum_temporal_order(uint m) { this->_maximum_temporal_order=m; }
+    //! \brief  Set the sweep threshold of the Taylor model representing a single step.
+    double step_sweep_threshold() const { return this->_step_sweep_threshold; }
+    void set_step_sweep_threshold(double lswp) { _step_sweep_threshold = lswp; }
     //! \brief  Set the sweep threshold of the Taylor model.
-    double sweep_threshold() const { return this->_sweep_threshold; }
-    void set_sweep_threshold(double lt) { _sweep_threshold = lt; }
+    double step_maximum_error() const { return this->_step_maximum_error; }
+    void set_step_maximum_error(double e) { _step_maximum_error = e; }
 
     virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
     virtual void write(std::ostream& os) const;
 
+    virtual Pair<Float,IntervalVector>
+    flow_bounds(const IntervalVectorFunction& vector_field,
+                const IntervalVector& state_domain,
+                const Float& suggested_time_step) const;
+
     virtual IntervalVectorFunctionModel
     flow_step(const IntervalVectorFunction& vector_field,
-              const IntervalVector& state_domain,
-              const Float& time_step,
-              const IntervalVector& bounding_box) const;
-
-    virtual Vector< Differential<Interval> >
-    flow_diff(const IntervalVectorProcedure& vector_field,
               const IntervalVector& state_domain,
               const Float& time_step,
               const IntervalVector& bounding_box) const;

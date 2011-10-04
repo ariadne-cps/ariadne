@@ -48,7 +48,6 @@
 #include "evolution_parameters.h"
 
 #include "logging.h"
-#include "integrator.h"
 
 namespace Ariadne {
 

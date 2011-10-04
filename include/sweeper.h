@@ -142,9 +142,6 @@ void SweeperBase<SWP>::_sweep(Expansion<Float>& p) const
     p.resize(curr-p.begin());
 }
 
-struct SweepThreshold : Attribute<double> { SweepThreshold(double v) : Attribute(v) { } };
-static const Generator<SweepThreshold> sweep_threshold = Generator<SweepThreshold>();
-
 //! \brief A sweeper class which discards terms whose absolute value is smaller than a threshold.
 class ThresholdSweeper : public SweeperBase<ThresholdSweeper> {
     double _sweep_threshold;

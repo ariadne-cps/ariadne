@@ -34,9 +34,9 @@
 
 #include "logging.h"
 
-namespace Ariadne {
-
 typedef unsigned int uint;
+
+namespace Ariadne {
 
 class Float;
 class Interval;

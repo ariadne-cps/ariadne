@@ -54,6 +54,8 @@ namespace Ariadne {
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<Interval> IntervalFunctionModelFactoryInterface;
 
+class IntegratorInterface;
+class SolverInterface;
 
 // A derived class of IntervalVectorFunctionModel representing the flow $\phi(x,t)\f$ of a
 // differential equations \f$\dot{x}=f(x)\f$.
@@ -152,6 +154,11 @@ class HybridEvolverBase
     const FunctionFactoryType& function_factory() const;
     /*! \brief Set the class which constructs functions for the enclosures. */
     void set_function_factory(const FunctionFactoryType& factory);
+
+    /*! \brief Set the class which integrates the continuous dynamics. */
+    void set_integrator(const IntegratorInterface& integrator);
+    /*! \brief Set the class which integrates the continuous dynamics. */
+    void set_solver(const SolverInterface& solver);
 
     virtual EnclosureType enclosure(const HybridBox& initial_box) const;
     virtual EnclosureType enclosure(const SystemType& system, const HybridSet& set) const;
@@ -454,6 +461,8 @@ class HybridEvolverBase
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters_ptr;
     boost::shared_ptr< FunctionFactoryType > _function_factory_ptr;
+    boost::shared_ptr< IntegratorInterface > _integrator_ptr;
+    boost::shared_ptr< SolverInterface > _solver_ptr;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 
@@ -508,8 +517,9 @@ enum CrossingKind {
         //! Implied by concavity along flow lines, which is equivalent to \f$L_{f}^{2} g < 0\f$ within the reached set.
     CONVEX_CROSSING, //!< The guard function is negative over at most an interval. Implied by convexity along flow lines.
         //! Implied by convexity along flow lines, which is equivalent to \f$L_{f}^{2} g > 0\f$ within the reached set.
-    TRANSVERSE_CROSSING, //!< The crossing time can be computed as a smooth function of the initial state.
-        //! Given an initial point \f$x_0\f$, the crossing time \f$\gamma(x_0)\f$.
+    TRANSVERSE_CROSSING, //!< The guard function is strictly increasing along flow lines, and
+        //! the crossing time can be computed as a smooth function of the initial state.
+        //! Given an initial point \f$x_0\f$, the crossing time is \f$\gamma(x_0)\f$.
     GRAZING_CROSSING //!< The time at which the guard function reaches a maximum along flow lines is a smooth function \f$\mu(x_0)\f$ of the initial state \f$x_0\f$.
         //! Implies by concavity along flow lines, which is equivalent to \f$L_{f}^{2} g < 0\f$ within the reached set.
 };

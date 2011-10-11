@@ -531,6 +531,17 @@ Differential<X>& operator/=(Differential<X>& x, const R& c)
 
 
 template<class X>
+Differential<X> operator+(const Differential<X>& x)
+{
+    Differential<X> r(x.argument_size(),x.degree());
+    r.expansion().reserve(x.expansion().number_of_nonzeros());
+    for(typename Differential<X>::const_iterator iter=x.begin(); iter!=x.end(); ++iter) {
+        r.expansion().append(iter->key(), +iter->data());
+    }
+    return r;
+}
+
+template<class X>
 Differential<X> operator-(const Differential<X>& x)
 {
     Differential<X> r(x.argument_size(),x.degree());
@@ -921,9 +932,9 @@ std::ostream& operator<<(std::ostream& os, const Differential<X>& x)
 {
     Expansion<X> e=x.expansion();
     //e.graded_sort();
-    os << "SD("<<x.argument_size()<<","<<x.degree()<<")";
+    os << "SD("<<x.argument_size()<<","<<x.degree()<<"){";
     for(typename Expansion<X>::const_iterator iter=e.begin(); iter!=e.end(); ++iter) {
-        if(iter==e.begin()) { os << "{ "; } else { os << ", "; }
+        if(iter!=e.begin()) { os << ","; } os << " ";
         for(uint i=0; i!=e.argument_size(); ++i) {
             if(i!=0) { os << ","; }
             os << uint(iter->key()[i]);

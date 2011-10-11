@@ -151,6 +151,7 @@ template<> inline Bool compare(OperatorCode op, const String& x1, const String& 
 }
 template<class X> inline X compute(OperatorCode op, const X& x) {
     switch(op) {
+        case POS: return +x;
         case NEG: return -x;
         case REC: return 1/x;
         case SQR: return sqr(x);

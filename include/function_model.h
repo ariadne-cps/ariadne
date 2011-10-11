@@ -444,6 +444,12 @@ inline VectorFunctionModel<Interval> intersection(const VectorFunctionModel<Inte
     ARIADNE_ASSERT_MSG(f1.size()==f2.size(),"intersection(f1,f2): f1="<<f1<<", f2="<<f2<<")");
     VectorFunctionModel<Interval> r=+f1; for(uint i=0; i!=r.size(); ++i) { r[i]=intersection(f1[i],f2[i]); } return r; }
 
+inline VectorFunctionModel<Interval> antiderivative(const VectorFunctionModel<Interval>& f, Nat j) {
+    VectorFunctionModel<Interval> r(f);
+    for(uint i=0; i!=r.size(); ++i) { r[i]=antiderivative(f[i],j); }
+    return r;
+}
+
 inline VectorFunctionModel<Interval> partial_evaluate(const VectorFunctionModel<Interval>& f, Nat j, const Interval& c) {
     return f._ptr->_partial_evaluate(j,c); }
 

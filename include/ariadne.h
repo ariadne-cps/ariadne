@@ -59,6 +59,9 @@ using std::ofstream; using std::ifstream;
 #include "curve.h"
 #include "orbit.h"
 
+#include "integrator.h"
+#include "solver.h"
+
 #include "discrete_location.h"
 #include "discrete_event.h"
 #include "hybrid_set.h"

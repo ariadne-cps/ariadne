@@ -37,6 +37,7 @@
 #include "integrator.h"
 #include "solver.h"
 #include <boost/concept_check.hpp>
+#include <include/hybrid_evolver.h>
 
 namespace {
 
@@ -243,6 +244,8 @@ HybridEvolverBase::_create(EvolutionParametersType* parameters, FunctionFactoryT
 {
     this->_parameters_ptr=shared_ptr<EvolutionParametersType>(parameters);
     this->_function_factory_ptr=shared_ptr<FunctionFactoryType>(factory);
+    this->_integrator_ptr=shared_ptr<IntegratorInterface>(new TaylorSeriesIntegrator(parameters->flow_accuracy));
+    this->_solver_ptr=shared_ptr<SolverInterface>(new IntervalNewtonSolver(1e-8,12));
     this->ALLOW_CREEP=true;
     this->ALLOW_UNWIND=false;
 }
@@ -276,6 +279,19 @@ HybridEvolverBase::function_factory() const
 {
     return*this->_function_factory_ptr;
 }
+
+void
+HybridEvolverBase::set_integrator(const IntegratorInterface& integrator)
+{
+    this->_integrator_ptr=shared_ptr<IntegratorInterface>(integrator.clone());
+}
+
+void
+HybridEvolverBase::set_solver(const SolverInterface& solver)
+{
+    this->_solver_ptr=shared_ptr<SolverInterface>(solver.clone());
+}
+
 
 HybridEvolverBase::EnclosureType
 HybridEvolverBase::enclosure(const HybridBox& initial_box) const
@@ -328,7 +344,9 @@ _log_summary(const EvolutionData& evolution_data, HybridEnclosure const& startin
     Box starting_bounding_box=starting_set.space_bounding_box();
     Interval starting_time_range=starting_set.time_range();
     Interval starting_dwell_time_range=starting_set.dwell_time_range();
-    ARIADNE_LOG(1,"\r"
+    int old_precision = std::clog.precision();
+    if(verbosity>=1) { std::clog<<"\n"; }
+    ARIADNE_LOG(1,(verbosity==1?"\r":"")
             <<"#w="<<std::setw(4)<<std::left<<evolution_data.initial_sets.size()+1u
             <<"#r="<<std::setw(5)<<std::left<<evolution_data.reach_sets.size()
             <<"#f="<<std::setw(4)<<std::left<<evolution_data.final_sets.size()
@@ -345,8 +363,8 @@ _log_summary(const EvolutionData& evolution_data, HybridEnclosure const& startin
             <<" se="<<std::setw(7)<<std::scientific<<std::setprecision(1)<<sup_norm(starting_set.space_function().errors())<<std::fixed<<std::flush
             <<" l="<<std::left<<starting_set.location()
             <<" e="<<starting_set.previous_events()
-            <<"                      \n");
-    ARIADNE_LOG(2,"\r    \r"<<starting_set<<"\n");
+            <<"                      \n"<<std::setprecision(old_precision));
+    ARIADNE_LOG(4,"\r    \r"<<starting_set<<"\n");
 
 }
 
@@ -355,7 +373,7 @@ HybridEvolverBase::
 _extract_transitions(DiscreteLocation const& location,
                      HybridAutomatonInterface const& system) const
 {
-    ARIADNE_LOG(2,"HybridEvolverBase::_extract_transitions(...)\n");
+    ARIADNE_LOG(3,"HybridEvolverBase::_extract_transitions(...)\n");
     const RealVectorFunction& dynamic=system.dynamic_function(location);
 
     Map<DiscreteEvent,TransitionData> transitions;
@@ -392,7 +410,7 @@ HybridEvolverBase::
 _apply_invariants(HybridEnclosure& initial_set,
                   Map<DiscreteEvent,TransitionData> const& transitions) const
 {
-    ARIADNE_LOG(2,"HybridEvolverBase::_apply_invariants(...)\n");
+    ARIADNE_LOG(3,"HybridEvolverBase::_apply_invariants(...)\n");
     HybridEnclosure& invariant_set=initial_set;
 
     // Apply restrictions due to invariants
@@ -415,7 +433,7 @@ _process_initial_events(EvolutionData& evolution_data,
                         HybridEnclosure const& initial_set,
                         Map<DiscreteEvent,TransitionData> const& transitions) const
 {
-    ARIADNE_LOG(2,"HybridEvolverBase::_process_initial_events(...)\n");
+    ARIADNE_LOG(3,"HybridEvolverBase::_process_initial_events(...)\n");
     ARIADNE_ASSERT(evolution_data.working_sets.empty());
     HybridEnclosure invariant_set=initial_set;
 
@@ -446,7 +464,7 @@ _process_initial_events(EvolutionData& evolution_data,
                     immediate_jump_set.new_activation(event,transition.guard_function);
                     if(!definitely(immediate_jump_set.empty())) {
                         // Put the immediate jump set in the reached sets, since it does not occur in the flowable set
-                        ARIADNE_LOG(2,"  "<<event<<": "<<transition.event_kind<<", immediate\n");
+                        ARIADNE_LOG(2,event<<": "<<transition.event_kind<<", immediate\n");
                         evolution_data.reach_sets.append(immediate_jump_set);
                         immediate_jump_set.apply_reset(event,transition.target,transition.target_space,transition.reset_function);
                         ARIADNE_LOG(4,"immediate_jump_set="<<immediate_jump_set<<"\n");
@@ -474,10 +492,11 @@ _compute_flow(RealVectorFunction dynamic,
               const Float& maximum_step_size) const
 {
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_flow(...)\n");
-    TaylorPicardIntegrator picard_integrator(maximum_error=this->parameters().flow_accuracy);
-    TaylorSeriesIntegrator series_integrator(maximum_error=this->parameters().flow_accuracy);
 
-    IntegratorInterface& integrator=picard_integrator;
+
+    IntegratorInterface& integrator=*this->_integrator_ptr;
+    //{uint c; std::cin>>c; series_integrator.verbosity=c;}
+
     // Compute flow and actual time step size used
     //
     // The Integrator classes compute the flow as a function on a symmetrical
@@ -487,12 +506,14 @@ _compute_flow(RealVectorFunction dynamic,
     // of the resulting set.
     Float step_size=maximum_step_size;
     IntervalVectorFunctionModel flow_model=static_cast<IntervalVectorFunctionModel>(integrator.flow_step(dynamic,initial_box,step_size));
+
     ARIADNE_LOG(6,"twosided_flow_model="<<flow_model<<"\n");
     IntervalVector flow_domain=flow_model.domain();
     ARIADNE_ASSERT(step_size==flow_domain[flow_domain.size()-1u].upper());
     flow_domain[flow_domain.size()-1u]=Interval(0,step_size);
     flow_model=restrict(flow_model,flow_domain);
     ARIADNE_LOG(6,"flow_model="<<flow_model<<"\n");
+    ARIADNE_LOG(2,"flow_model: step_size="<<step_size<<", errors="<<std::scientific<<flow_model.errors()<<", range="<<std::fixed<<flow_model.range()<<"\n");
     return flow_model;
 }
 
@@ -523,6 +544,8 @@ _compute_active_events(RealVectorFunction const& dynamic,
             HybridEnclosure test_set=reach_set;
             test_set.new_activation(event,guard_function);
             if(!definitely(test_set.empty())) {
+                active_events.insert(*event_iter);
+/*
                 // FIXME: Need to allow permissive events with strictly decreasing guard.
                 // Test direction of guard increase
                 RealScalarFunction flow_derivative = lie_derivative(guard_function,dynamic);
@@ -530,6 +553,7 @@ _compute_active_events(RealVectorFunction const& dynamic,
                 if(flow_derivative_range.upper()>0.0) {
                     active_events.insert(*event_iter);
                 }
+*/
             }
         }
     }
@@ -546,10 +570,9 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                    HybridEnclosure const& initial_set) const
 {
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_crossings(...)\n");
-    // Construct crossing solver with
-    // TODO: Choose default parameters based on evolver parameters,
-    // or pass Solver to Evolver.
-    IntervalNewtonSolver solver(1e-8,12);
+
+    const SolverInterface& solver=*this->_solver_ptr;
+
     Map<DiscreteEvent,CrossingData> crossings;
     crossings.clear();
 
@@ -576,18 +599,19 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             IntervalScalarFunctionModel crossing_time;
             try {
                 crossing_time=solver.implicit(compose(guard,flow),flow_spacial_domain,flow_time_domain);
+                if(crossing_time.error()>1e-8) { ARIADNE_LOG(2,event<<": crossing_time: error="<<crossing_time.error()<<", range="<<crossing_time.range()<<"\n"); }
                 crossings[event]=CrossingData(TRANSVERSE_CROSSING,crossing_time);
             }
             catch(const UnknownSolutionException& e) {
                 // If the crossing time cannot be computed, then we can still
                 // use the fact that the crossing occurs as soon as $g(x(t))=0$.
-                ARIADNE_LOG(0,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                ARIADNE_LOG(2,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                 crossings[event]=CrossingData(INCREASING_CROSSING);
             }
             catch(const SolverException& e) {
                 // If the crossing time cannot be computed, then we can still
                 // use the fact that the crossing occurs as soon as $g(x(t))=0$.
-                ARIADNE_LOG(0,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                ARIADNE_LOG(2,"Error in computing crossing time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                 crossings[event]=CrossingData(INCREASING_CROSSING);
             }
             catch(const std::runtime_error& e) {
@@ -651,11 +675,12 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 // time is $(g(\phi(x_0,t))<=0 /\ t<=\mu(x_0)) \/ g(\phi(x_0,\mu(x_0)))<=0$
                 try {
                     IntervalScalarFunctionModel critical_time=solver.implicit(compose(derivative,flow),flow_spacial_domain,flow_time_domain);
+                    if(critical_time.error()>1e-8) { ARIADNE_LOG(2,event<<": critical_time: error="<<critical_time.error()<<", range="<<critical_time.range()<<"\n"); }
                     crossings[event]=CrossingData(GRAZING_CROSSING);
                     crossings[event].critical_time=critical_time;
                 }
                 catch(const SolverException& e) {
-                    ARIADNE_LOG(0,"Error in computing critical time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
+                    ARIADNE_LOG(2,"Error in computing critical time for event "<<*event_iter<<":\n  "<<e.what()<<"\n");
                     crossings[event]=CrossingData(CONCAVE_CROSSING);
                 }
                 catch(const std::runtime_error& e) {
@@ -669,6 +694,22 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 crossings[event]=CrossingData(DEGENERATE_CROSSING);
             }
         }
+    }
+    if(!crossings.empty()) {
+        Map<DiscreteEvent,Tuple<CrossingKind,Interval,Float> > crossing_log_data;
+        for (Map<DiscreteEvent,CrossingData>::const_iterator crossing_iter=crossings.begin(); crossing_iter!=crossings.end(); ++crossing_iter) {
+            DiscreteEvent event=crossing_iter->first;
+            CrossingKind crossing_kind=crossing_iter->second.crossing_kind;
+            Float inf(1.0/0.0);
+            Interval crossing_time_range(-inf,+inf);
+            Float crossing_time_error=0.0;
+            if (crossing_kind==TRANSVERSE_CROSSING) {
+                crossing_time_range=crossing_iter->second.crossing_time.range();
+                crossing_time_error=crossing_iter->second.crossing_time.error();
+            }
+            crossing_log_data.insert(event,make_tuple(crossing_kind,crossing_time_range,crossing_time_error));
+        }
+        ARIADNE_LOG(2,"crossings: "<<crossing_log_data<<"\n");
     }
     return crossings;
 }
@@ -702,6 +743,7 @@ _apply_evolve_step(HybridEnclosure& set,
                   IntervalVectorFunctionModel const& flow,
                   TimingData const& timing_data) const
 {
+
     switch(timing_data.step_kind) {
         case CONSTANT_EVOLUTION_TIME: case SPACE_DEPENDENT_EVOLUTION_TIME:
         case TIME_DEPENDENT_EVOLUTION_TIME: case SPACETIME_DEPENDENT_EVOLUTION_TIME:
@@ -774,7 +816,13 @@ _apply_guard_step(HybridEnclosure& set,
                 case NEGATIVE_CROSSING:
                 case POSITIVE_CROSSING:
                 case DECREASING_CROSSING:
-                    ARIADNE_WARN("Crossing "<<crossing_data<<" does not introduce additional restrictions on flow\n");
+                    // Since guard must be satisfied on impact, the jump set is empty
+                    if(transition_data.event_kind==IMPACT) {
+                        jump_set.new_invariant(event,transition_data.guard_function*0.0+1.0);
+                    } else {
+                        ARIADNE_WARN("Crossing "<<crossing_data<<" does not introduce additional restrictions on flow\n");
+                    }
+                    break;
                 default:
                     ARIADNE_FAIL_MSG("Unhandled crossing kind in "<<crossing_data<<"\n");
             }
@@ -799,7 +847,7 @@ _apply_guard(List<HybridEnclosure>& sets,
              const CrossingData crossing_data,
              const Semantics semantics) const
 {
-    ARIADNE_LOG(2,"HybridEvolverBase::_apply_guard(...)\n");
+    ARIADNE_LOG(3,"HybridEvolverBase::_apply_guard(...)\n");
     static const uint SUBDIVISIONS_FOR_DEGENERATE_CROSSING = 2;
     const DiscreteEvent event=transition_data.event;
     const IntervalScalarFunction& guard_function=transition_data.guard_function;
@@ -934,7 +982,7 @@ _evolution_in_mode(EvolutionData& evolution_data,
 
     // Get the initial set for this round of evolution
     HybridEnclosure initial_set=evolution_data.initial_sets.back(); evolution_data.initial_sets.pop_back();
-    ARIADNE_LOG(2,"initial_set="<<initial_set<<"\n\n");
+    ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n\n");
 
     if(initial_set.time_range().lower()>=final_time) {
         ARIADNE_WARN("initial_set.time_range()="<<initial_set.time_range()<<" which exceeds final time="<<final_time<<"\n");
@@ -987,9 +1035,8 @@ _evolution_step(EvolutionData& evolution_data,
     ARIADNE_LOG(3,"HybridEvolverBase::_evolution_step\n");
     HybridEnclosure starting_set=evolution_data.working_sets.back(); evolution_data.working_sets.pop_back();
 
-
-    ARIADNE_LOG(2,"starting_set="<<starting_set<<"\n");
-    ARIADNE_LOG(2,"starting_time="<<starting_set.time_function()<<"\n");
+    ARIADNE_LOG(4,"starting_set="<<starting_set<<"\n");
+    ARIADNE_LOG(4,"starting_time="<<starting_set.time_function()<<"\n");
     if(definitely(starting_set.empty())) {
         ARIADNE_LOG(4,"Empty starting_set "<<starting_set<<"\n");
         return;
@@ -1000,7 +1047,9 @@ _evolution_step(EvolutionData& evolution_data,
         return;
     }
 
-    if(verbosity==1) { _log_summary(evolution_data,starting_set); }
+    if(verbosity==1 || verbosity==2) { _log_summary(evolution_data,starting_set); }
+    ARIADNE_LOG(2,"starting_set: bounding_box="<<starting_set.bounding_box()<<", time_range="<<starting_set.time_function().range()<<"    \n");
+
 
     // Compute the bounding box of the enclosure
     const Box starting_bounding_box=starting_set.space_bounding_box();
@@ -1039,7 +1088,13 @@ _evolution_step(EvolutionData& evolution_data,
     // Compute possibly active urgent events with increasing guards, and crossing times
     Set<DiscreteEvent> active_events =
         this->_compute_active_events(dynamic,guard_functions,flow_model,starting_set);
-    ARIADNE_LOG(4,"active_events="<<active_events<<"\n");
+    if(!active_events.empty()) {
+        Map<DiscreteEvent,EventKind> active_events_log_data;
+        for(Set<DiscreteEvent>::const_iterator event_iter=active_events.begin(); event_iter!=active_events.end(); ++event_iter) {
+            active_events_log_data.insert(*event_iter,transitions[*event_iter].event_kind);
+        }
+        ARIADNE_LOG(2,"active_events: "<<active_events_log_data<<"\n");
+    }
 
     // Compute the kind of crossing (increasing, convex, etc);
     Map<DiscreteEvent,CrossingData> crossings =
@@ -1048,7 +1103,7 @@ _evolution_step(EvolutionData& evolution_data,
 
     // Compute end conditions for flow
     TimingData timing_data = this->_estimate_timing(active_events,Real(final_time),flow_model,crossings,transitions,starting_set);
-    ARIADNE_LOG(4,"timing_data="<<timing_data<<"\n");
+    ARIADNE_LOG(2,"timing_data: "<<timing_data<<"\n");
 
     // Apply the time step
     HybridEnclosure reach_set, evolve_set;
@@ -1065,7 +1120,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
                       RealVectorFunction const& dynamic,
                       Map<DiscreteEvent,TransitionData> const& transitions) const
 {
-    ARIADNE_LOG(2,"GeneralHybridEvolver::_apply_evolution_step(...)\n");
+    ARIADNE_LOG(3,"GeneralHybridEvolver::_apply_evolution_step(...)\n");
     //ARIADNE_LOG(4,"parameter_dependent_evolution_time="<<parameter_dependent_evolution_time.range()<<" final_time="<<final_time<<"\n");
 
     EvolutionStepData _step_data;
@@ -1232,7 +1287,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
         // Compute active set
         List<HybridEnclosure> jump_sets((starting_set));
         HybridEnclosure& jump_set=jump_sets.front();
-        ARIADNE_LOG(1,"  "<<event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind<<"\n");
+        ARIADNE_LOG(3,"  "<<event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind<<"\n");
         _apply_guard_step(jump_set,dynamic,flow,timing_data,transitions[event],crossings[event],semantics);
         IntervalScalarFunctionModel jump_step_time;
         switch(crossings[event].crossing_kind) {
@@ -1273,7 +1328,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
             }
         }
 
-        ARIADNE_LOG(2, "  "<<event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind<<"\n");
+        ARIADNE_LOG(3, "  "<<event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind<<"\n");
         // Apply reset
         for(List<HybridEnclosure>::iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
             HybridEnclosure& jump_set=*jump_set_iter;
@@ -1286,8 +1341,8 @@ _apply_evolution_step(EvolutionData& evolution_data,
         }
     }
 
-    if(verbosity==1 && (_step_data.finishing || !_step_data.progress || !_step_data.events.empty()) ) {
-        ARIADNE_LOG(1,"\r  "<<(_step_data.finishing?"  finish":"")<<"  "<<_step_data.events<<(_step_data.progress?"":"  invariant")<<"\n");
+    if(verbosity>=1 && (_step_data.finishing || !_step_data.progress || !_step_data.events.empty()) ) {
+        ARIADNE_LOG(3,(_step_data.finishing?" finish ":"")<<_step_data.events<<(_step_data.progress?"":" invariant")<<"\n");
     }
 
 }
@@ -1437,7 +1492,9 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             crossing_iter!=crossings.end(); ++crossing_iter)
         {
             ARIADNE_LOG(6,"  Event "<<crossing_iter->first<<": "<<crossing_iter->second.crossing_kind<<"\n");
-            if(crossing_iter->second.crossing_kind==TRANSVERSE_CROSSING) {
+            // FIXME: When using permissive crossings, jumps in the step after the crossing time are lost.
+            // A hack to fix this is to only creep on non-permissive events. Check that evolution is correct in this case.
+            if(crossing_iter->second.crossing_kind==TRANSVERSE_CROSSING && !transitions[crossing_iter->first].event_kind==PERMISSIVE) {
                 ARIADNE_LOG(6,"  crossing_time_range="<<crossing_iter->second.crossing_time.range()<<"\n");
                 const IntervalScalarFunctionModel& crossing_time=crossing_iter->second.crossing_time;
                 Interval crossing_time_range=crossing_time.range();

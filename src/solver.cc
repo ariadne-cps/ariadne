@@ -35,8 +35,6 @@ namespace {
 
 using namespace Ariadne;
 
-typedef unsigned int uint;
-
 void
 solve_all(Set< Vector<Interval> >& r,
           const SolverInterface& s,

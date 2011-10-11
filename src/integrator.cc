@@ -321,7 +321,7 @@ typedef Polynomial<Interval> IntervalPolynomial;
 typedef Graded<IntervalDifferential> GradedIntervalDifferential;
 bool operator<(const MultiIndex& a1, const MultiIndex& a2);
 
-template<class X> inline void append(Expansion<X>& e, const MultiIndex& a1, const uint a2, const X& c) {
+template<class X> inline void append_join(Expansion<X>& e, const MultiIndex& a1, const uint a2, const X& c) {
     MultiIndex a(a1.size()+1);
     for(uint i=0; i!=a1.size(); ++i) { a[i]=a1[i]; }
     a[a1.size()]=a2;
@@ -343,46 +343,27 @@ Vector<IntervalFormula> formula(const IntervalVectorFunction& f) {
 
 void flow_init(const Vector<IntervalProcedure>& p,
                Vector<GradedIntervalDifferential>& fy, List<GradedIntervalDifferential>& t, Vector<GradedIntervalDifferential>& y,
-               const Vector<Interval>& d, uint so)
+               const Vector<Interval>& x, const Vector<Interval>& r,  uint so)
 {
     Graded< Differential<Interval> > null;
     y=Vector< Graded< Differential<Interval> > >(p.result_size(),null);
     fy=Vector< Graded< Differential<Interval> > >(p.result_size(),null);
     t=List< Graded< Differential<Interval> > >(p.temporaries_size(),null);
     for(Nat i=0; i!=y.size(); ++i) {
-        y[i]=Graded< Differential<Interval> >(Differential<Interval>::variable(y.size(),so,d[i],i));
+        y[i]=Graded< Differential<Interval> >(Differential<Interval>::variable(y.size(),so,Interval(0.0),i)*r[i]+x[i]);
     }
 }
 
-void flow_iterate(const Vector<IntervalProcedure>& p,
+void flow_iterate(const Vector<IntervalProcedure>& p, Float h,
                   Vector<GradedIntervalDifferential>& fy, List<GradedIntervalDifferential>& t, Vector<GradedIntervalDifferential>& y)
 {
     Ariadne::compute(p,fy,t,y);
     for(Nat i=0; i!=y.size(); ++i) {
         y[i]=antidifferential(fy[i]);
+        y[i]*=h;
     }
 }
 
-/*
-Vector< Graded< Differential<Interval> > > flow(const Vector< Procedure<Interval> >& f, const Vector<Interval>& c, Nat M, Nat N) {
-    Graded< Differential<Interval> > null;
-    Vector< Graded< Differential<Interval> > > y(f.result_size(),null);
-    Vector< Graded< Differential<Interval> > > fy(f.result_size(),null);
-    List< Graded< Differential<Interval> > > t(f.temporaries_size(),null);
-    for(Nat i=0; i!=y.size(); ++i) {
-        y[i]=Graded< Differential<Interval> >(Differential<Interval>::variable(y.size(),M,c[i],i));
-    }
-
-    for(Nat n=0; n!=N; ++n) {
-        Ariadne::compute(f,fy,t,y);
-        for(Nat i=0; i!=y.size(); ++i) {
-            y[i]=antidifferential(fy[i]);
-        }
-    }
-
-    return y;
-}
-*/
 
 Vector<IntervalDifferential> flow_differential(Vector<GradedIntervalDifferential> const& dphia, Vector<GradedIntervalDifferential> const& dphib,
                                                Vector<GradedIntervalDifferential> const& dphic, Vector<GradedIntervalDifferential> const& dphid,
@@ -395,15 +376,16 @@ Vector<IntervalDifferential> flow_differential(Vector<GradedIntervalDifferential
             for(Differential<Interval>::const_iterator iter=dphic[i][j].begin(); iter!=dphic[i][j].end(); ++iter) {
                 if(iter->key().degree()<so) { gdphi[i][j].expansion().append(iter->key(),iter->data()); }
             }
-            for(Differential<Interval>::const_iterator iter=dphia[i][j].begin(); iter!=dphia[i][j].end(); ++iter) {
+            for(Differential<Interval>::const_iterator iter=dphid[i][j].begin(); iter!=dphid[i][j].end(); ++iter) {
                 if(iter->key().degree()==so) { gdphi[i][j].expansion().append(iter->key(),iter->data()); }
             }
         }
-        for(Differential<Interval>::const_iterator iter=dphid[i][to].begin(); iter!=dphid[i][to].end(); ++iter) {
-            if(iter->key().degree()<so) { gdphi[i][to].expansion().append(iter->key(),iter->data()); }
+        uint j=to;
+        for(Differential<Interval>::const_iterator iter=dphia[i][j].begin(); iter!=dphia[i][j].end(); ++iter) {
+            if(iter->key().degree()<so) { gdphi[i][j].expansion().append(iter->key(),iter->data()); }
         }
-        for(Differential<Interval>::const_iterator iter=dphib[i][to].begin(); iter!=dphib[i][to].end(); ++iter) {
-            if(iter->key().degree()==so) { gdphi[i][to].expansion().append(iter->key(),iter->data()); }
+        for(Differential<Interval>::const_iterator iter=dphib[i][j].begin(); iter!=dphib[i][j].end(); ++iter) {
+            if(iter->key().degree()==so) { gdphi[i][j].expansion().append(iter->key(),iter->data()); }
         }
     }
     ARIADNE_LOG(4,"gdphi="<<gdphi<<"\n");
@@ -414,7 +396,7 @@ Vector<IntervalDifferential> flow_differential(Vector<GradedIntervalDifferential
         for(uint j=0; j<=to; ++j) {
             const Expansion<Interval>& expansion=gdphi[i][j].expansion();
             for(Expansion<Interval>::const_iterator iter=expansion.begin(); iter!=expansion.end(); ++iter) {
-                append(component,iter->key(),j,iter->data());
+                append_join(component,iter->key(),j,iter->data());
             }
         }
     }
@@ -424,19 +406,142 @@ Vector<IntervalDifferential> flow_differential(Vector<GradedIntervalDifferential
 }
 
 VectorTaylorFunction flow_function(const Vector<IntervalDifferential>& dphi, const IntervalVector& dx, const Float& h, double swpt, int verbosity=0) {
+    const uint n=dphi.size();
     Sweeper sweeper(new ThresholdSweeper(swpt));
-    const uint nx=dphi.size();
+    VectorTaylorFunction tphi(n,join(dx,Interval(-h,+h)),sweeper);
 
-    Vector<IntervalTaylorModel> tmid(nx+1,IntervalTaylorModel(nx+1,sweeper));
-    for(uint i=0; i!=nx; ++i) { tmid[i]=IntervalTaylorModel::variable(nx+1,i,sweeper)*dx[i].radius(); }
-    tmid[nx]=(IntervalTaylorModel::variable(nx+1,nx,sweeper)+1)*(h/2);
-    tmid[nx]=(IntervalTaylorModel::variable(nx+1,nx,sweeper))*(h);
+    for(uint i=0; i!=n; ++i) {
+        IntervalTaylorModel& model=tphi.model(i);
+        Expansion<Float>& expansion=model.expansion();
+        Float& error=model.error();
+        error=0.0;
+        expansion.reserve(dphi[i].expansion().number_of_nonzeros());
 
-    Vector<IntervalTaylorModel> tmphi(nx,IntervalTaylorModel(nx+1,sweeper));
-    for(uint i=0; i!=nx; ++i) { tmphi[i]=evaluate(dphi[i].expansion(),tmid); }
-    //IntervalVectorFunctionModel tphi(join(dx,Interval(0,h)),tmphi);
-    VectorTaylorFunction tphi(join(dx,Interval(-h,h)),tmphi);
+        Differential<Interval>::const_iterator iter=dphi[i].begin();
+        while(iter!=dphi[i].end()) {
+            MultiIndex const a=iter->key();
+            Interval ivl=iter->data();
+            Float x=ivl.midpoint();
+            set_rounding_upward();
+            Float e=max(sub_rnd(ivl.upper(),x),sub_rnd(x,ivl.lower()));
+            error=add_rnd(error,e);
+            set_rounding_to_nearest();
+            expansion.append(a,x);
+            ++iter;
+        }
+        model.unique_sort();
+        model.sweep();
+    }
+    return tphi;
+}
 
+IntervalVectorFunctionModel
+differential_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx,
+                       double swpt, uint so, uint to, uint verbosity=0)
+{
+    uint n=f.result_size();
+    Vector<IntervalDifferential> idc(n,n+1,so+to);
+    Vector<IntervalDifferential> idb(n,n+1,so+to);
+    Vector<IntervalDifferential> dphic(n,n+1,so+to);
+    Vector<IntervalDifferential> dphib(n,n+1,so+to);
+    for(uint i=0; i!=n; ++i) {
+        idc[i]=IntervalDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(midpoint(dx[i]));
+        idb[i]=IntervalDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(bx[i]);
+        dphic[i]=idc[i];
+        dphib[i]=idb[i];
+    }
+    for(uint i=0; i!=so+to; ++i) {
+        dphic=antiderivative(f(dphic),n)*h+idc;
+        dphib=antiderivative(f(dphib),n)*h+idb;
+    }
+
+    VectorTaylorFunction tphi(n,join(dx,Interval(-h,+h)),ThresholdSweeper(swpt));
+    for(uint i=0; i!=n; ++i) {
+        IntervalTaylorModel& model=tphi.model(i);
+        Expansion<Float>& expansion=model.expansion();
+        Float& error=model.error();
+        error=0.0;
+        expansion.reserve(dphic[i].expansion().number_of_nonzeros());
+
+        Differential<Interval>::const_iterator citer=dphic[i].begin();
+        Differential<Interval>::const_iterator biter=dphib[i].begin();
+        while(citer!=dphic[i].end() && biter!=dphib[i].end()) {
+            assert(citer->key()==biter->key());
+            MultiIndex const a=citer->key();
+            Interval ivl;
+            if (a.degree()==so+to) {
+                ivl=biter->data();
+            } else {
+                ivl=citer->data();
+            }
+            Float x=ivl.midpoint();
+            set_rounding_upward();
+            Float e=max(sub_rnd(ivl.upper(),x),sub_rnd(x,ivl.lower()));
+            error=add_rnd(error,e);
+            set_rounding_to_nearest();
+            expansion.append(a,x);
+            ++citer;
+            ++biter;
+        }
+        model.unique_sort();
+        model.sweep();
+    }
+    return tphi;
+}
+
+IntervalVectorFunctionModel
+differential_space_time_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx,
+                                  double swpt, uint so, uint to, uint verbosity=0)
+{
+    uint n=f.result_size();
+    Vector<IntervalDifferential> idc(n,n+1,so+to);
+    Vector<IntervalDifferential> idb(n,n+1,so+to);
+    Vector<IntervalDifferential> dphic(n,n+1,so+to);
+    Vector<IntervalDifferential> dphib(n,n+1,so+to);
+    for(uint i=0; i!=n; ++i) {
+        idc[i]=IntervalDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(midpoint(dx[i]));
+        idb[i]=IntervalDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(bx[i]);
+        dphic[i]=idc[i];
+        dphib[i]=idb[i];
+    }
+    for(uint i=0; i!=so+to; ++i) {
+        dphic=antiderivative(f(dphic),n)*h+idc;
+        dphib=antiderivative(f(dphib),n)*h+idb;
+    }
+
+    VectorTaylorFunction tphi(n,join(dx,Interval(-h,+h)),ThresholdSweeper(swpt));
+    for(uint i=0; i!=n; ++i) {
+        IntervalTaylorModel& model=tphi.model(i);
+        Expansion<Float>& expansion=model.expansion();
+        Float& error=model.error();
+        error=0.0;
+        expansion.reserve(dphic[i].expansion().number_of_nonzeros());
+
+        Differential<Interval>::const_iterator citer=dphic[i].begin();
+        Differential<Interval>::const_iterator biter=dphib[i].begin();
+        while(citer!=dphic[i].end() && biter!=dphib[i].end()) {
+            assert(citer->key()==biter->key());
+            MultiIndex const a=citer->key();
+            Interval ivl;
+            if (a[n]<=to && a.degree()<=so+a[n]) {
+                if(a[n]<to && a.degree()<so+a[n]) {
+                    ivl=citer->data();
+                } else {
+                    ivl=biter->data();
+                }
+                Float x=ivl.midpoint();
+                set_rounding_upward();
+                Float e=max(sub_rnd(ivl.upper(),x),sub_rnd(x,ivl.lower()));
+                error=add_rnd(error,e);
+                set_rounding_to_nearest();
+                expansion.append(a,x);
+            }
+            ++citer;
+            ++biter;
+        }
+        model.unique_sort();
+        model.sweep();
+    }
     return tphi;
 }
 
@@ -460,21 +565,25 @@ series_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, cons
     uint nso=0;
     uint nto=0;
 
+    uint n=dx.size();
+    Vector<Interval> rdx(n);
+    for(uint i=0; i!=n; ++i) { rdx[i]=rad_ivl(dx[i].lower(),dx[i].upper()); }
+
     Vector<GradedIntervalDifferential> dphia,fdphia,dphib,fdphib,dphic,fdphic,dphid,fdphid;
     List<GradedIntervalDifferential> tdphia,tdphib,tdphic,tdphid;
     Vector<GradedIntervalDifferential> ndphia,nfdphia,ndphib,nfdphib,ndphic,nfdphic,ndphid,nfdphid;
     List<GradedIntervalDifferential> ntdphia,ntdphib,ntdphic,ntdphid;
 
-    flow_init(p,fdphia,tdphia,dphia,ax,so);
-    flow_init(p,fdphib,tdphib,dphib,bx,so);
-    flow_init(p,fdphic,tdphic,dphic,cx,so);
-    flow_init(p,fdphid,tdphid,dphid,dx,so);
+    flow_init(p,fdphia,tdphia,dphia,ax,rdx,so);
+    flow_init(p,fdphib,tdphib,dphib,bx,rdx,so);
+    flow_init(p,fdphic,tdphic,dphic,cx,rdx,so);
+    flow_init(p,fdphid,tdphid,dphid,dx,rdx,so);
 
     for(uint i=0; i!=to; ++i) {
-        Ariadne::flow_iterate(p,fdphia,tdphia,dphia);
-        Ariadne::flow_iterate(p,fdphib,tdphib,dphib);
-        Ariadne::flow_iterate(p,fdphic,tdphic,dphic);
-        Ariadne::flow_iterate(p,fdphid,tdphid,dphid);
+        Ariadne::flow_iterate(p,h,fdphia,tdphia,dphia);
+        Ariadne::flow_iterate(p,h,fdphib,tdphib,dphib);
+        Ariadne::flow_iterate(p,h,fdphic,tdphic,dphic);
+        Ariadne::flow_iterate(p,h,fdphid,tdphid,dphid);
     }
 
     Vector<IntervalDifferential> dphi=flow_differential(dphia,dphib,dphic,dphid,so,to,verbosity);
@@ -496,24 +605,24 @@ series_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, cons
                 nso=so+1;
                 nto=to-1;
 
-                flow_init(p,nfdphia,ntdphia,ndphia,ax,nso);
-                flow_init(p,nfdphib,ntdphib,ndphib,bx,nso);
-                flow_init(p,nfdphic,ntdphic,ndphic,cx,nso);
-                flow_init(p,nfdphid,ntdphid,ndphid,dx,nso);
+                flow_init(p,nfdphia,ntdphia,ndphia,ax,rdx,nso);
+                flow_init(p,nfdphib,ntdphib,ndphib,bx,rdx,nso);
+                flow_init(p,nfdphic,ntdphic,ndphic,cx,rdx,nso);
+                flow_init(p,nfdphid,ntdphid,ndphid,dx,rdx,nso);
 
                 for(uint i=0; i!=nto; ++i) {
-                    Ariadne::flow_iterate(p,nfdphia,ntdphia,ndphia);
-                    Ariadne::flow_iterate(p,nfdphib,ntdphib,ndphib);
-                    Ariadne::flow_iterate(p,nfdphic,ntdphic,ndphic);
-                    Ariadne::flow_iterate(p,nfdphid,ntdphid,ndphid);
+                    Ariadne::flow_iterate(p,h,nfdphia,ntdphia,ndphia);
+                    Ariadne::flow_iterate(p,h,nfdphib,ntdphib,ndphib);
+                    Ariadne::flow_iterate(p,h,nfdphic,ntdphic,ndphic);
+                    Ariadne::flow_iterate(p,h,nfdphid,ntdphid,ndphid);
                 }
             }
             while(nto+1<to) {
                 ++nto;
-                Ariadne::flow_iterate(p,nfdphia,ntdphia,ndphia);
-                Ariadne::flow_iterate(p,nfdphib,ntdphib,ndphib);
-                Ariadne::flow_iterate(p,nfdphic,ntdphic,ndphic);
-                Ariadne::flow_iterate(p,nfdphid,ntdphid,ndphid);
+                Ariadne::flow_iterate(p,h,nfdphia,ntdphia,ndphia);
+                Ariadne::flow_iterate(p,h,nfdphib,ntdphib,ndphib);
+                Ariadne::flow_iterate(p,h,nfdphic,ntdphic,ndphic);
+                Ariadne::flow_iterate(p,h,nfdphid,ntdphid,ndphid);
             }
             Vector<IntervalDifferential> ndphi=flow_differential(ndphia,ndphib,ndphic,ndphid,nso,nto,verbosity);
             VectorTaylorFunction ntphi=flow_function(ndphi,dx,h,swpt,verbosity);
@@ -537,10 +646,10 @@ series_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, cons
         old_error=tphi.error();
 
         ++to;
-        Ariadne::flow_iterate(p,fdphia,tdphia,dphia);
-        Ariadne::flow_iterate(p,fdphib,tdphib,dphib);
-        Ariadne::flow_iterate(p,fdphic,tdphic,dphic);
-        Ariadne::flow_iterate(p,fdphid,tdphid,dphid);
+        Ariadne::flow_iterate(p,h,fdphia,tdphia,dphia);
+        Ariadne::flow_iterate(p,h,fdphib,tdphib,dphib);
+        Ariadne::flow_iterate(p,h,fdphic,tdphic,dphic);
+        Ariadne::flow_iterate(p,h,fdphid,tdphid,dphid);
         dphi=flow_differential(dphia,dphib,dphic,dphid,so,to,verbosity);
         tphi=flow_function(dphi,dx,h,swpt,verbosity);
     }
@@ -557,6 +666,11 @@ TaylorSeriesIntegrator::flow_step(const IntervalVectorFunction& f, const Interva
         this->step_maximum_error(),this->step_sweep_threshold(),
         this->minimum_spacial_order(),this->minimum_temporal_order(),
         this->maximum_spacial_order(),this->maximum_temporal_order(),this->verbosity);
+
+/*
+    IntervalVectorFunctionModel tphi=Ariadne::differential_space_time_flow_step(f,dx,h,bx,
+        this->step_sweep_threshold(),6,4,this->verbosity);
+*/
 
     if(tphi.error()>this->step_maximum_error()) {
         ARIADNE_THROW(FlowTimeStepException,"TaylorSeriesIntegrator::flow_step",

@@ -90,6 +90,7 @@ template<class A> struct Graded : public List<A>
     template<class Op> Void operator=(const ClosureExpression<Op,SelfType,SelfType>& expr);
     template<class Op> Void operator=(const ClosureExpression<Op,SelfType>& expr);
     Void operator=(const ClosureExpression<AntiDiff,SelfType>& ad);
+    Graded<A>& operator=(const Graded<A>& a) { this->List<A>::operator=(a); return *this; }
     Nat degree() const { return this->size()-1u; }
     Void extend(const A& a) { this->List<A>::append(a); }
 };
@@ -104,16 +105,21 @@ template<class A> std::ostream& operator<<(std::ostream& os, const Graded<A>& g)
 }
 template<> std::ostream& operator<<(std::ostream& os, const Graded<Float>& g) {
     if(g.size()==0) { return os << "0"; }
-    os << g[0];
+    bool nonzero=false;
+    if(g[0]!=0) { os << g[0]; nonzero=true; }
     for(uint i=1; i<=g.degree(); ++i) {
         if(g[i]>0) {
-            if(g[i]==1) { os << "+t"; } else { os << "+"<<g[i]<<"*t"; }
+            if(nonzero) { os << "+"; }
+            if(g[i]==1) { os << "t"; } else { os << g[i]<<"*t"; }
             if(i>1) { os << "^"<<i; }
+            nonzero=true;
         } else if(g[i]<0) {
             if(g[i]==-1) { os << "-t"; } else { os << g[i]<<"*t"; }
             if(i>1) { os << "^"<<i; }
-        }
+            nonzero=true;
+         }
     }
+    if(!nonzero) { os << "0"; }
     return os;
 }
 template<> std::ostream& operator<<(std::ostream& os, const Graded<Interval>& g) {
@@ -136,6 +142,8 @@ template<class X> Void compute(X& r, const Sqrt&, const X& a) { return sqrt(r,a)
 template<class X> Void compute(X& r, const Exp&, const X& a) { return exp(r,a); }
 template<class X> Void compute(X& r, const Log&, const X& a) { return log(r,a); }
 template<class X> Void compute(X& r, const Rec&, const X& a) { return rec(r,a); }
+template<class X> Void compute(X& r, const Sin&, const X& a) { return sin(r,a); }
+template<class X> Void compute(X& r, const Cos&, const X& a) { return cos(r,a); }
 
 template<class A, class B> Graded<A>& operator+=(Graded<A>& a, const B& c) {
     ARIADNE_ASSERT(a.size()>0); if(a.degree()==0) { a[0]+=c; } return a; }
@@ -171,12 +179,14 @@ template<class A> ClosureExpression<Log,Graded<A> > log(const Graded<A>& a) {
     return make_expression(Log(),a); }
 template<class A> ClosureExpression<Rec,Graded<A> > rec(const Graded<A>& a) {
     return make_expression(Rec(),a); }
+template<class A> ClosureExpression<Sin,Graded<A> > sin(const Graded<A>& a) {
+    return make_expression(Sin(),a); }
+template<class A> ClosureExpression<Cos,Graded<A> > cos(const Graded<A>& a) {
+    return make_expression(Cos(),a); }
 
 template<class A> Graded<A> pos(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> abs(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> pow(const Graded<A>& a, int n) { ARIADNE_NOT_IMPLEMENTED; }
-template<class A> Graded<A> sin(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
-template<class A> Graded<A> cos(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> tan(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> atan(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 
@@ -198,8 +208,8 @@ template<class A> Void sub(Graded<A>& r, const Graded<A>& a1, const Graded<A>& a
 }
 
 template<class A> Void mul(Graded<A>& r, const Graded<A>& a1, const Graded<A>& a2) {
-    ARIADNE_ASSERT(r.degree()+1u == a1.degree());
-    ARIADNE_ASSERT(r.degree()+1u == a2.degree());
+    ARIADNE_ASSERT_MSG(r.degree()+1u == a1.degree(),"r="<<r<<", a1="<<a1<<", a2="<<a2<<"\n");
+    ARIADNE_ASSERT_MSG(r.degree()+1u == a2.degree(),"r="<<r<<", a1="<<a1<<", a2="<<a2<<"\n");
     ARIADNE_ASSERT(compatible(a1[0],a2[0]));
     r.append(create(a1[0]));
     Nat d = r.degree();
@@ -276,6 +286,69 @@ template<class A> Void log(Graded<A>& r, const Graded<A>& a) {
     }
     r[d]=r[d]/a[0];
     r[d]/=d;
+}
+
+/*
+template<class A> Void sin(Graded<A>& r, const Graded<A>& a) {
+    // Let f[0](t)=f(t), s[0](t)=sin(f(t)), c[0](t)=cos(f(t))
+    // f[n+1](t)=df[n](t)/dt, s[n+1]=ds[n](t)/dt, c[n+1]=dc[n](t)/dt
+    // Then s[1]=c[0]*f[1]; c[1]=-s[0]*f[1]
+    const Graded<A>& f=a;
+    Graded<A>& s=r;
+    A z=create(f[0])*0;
+    s.append(z);
+    Nat d = s.degree();
+    if(d==0) { s[d]=sin(f[0]); return; }
+    if(d==1) { s[d]=cos(f[0])*f[1]; return; }
+    Graded<A> c(cos(f[0]));
+    c.append(-s[0]*f[1]);
+    for(Nat i=2; i!=d; ++i) {
+        c.append(z);
+        for(Nat j=0; j!=i; ++j) {
+            c.back() -= (i-j)*f[i-j]*s[j];
+        }
+        c.back()/=i;
+    }
+    for(Nat i=0; i!=d; ++i) {
+        s[d] += (d-i)*f[d-i]*c[i];
+    }
+    s[d]/=d;
+}
+*/
+
+template<class A> Void sincos(Graded<A>& s, Graded<A>& c, const Graded<A>& f) {
+    // Let f[0](t)=f(t), s[0](t)=sin(f(t)), c[0](t)=cos(f(t))
+    // f[n+1](t)=df[n](t)/dt, s[n+1]=ds[n](t)/dt, c[n+1]=dc[n](t)/dt
+    // Then s[n]=+Sum_{m=1}^{n} (m*f[m]*c[n-m])/n
+    // Then c[n]=-Sum_{m=1}^{n} (m*f[m]*s[n-m])/n
+    Nat d = f.degree();
+    A z=create(f[0]);
+    ARIADNE_ASSERT(s.size()==0 && c.size()==0);
+    for(uint i=0; i<=d; ++i) { s.append(z); c.append(z); }
+    s[0]=sin(f[0]);
+    c[0]=cos(f[0]);
+    for(Nat i=1; i<=d; ++i) {
+        for(Nat j=1; j<=i; ++j) {
+            s[i] += j*f[j]*c[i-j];
+            c[i] += j*f[j]*s[i-j];
+        }
+        s[i]/=(+Float(i));
+        c[i]/=(-Float(i));
+    }
+}
+
+template<class A> Void sin(Graded<A>& r, const Graded<A>& a) {
+    Graded<A> s; 
+    Graded<A> c;
+    sincos(s,c,a);
+    r=s;
+}
+
+template<class A> Void cos(Graded<A>& r, const Graded<A>& a) {
+    Graded<A> s;
+    Graded<A> c;
+    sincos(s,c,a);
+    r=c;
 }
 
 

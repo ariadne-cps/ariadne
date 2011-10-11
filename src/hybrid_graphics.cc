@@ -66,7 +66,7 @@ bool valid_axis_variables(const RealSpace& space, const Variables2d& variables) 
 
 Projection2d projection(const RealSpace& space, const Variables2d& variables) {
     ARIADNE_ASSERT(valid_axis_variables(space,variables));
-    uint x_index = (variables.x_variable()==TimeVariable()) ? space.dimension() : space.index(variables.x_variable());
+    uint x_index = (variables.x_variable()==TimeVariable() && !space.contains(variables.x_variable())) ? space.dimension() : space.index(variables.x_variable());
     uint y_index = space.index(variables.y_variable());
     return Projection2d(space.dimension(),x_index,y_index);
 }

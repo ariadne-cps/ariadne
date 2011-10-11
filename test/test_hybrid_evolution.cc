@@ -34,6 +34,7 @@
 #include "zonotope.h"
 #include "list_set.h"
 #include "evolution_parameters.h"
+#include "integrator.h"
 #include "orbit.h"
 #include "hybrid_automaton.h"
 #include "hybrid_time.h"
@@ -200,6 +201,7 @@ int main(int argc, const char* argv[])
     int evolver_verbosity=get_verbosity(argc,argv);
 
     GeneralHybridEvolver evolver;
+    evolver.set_integrator(TaylorSeriesIntegrator(1e-5));
     evolver.verbosity=evolver_verbosity;
     evolver.parameters().maximum_step_size=1./32;
     evolver.parameters().maximum_enclosure_radius = 1./8;

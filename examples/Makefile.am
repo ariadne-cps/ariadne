@@ -8,8 +8,9 @@ LDADD = ../src/libariadne.la $(LIBS)
 bin_PROGRAMS= \
 	tutorial \
 	bouncingball \
-	ballinabox \
 	watertank \
+	heating \
+	ballinabox \
 	watertank-compositional \
 	watertank-time \
 	watertank-proportional \
@@ -27,7 +28,8 @@ tutorial_SOURCES = tutorial.cc
 bouncingball_SOURCES = bouncingball.cc
 bouncingball_compositional_SOURCES=bouncingball-compositional.cc
 ballinabox_SOURCES = ballinabox.cc
-watertank_SOURCES=watertank.cc
+ballinabox_SOURCES = ballinabox.cc
+heating_SOURCES=heating.cc
 watertank_time_SOURCES=watertank-time.cc
 watertank_proportional_SOURCES=watertank-proportional.cc
 watertank_nonlinear_SOURCES=watertank-nonlinear.cc

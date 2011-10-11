@@ -24,6 +24,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cassert>
+#include "container.h"
 
 #include "config.h"
 #include "macros.h"
@@ -36,7 +37,7 @@
 namespace Ariadne {
 
 namespace {
-static const double pi_up=3.1415926535897936;
+static const double pi_up  =3.1415926535897936;
 static const double pi_down=3.1415926535897931;
 inline double _add_down(volatile double x, volatile double y) { set_rounding_downward(); return x+y; }
 inline double _add_up(volatile double x, volatile double y) { set_rounding_upward(); return x+y; }
@@ -348,39 +349,39 @@ Interval sin(Interval i)
 Interval cos(Interval i)
 {
     ARIADNE_ASSERT(i.lower()<=i.upper());
-
     rounding_mode_t rnd = get_rounding_mode();
 
-    static const Interval pi(pi_down,pi_up);
     if(i.radius()>2*pi_down) { return Interval(-1.0,+1.0); }
 
     Float n=floor(i.lower()/(2*pi_approx)+0.5);
-    i=i-2*n*pi;
+    i=i-(2*n)*pi_ivl;
 
-    ARIADNE_ASSERT(i.lower()>=-pi_up);
     ARIADNE_ASSERT(i.lower()<=pi_up);
+    ARIADNE_ASSERT(i.upper()>=-pi_up);
 
     Float rl,ru;
-    if(i.lower()<=0.0) {
+    if(i.lower()<=-pi_down) {
+        if(i.upper()<=0.0) { rl=-1.0; ru=cos_up(i.upper()); }
+        else { rl=-1.0; ru=+1.0; }
+    } else if(i.lower()<=0.0) {
         if(i.upper()<=0.0) { rl=cos_down(i.lower()); ru=cos_up(i.upper()); }
         else if(i.upper()<=pi_down) { rl=cos_down(max(-i.lower(),i.upper())); ru=+1.0; }
-        else { return Interval(-1.0,+1.0); }
+        else { rl=-1.0; ru=+1.0; }
     } else if(i.lower()<=pi_up) {
         if(i.upper()<=pi_down) { rl=cos_down(i.upper()); ru=cos_up(i.lower()); }
         else if(i.upper()<=2*pi_down) { rl=-1.0; ru=cos_up(min(i.lower(),sub_down(2*pi_down,i.upper()))); }
-        else { return Interval(-1.0,+1.0); }
+        else { rl=-1.0; ru=+1.0; }
     } else {
         assert(false);
     }
 
     set_rounding_mode(rnd);
-
     return Interval(rl,ru);
 }
 
 Interval tan(Interval i)
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    return mul(sin(i),rec(cos(i)));
 }
 
 Interval asin(Interval i)

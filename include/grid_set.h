@@ -49,6 +49,7 @@
 #include "numeric.h"
 
 #include "set_interface.h"
+#include "paving_interface.h"
 #include "vector.h"
 #include "grid.h"
 
@@ -239,6 +240,9 @@ class BinaryTreeNode {
 
     /*! \brief Allows to compare to binaty tree nodes */
     bool operator==(const BinaryTreeNode & otherNode ) const;
+
+    /*! \brief Marks the node as enabled or disabled. */
+    void set(bool all_enabled_or_all_disabled);
 
     static bool is_equal_nodes( const BinaryTreeNode * pFirstNode, const BinaryTreeNode * pSecondNode );
 
@@ -715,7 +719,10 @@ class GridOpenCell: public GridAbstractCell {
  * this class is just a pointer to the node in the tree of some paving. This class is not
  * responsible for deallocation of that original tree.
  */
-class GridTreeSubset : public DrawableInterface {
+class GridTreeSubset
+    : public virtual SubPavingInterface
+    , public virtual DrawableInterface
+{
   protected:
 
     friend class GridTreeCursor;
@@ -846,7 +853,8 @@ class GridTreeSubset : public DrawableInterface {
     /*! \brief Returns the \a GridCell corresponding to the ROOT NODE of this \a GridTreeSubset
      * WARNING: It is NOT the primary cell of the paving!
      */
-    GridCell cell() const;
+    GridCell root_cell() const;
+    GridCell cell() const { return this->root_cell(); };
 
     /*! \brief Computes a bounding box for a grid set. */
     Box bounding_box() const;
@@ -857,6 +865,15 @@ class GridTreeSubset : public DrawableInterface {
      * the two GridTreeSubset represent equal sets.
      */
     bool operator==(const GridTreeSubset& anotherGridTreeSubset) const;
+
+    //@}
+
+    //@{
+    //! \name Modifying operations
+
+    /*! \brief Sets the ROOT NODE of this \a GridTreeSubset to either enabled (true) or disabled (false).
+     */
+    void set_root_cell(bool enabled_or_disabled);
 
     //@}
 
@@ -895,6 +912,7 @@ class GridTreeSubset : public DrawableInterface {
 
     /*! \brief Tests if a cell is a subset of a set. */
     friend bool subset( const GridCell& theCell, const GridTreeSubset& theSet );
+    bool superset( const GridCell& theCell) const { return Ariadne::subset(theCell,*this); }
 
     /*! \brief Tests if a cell overlaps (as an open set) a paving set. */
     friend bool overlap( const GridCell& theCell, const GridTreeSubset& theSet );
@@ -919,10 +937,13 @@ class GridTreeSubset : public DrawableInterface {
     bool superset( const Box& theBox ) const;
 
     /*! \brief Tests if (the closure of) a grid set is disjoint from a box. */
-    bool disjoint( const Box& theBox  ) const;
+    tribool inside( const Box& theBox  ) const;
+
+    /*! \brief Tests if (the closure of) a grid set is disjoint from a box. */
+    tribool disjoint( const Box& theBox  ) const;
 
     /*! \brief Tests if a grid set overlaps a box. */
-    bool overlaps( const Box& theBox ) const;
+    tribool overlaps( const Box& theBox ) const;
 
     //@}
 
@@ -957,6 +978,9 @@ class GridTreeSubset : public DrawableInterface {
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;
 
+
+
+
     //@{
 };
 
@@ -974,7 +998,10 @@ class GridTreeSubset : public DrawableInterface {
  *  3. Cells [-1, -1]*[0, 0] and [0, -1]*[1, 0] are rooted to [-1, -1]*[1, 0],
  *  4. Cells [-1, -1]*[1, 0] and [-1, 0]*[1, 1] are rooted to [-1, -1]*[1, 1].
  */
-class GridTreeSet : public GridTreeSubset {
+class GridTreeSet
+    : public virtual PavingInterface
+    , public GridTreeSubset
+{
 
   public:
 
@@ -1159,16 +1186,28 @@ class GridTreeSet : public GridTreeSubset {
 
     /*! \brief Adjoin (make inplace union with) another grid paving set. */
     void adjoin( const GridTreeSubset& theOtherSubPaving );
+    void adjoin( const SubPavingInterface& theOtherSubPaving ) {
+        this->adjoin(dynamic_cast<const GridTreeSubset&>(theOtherSubPaving)); }
 
     /*! \brief Restrict to (make inplace intersection with) another grid paving set. */
     void restrict( const GridTreeSubset& theOtherSubPaving );
+    void restrict( const SubPavingInterface& theOtherSubPaving ) {
+        this->restrict(dynamic_cast<const GridTreeSubset&>(theOtherSubPaving)); }
 
     /*! \brief Remove cells in another grid paving set. */
     void remove( const GridTreeSubset& theOtherSubPaving );
+    void remove( const SubPavingInterface& theOtherSubPaving ) {
+        this->remove(dynamic_cast<const GridTreeSubset&>(theOtherSubPaving)); }
 
     /*! \brief Restrict to cells rooted to the primary cell with the height (at most) \a theHeight. */
     void restrict_to_height( const uint theHeight );
 
+    /*! /brief Creates an over approximation for the \a theBox on \a theGrid. \a theBox
+     * is in the original space coordinates. We compute the over approximation as the
+     * smallest primary cell on the Grid, such that it contains \a theBox (after it's
+     * mapping on \a theGrid )
+     */
+    GridCell smallest_enclosing_primary_cell(const Box& theBox) const;
     //@}
 
     //@{
@@ -1530,6 +1569,16 @@ inline BinaryTreeNode * BinaryTreeNode::left_node() const {
 
 inline BinaryTreeNode * BinaryTreeNode::right_node() const {
     return _pRightNode;
+}
+
+inline void BinaryTreeNode::set(bool enabled_or_disabled) {
+    _isEnabled = enabled_or_disabled;
+    if( _pLeftNode != NULL ) {
+        delete _pLeftNode;
+    }
+    if( _pRightNode != NULL ) {
+        delete _pRightNode;
+    }
 }
 
 inline void BinaryTreeNode::set_enabled() {
@@ -2058,8 +2107,12 @@ inline const Grid& GridTreeSubset::grid() const {
     return this->_theGridCell.grid();
 }
 
-inline GridCell GridTreeSubset::cell() const {
+inline GridCell GridTreeSubset::root_cell() const {
     return _theGridCell;
+}
+
+inline void GridTreeSubset::set_root_cell(bool enabled_or_disabled)  {
+    this->_pRootTreeNode->set(enabled_or_disabled);
 }
 
 inline Box GridTreeSubset::bounding_box() const {
@@ -2159,7 +2212,15 @@ inline bool GridTreeSubset::subset( const Box& theBox ) const {
     return GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, theBox );
 }
 
-inline bool GridTreeSubset::disjoint( const Box& theBox ) const {
+inline tribool GridTreeSubset::inside( const Box& theBox ) const {
+    //Simple check that the (closure of the) root cell is a subset of the interior of the box.
+
+    ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
+
+    return this->root_cell().box().inside(theBox) || indeterminate;
+}
+
+inline tribool GridTreeSubset::disjoint( const Box& theBox ) const {
     //Simply check if the box does not intersect with the set
 
     ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
@@ -2169,7 +2230,7 @@ inline bool GridTreeSubset::disjoint( const Box& theBox ) const {
     return GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, theBox );
 }
 
-inline bool GridTreeSubset::overlaps( const Box& theBox ) const {
+inline tribool GridTreeSubset::overlaps( const Box& theBox ) const {
     //Check if the box of the root cell overlaps with theBox,
     //if not then theBox does not intersect with the cell,
     //otherwise we need to find at least one enabled node
@@ -2190,6 +2251,12 @@ inline GridTreeSubset& GridTreeSubset::operator=( const GridTreeSubset &otherSub
 }
 
 /*********************************************GridTreeSet*********************************************/
+
+inline GridCell GridTreeSet::smallest_enclosing_primary_cell( const Box& theBox ) const {
+    ARIADNE_ASSERT_MSG( this->dimension() == theBox.dimension(), "Cannot find enclosing cell for Box  " << theBox << " for GridTreeSet with grid " << this->grid() );
+
+    return GridCell::smallest_enclosing_primary_cell( theBox, this->grid() );
+}
 
 inline void GridTreeSet::adjoin( const GridCell& theCell ) {
     ARIADNE_ASSERT_MSG( this->grid() == theCell.grid(), "Cannot adjoin GridCell with grid "<<theCell.grid()<<" to GridTreeSet with grid "<<this->grid() );

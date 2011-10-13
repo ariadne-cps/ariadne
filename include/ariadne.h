@@ -51,7 +51,7 @@ using std::ofstream; using std::ifstream;
 #include "taylor_model.h"
 
 #include "function_set.h"
-#include "taylor_set.h"
+#include "affine_set.h"
 #include "grid_set.h"
 
 #include "point.h"

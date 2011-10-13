@@ -46,7 +46,7 @@ template<class X> class Vector;
 template<class X> class LinearProgram;
 class Box;
 class Grid;
-class GridTreeSet;
+class PavingInterface;
 class GridCell;
 class DiscreteEvent;
 class Figure;
@@ -103,9 +103,9 @@ class AffineSet
     tribool disjoint(const Box& bx) const;
     tribool empty() const;
 
-    void adjoin_outer_approximation_to(GridTreeSet& g, int depth) const;
+    void adjoin_outer_approximation_to(PavingInterface& g, int depth) const;
     GridTreeSet outer_approximation(const Grid& g, int depth) const;
-    void robust_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    void robust_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
 
     List<Point2d> boundary(uint xc, uint yc) const;
 
@@ -115,8 +115,8 @@ class AffineSet
   private:
     void construct(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& c);
     void construct_linear_program(LinearProgram<Float>& lp) const;
-    static void _robust_adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Float>& lp, GridCell& cell, int depth);
-    static void _adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Float>& lp, GridCell& cell, int depth);
+    static void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, GridCell& cell, int depth);
+    static void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, GridCell& cell, int depth);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const AffineSet& as) {

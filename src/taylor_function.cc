@@ -932,7 +932,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
                                            const Sweeper& swp)
     : _domain(d), _models(f.result_size())
 {
-    ARIADNE_ASSERT(f.result_size()>0);
+    //ARIADNE_ASSERT_MSG(f.result_size()>0, "d="<<d<<", f="<<f<<", swp="<<swp);
     ARIADNE_ASSERT(d.size()==f.argument_size());
     Vector<IntervalTaylorModel> x=IntervalTaylorModel::scalings(d,swp);
     this->_models=f.evaluate(x);

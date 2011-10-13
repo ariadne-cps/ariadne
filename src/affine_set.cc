@@ -217,11 +217,11 @@ AffineSet::outer_approximation(const Grid& g, int d) const {
 }
 
 
-void AffineSet::_adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Float>& lp, GridCell& cell, int depth)
+void AffineSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, GridCell& cell, int depth)
 {
 
     // No need to check if cell is already part of the set
-    if(subset(cell,paving)) {
+    if(paving.superset(cell)) {
         return;
     }
 
@@ -349,7 +349,7 @@ AffineSet::construct_linear_program(LinearProgram<Float>& lp) const
 
 
 void
-AffineSet::adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
+AffineSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
     ARIADNE_ASSERT(this->_equations.empty());
@@ -366,7 +366,7 @@ AffineSet::adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
 
 
 
-void AffineSet::_robust_adjoin_outer_approximation_to(GridTreeSet& paving, LinearProgram<Float>& lp, GridCell& cell, int depth)
+void AffineSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, GridCell& cell, int depth)
 {
     SimplexSolver<Float> lpsolver;
 
@@ -376,7 +376,7 @@ void AffineSet::_robust_adjoin_outer_approximation_to(GridTreeSet& paving, Linea
 
 
     // No need to check if cell is already part of the set
-    if(subset(cell,paving)) {
+    if(paving.superset(cell)) {
         return;
     }
 
@@ -423,7 +423,7 @@ void AffineSet::_robust_adjoin_outer_approximation_to(GridTreeSet& paving, Linea
 
 
 void
-AffineSet::robust_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const {
+AffineSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const {
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
     ARIADNE_ASSERT(this->_equations.empty());
 

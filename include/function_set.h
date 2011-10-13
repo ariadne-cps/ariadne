@@ -55,6 +55,7 @@ class BoundedConstraintSet;
 class ConstrainedImageSet;
 
 class Grid;
+class PavingInterface;
 
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief An exact interval in \f$\mathbb{R}\f$.
@@ -345,7 +346,7 @@ class ConstrainedImageSet
     //! \brief Test if the set overlaps (intersects the interior of) a box.
     tribool overlaps(const Box&) const;
     //! \brief Adjoin an outer approximation to a paving.
-    void adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    void adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
     tribool satisfies(const RealNonlinearConstraint& c) const;
@@ -355,9 +356,9 @@ class ConstrainedImageSet
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;
   private:
-    void affine_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
-    void subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
-    void constraint_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    void affine_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
+    void subdivision_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
+    void constraint_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
 };
 
 
@@ -468,7 +469,7 @@ class IntervalConstrainedImageSet
     //! \brief Test if the set overlaps (intersects the interior of) a box.
     tribool overlaps(const Box&) const;
     //! \brief Adjoin an outer approximation to a paving.
-    void adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    void adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
     tribool satisfies(const IntervalNonlinearConstraint& c) const;

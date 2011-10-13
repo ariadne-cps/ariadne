@@ -31,6 +31,7 @@
 #include "procedure.h"
 #include "function_set.h"
 #include "affine_set.h"
+#include "paving_interface.h"
 #include "grid_set.h"
 #include "nonlinear_programming.h"
 #include "constraint_solver.h"
@@ -63,9 +64,22 @@ unsigned int DRAWING_ACCURACY=1u;
 
 template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; return ss.str(); }
 
-typedef Vector<Float> FloatVector;
-typedef Vector<Interval> IntervalVector;
 
+void subdivision_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& function,
+                                            const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
+
+void affine_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& function,
+                                       const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
+
+void constraint_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& function,
+                                           const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
+
+void optimal_constraint_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& function,
+                                                   const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
+
+Matrix<Float> nonlinearities_zeroth_order(const IntervalVectorFunction& f, const IntervalVector& dom);
+Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& function, const IntervalVector domain);
+Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& function, const IntervalVector& domain);
 
 
 RealBox::RealBox(const IntervalVector& bx) : _ary(bx.size()) {
@@ -98,6 +112,39 @@ Box approximation(const RealBox& rbx) {
     return bx;
 }
 
+
+Float widths(const IntervalVector& bx) {
+    Float res=0.0;
+    for(uint i=0; i!=bx.size(); ++i) {
+        res+=(bx[i].width());
+    }
+    return res;
+}
+
+Float maximum_scaled_width(const IntervalVector& bx, const FloatVector& sf) {
+    Float res=0.0;
+    for(uint i=0; i!=bx.size(); ++i) {
+        res=max(bx[i].width()/sf[i],res);
+    }
+    return res;
+}
+
+Float average_scaled_width(const IntervalVector& bx, const FloatVector& sf) {
+    Float res=0.0;
+    for(uint i=0; i!=bx.size(); ++i) {
+        res+=(bx[i].width()/sf[i]);
+    }
+    return res/bx.size();
+}
+
+Float average_width(const IntervalVector& bx) {
+    Float res=0.0;
+    for(uint i=0; i!=bx.size(); ++i) {
+        if(bx[i].lower()>bx[i].upper()) { return -inf<Float>(); }
+        res+=bx[i].width();
+    }
+    return res/bx.size();
+}
 
 
 
@@ -580,7 +627,7 @@ tribool ConstrainedImageSet::overlaps(const Box& bx) const
 
 
 void
-ConstrainedImageSet::adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
+ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
     //paving.adjoin_outer_approximation(*this,depth);
     this->constraint_adjoin_outer_approximation_to(paving,depth);
@@ -634,7 +681,150 @@ IntervalProcedure make_procedure(const IntervalScalarFunctionInterface& f) {
     return Procedure<Interval>(e);
 }
 
-void subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, const IntervalVector& subdomain, const IntervalVectorFunction& function, const List<IntervalNonlinearConstraint>& constraints, const int depth, const FloatVector& errors)
+
+
+
+Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const IntervalVector& dom);
+
+
+Matrix<Float> nonlinearities_zeroth_order(const IntervalVectorFunction& f, const IntervalVector& dom)
+{
+    ARIADNE_ASSERT(dynamic_cast<const VectorTaylorFunction*>(f.raw_pointer()));
+    return nonlinearities_zeroth_order(dynamic_cast<const VectorTaylorFunction&>(*f.raw_pointer()),dom);
+}
+
+/*
+Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& f, const IntervalVector& dom)
+{
+    //std::cerr<<"\n\nf="<<f<<"\n";
+    //std::cerr<<"dom="<<dom<<"\n";
+    const uint m=f.result_size();
+    const uint n=f.argument_size();
+    Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 1, dom);
+    MultiIndex a(n);
+    for(uint i=0; i!=n; ++i) {
+        Float sf=dom[i].radius();
+        ++a[i];
+        ivl_dx[i].expansion().append(a,Interval(sf));
+        --a[i];
+    }
+    //std::cerr<<"dx="<<ivl_dx<<"\n";
+    Vector<IntervalDifferential> df=f.evaluate(ivl_dx);
+    //std::cerr<<"df="<<df<<"\n";
+
+    Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
+    for(uint i=0; i!=m; ++i) {
+        const IntervalDifferential& d=df[i];
+        for(IntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+            a=iter->key();
+            if(a.degree()==1) {
+                for(uint j=0; j!=n; ++j) {
+                    if(a[j]>0) { nonlinearities[i][j]+=radius(iter->data()); }
+                }
+            }
+        }
+    }
+    //std::cerr<<"nonlinearities="<<nonlinearities<<"\n";
+
+    return nonlinearities;
+}
+
+Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface& f, const IntervalVector& dom)
+{
+    //std::cerr<<"\n\nf="<<f<<"\n";
+    //std::cerr<<"dom="<<dom<<"\n";
+    const uint m=f.result_size();
+    const uint n=f.argument_size();
+    Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 2, dom);
+    MultiIndex a(n);
+    for(uint i=0; i!=n; ++i) {
+        Float sf=dom[i].radius();
+        ++a[i];
+        ivl_dx[i].expansion().append(a,Interval(sf));
+        --a[i];
+    }
+    //std::cerr<<"dx="<<ivl_dx<<"\n";
+    Vector<IntervalDifferential> df=f.evaluate(ivl_dx);
+    //std::cerr<<"df="<<df<<"\n";
+
+    Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
+    for(uint i=0; i!=m; ++i) {
+        const IntervalDifferential& d=df[i];
+        for(IntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+            a=iter->key();
+            if(a.degree()==2) {
+                for(uint j=0; j!=n; ++j) {
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
+                }
+            }
+        }
+    }
+    //std::cerr<<"nonlinearities="<<nonlinearities<<"\n";
+
+    return nonlinearities;
+}
+*/
+
+Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& function, const IntervalVector& domain)
+{
+    Matrix<Interval> jacobian=function.jacobian(domain);
+
+    // Compute the column of the matrix which has the norm
+    // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
+    uint jmax=domain.size();
+    Float max_column_norm=0.0;
+    for(uint j=0; j!=domain.size(); ++j) {
+        Float column_norm=0.0;
+        for(uint i=0; i!=function.result_size(); ++i) {
+            column_norm+=mag(jacobian[i][j]);
+        }
+        column_norm *= domain[j].radius();
+        if(column_norm>max_column_norm) {
+            max_column_norm=column_norm;
+            jmax=j;
+        }
+    }
+    return make_pair(jmax,numeric_cast<double>(max_column_norm));
+}
+
+Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& function, const IntervalVector domain)
+{
+    Matrix<Float> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
+
+    // Compute the row of the nonlinearities Array which has the highest norm
+    // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
+    uint imax=nonlinearities.row_size();
+    uint jmax_in_row_imax=nonlinearities.column_size();
+    Float max_row_sum=0.0;
+    for(uint i=0; i!=nonlinearities.row_size(); ++i) {
+        uint jmax=nonlinearities.column_size();
+        Float row_sum=0.0;
+        Float max_mag_j_in_i=0.0;
+        for(uint j=0; j!=nonlinearities.column_size(); ++j) {
+            row_sum+=mag(nonlinearities[i][j]);
+            if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
+                jmax=j;
+                max_mag_j_in_i=mag(nonlinearities[i][j]);
+            }
+        }
+        if(row_sum>max_row_sum) {
+            imax=i;
+            max_row_sum=row_sum;
+            jmax_in_row_imax=jmax;
+        }
+    }
+
+    return make_pair(jmax_in_row_imax,numeric_cast<double>(max_row_sum));
+}
+
+
+
+
+
+namespace {
+
+void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, const IntervalVector& subdomain, const IntervalVectorFunction& function,
+                                                      const List<IntervalNonlinearConstraint>& constraints, const int depth, const FloatVector& errors)
 {
     // How small an over-approximating box needs to be relative to the cell size
     static const double RELATIVE_SMALLNESS=0.5;
@@ -660,46 +850,133 @@ void subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, const Interv
     } else {
         IntervalVector subdomain1,subdomain2;
         make_lpair(subdomain1,subdomain2)=Ariadne::split(subdomain);
-        subdivision_adjoin_outer_approximation_to(paving,subdomain1,function,constraints,depth,errors);
-        subdivision_adjoin_outer_approximation_to(paving,subdomain2,function,constraints,depth,errors);
+        subdivision_adjoin_outer_approximation_recursion(paving,subdomain1,function,constraints,depth,errors);
+        subdivision_adjoin_outer_approximation_recursion(paving,subdomain2,function,constraints,depth,errors);
     }
 }
 
 
 
+static uint COUNT_TESTS=0u;
 
-void subdivision_adjoin_outer_approximation_to(GridTreeSet& paving,
-                                               const Vector<Interval>& subdomain,
-                                               const IntervalVectorFunction& function,
-                                               const IntervalVectorFunction constraint_functions,
-                                               const IntervalVector& constraint_bounds,
-                                               int depth)
+// Adjoin an over-approximation to the solution of $f(dom)$ such that $g(D) in C$ to the paving p, looking only at solutions in b.
+void procedure_constraint_adjoin_outer_approximation_recursion(
+        PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& f,
+        const IntervalVectorFunction& g, const Box& codomain, const GridCell& cell, int max_dpth, uint splt, const List<IntervalProcedure>& procedures)
 {
-    List<IntervalNonlinearConstraint> constraints;
-    for(uint i=0; i!=constraint_functions.result_size(); ++i) {
-        constraints.append(IntervalNonlinearConstraint(constraint_functions[i],constraint_bounds[i]));
+    const uint m=domain.size();
+    const uint nf=f.result_size();
+    const uint ng=g.result_size();
+
+    const Box& cell_box=cell.box();
+    const FloatVector scalings=paving.grid().lengths();
+
+    Box bbox = f(domain);
+
+    Float domwdth = average_width(domain);
+    Float bbxwdth = average_scaled_width(bbox,paving.grid().lengths());
+    Float clwdth = average_scaled_width(cell_box,paving.grid().lengths());
+
+    ARIADNE_LOG(2,"\nconstraint_adjoin_outer_approximation(...)\n");
+    ARIADNE_LOG(2,"   splt="<<splt<<" dpth="<<cell.tree_depth()<<" max_dpth="<<max_dpth<<"\n");
+    ARIADNE_LOG(2,"     domwdth="<<domwdth<<" bbxwdth="<<bbxwdth<<" clwdth="<<clwdth<<" dom="<<domain<<" bbox="<<bbox<<" cell="<<cell.box()<<"\n");
+
+    ConstraintSolver constraint_solver;
+
+    if(paving.superset(cell)) {
+        ARIADNE_LOG(4,"  Cell is already a subset of paving\n");
+        return;
     }
 
-    FloatVector errors(paving.dimension());
-    for(uint i=0; i!=errors.size(); ++i) {
-        errors[i]=paving.grid().lengths()[i]/(1<<depth);
+    ++COUNT_TESTS;
+
+    // Try to prove disjointness
+    const Box& old_domain=domain;
+    Box new_domain=old_domain;
+    Float olddomwdth = average_width(domain);
+    Float newdomwdth = olddomwdth;
+
+    static const double ACCEPTABLE_REDUCTION_FACTOR = 0.75;
+
+
+    // Box reduction steps
+    for(uint i=0; i!=nf; ++i) {
+        for(uint j=0; j!=m; ++j) {
+            constraint_solver.box_reduce(new_domain,f[i],cell_box[i],j);
+            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
+        }
+    }
+    for(uint i=0; i!=ng; ++i) {
+        for(uint j=0; j!=m; ++j) {
+            constraint_solver.box_reduce(new_domain,g[i],codomain[i],j);
+            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
+        }
+    }
+    newdomwdth=average_width(new_domain);
+    ARIADNE_LOG(6,"     domwdth="<<newdomwdth<<" olddomwdth="<<olddomwdth<<" dom="<<new_domain<<" box reduce\n");
+
+    // Hull reduction steps
+    do {
+        olddomwdth=newdomwdth;
+        for(uint i=0; i!=nf; ++i) {
+            constraint_solver.hull_reduce(new_domain,procedures[i],cell_box[i]);
+            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n"); return; }
+            //constraint_solver.hull_reduce(new_domain,f[i],cell_box[i]);
+        }
+        for(uint i=0; i!=ng; ++i) {
+            constraint_solver.hull_reduce(new_domain,procedures[nf+i],codomain[i]);
+            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n"); return; }
+            //constraint_solver.hull_reduce(new_domain,g[i],codomain[i]);
+        }
+        newdomwdth=average_width(new_domain);
+        ARIADNE_LOG(6,"     domwdth="<<newdomwdth<<" dom="<<new_domain<<"\n");
+    } while( !new_domain.empty() && (newdomwdth < ACCEPTABLE_REDUCTION_FACTOR * olddomwdth) );
+
+    ARIADNE_LOG(6,"new_domain="<<new_domain);
+
+
+    domwdth = average_scaled_width(new_domain,FloatVector(new_domain.size(),1.0));
+    bbox=f(new_domain);
+    bbxwdth=average_scaled_width(bbox,paving.grid().lengths());
+    if(bbox.disjoint(cell_box) || disjoint(g(new_domain),codomain)) {
+        ARIADNE_LOG(4,"  Proved disjointness using image of new domain\n");
+        return;
     }
 
-    subdivision_adjoin_outer_approximation_to(paving,subdomain,function,constraints,depth,errors);
+    ARIADNE_LOG(4,"                 domwdth="<<domwdth<<" bbxwdth="<<bbxwdth<<" clwdth="<<clwdth<<" dom="<<new_domain<<" bbox="<<bbox<<" cell="<<cell.box()<<"\n");
+
+    // Decide whether to split cell or split domain by comparing size of
+    // bounding box with the cell and splitting the larger.
+    // It seems that a more efficient algorithm results if the domain
+    // is only split if the bounding box is much larger, so we preferentiably
+    // split the cell unless the bounding box is 4 times as large
+    Float bbxmaxwdth = maximum_scaled_width(bbox,scalings);
+    Float clmaxwdth = maximum_scaled_width(cell_box,scalings);
+
+    if( (bbxmaxwdth > 4.0*clmaxwdth) || (cell.tree_depth()>=max_dpth && (bbxmaxwdth > clmaxwdth)) ) {
+        Pair<uint,double> lipsch = lipschitz_index_and_error(f,new_domain);
+        ARIADNE_LOG(4,"  Splitting domain on coordinate "<<lipsch.first<<"\n");
+        Pair<Box,Box> sd=new_domain.split(lipsch.first);
+        procedure_constraint_adjoin_outer_approximation_recursion(paving, sd.first, f, g, codomain, cell, max_dpth, splt+1, procedures);
+        procedure_constraint_adjoin_outer_approximation_recursion(paving, sd.second, f, g, codomain, cell, max_dpth, splt+1, procedures);
+    } else if(cell.tree_depth()>=max_dpth) {
+        ARIADNE_LOG(4,"  Adjoining cell "<<cell_box<<"\n");
+        paving.adjoin(cell);
+    } else {
+        ARIADNE_LOG(4,"  Splitting cell "<<cell_box<<"\n");
+        Pair<GridCell,GridCell> sb = cell.split();
+        procedure_constraint_adjoin_outer_approximation_recursion(paving,new_domain,f,g,codomain,sb.first, max_dpth, splt, procedures);
+        procedure_constraint_adjoin_outer_approximation_recursion(paving,new_domain,f,g,codomain,sb.second, max_dpth, splt, procedures);
+    }
+
+
 }
 
 
 
-void affine_adjoin_outer_approximation_to(GridTreeSet& paving, const IntervalVector& subdomain, const IntervalVectorFunction& function,                                                const IntervalVectorFunction constraint_functions, const IntervalVector& constraint_bounds, const int depth)
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-
-
-namespace {
-
-void hotstarted_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const IntervalVectorFunction& f, const IntervalVectorFunction& g, const Box& c, const GridCell& b, Point x, Point y, int e)
+void hotstarted_constraint_adjoin_outer_approximation_recursion(
+    PavingInterface& r, const Box& d, const IntervalVectorFunction& f,
+    const IntervalVectorFunction& g, const IntervalVector& c, const GridCell& b, Point x, Point y, int e)
 {
     uint verbosity=0;
 
@@ -725,7 +1002,7 @@ void hotstarted_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const B
     Float t;
     FloatVector z(x.size());
 
-    if(subset(b,r)) {
+    if(r.superset(b)) {
         ARIADNE_LOG(2,"  Cell already in set\n");
         return;
     }
@@ -829,9 +1106,9 @@ void hotstarted_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const B
         Pair<Box,Box> sd=d.split();
         x = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
         y=midpoint(sd.first);
-        hotstarted_constraint_adjoin_outer_approximation_to(r, sd.first, f,g, c, b, x, y, e);
+        hotstarted_constraint_adjoin_outer_approximation_recursion(r, sd.first, f,g, c, b, x, y, e);
         y = midpoint(sd.second);
-        hotstarted_constraint_adjoin_outer_approximation_to(r, sd.second, f,g, c, b, x, y, e);
+        hotstarted_constraint_adjoin_outer_approximation_recursion(r, sd.second, f,g, c, b, x, y, e);
         return;
     }
 
@@ -845,13 +1122,13 @@ void hotstarted_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const B
     } else {
         ARIADNE_LOG(2,"  Splitting cell; t="<<t<<"\n");
         Pair<GridCell,GridCell> sb = b.split();
-        hotstarted_constraint_adjoin_outer_approximation_to(r,d,f,g,c,sb.first,x,y,e);
-        hotstarted_constraint_adjoin_outer_approximation_to(r,d,f,g,c,sb.second,x,y,e);
+        hotstarted_constraint_adjoin_outer_approximation_recursion(r,d,f,g,c,sb.first,x,y,e);
+        hotstarted_constraint_adjoin_outer_approximation_recursion(r,d,f,g,c,sb.second,x,y,e);
     }
 }
 
 
-void hotstarted_optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const VectorTaylorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
+void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const IntervalVector& d, const VectorTaylorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
 {
     Sweeper sweeper = fg.sweeper();
 
@@ -872,7 +1149,7 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r,
     Float t;
     Point z(x.size());
 
-    if(subset(b,r)) {
+    if(r.superset(b)) {
         return;
     }
 
@@ -924,13 +1201,13 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r,
 
         //Pair<Box,Box> sd=solver.split(List<RealNonlinearConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
-        Pair<Box,Box> sd=d.split();
+        Pair<Box,Box> sd=split(d);
         Point nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
         Point ny = midpoint(sd.first);
-        hotstarted_optimal_constraint_adjoin_outer_approximation_to(r, sd.first, fg, c, b, nx, ny, e);
+        hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r, sd.first, fg, c, b, nx, ny, e);
         nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
         ny = midpoint(sd.second);
-        hotstarted_optimal_constraint_adjoin_outer_approximation_to(r, sd.second, fg, c, b, x, ny, e);
+        hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r, sd.second, fg, c, b, x, ny, e);
     }
 
     if(b.tree_depth()>=e*int(b.dimension())) {
@@ -941,10 +1218,10 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r,
         Pair<GridCell,GridCell> sb = b.split();
         Point sx = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
         Point sy = y;
-        hotstarted_optimal_constraint_adjoin_outer_approximation_to(r,d,fg,c,sb.first,sx,sy,e);
+        hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r,d,fg,c,sb.first,sx,sy,e);
         sx = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
         sy = y;
-        hotstarted_optimal_constraint_adjoin_outer_approximation_to(r,d,fg,c,sb.second,sx,sy,e);
+        hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r,d,fg,c,sb.second,sx,sy,e);
     }
 
 
@@ -954,8 +1231,39 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r,
 } // namespace
 
 
+void subdivision_adjoin_outer_approximation(PavingInterface& paving,
+                                            const IntervalVector& subdomain,
+                                            const IntervalVectorFunction& function,
+                                            const IntervalVectorFunction& constraint_functions,
+                                            const IntervalVector& constraint_bounds,
+                                            int depth)
+{
+    List<IntervalNonlinearConstraint> constraints;
+    for(uint i=0; i!=constraint_functions.result_size(); ++i) {
+        constraints.append(IntervalNonlinearConstraint(constraint_functions[i],constraint_bounds[i]));
+    }
+
+    FloatVector errors(paving.dimension());
+    for(uint i=0; i!=errors.size(); ++i) {
+        errors[i]=paving.grid().lengths()[i]/(1<<depth);
+    }
+
+    ::subdivision_adjoin_outer_approximation_recursion(paving,subdomain,function,constraints,depth,errors);
+}
+
+void affine_adjoin_outer_approximation(PavingInterface& paving,
+                                       const IntervalVector& subdomain,
+                                       const IntervalVectorFunction& function,
+                                       const IntervalVectorFunction& constraints,
+                                       const IntervalVector& bounds,
+                                       int depth)
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
 void
-constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box& d, const IntervalVectorFunction& f, const IntervalVectorFunction& g, const IntervalVector& c, int e)
+constraint_adjoin_outer_approximation(PavingInterface& p, const IntervalVector& d, const IntervalVectorFunction& f,
+                                      const IntervalVectorFunction& g, const IntervalVector& c, int e)
 {
     ARIADNE_ASSERT(p.dimension()==f.result_size());
 
@@ -967,12 +1275,30 @@ constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box& d, const Int
     const uint l=(d.size()+f.result_size()+g.result_size())*2;
     Point x(l); for(uint k=0; k!=l; ++k) { x[k]=1.0/l; }
 
-    ::hotstarted_constraint_adjoin_outer_approximation_to(p,d,f,g,rc,b,x,y,e);
+    ::hotstarted_constraint_adjoin_outer_approximation_recursion(p,d,f,g,rc,b,x,y,e);
 }
 
-void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box& d, const VectorTaylorFunction& f, const VectorTaylorFunction& g, const IntervalVector& c, int e)
+void
+procedure_constraint_adjoin_outer_approximation(PavingInterface& p, const IntervalVector& d, const IntervalVectorFunction& f,
+                                                const IntervalVectorFunction& g, const IntervalVector& c, int e)
 {
+    GridCell b=p.smallest_enclosing_primary_cell(f(d));
 
+    List<IntervalProcedure> procedures;
+    procedures.reserve(f.result_size()+g.result_size());
+    for(uint i=0; i!=f.result_size(); ++i) { procedures.append(make_procedure(f[i])); }
+    for(uint i=0; i!=g.result_size(); ++i) { procedures.append(make_procedure(g[i])); }
+
+    Ariadne::procedure_constraint_adjoin_outer_approximation_recursion(p,d,f,g,c,b,e*p.dimension(),0, procedures);
+    //std::cerr<<"Computing outer approximation considered a total of "<<COUNT_TESTS<<" domains/cells\n";
+    //std::cerr<<"Measure of paving is "<<p.measure()<<"\n";
+
+    if(dynamic_cast<GridTreeSet*>(&p)) { dynamic_cast<GridTreeSet&>(p).recombine(); }
+}
+
+void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const IntervalVector& d, const IntervalVectorFunction& f,
+                                                   const IntervalVectorFunction& g, const IntervalVector& c, int e)
+{
     GridCell b=GridCell::smallest_enclosing_primary_cell(g(d),p.grid());
     Box rc=intersection(g(d)+IntervalVector(g.result_size(),Interval(-1,1)),c);
 
@@ -980,43 +1306,63 @@ void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& p, const Box&
     const uint l=(d.size()+f.result_size()+g.result_size())*2;
     Point x(l); for(uint k=0; k!=l; ++k) { x[k]=1.0/l; }
 
-    VectorTaylorFunction fg=join(f,g);
-
-    ::hotstarted_optimal_constraint_adjoin_outer_approximation_to(p,d,fg,rc,b,x,y,e);
-
-}
-
-
-void ConstrainedImageSet::
-subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
-{
-    IntervalVector subdomain=this->_domain;
-
-    FloatVector errors(paving.dimension());
-    for(uint i=0; i!=errors.size(); ++i) {
-        errors[i]=paving.grid().lengths()[i]/(1<<depth);
+    std::cerr<<"Here\n";
+    VectorTaylorFunction fg;
+    const VectorTaylorFunction* tfptr;
+    if( (tfptr=dynamic_cast<const VectorTaylorFunction*>(f.raw_pointer())) ) {
+        const VectorTaylorFunction* tgptr;
+        if( ( tgptr = dynamic_cast<const VectorTaylorFunction*>(g.raw_pointer()) ) ) {
+            fg=join(*tfptr,*tgptr);
+        } else {
+            if(g.result_size()>0) {
+                fg=join(*tfptr,VectorTaylorFunction(tfptr->domain(),g,tfptr->sweeper()));
+            } else {
+                fg=*tfptr;
+            }
+        }
+    } else {
+        ThresholdSweeper swp(1e-12);
+        fg=VectorTaylorFunction(d,join(f,g),swp);
     }
-
-    ::subdivision_adjoin_outer_approximation_to(paving,subdomain,this->_function,this->_constraints,depth,errors);
+    ::hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(p,d,fg,rc,b,x,y,e);
 }
 
 
 
 void ConstrainedImageSet::
-constraint_adjoin_outer_approximation_to(GridTreeSet& p, int e) const
+subdivision_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
-    ARIADNE_ASSERT(p.dimension()==this->dimension());
-    const Box& d=this->domain();
-    const RealVectorFunction& f=this->function();
-    RealVectorFunction g(this->number_of_constraints(),d.size());
-    Box c(this->number_of_constraints());
+    ARIADNE_ASSERT(paving.dimension()==this->dimension());
+    const Box& domain=this->domain();
+    const RealVectorFunction& function=this->function();
+    RealVectorFunction constraints(this->number_of_constraints(),domain.size());
+    Box bounds(this->number_of_constraints());
 
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
-        g.set(i,this->_constraints[i].function());
-        c[i]=this->_constraints[i].bounds();
+        constraints.set(i,this->_constraints[i].function());
+        bounds[i]=this->_constraints[i].bounds();
     }
 
-    Ariadne::constraint_adjoin_outer_approximation_to(p,d,f,g,c,e);
+    Ariadne::subdivision_adjoin_outer_approximation(paving,domain,function,constraints,bounds,depth);
+}
+
+
+
+void ConstrainedImageSet::
+constraint_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
+{
+    ARIADNE_ASSERT(paving.dimension()==this->dimension());
+    const Box& domain=this->domain();
+    const RealVectorFunction& function=this->function();
+    RealVectorFunction constraints(this->number_of_constraints(),domain.size());
+    Box bounds(this->number_of_constraints());
+
+    for(uint i=0; i!=this->number_of_constraints(); ++i) {
+        constraints.set(i,this->_constraints[i].function());
+        bounds[i]=this->_constraints[i].bounds();
+    }
+
+    Ariadne::constraint_adjoin_outer_approximation(paving,domain,function,constraints,bounds,depth);
 }
 
 void draw(CanvasInterface& cnvs, const Projection2d& proj, const ConstrainedImageSet& set, uint depth)
@@ -1287,7 +1633,7 @@ tribool IntervalConstrainedImageSet::overlaps(const Box& bx) const
     return optimiser.feasible(subdomain,function,codomain);
 }
 
-void IntervalConstrainedImageSet::adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
+void IntervalConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
     const IntervalVector subdomain=this->_reduced_domain;
     const IntervalVectorFunction function = this->function();
@@ -1296,19 +1642,21 @@ void IntervalConstrainedImageSet::adjoin_outer_approximation_to(GridTreeSet& pav
 
     switch(DISCRETISATION_METHOD) {
         case SUBDIVISION_DISCRETISE:
-            Ariadne::subdivision_adjoin_outer_approximation_to(paving,subdomain,function,constraint_function,constraint_bounds,depth);
+            Ariadne::subdivision_adjoin_outer_approximation(paving,subdomain,function,constraint_function,constraint_bounds,depth);
             break;
         case AFFINE_DISCRETISE:
-            Ariadne::affine_adjoin_outer_approximation_to(paving,subdomain,function,constraint_function,constraint_bounds,depth);
+            Ariadne::affine_adjoin_outer_approximation(paving,subdomain,function,constraint_function,constraint_bounds,depth);
             break;
         case CONSTRAINT_DISCRETISE:
-            Ariadne::constraint_adjoin_outer_approximation_to(paving,subdomain,function,constraint_function,constraint_bounds,depth);
+            Ariadne::constraint_adjoin_outer_approximation(paving,subdomain,function,constraint_function,constraint_bounds,depth);
             break;
         default:
             ARIADNE_FAIL_MSG("Unknown discretisation method\n");
     }
 
-    paving.recombine();
+    if(dynamic_cast<GridTreeSet*>(&paving)) {
+        dynamic_cast<GridTreeSet&>(paving).recombine();
+    }
 }
 
 

@@ -89,7 +89,7 @@ class RealBoundedConstraintSet;
 template<class BS> class ListSet;
 
 class Grid;
-class GridTreeSet;
+class PavingInterface;
 
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
@@ -238,33 +238,26 @@ class Enclosure
 
     //! \brief Compute an outer approximation on the \a grid to the given \a depth.
     GridTreeSet outer_approximation(const Grid& grid, int depth) const;
-    //! \brief Compute an outer approximation on the \a grid to the given \a depth
-    //! by subdividing the parameter domain. Does not require constraint propagation
-    //! or nonlinear programming, but may be inefficient.
-    GridTreeSet subdivision_outer_approximation(const Grid& grid, int depth) const;
-    //! \brief Compute an outer approximation on the \a grid to the given \a depth
-    //! by first computing affine over-approximations of the set.
-    GridTreeSet affine_outer_approximation(const Grid& grid, int depth) const;
 
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving.
-    void adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    void adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
     //! by subdividing the parameter domain. Does not require constraint propagation,
     //! but may be inefficient.
-    void subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    void subdivision_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
     //! by first computing affine over-approximations of the set.
-    void affine_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    void affine_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
     //! by using constraint propagation.
-    void constraint_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    void constraint_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
     //! by using an interior point method to try to find good barrier functions
     //! and using constraint propagation to prove disjointness with cells.
     //! \details Potentially very efficient, but may be unreliable due to the
     //! use of nonlinear programming to find good Lyapounov multipliers for
     //! the constraints.
-    void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const;
+    void optimal_constraint_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
 
     //! \brief An approximation as an affine set.
     //! \details Most easily computed by dropping all nonlinear terms in the

@@ -40,11 +40,12 @@
 #include "taylor_function.h"
 
 #include "box.h"
+#include "grid.h"
 
 #include "function_set.h"
 #include "affine_set.h"
 
-#include "list_set.h"
+#include "paving_interface.h"
 #include "grid_set.h"
 
 #include "constraint_solver.h"
@@ -73,7 +74,20 @@ template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; ret
 typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
 
-void constraint_adjoin_outer_approximation(GridTreeSet&, const Box& domain, const IntervalVectorFunction& function, const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
+void subdivision_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& function,
+                                            const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
+
+void affine_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& function,
+                                       const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
+
+void constraint_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& function,
+                                           const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
+
+void procedure_constraint_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& function,
+                                                     const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
+
+void optimal_constraint_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& function,
+                                                   const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
 
 
 namespace {
@@ -675,27 +689,10 @@ void Enclosure::reduce() const
 }
 
 
-Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunctionInterface& function, const IntervalVector& domain)
-{
-    Matrix<Interval> jacobian=function.jacobian(domain);
 
-    // Compute the column of the matrix which has the norm
-    // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
-    uint jmax=domain.size();
-    Float max_column_norm=0.0;
-    for(uint j=0; j!=domain.size(); ++j) {
-        Float column_norm=0.0;
-        for(uint i=0; i!=function.result_size(); ++i) {
-            column_norm+=mag(jacobian[i][j]);
-        }
-        column_norm *= domain[j].radius();
-        if(column_norm>max_column_norm) {
-            max_column_norm=column_norm;
-            jmax=j;
-        }
-    }
-    return make_pair(jmax,numeric_cast<double>(max_column_norm));
-}
+Matrix<Float> nonlinearities_zeroth_order(const IntervalVectorFunction& f, const IntervalVector& dom);
+Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& function, const IntervalVector domain);
+Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& function, const IntervalVector& domain);
 
 Pair<Enclosure,Enclosure>
 Enclosure::split_zeroth_order() const
@@ -742,117 +739,6 @@ Enclosure::splitting_index_zeroth_order() const
     }
 
     return jmax;
-}
-
-Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const IntervalVector& dom);
-
-
-Matrix<Float> nonlinearities_zeroth_order(const IntervalVectorFunctionModel& f, const IntervalVector& dom)
-{
-    ARIADNE_ASSERT(dynamic_cast<const VectorTaylorFunction*>(f.raw_pointer()));
-    return nonlinearities_zeroth_order(dynamic_cast<const VectorTaylorFunction&>(*f.raw_pointer()),dom);
-}
-
-/*
-Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& f, const IntervalVector& dom)
-{
-    //std::cerr<<"\n\nf="<<f<<"\n";
-    //std::cerr<<"dom="<<dom<<"\n";
-    const uint m=f.result_size();
-    const uint n=f.argument_size();
-    Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 1, dom);
-    MultiIndex a(n);
-    for(uint i=0; i!=n; ++i) {
-        Float sf=dom[i].radius();
-        ++a[i];
-        ivl_dx[i].expansion().append(a,Interval(sf));
-        --a[i];
-    }
-    //std::cerr<<"dx="<<ivl_dx<<"\n";
-    Vector<IntervalDifferential> df=f.evaluate(ivl_dx);
-    //std::cerr<<"df="<<df<<"\n";
-
-    Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
-    for(uint i=0; i!=m; ++i) {
-        const IntervalDifferential& d=df[i];
-        for(IntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
-            a=iter->key();
-            if(a.degree()==1) {
-                for(uint j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=radius(iter->data()); }
-                }
-            }
-        }
-    }
-    //std::cerr<<"nonlinearities="<<nonlinearities<<"\n";
-
-    return nonlinearities;
-}
-
-Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface& f, const IntervalVector& dom)
-{
-    //std::cerr<<"\n\nf="<<f<<"\n";
-    //std::cerr<<"dom="<<dom<<"\n";
-    const uint m=f.result_size();
-    const uint n=f.argument_size();
-    Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 2, dom);
-    MultiIndex a(n);
-    for(uint i=0; i!=n; ++i) {
-        Float sf=dom[i].radius();
-        ++a[i];
-        ivl_dx[i].expansion().append(a,Interval(sf));
-        --a[i];
-    }
-    //std::cerr<<"dx="<<ivl_dx<<"\n";
-    Vector<IntervalDifferential> df=f.evaluate(ivl_dx);
-    //std::cerr<<"df="<<df<<"\n";
-
-    Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
-    for(uint i=0; i!=m; ++i) {
-        const IntervalDifferential& d=df[i];
-        for(IntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
-            a=iter->key();
-            if(a.degree()==2) {
-                for(uint j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
-                }
-            }
-        }
-    }
-    //std::cerr<<"nonlinearities="<<nonlinearities<<"\n";
-
-    return nonlinearities;
-}
-*/
-
-Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunctionModel& function, const IntervalVector domain)
-{
-    Matrix<Float> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
-
-    // Compute the row of the nonlinearities Array which has the highest norm
-    // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
-    uint imax=nonlinearities.row_size();
-    uint jmax_in_row_imax=nonlinearities.column_size();
-    Float max_row_sum=0.0;
-    for(uint i=0; i!=nonlinearities.row_size(); ++i) {
-        uint jmax=nonlinearities.column_size();
-        Float row_sum=0.0;
-        Float max_mag_j_in_i=0.0;
-        for(uint j=0; j!=nonlinearities.column_size(); ++j) {
-            row_sum+=mag(nonlinearities[i][j]);
-            if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
-                jmax=j;
-                max_mag_j_in_i=mag(nonlinearities[i][j]);
-            }
-        }
-        if(row_sum>max_row_sum) {
-            imax=i;
-            max_row_sum=row_sum;
-            jmax_in_row_imax=jmax;
-        }
-    }
-
-    return make_pair(jmax_in_row_imax,numeric_cast<double>(max_row_sum));
 }
 
 
@@ -940,259 +826,15 @@ Enclosure::split(uint d) const
 
 
 
-void optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& r, const Box& d, const IntervalVectorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
-{
-    TaylorFunctionFactory taylor_factory(ThresholdSweeper(1e-8));
-
-    // When making a new starting primal point, need to move components away from zero
-    // This constant shows how far away from zero the points are
-    static const double XSIGMA = 0.125;
-    static const double TERR = -1.0/((1<<e)*1024.0);
-    static const Float inf = Ariadne::inf<Float>();
-
-    const uint m=fg.argument_size();
-    const uint n=fg.result_size();
-    ARIADNE_LOG(2,"\nadjoin_outer_approximation(...)\n");
-    ARIADNE_LOG(2,"  dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.tree_depth()<<" e="<<e<<"\n");
-
-    ConstraintSolver solver;
-    NonlinearInteriorPointOptimiser optimiser;
-
-    Float t;
-    Point z(x.size());
-
-    if(subset(b,r)) {
-        return;
-    }
-
-    Box bx=join(static_cast<const IntervalVector&>(b.box()),static_cast<const IntervalVector&>(c));
-
-    optimiser.compute_tz(d,fg,bx,y,t,z);
-    for(uint i=0; i!=12; ++i) {
-        ARIADNE_LOG(4," t="<<t);
-        optimiser.linearised_feasibility_step(d,fg,bx,x,y,z,t);
-        if(t>0) { break; }
-    }
-    ARIADNE_LOG(4,"\n  t="<<t<<"\n  y="<<y<<"\n    x="<<x<<"\n    z="<<z<<"\n");
-
-    if(t<TERR) {
-        // Probably disjoint, so try to prove this
-        Box nd=d;
-
-        // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
-        // This should be easier than using all constraints separately
-        ScalarTaylorFunction xg=taylor_factory.create_zero(d);
-        Interval cnst=0.0;
-        for(uint j=0; j!=n; ++j) {
-            xg = xg - (x[j]-x[n+j])*taylor_factory.create(d,fg[j]);
-            cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
-        }
-        for(uint i=0; i!=m; ++i) {
-            xg = xg - (x[2*n+i]-x[2*n+m+i])*taylor_factory.create_coordinate(d,i);
-            cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
-        }
-        xg = (cnst) + xg;
-
-        ARIADNE_LOG(4,"    xg="<<xg<<"\n");
 
 
-        ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-        solver.hull_reduce(nd,xg,Interval(0,inf));
-        ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-        if(nd.empty()) {
-            ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
-            return;
-        }
-
-        for(uint i=0; i!=m; ++i) {
-            solver.box_reduce(nd,xg,Interval(0,inf),i);
-            ARIADNE_LOG(8,"  dom="<<nd<<"\n");
-            if(nd.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
-        }
-        ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-
-        //Pair<Box,Box> sd=solver.split(List<RealNonlinearConstraint>(1u,constraint),d);
-        ARIADNE_LOG(4,"  Splitting domain\n");
-        Pair<Box,Box> sd=d.split();
-        Point nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
-        Point ny = midpoint(sd.first);
-        optimal_constraint_adjoin_outer_approximation_to(r, sd.first, fg, c, b, nx, ny, e);
-        nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
-        ny = midpoint(sd.second);
-        optimal_constraint_adjoin_outer_approximation_to(r, sd.second, fg, c, b, x, ny, e);
-    }
-
-    if(b.tree_depth()>=e*int(b.dimension())) {
-        ARIADNE_LOG(4,"  Adjoining cell "<<b.box()<<"\n");
-        r.adjoin(b);
-    } else {
-        ARIADNE_LOG(4,"  Splitting cell; t="<<t<<"\n");
-        Pair<GridCell,GridCell> sb = b.split();
-        Point sx = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
-        Point sy = y;
-        optimal_constraint_adjoin_outer_approximation_to(r,d,fg,c,sb.first,sx,sy,e);
-        sx = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
-        sy = y;
-        optimal_constraint_adjoin_outer_approximation_to(r,d,fg,c,sb.second,sx,sy,e);
-    }
-
-
-}
-
-
-Float widths(const IntervalVector& bx) {
-    Float res=0.0;
-    for(uint i=0; i!=bx.size(); ++i) {
-        res+=(bx[i].width());
-    }
-    return res;
-}
-
-Float maximum_scaled_width(const IntervalVector& bx, const FloatVector& sf) {
-    Float res=0.0;
-    for(uint i=0; i!=bx.size(); ++i) {
-        res=max(bx[i].width()/sf[i],res);
-    }
-    return res;
-}
-
-Float average_scaled_width(const IntervalVector& bx, const FloatVector& sf) {
-    Float res=0.0;
-    for(uint i=0; i!=bx.size(); ++i) {
-        res+=(bx[i].width()/sf[i]);
-    }
-    return res/bx.size();
-}
-
-Float average_width(const IntervalVector& bx) {
-    Float res=0.0;
-    for(uint i=0; i!=bx.size(); ++i) {
-        if(bx[i].lower()>bx[i].upper()) { return -inf<Float>(); }
-        res+=bx[i].width();
-    }
-    return res/bx.size();
-}
-
-static uint COUNT_TESTS=0u;
-double IMAGE_MULTIPLE_OF_CELL = 1;
 
 typedef Procedure<Interval> IntervalProcedure;
 
-// Adjoin an over-approximation to the solution of $f(dom)$ such that $g(D) in C$ to the paving p, looking only at solutions in b.
-void constraint_adjoin_outer_approximation_to(GridTreeSet& paving, const Box& domain, const IntervalVectorFunctionModel& f, const IntervalVectorFunctionModel& g, const Box& codomain, const GridCell& cell, int max_dpth, uint splt, const List<IntervalProcedure>& procedures)
-{
-    const uint m=domain.size();
-    const uint nf=f.result_size();
-    const uint ng=g.result_size();
 
-    const Box& cell_box=cell.box();
-    const FloatVector scalings=paving.grid().lengths();
+void adjoin_outer_approximation(PavingInterface&, const Box& domain, const IntervalVectorFunction& function, const IntervalVectorFunction& negative_constraints, const IntervalVectorFunction& equality_constraints, int depth);
 
-    Box bbox = f(domain);
-
-    Float domwdth = average_width(domain);
-    Float bbxwdth = average_scaled_width(bbox,paving.grid().lengths());
-    Float clwdth = average_scaled_width(cell_box,paving.grid().lengths());
-
-    ARIADNE_LOG(2,"\nconstraint_adjoin_outer_approximation(...)\n");
-    ARIADNE_LOG(2,"   splt="<<splt<<" dpth="<<cell.tree_depth()<<" max_dpth="<<max_dpth<<"\n");
-    ARIADNE_LOG(2,"     domwdth="<<domwdth<<" bbxwdth="<<bbxwdth<<" clwdth="<<clwdth<<" dom="<<domain<<" bbox="<<bbox<<" cell="<<cell.box()<<"\n");
-
-    ConstraintSolver constraint_solver;
-
-    if(subset(cell,paving)) {
-        ARIADNE_LOG(4,"  Cell is already a subset of paving\n");
-        return;
-    }
-
-    ++COUNT_TESTS;
-
-    // Try to prove disjointness
-    const Box& old_domain=domain;
-    Box new_domain=old_domain;
-    Float olddomwdth = average_width(domain);
-    Float newdomwdth = olddomwdth;
-
-    static const double ACCEPTABLE_REDUCTION_FACTOR = 0.75;
-
-
-    // Box reduction steps
-    for(uint i=0; i!=nf; ++i) {
-        for(uint j=0; j!=m; ++j) {
-            constraint_solver.box_reduce(new_domain,f[i],cell_box[i],j);
-            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
-        }
-    }
-    for(uint i=0; i!=ng; ++i) {
-        for(uint j=0; j!=m; ++j) {
-            constraint_solver.box_reduce(new_domain,g[i],codomain[i],j);
-            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
-        }
-    }
-    newdomwdth=average_width(new_domain);
-    ARIADNE_LOG(6,"     domwdth="<<newdomwdth<<" olddomwdth="<<olddomwdth<<" dom="<<new_domain<<" box reduce\n");
-
-    // Hull reduction steps
-    do {
-        olddomwdth=newdomwdth;
-        for(uint i=0; i!=nf; ++i) {
-            constraint_solver.hull_reduce(new_domain,procedures[i],cell_box[i]);
-            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n"); return; }
-            //constraint_solver.hull_reduce(new_domain,f[i],cell_box[i]);
-        }
-        for(uint i=0; i!=ng; ++i) {
-            constraint_solver.hull_reduce(new_domain,procedures[nf+i],codomain[i]);
-            if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n"); return; }
-            //constraint_solver.hull_reduce(new_domain,g[i],codomain[i]);
-        }
-        newdomwdth=average_width(new_domain);
-        ARIADNE_LOG(6,"     domwdth="<<newdomwdth<<" dom="<<new_domain<<"\n");
-    } while( !new_domain.empty() && (newdomwdth < ACCEPTABLE_REDUCTION_FACTOR * olddomwdth) );
-
-    ARIADNE_LOG(6,"new_domain="<<new_domain);
-
-
-    domwdth = average_scaled_width(new_domain,FloatVector(new_domain.size(),1.0));
-    bbox=f(new_domain);
-    bbxwdth=average_scaled_width(bbox,paving.grid().lengths());
-    if(bbox.disjoint(cell_box) || disjoint(g(new_domain),codomain)) {
-        ARIADNE_LOG(4,"  Proved disjointness using image of new domain\n");
-        return;
-    }
-
-    ARIADNE_LOG(4,"                 domwdth="<<domwdth<<" bbxwdth="<<bbxwdth<<" clwdth="<<clwdth<<" dom="<<new_domain<<" bbox="<<bbox<<" cell="<<cell.box()<<"\n");
-
-    // Decide whether to split cell or split domain by comparing size of
-    // bounding box with the cell and splitting the larger.
-    // It seems that a more efficient algorithm results if the domain
-    // is only split if the bounding box is much larger, so we preferentiably
-    // split the cell unless the bounding box is 4 times as large
-    Float bbxmaxwdth = maximum_scaled_width(bbox,scalings);
-    Float clmaxwdth = maximum_scaled_width(cell_box,scalings);
-
-    if( (bbxmaxwdth > 4.0*clmaxwdth) || (cell.tree_depth()>=max_dpth && (bbxmaxwdth > clmaxwdth)) ) {
-        Pair<uint,double> lipsch = lipschitz_index_and_error(f,new_domain);
-        ARIADNE_LOG(4,"  Splitting domain on coordinate "<<lipsch.first<<"\n");
-        Pair<Box,Box> sd=new_domain.split(lipsch.first);
-        constraint_adjoin_outer_approximation_to(paving, sd.first, f, g, codomain, cell, max_dpth, splt+1, procedures);
-        constraint_adjoin_outer_approximation_to(paving, sd.second, f, g, codomain, cell, max_dpth, splt+1, procedures);
-    } else if(cell.tree_depth()>=max_dpth) {
-        ARIADNE_LOG(4,"  Adjoining cell "<<cell_box<<"\n");
-        paving.adjoin(cell);
-    } else {
-        ARIADNE_LOG(4,"  Splitting cell "<<cell_box<<"\n");
-        Pair<GridCell,GridCell> sb = cell.split();
-        constraint_adjoin_outer_approximation_to(paving,new_domain,f,g,codomain,sb.first, max_dpth, splt, procedures);
-        constraint_adjoin_outer_approximation_to(paving,new_domain,f,g,codomain,sb.second, max_dpth, splt, procedures);
-    }
-
-
-}
-
-
-void adjoin_outer_approximation(GridTreeSet&, const Box& domain, const IntervalVectorFunction& function, const IntervalVectorFunction& negative_constraints, const IntervalVectorFunction& equality_constraints, int depth);
-
-void Enclosure::adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
+void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
     switch(DISCRETISATION_METHOD) {
         case SUBDIVISION_DISCRETISE:
@@ -1209,25 +851,11 @@ void Enclosure::adjoin_outer_approximation_to(GridTreeSet& paving, int depth) co
     }
 }
 
-void
-_subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const Enclosure& set, const IntervalVector& subdomain,
-                                           uint depth, const FloatVector& errors, uint splittings);
 
-void Enclosure::subdivision_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
+void Enclosure::subdivision_adjoin_outer_approximation_to(PavingInterface& p, int e) const
 {
-    Vector<Float> errors(paving.dimension());
-    for(uint i=0; i!=errors.size(); ++i) {
-        errors[i]=paving.grid().lengths()[i]/(1<<depth);
-    }
-    _subdivision_adjoin_outer_approximation_to(paving,*this,this->domain(),depth,errors,0u);
-}
-
-IntervalProcedure make_procedure(const IntervalScalarFunctionInterface& f);
-
-void Enclosure::constraint_adjoin_outer_approximation_to(GridTreeSet& p, int acc) const
-{
-    ARIADNE_LOG(6,"Enclosure::constraint_adjoin_outer_approximation_to(paving, depth)\n");
-    ARIADNE_LOG(7,"  set="<<*this<<", grid="<<p.grid()<<", depth="<<acc<<"\n");
+    ARIADNE_LOG(6,"Enclosure::subdivision_adjoin_outer_approximation_to(paving, depth)\n");
+    ARIADNE_LOG(7,"  set="<<*this<<", grid="<<p.grid()<<", depth="<<e<<"\n");
     ARIADNE_ASSERT(p.dimension()==this->dimension());
     const Box& d=this->domain();
     const IntervalVectorFunctionModel& f=this->function();
@@ -1242,25 +870,40 @@ void Enclosure::constraint_adjoin_outer_approximation_to(GridTreeSet& p, int acc
         g.set(i,*eiter);
         ++i;
     }
-    GridCell b=GridCell::smallest_enclosing_primary_cell(f(d),p.grid());
     IntervalVector cc(this->_constraints.size(),Interval(-inf<Float>(),0.0));
     IntervalVector ce(this->_equations.size(),Interval(0.0,0.0));
     Box c=intersection(Box(g(d)),Box(join(cc,ce)));
 
-    List<IntervalProcedure> procedures;
-    procedures.reserve(this->dimension()+this->_constraints.size()+this->_equations.size());
-    for(uint i=0; i!=this->dimension(); ++i) { procedures.append(make_procedure(this->_function[i])); }
-    for(uint i=0; i!=this->_constraints.size(); ++i) { procedures.append(make_procedure(this->_constraints[i])); }
-    for(uint i=0; i!=this->_equations.size(); ++i) { procedures.append(make_procedure(this->_equations[i])); }
-
-    COUNT_TESTS=0;
-    Ariadne::constraint_adjoin_outer_approximation_to(p,d,f,g,c,b,acc*p.dimension(),0, procedures);
-    //std::cerr<<"Computing outer approximation considered a total of "<<COUNT_TESTS<<" domains/cells\n";
-    //std::cerr<<"Measure of paving is "<<p.measure()<<"\n";
-    p.recombine();
+    Ariadne::subdivision_adjoin_outer_approximation(p,d,f,g,c,e);
 }
 
-void Enclosure::optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& p, int e) const
+void Enclosure::constraint_adjoin_outer_approximation_to(PavingInterface& p, int e) const
+{
+    ARIADNE_LOG(6,"Enclosure::constraint_adjoin_outer_approximation_to(paving, depth)\n");
+    ARIADNE_LOG(7,"  set="<<*this<<", grid="<<p.grid()<<", depth="<<e<<"\n");
+    ARIADNE_ASSERT(p.dimension()==this->dimension());
+    const Box& d=this->domain();
+    const IntervalVectorFunctionModel& f=this->function();
+
+    IntervalVectorFunctionModel g=this->function_factory().create_zeros(this->_constraints.size()+this->_equations.size(),d);
+    uint i=0;
+    for(List<IntervalScalarFunctionModel>::const_iterator citer=this->_constraints.begin(); citer!=this->_constraints.end(); ++citer) {
+        g.set(i,*citer);
+        ++i;
+    }
+    for(List<IntervalScalarFunctionModel>::const_iterator eiter=this->_equations.begin(); eiter!=this->_equations.end(); ++eiter) {
+        g.set(i,*eiter);
+        ++i;
+    }
+    IntervalVector cc(this->_constraints.size(),Interval(-inf<Float>(),0.0));
+    IntervalVector ce(this->_equations.size(),Interval(0.0,0.0));
+    Box c=intersection(Box(g(d)),Box(join(cc,ce)));
+
+
+    Ariadne::procedure_constraint_adjoin_outer_approximation(p,d,f,g,c,e);
+}
+
+void Enclosure::optimal_constraint_adjoin_outer_approximation_to(PavingInterface& p, int e) const
 {
     ARIADNE_ASSERT(p.dimension()==this->dimension());
     const Box& d=this->domain();
@@ -1272,19 +915,18 @@ void Enclosure::optimal_constraint_adjoin_outer_approximation_to(GridTreeSet& p,
         g.set(i,*citer);
         ++i;
     }
+    for(List<IntervalScalarFunctionModel>::const_iterator eiter=this->_equations.begin(); eiter!=this->_equations.end(); ++eiter) {
+        g.set(i,*eiter);
+        ++i;
+    }
 
-    GridCell b=GridCell::smallest_enclosing_primary_cell(g(d),p.grid());
-    Box c=intersection(g(d)+IntervalVector(g.result_size(),Interval(-1,1)),Box(g.result_size(),Interval(-inf<Float>(),0.0)));
+    IntervalVector cc(this->_constraints.size(),Interval(-inf<Float>(),0.0));
+    IntervalVector ce(this->_equations.size(),Interval(0.0,0.0));
+    Box c=intersection(Box(g(d)),Box(join(cc,ce)));
 
-    Point y=midpoint(d);
-    const uint l=(d.size()+f.result_size()+g.result_size())*2;
-    Point x(l); for(uint k=0; k!=l; ++k) { x[k]=1.0/l; }
-
-    IntervalVectorFunctionModel fg=join(f,g);
-
-    Ariadne::optimal_constraint_adjoin_outer_approximation_to(p,d,fg,c,b,x,y,e);
-
+    Ariadne::optimal_constraint_adjoin_outer_approximation(p,d,f,g,c,e);
 }
+
 
 GridTreeSet Enclosure::outer_approximation(const Grid& grid, int depth) const
 {
@@ -1293,14 +935,9 @@ GridTreeSet Enclosure::outer_approximation(const Grid& grid, int depth) const
     return paving;
 }
 
-GridTreeSet Enclosure::subdivision_outer_approximation(const Grid& grid, int depth) const
-{
-    GridTreeSet paving(grid);
-    this->subdivision_adjoin_outer_approximation_to(paving,depth);
-    return paving;
-}
 
-void Enclosure::affine_adjoin_outer_approximation_to(GridTreeSet& paving, int depth) const
+
+void Enclosure::affine_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->_reduced_domain,this->_domain),*this);
 
@@ -1564,53 +1201,6 @@ std::ostream& Enclosure::write(std::ostream& os) const {
 
 
 
-void
-_subdivision_adjoin_outer_approximation_to(GridTreeSet& gts, const Enclosure& set, const IntervalVector& subdomain,
-                                           uint depth, const FloatVector& errors, uint splittings)
-{
-    // How small an over-approximating box needs to be relative to the cell size
-    static const double RELATIVE_SMALLNESS=0.5;
-    static const uint MAXIMUM_SPLITTINGS = 18;
-
-    //std::cerr<<"subdomain="<<subdomain<<"; "<<"depth="<<depth<<" splittings="<<splittings<<"\n";
-    typedef List<IntervalScalarFunctionModel>::const_iterator const_iterator;
-
-    for(const_iterator iter=set.negative_constraints().begin(); iter!=set.negative_constraints().end(); ++iter) {
-        const IntervalScalarFunctionModel& constraint=*iter;;
-        Interval constraint_range=constraint.evaluate(subdomain);
-        if(constraint_range.lower() > 0.0) {
-            return;
-        }
-    }
-    for(const_iterator iter=set.zero_constraints().begin(); iter!=set.zero_constraints().end(); ++iter) {
-        const IntervalScalarFunctionModel& constraint=*iter;
-        Interval constraint_range=constraint.evaluate(subdomain);
-        if(constraint_range.lower() > 0.0 || constraint_range.upper() < 0.0 ) {
-            return;
-        }
-    }
-
-    Box range=evaluate(set.function(),subdomain);
-
-    Array<Float> radii(set.dimension());
-    for(uint i=0; i!=radii.size(); ++i) { radii[i]=range[i].radius()-set.function()[i].error(); }
-    bool small=true;
-    for(uint i=0; i!=range.size(); ++i) {
-        if(radii[i]>errors[i]*RELATIVE_SMALLNESS) {
-            small=false;
-            break;
-        }
-    }
-
-    if(small || splittings==MAXIMUM_SPLITTINGS) {
-        gts.adjoin_outer_approximation(range,depth);
-    } else {
-        Vector<Interval> subdomain1,subdomain2;
-        make_lpair(subdomain1,subdomain2)=Ariadne::split(subdomain);
-        _subdivision_adjoin_outer_approximation_to(gts,set,subdomain1,depth,errors,splittings+1u);
-        _subdivision_adjoin_outer_approximation_to(gts,set,subdomain2,depth,errors,splittings+1u);
-    }
-}
 
 
 /*

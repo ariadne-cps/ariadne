@@ -135,8 +135,6 @@ class HybridEnclosure
     List<DiscreteEvent> _events;
     List<Identifier> _space;
     Enclosure _set;
-    IntervalScalarFunctionModel _time;
-    IntervalScalarFunctionModel _dwell_time;
     List<EnclosureVariableType> _variables;
   public:
     //! \brief An empty enclosure.

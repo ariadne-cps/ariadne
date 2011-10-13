@@ -97,9 +97,11 @@ class Enclosure
     , public CompactSetInterface
 {
     Box _domain;
-    IntervalVectorFunctionModel _function;
-    List<IntervalScalarFunctionModel> _constraints;
-    List<IntervalScalarFunctionModel> _equations;
+    IntervalVectorFunctionModel _space_function;
+    IntervalScalarFunctionModel _time_function;
+    IntervalScalarFunctionModel _dwell_time_function;
+    List<IntervalScalarFunctionModel> _negative_constraints;
+    List<IntervalScalarFunctionModel> _zero_constraints;
     IntervalFunctionModelFactoryInterface* _function_factory_ptr;
     mutable Box _reduced_domain;
     mutable bool _is_fully_reduced;
@@ -128,6 +130,7 @@ class Enclosure
     const IntervalFunctionModelFactoryInterface& function_factory() const;
     //! \brief The parameter domain \f$D\f$.
     Vector<Interval> domain() const;
+    Vector<Interval> parameter_domain() const;
     //! \brief A subset of the parameter domain containing all feasible points.
     Vector<Interval> reduced_domain() const;
     //! \brief An over-approximation to the image of \f$D\f$ under \f$f\f$.
@@ -135,6 +138,8 @@ class Enclosure
     //! \brief The image function \f$f\f$.
     IntervalVectorFunctionModel const& function() const;
     IntervalVectorFunctionModel const& space_function() const;
+    IntervalScalarFunctionModel const& time_function() const;
+    IntervalScalarFunctionModel const& dwell_time_function() const;
 
     //! \brief Introduces a new parameter with values in the interval \a ivl. The set itself does not change.
     void new_parameter(Interval ivl);
@@ -146,16 +151,25 @@ class Enclosure
     void substitute(uint j, IntervalScalarFunctionModel v);
     //! \brief Substitutes the expression \f$x_j=c\f$ into the function and constraints.
     void substitute(uint j, Float c);
+
     //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
     void apply_map(IntervalVectorFunction r);
-    //! \brief Apply the flow \f$\phi(x,t)\f$ to the map \f$f\f$.
-    void apply_flow(IntervalVectorFunction phi, Interval time);
     //! \brief Apply the flow \f$\phi(x,h)\f$ to the map \f$f\f$.
-    void apply_flow_step(IntervalVectorFunction phi, Float h);
-    //! \brief Apply the flow \f$\phi(x,\epsilon(x))\f$ to the map \f$f\f$.
-    void apply_state_flow_step(IntervalVectorFunction phi, IntervalScalarFunction elps);
-    //! \brief Set \f$\xi'(s)=\phi(\xi(s),\tau(s))\f$.
-    void apply_parameter_flow_step(IntervalVectorFunction phi, IntervalScalarFunction tau);
+    void apply_fixed_evolve_step(IntervalVectorFunction phi, Float h);
+    //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.
+    void apply_space_evolve_step(IntervalVectorFunction phi, IntervalScalarFunction elps);
+    //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s),\tau(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s),\tau(s))\f$.
+    void apply_spacetime_evolve_step(IntervalVectorFunction phi, IntervalScalarFunction elps);
+    //! \brief Set \f$\xi'(s)=\phi(\xi(s),\epsilon(s))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(s)\f$.
+    void apply_parameter_evolve_step(IntervalVectorFunction phi, IntervalScalarFunction elps);
+    //! \brief Set \f$\xi'(s)=\phi(\xi(s),\omega(s)-\tau(s))\f$ and \f$\tau'(s)=\omega(s)\f$.
+    void apply_finishing_parameter_evolve_step(IntervalVectorFunction phi, IntervalScalarFunction omega);
+    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $r\leq h.
+    void apply_full_reach_step(IntervalVectorFunctionModel phi);
+    //! \brief Apply the flow \f$xi'(s,r)=\phi(\xi(s),r)\f$, \f$\tau'(s,r)=\tau(s)+r\f$, \f$r\leq\elps\f$
+    void apply_spacetime_reach_step(IntervalVectorFunctionModel phi, IntervalScalarFunction elps);
+    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $r-elps(s)\leq 0$.
+    void apply_parameter_reach_step(IntervalVectorFunctionModel phi, IntervalScalarFunction elps);
 /*
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,h]\f$
     void apply_reach_step(IntervalVectorFunction phi, Float h);
@@ -168,12 +182,16 @@ class Enclosure
     //! \brief Introduces the constraint \f$c\f$ applied to the parameter \f$s\f$.
     void new_parameter_constraint(IntervalNonlinearConstraint c);
 
+    //! \brief Introduces the constraint \f$-g(\xi(s)) \leq 0\f$.
+    void new_positive_state_constraint(IntervalScalarFunction g);
+    //! \brief Introduces the constraint \f$g(\xi(s)) \leq 0\f$.
+    void new_negative_state_constraint(IntervalScalarFunction g);
+    //! \brief Introduces the constraint \f$h(\xi(s)) = 0\f$.
+    void new_zero_state_constraint(IntervalScalarFunction h);
     //! \brief Introduces the constraint \f$g(s) \leq 0\f$.
-    void new_negative_constraint(IntervalScalarFunction g);
+    void new_negative_parameter_constraint(IntervalScalarFunction g);
     //! \brief Introduces the constraint \f$h(s) = 0\f$.
-    void new_zero_constraint(IntervalScalarFunction h);
-    //! \brief Introduces the constraint \f$h(s) = 0\f$. \deprecated
-    void new_equality_constraint(IntervalScalarFunction h);
+    void new_zero_parameter_constraint(IntervalScalarFunction h);
 
     //! \brief The functions \f$g\f$ defining the inequality constraints \f$g(x) \leq 0\f$.
     const List<IntervalScalarFunctionModel>& negative_constraints() const;
@@ -229,6 +247,10 @@ class Enclosure
     void reduce() const;
     //! \brief Reconditions the set to give an over-approximation with a simpler representation.
     void recondition();
+    //! \brief Simplifies the representation by changing all uniform errors into independent variables.
+    void uniform_error_recondition();
+    //! \brief Simplifies the representation by choosing most significant independent variables to keep, and merging the rest into a single error for each component.
+    void kuhn_recondition();
     //! \brief Restrict the parameter domain to \a subdomain.
     //! \details May also restrict the domain of the defining function models,
     //! resulting in more accurate computations.
@@ -292,6 +314,7 @@ class Enclosure
     //! the \a k<sup>th</sup> direction.
     Pair<Enclosure,Enclosure> split(uint k) const;
 
+
     //! \brief Draw to a canvas.
     void draw(CanvasInterface& c, const Projection2d& p) const;
     //! \brief Draw the bounding box to a canvas. Useful to obtain a quick and rough
@@ -323,6 +346,7 @@ Enclosure product(const Enclosure& set, const Interval& ivl);
 //! \related Enclosure \brief The Cartesian product of a constrained image set with a box.
 Enclosure product(const Enclosure& set, const Box& bx);
 //! \related Enclosure \brief The Cartesian product of two constrained image sets.
+//! \precondition The time function of each set is constant with the same value.
 Enclosure product(const Enclosure& set1, const Enclosure& set2);
 
 //! \related Enclosure \brief The image of the \a set under the \a function.

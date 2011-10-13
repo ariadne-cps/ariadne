@@ -38,7 +38,7 @@ int main(int argc, const char* argv[])
 
 
     DRAWING_METHOD = AFFINE_DRAW;
-    DRAWING_ACCURACY = 0;
+    DRAWING_ACCURACY = 1;
 
     /// Set the system parameters
     RealConstant a("a",-0.02);

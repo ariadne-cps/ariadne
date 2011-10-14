@@ -58,6 +58,7 @@ class TestInterval
     void test_aliasing();
     void test_monotone_functions();
     void test_trigonometric_functions();
+    void test_geometric_predicates();
     void regression_tests();
 };
 
@@ -75,6 +76,7 @@ TestInterval::test()
     ARIADNE_TEST_CALL(test_exact_rounded_arithmetic());
     ARIADNE_TEST_CALL(test_monotone_functions());
     ARIADNE_TEST_CALL(test_trigonometric_functions());
+    ARIADNE_TEST_CALL(test_geometric_predicates());
     ARIADNE_TEST_CALL(regression_tests());
 }
 
@@ -443,6 +445,63 @@ void TestInterval::test_trigonometric_functions()
     }
     catch(...) { }
 
+}
+
+void TestInterval::test_geometric_predicates()
+{
+    Interval empty_interval; empty_interval.set_empty();
+
+    ARIADNE_TEST_PRINT(empty_interval);
+
+    ARIADNE_TEST_BINARY_PREDICATE(intersect,Interval(0.0,1.5),Interval(1.5,3));
+    ARIADNE_TEST_BINARY_PREDICATE(!intersect,Interval(0.0,1.5),Interval(1.625,3));
+
+    ARIADNE_TEST_BINARY_PREDICATE(!disjoint,Interval(0.0,1.5),Interval(1.5,3));
+    ARIADNE_TEST_BINARY_PREDICATE(disjoint,Interval(0.0,1.5),Interval(1.625,3));
+
+    ARIADNE_TEST_BINARY_PREDICATE(subset,Interval(1.0,1.5),Interval(1.0,2.0));
+    ARIADNE_TEST_BINARY_PREDICATE(subset,Interval(1.5,2.0),Interval(1.0,2.0));
+    ARIADNE_TEST_BINARY_PREDICATE(subset,Interval(1.0,2.0),Interval(1.0,2.0));
+
+    ARIADNE_TEST_BINARY_PREDICATE(superset,Interval(1.0,2.0),Interval(1.0,1.5));
+    ARIADNE_TEST_BINARY_PREDICATE(superset,Interval(1.0,2.0),Interval(1.5,2.0));
+    ARIADNE_TEST_BINARY_PREDICATE(superset,Interval(1.0,2.0),Interval(1.0,2.0));
+
+    ARIADNE_TEST_BINARY_PREDICATE(inside,Interval(1.25,1.75),Interval(1.0,2.0));
+    ARIADNE_TEST_BINARY_PREDICATE(!inside,Interval(1.00,1.75),Interval(1.0,2.0));
+    ARIADNE_TEST_BINARY_PREDICATE(!inside,Interval(1.25,2.00),Interval(1.0,2.0));
+
+    ARIADNE_TEST_BINARY_PREDICATE(covers,Interval(1.0,2.0),Interval(1.25,1.75));
+    ARIADNE_TEST_BINARY_PREDICATE(!covers,Interval(1.0,2.0),Interval(1.00,1.75));
+    ARIADNE_TEST_BINARY_PREDICATE(!covers,Interval(1.0,2.0),Interval(1.25,2.00));
+
+    ARIADNE_TEST_BINARY_PREDICATE(overlap,Interval(1.0,2.0),Interval(1.75,3.0));
+    ARIADNE_TEST_BINARY_PREDICATE(!overlap,Interval(1.0,2.0),Interval(2.00,1.75));
+    ARIADNE_TEST_BINARY_PREDICATE(!overlap,Interval(1.0,2.0),Interval(2.25,1.75));
+
+    ARIADNE_TEST_BINARY_PREDICATE(!separated,Interval(1.0,2.0),Interval(1.75,3.0));
+    ARIADNE_TEST_BINARY_PREDICATE(!separated,Interval(1.0,2.0),Interval(2.00,1.75));
+    ARIADNE_TEST_BINARY_PREDICATE(separated,Interval(1.0,2.0),Interval(2.25,1.75));
+
+    ARIADNE_TEST_BINARY_PREDICATE(disjoint,empty_interval,empty_interval);
+    ARIADNE_TEST_BINARY_PREDICATE(!intersect,empty_interval,empty_interval);
+    ARIADNE_TEST_BINARY_PREDICATE(superset,empty_interval,empty_interval);
+    ARIADNE_TEST_BINARY_PREDICATE(subset,empty_interval,empty_interval);
+    ARIADNE_TEST_BINARY_PREDICATE(separated,empty_interval,empty_interval);
+    ARIADNE_TEST_BINARY_PREDICATE(!overlap,empty_interval,empty_interval);
+
+    if(!inside(empty_interval,empty_interval)) {
+        ARIADNE_TEST_WARN("inside(empty_interval,empty_interval) returns false");
+    }
+
+    if(!covers(empty_interval,empty_interval)) {
+        ARIADNE_TEST_WARN("covers(empty_interval,empty_interval) returns false");
+    }
+
+    ARIADNE_TEST_BINARY_PREDICATE(disjoint,Interval(-1,2),empty_interval);
+    ARIADNE_TEST_BINARY_PREDICATE(subset,empty_interval,Interval(0.25,0.75));
+    ARIADNE_TEST_BINARY_PREDICATE(covers,Interval(0.25,0.75),empty_interval);
+    ARIADNE_TEST_BINARY_PREDICATE(inside,empty_interval,Interval(0.25,0.75));
 }
 
 void TestInterval::regression_tests() {

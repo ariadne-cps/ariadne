@@ -136,7 +136,7 @@ class Interval {
     bool singleton() const { return l==u; }
 
     //! \brief Sets the interval to a "canonical" empty interval \a [1,0].
-    void set_empty() { l=1.0; u=0.0; }
+    void set_empty() { l=+std::numeric_limits< double >::infinity(); u=-std::numeric_limits< double >::infinity(); }
     void set_lower(const Float& lower) { l=lower; }
         // ARIADNE_ASSERT(lower<=this->u);
     void set_upper(const Float& upper) { u=upper; }

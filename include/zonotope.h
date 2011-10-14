@@ -165,7 +165,7 @@ class Zonotope
     tribool contains(const Point& pt) const;
 
     /*! \brief Test if the set is disjoint from a box. */
-    tribool disjoint(const Box& bx) const;
+    tribool separated(const Box& bx) const;
     /*! \brief Test if the set is a inside of a box. */
     tribool inside(const Box& bx) const;
 
@@ -175,13 +175,13 @@ class Zonotope
     //@{
     //! \name Geometric binary predicates
     /*! \brief Tests disjointness of \a z and \a r. */
-    friend tribool disjoint(const Zonotope& z, const Box& r);
+    friend tribool separated(const Zonotope& z, const Box& r);
     /*! \brief Tests if \a z and \a r intersect. */
     friend tribool overlaps(const Zonotope& z, const Box& r);
     /*! \brief Tests inclusion of \a z in \a r. */
     friend tribool inside(const Zonotope& z, const Box& r);
     /*! \brief Tests disjointness of \a r and \a z. */
-    friend tribool disjoint(const Box& r, const Zonotope& z);
+    friend tribool separated(const Box& r, const Zonotope& z);
     //@}
 
     //@{
@@ -223,11 +223,11 @@ Box bounding_box(const Zonotope& z);
 
 
 tribool contains(const Zonotope& z, const Point& pt);
-tribool disjoint(const Zonotope& z, const Box& r);
+tribool separated(const Zonotope& z, const Box& r);
 tribool overlaps(const Zonotope& z, const Box& r);
 tribool inside(const Zonotope& z, const Box& r);
 
-tribool disjoint(const Zonotope& z1, const Zonotope& z2);
+tribool separated(const Zonotope& z1, const Zonotope& z2);
 
 ListSet<Zonotope> split(const Zonotope& z);
 

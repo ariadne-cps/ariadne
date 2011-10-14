@@ -161,7 +161,7 @@ tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, co
 tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
 
 //! \brief Tests if \a ls is disjoint from \a rs, to a tolerance of \a eps.
-tribool disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
+tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
 
 
 //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
@@ -171,7 +171,7 @@ tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const
 tribool inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const Float& eps);
 
 //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
-tribool disjoint(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float& eps);
+tribool separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float& eps);
 
 
 
@@ -183,7 +183,7 @@ tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, co
 tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-tribool disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps);
+tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps);
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
@@ -193,7 +193,7 @@ tribool overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const B
 tribool inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const Box& bx, const Float& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-tribool disjoint(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const Box& bx, const Float& eps);
+tribool separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const Box& bx, const Float& eps);
 
 
 } // namespace Ariadne

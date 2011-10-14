@@ -30,6 +30,7 @@
 #include "box.h"
 #include "stlio.h"
 #include "point.h"
+#include <include/box.h>
 
 typedef unsigned int uint;
 
@@ -114,10 +115,24 @@ Box intersection(const Box& bx1, const Box& bx2) {
 }
 
 Box widen(const Box& bx) {
+    Box res=bx; res.widen(); return res;
     Box result(bx.dimension());
     for(uint i=0; i!=result.dimension(); ++i) {
         if(bx[i].lower()==bx[i].upper()) {
             result[i]=trunc(Ariadne::widen(bx[i]));
+        } else {
+            result[i]=trunc(bx[i]);
+        }
+    }
+    return result;
+}
+
+Box narrow(const Box& bx) {
+    Box res=bx; res.narrow(); return res;
+    Box result(bx.dimension());
+    for(uint i=0; i!=result.dimension(); ++i) {
+        if(bx[i].lower()==bx[i].upper()) {
+            result[i]=trunc(Ariadne::narrow(bx[i]));
         } else {
             result[i]=trunc(bx[i]);
         }

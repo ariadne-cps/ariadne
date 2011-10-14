@@ -36,8 +36,8 @@
 namespace Ariadne {
 
 tribool
-Polytope::disjoint(const Box& bx) const {
-    return this->bounding_box().disjoint(bx) || indeterminate;
+Polytope::separated(const Box& bx) const {
+    return this->bounding_box().separated(bx) || indeterminate;
 }
 
 tribool

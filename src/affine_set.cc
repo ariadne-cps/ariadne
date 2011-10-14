@@ -184,13 +184,14 @@ Box AffineSet::bounding_box() const {
 }
 
 
-tribool AffineSet::disjoint(const Box& bx) const {
+tribool AffineSet::separated(const Box& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
+    Box wbx=widen(bx);
     LinearProgram<Float> lp;
     this->construct_linear_program(lp);
     for(uint i=0; i!=bx.size(); ++i) {
-        lp.l[i]=bx[i].lower();
-        lp.u[i]=bx[i].upper();
+        lp.l[i]=wbx[i].lower();
+        lp.u[i]=wbx[i].upper();
     }
     tribool feasible=indeterminate;
     try {
@@ -205,7 +206,7 @@ tribool AffineSet::disjoint(const Box& bx) const {
 }
 
 tribool AffineSet::empty() const {
-    return this->disjoint(this->bounding_box());
+    return this->separated(this->bounding_box());
 }
 
 

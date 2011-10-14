@@ -611,7 +611,7 @@ tribool TaylorConstrainedImageSet::subset(const Box& bx) const
 
 }
 
-tribool TaylorConstrainedImageSet::disjoint(const Box& bx) const
+tribool TaylorConstrainedImageSet::separated(const Box& bx) const
 {
     ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"TaylorConstrainedImageSet::subset(Box): self="<<*this<<", box="<<bx);
     List<IntervalNonlinearConstraint> constraints=this->constraints();

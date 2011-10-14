@@ -70,6 +70,21 @@ Interval widen(Interval x)
     return Interval(wl,wu);
 }
 
+Interval narrow(Interval x)
+{
+    rounding_mode_t rm=get_rounding_mode();
+    const double& xl=internal_cast<const double&>(x.lower());
+    const double& xu=internal_cast<const double&>(x.upper());
+    const double m=std::numeric_limits<float>::min();
+    set_rounding_upward();
+    volatile double mnu=-xu+m;
+    volatile double nu=-mnu;
+    volatile double nl=xl+m;
+    set_rounding_mode(rm);
+    assert(xl<nl); assert(nu<xu);
+    return Interval(nl,nu);
+}
+
 Interval trunc(Interval x)
 {
 

@@ -65,20 +65,20 @@ class TestConstrainedImageSet
         // Test the polytope
         ConstrainedImageSet polytope((Interval(-2,+2),Interval(-2,+2)),(x[0],x[1]));
         polytope.new_parameter_constraint(x[0]+1.5*+x[1]<=1);
-        ARIADNE_TEST_ASSERT(polytope.disjoint( (Interval(1.0,2.0),Interval(0.5,1.0)) ));
+        ARIADNE_TEST_ASSERT(polytope.separated( (Interval(1.0,2.0),Interval(0.5,1.0)) ));
         ARIADNE_TEST_ASSERT(polytope.overlaps( (Interval(0.0,1.0),Interval(0.5,1.0)) ));
 
         // Test the unit disc
         ConstrainedImageSet disc((Interval(-2,+2),Interval(-2,+2)),(x[0],x[1]));
         disc.new_parameter_constraint(x[0]*x[0]+x[1]*x[1]<=1);
         ARIADNE_TEST_ASSERT(disc.overlaps( (Interval(-0.5,0.5),Interval(0.25,0.5)) ));
-        ARIADNE_TEST_ASSERT(disc.disjoint( (Interval(1,2),Interval(0.5,1)) ));
+        ARIADNE_TEST_ASSERT(disc.separated( (Interval(1,2),Interval(0.5,1)) ));
         ARIADNE_TEST_ASSERT(disc.overlaps( (Interval(0.75,2),Interval(0.5,1)) ));
 
         // Test a one-dimensional parabolic set
         ConstrainedImageSet parabola(Vector<Interval>(1u,Interval(-1,+1)),(p[0],p[0]*p[0]));
         ARIADNE_TEST_PRINT(parabola);
-        ARIADNE_TEST_ASSERT(parabola.disjoint( (Interval(0,0.5),Interval(0.5,1)) ));
+        ARIADNE_TEST_ASSERT(parabola.separated( (Interval(0,0.5),Interval(0.5,1)) ));
         ARIADNE_TEST_ASSERT(parabola.overlaps( (Interval(0.75,2),Interval(0.5,1)) ));
 
         // Test whether the second iterate of the Henon map intersects a box
@@ -89,7 +89,7 @@ class TestConstrainedImageSet
         //set.new_parameter_constraint(0<=x[0]+x[1]<=1);
 
         ARIADNE_TEST_PRINT(set);
-        ARIADNE_TEST_ASSERT(set.disjoint(Box(2, 1.0,1.25, 1.0,1.25)));
+        ARIADNE_TEST_ASSERT(set.separated(Box(2, 1.0,1.25, 1.0,1.25)));
         ARIADNE_TEST_ASSERT(set.overlaps(Box(2, -1.0,-0.875, 1.375,1.625)));
         ARIADNE_TEST_PRINT(f(Point(2,0.375,-0.375)));
 
@@ -97,7 +97,7 @@ class TestConstrainedImageSet
 
     }
 
-    void test_disjoint() {
+    void test_separated() {
         List<RealScalarFunction> s=RealScalarFunction::coordinates(3);
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
 
@@ -124,7 +124,7 @@ class TestConstrainedImageSet
                 }
             }
         }
-        figure.write("test_constrained_image_set-disjoint");
+        figure.write("test_constrained_image_set-separated");
         figure.clear();
     }
 

@@ -224,7 +224,7 @@ class TaylorConstrainedImageSet
     //! May return \c false if the set can (easily) be proved to be nonempty.
     tribool empty() const;
     //! \brief Returns \c true if the set can be shown to be disjoint from \a bx.
-    tribool disjoint(const Box& bx) const;
+    tribool separated(const Box& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
     tribool inside(const Box& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..

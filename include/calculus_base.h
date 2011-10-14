@@ -237,7 +237,7 @@ class CalculusBase
     //! \brief Compute an enclosure for the set model \a s.
     virtual EnclosureType enclosure(const SetModelType& s) const = 0;
     //! \brief Tests if the set described by the model \a s is disjoint from the box \a box.
-    virtual tribool disjoint(const SetModelType& s, const BoxType& bx) const = 0;
+    virtual tribool separated(const SetModelType& s, const BoxType& bx) const = 0;
     //! \brief A box containing the set \a s.
     virtual BoxType bounding_box(const SetModelType& s) const = 0;
     //! \brief A list of sets obtained by subdividing the set \a s into at least two smaller pieces.

@@ -51,7 +51,7 @@ class TestTaylorConstrainedImageSet
     void test() {
         figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
         ARIADNE_TEST_CALL(test_outer_approximation()); return;
-        ARIADNE_TEST_CALL(test_disjoint());
+        ARIADNE_TEST_CALL(test_separated());
         //ARIADNE_TEST_CALL(test_discretise());
         ARIADNE_TEST_CALL(test_affine_approximation());
         ARIADNE_TEST_CALL(test_outer_approximation());
@@ -229,7 +229,7 @@ class TestTaylorConstrainedImageSet
     }
 
 
-    void test_disjoint() {
+    void test_separated() {
         RealScalarFunction s=RealScalarFunction::coordinate(2,0);
         RealScalarFunction t=RealScalarFunction::coordinate(2,1);
         RealScalarFunction x=RealScalarFunction::coordinate(2,0);
@@ -241,7 +241,7 @@ class TestTaylorConstrainedImageSet
         ARIADNE_TEST_PRINT(set);
         Box bx1(2, 1.0,2.0, 0.0,1.0);
         ARIADNE_TEST_PRINT(bx1);
-        ARIADNE_TEST_ASSERT(set.disjoint(bx1));
+        ARIADNE_TEST_ASSERT(set.separated(bx1));
     }
 
     void test_outer_approximation() {

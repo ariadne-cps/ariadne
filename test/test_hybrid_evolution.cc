@@ -115,7 +115,7 @@ void TestHybridEvolution::test_bouncing_ball() const {
     for(ListSet<HybridEnclosure>::const_iterator iter=orbit_final.begin(); iter!=orbit_final.end(); ++iter) {
         const HybridEnclosure& orbit_final_set=*iter;
         ARIADNE_TEST_PRINT(orbit_final_set.bounding_box());
-        ARIADNE_TEST_BINARY_PREDICATE(subset,orbit_final_set,expected_orbit_final_bounding_box);
+        ARIADNE_TEST_BINARY_PREDICATE(inside,orbit_final_set,expected_orbit_final_bounding_box);
     }
     ARIADNE_TEST_PRINT(orbit.final().size());
     ARIADNE_TEST_PRINT(expected_orbit_final_bounding_box);
@@ -184,7 +184,7 @@ void TestHybridEvolution::test_water_tank() const {
     }
     HybridEnclosure final_enclosure=HybridEnclosure(*orbit.final().begin());
     ARIADNE_TEST_PRINT(final_enclosure.bounding_box());
-    ARIADNE_TEST_BINARY_PREDICATE(subset,final_enclosure,HybridBox(open,(height.in(7.7,8.0),aperture.in(0.999,1.001))));
+    ARIADNE_TEST_BINARY_PREDICATE(inside,final_enclosure,HybridBox(open,(height.in(7.7,8.0),aperture.in(0.999,1.001))));
 
     Axes2d bounding_box(-0.1<=height<=9.1, -0.3<=aperture<=+1.3);
     plot("test_hybrid_evolution-water_tank",bounding_box,

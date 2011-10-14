@@ -139,12 +139,18 @@ class Box
         return Ariadne::subset(bx.vector(),this->vector());
     }
 
-    //! \brief Test if the box intersects another box. Returns true even
+    //! \brief Test if the box intersects another box. Returns \a true even
     //! if the intersection occurs only on the boundary of the boxes.
     //! Use Box::overlaps(const Box& bx) to test robust intersection
     //! of the interiors.
     bool intersects(const Box& bx) const {
         return Ariadne::intersect(this->vector(),bx.vector());
+    }
+
+    //! \brief Test if the box intersects another box. Returns \a false even
+    //! if the intersection only occurs only on the boundary of the boxes.
+    bool disjoint(const Box& bx) const {
+        return Ariadne::disjoint(this->vector(),bx.vector());
     }
 
     //! \brief The dimension of the space the box lies in.
@@ -154,7 +160,7 @@ class Box
 
     //! \brief Tests if the box is disjoint from another box.
     //! Only returns true if the closures are disjoint.
-    virtual tribool disjoint(const Box& other) const {
+    virtual tribool separated(const Box& other) const {
         return Ariadne::disjoint(this->vector(), other.vector());
     }
 
@@ -187,12 +193,20 @@ class Box
 
     //! \brief Widens the box by the minimal floating-point increment.
     //! The result is guaranteed to contain the box in its interior.
-    Box widen() const {
-        Box result(this->dimension());
+    Void widen() {
+        Box& result=*this;
         for(uint i=0; i!=result.dimension(); ++i) {
             result[i]=Ariadne::widen((*this)[i]);
         }
-        return result;
+    }
+
+    //! \brief Narrows the box by the minimal floating-point increment.
+    //! The result is guaranteed to contain the box in its interior.
+    Void narrow() {
+        Box& result=*this;
+        for(uint i=0; i!=result.dimension(); ++i) {
+            result[i]=Ariadne::narrow((*this)[i]);
+        }
     }
 
     //! \brief Split into two along the largest side.
@@ -217,6 +231,8 @@ Box hull(const Box& bx1, const Box& bx2);
 Box intersection(const Box& bx1, const Box& bx2);
 //! \relates Box \brief A box which is wider than the input, and has single-precision values.
 Box widen(const Box& bx);
+//! \relates Box \brief A box which is narrower than the input, and has single-precision values.
+Box narrow(const Box& bx);
 
 Box make_box(const std::string& str);
 

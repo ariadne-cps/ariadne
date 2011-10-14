@@ -157,7 +157,7 @@ tribool Polyhedron::covers(const Box& bx) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-tribool Polyhedron::disjoint(const Box& bx) const {
+tribool Polyhedron::separated(const Box& bx) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 

@@ -328,9 +328,9 @@ tribool HybridBoundedConstraintSet::covers(const HybridBox& bx) const {
     }
 }
 
-tribool HybridBoundedConstraintSet::disjoint(const HybridBox& bx) const {
+tribool HybridBoundedConstraintSet::separated(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
-        return this->_sets[bx.location()].disjoint(bx.continuous_state_set());
+        return this->_sets[bx.location()].separated(bx.continuous_state_set());
     } else {
         return true;
     }

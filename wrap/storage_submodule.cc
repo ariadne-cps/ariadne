@@ -151,9 +151,9 @@ void export_grid_tree_set() {
     def("union",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&join));
     def("difference",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&difference));
     def("intersection",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&intersection));
-    def("overlap",(bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&overlap));
+    def("intersect",(bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&intersect));
     def("subset",(bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&subset));
-    def("overlap",(bool(*)(const GridCell&,const GridTreeSubset&))(&overlap));
+    def("intersect",(bool(*)(const GridCell&,const GridTreeSubset&))(&intersect));
     def("subset",(bool(*)(const GridCell&,const GridTreeSubset&))(&subset));
 
     def("outer_approximation",(GridTreeSet(*)(const CompactSetInterface&,const Grid&,const uint)) &outer_approximation);

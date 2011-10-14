@@ -601,7 +601,7 @@ BinaryTreeNode * BinaryTreeNode::prepend_tree( const BinaryWord & rootNodePath, 
     return pRootBinaryTreeNode;
 }
 
-bool BinaryTreeNode::overlap( const BinaryTreeNode * pRootNodeOne, const BinaryTreeNode * pRootNodeTwo ) {
+bool BinaryTreeNode::intersect( const BinaryTreeNode * pRootNodeOne, const BinaryTreeNode * pRootNodeTwo ) {
     bool result = false;
 
     bool isNodeOneALeaf = pRootNodeOne->is_leaf();
@@ -623,8 +623,8 @@ bool BinaryTreeNode::overlap( const BinaryTreeNode * pRootNodeOne, const BinaryT
             } else {
                 //Both nodes are non-lead nodes, then the trees overlap if
                 //either their left or right branches overlap
-                result = overlap( pRootNodeOne->left_node(), pRootNodeTwo->left_node() ) ||
-                    overlap( pRootNodeOne->right_node(), pRootNodeTwo->right_node() );
+                result = intersect( pRootNodeOne->left_node(), pRootNodeTwo->left_node() ) ||
+                    intersect( pRootNodeOne->right_node(), pRootNodeTwo->right_node() );
             }
         }
     }
@@ -1347,15 +1347,128 @@ GridTreeSubset::operator ListSet<Box>() const {
     return result;
 }
 
-tribool GridTreeSubset::covers( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                                const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
+bool GridTreeSubset::superset( const Box& theBox ) const {
+    //Check that the box corresponding to the root node of the set
+    //is not disjoint from theBox. If it is then the set is not a
+    //subset of theBox otherwise we need to traverse the tree and check
+    //if all it's enabled nodes give boxes that are subsets of theBox.
+
+    ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
+
+    bool isASubSet = theBox.subset( cell().box() );
+    if( ! isASubSet ) {
+        //If the box is not covered by the cell corresponding to the root node
+        //of the set, then clearly theBox is not a subset of this set.
+        return false;
+    } else {
+        //Otherwise, is theBox is possibly a subset then we try to see furhter
+        BinaryWord pathCopy( cell().word() );
+        return GridTreeSubset::superset( binary_tree(), grid(), cell().height(), pathCopy, theBox ) ;
+    }
+}
+
+bool GridTreeSubset::subset( const Box& theBox ) const {
+    //Check that the box corresponding to the root node of the set
+    //is not disjoint from theBox. If it is then the set is not a
+    //subset of theBox otherwise we need to traverse the tree and check
+    //if all it's enabled nodes give boxes that are subsets of theBox.
+
+    ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
+
+    BinaryWord pathCopy( cell().word() );
+
+    return definitely( GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, theBox ) );
+}
+
+bool GridTreeSubset::disjoint( const Box& theBox ) const {
+    //Check that the box corresponding to the root node of the set
+    //is not disjoint from theBox. If it is then the set is not a
+    //subset of theBox otherwise we need to traverse the tree and check
+    //if all it's enabled nodes give boxes that are subsets of theBox.
+
+    ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
+
+    BinaryWord pathCopy( cell().word() );
+
+    return definitely( GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, theBox ) );
+}
+
+bool GridTreeSubset::intersects( const Box& theBox ) const {
+    //Check that the box corresponding to the root node of the set
+    //is not disjoint from theBox. If it is then the set is not a
+    //subset of theBox otherwise we need to traverse the tree and check
+    //if all it's enabled nodes give boxes that are subsets of theBox.
+
+    ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
+
+    BinaryWord pathCopy( cell().word() );
+
+    return definitely( GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, theBox ) );
+}
+
+tribool GridTreeSubset::covers( const Box& theBox ) const {
+    //Simply check if theBox is covered by the set and then make sure that
+    //all tree cells that are not disjoint from theBox are enabled
+
+    ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
+
+    bool isASubSet = theBox.subset( cell().box() );
+    if( ! isASubSet ) {
+        //If the box is not covered by the cell corresponding to the root node
+        //of the set, then clearly theBox is not a subset of this set.
+        return false;
+    } else {
+        //Otherwise, is theBox is possibly a subset then we try to see furhter
+        BinaryWord pathCopy( cell().word() );
+        return GridTreeSubset::superset( binary_tree(), grid(), cell().height(), pathCopy, widen(theBox) ) || indeterminate;
+    }
+}
+
+tribool GridTreeSubset::inside( const Box& theBox ) const {
+    //Check that the box corresponding to the root node of the set
+    //is not disjoint from theBox. If it is then the set is not a
+    //subset of theBox otherwise we need to traverse the tree and check
+    //if all it's enabled nodes give boxes that are subsets of theBox.
+
+    ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
+
+    BinaryWord pathCopy( cell().word() );
+
+    return GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, narrow(theBox) ) || indeterminate;
+}
+
+tribool GridTreeSubset::separated( const Box& theBox ) const {
+    //Simply check if the box does not intersect with the set
+
+    ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
+
+    BinaryWord pathCopy( cell().word() );
+
+    return GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, widen(theBox) ) || indeterminate;
+}
+
+tribool GridTreeSubset::overlaps( const Box& theBox ) const {
+    //Check if the box of the root cell overlaps with theBox,
+    //if not then theBox does not intersect with the cell,
+    //otherwise we need to find at least one enabled node
+    //in the binary tree, such that it's box overlaps theBox.
+
+    ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
+
+    BinaryWord pathCopy( cell().word() );
+
+    return GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, narrow(theBox) ) || indeterminate;
+}
+
+tribool GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+                                  const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
     tribool result;
 
     //Check if the current node's cell intersects with theBox
     Box theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
     tribool doIntersect = theCellsBox.overlaps( theBox );
 
-    if( ! doIntersect ) {
+    if( ! definitely(doIntersect) ) {
         //If theBox does not intersect with the cell then for the covering relation
         //is is not important if we add or remove this cell, so we return true
         result = true;
@@ -1378,7 +1491,7 @@ tribool GridTreeSubset::covers( const BinaryTreeNode* pCurrentNode, const Grid& 
             //The node is not a leaf so we need to go down and see if the cell
             //falls into sub cells for which we can sort things out
             theWord.push_back(false);
-            const tribool result_left = covers( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
+            const tribool result_left = superset( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
             theWord.pop_back();
 
             if( ! result_left) {
@@ -1389,7 +1502,7 @@ tribool GridTreeSubset::covers( const BinaryTreeNode* pCurrentNode, const Grid& 
                 //If the covering property holds or is possible, then we still
                 //need to check the second branch because it can change the outcome.
                 theWord.push_back(true);
-                const tribool result_right = covers( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
+                const tribool result_right = superset( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
                 theWord.pop_back();
 
                 if( !result_right ) {
@@ -1510,7 +1623,7 @@ tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid
         } else {
             //The node is not a leaf and the intersection is possible so check the left sub-node
             theWord.push_back(false);
-            const tribool intersect_left = overlaps( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
+            const tribool intersect_left = intersects( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
             theWord.pop_back();
 
             //
@@ -1526,7 +1639,7 @@ tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid
             } else {
                 //If we still not sure/ or do not know then try to search further, i.e. check the right node
                 theWord.push_back(true);
-                const tribool intersect_right = overlaps( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
+                const tribool intersect_right = intersects( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
                 theWord.pop_back();
                 if( intersect_right ) {
                     //If we definitely have intersection for the right branch then answer is true
@@ -1555,8 +1668,8 @@ tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid
     return !intersect;
 }
 
-tribool GridTreeSubset::overlaps( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                                  const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
+tribool GridTreeSubset::intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+                                    const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
     tribool result;
 
     //Check if the current node overlaps with theBox
@@ -1577,7 +1690,7 @@ tribool GridTreeSubset::overlaps( const BinaryTreeNode* pCurrentNode, const Grid
         } else {
             //The node is not a leaf and the intersection is possible so check the left sub-node
             theWord.push_back(false);
-            const tribool result_left = overlaps( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
+            const tribool result_left = intersects( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
             theWord.pop_back();
 
             //
@@ -1593,7 +1706,7 @@ tribool GridTreeSubset::overlaps( const BinaryTreeNode* pCurrentNode, const Grid
             } else {
                 //If we still not sure/ or do not know then try to search further, i.e. check the right node
                 theWord.push_back(true);
-                const tribool result_right = overlaps( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
+                const tribool result_right = intersects( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
                 theWord.pop_back();
                 if( result_right ) {
                     //If we definitely have intersection for the right branch then answer is true
@@ -1764,7 +1877,7 @@ void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeN
 
     const OpenSetInterface* pOpenSet=dynamic_cast<const OpenSetInterface*>(static_cast<const SetInterfaceBase*>(&theSet));
 
-    if( bool( theSet.disjoint( theCurrentCell.box() ) ) ) {
+    if( bool( theSet.separated( theCurrentCell.box() ) ) ) {
         //DO NOTHING: We are in the node whoes representation in the original space is
         //disjoint from pSet and thus there will be nothing added to this cell.
     } else if( pOpenSet && bool( pOpenSet->covers( theCurrentCell.box() ) ) ) {
@@ -2390,7 +2503,7 @@ bool subset( const GridCell& theCell, const GridTreeSubset& theSet ) {
     return result;
 }
 
-bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {
+bool intersect( const GridCell& theCell, const GridTreeSubset& theSet ) {
     bool result = false;
 
     //Test that the Grids are equal
@@ -2666,7 +2779,7 @@ bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
  *  pSubTreeRootNode. In general we see if the sets represented by pSuperTreeRootNode and pSubTreeRootNode overlap.
  *  If at least one of pSuperTreeRootNode and pSubTreeRootNode have no enabled leaf nodes then the result is always false.
  */
-static bool overlap(const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord & pathFromSuperToSub, const BinaryTreeNode * pSubTreeRootNode) {
+static bool intersect(const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord & pathFromSuperToSub, const BinaryTreeNode * pSubTreeRootNode) {
     bool result = false;
 
     //Check if both sets are not empty
@@ -2682,14 +2795,14 @@ static bool overlap(const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord 
         } else {
             //At this point pCurrentSuperTreeNode corresponds to pSubTreeRootNode
             //So the trees are aligned now and we can continue checking further.
-            result = BinaryTreeNode::overlap( pCurrentSuperTreeNode, pSubTreeRootNode );
+            result = BinaryTreeNode::intersect( pCurrentSuperTreeNode, pSubTreeRootNode );
         }
     }
 
     return result;
 }
 
-bool overlap( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
+bool intersect( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
     bool result = false;
 
     //Test that the Grids are equal
@@ -2708,12 +2821,12 @@ bool overlap( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
     if( pathCommonPCtoRC1.is_prefix( pathCommonPCtoRC2 ) ){
         //theSet2 is located somewhere within the bounding box of theSet1
         pathCommonPCtoRC2.erase_prefix( pathCommonPCtoRC1.size() );
-        result = overlap( theSet1.binary_tree(), pathCommonPCtoRC2, theSet2.binary_tree() );
+        result = intersect( theSet1.binary_tree(), pathCommonPCtoRC2, theSet2.binary_tree() );
     } else {
         if( pathCommonPCtoRC2.is_prefix( pathCommonPCtoRC1 ) ){
             //theSet1 is located somewhere within the bounding box of theSet2
             pathCommonPCtoRC1.erase_prefix( pathCommonPCtoRC2.size() );
-            result = overlap( theSet2.binary_tree(), pathCommonPCtoRC1, theSet1.binary_tree() );
+            result = intersect( theSet2.binary_tree(), pathCommonPCtoRC1, theSet1.binary_tree() );
         } else {
             //The sets do not overlap
             result = false;

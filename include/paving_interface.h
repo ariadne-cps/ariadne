@@ -131,15 +131,16 @@ class SubPavingInterface
 
     //! \brief Tests if the paving is a subset of another paving on the same Grid.
     virtual bool subset(const SubPavingInterface&) const { ARIADNE_ABSTRACT_METHOD; }
-    //! \brief Tests if the paving overlaps (intersects the interior of) another paving on the same Grid.
-    virtual bool overlaps(const SubPavingInterface&) const { ARIADNE_ABSTRACT_METHOD; }
+    //! \brief Tests if the paving intersects another paving on the same Grid.
+    //! Tests intersection of interiors, so returns false if the pavings touch but do not overlap.
+    virtual bool intersects(const SubPavingInterface&) const { ARIADNE_ABSTRACT_METHOD; }
 
     //! \brief Modify the underlying paving so that the root cell of the subpaving is either enabled or disabled.
     virtual void set_root_cell(bool onoff) = 0;
 
     virtual Box bounding_box() const = 0; // Inherited from CompactSetInterface
     virtual tribool inside(const Box& bx) const = 0; // Inherited from CompactSetInterface
-    virtual tribool disjoint(const Box& bx) const = 0; // Inherited from ClosedSetInterface
+    virtual tribool separated(const Box& bx) const = 0; // Inherited from ClosedSetInterface
     virtual tribool overlaps(const Box& bx) const = 0; // Inherited from OvertSetInterface
     virtual std::ostream& write(std::ostream& os) const = 0;
   protected:

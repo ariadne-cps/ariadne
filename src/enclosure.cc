@@ -762,7 +762,7 @@ tribool Enclosure::subset(const Box& bx) const
 
 }
 
-tribool Enclosure::disjoint(const Box& bx) const
+tribool Enclosure::separated(const Box& bx) const
 {
     ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Enclosure::subset(Box): self="<<*this<<", box="<<bx);
     List<IntervalNonlinearConstraint> constraints=this->constraints();

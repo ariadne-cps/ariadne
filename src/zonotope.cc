@@ -334,9 +334,9 @@ Zonotope::contains(const Point& pt) const
 
 
 tribool
-Zonotope::disjoint(const Box& bx) const
+Zonotope::separated(const Box& bx) const
 {
-    return Ariadne::disjoint(*this,Box(bx));
+    return Ariadne::separated(*this,Box(bx));
 }
 
 
@@ -757,7 +757,7 @@ inside(const Zonotope& z, const Box& bx)
 tribool
 overlaps(const Zonotope& z, const Box& bx)
 {
-    return !disjoint(z,bx);
+    return !separated(z,bx);
 }
 
 
@@ -765,7 +765,7 @@ overlaps(const Zonotope& z, const Box& bx)
  * Here, A=[I,z.G], b=z.c, l=[r.l,-o], u=[r.u,+o]
  */
 tribool
-disjoint(const Zonotope& z, const Box& bx)
+separated(const Zonotope& z, const Box& bx)
 {
     ARIADNE_ASSERT(z.dimension()==bx.dimension());
     size_t d=z.dimension();
@@ -800,7 +800,7 @@ disjoint(const Zonotope& z, const Box& bx)
  * the \a b vector.
  */
 tribool
-disjoint(const Zonotope& z1, const Zonotope& z2)
+separated(const Zonotope& z1, const Zonotope& z2)
 {
     ARIADNE_ASSERT(z1.dimension()==z2.dimension());
     size_t d=z1.dimension();

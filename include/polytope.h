@@ -95,7 +95,7 @@ class Polytope
 
     virtual Polytope* clone() const { return new Polytope(*this); }
     virtual uint dimension() const { if(this->_vertices.size()==0) { return 0; } return this->_vertices.front().dimension(); }
-    virtual tribool disjoint(const Box& bx) const;
+    virtual tribool separated(const Box& bx) const;
     virtual tribool overlaps(const Box& bx) const;
     virtual tribool inside(const Box& bx) const;
     virtual Box bounding_box() const;

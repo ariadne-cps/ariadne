@@ -137,7 +137,7 @@ class TestAffineSet
     }
 
 
-    void test_disjoint() {
+    void test_separated() {
         Affine<Float> x0=Affine<Float>::variable(3,0);
         Affine<Float> x1=Affine<Float>::variable(3,1);
         Affine<Float> x2=Affine<Float>::variable(3,2);
@@ -152,12 +152,12 @@ class TestAffineSet
         Box cell5(2, -0.9375,-0.875, 0.4375,0.5); // disjoint
         Box cell6(2, -1.5,-1.375, 0.5,0.625); // regression test
 
-        ARIADNE_TEST_ASSERT(definitely(!affine_set.disjoint(cell1)));
-        ARIADNE_TEST_ASSERT(definitely(!affine_set.disjoint(cell2)));
-        ARIADNE_TEST_ASSERT(!definitely(affine_set.disjoint(cell3)));
-        ARIADNE_TEST_ASSERT(possibly(affine_set.disjoint(cell4)));
-        ARIADNE_TEST_ASSERT(definitely(affine_set.disjoint(cell5)));
-        ARIADNE_TEST_ASSERT(definitely(affine_set.disjoint(cell6)));
+        ARIADNE_TEST_ASSERT(definitely(!affine_set.separated(cell1)));
+        ARIADNE_TEST_ASSERT(definitely(!affine_set.separated(cell2)));
+        ARIADNE_TEST_ASSERT(!definitely(affine_set.separated(cell3)));
+        ARIADNE_TEST_ASSERT(possibly(affine_set.separated(cell4)));
+        ARIADNE_TEST_ASSERT(definitely(affine_set.separated(cell5)));
+        ARIADNE_TEST_ASSERT(definitely(affine_set.separated(cell6)));
 
         figure.clear();
         figure.set_bounding_box(affine_set.bounding_box()+IntervalVector(2,Interval(-0.125,+0.125)) );
@@ -169,7 +169,7 @@ class TestAffineSet
                << fill_colour(1,0,0) << cell5
                << fill_colour(1,0,0) << cell6
                ;
-        figure.write("test_affine_set-disjoint");
+        figure.write("test_affine_set-separated");
 
     }
 
@@ -378,7 +378,7 @@ class TestAffineSet
         ARIADNE_TEST_CALL(test_empty());
         ARIADNE_TEST_CALL(test_pure_constraint());
         ARIADNE_TEST_CALL(test_constrained_image());
-        ARIADNE_TEST_CALL(test_disjoint());
+        ARIADNE_TEST_CALL(test_separated());
         ARIADNE_TEST_CALL(test_outer_approximation());
         ARIADNE_TEST_CALL(test_draw());
     }

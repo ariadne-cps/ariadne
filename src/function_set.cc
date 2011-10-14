@@ -185,12 +185,12 @@ RealBoundedConstraintSet::dimension() const
 
 
 tribool
-RealBoundedConstraintSet::disjoint(const Box& bx) const
+RealBoundedConstraintSet::separated(const Box& bx) const
 {
     Box domain=over_approximation(this->domain());
     if(Ariadne::disjoint(domain,bx)) { return true; }
     Box codomain=over_approximation(this->codomain());
-    return ConstrainedImageSet(Ariadne::intersection(bx,domain),this->function()).disjoint(codomain);
+    return ConstrainedImageSet(Ariadne::intersection(bx,domain),this->function()).separated(codomain);
 }
 
 
@@ -294,7 +294,7 @@ ImageSet::empty() const
 
 
 tribool
-ImageSet::disjoint(const Box& bx) const
+ImageSet::separated(const Box& bx) const
 {
     return !ConstraintSolver().feasible(this->_domain,this->_function,bx).first;
 }
@@ -373,9 +373,9 @@ ConstraintSet::dimension() const
 
 
 tribool
-ConstraintSet::disjoint(const Box& bx) const
+ConstraintSet::separated(const Box& bx) const
 {
-    return ConstrainedImageSet(bx,this->function()).disjoint(this->codomain());
+    return ConstrainedImageSet(bx,this->function()).separated(this->codomain());
 }
 
 
@@ -443,10 +443,10 @@ BoundedConstraintSet::dimension() const
 
 
 tribool
-BoundedConstraintSet::disjoint(const Box& bx) const
+BoundedConstraintSet::separated(const Box& bx) const
 {
     if(Ariadne::disjoint(this->domain(),bx)) { return true; }
-    return ConstrainedImageSet(Ariadne::intersection(static_cast<const IntervalVector&>(bx),this->domain()),this->function()).disjoint(this->codomain());
+    return ConstrainedImageSet(Ariadne::intersection(static_cast<const IntervalVector&>(bx),this->domain()),this->function()).separated(this->codomain());
 }
 
 
@@ -589,7 +589,7 @@ tribool ConstrainedImageSet::satisfies(const RealNonlinearConstraint& nc) const
 }
 
 
-tribool ConstrainedImageSet::disjoint(const Box& bx) const
+tribool ConstrainedImageSet::separated(const Box& bx) const
 {
     ConstraintSolver solver;
     const Box& domain=this->_domain;
@@ -622,7 +622,7 @@ tribool ConstrainedImageSet::disjoint(const Box& bx) const
 
 tribool ConstrainedImageSet::overlaps(const Box& bx) const
 {
-    return !this->disjoint(bx);
+    return !this->separated(bx);
 }
 
 
@@ -1614,7 +1614,7 @@ tribool IntervalConstrainedImageSet::inside(const Box& bx) const
     return Ariadne::inside(this->bounding_box(),bx);
 }
 
-tribool IntervalConstrainedImageSet::disjoint(const Box& bx) const
+tribool IntervalConstrainedImageSet::separated(const Box& bx) const
 {
     Box subdomain = this->_reduced_domain;
     IntervalVectorFunction function = join(this->_function,this->constraint_function());

@@ -99,7 +99,7 @@ class HybridClosedSetInterface
 {
   public:
     virtual HybridClosedSetInterface* clone() const = 0;
-    virtual tribool disjoint(const HybridBox& bx) const = 0;
+    virtual tribool separated(const HybridBox& bx) const = 0;
     virtual ClosedSetInterface const& operator[](DiscreteLocation) const = 0;
 };
 

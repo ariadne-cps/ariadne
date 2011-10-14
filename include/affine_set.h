@@ -100,7 +100,7 @@ class AffineSet
 
     tribool bounded() const;
     Box bounding_box() const;
-    tribool disjoint(const Box& bx) const;
+    tribool separated(const Box& bx) const;
     tribool empty() const;
 
     void adjoin_outer_approximation_to(PavingInterface& g, int depth) const;

@@ -199,6 +199,8 @@ inline Interval hull(Interval i1, Float x2) {
 // An interval one ulp wider
 //! \related Interval \brief An interval containing the given interval in its interior.
 Interval widen(Interval i);
+//! \related Interval \brief An interval contained in the interior of the given interval.
+Interval narrow(Interval i);
 
 // Over-approximate by an interval with float coefficients
 //! \related Interval \brief Over-approximate the interval by one using builtin single-precision floating-point values as endpoints.
@@ -292,10 +294,16 @@ inline bool contains(Interval i, Float x) { return i.lower()<=x && x<=i.upper();
 
 //! \related Interval \brief Test if the interval \a I1 is a subset of \a I2.
 inline bool subset(Interval i1, Interval i2) { return i1.lower()>=i2.lower() && i1.upper()<=i2.upper(); }
-//! \related Interval \brief Test if the interval \a I1 intersects \a I2. Returns \c true even if the two intervals only have an endpoint in common.
-inline bool intersect(Interval i1, Interval i2) { return i1.lower()<=i2.upper() && i1.upper()>=i2.lower(); }
+//! \related Interval \brief Test if the interval \a I1 is a superset of \a I2.
+inline bool superset(Interval i1, Interval i2) { return i1.lower()<=i2.lower() && i1.upper()>=i2.upper(); }
 //! \related Interval \brief Test if the interval \a I1 is disjoint from \a I2. Returns \c false even if the two intervals only have an endpoint in common.
 inline bool disjoint(Interval i1, Interval i2) { return i1.lower()>i2.upper() || i1.upper()<i2.lower(); }
+//! \related Interval \brief Test if the interval \a I1 intersects \a I2. Returns \c true even if the two intervals only have an endpoint in common.
+inline bool intersect(Interval i1, Interval i2) { return i1.lower()<=i2.upper() && i1.upper()>=i2.lower(); }
+
+//! \related Interval \brief Test if the closed interval \a I1 is disjoint from the closed interval \a I2.
+//! Returns \c false if the two intervals only have an endpoint in common.
+inline bool separated(Interval i1, Interval i2) { return i1.lower()>i2.upper() || i1.upper()<i2.lower(); }
 //! \related Interval \brief Test if the interval \a I1 overlaps \a I2.
 //! Returns \c false if the two intervals only have an endpoint in common.
 //! Returns \c true if one of the intervals is a singleton in the interior of the other.

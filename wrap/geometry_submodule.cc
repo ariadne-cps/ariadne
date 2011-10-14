@@ -133,7 +133,7 @@ class ClosedSetWrapper
   public:
     ClosedSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
-    tribool disjoint(const Box& r) const { return this->get_override("disjoint")(); }
+    tribool separated(const Box& r) const { return this->get_override("separated")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -155,7 +155,7 @@ class CompactSetWrapper
   public:
     CompactSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
-    tribool disjoint(const Box& r) const { return this->get_override("disjoint")(); }
+    tribool separated(const Box& r) const { return this->get_override("separated")(); }
     tribool inside(const Box& r) const { return this->get_override("inside")(); }
     tribool bounded() const { return this->get_override("bounded")(); }
     Box bounding_box() const { return this->get_override("bounding_box")(); }
@@ -170,7 +170,7 @@ class LocatedSetWrapper
     uint dimension() const { return this->get_override("dimension")(); }
     tribool covers(const Box& r) const { return this->get_override("covers")(); }
     tribool overlaps(const Box& r) const { return this->get_override("overlaps")(); }
-    tribool disjoint(const Box& r) const { return this->get_override("disjoint")(); }
+    tribool separated(const Box& r) const { return this->get_override("separated")(); }
     tribool inside(const Box& r) const { return this->get_override("inside")(); }
     tribool bounded() const { return this->get_override("bounded")(); }
     Box bounding_box() const { return this->get_override("bounding_box")(); }
@@ -186,7 +186,7 @@ void export_set_interface() {
     open_set_wrapper_class.def("overlaps",&OpenSetInterface::overlaps);
 
     class_<CompactSetInterface, boost::noncopyable> compact_set_wrapper_class("CompactSetInterface", no_init);
-    compact_set_wrapper_class.def("disjoint",&CompactSetInterface::disjoint);
+    compact_set_wrapper_class.def("separated",&CompactSetInterface::separated);
     compact_set_wrapper_class.def("inside",&CompactSetInterface::inside);
     compact_set_wrapper_class.def("bounding_box",&CompactSetInterface::bounding_box);
 
@@ -220,7 +220,7 @@ void export_box()
     box_class.def("dimension", (uint(Box::*)()const) &Box::dimension);
     box_class.def("centre", (Point(Box::*)()const) &Box::centre);
     box_class.def("radius", (Float(Box::*)()const) &Box::radius);
-    box_class.def("separated", (tribool(Box::*)(const Box&)const) &Box::disjoint);
+    box_class.def("separated", (tribool(Box::*)(const Box&)const) &Box::separated);
     box_class.def("overlaps", (tribool(Box::*)(const Box&)const) &Box::overlaps);
     box_class.def("covers", (tribool(Box::*)(const Box&)const) &Box::covers);
     box_class.def("inside", (tribool(Box::*)(const Box&)const) &Box::inside);
@@ -257,9 +257,9 @@ void export_zonotope()
     zonotope_class.def("__str__",&__cstr__<Zonotope>);
 
     def("contains", (tribool(*)(const Zonotope&,const Point&)) &contains);
-    def("disjoint", (tribool(*)(const Zonotope&,const Box&)) &disjoint);
+    def("separated", (tribool(*)(const Zonotope&,const Box&)) &separated);
     def("overlaps", (tribool(*)(const Zonotope&,const Box&)) &overlaps);
-    def("disjoint", (tribool(*)(const Zonotope&,const Zonotope&)) &disjoint);
+    def("separated", (tribool(*)(const Zonotope&,const Zonotope&)) &separated);
 }
 
 void export_polytope()
@@ -345,7 +345,7 @@ void export_affine_set()
     affine_set_class.def("bounded", &AffineSet::bounded);
     affine_set_class.def("empty", &AffineSet::empty);
     affine_set_class.def("bounding_box", &AffineSet::bounding_box);
-    affine_set_class.def("disjoint", &AffineSet::disjoint);
+    affine_set_class.def("separated", &AffineSet::separated);
     affine_set_class.def("adjoin_outer_approximation_to", &AffineSet::adjoin_outer_approximation_to);
     affine_set_class.def("outer_approximation", &AffineSet::outer_approximation);
     affine_set_class.def("boundary", &AffineSet::boundary);
@@ -372,7 +372,7 @@ void export_constrained_image_set()
     //constrained_image_set_class.def("affine_over_approximation", &ConstrainedImageSet::affine_over_approximation);
     constrained_image_set_class.def("adjoin_outer_approximation_to", &ConstrainedImageSet::adjoin_outer_approximation_to);
     constrained_image_set_class.def("inside", &ConstrainedImageSet::inside);
-    constrained_image_set_class.def("disjoint", &ConstrainedImageSet::disjoint);
+    constrained_image_set_class.def("separated", &ConstrainedImageSet::separated);
     constrained_image_set_class.def("overlaps", &ConstrainedImageSet::overlaps);
     constrained_image_set_class.def("split", (Pair<ConstrainedImageSet,ConstrainedImageSet>(ConstrainedImageSet::*)()const) &ConstrainedImageSet::split);
     constrained_image_set_class.def("split", (Pair<ConstrainedImageSet,ConstrainedImageSet>(ConstrainedImageSet::*)(uint)const) &ConstrainedImageSet::split);

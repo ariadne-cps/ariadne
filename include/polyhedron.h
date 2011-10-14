@@ -119,7 +119,7 @@ class Polyhedron
     virtual tribool covers(const Box& bx) const;
 
     //! \brief Tests if the polyhedron is disjoint from a box. (Not currently implemented.)
-    virtual tribool disjoint(const Box& bx) const;
+    virtual tribool separated(const Box& bx) const;
 
     //! \brief The \a i<sup>th</sup> defining halfspace.
     Polyhedron halfspace(size_t i) const;

@@ -498,7 +498,7 @@ void TestHybridEvolver::test_creep() const {
     ARIADNE_TEST_PRINT(HybridEnclosure(*orbit.final().begin()).bounding_box());
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),3u);
-    ARIADNE_TEST_BINARY_PREDICATE(subset,HybridEnclosure(*orbit.final().begin()),HybridBox(q,space,Box(2, 0.24,0.635, 1.365,1.76)));
+    ARIADNE_TEST_BINARY_PREDICATE(inside,HybridEnclosure(*orbit.final().begin()),HybridBox(q,space,Box(2, 0.24,0.635, 1.365,1.76)));
 
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-creep"),Axes2d(-1.5,v0,+1.5, -0.5,v1,+3.5),
          //guard_set_colour,Box(2,1.0,8.0,-8.0,+8.0),

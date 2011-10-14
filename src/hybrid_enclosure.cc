@@ -389,13 +389,13 @@ tribool HybridEnclosure::empty() const {
     return this->_set.empty();
 }
 
-tribool HybridEnclosure::subset(const HybridBox& hbx) const {
-    if(this->_location==hbx.location()) { return this->continuous_state_set().subset(hbx.continuous_state_set()); }
+tribool HybridEnclosure::inside(const HybridBox& hbx) const {
+    if(this->_location==hbx.location()) { return this->continuous_state_set().inside(hbx.continuous_state_set()); }
     else { return this->continuous_state_set().empty(); }
 }
 
-tribool HybridEnclosure::disjoint(const HybridBox& hbx) const {
-    if(this->_location==hbx.location()) { return this->continuous_state_set().disjoint(hbx.continuous_state_set()); }
+tribool HybridEnclosure::separated(const HybridBox& hbx) const {
+    if(this->_location==hbx.location()) { return this->continuous_state_set().separated(hbx.continuous_state_set()); }
     else { return true; }
 }
 

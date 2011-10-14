@@ -171,7 +171,7 @@ class HybridBoundedConstraintSet
     virtual tribool overlaps(const HybridBox& bx) const;
     virtual tribool inside(const HybridBoxes& bx) const;
 
-    virtual tribool disjoint(const HybridBox& bx) const;
+    virtual tribool separated(const HybridBox& bx) const;
     virtual tribool covers(const HybridBox& bx) const;
     virtual BoundedConstraintSet const& operator[](DiscreteLocation loc) const;
     virtual Set<DiscreteLocation> locations() const;
@@ -593,29 +593,29 @@ class HybridGridTreeSet
     HybridSpace space() const { return this->grid().space(); }
 
     //!
-    bool disjoint(const HybridBox& hbx) const {
+    tribool separated(const HybridBox& hbx) const {
         locations_const_iterator _loc_iter = this->_map.find( hbx.location() );
-        return _loc_iter != this->locations_end() || _loc_iter->second.disjoint( hbx.continuous_state_set() );
+        return _loc_iter != this->locations_end() || _loc_iter->second.separated( hbx.continuous_state_set() );
     }
 
     //!
-    bool overlaps(const HybridBox& hbx) const {
+    tribool overlaps(const HybridBox& hbx) const {
         locations_const_iterator _loc_iter = this->_map.find( hbx.location() );
         return _loc_iter != this->locations_end() && _loc_iter->second.overlaps( hbx.continuous_state_set() );
     }
 
     //!
-    bool superset(const HybridBox& hbx) const {
+    tribool covers(const HybridBox& hbx) const {
         locations_const_iterator _loc_iter=this->_map.find(hbx.location());
-        return _loc_iter!=this->locations_end() && _loc_iter->second.superset( hbx.continuous_state_set() );
+        return _loc_iter!=this->locations_end() && _loc_iter->second.covers( hbx.continuous_state_set() );
     }
 
     //!
-    bool subset(const HybridBoxes& hbx) const  {
+    tribool inside(const HybridBoxes& hbx) const  {
         for( locations_const_iterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
             if( !_loc_iter->second.empty() ) {
                 HybridBoxes::const_iterator hbx_loc_iter = hbx.find( _loc_iter->first );
-                if( hbx_loc_iter != hbx.end() && ! _loc_iter->second.subset( hbx_loc_iter->second ) ) {
+                if( hbx_loc_iter != hbx.end() && ! _loc_iter->second.inside( hbx_loc_iter->second ) ) {
                     return false;
                 }
             }

@@ -134,7 +134,7 @@ class RealBoundedConstraintSet
 
     RealBoundedConstraintSet* clone() const;
     uint dimension() const;
-    tribool disjoint(const Box&) const;
+    tribool separated(const Box&) const;
     tribool overlaps(const Box&) const;
     tribool covers(const Box&) const;
     tribool inside(const Box&) const;
@@ -173,7 +173,7 @@ class ImageSet
     ImageSet* clone() const;
     uint dimension() const;
     tribool empty() const;
-    tribool disjoint(const Box&) const;
+    tribool separated(const Box&) const;
     tribool overlaps(const Box&) const;
     tribool inside(const Box&) const;
     Box bounding_box() const;
@@ -211,7 +211,7 @@ class ConstraintSet
 
     ConstraintSet* clone() const;
     uint dimension() const;
-    tribool disjoint(const Box&) const;
+    tribool separated(const Box&) const;
     tribool overlaps(const Box&) const;
     tribool covers(const Box&) const;
     std::ostream& write(std::ostream&) const;
@@ -256,7 +256,7 @@ class BoundedConstraintSet
 
     BoundedConstraintSet* clone() const;
     uint dimension() const;
-    tribool disjoint(const Box&) const;
+    tribool separated(const Box&) const;
     tribool overlaps(const Box&) const;
     tribool covers(const Box&) const;
     tribool inside(const Box&) const;
@@ -341,8 +341,8 @@ class ConstrainedImageSet
     //! \brief Split into two pieces by subdividing along the \a j<sup>th</sup> coordinate direction.
     Pair<ConstrainedImageSet,ConstrainedImageSet> split(uint j) const;
 
-    //! \brief Test if the set is disjoint from a box.
-    tribool disjoint(const Box&) const;
+    //! \brief Test if the set is disjoint from a (closed) box.
+    tribool separated(const Box&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
     tribool overlaps(const Box&) const;
     //! \brief Adjoin an outer approximation to a paving.
@@ -465,7 +465,7 @@ class IntervalConstrainedImageSet
     //! \brief Test if the set is a strict subset of a box.
     tribool inside(const Box& bx) const;
     //! \brief Test if the set is disjoint from a box.
-    tribool disjoint(const Box&) const;
+    tribool separated(const Box&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
     tribool overlaps(const Box&) const;
     //! \brief Adjoin an outer approximation to a paving.

@@ -41,12 +41,12 @@ int main(int argc, const char* argv[])
     DRAWING_ACCURACY = 1;
 
     /// Set the system parameters
-    RealConstant a("a",-0.02);
-    RealConstant b("b", 0.3);
-    RealConstant T("T",4.0);
-    RealConstant hmin("hmin",5.5);
-    RealConstant Delta("Delta",0.05);
-    RealConstant hmax("hmax",8.0);
+    RealConstant a("a","-0.02");
+    RealConstant b("b", "0.3");
+    RealConstant T("T","4.0");
+    RealConstant hmin("hmin","5.5");
+    RealConstant Delta("Delta","0.05");
+    RealConstant hmax("hmax","8.0");
 
     /// Build the Hybrid System
 
@@ -158,11 +158,11 @@ int main(int argc, const char* argv[])
     std::cout << "Orbit.reach_size="<<orbit.reach().size()<<std::endl;
 
     std::cout << "Plotting orbit... "<<std::flush;
-    Axes2d height_aperture_axes(-0.1<=height<=9.1,-0.1<=aperture<=1.3);
+    Axes2d height_aperture_axes(-0.1,height,9.1, -0.1,aperture,1.3);
     plot("watertank-orbit", height_aperture_axes, Colour(0.0,0.5,1.0), orbit, Colour(0.0,1.0,1.0), orbit.final());//, Colour(1.0,0.0,0.0),orbit.final()[9]
-    Axes2d time_height_axes(0<=TimeVariable()<=80,-0.1<=height<=9.1);
+    Axes2d time_height_axes(0,TimeVariable(),80, -0.1,height,9.1);
     plot("watertank-height", time_height_axes, Colour(0.0,0.5,1.0), orbit, Colour(0.0,1.0,1.0), orbit.final());
-    Axes2d time_aperture_axes(0<=TimeVariable()<=80,-0.1<=aperture<=1.31);
+    Axes2d time_aperture_axes(0,TimeVariable(),80, -0.1,aperture,1.31);
     plot("watertank-aperture", time_aperture_axes, Colour(0.0,0.5,1.0), orbit, Colour(0.0,1.0,1.0), orbit.final());
     std::cout << "done." << std::endl;
 

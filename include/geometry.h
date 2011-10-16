@@ -107,23 +107,6 @@ disjoint(const Box& d, const F& f, const Box& b, const Float& eps)
     }
 }
 
-template<class F>
-tribool
-inside(const Box& d, const F& f, const Box& b, const Float& eps)
-{
-    Box fd=f(d);
-    Box fc=f(Box(midpoint(d)));
-    if(inside(fc,b)) {
-        return true;
-    } else if(disjoint(fd,b)) {
-        return false;
-    } else if(d.radius()<eps) {
-        return indeterminate;
-    } else {
-        uint i=irmax(d);
-        return inside(split(d,i,left),f,b,eps) && inside(split(d,i,right),f,b,eps);
-    }
-}
 
 template<class DS>
 DS remove_subsets(const DS& ls)

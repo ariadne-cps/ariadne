@@ -493,7 +493,6 @@ _compute_flow(RealVectorFunction dynamic,
 {
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_flow(...)\n");
 
-
     IntegratorInterface& integrator=*this->_integrator_ptr;
     //{uint c; std::cin>>c; series_integrator.verbosity=c;}
 
@@ -630,7 +629,9 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             // to have a definite sign over the entire flow box, then try to compute
             // the sign of the second derivative $L_{f}^{2}g(x)=L_{f}L_{f}g(x)$.
             IntervalScalarFunction second_derivative=lie_derivative(derivative,dynamic);
-            Interval second_derivative_range=second_derivative.evaluate(flow_bounds);
+            Interval second_derivative_bounds_range=second_derivative.evaluate(flow_bounds);
+            Interval second_derivative_flow_range=compose(second_derivative,flow).range();
+            Interval second_derivative_range=intersection(second_derivative_bounds_range,second_derivative_flow_range);
             if(second_derivative_range.lower()>0.0) {
                 // If the second derivative is positive, then either
                 //    (i) the event is immediately active
@@ -801,13 +802,13 @@ _apply_guard_step(HybridEnclosure& set,
                 case CONCAVE_CROSSING: case GRAZING_CROSSING:
                     jump_set.apply_reach_step(flow,timing_data.parameter_dependent_evolution_time);
                     jump_set.new_guard(event,transition_data.guard_function);
-                    jump_set.new_invariant(event,lie_derivative(transition_data.guard_function,dynamic));
+                    jump_set.new_invariant(event,-lie_derivative(transition_data.guard_function,dynamic));
                     break;
                 case DEGENERATE_CROSSING: // Just check positive derivative in this case; NOT EXACT
                     if(semantics==UPPER_SEMANTICS) {
                         jump_set.apply_reach_step(flow,timing_data.parameter_dependent_evolution_time);
                         jump_set.new_guard(event,transition_data.guard_function);
-                        jump_set.new_invariant(event,lie_derivative(transition_data.guard_function,dynamic));
+                        jump_set.new_invariant(event,-lie_derivative(transition_data.guard_function,dynamic));
                     } else {
                         // Make the empty set
                         jump_set.new_invariant(event,transition_data.guard_function*0.0+1.0);
@@ -851,6 +852,7 @@ _apply_guard(List<HybridEnclosure>& sets,
     static const uint SUBDIVISIONS_FOR_DEGENERATE_CROSSING = 2;
     const DiscreteEvent event=transition_data.event;
     const IntervalScalarFunction& guard_function=transition_data.guard_function;
+    const IntervalScalarFunction& guard_flow_derivative_function=transition_data.guard_flow_derivative_function;
     IntervalVectorFunctionModel starting_state=starting_set.space_function();
     if(elapsed_time.argument_size()>starting_state.argument_size()) {
         starting_state=embed(starting_state,elapsed_time.domain()[elapsed_time.domain().size()-1]);

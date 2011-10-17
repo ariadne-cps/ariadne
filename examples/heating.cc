@@ -100,6 +100,8 @@ int main(int argc, const char* argv[])
     heater.new_mode( heating|off, (dot(T)=K*(Tav-Tamp*Ariadne::cos(2.0*pi*C)-T)) );
     heater.new_invariant( heating|off, T>=Ton_lower, must_switch_on );
     heater.new_transition( heating|off, switch_on, heating|on, (next(T)=T), T<=Ton_upper, permissive );
+    // Comment out above two lines and uncomment the line below to make the switch_on transition urgent
+    //heater.new_transition( heating|off, switch_on, heating|on, (next(T)=T), T<=Ton_upper, urgent );
     heater.new_transition( heating|on, switch_off, heating|off, (next(T)=T), T>=Toff, urgent );
 
     // Create the clock subsystem
@@ -113,6 +115,8 @@ int main(int argc, const char* argv[])
     // Create the analyser classes
 
     TaylorSeriesIntegrator series_integrator(1e-3);
+    series_integrator.set_maximum_spacial_order(6);
+    series_integrator.set_maximum_temporal_order(12);
     series_integrator.verbosity=0;
     TaylorPicardIntegrator picard_integrator(1e-5);
     IntervalNewtonSolver solver(1e-12,8);
@@ -123,11 +127,13 @@ int main(int argc, const char* argv[])
 
     // Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.25;
-    evolver.parameters().maximum_step_size = 1.0/16;
+    evolver.parameters().maximum_step_size = 7.0/16;
     evolver.verbosity=evolver_verbosity;
     cout <<  evolver.parameters() << endl << endl;
 
-
+    evolver.parameters().enable_reconditioning=true;
+    evolver.parameters().enable_subdivisions=true;
+    
 
 
     // Compute the system evolution
@@ -140,7 +146,7 @@ int main(int argc, const char* argv[])
     HybridEnclosure initial_enclosure = evolver.enclosure(heating_system,initial_set);
     cout << "initial_enclosure="<<initial_enclosure << endl << endl;
 
-    HybridTime evolution_time(2.5,127);
+    HybridTime evolution_time(2.75,127);
     cout << "evolution_time=" << evolution_time << endl;
 
 

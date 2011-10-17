@@ -630,7 +630,7 @@ series_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, cons
             uint nnnz=0; for(uint i=0; i!=tphi.size(); ++i) { nnnz+=tphi.model(i).number_of_nonzeros(); }
             ARIADNE_LOG(3,"nso="<<nso<<" nto="<<nto<<" nnnz="<<nnnz<<" nerr="<<ntphi.error()<<"\n");
 
-            if(ntphi.error()<tphi.error()) {
+            if( to==max_to || ntphi.error()<tphi.error()) {
                 dphia=ndphia; dphib=ndphib; dphic=ndphic; dphid=ndphid;
                 fdphia=nfdphia; fdphib=nfdphib; fdphic=nfdphic; fdphid=nfdphid;
                 tdphia=ntdphia; tdphib=ntdphib; tdphic=ntdphic; tdphid=ntdphid;

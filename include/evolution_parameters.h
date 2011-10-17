@@ -214,8 +214,8 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
       minimum_enclosure_radius(0.0),
       maximum_enclosure_radius(100.0),
       maximum_spacial_error(1e-2),
-      enable_reconditioning(false),
-      enable_subdivisions(false),
+      enable_reconditioning(true),
+      enable_subdivisions(true),
       enable_premature_termination(true)
 { }
 

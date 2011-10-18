@@ -178,7 +178,8 @@ const rounding_mode_t upward = ARIADNE_ROUND_UPWARD;
 const rounding_mode_t toward_zero = ARIADNE_ROUND_TOWARD_ZERO;
 
 //inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw %0" : : "m" (rnd) ); }
-inline void set_rounding_mode(const rounding_mode_t& rnd) { asm volatile ("fldcw %0" : : "m" (rnd) ); }
+//inline void set_rounding_mode(const rounding_mode_t& rnd) { asm volatile ("fldcw %0" : : "m" (rnd) ); }
+inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw %0" : : "m" (rnd) ); }
 inline void get_rounding_mode(rounding_mode_t& rnd) { asm volatile ("fstcw %0" : "=m" (rnd) ); }
 inline rounding_mode_t get_rounding_mode() { rounding_mode_t rnd; get_rounding_mode(rnd); return rnd; }
 

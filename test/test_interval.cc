@@ -149,12 +149,12 @@ TestInterval::test_correct_rounded_arithmetic()
 void
 TestInterval::test_accurate_rounded_arithmetic()
 {
-    const double min=1e-57;
-    const double eps=2e-16;
+    const double min=std::numeric_limits<double>::min();
+    const double eps=std::numeric_limits<double>::epsilon();
 
     ARIADNE_TEST_EQUAL(Interval(1.5)+Interval(min),Interval(1.5,1.5+eps));
     ARIADNE_TEST_EQUAL(Interval(1.5)-Interval(min),Interval(1.5-eps,1.5));
-    ARIADNE_TEST_EQUAL(Interval(1+eps,1+2*eps)*Interval(1+eps,1+3*eps),Interval(1+2*eps,1+7*eps));
+    ARIADNE_TEST_EQUAL(Interval(1+eps,1+2*eps)*Interval(1+eps,1+3*eps),Interval(1+2*eps,1+6*eps));
     ARIADNE_TEST_EQUAL(Interval(1)/Interval(3),Interval(0.33333333333333331,0.33333333333333337));
     ARIADNE_TEST_EQUAL(Interval(2)/Interval(5),Interval(0.39999999999999997,0.40000000000000002));
 
@@ -171,7 +171,7 @@ TestInterval::test_accurate_rounded_arithmetic()
     ARIADNE_TEST_EQUAL(pow(Interval(3,5),-1),Interval(0.19999999999999998,0.33333333333333337));
     ARIADNE_TEST_EQUAL(pow(Interval(3,5),-2),Interval(0.039999999999999986955,0.11111111111111114658));
 
-    ARIADNE_TEST_EQUAL(rec(Interval(1+2*eps,1+5*eps)),Interval(1-11*eps/2,1-3*eps/2));
+    ARIADNE_TEST_EQUAL(rec(Interval(1+2*eps,1+5*eps)),Interval(1-10*eps/2,1-3*eps/2));
 
 }
 

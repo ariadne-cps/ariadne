@@ -33,7 +33,8 @@ fi
 # C++ flags to be used for all files
 #   Add -fno-strict-aliasing because of code in Expansion class which uses
 #   reinterpret_cast in a way that breaks strict anti-aliasing rules.
-ARIADNE_CXXFLAGS="${ARIADNE_CXXFLAGS} -Wall -fno-strict-aliasing"
+#   Add -frounding-math to allow correctly-rounded arithmetic.
+ARIADNE_CXXFLAGS="${ARIADNE_CXXFLAGS} -Wall -fno-strict-aliasing -frounding-math"
 
 # Checks for libraries.
 AC_LANG(C++)

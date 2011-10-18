@@ -72,13 +72,23 @@ class TestMultiIndex
         int a1[3]={2,0,3};
         int a2[3]={1,0,4};
         int a3[3]={3,0,1};
-        MultiIndex i1(3,a1);
-        MultiIndex i2(3,a2);
-        MultiIndex i3(3,a3);
-        ARIADNE_TEST_ASSERT(a2<a1);
-        ARIADNE_TEST_ASSERT(a3<a1);
-        ARIADNE_TEST_ASSERT(a3<a2);
-        ARIADNE_TEST_ASSERT(!(a1<a2));
+        ARIADNE_TEST_CONSTRUCT(MultiIndex,i1,(3,a1));
+        ARIADNE_TEST_CONSTRUCT(MultiIndex,i2,(3,a2));
+        ARIADNE_TEST_CONSTRUCT(MultiIndex,i3,(3,a3));
+
+        ARIADNE_TEST_ASSERT(graded_less(i1,i2));
+        ARIADNE_TEST_ASSERT(graded_less(i3,i1));
+        ARIADNE_TEST_ASSERT(graded_less(i3,i2));
+        ARIADNE_TEST_ASSERT(!graded_less(i2,i1));
+
+        ARIADNE_TEST_ASSERT(lexicographic_less(i2,i1));
+        ARIADNE_TEST_ASSERT(lexicographic_less(i1,i3));
+        ARIADNE_TEST_ASSERT(lexicographic_less(i2,i3));
+
+        ARIADNE_TEST_ASSERT(reverse_lexicographic_less(i2,i1));
+        ARIADNE_TEST_ASSERT(reverse_lexicographic_less(i1,i3));
+        ARIADNE_TEST_ASSERT(reverse_lexicographic_less(i2,i3));
+
     }
 
     void test_addition() {

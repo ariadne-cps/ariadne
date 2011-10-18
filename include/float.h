@@ -202,10 +202,11 @@ inline Float acos(Float x) { return std::acos(x.v); }
 inline Float atan(Float x) { return std::atan(x.v); }
 
 
+/*
 // Correctly rounded arithmetic
 inline Float pos_rnd(const Float& x) { return +(volatile double&)x.v; }
 inline Float neg_rnd(const Float& x) { return -(volatile double&)x.v; }
-inline Float sqr_rnd(const Float& x) { volatile double r = (volatile double&)x.v*(volatile double&)x.v; return r; }
+inline Float sqr_rnd(const Float& x) { volatile double r =  (volatile double&)x.v*(volatile double&)x.v; return r; }
 inline Float rec_rnd(const Float& x) { volatile double r = 1.0/(volatile double&)x.v; return r; }
 inline Float add_rnd(const Float& x, const Float& y) { volatile double r = (volatile double&)x.v+(volatile double&)y.v; return r; }
 inline Float sub_rnd(const Float& x, const Float& y) { volatile double r = (volatile double&)x.v-(volatile double&)y.v; return r; }
@@ -224,6 +225,31 @@ inline Float add_opp(Float x, Float y) { volatile double t=(-(volatile double&)x
 inline Float sub_opp(Float x, Float y) { volatile double t=(-(volatile double&)x.v)+(volatile double&)y.v; return -t; }
 inline Float mul_opp(Float x, Float y) { volatile double t=(-(volatile double&)x.v)*(volatile double&)y.v; return -t; }
 inline Float div_opp(Float x, Float y) { volatile double t=(-(volatile double&)x.v)/(volatile double&)y.v; return -t; }
+Float pow_opp(Float x, int n);
+*/
+
+// Correctly rounded arithmetic
+inline Float pos_rnd(const Float& x) { volatile double xv=x.v; return +xv; }
+inline Float neg_rnd(const Float& x) { volatile double xv=x.v; return -xv; }
+inline Float sqr_rnd(const Float& x) { volatile double xv=x.v; return xv*xv; }
+inline Float rec_rnd(const Float& x) { volatile double xv=x.v; return 1.0/xv; }
+inline Float add_rnd(Float x, Float y) { volatile double xv = x.v; volatile double yv=y.v; volatile double r=xv+yv; return r; }
+inline Float sub_rnd(Float x, Float y) { volatile double xv = x.v; volatile double yv=y.v; volatile double r=xv-yv; return r; }
+inline Float mul_rnd(Float x, Float y) { volatile double xv = x.v; volatile double yv=y.v; volatile double r=xv*yv; return r; }
+inline Float div_rnd(Float x, Float y) { volatile double xv = x.v; volatile double yv=y.v; volatile double r=xv/yv; return r; }
+
+
+Float pow_rnd(Float x, int n);
+
+// Opposite rounded arithmetic
+inline Float pos_opp(const Float& x) { volatile double t=-x.v; return -t; }
+inline Float neg_opp(const Float& x) { volatile double t=x.v; return -t; }
+inline Float sqr_opp(const Float& x) { volatile double t=-x.v; t=t*x.v; return -t; }
+inline Float rec_opp(const Float& x) { volatile double t=-1.0/(volatile double&)x.v; return -t; }
+inline Float add_opp(Float x, Float y) { volatile double t=-x.v; t=t-y.v; return -t; }
+inline Float sub_opp(Float x, Float y) { volatile double t=-x.v; t=t+y.v; return -t; }
+inline Float mul_opp(Float x, Float y) { volatile double t=-x.v; t=t*y.v; return -t; }
+inline Float div_opp(Float x, Float y) { volatile double t=x.v; t=t/y.v; return -t; }
 Float pow_opp(Float x, int n);
 
 // Correctly rounded algebraic and transcendental functions

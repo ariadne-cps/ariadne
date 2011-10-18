@@ -85,8 +85,8 @@ struct ScalarFormulaFunction
 
     virtual Nat argument_size() const { return _argument_size; }
     virtual ScalarFunctionInterface<X>* _derivative(uint j) const { return new ScalarFormulaFunction<X>(_argument_size,Ariadne::derivative(_formula,j)); }
-    virtual std::ostream& repr(std::ostream& os) const { return os << this->_formula; }
-    virtual std::ostream& write(std::ostream& os) const { return os << "FF["<<this->_argument_size<<"]("<<this->_formula<<")"; }
+    virtual std::ostream& write(std::ostream& os) const { return os << this->_formula; }
+    virtual std::ostream& repr(std::ostream& os) const { return os << "FF["<<this->_argument_size<<"]("<<this->_formula<<")"; }
     template<class Y> void _compute(Y& r, const Vector<Y>& x) const { r=Ariadne::evaluate(_formula,x); }
 };
 
@@ -190,9 +190,9 @@ struct UnaryFunction
     }
 
     virtual std::ostream& repr(std::ostream& os) const {
-        return os << _op << "(" << _arg.raw_pointer() << ")"; }
+        return os << "UF[" << this->argument_size() << "](" << *this << ")"; }
     virtual std::ostream& write(std::ostream& os) const {
-        return os << "UF["<<this->argument_size()<<"](" << this <<")"; }
+        return os << _op << '(' << _arg << ')'; }
 
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
         r=Ariadne::compute(_op,_arg.evaluate(x)); }
@@ -245,10 +245,11 @@ struct BinaryFunction
     }
 
     virtual std::ostream& repr(std::ostream& os) const {
-        return os << '(' << _arg1.raw_pointer() << symbol(_op) << _arg2.raw_pointer() << ')'; }
+        return os << "BF[" << this->argument_size() << "](" << *this << ")"; }
     virtual std::ostream& write(std::ostream& os) const {
-        return os << "BF["<<this->argument_size()<<"]("<< this <<")"; }
-
+        if(_op==ADD || _op==SUB) { return os << '(' << _arg1 << symbol(_op) << _arg2 << ')'; }
+        else { return os << _arg1 << symbol(_op) << _arg2; } }
+        
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
         r=Ariadne::compute(_op,_arg1.evaluate(x),_arg2.evaluate(x)); }
 
@@ -282,9 +283,9 @@ class PowerFunction
     }
 
     virtual std::ostream& repr(std::ostream& os) const {
-        return os << "pow(" << _arg1.raw_pointer() << "," << _arg2 << ")"; }
+        return os << "PF["<<this->argument_size()<<"]("<< *this <<")"; }
     virtual std::ostream& write(std::ostream& os) const {
-        return os << "PF["<<this->argument_size()<<"]("<< this <<")"; }
+        return os << "pow(" << _arg1 << "," << _arg2 << ")"; }
 
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
         r=pow(_arg1.evaluate(x),_arg2); }

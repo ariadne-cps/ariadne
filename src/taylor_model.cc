@@ -1744,7 +1744,6 @@ static const uint MAXIMUM_DEGREE = 18;
 IntervalTaylorModel exp(const IntervalTaylorModel& x) {
     // FIXME: Truncation error may be incorrect
 
-
     // Scale to unit interval
     IntervalTaylorModel y=x;
     Float xval=x.value();

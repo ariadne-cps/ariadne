@@ -57,6 +57,7 @@ VectorTaylorFunction __getslice__(const VectorTaylorFunction& tf, int start, int
     return VectorTaylorFunction(tf.domain(),Vector<IntervalTaylorModel>(project(tf.models(),range(start,stop))));
 }
 
+
 template<>
 struct from_python<MultiIndex> {
     from_python() {
@@ -424,6 +425,14 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def(self-=Interval());
     scalar_taylor_function_class.def(self*=Interval());
     scalar_taylor_function_class.def(self/=Interval());
+    scalar_taylor_function_class.def(self+RealScalarFunction());
+    scalar_taylor_function_class.def(self-RealScalarFunction());
+    scalar_taylor_function_class.def(self*RealScalarFunction());
+    scalar_taylor_function_class.def(self/RealScalarFunction());
+    scalar_taylor_function_class.def(RealScalarFunction()+self);
+    scalar_taylor_function_class.def(RealScalarFunction()-self);
+    scalar_taylor_function_class.def(RealScalarFunction()*self);
+    scalar_taylor_function_class.def(RealScalarFunction()/self);
     scalar_taylor_function_class.def(self+=self);
     scalar_taylor_function_class.def(self-=self);
     scalar_taylor_function_class.def(self>Float());

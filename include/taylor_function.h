@@ -446,8 +446,22 @@ inline tribool operator<(const ScalarTaylorFunction& x, const Float& c) {
 inline tribool operator>(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)>0; }
 inline tribool operator<(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)<0; }
 
-inline ScalarTaylorFunction operator-(const ScalarTaylorFunction& f1, const RealScalarFunction& f2) {
-    return f1+ScalarTaylorFunction(f1.domain(),f2,f1.sweeper()); }
+inline ScalarTaylorFunction operator+(const RealScalarFunction& f1, const ScalarTaylorFunction& tf2) {
+    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())+tf2; }
+inline ScalarTaylorFunction operator-(const RealScalarFunction& f1, const ScalarTaylorFunction& tf2) {
+    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())-tf2; }
+inline ScalarTaylorFunction operator*(const RealScalarFunction& f1, const ScalarTaylorFunction& tf2) {
+    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())*tf2; }
+inline ScalarTaylorFunction operator/(const RealScalarFunction& f1, const ScalarTaylorFunction& tf2) {
+    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())/tf2; }
+inline ScalarTaylorFunction operator+(const ScalarTaylorFunction& tf1, const RealScalarFunction& f2) {
+    return tf1+ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+inline ScalarTaylorFunction operator-(const ScalarTaylorFunction& tf1, const RealScalarFunction& f2) {
+    return tf1-ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+inline ScalarTaylorFunction operator*(const ScalarTaylorFunction& tf1, const RealScalarFunction& f2) {
+    return tf1*ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+inline ScalarTaylorFunction operator/(const ScalarTaylorFunction& tf1, const RealScalarFunction& f2) {
+    return tf1/ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
 
 ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f, const Interval& c);
 ScalarTaylorFunction& operator-=(ScalarTaylorFunction& f, const Interval& c);

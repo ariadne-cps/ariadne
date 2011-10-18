@@ -145,7 +145,6 @@ read_sequence(std::istream& is, Container& v,
     char c;
 
     v.clear();
-    std::streampos pos = is.tellg();
 
     try {
         is >> c;

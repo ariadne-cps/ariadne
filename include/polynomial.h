@@ -651,9 +651,11 @@ template<class F> NamedArgumentRepresentation<F> named_argument_repr(const F& fu
     NamedArgumentRepresentation<F> r={function,argument_names}; return r; }
 
 template<class X>
-std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
+std::ostream& operator<<(std::ostream& os, const Polynomial<X>& q) {
     bool first_term=true;
     bool zero=true;
+    Polynomial<X> p=q;
+    p.expansion().graded_sort();
     for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
         MultiIndex a=iter->key();
         X v=iter->data();

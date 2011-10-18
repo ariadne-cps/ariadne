@@ -102,7 +102,14 @@ inline Matrix<X> get_jacobian(const Vector<D>& d) {
     return J;
 }
 
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<RealScalarFunction>& frepr) {
+    static_cast<const RealScalarFunctionInterface&>(frepr.reference()).repr(os); return os;
+}
 
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<RealVectorFunction>& frepr) {
+    const RealVectorFunction& f=frepr.reference();
+    static_cast<const RealVectorFunctionInterface&>(f).write(os); return os;
+}
 
 class ScalarPythonFunction
     : public ScalarFunctionMixin<ScalarPythonFunction,Real>
@@ -295,7 +302,8 @@ void export_scalar_function()
     scalar_function_class.def("__eq__", &__eq__<RealNonlinearConstraint,RealScalarFunction,Real>);
     scalar_function_class.def("__le__", &__le__<RealNonlinearConstraint,RealScalarFunction,Real>);
     scalar_function_class.def("__ge__", &__ge__<RealNonlinearConstraint,RealScalarFunction,Real>);
-    scalar_function_class.def(self_ns::str(self));
+    scalar_function_class.def("__str__", &__cstr__<RealScalarFunction>);
+    scalar_function_class.def("__repr__", &__repr__<RealScalarFunction>);
 
     scalar_function_class.def("constant", (RealScalarFunction(*)(uint,Real)) &RealScalarFunction::constant);
     scalar_function_class.def("coordinate", (RealScalarFunction(*)(uint,uint)) &RealScalarFunction::coordinate);
@@ -336,7 +344,8 @@ void export_vector_function()
     vector_function_class.def("__call__", (Vector<FloatDifferential>(RealVectorFunction::*)(const Vector<FloatDifferential>&)const)&RealVectorFunction::evaluate );
     vector_function_class.def("jacobian", (Matrix<Interval>(RealVectorFunction::*)(const Vector<Interval>&)const) &RealVectorFunction::jacobian);
     vector_function_class.def("jacobian", (Matrix<Float>(RealVectorFunction::*)(const Vector<Float>&)const) &RealVectorFunction::jacobian);
-    vector_function_class.def(self_ns::str(self));
+    vector_function_class.def("__str__", &__cstr__<RealVectorFunction>);
+    vector_function_class.def("__repr__", &__repr__<RealVectorFunction>);
 
     vector_function_class.def("identity", (RealVectorFunction(*)(uint)) &RealVectorFunction::identity);
     vector_function_class.staticmethod("identity");

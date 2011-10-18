@@ -78,6 +78,13 @@ struct IntersectionException : public std::runtime_error {
 
 
 
+IntervalTaylorModel sqrt(const IntervalTaylorModel& x);
+IntervalTaylorModel rec(const IntervalTaylorModel& x);
+IntervalTaylorModel exp(const IntervalTaylorModel& x);
+IntervalTaylorModel log(const IntervalTaylorModel& x);
+IntervalTaylorModel sin(const IntervalTaylorModel& x);
+IntervalTaylorModel cos(const IntervalTaylorModel& x);
+IntervalTaylorModel tan(const IntervalTaylorModel& x);
 
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.

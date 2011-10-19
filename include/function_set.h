@@ -191,11 +191,11 @@ class ImageSet
 class ConstraintSet
     : public RegularSetInterface
 {
-    Vector<Interval> _codomain;
     RealVectorFunction _function;
+    Vector<Interval> _codomain;
   public:
     //! \brief Construct the preimage of \a C under \a g.
-    ConstraintSet(const Vector<Interval>& C, const RealVectorFunction& g);
+    ConstraintSet(const RealVectorFunction& g, const Vector<Interval>& C);
     //! \brief Construct from a polyhedron.
     ConstraintSet(const Polyhedron& p);
     //! \brief Construct from a list of constraints.
@@ -220,7 +220,7 @@ class ConstraintSet
     //! \brief Compute the preimage of the set $S=g^{-1}(C)\f$ under \f$h\$.
     //! The resulting set is the constraint set \f$h^{-1}(S)=(g\circ h)^{-1}(C)\f$.
     friend ConstraintSet preimage(const RealVectorFunction& h, const ConstraintSet& s) {
-        return ConstraintSet(s.codomain(),compose(s.function(),h)); }
+        return ConstraintSet(compose(s.function(),h),s.codomain()); }
 };
 
 

@@ -37,6 +37,10 @@ int main(int argc, const char* argv[])
 
     typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
+    VectorFunction<Real> func(0,1);
+
+    cout << func.result_size() << "," << func.argument_size() << "\n";
+
     /// Set the system parameters
     Real ax = 0.75;  // Coefficient of restitution for bounces with vertical walls
     Real ay = 0.5;  // Coefficient of restitution for bounces with horizontal walls

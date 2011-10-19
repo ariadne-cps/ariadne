@@ -338,14 +338,14 @@ ImageSet::write(std::ostream& os) const
 
 
 
-ConstraintSet::ConstraintSet(const Vector<Interval>& codom, const RealVectorFunction& fn)
-    : _codomain(codom), _function(fn)
+ConstraintSet::ConstraintSet(const RealVectorFunction& fn,const Vector<Interval>& codom)
+    : _function(fn), _codomain(codom)
 {
     ARIADNE_ASSERT(codom.size()==fn.result_size());
 }
 
 ConstraintSet::ConstraintSet(const List<RealNonlinearConstraint>& c)
-    : _codomain(c.size()), _function()
+    : _function(), _codomain(c.size())
 {
     uint m=c.size();
     uint n=0u;

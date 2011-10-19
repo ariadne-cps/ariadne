@@ -15,34 +15,19 @@ bin_PROGRAMS= \
 	watertank-time \
 	watertank-proportional \
 	watertank-nonlinear \
-	3bouncingballs \
 	rectifier \
-	cmos_inverter_analoginput \
 	robotarm-verification
-
-#	multipleguards
-#	grid-refinement \
-#	coconut_demo
 
 tutorial_SOURCES = tutorial.cc
 bouncingball_SOURCES = bouncingball.cc
-bouncingball_compositional_SOURCES=bouncingball-compositional.cc
-ballinabox_SOURCES = ballinabox.cc
 ballinabox_SOURCES = ballinabox.cc
 heating_SOURCES=heating.cc
 watertank_time_SOURCES=watertank-time.cc
 watertank_proportional_SOURCES=watertank-proportional.cc
 watertank_nonlinear_SOURCES=watertank-nonlinear.cc
 watertank_compositional_SOURCES=watertank-compositional.cc
-3bouncingballs_SOURCES=3bouncingballs.cc
 rectifier_SOURCES=rectifier.cc
-cmos_inverter_analoginput_SOURCES=cmos_inverter_analoginput.cc
-grid_refinement_SOURCES=grid-refinement.cc
-multipleguards_SOURCES=multipleguards.cc
 robotarm_verification_SOURCES=robotarm-verification.cc
-
-
-coconut_demo_SOURCES=coconut-demo.cc system.cc coconut-demo.h system.h
 
 
 examples: $(bin_PROGRAMS)

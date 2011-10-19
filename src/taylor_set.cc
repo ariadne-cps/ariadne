@@ -1072,7 +1072,7 @@ Float average_width(const IntervalVector& bx) {
 }
 
 static uint COUNT_TESTS=0u;
-double IMAGE_MULTIPLE_OF_CELL = 1;
+//double IMAGE_MULTIPLE_OF_CELL = 1;
 }
 
 typedef Procedure<Interval> IntervalProcedure;

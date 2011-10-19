@@ -60,6 +60,23 @@ class TestExpression {
         //ARIADNE_TEST_EQUAL(evaluate(g,v),Real(227));
     }
 
+    void test_parameters() {
+    	RealVariable x("x");
+
+    	RealExpression expr = x;//+u;
+
+    	Map<Identifier,Real> valuation;
+    	valuation[x.name()] = Interval(-1.0,1.0);
+
+    	ARIADNE_TEST_EQUALS(expr.kind(),VARIABLE);
+    	ARIADNE_TEST_EQUALS(expr.var(),"x");
+    	ARIADNE_TEST_EQUALS(valuation[x.name()],Real(-1.0,1.0));
+
+    	Real result1 = evaluate(expr,valuation);
+
+    	ARIADNE_TEST_EQUALS(result1,Real(-1.0,1.0));
+    }
+
     void test_function()
     {
         // Test to ensure that constants are handled correctly.
@@ -104,6 +121,7 @@ class TestExpression {
 
     void test() {
         test_variables();
+        test_parameters();
         test_function();
     }
 };

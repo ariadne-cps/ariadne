@@ -387,6 +387,7 @@ class Interval;
 class ExactFloat {
     Float _x;
   public:
+    ExactFloat(int n) : _x(n) { }
     explicit ExactFloat(const Float& x) : _x(x) { }
     Float value() const { return _x; }
     operator Interval() const;

@@ -86,14 +86,15 @@ TestInterval::test_concept()
     int n=1;
     uint m=1;
     double d=1;
-    Float x=1;
+    ExactFloat x=1;
+    Float a,b;
     Interval i=1;
     Interval j=1;
 
 
     // Constructors
     j=I(); j=I(n); j=I(m); j=I(d); j=I(x); j=I(i);
-    j=I(n,n); j=I(m,m); j=I(d,d); j=I(x,x);
+    j=I(n,n); j=I(m,m); j=I(d,d); j=I(a,b);
     j=I(n,m); j=I(m,d); j=I(d,n);
     // Assignment
     j=n; j=m; j=d; j=x; j=i;
@@ -476,12 +477,12 @@ void TestInterval::test_geometric_predicates()
     ARIADNE_TEST_BINARY_PREDICATE(!covers,Interval(1.0,2.0),Interval(1.25,2.00));
 
     ARIADNE_TEST_BINARY_PREDICATE(overlap,Interval(1.0,2.0),Interval(1.75,3.0));
-    ARIADNE_TEST_BINARY_PREDICATE(!overlap,Interval(1.0,2.0),Interval(2.00,1.75));
-    ARIADNE_TEST_BINARY_PREDICATE(!overlap,Interval(1.0,2.0),Interval(2.25,1.75));
+    ARIADNE_TEST_BINARY_PREDICATE(!overlap,Interval(1.0,2.0),Interval(2.00,2.75));
+    ARIADNE_TEST_BINARY_PREDICATE(!overlap,Interval(1.0,2.0),Interval(2.25,2.75));
 
     ARIADNE_TEST_BINARY_PREDICATE(!separated,Interval(1.0,2.0),Interval(1.75,3.0));
-    ARIADNE_TEST_BINARY_PREDICATE(!separated,Interval(1.0,2.0),Interval(2.00,1.75));
-    ARIADNE_TEST_BINARY_PREDICATE(separated,Interval(1.0,2.0),Interval(2.25,1.75));
+    ARIADNE_TEST_BINARY_PREDICATE(!separated,Interval(1.0,2.0),Interval(2.00,2.75));
+    ARIADNE_TEST_BINARY_PREDICATE(separated,Interval(1.0,2.0),Interval(2.25,2.75));
 
     ARIADNE_TEST_BINARY_PREDICATE(disjoint,empty_interval,empty_interval);
     ARIADNE_TEST_BINARY_PREDICATE(!intersect,empty_interval,empty_interval);

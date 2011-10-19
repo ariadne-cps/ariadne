@@ -84,7 +84,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<Int
 {
     if(constraints.empty()) { return make_pair(!domain.empty(),domain.centre()); }
 
-    IntervalVectorFunction function;
+    IntervalVectorFunction function(constraints.size());
     Box bounds(constraints.size());
 
     for(uint i=0; i!=constraints.size(); ++i) {

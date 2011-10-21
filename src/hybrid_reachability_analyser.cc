@@ -467,9 +467,10 @@ chain_reach(const SystemType& system,
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
 
     HybridGrid grid=this->_hybrid_grid(system);
-    HybridGridTreeSet evolve_cells(grid);
+    HybridGridTreeSet evolve_cells(grid), accumulated_evolve_cells(grid);
     evolve_cells.adjoin_outer_approximation(initial_set,maximum_grid_depth);
     ARIADNE_LOG(5,"initial_size="<<evolve_cells.size()<<"\n");
+    accumulated_evolve_cells.adjoin(evolve_cells);
 
     HybridGridTreeSet reach_cells = HybridGridTreeSet(grid);
     if(transient_time > 0.0 || transient_steps > 0) {
@@ -482,10 +483,12 @@ chain_reach(const SystemType& system,
     HybridGridTreeSet found_cells(grid);
     ARIADNE_LOG(3,"Computing recurrent evolution...\n");
     while(!evolve_cells.empty()) {
+        accumulated_evolve_cells.adjoin(evolve_cells);
         make_lpair(found_cells,evolve_cells)=this->_upper_reach_evolve(system,evolve_cells,hybrid_lock_to_grid_time,maximum_grid_depth);
         ARIADNE_LOG(5,"found.size()="<<found_cells.size()<<"\n");
         ARIADNE_LOG(5,"evolve.size()="<<evolve_cells.size()<<"\n");
-        evolve_cells.remove(reach_cells);
+        evolve_cells.remove(accumulated_evolve_cells);
+        evolve_cells.restrict_to_height(maximum_grid_height);
         found_cells.restrict_to_height(maximum_grid_height);
         reach_cells.adjoin(found_cells);
         ARIADNE_LOG(3,"  found "<<found_cells.size()<<" cells, of which "<<evolve_cells.size()<<" are new.\n");
@@ -525,9 +528,10 @@ chain_reach(const SystemType& system,
     bounding.adjoin_outer_approximation(bounding_domain,maximum_grid_depth); bounding.recombine();
     ARIADNE_LOG(5,"bounding_size="<<bounding.size()<<"\n");
 
-    HybridGridTreeSet evolve_cells(grid);
+    HybridGridTreeSet evolve_cells(grid), accumulated_evolve_cells(grid);
     evolve_cells.adjoin_outer_approximation(initial_set,maximum_grid_depth);
     evolve_cells.restrict(bounding);
+    accumulated_evolve_cells.adjoin(evolve_cells);
     ARIADNE_LOG(5,"initial_size="<<evolve_cells.size()<<"\n");
 
     HybridGridTreeSet reach_cells(grid);
@@ -543,10 +547,11 @@ chain_reach(const SystemType& system,
     ARIADNE_LOG(3,"Computing recurrent evolution...\n");
 
     while(!evolve_cells.empty()) {
+        accumulated_evolve_cells.adjoin(evolve_cells);
         make_lpair(found_cells,evolve_cells)=this->_upper_reach_evolve(system,evolve_cells,hybrid_lock_to_grid_time,maximum_grid_depth);
         ARIADNE_LOG(5,"found.size()="<<found_cells.size()<<"\n");
         ARIADNE_LOG(5,"evolve.size()="<<evolve_cells.size()<<"\n");
-        evolve_cells.remove(reach_cells);
+        evolve_cells.remove(accumulated_evolve_cells);
         evolve_cells.restrict(bounding);
         reach_cells.adjoin(found_cells);
         ARIADNE_LOG(3,"  found "<<found_cells.size()<<" cells, of which "<<evolve_cells.size()<<" are new.\n");

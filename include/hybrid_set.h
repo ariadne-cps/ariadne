@@ -491,14 +491,12 @@ class HybridGridTreeSet
     //!
     void remove(const HybridGridTreeSet& hgts) {
         for(HybridGridTreeSet::locations_const_iterator _loc_iter=hgts.locations_begin(); _loc_iter!=hgts.locations_end(); ++_loc_iter) {
-            if(this->has_location(_loc_iter->first)) {
-                this->_map.find(_loc_iter->first)->second.remove(_loc_iter->second); } } }
+            this->_provide_location(_loc_iter->first).remove(_loc_iter->second); } }
 
     //!
     void restrict(const HybridGridTreeSet& hgts) {
         for(HybridGridTreeSet::locations_const_iterator _loc_iter=hgts.locations_begin(); _loc_iter!=hgts.locations_end(); ++_loc_iter) {
-            if(this->has_location(_loc_iter->first)) {
-                this->_map.find(_loc_iter->first)->second.restrict(_loc_iter->second); } } }
+            this->_provide_location(_loc_iter->first).restrict(_loc_iter->second); } }
 
     //!
     void restrict_to_height(uint h) {

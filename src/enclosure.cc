@@ -341,17 +341,40 @@ Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction&
     this->_check();
 }
 
-Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& function, const IntervalNonlinearConstraint& constraint, const IntervalFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& space_function, const IntervalScalarFunction& time_function, const List<IntervalNonlinearConstraint>& constraints, const IntervalFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
-    *this=Enclosure(domain,function,make_list(constraint),factory);
-}
+    ARIADNE_ASSERT_MSG(domain.size()==space_function.argument_size(),"domain="<<domain<<", space_function="<<space_function);
+    ARIADNE_ASSERT_MSG(domain.size()==time_function.argument_size(),"domain="<<domain<<", time_function="<<time_function);
+    const double min=std::numeric_limits<double>::min();
+    this->_domain=domain;
+    for(uint i=0; i!=this->_domain.size(); ++i) {
+        if(this->_domain[i].radius()==0) {
+            this->_domain[i]+=Interval(-min,+min);
+        }
+    }
 
-Enclosure::Enclosure(const IntervalVectorFunctionModel& function, const IntervalFunctionModelFactoryInterface& fac)
-    : _domain(function.domain()), _space_function(function), _time_function(), _function_factory_ptr(fac.clone()), _reduced_domain(_domain), _is_fully_reduced(true)
-{
-    this->_time_function=this->function_factory().create_zero(this->_domain);
+    this->_space_function=this->function_factory().create(this->_domain,space_function);
+    this->_time_function=this->function_factory().create(this->_domain,time_function);
     this->_dwell_time_function=this->function_factory().create_zero(this->domain());
+
+    for(uint i=0; i!=constraints.size(); ++i) {
+        ARIADNE_ASSERT_MSG(domain.size()==constraints[i].function().argument_size(),"domain="<<domain<<", constraint="<<constraints[i]);
+        if(constraints[i].bounds().singleton()) {
+            this->new_zero_parameter_constraint(constraints[i].function()-Interval(constraints[i].bounds().midpoint()));
+        } else {
+            if(constraints[i].bounds().lower()>-inf<Float>()) {
+                this->new_negative_parameter_constraint(Interval(constraints[i].bounds().lower())-constraints[i].function());
+            }
+            if(constraints[i].bounds().upper()<+inf<Float>()) {
+                this->new_negative_parameter_constraint(constraints[i].function()-Interval(constraints[i].bounds().upper()));
+            }
+        }
+    }
+
+    this->_reduced_domain=domain;
+    this->_check();
+    this->reduce();
     this->_check();
 }
 

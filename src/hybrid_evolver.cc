@@ -195,7 +195,7 @@ orbit(const HybridAutomatonInterface& system,
       Semantics semantics) const
 {
     ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-    HybridEnclosure initial_enclosure(system.continuous_state_space(initial_set.location()),initial_set,this->function_factory());
+    HybridEnclosure initial_enclosure(initial_set,system.continuous_state_space(initial_set.location()),this->function_factory());
     ARIADNE_LOG(3,"initial_enclosure="<<initial_enclosure<<"\n");
     return this->orbit(system,initial_enclosure,time,semantics);
 }
@@ -302,7 +302,7 @@ HybridEvolverBase::enclosure(const HybridBox& initial_box) const
 HybridEvolverBase::EnclosureType
 HybridEvolverBase::enclosure(const SystemType& sys, const HybridSet& initial_set) const
 {
-    return HybridEnclosure(sys.continuous_state_space(initial_set.location()),initial_set,this->function_factory());
+    return HybridEnclosure(initial_set,sys.continuous_state_space(initial_set.location()),this->function_factory());
 }
 
 

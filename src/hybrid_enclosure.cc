@@ -90,8 +90,8 @@ HybridEnclosure::HybridEnclosure()
 {
 }
 
-HybridEnclosure::HybridEnclosure(const RealSpace& space,
-                                 const HybridSet& hybrid_set,
+HybridEnclosure::HybridEnclosure(const HybridSet& hybrid_set,
+                                 const RealSpace& space,
                                  const IntervalFunctionModelFactoryInterface& factory)
     : _location(hybrid_set.location()), _events(), _space(space.variable_names()), _set(),
       _variables(space.dimension(),INITIAL)
@@ -118,18 +118,6 @@ HybridEnclosure::HybridEnclosure(const HybridBox& hbox, const IntervalFunctionMo
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& spc, const Enclosure& set)
     : _location(location), _events(), _space(spc.variable_names()), _set(set), 
       _variables(catenate(List<EnclosureVariableType>(set.dimension(),INITIAL),List<EnclosureVariableType>(set.number_of_parameters()-set.dimension(),UNKNOWN)))
-{
-}
-
-HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& spc, const Enclosure& set, const IntervalScalarFunction& time)
-    : _location(location), _events(), _space(spc.variable_names()), _set(set),
-      _variables(catenate(List<EnclosureVariableType>(set.dimension(),INITIAL),List<EnclosureVariableType>(set.number_of_parameters()-set.dimension(),UNKNOWN)))
-{
-}
-
-HybridEnclosure::HybridEnclosure(const Pair<DiscreteLocation,ContinuousStateSetType>& hpair)
-    : _location(hpair.first), _events(), _set(hpair.second), 
-      _variables(catenate(List<EnclosureVariableType>(_set.dimension(),INITIAL),List<EnclosureVariableType>(_set.number_of_parameters()-_set.dimension(),UNKNOWN)))
 {
 }
 

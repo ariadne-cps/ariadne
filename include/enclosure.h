@@ -114,13 +114,12 @@ class Enclosure
     explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& f, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.
     explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& f, const List<IntervalNonlinearConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
-    //! \brief Construct the set with domain \a d, image function \a f, negative constraints \a g and equality constraints \a h.
-    explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& f, const IntervalVectorFunction& g, const IntervalVectorFunction& h, const IntervalFunctionModelFactoryInterface& fac);
-    //! \brief Construct a set with a single constraint \a c. \deprecated Use a list of constraints instead
-    explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& f, const IntervalNonlinearConstraint& c, const IntervalFunctionModelFactoryInterface& fac);
-    //! \brief Construct a set with a single constraint \a c. \deprecated Use a list of constraints instead
-    explicit Enclosure(const IntervalVectorFunctionModel& f, const IntervalFunctionModelFactoryInterface& fac);
-    //! \brief Construct a set with a single constraint \a c. \deprecated Use a list of constraints instead
+    //! \brief Construct the set with parameter domain \a d, image function \a sf, time function \a tf and constraints \a c.
+    explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& sf, const IntervalScalarFunction& tf, const List<IntervalNonlinearConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
+    //! \brief Construct the set with domain \a d, space function \a sf, time function \a tf, negative constraints \a g and equality constraints \a h.
+    //!   (Not currently implemented.)
+    explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& sf, const IntervalScalarFunction tf, const IntervalVectorFunction& g, const IntervalVectorFunction& h, const IntervalFunctionModelFactoryInterface& fac);
+    //! \brief Construct from an exact bounded constraint \a set.
     explicit Enclosure(const RealBoundedConstraintSet& set, const IntervalFunctionModelFactoryInterface& fac);
 
     //! \brief Create a dynamically-allocated copy.

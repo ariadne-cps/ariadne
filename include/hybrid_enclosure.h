@@ -139,20 +139,14 @@ class HybridEnclosure
   public:
     //! \brief An empty enclosure.
     HybridEnclosure();
-    //! \brief An enclosure corresponding to a box \a bx in location \a q with constraints \a cnstr.
-    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const RealBox& bx, const List<RealScalarFunction>& cnstr, IntervalFunctionModelFactoryInterface& fac);
-    HybridEnclosure(const RealSpace& space, const HybridSet& set, const IntervalFunctionModelFactoryInterface& factory);
-    //! \brief An enclosure corresponding to a box \a s in location \a q.
+    //! \brief An enclosure corresponding to the hybrid set \a set using \a space to order the continuous variables.
+    HybridEnclosure(const HybridSet& set, const RealSpace& space, const IntervalFunctionModelFactoryInterface& factory);
+    //! \brief An enclosure corresponding to a Euclidean box \a bx in location \a q with variables ordered by \a spc.
     HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Box& bx, const IntervalFunctionModelFactoryInterface& fac);
+    //! \brief An enclosure corresponding to a hybrid box \a hbx.
     HybridEnclosure(const HybridBox& hbx, const IntervalFunctionModelFactoryInterface& fac);
-    //! \brief An enclosure corresponding to a box \a s in location \a q, using a default function factory class.
-    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Box& bx);
-    //! \brief An enclosure constructed from a continuous state set and a location.
-    HybridEnclosure(const Pair<DiscreteLocation,ContinuousStateSetType>&);
-    //! \brief An enclosure constructed from a continuous state set and a location with evolution time equal to zero.
-    HybridEnclosure(const DiscreteLocation&, const RealSpace& spc, const ContinuousStateSetType&);
-    //! \brief An enclosure constructed from a continuous state set, an evolution time and a location.
-    HybridEnclosure(const DiscreteLocation&, const RealSpace& spc, const ContinuousStateSetType&, const IntervalScalarFunction& time);
+    //! \brief An enclosure constructed from a location \a q, a real space \a spc, and a (timed) enclosure \a es.
+    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Enclosure& es);
     //! \brief Destructor.
     ~HybridEnclosure();
     //! \brief Create a dynamically-allocated copy.

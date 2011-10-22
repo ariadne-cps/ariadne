@@ -291,8 +291,7 @@ lower_reach_evolve(const SystemType& system,
         HybridEnclosure initial_enclosure=this->_evolver->enclosure(cell_iter->box());
         ListSet<HybridEnclosure> reach_enclosures;
         ListSet<HybridEnclosure> final_enclosures;
-        //make_lpair(reach_enclosures,final_enclosures) = this->_evolver->reach_evolve(system,initial_enclosure,time,LOWER_SEMANTICS);
-        make_lpair(reach_enclosures,final_enclosures) = this->_evolver->reach_evolve(system,initial_enclosure,time,UPPER_SEMANTICS);
+        make_lpair(reach_enclosures,final_enclosures) = this->_evolver->reach_evolve(system,initial_enclosure,time,LOWER_SEMANTICS);
         for(ListSet<HybridEnclosure>::const_iterator enclosure_iter=reach_enclosures.begin(); enclosure_iter!=reach_enclosures.end(); ++enclosure_iter) {
             enclosure_iter->adjoin_outer_approximation_to(reach,grid_depth);
         }

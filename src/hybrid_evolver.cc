@@ -1065,14 +1065,19 @@ _evolution_step(EvolutionData& evolution_data,
         return;
     }
 
-    // Test to see if set is too large
-    if(this->_parameters_ptr->enable_subdivisions && starting_bounding_box.radius() > this->_parameters_ptr->maximum_enclosure_radius) {
-        ARIADNE_LOG(1,"\r  splitting\n");
-        List<HybridEnclosure> split_sets = starting_set.split();
-        for(uint i=0; i!=split_sets.size(); ++i) {
-            if(!definitely(split_sets[i].empty())) { evolution_data.working_sets.append(split_sets[i]); }
+    // Handle a set that is too large, based on semantics
+    if (starting_bounding_box.radius() > this->_parameters_ptr->maximum_enclosure_radius) {
+        if (evolution_data.semantics == LOWER_SEMANTICS) {
+            ARIADNE_LOG(1,"\r  too large, discarding\n");
+            return;
+        } else if (this->_parameters_ptr->enable_subdivisions) {
+            ARIADNE_LOG(1,"\r  too large, splitting\n");
+            List<HybridEnclosure> split_sets = starting_set.split();
+            for(uint i=0; i!=split_sets.size(); ++i) {
+                if(!definitely(split_sets[i].empty())) { evolution_data.working_sets.append(split_sets[i]); }
+            }
+            return;
         }
-        return;
     }
 
     Map<DiscreteEvent,RealScalarFunction> guard_functions;

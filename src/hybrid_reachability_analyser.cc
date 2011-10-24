@@ -367,15 +367,16 @@ upper_reach(const SystemType& system,
     ARIADNE_LOG(3,"real_time="<<real_time<<"\n");
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
     ARIADNE_LOG(3,"discrete_steps="<<discrete_steps<<"\n");
-    HybridGridTreeSet found_cells(grid);
+    HybridGridTreeSet found_cells(grid), accumulated_evolve_cells(grid);
     for(uint i=0; i!=time_steps; ++i) {
+        accumulated_evolve_cells.adjoin(evolve_cells);
         ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
         make_lpair(found_cells,evolve_cells)=this->_upper_reach_evolve(system,evolve_cells,hybrid_lock_to_grid_time,grid_depth);
         ARIADNE_LOG(5,"found.size()="<<found_cells.size()<<"\n");
         ARIADNE_LOG(5,"evolve.size()="<<evolve_cells.size()<<"\n");
-        evolve_cells.remove(reach_cells);
+        evolve_cells.remove(accumulated_evolve_cells);
         reach_cells.adjoin(found_cells);
-        ARIADNE_LOG(3,"  found "<<found_cells.size()<<" cells, of which "<<evolve_cells.size()<<" are new.\n");
+        ARIADNE_LOG(3,"  found "<<found_cells.size()<<" cells, and "<<evolve_cells.size()<<" are new intermediate.\n");
         if(evolve_cells.empty()) break;
         ARIADNE_LOG(6,"evolve_cells="<<evolve_cells<<"\n");
     }

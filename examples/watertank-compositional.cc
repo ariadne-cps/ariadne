@@ -85,12 +85,12 @@ int main()
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to
     // check non-blockingness of urgent actions.
-    valve.new_invariant(open,height<=hmax,start_closing);
-    valve.new_invariant(opening,height<=hmax,start_closing);
-    valve.new_invariant(opening,aperture<=1.0,finished_opening);
-    valve.new_invariant(closed,height>=hmin,start_opening);
-    valve.new_invariant(closing,height>=hmin,start_opening);
-    valve.new_invariant(closing,aperture>=0.0,finished_closing);
+    //valve.new_invariant(open,height<=hmax,start_closing);
+    //valve.new_invariant(opening,height<=hmax,start_closing);
+    //valve.new_invariant(opening,aperture<=1.0,finished_opening);
+    //valve.new_invariant(closed,height>=hmin,start_opening);
+    //valve.new_invariant(closing,height>=hmin,start_opening);
+    //valve.new_invariant(closing,aperture>=0.0,finished_closing);
 
     valve.new_transition(closed,start_opening,opening,(next(aperture)=aperture),height<=hmin);
     valve.new_transition(closing,start_opening,opening,(next(aperture)=aperture),height<=hmin);

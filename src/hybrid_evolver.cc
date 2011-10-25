@@ -318,7 +318,7 @@ _evolution(ListSet<HybridEnclosure>& final,
            bool reach) const
 {
     EvolutionData evolution_data;
-
+    evolution_data.semantics = semantics;
     evolution_data.initial_sets.push_back(HybridEnclosure(initial_set));
 
     while(!evolution_data.initial_sets.empty()) {

@@ -24,6 +24,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "config.h"
 #include "tuple.h"
 #include "vector.h"
 #include "matrix.h"

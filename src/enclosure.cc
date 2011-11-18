@@ -23,6 +23,8 @@
 
 #include <iomanip>
 
+#include "config.h"
+
 #include "enclosure.h"
 
 #include "macros.h"

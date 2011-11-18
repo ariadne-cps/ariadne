@@ -42,6 +42,8 @@ using std::cin; using std::cout; using std::cerr; using std::clog;
 using std::endl; using std::flush;
 using std::ofstream; using std::ifstream;
 
+#include "config.h"
+
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
@@ -74,7 +76,10 @@ using std::ofstream; using std::ifstream;
 #include "hybrid_discretiser.h"
 #include "hybrid_reachability_analyser.h"
 
+#ifdef ARIADNE_ENABLE_SERIALIZATION
 #include "serialization.h"
+#endif /* ARIADNE_ENABLE_SERIALIZATION */
+
 #include "graphics.h"
 #include "hybrid_graphics.h"
 

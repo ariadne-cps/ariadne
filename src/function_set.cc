@@ -23,6 +23,8 @@
 
 #include "boost/multi_array.hpp"
 
+#include "config.h"
+
 #include "macros.h"
 #include "logging.h"
 #include "polynomial.h"

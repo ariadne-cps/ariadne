@@ -27,6 +27,8 @@
 
 #include <cstdarg>
 
+#include "config.h"
+
 #include "box.h"
 #include "stlio.h"
 #include "point.h"

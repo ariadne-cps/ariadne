@@ -24,6 +24,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include "config.h"
+
 #include "macros.h"
 #include "exceptions.h"
 #include "numeric.h"

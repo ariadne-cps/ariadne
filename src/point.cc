@@ -26,6 +26,8 @@
 #include <string>
 #include <vector>
 
+#include "config.h"
+
 #include "point.h"
 #include "box.h"
 #include "stlio.h"

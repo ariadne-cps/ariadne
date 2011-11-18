@@ -22,6 +22,7 @@
  */
 
 #include <typeinfo>
+#include "config.h"
 
 #include "numeric.h"
 #include "vector.h"

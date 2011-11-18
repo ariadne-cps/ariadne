@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS=-I m4
+
 SUBDIRS = include src test wrap examples
 
 EXTRA_DIST = Doxyfile

@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <vector>
+#include "config.h"
 #include "numeric.h"
 #include "expansion.h"
 

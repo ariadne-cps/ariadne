@@ -23,6 +23,8 @@
 
 #include <limits>
 
+#include "config.h"
+
 #include "macros.h"
 #include "logging.h"
 #include "tuple.h"

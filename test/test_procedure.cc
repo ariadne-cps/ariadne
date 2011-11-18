@@ -28,6 +28,8 @@
 #include <iomanip>
 #include <stdexcept>
 
+#include "config.h"
+
 #include "procedure.h"
 
 #include "numeric.h"

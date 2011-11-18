@@ -23,6 +23,8 @@
 
 #include <iostream>
 
+#include "config.h"
+
 #include "runge_kutta_integrator.h"
 
 #include "container.h"

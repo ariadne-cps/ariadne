@@ -23,6 +23,8 @@
 
 #include <iostream>
 
+#include "config.h"
+
 #include "expression_set.h"
 #include "expression.h"
 #include "space.h"

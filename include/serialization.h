@@ -27,9 +27,11 @@
 /*! \file serialization.h
  *  \brief Reading and writing to a boost archive.
  */
-
+ 
+#ifdef ARIADNE_ENABLE_SERIALIZATION
 // FIXME: This is a hack which fixes some bugs involving long ints on some machines
 #define BOOST_NO_INT64_T
+#define BOOST_NO_INTEGRAL_INT64_T
 
 #include <iostream>
 #include <iomanip>
@@ -54,5 +56,6 @@ class OutputArchive : public text_oarchive { };
 
 }
 
+#endif /* ARIADNE_ENABLE_SERIALIZATION */
 
 #endif /* ARIADNE_SERIALIZATION_H */

@@ -23,6 +23,8 @@
 
 #include <iomanip>
 
+#include "config.h"
+
 #include "macros.h"
 #include "exceptions.h"
 #include "numeric.h"
@@ -55,7 +57,6 @@
 
 #include "logging.h"
 
-#include "config.h"
 #ifdef HAVE_CAIRO_H
 #include <cairo/cairo.h>
 #endif // HAVE_CAIRO_H

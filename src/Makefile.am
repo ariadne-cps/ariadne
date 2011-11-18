@@ -8,9 +8,10 @@ lib-hybrid: libariadne-hybrid.la
 lib-extras: libariadne-extras.la
 
 AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
+AM_LDFLAGS = $(EXEC_LDFLAGS) 
 
 INCLUDES = -iquote$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
-LIBS =  $(CAIRO_LIBS) $(GTK_LIBS)
+LIBS =  $(BOOST_PYTHON_LIBS) $(BOOST_SERIALIZATION_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)
 LDADD =  $(LIBS)
 
 ARIADNE_KERNEL_SRC = \

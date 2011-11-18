@@ -51,7 +51,9 @@
 #include "point.h"
 #include "box.h"
 
+#ifdef ARIADNE_ENABLE_SERIALIZATION
 #include "serialization.h"
+#endif /* ARIADNE_ENABLE_SERIALIZATION */
 
 #include "graphics_interface.h"
 
@@ -709,16 +711,19 @@ HybridSetConstIterator<DS,HBS>::increment_loc()
     }
 }
 
-
-template<class A> void serialize(A& archive, HybridGridTreeSet& set, const unsigned int version) {
-    archive & static_cast<std::map<DiscreteLocation,GridTreeSet>&>(set); }
+#ifdef ARIADNE_ENABLE_SERIALIZATION
+  template<class A> void serialize(A& archive, HybridGridTreeSet& set, const unsigned int version) {
+      archive & static_cast<std::map<DiscreteLocation,GridTreeSet>&>(set); }
+#endif /* ARIADNE_ENABLE_SERIALIZATION */
 
 
 } // namespace Ariadne
 
-namespace boost { namespace serialization {
-template<class A> void serialize(A& archive, const Ariadne::HybridGridTreeSet& set, const uint version);
-template<class A> void serialize(A& archive, const Ariadne::DiscreteLocation& state, const uint version);
-}}
+#ifdef ARIADNE_ENABLE_SERIALIZATION
+  namespace boost { namespace serialization {
+  template<class A> void serialize(A& archive, const Ariadne::HybridGridTreeSet& set, const uint version);
+  template<class A> void serialize(A& archive, const Ariadne::DiscreteLocation& state, const uint version);
+  }}
+#endif /* ARIADNE_ENABLE_SERIALIZATION */
 
 #endif // ARIADNE_HYBRID_SET_H

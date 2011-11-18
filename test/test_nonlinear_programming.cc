@@ -24,6 +24,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "config.h"
+
 #include "test.h"
 
 #include "numeric.h"

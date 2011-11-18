@@ -32,6 +32,7 @@ using std::string;
 #include <boost/timer.hpp>
 #include <boost/progress.hpp>
 
+#include "config.h"
 #include "numeric.h"
 #include "taylor_function.h"
 #include "taylor_set.h"

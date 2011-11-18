@@ -104,7 +104,7 @@ Interval trunc(Interval x)
 
 Interval trunc(Interval x, uint n)
 {
-    Interval e=Interval(std::pow(2.0,52-n));
+    Interval e=Interval(std::pow(2.0,52-(int)n));
     Interval y=x+e;
     return y-e;
 }

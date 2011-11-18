@@ -26,6 +26,8 @@
 #include <sstream>
 #include <string>
 
+#include "config.h"
+
 #include "solver.h"
 #include "function.h"
 #include "taylor_function.h"

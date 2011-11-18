@@ -44,9 +44,9 @@ template<class T> class Generator {
     T operator=(const typename T::Type& v) const { return T(v); }
 };
 
-struct MaximumError : Attribute<double> { MaximumError(double v) : Attribute(v) { } };
-struct SweepThreshold : Attribute<double> { SweepThreshold(double v) : Attribute(v) { } };
-struct MaximumNumberOfSteps : Attribute<double> { MaximumNumberOfSteps(double v) : Attribute(v) { } };
+struct MaximumError : Attribute<double> { MaximumError(double v) : Attribute<double>(v) { } };
+struct SweepThreshold : Attribute<double> { SweepThreshold(double v) : Attribute<double>(v) { } };
+struct MaximumNumberOfSteps : Attribute<double> { MaximumNumberOfSteps(double v) : Attribute<double>(v) { } };
 
 static const Generator<MaximumError> maximum_error = Generator<MaximumError>();
 static const Generator<SweepThreshold> sweep_threshold = Generator<SweepThreshold>();

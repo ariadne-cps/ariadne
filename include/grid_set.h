@@ -106,7 +106,9 @@ GridTreeSet outer_approximation(const CompactSetInterface& theSet, const uint nu
 template<class BS> GridTreeSet outer_approximation(const ListSet<BS>& theSet, const uint numSubdivInDim);
 GridTreeSet inner_approximation(const OpenSetInterface& theSet, const Grid& theGrid, const uint height, const uint numSubdivInDim);
 
-template<class A> void serialize(A& archive, const GridTreeSet& set, const uint version);
+#ifdef ARIADNE_ENABLE_SERIALIZATION
+  template<class A> void serialize(A& archive, const GridTreeSet& set, const uint version);
+#endif /* ARIADNE_ENABLE_SERIALIZATION */
 
 
 /*! \brief The binary-tree node operation is not allowed on a non-leaf node. */
@@ -2319,12 +2321,11 @@ GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, 
     return result;
 }
 
-
-template<class A> void serialize(A& archive, Ariadne::GridTreeSet& set, const unsigned int version) {
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-
+#ifdef ARIADNE_ENABLE_SERIALIZATION
+  template<class A> void serialize(A& archive, Ariadne::GridTreeSet& set, const unsigned int version) {
+      ARIADNE_NOT_IMPLEMENTED;
+  }
+#endif /* ARIADNE_ENABLE_SERIALIZATION */
 
 } // namespace Ariadne
 

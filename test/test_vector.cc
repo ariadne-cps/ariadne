@@ -25,7 +25,6 @@
 #include <fstream>
 #include <cassert>
 
-
 #include "config.h"
 #include "numeric.h"
 #include "vector.h"

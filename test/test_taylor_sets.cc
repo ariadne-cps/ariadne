@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include "config.h"
 #include "multi_index.h"
 #include "taylor_model.h"
 #include "function.h"

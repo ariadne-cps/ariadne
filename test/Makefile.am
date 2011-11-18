@@ -7,10 +7,10 @@ TESTS_ENVIRONMENT = ./run_test.sh
 PROFILES_ENVIRONMENT = ./run_profile.sh
 
 AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
-AM_LDFLAGS = $(EXEC_LDFLAGS)
+AM_LDFLAGS = $(EXEC_LDFLAGS) 
 
 INCLUDES = -iquote$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
-LIBS += $(CAIRO_LIBS) $(GTK_LIBS)
+LIBS +=  $(BOOST_PYTHON_LIBS) $(BOOST_SERIALIZATION_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)
 LDADD = ../src/libariadne.la $(LIBS)
 
 bin_PROGRAMS = \
@@ -18,6 +18,14 @@ bin_PROGRAMS = \
 	profile_taylor_model
 
 #test_misc_LDADD = $(LDADD) -lboost_python -lpython2.5
+
+if WANT_SERIALIZATION
+## Serialization is enabled, compile the test
+TEST_SERIALIZATION = test_serialization
+else
+## Serialization is not enabled, do not compile the test
+TEST_SERIALIZATION = 
+endif
 
 check_PROGRAMS = \
 	test_float \
@@ -45,14 +53,14 @@ check_PROGRAMS = \
 	test_discrete_evolution \
 	test_continuous_evolution \
 	test_graphics \
-	test_serialization \
 	test_hybrid_set \
 	test_hybrid_automaton \
 	test_hybrid_simulator \
 	test_hybrid_evolver \
 	test_hybrid_evolution \
 	test_hybrid_reachability_analyser \
-	test_hybrid_graphics
+	test_hybrid_graphics \
+	$(TEST_SERIALIZATION)
 
 EXTRA_TESTS = \
 	test_textplot \
@@ -61,7 +69,7 @@ EXTRA_TESTS = \
 UNUSED_TESTS = \
 	test_hybrid_discretiser
 
-tests: $(check_PROGRAMS)
+tests: $(check_PROGRAMS) 
 profiles: $(bin_PROGRAMS)
 
 #test_integer_LDADD = -lgmp $(LIBS)
@@ -89,6 +97,7 @@ test_taylor_sets_SOURCES=test_taylor_sets.cc
 test_expression_SOURCES=test_expression.cc
 test_function_SOURCES=test_function.cc
 test_grid_set_SOURCES=test_grid_set.cc
+test_linear_programming_SOURCES=test_linear_programming.cc
 test_nonlinear_programming_SOURCES=test_nonlinear_programming.cc
 test_integrator_SOURCES=test_integrator.cc
 test_constraint_solver_SOURCES=test_constraint_solver.cc

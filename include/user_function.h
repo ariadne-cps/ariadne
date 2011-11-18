@@ -49,7 +49,6 @@
 
 namespace Ariadne {
 
-
 //! \related ScalarUserFunction
 //! \brief Template structure containing scalar function meta-information.
 template<uint AS, uint PS=0u, uint SM=255u>
@@ -77,7 +76,7 @@ template<class T> class ScalarUserFunction
 {
   private:
     class Representation
-        : public ScalarFunctionMixin< ScalarUserFunction<T>::Representation, Real >
+        : public ScalarFunctionMixin< Representation, Real >
     {
       private:
         Vector<Real> _p;
@@ -153,7 +152,7 @@ template<class T> class VectorUserFunction
 {
   private:
     class Representation
-        : public VectorFunctionMixin< VectorUserFunction<T>::Representation, Real >
+        : public VectorFunctionMixin< Representation, Real >
     {
       public:
         typedef uint SizeType;

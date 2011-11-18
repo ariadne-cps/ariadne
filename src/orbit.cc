@@ -23,6 +23,8 @@
 
 #include <utility>
 
+#include "config.h"
+
 #include "orbit.h"
 
 #include "box.h"

@@ -166,6 +166,7 @@ class Array {
 };
 
 
+#ifdef ARIADNE_ENABLE_SERIALIZATION
 template<class A, class X> void serialize(A& a, Array<X>& ary, const unsigned int v) {
     // We can't use separate save/load unless serialize is a member (I think).
     // We therefore need the same code to read and write.
@@ -174,8 +175,7 @@ template<class A, class X> void serialize(A& a, Array<X>& ary, const unsigned in
     size_t m=ary.size(); a & m; if(m!=ary.size()) { ary.resize(m); }
     for(size_t i=0; i!=m; ++i) { X& k=ary[i]; a & k; }
 }
-
-
+#endif /* ARIADNE_ENABLE_SERIALIZATION */
 
 } // namespace Ariadne;
 

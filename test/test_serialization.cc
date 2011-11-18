@@ -30,6 +30,7 @@
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/serialization/string.hpp>
 
+#include "config.h"
 #include "macros.h"
 #include "serialization.h"
 #include "array.h"

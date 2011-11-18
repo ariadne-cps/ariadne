@@ -588,7 +588,7 @@ Float tan_rnd(Float x)
 } // namespace Ariadne
 
 
-#ifdef HAVE_LIBBOOST_SERIALIZATION
+#ifdef ARIADNE_ENABLE_SERIALIZATION
 
 #include "serialization.h"
 
@@ -608,7 +608,7 @@ void serialize(boost::archive::text_iarchive& a, Float& flt, const unsigned int 
 
 } // namespace Ariadne
 
-#endif /* HAVE_LIBBOOST_SERIALIZATION */
+#endif /* ARIADNE_ENABLE_SERIALIZATION */
 
 
 

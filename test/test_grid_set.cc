@@ -28,6 +28,7 @@
 #include <sstream>
 #include <string>
 
+#include "config.h"
 #include "stlio.h"
 
 #include "macros.h"

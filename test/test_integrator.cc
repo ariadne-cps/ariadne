@@ -26,6 +26,8 @@
 #include <sstream>
 #include <string>
 
+#include "config.h"
+
 #include "polynomial.h"
 #include "integrator.h"
 #include "function.h"

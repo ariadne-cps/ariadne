@@ -56,15 +56,15 @@ typedef shared_ptr<const IntervalFunctionModelFactoryInterface> FunctionFactoryP
 
 class Sweeper;
 
-struct LipschitzConstant : Attribute<double> { LipschitzConstant(double v) : Attribute(v) { } };
-struct StepMaximumError : Attribute<double> { StepMaximumError(double v) : Attribute(v) { } };
-struct StepSweepThreshold : Attribute<double> { StepSweepThreshold(double v) : Attribute(v) { } };
-struct SpacialOrder : Attribute<uint> { SpacialOrder(uint v) : Attribute(v) { } };
-struct TemporalOrder : Attribute<uint> { TemporalOrder(uint v) : Attribute(v) { } };
-struct MinimumSpacialOrder : Attribute<uint> { MinimumSpacialOrder(uint v) : Attribute(v) { } };
-struct MinimumTemporalOrder : Attribute<uint> { MinimumTemporalOrder(uint v) : Attribute(v) { } };
-struct MaximumSpacialOrder : Attribute<uint> { MaximumSpacialOrder(uint v) : Attribute(v) { } };
-struct MaximumTemporalOrder : Attribute<uint> { MaximumTemporalOrder(uint v) : Attribute(v) { } };
+struct LipschitzConstant : Attribute<double> { LipschitzConstant(double v) : Attribute<double>(v) { } };
+struct StepMaximumError : Attribute<double> { StepMaximumError(double v) : Attribute<double>(v) { } };
+struct StepSweepThreshold : Attribute<double> { StepSweepThreshold(double v) : Attribute<double>(v) { } };
+struct SpacialOrder : Attribute<uint> { SpacialOrder(uint v) : Attribute<uint>(v) { } };
+struct TemporalOrder : Attribute<uint> { TemporalOrder(uint v) : Attribute<uint>(v) { } };
+struct MinimumSpacialOrder : Attribute<uint> { MinimumSpacialOrder(uint v) : Attribute<uint>(v) { } };
+struct MinimumTemporalOrder : Attribute<uint> { MinimumTemporalOrder(uint v) : Attribute<uint>(v) { } };
+struct MaximumSpacialOrder : Attribute<uint> { MaximumSpacialOrder(uint v) : Attribute<uint>(v) { } };
+struct MaximumTemporalOrder : Attribute<uint> { MaximumTemporalOrder(uint v) : Attribute<uint>(v) { } };
 
 static const Generator<LipschitzConstant> lipschitz_constant = Generator<LipschitzConstant>();
 static const Generator<StepMaximumError> step_maximum_error = Generator<StepMaximumError>();

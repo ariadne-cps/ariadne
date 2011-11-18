@@ -26,9 +26,10 @@
 #include <iostream>
 #include <fstream>
 
+#include "config.h"
+
 #include "test.h"
 
-#include "config.h"
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"

@@ -23,6 +23,7 @@
 
 #include <iostream>
 
+#include "config.h"
 #include "function.h"
 #include "box.h"
 #include "grid_set.h"

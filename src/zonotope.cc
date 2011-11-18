@@ -25,6 +25,8 @@
 #include <vector>
 #include <algorithm>
 
+#include "config.h"
+
 #include "zonotope.h"
 
 #include "macros.h"

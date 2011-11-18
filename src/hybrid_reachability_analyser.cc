@@ -30,6 +30,8 @@
 #include <vector>
 #include <valarray>
 
+#include "config.h"
+
 #include "exceptions.h"
 
 #include "numeric.h"

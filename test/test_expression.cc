@@ -23,6 +23,7 @@
 
 #include <iostream>
 
+#include "config.h"
 #include "container.h"
 #include "stlio.h"
 #include "numeric.h"

@@ -24,6 +24,8 @@
 #include <map>
 #include <boost/weak_ptr.hpp>
 
+#include "config.h"
+
 #include "macros.h"
 #include "stlio.h"
 #include "formula.h"

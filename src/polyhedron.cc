@@ -30,6 +30,8 @@
 #include <vector>
 #include <valarray>
 
+#include "config.h"
+
 #include "polyhedron.h"
 
 #include "macros.h"

@@ -29,6 +29,7 @@
 #include <stdexcept>
 #include <fenv.h>
 
+#include "config.h"
 #include "function.h"
 
 #include "numeric.h"

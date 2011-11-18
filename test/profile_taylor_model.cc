@@ -32,6 +32,7 @@ using std::string;
 #include <boost/timer.hpp>
 #include <boost/progress.hpp>
 
+#include "config.h"
 #include "taylor_model.h"
 using namespace Ariadne;
 

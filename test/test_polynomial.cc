@@ -22,6 +22,7 @@
  */
 
 #include <iostream>
+#include "config.h"
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"

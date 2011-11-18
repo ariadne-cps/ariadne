@@ -23,6 +23,8 @@
 
 #include <iomanip>
 
+#include "config.h"
+
 #include "integrator.h"
 
 #include "logging.h"

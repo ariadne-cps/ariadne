@@ -681,8 +681,10 @@ inline ExactFloat::operator Interval() const {
     return Interval(this->_x);
 }
 
-template<class A> void serialize(A& a, Interval& ivl, const uint version) {
+#ifdef ARIADNE_ENABLE_SERIALIZATION
+  template<class A> void serialize(A& a, Interval& ivl, const uint version) {
     a & ivl.lower() & ivl.upper(); }
+#endif
 
 std::ostream& operator<<(std::ostream&, const Interval&);
 std::istream& operator>>(std::istream&, Interval&);

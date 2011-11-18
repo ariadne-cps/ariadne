@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include "config.h"
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"

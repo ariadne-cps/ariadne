@@ -24,6 +24,8 @@
 #include "boost/multi_array.hpp"
 #include "boost/array.hpp"
 
+#include "config.h"
+
 #include "macros.h"
 #include "tuple.h"
 #include "tribool.h"

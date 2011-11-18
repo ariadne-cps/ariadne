@@ -28,7 +28,6 @@
 #ifndef ARIADNE_DISCRETE_EVENT_H
 #define ARIADNE_DISCRETE_EVENT_H
 
-
 namespace Ariadne {
 
 template<class T> std::string to_str(const T& t);
@@ -55,10 +54,12 @@ inline std::ostream& operator<<(std::ostream& os, const DiscreteEvent& e) {
     return os << e._id;
 }
 
-template<class A> inline void serialize(A& archive, DiscreteEvent& event, const uint version) {
-    std::string& id=reinterpret_cast<std::string&>(event);
-    archive & id;
-}
+#ifdef ARIADNE_ENABLE_SERIALIZATION
+  template<class A> inline void serialize(A& archive, DiscreteEvent& event, const uint version) {
+      std::string& id=reinterpret_cast<std::string&>(event);
+      archive & id;
+  }
+#endif /* ARIADNE_ENABLE_SERIALIZATION */
 
 } //namespace Ariadne
 

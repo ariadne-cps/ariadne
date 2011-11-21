@@ -128,13 +128,13 @@ int main()
     /// Create the dynamics
 
     /// The dynamic for an opening valve
-    RealExpressions opening_d((-a*Ariadne::sqrt(x)+b*y,1/T,one));
+    RealExpressions opening_d((-a*sqrt(x)+b*y,1/T,one));
     /// The dynamic for a closing valve
-    RealExpressions closing_d((-a*Ariadne::sqrt(x)+b*y,-1/T,one));
+    RealExpressions closing_d((-a*sqrt(x)+b*y,-1/T,one));
     /// The dynamic for an opened valve
-    RealExpressions opened_d((-a*Ariadne::sqrt(x)+b,zero,one));
+    RealExpressions opened_d((-a*sqrt(x)+b,zero,one));
     /// The dynamic for an opened valve
-    RealExpressions closed_d((-a*Ariadne::sqrt(x),zero,one));
+    RealExpressions closed_d((-a*sqrt(x),zero,one));
 
     cout << "opening dynamic = " << opening_d << endl << endl;
     cout << "closing dynamic = " << closing_d << endl << endl;

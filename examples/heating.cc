@@ -96,8 +96,8 @@ int main(int argc, const char* argv[])
     cerr<<"WARNING: Using different event labels for guard and invariant.\n";
     // Create the heater subsystem
     HybridAutomaton heater;
-    heater.new_mode( heating|on, (dot(T)=P+K*(Tav-Tamp*Ariadne::cos(2.0*pi*C)-T)) );
-    heater.new_mode( heating|off, (dot(T)=K*(Tav-Tamp*Ariadne::cos(2.0*pi*C)-T)) );
+    heater.new_mode( heating|on, (dot(T)=P+K*(Tav-Tamp*cos(2.0*pi*C)-T)) );
+    heater.new_mode( heating|off, (dot(T)=K*(Tav-Tamp*cos(2.0*pi*C)-T)) );
     heater.new_invariant( heating|off, T>=Ton_lower, must_switch_on );
     heater.new_transition( heating|off, switch_on, heating|on, (next(T)=T), T<=Ton_upper, permissive );
     // Comment out above two lines and uncomment the line below to make the switch_on transition urgent

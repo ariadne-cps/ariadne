@@ -108,8 +108,8 @@ CompositeHybridAutomaton create_heating_system()
 
     // Create the heater subsystem
     HybridAutomaton heater;
-    heater.new_mode( heating|on, (dot(T)=P+K*(Tav-Tamp*Ariadne::cos(2.0*pi*C)-T)) );
-    heater.new_mode( heating|off, (dot(T)=K*(Tav-Tamp*Ariadne::cos(2.0*pi*C)-T)) );
+    heater.new_mode( heating|on, (dot(T)=P+K*(Tav-Tamp*cos(2.0*pi*C)-T)) );
+    heater.new_mode( heating|off, (dot(T)=K*(Tav-Tamp*cos(2.0*pi*C)-T)) );
     heater.new_invariant( heating|off, T>=Ton_lower, switch_on );
     heater.new_transition( (heating|off), switch_on, (heating|on), (next(T)=T), T<=Ton_upper, permissive );
     heater.new_transition( (heating|on), switch_off, heating|off, (next(T)=T), T>=Toff, urgent );

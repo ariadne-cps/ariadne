@@ -1,5 +1,11 @@
 all: tests profiles
 
+.PHONY: all tests profiles show-env
+
+show-env:
+	@echo 'INCLUDES =' $(INCLUDES)
+	@echo 'LIBS =' $(LIBS)
+
 profile-lib: $(bin_PROGRAMS)
 	for file in $(bin_PROGRAMS); do ./run_profile.sh $$file; done
 
@@ -10,7 +16,7 @@ AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 AM_LDFLAGS = $(EXEC_LDFLAGS) 
 
 INCLUDES = -iquote$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
-LIBS +=  $(BOOST_PYTHON_LIBS) $(BOOST_SERIALIZATION_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)
+LIBS +=  $(BOOST_SERIALIZATION_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)
 LDADD = ../src/libariadne.la $(LIBS)
 
 bin_PROGRAMS = \
@@ -109,13 +115,13 @@ test_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
 test_hybrid_simulator_SOURCES=test_hybrid_simulator.cc
 test_hybrid_evolver_SOURCES=test_hybrid_evolver.cc
 test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
-test_hybrid_discretiser_SOURCES=test_hybrid_discretiser.cc
+#test_hybrid_discretiser_SOURCES=test_hybrid_discretiser.cc
 test_hybrid_reachability_analyser_SOURCES=test_hybrid_reachability_analyser.cc
 test_hybrid_graphics_SOURCES=test_hybrid_graphics.cc
 test_serialization_SOURCES=test_serialization.cc
 test_graphics_SOURCES=test_graphics.cc
-test_textplot_SOURCES=test_textplot.cc
-test_misc_SOURCES=test_misc.cc
+#test_textplot_SOURCES=test_textplot.cc
+#test_misc_SOURCES=test_misc.cc
 
 EXTRA_DIST =
 SUBDIRS =

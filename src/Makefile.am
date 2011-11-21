@@ -1,4 +1,11 @@
-phony: lib lib-kernel lib-geometry lib-dynamics lib-hybrid lib-extras
+all: lib lib-extras
+
+.PHONY: all lib lib-kernel lib-geometry lib-dynamics lib-hybrid lib-extras show-env
+
+show-env:
+	@echo 'INCLUDES =' $(INCLUDES)
+	@echo 'LIBS =' $(LIBS)
+
 
 lib: libariadne.la libcalculus.la
 lib-kernel: libariadne-kernel.la
@@ -11,7 +18,7 @@ AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 AM_LDFLAGS = $(EXEC_LDFLAGS) 
 
 INCLUDES = -iquote$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
-LIBS =  $(BOOST_PYTHON_LIBS) $(BOOST_SERIALIZATION_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)
+LIBS =  $(BOOST_SERIALIZATION_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)
 LDADD =  $(LIBS)
 
 ARIADNE_KERNEL_SRC = \

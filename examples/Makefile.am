@@ -1,8 +1,16 @@
+all: examples
+.PHONY: all examples show-env
+
+# Show the values of the environment variables
+show-env:
+	@echo 'INCLUDES =' $(INCLUDES)
+	@echo 'LIBS =' $(LIBS)
+
 AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 AM_LDFLAGS = $(EXEC_LDFLAGS) 
 
 INCLUDES = -iquote$(top_srcdir)/include
-LIBS +=  $(BOOST_PYTHON_LIBS) $(BOOST_SERIALIZATION_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)
+LIBS +=  $(BOOST_SERIALIZATION_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)
 LDADD = ../src/libariadne.la $(LIBS)
 
 bin_PROGRAMS= \

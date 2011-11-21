@@ -1,3 +1,10 @@
+all: wrap
+.PHONY: all wrap show-env
+
+show-env:
+	@echo 'INCLUDES =' $(INCLUDES)
+	@echo 'LIBS =' $(LIBS)
+
 AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 AM_LDFLAGS = $(EXEC_LDFLAGS) -module
 

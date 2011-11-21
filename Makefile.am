@@ -1,18 +1,19 @@
+all: lib lib-extras wrap tests examples profiles
+
 ACLOCAL_AMFLAGS=-I m4
 
 SUBDIRS = include src test wrap examples
 
 EXTRA_DIST = Doxyfile
 
-.PHONY: shiny doc all lib lib-extras wrap examples profiles check-lib check-python
+.PHONY: shiny doc all lib wrap examples profiles check-lib check-python show-env
 
-all: lib lib-extras wrap tests examples profiles
 
 # No point in setting AM_CXXFLAGS here as these do not propagate to subdirectories
 # Global CXXFLAGS are defined in configure.ac in the ARIADNE_CXXFLAGS variable.
 
 # Show the values of the environment variables
-evn:
+show-env:
 	@echo 'INCLUDES =' $(INCLUDES)
 	@echo 'LIBS =' $(LIBS)
 
@@ -33,6 +34,18 @@ doc:
 
 lib:
 	(cd src; make lib)
+
+lib-kernel:
+	(cd src; make lib-kernel)
+
+lib-geometry:
+	(cd src; make lib-geometry)
+	
+lib-dynamics:
+	(cd src; make lib-dynamics)
+	
+lib-hybrid:
+	(cd src; make lib-hybrid)
 
 lib-extras:
 	(cd src; make lib-extras)

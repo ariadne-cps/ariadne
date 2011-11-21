@@ -205,7 +205,8 @@ class ConstraintSet
     //! \brief The function used to define the set.
     const RealVectorFunction& function() const { return this->_function; };
     //! \brief The \a i<sup>th</sup> constraint \f$g_i(x)\in c_i\f$.
-    RealNonlinearConstraint constraint(uint i) const { return RealNonlinearConstraint(this->_function[i],this->_codomain[i]); }
+    RealNonlinearConstraint constraint(uint i) const {
+        return RealNonlinearConstraint(ExactFloat(this->_codomain[i].lower()),this->_function[i],ExactFloat(this->_codomain[i].upper())); }
     //! \brief The number of constraints.
     uint number_of_constraints() const { return this->_codomain.size(); };
 
@@ -250,7 +251,8 @@ class BoundedConstraintSet
     //! \brief The function used to define the set.
     const RealVectorFunction& function() const { return this->_function; };
     //! \brief The \a i<sup>th</sup> constraint \f$g_i(x)\in c_i\f$.
-    RealNonlinearConstraint constraint(uint i) const { return RealNonlinearConstraint(this->_function[i],this->_codomain[i]); }
+    RealNonlinearConstraint constraint(uint i) const {
+        return RealNonlinearConstraint(ExactFloat(this->_codomain[i].lower()),this->_function[i],ExactFloat(this->_codomain[i].upper())); }
     //! \brief The number of constraints.
     uint number_of_constraints() const { return this->_codomain.size(); };
 
@@ -324,7 +326,7 @@ class ConstrainedImageSet
     //! \brief Introduce a new constraint of the form \f$g(y)\in [c_l,c_u]\f$.
     void new_space_constraint(const RealNonlinearConstraint& c) {
         ARIADNE_ASSERT_MSG(c.function().argument_size()==this->_function.result_size(),*this<<", "<<c);
-        this->_constraints.append(RealNonlinearConstraint(compose(c.function(),_function),c.bounds())); }
+        this->_constraints.append(RealNonlinearConstraint(c.lower_bound(),compose(c.function(),_function),c.upper_bound())); }
 
     ConstrainedImageSet* clone() const { return new ConstrainedImageSet(*this); }
     uint dimension() const { return this->_function.result_size(); }

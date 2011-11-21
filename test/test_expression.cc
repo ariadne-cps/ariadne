@@ -67,7 +67,7 @@ class TestExpression {
     	RealExpression expr = x;//+u;
 
     	Map<Identifier,Real> valuation;
-    	valuation[x.name()] = Interval(-1.0,1.0);
+    	valuation[x.name()] = Real(-1.0,1.0);
 
     	ARIADNE_TEST_EQUALS(expr.kind(),VARIABLE);
     	ARIADNE_TEST_EQUALS(expr.var(),"x");

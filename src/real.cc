@@ -36,22 +36,21 @@ namespace{
 static const double _pi_up=3.1415926535897936;
 static const double _pi_approx=3.1415926535897931;
 static const double _pi_down=3.1415926535897931;
+static const double _infinity=std::numeric_limits<double>::infinity();
 }
 
 Real::~Real() { }
 Real::Real() : _ivl() { }
+Real::Real(double l, double u) : _ivl(l,u) { }
+Real::Real(double l, double x, double u) : _ivl(l,u) { }
+
 Real::Real(unsigned int m) : _ivl(m) { }
 Real::Real(int n) : _ivl(n) { }
 Real::Real(double x) : _ivl(x) { }
-
-Real::Real(const Float& x) : _ivl(x) { }
-Real::Real(const Interval& ivl) : _ivl(ivl) { }
+Real::Real(const ExactFloat& x) : _ivl(x.value()) { }
 Real::Real(const Real& x) : _ivl(x._ivl) { }
-Real::Real(double l, double u) : _ivl(l,u) { }
-Real::Real(double l, double x, double u) : _ivl(l,u) { }
 Real& Real::operator=(const double& x) { this->_ivl=x; return *this; }
-Real& Real::operator=(const Float& x) { this->_ivl=x; return *this; }
-Real& Real::operator=(const Interval& x) { this->_ivl=x; return *this; }
+Real& Real::operator=(const ExactFloat& x) { this->_ivl=x.value(); return *this; }
 Real& Real::operator=(const Real& x) { this->_ivl=x._ivl; return *this; }
 double Real::get_d() const { return this->_ivl.get_d(); }
 
@@ -60,37 +59,40 @@ Interval::Interval(const Real& x) : l(x._ivl.l), u(x._ivl.u) { }
 Float& Float::operator=(const Real& x) { *this=Float(x); return *this; }
 Interval& Interval::operator=(const Real& x) { *this=Interval(x); return *this; }
 
-Real operator+(const Real& x) { return Real(+static_cast<Interval>(x)); }
-Real operator-(const Real& x) { return Real(-static_cast<Interval>(x)); }
-Real operator+(const Real& x, const Real& y) { return Real(static_cast<Interval>(x)+static_cast<Interval>(y)); }
-Real operator-(const Real& x, const Real& y) { return Real(static_cast<Interval>(x)-static_cast<Interval>(y)); }
-Real operator*(const Real& x, const Real& y) { return Real(static_cast<Interval>(x)*static_cast<Interval>(y)); }
-Real operator/(const Real& x, const Real& y) { return Real(static_cast<Interval>(x)/static_cast<Interval>(y)); }
+Real _make_real(const Interval& ivl) { return Real(ivl.lower().get_d(),ivl.upper().get_d()); }
+
+Real operator+(const Real& x) { return _make_real(+static_cast<Interval>(x)); }
+Real operator-(const Real& x) { return _make_real(-static_cast<Interval>(x)); }
+Real operator+(const Real& x, const Real& y) { return _make_real(static_cast<Interval>(x)+static_cast<Interval>(y)); }
+Real operator-(const Real& x, const Real& y) { return _make_real(static_cast<Interval>(x)-static_cast<Interval>(y)); }
+Real operator*(const Real& x, const Real& y) { return _make_real(static_cast<Interval>(x)*static_cast<Interval>(y)); }
+Real operator/(const Real& x, const Real& y) { return _make_real(static_cast<Interval>(x)/static_cast<Interval>(y)); }
 
 Float mag(const Real& x) { return mag(static_cast<Interval>(x)); }
 
 const Real pi=Real(_pi_down,_pi_approx,_pi_up);
+const Real infinity=Real(_infinity,_infinity,_infinity);
 
-Real abs(const Real& x) { return Real(abs(static_cast<Interval>(x))); }
-Real pos(const Real& x) { return Real(pos(static_cast<Interval>(x))); }
-Real neg(const Real& x) { return Real(neg(static_cast<Interval>(x))); }
-Real sqr(const Real& x) { return Real(sqr(static_cast<Interval>(x))); }
-Real rec(const Real& x) { return Real(rec(static_cast<Interval>(x))); }
-Real add(const Real& x, const Real& y) { return Real(add(static_cast<Interval>(x),static_cast<Interval>(y))); }
-Real sub(const Real& x, const Real& y) { return Real(sub(static_cast<Interval>(x),static_cast<Interval>(y))); }
-Real mul(const Real& x, const Real& y) { return Real(mul(static_cast<Interval>(x),static_cast<Interval>(y))); }
-Real div(const Real& x, const Real& y) { return Real(div(static_cast<Interval>(x),static_cast<Interval>(y))); }
-Real pow(const Real& x, uint m) { return Real(pow(static_cast<Interval>(x),m)); }
-Real pow(const Real& x, int n) { return Real(pow(static_cast<Interval>(x),n)); }
-Real sqrt(const Real& x) { return Real(sqrt(static_cast<Interval>(x))); }
-Real exp(const Real& x) { return Real(exp(static_cast<Interval>(x))); }
-Real log(const Real& x) { return Real(log(static_cast<Interval>(x))); }
-Real sin(const Real& x) { return Real(sin(static_cast<Interval>(x))); }
-Real cos(const Real& x) { return Real(cos(static_cast<Interval>(x))); }
-Real tan(const Real& x) { return Real(tan(static_cast<Interval>(x))); }
-Real asin(const Real& x) { return Real(asin(static_cast<Interval>(x))); }
-Real acos(const Real& x) { return Real(acos(static_cast<Interval>(x))); }
-Real atan(const Real& x) { return Real(atan(static_cast<Interval>(x))); }
+Real abs(const Real& x) { return _make_real(abs(static_cast<Interval>(x))); }
+Real pos(const Real& x) { return _make_real(pos(static_cast<Interval>(x))); }
+Real neg(const Real& x) { return _make_real(neg(static_cast<Interval>(x))); }
+Real sqr(const Real& x) { return _make_real(sqr(static_cast<Interval>(x))); }
+Real rec(const Real& x) { return _make_real(rec(static_cast<Interval>(x))); }
+Real add(const Real& x, const Real& y) { return _make_real(add(static_cast<Interval>(x),static_cast<Interval>(y))); }
+Real sub(const Real& x, const Real& y) { return _make_real(sub(static_cast<Interval>(x),static_cast<Interval>(y))); }
+Real mul(const Real& x, const Real& y) { return _make_real(mul(static_cast<Interval>(x),static_cast<Interval>(y))); }
+Real div(const Real& x, const Real& y) { return _make_real(div(static_cast<Interval>(x),static_cast<Interval>(y))); }
+Real pow(const Real& x, uint m) { return _make_real(pow(static_cast<Interval>(x),m)); }
+Real pow(const Real& x, int n) { return _make_real(pow(static_cast<Interval>(x),n)); }
+Real sqrt(const Real& x) { return _make_real(sqrt(static_cast<Interval>(x))); }
+Real exp(const Real& x) { return _make_real(exp(static_cast<Interval>(x))); }
+Real log(const Real& x) { return _make_real(log(static_cast<Interval>(x))); }
+Real sin(const Real& x) { return _make_real(sin(static_cast<Interval>(x))); }
+Real cos(const Real& x) { return _make_real(cos(static_cast<Interval>(x))); }
+Real tan(const Real& x) { return _make_real(tan(static_cast<Interval>(x))); }
+Real asin(const Real& x) { return _make_real(asin(static_cast<Interval>(x))); }
+Real acos(const Real& x) { return _make_real(acos(static_cast<Interval>(x))); }
+Real atan(const Real& x) { return _make_real(atan(static_cast<Interval>(x))); }
 
 
 

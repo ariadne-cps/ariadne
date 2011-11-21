@@ -184,7 +184,7 @@ void TestContinuousEvolution::failure_test() const
     // cout << "initial_box=" << initial_box << endl;
 
     // Set up the vector field for the first test
-    Vector<Float> p(1, 200.0);
+    Vector<Real> p(1, 200.0);
     VectorUserFunction<FailOne> failone(p);
     VectorField failone_vf(failone);
 

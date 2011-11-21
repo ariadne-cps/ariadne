@@ -189,7 +189,7 @@ IntervalVectorFunctionModel
 IntegratorBase::flow(const IntervalVectorFunction& vf, const IntervalVector& dx0, const Interval& dt) const
 {
     ARIADNE_LOG(1,"IntegratorBase::flow(IntervalVectorFunction vf, IntervalVector dx0, Interval dt)\n");
-    Real dtl=Real(dt.lower());
+    Real dtl=Real(ExactFloat(dt.lower()));
     IntervalVectorFunctionModel evolve=this->flow(vf,dx0,dtl);
     Float dtw=dt.upper()-dt.lower();
     IntervalVector dx=evolve.range();

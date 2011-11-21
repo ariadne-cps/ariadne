@@ -86,7 +86,7 @@ Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& functi
 
 RealBox::RealBox(const IntervalVector& bx) : _ary(bx.size()) {
     for(uint i=0; i!=bx.size(); ++i) {
-        this->_ary[i]=RealInterval(Real(bx[i].lower()),Real(bx[i].upper()));
+        this->_ary[i]=RealInterval(ExactFloat(bx[i].lower()),ExactFloat(bx[i].upper()));
     }
 }
 
@@ -511,7 +511,7 @@ ConstrainedImageSet::ConstrainedImageSet(const BoundedConstraintSet& set)
     : _domain(set.domain()), _function(RealVectorFunction::identity(set.dimension()))
 {
     for(uint i=0; i!=set.number_of_constraints(); ++i) {
-        this->new_parameter_constraint(RealNonlinearConstraint(set.function()[i],set.codomain()[i]));
+        this->new_parameter_constraint(RealNonlinearConstraint(ExactFloat(set.codomain()[i].lower()),set.function()[i],ExactFloat(set.codomain()[i].upper())));
     }
 }
 
@@ -564,8 +564,6 @@ ConstrainedImageSet::affine_approximation() const
 
 tribool ConstrainedImageSet::satisfies(const RealNonlinearConstraint& nc) const
 {
-    const Float infty = inf<Float>();
-
     if( subset(nc.function().evaluate(this->bounding_box()),nc.bounds()) ) {
         return true;
     }
@@ -574,17 +572,18 @@ tribool ConstrainedImageSet::satisfies(const RealNonlinearConstraint& nc) const
     const Box& domain=this->_domain;
     List<RealNonlinearConstraint> all_constraints=this->_constraints;
     RealScalarFunction composed_function = compose(nc.function(),this->_function);
-    const Interval& bounds = nc.bounds();
+    const Real& lower_bound = nc.lower_bound();
+    const Real& upper_bound = nc.upper_bound();
 
     Tribool result;
-    if(bounds.upper()<+infty) {
-        all_constraints.append( composed_function >= bounds.upper() );
+    if(upper_bound<+infinity) {
+        all_constraints.append( composed_function >= upper_bound );
         result=solver.feasible(domain,all_constraints).first;
         all_constraints.pop_back();
         if(definitely(result)) { return false; }
     }
-    if(bounds.lower()>-infty) {
-        all_constraints.append(composed_function <= bounds.lower());
+    if(lower_bound>-infinity) {
+        all_constraints.append(composed_function <= lower_bound);
         result = result || solver.feasible(domain,all_constraints).first;
     }
     return !result;
@@ -614,7 +613,7 @@ tribool ConstrainedImageSet::separated(const Box& bx) const
     // Set up constraints as f_i(D)\cap C_i\neq\emptyset
     List<RealNonlinearConstraint> all_constraints;
     for(uint i=0; i!=this->dimension(); ++i) {
-        all_constraints.append(RealNonlinearConstraint(this->_function[i],bx[i]));
+        all_constraints.append(RealNonlinearConstraint(ExactFloat(bx[i].lower()),this->_function[i],ExactFloat(bx[i].upper())));
     }
     all_constraints.append(this->_constraints);
     Pair<Tribool,FloatVector> result=ConstraintSolver().feasible(domain,all_constraints);
@@ -1242,7 +1241,7 @@ void subdivision_adjoin_outer_approximation(PavingInterface& paving,
 {
     List<IntervalNonlinearConstraint> constraints;
     for(uint i=0; i!=constraint_functions.result_size(); ++i) {
-        constraints.append(IntervalNonlinearConstraint(constraint_functions[i],constraint_bounds[i]));
+        constraints.append(IntervalNonlinearConstraint(constraint_bounds[i].lower(),constraint_functions[i],constraint_bounds[i].upper()));
     }
 
     FloatVector errors(paving.dimension());

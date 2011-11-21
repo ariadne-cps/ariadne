@@ -116,11 +116,11 @@ operator/=(A& a, const X& c) { a.imul(rec(numeric_cast<typename A::NumericType>(
 template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type operator+(const A& a, const X& c) {
     A r=a; r+=c; return r; }
 template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type operator-(const A& a, const X& c) {
-    A r=a; r+=neg(static_cast<typename A::NumericType>(c)); return r; }
+    A r=a; r+=neg(numeric_cast<typename A::NumericType>(c)); return r; }
 template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type operator*(const A& a, const X& c) {
     A r=a; r*=c; return r; }
 template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type operator/(const A& a, const X& c) {
-    A r=a; r*=rec(static_cast<typename A::NumericType>(c)); return r; }
+    A r=a; r*=rec(numeric_cast<typename A::NumericType>(c)); return r; }
 template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type operator+(const X& c, const A& a) {
     A r=a; r+=c; return r; }
 template<class A, class X> inline typename EnableIfAlgebraOverX<A,X>::Type operator-(const X& c, const A& a) {

@@ -180,14 +180,13 @@ class TestTaylorConstrainedImageSet
         RealScalarFunction u=RealScalarFunction::coordinate(3,2);
         RealScalarFunction x=RealScalarFunction::coordinate(2,0);
         RealScalarFunction y=RealScalarFunction::coordinate(2,1);
-        Real e(Interval(-1,+1));
         //Box domain(2, -0.5,1.5, -0.5,0.5);
         Box domain(3, -1.0,+1.0, -1.0,+1.0, -1.0,+1.0);
 
         //TaylorConstrainedImageSet set(domain,(s+0.5*t+(1.0/256)*s*t+t*t,t+0.375*sqr(s)+0.25*e),(0.625*s*s+t-1<=0, 0.25*s+0.5*t==0, -0.25*s+0.5*t+0.125*e==0));
 
         //TaylorConstrainedImageSet set(domain,(s+0.5*t,t),(s+t<=1.0,t*t-s<=1.0,t+u+0.0625*e==0)); //,(t-4<=0)); //, -0.25*s+0.5*t+0.125*e==0));//, 0.25*s+0.5*t==0
-        TaylorConstrainedImageSet set(domain,(s+t+0.25*s*s-0.25*s*t+0.125*t*t,-s+t),(u<=2,-s+t+u-1+0*e/16==0),swp); //,(t-4<=0)); //, -0.25*s+0.5*t+0.125*e==0));//, 0.25*s+0.5*t==0
+        TaylorConstrainedImageSet set(domain,(s+t+0.25*s*s-0.25*s*t+0.125*t*t,-s+t),(u<=2,-s+t+u-1==0),swp); //,(t-4<=0)); //, -0.25*s+0.5*t+0.125*e==0));//, 0.25*s+0.5*t==0
 
         ARIADNE_TEST_PRINT(set);
         AffineSet affine_set=set.affine_over_approximation();

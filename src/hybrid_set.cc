@@ -202,7 +202,7 @@ RealBoundedConstraintSet HybridSet::continuous_state_set(const RealSpace& space)
     }
     List< RealNonlinearConstraint> constraints;
     for(uint i=0; i!=this->_constraints.size(); ++i) {
-        constraints.append( make_function(indicator(this->_constraints[i],POSITIVE),space) <= 0 );
+        constraints.append( make_function(indicator(this->_constraints[i],POSITIVE),space) <= Real(0) );
     }
     return RealBoundedConstraintSet(domain,constraints);
 }

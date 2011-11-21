@@ -932,7 +932,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                             Float alpha=Float(i+1)/n;
                             IntervalScalarFunctionModel intermediate_guard
                                 = compose( guard_function, unchecked_compose( flow, join(starting_state, ExactFloat(alpha)*elapsed_time) ) );
-                            set.new_parameter_constraint(event, intermediate_guard <= 0);
+                            set.new_parameter_constraint(event, intermediate_guard <= 0.0);
                         }
                         break;
                     case LOWER_SEMANTICS:
@@ -1585,7 +1585,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         result.step_kind=PARAMETER_DEPENDENT_FINISHING_TIME;
         result.finishing_kind=BEFORE_FINAL_TIME;
         if(starting_time_range.width()<step_size/2) {
-            result.parameter_dependent_finishing_time=this->function_factory().create_constant(initial_set.parameter_domain(),ExactFloat(starting_time_range.lower())+ExactFloat(step_size));
+            result.parameter_dependent_finishing_time=this->function_factory().create_constant(initial_set.parameter_domain(),add_ivl(starting_time_range.lower(),step_size));
         } else {
             // Try to reduce the time interval by half the step size
             // Corresponds to setting omega(smin)=tau(smin)+h, omega(smax)=tau(smax)+h/2

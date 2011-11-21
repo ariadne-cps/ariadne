@@ -263,8 +263,6 @@ void export_real()
 {
     class_<Real> real_class("Real");
     real_class.def(init<double>());
-    real_class.def(init<Float>());
-    real_class.def(init<Interval>());
     real_class.def(init<Real>());
     real_class.def(init<std::string>());
     real_class.def("radius", &Interval::radius);

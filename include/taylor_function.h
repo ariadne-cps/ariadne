@@ -57,10 +57,28 @@ class ScalarTaylorFunction;
 class VectorTaylorFunction;
 class TaylorFunctionFactory;
 
+template<template<class> class T> inline T<Float> unscale(const T<Float>& x, const Interval& d) {
+    Float c(add_approx(d.lower()/2,d.upper()/2));
+    Float r(add_approx(d.upper()/2,d.lower()/2));
+    return (x-c)/r;
+}
 
-template<class X> inline X unscale(const X& x, const Interval& d) {
-    Real c(add_ivl(d.lower()/2,d.upper()/2));
-    Real r(sub_ivl(d.upper()/2,d.lower()/2));
+template<template<class> class T> inline T<Interval> unscale(const T<Interval>& x, const Interval& d) {
+    Interval c(add_approx(d.lower()/2,d.upper()/2));
+    Interval r(add_approx(d.upper()/2,d.lower()/2));
+    return (x-c)/r;
+}
+
+
+inline Float unscale(const Float& x, const Interval& d) {
+    Float c(add_approx(d.lower()/2,d.upper()/2));
+    Float r(add_approx(d.upper()/2,d.lower()/2));
+    return (x-c)/r;
+}
+
+inline Interval unscale(const Interval& x, const Interval& d) {
+    Interval c(add_ivl(d.lower()/2,d.upper()/2));
+    Interval r(sub_ivl(d.upper()/2,d.lower()/2));
     return (x-c)/r;
 }
 

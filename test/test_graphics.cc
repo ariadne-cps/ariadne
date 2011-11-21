@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     TaylorConstrainedImageSet ts1(Box::unit_box(3),afn1,TrivialSweeper());
     Box bbx1=ts1.bounding_box()+Vector<Interval>(2, Interval(-0.25,+0.25));
 
-    VectorUserFunction<RadiusSquare> radius(Vector<Float>(1u,0.5));
+    VectorUserFunction<RadiusSquare> radius(Vector<Real>(1u,0.5));
     ConstraintSet cs1(radius,Box(1u,Interval(-1,0)));
 
     {

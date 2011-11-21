@@ -30,7 +30,7 @@
 
 namespace Ariadne {
 
-template<class A> typename EnableIfGradedAlgebra<A>::Type 
+template<class A> typename EnableIfGradedAlgebra<A>::Type
 compose(const Series<typename A::NumericType>& x, const A& y)
 {
     uint d=y.degree();
@@ -248,9 +248,9 @@ sqrt(const A& x)
     //std::cerr<<"te="<<trunc_err<<" te*[-1,+1]="<<trunc_err*Interval(-1,1)<<std::endl;
     z+=z.create_ball(trunc_err);
     //std::cerr<<"z="<<z<<std::endl;
-    X sqrta=sqrt(X(avg));
+    X sqrta=sqrt(numeric_cast<X>(avg));
     //std::cerr<<"sqrt(a)="<<sqrta<<std::endl;
-    z*=sqrt(X(avg));
+    z*=sqrt(numeric_cast<X>(avg));
     //std::cerr<<"z="<<z<<std::endl;
     return z;
 }
@@ -275,7 +275,7 @@ rec(const A& x)
 
     uint d=integer_cast<uint>((log((1-eps)*x.tolerance())/log(eps))+1);
 
-    A y=1-(x/avg);
+    A y=1-(x/numeric_cast<X>(avg));
     A z=x.create();
     z+=Float(d%2?-1:+1);
     //std::cerr<<"  y="<<y<<"\n";
@@ -319,7 +319,7 @@ log(const A& x)
     }
     z=z*y;
     Float trunc_err=pow(eps,d)/(1-eps)/d;
-    return z+log(X(avg))+trunc_err*Interval(-1,1);
+    return z+log(numeric_cast<X>(avg))+trunc_err*Interval(-1,1);
 }
 
 // Use special code to utilise exp(ax+b)=exp(x)^a*exp(b)

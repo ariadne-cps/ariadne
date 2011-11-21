@@ -56,6 +56,8 @@ TestVector::test_concept()
     Vector<Float> fv;
     Vector<Interval> iv;
 
+    iv=Vector<Interval>(fv);
+
     fv=fv+fv; iv=fv+fv; iv=fv+iv; iv=iv+fv; iv=iv+iv;
     fv=fv-fv; iv=fv-fv; iv=fv-iv; iv=iv-fv; iv=iv-iv;
 

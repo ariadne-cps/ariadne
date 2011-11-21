@@ -67,30 +67,33 @@ class Real {
     //! \brief Construct from a string literal.
     //! This can be used to create real numbers representing decimal values e.g. \c %Real("4.2") .
     explicit Real(const std::string& s);
+    //! \brief Construct from double-precision values giving lower and upper bounds for the exact value.
+    explicit Real(double l, double u);
+    //! \brief Construct from double-precision values giving lower and upper bounds for the exact value and a nearest approximation.
+    explicit Real(double l, double x, double u);
+
+    //! \brief Convert from a builtin natural number.
     Real(unsigned int m);
+    //! \brief Convert from a builtin integer.
     Real(int n);
     //! \brief Convert from a builtin double-precision floating-point value.
     //! A numeric literal is first processed by the language support, and the resulting %Real may not have
     //! the same value as the mathematical literal. e.g. \c %Real(4.2) has the value 4.2000000000000002 to 16 decimal places.
     Real(double x);
 #ifdef HAVE_GMPXX_H
-    //! \brief Construct from a rational number.
+    //! \brief Convert from a rational number.
     Real(const Rational& q);
 #endif
-    //! \brief Construct from a floating-point value.
-    explicit Real(const Float& x);
-    //! \brief Construct from a interval. The resulting %Real object does not describe a number arbitrarily accurately.
-    //! \deprecated This constructor should be avoided in user code.
-    explicit Real(const Interval& ivl);
-    explicit Real(double l, double u);
-    explicit Real(double l, double x, double u);
+    //! \brief Convert from a floating-point value representing a number exactly.
+    Real(const ExactFloat& x);
     //! \brief Copy constructor.
     Real(const Real&);
     //! \brief Copy assignment.
     Real& operator=(const Real&);
+    //! \brief Assign from a builtin double-precision floating-point value.
     Real& operator=(const double& x);
-    Real& operator=(const Float& x);
-    Real& operator=(const Interval& x);
+    //! \brief Assign from a floating-point value representing a number exactly.
+    Real& operator=(const ExactFloat& x);
     // Can't use conversion operators below in g++ since compiler complains
     // about ambiguous conversion to Interval through Interval(Real::operator Float())
     //operator Float() const { return this->_ivl.midpoint(); }
@@ -201,6 +204,8 @@ inline tribool operator< (const Real& x, double y) { return static_cast<Interval
 //!  \brief A floating-point bound for |x|.
 Float mag(const Real& x);
 
+//!  \brief The constant infinity.
+extern const Real infinity;
 //!  \brief The constant pi.
 extern const Real pi;
 

@@ -39,8 +39,8 @@ namespace Ariadne {
 
 template<class R, class A> inline R numeric_cast(const A& a);
 template<> inline double numeric_cast(const Real& a) { return a.get_d(); }
-template<> inline Real numeric_cast(const Float& a) { return Real(a); }
-template<> inline Real numeric_cast(const Interval& a) { return Real(a); }
+template<> inline Real numeric_cast(const Float& a) { return Real(ExactFloat(a)); }
+template<> inline Real numeric_cast(const Interval& a) { return Real(a.lower().get_d(),a.upper().get_d()); }
 
 //! \ingroup NumericModule \related Float \related Interval \related Real
 //! \brief Cast one %Ariadne numerical type or builtin numerical type to another.

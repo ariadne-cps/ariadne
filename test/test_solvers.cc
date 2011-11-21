@@ -90,7 +90,7 @@ class TestSolver
         f=RealVectorFunction(1u,(x*x+1)*x-a);
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
-        bb=RealScalarFunction(aa-Real(p[0].midpoint()))/Real(p[0].radius());
+        bb=RealScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
         e=RealVectorFunction( 1u, 0.682328+bb*(0.0521547+bb*(-0.0023232+bb*0.000147778)) );
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
 
@@ -100,7 +100,7 @@ class TestSolver
         f=RealVectorFunction(1u,4*x+x*x-a-4);
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
-        bb=RealScalarFunction(aa-Real(p[0].midpoint()))/Real(p[0].radius());
+        bb=RealScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
         e=RealVectorFunction( 1u, 0.828427+bb*(0.0441942+bb*(-0.000345267+bb*0.00000539468)) );
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
     }

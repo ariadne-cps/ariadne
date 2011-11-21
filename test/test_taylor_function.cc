@@ -40,7 +40,7 @@
 using namespace std;
 using namespace Ariadne;
 
-Vector<Float> e(uint n, uint i) { return Vector<Float>::unit(n,i); }
+Vector<Real> e(uint n, uint i) { return Vector<Real>::unit(n,i); }
 Expansion<Float> v(uint n, uint j) { return Expansion<Float>::variable(n,j); }
 Polynomial<Float> p(uint n, uint j) { return Polynomial<Float>::variable(n,j); }
 ScalarTaylorFunction t(Vector<Interval> d, uint j,Sweeper swp) { return ScalarTaylorFunction::variable(d,j,swp); }

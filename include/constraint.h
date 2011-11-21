@@ -39,10 +39,9 @@ class NonlinearConstraint {
     typedef R BoundType;
   public:
     NonlinearConstraint(R const& l, ScalarFunction<X> const& f, R const& u) : _function(f), _lower_bound(l), _upper_bound(u) { ARIADNE_ASSERT(l<=u); }
-    NonlinearConstraint(ScalarFunction<X> const& f, Interval const& b) : _function(f), _lower_bound(b.lower()), _upper_bound(b.upper()) { }
+    NonlinearConstraint(ScalarFunction<X> const& f, R const& x) : _function(f), _lower_bound(x), _upper_bound(x) { }
     template<class XX,class RR> NonlinearConstraint(const NonlinearConstraint<XX,RR>& c)
         : _function(static_cast<ScalarFunction<X> >(c.function())), _lower_bound(c.lower_bound()), _upper_bound(c.upper_bound()) { }
-//        : _function(c.function().operator ScalarFunction<X>())), _lower_bound(c.lower_bound()), _upper_bound(c.upper_bound()) { }
     ScalarFunction<X> const& function() const { return this->_function; }
     R const& lower_bound() const { return this->_lower_bound; }
     R const& upper_bound() const { return this->_upper_bound; }
@@ -56,65 +55,47 @@ class NonlinearConstraint {
 typedef NonlinearConstraint<Real,Real> RealNonlinearConstraint;
 typedef NonlinearConstraint<Interval,Float> IntervalNonlinearConstraint;
 
-inline RealNonlinearConstraint operator<=(const Float& c, const RealScalarFunction& f) {
-    return RealNonlinearConstraint(f,Interval(c,inf<Float>()));
+inline RealNonlinearConstraint operator<=(const Real& c, const RealScalarFunction& f) {
+    return RealNonlinearConstraint(c,f,infinity);
 }
 
-inline RealNonlinearConstraint operator<=(const RealScalarFunction& f, const Float& c) {
-    return RealNonlinearConstraint(f,Interval(-inf<Float>(),c));
-}
-
-inline RealNonlinearConstraint operator>=(const RealScalarFunction& f, const Float& c) {
-    return RealNonlinearConstraint(f,Interval(c,+inf<Float>()));
+inline RealNonlinearConstraint operator>=(const Real& c, const RealScalarFunction& f) {
+    return RealNonlinearConstraint(-infinity,f,c);
 }
 
 inline RealNonlinearConstraint operator<=(const RealScalarFunction& f, const Real& c) {
-    return RealNonlinearConstraint(Real(-inf<Float>()),f,c);
+    return RealNonlinearConstraint(-infinity,f,c);
 }
 
 inline RealNonlinearConstraint operator>=(const RealScalarFunction& f, const Real& c) {
-    return RealNonlinearConstraint(c,f,Real(+inf<Float>()));
-}
-
-inline RealNonlinearConstraint operator<=(const RealScalarFunction& f, double c) {
-    return RealNonlinearConstraint(f,Interval(-inf<Float>(),c));
-}
-
-inline RealNonlinearConstraint operator>=(const RealScalarFunction& f, double c) {
-    return RealNonlinearConstraint(f,Interval(c,+inf<Float>()));
-}
-
-inline RealNonlinearConstraint operator==(const RealScalarFunction& f, double c) {
-    return RealNonlinearConstraint(f,Interval(c));
+    return RealNonlinearConstraint(c,f,infinity);
 }
 
 inline RealNonlinearConstraint operator==(const RealScalarFunction& f, const Real& c) {
-    return RealNonlinearConstraint(f,Interval(c));
+    return RealNonlinearConstraint(f,c);
 }
 
-inline RealNonlinearConstraint operator==(const RealScalarFunction& f, const Float& c) {
-    return RealNonlinearConstraint(f,Interval(c));
+inline RealNonlinearConstraint operator<=(const RealScalarFunction& f, double c) {
+    return RealNonlinearConstraint(-infinity,f,Real(c));
 }
 
-inline RealNonlinearConstraint operator==(const RealScalarFunction& f, const Interval& c) {
-    return RealNonlinearConstraint(f,Interval(c));
+inline RealNonlinearConstraint operator>=(const RealScalarFunction& f, double c) {
+    return RealNonlinearConstraint(Real(c),f,infinity);
 }
 
-inline RealNonlinearConstraint operator<=(const RealNonlinearConstraint& nc, const Float& c) {
-    return RealNonlinearConstraint(nc.function(),intersection(nc.bounds(),Interval(-inf<Float>(),c)));
+inline RealNonlinearConstraint operator==(const RealScalarFunction& f, double c) {
+    return RealNonlinearConstraint(f,Real(c));
 }
 
 
-inline IntervalNonlinearConstraint operator<=(const IntervalScalarFunction& f, double c) {
-    return IntervalNonlinearConstraint(-inf<Float>(),f,Float(c));
+inline RealNonlinearConstraint operator<=(const RealNonlinearConstraint& nc, const Real& c) {
+    ARIADNE_ASSERT(Float(nc.upper_bound())==inf<Float>());
+    return RealNonlinearConstraint(nc.lower_bound(),nc.function(),c);
 }
 
-inline IntervalNonlinearConstraint operator>=(const IntervalScalarFunction& f, double c) {
-    return IntervalNonlinearConstraint(-inf<Float>(),f,c);
-}
 
 inline IntervalNonlinearConstraint operator<=(const IntervalScalarFunction& f, const Float& c) {
-    return IntervalNonlinearConstraint(c,f,+inf<Float>());
+    return IntervalNonlinearConstraint(-inf<Float>(),f,c);
 }
 
 inline IntervalNonlinearConstraint operator>=(const IntervalScalarFunction& f, const Float& c) {
@@ -125,16 +106,24 @@ inline IntervalNonlinearConstraint operator==(const IntervalScalarFunction& f, c
     return IntervalNonlinearConstraint(c,f,c);
 }
 
+inline IntervalNonlinearConstraint operator<=(const IntervalScalarFunction& f, double c) {
+    return IntervalNonlinearConstraint(-inf<Float>(),f,Float(c));
+}
+
+inline IntervalNonlinearConstraint operator>=(const IntervalScalarFunction& f, double c) {
+    return IntervalNonlinearConstraint(-inf<Float>(),f,c);
+}
+
 inline IntervalNonlinearConstraint operator==(const IntervalScalarFunction& f, double c) {
     return IntervalNonlinearConstraint(Float(c),f,Float(c));
 }
 
 inline IntervalNonlinearConstraint operator<=(const IntervalScalarFunction& f1, const IntervalScalarFunction& f2) {
-    return (f1-f2) <= 0;
+    return (f1-f2) <= 0.0;
 }
 
 inline IntervalNonlinearConstraint operator>=(const IntervalScalarFunction& f1, const IntervalScalarFunction& f2) {
-    return (f1-f2) >= 0;
+    return (f1-f2) >= 0.0;
 }
 
 

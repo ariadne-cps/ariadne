@@ -108,78 +108,79 @@ int main()
     HybridAutomaton watertank_system;
 
     /// Create four discrete states
-    DiscreteLocation l1("q","1");
-    DiscreteLocation l2("q","2");
-    DiscreteLocation l3("q","3");
-    DiscreteLocation l4("q","4");
+    StringVariable valve("valve");
+    DiscreteLocation opening(valve|"opening");
+    DiscreteLocation open(valve|"open");
+    DiscreteLocation closing(valve|"closing");
+    DiscreteLocation closed(valve|"closed");
 
     /// Create the discrete events
-    DiscreteEvent e12("e12");
-    DiscreteEvent e23("e23");
-    DiscreteEvent e34("e34");
-    DiscreteEvent e41("e41");
-    DiscreteEvent i2("i2");
-    DiscreteEvent i4("i4");
+    DiscreteEvent finish_opening("finish_opening");
+    DiscreteEvent start_closing("start_closing");
+    DiscreteEvent must_start_closing("must_start_closing");
+    DiscreteEvent finish_closing("finish_closing");
+    DiscreteEvent start_opening("start_opening");
+    DiscreteEvent must_start_opening("must_start_opening");
 
     /// Coordinates
-    RealVariable x("x");
-    RealVariable y("y");
-    RealVariable t("t");
+    RealVariable height("height");
+    RealVariable aperture("aperture");
+    TimeVariable time;
     /// Create the dynamics
 
     /// The dynamic for an opening valve
-    RealExpressions opening_d((-a*sqrt(x)+b*y,1/T,one));
+    DottedRealAssignments opening_dynamic = ( dot(height)=-a*sqrt(height)+b*aperture, dot(aperture)=1/T );
     /// The dynamic for a closing valve
-    RealExpressions closing_d((-a*sqrt(x)+b*y,-1/T,one));
+    DottedRealAssignments closing_dynamic = ( dot(height)=-a*sqrt(height)+b*aperture, dot(aperture)=-1/T );
     /// The dynamic for an opened valve
-    RealExpressions opened_d((-a*sqrt(x)+b,zero,one));
+    DottedRealAssignments open_dynamic = ( dot(height)=-a*sqrt(height)+b, dot(aperture)=zero );
     /// The dynamic for an opened valve
-    RealExpressions closed_d((-a*sqrt(x),zero,one));
+    DottedRealAssignments closed_dynamic = ( dot(height)=-a*sqrt(height), dot(aperture)=zero );
 
-    cout << "opening dynamic = " << opening_d << endl << endl;
-    cout << "closing dynamic = " << closing_d << endl << endl;
-    cout << "opened dynamic = " << opened_d << endl << endl;
-    cout << "closed dynamic = " << closed_d << endl << endl;
+    cout << "opening dynamic = " << opening_dynamic << endl << endl;
+    cout << "closing dynamic = " << closing_dynamic << endl << endl;
+    cout << "open dynamic = " << open_dynamic << endl << endl;
+    cout << "closed dynamic = " << closed_dynamic << endl << endl;
 
     /// Create the resets
-    RealExpressions reset_y_zero((x,zero,t));
-    cout << "reset_y_zero=" << reset_y_zero << endl << endl;
-    RealExpressions reset_y_one((x,one,t));
-    cout << "reset_y_one=" << reset_y_one << endl << endl;
+    PrimedRealAssignments reset_aperture_zero = ( next(height)=height, next(aperture)=0 );
+    cout << "reset_aperture_zero=" << reset_aperture_zero << endl << endl;
+    PrimedRealAssignments reset_aperture_one = ( next(height)=height, next(aperture)=1 );
+    cout << "reset_aperture_one=" << reset_aperture_one << endl << endl;
 
     /// Create the guards.
-    /// Guards are true when f(x) >= 0
-    ContinuousPredicate guard12(y-1>=0);
-    cout << "guard12=" << guard12 << endl << endl;
-    ContinuousPredicate guard23(x-(hmax-Delta)>=0);
-    cout << "guard23=" << guard23 << endl << endl;
-    ContinuousPredicate guard34(-y>=0);
-    cout << "guard34=" << guard34 << endl << endl;
-    ContinuousPredicate guard41(-x+(hmin+Delta)>=0);
-    cout << "guard41=" << guard41 << endl << endl;
+    /// Guards are true when f(height) >= 0
+    ContinuousPredicate finish_opening_guard(aperture-1>=0);
+    cout << "finish_opening_guard=" << finish_opening_guard << endl << endl;
+    ContinuousPredicate start_closing_guard(height-(hmax-Delta)>=0);
+    cout << "start_closing_guard=" << start_closing_guard << endl << endl;
+    ContinuousPredicate finish_closing_guard(-aperture>=0);
+    cout << "finish_closing_guard=" << finish_closing_guard << endl << endl;
+    ContinuousPredicate start_opening_guard(-height+(hmin+Delta)>=0);
+    cout << "start_opening_guard=" << start_opening_guard << endl << endl;
 
     /// Create the invariants.
-    /// Invariants are true when f(x) <= 0
+    /// Invariants are true when f(height) <= 0
     /// forced transitions do not need an explicit invariant,
     /// we need only the invariants for location 2 and 4
-    ContinuousPredicate inv2(x-(hmax+Delta)<=0);
-    cout << "inv2=" << inv2 << endl << endl;
-    ContinuousPredicate inv4(-x+(hmin-Delta)<=0);
-    cout << "inv4=" << inv4 << endl << endl;
+    ContinuousPredicate start_closing_invariant(height-(hmax+Delta)<=0);
+    cout << "start_closing_invariant=" << start_closing_invariant << endl << endl;
+    ContinuousPredicate start_opening_invariant(-height+(hmin-Delta)<=0);
+    cout << "start_opening_invariant=" << start_opening_invariant << endl << endl;
 
     /// Build the automaton
-    watertank_system.new_mode(l1,dot((x,y,t))=opening_d);
-    watertank_system.new_mode(l2,dot((x,y,t))=opened_d);
-    watertank_system.new_mode(l3,dot((x,y,t))=closing_d);
-    watertank_system.new_mode(l4,dot((x,y,t))=closed_d);
+    watertank_system.new_mode(opening,opening_dynamic);
+    watertank_system.new_mode(open,open_dynamic);
+    watertank_system.new_mode(closing,closing_dynamic);
+    watertank_system.new_mode(closed,closed_dynamic);
 
-    watertank_system.new_invariant(l2,inv2,i2);
-    watertank_system.new_invariant(l4,inv4,i2);
+    watertank_system.new_invariant(open,start_closing_invariant,must_start_closing);
+    watertank_system.new_invariant(closed,start_opening_invariant,must_start_opening);
 
-    watertank_system.new_transition(l1,e12,l2,next((x,y,t))=reset_y_one,guard12,urgent);
-    watertank_system.new_transition(l2,e23,l3,next((x,y,t))=reset_y_one,guard23,permissive);
-    watertank_system.new_transition(l3,e34,l4,next((x,y,t))=reset_y_zero,guard34,urgent);
-    watertank_system.new_transition(l4,e41,l1,next((x,y,t))=reset_y_zero,guard41,permissive);
+    watertank_system.new_transition(opening,finish_opening,open,reset_aperture_one,finish_opening_guard,urgent);
+    watertank_system.new_transition(open,start_closing,closing,reset_aperture_one,start_closing_guard,permissive);
+    watertank_system.new_transition(closing,finish_closing,closed,reset_aperture_zero,finish_closing_guard,urgent);
+    watertank_system.new_transition(closed,start_opening,opening,reset_aperture_zero,start_opening_guard,permissive);
 
 
     /// Finished building the automaton
@@ -203,27 +204,50 @@ int main()
     typedef GeneralHybridEvolver::OrbitType OrbitType;
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
-    std::cout << "Computing evolution starting from location l2, x = 6.0, y = 1.0" << std::endl;
+    std::cout << "Computing evolution starting from location l2, height = 6.0, aperture = 1.0" << std::endl;
 
-    RealVariableBox initial_box((x==6.0, y==1.0, t==0.0000));
-    HybridSet initial_set(l2,initial_box);
-    Box bounding_box(3, 0.0,10.0, -0.1,1.1, 0.0,tmax);
+    //RealVariableBox initial_box((height==0.5, aperture==0.0));
+    RealVariableBox initial_box((0.5<=height<=0.5001, 0.00<=aperture<=0.0001));
+    HybridSet initial_set(opening,initial_box);
+    //RealVariableBox initial_box((height==6.0, aperture==1.0, t==0.0000));
+    //HybridSet initial_set(l2,initial_box);
+    Box bounding_box(2, 0.0,10.0, -0.1,1.1);
 
     HybridTime evolution_time(tmax,jmax);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(watertank_system,initial_set,evolution_time,LOWER_SEMANTICS);
+    //OrbitType orbit = evolver.orbit(watertank_system,initial_set,evolution_time,LOWER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(watertank_system,initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
+
+    std::cout << "Plotting orbit... "<<std::flush;
+    Axes2d height_aperture_axes(-0.1,height,9.1, -0.1,aperture,1.3);
+    Axes2d time_height_axes(0.0,time,tmax, -0.1,height,9.1);
 
     std::cout << "Orbit.reach.size()="<<orbit.reach().size()<<std::endl;
     std::cout << "Orbit.final.size()="<<orbit.final().size()<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
-    plot("watertank-nonlinear-orbit-tx", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), orbit.reach(), -1);
-    plot("watertank-nonlinear-orbit-ty", 2,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit.reach(), -1);
-    plot("watertank-nonlinear-orbit-xy", 0,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit.reach(), -1);
+    plot("watertank-nonlinear-orbit", height_aperture_axes, Colour(0.0,0.5,1.0), orbit, Colour(0.0,1.0,1.0), orbit.final());
+    plot("watertank-nonlinear-height", time_height_axes, Colour(0.0,0.5,1.0), orbit, Colour(0.0,1.0,1.0), orbit.final());
+    //plot("watertank-nonlinear-orbit-time-height", 2,0, 3, bounding_box, Colour(0.0,0.5,1.0), orbit.reach(), -1);
+    //plot("watertank-nonlinear-orbit-time-aperture", 2,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit.reach(), -1);
+    //plot("watertank-nonlinear-orbit-height-aperture", 0,1, 3, bounding_box, Colour(0.0,0.5,1.0), orbit.reach(), -1);
     // textplot("watertank-nonlinear-orbit", orbit);
     // textplot("watertank-nonlinear-final", orbit.final());
 
+    std::cout << "Discretising orbit" << std::flush;
+    Int depth = 3;
+    HybridScaling scaling; scaling.set_scaling(height,1.0); scaling.set_scaling(aperture,0.125);
+    HybridGrid grid(watertank_system.state_space(),scaling);
+    HybridGridTreeSet hgts(grid);
+    for (ListSet<HybridEnclosure>::const_iterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
+    {
+        std::cout<<"."<<std::flush;
+        it->adjoin_outer_approximation_to(hgts,depth);
+    }
+    std::cout << "done." << std::endl;
+
+    plot("watertank-nonlinear-reach", height_aperture_axes, Colour(0.0,0.5,1.0), hgts);
 
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
@@ -233,9 +257,8 @@ int main()
 
     HybridTime reach_time(64.0,6);
 
-    std::cout << "Omitting computation of global upper and lower reach set." << std::endl;
-
 /*
+
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
     // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
@@ -252,7 +275,7 @@ int main()
     std::cout << "done." << std::endl;
     plot("watertank-nonlinear-upper_reach1",bounding_box, Colour(0.0,0.5,1.0), upper_reach_set);
 
-    std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
+    std::cout << "Computing evolution starting from location l1, height = 0.0, aperture = 0.0" << std::endl;
 
     Box initial_box2(2, 0.0,0.001, 0.0,0.001);
     HybridImageSet initial_set2;

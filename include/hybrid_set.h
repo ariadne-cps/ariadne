@@ -109,6 +109,7 @@ class HybridPoint
     HybridPoint(const DiscreteLocation& q, const RealSpace& spc, const Point& pt) : Tuple<DiscreteLocation,RealSpace,Point>(q,spc,pt) { }
     HybridPoint(const DiscreteLocation& q, const Map<Identifier,Float>& val);
     HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& val);
+    HybridPoint(const DiscreteLocation& q, const List< Assignment<RealVariable,Real> >& val);
     const DiscreteLocation& location() const { return this->first; }
     const RealSpace& space() const { return this->second; }
     const Point& point() const { return this->third; }

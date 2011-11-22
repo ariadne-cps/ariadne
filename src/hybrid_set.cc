@@ -242,6 +242,16 @@ HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,Float>&
     }
 }
 
+HybridPoint::HybridPoint(const DiscreteLocation& q, const List<RealConstantAssignment>& x)
+    : Tuple<DiscreteLocation,RealSpace,Point>(q,RealSpace(),Point(x.size()))
+{
+    uint i=0;
+    for(List<RealConstantAssignment>::const_iterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
+        this->second.append(RealVariable(iter->left_hand_side()));
+        this->third[i]=iter->right_hand_side();
+    }
+}
+
 Map<RealVariable,Float> HybridPoint::values() const {
     Map<RealVariable,Float> r;
     for(uint i=0; i!=this->second.dimension(); ++i) {

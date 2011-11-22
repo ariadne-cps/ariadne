@@ -29,6 +29,7 @@
 #include "numeric.h"
 #include "expression.h"
 #include "assignment.h"
+#include "valuation.h"
 #include "space.h"
 #include "function.h"
 
@@ -51,6 +52,24 @@ class TestExpression {
         ARIADNE_TEST_ASSERT(a!=RealVariable("b"));
     }
 
+    void test_assignment() {
+        RealVariable x("x"), y("y");
+        Real z(0), o(1);
+        Assignment<Variable<Real>,Real> ac = (x=o);
+        Assignment<Variable<Real>,Expression<Real> > a = (x=o);
+        Valuation<Real> v(ac);
+
+        List< Assignment<Variable<Real>,Real> > lac;
+        lac = (x=z,y=o);
+        List< Assignment<Variable<Real>,Expression<Real> > > la;
+        la = (x=z,y=o);
+        ARIADNE_TEST_PRINT( la = ((x=z,y=o+x+y)) );
+        ARIADNE_TEST_PRINT( ((x=z,y=o+x+y)) );
+        ARIADNE_TEST_PRINT( ((x=z,y=o)) );
+        v = Valuation<Real>(lac);
+        v = lac;
+    }
+
     void test_evaluate() {
         ARIADNE_TEST_CONSTRUCT(RealExpression,g,(x+3*y*z*z));
 
@@ -62,20 +81,20 @@ class TestExpression {
     }
 
     void test_parameters() {
-    	RealVariable x("x");
+        RealVariable x("x");
 
-    	RealExpression expr = x;//+u;
+        RealExpression expr = x;//+u;
 
-    	Map<Identifier,Real> valuation;
-    	valuation[x.name()] = Real(-1.0,1.0);
+        Map<Identifier,Real> valuation;
+        valuation[x.name()] = numeric_cast<Real>(Interval(-1.0,1.0));
 
-    	ARIADNE_TEST_EQUALS(expr.kind(),VARIABLE);
-    	ARIADNE_TEST_EQUALS(expr.var(),"x");
-    	ARIADNE_TEST_EQUALS(valuation[x.name()],Real(-1.0,1.0));
+        ARIADNE_TEST_EQUALS(expr.kind(),VARIABLE);
+        ARIADNE_TEST_EQUALS(expr.var(),"x");
+        ARIADNE_TEST_EQUALS(valuation[x.name()],Real(-1.0,1.0));
 
-    	Real result1 = evaluate(expr,valuation);
+        Real result1 = evaluate(expr,valuation);
 
-    	ARIADNE_TEST_EQUALS(result1,Real(-1.0,1.0));
+        ARIADNE_TEST_EQUALS(result1,Real(-1.0,1.0));
     }
 
     void test_function()
@@ -122,6 +141,7 @@ class TestExpression {
 
     void test() {
         test_variables();
+        test_assignment();
         test_parameters();
         test_function();
     }

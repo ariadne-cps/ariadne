@@ -242,7 +242,7 @@ TestHybridAutomaton::test_overspecified_dynamic()
     RealVariable x("x");
     RealVariable y("y");
     ARIADNE_TEST_EXECUTE( system.new_mode( (x=y),(dot(y)=x) ) );
-    ARIADNE_TEST_THROWS( system.new_mode( (x=1,x=2) ),SystemSpecificationError);
+    ARIADNE_TEST_THROWS( system.new_mode( (x=1,x=x+2) ),SystemSpecificationError);
     ARIADNE_TEST_THROWS( system.new_mode( (dot(x)=1,dot(x)=0) ),SystemSpecificationError);
     ARIADNE_TEST_THROWS( system.new_mode( (x=1),(dot(x)=0) ),SystemSpecificationError);
 }

@@ -98,9 +98,25 @@ struct Assignment
     operator List< Assignment<LHS,RHS> >() const { return List< Assignment<LHS,RHS> >(1u,*this); }
     const LHS& variable() const { return this->lhs; }
     const RHS& expression() const { return this->rhs; }
-    const LHS& left_hand_size() const { return this->lhs; }
-    const RHS& right_hand_size() const { return this->rhs; }
+    const LHS& left_hand_side() const { return this->lhs; }
+    const RHS& right_hand_side() const { return this->rhs; }
     LHS lhs; RHS rhs;
+};
+
+template<class T>
+struct Assignment< Variable<T>, T>
+{
+    Assignment(const Variable<T>& l, const T& r) : lhs(l), rhs(r) { }
+    operator Assignment< Variable<T>,Expression<T> > () const { return Assignment<Variable<T>,Expression<T> >(this->lhs,this->rhs); }
+    operator List< Assignment<Variable<T>,T > >() const { return List< Assignment<Variable<T>,T > >(1u,*this); }
+    operator List< Assignment<Variable<T>, Expression<T> > >() const { return List< Assignment<Variable<T>,Expression<T> > >(1u,*this); }
+    const Variable<T>& variable() const { return this->lhs; }
+    const T& value() const { return this->rhs; }
+    const Expression<T>& expression() const { return Expression<T>(this->rhs); }
+    const Variable<T>& left_hand_side() const { return this->lhs; }
+    const T& right_hand_side() const { return this->rhs; }
+    inline operator Valuation<T,T> () const;
+    Variable<T> lhs; T rhs;
 };
 
 template<class LHS, class RHS> bool operator<(const Assignment<LHS,RHS>& a1, const Assignment<LHS,RHS>& a2) {
@@ -111,9 +127,13 @@ template<class LHS, class RHS> inline std::ostream& operator<<(std::ostream& os,
     return os<<a.lhs<<"="<<a.rhs;
 }
 
-template<class T> inline Assignment< Variable<T>, Expression<T> >
+//template<class T> inline Assignment< Variable<T>, Expression<T> >
+//Variable<T>::operator=(const T& val) const {
+//    return Assignment< Variable<T>, Expression<T> >(*this,Expression<T>(val)); }
+
+template<class T> inline Assignment< Variable<T>, T >
 Variable<T>::operator=(const T& val) const {
-    return Assignment< Variable<T>, Expression<T> >(*this,Expression<T>(val)); }
+    return Assignment< Variable<T>, T >(*this,val); }
 
 template<class T> inline Assignment< Variable<T>, Expression<T> >
 Variable<T>::operator=(const Constant<T>& cnst) const {
@@ -127,7 +147,7 @@ template<class T> inline Assignment< Variable<T>, Expression<T> >
 Variable<T>::operator=(const Expression<T>& expr) const {
     return Assignment< Variable<T>, Expression<T> >(*this,Expression<T>(expr)); }
 
-template<class T> template<class D> inline typename EnableIfRealBuiltin<T,D,Assignment< Variable<T>, Expression<T> > >::Type
+template<class T> template<class D> inline typename EnableIfRealBuiltin<T,D,Assignment< Variable<T>, T > >::Type
 Variable<T>::operator=(D c) const {
     return this->operator=(Real(c)); }
 
@@ -250,6 +270,7 @@ template<class LHS, class RHS> List<typename LHS::BaseType> left_hand_sides(cons
     return result;
 }
 
+
 // Simplifying typedefs
 typedef Assignment<IntegerVariable,IntegerExpression> IntegerAssignment;
 typedef Assignment<PrimedIntegerVariable,IntegerExpression> PrimedIntegerAssignment;
@@ -263,6 +284,18 @@ typedef List<PrimedStringAssignment> PrimedStringAssignments;
 typedef List<RealAssignment> RealAssignments;
 typedef List<DottedRealAssignment> DottedRealAssignments;
 typedef List<PrimedRealAssignment> PrimedRealAssignments;
+
+typedef Assignment<RealVariable,Real> RealConstantAssignment;
+
+inline List<RealAssignment> operator,(const List<RealAssignment>& la, const RealConstantAssignment& ac) { return operator,(la,RealAssignment(ac)); }
+inline List<RealAssignment> operator,(const List<RealConstantAssignment>& lac, const RealAssignment& a) { return operator,(List<RealAssignment>(lac),a); }
+inline List<RealAssignment> operator,(const RealConstantAssignment& ac, const RealAssignment& a) { return operator,(RealAssignment(ac),a); }
+inline List<RealAssignment> operator,(const RealAssignment& a, const RealConstantAssignment& ac) { return operator,(a,RealAssignment(ac)); }
+
+inline List<RealConstantAssignment> operator,(const List<RealConstantAssignment>& lac, const RealConstantAssignment& ac) {
+    List<RealConstantAssignment> r(lac); r.append(ac); return r; }
+inline List<RealConstantAssignment> operator,(const RealConstantAssignment& ac1, const RealConstantAssignment& ac2) {
+    List<RealConstantAssignment> r; r.append(ac1); r.append(ac2); return r; }
 
 
 

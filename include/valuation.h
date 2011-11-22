@@ -38,6 +38,7 @@
 #include "tribool.h"
 
 #include "expression.h"
+#include "assignment.h"
 
 namespace Ariadne {
 
@@ -53,6 +54,7 @@ Map<Identifier,String> inline operator|(const Variable<String>& v, const char* c
 template<class V, class X=V> class Valuation;
 typedef Valuation<String> StringValuation;
 typedef Valuation<Integer> IntegerValuation;
+typedef Valuation<Real> RealValuation;
 
 template<class V, class X>
 class Valuation
@@ -64,6 +66,8 @@ class Valuation
   public:
     Valuation() { }
     Valuation(const Map<Identifier,ValueType>& m) : _values(m) { }
+    Valuation(const Assignment<Variable<V>,X>& a);
+    Valuation(const List<Assignment<Variable<V>,X> >& la);
     void insert(const Variable<Type>& v, const ValueType& s) { this->_values.insert(v.name(),s); }
     void set(const Variable<Type>& v, const ValueType& s) { this->_values[v.name()]=s; }
     const ValueType& get(const Variable<Type>& v) const { return _values[v.name()]; }
@@ -184,6 +188,10 @@ template<class X> inline std::ostream& operator<<(std::ostream& os, const Valuat
     return os << close;
 }
 
+template<class V, class X> Valuation<V,X>::Valuation(const Assignment<Variable<V>,X>& a) { this->insert(a.lhs,a.rhs); }
+template<class V, class X> Valuation<V,X>::Valuation(const List<Assignment<Variable<V>,X> >& la) {
+    for(uint i=0; i!=la.size(); ++i) { this->insert(la[i].lhs,la[i].rhs); } }
+template<class T> inline Assignment< Variable<T>, T>::operator Valuation<T> () const { Valuation<T> r; r.insert(this->lhs,this->rhs); return r; }
 
 Boolean evaluate(const Expression<Boolean>&, const StringValuation&);
 String evaluate(const Expression<String>&, const StringValuation&);

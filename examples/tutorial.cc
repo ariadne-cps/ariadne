@@ -157,8 +157,10 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     HybridSimulator simulator;
     simulator.set_step_size(0.03125);
 
+    RealConstantAssignment ac = (C=0.0);
+
     // Set an initial point for the simulation
-    HybridPoint initial_point(heating_off, (C|0.0,T|18.0) );
+    HybridPoint initial_point(heating_off, (C=0.0,T=18.0) );
     cout << "initial_point=" << initial_point << endl;
     // Set the maximum simulation time
     HybridTime simulation_time(8.0,9);

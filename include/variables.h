@@ -191,22 +191,24 @@ template<class T> struct EnableIfRealBuiltin<Real,double,T> { typedef T Type; };
 
 class RealVariableInterval;
 
+
 //! \ingroup ExpressionModule
 //! A named variable of type \a T.
 template<class T> class Variable
     : public ExtendedVariable<T>
 {
     typedef Assignment< Variable<T>, Expression<T> > AssignmentType;
+    typedef Assignment< Variable<T>, T > ConstantAssignmentType;
   public:
     typedef Variable<T> BaseType;
     explicit Variable(const String& nm) : ExtendedVariable<T>(nm) { }
     Variable<T> const& base() const { return *this; }
-    inline AssignmentType operator=(const T& e) const;
+    inline ConstantAssignmentType operator=(const T& e) const;
     inline AssignmentType operator=(const Constant<T>& cnst) const;
     inline AssignmentType operator=(const Variable<T>& e) const;
     inline AssignmentType operator=(const Expression<T>& e) const;
     template<class XL, class XU> inline RealVariableInterval in(const XL& l, const XU& u);
-    template<class D> inline typename EnableIfRealBuiltin<T,D,AssignmentType>::Type operator=(D e) const;
+    template<class D> inline typename EnableIfRealBuiltin<T,D,ConstantAssignmentType>::Type operator=(D e) const;
 };
 
 class TimeVariable : public Variable<Real> {

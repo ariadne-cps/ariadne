@@ -264,7 +264,7 @@ Float average_scaled_width(const IntervalVector& bx, const FloatVector& sf) {
 Float average_width(const IntervalVector& bx) {
     Float res=0.0;
     for(uint i=0; i!=bx.size(); ++i) {
-        if(bx[i].lower()>bx[i].upper()) { return -inf<Float>(); }
+        if(bx[i].lower()>bx[i].upper()) { return -inf; }
         res+=bx[i].width();
     }
     return res/bx.size();
@@ -931,7 +931,7 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
     static const double XSIGMA = 0.125;
     static const double TERR = -1.0/((1<<e)*1024.0);
     static const double XZMIN = 1.0/(1<<16);
-    static const Float inf = Ariadne::inf<Float>();
+    static const Float inf = Ariadne::inf;
 
     // Set up the classes used for constraint propagation and
     // optimisation using the Kuhn-Tucker conditions
@@ -1082,7 +1082,7 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     // This constant shows how far away from zero the points are
     static const double XSIGMA = 0.125;
     static const double TERR = -1.0/((1<<e)*1024.0);
-    static const Float inf = Ariadne::inf<Float>();
+    static const Float inf = Ariadne::inf;
 
     const uint m=fg.argument_size();
     const uint n=fg.result_size();
@@ -1398,7 +1398,7 @@ IntervalVector ConstrainedImageSet::constraint_bounds() const
 {
     IntervalVector result(this->number_of_constraints());
     for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
-        result[i]=Interval(-inf<Float>(),0.0);
+        result[i]=Interval(-inf,0.0);
     }
     for(uint i=0; i!=this->_zero_constraints.size(); ++i) {
         result[i+this->_negative_constraints.size()]=Interval(0.0);
@@ -1620,8 +1620,6 @@ void ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving,
 
 tribool ConstrainedImageSet::satisfies(const IntervalNonlinearConstraint& nc) const
 {
-    const Float infty = inf<Float>();
-
     if( subset(nc.function().evaluate(this->bounding_box()),nc.bounds()) ) {
         return true;
     }
@@ -1633,13 +1631,13 @@ tribool ConstrainedImageSet::satisfies(const IntervalNonlinearConstraint& nc) co
     const Interval& bounds = nc.bounds();
 
     Tribool result;
-    if(bounds.upper()<+infty) {
+    if(bounds.upper()<+inf) {
         all_constraints.append( composed_function >= bounds.upper() );
         result=solver.feasible(domain,all_constraints).first;
         all_constraints.pop_back();
         if(definitely(result)) { return false; }
     }
-    if(bounds.lower()>-infty) {
+    if(bounds.lower()>-inf) {
         all_constraints.append(composed_function <= bounds.lower());
         result = result || solver.feasible(domain,all_constraints).first;
     }

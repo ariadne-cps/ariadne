@@ -42,15 +42,17 @@ typedef unsigned int uint;
 
 namespace Ariadne {
 
+class Float;
+class Interval;
 class Real;
-
-template<class X> X inf();
+class ExactFloat;
 
 using std::min;
 using std::max;
 
-const double infty = std::numeric_limits<double>::infinity();
+const double inf = std::numeric_limits<double>::infinity();
 const double nan = (1.0/0.0);
+
 
 //! \ingroup NumericModule
 //! \brief Floating point numbers (double precision) using approxiamate arithmetic.
@@ -88,9 +90,12 @@ class Float {
     //! \brief Convert from a general real number by generating a representable approximation,
     //! not necessarily the nearest.
     Float(const Real& x);
+    //! \brief Convert from a floating-point number with an exact representation.
+    Float(const ExactFloat& x);
     Float& operator=(double x) { v=x; return *this; }
     Float& operator=(const Float& x) { v=x.v; return *this; }
     Float& operator=(const Real& x);
+    Float& operator=(const ExactFloat& x);
     //! \brief An approximation by a built-in double-precision floating-point number.
     double get_d() const { return this->v; }
 };
@@ -121,8 +126,6 @@ inline Float mx() { return std::numeric_limits<double>::max(); }
 
 inline Float eps() { return std::numeric_limits<double>::epsilon(); }
 
-// General constants
-template<> inline Float inf<Float>() { return std::numeric_limits<double>::infinity(); }
 
 // Checking whether a Float is not-a-number
 inline bool isnan(const Float& x) { return std::isnan(x.v); }
@@ -384,16 +387,23 @@ inline Float rad_up(Float x, Float y) {
     Float r=sub_rnd(y,x)/2; set_rounding_mode(rounding_mode); return r; }
 
 class Interval;
+
 class ExactFloat {
     Float _x;
   public:
     ExactFloat(int n) : _x(n) { }
     explicit ExactFloat(const Float& x) : _x(x) { }
     Float value() const { return _x; }
-    operator Interval() const;
 };
-inline std::ostream& operator<<(std::ostream& os, const ExactFloat& x) {
-    return os << x.value(); }
+inline ExactFloat operator+(const ExactFloat& x) { return ExactFloat(+x.value()); }
+inline ExactFloat operator-(const ExactFloat& x) { return ExactFloat(-x.value()); }
+inline std::ostream& operator<<(std::ostream& os, const ExactFloat& x) { return os << x.value(); }
+
+inline Float::Float(const ExactFloat& x) : v(x.value().get_d()) { }
+inline Float& Float::operator=(const ExactFloat& x) { this->operator=(x.value()); return *this; }
+
+//! \related Float \brief The constant infinity
+//extern ExactFloat inf;
 
 class Interval;
 inline Interval sqr_ivl(Float x);

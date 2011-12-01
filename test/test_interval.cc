@@ -103,10 +103,10 @@ TestInterval::test_concept()
     j=abs(i); j=neg(i); j=rec(i);
 
     // Arithmetic
-    j=add(x,x); j=add(x,i); j=add(i,x); j=add(i,i);
-    j=sub(x,x); j=sub(x,i); j=sub(i,x); j=sub(i,i);
-    j=mul(x,x); j=mul(x,i); j=mul(i,x); j=mul(i,i);
-    j=div(x,x); j=div(x,i); j=div(i,x); j=div(i,i);
+    //j=add(x,x); j=add(x,i); j=add(i,x); j=add(i,i);
+    //j=sub(x,x); j=sub(x,i); j=sub(i,x); j=sub(i,i);
+    //j=mul(x,x); j=mul(x,i); j=mul(i,x); j=mul(i,i);
+    //j=div(x,x); j=div(x,i); j=div(i,x); j=div(i,i);
     //j=pow(x,n); j=pow(x,n);
     //j=pow(x,m); j=pow(x,m);
 

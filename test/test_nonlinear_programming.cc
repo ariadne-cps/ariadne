@@ -96,7 +96,7 @@ class TestOptimiser
         RealVectorFunction g( (2*x[1]+x[0], x[0]+x[1]*x[1]-0.875) );
         ARIADNE_TEST_PRINT(g);
         Box D(3, -1.0,2.0, -3.0,5.0, -3.0,5.0);
-        Box C(2, 0.0,infty, 0.0,infty, 3.0,3.0);
+        Box C(2, 0.0,inf, 0.0,inf, 3.0,3.0);
 
         IntervalVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(subset,x_optimal,D);

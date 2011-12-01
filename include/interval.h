@@ -48,8 +48,6 @@ class Float;
 class Interval;
 class Real;
 
-template<class X> X inf();
-
 
 //! \ingroup NumericModule
 //! \brief Intervals with floating-point endpoints supporting outwardly-rounded arithmetic.
@@ -100,6 +98,8 @@ class Interval {
     Interval(const Interval& i) : l(i.l), u(i.u) { }
     //! \brief Convert from a general real number. Yields an interval containing the exact value.
     Interval(const Real& x);
+    //! \brief Convert from a floating-point number with an exact representation.
+    Interval(const ExactFloat& x) : l(x.value()), u(x.value()) { }
 
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     Interval(double lower, double upper) : l(lower), u(upper) { }
@@ -118,6 +118,7 @@ class Interval {
     Interval& operator=(double c) { l=c; u=c; return *this; }
     Interval& operator=(const Float& x) { l=x; u=x; return *this; }
     Interval& operator=(const Real& x);
+    Interval& operator=(const ExactFloat& x) { l=x.value(); u=x.value(); return *this; };
 
     //! \brief The lower bound of the interval.
     const Float& lower() const { return l; }
@@ -177,7 +178,7 @@ inline bool empty(Interval i) {
 
 //! \related Interval \brief Test if the interval is bounded.
 inline bool bounded(Interval i) {
-    return i.lower()!=-inf<Float>() && i.upper()!=+inf<Float>();
+    return i.lower()!=-inf && i.upper()!=+inf;
 }
 
 //! \related Interval \brief The intersection of two intervals.
@@ -675,10 +676,6 @@ inline tribool operator<=(Interval i1, Interval i2) {
     if(i1.upper()<=i2.lower()) { return true; }
     else if(i1.lower()> i2.upper()) { return false; }
     else { return indeterminate; }
-}
-
-inline ExactFloat::operator Interval() const {
-    return Interval(this->_x);
 }
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION

@@ -169,7 +169,6 @@ template<class X, class T> void _compute(List<T>& v, const List<ProcedureInstruc
 
 template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<ProcedureInstruction>& p)
 {
-    static const Float inf=Ariadne::inf<Float>();
     ARIADNE_ASSERT(v.size()==p.size());
     size_t r=p.size();
     while(r!=0u) {

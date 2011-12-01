@@ -73,7 +73,7 @@ typedef VectorRange<IntervalVector> IntervalVectorRange;
 
 
 std::ostream& operator<<(std::ostream& os, const RealNonlinearConstraint& c) {
-    static const Float inf = Ariadne::inf<Float>();
+    static const Float inf = Ariadne::inf;
     if(c.bounds().lower()==c.bounds().upper()) { return os << c.function() << "==" << c.bounds().upper(); }
     if(c.bounds().upper()==inf) { return os << c.bounds().lower() << "<=" << c.function(); }
     if(c.bounds().lower()==-inf) { return os << c.function() << "<=" << c.bounds().upper(); }
@@ -102,7 +102,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Interval
 
     static const double XSIGMA=0.125;
     static const double TERR=-1.0/(1<<10);
-    static const Float inf = Ariadne::inf<Float>();
+    static const Float inf = Ariadne::inf;
 
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
 
@@ -427,7 +427,7 @@ bool ConstraintSolver::box_reduce(Box& domain, const IntervalScalarFunctionInter
 
     // The set is proved to be empty
     if(imax==n) {
-        domain[variable]=Interval(+inf<Float>(),-inf<Float>());
+        domain[variable]=Interval(+inf,-inf);
         return true;
     }
 

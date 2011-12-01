@@ -585,6 +585,8 @@ Float tan_rnd(Float x)
     return tan_rnd(x.v);
 }
 
+//ExactFloat inf = ExactFloat(std::numeric_limits< double >::infinity());
+
 } // namespace Ariadne
 
 

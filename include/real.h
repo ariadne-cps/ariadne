@@ -47,8 +47,6 @@ class Float;
 class Interval;
 class Real;
 
-template<class X> X inf();
-
 class RealBody;
 
 //! \ingroup NumericModule

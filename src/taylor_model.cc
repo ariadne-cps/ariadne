@@ -136,7 +136,7 @@ Vector<Interval> unscale(const Vector<Interval>& x, const Vector<Interval>& d) {
             if(x==d) {
                 r[i]=Interval(0.0,0.0);
             } else {
-                r[i]=Interval(-inf<Float>(),+inf<Float>());
+                r[i]=Interval(-inf,+inf);
             }
         } else {
             r[i]=(2*r[i]-add_ivl(d[i].lower(),d[i].upper()))/sub_ivl(d[i].upper(),d[i].lower());
@@ -454,7 +454,7 @@ void _scal(IntervalTaylorModel& r, const Interval& c)
     ARIADNE_ASSERT_MSG(c.lower()<=c.upper(),c);
     ARIADNE_ASSERT_MSG(r.error()>=0,"r="<<r);
 
-    if(r.error()==infty) { r.expansion().clear(); return; }
+    if(r.error()==inf) { r.expansion().clear(); return; }
 
     //std::cerr<<"IntervalTaylorModel::scal(Interval c) c="<<c<<std::endl;
     Float& re=r.error();
@@ -1898,7 +1898,7 @@ IntervalTaylorModel& IntervalTaylorModel::rescale(const Interval& ocd, const Int
     ARIADNE_ASSERT_MSG(ocd.radius()>=0,"Illegal scaling from interval "<<ocd<<" with zero radius to interval "<<ncd);
     if(ocd.lower()==ocd.upper()) {
         x.clear();
-        x.set_error(+inf<Float>());
+        x.set_error(+inf);
     } else {
         Interval tmp=1.0/sub_ivl(b,a);
         Interval alpha=sub_ivl(d,c)*tmp;
@@ -2467,7 +2467,7 @@ unscale(const IntervalTaylorModel& tv, const Interval& ivl)
         IntervalTaylorModel r=tv.create();
         r+=ivl;
         // Uncomment out line below to make unscaling to a singleton interval undefined
-        //r.set_error(+inf<Float>());
+        //r.set_error(+inf);
         return r;
     } else {
         IntervalTaylorModel r=tv;

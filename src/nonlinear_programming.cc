@@ -375,8 +375,8 @@ enum ConstraintKind { EQUALITY, UPPER_BOUNDED, LOWER_BOUNDED, BOUNDED };
 
 inline ConstraintKind constraint_kind(Interval C) {
     if(C.lower()==C.upper()) { return EQUALITY; }
-    else if(C.lower()==-infty) { return UPPER_BOUNDED; }
-    else if(C.upper()==+infty) { return LOWER_BOUNDED; }
+    else if(C.lower()==-inf) { return UPPER_BOUNDED; }
+    else if(C.upper()==+inf) { return LOWER_BOUNDED; }
     else { return BOUNDED; }
 }
 
@@ -786,7 +786,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
     const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& c,
     FloatVector& x, FloatVector& y, Float& t) const
 {
-    static const double infty = std::numeric_limits<double>::infinity();
+    static const double inf = std::numeric_limits<double>::infinity();
 
     static const double gamma=1.0/1024;
     static const double sigma=1.0/8;
@@ -828,10 +828,10 @@ NonlinearInteriorPointOptimiser::feasibility_step(
     Vector<Float> D(n);
     for(uint j=0; j!=n; ++j) {
         if(c[j].lower()==c[j].upper()) {
-        } else if(c[j].upper()==+infty) {
-        } else if(c[j].lower()==-infty) {
+        } else if(c[j].upper()==+inf) {
+        } else if(c[j].lower()==-inf) {
         } else {
-            ARIADNE_DEBUG_ASSERT(-infty<c[j].lower() && c[j].lower()<c[j].upper() && c[j].upper()<+infty);
+            ARIADNE_DEBUG_ASSERT(-inf<c[j].lower() && c[j].lower()<c[j].upper() && c[j].upper()<+inf);
         }
     }
 
@@ -1051,8 +1051,8 @@ compute_mu(const IntervalVector& D, const FloatVectorFunction& g, const Interval
 
     for(uint i=0; i!=C.size(); ++i) {
         if(C[i].lower()==C[i].upper()) { }
-        else if(C[i].lower()==-infty) { mu += lambda[i] * (gx[i] - C[i].upper()); }
-        else if(C[i].upper()==+infty) { mu += lambda[i] * (gx[i] - C[i].lower()); }
+        else if(C[i].lower()==-inf) { mu += lambda[i] * (gx[i] - C[i].upper()); }
+        else if(C[i].upper()==+inf) { mu += lambda[i] * (gx[i] - C[i].lower()); }
         else { // std::cerr<<"FIXME: Compute mu for bounded constraint\n";
             if (lambda[i] <=0.0) { mu += lambda[i] * (gx[i] - C[i].upper()); }
             else { mu += lambda[i] * (gx[i] - C[i].lower()); }
@@ -1097,8 +1097,8 @@ feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const
 
     FloatVector w=midpoint(C);
     for(uint i=0; i!=C.size(); ++i) {
-        if(C[i].upper()==+infty) { w[i]=C[i].lower()+1.0; }
-        else if(C[i].lower()==-infty) { w[i]=C[i].upper()-1.0; }
+        if(C[i].upper()==+inf) { w[i]=C[i].lower()+1.0; }
+        else if(C[i].lower()==-inf) { w[i]=C[i].upper()-1.0; }
     }
 
     FloatVector y(C.size(),0.0);
@@ -1238,7 +1238,7 @@ compute_tz(const IntervalVector& d, const FloatVectorFunction& g, const Interval
 
     FloatVector gy=g(y);
 
-    t=+inf<Float>();
+    t=+inf;
     for(uint j=0; j!=n; ++j) {
         t=min(t,b[j].upper()-gy[j]);
         t=min(t,gy[j]-b[j].lower());
@@ -1629,7 +1629,7 @@ feasibility_step(const IntervalVector& D, const FloatVectorFunction& g, const In
         S[n+j][n+m+j] = -1.0;
         S[n+m+j][n+j] = -1.0;
         //if(zl[j]==zu[j]) { S[n+j][n+j] = -1.0; S[n+j][n+m+j] = 0.0; }
-        if(zl[j]==zu[j]) { S[n+j][n+j] = +infty; }
+        if(zl[j]==zu[j]) { S[n+j][n+j] = +inf; }
         else { S[n+j][n+j] = - rec(sqr(z[j]-zl[j])) - rec(sqr(zu[j]-z[j])); }
     }
     for(uint i=0; i!=n; ++i) {
@@ -1978,7 +1978,7 @@ void KrawczykOptimiser::compute_tz(const IntervalVector& d, const IntervalVector
 
     // Find the range of possible values of the optimal t
     // This range is too pessimistic
-    t=Interval(+inf<Float>(),+inf<Float>());
+    t=Interval(+inf,+inf);
     for(uint j=0; j!=n; ++j) {
         t=min(t,c[j]-gy[j]);
         t=min(t,gy[j]-c[j]);
@@ -1989,8 +1989,8 @@ void KrawczykOptimiser::compute_tz(const IntervalVector& d, const IntervalVector
     }
 
     // Find the range of possible values of the optimal t
-    Float tmin=+inf<Float>();
-    Float tmax=+inf<Float>();
+    Float tmin=+inf;
+    Float tmax=+inf;
     for(uint j=0; j!=n; ++j) {
         tmax=min(tmax,sub_up(c[j].upper(),gy[j].lower()));
         tmax=min(tmax,sub_up(gy[j].upper(),c[j].lower()));

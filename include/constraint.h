@@ -91,21 +91,21 @@ inline RealNonlinearConstraint operator==(const RealScalarFunction& f, double c)
 
 
 inline RealNonlinearConstraint operator<=(const RealNonlinearConstraint& nc, const Real& c) {
-    ARIADNE_ASSERT(Float(nc.upper_bound())==inf<Float>());
+    ARIADNE_ASSERT(Float(nc.upper_bound())==inf);
     return RealNonlinearConstraint(nc.lower_bound(),nc.function(),c);
 }
 
 
 inline IntervalNonlinearConstraint operator<=(const Float& c, const IntervalScalarFunction& f) {
-    return IntervalNonlinearConstraint(c,f,+inf<Float>());
+    return IntervalNonlinearConstraint(c,f,+inf);
 }
 
 inline IntervalNonlinearConstraint operator<=(const IntervalScalarFunction& f, const Float& c) {
-    return IntervalNonlinearConstraint(-inf<Float>(),f,c);
+    return IntervalNonlinearConstraint(-inf,f,c);
 }
 
 inline IntervalNonlinearConstraint operator>=(const IntervalScalarFunction& f, const Float& c) {
-    return IntervalNonlinearConstraint(c,f,+inf<Float>());
+    return IntervalNonlinearConstraint(c,f,+inf);
 }
 
 inline IntervalNonlinearConstraint operator==(const IntervalScalarFunction& f, const Float& c) {
@@ -113,11 +113,11 @@ inline IntervalNonlinearConstraint operator==(const IntervalScalarFunction& f, c
 }
 
 inline IntervalNonlinearConstraint operator<=(const IntervalScalarFunction& f, double c) {
-    return IntervalNonlinearConstraint(-inf<Float>(),f,Float(c));
+    return IntervalNonlinearConstraint(-inf,f,Float(c));
 }
 
 inline IntervalNonlinearConstraint operator>=(const IntervalScalarFunction& f, double c) {
-    return IntervalNonlinearConstraint(-inf<Float>(),f,c);
+    return IntervalNonlinearConstraint(-inf,f,c);
 }
 
 inline IntervalNonlinearConstraint operator==(const IntervalScalarFunction& f, double c) {
@@ -133,7 +133,7 @@ inline IntervalNonlinearConstraint operator>=(const IntervalScalarFunction& f1, 
 }
 
 inline IntervalNonlinearConstraint operator<=(const IntervalNonlinearConstraint& nc, const Float& c) {
-    ARIADNE_ASSERT(nc.upper_bound()==inf<Float>());
+    ARIADNE_ASSERT(nc.upper_bound()==inf);
     return IntervalNonlinearConstraint(nc.lower_bound(),nc.function(),c);
 }
 

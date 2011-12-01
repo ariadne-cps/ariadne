@@ -163,7 +163,6 @@ template<> class ScalarFunctionModel<Interval>
     ScalarFunctionModelInterface<Interval>& reference() { return *_ptr; }
     const ScalarFunctionModelInterface<Interval>& reference() const { return *_ptr; }
     ScalarFunctionModel<Interval> create_zero() const { return this->_ptr->_create(); }
-    ScalarFunctionModel<Interval>& operator=(const Float& c) { return this->operator=(c); }
     ScalarFunctionModel<Interval>& operator=(const Interval& c);
     ScalarFunctionModel<Interval>& operator=(const ScalarFunction<Interval>& f);
     ScalarFunctionModel<Interval>& operator=(const ScalarTaylorFunction& f);
@@ -477,8 +476,6 @@ template<> class FunctionModelFactoryInterface<Interval>
     inline ScalarFunctionModel<Interval> create_zero(const IntervalVector& domain) const;
     inline VectorFunctionModel<Interval> create_zeros(Nat result_size, const IntervalVector& domain) const;
     inline ScalarFunctionModel<Interval> create_constant(const IntervalVector& domain, const Interval& value) const;
-    inline ScalarFunctionModel<Interval> create_constant(const IntervalVector& domain, const Float& value) const;
-    inline ScalarFunctionModel<Interval> create_constant(const IntervalVector& domain, double value) const;
     inline VectorFunctionModel<Interval> create_constants(const IntervalVector& domain, const Vector<Interval>& values) const;
     inline ScalarFunctionModel<Interval> create_coordinate(const IntervalVector& domain, Nat index) const;
     inline ScalarFunctionModel<Interval> create_identity(const Interval& domain) const;
@@ -517,10 +514,6 @@ ScalarFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_ze
     return this->_create(domain,RealScalarFunction::zero(domain.size())); }
 VectorFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_zeros(Nat result_size, const IntervalVector& domain) const {
     return this->_create(domain,RealVectorFunction::zeros(result_size,domain.size())); }
-ScalarFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_constant(const IntervalVector& domain, double value) const {
-    return this->create_constant(domain,numeric_cast<Interval>(value)); }
-ScalarFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_constant(const IntervalVector& domain, const Float& value) const {
-    return this->create_constant(domain,numeric_cast<Interval>(value)); }
 ScalarFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_constant(const IntervalVector& domain, const Interval& value) const {
     return ScalarFunctionModel<Interval>(this->_create(domain,RealScalarFunction::zero(domain.size())))+value; };
 VectorFunctionModel<Interval> FunctionModelFactoryInterface<Interval>::create_constants(const IntervalVector& domain, const Vector<Interval>& values) const {

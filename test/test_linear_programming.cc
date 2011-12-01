@@ -52,7 +52,7 @@ class TestInteriorPointSolver
     void test_validate_feasibility() {
         // A feasible instance
         FloatVector xl(3, 0.0);
-        FloatVector xu(3, infty);
+        FloatVector xu(3, inf);
         FloatMatrix A(2,3, 1.0,0.0,1.0, 0.0,1.0,2.0);
         FloatVector b(2, 1.0,1.0);
         FloatVector x(3, 0.81,0.51,0.21);
@@ -68,7 +68,7 @@ class TestInteriorPointSolver
     void test_feasibility() {
         // A feasible instance
         FloatVector xl(3, 0.0);
-        FloatVector xu(3, infty);
+        FloatVector xu(3, inf);
         FloatMatrix A(2,3, 1.0,0.0,1.0, 0.0,1.0,2.0);
         FloatVector b(2, 1.0,1.0);
         ARIADNE_ASSERT(definitely(optimiser->feasible(xl,xu,A,b)));
@@ -89,7 +89,7 @@ class TestInteriorPointSolver
         b=FloatVector(2, 1.0, -1.0);
         ARIADNE_ASSERT(definitely(!optimiser->feasible(xl,xu,A,b)));
 
-        xu=FloatVector(3, +infty,+infty,3.0);
+        xu=FloatVector(3, +inf,+inf,3.0);
     }
 
 
@@ -98,7 +98,7 @@ class TestInteriorPointSolver
         FloatVector b(2, 1.0,1.0);
         FloatVector c(3, 1.0,0.5,-0.75);
         FloatVector xl(3, 0.0,0.0,0.0);
-        FloatVector xu(3, +infty,+infty,3.0);
+        FloatVector xu(3, +inf,+inf,3.0);
 
         ARIADNE_TEST_PRINT(optimiser->minimise(c,xl,xu,A,b));
     }

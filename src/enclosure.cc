@@ -328,10 +328,10 @@ Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction&
         if(constraints[i].bounds().singleton()) {
             this->new_zero_parameter_constraint(constraints[i].function()-Interval(constraints[i].bounds().midpoint()));
         } else {
-            if(constraints[i].bounds().lower()>-inf<Float>()) {
+            if(constraints[i].bounds().lower()>-inf) {
                 this->new_negative_parameter_constraint(Interval(constraints[i].bounds().lower())-constraints[i].function());
             }
-            if(constraints[i].bounds().upper()<+inf<Float>()) {
+            if(constraints[i].bounds().upper()<+inf) {
                 this->new_negative_parameter_constraint(constraints[i].function()-Interval(constraints[i].bounds().upper()));
             }
         }
@@ -365,10 +365,10 @@ Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction&
         if(constraints[i].bounds().singleton()) {
             this->new_zero_parameter_constraint(constraints[i].function()-Interval(constraints[i].bounds().midpoint()));
         } else {
-            if(constraints[i].bounds().lower()>-inf<Float>()) {
+            if(constraints[i].bounds().lower()>-inf) {
                 this->new_negative_parameter_constraint(Interval(constraints[i].bounds().lower())-constraints[i].function());
             }
-            if(constraints[i].bounds().upper()<+inf<Float>()) {
+            if(constraints[i].bounds().upper()<+inf) {
                 this->new_negative_parameter_constraint(constraints[i].function()-Interval(constraints[i].bounds().upper()));
             }
         }
@@ -482,7 +482,7 @@ void Enclosure::apply_flow(IntervalVectorFunction flow, Interval time)
 void Enclosure::apply_fixed_evolve_step(IntervalVectorFunction flow, Float time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
-    IntervalScalarFunctionModel evolve_time_function=this->function_factory().create_constant(this->domain(),time);
+    IntervalScalarFunctionModel evolve_time_function=this->function_factory().create_constant(this->domain(),ExactFloat(time));
     this->_space_function=compose(flow,join(this->_space_function,evolve_time_function));
     this->_time_function=this->_time_function + evolve_time_function;
     this->_dwell_time_function=this->_dwell_time_function + evolve_time_function;
@@ -538,7 +538,7 @@ void Enclosure::apply_full_reach_step(IntervalVectorFunctionModel phi)
     ARIADNE_ASSERT(phi.result_size()==this->dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
     Float h=phi.domain()[phi.result_size()].upper();
-    IntervalScalarFunctionModel elps=this->function_factory().create_constant(this->domain(),h);
+    IntervalScalarFunctionModel elps=this->function_factory().create_constant(this->domain(),ExactFloat(h));
     this->apply_parameter_reach_step(phi,elps);
 }
 
@@ -577,14 +577,13 @@ void Enclosure::apply_parameter_reach_step(IntervalVectorFunctionModel phi, Inte
 void Enclosure::new_state_constraint(IntervalNonlinearConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->dimension());
     this->_is_fully_reduced=false;
-    Float infty=+inf<Float>();
     Interval interval=constraint.bounds();
     IntervalScalarFunctionModel composed_function=compose(constraint.function(),this->_space_function);
     if(interval.lower()==0.0 && interval.upper()==0.0) {
         this->new_zero_parameter_constraint(composed_function);
-    } else if(interval.lower()==0.0 && interval.upper()==infty) {
+    } else if(interval.lower()==0.0 && interval.upper()==inf) {
         this->new_negative_parameter_constraint(-composed_function);
-    } else if(interval.lower()==-infty && interval.upper()==0.0) {
+    } else if(interval.lower()==-inf && interval.upper()==0.0) {
         this->new_negative_parameter_constraint(composed_function);
     } else {
         ARIADNE_FAIL_MSG("Enclosure cannot currently handle constraints which are not of the form g(x) <=> 0");
@@ -594,13 +593,12 @@ void Enclosure::new_state_constraint(IntervalNonlinearConstraint constraint) {
 void Enclosure::new_parameter_constraint(IntervalNonlinearConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->number_of_parameters());
     this->_is_fully_reduced=false;
-    Float infty=+inf<Float>();
     Interval interval=constraint.bounds();
     if(interval.lower()==0.0 && interval.upper()==0.0) {
         this->new_zero_parameter_constraint(constraint.function());
-    } else if(interval.lower()==0.0 && interval.upper()==infty) {
+    } else if(interval.lower()==0.0 && interval.upper()==inf) {
         this->new_negative_parameter_constraint(-constraint.function());
-    } else if(interval.lower()==-infty && interval.upper()==0.0) {
+    } else if(interval.lower()==-inf && interval.upper()==0.0) {
         this->new_negative_parameter_constraint(constraint.function());
     } else {
         ARIADNE_FAIL_MSG("Enclosure cannot currently handle constraints which are not of the form g(x) <=> 0");
@@ -1025,7 +1023,7 @@ void Enclosure::subdivision_adjoin_outer_approximation_to(PavingInterface& p, in
         g.set(i,*eiter);
         ++i;
     }
-    IntervalVector cc(this->_negative_constraints.size(),Interval(-inf<Float>(),0.0));
+    IntervalVector cc(this->_negative_constraints.size(),Interval(-inf,0.0));
     IntervalVector ce(this->_zero_constraints.size(),Interval(0.0,0.0));
     Box c=intersection(Box(g(d)),Box(join(cc,ce)));
 
@@ -1050,7 +1048,7 @@ void Enclosure::constraint_adjoin_outer_approximation_to(PavingInterface& p, int
         g.set(i,*eiter);
         ++i;
     }
-    IntervalVector cc(this->_negative_constraints.size(),Interval(-inf<Float>(),0.0));
+    IntervalVector cc(this->_negative_constraints.size(),Interval(-inf,0.0));
     IntervalVector ce(this->_zero_constraints.size(),Interval(0.0,0.0));
     Box c=intersection(Box(g(d)),Box(join(cc,ce)));
 
@@ -1075,7 +1073,7 @@ void Enclosure::optimal_constraint_adjoin_outer_approximation_to(PavingInterface
         ++i;
     }
 
-    IntervalVector cc(this->_negative_constraints.size(),Interval(-inf<Float>(),0.0));
+    IntervalVector cc(this->_negative_constraints.size(),Interval(-inf,0.0));
     IntervalVector ce(this->_zero_constraints.size(),Interval(0.0,0.0));
     Box c=intersection(Box(g(d)),Box(join(cc,ce)));
 

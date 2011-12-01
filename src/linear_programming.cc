@@ -136,8 +136,8 @@ Float compute_mu(const Vector<Float>& xl, const Vector<Float>& xu,
     const uint n=x.size();
     Float mu = 0.0;
     for(uint i=0; i!=n; ++i) {
-        if(xl[i]!=-infty) { mu += ((x[i]-xl[i])*zl[i]); }
-        if(xu[i]!=+infty) { mu += ((xu[i]-x[i])*zu[i]); }
+        if(xl[i]!=-inf) { mu += ((x[i]-xl[i])*zl[i]); }
+        if(xu[i]!=+inf) { mu += ((xu[i]-x[i])*zu[i]); }
     }
     mu /= (2.0*n);
     return mu;
@@ -224,13 +224,13 @@ InteriorPointSolver::minimise(const Vector<Float>& c,
     Vector<Float> zl(n);
     Vector<Float> zu(n);
     for(uint i=0; i!=n; ++i) {
-        if(xl[i]==-infty) {
-            if(xu[i]==+infty) { x[i]=0.0; } else { x[i] = xu[i]-1.0; }
+        if(xl[i]==-inf) {
+            if(xu[i]==+inf) { x[i]=0.0; } else { x[i] = xu[i]-1.0; }
         } else {
-            if(xu[i]==+infty) { x[i]=xl[i]+1.0; } else { ARIADNE_ASSERT(xl[i]<xu[i]); x[i] = (xl[i]+xu[i])/2; }
+            if(xu[i]==+inf) { x[i]=xl[i]+1.0; } else { ARIADNE_ASSERT(xl[i]<xu[i]); x[i] = (xl[i]+xu[i])/2; }
         }
-        if(xl[i]==-infty) { zl[i] = 0.0; } else { zl[i] = 1.0; }
-        if(xu[i]==+infty) { zu[i] = 0.0; } else { zu[i] = 1.0; }
+        if(xl[i]==-inf) { zl[i] = 0.0; } else { zl[i] = 1.0; }
+        if(xu[i]==+inf) { zu[i] = 0.0; } else { zu[i] = 1.0; }
     }
 
     bool done;
@@ -303,13 +303,13 @@ feasible(const Vector<Float>& xl, const Vector<Float>& xu,
     Vector<Float> zl(n);
     Vector<Float> zu(n);
     for(uint i=0; i!=n; ++i) {
-        if(xl[i]==-infty) {
-            if(xu[i]==+infty) { x[i]=0.0; } else { x[i] = xu[i]-1.0; }
+        if(xl[i]==-inf) {
+            if(xu[i]==+inf) { x[i]=0.0; } else { x[i] = xu[i]-1.0; }
         } else {
-            if(xu[i]==+infty) { x[i]=xl[i]+1.0; } else { ARIADNE_ASSERT(xl[i]<xu[i]); x[i] = (xl[i]+xu[i])/2; }
+            if(xu[i]==+inf) { x[i]=xl[i]+1.0; } else { ARIADNE_ASSERT(xl[i]<xu[i]); x[i] = (xl[i]+xu[i])/2; }
         }
-        if(xl[i]==-infty) { zl[i] = 0.0; } else { zl[i] = 1.0; }
-        if(xu[i]==+infty) { zu[i] = 0.0; } else { zu[i] = 1.0; }
+        if(xl[i]==-inf) { zl[i] = 0.0; } else { zl[i] = 1.0; }
+        if(xu[i]==+inf) { zu[i] = 0.0; } else { zu[i] = 1.0; }
     }
     Vector<Interval> X=hull(xl,xu);
 
@@ -370,8 +370,8 @@ _minimisation_step(const Vector<Float>& c, const Vector<Float>& xl, const Vector
     rx=A*x-b;
     ry=y*A+(zl-zu)-c;
     for(uint i=0; i!=n; ++i) {
-        if(xl[i]!=-infty) { rzl[i] = (x[i]-xl[i])*zl[i] - mu; } else { rzl[i]=0.0; }
-        if(xu[i]!=+infty) { rzu[i] = (xu[i]-x[i])*zu[i] - mu; } else { rzu[i]=0.0; }
+        if(xl[i]!=-inf) { rzl[i] = (x[i]-xl[i])*zl[i] - mu; } else { rzl[i]=0.0; }
+        if(xu[i]!=+inf) { rzu[i] = (xu[i]-x[i])*zu[i] - mu; } else { rzu[i]=0.0; }
     }
     ARIADNE_LOG(5,"rx="<<rx<<", ry="<<ry<<", rzl="<<rzl<<", rzu="<<rzu<<"\n");
 

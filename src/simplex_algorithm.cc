@@ -58,7 +58,6 @@ std::ostream& operator<<(std::ostream& os, Slackness t) {
 
 
 
-
 // Extend an Array of size m to an Array of size n
 // such that the first m elements are the same,
 // and the new Array contains the elements [0,n)
@@ -233,7 +232,7 @@ compute_vt(const Vector<X>& xl, const Vector<X>& xu, const Array<size_t>& p, con
         vt[p[k]]=BASIS;
     }
     for(size_t k=m; k!=n; ++k) {
-        if(xl[p[k]]==-inf<X>()) {
+        if(xl[p[k]]==-inf) {
             vt[p[k]] = UPPER;
         } else {
             vt[p[k]] = LOWER;
@@ -641,14 +640,12 @@ compute_d(const Matrix<X>& A, const Array<size_t>& p, const Matrix<XX>& B, const
     return d;
 }
 
-template<> Interval inf<Interval>() { return Interval(inf<Float>()); }
-
 template<class X>
 pair<size_t,X>
 compute_rt(const Array<size_t>& p, const Vector<X>& x, const Vector<X>& d)
 {
     const size_t m=d.size();
-    X t=inf<X>();
+    X t=inf;
     size_t r=m;
     for(size_t k=0; k!=m; ++k) {
         if(d[k] < -CUTOFF_THRESHOLD && x[p[k]] >= CUTOFF_THRESHOLD) {
@@ -667,7 +664,7 @@ template<class X>
 std::pair<size_t,X>
 compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt, const Array<size_t>& p, const Vector<X>& x, const Vector<X>& d, const size_t s)
 {
-    const X inf=Ariadne::inf<X>();
+    const X inf=Ariadne::inf;
 
     // Choose variable to take out of basis
     // If the problem is degenerate, choose the variable with smallest index
@@ -712,7 +709,7 @@ compute_rt(const Vector<Float>& xl, const Vector<Float>& xu, const Array<Slackne
 {
     typedef Float X;
     typedef Interval XX;
-    const X inf=Ariadne::inf<X>();
+    const X inf=Ariadne::inf;
 
     // Choose variable to take out of basis
     // If the problem is degenerate, choose the variable with smallest index
@@ -876,7 +873,7 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
-    static const X inf = Ariadne::inf<X>();
+    static const X inf = Ariadne::inf;
 
     typedef Interval XX;
 
@@ -1092,7 +1089,7 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
     ARIADNE_LOG(5,"\nInitial A="<<A<<" b="<<b<<"; xl="<<xl<<" xu="<<xu<<"\n  vt="<<vt<<"\n");
     const size_t m=A.row_size();
     const size_t n=A.column_size();
-    static const X inf = Ariadne::inf<X>();
+    static const X inf = Ariadne::inf;
 
     Vector<X> cc(n);
     Vector<X> ll(xl);

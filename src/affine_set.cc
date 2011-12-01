@@ -338,13 +338,13 @@ AffineSet::construct_linear_program(LinearProgram<Float>& lp) const
     }
     for(uint i=0; i!=nc; ++i) {
         lp.l[nx+np+i]=0;
-        lp.u[nx+np+i]=inf<Float>();
+        lp.u[nx+np+i]=inf;
     }
 
     // Make part of linear program dependent on cell be +/-infinity
     for(uint i=0; i!=nx; ++i) {
-        lp.l[i]=-inf<Float>();
-        lp.u[i]=+inf<Float>();
+        lp.l[i]=-inf;
+        lp.u[i]=+inf;
     }
 
 }
@@ -493,7 +493,7 @@ AffineSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, int dep
     }
     for(uint i=0; i!=nc; ++i) {
         lp.l[ne+nx+i]=0;
-        lp.u[ne+nx+i]=inf<Float>();
+        lp.u[ne+nx+i]=inf;
     }
 
 
@@ -507,7 +507,7 @@ AffineSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, int dep
     lp.c[ne+nx+nc]=-1;
     //lp.l[ne+nx+nc]=0;
     lp.l[ne+nx+nc]=-1;
-    lp.u[ne+nx+nc]=inf<Float>();
+    lp.u[ne+nx+nc]=inf;
     lp.vt[ne+nx+nc]=LOWER;
     lp.p[ne+nx+nc]=ne+nx+nc;
 
@@ -548,7 +548,7 @@ AffineSet::boundary(uint xind, uint yind) const
 
     static const int MAX_STEPS=1000;
     static const double ERROR_TOLERANCE = std::numeric_limits<float>::epsilon();
-    static const Float inf = Ariadne::inf<Float>();
+    static const Float inf = Ariadne::inf;
 
     Box const& domain=this->_domain;
     List< Affine<Float> > const& function=this->_function;

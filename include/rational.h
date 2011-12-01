@@ -35,8 +35,6 @@ typedef unsigned int uint;
 
 namespace Ariadne {
 
-template<class X> X inf();
-
 #ifdef DOXYGEN
 //! \ingroup NumericModule
 //! \brief %Rational numbers with exact arithmetic.
@@ -50,7 +48,6 @@ typedef mpq_class Rational;
 Rational sqr(const Rational& q);
 Rational pow(const Rational& q, uint n);
 Rational pow(const Rational& q, int n);
-template<> inline Rational inf<Rational>() { return Rational(1,-0); }
 #else
 #endif // HAVE_GMPXX_H
 

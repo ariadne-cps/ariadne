@@ -70,9 +70,9 @@ class Box
         return Box(n,Interval(-1,1));
     }
 
-    //! The upper quadrant box \f$[0,infty]^n\f$ in \a n dimensions.
+    //! The upper quadrant box \f$[0,\infty]^n\f$ in \a n dimensions.
     static Box upper_quadrant(uint n) {
-        return Box(n,Interval(0,inf<Float>()));
+        return Box(n,Interval(0,inf));
     }
 
     //! An explicit case to an interval vector. Useful to prevent ambiguous function overloads.

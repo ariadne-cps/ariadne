@@ -192,10 +192,10 @@ void TestTaylorModel::test_arithmetic()
     ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 0.0,0.0,3.0), 0.75,swp)*IntervalTaylorModel(E(1,2, 3.0,2.0,-4.0),0.5,swp), IntervalTaylorModel(E(1,4, 0.0,0.0,9.0,6.0,-12.0), 8.625,swp));
     ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp)*IntervalTaylorModel(E(1,2, 3.0,2.0,-4.0),0.5,swp), IntervalTaylorModel(E(1,4, 3.0,-4.0,1.0,14.0,-12.0), 10.125,swp));
 
-    IntervalTaylorModel tm_inf(E(2),+infty,swp);
+    IntervalTaylorModel tm_inf(E(2),+inf,swp);
     if(isnan(numeric_cast<double>((tm_inf * 0.0).error()))) {
-        ARIADNE_TEST_WARN("Multiplying 0+/-infty by 0 yields 0+/-NaN");
-    } else if((tm_inf * 0.0).error()==+infty) {
+        ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-NaN");
+    } else if((tm_inf * 0.0).error()==+inf) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-inf");
     } else if((tm_inf * 0.0).error()==0.0) {
         ARIADNE_TEST_PRINT("Multiplying 0+/-inf by 0 yields 0+/-0");

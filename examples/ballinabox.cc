@@ -106,7 +106,7 @@ int main(int argc, const char* argv[])
     std::cout << "Computing evolution..." << std::endl;
 
     RealVariableBox initial_box((0.48<=x<=0.52, 2.5<=vx<=2.5, 0.78<=y<=0.81, 1.0<=vy<=1.0));
-    HybridSet initial_set(free,initial_box);
+    HybridExpressionSet initial_set(free,initial_box);
     Box bounding_box(4, -1.0,1.0, -10.0,10.0, -1.0,1.0, -10.0,10.0);
 
     HybridTime evolution_time(10.0,3);

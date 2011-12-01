@@ -33,18 +33,20 @@
 
 namespace Ariadne {
 
+
 template<class X, class R>
 class NonlinearConstraint {
     typedef ScalarFunction<X> FunctionType;
     typedef R BoundType;
+//    typedef typename IntervalOfType<Real>::Type IntervalBoundsType;
   public:
     NonlinearConstraint(R const& l, ScalarFunction<X> const& f, R const& u) : _function(f), _lower_bound(l), _upper_bound(u) { ARIADNE_ASSERT(l<=u); }
     NonlinearConstraint(ScalarFunction<X> const& f, R const& x) : _function(f), _lower_bound(x), _upper_bound(x) { }
     template<class XX,class RR> NonlinearConstraint(const NonlinearConstraint<XX,RR>& c)
         : _function(static_cast<ScalarFunction<X> >(c.function())), _lower_bound(c.lower_bound()), _upper_bound(c.upper_bound()) { }
-    ScalarFunction<X> const& function() const { return this->_function; }
-    R const& lower_bound() const { return this->_lower_bound; }
-    R const& upper_bound() const { return this->_upper_bound; }
+    FunctionType const& function() const { return this->_function; }
+    BoundType const& lower_bound() const { return this->_lower_bound; }
+    BoundType const& upper_bound() const { return this->_upper_bound; }
     const Interval bounds() const { return Interval(this->_lower_bound,this->_upper_bound); }
   private:
     ScalarFunction<X> _function;
@@ -94,6 +96,10 @@ inline RealNonlinearConstraint operator<=(const RealNonlinearConstraint& nc, con
 }
 
 
+inline IntervalNonlinearConstraint operator<=(const Float& c, const IntervalScalarFunction& f) {
+    return IntervalNonlinearConstraint(c,f,+inf<Float>());
+}
+
 inline IntervalNonlinearConstraint operator<=(const IntervalScalarFunction& f, const Float& c) {
     return IntervalNonlinearConstraint(-inf<Float>(),f,c);
 }
@@ -124,6 +130,11 @@ inline IntervalNonlinearConstraint operator<=(const IntervalScalarFunction& f1, 
 
 inline IntervalNonlinearConstraint operator>=(const IntervalScalarFunction& f1, const IntervalScalarFunction& f2) {
     return (f1-f2) >= 0.0;
+}
+
+inline IntervalNonlinearConstraint operator<=(const IntervalNonlinearConstraint& nc, const Float& c) {
+    ARIADNE_ASSERT(nc.upper_bound()==inf<Float>());
+    return IntervalNonlinearConstraint(nc.lower_bound(),nc.function(),c);
 }
 
 

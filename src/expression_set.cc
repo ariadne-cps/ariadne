@@ -35,7 +35,6 @@
 
 namespace Ariadne {
 
-
 template<class T> struct KeyValue { };
 
 template<> struct KeyValue<RealVariableInterval> {
@@ -150,20 +149,20 @@ OutputStream& operator<<(OutputStream& os, const RealVariableBox& ebx) {
 
 
 
-RealExpressionSet::RealExpressionSet(const List<RealVariableInterval>& bounds)
+RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& bounds)
     : _bounds(make_key_value_map(bounds)), _constraints()
 {
     ARIADNE_ASSERT(unique_keys(bounds));
 }
 
-RealExpressionSet::RealExpressionSet(const List<RealVariableInterval>& bounds, const List<ContinuousPredicate>& constraints)
+RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& bounds, const List<ContinuousPredicate>& constraints)
     : _bounds(make_key_value_map(bounds)), _constraints(constraints)
 {
     ARIADNE_ASSERT(unique_keys(bounds));
     ARIADNE_ASSERT( subset(arguments(constraints),variables(bounds)) );
 }
 
-OutputStream& operator<<(OutputStream& os, const RealExpressionSet& eset) {
+OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraintSet& eset) {
     os << "[";
     for(Map<RealVariable,RealInterval>::const_iterator iter=eset._bounds.begin(); iter!=eset._bounds.end(); ++iter) {
         os << (iter==eset._bounds.begin()?"":",") << *iter; }
@@ -174,7 +173,7 @@ OutputStream& operator<<(OutputStream& os, const RealExpressionSet& eset) {
     return os << eset._bounds << eset._constraints;
 }
 
-RealBoundedConstraintSet euclidean_set(const RealExpressionSet& set, const RealSpace& space) {
+RealBoundedConstraintSet euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
     RealBox domain=euclidean_set(RealVariableBox(set.bounds()),space.variables());
     List<RealNonlinearConstraint> constraints;
     for(uint i=0; i!=set.constraints().size(); ++i) {
@@ -185,15 +184,20 @@ RealBoundedConstraintSet euclidean_set(const RealExpressionSet& set, const RealS
     return RealBoundedConstraintSet(domain,constraints);
 }
 
-BoundedConstraintSet approximate_euclidean_set(const RealExpressionSet& set, const RealSpace& space) {
+ConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
     IntervalVector domain=approximation(euclidean_set(RealVariableBox(set.bounds()),space.variables()));
-    List<RealNonlinearConstraint> constraints;
+    IntervalVectorFunction identity=IntervalVectorFunction::identity(domain.size());
+
+    ConstrainedImageSet result(domain,identity);
+    //List<IntervalNonlinearConstraint> constraints;
     for(uint i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
-        RealScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
-        constraints.append( constraint_function <= Real(0) );
+        IntervalScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
+        result.new_negative_parameter_constraint(constraint_function);
+        //constraints.append( constraint_function <= 0.0 );
     }
-    return BoundedConstraintSet(domain,constraints);
+    return result;
+    //return ConstrainedImageSet(domain,identity,constraints);
 }
 
 

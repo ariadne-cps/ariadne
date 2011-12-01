@@ -81,9 +81,9 @@ class HybridEvolverInterface
     //! HACK: Provided since HybridEnclosure needs a Sweeper to initialise.
     virtual Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_enclosure,const TimeType& time,Semantics semantics) const = 0;
     virtual Orbit<EnclosureType> orbit(const SystemType& system, const HybridBox& initial_box,const TimeType& time,Semantics semantics) const = 0;
-    virtual Orbit<EnclosureType> orbit(const SystemType& system, const HybridSet& initial_set,const TimeType& time,Semantics semantics) const = 0;
+    virtual Orbit<EnclosureType> orbit(const SystemType& system, const HybridExpressionSet& initial_set,const TimeType& time,Semantics semantics) const = 0;
     virtual EnclosureType enclosure(const HybridBox& initial_box) const = 0;
-    virtual EnclosureType enclosure(const SystemType& system, const HybridSet& initial_set) const = 0;
+    virtual EnclosureType enclosure(const SystemType& system, const HybridExpressionSet& initial_set) const = 0;
 };
 
 struct TransitionData;
@@ -161,7 +161,7 @@ class HybridEvolverBase
     void set_solver(const SolverInterface& solver);
 
     virtual EnclosureType enclosure(const HybridBox& initial_box) const;
-    virtual EnclosureType enclosure(const SystemType& system, const HybridSet& set) const;
+    virtual EnclosureType enclosure(const SystemType& system, const HybridExpressionSet& set) const;
 
     bool ALLOW_CREEP; //!< If true, a less-than-full evolution step may be taken to avoid splitting due to partially crossing a guard.
     bool ALLOW_UNWIND; //!< If true, a less-than-full evolution step may be taken to try to restore all time values over the parameter domain to the same value.
@@ -174,7 +174,7 @@ class HybridEvolverBase
     //! \brief Compute an approximation to the orbit set using the given semantics.
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_enclosure, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
     Orbit<EnclosureType> orbit(const SystemType& system, const HybridBox& initial_box, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
-    Orbit<EnclosureType> orbit(const SystemType& system, const HybridSet& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const SystemType& system, const HybridExpressionSet& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
 
     //! \brief Compute an approximation to the evolution set using the given semantics.

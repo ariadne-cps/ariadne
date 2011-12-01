@@ -129,7 +129,7 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 0.0" << std::endl;
     DiscreteLocation initial_location=(tank|draining,valve|opening);
-    HybridSet initial_set((tank|draining,valve|opening),(height==0.0,aperture==0.0));
+    HybridExpressionSet initial_set((tank|draining,valve|opening),(height==0.0,aperture==0.0));
 
     HybridTime evolution_time(80.0,5);
 

@@ -47,7 +47,9 @@ namespace Ariadne {
 
 class HybridTime;
 class HybridSpace;
-class HybridSet;
+
+class HybridRealExpressionBoundedConstraintSet;
+typedef HybridRealExpressionBoundedConstraintSet HybridExpressionSet;
 
 class DiscreteLocation;
 class DiscreteMode;

@@ -53,8 +53,10 @@ class EventSet;
 
 class HybridTime;
 class HybridSpace;
-class HybridSet;
 class HybridGrid;
+
+class HybridRealExpressionBoundedConstraintSet;
+typedef HybridRealExpressionBoundedConstraintSet HybridExpressionSet;
 
 class DiscreteLocation;
 class DiscreteSpace;

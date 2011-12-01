@@ -1668,7 +1668,7 @@ void test_adjoin_outer_approximation_operation(){
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test adjoining_outer_approximation a SetInterface to the GridTreeSet");
-    ImageSet initialRectangle( make_box("[-0.5,1.5]x[-0.3,1.0]") );
+    Box initialRectangle( make_box("[-0.5,1.5]x[-0.3,1.0]") );
 
     //Define the higth of the primary root cell.
     const uint theHeight = 2;

@@ -80,18 +80,23 @@ template<class ES> class ListSet< HybridBasicSet<ES> >;
 
 template<class DS, class HBS> class HybridSetConstIterator;
 
+class HybridRealExpressionBoundedConstraintSet;
+typedef HybridRealExpressionBoundedConstraintSet HybridExpressionSet;
 
-class HybridSet
+class HybridRealBoundedConstraintSet;
+typedef HybridRealBoundedConstraintSet HybridSet;
+
+class HybridRealExpressionBoundedConstraintSet
     : public HybridDrawableInterface
 {
     DiscreteLocation _location;
     Map< RealVariable, RealInterval> _bounds;
     List< ContinuousPredicate > _constraints;
   public:
-    HybridSet() { }
-    HybridSet(const DiscreteLocation& loc, const List<RealVariableInterval>& bnd, const List<ContinuousPredicate>& cnstr = List<ContinuousPredicate>());
-    HybridSet(const DiscreteLocation& loc, const RealExpressionSet& set);
-    HybridSet* clone() const { return new HybridSet(*this); }
+    HybridRealExpressionBoundedConstraintSet() { }
+    HybridRealExpressionBoundedConstraintSet(const DiscreteLocation& loc, const List<RealVariableInterval>& bnd, const List<ContinuousPredicate>& cnstr = List<ContinuousPredicate>());
+    HybridRealExpressionBoundedConstraintSet(const DiscreteLocation& loc, const RealExpressionBoundedConstraintSet& set);
+    HybridRealExpressionBoundedConstraintSet* clone() const { return new HybridRealExpressionBoundedConstraintSet(*this); }
     DiscreteLocation const& location() const { return this->_location; }
     Set<RealVariable> variables() const { return this->_bounds.keys(); };
     Map<RealVariable,RealInterval> const& bounds() const { return this->_bounds; };
@@ -99,7 +104,9 @@ class HybridSet
     RealBoundedConstraintSet continuous_state_set(const RealSpace&) const;
     void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
 };
-OutputStream& operator<<(OutputStream& os, const HybridSet& hs);
+OutputStream& operator<<(OutputStream& os, const HybridRealExpressionBoundedConstraintSet& hs);
+
+typedef HybridRealExpressionBoundedConstraintSet HybridExpressionSet;
 
 class HybridPoint
     : public Tuple<DiscreteLocation,RealSpace,Point>
@@ -160,23 +167,24 @@ bool operator==(const HybridBasicSet<ES> hset1, const HybridBasicSet<ES>& hset2)
 
 typedef List<RealVariable> RealVariables;
 
-class HybridBoundedConstraintSet
+class HybridRealBoundedConstraintSet
     : public virtual HybridSetInterface
 {
-    Map<DiscreteLocation, BoundedConstraintSet> _sets;
+    Map<DiscreteLocation, RealBoundedConstraintSet> _sets;
     Map<DiscreteLocation, RealSpace> _spaces;
   public:
-    HybridBoundedConstraintSet();
-    HybridBoundedConstraintSet(const HybridBox& hbx);
+    HybridRealBoundedConstraintSet();
+    HybridRealBoundedConstraintSet(const DiscreteLocation& q, const RealSpace& spc, const RealBox& bx);
+    HybridRealBoundedConstraintSet(const DiscreteLocation& q, const List<RealVariableInterval>& bnds);
 
-    virtual HybridBoundedConstraintSet* clone() const;
+    virtual HybridRealBoundedConstraintSet* clone() const;
     virtual HybridSpace space() const;
     virtual tribool overlaps(const HybridBox& bx) const;
     virtual tribool inside(const HybridBoxes& bx) const;
 
     virtual tribool separated(const HybridBox& bx) const;
     virtual tribool covers(const HybridBox& bx) const;
-    virtual BoundedConstraintSet const& operator[](DiscreteLocation loc) const;
+    virtual RealBoundedConstraintSet const& operator[](DiscreteLocation loc) const;
     virtual Set<DiscreteLocation> locations() const;
     virtual HybridBoxes bounding_box() const;
     virtual std::ostream& write(std::ostream& os) const;

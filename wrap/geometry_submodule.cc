@@ -361,7 +361,7 @@ void export_constrained_image_set()
     constrained_image_set_class.def(init<Box,RealVectorFunction>());
     constrained_image_set_class.def("domain", &ConstrainedImageSet::domain,return_value_policy<copy_const_reference>());
     constrained_image_set_class.def("function", &ConstrainedImageSet::function,return_value_policy<copy_const_reference>());
-    constrained_image_set_class.def("constraint", &ConstrainedImageSet::constraint,return_value_policy<copy_const_reference>());
+    constrained_image_set_class.def("constraint", &ConstrainedImageSet::constraint);
     constrained_image_set_class.def("number_of_parameters", &ConstrainedImageSet::number_of_parameters);
     constrained_image_set_class.def("number_of_constraints", &ConstrainedImageSet::number_of_constraints);
     constrained_image_set_class.def("apply", &ConstrainedImageSet::apply);

@@ -52,7 +52,7 @@ class AffineSet;
 class ImageSet;
 class ConstraintSet;
 class BoundedConstraintSet;
-class ConstrainedImageSet;
+class RealConstrainedImageSet;
 
 class Grid;
 class PavingInterface;
@@ -106,6 +106,37 @@ Box approximation(const RealBox& rbx);
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
 //! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
+class RealConstraintSet
+    : public RegularSetInterface
+{
+    RealVectorFunction _function;
+    RealBox _codomain;
+  public:
+    //! \brief Construct the preimage of \a C under \a g.
+    RealConstraintSet(const RealVectorFunction& g, const RealBox& C);
+    //! \brief Construct the restriction of \a D under the constraints \a c.
+    RealConstraintSet(const List<RealNonlinearConstraint>& c);
+    //! \brief The codomain of the set.
+    const RealBox& codomain() const { return this->_codomain; }
+    //! \brief The function used to define the set.
+    const RealVectorFunction& function() const { return this->_function; };
+    //! \brief The \a i<sup>th</sup> constraint \f$g_i(x)\in c_i\f$.
+    RealNonlinearConstraint constraint(uint i) const {
+        return RealNonlinearConstraint(this->_codomain[i].lower(),this->_function[i],this->_codomain[i].upper()); }
+    //! \brief The number of constraints.
+    uint number_of_constraints() const { return this->_codomain.size(); };
+
+    RealConstraintSet* clone() const;
+    uint dimension() const;
+    tribool separated(const Box&) const;
+    tribool overlaps(const Box&) const;
+    tribool covers(const Box&) const;
+    std::ostream& write(std::ostream&) const;
+};
+
+//! \ingroup GeometryModule ExactSetSubModule
+//! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
+//! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
 class RealBoundedConstraintSet
     : public SetInterface
     , public DrawableInterface
@@ -144,164 +175,32 @@ class RealBoundedConstraintSet
 };
 
 
-
-
-//! \ingroup GeometryModule ExactSetSubModule
-//! \brief A set defined as the image of a box under a continuous function.
-//! The set is described as \f$S=h(D) = \{ h(s) \mid s \in D\}\f$ where \f$D\f$ is the domain and \f$h\f$ the function.
-class ImageSet
-    : public LocatedSetInterface
-    , public DrawableInterface
-{
-    Vector<Interval> _domain;
-    RealVectorFunction _function;
-  public:
-    //! \brief Default constructor constructs the singleton in \f$\R^0\f$.
-    ImageSet();
-    //! \brief Construct the image of \a dom under the identity function.
-    ImageSet(const Vector<Interval>& dom);
-    //! \brief Construct the image of \a dom under the function \a fn.
-    ImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn);
-    //! \brief The box used to define the set.
-    const Vector<Interval>& domain() const { return this->_domain; }
-    //! \brief The function used to define the set.
-    const RealVectorFunction& function() const { return this->_function; }
-    //! \brief Equality operator. Compares functions by referential equality.
-    bool operator==(const ImageSet& ims) const {
-        return this->_domain==ims._domain && this->_function.raw_pointer()==ims._function.raw_pointer(); }
-
-    ImageSet* clone() const;
-    uint dimension() const;
-    tribool empty() const;
-    tribool separated(const Box&) const;
-    tribool overlaps(const Box&) const;
-    tribool inside(const Box&) const;
-    Box bounding_box() const;
-    void draw(CanvasInterface&,const Projection2d&) const;
-    std::ostream& write(std::ostream&) const;
-};
-
-
-
-//! \ingroup GeometryModule ExactSetSubModule
-//! \brief A set defined as the preimage of a box (the \em codomain) under a continuous function.
-//! The set is described as \f$S=g^{-1}(C) = \{ x \mid g(x)\in C\}\f$ where \f$C\f$ is the codomain and \f$g\f$ the function.
-//!
-//! A constraint set is not Drawable since it cannot be bounded. To plot the set, first intersect with a bounding box.
-class ConstraintSet
-    : public RegularSetInterface
-{
-    RealVectorFunction _function;
-    Vector<Interval> _codomain;
-  public:
-    //! \brief Construct the preimage of \a C under \a g.
-    ConstraintSet(const RealVectorFunction& g, const Vector<Interval>& C);
-    //! \brief Construct from a polyhedron.
-    ConstraintSet(const Polyhedron& p);
-    //! \brief Construct from a list of constraints.
-    ConstraintSet(const List<RealNonlinearConstraint>& c);
-    //! \brief The codomain of the set.
-    const Vector<Interval>& codomain() const { return this->_codomain; }
-    //! \brief The function used to define the set.
-    const RealVectorFunction& function() const { return this->_function; };
-    //! \brief The \a i<sup>th</sup> constraint \f$g_i(x)\in c_i\f$.
-    RealNonlinearConstraint constraint(uint i) const {
-        return RealNonlinearConstraint(ExactFloat(this->_codomain[i].lower()),this->_function[i],ExactFloat(this->_codomain[i].upper())); }
-    //! \brief The number of constraints.
-    uint number_of_constraints() const { return this->_codomain.size(); };
-
-    ConstraintSet* clone() const;
-    uint dimension() const;
-    tribool separated(const Box&) const;
-    tribool overlaps(const Box&) const;
-    tribool covers(const Box&) const;
-    std::ostream& write(std::ostream&) const;
-    //! \brief Intersect with a box to create a bounded set.
-    friend BoundedConstraintSet intersection(const ConstraintSet& set, const Box& bound);
-    //! \brief Compute the preimage of the set $S=g^{-1}(C)\f$ under \f$h\$.
-    //! The resulting set is the constraint set \f$h^{-1}(S)=(g\circ h)^{-1}(C)\f$.
-    friend ConstraintSet preimage(const RealVectorFunction& h, const ConstraintSet& s) {
-        return ConstraintSet(compose(s.function(),h),s.codomain()); }
-};
-
-
-//! \ingroup GeometryModule ExactSetSubModule
-//! \brief A set defined as the intersection of a box with preimage of a box (the \em codomain) under a continuous function.
-//! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
-//!
-//! A constraint set is Drawable since it cannot be bounded. To plot the set, first intersect with a bounding box.
-class BoundedConstraintSet
-    : public SetInterface
-    , public DrawableInterface
-{
-    Vector<Interval> _domain;
-    RealVectorFunction _function;
-    Vector<Interval> _codomain;
-  public:
-    //! \brief Construct the preimage of \a C under \a g.
-    BoundedConstraintSet(const Vector<Interval>& D, const RealVectorFunction& g, const Vector<Interval>& C);
-    //! \brief Construct the restriction of \a D under the constraints \a c.
-    BoundedConstraintSet(const Vector<Interval>& D, const List<RealNonlinearConstraint>& c);
-    //! \brief Construct the box \a D.
-    BoundedConstraintSet(const Box& bx);
-    //! \brief The domain of the set.
-    const Vector<Interval>& domain() const { return this->_domain; }
-    //! \brief The codomain of the set.
-    const Vector<Interval>& codomain() const { return this->_codomain; }
-    //! \brief The function used to define the set.
-    const RealVectorFunction& function() const { return this->_function; };
-    //! \brief The \a i<sup>th</sup> constraint \f$g_i(x)\in c_i\f$.
-    RealNonlinearConstraint constraint(uint i) const {
-        return RealNonlinearConstraint(ExactFloat(this->_codomain[i].lower()),this->_function[i],ExactFloat(this->_codomain[i].upper())); }
-    //! \brief The number of constraints.
-    uint number_of_constraints() const { return this->_codomain.size(); };
-
-    BoundedConstraintSet* clone() const;
-    uint dimension() const;
-    tribool separated(const Box&) const;
-    tribool overlaps(const Box&) const;
-    tribool covers(const Box&) const;
-    tribool inside(const Box&) const;
-    Box bounding_box() const;
-    std::ostream& write(std::ostream&) const;
-    void draw(CanvasInterface&,const Projection2d&) const;
-};
-
-
-//! \ingroup GeometryModule ExactSetSubModule
-//! \brief A set defined as the image of the intersection of a box \f$D\f$ and a constraint set \f$g^{-1}(C)\f$ under a function \f$f\f$.
-//! In other words, \f$S=f(D\cap g^{-1}(C))\f$.
-class ConstrainedImageSet
+class RealConstrainedImageSet
     : public LocatedSetInterface, public DrawableInterface
 {
-    Box _domain;
+    RealBox _domain;
     RealVectorFunction _function;
     List< RealNonlinearConstraint > _constraints;
   public:
     //! \brief Construct the set with zero-dimensional parameterisation in zero dimensions with no constraints.
-    ConstrainedImageSet() : _domain(), _function() { }
+    RealConstrainedImageSet() : _domain(), _function() { }
     //! \brief Construct the box \a dom.
-    ConstrainedImageSet(const Vector<Interval>& dom) : _domain(dom), _function(RealVectorFunction::identity(dom.size())) { }
+    RealConstrainedImageSet(const RealBox& dom) : _domain(dom), _function(RealVectorFunction::identity(dom.size())) { }
     //! \brief Construct the image of \a dom under \a fn.
-    ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn) : _domain(dom), _function(fn) {
+    RealConstrainedImageSet(const RealBox& dom, const RealVectorFunction& fn) : _domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn, using constraint \a c.
-    ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn, const RealNonlinearConstraint& c) : _domain(dom), _function(fn), _constraints(1u,c) {
+    RealConstrainedImageSet(const RealBox& dom, const RealVectorFunction& fn, const RealNonlinearConstraint& c) : _domain(dom), _function(fn), _constraints(1u,c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn);
         ARIADNE_ASSERT_MSG(dom.size()==c.function().argument_size(),"dom="<<dom<<", c="<<c);
     }
     //! \brief Construct the image of \a dom under \a fn, using constraints \a c.
-    ConstrainedImageSet(const Vector<Interval>& dom, const RealVectorFunction& fn, const List<RealNonlinearConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
+    RealConstrainedImageSet(const RealBox& dom, const RealVectorFunction& fn, const List<RealNonlinearConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
-    //! \brief Construct the image of \a dom under \a fn.
-    ConstrainedImageSet(const List<Interval>& dom, const List<RealScalarFunction>& fn) : _domain(Vector<Interval>(dom)), _function(fn) {
-        ARIADNE_ASSERT_MSG(_domain.size()==_function.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Convert from a bounded constraint set.
-    ConstrainedImageSet(const BoundedConstraintSet& set);
-    //! \brief Convert from an image set.
-    ConstrainedImageSet(const ImageSet& set);
+    RealConstrainedImageSet(const RealBoundedConstraintSet& set);
     //! \brief The domain of the set.
-    const Box& domain() const { return this->_domain; }
+    const RealBox& domain() const { return this->_domain; }
     //! \brief The function used to define the set.
     const RealVectorFunction& function() const { return this->_function; };
     //! \brief The function used to define the set.
@@ -328,7 +227,7 @@ class ConstrainedImageSet
         ARIADNE_ASSERT_MSG(c.function().argument_size()==this->_function.result_size(),*this<<", "<<c);
         this->_constraints.append(RealNonlinearConstraint(c.lower_bound(),compose(c.function(),_function),c.upper_bound())); }
 
-    ConstrainedImageSet* clone() const { return new ConstrainedImageSet(*this); }
+    RealConstrainedImageSet* clone() const { return new RealConstrainedImageSet(*this); }
     uint dimension() const { return this->_function.result_size(); }
     tribool inside(const Box& bx) const { return subset(this->bounding_box(),bx); }
 
@@ -339,9 +238,9 @@ class ConstrainedImageSet
     //! \brief Construct an affine approximation, with undefined accuracy.
     AffineSet affine_approximation() const;
     //! \brief Split into two pieces by subdividing along a coordinate direction.
-    Pair<ConstrainedImageSet,ConstrainedImageSet> split() const;
+    Pair<RealConstrainedImageSet,RealConstrainedImageSet> split() const;
     //! \brief Split into two pieces by subdividing along the \a j<sup>th</sup> coordinate direction.
-    Pair<ConstrainedImageSet,ConstrainedImageSet> split(uint j) const;
+    Pair<RealConstrainedImageSet,RealConstrainedImageSet> split(uint j) const;
 
     //! \brief Test if the set is disjoint from a (closed) box.
     tribool separated(const Box&) const;
@@ -364,13 +263,11 @@ class ConstrainedImageSet
 };
 
 
-class IntervalConstrainedImageSet;
-std::ostream& operator<<(std::ostream&, const IntervalConstrainedImageSet&);
 
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief A set defined as the image of the intersection of a box \f$D\f$ and a constraint set \f$g^{-1}(C)\f$ under a function \f$f\f$.
 //! In other words, \f$S=f(D\cap g^{-1}(C))\f$.
-class IntervalConstrainedImageSet
+class ConstrainedImageSet
     : public LocatedSetInterface, public DrawableInterface
 {
     IntervalVector _domain;
@@ -380,13 +277,13 @@ class IntervalConstrainedImageSet
     List< IntervalScalarFunction > _zero_constraints;
   public:
     //! \brief Construct the set with zero-dimensional parameterisation in zero dimensions with no constraints.
-    IntervalConstrainedImageSet() : _domain(), _function() { }
+    ConstrainedImageSet() : _domain(), _function() { }
     //! \brief Construct the box \a dom.
-    IntervalConstrainedImageSet(const Box& dom)
+    ConstrainedImageSet(const Box& dom)
         : _domain(dom), _reduced_domain(dom)
         , _function(static_cast<IntervalVectorFunctionInterface const&>(RealVectorFunction::identity(dom.size()))) { }
     //! \brief Construct the image of \a dom under \a fn.
-    IntervalConstrainedImageSet(const Vector<Interval>& dom, const IntervalVectorFunction& fn) : _domain(dom), _reduced_domain(dom), _function(fn) {
+    ConstrainedImageSet(const Vector<Interval>& dom, const IntervalVectorFunction& fn) : _domain(dom), _reduced_domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
 
     //! \brief The domain of the set.
@@ -403,7 +300,7 @@ class IntervalConstrainedImageSet
     uint number_of_negative_constraints() const { return this->_negative_constraints.size(); };
     uint number_of_zero_constraints() const { return this->_zero_constraints.size(); };
     //! \brief The \a i<sup>th</sup> constraint.
-    IntervalNonlinearConstraint const& constraint(uint i) const;
+    IntervalNonlinearConstraint const constraint(uint i) const;
     IntervalScalarFunction const& negative_constraint(uint i) const { return this->_negative_constraints[i]; }
     IntervalScalarFunction const& zero_constraint(uint i) const { return this->_zero_constraints[i]; }
 
@@ -443,7 +340,7 @@ class IntervalConstrainedImageSet
         ARIADNE_NOT_IMPLEMENTED;
     }
 
-    IntervalConstrainedImageSet* clone() const { return new IntervalConstrainedImageSet(*this); }
+    ConstrainedImageSet* clone() const { return new ConstrainedImageSet(*this); }
     uint dimension() const { return this->_function.result_size(); }
 
     IntervalVectorFunction constraint_function() const;
@@ -458,9 +355,9 @@ class IntervalConstrainedImageSet
     //! \brief Construct an affine approximation, with undefined accuracy.
     AffineSet affine_approximation() const;
     //! \brief Split into two pieces by subdividing along a coordinate direction.
-    Pair<IntervalConstrainedImageSet,IntervalConstrainedImageSet> split() const;
+    Pair<ConstrainedImageSet,ConstrainedImageSet> split() const;
     //! \brief Split into two pieces by subdividing along the \a j<sup>th</sup> coordinate direction.
-    Pair<IntervalConstrainedImageSet,IntervalConstrainedImageSet> split(uint j) const;
+    Pair<ConstrainedImageSet,ConstrainedImageSet> split(uint j) const;
 
     //! \brief Test if the set is empty.
     tribool empty() const;
@@ -481,6 +378,8 @@ class IntervalConstrainedImageSet
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;
 };
+
+std::ostream& operator<<(std::ostream&, const ConstrainedImageSet&);
 
 
 

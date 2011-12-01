@@ -147,7 +147,7 @@ int main()
     std::cout << "Computing evolution starting from location l2, x = 5.0, y = 1.0, t = 0.0" << std::endl;
 
     RealVariableBox initial_box((5.0<=RealVariable("x")<=5.001, 1.0<=RealVariable("y")<=1.001, 0.0<=RealVariable("t")<=0.001));
-    HybridSet initial_set(l2,initial_box);
+    HybridExpressionSet initial_set(l2,initial_box);
     Box bounding_box(3, -0.1,9.1, -0.1,1.1, -0.1,numeric_cast<double>(tmax)+0.1);
 
     HybridTime evolution_time(tmax,dmax);

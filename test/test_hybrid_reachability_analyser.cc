@@ -73,7 +73,7 @@ class TestHybridReachabilityAnalyser
     HybridAutomaton system;
     Grid grid;
     Interval bound;
-    HybridBoundedConstraintSet initial_set;
+    HybridSet initial_set;
     HybridTime reach_time;
 
   public:
@@ -112,7 +112,7 @@ class TestHybridReachabilityAnalyser
         cout << "Done building system\n";
 
         //ImageSet initial_box(make_box("[1.99,2.01]x[-0.01,0.01]"));
-        initial_set=HybridBox(location,(x.in(2.01,2.02),y.in(0.01,0.02)));
+        initial_set=HybridSet(location,(x.in(2.01,2.02),y.in(0.01,0.02)));
         cout << "Done creating initial set\n" << endl;
 
         cout << "system=" << system << endl;
@@ -131,7 +131,7 @@ class TestHybridReachabilityAnalyser
         HybridGridTreeSet hybrid_lower_reach=analyser.lower_reach(system,initial_set,reach_time);
         GridTreeSet& lower_evolve=hybrid_lower_evolve[loc];
         GridTreeSet& lower_reach=hybrid_lower_reach[loc];
-        BoundedConstraintSet const& initial=initial_set[loc];
+        RealBoundedConstraintSet const& initial=initial_set[loc];
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
         cout << "Reached " << lower_reach.size() << " cells " << endl << endl;
         plot("test_reachability_analyser-map_lower_reach_evolve.png",bounding_box,lower_evolve,lower_reach,initial);
@@ -148,7 +148,7 @@ class TestHybridReachabilityAnalyser
 
         const GridTreeSet& upper_evolve=upper_evolve_set[loc];
         const GridTreeSet& upper_reach=upper_reach_set[loc];
-        BoundedConstraintSet const& initial=initial_set[loc];
+        RealBoundedConstraintSet const& initial=initial_set[loc];
         //cout << "Reached " << upper_reach.size() << " cells out of " << upper_reach.capacity() << endl << endl;
         plot("test_reachability_analyser-map_upper_reach_evolve.png",bounding_box,upper_evolve,upper_reach,initial);
     }

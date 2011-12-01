@@ -129,7 +129,7 @@ int main(int argc, char** argv)
     cout << "initial_box=" << initial_box << endl;
 
 
-    HybridSet initial_set(free, initial_box);
+    HybridExpressionSet initial_set(free, initial_box);
     cout << "initial_set=" << initial_set << endl << endl;
 
     Semantics semantics=UPPER_SEMANTICS;

@@ -204,7 +204,7 @@ int main(int argc, const char* argv[])
     std::cout << "Computing evolution..." << std::endl;
 
     RealVariableBox initial_box((t==0.0, vi==0.0, vo==0.8*dp[0]));
-    HybridSet initial_set(rectifier|offoff,initial_box);
+    HybridExpressionSet initial_set(rectifier|offoff,initial_box);
 
 //    Box initial_box(3, 0.002836,0.002836, 3.110529,3.110529, 3.110529,3.110529);
 //    HybridEnclosureType initial_enclosure(onoff,initial_box);

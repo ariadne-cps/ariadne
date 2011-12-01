@@ -36,9 +36,6 @@ namespace Ariadne {
 
 typedef uint DimensionType;
 
-class HybridSet {};
-
-
 
 
 MonolithicHybridAutomaton::Mode::Mode(DiscreteLocation q, RealSpace s, RealVectorFunction f)

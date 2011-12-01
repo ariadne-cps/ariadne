@@ -51,7 +51,9 @@ class Grid;
 
 class HybridTime;
 class HybridSpace;
-class HybridSet;
+
+class HybridRealExpressionBoundedConstraintSet;
+typedef HybridRealExpressionBoundedConstraintSet HybridExpressionSet;
 
 class DiscreteMode;
 class DiscreteTransition;
@@ -251,7 +253,7 @@ class HybridSystem
 
     //@}
 
-    
+
     //@{
     //! \name Methods for extracting the discrete dynamics of the automaton.
 

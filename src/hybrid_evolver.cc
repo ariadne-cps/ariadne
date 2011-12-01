@@ -191,7 +191,7 @@ orbit(const HybridAutomatonInterface& system,
 Orbit<HybridEnclosure>
 HybridEvolverBase::
 orbit(const HybridAutomatonInterface& system,
-      const HybridSet& initial_set,
+      const HybridExpressionSet& initial_set,
       const HybridTime& time,
       Semantics semantics) const
 {
@@ -301,7 +301,7 @@ HybridEvolverBase::enclosure(const HybridBox& initial_box) const
 }
 
 HybridEvolverBase::EnclosureType
-HybridEvolverBase::enclosure(const SystemType& sys, const HybridSet& initial_set) const
+HybridEvolverBase::enclosure(const SystemType& sys, const HybridExpressionSet& initial_set) const
 {
     return HybridEnclosure(initial_set,sys.continuous_state_space(initial_set.location()),this->function_factory());
 }

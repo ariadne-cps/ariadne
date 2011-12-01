@@ -78,7 +78,7 @@ template<> class ListSet<HybridEnclosure>;
 template<class BS> class HybridBasicSet;
 typedef HybridBasicSet<Box> HybridBox;
 class HybridGridTreeSet;
-class HybridSet;
+class HybridRealExpressionBoundedConstraintSet;
 
 typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
@@ -140,7 +140,7 @@ class HybridEnclosure
     //! \brief An empty enclosure.
     HybridEnclosure();
     //! \brief An enclosure corresponding to the hybrid set \a set using \a space to order the continuous variables.
-    HybridEnclosure(const HybridSet& set, const RealSpace& space, const IntervalFunctionModelFactoryInterface& factory);
+    HybridEnclosure(const HybridRealExpressionBoundedConstraintSet& set, const RealSpace& space, const IntervalFunctionModelFactoryInterface& factory);
     //! \brief An enclosure corresponding to a Euclidean box \a bx in location \a q with variables ordered by \a spc.
     HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Box& bx, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief An enclosure corresponding to a hybrid box \a hbx.

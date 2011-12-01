@@ -250,7 +250,7 @@ struct BinaryFunction
     virtual std::ostream& write(std::ostream& os) const {
         if(_op==ADD || _op==SUB) { return os << '(' << _arg1 << symbol(_op) << _arg2 << ')'; }
         else { return os << _arg1 << symbol(_op) << _arg2; } }
-        
+
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
         r=Ariadne::compute(_op,_arg1.evaluate(x),_arg2.evaluate(x)); }
 
@@ -996,6 +996,23 @@ IntervalScalarFunction operator-(IntervalScalarFunction const& f1, IntervalScala
         return IntervalScalarFunctionModel(*f1p) - IntervalScalarFunctionModel(*f2p);
     }
     return new BinaryFunction<Interval>(SUB,f1,f2);
+}
+
+IntervalScalarFunction operator-(IntervalScalarFunction const& f, Interval const& c) {
+    std::cerr<<"operator-(IntervalScalarFunction, Interval): f="<<f<<"\n";
+    shared_ptr<IntervalScalarFunctionModelInterface const> fp=boost::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f.managed_pointer());
+    if(fp) { return IntervalScalarFunctionModel(*fp) - c; }
+    shared_ptr<RealScalarFunctionInterface const> rfp=boost::dynamic_pointer_cast<RealScalarFunctionInterface const>(f.managed_pointer());
+    if(rfp && c.lower()==c.upper()) { return RealScalarFunction(*rfp) - ExactFloat(c.lower()); }
+    std::cerr<<"  sub="<<IntervalScalarFunction(new BinaryFunction<Interval>(SUB,f,IntervalScalarFunction::constant(f.argument_size(),c)))<<"\n";
+    return new BinaryFunction<Interval>(SUB,f,IntervalScalarFunction::constant(f.argument_size(),c));
+}
+
+IntervalScalarFunction operator-(Interval const& c, IntervalScalarFunction const& f) {
+    std::cerr<<"operator-(Interval, IntervalScalarFunction): f="<<f<<"\n";
+    shared_ptr<IntervalScalarFunctionModelInterface const> fp=boost::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f.managed_pointer());
+    if(fp) { return c - IntervalScalarFunctionModel(*fp); }
+    return new BinaryFunction<Interval>(SUB,IntervalScalarFunction::constant(f.argument_size(),c),f);
 }
 
 IntervalScalarFunction compose(const IntervalScalarFunction& f, const IntervalVectorFunction& g) {

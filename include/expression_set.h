@@ -44,10 +44,11 @@ class Real;
 class RealInterval;
 
 class RealBox;
+class RealConstraintSet;
 class RealBoundedConstraintSet;
 
 class Box;
-class BoundedConstraintSet;
+class ConstrainedImageSet;
 
 template<class X> class Variable;
 typedef Variable<Real> RealVariable;
@@ -157,21 +158,35 @@ class RealVariableBox {
 
 
 //! \ingroup GeometryModule ExactSetSubModule
-//! \brief A set defined as the image of a box under a continuous function.
-//! The set is described as \f$S=h(D) = \{ h(s) \mid s \in D\}\f$ where \f$D\f$ is the domain and \f$h\f$ the function.
-class RealExpressionSet
+//! \brief A set defined as the preimage of a box under a continuous function.
+//! The set is described as \f$S=g^{-1}(C)\f$ where \f$g\f$ the constraint function and \f$C\f$ the codomain.
+class RealExpressionConstraintSet
+{
+    List<ContinuousPredicate> _constraints;
+  public:
+    RealExpressionConstraintSet();
+    RealExpressionConstraintSet(const List<ContinuousPredicate>& constraints);
+    List<ContinuousPredicate> const& constraints() const { return this->_constraints; }
+    friend RealConstraintSet euclidean_set(const RealExpressionConstraintSet& set, const RealSpace& space);
+    friend std::ostream& operator<<(std::ostream& os, const RealExpressionConstraintSet& eset);
+};
+
+//! \ingroup GeometryModule ExactSetSubModule
+//! \brief A set defined as the intersection of a box and the preimage of a box under a continuous function.
+//! The set is described as \f$S=D\cap g^{-1}(C)\f$ where \f$D\f$ is the domain, \f$g\f$ the constraint function and \f$C\f$ the codomain.
+class RealExpressionBoundedConstraintSet
 {
     Map<RealVariable,RealInterval> _bounds;
     List<ContinuousPredicate> _constraints;
   public:
-    RealExpressionSet(const List<RealVariableInterval>& domain);
-    RealExpressionSet(const List<RealVariableInterval>& domain, const List<ContinuousPredicate>& constraints);
-    RealExpressionSet(const RealVariableBox& box) : _bounds(box.bounds()) { }
+    RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain);
+    RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain, const List<ContinuousPredicate>& constraints);
+    RealExpressionBoundedConstraintSet(const RealVariableBox& box) : _bounds(box.bounds()) { }
     Map<RealVariable,RealInterval> bounds() const { return this->_bounds; }
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; }
-    friend RealBoundedConstraintSet euclidean_set(const RealExpressionSet& set, const RealSpace& space);
-    friend BoundedConstraintSet approximate_euclidean_set(const RealExpressionSet& set, const RealSpace& space);
-    friend std::ostream& operator<<(std::ostream& os, const RealExpressionSet& eset);
+    friend RealBoundedConstraintSet euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space);
+    friend ConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space);
+    friend std::ostream& operator<<(std::ostream& os, const RealExpressionBoundedConstraintSet& eset);
 };
 
 

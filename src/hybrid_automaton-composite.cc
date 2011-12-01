@@ -43,8 +43,6 @@ namespace Ariadne {
 
 typedef uint DimensionType;
 
-class HybridSet {};
-
 DiscreteMode::DiscreteMode()
 {
 }

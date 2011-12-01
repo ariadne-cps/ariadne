@@ -91,7 +91,7 @@ HybridEnclosure::HybridEnclosure()
 {
 }
 
-HybridEnclosure::HybridEnclosure(const HybridSet& hybrid_set,
+HybridEnclosure::HybridEnclosure(const HybridRealExpressionBoundedConstraintSet& hybrid_set,
                                  const RealSpace& space,
                                  const IntervalFunctionModelFactoryInterface& factory)
     : _location(hybrid_set.location()), _events(), _space(space.variable_names()), _set(),
@@ -117,7 +117,7 @@ HybridEnclosure::HybridEnclosure(const HybridBox& hbox, const IntervalFunctionMo
 
 
 HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpace& spc, const Enclosure& set)
-    : _location(location), _events(), _space(spc.variable_names()), _set(set), 
+    : _location(location), _events(), _space(spc.variable_names()), _set(set),
       _variables(catenate(List<EnclosureVariableType>(set.dimension(),INITIAL),List<EnclosureVariableType>(set.number_of_parameters()-set.dimension(),UNKNOWN)))
 {
 }

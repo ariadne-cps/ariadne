@@ -180,7 +180,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
 
 
     // Set the initial set.
-    HybridSet initial_set(heating_off, (T==17.0,0.0<=C<=1.0/1024) );
+    HybridExpressionSet initial_set(heating_off, (T==17.0,0.0<=C<=1.0/1024) );
     cout << "initial_set=" << initial_set << endl;
     // Compute the initial set as a validated enclosure.
     HybridEnclosure initial_enclosure = evolver.enclosure(heating_system,initial_set);

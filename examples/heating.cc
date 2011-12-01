@@ -140,7 +140,7 @@ int main(int argc, const char* argv[])
 
     // Set the initial set.
     Real r=1.0/32; Real Tinit=17.0-0.0/16; // Tinit=16.0;
-    HybridSet initial_set(heating|off, (Tinit<=T<=Tinit+r,0<=C<=0+r) );
+    HybridExpressionSet initial_set(heating|off, (Tinit<=T<=Tinit+r,0<=C<=0+r) );
     cout << "initial_set=" << initial_set << endl;
     // Compute the initial set as a validated enclosure.
     HybridEnclosure initial_enclosure = evolver.enclosure(heating_system,initial_set);

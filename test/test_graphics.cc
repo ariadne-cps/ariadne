@@ -64,7 +64,7 @@ int main(int argc, char **argv)
     Box bbx1=ts1.bounding_box()+Vector<Interval>(2, Interval(-0.25,+0.25));
 
     VectorUserFunction<RadiusSquare> radius(Vector<Real>(1u,0.5));
-    ConstraintSet cs1(radius,Box(1u,Interval(-1,0)));
+    RealConstraintSet cs1(radius,RealBox(1u,RealInterval(-1,0)));
 
     {
         double h=10000;

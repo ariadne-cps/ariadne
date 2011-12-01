@@ -83,6 +83,128 @@ Matrix<Float> nonlinearities_zeroth_order(const IntervalVectorFunction& f, const
 Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& function, const IntervalVector domain);
 Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& function, const IntervalVector& domain);
 
+Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const IntervalVector& dom)
+{
+    const uint m=f.result_size();
+    const uint n=f.argument_size();
+    VectorTaylorFunction g=restrict(f,dom);
+
+    Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
+    MultiIndex a;
+    for(uint i=0; i!=m; ++i) {
+        const IntervalTaylorModel& tm=g.model(i);
+        for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+            a=iter->key();
+            if(a.degree()>1) {
+                for(uint j=0; j!=n; ++j) {
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
+                }
+            }
+        }
+    }
+
+    return nonlinearities;
+}
+
+Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& f, const IntervalVector& dom)
+{
+    //std::cerr<<"\n\nf="<<f<<"\n";
+    //std::cerr<<"dom="<<dom<<"\n";
+    const uint m=f.result_size();
+    const uint n=f.argument_size();
+    Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 1, dom);
+    MultiIndex a(n);
+    for(uint i=0; i!=n; ++i) {
+        Float sf=dom[i].radius();
+        ++a[i];
+        ivl_dx[i].expansion().append(a,Interval(sf));
+        --a[i];
+    }
+    //std::cerr<<"dx="<<ivl_dx<<"\n";
+    Vector<IntervalDifferential> df=f.evaluate(ivl_dx);
+    //std::cerr<<"df="<<df<<"\n";
+
+    Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
+    for(uint i=0; i!=m; ++i) {
+        const IntervalDifferential& d=df[i];
+        for(IntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+            a=iter->key();
+            if(a.degree()==1) {
+                for(uint j=0; j!=n; ++j) {
+                    if(a[j]>0) { nonlinearities[i][j]+=radius(iter->data()); }
+                }
+            }
+        }
+    }
+    //std::cerr<<"nonlinearities="<<nonlinearities<<"\n";
+
+    return nonlinearities;
+}
+
+Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface& f, const IntervalVector& dom)
+{
+    //std::cerr<<"\n\nf="<<f<<"\n";
+    //std::cerr<<"dom="<<dom<<"\n";
+    const uint m=f.result_size();
+    const uint n=f.argument_size();
+    Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 2, dom);
+    MultiIndex a(n);
+    for(uint i=0; i!=n; ++i) {
+        Float sf=dom[i].radius();
+        ++a[i];
+        ivl_dx[i].expansion().append(a,Interval(sf));
+        --a[i];
+    }
+    //std::cerr<<"dx="<<ivl_dx<<"\n";
+    Vector<IntervalDifferential> df=f.evaluate(ivl_dx);
+    //std::cerr<<"df="<<df<<"\n";
+
+    Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
+    for(uint i=0; i!=m; ++i) {
+        const IntervalDifferential& d=df[i];
+        for(IntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+            a=iter->key();
+            if(a.degree()==2) {
+                for(uint j=0; j!=n; ++j) {
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
+                }
+            }
+        }
+    }
+    //std::cerr<<"nonlinearities="<<nonlinearities<<"\n";
+
+    return nonlinearities;
+}
+
+Pair<uint,double> nonlinearity_index_and_error(const VectorTaylorFunction& function, const IntervalVector domain) {
+    Matrix<Float> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
+
+    // Compute the row of the nonlinearities Array which has the highest norm
+    // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
+    uint imax=nonlinearities.row_size();
+    uint jmax_in_row_imax=nonlinearities.column_size();
+    Float max_row_sum=0.0;
+    for(uint i=0; i!=nonlinearities.row_size(); ++i) {
+        uint jmax=nonlinearities.column_size();
+        Float row_sum=0.0;
+        Float max_mag_j_in_i=0.0;
+        for(uint j=0; j!=nonlinearities.column_size(); ++j) {
+            row_sum+=mag(nonlinearities[i][j]);
+            if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
+                jmax=j;
+                max_mag_j_in_i=mag(nonlinearities[i][j]);
+            }
+        }
+        if(row_sum>max_row_sum) {
+            imax=i;
+            max_row_sum=row_sum;
+            jmax_in_row_imax=jmax;
+        }
+    }
+
+    return make_pair(jmax_in_row_imax,numeric_cast<double>(max_row_sum));
+}
+
 
 RealBox::RealBox(const IntervalVector& bx) : _ary(bx.size()) {
     for(uint i=0; i!=bx.size(); ++i) {

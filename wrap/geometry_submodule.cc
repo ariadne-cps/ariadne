@@ -35,7 +35,6 @@
 #include "polyhedron.h"
 #include "grid_set.h"
 #include "function_set.h"
-#include "taylor_set.h"
 #include "affine_set.h"
 
 #include "discrete_location.h"
@@ -286,51 +285,6 @@ void export_curve()
 }
 
 
-void export_taylor_constrained_image_set()
-{
-
-    class_<TaylorConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> > taylor_set_class("TaylorConstrainedImageSet",init<TaylorConstrainedImageSet>());
-    taylor_set_class.def(init<uint,Sweeper>());
-    taylor_set_class.def(init<Box,Sweeper>());
-    taylor_set_class.def(init<IntervalVector,RealVectorFunction,Sweeper>());
-    //taylor_set_class.def(init<IntervalVector,VectorTaylorFunction>());
-    taylor_set_class.def(init<VectorTaylorFunction>());
-
-    taylor_set_class.def("domain", &TaylorConstrainedImageSet::domain);
-    taylor_set_class.def("function", &TaylorConstrainedImageSet::domain);
-    taylor_set_class.def("bounding_box", &TaylorConstrainedImageSet::bounding_box);
-    taylor_set_class.def("split", (Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>(TaylorConstrainedImageSet::*)()const) &TaylorConstrainedImageSet::split);
-    taylor_set_class.def("split", (Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>(TaylorConstrainedImageSet::*)(uint)const) &TaylorConstrainedImageSet::split);
-    taylor_set_class.def(self_ns::str(self));
-
-    taylor_set_class.def("number_of_parameters", &TaylorConstrainedImageSet::number_of_parameters);
-    taylor_set_class.def("number_of_constraints", &TaylorConstrainedImageSet::number_of_constraints);
-    taylor_set_class.def("number_of_negative_constraints", &TaylorConstrainedImageSet::number_of_constraints);
-    taylor_set_class.def("number_of_zero_constraints", &TaylorConstrainedImageSet::number_of_constraints);
-    taylor_set_class.def("apply_map", (void(TaylorConstrainedImageSet::*)(RealVectorFunction))&TaylorConstrainedImageSet::apply_map);
-    taylor_set_class.def("apply_map", (void(TaylorConstrainedImageSet::*)(VectorTaylorFunction))&TaylorConstrainedImageSet::apply_map);
-    taylor_set_class.def("new_negative_constraint", (void(TaylorConstrainedImageSet::*)(RealScalarFunction))&TaylorConstrainedImageSet::new_negative_constraint);
-    taylor_set_class.def("new_negative_constraint", (void(TaylorConstrainedImageSet::*)(ScalarTaylorFunction))&TaylorConstrainedImageSet::new_negative_constraint);
-    taylor_set_class.def("new_zero_constraint", (void(TaylorConstrainedImageSet::*)(RealScalarFunction))&TaylorConstrainedImageSet::new_zero_constraint);
-    taylor_set_class.def("new_zero_constraint", (void(TaylorConstrainedImageSet::*)(ScalarTaylorFunction))&TaylorConstrainedImageSet::new_zero_constraint);
-    taylor_set_class.def("affine_over_approximation", &TaylorConstrainedImageSet::affine_over_approximation);
-    taylor_set_class.def("outer_approximation", &TaylorConstrainedImageSet::outer_approximation);
-    taylor_set_class.def("adjoin_outer_approximation_to", &TaylorConstrainedImageSet::adjoin_outer_approximation_to);
-
-    def("split", (Pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet>(TaylorConstrainedImageSet::*)()const) &TaylorConstrainedImageSet::split);
-
-    def("product", (TaylorConstrainedImageSet(*)(const TaylorConstrainedImageSet&,const Interval&)) &product);
-    def("product", (TaylorConstrainedImageSet(*)(const TaylorConstrainedImageSet&,const Box&)) &product);
-    def("product", (TaylorConstrainedImageSet(*)(const TaylorConstrainedImageSet&,const TaylorConstrainedImageSet&)) &product);
-
-    def("apply", (TaylorConstrainedImageSet(*)(const IntervalVectorFunction&, const TaylorConstrainedImageSet&)) &apply);
-    def("unchecked_apply", (TaylorConstrainedImageSet(*)(const VectorTaylorFunction&, const TaylorConstrainedImageSet&)) &unchecked_apply);
-
-    to_python< std::pair<TaylorConstrainedImageSet,TaylorConstrainedImageSet> >();
-
-}
-
-
 
 void export_affine_set()
 {
@@ -413,14 +367,10 @@ void geometry_submodule() {
     export_curve();
 
     export_affine_set();
-    export_taylor_constrained_image_set();
     export_constrained_image_set();
 
     export_hybrid_box();
     export_hybrid_constrained_image_set();
 
-    typedef HybridBasicSet<TaylorConstrainedImageSet> HybridTaylorConstrainedImageSet;
-    to_python< ListSet<TaylorConstrainedImageSet> >();
-    to_python< ListSet<HybridTaylorConstrainedImageSet> >();
 }
 

@@ -29,7 +29,6 @@
 #include "point.h"
 #include "box.h"
 #include "curve.h"
-#include "taylor_set.h"
 #include "function_set.h"
 #include "grid_set.h"
 
@@ -60,8 +59,8 @@ int main(int argc, char **argv)
     //Polytope p1=polytope(z1);
     RealVectorFunction x=RealVectorFunction::identity(3);
     RealVectorFunction afn1((0.05*x[0]+0.05*x[2]+0.15,0.05*x[1]+0.05*x[2]+0.6));
-    TaylorConstrainedImageSet ts1(Box::unit_box(3),afn1,TrivialSweeper());
-    Box bbx1=ts1.bounding_box()+Vector<Interval>(2, Interval(-0.25,+0.25));
+    ConstrainedImageSet s1(Box::unit_box(3),afn1);
+    Box bbx1=s1.bounding_box()+Vector<Interval>(2, Interval(-0.25,+0.25));
 
     VectorUserFunction<RadiusSquare> radius(Vector<Real>(1u,0.5));
     RealConstraintSet cs1(radius,RealBox(1u,RealInterval(-1,0)));
@@ -110,10 +109,10 @@ int main(int argc, char **argv)
     g.set_projection_map(PlanarProjectionMap(2,0,1));
     g.set_bounding_box(bbx1);
 
-    ARIADNE_TEST_PRINT(ts1);
+    ARIADNE_TEST_PRINT(s1);
     g << fill_colour(0.0,0.5,0.5)
-      << ts1;
-    g.write("test_graphics-ts");
+      << s1;
+    g.write("test_graphics-set");
     g.clear();
 
     InterpolatedCurve cv(Point(2,0.0));
@@ -126,7 +125,7 @@ int main(int argc, char **argv)
     g.set_line_colour(1,0,0);
     g.draw(cv);
     g.set_line_colour(0,0,0);
-    g.write("test_graphics-cv");
+    g.write("test_graphics-curve");
     g.clear();
 
     GridTreeSet gts(2);
@@ -140,14 +139,8 @@ int main(int argc, char **argv)
     Box bbox(2); bbox[0]=Interval(-2,2); bbox[1]=Interval(-2,2);
     g.set_bounding_box(bbox);
     g << gts;
-    g.write("test_graphics-gts1");
+    g.write("test_graphics-paving");
     g.clear();
-
-    g.set_bounding_box(Box());
-    g << gts;
-    g.write("test_graphics-gts2");
-    g.clear();
-
 
 }
 

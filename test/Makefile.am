@@ -13,7 +13,7 @@ TESTS_ENVIRONMENT = ./run_test.sh
 PROFILES_ENVIRONMENT = ./run_profile.sh
 
 AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
-AM_LDFLAGS = $(EXEC_LDFLAGS) 
+AM_LDFLAGS = $(EXEC_LDFLAGS)
 
 INCLUDES = -iquote$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
 LIBS +=  $(BOOST_SERIALIZATION_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)
@@ -30,7 +30,7 @@ if WANT_SERIALIZATION
 TEST_SERIALIZATION = test_serialization
 else
 ## Serialization is not enabled, do not compile the test
-TEST_SERIALIZATION = 
+TEST_SERIALIZATION =
 endif
 
 check_PROGRAMS = \
@@ -49,7 +49,6 @@ check_PROGRAMS = \
 	test_taylor_function \
 	test_function_sets \
 	test_affine_sets \
-	test_taylor_sets \
 	test_grid_set \
 	test_linear_programming \
 	test_nonlinear_programming \
@@ -75,7 +74,7 @@ EXTRA_TESTS = \
 UNUSED_TESTS = \
 	test_hybrid_discretiser
 
-tests: $(check_PROGRAMS) 
+tests: $(check_PROGRAMS)
 profiles: $(bin_PROGRAMS)
 
 #test_integer_LDADD = -lgmp $(LIBS)

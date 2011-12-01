@@ -29,8 +29,6 @@
 #include "vector.h"
 #include "matrix.h"
 #include "function.h"
-#include "taylor_set.h"
-#include "taylor_function.h"
 #include "box.h"
 #include "list_set.h"
 #include "evolution_parameters.h"

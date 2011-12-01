@@ -51,7 +51,6 @@ ARIADNE_GEOMETRY_SRC = \
 	curve.cc \
 	orbit.cc \
 	function_set.cc \
-	taylor_set.cc \
 	grid_set.cc \
 	affine_set.cc \
 	enclosure.cc \
@@ -96,7 +95,6 @@ CALCULUS_SRC = \
 	polynomial.cc \
 	differential.cc \
 	taylor_model.cc  \
-	taylor_set.cc  \
 	taylor_function.cc
 
 lib_LTLIBRARIES = libariadne.la libariadne-kernel.la libariadne-geometry.la libariadne-dynamics.la libariadne-hybrid.la libariadne-extras.la libcalculus.la

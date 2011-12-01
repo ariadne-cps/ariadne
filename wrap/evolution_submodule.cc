@@ -25,7 +25,6 @@
 
 #include "orbit.h"
 #include "vector_field_evolver.h"
-#include "taylor_set.h"
 
 #include "hybrid_evolver.h"
 #include "hybrid_automaton.h"
@@ -64,7 +63,6 @@ void export_evolver(const char* name)
 
 void evolution_submodule()
 {
-    export_orbit< Orbit<TaylorConstrainedImageSet> >("ContinuousOrbit");
     export_orbit< Orbit<HybridEnclosure> >("HybridOrbit");
     //export_evolver<VectorFieldEvolver, init<ContinuousEvolutionParameters> >("VectorFieldEvolver");
     export_evolver<GeneralHybridEvolver, init<> >("GeneralHybridEvolver");

@@ -26,7 +26,8 @@
 #include <string>
 
 #include "config.h"
-#include "taylor_set.h"
+#include "taylor_function.h"
+#include "function_set.h"
 #include "grid_set.h"
 #include "hybrid_time.h"
 #include "hybrid_set.h"

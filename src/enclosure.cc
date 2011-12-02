@@ -164,11 +164,8 @@ void Enclosure::_check() const {
     ARIADNE_ASSERT_MSG(this->_space_function.argument_size()==this->domain().size(),*this);
     ARIADNE_ASSERT_MSG(this->_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_time_function<<"\n\n");
     ARIADNE_ASSERT_MSG(this->_dwell_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_dwell_time_function<<"\n\n");
-    for(List<IntervalScalarFunctionModel>::const_iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
-        ARIADNE_ASSERT_MSG(iter->argument_size()==this->domain().size(),*this);
-    }
-    for(List<IntervalScalarFunctionModel>::const_iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ++iter) {
-        ARIADNE_ASSERT_MSG(iter->argument_size()==this->domain().size(),*this);
+    for(List<IntervalNonlinearConstraintModel>::const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+        ARIADNE_ASSERT_MSG(iter->function().argument_size()==this->domain().size(),*this);
     }
 }
 
@@ -325,16 +322,7 @@ Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction&
 
     for(uint i=0; i!=constraints.size(); ++i) {
         ARIADNE_ASSERT_MSG(domain.size()==constraints[i].function().argument_size(),"domain="<<domain<<", constraint="<<constraints[i]);
-        if(constraints[i].bounds().singleton()) {
-            this->new_zero_parameter_constraint(constraints[i].function()-Interval(constraints[i].bounds().midpoint()));
-        } else {
-            if(constraints[i].bounds().lower()>-inf) {
-                this->new_negative_parameter_constraint(Interval(constraints[i].bounds().lower())-constraints[i].function());
-            }
-            if(constraints[i].bounds().upper()<+inf) {
-                this->new_negative_parameter_constraint(constraints[i].function()-Interval(constraints[i].bounds().upper()));
-            }
-        }
+        this->new_parameter_constraint(constraints[i]);
     }
 
     this->_reduced_domain=domain;
@@ -362,16 +350,7 @@ Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction&
 
     for(uint i=0; i!=constraints.size(); ++i) {
         ARIADNE_ASSERT_MSG(domain.size()==constraints[i].function().argument_size(),"domain="<<domain<<", constraint="<<constraints[i]);
-        if(constraints[i].bounds().singleton()) {
-            this->new_zero_parameter_constraint(constraints[i].function()-Interval(constraints[i].bounds().midpoint()));
-        } else {
-            if(constraints[i].bounds().lower()>-inf) {
-                this->new_negative_parameter_constraint(Interval(constraints[i].bounds().lower())-constraints[i].function());
-            }
-            if(constraints[i].bounds().upper()<+inf) {
-                this->new_negative_parameter_constraint(constraints[i].function()-Interval(constraints[i].bounds().upper()));
-            }
-        }
+        this->new_parameter_constraint(constraints[i]);
     }
 
     this->_reduced_domain=domain;
@@ -430,11 +409,9 @@ void Enclosure::new_parameter(Interval ivl)
     this->_space_function=embed(this->_space_function,ivl);
     this->_time_function=embed(this->_time_function,ivl);
     this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
-        this->_negative_constraints[i]=embed(this->_negative_constraints[i],ivl);
-    }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) {
-        this->_zero_constraints[i]=embed(this->_zero_constraints[i],ivl);
+    for(uint i=0; i!=this->_constraints.size(); ++i) {
+        IntervalNonlinearConstraintModel& constraint=this->_constraints[i];
+        constraint.set_function(embed(constraint.function(),ivl));
     }
     this->_check();
 }
@@ -447,11 +424,9 @@ void Enclosure::new_variable(Interval ivl)
     this->_space_function=combine(this->_space_function,variable_function);
     this->_time_function=embed(this->_time_function,ivl);
     this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
-        this->_negative_constraints[i]=embed(this->_negative_constraints[i],ivl);
-    }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) {
-        this->_zero_constraints[i]=embed(this->_zero_constraints[i],ivl);
+    for(uint i=0; i!=this->_constraints.size(); ++i) {
+        IntervalNonlinearConstraintModel& constraint=this->_constraints[i];
+        constraint.set_function(embed(constraint.function(),ivl));
     }
     this->_check();
 }
@@ -577,108 +552,48 @@ void Enclosure::apply_parameter_reach_step(IntervalVectorFunctionModel phi, Inte
 void Enclosure::new_state_constraint(IntervalNonlinearConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->dimension());
     this->_is_fully_reduced=false;
-    Interval interval=constraint.bounds();
-    IntervalScalarFunctionModel composed_function=compose(constraint.function(),this->_space_function);
-    if(interval.lower()==0.0 && interval.upper()==0.0) {
-        this->new_zero_parameter_constraint(composed_function);
-    } else if(interval.lower()==0.0 && interval.upper()==inf) {
-        this->new_negative_parameter_constraint(-composed_function);
-    } else if(interval.lower()==-inf && interval.upper()==0.0) {
-        this->new_negative_parameter_constraint(composed_function);
-    } else {
-        ARIADNE_FAIL_MSG("Enclosure cannot currently handle constraints which are not of the form g(x) <=> 0");
-    }
+    IntervalScalarFunctionModel composed_function_model=compose(constraint.function(),this->_space_function);
+    this->_constraints.append(IntervalNonlinearConstraintModel(constraint.lower_bound(),composed_function_model,constraint.upper_bound()));
 }
 
 void Enclosure::new_parameter_constraint(IntervalNonlinearConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->number_of_parameters());
     this->_is_fully_reduced=false;
-    Interval interval=constraint.bounds();
-    if(interval.lower()==0.0 && interval.upper()==0.0) {
-        this->new_zero_parameter_constraint(constraint.function());
-    } else if(interval.lower()==0.0 && interval.upper()==inf) {
-        this->new_negative_parameter_constraint(-constraint.function());
-    } else if(interval.lower()==-inf && interval.upper()==0.0) {
-        this->new_negative_parameter_constraint(constraint.function());
-    } else {
-        ARIADNE_FAIL_MSG("Enclosure cannot currently handle constraints which are not of the form g(x) <=> 0");
-    }
+    IntervalScalarFunctionModel function_model=this->function_factory().create(this->domain(),constraint.function());
+    this->_constraints.append(IntervalNonlinearConstraintModel(constraint.lower_bound(),function_model,constraint.upper_bound()));
 }
 
 
-void Enclosure::new_positive_state_constraint(IntervalScalarFunction constraint) {
-    ARIADNE_ASSERT_MSG(constraint.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", constraint="<<constraint);
+void Enclosure::new_positive_state_constraint(IntervalScalarFunction constraint_function) {
+    ARIADNE_ASSERT_MSG(constraint_function.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", constraint_function="<<constraint_function);
     this->_is_fully_reduced=false;
-    this->_negative_constraints.append(-compose(constraint,this->space_function()));
+    this->_constraints.append(-compose(constraint_function,this->space_function())>=0.0);
 }
 
-void Enclosure::new_negative_state_constraint(IntervalScalarFunction constraint) {
-    ARIADNE_ASSERT_MSG(constraint.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", constraint="<<constraint);
+void Enclosure::new_negative_state_constraint(IntervalScalarFunction constraint_function) {
+    ARIADNE_ASSERT_MSG(constraint_function.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", constraint_function="<<constraint_function);
     this->_is_fully_reduced=false;
-    this->_negative_constraints.append(compose(constraint,this->space_function()));
+    this->_constraints.append(compose(constraint_function,this->space_function())<=0.0);
 }
 
-void Enclosure::new_zero_state_constraint(IntervalScalarFunction constraint) {
-    ARIADNE_ASSERT_MSG(constraint.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", constraint="<<constraint);
+void Enclosure::new_zero_state_constraint(IntervalScalarFunction constraint_function) {
+    ARIADNE_ASSERT_MSG(constraint_function.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", constraint_function="<<constraint_function);
     this->_is_fully_reduced=false;
-    this->_zero_constraints.append(compose(constraint,this->space_function()));
+    this->_constraints.append(compose(constraint_function,this->space_function())==0.0);
 }
 
-void Enclosure::new_negative_parameter_constraint(IntervalScalarFunction constraint) {
-    ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
+void Enclosure::new_negative_parameter_constraint(IntervalScalarFunction constraint_function) {
+    ARIADNE_ASSERT_MSG(constraint_function.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint_function="<<constraint_function);
     this->_is_fully_reduced=false;
-    this->_negative_constraints.append(this->function_factory().create(this->domain(),constraint));
+    this->_constraints.append(this->function_factory().create(this->domain(),constraint_function)<=0.0);
 }
 
-void Enclosure::new_zero_parameter_constraint(IntervalScalarFunction constraint) {
-    ARIADNE_ASSERT_MSG(constraint.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint="<<constraint);
+void Enclosure::new_zero_parameter_constraint(IntervalScalarFunction constraint_function) {
+    ARIADNE_ASSERT_MSG(constraint_function.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint_function="<<constraint_function);
     this->_is_fully_reduced=false;
-    this->_zero_constraints.append(this->function_factory().create(this->domain(),constraint));
+    this->_constraints.append(this->function_factory().create(this->domain(),constraint_function)==0.0);
 }
 
-
-List<IntervalScalarFunctionModel> const&
-Enclosure::negative_constraints() const {
-    return this->_negative_constraints;
-}
-
-List<IntervalScalarFunctionModel> const&
-Enclosure::zero_constraints() const {
-    return this->_zero_constraints;
-}
-
-List<IntervalNonlinearConstraint>
-Enclosure::constraints() const {
-    List<IntervalNonlinearConstraint> result;
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
-        result.append(this->_negative_constraints[i]<=0.0);
-    }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) {
-        result.append(this->_zero_constraints[i]==0.0);
-    }
-    return result;
-}
-
-
-uint Enclosure::number_of_constraints() const {
-    return this->_negative_constraints.size()+this->_zero_constraints.size();
-}
-
-uint Enclosure::number_of_negative_constraints() const {
-    return this->_negative_constraints.size();
-}
-
-uint Enclosure::number_of_zero_constraints() const {
-    return this->_zero_constraints.size();
-}
-
-IntervalScalarFunctionModel Enclosure::negative_constraint(uint i) const {
-    return this->_negative_constraints[i];
-}
-
-IntervalScalarFunctionModel Enclosure::zero_constraint(uint i) const {
-    return this->_zero_constraints[i];
-}
 
 
 
@@ -712,7 +627,43 @@ IntervalScalarFunctionModel const& Enclosure::time_function() const {
 }
 
 IntervalScalarFunctionModel const& Enclosure::dwell_time_function() const {
-    return this->_time_function;
+    return this->_dwell_time_function;
+}
+
+uint Enclosure::number_of_constraints() const {
+    return this->_constraints.size();
+}
+
+List<IntervalNonlinearConstraintModel> const& Enclosure::constraint_models() const {
+    return this->_constraints;
+}
+
+List<IntervalNonlinearConstraint> const Enclosure::constraints() const {
+    List<IntervalNonlinearConstraint> result;
+    for(uint i=0; i!=this->_constraints.size(); ++i) {
+        result.append(IntervalNonlinearConstraint(this->_constraints[i].lower_bound(),this->_constraints[i].function(),this->_constraints[i].upper_bound()));
+    }
+    return result;
+}
+
+IntervalNonlinearConstraintModel const& Enclosure::constraint(uint i) const {
+    return this->_constraints[i];
+}
+
+IntervalVectorFunctionModel const Enclosure::constraint_function() const {
+    IntervalVectorFunctionModel g=this->function_factory().create_zeros(this->number_of_constraints(),this->domain());
+    for(uint i=0; i!=this->number_of_constraints(); ++i) {
+        g.set(i,this->constraint(i).function());
+    }
+    return g;
+}
+
+IntervalVector const Enclosure::constraint_bounds() const {
+    IntervalVector c(this->number_of_constraints());
+    for(uint i=0; i!=this->number_of_constraints(); ++i) {
+        c[i]=this->constraint(i).bounds();
+    }
+    return c;
 }
 
 uint Enclosure::dimension() const {
@@ -753,17 +704,12 @@ tribool Enclosure::bounded() const
 tribool Enclosure::empty() const
 {
     if(definitely(Ariadne::empty(this->_reduced_domain))) { return true; }
-    if(this->_negative_constraints.empty() && this->_zero_constraints.empty()) { return Ariadne::empty(this->domain()); }
+    if(this->_constraints.empty()) { return Ariadne::empty(this->domain()); }
     if(!this->_is_fully_reduced) { this->reduce(); this->reduce(); this->reduce(); }
 
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
-        if(this->_negative_constraints[i](this->_reduced_domain).lower()>0.0) {
-            if(this->_reduced_domain.size()>0) { this->_reduced_domain[0] = Interval(1,-1); }
-            return true;
-        }
-    }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) {
-        if(!contains(this->_zero_constraints[i](this->_reduced_domain),0.0)) {
+    for(uint i=0; i!=this->_constraints.size(); ++i) {
+        Interval constraint_range = this->_constraints[i].function().evaluate(this->_reduced_domain);
+        if( disjoint(constraint_range,this->_constraints[i].bounds()) ) {
             if(this->_reduced_domain.size()>0) { this->_reduced_domain[0] = Interval(1,-1); }
             return true;
         }
@@ -788,7 +734,7 @@ tribool Enclosure::subset(const Box& bx) const
 tribool Enclosure::separated(const Box& bx) const
 {
     ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Enclosure::subset(Box): self="<<*this<<", box="<<bx);
-    List<IntervalNonlinearConstraint> constraints=this->constraints();
+    List<IntervalNonlinearConstraint> constraints = this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
     contractor.reduce(this->_reduced_domain,constraints);
 
@@ -941,25 +887,16 @@ Enclosure::split(uint d) const
     Enclosure& result1=result.first;
     Enclosure& result2=result.second;
 
-    IntervalScalarFunctionModel constraint1,constraint2;
-    for(List<IntervalScalarFunctionModel>::const_iterator iter=this->_negative_constraints.begin();
-        iter!=this->_negative_constraints.end(); ++iter)
+    IntervalScalarFunctionModel constraint_function1,constraint_function2;
+    for(List<IntervalNonlinearConstraintModel>::const_iterator iter=this->_constraints.begin();
+        iter!=this->_constraints.end(); ++iter)
     {
-        const IntervalScalarFunctionModel& constraint=*iter;
-        make_lpair(constraint1,constraint2)=Ariadne::split(constraint,d);
-        result1._negative_constraints.append(constraint1);
-        result2._negative_constraints.append(constraint2);
+        const IntervalNonlinearConstraintModel& constraint=*iter;
+        make_lpair(constraint_function1,constraint_function2)=Ariadne::split(constraint.function(),d);
+        result1._constraints.append(IntervalNonlinearConstraintModel(constraint.lower_bound(),constraint_function1,constraint.upper_bound()));
+        result2._constraints.append(IntervalNonlinearConstraintModel(constraint.lower_bound(),constraint_function2,constraint.upper_bound()));
     }
 
-    IntervalScalarFunctionModel equation1,equation2;
-    for(List<IntervalScalarFunctionModel>::const_iterator iter=this->_zero_constraints.begin();
-        iter!=this->_zero_constraints.end(); ++iter)
-    {
-        const IntervalScalarFunctionModel& equation=*iter;
-        make_lpair(equation1,equation1)=Ariadne::split(equation,d);
-        result1._zero_constraints.append(equation1);
-        result2._zero_constraints.append(equation1);
-    }
     IntervalScalarFunctionModel time_function1,time_function2;
     make_lpair(time_function1,time_function2)=Ariadne::split(this->_time_function,d);
     result1._time_function=time_function1;
@@ -1004,7 +941,6 @@ void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, int depth
     }
 }
 
-
 void Enclosure::subdivision_adjoin_outer_approximation_to(PavingInterface& p, int e) const
 {
     ARIADNE_LOG(6,"Enclosure::subdivision_adjoin_outer_approximation_to(paving, depth)\n");
@@ -1013,19 +949,8 @@ void Enclosure::subdivision_adjoin_outer_approximation_to(PavingInterface& p, in
     const Box& d=this->domain();
     const IntervalVectorFunctionModel& f=this->function();
 
-    IntervalVectorFunctionModel g=this->function_factory().create_zeros(this->_negative_constraints.size()+this->_zero_constraints.size(),d);
-    uint i=0;
-    for(List<IntervalScalarFunctionModel>::const_iterator citer=this->_negative_constraints.begin(); citer!=this->_negative_constraints.end(); ++citer) {
-        g.set(i,*citer);
-        ++i;
-    }
-    for(List<IntervalScalarFunctionModel>::const_iterator eiter=this->_zero_constraints.begin(); eiter!=this->_zero_constraints.end(); ++eiter) {
-        g.set(i,*eiter);
-        ++i;
-    }
-    IntervalVector cc(this->_negative_constraints.size(),Interval(-inf,0.0));
-    IntervalVector ce(this->_zero_constraints.size(),Interval(0.0,0.0));
-    Box c=intersection(Box(g(d)),Box(join(cc,ce)));
+    IntervalVectorFunctionModel g=this->constraint_function();
+    IntervalVector c=this->constraint_bounds();
 
     Ariadne::subdivision_adjoin_outer_approximation(p,d,f,g,c,e);
 }
@@ -1038,20 +963,8 @@ void Enclosure::constraint_adjoin_outer_approximation_to(PavingInterface& p, int
     const Box& d=this->domain();
     const IntervalVectorFunctionModel& f=this->function();
 
-    IntervalVectorFunctionModel g=this->function_factory().create_zeros(this->_negative_constraints.size()+this->_zero_constraints.size(),d);
-    uint i=0;
-    for(List<IntervalScalarFunctionModel>::const_iterator citer=this->_negative_constraints.begin(); citer!=this->_negative_constraints.end(); ++citer) {
-        g.set(i,*citer);
-        ++i;
-    }
-    for(List<IntervalScalarFunctionModel>::const_iterator eiter=this->_zero_constraints.begin(); eiter!=this->_zero_constraints.end(); ++eiter) {
-        g.set(i,*eiter);
-        ++i;
-    }
-    IntervalVector cc(this->_negative_constraints.size(),Interval(-inf,0.0));
-    IntervalVector ce(this->_zero_constraints.size(),Interval(0.0,0.0));
-    Box c=intersection(Box(g(d)),Box(join(cc,ce)));
-
+    IntervalVectorFunctionModel g=this->constraint_function();
+    IntervalVector c=this->constraint_bounds();
 
     Ariadne::procedure_constraint_adjoin_outer_approximation(p,d,f,g,c,e);
 }
@@ -1062,20 +975,8 @@ void Enclosure::optimal_constraint_adjoin_outer_approximation_to(PavingInterface
     const Box& d=this->domain();
     IntervalVectorFunctionModel f=this->function();
 
-    IntervalVectorFunctionModel g=this->function_factory().create_zeros(this->_negative_constraints.size(),d);
-    uint i=0;
-    for(List<IntervalScalarFunctionModel>::const_iterator citer=this->_negative_constraints.begin(); citer!=this->_negative_constraints.end(); ++citer) {
-        g.set(i,*citer);
-        ++i;
-    }
-    for(List<IntervalScalarFunctionModel>::const_iterator eiter=this->_zero_constraints.begin(); eiter!=this->_zero_constraints.end(); ++eiter) {
-        g.set(i,*eiter);
-        ++i;
-    }
-
-    IntervalVector cc(this->_negative_constraints.size(),Interval(-inf,0.0));
-    IntervalVector ce(this->_zero_constraints.size(),Interval(0.0,0.0));
-    Box c=intersection(Box(g(d)),Box(join(cc,ce)));
+    IntervalVectorFunctionModel g=this->constraint_function();
+    IntervalVector c=this->constraint_bounds();
 
     Ariadne::optimal_constraint_adjoin_outer_approximation(p,d,f,g,c,e);
 }
@@ -1103,10 +1004,7 @@ void Enclosure::affine_adjoin_outer_approximation_to(PavingInterface& paving, in
 
     const double max_error=BASIC_ERROR/(1<<depth);
 
-    IntervalVectorFunctionModel fg=this->function_factory().create_zeros(this->dimension()+this->number_of_constraints(),this->domain());
-    for(uint i=0; i!=this->dimension(); ++i) { fg[i]=this->_space_function[i]; }
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) { fg[i+this->dimension()]=this->_negative_constraints[i]; }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) { fg[i+this->dimension()+this->_negative_constraints.size()]=this->_zero_constraints[i]; }
+    IntervalVectorFunctionModel fg=join(this->function(),this->constraint_function());
 
     List<Box> subdomains;
     List<Box> unsplitdomains;
@@ -1179,11 +1077,8 @@ uniform_error_recondition()
     this->_domain=join(this->_domain,error_domains);
     this->_reduced_domain=join(this->_reduced_domain,error_domains);
     this->_space_function=embed(this->_space_function,error_domains);
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
-        this->_negative_constraints[i]=embed(this->_negative_constraints[i],error_domains);
-    }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) {
-        this->_zero_constraints[i]=embed(this->_zero_constraints[i],error_domains);
+    for(uint i=0; i!=this->_constraints.size(); ++i) {
+        this->_constraints[i].function()=embed(this->_constraints[i].function(),error_domains);
     }
 
     for(uint i=0; i!=large_error_indices.size(); ++i) {
@@ -1268,13 +1163,11 @@ Enclosure::kuhn_recondition()
     this->_reduced_domain = new_reduced_domain;
 
     Enclosure new_set(new_domain,VectorTaylorFunction(new_domain,new_models),this->function_factory());
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
-        ScalarTaylorFunction const& constraint=dynamic_cast<const ScalarTaylorFunction&>(this->_negative_constraints[i].reference());
-        new_set.new_negative_parameter_constraint(ScalarTaylorFunction(new_domain,Ariadne::recondition(constraint.model(),discarded_parameters,number_of_error_parameters)));
-    }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) {
-        ScalarTaylorFunction const& constraint=dynamic_cast<const ScalarTaylorFunction&>(this->_zero_constraints[i].reference());
-        new_set.new_zero_parameter_constraint(ScalarTaylorFunction(new_domain,Ariadne::recondition(constraint.model(),discarded_parameters,number_of_error_parameters)));
+    for(uint i=0; i!=this->_constraints.size(); ++i) {
+        const IntervalNonlinearConstraintModel& constraint=this->_constraints[i];
+        ScalarTaylorFunction const& constraint_function=dynamic_cast<const ScalarTaylorFunction&>(constraint.function().reference());
+        IntervalScalarFunctionModel new_constraint_function=ScalarTaylorFunction(new_domain,Ariadne::recondition(constraint_function.model(),discarded_parameters,number_of_error_parameters));
+        new_set._constraints.append(IntervalNonlinearConstraintModel(constraint.lower_bound(),new_constraint_function,constraint.upper_bound()));
     }
     ScalarTaylorFunction const& time=dynamic_cast<const ScalarTaylorFunction&>(this->_time_function.reference());
     new_set._time_function=ScalarTaylorFunction(new_domain,Ariadne::recondition(time.model(),discarded_parameters,number_of_error_parameters));
@@ -1301,17 +1194,11 @@ void Enclosure::restrict(const Vector<Interval>& subdomain)
     result._time_function=Ariadne::restrict(result._time_function,subdomain);
     result._dwell_time_function=Ariadne::restrict(result._dwell_time_function,subdomain);
     IntervalScalarFunctionModel new_constraint;
-    for(List<IntervalScalarFunctionModel>::iterator iter=result._negative_constraints.begin();
-        iter!=result._negative_constraints.end(); ++iter)
+    for(List<IntervalNonlinearConstraintModel>::iterator iter=result._constraints.begin();
+        iter!=result._constraints.end(); ++iter)
     {
-        IntervalScalarFunctionModel& constraint=*iter;
-        constraint=Ariadne::restrict(constraint,subdomain);
-    }
-    for(List<IntervalScalarFunctionModel>::iterator iter=result._zero_constraints.begin();
-        iter!=result._zero_constraints.end(); ++iter)
-    {
-        IntervalScalarFunctionModel& equation=*iter;
-        equation=Ariadne::restrict(equation,subdomain);
+        IntervalScalarFunctionModel& constraint_function=iter->function();
+        constraint_function=Ariadne::restrict(constraint_function,subdomain);
     }
     this->reduce();
 }
@@ -1346,6 +1233,9 @@ void Enclosure::box_draw(CanvasInterface& canvas, const Projection2d& projection
     Box(join(this->_space_function(this->_reduced_domain),this->_time_function(this->_reduced_domain))).draw(canvas,projection);
 }
 
+IntervalVectorFunctionModel join(const IntervalVectorFunctionModel& f1, const IntervalScalarFunctionModel& f2, const IntervalVectorFunctionModel& f3) {
+    return join(join(f1,f2),f3);
+}
 
 void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& projection, uint accuracy) const {
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->_reduced_domain,this->_domain),*this);
@@ -1370,8 +1260,9 @@ void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& project
     IntervalVectorFunctionModel fg=this->function_factory().create_zeros(this->dimension()+1u+this->number_of_constraints(),this->domain());
     for(uint i=0; i!=this->dimension(); ++i) { fg[i]=this->_space_function[i]; }
     for(uint i=0; i!=1; ++i) { fg[i+this->dimension()]=this->_time_function; }
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) { fg[i+this->dimension()+1]=this->_negative_constraints[i]; }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) { fg[i+this->dimension()+1+this->number_of_negative_constraints()]=this->_zero_constraints[i]; }
+    for(uint i=0; i!=this->_constraints.size(); ++i) { fg[i+this->dimension()+1]=this->_constraints[i].function(); }
+
+//    IntervalVectorFunctionModel fg=join(this->space_function(),this->time_function(),this->constraint_function());
 
     List<Box> subdomains;
     List<Box> unsplitdomains;
@@ -1445,8 +1336,7 @@ std::ostream& Enclosure::write(std::ostream& os) const {
            << ",\n  range=" << this->bounding_box()
            << ",\n  space_function=" << this->space_function()
            << ",\n  time_function=" << this->time_function()
-           << ",\n  negative_constraints=" << this->_negative_constraints
-           << ",\n  zero_constraints=" << this->_zero_constraints
+           << ",\n  constraints=" << this->constraints()
            << "\n)\n";
     } else {
         os << "Enclosure"
@@ -1454,8 +1344,7 @@ std::ostream& Enclosure::write(std::ostream& os) const {
            << ", range=" << this->bounding_box()
            << ", space_function=" << repr(this->space_function())
            << ", time_function=" << repr(this->time_function())
-           << ", negative_constraints=" << repr(this->_negative_constraints)
-           << ", zero_constraints=" << repr(this->_zero_constraints)
+           << ", negative_constraints=" << this->constraints()
            << ")";
 
     } return os;
@@ -1544,39 +1433,35 @@ Enclosure::affine_over_approximation() const
     typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
 
     const uint nx=this->dimension();
-    const uint nc=this->_negative_constraints.size();
-    const uint neq=this->_zero_constraints.size();
+    const uint nc=this->number_of_constraints();
     const uint np=this->number_of_parameters();
 
     AffineSweeper affine_sweeper;
-    VectorTaylorFunction function=dynamic_cast<const VectorTaylorFunction&>(this->_space_function.reference());
+    VectorTaylorFunction space_function=dynamic_cast<const VectorTaylorFunction&>(this->_space_function.reference());
     ScalarTaylorFunction time_function=dynamic_cast<const ScalarTaylorFunction&>(this->_time_function.reference());
-    List<ScalarTaylorFunction> constraints, equations;
-    for(uint i=0; i!=nc; ++i) { constraints.append(dynamic_cast<const ScalarTaylorFunction&>(this->_negative_constraints[i].reference())); }
-    for(uint i=0; i!=neq; ++i) { equations.append(dynamic_cast<const ScalarTaylorFunction&>(this->_zero_constraints[i].reference())); }
+    List<ScalarTaylorFunction> constraint_functions;
+    for(uint i=0; i!=nc; ++i) { constraint_functions.append(dynamic_cast<const ScalarTaylorFunction&>(this->_constraints[i].function().reference())); }
 
     for(uint i=0; i!=nx; ++i) {
-        const_cast<IntervalTaylorModel&>(function.models()[i]).sweep(affine_sweeper);
+        const_cast<IntervalTaylorModel&>(space_function.models()[i]).sweep(affine_sweeper);
+    }
+    for(uint i=0; i!=nx; ++i) {
+        const_cast<IntervalTaylorModel&>(time_function.model()).sweep(affine_sweeper);
     }
     for(uint i=0; i!=nc; ++i) {
-        const_cast<IntervalTaylorModel&>(constraints[i].model()).sweep(affine_sweeper);
-    }
-    for(uint i=0; i!=neq; ++i) {
-        const_cast<IntervalTaylorModel&>(equations[i].model()).sweep(affine_sweeper);
-        // Code below introduces artificial error into equality constraints to make them inequality constraints
-        //const_cast<IntervalTaylorModel&>(set._zero_constraints[i].model()).error()+=std::numeric_limits<float>::epsilon();
+        const_cast<IntervalTaylorModel&>(constraint_functions[i].model()).sweep(affine_sweeper);
     }
     const_cast<IntervalTaylorModel&>(time_function.model()).sweep(affine_sweeper);
 
     // Compute the number of values with a nonzero error
     uint nerr=0;
-    for(uint i=0; i!=nx; ++i) { if(function[i].error()>0.0) { ++nerr; } }
+    for(uint i=0; i!=nx; ++i) { if(space_function[i].error()>0.0) { ++nerr; } }
 
     Vector<Float> h(nx);
     Matrix<Float> G(nx,np+nerr);
     uint ierr=0; // The index where the error bound should go
     for(uint i=0; i!=nx; ++i) {
-        ScalarTaylorFunction component=function[i];
+        ScalarTaylorFunction component=space_function[i];
         h[i]=component.model().value();
         for(uint j=0; j!=np; ++j) {
             G[i][j]=component.model().gradient(j);
@@ -1592,45 +1477,30 @@ Enclosure::affine_over_approximation() const
     Vector<Float> a(np+nerr, 0.0);
     Float b;
 
-    for(const_iterator iter=constraints.begin();
-            iter!=constraints.end(); ++iter) {
-        const ScalarTaylorFunction& constraint=*iter;
-        b=sub_up(constraint.model().error(),constraint.model().value());
-        for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
-        result.new_inequality_constraint(a,b);
-    }
-
-    for(const_iterator iter=equations.begin();
-            iter!=equations.end(); ++iter) {
-        const ScalarTaylorFunction& constraint=*iter;
-        for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
-        if(constraint.model().error()==0.0) {
-            b=-constraint.model().value();
-            result.new_equality_constraint(a,b);
-        } else {
-            b=sub_up(constraint.model().error(),constraint.model().value());
-            result.new_inequality_constraint(a,b);
-            b=add_up(constraint.model().error(),constraint.model().value());
-            result.new_inequality_constraint(-a,b);
-        }
+    for(uint i=0; i!=this->number_of_constraints(); ++i) {
+        const IntervalTaylorModel& constraint_model=constraint_functions[i].model();
+        Interval constraint_bound=this->constraint(i).bounds();
+        for(uint j=0; j!=np; ++j) { a[j]=constraint_model.gradient(j); }
+        Float bl=sub_up(sub_up(constraint_bound.lower(),constraint_model.error()),constraint_model.value());
+        Float bu=sub_up(add_up(constraint_bound.upper(),constraint_model.error()),constraint_model.value());
+        if(bu!=+inf) { result.new_inequality_constraint(a,bu); }
+        if(bl!=-inf) { result.new_inequality_constraint(-a,-bl); }
     }
 
     ARIADNE_LOG(2,"set="<<*this<<"\nset.affine_over_approximation()="<<result<<"\n");
     return result;
+
 }
 
 
 Enclosure product(const Enclosure& set, const Interval& ivl) {
-    typedef List<IntervalScalarFunctionModel>::const_iterator const_iterator;
+    typedef List<IntervalNonlinearConstraintModel>::const_iterator const_iterator;
 
     IntervalVectorFunctionModel new_function=combine(set.function(),set.function_factory().create_identity(ivl));
 
     Enclosure result(new_function.domain(),new_function,set.function_factory());
-    for(const_iterator iter=set._negative_constraints.begin(); iter!=set._negative_constraints.end(); ++iter) {
-        result._negative_constraints.append(embed(*iter,ivl));
-    }
-    for(const_iterator iter=set._zero_constraints.begin(); iter!=set._zero_constraints.end(); ++iter) {
-        result._zero_constraints.append(embed(*iter,ivl));
+    for(const_iterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
+        result._constraints.append(IntervalNonlinearConstraintModel(iter->lower_bound(),embed(iter->function(),ivl),iter->upper_bound()));
     }
     result._time_function=embed(set._time_function,ivl);
     result._dwell_time_function=embed(set._dwell_time_function,ivl);
@@ -1639,16 +1509,13 @@ Enclosure product(const Enclosure& set, const Interval& ivl) {
 }
 
 Enclosure product(const Enclosure& set, const Box& bx) {
-    typedef List<IntervalScalarFunctionModel>::const_iterator const_iterator;
+    typedef List<IntervalNonlinearConstraintModel>::const_iterator const_iterator;
 
     IntervalVectorFunctionModel new_function=combine(set.function(),set.function_factory().create_identity(bx));
 
     Enclosure result(new_function.domain(),new_function,set.function_factory());
-    for(const_iterator iter=set._negative_constraints.begin(); iter!=set._negative_constraints.end(); ++iter) {
-        result._negative_constraints.append(embed(*iter,bx));
-    }
-    for(const_iterator iter=set._zero_constraints.begin(); iter!=set._zero_constraints.end(); ++iter) {
-        result._zero_constraints.append(embed(*iter,bx));
+    for(const_iterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
+        result._constraints.append(IntervalNonlinearConstraintModel(iter->lower_bound(),embed(iter->function(),bx),iter->upper_bound()));
     }
     result._time_function=embed(set._time_function,bx);
     result._dwell_time_function=embed(set._dwell_time_function,bx);
@@ -1660,22 +1527,16 @@ Enclosure product(const Enclosure& set1, const Enclosure& set2) {
     ARIADNE_ASSERT(set1.time_function().range() == set2.time_function().range());
     ARIADNE_ASSERT(set1.dwell_time_function().range() == set2.dwell_time_function().range());
 
-    typedef List<IntervalScalarFunctionModel>::const_iterator const_iterator;
+    typedef List<IntervalNonlinearConstraintModel>::const_iterator const_iterator;
 
     IntervalVectorFunctionModel new_function=combine(set1.function(),set2.function());
 
     Enclosure result(new_function.domain(),new_function,set1.function_factory());
-    for(const_iterator iter=set1._negative_constraints.begin(); iter!=set1._negative_constraints.end(); ++iter) {
-        result._negative_constraints.append(embed(*iter,set2.domain()));
+    for(const_iterator iter=set1._constraints.begin(); iter!=set1._constraints.end(); ++iter) {
+        result._constraints.append(IntervalNonlinearConstraintModel(iter->lower_bound(),embed(iter->function(),set2.domain()),iter->upper_bound()));
     }
-    for(const_iterator iter=set2._negative_constraints.begin(); iter!=set2._negative_constraints.end(); ++iter) {
-        result._negative_constraints.append(embed(set1.domain(),*iter));
-    }
-    for(const_iterator iter=set1._zero_constraints.begin(); iter!=set1._zero_constraints.end(); ++iter) {
-        result._zero_constraints.append(embed(*iter,set2.domain()));
-    }
-    for(const_iterator iter=set2._zero_constraints.begin(); iter!=set2._zero_constraints.end(); ++iter) {
-        result._zero_constraints.append(embed(set1.domain(),*iter));
+    for(const_iterator iter=set2._constraints.begin(); iter!=set2._constraints.end(); ++iter) {
+        result._constraints.append(IntervalNonlinearConstraintModel(iter->lower_bound(),embed(set1.domain(),iter->function()),iter->upper_bound()));
     }
     result._time_function=embed(set1.time_function(),set2.time_function().domain());
     result._dwell_time_function=embed(set1.dwell_time_function(),set2.dwell_time_function().domain());

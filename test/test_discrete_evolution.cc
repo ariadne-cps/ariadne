@@ -30,6 +30,7 @@
 #include "matrix.h"
 #include "taylor_model.h"
 #include "differential.h"
+#include "constraint.h"
 #include "function.h"
 #include "taylor_function.h"
 #include "enclosure.h"

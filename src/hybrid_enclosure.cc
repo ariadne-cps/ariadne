@@ -204,18 +204,6 @@ HybridEnclosure::number_of_constraints() const
 }
 
 uint
-HybridEnclosure::number_of_inequality_constraints() const
-{
-    return this->_set.negative_constraints().size();
-}
-
-uint
-HybridEnclosure::number_of_equality_constraints() const
-{
-    return this->_set.zero_constraints().size();
-}
-
-uint
 HybridEnclosure::number_of_parameters() const
 {
     return this->_set.number_of_parameters();
@@ -458,11 +446,8 @@ HybridEnclosure::_check() const
     const IntervalVector& reduced_domain = this->_set.reduced_domain();
     check_subset(reduced_domain,this->_set.domain(),"domain");
     check_subset(reduced_domain,this->space_function().domain(),"function domain");
-    for(uint i=0; i!=this->_set.negative_constraints().size(); ++i) {
-        check_subset(reduced_domain,this->_set.negative_constraints()[i].domain(),"constraint");
-    }
-    for(uint i=0; i!=this->_set.zero_constraints().size(); ++i) {
-        check_subset(reduced_domain,this->_set.zero_constraints()[i].domain(),"zero constraint");
+    for(uint i=0; i!=this->_set.constraints().size(); ++i) {
+        check_subset(reduced_domain,this->_set.constraint(i).function().domain(),"constraint");
     }
     check_subset(reduced_domain,this->time_function().domain(),"time");
 }
@@ -485,8 +470,7 @@ std::ostream& HybridEnclosure::write(std::ostream& os) const
               << ", subdomain=" << this->_set.reduced_domain()
               << ", empty=" << Ariadne::empty(this->_set.reduced_domain())
               << ", state=" << (this->_set.space_function())
-              << ", negative=" << (this->_set.negative_constraints())
-              << ", zero=" << (this->_set.zero_constraints())
+              << ", constraints=" << (this->_set.constraints())
               << ", time="<< (this->_set.time_function())
               << ")";
 }
@@ -500,8 +484,7 @@ std::ostream& HybridEnclosure::print(std::ostream& os) const
               << ", domain=" << this->_set.domain()
               << ", subdomain=" << this->_set.reduced_domain()
               << ", subdomain=" << this->_set.reduced_domain()
-              << ", #negative=" << this->_set.negative_constraints().size()
-              << ", #zero=" << this->_set.zero_constraints().size()
+              << ", #constraints=" << this->_set.constraints().size()
               << ", time_range="<<this->time_range() << ")";
 }
 
@@ -512,8 +495,7 @@ std::ostream& HybridEnclosure::repr(std::ostream& os) const
               << ", " << this->_set.domain()
               << ", " << this->_set.reduced_domain()
               << ", " << this->_set.space_function()
-              << ", " << this->_set.negative_constraints()
-              << ", " << this->_set.zero_constraints()
+              << ", " << this->_set.constraints()
               << ", " << this->time_function() << ")";
 }
 

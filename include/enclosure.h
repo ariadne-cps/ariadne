@@ -91,6 +91,8 @@ template<class BS> class ListSet;
 class Grid;
 class PavingInterface;
 
+typedef NonlinearConstraint<IntervalScalarFunctionModel,Float> IntervalNonlinearConstraintModel;
+
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
     : public DrawableInterface
@@ -100,8 +102,7 @@ class Enclosure
     IntervalVectorFunctionModel _space_function;
     IntervalScalarFunctionModel _time_function;
     IntervalScalarFunctionModel _dwell_time_function;
-    List<IntervalScalarFunctionModel> _negative_constraints;
-    List<IntervalScalarFunctionModel> _zero_constraints;
+    List<IntervalNonlinearConstraintModel> _constraints;
     IntervalFunctionModelFactoryInterface* _function_factory_ptr;
     mutable Box _reduced_domain;
     mutable bool _is_fully_reduced;
@@ -139,6 +140,8 @@ class Enclosure
     IntervalVectorFunctionModel const& space_function() const;
     IntervalScalarFunctionModel const& time_function() const;
     IntervalScalarFunctionModel const& dwell_time_function() const;
+    IntervalVectorFunctionModel const constraint_function() const;
+    IntervalVector const constraint_bounds() const;
 
     //! \brief Introduces a new parameter with values in the interval \a ivl. The set itself does not change.
     void new_parameter(Interval ivl);
@@ -192,24 +195,14 @@ class Enclosure
     //! \brief Introduces the constraint \f$h(s) = 0\f$.
     void new_zero_parameter_constraint(IntervalScalarFunction h);
 
-    //! \brief The functions \f$g\f$ defining the inequality constraints \f$g(x) \leq 0\f$.
-    const List<IntervalScalarFunctionModel>& negative_constraints() const;
-    //! \brief The functions \f$h\f$ defining the equality constraints \f$h(x) = 0\f$.
-    const List<IntervalScalarFunctionModel>& zero_constraints() const;
-    //! \brief All equality and inequality constraints.
-    List<IntervalNonlinearConstraint> constraints() const;
-
     //! \brief The number of negative constraints.
     uint number_of_constraints() const;
-    //! \brief The number of negative constraints.
-    uint number_of_negative_constraints() const;
-    //! \brief The number of zero constraints.
-    uint number_of_zero_constraints() const;
-
-    //! \brief The \a i<sup>th</sup> negative constraint.
-    IntervalScalarFunctionModel negative_constraint(uint i) const;
-    //! \brief The \a i<sup>th</sup> zero constraint.
-    IntervalScalarFunctionModel zero_constraint(uint i) const;
+    //! \brief All equality and inequality constraints.
+    List<IntervalNonlinearConstraintModel> const& constraint_models() const;
+    //! \brief All equality and inequality constraints.
+    List<IntervalNonlinearConstraint> const constraints() const;
+    //! \brief The \a i<sup>th</sup> constraint.
+    IntervalNonlinearConstraintModel const& constraint(uint i) const;
 
     //! \brief  Returns true if \f$g(x)>0\f$ over the whole set,
     //! false \f$g(x)<0\f$ over the whole set,

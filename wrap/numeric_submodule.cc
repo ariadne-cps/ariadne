@@ -281,6 +281,14 @@ void export_real()
     real_class.def(self <= self);
     real_class.def(self > self);
     real_class.def(self < self);
+    real_class.def(self + double());
+    real_class.def(self - double());
+    real_class.def(self * double());
+    real_class.def(self / double());
+    real_class.def(double() + self);
+    real_class.def(double() - self);
+    real_class.def(double() * self);
+    real_class.def(double() / self);
 
     def("pi", (Real(*)()) &pi_function);
 
@@ -313,6 +321,7 @@ void export_interval()
 
     class_< Interval > interval_class("Interval");
     interval_class.def(init<Float,Float>());
+    interval_class.def(init<Real,Real>());
     interval_class.def(init<Float>());
     interval_class.def(init<Interval>());
 #ifdef HAVE_GMPXX_H

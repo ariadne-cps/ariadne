@@ -353,7 +353,7 @@ _log_summary(const EvolutionData& evolution_data, HybridEnclosure const& startin
             <<"#f="<<std::setw(4)<<std::left<<evolution_data.final_sets.size()
             <<"#e="<<std::setw(3)<<std::left<<starting_set.previous_events().size()
             <<" #p="<<std::setw(2)<<std::left<<starting_set.number_of_parameters()
-            <<" #c="<<std::setw(1)<<std::left<<starting_set.number_of_inequality_constraints()<<"+"<<std::setw(2)<<starting_set.number_of_equality_constraints()
+            <<" #c="<<std::setw(2)<<std::left<<starting_set.number_of_constraints()
             <<" t=["<<std::setw(6)<<std::setprecision(3)<<std::left<<std::fixed<<starting_time_range.lower()
             <<","<<std::setw(6)<<std::left<<std::fixed<<starting_time_range.upper()<<"]"<<std::flush
             <<" dwt=["<<std::setw(6)<<std::setprecision(3)<<std::left<<std::fixed<<starting_dwell_time_range.lower()

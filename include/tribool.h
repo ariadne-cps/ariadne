@@ -41,6 +41,10 @@ inline tribool operator^(tribool tb1, tribool tb2) { return (tb1&&!tb2)||(!tb1&&
 
 inline std::ostream& operator<<(std::ostream& os, tribool tb) {  return boost::logic::operator<<(os << std::boolalpha,tb); }
 
+namespace Ariadne {
+typedef tribool Tribool;
+} // namespace Ariadne
+
 /*
 #ifdef DOXYGEN
 namespace Ariadne {

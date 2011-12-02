@@ -270,25 +270,64 @@ Float average_width(const IntervalVector& bx) {
     return res/bx.size();
 }
 
+namespace {
+
+uint argument_size(const List<RealNonlinearConstraint>& c) {
+    uint as = ( c.size()==0 ? 0 : c[0].function().argument_size() );
+    for(uint i=0; i!=c.size(); ++i) {
+        ARIADNE_ASSERT_MSG(c[i].function().argument_size()==as,"c="<<c);
+    }
+    return as;
+}
+
+RealVectorFunction constraint_function(uint as, const List<RealNonlinearConstraint>& c) {
+    RealVectorFunction f(c.size(),as);
+    for(uint i=0; i!=c.size(); ++i) {
+        //f[i]=c[i].function();
+        f.set(i,c[i].function());
+    }
+    return f;
+}
+
+RealBox constraint_bounds(const List<RealNonlinearConstraint>& c) {
+    RealBox b(c.size());
+    for(uint i=0; i!=c.size(); ++i) {
+        b[i]=RealInterval(c[i].lower_bound(),c[i].upper_bound());
+    }
+    return b;
+}
+
+List<RealNonlinearConstraint> constraints(const RealVectorFunction& f, const RealBox& b) {
+    ARIADNE_ASSERT(f.result_size()==b.size());
+    List<RealNonlinearConstraint> c; c.reserve(b.size());
+    for(uint i=0; i!=b.size(); ++i) {
+        c.append(RealNonlinearConstraint(b[i].lower(),f[i],b[i].upper()));
+    }
+    return c;
+}
+
+} //namespace
 
 
-RealConstraintSet::RealConstraintSet(const RealVectorFunction& fn, const RealBox& codom)
-    : _function(fn), _codomain(codom)
+RealConstraintSet::RealConstraintSet(const RealVectorFunction& f, const RealBox& b)
+    : _dimension(f.argument_size()), _constraints()
 {
-    ARIADNE_ASSERT(codom.size()==fn.result_size());
+    this->_constraints=::constraints(f,b);
 }
 
 RealConstraintSet::RealConstraintSet(const List<RealNonlinearConstraint>& c)
-    : _function(), _codomain()
+    : _dimension(argument_size(c)), _constraints(c)
 {
-    if(c.size()!=0) {
-        _function=RealVectorFunction(c.size(),c[0].function().argument_size());
-        _codomain=RealBox(c.size());
-    }
-    for(uint i=0; i!=c.size(); ++i) {
-        _function[i]=c[i].function();
-        _codomain[i]=RealInterval(c[i].lower_bound(),c[i].upper_bound());
-    }
+}
+
+RealVectorFunction const RealConstraintSet::constraint_function() const
+{
+    return ::constraint_function(this->dimension(),this->constraints());
+}
+
+RealBox const RealConstraintSet::constraint_bounds() const
+{
+    return ::constraint_bounds(this->constraints());
 }
 
 RealConstraintSet*
@@ -301,7 +340,7 @@ RealConstraintSet::clone() const
 uint
 RealConstraintSet::dimension() const
 {
-    return this->_function.argument_size();
+    return this->_dimension;
 }
 
 
@@ -309,53 +348,58 @@ tribool
 RealConstraintSet::separated(const Box& bx) const
 {
     Box codomain=over_approximation(this->codomain());
-    return ConstrainedImageSet(bx,this->function()).separated(codomain);
+    return ConstrainedImageSet(bx,this->constraint_function()).separated(codomain);
 }
 
 tribool
 RealConstraintSet::overlaps(const Box& bx) const
 {
     Box codomain=under_approximation(this->codomain());
-    return ConstrainedImageSet(bx,this->function()).overlaps(codomain);
+    return ConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain);
 }
 
 tribool
 RealConstraintSet::covers(const Box& bx) const
 {
     Box codomain=under_approximation(this->codomain());
-    return Box(this->function().evaluate(bx)).inside(codomain);
+    return Box(this->constraint_function().evaluate(bx)).inside(codomain);
 }
 
 
 std::ostream&
 RealConstraintSet::write(std::ostream& os) const
 {
-    return os << "RealConstraintSet( function=" << this->function() << ", codomain=" << this->codomain() << ")";
+    return os << "RealConstraintSet( constraints=" << this->constraints() << " )";
 }
 
 
 
 
 RealBoundedConstraintSet::RealBoundedConstraintSet(const RealBox& bx)
-    : _domain(bx), _function(RealVectorFunction(0u,bx.dimension())), _codomain()
+    : _domain(bx), _constraints()
 {
 }
 
-RealBoundedConstraintSet::RealBoundedConstraintSet(const RealBox& dom, const RealVectorFunction& fn, const RealBox& codom)
-    : _domain(dom), _function(fn), _codomain(codom)
+RealBoundedConstraintSet::RealBoundedConstraintSet(const RealBox& d, const RealVectorFunction& f, const RealBox& b)
+    : _domain(d), _constraints(::constraints(f,b))
 {
-    ARIADNE_ASSERT(codom.size()==fn.result_size());
-    ARIADNE_ASSERT(dom.size()==fn.argument_size());
+    ARIADNE_ASSERT(b.size()==f.result_size());
+    ARIADNE_ASSERT(d.size()==f.argument_size());
 }
 
-RealBoundedConstraintSet::RealBoundedConstraintSet(const RealBox& dom, const List<RealNonlinearConstraint>& c)
-    : _domain(dom), _function(c.size(),dom.size()), _codomain(c.size())
+RealBoundedConstraintSet::RealBoundedConstraintSet(const RealBox& d, const List<RealNonlinearConstraint>& c)
+    : _domain(d), _constraints(c)
 {
-    for(uint i=0; i!=c.size(); ++i) {
-        ARIADNE_ASSERT(_domain.size()==c[i].function().argument_size());
-        _function[i]=c[i].function();
-        _codomain[i]=RealInterval(c[i].lower_bound(),c[i].upper_bound());
-    }
+}
+
+RealVectorFunction const RealBoundedConstraintSet::constraint_function() const
+{
+    return ::constraint_function(this->dimension(),this->constraints());
+}
+
+RealBox const RealBoundedConstraintSet::constraint_bounds() const
+{
+    return ::constraint_bounds(this->constraints());
 }
 
 RealBoundedConstraintSet*
@@ -378,7 +422,7 @@ RealBoundedConstraintSet::separated(const Box& bx) const
     Box domain=over_approximation(this->domain());
     if(Ariadne::disjoint(domain,bx)) { return true; }
     Box codomain=over_approximation(this->codomain());
-    return ConstrainedImageSet(Ariadne::intersection(bx,domain),this->function()).separated(codomain);
+    return ConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).separated(codomain);
 }
 
 
@@ -388,7 +432,7 @@ RealBoundedConstraintSet::overlaps(const Box& bx) const
     if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
     Box domain=under_approximation(this->domain());
     Box codomain=under_approximation(this->codomain());
-    return ConstrainedImageSet(Ariadne::intersection(bx,domain),this->function()).overlaps(codomain);
+    return ConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).overlaps(codomain);
 }
 
 
@@ -398,7 +442,7 @@ RealBoundedConstraintSet::covers(const Box& bx) const
     Box domain=under_approximation(this->domain());
     Box codomain=under_approximation(this->codomain());
     if(!Ariadne::covers(domain,bx)) { return false; }
-    return Box(this->function().evaluate(bx)).inside(codomain);
+    return Box(this->constraint_function().evaluate(bx)).inside(codomain);
 }
 
 tribool
@@ -420,7 +464,7 @@ RealBoundedConstraintSet::bounding_box() const
 std::ostream&
 RealBoundedConstraintSet::write(std::ostream& os) const
 {
-    return os << "RealBoundedConstraintSet( domain=" << this->domain() << ", function=" << this->function() << ", codomain=" << this->codomain() << ")";
+    return os << "RealBoundedConstraintSet( domain=" << this->domain() << ", constraints=" << this->constraints() << ")";
 }
 
 void
@@ -449,7 +493,7 @@ RealConstrainedImageSet::RealConstrainedImageSet(const RealBoundedConstraintSet&
     : _domain(over_approximation(set.domain())), _function(RealVectorFunction::identity(set.dimension()))
 {
     for(uint i=0; i!=set.number_of_constraints(); ++i) {
-        this->new_parameter_constraint(RealNonlinearConstraint(ExactFloat(set.codomain()[i].lower()),set.function()[i],ExactFloat(set.codomain()[i].upper())));
+        this->new_parameter_constraint(set.constraint(i));
     }
 }
 
@@ -1360,36 +1404,11 @@ template<class SF> class TemplatedConstrainedImageSet;
 
 
 
-const IntervalNonlinearConstraint ConstrainedImageSet::constraint(uint i) const
-{
-    ARIADNE_ASSERT(i<this->_negative_constraints.size()+_zero_constraints.size());
-    if(i<this->_negative_constraints.size()) {
-        return this->_negative_constraints[i] <= 0.0;
-    } else {
-        return this->_zero_constraints[i-this->_negative_constraints.size()] == 0.0;
-    }
-}
-
-const List<IntervalNonlinearConstraint> ConstrainedImageSet::constraints() const
-{
-    List<IntervalNonlinearConstraint> result;
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
-        result.push_back(this->_negative_constraints[i] <= 0.0);
-    }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) {
-        result.push_back(this->_zero_constraints[i] == 0.0);
-    }
-    return result;
-}
-
 IntervalVectorFunction ConstrainedImageSet::constraint_function() const
 {
     IntervalVectorFunction result(this->number_of_constraints(),this->number_of_parameters());
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
-        result[i]=this->_negative_constraints[i];
-    }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) {
-        result[i+this->_negative_constraints.size()]=this->_zero_constraints[i];
+    for(uint i=0; i!=this->number_of_constraints(); ++i) {
+        result[i]=this->constraint(i).function();
     }
     return result;
 }
@@ -1397,11 +1416,8 @@ IntervalVectorFunction ConstrainedImageSet::constraint_function() const
 IntervalVector ConstrainedImageSet::constraint_bounds() const
 {
     IntervalVector result(this->number_of_constraints());
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
-        result[i]=Interval(-inf,0.0);
-    }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) {
-        result[i+this->_negative_constraints.size()]=Interval(0.0);
+    for(uint i=0; i!=this->number_of_constraints(); ++i) {
+        result[i]=Interval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
     }
     return result;
 }
@@ -1416,7 +1432,7 @@ ConstrainedImageSet::bounding_box() const
 AffineSet
 ConstrainedImageSet::affine_over_approximation() const
 {
-    typedef List<IntervalScalarFunction>::const_iterator const_iterator;
+    typedef List<IntervalNonlinearConstraint>::const_iterator const_iterator;
 
     const uint nx=this->dimension();
     //const uint nnc=this->_negative_constraints.size();
@@ -1453,28 +1469,14 @@ ConstrainedImageSet::affine_over_approximation() const
     Vector<Float> a(np+nerr, 0.0);
     Float b;
 
-    for(const_iterator iter=this->_negative_constraints.begin();
-            iter!=this->_negative_constraints.end(); ++iter) {
-        ScalarTaylorFunction constraint_function(this->_reduced_domain,*iter,affine_sweeper);
+    for(const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+        ScalarTaylorFunction constraint_function(this->_reduced_domain,iter->function(),affine_sweeper);
         b=sub_up(constraint_function.model().error(),constraint_function.model().value());
         for(uint j=0; j!=np; ++j) { a[j]=constraint_function.model().gradient(j); }
         result.new_inequality_constraint(a,b);
     }
 
-    for(const_iterator iter=this->_zero_constraints.begin();
-            iter!=this->_zero_constraints.end(); ++iter) {
-        ScalarTaylorFunction constraint_function(this->_reduced_domain,*iter,affine_sweeper);
-        for(uint j=0; j!=np; ++j) { a[j]=constraint_function.model().gradient(j); }
-        if(constraint_function.model().error()==0.0) {
-            b=-constraint_function.model().value();
-            result.new_equality_constraint(a,b);
-        } else {
-            b=sub_up(constraint_function.model().error(),constraint_function.model().value());
-            result.new_inequality_constraint(a,b);
-            b=add_up(constraint_function.model().error(),constraint_function.model().value());
-            result.new_inequality_constraint(-a,b);
-        }
-    }
+    ARIADNE_NOT_IMPLEMENTED;
 
     ARIADNE_LOG(2,"set="<<*this<<"\nset.affine_over_approximation()="<<result<<"\n");
     return result;
@@ -1494,7 +1496,7 @@ AffineSet ConstrainedImageSet::affine_approximation() const
 
     Vector<Float> a(this->number_of_parameters());
     Float b,l,u;
-    List<IntervalNonlinearConstraint> constraints=this->constraints();
+    List<IntervalNonlinearConstraint> const& constraints=this->constraints();
     for(List<IntervalNonlinearConstraint>::const_iterator iter=constraints.begin();
         iter!=constraints.end(); ++iter)
     {
@@ -1526,15 +1528,12 @@ Pair<ConstrainedImageSet,ConstrainedImageSet> ConstrainedImageSet::split(uint j)
         ConstrainedImageSet(subdomains.first,this->_function),
         ConstrainedImageSet(subdomains.second,this->_function));
 
-    for(uint i=0; i!=this->_negative_constraints.size(); ++i) {
-        result.first.new_negative_parameter_constraint(Ariadne::restrict(this->_negative_constraints[i],subdomains.first));
-        result.second.new_negative_parameter_constraint(Ariadne::restrict(this->_negative_constraints[i],subdomains.second));
+    for(uint i=0; i!=this->_constraints.size(); ++i) {
+        result.first.new_parameter_constraint(this->_constraints[i]);
+        result.second.new_parameter_constraint(this->_constraints[i]);
+        //result.first.new_parameter_constraint(Ariadne::restrict(this->_negative_constraints[i],subdomains.first));
+        //result.second.new_parameter_constraint(Ariadne::restrict(this->_negative_constraints[i],subdomains.second));
     }
-    for(uint i=0; i!=this->_zero_constraints.size(); ++i) {
-        result.first.new_zero_parameter_constraint(Ariadne::restrict(this->_zero_constraints[i],subdomains.first));
-        result.second.new_zero_parameter_constraint(Ariadne::restrict(this->_zero_constraints[i],subdomains.second));
-    }
-
     return result;
 }
 

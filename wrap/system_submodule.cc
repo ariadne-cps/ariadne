@@ -27,6 +27,7 @@
 
 #include <boost/python.hpp>
 
+#include "tribool.h"
 #include "numeric.h"
 #include "function.h"
 #include "expression.h"

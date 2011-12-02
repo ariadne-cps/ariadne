@@ -80,8 +80,8 @@ template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<Interval> IntervalFunctionModelFactoryInterface;
 
 template<class X, class R> class NonlinearConstraint;
-typedef NonlinearConstraint<Real,Real> RealNonlinearConstraint;
-typedef NonlinearConstraint<Interval,Float> IntervalNonlinearConstraint;
+typedef NonlinearConstraint<RealScalarFunction,Real> RealNonlinearConstraint;
+typedef NonlinearConstraint<IntervalScalarFunction,Float> IntervalNonlinearConstraint;
 
 class AffineSet;
 class RealBoundedConstraintSet;

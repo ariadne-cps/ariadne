@@ -109,29 +109,32 @@ Box approximation(const RealBox& rbx);
 class RealConstraintSet
     : public RegularSetInterface
 {
-    RealVectorFunction _function;
-    RealBox _codomain;
+    Nat _dimension;
+    List< RealNonlinearConstraint > _constraints;
   public:
     //! \brief Construct the preimage of \a C under \a g.
     RealConstraintSet(const RealVectorFunction& g, const RealBox& C);
     //! \brief Construct the restriction of \a D under the constraints \a c.
     RealConstraintSet(const List<RealNonlinearConstraint>& c);
     //! \brief The codomain of the set.
-    const RealBox& codomain() const { return this->_codomain; }
-    //! \brief The function used to define the set.
-    const RealVectorFunction& function() const { return this->_function; };
-    //! \brief The \a i<sup>th</sup> constraint \f$g_i(x)\in c_i\f$.
-    RealNonlinearConstraint constraint(uint i) const {
-        return RealNonlinearConstraint(this->_codomain[i].lower(),this->_function[i],this->_codomain[i].upper()); }
+    const RealBox codomain() const { return this->constraint_bounds(); }
+    //! \brief The function used to define the constraints.
+    const RealVectorFunction constraint_function() const;
+    //! \brief The bounds of the constraints.
+    const RealBox constraint_bounds() const;
     //! \brief The number of constraints.
-    uint number_of_constraints() const { return this->_codomain.size(); };
+    Nat number_of_constraints() const { return this->_constraints.size(); };
+    //! \brief The constraints.
+    List<RealNonlinearConstraint> const& constraints() const { return this->_constraints; }
+    //! \brief The \a i<sup>th</sup> constraint.
+    RealNonlinearConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
 
     RealConstraintSet* clone() const;
-    uint dimension() const;
-    tribool separated(const Box&) const;
-    tribool overlaps(const Box&) const;
-    tribool covers(const Box&) const;
-    std::ostream& write(std::ostream&) const;
+    Nat dimension() const;
+    Tribool separated(const Box&) const;
+    Tribool overlaps(const Box&) const;
+    Tribool covers(const Box&) const;
+    OutputStream& write(OutputStream&) const;
 };
 
 //! \ingroup GeometryModule ExactSetSubModule
@@ -142,8 +145,7 @@ class RealBoundedConstraintSet
     , public DrawableInterface
 {
     RealBox _domain;
-    RealVectorFunction _function;
-    RealBox _codomain;
+    List< RealNonlinearConstraint > _constraints;
   public:
     //! \brief Construct the preimage of \a C under \a g.
     RealBoundedConstraintSet(const RealBox& D, const RealVectorFunction& g, const RealBox& C);
@@ -154,24 +156,27 @@ class RealBoundedConstraintSet
     //! \brief The domain of the set.
     const RealBox& domain() const { return this->_domain; }
     //! \brief The codomain of the set.
-    const RealBox& codomain() const { return this->_codomain; }
-    //! \brief The function used to define the set.
-    const RealVectorFunction& function() const { return this->_function; };
-    //! \brief The \a i<sup>th</sup> constraint \f$g_i(x)\in c_i\f$.
-    RealNonlinearConstraint constraint(uint i) const {
-        return RealNonlinearConstraint(this->_codomain[i].lower(),this->_function[i],this->_codomain[i].upper()); }
+    const RealBox codomain() const { return this->constraint_bounds(); }
+    //! \brief The function used to define the constraints.
+    const RealVectorFunction constraint_function() const;
+    //! \brief The bounds for the constraints.
+    const RealBox constraint_bounds() const;
     //! \brief The number of constraints.
-    uint number_of_constraints() const { return this->_codomain.size(); };
+    Nat number_of_constraints() const { return this->_constraints.size(); };
+    //! \brief The constraints.
+    List<RealNonlinearConstraint> const& constraints() const { return this->_constraints; }
+    //! \brief The \a i<sup>th</sup> constraint.
+    RealNonlinearConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
 
     RealBoundedConstraintSet* clone() const;
-    uint dimension() const;
-    tribool separated(const Box&) const;
-    tribool overlaps(const Box&) const;
-    tribool covers(const Box&) const;
-    tribool inside(const Box&) const;
+    Nat dimension() const;
+    Tribool separated(const Box&) const;
+    Tribool overlaps(const Box&) const;
+    Tribool covers(const Box&) const;
+    Tribool inside(const Box&) const;
     Box bounding_box() const;
-    std::ostream& write(std::ostream&) const;
-    void draw(CanvasInterface&,const Projection2d&) const;
+    OutputStream& write(OutputStream&) const;
+    Void draw(CanvasInterface&,const Projection2d&) const;
 };
 
 
@@ -201,35 +206,39 @@ class RealConstrainedImageSet
     RealConstrainedImageSet(const RealBoundedConstraintSet& set);
     //! \brief The domain of the set.
     const RealBox& domain() const { return this->_domain; }
-    //! \brief The function used to define the set.
+    //! \brief The function used to define the mapping from the parameter domain to the space.
     const RealVectorFunction& function() const { return this->_function; };
+    //! \brief The bounds for the constraints.
+    const RealVectorFunction constraint_function() const;
+    //! \brief The bounds for the constraints.
+    const RealBox constraint_bounds() const;
     //! \brief The function used to define the set.
     const List<RealNonlinearConstraint>& constraints() const { return this->_constraints; };
     //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.
-    uint number_of_parameters() const { return this->_domain.size(); };
+    Nat number_of_parameters() const { return this->_domain.size(); };
     //! \brief The number of constraints.
-    uint number_of_constraints() const { return this->_constraints.size(); };
+    Nat number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The \a i<sup>th</sup> constraint.
-    RealNonlinearConstraint const& constraint(uint i) const { return this->_constraints[i]; }
+    RealNonlinearConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
 
     //! \brief Apply the function \f$h\f$ to obtain the set \f$h\circ f(D\cap g^{-1}(C))\f$.
-    void apply(const RealVectorFunction& h) {
+    Void apply(const RealVectorFunction& h) {
         this->_function=compose(h,this->_function);
     }
 
     //! \brief Introduce a new constraint of the form \f$g(y)\in [c_l,c_u]\f$.
-    void new_parameter_constraint(const RealNonlinearConstraint& c) {
+    Void new_parameter_constraint(const RealNonlinearConstraint& c) {
         ARIADNE_ASSERT_MSG(c.function().argument_size()==this->domain().size(),*this<<", "<<c);
         this->_constraints.append(c); }
 
     //! \brief Introduce a new constraint of the form \f$g(y)\in [c_l,c_u]\f$.
-    void new_space_constraint(const RealNonlinearConstraint& c) {
+    Void new_space_constraint(const RealNonlinearConstraint& c) {
         ARIADNE_ASSERT_MSG(c.function().argument_size()==this->_function.result_size(),*this<<", "<<c);
         this->_constraints.append(RealNonlinearConstraint(c.lower_bound(),compose(c.function(),_function),c.upper_bound())); }
 
     RealConstrainedImageSet* clone() const { return new RealConstrainedImageSet(*this); }
-    uint dimension() const { return this->_function.result_size(); }
-    tribool inside(const Box& bx) const { return subset(this->bounding_box(),bx); }
+    Nat dimension() const { return this->_function.result_size(); }
+    Tribool inside(const Box& bx) const { return subset(this->bounding_box(),bx); }
 
     //! \brief A coarse over-approximation to the set. Computed by taking the interval evaluation \f$h(D)\f$.
     Box bounding_box() const;
@@ -240,26 +249,26 @@ class RealConstrainedImageSet
     //! \brief Split into two pieces by subdividing along a coordinate direction.
     Pair<RealConstrainedImageSet,RealConstrainedImageSet> split() const;
     //! \brief Split into two pieces by subdividing along the \a j<sup>th</sup> coordinate direction.
-    Pair<RealConstrainedImageSet,RealConstrainedImageSet> split(uint j) const;
+    Pair<RealConstrainedImageSet,RealConstrainedImageSet> split(Nat j) const;
 
     //! \brief Test if the set is disjoint from a (closed) box.
-    tribool separated(const Box&) const;
+    Tribool separated(const Box&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    tribool overlaps(const Box&) const;
+    Tribool overlaps(const Box&) const;
     //! \brief Adjoin an outer approximation to a paving.
-    void adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
-    tribool satisfies(const RealNonlinearConstraint& c) const;
+    Tribool satisfies(const RealNonlinearConstraint& c) const;
 
     //! \brief Draw to a canvas.
-    void draw(CanvasInterface&,const Projection2d&) const;
+    Void draw(CanvasInterface&,const Projection2d&) const;
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream&) const;
+    OutputStream& write(OutputStream&) const;
   private:
-    void affine_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
-    void subdivision_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
-    void constraint_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
+    Void affine_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
+    Void subdivision_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
+    Void constraint_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 };
 
 
@@ -273,8 +282,7 @@ class ConstrainedImageSet
     IntervalVector _domain;
     Box _reduced_domain;
     IntervalVectorFunction _function;
-    List< IntervalScalarFunction > _negative_constraints;
-    List< IntervalScalarFunction > _zero_constraints;
+    List< IntervalNonlinearConstraint > _constraints;
   public:
     //! \brief Construct the set with zero-dimensional parameterisation in zero dimensions with no constraints.
     ConstrainedImageSet() : _domain(), _function() { }
@@ -289,65 +297,41 @@ class ConstrainedImageSet
     //! \brief The domain of the set.
     const IntervalVector& domain() const { return this->_domain; }
     //! \brief The function used to define the set.
-    const IntervalVectorFunction& function() const { return this->_function; };
-    const List<IntervalNonlinearConstraint> constraints() const;
-    const List<IntervalScalarFunction>& negative_constraints() const { return this->_negative_constraints; };
-    const List<IntervalScalarFunction>& zero_constraints() const { return this->_zero_constraints; };
-    //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.
-    uint number_of_parameters() const { return this->_domain.size(); };
-    //! \brief The number of constraints.
-    uint number_of_constraints() const { return this->_negative_constraints.size() + this->_zero_constraints.size(); };
-    uint number_of_negative_constraints() const { return this->_negative_constraints.size(); };
-    uint number_of_zero_constraints() const { return this->_zero_constraints.size(); };
+    const IntervalVectorFunction& function() const { return this->_function; }
+    //! \brief The constraints used to define the set.
+    const List<IntervalNonlinearConstraint> constraints() const { return this->_constraints; }
     //! \brief The \a i<sup>th</sup> constraint.
-    IntervalNonlinearConstraint const constraint(uint i) const;
-    IntervalScalarFunction const& negative_constraint(uint i) const { return this->_negative_constraints[i]; }
-    IntervalScalarFunction const& zero_constraint(uint i) const { return this->_zero_constraints[i]; }
+    IntervalNonlinearConstraint const constraint(Nat i) const { return this->_constraints[i]; };
+    //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.
+    Nat number_of_parameters() const { return this->_domain.size(); };
+    //! \brief The number of constraints.
+    Nat number_of_constraints() const { return this->_constraints.size(); };
 
     //! \brief Apply the function \f$h\f$ to obtain the set \f$h\circ f(D\cap g^{-1}(C))\f$.
-    void apply(const IntervalVectorFunction& h) {
-        this->_function=compose(h,this->_function); }
-
-    //! \brief Introduce a new constraint of the form \f$g(s) \leq 0\f$.
-    void new_negative_parameter_constraint(const IntervalScalarFunction& g) {
-        ARIADNE_ASSERT_MSG(g.argument_size()==this->domain().size(),*this<<", "<<g);
-        this->_negative_constraints.append(g); }
-
-    //! \brief Introduce a new constraint of the form \f$g(s) = 0\f$.
-    void new_zero_parameter_constraint(const IntervalScalarFunction& g) {
-        ARIADNE_ASSERT_MSG(g.argument_size()==this->domain().size(),*this<<", "<<g);
-        this->_zero_constraints.append(g); }
-
-    //! \brief Introduce a new constraint of the form \f$g(x) \leq 0\f$.
-    void new_negative_space_constraint(const IntervalScalarFunction& g) {
-        ARIADNE_ASSERT_MSG(g.argument_size()==this->domain().size(),*this<<", "<<g);
-        this->_negative_constraints.append(compose(g,this->_function)); }
-
-    //! \brief Introduce a new constraint of the form \f$g(x) = 0\f$.
-    void new_zero_space_constraint(const IntervalScalarFunction& g) {
-        ARIADNE_ASSERT_MSG(g.argument_size()==this->domain().size(),*this<<", "<<g);
-        this->_zero_constraints.append(compose(g,this->_function)); }
+    Void apply(const IntervalVectorFunction& h) {
+        this->_function=compose(h,this->_function);
+    }
 
     //! \brief Introduce a new constraint of the form \f$g(s)\in [c_l,c_u]\f$.
-    void new_parameter_constraint(const IntervalNonlinearConstraint& c) {
+    Void new_parameter_constraint(const IntervalNonlinearConstraint& c) {
         ARIADNE_ASSERT_MSG(c.function().argument_size()==this->number_of_parameters(),*this<<", "<<c);
-        ARIADNE_NOT_IMPLEMENTED;
+        this->_constraints.append(c);
     }
 
     //! \brief Introduce a new constraint of the form \f$g(x)\in [c_l,c_u]\f$.
-    void new_space_constraint(const IntervalNonlinearConstraint& c) {
+    Void new_space_constraint(const IntervalNonlinearConstraint& c) {
         ARIADNE_ASSERT_MSG(c.function().argument_size()==this->dimension(),*this<<", "<<c);
-        ARIADNE_NOT_IMPLEMENTED;
+        this->_constraints.append(IntervalNonlinearConstraint(c.lower_bound(),compose(c.function(),this->function()),c.upper_bound()));
     }
 
     ConstrainedImageSet* clone() const { return new ConstrainedImageSet(*this); }
-    uint dimension() const { return this->_function.result_size(); }
+    Nat dimension() const { return this->_function.result_size(); }
 
     IntervalVectorFunction constraint_function() const;
     IntervalVector constraint_bounds() const;
 
     //! \brief Reduce the size of the domain by constraint propagation, if possible.
-    void reduce();
+    Void reduce();
     //! \brief A coarse over-approximation to the set. Computed by taking the interval evaluation \f$h(D)\f$.
     Box bounding_box() const;
     //! \brief Construct an affine over-approximation
@@ -357,29 +341,29 @@ class ConstrainedImageSet
     //! \brief Split into two pieces by subdividing along a coordinate direction.
     Pair<ConstrainedImageSet,ConstrainedImageSet> split() const;
     //! \brief Split into two pieces by subdividing along the \a j<sup>th</sup> coordinate direction.
-    Pair<ConstrainedImageSet,ConstrainedImageSet> split(uint j) const;
+    Pair<ConstrainedImageSet,ConstrainedImageSet> split(Nat j) const;
 
     //! \brief Test if the set is empty.
-    tribool empty() const;
+    Tribool empty() const;
     //! \brief Test if the set is a strict subset of a box.
-    tribool inside(const Box& bx) const;
+    Tribool inside(const Box& bx) const;
     //! \brief Test if the set is disjoint from a box.
-    tribool separated(const Box&) const;
+    Tribool separated(const Box&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    tribool overlaps(const Box&) const;
+    Tribool overlaps(const Box&) const;
     //! \brief Adjoin an outer approximation to a paving.
-    void adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
-    tribool satisfies(const IntervalNonlinearConstraint& c) const;
+    Tribool satisfies(const IntervalNonlinearConstraint& c) const;
 
     //! \brief Draw to a canvas.
-    void draw(CanvasInterface&,const Projection2d&) const;
+    Void draw(CanvasInterface&,const Projection2d&) const;
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream&) const;
+    OutputStream& write(OutputStream&) const;
 };
 
-std::ostream& operator<<(std::ostream&, const ConstrainedImageSet&);
+OutputStream& operator<<(OutputStream&, const ConstrainedImageSet&);
 
 
 

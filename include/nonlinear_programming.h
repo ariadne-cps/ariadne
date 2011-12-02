@@ -48,8 +48,8 @@ typedef VectorFunction<Interval> IntervalVectorFunction;
 typedef VectorFunction<Float> FloatVectorFunction;
 
 template<class X, class R> class NonlinearConstraint;
-typedef NonlinearConstraint<Real,Real> RealNonlinearConstraint;
-typedef NonlinearConstraint<Interval,Float> IntervalNonlinearConstraint;
+typedef NonlinearConstraint<RealScalarFunction,Real> RealNonlinearConstraint;
+typedef NonlinearConstraint<IntervalScalarFunction,Float> IntervalNonlinearConstraint;
 
 class InfeasibleProblemException : public std::exception { };
 class DegenerateNonlinearFeasibilityProblemException : public std::exception { };

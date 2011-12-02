@@ -37,13 +37,6 @@
 using namespace Ariadne;
 
 
-struct RadiusSquare : VectorFunctionData<1,2,1> {
-    template<class R, class A, class P>
-    static void compute(R& r, const A& x, const P& p) {
-        r[0]=sqr(x[0])+sqr(x[1])-sqr(p[0]);
-    }
-};
-
 
 
 int main(int argc, char **argv)
@@ -57,13 +50,14 @@ int main(int argc, char **argv)
 
     //Zonotope z1(z1c,z1g);
     //Polytope p1=polytope(z1);
+    Real p = 0.5;
     RealVectorFunction x=RealVectorFunction::identity(3);
     RealVectorFunction afn1((0.05*x[0]+0.05*x[2]+0.15,0.05*x[1]+0.05*x[2]+0.6));
     ConstrainedImageSet s1(Box::unit_box(3),afn1);
     Box bbx1=s1.bounding_box()+Vector<Interval>(2, Interval(-0.25,+0.25));
 
-    VectorUserFunction<RadiusSquare> radius(Vector<Real>(1u,0.5));
-    RealConstraintSet cs1(radius,RealBox(1u,RealInterval(-1,0)));
+    RealVectorFunction rf(1u, sqr(x[0])+sqr(x[1])-sqr(p));
+    RealConstraintSet cs1(rf,RealBox(1u,RealInterval(-1,0)));
 
     {
         double h=10000;

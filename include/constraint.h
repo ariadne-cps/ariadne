@@ -34,28 +34,30 @@
 namespace Ariadne {
 
 
-template<class X, class R>
+template<class F, class R>
 class NonlinearConstraint {
-    typedef ScalarFunction<X> FunctionType;
+    typedef F FunctionType;
     typedef R BoundType;
 //    typedef typename IntervalOfType<Real>::Type IntervalBoundsType;
   public:
-    NonlinearConstraint(R const& l, ScalarFunction<X> const& f, R const& u) : _function(f), _lower_bound(l), _upper_bound(u) { ARIADNE_ASSERT(l<=u); }
-    NonlinearConstraint(ScalarFunction<X> const& f, R const& x) : _function(f), _lower_bound(x), _upper_bound(x) { }
-    template<class XX,class RR> NonlinearConstraint(const NonlinearConstraint<XX,RR>& c)
-        : _function(static_cast<ScalarFunction<X> >(c.function())), _lower_bound(c.lower_bound()), _upper_bound(c.upper_bound()) { }
+    NonlinearConstraint(BoundType const& l, FunctionType const& f, BoundType const& u) : _function(f), _lower_bound(l), _upper_bound(u) { ARIADNE_ASSERT(l<=u); }
+    NonlinearConstraint(FunctionType const& f, BoundType const& x) : _function(f), _lower_bound(x), _upper_bound(x) { }
+    template<class FF,class RR> NonlinearConstraint(const NonlinearConstraint<FF,RR>& c)
+        : _function(static_cast<F>(c.function())), _lower_bound(c.lower_bound()), _upper_bound(c.upper_bound()) { }
+    void set_function(const FunctionType& f) { this->_function = f; }
+    FunctionType& function() { return this->_function; }
     FunctionType const& function() const { return this->_function; }
     BoundType const& lower_bound() const { return this->_lower_bound; }
     BoundType const& upper_bound() const { return this->_upper_bound; }
     const Interval bounds() const { return Interval(this->_lower_bound,this->_upper_bound); }
   private:
-    ScalarFunction<X> _function;
+    F _function;
     R _lower_bound;
     R _upper_bound;
 };
 
-typedef NonlinearConstraint<Real,Real> RealNonlinearConstraint;
-typedef NonlinearConstraint<Interval,Float> IntervalNonlinearConstraint;
+typedef NonlinearConstraint<RealScalarFunction,Real> RealNonlinearConstraint;
+typedef NonlinearConstraint<IntervalScalarFunction,Float> IntervalNonlinearConstraint;
 
 inline RealNonlinearConstraint operator<=(const Real& c, const RealScalarFunction& f) {
     return RealNonlinearConstraint(c,f,infinity);

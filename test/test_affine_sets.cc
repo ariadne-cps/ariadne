@@ -77,10 +77,8 @@ class TestAffineSet
 {
   private:
     Figure figure;
-    Matrix<Float> G;
-    Vector<Float> h;
-    Vector<Float> a;
-    Float b;
+    Vector<Interval> D;
+    Vector< Affine<Interval> > x;
     AffineSet set;
   public:
     TestAffineSet() : set(Matrix<Float>(2,2),Vector<Float>(2)) { }
@@ -88,45 +86,32 @@ class TestAffineSet
     void test_pure_constraint() {
         figure.clear();
 
-        G=Matrix<Float>(2,2, 1.0,1.0, 0.0,1.0);
-        h=Vector<Float>(2, 2.0,0.0);
-        set=AffineSet(G,h);
+        D = IntervalVector::unit_box(2);
+        x = Affine<Interval>::variables(2);
 
-        a.resize(2);
-        a[0]=1.0; a[1]=0.5; b=0.75;
-        set.new_inequality_constraint(a,b);
-        a[0]=-0.5; a[1]=1.5; b=0.5;
-        set.new_inequality_constraint(a,b);
+        set=AffineSet(D, (x[0]+2,x[0]+x[1]) );
+
+        set.new_parameter_constraint(x[0]+0.5*x[1]+0.75 <= 0.0);
+        set.new_parameter_constraint(-0.5*x[0]+1.5*x[1]+0.5 <= 0.0);
 
         ARIADNE_TEST_PRINT(set);
         figure.draw(set);
 
-        G[0][1]=1.0;
-        h[0]=2.0; h[1]=2.0;
-        set=AffineSet(G,h);
-        //a[0]=1.0; a[1]=0.5; b=0.75;
-        //set.new_inequality_constraint(a,b);
-        a[0]=-0.5; a[1]=-1.5; b=0.5;
-        set.new_inequality_constraint(a,b);
+        set=AffineSet(D, (x[0]+x[1]+2,x[0]+x[1]+2));
+        set.new_parameter_constraint(-0.5*x[0]-1.5*x[1]+0.5 <= 0.0);
 
         ARIADNE_TEST_PRINT(set);
         figure.draw(set);
     }
 
     void test_constrained_image() {
-        G=Matrix<Float>(2,3, 2.0,3.0,1.0, 1.0,1.0,0.0);
-        //G=Matrix<Float>(2,3, 2.0,3.25,1.0, 1.0,1.0,0.0);
-        h=Vector<Float>(2, 0.0,-2.0);
-        set=AffineSet(G,h);
+        D = IntervalVector::unit_box(3);
+        x = Affine<Interval>::variables(3);
 
-        a.resize(3);
-        a[0]=1.0; a[1]=0.5; a[2]=0.25; b=0.75;
-        set.new_inequality_constraint(a,b);
-        a[0]=-0.5; a[1]=1.5; a[2]=0.0; b=0.5;
-        //set.new_inequality_constraint(a,b);
-        a[0]=-2.0; a[1]=-3.5; a[2]=-1.0; b=3.0;
-        a[0]=-2.0; a[1]=-3.0; a[2]=-1.0; b=3.0;
-        set.new_inequality_constraint(a,b);
+        set=AffineSet(D, (2*x[0]+3*x[1]+x[2],x[0]+x[1]-2) );
+
+        set.new_parameter_constraint(1.0*x[0]+0.5*x[1]+0.25*x[2]<=0.75);
+        set.new_parameter_constraint(-2.0*x[0]-3.0*x[1]-1.0*x[2]<=3.00);
 
         ARIADNE_TEST_PRINT(set);
         Polytope2d expected_set(8, -3.0,-3.0, -3.0,-3.66667, 2.0,-2.0, 4.0,-1.0,
@@ -139,12 +124,10 @@ class TestAffineSet
 
 
     void test_separated() {
-        Affine<Float> x0=Affine<Float>::variable(3,0);
-        Affine<Float> x1=Affine<Float>::variable(3,1);
-        Affine<Float> x2=Affine<Float>::variable(3,2);
-        AffineSet affine_set(Box::unit_box(3),(-0.9375+0.0625*x0+0.5*x1,0.87890625-0.1171875*x0+x1+0.00390625*x2));
-        //AffineSet affine_set(Box::unit_box(3),(x0+x2,x1+2*x2) );
-        //affine_set.new_inequality_constraint(-1.1875+0.0625*x0+x1);
+        D=IntervalVector::unit_box(3);
+        x=Affine<Interval>::variables(3);
+        AffineSet affine_set(D, (-0.9375+0.0625*x[0]+0.5*x[1],0.87890625-0.1171875*x[0]+x[1]+0.00390625*x[2]));
+        affine_set.new_parameter_constraint(-1.1875+0.0625*x[0]+x[1]<=0.0);
         ARIADNE_TEST_PRINT(affine_set);
         Box cell1(2, -1.0,-0.9375, 0.8125, 0.875); // subset
         Box cell2(2, -0.5625,-0.50, 1.4375,1.5); // overlaps
@@ -176,85 +159,103 @@ class TestAffineSet
 
     void test_outer_approximation() {
 
-        G=Matrix<Float>(2,3, 2.0,3.0,1.0, 1.0,1.0,0.0);
-        h=Vector<Float>(2, 0.05,2.051);
-        set=AffineSet(G,h);
-        a.resize(3);
+        {
+            D=IntervalVector::unit_box(2);
+            x=Affine<Interval>::variables(2);
+            AffineSet set(D,(x[0],x[1]));
+            set.new_parameter_constraint(x[0]+x[1]<=-0.5);
+            ARIADNE_TEST_PRINT(set);
 
-        a[0]=1.01; a[1]=0.51; a[2]=0.251; b=0.751;
-        set.new_inequality_constraint(a,b);
-        a[0]=-0.51; a[1]=1.51; a[2]=0.01; b=0.51;
-        set.new_inequality_constraint(a,b);
-        a[0]=-2.01; a[1]=-3.5; a[2]=-1.02; b=3.01;
-        a[0]=-2.01; a[1]=-3.01; a[2]=-1.02; b=3.01;
-        set.new_inequality_constraint(a,b);
+            GridTreeSet paving = set.outer_approximation(Grid(2),4);
+            paving.recombine();
+            std::cout<<std::setprecision(17);
+            ARIADNE_TEST_PRINT(paving);
 
-        Grid grid(2);
-        GridTreeSet paving(grid);
-        set.adjoin_outer_approximation_to(paving,3);
-        paving.recombine();
-
-        Figure figure;
-        figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
-        figure.set_fill_colour(1.0,0.0,0.0);
-        figure.set_fill_opacity(0.5);
-        figure.draw(paving);
-        figure.set_fill_colour(0.0,0.5,1.0);
-        figure.draw(set);
-        figure.write("test_affine_set-outer_approximation-1");
-        figure.clear();
-
-
-        // The following set has difficulties
-        G=Matrix<Float>::identity(2);
-        h=Vector<Float>::zero(2);
-        set=AffineSet(G,h);
-
-        a.resize(2);
-        a[0]=2.0; a[1]=1.0; b=0.5;
-        set.new_inequality_constraint(a,b);
-        a[0]=-0.5; a[1]=1.0; b=0.75;
-        set.new_inequality_constraint(a,b);
-        a[0]=-0.5; a[1]=-1.0; b=0.875;
-        set.new_inequality_constraint(a,b);
-
-        figure.set_fill_colour(1.0,0.0,0.0);
-        figure.draw(set.outer_approximation(Grid(2),3));
-        figure.set_fill_colour(0.0,0.5,1.0);
-        figure.draw(set);
-
-        figure.write("test_affine_set-outer_approximation-2");
-        figure.clear();
+            Figure figure;
+            figure.set_bounding_box(set.bounding_box()+IntervalVector(2,Interval(-0.125,+0.125)) );
+            figure.set_fill_opacity(0.5);
+            figure.set_fill_colour(1.0,0.0,0.0);
+            figure.draw(paving);
+            figure.set_fill_colour(0.0,0.5,1.0);
+            figure.draw(set);
+            figure.write("test_affine_set-outer_approximation-4");
+        }
 
         {
-            Affine<Float> x0=Affine<Float>::variable(3,0);
-            Affine<Float> x1=Affine<Float>::variable(3,1);
-            Affine<Float> x2=Affine<Float>::variable(3,2);
-            AffineSet affine_set(Box::unit_box(3),(-0.9375+0.0625*x0+0.5*x1,0.87890625-0.1171875*x0+x1+0.00390625*x2));
-            affine_set.new_inequality_constraint(-1.1875+0.0625*x0+x1);
-            GridTreeSet affine_set_paving = affine_set.outer_approximation(Grid(2),4);
-            affine_set_paving.recombine();
-            std::cout<<std::setprecision(17);
-            ARIADNE_TEST_PRINT(affine_set);
+            // The following set has difficulties
+            AffineSet set(D,(x[0],x[1]));
+            set.new_parameter_constraint(2.0*x[0]+1.0*x[1]<=0.5);
+            set.new_parameter_constraint(-0.5*x[0]+1.0*x[1]<=0.75);
+            set.new_parameter_constraint(-0.5*x[0]-1.0*x[1]<=0.875);
 
-            figure.set_bounding_box(affine_set.bounding_box()+IntervalVector(2,Interval(-0.125,+0.125)) );
+            Figure figure;
+            figure.set_bounding_box(Box(2, -1.0,+1.0, -1.0,+1.0)+IntervalVector(2,Interval(-0.125,+0.125)));
+            figure.set_fill_opacity(0.5);
             figure.set_fill_colour(1.0,0.0,0.0);
-            figure.draw(affine_set_paving);
+            figure.draw(set.outer_approximation(Grid(2),3));
             figure.set_fill_colour(0.0,0.5,1.0);
-            figure.draw(affine_set);
+            figure.draw(set);
+
+            figure.write("test_affine_set-outer_approximation-2");
+            figure.clear();
+        }
+
+        {
+            D=IntervalVector::unit_box(3);
+            x=Affine<Interval>::variables(3);
+
+            set=AffineSet( D, (2.0*x[0]+3.0*x[1]+1.0*x[2]+0.05, x[0]+x[1]+2.051) );
+
+            set.new_parameter_constraint(+1.01*x[0]+0.51*x[1]+0.251*x[2]<=0.751);
+            set.new_parameter_constraint(-0.51*x[0]+1.51*x[1]+0.01*x[2]<=0.51);
+            set.new_parameter_constraint(-2.01*x[0]-3.01*x[1]-1.02*x[2]<=3.01);
+
+            Grid grid(2);
+            GridTreeSet paving(grid);
+            set.adjoin_outer_approximation_to(paving,3);
+            paving.recombine();
+
+            Figure figure;
+            figure.set_bounding_box(Box(2, -7.0,+7.0, -1.0,+5.0));
+            figure.set_fill_colour(1.0,0.0,0.0);
+            figure.set_fill_opacity(0.5);
+            figure.draw(paving);
+            figure.set_fill_colour(0.0,0.5,1.0);
+            figure.draw(set);
+            figure.write("test_affine_set-outer_approximation-1");
+            figure.clear();
+        }
+
+        {
+            AffineSet set(Box::unit_box(3),(-0.9375+0.0625*x[0]+0.5*x[1],0.87890625-0.1171875*x[0]+x[1]+0.00390625*x[2]));
+            set.new_parameter_constraint(0.0625*x[0]+x[1]<=1.1875);
+            ARIADNE_TEST_PRINT(set);
+
+            GridTreeSet paving = set.outer_approximation(Grid(2),4);
+            paving.recombine();
+            std::cout<<std::setprecision(17);
+            ARIADNE_TEST_PRINT(paving);
+
+            Figure figure;
+            figure.set_bounding_box(set.bounding_box()+IntervalVector(2,Interval(-0.125,+0.125)) );
+            figure.set_fill_opacity(0.5);
+            figure.set_fill_colour(1.0,0.0,0.0);
+            figure.draw(paving);
+            figure.set_fill_colour(0.0,0.5,1.0);
+            figure.draw(set);
             figure.write("test_affine_set-outer_approximation-3");
         }
+
+
     }
 
 
     void test_empty() {
-        G=Matrix<Float>(2,2, 0.125,0.0, 0.0,0.125);
-        h=Vector<Float>(2, 1.0,1.0);
-        set=AffineSet(G,h);
-        a.resize(2);
+        D = IntervalVector::unit_box(2);
+        x = Affine<Interval>::variables(2);
 
-        a[0]=0.0; a[1]=-1.0; b=-2.0;
-        set.new_inequality_constraint(a,b);
+        set=AffineSet(D, (0.125*x[0]+1.0, 0.125*x[1]+1.0) );
+        set.new_parameter_constraint(-1.0*x[1] <= -2.0);
 
         ARIADNE_TEST_PRINT(set);
         ARIADNE_TEST_ASSERT(set.empty());
@@ -270,33 +271,63 @@ class TestAffineSet
         Vector2d offsets(0.0,0.0); // Offsets
         double& ox=offsets.x; double& oy=offsets.y;
         Polytope2d expected_set(1,0.0,0.0);
-        Vector< Affine<Float> > a;
+        Vector< Affine<Interval> > a;
         Vector<Interval> dom;
         figure.clear();
-        figure.set_bounding_box(Box(2, -0.25,+14.25, -0.25,+11.25));
+        figure.set_bounding_box(Box(2, -1.0,+15.0, -1.0,+15.0));
         figure.set_fill_colour(0.5,1.0,1.0);
         figure.set_fill_opacity(0.5);
 
         {
             // Draw overlapping sets to check colours
-            figure << fill_colour(expected_colour) << Polytope2d(4,0.,-0.25,2.,-0.25,2.,0.,0.,0.)
-                   << fill_colour(colour) << Polytope2d(4,1.,-0.25,3.,-0.25,3.,0.,1.,0.);
+            figure << fill_colour(expected_colour) << Polytope2d(4,0.,-0.5,2.,-0.5,2.,0.,0.,0.)
+                   << fill_colour(colour) << Polytope2d(4,1.,-0.5,3.,-0.5,3.,0.,1.,0.);
         }
 
         {
-            // Test draw of nondegenerate zero-dimensional image set
-            a=Affine<Float>::variables(1);
+            // Test draw of nondegenerate two-dimensional image set
+            a=Affine<Interval>::variables(2);
+            dom=Vector<Interval>::unit_box(2);
+            offsets=Vector2d(1.0,13.0);
+            set=AffineSet(dom, (offsets.x+0.5*a[0],offsets.y+0.25*a[1]));
+            expected_set=Polytope2d(4, -0.5,-0.25, +0.5,-0.25, +0.5,+0.25,-0.5,+0.25) + offsets;
+            figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
+        }
+
+        {
+            // Test draw of nondegenerate two-dimensional constrained image set
+            a=Affine<Interval>::variables(2);
+            dom=Vector<Interval>::unit_box(2);
+            offsets=Vector2d(4.0,13.0);
+            set=AffineSet(dom, (offsets.x+0.5*a[0],offsets.y+0.25*a[1]),(a[0]+a[1]<=0.5));
+            expected_set=Polytope2d(5, -0.5,-0.25, +0.5,-0.25, +0.5,-0.125, -0.25,+0.25,-0.5,+0.25) + offsets;
+            figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
+        }
+
+        {
+            // Test draw of two-dimensional image set with errors
+            a=Affine<Interval>::variables(2);
+            dom=Vector<Interval>::unit_box(2);
+            offsets=Vector2d(7.0,13.0);
+            Interval e=Interval(-1.0,+1.0);
+
+            set=AffineSet(dom, (offsets.x+0.25*a[0]+0.25*a[1]+0.5*e,offsets.y+0.5*a[0]-0.5*a[1]));
+            expected_set=Polytope2d(6, -1.0,0.0, -0.5,-1.0, +0.5,-1.0, +1.0,0.0, +0.5,+1.0, -0.5,+1.0) + offsets;
+            figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
+        }
+
+        {
+            // Test draw of nondegenerate one-dimensional image set
+            a=Affine<Interval>::variables(1);
             dom=Vector<Interval>::unit_box(1);
             offsets=Vector2d(1.0,1.0);
-            set=AffineSet(dom, (offsets.x+0.5*a[0],offsets.y+0.25*a[0]),(0*a[0]-1),(a[0]-0.75));
+            set=AffineSet(dom, (offsets.x+0.5*a[0],offsets.y+0.25*a[0]),(0*a[0]<=1.0,a[0]==0.75));
             expected_set=Polytope2d(1, 0.375, 0.1875) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of one-dimensional image set
-            a=Affine<Float>::variables(1);
-            dom=Vector<Interval>::unit_box(1);
             offsets=Vector2d(4.0,1.0);
             set=AffineSet(dom, (offsets.x+0.5*a[0],offsets.y+0.25*a[0]));
             expected_set=Polytope2d(2, -0.5,-0.25, 0.5,0.25) + offsets;
@@ -305,20 +336,18 @@ class TestAffineSet
 
         {
             // Test draw of one-dimensional constraint set
-            a=Affine<Float>::variables(2);
+            a=Affine<Interval>::variables(2);
             dom=Vector<Interval>::unit_box(2);
             offsets=Vector2d(7.0,1.0);
-            set=AffineSet(dom, (offsets.x+a[0],offsets.y+a[1]),(0*a[0]-1.0),(a[0]+a[1]-0.5));
+            set=AffineSet(dom, (offsets.x+a[0],offsets.y+a[1]),(0*a[0]<=1.0,a[0]+a[1]==0.5));
             expected_set=Polytope2d(2, -0.5,+1.0, +1.0,-0.5) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of one-dimensional constraint set with one proper constraint on boundary
-            a=Affine<Float>::variables(2);
-            dom=Vector<Interval>::unit_box(2);
             offsets=Vector2d(10.0,1.0);
-            set=AffineSet(dom, (offsets.x+a[0],offsets.y+a[1]),(-a[0]+1.0, a[1]-0.5));
+            set=AffineSet(dom, (offsets.x+a[0],offsets.y+a[1]),(1.0<=a[0], a[1]<=0.5));
             expected_set=Polytope2d(2, +1.0,-1.0, +1.0,+0.5) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -326,7 +355,15 @@ class TestAffineSet
         {
             // Test draw of set with constraint a<=0 and a>=0
             offsets=Vector2d(13.0,1.0);
-            set=AffineSet(dom, (ox+a[0],oy+a[1]),(a[0]+0.5*a[1]-0.75,-a[0]-0.5*a[1]+0.75));
+            set=AffineSet(dom, (ox+a[0],oy+a[1]),(a[0]+0.5*a[1]<=0.75,0.75<=a[0]+0.5*a[1]));
+            expected_set=Polytope2d(2, +0.25,+1.0, +1.0,-0.5) + offsets;
+            figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
+        }
+
+        {
+            // Test draw of set with constraint 0<=a<=0
+            offsets=Vector2d(13.0,1.0);
+            set=AffineSet(dom, (ox+a[0],oy+a[1]),(0.75<=a[0]+0.5*a[1]<=0.75));
             expected_set=Polytope2d(2, +0.25,+1.0, +1.0,-0.5) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -334,7 +371,7 @@ class TestAffineSet
         {
             // Test draw of set with degenerate constraints at corner of box
             offsets=Vector2d(1.0,4.0);
-            set=AffineSet(dom, (ox+a[0],oy+a[1]),(a[0]+2*a[1]-3,1.5*(a[0]+a[1])-3,2*a[0]+a[1]-3));
+            set=AffineSet(dom, (ox+a[0],oy+a[1]),(a[0]+2*a[1]<=3,1.5*(a[0]+a[1])<=3,2*a[0]+a[1]<=3));
             expected_set=Polytope2d(4, -1.0,-1.0, +1.0,-1.0, +1.0,+1.0, -1.0,+1.0) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -342,7 +379,7 @@ class TestAffineSet
         {
             // Test draw of set with degenerate constraints near corner of box
             offsets=Vector2d(4.0,4.0);
-            set=AffineSet(dom, (ox+a[0],oy+a[1]),(a[0]+2*a[1]-2,1.5*(a[0]+a[1])-2,2*a[0]+a[1]-2));
+            set=AffineSet(dom, (ox+a[0],oy+a[1]),(a[0]+2*a[1]<=2,1.5*(a[0]+a[1])<=2,2*a[0]+a[1]<=2));
             expected_set=Polytope2d(6, -1.0,-1.0, +1.0,-1.0, +1.0,0.0, +0.667,+0.667, 0.0,+1.0, -1.0,+1.0) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -350,27 +387,28 @@ class TestAffineSet
         {
             // Test draw of set repeated constraints
             offsets=Vector2d(7.0,4.0);
-            set=AffineSet(dom, (ox+a[0],oy+a[1]),(a[0]+2*a[1]-2,a[0]*(1/3.0)+a[1]*(2/3.0)-(2/3.0)));
+            set=AffineSet(dom, (ox+a[0],oy+a[1]),(a[0]+2*a[1]<=2,a[0]*(1/3.0)+a[1]*(2/3.0)<=(2/3.0)));
             expected_set=Polytope2d(5, -1.0,-1.0, +1.0,-1.0, +1.0,0.5, 0.0,+1.0, -1.0,+1.0) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
 
         {
             // Test draw of projection of three-dimensional box with single equality constraint
-            a=Affine<Float>::variables(3);
+            a=Affine<Interval>::variables(3);
             dom=Vector<Interval>::unit_box(3);
             offsets=Vector2d(10.0,4.0);
-            set=AffineSet(dom, (ox+a[0],oy+a[1]),(0*a[0]-1),(a[0]+2*a[1]+a[2]-1.5));
+            set=AffineSet(dom, (ox+a[0],oy+a[1]),(a[0]+2*a[1]+a[2]==1.5));
             expected_set=Polytope2d(5, +1.0,-0.25, +1.0,+0.75, +0.5,+1.0, -1.0,+1.0, -1.0,+0.75) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
         {
             // Test draw of two-dimensional set with nondegenerate inequality and equality constraints
             offsets=Vector2d(1.0,7.0);
-            set=AffineSet(dom, (ox+0.3*a[0]+0.20*a[1]+0.05*a[2],oy-0.10*a[0]+0.1*a[1]+0.05*a[2]),(a[1]-a[2]+0.25),(a[0]+a[1]+a[2]-0.5));
+            set=AffineSet(dom, (ox+0.3*a[0]+0.20*a[1]+0.05*a[2],oy-0.10*a[0]+0.1*a[1]+0.05*a[2]),(a[1]-a[2]<=-0.25,a[0]+a[1]+a[2]==0.5));
             expected_set=Polytope2d(1, +0.0,0.0) + offsets; // Unknown
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
+
         figure.write("test_affine_set-draw");
     }
 

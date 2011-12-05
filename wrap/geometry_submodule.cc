@@ -293,8 +293,8 @@ void export_affine_set()
         affine_set_class("AffineSet",init<AffineSet>());
     affine_set_class.def(init<Vector<Interval>, Matrix<Float>, Vector<Float> >());
     affine_set_class.def(init<Matrix<Float>, Vector<Float> >());
-    affine_set_class.def("new_inequality_constraint", (void(AffineSet::*)(const Vector<Float>&,const Float&)) &AffineSet::new_inequality_constraint);
-    affine_set_class.def("new_equality_constraint", (void(AffineSet::*)(const Vector<Float>&,const Float&)) &AffineSet::new_equality_constraint);
+    affine_set_class.def("new_parameter_constraint", (void(AffineSet::*)(const NonlinearConstraint<Affine<Interval>,Float>&)) &AffineSet::new_parameter_constraint);
+    affine_set_class.def("new_constraint", (void(AffineSet::*)(const NonlinearConstraint<AffineModel<Interval>,Float>&)) &AffineSet::new_constraint);
     affine_set_class.def("dimension", &AffineSet::dimension);
     affine_set_class.def("bounded", &AffineSet::bounded);
     affine_set_class.def("empty", &AffineSet::empty);

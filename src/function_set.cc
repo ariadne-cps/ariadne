@@ -503,6 +503,7 @@ Box RealConstrainedImageSet::bounding_box() const
     return this->_function(over_approximation(this->_domain));
 }
 
+
 AffineSet
 RealConstrainedImageSet::affine_approximation() const
 {
@@ -520,18 +521,9 @@ RealConstrainedImageSet::affine_approximation() const
     for(List<RealNonlinearConstraint>::const_iterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
-        RealScalarFunction function=iter->function();
-        Interval bounds=iter->bounds();
-        a=function.gradient(m);
-        b=function(m)-dot(a,m);
-        l=bounds.lower();
-        u=bounds.upper();
-        if(l==u) {
-            result.new_equality_constraint(a,u-b);
-        } else {
-            if(u< inf) { result.new_inequality_constraint( a,u-b); }
-            if(l>-inf) { result.new_inequality_constraint(-a,b-l); }
-        }
+        AffineModel<Interval> a=affine_model(D,iter->function());
+        Interval b=iter->bounds();
+        result.new_constraint(b.lower()<=a<=b.upper());
     }
 
     return result;
@@ -1388,6 +1380,7 @@ RealConstrainedImageSet::write(std::ostream& os) const
 
 #include "procedure.h"
 #include <include/container.h>
+#include <include/vector.h>
 
 namespace Ariadne {
 
@@ -1429,19 +1422,28 @@ ConstrainedImageSet::bounding_box() const
     return this->_function(this->_reduced_domain);
 }
 
+
 AffineSet
 ConstrainedImageSet::affine_over_approximation() const
 {
     typedef List<IntervalNonlinearConstraint>::const_iterator const_iterator;
 
+    Vector<Interval> domain = this->domain();
+    Vector<IntervalAffineModel> space_models=affine_models(domain,this->function());
+    List<IntervalAffineConstraintModel> constraint_models;
+    constraint_models.reserve(this->number_of_constraints());
+    for(uint i=0; i!=this->number_of_constraints(); ++i) {
+        const IntervalNonlinearConstraint& constraint=this->constraint(i);
+        constraint_models.append(IntervalAffineConstraintModel(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
+    }
+
+    return AffineSet(domain,space_models,constraint_models);
+
+/*
     const uint nx=this->dimension();
     //const uint nnc=this->_negative_constraints.size();
     //const uint nzc=this->_zero_constraints.size();
     const uint np=this->number_of_parameters();
-
-    AffineSweeper affine_sweeper;
-
-    VectorTaylorFunction function(this->domain(),this->function(),affine_sweeper);
 
     // Compute the number of values with a nonzero error
     uint nerr=0;
@@ -1473,48 +1475,33 @@ ConstrainedImageSet::affine_over_approximation() const
         ScalarTaylorFunction constraint_function(this->_reduced_domain,iter->function(),affine_sweeper);
         b=sub_up(constraint_function.model().error(),constraint_function.model().value());
         for(uint j=0; j!=np; ++j) { a[j]=constraint_function.model().gradient(j); }
-        result.new_inequality_constraint(a,b);
+        result.new_parameter_constraint(-inf,a,b);
     }
 
     ARIADNE_NOT_IMPLEMENTED;
 
     ARIADNE_LOG(2,"set="<<*this<<"\nset.affine_over_approximation()="<<result<<"\n");
     return result;
+*/
 }
 
 AffineSet ConstrainedImageSet::affine_approximation() const
 {
-    static const Float inf=std::numeric_limits<double>::infinity();
+    typedef List<IntervalNonlinearConstraint>::const_iterator const_iterator;
 
-    Vector<Float> m=midpoint(this->domain());
-
-    const Vector<Interval> D=this->domain();
-    Matrix<Float> G=this->_function.jacobian(m);
-    Vector<Float> h=this->_function.evaluate(m)-G*m;
-    AffineSet result(D,G,h);
-
-
-    Vector<Float> a(this->number_of_parameters());
-    Float b,l,u;
-    List<IntervalNonlinearConstraint> const& constraints=this->constraints();
-    for(List<IntervalNonlinearConstraint>::const_iterator iter=constraints.begin();
-        iter!=constraints.end(); ++iter)
-    {
-        IntervalScalarFunction function=iter->function();
-        Interval bounds=iter->bounds();
-        a=function.gradient(m);
-        b=function(m)-dot(a,m);
-        l=bounds.lower();
-        u=bounds.upper();
-        if(l==u) {
-            result.new_equality_constraint(a,u-b);
-        } else {
-            if(u< inf) { result.new_inequality_constraint( a,u-b); }
-            if(l>-inf) { result.new_inequality_constraint(-a,b-l); }
-        }
+    Vector<Interval> domain = this->domain();
+    Vector<IntervalAffineModel> space_models=affine_models(domain,this->function());
+    List<IntervalAffineConstraintModel> constraint_models;
+    constraint_models.reserve(this->number_of_constraints());
+    for(uint i=0; i!=this->number_of_constraints(); ++i) {
+        const IntervalNonlinearConstraint& constraint=this->constraint(i);
+        constraint_models.append(IntervalAffineConstraintModel(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
     }
 
-    return result;
+    for(uint i=0; i!=space_models.size(); ++i) { space_models[i].set_error(0.0); }
+    for(uint i=0; i!=constraint_models.size(); ++i) { constraint_models[i].function().set_error(0.0); }
+
+    return AffineSet(domain,space_models,constraint_models);
 }
 
 

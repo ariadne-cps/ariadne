@@ -49,7 +49,7 @@ class Box;
 class Zonotope;
 template<class BS> class ListSet;
 
-class AffineModel;
+template<class X> class Affine;
 
 class Figure;
 
@@ -202,8 +202,8 @@ class Zonotope
 
     //@{
     //! \name Function operations.
-    /*! \brief Compute the image of \a z under a function given by the concrete model \a am. */
-    friend Zonotope apply(const AffineModel& am, const Zonotope& z);
+    /*! \brief Compute the image of \a z under a function given by the affine form \a af. */
+    friend Zonotope apply(const Affine<Interval>& af, const Zonotope& z);
     //@}
 
     //@{
@@ -238,7 +238,7 @@ Zonotope orthogonal_over_approximation(const Zonotope&);
 Zonotope nonsingular_over_approximation(const Zonotope&);
 Zonotope cascade_over_approximation(const Zonotope& z, uint b);
 
-Zonotope apply(const AffineModel& am, const Zonotope& z);
+Zonotope apply(const Affine<Interval>& af, const Zonotope& z);
 
 std::ostream& operator<<(std::ostream& os, const Zonotope& z);
 std::istream& operator>>(std::istream& is, Zonotope& z);

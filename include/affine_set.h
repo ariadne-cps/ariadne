@@ -37,10 +37,13 @@
 #include "graphics_interface.h"
 #include "container.h"
 #include "affine.h"
+#include "affine_model.h"
+#include "constraint.h"
 #include "logging.h"
 
 namespace Ariadne {
 
+class Float;
 class Interval;
 template<class X> class Vector;
 template<class X> class LinearProgram;
@@ -53,6 +56,26 @@ class Figure;
 class CanvasInterface;
 class Point2d;
 
+typedef NonlinearConstraint<AffineModel<Interval>,Float> IntervalAffineConstraintModel;
+typedef NonlinearConstraint<Affine<Interval>,Float> IntervalAffineConstraint;
+typedef NonlinearConstraint<Affine<Real>,Real> RealAffineConstraint;
+typedef Affine<Interval> IntervalAffineFunction;
+
+RealAffineConstraint operator<=(const Real& l, const RealAffine& am);
+RealAffineConstraint operator<=(const RealAffine& am, const Real& u);
+RealAffineConstraint operator<=(const RealAffine& am, const Real& u);
+RealAffineConstraint operator==(const RealAffine& am, const Real& b);
+
+IntervalAffineConstraint operator<=(const Float& l, const IntervalAffineFunction& am);
+IntervalAffineConstraint operator<=(const IntervalAffineFunction& am, const Float& u);
+IntervalAffineConstraint operator<=(const IntervalAffineConstraint& am, const Float& u);
+IntervalAffineConstraint operator==(const IntervalAffineFunction& am, const Float& b);
+
+IntervalAffineConstraintModel operator<=(const Float& l, const IntervalAffineModel& am);
+IntervalAffineConstraintModel operator<=(const IntervalAffineModel& am, const Float& u);
+IntervalAffineConstraintModel operator<=(const IntervalAffineConstraintModel& am, const Float& u);
+IntervalAffineConstraintModel operator==(const IntervalAffineModel& am, const Float& b);
+
 //! \brief A constrained image set defined by affine functions.
 //!  Defines a set of the form \f$S=\{ f(x) \mid x\in D \mid g(x)\leq 0 \wedge h(x)=0 \}\f$
 //!  where \f$f\f$, \f$g\f$ and \f$h\f$ are vector-valued affine functions on \f$\R^n\f$ and \f$D\f$ is a box in \f$\R^n\f$.
@@ -62,41 +85,33 @@ class Point2d;
 class AffineSet
     : public DrawableInterface, public Loggable
 {
-    Vector<Interval> _domain;
-    List< Affine<Float> > _function;
-    List< Affine<Float> > _constraints; // Negative constraints
-    List< Affine<Float> > _equations; // Equal to zero constraints
+    IntervalVector _domain;
+    Vector<IntervalAffineModel> _space_models;
+    List<IntervalAffineConstraintModel> _constraint_models;
   public:
     //!\brief The set \f$\{ Gy+c \mid y\in D\}\f$.
     AffineSet(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& c);
     //!\brief The set \f$\{ Gy+c \mid ||y||_\infty\leq 1\}\f$. \deprecated
     AffineSet(const Matrix<Float>& G, const Vector<Float>& c);
-    //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \mid g(s)\leq 0 \wedge h(s)=0\}\f$.
-    AffineSet(const IntervalVector& D, const List< Affine<Float> >& f, const List< Affine<Float> >& g, const List< Affine<Float> >& h)
-        : _domain(D), _function(f), _constraints(g), _equations(h) { }
-    AffineSet(const IntervalVector& D, const List< Affine<Float> >& f, const List< Affine<Float> >& g)
-        : _domain(D), _function(f), _constraints(g), _equations() { }
-    AffineSet(const IntervalVector& D, const List< Affine<Float> >& f)
-        : _domain(D), _function(f), _constraints(), _equations() { }
+    //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \}\f$.
+    AffineSet(const IntervalVector& D, const Vector<IntervalAffine>& f);
+    //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \mid c(s) \}\f$.
+    AffineSet(const IntervalVector& D, const Vector<IntervalAffine>& f, const List<IntervalAffineConstraint>& c);
+    //!\brief The set \f$\{ x_i=f_i(s) \mid s\in [-1,+1]^n \mid c(s) \}\f$.
+    explicit AffineSet(const Vector<IntervalAffineModel>& f, const List<IntervalAffineConstraintModel>& c);
+    explicit AffineSet(const Vector<IntervalAffineModel>& f);
 
-    bool operator==(const AffineSet& other) const;
+    AffineSet(const IntervalVector& D, const Vector<IntervalAffineModel>& f, const List<IntervalAffineConstraintModel>& c);
 
     AffineSet* clone() const;
-    //!\brief The constraint \f$a\cdot y\leq b\f$.
-    void new_inequality_constraint(const Vector<Float>& a, const Float& b);
-    //!\brief The constraint \f$a\cdot y = b\f$.
-    void new_equality_constraint(const Vector<Float>& a, const Float& b);
-
-    //!\brief The constraint \f$a(x) \leq 0\f$.
-    void new_inequality_constraint(const Affine<Float>& a);
-    //!\brief The constraint \f$a(x) = 0\f$.
-    void new_equality_constraint(const Affine<Float>& a);
-
+    void new_parameter_constraint(const RealAffineConstraint& c);
+    void new_parameter_constraint(const IntervalAffineConstraint& c);
+    void new_constraint(const IntervalAffineConstraintModel& c);
 
     uint dimension() const;
     uint number_of_parameters() const;
     uint number_of_constraints() const;
-    Vector<Interval> domain() const;
+    IntervalVector domain() const;
 
     tribool bounded() const;
     Box bounding_box() const;

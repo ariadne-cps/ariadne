@@ -20,6 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
 #include "config.h"
 
 #include "numeric.h"
@@ -28,6 +29,7 @@
 #include "linear_programming.h"
 #include "function.h"
 #include "affine.h"
+#include "affine_model.h"
 
 #include "box.h"
 #include "grid_set.h"
@@ -61,7 +63,71 @@ struct LinearProgram {
 };
 
 
+IntervalAffineConstraint operator<=(const Float& l, const IntervalAffine& a) { return IntervalAffineConstraint(l,a,+inf); }
+IntervalAffineConstraint operator<=(const IntervalAffine& a, const Float& u) { return IntervalAffineConstraint(-inf,a,u); }
+IntervalAffineConstraint operator==(const IntervalAffine& a, const Float& b) { return IntervalAffineConstraint(b,a,b); }
 
+IntervalAffineConstraint operator<=(const IntervalAffineConstraint& c, const Float& u) {
+    ARIADNE_ASSERT(c.upper_bound()==inf);
+    return IntervalAffineConstraint(c.lower_bound(),c.function(),u);
+}
+
+IntervalAffineConstraintModel operator<=(const Float& l, const IntervalAffineModel& a) { return IntervalAffineConstraintModel(l,a,+inf); }
+IntervalAffineConstraintModel operator<=(const IntervalAffineModel& a, const Float& u) { return IntervalAffineConstraintModel(-inf,a,u); }
+IntervalAffineConstraintModel operator==(const IntervalAffineModel& a, const Float& b) { return IntervalAffineConstraintModel(b,a,b); }
+
+IntervalAffineConstraintModel operator<=(const IntervalAffineConstraintModel& c, const Float& u) {
+    ARIADNE_ASSERT(c.upper_bound()==inf);
+    return IntervalAffineConstraintModel(c.lower_bound(),c.function(),u);
+}
+
+IntervalAffineModel affine_model(const IntervalAffine& a);
+
+AffineSet::AffineSet(const Vector<Interval>& d,
+                     const Vector<IntervalAffine>& f)
+    : _domain(d), _space_models(f.size(),IntervalAffineModel(d.size()))
+{
+    if(d==Box::unit_box(d.size())) {
+        for(uint i=0; i!=f.size(); ++i) {
+            _space_models[i] = affine_model(f[i]);
+        }
+    }
+}
+
+AffineSet::AffineSet(const Vector<Interval>& d,
+                     const Vector<IntervalAffine>& f,
+                     const List<IntervalAffineConstraint>& c)
+    : _domain(d), _space_models(f.size(),IntervalAffineModel(d.size())), _constraint_models()
+{
+    if(d==Box::unit_box(d.size())) {
+        for(uint i=0; i!=f.size(); ++i) {
+            _space_models[i] = affine_model(f[i]);
+        }
+        for(uint i=0; i!=c.size(); ++i) {
+            _constraint_models.append(IntervalAffineConstraintModel(c[i].lower_bound(),affine_model(c[i].function()),c[i].upper_bound()));
+        }
+    } else {
+        ARIADNE_NOT_IMPLEMENTED;
+    }
+}
+
+AffineSet::AffineSet(const Vector<Interval>& d,
+                     const Vector<IntervalAffineModel>& f,
+                     const List<IntervalAffineConstraintModel>& c)
+    : _domain(d), _space_models(f), _constraint_models(c)
+{
+}
+
+AffineSet::AffineSet(const Vector<IntervalAffineModel>& f,
+                     const List<IntervalAffineConstraintModel>& c)
+    : _domain(Box::unit_box(f[0].argument_size())), _space_models(f), _constraint_models(c)
+{
+}
+
+AffineSet::AffineSet(const Vector<IntervalAffineModel>& f)
+    : _domain(Box::unit_box(f[0].argument_size())), _space_models(f)
+{
+}
 
 AffineSet::AffineSet(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& h)
 {
@@ -77,66 +143,36 @@ void AffineSet::construct(const Vector<Interval>& D, const Matrix<Float>& G, con
 {
     ARIADNE_ASSERT_MSG(G.row_size()==h.size() && G.row_size()>0,"G="<<G<<", h="<<h);
     this->_domain=D;
+    this->_space_models=Vector<IntervalAffineModel>(G.row_size(),IntervalAffineModel(G.column_size()));
     for(uint i=0; i!=G.row_size(); ++i) {
-        Affine<Float> x(G.column_size());
+        AffineModel<Interval> x(G.column_size());
         x=h[i];
         for(uint j=0; j!=G.column_size(); ++j) {
             x[j]=G[i][j];
         }
-        this->_function.append(x);
+        this->_space_models[i]=x;
     }
 }
 
 void
-AffineSet::new_inequality_constraint(const Vector<Float>& a, const Float& b)
+AffineSet::new_constraint(const IntervalAffineConstraintModel& c)
 {
-    // Re-write the constraint ax<=b as b-ax>=0
-    ARIADNE_ASSERT(this->_function.size()>0);
-    ARIADNE_ASSERT_MSG(a.size()==this->_function[0].argument_size(),"a="<<a<<" f="<<this->_function);
-    Affine<Float> c(a.size());
-    c=-b;
-    for(uint j=0; j!=a.size(); ++j) {
-        c[j]=a[j];
-    }
-    _constraints.append(c);
+    ARIADNE_ASSERT(this->_space_models.size()>0);
+    ARIADNE_ASSERT_MSG(this->number_of_parameters()==c.argument_size(),"c["<<c.argument_size()<<"]="<<c<<" f["<<this->number_of_parameters()<<"]="<<this->_space_models);
+    _constraint_models.append(c);
 }
 
 void
-AffineSet::new_equality_constraint(const Vector<Float>& a, const Float& b)
+AffineSet::new_parameter_constraint(const IntervalAffineConstraint& c)
 {
-    // Re-write the constraint ax<=b as b-ax>=0
-    ARIADNE_ASSERT(this->_function.size()>0);
-    ARIADNE_ASSERT_MSG(a.size()==this->_function[0].argument_size(),"a="<<a<<" f="<<this->_function);
-    Affine<Float> c(a.size());
-    c=-b;
-    for(uint j=0; j!=a.size(); ++j) {
-        c[j]=a[j];
-    }
-    _equations.append(c);
+    ARIADNE_ASSERT_MSG(this->_space_models.size()>0,"f="<<this->_space_models);
+    ARIADNE_ASSERT_MSG(this->number_of_parameters()==c.argument_size(),"c="<<c<<" f="<<this->_space_models);
+    this->new_constraint(IntervalAffineConstraintModel(c.lower_bound(),affine_model(c.function()),c.upper_bound()));
 }
 
 
-void
-AffineSet::new_inequality_constraint(const Affine<Float>& a)
-{
-    ARIADNE_ASSERT_MSG(a.argument_size()==this->number_of_parameters(),"a="<<a<<" f="<<this->_function);
-    this->_constraints.append(a);
-}
-
-void
-AffineSet::new_equality_constraint(const Affine<Float>& a)
-{
-    ARIADNE_ASSERT_MSG(a.argument_size()==this->number_of_parameters(),"a="<<a<<" f="<<this->_function);
-    this->_equations.append(a);
-}
 
 
-bool AffineSet::operator==(const AffineSet& other) const {
-    return this->_domain==other._domain
-        && this->_function==other._function
-        && this->_constraints==other._constraints
-        && this->_equations==other._equations;
-}
 
 AffineSet*
 AffineSet::clone() const
@@ -148,20 +184,20 @@ AffineSet::clone() const
 uint
 AffineSet::dimension() const
 {
-    return this->_function.size();
+    return this->_space_models.size();
 }
 
 uint
 AffineSet::number_of_parameters() const
 {
-    ARIADNE_ASSERT(this->_function.size()>0);
-    return this->_function[0].argument_size();
+    ARIADNE_ASSERT(this->_space_models.size()>0);
+    return this->_space_models[0].argument_size();
 }
 
 uint
 AffineSet::number_of_constraints() const
 {
-    return this->_constraints.size();
+    return this->_constraint_models.size();
 }
 
 Vector<Interval>
@@ -178,11 +214,14 @@ Box AffineSet::bounding_box() const {
     Box result(this->dimension());
     Vector<Interval> domain=this->domain();
     for(uint i=0; i!=this->dimension(); ++i) {
-        //result[i]=evaluate(this->_function[i],domain);
-        result[i]=this->_function[i].evaluate(domain);
+        //result[i]=evaluate(this->_space_models[i],domain);
+        result[i]=this->_space_models[i].evaluate(domain);
     }
     return result;
 }
+
+
+
 
 
 tribool AffineSet::separated(const Box& bx) const {
@@ -194,6 +233,7 @@ tribool AffineSet::separated(const Box& bx) const {
         lp.l[i]=wbx[i].lower();
         lp.u[i]=wbx[i].upper();
     }
+    //std::cerr<<"\ns="<<*this<<"\nbx="<<bx<<"\n\nA="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n\n";
     tribool feasible=indeterminate;
     try {
         InteriorPointSolver optimiser;
@@ -228,7 +268,7 @@ void AffineSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearPr
     }
 
     // Find concrete cell box
-    const Box& bx=cell.box();
+    const Box bx=cell.box();
 
     // Make part of linear program dependent on cell
     for(uint i=0; i!=cell.dimension(); ++i) {
@@ -282,11 +322,10 @@ AffineSet::construct_linear_program(LinearProgram<Float>& lp) const
     // Spacial dimension nx; parameter dimension ne; number of constraints nc
     const uint nx=this->dimension();
     const uint np=this->number_of_parameters();
-    const uint nc=this->_constraints.size();
-    const uint ne=this->_equations.size();
+    const uint nc=this->_constraint_models.size();
 
-    lp.A.resize(nx+nc+ne,nx+np+nc);
-    lp.b.resize(nx+nc+ne);
+    lp.A.resize(nx+nc,nx+np+nc);
+    lp.b.resize(nx+nc);
     lp.c.resize(nx+np+nc);
     lp.l.resize(nx+np+nc);
     lp.u.resize(nx+np+nc);
@@ -299,46 +338,36 @@ AffineSet::construct_linear_program(LinearProgram<Float>& lp) const
         }
         lp.A[i][i] = -1;
         for(uint j=0; j!=np; ++j) {
-            lp.A[i][nx+j] = +this->_function[i].gradient(j);
+            lp.A[i][nx+j] = +this->_space_models[i].gradient(j);
         }
         for(uint j=0; j!=nc; ++j) {
             lp.A[i][nx+np+j]=0;
         }
-        lp.b[i] = -this->_function[i].value();
+        lp.b[i] = -this->_space_models[i].value();
     }
     for(uint i=0; i!=nc; ++i) {
         for(uint j=0; j!=nx; ++j) {
             lp.A[nx+i][j]=0;
         }
         for(uint j=0; j!=np; ++j) {
-            lp.A[nx+i][nx+j] = +this->_constraints[i].gradient(j);
+            lp.A[nx+i][nx+j] = +this->_constraint_models[i].function().gradient(j);
         }
         for(uint j=0; j!=nc; ++j) {
             lp.A[nx+i][nx+np+j]=0;
         }
         lp.A[nx+i][nx+np+i] = +1;
-        lp.b[nx+i] = -this->_constraints[i].value();
-    }
-    for(uint i=0; i!=ne; ++i) {
-        for(uint j=0; j!=nx; ++j) {
-            lp.A[nx+nc+i][j]=0;
-        }
-        for(uint j=0; j!=np; ++j) {
-            lp.A[nx+nc+i][nx+j] = +this->_equations[i].gradient(j);
-        }
-        for(uint j=0; j!=ne; ++j) {
-            lp.A[nx+nc+i][nx+np+j]=0;
-        }
-        lp.b[nx+nc+i] = -this->_equations[i].value();
+        lp.b[nx+i] = -this->_constraint_models[i].function().value();
     }
 
     for(uint i=0; i!=np; ++i) {
-        lp.l[nx+i]=this->_domain[i].lower();
-        lp.u[nx+i]=this->_domain[i].upper();
+        //lp.l[nx+i]=this->_domain[i].lower();
+        //lp.u[nx+i]=this->_domain[i].upper();
+        lp.l[nx+i]=-1.0;
+        lp.u[nx+i]=+1.0;
     }
     for(uint i=0; i!=nc; ++i) {
-        lp.l[nx+np+i]=0;
-        lp.u[nx+np+i]=inf;
+        lp.l[nx+np+i]=-this->_constraint_models[i].upper_bound();
+        lp.u[nx+np+i]=-this->_constraint_models[i].lower_bound();
     }
 
     // Make part of linear program dependent on cell be +/-infinity
@@ -347,6 +376,7 @@ AffineSet::construct_linear_program(LinearProgram<Float>& lp) const
         lp.u[i]=+inf;
     }
 
+    ARIADNE_LOG(7,"set="<<*this<<", A="<<lp.A<<", b="<<lp.b<<", l="<<lp.l<<", u="<<lp.u<<"\n");
 }
 
 
@@ -354,7 +384,6 @@ void
 AffineSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
-    ARIADNE_ASSERT(this->_equations.empty());
 
     GridCell bounding_cell=GridCell::smallest_enclosing_primary_cell(this->bounding_box(),paving.grid());
 
@@ -427,7 +456,6 @@ void AffineSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, L
 void
 AffineSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const {
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
-    ARIADNE_ASSERT(this->_equations.empty());
 
     SimplexSolver<Float> lpsolver;
 
@@ -444,7 +472,7 @@ AffineSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, int dep
     // Set up linear program Ax=b; l<=x<=u.
     // Order variables as e,x,s
 
-    // Spacial dimension nx; parameter dimension ne; number of constraints nc
+    // Spacial dimension nx; parameter dimension np; number of constraints nc
     const uint nx=this->dimension();
     const uint ne=this->number_of_parameters();
     const uint nc=this->number_of_constraints();
@@ -463,7 +491,7 @@ AffineSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, int dep
     // Need to set all values since matrix is uninitialised
     for(uint i=0; i!=nx; ++i) {
         for(uint j=0; j!=ne; ++j) {
-            lp.A[i][j]=-this->_function[i].gradient(j);
+            lp.A[i][j]=-this->_space_models[i].gradient(j);
         }
         for(uint j=0; j!=nx; ++j) {
             lp.A[i][ne+j]=0;
@@ -472,11 +500,11 @@ AffineSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, int dep
         for(uint j=0; j!=nc; ++j) {
             lp.A[i][ne+nx+j]=0;
         }
-        lp.b[i]=this->_function[i].value();
+        lp.b[i]=this->_space_models[i].value();
     }
     for(uint i=0; i!=nc; ++i) {
         for(uint j=0; j!=ne; ++j) {
-            lp.A[nx+i][j]=this->_constraints[i].gradient(j);
+            lp.A[nx+i][j]=this->_constraint_models[i].function().gradient(j);
         }
         for(uint j=0; j!=nx; ++j) {
             lp.A[nx+i][ne+j]=0;
@@ -485,7 +513,7 @@ AffineSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, int dep
             lp.A[nx+i][ne+nx+j]=0;
         }
         lp.A[nx+i][nx+ne+i]=+1;
-        lp.b[nx+i]=-this->_constraints[i].value();
+        lp.b[nx+i]=-this->_constraint_models[i].function().value();
     }
     for(uint i=0; i!=ne; ++i) {
         lp.l[i]=-1;
@@ -539,10 +567,13 @@ AffineSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, int dep
     _adjoin_outer_approximation_to(paving,lp,bounding_cell,depth);
 }
 
+
+
+
 List<Point2d>
 AffineSet::boundary(uint xind, uint yind) const
 {
-    //ARIADNE_LOG(5,"AffineSet::boundary(xi,yi): self="<<*this<<"\n");
+    ARIADNE_LOG(3,"AffineSet::boundary("<<xind<<","<<yind<<"): self="<<*this<<"\n");
 
     SimplexSolver<Float> lpsolver;
 
@@ -550,61 +581,69 @@ AffineSet::boundary(uint xind, uint yind) const
     static const double ERROR_TOLERANCE = std::numeric_limits<float>::epsilon();
     static const Float inf = Ariadne::inf;
 
-    Box const& domain=this->_domain;
-    List< Affine<Float> > const& function=this->_function;
-    List< Affine<Float> > const& negative_constraints=this->_constraints;
-    List< Affine<Float> > const& zero_constraints=this->_equations;
-
-    const size_t nx=domain.size();
-    const size_t nc=negative_constraints.size();
-    const size_t ne=zero_constraints.size();
-
-    Affine<Float> xa=function[xind];
-    Affine<Float> ya=function[yind];
-
-    List<Point2d> vertices;
+    const size_t nx=_domain.size();
+    const size_t ne=2u;
+    const size_t nc=_constraint_models.size();
+    const size_t np=nx+ne+nc;
 
     // Set up matrix of function values
-    Matrix<Float> G=Matrix<Float>::zero(2,nx+nc);
+    AffineModel<Interval> const& xa=this->_space_models[xind];
+    AffineModel<Interval> const& ya=this->_space_models[yind];
+
+    Matrix<Float> G=Matrix<Float>::zero(2,np);
     for(uint j=0; j!=nx; ++j) { G[0][j]=numeric_cast<float>(xa.gradient(j)); G[1][j]=numeric_cast<float>(ya.gradient(j)); }
+    G[0][nx+0]=xa.error(); G[1][nx+1]=ya.error();
     Vector<Float> h(2);
     h[0]=numeric_cast<float>(xa.value()); h[1]=numeric_cast<float>(ya.value());
     ARIADNE_LOG(5,"G="<<G<<" h="<<h<<"\n");
 
-    // Set up linear programming problem over domain variables (x,w)
-    // We have constraints l<=(x,w)<=u; Ac*x-w=0; Ae*s=be
+    // Set up linear programming problem Ax=b; l<=x<=u
+    // Since the parameter domain is given by cl<=Ay+b+/-e<=cu, -1<=y<=+1, introduce slack variables z such that z-Ay=b, with cl-e<=z<=cu+e
 
-    Matrix<Float> A(nc+ne,nx+nc);
-    Vector<Float> b(nc+ne);
-    Vector<Float> l(nx+nc);
-    Vector<Float> u(nx+nc);
-    for(uint i=0; i!=nc; ++i) {
-        for(uint j=0; j!=nx; ++j) {
-            A[i][j]=numeric_cast<float>(negative_constraints[i].gradient(j));
-        }
-        A[i][i+nx]=1.0;
-        b[i]=numeric_cast<float>(-negative_constraints[i].value());
-    }
-    for(uint i=0; i!=ne; ++i) {
-        for(uint j=0; j!=nx; ++j) {
-            A[i+nc][j]=numeric_cast<float>(zero_constraints[i].gradient(j));
-        }
-        b[i+nc]=numeric_cast<float>(-zero_constraints[i].value());
-    }
+    Matrix<Float> A(nc,np);
+    Vector<Float> b(nc);
+    Vector<Float> l(np);
+    Vector<Float> u(np);
+
     for(uint j=0; j!=nx; ++j) {
-        l[j]=numeric_cast<float>(domain[j].lower());
-        u[j]=numeric_cast<float>(domain[j].upper());
+        l[j]=-1.0;
+        u[j]=+1.0;
     }
     for(uint i=0; i!=nc; ++i) {
-        l[nx+i]=0.0;
-        u[nx+i]=inf;
-        //u[n+i]=+std::numeric_limits<double>::max();
+        for(uint j=0; j!=nx; ++j) {
+            A[i][j] = neg( this->_constraint_models[i].function().gradient(j) );
+        }
+        for(uint j=nx; j!=nx+nc; ++j) {
+            A[i][j] = 0.0;
+        }
+        A[i][nx+i]=1.0;
+        Float fb=this->_constraint_models[i].function().value();
+        Float fe=this->_constraint_models[i].function().error();
+        Float cl=this->_constraint_models[i].lower_bound();
+        Float cu=this->_constraint_models[i].upper_bound();
+        b[i]=fb;
+        l[nx+i]=cl-fe;
+        u[nx+i]=cu+fe;
+    }
+
+    if(xa.error()==0.0) {
+        l[nx+nc]=0.0; u[nx+nc]=0.0;
+    } else {
+        l[nx+nc]=-1.0; u[nx+nc]=+1.0;
+    }
+    if(ya.error()==0.0) {
+        l[nx+nc+1]=0.0; u[nx+nc+1]=0.0;
+    } else {
+        l[nx+nc+1]=-1.0; u[nx+nc+1]=+1.0;
     }
     ARIADNE_LOG(3," A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<"\n");
 
+    List<Point2d> vertices;
+
+
     // Set up simplex algorithm working variables
-    Array<Slackness> vt(0); Array<size_t> p(nc+ne); Matrix<Float> B(nx+nc,nx+nc);
-    Vector<Float> x(nx+nc); Vector<Float> y(nc+ne);
+    Array<Slackness> vt(0); Array<size_t> p(nc); Matrix<Float> B(nc,nc);
+    Vector<Float> x(np); Vector<Float> y(nc);
 
     // Find an initial feasible point
     tribool feasible = lpsolver.hotstarted_feasible(l,u,A,b, vt, p,B, x,y);
@@ -614,8 +653,8 @@ AffineSet::boundary(uint xind, uint yind) const
     // If problem not feasible, then set is empty; return empty list
     if(!possibly(feasible)) { return vertices; }
 
-    Vector<Float> c(nx+nc,0.0);
-    for(uint j=0; j!=nx; ++j) { c[j]=xa[j]; }
+    Vector<Float> c(np,0.0);
+    for(uint j=0; j!=np; ++j) { c[j]=G[0][j]; }
 
     // Find a point on the boundary; choost the point minimising the spacial x-coordinate
     x=lpsolver.hotstarted_minimise(c,l,u,A,b, vt,p,B);
@@ -636,22 +675,23 @@ AffineSet::boundary(uint xind, uint yind) const
                                         // Should be set orthogonal to the direction (+1,0) which is minimised in finding first boundary point
     Vector<Float> best_next_vec(2);
     Vector<Float> trial_vec(2);
-    Vector<Float> Aj(nc+ne); // The jth column of A
-    Vector<Float> BAj(nc+ne); // The jth column of A
+    Vector<Float> Aj(nc); // The jth column of A
+    Vector<Float> BAj(nc); // The jth column of A
 
-    uint last_exiting_variable=nc+nx; // Last variable to exit the basis
+    uint last_exiting_variable=np; // Last variable to exit the basis
 
-    if(nx==ne) { vertices.push_back(Point2d(pt[0],pt[1])); return vertices; }
+    // FIXME: Do we need check below?
+    // if(nx==ne) { vertices.push_back(Point2d(pt[0],pt[1])); return vertices; }
 
     do {
         ++STEPS;
         Float cot_theta_max=-inf;
-        uint s=nx+nc; // The index giving the variable x[p[s]] to enter the basis
+        uint s=np; // The index giving the variable x[p[s]] to enter the basis
 
         // Compute direction the point Gx moves in when variable x[j]=x[p[k]] enters the basis
         // This direction is given by Gd where d_B=-A_B^{-1} A_N e_j and
         //   di=+1/-1 depending on whether variable x[j] is at lower or upper bound
-        for(uint k=nc+ne; k!=nx+nc; ++k) {
+        for(uint k=nc; k!=np; ++k) {
             // Test variable to enter basis; there are m to test, one for each dimension of the domain
             uint j=p[k];
             if(j!=last_exiting_variable || true) {
@@ -660,9 +700,9 @@ AffineSet::boundary(uint xind, uint yind) const
                 BAj=B*Aj;
 
                 // Compute the direction the point in space moves for x[j] entering the basis
-                Vector<Float> d(nx+nc,0.0); // The direction x moves in in changing the basis
+                Vector<Float> d(np,0.0); // The direction x moves in in changing the basis
                 d[j] = (vt[j]==LOWER ? +1 : -1);
-                for(uint i=0; i!=nc+ne; ++i) {
+                for(uint i=0; i!=nc; ++i) {
                     d[p[i]]=-BAj[i]*d[j];
                 }
                 trial_vec=G*d;
@@ -700,15 +740,15 @@ AffineSet::boundary(uint xind, uint yind) const
             } // k!=r
         }
 
-        ARIADNE_ASSERT_MSG(s<nc+nx,"Could not find direction to move along boundary of AffineSet.");
+        ARIADNE_ASSERT_MSG(s<np,"Could not find direction to move along boundary of AffineSet.");
         ARIADNE_DEBUG_ASSERT(vt[p[s]]!=BASIS);
-        ARIADNE_LOG(3,"  Choosing variable x["<<p[s]<<"]=x[p["<<s<<"]] to enter basis\n");
+        ARIADNE_LOG(5,"  Choosing variable x["<<p[s]<<"]=x[p["<<s<<"]] to enter basis\n");
         lpsolver.lpstep(l,u,A,b, vt,p,B,x,s);
         last_exiting_variable=p[s];
         pt=G*x+h;
         last_vec=best_next_vec;
-        ARIADNE_LOG(5,"G="<<G<<" h="<<h<<" x="<<x<<" pt="<<pt<<"\n");
-        ARIADNE_LOG(3,"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<" pt="<<pt<<" vec="<<best_next_vec<<"\n");
+        ARIADNE_LOG(7,"G="<<G<<" h="<<h<<" x="<<x<<" pt="<<pt<<"\n");
+        ARIADNE_LOG(5,"A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<" pt="<<pt<<" vec="<<best_next_vec<<"\n");
 
         vertices.push_back(Point2d(pt[0],pt[1]));
 
@@ -720,8 +760,18 @@ AffineSet::boundary(uint xind, uint yind) const
 }
 
 void AffineSet::draw(CanvasInterface& canvas, const Projection2d& projection) const {
-    //std::cerr<<"AffineSet::draw: "<<*this<<"\n";
-    List<Point2d> boundary=this->boundary(projection.x_coordinate(),projection.y_coordinate());
+    ARIADNE_LOG(2,"AffineSet::draw(Canvas canvas, Projection2d& projection)\n");
+    ARIADNE_LOG(3,"set="<<*this<<"\n");
+    ARIADNE_LOG(3,"projection="<<projection<<"\n");
+
+    List<Point2d> boundary;
+
+    try {
+        boundary=this->boundary(projection.x_coordinate(),projection.y_coordinate());
+        ARIADNE_LOG(3,"boundary="<<boundary<<"\n");
+    } catch(std::runtime_error& e) {
+        throw e;
+    }
 
     if(boundary.empty()) { return; }
     if(boundary.size()==1) { canvas.dot(boundary[0].x,boundary[0].y); }
@@ -737,7 +787,7 @@ void AffineSet::draw(CanvasInterface& canvas, const Projection2d& projection) co
 
 
 std::ostream& AffineSet::write(std::ostream& os) const {
-    return os << "AffineSet( domain=" << this->_domain << ", function=" << this->_function << ", negative_constraints=" << this->_constraints << ", zero_constraints=" << this->_equations <<" )";
+    return os << "AffineSet( domain=" << this->_domain << ", function=" << this->_space_models << ", constraints=" << this->_constraint_models <<" )";
 }
 
 

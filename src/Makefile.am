@@ -15,7 +15,7 @@ lib-hybrid: libariadne-hybrid.la
 lib-extras: libariadne-extras.la
 
 AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
-AM_LDFLAGS = $(EXEC_LDFLAGS) 
+AM_LDFLAGS = $(EXEC_LDFLAGS)
 
 INCLUDES = -iquote$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
 LIBS =  $(BOOST_SERIALIZATION_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)
@@ -37,6 +37,7 @@ ARIADNE_KERNEL_SRC = \
 	function.cc \
 	algebra.cc \
 	taylor_model.cc  \
+	affine_model.cc  \
 	taylor_function.cc  \
 	solver.cc \
 	integrator.cc \

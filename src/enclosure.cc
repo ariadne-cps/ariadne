@@ -65,6 +65,7 @@
 #endif // HAVE_CAIRO_H
 #include <boost/concept_check.hpp>
 #include <include/operators.h>
+#include <include/space.h>
 
 
 namespace Ariadne {
@@ -1295,7 +1296,8 @@ void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& project
     for(uint n=0; n!=subdomains.size(); ++n) {
         try {
             this->restriction(subdomains[n]).affine_over_approximation().draw(canvas,projection);
-        } catch(...) {
+        } catch(std::runtime_error& e) {
+            ARIADNE_WARN("Error "<<e.what()<<" in Enclosure::affine_draw(...) for "<<*this<<"\n");
             this->restriction(subdomains[n]).box_draw(canvas,projection);
         }
     }
@@ -1442,49 +1444,20 @@ Enclosure::affine_over_approximation() const
     List<ScalarTaylorFunction> constraint_functions;
     for(uint i=0; i!=nc; ++i) { constraint_functions.append(dynamic_cast<const ScalarTaylorFunction&>(this->_constraints[i].function().reference())); }
 
-    for(uint i=0; i!=nx; ++i) {
-        const_cast<IntervalTaylorModel&>(space_function.models()[i]).sweep(affine_sweeper);
-    }
-    for(uint i=0; i!=nx; ++i) {
-        const_cast<IntervalTaylorModel&>(time_function.model()).sweep(affine_sweeper);
-    }
-    for(uint i=0; i!=nc; ++i) {
-        const_cast<IntervalTaylorModel&>(constraint_functions[i].model()).sweep(affine_sweeper);
-    }
-    const_cast<IntervalTaylorModel&>(time_function.model()).sweep(affine_sweeper);
+    //std::cerr<<"\n"<<space_function<<"\n"<<time_function<<"\n"<<constraint_functions<<"\n\n";
 
-    // Compute the number of values with a nonzero error
-    uint nerr=0;
-    for(uint i=0; i!=nx; ++i) { if(space_function[i].error()>0.0) { ++nerr; } }
+    Vector< IntervalAffineModel > affine_function_models(space_function.result_size());
+    for(uint i=0; i!=space_function.result_size(); ++i) { affine_function_models[i]=affine_model(space_function.models()[i]); }
+    //affine_function_models[space_function.result_size()]=affine_model(time_function.model());
 
-    Vector<Float> h(nx);
-    Matrix<Float> G(nx,np+nerr);
-    uint ierr=0; // The index where the error bound should go
-    for(uint i=0; i!=nx; ++i) {
-        ScalarTaylorFunction component=space_function[i];
-        h[i]=component.model().value();
-        for(uint j=0; j!=np; ++j) {
-            G[i][j]=component.model().gradient(j);
-        }
-        if(component.model().error()>0.0) {
-            G[i][np+ierr]=component.model().error();
-            ++ierr;
-        }
-    }
-
-    AffineSet result(G,h);
-
-    Vector<Float> a(np+nerr, 0.0);
-    Float b;
+    AffineSet result(affine_function_models);
+    //std::cerr<<"\n"<<*this<<"\n"<<result<<"\n\n";
 
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
-        const IntervalTaylorModel& constraint_model=constraint_functions[i].model();
+        IntervalTaylorModel const& constraint_model=constraint_functions[i].model();
+        IntervalAffineModel affine_constraint_model=affine_model(constraint_model);
         Interval constraint_bound=this->constraint(i).bounds();
-        for(uint j=0; j!=np; ++j) { a[j]=constraint_model.gradient(j); }
-        Float bl=sub_up(sub_up(constraint_bound.lower(),constraint_model.error()),constraint_model.value());
-        Float bu=sub_up(add_up(constraint_bound.upper(),constraint_model.error()),constraint_model.value());
-        if(bu!=+inf) { result.new_inequality_constraint(a,bu); }
-        if(bl!=-inf) { result.new_inequality_constraint(-a,-bl); }
+        result.new_constraint(constraint_bound.lower()<=affine_constraint_model<=constraint_bound.upper());
     }
 
     ARIADNE_LOG(2,"set="<<*this<<"\nset.affine_over_approximation()="<<result<<"\n");

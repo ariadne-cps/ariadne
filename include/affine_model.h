@@ -41,14 +41,26 @@
 
 namespace Ariadne {
 
+template<class X> class Affine;
+typedef Affine<Float> FloatAffine;
+typedef Affine<Interval> IntervalAffine;
+
 template<class X> class AffineModel;
+typedef AffineModel<Float> FloatAffineModel;
+typedef AffineModel<Interval> IntervalAffineModel;
+
+template<class F, class B> class NonlinearConstraint;
+typedef NonlinearConstraint<IntervalAffineModel,Float> IntervalAffineConstraintModel;
+
 template<class X> class ScalarFunction;
 template<class X> class TaylorModel;
 
+AffineModel<Interval> affine_model(const Affine<Interval>& affine);
+AffineModel<Interval> affine_model(const Affine<Real>& affine);
 AffineModel<Interval> affine_model(const TaylorModel<Interval>& taylor_model);
 AffineModel<Interval> affine_model(const IntervalVector& domain, const ScalarFunction<Interval>& function);
+Vector< AffineModel<Interval> > affine_models(const Vector< TaylorModel<Interval> >& taylor_models);
 Vector< AffineModel<Interval> > affine_models(const IntervalVector& domain, const VectorFunction<Interval>& function);
-
 
 //! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x) \approx \sum_{i=0}^{n-1} a_i x_i + b\f$.
 template<>
@@ -64,6 +76,8 @@ class AffineModel<Float>
 
     AffineModel<Float>& operator=(const Float& c) {
         this->_c=c; for(uint i=0; i!=this->_g.size(); ++i) { this->_g[i]=0.0; } return *this; }
+    Float& operator[](uint i) { return this->_g[i]; }
+    const Float& operator[](uint i) const { return this->_g[i]; }
     static AffineModel<Float> constant(uint n, const Float& c) {
         return AffineModel<Float>(c,Vector<Float>(n,0.0)); }
     static AffineModel<Float> variable(uint n, uint j) {
@@ -75,6 +89,8 @@ class AffineModel<Float>
     const Vector<Float>& gradient() const { return this->_g; }
     const Float& gradient(uint i) const { return this->_g[i]; }
     const Float& value() const { return this->_c; }
+
+    void resize(uint n) { this->_g.resize(n); }
 
     uint argument_size() const { return this->_g.size(); }
   private:
@@ -130,6 +146,8 @@ class AffineModel<Interval>
     const Float& b() const { return this->_c; }
     const Float& e() const { return this->_e; }
 
+    Float& operator[](uint i) { return this->_g[i]; }
+    const Float& operator[](uint i) const { return this->_g[i]; }
     const Vector<Float>& gradient() const { return this->_g; }
     const Float& gradient(uint i) const { return this->_g[i]; }
     const Float& value() const { return this->_c; }
@@ -139,7 +157,17 @@ class AffineModel<Interval>
     void set_gradient(uint j, const Float& g) { _g[j]=g; }
     void set_error(const Float& e) { _e=e; }
 
+    void resize(uint n) { this->_g.resize(n); }
+
     uint argument_size() const { return this->_g.size(); }
+    template<class X> X evaluate(const Vector<X>& v) const {
+        X r=v.zero_element()+Interval(this->_c);
+        for(uint i=0; i!=this->_g.size(); ++i) {
+            r+=Interval(this->_g[i])*v[i]; }
+        r+=Interval(-_e,+_e);
+        return r;
+    }
+
   private:
     Float _c;
     Vector<Float> _g;
@@ -164,6 +192,16 @@ AffineModel<Interval>& operator+=(AffineModel<Interval>& f1, const Interval& c2)
 //! \relates AffineModel
 //! \brief Scalar multiplication of an affine model.
 AffineModel<Interval>& operator*=(AffineModel<Interval>& f1, const Interval& c2);
+
+//! \relates AffineModel \brief Scalar addition to an affine model.
+AffineModel<Interval> operator+(const Interval& c1, const AffineModel<Interval>& f2);
+AffineModel<Interval> operator+(const AffineModel<Interval>& f1, const Interval& c2);
+//! \relates AffineModel \brief Subtraction of an affine model from a scalar.
+AffineModel<Interval> operator-(const Interval& c1, const AffineModel<Interval>& f2);
+//! \relates AffineModel \brief Subtraction of a scalar from an affine model.
+AffineModel<Interval> operator-(const AffineModel<Interval>& f1, const Interval& c2);
+//! \relates AffineModel \brief Scalar multiplication of an affine model.
+AffineModel<Interval> operator*(const Interval& c1, const AffineModel<Interval>& f2);
 
 //! \relates AffineModel
 //! \brief Write to an output stream.

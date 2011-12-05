@@ -306,7 +306,7 @@ feasible(const Vector<Float>& xl, const Vector<Float>& xu,
         if(xl[i]==-inf) {
             if(xu[i]==+inf) { x[i]=0.0; } else { x[i] = xu[i]-1.0; }
         } else {
-            if(xu[i]==+inf) { x[i]=xl[i]+1.0; } else { ARIADNE_ASSERT(xl[i]<xu[i]); x[i] = (xl[i]+xu[i])/2; }
+            if(xu[i]==+inf) { x[i]=xl[i]+1.0; } else { ARIADNE_ASSERT(xl[i]<=xu[i]); x[i] = (xl[i]+xu[i])/2; }
         }
         if(xl[i]==-inf) { zl[i] = 0.0; } else { zl[i] = 1.0; }
         if(xu[i]==+inf) { zu[i] = 0.0; } else { zu[i] = 1.0; }

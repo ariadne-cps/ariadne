@@ -40,7 +40,14 @@
 
 namespace Ariadne {
 
+class Float;
+class Interval;
+
 template<class X> class Affine;
+typedef Affine<Float> FloatAffine;
+typedef Affine<Interval> IntervalAffine;
+typedef Affine<Real> RealAffine;
+
 template<class X> bool operator==(const Affine<X>&, const Affine<X>&);
 template<class X> Affine<X> operator-(const Affine<X>&);
 template<class X> Affine<X> operator+(const Affine<X>&, const Affine<X>&);
@@ -88,6 +95,7 @@ class Affine
     const X& gradient(uint i) const { return this->_g[i]; }
     const X& value() const { return this->_c; }
 
+    void resize(uint n) { return this->_g.resize(n); }
     uint argument_size() const { return this->_g.size(); }
 
     template<class Y> Y evaluate(const Vector<Y>& x) const {
@@ -172,6 +180,7 @@ template<class X> inline Affine<X> operator*(double c, const Affine<X>& f) {
 template<class X> inline Affine<X> operator/(const Affine<X>& f, double c) {
     return f/static_cast<X>(c); }
 
+/*
 template<class X> std::ostream& operator<<(std::ostream& os, const Affine<X>& f) {
     bool zero=true;
     if(f.b()!=0) { os<<f.b(); zero=false; }
@@ -185,6 +194,15 @@ template<class X> std::ostream& operator<<(std::ostream& os, const Affine<X>& f)
         }
     }
     if(zero) { os << "0"; }
+    return os;
+}
+*/
+
+template<class X> std::ostream& operator<<(std::ostream& os, const Affine<X>& f) {
+    os<<f.b();
+    for(uint j=0; j!=f.argument_size(); ++j) {
+        os<<"+" << "(" << f.a()[j] << ")*x" << j;
+    }
     return os;
 }
 

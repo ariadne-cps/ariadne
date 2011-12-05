@@ -23,6 +23,9 @@
 
 #include "config.h"
 
+#include "numeric.h"
+#include "vector.h"
+#include "function.h"
 #include "affine.h"
 
 namespace Ariadne {

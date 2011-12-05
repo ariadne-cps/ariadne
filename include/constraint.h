@@ -47,6 +47,7 @@ class NonlinearConstraint {
     void set_function(const FunctionType& f) { this->_function = f; }
     FunctionType& function() { return this->_function; }
     FunctionType const& function() const { return this->_function; }
+    Nat argument_size() const { return this->_function.argument_size(); }
     BoundType const& lower_bound() const { return this->_lower_bound; }
     BoundType const& upper_bound() const { return this->_upper_bound; }
     const Interval bounds() const { return Interval(this->_lower_bound,this->_upper_bound); }

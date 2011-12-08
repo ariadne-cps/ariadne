@@ -69,7 +69,7 @@ typedef Matrix<Interval> IntervalMatrix;
 typedef VectorRange<IntervalVector> IntervalVectorRange;
 
 
-std::ostream& operator<<(std::ostream& os, const RealNonlinearConstraint& c) {
+std::ostream& operator<<(std::ostream& os, const RealConstraint& c) {
     static const Float inf = Ariadne::inf;
     if(c.bounds().lower()==c.bounds().upper()) { return os << c.function() << "==" << c.bounds().upper(); }
     if(c.bounds().upper()==inf) { return os << c.bounds().lower() << "<=" << c.function(); }
@@ -79,7 +79,7 @@ std::ostream& operator<<(std::ostream& os, const RealNonlinearConstraint& c) {
 
 
 
-Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<IntervalNonlinearConstraint>& constraints) const
+Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<IntervalConstraint>& constraints) const
 {
     if(constraints.empty()) { return make_pair(!domain.empty(),domain.centre()); }
 
@@ -182,7 +182,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Interval
         }
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
 
-        //Pair<Box,Box> sd=solver.split(List<RealNonlinearConstraint>(1u,constraint),d);
+        //Pair<Box,Box> sd=solver.split(List<RealConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<Box,Box> sd=d.split();
         Point nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
@@ -242,7 +242,7 @@ bool has_nan(const Box& domain) {
     return false;
 }
 
-bool ConstraintSolver::reduce(Box& domain, const List<IntervalNonlinearConstraint>& constraints) const
+bool ConstraintSolver::reduce(Box& domain, const List<IntervalConstraint>& constraints) const
 {
     static const bool USE_BOX_REDUCE = false;
 
@@ -452,7 +452,7 @@ bool ConstraintSolver::box_reduce(Box& domain, const IntervalScalarFunctionInter
 
 namespace {
 
-void compute_monotonicity(Box& domain, const RealNonlinearConstraint& constraint) {
+void compute_monotonicity(Box& domain, const RealConstraint& constraint) {
 /*
     static const uint n = domain.size();
 

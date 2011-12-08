@@ -270,7 +270,7 @@ Float average_width(const IntervalVector& bx) {
 
 namespace {
 
-uint argument_size(const List<RealNonlinearConstraint>& c) {
+uint argument_size(const List<RealConstraint>& c) {
     uint as = ( c.size()==0 ? 0 : c[0].function().argument_size() );
     for(uint i=0; i!=c.size(); ++i) {
         ARIADNE_ASSERT_MSG(c[i].function().argument_size()==as,"c="<<c);
@@ -278,7 +278,7 @@ uint argument_size(const List<RealNonlinearConstraint>& c) {
     return as;
 }
 
-RealVectorFunction constraint_function(uint as, const List<RealNonlinearConstraint>& c) {
+RealVectorFunction constraint_function(uint as, const List<RealConstraint>& c) {
     RealVectorFunction f(c.size(),as);
     for(uint i=0; i!=c.size(); ++i) {
         //f[i]=c[i].function();
@@ -287,7 +287,7 @@ RealVectorFunction constraint_function(uint as, const List<RealNonlinearConstrai
     return f;
 }
 
-RealBox constraint_bounds(const List<RealNonlinearConstraint>& c) {
+RealBox constraint_bounds(const List<RealConstraint>& c) {
     RealBox b(c.size());
     for(uint i=0; i!=c.size(); ++i) {
         b[i]=RealInterval(c[i].lower_bound(),c[i].upper_bound());
@@ -295,11 +295,11 @@ RealBox constraint_bounds(const List<RealNonlinearConstraint>& c) {
     return b;
 }
 
-List<RealNonlinearConstraint> constraints(const RealVectorFunction& f, const RealBox& b) {
+List<RealConstraint> constraints(const RealVectorFunction& f, const RealBox& b) {
     ARIADNE_ASSERT(f.result_size()==b.size());
-    List<RealNonlinearConstraint> c; c.reserve(b.size());
+    List<RealConstraint> c; c.reserve(b.size());
     for(uint i=0; i!=b.size(); ++i) {
-        c.append(RealNonlinearConstraint(b[i].lower(),f[i],b[i].upper()));
+        c.append(RealConstraint(b[i].lower(),f[i],b[i].upper()));
     }
     return c;
 }
@@ -313,7 +313,7 @@ RealConstraintSet::RealConstraintSet(const RealVectorFunction& f, const RealBox&
     this->_constraints=::constraints(f,b);
 }
 
-RealConstraintSet::RealConstraintSet(const List<RealNonlinearConstraint>& c)
+RealConstraintSet::RealConstraintSet(const List<RealConstraint>& c)
     : _dimension(argument_size(c)), _constraints(c)
 {
 }
@@ -385,7 +385,7 @@ RealBoundedConstraintSet::RealBoundedConstraintSet(const RealBox& d, const RealV
     ARIADNE_ASSERT(d.size()==f.argument_size());
 }
 
-RealBoundedConstraintSet::RealBoundedConstraintSet(const RealBox& d, const List<RealNonlinearConstraint>& c)
+RealBoundedConstraintSet::RealBoundedConstraintSet(const RealBox& d, const List<RealConstraint>& c)
     : _domain(d), _constraints(c)
 {
 }
@@ -516,7 +516,7 @@ RealConstrainedImageSet::affine_approximation() const
 
     Vector<Float> a(this->number_of_parameters());
     Float b,l,u;
-    for(List<RealNonlinearConstraint>::const_iterator iter=this->_constraints.begin();
+    for(List<RealConstraint>::const_iterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
         AffineModel<Interval> a=affine_model(D,iter->function());
@@ -528,7 +528,7 @@ RealConstrainedImageSet::affine_approximation() const
 }
 
 
-tribool RealConstrainedImageSet::satisfies(const RealNonlinearConstraint& nc) const
+tribool RealConstrainedImageSet::satisfies(const RealConstraint& nc) const
 {
     if( subset(nc.function().evaluate(this->bounding_box()),nc.bounds()) ) {
         return true;
@@ -536,7 +536,7 @@ tribool RealConstrainedImageSet::satisfies(const RealNonlinearConstraint& nc) co
 
     ConstraintSolver solver;
     const RealBox& domain=this->_domain;
-    List<RealNonlinearConstraint> all_constraints=this->_constraints;
+    List<RealConstraint> all_constraints=this->_constraints;
     RealScalarFunction composed_function = compose(nc.function(),this->_function);
     const Real& lower_bound = nc.lower_bound();
     const Real& upper_bound = nc.upper_bound();
@@ -577,9 +577,9 @@ tribool RealConstrainedImageSet::separated(const Box& bx) const
 */
 
     // Set up constraints as f_i(D)\cap C_i\neq\emptyset
-    List<RealNonlinearConstraint> all_constraints;
+    List<RealConstraint> all_constraints;
     for(uint i=0; i!=this->dimension(); ++i) {
-        all_constraints.append(RealNonlinearConstraint(ExactFloat(bx[i].lower()),this->_function[i],ExactFloat(bx[i].upper())));
+        all_constraints.append(RealConstraint(ExactFloat(bx[i].lower()),this->_function[i],ExactFloat(bx[i].upper())));
     }
     all_constraints.append(this->_constraints);
     Pair<Tribool,FloatVector> result=ConstraintSolver().feasible(over_approximation(domain),all_constraints);
@@ -804,12 +804,12 @@ Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& fun
 namespace {
 
 void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, const IntervalVector& subdomain, const IntervalVectorFunction& function,
-                                                      const List<IntervalNonlinearConstraint>& constraints, const int depth, const FloatVector& errors)
+                                                      const List<IntervalConstraint>& constraints, const int depth, const FloatVector& errors)
 {
     // How small an over-approximating box needs to be relative to the cell size
     static const double RELATIVE_SMALLNESS=0.5;
 
-    for(List<IntervalNonlinearConstraint>::const_iterator iter=constraints.begin();
+    for(List<IntervalConstraint>::const_iterator iter=constraints.begin();
         iter!=constraints.end(); ++iter)
     {
         Interval constraint_range=iter->function().evaluate(subdomain);
@@ -1056,7 +1056,7 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
         ARIADNE_LOG(6,"    txg="<<txg<<"\n");
 
-        IntervalNonlinearConstraint constraint=(txg>=0.0);
+        IntervalConstraint constraint=(txg>=0.0);
 
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
         solver.hull_reduce(nd,txg,Interval(0,inf));
@@ -1179,7 +1179,7 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         }
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
 
-        //Pair<Box,Box> sd=solver.split(List<RealNonlinearConstraint>(1u,constraint),d);
+        //Pair<Box,Box> sd=solver.split(List<RealConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<Box,Box> sd=split(d);
         Point nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
@@ -1218,9 +1218,9 @@ void subdivision_adjoin_outer_approximation(PavingInterface& paving,
                                             const IntervalVector& constraint_bounds,
                                             int depth)
 {
-    List<IntervalNonlinearConstraint> constraints;
+    List<IntervalConstraint> constraints;
     for(uint i=0; i!=constraint_functions.result_size(); ++i) {
-        constraints.append(IntervalNonlinearConstraint(constraint_bounds[i].lower(),constraint_functions[i],constraint_bounds[i].upper()));
+        constraints.append(IntervalConstraint(constraint_bounds[i].lower(),constraint_functions[i],constraint_bounds[i].upper()));
     }
 
     FloatVector errors(paving.dimension());
@@ -1424,14 +1424,14 @@ ConstrainedImageSet::bounding_box() const
 AffineSet
 ConstrainedImageSet::affine_over_approximation() const
 {
-    typedef List<IntervalNonlinearConstraint>::const_iterator const_iterator;
+    typedef List<IntervalConstraint>::const_iterator const_iterator;
 
     Vector<Interval> domain = this->domain();
     Vector<IntervalAffineModel> space_models=affine_models(domain,this->function());
     List<IntervalAffineConstraintModel> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
-        const IntervalNonlinearConstraint& constraint=this->constraint(i);
+        const IntervalConstraint& constraint=this->constraint(i);
         constraint_models.append(IntervalAffineConstraintModel(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
     }
 
@@ -1485,14 +1485,14 @@ ConstrainedImageSet::affine_over_approximation() const
 
 AffineSet ConstrainedImageSet::affine_approximation() const
 {
-    typedef List<IntervalNonlinearConstraint>::const_iterator const_iterator;
+    typedef List<IntervalConstraint>::const_iterator const_iterator;
 
     Vector<Interval> domain = this->domain();
     Vector<IntervalAffineModel> space_models=affine_models(domain,this->function());
     List<IntervalAffineConstraintModel> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
-        const IntervalNonlinearConstraint& constraint=this->constraint(i);
+        const IntervalConstraint& constraint=this->constraint(i);
         constraint_models.append(IntervalAffineConstraintModel(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
     }
 
@@ -1602,7 +1602,7 @@ void ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving,
 
 
 
-tribool ConstrainedImageSet::satisfies(const IntervalNonlinearConstraint& nc) const
+tribool ConstrainedImageSet::satisfies(const IntervalConstraint& nc) const
 {
     if( subset(nc.function().evaluate(this->bounding_box()),nc.bounds()) ) {
         return true;
@@ -1610,7 +1610,7 @@ tribool ConstrainedImageSet::satisfies(const IntervalNonlinearConstraint& nc) co
 
     ConstraintSolver solver;
     const Box& domain=this->_domain;
-    List<IntervalNonlinearConstraint> all_constraints=this->constraints();
+    List<IntervalConstraint> all_constraints=this->constraints();
     IntervalScalarFunction composed_function = compose(nc.function(),this->_function);
     const Interval& bounds = nc.bounds();
 

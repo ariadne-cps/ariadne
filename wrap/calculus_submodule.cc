@@ -276,6 +276,7 @@ void export_taylor_model()
     taylor_model_class.def( init< N,Sweeper >());
     taylor_model_class.def("keys", (List<MultiIndex>(*)(const IntervalTaylorModel&))&keys);
     taylor_model_class.def("error", (const Float&(IntervalTaylorModel::*)()const) &IntervalTaylorModel::error, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("expansion", (const Expansion<Float>&(IntervalTaylorModel::*)()const) &IntervalTaylorModel::expansion, return_value_policy<copy_const_reference>());
     taylor_model_class.def("set_error", (void(IntervalTaylorModel::*)(const Float&)) &IntervalTaylorModel::set_error);
     taylor_model_class.def("argument_size", &IntervalTaylorModel::argument_size);
     taylor_model_class.def("domain", &IntervalTaylorModel::domain);
@@ -541,6 +542,7 @@ void export_vector_taylor_function()
     typedef VectorTaylorFunction VectorTaylorFunction;
 
     class_<VectorTaylorFunction> vector_taylor_function_class("VectorTaylorFunction", init<VectorTaylorFunction>());
+    vector_taylor_function_class.def( init< Nat, IntervalVector, Sweeper >());
     vector_taylor_function_class.def( init< IntervalVector,const RealVectorFunction&,Sweeper >());
     vector_taylor_function_class.def(init< IntervalVector, Vector< Expansion<Float> >, Vector<Float>, Sweeper >());
     vector_taylor_function_class.def( init< Vector<ScalarTaylorFunction> >());
@@ -551,6 +553,7 @@ void export_vector_taylor_function()
     vector_taylor_function_class.def("codomain", &VectorTaylorFunction::codomain);
     vector_taylor_function_class.def("centre", &VectorTaylorFunction::centre);
     vector_taylor_function_class.def("range", &VectorTaylorFunction::range);
+    vector_taylor_function_class.def("errors", &VectorTaylorFunction::errors);
     vector_taylor_function_class.def("sweep", (VectorTaylorFunction&(VectorTaylorFunction::*)())&VectorTaylorFunction::sweep,return_value_policy<reference_existing_object>());
     vector_taylor_function_class.def("clobber", (VectorTaylorFunction&(VectorTaylorFunction::*)()) &VectorTaylorFunction::clobber,return_value_policy<reference_existing_object>());
     vector_taylor_function_class.def("set_sweeper",&VectorTaylorFunction::set_sweeper);
@@ -563,14 +566,14 @@ void export_vector_taylor_function()
     vector_taylor_function_class.def(-self);
     vector_taylor_function_class.def(self+self);
     vector_taylor_function_class.def(self-self);
-    vector_taylor_function_class.def(self+FloatVector());
-    vector_taylor_function_class.def(self-FloatVector());
-    vector_taylor_function_class.def(self*Float());
-    vector_taylor_function_class.def(self/Float());
-    vector_taylor_function_class.def(self+=FloatVector());
-    vector_taylor_function_class.def(self-=FloatVector());
-    vector_taylor_function_class.def(self*=Float());
-    vector_taylor_function_class.def(self/=Float());
+    vector_taylor_function_class.def(self+IntervalVector());
+    vector_taylor_function_class.def(self-IntervalVector());
+    vector_taylor_function_class.def(self*Interval());
+    vector_taylor_function_class.def(self/Interval());
+    vector_taylor_function_class.def(self+=IntervalVector());
+    vector_taylor_function_class.def(self-=IntervalVector());
+    vector_taylor_function_class.def(self*=Interval());
+    vector_taylor_function_class.def(self/=Interval());
     vector_taylor_function_class.def(self+=self);
     vector_taylor_function_class.def(self-=self);
     vector_taylor_function_class.def(self_ns::str(self));
@@ -623,6 +626,7 @@ void export_vector_taylor_function()
     def("compose",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &compose);
     def("compose",(ScalarTaylorFunction(*)(const RealScalarFunction&,const VectorTaylorFunction&)) &compose);
     def("compose",(VectorTaylorFunction(*)(const RealVectorFunction&,const VectorTaylorFunction&)) &compose);
+    def("derivative",(VectorTaylorFunction(*)(const VectorTaylorFunction&,Nat)) &derivative);
     def("antiderivative",(VectorTaylorFunction(*)(const VectorTaylorFunction&,Nat)) &antiderivative);
     def("antiderivative",(VectorTaylorFunction(*)(const VectorTaylorFunction&,Nat,Float)) &antiderivative);
 

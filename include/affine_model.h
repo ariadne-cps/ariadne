@@ -49,8 +49,8 @@ template<class X> class AffineModel;
 typedef AffineModel<Float> FloatAffineModel;
 typedef AffineModel<Interval> IntervalAffineModel;
 
-template<class F, class B> class NonlinearConstraint;
-typedef NonlinearConstraint<IntervalAffineModel,Float> IntervalAffineConstraintModel;
+template<class F, class B> class Constraint;
+typedef Constraint<IntervalAffineModel,Float> IntervalAffineConstraintModel;
 
 template<class X> class ScalarFunction;
 template<class X> class TaylorModel;

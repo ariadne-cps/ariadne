@@ -175,7 +175,7 @@ OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraint
 
 RealBoundedConstraintSet euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
     RealBox domain=euclidean_set(RealVariableBox(set.bounds()),space.variables());
-    List<RealNonlinearConstraint> constraints;
+    List<RealConstraint> constraints;
     for(uint i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
         RealScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
@@ -189,7 +189,7 @@ ConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstra
     IntervalVectorFunction identity=IntervalVectorFunction::identity(domain.size());
 
     ConstrainedImageSet result(domain,identity);
-    //List<IntervalNonlinearConstraint> constraints;
+    //List<IntervalConstraint> constraints;
     for(uint i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
         IntervalScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );

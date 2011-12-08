@@ -587,6 +587,7 @@ VectorTaylorFunction compose(const IntervalVectorFunction&, const VectorTaylorFu
 VectorTaylorFunction compose(const RealVectorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint);
 VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint, Float);
+VectorTaylorFunction derivative(const VectorTaylorFunction&, uint);
 Float norm(const ScalarTaylorFunction& f);
 Float distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
 Float distance(const VectorTaylorFunction& f1, const RealVectorFunction& f2);
@@ -756,11 +757,7 @@ class VectorTaylorFunction
     /*! \brief Inplace subtraction. */
     friend VectorTaylorFunction& operator-=(VectorTaylorFunction& f, const Vector<Interval>& c);
     /*! \brief Inplace scalar multiplication. */
-    friend VectorTaylorFunction& operator*=(VectorTaylorFunction& f, const Float& c);
-    /*! \brief Inplace scalar multiplication. */
     friend VectorTaylorFunction& operator*=(VectorTaylorFunction& f, const Interval& c);
-    /*! \brief Inplace scalar division. */
-    friend VectorTaylorFunction& operator/=(VectorTaylorFunction& f, const Float& c);
     /*! \brief Inplace scalar division. */
     friend VectorTaylorFunction& operator/=(VectorTaylorFunction& f, const Interval& c);
 
@@ -775,16 +772,6 @@ class VectorTaylorFunction
     /*! \brief Multiplication. */
     friend VectorTaylorFunction operator*(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2);
 
-    /*! \brief Addition of a constant. */
-    friend VectorTaylorFunction operator+(const VectorTaylorFunction& f, const Vector<Float>& c);
-    /*! \brief Subtraction of a constant. */
-    friend VectorTaylorFunction operator-(const VectorTaylorFunction& f, const Vector<Float>& c);
-    /*! \brief Multiplication by a scalar. */
-    friend VectorTaylorFunction operator*(const Float& c, const VectorTaylorFunction& f);
-    /*! \brief Multiplication by a scalar. */
-    friend VectorTaylorFunction operator*(const VectorTaylorFunction& f, const Float& c);
-    /*! \brief Division by a scalar. */
-    friend VectorTaylorFunction operator/(const VectorTaylorFunction& f, const Float& c);
     /*! \brief Addition of a constant. */
     friend VectorTaylorFunction operator+(const VectorTaylorFunction& f, const Vector<Interval>& c);
     /*! \brief Subtraction of a constant. */

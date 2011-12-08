@@ -200,7 +200,7 @@ RealBoundedConstraintSet HybridRealExpressionBoundedConstraintSet::continuous_st
     for(uint i=0; i!=domain.size(); ++i) {
         domain[i]=_bounds[space[i]];
     }
-    List< RealNonlinearConstraint> constraints;
+    List< RealConstraint> constraints;
     for(uint i=0; i!=this->_constraints.size(); ++i) {
         constraints.append( make_function(indicator(this->_constraints[i],POSITIVE),space) <= Real(0) );
     }

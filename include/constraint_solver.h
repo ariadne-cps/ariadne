@@ -43,9 +43,9 @@ class Point;
 class Box;
 class GridTreeSet;
 
-template<class X, class R> class NonlinearConstraint;
-typedef NonlinearConstraint<RealScalarFunction,Real> RealNonlinearConstraint;
-typedef NonlinearConstraint<IntervalScalarFunction,Float> IntervalNonlinearConstraint;
+template<class X, class R> class Constraint;
+typedef Constraint<RealScalarFunction,Real> RealConstraint;
+typedef Constraint<IntervalScalarFunction,Float> IntervalConstraint;
 
 template<class X> class Procedure;
 typedef Procedure<Interval> IntervalProcedure;
@@ -101,9 +101,9 @@ class ConstraintSolver
 
 
     //! \brief Test if the constraints are solvable using a nonlinear feasibility test. Returns an approximate feasible point if the result is true. (Deprecated)
-    virtual Pair<Tribool,Point> feasible(const Box& domain, const List<IntervalNonlinearConstraint>& constraints) const;
+    virtual Pair<Tribool,Point> feasible(const Box& domain, const List<IntervalConstraint>& constraints) const;
     //! \brief Try to reduce the size of the domain by propagating interval constraints. (Deprecated)
-    virtual bool reduce(Box& domain, const List<IntervalNonlinearConstraint>& constraints) const;
+    virtual bool reduce(Box& domain, const List<IntervalConstraint>& constraints) const;
 
     //! \brief Try to enforce hull consistency by propagating several interval constraints at once.
     //! This method is sharp if each variable occurs at most once in the constraint.
@@ -129,11 +129,11 @@ class ConstraintSolver
     Pair<Box,Box> split(const Box& domain, const IntervalVectorFunction& function, const IntervalVector& codomain) const;
 
     // Deprecated functions.
-    bool hull_reduce(Box& bx, const IntervalNonlinearConstraint& constraint) const {
+    bool hull_reduce(Box& bx, const IntervalConstraint& constraint) const {
         return this->hull_reduce(bx,constraint.function(),constraint.bounds()); }
-    bool box_reduce(Box& bx, const IntervalNonlinearConstraint& constraint, uint j) const {
+    bool box_reduce(Box& bx, const IntervalConstraint& constraint, uint j) const {
         return this->box_reduce(bx,constraint.function(),constraint.bounds(),j); }
-    bool monotone_reduce(Box& bx, const IntervalNonlinearConstraint& constraint, uint j) const {
+    bool monotone_reduce(Box& bx, const IntervalConstraint& constraint, uint j) const {
         return this->monotone_reduce(bx,constraint.function(),constraint.bounds(),j); }
 
 };

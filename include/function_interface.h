@@ -117,6 +117,7 @@ class ScalarFunctionInterface<Float>
     virtual Algebra<Float> evaluate(const Vector< Algebra<Float> >& x) const = 0;
 
     Vector<Float> gradient(const Vector<Float>& x) const;
+    Differential<Float> differential(const Vector<Float>& x, Nat d) const;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
     inline ScalarFunction<Float> derivative(Nat i) const;
@@ -154,6 +155,8 @@ class ScalarFunctionInterface<Interval>
 
     using ScalarFunctionInterface<Float>::gradient;
     Vector<Interval> gradient(const Vector<Interval>& x) const;
+    using ScalarFunctionInterface<Float>::differential;
+    Differential<Interval> differential(const Vector<Interval>& x, Nat d) const;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
     inline ScalarFunction<Interval> derivative(Nat i) const;
@@ -244,6 +247,7 @@ class VectorFunctionInterface<Float>
     virtual Vector< Algebra<Float> > evaluate(const Vector< Algebra<Float> >& x) const = 0;
 
     Matrix<Float> jacobian(const Vector<Float>& x) const;
+    Vector< Differential<Float> > differentials(const Vector<Float>& x, Nat d) const;
 
     //! \brief Get the \a i<sup>th</sup> component function.
     inline ScalarFunction<Float> operator[](Nat i) const;
@@ -276,6 +280,8 @@ class VectorFunctionInterface<Interval>
 
     using VectorFunctionInterface<Float>::jacobian;
     Matrix<Interval> jacobian(const Vector<Interval>& x) const;
+    using VectorFunctionInterface<Float>::differentials;
+    Vector< Differential<Interval> > differentials(const Vector<Interval>& x, Nat d) const;
 
     //! \brief Get the \a i<sup>th</sup> component function.
     inline ScalarFunction<Interval> operator[](Nat i) const;

@@ -56,9 +56,9 @@ class Figure;
 class CanvasInterface;
 class Point2d;
 
-typedef NonlinearConstraint<AffineModel<Interval>,Float> IntervalAffineConstraintModel;
-typedef NonlinearConstraint<Affine<Interval>,Float> IntervalAffineConstraint;
-typedef NonlinearConstraint<Affine<Real>,Real> RealAffineConstraint;
+typedef Constraint<AffineModel<Interval>,Float> IntervalAffineConstraintModel;
+typedef Constraint<Affine<Interval>,Float> IntervalAffineConstraint;
+typedef Constraint<Affine<Real>,Real> RealAffineConstraint;
 typedef Affine<Interval> IntervalAffineFunction;
 
 RealAffineConstraint operator<=(const Real& l, const RealAffine& am);

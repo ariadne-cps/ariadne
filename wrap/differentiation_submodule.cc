@@ -36,6 +36,75 @@ using namespace Ariadne;
 template<class X> void read_array(Array<X>&, const boost::python::object& obj) { }
 inline uint compute_polynomial_data_size(uint rs, uint as, uint d) { return rs*Ariadne::bin(d+as,as); }
 
+namespace Ariadne {
+
+template<class X>
+struct to_python_dict< Ariadne::Expansion<X>  > {
+    to_python_dict() { boost::python::to_python_converter< Ariadne::Expansion<X>, to_python_dict< Ariadne::Expansion<X> > >(); }
+    static PyObject* convert(const Ariadne::Expansion<X>& e) {
+        uint n=e.argument_size();
+        boost::python::dict res;
+        boost::python::list lst;
+        for(uint i=0; i!=n; ++i) { lst.append(0); }
+        Ariadne::MultiIndex a;
+        X c;
+        for(typename Expansion<X>::const_iterator iter=e.begin(); iter!=e.end(); ++iter) {
+            a=iter->key();
+            c=iter->data();
+            for(uint i=0; i!=a.size(); ++i) { int ai=a[i]; lst[i]=ai; }
+            boost::python::tuple tup(lst);
+            //res[tup]=boost::python::object(c);
+            res[boost::python::object(a)]=boost::python::object(c);
+        }
+        return boost::python::incref(boost::python::dict(res).ptr());
+    }
+    static const PyTypeObject* get_pytype() { return &PyDict_Type; }
+};
+
+template<class X>
+struct to_python_list< Ariadne::Expansion<X>  > {
+    to_python_list() { boost::python::to_python_converter< Ariadne::Expansion<X>, to_python_list< Ariadne::Expansion<X> > >(); }
+    static PyObject* convert(const Ariadne::Expansion<X>& e) {
+        uint n=e.argument_size();
+        boost::python::list res;
+        boost::python::list alst;
+        for(uint i=0; i!=n; ++i) { alst.append(0); }
+        std::cerr<<"Here\n";
+        boost::python::list pr; pr.append(0); pr.append(0);
+        Ariadne::MultiIndex a;
+        X c;
+        for(typename Expansion<X>::const_iterator iter=e.begin(); iter!=e.end(); ++iter) {
+            a=iter->key();
+            c=iter->data();
+            for(uint i=0; i!=n; ++i) { int ai=a[i]; alst[i]=ai; }
+            pr[0]=boost::python::tuple(alst);
+            pr[1]=boost::python::object(c);
+            res.append(boost::python::tuple(pr));
+        }
+        return boost::python::incref(boost::python::list(res).ptr());
+    }
+    static const PyTypeObject* get_pytype() { return &PyList_Type; }
+};
+
+/*
+   static PyObject* convert(const Tuple<T1,T2,T3,T4>& tup) {
+        boost::python::list lst;
+        lst.append(boost::python::object(tup.first));
+        lst.append(boost::python::object(tup.second));
+        lst.append(boost::python::object(tup.third));
+        lst.append(boost::python::object(tup.fourth));
+        boost::python::tuple result(lst);
+        return boost::python::incref(boost::python::tuple(result).ptr());
+    static PyObject* convert(const std::map<K,V>& map) {
+        boost::python::dict result;
+        for(typename std::map<K,V>::const_iterator iter=map.begin(); iter!=map.end(); ++iter) {
+            result[boost::python::object(iter->first)]=boost::python::object(iter->second);
+        }
+        return boost::python::incref(boost::python::dict(result).ptr());
+*/
+}
+
+
 template<class DIFF>
 DIFF*
 make_differential(const uint& as, const uint& d, const boost::python::object& obj)
@@ -133,6 +202,7 @@ void export_differential(const char* name)
     class_<D> differential_class(name);
     //differential_class.def("__init__", make_constructor(&make_differential<D>) );
     differential_class.def("__init__", make_constructor(&make_sparse_differential<D>) );
+    differential_class.def( init< D >());
     differential_class.def( init< uint, uint >());
     differential_class.def( init< Expansion<X>, uint >());
     differential_class.def("__getitem__", &get_item<D,MultiIndex,X>);
@@ -163,6 +233,7 @@ void export_differential(const char* name)
     differential_class.def("value",&D::value,return_value_policy<copy_const_reference>());
     differential_class.def("gradient",(Vector<X>(D::*)()const)&D::gradient);
     differential_class.def("hessian", (Matrix<X>(D::*)()const)&D::hessian);
+    differential_class.def("expansion", (Expansion<X>const&(D::*)()const)&D::expansion,return_value_policy<copy_const_reference>());
 
     differential_class.def("constant",(D(*)(uint, uint, const X&))&D::constant);
     differential_class.def("variable",(D(*)(uint, uint, const X&, uint))&D::variable);
@@ -240,6 +311,9 @@ template void export_differential_vector< Differential<Interval> >(const char*);
 
 void differentiation_submodule()
 {
+    to_python_dict < Expansion<Float> >();
+    to_python_dict < Expansion<Interval> >();
+
     export_differential< Differential<Float> >("FloatDifferential");
     export_differential< Differential<Interval> >("IntervalDifferential");
     //export_differential< Differential<IntervalTaylorModel> >("TaylorModelDifferential");

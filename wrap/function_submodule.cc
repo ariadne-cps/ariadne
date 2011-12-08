@@ -221,6 +221,7 @@ void export_multi_index()
     multi_index_class.def("__setitem__",&MultiIndex::set);
     multi_index_class.def("degree",&MultiIndex::degree);
     multi_index_class.def(self_ns::str(self));
+    multi_index_class.def(self_ns::repr(self));
 
     from_python<MultiIndex>();
     to_python< List<MultiIndex> >();
@@ -284,6 +285,8 @@ void export_scalar_function()
     scalar_function_class.def("__call__", (FloatDifferential(RealScalarFunction::*)(const Vector<FloatDifferential>&)const)&RealScalarFunction::evaluate );
     scalar_function_class.def("gradient", (Vector<Interval>(RealScalarFunction::*)(const Vector<Interval>&)const)&RealScalarFunction::gradient );
     scalar_function_class.def("gradient", (Vector<Interval>(RealScalarFunction::*)(const Vector<Interval>&)const)&RealScalarFunction::gradient );
+    scalar_function_class.def("differential", (Differential<Interval>(RealScalarFunction::*)(const Vector<Interval>&,Nat)const) &RealScalarFunction::differential);
+    scalar_function_class.def("differential", (Differential<Float>(RealScalarFunction::*)(const Vector<Float>&,Nat)const) &RealScalarFunction::differential);
     scalar_function_class.def("__pos__", &__pos__<RealScalarFunction,RealScalarFunction>);
     scalar_function_class.def("__neg__", &__neg__<RealScalarFunction,RealScalarFunction>);
     scalar_function_class.def("__add__", &__add__<RealScalarFunction,RealScalarFunction,RealScalarFunction>);
@@ -298,9 +301,9 @@ void export_scalar_function()
     scalar_function_class.def("__rsub__", &__rsub__<RealScalarFunction,RealScalarFunction,Real>);
     scalar_function_class.def("__rmul__", &__rmul__<RealScalarFunction,RealScalarFunction,Real>);
     scalar_function_class.def("__rdiv__", &__rdiv__<RealScalarFunction,RealScalarFunction,Real>);
-    scalar_function_class.def("__eq__", &__eq__<RealNonlinearConstraint,RealScalarFunction,Real>);
-    scalar_function_class.def("__le__", &__le__<RealNonlinearConstraint,RealScalarFunction,Real>);
-    scalar_function_class.def("__ge__", &__ge__<RealNonlinearConstraint,RealScalarFunction,Real>);
+    scalar_function_class.def("__eq__", &__eq__<RealConstraint,RealScalarFunction,Real>);
+    scalar_function_class.def("__le__", &__le__<RealConstraint,RealScalarFunction,Real>);
+    scalar_function_class.def("__ge__", &__ge__<RealConstraint,RealScalarFunction,Real>);
     scalar_function_class.def("__str__", &__cstr__<RealScalarFunction>);
     scalar_function_class.def("__repr__", &__repr__<RealScalarFunction>);
 
@@ -343,6 +346,8 @@ void export_vector_function()
     vector_function_class.def("__call__", (Vector<FloatDifferential>(RealVectorFunction::*)(const Vector<FloatDifferential>&)const)&RealVectorFunction::evaluate );
     vector_function_class.def("jacobian", (Matrix<Interval>(RealVectorFunction::*)(const Vector<Interval>&)const) &RealVectorFunction::jacobian);
     vector_function_class.def("jacobian", (Matrix<Float>(RealVectorFunction::*)(const Vector<Float>&)const) &RealVectorFunction::jacobian);
+    vector_function_class.def("differentials", (Vector<Differential<Interval> >(RealVectorFunction::*)(const Vector<Interval>&,Nat)const) &RealVectorFunction::differentials);
+    vector_function_class.def("differentials", (Vector<Differential<Float> >(RealVectorFunction::*)(const Vector<Float>&,Nat)const) &RealVectorFunction::differentials);
     vector_function_class.def("__str__", &__cstr__<RealVectorFunction>);
     vector_function_class.def("__repr__", &__repr__<RealVectorFunction>);
 

@@ -247,16 +247,16 @@ void HybridEnclosure::new_guard(DiscreteEvent event, IntervalScalarFunction cons
     this->_set.new_zero_state_constraint(constraint_function);
 }
 
-void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, IntervalNonlinearConstraint constraint) {
+void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, IntervalConstraint constraint) {
     this->_set.new_parameter_constraint(constraint);
 }
 
-void HybridEnclosure::new_state_constraint(DiscreteEvent event, IntervalNonlinearConstraint constraint) {
+void HybridEnclosure::new_state_constraint(DiscreteEvent event, IntervalConstraint constraint) {
     this->_set.new_state_constraint(constraint);
 }
 
 
-void HybridEnclosure::new_constraint(DiscreteEvent event, IntervalNonlinearConstraint constraint) {
+void HybridEnclosure::new_constraint(DiscreteEvent event, IntervalConstraint constraint) {
     this->new_state_constraint(event,constraint);
 }
 
@@ -376,13 +376,13 @@ tribool HybridEnclosure::separated(const HybridBox& hbx) const {
     else { return true; }
 }
 
-tribool HybridEnclosure::satisfies(RealNonlinearConstraint c) const
+tribool HybridEnclosure::satisfies(RealConstraint c) const
 {
     return this->continuous_state_set().satisfies(c);
 }
 
 
-List<IntervalNonlinearConstraint> HybridEnclosure::constraints() const {
+List<IntervalConstraint> HybridEnclosure::constraints() const {
     return this->continuous_state_set().constraints();
 }
 

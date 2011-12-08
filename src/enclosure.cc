@@ -165,7 +165,7 @@ void Enclosure::_check() const {
     ARIADNE_ASSERT_MSG(this->_space_function.argument_size()==this->domain().size(),*this);
     ARIADNE_ASSERT_MSG(this->_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_time_function<<"\n\n");
     ARIADNE_ASSERT_MSG(this->_dwell_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_dwell_time_function<<"\n\n");
-    for(List<IntervalNonlinearConstraintModel>::const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+    for(List<IntervalConstraintModel>::const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
         ARIADNE_ASSERT_MSG(iter->function().argument_size()==this->domain().size(),*this);
     }
 }
@@ -305,7 +305,7 @@ Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction&
     this->_check();
 }
 
-Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& function, const List<IntervalNonlinearConstraint>& constraints, const IntervalFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& function, const List<IntervalConstraint>& constraints, const IntervalFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
@@ -332,7 +332,7 @@ Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction&
     this->_check();
 }
 
-Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& space_function, const IntervalScalarFunction& time_function, const List<IntervalNonlinearConstraint>& constraints, const IntervalFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& space_function, const IntervalScalarFunction& time_function, const List<IntervalConstraint>& constraints, const IntervalFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     ARIADNE_ASSERT_MSG(domain.size()==space_function.argument_size(),"domain="<<domain<<", space_function="<<space_function);
@@ -411,7 +411,7 @@ void Enclosure::new_parameter(Interval ivl)
     this->_time_function=embed(this->_time_function,ivl);
     this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
     for(uint i=0; i!=this->_constraints.size(); ++i) {
-        IntervalNonlinearConstraintModel& constraint=this->_constraints[i];
+        IntervalConstraintModel& constraint=this->_constraints[i];
         constraint.set_function(embed(constraint.function(),ivl));
     }
     this->_check();
@@ -426,7 +426,7 @@ void Enclosure::new_variable(Interval ivl)
     this->_time_function=embed(this->_time_function,ivl);
     this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
     for(uint i=0; i!=this->_constraints.size(); ++i) {
-        IntervalNonlinearConstraintModel& constraint=this->_constraints[i];
+        IntervalConstraintModel& constraint=this->_constraints[i];
         constraint.set_function(embed(constraint.function(),ivl));
     }
     this->_check();
@@ -550,18 +550,18 @@ void Enclosure::apply_parameter_reach_step(IntervalVectorFunctionModel phi, Inte
     this->_check();
 }
 
-void Enclosure::new_state_constraint(IntervalNonlinearConstraint constraint) {
+void Enclosure::new_state_constraint(IntervalConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->dimension());
     this->_is_fully_reduced=false;
     IntervalScalarFunctionModel composed_function_model=compose(constraint.function(),this->_space_function);
-    this->_constraints.append(IntervalNonlinearConstraintModel(constraint.lower_bound(),composed_function_model,constraint.upper_bound()));
+    this->_constraints.append(IntervalConstraintModel(constraint.lower_bound(),composed_function_model,constraint.upper_bound()));
 }
 
-void Enclosure::new_parameter_constraint(IntervalNonlinearConstraint constraint) {
+void Enclosure::new_parameter_constraint(IntervalConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->number_of_parameters());
     this->_is_fully_reduced=false;
     IntervalScalarFunctionModel function_model=this->function_factory().create(this->domain(),constraint.function());
-    this->_constraints.append(IntervalNonlinearConstraintModel(constraint.lower_bound(),function_model,constraint.upper_bound()));
+    this->_constraints.append(IntervalConstraintModel(constraint.lower_bound(),function_model,constraint.upper_bound()));
 }
 
 
@@ -635,19 +635,19 @@ uint Enclosure::number_of_constraints() const {
     return this->_constraints.size();
 }
 
-List<IntervalNonlinearConstraintModel> const& Enclosure::constraint_models() const {
+List<IntervalConstraintModel> const& Enclosure::constraint_models() const {
     return this->_constraints;
 }
 
-List<IntervalNonlinearConstraint> const Enclosure::constraints() const {
-    List<IntervalNonlinearConstraint> result;
+List<IntervalConstraint> const Enclosure::constraints() const {
+    List<IntervalConstraint> result;
     for(uint i=0; i!=this->_constraints.size(); ++i) {
-        result.append(IntervalNonlinearConstraint(this->_constraints[i].lower_bound(),this->_constraints[i].function(),this->_constraints[i].upper_bound()));
+        result.append(IntervalConstraint(this->_constraints[i].lower_bound(),this->_constraints[i].function(),this->_constraints[i].upper_bound()));
     }
     return result;
 }
 
-IntervalNonlinearConstraintModel const& Enclosure::constraint(uint i) const {
+IntervalConstraintModel const& Enclosure::constraint(uint i) const {
     return this->_constraints[i];
 }
 
@@ -689,7 +689,7 @@ Point Enclosure::centre() const {
 
 
 tribool
-Enclosure::satisfies(IntervalNonlinearConstraint c) const
+Enclosure::satisfies(IntervalConstraint c) const
 {
     Enclosure copy=*this;
     copy.new_state_constraint(c);
@@ -735,7 +735,7 @@ tribool Enclosure::subset(const Box& bx) const
 tribool Enclosure::separated(const Box& bx) const
 {
     ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Enclosure::subset(Box): self="<<*this<<", box="<<bx);
-    List<IntervalNonlinearConstraint> constraints = this->constraints();
+    List<IntervalConstraint> constraints = this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
     contractor.reduce(this->_reduced_domain,constraints);
 
@@ -751,7 +751,7 @@ tribool Enclosure::separated(const Box& bx) const
 
 void Enclosure::reduce() const
 {
-    List<IntervalNonlinearConstraint> constraints=this->constraints();
+    List<IntervalConstraint> constraints=this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
     contractor.reduce(this->_reduced_domain,constraints);
 
@@ -889,13 +889,13 @@ Enclosure::split(uint d) const
     Enclosure& result2=result.second;
 
     IntervalScalarFunctionModel constraint_function1,constraint_function2;
-    for(List<IntervalNonlinearConstraintModel>::const_iterator iter=this->_constraints.begin();
+    for(List<IntervalConstraintModel>::const_iterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
-        const IntervalNonlinearConstraintModel& constraint=*iter;
+        const IntervalConstraintModel& constraint=*iter;
         make_lpair(constraint_function1,constraint_function2)=Ariadne::split(constraint.function(),d);
-        result1._constraints.append(IntervalNonlinearConstraintModel(constraint.lower_bound(),constraint_function1,constraint.upper_bound()));
-        result2._constraints.append(IntervalNonlinearConstraintModel(constraint.lower_bound(),constraint_function2,constraint.upper_bound()));
+        result1._constraints.append(IntervalConstraintModel(constraint.lower_bound(),constraint_function1,constraint.upper_bound()));
+        result2._constraints.append(IntervalConstraintModel(constraint.lower_bound(),constraint_function2,constraint.upper_bound()));
     }
 
     IntervalScalarFunctionModel time_function1,time_function2;
@@ -1165,10 +1165,10 @@ Enclosure::kuhn_recondition()
 
     Enclosure new_set(new_domain,VectorTaylorFunction(new_domain,new_models),this->function_factory());
     for(uint i=0; i!=this->_constraints.size(); ++i) {
-        const IntervalNonlinearConstraintModel& constraint=this->_constraints[i];
+        const IntervalConstraintModel& constraint=this->_constraints[i];
         ScalarTaylorFunction const& constraint_function=dynamic_cast<const ScalarTaylorFunction&>(constraint.function().reference());
         IntervalScalarFunctionModel new_constraint_function=ScalarTaylorFunction(new_domain,Ariadne::recondition(constraint_function.model(),discarded_parameters,number_of_error_parameters));
-        new_set._constraints.append(IntervalNonlinearConstraintModel(constraint.lower_bound(),new_constraint_function,constraint.upper_bound()));
+        new_set._constraints.append(IntervalConstraintModel(constraint.lower_bound(),new_constraint_function,constraint.upper_bound()));
     }
     ScalarTaylorFunction const& time=dynamic_cast<const ScalarTaylorFunction&>(this->_time_function.reference());
     new_set._time_function=ScalarTaylorFunction(new_domain,Ariadne::recondition(time.model(),discarded_parameters,number_of_error_parameters));
@@ -1195,7 +1195,7 @@ void Enclosure::restrict(const Vector<Interval>& subdomain)
     result._time_function=Ariadne::restrict(result._time_function,subdomain);
     result._dwell_time_function=Ariadne::restrict(result._dwell_time_function,subdomain);
     IntervalScalarFunctionModel new_constraint;
-    for(List<IntervalNonlinearConstraintModel>::iterator iter=result._constraints.begin();
+    for(List<IntervalConstraintModel>::iterator iter=result._constraints.begin();
         iter!=result._constraints.end(); ++iter)
     {
         IntervalScalarFunctionModel& constraint_function=iter->function();
@@ -1467,13 +1467,13 @@ Enclosure::affine_over_approximation() const
 
 
 Enclosure product(const Enclosure& set, const Interval& ivl) {
-    typedef List<IntervalNonlinearConstraintModel>::const_iterator const_iterator;
+    typedef List<IntervalConstraintModel>::const_iterator const_iterator;
 
     IntervalVectorFunctionModel new_function=combine(set.function(),set.function_factory().create_identity(ivl));
 
     Enclosure result(new_function.domain(),new_function,set.function_factory());
     for(const_iterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
-        result._constraints.append(IntervalNonlinearConstraintModel(iter->lower_bound(),embed(iter->function(),ivl),iter->upper_bound()));
+        result._constraints.append(IntervalConstraintModel(iter->lower_bound(),embed(iter->function(),ivl),iter->upper_bound()));
     }
     result._time_function=embed(set._time_function,ivl);
     result._dwell_time_function=embed(set._dwell_time_function,ivl);
@@ -1482,13 +1482,13 @@ Enclosure product(const Enclosure& set, const Interval& ivl) {
 }
 
 Enclosure product(const Enclosure& set, const Box& bx) {
-    typedef List<IntervalNonlinearConstraintModel>::const_iterator const_iterator;
+    typedef List<IntervalConstraintModel>::const_iterator const_iterator;
 
     IntervalVectorFunctionModel new_function=combine(set.function(),set.function_factory().create_identity(bx));
 
     Enclosure result(new_function.domain(),new_function,set.function_factory());
     for(const_iterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
-        result._constraints.append(IntervalNonlinearConstraintModel(iter->lower_bound(),embed(iter->function(),bx),iter->upper_bound()));
+        result._constraints.append(IntervalConstraintModel(iter->lower_bound(),embed(iter->function(),bx),iter->upper_bound()));
     }
     result._time_function=embed(set._time_function,bx);
     result._dwell_time_function=embed(set._dwell_time_function,bx);
@@ -1500,16 +1500,16 @@ Enclosure product(const Enclosure& set1, const Enclosure& set2) {
     ARIADNE_ASSERT(set1.time_function().range() == set2.time_function().range());
     ARIADNE_ASSERT(set1.dwell_time_function().range() == set2.dwell_time_function().range());
 
-    typedef List<IntervalNonlinearConstraintModel>::const_iterator const_iterator;
+    typedef List<IntervalConstraintModel>::const_iterator const_iterator;
 
     IntervalVectorFunctionModel new_function=combine(set1.function(),set2.function());
 
     Enclosure result(new_function.domain(),new_function,set1.function_factory());
     for(const_iterator iter=set1._constraints.begin(); iter!=set1._constraints.end(); ++iter) {
-        result._constraints.append(IntervalNonlinearConstraintModel(iter->lower_bound(),embed(iter->function(),set2.domain()),iter->upper_bound()));
+        result._constraints.append(IntervalConstraintModel(iter->lower_bound(),embed(iter->function(),set2.domain()),iter->upper_bound()));
     }
     for(const_iterator iter=set2._constraints.begin(); iter!=set2._constraints.end(); ++iter) {
-        result._constraints.append(IntervalNonlinearConstraintModel(iter->lower_bound(),embed(set1.domain(),iter->function()),iter->upper_bound()));
+        result._constraints.append(IntervalConstraintModel(iter->lower_bound(),embed(set1.domain(),iter->function()),iter->upper_bound()));
     }
     result._time_function=embed(set1.time_function(),set2.time_function().domain());
     result._dwell_time_function=embed(set1.dwell_time_function(),set2.dwell_time_function().domain());

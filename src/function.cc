@@ -66,10 +66,18 @@ Vector<Float> ScalarFunctionInterface<Float>::gradient(const Vector<Float>& x) c
     return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
 Vector<Interval> ScalarFunctionInterface<Interval>::gradient(const Vector<Interval>& x) const {
     return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
+Differential<Float> ScalarFunctionInterface<Float>::differential(const Vector<Float>& x, Nat d) const {
+    return this->evaluate(Differential<Float>::variables(d,x)); }
+Differential<Interval> ScalarFunctionInterface<Interval>::differential(const Vector<Interval>& x, Nat d) const {
+    return this->evaluate(Differential<Interval>::variables(d,x)); }
 Matrix<Float> VectorFunctionInterface<Float>::jacobian(const Vector<Float>& x) const {
     return this->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
 Matrix<Interval> VectorFunctionInterface<Interval>::jacobian(const Vector<Interval>& x) const {
     return this->evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
+Vector< Differential<Float> > VectorFunctionInterface<Float>::differentials(const Vector<Float>& x, Nat d) const {
+    return this->evaluate(Differential<Float>::variables(d,x)); }
+Vector< Differential<Interval> > VectorFunctionInterface<Interval>::differentials(const Vector<Interval>& x, Nat d) const {
+    return this->evaluate(Differential<Interval>::variables(d,x)); }
 
 //------------------------ Formula functions  -----------------------------------//
 

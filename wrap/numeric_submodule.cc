@@ -225,6 +225,20 @@ void export_float()
 
 }
 
+void export_exact_float()
+{
+    class_< ExactFloat > exact_float_class("ExactFloat",init<ExactFloat>());
+    exact_float_class.def(init<double>());
+    exact_float_class.def(init<Float>());
+    exact_float_class.def("__str__", &__cstr__<ExactFloat>);
+    exact_float_class.def("__repr__", &__cstr__<ExactFloat>);
+
+    implicitly_convertible<ExactFloat,Float>();
+    implicitly_convertible<ExactFloat,Interval>();
+    implicitly_convertible<ExactFloat,Real>();
+}
+
+
 #ifdef HAVE_GMPXX_H
 void export_integer()
 {
@@ -420,6 +434,7 @@ numeric_submodule()
     export_float();
     export_interval();
     export_real();
+    export_exact_float();
 
 #ifdef HAVE_GMPXX_H
     export_integer();

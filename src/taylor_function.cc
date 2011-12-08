@@ -1503,14 +1503,14 @@ operator-=(VectorTaylorFunction& f, const Vector<Interval>& e)
 }
 
 VectorTaylorFunction&
-operator*=(VectorTaylorFunction& f, const Float& c)
+operator*=(VectorTaylorFunction& f, const Interval& c)
 {
     f._models*=c;
     return f;
 }
 
 VectorTaylorFunction&
-operator/=(VectorTaylorFunction& f, const Float& c)
+operator/=(VectorTaylorFunction& f, const Interval& c)
 {
     f._models/=c;
     return f;
@@ -1577,39 +1577,27 @@ operator-(const VectorTaylorFunction& f)
 }
 
 VectorTaylorFunction
-operator*(const Float& c, const VectorTaylorFunction& f)
+operator*(const Interval& c, const VectorTaylorFunction& f)
 {
     return VectorTaylorFunction(f.domain(),Vector<IntervalTaylorModel>(f.models()*c));
 }
 
 VectorTaylorFunction
-operator*(const VectorTaylorFunction& f, const Float& c)
+operator*(const VectorTaylorFunction& f, const Interval& c)
 {
     return VectorTaylorFunction(f.domain(),Vector<IntervalTaylorModel>(f.models()*c));
 }
 
 VectorTaylorFunction
-operator/(const VectorTaylorFunction& f, const Float& c)
+operator/(const VectorTaylorFunction& f, const Interval& c)
 {
     return VectorTaylorFunction(f.domain(),Vector<IntervalTaylorModel>(f.models()/c));
-}
-
-VectorTaylorFunction
-operator+(const VectorTaylorFunction& f, const Vector<Float>& c)
-{
-    return VectorTaylorFunction(f.domain(),Vector<IntervalTaylorModel>(f.models()+c));
 }
 
 VectorTaylorFunction
 operator+(const VectorTaylorFunction& f, const Vector<Interval>& c)
 {
     return VectorTaylorFunction(f.domain(),Vector<IntervalTaylorModel>(f.models()+c));
-}
-
-VectorTaylorFunction
-operator-(const VectorTaylorFunction& f, const Vector<Float>& c)
-{
-    return VectorTaylorFunction(f.domain(),Vector<IntervalTaylorModel>(f.models()-c));
 }
 
 VectorTaylorFunction
@@ -1739,6 +1727,18 @@ unchecked_compose(const VectorTaylorFunction& g, const VectorTaylorFunction& f)
 }
 
 
+
+VectorTaylorFunction
+derivative(const VectorTaylorFunction& f, uint k)
+{
+    ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
+    Interval fdomkrad=rad_ivl(f.domain()[k].lower(),f.domain()[k].upper());
+    VectorTaylorFunction g=f;
+    for(uint i=0; i!=g.size(); ++i) {
+        g[i]=derivative(f[i],k);
+    }
+    return g;
+}
 
 VectorTaylorFunction
 antiderivative(const VectorTaylorFunction& f, uint k)

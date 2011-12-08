@@ -293,8 +293,8 @@ void export_affine_set()
         affine_set_class("AffineSet",init<AffineSet>());
     affine_set_class.def(init<Vector<Interval>, Matrix<Float>, Vector<Float> >());
     affine_set_class.def(init<Matrix<Float>, Vector<Float> >());
-    affine_set_class.def("new_parameter_constraint", (void(AffineSet::*)(const NonlinearConstraint<Affine<Interval>,Float>&)) &AffineSet::new_parameter_constraint);
-    affine_set_class.def("new_constraint", (void(AffineSet::*)(const NonlinearConstraint<AffineModel<Interval>,Float>&)) &AffineSet::new_constraint);
+    affine_set_class.def("new_parameter_constraint", (void(AffineSet::*)(const Constraint<Affine<Interval>,Float>&)) &AffineSet::new_parameter_constraint);
+    affine_set_class.def("new_constraint", (void(AffineSet::*)(const Constraint<AffineModel<Interval>,Float>&)) &AffineSet::new_constraint);
     affine_set_class.def("dimension", &AffineSet::dimension);
     affine_set_class.def("bounded", &AffineSet::bounded);
     affine_set_class.def("empty", &AffineSet::empty);
@@ -319,19 +319,22 @@ void export_constrained_image_set()
     constrained_image_set_class.def("number_of_parameters", &ConstrainedImageSet::number_of_parameters);
     constrained_image_set_class.def("number_of_constraints", &ConstrainedImageSet::number_of_constraints);
     constrained_image_set_class.def("apply", &ConstrainedImageSet::apply);
-    constrained_image_set_class.def("new_space_constraint", (void(ConstrainedImageSet::*)(const RealNonlinearConstraint&))&ConstrainedImageSet::new_space_constraint);
-    constrained_image_set_class.def("new_parameter_constraint", (void(ConstrainedImageSet::*)(const RealNonlinearConstraint&))&ConstrainedImageSet::new_parameter_constraint);
+    constrained_image_set_class.def("new_space_constraint", (void(ConstrainedImageSet::*)(const RealConstraint&))&ConstrainedImageSet::new_space_constraint);
+    constrained_image_set_class.def("new_parameter_constraint", (void(ConstrainedImageSet::*)(const RealConstraint&))&ConstrainedImageSet::new_parameter_constraint);
     //constrained_image_set_class.def("outer_approximation", &ConstrainedImageSet::outer_approximation);
     constrained_image_set_class.def("affine_approximation", &ConstrainedImageSet::affine_approximation);
     //constrained_image_set_class.def("affine_over_approximation", &ConstrainedImageSet::affine_over_approximation);
     constrained_image_set_class.def("adjoin_outer_approximation_to", &ConstrainedImageSet::adjoin_outer_approximation_to);
+    constrained_image_set_class.def("bounding_box", &ConstrainedImageSet::bounding_box);
     constrained_image_set_class.def("inside", &ConstrainedImageSet::inside);
     constrained_image_set_class.def("separated", &ConstrainedImageSet::separated);
     constrained_image_set_class.def("overlaps", &ConstrainedImageSet::overlaps);
     constrained_image_set_class.def("split", (Pair<ConstrainedImageSet,ConstrainedImageSet>(ConstrainedImageSet::*)()const) &ConstrainedImageSet::split);
     constrained_image_set_class.def("split", (Pair<ConstrainedImageSet,ConstrainedImageSet>(ConstrainedImageSet::*)(uint)const) &ConstrainedImageSet::split);
     constrained_image_set_class.def(self_ns::str(self));
+    constrained_image_set_class.def("__repr__", &__cstr__<ConstrainedImageSet>);
 
+    def("product", (ConstrainedImageSet(*)(const ConstrainedImageSet&,const IntervalVector&)) &product);
 }
 
 

@@ -110,12 +110,12 @@ class RealConstraintSet
     : public RegularSetInterface
 {
     Nat _dimension;
-    List< RealNonlinearConstraint > _constraints;
+    List< RealConstraint > _constraints;
   public:
     //! \brief Construct the preimage of \a C under \a g.
     RealConstraintSet(const RealVectorFunction& g, const RealBox& C);
     //! \brief Construct the restriction of \a D under the constraints \a c.
-    RealConstraintSet(const List<RealNonlinearConstraint>& c);
+    RealConstraintSet(const List<RealConstraint>& c);
     //! \brief The codomain of the set.
     const RealBox codomain() const { return this->constraint_bounds(); }
     //! \brief The function used to define the constraints.
@@ -125,9 +125,9 @@ class RealConstraintSet
     //! \brief The number of constraints.
     Nat number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The constraints.
-    List<RealNonlinearConstraint> const& constraints() const { return this->_constraints; }
+    List<RealConstraint> const& constraints() const { return this->_constraints; }
     //! \brief The \a i<sup>th</sup> constraint.
-    RealNonlinearConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
+    RealConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
 
     RealConstraintSet* clone() const;
     Nat dimension() const;
@@ -145,12 +145,12 @@ class RealBoundedConstraintSet
     , public DrawableInterface
 {
     RealBox _domain;
-    List< RealNonlinearConstraint > _constraints;
+    List< RealConstraint > _constraints;
   public:
     //! \brief Construct the preimage of \a C under \a g.
     RealBoundedConstraintSet(const RealBox& D, const RealVectorFunction& g, const RealBox& C);
     //! \brief Construct the restriction of \a D under the constraints \a c.
-    RealBoundedConstraintSet(const RealBox& D, const List<RealNonlinearConstraint>& c);
+    RealBoundedConstraintSet(const RealBox& D, const List<RealConstraint>& c);
     //! \brief Construct the box \a D.
     RealBoundedConstraintSet(const RealBox& bx);
     //! \brief The domain of the set.
@@ -164,9 +164,9 @@ class RealBoundedConstraintSet
     //! \brief The number of constraints.
     Nat number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The constraints.
-    List<RealNonlinearConstraint> const& constraints() const { return this->_constraints; }
+    List<RealConstraint> const& constraints() const { return this->_constraints; }
     //! \brief The \a i<sup>th</sup> constraint.
-    RealNonlinearConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
+    RealConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
 
     RealBoundedConstraintSet* clone() const;
     Nat dimension() const;
@@ -185,7 +185,7 @@ class RealConstrainedImageSet
 {
     RealBox _domain;
     RealVectorFunction _function;
-    List< RealNonlinearConstraint > _constraints;
+    List< RealConstraint > _constraints;
   public:
     //! \brief Construct the set with zero-dimensional parameterisation in zero dimensions with no constraints.
     RealConstrainedImageSet() : _domain(), _function() { }
@@ -195,12 +195,12 @@ class RealConstrainedImageSet
     RealConstrainedImageSet(const RealBox& dom, const RealVectorFunction& fn) : _domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn, using constraint \a c.
-    RealConstrainedImageSet(const RealBox& dom, const RealVectorFunction& fn, const RealNonlinearConstraint& c) : _domain(dom), _function(fn), _constraints(1u,c) {
+    RealConstrainedImageSet(const RealBox& dom, const RealVectorFunction& fn, const RealConstraint& c) : _domain(dom), _function(fn), _constraints(1u,c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn);
         ARIADNE_ASSERT_MSG(dom.size()==c.function().argument_size(),"dom="<<dom<<", c="<<c);
     }
     //! \brief Construct the image of \a dom under \a fn, using constraints \a c.
-    RealConstrainedImageSet(const RealBox& dom, const RealVectorFunction& fn, const List<RealNonlinearConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
+    RealConstrainedImageSet(const RealBox& dom, const RealVectorFunction& fn, const List<RealConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Convert from a bounded constraint set.
     RealConstrainedImageSet(const RealBoundedConstraintSet& set);
@@ -213,13 +213,13 @@ class RealConstrainedImageSet
     //! \brief The bounds for the constraints.
     const RealBox constraint_bounds() const;
     //! \brief The function used to define the set.
-    const List<RealNonlinearConstraint>& constraints() const { return this->_constraints; };
+    const List<RealConstraint>& constraints() const { return this->_constraints; };
     //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.
     Nat number_of_parameters() const { return this->_domain.size(); };
     //! \brief The number of constraints.
     Nat number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The \a i<sup>th</sup> constraint.
-    RealNonlinearConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
+    RealConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
 
     //! \brief Apply the function \f$h\f$ to obtain the set \f$h\circ f(D\cap g^{-1}(C))\f$.
     Void apply(const RealVectorFunction& h) {
@@ -227,14 +227,14 @@ class RealConstrainedImageSet
     }
 
     //! \brief Introduce a new constraint of the form \f$g(y)\in [c_l,c_u]\f$.
-    Void new_parameter_constraint(const RealNonlinearConstraint& c) {
+    Void new_parameter_constraint(const RealConstraint& c) {
         ARIADNE_ASSERT_MSG(c.function().argument_size()==this->domain().size(),*this<<", "<<c);
         this->_constraints.append(c); }
 
     //! \brief Introduce a new constraint of the form \f$g(y)\in [c_l,c_u]\f$.
-    Void new_space_constraint(const RealNonlinearConstraint& c) {
+    Void new_space_constraint(const RealConstraint& c) {
         ARIADNE_ASSERT_MSG(c.function().argument_size()==this->_function.result_size(),*this<<", "<<c);
-        this->_constraints.append(RealNonlinearConstraint(c.lower_bound(),compose(c.function(),_function),c.upper_bound())); }
+        this->_constraints.append(RealConstraint(c.lower_bound(),compose(c.function(),_function),c.upper_bound())); }
 
     RealConstrainedImageSet* clone() const { return new RealConstrainedImageSet(*this); }
     Nat dimension() const { return this->_function.result_size(); }
@@ -259,7 +259,7 @@ class RealConstrainedImageSet
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
-    Tribool satisfies(const RealNonlinearConstraint& c) const;
+    Tribool satisfies(const RealConstraint& c) const;
 
     //! \brief Draw to a canvas.
     Void draw(CanvasInterface&,const Projection2d&) const;
@@ -282,7 +282,7 @@ class ConstrainedImageSet
     IntervalVector _domain;
     Box _reduced_domain;
     IntervalVectorFunction _function;
-    List< IntervalNonlinearConstraint > _constraints;
+    List< IntervalConstraint > _constraints;
   public:
     //! \brief Construct the set with zero-dimensional parameterisation in zero dimensions with no constraints.
     ConstrainedImageSet() : _domain(), _function() { }
@@ -299,9 +299,9 @@ class ConstrainedImageSet
     //! \brief The function used to define the set.
     const IntervalVectorFunction& function() const { return this->_function; }
     //! \brief The constraints used to define the set.
-    const List<IntervalNonlinearConstraint> constraints() const { return this->_constraints; }
+    const List<IntervalConstraint> constraints() const { return this->_constraints; }
     //! \brief The \a i<sup>th</sup> constraint.
-    IntervalNonlinearConstraint const constraint(Nat i) const { return this->_constraints[i]; };
+    IntervalConstraint const constraint(Nat i) const { return this->_constraints[i]; };
     //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.
     Nat number_of_parameters() const { return this->_domain.size(); };
     //! \brief The number of constraints.
@@ -313,15 +313,15 @@ class ConstrainedImageSet
     }
 
     //! \brief Introduce a new constraint of the form \f$g(s)\in [c_l,c_u]\f$.
-    Void new_parameter_constraint(const IntervalNonlinearConstraint& c) {
+    Void new_parameter_constraint(const IntervalConstraint& c) {
         ARIADNE_ASSERT_MSG(c.function().argument_size()==this->number_of_parameters(),*this<<", "<<c);
         this->_constraints.append(c);
     }
 
     //! \brief Introduce a new constraint of the form \f$g(x)\in [c_l,c_u]\f$.
-    Void new_space_constraint(const IntervalNonlinearConstraint& c) {
+    Void new_space_constraint(const IntervalConstraint& c) {
         ARIADNE_ASSERT_MSG(c.function().argument_size()==this->dimension(),*this<<", "<<c);
-        this->_constraints.append(IntervalNonlinearConstraint(c.lower_bound(),compose(c.function(),this->function()),c.upper_bound()));
+        this->_constraints.append(IntervalConstraint(c.lower_bound(),compose(c.function(),this->function()),c.upper_bound()));
     }
 
     ConstrainedImageSet* clone() const { return new ConstrainedImageSet(*this); }
@@ -355,7 +355,7 @@ class ConstrainedImageSet
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
     //! \brief Test if the set satisfies the state constraint at all points.
-    Tribool satisfies(const IntervalNonlinearConstraint& c) const;
+    Tribool satisfies(const IntervalConstraint& c) const;
 
     //! \brief Draw to a canvas.
     Void draw(CanvasInterface&,const Projection2d&) const;

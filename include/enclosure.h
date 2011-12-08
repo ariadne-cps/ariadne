@@ -79,9 +79,9 @@ typedef VectorFunction<Interval> IntervalVectorFunction;
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<Interval> IntervalFunctionModelFactoryInterface;
 
-template<class X, class R> class NonlinearConstraint;
-typedef NonlinearConstraint<RealScalarFunction,Real> RealNonlinearConstraint;
-typedef NonlinearConstraint<IntervalScalarFunction,Float> IntervalNonlinearConstraint;
+template<class X, class R> class Constraint;
+typedef Constraint<RealScalarFunction,Real> RealConstraint;
+typedef Constraint<IntervalScalarFunction,Float> IntervalConstraint;
 
 class AffineSet;
 class RealBoundedConstraintSet;
@@ -91,7 +91,7 @@ template<class BS> class ListSet;
 class Grid;
 class PavingInterface;
 
-typedef NonlinearConstraint<IntervalScalarFunctionModel,Float> IntervalNonlinearConstraintModel;
+typedef Constraint<IntervalScalarFunctionModel,Float> IntervalConstraintModel;
 
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
@@ -102,7 +102,7 @@ class Enclosure
     IntervalVectorFunctionModel _space_function;
     IntervalScalarFunctionModel _time_function;
     IntervalScalarFunctionModel _dwell_time_function;
-    List<IntervalNonlinearConstraintModel> _constraints;
+    List<IntervalConstraintModel> _constraints;
     IntervalFunctionModelFactoryInterface* _function_factory_ptr;
     mutable Box _reduced_domain;
     mutable bool _is_fully_reduced;
@@ -114,9 +114,9 @@ class Enclosure
     //! \brief Construct the set with parameter domain \a d and image function \a f.
     explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& f, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.
-    explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& f, const List<IntervalNonlinearConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& f, const List<IntervalConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d, image function \a sf, time function \a tf and constraints \a c.
-    explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& sf, const IntervalScalarFunction& tf, const List<IntervalNonlinearConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& sf, const IntervalScalarFunction& tf, const List<IntervalConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with domain \a d, space function \a sf, time function \a tf, negative constraints \a g and equality constraints \a h.
     //!   (Not currently implemented.)
     explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& sf, const IntervalScalarFunction tf, const IntervalVectorFunction& g, const IntervalVectorFunction& h, const IntervalFunctionModelFactoryInterface& fac);
@@ -180,9 +180,9 @@ class Enclosure
 */
 
     //! \brief Introduces the constraint \f$c\f$ applied to the state \f$x=f(s)\f$.
-    void new_state_constraint(IntervalNonlinearConstraint c);
+    void new_state_constraint(IntervalConstraint c);
     //! \brief Introduces the constraint \f$c\f$ applied to the parameter \f$s\f$.
-    void new_parameter_constraint(IntervalNonlinearConstraint c);
+    void new_parameter_constraint(IntervalConstraint c);
 
     //! \brief Introduces the constraint \f$-g(\xi(s)) \leq 0\f$.
     void new_positive_state_constraint(IntervalScalarFunction g);
@@ -198,11 +198,11 @@ class Enclosure
     //! \brief The number of negative constraints.
     uint number_of_constraints() const;
     //! \brief All equality and inequality constraints.
-    List<IntervalNonlinearConstraintModel> const& constraint_models() const;
+    List<IntervalConstraintModel> const& constraint_models() const;
     //! \brief All equality and inequality constraints.
-    List<IntervalNonlinearConstraint> const constraints() const;
+    List<IntervalConstraint> const constraints() const;
     //! \brief The \a i<sup>th</sup> constraint.
-    IntervalNonlinearConstraintModel const& constraint(uint i) const;
+    IntervalConstraintModel const& constraint(uint i) const;
 
     //! \brief  Returns true if \f$g(x)>0\f$ over the whole set,
     //! false \f$g(x)<0\f$ over the whole set,
@@ -210,7 +210,7 @@ class Enclosure
     tribool satisfies(IntervalScalarFunction g) const;
     //! \brief Tests if the set satisfies the constraint \a c. Returns \c true if all points in the set satisfy
     //! the constraint, and \c false if no points in the set satisfy the constraint.
-    virtual tribool satisfies(IntervalNonlinearConstraint c) const;
+    virtual tribool satisfies(IntervalConstraint c) const;
 
     //! \brief The dimension of the set.
     uint dimension() const;

@@ -106,6 +106,7 @@ class ScalarFunction
     ScalarFunction<X> derivative(Nat j) const { return this->reference().derivative(j); }
 
     template<class XX> Vector<XX> gradient(const Vector<XX>& x) const { return this->reference().gradient(x); }
+    template<class XX> Differential<XX> differential(const Vector<XX>& x, Nat d) const { this->_ptr->differential(x,d); }
 
     OutputStream& write(OutputStream& os) const { return this->_ptr->write(os); }
 };
@@ -241,6 +242,7 @@ class VectorFunction
     template<class XX> Vector<XX> operator() (const Vector<XX>& x) const { return this->_ptr->evaluate(x); }
 
     template<class XX> Matrix<XX> jacobian(const Vector<XX>& x) const { return this->_ptr->jacobian(x); }
+    template<class XX> Vector< Differential<XX> > differentials(const Vector<XX>& x, Nat d) const { return this->_ptr->differentials(x,d); }
 
     OutputStream& write(OutputStream& os) const { return this->_ptr->write(os); }
   private:

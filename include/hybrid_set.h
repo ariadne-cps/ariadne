@@ -90,7 +90,7 @@ class HybridRealExpressionBoundedConstraintSet
     : public HybridDrawableInterface
 {
     DiscreteLocation _location;
-    Map< RealVariable, IntervalSet> _bounds;
+    Map< RealVariable, RealIntervalSet> _bounds;
     List< ContinuousPredicate > _constraints;
   public:
     HybridRealExpressionBoundedConstraintSet() { }
@@ -99,9 +99,9 @@ class HybridRealExpressionBoundedConstraintSet
     HybridRealExpressionBoundedConstraintSet* clone() const { return new HybridRealExpressionBoundedConstraintSet(*this); }
     DiscreteLocation const& location() const { return this->_location; }
     Set<RealVariable> variables() const { return this->_bounds.keys(); };
-    Map<RealVariable,IntervalSet> const& bounds() const { return this->_bounds; };
+    Map<RealVariable,RealIntervalSet> const& bounds() const { return this->_bounds; };
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; };
-    BoundedConstraintSet continuous_state_set(const RealSpace&) const;
+    RealBoundedConstraintSet continuous_state_set(const RealSpace&) const;
     void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
 };
 OutputStream& operator<<(OutputStream& os, const HybridRealExpressionBoundedConstraintSet& hs);
@@ -170,11 +170,11 @@ typedef List<RealVariable> RealVariables;
 class HybridRealBoundedConstraintSet
     : public virtual HybridSetInterface
 {
-    Map<DiscreteLocation, BoundedConstraintSet> _sets;
+    Map<DiscreteLocation, RealBoundedConstraintSet> _sets;
     Map<DiscreteLocation, RealSpace> _spaces;
   public:
     HybridRealBoundedConstraintSet();
-    HybridRealBoundedConstraintSet(const DiscreteLocation& q, const RealSpace& spc, const BoxSet& bx);
+    HybridRealBoundedConstraintSet(const DiscreteLocation& q, const RealSpace& spc, const RealBoxSet& bx);
     HybridRealBoundedConstraintSet(const DiscreteLocation& q, const List<RealVariableInterval>& bnds);
 
     virtual HybridRealBoundedConstraintSet* clone() const;
@@ -184,7 +184,7 @@ class HybridRealBoundedConstraintSet
 
     virtual tribool separated(const HybridBox& bx) const;
     virtual tribool covers(const HybridBox& bx) const;
-    virtual BoundedConstraintSet const& operator[](DiscreteLocation loc) const;
+    virtual RealBoundedConstraintSet const& operator[](DiscreteLocation loc) const;
     virtual Set<DiscreteLocation> locations() const;
     virtual HybridBoxes bounding_box() const;
     virtual std::ostream& write(std::ostream& os) const;

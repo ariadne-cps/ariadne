@@ -50,7 +50,7 @@ typedef AffineModel<Float> FloatAffineModel;
 typedef AffineModel<Interval> IntervalAffineModel;
 
 template<class F, class B> class Constraint;
-typedef Constraint<IntervalAffineModel,Float> IntervalAffineConstraintModel;
+typedef Constraint<IntervalAffineModel,Float> IntervalAffineModelConstraint;
 
 template<class X> class ScalarFunction;
 template<class X> class TaylorModel;

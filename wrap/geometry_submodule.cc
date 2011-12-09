@@ -289,52 +289,52 @@ void export_curve()
 void export_affine_set()
 {
 
-    class_<ValidatedAffineConstrainedImageSet,bases<DrawableInterface> >
-        affine_set_class("ValidatedAffineConstrainedImageSet",init<ValidatedAffineConstrainedImageSet>());
+    class_<IntervalAffineConstrainedImageSet,bases<DrawableInterface> >
+        affine_set_class("IntervalAffineConstrainedImageSet",init<IntervalAffineConstrainedImageSet>());
     affine_set_class.def(init<Vector<Interval>, Matrix<Float>, Vector<Float> >());
     affine_set_class.def(init<Matrix<Float>, Vector<Float> >());
-    affine_set_class.def("new_parameter_constraint", (void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<Interval>,Float>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
-    affine_set_class.def("new_constraint", (void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<Interval>,Float>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
-    affine_set_class.def("dimension", &ValidatedAffineConstrainedImageSet::dimension);
-    affine_set_class.def("bounded", &ValidatedAffineConstrainedImageSet::bounded);
-    affine_set_class.def("empty", &ValidatedAffineConstrainedImageSet::empty);
-    affine_set_class.def("bounding_box", &ValidatedAffineConstrainedImageSet::bounding_box);
-    affine_set_class.def("separated", &ValidatedAffineConstrainedImageSet::separated);
-    affine_set_class.def("adjoin_outer_approximation_to", &ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to);
-    affine_set_class.def("outer_approximation", &ValidatedAffineConstrainedImageSet::outer_approximation);
-    affine_set_class.def("boundary", &ValidatedAffineConstrainedImageSet::boundary);
+    affine_set_class.def("new_parameter_constraint", (void(IntervalAffineConstrainedImageSet::*)(const Constraint<Affine<Interval>,Float>&)) &IntervalAffineConstrainedImageSet::new_parameter_constraint);
+    affine_set_class.def("new_constraint", (void(IntervalAffineConstrainedImageSet::*)(const Constraint<AffineModel<Interval>,Float>&)) &IntervalAffineConstrainedImageSet::new_constraint);
+    affine_set_class.def("dimension", &IntervalAffineConstrainedImageSet::dimension);
+    affine_set_class.def("bounded", &IntervalAffineConstrainedImageSet::bounded);
+    affine_set_class.def("empty", &IntervalAffineConstrainedImageSet::empty);
+    affine_set_class.def("bounding_box", &IntervalAffineConstrainedImageSet::bounding_box);
+    affine_set_class.def("separated", &IntervalAffineConstrainedImageSet::separated);
+    affine_set_class.def("adjoin_outer_approximation_to", &IntervalAffineConstrainedImageSet::adjoin_outer_approximation_to);
+    affine_set_class.def("outer_approximation", &IntervalAffineConstrainedImageSet::outer_approximation);
+    affine_set_class.def("boundary", &IntervalAffineConstrainedImageSet::boundary);
     affine_set_class.def(self_ns::str(self));
 }
 
 
 void export_constrained_image_set()
 {
-    class_<ValidatedConstrainedImageSet,bases<DrawableInterface> >
-    constrained_image_set_class("ValidatedConstrainedImageSet",init<ValidatedConstrainedImageSet>());
+    class_<IntervalConstrainedImageSet,bases<DrawableInterface> >
+    constrained_image_set_class("IntervalConstrainedImageSet",init<IntervalConstrainedImageSet>());
     constrained_image_set_class.def(init<Box>());
     constrained_image_set_class.def(init<Box,RealVectorFunction>());
-    constrained_image_set_class.def("domain", &ValidatedConstrainedImageSet::domain,return_value_policy<copy_const_reference>());
-    constrained_image_set_class.def("function", &ValidatedConstrainedImageSet::function,return_value_policy<copy_const_reference>());
-    constrained_image_set_class.def("constraint", &ValidatedConstrainedImageSet::constraint);
-    constrained_image_set_class.def("number_of_parameters", &ValidatedConstrainedImageSet::number_of_parameters);
-    constrained_image_set_class.def("number_of_constraints", &ValidatedConstrainedImageSet::number_of_constraints);
-    constrained_image_set_class.def("apply", &ValidatedConstrainedImageSet::apply);
-    constrained_image_set_class.def("new_space_constraint", (void(ValidatedConstrainedImageSet::*)(const RealConstraint&))&ValidatedConstrainedImageSet::new_space_constraint);
-    constrained_image_set_class.def("new_parameter_constraint", (void(ValidatedConstrainedImageSet::*)(const RealConstraint&))&ValidatedConstrainedImageSet::new_parameter_constraint);
-    //constrained_image_set_class.def("outer_approximation", &ValidatedConstrainedImageSet::outer_approximation);
-    constrained_image_set_class.def("affine_approximation", &ValidatedConstrainedImageSet::affine_approximation);
-    //constrained_image_set_class.def("affine_over_approximation", &ValidatedConstrainedImageSet::affine_over_approximation);
-    constrained_image_set_class.def("adjoin_outer_approximation_to", &ValidatedConstrainedImageSet::adjoin_outer_approximation_to);
-    constrained_image_set_class.def("bounding_box", &ValidatedConstrainedImageSet::bounding_box);
-    constrained_image_set_class.def("inside", &ValidatedConstrainedImageSet::inside);
-    constrained_image_set_class.def("separated", &ValidatedConstrainedImageSet::separated);
-    constrained_image_set_class.def("overlaps", &ValidatedConstrainedImageSet::overlaps);
-    constrained_image_set_class.def("split", (Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet>(ValidatedConstrainedImageSet::*)()const) &ValidatedConstrainedImageSet::split);
-    constrained_image_set_class.def("split", (Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet>(ValidatedConstrainedImageSet::*)(uint)const) &ValidatedConstrainedImageSet::split);
+    constrained_image_set_class.def("domain", &IntervalConstrainedImageSet::domain,return_value_policy<copy_const_reference>());
+    constrained_image_set_class.def("function", &IntervalConstrainedImageSet::function,return_value_policy<copy_const_reference>());
+    constrained_image_set_class.def("constraint", &IntervalConstrainedImageSet::constraint);
+    constrained_image_set_class.def("number_of_parameters", &IntervalConstrainedImageSet::number_of_parameters);
+    constrained_image_set_class.def("number_of_constraints", &IntervalConstrainedImageSet::number_of_constraints);
+    constrained_image_set_class.def("apply", &IntervalConstrainedImageSet::apply);
+    constrained_image_set_class.def("new_space_constraint", (void(IntervalConstrainedImageSet::*)(const RealConstraint&))&IntervalConstrainedImageSet::new_space_constraint);
+    constrained_image_set_class.def("new_parameter_constraint", (void(IntervalConstrainedImageSet::*)(const RealConstraint&))&IntervalConstrainedImageSet::new_parameter_constraint);
+    //constrained_image_set_class.def("outer_approximation", &IntervalConstrainedImageSet::outer_approximation);
+    constrained_image_set_class.def("affine_approximation", &IntervalConstrainedImageSet::affine_approximation);
+    //constrained_image_set_class.def("affine_over_approximation", &IntervalConstrainedImageSet::affine_over_approximation);
+    constrained_image_set_class.def("adjoin_outer_approximation_to", &IntervalConstrainedImageSet::adjoin_outer_approximation_to);
+    constrained_image_set_class.def("bounding_box", &IntervalConstrainedImageSet::bounding_box);
+    constrained_image_set_class.def("inside", &IntervalConstrainedImageSet::inside);
+    constrained_image_set_class.def("separated", &IntervalConstrainedImageSet::separated);
+    constrained_image_set_class.def("overlaps", &IntervalConstrainedImageSet::overlaps);
+    constrained_image_set_class.def("split", (Pair<IntervalConstrainedImageSet,IntervalConstrainedImageSet>(IntervalConstrainedImageSet::*)()const) &IntervalConstrainedImageSet::split);
+    constrained_image_set_class.def("split", (Pair<IntervalConstrainedImageSet,IntervalConstrainedImageSet>(IntervalConstrainedImageSet::*)(uint)const) &IntervalConstrainedImageSet::split);
     constrained_image_set_class.def(self_ns::str(self));
-    constrained_image_set_class.def("__repr__", &__cstr__<ValidatedConstrainedImageSet>);
+    constrained_image_set_class.def("__repr__", &__cstr__<IntervalConstrainedImageSet>);
 
-    def("product", (ValidatedConstrainedImageSet(*)(const ValidatedConstrainedImageSet&,const IntervalVector&)) &product);
+    def("product", (IntervalConstrainedImageSet(*)(const IntervalConstrainedImageSet&,const IntervalVector&)) &product);
 }
 
 
@@ -349,12 +349,12 @@ void export_hybrid_box()
 
 void export_hybrid_constrained_image_set()
 {
-    typedef HybridBasicSet<ValidatedConstrainedImageSet> HybridConstrainedImageSet;
+    typedef HybridBasicSet<IntervalConstrainedImageSet> HybridConstrainedImageSet;
 
     class_<HybridConstrainedImageSet>
         hybrid_constrained_image_set_class("HybridConstrainedImageSet",init<HybridConstrainedImageSet>());
     hybrid_constrained_image_set_class.def(init<DiscreteLocation,RealSpace,Box>());
-    hybrid_constrained_image_set_class.def(init<DiscreteLocation,RealSpace,ValidatedConstrainedImageSet>());
+    hybrid_constrained_image_set_class.def(init<DiscreteLocation,RealSpace,IntervalConstrainedImageSet>());
     hybrid_constrained_image_set_class.def(self_ns::str(self));
 }
 

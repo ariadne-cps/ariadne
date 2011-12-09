@@ -97,7 +97,7 @@ HybridEnclosure::HybridEnclosure(const HybridRealExpressionBoundedConstraintSet&
     : _location(hybrid_set.location()), _events(), _space(space.variable_names()), _set(),
       _variables(space.dimension(),INITIAL)
 {
-    BoundedConstraintSet euclidean_set=hybrid_set.continuous_state_set(space);
+    RealBoundedConstraintSet euclidean_set=hybrid_set.continuous_state_set(space);
     this->_set=Enclosure(euclidean_set,factory);
 }
 
@@ -346,8 +346,8 @@ const DiscreteLocation& HybridEnclosure::location() const {
 }
 
 /*
-ValidatedConstrainedImageSet HybridEnclosure::continuous_state_set() const {
-    return ValidatedConstrainedImageSet(this->_set.domain(),this->space_function(),this->_constraints);
+IntervalConstrainedImageSet HybridEnclosure::continuous_state_set() const {
+    return IntervalConstrainedImageSet(this->_set.domain(),this->space_function(),this->_constraints);
 }
 */
 

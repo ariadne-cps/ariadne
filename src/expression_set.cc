@@ -38,7 +38,7 @@ namespace Ariadne {
 template<class T> struct KeyValue { };
 
 template<> struct KeyValue<RealVariableInterval> {
-    typedef RealVariable KeyType; typedef IntervalSet ValueType;
+    typedef RealVariable KeyType; typedef RealIntervalSet ValueType;
     KeyType const& key(const RealVariableInterval& ivl) { return ivl.variable(); }
     ValueType value(const RealVariableInterval& ivl) { return ivl.interval(); }
 };
@@ -89,8 +89,8 @@ Set<Identifier> arguments(const List<ContinuousPredicate>& c) {
 }
 
 
-const IntervalSet RealVariableInterval::interval() const {
-    return IntervalSet(this->_lower,this->_upper);
+const RealIntervalSet RealVariableInterval::interval() const {
+    return RealIntervalSet(this->_lower,this->_upper);
 }
 
 const Interval RealVariableInterval::approximate_interval() const {
@@ -109,7 +109,7 @@ RealVariableBox::RealVariableBox(const List<RealVariableInterval>& lst)
     }
 }
 
-RealVariableBox::RealVariableBox(const RealSpace& spc, const BoxSet& bx)
+RealVariableBox::RealVariableBox(const RealSpace& spc, const RealBoxSet& bx)
 {
     ARIADNE_ASSERT(spc.size()==bx.size());
     for(uint i=0; i!=spc.size(); ++i) {
@@ -117,17 +117,17 @@ RealVariableBox::RealVariableBox(const RealSpace& spc, const BoxSet& bx)
     }
 }
 
-BoxSet RealVariableBox::box(const List<RealVariable>& spc) const {
+RealBoxSet RealVariableBox::box(const List<RealVariable>& spc) const {
     const RealVariableBox& ebx = *this;
-    BoxSet bx(spc.size());
+    RealBoxSet bx(spc.size());
     for(uint i=0; i!=spc.size(); ++i) {
         bx[i]=ebx[spc[i]];
     }
     return bx;
 }
 
-BoxSet euclidean_set(const RealVariableBox& ebx, const List<RealVariable>& spc) {
-    BoxSet bx(spc.size());
+RealBoxSet euclidean_set(const RealVariableBox& ebx, const List<RealVariable>& spc) {
+    RealBoxSet bx(spc.size());
     for(uint i=0; i!=spc.size(); ++i) {
         bx[i]=ebx[spc[i]];
     }
@@ -164,7 +164,7 @@ RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const Lis
 
 OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraintSet& eset) {
     os << "[";
-    for(Map<RealVariable,IntervalSet>::const_iterator iter=eset._bounds.begin(); iter!=eset._bounds.end(); ++iter) {
+    for(Map<RealVariable,RealIntervalSet>::const_iterator iter=eset._bounds.begin(); iter!=eset._bounds.end(); ++iter) {
         os << (iter==eset._bounds.begin()?"":",") << *iter; }
     os << ";";
     for(List<ContinuousPredicate>::const_iterator iter=eset._constraints.begin(); iter!=eset._constraints.end(); ++iter) {
@@ -173,22 +173,22 @@ OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraint
     return os << eset._bounds << eset._constraints;
 }
 
-BoundedConstraintSet euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
-    BoxSet domain=euclidean_set(RealVariableBox(set.bounds()),space.variables());
+RealBoundedConstraintSet euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
+    RealBoxSet domain=euclidean_set(RealVariableBox(set.bounds()),space.variables());
     List<RealConstraint> constraints;
     for(uint i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
         RealScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
         constraints.append( constraint_function <= Real(0) );
     }
-    return BoundedConstraintSet(domain,constraints);
+    return RealBoundedConstraintSet(domain,constraints);
 }
 
-ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
+IntervalConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
     IntervalVector domain=approximation(euclidean_set(RealVariableBox(set.bounds()),space.variables()));
     IntervalVectorFunction identity=IntervalVectorFunction::identity(domain.size());
 
-    ValidatedConstrainedImageSet result(domain,identity);
+    IntervalConstrainedImageSet result(domain,identity);
     //List<IntervalConstraint> constraints;
     for(uint i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
@@ -197,7 +197,7 @@ ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBound
         //constraints.append( constraint_function <= 0.0 );
     }
     return result;
-    //return ValidatedConstrainedImageSet(domain,identity,constraints);
+    //return IntervalConstrainedImageSet(domain,identity,constraints);
 }
 
 

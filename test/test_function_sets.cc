@@ -51,8 +51,8 @@ class TestConstrainedImageSet
         List<RealScalarFunction> s=RealScalarFunction::coordinates(3);
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
 
-        BoxSet d(3,IntervalSet(-1,+2));
-        ConstrainedImageSet set(d,(s[0],0.25*s[0]*s[0]+s[1]+0.5*s[2]));
+        RealBoxSet d(3,RealIntervalSet(-1,+2));
+        RealConstrainedImageSet set(d,(s[0],0.25*s[0]*s[0]+s[1]+0.5*s[2]));
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
         set.new_space_constraint(x[0]+x[1]<=2.0);
         set.apply((x[0]+x[1],x[0]-x[1]*x[1]));
@@ -64,29 +64,29 @@ class TestConstrainedImageSet
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
 
         // Test the polytope
-        ConstrainedImageSet polytope((IntervalSet(-2,+2),IntervalSet(-2,+2)),(x[0],x[1]));
+        RealConstrainedImageSet polytope((RealIntervalSet(-2,+2),RealIntervalSet(-2,+2)),(x[0],x[1]));
         polytope.new_parameter_constraint(x[0]+1.5*+x[1]<=1);
         ARIADNE_TEST_ASSERT(polytope.separated( (Interval(1.0,2.0),Interval(0.5,1.0)) ));
         ARIADNE_TEST_ASSERT(polytope.overlaps( (Interval(0.0,1.0),Interval(0.5,1.0)) ));
 
         // Test the unit disc
-        ConstrainedImageSet disc((IntervalSet(-2,+2),IntervalSet(-2,+2)),(x[0],x[1]));
+        RealConstrainedImageSet disc((RealIntervalSet(-2,+2),RealIntervalSet(-2,+2)),(x[0],x[1]));
         disc.new_parameter_constraint(x[0]*x[0]+x[1]*x[1]<=1);
         ARIADNE_TEST_ASSERT(disc.overlaps( (Interval(-0.5,0.5),Interval(0.25,0.5)) ));
         ARIADNE_TEST_ASSERT(disc.separated( (Interval(1,2),Interval(0.5,1)) ));
         ARIADNE_TEST_ASSERT(disc.overlaps( (Interval(0.75,2),Interval(0.5,1)) ));
 
         // Test a one-dimensional parabolic set
-        ConstrainedImageSet parabola(BoxSet(1u,IntervalSet(-1,+1)),(p[0],p[0]*p[0]));
+        RealConstrainedImageSet parabola(RealBoxSet(1u,RealIntervalSet(-1,+1)),(p[0],p[0]*p[0]));
         ARIADNE_TEST_PRINT(parabola);
         ARIADNE_TEST_ASSERT(parabola.separated( (Interval(0,0.5),Interval(0.5,1)) ));
         ARIADNE_TEST_ASSERT(parabola.overlaps( (Interval(0.75,2),Interval(0.5,1)) ));
 
         // Test whether the second iterate of the Henon map intersects a box
-        BoxSet d(2,IntervalSet(-0.5,+0.5));
+        RealBoxSet d(2,RealIntervalSet(-0.5,+0.5));
         RealVectorFunction h((1.5-x[0]*x[0]-0.375*x[1],x[0]));
         RealVectorFunction f=compose(h,h);
-        ConstrainedImageSet set(d,f);
+        RealConstrainedImageSet set(d,f);
         //set.new_parameter_constraint(0<=x[0]+x[1]<=1);
 
         ARIADNE_TEST_PRINT(set);
@@ -94,7 +94,7 @@ class TestConstrainedImageSet
         ARIADNE_TEST_ASSERT(set.overlaps(Box(2, -1.0,-0.875, 1.375,1.625)));
         ARIADNE_TEST_PRINT(f(Point(2,0.375,-0.375)));
 
-        ConstrainedImageSet idisc(BoxSet((IntervalSet(-2,+2),IntervalSet(-2,+2))),RealVectorFunction((x[0],x[1])));
+        RealConstrainedImageSet idisc(RealBoxSet((RealIntervalSet(-2,+2),RealIntervalSet(-2,+2))),RealVectorFunction((x[0],x[1])));
 
     }
 
@@ -102,8 +102,8 @@ class TestConstrainedImageSet
         List<RealScalarFunction> s=RealScalarFunction::coordinates(3);
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
 
-        BoxSet d(3,IntervalSet(-1.1,+2.1));
-        ConstrainedImageSet set(d,(s[0],0.25*s[0]*s[0]+s[1]+0.5*s[2]));
+        RealBoxSet d(3,RealIntervalSet(-1.1,+2.1));
+        RealConstrainedImageSet set(d,(s[0],0.25*s[0]*s[0]+s[1]+0.5*s[2]));
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
 
         Box b(set.bounding_box());
@@ -133,8 +133,8 @@ class TestConstrainedImageSet
         List<RealScalarFunction> s=RealScalarFunction::coordinates(3);
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
 
-        BoxSet d(3,IntervalSet(-1,+2));
-        ConstrainedImageSet set(d,(s[0],0.25*s[0]*s[0]+s[1]+0.5*s[2]));
+        RealBoxSet d(3,RealIntervalSet(-1,+2));
+        RealConstrainedImageSet set(d,(s[0],0.25*s[0]*s[0]+s[1]+0.5*s[2]));
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
         set.new_space_constraint(x[0]+x[1]<=2.0);
         ARIADNE_TEST_PRINT(set);
@@ -153,18 +153,18 @@ class TestConstrainedImageSet
         RealScalarFunction s2=RealScalarFunction::coordinate(3,2);
         RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
         RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
-        BoxSet d(3,IntervalSet(-1,+1));
-        ConstrainedImageSet set(d,(s0,s1+0.5*s2*s2));
+        RealBoxSet d(3,RealIntervalSet(-1,+1));
+        RealConstrainedImageSet set(d,(s0,s1+0.5*s2*s2));
         set.new_parameter_constraint(s0+0.75*s1+s2<=0.0);
 
-        ConstrainedImageSet subset1,subset2;
+        RealConstrainedImageSet subset1,subset2;
         make_lpair(subset1,subset2)=set.split(0);
         ARIADNE_TEST_PRINT(set);
         ARIADNE_TEST_PRINT(subset1);
         ARIADNE_TEST_PRINT(subset2);
         ARIADNE_TEST_PRINT(set.split(1));
 
-        ConstrainedImageSet subset11,subset12,subset21,subset22;
+        RealConstrainedImageSet subset11,subset12,subset21,subset22;
         make_lpair(subset11,subset12)=subset1.split(0);
         make_lpair(subset21,subset22)=subset2.split(0);
         ARIADNE_TEST_PRINT(subset11);
@@ -192,16 +192,16 @@ class TestConstrainedImageSet
     void test_affine_approximation() {
         // Test conversionn is exact for the affine set -2<x<1; 0<y<2 3x+y<1
         List<RealScalarFunction> s=RealScalarFunction::coordinates(2);
-        BoxSet d( (IntervalSet(-2.0,1.0),IntervalSet(0.0,2.0)) );
-        ConstrainedImageSet set(d,(s[0],s[1]));
+        RealBoxSet d( (RealIntervalSet(-2.0,1.0),RealIntervalSet(0.0,2.0)) );
+        RealConstrainedImageSet set(d,(s[0],s[1]));
         set.new_parameter_constraint(3*s[0]+s[1]<=1);
-        ValidatedAffineConstrainedImageSet affine_set=set.affine_approximation();
+        IntervalAffineConstrainedImageSet affine_set=set.affine_approximation();
         ARIADNE_TEST_PRINT(set);
         ARIADNE_TEST_PRINT(affine_set);
         //ARIADNE_TEST_PRINT(set.affine_approximation());
     }
 
-    void test_draw(const std::string& str, const ConstrainedImageSet& set, uint acc) {
+    void test_draw(const std::string& str, const RealConstrainedImageSet& set, uint acc) {
         figure.clear();
         figure.set_bounding_box(Box(2, -1.75,+1.75,-1.5,+2.0));
         GridTreeSet paving(set.dimension());
@@ -212,7 +212,7 @@ class TestConstrainedImageSet
         figure.draw(paving);
         figure.set_fill_colour(green);
         figure.set_fill_opacity(0.5);
-        typedef ConstrainedImageSet CIS;
+        typedef RealConstrainedImageSet CIS;
         CIS s1,s2,s3,s4,s5,s6,s7,s8, s9,s10,s11,s12,s13,s14,s15,s16;;
         make_lpair(s1,s2)=set.split();
         make_lpair(s3,s4)=s2.split(); make_lpair(s1,s2)=s1.split();
@@ -227,7 +227,7 @@ class TestConstrainedImageSet
         figure.clear();
     }
 
-    void test_draw2(const std::string& str, const ConstrainedImageSet& set, uint acc) {
+    void test_draw2(const std::string& str, const RealConstrainedImageSet& set, uint acc) {
         figure.clear();
         figure.set_bounding_box(Box(2, -1.75,+1.75,-1.5,+2.0));
         GridTreeSet paving(set.dimension());
@@ -238,7 +238,7 @@ class TestConstrainedImageSet
         figure.draw(paving);
         figure.set_fill_colour(green);
         figure.set_fill_opacity(0.5);
-        typedef ConstrainedImageSet CIS;
+        typedef RealConstrainedImageSet CIS;
         CIS s1,s2,s3,s4,s5,s6,s7,s8, s9,s10,s11,s12,s13,s14,s15,s16;;
         make_lpair(s1,s2)=set.split();
         make_lpair(s3,s4)=s2.split(); make_lpair(s1,s2)=s1.split();
@@ -260,8 +260,8 @@ class TestConstrainedImageSet
         RealScalarFunction y=RealScalarFunction::coordinate(2,1);
         uint acc = 2u;
 
-        test_draw("ellipse",ConstrainedImageSet(BoxSet(2,IntervalSet(-1.0,1.0)),(2*s+t,s+t),(s*s+t*t<=0.75)),acc+1u);
-        //test_draw("concave",ConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,1.0*s*s+t),(2*s+0.25*s*s+t-2.0<=0)),acc);
+        test_draw("ellipse",RealConstrainedImageSet(RealBoxSet(2,RealIntervalSet(-1.0,1.0)),(2*s+t,s+t),(s*s+t*t<=0.75)),acc+1u);
+        //test_draw("concave",RealConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,1.0*s*s+t),(2*s+0.25*s*s+t-2.0<=0)),acc);
     }
 };
 

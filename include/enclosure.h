@@ -83,8 +83,8 @@ template<class X, class R> class Constraint;
 typedef Constraint<RealScalarFunction,Real> RealConstraint;
 typedef Constraint<IntervalScalarFunction,Float> IntervalConstraint;
 
-class ValidatedAffineConstrainedImageSet;
-class BoundedConstraintSet;
+class IntervalAffineConstrainedImageSet;
+class RealBoundedConstraintSet;
 
 template<class BS> class ListSet;
 
@@ -121,7 +121,7 @@ class Enclosure
     //!   (Not currently implemented.)
     explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& sf, const IntervalScalarFunction tf, const IntervalVectorFunction& g, const IntervalVectorFunction& h, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct from an exact bounded constraint \a set.
-    explicit Enclosure(const BoundedConstraintSet& set, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const RealBoundedConstraintSet& set, const IntervalFunctionModelFactoryInterface& fac);
 
     //! \brief Create a dynamically-allocated copy.
     Enclosure* clone() const;
@@ -276,13 +276,13 @@ class Enclosure
     //! \brief An approximation as an affine set.
     //! \details Most easily computed by dropping all nonlinear terms in the
     //! image and constraint functions. Potentially a very poor approximation.
-    ValidatedAffineConstrainedImageSet affine_approximation() const;
+    IntervalAffineConstrainedImageSet affine_approximation() const;
     //! \brief An over-approximation as an affine set.
     //! \details Most easily computed by sweeping all nonlinear terms in the
     //! image and constraint function to constant error terms.
     //! Potentially a very poor approximation, but guaranteed to be an over-
     //! approximation.
-    ValidatedAffineConstrainedImageSet affine_over_approximation() const;
+    IntervalAffineConstrainedImageSet affine_over_approximation() const;
 
     //! \brief A collection of parameter subdomains chosen to make the bounding boxes as small as possible.
     List<IntervalVector> splitting_subdomains_zeroth_order() const;

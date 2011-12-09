@@ -72,18 +72,18 @@ IntervalAffineConstraint operator<=(const IntervalAffineConstraint& c, const Flo
     return IntervalAffineConstraint(c.lower_bound(),c.function(),u);
 }
 
-IntervalAffineConstraintModel operator<=(const Float& l, const IntervalAffineModel& a) { return IntervalAffineConstraintModel(l,a,+inf); }
-IntervalAffineConstraintModel operator<=(const IntervalAffineModel& a, const Float& u) { return IntervalAffineConstraintModel(-inf,a,u); }
-IntervalAffineConstraintModel operator==(const IntervalAffineModel& a, const Float& b) { return IntervalAffineConstraintModel(b,a,b); }
+IntervalAffineModelConstraint operator<=(const Float& l, const IntervalAffineModel& a) { return IntervalAffineModelConstraint(l,a,+inf); }
+IntervalAffineModelConstraint operator<=(const IntervalAffineModel& a, const Float& u) { return IntervalAffineModelConstraint(-inf,a,u); }
+IntervalAffineModelConstraint operator==(const IntervalAffineModel& a, const Float& b) { return IntervalAffineModelConstraint(b,a,b); }
 
-IntervalAffineConstraintModel operator<=(const IntervalAffineConstraintModel& c, const Float& u) {
+IntervalAffineModelConstraint operator<=(const IntervalAffineModelConstraint& c, const Float& u) {
     ARIADNE_ASSERT(c.upper_bound()==inf);
-    return IntervalAffineConstraintModel(c.lower_bound(),c.function(),u);
+    return IntervalAffineModelConstraint(c.lower_bound(),c.function(),u);
 }
 
 IntervalAffineModel affine_model(const IntervalAffine& a);
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<Interval>& d,
+IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Vector<Interval>& d,
                      const Vector<IntervalAffine>& f)
     : _domain(d), _space_models(f.size(),IntervalAffineModel(d.size()))
 {
@@ -94,7 +94,7 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vec
     }
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<Interval>& d,
+IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Vector<Interval>& d,
                      const Vector<IntervalAffine>& f,
                      const List<IntervalAffineConstraint>& c)
     : _domain(d), _space_models(f.size(),IntervalAffineModel(d.size())), _constraint_models()
@@ -104,42 +104,42 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vec
             _space_models[i] = affine_model(f[i]);
         }
         for(uint i=0; i!=c.size(); ++i) {
-            _constraint_models.append(IntervalAffineConstraintModel(c[i].lower_bound(),affine_model(c[i].function()),c[i].upper_bound()));
+            _constraint_models.append(IntervalAffineModelConstraint(c[i].lower_bound(),affine_model(c[i].function()),c[i].upper_bound()));
         }
     } else {
         ARIADNE_NOT_IMPLEMENTED;
     }
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<Interval>& d,
+IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Vector<Interval>& d,
                      const Vector<IntervalAffineModel>& f,
-                     const List<IntervalAffineConstraintModel>& c)
+                     const List<IntervalAffineModelConstraint>& c)
     : _domain(d), _space_models(f), _constraint_models(c)
 {
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<IntervalAffineModel>& f,
-                     const List<IntervalAffineConstraintModel>& c)
+IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Vector<IntervalAffineModel>& f,
+                     const List<IntervalAffineModelConstraint>& c)
     : _domain(Box::unit_box(f[0].argument_size())), _space_models(f), _constraint_models(c)
 {
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<IntervalAffineModel>& f)
+IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Vector<IntervalAffineModel>& f)
     : _domain(Box::unit_box(f[0].argument_size())), _space_models(f)
 {
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& h)
+IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& h)
 {
     this->construct(D,G,h);
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Matrix<Float>& G, const Vector<Float>& h)
+IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Matrix<Float>& G, const Vector<Float>& h)
 {
     this->construct(Vector<Interval>(G.column_size(),Interval(-1,+1)),G,h);
 }
 
-void ValidatedAffineConstrainedImageSet::construct(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& h)
+void IntervalAffineConstrainedImageSet::construct(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& h)
 {
     ARIADNE_ASSERT_MSG(G.row_size()==h.size() && G.row_size()>0,"G="<<G<<", h="<<h);
     this->_domain=D;
@@ -155,7 +155,7 @@ void ValidatedAffineConstrainedImageSet::construct(const Vector<Interval>& D, co
 }
 
 void
-ValidatedAffineConstrainedImageSet::new_constraint(const IntervalAffineConstraintModel& c)
+IntervalAffineConstrainedImageSet::new_constraint(const IntervalAffineModelConstraint& c)
 {
     ARIADNE_ASSERT(this->_space_models.size()>0);
     ARIADNE_ASSERT_MSG(this->number_of_parameters()==c.argument_size(),"c["<<c.argument_size()<<"]="<<c<<" f["<<this->number_of_parameters()<<"]="<<this->_space_models);
@@ -163,54 +163,54 @@ ValidatedAffineConstrainedImageSet::new_constraint(const IntervalAffineConstrain
 }
 
 void
-ValidatedAffineConstrainedImageSet::new_parameter_constraint(const IntervalAffineConstraint& c)
+IntervalAffineConstrainedImageSet::new_parameter_constraint(const IntervalAffineConstraint& c)
 {
     ARIADNE_ASSERT_MSG(this->_space_models.size()>0,"f="<<this->_space_models);
     ARIADNE_ASSERT_MSG(this->number_of_parameters()==c.argument_size(),"c="<<c<<" f="<<this->_space_models);
-    this->new_constraint(IntervalAffineConstraintModel(c.lower_bound(),affine_model(c.function()),c.upper_bound()));
+    this->new_constraint(IntervalAffineModelConstraint(c.lower_bound(),affine_model(c.function()),c.upper_bound()));
 }
 
 
 
 
 
-ValidatedAffineConstrainedImageSet*
-ValidatedAffineConstrainedImageSet::clone() const
+IntervalAffineConstrainedImageSet*
+IntervalAffineConstrainedImageSet::clone() const
 {
-    return new ValidatedAffineConstrainedImageSet(*this);
+    return new IntervalAffineConstrainedImageSet(*this);
 }
 
 
 uint
-ValidatedAffineConstrainedImageSet::dimension() const
+IntervalAffineConstrainedImageSet::dimension() const
 {
     return this->_space_models.size();
 }
 
 uint
-ValidatedAffineConstrainedImageSet::number_of_parameters() const
+IntervalAffineConstrainedImageSet::number_of_parameters() const
 {
     ARIADNE_ASSERT(this->_space_models.size()>0);
     return this->_space_models[0].argument_size();
 }
 
 uint
-ValidatedAffineConstrainedImageSet::number_of_constraints() const
+IntervalAffineConstrainedImageSet::number_of_constraints() const
 {
     return this->_constraint_models.size();
 }
 
 Vector<Interval>
-ValidatedAffineConstrainedImageSet::domain() const
+IntervalAffineConstrainedImageSet::domain() const
 {
     return this->_domain;
 }
 
-tribool ValidatedAffineConstrainedImageSet::bounded() const {
+tribool IntervalAffineConstrainedImageSet::bounded() const {
     return Box(this->domain()).bounded() || indeterminate;
 }
 
-Box ValidatedAffineConstrainedImageSet::bounding_box() const {
+Box IntervalAffineConstrainedImageSet::bounding_box() const {
     Box result(this->dimension());
     Vector<Interval> domain=this->domain();
     for(uint i=0; i!=this->dimension(); ++i) {
@@ -224,7 +224,7 @@ Box ValidatedAffineConstrainedImageSet::bounding_box() const {
 
 
 
-tribool ValidatedAffineConstrainedImageSet::separated(const Box& bx) const {
+tribool IntervalAffineConstrainedImageSet::separated(const Box& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     Box wbx=widen(bx);
     LinearProgram<Float> lp;
@@ -246,20 +246,20 @@ tribool ValidatedAffineConstrainedImageSet::separated(const Box& bx) const {
     return !feasible;
 }
 
-tribool ValidatedAffineConstrainedImageSet::empty() const {
+tribool IntervalAffineConstrainedImageSet::empty() const {
     return this->separated(this->bounding_box());
 }
 
 
 GridTreeSet
-ValidatedAffineConstrainedImageSet::outer_approximation(const Grid& g, int d) const {
+IntervalAffineConstrainedImageSet::outer_approximation(const Grid& g, int d) const {
     GridTreeSet r(g);
     this->adjoin_outer_approximation_to(r,d);
     return r;
 }
 
 
-void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, GridCell& cell, int depth)
+void IntervalAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, GridCell& cell, int depth)
 {
 
     // No need to check if cell is already part of the set
@@ -304,7 +304,7 @@ void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
 
 
 void
-ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float>& lp) const
+IntervalAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float>& lp) const
 {
     // Set up linear programming problem.
     // We have parameter e and point x, which need to satisfy
@@ -381,7 +381,7 @@ ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float
 
 
 void
-ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
+IntervalAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
 
@@ -397,7 +397,7 @@ ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterfac
 
 
 
-void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, GridCell& cell, int depth)
+void IntervalAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, GridCell& cell, int depth)
 {
     SimplexSolver<Float> lpsolver;
 
@@ -445,8 +445,8 @@ void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
     } else {
         GridCell subcell1 = cell.split(0);
         GridCell subcell2 = cell.split(1);
-        ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(paving,lp,subcell1,depth);
-        ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(paving,lp,subcell2,depth);
+        IntervalAffineConstrainedImageSet::_adjoin_outer_approximation_to(paving,lp,subcell1,depth);
+        IntervalAffineConstrainedImageSet::_adjoin_outer_approximation_to(paving,lp,subcell2,depth);
     }
 
 }
@@ -454,7 +454,7 @@ void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
 
 
 void
-ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const {
+IntervalAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const {
     ARIADNE_ASSERT(this->dimension()==paving.dimension());
 
     SimplexSolver<Float> lpsolver;
@@ -571,9 +571,9 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
 
 
 List<Point2d>
-ValidatedAffineConstrainedImageSet::boundary(uint xind, uint yind) const
+IntervalAffineConstrainedImageSet::boundary(uint xind, uint yind) const
 {
-    ARIADNE_LOG(3,"ValidatedAffineConstrainedImageSet::boundary("<<xind<<","<<yind<<"): self="<<*this<<"\n");
+    ARIADNE_LOG(3,"IntervalAffineConstrainedImageSet::boundary("<<xind<<","<<yind<<"): self="<<*this<<"\n");
 
     SimplexSolver<Float> lpsolver;
 
@@ -723,7 +723,7 @@ ValidatedAffineConstrainedImageSet::boundary(uint xind, uint yind) const
                 // If this lies within a reasonable tolerance, set to zero,
                 // otherwise abort.
                 ARIADNE_ASSERT_MSG(cross >= -ERROR_TOLERANCE,
-                                   "ValidatedAffineConstrainedImageSet::boundary(...): cross product is="<<cross<<"; should be positive.");
+                                   "IntervalAffineConstrainedImageSet::boundary(...): cross product is="<<cross<<"; should be positive.");
 
                 if(cross<=0.0 ) {
                     cross=+0.0;
@@ -740,7 +740,7 @@ ValidatedAffineConstrainedImageSet::boundary(uint xind, uint yind) const
             } // k!=r
         }
 
-        ARIADNE_ASSERT_MSG(s<np,"Could not find direction to move along boundary of ValidatedAffineConstrainedImageSet.");
+        ARIADNE_ASSERT_MSG(s<np,"Could not find direction to move along boundary of IntervalAffineConstrainedImageSet.");
         ARIADNE_DEBUG_ASSERT(vt[p[s]]!=BASIS);
         ARIADNE_LOG(5,"  Choosing variable x["<<p[s]<<"]=x[p["<<s<<"]] to enter basis\n");
         lpsolver.lpstep(l,u,A,b, vt,p,B,x,s);
@@ -759,8 +759,8 @@ ValidatedAffineConstrainedImageSet::boundary(uint xind, uint yind) const
 
 }
 
-void ValidatedAffineConstrainedImageSet::draw(CanvasInterface& canvas, const Projection2d& projection) const {
-    ARIADNE_LOG(2,"ValidatedAffineConstrainedImageSet::draw(Canvas canvas, Projection2d& projection)\n");
+void IntervalAffineConstrainedImageSet::draw(CanvasInterface& canvas, const Projection2d& projection) const {
+    ARIADNE_LOG(2,"IntervalAffineConstrainedImageSet::draw(Canvas canvas, Projection2d& projection)\n");
     ARIADNE_LOG(3,"set="<<*this<<"\n");
     ARIADNE_LOG(3,"projection="<<projection<<"\n");
 
@@ -786,8 +786,8 @@ void ValidatedAffineConstrainedImageSet::draw(CanvasInterface& canvas, const Pro
 }
 
 
-std::ostream& ValidatedAffineConstrainedImageSet::write(std::ostream& os) const {
-    return os << "ValidatedAffineConstrainedImageSet( domain=" << this->_domain << ", function=" << this->_space_models << ", constraints=" << this->_constraint_models <<" )";
+std::ostream& IntervalAffineConstrainedImageSet::write(std::ostream& os) const {
+    return os << "IntervalAffineConstrainedImageSet( domain=" << this->_domain << ", function=" << this->_space_models << ", constraints=" << this->_constraint_models <<" )";
 }
 
 

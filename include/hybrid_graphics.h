@@ -43,7 +43,7 @@ typedef unsigned int uint;
 
 namespace Ariadne {
 
-class RealInterval;
+class IntervalSet;
 
 struct HybridGraphicsObject {
     HybridGraphicsObject(const GraphicsProperties& gp, const HybridDrawableInterface& sh)
@@ -86,7 +86,7 @@ class HybridFigure
     void set_bounds(const RealVariable& x, const Float& l, const Float& u) { bounds.insert(x,Interval(l,u)); }
     void set_bounds(const RealVariable& x, const Interval& ivl) { bounds.insert(x,ivl); }
     void set_bounds(const Map<RealVariable,Interval>& b) { bounds=b; };
-    void set_bounds(const Map<RealVariable,RealInterval>& b);
+    void set_bounds(const Map<RealVariable,IntervalSet>& b);
     void set_variables(const RealVariable& x, const RealVariable& y) { variables=Variables2d(x,y); }
 
     void set_line_style(bool ls) { properties.line_style=ls; }
@@ -132,7 +132,7 @@ inline HybridFigure& operator<<(HybridFigure& g, const FillColour& fc) { g.set_f
 inline void draw(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); }
 inline HybridFigure& operator<<(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); return fig; }
 
-Interval approximation(const RealInterval& rivl);
+Interval approximation(const IntervalSet& rivl);
 
 template<class SET1>
 void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1) {

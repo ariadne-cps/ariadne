@@ -174,10 +174,10 @@ operator<<(std::ostream& os, const Orbit< HybridEnclosure >& orb)
 
 
 
-Map<RealVariable,RealInterval> make_map(const List<RealVariableInterval>& b) {
-    Map<RealVariable,RealInterval> res;
+Map<RealVariable,IntervalSet> make_map(const List<RealVariableInterval>& b) {
+    Map<RealVariable,IntervalSet> res;
     for(uint i=0; i!=b.size(); ++i) {
-        res.insert(b[i].variable(),RealInterval(b[i].lower(),b[i].upper()));
+        res.insert(b[i].variable(),IntervalSet(b[i].lower(),b[i].upper()));
     }
     return res;
 }
@@ -194,9 +194,9 @@ HybridRealExpressionBoundedConstraintSet::HybridRealExpressionBoundedConstraintS
 {
 }
 
-RealBoundedConstraintSet HybridRealExpressionBoundedConstraintSet::continuous_state_set(const RealSpace& space) const {
+BoundedConstraintSet HybridRealExpressionBoundedConstraintSet::continuous_state_set(const RealSpace& space) const {
     ARIADNE_ASSERT_MSG(this->_bounds.size()==space.dimension()," set="<<*this<<", space="<<space<<"\n");
-    RealBox domain(this->_bounds.size());
+    BoxSet domain(this->_bounds.size());
     for(uint i=0; i!=domain.size(); ++i) {
         domain[i]=_bounds[space[i]];
     }
@@ -204,7 +204,7 @@ RealBoundedConstraintSet HybridRealExpressionBoundedConstraintSet::continuous_st
     for(uint i=0; i!=this->_constraints.size(); ++i) {
         constraints.append( make_function(indicator(this->_constraints[i],POSITIVE),space) <= Real(0) );
     }
-    return RealBoundedConstraintSet(domain,constraints);
+    return BoundedConstraintSet(domain,constraints);
 }
 
 void HybridRealExpressionBoundedConstraintSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {
@@ -219,7 +219,7 @@ OutputStream& operator<<(OutputStream& os, const HybridRealExpressionBoundedCons
     return os << "HybridRealExpressionBoundedConstraintSet( " << hs.location() << ", " << hs.bounds() << ", " << hs.constraints() << ")";
 }
 
-// Map<DiscreteLocation,ConstrainedImageSet> HybridRealBoundedConstraintSet::_sets;
+// Map<DiscreteLocation,ValidatedConstrainedImageSet> HybridRealBoundedConstraintSet::_sets;
 // HybridSpace HybridRealBoundedConstraintSet::_space;
 
 HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& x)
@@ -308,7 +308,7 @@ HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet()
 {
 }
 
-HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet(const DiscreteLocation& q, const RealSpace& spc, const RealBox& bx)
+HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet(const DiscreteLocation& q, const RealSpace& spc, const BoxSet& bx)
     : _sets(), _spaces()
 {
     _sets.insert(q,bx);
@@ -319,7 +319,7 @@ HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet(const DiscreteLoc
     : _sets(), _spaces()
 {
     RealSpace spc;
-    RealBox bx(bnds.size());
+    BoxSet bx(bnds.size());
     for(uint i=0; i!=bnds.size(); ++i) {
         spc.append(bnds[i].variable());
         bx[i]=bnds[i].interval();
@@ -363,13 +363,13 @@ tribool HybridRealBoundedConstraintSet::separated(const HybridBox& bx) const {
 
 tribool HybridRealBoundedConstraintSet::inside(const HybridBoxes& bxs) const {
     tribool result=true;
-    for(Map<DiscreteLocation,RealBoundedConstraintSet>::const_iterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
+    for(Map<DiscreteLocation,BoundedConstraintSet>::const_iterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
         result = result && iter->second.inside(bxs[iter->first]);
     }
     return result;
 }
 
-RealBoundedConstraintSet const& HybridRealBoundedConstraintSet::operator[](DiscreteLocation loc) const {
+BoundedConstraintSet const& HybridRealBoundedConstraintSet::operator[](DiscreteLocation loc) const {
     return this->_sets[loc];
 }
 
@@ -379,7 +379,7 @@ Set<DiscreteLocation> HybridRealBoundedConstraintSet::locations() const {
 
 HybridBoxes HybridRealBoundedConstraintSet::bounding_box() const {
     HybridBoxes result;
-    for(Map<DiscreteLocation,RealBoundedConstraintSet>::const_iterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
+    for(Map<DiscreteLocation,BoundedConstraintSet>::const_iterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
         result.insert(iter->first,iter->second.bounding_box());
     }
     return result;

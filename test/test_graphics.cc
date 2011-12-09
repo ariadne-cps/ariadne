@@ -53,11 +53,11 @@ int main(int argc, char **argv)
     Real p = 0.5;
     RealVectorFunction x=RealVectorFunction::identity(3);
     RealVectorFunction afn1((0.05*x[0]+0.05*x[2]+0.15,0.05*x[1]+0.05*x[2]+0.6));
-    ConstrainedImageSet s1(Box::unit_box(3),afn1);
+    ValidatedConstrainedImageSet s1(Box::unit_box(3),afn1);
     Box bbx1=s1.bounding_box()+Vector<Interval>(2, Interval(-0.25,+0.25));
 
     RealVectorFunction rf(1u, sqr(x[0])+sqr(x[1])-sqr(p));
-    RealConstraintSet cs1(rf,RealBox(1u,RealInterval(-1,0)));
+    ConstraintSet cs1(rf,BoxSet(1u,IntervalSet(-1,0)));
 
     {
         double h=10000;

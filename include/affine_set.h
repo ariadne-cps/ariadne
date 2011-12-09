@@ -81,8 +81,8 @@ IntervalAffineConstraintModel operator==(const IntervalAffineModel& am, const Fl
 //!  where \f$f\f$, \f$g\f$ and \f$h\f$ are vector-valued affine functions on \f$\R^n\f$ and \f$D\f$ is a box in \f$\R^n\f$.
 //!
 //! Includes the class of zonotopes \f$Z=\{ f(x) \mid x\in D\}\f$, polyhedra \f$\{ f(x) \mid x\in\R^n \mid g(x)\leq 0\}\f$ and polytopes \f$\{ f(x) \mid x\in[0,\infty)^n \mid \sum_{i=1}^{n} x_i -1 = 0\}\f$.
-//! \sa ConstrainedImageSet
-class AffineSet
+//! \sa ValidatedConstrainedImageSet
+class ValidatedAffineConstrainedImageSet
     : public DrawableInterface, public Loggable
 {
     IntervalVector _domain;
@@ -90,20 +90,20 @@ class AffineSet
     List<IntervalAffineConstraintModel> _constraint_models;
   public:
     //!\brief The set \f$\{ Gy+c \mid y\in D\}\f$.
-    AffineSet(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& c);
+    ValidatedAffineConstrainedImageSet(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& c);
     //!\brief The set \f$\{ Gy+c \mid ||y||_\infty\leq 1\}\f$. \deprecated
-    AffineSet(const Matrix<Float>& G, const Vector<Float>& c);
+    ValidatedAffineConstrainedImageSet(const Matrix<Float>& G, const Vector<Float>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \}\f$.
-    AffineSet(const IntervalVector& D, const Vector<IntervalAffine>& f);
+    ValidatedAffineConstrainedImageSet(const IntervalVector& D, const Vector<IntervalAffine>& f);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \mid c(s) \}\f$.
-    AffineSet(const IntervalVector& D, const Vector<IntervalAffine>& f, const List<IntervalAffineConstraint>& c);
+    ValidatedAffineConstrainedImageSet(const IntervalVector& D, const Vector<IntervalAffine>& f, const List<IntervalAffineConstraint>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in [-1,+1]^n \mid c(s) \}\f$.
-    explicit AffineSet(const Vector<IntervalAffineModel>& f, const List<IntervalAffineConstraintModel>& c);
-    explicit AffineSet(const Vector<IntervalAffineModel>& f);
+    explicit ValidatedAffineConstrainedImageSet(const Vector<IntervalAffineModel>& f, const List<IntervalAffineConstraintModel>& c);
+    explicit ValidatedAffineConstrainedImageSet(const Vector<IntervalAffineModel>& f);
 
-    AffineSet(const IntervalVector& D, const Vector<IntervalAffineModel>& f, const List<IntervalAffineConstraintModel>& c);
+    ValidatedAffineConstrainedImageSet(const IntervalVector& D, const Vector<IntervalAffineModel>& f, const List<IntervalAffineConstraintModel>& c);
 
-    AffineSet* clone() const;
+    ValidatedAffineConstrainedImageSet* clone() const;
     void new_parameter_constraint(const RealAffineConstraint& c);
     void new_parameter_constraint(const IntervalAffineConstraint& c);
     void new_constraint(const IntervalAffineConstraintModel& c);
@@ -134,7 +134,7 @@ class AffineSet
     static void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, GridCell& cell, int depth);
 };
 
-inline std::ostream& operator<<(std::ostream& os, const AffineSet& as) {
+inline std::ostream& operator<<(std::ostream& os, const ValidatedAffineConstrainedImageSet& as) {
     return as.write(os); }
 
 

@@ -44,7 +44,7 @@
 
 namespace Ariadne {
 
-class RealBox;
+class BoxSet;
 
 class Interval;
 template<class X> class Vector;

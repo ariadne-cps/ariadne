@@ -95,7 +95,7 @@ void optimal_constraint_adjoin_outer_approximation(PavingInterface& paving, cons
 
 namespace {
 
-Interval make_domain(const RealInterval& ivl) {
+Interval make_domain(const IntervalSet& ivl) {
     rounding_mode_t rnd=get_rounding_mode();
     Interval dom_lower_ivl=Interval(ivl.lower());
     Interval dom_upper_ivl=Interval(ivl.upper());
@@ -118,7 +118,7 @@ Interval make_domain(const RealInterval& ivl) {
 }
 
 
-IntervalVectorFunctionModel make_identity(const RealBox& bx, const IntervalFunctionModelFactoryInterface& fac) {
+IntervalVectorFunctionModel make_identity(const BoxSet& bx, const IntervalFunctionModelFactoryInterface& fac) {
     IntervalVector dom(bx.dimension());
     FloatVector errs(bx.dimension());
 
@@ -236,7 +236,7 @@ Enclosure* Enclosure::clone() const
     return new Enclosure(*this);
 }
 
-Enclosure::Enclosure(const RealBoundedConstraintSet& set, const IntervalFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const BoundedConstraintSet& set, const IntervalFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     this->_space_function=make_identity(set.domain(),this->function_factory());
@@ -1357,7 +1357,7 @@ std::ostream& Enclosure::write(std::ostream& os) const {
 
 
 /*
-AffineSet
+ValidatedAffineConstrainedImageSet
 Enclosure::affine_approximation() const
 {
     this->_check();
@@ -1380,7 +1380,7 @@ Enclosure::affine_approximation() const
             G[i][j]=component.model().gradient(j);
         }
     }
-    AffineSet result(G,h);
+    ValidatedAffineConstrainedImageSet result(G,h);
 
     Vector<Float> a(np);
     Float b;
@@ -1428,7 +1428,7 @@ IntervalAffineModel _affine_model(const IntervalTaylorModel& tm) {
 */
 
 
-AffineSet
+ValidatedAffineConstrainedImageSet
 Enclosure::affine_over_approximation() const
 {
     this->_check();
@@ -1450,7 +1450,7 @@ Enclosure::affine_over_approximation() const
     for(uint i=0; i!=space_function.result_size(); ++i) { affine_function_models[i]=affine_model(space_function.models()[i]); }
     //affine_function_models[space_function.result_size()]=affine_model(time_function.model());
 
-    AffineSet result(affine_function_models);
+    ValidatedAffineConstrainedImageSet result(affine_function_models);
     //std::cerr<<"\n"<<*this<<"\n"<<result<<"\n\n";
 
     for(uint i=0; i!=this->number_of_constraints(); ++i) {

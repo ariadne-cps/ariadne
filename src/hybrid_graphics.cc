@@ -96,8 +96,8 @@ HybridFigure::HybridFigure()
 {
 }
 
-void HybridFigure::set_bounds(const Map<RealVariable,RealInterval>& b) {
-    for(Map<RealVariable,RealInterval>::const_iterator iter=b.begin(); iter!=b.end(); ++iter) {
+void HybridFigure::set_bounds(const Map<RealVariable,IntervalSet>& b) {
+    for(Map<RealVariable,IntervalSet>::const_iterator iter=b.begin(); iter!=b.end(); ++iter) {
         bounds.insert(iter->first,approximation(iter->second));
     }
 }

@@ -31,10 +31,13 @@
 #include <iostream>
 #include <fstream>
 
+// (Placeholder constant required for compilation)
+static const std::string charcode="";
+
 //! Send a message to the global logging stream.
 #define ARIADNE_LOG(level,msg) \
     if(verbosity >= level) { \
-        std::clog << "[" << level << "] "; \
+        std::clog << "[" << charcode << ":" << level << "] "; \
         for(uint _i=0; _i!=level; ++_i) { std::clog<<' '; } \
         std::clog << msg << std::flush; \
     }
@@ -43,8 +46,10 @@ namespace Ariadne {
 
 struct Loggable {
   public:
-    Loggable() : verbosity(0) { }
+    Loggable() : verbosity(0),charcode("") { }
     mutable int verbosity;
+  protected:
+    mutable std::string charcode;
 };
 
 // Global log output file
@@ -52,8 +57,6 @@ extern std::ofstream log_file_stream;
 
 //! \brief Redirect logging output to file \a filename.
 void redirect_log(const char* filename);
-
-extern int global_verbosity;
 
 
 } // namespace Ariadne

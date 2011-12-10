@@ -91,22 +91,54 @@ std::pair<Box,Box> split(const Box& bx) {
 
 template<class F>
 tribool
-disjoint(const Box& d, const F& f, const Box& b, const Float& eps)
+separated(const Box& d, const F& f, const Box& b, const Float& eps)
 {
+
     Box fd=f.evaluate(d);
     Box fc=f.evaluate(Box(midpoint(d)));
+
+    //cout << "called with " << d << ", having fd=" << fd << " and fc=" << fc << endl;
     if(disjoint(fd,b)) {
+    	//cout << "evaluation is disjoint\n";
         return true;
-    } else if(inside(fc,b)) {
+    } else if(definitely(inside(fc,b))) {
+    	//cout << "evaluation of the midpoint is inside\n";
         return false;
     } else if(d.radius()<eps) {
+    	//cout << "radius limit reached\n";
         return indeterminate;
     } else {
         uint i=irmax(d);
-        return disjoint(split(d,i,left),f,b,eps) && disjoint(split(d,i,right),f,b,eps);
+        //cout << "splitting\n";
+        return separated(split(d,i,left),f,b,eps) && separated(split(d,i,right),f,b,eps);
     }
 }
 
+
+template<class F>
+tribool
+inside(const Box& d, const F& f, const Box& b, const Float& eps)
+{
+
+    Box fd=f.evaluate(d);
+    Box fc=f.evaluate(Box(midpoint(d)));
+
+    //cout << "called with " << d << ", having fd=" << fd << " and fc=" << fc << endl;
+    if(disjoint(fc,b)) {
+    	//cout << "evaluation of the midpoint is disjoint\n";
+        return false;
+    } else if(definitely(inside(fd,b))) {
+    	//cout << "evaluation is definitely inside\n";
+        return true;
+    } else if(d.radius()<eps) {
+    	//cout << "radius limit reached\n";
+        return indeterminate;
+    } else {
+        uint i=irmax(d);
+        //cout << "splitting\n";
+        return inside(split(d,i,left),f,b,eps) && inside(split(d,i,right),f,b,eps);
+    }
+}
 
 template<class DS>
 DS remove_subsets(const DS& ls)

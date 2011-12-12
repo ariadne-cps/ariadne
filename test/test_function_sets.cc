@@ -44,6 +44,9 @@ class TestConstrainedImageSet
   public:
     void test() {
         figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
+        ARIADNE_TEST_CALL(test_constructor());
+        ARIADNE_TEST_CALL(test_geometry());
+        ARIADNE_TEST_CALL(test_separated());
         ARIADNE_TEST_CALL(test_draw());
     }
 

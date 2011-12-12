@@ -122,7 +122,7 @@ void export_grid_tree_set() {
 
     class_<GridTreeSubset> grid_tree_subset_class("GridTreeSubset",no_init);
 
-    class_<GridTreeSet, bases<GridTreeSubset> > grid_tree_set_class("GridTreeSet",init<GridTreeSet>());
+    class_<GridTreeSet, bases<GridTreeSubset,DrawableInterface> > grid_tree_set_class("GridTreeSet",init<GridTreeSet>());
     grid_tree_set_class.def(init<uint>());
     grid_tree_set_class.def(init<Grid>());
     grid_tree_set_class.def("bounding_box", &GridTreeSet::bounding_box);

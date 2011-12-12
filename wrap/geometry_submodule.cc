@@ -116,7 +116,7 @@ struct to_python< ListSet< HybridBasicSet<ES> > > {
 
 
 class OpenSetWrapper
-  : public OpenSetInterface, public wrapper< OpenSetInterface >
+  : public virtual OpenSetInterface, public wrapper< OpenSetInterface >
 {
   public:
     OpenSetInterface* clone() const { return this->get_override("clone")(); }
@@ -127,7 +127,7 @@ class OpenSetWrapper
 };
 
 class ClosedSetWrapper
-  : public ClosedSetInterface, public wrapper< ClosedSetInterface >
+  : public virtual ClosedSetInterface, public wrapper< ClosedSetInterface >
 {
   public:
     ClosedSetInterface* clone() const { return this->get_override("clone")(); }
@@ -138,7 +138,7 @@ class ClosedSetWrapper
 
 
 class OvertSetWrapper
-  : public OvertSetInterface, public wrapper< OvertSetInterface >
+  : public virtual OvertSetInterface, public wrapper< OvertSetInterface >
 {
   public:
     OvertSetInterface* clone() const { return this->get_override("clone")(); }
@@ -149,7 +149,7 @@ class OvertSetWrapper
 
 
 class CompactSetWrapper
-  : public CompactSetInterface, public wrapper< CompactSetInterface >
+  : public virtual CompactSetInterface, public wrapper< CompactSetInterface >
 {
   public:
     CompactSetInterface* clone() const { return this->get_override("clone")(); }
@@ -162,12 +162,11 @@ class CompactSetWrapper
 };
 
 class LocatedSetWrapper
-  : public LocatedSetInterface, public wrapper< LocatedSetInterface >
+  : public virtual LocatedSetInterface, public wrapper< LocatedSetInterface >
 {
   public:
     LocatedSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
-    tribool covers(const Box& r) const { return this->get_override("covers")(); }
     tribool overlaps(const Box& r) const { return this->get_override("overlaps")(); }
     tribool separated(const Box& r) const { return this->get_override("separated")(); }
     tribool inside(const Box& r) const { return this->get_override("inside")(); }
@@ -289,7 +288,7 @@ void export_curve()
 void export_affine_set()
 {
 
-    class_<IntervalAffineConstrainedImageSet,bases<DrawableInterface> >
+    class_<IntervalAffineConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> >
         affine_set_class("IntervalAffineConstrainedImageSet",init<IntervalAffineConstrainedImageSet>());
     affine_set_class.def(init<Vector<Interval>, Matrix<Float>, Vector<Float> >());
     affine_set_class.def(init<Matrix<Float>, Vector<Float> >());
@@ -309,7 +308,7 @@ void export_affine_set()
 
 void export_constrained_image_set()
 {
-    class_<IntervalConstrainedImageSet,bases<DrawableInterface> >
+    class_<IntervalConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> >
     constrained_image_set_class("IntervalConstrainedImageSet",init<IntervalConstrainedImageSet>());
     constrained_image_set_class.def(init<Box>());
     constrained_image_set_class.def(init<Box,RealVectorFunction>());
@@ -323,7 +322,7 @@ void export_constrained_image_set()
     constrained_image_set_class.def("new_parameter_constraint", (void(IntervalConstrainedImageSet::*)(const RealConstraint&))&IntervalConstrainedImageSet::new_parameter_constraint);
     //constrained_image_set_class.def("outer_approximation", &IntervalConstrainedImageSet::outer_approximation);
     constrained_image_set_class.def("affine_approximation", &IntervalConstrainedImageSet::affine_approximation);
-    //constrained_image_set_class.def("affine_over_approximation", &IntervalConstrainedImageSet::affine_over_approximation);
+    	constrained_image_set_class.def("affine_over_approximation", &IntervalConstrainedImageSet::affine_over_approximation);
     constrained_image_set_class.def("adjoin_outer_approximation_to", &IntervalConstrainedImageSet::adjoin_outer_approximation_to);
     constrained_image_set_class.def("bounding_box", &IntervalConstrainedImageSet::bounding_box);
     constrained_image_set_class.def("inside", &IntervalConstrainedImageSet::inside);
@@ -338,27 +337,6 @@ void export_constrained_image_set()
 }
 
 
-void export_hybrid_box()
-{
-    class_<HybridBox> hybrid_box_class("HybridBox",init<HybridBox>());
-    hybrid_box_class.def(init<DiscreteLocation,RealSpace,Box>());
-    hybrid_box_class.def("location",&HybridBox::location,return_value_policy<copy_const_reference>());
-    hybrid_box_class.def("continuous_state_set",&HybridBox::continuous_state_set,return_value_policy<copy_const_reference>());
-    hybrid_box_class.def(self_ns::str(self));
-}
-
-void export_hybrid_constrained_image_set()
-{
-    typedef HybridBasicSet<IntervalConstrainedImageSet> HybridConstrainedImageSet;
-
-    class_<HybridConstrainedImageSet>
-        hybrid_constrained_image_set_class("HybridConstrainedImageSet",init<HybridConstrainedImageSet>());
-    hybrid_constrained_image_set_class.def(init<DiscreteLocation,RealSpace,Box>());
-    hybrid_constrained_image_set_class.def(init<DiscreteLocation,RealSpace,IntervalConstrainedImageSet>());
-    hybrid_constrained_image_set_class.def(self_ns::str(self));
-}
-
-
 
 
 void geometry_submodule() {
@@ -370,10 +348,8 @@ void geometry_submodule() {
     export_curve();
 
     export_affine_set();
-    export_constrained_image_set();
 
-    export_hybrid_box();
-    export_hybrid_constrained_image_set();
+    export_constrained_image_set();
 
 }
 

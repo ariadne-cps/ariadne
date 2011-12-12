@@ -230,8 +230,8 @@ tribool IntervalAffineConstrainedImageSet::separated(const Box& bx) const {
     LinearProgram<Float> lp;
     this->construct_linear_program(lp);
     for(uint i=0; i!=bx.size(); ++i) {
-        lp.l[i]=wbx[i].lower();
-        lp.u[i]=wbx[i].upper();
+        lp.l[i]=sub_down(wbx[i].lower(),this->_space_models[i].error());
+        lp.u[i]=add_up(wbx[i].upper(),this->_space_models[i].error());
     }
     //std::cerr<<"\ns="<<*this<<"\nbx="<<bx<<"\n\nA="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n\n";
     tribool feasible=indeterminate;
@@ -250,6 +250,11 @@ tribool IntervalAffineConstrainedImageSet::empty() const {
     return this->separated(this->bounding_box());
 }
 
+tribool IntervalAffineConstrainedImageSet::inside(const Box& bx) const {
+    ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
+    return widen(this->bounding_box()).inside(bx) || indeterminate;
+}
+
 
 GridTreeSet
 IntervalAffineConstrainedImageSet::outer_approximation(const Grid& g, int d) const {
@@ -259,7 +264,7 @@ IntervalAffineConstrainedImageSet::outer_approximation(const Grid& g, int d) con
 }
 
 
-void IntervalAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, GridCell& cell, int depth)
+void IntervalAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth)
 {
 
     // No need to check if cell is already part of the set
@@ -272,8 +277,10 @@ void IntervalAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInt
 
     // Make part of linear program dependent on cell
     for(uint i=0; i!=cell.dimension(); ++i) {
-        lp.l[i]=bx[i].lower();
-        lp.u[i]=bx[i].upper();
+        //lp.l[i]=bx[i].lower();
+        //lp.u[i]=bx[i].upper();
+        lp.l[i]=sub_down(bx[i].lower(),errors[i]);
+        lp.u[i]=add_up(bx[i].upper(),errors[i]);
     }
 
     int cell_tree_depth=(cell.depth()-cell.height());
@@ -295,8 +302,8 @@ void IntervalAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingInt
     } else {
         GridCell subcell1 = cell.split(0);
         GridCell subcell2 = cell.split(1);
-        _adjoin_outer_approximation_to(paving,lp,subcell1,depth);
-        _adjoin_outer_approximation_to(paving,lp,subcell2,depth);
+        _adjoin_outer_approximation_to(paving,lp,errors,subcell1,depth);
+        _adjoin_outer_approximation_to(paving,lp,errors,subcell2,depth);
     }
 
 }
@@ -320,6 +327,9 @@ IntervalAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float>
     //    (  0 C I )    ( -d )
     //    (  0 E 0 )    ( -f )
     // Spacial dimension nx; parameter dimension ne; number of constraints nc
+
+	// Warning: Uniform part of space function is not included!
+	
     const uint nx=this->dimension();
     const uint np=this->number_of_parameters();
     const uint nc=this->_constraint_models.size();
@@ -390,14 +400,17 @@ IntervalAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface
     // Create linear program
     LinearProgram<Float> lp;
     this->construct_linear_program(lp);
-
-    _adjoin_outer_approximation_to(paving,lp,bounding_cell,depth);
+	Vector<Float> errors(this->dimension());
+	for(uint i=0; i!=this->dimension(); ++i) {
+		errors[i]=this->_space_models[i].error();
+	}
+    _adjoin_outer_approximation_to(paving,lp,errors,bounding_cell,depth);
 }
 
 
 
 
-void IntervalAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, GridCell& cell, int depth)
+void IntervalAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth)
 {
     SimplexSolver<Float> lpsolver;
 
@@ -444,9 +457,9 @@ void IntervalAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(Pa
         paving.adjoin(cell);
     } else {
         GridCell subcell1 = cell.split(0);
-        GridCell subcell2 = cell.split(1);
-        IntervalAffineConstrainedImageSet::_adjoin_outer_approximation_to(paving,lp,subcell1,depth);
-        IntervalAffineConstrainedImageSet::_adjoin_outer_approximation_to(paving,lp,subcell2,depth);
+		GridCell subcell2 = cell.split(1);
+        IntervalAffineConstrainedImageSet::_adjoin_outer_approximation_to(paving,lp,errors,subcell1,depth);
+        IntervalAffineConstrainedImageSet::_adjoin_outer_approximation_to(paving,lp,errors,subcell2,depth);
     }
 
 }
@@ -559,12 +572,17 @@ IntervalAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingIn
     }
     lp.B=Matrix<Float>::identity(nx+nc);
 
+	Vector<Float> errors(this->dimension());
+	for(uint i=0; i!=this->dimension(); ++i) {
+		errors[i]=this->_space_models[i].error();
+	}
+	
     ARIADNE_LOG(9,"A="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n");
     tribool feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
     ARIADNE_LOG(9,"  vt="<<lp.vt<<"\nx="<<lp.x<<"\n");
     if(!feasible) { return; } // no intersection
 
-    _adjoin_outer_approximation_to(paving,lp,bounding_cell,depth);
+    _adjoin_outer_approximation_to(paving,lp,errors,bounding_cell,depth);
 }
 
 

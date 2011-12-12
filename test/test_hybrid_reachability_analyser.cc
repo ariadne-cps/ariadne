@@ -36,13 +36,21 @@
 #include "hybrid_evolver.h"
 #include "hybrid_discretiser.h"
 #include "hybrid_reachability_analyser.h"
-#include "graphics.h"
+#include "hybrid_graphics.h"
 #include "logging.h"
 
 #include "test.h"
 
 using namespace std;
 using namespace Ariadne;
+
+Colour reach_set_colour(0.25,0.25,0.50);
+Colour intermediate_set_colour(0.50,0.50,0.75);
+Colour final_set_colour(0.75,0.75,1.00);
+Colour evolve_set_colour(0.75,0.75,1.00);
+Colour initial_set_colour(0.75,0.75,1.00);
+Colour guard_set_colour(0.75,0.75,0.75);
+Colour bounding_box_colour(0.75,0.75,0.875);
 
 
 namespace Ariadne {
@@ -76,7 +84,7 @@ class TestHybridReachabilityAnalyser
     Interval bound;
     HybridSet initial_set;
     HybridTime reach_time;
-
+	
   public:
     static HybridReachabilityAnalyser build_analyser()
     {
@@ -135,7 +143,10 @@ class TestHybridReachabilityAnalyser
         RealBoundedConstraintSet const& initial=initial_set[loc];
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
         cout << "Reached " << lower_reach.size() << " cells " << endl << endl;
-        plot("test_reachability_analyser-map_lower_reach_evolve.png",bounding_box,lower_evolve,lower_reach,initial);
+        RealVariable x("x"); RealVariable y("y");
+   		Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
+        plot("test_reachability_analyser-map_lower_reach_evolve.png",axes,
+             reach_set_colour,hybrid_lower_reach,evolve_set_colour,hybrid_lower_evolve);
     }
 
     void test_upper_reach_evolve() {
@@ -150,8 +161,10 @@ class TestHybridReachabilityAnalyser
         const GridTreeSet& upper_evolve=upper_evolve_set[loc];
         const GridTreeSet& upper_reach=upper_reach_set[loc];
         RealBoundedConstraintSet const& initial=initial_set[loc];
-        //cout << "Reached " << upper_reach.size() << " cells out of " << upper_reach.capacity() << endl << endl;
-        plot("test_reachability_analyser-map_upper_reach_evolve.png",bounding_box,upper_evolve,upper_reach,initial);
+        RealVariable x("x"); RealVariable y("y");
+   		Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
+        plot("test_reachability_analyser-map_upper_reach_evolve.png",axes,
+             reach_set_colour,upper_reach_set,final_set_colour,upper_evolve_set);
     }
 
     void test_chain_reach() {
@@ -165,7 +178,10 @@ class TestHybridReachabilityAnalyser
         analyser.parameters().transient_time=4.0;
         cout << analyser.parameters();
         HybridGridTreeSet chain_reach_set=analyser.chain_reach(system,initial_set,bounding_boxes);
-        plot("test_reachability_analyser-map_chain_reach.png",bounding_box,chain_reach_set[loc],initial_set[loc]);
+        RealVariable x("x"); RealVariable y("y");
+   		Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
+        plot("test_reachability_analyser-map_chain_reach.png",axes,
+             reach_set_colour,chain_reach_set);
     }
 
     void test() {

@@ -1558,11 +1558,14 @@ tribool IntervalConstrainedImageSet::inside(const Box& bx) const
 tribool IntervalConstrainedImageSet::separated(const Box& bx) const
 {
     Box subdomain = this->_reduced_domain;
-    IntervalVectorFunction function = join(this->_function,this->constraint_function());
+    IntervalVectorFunction function(this->dimension()+this->number_of_constraints(),this->number_of_parameters());
+	for(uint i=0; i!=this->dimension(); ++i) { function[i]=this->_function[i]; }
+	for(uint i=0; i!=this->number_of_constraints(); ++i) { function[i+this->dimension()]=this->_constraints[i].function(); }
+    //IntervalVectorFunction function = join(this->_function,this->constraint_function());
     IntervalVector codomain = join(bx,this->constraint_bounds());
-    ConstraintSolver solver;
+	ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
-    return subdomain.empty() || indeterminate;
+    return tribool(subdomain.empty()) || indeterminate;
 }
 
 tribool IntervalConstrainedImageSet::overlaps(const Box& bx) const
@@ -1580,7 +1583,8 @@ void IntervalConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface&
     const IntervalVectorFunction function = this->function();
     const IntervalVectorFunction constraint_function = this->constraint_function();
     const IntervalVector constraint_bounds = this->constraint_bounds();
-
+	std::cerr<<"function="<<function<<"\nconstraint_function="<<constraint_function<<"\n";
+	
     switch(DISCRETISATION_METHOD) {
         case SUBDIVISION_DISCRETISE:
             Ariadne::subdivision_adjoin_outer_approximation(paving,subdomain,function,constraint_function,constraint_bounds,depth);
@@ -1632,7 +1636,7 @@ tribool IntervalConstrainedImageSet::satisfies(const IntervalConstraint& nc) con
 void draw(CanvasInterface& cnvs, const Projection2d& proj, const IntervalConstrainedImageSet& set, uint depth)
 {
     if( depth==0) {
-        set.affine_approximation().draw(cnvs,proj);
+        set.affine_over_approximation().draw(cnvs,proj);
     } else {
         Pair<IntervalConstrainedImageSet,IntervalConstrainedImageSet> split=set.split();
         draw(cnvs,proj,split.first,depth-1u);

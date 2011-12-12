@@ -83,7 +83,9 @@ IntervalAffineModelConstraint operator==(const IntervalAffineModel& am, const Fl
 //! Includes the class of zonotopes \f$Z=\{ f(x) \mid x\in D\}\f$, polyhedra \f$\{ f(x) \mid x\in\R^n \mid g(x)\leq 0\}\f$ and polytopes \f$\{ f(x) \mid x\in[0,\infty)^n \mid \sum_{i=1}^{n} x_i -1 = 0\}\f$.
 //! \sa IntervalConstrainedImageSet
 class IntervalAffineConstrainedImageSet
-    : public DrawableInterface, public Loggable
+    : public virtual CompactSetInterface
+	, public virtual DrawableInterface
+	, public Loggable
 {
     IntervalVector _domain;
     Vector<IntervalAffineModel> _space_models;
@@ -116,6 +118,7 @@ class IntervalAffineConstrainedImageSet
     tribool bounded() const;
     Box bounding_box() const;
     tribool separated(const Box& bx) const;
+    tribool inside(const Box& bx) const;
     tribool empty() const;
 
     void adjoin_outer_approximation_to(PavingInterface& g, int depth) const;
@@ -130,8 +133,8 @@ class IntervalAffineConstrainedImageSet
   private:
     void construct(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& c);
     void construct_linear_program(LinearProgram<Float>& lp) const;
-    static void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, GridCell& cell, int depth);
-    static void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, GridCell& cell, int depth);
+    static void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth);
+    static void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const IntervalAffineConstrainedImageSet& as) {

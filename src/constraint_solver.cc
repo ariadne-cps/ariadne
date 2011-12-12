@@ -219,6 +219,7 @@ bool ConstraintSolver::reduce(Box& domain, const IntervalVectorFunction& functio
         for(uint i=0; i!=codomain.size(); ++i) {
             for(uint j=0; j!=domain.size(); ++j) {
                 this->box_reduce(domain,function[i],codomain[i],j);
+		        if(domain.empty()) { return true; }
             }
         }
         if(domain.empty()) { return true; }

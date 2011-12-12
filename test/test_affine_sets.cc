@@ -265,6 +265,40 @@ class TestAffineSet
         figure.write("test_affine_set-empty");
     }
 
+    void test_uniform_error() {
+		double e=0.25;
+		Interval I = Interval(-1,+1);
+		Interval E = Interval(-e,+e);
+        D = IntervalVector::unit_box(2);
+        x = Affine<Interval>::variables(2);
+        IntervalAffineConstrainedImageSet set1=IntervalAffineConstrainedImageSet(D, (0.5*x[0]+0.25*x[1]+E/2, 0.25*x[0]-0.25*x[1]+E) );
+        D = IntervalVector::unit_box(4);
+        x = Affine<Interval>::variables(4);
+        IntervalAffineConstrainedImageSet set2=IntervalAffineConstrainedImageSet(D, (0.5*x[0]+0.25*x[1]+e*x[2]/2, 0.25*x[0]-0.25*x[1]+e*x[3]) );
+		
+        figure.clear();
+        figure.set_bounding_box(Box(2, -1.0,+1.0, -1.0,+1.0));
+        figure.set_fill_opacity(0.5);
+		figure.set_fill_colour(0,1,0);
+		figure.draw(set2);
+		figure.set_fill_colour(0,0,1);
+        figure.draw(set1);
+        figure.write("test_affine_set-uniform_error");
+
+		Grid g(2);
+		GridTreeSet paving1=outer_approximation(set1,g,4);
+		GridTreeSet paving2=outer_approximation(set2,g,4);
+
+		figure.clear();
+		figure.set_fill_colour(1,0,0);
+		figure.draw(paving1);
+		figure.set_fill_colour(0,0,1);
+        figure.draw(set1);
+        figure.write("test_affine_set-uniform_error-paving");
+
+		ARIADNE_TEST_ASSERT(paving1==paving2);
+
+	}
 
 
     void test_draw() {
@@ -419,6 +453,7 @@ class TestAffineSet
         ARIADNE_TEST_CALL(test_constrained_image());
         ARIADNE_TEST_CALL(test_separated());
         ARIADNE_TEST_CALL(test_outer_approximation());
+        ARIADNE_TEST_CALL(test_uniform_error());
         ARIADNE_TEST_CALL(test_draw());
     }
 

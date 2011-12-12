@@ -62,7 +62,7 @@ class PavingInterface;
 //! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
 //! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
 class RealConstraintSet
-    : public RegularSetInterface
+    : public virtual RegularSetInterface
 {
     Nat _dimension;
     List< RealConstraint > _constraints;
@@ -96,8 +96,8 @@ class RealConstraintSet
 //! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
 //! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
 class RealBoundedConstraintSet
-    : public SetInterface
-    , public DrawableInterface
+    : public virtual SetInterface
+    , public virtual DrawableInterface
 {
     RealBoxSet _domain;
     List< RealConstraint > _constraints;
@@ -136,7 +136,7 @@ class RealBoundedConstraintSet
 
 
 class RealConstrainedImageSet
-    : public LocatedSetInterface, public DrawableInterface
+    : public virtual LocatedSetInterface, public virtual DrawableInterface
 {
     RealBoxSet _domain;
     RealVectorFunction _function;
@@ -232,7 +232,7 @@ class RealConstrainedImageSet
 //! \brief A set defined as the image of the intersection of a box \f$D\f$ and a constraint set \f$g^{-1}(C)\f$ under a function \f$f\f$.
 //! In other words, \f$S=f(D\cap g^{-1}(C))\f$.
 class IntervalConstrainedImageSet
-    : public LocatedSetInterface, public DrawableInterface
+    : public virtual LocatedSetInterface, public virtual DrawableInterface
 {
     IntervalVector _domain;
     Box _reduced_domain;

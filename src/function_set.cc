@@ -496,6 +496,25 @@ RealConstrainedImageSet::RealConstrainedImageSet(const RealBoundedConstraintSet&
 }
 
 
+const RealVectorFunction RealConstrainedImageSet::constraint_function() const
+{
+    RealVectorFunction result(this->number_of_constraints(),this->number_of_parameters());
+    for(uint i=0; i!=this->number_of_constraints(); ++i) {
+        result[i]=this->constraint(i).function();
+    }
+    return result;
+}
+
+const RealBoxSet RealConstrainedImageSet::constraint_bounds() const
+{
+    RealBoxSet result(this->number_of_constraints());
+    for(uint i=0; i!=this->number_of_constraints(); ++i) {
+        result[i]=RealIntervalSet(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
+    }
+    return result;
+}
+
+
 Box RealConstrainedImageSet::bounding_box() const
 {
     return this->_function(over_approximation(this->_domain));
@@ -558,32 +577,12 @@ tribool RealConstrainedImageSet::satisfies(const RealConstraint& nc) const
 
 tribool RealConstrainedImageSet::separated(const Box& bx) const
 {
+    Box subdomain = over_approximation(this->_domain);
+    RealVectorFunction function = join(this->function(),this->constraint_function());
+    Box codomain = product(bx,Box(over_approximation(this->constraint_bounds())));
     ConstraintSolver solver;
-    const RealBoxSet& domain=this->_domain;
-
-/*
-    // Set up constraints as f(D)\cap C\neq\emptyset
-    const Box& codomain(this->dimension()+this->number_of_constraints());
-    RealVectorFunction function(codomain.size(),domain.size());
-    for(uint i=0; i!=this->dimension(); ++i) {
-        function.set(i,this->_function[i]);
-        codomain[i]=bx[i];
-    }
-    for(uint i=0; i!=this->number_of_constraints(); ++i) {
-        function.set(this->dimension()+i,this->constraints()[i].function());
-        codomain[this->dimension()+i=this->constraints()[i].function());
-    }
-    return solver.feasible(domain,function,codomain).first;
-*/
-
-    // Set up constraints as f_i(D)\cap C_i\neq\emptyset
-    List<RealConstraint> all_constraints;
-    for(uint i=0; i!=this->dimension(); ++i) {
-        all_constraints.append(RealConstraint(ExactFloat(bx[i].lower()),this->_function[i],ExactFloat(bx[i].upper())));
-    }
-    all_constraints.append(this->_constraints);
-    Pair<Tribool,FloatVector> result=ConstraintSolver().feasible(over_approximation(domain),all_constraints);
-    return !result.first;
+    solver.reduce(subdomain,function,codomain);
+    return tribool(subdomain.empty()) || indeterminate;
 }
 
 
@@ -596,8 +595,32 @@ tribool RealConstrainedImageSet::overlaps(const Box& bx) const
 void
 RealConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
-    //paving.adjoin_outer_approximation(*this,depth);
-    this->constraint_adjoin_outer_approximation_to(paving,depth);
+    ARIADNE_ASSERT(paving.dimension()==this->dimension());
+    const Box domain=over_approximation(this->domain());
+    const RealVectorFunction& space_function=this->function();
+    RealVectorFunction constraint_function(this->number_of_constraints(),domain.size());
+    RealBoxSet codomain(this->number_of_constraints());
+
+    for(uint i=0; i!=this->number_of_constraints(); ++i) {
+        constraint_function.set(i,this->_constraints[i].function());
+        codomain[i]=RealIntervalSet(this->_constraints[i].lower_bound(),this->_constraints[i].upper_bound());
+    }
+    Box constraint_bounds=over_approximation(codomain);
+    
+    switch(DISCRETISATION_METHOD) {
+        case SUBDIVISION_DISCRETISE:
+            Ariadne::subdivision_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
+            break;
+        case AFFINE_DISCRETISE:
+            Ariadne::affine_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
+            break;
+        case CONSTRAINT_DISCRETISE:
+            Ariadne::constraint_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
+            break;
+        default:
+            ARIADNE_FAIL_MSG("Unknown discretisation method\n");
+    }
+
 }
 
 
@@ -1286,7 +1309,6 @@ void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Int
     const uint l=(d.size()+f.result_size()+g.result_size())*2;
     Point x(l); for(uint k=0; k!=l; ++k) { x[k]=1.0/l; }
 
-    std::cerr<<"Here\n";
     VectorTaylorFunction fg;
     const VectorTaylorFunction* tfptr;
     if( (tfptr=dynamic_cast<const VectorTaylorFunction*>(f.raw_pointer())) ) {
@@ -1309,58 +1331,11 @@ void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Int
 
 
 
-void RealConstrainedImageSet::
-subdivision_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
-{
-    ARIADNE_ASSERT(paving.dimension()==this->dimension());
-    const Box domain=over_approximation(this->domain());
-    const RealVectorFunction& function=this->function();
-    RealVectorFunction constraints(this->number_of_constraints(),domain.size());
-    Box bounds(this->number_of_constraints());
-
-    for(uint i=0; i!=this->number_of_constraints(); ++i) {
-        constraints.set(i,this->_constraints[i].function());
-        bounds[i]=this->_constraints[i].bounds();
-    }
-
-    Ariadne::subdivision_adjoin_outer_approximation(paving,domain,function,constraints,bounds,depth);
-}
-
-
-
-void RealConstrainedImageSet::
-constraint_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
-{
-    ARIADNE_ASSERT(paving.dimension()==this->dimension());
-    const Box domain=over_approximation(this->domain());
-    const RealVectorFunction& function=this->function();
-    RealVectorFunction constraints(this->number_of_constraints(),domain.size());
-    Box bounds(this->number_of_constraints());
-
-    for(uint i=0; i!=this->number_of_constraints(); ++i) {
-        constraints.set(i,this->_constraints[i].function());
-        bounds[i]=this->_constraints[i].bounds();
-    }
-
-    Ariadne::constraint_adjoin_outer_approximation(paving,domain,function,constraints,bounds,depth);
-}
-
-void draw(CanvasInterface& cnvs, const Projection2d& proj, const RealConstrainedImageSet& set, uint depth)
-{
-    if( depth==0) {
-        set.affine_approximation().draw(cnvs,proj);
-    } else {
-        Pair<RealConstrainedImageSet,RealConstrainedImageSet> split=set.split();
-        draw(cnvs,proj,split.first,depth-1u);
-        draw(cnvs,proj,split.second,depth-1u);
-    }
-}
 
 void
 RealConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
 {
-    static const uint DEPTH = 0;
-    Ariadne::draw(cnvs,proj,*this,DEPTH);
+    IntervalConstrainedImageSet(approximation(this->_domain),this->_function,this->_constraints).draw(cnvs,proj);
 }
 
 
@@ -1559,11 +1534,11 @@ tribool IntervalConstrainedImageSet::separated(const Box& bx) const
 {
     Box subdomain = this->_reduced_domain;
     IntervalVectorFunction function(this->dimension()+this->number_of_constraints(),this->number_of_parameters());
-	for(uint i=0; i!=this->dimension(); ++i) { function[i]=this->_function[i]; }
-	for(uint i=0; i!=this->number_of_constraints(); ++i) { function[i+this->dimension()]=this->_constraints[i].function(); }
+    for(uint i=0; i!=this->dimension(); ++i) { function[i]=this->_function[i]; }
+    for(uint i=0; i!=this->number_of_constraints(); ++i) { function[i+this->dimension()]=this->_constraints[i].function(); }
     //IntervalVectorFunction function = join(this->_function,this->constraint_function());
     IntervalVector codomain = join(bx,this->constraint_bounds());
-	ConstraintSolver solver;
+    ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
     return tribool(subdomain.empty()) || indeterminate;
 }
@@ -1583,8 +1558,7 @@ void IntervalConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface&
     const IntervalVectorFunction function = this->function();
     const IntervalVectorFunction constraint_function = this->constraint_function();
     const IntervalVector constraint_bounds = this->constraint_bounds();
-	std::cerr<<"function="<<function<<"\nconstraint_function="<<constraint_function<<"\n";
-	
+
     switch(DISCRETISATION_METHOD) {
         case SUBDIVISION_DISCRETISE:
             Ariadne::subdivision_adjoin_outer_approximation(paving,subdomain,function,constraint_function,constraint_bounds,depth);
@@ -1647,7 +1621,7 @@ void draw(CanvasInterface& cnvs, const Projection2d& proj, const IntervalConstra
 void
 IntervalConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
 {
-    static const uint DEPTH = 0;
+    static const uint DEPTH = 4;
     Ariadne::draw(cnvs,proj,*this,DEPTH);
 }
 

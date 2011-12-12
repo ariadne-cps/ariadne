@@ -47,6 +47,8 @@ class TestConstrainedImageSet
         ARIADNE_TEST_CALL(test_constructor());
         ARIADNE_TEST_CALL(test_geometry());
         ARIADNE_TEST_CALL(test_separated());
+        ARIADNE_TEST_CALL(test_split());
+        ARIADNE_TEST_CALL(test_affine_approximation());
         ARIADNE_TEST_CALL(test_draw());
     }
 
@@ -109,26 +111,33 @@ class TestConstrainedImageSet
         RealConstrainedImageSet set(d,(s[0],0.25*s[0]*s[0]+s[1]+0.5*s[2]));
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
 
+        Figure figure;
+        figure.set_bounding_box(set.bounding_box()+IntervalVector(2,Interval(-1,+1))*0.5);
         Box b(set.bounding_box());
         List<Box> stack(1u,b);
         while(!stack.empty()) {
             Box bx=stack.back();
             stack.pop_back();
-            if(bx.radius()>=0.25) {
+            if(bx.radius()>=0.125) {
                 Pair<Box,Box> sbx=bx.split();
                 stack.append(sbx.first); stack.append(sbx.second);
             } else {
                 tribool overlaps = set.overlaps(bx);
-                if(overlaps) {
-                    figure.set_fill_colour(0.0,0.5,0.5);
-                    figure.draw(bx);
-                } else if(possibly(overlaps)) {
-                    figure.set_fill_colour(0.0,1.0,1.0);
-                    figure.draw(bx);
-                }
+                tribool separated = set.separated(bx);
+            if(definitely(overlaps)) {
+                    figure.set_fill_colour(0.0,0.5,0.0);
+                } else if(definitely(separated)) {
+                    figure.set_fill_colour(0.75,1.0,0.75);
+                } else {
+                    figure.set_fill_colour(0.55,0.75,0.5);
+            }
+                figure.draw(bx);
             }
         }
-        figure.write("test_constrained_image_set-separated");
+        figure.set_fill_opacity(0.5);
+        figure.set_fill_colour(0.0,0.5,0.5);
+        figure.draw(set);
+        figure.write("test_function_set-separated");
         figure.clear();
     }
 
@@ -189,7 +198,7 @@ class TestConstrainedImageSet
         figure.draw(subset12.affine_approximation());
         figure.draw(subset21.affine_approximation());
         figure.draw(subset22.affine_approximation());
-        figure.write("test_constrained_image_set-split");
+        figure.write("test_function_set-split");
     }
 
     void test_affine_approximation() {
@@ -206,7 +215,7 @@ class TestConstrainedImageSet
 
     void test_draw(const std::string& str, const RealConstrainedImageSet& set, uint acc) {
         figure.clear();
-        figure.set_bounding_box(Box(2, -1.75,+1.75,-1.5,+2.0));
+        figure.set_bounding_box(Box(2, -2.75,+2.75,-1.5,+2.0));
         GridTreeSet paving(set.dimension());
         set.adjoin_outer_approximation_to(paving,acc+1);
         figure.set_fill_opacity(1.0);

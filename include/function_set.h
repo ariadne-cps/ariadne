@@ -220,10 +220,6 @@ class RealConstrainedImageSet
     Void draw(CanvasInterface&,const Projection2d&) const;
     //! \brief Write to an output stream.
     OutputStream& write(OutputStream&) const;
-  private:
-    Void affine_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
-    Void subdivision_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
-    Void constraint_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 };
 
 
@@ -247,6 +243,9 @@ class IntervalConstrainedImageSet
         , _function(static_cast<IntervalVectorFunctionInterface const&>(RealVectorFunction::identity(dom.size()))) { }
     //! \brief Construct the image of \a dom under \a fn.
     IntervalConstrainedImageSet(const Vector<Interval>& dom, const IntervalVectorFunction& fn) : _domain(dom), _reduced_domain(dom), _function(fn) {
+        ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
+    //! \brief Construct the image of \a dom under \a fn.
+    IntervalConstrainedImageSet(const Vector<Interval>& dom, const IntervalVectorFunction& fn, const List<IntervalConstraint>& cnstr) : _domain(dom), _reduced_domain(dom), _function(fn), _constraints(cnstr) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
 
     //! \brief The domain of the set.

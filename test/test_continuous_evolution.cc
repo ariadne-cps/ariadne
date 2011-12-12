@@ -33,7 +33,6 @@
 #include "enclosure.h"
 #include "box.h"
 #include "list_set.h"
-#include "evolution_parameters.h"
 #include "integrator.h"
 #include "vector_field_evolver.h"
 #include "orbit.h"
@@ -96,10 +95,6 @@ void TestContinuousEvolution::test() const
     double step_size(0.5);
     double enclosure_radius(0.25);
 
-    EvolutionParameters parameters;
-    parameters.maximum_enclosure_radius=enclosure_radius;
-    parameters.maximum_step_size=step_size;
-
     // Set up the evaluators
     TaylorPicardIntegrator picard_integrator(maximum_error=1e-4,sweep_threshold=1e-8,lipschitz_constant=0.5,
                                              step_maximum_error=1e-6,step_sweep_threshold=1e-10,maximum_temporal_order=8);
@@ -111,8 +106,6 @@ void TestContinuousEvolution::test() const
     IntegratorInterface& integrator=picard_integrator;
 
     ARIADNE_TEST_PRINT(integrator);
-
-    VectorFieldEvolver evolver(parameters,integrator);
 
     // Define the initial box
     Box initial_box(2);
@@ -130,6 +123,9 @@ void TestContinuousEvolution::test() const
     VectorField vanderpol(vdp);
     ARIADNE_TEST_PRINT(vanderpol);
 
+    VectorFieldEvolver evolver(vanderpol,integrator);
+    evolver.configuration().maximum_enclosure_radius(enclosure_radius);
+    evolver.configuration().maximum_step_size(step_size);
 
     // Over-approximate the initial set by a grid cell
     TaylorFunctionFactory function_factory(ThresholdSweeper(1e-10));
@@ -139,7 +135,7 @@ void TestContinuousEvolution::test() const
     Semantics semantics=UPPER_SEMANTICS;
 
     // Compute the reachable sets
-    Orbit<EnclosureType> orbit = evolver.orbit(vanderpol,initial_set,time,semantics);
+    Orbit<EnclosureType> orbit = evolver.orbit(initial_set,time,semantics);
     ARIADNE_TEST_PRINT(orbit);
 
     // Print the intial, evolve and reach sets
@@ -169,14 +165,9 @@ void TestContinuousEvolution::failure_test() const
     double step_size(0.01);
     double enclosure_radius(0.25);
 
-    EvolutionParameters parameters;
-    parameters.maximum_enclosure_radius=enclosure_radius;
-    parameters.maximum_step_size=step_size;
-
     // Set up the evaluators
     TaylorPicardIntegrator integrator(maximum_error=1e-6,sweep_threshold=1e-8,lipschitz_constant=0.5,
                                       step_maximum_error=1e-8,step_sweep_threshold=1e-10,maximum_temporal_order=6);
-    VectorFieldEvolver evolver(parameters,integrator);
 
     // Define the initial box
     Box initial_box(2, 0.0,0.0, 0.9,0.9 );
@@ -188,6 +179,10 @@ void TestContinuousEvolution::failure_test() const
     VectorUserFunction<FailOne> failone(p);
     VectorField failone_vf(failone);
 
+    VectorFieldEvolver evolverone(failone_vf,integrator);
+    evolverone.configuration().maximum_enclosure_radius(enclosure_radius);
+    evolverone.configuration().maximum_step_size(step_size);
+
     TaylorFunctionFactory function_factory(ThresholdSweeper(1e-10));
     EnclosureType initial_set(initial_box,function_factory);
     // cout << "initial_set=" << initial_set << endl << endl;
@@ -195,7 +190,7 @@ void TestContinuousEvolution::failure_test() const
     Semantics semantics=UPPER_SEMANTICS;
 
     // Compute the reachable sets
-    Orbit<EnclosureType> orbit = evolver.orbit(failone_vf,initial_set,time,semantics);
+    Orbit<EnclosureType> orbit = evolverone.orbit(initial_set,time,semantics);
 
     cout << "\norbit.final=\n" << orbit.final() << endl << endl;
     cout << "final set radius="<< orbit.final()[0].radius() << endl;
@@ -219,13 +214,17 @@ void TestContinuousEvolution::failure_test() const
     VectorUserFunction<FailTwo> failtwo(p);
     VectorField failtwo_vf(failtwo);
 
+    VectorFieldEvolver evolvertwo(failtwo_vf,integrator);
+    evolvertwo.configuration().maximum_enclosure_radius(enclosure_radius);
+    evolvertwo.configuration().maximum_step_size(step_size);
+
     Box initial_box2(3, 0.0,0.0, 1.0,1.0, 1.0,1.0);
     initial_set = EnclosureType(initial_box2,function_factory);
 
     time = 1.5;
 
     // Compute the reachable sets
-    orbit = evolver.orbit(failtwo_vf,initial_set,time,semantics);
+    orbit = evolvertwo.orbit(initial_set,time,semantics);
 
     cout << "\norbit.final=\n" << orbit.final() << endl << endl;
     cout << "final set radius="<< orbit.final()[0].radius() << endl;

@@ -65,13 +65,13 @@ int main(int argc, const char* argv[])
     /// Compute the system evolution
 
     /// Create a GeneralHybridEvolver object
-    GeneralHybridEvolverType evolver;
+    GeneralHybridEvolverType evolver(ball);
     evolver.verbosity=evolver_verbosity;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.05;
-    evolver.parameters().maximum_step_size = 1.0/32;
-    std::cout <<  evolver.parameters() << std::endl;
+    evolver.configuration().set_maximum_enclosure_radius(0.05);
+    evolver.configuration().set_maximum_step_size(1.0/32);
+    std::cout <<  evolver.configuration() << std::endl;
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolverType::EnclosureType EnclosureType;
@@ -86,7 +86,7 @@ int main(int argc, const char* argv[])
     HybridTime evolution_time(1.5,4);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(ball,initial_set,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     //std::cout << "Orbit="<<orbit<<std::endl;
@@ -98,7 +98,7 @@ int main(int argc, const char* argv[])
 
 /*
     std::cout << "Computing reach set using GeneralHybridEvolver... " << std::flush;
-    EnclosureListType reach = evolver.reach(ball,initial_enclosure,evolution_time);
+    EnclosureListType reach = evolver.reach(initial_enclosure,evolution_time);
     std::cout << "done." << std::endl;
 
     std::cout << "Reach="<<reach<<std::endl;

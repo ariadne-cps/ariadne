@@ -125,23 +125,23 @@ CompositeHybridAutomaton create_heating_system()
     return heating_system;
 }
 
-HybridEvolverType create_evolver()
+HybridEvolverType create_evolver(const CompositeHybridAutomaton& heating_system)
 {
     // Create a GeneralHybridEvolver object
-    HybridEvolverType evolver;
+    HybridEvolverType evolver(heating_system);
 
     // Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.25;
-    //evolver.parameters().maximum_step_size = 0.125;
-    evolver.parameters().maximum_step_size = 0.5;
+    evolver.configuration().set_maximum_enclosure_radius(0.25);
+    //evolver.parameters().maximum_step_size(0.125);
+    evolver.configuration().set_maximum_step_size(0.5);
     evolver.verbosity=1;
-    cout <<  evolver.parameters() << endl << endl;
+    cout <<  evolver.configuration() << endl << endl;
 
     return evolver;
 }
 
 
-void compute_evolution(const CompositeHybridAutomaton& heating_system, const GeneralHybridEvolver& evolver)
+void compute_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
 {
 
     // Redefine the two discrete states
@@ -156,8 +156,6 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     // Create a simulator object.
     HybridSimulator simulator;
     simulator.set_step_size(0.03125);
-
-    RealConstantAssignment ac = (C=0.0);
 
     // Set an initial point for the simulation
     HybridPoint initial_point(heating_off, (C=0.0,T=18.0) );
@@ -183,7 +181,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     HybridExpressionSet initial_set(heating_off, (T==17.0,0.0<=C<=1.0/1024) );
     cout << "initial_set=" << initial_set << endl;
     // Compute the initial set as a validated enclosure.
-    HybridEnclosure initial_enclosure = evolver.enclosure(heating_system,initial_set);
+    HybridEnclosure initial_enclosure = evolver.enclosure(initial_set);
     cout << "initial_enclosure="<<initial_enclosure << endl << endl;
 
     // Set the maximum evolution time
@@ -192,7 +190,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
 
     // Compute a validated orbit.
     cout << "Computing orbit... \n" << flush;
-    Orbit<HybridEnclosure> orbit = evolver.orbit(heating_system,initial_set,evolution_time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     cout << "    done." << endl;
     // Write the validated orbit to standard output and plot.
     cout << "Writing orbit... " << flush;
@@ -207,7 +205,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
     // Compute reachable and evolved sets
     cout << "Computing reach and evolve sets... \n" << flush;
     ListSet<HybridEnclosure> reach,evolve;
-    make_lpair(reach,evolve) = evolver.reach_evolve(heating_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    make_lpair(reach,evolve) = evolver.reach_evolve(initial_enclosure,evolution_time,UPPER_SEMANTICS);
     cout << "    done." << endl;
     // Write the orbit to standard output and plot.
     cout << "Plotting reach and evolve sets... " << flush;
@@ -226,7 +224,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system, const Gen
 }
 
 
-void compute_reachable_sets(const CompositeHybridAutomaton& heating_system, const GeneralHybridEvolver& evolver)
+void compute_reachable_sets(const GeneralHybridEvolver& evolver)
 {
 /*
     // Create a ReachabilityAnalyser object
@@ -336,10 +334,10 @@ int main(int argc, const char* argv[])
     std::cerr<<heating_system<<"\n";
 
     // Create the analyser classes
-    HybridEvolverType evolver=create_evolver();
+    HybridEvolverType evolver=create_evolver(heating_system);
     std::cerr<<evolver<<"\n";
 
     // Compute the system evolution
     compute_evolution(heating_system,evolver);
-    compute_reachable_sets(heating_system,evolver);
+    //compute_reachable_sets(evolver);
 }

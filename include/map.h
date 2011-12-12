@@ -49,6 +49,8 @@ class IteratedMap
     typedef EuclideanSpace StateSpaceType;
   public:
     IteratedMap(const RealVectorFunction& f) : _function(f) { }
+    virtual IteratedMap* clone() const { return new IteratedMap(*this); }
+    virtual ~IteratedMap() { }
     const RealVectorFunction& function() const { return _function; }
     Grid grid() const { return Grid(_function.argument_size()); }
   private:

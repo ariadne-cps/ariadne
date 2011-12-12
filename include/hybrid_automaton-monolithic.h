@@ -182,19 +182,26 @@ class MonolithicHybridAutomaton
   private:
     //! \brief The list of the hybrid automaton's discrete modes.
     Map< DiscreteLocation, Mode > _modes;
+  protected:
+    //! \brief The name of the automaton
+    Identifier _name;
 
   public:
     //@{
     //! \name Constructors and destructors
 
-    //! \brief Construct an empty automaton with no name
+    //! \brief Default constructor with "system" name
     MonolithicHybridAutomaton();
 
-    //! \brief Construct an empty automaton with the given name (Deprecated)
-    MonolithicHybridAutomaton(const std::string& name);
+    //! \brief Construct an empty automaton with the given name
+    MonolithicHybridAutomaton(Identifier name);
 
-    //! \brief  Destructor.
-    ~MonolithicHybridAutomaton();
+    //! \brief Destructor.
+    virtual ~MonolithicHybridAutomaton();
+
+    //! \brief Construct dynamically-allocated copy. (Not currently implemented)
+    MonolithicHybridAutomaton* clone() const { return new MonolithicHybridAutomaton(*this); }
+
     //@}
 
     //@{
@@ -252,6 +259,9 @@ class MonolithicHybridAutomaton
 
     //@{
     //! \name Data access and queries.
+
+    //! \brief Get the name of the automaton.
+    const Identifier& name() const { return _name; }
 
     //! \brief Test if the hybrid automaton has a discrete mode \a location.
     bool has_mode(DiscreteLocation location) const;

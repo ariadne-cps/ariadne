@@ -165,22 +165,22 @@ int main(int argc,char *argv[])
     /// Compute the system evolution
 
     /// Create a GeneralHybridEvolver object
-    GeneralHybridEvolver evolver;
+    GeneralHybridEvolver evolver(watertank_system);
     evolver.verbosity = 1;
 
     /// Set the evolution parameters
     double maximum_step_size= 0.05;
-    evolver.parameters().maximum_enclosure_radius = 0.5;
-    evolver.parameters().maximum_step_size = maximum_step_size;
-    std::cout <<  evolver.parameters() << std::endl;
+    evolver.configuration().set_maximum_enclosure_radius(0.5);
+    evolver.configuration().set_maximum_step_size(maximum_step_size);
+    std::cout <<  evolver.configuration() << std::endl;
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
-    double time_step = 0.25;
-    double total_time = 35.0;
+    //double time_step = 0.25;
+    //double total_time = 35.0;
     double skip_time = 35.0;
     HybridTime evolution_time(skip_time,6);
 
@@ -190,8 +190,8 @@ int main(int argc,char *argv[])
     HybridScaling scaling( (water|0.25, aperture|1.0, pressure|1.0, error|1.0, time|1.0) );
     HybridGrid hg(watertank_system.state_space(),scaling);
     HybridGridTreeSet hgts(hg);
-    uint grid_depth = 9;
-    uint grid_height = 8;
+    //uint grid_depth = 9;
+    //uint grid_height = 8;
 
     std::cout << "Computing timed evolution starting from location one_saturated, x = 0.0, y = 1.0 for " << skip_time << " seconds" << std::endl;
     for(double b=bmin ; b < bmax+bstep ; b += bstep) {
@@ -199,7 +199,7 @@ int main(int argc,char *argv[])
             cout << "b = "<< b <<", Delta = "<<d<<std::endl;
             RealVariableBox initial_box((water==0.0, aperture==1.0, pressure==b, error==d, time==0.0));
             HybridExpressionSet initial_set(one_saturated,initial_box);
-            OrbitType result = evolver.orbit(watertank_system,initial_set,evolution_time,UPPER_SEMANTICS);
+            OrbitType result = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
             cout<<"Orbit.final=" << result.final() << endl;
             /*cout<<"Adjoining result to the grid..."<<std::flush;
             hgts.adjoin(outer_approximation(result.reach(),hgts.grid(),grid_depth));

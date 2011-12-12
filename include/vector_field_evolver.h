@@ -39,9 +39,9 @@
 
 #include "vector_field.h"
 #include "function_interface.h"
+#include "configuration_interface.h"
 #include "integrator_interface.h"
 #include "evolver_base.h"
-#include "evolution_parameters.h"
 
 #include "logging.h"
 
@@ -52,7 +52,7 @@ template<class Sys, class BS> class Evolver;
 class VectorField;
 template<class ES> class Orbit;
 
-class EvolutionParameters;
+class VectorFieldEvolverConfiguration;
 class Enclosure;
 
 class EvolutionProfiler;
@@ -67,7 +67,7 @@ class VectorFieldEvolver
     , public Loggable
 {
   public:
-    typedef ContinuousEvolutionParameters EvolutionParametersType;
+    typedef VectorFieldEvolverConfiguration ConfigurationType;
     typedef VectorField::TimeType TimeType;
     typedef VectorField SystemType;
     typedef Enclosure EnclosureType;
@@ -77,17 +77,21 @@ class VectorFieldEvolver
   public:
 
     //! \brief Construct from parameters and an integrator to compute the flow.
-    VectorFieldEvolver(const EvolutionParametersType& parameters,
-                       const IntegratorInterface& integrator);
+    VectorFieldEvolver(
+    		const SystemType& system,
+            const IntegratorInterface& integrator);
 
     /*! \brief Make a dynamically-allocated copy. */
     VectorFieldEvolver* clone() const { return new VectorFieldEvolver(*this); }
 
+    /* \brief Get the internal system. */
+    virtual const SystemType& system() const { return *_sys_ptr; }
+
     //@{
-    //! \name Parameters controlling the evolution.
-    //! \brief A reference to the parameters controlling the evolution.
-    EvolutionParametersType& parameters() { return *this->_parameters; }
-    const EvolutionParametersType& parameters() const { return *this->_parameters; }
+    //! \name Configuration for the class.
+    //! \brief A reference to the configuration controlling the evolution.
+    ConfigurationType& configuration() { return *this->_configuration; }
+    const ConfigurationType& configuration() const { return *this->_configuration; }
 
     //@}
 
@@ -95,40 +99,72 @@ class VectorFieldEvolver
     //@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
     using EvolverBase< VectorField, EnclosureType >::evolve;
     using EvolverBase< VectorField, EnclosureType >::reach;
 
     //! \brief Compute an approximation to the evolution set using upper semantics.
-    EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
+    EnclosureListType evolve(const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false);
+        this->_evolution(final,reachable,intermediate,initial_set,time,UPPER_SEMANTICS,false);
         return final; }
 
     //! \brief Compute an approximation to the reachable set under upper semantics.
-    EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
+    EnclosureListType reach(const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true);
+        this->_evolution(final,reachable,intermediate,initial_set,time,UPPER_SEMANTICS,true);
         return reachable; }
 
   protected:
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-                            const SystemType& system, const EnclosureType& initial, const TimeType& time,
+                            const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
 
     virtual void _evolution_step(List< TimedEnclosureType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-                                 const SystemType& system, const TimedEnclosureType& current_set, const TimeType& time,
+                                 const TimedEnclosureType& current_set, const TimeType& time,
                                  Semantics semantics, bool reach) const;
 
   private:
-    boost::shared_ptr< EvolutionParametersType > _parameters;
+    boost::shared_ptr< SystemType > _sys_ptr;
     boost::shared_ptr< IntegratorInterface > _integrator;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
+    boost::shared_ptr< ConfigurationType > _configuration;
 };
 
 
+//! \brief Configuration for a VectorFieldEvolver, essentially for controlling the accuracy of continuous evolution methods.
+class VectorFieldEvolverConfiguration : public ConfigurationInterface
+{
+  public:
+    typedef double RealType;
+
+    //! \brief Default constructor gives reasonable values.
+    VectorFieldEvolverConfiguration();
+
+  private:
+
+    //! \brief The maximum allowable step size for integration.
+    //! Decreasing this value increases the accuracy of the computation.
+    RealType _maximum_step_size;
+
+    //! \brief The maximum allowable radius of a basic set during integration.
+    //! Decreasing this value increases the accuracy of the computation of an over-approximation.
+    RealType _maximum_enclosure_radius;
+
+  public:
+
+    const RealType& maximum_step_size() const { return _maximum_step_size; }
+    void maximum_step_size(const RealType value) { _maximum_step_size = value; }
+
+    const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
+    void maximum_enclosure_radius(const RealType value) { _maximum_enclosure_radius = value; }
+
+  public:
+
+    virtual std::ostream& write(std::ostream& os) const;
+};
 
 } // namespace Ariadne
 

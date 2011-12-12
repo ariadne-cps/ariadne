@@ -79,14 +79,14 @@ int main(int argc, const char* argv[])
 
     /// Introduces the global parameters
     Real TIME_LIMIT = 1.0/frequency;
-//    float TIME_LIMIT = 0.0042;
+    //float TIME_LIMIT = 0.0042;
     int TRAN_LIMIT = 1;
     double MAX_ENCL_RADIUS = 1.0;
     double MAX_STEP_SIZE = 1e-2/frequency;
-//    float LOCK_TOGRID_TIME = 2.0/frequency;
-    double LOCK_TOGRID_TIME = 0.25/frequency;
-    int MAX_GRID_DEPTH = 7;
-    int VERBOSITY=3;
+    //float LOCK_TOGRID_TIME = 2.0/frequency;
+    //double LOCK_TOGRID_TIME = 0.25/frequency;
+    //int MAX_GRID_DEPTH = 7;
+    //int VERBOSITY=3;
     bool ENABLE_SUBDIV=false;
 
     /// Build the Hybrid System
@@ -187,14 +187,14 @@ int main(int argc, const char* argv[])
     /// Compute the system evolution
 
     /// Create a GeneralHybridEvolver object
-    GeneralHybridEvolver evolver;
+    GeneralHybridEvolver evolver(rectifier);
     evolver.verbosity = evolver_verbosity;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = MAX_ENCL_RADIUS;
-    evolver.parameters().maximum_step_size = MAX_STEP_SIZE;
-    evolver.parameters().enable_subdivisions = ENABLE_SUBDIV;
-    std::cout <<  evolver.parameters() << std::endl;
+    evolver.configuration().set_maximum_enclosure_radius(MAX_ENCL_RADIUS);
+    evolver.configuration().set_maximum_step_size(MAX_STEP_SIZE);
+    evolver.configuration().set_enable_subdivisions(ENABLE_SUBDIV);
+    std::cout <<  evolver.configuration() << std::endl;
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
@@ -215,7 +215,7 @@ int main(int argc, const char* argv[])
 
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(rectifier,initial_set,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;

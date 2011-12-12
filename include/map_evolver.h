@@ -39,8 +39,8 @@
 
 #include "map.h"
 #include "function_interface.h"
+#include "configuration_interface.h"
 #include "evolver_base.h"
-#include "evolution_parameters.h"
 
 #include "logging.h"
 
@@ -52,7 +52,7 @@ class Enclosure;
 class IteratedMap;
 template<class ES> class Orbit;
 
-class EvolutionParameters;
+class MapEvolverConfiguration;
 class EvolutionProfiler;
 
 
@@ -66,7 +66,7 @@ class MapEvolver
 {
     typedef IntervalTaylorModel VariableType;
   public:
-    typedef ContinuousEvolutionParameters EvolutionParametersType;
+    typedef MapEvolverConfiguration ConfigurationType;
     typedef IteratedMap::TimeType TimeType;
     typedef IteratedMap SystemType;
     typedef Enclosure EnclosureType;
@@ -76,19 +76,20 @@ class MapEvolver
   public:
 
     //! \brief Default constructor.
-    MapEvolver();
-
-    //! \brief Construct from parameters using a default integrator.
-    MapEvolver(const EvolutionParametersType& parameters);
+    MapEvolver(const SystemType& system);
 
     /*! \brief Make a dynamically-allocated copy. */
     MapEvolver* clone() const { return new MapEvolver(*this); }
 
+    /* \brief Get the internal system. */
+    virtual const SystemType& system() const { return *_sys_ptr; }
+
     //@{
-    //! \name Parameters controlling the evolution.
-    //! \brief A reference to the parameters controlling the evolution.
-    EvolutionParametersType& parameters() { return *this->_parameters; }
-    const EvolutionParametersType& parameters() const { return *this->_parameters; }
+    //! \name Configuration for the class.
+
+    //! \brief A reference to the configuration.
+    ConfigurationType& configuration() { return *this->_configuration; }
+    const ConfigurationType& configuration() const { return *this->_configuration; }
 
     //@}
 
@@ -96,36 +97,63 @@ class MapEvolver
     //@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
 
     //! \brief Compute an approximation to the evolution set using upper semantics.
-    EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
+    EnclosureListType evolve(const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false);
+        this->_evolution(final,reachable,intermediate,initial_set,time,UPPER_SEMANTICS,false);
         return final; }
 
     //! \brief Compute an approximation to the evolution set under upper semantics.
-    EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
+    EnclosureListType reach(const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true);
+        this->_evolution(final,reachable,intermediate,initial_set,time,UPPER_SEMANTICS,true);
         return intermediate; }
 
   protected:
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-                            const SystemType& system, const EnclosureType& initial, const TimeType& time,
+                            const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
 
     virtual void _evolution_step(List< TimedEnclosureType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-                                 const SystemType& system, const TimedEnclosureType& current_set, const TimeType& time,
+                                 const TimedEnclosureType& current_set, const TimeType& time,
                                  Semantics semantics, bool reach) const;
 
   private:
-    boost::shared_ptr< EvolutionParametersType > _parameters;
+    boost::shared_ptr< SystemType > _sys_ptr;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
+    boost::shared_ptr< ConfigurationType > _configuration;
 };
 
+
+//! \brief Configuration for a MapEvolver, essentially to control accuracy of evolution.
+class MapEvolverConfiguration : public ConfigurationInterface
+{
+  public:
+    typedef double RealType;
+
+    //! \brief Default constructor gives reasonable values.
+    MapEvolverConfiguration();
+
+  private:
+
+    //! \brief The maximum allowable radius of a basic set.
+    //! Decreasing this value increases the accuracy of the computation of an over-approximation.
+    RealType _maximum_enclosure_radius;
+
+  public:
+
+    const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
+    void maximum_enclosure_radius(const RealType value) { _maximum_enclosure_radius = value; }
+
+  public:
+
+    virtual std::ostream& write(std::ostream& os) const;
+
+};
 
 
 } // namespace Ariadne

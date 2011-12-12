@@ -40,12 +40,11 @@
 #include "hybrid_time.h"
 #include "hybrid_set.h"
 
+#include "configuration_interface.h"
 #include "hybrid_enclosure.h"
 #include "hybrid_orbit.h"
 #include "hybrid_automaton_interface.h"
-#include "evolver_interface.h"
-#include "evolver_base.h"
-#include "evolution_parameters.h"
+#include "hybrid_evolver_interface.h"
 
 #include "logging.h"
 
@@ -56,6 +55,8 @@ typedef FunctionModelFactoryInterface<Interval> IntervalFunctionModelFactoryInte
 
 class IntegratorInterface;
 class SolverInterface;
+class HybridEvolverBaseConfiguration;
+class GeneralHybridEvolverConfiguration;
 
 // A derived class of IntervalVectorFunctionModel representing the flow $\phi(x,t)\f$ of a
 // differential equations \f$\dot{x}=f(x)\f$.
@@ -68,22 +69,6 @@ class FlowFunctionPatch
     Interval time_domain() const { return this->domain()[this->domain().size()-1]; }
     IntervalVector space_domain() const { return project(this->domain(),Ariadne::range(0,this->domain().size()-1)); }
     IntervalVector const codomain() const { return this->IntervalVectorFunctionModel::codomain(); }
-};
-
-//! \brief Interface for hybrid evolvers using HybridEnclosure as the enclosure type.
-class HybridEvolverInterface
-    : public EvolverBase<HybridAutomatonInterface,HybridEnclosure>
-{
-  public:
-    //! \brief Make a dynamically-allocated copy.
-    virtual HybridEvolverInterface* clone() const = 0;
-    //! \brief Evolution starting in a box.
-    //! HACK: Provided since HybridEnclosure needs a Sweeper to initialise.
-    virtual Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_enclosure,const TimeType& time,Semantics semantics) const = 0;
-    virtual Orbit<EnclosureType> orbit(const SystemType& system, const HybridBox& initial_box,const TimeType& time,Semantics semantics) const = 0;
-    virtual Orbit<EnclosureType> orbit(const SystemType& system, const HybridExpressionSet& initial_set,const TimeType& time,Semantics semantics) const = 0;
-    virtual EnclosureType enclosure(const HybridBox& initial_box) const = 0;
-    virtual EnclosureType enclosure(const SystemType& system, const HybridExpressionSet& initial_set) const = 0;
 };
 
 struct TransitionData;
@@ -110,10 +95,10 @@ struct EvolutionData;
 //! interface.
 class HybridEvolverBase
     : public HybridEvolverInterface
-    , public Loggable
 {
+    friend class HybridEvolverBaseConfiguration;
   public:
-    typedef ContinuousEvolutionParameters EvolutionParametersType;
+    typedef HybridEvolverBaseConfiguration ConfigurationType;
     typedef IntervalFunctionModelFactoryInterface FunctionFactoryType;
     typedef HybridAutomatonInterface SystemType;
     typedef SystemType::TimeType TimeType;
@@ -126,29 +111,32 @@ class HybridEvolverBase
   public:
 
     //@{
-    //! \name Constructors and descructors
+    //! \name Constructors and destructors
 
     //! \brief Default constructor.
-    HybridEvolverBase();
+    HybridEvolverBase(const SystemType& system);
 
     //! \brief Construct from parameters using a default integrator.
-    HybridEvolverBase(const EvolutionParametersType& parameters,
-                      const FunctionFactoryType& factory);
+    HybridEvolverBase(
+    		const SystemType& system,
+            const FunctionFactoryType& factory);
 
     /*! \brief Make a dynamically-allocated copy. */
     HybridEvolverBase* clone() const = 0;
 
+    /*! \brief Get the internal system. */
+    const SystemType& system() const;
+
     //@}
 
     //@{
-    //! \name Parameters controlling the evolution.
+    //! \name Settng and configuration for the class.
 
-    //! \brief A reference to the parameters controlling the evolution.
-    EvolutionParametersType& parameters();
-    //! \brief A constant reference to the parameters controlling the evolution.
-    const EvolutionParametersType& parameters() const;
-    /*! \brief Set the parameters controlling the evolution. */
-    void set_parameters(const EvolutionParametersType& parameters);
+    ConfigurationType& configuration();
+    const ConfigurationType& configuration() const;
+
+    //! \brief Change the configuration from a \a domain and \a lengths (NOT IMPLEMENTED).
+    virtual void reconfigure(const HybridBoxes& domain, const HybridFloatVector& lengths) { }
 
     /*! \brief The class which constructs functions for the enclosures. */
     const FunctionFactoryType& function_factory() const;
@@ -161,7 +149,7 @@ class HybridEvolverBase
     void set_solver(const SolverInterface& solver);
 
     virtual EnclosureType enclosure(const HybridBox& initial_box) const;
-    virtual EnclosureType enclosure(const SystemType& system, const HybridExpressionSet& set) const;
+    virtual EnclosureType enclosure(const HybridExpressionSet& set) const;
 
     bool ALLOW_CREEP; //!< If true, a less-than-full evolution step may be taken to avoid splitting due to partially crossing a guard.
     bool ALLOW_UNWIND; //!< If true, a less-than-full evolution step may be taken to try to restore all time values over the parameter domain to the same value.
@@ -172,21 +160,21 @@ class HybridEvolverBase
     //! \name Main evolution functions.
 
     //! \brief Compute an approximation to the orbit set using the given semantics.
-    Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_enclosure, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
-    Orbit<EnclosureType> orbit(const SystemType& system, const HybridBox& initial_box, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
-    Orbit<EnclosureType> orbit(const SystemType& system, const HybridExpressionSet& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const HybridBox& initial_box, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const HybridExpressionSet& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
 
     //! \brief Compute an approximation to the evolution set using the given semantics.
-    EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
+    EnclosureListType evolve(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,false);
+        this->_evolution(final,reachable,intermediate,initial_set,time,semantics,false);
         return final; }
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
+    EnclosureListType reach(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true);
+        this->_evolution(final,reachable,intermediate,initial_set,time,semantics,true);
         return reachable; }
     //@}
 
@@ -208,7 +196,7 @@ class HybridEvolverBase
     //! \param reach A flag indicating whether the reachable sets should
     //!   be computed.
     virtual void _evolution(ListSet<HybridEnclosure>& final, ListSet<HybridEnclosure>& reachable, ListSet<HybridEnclosure>& intermediate,
-                            const SystemType& system, const EnclosureType& initial, const TimeType& time,
+                            const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
 
     //! \brief Compute the evolution within a single discrete mode.
@@ -221,7 +209,6 @@ class HybridEvolverBase
     virtual
     void
     _evolution_in_mode(EvolutionData& evolution_data,
-                       SystemType const& system,
                        TimeType const& maximum_time) const;
 
     //! \brief Performs an evolution step on one of the sets listed in \a
@@ -239,8 +226,7 @@ class HybridEvolverBase
     //! information in one place
     virtual
     Map<DiscreteEvent,TransitionData>
-    _extract_transitions(DiscreteLocation const& location,
-                         HybridAutomatonInterface const& system) const;
+    _extract_transitions(DiscreteLocation const& location) const;
 
     //! \brief Compute the flow of the \a vector_field, starting in the
     //! given \a initial_set, and with a time step as large as
@@ -457,20 +443,23 @@ class HybridEvolverBase
     _log_summary(EvolutionData const& evolution_data, HybridEnclosure const& starting_set) const;
 
   protected:
-    void _create(EvolutionParametersType* parameters, FunctionFactoryType* factory);
-  private:
-    boost::shared_ptr< EvolutionParametersType > _parameters_ptr;
-    boost::shared_ptr< FunctionFactoryType > _function_factory_ptr;
+    void _create(const SystemType& system, FunctionFactoryType* factory);
     boost::shared_ptr< IntegratorInterface > _integrator_ptr;
+  private:
+    boost::shared_ptr< FunctionFactoryType > _function_factory_ptr;
+
     boost::shared_ptr< SolverInterface > _solver_ptr;
+    boost::shared_ptr< SystemType > _sys_ptr;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
+  protected:
+    boost::shared_ptr< ConfigurationType > _configuration_ptr;
 };
 
 
 bool is_blocking(EventKind evk);
 bool is_activating(EventKind evk);
 
-//! \brief A data type used to store information about a transtion of a hybrid system.
+//! \brief A data type used to store information about a transition of a hybrid system.
 //! \relates HybridEvolverInterface
 struct TransitionData
 {
@@ -635,6 +624,74 @@ struct EvolutionData
     Semantics semantics;
 };
 
+
+//! \brief Configuration for HybridEvolverBase, for controlling the accuracy of continuous evolution methods.
+class HybridEvolverBaseConfiguration : public ConfigurationInterface
+{
+  public:
+    typedef uint UnsignedIntType;
+    typedef double RealType;
+
+  protected:
+
+    HybridEvolverBaseConfiguration(HybridEvolverBase& evolver);
+
+  private:
+
+    HybridEvolverBase& _evolver;
+
+  private:
+
+    //! \brief The accuracy required for integration.
+    //! Decreasing this value increases the accuracy of the computation.
+    RealType _flow_accuracy;
+
+    //! \brief The maximum allowable step size for integration.
+    //! Decreasing this value increases the accuracy of the computation.
+    RealType _maximum_step_size;
+
+    //! \brief The maximum allowable radius of a basic set during integration.
+    //! Decreasing this value increases the accuracy of the computation of an over-approximation.
+    //! Decreasing this value reduces the actual evolution time of a lower-approximation.
+    RealType _maximum_enclosure_radius;
+
+    //! \brief The maximum allowable approximation error in the parameter-to-space mapping of an enclosure set.
+    //! Decreasing this value increases the accuracy of the computation of an over-approximation.
+    RealType _maximum_spacial_error;
+
+    //! \brief Enable reconditioning of basic sets (false by default).
+    bool _enable_reconditioning;
+
+    //! \brief Enable subdivision of basic sets (false by default), only for upper semantics.
+    bool _enable_subdivisions;
+
+  public:
+
+    const RealType& flow_accuracy() const { return _flow_accuracy; }
+    //! \brief Construct the _integrator of the evolver, then set the _flow_accuracy.
+    void set_flow_accuracy(const RealType value);
+
+    const RealType& maximum_step_size() const { return _maximum_step_size; }
+    void set_maximum_step_size(const RealType value) { _maximum_step_size = value; }
+
+    const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
+    void set_maximum_enclosure_radius(const RealType value) { _maximum_enclosure_radius = value; }
+
+    const RealType& maximum_spacial_error() const { return _maximum_spacial_error; }
+    void set_maximum_spacial_error(const RealType value) { _maximum_spacial_error = value; }
+
+    const bool& enable_reconditioning() const { return _enable_reconditioning; }
+    void set_enable_reconditioning(const bool value) { _enable_reconditioning = value; }
+
+    const bool& enable_subdivisions() const { return _enable_subdivisions; }
+    void set_enable_subdivisions(const bool value) { _enable_subdivisions = value; }
+
+  public:
+
+    virtual std::ostream& write(std::ostream& os) const;
+};
+
+
 //! \brief A class for computing the evolution of a general hybrid system as
 //! efficiently as possible. In particular, crossing times are computed
 //! explicitly, and the number of additional constraints is minimised.
@@ -645,9 +702,9 @@ class GeneralHybridEvolver
 {
   public:
 
-    GeneralHybridEvolver() : HybridEvolverBase() { }
-    GeneralHybridEvolver(const EvolutionParametersType& parameters,
-                         const IntervalFunctionModelFactoryInterface& factory) : HybridEvolverBase(parameters,factory) { }
+    GeneralHybridEvolver(const SystemType& system);
+    GeneralHybridEvolver(const SystemType& system,
+                         const IntervalFunctionModelFactoryInterface& factory);
     GeneralHybridEvolver* clone() const { return new GeneralHybridEvolver(*this); }
 
   protected:
@@ -660,6 +717,37 @@ class GeneralHybridEvolver
                      Map<DiscreteEvent,TransitionData> const& transitions,
                      HybridEnclosure const& initial_set) const;
 
+};
+
+
+//! \brief Configuration for GeneralHybridEvolver, for controlling the accuracy of continuous evolution methods.
+class GeneralHybridEvolverConfiguration : public HybridEvolverBaseConfiguration
+{
+  public:
+
+    GeneralHybridEvolverConfiguration(GeneralHybridEvolver& evolver);
+
+    virtual ~GeneralHybridEvolverConfiguration() { }
+};
+
+//! \brief Factory for GeneralHybridEvolver objects.
+class GeneralHybridEvolverFactory
+    : public HybridEvolverFactoryInterface
+{
+  private:
+
+    boost::shared_ptr<IntervalFunctionModelFactoryInterface> _function_factory;
+
+  public:
+
+    GeneralHybridEvolverFactory();
+
+    GeneralHybridEvolverFactory(const IntervalFunctionModelFactoryInterface& factory);
+
+    virtual GeneralHybridEvolverFactory* clone() const { return new GeneralHybridEvolverFactory(*this); }
+
+    //! \brief Create an hybrid evolver around a \a system.
+    virtual GeneralHybridEvolver* create(const HybridAutomatonInterface& system) const;
 };
 
 

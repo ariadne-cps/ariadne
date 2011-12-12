@@ -68,45 +68,42 @@ class EvolverInterface
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;
 
+    //! \brief Gets the system associated with the evolver.
+    virtual const SYS& system() const = 0;
+
   public:
     //! \brief Compute an approximation to the evolved set under the given semantics.
     virtual
     Orbit<EnclosureType>
-    orbit(const SystemType& system,
-          const EnclosureType& initial_set,
+    orbit(const EnclosureType& initial_set,
           const TimeType& time,
           Semantics semantics) const = 0;
 
     //! \brief Compute an approximation to the evolved set under the given semantics.
     virtual
     EnclosureListType
-    evolve(const SystemType& system,
-           const EnclosureType& initial_set,
+    evolve(const EnclosureType& initial_set,
            const TimeType& time,
            Semantics semantics) const = 0;
 
     //! \brief Compute an approximation to the reachable set under the given semantics.
     virtual
     EnclosureListType
-    reach(const SystemType& system,
-          const EnclosureType& initial_set,
+    reach(const EnclosureType& initial_set,
           const TimeType& time,
           Semantics semantics) const = 0;
 
     //! \brief Compute an approximation to the evolved and reachable sets under the given semantics.
     virtual
     pair<EnclosureListType,EnclosureListType>
-    reach_evolve(const SystemType& system,
-                 const EnclosureType& initial_set,
+    reach_evolve(const EnclosureType& initial_set,
                  const TimeType& time,
                  Semantics semantics) const = 0;
-
 
     //! \brief Compute an approximation to the evolved set under the given semantics.
     virtual
     void
     evolution(EnclosureListType& final,
-              const SystemType& system,
               const EnclosureType& initial,
               const TimeType& time,
               Semantics semantics) const = 0;
@@ -115,7 +112,6 @@ class EvolverInterface
     //! under the given semantics.
     virtual void evolution(EnclosureListType& final,
                            EnclosureListType& intermediate,
-                           const SystemType& system,
                            const EnclosureType& initial,
                            const TimeType& time,
                            Semantics semantics) const = 0;
@@ -126,7 +122,6 @@ class EvolverInterface
     virtual
     void
     evolution(EnclosureListType& final,
-              const SystemType& system,
               const EnclosureListType& initial,
               const TimeType& time,
               Semantics semantics) const = 0;
@@ -137,7 +132,6 @@ class EvolverInterface
     void
     evolution(EnclosureListType& final,
               EnclosureListType& intermediate,
-              const SystemType& system,
               const EnclosureListType& initial,
               const TimeType& time,
               Semantics semantics) const = 0;
@@ -151,6 +145,19 @@ std::ostream&
 operator<<(std::ostream& os, const EvolverInterface<SYS,ES>& e) {
     return e.write(os);
 }
+
+
+//! \brief Factory for evolver interface classes.
+template<class SYS, class ES>
+class EvolverFactoryInterface
+{
+  public:
+
+    //! \brief Create a copy of the factory.
+    virtual EvolverFactoryInterface* clone() const = 0;
+    //! \brief Create an evolver interface object around a \a system.
+    virtual EvolverInterface<SYS,ES>* create(const SYS& system) const = 0;
+};
 
 
 } // namespace Ariadne

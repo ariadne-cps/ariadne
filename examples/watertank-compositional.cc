@@ -38,25 +38,18 @@ int main()
     RealConstant lambda("lambda",0.02);
     RealConstant rate("rate",0.3);
 
-
-
-
     // Declare the system variables
     RealVariable height("height");
     RealVariable aperture("aperture");
-
     // Create the tank object
     AtomicHybridAutomaton tank("tank");
 
     // Declare a trivial discrete mode.
     AtomicDiscreteLocation draining("draining");
-
     // The water level is always given by the same dynamic
     // The inflow is controlled by the valve aperture, the outflow depends on the
     // pressure, which is proportional to the water height.
     tank.new_mode(draining,(dot(height)=-lambda*height+rate*aperture));
-
-
 
     // Describe the valve model
 
@@ -103,24 +96,19 @@ int main()
     valve.new_transition(opening,finished_opening,open,aperture>=1.0);
     valve.new_transition(closing,finished_closing,closed,aperture<=0.0);
 
-
     CompositeHybridAutomaton watertank_system((tank,valve));
     std::cout << "watertank_system:\n" << watertank_system << "\n";
-
-
-
-
 
     // Compute the system evolution
 
     // Create a GeneralHybridEvolver object
-    GeneralHybridEvolver evolver;
-    evolver.verbosity = 1;
+    GeneralHybridEvolver evolver(watertank_system);
+    evolver.verbosity = 0;
 
     // Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.25;
-    evolver.parameters().maximum_step_size = 0.125;
-    std::cout <<  evolver.parameters() << std::endl;
+    evolver.configuration().set_maximum_enclosure_radius(0.25);
+    evolver.configuration().set_maximum_step_size(0.125);
+    std::cout << evolver.configuration() << std::endl;
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
@@ -134,12 +122,14 @@ int main()
     HybridTime evolution_time(80.0,5);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(watertank_system,initial_set,evolution_time,UPPER_SEMANTICS);
-    std::cout << "done." << std::endl;
+
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
+    std::cout << "done." << orbit << std::endl;
 
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
-    std::cout << "Plotting orbit... "<<std::flush;
+
     Axes2d axes(-0.1<=height<=9.1, -0.1<=aperture<=1.1);
+    std::cout << "Plotting orbit... "<<std::flush;
     plot("watertank_compositional-orbit",axes, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
 

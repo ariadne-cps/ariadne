@@ -60,13 +60,12 @@
 namespace Ariadne {
 
 class HybridGridTreeSet;
-class HybridBoundedConstraintSet;
-
 
 class RealVariableInterval;
 class RealVariableBox;
 class RealExpressionSet;
 
+typedef Map< DiscreteLocation, Vector<Float> > HybridFloatVector;
 
 template<class HBS> class HybridBasicSetExpression { };
 template<class HDS> class HybridDenotableSetExpression { };

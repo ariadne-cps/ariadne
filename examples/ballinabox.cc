@@ -37,10 +37,6 @@ int main(int argc, const char* argv[])
 
     typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
-    VectorFunction<Real> func(0,1);
-
-    cout << func.result_size() << "," << func.argument_size() << "\n";
-
     /// Set the system parameters
     Real ax = 0.75;  // Coefficient of restitution for bounces with vertical walls
     Real ay = 0.5;  // Coefficient of restitution for bounces with horizontal walls
@@ -92,16 +88,16 @@ int main(int argc, const char* argv[])
     /// Compute the system evolution
 
     /// Create a GeneralHybridEvolver object
-    GeneralHybridEvolverType evolver;
+    GeneralHybridEvolverType evolver(ball);
     typedef GeneralHybridEvolver::OrbitType OrbitType;
     evolver.verbosity=evolver_verbosity;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 1.0;
-    evolver.parameters().maximum_step_size = 16.0;
+    evolver.configuration().set_maximum_enclosure_radius(1.0);
+    evolver.configuration().set_maximum_step_size(16.0);
     //Uncomment out to use small time-steps
     //evolver.parameters().maximum_step_size = 1.0/16;
-    std::cout <<  evolver.parameters() << std::endl;
+    std::cout <<  evolver.configuration() << std::endl;
 
     std::cout << "Computing evolution..." << std::endl;
 
@@ -112,7 +108,7 @@ int main(int argc, const char* argv[])
     HybridTime evolution_time(10.0,3);
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(ball,initial_set,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final()="<<orbit.final()<<std::endl;

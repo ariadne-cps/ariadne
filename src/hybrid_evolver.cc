@@ -175,8 +175,7 @@ Set<DiscreteEvent> activating_events(const Map<DiscreteEvent,TransitionData>& tr
 
 Orbit<HybridEnclosure>
 HybridEvolverBase::
-orbit(const HybridAutomatonInterface& system,
-      const HybridBox& initial_box,
+orbit(const HybridBox& initial_box,
       const HybridTime& time,
       Semantics semantics) const
 {
@@ -185,27 +184,25 @@ orbit(const HybridAutomatonInterface& system,
     ARIADNE_LOG(3,"initial_box="<<initial_box<<"\n");
     HybridEnclosure initial_enclosure(initial_box,this->function_factory());
     ARIADNE_LOG(3,"initial_enclosure="<<initial_enclosure<<"\n");
-    return this->orbit(system,initial_enclosure,time,semantics);
+    return this->orbit(initial_enclosure,time,semantics);
 }
 
 Orbit<HybridEnclosure>
 HybridEvolverBase::
-orbit(const HybridAutomatonInterface& system,
-      const HybridExpressionSet& initial_set,
+orbit(const HybridExpressionSet& initial_set,
       const HybridTime& time,
       Semantics semantics) const
 {
     ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-    HybridEnclosure initial_enclosure(initial_set,system.continuous_state_space(initial_set.location()),this->function_factory());
+    HybridEnclosure initial_enclosure(initial_set,_sys_ptr->continuous_state_space(initial_set.location()),this->function_factory());
     ARIADNE_LOG(3,"initial_enclosure="<<initial_enclosure<<"\n");
-    return this->orbit(system,initial_enclosure,time,semantics);
+    return this->orbit(initial_enclosure,time,semantics);
 }
 
 
 Orbit<HybridEnclosure>
 HybridEvolverBase::
-orbit(const HybridAutomatonInterface& system,
-      const HybridEnclosure& initial,
+orbit(const HybridEnclosure& initial,
       const HybridTime& time,
       Semantics semantics) const
 {
@@ -215,7 +212,7 @@ orbit(const HybridAutomatonInterface& system,
     evolution_data.semantics=semantics;
     evolution_data.initial_sets.push_back(HybridEnclosure(initial));
     while(!evolution_data.initial_sets.empty()) {
-        this->_evolution_in_mode(evolution_data,system,time);
+        this->_evolution_in_mode(evolution_data,time);
     }
     ARIADNE_ASSERT(evolution_data.initial_sets.empty());
     ARIADNE_ASSERT(evolution_data.working_sets.empty());
@@ -229,44 +226,47 @@ orbit(const HybridAutomatonInterface& system,
 
 HybridEvolverBase::FunctionFactoryType* make_taylor_function_factory();
 
-HybridEvolverBase::HybridEvolverBase()
+HybridEvolverBase::HybridEvolverBase(const SystemType& system)
 {
-    this->_create(new EvolutionParametersType(),make_taylor_function_factory());
+    this->_create(system,make_taylor_function_factory());
 }
 
-HybridEvolverBase::HybridEvolverBase(const EvolutionParametersType& parameters,
+HybridEvolverBase::HybridEvolverBase(const SystemType& system,
                                      const FunctionFactoryType& factory)
 {
-    this->_create(new EvolutionParametersType(parameters),factory.clone());
+    this->_create(system,factory.clone());
 }
 
 void
-HybridEvolverBase::_create(EvolutionParametersType* parameters, FunctionFactoryType* factory)
+HybridEvolverBase::_create(
+        const SystemType& system,
+        FunctionFactoryType* factory)
 {
-    this->_parameters_ptr=shared_ptr<EvolutionParametersType>(parameters);
+    this->_sys_ptr=shared_ptr<SystemType>(system.clone());
     this->_function_factory_ptr=shared_ptr<FunctionFactoryType>(factory);
-    this->_integrator_ptr=shared_ptr<IntegratorInterface>(new TaylorSeriesIntegrator(parameters->flow_accuracy));
     this->_solver_ptr=shared_ptr<SolverInterface>(new IntervalNewtonSolver(1e-8,12));
     this->ALLOW_CREEP=true;
     this->ALLOW_UNWIND=false;
+    //this->_configuration_ptr=shared_ptr<ConfigurationType>(new ConfigurationType());
 }
 
-HybridEvolverBase::EvolutionParametersType&
-HybridEvolverBase::parameters()
+
+const HybridEvolverBase::SystemType&
+HybridEvolverBase::system() const
 {
-    return *this->_parameters_ptr;
+    return *this->_sys_ptr;
 }
 
-const HybridEvolverBase::EvolutionParametersType&
-HybridEvolverBase::parameters() const
+HybridEvolverBase::ConfigurationType&
+HybridEvolverBase::configuration()
 {
-    return *this->_parameters_ptr;
+    return *this->_configuration_ptr;
 }
 
-void
-HybridEvolverBase::set_parameters(const EvolutionParametersType& parameters)
+const HybridEvolverBase::ConfigurationType&
+HybridEvolverBase::configuration() const
 {
-    this->_parameters_ptr=shared_ptr<EvolutionParametersType>(new EvolutionParametersType(parameters));
+    return *this->_configuration_ptr;
 }
 
 void
@@ -301,9 +301,9 @@ HybridEvolverBase::enclosure(const HybridBox& initial_box) const
 }
 
 HybridEvolverBase::EnclosureType
-HybridEvolverBase::enclosure(const SystemType& sys, const HybridExpressionSet& initial_set) const
+HybridEvolverBase::enclosure(const HybridExpressionSet& initial_set) const
 {
-    return HybridEnclosure(initial_set,sys.continuous_state_space(initial_set.location()),this->function_factory());
+    return HybridEnclosure(initial_set,_sys_ptr->continuous_state_space(initial_set.location()),this->function_factory());
 }
 
 
@@ -312,18 +312,17 @@ HybridEvolverBase::
 _evolution(ListSet<HybridEnclosure>& final,
            ListSet<HybridEnclosure>& reachable,
            ListSet<HybridEnclosure>& intermediate,
-           HybridAutomatonInterface const& system,
            HybridEnclosure const& initial_set,
            HybridTime const& maximum_time,
            Semantics semantics,
            bool reach) const
 {
     EvolutionData evolution_data;
-    evolution_data.semantics = semantics;
+    evolution_data.semantics=semantics;
     evolution_data.initial_sets.push_back(HybridEnclosure(initial_set));
 
     while(!evolution_data.initial_sets.empty()) {
-        this->_evolution_in_mode(evolution_data,system,maximum_time);
+        this->_evolution_in_mode(evolution_data,maximum_time);
     }
 
     final=evolution_data.final_sets;
@@ -353,7 +352,7 @@ _log_summary(const EvolutionData& evolution_data, HybridEnclosure const& startin
             <<"#f="<<std::setw(4)<<std::left<<evolution_data.final_sets.size()
             <<"#e="<<std::setw(3)<<std::left<<starting_set.previous_events().size()
             <<" #p="<<std::setw(2)<<std::left<<starting_set.number_of_parameters()
-            <<" #c="<<std::setw(2)<<std::left<<starting_set.number_of_constraints()
+            <<" #c="<<std::setw(1)<<std::left<<starting_set.number_of_constraints()
             <<" t=["<<std::setw(6)<<std::setprecision(3)<<std::left<<std::fixed<<starting_time_range.lower()
             <<","<<std::setw(6)<<std::left<<std::fixed<<starting_time_range.upper()<<"]"<<std::flush
             <<" dwt=["<<std::setw(6)<<std::setprecision(3)<<std::left<<std::fixed<<starting_dwell_time_range.lower()
@@ -371,33 +370,32 @@ _log_summary(const EvolutionData& evolution_data, HybridEnclosure const& startin
 
 Map<DiscreteEvent,TransitionData>
 HybridEvolverBase::
-_extract_transitions(DiscreteLocation const& location,
-                     HybridAutomatonInterface const& system) const
+_extract_transitions(DiscreteLocation const& location) const
 {
     ARIADNE_LOG(3,"HybridEvolverBase::_extract_transitions(...)\n");
-    const RealVectorFunction& dynamic=system.dynamic_function(location);
+    const RealVectorFunction& dynamic=_sys_ptr->dynamic_function(location);
 
     Map<DiscreteEvent,TransitionData> transitions;
-    Set<DiscreteEvent> events = system.events(location);
+    Set<DiscreteEvent> events = _sys_ptr->events(location);
     for(Set<DiscreteEvent>::const_iterator event_iter=events.begin();
         event_iter!=events.end(); ++event_iter)
     {
         DiscreteEvent event=*event_iter;
-        EventKind event_kind=system.event_kind(location,event);
+        EventKind event_kind=_sys_ptr->event_kind(location,event);
         ARIADNE_LOG(5,"event="<<event<<", kind="<<event_kind<<"\n");
         RealScalarFunction constraint_function;
         if(is_activating(event_kind)) {
-            constraint_function=system.guard_function(location,event);
+            constraint_function=_sys_ptr->guard_function(location,event);
         } else {
-            constraint_function=system.invariant_function(location,event);
+            constraint_function=_sys_ptr->invariant_function(location,event);
         }
         ARIADNE_LOG(5,"constraint_function="<<constraint_function<<"\n");
         RealScalarFunction constraint_flow_derivative_function=lie_derivative(constraint_function,dynamic);
         RealVectorFunction reset_function; DiscreteLocation target; RealSpace target_space;
         if(is_activating(event_kind)) {
-            reset_function=system.reset_function(location,event);
-            target=system.target(location,event);
-            target_space=system.continuous_state_space(target);
+            reset_function=_sys_ptr->reset_function(location,event);
+            target=_sys_ptr->target(location,event);
+            target_space=_sys_ptr->continuous_state_space(target);
         }
         TransitionData transition_data={event,event_kind,constraint_function,constraint_flow_derivative_function,target,reset_function,target_space};
         transitions.insert(event,transition_data);
@@ -473,7 +471,7 @@ _process_initial_events(EvolutionData& evolution_data,
                         evolution_data.initial_sets.append(immediate_jump_set);
                     }
                 }
-                if(transition_iter->second.event_kind!=PERMISSIVE) {
+                if(transition.event_kind!=PERMISSIVE) {
                     flowable_set.new_invariant(event,transition.guard_function);
                 }
             }
@@ -853,7 +851,7 @@ _apply_guard(List<HybridEnclosure>& sets,
     static const uint SUBDIVISIONS_FOR_DEGENERATE_CROSSING = 2;
     const DiscreteEvent event=transition_data.event;
     const IntervalScalarFunction& guard_function=transition_data.guard_function;
-    const IntervalScalarFunction& guard_flow_derivative_function=transition_data.guard_flow_derivative_function;
+    //const IntervalScalarFunction& guard_flow_derivative_function=transition_data.guard_flow_derivative_function;
     IntervalVectorFunctionModel starting_state=starting_set.space_function();
     if(elapsed_time.argument_size()>starting_state.argument_size()) {
         starting_state=embed(starting_state,elapsed_time.domain()[elapsed_time.domain().size()-1]);
@@ -924,7 +922,7 @@ _apply_guard(List<HybridEnclosure>& sets,
             }
             case DEGENERATE_CROSSING: case CONCAVE_CROSSING: {
                 // The crossing with the guard set is not one of the kinds handled above.
-                // We obtain an over-appproximation by testing at finitely many time points
+                // We obtain an over-approximation by testing at finitely many time points
                 const uint n=SUBDIVISIONS_FOR_DEGENERATE_CROSSING;
                 switch(semantics) {
                     case UPPER_SEMANTICS:
@@ -963,7 +961,6 @@ _apply_guard(List<HybridEnclosure>& sets,
 void
 HybridEvolverBase::
 _evolution_in_mode(EvolutionData& evolution_data,
-                   HybridAutomatonInterface const& system,
                    HybridTime const& maximum_hybrid_time) const
 {
 
@@ -996,8 +993,8 @@ _evolution_in_mode(EvolutionData& evolution_data,
     const DiscreteLocation location=initial_set.location();
 
     // Cache dynamic and constraint functions
-    RealVectorFunction dynamic=system.dynamic_function(location);
-    Map<DiscreteEvent,TransitionData> transitions = this->_extract_transitions(location,system);
+    RealVectorFunction dynamic=_sys_ptr->dynamic_function(location);
+    Map<DiscreteEvent,TransitionData> transitions = this->_extract_transitions(location);
     Set<DiscreteEvent> events = transitions.keys();
 
     ARIADNE_LOG(4,"dynamic="<<dynamic<<"\n");
@@ -1059,7 +1056,8 @@ _evolution_step(EvolutionData& evolution_data,
     ARIADNE_LOG(4,"starting_bounding_box="<<starting_bounding_box<<"\n");
 
     // Test to see if set requires reconditioning
-    if(this->_parameters_ptr->enable_reconditioning && norm(starting_set.space_function().errors()) > this->_parameters_ptr->maximum_spacial_error) {
+    if(this->_configuration_ptr->enable_reconditioning() &&
+            norm(starting_set.space_function().errors()) > this->_configuration_ptr->maximum_spacial_error()) {
         HybridEnclosure reconditioned_set=starting_set;
         reconditioned_set.recondition();
         evolution_data.working_sets.append(reconditioned_set);
@@ -1067,11 +1065,11 @@ _evolution_step(EvolutionData& evolution_data,
     }
 
     // Handle a set that is too large, based on semantics
-    if (starting_bounding_box.radius() > this->_parameters_ptr->maximum_enclosure_radius) {
+    if (starting_bounding_box.radius() > this->_configuration_ptr->maximum_enclosure_radius()) {
         if (evolution_data.semantics == LOWER_SEMANTICS) {
             ARIADNE_LOG(1,"\r  too large, discarding\n");
             return;
-        } else if (this->_parameters_ptr->enable_subdivisions) {
+        } else if (this->_configuration_ptr->enable_subdivisions()) {
             ARIADNE_LOG(1,"\r  too large, splitting\n");
             List<HybridEnclosure> split_sets = starting_set.split();
             for(uint i=0; i!=split_sets.size(); ++i) {
@@ -1090,7 +1088,7 @@ _evolution_step(EvolutionData& evolution_data,
     ARIADNE_LOG(4,"guards="<<guard_functions<<"\n");
 
     // Compute flow and actual time step size used
-    const FlowFunctionPatch flow_model=this->_compute_flow(dynamic,starting_bounding_box,this->parameters().maximum_step_size);
+    const FlowFunctionPatch flow_model=this->_compute_flow(dynamic,starting_bounding_box,this->configuration().maximum_step_size());
     ARIADNE_LOG(4,"flow_model.domain()="<<flow_model.domain()<<" flow_model.range()="<<flow_model.range()<<"\n");
 
     // Compute possibly active urgent events with increasing guards, and crossing times
@@ -1384,6 +1382,54 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 }
 
 
+HybridEvolverBaseConfiguration::HybridEvolverBaseConfiguration(HybridEvolverBase& evolver)
+    : _evolver(evolver)
+{
+    set_flow_accuracy(1e-5);
+    set_maximum_step_size(1.0);
+    set_maximum_enclosure_radius(100.0);
+    set_maximum_spacial_error(1e-2);
+    set_enable_reconditioning(true);
+    set_enable_subdivisions(true);
+}
+
+void
+HybridEvolverBaseConfiguration::set_flow_accuracy(const RealType value)
+{
+    _evolver._integrator_ptr=shared_ptr<TaylorSeriesIntegrator>(new TaylorSeriesIntegrator(value));
+    _flow_accuracy = value;
+}
+
+
+std::ostream&
+HybridEvolverBaseConfiguration::write(std::ostream& os) const
+{
+    os << "HybridEvolverBaseConfiguration"
+       << ",\n  flow_accuracy=" << flow_accuracy()
+       << ",\n  maximum_step_size=" << maximum_step_size()
+       << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
+       << ",\n  maximum_spacial_error=" << maximum_spacial_error()
+       << ",\n  enable_reconditioning=" << enable_reconditioning()
+       << ",\n  enable_subdivisions=" << enable_subdivisions()
+       << "\n)\n";
+    return os;
+}
+
+GeneralHybridEvolver::GeneralHybridEvolver(const SystemType& system)
+    : HybridEvolverBase(system)
+{
+    this->_configuration_ptr.reset(new GeneralHybridEvolverConfiguration(*this));
+}
+
+
+GeneralHybridEvolver::GeneralHybridEvolver(
+        const SystemType& system,
+        const IntervalFunctionModelFactoryInterface& factory)
+    : HybridEvolverBase(system,factory)
+{
+    this->_configuration_ptr.reset(new GeneralHybridEvolverConfiguration(*this));
+}
+
 
 TimingData
 GeneralHybridEvolver::
@@ -1606,6 +1652,27 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 }
 
 
+GeneralHybridEvolverConfiguration::GeneralHybridEvolverConfiguration(GeneralHybridEvolver& evolver)
+    : HybridEvolverBaseConfiguration(evolver)
+{
+}
+
+GeneralHybridEvolverFactory::GeneralHybridEvolverFactory()
+    : _function_factory(make_taylor_function_factory())
+{
+}
+
+GeneralHybridEvolverFactory::GeneralHybridEvolverFactory(const IntervalFunctionModelFactoryInterface& factory)
+    : _function_factory(factory.clone())
+{
+}
+
+
+GeneralHybridEvolver*
+GeneralHybridEvolverFactory::create(const HybridAutomatonInterface& system) const
+{
+    return new GeneralHybridEvolver(system,*_function_factory);
+}
 
 
 } // namespace Ariadne

@@ -49,37 +49,37 @@ template<class SYS, class ES> class EvolverBase
 
   public:
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    ESL evolve(const SYS& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,false); return final; }
+    ESL evolve(const ES& initial_set, const T& time, Semantics semantics) const {
+        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,initial_set,time,semantics,false); return final; }
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    ESL reach(const SYS& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true); return reachable; }
+    ESL reach(const ES& initial_set, const T& time, Semantics semantics) const {
+        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,initial_set,time,semantics,true); return reachable; }
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    std::pair<ESL,ESL> reach_evolve(const SYS& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true); return std::make_pair(reachable,final); }
+    std::pair<ESL,ESL> reach_evolve(const ES& initial_set, const T& time, Semantics semantics) const {
+        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,initial_set,time,semantics,true); return std::make_pair(reachable,final); }
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    void evolution(ESL& final, const SYS& system, const ES& initial, const T& time, Semantics semantics) const {
-        ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial,time,semantics,false); }
+    void evolution(ESL& final, const ES& initial, const T& time, Semantics semantics) const {
+        ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,initial,time,semantics,false); }
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    void evolution(ESL& final, const SYS& system, const ESL& initial, const T& time, Semantics semantics) const {
-        ESL reachable; ESL intermediate; for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,reachable,intermediate,system,ES(*iter),time,semantics,false); } }
+    void evolution(ESL& final, const ESL& initial, const T& time, Semantics semantics) const {
+        ESL reachable; ESL intermediate; for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,reachable,intermediate,ES(*iter),time,semantics,false); } }
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    void evolution(ESL& final, ESL& reachable, const SYS& system, const ES& initial, const T& time, Semantics semantics) const {
-        ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial,time,semantics,true); }
+    void evolution(ESL& final, ESL& reachable, const ES& initial, const T& time, Semantics semantics) const {
+        ESL intermediate; this->_evolution(final,reachable,intermediate,initial,time,semantics,true); }
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    void evolution(ESL& final, ESL& reachable, const SYS& system, const ESL& initial, const T& time, Semantics semantics) const {
-        ESL intermediate; for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,reachable,intermediate,system,*iter,time,semantics,true); } }
+    void evolution(ESL& final, ESL& reachable, const ESL& initial, const T& time, Semantics semantics) const {
+        ESL intermediate; for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,reachable,intermediate,*iter,time,semantics,true); } }
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    void evolution(ESL& final, ESL& reachable, ESL& intermediate, const SYS& system, const ESL& initial, const T& time, Semantics semantics) const {
-        for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,reachable,intermediate,system,*iter,time,semantics,true); } }
+    void evolution(ESL& final, ESL& reachable, ESL& intermediate, const ESL& initial, const T& time, Semantics semantics) const {
+        for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,reachable,intermediate,*iter,time,semantics,true); } }
   protected:
-    virtual void _evolution(ESL& final, ESL& reachable, ESL& intermediate, const SYS& system, const ES& initial, const T& time, Semantics semantics, bool reach) const = 0;
+    virtual void _evolution(ESL& final, ESL& reachable, ESL& intermediate, const ES& initial, const T& time, Semantics semantics, bool reach) const = 0;
 };
 
 

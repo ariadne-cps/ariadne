@@ -32,9 +32,7 @@
 #include "hybrid_time.h"
 #include "hybrid_set.h"
 #include "hybrid_automaton.h"
-#include "evolution_parameters.h"
 #include "hybrid_evolver.h"
-#include "hybrid_discretiser.h"
 #include "hybrid_reachability_analyser.h"
 #include "hybrid_graphics.h"
 #include "logging.h"
@@ -78,37 +76,19 @@ class TestHybridReachabilityAnalyser
     typedef HybridEvolverType::EnclosureType HybridEnclosureType;
     typedef HybridEnclosureType::ContinuousStateSetType ContinuousEnclosureType;
 
-    HybridReachabilityAnalyser analyser;
+    shared_ptr<HybridReachabilityAnalyser> analyser_ptr;
     HybridAutomaton system;
+    HybridReachabilityAnalyser analyser;
     Grid grid;
     Interval bound;
     HybridSet initial_set;
     HybridTime reach_time;
 	
   public:
-    static HybridReachabilityAnalyser build_analyser()
-    {
-        EvolutionParameters parameters;
-        parameters.maximum_grid_depth=4;
-        parameters.maximum_step_size=0.25;
-        parameters.lock_to_grid_time=1.0;
-        TaylorFunctionFactory factory(ThresholdSweeper(1e-8));
 
-        Grid grid(2);
-        HybridEvolverType evolver(parameters,factory);
-        //HybridDiscretiser<EnclosureType> discretiser(evolver);
-        HybridReachabilityAnalyser analyser(parameters,evolver);
-        cout << "Done building analyser\n";
-        return analyser;
-    }
-
-    TestHybridReachabilityAnalyser()
-        : analyser(build_analyser()),
-          system(),
-          grid(2),
-          bound(-4,4),
-          reach_time(3.0,4)
+    static HybridAutomaton build_system()
     {
+        HybridAutomaton sys;
         cout << "Done initialising variables\n";
         std::cout<<std::setprecision(20);
         std::cerr<<std::setprecision(20);
@@ -117,8 +97,34 @@ class TestHybridReachabilityAnalyser
 
         RealVariable x("x");
         RealVariable y("y");
-        system.new_mode(location,(dot(x)=-0.5*x-1.0*y,dot(y)=1.0*x-0.5*y) );
+        sys.new_mode(location,(dot(x)=-0.5*x-1.0*y,dot(y)=1.0*x-0.5*y) );
         cout << "Done building system\n";
+        return sys;
+    }
+
+    static HybridReachabilityAnalyser build_analyser(const HybridAutomatonInterface& system)
+    {
+        TaylorFunctionFactory function_factory(ThresholdSweeper(1e-8));
+        GeneralHybridEvolverFactory evolver_factory(function_factory);
+
+        HybridReachabilityAnalyser analyser(system,evolver_factory);
+        analyser.configuration().set_maximum_grid_depth(4);
+        analyser.configuration().set_lock_to_grid_time(1.0);
+        cout << "Done building analyser\n";
+        return analyser;
+    }
+
+    TestHybridReachabilityAnalyser()
+        : system(build_system()),
+          analyser(build_analyser(system)),
+          grid(2),
+          bound(-4,4),
+          reach_time(3.0,4)
+    {
+        DiscreteLocation location(StringVariable("q")|"1");
+
+        RealVariable x("x");
+        RealVariable y("y");
 
         //ImageSet initial_box(make_box("[1.99,2.01]x[-0.01,0.01]"));
         initial_set=HybridSet(location,(x.in(2.01,2.02),y.in(0.01,0.02)));
@@ -131,66 +137,122 @@ class TestHybridReachabilityAnalyser
 
     }
 
-    void test_lower_reach_evolve() {
+    void test_lower_reach_lower_evolve() {
         DiscreteLocation loc(1);
         Box bounding_box(2,bound);
-        cout << "Computing timed evolve set" << endl;
-        HybridGridTreeSet hybrid_lower_evolve=analyser.lower_evolve(system,initial_set,reach_time);
         cout << "Computing timed reachable set" << endl;
-        HybridGridTreeSet hybrid_lower_reach=analyser.lower_reach(system,initial_set,reach_time);
-        GridTreeSet& lower_evolve=hybrid_lower_evolve[loc];
+        HybridGridTreeSet hybrid_lower_reach=analyser.lower_reach(initial_set,reach_time);
         GridTreeSet& lower_reach=hybrid_lower_reach[loc];
-        RealBoundedConstraintSet const& initial=initial_set[loc];
-        cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
+        cout << "Computing timed evolve set" << endl;
+        HybridGridTreeSet hybrid_lower_evolve=analyser.lower_evolve(initial_set,reach_time);
+        GridTreeSet& lower_evolve=hybrid_lower_evolve[loc];
         cout << "Reached " << lower_reach.size() << " cells " << endl << endl;
+        cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
         RealVariable x("x"); RealVariable y("y");
-   		Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
-        plot("test_reachability_analyser-map_lower_reach_evolve.png",axes,
+        Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
+        plot("test_reachability_analyser-map_lower_reach_lower_evolve.png",axes,
              reach_set_colour,hybrid_lower_reach,evolve_set_colour,hybrid_lower_evolve);
     }
 
-    void test_upper_reach_evolve() {
-        cout << "Computing timed reachable set" << endl;
+    void test_lower_reach_evolve() {
         DiscreteLocation loc(1);
         Box bounding_box(2,bound);
-        HybridGridTreeSet upper_evolve_set=analyser.upper_evolve(system,initial_set,reach_time);
-        cout << "upper_evolve_set="<<upper_evolve_set<<std::endl;
-        HybridGridTreeSet upper_reach_set=analyser.upper_reach(system,initial_set,reach_time);
-        cout << "upper_reach_set="<<upper_reach_set<<std::endl;
 
-        const GridTreeSet& upper_evolve=upper_evolve_set[loc];
-        const GridTreeSet& upper_reach=upper_reach_set[loc];
-        RealBoundedConstraintSet const& initial=initial_set[loc];
+        cout << "Computing timed reach-evolve set" << endl;
+        Pair<HybridGridTreeSet,HybridGridTreeSet> result = analyser.lower_reach_evolve(initial_set,reach_time);
+        GridTreeSet& lower_reach=result.first[loc];
+        GridTreeSet& lower_evolve=result.second[loc];
+        cout << "Reached " << lower_reach.size() << " cells " << endl << endl;
+        cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
         RealVariable x("x"); RealVariable y("y");
-   		Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
-        plot("test_reachability_analyser-map_upper_reach_evolve.png",axes,
-             reach_set_colour,upper_reach_set,final_set_colour,upper_evolve_set);
+        Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
+        plot("test_reachability_analyser-map_lower_reach_evolve.png",axes,
+             reach_set_colour,result.first,evolve_set_colour,result.second);
     }
 
-    void test_chain_reach() {
-        cout << "Computing chain reachable set" << endl;
+    void test_upper_reach_upper_evolve() {
+        DiscreteLocation loc(1);
+        Box bounding_box(2,bound);
+        cout << "Computing timed reachable set" << endl;
+        HybridGridTreeSet upper_reach_set=analyser.upper_reach(initial_set,reach_time);
+        cout << "upper_reach_set="<<upper_reach_set<<std::endl;
+        cout << "Computing timed evolve set" << endl;
+        HybridGridTreeSet upper_evolve_set=analyser.upper_evolve(initial_set,reach_time);
+        cout << "upper_evolve_set="<<upper_evolve_set<<std::endl;
+
+        RealVariable x("x"); RealVariable y("y");
+        Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
+        plot("test_reachability_analyser-map_upper_reach_upper_evolve.png",axes,
+             reach_set_colour,upper_reach_set,evolve_set_colour,upper_evolve_set);
+    }
+
+    void test_upper_reach_evolve() {
+        cout << "Computing timed reach-evolve set" << endl;
+        DiscreteLocation loc(1);
+        Box bounding_box(2,bound);
+        Pair<HybridGridTreeSet,HybridGridTreeSet> result = analyser.upper_reach_evolve(initial_set,reach_time);
+
+        RealVariable x("x"); RealVariable y("y");
+        Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
+        plot("test_reachability_analyser-map_upper_reach_evolve.png",axes,
+             reach_set_colour,result.first,final_set_colour,result.second);
+    }
+
+    void test_infinite_time_lower_reach() {
+
         DiscreteLocation loc(1);
         HybridBoxes bounding_boxes
             =Ariadne::bounding_boxes(system.state_space(),bound);
         Box bounding_box=bounding_boxes[loc];
 
-        analyser.verbosity=0;
-        analyser.parameters().transient_time=4.0;
-        cout << analyser.parameters();
-        HybridGridTreeSet chain_reach_set=analyser.chain_reach(system,initial_set,bounding_boxes);
+        analyser.configuration().set_transient_time(4.0);
+        analyser.configuration().set_bounding_domain_ptr(shared_ptr<HybridBoxes>(new HybridBoxes(bounding_boxes)));
+        cout << analyser.configuration();
+
+        cout << "Computing infinite time lower reachable set" << endl;
+
+        HybridGridTreeSet lower_reach_set=analyser.lower_reach(initial_set);
         RealVariable x("x"); RealVariable y("y");
-   		Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
-        plot("test_reachability_analyser-map_chain_reach.png",axes,
-             reach_set_colour,chain_reach_set);
+        Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
+        plot("test_reachability_analyser-map_infinite_time_lower_reach.png",axes,
+             reach_set_colour,lower_reach_set);
+    }
+
+    void test_outer_chain_reach() {
+        cout << "Computing outer chain reachable set" << endl;
+        DiscreteLocation loc(1);
+        HybridBoxes bounding_boxes
+            =Ariadne::bounding_boxes(system.state_space(),bound);
+        Box bounding_box=bounding_boxes[loc];
+
+        analyser.configuration().set_transient_time(4.0);
+        analyser.configuration().set_bounding_domain_ptr(shared_ptr<HybridBoxes>(new HybridBoxes(bounding_boxes)));
+        cout << analyser.configuration();
+
+        HybridGridTreeSet outer_chain_reach_set=analyser.outer_chain_reach(initial_set);
+        RealVariable x("x"); RealVariable y("y");
+        Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
+        plot("test_reachability_analyser-map_outer_chain_reach.png",axes,
+             reach_set_colour,outer_chain_reach_set);
+
+        cout << "Recomputing with tight restriction" << endl;
+
+        analyser.configuration().set_maximum_grid_height(1);
+        ARIADNE_TEST_THROWS(analyser.outer_chain_reach(initial_set),OuterChainOverspill);
+
+
     }
 
     void test() {
         //IntervalTaylorModel::set_default_sweep_threshold(1e-6);
         //IntervalTaylorModel::set_default_maximum_degree(6u);
 
+        ARIADNE_TEST_CALL(test_lower_reach_lower_evolve());
         ARIADNE_TEST_CALL(test_lower_reach_evolve());
+        ARIADNE_TEST_CALL(test_upper_reach_upper_evolve());
         ARIADNE_TEST_CALL(test_upper_reach_evolve());
-        ARIADNE_TEST_CALL(test_chain_reach());
+        ARIADNE_TEST_CALL(test_infinite_time_lower_reach());
+        ARIADNE_TEST_CALL(test_outer_chain_reach());
     }
 
 };

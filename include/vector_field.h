@@ -49,6 +49,8 @@ class VectorField
     typedef EuclideanSpace StateSpaceType;
   public:
     VectorField(const RealVectorFunction& f) : _function(f) { }
+    virtual ~VectorField() { }
+    virtual VectorField* clone() const { return new VectorField(*this); }
     const RealVectorFunction& function() const { return _function; }
     Grid grid() const { return Grid(_function.argument_size()); }
   private:

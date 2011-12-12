@@ -59,8 +59,7 @@ ARIADNE_GEOMETRY_SRC = \
 
 ARIADNE_DYNAMICS_SRC = \
 	map_evolver.cc \
-	vector_field_evolver.cc \
-	discretiser.cc
+	vector_field_evolver.cc
 
 ARIADNE_HYBRID_SRC = \
 	expression.cc \
@@ -79,7 +78,6 @@ ARIADNE_SRC = $(ARIADNE_KERNEL_SRC) $(ARIADNE_GEOMETRY_SRC) $(ARIADNE_DYNAMICS_S
 
 EXTRAS_SRC = \
 	runge_kutta_integrator.cc \
-	hybrid_discretiser.cc \
 	geometry.cc \
 	zonotope.cc \
 	polytope.cc \

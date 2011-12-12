@@ -32,7 +32,6 @@
 #include "box.h"
 #include "zonotope.h"
 #include "list_set.h"
-#include "evolution_parameters.h"
 #include "integrator.h"
 #include "orbit.h"
 #include "hybrid_automaton.h"
@@ -67,17 +66,29 @@ Colour guard_set_colour(0.75,0.75,0.75);
 // Test evolution of realistic hybrid systems
 class TestHybridEvolution
 {
-    HybridEvolverInterface& evolver;
+    int verbosity;
+    mutable shared_ptr<HybridEvolverBase> evolver;
   public:
-    TestHybridEvolution(const HybridEvolverInterface&);
+    TestHybridEvolution(const int verb);
+  private:
+    void _set_evolver(const HybridAutomatonInterface& system) const;
   public:
     void test() const;
     void test_bouncing_ball() const;
     void test_water_tank() const;
 };
 
-TestHybridEvolution::TestHybridEvolution(const HybridEvolverInterface& _evolver)
-    : evolver(*_evolver.clone()) { }
+TestHybridEvolution::TestHybridEvolution(const int verb) : verbosity(verb) { }
+
+void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) const
+{
+    evolver.reset(new GeneralHybridEvolver(system));
+    evolver->set_integrator(TaylorSeriesIntegrator(1e-5));
+    evolver->verbosity=verbosity;
+    evolver->configuration().set_maximum_step_size(1./32);
+    evolver->configuration().set_maximum_enclosure_radius(1./8);
+    evolver->configuration().set_maximum_enclosure_radius(1./2);
+}
 
 void TestHybridEvolution::test() const {
     ARIADNE_TEST_CALL(test_bouncing_ball());
@@ -100,7 +111,9 @@ void TestHybridEvolution::test_bouncing_ball() const {
     HybridBox initial(q,bouncing_ball.continuous_state_space(q),Box(2, height-radius,height+radius, -radius,+radius));
     HybridTime time(4.5,3);
 
-    Orbit<HybridEnclosure> orbit=evolver.orbit(bouncing_ball,initial,time,UPPER_SEMANTICS);
+    _set_evolver(bouncing_ball);
+
+    Orbit<HybridEnclosure> orbit=evolver->orbit(initial,time,UPPER_SEMANTICS);
     ListSet<HybridEnclosure> const& orbit_final=orbit.final();
 
     //ARIADNE_TEST_PRINT(orbit);
@@ -174,9 +187,11 @@ void TestHybridEvolution::test_water_tank() const {
     //HybridTime evolution_time(80.0,5);
     HybridTime evolution_time(80.0,8);
 
-    dynamic_cast<HybridEvolverBase&>(evolver).parameters().maximum_step_size=1.0;
+    _set_evolver(watertank);
 
-    Orbit<HybridEnclosure> orbit = evolver.orbit(watertank,initial,evolution_time,UPPER_SEMANTICS);
+    evolver->configuration().set_maximum_step_size(1.0);
+
+    Orbit<HybridEnclosure> orbit = evolver->orbit(initial,evolution_time,UPPER_SEMANTICS);
     if(orbit.final().size()!=1u) {
         ARIADNE_TEST_WARN("orbit.final().size()="<<orbit.final().size()<<"; expected 1. "
                           "This may indicate over-zealous splitting, and/or errors in detecting the end conditions.");
@@ -199,16 +214,9 @@ int main(int argc, const char* argv[])
 {
     int evolver_verbosity=get_verbosity(argc,argv);
 
-    GeneralHybridEvolver evolver;
-    evolver.set_integrator(TaylorSeriesIntegrator(1e-5));
-    evolver.verbosity=evolver_verbosity;
-    evolver.parameters().maximum_step_size=1./32;
-    evolver.parameters().maximum_enclosure_radius = 1./8;
-    evolver.parameters().maximum_enclosure_radius = 1./2;
-
     DRAWING_METHOD = AFFINE_DRAW; DRAWING_ACCURACY = 1u;
 
-    TestHybridEvolution(evolver).test();
+    TestHybridEvolution(evolver_verbosity).test();
     std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;
 }

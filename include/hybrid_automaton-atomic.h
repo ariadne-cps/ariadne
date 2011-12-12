@@ -81,15 +81,13 @@ class AtomicHybridAutomaton
     typedef HybridSpace StateSpaceType;
 
   private:
-    //! \brief The hybrid automaton's name.
-    Identifier _name;
     StringVariable _variable;
   public:
     //@{
     //! \name Constructors and destructors
 
     //! \brief Construct an empty automaton with the given name
-    AtomicHybridAutomaton(const Identifier& name) : HybridAutomaton(), _name(name), _variable(name) { }
+    AtomicHybridAutomaton(const Identifier& name) : HybridAutomaton(name), _variable(name) { }
 
     //! \brief Construct dynamically-allocated copy. (Not currently implemented)
     AtomicHybridAutomaton* clone() const { return new AtomicHybridAutomaton(*this); }

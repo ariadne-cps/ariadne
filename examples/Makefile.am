@@ -20,7 +20,6 @@ bin_PROGRAMS= \
 	heating \
 	ballinabox \
 	watertank-compositional \
-	watertank-time \
 	watertank-proportional \
 	watertank-nonlinear \
 	rectifier \
@@ -31,7 +30,6 @@ bouncingball_SOURCES = bouncingball.cc
 ballinabox_SOURCES = ballinabox.cc
 heating_SOURCES=heating.cc
 watertank_SOURCES=watertank.cc
-watertank_time_SOURCES=watertank-time.cc
 watertank_proportional_SOURCES=watertank-proportional.cc
 watertank_nonlinear_SOURCES=watertank-nonlinear.cc
 watertank_compositional_SOURCES=watertank-compositional.cc

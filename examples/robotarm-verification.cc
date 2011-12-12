@@ -114,14 +114,14 @@ int main(int argc, char** argv)
     //
 
     // Set up the evaluators
-    GeneralHybridEvolver evolver;
+    GeneralHybridEvolver evolver(robotarm_automaton);
     evolver.verbosity = verbosity;
-    evolver.parameters().maximum_enclosure_radius = 10.0;
-    evolver.parameters().maximum_step_size = 2.5;
-    evolver.parameters().enable_reconditioning = true;
-    evolver.parameters().maximum_spacial_error = 1e-3;
+    evolver.configuration().set_maximum_enclosure_radius(10.0);
+    evolver.configuration().set_maximum_step_size(2.5);
+    evolver.configuration().set_enable_reconditioning(true);
+    evolver.configuration().set_maximum_spacial_error(1e-3);
 
-    std::cout << "Evolution parameters:" << evolver.parameters() << std::endl;
+    std::cout << "Evolution parameters:" << evolver.configuration() << std::endl;
 
     // Define the initial box
     RealVariableBox initial_box((x==0.0,vx==0.0,t==0.0));
@@ -135,7 +135,7 @@ int main(int argc, char** argv)
     Semantics semantics=UPPER_SEMANTICS;
 
     // Compute the reachable sets
-    Orbit<HybridEnclosure> orbit = evolver.orbit(robotarm_automaton,initial_set,HybridTime(time,steps),semantics);
+    Orbit<HybridEnclosure> orbit = evolver.orbit(initial_set,HybridTime(time,steps),semantics);
     cout << std::endl;
 
     cout << "\norbit.final=\n" << orbit.final() << endl << endl;

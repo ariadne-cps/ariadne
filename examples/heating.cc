@@ -122,17 +122,17 @@ int main(int argc, const char* argv[])
     IntervalNewtonSolver solver(1e-12,8);
 
     // Create a GeneralHybridEvolver object
-    HybridEvolverType evolver;
+    HybridEvolverType evolver(heating_system);
     evolver.set_solver(solver);
 
     // Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.25;
-    evolver.parameters().maximum_step_size = 7.0/16;
+    evolver.configuration().set_maximum_enclosure_radius(0.25);
+    evolver.configuration().set_maximum_step_size(7.0/16);
     evolver.verbosity=evolver_verbosity;
-    cout <<  evolver.parameters() << endl << endl;
+    cout <<  evolver.configuration() << endl << endl;
 
-    evolver.parameters().enable_reconditioning=true;
-    evolver.parameters().enable_subdivisions=true;
+    evolver.configuration().set_enable_reconditioning(true);
+    evolver.configuration().set_enable_subdivisions(true);
     
 
 
@@ -143,7 +143,7 @@ int main(int argc, const char* argv[])
     HybridExpressionSet initial_set(heating|off, (Tinit<=T<=Tinit+r,0<=C<=0+r) );
     cout << "initial_set=" << initial_set << endl;
     // Compute the initial set as a validated enclosure.
-    HybridEnclosure initial_enclosure = evolver.enclosure(heating_system,initial_set);
+    HybridEnclosure initial_enclosure = evolver.enclosure(initial_set);
     cout << "initial_enclosure="<<initial_enclosure << endl << endl;
 
     HybridTime evolution_time(2.75,127);
@@ -152,7 +152,7 @@ int main(int argc, const char* argv[])
 
     cout << "\nComputing orbit using series integrator... \n" << flush;
     evolver.set_integrator(series_integrator);
-    Orbit<HybridEnclosure> series_orbit = evolver.orbit(heating_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    Orbit<HybridEnclosure> series_orbit = evolver.orbit(initial_enclosure,evolution_time,UPPER_SEMANTICS);
     cout << "    done." << endl;
 
     DRAWING_METHOD = AFFINE_DRAW;

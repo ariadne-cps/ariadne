@@ -48,9 +48,6 @@ namespace Ariadne {
 class HybridTime;
 class HybridSpace;
 
-class HybridRealExpressionBoundedConstraintSet;
-typedef HybridRealExpressionBoundedConstraintSet HybridExpressionSet;
-
 class DiscreteLocation;
 class DiscreteMode;
 class DiscreteTransition;
@@ -230,6 +227,10 @@ class HybridAutomaton
 
     static List<RealAssignment> sort(const List<RealAssignment>& auxiliary);
 
+  protected:
+
+    //! \brief The automaton name.
+    Identifier _name;
     //! \brief The list of the hybrid automaton's discrete modes.
     Map< DiscreteLocation, DiscreteMode > _modes;
 
@@ -262,17 +263,22 @@ class HybridAutomaton
     //@{
     //! \name Constructors and destructors
 
-    //! \brief Construct an empty automaton with the given name
+    //! \brief Default constructor with "system" name.
     HybridAutomaton();
 
     //! \brief Construct an empty automaton with the given name
-    HybridAutomaton(const List<StringVariable>& discrete_variables);
+    HybridAutomaton(Identifier name);
+
+    //! \brief Construct an empty automaton with the given name
+    HybridAutomaton(
+    		Identifier name,
+    		const List<StringVariable>& discrete_variables);
 
     //! \brief Construct dynamically-allocated copy. (Not currently implemented)
-    HybridAutomaton* clone() const;
+    HybridAutomaton* clone() const { return new HybridAutomaton(*this); }
 
-    //! \brief  Destructor.
-    ~HybridAutomaton();
+    //! \brief Destructor.
+    virtual ~HybridAutomaton();
     //@}
 
     //@{
@@ -457,6 +463,9 @@ class HybridAutomaton
     //@{
     //! \name Data access and queries.
 
+    //! \brief The name of the automaton
+    const Identifier& name() const { return _name; }
+
     //! \brief The modes of the automaton.
     Map<DiscreteLocation,DiscreteMode> const& modes() const;
 
@@ -540,6 +549,7 @@ class HybridAutomaton
 
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;
+
 };
 
 inline std::ostream& operator<<(std::ostream& os, const HybridAutomaton& ha) {
@@ -564,16 +574,32 @@ class CompositeHybridAutomaton
     //@{
     //! \name Constructors.
 
-    //! \brief Default constructor creates empty automaton.
+    //! \brief Default constructor creates "system" named automaton.
     CompositeHybridAutomaton();
+    //! \brief Constructor with name.
+    CompositeHybridAutomaton(Identifier name);
     //! \brief Convert a single atomic hybrid automaton to a composite hybrid automaton for analysis.
     CompositeHybridAutomaton(const HybridAutomaton&);
-    //! \brief Create the parallel composition of a list of atomic hybrid automata.
+    //! \brief Create the parallel composition of a list of atomic hybrid automata, with given name.
+    CompositeHybridAutomaton(
+    		Identifier name,
+    		const List<HybridAutomaton>&);
+    //! \brief Create the parallel composition of a list of atomic hybrid automata, with composed name.
     CompositeHybridAutomaton(const List<HybridAutomaton>&);
+
+    //! \brief Construct dynamically-allocated copy. (Not currently implemented)
+    CompositeHybridAutomaton* clone() const { return new CompositeHybridAutomaton(*this); }
+
+    //! \brief Virtual destructor.
+    virtual ~CompositeHybridAutomaton();
+
     //@}
 
     //@{
     //! \name Methods for querying the component automata.
+
+    //! \brief The name of the automaton
+    const Identifier& name() const { return _name; }
 
     //! \brief The number of component automata.
     uint number_of_components() const;
@@ -685,6 +711,8 @@ class CompositeHybridAutomaton
 
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream&) const;
+  protected:
+    Identifier _name;
   private:
     List<HybridAutomaton> _components;
 };

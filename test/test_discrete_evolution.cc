@@ -37,7 +37,6 @@
 #include "box.h"
 #include "zonotope.h"
 #include "list_set.h"
-#include "evolution_parameters.h"
 #include "map.h"
 #include "map_evolver.h"
 #include "graphics.h"
@@ -65,16 +64,6 @@ void TestMapEvolver::test() const
     cout << __PRETTY_FUNCTION__ << endl;
 
     typedef Enclosure EnclosureType;
-
-    // Set up the evolution parameters and grid
-    IteratedMap::TimeType time(3);
-    double enclosure_radius(0.25);
-
-    EvolutionParameters parameters;
-    parameters.maximum_enclosure_radius=enclosure_radius;
-
-    // Set up the evaluators
-    MapEvolver evolver(parameters);
 
     // Define the initial box
     Box initial_box(2);
@@ -113,11 +102,18 @@ void TestMapEvolver::test() const
     EnclosureType initial_set(initial_box,TaylorFunctionFactory(ThresholdSweeper(1e-10)));
     cout << "initial_set=" << initial_set << endl << endl << endl;
 
+    // Set up the evolution parameters and grid
+    IteratedMap::TimeType time(3);
+    double enclosure_radius(0.25);
+
+    // Set up the evaluators
+    MapEvolver evolver(henon);
+    evolver.configuration().maximum_enclosure_radius(enclosure_radius);
 
     // Compute the reachable sets
     ListSet<EnclosureType> evolve_set,reach_set;
-    //evolve_set = evolver.evolve(henon,initial_set,time);
-    reach_set = evolver.reach(henon,initial_set,time);
+    //evolve_set = evolver.evolve(initial_set,time);
+    reach_set = evolver.reach(initial_set,time);
     cout << "initial_bounding_box=" << initial_set.bounding_box() << endl;
     //cout << "evolve_bounding_boxes=" << evolve_set.bounding_boxes() << endl;
     cout << "reach_bounding_boxes=" << reach_set.bounding_boxes() << endl;

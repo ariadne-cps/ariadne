@@ -140,7 +140,19 @@ DiscreteTransition::write(std::ostream& os) const
 }
 
 
+Identifier name_composition(const List<HybridAutomaton>& components)
+{
+	List<HybridAutomaton>::const_iterator comp_it = components.begin();
 
+	ARIADNE_ASSERT_MSG(comp_it != components.end(), "The components list is empty.");
+
+	Identifier composed_name = comp_it->name();
+	++comp_it;
+	for (; comp_it != components.end(); ++comp_it)
+		composed_name += "&" + comp_it->name();
+
+	return composed_name;
+}
 
 RealVectorFunction dynamic_function(
     Space<Real> const& space,
@@ -174,18 +186,25 @@ RealScalarFunction constraint_function(
     return RealScalarFunction(Ariadne::dimension(space),Ariadne::formula(constraint_expression,algebraic,space));
 }
 
+HybridAutomaton::HybridAutomaton()
+    : _name("system"),_modes()
+{
+}
+
 
 HybridAutomaton::~HybridAutomaton()
 {
 }
 
-HybridAutomaton::HybridAutomaton()
-    : _modes()
+HybridAutomaton::HybridAutomaton(Identifier name)
+    : _name(name),_modes()
 {
 }
 
-HybridAutomaton::HybridAutomaton(const List<StringVariable>& discrete_variables)
-    : _modes()
+HybridAutomaton::HybridAutomaton(
+		Identifier name,
+		const List<StringVariable>& discrete_variables)
+    : _name(name),_modes()
 {
 }
 
@@ -712,10 +731,6 @@ void HybridAutomaton::check_mode(DiscreteLocation location) const {
 
 
 
-
-
-
-
 class CompositeHybridSpace
     : public HybridSpaceInterface
 {
@@ -726,19 +741,36 @@ class CompositeHybridSpace
     virtual bool has_location(const DiscreteLocation& q) const { return this->_system_ptr->has_mode(q); }
     virtual RealSpace operator[](const DiscreteLocation& q) const { return this->_system_ptr->continuous_state_space(q); }
     virtual std::ostream& write(std::ostream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
+    tribool operator==(const HybridSpaceInterface& other) const {
+        const CompositeHybridSpace* chs_ptr = dynamic_cast<const CompositeHybridSpace* >(&other);
+        if (!chs_ptr) return indeterminate;
+        if (&*chs_ptr->_system_ptr == &*_system_ptr)
+            return true;
+        else return indeterminate;
+    }
   private:
     const CompositeHybridAutomaton* _system_ptr;
 };
 
 
 CompositeHybridAutomaton::CompositeHybridAutomaton()
-    : _components() { }
+    : _name("system"),_components() { }
+
+CompositeHybridAutomaton::CompositeHybridAutomaton(Identifier name)
+    : _name(name),_components() { }
 
 CompositeHybridAutomaton::CompositeHybridAutomaton(const HybridAutomaton& automaton)
-    : _components(1u,automaton) { }
+    : _name(automaton.name()),_components(1u,automaton) { }
 
 CompositeHybridAutomaton::CompositeHybridAutomaton(const List<HybridAutomaton>& components)
-    : _components(components) { }
+    : _name(name_composition(components)),_components(components) { }
+
+CompositeHybridAutomaton::CompositeHybridAutomaton(
+		Identifier name,
+		const List<HybridAutomaton>& components)
+    : _name(name),_components(components) { }
+
+CompositeHybridAutomaton::~CompositeHybridAutomaton() { }
 
 uint
 CompositeHybridAutomaton::number_of_components() const
@@ -1390,7 +1422,7 @@ CompositeHybridAutomaton::discrete_reachability(const Set<DiscreteLocation>& ini
 
 CompositeHybridAutomaton parallel_composition(const List<HybridAutomaton>& components)
 {
-    return CompositeHybridAutomaton(components);
+    return CompositeHybridAutomaton(name_composition(components),components);
 }
 
 HybridAutomaton flatten(const CompositeHybridAutomaton& composite_automaton, const List<DiscreteLocation>& locations)

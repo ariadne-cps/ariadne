@@ -67,6 +67,7 @@ template<class T> struct Space
 
 
     bool operator==(const Space<T>& other) const { return this->_variables==other._variables; }
+    bool operator!=(const Space<T>& other) const { return !(*this == other); }
 
     SizeType size() const { return _variables.size(); }
     //! \brief The dimension of the space.

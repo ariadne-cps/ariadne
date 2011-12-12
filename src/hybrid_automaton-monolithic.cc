@@ -37,28 +37,26 @@ namespace Ariadne {
 typedef uint DimensionType;
 
 
-
 MonolithicHybridAutomaton::Mode::Mode(DiscreteLocation q, RealSpace s, RealVectorFunction f)
     : _location(q), _variable_names(s.variable_names()), _dynamic(f)
 {
 }
 
 
-MonolithicHybridAutomaton::~MonolithicHybridAutomaton()
-{
-}
-
 MonolithicHybridAutomaton::MonolithicHybridAutomaton()
 {
 }
 
-MonolithicHybridAutomaton::MonolithicHybridAutomaton(const String& name)
+
+MonolithicHybridAutomaton::MonolithicHybridAutomaton(Identifier name)
 {
-    ARIADNE_DEPRECATED("MonolithicHybridAutomaton(String)","MonolithicHybridAutomaton class instances have no name.");
+    _name = name;
 }
 
 
-
+MonolithicHybridAutomaton::~MonolithicHybridAutomaton()
+{
+}
 
 
 void

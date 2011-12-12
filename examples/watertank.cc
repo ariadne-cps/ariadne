@@ -126,18 +126,17 @@ int main(int argc, const char* argv[])
 
     cout << "Automaton = " << watertank_system << endl << endl;
 
-
     /// Compute the system evolution
 
     /// Create a GeneralHybridEvolver object
-    GeneralHybridEvolverType evolver;
+    GeneralHybridEvolverType evolver(watertank_system);
     evolver.verbosity = evolver_verbosity;
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.5;
-    evolver.parameters().maximum_step_size = 2.5;
-    evolver.parameters().maximum_spacial_error = 1e-3;
-    std::cout <<  evolver.parameters() << std::endl;
+    evolver.configuration().set_maximum_enclosure_radius(0.5);
+    evolver.configuration().set_maximum_step_size(2.5);
+    evolver.configuration().set_maximum_spacial_error(1e-3);
+    std::cout <<  evolver.configuration() << std::endl;
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolverType::EnclosureType EnclosureType;
@@ -151,7 +150,7 @@ int main(int argc, const char* argv[])
     std::cout << "Evolution time = "  << evolution_time << "\n" ;
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(watertank_system,initial_set,evolution_time,LOWER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,LOWER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final_size="<<orbit.final().size()<<std::endl;

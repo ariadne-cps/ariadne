@@ -139,8 +139,14 @@ class HybridAutomatonInterface {
     //! \brief Virtual destructor.
     virtual ~HybridAutomatonInterface() { }
 
+    //! \brief Cloning operator.
+    virtual HybridAutomatonInterface* clone() const = 0;
+
     //@{
     //! \name Data access and queries.
+    
+    //! \brief The name of the automaton.
+    virtual const Identifier& name() const = 0;
 
     //@{
     //! \name Methods for testing and extracting the discrete dynamics.
@@ -171,7 +177,7 @@ class HybridAutomatonInterface {
     //@{
     //! \name Methods for extracting the continuous dynamics.
 
-    //! \brief The dimension of the state spacec in the given \a location.
+    //! \brief The dimension of the state space in the given \a location.
     virtual uint dimension(DiscreteLocation location) const = 0;
 
     //! \brief The dynamic valid in the mode \a location.

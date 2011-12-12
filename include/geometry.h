@@ -25,7 +25,7 @@
  *  \brief Geometric operations on abstract sets.
  */
 #ifndef ARIADNE_GEOMETRY_H
-#define ARIANDE_GEOMETRY_H
+#define ARIADNE_GEOMETRY_H
 
 #include <vector>
 

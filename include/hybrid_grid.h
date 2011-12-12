@@ -97,7 +97,7 @@ class HybridGrid
     //! The grid corresponding to scaling each variable in each location according to the policy \a hsc.
     HybridGrid(const HybridSpace& hsp, const HybridScaling& hsc)
         : _space(hsp), _scaling(hsc) { }
-
+    HybridGrid* clone() const { return new HybridGrid(*this); }
     //!
     friend inline std::ostream&
     operator<<(std::ostream& os, const HybridGrid& hgrid) {

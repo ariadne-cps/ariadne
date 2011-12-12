@@ -30,7 +30,6 @@
 #include "function.h"
 #include "enclosure.h"
 #include "orbit.h"
-#include "evolution_parameters.h"
 
 #include "logging.h"
 
@@ -65,23 +64,16 @@ using boost::shared_ptr;
 class DegenerateCrossingException { };
 
 
-MapEvolver::MapEvolver()
-    : _parameters(new EvolutionParametersType())
-{
-}
-
-
-
-MapEvolver::MapEvolver(const EvolutionParametersType& p)
-    : _parameters(new EvolutionParametersType(p))
+MapEvolver::MapEvolver(const SystemType& system)
+    : _sys_ptr(system.clone())
+    , _configuration(new ConfigurationType())
 {
 }
 
 
 Orbit<MapEvolver::EnclosureType>
 MapEvolver::
-orbit(const SystemType& system,
-      const EnclosureType& initial_set,
+orbit(const EnclosureType& initial_set,
       const TimeType& time,
       Semantics semantics) const
 {
@@ -90,7 +82,7 @@ orbit(const SystemType& system,
     EnclosureListType reachable;
     EnclosureListType intermediate;
     this->_evolution(final,reachable,intermediate,
-                     system,initial_set,time,semantics,false);
+                     initial_set,time,semantics,false);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -110,7 +102,6 @@ MapEvolver::
 _evolution(EnclosureListType& final_sets,
            EnclosureListType& reach_sets,
            EnclosureListType& intermediate_sets,
-           const SystemType& system,
            const EnclosureType& initial_set,
            const TimeType& maximum_time,
            Semantics semantics,
@@ -144,21 +135,21 @@ _evolution(EnclosureListType& final_sets,
         if(initial_time>=maximum_time) {
             final_sets.adjoin(EnclosureType(initial_enclosure));
         } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
-                  && (initial_set_radius>this->_parameters->maximum_enclosure_radius)) {
+                  && (initial_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List<EnclosureType> subdivisions=subdivide(initial_enclosure);
             for(uint i=0; i!=subdivisions.size(); ++i) {
                 EnclosureType const& subdivided_enclosure=subdivisions[i];
                 working_sets.push_back(make_pair(initial_time,subdivided_enclosure));
             }
-        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_parameters->maximum_enclosure_radius) {
+        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_configuration->maximum_enclosure_radius()) {
             ARIADNE_WARN("Terminating lower evolution at time " << initial_time
                          << " and set " << initial_enclosure << " due to maximum radius being exceeded.");
         } else {
             // Compute evolution
             this->_evolution_step(working_sets,
                                   final_sets,reach_sets,intermediate_sets,
-                                  system,current_set,maximum_time,
+                                  current_set,maximum_time,
                                   semantics,reach);
         }
     }
@@ -175,7 +166,6 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 EnclosureListType& final_sets,
                 EnclosureListType& reach_sets,
                 EnclosureListType& intermediate_sets,
-                const SystemType& system,
                 const TimedEnclosureType& current_set,
                 const TimeType& maximum_time,
                 Semantics semantics,
@@ -200,7 +190,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
 
     // Compute the map model
-    EnclosureType final_enclosure=Ariadne::apply(system.function(),initial_enclosure);
+    EnclosureType final_enclosure=Ariadne::apply(_sys_ptr->function(),initial_enclosure);
     TimeType final_time=initial_time+1;
     ARIADNE_LOG(6,"final_enclosure = "<<final_enclosure<<"\n");
     ARIADNE_LOG(4,"Done computing evolution\n");
@@ -210,15 +200,25 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     intermediate_sets.adjoin(final_enclosure);
     working_sets.push_back(make_pair(final_time,final_enclosure));
 
-
-
-
-
     ARIADNE_LOG(2,"Done evolution_step.\n\n");
 
 }
 
 
+MapEvolverConfiguration::MapEvolverConfiguration()
+{
+    maximum_enclosure_radius(100.0);
+}
+
+
+std::ostream&
+MapEvolverConfiguration::write(std::ostream& os) const
+{
+    os << "MapEvolverSettings"
+       << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
+       << "\n)\n";
+    return os;
+}
 
 
 }  // namespace Ariadne

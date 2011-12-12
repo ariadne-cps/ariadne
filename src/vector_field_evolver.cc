@@ -30,7 +30,6 @@
 #include "function.h"
 #include "enclosure.h"
 #include "orbit.h"
-#include "evolution_parameters.h"
 
 #include "integrator.h"
 
@@ -70,9 +69,10 @@ class DegenerateCrossingException { };
 
 
 
-VectorFieldEvolver::VectorFieldEvolver(const EvolutionParametersType& p, const IntegratorInterface& i)
-    : _parameters(new EvolutionParametersType(p))
+VectorFieldEvolver::VectorFieldEvolver(const SystemType& system, const IntegratorInterface& i)
+    : _sys_ptr(system.clone())
     , _integrator(i.clone())
+    , _configuration(new ConfigurationType())
 {
     //ARIADNE_ASSERT_MSG(dynamic_cast<const TaylorPicardIntegrator*>(&i),"Only TaylorPicardIntegrator supported by VectorFieldEvolver\n");
 }
@@ -80,8 +80,7 @@ VectorFieldEvolver::VectorFieldEvolver(const EvolutionParametersType& p, const I
 
 Orbit<VectorFieldEvolver::EnclosureType>
 VectorFieldEvolver::
-orbit(const SystemType& system,
-      const EnclosureType& initial_set,
+orbit(const EnclosureType& initial_set,
       const TimeType& time,
       Semantics semantics) const
 {
@@ -90,7 +89,7 @@ orbit(const SystemType& system,
     EnclosureListType reachable;
     EnclosureListType intermediate;
     this->_evolution(final,reachable,intermediate,
-                     system,initial_set,time,semantics,false);
+                     initial_set,time,semantics,false);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -110,7 +109,6 @@ VectorFieldEvolver::
 _evolution(EnclosureListType& final_sets,
            EnclosureListType& reach_sets,
            EnclosureListType& intermediate_sets,
-           const SystemType& system,
            const EnclosureType& initial_set,
            const TimeType& maximum_time,
            Semantics semantics,
@@ -145,21 +143,21 @@ _evolution(EnclosureListType& final_sets,
         if(current_time>=maximum_time) {
             final_sets.adjoin(current_set_model);
         } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
-                  && (current_set_radius>this->_parameters->maximum_enclosure_radius)) {
+                  && (current_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List< EnclosureType > subdivisions=subdivide(current_set_model);
             for(uint i=0; i!=subdivisions.size(); ++i) {
                 EnclosureType const& subdivided_set_model=subdivisions[i];
                 working_sets.push_back(make_pair(current_time,subdivided_set_model));
             }
-        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && current_set_radius>this->_parameters->maximum_enclosure_radius) {
+        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && current_set_radius>this->_configuration->maximum_enclosure_radius()) {
             ARIADNE_WARN("Terminating lower evolution at time " << current_time
                          << " and set " << current_set_model << " due to maximum radius being exceeded.");
         } else {
             // Compute evolution
             this->_evolution_step(working_sets,
                                   final_sets,reach_sets,intermediate_sets,
-                                  system,current_timed_set,maximum_time,
+                                  current_timed_set,maximum_time,
                                   semantics,reach);
         }
 
@@ -187,7 +185,6 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 EnclosureListType& final_sets,
                 EnclosureListType& reach_sets,
                 EnclosureListType& intermediate_sets,
-                const SystemType& system,
                 const TimedEnclosureType& working_timed_set_model,
                 const TimeType& maximum_time,
                 Semantics semantics,
@@ -214,12 +211,12 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
 
     /////////////// Main Evolution ////////////////////////////////
-    const FunctionType& dynamic=system.function();
+    const FunctionType& dynamic=_sys_ptr->function();
 
     // Set evolution parameters
-    const Float maximum_step_size=this->_parameters->maximum_step_size;
-    const Float maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*2;
-    const Float zero_time=0.0;
+    const Float maximum_step_size=this->_configuration->maximum_step_size();
+    //const Float maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*2;
+    //const Float zero_time=0.0;
 
     // Get bounding boxes for time and space bounding_box
     Vector<Interval> current_set_bounds=current_set_model.bounding_box();
@@ -228,7 +225,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
     // Compute flow model
     // TODO: Modify this for general integrator interface
-    TaylorPicardIntegrator const* taylor_integrator=dynamic_cast<const TaylorPicardIntegrator*>(this->_integrator.operator->());
+    //TaylorPicardIntegrator const* taylor_integrator=dynamic_cast<const TaylorPicardIntegrator*>(this->_integrator.operator->());
     IntegratorInterface const* integrator=this->_integrator.operator->();
     Float step_size=maximum_step_size;
     FlowModelType flow_model=integrator->flow_step(dynamic,current_set_bounds,step_size);
@@ -253,15 +250,27 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     intermediate_sets.adjoin(EnclosureType(next_set_model));
     working_sets.push_back(make_pair(next_time,next_set_model));
 
-
-
-
-
     ARIADNE_LOG(2,"Done evolution_step.\n\n");
 
 }
 
 
+VectorFieldEvolverConfiguration::VectorFieldEvolverConfiguration()
+{
+    maximum_step_size(1.0);
+    maximum_enclosure_radius(100.0);
+}
+
+
+std::ostream&
+VectorFieldEvolverConfiguration::write(std::ostream& os) const
+{
+    os << "VectorFieldEvolverSettings"
+       << ",\n  maximum_step_size=" << maximum_step_size()
+       << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()
+       << "\n)\n";
+    return os;
+}
 
 
 }  // namespace Ariadne

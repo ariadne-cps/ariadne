@@ -190,21 +190,21 @@ int main()
     /// Compute the system evolution
 
     /// Create a GeneralHybridEvolver object
-    GeneralHybridEvolver evolver;
+    GeneralHybridEvolver evolver(watertank_system);
 
     /// Set the evolution parameters
-    evolver.parameters().maximum_enclosure_radius = 0.5;
-    evolver.parameters().maximum_step_size = 1.25;
-    evolver.parameters().enable_subdivisions = true;
+    evolver.configuration().set_maximum_enclosure_radius(0.5);
+    evolver.configuration().set_maximum_step_size(1.25);
+    evolver.configuration().set_enable_subdivisions(true);
     evolver.verbosity = 1;
-    std::cout <<  evolver.parameters() << std::endl;
+    std::cout <<  evolver.configuration() << std::endl;
 
     // Declare the type to be used for the system evolution
     typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
     typedef GeneralHybridEvolver::OrbitType OrbitType;
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
-    std::cout << "Computing evolution starting from location l2, height = 6.0, aperture = 1.0" << std::endl;
+    std::cout << "Computing evolution starting from location l2, x = 6.0, y = 1.0" << std::endl;
 
     //RealVariableBox initial_box((height==0.5, aperture==0.0));
     RealVariableBox initial_box((0.5<=height<=0.5001, 0.00<=aperture<=0.0001));
@@ -216,8 +216,7 @@ int main()
     HybridTime evolution_time(tmax,jmax);
 
     std::cout << "Computing orbit... " << std::flush;
-    //OrbitType orbit = evolver.orbit(watertank_system,initial_set,evolution_time,LOWER_SEMANTICS);
-    OrbitType orbit = evolver.orbit(watertank_system,initial_set,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Plotting orbit... "<<std::flush;
@@ -250,15 +249,16 @@ int main()
     plot("watertank-nonlinear-reach", height_aperture_axes, Colour(0.0,0.5,1.0), hgts);
 
     /// Create a ReachabilityAnalyser object
-    HybridReachabilityAnalyser analyser(evolver);
-    analyser.parameters().lock_to_grid_time = 32.0;
+    HybridReachabilityAnalyser analyser(watertank_system,GeneralHybridEvolverFactory());
+    analyser.configuration().set_lock_to_grid_time(32.0);
     analyser.verbosity=5;
-    std::cout <<  analyser.parameters() << std::endl;
+    std::cout <<  analyser.configuration() << std::endl;
 
     HybridTime reach_time(64.0,6);
 
-/*
+    std::cout << "Omitting computation of global upper and lower reach set." << std::endl;
 
+/*
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
     // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
@@ -275,7 +275,7 @@ int main()
     std::cout << "done." << std::endl;
     plot("watertank-nonlinear-upper_reach1",bounding_box, Colour(0.0,0.5,1.0), upper_reach_set);
 
-    std::cout << "Computing evolution starting from location l1, height = 0.0, aperture = 0.0" << std::endl;
+    std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
 
     Box initial_box2(2, 0.0,0.001, 0.0,0.001);
     HybridImageSet initial_set2;

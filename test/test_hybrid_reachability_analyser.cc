@@ -143,9 +143,15 @@ class TestHybridReachabilityAnalyser
         cout << "Computing timed reachable set" << endl;
         HybridGridTreeSet hybrid_lower_reach=analyser.lower_reach(initial_set,reach_time);
         GridTreeSet& lower_reach=hybrid_lower_reach[loc];
+
+        ARIADNE_TEST_ASSERT(lower_reach.size() > 0);
+
         cout << "Computing timed evolve set" << endl;
         HybridGridTreeSet hybrid_lower_evolve=analyser.lower_evolve(initial_set,reach_time);
         GridTreeSet& lower_evolve=hybrid_lower_evolve[loc];
+
+        ARIADNE_TEST_ASSERT(lower_evolve.size() > 0);
+
         cout << "Reached " << lower_reach.size() << " cells " << endl << endl;
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
         RealVariable x("x"); RealVariable y("y");
@@ -159,15 +165,19 @@ class TestHybridReachabilityAnalyser
         Box bounding_box(2,bound);
 
         cout << "Computing timed reach-evolve set" << endl;
-        Pair<HybridGridTreeSet,HybridGridTreeSet> result = analyser.lower_reach_evolve(initial_set,reach_time);
-        GridTreeSet& lower_reach=result.first[loc];
-        GridTreeSet& lower_evolve=result.second[loc];
+        Pair<HybridGridTreeSet,HybridGridTreeSet> reach_evolve_set = analyser.lower_reach_evolve(initial_set,reach_time);
+        GridTreeSet& lower_reach=reach_evolve_set.first[loc];
+        GridTreeSet& lower_evolve=reach_evolve_set.second[loc];
         cout << "Reached " << lower_reach.size() << " cells " << endl << endl;
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
+
+        ARIADNE_TEST_ASSERT(lower_reach.size() > 0);
+        ARIADNE_TEST_ASSERT(lower_evolve.size() > 0);
+
         RealVariable x("x"); RealVariable y("y");
         Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
         plot("test_reachability_analyser-map_lower_reach_evolve.png",axes,
-             reach_set_colour,result.first,evolve_set_colour,result.second);
+             reach_set_colour,reach_evolve_set.first,evolve_set_colour,reach_evolve_set.second);
     }
 
     void test_upper_reach_upper_evolve() {
@@ -176,9 +186,14 @@ class TestHybridReachabilityAnalyser
         cout << "Computing timed reachable set" << endl;
         HybridGridTreeSet upper_reach_set=analyser.upper_reach(initial_set,reach_time);
         cout << "upper_reach_set="<<upper_reach_set<<std::endl;
+
+        ARIADNE_TEST_ASSERT(upper_reach_set.size() > 0);
+
         cout << "Computing timed evolve set" << endl;
         HybridGridTreeSet upper_evolve_set=analyser.upper_evolve(initial_set,reach_time);
         cout << "upper_evolve_set="<<upper_evolve_set<<std::endl;
+
+        ARIADNE_TEST_ASSERT(upper_evolve_set.size() > 0);
 
         RealVariable x("x"); RealVariable y("y");
         Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
@@ -190,12 +205,15 @@ class TestHybridReachabilityAnalyser
         cout << "Computing timed reach-evolve set" << endl;
         DiscreteLocation loc(1);
         Box bounding_box(2,bound);
-        Pair<HybridGridTreeSet,HybridGridTreeSet> result = analyser.upper_reach_evolve(initial_set,reach_time);
+        Pair<HybridGridTreeSet,HybridGridTreeSet> reach_evolve_set = analyser.upper_reach_evolve(initial_set,reach_time);
+
+        ARIADNE_TEST_ASSERT(reach_evolve_set.first.size() > 0);
+        ARIADNE_TEST_ASSERT(reach_evolve_set.second.size() > 0);
 
         RealVariable x("x"); RealVariable y("y");
         Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
         plot("test_reachability_analyser-map_upper_reach_evolve.png",axes,
-             reach_set_colour,result.first,final_set_colour,result.second);
+             reach_set_colour,reach_evolve_set.first,final_set_colour,reach_evolve_set.second);
     }
 
     void test_infinite_time_lower_reach() {
@@ -210,8 +228,10 @@ class TestHybridReachabilityAnalyser
         cout << analyser.configuration();
 
         cout << "Computing infinite time lower reachable set" << endl;
-
         HybridGridTreeSet lower_reach_set=analyser.lower_reach(initial_set);
+
+        ARIADNE_TEST_ASSERT(lower_reach_set.size() > 0);
+
         RealVariable x("x"); RealVariable y("y");
         Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
         plot("test_reachability_analyser-map_infinite_time_lower_reach.png",axes,
@@ -230,6 +250,9 @@ class TestHybridReachabilityAnalyser
         cout << analyser.configuration();
 
         HybridGridTreeSet outer_chain_reach_set=analyser.outer_chain_reach(initial_set);
+
+        ARIADNE_TEST_ASSERT(outer_chain_reach_set.size() > 0);
+
         RealVariable x("x"); RealVariable y("y");
         Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
         plot("test_reachability_analyser-map_outer_chain_reach.png",axes,

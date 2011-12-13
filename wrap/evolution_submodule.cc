@@ -57,7 +57,7 @@ void export_evolver(const char* name)
     typedef typename Ev::OrbitType Orb;
 
     class_<Ev> evolver_class(name,Init());
-    evolver_class.def("orbit",(Orb(Ev::*)(const Sys&,const ES&,const Tm&,Semantics)const) &Ev::orbit);
+    evolver_class.def("orbit",(Orb(Ev::*)(const ES&,const Tm&,Semantics)const) &Ev::orbit);
     evolver_class.def(self_ns::str(self));
 }
 
@@ -65,5 +65,5 @@ void evolution_submodule()
 {
     export_orbit< Orbit<HybridEnclosure> >("HybridOrbit");
     //export_evolver<VectorFieldEvolver, init<ContinuousEvolutionParameters> >("VectorFieldEvolver");
-    export_evolver<GeneralHybridEvolver, init<> >("GeneralHybridEvolver");
+    export_evolver<GeneralHybridEvolver, init<GeneralHybridEvolver::SystemType const&> >("GeneralHybridEvolver");
 }

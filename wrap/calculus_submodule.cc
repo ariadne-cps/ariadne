@@ -275,6 +275,8 @@ void export_taylor_model()
     class_<IntervalTaylorModel> taylor_model_class("IntervalTaylorModel", init<IntervalTaylorModel>());
     taylor_model_class.def( init< N,Sweeper >());
     taylor_model_class.def("keys", (List<MultiIndex>(*)(const IntervalTaylorModel&))&keys);
+    taylor_model_class.def("value", (const Float&(IntervalTaylorModel::*)()const) &IntervalTaylorModel::value, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("gradient", (const Float&(IntervalTaylorModel::*)(uint)const) &IntervalTaylorModel::gradient, return_value_policy<copy_const_reference>());
     taylor_model_class.def("error", (const Float&(IntervalTaylorModel::*)()const) &IntervalTaylorModel::error, return_value_policy<copy_const_reference>());
     taylor_model_class.def("expansion", (const Expansion<Float>&(IntervalTaylorModel::*)()const) &IntervalTaylorModel::expansion, return_value_policy<copy_const_reference>());
     taylor_model_class.def("set_error", (void(IntervalTaylorModel::*)(const Float&)) &IntervalTaylorModel::set_error);
@@ -551,6 +553,7 @@ void export_vector_taylor_function()
     vector_taylor_function_class.def("argument_size", &VectorTaylorFunction::argument_size);
     vector_taylor_function_class.def("domain", &VectorTaylorFunction::domain, return_value_policy<copy_const_reference>());
     vector_taylor_function_class.def("codomain", &VectorTaylorFunction::codomain);
+    vector_taylor_function_class.def("models", &VectorTaylorFunction::models, return_value_policy<copy_const_reference>());
     vector_taylor_function_class.def("centre", &VectorTaylorFunction::centre);
     vector_taylor_function_class.def("range", &VectorTaylorFunction::range);
     vector_taylor_function_class.def("errors", &VectorTaylorFunction::errors);

@@ -237,6 +237,7 @@ Zonotope error_free_over_approximation(const Zonotope&);
 Zonotope orthogonal_over_approximation(const Zonotope&);
 Zonotope nonsingular_over_approximation(const Zonotope&);
 Zonotope cascade_over_approximation(const Zonotope& z, uint b);
+Zonotope orthogonal_approximation(const Zonotope& z);
 
 Zonotope apply(const Affine<Interval>& af, const Zonotope& z);
 

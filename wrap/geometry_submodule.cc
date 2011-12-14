@@ -258,6 +258,11 @@ void export_zonotope()
     def("separated", (tribool(*)(const Zonotope&,const Box&)) &separated);
     def("overlaps", (tribool(*)(const Zonotope&,const Box&)) &overlaps);
     def("separated", (tribool(*)(const Zonotope&,const Zonotope&)) &separated);
+
+    def("polytope", (Polytope(*)(const Zonotope&)) &polytope);
+    def("orthogonal_approximation", (Zonotope(*)(const Zonotope&)) &orthogonal_approximation);
+    def("orthogonal_over_approximation", (Zonotope(*)(const Zonotope&)) &orthogonal_over_approximation);
+
 }
 
 void export_polytope()

@@ -617,6 +617,42 @@ orthogonal_over_approximation(const Zonotope& z)
 // Choose
 }
 
+Zonotope
+orthogonal_approximation(const Zonotope& z)
+{
+
+    Vector<Float> c=z.centre();
+    Matrix<Float> J=z.generators();
+    Vector<Float> e=z.error();
+
+    const uint m=J.row_size();
+    const uint n=J.column_size();
+
+    Matrix<Float> G(m,m+m);
+
+    Matrix< Float > Q;
+    Matrix< Float > R;
+    PivotMatrix P;
+    make_ltuple(Q,R,P)=orthogonal_decomposition(J,false);
+
+    ARIADNE_ASSERT(norm(FloatMatrix(Q*R-J))<1e-8);
+    
+    for(uint i=0; i!=m;++i) {
+        Float a=0;
+        for(uint j=i; j!=n; ++j) {
+            a+=abs(R[i][j]);
+        }
+        for(uint k=0; k!=m; ++k) {
+            Float b=Q[k][i]*a;
+            G[k][i]=b;
+        }
+    }
+
+    for(uint i=0; i!=m; ++i) { G[i][m+i]=e[i]; }
+    return Zonotope(c,G);
+// Choose
+}
+
 
 /*
 

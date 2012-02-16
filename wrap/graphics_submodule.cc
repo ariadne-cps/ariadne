@@ -58,6 +58,7 @@ void export_figure()
     figure_class.def("set_line_colour", (void(Figure::*)(double,double,double)) &Figure::set_line_colour);
     figure_class.def("set_fill_style", (void(Figure::*)(bool)) &Figure::set_fill_style);
     figure_class.def("set_fill_colour", (void(Figure::*)(double,double,double)) &Figure::set_fill_colour);
+    figure_class.def("set_fill_opacity", (void(Figure::*)(double)) &Figure::set_fill_opacity);
     figure_class.def("draw",(void(FigureInterface::*)(const DrawableInterface&))&FigureInterface::draw);
     figure_class.def("clear",&Figure::clear);
     figure_class.def("display",&Figure::display);

@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
 ##############################################################################
-#            test_function.py
+#            test_solvers.py
 #
-#  Copyright 2009  Pieter Collins <Pieter.Collins@cwi.nl>
+#  Copyright 2012  Pieter Collins <Pieter.Collins@cwi.nl>
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify
@@ -21,28 +21,30 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 from ariadne import *
-Float=float
 
-r=Real(1.75)
+fo=RealScalarFunction(2)
+fx=RealScalarFunction.coordinate(2,0)
+fy=RealScalarFunction.coordinate(2,1)
 
-c=RealScalarFunction.constant(3,1.5)
-x=RealScalarFunction.coordinate(3,0)
-y=RealScalarFunction.coordinate(3,1)
-id=RealVectorFunction.identity(3)
+fn=IntervalVectorFunction([fx+fy,fy])
+b=IntervalVector([[-1,+1],[-1,+1]])
 
-p=x+y
+solver=IntervalNewtonSolver(1e-8,12)
+solver.solve(fn,b)
 
-+p; -p; p+p; p-p; p*p;
-p+r; p-r; p*r; p/r;
-r+p; r-p; r*p;
+solver=KrawczykSolver(1e-8,12)
+solver.solve(fn,b)
 
-derivative(p,0)
 
-b=Box([{0:0.25},{0.25:0.50},{0.50:0.75}])
-f=RealVectorFunction([c,x,y])
-g=RealScalarFunction(p)
 
-join(g,g); join(f,g); join(g,f); join(f,f)
-compose(g,f); compose(f,f)
-evaluate(f,b); evaluate(g,b)
+d=IntervalVector([[-1,+1],[-1,+1]])
+h=Float(0.25)
+
+vf=RealVectorFunction([fo,fx])
+integrator=TaylorPicardIntegrator(1e-8)
+integrator.flow_step(vf,d,h)
+
+vf=IntervalVectorFunction([fo,fx])
+integrator=TaylorSeriesIntegrator(1e-8)
+integrator.flow_step(vf,d,h)
 

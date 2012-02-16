@@ -26,6 +26,7 @@
 #include "function_interface.h"
 #include "polynomial.h"
 #include "function.h"
+#include "function_model.h"
 #include "taylor_function.h"
 
 #include "utilities.h"
@@ -374,6 +375,22 @@ void export_taylor_model()
 */
 }
 
+void export_scalar_function_model()
+{
+    class_<IntervalScalarFunctionModel> scalar_function_model_class("IntervalScalarFunctionModel",init<IntervalScalarFunctionModel>());
+    //scalar_function_model_class.def(self_ns::str(self));
+    //scalar_function_model_class.def("__repr__",&__repr__<IntervalScalarFunctionModel>);
+}
+
+void export_vector_function_model()
+{
+    class_<IntervalVectorFunctionModel> export_vector_function_model("IntervalVectorFunctionModel",init<IntervalVectorFunctionModel>());
+    export_vector_function_model.def(self_ns::str(self));
+    //export_vector_function_model.def("__repr__",&__repr__<IntervalVectorFunctionModel>);
+}
+
+
+
 void export_scalar_taylor_function()
 {
     typedef Vector<Float> FloatVector;
@@ -644,6 +661,8 @@ void calculus_submodule()
     export_expansion();
     export_sweeper();
     export_taylor_model();
+    export_scalar_function_model();
+    export_vector_function_model();
     export_scalar_taylor_function();
     export_vector_taylor_function();
 }

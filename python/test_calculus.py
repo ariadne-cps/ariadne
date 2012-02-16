@@ -51,7 +51,7 @@ f=VectorTaylorFunction([x,c,y])
 g=ScalarTaylorFunction(t)
 compose(f,f); compose(g,f)
 
-p=VectorFunction.identity(3)
-q=ScalarFunction.coordinate(3,1)
+p=RealVectorFunction.identity(3)
+q=RealScalarFunction.coordinate(3,1)
 compose(p,f); compose(q,f)
 

@@ -107,12 +107,17 @@ class Box
 
     //! Construct a singleton point in zero dimensions.
     Box() : Vector<Interval>() { }
+    //! Construct an empty box in \a d dimensions.
+    explicit Box(uint d) : Vector<Interval>(d) { }
     //! Construct from an integer giving the dimension and a list of floating-point values
     //! giving alternately lower and upper bounds.
     explicit Box(uint d, double x0l, double x0u, ...);
 
+    Box(const IntervalVector& ivec) : Vector<Interval>(ivec) { }
+    Box(const List<Interval>& ilst) : Vector<Interval>(ilst) { }
+
     // Templated constructor; useful for automatic conversion from vector expressions
-    template<class T> Box(const T& t) : Vector<Interval>(t) { }
+    template<class E> Box(const VectorExpression<E>& t) : Vector<Interval>(t) { }
     template<class T1, class T2> Box(const T1& t1, const T2& t2) : Vector<Interval>(t1,t2) { }
 
     //! Construct from a string literal of the form "[a1,b1]x[a2,b2]x...x[ad,bd]".

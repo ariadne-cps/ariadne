@@ -113,6 +113,8 @@ class BinaryWord : public std::vector<bool> {
     //! \brief true if the word is a subword of the other word.
     bool is_subword(const BinaryWord& b) const;
 
+    //! \brief appends the binary symbol \a binarySymbol
+    void append( const bool& binarySymbol );
     //! \brief appends the binary word \a binaryWord
     void append( const BinaryWord& binaryWord );
 };
@@ -160,6 +162,10 @@ inline bool BinaryWord::is_subword(const BinaryWord& b) const {
         }
     }
     return false;
+}
+
+inline void BinaryWord::append( const bool& binarySymbol ) {
+    this->push_back( binarySymbol );
 }
 
 inline void BinaryWord::append( const BinaryWord& binaryWord ) {

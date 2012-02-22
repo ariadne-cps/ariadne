@@ -1,8 +1,8 @@
 /***************************************************************************
  *            grid_set.cc
  *
- *  Copyright  2008  Ivan S. Zapreev, Pieter Collins
- *            ivan.zapreev@gmail.com, pieter.collins@cwi.nl
+ *  Copyright  2008-12  Ivan S. Zapreev, Pieter Collins
+ *
  *
  ****************************************************************************/
 
@@ -1263,6 +1263,14 @@ std::vector<GridOpenCell> GridOpenCell::intersection( const GridOpenCell & theLe
 GridTreeSubset* GridTreeSubset::clone( ) const {
     // Return a GridTreeSet to ensure that memory is copied.
     return new GridTreeSet(this->grid(),this->_pRootTreeNode);
+}
+
+
+GridTreeSubset GridTreeSubset::branch(bool left_or_right) const {
+    BinaryWord theWord=this->_theGridCell.word();
+    theWord.append(left_or_right);
+    BinaryTreeNode* pBinaryTreeNode=this->_pRootTreeNode->child_node(left_or_right);
+    return GridTreeSubset(this->_theGridCell.grid(),this->_theGridCell.height(),theWord,pBinaryTreeNode);
 }
 
 

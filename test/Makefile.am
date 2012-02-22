@@ -49,6 +49,7 @@ check_PROGRAMS = \
 	test_taylor_function \
 	test_function_sets \
 	test_affine_sets \
+	test_paving \
 	test_grid_set \
 	test_linear_programming \
 	test_nonlinear_programming \
@@ -101,6 +102,7 @@ test_affine_sets_SOURCES=test_affine_sets.cc
 test_taylor_sets_SOURCES=test_taylor_sets.cc
 test_expression_SOURCES=test_expression.cc
 test_function_SOURCES=test_function.cc
+test_paving_SOURCES=test_paving.cc
 test_grid_set_SOURCES=test_grid_set.cc
 test_linear_programming_SOURCES=test_linear_programming.cc
 test_nonlinear_programming_SOURCES=test_nonlinear_programming.cc

@@ -53,6 +53,7 @@ ARIADNE_GEOMETRY_SRC = \
 	orbit.cc \
 	function_set.cc \
 	grid_set.cc \
+	paver.cc \
 	affine_set.cc \
 	enclosure.cc \
 	graphics.cc

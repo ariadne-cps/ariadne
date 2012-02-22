@@ -2907,7 +2907,7 @@ Matrix<Interval>
 jacobian(const Vector<IntervalTaylorModel>& f, const Vector<Interval>& x)
 {
     Vector< Differential<Interval> > dx=Differential<Interval>::variables(1u,x);
-    Vector< Differential<Interval> > df(f.size());
+    Vector< Differential<Interval> > df(f.size(),x.size(),1u);
     for(uint i=0; i!=f.size(); ++i) {
         df[i]=evaluate(f[i].expansion(),dx);
     }
@@ -3120,7 +3120,7 @@ _compose2(const Vector<IntervalTaylorModel>& x,
 
     Array<uchar> max_power(ys.size());
     for(uint j=0; j!=ys.size(); ++j) { max_power[j]=1; }
-    
+
     for(uint i=0; i!=x.size(); ++i) {
         for(IntervalTaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
             assert(xas==iter->key().size());

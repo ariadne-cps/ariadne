@@ -760,7 +760,7 @@ std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
 template<class X, class Y>
 Vector<Y> evaluate(const Vector< Expansion<X> >& x, const Vector<Y>& y)
 {
-    Vector<Y> r(x.size());
+    Vector<Y> r(x.size(),y.zero_element());
     for(unsigned int i=0; i!=x.size(); ++i) {
         r[i]=evaluate(x[i],y);
     }

@@ -354,7 +354,7 @@ struct VectorOfScalarFunction
         return os << "]"; }
 
     template<class XX> inline void _compute(Vector<XX>& r, const Vector<XX>& x) const {
-        r=Vector<XX>(this->_vec.size());
+        r=Vector<XX>(this->_vec.size(),x.zero_element());
         for(uint i=0; i!=r.size(); ++i) {
             r[i]=_vec[i].evaluate(x); } }
 

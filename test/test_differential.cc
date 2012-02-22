@@ -236,7 +236,7 @@ class TestDifferentialVector {
     }
 
     void test_degree() {
-        ARIADNE_TEST_ASSERT(x1.degree()==4);
+        ARIADNE_TEST_EQUAL(x1.degree(),4);
 
         // Regression test to check setting of degree for null vector
         DifferentialVectorType dx(0u,2u,3u);
@@ -305,16 +305,17 @@ class TestDifferentialVector {
         //double ax[10] = { 3.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
         double ax[10] = { 3.0, 1.0, 0.0, 0.0, 0.125, 0.25, 0.0, 0.0, 0.0, 0.0 };
         double ay[4] = { 1.0, -1.0, 0.5, -0.25 };
+        double az[10] = { 1.0, -1.0,0.0, 0.5,-0.125,-0.25, -0.25,0.125,0.25,0.0 };
         double aid[4] = { ax[0], 1.0, 0.0, 0.0 };
         DifferentialVectorType x(1,2,3,ax);
         DifferentialType y(1,3,ay);
+        DifferentialType z(2,3,az);
         DifferentialVectorType id(1,1,3,aid);
-        cout << "x=" << x << endl;
-        cout << "y=" << y << endl;
-        cout << "compose(y,x)=" << compose(y,x) << endl;
-        cout << "compose(id,x)=" << compose(id,x) << endl;
+        ARIADNE_TEST_PRINT(x);
+        ARIADNE_TEST_PRINT(y);
+        ARIADNE_TEST_PRINT(z);
+        ARIADNE_TEST_EQUAL(compose(y,x),z);
         ARIADNE_TEST_EQUAL(compose(id,x),x);
-        cout << "compose(id,x)-x=" << compose(id,x)-x << endl;
     }
 
     void test_mapping() {

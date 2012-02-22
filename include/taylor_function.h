@@ -727,7 +727,7 @@ class VectorTaylorFunction
     static VectorTaylorFunction projection(const Vector<Interval>& d, uint imin, uint imax, Sweeper swp);
 
     /*! \brief Convert to an interval polynomial. */
-    Vector< Polynomial<Interval> > polynomial() const;
+    Vector< Polynomial<Interval> > polynomials() const;
     /*! \brief The vector of roundoff/truncation errors of each component. */
     Vector< Float > const errors() const;
     /*! \brief The maximum roundoff/truncation error of the components. */

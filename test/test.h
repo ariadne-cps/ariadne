@@ -352,7 +352,7 @@ int test_case_counter = 0;
             Class variable expression;                                  \
             std::cout << #variable << "==" << variable << "\n" << std::endl; \
         }                                                               \
-        ARIADNE_TEST_CATCH("Constructor `" << #Class << "" << #variable << "" << #expression << "'") \
+        ARIADNE_TEST_CATCH("Constructor `" << #Class << " " << #variable << "" << #expression << "'") \
     }                                                                   \
     Class variable expression;                                          \
 

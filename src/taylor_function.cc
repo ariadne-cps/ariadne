@@ -1039,20 +1039,13 @@ Polynomial<Interval> polynomial(const IntervalTaylorModel& tm) {
 }
 
 Vector< Polynomial<Interval> >
-VectorTaylorFunction::polynomial() const
+VectorTaylorFunction::polynomials() const
 {
-    Vector<Polynomial<Interval> > p(this->result_size());
+    Vector<Polynomial<Interval> > p(this->result_size(),Polynomial<Interval>(this->argument_size()));
     for(uint i=0; i!=this->result_size(); ++i) {
-        p[i]=Ariadne::polynomial(this->models()[i]);
+        p[i]=static_cast<ScalarTaylorFunction>((*this)[i]).polynomial();
     }
-
-    Vector<Polynomial<Interval> > s(this->argument_size());
-    for(uint j=0; j!=this->argument_size(); ++j) {
-        if(this->domain()[j].radius()<=0) { ARIADNE_WARN("zero radius in domain of VectorTaylorFunction"<<std::endl); }
-        else { s[j]=Ariadne::polynomial(IntervalTaylorModel::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper())); }
-    }
-
-    return compose(p,s);
+    return p;
 }
 
 Vector< Expansion<Float> > const
@@ -1790,7 +1783,8 @@ Float distance(const VectorTaylorFunction& f1, const RealVectorFunction& f2) {
 std::ostream&
 VectorTaylorFunction::write(std::ostream& os) const
 {
-    return os << "VectorTaylorFunction(d=" << this->domain() << ", p~" << midpoint(this->polynomial()) << ", e=" << this->errors() << ", m=" << this->models() << ")";
+    return os << "VectorTaylorFunction(d=" << this->domain() << ", p~" << midpoint(this->polynomials()) << ", e=" << this->errors() << ", m=" << this->models() << ")";
+//    return os << "ScalarTaylorFunction(d=" << this->domain() << ", p~(" << midpoint(this->polynomial()) << "), e=" << this->error() << ", m=" << this->model() << ", s=" << this->sweeper() << ")";
 }
 
 std::ostream&
@@ -1841,7 +1835,7 @@ Polynomial<Interval> polynomial(const ScalarTaylorFunction& tfn) {
 }
 
 Vector< Polynomial<Interval> > polynomial(const VectorTaylorFunction& tfn) {
-    return Vector< Polynomial<Interval> >(tfn.polynomial());
+    return tfn.polynomials();
 }
 
 List< Polynomial<Interval> > polynomials(const List<ScalarTaylorFunction>& tfns) {

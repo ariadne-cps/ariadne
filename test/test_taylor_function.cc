@@ -524,6 +524,15 @@ void TestVectorTaylorFunction::test_domain()
     ARIADNE_TEST_THROWS(compose(t2,te1),DomainException);
 
     ARIADNE_TEST_EQUAL(unchecked_evaluate(t2,xe),Interval(2.25,4.25));
+    
+    // Regression test for printing functions with trivial domain component
+    Vector<Interval> D4(2, 1.0,1.0, 0.0,2.0);
+    ScalarTaylorFunction st40(D4, x0, swp);
+    ScalarTaylorFunction st41(D4, x1, swp);
+    ARIADNE_TEST_PRINT(st40);
+    ARIADNE_TEST_PRINT(st41);
+    VectorTaylorFunction t4(D4, (x0,x1), swp);
+    ARIADNE_TEST_PRINT(t4);
 }
 
 

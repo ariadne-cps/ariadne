@@ -77,11 +77,19 @@ int test_case_counter = 0;
     }                                                                   \
 
 
-/*! \brief Print the comment for the test */
+/*! \brief Provide a warning message */
 #define ARIADNE_TEST_WARN( message )                                    \
     {                                                                   \
         cout << "WARNING: " << message << "" << endl;                \
         cerr << "WARNING: " << message << "" << endl;                \
+    }                                                                   \
+
+
+/*! \brief Notify the user about a possibly unintuitive feature */
+#define ARIADNE_TEST_NOTIFY( message )                                    \
+    {                                                                   \
+        cout << "NOTIFICATION: " << message << "" << endl;                \
+        cerr << "NOTIFICATION: " << message << "" << endl;                \
     }                                                                   \
 
 

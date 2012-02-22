@@ -247,13 +247,13 @@ void TestExpansion::test_equality()
     ARIADNE_TEST_EQUAL(e1,e2);
     e1.clear(); e1.append(b,2.0);
     e2.clear(); e2.append(a,0.0); e2.append(b,2.0);
-    if(!(e1==e2)) { ARIADNE_TEST_WARN("Expansion<Float> objects differing by explicit zeros are considered nonequal."); }
+    if(!(e1==e2)) { ARIADNE_TEST_NOTIFY("Expansion<Float> objects differing by explicit zeros are considered nonequal."); }
     e1.clear(); e1.append(a,-0.0);
     e1.clear(); e1.append(a,+0.0);
-    if(!(e1==e2)) { ARIADNE_TEST_WARN("Expansion<Float> objects differing by +0 versus -0 coefficients are considered nonequal."); }
+    if(!(e1==e2)) { ARIADNE_TEST_NOTIFY("Expansion<Float> objects differing by +0 versus -0 coefficients are considered nonequal."); }
     e1.clear(); e1.append(a,1.0); e1.append(b,2.0);
     e2.clear(); e2.append(b,2.0); e2.append(a,1.0);
-    if(!(e1==e2)) { ARIADNE_TEST_WARN("Expansion<Float> objects differing by order of set operators are considered nonequal."); }
+    if(!(e1==e2)) { ARIADNE_TEST_NOTIFY("Expansion<Float> objects differing by order of set operators are considered nonequal."); }
 }
 
 

@@ -250,7 +250,7 @@ TestFloat::test_stream()
         ss >> f4;
         cout << f4 << endl;
         if(f4!=23.75) {
-            throw std::runtime_error("WARNING: cannot create float from string literal in exponential form 2.375e1");
+            ARIADNE_TEST_WARN("Cannot create float from string literal in exponential form 2.375e1");
         }
     }
     catch(std::exception& e) {
@@ -261,7 +261,7 @@ TestFloat::test_stream()
         ss >> f5;
         cout << f5 << endl;
         if(f4!=23.5) {
-            throw std::runtime_error("WARNING: cannot create float from string literal in exponential form 2.35e1");
+            ARIADNE_TEST_WARN("Cannot create float from string literal in exponential form 2.35e1");
         }
     }
     catch(std::exception& e) {

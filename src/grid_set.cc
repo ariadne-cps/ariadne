@@ -2390,7 +2390,7 @@ void GridTreeSet::restrict_to_height( const uint theHeight ) {
     const uint thisPavingPCellHeight = this->cell().height();
 
     if( thisPavingPCellHeight > theHeight){
-        ARIADNE_WARN("restricting GridTreeSet of height " << this->cell().height() << " to height " << theHeight << ".\n");
+        // ARIADNE_WARN("restricting GridTreeSet of height " << this->cell().height() << " to height " << theHeight << ".\n");
 
         BinaryWord pathToPCell = GridCell::primary_cell_path( this->dimension(), thisPavingPCellHeight, theHeight );
 

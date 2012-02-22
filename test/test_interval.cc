@@ -274,6 +274,7 @@ TestInterval::test_constructors()
     // Construct from pair
     Interval ivld1(Float(1.125),Float(2.25));
     ARIADNE_TEST_ASSERT(ivld1.lower()==1.125); ARIADNE_TEST_ASSERT(ivld1.upper()==2.25);
+
     // Default constructor
     Interval ivld2;
     if(ivld2.lower()>ivld2.upper()) {
@@ -310,6 +311,11 @@ TestInterval::test_constructors()
     Interval ivld6(Float(1.25));
     ARIADNE_TEST_EQUAL(ivld6.lower(),Float(1.25));
     ARIADNE_TEST_EQUAL(ivld6.upper(),Float(1.25));
+
+    // Empty interval
+    Interval ivld7;
+    ARIADNE_TEST_EXECUTE(ivld7.set_empty());
+    ARIADNE_TEST_ASSERT(ivld7.lower()==+inf); ARIADNE_TEST_ASSERT(ivld7.upper()==-inf);
 }
 
 void TestInterval::test_class()

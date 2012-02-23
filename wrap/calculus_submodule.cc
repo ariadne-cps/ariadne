@@ -604,7 +604,7 @@ void export_vector_taylor_function()
     vector_taylor_function_class.def("evaluate", (FloatVector(VectorTaylorFunction::*)(const Vector<Float>&)const) &VectorTaylorFunction::evaluate);
     vector_taylor_function_class.def("evaluate", (IntervalVector(VectorTaylorFunction::*)(const IntervalVector&)const) &VectorTaylorFunction::evaluate);
     //vector_taylor_function_class.def("jacobian", (Vector<Interval>(ScalarTaylorFunction::*)(const Vector<Interval>&)const) &ScalarTaylorFunction::gradient);
-    vector_taylor_function_class.def("polynomial", (Vector< Polynomial<Interval> >(VectorTaylorFunction::*)()const) &VectorTaylorFunction::polynomial);
+    vector_taylor_function_class.def("polynomials", (Vector< Polynomial<Interval> >(VectorTaylorFunction::*)()const) &VectorTaylorFunction::polynomials);
     vector_taylor_function_class.def("function", (RealVectorFunction(VectorTaylorFunction::*)()const) &VectorTaylorFunction::function);
 
 

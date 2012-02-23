@@ -636,7 +636,7 @@ HybridReachabilityAnalyserConfiguration::HybridReachabilityAnalyserConfiguration
     set_lock_to_grid_steps(1);
     set_maximum_grid_depth(3);
     set_maximum_grid_height(16);
-    set_grid(shared_ptr<HybridGrid>(new HybridGrid(_analyser.system().state_space(),HybridScaling())));
+    set_grid(shared_ptr<HybridGrid>(new HybridGrid(_analyser.system().state_space(),SimpleHybridScaling())));
     set_outer_overspill_policy(OVERSPILL_ERROR);
 }
 

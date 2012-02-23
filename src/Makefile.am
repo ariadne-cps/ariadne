@@ -56,6 +56,7 @@ ARIADNE_GEOMETRY_SRC = \
 	paver.cc \
 	affine_set.cc \
 	enclosure.cc \
+	drawer.cc \
 	graphics.cc
 
 ARIADNE_DYNAMICS_SRC = \

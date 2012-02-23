@@ -48,6 +48,7 @@
 #include "affine_set.h"
 
 #include "paving_interface.h"
+#include "paver.h"
 #include "grid_set.h"
 
 #include "constraint_solver.h"
@@ -76,22 +77,6 @@ template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; ret
 
 typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
-
-void subdivision_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& function,
-                                            const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
-
-void affine_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& function,
-                                       const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
-
-void constraint_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& function,
-                                           const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
-
-void procedure_constraint_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& function,
-                                                     const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
-
-void optimal_constraint_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const IntervalVectorFunction& function,
-                                                   const IntervalVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
-
 
 namespace {
 
@@ -927,59 +912,27 @@ void adjoin_outer_approximation(PavingInterface&, const Box& domain, const Inter
 
 void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
+    PavingInterface& p=paving;
+    const Box& d=this->domain();
+    const IntervalVectorFunction& f=this->function();
+
+    IntervalVectorFunctionModel g=this->constraint_function();
+    IntervalVector c=this->constraint_bounds();
+    Int e=depth;
+
     switch(DISCRETISATION_METHOD) {
         case SUBDIVISION_DISCRETISE:
-            this->subdivision_adjoin_outer_approximation_to(paving,depth);
+            SubdivisionPaver().adjoin_outer_approximation(p,d,f,g,c,e);
             break;
         case AFFINE_DISCRETISE:
-            this->affine_adjoin_outer_approximation_to(paving,depth);
+            AffinePaver().adjoin_outer_approximation(p,d,f,g,c,e);
             break;
         case CONSTRAINT_DISCRETISE:
-            this->constraint_adjoin_outer_approximation_to(paving,depth);
+            ConstraintPaver().adjoin_outer_approximation(p,d,f,g,c,e);
             break;
         default:
             ARIADNE_FAIL_MSG("Unknown discretisation method\n");
     }
-}
-
-void Enclosure::subdivision_adjoin_outer_approximation_to(PavingInterface& p, int e) const
-{
-    ARIADNE_LOG(6,"Enclosure::subdivision_adjoin_outer_approximation_to(paving, depth)\n");
-    ARIADNE_LOG(7,"  set="<<*this<<", grid="<<p.grid()<<", depth="<<e<<"\n");
-    ARIADNE_ASSERT(p.dimension()==this->dimension());
-    const Box& d=this->domain();
-    const IntervalVectorFunctionModel& f=this->function();
-
-    IntervalVectorFunctionModel g=this->constraint_function();
-    IntervalVector c=this->constraint_bounds();
-
-    Ariadne::subdivision_adjoin_outer_approximation(p,d,f,g,c,e);
-}
-
-void Enclosure::constraint_adjoin_outer_approximation_to(PavingInterface& p, int e) const
-{
-    ARIADNE_LOG(6,"Enclosure::constraint_adjoin_outer_approximation_to(paving, depth)\n");
-    ARIADNE_LOG(7,"  set="<<*this<<", grid="<<p.grid()<<", depth="<<e<<"\n");
-    ARIADNE_ASSERT(p.dimension()==this->dimension());
-    const Box& d=this->domain();
-    const IntervalVectorFunctionModel& f=this->function();
-
-    IntervalVectorFunctionModel g=this->constraint_function();
-    IntervalVector c=this->constraint_bounds();
-
-    Ariadne::procedure_constraint_adjoin_outer_approximation(p,d,f,g,c,e);
-}
-
-void Enclosure::optimal_constraint_adjoin_outer_approximation_to(PavingInterface& p, int e) const
-{
-    ARIADNE_ASSERT(p.dimension()==this->dimension());
-    const Box& d=this->domain();
-    IntervalVectorFunctionModel f=this->function();
-
-    IntervalVectorFunctionModel g=this->constraint_function();
-    IntervalVector c=this->constraint_bounds();
-
-    Ariadne::optimal_constraint_adjoin_outer_approximation(p,d,f,g,c,e);
 }
 
 

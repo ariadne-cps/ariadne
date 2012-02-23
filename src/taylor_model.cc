@@ -573,6 +573,13 @@ void _acc(IntervalTaylorModel& r, const Interval& c)
 {
     // Compute self+=c
     ARIADNE_ASSERT_MSG(r.error()>=0,r);
+
+    if(c.lower()==-inf || c.upper()==+inf) {
+        r.clear();
+        r.set_error(+inf);
+        return;
+    }
+
     if(c.lower()==-c.upper()) { // The midpoint of the interval is zero, so no need to change constant term
         set_rounding_upward();
         r.error()+=c.upper();

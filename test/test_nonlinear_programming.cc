@@ -79,10 +79,10 @@ class TestOptimiser
         ARIADNE_TEST_PRINT(f);
         RealVectorFunction h( (1.5+x[0]+2*x[1]+0.25*x[0]*x[1]) );
         ARIADNE_TEST_PRINT(h);
-
+        IntervalVector C(1,Interval(0.0));
         Box D(2, -1.0,2.0, -3.0,5.0);
 
-        IntervalVector x_optimal=optimiser->minimise(f,D,h);
+        IntervalVector x_optimal=optimiser->minimise(f,D,h,C);
         ARIADNE_TEST_BINARY_PREDICATE(subset,x_optimal,D);
         ARIADNE_TEST_LESS(norm(h(x_optimal)),1e-7);
     }
@@ -108,15 +108,16 @@ class TestOptimiser
         List<RealScalarFunction> x=RealScalarFunction::coordinates(3);
         RealScalarFunction f(+(sqr(x[0])+sqr(x[1])+x[1]*x[2]));
         ARIADNE_TEST_PRINT(f);
-        RealVectorFunction g( x[0]*x[1]-x[0]*1.25 );
-        ARIADNE_TEST_PRINT(g);
-        RealVectorFunction h( (1.5+x[0]+2*x[1]+0.25*x[0]*x[1]) );
-        ARIADNE_TEST_PRINT(h);
-
         Box D(3, -1.0,2.0, -3.0,5.0, 1.25,2.25);
-        Box C(1, -1.0,-0.5);
+        ARIADNE_TEST_PRINT(D);
+        RealScalarFunction g( x[0]*x[1]-x[0]*1.25 );
+        RealVectorFunction h( 1.5+x[0]+2*x[1]+0.25*x[0]*x[1] );
+        RealVectorFunction gh=join(g,h);
+        ARIADNE_TEST_PRINT(gh);
+        Box C(2, -1.0,-0.5, 0.0,0.0);
+        ARIADNE_TEST_PRINT(C);
 
-        IntervalVector x_optimal=optimiser->minimise(f,D,g,C,h);
+        IntervalVector x_optimal=optimiser->minimise(f,D,gh,C);
         ARIADNE_TEST_LESS(norm(h(x_optimal)),1e-8);
     }
 
@@ -156,8 +157,9 @@ class TestOptimiser
         RealVectorFunction h=RealVectorFunction(1u, 2*x[0]-x[1]+0.125*x[0]*x[1]);
         ARIADNE_TEST_PRINT(h);
         Box D(2, 0.0,2.0, 0.0,2.0);
+        Box C(1, 0.0,0.0);
 
-        ARIADNE_TEST_ASSERT(optimiser->feasible(D,h));
+        ARIADNE_TEST_ASSERT(optimiser->feasible(D,h,C));
     }
 
     void test_feasibility_check() {

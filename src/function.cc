@@ -320,6 +320,16 @@ typedef PowerFunction<Real> RealPowerFunction;
 
 //------------------------ Vector of Scalar functions  -----------------------------------//
 
+
+template<class X> class NonResizableScalarFunction : public ScalarFunction<X> {
+  public:
+    NonResizableScalarFunction<X>& operator=(const ScalarFunction<X>& f) {
+        ARIADNE_ASSERT(this->argument_size()==f.argument_size());
+        this->ScalarFunction<X>::operator=(f);
+        return *this;
+    }
+};
+
 template<class X>
 struct VectorOfScalarFunction
     : VectorFunctionMixin<VectorOfScalarFunction<X>,X>
@@ -343,10 +353,20 @@ struct VectorOfScalarFunction
 
     virtual ScalarFunctionInterface<X>* _get(uint i) const { return static_cast<const ScalarFunctionInterface<X>&>(this->_vec[i])._clone(); }
 
-    ScalarFunction<X> operator[](uint i) const {
+    const ScalarFunction<X> operator[](uint i) const {
         return this->_vec[i]; }
 
+    NonResizableScalarFunction<X>& operator[](uint i) {
+        return static_cast<NonResizableScalarFunction<X>&>(this->_vec[i]); }
+
     virtual std::ostream& write(std::ostream& os) const {
+        os << "VF[" << this->result_size() << "," << this->argument_size() << "][";
+        for(uint i=0; i!=this->_vec.size(); ++i) {
+            if(i!=0) { os << ","; }
+            this->_vec[i].raw_pointer()->write(os); }
+        return os << "]"; }
+
+    virtual std::ostream& repr(std::ostream& os) const {
         os << "VoSF[" << this->result_size() << "," << this->argument_size() << "][";
         for(uint i=0; i!=this->_vec.size(); ++i) {
             if(i!=0) { os << ","; }
@@ -1007,17 +1027,14 @@ IntervalScalarFunction operator-(IntervalScalarFunction const& f1, IntervalScala
 }
 
 IntervalScalarFunction operator-(IntervalScalarFunction const& f, Interval const& c) {
-    std::cerr<<"operator-(IntervalScalarFunction, Interval): f="<<f<<"\n";
     shared_ptr<IntervalScalarFunctionModelInterface const> fp=boost::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f.managed_pointer());
     if(fp) { return IntervalScalarFunctionModel(*fp) - c; }
     shared_ptr<RealScalarFunctionInterface const> rfp=boost::dynamic_pointer_cast<RealScalarFunctionInterface const>(f.managed_pointer());
     if(rfp && c.lower()==c.upper()) { return RealScalarFunction(*rfp) - ExactFloat(c.lower()); }
-    std::cerr<<"  sub="<<IntervalScalarFunction(new BinaryFunction<Interval>(SUB,f,IntervalScalarFunction::constant(f.argument_size(),c)))<<"\n";
     return new BinaryFunction<Interval>(SUB,f,IntervalScalarFunction::constant(f.argument_size(),c));
 }
 
 IntervalScalarFunction operator-(Interval const& c, IntervalScalarFunction const& f) {
-    std::cerr<<"operator-(Interval, IntervalScalarFunction): f="<<f<<"\n";
     shared_ptr<IntervalScalarFunctionModelInterface const> fp=boost::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f.managed_pointer());
     if(fp) { return c - IntervalScalarFunctionModel(*fp); }
     return new BinaryFunction<Interval>(SUB,IntervalScalarFunction::constant(f.argument_size(),c),f);

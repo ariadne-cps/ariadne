@@ -169,7 +169,6 @@ Pair<uint,double> nonlinearity_index_and_error(const VectorTaylorFunction& funct
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
-    uint imax=nonlinearities.row_size();
     uint jmax_in_row_imax=nonlinearities.column_size();
     Float max_row_sum=0.0;
     for(uint i=0; i!=nonlinearities.row_size(); ++i) {
@@ -184,7 +183,6 @@ Pair<uint,double> nonlinearity_index_and_error(const VectorTaylorFunction& funct
             }
         }
         if(row_sum>max_row_sum) {
-            imax=i;
             max_row_sum=row_sum;
             jmax_in_row_imax=jmax;
         }
@@ -303,21 +301,21 @@ tribool
 RealConstraintSet::separated(const Box& bx) const
 {
     Box codomain=over_approximation(this->codomain());
-    return IntervalConstrainedImageSet(bx,this->constraint_function()).separated(codomain);
+    return IntervalConstrainedImageSet(bx,this->constraint_function()).separated(codomain) || indeterminate;
 }
 
 tribool
 RealConstraintSet::overlaps(const Box& bx) const
 {
     Box codomain=under_approximation(this->codomain());
-    return IntervalConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain);
+    return IntervalConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain) || indeterminate;
 }
 
 tribool
 RealConstraintSet::covers(const Box& bx) const
 {
     Box codomain=under_approximation(this->codomain());
-    return Box(this->constraint_function().evaluate(bx)).inside(codomain);
+    return Box(this->constraint_function().evaluate(bx)).inside(codomain) || indeterminate;
 }
 
 
@@ -377,7 +375,7 @@ RealBoundedConstraintSet::separated(const Box& bx) const
     Box domain=over_approximation(this->domain());
     if(Ariadne::disjoint(domain,bx)) { return true; }
     Box codomain=over_approximation(this->codomain());
-    return IntervalConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).separated(codomain);
+    return IntervalConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).separated(codomain) || indeterminate;
 }
 
 
@@ -387,7 +385,7 @@ RealBoundedConstraintSet::overlaps(const Box& bx) const
     if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
     Box domain=under_approximation(this->domain());
     Box codomain=under_approximation(this->codomain());
-    return IntervalConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).overlaps(codomain);
+    return IntervalConstrainedImageSet(domain,this->constraint_function()).overlaps(Ariadne::intersection(bx,codomain)) || indeterminate;
 }
 
 
@@ -397,14 +395,13 @@ RealBoundedConstraintSet::covers(const Box& bx) const
     Box domain=under_approximation(this->domain());
     Box codomain=under_approximation(this->codomain());
     if(!Ariadne::covers(domain,bx)) { return false; }
-    return Box(this->constraint_function().evaluate(bx)).inside(codomain);
+    return Box(this->constraint_function().evaluate(bx)).inside(codomain) || indeterminate;
 }
 
 tribool
 RealBoundedConstraintSet::inside(const Box& bx) const
 {
-    if(Ariadne::inside(over_approximation(this->domain()),bx)) { return true; }
-    return indeterminate;
+    return Ariadne::inside(over_approximation(this->domain()),bx) || indeterminate;
 }
 
 Box
@@ -475,8 +472,6 @@ Box RealConstrainedImageSet::bounding_box() const
 IntervalAffineConstrainedImageSet
 RealConstrainedImageSet::affine_approximation() const
 {
-    static const Float inf=std::numeric_limits<double>::infinity();
-
     const Vector<Interval> D=approximation(this->domain());
     Vector<Float> m=midpoint(D);
     Matrix<Float> G=this->_function.jacobian(m);
@@ -534,12 +529,22 @@ tribool RealConstrainedImageSet::separated(const Box& bx) const
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
     return tribool(subdomain.empty()) || indeterminate;
+
+
 }
 
 
 tribool RealConstrainedImageSet::overlaps(const Box& bx) const
 {
-    return !this->separated(bx);
+    return IntervalConstrainedImageSet(under_approximation(this->_domain),this->_function,this->_constraints).overlaps(bx);
+    return indeterminate;
+    //ARIADNE_NOT_IMPLEMENTED;
+    Box subdomain = under_approximation(this->_domain);
+    RealVectorFunction function = join(this->function(),this->constraint_function());
+    Box codomain = product(bx,Box(under_approximation(this->constraint_bounds())));
+    ConstraintSolver solver;
+    solver.reduce(subdomain,function,codomain);
+    return !tribool(subdomain.empty()) || indeterminate;
 }
 
 
@@ -738,7 +743,6 @@ Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& fun
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
-    uint imax=nonlinearities.row_size();
     uint jmax_in_row_imax=nonlinearities.column_size();
     Float max_row_sum=0.0;
     for(uint i=0; i!=nonlinearities.row_size(); ++i) {
@@ -753,7 +757,6 @@ Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& fun
             }
         }
         if(row_sum>max_row_sum) {
-            imax=i;
             max_row_sum=row_sum;
             jmax_in_row_imax=jmax;
         }
@@ -982,11 +985,43 @@ tribool IntervalConstrainedImageSet::separated(const Box& bx) const
 
 tribool IntervalConstrainedImageSet::overlaps(const Box& bx) const
 {
+    //std::cerr<<"domain="<<this->_domain<<"\n";
+    //std::cerr<<"subdomain="<<this->_reduced_domain<<"\n";
+
     Box subdomain = this->_reduced_domain;
-    IntervalVectorFunction function = join(this->_function,this->constraint_function());
-    IntervalVector codomain = join(bx,this->constraint_bounds());
-    NonlinearInteriorPointOptimiser optimiser;
-    return optimiser.feasible(subdomain,function,codomain);
+    IntervalVectorFunction space_function = this->_function;
+    IntervalVectorFunction constraint_function = this->constraint_function();
+    IntervalVectorFunction function = join(space_function,constraint_function);
+    //std::cerr<<"function="<<function<<"\n";
+    IntervalVector constraint_bounds = intersection(this->constraint_bounds(),this->constraint_function().evaluate(subdomain));
+    IntervalVector codomain = join(bx,constraint_bounds);
+    //std::cerr<<"codomain="<<codomain<<"\n";
+    NonlinearInfeasibleInteriorPointOptimiser optimiser;
+    optimiser.verbosity=0;
+
+    List<Pair<Nat,Box> > subdomains;
+    Nat depth(0);
+    Nat MAX_DEPTH=2;
+    tribool feasible = false;
+    subdomains.append(make_pair(depth,subdomain));
+
+    while(!subdomains.empty()) {
+        make_lpair(depth,subdomain)=subdomains.back();
+        subdomains.pop_back();
+        tribool found_feasible = optimiser.feasible(subdomain,function,codomain);
+        if(definitely(found_feasible)) { return true; }
+        if(possibly(found_feasible)) {
+            if(depth==MAX_DEPTH) {
+                feasible = indeterminate;
+            } else {
+                Pair<Box,Box> split_subdomains=subdomain.split();
+                subdomains.append(make_pair(depth+1,split_subdomains.first));
+                subdomains.append(make_pair(depth+1,split_subdomains.second));
+            }
+        }
+    }
+    return false;
+
 }
 
 void IntervalConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
@@ -1045,7 +1080,7 @@ tribool IntervalConstrainedImageSet::satisfies(const IntervalConstraint& nc) con
 void
 IntervalConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
 {
-    AffineDrawer(Depth(4)).draw(cnvs,proj,*this);
+    AffineDrawer(Depth(8)).draw(cnvs,proj,*this);
 }
 
 

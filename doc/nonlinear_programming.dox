@@ -38,13 +38,15 @@
 Consider the nonlinear programming problem
 \f[ \framebox{$\displaystyle\max f(x) \text{ s.t. } g_j(x)\geq 0,\ j=1,\ldots,l; \ h_k(x) = 0,\ k=1,\ldots,m . $} \f]
 Applying a penalty function yields the unconstrained maximisation of
-\f[ f(x) + \mu  \sum_{j=1}^{l} \log g_j(x) - \frac{1}{2\mu} \sum_{k=1}^{m} (h_k(x) )^2 . \f]
+\f[ f(x) + \mu  \sum_{j=1}^{l} \log g_j(x) - \frac{1}{2\nu} \sum_{k=1}^{m} (h_k(x) )^2 . \f]
 Differentiating with respect to \f$x\f$ yields
-\f[ \nabla_{\!i\,} f(x) + \mu  \sum_{j=1}^{l} \frac{\nabla_{\!i\,}g_j(x)}{g_j(x)} - \frac{1}{\mu} \sum_{k=1}^{m} h_k(x)\nabla_{\!i\,}h_k(x) = 0. \f]
-Setting \f$\lambda_j = \mu/g_j(x)\f$ and \f$\kappa_k = - h_k(x)/\mu\f$ yields
+\f[ \nabla_{\!i\,} f(x) + \mu  \sum_{j=1}^{l} \frac{\nabla_{\!i\,}g_j(x)}{g_j(x)} - \frac{1}{\nu} \sum_{k=1}^{m} h_k(x)\nabla_{\!i\,}h_k(x) = 0. \f]
+Setting \f$\lambda_j = \mu/g_j(x)\f$ and \f$\kappa_k = - h_k(x)/\nu\f$ yields
 \f[ \nabla_{\!i\,} f(x) +  \sum_{j=1}^{l} \lambda_j \nabla_{\!i\,}g_j(x) + \sum_{k=1}^{m} \kappa_k\,\nabla_{\!i\,}h_k(x) . \f]
-Combining these equations yields the <em>central path</em> for the problem, which is a relaxation of the optimality conditions
-\f[ \framebox{ $\begin{gathered} \nabla f(x) + \sum_{j=1}^{l} \lambda_j \nabla g_j(x) + \sum_{k=1}^{m} \kappa_k \nabla h_k(x) = 0; \\ \lambda_j g_j(x) - \mu = 0; \\ h_k(x) + \mu \kappa_k = 0; \\ \lambda_j \geq 0; \ g_j(x) \geq 0 . \end{gathered}$ } \f]
+Combining these equations yields
+\f[ \begin{gathered} \nabla f(x) + \sum_{j=1}^{l} \lambda_j \nabla g_j(x) + \sum_{k=1}^{m} \kappa_k \nabla h_k(x) = 0; \\ \lambda_j g_j(x) - \mu = 0; \\ h_k(x) + \nu \kappa_k = 0; \\ \lambda_j \geq 0; \ g_j(x) \geq 0 . \end{gathered} \f]
+Setting \f$\nu=0\f$ these equations yields the <em>central path</em> for the problem, which is a relaxation of the optimality conditions
+\f[ \framebox{ $\begin{gathered} \nabla f(x) + \sum_{j=1}^{l} \lambda_j \nabla g_j(x) + \sum_{k=1}^{m} \kappa_k \nabla h_k(x) = 0; \\ \lambda_j g_j(x) = \mu; \\ h_k(x) = 0; \\ \lambda_j \geq 0; \ g_j(x) \geq 0 . \end{gathered}$ } \f]
 Taking \f$\mu\to0\f$ yields the standard Karush-Kuhn-Tucker conditions for optimality
 \f[ \framebox{ $\begin{gathered} \nabla f(x) + \sum_{j=1}^{l} \lambda_j \nabla g_j(x) + \sum_{k=1}^{m} \kappa_k \nabla h_k(x) = 0; \\ \lambda_j g_j(x) = 0; \\ h_k(x) = 0; \\ \lambda_j \geq 0; \ g_j(x) \geq 0 . \end{gathered}$ } \f]
 
@@ -126,12 +128,43 @@ which can be used to eliminate these Lagrange multipliers entirely.
 
 
 
-\subsection general_nonlinear_optimisation General Optimisation Problem
+\section general_nonlinear_optimisation General Optimisation Problem
 
 In %Ariadne, we need to problems with a more general form of the constraints including bounds on the variables and constraints with upper and lower bounds.
 We henceforth consider the generalised problem:
-\f[ \framebox{$\max f(x) \text{ s.t. } \underline{w}_j \leq g_j(x)\leq  \overline{w}_j, \ j=1,\ldots,m; \  \underline{x}_i \leq x_i\leq  \overline{x}_i,\ i=1,\ldots,n. $} \f]
+\f[ \framebox{$\min f(x) \text{ s.t. } \underline{w}_j \leq g_j(x)\leq  \overline{w}_j, \ j=1,\ldots,m; \  \underline{x}_i \leq x_i\leq  \overline{x}_i,\ i=1,\ldots,n. $} \f]
+We make the constraints on \f$g\f$ into equality constraints by introducing variables \f$w_i\f$
+\f[ g_j(x) - w_j = 0, \ \underline{w}_j \leq w_j \leq \overline{w}_j,\ j=1,\ldots,m. \f]
+We add a penalty function, and attempt to minimise the function
+\f[ \framebox{$ f(x) - \mu \sum_{j=1}^{m} \bigl(\log(w_j-\underline{w}_j) + \log(\overline{w}_j-w_j) \bigr) - \mu \sum_{i=1}^{n} \bigl( \log(x_i-\underline{x}_i) + \log(\overline{x}_i-x_i) \bigr)  + \frac{1}{2\nu} \sum_{j=1}^{m} (g_j(x)-w_j)^2 . $} \f]
+Differentiating with respect to \f$w\f$ and \f$x\f$ gives
+\f[ \begin{gathered} \nabla_{\!i\,}f(x) - \mu \Bigl( \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} \Bigr) + \frac{1}{\nu} \sum_{j=1}^{m} (g_j(x)-w_j) \nabla_{\!i\,}g_j(x) = 0; \\  - \mu \Bigl(\frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j} \Bigr) - \frac{1}{\nu} (g_j(x)-w_j) = 0.  \end{gathered} \f]
+Setting \f$y_j = -(g_j(x)-w_j)/\nu\f$ gives
+\f[ \begin{gathered}  \mu \Bigl(\frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j} \Bigr) -  y_j = 0; \\ \nabla_{\!i\,}f(x) - \mu \Bigl( \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} \Bigr) - \sum_{j=1}^{m} y_j \nabla_{\!i\,}g_j(x) = 0; \\ g_j(x)-w_j + \nu\,y_j = 0.  \end{gathered} \f]
+Setting \f$\nu=0\f$ simplifies to
+\f[ \framebox{$ \displaystyle \begin{gathered}  \mu  \Bigl(\frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j} \Bigr) -  y_j = 0; \\ \nabla_{\!i\,}f(x) - \mu \Bigl( \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} \Bigr) - \sum_{j=1}^{m} y_j \nabla_{\!i\,}g_j(x) = 0; \\ g_j(x)-w_j = 0.  \end{gathered} $} \f]
+Setting \f$z_i=\mu \bigl( 1/(x_i-\underline{x}_i) - 1/(\overline{x}_i-x_i) \bigr)\f$ gives
+\f[ \framebox{$ \displaystyle \begin{gathered}   \mu  \Bigl(\frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j} \Bigr) -  y_j = 0; \\ \mu \Bigl( \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} \Bigr) - z_i = 0; \\ \nabla_{\!i\,}f(x) - z_i - \sum_{j=1}^{m} y_j \nabla_{\!i\,}g_j(x) = 0; \\ g_j(x)-w_j + \nu\,y_j= 0.  \end{gathered} $} \f]
+It is possible to eliminate the dual variables \f$y_j\f$ to obtain the alternative (and less useful) form
+\f[ \begin{gathered}  -\nabla_{\!i\,}f + \mu \biggl( \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} \biggr) + \mu \sum_{j=1}^{m} \biggl( \frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j} \biggr) \nabla_{\!i\,} g_j(x) = 0; \quad  g_j(x) - w_j + \nu\,y_j = 0.  \end{gathered} \f]
 
+Note that if \f$\underline{x}_i=0\f$ and \f$\overline{x}_i=\infty\f$, then
+\f[ \mu ( 1/x_i - 1/\infty ) - z_i = 0  \f]
+so
+\f[ x_i\,z_i = \mu . \f]
+
+Note that if \f$ \underline{w}_j = \overline{w}_j \f$, then \f$ w_j = \underline{\overline{w}}_j \f$ and we can set \f$y_j\f$ arbitrarily. 
+Hence \f$\mu  \bigl(\frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j} \bigr) -  y_j = 0\f$ is replaced by \f$w_j-\underline{\overline{w}}_j\f$ for this \f$j\f$.
+
+\subsection nonlinear_optimisation_as_linear The linear case
+
+If \f$f(x) = c^Tx\f$, \f$g(x)=Ax-b\f$, \f$\underline{w}=\overline{w}=0\f$, \f$\underline{x}=0\f$ and \f$\overline{x}=\infty\f$, then \f$w=0\f$ and we obtain the conditions
+\f[  x_i\,z_i = \mu; \quad A^Ty + z = c; \quad Ax + \nu\,y = b,\f]
+which are a relaxed version of the standard conditions for linear programming 
+
+Conversely, if \f$f(x)=-b^Tx\f$, \f$g(x)=c-A^Tx\f$, \f$\underline{w}=0\f$, \f$\overline{w}=\infty\f$, \f$\underline{x}=-\infty\f$ and \f$\overline{x}=+\infty\f$, then \f$z=0\f$ and 
+\f[  w_j\,y_j = 0; \quad Ay = b; \quad A^T x+w = c + \nu\,y = 0 . \f]
+This is a relaxed version of the standard conditions for linear programming with \f$w\f$ instead of \f$z\f$ for the slack variables, and \f$x\f$ and \f$y\f$ interchanged.
 
 \section general_nonlinear_feasibility General feasibility problem
 
@@ -140,22 +173,11 @@ We henceforth consider the generalised problem:
 Consider the generalised feasibility problem:
 \f[ \framebox{$ \underline{w}_j \leq g_j(x)\leq  \overline{w}_j, \ j=1,\ldots,m; \  \underline{x}_i \leq x_i\leq  \overline{x}_i;\ i=1,\ldots,n. $} \f]
 where \f$-\infty < \underline{x}_i < \overline{x}_i < +\infty\f$.
-We make the constraints on \f$g\f$ into equality constraints by introducing variables \f$w_i\f$
-\f[ g_j(x) - w_j = 0, \ \underline{w}_j \leq w_j \leq \overline{w}_j,\ j=1,\ldots,m. \f]
-We attempt to maximise the feasibility function
-\f[ \framebox{$ \sum_{j=1}^{m} \bigl(\log(w_j-\underline{w}_j) + \log(\overline{w}_j-w_j) \bigr) + \sum_{i=1}^{n} \bigl( \log(x_i-\underline{x}_i) + \log(\overline{x}_i-x_i) \bigr) - \frac{1}{2\mu} \sum_{j=1}^{m} (g_j(x)-w_j)^2 . $} \f]
 
-Differentiating with respect to the \f$w_j\f$ and \f$x_i\f$ we obtain
-\f[ \begin{gathered} \frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j}  + \frac{1}{\mu} (g_j(x)-w_j) = 0; \\  \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i}  - \frac{1}{\mu} \sum_{j=1}^{m} (g_j(x)-w_j) \nabla_{\!i\,} g_j(x) = 0. \end{gathered} \f]
-Introduce dual variables \f$y_j = - (g_j(x)-w_j)/\mu\f$ to obtain the central path
-\f[ \framebox{$\displaystyle \begin{gathered} \frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j}  - y_j = 0; \\  \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i}  + \sum_{j=1}^{m}y_j \nabla_{\!i\,} g_j(x) = 0; \\ g_j(x)-w_j + \mu\,y_j = 0.  \end{gathered} $} \f]
-A feasible solution is obtained by solving the Karush-Kuhn-Tucker conditions
-\f[ \framebox{$\begin{gathered} \frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j} - y_j = 0; \\  \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} + \sum_{j=1}^{m} y_j \nabla_{\!i\,} g_j(x) = 0; \\  g_j(x) - w_j = 0.  \end{gathered} $} \f]
-In the case of an equality constraint for \f$w_j\f$, the equation relating \f$w_j\f$ and \f$y_j\f$ is replaced by \f$w_j = \overline{\underline{w}}_j\f$.
-It is possible to introduce dual variables \f$z_i = 1/(x_i-\underline{x}_i) - 1/(\overline{x}_i-x_i)\f$ to obtain the alternative (and less useful) form
-\f[ \begin{gathered} \frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j} - y_j = 0; \quad  \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} - z_i = 0; \\  z_i + \sum_{j=1}^{m} y_j \nabla_{\!i\,} g_j(x) = 0; \quad g_j(x) - w_j = 0.  \end{gathered} \f]
-It is possible to eliminate the dual variables \f$y_j\f$ to obtain the alternative (and less useful) form
-\f[ \begin{gathered}   \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} + \sum_{j=1}^{m} \biggl( \frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j} \biggr) \nabla_{\!i\,} g_j(x) = 0; \quad  g_j(x) - w_j = 0.  \end{gathered} \f]
+A similar analysis to the minimisation problem with \f$f(x) = 0\f$ gives the relaxation
+\f[ \begin{gathered}  \mu \Bigl(\frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j} \Bigr) -  y_j = 0; \\  \mu \Bigl( \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} \Bigr) + \sum_{j=1}^{m} y_j \nabla_{\!i\,}g_j(x) = 0; \\ g_j(x)-w_j + \nu\,y_j = 0.  \end{gathered} \f]
+Setting \f$z_i=\mu \bigl( 1/(x_i-\underline{x}_i) - 1/(\overline{x}_i-x_i) \bigr)\f$ gives
+\f[ \framebox{$ \displaystyle \begin{gathered}   \mu  \Bigl(\frac{1}{w_j-\underline{w}_j} - \frac{1}{\overline{w}_j-w_j} \Bigr) -  y_j = 0; \\ \mu \Bigl( \frac{1}{x_i-\underline{x}_i} - \frac{1}{\overline{x}_i-x_i} \Bigr) - z_i = 0; \\ z_i + \sum_{j=1}^{m} y_j \nabla_{\!i\,}g_j(x) = 0; \\ g_j(x)-w_j + \nu\,y_j= 0.  \end{gathered} $} \f]
 
 The <em>Lagrangian</em> function is defined as
 \f[ \framebox{$ \displaystyle L(w,x,y) = \sum_{j=1}^{m} \bigl( \log(w_j-\underline{w}_j)+\log(\overline{w}_j-w_j) \bigr) + \sum_{i=1}^{n} \bigl( \log(x_i-\underline{x}_i)+\log(\overline{x}_i-x_i) \bigr) + \sum_{j=1}^{m} y_j(g_j(x)-w_j) $} \f]

@@ -154,6 +154,9 @@ class NonlinearInfeasibleInteriorPointOptimiser
     using OptimiserBase::minimise;
     using OptimiserBase::feasible;
 
+    struct PrimalDualData;
+    struct StepData;
+
     //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
     //! \precondition The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
@@ -164,12 +167,12 @@ class NonlinearInfeasibleInteriorPointOptimiser
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall primal and dual variables.
     Pair<Tribool,FloatVector> feasible_hotstarted(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
-                                                  const FloatVector& w0, const FloatVector& x0, const FloatVector& y0) const;
+                                                  const PrimalDualData& wxy0) const;
 
-    Void setup_feasibility(const IntervalVector& D, IntervalVectorFunction g, const IntervalVector& C,
-                           FloatVector& w, FloatVector& x, FloatVector& y, Float& mu) const;
-    Void feasibility_step(const IntervalVector& D, const FloatVectorFunctionInterface& g, const IntervalVector& C,
-                          FloatVector& w, FloatVector& x, FloatVector& y, Float& mu) const;
+    Void setup_feasibility(const IntervalVector& D, const FloatVectorFunctionInterface& g, const IntervalVector& C,
+                           StepData& stp) const;
+    Void step(const FloatScalarFunctionInterface& f, const IntervalVector& d, const FloatVectorFunctionInterface& g, const IntervalVector& c,
+              StepData& stp) const;
 //    Float compute_mu(const IntervalVector& D, const FloatVectorFunction& g, const IntervalVector& C,
 //                     FloatVector& w, FloatVector& x, FloatVector& y) const;
 };

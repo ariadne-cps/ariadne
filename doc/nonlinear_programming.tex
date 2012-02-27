@@ -1,0 +1,173 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsmath,amsthm,amssymb}
+
+\setlength{\textwidth}{160mm}
+\setlength{\oddsidemargin}{-0.4mm}
+\setlength{\textheight}{247mm}
+\setlength{\topmargin}{-0.4mm}
+\setlength{\headheight}{0mm}
+\setlength{\headsep}{0mm}
+\setlength{\footskip}{0mm}
+
+\pagestyle{empty}
+
+\newcommand{\unl}[1]{{\ \!\underline{\;\!\!#1\;\!\!}\ \!}}
+\renewcommand{\unl}[1]{{\underline{#1}}}
+\newcommand{\ovl}[1]{{\bar{#1}}}
+\renewcommand{\ovl}[1]{{\overline{#1}}}
+\newcommand{\cl}{{\underline{c}}}
+\newcommand{\dl}{{\underline{d}}}
+\newcommand{\vl}{{\unl{v}}}
+\newcommand{\wl}{{\unl{w}}}
+\newcommand{\xl}{{\unl{x}}}
+\newcommand{\zl}{{\unl{z}}}
+\newcommand{\Dl}{{\underline{D\!}\,}}
+\newcommand{\El}{{\underline{E\!}\,}}
+\newcommand{\Vl}{{\underline{V\!\!}\,\,}}
+\newcommand{\Wl}{{\underline{W\!\!}\,\,}}
+\newcommand{\Xl}{{\underline{X\!}\,}}
+\newcommand{\Zl}{{\underline{Z\!}\,}}
+\newcommand{\cu}{{\overline{c}}}
+\newcommand{\du}{{\overline{d}}}
+\newcommand{\vu}{{\ovl{v}}}
+\newcommand{\wu}{{\ovl{w}}}
+\newcommand{\xu}{{\ovl{x}}}
+\newcommand{\zu}{{\ovl{z}}}
+\newcommand{\Du}{{\,\overline{\!D}}}
+\newcommand{\Eu}{{\,\overline{\!E}}}
+\newcommand{\Vu}{{\overline{V}}}
+\newcommand{\Wu}{{\overline{W}}}
+\newcommand{\Xu}{{\,\overline{\!X}}}
+\newcommand{\Zu}{{\,\overline{\!Z}}}
+\newcommand{\w}{w}
+\newcommand{\x}{x}
+\newcommand{\y}{y}
+\newcommand{\nablaj}{\nabla_{\!j\,}}
+\newcommand{\sfrac}[2]{{#1}/{#2}}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.65\baselineskip}
+
+\begin{document}
+
+\section*{Nonlinear programming}
+
+Consider the nonlinear programming problem
+\[ \min f(x) \ \text{ s.t. } \ \dl\leq\x\leq\du, \quad \cl\leq g(x)\leq\cu \]
+where
+\[ \begin{gathered} 
+      -\infty < \dl_j < \du_j < +\infty \\
+      -\infty \leq \cl_i < +\infty, \quad -\infty<\cu_i\leq+\infty, \quad \cl_i\leq \cu_i. 
+   \end{gathered} \]
+By intersecting $C$ with $g(D)$ if necessary, we can assume that $C$ is also bounded, 
+\[ -\infty < \cl_i \leq \cu_i < +\infty \]
+though there may be equality constraints $\cl_i=\cu_i$.
+
+Introduce new variables $w_i$ satisfying
+\[ g(\x) - \w = 0 , \]
+and slack variables $\wl$, $\wu$, $\xl$, $\xu$ satisfying
+\[ \w+\wl=\cl,\ \w+\wu=\cu,\ \x+\xl=\dl,\ \x+\xu=\du,\]
+and
+\[ \wl,\xl\leq 0,\ \wu,\xu\geq 0 . \]
+Add a penalty function to obtain
+\begin{multline*} f(x) - \mu \sum_{i=1}^{m}\bigl(\log\!|\wl_i|+\log\!|\wu_i|\bigr) - \mu \sum_{j=1}^{m}\bigl(\log\!|\xl_j|+\log\!|\xu_j|\bigr) + \frac{1}{2\nu} \sum_{i=1}^{m}(g_i(x)-w_i)^2 \\
+    \hspace*{\fill} + \frac{1}{2\nu} \sum_{i=1}^{m}\bigl((\w_i+\wl_i-\cl_i)^2+(\w_i+\wu_i-\cu_i)^2\bigr) + \frac{1}{2\nu} \sum_{j=1}^{n}\bigl((\x_j+\xl_j-\dl_j)^2+(\x_j+\xu_j-\du_j)^2\bigr) \end{multline*}
+Finding the critical points of the revised function gives
+\[ \begin{gathered} 
+      \nablaj{f}(x) + \frac{1}{\nu} \sum_{i=1}^{m}(g_i(x)-w_i) \nablaj{g_i}(x) + \frac{1}{\nu}(\x_j+\xl_j-\dl_j)+\frac{1}{\nu}(\x_j+\xu_j-\du_j)= 0; \\
+      -\frac{1}{\nu}(g_i(x)-w_i) + \frac{1}{\nu}(\w_i+\wl_i-\cl_i) + \frac{1}{\nu}(\w_i+\wu_i-\cu_i) = 0; \\
+      -\frac{\mu}{\wl} + \frac{1}{\nu}(\w_i+\wl_i-\cl_i) = 0; \quad -\frac{\mu}{\wu} + \frac{1}{\nu}(\w_i+\wu_i-\cu_i) = 0; \\
+       -\frac{\mu}{\xl} + \frac{1}{\nu}(\x_j+\xl_j-\dl_j) = 0; \quad -\frac{\mu}{\xu} + \frac{1}{\nu}(\x_j+\xu_j-\du_j) = 0; \\
+   \end{gathered} \]
+Introduce dual variables
+\[ \begin{gathered} y = (g_i(x)-w_i)/\nu; \\ \vl=(\w+\wl-\cl)/\nu, \quad \vu=(\w+\wu-\cu)/\nu, \\ \zl=(\x+\xl-\dl)/\nu, \quad \zu=(\x+\xu-\du)/\nu,  \end{gathered} \]
+satisfying
+\[ \vl,\zl\leq 0,\ \vu,\zu\geq 0 . \]
+On taking $\nu\to0$, the criticality conditions become
+\[ \begin{gathered} 
+      \nablaj{f}(x) + \sum_{i=1}^{m} y_i \nablaj{g_i}(x) + (\zl_j+\zu_j) = 0; \\
+      g_i(x) - w_i = 0; \quad -y_i + \vl_i + \vu_i = 0; \\
+      \w_i+\wl_i-\cl_i = 0; \quad \vl_i\,\wl_i - \mu = 0; \\
+      \w_i+\wu_i-\cu_i = 0; \quad \vu_i\,\wu_i - \mu = 0; \\
+      \x_j+\xl_j-\dl_j = 0; \quad \zl_j\,\xl_j - \mu = 0; \\
+      \x_j+\xu_j-\du_j = 0; \quad \zu_j\,\xu_j - \mu = 0; 
+   \end{gathered} \]
+
+Setting $A=\nabla\!g(x)$ and $H=\nabla^2\!f(x)+\sum_{i=1}^{m} y_i \nabla^2 g(x)$, we have
+{\small\begin{equation*}
+\left( \begin{array}{c|ccc|cccc|cccc}
+    & \w&\x&\y & \wl&\wu&\xl&\xu & \vl&\vu&\zl&\zu \\ \hline
+  \w & 0 & 0 & -I  &  0&0&0&0 & I&I&0&0 \\
+  \x & 0 & H & A^T  &  0&0&0&0 & 0&0&I&I \\
+  \y & -I & A & 0  &  0&0&0&0 & 0&0&0&0 \\ \hline
+  \wl & 0 & 0 & 0  &  \!\Dl\!\!\!&0&0&0 & I\,&0&0&0 \\
+  \wu & 0 & 0 & 0  &  0&\!\!\!\Du\!\!\!&0&0 & 0&\,I\,&0&0 \\
+  \xl & 0 & 0 & 0  &  0&0&\!\!\!\El\!\!\!&0 & 0&0&\,I\,&0 \\
+  \xu & 0 & 0 & 0  &  0&0&0&\!\!\!\Eu\! & 0&0&0&\,I \\ \hline
+  \vl & I & 0 & 0  &  I&0&0&0 & 0&0&0&0 \\
+  \vu & I & 0 & 0  &  0&I&0&0 & 0&0&0&0 \\
+  \zl & 0 & I & 0  &  0&0&I&0 & 0&0&0&0 \\
+  \zu & 0 & I & 0  &  0&0&0&I & 0&0&0&0
+\end{array}\right)
+\left( \begin{array}{c} 
+  \\\hline \delta\w\\\delta\x\\\delta\y \\\hline \delta\wl\\\delta\wu\\\delta\xl\\\delta\xu \\\hline \delta\vl\\\delta\vu\\\delta\zl\\\delta\zu 
+\end{array}\right)
+=
+\left( \begin{array}{c} 
+  \\\hline \epsilon\w\\\epsilon\x\\\epsilon\y \\\hline \epsilon\wl\\\epsilon\wu\\\epsilon\xl\\\epsilon\xu \\\hline \epsilon\vl\\\epsilon\vu\\\epsilon\zl\\\epsilon\zu 
+\end{array}\right)
+=
+\left( \begin{array}{c} 
+  \\\hline y+\vl+\vu\\\nabla\!f(x)+\nabla g(x)^Ty+\zl+\zu\\g(x)-w \\\hline \vl-\mu/\wl\\\vu-\mu/\wu\\\zl-\mu/\xl\\\zu-\mu/\xu 
+  \\\hline \w+\wl-\cl\\\w+\wu-\cu_i\\\x+\xl-\dl\\\x+\xu-\du
+\end{array}\right)
+\end{equation*}}
+where
+\[ \Dl = \Vl/\Wl; \quad \Du=\Vu/\Wu; \qquad \El=\Xl/\Zl; \quad \Eu=\Xu/\Zu . \]
+
+We can eliminate all variables except $w$, $x$ and $y$ to obtain
+\begin{equation*}
+\left( \begin{array}{c|ccc}
+    & \w&\x&\y \\ \hline \\[-2ex]
+  \w & D & 0 & -I \\
+  \x & 0 & H\!+\!E & A^T  \\
+  \y & -I & A & 0   \\ 
+\end{array}\right)
+\left( \begin{array}{c} \delta\\\hline \delta\w\\\delta\x\\\delta\y \end{array}\right)
+= \left( \begin{array}{c} \rho\\\hline \rho\w\\\rho\x\\\rho\y \end{array}\right)
+\end{equation*}
+where
+\[ D = \Dl + \Du = \Vl/\Wl+\Vu/\Wu; \qquad E = \El + \Eu = \Xl/\Zl+\Xu/\Zu ; \]
+and
+\[ \begin{aligned} 
+      \rho\w &= \epsilon\w - (\epsilon\wl+\epsilon\wu) + \Dl\,\epsilon\vl + \Du\,\epsilon\vu \,; \\
+      \rho\x &= \epsilon\x - (\epsilon\xl+\epsilon\xu) + \El\,\epsilon\zl + \Eu\,\epsilon\zu \,; \\
+      \rho\y &= \epsilon\y \,.
+   \end{aligned} \]
+These equations further simplify to
+\[ \begin{aligned} 
+        S\, &= (H+E+A^TDA) \\[\jot] 
+        \delta\x &= S^{-1} \bigl(\rho\x+A^T(\rho_w+D\rho\y)\bigr) \\[\jot] 
+        \delta\w &= A \delta\x - \rho\y \\
+        \delta\y &= D \delta\w - \rho\w 
+   \end{aligned} \]
+We can recover the other changes as
+\[ \begin{gathered} 
+      \delta\wl = \epsilon\vl - \delta\w; \quad \delta\vl = \epsilon\wl - \Dl\,\delta\wl; \\
+      \delta\wu = \epsilon\vu - \delta\w; \quad \delta\vu = \epsilon\wu - \Du\,\delta\wu; \\
+      \delta\xl = \epsilon\zl - \delta\x; \quad \delta\zl = \epsilon\xl - \El\,\delta\xl; \\
+      \delta\xu = \epsilon\zu - \delta\x; \quad \delta\zu = \epsilon\xu - \Eu\,\delta\xu; \\
+    \end{gathered} \]
+
+Note that the conditions are equivalent to minimising the Lagrangian
+\begin{multline*} L(\w,\x,\y,\,\wl,\wu,\xl,\xu,\,\vl,\vu,\zl,\zu) = f(\x) + \sum_{i=1}^{m} \y_i(g_i(\x)-\w_i) \\ 
+     + \sum_{i=1}^{m} \bigl(  \vl_i(\w_i+\wl_i-\cl_i)\!-\!\mu\log\!|\wl_i| \;+\; \vu_i(\w_i+\wu_i-\cu_i)\!-\!\mu\log\!|\wu_i| \bigr) \\
+     \qquad\qquad + \sum_{j=1}^{n} \bigl(  \zl_j(\x_j+\xl_j-\dl_j)\!-\!\mu\log\!|\xl_j| \;+\; \zu_j(\x_j+\xu_j-\du_j)\!-\!\mu\log\!|\xu_j| \bigr) \,. \end{multline*}
+
+The variables are updated using a Newton step
+\[ \mathbf{x}' = \mathbf{x} - \alpha \, \mbox{\boldmath$\delta x$} \]
+where $0<\alpha\leq 1$ is such that $\wl',\xl',\vl',\zl' < 0$ and $\wu',\xu',\vu',\zu'>0$.
+
+The parameter $\mu$ is set by
+\[  \mu = \frac{1}{2(m+n)} \biggl( \sum_{i=1}^{m}\bigl(\vl_i\,\wl_i+\vu_i\,\wu_i\bigr) + \sum_{j=1}^{n}\bigl(\zl_j\,\xl_j+\zu_j\,\xu_j\bigr) \biggr) . \]
+\end{document}

@@ -97,6 +97,27 @@ which factorises
 \f]
 To compute the full interval inverse, we only need to invert the matrix \f$[H-AZ^{-1}XA^T]\f$, which is small and dense.
 
+\section hotstarting_algebraic_equations Hotstarting Validated Algebraic Equation Solvers
+
+A validated algebraic equation solver requires an initial box containing the solution. 
+We often have a candidate approximate solution \f$\tilde{x}\f$, and wish to prove the existence of a solution near \f$\tilde{x}\f$.
+A precise definition of "near" is as follows:
+<center><em>A solution \f$x^*\f$ of \f$f(x)=0\f$ is near \f$\tilde{x}\f$ if \f$\langle Df(\langle \tilde{x},x^*\rangle)\rangle\f$ is invertible.</em></center> 
+Here, \f$\langle \cdot \rangle\f$ denotes the convex hull.
+We conjecture that there is at most one solution near any starting point.
+A sufficient condition, which may be easier to check, is invertibility of \f$[Df([\tilde{x},x^*\rangle])]\f$, i.e. the interval hull of the Jacobians over the interval hull consists of invertible matrices.
+
+An algorithm for computing a solution given a hotstart is to compute interval Newton iterates.
+Whenever an iterate \f$[\hat{x}]\f$ is disjoint from \f$[x]\f$ in the \f$i\f$<sup>th</sup> component, we take \f$\mathrm{hull}([\hat{x}_i],\mathrm{mid}([x_i]))\f$ as the new component.
+
+
+\section underdetermined_algebraic_equations Solving Underdetermined Algebraic Equations
+
+If \f$ f:\R^n\fto\R^m \f$ with \f$ m < n \f$, then the system of equations \f$f(x)=0\f$ is underdetermined. A Newton-like step can be taken as
+\f[ x_{n+1} = x_n - A^T (AA^T)^{-1} f(x_n) \text{ where } A=Df(x_n) . \f]
+
+
+
 
 
 */

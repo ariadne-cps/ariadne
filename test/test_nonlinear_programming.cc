@@ -48,6 +48,7 @@ class TestOptimiser
 
     void test() {
         //ARIADNE_TEST_CALL(test_mixed_constrained_optimisation()); return;
+        //ARIADNE_TEST_CALL(test_equality_constrained_optimisation()); return;
         ARIADNE_TEST_CALL(test_feasibility_check());
         ARIADNE_TEST_CALL(test_unconstrained_optimisation());
         ARIADNE_TEST_CALL(test_constrained_optimisation());
@@ -182,6 +183,10 @@ class TestOptimiser
 int main(int argc, const char* argv[]) {
     uint optimiser_verbosity = get_verbosity(argc,argv);
 
+    NonlinearInfeasibleInteriorPointOptimiser nlio;
+    nlio.verbosity=optimiser_verbosity;
+    TestOptimiser(nlio).test();
+    return ARIADNE_TEST_FAILURES;
     NonlinearInteriorPointOptimiser nlo;
     nlo.verbosity=optimiser_verbosity;
     TestOptimiser(nlo).test();

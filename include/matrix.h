@@ -615,17 +615,33 @@ template<class X> DiagonalMatrix<X> operator*(const DiagonalMatrix<X>& D1, const
 template<class X> DiagonalMatrix<X> operator/(const DiagonalMatrix<X>& D1, const DiagonalMatrix<X>& D2) {
     DiagonalMatrix<X> r(D1.size()); for(size_t i=0; i!=r.size(); ++i) { r[i] = D1[i]/D2[i]; } return r;
 }
-template<class X, class XX> Vector<XX> operator/(const Vector<XX>& v, const DiagonalMatrix<X>& D) {
-    Vector<XX> r(v.size()); for(size_t i=0; i!=r.size(); ++i) { r[i] = v[i]/D[i]; } return r;
-}
 template<class X, class XX> Vector<XX> operator*(const DiagonalMatrix<X>& D, const Vector<XX>& v) {
     Vector<XX> r(v.size()); for(size_t i=0; i!=r.size(); ++i) { r[i] = D[i]*v[i]; } return r;
+}
+template<class X, class XX> inline Vector<XX> operator*(const Vector<XX>& v1, const DiagonalMatrix<X>& D2) {
+    Vector<XX> r(v1.size()); for(uint i=0; i!=r.size(); ++i) { r[i] = v1[i] * D2[i]; } return r;
+}
+template<class X, class XX> Vector<XX> operator/(const Vector<XX>& v, const DiagonalMatrix<X>& D) {
+    Vector<XX> r(v.size()); for(size_t i=0; i!=r.size(); ++i) { r[i] = v[i]/D[i]; } return r;
 }
 template<class X, class XX> Matrix<XX> operator*(const DiagonalMatrix<X>& D, const Matrix<XX>& A) {
     ARIADNE_ASSERT_MSG(D.size()==A.row_size(),"D*A: D="<<D<<" A="<<A);
     Matrix<XX> R(A.row_size(),A.column_size());
     for(size_t i=0; i!=R.row_size(); ++i) { for(size_t j=0; j!=R.column_size(); ++j) { R[i][j] = D[i]*A[i][j]; } }
     return R;
+}
+template<class X, class XX> inline Matrix<XX> operator*(const Matrix<XX>& A, const DiagonalMatrix<X>& B) {
+    Matrix<XX> R(A.row_size(),A.column_size());
+    for(uint i=0; i!=A.row_size(); ++i) { for(uint j=0; j!=A.column_size(); ++j) { R[i][j]=A[i][j]*B.diagonal()[j]; } }
+    return R;
+}
+template<class X> Matrix<X>& operator+=(Matrix<X>& A, const DiagonalMatrix<X>& D) {
+    ARIADNE_ASSERT_MSG(D.size()==A.row_size() && D.size()==A.column_size(),"D*A: D="<<D<<" A="<<A);
+    for(size_t i=0; i!=D.size(); ++i) { A[i][i] += D[i]; }
+    return A;
+}
+template<class X> Matrix<X> operator+(const Matrix<X>& A, const DiagonalMatrix<X>& D) {
+    Matrix<X> R(A); R+=D; return R;
 }
 template<class X> DiagonalMatrix<X> inverse(const DiagonalMatrix<X>& D) {
     DiagonalMatrix<X> r(D.size()); for(size_t i=0; i!=r.size(); ++i) { r[i] = 1/D[i]; } return r;

@@ -43,6 +43,7 @@
 
 #include "nonlinear_programming.h"
 #include "solver.h"
+#include <include/multi_index-noaliasing.h>
 
 namespace Ariadne {
 
@@ -59,6 +60,11 @@ typedef Vector<Interval> IntervalVector;
 typedef Matrix<Interval> IntervalMatrix;
 typedef VectorRange<IntervalVector> IntervalVectorRange;
 typedef DiagonalMatrix<Interval> IntervalDiagonalMatrix;
+
+template<class X> inline
+DiagonalMatrix<X> const& diagonal_matrix(const Vector<X>& v) {
+    return reinterpret_cast<DiagonalMatrix<X>const&>(v);
+}
 
 template<class X> inline
 bool epos(const Vector<X>& x) {
@@ -171,6 +177,13 @@ void atda(Matrix<X>& S, const Matrix<X>& A, const Vector<X>& D)
     }
 }
 
+// Compute S+=A^TDA, where D is diagonal and S is symmetric.
+template<class X>
+void atda(Matrix<X>& S, const Matrix<X>& A, const DiagonalMatrix<X>& D)
+{
+    atda(S,A,D.diagonal());
+}
+
 // Compute S=ADA^T, where D is diagonal.
 template<class X>
 Matrix<X> adat(const Matrix<X>& A, const Vector<X>& D)
@@ -207,19 +220,7 @@ template<class X> inline bool all_greater(const Vector<X>& x, const X& e) {
     for(uint i=0; i!=x.size(); ++i) { if(x[i]<=e) { return false; } } return true;
 }
 
-template<class X> inline Matrix<X> operator*(const Matrix<X>& A, const DiagonalMatrix<X>& B) {
-    Matrix<X> R(A.row_size(),A.column_size());
-    for(uint i=0; i!=A.row_size(); ++i) { for(uint j=0; j!=A.column_size(); ++j) { R[i][j]=A[i][j]*B.diagonal()[j]; } }
-    return R;
-}
 
-template<class X> inline Vector<X> operator*(const Vector<X>& v1, const DiagonalMatrix<X>& D2) {
-    Vector<X> r(v1.size()); for(uint i=0; i!=r.size(); ++i) { r[i] = v1[i] * D2[i]; } return r;
-}
-
-template<class X> inline Matrix<X>& operator+=(Matrix<X>& A, const DiagonalMatrix<X>& D) {
-    for(uint i=0; i!=D.size(); ++i) { A[i][i]+=D[i]; } return A;
-}
 
 
 
@@ -515,6 +516,97 @@ contains_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVect
 
 
 
+
+Bool OptimiserBase::
+validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+                     FloatVector fltx, FloatVector flty) const
+{
+    ARIADNE_PRECONDITION(D.size()==g.argument_size());
+    ARIADNE_PRECONDITION(C.size()==g.result_size());
+    ARIADNE_PRECONDITION(fltx.size()==D.size());
+    ARIADNE_PRECONDITION(flty.size()==C.size());
+    ARIADNE_LOG(2,"validate_feasibility\n");
+    ARIADNE_LOG(3,"D="<<D<<" C="<<C<<"\n");
+
+    IntervalVector x(fltx);
+    ARIADNE_LOG(3,"x="<<x<<"\n");
+
+    IntervalVector gx=g(x);
+    ARIADNE_LOG(4,"gx="<<gx<<"\n");
+
+    List<uint> equalities;
+    for(uint j=0; j!=C.size(); ++j) {
+        if(C[j].lower()==C[j].upper()) {
+            equalities.append(j);
+        } else {
+            if(!subset(gx[j],C[j])) { return false; }
+        }
+    }
+
+    if(equalities.empty()) { ARIADNE_LOG(2,"feasible\n"); return true; }
+
+    IntervalVectorFunction h(equalities.size(),g.argument_size());
+    FloatVector c(equalities.size());
+    for(uint i=0; i!=equalities.size(); ++i) {
+        h[i] = g[equalities[i]];
+        c[i] = C[equalities[i]].lower();
+    }
+    ARIADNE_LOG(5,"g="<<g<<"\n");
+    ARIADNE_LOG(5,"h="<<h<<" c="<<c<<" h(x)-c="<<FloatVector(h(fltx)-c)<<"\n");
+
+    IntervalVector W(h.result_size(),Interval(-1e-8,1e-8));
+    IntervalMatrix AT = transpose(midpoint(h.jacobian(fltx)));
+    IntervalVector B = x+AT*W;
+    IntervalMatrix IA = h.jacobian(B);
+    ARIADNE_LOG(5,"AT="<<AT<<" IA="<<IA<<"\n");
+    ARIADNE_LOG(5,"B="<<B<<"\n");
+
+    IntervalVector nW = inverse(IA*AT) * IntervalVector(h(x)-c);
+    ARIADNE_LOG(4,"W="<<W<<"\nnew_W="<<nW<<"\n");
+    if(subset(B,D) && subset(nW,W)) { ARIADNE_LOG(3,"feasible\n"); return true; }
+    else { return false; }
+
+}
+
+
+Bool OptimiserBase::
+validate_infeasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+                       FloatVector x, FloatVector y) const
+{
+    ARIADNE_PRECONDITION(D.size()==g.argument_size());
+    ARIADNE_PRECONDITION(C.size()==g.result_size());
+    ARIADNE_PRECONDITION(x.size()==D.size());
+    ARIADNE_PRECONDITION(y.size()==C.size());
+    ARIADNE_LOG(2,"validate_infeasibility\n");
+    // Compute first-order approximation to g(D) centred at x.
+    // For feasibilty, have yg(D) cap yC nonempty.
+    // Estimate y g(X) = y g(x) + y Dg(X).(X-x)
+
+    // Compute y.C
+    Interval yC = dot(IntervalVector(y),C);
+
+    // Compute Taylor estimate of y g(X)
+    VectorTaylorFunction tg(D,g,default_sweeper());
+    ScalarTaylorFunction tyg(D,default_sweeper());
+    for(uint j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
+    Interval tygD = tyg(D);
+
+    IntervalMatrix dgD = g.jacobian(D);
+    IntervalVector ydgD = IntervalVector(y) * dgD;
+
+    Interval ygx = dot(IntervalVector(y),g(IntervalVector(x)));
+
+    Interval ygD = ygx;
+    for(uint i=0; i!=x.size(); ++i) {
+        ygD += ydgD[i] * (D[i]-x[i]);
+    }
+
+    ARIADNE_LOG(4,"yC="<<yC<<" tygD="<<tygD<<" ygD="<<ygD<<"\n");
+
+    if(empty(intersection(yC,ygD))) { ARIADNE_LOG(3,"infeasible\n"); return true; }
+    else { return false; }
+}
+
 // FIXME: Look at this code again, especially relating to generalised Lagrange multipliers
 Bool OptimiserBase::
 is_infeasibility_certificate(IntervalVector d, IntervalVectorFunction g, IntervalVector c, FloatVector y) const
@@ -594,8 +686,11 @@ minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, I
     StepData v;
     FloatVector& x=v.x;
     FloatVector& y=v.y;
+    C=intersection(C,g(D)+IntervalVector(C.size(),Interval(-1,+1)));
     this->setup_feasibility(D,g,C,v);
     FloatVector oldx=x;
+
+    static const float MU_MIN = 1e-12;
 
     // FIXME: Allow more steps
     for(uint i=0; i!=MAXIMUM_STEPS; ++i) {
@@ -606,10 +701,14 @@ minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, I
         if(this->is_infeasibility_certificate(D,g,C,y)) {
             ARIADNE_LOG(2,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
             ARIADNE_LOG(2,"infeasible\n");
+            std::cerr<<"EXCEPTION: "<<InfeasibleProblemException().what()<<"\n";
             throw InfeasibleProblemException();
         }
         Float fx=f(x);
         if(abs(fx-oldfx)<VALUE_TOLERANCE && norm(oldx-x)<STATE_TOLERANCE) {
+            break;
+        }
+        if(v.mu<MU_MIN) {
             break;
         }
     }
@@ -619,7 +718,7 @@ minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, I
         return x;
     }
     ARIADNE_LOG(2,"indeterminate_feasibility\n");
-    ARIADNE_NOT_IMPLEMENTED;
+    throw IndeterminateFeasibilityException();
 }
 
 Tribool NonlinearInfeasibleInteriorPointOptimiser::
@@ -639,6 +738,7 @@ feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const
     IntervalVector R=intersection(g(D)+IntervalVector(C.size(),Interval(-1,+1)),C);
     this->setup_feasibility(D,g,R,v);
 
+    static const float MU_MIN = 1e-12;
 
     // FIXME: Allow more steps
     for(uint i=0; i!=12; ++i) {
@@ -653,6 +753,9 @@ feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const
             ARIADNE_LOG(3,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
             ARIADNE_LOG(2,"infeasible\n");
             return false;
+        }
+        if(v.mu<MU_MIN) {
+            break;
         }
     }
     ARIADNE_LOG(3,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
@@ -672,10 +775,10 @@ setup_feasibility(const IntervalVector& D, const FloatVectorFunctionInterface& g
     v.w=midpoint(C);
 
     //stp.xl=lower(D)-x;
-    v.xl=FloatVector(n,-1.0);
-    v.xu=FloatVector(n,+1.0);
     v.wl=FloatVector(m,-1.0);
     v.wu=FloatVector(m,+1.0);
+    v.xl=lower_bounds(D)-v.x;
+    v.xu=upper_bounds(D)-v.x;
     v.vl=FloatVector(m,-1.0);
     v.vu=FloatVector(m,+1.0);
     v.zl=FloatVector(n,-1.0);
@@ -697,10 +800,12 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
 
     ARIADNE_LOG(4,"NonlinearInfeasibleInteriorPointOptimiser::step(f,D,g,C,...)\n");
     ARIADNE_LOG(5,"  f="<<f<<", D="<<d<<", g="<<g<<", C="<<c<<"\n");
-    ARIADNE_LOG(5,"  w="<<w<<", x="<<x<<", y="<<y<<"\n");
-    ARIADNE_LOG(7,"  wl="<<wl<<", wu="<<wu<<", xl="<<xl<<", xu="<<xu<<"\n");
-    ARIADNE_LOG(7,"  vl="<<vl<<", vu="<<vu<<", zl="<<zl<<", zu="<<zu<<"\n");
-    ARIADNE_LOG(5,"  mu="<<mu<<"\n");
+    ARIADNE_LOG(5,"  w ="<<w<<",  x ="<<x<<", y ="<<y<<" mu="<<mu<<"\n");
+    ARIADNE_LOG(5,"  wl="<<wl<<", wu="<<wu<<", xl="<<xl<<", xu="<<xu<<"\n");
+    ARIADNE_LOG(5,"  vl="<<vl<<", vu="<<vu<<", zl="<<zl<<", zu="<<zu<<"\n");
+    ARIADNE_LOG(9,"  cl-wl="<<cl-wl<<", dl-xl="<<dl-xl<<"\n");
+    ARIADNE_LOG(9,"    w  ="<<w<<",   x  ="<<x<<"\n");
+    ARIADNE_LOG(9,"  cu-wu="<<cu-wu<<", du-xu="<<du-xu<<"\n");
     static const double gamma=1.0/1024;
     static const double sigma=1.0/8;
     static const double scale=0.75;
@@ -715,48 +820,66 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     ARIADNE_ASSERT(x.size()==n);
     ARIADNE_ASSERT(y.size()==m);
 
-    ARIADNE_LOG(4,"  f="<<f<<", D="<<d<<", g="<<g<<", C="<<c<<"\n");
-    FloatDifferential ddfx=f.evaluate(FloatDifferential::variables(2,x));
-    Vector<FloatDifferential> ddgx=g.evaluate(FloatDifferential::variables(2,x));
-    ARIADNE_LOG(9,"  ddgx="<<ddgx<<"\n");
+    mu = mu * sigma;
 
-    Vector<Float> dfx = ddfx.gradient();
+    FloatDifferential ddfx=f.evaluate(FloatDifferential::variables(2,x));
+    ARIADNE_LOG(9,"ddfx="<<ddfx<<"\n");
+    Vector<FloatDifferential> ddgx=g.evaluate(FloatDifferential::variables(2,x));
+    ARIADNE_LOG(9,"ddgx="<<ddgx<<"\n");
+
+    Float fx = ddfx.value();
     Vector<Float> gx = ddgx.value();
-    ARIADNE_LOG(7," g(x)="<<gx<<"\n");
+    ARIADNE_LOG(7,"f(x)="<<fx<<"\n");
+    ARIADNE_LOG(7,"g(x)="<<gx<<"\n");
+    Vector<Float> Jfx = ddfx.gradient();
     Matrix<Float> A = ddgx.jacobian();
-    Matrix<Float>& dgx = A;
-    ARIADNE_LOG(7," A="<<A<<"\n");
+    Matrix<Float>& Jgx = A;
+    ARIADNE_LOG(7,"Df(x)="<<Jfx<<"\n");
+    ARIADNE_LOG(7,"Dg(x)="<<Jgx<<"\n");
 
     // H is the Hessian matrix H of the Lagrangian $L(x,\lambda) = f(x) + \sum_k g_k(x) $
     Matrix<Float> YH = ddfx.hessian();
     for(uint i=0; i!=m; ++i) {
         YH+=y[i]*ddgx[i].hessian();
     }
-    ARIADNE_LOG(7," D2f+Y.D2g="<<YH<<"\n");
+    ARIADNE_LOG(7,"D2f(x)="<<ddfx.hessian()<<"\n");
+    ARIADNE_LOG(7,"D2f(x)+Y.D2g(x)="<<YH<<"\n");
 
     // Set up the system of equations
     // (A^TDA + E - Y.H) dx = A^T(r_w-Dr_y)+r_x
     // dw = A \delta x + r_y
     // dy = r_w - D dw
 
+    FloatDiagonalMatrix const& Vl=diagonal_matrix(vl);
+    FloatDiagonalMatrix const& Vu=diagonal_matrix(vu);
+    FloatDiagonalMatrix const& Wl=diagonal_matrix(wl);
+    FloatDiagonalMatrix const& Wu=diagonal_matrix(wu);
+    FloatDiagonalMatrix const& Xl=diagonal_matrix(xl);
+    FloatDiagonalMatrix const& Xu=diagonal_matrix(xu);
+    FloatDiagonalMatrix const& Zl=diagonal_matrix(zl);
+    FloatDiagonalMatrix const& Zu=diagonal_matrix(zu);
+
     // Compute the diagonal matrices
     //   D=XL/ZL+XU/ZU  E=WL/VL+WU/VU
-    FloatVector Dl=ediv(vl,wl);
-    FloatVector Du=ediv(vu,wu);
-    FloatVector D=eadd(Dl,Du);
+    FloatDiagonalMatrix Dl=Vl/Wl;
+    FloatDiagonalMatrix Du=Vu/Wu;
+    FloatDiagonalMatrix D=Dl+Du;
     ARIADNE_LOG(9,"D="<<D<<"\n");
-    FloatVector El=ediv(zl,xl);
-    FloatVector Eu=ediv(zu,xu);
-    FloatVector E=eadd(El,Eu);
+    FloatDiagonalMatrix El=Zl/Xl;
+    FloatDiagonalMatrix Eu=Zu/Xu;
+    FloatDiagonalMatrix E=El+Eu;
     ARIADNE_LOG(9,"E="<<E<<"\n");
 
     // normal equation matrix
-    FloatMatrix& S=YH;
+    FloatMatrix S=YH;
     atda(S,A,D);
-    for(uint i=0; i!=n; ++i) { S[i][i]+=E[i]; }
+    S+=E;
 
+    //FloatMatrix EE(n,n); for(uint j=0; j!=n; ++j) { EE[j][j]=E[j]; }
+    //FloatMatrix DD(m,m); for(uint i=0; i!=m; ++i) { DD[i][i]=E[i]; }
 
     ARIADNE_LOG(9,"S="<<S<<"\n");
+    ARIADNE_DEBUG_ASSERT(norm(FloatMatrix(S-(YH+E+transpose(A)*(D*A))))/norm(S)<1e-8);
     FloatMatrix Sinv=inverse(S);
     ARIADNE_LOG(9,"Sinv="<<Sinv<<"\n");
 
@@ -765,8 +888,8 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     // The residual for the dual variable zl is given by the slackness condition x-xl-cl
     // The residual for the auxiliary variable w is given by y-(vu-vl)
     // The residual for the dual variable y is given by g(x)-w
-    FloatVector ew=y+(vl+vu);
-    FloatVector ex=dfx+y*dgx+(zl+zu);
+    FloatVector ew=(vl+vu)-y;
+    FloatVector ex=Jfx+y*Jgx+(zl+zu);
     FloatVector ey=gx-w;
     FloatVector ewl=esub(vl,ediv(mu,wl));
     FloatVector ewu=esub(vu,ediv(mu,wu));
@@ -777,45 +900,96 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     FloatVector ezl=x+xl-dl;
     FloatVector ezu=x+xu-du;
 
-    FloatVector rw = ew - (ewl+ewu) + emul(Dl,evl) + emul(Du,evu);
-    FloatVector rx = ex - (exl+exu) + emul(El,ezl) + emul(Eu,ezu);
+    ARIADNE_LOG(9,"ew="<<ew<<", ex="<<ex<<", ey="<<ey<<"\n");
+    ARIADNE_LOG(9,"ewl="<<ewl<<", ewu="<<ewu<<", exl="<<exl<<" exu="<<exu<<"\n");
+    ARIADNE_LOG(9,"evl="<<evl<<", evu="<<evu<<", ezl="<<ezl<<" ezu="<<ezu<<"\n");
+
+    FloatVector rw = ew - (ewl+ewu) + Dl*evl + Du*evu;
+    FloatVector rx = ex - (exl+exu) + El*ezl + Eu*ezu;
     FloatVector& ry = ey;
 
-    FloatVector r = (rw+emul(D,ry))*A+rx;
+    // Solve linear system
+    // ( D   0  -I ) (dw)   (rw)
+    // ( 0  H+E A^T) (dx) = (rx)
+    // (-I   A   0 ) (dy) = (ry)
+
+    FloatVector r = (rw+D*ry)*A+rx;
     ARIADNE_LOG(9,"rw="<<rw<<" rx="<<rx<<" ry="<<ry<<"\n");
+    ARIADNE_LOG(9,"r="<<r<<"\n");
 
     // Compute the differences
-    FloatVector dx=solve(S,r);
-    //FloatVector dz=-rz-prod(AET,dyt);
-    FloatVector dw=A*dx-ry;
-    FloatVector dy=emul(D,dw) - rw;
+    FloatVector dx = solve(S,r);
+    ARIADNE_LOG(9,"S*dx="<<S*dx<<" r="<<r<<"\n");
+    ARIADNE_LOG(9,"S*inverse(S)-I="<<S*inverse(S)-FloatMatrix::identity(n)<<"\n");
+    ARIADNE_DEBUG_ASSERT(norm(S*dx - r)/max(1.0,norm(r))<1e-4);
+
+    FloatVector dw = A*dx-ry;
+    FloatVector dy = D*dw-rw;
     ARIADNE_LOG(9,"dw="<<dw<<" dx="<<dx<<" dy="<<dy<<"\n");
+
+    ARIADNE_LOG(9,"YH*dx+E*dx+dy*A="<<(YH*dx+E*dx+dy*A)<<", rx="<<rx<<"\n");
+
+    // Check solution of linear system for residuals
+    ARIADNE_DEBUG_ASSERT(norm(D*dw-dy-rw)/max(1.0,norm(rw))<1e-4);
+    ARIADNE_DEBUG_ASSERT(norm(YH*dx+E*dx+dy*A-rx)/max(1.0,norm(rx))<1e-2);
+    ARIADNE_DEBUG_ASSERT(norm(-dw+A*dx-ry)/max(1.0,norm(ry))<1e-4);
 
     FloatVector dwl = evl-dw;
     FloatVector dwu = evu-dw;
     FloatVector dxl = ezl-dx;
     FloatVector dxu = ezu-dx;
-    FloatVector dvl = ewl-emul(Dl,dwl);
-    FloatVector dvu = ewu-emul(Du,dwu);
-    FloatVector dzl = exl-emul(El,dxl);
-    FloatVector dzu = exu-emul(Eu,dxu);
+    FloatVector dvl = ewl-Dl*dwl;
+    FloatVector dvu = ewu-Du*dwu;
+    FloatVector dzl = exl-El*dxl;
+    FloatVector dzu = exu-Eu*dxu;
+
+    ARIADNE_LOG(9,"dwl="<<dwl<<", dwu="<<dwu<<", dxl="<<dxl<<" dxu="<<dxu<<"\n");
+    ARIADNE_LOG(9,"dvl="<<dvl<<", dvu="<<dvu<<", dzl="<<dzl<<" dzu="<<dzu<<"\n");
+
+    ARIADNE_LOG(9,"YH*dx+dy*A+dzl+dzu="<<(YH*dx+dy*A+dzl+dzu)<<", ex="<<ex<<"\n");
+    // Check solution of linear system
+/*
+    ARIADNE_DEBUG_ASSERT(norm(-dy+dvl+dvu - ew)/max(1.0,norm(ew))<1e-4);
+    ARIADNE_DEBUG_ASSERT(norm(YH*dx+dy*A+dzl+dzu - ex)/max(1.0,norm(ex))<1e-2);
+    ARIADNE_DEBUG_ASSERT(norm(-dw+A*dx - ey)/max(1.0,norm(ey))<1e-4);
+    ARIADNE_DEBUG_ASSERT(norm(Dl*dwl+dvl - ewl)<1e-12);
+    ARIADNE_DEBUG_ASSERT(norm(Du*dwu+dvu - ewu)<1e-12);
+    ARIADNE_DEBUG_ASSERT(norm(El*dxl+dzl - exl)<1e-12);
+    ARIADNE_DEBUG_ASSERT(norm(Eu*dxu+dzu - exu)<1e-12);
+    ARIADNE_DEBUG_ASSERT(norm(dw+dwl - evl)<1e-12);
+    ARIADNE_DEBUG_ASSERT(norm(dw+dwu - evu)<1e-12);
+    ARIADNE_DEBUG_ASSERT(norm(dx+dxl - ezl)<1e-12);
+    ARIADNE_DEBUG_ASSERT(norm(dx+dxu - ezu)<1e-12);
+*/
 
     FloatVector nw; FloatVector nx; FloatVector ny;
     FloatVector nwl; FloatVector nwu; FloatVector nxl; FloatVector nxu;
     FloatVector nvl; FloatVector nvu; FloatVector nzl; FloatVector nzu;
 
 
+    Float alpha=1.0;
+    nx = x-alpha*dx;
+    // Pick an update value which minimises the objective function
+    Float fxmin=f(nx);
+    Float alphamin=1.0;
+    static const uint REDUCTION_STEPS=4;
+    for(uint i=0; i!=REDUCTION_STEPS; ++i) {
+        alpha*=scale;
+        nx = x-alpha*dx;
+        Float fnx=f(nx);
+        if(fnx<fxmin*scale) {
+            fxmin=fnx;
+            alphamin=alpha;
+        }
+    }
+    //alpha=alphamin;
+    alpha=1.0;
+
     // Since we need to keep the point feasible, but the updates are linear
     // we need to validate feasibility directly.
-    bool allfeasible=false;
-    Float alpha=1/scale;
-//    if(!egtr(emul(x,z) , gamma*mu/16)) {
-//        ARIADNE_LOG(1,"WARNING: x="<<x<<", z="<<z<< ", x.z="<<emul(x,z)<<"<"<<gamma*mu / 16);
-//        throw NearBoundaryOfFeasibleDomainException();
-//    }
     static const double MINIMUM_ALPHA=1e-16;
+    bool allfeasible=false;
     while(alpha>MINIMUM_ALPHA && !allfeasible) {
-        alpha=alpha*scale;
         nwl=wl-alpha*dwl;
         nwu=wu-alpha*dwu;
         nxl=xl-alpha*dxl;
@@ -824,7 +998,10 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
         nvu=vu-alpha*dvu;
         nzl=zl-alpha*dzl;
         nzu=zu-alpha*dzu;
-        allfeasible = eneg(nwl) && epos(nwu) && eneg(nxl) && epos(nxu) && eneg(nvl) && epos(nvu) && eneg(nzl) && epos(nzu);
+        allfeasible = elss(nwl,mu*gamma) && egtr(nwu,mu*gamma) && elss(nxl,mu*gamma) && egtr(nxu,mu*gamma)
+                           && elss(nvl,mu*gamma)&& egtr(nvu,mu*gamma) && elss(nzl,mu*gamma) && egtr(nzu,mu*gamma);
+        //allfeasible = eneg(nwl) && epos(nwu) && eneg(nxl) && epos(nxu) && elss(nvl,mu*gamma) && egtr(nvu,mu*gamma) && elss(nzl,mu*gamma) && egtr(nzu,mu*gamma);
+        if(!allfeasible) { alpha*=scale; }
     }
     nw=w-alpha*dw;
     nx=x-alpha*dx;
@@ -833,8 +1010,10 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
         ARIADNE_LOG(9," w="<<w<<"  x="<<x<<"  y="<<y<<"\n");
         ARIADNE_LOG(9," nw="<<nw<<"  nx="<<nx<<"  ny="<<ny<<"\n");
         throw NearBoundaryOfFeasibleDomainException(); }
-    ARIADNE_LOG(9,"alpha="<<alpha<<"\n");
+    ARIADNE_LOG(5,"alpha="<<alpha<<"\n");
     ARIADNE_LOG(9,"nw="<<nw<<" nx="<<nx<<" ny="<<ny<<"\n");
+    ARIADNE_LOG(9,"nwl="<<nwl<<", nwu="<<nwu<<", nxl="<<nxl<<" nxu="<<nxu<<"\n");
+    ARIADNE_LOG(9,"nvl="<<nvl<<", nvu="<<nvu<<", nzl="<<nzl<<" nzu="<<nzu<<"\n");
 
     w=nw; x=nx; y=ny;
     wl=nwl; wu=nwu; xl=nxl; xu=nxu;
@@ -848,9 +1027,9 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
         nmu = nmu + xl[j]*zl[j] + xu[j]*zu[j];
     }
     nmu /= (2*(m+n));
+    mu = nmu;
 
     ARIADNE_LOG(9,"nmu="<<nmu<<"\n");
-    mu = nmu / 8;
 
 }
 
@@ -1752,91 +1931,6 @@ check_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
 }
 
 
-
-Tribool PenaltyFunctionOptimiser::
-validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
-                     FloatVector fltx, FloatVector flty) const
-{
-    ARIADNE_PRECONDITION(D.size()==g.argument_size());
-    ARIADNE_PRECONDITION(C.size()==g.result_size());
-    ARIADNE_PRECONDITION(fltx.size()==D.size());
-    ARIADNE_LOG(2,"validate_feasibility\n");
-    ARIADNE_LOG(3,"D="<<D<<" C="<<C<<"\n");
-
-    IntervalVector x(fltx);
-    ARIADNE_LOG(3,"x="<<x<<"\n");
-
-    IntervalVector gx=g(x);
-    ARIADNE_LOG(4,"gx="<<gx<<"\n");
-
-    List<uint> equalities;
-    for(uint j=0; j!=C.size(); ++j) {
-        if(C[j].lower()==C[j].upper()) {
-            equalities.append(j);
-        } else {
-            if(!subset(gx[j],C[j])) { return indeterminate; }
-        }
-    }
-
-    if(equalities.empty()) { ARIADNE_LOG(2,"feasible\n"); return true; }
-
-    IntervalVectorFunction h(equalities.size(),g.argument_size());
-    FloatVector c(equalities.size());
-    for(uint i=0; i!=equalities.size(); ++i) {
-        h[i] = g[equalities[i]];
-        c[i] = C[equalities[i]].lower();
-    }
-    ARIADNE_LOG(5,"g="<<g<<"\n");
-    ARIADNE_LOG(5,"h="<<h<<" c="<<c<<" h(x)-c="<<FloatVector(h(fltx)-c)<<"\n");
-
-    IntervalVector W(h.result_size(),Interval(-1e-8,1e-8));
-    IntervalMatrix AT = transpose(midpoint(h.jacobian(fltx)));
-    IntervalVector B = x+AT*W;
-    IntervalMatrix IA = h.jacobian(B);
-    ARIADNE_LOG(5,"AT="<<AT<<" IA="<<IA<<"\n");
-    ARIADNE_LOG(5,"B="<<B<<"\n");
-
-    IntervalVector nW = inverse(IA*AT) * IntervalVector(h(x)-c);
-    ARIADNE_LOG(4,"W="<<W<<"\nnew_W="<<nW<<"\n");
-    if(subset(B,D) && subset(nW,W)) { ARIADNE_LOG(3,"feasible\n"); return true; }
-    else { return indeterminate; }
-
-}
-
-
-Tribool PenaltyFunctionOptimiser::
-validate_infeasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
-                       FloatVector x, FloatVector y) const
-{
-    ARIADNE_LOG(2,"validate_infeasibility\n");
-    // Compute first-order approximation to g(D) centred at x.
-    // For feasibilty, have yg(D) cap yC nonempty.
-    // Estimate y g(X) = y g(x) + y Dg(X).(X-x)
-
-    // Compute y.C
-    Interval yC = dot(IntervalVector(y),C);
-
-    // Compute Taylor estimate of y g(X)
-    VectorTaylorFunction tg(D,g,default_sweeper());
-    ScalarTaylorFunction tyg(D,default_sweeper());
-    for(uint j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
-    Interval tygD = tyg(D);
-
-    IntervalMatrix dgD = g.jacobian(D);
-    IntervalVector ydgD = IntervalVector(y) * dgD;
-
-    Interval ygx = dot(IntervalVector(y),g(IntervalVector(x)));
-
-    Interval ygD = ygx;
-    for(uint i=0; i!=x.size(); ++i) {
-        ygD += ydgD[i] * (D[i]-x[i]);
-    }
-
-    ARIADNE_LOG(4,"yC="<<yC<<" tygD="<<tygD<<" ygD="<<ygD<<"\n");
-
-    if(empty(intersection(yC,ygD))) { ARIADNE_LOG(3,"infeasible\n"); return true; }
-    else { return indeterminate; }
-}
 
 
 

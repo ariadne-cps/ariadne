@@ -51,9 +51,18 @@ template<class X, class R> class Constraint;
 typedef Constraint<RealScalarFunction,Real> RealConstraint;
 typedef Constraint<IntervalScalarFunction,Float> IntervalConstraint;
 
-class InfeasibleProblemException : public std::exception { };
-class DegenerateNonlinearFeasibilityProblemException : public std::exception { };
-class NearBoundaryOfFeasibleDomainException : public std::exception { };
+class InfeasibleProblemException : public std::runtime_error {
+  public: InfeasibleProblemException() : std::runtime_error("InfeasibleProblemException") { }
+};
+class IndeterminateFeasibilityException : public std::runtime_error {
+  public: IndeterminateFeasibilityException() : std::runtime_error("IndeterminateFeasibilityException") { }
+};
+class DegenerateNonlinearFeasibilityProblemException : public std::runtime_error {
+  public: DegenerateNonlinearFeasibilityProblemException() : std::runtime_error("DegenerateNonlinearFeasibilityProblemException") { }
+};
+class NearBoundaryOfFeasibleDomainException : public std::runtime_error {
+  public: NearBoundaryOfFeasibleDomainException() : std::runtime_error("NearBoundaryOfFeasibleDomainException") { }
+};
 
 //! \ingroup OptimisationModule EvaluationModule
 //! Interface for nonlinear programming solvers.
@@ -79,16 +88,22 @@ class OptimiserInterface {
 
     //! \brief Tests if the point \a x is feasible, in that \f$x\in D\f$ and \f$g(x)\in N_\epsilon(C)\f$.
     virtual Bool almost_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
-                                       FloatVector x, Float error) const = 0;
+                                       FloatVector x, Float eps) const = 0;
     //! \brief Tests if the point \a x is feasible.
     virtual Bool is_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
                                    FloatVector x) const = 0;
+    //! \brief Tests if the point \a x is near feasible, using approximate multipliers \a y to guide the search.
+    virtual Bool validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+                                      FloatVector x, FloatVector y) const = 0;
+    //! \brief Tests if the feasibility problem is definitely unsolvable, using multipliers \a y and local centering point \a x.
+    virtual Bool validate_infeasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+                                      FloatVector x, FloatVector y) const = 0;
     //! \brief Tests if the interval box \a X definitely contains a feasible point.
     virtual Tribool contains_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
                                             IntervalVector X) const = 0;
-    //! \brief Tests if the Lagrange multipliers \a lambda are a certificate of infeasiblity.
+    //! \brief Tests if the Lagrange multipliers \a y are a certificate of infeasiblity.
     virtual Bool is_infeasibility_certificate(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
-                                              FloatVector lambda) const = 0;
+                                              FloatVector y) const = 0;
 };
 
 //! \ingroup OptimisationModule
@@ -108,6 +123,10 @@ class OptimiserBase
                                        FloatVector x, Float error) const;
     virtual Bool is_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
                                    FloatVector x) const;
+    virtual Bool validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+                                      FloatVector x, FloatVector y) const;
+    virtual Bool validate_infeasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+                                        FloatVector x, FloatVector y) const;
     virtual Tribool contains_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
                                             IntervalVector X) const;
     virtual Bool is_infeasibility_certificate(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
@@ -126,8 +145,6 @@ class PenaltyFunctionOptimiser
 {
     virtual PenaltyFunctionOptimiser* clone() const;
     virtual Tribool check_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C, FloatVector x, FloatVector y) const;
-    virtual Tribool validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C, FloatVector x, FloatVector y) const;
-    virtual Tribool validate_infeasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C, FloatVector x, FloatVector y) const;
     virtual IntervalVector minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C) const;
     virtual Tribool feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const;
     virtual Void feasibility_step(const IntervalVector& D, const FloatVectorFunction& g, const IntervalVector& C,

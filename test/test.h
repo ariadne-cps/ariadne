@@ -117,7 +117,7 @@ int test_case_counter = 0;
             function;                                                   \
         } catch(const std::exception& e) {                              \
             ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "ERROR: exception in " << #function << ": "    \
+            std::cout << "ERROR: exception '" << e.what() << "' in " << #function << ": "    \
                       << e.what() << std::endl;                         \
             std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": calling " \
                       << #function << ": " << e.what() << std::endl; \

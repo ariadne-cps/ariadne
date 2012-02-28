@@ -47,8 +47,6 @@ class TestOptimiser
         : optimiser(opt.clone()) { }
 
     void test() {
-        //ARIADNE_TEST_CALL(test_mixed_constrained_optimisation()); return;
-        //ARIADNE_TEST_CALL(test_equality_constrained_optimisation()); return;
         ARIADNE_TEST_CALL(test_feasibility_check());
         ARIADNE_TEST_CALL(test_unconstrained_optimisation());
         ARIADNE_TEST_CALL(test_constrained_optimisation());
@@ -67,6 +65,7 @@ class TestOptimiser
         ARIADNE_TEST_PRINT(g);
         Box D(2, -1.0,2.0, -3.0,5.0);
         Box C(0);
+        ARIADNE_TEST_PRINT(make_tuple(f,D,g,C));
 
         IntervalVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(subset,x_optimal,D);
@@ -78,14 +77,15 @@ class TestOptimiser
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         RealScalarFunction f(+(sqr(x[0])+sqr(x[1])));
         ARIADNE_TEST_PRINT(f);
-        RealVectorFunction h( (1.5+x[0]+2*x[1]+0.25*x[0]*x[1]) );
-        ARIADNE_TEST_PRINT(h);
+        RealVectorFunction g( (1.5+x[0]+2*x[1]+0.25*x[0]*x[1]) );
+        ARIADNE_TEST_PRINT(g);
         IntervalVector C(1,Interval(0.0));
         Box D(2, -1.0,2.0, -3.0,5.0);
+        ARIADNE_TEST_PRINT(make_tuple(f,D,g,C));
 
-        IntervalVector x_optimal=optimiser->minimise(f,D,h,C);
+        IntervalVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(subset,x_optimal,D);
-        ARIADNE_TEST_LESS(norm(h(x_optimal)),1e-7);
+        ARIADNE_TEST_LESS(norm(g(x_optimal)),1e-7);
     }
 
     void test_constrained_optimisation() {
@@ -94,10 +94,12 @@ class TestOptimiser
         RealScalarFunction f(x0s*(12+x0s*(6.3+x0s))+6*x[1]*(x[1]-x[0])+x[2]);
         ARIADNE_TEST_PRINT(f);
         //RealVectorFunction g( (x[0]-1, x[0]+x[1]*x[1], x[1]*x[1]) );
+        Box D(3, -1.0,2.0, -3.0,5.0, -3.0,5.0);
+        ARIADNE_TEST_PRINT(D);
         RealVectorFunction g( (2*x[1]+x[0], x[0]+x[1]*x[1]-0.875) );
         ARIADNE_TEST_PRINT(g);
-        Box D(3, -1.0,2.0, -3.0,5.0, -3.0,5.0);
         Box C(2, 0.0,inf, 0.0,inf, 3.0,3.0);
+        ARIADNE_TEST_PRINT(C);
 
         IntervalVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(subset,x_optimal,D);

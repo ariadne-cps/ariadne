@@ -45,7 +45,7 @@ for some \f$\xi\in[x]\f$. Denoting the matrix formed by the gradients of \f$Df_i
 and by rearranging,
 \f[ x^* = x - Df(\xi)^{-1} f(x) . \f]
 The interval Newton method is given by the contraction algorithm
-\f[ \framebox{$ [x_{n+1}] = [x_n] \cap \bigl( x_n - Df[x_n]^{-1} f(x_n) \bigr) $} \f]
+\f[ \boxed{ [x_{n+1}] = [x_n] \cap \bigl( x_n - Df[x_n]^{-1} f(x_n) \bigr) } \f]
 where \f$x_n\in[x_n]\f$ and \f$Df[x]\f$ is the interval matrix of all partial derivatives \f$ \partial f_i/\partial x_j[x]\f$.
 
 \section krawczyk The Krawczyk  method
@@ -62,9 +62,9 @@ Now add \f$(x^*-x)\f$ to both sides to obtain
 and rearrange to obtain
 \f[ x^* = x -Jf(x) + (I - JDf(\xi)) (x^*-x) . \f]
 The Krawczyk method is given by the contraction algorithm
-\f[ \framebox{$ [x_{n+1}] = [x_n] \cap \bigl( x_n -J_nf(x_n) + (I - J_nDf[x_n]) ([x_n]-x]) \bigr) $} \f]
+\f[ \boxed{ [x_{n+1}] = [x_n] \cap \bigl( x_n -J_nf(x_n) + (I - J_nDf[x_n]) ([x_n]-x]) \bigr) } \f]
 Typically, we take either
-\f[ \framebox{$ J = \mathrm{mid}(Df[x]) \text{ or } J=Df(x) $} \f]
+\f[ \boxed{ J = \mathrm{mid}(Df[x]) \text{ or } J=Df(x) } \f]
 
 \section modified_krawczyk The Modified Krawczyk  Method
 
@@ -99,10 +99,10 @@ To compute the full interval inverse, we only need to invert the matrix \f$[H-AZ
 
 \section hotstarting_algebraic_equations Hotstarting Validated Algebraic Equation Solvers
 
-A validated algebraic equation solver requires an initial box containing the solution. 
+A validated algebraic equation solver requires an initial box containing the solution.
 We often have a candidate approximate solution \f$\tilde{x}\f$, and wish to prove the existence of a solution near \f$\tilde{x}\f$.
 A precise definition of "near" is as follows:
-<center><em>A solution \f$x^*\f$ of \f$f(x)=0\f$ is near \f$\tilde{x}\f$ if \f$\langle Df(\langle \tilde{x},x^*\rangle)\rangle\f$ is invertible.</em></center> 
+<center><em>A solution \f$x^*\f$ of \f$f(x)=0\f$ is near \f$\tilde{x}\f$ if \f$\langle Df(\langle \tilde{x},x^*\rangle)\rangle\f$ is invertible.</em></center>
 Here, \f$\langle \cdot \rangle\f$ denotes the convex hull.
 We conjecture that there is at most one solution near any starting point.
 A sufficient condition, which may be easier to check, is invertibility of \f$[Df([\tilde{x},x^*\rangle])]\f$, i.e. the interval hull of the Jacobians over the interval hull consists of invertible matrices.

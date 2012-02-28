@@ -168,9 +168,9 @@ class Enclosure
     void apply_finishing_parameter_evolve_step(IntervalVectorFunction phi, IntervalScalarFunction omega);
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $r\leq h.
     void apply_full_reach_step(IntervalVectorFunctionModel phi);
-    //! \brief Apply the flow \f$xi'(s,r)=\phi(\xi(s),r)\f$, \f$\tau'(s,r)=\tau(s)+r\f$, \f$r\leq\elps\f$
+    //! \brief Apply the flow \f$xi'(s,r)=\phi(\xi(s),r)\f$, \f$\tau'(s,r)=\tau(s)+r\f$, \f$r\leq\epsilon(s)\f$
     void apply_spacetime_reach_step(IntervalVectorFunctionModel phi, IntervalScalarFunction elps);
-    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $r-elps(s)\leq 0$.
+    //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $r-\epsilon(s)\leq 0$.
     void apply_parameter_reach_step(IntervalVectorFunctionModel phi, IntervalScalarFunction elps);
 /*
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,h]\f$

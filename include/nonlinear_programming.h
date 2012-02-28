@@ -92,6 +92,9 @@ class OptimiserInterface {
     //! \brief Tests if the point \a x is feasible.
     virtual Bool is_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
                                    FloatVector x) const = 0;
+    //! \brief Tests if the point \a x is near feasible.
+    virtual Bool validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+                                      FloatVector x) const = 0;
     //! \brief Tests if the point \a x is near feasible, using approximate multipliers \a y to guide the search.
     virtual Bool validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
                                       FloatVector x, FloatVector y) const = 0;
@@ -123,6 +126,8 @@ class OptimiserBase
                                        FloatVector x, Float error) const;
     virtual Bool is_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
                                    FloatVector x) const;
+    virtual Bool validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+                                      FloatVector x) const;
     virtual Bool validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
                                       FloatVector x, FloatVector y) const;
     virtual Bool validate_infeasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,

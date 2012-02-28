@@ -128,5 +128,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_nonlinear_programming test_hybrid_reachability_analyser
+XFAIL_TESTS = test_hybrid_reachability_analyser
 testsubdir = ./

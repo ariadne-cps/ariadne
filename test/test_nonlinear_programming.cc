@@ -53,6 +53,7 @@ class TestOptimiser
         ARIADNE_TEST_CALL(test_equality_constrained_optimisation());
         ARIADNE_TEST_CALL(test_linear_feasibility());
         ARIADNE_TEST_CALL(test_nonlinear_feasibility());
+        ARIADNE_TEST_CALL(test_nonlinear_equality_feasibility());
     }
 
     void test_unconstrained_optimisation() {
@@ -176,8 +177,14 @@ class TestOptimiser
 
         // The following test fails since it is difficult to find the feasible
         // point in the box.
-        ARIADNE_TEST_CONSTRUCT( IntervalVector, X2,(2, 0.30,0.40, 0.65,0.66) );
+        ARIADNE_TEST_CONSTRUCT( IntervalVector, X2,(2, 0.30,0.40, 0.65,0.65) );
         ARIADNE_TEST_ASSERT( optimiser->contains_feasible_point(D,g,C,X2) );
+
+        ARIADNE_TEST_CONSTRUCT( IntervalVector, X3,(2, 0.30,0.40, 0.65,0.68) );
+        ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X3)) );
+
+        ARIADNE_TEST_CONSTRUCT(FloatVector, x2,(2, 0.35, 0.655) );
+        ARIADNE_TEST_ASSERT( optimiser->validate_feasibility(D,g,C,x2) );
     }
 
 };

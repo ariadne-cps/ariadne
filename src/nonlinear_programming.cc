@@ -44,6 +44,7 @@
 #include "nonlinear_programming.h"
 #include "solver.h"
 #include <include/multi_index-noaliasing.h>
+#include <include/constraint_solver.h>
 
 namespace Ariadne {
 
@@ -519,53 +520,112 @@ contains_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVect
 
 Bool OptimiserBase::
 validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
-                     FloatVector fltx, FloatVector flty) const
+                     FloatVector x0, FloatVector y0) const
+{
+    return this->validate_feasibility(D,g,C,x0);
+}
+
+Bool OptimiserBase::
+validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+                     FloatVector x0) const
 {
     ARIADNE_PRECONDITION(D.size()==g.argument_size());
     ARIADNE_PRECONDITION(C.size()==g.result_size());
-    ARIADNE_PRECONDITION(fltx.size()==D.size());
-    ARIADNE_PRECONDITION(flty.size()==C.size());
+    ARIADNE_PRECONDITION(x0.size()==D.size());
     ARIADNE_LOG(2,"validate_feasibility\n");
-    ARIADNE_LOG(3,"D="<<D<<" C="<<C<<"\n");
+    ARIADNE_LOG(3,"D="<<D<<", g="<<g<<", C="<<C<<"\n");
+    ARIADNE_LOG(3,"x0="<<x0<<"\n");
 
-    IntervalVector x(fltx);
+    IntervalVector x(x0);
     ARIADNE_LOG(3,"x="<<x<<"\n");
 
     IntervalVector gx=g(x);
     ARIADNE_LOG(4,"gx="<<gx<<"\n");
 
-    List<uint> equalities;
-    for(uint j=0; j!=C.size(); ++j) {
-        if(C[j].lower()==C[j].upper()) {
-            equalities.append(j);
+    List<Nat> equalities, inequalities;
+    for(Nat i=0; i!=C.size(); ++i) {
+        if(C[i].lower()==C[i].upper()) {
+            equalities.append(i);
         } else {
-            if(!subset(gx[j],C[j])) { return false; }
+            inequalities.append(i);
+            if(!subset(gx[i],C[i])) {
+                ARIADNE_LOG(3,"g["<<i<<"](x)="<<gx[i]<<", C["<<i<<"]="<<C[i]<<"\n");
+                return false; }
         }
     }
 
     if(equalities.empty()) { ARIADNE_LOG(2,"feasible\n"); return true; }
 
+    Nat k=equalities.size();
+    Nat n=D.size();
     IntervalVectorFunction h(equalities.size(),g.argument_size());
     FloatVector c(equalities.size());
     for(uint i=0; i!=equalities.size(); ++i) {
         h[i] = g[equalities[i]];
         c[i] = C[equalities[i]].lower();
     }
-    ARIADNE_LOG(5,"g="<<g<<"\n");
-    ARIADNE_LOG(5,"h="<<h<<" c="<<c<<" h(x)-c="<<FloatVector(h(fltx)-c)<<"\n");
+    ARIADNE_LOG(5,"h="<<h<<" c="<<c<<" h(x)-c="<<(h(x0)-c)<<"\n");
 
-    IntervalVector W(h.result_size(),Interval(-1e-8,1e-8));
-    IntervalMatrix AT = transpose(midpoint(h.jacobian(fltx)));
-    IntervalVector B = x+AT*W;
-    IntervalMatrix IA = h.jacobian(B);
-    ARIADNE_LOG(5,"AT="<<AT<<" IA="<<IA<<"\n");
-    ARIADNE_LOG(5,"B="<<B<<"\n");
+    // Attempt to solve h(x0+AT*w)=0
+    IntervalMatrix AT = transpose(h.jacobian(x0));
+    ARIADNE_LOG(5,"A="<<transpose(AT)<<"\n");
+    IntervalVector w0(k,Interval(0));
 
-    IntervalVector nW = inverse(IA*AT) * IntervalVector(h(x)-c);
-    ARIADNE_LOG(4,"W="<<W<<"\nnew_W="<<nW<<"\n");
-    if(subset(B,D) && subset(nW,W)) { ARIADNE_LOG(3,"feasible\n"); return true; }
-    else { return false; }
+    bool found_solution=false;
+    bool validated_solution=false;
 
+    IntervalVector w(k), mw(k), nw(k);
+    IntervalVector mx(n);
+
+    for(uint ii=0; ii!=12; ++ii) {
+        mw=midpoint(w);
+        x=x0+AT*w;
+        mx=x0+AT*mw;
+        nw = mw - solve(h.jacobian(x)*AT,IntervalVector(h(mx)-c));
+        ARIADNE_LOG(7,"w="<<w<<", h(x0+AT*w)="<<h(x)<<", nw="<<nw<<", subset="<<subset(nw,w)<<"\n");
+
+        if(!found_solution) {
+            if(subset(nw,w)) {
+                found_solution=true;
+                w=hull(w0,w);
+            } else {
+                w=hull(w,IntervalVector(2.0*nw)-w);
+            }
+        } else {
+            if(subset(nw,w)) {
+                validated_solution=true;
+            } else if(validated_solution) {
+                // Not a contraction, so presumably accurate enough
+                break;
+            }
+            w=intersection(nw,w);
+        }
+
+    }
+    ARIADNE_LOG(5,"w="<<w<<", validated="<<validated_solution<<"\n");
+
+    if(!validated_solution) { return false; }
+
+    // Compute x value
+    x=x0+AT*w;
+    ARIADNE_LOG(3,"x="<<x<<"\n");
+    gx=g(x);
+    ARIADNE_LOG(3,"g(x)="<<gx<<"\n");
+
+    // Check that equality constraints are plausible
+    ARIADNE_DEBUG_ASSERT(contains(h(x)-c,FloatVector(k)));
+
+    // Check inequality constraints once more
+    for(uint i=0; i!=C.size(); ++i) {
+        if(C[i].lower()==C[i].upper()) {
+            ARIADNE_DEBUG_ASSERT(subset(C[i],gx[i]));
+        } else {
+            if(!subset(gx[i],C[i])) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 
@@ -713,7 +773,7 @@ minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, I
         }
     }
     ARIADNE_LOG(2,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
-    if(this->is_feasible_point(D,g,C,x)) {
+    if(this->validate_feasibility(D,g,C,x)) {
         ARIADNE_LOG(2,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
         return x;
     }
@@ -744,7 +804,7 @@ feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const
     for(uint i=0; i!=12; ++i) {
         ARIADNE_LOG(5,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
         this->step(f,D,g,R,v);
-        if(this->is_feasible_point(D,g,C,x)) {
+        if(this->validate_feasibility(D,g,C,x)) {
             ARIADNE_LOG(3,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
             ARIADNE_LOG(2,"feasible\n");
             return true;

@@ -33,6 +33,7 @@
 
 #include "tribool.h"
 #include "numeric.h"
+#include "constraint.h"
 
 namespace Ariadne {
 

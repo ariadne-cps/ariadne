@@ -298,7 +298,32 @@ We call methods in which the slack is stored and updated by a Newton-like step <
 In general, enforcing primal feasibility using a primal-dual-slack method may be harder than for an ordinary primal-dual method. We doubt these methods are advantageous in practise.
 
 
-\section nonlinear_optimisation_feasibility_interval_methods Interval methods for solving the John conditions
+\section nonlinear_optimisation_interval_methods Interval Methods for Nonlinear Programming
+
+See Hansen & Walster (1993).
+
+\subsection nonlinear_optimisation_interval_kkt Interval methods for solving the Karush-Kuhn-Tucker conditions
+
+Consider the standard nonlinear optimisation problem with inequality constraints only
+\f[ \max f(x) \text{ s.t. } g(x)\geq0 \f]
+and look for a solution with \f$x\in X = [\unl{x},\ovl{x}] \f$
+
+The Karush-Kuhn-Tucker optimality conditions are
+\f[ \begin{gathered}
+      \nabla_j f(x) + \sum_{i=1}^{m} y_i \cdot \nabla_j g_i(x) = 0; \\
+      y_i \, g_i(x) = 0; \quad
+      y_i,g_i(x) \geq 0. \end{gathered}
+\f]
+Applying the one-dimensional Taylor theorem with remainder to each component, we obtain
+\f[ F(x+\delta{x},y+\delta{y}) \in F(x,y) + D_xF(X,y)\,\delta{x} + D_yF(X,Y)\,\delta{y} \f]
+and can hence use the Jacobian matrix
+\f[ \begin{pmatrix} \nabla^2f(X)+y\!\cdot\!\nabla^2g(X) & \nabla g(X)^T \\ \nabla g(X) & \mathrm{diag}(g(X)/y) \end{pmatrix} \f]
+Note that the variables \f$y\f$ only enter into the Jacobian in the non-interval form.
+Hence even if the interval \f$Y_i\f$ contining the dual variable \f$y_i\f$ is unbounded, the interval Newton step only requires a suitably-chosen point \f$y_i\in Y_i\f$.
+
+
+
+\subsection nonlinear_optimisation_feasibility_interval_methods Interval methods for solving the John conditions
 
 Introduce variables \f$w,y,z\f$ and use the following form of the John conditions
 \f[ \boxed{\begin{gathered}

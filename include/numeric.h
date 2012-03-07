@@ -82,13 +82,37 @@ template<> struct IsNumeric<Rational> { static const bool value = true; };
 
 template<class X, class T> struct EnableIfNumeric : EnableIf<IsNumeric<X>,T> { };
 
-template<class FROM, class TO> struct IsSafelyConvertible : public False { };
-template<> struct IsSafelyConvertible<Real,Real> : public True { };
-template<> struct IsSafelyConvertible<Real,Interval> : public True { };
-template<> struct IsSafelyConvertible<Real,Float> : public True { };
-template<> struct IsSafelyConvertible<Interval,Interval> : public True { };
-template<> struct IsSafelyConvertible<Interval,Float> : public True { };
-template<> struct IsSafelyConvertible<Float,Float> : public True { };
+template<class F, class T> struct IsSafelyConvertible : False { };
+template<> struct IsSafelyConvertible<ExactFloat,Real> : True { };
+template<> struct IsSafelyConvertible<ExactFloat,ExactFloat> : True { };
+template<> struct IsSafelyConvertible<ExactFloat,Interval> : True { };
+template<> struct IsSafelyConvertible<Real,Real> : True { };
+template<> struct IsSafelyConvertible<Real,Interval> : True { };
+template<> struct IsSafelyConvertible<Real,Float> : True { };
+template<> struct IsSafelyConvertible<Interval,Interval> : True { };
+template<> struct IsSafelyConvertible<Interval,Float> : True { };
+template<> struct IsSafelyConvertible<Float,Float> : True { };
+#ifdef HAVE_GMPXX_H
+template<> struct IsSafelyConvertible<Rational,Float> : True { };
+template<> struct IsSafelyConvertible<Rational,Interval> : True { };
+template<> struct IsSafelyConvertible<uint,Rational> : True { };
+template<> struct IsSafelyConvertible<int,Rational> : True { };
+#endif // HAVE_GMPXX_H
+template<> struct IsSafelyConvertible<int,Real> : True { };
+template<> struct IsSafelyConvertible<int,ExactFloat> : True { };
+template<> struct IsSafelyConvertible<int,Interval> : True { };
+template<> struct IsSafelyConvertible<int,Float> : True { };
+template<> struct IsSafelyConvertible<uint,Real> : True { };
+template<> struct IsSafelyConvertible<uint,ExactFloat> : True { };
+template<> struct IsSafelyConvertible<uint,Interval> : True { };
+template<> struct IsSafelyConvertible<uint,Float> : True { };
+template<> struct IsSafelyConvertible<double,ExactFloat> : True { };
+template<> struct IsSafelyConvertible<double,Interval> : True { };
+template<> struct IsSafelyConvertible<double,Float> : True { };
+
+template<class FROM, class TO> struct IsNumericCastable : IsSafelyConvertible<FROM,TO> { };
+template<> struct IsNumericCastable<Float,ExactFloat> : True { };
+template<> struct IsNumericCastable<Float,Interval> : True { };
 
 // Type deduction for numerical arithmetic
 template<class X1, class X2> struct Arithmetic { };
@@ -114,6 +138,7 @@ template<> struct Arithmetic<double,Rational> { typedef Rational ResultType; };
 template<> struct Arithmetic<Rational,Interval> { typedef Interval ResultType; };
 template<> struct Arithmetic<Interval,Rational> { typedef Interval ResultType; };
 #endif // HAVE_GMPXX_H
+
 
 } // namespace Ariadne
 

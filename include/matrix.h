@@ -28,6 +28,8 @@
 #ifndef ARIADNE_MATRIX_H
 #define ARIADNE_MATRIX_H
 
+#include <iostream>
+#include <iomanip>
 #include <cstdarg>
 #include <limits>
 
@@ -37,6 +39,15 @@
 #include "tuple.h"
 
 namespace Ariadne {
+
+template<class T> class Pretty {
+    const T& _t;
+  public:
+    Pretty(const T& t) : _t(t) { }
+    operator const T& () const { return this->_t; }
+};
+template<class T> Pretty<T> pretty(const T& t) { return Pretty<T>(t); }
+template<class T> std::ostream& operator<<(std::ostream& os, const Pretty<T>& p);
 
 class SingularMatrixException {
 };
@@ -376,23 +387,23 @@ MatrixNegation<M>
 operator-(const MatrixExpression<M>& Ae) { return MatrixNegation<M>(Ae()); }
 
 template<class M1, class M2> inline
-typename EnableIfDefined< typename Arithmetic<typename M1::ValueType,typename M2::ValueType>::ResultType, MatrixSum< M1, M2 > >::Type
+typename EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,typename M2::ValueType>::ResultType>, MatrixSum< M1, M2 > >::Type
 operator+(const MatrixExpression<M1>& A1e, const MatrixExpression<M2>& A2e) { return MatrixSum<M1,M2>(A1e(),A2e()); }
 
 template<class M1, class M2> inline
-typename EnableIfDefined< typename Arithmetic<typename M1::ValueType,typename M2::ValueType>::ResultType, MatrixDifference< M1, M2 > >::Type
+typename EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,typename M2::ValueType>::ResultType>, MatrixDifference< M1, M2 > >::Type
 operator-(const MatrixExpression<M1>& A1e, const MatrixExpression<M2>& A2e) { return MatrixDifference<M1,M2>(A1e(),A2e()); }
 
 template<class X1, class M2> inline
-typename EnableIf< And< IsScalar<X1>, IsDefined<typename Arithmetic<X1,typename M2::ValueType>::ResultType> >, MatrixScalarProduct< M2, X1 > >::Type
+typename EnableIf< IsDefined<typename Arithmetic<X1,typename M2::ValueType>::ResultType>, MatrixScalarProduct< M2, X1 > >::Type
 operator*(const X1& x1, const MatrixExpression<M2>& A2e) { return MatrixScalarProduct<M2,X1>(A2e(),x1); }
 
 template<class M1, class X2> inline
-typename EnableIf< And< IsScalar<X2>, IsDefined<typename Arithmetic<typename M1::ValueType,X2>::ResultType> >, MatrixScalarProduct< M1, X2 > >::Type
+typename EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,X2>::ResultType>, MatrixScalarProduct< M1, X2 > >::Type
 operator*(const MatrixExpression<M1>& A1e, const X2& x2) { return MatrixScalarProduct<M1,X2>(A1e(),x2); }
 
 template<class M1, class X2> inline
-typename EnableIf< And< IsScalar<X2>, IsDefined<typename Arithmetic<typename M1::ValueType,X2>::ResultType> >, MatrixScalarProduct< M1, X2 > >::Type
+typename EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,X2>::ResultType>, MatrixScalarProduct< M1, X2 > >::Type
 operator/(const MatrixExpression<M1>& A1e, const X2& x2) { return MatrixScalarProduct<M1,X2>(A1e(),1/x2); }
 
 
@@ -680,6 +691,36 @@ Matrix<Float> normalise_rows(const Matrix<Float>& A);
 
 Matrix<Float> midpoint(const Matrix<Interval>&);
 
+inline std::ostream& operator<<(std::ostream& os, const Pretty< Interval >& pI) {
+    Interval const& I(pI); return os << std::setprecision(5) << std::fixed << "{" << std::setw(8) << I.lower() << ":" << std::setw(8) << I.upper() << "}";
+}
+
+inline std::ostream& operator<<(std::ostream& os, const Pretty< Float >& px) {
+    Float const& x(px); return os << std::setprecision(5) << std::fixed << std::setw(8) << x;
+}
+
+template<class X> inline std::ostream& operator<<(std::ostream& os, const Pretty< Vector<X> >& pv) {
+    const Vector<X>& v(pv);
+    os << "  ( ";
+    for(size_t j=0; j!=v.size(); ++j) {
+        if(j!=0) { os << ", "; }
+        os << pretty(v[j]);
+    }
+    return os;
+}
+
+template<class X> inline std::ostream& operator<<(std::ostream& os, const Pretty< Matrix<X> >& pA) {
+    const Matrix<X>& A(pA);
+    for(size_t i=0; i!=A.row_size(); ++i) {
+        os << "  ( ";
+        for(size_t j=0; j!=A.column_size(); ++j) {
+            if(j!=0) { os << ", "; }
+            os << pretty(A[i][j]);
+        }
+        os << " )\n";
+    }
+    return os;
+}
 
 } // namespace Ariadne
 

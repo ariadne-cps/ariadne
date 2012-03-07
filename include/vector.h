@@ -50,6 +50,8 @@ template<class V> struct VectorExpression {
 
 template<class V> struct VectorContainer : public VectorExpression<V> { };
 
+template<class T> struct IsScalar : IsNumeric<T> { };
+
 
 //! \brief A vector over a field. See also \link Ariadne::Matrix \c Matrix<X> \endlink.
 //!
@@ -107,9 +109,9 @@ class Vector
    //! \brief Copy assignement allows conversion from a vector using another numerical type.
     template<class XX> Vector<X>& operator=(const Vector<XX> &v);
 #endif
-    template<class E> Vector(const VectorExpression<E>& ve) : _ary(ve().size()) {
-        for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=ve()[i]; } }
-    template<class E> Vector<X>& operator=(const VectorExpression<E>& ve) {
+    template<class V> Vector(const VectorExpression<V>& ve, typename EnableIf<Or<IsSame<typename V::ValueType,X>, IsNumericCastable<typename V::ValueType,X> >,Void>::Type* = 0)
+        : _ary(ve().size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=static_cast<X>(ve()[i]); } }
+    template<class V> typename EnableIf<IsSafelyConvertible<typename V::ValueType,X>,Vector<X>&>::Type operator=(const VectorExpression<V>& ve) {
         this->resize(ve().size()); for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=ve()[i]; } return *this; }
     //@}
 
@@ -201,12 +203,6 @@ template<class X> std::istream& operator>>(std::istream& is, Vector<X>& v);
 
 template<class V> std::ostream& operator<<(std::ostream& os, const VectorExpression<V>& ve);
 
-
-template<class T> class IsVector : public False { };
-template<class T> class IsMatrix : public False { };
-template<class T> class IsScalar : public Not< Or< IsVector<T>, IsMatrix<T> > > { };
-
-template<class X> class IsVector< Vector<X> > : public True { };
 
 class Range {
     size_t _start; size_t _stop;
@@ -301,13 +297,6 @@ template<class V1, class X2> struct VectorScalarProduct
     const ValueType zero_element() const { return ValueType(_v1.zero_element()*_x2); }
 };
 
-template<class V> class IsVector< VectorRange<V> > : public True { };
-template<class V> class IsVector< VectorContainerRange<V> > : public True { };
-template<class V> class IsVector< VectorNegation<V> > : public True { };
-template<class V1,class V2> class IsVector< VectorSum<V1,V2> > : public True { };
-template<class V1,class V2> class IsVector< VectorDifference<V1,V2> > : public True { };
-template<class V1,class X2> class IsVector< VectorScalarProduct<V1,X2> > : public True { };
-
 template<class V> inline VectorRange<V> project(const VectorExpression<V>& v, Range rng) { return VectorRange<V>(v(),rng); }
 template<class X> inline VectorContainerRange< Vector<X> > project(Vector<X>& v, Range rng) { return VectorContainerRange< Vector<X> >(v,rng); }
 
@@ -333,7 +322,7 @@ operator-(const VectorExpression<V>& ve) { return VectorNegation<V>(ve()); }
 
 
 template<class V1, class V2> inline
-typename EnableIfDefined< typename Arithmetic<typename V1::ValueType,typename V2::ValueType>::ResultType, VectorSum< V1, V2 > >::Type
+typename EnableIf< IsDefined<typename Arithmetic<typename V1::ValueType,typename V2::ValueType>::ResultType>, VectorSum< V1, V2 > >::Type
 operator+(const VectorExpression<V1>& v1, const VectorExpression<V2>& v2) { return VectorSum<V1,V2>(v1(),v2()); }
 
 template<class V1, class V2> inline
@@ -341,15 +330,15 @@ typename EnableIf< IsDefined<typename Arithmetic<typename V1::ValueType,typename
 operator-(const VectorExpression<V1>& v1, const VectorExpression<V2>& v2) { return VectorDifference<V1,V2>(v1(),v2()); }
 
 template<class X1, class V2> inline
-typename EnableIf< And< IsScalar<X1>, IsDefined<typename Arithmetic<X1,typename V2::ValueType>::ResultType> >, VectorScalarProduct< V2, X1 > >::Type
+typename EnableIf< IsDefined<typename Arithmetic<X1,typename V2::ValueType>::ResultType>, VectorScalarProduct< V2, X1 > >::Type
 operator*(const X1& x1, const VectorExpression<V2>& v2) { return VectorScalarProduct<V2,X1>(v2(),x1); }
 
 template<class V1, class X2> inline
-typename EnableIf< And< IsScalar<X2>, IsDefined<typename Arithmetic<typename V1::ValueType,X2>::ResultType> >, VectorScalarProduct< V1, X2 > >::Type
+typename EnableIf< IsDefined<typename Arithmetic<typename V1::ValueType,X2>::ResultType>, VectorScalarProduct< V1, X2 > >::Type
 operator*(const VectorExpression<V1>& v1, const X2& x2) { return VectorScalarProduct<V1,X2>(v1(),x2); }
 
 template<class V1, class X2> inline
-typename EnableIf< And< IsScalar<X2>, IsDefined<typename Arithmetic<typename V1::ValueType,X2>::ResultType> >, VectorScalarProduct< V1, X2 > >::Type
+typename EnableIf< IsDefined<typename Arithmetic<typename V1::ValueType,X2>::ResultType>, VectorScalarProduct< V1, X2 > >::Type
 operator/(const VectorExpression<V1>& v1, const X2& x2) { return VectorScalarProduct<V1,X2>(v1(),1/x2); }
 
 template<class X, class V> inline Vector<X>& operator+=(Vector<X>& r, const VectorExpression<V>& ve) {
@@ -378,29 +367,33 @@ template<class X1, class X2> inline typename EnableIfNumeric<X2,Vector<X1>&>::Ty
 
 
 
-template<class X>
-X sup_norm(const Vector<X>& v)
+template<class V>
+typename V::ValueType sup_norm(const VectorExpression<V>& ve)
 {
-    X r=0;
+    const V& v=ve();
+    typename V::ValueType r=0;
     for(size_t i=0; i!=v.size(); ++i) {
-        X absvi=abs(v[i]);
+        typename V::ValueType absvi=abs(v[i]);
         // NOTE: The arguments must be this way round to propagate a nan row_sum
         r=max(absvi,r);
     }
     return r;
 }
 
-template<class X>
-X norm(const Vector<X>& v)
+template<class V>
+typename V::ValueType norm(const VectorExpression<V>& ve)
 {
+    const V& v=ve();
     return Ariadne::sup_norm(v);
 }
 
-template<class X>
-X dot(const Vector<X>& v1, const Vector<X>& v2)
+template<class V1, class V2>
+typename Arithmetic<typename V1::ValueType,typename V2::ValueType>::ResultType
+dot(const VectorExpression<V1>& ve1, const VectorExpression<V2>& ve2)
 {
+    const V1& v1=ve1(); const V2& v2=ve2();
     ARIADNE_ASSERT(v1.size()==v2.size());
-    X r=0;
+    typename V1::ValueType r=0;
     for(size_t i=0; i!=v1.size(); ++i) {
         r+=v1[i]*v2[i];
     }
@@ -409,48 +402,57 @@ X dot(const Vector<X>& v1, const Vector<X>& v2)
 
 
 
-template<class X>
-Vector<X> join(const Vector<X>& v1, const Vector<X>& v2)
+template<class V1, class V2>
+Vector<typename V1::ValueType>
+join(const VectorExpression<V1>& ve1, const VectorExpression<V2>& ve2,
+     typename EnableIf< IsSame<typename V1::ValueType,typename V2::ValueType> >::Type* = 0)
 {
+    const V1& v1=ve1(); const V2& v2=ve2();
     if(v1.size()==0) { return v2; }
     if(v2.size()==0) { return v1; }
     size_t n1=v1.size();
     size_t n2=v2.size();
-    Vector<X> r(n1+n2,v1[0]);
+    Vector<typename V1::ValueType> r(n1+n2,v1[0]);
     project(r,range(0,n1))=v1;
     project(r,range(n1,n1+n2))=v2;
     return r;
 }
 
-template<class X>
-Vector<X> join(const Vector<X>& v1, const X& s2)
+template<class V1>
+Vector<typename V1::ValueType> join(const VectorExpression<V1>& ve1, const typename V1::ValueType& s2)
 {
+    const V1& v1=ve1();
     size_t n1=v1.size();
-    Vector<X> r(n1+1,s2);
+    Vector<typename V1::ValueType> r(n1+1,s2);
     project(r,range(0,n1))=v1;
     return r;
 }
 
-template<class X>
-Vector<X> join(const X& s1, const Vector<X>& v2)
+template<class V2>
+Vector<typename V2::ValueType> join(const typename V2::ValueType& s1, const VectorExpression<V2>& ve2)
 {
+    const V2& v2=ve2();
     size_t n2=v2.size();
-    Vector<X> r(1+n2,s1);
+    Vector<typename V2::ValueType> r(1+n2,s1);
     project(r,range(1,n2+1))=v2;
     return r;
 }
 
 template<class X>
-Vector<X> join(const X& s1, const X& s2)
+Vector<X> join(const X& s1, const X& s2, typename EnableIf<IsScalar<X>,Void>::Type* = 0)
 {
     Vector<X> r(2,s1);
     r[1]=s2;
     return r;
 }
 
-template<class X>
-Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3)
+template<class V1, class V2, class V3>
+Vector<typename V1::ValueType>
+join(const VectorExpression<V1>& ve1, const VectorExpression<V2>& ve2, const VectorExpression<V3>& ve3,
+     typename EnableIf< And< IsSame<typename V1::ValueType,typename V2::ValueType>,IsSame<typename V1::ValueType,typename V3::ValueType> > >::Type* = 0)
 {
+    const V1& v1=ve1(); const V2& v2=ve2(); const V3& v3=ve3();
+    typedef typename V1::ValueType X;
     if(v1.size()==0) { return join(v2,v3); }
     size_t n1=v1.size();
     size_t n2=v2.size();
@@ -462,14 +464,24 @@ Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3)
     return r;
 }
 
-template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const X& s3) {
+template<class V1, class V2> Vector<typename V1::ValueType>
+join(const VectorExpression<V1>& ve1, const VectorExpression<V2>& ve2, const typename V1::ValueType& s3,
+     typename EnableIf< IsSame<typename V1::ValueType,typename V2::ValueType> >::Type* = 0)
+{
+    const V1& v1=ve1(); const V2& v2=ve2();
+    typedef typename V1::ValueType X;
     Vector<X> r(v1.size()+v2.size()+1u,s3);
     for(uint i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     for(uint i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
     return r;
 }
 
-template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3, const X& s4) {
+template<class V1, class V2, class V3> Vector<typename V1::ValueType>
+join(const VectorExpression<V1>& ve1, const VectorExpression<V2>& ve2, const VectorExpression<V3>& ve3, const typename V1::ValueType& s4,
+     typename EnableIf< And< IsSame<typename V1::ValueType,typename V2::ValueType>,IsSame<typename V1::ValueType,typename V3::ValueType> > >::Type* = 0)
+{
+    const V1& v1=ve1(); const V2& v2=ve2(); const V3& v3=ve3();
+    typedef typename V1::ValueType X;
     Vector<X> r(v1.size()+v2.size()+v3.size()+1u);
     for(uint i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
     for(uint i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }

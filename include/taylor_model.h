@@ -57,6 +57,7 @@ template<class X> class TaylorModel;
 typedef TaylorModel<Float> FloatTaylorModel;
 typedef TaylorModel<Interval> IntervalTaylorModel;
 
+template<class X> struct IsScalar< TaylorModel<X> > { static const bool value = true; };
 template<class X> struct IsAlgebra< TaylorModel<X> > { static const bool value = true; };
 template<class X> struct IsNormedAlgebra< TaylorModel<X> > { static const bool value = true; };
 

@@ -40,8 +40,6 @@ template<class P1, class P2> struct And<P1,P2> { static const bool value = P1::v
 template<class P1, class P2> struct Or { static const bool value = P1::value || P2::value; };
 template<class P> struct Not { static const bool value = !P::value; };
 
-template<class X> struct IsDefined : public True { };
-
 template<bool,class> struct EnableIfBool;
 template<class T> struct EnableIfBool<false,T> { };
 template<class T> struct EnableIfBool<true,T> { typedef T Type; };
@@ -49,9 +47,13 @@ template<class T> struct EnableIfBool<true,T> { typedef T Type; };
 template<class P, class T> struct EnableIfClass : public EnableIfBool<P::value,T> { };
 
 //template<bool B, class T> struct EnableIf : public EnableIfBool<B,T> { };
-template<class P, class T> struct EnableIf : public EnableIfClass<P,T> { };
+template<class P, class T=Void> struct EnableIf : public EnableIfClass<P,T> { };
 
-template<class X, class T> struct EnableIfDefined : public EnableIf<IsDefined<X>,T> { };
+template<class T1, class T2> struct IsSame : False { };
+template<class T> struct IsSame<T,T> : True { };
+
+template<class X> struct IsDefined : public True { };
+
 
 } // namespace Ariadne
 

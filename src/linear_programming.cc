@@ -121,14 +121,6 @@ bool all_greater(const Vector<Float>& x1, const Vector<Float>& x2) {
     return true;
 }
 
-Interval dot(const Vector<Float>& c, const Vector<Interval>& x) {
-    Interval r=0.0;
-    for(uint i=0; i!=x.size(); ++i) {
-        r+=c[i]*x[i];
-    }
-    return r;
-}
-
 
 Float compute_mu(const Vector<Float>& xl, const Vector<Float>& xu,
                  const Vector<Float>& x, const Vector<Float>& zl, const Vector<Float>& zu)

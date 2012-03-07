@@ -157,6 +157,12 @@ template<class X> std::ostream& operator<<(std::ostream& os, const PythonReprese
         if(j!=0) { os << ","; } os << python_representation(A[i][j]); } os << "]"; } os << "]"; return os;
 }
 
+template<class X> X __norm__(const Vector<X>& v) { return norm(v); }
+template<class X> X __dot__(const Vector<X>& v1, const Vector<X>& v2) { return dot(v1,v2); }
+template<class X> Vector<X> __join__(const Vector<X>& v1, const Vector<X>& v2) { return join(v1,v2); }
+template<class X> Vector<X> __join__(const Vector<X>& v1, const X& s2) { return join(v1,s2); }
+template<class X> Vector<X> __join__(const X& s1, const Vector<X>& v2) { return join(s1,v2); }
+template<class X> Vector<X> __join__(const X& s1, const X& s2) { return join(s1,s2); }
 
 } // namespace Ariadne
 
@@ -183,11 +189,12 @@ void export_vector_class(class_<Vector<X> >& vector_class)
     vector_class.staticmethod("unit");
     vector_class.staticmethod("basis");
 
-    def("norm",(X(*)(const Vector<X>&)) &norm);
-    def("dot",(X(*)(const Vector<X>&,const Vector<X>&)) &dot);
-    def("join",(Vector<X>(*)(const Vector<X>&,const Vector<X>&)) &join);
-    def("join",(Vector<X>(*)(const Vector<X>&,const X&)) &join);
-    def("join",(Vector<X>(*)(const X&,const X&)) &join);
+    def("norm",(X(*)(const Vector<X>&)) &__norm__);
+    def("dot",(X(*)(const Vector<X>&,const Vector<X>&)) &__dot__);
+    def("join",(Vector<X>(*)(const Vector<X>&,const Vector<X>&)) &__join__);
+    def("join",(Vector<X>(*)(const Vector<X>&,const X&)) &__join__);
+    def("join",(Vector<X>(*)(const X&,const Vector<X>&)) &__join__);
+    def("join",(Vector<X>(*)(const X&,const X&)) &__join__);
 
     from_python< Vector<X> >();
     to_python< Array< Vector<X> > >();

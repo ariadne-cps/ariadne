@@ -536,57 +536,70 @@ inline Interval rad_ivl(Interval i) {
 
 
 //! \related Interval \brief Unary plus operator. Should be implemented exactly and yield \f$\{ +x \mid x\in I\}\f$.
-inline Interval operator+(Interval i) { return Interval(i.lower(),i.upper()); }
+inline Interval operator+(const Interval& i) { return Interval(i.lower(),i.upper()); }
 //! \related Interval \brief Unary negation operator. Should be implemented exactly and yield \f$\{ -x \mid x\in I\}\f$.
-inline Interval operator-(Interval i) { return Interval(-i.upper(),-i.lower()); }
+inline Interval operator-(const Interval& i) { return Interval(-i.upper(),-i.lower()); }
 //! \related Interval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1+x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-inline Interval operator+(Interval i1, Interval i2) { return add(i1,i2); }
+inline Interval operator+(const Interval& i1, const Interval& i2) { return add(i1,i2); }
 //! \related Interval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1-x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-inline Interval operator-(Interval i1, Interval i2) { return sub(i1,i2); }
+inline Interval operator-(const Interval& i1, const Interval& i2) { return sub(i1,i2); }
 //! \related Interval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1*x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-inline Interval operator*(Interval i1, Interval i2) { return mul(i1,i2); }
+inline Interval operator*(const Interval& i1, const Interval& i2) { return mul(i1,i2); }
 //! \related Interval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1/x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$. Yields \f$[-\infty,+\infty]\f$ if \f$0\in I_2\f$.
-inline Interval operator/(Interval i1, Interval i2) { return div(i1,i2); };
+inline Interval operator/(const Interval& i1, const Interval& i2) { return div(i1,i2); };
 
 //! \related Interval \brief Inplace addition operator.
-inline Interval& operator+=(Interval& i1, Interval i2) { i1=add(i1,i2); return i1; }
+inline Interval& operator+=(Interval& i1, const Interval& i2) { i1=add(i1,i2); return i1; }
 //! \related Interval \brief Inplace subtraction operator.
-inline Interval& operator-=(Interval& i1, Interval i2) { i1=sub(i1,i2); return i1; }
+inline Interval& operator-=(Interval& i1, const Interval& i2) { i1=sub(i1,i2); return i1; }
 //! \related Interval \brief Inplace multiplication operator.
-inline Interval& operator*=(Interval& i1, Interval i2) { i1=mul(i1,i2); return i1; }
+inline Interval& operator*=(Interval& i1, const Interval& i2) { i1=mul(i1,i2); return i1; }
 //! \related Interval \brief Inplace division operator.
-inline Interval& operator/=(Interval& i1, Interval i2) { i1=div(i1,i2); return i1; }
+inline Interval& operator/=(Interval& i1, const Interval& i2) { i1=div(i1,i2); return i1; }
 
-inline Interval operator+(Interval i1, Float x2) { return add(i1,x2); }
-inline Interval operator+(Float x1, Interval i2) { return add(i2,x1); }
-inline Interval operator-(Interval i1, Float x2) { return sub(i1,x2); }
-inline Interval operator-(Float x1, Interval i2) { return sub(x1,i2); }
-inline Interval operator*(Interval i1, Float x2) { return mul(i1,x2); }
-inline Interval operator*(Float x1, Interval i2) { return mul(i2,x1); }
-inline Interval operator/(Interval i1, Float x2) { return div(i1,x2); }
-inline Interval operator/(Float x1, Interval i2) { return div(x1,i2); }
+inline Interval operator+(const Interval& i1, const Float& x2) { return add(i1,x2); }
+inline Interval operator-(const Interval& i1, const Float& x2) { return sub(i1,x2); }
+inline Interval operator*(const Interval& i1, const Float& x2) { return mul(i1,x2); }
+inline Interval operator/(const Interval& i1, const Float& x2) { return div(i1,x2); }
+inline Interval operator+(const Float& x1, const Interval& i2) { return add(i2,x1); }
+inline Interval operator-(const Float& x1, const Interval& i2) { return sub(x1,i2); }
+inline Interval operator*(const Float& x1, const Interval& i2) { return mul(i2,x1); }
+inline Interval operator/(const Float& x1, const Interval& i2) { return div(x1,i2); }
 
-inline Interval& operator+=(Interval& i1, Float x2) { i1=add(i1,x2); return i1; }
-inline Interval& operator-=(Interval& i1, Float x2) { i1=sub(i1,x2); return i1; }
-inline Interval& operator*=(Interval& i1, Float x2) { i1=mul(i1,x2); return i1; }
-inline Interval& operator/=(Interval& i1, Float x2) { i1=div(i1,x2); return i1; }
+inline Interval operator+(const ExactFloat& x1, const ExactFloat& x2) { return add_ivl(x1,x2); }
+inline Interval operator-(const ExactFloat& x1, const ExactFloat& x2) { return sub_ivl(x1,x2); }
+inline Interval operator*(const ExactFloat& x1, const ExactFloat& x2) { return mul_ivl(x1,x2); }
+inline Interval operator/(const ExactFloat& x1, const ExactFloat& x2) { return div_ivl(x1,x2); }
+inline Interval operator+(const Interval& i1, const ExactFloat& x2) { return add(i1,static_cast<Float>(x2)); }
+inline Interval operator-(const Interval& i1, const ExactFloat& x2) { return sub(i1,static_cast<Float>(x2)); }
+inline Interval operator*(const Interval& i1, const ExactFloat& x2) { return mul(i1,static_cast<Float>(x2)); }
+inline Interval operator/(const Interval& i1, const ExactFloat& x2) { return div(i1,static_cast<Float>(x2)); }
+inline Interval operator+(const ExactFloat& x1, const Interval& i2) { return add(static_cast<Float>(x1),i2); }
+inline Interval operator-(const ExactFloat& x1, const Interval& i2) { return sub(static_cast<Float>(x1),i2); }
+inline Interval operator*(const ExactFloat& x1, const Interval& i2) { return mul(static_cast<Float>(x1),i2); }
+inline Interval operator/(const ExactFloat& x1, const Interval& i2) { return div(static_cast<Float>(x1),i2); }
 
-inline Interval operator+(Interval i1, double x2) { return add(i1,static_cast<Float>(x2)); }
-inline Interval operator+(double x1, Interval i2) { return add(i2,static_cast<Float>(x1)); }
-inline Interval operator-(Interval i1, double x2) { return sub(i1,static_cast<Float>(x2)); }
-inline Interval operator-(double x1, Interval i2) { return sub(static_cast<Float>(x1),i2); }
-inline Interval operator*(Interval i1, double x2) { return mul(i1,static_cast<Float>(x2)); }
-inline Interval operator*(double x1, Interval i2) { return mul(i2,static_cast<Float>(x1)); }
-inline Interval operator/(Interval i1, double x2) { return div(i1,static_cast<Float>(x2)); }
-inline Interval operator/(double x1, Interval i2) { return div(static_cast<Float>(x1),i2); }
+inline Interval& operator+=(Interval& i1, const Float& x2) { i1=add(i1,x2); return i1; }
+inline Interval& operator-=(Interval& i1, const Float& x2) { i1=sub(i1,x2); return i1; }
+inline Interval& operator*=(Interval& i1, const Float& x2) { i1=mul(i1,x2); return i1; }
+inline Interval& operator/=(Interval& i1, const Float& x2) { i1=div(i1,x2); return i1; }
+
+inline Interval operator+(const Interval& i1, double x2) { return add(i1,static_cast<Float>(x2)); }
+inline Interval operator+(double x1, const Interval& i2) { return add(i2,static_cast<Float>(x1)); }
+inline Interval operator-(const Interval& i1, double x2) { return sub(i1,static_cast<Float>(x2)); }
+inline Interval operator-(double x1, const Interval& i2) { return sub(static_cast<Float>(x1),i2); }
+inline Interval operator*(const Interval& i1, double x2) { return mul(i1,static_cast<Float>(x2)); }
+inline Interval operator*(double x1, const Interval& i2) { return mul(i2,static_cast<Float>(x1)); }
+inline Interval operator/(const Interval& i1, double x2) { return div(i1,static_cast<Float>(x2)); }
+inline Interval operator/(double x1, const Interval& i2) { return div(static_cast<Float>(x1),i2); }
 
 inline Interval& operator+=(Interval& i1, double x2) { i1=add(i1,static_cast<Float>(x2)); return i1; }
 inline Interval& operator-=(Interval& i1, double x2) { i1=sub(i1,static_cast<Float>(x2)); return i1; }
 inline Interval& operator*=(Interval& i1, double x2) { i1=mul(i1,static_cast<Float>(x2)); return i1; }
 inline Interval& operator/=(Interval& i1, double x2) { i1=div(i1,static_cast<Float>(x2)); return i1; }
 
-//inline Interval operator/(Interval i1, int n2) { return div(i1,Float(n2)); }
-//inline Interval operator/(Interval i1, double x2) { return div(i1,Float(x2)); }
+//inline Interval operator/(const Interval& i1, int n2) { return div(i1,Float(n2)); }
+//inline Interval operator/(const Interval& i1, double x2) { return div(i1,Float(x2)); }
 
 // Standard equality operators
 //! \related Interval \brief Equality operator. Tests equality of intervals as geometric objects, so \c [0,1]==[0,1] returns \c true.
@@ -602,7 +615,7 @@ inline bool operator!=(const Interval& i1, const Interval& i2) { return i1.lower
 
 //! \related Interval \brief Equality operator. Tests equality of represented real-point value.
 //! Hence \c [0.0,2.0]==1.0 yields \c indeterminate since the interval may represent a real number other than \c 1.0 .
-inline tribool operator==(Interval i1, Float x2) {
+inline tribool operator==(const Interval& i1, const Float& x2) {
     if(i1.upper()<x2 || i1.lower()>x2) { return false; }
     else if(i1.lower()==x2 && i1.upper()==x2) { return true; }
     else { return indeterminate; }
@@ -610,42 +623,42 @@ inline tribool operator==(Interval i1, Float x2) {
 
 //! \related Interval \brief Equality operator. Tests equality of represented real-point value.
 //! Hence \c [0.0,2.0]!=1.0 yields \c indeterminate since the interval may represent a real number equal to \c 1.0 .
-inline tribool operator!=(Interval i1, Float x2) {
+inline tribool operator!=(const Interval& i1, const Float& x2) {
     if(i1.upper()<x2 || i1.lower()>x2) { return true; }
     else if(i1.lower()==x2 && i1.upper()==x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator> (Interval i1, Float x2) {
+inline tribool operator> (const Interval& i1, const Float& x2) {
     if(i1.lower()> x2) { return true; }
     else if(i1.upper()<=x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator< (Interval i1, Float x2) {
+inline tribool operator< (const Interval& i1, const Float& x2) {
     if(i1.upper()< x2) { return true; }
     else if(i1.lower()>=x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator>=(Interval i1, Float x2) {
+inline tribool operator>=(const Interval& i1, const Float& x2) {
     if(i1.lower()>=x2) { return true; }
     else if(i1.upper()< x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator<=(Interval i1, Float x2) {
+inline tribool operator<=(const Interval& i1, const Float& x2) {
     if(i1.upper()<=x2) { return true; }
     else if(i1.lower()> x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator==(Interval i1, double x2) { return i1==static_cast<Float>(x2); }
-inline tribool operator!=(Interval i1, double x2) { return i1!=static_cast<Float>(x2); }
-inline tribool operator<=(Interval i1, double x2) { return i1<=static_cast<Float>(x2); }
-inline tribool operator>=(Interval i1, double x2) { return i1>=static_cast<Float>(x2); }
-inline tribool operator< (Interval i1, double x2) { return i1< static_cast<Float>(x2); }
-inline tribool operator> (Interval i1, double x2) { return i1> static_cast<Float>(x2); }
+inline tribool operator==(const Interval& i1, double x2) { return i1==static_cast<Float>(x2); }
+inline tribool operator!=(const Interval& i1, double x2) { return i1!=static_cast<Float>(x2); }
+inline tribool operator<=(const Interval& i1, double x2) { return i1<=static_cast<Float>(x2); }
+inline tribool operator>=(const Interval& i1, double x2) { return i1>=static_cast<Float>(x2); }
+inline tribool operator< (const Interval& i1, double x2) { return i1< static_cast<Float>(x2); }
+inline tribool operator> (const Interval& i1, double x2) { return i1> static_cast<Float>(x2); }
 
 
 

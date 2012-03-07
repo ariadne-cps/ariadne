@@ -310,16 +310,6 @@ namespace Ariadne {
 
 FunctionModelFactoryInterface<Interval>* make_taylor_function_factory();
 
-inline Vector<Interval> operator*(const Matrix<Interval>& A, const Vector<Interval>& v) {
-    ARIADNE_PRECONDITION(A.column_size()==v.size());
-    Vector<Interval> r(A.row_size());
-    for(size_t j=0; j!=v.size(); ++j) { for(size_t i=0; i!=r.size(); ++i) { r[i] += A.get(i,j) * v.get(j); } }
-    return r;
-}
-
-inline Vector<Interval> operator*(const Matrix<Interval>& A, const VectorSum< Vector<Interval>, Vector<Interval> >& v) {
-    return A*Vector<Interval>(v); }
-
 /*
 IntervalVectorFunctionModel evaluate(const IntervalVectorFunction& f,const IntervalVectorFunctionModel& x) {
     ARIADNE_ASSERT(x.size()!=0);
@@ -456,7 +446,7 @@ SolverBase::zero(const IntervalVectorFunction& f,
     if(disjoint(f.evaluate(r),Vector<Interval>(f.result_size()))) {
         ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<ix<<"; f("<<r<<") is disjoint from zero");
     } else {
-        r+=(eps()+radius(r))*Vector<Interval>(r.size(),Interval(-1,+1));
+        r+=add_ivl(eps(),radius(r))*Vector<Interval>(r.size(),Interval(-1,+1));
         nr=this->step(f,r);
         if(subset(nr,r)) {
             return nr;
@@ -611,7 +601,7 @@ IntervalNewtonSolver::step(const IntervalVectorFunction& f,
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
-    Vector<Float> m=midpoint(x);
+    Vector<ExactFloat> m(midpoint(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<Interval> im(m);
     Vector<Interval> w=f.evaluate(im);
@@ -634,7 +624,7 @@ KrawczykSolver::step(const IntervalVectorFunction& f,
     Matrix<Interval> I=Matrix<Interval>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
-    Vector<Float> m=midpoint(x);
+    Vector<ExactFloat> m(midpoint(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<Interval> im(m);
     Vector<Interval> fm=f.evaluate(im);
@@ -660,14 +650,14 @@ FactoredKrawczykSolver::step(const IntervalVectorFunction& f,
     Matrix<Interval> I=Matrix<Interval>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
-    Vector<Float> m=midpoint(x);
+    Vector<ExactFloat> m(midpoint(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<Interval> im(m);
     Vector<Interval> fm=f.evaluate(im);
     ARIADNE_LOG(5,"  f(m)="<<fm<<"\n");
     Matrix<Interval> J=f.jacobian(x);
     ARIADNE_LOG(5,"  Df(r)="<<J<<"\n");
-    Matrix<Float> mJ=midpoint(J);
+    Matrix<Interval> mJ(midpoint(J));
     Matrix<Interval> M=inverse(mJ);
     ARIADNE_LOG(5,"  inverse(Df(m))="<<M<<"\n");
     Vector<Interval> dx=M*(fm+(J-mJ)*(x-m));
@@ -704,6 +694,7 @@ KrawczykSolver::implicit_step(const IntervalVectorFunction& f,
     for(uint i=0; i!=mx.size(); ++i) { mx[i].set_error(0.0); }
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
     Vector<Float> ex(nx);
+    Vector<Interval> eix=Vector<ExactFloat>(ex)*Interval(-1,+1);
     for(uint i=0; i!=nx; ++i) { ex[i]=x[i].error(); }
     ARIADNE_LOG(5,"    ex="<<ex<<"\n");
     IntervalVectorFunctionModel fm=compose(f,join(p,mx));
@@ -717,8 +708,8 @@ KrawczykSolver::implicit_step(const IntervalVectorFunction& f,
     Matrix<Interval> M=inverse(midpoint(J));
     ARIADNE_LOG(5,"    inverse(D2f(m))=M="<<M<<"\n");
     ARIADNE_LOG(5,"    M*f(p,mx)="<<M*fm<<"\n");
-    ARIADNE_LOG(5,"    (I-M*J) * (ex*Interval(-1,+1))="<<(I-M*J)<<"*"<<(ex*Interval(-1,+1))<<"="<<(I-M*J) * (ex*Interval(-1,+1))<<"\n");
-    IntervalVectorFunctionModel dx= M*fm - (I-M*J) * (ex*Interval(-1,+1));
+    ARIADNE_LOG(5,"    (I-M*J) * (ex*Interval(-1,+1))="<<(I-M*J)<<"*"<<eix<<"="<<(I-M*J) * eix<<"\n");
+    IntervalVectorFunctionModel dx= M*fm - (I-M*J) * eix;
     ARIADNE_LOG(5,"    dx="<<dx<<"\n");
     IntervalVectorFunctionModel nwx= mx - dx;
     ARIADNE_LOG(5,"    nwx="<<nwx<<"\n");
@@ -756,7 +747,7 @@ IntervalNewtonSolver::implicit(const IntervalScalarFunction& f,
     }
 
     // Test to see if there is a solution f(mid(P),x)=0
-    IntervalVector mp=midpoint(ip);
+    IntervalVector mp(midpoint(ip));
     Interval x=ix;
     bool validated=false;
     for(uint i=0; i!=this->maximum_number_of_steps(); ++i) {

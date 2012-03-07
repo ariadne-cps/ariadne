@@ -391,16 +391,33 @@ class Interval;
 class ExactFloat {
     Float _x;
   public:
+    ExactFloat() : _x(0) { }
     ExactFloat(int n) : _x(n) { }
     explicit ExactFloat(const Float& x) : _x(x) { }
     Float value() const { return _x; }
 };
 inline ExactFloat operator+(const ExactFloat& x) { return ExactFloat(+x.value()); }
 inline ExactFloat operator-(const ExactFloat& x) { return ExactFloat(-x.value()); }
+inline Interval operator+(const ExactFloat& x1,  const ExactFloat& x2);
+inline Interval operator-(const ExactFloat& x1,  const ExactFloat& x2);
+inline Interval operator*(const ExactFloat& x1,  const ExactFloat& x2);
+inline Interval operator/(const ExactFloat& x1,  const ExactFloat& x2);
+inline Interval operator+(const Interval& x1,  const ExactFloat& x2);
+inline Interval operator-(const Interval& x1,  const ExactFloat& x2);
+inline Interval operator*(const Interval& x1,  const ExactFloat& x2);
+inline Interval operator/(const Interval& x1,  const ExactFloat& x2);
+inline Interval operator+(const ExactFloat& x1,  const Interval& x2);
+inline Interval operator-(const ExactFloat& x1,  const Interval& x2);
+inline Interval operator*(const ExactFloat& x1,  const Interval& x2);
+inline Interval operator/(const ExactFloat& x1,  const Interval& x2);
+inline Interval operator/(int n1,  const ExactFloat& x2);
 inline std::ostream& operator<<(std::ostream& os, const ExactFloat& x) { return os << x.value(); }
 
 inline Float::Float(const ExactFloat& x) : v(x.value().get_d()) { }
 inline Float& Float::operator=(const ExactFloat& x) { this->operator=(x.value()); return *this; }
+
+inline const ExactFloat& make_exact(const Float& x) { return reinterpret_cast<const ExactFloat&>(x); }
+template<template<class>class T> inline const T<ExactFloat>& make_exact(const T<Float>& t) { return reinterpret_cast<const T<ExactFloat>&>(t); }
 
 //! \related Float \brief The constant infinity
 //extern ExactFloat inf;

@@ -150,7 +150,7 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
     // x should be an approximate solution to Ax=b
     // Use the fact that for any x, x'=(x + A^T (AA^T)^{-1}(b-Ax)) satisfies Ax'=0
     Vector<Interval> ivlx = x;
-    Vector<Interval> ivle = b-A*ivlx;
+    Vector<Interval> ivle = make_exact(b)-make_exact(A)*ivlx;
 
     Matrix<Interval> ivlS(m,m);
     for(uint i1=0; i1!=m; ++i1) {
@@ -166,7 +166,7 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
         }
     }
 
-    Vector<Interval> ivld = solve(ivlS,ivle) * A;
+    Vector<Interval> ivld = solve(ivlS,ivle) * make_exact(A);
 
     ivlx += ivld;
 
@@ -182,7 +182,7 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
 
     // If yb - max(yA,0) xu + min(yA,0) xl > 0, then problem is infeasible
     // Evaluate lower bound for yb - max(z,0) xu + min(z,0) xl
-    Vector<Interval> z=Vector<Interval>(y)*A;
+    Vector<Interval> z=make_exact(y)*make_exact(A);
     Float mx = 0.0;
     set_rounding_downward();
     for(uint i=0; i!=y.size(); ++i) {
@@ -314,7 +314,7 @@ feasible(const Vector<Float>& xl, const Vector<Float>& xu,
             if(definitely(validated_feasible)) { return true; }
         }
         Interval yb=dot(IntervalVector(y),IntervalVector(b));
-        Interval yAX = dot( (IntervalVector(y)*A), X );
+        Interval yAX = dot( make_exact(y)*make_exact(A), X );
         if(disjoint(yb,yAX)) { return false; }
         if(result==DEGENERATE_FEASIBILITY) { ARIADNE_LOG(2,"  degenerate\n"); return indeterminate; }
         if(compute_mu(xl,xu, x,zl,zu)<THRESHOLD ) { ARIADNE_LOG(2,"  threshold\n"); return indeterminate; }

@@ -59,28 +59,30 @@ TestMatrix::test_concept()
 {
     Float fx(1);
     Interval ix(1);
+    ExactFloat ex(1);
     Vector<Float> fv;
     Vector<Interval> iv;
+    Vector<ExactFloat> ev;
     Matrix<Float> fA;
     Matrix<Interval> iA;
+    Matrix<ExactFloat> eA;
 
-    // Redo vector concept tests with new header
-    fv=fv+fv; iv=fv+fv; iv=fv+iv; iv=iv+fv; iv=iv+iv;
-    fv=fv-fv; iv=fv-fv; iv=fv-iv; iv=iv-fv; iv=iv-iv;
-    fv=fx*fv; iv=fx*fv; iv=fx*iv; iv=ix*fv; iv=ix*iv;
-    fv=fv*fx; iv=fv*fx; iv=fv*ix; iv=iv*fx; iv=iv*ix;
-    fv=fv/fx; iv=fv/fx; iv=fv/ix; iv=iv/fx; iv=iv/ix;
+    fv=fv+fv; iv=ev+ev; iv=ev+iv; iv=iv+ev; iv=iv+iv;
+    fv=fv-fv; iv=ev-ev; iv=ev-iv; iv=iv-ev; iv=iv-iv;
+    fv=fx*fv; iv=ex*ev; iv=ex*iv; iv=ix*ev; iv=ix*iv;
+    fv=fv*fx; iv=ev*ex; iv=ev*ix; iv=iv*ex; iv=iv*ix;
+    fv=fv/fx; iv=ev/ex; iv=ev/ix; iv=iv/ex; iv=iv/ix;
 
-    fA=fA+fA; iA=fA+fA; iA=fA+iA; iA=iA+fA; iA=iA+iA;
-    fA=fA-fA; iA=fA-fA; iA=fA-iA; iA=iA-fA; iA=iA-iA;
+    fA=fA+fA; iA=eA+eA; iA=eA+iA; iA=iA+eA; iA=iA+iA;
+    fA=fA-fA; iA=eA-eA; iA=eA-iA; iA=iA-eA; iA=iA-iA;
 
-    fA=fx*fA; iA=fx*fA; iA=fx*iA; iA=ix*fA; iA=ix*iA;
-    fA=fA*fx; iA=fA*fx; iA=fA*ix; iA=iA*fx; iA=iA*ix;
-    //fv=fA*fv; iv=fA*fv; iv=fA*iv; iv=iA*fv; iv=iA*iv;
-    //fA=fA*fA; iA=fA*fA; iA=fA*iA; iA=iA*fA; iA=iA*iA;
+    fA=fx*fA; iA=ex*eA; iA=ex*iA; iA=ix*eA; iA=ix*iA;
+    fA=fA*fx; iA=eA*ex; iA=eA*ix; iA=iA*ex; iA=iA*ix;
+    //fv=fA*fv; iv=eA*ev; iv=eA*iv; iv=iA*ev; iv=iA*iv;
+    //fA=fA*fA; iA=eA*eA; iA=eA*iA; iA=iA*eA; iA=iA*iA;
 
-    fv=fA*fv; iv=fA*fv; iv=fA*iv; iv=iA*fv; iv=iA*iv;
-    fA=fA*fA; iA=fA*fA; iA=fA*iA; iA=iA*fA; iA=iA*iA;
+    fv=fA*fv; iv=eA*ev; iv=eA*iv; iv=iA*ev; iv=iA*iv;
+    fA=fA*fA; iA=eA*eA; iA=eA*iA; iA=iA*eA; iA=iA*iA;
 }
 
 

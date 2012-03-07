@@ -27,6 +27,8 @@
 
 #include "config.h"
 #include "numeric.h"
+#include "float.h"
+#include "interval.h"
 #include "vector.h"
 
 #include "test.h"
@@ -53,17 +55,23 @@ TestVector::test_concept()
 {
     Float fx(1);
     Interval ix(1);
+    ExactFloat ex(1);
     Vector<Float> fv;
     Vector<Interval> iv;
+    Vector<ExactFloat> ev;
 
-    iv=Vector<Interval>(fv);
+    iv=Vector<Interval>(ev);
 
-    fv=fv+fv; iv=fv+fv; iv=fv+iv; iv=iv+fv; iv=iv+iv;
-    fv=fv-fv; iv=fv-fv; iv=fv-iv; iv=iv-fv; iv=iv-iv;
+    fv=fv+fv;
+    iv=ev+ev;
+    iv=ev+iv;
+    iv=iv+ev;
+    iv=iv+iv;
+    fv=fv-fv; iv=ev-ev; iv=ev-iv; iv=iv-ev; iv=iv-iv;
 
-    fv=fx*fv; iv=fx*fv; iv=fx*iv; iv=ix*fv; iv=ix*iv;
-    fv=fv*fx; iv=fv*fx; iv=fv*ix; iv=iv*fx; iv=iv*ix;
-    fv=fv/fx; iv=fv/fx; iv=fv/ix; iv=iv/fx; iv=iv/ix;
+    fv=fx*fv; iv=ex*ev; iv=ex*iv; iv=ix*ev; iv=ix*iv;
+    fv=fv*fx; iv=ev*ex; iv=ev*ix; iv=iv*ex; iv=iv*ix;
+    fv=fv/fx; iv=ev/ex; iv=ev/ix; iv=iv/ex; iv=iv/ix;
 }
 
 
@@ -149,29 +157,30 @@ TestVector::test_misc()
     cout << iv1 << " = " << iv2 << " / " << ix << endl;
     cout << endl;
 
-    v1==Vector<Float>("[-1.25,0.75]");
-    iv0=iv1+v1;
-    cout << iv0 << " = " << iv1 << " + " << v1 << endl;
-    iv0=v1+iv1;
-    cout << iv0 << " = " << v1 << " + " << iv1 << endl;
-    iv0=iv1-v1;
-    cout << iv0 << " = " << iv1 << " - " << v1 << endl;
-    iv0=v1-iv1;
-    cout << iv0 << " = " << v1 << " - " << iv1 << endl;
-    iv0=x*iv1;
-    cout << iv0 << " = " << x << " * " << iv1 << endl;
-    iv0=ix*v1;
-    cout << iv0 << " = " << ix << " * " << v1 << endl;
-    iv0=iv1*x;
-    cout << iv0 << " = " << iv1 << " * " << x << endl;
-    iv0=v1*ix;
-    cout << iv0 << " = " << v1 << " * " << ix << endl;
-    iv0=iv1/x;
-    cout << iv0 << " = " << iv1 << " / " << x << endl;
-    iv0=v1/ix;
-    cout << iv0 << " = " << v1 << " / " << ix << endl;
+    Vector<ExactFloat> ev1(v1);
+    ExactFloat ex(x);
+    iv0=iv1+ev1;
+    cout << iv0 << " = " << iv1 << " + " << ev1 << endl;
+    iv0=ev1+iv1;
+    cout << iv0 << " = " << ev1 << " + " << iv1 << endl;
+    iv0=iv1-ev1;
+    cout << iv0 << " = " << iv1 << " - " << ev1 << endl;
+    iv0=ev1-iv1;
+    cout << iv0 << " = " << ev1 << " - " << iv1 << endl;
+    iv0=ex*iv1;
+    cout << iv0 << " = " << ex << " * " << iv1 << endl;
+    iv0=ix*ev1;
+    cout << iv0 << " = " << ix << " * " << ev1 << endl;
+    iv0=iv1*ex;
+    cout << iv0 << " = " << iv1 << " * " << ex << endl;
+    iv0=ev1*ix;
+    cout << iv0 << " = " << ev1 << " * " << ix << endl;
+    iv0=iv1/ex;
+    cout << iv0 << " = " << iv1 << " / " << ex << endl;
+    iv0=ev1/ix;
+    cout << iv0 << " = " << ev1 << " / " << ix << endl;
 
-    iv0=v1;
+    iv0=ev1;
     iv0/=ix;
     iv0=Vector<Interval>("[2,1]");
     iv1=Vector<Interval>("[0,1]");

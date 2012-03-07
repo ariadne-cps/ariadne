@@ -487,7 +487,7 @@ contains_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVect
     FloatMatrix fltL = FloatDiagonalMatrix(fltD)*FloatMatrix(transpose(fltA));
     ARIADNE_LOG(7,"L="<<fltL<<"\n");
 
-    IntervalMatrix ivlS = ivlA * fltL;
+    IntervalMatrix ivlS = ivlA * make_exact(fltL);
     ARIADNE_LOG(7,"ivlS="<<ivlS<<"\n");
 
     IntervalMatrix ivlR = inverse(ivlS);
@@ -505,7 +505,7 @@ contains_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVect
     // Interval Newton update X' = x - L * (Dh(X)*L)^{-1} * h(x)
     // Choose L = rad(X)^2 Dh(x)^T where rad(X) is the diagonal matrix of radii of X
     IntervalVector x=midpoint(X);
-    IntervalVector new_X = x - fltL * (ivlR * (ge(x)-ce) );
+    IntervalVector new_X = x - make_exact(fltL) * (ivlR * (ge(x)-ce) );
     ARIADNE_LOG(5,"old_X="<<X<<"\n");
     ARIADNE_LOG(5,"new_X="<<new_X<<"\n");
     IntervalVector reduced_X = intersection(X,new_X);
@@ -579,9 +579,9 @@ validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector 
 
     for(uint ii=0; ii!=12; ++ii) {
         mw=midpoint(w);
-        x=x0+AT*w;
-        mx=x0+AT*mw;
-        nw = mw - solve(h.jacobian(x)*AT,IntervalVector(h(mx)-c));
+        x=make_exact(x0)+AT*w;
+        mx=make_exact(x0)+AT*mw;
+        nw = mw - solve(h.jacobian(x)*AT,IntervalVector(h(mx)-make_exact(c)));
         ARIADNE_LOG(7,"w="<<w<<", h(x0+AT*w)="<<h(x)<<", nw="<<nw<<", subset="<<subset(nw,w)<<"\n");
 
         if(!found_solution) {
@@ -607,13 +607,13 @@ validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector 
     if(!validated_solution) { return false; }
 
     // Compute x value
-    x=x0+AT*w;
+    x=make_exact(x0)+AT*w;
     ARIADNE_LOG(3,"x="<<x<<"\n");
     gx=g(x);
     ARIADNE_LOG(3,"g(x)="<<gx<<"\n");
 
     // Check that equality constraints are plausible
-    ARIADNE_DEBUG_ASSERT(contains(h(x)-c,FloatVector(k)));
+    ARIADNE_DEBUG_ASSERT(contains(h(x)-make_exact(c),FloatVector(k)));
 
     // Check inequality constraints once more
     for(uint i=0; i!=C.size(); ++i) {
@@ -1955,7 +1955,7 @@ check_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
         ARIADNE_LOG(5,"B="<<B<<"\n");
 
         // Perform an interval Newton step to try to attain feasibility
-        IntervalVector nW = inverse(IA*AT) * IntervalVector(h(x)-c);
+        IntervalVector nW = inverse(IA*AT) * IntervalVector(h(x)-make_exact(c));
         ARIADNE_LOG(4,"W="<<W<<"\nnew_W="<<nW<<"\n");
         if(subset(B,D) && subset(nW,W)) { ARIADNE_LOG(3,"feasible\n"); return true; }
         else { result=indeterminate; }
@@ -2183,8 +2183,8 @@ feasibility_step(const FloatVector& xl, const FloatVector& xu, const IntervalVec
         rx[j] += mmu*rec(xu[j]-mx[j]);
     }
     IntervalVector ry = dhmx.value();
-    IntervalVector rzl = esub(emul(IntervalVector(mx-xl),mzl),mmu);
-    IntervalVector rzu = esub(emul(IntervalVector(xu-mx),mzu),mmu);
+    IntervalVector rzl = esub(emul(IntervalVector(mx-make_exact(xl)),mzl),mmu);
+    IntervalVector rzu = esub(emul(IntervalVector(make_exact(xu)-mx),mzu),mmu);
     ARIADNE_LOG(5,"rx="<<rx<<" ry="<<ry<<" rzl="<<rzl<<" rzu="<<rzu<<"\n");
 
     IntervalMatrix H(n,n);

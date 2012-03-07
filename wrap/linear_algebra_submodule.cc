@@ -239,7 +239,7 @@ template<> void export_vector<Float>()
     export_vector_class<Float>(float_vector_class);
     export_vector_conversion<Float,Float>(float_vector_class);
     export_vector_arithmetic<Float,Float,Float>(float_vector_class);
-    export_vector_arithmetic<Interval,Float,Interval>(float_vector_class);
+    //export_vector_arithmetic<Interval,Float,Interval>(float_vector_class);
     float_vector_class.def("__rmul__",__rmul__< Vector<Float>, Vector<Float>, double >);
     float_vector_class.def("__mul__",__mul__< Vector<Float>, Vector<Float>, double >);
     float_vector_class.def("__div__",__div__< Vector<Float>, Vector<Float>, double >);
@@ -251,7 +251,7 @@ template<> void export_vector<Interval>()
     export_vector_class<Interval>(interval_vector_class);
     export_vector_conversion<Interval,Float>(interval_vector_class);
     export_vector_conversion<Interval,Interval>(interval_vector_class);
-    export_vector_arithmetic<Interval,Interval,Float>(interval_vector_class);
+    //export_vector_arithmetic<Interval,Interval,Float>(interval_vector_class);
     export_vector_arithmetic<Interval,Interval,Interval>(interval_vector_class);
     def("midpoint", (Vector<Float>(*)(const Vector<Interval>&)) &midpoint);
     def("intersection", (Vector<Interval>(*)(const Vector<Interval>&,const Vector<Interval>&)) &intersection);
@@ -338,7 +338,7 @@ template<> void export_matrix<Float>()
     export_matrix_class<Float>(matrix_class);
     export_matrix_conversion<Float,Float>(matrix_class);
     export_matrix_arithmetic<Float,Float,Float>(matrix_class);
-    export_matrix_arithmetic<Interval,Float,Interval>(matrix_class);
+    //export_matrix_arithmetic<Interval,Float,Interval>(matrix_class);
 
     def("triangular_decomposition",&triangular_decomposition);
     def("orthogonal_decomposition", &orthogonal_decomposition);
@@ -357,7 +357,7 @@ template<> void export_matrix<Interval>()
     export_matrix_conversion<Interval,Float>(matrix_class);
     export_matrix_conversion<Interval,Interval>(matrix_class);
     export_matrix_arithmetic<Interval,Interval,Interval>(matrix_class);
-    export_matrix_arithmetic<Interval,Interval,Float>(matrix_class);
+    //export_matrix_arithmetic<Interval,Interval,Float>(matrix_class);
     def("gs_inverse", (Matrix<Interval>(*)(const Matrix<Interval>&)) &gs_inverse);
     def("lu_inverse", (Matrix<Interval>(*)(const Matrix<Interval>&)) &lu_inverse);
     def("gs_solve", (Matrix<Interval>(*)(const Matrix<Interval>&,const Matrix<Interval>&)) &gs_solve);

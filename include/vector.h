@@ -297,6 +297,17 @@ template<class V1, class X2> struct VectorScalarProduct
     const ValueType zero_element() const { return ValueType(_v1.zero_element()*_x2); }
 };
 
+template<class V1, class X2> struct VectorScalarQuotient
+    : public VectorExpression< VectorScalarQuotient<V1,X2> >
+{
+    const V1& _v1; const X2& _x2;
+    VectorScalarQuotient(const V1& v1, const X2& x2) : _v1(v1), _x2(x2) { }
+    typedef typename Arithmetic<typename V1::ValueType, X2>::ResultType ValueType;
+    size_t size() const { return _v1.size(); }
+    ValueType operator[](size_t i) const { return _v1[i]*_x2; }
+    const ValueType zero_element() const { return ValueType(_v1.zero_element()/_x2); }
+};
+
 template<class V> inline VectorRange<V> project(const VectorExpression<V>& v, Range rng) { return VectorRange<V>(v(),rng); }
 template<class X> inline VectorContainerRange< Vector<X> > project(Vector<X>& v, Range rng) { return VectorContainerRange< Vector<X> >(v,rng); }
 
@@ -338,8 +349,8 @@ typename EnableIf< IsDefined<typename Arithmetic<typename V1::ValueType,X2>::Res
 operator*(const VectorExpression<V1>& v1, const X2& x2) { return VectorScalarProduct<V1,X2>(v1(),x2); }
 
 template<class V1, class X2> inline
-typename EnableIf< IsDefined<typename Arithmetic<typename V1::ValueType,X2>::ResultType>, VectorScalarProduct< V1, X2 > >::Type
-operator/(const VectorExpression<V1>& v1, const X2& x2) { return VectorScalarProduct<V1,X2>(v1(),1/x2); }
+typename EnableIf< IsDefined<typename Arithmetic<typename V1::ValueType,X2>::ResultType>, VectorScalarQuotient< V1, X2 > >::Type
+operator/(const VectorExpression<V1>& v1, const X2& x2) { return VectorScalarQuotient<V1,X2>(v1(),x2); }
 
 template<class X, class V> inline Vector<X>& operator+=(Vector<X>& r, const VectorExpression<V>& ve) {
     const V& v=ve();

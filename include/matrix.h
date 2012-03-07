@@ -55,6 +55,7 @@ class SingularMatrixException {
 template<class X> class Matrix;
 typedef Matrix<Float> FloatMatrix;
 typedef Matrix<Interval> IntervalMatrix;
+typedef Matrix<ExactFloat> ExactFloatMatrix;
 
 struct Uninitialised { };
 
@@ -138,7 +139,7 @@ class Matrix
     }
 
     template<class ME> Matrix(const MatrixExpression<ME>& Ae) : _nr(Ae().row_size()), _nc(Ae().column_size()), _ptr(new X[_nr*_nc]) {
-        for(size_t i=0; i!=this->_nr; ++i) { for(size_t j=0; j!=this->_nc; ++j) { this->set(i,j,Ae().get(i,j)); } } }
+        for(size_t i=0; i!=this->_nr; ++i) { for(size_t j=0; j!=this->_nc; ++j) { this->set(i,j,static_cast<X>(Ae().get(i,j))); } } }
     template<class ME> Matrix<X>& operator=(const MatrixExpression<ME>& Ae) {
         this->resize(Ae().row_size(),Ae().column_size());
         for(size_t i=0; i!=this->_nr; ++i) { for(size_t j=0; j!=this->_nc; ++j) { this->set(i,j,Ae().get(i,j)); } } return *this; }

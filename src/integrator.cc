@@ -88,7 +88,7 @@ IntegratorBase::flow_bounds(const IntervalVectorFunction& vf, const IntervalVect
     const uint REDUCTION_STEPS=8;
     const uint REFINEMENT_STEPS=4;
 
-    IntervalVector delta=(dx-midpoint(dx))*(BOX_RADIUS_MULTIPLIER-1);
+    IntervalVector delta=(dx-Vector<Interval>(midpoint(dx)))*(BOX_RADIUS_MULTIPLIER-1);
 
     // Compute the Lipschitz constant over the initial box
     Float lip = norm(vf.jacobian(dx)).upper();
@@ -143,8 +143,8 @@ IntegratorBase::flow_bounds(const IntervalVectorFunction& vf, const IntervalVect
 
     ARIADNE_ASSERT(subset(dx,bx));
 
-    ARIADNE_ASSERT_MSG(subset(dx+h*vf.evaluate(bx),bx),
-        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<vf.evaluate(bx)<<"\nd+hf(b)="<<IntervalVector(dx+h*vf.evaluate(bx))<<"\nb="<<bx<<"\n");
+    ARIADNE_ASSERT_MSG(subset(dx+make_exact(h)*vf.evaluate(bx),bx),
+        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<vf.evaluate(bx)<<"\nd+hf(b)="<<IntervalVector(dx+make_exact(h)*vf.evaluate(bx))<<"\nb="<<bx<<"\n");
 
     return std::make_pair(h,bx);
 }
@@ -438,7 +438,7 @@ VectorTaylorFunction flow_function(const Vector<IntervalDifferential>& dphi, con
 }
 
 IntervalVectorFunctionModel
-differential_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx,
+differential_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, const Float& flth, const IntervalVector& bx,
                        double swpt, uint so, uint to, uint verbosity=0)
 {
     uint n=f.result_size();
@@ -446,6 +446,7 @@ differential_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx
     Vector<IntervalDifferential> idb(n,n+1,so+to);
     Vector<IntervalDifferential> dphic(n,n+1,so+to);
     Vector<IntervalDifferential> dphib(n,n+1,so+to);
+    ExactFloat h(flth);
     for(uint i=0; i!=n; ++i) {
         idc[i]=IntervalDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(midpoint(dx[i]));
         idb[i]=IntervalDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(bx[i]);
@@ -507,8 +508,8 @@ differential_space_time_flow_step(const IntervalVectorFunction& f, const Interva
         dphib[i]=idb[i];
     }
     for(uint i=0; i!=so+to; ++i) {
-        dphic=antiderivative(f(dphic),n)*h+idc;
-        dphib=antiderivative(f(dphib),n)*h+idb;
+        dphic=antiderivative(f(dphic),n)*make_exact(h)+idc;
+        dphib=antiderivative(f(dphib),n)*make_exact(h)+idb;
     }
 
     VectorTaylorFunction tphi(n,join(dx,Interval(-h,+h)),ThresholdSweeper(swpt));
@@ -701,7 +702,7 @@ TaylorSeriesIntegrator::flow_bounds(const IntervalVectorFunction& vf, const Inte
     const uint REDUCTION_STEPS=8;
     const uint REFINEMENT_STEPS=4;
 
-    IntervalVector delta=(dx-midpoint(dx))*(BOX_RADIUS_MULTIPLIER-1);
+    IntervalVector delta=(dx-IntervalVector(midpoint(dx)))*(BOX_RADIUS_MULTIPLIER-1);
 
     Float hmin=hmax/(1<<REDUCTION_STEPS);
     Float h=hmax;
@@ -752,8 +753,8 @@ TaylorSeriesIntegrator::flow_bounds(const IntervalVectorFunction& vf, const Inte
 
     ARIADNE_ASSERT(subset(dx,bx));
 
-    ARIADNE_ASSERT_MSG(subset(dx+h*vf.evaluate(bx),bx),
-        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<vf.evaluate(bx)<<"\nd+hf(b)="<<IntervalVector(dx+h*vf.evaluate(bx))<<"\nb="<<bx<<"\n");
+    ARIADNE_ASSERT_MSG(subset(dx+make_exact(h)*vf.evaluate(bx),bx),
+        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<vf.evaluate(bx)<<"\nd+hf(b)="<<IntervalVector(dx+make_exact(h)*vf.evaluate(bx))<<"\nb="<<bx<<"\n");
 
     return std::make_pair(h,bx);
 }

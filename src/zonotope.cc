@@ -316,7 +316,7 @@ Box
 Zonotope::bounding_box() const
 {
     const Zonotope& z=*this;
-    Box b=z.centre()+(z.generators()*z.domain())+z.error()*Interval(-1,1);
+    Box b=make_exact(z.centre())+(make_exact(z.generators())*z.domain())+make_exact(z.error())*Interval(-1,1);
     return b;
 }
 
@@ -379,7 +379,7 @@ bounded(const Zonotope& z)
 Float
 radius(const Zonotope& z)
 {
-    return Ariadne::radius(z.centre()+(z.generators()*z.domain())+z.error()*Interval(-1,1));
+    return Ariadne::radius(z.bounding_box());
 }
 
 
@@ -636,7 +636,7 @@ orthogonal_approximation(const Zonotope& z)
     make_ltuple(Q,R,P)=orthogonal_decomposition(J,false);
 
     ARIADNE_ASSERT(norm(FloatMatrix(Q*R-J))<1e-8);
-    
+
     for(uint i=0; i!=m;++i) {
         Float a=0;
         for(uint j=i; j!=n; ++j) {
@@ -808,7 +808,7 @@ separated(const Zonotope& z, const Box& bx)
     ARIADNE_ASSERT(z.dimension()==bx.dimension());
     size_t d=z.dimension();
     size_t ng=z.number_of_generators();
-    Vector<Interval> ebx=bx+Interval(-1,1)*z.error();
+    Vector<Interval> ebx=bx+Interval(-1,1)*make_exact(z.error());
     const Vector<Float>& zc=z.centre();
     const Matrix<Float>& zG=z.generators();
     Matrix<Float> A(d,d+ng);

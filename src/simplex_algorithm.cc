@@ -460,8 +460,8 @@ compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Ve
         }
     }
 
-    Vector<XX> Ax=A*x;
-    Vector<XX> Axmb=Ax-b;
+    Vector<XX> Ax=Matrix<XX>(A)*x;
+    Vector<XX> Axmb=Ax-Vector<XX>(b);
     ARIADNE_ASSERT_MSG(norm(Axmb)<0.00001,"A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
     return x;
 }
@@ -1305,10 +1305,10 @@ SimplexSolver<X>::verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, c
     }
 
     const Matrix<XX> B=compute_B<XX>(A,p);
-    ARIADNE_LOG(9," B="<<B<<"; B*A="<<midpoint(B*A)<<"\n");
+    ARIADNE_LOG(9," B="<<B<<"; B*A="<<midpoint(B*Matrix<XX>(A))<<"\n");
 
     const Vector<XX> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
-    ARIADNE_LOG(9," x="<<x<<"; A*x="<<(A*x)<<"\n");
+    ARIADNE_LOG(9," x="<<x<<"; A*x="<<(Matrix<XX>(A)*x)<<"\n");
 
 
     const Vector<X> c=compute_c(m,xl,xu,p,x);

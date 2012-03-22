@@ -441,7 +441,7 @@ and slack variables \f$\unl{w}\f$, \f$\ovl{w}\f$, \f$\unl{x}\f$, \f$\ovl{x}\f$ s
 and
 \f[ \unl{w},\unl{x}\leq 0,\ \ovl{w},\ovl{x}\geq 0 . \f]
 Add a penalty function to obtain
-\f{multline*}{ f(x) - \mu \sum_{i=1}^{m}\bigl(\log\!|\unl{w}_i|+\log\!|\ovl{w}_i|\bigr) - \mu \sum_{j=1}^{m}\bigl(\log\!|\unl{x}_j|+\log\!|\ovl{x}_j|\bigr) + \frac{1}{2\nu} \sum_{i=1}^{m}(g_i({x})-{w}_i)^2 \\
+\f{multline*} f(x) - \mu \sum_{i=1}^{m}\bigl(\log\!|\unl{w}_i|+\log\!|\ovl{w}_i|\bigr) - \mu \sum_{j=1}^{m}\bigl(\log\!|\unl{x}_j|+\log\!|\ovl{x}_j|\bigr) + \frac{1}{2\nu} \sum_{i=1}^{m}(g_i({x})-{w}_i)^2 \\
     \hspace*{\fill} + \frac{1}{2\nu} \sum_{i=1}^{m}\bigl(( {w}_i+\unl{w}_i-\unl{c}_i)^2+( {w}_i+\ovl{w}_i-\ovl{c}_i)^2\bigr) + \frac{1}{2\nu} \sum_{j=1}^{n}\bigl(({x}_j+\unl{x}_j-\unl{d}_j)^2+({x}_j+\ovl{x}_j-\ovl{d}_j)^2\bigr) \f}
 Finding the critical points of the revised function gives
 \f[ \begin{gathered}
@@ -465,7 +465,7 @@ On taking \f$\nu\to0\f$, the criticality conditions become
    \end{gathered} \f]
 
 Setting \f$A=\nabla\!g(x)\f$ and \f$H=\nabla^2\!f(x)+\sum_{i=1}^{m} y_i \nabla^2 g_i({x})\f$, we have
-\f{equation*}{
+\f{equation*}
 \left( \begin{array}{c|ccc|cccc|cccc}
     & {w}&{x}&{y} & \unl{w}&\ovl{w}&\unl{x}&\ovl{x} & \unl{v}&\ovl{v}&\unl{z}&\ovl{z} \\ \hline
   {w} & 0 & 0 & -I  &  0&0&0&0 & I&I&0&0 \\
@@ -497,7 +497,7 @@ where
 \f[ \unl{D} = \unl{V}/\unl{W}; \quad \ovl{D}=\ovl{V}/\ovl{W}; \qquad \unl{E}=\unl{Z}/\unl{X}; \quad \ovl{E}=\ovl{Z}/\ovl{X} . \f]
 
 We can eliminate all variables except \f$w\f$, \f$x\f$ and \f$y\f$ to obtain
-\f{equation*}{
+\f{equation*}
 \left( \begin{array}{c|ccc}
     & {w}&{x}&{y} \\ \hline \\[-2ex]
   {w} & D & 0 & -I \\
@@ -530,7 +530,7 @@ We can recover the other changes as
       \delta\ovl{x} = \epsilon\ovl{z} - \delta x; \quad \delta\ovl{z} = \epsilon\ovl{x} - \ovl{E}\,\delta\ovl{x}; \\
     \end{gathered} \f]
 As an alternative, we can use \f$\delta w = D^{-1}(\rho w+\delta y)\f$ to obtain
-\f{equation*}{
+\f{equation*}
 \left( \begin{array}{cc}
   H\!+\!E & A^T  \\
    A     & D^{-1}
@@ -539,7 +539,7 @@ As an alternative, we can use \f$\delta w = D^{-1}(\rho w+\delta y)\f$ to obtain
 = \left( \begin{array}{c} \rho x\\\rho y-D^{-1}\rho w \end{array}\right)
 \f}
 Note that the conditions are equivalent to minimising the Lagrangian
-\f{multline*}{ L({w},{x},{y},\,\unl{w},\ovl{w},\unl{x},\ovl{x},\,\unl{v},\ovl{v},\unl{z},\ovl{z}) = f({x}) + \sum_{i=1}^{m} {y}_i(g_i({x})- {w}_i) \\
+\f{multline*} L({w},{x},{y},\,\unl{w},\ovl{w},\unl{x},\ovl{x},\,\unl{v},\ovl{v},\unl{z},\ovl{z}) = f({x}) + \sum_{i=1}^{m} {y}_i(g_i({x})- {w}_i) \\
      + \sum_{i=1}^{m} \bigl(  \unl{v}_i( {w}_i+\unl{w}_i-\unl{c}_i)\!-\!\mu\log\!|\unl{w}_i| \;+\; \ovl{v}_i( {w}_i+\ovl{w}_i-\ovl{c}_i)\!-\!\mu\log\!|\ovl{w}_i| \bigr) \\
      \qquad\qquad + \sum_{j=1}^{n} \bigl(  \unl{z}_j({x}_j+\unl{x}_j-\unl{d}_j)\!-\!\mu\log\!|\unl{x}_j| \;+\; \ovl{z}_j({x}_j+\ovl{x}_j-\ovl{d}_j)\!-\!\mu\log\!|\ovl{x}_j| \bigr) \,. \f}
 

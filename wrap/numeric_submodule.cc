@@ -229,9 +229,12 @@ void export_exact_float()
 {
     class_< ExactFloat > exact_float_class("ExactFloat",init<ExactFloat>());
     exact_float_class.def(init<double>());
-    exact_float_class.def(init<Float>());
     exact_float_class.def("__str__", &__cstr__<ExactFloat>);
     exact_float_class.def("__repr__", &__cstr__<ExactFloat>);
+
+    def("make_exact", (const ExactFloat&(*)(const Float&)) &Ariadne::make_exact, return_value_policy<copy_const_reference>());
+
+    implicitly_convertible<double,ExactFloat>();
 
     implicitly_convertible<ExactFloat,Float>();
     implicitly_convertible<ExactFloat,Interval>();
@@ -334,9 +337,11 @@ void export_interval()
     def("up",&up);
 
     class_< Interval > interval_class("Interval");
+    interval_class.def(init<double,double>());
     interval_class.def(init<Float,Float>());
     interval_class.def(init<Real,Real>());
-    interval_class.def(init<Float>());
+    interval_class.def(init<double>());
+    interval_class.def(init<ExactFloat>());
     interval_class.def(init<Interval>());
 #ifdef HAVE_GMPXX_H
     interval_class.def(init<Rational>());
@@ -386,6 +391,7 @@ void export_interval()
 #ifdef HAVE_GMPXX_H
     implicitly_convertible<Rational,Interval>();
 #endif
+    implicitly_convertible<Interval,Float>();
 
     from_python_dict<Interval>();
     from_python_list<Interval>();

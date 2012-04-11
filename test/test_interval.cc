@@ -287,8 +287,8 @@ TestInterval::test_constructors()
 #ifdef HAVE_GMPXX_H
     Interval ivld3(Rational(21,10),Rational(16,5));
     cout<<ivld3<<std::endl;
-    ARIADNE_TEST_COMPARE(ivld3.lower(),<,Rational(21,10));
-    ARIADNE_TEST_COMPARE(ivld3.upper(),>,Rational(16,5));
+    ARIADNE_TEST_COMPARE(make_exact(ivld3.lower()),<,Rational(21,10));
+    ARIADNE_TEST_COMPARE(make_exact(ivld3.upper()),>,Rational(16,5));
 #else
     Interval ivld3(2.1,3.2);
 #endif // HAVE_GMPXX_H
@@ -301,8 +301,8 @@ TestInterval::test_constructors()
 #ifdef HAVE_GMPXX_H
     // Approximate constructor from a single value
     Interval ivld5(Rational(1,3));
-    ARIADNE_TEST_COMPARE(ivld5.lower(),<,Rational(1,3));
-    ARIADNE_TEST_COMPARE(ivld5.upper(),>,Rational(1,3));
+    ARIADNE_TEST_COMPARE(make_exact(ivld5.lower()),<,Rational(1,3));
+    ARIADNE_TEST_COMPARE(make_exact(ivld5.upper()),>,Rational(1,3));
 #else
     Interval ivld5(1./3.);
 #endif // HAVE_GMPXX_H

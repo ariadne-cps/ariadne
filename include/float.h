@@ -395,6 +395,7 @@ class ExactFloat {
     ExactFloat(int n) : _x(n) { }
     explicit ExactFloat(const Float& x) : _x(x) { }
     Float value() const { return _x; }
+    double get_d() const { return _x.get_d(); }
 };
 inline ExactFloat operator+(const ExactFloat& x) { return ExactFloat(+x.value()); }
 inline ExactFloat operator-(const ExactFloat& x) { return ExactFloat(-x.value()); }
@@ -436,19 +437,19 @@ inline Interval med_ivl(Float x, Float y);
 
 
 #ifdef HAVE_GMPXX_H
-inline bool operator==(const Float& x, const Rational& q) { return x.get_d()==static_cast<const mpq_class&>(q); }
-inline bool operator!=(const Float& x, const Rational& q) { return x.get_d()!=static_cast<const mpq_class&>(q); }
-inline bool operator<=(const Float& x, const Rational& q) { return x.get_d()<=static_cast<const mpq_class&>(q); }
-inline bool operator>=(const Float& x, const Rational& q) { return x.get_d()>=static_cast<const mpq_class&>(q); }
-inline bool operator< (const Float& x, const Rational& q) { return x.get_d()< static_cast<const mpq_class&>(q); }
-inline bool operator> (const Float& x, const Rational& q) { return x.get_d()> static_cast<const mpq_class&>(q); }
+inline bool operator==(const ExactFloat& x, const Rational& q) { return x.get_d()==static_cast<const mpq_class&>(q); }
+inline bool operator!=(const ExactFloat& x, const Rational& q) { return x.get_d()!=static_cast<const mpq_class&>(q); }
+inline bool operator<=(const ExactFloat& x, const Rational& q) { return x.get_d()<=static_cast<const mpq_class&>(q); }
+inline bool operator>=(const ExactFloat& x, const Rational& q) { return x.get_d()>=static_cast<const mpq_class&>(q); }
+inline bool operator< (const ExactFloat& x, const Rational& q) { return x.get_d()< static_cast<const mpq_class&>(q); }
+inline bool operator> (const ExactFloat& x, const Rational& q) { return x.get_d()> static_cast<const mpq_class&>(q); }
 
-inline bool operator==(const Rational& q, const Float& x) { return static_cast<mpq_class>(q)==x.get_d(); }
-inline bool operator!=(const Rational& q, const Float& x) { return static_cast<mpq_class>(q)!=x.get_d(); }
-inline bool operator<=(const Rational& q, const Float& x) { return static_cast<mpq_class>(q)<=x.get_d(); }
-inline bool operator>=(const Rational& q, const Float& x) { return static_cast<mpq_class>(q)>=x.get_d(); }
-inline bool operator< (const Rational& q, const Float& x) { return static_cast<mpq_class>(q)< x.get_d(); }
-inline bool operator> (const Rational& q, const Float& x) { return static_cast<mpq_class>(q)> x.get_d(); }
+inline bool operator==(const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)==x.get_d(); }
+inline bool operator!=(const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)!=x.get_d(); }
+inline bool operator<=(const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)<=x.get_d(); }
+inline bool operator>=(const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)>=x.get_d(); }
+inline bool operator< (const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)< x.get_d(); }
+inline bool operator> (const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)> x.get_d(); }
 #endif // HAVE_GMPXX_H
 
 

@@ -422,18 +422,18 @@ Interval atan(Interval i)
 Interval::Interval(const Rational& q) : l(q.get_d()), u(l) {
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(downward);
-    while(l>q) { l-=std::numeric_limits<double>::min(); }
+    while(l.get_d()>q) { l-=std::numeric_limits<double>::min(); }
     set_rounding_mode(upward);
-    while(u<q) { u+=std::numeric_limits<double>::min(); }
+    while(u.get_d()<q) { u+=std::numeric_limits<double>::min(); }
     set_rounding_mode(rounding_mode);
 }
 
 Interval::Interval(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu.get_d())  {
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(downward);
-    while(l>ql) { l-=std::numeric_limits<double>::min(); }
+    while(l.get_d()>ql) { l-=std::numeric_limits<double>::min(); }
     set_rounding_mode(upward);
-    while(u<qu) { u+=std::numeric_limits<double>::min(); }
+    while(u.get_d()<qu) { u+=std::numeric_limits<double>::min(); }
     set_rounding_mode(rounding_mode);
 }
 

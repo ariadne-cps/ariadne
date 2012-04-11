@@ -101,6 +101,9 @@ class Interval {
     //! \brief Convert from a floating-point number with an exact representation.
     Interval(const ExactFloat& x) : l(x.value()), u(x.value()) { }
 
+    //! \brief Convert to a floating-point approximation.
+    operator Float () const { return this->midpoint(); }
+
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     Interval(double lower, double upper) : l(lower), u(upper) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].

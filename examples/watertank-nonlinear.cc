@@ -236,7 +236,7 @@ int main()
 
     std::cout << "Discretising orbit" << std::flush;
     Int depth = 3;
-    HybridScaling scaling; scaling.set_scaling(height,1.0); scaling.set_scaling(aperture,0.125);
+    HybridScaling scaling( (height|1.0, aperture|0.125) );
     HybridGrid grid(watertank_system.state_space(),scaling);
     HybridGridTreeSet hgts(grid);
     for (ListSet<HybridEnclosure>::const_iterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)

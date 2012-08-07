@@ -248,6 +248,8 @@ void export_polynomial()
     polynomial_class.staticmethod("constant");
     polynomial_class.def("variable", (Polynomial<X>(*)(uint,uint)) &Polynomial<X>::variable);
     polynomial_class.staticmethod("variable");
+    polynomial_class.def("coordinate", (Polynomial<X>(*)(uint,uint)) &Polynomial<X>::variable);
+    polynomial_class.staticmethod("coordinate");
     polynomial_class.def("variables", (Vector< Polynomial<X> >(*)(uint)) &Polynomial<X>::variables);
     polynomial_class.staticmethod("variables");
 

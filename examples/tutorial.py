@@ -89,40 +89,37 @@ print "\n\n"
 # Function submodule
 ###############################################################################
 
-### ScalarUserFunction and VectorUserFunction no longer supported
+print dir(RealScalarFunction)
 
-## Create a user-defined scalar-valued function
-#argument_size=2
-#function=lambda x:sqrt(sqr(x[0])+sqr(x[1]))
-#f=ScalarUserFunction(argument_size,function)
-#print dir(ScalarUserFunction)
-#print type(f),type(FloatVector([4,3]))
-##print f(FloatVector([4,3]))
-##print f(IntervalVector([4,3]))
+# Create a user-defined scalar-valued function
+argument_size=2
+x=[RealScalarFunction.coordinate(argument_size,index) for index in range(0,argument_size)]
+f=sqrt(sqr(x[0])+sqr(x[1]))
+print f
+print f(FloatVector([4,3]))
+print f(IntervalVector([4,3]))
 
-#result_size=2
-#argument_size=3
-#function=lambda (x):[sqrt(sqr(x[0])+sqr(x[1])),x[1]+x[2]]
-#f=VectorUserFunction(result_size,argument_size,function)
-#print f
-##print f(FloatVector([4,3,0]))
-##print f.evaluate(IntervalVector([4,3,0]))
-#
-#print "\n"
+result_size=2
+argument_size=3
+x=[RealScalarFunction.coordinate(argument_size,index) for index in range(0,argument_size)]
+f=RealVectorFunction([sqrt(sqr(x[0])+sqr(x[1])),x[1]+x[2]])
+print f
+print f(FloatVector([4,3,0]))
+print evaluate(f,(IntervalVector([4,3,0])))
 
 
 
 # Create a scalar polynomial function in three unknowns, with value \f$x_0\f$.
-p=ScalarFunction.variable(3,0)
+p=RealPolynomial.coordinate(3,0)
 print p
 
 # Make a shorthand for constructing polynomial functions.
-def p(n,j):
-    return ScalarFunction.variable(n,j)
+def poly(n,j):
+    return RealPolynomial.coordinate(n,j)
 
 # Arithmetic for Polynomial expressions
-p=ScalarFunction.variable(3,0)
-q=ScalarFunction.variable(3,1)
+p=RealPolynomial.coordinate(3,0)
+q=RealPolynomial.coordinate(3,1)
 c=Real(1.0)
 
 print +p, -p;
@@ -144,16 +141,20 @@ print "\n\n"
 ###############################################################################
 
 
-# Create a box to act as the domain of a Taylor expression
+# Create a box to act as the domain of a Taylor function
 d=IntervalVector([[4,7],[1,6],[-1,1]])
 print "d:",d
 
+# Create a sweeper to control the accuracy of a Taylor function
+swp=ThresholdSweeper(1e-8)
+print "swp:",swp
+
 # Create the scalar Taylor model representing the function x1 on the domain d
-t=ScalarTaylorFunction.variable(d,1)
+t=ScalarTaylorFunction.coordinate(d,1,swp)
 print "t:",t,"\n"
 
 # Create all Taylor variables on the domain dom
-tv=ScalarTaylorFunction.variables(d)
+tv=[ScalarTaylorFunction.coordinate(d,i,swp) for i in range(0,3)]
 print "tv[0]:",tv[0]
 print "tv[1]:",tv[1]
 print "tv[2]:",tv[2]
@@ -167,11 +168,11 @@ print "x:",x,"\ny:",y,"\nz:",z,"\n"
 
 # Make a shorthand for constructing Taylor expressions
 def t(d,j):
-    return ScalarTaylorFunction.variable(d,j)
+    return ScalarTaylorFunction.coordinate(d,j,swp)
 
 #Create a ScalarTaylorFunction from a Polynomial
-p=ScalarFunction.variable(3,0)
-tp=ScalarTaylorFunction(d,p)
+p=RealScalarFunction.coordinate(3,0)
+tp=ScalarTaylorFunction(d,p,swp)
 print "p:",p,"\ntp: ",tp,"\n"
 
 # The domain D of x.
@@ -201,9 +202,9 @@ x+=y; x-=y;
 x+=c; x-=c; x*=c; x/=c;
 x+=i; x-=i; x*=i; x/=i;
 
-# Reset x
-x=tv[0];
-y=tv[1];
+# Reset x,y
+x=ScalarTaylorFunction.coordinate(d,0,swp);
+y=ScalarTaylorFunction.coordinate(d,1,swp);
 
 # Comparison functions
 min(x,y); max(x,y); abs(x);
@@ -241,15 +242,15 @@ print
 
 # Function composition
 d=IntervalVector([[4,7],[1,6],[-1,1]])
-th=VectorTaylorFunction.identity(d)
+th=VectorTaylorFunction.identity(d,swp)
 cd=th.codomain()
 
 ##f=VectorFunction.affine(FloatMatrix([[2,1,0],[1,1,1]]),FloatVector([1,1]))
-f=VectorFunction(2,3)
-g=ScalarFunction.variable(3,0)
+f=RealVectorFunction(2,3)
+g=RealScalarFunction.coordinate(3,0)
 
-tg=ScalarTaylorFunction(cd,g)
-tf=VectorTaylorFunction(cd,f)
+tg=ScalarTaylorFunction(cd,g,swp)
+tf=VectorTaylorFunction(cd,f,swp)
 
 # Compose an expression and a Taylor function
 compose(g,th)
@@ -278,8 +279,9 @@ a=t(d,0)
 x=t(d,1)
 y=t(d,2)
 f=join(a+4*x+y,x+y)
+slv=IntervalNewtonSolver(1e-8,6,)
 print "f:",f
-h=implicit(f)
+h=slv.implicit(f,Box([[-1,1],[-1,1]]),Box([[-1,1]]))
 print "implicit(f):",h
 
 # Compute the solution h to the scalar equation g(x,h(x))=0

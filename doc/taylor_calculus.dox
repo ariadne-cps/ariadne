@@ -85,34 +85,34 @@ As well as matrix and vector arithmetic, %Ariadne provides a \c solve routine fo
 
 \section python_tutorial_functional_calculus Functional Calculus
 
-%Ariadne supports nonlinear functions by means of two abstract classes, the ExpressionInterface for scalar functions \f$f:\R^m\rightarrow\R\f$ and the FunctionInterface for functions \f$f:\R^m\rightarrow\R^n\f$. These interfaces cannot be directly manipulated. Instead, they can be converted to numerical TaylorExpression and TaylorFunction types which can then be worked with.
+%Ariadne supports nonlinear functions by means of two abstract classes, the RealScalarFunction for scalar functions \f$f:\R^m\rightarrow\R\f$ and the RealVectorFunction for functions \f$f:\R^m\rightarrow\R^n\f$. These interfaces cannot be directly manipulated. Instead, they can be converted to numerical ScalarTaylorFunction and VectorTaylorFunction types which can then be worked with.
 
 \subsection taylor_calculus_nonlinear User-Defined Functions
 
-The UserExpression and UserFunction allow the creation of user-defined %Ariadne functions.
+The RealScalarFunction and RealVectorFunction also allow the creation of %Ariadne functions.
 
 \skipline argument_size
-\until UserExpression
+\until evaluate
 
 \subsection taylor_calculus_polynomial Polynomial Calculus
 
 \dontinclude examples/tutorial.py
 
-The PolynomialExpression and PolynomialFunction classes provide concrete implementations of the function calculus.
+The RealPolynomial class provide concrete implementations of the function calculus.
 
 A PolynomialExpression represents a scalar polynomial function in multiple variables, with coefficients represented by intervals to take into account roundoff error. A polynomial expression can be created by using the PolynomialExpression.variable(n,j), which creates the polynomial \f$p(x)=x_j\f$ for \f$x\in\R^n\f$:
 
-\skipline PolynomialExpression.variable
+\skipline RealPolynomial.coordinate
 
-We can define a shorthand for creating polynomial expressions:
+We can define a shorthand for creating polynomials:
 
-\skipline def p
+\skipline def poly
 \until return
 
 The standard arithmetical operations are available for polynomial expressions:
 
 \skipline +p
-\until i*p
+\until c*p
 
 
 
@@ -121,10 +121,10 @@ The standard arithmetical operations are available for polynomial expressions:
 
 \dontinclude examples/tutorial.py
 
-The core type is a TaylorExpression, which is a polynomial representation \a p of a function \a f on a box \a D in Euclidean space with uniform error \a e:
+The core type is a ScalarTaylorFunction, which is a polynomial representation \a p of a function \a f on a box \a D in Euclidean space with uniform error \a e:
 \f[ f(x) = p(x)\pm e \text{ for } x\in D . \f]
 
-Rather than represent a Taylor expression by the polynomial \a p itself, we use a scaled model \a m such that
+Rather than represent a Taylor function by the polynomial \a p itself, we use a scaled model \a m such that
 \f[ m(\xi) = p(s(\xi)) \f]
 where
 \f[ s:[-1,+1]^n \rightarrow [a_1,b_1]\times\cdots\times[a_n,b_n] = D\f]
@@ -134,14 +134,14 @@ The use of the scaled model \a m gives better accuracy over the domain of the ex
 
 \sa \ref function_models_page
 
-\subsection taylor_calculus_creating
+\subsection taylor_calculus_creating Creating Taylor functions
 
-The simplest way to create a Taylor expression is to use the named constructor variable(D,j), which constructs a Taylor expression for the function \f$f(x)=x_j\f$ on the domain \f$D\f$:
+The simplest way to create a Taylor function is to use the named constructor coordinate(D,j,swp), which constructs a Taylor function for the function \f$f(x)=x_j\f$ on the domain \f$D\f$ using the \e sweeper to control the accuracy:
 
-\skipline TaylorExpression.variable
+\skipline ScalarTaylorFunction.coordinate
 
-It is possible to create a list of all \f$n\f$ variables on \f$D\in\R^n\f$ by using the named constructor variables(D):
-\skipline TaylorExpression.variables
+It is possible to create a list of all \f$n\f$ variables on \f$D\in\R^n\f$:
+\skipline ScalarTaylorFunction.coordinate
 
 To save typing, give shorthand names to the variables:
 \skipline x
@@ -153,7 +153,7 @@ We can even make a shorthand function to create new Taylor expressions.
 
 A Taylor expression can also be constructed as an approximations to any object satisfying the ExpressionInterface type, including the PolynomialExpression. The domain of the expression has to be given.
 
-\skipline =TaylorExpression
+\skipline =ScalarTaylorFunction
 
 
 The following functions are available to inspect the Taylor expression.

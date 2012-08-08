@@ -50,6 +50,8 @@ A more detailed explanation of how to analyse a hybrid system can be found on th
 
 An example of the use of %Ariadne for reachability analysis of a simple hybrid system is given on the \ref tutorial_page  page. The example is contained in the file  \link examples/tutorial.cc tutorial.cc \endlink.
 
+The internal structure of %Ariadne can be best explored via the <A HREF="modules.html">Modules</A> page (also linked to at the top of this page).
+
 \section mainpage_advanced_usage Advanced Usage
 
 A guide for advanced users on to use the internal data types including the function calculus and Taylor calculus can be found on the \ref python_tutorial_page documentation page.

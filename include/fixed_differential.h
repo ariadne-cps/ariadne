@@ -109,7 +109,7 @@ Matrix<X> outer(const Vector<X>& v) {
     }
 }
 
-//! \ingroup CalculusModule
+//! \ingroup DifferentiationModule
 //! \brief A class representing the partial derivatives of a scalar quantity
 //! depending on multiple arguments.
 //!
@@ -520,7 +520,7 @@ FirstDifferential<X> atan(const FirstDifferential<X>& x)
 }
 
 
-template<class X> 
+template<class X>
 bool
 operator>=(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
 {
@@ -528,7 +528,7 @@ operator>=(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
 }
 
 
-template<class X> 
+template<class X>
 bool
 operator<=(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
 {
@@ -536,7 +536,7 @@ operator<=(const FirstDifferential<X>& x, const FirstDifferential<X>& y)
 }
 
 
-template<class X, class R> 
+template<class X, class R>
 typename EnableIfNumeric<R,bool>::Type
 operator>=(const FirstDifferential<X>& x, const R& c)
 {
@@ -544,7 +544,7 @@ operator>=(const FirstDifferential<X>& x, const R& c)
 }
 
 
-template<class X, class R> 
+template<class X, class R>
 typename EnableIfNumeric<R,bool>::Type
 operator<=(const FirstDifferential<X>& x, const R& c)
 {
@@ -617,7 +617,7 @@ class Vector< FirstDifferential<X> >
 
 
 
-//! \ingroup CalculusModule
+//! \ingroup DifferentiationModule
 //! \brief A class representing the partial derivatives of a scalar quantity
 //! depending on multiple arguments.
 //!

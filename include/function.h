@@ -68,7 +68,7 @@ typedef VectorFunction<Real> RealVectorFunction;
 template<class X> class VectorFunctionElementReference;
 
 //! \ingroup FunctionModule
-//! \brief A scalar function which can only be evaluated approximately, \f$f:\F^n\rightarrow\F\f$.
+//! \brief A generic scalar function which can be evaluated over the number type \a X,  \f$f:\X^n\rightarrow\X\f$.
 template<class X>
 class ScalarFunction
 {
@@ -201,7 +201,7 @@ ScalarFunction<Real> tan(const ScalarFunction<Real>&);
 
 
 //! \ingroup FunctionModule
-//! \brief A vector function which can only be evaluated approximately, \f$f:\F^n\rightarrow\F^m\f$.
+//! \brief A generic vector function which can be evaluated over the number type \a X,  \f$f:\X^n\rightarrow\X^m\f$.
 template<class X>
 class VectorFunction
 {

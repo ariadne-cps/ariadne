@@ -692,6 +692,7 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
 };
 
 
+//! \ingroup AnalysisModule
 //! \brief A class for computing the evolution of a general hybrid system as
 //! efficiently as possible. In particular, crossing times are computed
 //! explicitly, and the number of additional constraints is minimised.

@@ -78,6 +78,8 @@ struct RealVariableUpperInterval {
 };
 
 
+//! \ingroup ExpressionSetSubModule
+//! \brief An interval range for a real variable.
 class RealVariableInterval {
   private:
     Real _lower;
@@ -140,6 +142,8 @@ inline RealVariableUpperInterval operator>=(double u, const RealVariable& v) { r
 inline RealVariableInterval operator==(const RealVariable& v, double x) { return v==Real(x); }
 inline RealVariableInterval operator==(double x, const RealVariable& v) { return Real(x)==v; }
 
+//! \ingroup ExpressionSetSubModule
+//! \brief An box defining ranges for a collection of real variables.
 class RealVariableBox {
     Map<RealVariable,RealIntervalSet> _bounds;
   public:
@@ -157,7 +161,7 @@ class RealVariableBox {
 
 
 
-//! \ingroup GeometryModule ExactSetSubModule
+//! \ingroup ExpressionSetSubModule
 //! \brief A set defined as the preimage of a box under a continuous function.
 //! The set is described as \f$S=g^{-1}(C)\f$ where \f$g\f$ the constraint function and \f$C\f$ the codomain.
 class RealExpressionConstraintSet
@@ -171,7 +175,7 @@ class RealExpressionConstraintSet
     friend std::ostream& operator<<(std::ostream& os, const RealExpressionConstraintSet& eset);
 };
 
-//! \ingroup GeometryModule ExactSetSubModule
+//! \ingroup ExpressionSetSubModule
 //! \brief A set defined as the intersection of a box and the preimage of a box under a continuous function.
 //! The set is described as \f$S=D\cap g^{-1}(C)\f$ where \f$D\f$ is the domain, \f$g\f$ the constraint function and \f$C\f$ the codomain.
 class RealExpressionBoundedConstraintSet

@@ -76,6 +76,7 @@ template<class X> struct ConstMatrixRow {
 };
 
 
+//! \ingroup LinearAlgebraModule
 //! \brief A matrix over a field. See also \link Ariadne::Vector \c Vector<X> \endlink.
 //!
 //! \par Python interface

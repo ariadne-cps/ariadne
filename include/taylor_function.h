@@ -138,7 +138,8 @@ ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, uint k);
 
 class VectorTaylorFunctionElementReference;
 
-/*! \brief A ScalarTaylorFunction is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
+/*! \ingroup FunctionModelSubModule
+ *  \brief A ScalarTaylorFunction is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
  *
  * Formally, a ScalarTaylorFunction is a triple \f$(D,p,e)\f$ representing a set of continuous functions \f$\mathrm{T}(D,p,e)\f$ by
  * \f[ \mathrm{T}(D,p,e) = \{ f:\R^n\rightarrow \R \mid \sup_{x\in D}|f(x)-p(x)| \leq e \} . \f]
@@ -599,7 +600,8 @@ ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const Vector
 VectorTaylorFunction unchecked_compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
 
 
-/*! \brief A taylor_model with multivalued output using the TaylorModel class.
+/*! \ingroup FunctionModelSubModule
+ *  \brief A Taylor function model with multivalued codomain built from the TaylorModel class.
  *
  *  See also TaylorModel, ScalarTaylorFunction, VectorTaylorFunction.
  */

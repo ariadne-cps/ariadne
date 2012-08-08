@@ -146,6 +146,8 @@ template<class F> class ScalarFunctionModelMixin<F,Interval>
         static_cast<F&>(*this)+=dynamic_cast<const F&>(f1)*dynamic_cast<const F&>(f2); }
 };
 
+//! \ingroup FunctionModelSubModule
+//! \brief Generic scalar functions on bounded domains.
 template<> class ScalarFunctionModel<Interval>
 {
   public:
@@ -260,6 +262,8 @@ template<class F> F ScalarFunctionModelMixin<F,Interval>::apply(OperatorCode op)
 
 
 
+//! \ingroup FunctionModelSubModule
+//! \brief Generic vector functions on bounded domains.
 template<> class VectorFunctionModelInterface<Interval>
     : public virtual VectorFunctionInterface<Interval>
 {

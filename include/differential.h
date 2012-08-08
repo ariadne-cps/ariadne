@@ -92,7 +92,7 @@ template<class X> Vector< Differential<X> > compose(const Vector< Differential<X
 
 
 
-//! \ingroup CalculusModule
+//! \ingroup DifferentiationModule
 //! \brief A class representing the partial derivatives of a scalar quantity
 //! depending on multiple arguments.
 //!

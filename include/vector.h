@@ -53,6 +53,7 @@ template<class V> struct VectorContainer : public VectorExpression<V> { };
 template<class T> struct IsScalar : IsNumeric<T> { };
 
 
+//! \ingroup LinearAlgebraModule
 //! \brief A vector over a field. See also \link Ariadne::Matrix \c Matrix<X> \endlink.
 //!
 //! \par Python interface

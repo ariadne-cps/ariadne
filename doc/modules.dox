@@ -26,6 +26,7 @@
 
 /*! \file modules.dox
  * \brief Documentation for %Ariadne modules.
+ * \anchor modules
  */
 
 /*! \brief The main %Ariadne namespace.
@@ -34,6 +35,19 @@ namespace Ariadne {
 }
 
 /*!\defgroup UserModules UserModules
+ */
+
+/*! \defgroup ExpressionModule Expression Module
+ *  \ingroup UserModules
+ *  \brief Expressions in named variables.
+ *
+ * In this module, expressions in named variables can defined. These form the
+ * building blocks for defining hybrid systems.
+ */
+
+/*!\defgroup ExpressionSetSubModule Expression Sets
+ * \ingroup ExpressionModule
+ * \brief Sets described by giving constraints on variables and expressions.
  */
 
 /*!\defgroup SystemModule System Module
@@ -54,17 +68,12 @@ namespace Ariadne {
  * compute the image of denotable sets; this is the purpose of the Evaluation
  * module.
  *
- * We use the following abbreviations for template parameters for classes in this module:
- *  - \b FN: %Function
- *  - \b MP: %Map
- *  - \b VF: %VectorField
- *
  * See the page on \ref function_evaluation_page for more information.
  */
 
-/*! \defgroup EvaluationModule Evaluation Module
+/*! \defgroup AnalysisModule Analysis Module
  *  \ingroup UserModules
- *  \brief Functions and methods for computing the evolution of a system and solving equations.
+ *  \brief Classes for computing the evolution and analysing the behaviour of a system.
  */
 
 
@@ -76,12 +85,76 @@ namespace Ariadne {
  */
 
 
-/*! \defgroup ExpressionModule Expression Module
- *  \ingroup CoreModules
- *  \brief Expressions in named variables.
+
+
+/*!\defgroup NumericModule Numeric Module
+ * \ingroup CoreModules
+ * \brief Numerical types and intervals.
+ * \details In this module, we define %Ariadne's base numerical types, and interval
+ * arithmetic. The main classes are \ref Ariadne::Integer "Integer",
+ * \ref Ariadne::Rational "Rational", \ref Ariadne::Float "Float",
+ * \ref Ariadne::Interval "Interval" and \ref Ariadne::Real "Real" classes.
  *
- * In this module, expressions in named variables can defined. These form the
- * building blocks for defining hybrid systems.
+ * Rounded operations on \ref Ariadne::Float "Float" are provided using the \c _down
+ * and \c _up suffixes. Approximate arithmetic without control of the
+ * rounding mode can be specified by the approx rounding type, and exact
+ * arithmetic (the default) can be specified explicitly using the exact
+ * rounding type.
+ *
+ * Note that to prevent accidental calls to approximate functions, all
+ * non-exact operations must yield a \a Float value.
+ *
+ * We use the following abbreviations for template parameters
+ * for classes and concepts in this module:
+ *  - \b Q: Rational
+ *  - \b F: Float
+ *  - \b I: Interval
+ *  - \b A: Rational, Interval
+ *  - \b R: Rational, Float
+ *  - \b X: Rational, Float, Interval
+ *
+ * \internal The above template names are currently not used consistently
+ *
+ * See the page \ref realnumbertypes for more information.
+ */
+
+/*!
+ * \defgroup LinearAlgebraModule Linear Algebra Module
+ * \ingroup CoreModules
+ * \brief %Vector, matrix and tensor classes, solution of linear equations,
+ * LU and QR factorisation and singular value decomposition.
+ *
+ * \details Basic types are represented by the classes \ref Ariadne::Vector "Vector"
+ * and \ref Ariadne::Matrix "Matrix".
+ * Specialist types include PermutationMatrix and DiagonalMatrix.
+ * Operations such as vector sums and matrix-vector products are
+ * accessed using operator overloading. Expression templates and slices are
+ * used to improve efficiency.
+ *
+ * More complicated matrix operations, such as factorisation, are represented
+ * by sub-classes which contain the factorised data, from which the factors
+ * can easily be extracted.
+ *
+ * Currently sparse and structured (e.g. triangular, symmetric, banded)
+ * matrices are not directly supported, except to the extent needed for the
+ * matrix decomposition classes, or for derivative tensors.
+ *
+ * All classes support exact arithmetic and interval arithmetic.
+ *
+ * We use the following abbreviations for template parameters for classes
+ * in this module:
+ *  - \b SCA: Scalar
+ *  - \b VEC: Vector
+ *  - \b MX: Matrix
+ *
+ */
+
+/*!\defgroup DifferentiationModule  Differentiation Module
+ * \ingroup CoreModules
+ * \brief Support for automatic differentiation using Taylor expansions
+ *
+ * In this core module are the classes used to compute derivatives
+ * of functions.
  */
 
 /*! \defgroup FunctionModule Function Module
@@ -90,6 +163,10 @@ namespace Ariadne {
  *
  * In this module are the classes used to represent concrete functions in Euclidean space.
  * These functions can be used as the building blocks for geometric objects and dynamic systems.
+ *
+ *  \defgroup FunctionModelSubModule Function Models
+ *  \ingroup FunctionModule
+ *  \brief Validated and approximate functions on bounded domains in Euclidean space.
  */
 
 
@@ -187,69 +264,24 @@ namespace Ariadne {
  */
 
 
-
-
-/*!\defgroup NumericModule Numeric Module
+/*!\defgroup SolverModule Solver Module
  * \ingroup CoreModules
- * \brief Numerical types and intervals.
- * \details In this module, we define %Ariadne's base numerical types, and interval
- * arithmetic. The main classes are \ref Ariadne::Integer "Integer",
- * \ref Ariadne::Rational "Rational", \ref Ariadne::Float "Float",
- * \ref Ariadne::Interval "Interval" and \ref Ariadne::Real "Real" classes.
+ * \brief Classes and functions for solving algebraic equations, differential equations and optimisation problems (including constraint feasibility problems).
  *
- * Rounded operations on \ref Ariadne::Float "Float" are provided using the \c _down
- * and \c _up suffixes. Approximate arithmetic without control of the
- * rounding mode can be specified by the approx rounding type, and exact
- * arithmetic (the default) can be specified explicitly using the exact
- * rounding type.
- *
- * Note that to prevent accidental calls to approximate functions, all
- * non-exact operations must yield a \a Float value.
- *
- * We use the following abbreviations for template parameters
- * for classes and concepts in this module:
- *  - \b Q: Rational
- *  - \b F: Float
- *  - \b I: Interval
- *  - \b A: Rational, Interval
- *  - \b R: Rational, Float
- *  - \b X: Rational, Float, Interval
- *
- * \internal The above template names are currently not used consistently
- *
- * See the page \ref realnumbertypes for more information.
+ * The LinearProgram class supports construction and solution of linear
+ * programming problems. Tests for feasibility only are also possible. The
+ * computations are performed by a BLAS/LAPACK style lpslv() routing.
  */
 
-/*!
- * \defgroup LinearAlgebraModule Linear Algebra
+/*!\defgroup OptimisationSubModule Optimisation Submodule
  * \ingroup CoreModules
- * \brief %Vector, matrix and tensor classes, solution of linear equations,
- * LU and QR factorisation and singular value decomposition.
+ * \brief Classes and functions for solving linear and nonlinear programming problems.
  *
- * \details Basic types are represented by the classes \ref Ariadne::Vector "Vector"
- * and \ref Ariadne::Matrix "Matrix".
- * Specialist types include PermutationMatrix and DiagonalMatrix.
- * Operations such as vector sums and matrix-vector products are
- * accessed using operator overloading. Expression templates and slices are
- * used to improve efficiency.
- *
- * More complicated matrix operations, such as factorisation, are represented
- * by sub-classes which contain the factorised data, from which the factors
- * can easily be extracted.
- *
- * Currently sparse and structured (e.g. triangular, symmetric, banded)
- * matrices are not directly supported, except to the extent needed for the
- * matrix decomposition classes, or for derivative tensors.
- *
- * All classes support exact arithmetic and interval arithmetic.
- *
- * We use the following abbreviations for template parameters for classes
- * in this module:
- *  - \b SCA: Scalar
- *  - \b VEC: Vector
- *  - \b MX: Matrix
- *
+ * The LinearProgram class supports construction and solution of linear
+ * programming problems. Tests for feasibility only are also possible. The
+ * computations are performed by a BLAS/LAPACK style lpslv() routing.
  */
+
 
 /*! \defgroup OutputModules Output Modules
  *
@@ -266,37 +298,8 @@ namespace Ariadne {
  *  \brief Homology Output.
  */
 
-/*!\defgroup InternalModules Internal Modules
- * \brief Modules used for internal computations; not directly needed by users.
+
+/*! \defgroup HybridModules Hybrid System Modules
  */
-
-/* \defgroup OptimisationModule Optimisation
- * \ingroup InternalModules
- * \brief Classes and functions for solving linear and nonliner programming problems (including constraint feasibility problems).
- *
- * The LinearProgram class supports construction and solution of linear
- * programming problems. Tests for feasibility only are also possible. The
- * computations are performed by a BLAS/LAPACK style lpslv() routing.
- */
-
-/* \defgroup DifferentiationModule Automatic Differentiation
- * \ingroup InternalModules
- * \brief Support for automatic differentiation using Taylor expansions
- *
- * In this core module are the classes used to compute derivatives
- * of functions.
- */
-
-/*!\defgroup CalculusModule Calculus Module
- * \ingroup InternalModules
- * \brief Calculus operations.
- */
-
-/*!\defgroup OptimisationModule Optimisation Module
- * \ingroup InternalModules
- * \brief Solvers for optimisation and feasibility problems.
- */
-
-
 
 #endif /* _ARIADNE_MODULES_H */

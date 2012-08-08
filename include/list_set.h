@@ -48,6 +48,9 @@ class DiscreteLocation;
 
 struct ListSetSummary { uint size, dimension; };
 
+/*! \ingroup ListSetSubModule
+ *  \brief A set described as the union of sets in a list of basic sets.
+ */
 template<class BS>
 class ListSet
     : public DrawableInterface

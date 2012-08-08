@@ -62,7 +62,8 @@ template<class ES> class HybridListSet;
 class HybridEvolverInterface;
 class HybridReachabilityAnalyserConfiguration;
 
-/*! \brief A class for performing reachability analysis on a hybrid system.
+/*! \ingroup AnalysisModule
+ *  \brief A class for performing reachability analysis on a hybrid system.
  */
 class HybridReachabilityAnalyser
     : public HybridReachabilityAnalyserInterface

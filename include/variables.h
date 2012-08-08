@@ -44,18 +44,24 @@ class Identifier;
 
 template<class T> class Set;
 
+typedef unsigned int Nat;
+
 typedef bool Boolean;
 typedef tribool Tribool;
-typedef unsigned int Nat;
 typedef std::string String;
 class Integer;
 class Real;
 
+//! \ingroup ExpressionModule
+//! \brief A class representing the name of a variable.
+//! \details A proxy for a standard string; used to distinguish a string used as a variable name from a value.
+//! \sa Variable
 class Identifier : public String
 {
   public:
     Identifier() : String() { }
     Identifier(const char* cstr) : String(cstr) { }
+    //! \brief Construct an identifier from a standard string.
     Identifier(const String& str) : String(str) { }
 };
 
@@ -193,7 +199,8 @@ class RealVariableInterval;
 
 
 //! \ingroup ExpressionModule
-//! A named variable of type \a T.
+//! \brief A named variable of type \a T.
+//! \sa Expression
 template<class T> class Variable
     : public ExtendedVariable<T>
 {
@@ -244,6 +251,8 @@ DottedVariable<Real> dot(const Variable<Real>&);
 
 template<class T> class DottedVariable;
 
+//! \ingroup ExpressionModule
+//! \brief A named variable of type \a T decorated by a dot representing differentiation with respect to time.
 template<class T> class DottedVariable
     : public ExtendedVariable<T>
 {
@@ -268,6 +277,7 @@ inline DottedVariable<Real> dot(const Variable<Real>& var) {
 template<class T> PrimedVariable<T> prime(const Variable<T>&);
 template<class T> PrimedVariable<T> next(const Variable<T>&);
 
+//! \brief A named variable of type \a T decorated by a prime representing a value after a discrete jump.
 template<class T> class PrimedVariable
     : public ExtendedVariable<T>
 {

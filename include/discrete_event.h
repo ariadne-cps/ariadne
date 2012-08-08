@@ -32,6 +32,7 @@ namespace Ariadne {
 
 template<class T> std::string to_str(const T& t);
 
+//! \ingroup SystemModule
 //! \brief Type of a  discrete event of a hybrid system.
 class DiscreteEvent {
   public:

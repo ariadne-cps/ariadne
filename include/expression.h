@@ -45,9 +45,11 @@
 
 namespace Ariadne {
 
-//! Internal name for boolean objects in expressions.
+//! \brief Internal name for boolean objects.
 typedef bool Boolean;
+//! \brief Internal name for three-valued logical expressions.
 typedef tribool Tribool;
+//! \brief Internal name for strings.
 typedef std::string String;
 class Integer;
 class Real;
@@ -108,48 +110,48 @@ template<class T> struct EnableIfDoubleReal<double,Real,T> { typedef T Type; };
 //! Formulae in different variables may be combined; the variables of the resulting formula
 //! are all variables occuring in all formulae.
 //! Formulae may be manipulated symbolically.
-template<class X>
+template<class T>
 class Expression {
     typedef Identifier V;
   public:
-    typedef X ConstantType;
+    typedef T ConstantType;
   public:
-    explicit Expression(const ExpressionNode<X>* eptr) : _root(eptr) { }
-    explicit Expression(counted_pointer< const ExpressionNode<X> > eptr) : _root(eptr) { }
+    explicit Expression(const ExpressionNode<T>* eptr) : _root(eptr) { }
+    explicit Expression(counted_pointer< const ExpressionNode<T> > eptr) : _root(eptr) { }
   public:
-    //! \brief Construct the constant expression with the default value of \a X.
+    //! \brief Construct the constant expression with the default value of \a T.
     Expression();
     //! \brief Construct an expression from a value.
-    Expression(const X& c);
+    Expression(const T& c);
     //! \brief Construct an expression from a name.
     Expression(const Identifier& v);
     //! \brief Construct an expression from a constant.
-    Expression(const Constant<X>& c);
+    Expression(const Constant<T>& c);
     //! \brief Construct an expression from a variable.
-    Expression(const Variable<X>& v);
+    Expression(const Variable<T>& v);
 
   public:
     const Operator& op() const;
     OperatorCode code() const;
     OperatorKind kind() const;
-    const X& val() const;
+    const T& val() const;
     const V& var() const;
-    const Expression<X>& arg() const;
+    const Expression<T>& arg() const;
     const Int& num() const;
-    const Expression<X>& arg1() const;
-    const Expression<X>& arg2() const;
+    const Expression<T>& arg1() const;
+    const Expression<T>& arg2() const;
     template<class A> const Expression<A>& cmp1(A* dummy=0) const;
     template<class A> const Expression<A>& cmp2(A* dummy=0) const;
   public:
     Set<UntypedVariable> arguments() const;
   public:
-    const ExpressionNode<X>* node_ptr() const { return _root.operator->(); }
+    const ExpressionNode<T>* node_ptr() const { return _root.operator->(); }
   private:
-    counted_pointer< const ExpressionNode<X> > _root;
+    counted_pointer< const ExpressionNode<T> > _root;
 };
 
 
-template<class X>
+template<class T>
 struct ExpressionNode {
     mutable uint count;
     Operator op;
@@ -158,28 +160,28 @@ struct ExpressionNode {
     explicit ExpressionNode(OperatorCode cd, OperatorKind knd) : count(0u), op(cd,knd) { }
 };
 
-template<class X> struct ConstantExpressionNode : public ExpressionNode<X> {
-    X val;
-    ConstantExpressionNode(const X& v) : ExpressionNode<X>(CNST,NULLARY), val(v) { }
+template<class T> struct ConstantExpressionNode : public ExpressionNode<T> {
+    T val;
+    ConstantExpressionNode(const T& v) : ExpressionNode<T>(CNST,NULLARY), val(v) { }
 };
-template<class X> struct VariableExpressionNode : public ExpressionNode<X> {
+template<class T> struct VariableExpressionNode : public ExpressionNode<T> {
     Identifier var;
-    VariableExpressionNode(const Identifier& v) : ExpressionNode<X>(VAR,VARIABLE), var(v) { }
+    VariableExpressionNode(const Identifier& v) : ExpressionNode<T>(VAR,VARIABLE), var(v) { }
 };
-template<class X, class A=X> struct UnaryExpressionNode : public ExpressionNode<X> {
+template<class T, class A=T> struct UnaryExpressionNode : public ExpressionNode<T> {
     Expression<A> arg;
-    UnaryExpressionNode(const Operator& op, Expression<A> const& a) : ExpressionNode<X>(op), arg(a) { }
+    UnaryExpressionNode(const Operator& op, Expression<A> const& a) : ExpressionNode<T>(op), arg(a) { }
 };
-template<class X, class A1=X, class A2=A1> struct BinaryExpressionNode {
-    Expression<X> arg1; Expression<X> arg2;
+template<class T, class A1=T, class A2=A1> struct BinaryExpressionNode {
+    Expression<T> arg1; Expression<T> arg2;
 };
-template<class X> struct BinaryExpressionNode<X> : public ExpressionNode<X> {
-    Expression<X> arg1; Expression<X> arg2;
-    BinaryExpressionNode(const Operator& op, Expression<X> const& a1, Expression<X> const& a2)
-        : ExpressionNode<X>(op), arg1(a1), arg2(a2) { }
+template<class T> struct BinaryExpressionNode<T> : public ExpressionNode<T> {
+    Expression<T> arg1; Expression<T> arg2;
+    BinaryExpressionNode(const Operator& op, Expression<T> const& a1, Expression<T> const& a2)
+        : ExpressionNode<T>(op), arg1(a1), arg2(a2) { }
 };
-template<class X> struct BinaryExpressionNode<typename Logic<X>::Type,X,X> : public ExpressionNode<typename Logic<X>::Type> {
-    typedef typename Logic<X>::Type R; typedef X A;
+template<class T> struct BinaryExpressionNode<typename Logic<T>::Type,T,T> : public ExpressionNode<typename Logic<T>::Type> {
+    typedef typename Logic<T>::Type R; typedef T A;
     Expression<A> arg1; Expression<A> arg2;
     BinaryExpressionNode(const Operator& op, Expression<A> const& a1, Expression<A> const& a2)
         : ExpressionNode<R>(op), arg1(a1), arg2(a2) { }
@@ -190,37 +192,37 @@ template<class R, class A=R, class N=Int> struct ScalarExpressionNode : public U
         : UnaryExpressionNode<R,A>(op,a), num(n) { }
 };
 
-template<class X> ExpressionNode<X>::~ExpressionNode() { }
+template<class T> ExpressionNode<T>::~ExpressionNode() { }
 
-template<class X> const Operator& Expression<X>::op() const {
+template<class T> const Operator& Expression<T>::op() const {
     return node_ptr()->op; }
-template<class X> OperatorCode Expression<X>::code() const {
+template<class T> OperatorCode Expression<T>::code() const {
     return node_ptr()->op.code(); }
-template<class X> OperatorKind Expression<X>::kind() const {
+template<class T> OperatorKind Expression<T>::kind() const {
     return node_ptr()->op.kind(); }
-template<class X> const X& Expression<X>::val() const {
-    return static_cast<const ConstantExpressionNode<X>*>(node_ptr())->val; }
-template<class X> const Identifier& Expression<X>::var() const {
-    return static_cast<const VariableExpressionNode<X>*>(node_ptr())->var; }
-template<class X> const Expression<X>& Expression<X>::arg() const {
-    return static_cast<const UnaryExpressionNode<X>*>(node_ptr())->arg; }
-template<class X> const Int& Expression<X>::num() const {
-    return static_cast<const ScalarExpressionNode<X>*>(node_ptr())->num; }
-template<class X> const Expression<X>& Expression<X>::arg1() const {
-    return static_cast<const BinaryExpressionNode<X>*>(node_ptr())->arg1; }
-template<class X> const Expression<X>& Expression<X>::arg2() const {
-    return static_cast<const BinaryExpressionNode<X>*>(node_ptr())->arg2; }
+template<class T> const T& Expression<T>::val() const {
+    return static_cast<const ConstantExpressionNode<T>*>(node_ptr())->val; }
+template<class T> const Identifier& Expression<T>::var() const {
+    return static_cast<const VariableExpressionNode<T>*>(node_ptr())->var; }
+template<class T> const Expression<T>& Expression<T>::arg() const {
+    return static_cast<const UnaryExpressionNode<T>*>(node_ptr())->arg; }
+template<class T> const Int& Expression<T>::num() const {
+    return static_cast<const ScalarExpressionNode<T>*>(node_ptr())->num; }
+template<class T> const Expression<T>& Expression<T>::arg1() const {
+    return static_cast<const BinaryExpressionNode<T>*>(node_ptr())->arg1; }
+template<class T> const Expression<T>& Expression<T>::arg2() const {
+    return static_cast<const BinaryExpressionNode<T>*>(node_ptr())->arg2; }
 template<class R> template<class A> const Expression<A>& Expression<R>::cmp1(A*) const {
     return static_cast<const BinaryExpressionNode<R,A>*>(node_ptr())->arg1; }
 template<class R> template<class A> const Expression<A>& Expression<R>::cmp2(A*) const {
     return static_cast<const BinaryExpressionNode<R,A>*>(node_ptr())->arg2; }
 
 
-template<class X> inline Expression<X>::Expression() : _root(new ConstantExpressionNode<X>(X())) { }
-template<class X> inline Expression<X>::Expression(const X& c) : _root(new ConstantExpressionNode<X>(c)) { }
-template<class X> inline Expression<X>::Expression(const Identifier& v) : _root(new VariableExpressionNode<X>(v)) { }
-template<class X> inline Expression<X>::Expression(const Constant<X>& c): _root(new ConstantExpressionNode<X>(c.value())) { };
-template<class X> inline Expression<X>::Expression(const Variable<X>& v) : _root(new VariableExpressionNode<X>(v.name())) { }
+template<class T> inline Expression<T>::Expression() : _root(new ConstantExpressionNode<T>(T())) { }
+template<class T> inline Expression<T>::Expression(const T& c) : _root(new ConstantExpressionNode<T>(c)) { }
+template<class T> inline Expression<T>::Expression(const Identifier& v) : _root(new VariableExpressionNode<T>(v)) { }
+template<class T> inline Expression<T>::Expression(const Constant<T>& c): _root(new ConstantExpressionNode<T>(c.value())) { };
+template<class T> inline Expression<T>::Expression(const Variable<T>& v) : _root(new VariableExpressionNode<T>(v.name())) { }
 
 
 template<class R> inline
@@ -248,7 +250,7 @@ Expression<R> make_expression(Op op, const Expression<A1>& e1, Expression<A2> e2
 
 
 
-template<class X> inline OutputStream& operator<<(OutputStream& os, const ExpressionNode<X>* e) {
+template<class T> inline OutputStream& operator<<(OutputStream& os, const ExpressionNode<T>* e) {
     return os << (void*)(e);
 }
 
@@ -261,8 +263,8 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, const Expres
 //! \name Input / output operations.
 //! \related Expression
 
-template<class X> OutputStream& operator<<(std::ostream& os, const Expression<X>& f);
-template<class X> inline std::ostream& _write_comparison(std::ostream& os, const Expression<X>& f) {
+template<class T> OutputStream& operator<<(std::ostream& os, const Expression<T>& f);
+template<class T> inline std::ostream& _write_comparison(std::ostream& os, const Expression<T>& f) {
     ARIADNE_FAIL_MSG("Comparison must return a logical type."); }
 template<> inline std::ostream& _write_comparison(std::ostream& os, const Expression<Tribool>& f) {
     Real* real_ptr=0; return os << "(" << f.cmp1(real_ptr) << symbol(f.op()) << f.cmp2(real_ptr) << ")"; }
@@ -271,7 +273,7 @@ template<> inline std::ostream& _write_comparison(std::ostream& os, const Expres
 //FIXME: Distinguish String and Integer comparisons
 
 //! \brief Write to an output stream
-template<class X> OutputStream& operator<<(std::ostream& os, const Expression<X>& f) {
+template<class T> OutputStream& operator<<(std::ostream& os, const Expression<T>& f) {
     switch(f.op()) {
         //case CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
         case CNST:
@@ -332,9 +334,9 @@ evaluate(const Expression<typename Logic<A>::Type>& e, const Map<Identifier,A>& 
 }
 
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
-template<class X>
-X
-evaluate(const Expression<X>& e, const Map<Identifier,X>& x)
+template<class T>
+T
+evaluate(const Expression<T>& e, const Map<Identifier,T>& x)
 {
     switch(e.kind()) {
         case VARIABLE: return x[e.var()];
@@ -348,17 +350,17 @@ evaluate(const Expression<X>& e, const Map<Identifier,X>& x)
 
 
 
-template<class R> Set<UntypedVariable> Expression<R>::arguments() const {
-    const Expression<R>& e=*this;
+template<class T> Set<UntypedVariable> Expression<T>::arguments() const {
+    const Expression<T>& e=*this;
     switch(e.kind()) {
-        case VARIABLE: return Set<UntypedVariable>(Variable<R>(e.var()));
+        case VARIABLE: return Set<UntypedVariable>(Variable<T>(e.var()));
         case NULLARY: return Set<UntypedVariable>();
         case UNARY: return e.arg().arguments();
         case BINARY: return join(e.arg1().arguments(),e.arg2().arguments());
         case COMPARISON: {
-            const BinaryExpressionNode<R,Real>* rlp = dynamic_cast<const BinaryExpressionNode<R,Real>*>(e.node_ptr());
+            const BinaryExpressionNode<T,Real>* rlp = dynamic_cast<const BinaryExpressionNode<T,Real>*>(e.node_ptr());
             if(rlp) { return join(rlp->arg1.arguments(),rlp->arg2.arguments()); }
-            const BinaryExpressionNode<R,String>* strp = dynamic_cast<const BinaryExpressionNode<R,String>*>(e.node_ptr());
+            const BinaryExpressionNode<T,String>* strp = dynamic_cast<const BinaryExpressionNode<T,String>*>(e.node_ptr());
             if(strp) { return join(strp->arg1.arguments(),strp->arg2.arguments()); }
         }
         default: ARIADNE_FAIL_MSG("Cannot compute arguments of expression "<<e<<"\n");
@@ -366,7 +368,7 @@ template<class R> Set<UntypedVariable> Expression<R>::arguments() const {
 }
 
 //! \brief Extract the arguments of expression \a e.
-template<class R> Set<Identifier> arguments(const Expression<R>& e)
+template<class T> Set<Identifier> arguments(const Expression<T>& e)
 {
     switch(e.kind()) {
         case VARIABLE: return Set<Identifier>(e.var());
@@ -379,19 +381,19 @@ template<class R> Set<Identifier> arguments(const Expression<R>& e)
 
 
 //! \brief Returns \a true if the expression\a e is syntactically equal to the constant \a c.
-template<class X> Bool is_constant(const Expression<X>& e, const X& c) {
+template<class T> Bool is_constant(const Expression<T>& e, const T& c) {
     switch(e.op()) {
         case CNST: return e.val()==c;
         default: return false;
     }
 }
 
-template<class X, class R> Bool is_constant(const Expression<X>& e, const R& c) {
-    return is_constant(e,static_cast<X>(c));
+template<class T, class X> Bool is_constant(const Expression<T>& e, const X& c) {
+    return is_constant(e,static_cast<T>(c));
 }
 
 //! \brief Returns \a true if the expression \a e is syntactically equal to the variable with name \a vn.
-template<class X> Bool is_variable(const Expression<X>& e, const Identifier& vn) {
+template<class T> Bool is_variable(const Expression<T>& e, const Identifier& vn) {
     switch(e.op()) {
         case VAR: return e.var()==vn;
         default: return false;
@@ -399,7 +401,7 @@ template<class X> Bool is_variable(const Expression<X>& e, const Identifier& vn)
 }
 
 //! \brief Returns \a true if the expression \a e is syntactically equal to the variable \a v.
-template<class X> Bool is_variable(const Expression<X>& e, const Variable<X>& v) {
+template<class T> Bool is_variable(const Expression<T>& e, const Variable<T>& v) {
     switch(e.op()) {
         case VAR: return e.var()==v.name();
         default: return false;
@@ -407,10 +409,10 @@ template<class X> Bool is_variable(const Expression<X>& e, const Variable<X>& v)
 }
 
 //! \brief Simplify the expression \a e.
-template<class X> Expression<X> simplify(const Expression<X>& e);
+template<class T> Expression<T> simplify(const Expression<T>& e);
 
 //! \brief Tests whether two expressions are identical.
-template<class X> Bool identical(const Expression<X>& e1, const Expression<X>& e2);
+template<class T> Bool identical(const Expression<T>& e1, const Expression<T>& e2);
 
 //! \brief Returns true if the expressions are mutual negations.
 //!
@@ -422,12 +424,12 @@ Bool opposite(Expression<Tribool> p, Expression<Tribool> q);
 Expression<Real> indicator(Expression<Tribool> p, Sign sign=POSITIVE);
 
 //! \brief Substitute all occurrences of variable \a v of type \c Y with constant value \a c.
-template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Y& c);
+template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const Variable<Y>& v, const Y& c);
 
 //! \brief Substitute all occurrences of variable \a v of type \c Y with expression value \a se.
-template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const Variable<Y>& v, const Expression<Y>& se);
+template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const Variable<Y>& v, const Expression<Y>& se);
 
-template<class X, class Y> Expression<X> substitute(const Expression<X>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
+template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 
 //! \brief Convert the expression in named variables to a formula in numbered coordinates.
 Formula<Real> formula(const Expression<Real>& e, const Map<Identifier,Nat>& v);
@@ -444,9 +446,9 @@ Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& q);
 String evaluate(const Expression<String>& e, const StringValuation& q);
 Integer evaluate(const Expression<Integer>& e, const IntegerValuation& q);
 
-template<class X> Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<X>& x);
-template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>& x);
-//template<class X> X evaluate(const Expression<Real>& e, const Map<ExtendedVariable<Real>,X>& x);
+template<class T> Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<T>& x);
+template<class T> T evaluate(const Expression<Real>& e, const ContinuousValuation<T>& x);
+//template<class T> T evaluate(const Expression<Real>& e, const Map<ExtendedVariable<Real>,T>& x);
 
 Formula<Real> formula(const Expression<Real>& e, const List< Variable<Real> >& vars);
 Formula<Real> formula(const Expression<Real>& res, const List< Assignment< Variable<Real>, Expression<Real> > >& aux, const Space<Real> spc);
@@ -462,30 +464,30 @@ ScalarFunction<Real> make_function(const Expression<Real>& e, const Space<Real>&
 //! \name Metaprogramming and sequencing operators for making lists
 //! \related Expression
 
-//! \brief Inherits from True type if class \a T is a constant, variable or expression in type \a X, otherwise inherits from False.
-template<class X, class T> struct IsExpression;
+//! \brief Inherits from True type if class \a X is a constant, variable or expression in type \a T, otherwise inherits from False.
+template<class T, class X> struct IsExpression;
 
-template<class X, class T> struct IsExpression : public False { };
-template<class X> struct IsExpression< X, X > : public True { };
-template<class X> struct IsExpression< X, Constant<X> > : public True { };
-template<class X> struct IsExpression< X, Variable<X> > : public True { };
-template<class X> struct IsExpression< X, Expression<X> > : public True { };
-template<class X, class T1, class T2, class R> struct EnableIfExpressions : public EnableIf< And<IsExpression<X,T1>,IsExpression<X,T2> >, R> { };
+template<class T, class X> struct IsExpression : public False { };
+template<class T> struct IsExpression< T, T > : public True { };
+template<class T> struct IsExpression< T, Constant<T> > : public True { };
+template<class T> struct IsExpression< T, Variable<T> > : public True { };
+template<class T> struct IsExpression< T, Expression<T> > : public True { };
+template<class T, class X1, class X2, class R> struct EnableIfExpressions : public EnableIf< And<IsExpression<T,X1>,IsExpression<T,X2> >, R> { };
 
-template<class T1, class T2> inline
-typename EnableIfExpressions< Real, T1, T2, List<Expression<Real> > >::Type
-operator,(const T1& e1, const T2& e2) {
+template<class X1, class X2> inline
+typename EnableIfExpressions< Real, X1, X2, List<Expression<Real> > >::Type
+operator,(const X1& e1, const X2& e2) {
     List< Expression<Real> > r; r.append(e1); r.append(e2); return r; }
 
-template<class T> inline
-typename EnableIf< IsExpression<Real,T>, List<Expression<Real> > >::Type
-operator,(Int c, const T& e) {
+template<class X> inline
+typename EnableIf< IsExpression<Real,X>, List<Expression<Real> > >::Type
+operator,(Int c, const X& e) {
     List< Expression<Real> > r; r.append(Expression<Real>(c)); r.append(Expression<Real>(e)); return r; }
 
-template<class X, class T> inline
-typename EnableIf< IsExpression<X,T>, List<Expression<X> > >::Type
-operator,(List<Expression<X> > l, const T& e) {
-    List< Expression<X> > r(l); r.append(Expression<Real>(e)); return r; }
+template<class T, class X> inline
+typename EnableIf< IsExpression<T,X>, List<Expression<T> > >::Type
+operator,(List<Expression<T> > l, const T& e) {
+    List< Expression<T> > r(l); r.append(Expression<Real>(e)); return r; }
 
 //@}
 
@@ -507,34 +509,34 @@ Expression<Tribool> operator||(Expression<Tribool> e1, Expression<Tribool> e2);
 //! \related Expression \brief Fuzzy logical negation.
 Expression<Tribool> operator!(Expression<Tribool> e);
 
-//! \related Expression \brief String equality.
+//! \related Expression \brief %String equality.
 Expression<Boolean> operator==(Variable<String> v1, const String& s2);
-//! \related Expression \brief String inequality.
+//! \related Expression \brief %String inequality.
 Expression<Boolean> operator!=(Variable<String> v1, const String& s2);
 
 
-//! \related Expression \brief Integer equality predicate.
+//! \related Expression \brief %Integer equality predicate.
 Expression<Boolean> operator==(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief Integer inequality predicate.
+//! \related Expression \brief %Integer inequality predicate.
 Expression<Boolean> operator!=(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief Integer comparison predicate (greater or equal).
+//! \related Expression \brief %Integer comparison predicate (greater or equal).
 Expression<Boolean> operator>=(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief Integer comparison (less or equal)..
+//! \related Expression \brief %Integer comparison (less or equal)..
 Expression<Boolean> operator<=(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief Integer comparison (greater).
+//! \related Expression \brief %Integer comparison (greater).
 Expression<Boolean> operator> (Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief Integer comparison (less).
+//! \related Expression \brief %Integer comparison (less).
 Expression<Boolean> operator< (Expression<Integer> e1, Expression<Integer> e2);
 
-//! \related Expression \brief Integer unary plus expression (identity).
+//! \related Expression \brief %Integer unary plus expression (identity).
 Expression<Integer> operator+(Expression<Integer> e);
-//! \related Expression \brief Integer unary minus expression.
+//! \related Expression \brief %Integer unary minus expression.
 Expression<Integer> operator-(Expression<Integer> e);
-//! \related Expression \brief Integer addition expression.
+//! \related Expression \brief %Integer addition expression.
 Expression<Integer> operator+(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief Integer subtraction expression.
+//! \related Expression \brief %Integer subtraction expression.
 Expression<Integer> operator-(Expression<Integer> e1, Expression<Integer> e2);
-//! \related Expression \brief Integer multiplication expression.
+//! \related Expression \brief %Integer multiplication expression.
 Expression<Integer> operator*(Expression<Integer> e1, Expression<Integer> e2);
 
 
@@ -551,53 +553,53 @@ Expression<Tribool> operator< (Expression<Real> e1, Expression<Real> e2);
 //! \related Expression \brief Fuzzy inequality comparison predicate (greater) of real expressions.
 Expression<Tribool> operator> (Expression<Real> e1, Expression<Real> e2);
 
-//! \related Expression \brief Real unary plus expression.
+//! \related Expression \brief %Real unary plus expression.
 Expression<Real> operator+(Expression<Real> e);
-//! \related Expression \brief Real unary minus expression.
+//! \related Expression \brief %Real unary minus expression.
 Expression<Real> operator-(Expression<Real> e);
-//! \related Expression \brief Real addition expression.
+//! \related Expression \brief %Real addition expression.
 Expression<Real> operator+(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief Real subtraction expression.
+//! \related Expression \brief %Real subtraction expression.
 Expression<Real> operator-(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief Real multiplication expression.
+//! \related Expression \brief %Real multiplication expression.
 Expression<Real> operator*(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief Real division expression.
+//! \related Expression \brief %Real division expression.
 Expression<Real> operator/(Expression<Real> e1, Expression<Real> e2);
 
-//! \related Expression \brief Real integer power expression.
+//! \related Expression \brief %Real integer power expression.
 Expression<Real> pow(Expression<Real> e, Int n);
 
-//! \related Expression \brief Real negation expression.
+//! \related Expression \brief %Real negation expression.
 //! Equivalent to -\a e.
 Expression<Real> neg(Expression<Real> e);
-//! \related Expression \brief Real reciprocal expression.
+//! \related Expression \brief %Real reciprocal expression.
 //! Equivalent to 1/\a e.
 Expression<Real> rec(Expression<Real> e);
-//! \related Expression \brief Real square expression.
+//! \related Expression \brief %Real square expression.
 Expression<Real> sqr(Expression<Real> e);
-//! \related Expression \brief Real square root expression.
+//! \related Expression \brief %Real square root expression.
 Expression<Real> sqrt(Expression<Real> e);
-//! \related Expression \brief Real exponential expression.
+//! \related Expression \brief %Real exponential expression.
 Expression<Real> exp(Expression<Real> e);
-//! \related Expression \brief Real natural logarithm expression.
+//! \related Expression \brief %Real natural logarithm expression.
 Expression<Real> log(Expression<Real> e);
-//! \related Expression \brief Real sine expression.
+//! \related Expression \brief %Real sine expression.
 Expression<Real> sin(Expression<Real> e);
-//! \related Expression \brief Real cosine expression.
+//! \related Expression \brief %Real cosine expression.
 Expression<Real> cos(Expression<Real> e);
-//! \related Expression \brief Real tangent expression.
+//! \related Expression \brief %Real tangent expression.
 Expression<Real> tan(Expression<Real> e);
 
 //! \related Expression \brief Real maximum expression.
 Expression<Real> max(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief Real minimum expression.
+//! \related Expression \brief %Real minimum expression.
 Expression<Real> min(Expression<Real> e1, Expression<Real> e2);
-//! \related Expression \brief Real absolute value expression.
+//! \related Expression \brief %Real absolute value expression.
 Expression<Real> abs(Expression<Real> e);
 
 //@}
 
-template<class R> Expression<R> make_expression(double c) { return Expression<R>(static_cast<R>(c)); }
+template<class T> Expression<T> make_expression(double c) { return Expression<T>(static_cast<T>(c)); }
 
 inline Expression<Real> operator+(Expression<Real> e, double c) { return e + make_expression<Real>(c); }
 inline Expression<Real> operator-(Expression<Real> e, double c) { return e - make_expression<Real>(c); }

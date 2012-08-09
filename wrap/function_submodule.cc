@@ -329,6 +329,8 @@ void export_scalar_function()
     def("cos", (RealScalarFunction(*)(const RealScalarFunction&)) &cos);
     def("tan", (RealScalarFunction(*)(const RealScalarFunction&)) &tan);
 
+    def("lie_derivative", (RealScalarFunction(*)(const RealScalarFunction&,const RealVectorFunction&)) &lie_derivative);
+
     class_<IntervalScalarFunction> interval_scalar_function_class("IntervalScalarFunction", init<IntervalScalarFunction>());
     interval_scalar_function_class.def(init<RealScalarFunction>());
     interval_scalar_function_class.def(init<uint>());

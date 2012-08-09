@@ -38,6 +38,7 @@
 #include "vector.h"
 #include "set_interface.h"
 #include "function.h"
+#include "function_model.h"
 #include "constraint.h"
 #include "graphics_interface.h"
 
@@ -243,6 +244,8 @@ class IntervalConstrainedImageSet
         , _function(static_cast<IntervalVectorFunctionInterface const&>(RealVectorFunction::identity(dom.size()))) { }
     //! \brief Construct the image of \a dom under \a fn.
     IntervalConstrainedImageSet(const Vector<Interval>& dom, const IntervalVectorFunction& fn) : _domain(dom), _reduced_domain(dom), _function(fn) {
+        ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
+    IntervalConstrainedImageSet(const Vector<Interval>& dom, const IntervalVectorFunctionModel& fn) : _domain(dom), _reduced_domain(dom), _function(fn.raw_pointer()->_clone()) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn.
     IntervalConstrainedImageSet(const Vector<Interval>& dom, const IntervalVectorFunction& fn, const List<IntervalConstraint>& cnstr) : _domain(dom), _reduced_domain(dom), _function(fn), _constraints(cnstr) {

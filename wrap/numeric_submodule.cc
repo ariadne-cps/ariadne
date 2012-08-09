@@ -229,6 +229,7 @@ void export_exact_float()
 {
     class_< ExactFloat > exact_float_class("ExactFloat",init<ExactFloat>());
     exact_float_class.def(init<double>());
+    exact_float_class.def(init<Float>());
     exact_float_class.def("__str__", &__cstr__<ExactFloat>);
     exact_float_class.def("__repr__", &__cstr__<ExactFloat>);
 

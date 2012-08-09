@@ -232,6 +232,7 @@ void export_box()
     def("disjoint", (bool(*)(const IVector&,const IVector&)) &disjoint);
     def("subset", (bool(*)(const IVector&,const IVector&)) &subset);
 
+    def("product", (Box(*)(const Box&,const Interval&)) &product);
     def("product", (Box(*)(const Box&,const Box&)) &product);
     def("hull", (Box(*)(const Box&,const Box&)) &hull);
     def("intersection", (Box(*)(const Box&,const Box&)) &intersection);
@@ -317,6 +318,8 @@ void export_constrained_image_set()
     constrained_image_set_class("IntervalConstrainedImageSet",init<IntervalConstrainedImageSet>());
     constrained_image_set_class.def(init<Box>());
     constrained_image_set_class.def(init<Box,RealVectorFunction>());
+    constrained_image_set_class.def(init<Box,IntervalVectorFunction>());
+    constrained_image_set_class.def(init<Box,IntervalVectorFunctionModel>());
     constrained_image_set_class.def("domain", &IntervalConstrainedImageSet::domain,return_value_policy<copy_const_reference>());
     constrained_image_set_class.def("function", &IntervalConstrainedImageSet::function,return_value_policy<copy_const_reference>());
     constrained_image_set_class.def("constraint", &IntervalConstrainedImageSet::constraint);

@@ -44,17 +44,20 @@
 
 A location of a hybrid system is described by the following data:
 \begin{itemize}
-\item A \texttt{Function} $f:\R^n \rightarrow \R^n$ giving the system \emph{dynamic} $\dot{x}=f(x)$.
-\item A collections of \texttt{Expression}s $g_e:\R^n\rightarrow \R$ which define \emph{predicates} $g(x)\lessgtr 0$ on the state space.
-There are three kinds of behaviour associated with predicates:
+\item A \texttt{VectorFunction} $f:\R^n \rightarrow \R^n$ giving the system \emph{dynamic} $\dot{x}=f(x)$.
+\item A collections of \texttt{ScalarFunction}s $g_e:\R^n\rightarrow \R$ which define \emph{predicates} $g(x)\lessgtr 0$ on the state space.
+There are five kinds of behaviour associated with predicates:
  \begin{itemize}
-  \item Invariant: Continuous dynamics is only possible if $g(x)\lesssim 0$.
-  \item Unforced/Non-Urgent Transition: A discrete event $e$ may occur if $g(x)\gtrsim0$.
-  \item Forced/Urgent Transition: A discrete event must occur as soon as $g(x)$ crosses from $g(x)<0$ to $g(x)>0$.
+  \item Invariant Constraint: The state must satisfy $g(x)\lesssim 0$ at all times, including immediately after an event.
+  \item Progress Constraint: Continuous dynamics is only possible if $g(x)\lesssim 0$.
+  \item Non-Urgent Transition: A discrete event $e$ may occur if $g(x)\gtrsim0$.
+  \item Urgent Transition: A discrete event must occur as soon as $g(x)\gtrsim 0$.
+  \item Impact Transition: A discrete event must occur as soon as $g(x)$ crosses from $g(x)<0$ to $g(x)>0$. Further, the constraint $g(x)\leq 0$ is guaranteed always to be satisfied, including in the initial conditions and immediately after a jump.
  \end{itemize}
 Note that an urgent transition can be (and often is) considered as a combination of an invariant $g(x)\leq0$ and guard $g(x)\geq0$.
-\item For each event $e$, a \texttt{Function} $r:\R^n\rightarrow\R^m$ giving the \emph{reset map} to another continuous state.
-\end{itemize}
+\item For each event $e$, a \texttt{VectorFunction} $r:\R^n\rightarrow\R^m$ giving the \emph{reset map} to another continuous state.
+
+We say an event is \emph{blocking}\footnote{Is this a good name for this kind of event?} if it prohibits continuous evolution, and \emph{activating} if it allows a discrete transition.\end{itemize}
 \begin{remark*}
 In this version, we only consider single-valued functions defining predicates.
 \end{remark*}
@@ -64,7 +67,7 @@ The rationale for taking invariants $g(x)\leq 0$ and guards/activations $g(x)\ge
 \end{rationale*}
 
 We can define the \emph{blocking function}
-$$g_B(x) = \min\{g_e(x) \mid e \text{ is an invariant label or urgent action label} \} .$$
+$$g_B(x) = \min\{g_e(x) \mid e \text{ is a blocking event} \} .$$
 
 
 \subsection*{Formal semantics}
@@ -103,7 +106,7 @@ A hybrid trajectory $\xi:\mathcal{T}\rightarrow X$ is an \emph{execution} of the
 \end{definition*}
 
 \begin{definition*}[Crossing time set]
-Consider a curve $\xi:\R\rightarrow X$, and suppose $g(\xi(0))<0$ and $g(\xi(T))>0$. We define the \emph{possible crossing time set} $\tau_\chi(g,\xi)$ to be $\{ t\in [0,T] \mid g(\xi(t))=0 \wedge g(\xi([0,t]))\leq 0\}$.
+Consider a curve $\xi:\R\rightarrow X$, and suppose $g(\xi(0))<0$ and $g(\xi(T))>0$. We define the \emph{possible crossing time set} $$\tau_\chi(g,\xi) := \{ t\in [0,T] \mid g(\xi(t))=0 \wedge \forall \tau\in[0,t],\ g(\xi(\tau))\leq 0\}.$$
 The crossing is \emph{detectible} if $\tau_\chi$ is a singleton.
 \end{definition*}
 
@@ -114,38 +117,45 @@ The crossing is \emph{detectible} if $\tau_\chi$ is a singleton.
 
 \subsection{Set and Function Classes}
 
-The basic data type for defining system dynamics is the \texttt{Function} type, which defines a (sufficiently smooth) function $f:\R^n\rightarrow\R^m$. We also have an \texttt{Expression} type, which defines a function $f:\R^n\rightarrow \R$.
+The basic data type for defining system dynamics is the \texttt{VectorFunction} type, which defines a (sufficiently smooth) function $f:\R^n\rightarrow\R^m$. We also have an \texttt{ScalarFunction} type, which defines a function $f:\R^n\rightarrow \R$.
 
 An \texttt{ImageSet} is the image of a bounded box $D$ under a function $f$. We write $S=\{ f(s) \mid s\in D\}$, so that $f$ is a \emph{parameterisation} of $S$. Similarly, a \texttt{ConstraintSet} is the preimage of a codomain $C$ under a function, $S=\{ x \mid f(x)\in C \}$. We can always take $D=[-1,+1]^n$ and $C=[0,\infty)^n$.
 
 Note that the image of an \texttt{ImageSet} $(D,h)$ under a function $f$ is the image set $(D,f\circ h)$, and the preimage of a \texttt{ConstraintSet} $(C,g)$ under $f$ is the constraint set $(C,g\circ f)$.
 
+A \texttt{ConstrainedImageSet} is the image of the intersection of a bounded box $D$ with the preimage of a box $C$.
+\[ \langle f,D,g,C\rangle = f(D\cap g^{-1}(C)) . \]
+Without loss of generality, a \texttt{ConstrainedImageSet} can also be represented as
+\[ \langle f,D,g,h\rangle = \{ f(s) \mid s\in D \mid g(s) \geq 0 \wedge h(s)=0 \} . \]
 
-\subsection{Set and Function Model Classes}
+\subsection{SetModel and FunctionModel Classes}
 
-The basic data type for working with system dynamics is the \texttt{FunctionModel} type, which defines a collection of functions $[f]:D\rightarrow \R^n$, where $D$ is a subset of $\R^n$ (usually a compact box). The \texttt{TaylorFunctionModel} type, for example, defines a collection of functions $[f]$ as $\{ f:D\rightarrow\R^m \mid \forall i=1,\ldots,m,\ x\in D:\ |f_i(x)-p_i(x)| \leq \epsilon_i\}$ for some polynomials $p_i:\R^n\rightarrow\R$ and error bounds $\epsilon_i\geq0$. The semantics of operations of \texttt{FunctionModel}s is that
+The basic data type for working with system dynamics are the \texttt{Scalar}- and \texttt{VectorFunctionModel} types, which defines a collection of functions $[f]:D\rightarrow \R^n$, where $D$ is a subset of $\R^n$ (usually a compact box). The \texttt{TaylorFunctionModel} type, for example, defines a collection of functions $[f]$ as $\{ f:D\rightarrow\R^m \mid \forall i=1,\ldots,m,\ x\in D:\ |f_i(x)-p_i(x)| \leq \epsilon_i\}$ for some polynomials $p_i:\R^n\rightarrow\R$ and error bounds $\epsilon_i\geq0$. The semantics of operations of \texttt{FunctionModel}s is that
 $$ f\in[f],\ g\in[g]  \text{ and } h=\mathrm{op}(f,g) \implies \mathrm{op}([f],[g])\ni h . $$
 
-Similarly, an \texttt{ImageSetModel} is the image of a box under a \texttt{FunctionModel}, and a \texttt{ConstraintSetModel} is the preimage of a box under a \texttt{FunctionModel}.
+Similarly, a \texttt{ConstrainedImageSetModel} is defined by a tuple $\langle [f],[D],[g],[C]\rangle$ where $[D]$ and $[C]$ are boxes with floating-point ranges, and $[f]$ and $[g]$ are function models with domain $[D]$.
 
-\begin{remark*} It may be useful to add another class of set, which combines both image sets and preimage sets.
-The representation is a tuple $\langle C,D,g,h \rangle$, and the set is $\{ h(s) \mid s\in D\cap g^{-1}(C)\}$. We can assume the standard domain and codomain. The advantage of this class is that we can easily compute images, and can also compute intersections with constraint sets; very useful for computing the evolution of a hybrid system!
-\end{remark*}
+We abstract away the set used in the hybrid system evolution as a \emph{timed enclosure}.
+A concrete implementation of a timed enclosure is given by a tuple 
+
+$$ \langle \xi, \tau ; D ; \rho, C \rangle $$
+A timed enclosure represents the pairs $(x,t) \in X\times \R^+$ given by $$\{ (\xi(s),\tau(x)) \mid s\in D \mid \rho(s)\in C \}.$$
+
 
 \subsection{Core algorithms}
 
 The main algorithms for computing with functions are as follows
 \begin{description}
-\item \texttt{evaluate(Function f, Box D):Box}\\ Compute an over-approximation to $\{ f(x) \mid x\in D\}$.
-\item \texttt{compose(Function f, Function g):FunctionModel}\\ Compute the composition $(f\circ g)(x)=f(g(x))$.
-\item \texttt{compose(Expression f, Function g):ExpressionModel}\\ Compute the composition $(f\circ g)(x)=f(g(x))$.
-\item \texttt{flow(Function f, Box D, Real h):FunctionModel}\\ Compute the flow $\phi:D\times[0,h]\rightarrow \R^n$ such that $\dot{\phi}(x_0,t)=f(\phi(x_0,t))$ for all $(x_0,t)\in D\times[0,h]$.
-\item \texttt{implicit(Expression f):ExpressionModel}\\ For $f:\R^{m+1}\rightarrow\R$, compute a function $h:\R^{m}\rightarrow\R$ such that $f(x,h(x))=0$.
+\item \texttt{evaluate(VectorFunctionModel f, Box D):Box}\\ Compute an over-approximation to $\{ f(x) \mid x\in D\}$.
+\item \texttt{compose(VectorFunctionModel f, VectorFunctionModel g):VectorFunctionModel}\\ Compute the composition $(f\circ g)(x)=f(g(x))$.
+\item \texttt{compose(ScalarFunctionModel f, VectorFunctionModel g):ScalarFunctionModel}\\ Compute the composition $(f\circ g)(x)=f(g(x))$.
+\item \texttt{flow(VectorFunctionModel f, Box D, Real h):VectorFunctionModel}\\ Compute the flow $\phi:D\times[0,h]\rightarrow \R^n$ such that $\dot{\phi}(x_0,t)=f(\phi(x_0,t))$ for all $(x_0,t)\in D\times[0,h]$.
+\item \texttt{implicit(ScalarFunctionModel f):ScalarFunctionModel}\\ For $f:\R^{m+1}\rightarrow\R$, compute a function $h:\R^{m}\rightarrow\R$ such that $f(x,h(x))=0$.
 \end{description}
 Other algorithms which may be useful are
 \begin{description}
-\item \texttt{antiderivative(Expression f, Nat k):ExpressionModel}\\ For $f:\R^{m}\rightarrow\R$, compute a function $h:\R^{m}\rightarrow\R$ such that $dh/dx_k=f=0$.
-\item \texttt{derivative(Expression f,Nat i):Expression}
+\item \texttt{antiderivative(ScalarFunctionModel f, Nat k):ScalarFunctionModel}\\ For $f:\R^{m}\rightarrow\R$, compute a function $h:\R^{m}\rightarrow\R$ such that $dh/dx_k=f=0$.
+\item \texttt{derivative(ScalarFunction f, Nat i):ScalarFunction}
 \end{description}
 
 \section{Evolution Steps}
@@ -230,7 +240,7 @@ Given a collection of events $E$ with crossing times $\tau_e$, we need to comput
  \begin{enumerate}
  \item Compute definitely initially active blocking transitions. If there is at least one initially active blocking transitions, apply all such transitions and exit.
  \item Compute the flow $\phi:\R^n\times\R\rightarrow\R$ over a spacial domain $D$ and time domain $[-h,+h]$.
- \item For each blocking guard (invariant or urgent action) 
+ \item For each blocking guard (invariant or urgent action)
   \begin{enumerate}
    \item If the transition is possibly active, compute the crossing time model as a function $D\rightarrow\R$.
   \end{enumerate}
@@ -243,7 +253,19 @@ Given a collection of events $E$ with crossing times $\tau_e$, we need to comput
 \end{algorithm*}
 
 
+\section{Evolution Steps Algorithm}
 
+\texttt{initialise\_evolution\_in\_mode(system,set)}
+  # 
+  \for [e:Event,c:Constraint] in systems.events(set.mode()):
+    if system.type(e) == INVARIANT:
+      set.new_invariant(e,c)
+
+
+
+\appendix
+
+\section{Evolution Steps in Previous Versions}
 
 \subsection*{Evolution Step in Version 0.4.1}
 
@@ -338,7 +360,7 @@ semantics.
 
 \begin{tabbing}
 Input: \= \texttt{Set starting\_set},\\
-       \> \texttt{map<Event,Expression> guards}\\
+       \> \texttt{map<Event,ScalarFunction> guards}\\
 Output: \= \texttt{map<Event,Tribool> initially\_active}\\
      \> \qquad (includes special "blocking event")
 \end{tabbing}
@@ -347,11 +369,11 @@ Output: \= \texttt{map<Event,Tribool> initially\_active}\\
 time interval [-h,+h]
 
 \begin{tabbing}
-Input: \=\texttt{Function:\ dynamic},\\
+Input: \=\texttt{VectorFunction:\ dynamic},\\
        \>\texttt{Box:\ domain} or  \texttt{SetModel\ initial\_set},\\
        \>\texttt{Time:\ maximum\_step\_size}\\
 Output: \=
-        \texttt{FunctionModel:\ flow\_model}
+        \texttt{VectorFunctionModel:\ flow\_model}
            or \texttt{SetModel:\ flow\_set\_model}\\
         \> \texttt{Box:\ flow\_bounds}\\
 \end{tabbing}
@@ -376,11 +398,11 @@ we should probably evolve close to the transition, and maybe split
 the evolution across the transversality boundary.
 
 \begin{tabbing}
-Input: \= \texttt{map<Event,Expression>:\ resets}, \\
+Input: \= \texttt{map<Event,ScalarFunction>:\ resets}, \\
        \> \texttt{Box:\ flow\_bounds} \\
-       \> \quad or \texttt{FunctionModel:\ flow\_model} \\
+       \> \quad or \texttt{VectorFunctionModel:\ flow\_model} \\
        \> \quad or \texttt{SetModel:\ flow\_set\_model} \\
-Output: \= \texttt{map<Event,ExpressionModel>\ crossing\_times}, \\
+Output: \= \texttt{map<Event,ScalarFunctionModel>\ crossing\_times}, \\
         \> \texttt{set<Event>\ tangential\_events}
 \end{tabbing}
 
@@ -402,9 +424,9 @@ upper evolution proceeds according to the crossing time of each
 blocking event.
 
 \begin{tabbing}
-Input: \= \texttt{map<Event,ExpressionModel>:\ crossing\_times} \\
+Input: \= \texttt{map<Event,ScalarFunctionModel>:\ crossing\_times} \\
 Output: \= \texttt{set<Event>\ blocking\_events}, \\
-        \> \texttt{ExpressionModel:\ blocking\_time}
+        \> \texttt{ScalarFunctionModel:\ blocking\_time}
 \end{tabbing}
 
 \item Compute the initial and final activation times of the non-blocking
@@ -416,11 +438,11 @@ and the minimum of the final activation time and finishing/blocking
 time.
 
 \begin{tabbing}
-Input: \= \texttt{map<Event,Expression>:\ guards}, \\
+Input: \= \texttt{map<Event,ScalarFunction>:\ guards}, \\
        \> \texttt{Box:\ domain} \\
-       \> \quad or \texttt{FunctionModel:\ flow\_model} \\
+       \> \quad or \texttt{VectorFunctionModel:\ flow\_model} \\
        \> \quad or \texttt{SetModel:\ flow\_set\_model} \\
-Output: \= \texttt{map<Event,pair<ExpressionModel,ExpressionModel>>:\ initial/final\_times}
+Output: \= \texttt{map<Event,pair<ScalarFunctionModel,ScalarFunctionModel>>:\ initial/final\_times}
 \end{tabbing}
 
 \item Apply the flows, guards and resets according to the computed

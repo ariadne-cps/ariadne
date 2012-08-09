@@ -417,7 +417,9 @@ inline Interval unchecked_evaluate(const ScalarFunctionModel<Interval>& f, const
 inline Vector<Interval> unchecked_evaluate(const VectorFunctionModel<Interval>& f, const Vector<Interval>& x) { return f._ptr->_unchecked_evaluate(x); }
 
 inline ScalarFunctionModel<Interval> compose(const ScalarFunction<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_compose(f); }
+inline ScalarFunctionModel<Interval> compose(const ScalarFunctionModel<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_compose(f); }
 inline VectorFunctionModel<Interval> compose(const VectorFunction<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_compose(f); }
+inline VectorFunctionModel<Interval> compose(const VectorFunctionModel<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_compose(f); }
 
 inline ScalarFunctionModel<Interval> unchecked_compose(const ScalarFunctionModel<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_unchecked_compose(f); }
 inline VectorFunctionModel<Interval> unchecked_compose(const VectorFunctionModel<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_unchecked_compose(f); }

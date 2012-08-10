@@ -61,6 +61,8 @@ template<class T> class ForwardConstantIteratorHandle;
 template<class T> class ForwardConstantIteratorInterface
 {
     friend class ForwardConstantIteratorHandle<T>;
+  public:
+    virtual ~ForwardConstantIteratorInterface() { }
   private:
     virtual ForwardConstantIteratorInterface<T>* clone() const = 0;
     virtual Void increment() = 0;

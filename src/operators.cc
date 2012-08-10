@@ -37,6 +37,7 @@ OutputStream& operator<<(OutputStream& os, const OperatorKind& knd) {
         case TERNARY: return os << "TERNARY";
         case SCALAR: return os << "SCALAR";
         case COMPARISON: return os << "COMPARISON";
+        default: return os << "UNKNOWN";
     }
 }
 

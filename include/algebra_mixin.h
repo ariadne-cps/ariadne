@@ -46,7 +46,7 @@ template<class X> struct IsAlgebra< Algebra<X> > { static const bool value = tru
 template<class X> struct IsAlgebra< GradedAlgebra<X> > { static const bool value = true; };
 template<class X> struct IsAlgebra< NormedAlgebra<X> > { static const bool value = true; };
 template<class X> struct IsAlgebra< SymbolicAlgebra<X> > { static const bool value = true; };
-template<class X> struct IsAlgebra< Differential<X> > { static const bool value = true; };
+//template<class X> struct IsAlgebra< Differential<X> > { static const bool value = true; };
 template<class A> struct EnableIfAlgebra : EnableIf<IsAlgebra<A>,A> { };
 template<class A, class X> struct IsAlgebraOverX : public And< IsAlgebra<A>, IsNumeric<X> > { };
 template<class A, class X> struct EnableIfAlgebraOverX : EnableIf<IsAlgebraOverX<A,X>,A> { };
@@ -158,7 +158,7 @@ template<class A> typename EnableIfNormedAlgebra<A>::Type atan(const A& a);
 
 template<class A> struct IsGradedAlgebra { static const bool value = false; };
 template<class X> struct IsGradedAlgebra< GradedAlgebra<X> > { static const bool value = true; };
-template<class X> struct IsGradedAlgebra< Differential<X> > { static const bool value = true; };
+//template<class X> struct IsGradedAlgebra< Differential<X> > { static const bool value = true; };
 template<class A> struct EnableIfGradedAlgebra : public EnableIf<IsGradedAlgebra<A>,A> { };
 
 template<class A> typename EnableIfGradedAlgebra<A>::Type compose(const Series<typename A::NumericType>& x, const A& y);

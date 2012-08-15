@@ -677,14 +677,9 @@ template<class T> std::ostream& operator<<(std::ostream& os, const Representatio
 std::ostream&
 ScalarTaylorFunction::write(std::ostream& os) const
 {
-/*
-    os << "ScalarTaylorFunction"<< this->domain()
-       << "(" << midpoint(this->polynomial());
+    os << midpoint(this->polynomial());
     if(this->error()>0.0) { os << "+/-" << this->error(); }
-    os <<  ")";
     return os;
-*/
-    return os << "ScalarTaylorFunction(d=" << this->domain() << ", p~(" << midpoint(this->polynomial()) << "), e=" << this->error() << ", m=" << this->model() << ", s=" << this->sweeper() << ")";
 }
 
 std::ostream&
@@ -1783,8 +1778,17 @@ Float distance(const VectorTaylorFunction& f1, const RealVectorFunction& f2) {
 std::ostream&
 VectorTaylorFunction::write(std::ostream& os) const
 {
-    return os << "VectorTaylorFunction(d=" << this->domain() << ", p~" << midpoint(this->polynomials()) << ", e=" << this->errors() << ", m=" << this->models() << ")";
-//    return os << "ScalarTaylorFunction(d=" << this->domain() << ", p~(" << midpoint(this->polynomial()) << "), e=" << this->error() << ", m=" << this->model() << ", s=" << this->sweeper() << ")";
+    Vector< Polynomial<Float> > p=midpoint(this->polynomials());
+    Vector<Float> e=this->errors();
+
+    os << "[";
+    for(uint i=0; i!=this->result_size(); ++i) {
+        if(i!=0) { os << ", "; }
+        os << p[i];
+        if(e[i]!=0) { os << "+/-" << e[i]; }
+    }
+    os << "]";
+    return os;
 }
 
 std::ostream&

@@ -86,7 +86,7 @@ class ScalarFunctionInterface<Void>
     //! \brief The number of arguments to the expression.
     virtual SizeType argument_size() const = 0;
 
-    //! \brief Write a brief version to an output stream.
+    //! \brief Write a full version to an output stream.
     virtual std::ostream& repr(std::ostream& os) const = 0;
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;
@@ -221,6 +221,8 @@ class VectorFunctionInterface<Void>
     //! \brief The number of result variables of the function.
     virtual SizeType result_size() const = 0;
 
+    //! \brief Write a full version to an output stream.
+    virtual std::ostream& repr(std::ostream& os) const = 0;
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;
   public:

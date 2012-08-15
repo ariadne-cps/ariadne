@@ -95,7 +95,7 @@ struct ScalarFormulaFunction
     virtual Nat argument_size() const { return _argument_size; }
     virtual ScalarFunctionInterface<X>* _derivative(uint j) const { return new ScalarFormulaFunction<X>(_argument_size,Ariadne::derivative(_formula,j)); }
     virtual std::ostream& write(std::ostream& os) const { return os << this->_formula; }
-    virtual std::ostream& repr(std::ostream& os) const { return os << "FF["<<this->_argument_size<<"]("<<this->_formula<<")"; }
+    virtual std::ostream& repr(std::ostream& os) const { return os << "FormulaFunction("<<this->_argument_size<<","<<this->_formula<<")"; }
     template<class Y> void _compute(Y& r, const Vector<Y>& x) const { r=Ariadne::evaluate(_formula,x); }
 };
 
@@ -117,7 +117,8 @@ struct VectorFormulaFunction
     virtual Nat result_size() const { return this->_formulae.size(); }
     virtual Nat argument_size() const { return this->_argument_size; }
     virtual ScalarFormulaFunction<X>* _get(uint i) const { return new ScalarFormulaFunction<X>(this->_argument_size,this->_formulae[i]); }
-    virtual std::ostream& write(std::ostream& os) const { return os << "FF[R"<<this->argument_size()<<"->R"<<this->result_size()<<"]("<<this->_formulae<<")"; }
+    virtual std::ostream& write(std::ostream& os) const { return os << this->_formulae; }
+    virtual std::ostream& repr(std::ostream& os) const { return os << "VectorFormulaFunction("<<this->result_size()<<","<<this->argument_size()<<","<<this->_formulae<<")"; }
     template<class Y> void _compute(Vector<Y>& r, const Vector<Y>& x) const { r=Ariadne::cached_evaluate(this->_formulae,x); }
 };
 
@@ -140,7 +141,7 @@ struct ConstantFunction
     virtual Nat argument_size() const { return _argument_size; }
     virtual ScalarFunctionInterface<X>* _derivative(uint j) const { return new ConstantFunction<X>(_argument_size,0.0); }
     virtual std::ostream& repr(std::ostream& os) const { return os << this->_value; }
-    virtual std::ostream& write(std::ostream& os) const { return os << "CF["<<this->_argument_size<<"]("<<_value<<")"; }
+    virtual std::ostream& write(std::ostream& os) const { return os << "CF[R"<<this->_argument_size<<"]("<<_value<<")"; }
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
         r=x.zero_element()+_value; }
 };
@@ -161,7 +162,7 @@ struct CoordinateFunction
         if(j==_index) { return new CoordinateFunction<X>(_argument_size,1.0); }
         else { return new CoordinateFunction<X>(_argument_size,0.0); } }
     virtual std::ostream& repr(std::ostream& os) const { return os << "x"<<this->_index; }
-    virtual std::ostream& write(std::ostream& os) const { return os << "IF["<<this->_argument_size<<"](x"<<this->_index<<")"; }
+    virtual std::ostream& write(std::ostream& os) const { return os << "IF[R"<<this->_argument_size<<"](x"<<this->_index<<")"; }
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
         r=x[_index]; }
 };
@@ -199,7 +200,7 @@ struct UnaryFunction
     }
 
     virtual std::ostream& repr(std::ostream& os) const {
-        return os << "UF[" << this->argument_size() << "](" << *this << ")"; }
+        return os << "UF[R" << this->argument_size() << "](" << *this << ")"; }
     virtual std::ostream& write(std::ostream& os) const {
         return os << _op << '(' << _arg << ')'; }
 
@@ -254,7 +255,7 @@ struct BinaryFunction
     }
 
     virtual std::ostream& repr(std::ostream& os) const {
-        return os << "BF[" << this->argument_size() << "](" << *this << ")"; }
+        return os << "BF[R" << this->argument_size() << "](" << *this << ")"; }
     virtual std::ostream& write(std::ostream& os) const {
         if(_op==ADD || _op==SUB) { return os << '(' << _arg1 << symbol(_op) << _arg2 << ')'; }
         else { return os << _arg1 << symbol(_op) << _arg2; } }
@@ -360,14 +361,15 @@ struct VectorOfScalarFunction
         return static_cast<NonResizableScalarFunction<X>&>(this->_vec[i]); }
 
     virtual std::ostream& write(std::ostream& os) const {
-        os << "VF[" << this->result_size() << "," << this->argument_size() << "][";
+        os << "[";
         for(uint i=0; i!=this->_vec.size(); ++i) {
             if(i!=0) { os << ","; }
             this->_vec[i].raw_pointer()->write(os); }
         return os << "]"; }
 
     virtual std::ostream& repr(std::ostream& os) const {
-        os << "VoSF[" << this->result_size() << "," << this->argument_size() << "][";
+        //os << "VoSF[R" << this->argument_size() << "->R" << this->result_size() << "]";
+        os << "[";
         for(uint i=0; i!=this->_vec.size(); ++i) {
             if(i!=0) { os << ","; }
             this->_vec[i].raw_pointer()->repr(os); }

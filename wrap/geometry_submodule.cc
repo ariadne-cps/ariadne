@@ -161,6 +161,18 @@ class CompactSetWrapper
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
+class RegularSetWrapper
+  : public virtual LocatedSetInterface, public wrapper< RegularSetWrapper >
+{
+  public:
+    RegularSetWrapper* clone() const { return this->get_override("clone")(); }
+    uint dimension() const { return this->get_override("dimension")(); }
+    tribool overlaps(const Box& r) const { return this->get_override("overlaps")(); }
+    tribool covers(const Box& r) const { return this->get_override("covers")(); }
+    tribool separated(const Box& r) const { return this->get_override("separated")(); }
+    std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
+};
+
 class LocatedSetWrapper
   : public virtual LocatedSetInterface, public wrapper< LocatedSetInterface >
 {
@@ -183,12 +195,19 @@ void export_set_interface() {
     open_set_wrapper_class.def("covers",&OpenSetInterface::covers);
     open_set_wrapper_class.def("overlaps",&OpenSetInterface::overlaps);
 
+    class_<ClosedSetInterface, boost::noncopyable> closed_set_wrapper_class("ClosedSetInterface", no_init);
+    closed_set_wrapper_class.def("separated",&ClosedSetInterface::separated);
+
+    class_<OvertSetInterface, boost::noncopyable> overt_set_wrapper_class("OvertSetInterface", no_init);
+    overt_set_wrapper_class.def("overlaps",&OvertSetInterface::overlaps);
+
     class_<CompactSetInterface, boost::noncopyable> compact_set_wrapper_class("CompactSetInterface", no_init);
     compact_set_wrapper_class.def("separated",&CompactSetInterface::separated);
     compact_set_wrapper_class.def("inside",&CompactSetInterface::inside);
     compact_set_wrapper_class.def("bounding_box",&CompactSetInterface::bounding_box);
 
     class_<LocatedSetInterface, boost::noncopyable> located_set_wrapper_class("LocatedSetInterface", no_init);
+    class_<RegularSetInterface, boost::noncopyable> regular_set_wrapper_class("RegularSetInterface", no_init);
 
     class_<DrawableInterface,boost::noncopyable>("DrawableInterface",no_init);
 
@@ -222,6 +241,7 @@ void export_box()
     box_class.def("overlaps", (tribool(Box::*)(const Box&)const) &Box::overlaps);
     box_class.def("covers", (tribool(Box::*)(const Box&)const) &Box::covers);
     box_class.def("inside", (tribool(Box::*)(const Box&)const) &Box::inside);
+    box_class.def("empty", (bool(Box::*)()const) &Box::empty);
     box_class.def("widen", (Box(Box::*)()const) &Box::widen);
     box_class.def("split", (std::pair<Box,Box>(Box::*)()const) &Box::split);
     box_class.def("split", (std::pair<Box,Box>(Box::*)(uint)const) &Box::split);
@@ -312,13 +332,38 @@ void export_affine_set()
 }
 
 
+void export_constraint_set()
+{
+    from_python< List<RealConstraint> >();
+
+    class_<RealConstraintSet,bases<RegularSetInterface> >
+        constraint_set_class("RealConstraintSet",init<RealConstraintSet>());
+    constraint_set_class.def(init< List<RealConstraint> >());
+
+    class_<RealBoundedConstraintSet,bases<DrawableInterface> >
+        bounded_constraint_set_class("RealBoundedConstraintSet",init<RealBoundedConstraintSet>());
+    bounded_constraint_set_class.def(init< RealBoxSet, List<RealConstraint> >());
+
+    class_<RealBoxSet>
+        box_set_class("RealBoxSet");
+    box_set_class.def(init<IntervalVector>());
+    box_set_class.def(init< List<RealIntervalSet> >());
+
+    def("intersection", (RealBoundedConstraintSet(*)(const RealConstraintSet&,const RealBoxSet&)) &intersection);
+
+}
+
+
 void export_constrained_image_set()
 {
+    from_python< List<IntervalConstraint> >();
+
     class_<IntervalConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> >
-    constrained_image_set_class("IntervalConstrainedImageSet",init<IntervalConstrainedImageSet>());
+        constrained_image_set_class("IntervalConstrainedImageSet",init<IntervalConstrainedImageSet>());
     constrained_image_set_class.def(init<Box>());
     constrained_image_set_class.def(init<Box,RealVectorFunction>());
     constrained_image_set_class.def(init<Box,IntervalVectorFunction>());
+    constrained_image_set_class.def(init<Box,IntervalVectorFunction,List<IntervalConstraint> >());
     constrained_image_set_class.def(init<Box,IntervalVectorFunctionModel>());
     constrained_image_set_class.def("domain", &IntervalConstrainedImageSet::domain,return_value_policy<copy_const_reference>());
     constrained_image_set_class.def("function", &IntervalConstrainedImageSet::function,return_value_policy<copy_const_reference>());
@@ -357,6 +402,7 @@ void geometry_submodule() {
 
     export_affine_set();
 
+    export_constraint_set();
     export_constrained_image_set();
 
 }

@@ -426,7 +426,11 @@ RealBoundedConstraintSet::draw(CanvasInterface& c, const Projection2d& p) const
 }
 
 
-
+RealBoundedConstraintSet
+intersection(const RealConstraintSet& cs,const RealBoxSet& bx)
+{
+    return RealBoundedConstraintSet(bx,cs.constraints());
+}
 
 
 

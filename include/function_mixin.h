@@ -141,6 +141,8 @@ class VectorFunctionMixin<F,Float>
     virtual Vector<FloatFormula> evaluate(const Vector<FloatFormula>& x) const;
     virtual Vector<FloatAlgebra> evaluate(const Vector<FloatAlgebra>& x) const;
     virtual VectorFunctionInterface<Float>* _clone() const;
+
+    virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
 };
 
 template<class F>
@@ -164,6 +166,8 @@ class VectorFunctionMixin<F,Interval>
     virtual Vector<FloatAlgebra> evaluate(const Vector<FloatAlgebra>& x) const;
     virtual Vector<IntervalAlgebra> evaluate(const Vector<IntervalAlgebra>& x) const;
     virtual VectorFunctionInterface<Interval>* _clone() const;
+
+    virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
 };
 
 // A wrapper for classes with non-static _compute methods
@@ -191,6 +195,9 @@ class VectorFunctionMixin<F,Real>
     virtual Vector<IntervalAlgebra> evaluate(const Vector<IntervalAlgebra>& x) const;
     virtual Vector<RealAlgebra> evaluate(const Vector<RealAlgebra>& x) const;
     virtual VectorFunctionInterface<Real>* _clone() const;
+
+    virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
+
 };
 
 

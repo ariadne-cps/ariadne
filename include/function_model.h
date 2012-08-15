@@ -409,6 +409,8 @@ inline VectorFunctionModel<Interval> operator-(const VectorFunctionModel<Interva
     VectorFunctionModel<Interval> r=f1; for(uint i=0; i!=r.size(); ++i) { r[i]=f1[i]-c2[i]; } return r; }
 inline VectorFunctionModel<Interval> operator+(const Vector<Interval>& c1, const VectorFunctionModel<Interval>& f2);
 inline VectorFunctionModel<Interval> operator-(const Vector<Interval>& c1, const VectorFunctionModel<Interval>& f2);
+inline VectorFunctionModel<Interval> operator*(const VectorFunctionModel<Interval>& f1, const Interval& c2) {
+    VectorFunctionModel<Interval> r=f1; for(uint i=0; i!=r.size(); ++i) { r[i]=f1[i]*c2; } return r; }
 
 inline Interval evaluate(const ScalarFunctionModel<Interval>& f, const Vector<Interval>& x) { return f._ptr->evaluate(x); }
 inline Vector<Interval> evaluate(const VectorFunctionModel<Interval>& f, const Vector<Interval>& x) { return f._ptr->evaluate(x); }
@@ -466,8 +468,9 @@ template<class X> VectorFunctionModelElement<X>::operator const ScalarFunctionMo
 
 
 // Exact output
-template<class T> struct Representation { const T* pointer; Representation(const T& t) : pointer(&t) { } };
-template<class T> Representation<T> representation(const T& t) { return Representation<T>(t); }
+template<class T> struct Representation { const T* pointer; Representation(const T& t) : pointer(&t) { } const T& reference() const { return *pointer; } };
+template<class T> inline Representation<T> representation(const T& t) { return Representation<T>(t); }
+template<class T> inline OutputStream& operator<<(OutputStream& os, const Representation<T>& obj) { obj.reference().repr(os); return os; }
 
 template<class X> class FunctionModelFactoryInterface;
 

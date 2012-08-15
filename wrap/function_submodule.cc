@@ -102,13 +102,12 @@ inline Matrix<X> get_jacobian(const Vector<D>& d) {
     return J;
 }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<RealScalarFunction>& frepr) {
-    static_cast<const RealScalarFunctionInterface&>(frepr.reference()).repr(os); return os;
+template<class X> std::ostream& operator<<(std::ostream& os, const Representation< ScalarFunction<X> >& frepr) {
+    static_cast<const ScalarFunctionInterface<X>&>(frepr.reference()).repr(os); return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<RealVectorFunction>& frepr) {
-    const RealVectorFunction& f=frepr.reference();
-    static_cast<const RealVectorFunctionInterface&>(f).write(os); return os;
+template<class X> std::ostream& operator<<(std::ostream& os, const Representation< VectorFunction<X> >& frepr) {
+    static_cast<const VectorFunctionInterface<X>&>(frepr.reference()).repr(os); return os;
 }
 
 class ScalarPythonFunction
@@ -307,7 +306,7 @@ void export_scalar_function()
     scalar_function_class.def("__le__", &__le__<RealConstraint,RealScalarFunction,Real>);
     scalar_function_class.def("__ge__", &__ge__<RealConstraint,RealScalarFunction,Real>);
     scalar_function_class.def("__str__", &__cstr__<RealScalarFunction>);
-    scalar_function_class.def("__repr__", &__repr__<RealScalarFunction>);
+    scalar_function_class.def("__repr__", &__crepr__<RealScalarFunction>);
 
     scalar_function_class.def("constant", (RealScalarFunction(*)(uint,Real)) &RealScalarFunction::constant);
     scalar_function_class.def("coordinate", (RealScalarFunction(*)(uint,uint)) &RealScalarFunction::coordinate);
@@ -334,9 +333,9 @@ void export_scalar_function()
     class_<IntervalScalarFunction> interval_scalar_function_class("IntervalScalarFunction", init<IntervalScalarFunction>());
     interval_scalar_function_class.def(init<RealScalarFunction>());
     interval_scalar_function_class.def(init<uint>());
-    interval_scalar_function_class.def(self_ns::str(self));
-    //interval_scalar_function_class.def("__str__", &__cstr__<IntervalScalarFunction>);
-    //interval_scalar_function_class.def("__repr__", &__repr__<IntervalScalarFunction>);
+    interval_scalar_function_class.def("argument_size", &IntervalScalarFunction::argument_size);
+    interval_scalar_function_class.def("__str__", &__cstr__<IntervalScalarFunction>);
+    interval_scalar_function_class.def("__repr__", &__crepr__<IntervalScalarFunction>);
 
     implicitly_convertible<RealScalarFunction,IntervalScalarFunction>();
 }
@@ -362,7 +361,7 @@ void export_vector_function()
     vector_function_class.def("differentials", (Vector<Differential<Interval> >(RealVectorFunction::*)(const Vector<Interval>&,Nat)const) &RealVectorFunction::differentials);
     vector_function_class.def("differentials", (Vector<Differential<Float> >(RealVectorFunction::*)(const Vector<Float>&,Nat)const) &RealVectorFunction::differentials);
     vector_function_class.def("__str__", &__cstr__<RealVectorFunction>);
-    vector_function_class.def("__repr__", &__repr__<RealVectorFunction>);
+    vector_function_class.def("__repr__", &__crepr__<RealVectorFunction>);
 
     vector_function_class.def("identity", (RealVectorFunction(*)(uint)) &RealVectorFunction::identity);
     vector_function_class.staticmethod("identity");
@@ -383,9 +382,12 @@ void export_vector_function()
     class_<IntervalVectorFunction> interval_vector_function_class("IntervalVectorFunction", init<IntervalVectorFunction>());
     interval_vector_function_class.def(init<RealVectorFunction>());
     interval_vector_function_class.def(init<uint,uint>());
-    interval_vector_function_class.def(self_ns::str(self));
-    //interval_vector_function_class.def("__str__", &__cstr__<IntervalVectorFunction>);
-    //interval_vector_function_class.def("__repr__", &__repr__<IntervalVectorFunction>);
+    interval_vector_function_class.def("result_size", &IntervalVectorFunction::result_size);
+    interval_vector_function_class.def("argument_size", &IntervalVectorFunction::argument_size);
+    interval_vector_function_class.def("__getitem__", &IntervalVectorFunction::get);
+    interval_vector_function_class.def("__setitem__", &IntervalVectorFunction::set);
+    interval_vector_function_class.def("__str__", &__cstr__<IntervalVectorFunction>);
+    interval_vector_function_class.def("__repr__", &__crepr__<IntervalVectorFunction>);
 
     implicitly_convertible<RealVectorFunction,IntervalVectorFunction>();
 }

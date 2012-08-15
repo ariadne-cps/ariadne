@@ -227,7 +227,11 @@ List<MultiIndex> keys(const IntervalTaylorModel& tm) {
 }
 
 IntervalScalarFunction unrestrict(const IntervalScalarFunctionModel& fm) {
-    return IntervalScalarFunction(fm.raw_pointer()->clone());
+    return IntervalScalarFunction(fm.raw_pointer()->_clone());
+}
+
+IntervalVectorFunction unrestrict(const IntervalVectorFunctionModel& fm) {
+    return IntervalVectorFunction(fm.raw_pointer()->_clone());
 }
 
 

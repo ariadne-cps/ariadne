@@ -74,19 +74,9 @@ void make_vertices_down(const Box& bx, uint i, uint n, Point& pt, std::vector<Po
 }
 
 
-Box::Box(uint d, double x0l, double x0u, ...)
-    : Vector<Interval>(d)
+Box::Box(std::initializer_list<Interval> lst)
+    : Vector<Interval>(lst)
 {
-    assert(d>=1);
-    va_list args;
-    va_start(args,x0u);
-    (*this)[0]=Interval(x0l,x0u);
-    for(uint i=1; i!=d; ++i) {
-        double xil=va_arg(args,double);
-        double xiu=va_arg(args,double);
-        (*this)[i]=Interval(xil,xiu);
-    }
-    va_end(args);
 }
 
 Box::Box(const std::string& str)

@@ -59,7 +59,7 @@ const bool ENABLE_SUBDIVISIONS = false;
 const bool ENABLE_PREMATURE_TERMINATION = false;
 
 static const int BLOCKING_EVENT = -2;
-using boost::shared_ptr;
+using std::shared_ptr;
 
 class DegenerateCrossingException { };
 

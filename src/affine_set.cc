@@ -689,7 +689,7 @@ IntervalAffineConstrainedImageSet::boundary(uint xind, uint yind) const
     Array<Slackness> initial_variable_type=vt;
 
     Vector<Float> pt=G*x+h; // The current point in space
-    Vector<Float> last_vec(2,0.0,-1.0); // The direction in space of the last step along the boundary
+    Vector<Float> last_vec({0.0,-1.0}); // The direction in space of the last step along the boundary
                                         // Should be set orthogonal to the direction (+1,0) which is minimised in finding first boundary point
     Vector<Float> best_next_vec(2);
     Vector<Float> trial_vec(2);

@@ -73,7 +73,7 @@ template<class X>
 class ScalarFunction
 {
   private:
-    shared_ptr< const ScalarFunctionInterface<X> > _ptr;
+    std::shared_ptr< const ScalarFunctionInterface<X> > _ptr;
   public:
     static ScalarFunction<X> zero(Nat m);
     static ScalarFunction<X> constant(Nat m, X c);
@@ -86,15 +86,15 @@ class ScalarFunction
     ScalarFunction();
     ScalarFunction(ScalarFunctionInterface<X>* p) : _ptr(p) { }
     ScalarFunction(const ScalarFunctionInterface<X>& t) : _ptr(t._clone()) { }
-    ScalarFunction(shared_ptr< const ScalarFunctionInterface<X> > p) : _ptr(p) { }
-    ScalarFunction<X>& operator=(const ScalarFunctionInterface<X>& f) { _ptr=shared_ptr< const ScalarFunctionInterface<X> >(f._clone()); return *this; }
+    ScalarFunction(std::shared_ptr< const ScalarFunctionInterface<X> > p) : _ptr(p) { }
+    ScalarFunction<X>& operator=(const ScalarFunctionInterface<X>& f) { _ptr=std::shared_ptr< const ScalarFunctionInterface<X> >(f._clone()); return *this; }
 
     template<class XX> ScalarFunction(const ScalarFunction<XX>& f, typename EnableIf<IsSafelyConvertible<XX,X>,Void>::Type* = 0)
-        : _ptr(boost::dynamic_pointer_cast< const ScalarFunctionInterface<X> >(f.managed_pointer())) { }
+        : _ptr(std::dynamic_pointer_cast< const ScalarFunctionInterface<X> >(f.managed_pointer())) { }
     template<class XX> inline ScalarFunction(const VectorFunctionElementReference<XX>& vfe,
                                              typename EnableIf<IsSafelyConvertible<XX,X>,Void>::Type* = 0);
 
-    shared_ptr< const ScalarFunctionInterface<X> > managed_pointer() const  { return _ptr; }
+    std::shared_ptr< const ScalarFunctionInterface<X> > managed_pointer() const  { return _ptr; }
     const ScalarFunctionInterface<X>* raw_pointer() const  { return _ptr.operator->(); }
     const ScalarFunctionInterface<X>& reference() const  { return _ptr.operator*(); }
     operator const ScalarFunctionInterface<X>& () const { return _ptr.operator*(); }
@@ -215,18 +215,19 @@ class VectorFunction
     VectorFunction(Nat rs, ScalarFunction<X> sf);
 
     VectorFunction(VectorFunctionInterface<X>* fptr) : _ptr(fptr) { }
-    VectorFunction(shared_ptr< VectorFunctionInterface<X> > fptr) : _ptr(fptr) { }
+    VectorFunction(std::shared_ptr< VectorFunctionInterface<X> > fptr) : _ptr(fptr) { }
     VectorFunction(const VectorFunctionInterface<X>& fref) : _ptr(fref._clone()) { }
-    shared_ptr< const VectorFunctionInterface<X> > managed_pointer() const { return this->_ptr; }
+    std::shared_ptr< const VectorFunctionInterface<X> > managed_pointer() const { return this->_ptr; }
     const VectorFunctionInterface<X>* raw_pointer() const { return this->_ptr.operator->(); }
     const VectorFunctionInterface<X>& reference() const { return this->_ptr.operator*(); }
     operator const VectorFunctionInterface<X>& () const { return *this->_ptr; }
 
     VectorFunction(const List< ScalarFunction<X> >& lsf);
+    VectorFunction(std::initializer_list< ScalarFunction<X> > lsf);
     template<class XX> VectorFunction(const List< ScalarFunction<XX> >& lsf, typename EnableIf< IsSafelyConvertible<XX,X>, Void >::Type* = 0) {
         *this=VectorFunction<X>(List< ScalarFunction<X> >(lsf)); }
     template<class XX> VectorFunction(const VectorFunction<XX>& vf, typename EnableIf< IsSafelyConvertible<XX,X>, Void >::Type* = 0)
-        : _ptr(boost::dynamic_pointer_cast< const VectorFunctionInterface<X> >(vf.managed_pointer())) { }
+        : _ptr(std::dynamic_pointer_cast< const VectorFunctionInterface<X> >(vf.managed_pointer())) { }
 
     ScalarFunction<X> get(Nat i) const { return this->_ptr->_get(i); }
     //Void set(Nat i, ScalarFunction<X> f) { this->_ptr->_set(i,f); };
@@ -246,7 +247,7 @@ class VectorFunction
 
     OutputStream& write(OutputStream& os) const { return this->_ptr->write(os); }
   private:
-    shared_ptr< const VectorFunctionInterface<X> > _ptr;
+    std::shared_ptr< const VectorFunctionInterface<X> > _ptr;
 };
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, const VectorFunction<X>& f) { return f.write(os); }
@@ -349,11 +350,11 @@ typedef FunctionFactory<Interval> IntervalFunctionFactory;
 template<>
 class FunctionFactory<Interval>
 {
-    shared_ptr< const FunctionFactoryInterface<Interval> > _ptr;
+    std::shared_ptr< const FunctionFactoryInterface<Interval> > _ptr;
   public:
     FunctionFactory(const FunctionFactoryInterface<Interval>& ref) : _ptr(ref.clone()) { }
     FunctionFactory(const FunctionFactoryInterface<Interval>* ptr) : _ptr(ptr) { }
-    FunctionFactory(shared_ptr< const FunctionFactoryInterface<Interval> > ptr) : _ptr(ptr) { }
+    FunctionFactory(std::shared_ptr< const FunctionFactoryInterface<Interval> > ptr) : _ptr(ptr) { }
     inline ScalarFunction<Interval> create(const IntervalVector& d, const ScalarFunctionInterface<Interval>& f) const;
     inline VectorFunction<Interval> create(const IntervalVector& d, const VectorFunctionInterface<Interval>& f) const;
     inline ScalarFunction<Interval> create_zero(const IntervalVector& d) const;

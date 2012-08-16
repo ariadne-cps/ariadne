@@ -47,6 +47,7 @@
 namespace Ariadne {
 
 template<class X> class Expansion;
+typedef Expansion<Float> FloatExpansion;
 
 template<class X> Expansion<X> embed(unsigned int, const Expansion<X>&, unsigned int);
 
@@ -306,9 +307,9 @@ class Expansion
   public:
     explicit Expansion() : _argument_size() { }
     explicit Expansion(unsigned int as) : _argument_size(as) { }
-    template<class XX> explicit Expansion(unsigned int as, unsigned int deg, const XX* c0, ...);
-    explicit Expansion(unsigned int as, unsigned int deg, double c0, ...);
-    explicit Expansion(unsigned int as, unsigned int nnz, int a00, ...);
+    Expansion(unsigned int as, unsigned int deg, std::initializer_list<X> lst);
+    Expansion(std::initializer_list< std::pair<std::initializer_list<int>,X> > lst);
+    Expansion(unsigned int as, std::initializer_list< std::pair<std::initializer_list<int>,X> > lst);
     template<class XX> Expansion(const std::map<MultiIndex,XX>& m);
     template<class XX> Expansion(const Expansion<XX>& p);
 
@@ -484,49 +485,48 @@ template<> class Expansion<Rational>;
 
 template<class X> X Expansion<X>::_zero = 0.0;
 
-template<class X> template<class XX>
-Expansion<X>::Expansion(unsigned int as, unsigned int deg, const XX* p, ...)
-    : _argument_size(as)
-{
-    MultiIndex a(as);
-    while(a.degree()<=deg) {
-        if(*p!=0) { this->insert(a,*p); }
-        ++a; ++p;
-    }
-}
-
 template<class X>
-Expansion<X>::Expansion(unsigned int as, unsigned int deg, double c0, ...)
+Expansion<X>::Expansion(unsigned int as, unsigned int deg, std::initializer_list<X> lst)
     : _argument_size(as)
 {
-    MultiIndex a(as); double x;
-    va_list args; va_start(args,c0);
+    MultiIndex a(as); X x;
+    typename std::initializer_list<X>::const_iterator iter = lst.begin();
     while(a.degree()<=deg) {
-        if(a.degree()==0) { x=c0; }
-        else { x=va_arg(args,double); }
+        x=*iter;
         if(x!=0) { this->append(a,x); }
         ++a;
+        ++iter;
     }
-    va_end(args);
 }
 
 template<class X>
-Expansion<X>::Expansion(unsigned int as, unsigned int nnz, int a00, ...)
+Expansion<X>::Expansion(unsigned int as, std::initializer_list< std::pair<std::initializer_list<int>,X> > lst)
     : _argument_size(as)
 {
-    MultiIndex a(as);
-    double x;
-    va_list args;
-    va_start(args,a00);
-    for(unsigned int i=0; i!=nnz; ++i) {
-        for(unsigned int j=0; j!=as; ++j) {
-            if(i==0 && j==0) { a[j]=a00; }
-            else { a[j]=va_arg(args,int); }
-        }
-        x=va_arg(args,double);
+    MultiIndex a;
+    X x;
+    for(typename std::initializer_list< std::pair<std::initializer_list<int>,X> >::const_iterator iter=lst.begin();
+        iter!=lst.end(); ++iter)
+    {
+        a=MultiIndex(iter->first);
+        x=iter->second;
         if(x!=0) { this->append(a,x); }
     }
-    va_end(args);
+}
+
+template<class X>
+Expansion<X>::Expansion(std::initializer_list< std::pair<std::initializer_list<int>,X> > lst)
+    : _argument_size(lst.size()==0?0u:lst.begin()->first.size())
+{
+    MultiIndex a;
+    X x;
+    for(typename std::initializer_list< std::pair<std::initializer_list<int>,X> >::const_iterator iter=lst.begin();
+        iter!=lst.end(); ++iter)
+    {
+        a=iter->first;
+        x=iter->second;
+        if(x!=0) { this->append(a,x); }
+    }
 }
 
 template<class X> template<class XX>

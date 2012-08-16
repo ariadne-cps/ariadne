@@ -114,7 +114,7 @@ class Grid {
     void _create(const Vector<Float>& o, const Vector<Float>& l);
   private:
     // Pointer to data. We can test grids for equality using reference semantics since data is a constant.
-    boost::shared_ptr<Data> _data;
+    std::shared_ptr<Data> _data;
 };
 
 

@@ -65,10 +65,10 @@ class Sweeper {
   public:
     Sweeper();
     inline Sweeper(const SweeperInterface& p) : _ptr(p._clone()) { }
-    inline Sweeper(shared_ptr<const SweeperInterface> p) : _ptr(p) { }
+    inline Sweeper(std::shared_ptr<const SweeperInterface> p) : _ptr(p) { }
     inline Sweeper(const SweeperInterface* p) : _ptr(p) { }
     inline operator const SweeperInterface& () const { return *_ptr; }
-    inline shared_ptr<const SweeperInterface> operator& () { return _ptr; }
+    inline std::shared_ptr<const SweeperInterface> operator& () { return _ptr; }
   public:
     //! \brief Returns \a true if the term with index \a a and coefficient \a x should be discarded.
     inline bool discard(const MultiIndex& a, const Float& x) const { return this->_ptr->_discard(a,x); }
@@ -78,7 +78,7 @@ class Sweeper {
     inline void sweep(Expansion<Float>& p) const { this->_ptr->_sweep(p); }
     friend std::ostream& operator<<(std::ostream& os, const Sweeper& swp) { return os << *swp._ptr; }
   private:
-    shared_ptr<const SweeperInterface> _ptr;
+    std::shared_ptr<const SweeperInterface> _ptr;
 };
 
 template<class SWP> class SweeperBase

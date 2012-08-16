@@ -69,9 +69,7 @@ class Affine
     explicit Affine() : _c(), _g() { }
     explicit Affine(uint n) : _c(0), _g(n) { }
     explicit Affine(const Vector<X>& g, const X& c) : _c(c), _g(g) { }
-    explicit Affine(uint as, double c, double g0, ...) : _c(static_cast<X>(c)), _g(as) {
-        ARIADNE_ASSERT(as>=2); _g[0]=static_cast<X>(g0); va_list args; va_start(args,g0);
-        for(uint i=1; i!=as; ++i) { _g[i]=static_cast<X>(va_arg(args,double)); } }
+    explicit Affine(X c, std::initializer_list<X> g) : _c(c), _g(g) { }
     template<class XX> explicit Affine(const Affine<XX>& aff)
         : _c(aff.b()), _g(aff.a()) { }
 

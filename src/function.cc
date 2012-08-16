@@ -824,6 +824,17 @@ template<class X> VectorFunction<X>::VectorFunction(Nat rs, Nat as)
 {
 }
 
+template<class X> VectorFunction<X>::VectorFunction(std::initializer_list< ScalarFunction<X> > lsf)
+{
+    ARIADNE_ASSERT(lsf.size()>0);
+    Nat as=lsf.begin()->argument_size();
+    VectorOfScalarFunction<X>* new_ptr=new VectorOfScalarFunction<X>(lsf.size(),as);
+    for(uint i=0; i!=lsf.size(); ++i) {
+        new_ptr->set(i,*(lsf.begin()+i));
+    }
+    this->_ptr=std::shared_ptr< const VectorFunctionInterface<X> >(new_ptr);
+}
+
 template<class X> VectorFunction<X>::VectorFunction(const List< ScalarFunction<X> >& lsf)
 {
     ARIADNE_ASSERT(lsf.size()>0);
@@ -832,7 +843,7 @@ template<class X> VectorFunction<X>::VectorFunction(const List< ScalarFunction<X
     for(uint i=0; i!=lsf.size(); ++i) {
         new_ptr->set(i,lsf[i]);
     }
-    this->_ptr=shared_ptr< const VectorFunctionInterface<X> >(new_ptr);
+    this->_ptr=std::shared_ptr< const VectorFunctionInterface<X> >(new_ptr);
 }
 
 template<class X> VectorFunction<X>::VectorFunction(Nat as, const List< Formula<X> >& le)
@@ -842,7 +853,7 @@ template<class X> VectorFunction<X>::VectorFunction(Nat as, const List< Formula<
     for(uint i=0; i!=le.size(); ++i) {
         new_ptr->set(i,ScalarFormulaFunction<X>(as,le[i]));
     }
-    this->_ptr=shared_ptr< const VectorFunctionInterface<X> >(new_ptr);
+    this->_ptr=std::shared_ptr< const VectorFunctionInterface<X> >(new_ptr);
 }
 
 template<class X> VectorFunction<X>::VectorFunction(Nat rs, ScalarFunction<X> sf)
@@ -872,7 +883,7 @@ template<class X> Void VectorFunction<X>::set(Nat i, ScalarFunction<X> sf)
 {
     if(!this->_ptr.unique()) {
         ARIADNE_WARN("VectorFunction<X>::set(Nat, ScalarFunction<X>): Cloning shared pointer.\n");
-        this->_ptr=shared_ptr< const VectorFunctionInterface<X> >(this->_ptr->_clone());
+        this->_ptr=std::shared_ptr< const VectorFunctionInterface<X> >(this->_ptr->_clone());
     }
     VectorFunctionInterface<X>* vf=const_cast<VectorFunctionInterface<X>*>(this->raw_pointer());
     VectorOfScalarFunction<X>* vsf=dynamic_cast<VectorOfScalarFunction<X>*>(vf);
@@ -1020,8 +1031,8 @@ RealScalarFunction lie_derivative(const RealScalarFunction& g, const RealVectorF
 //------------------------ Interval function operators -------------------------------//
 
 IntervalScalarFunction operator-(IntervalScalarFunction const& f1, IntervalScalarFunction const& f2) {
-    shared_ptr<IntervalScalarFunctionModelInterface const> f1p=boost::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f1.managed_pointer());
-    shared_ptr<IntervalScalarFunctionModelInterface const> f2p=boost::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f2.managed_pointer());
+    std::shared_ptr<IntervalScalarFunctionModelInterface const> f1p=std::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f1.managed_pointer());
+    std::shared_ptr<IntervalScalarFunctionModelInterface const> f2p=std::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
         return IntervalScalarFunctionModel(*f1p) - IntervalScalarFunctionModel(*f2p);
     }
@@ -1029,15 +1040,15 @@ IntervalScalarFunction operator-(IntervalScalarFunction const& f1, IntervalScala
 }
 
 IntervalScalarFunction operator-(IntervalScalarFunction const& f, Interval const& c) {
-    shared_ptr<IntervalScalarFunctionModelInterface const> fp=boost::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f.managed_pointer());
+    std::shared_ptr<IntervalScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f.managed_pointer());
     if(fp) { return IntervalScalarFunctionModel(*fp) - c; }
-    shared_ptr<RealScalarFunctionInterface const> rfp=boost::dynamic_pointer_cast<RealScalarFunctionInterface const>(f.managed_pointer());
+    std::shared_ptr<RealScalarFunctionInterface const> rfp=std::dynamic_pointer_cast<RealScalarFunctionInterface const>(f.managed_pointer());
     if(rfp && c.lower()==c.upper()) { return RealScalarFunction(*rfp) - ExactFloat(c.lower()); }
     return new BinaryFunction<Interval>(SUB,f,IntervalScalarFunction::constant(f.argument_size(),c));
 }
 
 IntervalScalarFunction operator-(Interval const& c, IntervalScalarFunction const& f) {
-    shared_ptr<IntervalScalarFunctionModelInterface const> fp=boost::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f.managed_pointer());
+    std::shared_ptr<IntervalScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f.managed_pointer());
     if(fp) { return c - IntervalScalarFunctionModel(*fp); }
     return new BinaryFunction<Interval>(SUB,IntervalScalarFunction::constant(f.argument_size(),c),f);
 }

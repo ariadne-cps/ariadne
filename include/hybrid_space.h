@@ -93,7 +93,7 @@ class HybridSpace
 
     friend std::ostream& operator<<(std::ostream& os, const HybridSpace& hsp) { return os << *hsp._ptr; }
   private:
-    shared_ptr<const HybridSpaceInterface> _ptr;
+    std::shared_ptr<const HybridSpaceInterface> _ptr;
 };
 
 

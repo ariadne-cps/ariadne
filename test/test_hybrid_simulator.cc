@@ -106,7 +106,7 @@ void TestHybridSimulator::test() const
 
     // Define the initial box
     RealSpace space((x,y));
-    Point initial_point(2, -0.00, 0.50);
+    Point initial_point = Point{-0.00, 0.50};
     cout << "initial_point=" << initial_point << endl;
     HybridPoint initial_hybrid_point(location1,space,initial_point);
     HybridTime simulation_time(2.25,3);

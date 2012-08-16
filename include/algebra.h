@@ -42,7 +42,7 @@ template<class X> class Algebra
 {
   private:
   public:
-    boost::shared_ptr< AlgebraInterface<X> > _ptr;
+    std::shared_ptr< AlgebraInterface<X> > _ptr;
   public:
     typedef X ScalarType;
     typedef typename X::NumericType NumericType;
@@ -52,7 +52,7 @@ template<class X> class Algebra
     Algebra(const Algebra<X>& a) : _ptr(a._ptr->_clone()) { }
     Algebra<X>& operator=(int c) { *this = this->create(); this->iadd(c); return *this; }
     Algebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
-    Algebra<X>& operator=(const Algebra<X>& a) { this->_ptr=boost::shared_ptr< AlgebraInterface<X> >(a._ptr->_clone()); return *this; }
+    Algebra<X>& operator=(const Algebra<X>& a) { this->_ptr=std::shared_ptr< AlgebraInterface<X> >(a._ptr->_clone()); return *this; }
     operator const AlgebraInterface<X>& () const { return *_ptr; }
     Algebra<X> create() const { return Algebra<X>(_ptr->_create()); }
     Algebra<X> clone() const { return Algebra<X>(_ptr->_clone()); }
@@ -67,19 +67,19 @@ template<class X> class Algebra
 template<class X> class NormedAlgebra
 {
   private:
-    boost::shared_ptr< NormedAlgebraInterface<X> > _ptr;
+    std::shared_ptr< NormedAlgebraInterface<X> > _ptr;
   public:
     typedef X ScalarType;
     typedef typename X::NumericType NumericType;
-    NormedAlgebra(const Algebra<X>& a) : _ptr(boost::dynamic_pointer_cast(a._ptr)) { }
+    NormedAlgebra(const Algebra<X>& a) : _ptr(std::dynamic_pointer_cast(a._ptr)) { }
     NormedAlgebra(NormedAlgebraInterface<X>* p) : _ptr(p) { }
-    NormedAlgebra(shared_ptr< NormedAlgebraInterface<X> > p) : _ptr(p) { }
+    NormedAlgebra(std::shared_ptr< NormedAlgebraInterface<X> > p) : _ptr(p) { }
     NormedAlgebra(const NormedAlgebraInterface<X>& a) : _ptr(a.clone()) { }
     operator Algebra<X> () const { return _ptr->_clone(); }
     operator const NormedAlgebraInterface<X>& () const { return *_ptr; }
     NormedAlgebra<X>& operator=(int c) { *this = this->create(); this->iadd(c); return *this; }
     NormedAlgebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
-    NormedAlgebra<X>& operator=(const NormedAlgebra<X>& a) { this->_ptr=boost::shared_ptr< NormedAlgebraInterface<X> >(a._ptr->_clone()); return *this; }
+    NormedAlgebra<X>& operator=(const NormedAlgebra<X>& a) { this->_ptr=std::shared_ptr< NormedAlgebraInterface<X> >(a._ptr->_clone()); return *this; }
     //! \brief The norm of the element.
     Float norm() const { return _ptr->norm(); }
     //! \brief A value \a c minimising |a-c|.
@@ -105,7 +105,7 @@ template<class X> class GradedAlgebra
 {
   private:
   public:
-    boost::shared_ptr< GradedAlgebraInterface<X> > _ptr;
+    std::shared_ptr< GradedAlgebraInterface<X> > _ptr;
   public:
     typedef X ScalarType;
     typedef typename X::NumericType NumericType;
@@ -115,7 +115,7 @@ template<class X> class GradedAlgebra
     GradedAlgebra(const GradedAlgebra<X>& a) : _ptr(a._ptr->_clone()) { }
     GradedAlgebra<X>& operator=(int c) { *this = this->create(); this->iadd(c); return *this; }
     GradedAlgebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
-    GradedAlgebra<X>& operator=(const Algebra<X>& a) { this->_ptr=boost::shared_ptr< AlgebraInterface<X> >(a._ptr->_clone()); return *this; }
+    GradedAlgebra<X>& operator=(const Algebra<X>& a) { this->_ptr=std::shared_ptr< AlgebraInterface<X> >(a._ptr->_clone()); return *this; }
     operator Algebra<X> () const { return _ptr->_clone(); }
     operator const GradedAlgebraInterface<X>& () const { return *_ptr; }
     GradedAlgebra<X> create() const { return GradedAlgebra<X>(_ptr->_create()); }
@@ -137,7 +137,7 @@ template<class X> class SymbolicAlgebra
 {
   private:
   public:
-    boost::shared_ptr< SymbolicAlgebraInterface<X> > _ptr;
+    std::shared_ptr< SymbolicAlgebraInterface<X> > _ptr;
   public:
     typedef X ScalarType;
     typedef typename X::NumericType NumericType;
@@ -149,7 +149,7 @@ template<class X> class SymbolicAlgebra
     SymbolicAlgebra(OperatorCode op, const SymbolicAlgebra<X>& a) : _ptr(a._ptr->_apply(op)) { }
     SymbolicAlgebra<X>& operator=(int c) { *this = this->create(); this->iadd(c); return *this; }
     SymbolicAlgebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
-    SymbolicAlgebra<X>& operator=(const Algebra<X>& a) { this->_ptr=boost::shared_ptr< AlgebraInterface<X> >(a._ptr->_clone()); return *this; }
+    SymbolicAlgebra<X>& operator=(const Algebra<X>& a) { this->_ptr=std::shared_ptr< AlgebraInterface<X> >(a._ptr->_clone()); return *this; }
     operator Algebra<X> () const { return _ptr->_clone(); }
     operator const SymbolicAlgebraInterface<X>& () const { return *_ptr; }
     SymbolicAlgebra<X> create() const { return SymbolicAlgebra<X>(_ptr->_create()); }
@@ -181,7 +181,7 @@ template<class X> Algebra<X> sin(const Algebra<X>& a) { return apply(Sin(),a); }
 template<class X> Algebra<X> cos(const Algebra<X>& a) { return apply(Cos(),a); }
 template<class X> Algebra<X> tan(const Algebra<X>& a) { return apply(Tan(),a); }
 
-// FIXME: Eliminate use of clone with boost::dynamic_pointer_cast
+// FIXME: Eliminate use of clone with std::dynamic_pointer_cast
 template<class X, class OP> Algebra<X> apply(OP op, const Algebra<X>& a) {
     const AlgebraInterface<X>* aptr = &static_cast<const AlgebraInterface<X>&>(a);
     if(dynamic_cast<const NormedAlgebraInterface<X>*>(aptr)) {

@@ -41,7 +41,7 @@ using namespace Ariadne;
 class TestOptimiser
 {
   private:
-    scoped_ptr<OptimiserInterface> optimiser;
+    std::unique_ptr<OptimiserInterface> optimiser;
   public:
     TestOptimiser(const OptimiserInterface& opt)
         : optimiser(opt.clone()) { }
@@ -64,9 +64,9 @@ class TestOptimiser
         ARIADNE_TEST_PRINT(f);
         RealVectorFunction g(0u,2u);
         ARIADNE_TEST_PRINT(g);
-        Box D(2, -1.0,2.0, -3.0,5.0);
-        Box C(0);
-        ARIADNE_TEST_PRINT(make_tuple(f,D,g,C));
+        Box D=Box{{-1.0,2.0},{-3.0,5.0}};
+        Box C=Box{};
+        ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
 
         IntervalVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(subset,x_optimal,D);
@@ -76,13 +76,13 @@ class TestOptimiser
 
     void test_equality_constrained_optimisation() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
-        RealScalarFunction f(+(sqr(x[0])+sqr(x[1])));
+        RealScalarFunction f=(sqr(x[0])+sqr(x[1]));
         ARIADNE_TEST_PRINT(f);
-        RealVectorFunction g( (1.5+x[0]+2*x[1]+0.25*x[0]*x[1]) );
+        RealVectorFunction g={1.5+x[0]+2*x[1]+0.25*x[0]*x[1]};
         ARIADNE_TEST_PRINT(g);
-        IntervalVector C(1,Interval(0.0));
-        Box D(2, -1.0,2.0, -3.0,5.0);
-        ARIADNE_TEST_PRINT(make_tuple(f,D,g,C));
+        IntervalVector C={{0.0,0.0}};
+        Box D=Box{{-1.0,2.0},{-3.0,5.0}};
+        ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
 
         IntervalVector x_optimal=optimiser->minimise(f,D,g,C);
         ARIADNE_TEST_BINARY_PREDICATE(subset,x_optimal,D);
@@ -92,14 +92,14 @@ class TestOptimiser
     void test_constrained_optimisation() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(3);
         RealScalarFunction x0s = sqr(x[0]);
-        RealScalarFunction f(x0s*(12+x0s*(6.3+x0s))+6*x[1]*(x[1]-x[0])+x[2]);
+        RealScalarFunction f = x0s*(12+x0s*(6.3+x0s))+6*x[1]*(x[1]-x[0])+x[2];
         ARIADNE_TEST_PRINT(f);
         //RealVectorFunction g( (x[0]-1, x[0]+x[1]*x[1], x[1]*x[1]) );
-        Box D(3, -1.0,2.0, -3.0,5.0, -3.0,5.0);
+        Box D = Box{{-1.0,2.0},{-3.0,5.0},{-3.0,5.0}};
         ARIADNE_TEST_PRINT(D);
-        RealVectorFunction g( (2*x[1]+x[0], x[0]+x[1]*x[1]-0.875) );
+        RealVectorFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-0.875};
         ARIADNE_TEST_PRINT(g);
-        Box C(2, 0.0,inf, 0.0,inf, 3.0,3.0);
+        Box C = Box{{0.0,inf},{0.0,inf}};
         ARIADNE_TEST_PRINT(C);
 
         IntervalVector x_optimal=optimiser->minimise(f,D,g,C);
@@ -112,13 +112,13 @@ class TestOptimiser
         List<RealScalarFunction> x=RealScalarFunction::coordinates(3);
         RealScalarFunction f(+(sqr(x[0])+sqr(x[1])+x[1]*x[2]));
         ARIADNE_TEST_PRINT(f);
-        Box D(3, -1.0,2.0, -3.0,5.0, 1.25,2.25);
+        Box D = Box{{-1.0,2.0},{-3.0,5.0},{1.25,2.25}};
         ARIADNE_TEST_PRINT(D);
-        RealScalarFunction g( x[0]*x[1]-x[0]*1.25 );
-        RealVectorFunction h( 1.5+x[0]+2*x[1]+0.25*x[0]*x[1] );
+        RealScalarFunction g = x[0]*x[1]-x[0]*1.25;
+        RealVectorFunction h = {1.5+x[0]+2*x[1]+0.25*x[0]*x[1]};
         RealVectorFunction gh=join(g,h);
         ARIADNE_TEST_PRINT(gh);
-        Box C(2, -1.0,-0.5, 0.0,0.0);
+        Box C = Box {{-1.0,-0.5},{0.0,0.0}};
         ARIADNE_TEST_PRINT(C);
 
         IntervalVector x_optimal=optimiser->minimise(f,D,gh,C);
@@ -130,60 +130,60 @@ class TestOptimiser
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         RealVectorFunction g=RealVectorFunction(1u, 2*x[0]+x[1]);
         ARIADNE_TEST_PRINT(g);
-        Box D(2, 0.0,2.0, 0.0,2.0);
-        Box C(1, -2.0,1.0);
+        Box D = Box{{0.0,2.0},{0.0,2.0}};
+        Box C = Box{{-2.0,1.0}};
 
         ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
-        C=Box(1, 1.0,1.5);
+        C=Box{{1.0,1.5}};
         ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
-        D=Box(2, 1.0,1.5,0.5,1.0);
+        D=Box{{1.0,1.5},{0.5,1.0}};
         ARIADNE_TEST_ASSERT(!optimiser->feasible(D,g,C));
     }
 
     void test_nonlinear_feasibility() {
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
-        RealVectorFunction g=RealVectorFunction(1u, 2*x[0]+x[1]+0.125*x[0]*x[1]);
+        RealVectorFunction g = {2*x[0]+x[1]+0.125*x[0]*x[1]};
         ARIADNE_TEST_PRINT(g);
-        Box D(2, 0.0,2.0, 0.0,2.0);
-        Box C(1, -2.0,1.0);
+        Box D = Box{{0.0,2.0},{0.0,2.0}};
+        Box C = Box{{-2.0,1.0}};
 
         ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
-        C=Box(1, 1.0,1.5);
+        C=Box{{1.0,1.5}};
         ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
-        D=Box(2, 1.0,1.5,0.5,1.0);
+        D=Box{{1.0,1.5},{0.5,1.0}};
         ARIADNE_TEST_ASSERT(!optimiser->feasible(D,g,C));
     }
 
     void test_nonlinear_equality_feasibility() {
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
-        RealVectorFunction h=RealVectorFunction(1u, 2*x[0]-x[1]+0.125*x[0]*x[1]);
+        RealVectorFunction h = { 2*x[0]-x[1]+0.125*x[0]*x[1] };
         ARIADNE_TEST_PRINT(h);
-        Box D(2, 0.0,2.0, 0.0,2.0);
-        Box C(1, 0.0,0.0);
+        Box D = Box{{0.0,2.0},{0.0,2.0}};
+        Box C = Box{{0.0,0.0}};
 
         ARIADNE_TEST_ASSERT(optimiser->feasible(D,h,C));
     }
 
     void test_feasibility_check() {
         RealVectorFunction x=RealVectorFunction::identity(2);
-        ARIADNE_TEST_CONSTRUCT( RealVectorFunction, g,(sqr(x[0])+2*sqr(x[1])-1) );
-        ARIADNE_TEST_CONSTRUCT( IntervalVector, D,(2, -1.0, 1.0, -1.0,1.0) );
-        ARIADNE_TEST_CONSTRUCT( IntervalVector, C,(1, 0.0, 0.0) );
+        ARIADNE_TEST_CONSTRUCT( RealVectorFunction, g, ({sqr(x[0])+2*sqr(x[1])-1}) );
+        ARIADNE_TEST_CONSTRUCT( IntervalVector, D, ({{-1.0, 1.0},{-1.0,1.0}}) );
+        ARIADNE_TEST_CONSTRUCT( IntervalVector, C, ({{0.0,0.0}}) );
 
-        ARIADNE_TEST_CONSTRUCT( IntervalVector, X1,(2, 0.30,0.40, 0.60,0.70) );
+        ARIADNE_TEST_CONSTRUCT( IntervalVector, X1, ({{0.30,0.40},{0.60,0.70}}) );
         ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X1)) );
 
         // The following test fails since it is difficult to find the feasible
         // point in the box.
-        ARIADNE_TEST_CONSTRUCT( IntervalVector, X2,(2, 0.30,0.40, 0.65,0.65) );
+        ARIADNE_TEST_CONSTRUCT( IntervalVector, X2, ({{0.30,0.40},{0.65,0.65}}) );
         ARIADNE_TEST_ASSERT( optimiser->contains_feasible_point(D,g,C,X2) );
 
-        ARIADNE_TEST_CONSTRUCT( IntervalVector, X3,(2, 0.30,0.40, 0.65,0.68) );
+        ARIADNE_TEST_CONSTRUCT( IntervalVector, X3, ({{0.30,0.40},{0.65,0.68}}) );
         ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X3)) );
 
-        ARIADNE_TEST_CONSTRUCT(FloatVector, x2,(2, 0.35, 0.655) );
+        ARIADNE_TEST_CONSTRUCT(FloatVector, x2, ({0.35,0.655}) );
         ARIADNE_TEST_ASSERT( optimiser->validate_feasibility(D,g,C,x2) );
     }
 

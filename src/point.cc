@@ -35,18 +35,9 @@
 namespace Ariadne {
 
 
-Point::Point(uint d, double x0,  ...)
-    : Vector<Float>(d)
+Point::Point(std::initializer_list<Float> lst)
+    : Vector<Float>(lst)
 {
-    assert(d>=1);
-    va_list args;
-    va_start(args,x0);
-    (*this)[0]=x0;
-    for(uint i=1; i!=d; ++i) {
-        double xi=va_arg(args,double);
-        (*this)[i]=xi;
-    }
-    va_end(args);
 }
 
 Point::Point(const std::string& str)

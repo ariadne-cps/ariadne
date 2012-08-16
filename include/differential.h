@@ -128,8 +128,8 @@ class Differential
     explicit Differential(const Expansion<X>& e, uint deg) : _expansion(e.argument_size()),_degree(deg) {
         for(typename Expansion<X>::const_iterator iter=e.begin(); iter!=e.end(); ++iter) {
             if(iter->key().degree()<=deg) { this->_expansion.append(iter->key(),iter->data()); } } this->cleanup(); }
-    //! \brief Construct a differential of degree \a deg from a variable-size argument list of (index,coefficient) pairs.
-    explicit Differential(unsigned int as, unsigned int deg, unsigned int nnz, int a00, ...);
+    //! \brief Construct a differential of degree \a deg from an initializer list list of (index,coefficient) pairs.
+    explicit Differential(unsigned int as, unsigned int deg, std::initializer_list< std::pair<std::initializer_list<int>,X> > lst);
 
     //! \brief Construct a dense differential of degree \a deg in \a as variables from a list of coefficients beginning at \a ptr.
     template<class XX> Differential(uint as, uint deg, const XX* ptr) : _expansion(as), _degree(deg) {
@@ -326,22 +326,10 @@ template<class X>
 const X Differential<X>::_one=X(1);
 
 template<class X>
-Differential<X>::Differential(unsigned int as, unsigned int deg, unsigned int nnz, int a00, ...)
-    : _expansion(as), _degree(deg)
+Differential<X>::Differential(unsigned int as, unsigned int deg,
+                              std::initializer_list< std::pair<std::initializer_list<int>,X> > lst)
+    : _expansion(as,lst), _degree(deg)
 {
-    MultiIndex a(as);
-    double x;
-    va_list args;
-    va_start(args,a00);
-    for(unsigned int i=0; i!=nnz; ++i) {
-        for(unsigned int j=0; j!=as; ++j) {
-            if(i==0 && j==0) { a[j]=a00; }
-            else { a[j]=va_arg(args,int); }
-        }
-        x=va_arg(args,double);
-        if(x!=0) { this->_expansion.append(a,x); }
-    }
-    va_end(args);
     this->cleanup();
 }
 

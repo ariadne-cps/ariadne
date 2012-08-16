@@ -30,7 +30,7 @@
 
 #include <string>
 #include <sstream>
-#include <cstdarg>
+#include <initializer_list>
 #include <vector>
 
 #include "macros.h"
@@ -88,12 +88,12 @@ class Vector
     Vector(size_t n, const X& t) : _ary(n,t) {  }
     //! \brief Construct a vector of size \a n, with values initialised from the C-style Array beginning at \a ptr.
     template<class XX> Vector(size_t n, const XX* ptr) : _ary(ptr,ptr+n) { }
+    //! \brief Convert from an initializer list of the same type.
+    Vector(std::initializer_list<X> lst) : _ary(lst.begin(),lst.end()) { }
     //! \brief Convert from a list of the same type.
     Vector(const std::vector<X>& lst) : _ary(lst.begin(),lst.end()) { }
     //! \brief Construct from a list of a possibly different type.
     template<class XX> explicit Vector(const std::vector<XX>& lst) : _ary(lst.begin(),lst.end()) { }
-    //! \brief Construct a vector of size \a n, with values initialised from a variadic argument list. WARNING: The values in the list must all be double-precision type; in particular, constants must be floating-point values \c 2.0 rather integer values \c 2 .
-    Vector(size_t n, const double& t0, const double& t1, ...);
     //! \brief Construct a matrix from a string literal, with entries enclosed in square braces and separated by commass. e.g. <tt>"[1, 2.3, 4.2]"</tt>.
     explicit Vector(const std::string& str)
         : _ary() { std::stringstream ss(str); ss >> *this; }

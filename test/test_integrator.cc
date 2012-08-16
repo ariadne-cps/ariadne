@@ -49,7 +49,7 @@ class TestIntegrator
 {
     typedef Vector<Interval> IntervalVector;
   private:
-    scoped_ptr<IntegratorInterface> integrator_ptr;
+    std::unique_ptr<IntegratorInterface> integrator_ptr;
     RealScalarFunction o,x,y,x0,y0,t;
   public:
     TestIntegrator(const IntegratorInterface& i)

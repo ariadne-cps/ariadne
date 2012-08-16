@@ -82,10 +82,10 @@ class Polynomial
     template<class XX> Polynomial(const Polynomial<XX>& p) : _expansion(p._expansion) { }
     //! \brief Copy/conversion constructor.
     template<class XX> explicit Polynomial(const Expansion<XX>& e) : _expansion(e) { }
-    //! \brief A dense polynomial with coefficients given by a list of doubles.
-    explicit Polynomial(unsigned int as, unsigned int deg, double c0, ...);
-    //! \brief A sparse polynomial with coefficients given by a list of indices and coefficients.
-    explicit Polynomial(unsigned int as, unsigned int nnz, int a00, ...);
+    //! \brief A dense polynomial with coefficients given by an initializer list of doubles.
+    explicit Polynomial(unsigned int as, unsigned int deg, std::initializer_list<X> lst);
+    //! \brief A sparse polynomial with coefficients given by an initializer list of indices and coefficients.
+    Polynomial(std::initializer_list< std::pair<std::initializer_list<int>,X> > lst);
     //@}
 
     //! \brief Create a constant polynomial in \a as variables with value \a c.
@@ -195,38 +195,16 @@ template<class X1, class X2> struct Arithmetic< Polynomial<X1>,Polynomial<X2> > 
 
 
 template<class X>
-Polynomial<X>::Polynomial(unsigned int as, unsigned int deg, double c0, ...)
-    : _expansion(as)
+Polynomial<X>::Polynomial(std::initializer_list< std::pair<std::initializer_list<int>,X> > lst)
+    : _expansion(lst)
 {
-    MultiIndex a(as); double x;
-    va_list args; va_start(args,c0);
-    while(a.degree()<=deg) {
-        if(a.degree()==0) { x=c0; }
-        else { x=va_arg(args,double); }
-        if(x!=0) { this->_expansion.append(a,x); }
-        ++a;
-    }
-    va_end(args);
     this->cleanup();
 }
 
 template<class X>
-Polynomial<X>::Polynomial(unsigned int as, unsigned int nnz, int a00, ...)
-    : _expansion(as)
+Polynomial<X>::Polynomial(unsigned int as, unsigned int deg, std::initializer_list<X> lst)
+    : _expansion(as,deg,lst)
 {
-    MultiIndex a(as);
-    double x;
-    va_list args;
-    va_start(args,a00);
-    for(unsigned int i=0; i!=nnz; ++i) {
-        for(unsigned int j=0; j!=as; ++j) {
-            if(i==0 && j==0) { a[j]=a00; }
-            else { a[j]=va_arg(args,int); }
-        }
-        x=va_arg(args,double);
-        if(x!=0) { this->_expansion.append(a,x); }
-    }
-    va_end(args);
     this->cleanup();
 }
 

@@ -76,6 +76,9 @@ class TestDifferential {
         x2=DifferentialType(2,4,a2);
         x3=DifferentialType(1,4,a3);
 
+        ARIADNE_TEST_PRINT(x1);
+        ARIADNE_TEST_PRINT(x2);
+        
         ARIADNE_TEST_CALL(test_degree());
         ARIADNE_TEST_CALL(test_neg());
         ARIADNE_TEST_CALL(test_add());
@@ -94,12 +97,12 @@ class TestDifferential {
     }
 
     void test_neg() {
-        DifferentialType nx1(2,4, 3, 0,0,-2.0, 1,0,-1.0, 2,0,-0.5);
+        DifferentialType nx1(2,4, { {{0,0},-2.0}, {{1,0},-1.0}, {{2,0},-0.5} });
         ARIADNE_TEST_EQUALS(-x1,nx1);
     }
 
     void test_add() {
-        DifferentialType x1px2(2,4, 3, 0,0,5.0, 1,0,2.0, 2,0,0.75);
+        DifferentialType x1px2(2,4, { {{0,0},5.0}, {{1,0},2.0}, {{2,0},0.75} });
         ARIADNE_TEST_EQUALS(x1+x2,x1px2);
         ARIADNE_TEST_EVALUATE(x1+c1);
         ARIADNE_TEST_EVALUATE(c1+x1);
@@ -107,7 +110,7 @@ class TestDifferential {
     }
 
     void test_sub() {
-         DifferentialType x1mx2(2,4, 3, 0,0,-1.0, 1,0,0.0, 2,0,0.25);
+        DifferentialType x1mx2(2,4, { {{0,0},-1.0}, {{1,0},0.0}, {{2,0},0.25} });
         ARIADNE_TEST_EQUALS(x1-x2,x1mx2);
         ARIADNE_TEST_EVALUATE(x1-c1);
         ARIADNE_TEST_EVALUATE(c1-x1);
@@ -173,7 +176,7 @@ class TestDifferential {
 
     void test_gradient() {
         // Regression test based on errors in Henon evaluation.
-        Vector<Float> x(2, 0.875,-0.125);
+        Vector<Float> x={0.875,-0.125};
         Vector< Differential<Float> > dx=Differential<Float>::variables(1u,x);
         Differential<Float> dfx=1.5-dx[0]*dx[0]-0.25*dx[1];
         ARIADNE_TEST_PRINT(dfx);
@@ -187,7 +190,7 @@ class TestDifferential {
         // Test Hessian matrix of
         Float a00=1.5; Float a01=2.5; Float a11=3.5;
         double x0=0.875; double x1=-1.25;
-        Vector<Float> x(2, x0,x1);
+        Vector<Float> x={x0,x1};
         Vector< Differential<Float> > dx=Differential<Float>::variables(2u,x);
         Differential<Float> dfx=a00*dx[0]*dx[0]+a01*dx[0]*dx[1]+a11*dx[1]*dx[1];
         ARIADNE_TEST_PRINT(dfx);

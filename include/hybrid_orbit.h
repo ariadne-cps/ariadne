@@ -32,7 +32,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/scoped_ptr.hpp>
 
 #include "numeric.h"
@@ -79,7 +79,7 @@ class Orbit<HybridPoint>
     const std::vector<HybridInterpolatedCurve>& curves() const { return *this->_curves_ptr; }
     void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const;
   private:
-    boost::shared_ptr<std::vector<HybridInterpolatedCurve> > _curves_ptr;
+    std::shared_ptr<std::vector<HybridInterpolatedCurve> > _curves_ptr;
 };
 
 template<>
@@ -104,7 +104,7 @@ class Orbit<HybridGridCell>
     HybridGridTreeSet const& intermediate() const;
     HybridGridTreeSet const& final() const;
   private:
-    boost::shared_ptr<Data> _data;
+    std::shared_ptr<Data> _data;
 };
 
 template<>

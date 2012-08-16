@@ -29,6 +29,7 @@
 #define ARIADNE_TUPLE_H
 
 #include <utility>
+#include <tuple>
 
 namespace Ariadne {
 
@@ -63,6 +64,7 @@ template<class T1>
 struct Tuple<T1,void,void,void>
 {
     inline Tuple(const T1& t1) : first(t1) { }
+    inline Tuple(const std::tuple<T1>& t) : first(std::get<0>(t)) { }
     T1 first;
 };
 
@@ -70,6 +72,7 @@ template<class T1, class T2>
 struct Tuple<T1,T2,void,void>
 {
     inline Tuple(const T1& t1, const T2& t2) : first(t1), second(t2) { }
+    inline Tuple(const std::tuple<T1,T2>& t) : first(std::get<0>(t)), second(std::get<1>(t)) { }
     T1 first; T2 second;
 };
 
@@ -77,6 +80,7 @@ template<class T1, class T2, class T3>
 struct Tuple<T1,T2,T3,void>
 {
     inline Tuple(const T1& t1, const T2& t2, const T3& t3) : first(t1), second(t2), third(t3) { }
+    inline Tuple(const std::tuple<T1,T2,T3>& t) : first(std::get<0>(t)), second(std::get<1>(t)), third(std::get<2>(t)) { }
     T1 first; T2 second; T3 third;
 };
 
@@ -85,6 +89,8 @@ struct Tuple
 {
     inline Tuple(const T1& t1, const T2& t2, const T3& t3, const T4& t4)
         : first(t1), second(t2), third(t3), fourth(t4) { }
+    inline Tuple(const std::tuple<T1,T2,T3,T4>& t)
+        : first(std::get<0>(t)), second(std::get<1>(t)), third(std::get<2>(t)), fourth(std::get<3>(t)) { }
     T1 first; T2 second; T3 third; T4 fourth;
 };
 

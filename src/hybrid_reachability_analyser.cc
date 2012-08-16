@@ -212,7 +212,7 @@ lower_evolve(const OvertSetInterfaceType& initial_set,
     HybridGrid grid=this->_configuration->grid();
     HybridGridTreeSet initial_cells(grid); HybridGridTreeSet final_cells(grid);
 
-    shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
+    std::shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
 
     // Improve accuracy of initial set for lower computations
     initial_cells.adjoin_lower_approximation(initial_set,grid_height,grid_depth+4);
@@ -244,7 +244,7 @@ lower_reach(const OvertSetInterfaceType& initial_set,
     const HybridGrid& grid=this->_configuration->grid();
     HybridGridTreeSet initial_cells(grid); HybridGridTreeSet reach_cells(grid);
 
-    shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
+    std::shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
 
     ARIADNE_LOG(3,"Adjoining initial set to the grid...\n");
     // Improve accuracy of initial set for lower computations
@@ -280,7 +280,7 @@ lower_reach_evolve(const OvertSetInterfaceType& initial_set,
 
     HybridGridTreeSet reach=(grid); HybridGridTreeSet evolve_cells(grid);
 
-    shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
+    std::shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
 
     // Improve accuracy of initial set for lower computations
     initial_cells.adjoin_lower_approximation(initial_set,grid_height,grid_depth+4);
@@ -323,7 +323,7 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
 
     const HybridGrid& grid=this->_configuration->grid();
 
-    bool has_bounding_domain = (this->_configuration->bounding_domain_ptr());
+    bool has_bounding_domain = static_cast<bool>(this->_configuration->bounding_domain_ptr());
 
     HybridGridTreeSet bounding(grid);
     if (has_bounding_domain)
@@ -337,7 +337,7 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
     if (has_bounding_domain) initial_cells.restrict(bounding);
     ARIADNE_LOG(5,"initial_size="<<initial_cells.size()<<"\n");
 
-    shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
+    std::shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
 
     ListSet<HybridEnclosure> starting_enclosures;
 
@@ -411,7 +411,7 @@ upper_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(3,"real_time="<<real_time<<"\n");
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
 
-    shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
+    std::shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
 
     for(uint i=0; i!=time_steps; ++i) {
         ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
@@ -452,7 +452,7 @@ upper_reach(const CompactSetInterfaceType& initial_set,
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
     HybridTime hybrid_remainder_time(remainder_time,discrete_steps);
 
-    shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
+    std::shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
 
     ARIADNE_LOG(3,"real_time="<<real_time<<"\n");
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
@@ -511,7 +511,7 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(3,"real_time="<<real_time<<"\n");
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
 
-    shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
+    std::shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
 
     HybridGridTreeSet found_cells(grid);
     for(uint i=0; i!=time_steps; ++i) {
@@ -556,7 +556,7 @@ outer_chain_reach(
 
     const HybridGrid& grid=this->_configuration->grid();
 
-    bool has_bounding_domain = (this->_configuration->bounding_domain_ptr());
+    bool has_bounding_domain = static_cast<bool>(this->_configuration->bounding_domain_ptr());
 
     HybridGridTreeSet bounding(grid);
     if (has_bounding_domain)
@@ -571,7 +571,7 @@ outer_chain_reach(
     accumulated_evolve_cells.adjoin(evolve_cells);
     ARIADNE_LOG(5,"initial_size="<<evolve_cells.size()<<"\n");
 
-    shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
+    std::shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
 
     HybridGridTreeSet reach_cells(grid);
     if(transient_time > 0.0 || transient_steps > 0) {
@@ -636,7 +636,7 @@ HybridReachabilityAnalyserConfiguration::HybridReachabilityAnalyserConfiguration
     set_lock_to_grid_steps(1);
     set_maximum_grid_depth(3);
     set_maximum_grid_height(16);
-    set_grid(shared_ptr<HybridGrid>(new HybridGrid(_analyser.system().state_space(),SimpleHybridScaling())));
+    set_grid(std::shared_ptr<HybridGrid>(new HybridGrid(_analyser.system().state_space(),SimpleHybridScaling())));
     set_outer_overspill_policy(OVERSPILL_ERROR);
 }
 
@@ -660,7 +660,7 @@ HybridReachabilityAnalyserConfiguration::write(std::ostream& os) const
 
 
 void
-HybridReachabilityAnalyserConfiguration::set_bounding_domain_ptr(const shared_ptr<HybridBoxes> value)
+HybridReachabilityAnalyserConfiguration::set_bounding_domain_ptr(const std::shared_ptr<HybridBoxes> value)
 {
  //   ARIADNE_ASSERT_MSG(possibly(value_ptr->space() == _analyser.system().state_space()),
  //           "The bounding domain to set has a different hybrid space than the system.");
@@ -670,7 +670,7 @@ HybridReachabilityAnalyserConfiguration::set_bounding_domain_ptr(const shared_pt
 
 
 void
-HybridReachabilityAnalyserConfiguration::set_grid(const shared_ptr<HybridGrid> value_ptr)
+HybridReachabilityAnalyserConfiguration::set_grid(const std::shared_ptr<HybridGrid> value_ptr)
 {
     ARIADNE_ASSERT_MSG(possibly(value_ptr->space() == _analyser.system().state_space()),
             "The grid to set has a different hybrid space than the system.");

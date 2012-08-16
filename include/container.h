@@ -115,6 +115,7 @@ template<class T> class List
     List(unsigned int n) : std::vector<T>(n) { }
     List(unsigned int n, const T& t) : std::vector<T>(n,t) { }
     List(const std::vector<T>& l) : std::vector<T>(l) { }
+    List(std::initializer_list<T> l) : std::vector<T>(l) { }
     template<class X> List(const List<X>& l) : std::vector<T>(l.begin(),l.end()) { }
     template<class I> List(const I& b, const I& e) : std::vector<T>(b,e) { }
     // Conversion constructor from an value to a single-element list.
@@ -246,6 +247,8 @@ template<class K, class V> class Map
     const V& value(const K& k) const {
         typename std::map<K,V>::const_iterator iter=this->find(k);
         assert(iter!=this->end()); return iter->second; }
+    void insert(const std::pair<K,V>& kv) {
+        this->std::map<K,V>::insert(kv); }
     void insert(const K& k, const V& v) {
         this->std::map<K,V>::insert(std::make_pair(k,v)); }
     void adjoin(const std::map<K,V>& m) {

@@ -28,7 +28,7 @@
 #ifndef ARIADNE_MAP_H
 #define ARIADNE_MAP_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "function.h"
 #include "set_interface.h"

@@ -28,7 +28,7 @@
 #ifndef ARIADNE_VECTOR_FIELD_H
 #define ARIADNE_VECTOR_FIELD_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "function.h"
 #include "set_interface.h"

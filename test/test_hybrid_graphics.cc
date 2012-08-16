@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
     RealVariable x("x"),y("y"),z("z");
     DiscreteLocation location((q|"1"));
     HybridBox hbx1(location,(0<=x<=1,2<=y<=3,5<=z<=7));
-    HybridBox hbx2(location,(x,y,z),Box(3, 1.,2.,3.,4.,6.,8.));
+    HybridBox hbx2(location,(x,y,z),Box{{1.,2.},{3.,4.},{6.,8.}});
 
     HybridFigure hfig;
     hfig.set_locations((location));

@@ -62,12 +62,12 @@ int main(int argc, char **argv)
     {
         double h=10000;
         Figure g;
-        g.set_bounding_box(Box(2, -1.,+1., -1*h,+1*h));
+        g.set_bounding_box(Box{{-1.,+1.},{-1*h,+1*h}});
         g.set_fill_colour(0.5,1.0,1.0);
         g.set_line_width(10);
-        g << Box(2, -0.5,+0.0, -0.5*h, +0.5*h);
+        g << Box({{-0.5,+0.0},{-0.5*h, +0.5*h}});
         g.set_line_width(1);
-        g << Box(2, 0.25,+0.75, -0.5*h, +0.5*h);
+        g << Box({{0.25,+0.75},{-0.5*h, +0.5*h}});
         g.write("test_graphics-canvas");
     }
 

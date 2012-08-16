@@ -398,6 +398,8 @@ void export_scalar_function_model()
     scalar_function_model_class.def("domain", &IntervalScalarFunctionModel::domain, return_value_policy<copy_const_reference>());
     scalar_function_model_class.def("codomain", &IntervalScalarFunctionModel::codomain);
     scalar_function_model_class.def("range", &IntervalScalarFunctionModel::range);
+    scalar_function_model_class.def("clobber", &IntervalScalarFunctionModel::clobber);
+    scalar_function_model_class.def("error", &IntervalScalarFunctionModel::error);
     scalar_function_model_class.def("__call__", (Interval(IntervalScalarFunctionModel::*)(const IntervalVector&)const) &IntervalScalarFunctionModel::operator());
     scalar_function_model_class.def(self+self);
     scalar_function_model_class.def(self-self);

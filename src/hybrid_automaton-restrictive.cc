@@ -28,6 +28,7 @@
 
 #include "macros.h"
 #include "stlio.h"
+#include "tuple.h"
 #include "formula.h"
 #include "expression.h"
 #include "space.h"

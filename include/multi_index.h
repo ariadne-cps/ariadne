@@ -29,7 +29,7 @@
 #define ARIADNE_MULTI_INDEX_H
 
 #include <cassert>
-#include <cstdarg>
+#include <initializer_list>
 #include <iostream>
 
 #include "macros.h"
@@ -83,8 +83,8 @@ class MultiIndex {
     explicit MultiIndex(size_type nv, const int* ary);
     //! \brief Construct a multi index with \a nv variables from the Array \a ary.
     explicit MultiIndex(size_type nv, const unsigned char* ary);
-    //! \brief Construct a multi index with \a nv variables from variable arguments.
-    explicit MultiIndex(size_type nv, int a1, ...);
+    //! \brief Construct a multi index with from an initializer list.
+    MultiIndex(std::initializer_list<int> lst);
 
     //! \brief Copy constructor.
     MultiIndex(const MultiIndex& a);
@@ -241,18 +241,18 @@ inline MultiIndex::MultiIndex(size_type n, const int* ary)
     p[n]=0; for(size_type i=0; i!=n; ++i) { p[i]=ary[i]; p[n]+=ary[i]; }
 }
 
-inline MultiIndex::MultiIndex(size_type n, int a0, ...)
-    : _n(n), _nw(_word_size(_n)), _p(_allocate_words(_nw))
+inline MultiIndex::MultiIndex(std::initializer_list<int> lst)
+    : _n(lst.size()), _nw(_word_size(_n)), _p(_allocate_words(_nw))
 {
-    ARIADNE_ASSERT(n>0);
-    index_type* p=reinterpret_cast<index_type*>(_p);
-    p[0]=a0; p[_n]=a0;
-    va_list args; va_start(args,a0);
-    for(size_type i=1; i!=n; ++i) {
-        p[i]=va_arg(args,int);
-        p[_n]+=p[i];
+    index_type* ptr=reinterpret_cast<index_type*>(_p);
+    std::initializer_list<int>::const_iterator iter=lst.begin();
+    index_type* deg_ptr=ptr+_n;
+    *deg_ptr=0;
+    while(iter!=lst.end()) {
+        *ptr=*iter;
+        *deg_ptr+=*ptr;
+        ++ptr; ++iter;
     }
-    va_end(args);
 }
 
 inline MultiIndex::MultiIndex(const MultiIndex& a)
@@ -594,7 +594,6 @@ class MultiIndexBound {
     typedef MultiIndex::size_type size_type;
     MultiIndexBound(size_type as, size_type d);
     MultiIndexBound(const MultiIndex& a);
-    MultiIndexBound(size_type as, size_type ng, size_type g1s, size_type g1d, ...);
     size_type size() const { return _groups.size(); }
     friend bool operator<=(const MultiIndex& a, const MultiIndexBound& b);
   private:
@@ -621,26 +620,6 @@ inline MultiIndexBound::MultiIndexBound(const MultiIndex& a)
     }
 }
 
-
-inline MultiIndexBound::MultiIndexBound(size_type as, size_type ng, size_type g1s, size_type g1d, ...)
-    : _groups(as), _max_degrees(ng)
-{
-    va_list args; va_start(args,g1d);
-    size_type k=0;
-    for( ; k!=g1s; ++k) {
-        _groups[k]=0;
-    }
-    _max_degrees[0]=g1d;
-    for(size_type i=1; i!=ng; ++i) {
-        size_type nk=k+va_arg(args,int);
-        for( ; k!=nk; ++k) {
-            _groups[k]=i;
-        }
-        _max_degrees[i]=va_arg(args,int);
-    }
-    va_end(args);
-    ARIADNE_ASSERT(k==as);
-}
 
 inline bool operator<=(const MultiIndex& a, const MultiIndexBound& b) {
     typedef MultiIndex::size_type size_type;

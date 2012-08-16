@@ -115,7 +115,7 @@ class Zonotope
     /*! \brief Construct a zonotope of dimension \a d with \a m generators from raw data.
      *  The data format is (c0,G00,G01,...,G0m,e0,c1,G10,...,G1m,e1,...).
      */
-    explicit Zonotope(uint d, uint m, double x0, ...);
+    explicit Zonotope(std::initializer_list< std::tuple<Float,std::initializer_list<Float>,Float> > lst);
 
 
     /*! \brief Convert from a box. */

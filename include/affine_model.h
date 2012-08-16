@@ -70,9 +70,7 @@ class AffineModel<Float>
     explicit AffineModel() : _c(), _g() { }
     explicit AffineModel(uint n) : _c(0.0), _g(n,0.0) { }
     explicit AffineModel(const Float& c, const Vector<Float>& g) : _c(c), _g(g) { }
-    explicit AffineModel(uint as, double c, double g0, ...) : _c(static_cast<Float>(c)), _g(as) {
-        _g[0]=static_cast<Float>(g0); va_list args; va_start(args,g0);
-        for(uint i=1; i!=as; ++i) { _g[i]=static_cast<Float>(va_arg(args,double)); } }
+    explicit AffineModel(Float c, std::initializer_list<Float> g) : _c(c), _g(g) { }
 
     AffineModel<Float>& operator=(const Float& c) {
         this->_c=c; for(uint i=0; i!=this->_g.size(); ++i) { this->_g[i]=0.0; } return *this; }
@@ -130,9 +128,7 @@ class AffineModel<Interval>
     explicit AffineModel() : _c(), _g() { }
     explicit AffineModel(uint n) : _c(0.0), _g(n,0.0), _e(0.0) { }
     explicit AffineModel(const Float& c, const Vector<Float>& g, const Float& e) : _c(c), _g(g), _e(e) { }
-    explicit AffineModel(uint as, double c, double g0, ...) : _c(static_cast<Float>(c)), _g(as), _e(0.0) {
-        _g[0]=static_cast<Float>(g0); va_list args; va_start(args,g0);
-        for(uint i=1; i!=as; ++i) { _g[i]=static_cast<Float>(va_arg(args,double)); } }
+    explicit AffineModel(Float c, std::initializer_list<Float> g) : _c(c), _g(g), _e(0.0) { }
 
     AffineModel<Interval>& operator=(const Float& c) {
         this->_c=c; for(uint i=0; i!=this->_g.size(); ++i) { this->_g[i]=0.0; } this->_e=0.0; return *this; }

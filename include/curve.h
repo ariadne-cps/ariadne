@@ -28,7 +28,7 @@
 #ifndef ARIADNE_CURVE_H
 #define ARIADNE_CURVE_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "macros.h"
 #include "stlio.h"

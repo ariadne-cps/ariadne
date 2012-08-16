@@ -103,8 +103,8 @@ template<class T> class Constant
     bool operator==(const Constant<T>& other) const {
         if(this->name()==other.name()) { assert(this->value()==other.value()); return true; } else { return false; } }
   private:
-    shared_ptr<Identifier> _name_ptr;
-    shared_ptr<T> _value_ptr;
+    std::shared_ptr<Identifier> _name_ptr;
+    std::shared_ptr<T> _value_ptr;
 };
 
 template<> class Constant<String>
@@ -151,7 +151,7 @@ class UntypedVariable {
     explicit UntypedVariable(const String& nm, VariableType tp, VariableCategory cat=simple)
         : _name_ptr(new Identifier(nm)), _type(tp), _category(cat) { }
   private:
-    shared_ptr<Identifier> _name_ptr;
+    std::shared_ptr<Identifier> _name_ptr;
     VariableType _type;
     VariableCategory _category;
 };

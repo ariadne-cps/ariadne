@@ -242,12 +242,12 @@ HybridEvolverBase::_create(
         const SystemType& system,
         FunctionFactoryType* factory)
 {
-    this->_sys_ptr=shared_ptr<SystemType>(system.clone());
-    this->_function_factory_ptr=shared_ptr<FunctionFactoryType>(factory);
-    this->_solver_ptr=shared_ptr<SolverInterface>(new IntervalNewtonSolver(1e-8,12));
+    this->_sys_ptr=std::shared_ptr<SystemType>(system.clone());
+    this->_function_factory_ptr=std::shared_ptr<FunctionFactoryType>(factory);
+    this->_solver_ptr=std::shared_ptr<SolverInterface>(new IntervalNewtonSolver(1e-8,12));
     this->ALLOW_CREEP=true;
     this->ALLOW_UNWIND=false;
-    //this->_configuration_ptr=shared_ptr<ConfigurationType>(new ConfigurationType());
+    //this->_configuration_ptr=std::shared_ptr<ConfigurationType>(new ConfigurationType());
 }
 
 
@@ -272,7 +272,7 @@ HybridEvolverBase::configuration() const
 void
 HybridEvolverBase::set_function_factory(const FunctionFactoryType& factory)
 {
-    this->_function_factory_ptr=shared_ptr<FunctionFactoryType>(factory.clone());
+    this->_function_factory_ptr=std::shared_ptr<FunctionFactoryType>(factory.clone());
 }
 
 const HybridEvolverBase::FunctionFactoryType&
@@ -284,13 +284,13 @@ HybridEvolverBase::function_factory() const
 void
 HybridEvolverBase::set_integrator(const IntegratorInterface& integrator)
 {
-    this->_integrator_ptr=shared_ptr<IntegratorInterface>(integrator.clone());
+    this->_integrator_ptr=std::shared_ptr<IntegratorInterface>(integrator.clone());
 }
 
 void
 HybridEvolverBase::set_solver(const SolverInterface& solver)
 {
-    this->_solver_ptr=shared_ptr<SolverInterface>(solver.clone());
+    this->_solver_ptr=std::shared_ptr<SolverInterface>(solver.clone());
 }
 
 
@@ -1396,7 +1396,7 @@ HybridEvolverBaseConfiguration::HybridEvolverBaseConfiguration(HybridEvolverBase
 void
 HybridEvolverBaseConfiguration::set_flow_accuracy(const RealType value)
 {
-    _evolver._integrator_ptr=shared_ptr<TaylorSeriesIntegrator>(new TaylorSeriesIntegrator(value));
+    _evolver._integrator_ptr=std::shared_ptr<TaylorSeriesIntegrator>(new TaylorSeriesIntegrator(value));
     _flow_accuracy = value;
 }
 

@@ -41,7 +41,7 @@ using namespace std;
 class TestSolver
 {
   private:
-    scoped_ptr<SolverInterface> solver;
+    std::unique_ptr<SolverInterface> solver;
   public:
     TestSolver(const SolverInterface& s)
         : solver(s.clone()) { }

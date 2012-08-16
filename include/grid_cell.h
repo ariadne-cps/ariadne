@@ -34,7 +34,7 @@
 #include <string>
 
 #include <boost/iterator/iterator_facade.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "tribool.h"
 #include "array.h"

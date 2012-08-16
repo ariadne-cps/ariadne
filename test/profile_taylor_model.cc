@@ -181,7 +181,7 @@ int main(int argc, const char* argv[]) {
     uint ntries=20;
     if(argc>1) { ntries=atoi(argv[1]); }
 
-    Vector<Float> c(2, 1.0,2.0);
+    Vector<Float> c={1.0,2.0};
     int i;
 
     TrivialSweeper trivial_sweeper;
@@ -220,7 +220,7 @@ int main(int argc, const char* argv[]) {
     threshold_sweeper = ThresholdSweeper(1e-3);
     y.set_sweeper(threshold_sweeper);
 
-    IntervalTaylorModel z(Expansion<Float>(3,4, 0,0,0,1.0, 1,0,0,0.5, 0,1,0,-0.25, 0,0,1,0.625),0.0,threshold_sweeper);
+    IntervalTaylorModel z(Expansion<Float>({ {{0,0,0},1.0}, {{1,0,0},0.5}, {{0,1,0},-0.25}, {{0,0,1},0.625} }),0.0,threshold_sweeper);
 
     std::cout << std::setw(20) << std::left << "name" << std::right
               << std::setw(11) << "time(us)"

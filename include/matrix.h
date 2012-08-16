@@ -30,7 +30,7 @@
 
 #include <iostream>
 #include <iomanip>
-#include <cstdarg>
+#include <initializer_list>
 #include <limits>
 
 #include "macros.h"
@@ -120,8 +120,8 @@ class Matrix
     //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style Array beginning at \a ptr. The C-style Array stores a matrix with row increment \a ri and column increment \a ci.
     template<class XX> Matrix(size_t r, size_t c, const XX* ptr, int ri, int ci) : _nr(r), _nc(c), _ptr(new X[_nr*_nc]) {
         for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { this->set(i,j,ptr[i*ri+j*ci]); } } }
-    //! Construct a matrix with \a r rows and \a c columns, with values initialised from a variadic argument list. WARNING: The values in the list must all be double-precision type; in particular, constants must be floating-point values \c 2.0 rather integer values \c 2 .
-    Matrix(size_t r, size_t c, const double& x00, const double& x01, ... );
+    //! Construct a matrix using initializer lists.
+    Matrix(std::initializer_list< std::initializer_list<X> > const lst);
     //! Construct a matrix from a string in Matlab format, with entries in a row separated with commas, and rows separated with semicolons. e.g. <tt>"[a00, a01, a02; a10, a11, a12]"</tt>.
     explicit Matrix(const std::string& str)
         : _nr(0), _nc(0), _ptr(0) { std::stringstream ss(str); ss >> *this; }
@@ -261,18 +261,21 @@ template<class X> std::istream& operator>>(std::istream& is, Matrix<X>& A);
 template<class M> std::ostream& operator<<(std::ostream& os, const MatrixExpression<M>& Ae);
 
 
-template<class X> Matrix<X>::Matrix(size_t r, size_t c, const double& x00, const double& x01, ...)
-    : _nr(r), _nc(c), _ptr(new X[r*c])
+template<class X> Matrix<X>::Matrix(std::initializer_list< std::initializer_list<X> > lst)
+    : _nr(lst.size()), _nc(lst.size()==0?0u:lst.begin()->size()), _ptr(new X[_nr*_nc])
 {
-    assert(r>=1 && c>=1 && r*c>1); va_list args; va_start(args,x01);
-    (*this)[0][0]=x00;
-    if(c==1) {
-        (*this)[1][0]=x01; for(size_t i=2; i!=r; ++i) { (*this)[i][0]=va_arg(args,double); }
-    } else {
-        (*this)[0][1]=x01; for(size_t j=2; j!=c; ++j) { (*this)[0][j]=va_arg(args,double); }
-        for(size_t i=1; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)[i][j]=va_arg(args,double); } }
+    X* pointer = this->_ptr;
+    for(typename std::initializer_list< std::initializer_list<X> >::const_iterator row_iter=lst.begin();
+        row_iter!=lst.end(); ++row_iter)
+    {
+        assert(row_iter->size()==this->_nc);
+        for(typename std::initializer_list<X>::const_iterator iter=row_iter->begin();
+            iter!=row_iter->end(); ++iter)
+        {
+            *pointer = *iter;
+            ++pointer;
+        }
     }
-    va_end(args);
 }
 
 template<class X1, class X2> bool operator==(const Matrix<X1>& A1, const Matrix<X2>& A2)

@@ -125,11 +125,11 @@ TestMatrix::test_misc()
     A1=Matrix<Float>::identity(4);
     ARIADNE_TEST_PRINT(A1);
 
-    ARIADNE_TEST_EQUALS(+FloatMatrix(2,2,1.,2.,3.,4.),FloatMatrix(2,2,1.,2.,3.,4.));
-    ARIADNE_TEST_EQUALS(-FloatMatrix(2,2,1.,2.,3.,4.),FloatMatrix(2,2,-1.,-2.,-3.,-4.));
-    ARIADNE_TEST_EQUALS(FloatMatrix(2,2,1.,2.,3.,4.)+FloatMatrix(2,2,5.,7.,8.,6.),FloatMatrix(2,2,6.,9.,11.,10.));
-    ARIADNE_TEST_EQUALS(FloatMatrix(2,2,1.,2.,3.,4.)-FloatMatrix(2,2,5.,7.,8.,6.),FloatMatrix(2,2,-4.,-5.,-5.,-2.));
-    ARIADNE_TEST_EQUALS(FloatMatrix(2,2,1.,2.,3.,4.)*FloatMatrix(2,2,5.,7.,8.,6.),FloatMatrix(2,2,21.,19.,47.,45.));
+    ARIADNE_TEST_EQUALS(+FloatMatrix({{1.,2.},{3.,4.}}),FloatMatrix({{1.,2.},{3.,4.}}));
+    ARIADNE_TEST_EQUALS(-FloatMatrix({{1.,2.},{3.,4.}}),FloatMatrix({{-1.,-2.},{-3.,-4.}}));
+    ARIADNE_TEST_EQUALS(FloatMatrix({{1.,2.},{3.,4.}})+FloatMatrix({{5.,7.},{8.,6.}}),FloatMatrix({{6.,9.},{11.,10.}}));
+    ARIADNE_TEST_EQUALS(FloatMatrix({{1.,2.},{3.,4.}})-FloatMatrix({{5.,7.},{8.,6.}}),FloatMatrix({{-4.,-5.},{-5.,-2.}}));
+    ARIADNE_TEST_EQUALS(FloatMatrix({{1.,2.},{3.,4.}})*FloatMatrix({{5.,7.},{8.,6.}}),FloatMatrix({{21.,19.},{47.,45.}}));
 
 }
 

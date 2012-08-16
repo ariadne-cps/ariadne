@@ -371,7 +371,7 @@ class DifferenceFunction
     template<class Res, class Args> void _compute(Res& r, const Args& a) const { r=fptr->evaluate(a)-a; }
     template<class Res, class Args> void _compute_approx(Res& r, const Args& a) const { _compute(r,a); }
   private:
-    boost::shared_ptr<IntervalVectorFunction> fptr;
+    std::shared_ptr<IntervalVectorFunction> fptr;
 };
 */
 
@@ -384,7 +384,7 @@ SolverBase::SolverBase(double max_error, uint max_steps)
 void
 SolverBase::set_function_factory(const FunctionModelFactoryInterface<Interval>& factory)
 {
-    this->_function_factory_ptr=shared_ptr< FunctionModelFactoryInterface<Interval> >(factory.clone());
+    this->_function_factory_ptr=std::shared_ptr< FunctionModelFactoryInterface<Interval> >(factory.clone());
 }
 
 const FunctionModelFactoryInterface<Interval>&

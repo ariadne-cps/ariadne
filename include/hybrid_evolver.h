@@ -444,15 +444,15 @@ class HybridEvolverBase
 
   protected:
     void _create(const SystemType& system, FunctionFactoryType* factory);
-    boost::shared_ptr< IntegratorInterface > _integrator_ptr;
+    std::shared_ptr< IntegratorInterface > _integrator_ptr;
   private:
-    boost::shared_ptr< FunctionFactoryType > _function_factory_ptr;
+    std::shared_ptr< FunctionFactoryType > _function_factory_ptr;
 
-    boost::shared_ptr< SolverInterface > _solver_ptr;
-    boost::shared_ptr< SystemType > _sys_ptr;
-    //boost::shared_ptr< EvolutionProfiler >  _profiler;
+    std::shared_ptr< SolverInterface > _solver_ptr;
+    std::shared_ptr< SystemType > _sys_ptr;
+    //std::shared_ptr< EvolutionProfiler >  _profiler;
   protected:
-    boost::shared_ptr< ConfigurationType > _configuration_ptr;
+    std::shared_ptr< ConfigurationType > _configuration_ptr;
 };
 
 
@@ -737,7 +737,7 @@ class GeneralHybridEvolverFactory
 {
   private:
 
-    boost::shared_ptr<IntervalFunctionModelFactoryInterface> _function_factory;
+    std::shared_ptr<IntervalFunctionModelFactoryInterface> _function_factory;
 
   public:
 

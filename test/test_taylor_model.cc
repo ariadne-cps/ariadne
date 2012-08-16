@@ -132,8 +132,8 @@ void TestTaylorModel::test_concept()
 
 void TestTaylorModel::test_constructors()
 {
-    ARIADNE_TEST_CONSTRUCT(IntervalTaylorModel,tv1,(E(2,3, 1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0), 0.25, swp));
-    ARIADNE_TEST_CONSTRUCT(IntervalTaylorModel,tv2,(E(2,10, 0,0,1.0, 1,0,2.0, 0,1,3.0, 2,0,4.0, 1,1,5.0, 0,2,6.0, 3,0,7.0, 2,1,8.0, 1,2,9.0, 0,3,10.0), 0.25, swp));
+    ARIADNE_TEST_CONSTRUCT(IntervalTaylorModel,tv1,(E(2,3, {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0}), 0.25, swp));
+    ARIADNE_TEST_CONSTRUCT(IntervalTaylorModel,tv2,(E({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0}, {{3,0},7.0}, {{2,1},8.0}, {{1,2},9.0}, {{0,3},10.0} }), 0.25, swp));
 
     ARIADNE_ASSERT_EQUAL(tv1.value(),1.0);
     ARIADNE_ASSERT_EQUAL(tv1.error(),0.25);
@@ -144,10 +144,10 @@ void TestTaylorModel::test_constructors()
 
 void TestTaylorModel::test_predicates()
 {
-    IntervalTaylorModel tv1(E(1,2, 1.00,2.00,3.00), 0.75, swp);
-    IntervalTaylorModel tv2(E(1,2, 1.00,1.75,3.25), 0.25, swp);
-    IntervalTaylorModel tv3(E(1,2, 1.125,1.75,3.25), 0.25, swp);
-    IntervalTaylorModel tv4(E(1,3, 1.00,2.25,3.00,-0.25), 0.25, swp);
+    IntervalTaylorModel tv1({{{0},1.00},{{1},2.00},{{2},3.00}}, 0.75, swp);
+    IntervalTaylorModel tv2({{{0},1.00},{{1},1.75},{{2},3.25}}, 0.25, swp);
+    IntervalTaylorModel tv3({{{0},1.125},{{1},1.75},{{2},3.25}}, 0.25, swp);
+    IntervalTaylorModel tv4({{{0},1.00},{{1},2.25},{{2},3.00},{{4},-0.25}}, 0.25, swp);
 
     ARIADNE_TEST_BINARY_PREDICATE(refines,tv1,tv1);
     ARIADNE_TEST_BINARY_PREDICATE(refines,tv2,tv1);
@@ -157,40 +157,40 @@ void TestTaylorModel::test_predicates()
 
 void TestTaylorModel::test_approximation()
 {
-    ARIADNE_TEST_CONSTRUCT(IntervalTaylorModel,tv2,(E(1,2,1.0,2.0,3.0),0.25, swp));
+    ARIADNE_TEST_CONSTRUCT(IntervalTaylorModel,tv2,(E(1,2, {1.0,2.0,3.0}),0.25, swp));
 }
 
 void TestTaylorModel::test_unscale()
 {
-    if(unscale(IntervalTaylorModel(E(1,0, 3.0),0.0,swp),Interval(1.0)).range()!=Interval(1.0)) {
+    if(unscale(IntervalTaylorModel({{{0},3.0}},0.0,swp),Interval(1.0)).range()!=Interval(1.0)) {
         ARIADNE_TEST_WARN("Unscaling over singleton domain does not yield constant");
     }
 }
 
 void TestTaylorModel::test_evaluate()
 {
-    Vector<Interval> iv(2, 0.25,0.5, -0.75,-0.5);
-    IntervalTaylorModel tv(E(2,2,1.0,2.0,3.0,4.0,5.0,6.0),0.25,swp);
+    Vector<Interval> iv={{0.25,0.5},{-0.75,-0.5}};
+    IntervalTaylorModel tv({{{0,0},1.0},{{1,0},2.0},{{0,1},3.0},{{2,0},4.0},{{1,1},5.0},{{0,2},6.0}},0.25,swp);
     ARIADNE_TEST_EQUAL(evaluate(tv,iv),Interval(-1,1));
 }
 
 void TestTaylorModel::test_arithmetic()
 {
     //Operations which can be performed exactly with floating-point arithmetic.
-    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp)+(-3), IntervalTaylorModel(E(1,2, -2.0,-2.0,3.0), 0.75,swp));
-    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp)-(-3), IntervalTaylorModel(E(1,2, 4.0,-2.0,3.0), 0.75,swp));
-    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp)*(-3), IntervalTaylorModel(E(1,2, -3.0,6.0,-9.0), 2.25,swp));
-    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp)/(-4), IntervalTaylorModel(E(1,2, -0.25,0.5,-0.75), 0.1875,swp));
-    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp)+Interval(-1,2), IntervalTaylorModel(E(1,2, 1.5,-2.0,3.0), 2.25,swp));
-    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp)-Interval(-1,2), IntervalTaylorModel(E(1,2, 0.5,-2.0,3.0), 2.25,swp));
-    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp)*Interval(-1,2), IntervalTaylorModel(E(1,2, 0.5,-1.0,1.5), 10.5,swp));
-    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp)/Interval(0.25,2.0), IntervalTaylorModel(E(1,2, 2.25,-4.5,6.75), 13.5,swp));
-    ARIADNE_TEST_EQUAL(+IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp), IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp));
-    ARIADNE_TEST_EQUAL(-IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp), IntervalTaylorModel(E(1,2, -1.0,2.0,-3.0), 0.75,swp));
-    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp)+IntervalTaylorModel(E(1,2, 3.0,2.0,-4.0),0.5,swp), IntervalTaylorModel(E(1,2, 4.0,0.0,-1.0), 1.25,swp));
-    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp)-IntervalTaylorModel(E(1,2, 3.0,2.0,-4.0),0.5,swp), IntervalTaylorModel(E(1,2, -2.0,-4.0,7.0), 1.25,swp));
-    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 0.0,0.0,3.0), 0.75,swp)*IntervalTaylorModel(E(1,2, 3.0,2.0,-4.0),0.5,swp), IntervalTaylorModel(E(1,4, 0.0,0.0,9.0,6.0,-12.0), 8.625,swp));
-    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75,swp)*IntervalTaylorModel(E(1,2, 3.0,2.0,-4.0),0.5,swp), IntervalTaylorModel(E(1,4, 3.0,-4.0,1.0,14.0,-12.0), 10.125,swp));
+    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+(-3), IntervalTaylorModel(E(1,2, {-2.0,-2.0,3.0}), 0.75,swp));
+    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-(-3), IntervalTaylorModel(E(1,2, {4.0,-2.0,3.0}), 0.75,swp));
+    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*(-3), IntervalTaylorModel(E(1,2, {-3.0,6.0,-9.0}), 2.25,swp));
+    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)/(-4), IntervalTaylorModel(E(1,2, {-0.25,0.5,-0.75}), 0.1875,swp));
+    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+Interval(-1,2), IntervalTaylorModel(E(1,2, {1.5,-2.0,3.0}), 2.25,swp));
+    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-Interval(-1,2), IntervalTaylorModel(E(1,2, {0.5,-2.0,3.0}), 2.25,swp));
+    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*Interval(-1,2), IntervalTaylorModel(E(1,2, {0.5,-1.0,1.5}), 10.5,swp));
+    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)/Interval(0.25,2.0), IntervalTaylorModel(E(1,2, {2.25,-4.5,6.75}), 13.5,swp));
+    ARIADNE_TEST_EQUAL(+IntervalTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp), IntervalTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp));
+    ARIADNE_TEST_EQUAL(-IntervalTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp), IntervalTaylorModel(E(1,2, {-1.0,2.0,-3.0}), 0.75,swp));
+    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+IntervalTaylorModel(E(1,2, {3.0,2.0,-4.0}),0.5,swp), IntervalTaylorModel(E(1,2, {4.0,0.0,-1.0}), 1.25,swp));
+    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-IntervalTaylorModel(E(1,2, {3.0,2.0,-4.0}),0.5,swp), IntervalTaylorModel(E(1,2, {-2.0,-4.0,7.0}), 1.25,swp));
+    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, {0.0,0.0,3.0}), 0.75,swp)*IntervalTaylorModel(E(1,2, {3.0,2.0,-4.0}),0.5,swp), IntervalTaylorModel(E(1,4, {0.0,0.0,9.0,6.0,-12.0}), 8.625,swp));
+    ARIADNE_TEST_EQUAL(IntervalTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*IntervalTaylorModel(E(1,2, {3.0,2.0,-4.0}),0.5,swp), IntervalTaylorModel(E(1,4, {3.0,-4.0,1.0,14.0,-12.0}), 10.125,swp));
 
     IntervalTaylorModel tm_inf(E(2),+inf,swp);
     if(isnan(numeric_cast<double>((tm_inf * 0.0).error()))) {
@@ -220,31 +220,31 @@ void TestTaylorModel::test_range()
 
 void TestTaylorModel::test_functions()
 {
-    IntervalTaylorModel x(E(1,1, 0.0, 1.0), 0.0, swp);
-    IntervalTaylorModel xz(E(1,1, 0.0, 0.5), 0.0, swp);
-    IntervalTaylorModel xo(E(1,1, 1.0, 0.5), 0.0, swp);
+    IntervalTaylorModel x(E(1,1, {0.0, 1.0}), 0.0, swp);
+    IntervalTaylorModel xz(E(1,1, {0.0, 0.5}), 0.0, swp);
+    IntervalTaylorModel xo(E(1,1, {1.0, 0.5}), 0.0, swp);
 
     ARIADNE_TEST_PRINT(exp(x));
     ARIADNE_TEST_PRINT(sin(x));
     ARIADNE_TEST_PRINT(cos(x));
 
     //Functions based on their natural defining points with variable dependence 0.5
-    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(T(E(1,1,0.0,1.0),0.0,swp)),T(E(1,6, 1.0,1.00,0.500,0.1667,0.0417,0.0083,0.0014),0.0004,swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(x),T(E(1,6, 0.0,1.0000,0.0,-0.1667,0.0,0.0083,0.0),0.0003,swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(x),T(E(1,6, 1.0000,0.0,-0.5000,0.0,0.0417,0.0,-0.0014),0.0003,swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(T(E(1,1,{0.0,1.0}),0.0,swp)),T(E(1,6, {1.0,1.00,0.500,0.1667,0.0417,0.0083,0.0014}),0.0004,swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(x),T(E(1,6, {0.0,1.0000,0.0,-0.1667,0.0,0.0083,0.0}),0.0003,swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(x),T(E(1,6, {1.0000,0.0,-0.5000,0.0,0.0417,0.0,-0.0014}),0.0003,swp));
 
     //Functions based on their natural defining points with variable dependence 0.5
-    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(xz),IntervalTaylorModel(E(1,6, 1.00000,0.50000,0.12500,0.02083,0.00260,0.00026,0.00002), 0.00003, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(xz),IntervalTaylorModel(E(1,6, 0.00000,0.50000,0.0000,-0.02083,0.00000,0.00026,0.00000), 0.00003, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(xz),IntervalTaylorModel(E(1,6, 1.00000,0.0000,-0.12500,0.00000,0.00260,0.0000,-0.00002), 0.00003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(xz),IntervalTaylorModel(E(1,6, {1.00000,0.50000,0.12500,0.02083,0.00260,0.00026,0.00002}), 0.00003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(xz),IntervalTaylorModel(E(1,6, {0.00000,0.50000,0.0000,-0.02083,0.00000,0.00026,0.00000}), 0.00003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(xz),IntervalTaylorModel(E(1,6, {1.00000,0.0000,-0.12500,0.00000,0.00260,0.0000,-0.00002}), 0.00003, swp));
 
-    ARIADNE_TEST_BINARY_PREDICATE(refines,rec(xo),IntervalTaylorModel(E(1,6,  1.000000,-0.500000, 0.250000,-0.125000, 0.062500,-0.031250, 0.015625), 0.018, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(xo),IntervalTaylorModel(E(1,6, 1.000000, 0.250000,-0.031250, 0.007813,-0.002441, 0.000854,-0.000320), 0.0003, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,log(xo),IntervalTaylorModel(E(1,6,  0.000000, 0.500000,-0.125000, 0.041667,-0.015625, 0.006250,-0.002604), 0.003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,rec(xo),IntervalTaylorModel(E(1,6,  {1.000000,-0.500000, 0.250000,-0.125000, 0.062500,-0.031250, 0.015625}), 0.018, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(xo),IntervalTaylorModel(E(1,6, {1.000000, 0.250000,-0.031250, 0.007813,-0.002441, 0.000854,-0.000320}), 0.0003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,log(xo),IntervalTaylorModel(E(1,6,  {0.000000, 0.500000,-0.125000, 0.041667,-0.015625, 0.006250,-0.002604}), 0.003, swp));
 
     // Test exponential based at log2
-    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(T(E(1,1,0.693147,0.5),0.0,swp)),
-                                  T(E(1,6, 2.00000,1.00000,0.25000,0.04166,0.00520,0.00052,0.00004), 0.00006, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(T(E(1,1,{0.693147,0.5}),0.0,swp)),
+                                  T(E(1,6, {2.00000,1.00000,0.25000,0.04166,0.00520,0.00052,0.00004}), 0.00006, swp));
 
 }
 
@@ -264,12 +264,12 @@ void TestTaylorModel::test_intersection()
     IntervalTaylorModel e=IntervalTaylorModel::error(2,1.0,swp);
 
     // Test intersection with no roundoff errors
-    ARIADNE_TEST_EQUAL(intersection(T(E(1,4, 1.0,-0.75,0.0,3.0,3.25),0.5,swp),T(E(1,4, 1.0,0.0,0.25,2.0,3.0),1.0,swp)),
-        T(E(1,4, 1.0,-0.625,0.0,2.75,3.25),0.50,swp));
+    ARIADNE_TEST_EQUAL(intersection(T(E(1,4, {1.0,-0.75,0.0,3.0,3.25}),0.5,swp),T(E(1,4, {1.0,0.0,0.25,2.0,3.0}),1.0,swp)),
+        T(E(1,4, {1.0,-0.625,0.0,2.75,3.25}),0.50,swp));
 
     // Test intersection with roundoff errors
-    ARIADNE_TEST_EQUAL(intersection(T(E(1,0, 2./3),0.5,swp),T(E(1,0, 6./5),0.25,swp)),
-        T(E(1,0, 1.0583333333333331),0.10833333333333339,swp));
+    ARIADNE_TEST_EQUAL(intersection(T(E(1,0, {2./3}),0.5,swp),T(E(1,0, {6./5}),0.25,swp)),
+        T(E(1,0, {1.0583333333333331}),0.10833333333333339,swp));
 }
 
 void TestTaylorModel::test_split()
@@ -301,20 +301,24 @@ void TestTaylorModel::test_antiderivative()
     IntervalTaylorModel tm=IntervalTaylorModel::constant(2,1.0,swp);
     IntervalTaylorModel atm=antiderivative(tm,1);
 
-    ARIADNE_TEST_EQUAL(antiderivative(T(E(2,1, 0,0,2.0),0.,swp),0),T(E(2,1, 1,0,2.0),0.,swp));
-    ARIADNE_TEST_EQUAL(antiderivative(T(E(2,1, 0,0,2.0),0.,swp),1),T(E(2,1, 0,1,2.0),0.,swp));
-    ARIADNE_TEST_EQUAL(antiderivative(T(E(2,1, 1,0,3.0),0.,swp),0),T(E(2,1, 2,0,1.5),0.,swp));
-    ARIADNE_TEST_EQUAL(antiderivative(T(E(2,1, 2,0,7.5),0.,swp),0),T(E(2,1, 3,0,2.5),0.,swp));
-    ARIADNE_TEST_EQUAL(antiderivative(T(E(2,1, 2,4,7.5),0.,swp),0),T(E(2,1, 3,4,2.5),0.,swp));
-    ARIADNE_TEST_EQUAL(antiderivative(T(E(2,1, 2,4,7.5),0.,swp),1),T(E(2,1, 2,5,1.5),0.,swp));
+    ARIADNE_TEST_EQUAL(antiderivative(T(E({ {{0,0},2.0} }),0.,swp),0),T(E({ {{1,0},2.0} }),0.,swp));
+    ARIADNE_TEST_EQUAL(antiderivative(T(E({ {{0,0},2.0} }),0.,swp),1),T(E({ {{0,1},2.0} }),0.,swp));
+    ARIADNE_TEST_EQUAL(antiderivative(T(E({ {{1,0},3.0} }),0.,swp),0),T(E({ {{2,0},1.5} }),0.,swp));
+    ARIADNE_TEST_EQUAL(antiderivative(T(E({ {{2,0},7.5} }),0.,swp),0),T(E({ {{3,0},2.5} }),0.,swp));
+    ARIADNE_TEST_EQUAL(antiderivative(T(E({ {{2,4},7.5} }),0.,swp),0),T(E({ {{3,4},2.5} }),0.,swp));
+    ARIADNE_TEST_EQUAL(antiderivative(T(E({ {{2,4},7.5} }),0.,swp),1),T(E({ {{2,5},1.5} }),0.,swp));
 
     // Test error control
-    ARIADNE_TEST_EQUAL(antiderivative(T(E(1,1, 2,2.0),0.,swp),0),T(E(1,1, 3,0.66666666666666663),5.5511151231257827021e-17,swp));
-    ARIADNE_TEST_EQUAL(antiderivative(T(E(1,1, 2,2.0),1.,swp),0),T(E(1,1, 3,0.66666666666666663),1.0000000000000002,swp));
+    IntervalTaylorModel x=IntervalTaylorModel::variable(1,0,swp);
+    IntervalTaylorModel e=IntervalTaylorModel::zero(1,swp)+Interval(-1,+1);
+    ARIADNE_TEST_EQUAL(antiderivative(2.0*x*x,0),0.66666666666666663*x*x*x+5.5511151231257827021e-17*e);
+    ARIADNE_TEST_EQUAL(antiderivative(2.0*x*x+e,0),0.66666666666666663*x*x*x+1.0000000000000002*e);
+    ARIADNE_TEST_EQUAL(antiderivative(T({{{2},2.0}},0.,swp),0),T({{{3},0.66666666666666663}},5.5511151231257827021e-17,swp));
+    ARIADNE_TEST_EQUAL(antiderivative(T({{{2},2.0}},1.,swp),0),T({{{3},0.66666666666666663}},1.0000000000000002,swp));
 
-    // Regression test for
-    T t1=T(E(2,6, 0,0,1., 1,0,2., 0,1,3., 2,0,4., 1,1,5., 0,2,6.), 0., swp);
-    T at1=T(E(2,6, 1,0,1., 2,0,1., 1,1,3., 3,0,1.33333333333333333, 2,1,2.5, 1,2,6.), 1.1102230246251565404e-16, swp);
+    // Regression test
+    T t1=T({ {{0,0},1.}, {{1,0},2.}, {{0,1},3.}, {{2,0},4.}, {{1,1},5.}, {{0,2},6.} }, 0., swp);
+    T at1=T({ {{1,0},1.}, {{2,0},1.}, {{1,1},3.}, {{3,0},1.33333333333333333}, {{2,1},2.5}, {{1,2},6.} }, 1.1102230246251565404e-16, swp);
     ARIADNE_TEST_EQUAL(antiderivative(t1,0),at1);
 }
 

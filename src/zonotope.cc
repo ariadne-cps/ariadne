@@ -181,24 +181,20 @@ Zonotope::Zonotope(uint d, uint m)
 {
 }
 
-Zonotope::Zonotope(uint d, uint m, double x0, ...)
-    : _centre(d), _generators(d,m), _error(d)
+Zonotope::Zonotope(std::initializer_list< std::tuple<Float,std::initializer_list<Float>,Float> > lst)
+    : _centre(lst.size()), _generators(lst.size(),lst.size()==0?0u:std::get<1>(*lst.begin()).size()), _error(lst.size())
 {
-    double x=x0;
-    va_list args;
-    va_start(args,x0);
-    for(uint i=0; i!=d; ++i) {
-        if(i!=0) { x=va_arg(args,double); }
-        this->_centre[i]=x0;
-        for(uint j=0; j!=m; ++j) {
-            x=va_arg(args,double);
-            this->_generators[i][j]=x;
+    for(std::initializer_list< std::tuple<Float,std::initializer_list<Float>,Float> >::const_iterator aff_iter=lst.begin();
+        aff_iter!=lst.end(); ++aff_iter)
+    {
+        uint i=aff_iter-lst.begin();
+        this->_centre[i]=std::get<0>(*aff_iter);
+        for(uint j=0; j!=_generators.column_size(); ++j) {
+            this->_generators[i][j]=*(std::get<1>(*aff_iter).begin()+j);
         }
-        x=va_arg(args,double);
-        this->_error[i]=x;
+        this->_error[i]=std::get<2>(*aff_iter);
         ARIADNE_ASSERT(this->_error[i]>=0);
-    }
-    va_end(args);
+    } 
 }
 
 

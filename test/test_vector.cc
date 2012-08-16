@@ -98,6 +98,9 @@ TestVector::test_misc()
     cout << "v3=" << v3 << endl;
     Vector<Float> v4=v2;
     cout << "v4=" << v4 << endl;
+    Vector<Float> v5={-4.0,3.0,1.0};
+    cout << "v5=" << v5 << endl;
+    assert(v1==v5);
     cout << endl;
 
     Vector<Float> vf0;

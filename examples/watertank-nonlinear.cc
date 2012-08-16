@@ -209,9 +209,6 @@ int main()
     //RealVariableBox initial_box((height==0.5, aperture==0.0));
     RealVariableBox initial_box((0.5<=height<=0.5001, 0.00<=aperture<=0.0001));
     HybridExpressionSet initial_set(opening,initial_box);
-    //RealVariableBox initial_box((height==6.0, aperture==1.0, t==0.0000));
-    //HybridExpressionSet initial_set(l2,initial_box);
-    Box bounding_box(2, 0.0,10.0, -0.1,1.1);
 
     HybridTime evolution_time(tmax,jmax);
 

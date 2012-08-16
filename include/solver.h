@@ -93,7 +93,7 @@ class SolverBase
   private:
     double _max_error;
     uint _max_steps;
-    shared_ptr< FunctionModelFactoryInterface<Interval> > _function_factory_ptr;
+    std::shared_ptr< FunctionModelFactoryInterface<Interval> > _function_factory_ptr;
 };
 
 

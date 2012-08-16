@@ -66,10 +66,10 @@ namespace Ariadne {
  *  void set_property_name(const PropertyType value);
  *
  *  Please note that the argument to the write method must be passed by value for clear responsibility and simplicity of
- *  manually setting the property. If efficiency demands not to perform any copy, then the PropertyType must be a boost::shared_ptr
+ *  manually setting the property. If efficiency demands not to perform any copy, then the PropertyType must be a std::shared_ptr
  *  object, in order to properly increment the reference count if necessary; to make this situation clearer, the field name must
  *  be appended with _ptr, and the argument to the write method must be called value_ptr. If the property is also optional,
- *  it is read as a shared_ptr type; as a consequence, the read/write method names must be appended with _ptr too.
+ *  it is read as a std::shared_ptr type; as a consequence, the read/write method names must be appended with _ptr too.
  *
  *  In the simplest case of the read and write methods strictly getting the field and setting the field to the argument value,
  *  the code may reside in the header file, for simplicity. If on the other hand the implementation is more complex,

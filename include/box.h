@@ -109,9 +109,9 @@ class Box
     Box() : Vector<Interval>() { }
     //! Construct an empty box in \a d dimensions.
     explicit Box(uint d) : Vector<Interval>(d) { }
-    //! Construct from an integer giving the dimension and a list of floating-point values
-    //! giving alternately lower and upper bounds.
-    explicit Box(uint d, double x0l, double x0u, ...);
+    //! Construct from an initializer list of pairs of floating-point values
+    //! giving lower and upper bounds.
+    explicit Box(std::initializer_list<Interval> lst);
 
     Box(const IntervalVector& ivec) : Vector<Interval>(ivec) { }
     Box(const List<Interval>& ilst) : Vector<Interval>(ilst) { }

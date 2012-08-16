@@ -121,10 +121,10 @@ void TestPaving::test_branch() const {
     BinaryWord word3("1100");
     BinaryWord word4("1110");
 
-    Box box1(2, 0.0,0.25, 0.25,0.5);
-    Box box2(2, 0.25,0.5, 0.0,0.25);
-    Box box3(2, 0.5,0.75, 0.5,0.75);
-    Box box4(2, 0.75,1.0, 0.5,0.75);
+    Box box1{{0.0,0.25},{0.25,0.5}};
+    Box box2{{0.25,0.5},{0.0,0.25}};
+    Box box3{{0.5,0.75},{0.5,0.75}};
+    Box box4{{0.75,1.0},{0.5,0.75}};
 
     paving.adjoin(GridCell(grid,height,word1));
     paving.adjoin(GridCell(grid,height,word2));
@@ -207,7 +207,7 @@ void TestPaving::test_geometry() const {
     ARIADNE_TEST_EQUAL(intersection(paving_handle1,paving_handle2),paving_handle1);
     ARIADNE_TEST_EQUAL(difference(paving_handle2,paving_handle1),paving_handle4);
 
-    ARIADNE_TEST_EQUAL(geometric_union(paving_handle1,paving_handle3).bounding_box(),Box(2, 0.25,1.0, 0.0,0.75));
+    ARIADNE_TEST_EQUAL(geometric_union(paving_handle1,paving_handle3).bounding_box(),Box({{0.25,1.0},{0.0,0.75}}));
 
 
 }
@@ -218,7 +218,7 @@ void TestPaving::test_approximation() const {
     PavingInterface& paving = grid_set;
 
     RealVectorFunction x=RealVectorFunction::identity(2);
-    RealConstrainedImageSet set(RealBoxSet(IntervalVector(2, -1.0,1.0, -1.0,1.0)));
+    RealConstrainedImageSet set(RealBoxSet(IntervalVector({{-1.0,1.0},{-1.0,1.0}})));
     set.apply( (2*x[0]+x[1]+0.25*x[0]*x[0],x[0]+x[1]) );
     Nat depth = 2;
     paving.adjoin_outer_approximation(set,depth);

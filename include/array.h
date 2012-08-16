@@ -29,7 +29,7 @@
 #define ARIADNE_ARRAY_H
 
 #include <cstddef>
-#include <cstdarg>
+#include <initializer_list>
 #include <stdexcept>
 #include <new>
 
@@ -60,13 +60,12 @@ class Array {
     explicit Array(const size_type n) : _size(n), _ptr(uninitialized_new(n)) { for(size_type i=0; i!=n; ++i) { new (_ptr+i) T(); } }
     /*! \brief Constructs an Array of size \a n with elements initialised to \a x. */
     Array(const size_type n, const value_type& x) : _size(n), _ptr(uninitialized_new(n)) { this->_uninitialized_fill(x); }
-    /*! \brief Constructs an Array of size \a n with elements initialised by the variable argument list x0,x1,... . */
-    Array(const size_type n, const value_type& x0, const value_type& x1, ...)
-        : _size(n), _ptr(uninitialized_new(n))
+    /*! \brief Constructs an Array of from an initializer list. */
+    Array(std::initializer_list<value_type> lst)
+        : _size(lst.size()), _ptr(uninitialized_new(_size))
     {
-        if(n<2) { throw std::out_of_range("Array: size is less than number of arguments"); }
-        va_list args; va_start(args,x1); new (_ptr) T(x0); new (_ptr+1u) T(x1);
-        for(size_t i=2; i!=n; ++i) { new (_ptr+i) T(va_arg(args,T)); } va_end(args); }
+        this->_uninitialized_fill(lst.begin());
+    }
     /*! \brief Constructs an Array from the range \a first to \a last. */
     template<class ForwardIterator> Array(ForwardIterator first, ForwardIterator last)
         : _size(std::distance(first,last)), _ptr(uninitialized_new(_size))

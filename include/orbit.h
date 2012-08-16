@@ -32,7 +32,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/scoped_ptr.hpp>
 
 #include "numeric.h"
@@ -81,7 +81,7 @@ class Orbit<Point>
     void insert(Time t, const Point& hpt);
     const InterpolatedCurve& curve() const { return *this->_curve; }
   private:
-    boost::shared_ptr< InterpolatedCurve > _curve;
+    std::shared_ptr< InterpolatedCurve > _curve;
 };
 
 template<>
@@ -102,7 +102,7 @@ class Orbit<GridCell>
     GridTreeSet const& intermediate() const;
     GridTreeSet const& final() const;
   private:
-    boost::shared_ptr<Data> _data;
+    std::shared_ptr<Data> _data;
 };
 
 

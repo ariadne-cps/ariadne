@@ -34,7 +34,7 @@
 #include <set>
 #include <map>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/shared_array.hpp>
 
 #include "logging.h"
@@ -89,12 +89,12 @@ class HybridSystem
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
 
-    typedef boost::shared_ptr<const ScalarFunction> ScalarFunctionPtr;
-    typedef boost::shared_ptr<const VectorFunction> VectorFunctionPtr;
+    typedef std::shared_ptr<const ScalarFunction> ScalarFunctionPtr;
+    typedef std::shared_ptr<const VectorFunction> VectorFunctionPtr;
 
 
 /*
-    typedef std::map< Event, boost::shared_ptr<const VectorFunction> >::const_iterator invariant_const_iterator;
+    typedef std::map< Event, std::shared_ptr<const VectorFunction> >::const_iterator invariant_const_iterator;
     typedef std::set< DiscreteTransition >::const_iterator discrete_transition_const_iterator;
     typedef std::set< DiscreteMode >::const_iterator discrete_mode_const_iterator;
 */

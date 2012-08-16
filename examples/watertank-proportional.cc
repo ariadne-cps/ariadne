@@ -184,9 +184,6 @@ int main(int argc,char *argv[])
     double skip_time = 35.0;
     HybridTime evolution_time(skip_time,6);
 
-    Box graphic_box(2, 18.0,skip_time, 5.0,6.0);
-    Array<uint> tx(2,4,0);
-
     HybridScaling scaling( (water|0.25, aperture|1.0, pressure|1.0, error|1.0, time|1.0) );
     HybridGrid hg(watertank_system.state_space(),scaling);
     HybridGridTreeSet hgts(hg);

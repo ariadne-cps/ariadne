@@ -50,7 +50,7 @@ class TestConstrainedImageSet
     Figure figure;
   public:
     void test() {
-        figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
+        figure.set_bounding_box(Box{{-4.0,+4.0},{-4.0,+4.0}});
         ARIADNE_TEST_CALL(test_constructor());
         ARIADNE_TEST_CALL(test_geometry());
         ARIADNE_TEST_CALL(test_separated());
@@ -121,12 +121,12 @@ class TestConstrainedImageSet
         set.new_parameter_constraint(0<=x[0]+x[1]<=1);
 
         ARIADNE_TEST_PRINT(set);
-        ARIADNE_TEST_ASSERT(set.separated(Box(2, 1.0,1.25, 1.0,1.25)));
+        ARIADNE_TEST_ASSERT(set.separated(Box{{1.0,1.25},{1.0,1.25}}));
         //ARIADNE_TEST_ASSERT(set.overlaps(Box(2, -1.0,-0.875, 1.375,1.625)));
-        ARIADNE_TEST_PRINT(f(Point(2,0.375,-0.375)));
+        ARIADNE_TEST_PRINT(f(Point{0.375,-0.375}));
 
 
-        IntervalConstrainedImageSet idisc(Box(2, -2.0,+2.0, -2.0,+2.0),(x[0],x[1]));
+        IntervalConstrainedImageSet idisc(Box({{-2.0,+2.0},{-2.0,+2.0}}),(x[0],x[1]));
         idisc.new_parameter_constraint(x[0]*x[0]+x[1]*x[1]<=1);
         box1=Box( (Interval(-0.5,0.5),Interval(0.25,0.75)) );
         box1=Box( (Interval(-0.5,0.75),Interval(0.25,0.75)) );
@@ -220,7 +220,7 @@ class TestConstrainedImageSet
 
         set.apply(RealVectorFunction((x0-2.5,x1)));
         Figure figure;
-        figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
+        figure.set_bounding_box(Box({{-4.0,+4.0},{-4.0,+4.0}}));
         figure.set_fill_colour(1.0,1.0,1.0);
         figure.draw(set.bounding_box());
         figure.set_fill_colour(0.75,0.75,0.75);
@@ -250,7 +250,7 @@ class TestConstrainedImageSet
 
     void test_draw(const std::string& str, const RealConstrainedImageSet& set, uint acc) {
         figure.clear();
-        figure.set_bounding_box(Box(2, -2.75,+2.75,-1.5,+2.0));
+        figure.set_bounding_box(Box({{-2.75,+2.75},{-1.5,+2.0}}));
         GridTreeSet paving(set.dimension());
         set.adjoin_outer_approximation_to(paving,acc+1);
         figure.set_fill_opacity(1.0);
@@ -276,7 +276,7 @@ class TestConstrainedImageSet
 
     void test_draw2(const std::string& str, const RealConstrainedImageSet& set, uint acc) {
         figure.clear();
-        figure.set_bounding_box(Box(2, -1.75,+1.75,-1.5,+2.0));
+        figure.set_bounding_box(Box{{-1.75,+1.75},{-1.5,+2.0}});
         GridTreeSet paving(set.dimension());
         set.adjoin_outer_approximation_to(paving,acc+3);
         figure.set_fill_opacity(1.0);

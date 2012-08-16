@@ -117,7 +117,7 @@ class TestAffineSet
         Polytope2d expected_set(8, -3.0,-3.0, -3.0,-3.66667, 2.0,-2.0, 4.0,-1.0,
                                     3.0,-0.5, 1.0,-1.0, -2.0,-2.0, -3.0,-2.5);
 
-        figure.clear(); figure.set_bounding_box(Box(2,-7.,+7.,-5.,+1.)); figure.set_fill_opacity(0.5);
+        figure.clear(); figure.set_bounding_box(Box{{-7.,+7.},{-5.,+1.}}); figure.set_fill_opacity(0.5);
         figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         figure.write("test_affine_set-constrained_image");
     }
@@ -129,12 +129,12 @@ class TestAffineSet
         IntervalAffineConstrainedImageSet affine_set(D, (-0.9375+0.0625*x[0]+0.5*x[1],0.87890625-0.1171875*x[0]+x[1]+0.00390625*x[2]));
         affine_set.new_parameter_constraint(-1.1875+0.0625*x[0]+x[1]<=0.0);
         ARIADNE_TEST_PRINT(affine_set);
-        Box cell1(2, -1.0,-0.9375, 0.8125, 0.875); // subset
-        Box cell2(2, -0.5625,-0.50, 1.4375,1.5); // overlaps
-        Box cell3(2, -0.875,-0.75, 0.625,0.7578125); // touches at (-0.875,0.7578125);
-        Box cell4(2, -1.1850,-1.125, 0.0625,0.125); // almost touches
-        Box cell5(2, -0.9375,-0.875, 0.4375,0.5); // disjoint
-        Box cell6(2, -1.5,-1.375, 0.5,0.625); // regression test
+        Box cell1({{-1.0,-0.9375},{0.8125, 0.875}}); // subset
+        Box cell2({{-0.5625,-0.50},{1.4375,1.5}}); // overlaps
+        Box cell3({{-0.875,-0.75},{0.625,0.7578125}}); // touches at (-0.875,0.7578125);
+        Box cell4({{-1.1850,-1.125},{0.0625,0.125}}); // almost touches
+        Box cell5({{-0.9375,-0.875},{0.4375,0.5}}); // disjoint
+        Box cell6({{-1.5,-1.375},{0.5,0.625}}); // regression test
 
         ARIADNE_TEST_ASSERT(definitely(!affine_set.separated(cell1)));
         ARIADNE_TEST_ASSERT(definitely(!affine_set.separated(cell2)));
@@ -189,7 +189,7 @@ class TestAffineSet
             set.new_parameter_constraint(-0.5*x[0]-1.0*x[1]<=0.875);
 
             Figure figure;
-            figure.set_bounding_box(Box(2, -1.0,+1.0, -1.0,+1.0)+IntervalVector(2,Interval(-0.125,+0.125)));
+            figure.set_bounding_box(Box{{-1.0,+1.0},{-1.0,+1.0}}+IntervalVector(2,Interval(-0.125,+0.125)));
             figure.set_fill_opacity(0.5);
             figure.set_fill_colour(1.0,0.0,0.0);
             figure.draw(set.outer_approximation(Grid(2),3));
@@ -216,7 +216,7 @@ class TestAffineSet
             paving.recombine();
 
             Figure figure;
-            figure.set_bounding_box(Box(2, -7.0,+7.0, -1.0,+5.0));
+            figure.set_bounding_box(Box{{-7.0,+7.0},{-1.0,+5.0}});
             figure.set_fill_colour(1.0,0.0,0.0);
             figure.set_fill_opacity(0.5);
             figure.draw(paving);
@@ -277,7 +277,7 @@ class TestAffineSet
         IntervalAffineConstrainedImageSet set2=IntervalAffineConstrainedImageSet(D, (0.5*x[0]+0.25*x[1]+e*x[2]/2, 0.25*x[0]-0.25*x[1]+e*x[3]) );
 		
         figure.clear();
-        figure.set_bounding_box(Box(2, -1.0,+1.0, -1.0,+1.0));
+        figure.set_bounding_box(Box{{-1.0,+1.0},{-1.0,+1.0}});
         figure.set_fill_opacity(0.5);
 		figure.set_fill_colour(0,1,0);
 		figure.draw(set2);
@@ -308,7 +308,7 @@ class TestAffineSet
         Vector< Affine<Interval> > a;
         Vector<Interval> dom;
         figure.clear();
-        figure.set_bounding_box(Box(2, -1.0,+15.0, -1.0,+15.0));
+        figure.set_bounding_box(Box{{-1.0,+15.0},{-1.0,+15.0}});
         figure.set_fill_colour(0.5,1.0,1.0);
         figure.set_fill_opacity(0.5);
 
@@ -447,7 +447,7 @@ class TestAffineSet
     }
 
     void test() {
-        figure.set_bounding_box(Box(2, -4.0,+4.0, -4.0,+4.0));
+        figure.set_bounding_box(Box{{-4.0,+4.0},{-4.0,+4.0}});
         ARIADNE_TEST_CALL(test_empty());
         ARIADNE_TEST_CALL(test_pure_constraint());
         ARIADNE_TEST_CALL(test_constrained_image());

@@ -68,7 +68,7 @@ struct GraphicsObject {
     GraphicsObject(const GraphicsProperties& gp, const DrawableInterface& sh)
         : properties(gp), shape_ptr(sh.clone()) { }
     GraphicsProperties properties;
-    shared_ptr<const DrawableInterface> shape_ptr;
+    std::shared_ptr<const DrawableInterface> shape_ptr;
 };
 
 

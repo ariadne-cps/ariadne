@@ -52,7 +52,7 @@ typedef Vector< Procedure<Interval> > IntervalVectorProcedure;
 typedef Vector< Differential<Interval> > IntervalDifferentialVector;
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<Interval> IntervalFunctionModelFactoryInterface;
-typedef shared_ptr<const IntervalFunctionModelFactoryInterface> FunctionFactoryPointer;
+typedef std::shared_ptr<const IntervalFunctionModelFactoryInterface> FunctionFactoryPointer;
 
 class Sweeper;
 

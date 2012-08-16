@@ -79,9 +79,9 @@ class HybridReachabilityAnalyser
     typedef HybridRegularSetInterface RegularSetInterfaceType;
     typedef HybridGridTreeSet SetApproximationType;
   private:
-    boost::shared_ptr< SystemType > _system;
-    boost::shared_ptr< HybridEvolverFactoryInterface > _evolver_factory;
-    boost::shared_ptr< ConfigurationType > _configuration;
+    std::shared_ptr< SystemType > _system;
+    std::shared_ptr< HybridEvolverFactoryInterface > _evolver_factory;
+    std::shared_ptr< ConfigurationType > _configuration;
   public:
     //@{
     //! \name Constructors and destructors
@@ -272,11 +272,11 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
     //! If defined, this property combines with _maximum_grid_height to define the actual bounding domain.
     //!  <br>
     //! This property is only used in the chain_reach() routines.
-    shared_ptr<HybridBoxes> _bounding_domain_ptr;
+    std::shared_ptr<HybridBoxes> _bounding_domain_ptr;
 
     //! \brief The grid used for approximation.
     //! \details Provided as a pointer in order to avoid double construction. It must always be defined.
-    shared_ptr<HybridGrid> _grid_ptr;
+    std::shared_ptr<HybridGrid> _grid_ptr;
 
     //! \brief The policy for overspill in outer chain reach computation.
     //! \details A OVERSPILL_IGNORE simply bypasses checks, OVERSPILL_WARNING issues a warning and OVERSPILL_ERROR
@@ -303,13 +303,13 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
     const IntType& maximum_grid_height() const { return _maximum_grid_height; }
     void set_maximum_grid_height(const IntType value) { _maximum_grid_height = value; }
 
-    const shared_ptr<HybridBoxes>& bounding_domain_ptr() const { return _bounding_domain_ptr; }
+    const std::shared_ptr<HybridBoxes>& bounding_domain_ptr() const { return _bounding_domain_ptr; }
     //! \brief Check the consistency in respect to the system space, then set the bounding domain.
-    void set_bounding_domain_ptr(const shared_ptr<HybridBoxes> value);
+    void set_bounding_domain_ptr(const std::shared_ptr<HybridBoxes> value);
 
     const HybridGrid& grid() const { return *_grid_ptr; }
     //! \brief Check the consistency in respect to the system space, then set the grid.
-    void set_grid(const shared_ptr<HybridGrid> value_ptr);
+    void set_grid(const std::shared_ptr<HybridGrid> value_ptr);
 
     const ChainOverspillPolicy& outer_overspill_policy() const { return _outer_overspill_policy; }
     void set_outer_overspill_policy(const ChainOverspillPolicy value) { _outer_overspill_policy = value; }

@@ -111,18 +111,18 @@ void TestProcedure::test_construct_from_formula()
 void TestProcedure::test_construct_from_expansion()
 {
     {
-        Expansion<Float> e(2, 4, 0,0,1.0, 1,0,2.0, 0,2,3.0, 1,4,4.0);
+        Expansion<Float> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,2},3.0}, {{1,4},4.0} });
         ARIADNE_TEST_PRINT(e);
         e.reverse_lexicographic_sort();
         ARIADNE_TEST_PRINT(e);
         Procedure<Float> p(e);
         ARIADNE_TEST_PRINT(p);
-        Vector<Float> x(2, 2.0,3.0);
+        Vector<Float> x={2.0,3.0};
         ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
     }
 
     {
-        Expansion<Float> e(2, 6, 0,0,1.0, 1,0,2.0, 0,1,3.0, 2,0,4.0, 1,1,5.0, 0,2,6.0);
+        Expansion<Float> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0} });
         e.reverse_lexicographic_sort();
         Procedure<Float> p(e);
         ARIADNE_TEST_PRINT(p);
@@ -141,7 +141,7 @@ void TestProcedure::test_evaluate()
     p.new_unary_instruction(SQRT,4u);
     ARIADNE_TEST_PRINT(p);
 
-    Vector<Float> x(2, 3.0, 4.0);
+    Vector<Float> x={3.0,4.0};
     ARIADNE_TEST_PRINT(x);
 
     ARIADNE_TEST_EQUALS(evaluate(p,x),5.0);
@@ -159,7 +159,7 @@ void TestProcedure::test_propagate()
         p.new_unary_instruction(SQRT,4u);
         ARIADNE_TEST_PRINT(p);
 
-        Vector<Interval> x(2, 0.25,2.0, 0.5,3.0);
+        Vector<Interval> x={ {0.25,2.0}, {0.5,3.0} };
         ARIADNE_TEST_PRINT(x);
 
         simple_hull_reduce(x,p,Interval(1,1));
@@ -175,8 +175,8 @@ void TestProcedure::test_propagate()
     ARIADNE_TEST_PRINT(ff);
     Vector< Procedure<Float> > pp(ff);
     ARIADNE_TEST_PRINT(pp);
-    Vector<Interval> xx(2, 0.125,2.0, 0.25,3.0);
-    Vector<Interval> cc(2, 1.0,1.0, 1.0,1.0);
+    Vector<Interval> xx={ {0.125,2.0}, {0.25,3.0} };
+    Vector<Interval> cc={ {1.0,1.0}, {1.0,1.0} };
     ARIADNE_TEST_PRINT(xx);
     ARIADNE_TEST_PRINT(evaluate(pp,xx));
     simple_hull_reduce(xx,pp,cc);

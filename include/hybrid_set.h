@@ -33,7 +33,7 @@
 #include <boost/iterator.hpp>
 #include <boost/iterator_adaptors.hpp>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "macros.h"
 #include "stlio.h"
@@ -659,7 +659,7 @@ class HybridGridTreeSet
     GridTreeSet& _provide_location(const DiscreteLocation& q) {
         std::map<DiscreteLocation,GridTreeSet>::iterator iter=this->_map.find(q);
         if(iter==this->_map.end()) {
-            this->_map.insert(std::make_pair(q,this->_hgrid[q]));
+            this->_map.insert(std::make_pair(q,GridTreeSet(this->_hgrid[q])));
             iter=this->_map.find(q);
         }
         return iter->second; }

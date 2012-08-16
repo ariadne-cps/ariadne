@@ -45,7 +45,7 @@ template<class R, class Op=OperatorCode, class A1=R, class A2=A1> class BinaryEx
         : _op(op), _arg1(expr1.clone()), _arg2(expr2.clone()) { }
     BinaryExpression(Op op, const ExpressionInterface<A1>* expr1, const ExpressionInterface<A2>* expr2)
         : _op(op), _arg1(expr1), _arg2(expr2) { }
-    BinaryExpression(Op op, shared_ptr< const ExpressionInterface<A1> > expr1, shared_ptr< const ExpressionInterface<A2> > expr2)
+    BinaryExpression(Op op, std::shared_ptr< const ExpressionInterface<A1> > expr1, std::shared_ptr< const ExpressionInterface<A2> > expr2)
         : _op(op), _arg1(expr1), _arg2(expr2)  { }
     virtual String operator_name() const { return name(_op); }
     virtual OperatorCode type() const { return static_cast<OperatorCode>(_op); }

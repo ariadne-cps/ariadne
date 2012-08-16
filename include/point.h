@@ -44,13 +44,15 @@ class Point
     typedef Float real_type;
     //! Default constructor contructs the singleton point in zero dimensions.
     Point() : Vector<Float>() { }
+    //! The origin in \a n dimensions.
+    explicit Point(uint n) : Vector<Float>(n) { }
     //! Construct from a string literal of the form "(x1,x2,...,xd)".
     explicit Point(const std::string& str);
-    template<class T> Point(const T& t) : Vector<Float>(t) { }
+    Point(const Vector<Float>& v) : Vector<Float>(v) { }
+    template<class E> Point(const VectorExpression<E>& ve) : Vector<Float>(ve) { }
     template<class T1, class T2> Point(const T1& t1, const T2& t2) : Vector<Float>(t1,t2) { }
-    //! Construct from an integer giving the dimension and a list of floating-point values
-    //! giving the values.
-    explicit Point(uint d, double x0, ...);
+    //! Construct from an initializer list of floating-point values.
+    explicit Point(std::initializer_list<Float> lst);
     //! The origin in \a n dimensions.
     static Point origin(uint n) { return Point(n,0.0); }
     //! A dynamically-allocated copy.

@@ -44,7 +44,7 @@ template<class T> class Handle
     Handle() : _ptr() { }
     Handle(T* p) : _ptr(p) { }
     Handle(const T& t) : _ptr(t._clone()) { }
-    Handle(shared_ptr<const T> p) : _ptr(p->_clone()) { }
+    Handle(std::shared_ptr<const T> p) : _ptr(p->_clone()) { }
     clone_on_write_ptr<T> managed_pointer() { return _ptr; }
     T* raw_pointer()  { return _ptr.operator->(); }
     const T* raw_pointer() const  { return _ptr.operator->(); }
@@ -58,17 +58,17 @@ template<class T> class Handle
 template<class T> class Handle<const T>
 {
   private:
-    shared_ptr<const T> _ptr;
+    std::shared_ptr<const T> _ptr;
   public:
     Handle() : _ptr() { }
     Handle(T* p) : _ptr(p) { }
     Handle(const T& t) : _ptr(t._clone()) { }
-    Handle(shared_ptr<const T> p) : _ptr(p) { }
-    shared_ptr<const T> managed_pointer() const  { return _ptr; }
+    Handle(std::shared_ptr<const T> p) : _ptr(p) { }
+    std::shared_ptr<const T> managed_pointer() const  { return _ptr; }
     const T* raw_pointer() const  { return _ptr.operator->(); }
     const T& reference() const  { return _ptr.operator*(); }
     operator const T& () const { return _ptr->operator*(); }
-    Handle<const T>& operator=(const T& t) { _ptr(shared_ptr<T>(t._clone())); }
+    Handle<const T>& operator=(const T& t) { _ptr(std::shared_ptr<T>(t._clone())); }
 };
 
 

@@ -32,6 +32,7 @@
 #include <stdexcept>
 
 #include <string>
+#include <tuple>
 #include <vector>
 #include <list>
 #include <deque>
@@ -41,7 +42,7 @@
 #include "array.h"
 #include "tuple.h"
 
-#include "boost/shared_ptr.hpp"
+#include <memory>
 
 
 namespace Ariadne {
@@ -300,7 +301,7 @@ operator<<(std::ostream &os, const std::map<K,T,C>& m)
 template<class K, class T, class C>
 inline
 std::ostream&
-operator<<(std::ostream &os, const std::map<K,boost::shared_ptr<T>,C>& m)
+operator<<(std::ostream &os, const std::map<K,std::shared_ptr<T>,C>& m)
 {
     return Ariadne::write_map_pointer_sequence(os,m.begin(), m.end(), '{', '}');
 }

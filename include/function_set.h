@@ -30,7 +30,7 @@
 
 #include <iosfwd>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "macros.h"
 #include "container.h"

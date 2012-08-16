@@ -130,9 +130,9 @@ void TestScalarTaylorFunction::test_concept()
 
 void TestScalarTaylorFunction::test_constructors()
 {
-    ARIADNE_TEST_CONSTRUCT(ScalarTaylorFunction,tv1,(d(2),e(2,3, 1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0), 0.25, swp));
+    ARIADNE_TEST_CONSTRUCT(ScalarTaylorFunction,tv1,({{-1,+1},{-1,+1}},{{{0,0},1.},{{1,0},2.},{{0,1},3.},{{2,0},4.},{{1,1},5.},{{0,2},6.},{{3,0},7.},{{2,1},8.},{{1,2},9.},{{0,3},10.}},0.25,swp));
 
-    ARIADNE_ASSERT_EQUAL(tv1.domain(),Vector<Interval>(2,Interval(-1,+1)));
+    ARIADNE_ASSERT_EQUAL(tv1.domain(),Vector<Interval>({{-1,+1},{-1,+1}}));
     ARIADNE_ASSERT_EQUAL(tv1.argument_size(),2);
     ARIADNE_ASSERT_EQUAL(tv1.number_of_nonzeros(),10);
     ARIADNE_ASSERT_EQUAL(tv1.value(),1.0);
@@ -141,10 +141,10 @@ void TestScalarTaylorFunction::test_constructors()
 
 void TestScalarTaylorFunction::test_predicates()
 {
-    ScalarTaylorFunction tv1(d(1),e(1,2, 1.00,2.00,3.00), 0.75, swp);
-    ScalarTaylorFunction tv2(d(1),e(1,2, 1.00,1.75,3.25), 0.25, swp);
-    ScalarTaylorFunction tv3(d(1),e(1,2, 1.125,1.75,3.25), 0.25, swp);
-    ScalarTaylorFunction tv4(d(1),e(1,3, 1.00,2.25,3.00,-0.25), 0.25, swp);
+    ScalarTaylorFunction tv1(d(1),e(1,2, {1.00,2.00,3.00}), 0.75, swp);
+    ScalarTaylorFunction tv2(d(1),e(1,2, {1.00,1.75,3.25}), 0.25, swp);
+    ScalarTaylorFunction tv3(d(1),e(1,2, {1.125,1.75,3.25}), 0.25, swp);
+    ScalarTaylorFunction tv4(d(1),e(1,3, {1.00,2.25,3.00,-0.25}), 0.25, swp);
 
     ARIADNE_TEST_BINARY_PREDICATE(refines,tv1,tv1);
     ARIADNE_TEST_BINARY_PREDICATE(refines,tv2,tv1);
@@ -154,14 +154,14 @@ void TestScalarTaylorFunction::test_predicates()
 
 void TestScalarTaylorFunction::test_approximation()
 {
-    ARIADNE_TEST_CONSTRUCT(ScalarTaylorFunction,tv1,(d(2),e(2,3,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0),0.25,swp));
-    ARIADNE_TEST_CONSTRUCT(ScalarTaylorFunction,tv2,(d(1),e(1,2,1.0,2.0,3.0),0.25,swp));
+    ARIADNE_TEST_CONSTRUCT(ScalarTaylorFunction,tv1,(d(2),e(2,3,{1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0}),0.25,swp));
+    ARIADNE_TEST_CONSTRUCT(ScalarTaylorFunction,tv2,(d(1),e(1,2,{1.0,2.0,3.0}),0.25,swp));
 }
 
 void TestScalarTaylorFunction::test_evaluate()
 {
-    Vector<Interval> iv(2, 0.25,0.5, -0.75,-0.5);
-    ScalarTaylorFunction tv(d(2),e(2,1.0,2.0,3.0,4.0,5.0,6.0),0.25,swp);
+    Vector<Interval> iv({{0.25,0.5},{-0.75,-0.5}});
+    ScalarTaylorFunction tv(d(2),e(2,2,{1.0,2.0,3.0,4.0,5.0,6.0}),0.25,swp);
     ARIADNE_TEST_EQUAL(evaluate(tv,iv),Interval(-1,1));
 }
 
@@ -169,38 +169,38 @@ void TestScalarTaylorFunction::test_arithmetic()
 {
     ARIADNE_TEST_EQUAL(d(1),d(1));
     //Operations which can be performed exactly with floating-point arithmetic.
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, 1.0,-2.0,3.0), 0.75, swp)+(-3), ScalarTaylorFunction(d(1),e(1,2, -2.0,-2.0,3.0), 0.75, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, 1.0,-2.0,3.0), 0.75, swp)-(-3), ScalarTaylorFunction(d(1),e(1,2, 4.0,-2.0,3.0), 0.75, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, 1.0,-2.0,3.0), 0.75, swp)*(-3), ScalarTaylorFunction(d(1),e(1,2, -3.0,6.0,-9.0), 2.25, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, 1.0,-2.0,3.0), 0.75, swp)/(-4), ScalarTaylorFunction(d(1),e(1,2, -0.25,0.5,-0.75), 0.1875, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, 1.0,-2.0,3.0), 0.75, swp)+Interval(-1,2), ScalarTaylorFunction(d(1),e(1,2, 1.5,-2.0,3.0), 2.25, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, 1.0,-2.0,3.0), 0.75, swp)-Interval(-1,2), ScalarTaylorFunction(d(1),e(1,2, 0.5,-2.0,3.0), 2.25, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, 1.0,-2.0,3.0), 0.75, swp)*Interval(-1,2), ScalarTaylorFunction(d(1),e(1,2, 0.5,-1.0,1.5), 10.5, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, 1.0,-2.0,3.0), 0.75, swp)/Interval(0.25,2.0), ScalarTaylorFunction(d(1),e(1,2, 2.25,-4.5,6.75), 13.5, swp));
-    ARIADNE_TEST_EQUAL(+ScalarTaylorFunction(d(1),e(1,2, 1.0,-2.0,3.0), 0.75, swp), ScalarTaylorFunction(d(1),e(1,2, 1.0,-2.0,3.0), 0.75, swp));
-    ARIADNE_TEST_EQUAL(-ScalarTaylorFunction(d(1),e(1,2, 1.0,-2.0,3.0), 0.75, swp), ScalarTaylorFunction(d(1),e(1,2, -1.0,2.0,-3.0), 0.75, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)+(-3), ScalarTaylorFunction(d(1),e(1,2, {-2.0,-2.0,3.0}), 0.75, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)-(-3), ScalarTaylorFunction(d(1),e(1,2, {4.0,-2.0,3.0}), 0.75, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)*(-3), ScalarTaylorFunction(d(1),e(1,2, {-3.0,6.0,-9.0}), 2.25, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)/(-4), ScalarTaylorFunction(d(1),e(1,2, {-0.25,0.5,-0.75}), 0.1875, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)+Interval(-1,2), ScalarTaylorFunction(d(1),e(1,2, {1.5,-2.0,3.0}), 2.25, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)-Interval(-1,2), ScalarTaylorFunction(d(1),e(1,2, {0.5,-2.0,3.0}), 2.25, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)*Interval(-1,2), ScalarTaylorFunction(d(1),e(1,2, {0.5,-1.0,1.5}), 10.5, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)/Interval(0.25,2.0), ScalarTaylorFunction(d(1),e(1,2, {2.25,-4.5,6.75}), 13.5, swp));
+    ARIADNE_TEST_EQUAL(+ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp), ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp));
+    ARIADNE_TEST_EQUAL(-ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp), ScalarTaylorFunction(d(1),e(1,2, {-1.0,2.0,-3.0}), 0.75, swp));
 
     // Regression test to check subtraction yielding zero coefficients
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, 1.0,-2.0,3.0), 0.75, swp)+ScalarTaylorFunction(d(1),e(1,2, 3.0,2.0,-4.0), 0.5, swp), ScalarTaylorFunction(d(1),e(1,2, 4.0,0.0,-1.0), 1.25, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)+ScalarTaylorFunction(d(1),e(1,2, {3.0,2.0,-4.0}), 0.5, swp), ScalarTaylorFunction(d(1),e(1,2, {4.0,0.0,-1.0}), 1.25, swp));
 
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, 1.0,-2.0,3.0), 0.75, swp)-ScalarTaylorFunction(d(1),e(1,2, 3.0,2.0,-4.0), 0.5, swp), ScalarTaylorFunction(d(1),e(1,2, -2.0,-4.0,7.0), 1.25, swp));
-    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, 1.0,-2.0,3.0), 0.75, swp)*ScalarTaylorFunction(d(1),e(1,2, 3.0,2.0,-4.0), 0.5, swp), ScalarTaylorFunction(d(1),e(1,4, 3.0,-4.0,1.0,14.0,-12.0), 10.125, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)-ScalarTaylorFunction(d(1),e(1,2, {3.0,2.0,-4.0}), 0.5, swp), ScalarTaylorFunction(d(1),e(1,2, {-2.0,-4.0,7.0}), 1.25, swp));
+    ARIADNE_TEST_EQUAL(ScalarTaylorFunction(d(1),e(1,2, {1.0,-2.0,3.0}), 0.75, swp)*ScalarTaylorFunction(d(1),e(1,2, {3.0,2.0,-4.0}), 0.5, swp), ScalarTaylorFunction(d(1),e(1,4, {3.0,-4.0,1.0,14.0,-12.0}), 10.125, swp));
 
 }
 
 void TestScalarTaylorFunction::test_functions()
 {
-    ScalarTaylorFunction xz(d(1),e(1,1, 0.0, 0.5), 0.0, swp);
-    ScalarTaylorFunction xo(d(1),e(1,1, 1.0, 0.5), 0.0, swp);
+    ScalarTaylorFunction xz(d(1),e(1,1, {0.0, 0.5}), 0.0, swp);
+    ScalarTaylorFunction xo(d(1),e(1,1, {1.0, 0.5}), 0.0, swp);
 
     //Functions based on their natural defining points
-    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(xz),ScalarTaylorFunction(d(1),e(1,6, 1.00000,0.50000,0.12500,0.02083,0.00260,0.00026,0.00002), 0.00003, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(xz),ScalarTaylorFunction(d(1),e(1,6, 0.00000,0.50000,0.0000,-0.02083,0.00000,0.00026,0.00000), 0.00003, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(xz),ScalarTaylorFunction(d(1),e(1,6, 1.00000,0.0000,-0.12500,0.00000,0.00260,0.0000,-0.00002), 0.00003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(xz),ScalarTaylorFunction(d(1),e(1,6, {1.00000,0.50000,0.12500,0.02083,0.00260,0.00026,0.00002}), 0.00003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(xz),ScalarTaylorFunction(d(1),e(1,6, {0.00000,0.50000,0.0000,-0.02083,0.00000,0.00026,0.00000}), 0.00003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(xz),ScalarTaylorFunction(d(1),e(1,6, {1.00000,0.0000,-0.12500,0.00000,0.00260,0.0000,-0.00002}), 0.00003, swp));
 
-    ARIADNE_TEST_BINARY_PREDICATE(refines,rec(xo),ScalarTaylorFunction(d(1),e(1,6,  1.000000,-0.500000, 0.250000,-0.125000, 0.062500,-0.031250, 0.015625), 0.018, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(xo),ScalarTaylorFunction(d(1),e(1,6, 1.000000, 0.250000,-0.031250, 0.007813,-0.002441, 0.000854,-0.000320), 0.0003, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,log(xo),ScalarTaylorFunction(d(1),e(1,6,  0.000000, 0.500000,-0.125000, 0.041667,-0.015625, 0.006250,-0.002604), 0.003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,rec(xo),ScalarTaylorFunction(d(1),e(1,6,  {1.000000,-0.500000, 0.250000,-0.125000, 0.062500,-0.031250, 0.015625}), 0.018, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(xo),ScalarTaylorFunction(d(1),e(1,6, {1.000000, 0.250000,-0.031250, 0.007813,-0.002441, 0.000854,-0.000320}), 0.0003, swp));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,log(xo),ScalarTaylorFunction(d(1),e(1,6,  {0.000000, 0.500000,-0.125000, 0.041667,-0.015625, 0.006250,-0.002604}), 0.003, swp));
 
 }
 
@@ -215,7 +215,7 @@ void TestScalarTaylorFunction::test_antiderivative()
     ScalarTaylorFunction tm=ScalarTaylorFunction::constant(d(2),1.0,swp);
     ScalarTaylorFunction atm=antiderivative(tm,1u);
 
-    IntervalVector dom(2, 1.0, 4.0, 0.0, 2.0);
+    IntervalVector dom({{1.0, 4.0}, {0.0, 2.0}});
     VectorTaylorFunction x = VectorTaylorFunction::identity(dom,swp);
     ScalarTaylorFunction f = 1.0 + 2.0*x[0]+3.0*x[1]+5.0*x[0]*x[0]+4.0*x[0]*x[1];
 
@@ -233,10 +233,10 @@ void TestScalarTaylorFunction::test_antiderivative()
 
 void TestScalarTaylorFunction::test_substitute()
 {
-    Vector<Interval> d1(1, -0.75,+0.75);
+    Vector<Interval> d1={{-0.75,+0.75}};
     ScalarTaylorFunction tu=ScalarTaylorFunction::coordinate(d1,0,swp);
 
-    Vector<Interval> d2(2, -0.75,+0.75, -0.25,+0.75);
+    Vector<Interval> d2={{-0.75,+0.75},{-0.25,+0.75}};
     ScalarTaylorFunction tx=ScalarTaylorFunction::coordinate(d2,0,swp);
     ScalarTaylorFunction ty=ScalarTaylorFunction::coordinate(d2,1,swp);
 
@@ -250,8 +250,8 @@ void TestScalarTaylorFunction::test_substitute()
 
 void TestScalarTaylorFunction::test_conversion() {
     // Test conversion between ordinary functions and Taylor functions.
-    Vector<Interval> D(2, -0.5,0.5, -1.0,2.0);
-    Vector<Float> pt(2, -0.25,0.25);
+    Vector<Interval> D={{-0.5,0.5},{-1.0,2.0}};
+    Vector<Float> pt={-0.25,0.25};
     Vector<Interval> ipt(pt);
     RealVectorFunction x=RealVectorFunction::identity(2);
 
@@ -319,11 +319,11 @@ TestVectorTaylorFunction::test()
 void TestVectorTaylorFunction::test_constructors()
 {
     Vector< Expansion<Float> > expansion(2);
-    expansion[0]=Expansion<Float>(2,4, 0,0,1.125, 1,0,-0.75, 0,1,0.0625, 2,0,-0.25);
-    expansion[1]=Expansion<Float>(2,2, 0,0,0.750, 1,0,0.50);
+    expansion[0]=Expansion<Float>({ {{0,0},1.125}, {{1,0},-0.75}, {{0,1},0.0625}, {{2,0},-0.25} });
+    expansion[1]=Expansion<Float>({ {{0,0},0.750}, {{1,0},0.50} });
     expansion[0].reverse_lexicographic_sort(); expansion[1].reverse_lexicographic_sort();
 
-    Vector<Interval> domain(2,0.25,1.25,0.5,1.0);
+    Vector<Interval> domain={{0.25,1.25},{0.5,1.0}};
     RealVectorFunction x=RealVectorFunction::identity(2);
     RealVectorFunction henon_function( (1.5-x[0]*x[0]+0.25*x[1], x[0]*1) );
     ARIADNE_TEST_CONSTRUCT(VectorTaylorFunction,henon_model,(domain,henon_function,swp));
@@ -342,21 +342,21 @@ void TestVectorTaylorFunction::test_constructors()
 
 void TestVectorTaylorFunction::test_restrict()
 {
-    Vector<Interval> domain1(2, -1.0,+1.0, -1.0,+1.0);
-    Expansion<Float> expansion1(2,3, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0);
-    Vector<Interval> subdomain1(2, -0.25,0.75, -0.5,0.0);
-    Expansion<Float> subexpansion1(2,3, 1.031250, 1.812500,0.625000, 1.812500,0.562500,0.0468750,
-                                             0.875000,0.500000,0.281250,0.156250);
+    Vector<Interval> domain1={{-1.0,+1.0},{-1.0,+1.0}};
+    Expansion<Float> expansion1(2,3, {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0});
+    Vector<Interval> subdomain1={{-0.25,0.75},{-0.5,0.0}};
+    Expansion<Float> subexpansion1(2,3, {1.031250, 1.812500,0.625000, 1.812500,0.562500,0.0468750,
+                                             0.875000,0.500000,0.281250,0.156250});
     VectorTaylorFunction function1(domain1,expansion1*e(1,0),swp);
     VectorTaylorFunction restricted_function1(subdomain1,subexpansion1*e(1,0),swp);
     ARIADNE_TEST_EQUAL(restrict(function1,subdomain1),restricted_function1);
 
-    Vector<Interval> domain2(1, -1.0,+1.0);
-    Expansion<Float> expansion2(1,2, 0,0.0, 1,1.0);
-    Vector<Float> error2(1, 0.125);
-    Vector<Interval> subdomain2(1, 3e-16, 1.0);
-    Expansion<Float> subexpansion2(1,2, 0,0.50000000000000022, 1,0.49999999999999989);
-    Vector<Float> suberror2(1, 0.12500000000000008);
+    Vector<Interval> domain2={{-1.0,+1.0}};
+    Expansion<Float> expansion2={{{0},0.0},{{1},1.0} };
+    Vector<Float> error2={0.125};
+    Vector<Interval> subdomain2={{3e-16,1.0}};
+    Expansion<Float> subexpansion2={{{0},0.50000000000000022},{{1},0.49999999999999989}};
+    Vector<Float> suberror2={0.12500000000000008};
     VectorTaylorFunction function2(domain2,expansion2*e(1,0),error2,swp);
     VectorTaylorFunction restricted_function2(subdomain2,subexpansion2*e(1,0),suberror2,swp);
     ARIADNE_TEST_EQUAL(restrict(function2,subdomain2),restricted_function2);
@@ -366,11 +366,11 @@ void TestVectorTaylorFunction::test_jacobian()
 {
     RealVectorFunction x=RealVectorFunction::identity(2);
     RealVectorFunction henon( (1.5-x[0]*x[0]+0.25*x[1], x[0]*1) );
-    Vector<Interval> domain1(2, -1.0,+1.0, -1.0,+1.0);
-    Vector<Interval> domain2(2, -0.5,+0.5, -0.25,+0.25);
-    Vector<Interval> domain3(2, -0.25,+0.75, 0.0,+0.50);
-    Vector<Float> point1(2, 0.0,0.0);
-    Vector<Float> point2(2, 0.5,0.25);
+    Vector<Interval> domain1={{-1.0,+1.0},{-1.0,+1.0}};
+    Vector<Interval> domain2={{-0.5,+0.5},{-0.25,+0.25}};
+    Vector<Interval> domain3={{-0.25,+0.75},{0.0,+0.50}};
+    Vector<Float> point1={0.0,0.0};
+    Vector<Float> point2={0.5,0.25};
     ARIADNE_TEST_EQUAL(VectorTaylorFunction(domain1,henon,swp).jacobian(point1),henon.jacobian(point1));
     ARIADNE_TEST_EQUAL(VectorTaylorFunction(domain1,henon,swp).jacobian(point2),henon.jacobian(point2));
     ARIADNE_TEST_EQUAL(VectorTaylorFunction(domain2,henon,swp).jacobian(point1),henon.jacobian(point1));
@@ -389,9 +389,9 @@ void TestVectorTaylorFunction::test_compose()
         (a*(1-a)+b*x-2*a*b*y+2*a*x*x-b*b*y*y+2*b*x*x*y-x*x*x*x)*e(2,0)
             + (a-x*x+b*y)*e(2,1);
     //    compose(henon_polynomial,henon_polynomial);
-    Vector<Interval> domain1(2,0.25,1.25,0.5,1.0);
+    Vector<Interval> domain1={{0.25,1.25},{0.5,1.0}};
     VectorTaylorFunction function1(domain1,henon_polynomial,swp);
-    Vector<Interval> domain2(2, -1.5,2.5, 0.25,1.25);
+    Vector<Interval> domain2={{-1.5,2.5},{0.25,1.25}};
     VectorTaylorFunction function2(domain2,henon_polynomial,swp);
 
     VectorTaylorFunction composition1(domain1,henon_square_polynomial,swp);
@@ -404,28 +404,28 @@ void TestVectorTaylorFunction::test_antiderivative()
     unsigned int index0=0;
     unsigned int index1=1;
 
-    Vector<Interval> domain1(2,Interval(-1,1));
-    Expansion<Float> expansion1(2,0, 3.0);
+    Vector<Interval> domain1={{-1,+1},{-1,+1}};
+    Expansion<Float> expansion1={{{0,0},3.0}};
     VectorTaylorFunction function1(domain1,expansion1*e(1,0),swp);
-    Expansion<Float> aexpansion1(2,1, 0.0, 0.0,3.0);
+    Expansion<Float> aexpansion1={{{0,1},3.0}};
     VectorTaylorFunction antiderivative1(domain1,aexpansion1*e(1,0),swp);
     ARIADNE_TEST_EQUAL(antiderivative(function1,index1),antiderivative1);
 
-    Vector<Interval> domain2(2, -0.25,0.75, 0.0,0.5);
-    Expansion<Float> expansion2(2,0, 3.0);
+    Vector<Interval> domain2={{-0.25,0.75},{0.0,0.5}};
+    Expansion<Float> expansion2={{{0,0},3.0}};
     VectorTaylorFunction function2(domain2,expansion2*e(1,0),swp);
-    Expansion<Float> aexpansion2(2,1, 0.0, 0.0,0.75);
+    Expansion<Float> aexpansion2={{{0,1},0.75}};
     VectorTaylorFunction antiderivative2(domain2,aexpansion2*e(1,0),swp);
     ARIADNE_TEST_EQUAL(antiderivative(function2,index1),antiderivative2);
 
-    Vector<Interval> domain3(2, -0.25,0.75, 0.0,0.5);
-    Expansion<Float> expansion3(2,2, 1.0,2.0,3.0,4.0,5.0,6.0);
+    Vector<Interval> domain3={{-0.25,0.75},{0.0,0.5}};
+    Expansion<Float> expansion3={{{0,0},1.0},{{1,0},2.0},{{0,1},3.0},{{2,0},4.0},{{1,1},5.0},{{0,2},6.0}};
     VectorTaylorFunction function3(domain3,expansion3*e(1,0),swp);
-    Expansion<Float> aexpansion30(2,3, 0.0, 0.5,0.0, 0.5,1.5,0.0,0.66666666666666663,1.25,3.0,0.0);
-    Vector<Float> aerror30(1,5.5511151231257827e-17);
+    Expansion<Float> aexpansion30={{{1,0},0.5},{{2,0},0.5},{{1,1},1.5},{{3,0},0.66666666666666663},{{2,1},1.25},{{1,2},3.0}};
+    Vector<Float> aerror30={5.5511151231257827e-17};
     VectorTaylorFunction antiderivative30(domain3,aexpansion30*e(1,0),aerror30,swp);
     ARIADNE_TEST_EQUAL(antiderivative(function3,index0),antiderivative30);
-    Expansion<Float> aexpansion31(2,3, 0.0, 0.0,0.25, 0.0,0.5,0.375, 0.0,1.0,0.625,0.5);
+    Expansion<Float> aexpansion31={{{0,1},0.25},{{1,1},0.5},{{0,2},0.375},{{2,1},1.0},{{1,2},0.625},{{0,3},0.5}};
     VectorTaylorFunction antiderivative31(domain3,aexpansion31*e(1,0),swp);
     ARIADNE_TEST_EQUAL(antiderivative(function3,index1),antiderivative31);
 
@@ -433,7 +433,7 @@ void TestVectorTaylorFunction::test_antiderivative()
 
 void TestVectorTaylorFunction::test_join()
 {
-    Vector<Interval> domain(2, -0.25,+0.25, -0.5,+0.5);
+    Vector<Interval> domain={{-0.25,+0.25},{-0.5,+0.5}};
     RealVectorFunction x=RealVectorFunction::identity(2);
     RealVectorFunction function1 = (x[0]*x[0]+2.0*x[0]*x[1]+3.0*x[1]*x[1])*e(1,0);
     RealVectorFunction function2 = (4.0*x[0]*x[0]+5.0*x[0]*x[1]+6.0*x[1]*x[1])*e(2,1);
@@ -449,9 +449,9 @@ void TestVectorTaylorFunction::test_join()
 void TestVectorTaylorFunction::test_combine()
 {
     // This test contains a regression test to check correct behaviour for a zero component.
-    Vector<Interval> domain1(2, -0.25,+0.25, -0.5,+0.5);
-    Vector<Interval> domain2(3, -0.75,+0.75, -1.0,+1.0, -1.25,+1.25);
-    Vector<Interval> domain3(5, -0.25,+0.25, -0.5,+0.5, -0.75,+0.75, -1.0,+1.0, -1.25,+1.25);
+    Vector<Interval> domain1={{-0.25,+0.25},{-0.5,+0.5}};
+    Vector<Interval> domain2={{-0.75,+0.75},{-1.0,+1.0},{-1.25,+1.25}};
+    Vector<Interval> domain3={{-0.25,+0.25},{-0.5,+0.5},{-0.75,+0.75},{-1.0,+1.0},{-1.25,+1.25}};
     RealVectorFunction x;
     x=RealVectorFunction::identity(2);
     RealVectorFunction function1 = (x[0]*x[0]+2.0*x[0]*x[1]+3.0*x[1]*x[1])*e(1,0);
@@ -470,8 +470,8 @@ void TestVectorTaylorFunction::test_combine()
 void TestVectorTaylorFunction::test_conversion()
 {
     // Test conversion between ordinary functions and Taylor functions.
-    Vector<Interval> D(2, -0.5,0.5, -1.0,2.0);
-    Vector<Float> pt(2, -0.25,0.25);
+    Vector<Interval> D={{-0.5,0.5},{-1.0,2.0}};
+    Vector<Float> pt={-0.25,0.25};
     Vector<Interval> ipt(pt);
     RealVectorFunction x=RealVectorFunction::identity(2);
 
@@ -497,11 +497,11 @@ void TestVectorTaylorFunction::test_domain()
     RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
     RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
 
-    Vector<Interval> D1(2, -1.0,1.0, -1.0,1.0);
+    Vector<Interval> D1={{-1.0,1.0},{-1.0,1.0}};
     VectorTaylorFunction t1(D1, (o,x0+x1), swp);
     ARIADNE_TEST_PRINT(t1);
     ARIADNE_TEST_PRINT(t1.codomain());
-    Vector<Interval> D2(2, 1.0,1.0, -2.0,2.0);
+    Vector<Interval> D2={{1.0,1.0},{-2.0,2.0}};
     ScalarTaylorFunction t2(D2,2*x0+x1*x1,swp);
     ARIADNE_TEST_PRINT(t2.domain());
     ARIADNE_TEST_PRINT(t2.model());
@@ -512,12 +512,12 @@ void TestVectorTaylorFunction::test_domain()
     ScalarTaylorFunction t3(D1,2+(x0+x1)*(x0+x1),swp);
     ARIADNE_TEST_EQUAL(compose(t2,t1),t3);
 
-    Vector<Interval> x(2, 1.0,1.0, 0.5,1.5);
+    Vector<Interval> x={{1.0,1.0},{0.5,1.5}};
     ARIADNE_TEST_PRINT(x);
     ARIADNE_TEST_EQUAL(evaluate(t2,x),Interval(2.25,4.25));
 
     // Ensure evaluation and composition throw errors when expected
-    Vector<Interval> xe(2, 0.875,1.125, 0.5,1.5);
+    Vector<Interval> xe={{0.875,1.125},{0.5,1.5}};
     ARIADNE_TEST_THROWS(evaluate(t2,xe),DomainException);
 
     VectorTaylorFunction te1=t1; te1[0]=te1[0]+Interval(-0.125,+0.125);
@@ -526,7 +526,7 @@ void TestVectorTaylorFunction::test_domain()
     ARIADNE_TEST_EQUAL(unchecked_evaluate(t2,xe),Interval(2.25,4.25));
     
     // Regression test for printing functions with trivial domain component
-    Vector<Interval> D4(2, 1.0,1.0, 0.0,2.0);
+    Vector<Interval> D4={{1.0,1.0},{0.0,2.0}};
     ScalarTaylorFunction st40(D4, x0, swp);
     ScalarTaylorFunction st41(D4, x1, swp);
     ARIADNE_TEST_PRINT(st40);
@@ -559,7 +559,7 @@ void TestTaylorFunctionFactory::test_create()
     Sweeper sweeper(new ThresholdSweeper(1e-4));
     TaylorFunctionFactory factory(sweeper);
 
-    IntervalVector dom(2, -1,+1, 0.5,3.5);
+    IntervalVector dom={{-1,+1},{0.5,3.5}};
 
     ScalarTaylorFunction stf=factory.create(dom, RealScalarFunction::zero(dom.size()) );
     ARIADNE_TEST_PRINT(stf);

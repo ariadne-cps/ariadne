@@ -12,6 +12,9 @@ CXXFLAGS_EARLY=${CXXFLAGS}
 # Checks for programs.
 AC_PROG_CXX
 
+# Check for C++11
+CXXFLAGS="$CXXFLAGS -std=c++0x"
+
 # this macro is used to get the arguments supplied
 # to the configure script (./configure --enable-debug)
 # Check if we have enable debug support.

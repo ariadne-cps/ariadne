@@ -586,7 +586,13 @@ IntervalAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingIn
 }
 
 
-
+class PerturbationGenerator {
+  public:
+    PerturbationGenerator() : _n(0) { }
+    double operator()() { _n=_n+3; if(_n>19) { _n=_n-37; } return _n*1e-14; }
+  private:
+    int _n;
+};
 
 List<Point2d>
 IntervalAffineConstrainedImageSet::boundary(uint xind, uint yind) const
@@ -594,7 +600,8 @@ IntervalAffineConstrainedImageSet::boundary(uint xind, uint yind) const
     ARIADNE_LOG(3,"IntervalAffineConstrainedImageSet::boundary("<<xind<<","<<yind<<"): self="<<*this<<"\n");
 
     SimplexSolver<Float> lpsolver;
-
+    PerturbationGenerator eps;
+    
     static const int MAX_STEPS=1000;
     static const double ERROR_TOLERANCE = std::numeric_limits<float>::epsilon();
     static const Float inf = Ariadne::inf;
@@ -608,11 +615,12 @@ IntervalAffineConstrainedImageSet::boundary(uint xind, uint yind) const
     AffineModel<Interval> const& xa=this->_space_models[xind];
     AffineModel<Interval> const& ya=this->_space_models[yind];
 
+    // The set is given by (x,y)=Gs+h, where As=b and l<=s<=u
     Matrix<Float> G=Matrix<Float>::zero(2,np);
-    for(uint j=0; j!=nx; ++j) { G[0][j]=numeric_cast<float>(xa.gradient(j)); G[1][j]=numeric_cast<float>(ya.gradient(j)); }
-    G[0][nx+0]=xa.error(); G[1][nx+1]=ya.error();
+    for(uint j=0; j!=nx; ++j) { G[0][j]=numeric_cast<float>(xa.gradient(j))+eps(); G[1][j]=numeric_cast<float>(ya.gradient(j))+eps(); }
+    G[0][nx+0]=xa.error()+eps(); G[1][nx+1]=ya.error()+eps();
     Vector<Float> h(2);
-    h[0]=numeric_cast<float>(xa.value()); h[1]=numeric_cast<float>(ya.value());
+    h[0]=numeric_cast<float>(xa.value())+eps(); h[1]=numeric_cast<float>(ya.value())+eps();
     ARIADNE_LOG(5,"G="<<G<<" h="<<h<<"\n");
 
     // Set up linear programming problem Ax=b; l<=x<=u
@@ -624,24 +632,24 @@ IntervalAffineConstrainedImageSet::boundary(uint xind, uint yind) const
     Vector<Float> u(np);
 
     for(uint j=0; j!=nx; ++j) {
-        l[j]=-1.0;
-        u[j]=+1.0;
+        l[j]=-1.0+eps();
+        u[j]=+1.0+eps();
     }
     for(uint i=0; i!=nc; ++i) {
         for(uint j=0; j!=nx; ++j) {
-            A[i][j] = neg( this->_constraint_models[i].function().gradient(j) );
+            A[i][j] = neg( this->_constraint_models[i].function().gradient(j) )+eps();
         }
         for(uint j=nx; j!=nx+nc; ++j) {
-            A[i][j] = 0.0;
+            A[i][j] = 0.0+eps();
         }
-        A[i][nx+i]=1.0;
+        A[i][nx+i]=1.0+eps();
         Float fb=this->_constraint_models[i].function().value();
         Float fe=this->_constraint_models[i].function().error();
         Float cl=this->_constraint_models[i].lower_bound();
         Float cu=this->_constraint_models[i].upper_bound();
-        b[i]=fb;
-        l[nx+i]=cl-fe;
-        u[nx+i]=cu+fe;
+        b[i]=fb+eps();
+        l[nx+i]=cl-fe+eps();
+        u[nx+i]=cu+fe+eps();
     }
 
     if(xa.error()==0.0) {
@@ -658,7 +666,6 @@ IntervalAffineConstrainedImageSet::boundary(uint xind, uint yind) const
 
     List<Point2d> vertices;
 
-
     // Set up simplex algorithm working variables
     Array<Slackness> vt(0); Array<size_t> p(nc); Matrix<Float> B(nc,nc);
     Vector<Float> x(np); Vector<Float> y(nc);
@@ -674,7 +681,7 @@ IntervalAffineConstrainedImageSet::boundary(uint xind, uint yind) const
     Vector<Float> c(np,0.0);
     for(uint j=0; j!=np; ++j) { c[j]=G[0][j]; }
 
-    // Find a point on the boundary; choost the point minimising the spacial x-coordinate
+    // Find a point on the boundary; choose the point minimising the spacial x-coordinate
     x=lpsolver.hotstarted_minimise(c,l,u,A,b, vt,p,B);
     ARIADNE_LOG(3,"\nA="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<"\n")
     ARIADNE_LOG(3,"  x="<<x<<" Ax="<<(A*x)<<" c="<<c<<" cx="<<dot(c,x)<<" pt="<<G*x+h<<"\n\n");

@@ -618,9 +618,9 @@ IntervalAffineConstrainedImageSet::boundary(uint xind, uint yind) const
     // The set is given by (x,y)=Gs+h, where As=b and l<=s<=u
     Matrix<Float> G=Matrix<Float>::zero(2,np);
     for(uint j=0; j!=nx; ++j) { G[0][j]=numeric_cast<float>(xa.gradient(j))+eps(); G[1][j]=numeric_cast<float>(ya.gradient(j))+eps(); }
-    G[0][nx+0]=xa.error()+eps(); G[1][nx+1]=ya.error()+eps();
+    G[0][nx+0]=xa.error()+std::abs(eps()); G[1][nx+1]=ya.error()+std::abs(eps());
     Vector<Float> h(2);
-    h[0]=numeric_cast<float>(xa.value())+eps(); h[1]=numeric_cast<float>(ya.value())+eps();
+    h[0]=numeric_cast<float>(xa.value()); h[1]=numeric_cast<float>(ya.value());
     ARIADNE_LOG(5,"G="<<G<<" h="<<h<<"\n");
 
     // Set up linear programming problem Ax=b; l<=x<=u
@@ -637,19 +637,19 @@ IntervalAffineConstrainedImageSet::boundary(uint xind, uint yind) const
     }
     for(uint i=0; i!=nc; ++i) {
         for(uint j=0; j!=nx; ++j) {
-            A[i][j] = neg( this->_constraint_models[i].function().gradient(j) )+eps();
+            A[i][j] = neg( this->_constraint_models[i].function().gradient(j) );
         }
         for(uint j=nx; j!=nx+nc; ++j) {
-            A[i][j] = 0.0+eps();
+            A[i][j] = 0.0;
         }
-        A[i][nx+i]=1.0+eps();
+        A[i][nx+i]=1.0;
         Float fb=this->_constraint_models[i].function().value();
         Float fe=this->_constraint_models[i].function().error();
         Float cl=this->_constraint_models[i].lower_bound();
         Float cu=this->_constraint_models[i].upper_bound();
-        b[i]=fb+eps();
-        l[nx+i]=cl-fe+eps();
-        u[nx+i]=cu+fe+eps();
+        b[i]=fb;
+        l[nx+i]=cl-fe;
+        u[nx+i]=cu+fe;
     }
 
     if(xa.error()==0.0) {

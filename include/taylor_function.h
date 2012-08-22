@@ -652,6 +652,9 @@ class VectorTaylorFunction
     /*! \brief Construct from a list of scalar Taylor functions. */
     explicit VectorTaylorFunction(const List<ScalarTaylorFunction>& components);
 
+    /*! \brief Construct from an initializer list of scalar Taylor functions. */
+    VectorTaylorFunction(std::initializer_list<ScalarTaylorFunction> components);
+
     /*! \brief Construct from a vector expression. */
     template<class E> explicit VectorTaylorFunction(const VectorExpression<E>& ve);
 
@@ -717,7 +720,7 @@ class VectorTaylorFunction
     //! \brief Remove all terms as specified by \a sweeper.
     VectorTaylorFunction& sweep(const SweeperInterface& sweeper);
     /*! \brief Set the error to zero. */
-    VectorTaylorFunction& clobber();
+    Void clobber();
 
     /*! \brief The constant Taylor model with range \a r and argument domain \a d. */
     static VectorTaylorFunction constant(const Vector<Interval>& d, const Vector<Interval>& r, Sweeper swp);

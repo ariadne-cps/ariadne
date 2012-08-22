@@ -973,6 +973,12 @@ VectorTaylorFunction::VectorTaylorFunction(const List<ScalarTaylorFunction>& v)
     }
 }
 
+VectorTaylorFunction::VectorTaylorFunction(std::initializer_list<ScalarTaylorFunction> lst)
+    : _domain(), _models(lst.size())
+{
+    *this=VectorTaylorFunction(List<ScalarTaylorFunction>(lst));
+}
+
 
 VectorTaylorFunction* VectorTaylorFunction::_clone() const
 {
@@ -1263,13 +1269,12 @@ VectorTaylorFunction::sweep(const SweeperInterface& sweeper)
 }
 
 
-VectorTaylorFunction&
+Void
 VectorTaylorFunction::clobber()
 {
     for(uint i=0; i!=this->size(); ++i) {
         this->_models[i].clobber();
     }
-    return *this;
 }
 
 

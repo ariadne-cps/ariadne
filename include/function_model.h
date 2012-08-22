@@ -273,6 +273,7 @@ template<> class VectorFunctionModelInterface<Interval>
     virtual IntervalVector const codomain() const = 0;
     virtual Vector<Float> const errors() const = 0;
     virtual Float const error() const = 0;
+    virtual Void clobber() = 0;
 
     virtual Float const _norm() const = 0;
 
@@ -378,6 +379,7 @@ template<> class VectorFunctionModel<Interval>
     inline IntervalVector const codomain() const { return this->_ptr->codomain(); }
     inline Vector<Float> const errors() const { return this->_ptr->errors(); }
     inline Float const error() const { return this->_ptr->error(); }
+    inline Void clobber() { this->_ptr->clobber(); }
     inline Matrix<Interval> const jacobian(const Vector<Interval>& x) const { return this->_ptr->jacobian(x); }
 
     inline Void restrict(const IntervalVector& d) { this->_ptr->restrict(d); }

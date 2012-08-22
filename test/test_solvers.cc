@@ -55,8 +55,8 @@ class TestSolver
 
     void test_solve() {
         RealScalarFunction x=RealScalarFunction::coordinate(1,0);
-        IntervalVector d(1, Interval(0.0,1.0));
-        RealVectorFunction f(1u, (x*x+1)*x-1);
+        IntervalVector d({Interval(0.0,1.0)});
+        RealVectorFunction f({(x*x+1)*x-1});
         IntervalVector p=solver->solve(f,d);
         ARIADNE_TEST_BINARY_PREDICATE(subset,p[0],Interval(0.6823,0.6824));
     }
@@ -74,9 +74,9 @@ class TestSolver
         RealVectorFunction e;
 
         // Test solution of x-a=0. This should be very easy to solve.
-        p=IntervalVector(1, Interval(-0.25,0.25));
-        r=IntervalVector(1, Interval(-2.0,2.0));
-        f=RealVectorFunction(1u,x-a);
+        p=IntervalVector({Interval(-0.25,0.25)});
+        r=IntervalVector({Interval(-2.0,2.0)});
+        f=RealVectorFunction({x-a});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
@@ -85,23 +85,27 @@ class TestSolver
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-8);
 
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
-        p=IntervalVector(1, Interval(0.875,1.125));
-        r=IntervalVector(1, Interval(0.25,1.25));
-        f=RealVectorFunction(1u,(x*x+1)*x-a);
+        p=IntervalVector({Interval(0.875,1.125)});
+        r=IntervalVector({Interval(0.25,1.25)});
+        f=RealVectorFunction({(x*x+1)*x-a});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
+        ARIADNE_TEST_PRINT(h);
         bb=RealScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
-        e=RealVectorFunction( 1u, 0.682328+bb*(0.0521547+bb*(-0.0023232+bb*0.000147778)) );
+        e=RealVectorFunction( { 0.682328+bb*(0.0521547+bb*(-0.0023232+bb*0.000147778)) } );
+        ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
 
         // Test solution of 4x^2+x-4-a=0 on [-0.25,0.25]. There is a unique solution with positive derivative.
-        p=IntervalVector(1, Interval(-0.25,0.25));
-        r=IntervalVector(1, Interval(0.25,2.0));
-        f=RealVectorFunction(1u,4*x+x*x-a-4);
+        p=IntervalVector({Interval(-0.25,0.25)});
+        r=IntervalVector({Interval(0.25,2.0)});
+        f=RealVectorFunction({4*x+x*x-a-4});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
+        ARIADNE_TEST_PRINT(h);
         bb=RealScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
-        e=RealVectorFunction( 1u, 0.828427+bb*(0.0441942+bb*(-0.000345267+bb*0.00000539468)) );
+        e=RealVectorFunction( { 0.828427+bb*(0.0441942+bb*(-0.000345267+bb*0.00000539468)) } );
+        ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
     }
 

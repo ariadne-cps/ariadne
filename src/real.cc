@@ -88,7 +88,7 @@ class IntegerReal
     Integer _value;
   public:
     IntegerReal(const Integer& z) : RealBody(Interval(z),Float(midpoint(Interval(z)))), _value(z) { }
-    virtual Void write(OutputStream& os) const final { os << "(Int)" << _value; }
+    virtual Void write(OutputStream& os) const final { os << _value; }
 };
 
 class RationalReal
@@ -107,7 +107,7 @@ class FloatReal
   public:
     FloatReal(double x) : RealBody(Interval(x),Float(x)), _value(x) { }
     FloatReal(const ExactFloat& x) : RealBody(Interval(x),Float(x)), _value(x) { }
-    virtual Void write(OutputStream& os) const final { os << "(Flt)" << _value; }
+    virtual Void write(OutputStream& os) const final { os << _value; }
 };
 
 class UnaryReal

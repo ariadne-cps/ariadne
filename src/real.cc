@@ -143,7 +143,7 @@ Real::Real(int n) : _ptr(new IntegerReal(n)) { }
 Real::Real(double x) : _ptr(new FloatReal(x)) { }
 Real::Real(const ExactFloat& x) : _ptr(new FloatReal(x)) { }
 Real::Real(const Real& x) : _ptr(x._ptr) { }
-Real& Real::operator=(const double& x) { *this=Real(x); return *this; }
+Real& Real::operator=(double x) { *this=Real(x); return *this; }
 Real& Real::operator=(const ExactFloat& x) { *this=Real(x); return *this; }
 Real& Real::operator=(const Real& x) { this->_ptr=x._ptr; return *this; }
 double Real::get_d() const { return this->_ptr->operator Float().get_d(); }

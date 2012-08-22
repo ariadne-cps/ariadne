@@ -31,6 +31,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <string>
+#include <memory>
 
 #include "tribool.h"
 #include "rounding.h"
@@ -42,21 +43,25 @@ typedef unsigned int uint;
 
 namespace Ariadne {
 
+typedef std::ostream OutputStream;
+
 // Forward declarations
 class Float;
 class Interval;
 class Real;
 
-class RealBody;
+class RealInterface;
 
 //! \ingroup NumericModule
 //! \brief Computable real numbers.
 //!
 //! Support over-approximation by an Interval and approximation by a Float.
 class Real {
-    Interval _ivl;
+    std::shared_ptr<RealInterface> _ptr;
   public:
     typedef Real NumericType;
+  public:
+    explicit Real(RealInterface* raw_ptr);
   public:
     //! Destructor.
     ~Real();
@@ -89,7 +94,7 @@ class Real {
     //! \brief Copy assignment.
     Real& operator=(const Real&);
     //! \brief Assign from a builtin double-precision floating-point value.
-    Real& operator=(const double& x);
+    Real& operator=(double x);
     //! \brief Assign from a floating-point value representing a number exactly.
     Real& operator=(const ExactFloat& x);
     // Can't use conversion operators below in g++ since compiler complains
@@ -102,6 +107,7 @@ class Real {
   private:
     friend Float::Float(const Real&);
     friend Interval::Interval(const Real&);
+    friend OutputStream& operator<<(OutputStream& os, const Real& x);
 };
 
 //@{

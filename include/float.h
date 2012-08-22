@@ -393,6 +393,7 @@ class ExactFloat {
   public:
     ExactFloat() : _x(0) { }
     ExactFloat(int n) : _x(n) { }
+    explicit ExactFloat(double x) : _x(x) { }
     explicit ExactFloat(const Float& x) : _x(x) { }
     Float value() const { return _x; }
     double get_d() const { return _x.get_d(); }

@@ -344,7 +344,12 @@ ScalarTaylorFunction* ScalarTaylorFunction::_derivative(uint j) const
 Float
 ScalarTaylorFunction::evaluate(const Vector<Float>& x) const
 {
-    return Ariadne::evaluate(this->_model.expansion(),x);
+    const ScalarTaylorFunction& f=*this;
+    if(!contains(f.domain(),x)) {
+        ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
+    }
+    Vector<Float> sx=Ariadne::unscale(x,f._domain);
+    return Ariadne::evaluate(this->_model.expansion(),sx);
 }
 
 Interval

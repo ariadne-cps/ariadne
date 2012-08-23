@@ -59,6 +59,8 @@ class SolverWrapper
         return this->get_override("implicit")(); }
     IntervalScalarFunctionModel implicit(const IntervalScalarFunction& f, const IntervalVector& pd, const Interval& ivl) const {
         return this->get_override("implicit")(); }
+    IntervalVectorFunctionModel continuation(const IntervalVectorFunction& f, const Vector<Float>& a, const Vector<Interval>& X,  const Vector<Interval>& A) const {
+        return this->get_override("continuation")(); }
     Set< IntervalVector > solve_all(const IntervalVectorFunction& f, const IntervalVector& bx) const {
         return this->get_override("solve_all")(); }
     void write(std::ostream&) const { this->get_override("write")(); }

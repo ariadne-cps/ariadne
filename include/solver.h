@@ -82,6 +82,9 @@ class SolverBase
     virtual IntervalVectorFunctionModel implicit(const IntervalVectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
     virtual IntervalScalarFunctionModel implicit(const IntervalScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
+    //! \brief Solve \f$f(a,x)=0\f$ yielding a function \f$x=h(a)\f$ for a in \a A, looking for a solution with \f$h(A) \subset X\f$ and $h(a)\in x\f$.
+    virtual IntervalVectorFunctionModel continuation(const IntervalVectorFunction& f, const Vector<Float>& a, const Vector<Interval>& X, const Vector<Interval>& A) const;
+
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
     virtual Set< Vector<Interval> > solve_all(const IntervalVectorFunction& f,const Vector<Interval>& pt) const;

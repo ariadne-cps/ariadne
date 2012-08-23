@@ -127,14 +127,18 @@ class SolverInterface
 
     //! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. Throws a SolverException if there is not a unique solution.
     virtual Vector<Interval> solve(const IntervalVectorFunction& f,const Vector<Interval>& pt) const = 0;
-    //! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix.
-    virtual IntervalVectorFunctionModel implicit(const IntervalVectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const = 0;
-    //! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix.
-    //! If \f$D_2f(a,x)\neq 0\f$ for \f$(a,x)\in A\times X\f$, then any solution is guaranteed to be unique.
+    //! \brief Solve \f$f(a,x)=0\f$ for \f$a\f$ in \f$A\f$, looking for a solution with \f$x\f$ in \f$X\f$. The result is a function \f$h\f$ with domain \f$A\f$ such that \f$f(a,h(a))=0\f$ for all \f$a\in A\f$.
+    //! \details A <em>strong solution</em> to the problem exists if for every \f$a\in A\f$, there is a unique solution \f$x\in X\f$ to the equation \f$f(a,x)=0\f$, and this solution varies continuously in \f$a\f$. A <em>weak solution</em> is a function \f$h\f$ with domain \f$A\f$ such that \f$f(a,h(a))=0\f$ for all \f$a\in A\f$, if \f$f(a,x)=0\f$ for \f$x\in X\f$ then \f$h(a)=x\f$, and there exists \f$(a,x)\in A\times X\f$ such that \f$f(a,x)=0\f$.
+    //! If \f$D_2f(a,x)\f$ is nonsingular for all \f$(a,x)\in A\times X\f$, then any solution is guaranteed to be unique.
+    //! May throw a NoSolutionException, but \em only if there are no solutions to \f$f(a,x)=0\f$ in \f$A\times X\f$.
     //! If there is a continuous branch of solutions \f$x=h(a)\f$ such that \f$h(a)\in X\f$ for some parameter values,
     //! but \f$h(a)\not\in X\f$ for others, then \f$h\f$ is a valid result for the function.
-    //! May throw a NoSolutionException, but \em only if there are no solutions to \f$f(a,x)=0\f$ in \f$A\times X\f$.
-    virtual IntervalScalarFunctionModel implicit(const IntervalScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const = 0;
+    virtual IntervalVectorFunctionModel implicit(const IntervalVectorFunction& f, const Vector<Interval>& A, const Vector<Interval>& X) const = 0;
+    //! \brief Solve \f$f(a,x)=0\f$ for a in \a A, looking for a solution with x in \a X.
+    virtual IntervalScalarFunctionModel implicit(const IntervalScalarFunction& f, const Vector<Interval>& A, const Interval& X) const = 0;
+
+    //! \brief Solve \f$f(a,x)=0\f$ for x in \a X, and continue to a function \f$h\f$ solving \f$f(a,h(a))=0\f$ over \f$A\f$.
+    virtual IntervalVectorFunctionModel continuation(const IntervalVectorFunction& f, const Vector<Float>& a, const Vector<Interval>& X,  const Vector<Interval>& A) const = 0;
 
     //! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. Returns a set of boxes for which it can be <em>proved</em> that
     //! a solution exists in the box. This means that some solutions may be omitted if they are not sufficiently robust.

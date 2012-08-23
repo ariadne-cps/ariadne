@@ -32,6 +32,8 @@
 #include "function.h"
 #include "taylor_function.h"
 #include "vector.h"
+#include "expression.h"
+#include "space.h"
 
 #include "test.h"
 
@@ -42,14 +44,16 @@ class TestSolver
 {
   private:
     std::unique_ptr<SolverInterface> solver;
+    std::string solver_class_name;
   public:
-    TestSolver(const SolverInterface& s)
-        : solver(s.clone()) { }
+    TestSolver(const SolverInterface& s,const char* n)
+        : solver(s.clone()), solver_class_name(n) { }
 
     int test() {
         ARIADNE_TEST_PRINT(*solver);
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_implicit());
+        ARIADNE_TEST_CALL(test_scalar_implicit());
         return 0;
     }
 
@@ -107,6 +111,59 @@ class TestSolver
         e=RealVectorFunction( { 0.828427+bb*(0.0441942+bb*(-0.000345267+bb*0.00000539468)) } );
         ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
+
+        // Test solution of x-2*a=0 on [-1,+1], taking values in [-1,+1].
+        // There is at most one solution, but this lies partially outside the range.
+        // Should obtain PartialSolutionException
+        p=IntervalVector({Interval(-1,1)});
+        r=IntervalVector({Interval(-1,1)});
+        f=RealVectorFunction({x-2*a});
+        ARIADNE_TEST_PRINT(f);
+        ARIADNE_TEST_THROWS(solver->implicit(f,p,r),SolverException);
+    }
+
+    void test_scalar_implicit() {
+        //TaylorModelAccuracy::set_default_sweep_threshold(1e-12);
+
+        RealScalarFunction aa=RealScalarFunction::coordinate(1,0);
+        RealScalarFunction a=RealScalarFunction::coordinate(2,0);
+        RealScalarFunction x=RealScalarFunction::coordinate(2,1);
+        // Test solution of x-2*a=0 on [-1,+1], taking values in [-1,+1]. There is at most one solution.
+        // Uses scalar implicit
+        IntervalVector p; Interval r;
+        RealScalarFunction e,f,s; // s is unscaling functions
+        IntervalScalarFunctionModel h;
+
+        ARIADNE_TEST_PRINT(*solver);
+        
+        // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
+        p=IntervalVector({Interval(0.875,1.125)});
+        r=Interval(0.25,1.25);
+        f=RealScalarFunction((x*x+1)*x-a);
+        ARIADNE_TEST_PRINT(f);
+        h=solver->implicit(f,p,r);
+        ARIADNE_TEST_PRINT(h);
+        s=RealScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
+        e=RealScalarFunction( 0.682328+s*(0.0521547+s*(-0.0023232+s*0.000147778)) );
+        ARIADNE_TEST_PRINT(e);
+        ARIADNE_TEST_COMPARE(mag((h-e).range()),<,1e-4);
+
+        // Test solution of x-2*a=0 on [-1,+1], taking values in [-1,+1].
+        // There is at most one solution, but this lies partially outside the range.
+        // Should obtain PartialSolutionException
+        p=IntervalVector({Interval(-1,1)});
+        r=Interval(-1,1);
+        f=RealScalarFunction(x-2*a);
+        ARIADNE_TEST_PRINT(f);
+        try {
+            h=solver->implicit(f,p,r);
+            ARIADNE_TEST_NOTIFY(solver_class_name<<" silently returns partially defined scalar implicit function.");
+        }
+        catch(SolverException) {
+            ARIADNE_TEST_THROWS(solver->implicit(f,p,r),SolverException);
+            ARIADNE_TEST_NOTIFY(solver_class_name<<" throws error on partially defined scalar implicit function.");
+        }
+
     }
 
 };
@@ -117,17 +174,16 @@ int main(int argc, const char **argv) {
 
     IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5,maximum_number_of_steps=12);
     interval_newton_solver.verbosity=verbosity;
-    TestSolver(interval_newton_solver).test_solve();
-    ARIADNE_TEST_WARN("IntervalNewtonSolver cannot solve for implicit functions.");
+    TestSolver(interval_newton_solver,"IntervalNewtonSolver").test();
 
     KrawczykSolver krawczyk_solver(maximum_error=1e-5,maximum_number_of_steps=12);
     ARIADNE_TEST_PRINT(krawczyk_solver.function_factory());
     krawczyk_solver.verbosity=verbosity;
-    TestSolver(krawczyk_solver).test();
+    TestSolver(krawczyk_solver,"KrawczykSolver").test();
 
     FactoredKrawczykSolver factored_krawczyk_solver(maximum_error=1e-5,maximum_number_of_steps=12);
     factored_krawczyk_solver.verbosity=verbosity;
-    TestSolver(factored_krawczyk_solver).test();
+    TestSolver(factored_krawczyk_solver,"FactoredKrawczykSolver").test();
 
     std::cerr<<"INCOMPLETE "<<std::flush;
     return ARIADNE_TEST_FAILURES;

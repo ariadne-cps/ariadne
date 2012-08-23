@@ -664,7 +664,7 @@ TestHybridEvolver::test_splitting_on_urgent_event() const
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(initial_enclosure,evolution_time);
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_CHECK_WARN(orbit.final().size(),1u);
-    ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),2u);
+    ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),4u);
 
     Axes2d axes(-1.0,x,11.0, -6.0,y,6.0);
     HybridExpressionSet guard_set(upwards,(-1.0<=x<=11.0,2.0<=y<=6.0));
@@ -872,7 +872,7 @@ void TestHybridEvolver::test_transverse_cube_root_crossing() const
 {
     DiscreteLocation q1("q1"), q2("q2");
     RealVariable x("x"), y("y");
-    Real r=1.0/32;
+    Real r=Real(1.0/32);
     RealExpression guard=((x-1)*(x-1)+1.0)*(x-1)-y-1./64;
     HybridAutomaton system;
     system.new_mode(q1,(dot(x)=1,dot(y)=0));

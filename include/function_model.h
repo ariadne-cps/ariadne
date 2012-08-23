@@ -348,6 +348,8 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, const Vector
     return os << static_cast< const ScalarFunctionModel<X> >(function);
 }
 
+//! \ingroup FunctionModelSubModule
+//! \brief Generic vector functions on bounded domains.
 template<> class VectorFunctionModel<Interval>
 {
   public:

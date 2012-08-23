@@ -270,6 +270,11 @@ void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, 
     this->_set.apply_map(map);
 }
 
+void HybridEnclosure::apply_fixed_evolve_step(const IntervalVectorFunctionModel& phi, const ExactFloat& elps)
+{
+    this->_set.apply_fixed_evolve_step(phi,elps);
+}
+
 void HybridEnclosure::apply_spacetime_evolve_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& elps)
 {
     this->_set.apply_spacetime_evolve_step(phi,elps);

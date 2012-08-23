@@ -60,12 +60,12 @@ class GeneralHybridEvolverConfiguration;
 
 // A derived class of IntervalVectorFunctionModel representing the flow $\phi(x,t)\f$ of a
 // differential equations \f$\dot{x}=f(x)\f$.
-class FlowFunctionPatch
+class FlowFunctionModel
     : public IntervalVectorFunctionModel
 {
   public:
-    FlowFunctionPatch(const IntervalVectorFunctionModel& f) : IntervalVectorFunctionModel(f) { }
-    Float step_size() const { return this->time_domain().upper(); }
+    FlowFunctionModel(const IntervalVectorFunctionModel& f) : IntervalVectorFunctionModel(f) { }
+    ExactFloat step_size() const { return make_exact(this->time_domain().upper()); }
     Interval time_domain() const { return this->domain()[this->domain().size()-1]; }
     IntervalVector space_domain() const { return project(this->domain(),Ariadne::range(0,this->domain().size()-1)); }
     IntervalVector const codomain() const { return this->IntervalVectorFunctionModel::codomain(); }
@@ -201,8 +201,8 @@ class HybridEvolverBase
 
     //! \brief Compute the evolution within a single discrete mode.
     //!
-    //! Takes a set from evolution_data.initial_sets and processes the initial
-    //! events using _process_initial_events.
+    //! Takes a set from evolution_data.starting_sets and processes the active
+    //! events using _process_starting_sets.
     //! The resulting set is then evolved using _upper_evolution_step until
     //! either the maximum continuous time is reached, or no furter continuous
     //! evolution is possible.
@@ -255,7 +255,7 @@ class HybridEvolverBase
 
     //! \brief Compute data on how trajectories of the \a flow
     //! cross the given \a guards.
-    //! For example, trajectories may have a #INCREASING_CROSSING crossing with
+    //! For example, trajectories may have a #INCREASING crossing with
     //! a given crossing_time as a function of the initial state.
     //!
     //! \details The \a dynamic is given explicitly to facilitate computation
@@ -263,16 +263,16 @@ class HybridEvolverBase
     //! A crossing_time computed must be valid over the \a initial_set, though
     //! will often be computed over the entire bounding box.
     //!
-    //! If the crossing is #INCREASING_CROSSING, then the \a crossing_time \f$\gamma\f$
+    //! If the crossing is #INCREASING, then the \a crossing_time \f$\gamma\f$
     //! should be computed, satisfying \f$g(\phi(x,\gamma(x)))=0\f$.
-    //! If the crossing is #CONCAVE_CROSSING, the the \a critical_time (\a maximum_time) \f$\mu\f$
+    //! If the crossing is #CONCAVE, the the \a critical_time (\a maximum_time) \f$\mu\f$
     //! should be computed, satisfying \f$L_{f}g(\phi(x,\mu(x)))=0\f$.
     virtual
     Map<DiscreteEvent,CrossingData>
     _compute_crossings(Set<DiscreteEvent> const& active_events,
                        RealVectorFunction const& dynamic,
                        Map<DiscreteEvent,RealScalarFunction> const& guards,
-                       IntervalVectorFunctionModel const& flow,
+                       FlowFunctionModel const& flow,
                        HybridEnclosure const& initial_set) const;
 
     //! \brief Compute data related to the time of evolution related to the
@@ -300,7 +300,7 @@ class HybridEvolverBase
     TimingData
     _estimate_timing(Set<DiscreteEvent>& active_events,
                      Real final_time,
-                     IntervalVectorFunctionModel const& flow,
+                     FlowFunctionModel const& flow,
                      Map<DiscreteEvent,CrossingData>& crossings,
                      Map<DiscreteEvent,TransitionData> const& transitions,
                      HybridEnclosure const& initial_set) const;
@@ -312,8 +312,8 @@ class HybridEvolverBase
     void
     _recondition(HybridEnclosure& set) const;
 
-    //! \brief Process the \a initial_set to find any
-    //!  <em>initially active</em> events, and compute the relevant \em jump sets
+    //! \brief Process the \a starting_set to find any
+    //!  <em>immediately active</em> events, and compute the relevant \em jump sets
     //!  and the <em>flowable</em> or <em>progress</em> set.
     //!
     //! First, and \em invariants \f$i_e(x)\leq0\f$ are processed to give
@@ -328,8 +328,8 @@ class HybridEvolverBase
     //! \f$P=\{ x\in I \mid \forall e\in E_{\mathrm{tcp}},\ p_e(x)\leq0\}\f$.
     virtual
     void
-    _process_initial_events(EvolutionData& evolution_data,
-                            HybridEnclosure const& initial_set,
+    _process_starting_events(EvolutionData& evolution_data,
+                            HybridEnclosure const& starting_set,
                             Map<DiscreteEvent,TransitionData> const& transitions) const;
 
     //! \brief Apply the \a flow to the \a set up to the time specified by \a timing_data
@@ -423,7 +423,7 @@ class HybridEvolverBase
     //!
     //! \note The \a jump, \a finishing, \a final and \a reach sets may need to
     //! be constructed as unions of Enclosure sets. The is because when dealing
-    //! with #CONCAVE_CROSSING events, it may be the case that these sets are split into
+    //! with #CONCAVE events, it may be the case that these sets are split into
     //! two.
     //!
     //! TODO: This method might be better split into even simpler events.
@@ -485,31 +485,47 @@ struct TransitionData
 };
 
 
+enum class DirectionKind {
+    POSITIVE, //!< The guard function is strictly positive on the flow range.
+        //! The event occurs immediately (if urgent) or at any time (if permissive).
+    NEGATIVE, //!< The guard function is strictly negative on the flow range. No event occurs.
+    INCREASING, //!< The guard function is strictly increasing along flow lines.
+        //! i.e. \f$\frac{d}{dt}g(\phi(x_0,t))>0\f$. Implied by \f$L_{f}g > 0\f$.
+    DECREASING, //!< The guard function is strictly decreasing along flow lines.
+        //! i.e. \f$\frac{d}{dt}g(\phi(x_0,t))<0\f$. Implied by \f$L_{f}g < 0\f$.
+    CONCAVE, //!< The guard function varies concavely along flow lines, which is equivalent to \f$L_{f}^{2} g < 0\f$.
+    CONVEX, //!< The guard function varies convexly along flow lines, which is equivalent to \f$L_{f}^{2} g > 0\f$.
+    INDETERMINATE //!< Neither the guard function, nor its first or second Lie derivatives, has a definite sign.
+};
+
 //! \brief The way trajectories of the flow \f$\phi(x_0,t)\f$ of \f$\dot{x}=f(x)\f$ cross the guard set \f$g(x)=0\f$.
 //! The rate of change of the guard function changes along flow lines is given by
 //! \f$d g(x(t))/dt = L_{f}g(x(t))\f$ where the Lie derivative \f$L_{f}g\f$ is defined by \f$L_{f}g(x) = (\nabla g\cdot f)(x)\f$.
 //!
-//! Defaults to DEGENERATE_CROSSING whenever the crossing kind has not been resolved;
+//! Defaults to DEGENERATE whenever the crossing kind has not been resolved;
 //! this need not necessarily mean that the crossing is degenerate, but may
 //! also imply that the crossing information is too expensive or sensitive to
 //! compute.
 //! \relates HybridEvolverInterface \relates CrossingData
-enum CrossingKind {
-    DEGENERATE_CROSSING, //!< The crossing may be degenerate to second order.
-    NEGATIVE_CROSSING, //!< The guard function is negative on the flow domain. No event occurs.
-    POSITIVE_CROSSING, //!< The guard function is negative on the domain. The event occurs immediately (if urgent) or at all times (if permissive).
-    INCREASING_CROSSING, //!< The guard function is strictly increasing along flow lines at a crossing point.
+enum class CrossingKind {
+    DEGENERATE, //!< The crossing may be degenerate to second order.
+    NEGATIVE, //!< The guard function is negative on the flow domain. No event occurs.
+    POSITIVE, //!< The guard function is negative on the domain. The event occurs immediately (if urgent) or at all times (if permissive).
+    MONOTONE, //!< The guard function is strictly increasing or decreasing along flow lines at a crossing point.
         //! i.e. \f$\frac{d}{dt}g(\phi(x_0,t))>0\f$ whenever \f$g(\phi(x_0,t))=0\f$.
         //! Implied by \f$L_{f}g \geq 0\f$.
-    DECREASING_CROSSING, //!< The guard function is strictly decreasing along flow lines.
-    CONCAVE_CROSSING, //!< The guard function is positive over at most an interval.
+    INCREASING, //!< The guard function is strictly increasing along flow lines at a crossing point.
+        //! i.e. \f$\frac{d}{dt}g(\phi(x_0,t))>0\f$ whenever \f$g(\phi(x_0,t))=0\f$.
+        //! Implied by \f$L_{f}g \geq 0\f$.
+    DECREASING, //!< The guard function is strictly decreasing along flow lines.
+    CONCAVE, //!< The guard function is positive over at most an interval.
         //! Implied by concavity along flow lines, which is equivalent to \f$L_{f}^{2} g < 0\f$ within the reached set.
-    CONVEX_CROSSING, //!< The guard function is negative over at most an interval. Implied by convexity along flow lines.
+    CONVEX, //!< The guard function is negative over at most an interval. Implied by convexity along flow lines.
         //! Implied by convexity along flow lines, which is equivalent to \f$L_{f}^{2} g > 0\f$ within the reached set.
-    TRANSVERSE_CROSSING, //!< The guard function is strictly increasing along flow lines, and
+    TRANSVERSE, //!< The guard function is strictly increasing along flow lines, and
         //! the crossing time can be computed as a smooth function of the initial state.
         //! Given an initial point \f$x_0\f$, the crossing time is \f$\gamma(x_0)\f$.
-    GRAZING_CROSSING //!< The time at which the guard function reaches a maximum along flow lines is a smooth function \f$\mu(x_0)\f$ of the initial state \f$x_0\f$.
+    GRAZING //!< The time at which the guard function reaches a maximum along flow lines is a smooth function \f$\mu(x_0)\f$ of the initial state \f$x_0\f$.
         //! Implies by concavity along flow lines, which is equivalent to \f$L_{f}^{2} g < 0\f$ within the reached set.
 };
 std::ostream& operator<<(std::ostream& os, const CrossingKind& crk);
@@ -523,8 +539,12 @@ struct CrossingData
     CrossingData(CrossingKind crk, const IntervalScalarFunctionModel& crt)
         : crossing_kind(crk), crossing_time(crt) { }
     //! \brief The way in which the guard function changes along trajectories
-    //! during a crossing. e.g. INCREASING_CROSSING
+    DirectionKind direction_kind;
+    //! \brief The way in which the guard function changes along trajectories
+    //! during a crossing. e.g. INCREASING
     CrossingKind crossing_kind;
+    //! \brief The range of times at which the crossing may occur.
+    Interval crossing_time_range;
     //! \brief The time \f$\gamma(x)\f$ at which the crossing occurs,
     //! as a function of the initial point in space. Satisfies \f$g(\phi(x,\gamma(x)))=0\f$.
     IntervalScalarFunctionModel crossing_time;
@@ -540,7 +560,7 @@ std::ostream& operator<<(std::ostream& os, const CrossingData& crk);
 //! is the time the point has so far been evolved for. Assumes that the flow is given by a function \f$x'=\phi(x,t)\f$,
 //! typically only defined over a bounded set of space and time.
 //! \relates TimingData
-enum StepKind {
+enum class StepKind {
     CONSTANT_EVOLUTION_TIME, //!< The step is taken for a fixed time \f$h\f$. The actual step length depends only on the starting state.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),h)\f$ and \f$\tau'(s)=\tau(s)+h\f$.
     SPACE_DEPENDENT_EVOLUTION_TIME, //!< The step is taken for a time \f$\varepsilon(x)\f$ depending only on the starting state.
@@ -566,7 +586,7 @@ std::ostream& operator<<(std::ostream& os, const StepKind& crk);
 //! Needed since the final time may be an arbitrary real number, at it may not be possible to determine
 //! whether a given enclosure is exactly at the final time or not
 //! \relates TimingData
-enum FinishingKind {
+enum class FinishingKind {
     BEFORE_FINAL_TIME, //!< At the end of the step, the final time has definitely not been reached by any point.
     AT_FINAL_TIME, //!< At the end of the step, the final time is reached exactly. No more evolution is possible.
     AFTER_FINAL_TIME, //!< At the end of the step, the final time has definitely been passed by every point. No more evolution is possible.
@@ -604,12 +624,14 @@ struct EvolutionData
     //! \brief Sets for which the evolution starts in a new mode, initially or after a jump.
     //! The set needs to be processed by finding initially active events,
     //! and moving the set into working_sets.
-    List<HybridEnclosure> initial_sets;
+    List<HybridEnclosure> starting_sets;
     //! \brief Sets which have been processed for initially active events.
     //! Sets in this list can be assumed to satisfy all invariants and progress
     //! predicates.
     List<HybridEnclosure> working_sets;
 
+    //! \brief The initial sets for the evolution.
+    List<HybridEnclosure> initial_sets;
     //! \brief Sets which have been computed as reach sets for the current
     //! evolution.
     List<HybridEnclosure> reach_sets;
@@ -713,11 +735,34 @@ class GeneralHybridEvolver
     TimingData
     _estimate_timing(Set<DiscreteEvent>& active_events,
                      Real final_time,
-                     IntervalVectorFunctionModel const& flow,
+                     FlowFunctionModel const& flow,
                      Map<DiscreteEvent,CrossingData>& crossings,
                      Map<DiscreteEvent,TransitionData> const& transitions,
                      HybridEnclosure const& initial_set) const;
 
+/*
+    virtual
+    Void
+    _compute_finishing_time(TimingData& result,
+                            Real final_time,
+                            FlowFunctionModel const& flow,
+                            HybridEnclosure const& initial_set) const;
+
+    virtual
+    Void
+    _compute_unwind_time(TimingData& result,
+                         Real final_time,
+                         FlowFunctionModel const& flow,
+                         HybridEnclosure const& initial_set) const;
+    virtual
+    Void
+    _compute_creep_time(TimingData& result,
+                        Real final_time,
+                        FlowFunctionModel const& flow,
+                        Map<DiscreteEvent,CrossingData>& crossings,
+                        Map<DiscreteEvent,TransitionData> const& transitions,
+                        HybridEnclosure const& initial_set) const;
+*/
 };
 
 

@@ -85,7 +85,7 @@ void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) c
     evolver.reset(new GeneralHybridEvolver(system));
     evolver->set_integrator(TaylorSeriesIntegrator(1e-5));
     evolver->verbosity=verbosity;
-    evolver->configuration().set_maximum_step_size(1./32);
+    evolver->configuration().set_maximum_step_size(1./4);
     evolver->configuration().set_maximum_enclosure_radius(1./8);
     evolver->configuration().set_maximum_enclosure_radius(1./2);
 }
@@ -111,7 +111,7 @@ void TestHybridEvolution::test_bouncing_ball() const {
     HybridBox initial(q,bouncing_ball.continuous_state_space(q),Box{{height-radius,height+radius},{-radius,+radius}});
     HybridTime time(4.5,3);
 
-    _set_evolver(bouncing_ball);
+    this->_set_evolver(bouncing_ball);
 
     Orbit<HybridEnclosure> orbit=evolver->orbit(initial,time,UPPER_SEMANTICS);
     ListSet<HybridEnclosure> const& orbit_final=orbit.final();
@@ -143,12 +143,12 @@ void TestHybridEvolution::test_bouncing_ball() const {
 
 void TestHybridEvolution::test_water_tank() const {
     // Declare some constants
-    Real T(4.0);
-    Real hmin(5.5);
-    Real hmax(8.0);
-    Real delta(0.05);
-    Real lambda(0.02);
-    Real rate(0.3);
+    Real T(Rational(4));
+    Real hmin(Rational(11,2));
+    Real hmax(Rational(8));
+    Real delta(Rational(1,20));
+    Real lambda(Rational(1,50));
+    Real rate(Rational(3,10));
 
     RealVariable height("height");
     RealVariable aperture("aperture");
@@ -181,8 +181,8 @@ void TestHybridEvolution::test_water_tank() const {
     ARIADNE_TEST_PRINT(watertank);
 
     DiscreteLocation initial_location=opening;
-    HybridBox initial_box(initial_location,(0<=height<=0.05,0.0<=aperture<=0.01));
-    HybridExpressionSet initial(initial_location,(0<=height<=0.05,0.0<=aperture<=0.01));
+    HybridBox initial_box(initial_location,(0<=height<=one/16,0.0<=aperture<=one/64));
+    HybridExpressionSet initial(initial_location,(0<=height<=one/16,0.0<=aperture<=one/64));
 
     //HybridTime evolution_time(80.0,5);
     HybridTime evolution_time(80.0,8);

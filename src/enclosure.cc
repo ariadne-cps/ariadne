@@ -440,7 +440,7 @@ void Enclosure::apply_flow(IntervalVectorFunction flow, Interval time)
 }
 */
 
-void Enclosure::apply_fixed_evolve_step(IntervalVectorFunction flow, Float time)
+void Enclosure::apply_fixed_evolve_step(IntervalVectorFunction flow, ExactFloat time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     IntervalScalarFunctionModel evolve_time_function=this->function_factory().create_constant(this->domain(),ExactFloat(time));
@@ -1299,7 +1299,7 @@ std::ostream& Enclosure::write(std::ostream& os) const {
            << ", range=" << this->bounding_box()
            << ", space_function=" << repr(this->space_function())
            << ", time_function=" << repr(this->time_function())
-           << ", negative_constraints=" << this->constraints()
+           << ", constraints=" << this->constraints()
            << ")";
 
     } return os;

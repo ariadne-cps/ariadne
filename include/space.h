@@ -61,6 +61,7 @@ template<class T> struct Space
     Space(const Set<Identifier>& vs) : _variables(vs.begin(),vs.end()) { }
     Space(const List<Identifier>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(VariableType(vl[i])); } }
     Space(const List<VariableType>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(vl[i]); } }
+    Space(const std::initializer_list<VariableType>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(vl.begin()[i]); } }
 
     explicit Space(const List<String>& vnl) { for(uint i=0; i!=vnl.size(); ++i) { this->append(VariableType(vnl[i])); } }
     explicit Space(const String& vn) { this->append(VariableType(vn)); }

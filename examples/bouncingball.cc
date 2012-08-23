@@ -92,8 +92,8 @@ int main(int argc, const char* argv[])
     plot("bouncingball-orbit",Axes2d(-0.1,x,2.1, -10.1,v,10.1), Colour(0.0,0.5,1.0), orbit);
     plot("bouncingball-x",Axes2d(0.0,TimeVariable(),1.5,- 0.1,x,2.1), Colour(0.0,0.5,1.0), orbit);
 
-    //textplot("ball-orbit.txt",orbit);
-
+    std::cout << "\norbit: 1 initial set, "<<orbit.reach().size()<<" reach sets, "<<orbit.intermediate().size()<<" intermediate sets, "<<orbit.final().size()<<" final sets\n\n";
+    
 /*
     std::cout << "Computing reach set using GeneralHybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(initial_enclosure,evolution_time);

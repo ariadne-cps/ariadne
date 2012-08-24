@@ -116,28 +116,12 @@ class IntervalNewtonSolver
     virtual void write(std::ostream& os) const;
 
     using SolverBase::implicit;
-
-    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
-    virtual IntervalVectorFunctionModel implicit_step(const IntervalVectorFunction& f, const IntervalVectorFunctionModel& p, const IntervalVectorFunctionModel& x) const;
-    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual IntervalScalarFunctionModel implicit(const IntervalScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
   public:
-    virtual Vector<Interval>
-    step(const IntervalVectorFunction& f,
-         const Vector<Interval>& pt) const;
+    virtual IntervalVectorFunctionModel implicit_step(const IntervalVectorFunction& f, const IntervalVectorFunctionModel& p, const IntervalVectorFunctionModel& x) const;
+
+    virtual Vector<Interval> step(const IntervalVectorFunction& f, const Vector<Interval>& pt) const;
 };
 
-
-/*! \ingroup Solvers
- *  \brief Interval Newton solver. Uses the contractor \f$[x']=x_0-Df^{-1}([x])f(x_0)\f$.
- *  Performs implicit function computation by first guessing a trial solution function.
- */
-class GuessingIntervalNewtonSolver
-    : public IntervalNewtonSolver
-{
-    /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual IntervalScalarFunctionModel implicit(const IntervalScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
-};
 
 /*! \ingroup Solvers
  *  \brief Krawczyk solver. Uses the contractor \f$[x']=x_0-Mf(x_0)+(I-MDf([x])([x]-x_0)\f$

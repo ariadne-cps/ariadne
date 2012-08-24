@@ -94,7 +94,6 @@ class SingularJacobianException : public SolverException
 };
 
 
-
 //! \ingroup SolverModule EvaluationModule
 //! \brief %Interface for solving (nonlinear) equations.
 //! \sa SolverException

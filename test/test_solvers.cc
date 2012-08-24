@@ -119,7 +119,15 @@ class TestSolver
         r=IntervalVector({Interval(-1,1)});
         f=RealVectorFunction({x-2*a});
         ARIADNE_TEST_PRINT(f);
-        ARIADNE_TEST_THROWS(solver->implicit(f,p,r),SolverException);
+        try {
+            h=solver->implicit(f,p,r);
+            ARIADNE_TEST_NOTIFY(solver_class_name<<" silently returns partially defined vector implicit function.");
+        }
+        catch(SolverException) {
+            ARIADNE_TEST_THROWS(solver->implicit(f,p,r),SolverException);
+            ARIADNE_TEST_NOTIFY(solver_class_name<<" throws error on partially defined vector implicit function.");
+        }
+
     }
 
     void test_scalar_implicit() {
@@ -155,12 +163,14 @@ class TestSolver
         r=Interval(-1,1);
         f=RealScalarFunction(x-2*a);
         ARIADNE_TEST_PRINT(f);
+        IntervalScalarFunctionModel g=ScalarTaylorFunction(join(p,r),f,ThresholdSweeper(1e-12));
+        ARIADNE_TEST_PRINT(g);
         try {
-            h=solver->implicit(f,p,r);
+            h=solver->implicit(g,p,r);
             ARIADNE_TEST_NOTIFY(solver_class_name<<" silently returns partially defined scalar implicit function.");
         }
         catch(SolverException) {
-            ARIADNE_TEST_THROWS(solver->implicit(f,p,r),SolverException);
+            ARIADNE_TEST_THROWS(solver->implicit(g,p,r),SolverException);
             ARIADNE_TEST_NOTIFY(solver_class_name<<" throws error on partially defined scalar implicit function.");
         }
 
@@ -168,8 +178,27 @@ class TestSolver
 
 };
 
+#include "differential.h"
 
 int main(int argc, const char **argv) {
+/*
+    IntervalVector D={{-1,+1},{-1,+1}};
+    VectorTaylorFunction x=VectorTaylorFunction::identity(D,ThresholdSweeper(1e-10));
+    ScalarTaylorFunction f=2*x[0]-x[1];
+    std::cerr<<"D="<<D<<"\n";
+    Interval D0=D[0];
+    std::cerr<<"f="<<representation(f)<<"\n";
+    Vector<Differential<Interval>> dx=Differential<Interval>::variables(2,2,1u,D);
+    Differential<Interval> dx0=dx[0];
+    std::cerr<<"dx="<<dx<<"\n";
+    std::cerr<<"unscale(dx[0],D[0])="<<unscale(dx0,D[0])<<"\n";
+    Interval c(add_ivl(D0.lower()/2,D0.upper()/2));
+    Interval r(sub_ivl(D0.upper()/2,D0.lower()/2));
+    std::cerr<<"(dx[0]-c)/r="<<((dx0-c)/r)<<" c="<<c<<" r="<<r<<"\n";
+    std::cerr<<"unscale(dx,D)="<<unscale(dx,D)<<"\n";
+    std::cerr<<"f(dx)="<<f.evaluate(dx)<<"\n";
+    return 0;
+*/    
     int verbosity=get_verbosity(argc,argv);
 
     IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5,maximum_number_of_steps=12);

@@ -59,20 +59,20 @@ class TaylorFunctionFactory;
 
 template<template<class> class T> inline T<Float> unscale(const T<Float>& x, const Interval& d) {
     Float c(add_approx(d.lower()/2,d.upper()/2));
-    Float r(add_approx(d.upper()/2,d.lower()/2));
+    Float r(sub_approx(d.upper()/2,d.lower()/2));
     return (x-c)/r;
 }
 
 template<template<class> class T> inline T<Interval> unscale(const T<Interval>& x, const Interval& d) {
-    Interval c(add_approx(d.lower()/2,d.upper()/2));
-    Interval r(add_approx(d.upper()/2,d.lower()/2));
+    Interval c(add_ivl(d.lower()/2,d.upper()/2));
+    Interval r(sub_ivl(d.upper()/2,d.lower()/2));
     return (x-c)/r;
 }
 
 
 inline Float unscale(const Float& x, const Interval& d) {
     Float c(add_approx(d.lower()/2,d.upper()/2));
-    Float r(add_approx(d.upper()/2,d.lower()/2));
+    Float r(sub_approx(d.upper()/2,d.lower()/2));
     return (x-c)/r;
 }
 
@@ -83,7 +83,7 @@ inline Interval unscale(const Interval& x, const Interval& d) {
 }
 
 template<class X> Vector<X> unscale(const Vector<X>& x, const Vector<Interval>& d) {
-    Vector<X> r(x.size());
+    Vector<X> r(x);
     for(uint i=0; i!=r.size(); ++i) {
         r[i]=unscale(x[i],d[i]);
     }

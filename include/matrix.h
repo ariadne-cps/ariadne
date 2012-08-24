@@ -113,6 +113,10 @@ class Matrix
     Matrix(size_t r, size_t c) : _nr(r), _nc(c), _ptr(new X[_nr*_nc]) {
         for(size_t k=0; k!=r*c; ++k) { this->_ptr[k]=0; } }
 
+    //! Construct a matrix with \a r rows and \a c columns with values initialised to \a x.
+    Matrix(size_t r, size_t c, const X& x) : _nr(r), _nc(c), _ptr(new X[_nr*_nc]) {
+        for(size_t k=0; k!=r*c; ++k) { this->_ptr[k]=x; } }
+
     //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style Array beginning at \a ptr in row-major format. The value in the \a i<sup>th</sup> row and \a j<sup>th</sup> column of the resulting matrix is \a ptr[i*c+j].
     template<class XX> Matrix(size_t r, size_t c, const XX* ptr) : _nr(r), _nc(c), _ptr(new X[_nr*_nc]) {
         for(size_t k=0; k!=r*c; ++k) { this->_ptr[k] = ptr[k]; } }

@@ -430,6 +430,19 @@ inline VectorFunctionModel<Interval> compose(const VectorFunctionModel<Interval>
 inline ScalarFunctionModel<Interval> unchecked_compose(const ScalarFunctionModel<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_unchecked_compose(f); }
 inline VectorFunctionModel<Interval> unchecked_compose(const VectorFunctionModel<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_unchecked_compose(f); }
 
+inline Interval unchecked_evaluate(const ScalarFunction<Interval>& f, const Vector<Interval>& x) {
+    ScalarFunctionModelInterface<Interval> const* fptr = dynamic_cast<ScalarFunctionModelInterface<Interval> const*>(f.raw_pointer());
+    if(fptr) { return unchecked_evaluate(ScalarFunctionModel<Interval>(*fptr),x); } else { return evaluate(f,x); } }
+inline Vector<Interval> unchecked_evaluate(const VectorFunction<Interval>& f, const Vector<Interval>& x) {
+    VectorFunctionModelInterface<Interval> const* fptr = dynamic_cast<VectorFunctionModelInterface<Interval> const*>(f.raw_pointer());
+    if(fptr) { return unchecked_evaluate(VectorFunctionModel<Interval>(*fptr),x); } else { return evaluate(f,x); } }
+inline ScalarFunctionModel<Interval> unchecked_compose(const ScalarFunction<Interval>& f, const VectorFunctionModel<Interval>& g) {
+    ScalarFunctionModelInterface<Interval> const* fptr = dynamic_cast<ScalarFunctionModelInterface<Interval> const*>(f.raw_pointer());
+    if(fptr) { return unchecked_compose(ScalarFunctionModel<Interval>(*fptr),g); } else { return compose(f,g); } }
+inline VectorFunctionModel<Interval> unchecked_compose(const VectorFunction<Interval>& f, const VectorFunctionModel<Interval>& g) {
+    VectorFunctionModelInterface<Interval> const* fptr = dynamic_cast<VectorFunctionModelInterface<Interval> const*>(f.raw_pointer());
+    if(fptr) { return unchecked_compose(VectorFunctionModel<Interval>(*fptr),g); } else { return compose(f,g); } }
+
 //inline VectorFunctionModel<Interval> compose(const VectorFunctionModel<Interval>& f, const VectorFunctionModel<Interval>& g) { return g._ptr->_compose(f); }
 
 inline VectorFunctionModel<Interval> operator-(const VectorFunctionModel<Interval>& f1, const VectorFunctionInterface<Interval>& f2) {

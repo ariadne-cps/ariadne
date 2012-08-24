@@ -1053,6 +1053,24 @@ IntervalScalarFunction operator-(Interval const& c, IntervalScalarFunction const
     return new BinaryFunction<Interval>(SUB,IntervalScalarFunction::constant(f.argument_size(),c),f);
 }
 
+IntervalVectorFunction operator-(IntervalVectorFunction const& f1, IntervalVectorFunction const& f2) {
+    std::shared_ptr<IntervalVectorFunctionModelInterface const> f1p=std::dynamic_pointer_cast<IntervalVectorFunctionModelInterface const>(f1.managed_pointer());
+    std::shared_ptr<IntervalVectorFunctionModelInterface const> f2p=std::dynamic_pointer_cast<IntervalVectorFunctionModelInterface const>(f2.managed_pointer());
+    if(f1p && f2p) {
+        return IntervalVectorFunctionModel(*f1p) - IntervalVectorFunctionModel(*f2p);
+    } else if(f1p) {
+        return IntervalVectorFunctionModel(*f1p) - f2.reference();
+    } else if(f2p) {
+        return f1.reference() - IntervalVectorFunctionModel(*f2p);
+    } else {
+        VectorOfScalarFunction<Interval> r(f1.result_size(),IntervalScalarFunction(f1.argument_size()));
+        for(uint i=0; i!=r.result_size(); ++i) {
+            r[i]=f1[i]-f2[i];
+        }
+        return r;
+    }
+}
+
 IntervalScalarFunction compose(const IntervalScalarFunction& f, const IntervalVectorFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
     return compose(f,IntervalVectorFunctionModel(dynamic_cast<IntervalVectorFunctionModelInterface const&>(*g.raw_pointer())));

@@ -302,6 +302,7 @@ Vector< Formula<Real> > formula(const VectorFunction<Real>& f);
 ScalarFunction<Interval> operator-(const ScalarFunction<Interval>&, const ScalarFunction<Interval>&);
 ScalarFunction<Interval> operator-(const ScalarFunction<Interval>&, const Interval&);
 ScalarFunction<Interval> operator-(const Interval&, const ScalarFunction<Interval>&);
+VectorFunction<Interval> operator-(const VectorFunction<Interval>&, const VectorFunction<Interval>&);
 VectorFunction<Interval> join(const VectorFunction<Interval>& f1, const VectorFunction<Interval>& f2);
 ScalarFunction<Interval> compose(const ScalarFunction<Interval>& f, const VectorFunction<Interval>& g);
 VectorFunction<Interval> compose(const VectorFunction<Interval>& f, const VectorFunction<Interval>& g);

@@ -1372,7 +1372,6 @@ _apply_evolution_step(EvolutionData& evolution_data,
 
     if(verbosity>=1 && (_step_data.finishing || !_step_data.progress || !_step_data.events.empty()) ) {
         ARIADNE_LOG(3,timing_data.finishing_kind<<" "<<_step_data.events<<(_step_data.progress?" progress":" no progress")<<"\n");
-        std::getchar();
     }
 
 }

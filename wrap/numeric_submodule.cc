@@ -362,6 +362,7 @@ void export_interval()
     interval_class.def(double() - self);
     interval_class.def(double() * self);
     interval_class.def(double() / self);
+/*
     interval_class.def(self + Float());
     interval_class.def(self - Float());
     interval_class.def(self * Float());
@@ -370,6 +371,7 @@ void export_interval()
     interval_class.def(Float() - self);
     interval_class.def(Float() * self);
     interval_class.def(Float() / self);
+*/
     interval_class.def(self == self);
     interval_class.def(self != self);
     interval_class.def(self >= self);

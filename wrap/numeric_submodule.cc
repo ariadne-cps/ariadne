@@ -108,7 +108,6 @@ std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Real>& x) 
     return os << "Real(" << x.reference() << ")";
 }
 
-
 } // namespace Ariadne
 
 
@@ -160,6 +159,38 @@ void export_tribool() {
 }
 
 
+#ifdef HAVE_GMPXX_H
+void export_integer()
+{
+    class_<Integer> integer_class("Integer");
+    integer_class.def(init<int>());
+    integer_class.def(init<Integer>());
+    integer_class.def(boost::python::self_ns::str(self));
+    integer_class.def("__repr__", &__repr__<Integer>);
+    integer_class.def("__less__",(bool(*)(const mpz_class&, const mpz_class&)) &operator<);
+
+    implicitly_convertible<int,Integer>();
+
+}
+#endif
+
+#ifdef HAVE_GMPXX_H
+void export_rational()
+{
+    class_<Rational> rational_class("Rational");
+    rational_class.def(init<int,int>());
+    rational_class.def(init<int>());
+    rational_class.def(init<Rational>());
+    rational_class.def(boost::python::self_ns::str(self));
+    rational_class.def("__repr__", &__repr__<Rational>);
+    rational_class.def("__less__",(bool(*)(const Rational&, const Rational&)) &operator<);
+
+    implicitly_convertible<int,Rational>();
+    implicitly_convertible<Integer,Rational>();
+
+}
+#endif
+
 
 void export_float()
 {
@@ -176,6 +207,7 @@ void export_float()
     float_class.def(self - self);
     float_class.def(self * self);
     float_class.def(self / self);
+
     float_class.def(self + double());
     float_class.def(self - double());
     float_class.def(self * double());
@@ -184,6 +216,16 @@ void export_float()
     float_class.def(double() - self);
     float_class.def(double() * self);
     float_class.def(double() / self);
+/*
+    float_class.def(self + Interval());
+    float_class.def(self - Interval());
+    float_class.def(self * Interval());
+    float_class.def(self / Interval());
+    float_class.def(Interval() + self);
+    float_class.def(Interval() - self);
+    float_class.def(Interval() * self);
+    float_class.def(Interval() / self);
+
     float_class.def(self + Real());
     float_class.def(self - Real());
     float_class.def(self * Real());
@@ -192,6 +234,7 @@ void export_float()
     float_class.def(Real() - self);
     float_class.def(Real() * self);
     float_class.def(Real() / self);
+*/
     float_class.def(self == self);
     float_class.def(self != self);
     float_class.def(self >= self);
@@ -235,83 +278,7 @@ void export_exact_float()
 
     def("make_exact", (const ExactFloat&(*)(const Float&)) &Ariadne::make_exact, return_value_policy<copy_const_reference>());
 
-    implicitly_convertible<double,ExactFloat>();
-
     implicitly_convertible<ExactFloat,Float>();
-    implicitly_convertible<ExactFloat,Interval>();
-    implicitly_convertible<ExactFloat,Real>();
-}
-
-
-#ifdef HAVE_GMPXX_H
-void export_integer()
-{
-    class_<Integer> integer_class("Integer");
-    integer_class.def(init<int>());
-    integer_class.def(init<Integer>());
-    integer_class.def(boost::python::self_ns::str(self));
-    integer_class.def("__repr__", &__repr__<Integer>);
-    integer_class.def("__less__",(bool(*)(const mpz_class&, const mpz_class&)) &operator<);
-
-    implicitly_convertible<int,Integer>();
-
-}
-#endif
-
-#ifdef HAVE_GMPXX_H
-void export_rational()
-{
-    class_<Rational> rational_class("Rational");
-    rational_class.def(init<int,int>());
-    rational_class.def(init<int>());
-    rational_class.def(init<Rational>());
-    rational_class.def(boost::python::self_ns::str(self));
-    rational_class.def("__repr__", &__repr__<Rational>);
-    rational_class.def("__less__",(bool(*)(const Rational&, const Rational&)) &operator<);
-
-    implicitly_convertible<int,Rational>();
-    implicitly_convertible<Integer,Rational>();
-
-}
-#endif
-
-Real pi_function() { return pi; }
-
-void export_real()
-{
-    class_<Real> real_class("Real");
-    real_class.def(init<double>());
-    real_class.def(init<Real>());
-    real_class.def(init<std::string>());
-    real_class.def("radius", &Interval::radius);
-    real_class.def(boost::python::self_ns::str(self));
-    real_class.def("__repr__", &__repr__<Real>);
-
-    real_class.def(+self);
-    real_class.def(-self);
-    real_class.def(self + self);
-    real_class.def(self - self);
-    real_class.def(self * self);
-    real_class.def(self / self);
-    real_class.def(self == self);
-    real_class.def(self != self);
-    real_class.def(self >= self);
-    real_class.def(self <= self);
-    real_class.def(self > self);
-    real_class.def(self < self);
-    real_class.def(self + double());
-    real_class.def(self - double());
-    real_class.def(self * double());
-    real_class.def(self / double());
-    real_class.def(double() + self);
-    real_class.def(double() - self);
-    real_class.def(double() * self);
-    real_class.def(double() / self);
-
-    def("pi", (Real(*)()) &pi_function);
-
-    implicitly_convertible<int,Real>();
-    implicitly_convertible<double,Real>();
 }
 
 
@@ -354,6 +321,7 @@ void export_interval()
     interval_class.def(self - self);
     interval_class.def(self * self);
     interval_class.def(self / self);
+
     interval_class.def(self + double());
     interval_class.def(self - double());
     interval_class.def(self * double());
@@ -363,14 +331,14 @@ void export_interval()
     interval_class.def(double() * self);
     interval_class.def(double() / self);
 /*
-    interval_class.def(self + Float());
-    interval_class.def(self - Float());
-    interval_class.def(self * Float());
-    interval_class.def(self / Float());
-    interval_class.def(Float() + self);
-    interval_class.def(Float() - self);
-    interval_class.def(Float() * self);
-    interval_class.def(Float() / self);
+    interval_class.def(self + Real());
+    interval_class.def(self - Real());
+    interval_class.def(self * Real());
+    interval_class.def(self / Real());
+    interval_class.def(Real() + self);
+    interval_class.def(Real() - self);
+    interval_class.def(Real() * self);
+    interval_class.def(Real() / self);
 */
     interval_class.def(self == self);
     interval_class.def(self != self);
@@ -389,11 +357,11 @@ void export_interval()
     interval_class.def("__repr__", &__repr__<Interval>);
 
     implicitly_convertible<int,Interval>();
-    implicitly_convertible<double,Interval>();
-    implicitly_convertible<Real,Interval>();
+    implicitly_convertible<ExactFloat,Interval>();
 #ifdef HAVE_GMPXX_H
     implicitly_convertible<Rational,Interval>();
 #endif
+
     implicitly_convertible<Interval,Float>();
 
     from_python_dict<Interval>();
@@ -435,6 +403,50 @@ void export_interval()
     def("atan", (IFUN) &atan);
 }
 
+
+Real pi_function() { return pi; }
+
+void export_real()
+{
+    class_<Real> real_class("Real");
+    real_class.def(init<double>());
+    real_class.def(init<Real>());
+    real_class.def(init<std::string>());
+    real_class.def("radius", &Interval::radius);
+    real_class.def(boost::python::self_ns::str(self));
+    real_class.def("__repr__", &__repr__<Real>);
+
+    real_class.def(+self);
+    real_class.def(-self);
+    real_class.def(self + self);
+    real_class.def(self - self);
+    real_class.def(self * self);
+    real_class.def(self / self);
+
+    real_class.def(self + double());
+    real_class.def(self - double());
+    real_class.def(self * double());
+    real_class.def(self / double());
+    real_class.def(double() + self);
+    real_class.def(double() - self);
+    real_class.def(double() * self);
+    real_class.def(double() / self);
+
+    real_class.def(self == self);
+    real_class.def(self != self);
+    real_class.def(self >= self);
+    real_class.def(self <= self);
+    real_class.def(self > self);
+    real_class.def(self < self);
+
+    def("pi", (Real(*)()) &pi_function);
+
+    implicitly_convertible<int,Real>();
+    implicitly_convertible<ExactFloat,Real>();
+
+    implicitly_convertible<Real,Float>();
+    implicitly_convertible<Real,Interval>();
+}
 
 void
 numeric_submodule()

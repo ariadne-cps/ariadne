@@ -22,28 +22,26 @@
 
 
 from ariadne import *
-x=Float(2.25)
 
 n=2
 d=2.125
 z=Integer(3)
+q=Rational(17,8)
 x=Float(2.25)
 ix=Interval()
 ix=Interval(5)
 ix=Interval(2.25)
 ix=Interval(2.00,2.25)
 ix=Interval({2.00:2.25})
-q=Rational(17,8)
+
+ax=Float(2.25)
+ix=Interval(2.25)
+sx=Real(2.25)
+ex=ExactFloat(2.25)
 
 #(z+z,z-z,z*z)
 #(z+n,z-n,z*n)
 #(n+z,n-z,n*z)
-
-(x+x,x-x,x*x,x/x)
-#(x+n,x-n,x*n,x/n)
-#(n+x,n-x,n*x,n/x)
-(x+d,x-d,x*d,x/d)
-(d+x,d-x,d*x,d/x)
 
 #(q+q,q-q,q*q,q/q)
 #(q+n,q-n,q*n,q/n)
@@ -52,26 +50,41 @@ q=Rational(17,8)
 #(z+q,z-q,z*q,z/q)
 #(q+d,q-d,q*d,q/d)
 #(d+q,d-q,d*q,d/q)
-#(q+x,q-x,q*x,q/x)
-#(x+q,x-q,x*q,x/q)
+
+(ax+ax,ax-ax,ax*ax,ax/ax)
+(ax+n,ax-n,ax*n,ax/n)
+(n+ax,n-ax,n*ax,n/ax)
+(ax+d,ax-d,ax*d,ax/d)
+(d+ax,d-ax,d*ax,d/ax)
+(ax+ix,ax-ix,ax*ix,ax/ix)
+#(ix+ax,ix-ax,ix*ax,ix/ax)
+(ax+sx,ax-sx,ax*sx,ax/sx)
+#(sx+ax,sx-ax,sx*ax,sx/ax)
+(ax+ex,ax-ex,ax*ex,ax/ex)
+#(ex+ax,ex-ax,ex*ax,ex/ax)
+
 
 (ix+ix,ix-ix,ix*ix,ix/ix)
 (ix+n,ix-n,ix*n,ix/n)
 (n+ix,n-ix,n*ix,n/ix)
 (ix+d,ix-d,ix*d,ix/d)
 (d+ix,d-ix,d*ix,d/ix)
-(ix+x,ix-x,ix*x,ix/x)
-(x+ix,x-ix,x*ix,x/ix)
+(ix+sx,ix-sx,ix*sx,ix/sx)
+#(sx+ix,sx-ix,sx*ix,sx/ix)
+(ix+ex,ix-ex,ix*ex,ix/ex)
+#(ex+ix,ex-ix,ex*ix,ex/ix)
+
+(sx+sx,sx-sx,sx*sx,sx/sx)
+(sx+n,sx-n,sx*n,sx/n)
+(n+sx,n-sx,n*sx,n/sx)
+(sx+d,sx-d,sx*d,sx/d)
+(d+sx,d-sx,d*sx,d/sx)
+(sx+ex,sx-ex,sx*ex,sx/ex)
+#(ex+sx,ex-sx,ex*sx,ex/sx)
 
 #(z==z,z!=z,z<z,z<=z,z>z,z>=z)
 #(z==n,z!=n,z<n,z<=n,z>n,z>=n)
 #(n==z,n!=z,n<z,n<=z,n>z,n>=z)
-
-(x==x,x!=x,x<x,x<=x,x>x,x>=x)
-(x==n,x!=n,x<n,x<=n,x>n,x>=n)
-(n==x,n!=x,n<x,n<=x,n>x,n>=x)
-(x==d,x!=d,x<d,x<=d,x>d,x>=d)
-(d==x,d!=x,d<x,d<=x,d>x,d>=x)
 
 #(q==q,q!=q,q<q,q<=q,q>q,q>=q)
 #(q==n,q!=n,q<n,q<=n,q>n,q>=n)
@@ -80,5 +93,10 @@ q=Rational(17,8)
 #(z==q,z!=q,z<q,z<=q,z>q,z>=q)
 #(q==d,q!=d,q<d,q<=d,q>d,q>=d)
 #(d==q,d!=q,d<q,d<=q,d>q,d>=q)
-#(q==x,q!=x,q<x,q<=x,q>x,q>=x)
-#(x==q,x!=q,x<q,x<=q,x>q,x>=q)
+
+(ax==ax,ax!=ax,ax<ax,ax<=ax,ax>ax,ax>=ax)
+(ax==n,ax!=n,ax<n,ax<=n,ax>n,ax>=n)
+(n==ax,n!=ax,n<ax,n<=ax,n>ax,n>=ax)
+(ax==d,ax!=d,ax<d,ax<=d,ax>d,ax>=d)
+(d==ax,d!=ax,d<ax,d<=ax,d>ax,d>=ax)
+

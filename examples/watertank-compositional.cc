@@ -41,6 +41,7 @@ int main()
     // Declare the system variables
     RealVariable height("height");
     RealVariable aperture("aperture");
+    TimeVariable time;
     // Create the tank object
     AtomicHybridAutomaton tank("tank");
 
@@ -128,7 +129,9 @@ int main()
 
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
 
-    Axes2d axes(-0.1<=height<=9.1, -0.1<=aperture<=1.1);
+    // FIXME: Aperture variable not a state variable in all modes, so cannot be plotted
+    // Axes2d axes(-0.1<=height<=9.1, -0.1<=aperture<=1.1);
+    Axes2d axes(0<=time<=80,-0.1<=height<=9.1);
     std::cout << "Plotting orbit... "<<std::flush;
     plot("watertank_compositional-orbit",axes, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;

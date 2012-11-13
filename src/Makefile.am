@@ -38,6 +38,7 @@ ARIADNE_KERNEL_SRC = \
 	algebra.cc \
 	taylor_model.cc  \
 	affine_model.cc  \
+	symbolic_function.cc \
 	taylor_function.cc  \
 	solver.cc \
 	integrator.cc \

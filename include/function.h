@@ -281,6 +281,7 @@ VectorFunction<Real> operator+(const VectorFunction<Real>& f1, const VectorFunct
 VectorFunction<Real> operator-(const VectorFunction<Real>& f1, const VectorFunction<Real>& f2);
 VectorFunction<Real> operator*(const VectorFunction<Real>& vf, const ScalarFunction<Real>& sf);
 VectorFunction<Real> operator*(const ScalarFunction<Real>& sf, const VectorFunction<Real>& vf);
+VectorFunction<Real> operator*(const Real& c, const VectorFunction<Real>& vf);
 
 ScalarFunction<Real> embed(Nat as1, const ScalarFunction<Real>& f2, Nat as3);
 VectorFunction<Real> embed(Nat as1, const VectorFunction<Real>& f2, Nat as3);

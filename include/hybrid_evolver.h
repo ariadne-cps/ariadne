@@ -447,7 +447,7 @@ class HybridEvolverBase
     std::shared_ptr< IntegratorInterface > _integrator_ptr;
   private:
     std::shared_ptr< FunctionFactoryType > _function_factory_ptr;
-
+  protected:
     std::shared_ptr< SolverInterface > _solver_ptr;
     std::shared_ptr< SystemType > _sys_ptr;
     //std::shared_ptr< EvolutionProfiler >  _profiler;

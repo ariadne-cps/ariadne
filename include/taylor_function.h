@@ -827,6 +827,7 @@ class VectorTaylorFunction
     virtual VectorTaylorFunction* _clone() const;
     virtual VectorTaylorFunction* _create() const;
     virtual VectorTaylorFunction* _create_identity() const;
+    virtual ScalarTaylorFunction* _create_zero() const;
   private:
     friend class VectorFunctionMixin<VectorTaylorFunction,Interval>;
     friend class TaylorFunctionFactory;

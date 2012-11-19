@@ -564,6 +564,14 @@ VectorFunction<Real> operator*(const ScalarFunction<Real>& sf, const VectorFunct
     return r;
 }
 
+VectorFunction<Real> operator*(const Real& c, const VectorFunction<Real>& vf) {
+    RealVectorFunction r(vf.result_size(),vf.argument_size());
+    for(uint i=0; i!=r.result_size(); ++i) {
+        r.set(i,c*vf[i]);
+    }
+    return r;
+}
+
 
 
 RealVectorFunction join(const RealScalarFunction& f1, const RealScalarFunction& f2) {

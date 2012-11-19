@@ -1155,7 +1155,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
     // Counters for number of sucessor sets
     Nat jump_sets = 0;
     Bool progress = false;
-    
+
     if(definitely(starting_set_empty)) {
         IntervalVector reduced_domain=starting_set.continuous_state_set().reduced_domain();
         ARIADNE_WARN("empty starting_set "<<representation(starting_set)<<"\n");
@@ -1557,6 +1557,13 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 
     IntervalScalarFunctionModel spacial_evolution_time=this->function_factory().create_constant(space_domain,ExactFloat(step_size));
 
+    // Select one of GUARD_CREEP or TIME_CREEP
+    static const bool GUARD_CREEP=true;
+    static const bool TIME_CREEP=false;
+
+    bool creep=false;
+
+    // Test for creep step
     if(ALLOW_CREEP && !crossings.empty() && (result.finishing_kind == FinishingKind::BEFORE_FINAL_TIME || result.finishing_kind == FinishingKind::STRADDLE_FINAL_TIME) ) {
         // If an event is possible, but only some points reach the guard set
         // after a full time step, then terminating the evolution here will
@@ -1566,10 +1573,9 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         // Test to see if a creep step is needed
         ARIADNE_LOG(6,"Possible creep step; h="<<step_size<<"\n");
 
-        bool creep=false;
         HybridEnclosure evolve_set=initial_set;
         evolve_set.apply_fixed_evolve_step(flow,flow.step_size());
-        
+
         for(Map<DiscreteEvent,CrossingData>::iterator crossing_iter=crossings.begin();
             crossing_iter!=crossings.end(); ++crossing_iter)
         {
@@ -1593,7 +1599,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                     // NOTE: Use strict comparison here so that guard is fully crossed
                     // In principle this is not necessary, but this would involve testing
                     // to ensure that the evolved set is not propagated
-                    
+
                     // This event ensures that the evolve set is empty after a full step, so use this.
                     ARIADNE_LOG(6,std::setprecision(18)<<"crossing_time_range="<<crossing_time_range<<", crossing_time_range .upper()="<<crossing_time_range.upper()<<", step_size="<<step_size<<"\n");
                     RealScalarFunction guard=transitions[event].guard_function;
@@ -1624,48 +1630,122 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             ARIADNE_LOG(6,"No creep; evolve set is empty");
             creep=false;
         }
-        if(creep==false) { ARIADNE_LOG(6,"No creep\n"); }
-        if(creep==true) {
-            // Compute reduced evolution time; note that for every remaining increasing crossing, we have
-            // crossing_time_range.lower()>0.0 and crossing_time_range.upper()>step_size.
-
-            for(Map<DiscreteEvent,CrossingData>::const_iterator crossing_iter=crossings.begin();
-                crossing_iter!=crossings.end(); ++crossing_iter)
-            {
-                if(crossing_iter->second.crossing_kind==CrossingKind::TRANSVERSE) {
-                    // Modify the crossing time function to be the smallest possible; this ensures that the evaluation time is
-                    // essentially exact
-                    IntervalScalarFunctionModel lower_crossing_time=crossing_iter->second.crossing_time;
-                    Float crossing_time_error=lower_crossing_time.error();
-                    lower_crossing_time.set_error(0.0);
-                    lower_crossing_time-=ExactFloat(crossing_time_error);
-
-                    // One possibility is to use quadratic restrictions
-                    //   If 0<=x<=2h, then x(1-x/4h)<=min(x,h)
-                    //   If 0<=x<=4h, then x(1-x/8h)<=min(x,2h)
-                    // Formula below works if x<=2h
-                    //   evolution_time=evolution_time*(crossing_time/result.step_size)*(1.0-crossing_time/(4*result.step_size));
-
-                    // Prefer simpler linear restrictions.
-                    // Multiply evolution time by crossing_time/max_crossing_time
-                    spacial_evolution_time=spacial_evolution_time*lower_crossing_time/ExactFloat(lower_crossing_time.range().upper());
-                }
-            }
-            // Erase increasing transverse crossings since these cannot occur
-            for(Map<DiscreteEvent,CrossingData>::iterator crossing_iter=crossings.begin();
-                crossing_iter!=crossings.end(); )
-            {
-                if(crossing_iter->second.crossing_kind==CrossingKind::TRANSVERSE) {
-                    crossings.erase(crossing_iter++);
-                } else {
-                    ++crossing_iter;
-                }
-            }
-            ARIADNE_LOG(6,"Creep step: spacial_evolution_time="<<spacial_evolution_time<<"\n");
-            result.step_kind=StepKind::SPACETIME_DEPENDENT_EVOLUTION_TIME;
-            result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
-        }
     }
+
+    if(ALLOW_CREEP && creep==false) { ARIADNE_LOG(6,"No creep\n"); }
+
+    if(TIME_CREEP && creep==true) {
+        // Compute reduced evolution time; note that for every remaining increasing crossing, we have
+        // crossing_time_range.lower()>0.0 and crossing_time_range.upper()>step_size.
+
+        for(Map<DiscreteEvent,CrossingData>::const_iterator crossing_iter=crossings.begin();
+            crossing_iter!=crossings.end(); ++crossing_iter)
+        {
+            if(crossing_iter->second.crossing_kind==CrossingKind::TRANSVERSE) {
+                // Modify the crossing time function to be the smallest possible; this ensures that the evaluation time is
+                // essentially exact
+                IntervalScalarFunctionModel lower_crossing_time=crossing_iter->second.crossing_time;
+                Float crossing_time_error=lower_crossing_time.error();
+                lower_crossing_time.set_error(0.0);
+                lower_crossing_time-=ExactFloat(crossing_time_error);
+
+                // One possibility is to use quadratic restrictions
+                //   If 0<=x<=2h, then x(1-x/4h)<=min(x,h)
+                //   If 0<=x<=4h, then x(1-x/8h)<=min(x,2h)
+                // Formula below works if x<=2h
+                //   evolution_time=evolution_time*(crossing_time/result.step_size)*(1.0-crossing_time/(4*result.step_size));
+
+                // Prefer simpler linear restrictions.
+                // Multiply evolution time by crossing_time/max_crossing_time
+                spacial_evolution_time=spacial_evolution_time*lower_crossing_time/ExactFloat(lower_crossing_time.range().upper());
+            }
+        }
+        // Erase increasing transverse crossings since these cannot occur
+        for(Map<DiscreteEvent,CrossingData>::iterator crossing_iter=crossings.begin();
+            crossing_iter!=crossings.end(); )
+        {
+            if(crossing_iter->second.crossing_kind==CrossingKind::TRANSVERSE) {
+                crossings.erase(crossing_iter++);
+            } else {
+                ++crossing_iter;
+            }
+        }
+        ARIADNE_LOG(6,"Creep step: spacial_evolution_time="<<spacial_evolution_time<<"\n");
+        result.step_kind=StepKind::SPACETIME_DEPENDENT_EVOLUTION_TIME;
+        result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
+    }
+
+    if(GUARD_CREEP && creep==true) {
+        // If an event is possible, but only some points reach the guard set
+        // after a full time step, then terminating the evolution here will
+        // cause a splitting of the enclosure set. To prevent this, attempt
+        // to "creep" up to the event guard boundary, so that in the next step,
+        // all points can be made to cross.
+        // Test to see if a creep step is needed
+        ARIADNE_LOG(6,"Possible creep step; h="<<step_size<<"\n");
+        ARIADNE_LOG(6,"crossings="<<crossings<<"\n");
+
+        const SolverInterface& solver=*this->_solver_ptr;
+
+        HybridEnclosure evolve_set=initial_set;
+        evolve_set.apply_fixed_evolve_step(flow,flow.step_size());
+        RealVectorFunction dynamic=this->_sys_ptr->dynamic_function(initial_set.location());
+        IntervalVector flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
+        Interval flow_time_domain=flow.domain()[flow.argument_size()-1u];
+        IntervalScalarFunctionModel zero=flow[0].create_zero();
+        IntervalVectorFunctionModel identity=flow.create_identity();
+        IntervalVectorFunctionModel space_projection=flow*Interval(0.0);
+        for(uint i=0; i!=n; ++i) { space_projection[i]=space_projection[i]+identity[i]; }
+
+        //static const ExactFloat CREEP_MAXIMUM=ExactFloat(1.0);
+        static const ExactFloat CREEP_MAXIMUM=ExactFloat(15.0/16);
+        spacial_evolution_time=this->function_factory().create_constant(flow.space_domain(),flow.step_size()*CREEP_MAXIMUM);
+
+        for(Map<DiscreteEvent,CrossingData>::iterator crossing_iter=crossings.begin();
+            crossing_iter!=crossings.end(); ++crossing_iter)
+        {
+            DiscreteEvent event=crossing_iter->first;
+            EventKind event_kind=transitions[event].event_kind;
+            CrossingKind crossing_kind=crossing_iter->second.crossing_kind;
+            RealScalarFunction guard_function=transitions[event].guard_function;
+            ARIADNE_LOG(6,"  Event "<<event<<": "<<event_kind<<": "<<crossing_kind<<"\n");
+            if(event_kind!=PERMISSIVE) {
+                Interval guard_range = compose(guard_function,flow).range();
+                ARIADNE_ASSERT(guard_range.lower()<0);
+                Interval guard_derivative_range = compose(lie_derivative(guard_function,dynamic),flow).range();
+
+                ExactFloat alpha=numeric_cast<ExactFloat>(1+Float(flow.step_size())*guard_derivative_range.lower()/guard_range.lower());
+                ARIADNE_LOG(6,"  step_size: "<<flow.step_size()<<", guard_range: "<<guard_range<<", guard_derivative_range: "<<guard_derivative_range<<", alpha: "<<alpha<<"\n");
+                if(alpha>0 && alpha<=1) {
+                    IntervalScalarFunctionModel guard_creep_time;
+                    bool sucessfully_computed_guard_creep_time=false;
+                    try {
+                        guard_creep_time=solver.implicit(compose(guard_function,flow)-alpha*compose(guard_function,space_projection),
+                                                        flow_spacial_domain,flow_time_domain);
+                        ARIADNE_LOG(6,"  guard_creep_time= "<<guard_creep_time<<"\n");
+                        ARIADNE_LOG(6,"  guard_creep_time.range()="<<guard_creep_time.range()<<"\n");
+                        sucessfully_computed_guard_creep_time=true;
+                    }
+                    catch(...) {
+                        ARIADNE_LOG(6,"  Error in computing guard creep time\n");
+                    }
+                    if(sucessfully_computed_guard_creep_time) {
+                        spacial_evolution_time = spacial_evolution_time * (guard_creep_time/flow.step_size());
+                        crossings.erase(event);
+                    }
+                }
+            }
+        }
+        spacial_evolution_time.set_error(0.0);
+
+
+        ARIADNE_LOG(6,"Creep step: spacial_evolution_time="<<spacial_evolution_time<<"\n");
+        ARIADNE_LOG(6,"  spacial_evolution_time.range()="<<spacial_evolution_time.range()<<"\n");
+        ARIADNE_LOG(6,"  remaining crossings="<<crossings<<"\n");
+        result.step_kind=StepKind::SPACETIME_DEPENDENT_EVOLUTION_TIME;
+        result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
+    }
+
 
     IntervalScalarFunctionModel evolution_time = embed(spacial_evolution_time,time_domain) * embed(space_domain,temporal_evolution_time/ExactFloat(step_size));
     IntervalScalarFunctionModel finishing_time=evolution_time+time_coordinate;

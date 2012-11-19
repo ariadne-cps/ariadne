@@ -995,6 +995,11 @@ VectorTaylorFunction* VectorTaylorFunction::_create() const
     return new VectorTaylorFunction(this->result_size(), ScalarTaylorFunction(this->domain(),this->sweeper()));
 }
 
+ScalarTaylorFunction* VectorTaylorFunction::_create_zero() const
+{
+    return new ScalarTaylorFunction(this->domain(),this->sweeper());
+}
+
 VectorTaylorFunction* VectorTaylorFunction::_create_identity() const
 {
     Sweeper sweeper=this->sweeper();

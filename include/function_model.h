@@ -278,6 +278,7 @@ template<> class VectorFunctionModelInterface<Interval>
     virtual Float const _norm() const = 0;
 
     virtual VectorFunctionModelInterface<Interval>* _clone() const = 0;
+    virtual ScalarFunctionModelInterface<Interval>* _create_zero() const = 0;
     virtual VectorFunctionModelInterface<Interval>* _create_identity() const = 0;
     virtual Void _set(Nat, ScalarFunctionModelInterface<Interval> const&) = 0;
     virtual ScalarFunctionModelInterface<Interval>* _get(Nat) const = 0;
@@ -366,6 +367,7 @@ template<> class VectorFunctionModel<Interval>
     inline const VectorFunctionModelInterface<Interval>* raw_pointer() const { return _ptr.operator->(); }
     inline const VectorFunctionModelInterface<Interval>& reference() const { return *_ptr; }
     inline VectorFunctionModelInterface<Interval>& reference() { return *_ptr; }
+    inline ScalarFunctionModel<Interval> create_zero() const { return this->_ptr->_create_zero(); }
     inline VectorFunctionModel<Interval> create_identity() const { return this->_ptr->_create_identity(); }
     inline Nat result_size() const { return this->_ptr->result_size(); }
     inline Nat argument_size() const { return this->_ptr->argument_size(); }
@@ -415,6 +417,8 @@ inline VectorFunctionModel<Interval> operator+(const Vector<Interval>& c1, const
 inline VectorFunctionModel<Interval> operator-(const Vector<Interval>& c1, const VectorFunctionModel<Interval>& f2);
 inline VectorFunctionModel<Interval> operator*(const VectorFunctionModel<Interval>& f1, const Interval& c2) {
     VectorFunctionModel<Interval> r=f1; for(uint i=0; i!=r.size(); ++i) { r[i]=f1[i]*c2; } return r; }
+inline VectorFunctionModel<Interval> operator*(const Interval& c1, const VectorFunctionModel<Interval>& f2) {
+    VectorFunctionModel<Interval> r=f2; for(uint i=0; i!=r.size(); ++i) { r[i]=c1*f2[i]; } return r; }
 
 inline Interval evaluate(const ScalarFunctionModel<Interval>& f, const Vector<Interval>& x) { return f._ptr->evaluate(x); }
 inline Vector<Interval> evaluate(const VectorFunctionModel<Interval>& f, const Vector<Interval>& x) { return f._ptr->evaluate(x); }

@@ -323,6 +323,7 @@ class IntervalConstrainedImageSet
     OutputStream& write(OutputStream&) const;
 };
 
+IntervalConstrainedImageSet join(const IntervalConstrainedImageSet& set1, const IntervalConstrainedImageSet& set2);
 OutputStream& operator<<(OutputStream&, const IntervalConstrainedImageSet&);
 
 

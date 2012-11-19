@@ -1087,6 +1087,61 @@ IntervalConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& pro
     AffineDrawer(Depth(8)).draw(cnvs,proj,*this);
 }
 
+IntervalConstrainedImageSet
+join(const IntervalConstrainedImageSet& set1, const IntervalConstrainedImageSet& set2)
+{
+    ARIADNE_ASSERT(set1.dimension()==set2.dimension());
+    ARIADNE_ASSERT(set1.number_of_parameters()==set2.number_of_parameters());
+    ARIADNE_ASSERT(set1.number_of_constraints()==set2.number_of_constraints());
+
+    const uint np = set1.number_of_parameters();
+    const uint nc = set1.number_of_parameters();
+
+    const Box& domain1 = set1.domain();
+    const Box& domain2 = set2.domain();
+
+    uint join_parameter=np;
+    for(uint i=0; i!=np; ++i) {
+        if(domain1[i]!=domain2[i]) {
+            if(domain1[i].upper() < domain2[i].lower() || domain1[i].lower() > domain2[i].upper()) {
+                ARIADNE_FAIL_MSG("Cannot joint sets "<<set1<<" and "<<set2<<" since domains are separated.");
+            }
+            if(domain1[i].upper() >= domain2[i].lower() || domain1[i].lower() <= domain2[i].upper()) {
+                if(join_parameter==np) {
+                    join_parameter=i;
+                } else {
+                    ARIADNE_FAIL_MSG("Cannot joint sets "<<set1<<" and "<<set2<<" since domains do not join to form a box.");
+                }
+            }
+        }
+    }
+
+    Box new_domain = hull(domain1,domain2);
+
+    IntervalVectorFunctionModel function1
+        = IntervalVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<Interval> const&>(set1.function().reference()));
+    Vector<Float> function_error1=function1.errors();
+    function1.clobber();
+    function1.restrict(new_domain);
+
+    IntervalVectorFunctionModel function2
+        = IntervalVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<Interval> const&>(set2.function().reference()));
+    Vector<Float> function_error2=function2.errors();
+    function2.clobber();
+    function2.restrict(new_domain);
+
+    IntervalVectorFunctionModel new_function=(function1+function2)*ExactFloat(0.5);
+    new_function.clobber();
+    for(uint i=0; i!=new_function.result_size(); ++i) {
+        function_error1[i]=add_up(norm(new_function[i]-function1[i]),function_error1[i]);
+        function_error2[i]=add_up(norm(new_function[i]-function2[i]),function_error2[i]);
+        Float new_function_error = max(function_error1[i],function_error2[i]);
+        new_function[i] = new_function[i] + Interval(-new_function_error,+new_function_error);
+    }
+
+    ARIADNE_ASSERT(set1.number_of_constraints()==0);
+    return IntervalConstrainedImageSet(new_domain,new_function);
+}
 
 
 std::ostream& IntervalConstrainedImageSet::write(std::ostream& os) const

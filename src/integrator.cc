@@ -94,8 +94,8 @@ IntegratorBase::flow_bounds(const IntervalVectorFunction& vf, const IntervalVect
     Float lip = norm(vf.jacobian(dx)).upper();
     Float hlip = this->_lipschitz_tolerance/lip;
 
-    Float hmin=hmax/(1<<REDUCTION_STEPS);
-    Float h=max(hmin,min(hmax,hlip));
+    Float hmin=Float(hmax)/(1<<REDUCTION_STEPS);
+    Float h=Float(max(hmin,min(hmax,hlip)));
     ARIADNE_LOG(4,"L="<<lip<<", hL="<<hlip<<", hmax="<<hmax<<"\n");
 
     bool success=false;
@@ -154,9 +154,9 @@ IntegratorBase::flow_bounds(const IntervalVectorFunction& vf, const IntervalVect
 
 
 IntervalVectorFunctionModel
-IntegratorBase::flow(const IntervalVectorFunction& vf, const IntervalVector& dx0, const Real& tmax) const
+IntegratorBase::flow_to(const IntervalVectorFunction& vf, const IntervalVector& dx0, const Real& tmax) const
 {
-    ARIADNE_LOG(1,"IntegratorBase::flow(IntervalVectorFunction vf, IntervalVector dx0, Real tmax)\n");
+    ARIADNE_LOG(1,"IntegratorBase::flow_to(IntervalVectorFunction vf, IntervalVector dx0, Real tmax)\n");
     ARIADNE_LOG(2,"vf="<<vf<<"\n");
     ARIADNE_LOG(2,"dom(x0)="<<dx0<<" tmax="<<tmax<<"\n");
     const uint n=dx0.size(); // Dimension of the state space
@@ -185,24 +185,38 @@ IntegratorBase::flow(const IntervalVectorFunction& vf, const IntervalVector& dx0
 }
 
 
-IntervalVectorFunctionModel
-IntegratorBase::flow(const IntervalVectorFunction& vf, const IntervalVector& dx0, const Interval& dt) const
+List<IntervalVectorFunctionModel>
+IntegratorBase::flow(const IntervalVectorFunction& vf, const IntervalVector& dx0, const Real& tmin, const Real& tmax) const
 {
-    ARIADNE_LOG(1,"IntegratorBase::flow(IntervalVectorFunction vf, IntervalVector dx0, Interval dt)\n");
-    Real dtl=Real(ExactFloat(dt.lower()));
-    IntervalVectorFunctionModel evolve=this->flow(vf,dx0,dtl);
-    Float dtw=dt.upper()-dt.lower();
-    IntervalVector dx=evolve.range();
-    Float h;
-    IntervalVector bx;
-    make_lpair(h,bx) = this->flow_bounds(vf,dx,dtw);
-    if(dtw!=h) {
-        ARIADNE_THROW(FlowTimeStepException,"IntegratorBase::flow","Width of time interval "<<dt<<" cannot be covered in a single flow step; maximum flow step "<<h<<" over domain "<<dx);
+    ARIADNE_LOG(1,"IntegratorBase::flow(IntervalVectorFunction vf, IntervalVector dx0, Float tmin, Float tmax)\n");
+    Float tminl=Interval(tmin).lower();
+    Float tmaxu=Interval(tmax).upper();
+    IntervalVectorFunctionModel evolve_function=this->flow_to(vf,dx0,tmin);
+    Float t=tminl;
+    List<IntervalVectorFunctionModel> result;
+
+    while(t<tmaxu) {
+        IntervalVector dx=evolve_function.range();
+        Float h;
+        IntervalVector bx;
+        make_lpair(h,bx) = this->flow_bounds(vf,dx,Float(sub_up(tmaxu,t)));
+        IntervalVectorFunctionModel flow_step_function=this->flow_step(vf,dx,h,bx);
+        Float new_t=add_down(t,h);
+        Interval dt(t,new_t);
+        IntervalScalarFunctionModel step_time_function=this->function_factory().create_identity(dt-ExactFloat(t));
+        IntervalVectorFunctionModel flow=compose(flow_step_function,combine(evolve_function,step_time_function));
+        ARIADNE_ASSERT(flow.domain()[dx0.size()].upper()==new_t);
+        result.append(flow);
+        evolve_function=partial_evaluate(flow_step_function,dx0.size(),ExactFloat(new_t));
+        t=new_t;
     }
-    IntervalVectorFunctionModel step=this->flow_step(vf,dx,h,bx);
-    IntervalScalarFunctionModel time=this->function_factory().create_identity(dt)-ExactFloat(dt.lower());
-    IntervalVectorFunctionModel flow=compose(step,combine(evolve,time));
-    return flow;
+    return result;
+}
+
+List<IntervalVectorFunctionModel>
+IntegratorBase::flow(const IntervalVectorFunction& vf, const IntervalVector& dx0, const Real& tmax) const
+{
+    return flow(vf,dx0,Real(0),tmax);
 }
 
 

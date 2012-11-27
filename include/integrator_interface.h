@@ -33,7 +33,9 @@
 namespace Ariadne {
 
 template<class T1,class T2> class Pair;
+template<class T> class List;
 class Real;
+class Float;
 class Float;
 class Interval;
 template<class X> class Vector;
@@ -96,15 +98,22 @@ class IntegratorInterface
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
     virtual IntervalVectorFunctionModel
-    flow(const IntervalVectorFunction& vector_field,
-         const IntervalVector& state_domain,
-         const Real& time) const = 0;
+    flow_to(const IntervalVectorFunction& vector_field,
+            const IntervalVector& state_domain,
+            const Real& final_time) const = 0;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
-    virtual IntervalVectorFunctionModel
+    virtual List<IntervalVectorFunctionModel>
     flow(const IntervalVectorFunction& vector_field,
          const IntervalVector& state_domain,
-         const Interval& time_domain) const = 0;
+         const Real& minimum_time,
+         const Real& maximum_time) const = 0;
+
+    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
+    virtual List<IntervalVectorFunctionModel>
+    flow(const IntervalVectorFunction& vector_field,
+         const IntervalVector& state_domain,
+         const Real& maximum_time) const = 0;
 
 };
 

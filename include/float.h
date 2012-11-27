@@ -415,6 +415,13 @@ inline Interval operator/(const ExactFloat& x1,  const Interval& x2);
 inline Interval operator/(int n1,  const ExactFloat& x2);
 inline std::ostream& operator<<(std::ostream& os, const ExactFloat& x) { return os << x.value(); }
 
+inline bool operator==(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()==x2.value(); }
+inline bool operator!=(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()!=x2.value(); }
+inline bool operator<=(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()<=x2.value(); }
+inline bool operator>=(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()>=x2.value(); }
+inline bool operator< (const ExactFloat& x1, const ExactFloat& x2) { return x1.value()< x2.value(); }
+inline bool operator> (const ExactFloat& x1, const ExactFloat& x2) { return x1.value()> x2.value(); }
+
 inline bool operator==(const ExactFloat& x1, double x2) { return x1.value()==x2; }
 inline bool operator!=(const ExactFloat& x1, double x2) { return x1.value()!=x2; }
 inline bool operator<=(const ExactFloat& x1, double x2) { return x1.value()<=x2; }

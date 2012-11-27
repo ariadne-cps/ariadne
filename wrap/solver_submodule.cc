@@ -85,9 +85,11 @@ class IntegratorWrapper
         return this->get_override("flow_step")(); }
     IntervalVectorFunctionModel flow_step(const IntervalVectorFunction&,const IntervalVector&,const Float&,const IntervalVector&) const {
         return this->get_override("flow_step")(); }
-    IntervalVectorFunctionModel flow(const IntervalVectorFunction& vector_field,const IntervalVector&,const Real&) const {
+    IntervalVectorFunctionModel flow_to(const IntervalVectorFunction& vector_field,const IntervalVector&,const Real&) const {
+        return this->get_override("flow_to")(); }
+    List<IntervalVectorFunctionModel> flow(const IntervalVectorFunction&,const IntervalVector&,const Real&,const Real&) const {
         return this->get_override("flow")(); }
-    IntervalVectorFunctionModel flow(const IntervalVectorFunction&,const IntervalVector&,const Interval&) const {
+    List<IntervalVectorFunctionModel> flow(const IntervalVectorFunction&,const IntervalVector&,const Real&) const {
         return this->get_override("flow")(); }
     void write(std::ostream&) const {
         this->get_override("write")(); }
@@ -115,24 +117,26 @@ void export_solver()
 void export_integrator()
 {
     class_<IntegratorWrapper, boost::noncopyable> integrator_wrapper_class("IntegratorInterface");
-    integrator_wrapper_class.def("flow",(IntervalVectorFunctionModel(IntegratorInterface::*)(const IntervalVectorFunction&,const IntervalVector&,const Interval&)const)&IntegratorInterface::flow);
-    integrator_wrapper_class.def("flow",(IntervalVectorFunctionModel(IntegratorInterface::*)(const IntervalVectorFunction&,const IntervalVector&,const Real&)const)&IntegratorInterface::flow);
     integrator_wrapper_class.def("flow_bounds",(Pair<Float,IntervalVector>(IntegratorInterface::*)(const IntervalVectorFunction&,const IntervalVector&,const Float&)const)&IntegratorInterface::flow_bounds);
     integrator_wrapper_class.def("flow_step",(IntervalVectorFunctionModel(IntegratorInterface::*)(const IntervalVectorFunction&,const IntervalVector&,Float&)const)&IntegratorInterface::flow_step);
     integrator_wrapper_class.def("flow_step",(IntervalVectorFunctionModel(IntegratorInterface::*)(const IntervalVectorFunction&,const IntervalVector&,const Float&,const IntervalVector&)const)&IntegratorInterface::flow_step);
+    integrator_wrapper_class.def("flow_to",(IntervalVectorFunctionModel(IntegratorInterface::*)(const IntervalVectorFunction&,const IntervalVector&,const Real&)const)&IntegratorInterface::flow_to);
+    integrator_wrapper_class.def("flow",(List<IntervalVectorFunctionModel>(IntegratorInterface::*)(const IntervalVectorFunction&,const IntervalVector&,const Real&)const)&IntegratorInterface::flow);
 
 
     class_<TaylorPicardIntegrator > taylor_picard_integrator_class("TaylorPicardIntegrator",init<double>());
     taylor_picard_integrator_class.def("flow_bounds",(Pair<Float,IntervalVector>(IntegratorInterface::*)(const IntervalVectorFunction&,const IntervalVector&,const Float&)const)&TaylorPicardIntegrator::flow_bounds);
     taylor_picard_integrator_class.def("flow_step", (IntervalVectorFunctionModel(TaylorPicardIntegrator::*)(const IntervalVectorFunction&,const IntervalVector&,Float&)const)&TaylorPicardIntegrator::flow_step);
     taylor_picard_integrator_class.def("flow_step", (IntervalVectorFunctionModel(TaylorPicardIntegrator::*)(const IntervalVectorFunction&,const IntervalVector&,const Float&,const IntervalVector&)const)&TaylorPicardIntegrator::flow_step);
-    taylor_picard_integrator_class.def("flow",(IntervalVectorFunctionModel(TaylorPicardIntegrator::*)(const IntervalVectorFunction&,const IntervalVector&,const Real&)const)&TaylorPicardIntegrator::flow);
+    taylor_picard_integrator_class.def("flow_to",(IntervalVectorFunctionModel(TaylorPicardIntegrator::*)(const IntervalVectorFunction&,const IntervalVector&,const Real&)const)&TaylorPicardIntegrator::flow_to);
+    taylor_picard_integrator_class.def("flow",(List<IntervalVectorFunctionModel>(TaylorPicardIntegrator::*)(const IntervalVectorFunction&,const IntervalVector&,const Real&)const)&TaylorPicardIntegrator::flow);
 
     class_<TaylorSeriesIntegrator > taylor_series_integrator_class("TaylorSeriesIntegrator",init<double>());
     taylor_series_integrator_class.def("flow_bounds",(Pair<Float,IntervalVector>(IntegratorInterface::*)(const IntervalVectorFunction&,const IntervalVector&,const Float&)const)&TaylorSeriesIntegrator::flow_bounds);
     taylor_series_integrator_class.def("flow_step", (IntervalVectorFunctionModel(TaylorSeriesIntegrator::*)(const IntervalVectorFunction&,const IntervalVector&,Float&)const)&TaylorSeriesIntegrator::flow_step);
     taylor_series_integrator_class.def("flow_step", (IntervalVectorFunctionModel(TaylorSeriesIntegrator::*)(const IntervalVectorFunction&,const IntervalVector&,const Float&,const IntervalVector&)const)&TaylorSeriesIntegrator::flow_step);
-    taylor_series_integrator_class.def("flow",(IntervalVectorFunctionModel(TaylorSeriesIntegrator::*)(const IntervalVectorFunction&,const IntervalVector&,const Real&)const)&TaylorSeriesIntegrator::flow);
+    taylor_series_integrator_class.def("flow_to",(IntervalVectorFunctionModel(TaylorSeriesIntegrator::*)(const IntervalVectorFunction&,const IntervalVector&,const Real&)const)&TaylorSeriesIntegrator::flow_to);
+    taylor_series_integrator_class.def("flow",(List<IntervalVectorFunctionModel>(TaylorSeriesIntegrator::*)(const IntervalVectorFunction&,const IntervalVector&,const Real&)const)&TaylorSeriesIntegrator::flow);
 
     class_<RungeKutta4Integrator > runge_kutta_4_integrator_class("RungeKutta4Integrator",init<double>());
     runge_kutta_4_integrator_class.def("step", &RungeKutta4Integrator::step);

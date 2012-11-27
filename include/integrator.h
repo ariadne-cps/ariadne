@@ -110,14 +110,22 @@ class IntegratorBase
               Float& suggested_time_step) const;
 
     virtual IntervalVectorFunctionModel
-    flow(const IntervalVectorFunction& vector_field,
+    flow_to(const IntervalVectorFunction& vector_field,
          const IntervalVector& state_domain,
          const Real& time) const;
 
-    virtual IntervalVectorFunctionModel
+    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
+    virtual List<IntervalVectorFunctionModel>
     flow(const IntervalVectorFunction& vector_field,
          const IntervalVector& state_domain,
-         const Interval& time_domain) const;
+         const Real& minimum_time,
+         const Real& maximum_time) const;
+
+    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
+    virtual List<IntervalVectorFunctionModel>
+    flow(const IntervalVectorFunction& vector_field,
+         const IntervalVector& state_domain,
+         const Real& maximum_time) const;
 
     virtual IntervalVectorFunctionModel
     flow_step(const IntervalVectorFunction& vector_field,

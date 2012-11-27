@@ -92,6 +92,9 @@ class IntegratorBase
     //! The convergence of the Picard iteration is approximately Lf*h.
     void set_lipschitz_tolerance(double lt) { _lipschitz_tolerance = lt; }
     double lipschitz_tolerance() const { return this->_lipschitz_tolerance; }
+    //! \brief  Set maximum size used for a single step.
+    double maximum_step_size() const { return this->_maximum_step_size; }
+    void set_maximum_step_size(double hmax) { this->_maximum_step_size = hmax; }
 
     //! \brief The class which constructs functions for representing the flow.
     const IntervalFunctionModelFactoryInterface& function_factory() const;
@@ -136,6 +139,7 @@ class IntegratorBase
   public:
     double _maximum_error;
     double _lipschitz_tolerance;
+    double _maximum_step_size;
     FunctionFactoryPointer _function_factory_ptr;
 };
 

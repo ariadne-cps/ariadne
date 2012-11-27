@@ -45,14 +45,14 @@ FunctionModelFactoryInterface<Interval>* make_taylor_function_factory();
 FunctionModelFactoryInterface<Interval>* make_taylor_function_factory(double s);
 
 IntegratorBase::IntegratorBase(MaximumError e, LipschitzConstant l)
-    :  _maximum_error(e), _lipschitz_tolerance(l), _function_factory_ptr(make_taylor_function_factory())
+    :  _maximum_error(e), _lipschitz_tolerance(l), _maximum_step_size(16), _function_factory_ptr(make_taylor_function_factory())
 {
     ARIADNE_PRECONDITION(e>0.0);
     ARIADNE_PRECONDITION(l>0.0)
 }
 
 IntegratorBase::IntegratorBase(MaximumError e, SweepThreshold s, LipschitzConstant l)
-    :  _maximum_error(e), _lipschitz_tolerance(l), _function_factory_ptr(make_taylor_function_factory(s))
+    :  _maximum_error(e), _lipschitz_tolerance(l), _maximum_step_size(16), _function_factory_ptr(make_taylor_function_factory(s))
 {
     ARIADNE_PRECONDITION(e>0.0);
     ARIADNE_PRECONDITION(l>0.0);
@@ -96,6 +96,7 @@ IntegratorBase::flow_bounds(const IntervalVectorFunction& vf, const IntervalVect
 
     Float hmin=Float(hmax)/(1<<REDUCTION_STEPS);
     Float h=Float(max(hmin,min(hmax,hlip)));
+    h=min(h,this->maximum_step_size());
     ARIADNE_LOG(4,"L="<<lip<<", hL="<<hlip<<", hmax="<<hmax<<"\n");
 
     bool success=false;
@@ -197,17 +198,17 @@ IntegratorBase::flow(const IntervalVectorFunction& vf, const IntervalVector& dx0
 
     while(t<tmaxu) {
         IntervalVector dx=evolve_function.range();
-        Float h;
+        Float h=Float(float(sub_up(tmaxu,t).get_d()));
         IntervalVector bx;
-        make_lpair(h,bx) = this->flow_bounds(vf,dx,Float(sub_up(tmaxu,t)));
+        make_lpair(h,bx) = this->flow_bounds(vf,dx,h);
         IntervalVectorFunctionModel flow_step_function=this->flow_step(vf,dx,h,bx);
         Float new_t=add_down(t,h);
         Interval dt(t,new_t);
-        IntervalScalarFunctionModel step_time_function=this->function_factory().create_identity(dt-ExactFloat(t));
-        IntervalVectorFunctionModel flow=compose(flow_step_function,combine(evolve_function,step_time_function));
-        ARIADNE_ASSERT(flow.domain()[dx0.size()].upper()==new_t);
-        result.append(flow);
-        evolve_function=partial_evaluate(flow_step_function,dx0.size(),ExactFloat(new_t));
+        IntervalScalarFunctionModel step_time_function=this->function_factory().create_identity(dt)-ExactFloat(t);
+        IntervalVectorFunctionModel flow_function=compose(flow_step_function,combine(evolve_function,step_time_function));
+        ARIADNE_ASSERT(flow_function.domain()[dx0.size()].upper()==new_t);
+        result.append(flow_function);
+        evolve_function=partial_evaluate(flow_function,dx0.size(),ExactFloat(new_t));
         t=new_t;
     }
     return result;
@@ -720,6 +721,7 @@ TaylorSeriesIntegrator::flow_bounds(const IntervalVectorFunction& vf, const Inte
 
     Float hmin=hmax/(1<<REDUCTION_STEPS);
     Float h=hmax;
+    h=min(h,this->maximum_step_size());
     ARIADNE_LOG(4,"hmax="<<hmax<<"\n");
 
     bool success=false;

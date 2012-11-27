@@ -132,6 +132,14 @@ void export_integrator()
     taylor_picard_integrator_class.def("flow",(List<IntervalVectorFunctionModel>(TaylorPicardIntegrator::*)(const IntervalVectorFunction&,const IntervalVector&,const Real&)const)&TaylorPicardIntegrator::flow);
 
     class_<TaylorSeriesIntegrator > taylor_series_integrator_class("TaylorSeriesIntegrator",init<double>());
+    taylor_series_integrator_class.def("maximum_spacial_order",&TaylorSeriesIntegrator::maximum_spacial_order);
+    taylor_series_integrator_class.def("maximum_temporal_order",&TaylorSeriesIntegrator::maximum_temporal_order);
+    taylor_series_integrator_class.def("maximum_error",&TaylorSeriesIntegrator::maximum_error);
+    taylor_series_integrator_class.def("maximum_step_size",&TaylorSeriesIntegrator::maximum_step_size);
+    taylor_series_integrator_class.def("set_maximum_spacial_order",&TaylorSeriesIntegrator::set_maximum_spacial_order);
+    taylor_series_integrator_class.def("set_maximum_temporal_order",&TaylorSeriesIntegrator::set_maximum_temporal_order);
+    taylor_series_integrator_class.def("set_maximum_error",&TaylorSeriesIntegrator::set_maximum_error);
+    taylor_series_integrator_class.def("set_maximum_step_size",&TaylorSeriesIntegrator::set_maximum_step_size);
     taylor_series_integrator_class.def("flow_bounds",(Pair<Float,IntervalVector>(IntegratorInterface::*)(const IntervalVectorFunction&,const IntervalVector&,const Float&)const)&TaylorSeriesIntegrator::flow_bounds);
     taylor_series_integrator_class.def("flow_step", (IntervalVectorFunctionModel(TaylorSeriesIntegrator::*)(const IntervalVectorFunction&,const IntervalVector&,Float&)const)&TaylorSeriesIntegrator::flow_step);
     taylor_series_integrator_class.def("flow_step", (IntervalVectorFunctionModel(TaylorSeriesIntegrator::*)(const IntervalVectorFunction&,const IntervalVector&,const Float&,const IntervalVector&)const)&TaylorSeriesIntegrator::flow_step);

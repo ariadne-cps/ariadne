@@ -452,6 +452,9 @@ void export_vector_function_model()
     def("unrestrict", (IntervalVectorFunction(*)(const IntervalVectorFunctionModel&)) &unrestrict);
 
     def("join", (IntervalVectorFunctionModel(*)(const IntervalVectorFunctionModel&,const IntervalScalarFunctionModel&)) &join);
+
+    to_python< List<IntervalVectorFunctionModel> >();
+
 }
 
 

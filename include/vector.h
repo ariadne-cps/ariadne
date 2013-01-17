@@ -305,7 +305,7 @@ template<class V1, class X2> struct VectorScalarQuotient
     VectorScalarQuotient(const V1& v1, const X2& x2) : _v1(v1), _x2(x2) { }
     typedef typename Arithmetic<typename V1::ValueType, X2>::ResultType ValueType;
     size_t size() const { return _v1.size(); }
-    ValueType operator[](size_t i) const { return _v1[i]*_x2; }
+    ValueType operator[](size_t i) const { return _v1[i]/_x2; }
     const ValueType zero_element() const { return ValueType(_v1.zero_element()/_x2); }
 };
 

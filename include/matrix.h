@@ -374,6 +374,17 @@ template<class M1, class X2> struct MatrixScalarProduct
     ValueType get(size_t i,size_t j) const { return _A1.get(i,j)*_x2; }
 };
 
+template<class M1, class X2> struct MatrixScalarQuotient
+    : public MatrixExpression< MatrixScalarProduct<M1,X2> >
+{
+    typedef typename Arithmetic<typename M1::ValueType, X2>::ResultType ValueType;
+    const M1& _A1; const X2& _x2;
+    MatrixScalarQuotient(const M1& A1, const X2& x2) : _A1(A1), _x2(x2) { }
+    size_t row_size() const { return _A1.row_size(); }
+    size_t column_size() const { return _A1.column_size(); }
+    ValueType get(size_t i,size_t j) const { return _A1.get(i,j)/_x2; }
+};
+
 template<class M> struct MatrixTranspose
     : public MatrixExpression< MatrixTranspose<M> >
 {
@@ -412,8 +423,8 @@ typename EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,X2>::Res
 operator*(const MatrixExpression<M1>& A1e, const X2& x2) { return MatrixScalarProduct<M1,X2>(A1e(),x2); }
 
 template<class M1, class X2> inline
-typename EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,X2>::ResultType>, MatrixScalarProduct< M1, X2 > >::Type
-operator/(const MatrixExpression<M1>& A1e, const X2& x2) { return MatrixScalarProduct<M1,X2>(A1e(),1/x2); }
+typename EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,X2>::ResultType>, MatrixScalarQuotient< M1, X2 > >::Type
+operator/(const MatrixExpression<M1>& A1e, const X2& x2) { return MatrixScalarQuotient<M1,X2>(A1e(),x2); }
 
 
 template<class M, class V>

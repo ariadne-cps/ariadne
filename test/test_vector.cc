@@ -41,6 +41,9 @@ class TestVector {
     void test();
   private:
     void test_concept();
+    void test_constructors();
+    void test_comparisons();
+    void test_arithmetic();
     void test_misc();
 };
 
@@ -48,6 +51,9 @@ void
 TestVector::test()
 {
     ARIADNE_TEST_CALL(test_concept());
+    ARIADNE_TEST_CALL(test_constructors());
+    ARIADNE_TEST_CALL(test_comparisons());
+    ARIADNE_TEST_CALL(test_arithmetic());
 }
 
 void
@@ -72,6 +78,49 @@ TestVector::test_concept()
     fv=fx*fv; iv=ex*ev; iv=ex*iv; iv=ix*ev; iv=ix*iv;
     fv=fv*fx; iv=ev*ex; iv=ev*ix; iv=iv*ex; iv=iv*ix;
     fv=fv/fx; iv=ev/ex; iv=ev/ix; iv=iv/ex; iv=iv/ix;
+}
+
+
+void
+TestVector::test_constructors()
+{
+    ARIADNE_TEST_CONSTRUCT( FloatVector, v0, (3) );
+    ARIADNE_TEST_ASSERT( v0.size()==3 );
+    ARIADNE_TEST_ASSERT( v0[0]==0.0 );
+    ARIADNE_TEST_ASSERT( v0[1]==0.0 );
+    ARIADNE_TEST_ASSERT( v0[2]==0.0 );
+    
+    ARIADNE_TEST_CONSTRUCT( FloatVector, v1, ({3.25,-0.75,0.0,1.375}) );
+    ARIADNE_TEST_ASSERT( v1.size()==4 );
+    ARIADNE_TEST_ASSERT( v1[0]==3.25 );
+    ARIADNE_TEST_ASSERT( v1[1]==-0.75 );
+    ARIADNE_TEST_ASSERT( v1[2]==0.0 );
+    ARIADNE_TEST_ASSERT( v1[3]==1.375 );
+}
+
+
+void
+TestVector::test_comparisons()
+{
+    FloatVector v(2); v[0]=1.25; v[1]=-1.375;
+    ARIADNE_TEST_PRINT( v );
+    ARIADNE_TEST_COMPARE( v , ==, FloatVector({1.25,-1.375}) );
+    ARIADNE_TEST_COMPARE( v , !=, FloatVector({1.25,-1.625}) );
+}
+
+
+void
+TestVector::test_arithmetic()
+{
+    ARIADNE_TEST_EQUAL( + FloatVector({2.0,-3.0,5.0}) , FloatVector({2.0,-3.0,5.0}) );
+    ARIADNE_TEST_EQUAL( - FloatVector({2.0,-3.0,5.0}) , FloatVector({-2.0,+3.0,-5.0}) );
+    ARIADNE_TEST_EQUAL( FloatVector({2.0,-3.0,5.0}) + FloatVector({1.25,2.75,-3.5}), FloatVector({3.25,-0.25,1.5}) );
+    ARIADNE_TEST_EQUAL( FloatVector({2.0,-3.0,5.0}) - FloatVector({1.25,2.75,-3.5}), FloatVector({0.75,-5.75,8.5}) );
+    ARIADNE_TEST_EQUAL( Float(4.0) * FloatVector({2.0,-3.0,5.0}), FloatVector({8.0,-12.0,20.0}) );
+    ARIADNE_TEST_EQUAL( FloatVector({2.0,-3.0,5.0}) * Float(4.0), FloatVector({8.0,-12.0,20.0}) );
+    ARIADNE_TEST_EQUAL( FloatVector({2.0,-3.0,5.0}) / Float(4.0), FloatVector({0.5,-0.75,1.25}) );
+
+    ARIADNE_TEST_EQUAL( sup_norm(FloatVector({2.0,-3.0,1.0})), Float(3.0) )
 }
 
 

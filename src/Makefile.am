@@ -80,6 +80,7 @@ ARIADNE_HYBRID_SRC = \
 ARIADNE_SRC = $(ARIADNE_KERNEL_SRC) $(ARIADNE_GEOMETRY_SRC) $(ARIADNE_DYNAMICS_SRC) $(ARIADNE_HYBRID_SRC)
 
 EXTRAS_SRC = \
+	c1_taylor_function.cc \
 	runge_kutta_integrator.cc \
 	geometry.cc \
 	zonotope.cc \

@@ -1,0 +1,86 @@
+/***************************************************************************
+ *            c1_taylor_function.h
+ *
+ *  Copyright 2013  Pieter Collins
+ *
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+/*! \file c1_taylor_function.h
+ *  \brief Over-approximations of continuously-differentiable functions based on Taylor expansions.
+ */
+
+#ifndef ARIADNE_C1_TAYLOR_FUNCTION_H
+#define ARIADNE_C1_TAYLOR_FUNCTION_H
+
+#include <iosfwd>
+#include "container.h"
+#include "numeric.h"
+#include "float.h"
+
+namespace Ariadne {
+
+typedef uint Nat;
+
+template<class X> class Vector;
+template<class X> class Matrix;
+template<class X> class Polynomial;
+
+template<class X> class ScalarFunction;
+typedef ScalarFunction<Real> RealScalarFunction;
+typedef ScalarFunction<Interval> IntervalScalarFunction;
+template<class X> class VectorFunction;
+typedef VectorFunction<Real> RealVectorFunction;
+typedef VectorFunction<Interval> IntervalVectorFunction;
+
+class MultiIndex;
+class ScalarC1TaylorFunction;
+
+
+/*! \ingroup FunctionModelSubModule
+ *  \brief A C1TaylorSeries is a univariate function \f$f:\R\rightarrow\R\f$ on an interval \f$[a,b]\f$ is approximated by polynomial \f$p\f$ with error bounds \f$e_0 \geq |f(c)-p(c)|\f$ and \f$e_1\geq sup_{\xi\in D} |f'(\xi)-p'(\xi)|\f$.
+ */
+class C1TaylorSeries
+{
+  public:
+    std::vector<Float> _coefficients;
+    Float _zero_error;
+    Float _uniform_error;
+    Float _derivative_error;
+  private:
+    C1TaylorSeries(Nat d);
+  public:
+    static C1TaylorSeries constant(ExactFloat);
+    static C1TaylorSeries coordinate();
+  public:
+    Interval domain() const;
+    Nat degree() const;
+    Void sweep(Float threshold);
+  public:
+    friend C1TaylorSeries& operator+=(C1TaylorSeries&, ExactFloat);
+    friend C1TaylorSeries& operator*=(C1TaylorSeries&, ExactFloat);
+    friend C1TaylorSeries operator+(C1TaylorSeries, C1TaylorSeries);
+    friend C1TaylorSeries operator*(C1TaylorSeries, C1TaylorSeries);
+    friend Interval evaluate(C1TaylorSeries, ExactFloat);
+    friend C1TaylorSeries compose(C1TaylorSeries, C1TaylorSeries);
+    friend OutputStream& operator<< (OutputStream& os, const C1TaylorSeries& f);
+};
+
+} // namespace Ariadne
+
+#endif // ARIADNE_TAYLOR_FUNCTION_H

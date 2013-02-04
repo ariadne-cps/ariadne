@@ -32,6 +32,7 @@
 #include "container.h"
 #include "numeric.h"
 #include "float.h"
+#include "expansion.h"
 
 namespace Ariadne {
 
@@ -49,7 +50,8 @@ typedef VectorFunction<Real> RealVectorFunction;
 typedef VectorFunction<Interval> IntervalVectorFunction;
 
 class MultiIndex;
-class ScalarC1TaylorFunction;
+class C1TaylorSeries;
+class C1TaylorFunction;
 
 
 /*! \ingroup FunctionModelSubModule
@@ -79,6 +81,34 @@ class C1TaylorSeries
     friend Interval evaluate(C1TaylorSeries, ExactFloat);
     friend C1TaylorSeries compose(C1TaylorSeries, C1TaylorSeries);
     friend OutputStream& operator<< (OutputStream& os, const C1TaylorSeries& f);
+};
+
+class C1TaylorFunction
+{
+  public:
+    Expansion<Float> _expansion;
+    Float _zero_error;
+    Float _uniform_error;
+    Array<Float> _derivative_errors;
+  private:
+  public:
+    C1TaylorFunction(Nat as);
+  public:
+    static C1TaylorFunction constant(Nat as, ExactFloat c);
+    static C1TaylorFunction coordinate(Nat as, Nat ind);
+  public:
+    Vector<Interval> domain() const;
+    Nat argument_size() const;
+    Void sweep(Float threshold);
+  public:
+    friend C1TaylorFunction& operator+=(C1TaylorFunction& f, ExactFloat c);
+    friend C1TaylorFunction& operator*=(C1TaylorFunction& f, ExactFloat c);
+    friend C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2);
+    friend C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2);
+    friend Interval evaluate(C1TaylorFunction f, Vector<ExactFloat> x);
+    friend C1TaylorFunction compose(C1TaylorSeries f, C1TaylorFunction g);
+    friend C1TaylorFunction compose(C1TaylorFunction f, Vector<C1TaylorFunction> g);
+    friend OutputStream& operator<< (OutputStream& os, const C1TaylorFunction& f);
 };
 
 } // namespace Ariadne

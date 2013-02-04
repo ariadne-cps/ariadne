@@ -4,7 +4,7 @@
 
 using namespace Ariadne;
 
-int main() {
+int test_taylor_series() {
     C1TaylorSeries f1=C1TaylorSeries::constant(2.0);
     f1._coefficients={2,3,5,7};
     f1._uniform_error=0.1;
@@ -15,10 +15,49 @@ int main() {
     f2._uniform_error=0.01;
     std::cout << "f2="<<f2<<"\n";
 
+    const ExactFloat c1=3.0;
+    const ExactFloat c2=ExactFloat(1.0/3.0);
+    C1TaylorSeries f1pc1=f1; f1pc1+=c1;
+    std::cout << "f1pc1="<<f1pc1<<"\n";
+    C1TaylorSeries f1tc2=f1; f1tc2*=c2;
+    std::cout << "f1tc2="<<f1tc2<<"\n";
+
+
     C1TaylorSeries f1pf2=f1+f2;
     std::cout << "f1pf2="<<f1pf2<<"\n";
     C1TaylorSeries f1tf2=f1*f2;
     std::cout << "f1tf2="<<f1tf2<<"\n";
-    std::cout << "Done\n";
+    std::cout << "\n\n";
     //std::cout << "f2*f2="<<f2*f2<<"\n";
+}
+
+int test_taylor_function() {
+    C1TaylorFunction f1=C1TaylorFunction(2);
+    f1._expansion={{{1,1},7},{{1,0},5},{{0,1},3},{{0,0},2}};
+    f1._uniform_error=0.0;
+    std::cout << "f1="<<f1<<"\n";
+    std::cout << "(f1+=13)="<<(f1+=13)<<"\n";
+    std::cout << "(f1+=1/5)="<<(f1+=ExactFloat(0.2))<<"\n";
+    std::cout << "(f1*=1/5)="<<(f1*=ExactFloat(0.2))<<"\n";
+
+    C1TaylorFunction f2=C1TaylorFunction::coordinate(2,1);
+    f2._uniform_error=0.01;
+    std::cout << "f2="<<f2<<"\n";
+
+    C1TaylorFunction f3=C1TaylorFunction::constant(2,3.0);
+    std::cout << "f3="<<f3<<"\n";
+
+    C1TaylorFunction f1pf2=f1+f2;
+    std::cout << "f1pf2="<<f1pf2<<"\n";
+    C1TaylorFunction f1tf2=f1*f2;
+    std::cout << "f1tf2="<<f1tf2<<"\n";
+    std::cout << "\n\n";
+    //std::cout << "f2*f2="<<f2*f2<<"\n";
+}
+
+
+int main() {
+    test_taylor_series();
+    test_taylor_function();
+    std::cout << "Done\n";
 }

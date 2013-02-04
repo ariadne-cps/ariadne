@@ -25,6 +25,8 @@
 #include <iomanip>
 
 #include "config.h"
+#include <include/container.h>
+#include <include/c1_taylor_function.h>
 
 #include "macros.h"
 #include "exceptions.h"
@@ -38,6 +40,9 @@
 #define VOLATILE ;
 
 namespace Ariadne {
+
+static const char* plusminus = u8"\u00B1";
+
 
 C1TaylorSeries::C1TaylorSeries(uint d)
     : _coefficients(d+1,ExactFloat(0))
@@ -84,7 +89,47 @@ C1TaylorSeries& operator+=(C1TaylorSeries& f, ExactFloat ec) {
     return f;
 }
 
-C1TaylorSeries& operator*=(C1TaylorSeries&, ExactFloat);
+C1TaylorSeries& operator*=(C1TaylorSeries& f, ExactFloat ec) {
+    set_rounding_upward();
+    Float& fze=f._zero_error;
+    Float& fue=f._uniform_error;
+    Float& fde=f._derivative_error;
+    const Float& c=ec;
+    const Float ac=abs(c);
+
+    set_rounding_upward();
+    fze*=ac;
+    fue*=ac;
+    fde*=ac;
+
+    {
+        Float& fv=f._coefficients[0];
+        VOLATILE Float fvu=fv*c;
+        VOLATILE Float mfvl=(-fv)*c;
+        const Float e=(fvu+mfvl)/2;
+        fze+=e;
+        fue+=e;
+    }
+
+    for(uint i=1; i!=f._coefficients.size(); ++i) {
+        set_rounding_upward();
+        Float& fv=f._coefficients[i];
+        VOLATILE Float fvu=fv*c;
+        VOLATILE Float mfvl=(-fv)*c;
+        const Float e=(fvu+mfvl)/2;
+        fue+=e;
+        fde+=i*e;
+    };
+
+    set_rounding_to_nearest();
+    for(uint i=0; i!=f._coefficients.size(); ++i) {
+        f._coefficients[i]*=c;
+    }
+
+    ARIADNE_ASSERT_MSG(f._zero_error>=0,"f="<<f<<" c="<<c);
+    return f;
+
+}
 
 C1TaylorSeries operator+(C1TaylorSeries f1, C1TaylorSeries f2) {
     C1TaylorSeries r(max(f1.degree(),f2.degree()));
@@ -240,8 +285,6 @@ Interval evaluate(C1TaylorSeries f, ExactFloat x) {
 }
 
 
-static const char* plusminus = u8"\u00B1";
-
 OutputStream& operator<<(OutputStream& os, const C1TaylorSeries& f) {
     os << "(" << f._coefficients[0] << "±" << f._zero_error << "/" << f._uniform_error << ")+(" << f._coefficients[1] << plusminus << f._derivative_error <<")*x";
     for(Nat i=2; i<f._coefficients.size(); ++i) {
@@ -250,5 +293,155 @@ OutputStream& operator<<(OutputStream& os, const C1TaylorSeries& f) {
     }
     return os;
 }
+
+
+
+
+C1TaylorFunction::C1TaylorFunction(Nat as)
+    : _expansion(as)
+    , _zero_error(0)
+    , _uniform_error(0)
+    , _derivative_errors(as)
+{
+    MultiIndex ind(as);
+    for(Nat i=0; i!=as; ++i) {
+        ind[i]=1;
+        _expansion.append(ind,0);
+        ind[i]=0;
+    }
+    _expansion.append(ind,0);
+    _expansion.sort(ReverseLexicographicKeyLess());
+}
+
+C1TaylorFunction C1TaylorFunction::constant(Nat as, ExactFloat c) {
+    C1TaylorFunction result(as);
+    MultiIndex ind=MultiIndex::zero(as);
+    //result._expansion[ind]=Float(c);
+    result._expansion.set(ind,c,ReverseLexicographicKeyLess());
+    return result;
+}
+
+C1TaylorFunction C1TaylorFunction::coordinate(Nat as, Nat i) {
+    C1TaylorFunction result(as);
+    MultiIndex ind=MultiIndex::unit(as,i);
+    //result._expansion[ind]=1;
+    result._expansion.set(ind,1.0,ReverseLexicographicKeyLess());
+    return result;
+}
+
+Nat C1TaylorFunction::argument_size() const {
+    return this->_expansion.argument_size();
+}
+
+C1TaylorFunction& operator+=(C1TaylorFunction& f, ExactFloat ec) {
+    ARIADNE_ASSERT((--f._expansion.end())->key().degree()==0);
+    std::cerr<<ec<<"\n";
+    //ARIADNE_DEBUG_ASSERT(f._expansion.back().key().degree()==0);
+    set_rounding_upward();
+    //Float& fv=f._expansion.back().data();
+    Float& fv=(--f._expansion.end())->data();
+    Float& fze=f._zero_error;
+    Float& fe=f._uniform_error;
+    const Float& c=ec;
+    set_rounding_upward();
+    VOLATILE Float fvu=fv+c;
+    VOLATILE Float mfvl=(-fv)-c;
+    fze+=(fvu+mfvl)/2;
+    fe+=(fvu+mfvl)/2;
+    set_rounding_to_nearest();
+    fv+=c;
+    ARIADNE_ASSERT_MSG(f._zero_error>=0,"f="<<f<<" c="<<c);
+    return f;
+}
+
+C1TaylorFunction& operator*=(C1TaylorFunction& f, ExactFloat ec) {
+    set_rounding_upward();
+    Float& fze=f._zero_error;
+    Float& fue=f._uniform_error;
+    Array<Float>& fde=f._derivative_errors;
+    const Float& c=ec;
+    const Float ac=abs(c);
+
+    set_rounding_upward();
+    fze*=ac;
+    fue*=ac;
+    for(Nat j=0; j!=f.argument_size(); ++j) {
+        fde[j]*=ac;
+    }
+
+    for(Expansion<Float>::iterator iter=f._expansion.begin();
+        iter!=f._expansion.end(); ++iter)
+    {
+        const MultiIndex& a=iter->key();
+        Float& fv=iter->data();
+        VOLATILE Float fvu=fv*c;
+        VOLATILE Float mfvl=(-fv)*c;
+        const Float e=(fvu+mfvl)/2;
+        if(a.degree()==0) { fze+=e; }
+        fue+=e;
+        for(Nat j=0; j!=f.argument_size(); ++j) {
+            fde[j]+=a[j]*e;
+        }
+    }
+
+    set_rounding_to_nearest();
+    for(Expansion<Float>::iterator iter=f._expansion.begin();
+        iter!=f._expansion.end(); ++iter)
+    {
+        Float& fv=iter->data();
+        fv*=c;
+    }
+
+    return f;
+
+}
+
+
+
+C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+template<class T> struct ListForm {
+    ListForm(const T& t) : value(t) { } const T& value;
+};
+template<class T> ListForm<T> list_form(const T& t) { return ListForm<T>(t); }
+
+OutputStream& operator<<(OutputStream& os, const ListForm<Expansion<Float>>& lfe) {
+    const Expansion<Float>& e=lfe.value;
+    os << "{";
+    for(Expansion<Float>::const_iterator iter=e.begin();
+        iter!=e.end(); ++iter)
+    {
+        if(iter!=e.begin()) { os << ","; }
+        for(Nat i=0; i!=iter->key().size(); ++i) {
+            os << uint(iter->key()[i]);
+            if(i+1!=iter->key().size()) { os << ","; }
+        }
+        os << ":" << iter->data();
+    }
+    return os << "}";
+}
+
+OutputStream& operator<<(OutputStream& os, const C1TaylorFunction& f) {
+    os << "C1TaylorFunction( _expansion=" << list_form(f._expansion)
+       << ", _zero_error=" << f._zero_error
+       << ", _uniform_error=" << f._uniform_error
+       << ", _derivative_errors=" << f._derivative_errors
+       << ")";
+    return os;
+
+    for(Expansion<Float>::iterator iter=f._expansion.begin();
+        iter!=f._expansion.end(); ++iter)
+    {
+        os << *iter;
+    }
+}
+
+
 
 } // namespace Ariadne

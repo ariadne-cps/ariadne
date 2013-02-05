@@ -333,6 +333,15 @@ Nat C1TaylorFunction::argument_size() const {
     return this->_expansion.argument_size();
 }
 
+Void C1TaylorFunction::clear() {
+    this->_expansion.clear();
+    this->_zero_error=0;
+    this->_uniform_error=0;
+    for(Nat j=0; j!=this->_derivative_errors.size(); ++j) {
+        this->_derivative_errors[j]=0;
+    }
+}
+
 C1TaylorFunction& operator+=(C1TaylorFunction& f, ExactFloat ec) {
     ARIADNE_ASSERT((--f._expansion.end())->key().degree()==0);
     std::cerr<<ec<<"\n";
@@ -399,11 +408,154 @@ C1TaylorFunction& operator*=(C1TaylorFunction& f, ExactFloat ec) {
 
 
 C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2) {
-    ARIADNE_NOT_IMPLEMENTED;
+    ARIADNE_PRECONDITION(f1.argument_size()==f2.argument_size());
+    const Nat n=f1.argument_size();
+    C1TaylorFunction f0(n);
+    f0._expansion.clear();
+    f0._expansion.reserve(f1._expansion.number_of_nonzeros()+f2._expansion.number_of_nonzeros());
+
+    Expansion<Float>::const_iterator i1=f1._expansion.begin();
+    Expansion<Float>::const_iterator i2=f2._expansion.begin();
+    while(i1!=f1._expansion.end() && i2!=f2._expansion.end()) {
+        if(i1->key()==i2->key()) {
+            const MultiIndex& a = i1->key();
+            set_rounding_upward();
+            VOLATILE Float fvu=i1->data()+i2->data();
+            VOLATILE Float mfvl=(-i1->data())-i2->data();
+            const Float e=(fvu+mfvl)/2;
+            if(a.degree()==0) {
+                f0._zero_error+=e;
+            }
+            f0._uniform_error+=e;
+            for(Nat j=0; j!=n; ++j) {
+                f0._derivative_errors[j]+=a[j]*e;
+            }
+            set_rounding_to_nearest();
+            f0._expansion.append(a,i1->data()+i2->data());
+            ++i1;
+            ++i2;
+        } else if(reverse_lexicographic_less(i1->key(),i2->key())) {
+            f0._expansion.append(i1->key(),i1->data());
+            ++i1;
+        } else {
+            f0._expansion.append(i2->key(),i2->data());
+            ++i2;
+        }
+    }
+    while(i1!=f1._expansion.end()) {
+        f0._expansion.append(i1->key(),i1->data());
+        ++i1;
+    }
+    while(i2!=f2._expansion.end()) {
+        f0._expansion.append(i2->key(),i2->data());
+        ++i2;
+    }
+
+    set_rounding_upward();
+    f0._zero_error+=(f1._zero_error+f2._zero_error);
+    f0._uniform_error+=(f1._uniform_error+f2._uniform_error);
+    for(Nat j=0; j!=n; ++j) {
+        f0._derivative_errors[j]+=(f1._derivative_errors[j]+f2._derivative_errors[j]);
+    }
+    set_rounding_to_nearest();
+
+    return f0;
+}
+
+
+Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunction& f2, const Float& c3, const MultiIndex& a3) {
+    ARIADNE_PRECONDITION(f0.argument_size()==f1.argument_size());
+    ARIADNE_PRECONDITION(f1.argument_size()==f2.argument_size());
+    const Nat n=f1.argument_size();
+    MultiIndex a(n);
+    f0.clear();
+
+    Expansion<Float>::const_iterator i1=f1._expansion.begin();
+    Expansion<Float>::const_iterator i2=f2._expansion.begin();
+    while(i1!=f1._expansion.end() && i2!=f2._expansion.end()) {
+        if(i1->key()==i2->key()+a3) {
+            const MultiIndex& a = i1->key();
+            set_rounding_upward();
+            VOLATILE Float fvu=i1->data()+i2->data()*c3;
+            VOLATILE Float mfvl=(-i1->data())+i2->data()*(-c3);
+            const Float e=(fvu+mfvl)/2;
+            if(a.degree()==0) {
+                f0._zero_error+=e;
+            }
+            f0._uniform_error+=e;
+            for(Nat j=0; j!=n; ++j) {
+                f0._derivative_errors[j]+=a[j]*e;
+            }
+            set_rounding_to_nearest();
+            f0._expansion.append(a,i1->data()+i2->data()*c3);
+            ++i1;
+            ++i2;
+        } else if(reverse_lexicographic_less(i1->key(),i2->key()+a3)) {
+            f0._expansion.append(i1->key(),i1->data());
+            ++i1;
+        } else {
+            a=i2->key()+a3;
+            set_rounding_upward();
+            VOLATILE Float fvu=i2->data()*c3;
+            VOLATILE Float mfvl=i2->data()*(-c3);
+            const Float e=(fvu+mfvl)/2;
+            if(a.degree()==0) {
+                f0._zero_error+=e;
+            }
+            f0._uniform_error+=e;
+            for(Nat j=0; j!=n; ++j) {
+                f0._derivative_errors[j]+=a[j]*e;
+            }
+            set_rounding_to_nearest();
+            f0._expansion.append(a,i2->data()*c3);
+            ++i2;
+        }
+    }
+    while(i1!=f1._expansion.end()) {
+        f0._expansion.append(i1->key(),i1->data());
+        ++i1;
+    }
+    while(i2!=f2._expansion.end()) {
+        set_rounding_upward();
+        VOLATILE Float fvu=i2->data()*c3;
+        VOLATILE Float mfvl=i2->data()*(-c3);
+        const Float e=(fvu+mfvl)/2;
+        if(a.degree()==0) {
+            f0._zero_error+=e;
+        }
+        f0._uniform_error+=e;
+        for(Nat j=0; j!=n; ++j) {
+            f0._derivative_errors[j]+=a[j]*e;
+        }
+        set_rounding_to_nearest();
+        f0._expansion.append(i2->key()+a3,i2->data()*c3);
+        ++i2;
+    }
+
+    set_rounding_upward();
+    f0._zero_error+=(f1._zero_error+f2._zero_error*abs(c3));
+    f0._uniform_error+=(f1._uniform_error+f2._uniform_error*abs(c3));
+    for(Nat j=0; j!=n; ++j) {
+        f0._derivative_errors[j]+=(f1._derivative_errors[j]+f2._derivative_errors[j]*abs(c3));
+    }
+    set_rounding_to_nearest();
+
 }
 
 C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2) {
-    ARIADNE_NOT_IMPLEMENTED;
+    C1TaylorFunction f0a(f2);
+    f0a._expansion.clear();
+    C1TaylorFunction f0b(f0a);
+    f0b.clear();
+    C1TaylorFunction* ftp=&f0a;
+    C1TaylorFunction* frp=&f0b;
+    for(Expansion<Float>::const_iterator i2=f2._expansion.begin();
+        i2!=f2._expansion.end(); ++i2)
+    {
+        fma(*frp,*ftp,f1,i2->data(),i2->key());
+        std::swap(ftp,frp);
+    }
+    return *frp;
 }
 
 template<class T> struct ListForm {
@@ -413,18 +565,18 @@ template<class T> ListForm<T> list_form(const T& t) { return ListForm<T>(t); }
 
 OutputStream& operator<<(OutputStream& os, const ListForm<Expansion<Float>>& lfe) {
     const Expansion<Float>& e=lfe.value;
-    os << "{";
+    os << "{ ";
     for(Expansion<Float>::const_iterator iter=e.begin();
         iter!=e.end(); ++iter)
     {
-        if(iter!=e.begin()) { os << ","; }
+        if(iter!=e.begin()) { os << ", "; }
         for(Nat i=0; i!=iter->key().size(); ++i) {
             os << uint(iter->key()[i]);
             if(i+1!=iter->key().size()) { os << ","; }
         }
         os << ":" << iter->data();
     }
-    return os << "}";
+    return os << " }";
 }
 
 OutputStream& operator<<(OutputStream& os, const C1TaylorFunction& f) {

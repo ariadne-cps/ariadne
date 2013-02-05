@@ -100,6 +100,7 @@ class C1TaylorFunction
     Vector<Interval> domain() const;
     Nat argument_size() const;
     Void sweep(Float threshold);
+    Void clear();
   public:
     friend C1TaylorFunction& operator+=(C1TaylorFunction& f, ExactFloat c);
     friend C1TaylorFunction& operator*=(C1TaylorFunction& f, ExactFloat c);

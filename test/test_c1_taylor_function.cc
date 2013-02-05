@@ -45,8 +45,14 @@ int test_taylor_function() {
     std::cout << "f2="<<f2<<"\n";
 
     C1TaylorFunction f3=C1TaylorFunction::constant(2,3.0);
-    std::cout << "f3="<<f3<<"\n";
+    std::cout << "f3="<<f3<<"\n\n";
 
+    f1._expansion={{{1,1},7},{{1,0},5},{{0,1},3},{{0,0},2}};
+    f2._expansion={{{2,0},1.3},{{1,1},1.1},{{1,0},0.7},{{0,2},0.5},{{0,1},0.3},{{0,0},0.2}};
+    f1._expansion.sort(ReverseLexicographicKeyLess());
+    f2._expansion.sort(ReverseLexicographicKeyLess());
+    std::cout << "f1="<<f1<<"\n";
+    std::cout << "f2="<<f2<<"\n";
     C1TaylorFunction f1pf2=f1+f2;
     std::cout << "f1pf2="<<f1pf2<<"\n";
     C1TaylorFunction f1tf2=f1*f2;

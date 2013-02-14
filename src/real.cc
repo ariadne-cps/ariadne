@@ -149,7 +149,7 @@ Real& Real::operator=(const Real& x) { this->_ptr=x._ptr; return *this; }
 double Real::get_d() const { return this->_ptr->operator Float().get_d(); }
 
 Float::Float(const Real& x) : v(x._ptr->operator Float().get_d()) { }
-Interval::Interval(const Real& x) : l(x._ptr->operator Interval().lower()), u(x._ptr->operator Interval().lower()) { }
+Interval::Interval(const Real& x) : l(x._ptr->operator Interval().lower()), u(x._ptr->operator Interval().upper()) { }
 Float& Float::operator=(const Real& x) { *this=Float(x); return *this; }
 Interval& Interval::operator=(const Real& x) { *this=Interval(x); return *this; }
 

@@ -208,33 +208,16 @@ void export_float()
     float_class.def(self * self);
     float_class.def(self / self);
 
-    float_class.def(self + double());
-    float_class.def(self - double());
-    float_class.def(self * double());
-    float_class.def(self / double());
     float_class.def(double() + self);
     float_class.def(double() - self);
     float_class.def(double() * self);
     float_class.def(double() / self);
-/*
-    float_class.def(self + Interval());
-    float_class.def(self - Interval());
-    float_class.def(self * Interval());
-    float_class.def(self / Interval());
+
     float_class.def(Interval() + self);
     float_class.def(Interval() - self);
     float_class.def(Interval() * self);
     float_class.def(Interval() / self);
 
-    float_class.def(self + Real());
-    float_class.def(self - Real());
-    float_class.def(self * Real());
-    float_class.def(self / Real());
-    float_class.def(Real() + self);
-    float_class.def(Real() - self);
-    float_class.def(Real() * self);
-    float_class.def(Real() / self);
-*/
     float_class.def(self == self);
     float_class.def(self != self);
     float_class.def(self >= self);
@@ -266,19 +249,6 @@ void export_float()
     def("acos", (Float(*)(Float)) &Ariadne::acos);
     def("atan", (Float(*)(Float)) &Ariadne::atan);
 
-}
-
-void export_exact_float()
-{
-    class_< ExactFloat > exact_float_class("ExactFloat",init<ExactFloat>());
-    exact_float_class.def(init<double>());
-    exact_float_class.def(init<Float>());
-    exact_float_class.def("__str__", &__cstr__<ExactFloat>);
-    exact_float_class.def("__repr__", &__cstr__<ExactFloat>);
-
-    def("make_exact", (const ExactFloat&(*)(const Float&)) &Ariadne::make_exact, return_value_policy<copy_const_reference>());
-
-    implicitly_convertible<ExactFloat,Float>();
 }
 
 
@@ -322,24 +292,11 @@ void export_interval()
     interval_class.def(self * self);
     interval_class.def(self / self);
 
-    interval_class.def(self + double());
-    interval_class.def(self - double());
-    interval_class.def(self * double());
-    interval_class.def(self / double());
-    interval_class.def(double() + self);
-    interval_class.def(double() - self);
-    interval_class.def(double() * self);
-    interval_class.def(double() / self);
-/*
-    interval_class.def(self + Real());
-    interval_class.def(self - Real());
-    interval_class.def(self * Real());
-    interval_class.def(self / Real());
     interval_class.def(Real() + self);
     interval_class.def(Real() - self);
     interval_class.def(Real() * self);
     interval_class.def(Real() / self);
-*/
+
     interval_class.def(self == self);
     interval_class.def(self != self);
     interval_class.def(self >= self);
@@ -409,8 +366,11 @@ Real pi_function() { return pi; }
 void export_real()
 {
     class_<Real> real_class("Real");
-    real_class.def(init<double>());
+//    real_class.def(init<double>());
     real_class.def(init<Real>());
+#ifdef HAVE_GMPXX_H
+    real_class.def(init<Rational>());
+#endif
     real_class.def(init<std::string>());
     real_class.def("radius", &Interval::radius);
     real_class.def(boost::python::self_ns::str(self));
@@ -423,14 +383,10 @@ void export_real()
     real_class.def(self * self);
     real_class.def(self / self);
 
-    real_class.def(self + double());
-    real_class.def(self - double());
-    real_class.def(self * double());
-    real_class.def(self / double());
-    real_class.def(double() + self);
-    real_class.def(double() - self);
-    real_class.def(double() * self);
-    real_class.def(double() / self);
+    real_class.def(int() + self);
+    real_class.def(int() - self);
+    real_class.def(int() * self);
+    real_class.def(int() / self);
 
     real_class.def(self == self);
     real_class.def(self != self);
@@ -443,9 +399,25 @@ void export_real()
 
     implicitly_convertible<int,Real>();
     implicitly_convertible<ExactFloat,Real>();
+#ifdef HAVE_GMPXX_H
+    implicitly_convertible<Rational,Real>();
+#endif
 
     implicitly_convertible<Real,Float>();
     implicitly_convertible<Real,Interval>();
+}
+
+void export_exact_float()
+{
+    class_< ExactFloat > exact_float_class("ExactFloat",init<ExactFloat>());
+    exact_float_class.def(init<double>());
+    exact_float_class.def(init<Float>());
+    exact_float_class.def("__str__", &__cstr__<ExactFloat>);
+    exact_float_class.def("__repr__", &__cstr__<ExactFloat>);
+
+    def("make_exact", (const ExactFloat&(*)(const Float&)) &Ariadne::make_exact, return_value_policy<copy_const_reference>());
+
+    implicitly_convertible<ExactFloat,Float>();
 }
 
 void

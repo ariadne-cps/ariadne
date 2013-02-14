@@ -385,7 +385,7 @@ RealBoundedConstraintSet::overlaps(const Box& bx) const
     if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
     Box domain=under_approximation(this->domain());
     Box codomain=under_approximation(this->codomain());
-    return IntervalConstrainedImageSet(domain,this->constraint_function()).overlaps(Ariadne::intersection(bx,codomain)) || indeterminate;
+    return IntervalConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).overlaps(codomain) || indeterminate;
 }
 
 

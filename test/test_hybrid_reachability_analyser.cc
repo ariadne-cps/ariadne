@@ -83,7 +83,7 @@ class TestHybridReachabilityAnalyser
     Interval bound;
     HybridSet initial_set;
     HybridTime reach_time;
-	
+
   public:
 
     static HybridAutomaton build_system()
@@ -114,13 +114,14 @@ class TestHybridReachabilityAnalyser
         return analyser;
     }
 
-    TestHybridReachabilityAnalyser()
+    TestHybridReachabilityAnalyser(uint analyser_verbosity = 0u)
         : system(build_system()),
           analyser(build_analyser(system)),
           grid(2),
           bound(-4,4),
           reach_time(3.0,4)
     {
+        analyser.verbosity=analyser_verbosity;
         DiscreteLocation location(StringVariable("q")|"1");
 
         RealVariable x("x");
@@ -281,9 +282,11 @@ class TestHybridReachabilityAnalyser
 };
 
 
-int main(int nargs, const char* args[])
+int main(int argc, const char* argv[])
 {
-    TestHybridReachabilityAnalyser().test();
+    int analyser_verbosity=get_verbosity(argc,argv);
+
+    TestHybridReachabilityAnalyser(analyser_verbosity).test();
     return ARIADNE_TEST_FAILURES;
 }
 

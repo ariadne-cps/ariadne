@@ -150,7 +150,7 @@ int main(int argc, const char* argv[])
     std::cout << "Evolution time = "  << evolution_time << "\n" ;
 
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(initial_set,evolution_time,LOWER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit.final_size="<<orbit.final().size()<<std::endl;

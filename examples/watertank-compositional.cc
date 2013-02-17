@@ -136,4 +136,18 @@ int main()
     plot("watertank_compositional-orbit",axes, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
 
+    Axes2d height_aperture_axes(-0.1,height,9.1, -0.1,aperture,1.3);
+
+    std::cout << "Discretising orbit" << std::flush;
+    HybridGrid grid(watertank_system.state_space());
+    HybridGridTreeSet hgts(grid);
+    for (ListSet<HybridEnclosure>::const_iterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
+    {
+        std::cout<<"."<<std::flush;
+        it->adjoin_outer_approximation_to(hgts,4);
+    }
+    std::cout << "done." << std::endl;
+
+    plot("watertank_compositional-reach", height_aperture_axes, Colour(0.0,0.5,1.0), hgts);
+
 }

@@ -61,6 +61,8 @@ class HybridGrid
     const HybridSpace& space() const { return this->_space; }
     //! The underlying hybrid space.
     RealSpace space(const DiscreteLocation& loc) const { return this->_space[loc]; }
+    //! The underlying hybrid space.
+    Grid grid(const DiscreteLocation& loc) const { return this->operator[](loc); }
   public:
     //! The grid corresponding to unit resolution on each dimension.
     HybridGrid(const HybridSpace& hsp) : _space(hsp), _scaling(SimpleHybridScaling()) { }

@@ -175,6 +175,7 @@ class HybridRealBoundedConstraintSet
     HybridRealBoundedConstraintSet();
     HybridRealBoundedConstraintSet(const DiscreteLocation& q, const RealSpace& spc, const RealBoxSet& bx);
     HybridRealBoundedConstraintSet(const DiscreteLocation& q, const List<RealVariableInterval>& bnds);
+    HybridRealBoundedConstraintSet(const HybridExpressionSet& hes, const RealSpace& spc);
 
     virtual HybridRealBoundedConstraintSet* clone() const;
     virtual HybridSpace space() const;

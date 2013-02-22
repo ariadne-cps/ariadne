@@ -43,6 +43,9 @@
 #include "list_set.h"
 #include "grid_set.h"
 
+#include "integrator.h"
+#include "solver.h"
+
 #include "hybrid_automaton_interface.h"
 
 #include "hybrid_time.h"
@@ -169,35 +172,41 @@ HybridReachabilityAnalyser::_upper_evolve(const HybridGridTreeSet& set,
 }
 
 
-Pair<HybridGridTreeSet,HybridGridTreeSet>
-HybridReachabilityAnalyser::_upper_reach_evolve(const HybridGridTreeSet& set,
-                                                const HybridTime& time,
-                                                const int accuracy,
-                                                const HybridEvolverInterface& evolver) const
+Void
+HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreeSet& reach_cells,
+                                                       HybridGridTreeSet& evolve_cells,
+                                                       const HybridGridTreeSet& set,
+                                                       const HybridTime& time,
+                                                       const int accuracy,
+                                                       const HybridEvolverInterface& evolver) const
 {
-    ARIADNE_LOG(2,"HybridReachabilityAnalyser::_upper_reach_evolve(...)\n");
+    ARIADNE_LOG(4,"HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(...)\n");
     HybridGrid grid=set.grid();
-    std::pair<HybridGridTreeSet,HybridGridTreeSet> result=make_pair(HybridGridTreeSet(grid),HybridGridTreeSet(grid));
-    HybridGridTreeSet& reach_cells=result.first; HybridGridTreeSet& evolve_cells=result.second;
-    HybridGridTreeSet cells=set; cells.mince(accuracy);
+    HybridGridTreeSet cells=set; 
+    cells.mince(accuracy);
 
-    for(HybridGridTreeSet::const_iterator cell_iter=cells.begin(); cell_iter!=cells.end(); ++cell_iter) {
-        ARIADNE_LOG(5,"Evolving cell = "<<*cell_iter<<"\n");
-        HybridEnclosure initial_enclosure = evolver.enclosure(cell_iter->box());
+    ARIADNE_LOG(3,"Evolving "<<cells.size()<<" cells\n");
+    for(HybridGridCell const& cell : cells) {
+        ARIADNE_LOG(5,"Evolving cell = "<<cell<<"\n");
+        HybridEnclosure initial_enclosure = evolver.enclosure(cell.box());
         ListSet<HybridEnclosure> reach_enclosures;
         ListSet<HybridEnclosure> final_enclosures;
         make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,time,UPPER_SEMANTICS);
-        for(ListSet<HybridEnclosure>::const_iterator enclosure_iter=reach_enclosures.begin(); enclosure_iter!=reach_enclosures.end(); ++enclosure_iter) {
-            enclosure_iter->adjoin_outer_approximation_to(reach_cells,accuracy);
+        ARIADNE_LOG(5,"  computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.\n");
+        ARIADNE_LOG(5,"  adjoining reach enclosures to grid... ");
+        for(HybridEnclosure const& enclosure : reach_enclosures) {
+            enclosure.adjoin_outer_approximation_to(reach_cells,accuracy);
         }
-        for(ListSet<HybridEnclosure>::const_iterator enclosure_iter=final_enclosures.begin(); enclosure_iter!=final_enclosures.end(); ++enclosure_iter) {
-            enclosure_iter->adjoin_outer_approximation_to(evolve_cells,accuracy);
+        ARIADNE_LOG(5,"done\n");
+        ARIADNE_LOG(5,"  adjoining final enclosures to grid... ");
+        for(HybridEnclosure const& enclosure : final_enclosures) {
+            enclosure.adjoin_outer_approximation_to(evolve_cells,accuracy);
         }
+        ARIADNE_LOG(5,"done.\n");
     }
     ARIADNE_LOG(3,"  final reach size = "<<reach_cells.size()<<"\n");
     ARIADNE_LOG(3,"  final evolve size = "<<evolve_cells.size()<<"\n");
     ARIADNE_LOG(2,"Done.\n");
-    return result;
 }
 
 
@@ -461,7 +470,7 @@ upper_reach(const CompactSetInterfaceType& initial_set,
     for(uint i=0; i!=time_steps; ++i) {
         accumulated_evolve_cells.adjoin(found_cells);
         ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
-        make_lpair(found_cells,evolve_cells)=this->_upper_reach_evolve(evolve_cells,hybrid_lock_to_grid_time,grid_depth,*evolver_ptr);
+        this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,evolve_cells,hybrid_lock_to_grid_time,grid_depth,*evolver_ptr);
         ARIADNE_LOG(5,"found.size()="<<found_cells.size()<<"\n");
         ARIADNE_LOG(5,"evolve.size()="<<evolve_cells.size()<<"\n");
         evolve_cells.remove(accumulated_evolve_cells);
@@ -474,7 +483,7 @@ upper_reach(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
     if(!evolve_cells.empty() && remainder_time > 0) {
         ARIADNE_LOG(3,"computing evolution for remainder time...\n");
-        make_lpair(found_cells,evolve_cells)=this->_upper_reach_evolve(evolve_cells,hybrid_remainder_time,grid_depth,*evolver_ptr);
+        this->_adjoin_upper_reach_evolve(found_cells,accumulated_evolve_cells,evolve_cells,hybrid_remainder_time,grid_depth,*evolver_ptr);
         reach_cells.adjoin(found_cells);
     }
     // This last step is necessary to add the final set to the result.
@@ -516,7 +525,7 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
     HybridGridTreeSet found_cells(grid);
     for(uint i=0; i!=time_steps; ++i) {
         ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
-        make_lpair(found_cells,evolve_cells) = this->_upper_reach_evolve(evolve_cells,hybrid_lock_to_grid_time,grid_depth,*evolver_ptr);
+        this->_adjoin_upper_reach_evolve(found_cells,evolve_cells,evolve_cells,hybrid_lock_to_grid_time,grid_depth,*evolver_ptr);
         ARIADNE_LOG(5,"found.size()="<<found_cells.size()<<"\n");
         ARIADNE_LOG(5,"evolve.size()="<<evolve_cells.size()<<"\n");
         reach_cells.adjoin(found_cells);
@@ -525,7 +534,7 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
     if(!evolve_cells.empty() && remainder_time > 0) {
         ARIADNE_LOG(3,"computing evolution for remainder time...\n");
-        make_lpair(found_cells,evolve_cells) = this->_upper_reach_evolve(evolve_cells,hybrid_remainder_time,grid_depth,*evolver_ptr);
+        this->_adjoin_upper_reach_evolve(found_cells,evolve_cells,evolve_cells,hybrid_remainder_time,grid_depth,*evolver_ptr);
         reach_cells.adjoin(found_cells);
     }
     reach_cells.recombine();
@@ -565,38 +574,53 @@ outer_chain_reach(
     ARIADNE_LOG(5,"maximum_grid_height="<<maximum_grid_height<<"\n");
     ARIADNE_LOG(5,"bounding_size="<<bounding.size()<<"\n");
 
-    HybridGridTreeSet evolve_cells(grid), accumulated_evolve_cells(grid);
-    evolve_cells.adjoin_outer_approximation(initial_set,maximum_grid_depth);
-    _checked_restriction(evolve_cells,bounding);
-    accumulated_evolve_cells.adjoin(evolve_cells);
-    ARIADNE_LOG(5,"initial_size="<<evolve_cells.size()<<"\n");
+    HybridGridTreeSet initial_cells(grid);
+    initial_cells.adjoin_outer_approximation(initial_set,maximum_grid_depth);
+    _checked_restriction(initial_cells,bounding);
+    ARIADNE_LOG(5,"initial_size="<<initial_cells.size()<<"\n");
+
 
     std::shared_ptr<HybridEvolverInterface> evolver_ptr(_evolver_factory->create(*_system));
-
+    
     HybridGridTreeSet reach_cells(grid);
+    HybridGridTreeSet evolve_cells(grid);
     if(transient_time > 0.0 || transient_steps > 0) {
         ARIADNE_LOG(3,"Computing transient evolution...\n");
-        make_lpair(reach_cells,evolve_cells)=this->_upper_reach_evolve(evolve_cells,hybrid_transient_time,maximum_grid_depth,*evolver_ptr);
+        this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,initial_cells,hybrid_transient_time,maximum_grid_depth,*evolver_ptr);
         _checked_restriction(evolve_cells,bounding);
+        evolve_cells.recombine();
+        evolve_cells.mince(maximum_grid_depth);
         ARIADNE_LOG(5,"transient_reach_size="<<reach_cells.size()<<"\n");
-        ARIADNE_LOG(5,"evolve_size="<<evolve_cells.size()<<"\n");
+        ARIADNE_LOG(5,"transient evolve_size="<<evolve_cells.size()<<"\n");
         ARIADNE_LOG(3,"  found "<<reach_cells.size()<<" cells.\n");
+    } else {
+        evolve_cells=initial_cells;
     }
-    HybridGridTreeSet found_cells(grid);
-    ARIADNE_LOG(3,"Computing recurrent evolution...\n");
 
-    while(!evolve_cells.empty()) {
-        accumulated_evolve_cells.adjoin(evolve_cells);
-        make_lpair(found_cells,evolve_cells)=this->_upper_reach_evolve(evolve_cells,hybrid_lock_to_grid_time,maximum_grid_depth,*evolver_ptr);
-        ARIADNE_LOG(5,"found.size()="<<found_cells.size()<<"\n");
+    ARIADNE_LOG(3,"Computing recurrent evolution...\n");
+    HybridGridTreeSet starting_cells = evolve_cells;
+    HybridGridTreeSet current_evolve_cells(grid);
+    
+    
+    int step=0; int MAX_STEPS=1024;
+    while(!starting_cells.empty() && step<MAX_STEPS) {
+        current_evolve_cells = evolve_cells;
+        this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,starting_cells,
+                                         hybrid_lock_to_grid_time,maximum_grid_depth,*evolver_ptr);
+        ARIADNE_LOG(5,"reach.size()="<<reach_cells.size()<<"\n");
         ARIADNE_LOG(5,"evolve.size()="<<evolve_cells.size()<<"\n");
-        evolve_cells.remove(accumulated_evolve_cells);
         _checked_restriction(evolve_cells,bounding);
-        reach_cells.adjoin(found_cells);
-        ARIADNE_LOG(3,"  found "<<found_cells.size()<<" cells, of which "<<evolve_cells.size()<<" are new.\n");
+        evolve_cells.recombine();
+        evolve_cells.mince(maximum_grid_depth);
+        starting_cells = evolve_cells;
+        starting_cells.remove(current_evolve_cells);
+        starting_cells.mince(maximum_grid_depth);
+        ARIADNE_LOG(3,"  evolved to "<<evolve_cells.size()<<" cells, of which "<<starting_cells.size()<<" are new.\n");
         // ARIADNE_LOG(5,"bounded_new_size="<<found_cells.size()<<"\n");
+        ++step;
     }
     _checked_restriction(reach_cells,bounding);
+    return evolve_cells;
     return reach_cells;
 }
 

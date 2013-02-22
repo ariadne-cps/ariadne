@@ -107,7 +107,7 @@ int main(int argc, const char* argv[])
     // Create the clock subsystem
     HybridAutomaton clock;
     clock.new_mode( (dot(C)=1.0) );
-    clock.new_transition( midnight, next(C)=0, C>=1, urgent );
+    clock.new_transition( midnight, next(C)=0.0, C>=1.0, urgent );
 
     CompositeHybridAutomaton heating_system((clock,heater));
     cout << "heating_system=" << heating_system << "\n" << "\n";
@@ -133,14 +133,15 @@ int main(int argc, const char* argv[])
 
     evolver.configuration().set_enable_reconditioning(true);
     evolver.configuration().set_enable_subdivisions(true);
-    
+
 
 
     // Compute the system evolution
 
     // Set the initial set.
-    Real r=1.0/32; Real Tinit=17.0-0.0/16; // Tinit=16.0;
-    HybridExpressionSet initial_set(heating|off, (Tinit<=T<=Tinit+r,0<=C<=0+r) );
+    double r=1.0/1024; double Ti=17.0; 
+    Real Tinitmin=Ti+r; Real Tinitmax=Ti+3*r; Real Cinitmin=0+r; Real Cinitmax=0+3*r; // Tinit=16.0;
+    HybridExpressionSet initial_set(heating|off, (Tinitmin<=T<=Tinitmax,Cinitmin<=C<=Cinitmax) );
     cout << "initial_set=" << initial_set << endl;
     // Compute the initial set as a validated enclosure.
     HybridEnclosure initial_enclosure = evolver.enclosure(initial_set);
@@ -155,6 +156,8 @@ int main(int argc, const char* argv[])
     Orbit<HybridEnclosure> series_orbit = evolver.orbit(initial_enclosure,evolution_time,UPPER_SEMANTICS);
     cout << "    done." << endl;
 
+    cout << "\nComputed " << series_orbit.reach().size() << " reach enclosures and " << series_orbit.final().size() << " final enclosures.\n";
+    
     DRAWING_METHOD = AFFINE_DRAW;
     DRAWING_ACCURACY += 1;
 
@@ -162,13 +165,29 @@ int main(int argc, const char* argv[])
     Colour midnight_guard_colour(0.75,0.75,0.75);
     Colour picard_orbit_colour(0.0,1.0,1.0);
     Colour series_orbit_colour(0.0,0.0,1.0);
-    
+
     Real tmax=evolution_time.continuous_time();
     double dTmin=Tmin.value().get_d(); double dTmax=Tmax.value().get_d();
     HybridBox guard(heating|off,(Ton_lower.value()<=T<=Ton_upper.value(),0<=C<=1,0<=t<=tmax));
     HybridBox midnight_guard(heating|off,(dTmin<=T<=dTmax,0.0<=C<=1.0,1.0<=t<=2.0));
     cout << "\nPlotting time trace of orbit... " << flush;
     plot("heating-orbit-time.png",Axes2d(0.0<=t<=tmax,dTmin<=T<=dTmax), midnight_guard_colour, midnight_guard, guard_colour, guard, series_orbit_colour, series_orbit);
+    cout << "done." << endl << endl;
+
+    HybridSet init_set(initial_set,RealSpace({C,T}));
+    HybridReachabilityAnalyser analyser(heating_system,GeneralHybridEvolverFactory());
+    analyser.configuration().set_lock_to_grid_time(1+1.0/1024);
+    analyser.configuration().set_lock_to_grid_steps(1);
+    std::cerr<<"max grid depth="<<analyser.configuration().maximum_grid_depth();
+    std::cerr<<"transient_time="<<analyser.configuration().transient_time();
+    std::cerr<<"transient_steps="<<analyser.configuration().transient_steps();
+    analyser.configuration().set_maximum_grid_depth(4);
+    analyser.verbosity=5;
+    cout << "\nComputing chain-reachable set... \n" << flush;
+    HybridGridTreeSet chain_reach_set = analyser.outer_chain_reach(init_set);
+    cout << "done." << endl << endl;
+    cout << "\nPlotting chain-reachable set... " << flush;
+    plot("heating-chainreach-time.png",Axes2d(0.0<=C<=1.0,dTmin<=T<=dTmax), guard_colour, guard, series_orbit_colour, chain_reach_set);
     cout << "done." << endl << endl;
 
 }

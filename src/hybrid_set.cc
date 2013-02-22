@@ -328,6 +328,14 @@ HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet(const DiscreteLoc
     _spaces.insert(q,spc);
 }
 
+HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet(const HybridRealExpressionBoundedConstraintSet& hes, const RealSpace& spc)
+    : _sets(), _spaces()
+{
+    std::cerr<<"spc="<<spc<<"\nloc="<<hes.location()<<"\nvars="<<hes.variables()<<"\n";
+    _sets.insert(hes.location(),hes.continuous_state_set(spc));
+    _spaces.insert(hes.location(),spc);
+}
+
 HybridRealBoundedConstraintSet* HybridRealBoundedConstraintSet::clone() const {
     return new HybridRealBoundedConstraintSet(*this);
 }

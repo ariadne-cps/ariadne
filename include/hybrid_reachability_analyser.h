@@ -171,8 +171,9 @@ class HybridReachabilityAnalyser
             const int accuracy, const HybridEvolverInterface& evolver) const;
     HybridGridTreeSet _upper_evolve(const HybridGridTreeSet& set, const HybridTime& time,
             const int accuracy, const HybridEvolverInterface& evolver) const;
-    Pair<HybridGridTreeSet,HybridGridTreeSet> _upper_reach_evolve(const HybridGridTreeSet& set, const HybridTime& time,
-            const int accuracy, const HybridEvolverInterface& evolver) const;
+    void _adjoin_upper_reach_evolve(HybridGridTreeSet& reach_set, HybridGridTreeSet& final_set,
+                                    const HybridGridTreeSet& set, const HybridTime& time,
+                                    const int accuracy, const HybridEvolverInterface& evolver) const;
     //! \brief Perform restriction on \a set, using the overspill policy
     void _checked_restriction(HybridGridTreeSet& set, const HybridGridTreeSet& bounding) const;
 };

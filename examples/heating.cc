@@ -107,8 +107,7 @@ int main(int argc, const char* argv[])
     // Create the clock subsystem
     HybridAutomaton clock;
     clock.new_mode( (dot(C)=1.0) );
-    double e=1.0/1024;
-    clock.new_transition( midnight, next(C)=0.0+e, C>=1.0+e, urgent );
+    clock.new_transition( midnight, next(C)=0.0, C>=1.0, urgent );
 
     CompositeHybridAutomaton heating_system((clock,heater));
     cout << "heating_system=" << heating_system << "\n" << "\n";

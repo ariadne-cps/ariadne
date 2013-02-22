@@ -58,10 +58,11 @@ inline OutputStream& operator<<(OutputStream& os, const HybridScalingInterface& 
 //! \brief A class which defines the state space grid to use in location \a loc given the continuous state variables \a spc.
 class HybridScaling
 {
-    std::shared_ptr<const HybridScalingInterface> _ptr;
+    std::shared_ptr<HybridScalingInterface> _ptr;
   public:
     HybridScaling(const HybridScalingInterface& ref) : _ptr(ref.clone()) { }
     operator const HybridScalingInterface& () const { return *this->_ptr; }
+    operator HybridScalingInterface& () { return *this->_ptr; }
     Float scaling(const DiscreteLocation& loc, const RealVariable& var) const { return this->_ptr->scaling(loc,var); }
   public:
     HybridScaling(const Map<Identifier,Float>& scalings);

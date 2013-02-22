@@ -309,8 +309,12 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
     void set_bounding_domain_ptr(const std::shared_ptr<HybridBoxes> value);
 
     const HybridGrid& grid() const { return *_grid_ptr; }
+    HybridGrid& grid() { return *_grid_ptr; }
     //! \brief Check the consistency in respect to the system space, then set the grid.
     void set_grid(const std::shared_ptr<HybridGrid> value_ptr);
+
+    void set_scaling(const RealVariable& v, Float s) {
+        dynamic_cast<SimpleHybridScaling&>(this->grid().scalings()).set_scaling(v,s); }
 
     const ChainOverspillPolicy& outer_overspill_policy() const { return _outer_overspill_policy; }
     void set_outer_overspill_policy(const ChainOverspillPolicy value) { _outer_overspill_policy = value; }

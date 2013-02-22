@@ -107,7 +107,8 @@ int main(int argc, const char* argv[])
     // Create the clock subsystem
     HybridAutomaton clock;
     clock.new_mode( (dot(C)=1.0) );
-    clock.new_transition( midnight, next(C)=0.0, C>=1.0, urgent );
+    double e=1.0/1024;
+    clock.new_transition( midnight, next(C)=0.0+e, C>=1.0+e, urgent );
 
     CompositeHybridAutomaton heating_system((clock,heater));
     cout << "heating_system=" << heating_system << "\n" << "\n";
@@ -165,29 +166,39 @@ int main(int argc, const char* argv[])
     Colour midnight_guard_colour(0.75,0.75,0.75);
     Colour picard_orbit_colour(0.0,1.0,1.0);
     Colour series_orbit_colour(0.0,0.0,1.0);
+    Colour chain_reach_on_colour(0.75,0.0,0.75);
+    Colour chain_reach_off_colour(0.0,0.0,1.0);
 
     Real tmax=evolution_time.continuous_time();
     double dTmin=Tmin.value().get_d(); double dTmax=Tmax.value().get_d();
     HybridBox guard(heating|off,(Ton_lower.value()<=T<=Ton_upper.value(),0<=C<=1,0<=t<=tmax));
     HybridBox midnight_guard(heating|off,(dTmin<=T<=dTmax,0.0<=C<=1.0,1.0<=t<=2.0));
     cout << "\nPlotting time trace of orbit... " << flush;
-    plot("heating-orbit-time.png",Axes2d(0.0<=t<=tmax,dTmin<=T<=dTmax), midnight_guard_colour, midnight_guard, guard_colour, guard, series_orbit_colour, series_orbit);
+//    plot("heating-orbit-time.png",Axes2d(0.0<=t<=tmax,dTmin<=T<=dTmax), midnight_guard_colour, midnight_guard, guard_colour, guard, series_orbit_colour, series_orbit);
     cout << "done." << endl << endl;
 
     HybridSet init_set(initial_set,RealSpace({C,T}));
     HybridReachabilityAnalyser analyser(heating_system,evolver);
     analyser.configuration().set_lock_to_grid_time(1+1.0/1024);
     analyser.configuration().set_lock_to_grid_steps(1);
+    analyser.configuration().set_scaling(T,8.0);
+    analyser.configuration().set_scaling(C,1.0);
     std::cerr<<"max grid depth="<<analyser.configuration().maximum_grid_depth();
     std::cerr<<"transient_time="<<analyser.configuration().transient_time();
     std::cerr<<"transient_steps="<<analyser.configuration().transient_steps();
-    analyser.configuration().set_maximum_grid_depth(4);
+    analyser.configuration().set_maximum_grid_depth(5);
     analyser.verbosity=5;
     cout << "\nComputing chain-reachable set... \n" << flush;
     HybridGridTreeSet chain_reach_set = analyser.outer_chain_reach(init_set);
     cout << "done." << endl << endl;
     cout << "\nPlotting chain-reachable set... " << flush;
-    plot("heating-chainreach-time.png",Axes2d(0.0<=C<=1.0,dTmin<=T<=dTmax), guard_colour, guard, series_orbit_colour, chain_reach_set);
+    HybridGridTreeSet chain_reach_set_off=chain_reach_set;
+    chain_reach_set_off[heating|on].clear();
+    HybridGridTreeSet chain_reach_set_on=chain_reach_set;
+    chain_reach_set_on[heating|off].clear();
+    plot("heating-chainreach.png",Axes2d(0.0<=C<=1.0,dTmin<=T<=dTmax), guard_colour, guard, chain_reach_off_colour, chain_reach_set_off, chain_reach_on_colour, chain_reach_set_on);
+    plot("heating-chainreach-off.png",Axes2d(0.0<=C<=1.0,dTmin<=T<=dTmax), guard_colour, guard, chain_reach_off_colour, chain_reach_set_off);
+    plot("heating-chainreach-on.png",Axes2d(0.0<=C<=1.0,dTmin<=T<=dTmax), guard_colour, guard, chain_reach_on_colour, chain_reach_set_on);
     cout << "done." << endl << endl;
 
 }

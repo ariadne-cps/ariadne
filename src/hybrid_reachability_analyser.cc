@@ -586,8 +586,7 @@ outer_chain_reach(
     HybridGridTreeSet current_evolve_cells(grid);
     
     
-    int step=0; int MAX_STEPS=1024;
-    while(!starting_cells.empty() && step<MAX_STEPS) {
+    while(!starting_cells.empty()) {
         current_evolve_cells = evolve_cells;
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,starting_cells,
                                          hybrid_lock_to_grid_time,maximum_grid_depth,*_evolver);
@@ -601,10 +600,8 @@ outer_chain_reach(
         starting_cells.mince(maximum_grid_depth);
         ARIADNE_LOG(3,"  evolved to "<<evolve_cells.size()<<" cells, of which "<<starting_cells.size()<<" are new.\n");
         // ARIADNE_LOG(5,"bounded_new_size="<<found_cells.size()<<"\n");
-        ++step;
     }
     _checked_restriction(reach_cells,bounding);
-    return evolve_cells;
     return reach_cells;
 }
 

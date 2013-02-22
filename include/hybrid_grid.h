@@ -59,9 +59,11 @@ class HybridGrid
     Grid operator[](const DiscreteLocation& loc) const;
     //! The underlying hybrid space.
     const HybridSpace& space() const { return this->_space; }
-    //! The underlying hybrid space.
+    //! The underlying real space in location \a loc.
     RealSpace space(const DiscreteLocation& loc) const { return this->_space[loc]; }
-    //! The underlying hybrid space.
+    //! The variable scalings used.
+    HybridScalingInterface& scalings() { return this->_scaling; }
+    //! The grid in location \a loc.
     Grid grid(const DiscreteLocation& loc) const { return this->operator[](loc); }
   public:
     //! The grid corresponding to unit resolution on each dimension.

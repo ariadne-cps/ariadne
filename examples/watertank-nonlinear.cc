@@ -246,7 +246,7 @@ int main()
     plot("watertank-nonlinear-reach", height_aperture_axes, Colour(0.0,0.5,1.0), hgts);
 
     /// Create a ReachabilityAnalyser object
-    HybridReachabilityAnalyser analyser(watertank_system,GeneralHybridEvolverFactory());
+    HybridReachabilityAnalyser analyser(watertank_system,GeneralHybridEvolver(watertank_system));
     analyser.configuration().set_lock_to_grid_time(32.0);
     analyser.verbosity=5;
     std::cout <<  analyser.configuration() << std::endl;

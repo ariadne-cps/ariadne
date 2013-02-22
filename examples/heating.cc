@@ -175,7 +175,7 @@ int main(int argc, const char* argv[])
     cout << "done." << endl << endl;
 
     HybridSet init_set(initial_set,RealSpace({C,T}));
-    HybridReachabilityAnalyser analyser(heating_system,GeneralHybridEvolverFactory());
+    HybridReachabilityAnalyser analyser(heating_system,evolver);
     analyser.configuration().set_lock_to_grid_time(1+1.0/1024);
     analyser.configuration().set_lock_to_grid_steps(1);
     std::cerr<<"max grid depth="<<analyser.configuration().maximum_grid_depth();

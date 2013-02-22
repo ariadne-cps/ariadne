@@ -80,7 +80,7 @@ class HybridReachabilityAnalyser
     typedef HybridGridTreeSet SetApproximationType;
   private:
     std::shared_ptr< SystemType > _system;
-    std::shared_ptr< HybridEvolverFactoryInterface > _evolver_factory;
+    std::shared_ptr< HybridEvolverInterface > _evolver;
     std::shared_ptr< ConfigurationType > _configuration;
   public:
     //@{
@@ -91,7 +91,7 @@ class HybridReachabilityAnalyser
     /*! \brief Construct from an evolver. */
     HybridReachabilityAnalyser(
             const SystemType& system,
-            const HybridEvolverFactoryInterface& evolver_factory);
+            const HybridEvolverInterface& evolver);
 
     /*! \brief Make a dynamically-allocated copy. */
     virtual HybridReachabilityAnalyser* clone() const;

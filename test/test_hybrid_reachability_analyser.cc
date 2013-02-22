@@ -105,9 +105,9 @@ class TestHybridReachabilityAnalyser
     static HybridReachabilityAnalyser build_analyser(const HybridAutomatonInterface& system)
     {
         TaylorFunctionFactory function_factory(ThresholdSweeper(1e-8));
-        GeneralHybridEvolverFactory evolver_factory(function_factory);
+        GeneralHybridEvolver evolver(system,function_factory);
 
-        HybridReachabilityAnalyser analyser(system,evolver_factory);
+        HybridReachabilityAnalyser analyser(system,evolver);
         analyser.configuration().set_maximum_grid_depth(4);
         analyser.configuration().set_lock_to_grid_time(1.0);
         cout << "Done building analyser\n";

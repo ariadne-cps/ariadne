@@ -16,7 +16,7 @@ int test_taylor_series() {
     std::cout << "f2="<<f2<<"\n";
 
     const ExactFloat c1=3.0;
-    const ExactFloat c2=ExactFloat(1.0/3.0);
+    const Interval c2=Interval(1.0)/Interval(3.0);
     C1TaylorSeries f1pc1=f1; f1pc1+=c1;
     std::cout << "f1pc1="<<f1pc1<<"\n";
     C1TaylorSeries f1tc2=f1; f1tc2*=c2;
@@ -29,6 +29,10 @@ int test_taylor_series() {
     std::cout << "f1tf2="<<f1tf2<<"\n";
     std::cout << "\n\n";
     //std::cout << "f2*f2="<<f2*f2<<"\n";
+
+    Interval x=2.0;
+    std::cout << "f1(x)="<<evaluate(f1,x)<<"\n";
+   
 }
 
 int test_taylor_function() {
@@ -59,6 +63,17 @@ int test_taylor_function() {
     std::cout << "f1tf2="<<f1tf2<<"\n";
     std::cout << "\n\n";
     //std::cout << "f2*f2="<<f2*f2<<"\n";
+
+    Vector<Interval> x={2,3};
+    std::cout << "x="<<x<<"\n";
+    std::cout << "f1(x)="<<evaluate(f1,x)<<"\n";
+
+    C1TaylorSeries s;
+    s._coefficients={1.,1./2,1./3,1./4};
+    std::cout << "s="<<s<<"\n";
+    std::cout << "f="<<f1<<"\n";
+    std::cout << "compose(s,f)="<<compose(s,f1)<<"\n";
+    compose(f1,{f1,f2});
 }
 
 

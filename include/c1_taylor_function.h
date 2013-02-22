@@ -67,6 +67,7 @@ class C1TaylorSeries
   private:
     C1TaylorSeries(Nat d);
   public:
+    C1TaylorSeries();
     static C1TaylorSeries constant(ExactFloat);
     static C1TaylorSeries coordinate();
   public:
@@ -74,11 +75,11 @@ class C1TaylorSeries
     Nat degree() const;
     Void sweep(Float threshold);
   public:
-    friend C1TaylorSeries& operator+=(C1TaylorSeries&, ExactFloat);
-    friend C1TaylorSeries& operator*=(C1TaylorSeries&, ExactFloat);
+    friend C1TaylorSeries& operator+=(C1TaylorSeries&, Interval);
+    friend C1TaylorSeries& operator*=(C1TaylorSeries&, Interval);
     friend C1TaylorSeries operator+(C1TaylorSeries, C1TaylorSeries);
     friend C1TaylorSeries operator*(C1TaylorSeries, C1TaylorSeries);
-    friend Interval evaluate(C1TaylorSeries, ExactFloat);
+    friend Interval evaluate(C1TaylorSeries, Interval);
     friend C1TaylorSeries compose(C1TaylorSeries, C1TaylorSeries);
     friend OutputStream& operator<< (OutputStream& os, const C1TaylorSeries& f);
 };
@@ -86,12 +87,15 @@ class C1TaylorSeries
 class C1TaylorFunction
 {
   public:
+    typedef Interval NumericType;
+  public:
     Expansion<Float> _expansion;
     Float _zero_error;
     Float _uniform_error;
     Array<Float> _derivative_errors;
   private:
   public:
+    C1TaylorFunction() { };
     C1TaylorFunction(Nat as);
   public:
     static C1TaylorFunction constant(Nat as, ExactFloat c);
@@ -100,13 +104,14 @@ class C1TaylorFunction
     Vector<Interval> domain() const;
     Nat argument_size() const;
     Void sweep(Float threshold);
+    C1TaylorFunction& operator=(Interval c);
     Void clear();
   public:
     friend C1TaylorFunction& operator+=(C1TaylorFunction& f, ExactFloat c);
     friend C1TaylorFunction& operator*=(C1TaylorFunction& f, ExactFloat c);
     friend C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2);
     friend C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2);
-    friend Interval evaluate(C1TaylorFunction f, Vector<ExactFloat> x);
+    friend Interval evaluate(C1TaylorFunction f, Vector<Interval> x);
     friend C1TaylorFunction compose(C1TaylorSeries f, C1TaylorFunction g);
     friend C1TaylorFunction compose(C1TaylorFunction f, Vector<C1TaylorFunction> g);
     friend OutputStream& operator<< (OutputStream& os, const C1TaylorFunction& f);

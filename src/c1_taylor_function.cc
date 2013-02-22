@@ -25,8 +25,8 @@
 #include <iomanip>
 
 #include "config.h"
-#include <include/container.h>
-#include <include/c1_taylor_function.h>
+#include "float.h"
+#include "rational.h"
 
 #include "macros.h"
 #include "exceptions.h"
@@ -43,6 +43,33 @@ namespace Ariadne {
 
 static const char* plusminus = u8"\u00B1";
 
+template<class X, class Y> 
+static Y polynomial_evaluate(const std::vector<X>& f, const Y& x) 
+{
+    if(f.size()>=2) {
+        Nat i=f.size()-2;
+        Y r=x*f[i+1]+f[i];
+        while(i!=0) {
+            i=i-1;
+            r=r*x;
+            r+=f[i];
+        }
+        return r;
+    } else if(f.size()==1) {
+        return x*X(0)+f[0];
+    } else {
+        return x*X(0);
+    }
+}
+    
+    
+C1TaylorSeries::C1TaylorSeries()
+    : _coefficients(1,ExactFloat(0))
+    , _zero_error(0)
+    , _uniform_error(0)
+    , _derivative_error(0)
+{
+}
 
 C1TaylorSeries::C1TaylorSeries(uint d)
     : _coefficients(d+1,ExactFloat(0))
@@ -72,36 +99,55 @@ uint C1TaylorSeries::degree() const {
     return this->_coefficients.size()-1;
 }
 
-C1TaylorSeries& operator+=(C1TaylorSeries& f, ExactFloat ec) {
+#define ARIADNE_BOUNDS_INTERVAL_SUM
+#if defined ARIADNE_MIDPOINT_INTERVAL_SUM
+C1TaylorSeries& operator+=(C1TaylorSeries& f, Interval ic) {
     set_rounding_upward();
     Float& fv=f._coefficients[0];
-    Float& fze=f._zero_error;
-    Float& fe=f._uniform_error;
-    const Float& c=ec;
+    Float c=ic.midpoint();
     set_rounding_upward();
     VOLATILE Float fvu=fv+c;
     VOLATILE Float mfvl=(-fv)-c;
-    fze+=(fvu+mfvl)/2;
-    fe+=(fvu+mfvl)/2;
+    Float e=(fvu+mfvl)/2;
+    e+=max(ic.upper()-c,c-ic.lower());
+    f._zero_error+=(fvu+mfvl)/2;
+    f._uniform_error+=(fvu+mfvl)/2;
     set_rounding_to_nearest();
     fv+=c;
     ARIADNE_ASSERT_MSG(f._zero_error>=0,"f="<<f<<" c="<<c);
     return f;
 }
 
-C1TaylorSeries& operator*=(C1TaylorSeries& f, ExactFloat ec) {
+#elif defined ARIADNE_BOUNDS_INTERVAL_SUM
+C1TaylorSeries& operator+=(C1TaylorSeries& f, Interval ic) {
     set_rounding_upward();
+    Float& fv=f._coefficients[0];
+    set_rounding_upward();
+    VOLATILE Float fvu=fv+ic.upper();
+    VOLATILE Float mfvl=(-fv)-ic.lower();
+    Float e=(fvu+mfvl)/2;
+    f._zero_error+=e;
+    f._uniform_error+=e;
+    set_rounding_to_nearest();
+    fv=(fvu-mfvl)/2;
+    return f;
+}
+#endif
+
+C1TaylorSeries& operator*=(C1TaylorSeries& f, Interval ic) {
     Float& fze=f._zero_error;
     Float& fue=f._uniform_error;
     Float& fde=f._derivative_error;
-    const Float& c=ec;
-    const Float ac=abs(c);
+    const Float c=ic.midpoint();
+    const Float ac=max(abs(ic.lower()),abs(ic.upper()));
 
     set_rounding_upward();
+    const Float rc=(ic.upper()-ic.lower())/2;
+    
     fze*=ac;
     fue*=ac;
     fde*=ac;
-
+    std::cerr<<"WARNING: operator*=(C1TaylorSeries&,Interval): Mistake in errors\n";
     {
         Float& fv=f._coefficients[0];
         VOLATILE Float fvu=fv*c;
@@ -257,7 +303,7 @@ C1TaylorSeries compose(C1TaylorSeries f, C1TaylorSeries g) {
         r=r*g;
         r+=ExactFloat(f._coefficients[i]);
     }
-
+    
     set_rounding_upward();
     r._zero_error+=f._zero_error;
     r._uniform_error+=f._uniform_error;
@@ -267,13 +313,13 @@ C1TaylorSeries compose(C1TaylorSeries f, C1TaylorSeries g) {
     return r;
 }
 
-Interval evaluate(C1TaylorSeries f, ExactFloat x) {
+Interval evaluate(C1TaylorSeries f, Interval x) {
     Nat i=f.degree();
     Interval r=ExactFloat(f._coefficients[i]);
     while (i!=0) {
         i=i-i;
-        r*=Interval(x);
-        r+=Interval(f._coefficients[i]);
+        r*=x;
+        r+=Interval(ExactFloat(f._coefficients[i]));
     }
     if(f._zero_error+Float(x)*f._derivative_error < f._uniform_error) {
         r+=Interval(-f._zero_error,+f._zero_error);
@@ -342,16 +388,29 @@ Void C1TaylorFunction::clear() {
     }
 }
 
+C1TaylorFunction& C1TaylorFunction::operator=(Interval ic) {
+    this->clear();
+    set_rounding_upward();
+    Float e=(ic.upper()-ic.lower())/2;
+    this->_zero_error=e;
+    this->_uniform_error=e;
+    set_rounding_to_nearest();
+    this->_expansion.append(MultiIndex(this->argument_size()),ic.midpoint());
+    return *this;
+}
+
 C1TaylorFunction& operator+=(C1TaylorFunction& f, ExactFloat ec) {
-    ARIADNE_ASSERT((--f._expansion.end())->key().degree()==0);
-    std::cerr<<ec<<"\n";
+    const Float& c=ec;
+    if(f._expansion.empty() || (--f._expansion.end())->key().degree()!=0) {
+        f._expansion.append(MultiIndex(f.argument_size()),c);
+        return f;
+    }
     //ARIADNE_DEBUG_ASSERT(f._expansion.back().key().degree()==0);
     set_rounding_upward();
     //Float& fv=f._expansion.back().data();
     Float& fv=(--f._expansion.end())->data();
     Float& fze=f._zero_error;
     Float& fe=f._uniform_error;
-    const Float& c=ec;
     set_rounding_upward();
     VOLATILE Float fvu=fv+c;
     VOLATILE Float mfvl=(-fv)-c;
@@ -556,6 +615,42 @@ C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2) {
         std::swap(ftp,frp);
     }
     return *frp;
+}
+
+Interval evaluate(C1TaylorFunction f, Vector<Interval> x) {
+    Interval r=horner_evaluate(reinterpret_cast<Expansion<ExactFloat>const&>(f._expansion),x);
+    r += Interval(-f._uniform_error,+f._uniform_error);
+    return r;
+}
+
+
+C1TaylorFunction compose(C1TaylorSeries f, C1TaylorFunction g) {
+    C1TaylorFunction r = g;
+    r.clear();
+   
+    Nat i=f.degree();
+    r+=ExactFloat(f._coefficients[i]);
+
+    while(i!=0) {
+        r=r*g;
+        --i;
+        r+=ExactFloat(f._coefficients[i]);
+    }
+    std::cerr<<"intermediate="<<r<<"\n";
+
+    // TODO: How do first derivatives change?
+    ARIADNE_NOT_IMPLEMENTED;
+    return r;
+}
+
+C1TaylorFunction compose(C1TaylorFunction f, Vector<C1TaylorFunction> g) {
+    C1TaylorFunction r=horner_evaluate(reinterpret_cast<Expansion<ExactFloat>const&>(f._expansion),g);
+    std::cerr<<"intermediate="<<r<<"\n";
+    r._uniform_error += f._uniform_error;
+    r._zero_error += f._zero_error;
+    // TODO: How do first derivatives change?
+    ARIADNE_NOT_IMPLEMENTED;
+    return r;
 }
 
 template<class T> struct ListForm {

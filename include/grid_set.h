@@ -526,6 +526,9 @@ class GridTreeSubset
      * WARNING: It is NOT the primary cell of the paving!
      */
     GridCell root_cell() const;
+
+    /*! \brief Returns the \a GridCell corresponding to the ROOT NODE of \em this \a GridTreeSubset
+     */
     GridCell cell() const { return this->root_cell(); };
 
     /*! \brief Computes a bounding box for a grid set. */
@@ -673,7 +676,9 @@ class GridTreeSubset
 
 };
 
-/*! \brief The GridTreeSet class that represents a set of cells with mixed integer and dyadic coordinates.
+/*! \ingroup ListSetSubModule
+ * \ingroup StorageModule
+ * \brief The %GridTreeSet class represents a set of cells with mixed integer and dyadic coordinates.
  * The cells can be enabled or disabled (on/off), indicating whether they belong to the paving or not.
  * It is possible to have cells that are neither on nor off, indicating that they have enabled and
  * disabled sub cells.
@@ -682,10 +687,12 @@ class GridTreeSubset
  * space. Subdivision of any 0-level paving is based on dyadic numbers and thus is a binary-style
  * partitioning of the cell. All cells with purely integer coordinates are enclosed in a (virtual)
  * binary tree. We illustrate this for a two dimensional case:
- *  1. Take the unit cell [0, 0]*[1, 1],
- *  2. Cells [-1, 0]*[0, 1] and [0, 0]*[1, 1] are rooted to [-1, 0]*[1, 1],
- *  3. Cells [-1, -1]*[0, 0] and [0, -1]*[1, 0] are rooted to [-1, -1]*[1, 0],
- *  4. Cells [-1, -1]*[1, 0] and [-1, 0]*[1, 1] are rooted to [-1, -1]*[1, 1].
+ *   1. Take the unit cell [0, 0]*[1, 1],
+ *   2. Cells [-1, 0]*[0, 1] and [0, 0]*[1, 1] are rooted to [-1, 0]*[1, 1],
+ *   3. Cells [-1, -1]*[0, 0] and [0, -1]*[1, 0] are rooted to [-1, -1]*[1, 0],
+ *   4. Cells [-1, -1]*[1, 0] and [-1, 0]*[1, 1] are rooted to [-1, -1]*[1, 1].
+ *
+ * \sa GridCell
  */
 class GridTreeSet
     : public virtual PavingInterface

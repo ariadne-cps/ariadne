@@ -72,7 +72,7 @@ const double nan = (1.0/0.0);
 //! Note that the value of a built-in floating-point value may differ from the mathematical value of the literal.
 //! For example, while <c>%Float(3.25)</c> is represented exactly, <c>%Float(3.3)</c> has a value of \f$3.2999999999999998224\ldots\f$.
 //! \note In the future, the construction of a \c %Float from a string literal may be supported.
-//! \sa Interval, Real
+//! \sa Interval, Real, ExactFloat
 class Float {
   public:
     double v;
@@ -388,14 +388,27 @@ inline Float rad_up(Float x, Float y) {
 
 class Interval;
 
+//! \ingroup NumericModule
+//! \related ExactFloat
+//! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
 class ExactFloat {
     Float _x;
   public:
+    //! \brief Default constructor creates the number 0 (zero).
     ExactFloat() : _x(0) { }
+    //! \brief Convert from a built-in positive integer.
+    ExactFloat(unsigned int n) : _x(n) { }
+    //! \brief Convert from a built-in integer.
     ExactFloat(int n) : _x(n) { }
+    //! \brief Explicit construction from a built-in double-precision value.
+    //! \details Tests to ensure that the number is not 'accidentally' created from a rounded version of a string literal,
+    //! by comparing the input with it's single-precision approximation.
     explicit ExactFloat(double x) : _x(x) { }
+    //! \brief Explicit construction from an approximate floating-point value.
     explicit ExactFloat(const Float& x) : _x(x) { }
+    //! \brief The approximate floating-point number with the same value.
     Float value() const { return _x; }
+    //! \brief A double-precision approximateion.
     double get_d() const { return _x.get_d(); }
 };
 inline ExactFloat operator+(const ExactFloat& x) { return ExactFloat(+x.value()); }

@@ -225,6 +225,7 @@ class HybridPoint
 
 //! \ingroup HybridSetSubModule
 //! \brief A box in a location of a hybrid space.
+//! \details Primarily used as a basic set against whabstract set properties can be tested.
 class HybridBox
     : public HybridBasicSet<Box>
     , public virtual HybridDrawableInterface
@@ -237,6 +238,7 @@ class HybridBox
     HybridBox(const DiscreteLocation& loc, const RealSpace& spc, const Box& bx)
         : HybridBasicSet<Box>(loc,spc,bx) { }
 
+   //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
     Box euclidean_set(const RealSpace& spc) const {
         if(spc==this->space()) { return this->continuous_set(); }
         else { return VariablesBox(this->space(),this->continuous_set() ).euclidean_set(spc); }
@@ -247,19 +249,26 @@ class HybridBox
 
 //! \ingroup HybridSetSubModule
 //! \brief A collection of boxes, one in each location of a hybrid space.
+//! \details Primarily used to represent bounds for a compact hybrid set.
 class HybridBoxes
     : public Map<DiscreteLocation,VariablesBox>
 {
   public:
+    //! \brief Set the continuous state set in location \a loc to \a vbx.
     void insert(const DiscreteLocation& loc, const VariablesBox& vbx) {
         this->Map<DiscreteLocation,VariablesBox>::insert(loc,vbx); }
+    //! \brief Set the continuous state set in location \a loc to box \a bx using \a spc to order the variables.
     void insert(const DiscreteLocation& loc, const RealSpace& spc, const Box& bx) {
         this->insert(loc,VariablesBox(spc,bx)); }
 
+    //! \brief The set of discrete locations in which the set is nontrivial.
     Set<DiscreteLocation> locations() const { return this->keys(); }
+    //! \brief The ordering of variables used to define the Euclidean box in location \a loc.
     RealSpace const& space(const DiscreteLocation& loc) const { return this->operator[](loc).space(); }
+    //! \brief The Euclidean box in location \a loc.
     Box const& continuous_set(const DiscreteLocation& loc) const { return this->operator[](loc).continuous_set(); }
 
+    //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
     Box euclidean_set(const DiscreteLocation& loc, const RealSpace& spc) const {
         return this->operator[](loc).euclidean_set(spc); }
 };
@@ -351,7 +360,7 @@ HybridListSetConstIterator<ES>::_increment_loc()
 template<class ES> class HybridListSet;
 template<class ES> std::ostream& operator<<(std::ostream& os, const HybridListSet<ES>& hls);
 
-//! \ingroup HybridSetModule
+//! \ingroup HybridSetSubModule
 //! A set comprising a %ListSet in each location.
 template<class ES>
 class HybridListSet

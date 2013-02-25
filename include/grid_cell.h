@@ -167,13 +167,13 @@ class GridAbstractCell {
 
     /*! \brief The primary-cell box on some grid is defined by the height above the zero level cells.
      *     The coordinates of the primary cells change uniformly. For example (3-D):
-     *       Heigth | (left bottom) | (right top)
-     *       ---------------------------------------
-     *          0   | (0, 0, 0)     | (1, 1, 1)
-     *          1   | (-1, -1, -1)  | (1, 1, 1)
-     *          2   | (-1, -1, -1)  | (3, 3, 3)
-     *          3   | (-5, -5, -5)  | (3, 3, 3)
-     *          4   | (-5, -5, -5)  | (11, 11, 11)
+     *       |Height | (left bottom) | (right top)   |
+     *       |-------|---------------|---------------|
+     *       |   0   | (0, 0, 0)     | (1, 1, 1)     |
+     *       |   1   | (-1, -1, -1)  | (1, 1, 1)     |
+     *       |   2   | (-1, -1, -1)  | (3, 3, 3)     |
+     *       |   3   | (-5, -5, -5)  | (3, 3, 3)     |
+     *       |   4   | (-5, -5, -5)  | (11, 11, 11)  |
      *     The cell size is always double the size of the previous-level cell and one
      *     of the corners stays the same as well. If Li, Ri are the left-, right-corned
      *     coordinates at livel i then we have the following recursive definition:
@@ -216,12 +216,15 @@ class GridAbstractCell {
     static Box lattice_box_to_space(const Vector<Interval> & theLatticeBox, const Grid& theGrid );
 };
 
-/*! \brief A cell of a grid paving. Note that this class represents the closed cell.
+/*! \ingroup BasicSetSubModule
+ *  \ingroup StorageModule
+ *  \brief A cell of a grid paving. Note that this class represents the closed cell.
  *  It is uniquely defined by the path from the primary cell and is exactly on cell in a grid.
  *  This is different from the GridOpenCell which is open and the path from the root cell defines
  *  its lower left sub cell wheres the complete open cell is a union of 4 cells.
  *
- * This class does not contain the tree structure, so cannot be used in cursors/iterators.
+ *  This class does not contain the tree structure, so cannot be used in cursors/iterators.
+ *  \sa GridTreeSet
  */
 class GridCell : public GridAbstractCell {
   protected:

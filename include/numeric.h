@@ -42,7 +42,8 @@ template<> inline double numeric_cast(const Real& a) { return a.get_d(); }
 template<> inline Real numeric_cast(const Float& a) { return Real(ExactFloat(a)); }
 template<> inline Real numeric_cast(const Interval& a) { return Real(a.lower().get_d(),a.upper().get_d()); }
 
-//! \ingroup NumericModule \related Float \related Interval \related Real
+//! \ingroup NumericModule
+//! \related Float \related Interval \related Real
 //! \brief Cast one %Ariadne numerical type or builtin numerical type to another.
 template<class R, class A> inline R numeric_cast(const A& a) { return R(a); }
 template<> inline int numeric_cast(const Float& a) { return int(a.get_d()); }
@@ -56,7 +57,8 @@ template<> inline float numeric_cast(const Float& a) { return a.get_d(); }
 template<> inline float numeric_cast(const Interval& a) { return a.get_d(); }
 template<> inline float numeric_cast(const Real& a) { return a.get_d(); }
 
-//! \ingroup NumericModule \related Float
+//! \ingroup NumericModule
+//! \related Float
 //! \brief Converts \a e to an object of type \a X, which may either be an
 //! \c Float or \c Interval, with the semantics that \a e denotes and error bound.
 //! Returns the float 0.0 (since floating-point computations do not keep track of errors)

@@ -231,7 +231,7 @@ void TestHybridEvolver::test_maximum_steps() const {
 
     Axes2d axes(-1.5,space[0],+2.5, -1.0,space[1],+3.0);
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-maximum_steps"),axes,
-         //guard_set_colour,RealBoundedConstraintSet(bounding_box,x0+x1/16-0.5>=0),
+         //guard_set_colour,BoundedConstraintSet(bounding_box,x0+x1/16-0.5>=0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -261,7 +261,7 @@ void TestHybridEvolver::test_urgent_event() const {
 
     Axes2d axes(-1.5,space[0],+2.5, -1.0,space[1],+3.0);
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-urgent_event"),axes,
-         //guard_set_colour,RealBoundedConstraintSet(bounding_box,x0+x1/16-0.5>=0),
+         //guard_set_colour,BoundedConstraintSet(bounding_box,x0+x1/16-0.5>=0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -317,7 +317,7 @@ void TestHybridEvolver::test_partial_event() const {
 
     Axes2d axes(-1.5,v0,+2.5, -1.0,v1,+3.0);
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-partial_event"),axes,
-         //guard_set_colour,RealBoundedConstraintSet(bounding_box,x0-x1/16-2>=0),
+         //guard_set_colour,BoundedConstraintSet(bounding_box,x0-x1/16-2>=0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -472,7 +472,7 @@ void TestHybridEvolver::test_tangency() const {
 
     Axes2d axes(-2.0,v0,+2.0, -2.0,v1,+1.0);
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-tangency"),axes,
-         //guard_set_colour,RealBoundedConstraintSet(bounding_box,x1-x0*x0>=0),
+         //guard_set_colour,BoundedConstraintSet(bounding_box,x1-x0*x0>=0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),
@@ -557,7 +557,7 @@ void TestHybridEvolver::test_unwind() const {
 
     Axes2d axes(-2.5,v0,+1.5, -0.5,v1,+2.5);
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-unwind"),axes,
-         //guard_set_colour,RealBoundedConstraintSet(bounding_box,x0-x1/16-1>=0),
+         //guard_set_colour,BoundedConstraintSet(bounding_box,x0-x1/16-1>=0),
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(),

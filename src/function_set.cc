@@ -192,13 +192,13 @@ Pair<uint,double> nonlinearity_index_and_error(const VectorTaylorFunction& funct
 }
 
 
-RealBoxSet::RealBoxSet(const IntervalVector& bx) : _ary(bx.size()) {
+BoxSet::BoxSet(const IntervalVector& bx) : _ary(bx.size()) {
     for(uint i=0; i!=bx.size(); ++i) {
-        this->_ary[i]=RealIntervalSet(ExactFloat(bx[i].lower()),ExactFloat(bx[i].upper()));
+        this->_ary[i]=IntervalSet(ExactFloat(bx[i].lower()),ExactFloat(bx[i].upper()));
     }
 }
 
-Box under_approximation(const RealBoxSet& rbx) {
+Box under_approximation(const BoxSet& rbx) {
     Box bx(rbx.size());
     for(uint i=0; i!=bx.size(); ++i) {
         bx[i]=under_approximation(rbx[i]);
@@ -206,7 +206,7 @@ Box under_approximation(const RealBoxSet& rbx) {
     return bx;
 }
 
-Box over_approximation(const RealBoxSet& rbx) {
+Box over_approximation(const BoxSet& rbx) {
     Box bx(rbx.size());
     for(uint i=0; i!=bx.size(); ++i) {
         bx[i]=over_approximation(rbx[i]);
@@ -214,7 +214,7 @@ Box over_approximation(const RealBoxSet& rbx) {
     return bx;
 }
 
-Box approximation(const RealBoxSet& rbx) {
+Box approximation(const BoxSet& rbx) {
     Box bx(rbx.size());
     for(uint i=0; i!=bx.size(); ++i) {
         bx[i]=approximation(rbx[i]);
@@ -242,15 +242,15 @@ RealVectorFunction constraint_function(uint as, const List<RealConstraint>& c) {
     return f;
 }
 
-RealBoxSet constraint_bounds(const List<RealConstraint>& c) {
-    RealBoxSet b(c.size());
+BoxSet constraint_bounds(const List<RealConstraint>& c) {
+    BoxSet b(c.size());
     for(uint i=0; i!=c.size(); ++i) {
-        b[i]=RealIntervalSet(c[i].lower_bound(),c[i].upper_bound());
+        b[i]=IntervalSet(c[i].lower_bound(),c[i].upper_bound());
     }
     return b;
 }
 
-List<RealConstraint> constraints(const RealVectorFunction& f, const RealBoxSet& b) {
+List<RealConstraint> constraints(const RealVectorFunction& f, const BoxSet& b) {
     ARIADNE_ASSERT(f.result_size()==b.size());
     List<RealConstraint> c; c.reserve(b.size());
     for(uint i=0; i!=b.size(); ++i) {
@@ -262,57 +262,57 @@ List<RealConstraint> constraints(const RealVectorFunction& f, const RealBoxSet& 
 } //namespace
 
 
-RealConstraintSet::RealConstraintSet(const RealVectorFunction& f, const RealBoxSet& b)
+ConstraintSet::ConstraintSet(const RealVectorFunction& f, const BoxSet& b)
     : _dimension(f.argument_size()), _constraints()
 {
     this->_constraints=::constraints(f,b);
 }
 
-RealConstraintSet::RealConstraintSet(const List<RealConstraint>& c)
+ConstraintSet::ConstraintSet(const List<RealConstraint>& c)
     : _dimension(argument_size(c)), _constraints(c)
 {
 }
 
-RealVectorFunction const RealConstraintSet::constraint_function() const
+RealVectorFunction const ConstraintSet::constraint_function() const
 {
     return ::constraint_function(this->dimension(),this->constraints());
 }
 
-RealBoxSet const RealConstraintSet::constraint_bounds() const
+BoxSet const ConstraintSet::constraint_bounds() const
 {
     return ::constraint_bounds(this->constraints());
 }
 
-RealConstraintSet*
-RealConstraintSet::clone() const
+ConstraintSet*
+ConstraintSet::clone() const
 {
-    return new RealConstraintSet(*this);
+    return new ConstraintSet(*this);
 }
 
 
 uint
-RealConstraintSet::dimension() const
+ConstraintSet::dimension() const
 {
     return this->_dimension;
 }
 
 
 tribool
-RealConstraintSet::separated(const Box& bx) const
+ConstraintSet::separated(const Box& bx) const
 {
     Box codomain=over_approximation(this->codomain());
     return IntervalConstrainedImageSet(bx,this->constraint_function()).separated(codomain) || indeterminate;
 }
 
 tribool
-RealConstraintSet::overlaps(const Box& bx) const
+ConstraintSet::overlaps(const Box& bx) const
 {
     Box codomain=under_approximation(this->codomain());
     return IntervalConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain) || indeterminate;
 }
 
 tribool
-RealConstraintSet::covers(const Box& bx) const
+ConstraintSet::covers(const Box& bx) const
 {
     Box codomain=under_approximation(this->codomain());
     return Box(this->constraint_function().evaluate(bx)).inside(codomain) || indeterminate;
@@ -320,57 +320,57 @@ RealConstraintSet::covers(const Box& bx) const
 
 
 std::ostream&
-RealConstraintSet::write(std::ostream& os) const
+ConstraintSet::write(std::ostream& os) const
 {
-    return os << "RealConstraintSet( constraints=" << this->constraints() << " )";
+    return os << "ConstraintSet( constraints=" << this->constraints() << " )";
 }
 
 
 
 
-RealBoundedConstraintSet::RealBoundedConstraintSet(const RealBoxSet& bx)
+BoundedConstraintSet::BoundedConstraintSet(const BoxSet& bx)
     : _domain(bx), _constraints()
 {
 }
 
-RealBoundedConstraintSet::RealBoundedConstraintSet(const RealBoxSet& d, const RealVectorFunction& f, const RealBoxSet& b)
+BoundedConstraintSet::BoundedConstraintSet(const BoxSet& d, const RealVectorFunction& f, const BoxSet& b)
     : _domain(d), _constraints(::constraints(f,b))
 {
     ARIADNE_ASSERT(b.size()==f.result_size());
     ARIADNE_ASSERT(d.size()==f.argument_size());
 }
 
-RealBoundedConstraintSet::RealBoundedConstraintSet(const RealBoxSet& d, const List<RealConstraint>& c)
+BoundedConstraintSet::BoundedConstraintSet(const BoxSet& d, const List<RealConstraint>& c)
     : _domain(d), _constraints(c)
 {
 }
 
-RealVectorFunction const RealBoundedConstraintSet::constraint_function() const
+RealVectorFunction const BoundedConstraintSet::constraint_function() const
 {
     return ::constraint_function(this->dimension(),this->constraints());
 }
 
-RealBoxSet const RealBoundedConstraintSet::constraint_bounds() const
+BoxSet const BoundedConstraintSet::constraint_bounds() const
 {
     return ::constraint_bounds(this->constraints());
 }
 
-RealBoundedConstraintSet*
-RealBoundedConstraintSet::clone() const
+BoundedConstraintSet*
+BoundedConstraintSet::clone() const
 {
-    return new RealBoundedConstraintSet(*this);
+    return new BoundedConstraintSet(*this);
 }
 
 
 uint
-RealBoundedConstraintSet::dimension() const
+BoundedConstraintSet::dimension() const
 {
     return this->_domain.size();
 }
 
 
 tribool
-RealBoundedConstraintSet::separated(const Box& bx) const
+BoundedConstraintSet::separated(const Box& bx) const
 {
     Box domain=over_approximation(this->domain());
     if(Ariadne::disjoint(domain,bx)) { return true; }
@@ -380,7 +380,7 @@ RealBoundedConstraintSet::separated(const Box& bx) const
 
 
 tribool
-RealBoundedConstraintSet::overlaps(const Box& bx) const
+BoundedConstraintSet::overlaps(const Box& bx) const
 {
     if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
     Box domain=under_approximation(this->domain());
@@ -390,7 +390,7 @@ RealBoundedConstraintSet::overlaps(const Box& bx) const
 
 
 tribool
-RealBoundedConstraintSet::covers(const Box& bx) const
+BoundedConstraintSet::covers(const Box& bx) const
 {
     Box domain=under_approximation(this->domain());
     Box codomain=under_approximation(this->codomain());
@@ -399,13 +399,13 @@ RealBoundedConstraintSet::covers(const Box& bx) const
 }
 
 tribool
-RealBoundedConstraintSet::inside(const Box& bx) const
+BoundedConstraintSet::inside(const Box& bx) const
 {
     return Ariadne::inside(over_approximation(this->domain()),bx) || indeterminate;
 }
 
 Box
-RealBoundedConstraintSet::bounding_box() const
+BoundedConstraintSet::bounding_box() const
 {
     Box result=over_approximation(this->_domain);
     result.widen();
@@ -414,22 +414,22 @@ RealBoundedConstraintSet::bounding_box() const
 
 
 std::ostream&
-RealBoundedConstraintSet::write(std::ostream& os) const
+BoundedConstraintSet::write(std::ostream& os) const
 {
-    return os << "RealBoundedConstraintSet( domain=" << this->domain() << ", constraints=" << this->constraints() << ")";
+    return os << "BoundedConstraintSet( domain=" << this->domain() << ", constraints=" << this->constraints() << ")";
 }
 
 void
-RealBoundedConstraintSet::draw(CanvasInterface& c, const Projection2d& p) const
+BoundedConstraintSet::draw(CanvasInterface& c, const Projection2d& p) const
 {
     return RealConstrainedImageSet(*this).draw(c,p);
 }
 
 
-RealBoundedConstraintSet
-intersection(const RealConstraintSet& cs,const RealBoxSet& bx)
+BoundedConstraintSet
+intersection(const ConstraintSet& cs,const BoxSet& bx)
 {
-    return RealBoundedConstraintSet(bx,cs.constraints());
+    return BoundedConstraintSet(bx,cs.constraints());
 }
 
 
@@ -439,7 +439,7 @@ intersection(const RealConstraintSet& cs,const RealBoxSet& bx)
 
 
 
-RealConstrainedImageSet::RealConstrainedImageSet(const RealBoundedConstraintSet& set)
+RealConstrainedImageSet::RealConstrainedImageSet(const BoundedConstraintSet& set)
     : _domain(over_approximation(set.domain())), _function(RealVectorFunction::identity(set.dimension()))
 {
     for(uint i=0; i!=set.number_of_constraints(); ++i) {
@@ -457,11 +457,11 @@ const RealVectorFunction RealConstrainedImageSet::constraint_function() const
     return result;
 }
 
-const RealBoxSet RealConstrainedImageSet::constraint_bounds() const
+const BoxSet RealConstrainedImageSet::constraint_bounds() const
 {
-    RealBoxSet result(this->number_of_constraints());
+    BoxSet result(this->number_of_constraints());
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
-        result[i]=RealIntervalSet(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
+        result[i]=IntervalSet(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
     }
     return result;
 }
@@ -504,7 +504,7 @@ tribool RealConstrainedImageSet::satisfies(const RealConstraint& nc) const
     }
 
     ConstraintSolver solver;
-    const RealBoxSet& domain=this->_domain;
+    const BoxSet& domain=this->_domain;
     List<RealConstraint> all_constraints=this->_constraints;
     RealScalarFunction composed_function = compose(nc.function(),this->_function);
     const Real& lower_bound = nc.lower_bound();
@@ -559,11 +559,11 @@ RealConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, 
     const Box domain=over_approximation(this->domain());
     const RealVectorFunction& space_function=this->function();
     RealVectorFunction constraint_function(this->number_of_constraints(),domain.size());
-    RealBoxSet codomain(this->number_of_constraints());
+    BoxSet codomain(this->number_of_constraints());
 
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
         constraint_function.set(i,this->_constraints[i].function());
-        codomain[i]=RealIntervalSet(this->_constraints[i].lower_bound(),this->_constraints[i].upper_bound());
+        codomain[i]=IntervalSet(this->_constraints[i].lower_bound(),this->_constraints[i].upper_bound());
     }
     Box constraint_bounds=over_approximation(codomain);
 
@@ -601,17 +601,17 @@ RealConstrainedImageSet::split() const
 Pair<RealConstrainedImageSet,RealConstrainedImageSet>
 RealConstrainedImageSet::split(uint j) const
 {
-    RealIntervalSet interval = this->domain()[j];
+    IntervalSet interval = this->domain()[j];
     Real midpoint = interval.midpoint();
-    Pair<RealBoxSet,RealBoxSet> subdomains(this->domain(),this->domain());
-    subdomains.first[j]=RealIntervalSet(interval.lower(),midpoint);
-    subdomains.second[j]=RealIntervalSet(midpoint,interval.upper());
+    Pair<BoxSet,BoxSet> subdomains(this->domain(),this->domain());
+    subdomains.first[j]=IntervalSet(interval.lower(),midpoint);
+    subdomains.second[j]=IntervalSet(midpoint,interval.upper());
     return make_pair(RealConstrainedImageSet(subdomains.first,this->_function,this->_constraints),
                      RealConstrainedImageSet(subdomains.second,this->_function,this->_constraints));
 }
 
 
-RealConstrainedImageSet image(const RealBoundedConstraintSet& set, const RealVectorFunction& function) {
+RealConstrainedImageSet image(const BoundedConstraintSet& set, const RealVectorFunction& function) {
     ARIADNE_ASSERT(set.dimension()==function.argument_size());
     RealConstrainedImageSet result(set.domain(),function);
     for(uint i=0; i!=set.number_of_constraints(); ++i) {

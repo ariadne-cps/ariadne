@@ -91,13 +91,13 @@ HybridEnclosure::HybridEnclosure()
 {
 }
 
-HybridEnclosure::HybridEnclosure(const HybridRealBoundedConstraintSet& hybrid_set,
+HybridEnclosure::HybridEnclosure(const HybridBoundedConstraintSet& hybrid_set,
                                  const RealSpace& space,
                                  const IntervalFunctionModelFactoryInterface& factory)
     : _location(hybrid_set.location()), _events(), _space(space.variable_names()), _set(),
       _variables(space.dimension(),INITIAL)
 {
-    RealBoundedConstraintSet euclidean_set=hybrid_set.euclidean_set(this->_location,space);
+    BoundedConstraintSet euclidean_set=hybrid_set.euclidean_set(this->_location,space);
     this->_set=Enclosure(euclidean_set,factory);
 }
 

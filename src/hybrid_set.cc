@@ -175,10 +175,10 @@ operator<<(std::ostream& os, const Orbit< HybridEnclosure >& orb)
 
 
 
-Map<RealVariable,RealIntervalSet> make_map(const List<RealVariableInterval>& b) {
-    Map<RealVariable,RealIntervalSet> res;
+Map<RealVariable,IntervalSet> make_map(const List<RealVariableInterval>& b) {
+    Map<RealVariable,IntervalSet> res;
     for(uint i=0; i!=b.size(); ++i) {
-        res.insert(b[i].variable(),RealIntervalSet(b[i].lower(),b[i].upper()));
+        res.insert(b[i].variable(),IntervalSet(b[i].lower(),b[i].upper()));
     }
     return res;
 }
@@ -249,37 +249,37 @@ void HybridGridTreeSet::draw(CanvasInterface& canvas, const Set<DiscreteLocation
 
 
 
-HybridRealConstraintSet::HybridRealConstraintSet()
+HybridConstraintSet::HybridConstraintSet()
     : _sets()
 {
 }
 
-HybridRealConstraintSet::HybridRealConstraintSet(const DiscreteLocation& loc,
+HybridConstraintSet::HybridConstraintSet(const DiscreteLocation& loc,
                                                  const List<ContinuousPredicate>& cnstr)
     : _sets()
 {
     _sets.insert(loc,RealExpressionConstraintSet(cnstr));
 }
 
-HybridRealConstraintSet* HybridRealConstraintSet::clone() const {
-    return new HybridRealConstraintSet(*this);
+HybridConstraintSet* HybridConstraintSet::clone() const {
+    return new HybridConstraintSet(*this);
 }
 
-Set<RealVariable> HybridRealConstraintSet::variables(DiscreteLocation loc) const {
+Set<RealVariable> HybridConstraintSet::variables(DiscreteLocation loc) const {
     ARIADNE_ASSERT(this->_sets.has_key(loc));
     return _sets[loc].variables();
 }
 
-RealConstraintSet const HybridRealConstraintSet::euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+ConstraintSet const HybridConstraintSet::euclidean_set(DiscreteLocation loc, RealSpace spc) const {
     ARIADNE_ASSERT(this->_sets.has_key(loc));
-    return RealConstraintSet(this->_sets[loc].euclidean_set(spc));
+    return ConstraintSet(this->_sets[loc].euclidean_set(spc));
 }
 
-RegularSetInterface* HybridRealConstraintSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
-    return new RealConstraintSet(this->euclidean_set(loc,spc));
+RegularSetInterface* HybridConstraintSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+    return new ConstraintSet(this->euclidean_set(loc,spc));
 }
 
-tribool HybridRealConstraintSet::overlaps(const HybridBox& bx) const {
+tribool HybridConstraintSet::overlaps(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).overlaps(bx.continuous_set());
     } else {
@@ -287,7 +287,7 @@ tribool HybridRealConstraintSet::overlaps(const HybridBox& bx) const {
     }
 }
 
-tribool HybridRealConstraintSet::covers(const HybridBox& bx) const {
+tribool HybridConstraintSet::covers(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).covers(bx.continuous_set());
     } else {
@@ -295,7 +295,7 @@ tribool HybridRealConstraintSet::covers(const HybridBox& bx) const {
     }
 }
 
-tribool HybridRealConstraintSet::separated(const HybridBox& bx) const {
+tribool HybridConstraintSet::separated(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).separated(bx.continuous_set());
     } else {
@@ -303,25 +303,25 @@ tribool HybridRealConstraintSet::separated(const HybridBox& bx) const {
     }
 }
 
-std::ostream& HybridRealConstraintSet::write(std::ostream& os) const {
-    return os << "HybridRealConstraintSet( "<< this->_sets << " )";
+std::ostream& HybridConstraintSet::write(std::ostream& os) const {
+    return os << "HybridConstraintSet( "<< this->_sets << " )";
 }
 
 
 
-HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet()
+HybridBoundedConstraintSet::HybridBoundedConstraintSet()
     : _sets()
 {
 }
 
-HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet(const DiscreteLocation& loc,
+HybridBoundedConstraintSet::HybridBoundedConstraintSet(const DiscreteLocation& loc,
                                                                const List<RealVariableInterval>& bnd)
     : _sets()
 {
     _sets.insert(loc,RealExpressionBoundedConstraintSet(bnd));
 }
 
-HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet(const DiscreteLocation& loc,
+HybridBoundedConstraintSet::HybridBoundedConstraintSet(const DiscreteLocation& loc,
                                                                const List<RealVariableInterval>& bnd,
                                                                const List<ContinuousPredicate>& cnstr)
     : _sets()
@@ -329,33 +329,33 @@ HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet(const DiscreteLoc
     _sets.insert(loc,RealExpressionBoundedConstraintSet(bnd,cnstr));
 }
 
-HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet(const DiscreteLocation& loc,
+HybridBoundedConstraintSet::HybridBoundedConstraintSet(const DiscreteLocation& loc,
                                                                const RealVariablesBox& bx)
     : _sets()
 {
     _sets.insert(loc,RealExpressionBoundedConstraintSet(bx));
 }
 
-HybridRealBoundedConstraintSet* HybridRealBoundedConstraintSet::clone() const {
-    return new HybridRealBoundedConstraintSet(*this);
+HybridBoundedConstraintSet* HybridBoundedConstraintSet::clone() const {
+    return new HybridBoundedConstraintSet(*this);
 }
 
-Set<RealVariable> HybridRealBoundedConstraintSet::variables(DiscreteLocation loc) const {
+Set<RealVariable> HybridBoundedConstraintSet::variables(DiscreteLocation loc) const {
     ARIADNE_ASSERT(this->_sets.has_key(loc));
     return _sets[loc].variables();
 }
 
-RealBoundedConstraintSet const HybridRealBoundedConstraintSet::euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+BoundedConstraintSet const HybridBoundedConstraintSet::euclidean_set(DiscreteLocation loc, RealSpace spc) const {
     // FIXME: Should be no need to cache Euclidean sets.
     ARIADNE_ASSERT(this->_sets.has_key(loc));
-    return RealBoundedConstraintSet(this->_sets[loc].euclidean_set(spc));
+    return BoundedConstraintSet(this->_sets[loc].euclidean_set(spc));
 }
 
-RealBoundedConstraintSet* HybridRealBoundedConstraintSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
-    return new RealBoundedConstraintSet(this->euclidean_set(loc,spc));
+BoundedConstraintSet* HybridBoundedConstraintSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+    return new BoundedConstraintSet(this->euclidean_set(loc,spc));
 }
 
-tribool HybridRealBoundedConstraintSet::overlaps(const HybridBox& bx) const {
+tribool HybridBoundedConstraintSet::overlaps(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).overlaps(bx.continuous_set());
     } else {
@@ -363,7 +363,7 @@ tribool HybridRealBoundedConstraintSet::overlaps(const HybridBox& bx) const {
     }
 }
 
-tribool HybridRealBoundedConstraintSet::covers(const HybridBox& bx) const {
+tribool HybridBoundedConstraintSet::covers(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).covers(bx.continuous_set());
     } else {
@@ -371,7 +371,7 @@ tribool HybridRealBoundedConstraintSet::covers(const HybridBox& bx) const {
     }
 }
 
-tribool HybridRealBoundedConstraintSet::separated(const HybridBox& bx) const {
+tribool HybridBoundedConstraintSet::separated(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).separated(bx.continuous_set());
     } else {
@@ -379,7 +379,7 @@ tribool HybridRealBoundedConstraintSet::separated(const HybridBox& bx) const {
     }
 }
 
-tribool HybridRealBoundedConstraintSet::inside(const HybridBoxes& bxs) const {
+tribool HybridBoundedConstraintSet::inside(const HybridBoxes& bxs) const {
     tribool result=true;
     for(Map<DiscreteLocation,RealExpressionBoundedConstraintSet>::const_iterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
         DiscreteLocation const& loc=iter->first;
@@ -392,16 +392,16 @@ tribool HybridRealBoundedConstraintSet::inside(const HybridBoxes& bxs) const {
     return result;
 }
 
-DiscreteLocation HybridRealBoundedConstraintSet::location() const {
+DiscreteLocation HybridBoundedConstraintSet::location() const {
     ARIADNE_ASSERT(this->_sets.size()==1);
     return this->_sets.begin()->first;
 }
 
-Set<DiscreteLocation> HybridRealBoundedConstraintSet::locations() const {
+Set<DiscreteLocation> HybridBoundedConstraintSet::locations() const {
     return this->_sets.keys();
 }
 
-HybridBoxes HybridRealBoundedConstraintSet::bounding_box() const {
+HybridBoxes HybridBoundedConstraintSet::bounding_box() const {
     HybridBoxes result;
     for(Map<DiscreteLocation,RealExpressionBoundedConstraintSet>::const_iterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
         result.insert(iter->first,over_approximation(RealVariablesBox(iter->second.bounds())));
@@ -409,11 +409,11 @@ HybridBoxes HybridRealBoundedConstraintSet::bounding_box() const {
     return result;
 }
 
-std::ostream& HybridRealBoundedConstraintSet::write(std::ostream& os) const {
-    return os << "HybridRealBoundedConstraintSet( "<< this->_sets << " )";
+std::ostream& HybridBoundedConstraintSet::write(std::ostream& os) const {
+    return os << "HybridBoundedConstraintSet( "<< this->_sets << " )";
 }
 
-void HybridRealBoundedConstraintSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {
+void HybridBoundedConstraintSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {
     if(q.empty() || q.contains(this->location())) {
         Set<RealVariable> variables=this->variables(this->location());
         RealSpace space(List<RealVariable>(variables.begin(),variables.end()));

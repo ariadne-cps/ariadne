@@ -57,7 +57,7 @@ int main(int argc, char **argv)
     Box bbx1=s1.bounding_box()+Vector<Interval>(2, Interval(-0.25,+0.25));
 
     RealVectorFunction rf(1u, sqr(x[0])+sqr(x[1])-sqr(p));
-    RealConstraintSet cs1(rf,RealBoxSet(1u,RealIntervalSet(-1,0)));
+    ConstraintSet cs1(rf,BoxSet(1u,IntervalSet(-1,0)));
 
     {
         double h=10000;

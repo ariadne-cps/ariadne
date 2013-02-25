@@ -336,20 +336,20 @@ void export_constraint_set()
 {
     from_python< List<RealConstraint> >();
 
-    class_<RealConstraintSet,bases<RegularSetInterface> >
-        constraint_set_class("RealConstraintSet",init<RealConstraintSet>());
+    class_<ConstraintSet,bases<RegularSetInterface> >
+        constraint_set_class("ConstraintSet",init<ConstraintSet>());
     constraint_set_class.def(init< List<RealConstraint> >());
 
-    class_<RealBoundedConstraintSet,bases<DrawableInterface> >
-        bounded_constraint_set_class("RealBoundedConstraintSet",init<RealBoundedConstraintSet>());
-    bounded_constraint_set_class.def(init< RealBoxSet, List<RealConstraint> >());
+    class_<BoundedConstraintSet,bases<DrawableInterface> >
+        bounded_constraint_set_class("BoundedConstraintSet",init<BoundedConstraintSet>());
+    bounded_constraint_set_class.def(init< BoxSet, List<RealConstraint> >());
 
-    class_<RealBoxSet>
-        box_set_class("RealBoxSet");
+    class_<BoxSet>
+        box_set_class("BoxSet");
     box_set_class.def(init<IntervalVector>());
-    box_set_class.def(init< List<RealIntervalSet> >());
+    box_set_class.def(init< List<IntervalSet> >());
 
-    def("intersection", (RealBoundedConstraintSet(*)(const RealConstraintSet&,const RealBoxSet&)) &intersection);
+    def("intersection", (BoundedConstraintSet(*)(const ConstraintSet&,const BoxSet&)) &intersection);
 
 }
 

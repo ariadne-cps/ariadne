@@ -65,7 +65,7 @@ int main(int argc, char **argv)
     TaylorConstrainedImageSet ts1(afn1,Box::unit_box(3));
 
     VectorUserFunction<RadiusSquare> radius(Vector<Float>(1u,0.5));
-    RealConstraintSet cs1(Box(1u,Interval(-1,0)),radius);
+    ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);
 
     std::cout << "Testing boxes.." << std::endl;
     TextPlot g("test_textplot-bx1.txt");

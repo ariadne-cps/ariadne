@@ -42,11 +42,11 @@
 namespace Ariadne {
 
 class Real;
-class RealIntervalSet;
+class IntervalSet;
 
-class RealBoxSet;
-class RealConstraintSet;
-class RealBoundedConstraintSet;
+class BoxSet;
+class ConstraintSet;
+class BoundedConstraintSet;
 
 class Box;
 class IntervalConstrainedImageSet;
@@ -98,7 +98,7 @@ class RealVariableInterval {
         : _lower(-inf), _variable(vu._variable), _upper(vu._upper) { }
     Variable<Real> const& variable() const { return this->_variable; }
     const Interval approximate_interval() const;
-    const RealIntervalSet interval() const;
+    const IntervalSet interval() const;
     const Real lower() const { return this->_lower; }
     const Real upper() const { return this->_upper; }
 };
@@ -149,18 +149,18 @@ inline RealVariableInterval operator==(double x, const RealVariable& v) { return
 //! \ingroup ExpressionSetSubModule
 //! \brief An box defining ranges for a collection of real variables.
 class RealVariablesBox {
-    Map<RealVariable,RealIntervalSet> _bounds;
+    Map<RealVariable,IntervalSet> _bounds;
   public:
     RealVariablesBox() : _bounds() { };
     RealVariablesBox(const List<RealVariableInterval>& lst);
-    RealVariablesBox(const Map<RealVariable,RealIntervalSet>& bnds) : _bounds(bnds) { }
-    RealVariablesBox(const RealSpace& spc, const RealBoxSet& bx);
+    RealVariablesBox(const Map<RealVariable,IntervalSet>& bnds) : _bounds(bnds) { }
+    RealVariablesBox(const RealSpace& spc, const BoxSet& bx);
     Set<RealVariable> variables() const { return _bounds.keys(); }
     RealSpace canonical_space() const { Set<RealVariable> vars=this->variables(); return RealSpace(List<RealVariable>(vars.begin(),vars.end())); }
-    Map<RealVariable,RealIntervalSet> bounds() const { return this->_bounds; }
-    const RealIntervalSet& operator[](const RealVariable& v) const { return this->_bounds[v]; }
-    RealBoxSet box(const RealSpace& spc) const;
-    RealBoxSet euclidean_set(const RealSpace& spc) const;
+    Map<RealVariable,IntervalSet> bounds() const { return this->_bounds; }
+    const IntervalSet& operator[](const RealVariable& v) const { return this->_bounds[v]; }
+    BoxSet box(const RealSpace& spc) const;
+    BoxSet euclidean_set(const RealSpace& spc) const;
     friend VariablesBox approximation(const RealVariablesBox& set);
     friend VariablesBox over_approximation(const RealVariablesBox& vbx);
     friend VariablesBox under_approximation(const RealVariablesBox& set);
@@ -202,7 +202,7 @@ class RealExpressionConstraintSet
     RealExpressionConstraintSet(const List<ContinuousPredicate>& constraints);
     Set<RealVariable> variables() const { return Set<RealVariable>(arguments(this->_constraints)); }
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; }
-    RealConstraintSet euclidean_set(const RealSpace& space) const;
+    ConstraintSet euclidean_set(const RealSpace& space) const;
     friend std::ostream& operator<<(std::ostream& os, const RealExpressionConstraintSet& eset);
 };
 
@@ -211,16 +211,16 @@ class RealExpressionConstraintSet
 //! The set is described as \f$S=D\cap g^{-1}(C)\f$ where \f$D\f$ is the domain, \f$g\f$ the constraint function and \f$C\f$ the codomain.
 class RealExpressionBoundedConstraintSet
 {
-    Map<RealVariable,RealIntervalSet> _bounds;
+    Map<RealVariable,IntervalSet> _bounds;
     List<ContinuousPredicate> _constraints;
   public:
     RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain);
     RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain, const List<ContinuousPredicate>& constraints);
     RealExpressionBoundedConstraintSet(const RealVariablesBox& box) : _bounds(box.bounds()) { }
     Set<RealVariable> variables() const { return this->_bounds.keys(); }
-    Map<RealVariable,RealIntervalSet> bounds() const { return this->_bounds; }
+    Map<RealVariable,IntervalSet> bounds() const { return this->_bounds; }
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; }
-    RealBoundedConstraintSet euclidean_set(const RealSpace& space) const;
+    BoundedConstraintSet euclidean_set(const RealSpace& space) const;
     friend std::ostream& operator<<(std::ostream& os, const RealExpressionBoundedConstraintSet& eset);
 };
 

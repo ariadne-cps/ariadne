@@ -80,7 +80,7 @@ typedef Vector<Interval> IntervalVector;
 
 namespace {
 
-Interval make_domain(const RealIntervalSet& ivl) {
+Interval make_domain(const IntervalSet& ivl) {
     rounding_mode_t rnd=get_rounding_mode();
     Interval dom_lower_ivl=Interval(ivl.lower());
     Interval dom_upper_ivl=Interval(ivl.upper());
@@ -103,7 +103,7 @@ Interval make_domain(const RealIntervalSet& ivl) {
 }
 
 
-IntervalVectorFunctionModel make_identity(const RealBoxSet& bx, const IntervalFunctionModelFactoryInterface& fac) {
+IntervalVectorFunctionModel make_identity(const BoxSet& bx, const IntervalFunctionModelFactoryInterface& fac) {
     IntervalVector dom(bx.dimension());
     FloatVector errs(bx.dimension());
 
@@ -221,7 +221,7 @@ Enclosure* Enclosure::clone() const
     return new Enclosure(*this);
 }
 
-Enclosure::Enclosure(const RealBoundedConstraintSet& set, const IntervalFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const BoundedConstraintSet& set, const IntervalFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     this->_space_function=make_identity(set.domain(),this->function_factory());

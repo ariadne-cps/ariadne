@@ -67,8 +67,8 @@ class HybridGridTreeSet;
 template<class ES> class HybridBasicSet;
 template<class ES> class ListSet< HybridBasicSet<ES> >;
 
-class HybridRealBoundedConstraintSet;
-typedef HybridRealBoundedConstraintSet HybridSet;
+class HybridBoundedConstraintSet;
+typedef HybridBoundedConstraintSet HybridSet;
 
 template<class DS, class HBS> class HybridSetConstIterator;
 
@@ -77,21 +77,21 @@ template<class DS, class HBS> class HybridSetConstIterator;
 //! \ingroup ExpressionSetSubModule
 //! \ingroup HybridSetSubModule
 //! \brief A hybrid set defined by a box in a single location.
-class HybridRealBox
+class HybridBoxSet
     : public Pair<DiscreteLocation,RealVariablesBox>
     , public virtual HybridDrawableInterface
 {
   public:
-    HybridRealBox(const DiscreteLocation& loc, const RealVariablesBox& bx)
+    HybridBoxSet(const DiscreteLocation& loc, const RealVariablesBox& bx)
         : Pair<DiscreteLocation,RealVariablesBox>(loc,bx) { }
-    HybridRealBox(const DiscreteLocation& loc, const RealSpace& spc, const RealBoxSet& bx)
+    HybridBoxSet(const DiscreteLocation& loc, const RealSpace& spc, const BoxSet& bx)
         : Pair<DiscreteLocation,RealVariablesBox>(loc,RealVariablesBox(spc,bx)) { }
     //! \brief The location in which the box is defined.
     DiscreteLocation location() const { return this->first; }
     //! \brief The active variables in the location \a loc.
     virtual Set<RealVariable> variables() const { return this->second.variables(); }
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by ordering the variables as defined by \a spc.
-    RealBoxSet euclidean_set(const RealSpace& spc) const { return this->second.euclidean_set(spc); }
+    BoxSet euclidean_set(const RealSpace& spc) const { return this->second.euclidean_set(spc); }
 
     virtual void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
 };
@@ -99,22 +99,22 @@ class HybridRealBox
 //! \ingroup ExpressionSetSubModule
 //! \ingroup HybridSetSubModule
 //! \brief A hybrid set defined by a constraint system in each location.
-class HybridRealConstraintSet
+class HybridConstraintSet
     : public virtual HybridRegularSetInterface
 {
     Map<DiscreteLocation, RealExpressionConstraintSet> _sets;
   public:
-    HybridRealConstraintSet();
+    HybridConstraintSet();
     //! \brief Construct a set in a single \a location with a list of \a bounds on the variables and nonlinear \a constraints.
-    HybridRealConstraintSet(const DiscreteLocation& location,
+    HybridConstraintSet(const DiscreteLocation& location,
                             const List<ContinuousPredicate>& constraints);
 
-    virtual HybridRealConstraintSet* clone() const override;
+    virtual HybridConstraintSet* clone() const override;
 
     //! \brief The active variables in the location \a loc.
     virtual Set<RealVariable> variables(DiscreteLocation loc) const override;
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
-    RealConstraintSet const euclidean_set(DiscreteLocation loc, RealSpace spc) const;
+    ConstraintSet const euclidean_set(DiscreteLocation loc, RealSpace spc) const;
 
     virtual tribool overlaps(const HybridBox& bx) const override;
     virtual tribool separated(const HybridBox& bx) const override;
@@ -128,33 +128,33 @@ class HybridRealConstraintSet
 //! \ingroup ExpressionSetSubModule
 //! \ingroup HybridSetSubModule
 //! \brief A hybrid set defined by the intersection of a box and a constraint system in each location.
-class HybridRealBoundedConstraintSet
+class HybridBoundedConstraintSet
     : public virtual HybridSetInterface
     , public virtual HybridDrawableInterface
 {
     Map<DiscreteLocation, RealExpressionBoundedConstraintSet> _sets;
   public:
-    HybridRealBoundedConstraintSet();
-    HybridRealBoundedConstraintSet(const HybridRealBox& bx);
-    HybridRealBoundedConstraintSet(const DiscreteLocation& loc,
+    HybridBoundedConstraintSet();
+    HybridBoundedConstraintSet(const HybridBoxSet& bx);
+    HybridBoundedConstraintSet(const DiscreteLocation& loc,
                                    const RealVariablesBox& bx);
-    HybridRealBoundedConstraintSet(const DiscreteLocation& loc,
+    HybridBoundedConstraintSet(const DiscreteLocation& loc,
                                    const List<RealVariableInterval>& bnd);
     //! \brief Construct a set in a single \a location with a list of \a bounds on the variables and nonlinear \a constraints.
-    HybridRealBoundedConstraintSet(const DiscreteLocation& location,
+    HybridBoundedConstraintSet(const DiscreteLocation& location,
                                    const List<RealVariableInterval>& bounds,
                                    const List<ContinuousPredicate>& constraints);
 
     DiscreteLocation location() const;
 
-    virtual HybridRealBoundedConstraintSet* clone() const override;
+    virtual HybridBoundedConstraintSet* clone() const override;
 
     //! \brief The set of discrete locations in which the set is nontrivial.
     virtual Set<DiscreteLocation> locations() const override;
     //! \brief The active variables in the location \a loc.
     virtual Set<RealVariable> variables(DiscreteLocation loc) const override;
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
-    RealBoundedConstraintSet const euclidean_set(DiscreteLocation loc, RealSpace spc) const;
+    BoundedConstraintSet const euclidean_set(DiscreteLocation loc, RealSpace spc) const;
 
     virtual tribool overlaps(const HybridBox& bx) const override;
     virtual tribool inside(const HybridBoxes& bx) const override;
@@ -166,7 +166,7 @@ class HybridRealBoundedConstraintSet
     virtual std::ostream& write(std::ostream& os) const override;
     virtual void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
   protected:
-    virtual RealBoundedConstraintSet* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
+    virtual BoundedConstraintSet* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
 };
 
 

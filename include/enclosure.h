@@ -84,7 +84,7 @@ typedef Constraint<RealScalarFunction,Real> RealConstraint;
 typedef Constraint<IntervalScalarFunction,Float> IntervalConstraint;
 
 class IntervalAffineConstrainedImageSet;
-class RealBoundedConstraintSet;
+class BoundedConstraintSet;
 
 template<class BS> class ListSet;
 
@@ -121,7 +121,7 @@ class Enclosure
     //!   (Not currently implemented.)
     explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& sf, const IntervalScalarFunction tf, const IntervalVectorFunction& g, const IntervalVectorFunction& h, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct from an exact bounded constraint \a set.
-    explicit Enclosure(const RealBoundedConstraintSet& set, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const BoundedConstraintSet& set, const IntervalFunctionModelFactoryInterface& fac);
 
     //! \brief Create a dynamically-allocated copy.
     Enclosure* clone() const;

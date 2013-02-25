@@ -47,8 +47,8 @@
 namespace Ariadne {
 
 
-class RealConstraintSet;
-class RealBoundedConstraintSet;
+class ConstraintSet;
+class BoundedConstraintSet;
 class RealConstrainedImageSet;
 
 class IntervalConstrainedImageSet;
@@ -62,22 +62,22 @@ class PavingInterface;
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
 //! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
-class RealConstraintSet
+class ConstraintSet
     : public virtual RegularSetInterface
 {
     Nat _dimension;
     List< RealConstraint > _constraints;
   public:
     //! \brief Construct the preimage of \a C under \a g.
-    RealConstraintSet(const RealVectorFunction& g, const RealBoxSet& C);
+    ConstraintSet(const RealVectorFunction& g, const BoxSet& C);
     //! \brief Construct the restriction of \a D under the constraints \a c.
-    RealConstraintSet(const List<RealConstraint>& c);
+    ConstraintSet(const List<RealConstraint>& c);
     //! \brief The codomain of the set.
-    const RealBoxSet codomain() const { return this->constraint_bounds(); }
+    const BoxSet codomain() const { return this->constraint_bounds(); }
     //! \brief The function used to define the constraints.
     const RealVectorFunction constraint_function() const;
     //! \brief The bounds of the constraints.
-    const RealBoxSet constraint_bounds() const;
+    const BoxSet constraint_bounds() const;
     //! \brief The number of constraints.
     Nat number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The constraints.
@@ -85,7 +85,7 @@ class RealConstraintSet
     //! \brief The \a i<sup>th</sup> constraint.
     RealConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
 
-    RealConstraintSet* clone() const;
+    ConstraintSet* clone() const;
     Nat dimension() const;
     Tribool separated(const Box&) const;
     Tribool overlaps(const Box&) const;
@@ -97,27 +97,27 @@ class RealConstraintSet
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief A set defined as the intersection of an exact box with preimage of an exact box (the \em codomain) under a continuous function.
 //! The set is described as \f$S=D\cap g^{-1}(C) = \{ x\in D \mid g(x)\in C\}\f$ where \f$D\f$ is the domain, \f$C\f$ is the codomain and \f$g\f$ the function.
-class RealBoundedConstraintSet
+class BoundedConstraintSet
     : public virtual SetInterface
     , public virtual DrawableInterface
 {
-    RealBoxSet _domain;
+    BoxSet _domain;
     List< RealConstraint > _constraints;
   public:
     //! \brief Construct the preimage of \a C under \a g.
-    RealBoundedConstraintSet(const RealBoxSet& D, const RealVectorFunction& g, const RealBoxSet& C);
+    BoundedConstraintSet(const BoxSet& D, const RealVectorFunction& g, const BoxSet& C);
     //! \brief Construct the restriction of \a D under the constraints \a c.
-    RealBoundedConstraintSet(const RealBoxSet& D, const List<RealConstraint>& c);
+    BoundedConstraintSet(const BoxSet& D, const List<RealConstraint>& c);
     //! \brief Construct the box \a D.
-    RealBoundedConstraintSet(const RealBoxSet& bx);
+    BoundedConstraintSet(const BoxSet& bx);
     //! \brief The domain of the set.
-    const RealBoxSet& domain() const { return this->_domain; }
+    const BoxSet& domain() const { return this->_domain; }
     //! \brief The codomain of the set.
-    const RealBoxSet codomain() const { return this->constraint_bounds(); }
+    const BoxSet codomain() const { return this->constraint_bounds(); }
     //! \brief The function used to define the constraints.
     const RealVectorFunction constraint_function() const;
     //! \brief The bounds for the constraints.
-    const RealBoxSet constraint_bounds() const;
+    const BoxSet constraint_bounds() const;
     //! \brief The number of constraints.
     Nat number_of_constraints() const { return this->_constraints.size(); };
     //! \brief The constraints.
@@ -125,7 +125,7 @@ class RealBoundedConstraintSet
     //! \brief The \a i<sup>th</sup> constraint.
     RealConstraint const& constraint(Nat i) const { return this->_constraints[i]; }
 
-    RealBoundedConstraintSet* clone() const;
+    BoundedConstraintSet* clone() const;
     Nat dimension() const;
     Tribool separated(const Box&) const;
     Tribool overlaps(const Box&) const;
@@ -136,41 +136,41 @@ class RealBoundedConstraintSet
     Void draw(CanvasInterface&,const Projection2d&) const;
 };
 
-RealBoundedConstraintSet intersection(const RealConstraintSet& cs, const RealBoxSet& bx);
+BoundedConstraintSet intersection(const ConstraintSet& cs, const BoxSet& bx);
 
 
 class RealConstrainedImageSet
     : public virtual LocatedSetInterface, public virtual DrawableInterface
 {
-    RealBoxSet _domain;
+    BoxSet _domain;
     RealVectorFunction _function;
     List< RealConstraint > _constraints;
   public:
     //! \brief Construct the set with zero-dimensional parameterisation in zero dimensions with no constraints.
     RealConstrainedImageSet() : _domain(), _function() { }
     //! \brief Construct the box \a dom.
-    RealConstrainedImageSet(const RealBoxSet& dom) : _domain(dom), _function(RealVectorFunction::identity(dom.size())) { }
+    RealConstrainedImageSet(const BoxSet& dom) : _domain(dom), _function(RealVectorFunction::identity(dom.size())) { }
     //! \brief Construct the image of \a dom under \a fn.
-    RealConstrainedImageSet(const RealBoxSet& dom, const RealVectorFunction& fn) : _domain(dom), _function(fn) {
+    RealConstrainedImageSet(const BoxSet& dom, const RealVectorFunction& fn) : _domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn, using constraint \a c.
-    RealConstrainedImageSet(const RealBoxSet& dom, const RealVectorFunction& fn, const RealConstraint& c) : _domain(dom), _function(fn), _constraints(1u,c) {
+    RealConstrainedImageSet(const BoxSet& dom, const RealVectorFunction& fn, const RealConstraint& c) : _domain(dom), _function(fn), _constraints(1u,c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn);
         ARIADNE_ASSERT_MSG(dom.size()==c.function().argument_size(),"dom="<<dom<<", c="<<c);
     }
     //! \brief Construct the image of \a dom under \a fn, using constraints \a c.
-    RealConstrainedImageSet(const RealBoxSet& dom, const RealVectorFunction& fn, const List<RealConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
+    RealConstrainedImageSet(const BoxSet& dom, const RealVectorFunction& fn, const List<RealConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Convert from a bounded constraint set.
-    RealConstrainedImageSet(const RealBoundedConstraintSet& set);
+    RealConstrainedImageSet(const BoundedConstraintSet& set);
     //! \brief The domain of the set.
-    const RealBoxSet& domain() const { return this->_domain; }
+    const BoxSet& domain() const { return this->_domain; }
     //! \brief The function used to define the mapping from the parameter domain to the space.
     const RealVectorFunction& function() const { return this->_function; };
     //! \brief The bounds for the constraints.
     const RealVectorFunction constraint_function() const;
     //! \brief The bounds for the constraints.
-    const RealBoxSet constraint_bounds() const;
+    const BoxSet constraint_bounds() const;
     //! \brief The function used to define the set.
     const List<RealConstraint>& constraints() const { return this->_constraints; };
     //! \brief The number of parameters used to define the set, which equals the dimension of \f$D\f$.

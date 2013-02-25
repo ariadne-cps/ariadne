@@ -42,56 +42,56 @@ namespace Ariadne {
 typedef std::ostream OutputStream;
 typedef uint Nat;
 
-class RealIntervalSet;
-class RealBoxSet;
+class IntervalSet;
+class BoxSet;
 
 class Point;
 class Box;
 
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief An exact interval in \f$\mathbb{R}\f$.
-class RealIntervalSet {
+class IntervalSet {
     Real _lower, _upper;
   public:
-    RealIntervalSet() : _lower(-1), _upper(+1) { }
-    RealIntervalSet(const Real& l, const Real& u) : _lower(l), _upper(u) { }
+    IntervalSet() : _lower(-1), _upper(+1) { }
+    IntervalSet(const Real& l, const Real& u) : _lower(l), _upper(u) { }
     const Real& lower() const { return _lower; }
     const Real& upper() const { return _upper; }
     const Real midpoint() const { return (_lower+_upper)/2; }
     const Real radius() const { return (_upper-_lower)/2; }
 };
-inline OutputStream& operator<<(OutputStream& os, const RealIntervalSet& ivl) {
+inline OutputStream& operator<<(OutputStream& os, const IntervalSet& ivl) {
     return os << "{" << ivl.lower() << ":" << ivl.upper() << "}";
 }
-inline Interval under_approximation(const RealIntervalSet& rivl) {
+inline Interval under_approximation(const IntervalSet& rivl) {
     return Interval(Interval(rivl.lower()).upper(),Interval(rivl.upper()).lower());
 }
-inline Interval over_approximation(const RealIntervalSet& rivl) {
+inline Interval over_approximation(const IntervalSet& rivl) {
     return Interval(Interval(rivl.lower()).lower(),Interval(rivl.upper()).upper());
 }
-inline Interval approximation(const RealIntervalSet& rivl) {
+inline Interval approximation(const IntervalSet& rivl) {
     return Interval(Float(rivl.lower()),Float(rivl.upper()));
 }
 
 
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief An exact coordinate-aligned box in \f$\mathbb{R}^n\f$.
-class RealBoxSet {
-    Array<RealIntervalSet> _ary;
+class BoxSet {
+    Array<IntervalSet> _ary;
   public:
-    RealBoxSet() : _ary() { }
-    explicit RealBoxSet(const IntervalVector& iv);
-    RealBoxSet(const List<RealIntervalSet>& t) : _ary(t.begin(),t.end()) { }
-    RealBoxSet(Nat n, const RealIntervalSet& ivl) : _ary(n,ivl) { }
+    BoxSet() : _ary() { }
+    explicit BoxSet(const IntervalVector& iv);
+    BoxSet(const List<IntervalSet>& t) : _ary(t.begin(),t.end()) { }
+    BoxSet(Nat n, const IntervalSet& ivl) : _ary(n,ivl) { }
     Nat size() const { return _ary.size(); }
     Nat dimension() const { return _ary.size(); }
-    RealIntervalSet const& operator[](Nat i) const { return _ary[i]; }
-    RealIntervalSet& operator[](Nat i) { return _ary[i]; }
-    friend OutputStream& operator<<(OutputStream& os, const RealBoxSet& bx) { return os << bx._ary; }
+    IntervalSet const& operator[](Nat i) const { return _ary[i]; }
+    IntervalSet& operator[](Nat i) { return _ary[i]; }
+    friend OutputStream& operator<<(OutputStream& os, const BoxSet& bx) { return os << bx._ary; }
 };
-Box under_approximation(const RealBoxSet& rbx);
-Box over_approximation(const RealBoxSet& rbx);
-Box approximation(const RealBoxSet& rbx);
+Box under_approximation(const BoxSet& rbx);
+Box over_approximation(const BoxSet& rbx);
+Box approximation(const BoxSet& rbx);
 
 Box widen(const Box& bx);
 

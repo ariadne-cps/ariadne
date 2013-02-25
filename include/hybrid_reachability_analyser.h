@@ -50,7 +50,7 @@ class DiscreteLocation;
 class HybridAutomatonInterface;
 
 template<class BS> class HybridBasicSet;
-typedef HybridBasicSet<Box> HybridBox;
+class HybridBox;
 
 class HybridGrid;
 class HybridGridCell;

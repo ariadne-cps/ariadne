@@ -59,111 +59,35 @@
 
 namespace Ariadne {
 
+// Classes defined in this file
+class HybridPoint;
+class HybridBox;
+class HybridBoxes;
 class HybridGridTreeSet;
-
-class RealVariableInterval;
-class RealVariablesBox;
-
-typedef Map< DiscreteLocation, Vector<Float> > HybridFloatVector;
-
-template<class HBS> class HybridBasicSetExpression { };
-template<class HDS> class HybridDenotableSetExpression { };
-
-
-template<class SET> struct is_basic_set { };
-
-// Declare template specialisation for hybrid list set
 template<class ES> class HybridBasicSet;
 template<class ES> class ListSet< HybridBasicSet<ES> >;
-
-template<class DS, class HBS> class HybridSetConstIterator;
-
-class HybridRealExpressionBoundedConstraintSet;
-typedef HybridRealExpressionBoundedConstraintSet HybridExpressionSet;
 
 class HybridRealBoundedConstraintSet;
 typedef HybridRealBoundedConstraintSet HybridSet;
 
-class HybridRealExpressionBoundedConstraintSet
-    : public HybridDrawableInterface
-{
-    DiscreteLocation _location;
-    Map< RealVariable, RealIntervalSet> _bounds;
-    List< ContinuousPredicate > _constraints;
-  public:
-    HybridRealExpressionBoundedConstraintSet() { }
-    HybridRealExpressionBoundedConstraintSet(const DiscreteLocation& loc, const List<RealVariableInterval>& bnd, const List<ContinuousPredicate>& cnstr = List<ContinuousPredicate>());
-    HybridRealExpressionBoundedConstraintSet(const DiscreteLocation& loc, const RealExpressionBoundedConstraintSet& set);
-    HybridRealExpressionBoundedConstraintSet* clone() const { return new HybridRealExpressionBoundedConstraintSet(*this); }
-    DiscreteLocation const& location() const { return this->_location; }
-    Set<RealVariable> variables() const { return this->_bounds.keys(); };
-    Map<RealVariable,RealIntervalSet> const& bounds() const { return this->_bounds; };
-    List<ContinuousPredicate> const& constraints() const { return this->_constraints; };
-    RealBoundedConstraintSet continuous_set(const RealSpace&) const;
-    void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
-};
-OutputStream& operator<<(OutputStream& os, const HybridRealExpressionBoundedConstraintSet& hs);
+template<class DS, class HBS> class HybridSetConstIterator;
 
-typedef HybridRealExpressionBoundedConstraintSet HybridExpressionSet;
 
-class HybridPoint
-    : public Tuple<DiscreteLocation,RealSpace,Point>
+
+class HybridRealBox
+    : public Pair<DiscreteLocation,RealVariablesBox>
+    , public virtual HybridDrawableInterface
 {
   public:
-    HybridPoint() : Tuple<DiscreteLocation,RealSpace,Point>(DiscreteLocation(),RealSpace(),Point()) { }
-    HybridPoint(const DiscreteLocation& q, const RealSpace& spc, const Point& pt) : Tuple<DiscreteLocation,RealSpace,Point>(q,spc,pt) { }
-    HybridPoint(const DiscreteLocation& q, const Map<Identifier,Float>& val);
-    HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& val);
-    HybridPoint(const DiscreteLocation& q, const List< Assignment<RealVariable,Real> >& val);
-    const DiscreteLocation& location() const { return this->first; }
-    const RealSpace& space() const { return this->second; }
-    const Point& point() const { return this->third; }
-    const Point& real_values() const { return this->third; }
-    Map<RealVariable,Float> values() const;
+    HybridRealBox(const DiscreteLocation& loc, const RealVariablesBox& bx)
+        : Pair<DiscreteLocation,RealVariablesBox>(loc,bx) { }
+    HybridRealBox(const DiscreteLocation& loc, const RealSpace& spc, const RealBoxSet& bx)
+        : Pair<DiscreteLocation,RealVariablesBox>(loc,RealVariablesBox(spc,bx)) { }
+    DiscreteLocation location() const { return this->first; }
+    RealBoxSet euclidean_set(const RealSpace& spc) const { return this->second.euclidean_set(spc); }
+
+    virtual void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
 };
-
-template<class BS>
-class HybridBasicSet
-    : public Tuple<DiscreteLocation,RealSpace,BS>
-{
-  public:
-    typedef BS ContinuousSetType;
-    HybridBasicSet() : Tuple<DiscreteLocation,RealSpace,BS>(DiscreteLocation(),RealSpace(),BS()) { }
-    HybridBasicSet(const DiscreteLocation& q, const RealSpace& spc, const BS& bs) : Tuple<DiscreteLocation,RealSpace,BS>(q,spc,bs) { }
-    const DiscreteLocation& location() const { return this->first; }
-    const RealSpace& space() const { return this->second; }
-    const ContinuousSetType& continuous_set() const { return this->third; }
-};
-
-typedef HybridBasicSet<Box> HybridBox;
-
-template<> class HybridBasicSet<Box>
-    : public HybridDrawableInterface
-{
-    DiscreteLocation _location;
-    RealSpace _space;
-    Box _set;
-  public:
-    HybridBasicSet() : _location(), _space(), _set() { }
-    HybridBasicSet(const DiscreteLocation& q, const RealSpace& spc, const Box& bx) : _location(q), _space(spc), _set(bx) { }
-    HybridBasicSet(const DiscreteLocation& q, const List<RealVariableInterval>& bnds);
-    const DiscreteLocation& location() const { return this->_location; }
-    const RealSpace& space() const { return this->_space; }
-    const Box& continuous_set() const { return this->_set; }
-    const Interval& operator[](const RealVariable& v) const { return this->_set[this->_space.index(v)]; }
-    HybridBasicSet<Box>* clone() const { return new HybridBasicSet<Box>(*this); }
-    void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
-    friend std::ostream& operator<<(std::ostream& os, const HybridBox& hbx) {
-        return os << "(" << hbx.location() << ", " << hbx.space() << ", " << hbx.continuous_set() << ")"; }
-};
-
-template<class ES> inline
-bool operator==(const HybridBasicSet<ES> hset1, const HybridBasicSet<ES>& hset2) {
-    return hset1.location()==hset2.location() && hset1.continuous_set() == hset2.continuous_set();
-}
-
-
-typedef List<RealVariable> RealVariables;
 
 class HybridRealBoundedConstraintSet
     : public virtual HybridSetInterface
@@ -173,7 +97,7 @@ class HybridRealBoundedConstraintSet
     mutable Map<DiscreteLocation,Pair<RealSpace,RealBoundedConstraintSet>> _euclidean_sets;
   public:
     HybridRealBoundedConstraintSet();
-    HybridRealBoundedConstraintSet(const HybridBox& bx);
+    HybridRealBoundedConstraintSet(const HybridRealBox& bx);
     HybridRealBoundedConstraintSet(const DiscreteLocation& loc,
                                    const RealVariablesBox& bx);
     HybridRealBoundedConstraintSet(const DiscreteLocation& loc,
@@ -189,12 +113,97 @@ class HybridRealBoundedConstraintSet
 
     virtual tribool separated(const HybridBox& bx) const override;
     virtual tribool covers(const HybridBox& bx) const override;
-    virtual RealBoundedConstraintSet const& euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
+    RealBoundedConstraintSet const euclidean_set(DiscreteLocation loc, RealSpace spc) const;
     virtual Set<DiscreteLocation> locations() const override;
     virtual Set<RealVariable> variables(DiscreteLocation loc) const override;
     virtual HybridBoxes bounding_box() const override;
     virtual std::ostream& write(std::ostream& os) const override;
     virtual void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
+  protected:
+    virtual RealBoundedConstraintSet* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
+};
+
+
+
+template<class EBS>
+class HybridBasicSet
+    : private Tuple<DiscreteLocation,RealSpace,EBS>
+{
+  public:
+    typedef EBS ContinuousSetType;
+    HybridBasicSet()
+        : Tuple<DiscreteLocation,RealSpace,EBS>(DiscreteLocation(),RealSpace(),EBS()) { }
+    HybridBasicSet(const DiscreteLocation& loc, const RealSpace& spc, const ContinuousSetType& ebs)
+        : Tuple<DiscreteLocation,RealSpace,EBS>(loc,spc,ebs) { }
+    const DiscreteLocation& location() const { return this->first; }
+    const RealSpace& space() const { return this->second; }
+    const ContinuousSetType& continuous_set() const { return this->third; }
+    ContinuousSetType& continuous_set() { return this->third; }
+};
+template<class EBS> OutputStream& operator<<(OutputStream& os, const HybridBasicSet<EBS>& hbs) {
+    return os << "HybridBasicSet{ " << hbs.location() << ", " << hbs.space() << ", " << hbs.continuous_set() << " )";
+}
+
+template<class EBS> inline
+bool operator==(const HybridBasicSet<EBS> hset1, const HybridBasicSet<EBS>& hset2) {
+    if(hset1.location()==hset2.location()) {
+        ARIADNE_ASSERT(hset1.space()==hset2.space());
+        return hset1.continuous_set() == hset2.continuous_set();
+    } else {
+        return false;
+    }
+}
+
+class HybridPoint
+    : public HybridBasicSet<Point>
+{
+  public:
+    HybridPoint() : HybridBasicSet<Point>() { }
+    HybridPoint(const DiscreteLocation& q, const RealSpace& spc, const Point& pt) : HybridBasicSet<Point>(q,spc,pt) { }
+    HybridPoint(const DiscreteLocation& q, const Map<Identifier,Float>& val);
+    HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& val);
+    HybridPoint(const DiscreteLocation& q, const List< Assignment<RealVariable,Real> >& val);
+    Point& point() { return this->continuous_set(); }
+    const Point& point() const { return this->continuous_set(); }
+    const Point& real_values() const { return this->continuous_set(); }
+    Map<RealVariable,Float> values() const;
+};
+
+class HybridBox
+    : public HybridBasicSet<Box>
+    , public virtual HybridDrawableInterface
+{
+  public:
+    HybridBox(const DiscreteLocation& loc, const VariablesBox& bx)
+        : HybridBasicSet<Box>(loc,bx.space(),bx.continuous_set()) { }
+    HybridBox(const DiscreteLocation& loc, const List<RealVariableInterval>& bnds)
+        : HybridBox(loc,VariablesBox(bnds)) { }
+    HybridBox(const DiscreteLocation& loc, const RealSpace& spc, const Box& bx)
+        : HybridBasicSet<Box>(loc,spc,bx) { }
+
+    Box euclidean_set(const RealSpace& spc) const {
+        if(spc==this->space()) { return this->continuous_set(); }
+        else { return VariablesBox(this->space(),this->continuous_set() ).euclidean_set(spc); }
+    }
+
+    virtual void draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& v) const override;
+};
+
+class HybridBoxes
+    : public Map<DiscreteLocation,VariablesBox>
+{
+  public:
+    void insert(const DiscreteLocation& loc, const VariablesBox& vbx) {
+        this->Map<DiscreteLocation,VariablesBox>::insert(loc,vbx); }
+    void insert(const DiscreteLocation& loc, const RealSpace& spc, const Box& bx) {
+        this->insert(loc,VariablesBox(spc,bx)); }
+
+    Set<DiscreteLocation> locations() const { return this->keys(); }
+    RealSpace const& space(const DiscreteLocation& loc) const { return this->operator[](loc).space(); }
+    Box const& continuous_set(const DiscreteLocation& loc) const { return this->operator[](loc).continuous_set(); }
+
+    Box euclidean_set(const DiscreteLocation& loc, const RealSpace& spc) const {
+        return this->operator[](loc).euclidean_set(spc); }
 };
 
 
@@ -387,7 +396,7 @@ class HybridGridCell
         : HybridBasicSet<GridCell>() { }
     HybridGridCell(DiscreteLocation q,const RealSpace& s,const GridCell& gc)
         : HybridBasicSet<GridCell>(q,s,gc) { }
-    HybridBox box() const { return HybridBox(this->first,this->second,this->third.box()); }
+    HybridBox box() const { return HybridBox(this->location(),this->space(),this->continuous_set().box()); }
 };
 
 class HybridGridTreeSet;
@@ -497,7 +506,7 @@ class HybridGridTreeSet
 
     //!
     void adjoin(const HybridGridCell& hgc) {
-        this->_provide_location(hgc.first).adjoin(hgc.third); }
+        this->_provide_location(hgc.location()).adjoin(hgc.continuous_set()); }
 
     //!
     void adjoin(const ListSet<HybridGridCell>& hgcls) {
@@ -528,10 +537,10 @@ class HybridGridTreeSet
     void adjoin_inner_approximation(const HybridBoxes& hbxs, const int depth) {
         for(HybridBoxes::const_iterator _loc_iter=hbxs.begin();
                 _loc_iter!=hbxs.end(); ++_loc_iter) {
-            DiscreteLocation loc=_loc_iter->first;
-            RealSpace spc=this->space(loc);
-            Box const& bx = _loc_iter->second.euclidean_set(spc.variables());
-            this->_provide_location(loc).adjoin_inner_approximation(bx,bx,depth); } }
+            DiscreteLocation const& loc=_loc_iter->first;
+            VariablesBox const& vbx=_loc_iter->second;
+            ARIADNE_ASSERT(vbx.space() == this->space(loc));
+            this->_provide_location(loc).adjoin_inner_approximation(vbx.continuous_set(),vbx.continuous_set(),depth); } }
 
     //!
     void adjoin_lower_approximation(const HybridOvertSetInterface& hs, const int height, const int depth) {
@@ -555,10 +564,10 @@ class HybridGridTreeSet
     void adjoin_outer_approximation(const HybridBoxes& hbxs, const int depth) {
         for(HybridBoxes::const_iterator _loc_iter=hbxs.begin();
                 _loc_iter!=hbxs.end(); ++_loc_iter) {
-            DiscreteLocation loc=_loc_iter->first;
-            RealSpace spc=this->space(loc);
-            Box const& bx = _loc_iter->second.euclidean_set(spc.variables());
-            this->_provide_location(_loc_iter->first).adjoin_outer_approximation(bx,depth); } }
+            DiscreteLocation const& loc=_loc_iter->first;
+            VariablesBox const& vbx=_loc_iter->second;
+            ARIADNE_ASSERT(vbx.space() == this->space(loc));
+            this->_provide_location(_loc_iter->first).adjoin_outer_approximation(vbx.continuous_set(),depth); } }
 
     //!
     template<class S> void adjoin_outer_approximation(DiscreteLocation q, const S& s) {
@@ -595,7 +604,7 @@ class HybridGridTreeSet
         HybridListSet<Box> result;
         for(const_iterator iter=this->begin();
             iter!=this->end(); ++iter) {
-            result.adjoin(iter->first,iter->third.box()); }
+            result.adjoin(iter->location(),iter->continuous_set().box()); }
         return result; }
 
     //!

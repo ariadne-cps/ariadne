@@ -180,6 +180,7 @@ class SetInterface
     : public virtual RegularSetInterface,
       public virtual LocatedSetInterface
 {
+  public:
     virtual SetInterface* clone() const = 0;
 };
 

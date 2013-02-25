@@ -50,8 +50,8 @@ template<class T> class Handle
     const T* raw_pointer() const  { return _ptr.operator->(); }
     T& reference()  { return _ptr.operator*(); }
     const T& reference() const  { return _ptr.operator*(); }
-    operator T& () { return _ptr->operator*(); }
-    operator const T& () const { return _ptr->operator*(); }
+    operator T& () { return _ptr.operator*(); }
+    operator const T& () const { return _ptr.operator*(); }
     Handle<T>& operator=(const T& t) { _ptr(clone_on_write_ptr<T>(t._clone())); }
 };
 

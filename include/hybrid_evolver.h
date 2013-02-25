@@ -53,6 +53,8 @@ namespace Ariadne {
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<Interval> IntervalFunctionModelFactoryInterface;
 
+typedef Map< DiscreteLocation, Vector<Float> > HybridFloatVector;
+
 class IntegratorInterface;
 class SolverInterface;
 class HybridEvolverBaseConfiguration;

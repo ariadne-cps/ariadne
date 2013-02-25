@@ -76,7 +76,7 @@ class HybridEnclosure;
 template<> class ListSet<HybridEnclosure>;
 
 template<class BS> class HybridBasicSet;
-typedef HybridBasicSet<Box> HybridBox;
+class HybridBox;
 class HybridGridTreeSet;
 class HybridRealBoundedConstraintSet;
 

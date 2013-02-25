@@ -61,7 +61,7 @@ class HybridSetInterfaceBase
     virtual ~HybridSetInterfaceBase() { }
     virtual HybridSetInterfaceBase* clone() const = 0;
     virtual Set<RealVariable> variables(DiscreteLocation) const = 0;
-    inline SetBase euclidean_set(DiscreteLocation loc, RealSpace spc) const { return SetBase(this->_euclidean_set(loc,spc)); }
+    inline SetBase euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
     virtual std::ostream& write(std::ostream& os) const = 0;
     friend std::ostream& operator<<(std::ostream& os, const HybridSetInterfaceBase& hs);
   protected:
@@ -75,7 +75,7 @@ class HybridBoundedSetInterface
   public:
     virtual HybridBoundedSetInterface* clone() const = 0;
     virtual Set<DiscreteLocation> locations() const = 0;
-    inline BoundedSet euclidean_set(DiscreteLocation,RealSpace) const;
+    inline BoundedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
     virtual tribool inside(const HybridBoxes& bx) const = 0;
     virtual HybridBoxes bounding_box() const = 0;
   protected:

@@ -81,6 +81,7 @@ operator<<(std::ostream& os, const copy_on_write_ptr<T>& ptr) {
 template<class T>
 class clone_on_write_ptr
 {
+    template<class S> friend class clone_on_write_ptr;
   private:
     mutable int* _ref_count;
     mutable T* _ptr;
@@ -89,6 +90,8 @@ class clone_on_write_ptr
     template<class S> clone_on_write_ptr(S* pointer)
         : _ref_count(new int(1)), _ptr(pointer) { }
     clone_on_write_ptr(const clone_on_write_ptr<T>& other)
+        : _ref_count(other._ref_count), _ptr(other._ptr) { ++(*_ref_count); }
+    template<class S> clone_on_write_ptr(const clone_on_write_ptr<S>& other)
         : _ref_count(other._ref_count), _ptr(other._ptr) { ++(*_ref_count); }
     template<class S> clone_on_write_ptr<T>& operator=(S* pointer) {
         _deallocate(); _allocate(pointer); return *this; }

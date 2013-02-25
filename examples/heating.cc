@@ -185,7 +185,7 @@ int main(int argc, const char* argv[])
     std::cerr<<"transient_time="<<analyser.configuration().transient_time();
     std::cerr<<"transient_steps="<<analyser.configuration().transient_steps();
     analyser.configuration().set_maximum_grid_depth(5);
-    analyser.verbosity=5;
+    analyser.verbosity=0;
     cout << "\nComputing chain-reachable set... \n" << flush;
     HybridGridTreeSet chain_reach_set = analyser.outer_chain_reach(initial_set);
     cout << "done." << endl << endl;

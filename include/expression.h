@@ -363,7 +363,7 @@ template<class T> Set<UntypedVariable> Expression<T>::arguments() const {
             const BinaryExpressionNode<T,String>* strp = dynamic_cast<const BinaryExpressionNode<T,String>*>(e.node_ptr());
             if(strp) { return join(strp->arg1.arguments(),strp->arg2.arguments()); }
         }
-        default: ARIADNE_FAIL_MSG("Cannot compute arguments of expression "<<e<<"\n");
+        default: ARIADNE_FAIL_MSG("Cannot compute arguments of expression "<<e<<" of kind "<<e.kind()<<"\n");
     }
 }
 
@@ -375,7 +375,13 @@ template<class T> Set<Identifier> arguments(const Expression<T>& e)
         case NULLARY: return Set<Identifier>();
         case UNARY: return arguments(e.arg());
         case BINARY: return join(arguments(e.arg1()),arguments(e.arg2()));
-        default: ARIADNE_FAIL_MSG("Cannot compute arguments of expression "<<e<<"\n");
+        case COMPARISON: {
+            const BinaryExpressionNode<T,Real>* rlp = dynamic_cast<const BinaryExpressionNode<T,Real>*>(e.node_ptr());
+            if(rlp) { return join(arguments(rlp->arg1),arguments(rlp->arg2)); }
+            const BinaryExpressionNode<T,String>* strp = dynamic_cast<const BinaryExpressionNode<T,String>*>(e.node_ptr());
+            if(strp) { return join(arguments(strp->arg1),arguments(strp->arg2)); }
+        }
+        default: ARIADNE_FAIL_MSG("Cannot compute arguments of expression "<<e<<" of kind "<<e.kind()<<"\n");
     }
 }
 

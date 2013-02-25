@@ -38,17 +38,13 @@
 namespace Ariadne {
 
 //! \ingroup GeometryModule SetSubModule
-//! \brief Base class for sets described by predicates involving boxes.
+//! \brief Base handle class for sets.
 class SetBase
     : public Handle<SetInterfaceBase>
 {
   public:
-    template<typename... Args> SetBase(Args&&... args);
-    //template<typename ...Args> SetBase(Args&&... args) : Handle<SetInterfaceBase>(args) { }
-    //! \brief The dimension of the set.
+    template<class ...Args> SetBase(Args&&... args) : Handle<SetInterfaceBase>(std::forward<Args>(args)...) { }
     inline uint dimension() const { return this->reference().dimension(); }
-    //! \brief Write to an output stream.
-    friend inline OutputStream& operator<<(OutputStream& os, const SetBase& set) { set.reference().write(os); return os; }
 };
 
 //! \ingroup GeometryModule SetSubModule
@@ -65,7 +61,7 @@ class BoundedSet
 
 
 //! \ingroup GeometryModule SetSubModule
-//! \brief  for overt sets, for which intersection with an open box is verifiable.
+//! \brief Handle class for overt sets, for which intersection with an open box is verifiable.
 class OvertSet
     : public Handle<OvertSetInterface>
 {
@@ -76,7 +72,7 @@ class OvertSet
 };
 
 //! \ingroup GeometryModule SetSubModule
-//! \brief  for open sets.
+//! \brief Handle class for open sets.
 class OpenSet
     : public Handle<OpenSetInterface>
 {
@@ -88,7 +84,7 @@ class OpenSet
 };
 
 //! \ingroup GeometryModule SetSubModule
-//! \brief Handle for closed sets.
+//! \brief Handle class for closed sets.
 class ClosedSet
     : public Handle<ClosedSetInterface>
 {
@@ -99,7 +95,7 @@ class ClosedSet
 };
 
 //! \ingroup GeometryModule SetSubModule
-//! \brief Handle for compact (closed and bounded) sets.
+//! \brief Handle class for compact (closed and bounded) sets.
 class CompactSet
     : public Handle<CompactSetInterface>
 {
@@ -112,7 +108,7 @@ class CompactSet
 };
 
 //! \ingroup GeometryModule SetSubModule
-//! \brief  for regular sets, whose closure is the closure of the interior, and whose interior is the interior of the closure.
+//! \brief Handle class for regular sets, whose closure is the closure of the interior, and whose interior is the interior of the closure.
 class RegularSet
     : public Handle<RegularSetInterface>
 {
@@ -127,7 +123,7 @@ class RegularSet
 
 
 //! \ingroup GeometryModule SetSubModule
-//! \brief  for located (overt and compact) sets.
+//! \brief Handle class for located (overt and compact) sets.
 class LocatedSet
     : public Handle<LocatedSetInterface>
 {
@@ -141,7 +137,7 @@ class LocatedSet
 };
 
 //! \ingroup GeometryModule SetSubModule
-//! \brief Complete set interface for bounded regular sets.
+//! \brief Handle class for bounded regular sets.
 class RegularLocatedSet
     : public Handle<SetInterface>
 {

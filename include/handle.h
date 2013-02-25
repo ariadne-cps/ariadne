@@ -45,7 +45,9 @@ template<class T> class Handle
     Handle(T* p) : _ptr(p) { }
     Handle(const T& t) : _ptr(t._clone()) { }
     Handle(std::shared_ptr<const T> p) : _ptr(p->_clone()) { }
+    template<class TT> Handle(const Handle<TT>& h) : _ptr(h.managed_pointer()) { }
     clone_on_write_ptr<T> managed_pointer() { return _ptr; }
+    const clone_on_write_ptr<T> managed_pointer() const { return _ptr; }
     T* raw_pointer()  { return _ptr.operator->(); }
     const T* raw_pointer() const  { return _ptr.operator->(); }
     T& reference()  { return _ptr.operator*(); }

@@ -219,7 +219,6 @@ class RealExpressionBoundedConstraintSet
     Map<RealVariable,RealIntervalSet> bounds() const { return this->_bounds; }
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; }
     RealBoundedConstraintSet euclidean_set(const RealSpace& space) const;
-    friend IntervalConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space);
     friend std::ostream& operator<<(std::ostream& os, const RealExpressionBoundedConstraintSet& eset);
 };
 

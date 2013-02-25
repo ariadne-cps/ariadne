@@ -254,6 +254,13 @@ HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet()
 }
 
 HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet(const DiscreteLocation& loc,
+                                                               const List<RealVariableInterval>& bnd)
+    : _sets()
+{
+    _sets.insert(loc,RealExpressionBoundedConstraintSet(bnd));
+}
+
+HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet(const DiscreteLocation& loc,
                                                                const List<RealVariableInterval>& bnd,
                                                                const List<ContinuousPredicate>& cnstr)
     : _sets()

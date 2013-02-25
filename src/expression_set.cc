@@ -84,7 +84,7 @@ Set<Identifier> variables(const List<RealVariableInterval>& b) {
 
 Set<Identifier> arguments(const List<ContinuousPredicate>& c) {
     Set<Identifier> r;
-    for(uint i=0; i!=c.size(); ++i) { r.adjoin(arguments(c)); }
+    for(uint i=0; i!=c.size(); ++i) { r.adjoin(arguments(c[i])); }
     return r;
 }
 

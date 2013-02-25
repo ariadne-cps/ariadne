@@ -94,15 +94,16 @@ class HybridRealBoundedConstraintSet
     , public virtual HybridDrawableInterface
 {
     Map<DiscreteLocation, RealExpressionBoundedConstraintSet> _sets;
-    mutable Map<DiscreteLocation,Pair<RealSpace,RealBoundedConstraintSet>> _euclidean_sets;
   public:
     HybridRealBoundedConstraintSet();
     HybridRealBoundedConstraintSet(const HybridRealBox& bx);
     HybridRealBoundedConstraintSet(const DiscreteLocation& loc,
                                    const RealVariablesBox& bx);
     HybridRealBoundedConstraintSet(const DiscreteLocation& loc,
+                                   const List<RealVariableInterval>& bnd);
+    HybridRealBoundedConstraintSet(const DiscreteLocation& loc,
                                    const List<RealVariableInterval>& bnd,
-                                   const List<ContinuousPredicate>& cnstr = List<ContinuousPredicate>());
+                                   const List<ContinuousPredicate>& cnstr);
 
     DiscreteLocation location() const;
 

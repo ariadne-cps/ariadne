@@ -124,12 +124,12 @@ int main(int argc, char** argv)
     std::cout << "Evolution parameters:" << evolver.configuration() << std::endl;
 
     // Define the initial box
-    RealVariableBox initial_box((x==0.0,vx==0.0,t==0.0));
+    RealVariablesBox initial_box((x==0.0,vx==0.0,t==0.0));
 
     cout << "initial_box=" << initial_box << endl;
 
 
-    HybridExpressionSet initial_set(free, initial_box);
+    HybridSet initial_set(free, initial_box);
     cout << "initial_set=" << initial_set << endl << endl;
 
     Semantics semantics=UPPER_SEMANTICS;

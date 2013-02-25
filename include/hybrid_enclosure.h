@@ -78,7 +78,7 @@ template<> class ListSet<HybridEnclosure>;
 template<class BS> class HybridBasicSet;
 typedef HybridBasicSet<Box> HybridBox;
 class HybridGridTreeSet;
-class HybridRealExpressionBoundedConstraintSet;
+class HybridRealBoundedConstraintSet;
 
 typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
@@ -140,7 +140,7 @@ class HybridEnclosure
     //! \brief An empty enclosure.
     HybridEnclosure();
     //! \brief An enclosure corresponding to the hybrid set \a set using \a space to order the continuous variables.
-    HybridEnclosure(const HybridRealExpressionBoundedConstraintSet& set, const RealSpace& space, const IntervalFunctionModelFactoryInterface& factory);
+    HybridEnclosure(const HybridRealBoundedConstraintSet& set, const RealSpace& space, const IntervalFunctionModelFactoryInterface& factory);
     //! \brief An enclosure corresponding to a Euclidean box \a bx in location \a q with variables ordered by \a spc.
     HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Box& bx, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
@@ -184,7 +184,7 @@ class HybridEnclosure
     Interval dwell_time_range() const;
 
     //! \brief The continuous state set.
-    const ContinuousStateSetType& continuous_state_set() const;
+    const ContinuousStateSetType& continuous_set() const;
 
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.

@@ -203,7 +203,7 @@ orbit(const HybridBox& initial_box,
 
 Orbit<HybridEnclosure>
 HybridEvolverBase::
-orbit(const HybridExpressionSet& initial_set,
+orbit(const HybridSet& initial_set,
       const HybridTime& time,
       Semantics semantics) const
 {
@@ -315,7 +315,7 @@ HybridEvolverBase::enclosure(const HybridBox& initial_box) const
 }
 
 HybridEvolverBase::EnclosureType
-HybridEvolverBase::enclosure(const HybridExpressionSet& initial_set) const
+HybridEvolverBase::enclosure(const HybridSet& initial_set) const
 {
     return HybridEnclosure(initial_set,_sys_ptr->continuous_state_space(initial_set.location()),this->function_factory());
 }
@@ -1157,7 +1157,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
     Bool progress = false;
 
     if(definitely(starting_set_empty)) {
-        IntervalVector reduced_domain=starting_set.continuous_state_set().reduced_domain();
+        IntervalVector reduced_domain=starting_set.continuous_set().reduced_domain();
         ARIADNE_WARN("empty starting_set "<<representation(starting_set)<<"\n");
         return;
     }
@@ -1288,7 +1288,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
             reach_set_iter!=reach_sets.end(); ++reach_set_iter)
         {
             HybridEnclosure& reach_set=*reach_set_iter;
-            //reach_set.continuous_state_set().reduce();
+            //reach_set.continuous_set().reduce();
             if(reach_set.time_range().upper()>timing_data.final_time) {
                 HybridEnclosure final_set=reach_set;
                 final_set.set_time(timing_data.final_time);

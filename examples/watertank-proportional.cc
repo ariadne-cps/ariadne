@@ -42,7 +42,7 @@ outer_approximation(const EnclosureListType& hls,
             iter=hls.begin(); iter!=hls.end(); ++iter)
         {
             DiscreteLocation loc=iter->location();
-            const ContinuousEnclosureType& es=iter->continuous_state_set();
+            const ContinuousEnclosureType& es=iter->continuous_set();
             GridTreeSet& gts=result[loc];
             gts.adjoin_outer_approximation(es.bounding_box(),accuracy);
             //gts.adjoin_outer_approximation(ModelSet<ES>(es),accuracy);
@@ -194,8 +194,8 @@ int main(int argc,char *argv[])
     for(double b=bmin ; b < bmax+bstep ; b += bstep) {
         for(double d=-Delta ; d < Delta+dstep ; d += dstep) {
             cout << "b = "<< b <<", Delta = "<<d<<std::endl;
-            RealVariableBox initial_box((water==0.0, aperture==1.0, pressure==b, error==d, time==0.0));
-            HybridExpressionSet initial_set(one_saturated,initial_box);
+            RealVariablesBox initial_box((water==0.0, aperture==1.0, pressure==b, error==d, time==0.0));
+            HybridSet initial_set(one_saturated,initial_box);
             OrbitType result = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
             cout<<"Orbit.final=" << result.final() << endl;
             /*cout<<"Adjoining result to the grid..."<<std::flush;

@@ -149,7 +149,7 @@ class HybridEvolverBase
     void set_solver(const SolverInterface& solver);
 
     virtual EnclosureType enclosure(const HybridBox& initial_box) const;
-    virtual EnclosureType enclosure(const HybridExpressionSet& set) const;
+    virtual EnclosureType enclosure(const HybridSet& initial_set) const;
 
     bool ALLOW_CREEP; //!< If true, a less-than-full evolution step may be taken to avoid splitting due to partially crossing a guard.
     bool ALLOW_UNWIND; //!< If true, a less-than-full evolution step may be taken to try to restore all time values over the parameter domain to the same value.
@@ -162,7 +162,7 @@ class HybridEvolverBase
     //! \brief Compute an approximation to the orbit set using the given semantics.
     Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
     Orbit<EnclosureType> orbit(const HybridBox& initial_box, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
-    Orbit<EnclosureType> orbit(const HybridExpressionSet& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const HybridSet& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
 
     //! \brief Compute an approximation to the evolution set using the given semantics.

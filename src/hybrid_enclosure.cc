@@ -91,13 +91,13 @@ HybridEnclosure::HybridEnclosure()
 {
 }
 
-HybridEnclosure::HybridEnclosure(const HybridRealExpressionBoundedConstraintSet& hybrid_set,
+HybridEnclosure::HybridEnclosure(const HybridRealBoundedConstraintSet& hybrid_set,
                                  const RealSpace& space,
                                  const IntervalFunctionModelFactoryInterface& factory)
     : _location(hybrid_set.location()), _events(), _space(space.variable_names()), _set(),
       _variables(space.dimension(),INITIAL)
 {
-    RealBoundedConstraintSet euclidean_set=hybrid_set.continuous_state_set(space);
+    RealBoundedConstraintSet euclidean_set=hybrid_set.euclidean_set(this->_location,space);
     this->_set=Enclosure(euclidean_set,factory);
 }
 
@@ -109,8 +109,8 @@ HybridEnclosure::HybridEnclosure(const DiscreteLocation& location, const RealSpa
 }
 
 HybridEnclosure::HybridEnclosure(const HybridBox& hbox, const IntervalFunctionModelFactoryInterface& factory)
-    : _location(hbox.location()), _events(), _space(hbox.space().variable_names()), _set(hbox.continuous_state_set(),factory),
-      _variables(hbox.continuous_state_set().dimension(),INITIAL)
+    : _location(hbox.location()), _events(), _space(hbox.space().variable_names()), _set(hbox.continuous_set(),factory),
+      _variables(hbox.continuous_set().dimension(),INITIAL)
 {
 }
 
@@ -351,14 +351,14 @@ const DiscreteLocation& HybridEnclosure::location() const {
 }
 
 /*
-IntervalConstrainedImageSet HybridEnclosure::continuous_state_set() const {
+IntervalConstrainedImageSet HybridEnclosure::continuous_set() const {
     return IntervalConstrainedImageSet(this->_set.domain(),this->space_function(),this->_constraints);
 }
 */
 
 
 const Enclosure&
-HybridEnclosure::continuous_state_set() const {
+HybridEnclosure::continuous_set() const {
     return this->_set;
 }
 
@@ -372,23 +372,23 @@ tribool HybridEnclosure::empty() const {
 }
 
 tribool HybridEnclosure::inside(const HybridBox& hbx) const {
-    if(this->_location==hbx.location()) { return this->continuous_state_set().inside(hbx.continuous_state_set()); }
-    else { return this->continuous_state_set().empty(); }
+    if(this->_location==hbx.location()) { return this->continuous_set().inside(hbx.continuous_set()); }
+    else { return this->continuous_set().empty(); }
 }
 
 tribool HybridEnclosure::separated(const HybridBox& hbx) const {
-    if(this->_location==hbx.location()) { return this->continuous_state_set().separated(hbx.continuous_state_set()); }
+    if(this->_location==hbx.location()) { return this->continuous_set().separated(hbx.continuous_set()); }
     else { return true; }
 }
 
 tribool HybridEnclosure::satisfies(RealConstraint c) const
 {
-    return this->continuous_state_set().satisfies(c);
+    return this->continuous_set().satisfies(c);
 }
 
 
 List<IntervalConstraint> HybridEnclosure::constraints() const {
-    return this->continuous_state_set().constraints();
+    return this->continuous_set().constraints();
 }
 
 void
@@ -426,7 +426,7 @@ HybridEnclosure::kuhn_recondition()
 List<HybridEnclosure>
 HybridEnclosure::split() const
 {
-    List<IntervalVector> subdomains = this->continuous_state_set().splitting_subdomains_zeroth_order();
+    List<IntervalVector> subdomains = this->continuous_set().splitting_subdomains_zeroth_order();
     List<HybridEnclosure> result(subdomains.size(),*this);
     for(uint i=0; i!=result.size(); ++i) {
         result[i].restrict(subdomains[i]);
@@ -460,7 +460,7 @@ HybridEnclosure::_check() const
 void HybridEnclosure::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const
 {
     Projection2d proj=Ariadne::projection(this->space(),axes);
-    this->continuous_state_set().draw(canvas,proj);
+    this->continuous_set().draw(canvas,proj);
 }
 
 std::ostream& HybridEnclosure::write(std::ostream& os) const
@@ -506,7 +506,7 @@ std::ostream& HybridEnclosure::repr(std::ostream& os) const
 
 
 void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreeSet& hgts, int depth) const {
-    const Enclosure& set = this->continuous_state_set();
+    const Enclosure& set = this->continuous_set();
     GridTreeSet& paving = hgts[this->location()];
     set.adjoin_outer_approximation_to(paving,depth);
 }
@@ -514,7 +514,7 @@ void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreeSet& hgts, int
 HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, int depth) {
     HybridGridTreeSet result(g);
     for(ListSet<HybridEnclosure>::const_iterator iter=hls.begin(); iter!=hls.end(); ++iter) {
-        result[iter->location()].adjoin_outer_approximation(iter->continuous_state_set(),depth);
+        result[iter->location()].adjoin_outer_approximation(iter->continuous_set(),depth);
     }
     return result;
 }
@@ -522,7 +522,7 @@ HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const
 void
 draw(FigureInterface& figure, const ListSet<HybridEnclosure>& hels) {
     for(ListSet<HybridEnclosure>::const_iterator iter=hels.begin(); iter!=hels.end(); ++iter) {
-        draw(figure,iter->continuous_state_set());
+        draw(figure,iter->continuous_set());
     }
 }
 
@@ -532,7 +532,7 @@ ListSet<HybridEnclosure>::operator[](const DiscreteLocation& loc) const
     ListSet<HybridEnclosure::ContinuousStateSetType> result;
     for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         if(iter->location()==loc) {
-            result.adjoin(iter->continuous_state_set());
+            result.adjoin(iter->continuous_set());
         }
     }
     return result;

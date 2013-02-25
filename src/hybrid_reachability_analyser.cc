@@ -112,7 +112,7 @@ HybridReachabilityAnalyser::_reach_evolve_resume(const ListSet<HybridEnclosure>&
             enclosure_iter->adjoin_outer_approximation_to(reach_cells,accuracy);
         }
         for(ListSet<HybridEnclosure>::const_iterator enclosure_iter=current_evolve_enclosures.begin(); enclosure_iter!=current_evolve_enclosures.end(); ++enclosure_iter) {
-            const Enclosure& orig_encl = enclosure_iter->continuous_state_set();
+            const Enclosure& orig_encl = enclosure_iter->continuous_set();
             evolve_enclosures.adjoin(HybridEnclosure(enclosure_iter->location(),enclosure_iter->space(),
                                                         Enclosure(orig_encl.domain(),orig_encl.space_function(),
                                                                   ScalarFunction<Interval>::zero(orig_encl.time_function().argument_size()),
@@ -182,7 +182,7 @@ HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreeSet& reach_
 {
     ARIADNE_LOG(4,"HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(...)\n");
     HybridGrid grid=set.grid();
-    HybridGridTreeSet cells=set; 
+    HybridGridTreeSet cells=set;
     cells.mince(accuracy);
 
     ARIADNE_LOG(3,"Evolving "<<cells.size()<<" cells\n");
@@ -584,8 +584,8 @@ outer_chain_reach(
     ARIADNE_LOG(3,"Computing recurrent evolution...\n");
     HybridGridTreeSet starting_cells = evolve_cells;
     HybridGridTreeSet current_evolve_cells(grid);
-    
-    
+
+
     while(!starting_cells.empty()) {
         current_evolve_cells = evolve_cells;
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,starting_cells,

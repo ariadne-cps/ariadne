@@ -55,9 +55,9 @@ class HybridEvolverInterface
     //! HACK: Provided since HybridEnclosure needs a Sweeper to initialise.
     virtual Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure,const TimeType& time,Semantics semantics) const = 0;
     virtual Orbit<EnclosureType> orbit(const HybridBox& initial_box,const TimeType& time,Semantics semantics) const = 0;
-    virtual Orbit<EnclosureType> orbit(const HybridExpressionSet& initial_set,const TimeType& time,Semantics semantics) const = 0;
+    virtual Orbit<EnclosureType> orbit(const HybridSet& initial_set,const TimeType& time,Semantics semantics) const = 0;
     virtual EnclosureType enclosure(const HybridBox& initial_box) const = 0;
-    virtual EnclosureType enclosure(const HybridExpressionSet& initial_set) const = 0;
+    virtual EnclosureType enclosure(const HybridSet& initial_set) const = 0;
 };
 
 

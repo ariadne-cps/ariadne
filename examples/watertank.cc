@@ -143,8 +143,8 @@ int main(int argc, const char* argv[])
     typedef GeneralHybridEvolverType::EnclosureListType EnclosureListType;
     typedef GeneralHybridEvolverType::OrbitType OrbitType;
 
-    //HybridExpressionSet initial_set(opening,(height==0.0, aperture==0.0));
-    HybridExpressionSet initial_set(opening,(0.0<=height<=1.0/256, 0.0<=aperture<=1.0/256));
+    //HybridSet initial_set(opening,(height==0.0, aperture==0.0));
+    HybridSet initial_set(opening,(0.0<=height<=1.0/256, 0.0<=aperture<=1.0/256));
     std::cout << "Initial set = " << initial_set << "\n" ;
     HybridTime evolution_time(80.0,10);
     std::cout << "Evolution time = "  << evolution_time << "\n" ;

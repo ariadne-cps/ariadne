@@ -139,9 +139,9 @@ int main(int argc, const char* argv[])
     // Compute the system evolution
 
     // Set the initial set.
-    double r=1.0/1024; double Ti=17.0; 
+    double r=1.0/1024; double Ti=17.0;
     Real Tinitmin=Ti+r; Real Tinitmax=Ti+3*r; Real Cinitmin=0+r; Real Cinitmax=0+3*r; // Tinit=16.0;
-    HybridExpressionSet initial_set(heating|off, (Tinitmin<=T<=Tinitmax,Cinitmin<=C<=Cinitmax) );
+    HybridSet initial_set(heating|off, (Tinitmin<=T<=Tinitmax,Cinitmin<=C<=Cinitmax) );
     cout << "initial_set=" << initial_set << endl;
     // Compute the initial set as a validated enclosure.
     HybridEnclosure initial_enclosure = evolver.enclosure(initial_set);
@@ -157,7 +157,7 @@ int main(int argc, const char* argv[])
     cout << "    done." << endl;
 
     cout << "\nComputed " << series_orbit.reach().size() << " reach enclosures and " << series_orbit.final().size() << " final enclosures.\n";
-    
+
     DRAWING_METHOD = AFFINE_DRAW;
     DRAWING_ACCURACY += 1;
 
@@ -176,7 +176,6 @@ int main(int argc, const char* argv[])
 //    plot("heating-orbit-time.png",Axes2d(0.0<=t<=tmax,dTmin<=T<=dTmax), midnight_guard_colour, midnight_guard, guard_colour, guard, series_orbit_colour, series_orbit);
     cout << "done." << endl << endl;
 
-    HybridSet init_set(initial_set,RealSpace({C,T}));
     HybridReachabilityAnalyser analyser(heating_system,evolver);
     analyser.configuration().set_lock_to_grid_time(1+1.0/1024);
     analyser.configuration().set_lock_to_grid_steps(1);
@@ -188,7 +187,7 @@ int main(int argc, const char* argv[])
     analyser.configuration().set_maximum_grid_depth(5);
     analyser.verbosity=5;
     cout << "\nComputing chain-reachable set... \n" << flush;
-    HybridGridTreeSet chain_reach_set = analyser.outer_chain_reach(init_set);
+    HybridGridTreeSet chain_reach_set = analyser.outer_chain_reach(initial_set);
     cout << "done." << endl << endl;
     cout << "\nPlotting chain-reachable set... " << flush;
     HybridGridTreeSet chain_reach_set_off=chain_reach_set;

@@ -61,7 +61,8 @@ bounding_boxes(const HybridSpaceInterface& space, Interval bound)
     for(Set<DiscreteLocation>::const_iterator loc_iter=locations.begin();
         loc_iter!=locations.end(); ++loc_iter)
         {
-            result.insert(make_pair(*loc_iter,Box(space[*loc_iter].dimension(), bound)));
+            DiscreteLocation const& loc=*loc_iter;
+            result.insert(loc,space[loc],Box(space[loc].dimension(), bound));
         }
     return result;
 }
@@ -222,7 +223,7 @@ class TestHybridReachabilityAnalyser
         DiscreteLocation loc(1);
         HybridBoxes bounding_boxes
             =Ariadne::bounding_boxes(system.state_space(),bound);
-        Box bounding_box=bounding_boxes[loc];
+        VariablesBox bounding_box=bounding_boxes[loc];
 
         analyser.configuration().set_transient_time(4.0);
         analyser.configuration().set_bounding_domain_ptr(shared_ptr<HybridBoxes>(new HybridBoxes(bounding_boxes)));
@@ -244,7 +245,7 @@ class TestHybridReachabilityAnalyser
         DiscreteLocation loc(1);
         HybridBoxes bounding_boxes
             =Ariadne::bounding_boxes(system.state_space(),bound);
-        Box bounding_box=bounding_boxes[loc];
+        VariablesBox bounding_box=bounding_boxes[loc];
 
         analyser.configuration().set_transient_time(4.0);
         analyser.configuration().set_bounding_domain_ptr(shared_ptr<HybridBoxes>(new HybridBoxes(bounding_boxes)));

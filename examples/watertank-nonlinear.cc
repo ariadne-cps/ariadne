@@ -28,7 +28,7 @@ using namespace Ariadne;
 
 Figure& operator<<(Figure& fig, const ListSet<HybridEnclosure>& set) {
     for(ListSet<HybridEnclosure>::const_iterator set_iter=set.begin(); set_iter!=set.end(); ++set_iter) {
-        fig << set_iter->continuous_state_set(); } return fig; }
+        fig << set_iter->continuous_set(); } return fig; }
 
 Figure& operator<<(Figure& fig, const HybridGridTreeSet& set) {
     for(Map<DiscreteLocation,GridTreeSet>::const_iterator loc_iter=set.locations_begin(); loc_iter!=set.locations_end(); ++loc_iter) {
@@ -206,9 +206,9 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 6.0, y = 1.0" << std::endl;
 
-    //RealVariableBox initial_box((height==0.5, aperture==0.0));
-    RealVariableBox initial_box((0.5<=height<=0.5001, 0.00<=aperture<=0.0001));
-    HybridExpressionSet initial_set(opening,initial_box);
+    //RealVariablesBox initial_box((height==0.5, aperture==0.0));
+    RealVariablesBox initial_box((0.5<=height<=0.5001, 0.00<=aperture<=0.0001));
+    HybridSet initial_set(opening,initial_box);
 
     HybridTime evolution_time(tmax,jmax);
 

@@ -614,7 +614,7 @@ TestHybridEvolver::test_affine_flow() const
     evolver_ptr->configuration().set_maximum_step_size(0.5);
 
     const double r=0.125;
-    HybridExpressionSet initial_set(q,(2-r<=x0<=2+r,-r<=x1<=r));
+    HybridSet initial_set(q,(2-r<=x0<=2+r,-r<=x1<=r));
     HybridEnclosure initial_enclosure=this->evolver_ptr->enclosure(initial_set);
 
     HybridTime evolution_time=HybridTime(1.5,2);
@@ -658,8 +658,8 @@ TestHybridEvolver::test_splitting_on_urgent_event() const
 
     DiscreteLocation initial_location(upwards);
     const double r=0.125;
-    RealVariableBox initial_box((-r<=x<=+r, -r<=y<=+r));
-    HybridEnclosure initial_enclosure=this->evolver_ptr->enclosure(HybridExpressionSet(initial_location,initial_box));
+    RealVariablesBox initial_box((-r<=x<=+r, -r<=y<=+r));
+    HybridEnclosure initial_enclosure=this->evolver_ptr->enclosure(HybridSet(initial_location,initial_box));
     HybridTime evolution_time=HybridTime(4.0,2);
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(initial_enclosure,evolution_time);
     ARIADNE_TEST_PRINT(orbit);
@@ -667,7 +667,7 @@ TestHybridEvolver::test_splitting_on_urgent_event() const
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),4u);
 
     Axes2d axes(-1.0,x,11.0, -6.0,y,6.0);
-    HybridExpressionSet guard_set(upwards,(-1.0<=x<=11.0,2.0<=y<=6.0));
+    HybridSet guard_set(upwards,(-1.0<=x<=11.0,2.0<=y<=6.0));
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-splitting_on_urgent_event"), axes, guard_set_colour,guard_set,
          reach_set_colour,orbit.reach(), intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(), initial_set_colour,orbit.initial());
@@ -708,12 +708,12 @@ TestHybridEvolver::test_affine_flow_system() const
 
     DiscreteLocation initial_location(upwards);
     Real r=0.125;
-    RealVariableBox initial_box((-r<=x<=+r, -r<=y<=+r));
-    HybridEnclosure initial_enclosure=this->evolver_ptr->enclosure(HybridExpressionSet(initial_location,initial_box));
+    RealVariablesBox initial_box((-r<=x<=+r, -r<=y<=+r));
+    HybridEnclosure initial_enclosure=this->evolver_ptr->enclosure(HybridSet(initial_location,initial_box));
     HybridTime evolution_time(0.0,0u);
 
     Axes2d axes(-1.0,x,3.0, -1.0,y,3.0);
-    HybridExpressionSet guard_set_changeup(downwards,(-1.0<=x<=11.0,-2.0<=y<=-1.5));
+    HybridSet guard_set_changeup(downwards,(-1.0<=x<=11.0,-2.0<=y<=-1.5));
 
     evolution_time=HybridTime(1.0,3);
     ARIADNE_TEST_PRINT(evolution_time);
@@ -779,8 +779,8 @@ void TestHybridEvolver::test_constant_derivative_system() const
     system.new_transition(q1,e,q2,(prime(x)=x-2,prime(y)=y),x+y>=0,urgent);
 
     Real r=0.0625;
-    RealVariableBox initial_box((-r<=x<=+r,-r<=y<=+r));
-    HybridExpressionSet initial_set(q1,initial_box);
+    RealVariablesBox initial_box((-r<=x<=+r,-r<=y<=+r));
+    HybridSet initial_set(q1,initial_box);
 
     _set_evolver(system);
 
@@ -796,7 +796,7 @@ void TestHybridEvolver::test_constant_derivative_system() const
 
     ListSet<HybridEnclosure> final_set=orbit.final();
     ARIADNE_TEST_PRINT(final_set);
-    HybridEnclosure expected_final_set=evolver_ptr->enclosure(HybridExpressionSet(q2,initial_box));
+    HybridEnclosure expected_final_set=evolver_ptr->enclosure(HybridSet(q2,initial_box));
     ARIADNE_TEST_PRINT(expected_final_set);
 
     ARIADNE_TEST_COMPARE(norm(final_set[0].space_function()-expected_final_set.space_function()),<,1e-14);
@@ -817,19 +817,19 @@ void TestHybridEvolver::test_transverse_linear_crossing() const
     system.new_mode(q1,(dot(x)=1,dot(y)=0));
     system.new_mode(q2,(dot(x)=0,dot(y)=1));
     system.new_transition(q1,e,q2,(prime(x)=x,prime(y)=y),guard>=0,urgent);
-    HybridExpressionSet initial_set(q1,(-r<=x<=r,-r<=y<=r));
+    HybridSet initial_set(q1,(-r<=x<=r,-r<=y<=r));
     HybridTime evolution_time(2.0,3);
 
     _set_evolver(system);
 
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(initial_set,evolution_time,UPPER_SEMANTICS);
-    Enclosure final_enclosure=orbit.final()[0].continuous_state_set();
+    Enclosure final_enclosure=orbit.final()[0].continuous_set();
 
     RealSpace final_space=system.continuous_state_space(q2);
     RealExpression ct=-guard; // Crossing time
     //RealVectorFunction function=make_function((x+ct,y+2-ct),final_space);
     RealVectorFunction function=join(make_function(x+ct,final_space),make_function(y+2-ct,final_space));
-    Enclosure expected_final_enclosure(initial_set.continuous_state_set(final_space),evolver_ptr->function_factory());
+    Enclosure expected_final_enclosure(initial_set.euclidean_set(q1,final_space),evolver_ptr->function_factory());
     expected_final_enclosure.apply_map(function);
 
     Vector<Interval> tolerance(2,Interval(-tol,+tol));
@@ -837,7 +837,7 @@ void TestHybridEvolver::test_transverse_linear_crossing() const
     ARIADNE_TEST_BINARY_PREDICATE(refines,final_enclosure.space_function()[0],expected_final_enclosure.space_function()[0]+tolerance[0]);
 
     Axes2d axes(-1.0<=x<=3.0, -1.0<=y<=3.0);
-    HybridExpressionSet guard_set(q1,(-1.0<=x<=3.0,-1.0<=y<=3.0),guard>=0);
+    HybridSet guard_set(q1,(-1.0<=x<=3.0,-1.0<=y<=3.0),guard>=0);
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-transverse_linear_crossing"), axes, guard_set_colour,guard_set,
          reach_set_colour,orbit.reach(), intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(), initial_set_colour,orbit.initial());
@@ -853,7 +853,7 @@ void TestHybridEvolver::test_transverse_cubic_crossing() const
     system.new_mode(q1,(dot(x)=1,dot(y)=0));
     system.new_mode(q2,(dot(x)=0,dot(y)=1));
     system.new_transition(q1,e,q2,(prime(x)=x,prime(y)=y),guard>=0,urgent);
-    HybridExpressionSet initial_set(q1,(-r<=x<=r,-r<=y<=r));
+    HybridSet initial_set(q1,(-r<=x<=r,-r<=y<=r));
     HybridTime evolution_time(2.0,3);
 
     _set_evolver(system);
@@ -861,7 +861,7 @@ void TestHybridEvolver::test_transverse_cubic_crossing() const
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(initial_set,evolution_time,UPPER_SEMANTICS);
 
     Axes2d axes(-1.0<=x<=3.0, -1.0<=y<=3.0);
-    HybridExpressionSet guard_set(q1,(-1.0<=x<=3.0,-1.0<=y<=3.0),guard>=0);
+    HybridSet guard_set(q1,(-1.0<=x<=3.0,-1.0<=y<=3.0),guard>=0);
     HybridEnclosure guard_enclosure=evolver_ptr->enclosure(guard_set);
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-transverse_cubic_crossing"), axes, guard_set_colour,guard_enclosure,
          reach_set_colour,orbit.reach(), intermediate_set_colour,orbit.intermediate(),
@@ -878,7 +878,7 @@ void TestHybridEvolver::test_transverse_cube_root_crossing() const
     system.new_mode(q1,(dot(x)=1,dot(y)=0));
     system.new_mode(q2,(dot(x)=0,dot(y)=1));
     system.new_transition(q1,e,q2,(prime(x)=x,prime(y)=y),guard>=0,urgent);
-    HybridExpressionSet initial_set(q1,(-r<=x<=r,-r<=y<=r));
+    HybridSet initial_set(q1,(-r<=x<=r,-r<=y<=r));
     HybridTime evolution_time(2.0,3);
 
     _set_evolver(system);
@@ -886,7 +886,7 @@ void TestHybridEvolver::test_transverse_cube_root_crossing() const
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(initial_set,evolution_time,UPPER_SEMANTICS);
 
     Axes2d axes(-1.0<=x<=3.0, -1.0<=y<=3.0);
-    HybridExpressionSet guard_set(q1,(-1.0<=x<=3.0,-1.0<=y<=3.0),guard>=0);
+    HybridSet guard_set(q1,(-1.0<=x<=3.0,-1.0<=y<=3.0),guard>=0);
     HybridEnclosure guard_enclosure=evolver_ptr->enclosure(guard_set);
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-transverse_cube_root_crossing"), axes, guard_set_colour,guard_enclosure,
          reach_set_colour,orbit.reach(), intermediate_set_colour,orbit.intermediate(),

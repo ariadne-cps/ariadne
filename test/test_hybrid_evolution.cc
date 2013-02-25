@@ -182,7 +182,7 @@ void TestHybridEvolution::test_water_tank() const {
 
     DiscreteLocation initial_location=opening;
     HybridBox initial_box(initial_location,(0<=height<=one/16,0.0<=aperture<=one/64));
-    HybridExpressionSet initial(initial_location,(0<=height<=one/16,0.0<=aperture<=one/64));
+    HybridSet initial(initial_location,(0<=height<=one/16,0.0<=aperture<=one/64));
 
     //HybridTime evolution_time(80.0,5);
     HybridTime evolution_time(80.0,8);

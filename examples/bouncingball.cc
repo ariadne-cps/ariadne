@@ -80,7 +80,7 @@ int main(int argc, const char* argv[])
 
     std::cout << "Computing evolution starting from location l1, x = 2.0, v = 0.0" << std::endl;
 
-    HybridExpressionSet initial_set(freefall,(2.0<=x<=2.0,v.in(0.0,0.0)));
+    HybridSet initial_set(freefall,(2.0<=x<=2.0,v.in(0.0,0.0)));
     HybridTime evolution_time(1.5,4);
 
     std::cout << "Computing orbit... " << std::flush;

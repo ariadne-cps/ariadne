@@ -102,14 +102,14 @@ OutputStream& operator<<(OutputStream& os, const RealVariableInterval& eivl) {
 }
 
 
-RealVariableBox::RealVariableBox(const List<RealVariableInterval>& lst)
+RealVariablesBox::RealVariablesBox(const List<RealVariableInterval>& lst)
 {
     for(uint i=0; i!=lst.size(); ++i) {
         _bounds.insert(lst[i].variable(),lst[i].interval());
     }
 }
 
-RealVariableBox::RealVariableBox(const RealSpace& spc, const RealBoxSet& bx)
+RealVariablesBox::RealVariablesBox(const RealSpace& spc, const RealBoxSet& bx)
 {
     ARIADNE_ASSERT(spc.size()==bx.size());
     for(uint i=0; i!=spc.size(); ++i) {
@@ -117,8 +117,16 @@ RealVariableBox::RealVariableBox(const RealSpace& spc, const RealBoxSet& bx)
     }
 }
 
-RealBoxSet RealVariableBox::box(const List<RealVariable>& spc) const {
-    const RealVariableBox& ebx = *this;
+RealBoxSet RealVariablesBox::euclidean_set(const RealSpace& spc) const {
+    RealBoxSet bx(spc.size());
+    for(uint i=0; i!=spc.size(); ++i) {
+        bx[i]=(*this)[spc[i]];
+    }
+    return bx;
+}
+
+RealBoxSet RealVariablesBox::box(const List<RealVariable>& spc) const {
+    const RealVariablesBox& ebx = *this;
     RealBoxSet bx(spc.size());
     for(uint i=0; i!=spc.size(); ++i) {
         bx[i]=ebx[spc[i]];
@@ -126,7 +134,35 @@ RealBoxSet RealVariableBox::box(const List<RealVariable>& spc) const {
     return bx;
 }
 
-RealBoxSet euclidean_set(const RealVariableBox& ebx, const List<RealVariable>& spc) {
+
+VariablesBox::VariablesBox(const RealSpace& spc, const Box& bx)
+{
+    ARIADNE_ASSERT(spc.size()==bx.size());
+    for(uint i=0; i!=spc.size(); ++i) {
+        _bounds.insert(spc[i],bx[i]);
+    }
+}
+
+VariablesBox over_approximation(const RealVariablesBox& ebx) {
+    Map<RealVariable,Interval> result;
+    for(Map<RealVariable,RealIntervalSet>::const_iterator iter=ebx.bounds().begin();
+        iter!=ebx.bounds().end(); ++iter)
+    {
+        result[iter->first]=over_approximation(iter->second);
+    }
+    return result;
+}
+
+
+Box VariablesBox::euclidean_set(const RealSpace& spc) const {
+    Box bx(spc.dimension());
+    for(uint i=0; i!=spc.dimension(); ++i) {
+        bx[i]=this->operator[](spc[i]);
+    }
+    return bx;
+}
+
+RealBoxSet euclidean_set(const RealVariablesBox& ebx, const List<RealVariable>& spc) {
     RealBoxSet bx(spc.size());
     for(uint i=0; i!=spc.size(); ++i) {
         bx[i]=ebx[spc[i]];
@@ -134,7 +170,7 @@ RealBoxSet euclidean_set(const RealVariableBox& ebx, const List<RealVariable>& s
     return bx;
 }
 
-Box approximate_euclidean_set(const RealVariableBox& ebx, const List<RealVariable>& spc) {
+Box approximate_euclidean_set(const RealVariablesBox& ebx, const List<RealVariable>& spc) {
     Box bx(spc.size());
     for(uint i=0; i!=spc.size(); ++i) {
         bx[i]=approximation(ebx[spc[i]]);
@@ -142,7 +178,7 @@ Box approximate_euclidean_set(const RealVariableBox& ebx, const List<RealVariabl
     return bx;
 }
 
-OutputStream& operator<<(OutputStream& os, const RealVariableBox& ebx) {
+OutputStream& operator<<(OutputStream& os, const RealVariablesBox& ebx) {
     return os << ebx._bounds;
 }
 
@@ -159,8 +195,19 @@ RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const Lis
     : _bounds(make_key_value_map(bounds)), _constraints(constraints)
 {
     ARIADNE_ASSERT(unique_keys(bounds));
-    ARIADNE_ASSERT( subset(arguments(constraints),variables(bounds)) );
+    ARIADNE_ASSERT( subset(arguments(constraints),Ariadne::variables(bounds)) );
 }
+
+RealBoundedConstraintSet RealExpressionBoundedConstraintSet::euclidean_set(const RealSpace& space) const {
+    const RealExpressionBoundedConstraintSet& set = *this;
+    RealBoxSet domain=Ariadne::euclidean_set(RealVariablesBox(set.bounds()),space.variables());
+    List<RealConstraint> constraints;
+    for(uint i=0; i!=set.constraints().size(); ++i) {
+        RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
+        RealScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
+        constraints.append( constraint_function <= Real(0) );
+    }
+    return RealBoundedConstraintSet(domain,constraints);}
 
 OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraintSet& eset) {
     os << "[";
@@ -174,7 +221,7 @@ OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraint
 }
 
 RealBoundedConstraintSet euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
-    RealBoxSet domain=euclidean_set(RealVariableBox(set.bounds()),space.variables());
+    RealBoxSet domain=euclidean_set(RealVariablesBox(set.bounds()),space.variables());
     List<RealConstraint> constraints;
     for(uint i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
@@ -185,7 +232,7 @@ RealBoundedConstraintSet euclidean_set(const RealExpressionBoundedConstraintSet&
 }
 
 IntervalConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
-    IntervalVector domain=approximation(euclidean_set(RealVariableBox(set.bounds()),space.variables()));
+    IntervalVector domain=approximation(euclidean_set(RealVariablesBox(set.bounds()),space.variables()));
     IntervalVectorFunction identity=IntervalVectorFunction::identity(domain.size());
 
     IntervalConstrainedImageSet result(domain,identity);

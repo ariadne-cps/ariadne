@@ -167,6 +167,30 @@ VariablesBox under_approximation(const RealVariablesBox& ebx) {
 
 
 
+RealExpressionConstraintSet::RealExpressionConstraintSet(const List<ContinuousPredicate>& constraints)
+    : _constraints(constraints)
+{
+}
+
+RealConstraintSet RealExpressionConstraintSet::euclidean_set(const RealSpace& space) const {
+    const RealExpressionConstraintSet& set = *this;
+    List<RealConstraint> constraints;
+    for(uint i=0; i!=set.constraints().size(); ++i) {
+        RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
+        RealScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
+        constraints.append( constraint_function <= Real(0) );
+    }
+    return RealConstraintSet(constraints);
+}
+
+OutputStream& operator<<(OutputStream& os, const RealExpressionConstraintSet& eset) {
+    os << "[";
+    for(List<ContinuousPredicate>::const_iterator iter=eset._constraints.begin(); iter!=eset._constraints.end(); ++iter) {
+        os << (iter==eset._constraints.begin()?"":",") << *iter; }
+    return os << "]";
+}
+
+
 
 RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& bounds)
     : _bounds(make_key_value_map(bounds)), _constraints()

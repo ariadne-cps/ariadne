@@ -248,6 +248,67 @@ void HybridGridTreeSet::draw(CanvasInterface& canvas, const Set<DiscreteLocation
 }
 
 
+
+HybridRealConstraintSet::HybridRealConstraintSet()
+    : _sets()
+{
+}
+
+HybridRealConstraintSet::HybridRealConstraintSet(const DiscreteLocation& loc,
+                                                 const List<ContinuousPredicate>& cnstr)
+    : _sets()
+{
+    _sets.insert(loc,RealExpressionConstraintSet(cnstr));
+}
+
+HybridRealConstraintSet* HybridRealConstraintSet::clone() const {
+    return new HybridRealConstraintSet(*this);
+}
+
+Set<RealVariable> HybridRealConstraintSet::variables(DiscreteLocation loc) const {
+    ARIADNE_ASSERT(this->_sets.has_key(loc));
+    return _sets[loc].variables();
+}
+
+RealConstraintSet const HybridRealConstraintSet::euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+    ARIADNE_ASSERT(this->_sets.has_key(loc));
+    return RealConstraintSet(this->_sets[loc].euclidean_set(spc));
+}
+
+RegularSetInterface* HybridRealConstraintSet::_euclidean_set(DiscreteLocation loc, RealSpace spc) const {
+    return new RealConstraintSet(this->euclidean_set(loc,spc));
+}
+
+tribool HybridRealConstraintSet::overlaps(const HybridBox& bx) const {
+    if(this->_sets.has_key(bx.location())) {
+        return this->_sets[bx.location()].euclidean_set(bx.space()).overlaps(bx.continuous_set());
+    } else {
+        return false;
+    }
+}
+
+tribool HybridRealConstraintSet::covers(const HybridBox& bx) const {
+    if(this->_sets.has_key(bx.location())) {
+        return this->_sets[bx.location()].euclidean_set(bx.space()).covers(bx.continuous_set());
+    } else {
+        return bx.continuous_set().empty();
+    }
+}
+
+tribool HybridRealConstraintSet::separated(const HybridBox& bx) const {
+    if(this->_sets.has_key(bx.location())) {
+        return this->_sets[bx.location()].euclidean_set(bx.space()).separated(bx.continuous_set());
+    } else {
+        return true;
+    }
+}
+
+std::ostream& HybridRealConstraintSet::write(std::ostream& os) const {
+    return os << "HybridRealConstraintSet( "<< this->_sets << " )";
+}
+
+
+
 HybridRealBoundedConstraintSet::HybridRealBoundedConstraintSet()
     : _sets()
 {

@@ -60,8 +60,8 @@ class SolverInterface;
 class HybridEvolverBaseConfiguration;
 class GeneralHybridEvolverConfiguration;
 
-// A derived class of IntervalVectorFunctionModel representing the flow $\phi(x,t)\f$ of a
-// differential equations \f$\dot{x}=f(x)\f$.
+//! \ingroup FunctionModule
+//! \brief A class representing the flow \f$\phi(x,t)\f$ of a differential equation \f$\frac{dx}{dt}=f(x)\f$.
 class FlowFunctionModel
     : public IntervalVectorFunctionModel
 {
@@ -112,9 +112,6 @@ class HybridEvolverBase
 
   public:
 
-    //@{
-    //! \name Constructors and destructors
-
     //! \brief Default constructor.
     HybridEvolverBase(const SystemType& system);
 
@@ -123,45 +120,40 @@ class HybridEvolverBase
     		const SystemType& system,
             const FunctionFactoryType& factory);
 
-    /*! \brief Make a dynamically-allocated copy. */
+    //! \brief Make a dynamically-allocated copy.
     HybridEvolverBase* clone() const = 0;
 
-    /*! \brief Get the internal system. */
+    //! \brief Get the internal system.
     const SystemType& system() const;
 
-    //@}
 
     //@{
     //! \name Settng and configuration for the class.
 
+    //! \brief A reference to the evolver's configuration parameters.
     ConfigurationType& configuration();
     const ConfigurationType& configuration() const;
 
     //! \brief Change the configuration from a \a domain and \a lengths (NOT IMPLEMENTED).
     virtual void reconfigure(const HybridBoxes& domain, const HybridFloatVector& lengths) { }
 
-    /*! \brief The class which constructs functions for the enclosures. */
+    //! \brief The class which constructs functions for the enclosures.
     const FunctionFactoryType& function_factory() const;
-    /*! \brief Set the class which constructs functions for the enclosures. */
+    //! \brief Set the class which constructs functions for the enclosures.
     void set_function_factory(const FunctionFactoryType& factory);
 
-    /*! \brief Set the class which integrates the continuous dynamics. */
+    //! \brief Set the class which integrates the continuous dynamics.
     void set_integrator(const IntegratorInterface& integrator);
-    /*! \brief Set the class which integrates the continuous dynamics. */
+    //! \brief Set the class which integrates the continuous dynamics.
     void set_solver(const SolverInterface& solver);
-
-    virtual EnclosureType enclosure(const HybridBox& initial_box) const;
-    virtual EnclosureType enclosure(const HybridSet& initial_set) const;
 
     bool ALLOW_CREEP; //!< If true, a less-than-full evolution step may be taken to avoid splitting due to partially crossing a guard.
     bool ALLOW_UNWIND; //!< If true, a less-than-full evolution step may be taken to try to restore all time values over the parameter domain to the same value.
     //@}
 
-
     //@{
     //! \name Main evolution functions.
 
-    //! \brief Compute an approximation to the orbit set using the given semantics.
     Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
     Orbit<EnclosureType> orbit(const HybridBox& initial_box, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
     Orbit<EnclosureType> orbit(const HybridSet& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
@@ -178,6 +170,22 @@ class HybridEvolverBase
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
         this->_evolution(final,reachable,intermediate,initial_set,time,semantics,true);
         return reachable; }
+
+    //! \brief Compute an approximation to the evolution set under the given semantics.
+    Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,initial_set,time,semantics,true);
+        return make_pair(reachable,final); }
+    //@}
+
+    //@{
+    //! \name Auxiliary set conversion functionality
+
+    //! \brief Set construct an enclosure from a box, such as one obtained from a grid.
+    virtual EnclosureType enclosure(const HybridBox& initial_box) const;
+    //! \brief Set construct an enclosure from a user-provided set.
+    virtual EnclosureType enclosure(const HybridSet& initial_set) const;
+
     //@}
 
   protected:
@@ -487,6 +495,8 @@ struct TransitionData
 };
 
 
+//! \relates HybridEvolverBase
+//! \brief Information on how a flow tube crosses a hypersurface.
 enum class DirectionKind {
     POSITIVE, //!< The guard function is strictly positive on the flow range.
         //! The event occurs immediately (if urgent) or at any time (if permissive).
@@ -500,7 +510,8 @@ enum class DirectionKind {
     INDETERMINATE //!< Neither the guard function, nor its first or second Lie derivatives, has a definite sign.
 };
 
-//! \brief The way trajectories of the flow \f$\phi(x_0,t)\f$ of \f$\dot{x}=f(x)\f$ cross the guard set \f$g(x)=0\f$.
+//! \relates HybridEvolverBase
+//! \brief The way trajectories of the flow \f$\phi(x_0,t)\f$ of \f$\frac{dx}{dt}=f(x)\f$ cross the guard set \f$g(x)=0\f$.
 //! The rate of change of the guard function changes along flow lines is given by
 //! \f$d g(x(t))/dt = L_{f}g(x(t))\f$ where the Lie derivative \f$L_{f}g\f$ is defined by \f$L_{f}g(x) = (\nabla g\cdot f)(x)\f$.
 //!
@@ -621,6 +632,7 @@ struct TimingData
 
 //! \brief A data type used to store information about the kind of time step taken during hybrid evolution.
 //! \relates HybridEvolverInterface
+//! \relates HybridEvolverBase
 struct EvolutionData
 {
     //! \brief Sets for which the evolution starts in a new mode, initially or after a jump.
@@ -649,6 +661,7 @@ struct EvolutionData
 };
 
 
+//! \relates HybridEvolverBase
 //! \brief Configuration for HybridEvolverBase, for controlling the accuracy of continuous evolution methods.
 class HybridEvolverBaseConfiguration : public ConfigurationInterface
 {
@@ -730,7 +743,8 @@ class GeneralHybridEvolver
     GeneralHybridEvolver(const SystemType& system);
     GeneralHybridEvolver(const SystemType& system,
                          const IntervalFunctionModelFactoryInterface& factory);
-    GeneralHybridEvolver* clone() const { return new GeneralHybridEvolver(*this); }
+    virtual GeneralHybridEvolver* clone() const { return new GeneralHybridEvolver(*this); }
+    virtual OutputStream& write(OutputStream& os) const { return os << "GeneralHybridEvolver( " << this->configuration() << ")"; }
 
   protected:
     virtual
@@ -769,6 +783,7 @@ class GeneralHybridEvolver
 
 
 //! \brief Configuration for GeneralHybridEvolver, for controlling the accuracy of continuous evolution methods.
+//! \relates GeneralHybridEvolver
 class GeneralHybridEvolverConfiguration : public HybridEvolverBaseConfiguration
 {
   public:
@@ -779,6 +794,7 @@ class GeneralHybridEvolverConfiguration : public HybridEvolverBaseConfiguration
 };
 
 //! \brief Factory for GeneralHybridEvolver objects.
+//! \deprecated Use cloning instead
 class GeneralHybridEvolverFactory
     : public HybridEvolverFactoryInterface
 {

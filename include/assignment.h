@@ -88,6 +88,7 @@ typedef Set< Variable<Real> > RealVariableSet;
 
 
 
+//! \ingroup ExpressionModule
 //! \brief An assignment statement.
 template<class LHS, class RHS>
 struct Assignment

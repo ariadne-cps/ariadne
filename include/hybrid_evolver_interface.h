@@ -28,7 +28,7 @@
 #ifndef ARIADNE_HYBRID_EVOLVER_INTERFACE_H
 #define ARIADNE_HYBRID_EVOLVER_INTERFACE_H
 
-#include "evolver_base.h"
+#include "evolver_interface.h"
 
 #include "hybrid_time.h"
 #include "hybrid_set.h"
@@ -45,19 +45,38 @@ class HybridEnclosure;
 //! \brief Interface for hybrid evolvers using HybridEnclosure as the enclosure type.
 //! \details The class is loggable in order to allow verbosity tuning at the analyser layer.
 class HybridEvolverInterface
-    : public EvolverBase<HybridAutomatonInterface,HybridEnclosure>
+    : public EvolverInterface<HybridAutomatonInterface,HybridEnclosure>
     , public Loggable
 {
   public:
     //! \brief Make a dynamically-allocated copy.
     virtual HybridEvolverInterface* clone() const = 0;
-    //! \brief Evolution starting in a box.
-    //! HACK: Provided since HybridEnclosure needs a Sweeper to initialise.
+
+    //@{
+    //! \name Main evolution functions.
+
+    //! \brief Compute an approximation to the orbit set using the given semantics, starting from an initial enclosure.
+    //!   Useful for continuing a partially-computed orbit.
     virtual Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure,const TimeType& time,Semantics semantics) const = 0;
+    //! \brief Compute an approximation to the orbit set using the given semantics, starting from a box.
+    //!   Useful for computing the evolution starting from a cell of a grid.
     virtual Orbit<EnclosureType> orbit(const HybridBox& initial_box,const TimeType& time,Semantics semantics) const = 0;
+    //! \brief Compute an approximation to the orbit set using the given semantics, starting from a set described by bounds and constraints.
+    //!   Useful for computing the evolution starting from user-provided set.
     virtual Orbit<EnclosureType> orbit(const HybridSet& initial_set,const TimeType& time,Semantics semantics) const = 0;
+
+    //@}
+
+    //@{
+    //! \name Auxiliary set conversion functionality
+
+    //! \brief Set construct an enclosure from a box, such as one obtained from a grid.
     virtual EnclosureType enclosure(const HybridBox& initial_box) const = 0;
+    //! \brief Set construct an enclosure from a user-provided set.
     virtual EnclosureType enclosure(const HybridSet& initial_set) const = 0;
+
+    //@}
+
 };
 
 

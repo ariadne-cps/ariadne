@@ -62,9 +62,8 @@ template<class ES> class HybridListSet;
 class HybridEvolverInterface;
 class HybridReachabilityAnalyserConfiguration;
 
-/*! \ingroup AnalysisModule
- *  \brief A class for performing reachability analysis on a hybrid system.
- */
+//! \ingroup AnalysisModule
+//! \brief A class for performing reachability analysis on a hybrid system.
 class HybridReachabilityAnalyser
     : public HybridReachabilityAnalyserInterface
 {
@@ -85,67 +84,69 @@ class HybridReachabilityAnalyser
   public:
     //@{
     //! \name Constructors and destructors
-    /*! \brief Virtual destructor */
+
+    //! \brief Virtual destructor
     virtual ~HybridReachabilityAnalyser();
 
-    /*! \brief Construct from an evolver. */
+    //! \brief Construct from an evolver.
     HybridReachabilityAnalyser(
             const SystemType& system,
             const HybridEvolverInterface& evolver);
 
-    /*! \brief Make a dynamically-allocated copy. */
+    //! \brief Make a dynamically-allocated copy.
     virtual HybridReachabilityAnalyser* clone() const;
     //@}
 
     //@{
     //! \name Methods to set and get the configuration properties of the class.
 
-    const ConfigurationType& configuration() const { return *this->_configuration; }
+    //! \brief A reference to the analyser's configuration parameters.
     ConfigurationType& configuration() { return *this->_configuration; }
+    const ConfigurationType& configuration() const { return *this->_configuration; }
 
+    //! \brief Get the system associated with the analyser.
+    virtual const SystemType& system() const { return *this->_system; }
     //@}
 
-    //! \name Get the system associated with the analyser.
-    virtual const SystemType& system() const { return *this->_system; }
 
 
     //@{
     //! \name Evaluation of systems on abstract sets
-    /*! \brief Compute a lower-approximation to the set obtained by evolving the system for \a time starting in \a initial_set. */
+    //! \brief Compute a lower-approximation to the set obtained by evolving the system for \a time starting in \a initial_set.
     virtual SetApproximationType
     lower_evolve(const OvertSetInterfaceType& initial_set,
                  const TimeType& time) const;
 
-    /*! \brief Compute a lower-approximation to the reachable and evolved sets of the system starting in \a initial_set up to \a time. */
+    //! \brief Compute a lower-approximation to the reachable and evolved sets of the system starting in \a initial_set up to \a time.
     virtual Pair<SetApproximationType,SetApproximationType>
     lower_reach_evolve(const OvertSetInterfaceType& initial_set,
                        const TimeType& time) const;
 
-    /*! \brief Compute a lower-approximation to the reachable set of the system starting in \a initial_set up to \a time. */
+    //! \brief Compute a lower-approximation to the reachable set of the system starting in \a initial_set up to \a time.
     virtual SetApproximationType
     lower_reach(const OvertSetInterfaceType& initial_set,
                 const TimeType& time) const;
 
-    /*! \brief Compute an infinite-time lower-approximation to the reachable set of the system starting in \a initial_set. */
+    //! \brief Compute an infinite-time lower-approximation to the reachable set of the system starting in \a initial_set.
     virtual SetApproximationType
     lower_reach(const OvertSetInterfaceType& initial_set) const;
 
-    /*! \brief Compute an upper-approximation to the set obtained by iterating \a time times the system starting in \a initial_set. */
+    //! \brief Compute an upper-approximation to the set obtained by iterating \a time times the system starting in \a initial_set.
     virtual SetApproximationType
     upper_evolve(const CompactSetInterfaceType& initial_set,
                  const TimeType& time) const;
 
-    /*! \brief Compute an upper-approximation to the reachable and evolved sets of the system starting in \a initial_set iterating at most \a time times. */
+    //! \brief Compute an upper-approximation to the reachable and evolved sets of the system starting in \a initial_set iterating at most \a time times.
     virtual Pair<SetApproximationType,SetApproximationType>
     upper_reach_evolve(const CompactSetInterfaceType& initial_set,
                        const TimeType& time) const;
 
-    /*! \brief Compute an upper-approximation to the reachable set of the system starting in \a initial_set iterating at most \a time times. */
+    //! \brief Compute an upper-approximation to the reachable set of the system starting in \a initial_set iterating at most \a time times.
     virtual SetApproximationType
     upper_reach(const CompactSetInterfaceType& initial_set,
                 const TimeType& timeType) const;
 
-    /*! \brief Compute a (possibly-restricted) approximation to the outer chain-reachable set of the system starting in \a initial_set. */
+    //! \brief Compute a (possibly-restricted) approximation to the outer chain-reachable set of the system starting in \a initial_set.
     virtual SetApproximationType
     outer_chain_reach(const CompactSetInterfaceType& initial_set) const;
 

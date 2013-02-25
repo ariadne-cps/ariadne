@@ -54,6 +54,8 @@ class HybridPoint;
 class HybridBox;
 class HybridBoxes;
 
+//! \ingroup HybridSetSubmodule
+//! \ingroup ExpressionSet
 //! \brief Base class for sets in a hybrid space.
 class HybridSetInterfaceBase
 {

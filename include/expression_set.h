@@ -63,6 +63,8 @@ class RealVariablesBox;
 class VariablesBox;
 class ExpressionConstraintSet;
 
+Set<Identifier> arguments(const List<ContinuousPredicate>& c);
+
 struct RealVariableLowerInterval {
     Real _lower; RealVariable _variable;
     RealVariableLowerInterval(const Real& l, const RealVariable& v) : _lower(l), _variable(v) { }
@@ -165,7 +167,6 @@ class RealVariablesBox {
     friend OutputStream& operator<<(OutputStream& os, const RealVariablesBox& ebx);
 };
 
-//! \ingroup ExpressionSetSubModule
 //! \brief An box defining ranges for a collection of real variables.
 class VariablesBox {
     RealSpace _spc;
@@ -199,6 +200,7 @@ class RealExpressionConstraintSet
   public:
     RealExpressionConstraintSet();
     RealExpressionConstraintSet(const List<ContinuousPredicate>& constraints);
+    Set<RealVariable> variables() const { return Set<RealVariable>(arguments(this->_constraints)); }
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; }
     RealConstraintSet euclidean_set(const RealSpace& space) const;
     friend std::ostream& operator<<(std::ostream& os, const RealExpressionConstraintSet& eset);

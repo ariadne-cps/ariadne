@@ -74,6 +74,9 @@ template<class DS, class HBS> class HybridSetConstIterator;
 
 
 
+//! \ingroup ExpressionSetSubModule
+//! \ingroup HybridSetSubModule
+//! \brief A hybrid set defined by a box in a single location.
 class HybridRealBox
     : public Pair<DiscreteLocation,RealVariablesBox>
     , public virtual HybridDrawableInterface
@@ -83,12 +86,19 @@ class HybridRealBox
         : Pair<DiscreteLocation,RealVariablesBox>(loc,bx) { }
     HybridRealBox(const DiscreteLocation& loc, const RealSpace& spc, const RealBoxSet& bx)
         : Pair<DiscreteLocation,RealVariablesBox>(loc,RealVariablesBox(spc,bx)) { }
+    //! \brief The location in which the box is defined.
     DiscreteLocation location() const { return this->first; }
+    //! \brief The active variables in the location \a loc.
+    virtual Set<RealVariable> variables() const { return this->second.variables(); }
+    //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by ordering the variables as defined by \a spc.
     RealBoxSet euclidean_set(const RealSpace& spc) const { return this->second.euclidean_set(spc); }
 
     virtual void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
 };
 
+//! \ingroup ExpressionSetSubModule
+//! \ingroup HybridSetSubModule
+//! \brief A hybrid set defined by the intersection of a box and a constraint system in each location.
 class HybridRealBoundedConstraintSet
     : public virtual HybridSetInterface
     , public virtual HybridDrawableInterface
@@ -101,9 +111,10 @@ class HybridRealBoundedConstraintSet
                                    const RealVariablesBox& bx);
     HybridRealBoundedConstraintSet(const DiscreteLocation& loc,
                                    const List<RealVariableInterval>& bnd);
-    HybridRealBoundedConstraintSet(const DiscreteLocation& loc,
-                                   const List<RealVariableInterval>& bnd,
-                                   const List<ContinuousPredicate>& cnstr);
+    //! \brief Construct a set in a single \a location with a list of \a bounds on the variables and nonlinear \a constraints.
+    HybridRealBoundedConstraintSet(const DiscreteLocation& location,
+                                   const List<RealVariableInterval>& bounds,
+                                   const List<ContinuousPredicate>& constraints);
 
     DiscreteLocation location() const;
 
@@ -114,8 +125,11 @@ class HybridRealBoundedConstraintSet
 
     virtual tribool separated(const HybridBox& bx) const override;
     virtual tribool covers(const HybridBox& bx) const override;
+    //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
     RealBoundedConstraintSet const euclidean_set(DiscreteLocation loc, RealSpace spc) const;
+    //! \brief The set of discrete locations in which the set is nontrivial.
     virtual Set<DiscreteLocation> locations() const override;
+    //! \brief The active variables in the location \a loc.
     virtual Set<RealVariable> variables(DiscreteLocation loc) const override;
     virtual HybridBoxes bounding_box() const override;
     virtual std::ostream& write(std::ostream& os) const override;
@@ -126,21 +140,29 @@ class HybridRealBoundedConstraintSet
 
 
 
+//! \ingroup HybridSetSubModule
+//! \brief A hybrid set defined in a single location obtained from a Euclidean set by naming variables.
 template<class EBS>
 class HybridBasicSet
-    : private Tuple<DiscreteLocation,RealSpace,EBS>
 {
+    Tuple<DiscreteLocation,RealSpace,EBS> _tuple;
   public:
+    //! \brief The type of the Euclidean set used to describe the hybrid set.
     typedef EBS ContinuousSetType;
     HybridBasicSet()
-        : Tuple<DiscreteLocation,RealSpace,EBS>(DiscreteLocation(),RealSpace(),EBS()) { }
+        : _tuple(DiscreteLocation(),RealSpace(),EBS()) { }
+    //! \brief Construct a set in location \a loc, with variables ordered by \a spc, defined by Euclidean set \a ebs.
     HybridBasicSet(const DiscreteLocation& loc, const RealSpace& spc, const ContinuousSetType& ebs)
-        : Tuple<DiscreteLocation,RealSpace,EBS>(loc,spc,ebs) { }
-    const DiscreteLocation& location() const { return this->first; }
-    const RealSpace& space() const { return this->second; }
-    const ContinuousSetType& continuous_set() const { return this->third; }
-    ContinuousSetType& continuous_set() { return this->third; }
+        : _tuple(loc,spc,ebs) { }
+    //! \brief The location the set is contained in.
+    const DiscreteLocation& location() const { return this->_tuple.first; }
+    //! \brief The ordering of variables used to define the set.
+    const RealSpace& space() const { return this->_tuple.second; }
+    //! \brief The continuous Euclidean subset.
+    const ContinuousSetType& continuous_set() const { return this->_tuple.third; }
+    ContinuousSetType& continuous_set() { return this->_tuple.third; }
 };
+//! \relates HybridBasicSet \brief Write to an output stream.
 template<class EBS> OutputStream& operator<<(OutputStream& os, const HybridBasicSet<EBS>& hbs) {
     return os << "HybridBasicSet{ " << hbs.location() << ", " << hbs.space() << ", " << hbs.continuous_set() << " )";
 }
@@ -170,6 +192,8 @@ class HybridPoint
     Map<RealVariable,Float> values() const;
 };
 
+//! \ingroup HybridSetSubModule
+//! \brief A box in a location of a hybrid space.
 class HybridBox
     : public HybridBasicSet<Box>
     , public virtual HybridDrawableInterface
@@ -190,6 +214,8 @@ class HybridBox
     virtual void draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& v) const override;
 };
 
+//! \ingroup HybridSetSubModule
+//! \brief A collection of boxes, one in each location of a hybrid space.
 class HybridBoxes
     : public Map<DiscreteLocation,VariablesBox>
 {
@@ -294,7 +320,7 @@ HybridListSetConstIterator<ES>::_increment_loc()
 template<class ES> class HybridListSet;
 template<class ES> std::ostream& operator<<(std::ostream& os, const HybridListSet<ES>& hls);
 
-//! \ingroup HybridModule
+//! \ingroup HybridSetModule
 //! A set comprising a %ListSet in each location.
 template<class ES>
 class HybridListSet
@@ -389,6 +415,8 @@ operator<<(std::ostream& os,
 
 
 
+//! \ingroup HybridSetModule
+//! \brief A cell associated with a grid in a hybrid space.
 class HybridGridCell
     : public HybridBasicSet<GridCell>
 {
@@ -449,7 +477,7 @@ class HybridSetConstIterator
 
 
 
-//! \ingroup HybridModule
+//! \ingroup HybridSetSubModule
 //! A set comprising a %GridTreeSet in each location.
 class HybridGridTreeSet
     : public HybridDrawableInterface

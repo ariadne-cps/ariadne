@@ -73,7 +73,7 @@ template<class SYS> class ReachabilityAnalyserInterface {
     lower_evolve(const OvertSetInterfaceType& initial_set,
                  const TimeType& steps) const = 0;
 
-    /*! \brief Compute a lower-approximation to the reachable and evolved sets of the system starting in \a initial_set up to \a time. */
+    //! \brief Compute a lower-approximation to the reachable and evolved sets of the system starting in \a initial_set up to \a time.
     virtual Pair<SetApproximationType,SetApproximationType>
     lower_reach_evolve(const OvertSetInterfaceType& initial_set,
                        const TimeType& time) const = 0;
@@ -93,7 +93,7 @@ template<class SYS> class ReachabilityAnalyserInterface {
     upper_evolve(const CompactSetInterfaceType& initial_set,
                  const TimeType& steps) const = 0;
 
-    /*! \brief Compute an upper-approximation to the reachable and evolved sets of the system starting in \a initial_set iterating at most \a time times. */
+    //! \brief Compute an upper-approximation to the reachable and evolved sets of the system starting in \a initial_set iterating at most \a time times.
     virtual Pair<SetApproximationType,SetApproximationType>
     upper_reach_evolve(const CompactSetInterfaceType& initial_set,
                        const TimeType& time) const = 0;

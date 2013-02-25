@@ -74,7 +74,7 @@ template<class X> class Vector;
 template<class X> class Formula;
 
 
-//! The sign of a numerical value.
+//! \brief The sign of a numerical value.
 enum Sign { NEGATIVE=-1, ZERO=0, POSITIVE=+1 };
 
 typedef Expression<Boolean> DiscretePredicate;
@@ -110,6 +110,8 @@ template<class T> struct EnableIfDoubleReal<double,Real,T> { typedef T Type; };
 //! Formulae in different variables may be combined; the variables of the resulting formula
 //! are all variables occuring in all formulae.
 //! Formulae may be manipulated symbolically.
+//!
+//! \sa Variable \sa Assignment
 template<class T>
 class Expression {
     typedef Identifier V;
@@ -143,6 +145,7 @@ class Expression {
     template<class A> const Expression<A>& cmp1(A* dummy=0) const;
     template<class A> const Expression<A>& cmp2(A* dummy=0) const;
   public:
+    //! \brief The variables needed to compute the expression.
     Set<UntypedVariable> arguments() const;
   public:
     const ExpressionNode<T>* node_ptr() const { return _root.operator->(); }

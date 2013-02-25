@@ -123,10 +123,10 @@ template<> class Constant<String>
 enum VariableType { type_bool, type_tribool, type_enumerated, type_string, type_integer, type_real };
 enum VariableCategory { simple, dotted, primed };
 
-//! \ingroup ExpressionModule
 //! A named variable of unknown type.
 class UntypedVariable {
   public:
+    //! \brief The name of the variable.
     const Identifier& name() const { return *_name_ptr; }
     const VariableType& type() const { return this->_type; }
     bool operator==(const UntypedVariable& other) const {
@@ -178,13 +178,14 @@ inline std::ostream& operator<<(std::ostream& os, const UntypedVariable& var) {
 
 
 
-//! \ingroup ExpressionModule
 //! A named variable of type \a T, possibly decorated by a "dot" or "prime"
 //! representing a time derivative or updated value.
 template<class T> class ExtendedVariable
     : public UntypedVariable
 {
   public:
+    //! \brief The type (class) of data held by the variable.
+    typedef T Type;
     Assignment< ExtendedVariable<T>,Expression<T> > operator=(const Expression<T>& e) const;
   protected:
     explicit ExtendedVariable(const String& nm, VariableCategory cat=simple)
@@ -200,7 +201,7 @@ class RealVariableInterval;
 
 //! \ingroup ExpressionModule
 //! \brief A named variable of type \a T.
-//! \sa Expression
+//! \sa Expression \sa Assignment
 template<class T> class Variable
     : public ExtendedVariable<T>
 {
@@ -208,7 +209,8 @@ template<class T> class Variable
     typedef Assignment< Variable<T>, T > ConstantAssignmentType;
   public:
     typedef Variable<T> BaseType;
-    explicit Variable(const String& nm) : ExtendedVariable<T>(nm) { }
+    //! \brief Construct a variable with name \a nm.
+    explicit Variable(const Identifier& nm) : ExtendedVariable<T>(nm) { }
     Variable<T> const& base() const { return *this; }
     inline ConstantAssignmentType operator=(const T& e) const;
     inline AssignmentType operator=(const Constant<T>& cnst) const;
@@ -225,23 +227,27 @@ class TimeVariable : public Variable<Real> {
 
 template<class T> LetVariable<T> let(const Variable<T>&);
 
+//! A named variable of type \a T to be used on the left-hand-side of an assignment denoting an algebraic equation.
 template<class T> class LetVariable
     : public ExtendedVariable<T>
 {
-    typedef Assignment< Variable<T>, Expression<T> > AssignmentType;
+    typedef Assignment<Variable<T>,Expression<T>> AssignmentType;
   public:
     typedef Variable<T> BaseType;
+    //! \brief Decorate a simple variable to denote the left-hand-side of an algebraic equation.
     friend LetVariable<T> let<>(const Variable<T>&);
     Variable<T> base() const { return Variable<T>(this->name()); }
     inline AssignmentType operator=(const T& val) const;
     inline AssignmentType operator=(const Constant<T>& cnst) const;
     inline AssignmentType operator=(const Variable<T>& var) const;
-    inline AssignmentType operator=(const Expression<T>& expr) const;
+    //! \brief Construct an assignment statement representing the algebraic equation \a var := \a expr.
+    inline Assignment<Variable<T>,Expression<T>> operator=(const Expression<T>& expr) const;
     template<class D> inline typename EnableIfRealBuiltin<T,D,AssignmentType>::Type operator=(D e) const;
   private:
     explicit LetVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),simple) { }
 };
 
+//! \relates Variable \brief Decorate a simple variable to denote the left-hand-side of an algebraic equation.
 template<class T> inline LetVariable<T> let(const Variable<T>& var) {
     return LetVariable<T>(var); }
 
@@ -251,25 +257,27 @@ DottedVariable<Real> dot(const Variable<Real>&);
 
 template<class T> class DottedVariable;
 
-//! \ingroup ExpressionModule
 //! \brief A named variable of type \a T decorated by a dot representing differentiation with respect to time.
 template<class T> class DottedVariable
     : public ExtendedVariable<T>
 {
-    typedef Assignment< DottedVariable<T>, Expression<T> > AssignmentType;
+    typedef Assignment<DottedVariable<T>,Expression<T>> AssignmentType;
   public:
     typedef Variable<T> BaseType;
+    //! \brief Decorate a simple variable with a dot.
     friend DottedVariable<Real> dot(const Variable<Real>&);
     Variable<T> base() const { return Variable<T>(this->name()); }
     inline AssignmentType operator=(const T& e) const;
     inline AssignmentType operator=(const Constant<T>& cnst) const;
     inline AssignmentType operator=(const Variable<T>& e) const;
-    inline AssignmentType operator=(const Expression<T>& e) const;
+    //! \brief Construct an assignment statement representing the differential equation \a dot(var) := \a expr.
+    inline Assignment<DottedVariable<T>,Expression<T>> operator=(const Expression<T>& e) const;
     template<class D> inline typename EnableIfRealBuiltin<T,D,AssignmentType>::Type operator=(D e) const;
   private:
     explicit DottedVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),dotted) { }
 };
 
+//! \relates Variable  \brief Decorate a simple variable with a dot.
 inline DottedVariable<Real> dot(const Variable<Real>& var) {
     return DottedVariable<Real>(var); }
 
@@ -281,20 +289,23 @@ template<class T> PrimedVariable<T> next(const Variable<T>&);
 template<class T> class PrimedVariable
     : public ExtendedVariable<T>
 {
-    typedef Assignment< PrimedVariable<T>, Expression<T> > AssignmentType;
+    typedef Assignment<PrimedVariable<T>,Expression<T>> AssignmentType;
   public:
     typedef Variable<T> BaseType;
+    //! \brief Decorate a simple variable with a prime.
     friend PrimedVariable<T> prime<>(const Variable<T>&);
     Variable<T> base() const { return Variable<T>(this->name()); }
     inline AssignmentType operator=(const T& val) const;
     inline AssignmentType operator=(const Constant<T>& cnst) const;
     inline AssignmentType operator=(const Variable<T>& var) const;
-    inline AssignmentType operator=(const Expression<T>& expr) const;
+    //! \brief Construct an assignment statement representing the differential equation \a var' := \a expr.
+    inline Assignment<PrimedVariable<T>,Expression<T>> operator=(const Expression<T>& expr) const;
     template<class D> inline typename EnableIfRealBuiltin<T,D,AssignmentType>::Type operator=(D e) const;
   private:
     explicit PrimedVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),primed) { }
 };
 
+//! \relates Variable \brief Decorate a simple variable with a prime.
 template<class T> inline PrimedVariable<T> prime(const Variable<T>& var) {
     return PrimedVariable<T>(var); }
 template<class T> inline PrimedVariable<T> next(const Variable<T>& var) {

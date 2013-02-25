@@ -34,52 +34,47 @@
 namespace Ariadne {
 
 
+//! \brief Base class for common evolver functionality.
 template<class SYS, class ES> class EvolverBase
     : public EvolverInterface<SYS,ES>
 {
     typedef EvolverInterface<SYS,ES> Interface;
-    typedef typename SYS::TimeType T;
-    typedef ListSet<ES> ESL;
-    typedef typename ESL::const_iterator ESLCI;
+
+  public:
+    typedef typename EvolverInterface<SYS,ES>::SystemType SystemType;
+    typedef typename EvolverInterface<SYS,ES>::TimeType TimeType;
+    typedef typename EvolverInterface<SYS,ES>::EnclosureType EnclosureType;
+    typedef typename EvolverInterface<SYS,ES>::EnclosureListType EnclosureListType;
+
   public:
 
-    //! \brief Write to an output stream.
-    virtual std::ostream& write(std::ostream& os) const {
+    virtual OutputStream& write(OutputStream& os) const {
         return os << "Evolver( ... )"; }
 
   public:
-    //! \brief Compute an approximation to the evolution set under the given semantics.
-    ESL evolve(const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,initial_set,time,semantics,false); return final; }
+    //@{
+    //! \name Main evolution functions.
 
-    //! \brief Compute an approximation to the evolution set under the given semantics.
-    ESL reach(const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,initial_set,time,semantics,true); return reachable; }
-    //! \brief Compute an approximation to the evolution set under the given semantics.
-    std::pair<ESL,ESL> reach_evolve(const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,initial_set,time,semantics,true); return std::make_pair(reachable,final); }
+    virtual Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics) const = 0;
 
-    //! \brief Compute an approximation to the evolution set under the given semantics.
-    void evolution(ESL& final, const ES& initial, const T& time, Semantics semantics) const {
-        ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,initial,time,semantics,false); }
+    EnclosureListType evolve(const EnclosureType& initial_set, const TimeType& time, Semantics semantics) const {
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,initial_set,time,semantics,false); return final; }
 
-    //! \brief Compute an approximation to the evolution set under the given semantics.
-    void evolution(ESL& final, const ESL& initial, const T& time, Semantics semantics) const {
-        ESL reachable; ESL intermediate; for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,reachable,intermediate,ES(*iter),time,semantics,false); } }
+    EnclosureListType reach(const EnclosureType& initial_set, const TimeType& time, Semantics semantics) const {
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,initial_set,time,semantics,true); return reachable; }
 
-    //! \brief Compute an approximation to the evolution set under the given semantics.
-    void evolution(ESL& final, ESL& reachable, const ES& initial, const T& time, Semantics semantics) const {
-        ESL intermediate; this->_evolution(final,reachable,intermediate,initial,time,semantics,true); }
+    Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TimeType& time, Semantics semantics) const {
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,initial_set,time,semantics,true); return std::make_pair(reachable,final); }
 
-    //! \brief Compute an approximation to the evolution set under the given semantics.
-    void evolution(ESL& final, ESL& reachable, const ESL& initial, const T& time, Semantics semantics) const {
-        ESL intermediate; for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,reachable,intermediate,*iter,time,semantics,true); } }
+    //@}
 
-    //! \brief Compute an approximation to the evolution set under the given semantics.
-    void evolution(ESL& final, ESL& reachable, ESL& intermediate, const ESL& initial, const T& time, Semantics semantics) const {
-        for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,reachable,intermediate,*iter,time,semantics,true); } }
   protected:
-    virtual void _evolution(ESL& final, ESL& reachable, ESL& intermediate, const ES& initial, const T& time, Semantics semantics, bool reach) const = 0;
+    //! \brief Main routine for computing the evolution.
+    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, const EnclosureType& initial,
+                            const TimeType& time, Semantics semantics, bool reach) const = 0;
 };
 
 

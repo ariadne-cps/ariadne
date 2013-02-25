@@ -51,28 +51,39 @@ template<class K, class V> inline  Map<K,V> operator,(const Map<K,V>& m1, const 
     Map<K,V> r=m1; for(typename Map<K,V>::const_iterator iter=m2.begin(); iter!=m2.end(); ++iter) { r.insert(*iter); } return r; }
 Map<Identifier,String> inline operator|(const Variable<String>& v, const char* c) { return v|String(c); }
 
-template<class V, class X=V> class Valuation;
+template<class T, class X=T> class Valuation;
 typedef Valuation<String> StringValuation;
 typedef Valuation<Integer> IntegerValuation;
 typedef Valuation<Real> RealValuation;
 
-template<class V, class X>
+//! \ingroup ExpressionModule
+//! \brief A valuation of named variables of mathematical type \a T, with values represented by values of concrete type \a X,
+//!   where X defaults to \a T.
+//! \sa DiscreteValuation, ContinuousValuation, HybridValuation, DiscreteLocation
+template<class T, class X>
 class Valuation
 {
   public:
     typedef typename Map<Identifier,X>::const_iterator const_iterator;
-    typedef V Type;
+    //! \brief The abstract mathematical type represented by variables.
+    typedef T Type;
+    //! \brief The concrete class of the values of the variables.
     typedef X ValueType;
   public:
+    //! \brief Construct a valuation assigning values to no variables.
     Valuation() { }
+    //! \brief Construct from a mapping from \em names of variables to values.
     Valuation(const Map<Identifier,ValueType>& m) : _values(m) { }
-    Valuation(const Assignment<Variable<V>,X>& a);
-    Valuation(const List<Assignment<Variable<V>,X> >& la);
+    Valuation(const Assignment<Variable<T>,X>& a);
+    Valuation(const List<Assignment<Variable<T>,X> >& la);
     void insert(const Variable<Type>& v, const ValueType& s) { this->_values.insert(v.name(),s); }
+    //! \brief Set the value associated with variable \a v to \a s.
     void set(const Variable<Type>& v, const ValueType& s) { this->_values[v.name()]=s; }
+    //! \brief Get the value associated with variable \a v.
     const ValueType& get(const Variable<Type>& v) const { return _values[v.name()]; }
     const ValueType& operator[](const Identifier& nm) const { return _values[nm]; }
     ValueType& operator[](const Identifier& nm) { return _values[nm]; }
+    //! \brief Extract the value associated with the variable \a v.
     const ValueType& operator[](const Variable<Type>& v) const { return _values[v.name()]; }
     ValueType& operator[](const Variable<Type>& v) { return _values[v.name()]; }
     const Map<Identifier,ValueType>& values() const { return _values; }
@@ -109,9 +120,11 @@ template<class V, class X> bool operator==(const Valuation<V,X>& v1, const Valua
 
 
 
-//! \brief
+//! \brief A valuation of named variables taking String or Integer values.
+//! \sa DiscreteLocation
 class DiscreteValuation
-    : public Valuation<String>, public Valuation<Integer>
+    : public Valuation<String>
+    , public Valuation<Integer>
 {
     typedef String StringType;
     typedef Integer IntegerType;
@@ -123,7 +136,9 @@ class DiscreteValuation
     using Valuation<String>::insert; using Valuation<Integer>::insert;
     using Valuation<String>::get; using Valuation<Integer>::get;
     using Valuation<String>::set; using Valuation<Integer>::set;
+    //! \brief Extract the value associated with the string variable \a v.
     const String& operator[](const Variable<String>& v) const { return this->Valuation<String>::operator[](v); }
+    //! \brief Extract the value associated with the integer variable \a v.
     const Integer& operator[](const Variable<Integer>& v) const { return this->Valuation<Integer>::operator[](v); }
     const Map<Identifier,StringType>& string_values() const { return Valuation<String>::values(); }
     const Map<Identifier,IntegerType>& integer_values() const { return Valuation<Integer>::values(); }
@@ -133,6 +148,7 @@ inline bool operator==(const DiscreteValuation& v1, const DiscreteValuation& v2)
     return static_cast<const StringValuation&>(v1)==static_cast<const StringValuation&>(v2)
         && static_cast<const IntegerValuation&>(v1)==static_cast<const IntegerValuation&>(v2); }
 
+//! \brief A valuation of named real variables taking values of concrete class \a X.
 template<class X>
 class ContinuousValuation
     : public Valuation<Real,X>
@@ -143,6 +159,7 @@ class ContinuousValuation
 };
 
 
+//! \brief A valuation of named variables of String, Integer and Real quantities, with the real variables taking values in concrete type \a X.
 template<class X> class HybridValuation
     : public DiscreteValuation
     , public ContinuousValuation<X>

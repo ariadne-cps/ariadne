@@ -48,9 +48,10 @@ template<class T> std::ostream& operator<<(std::ostream& os, const Space<T>& spc
 class Real;
 typedef Space<Real> RealSpace;
 
-/*! \brief A space defined as a list of named variables of type \a T
- *  \details \sa Variable
- */
+//! \ingroup ExpressionModule
+//! \brief A space defined as a list of named variables of type \a T.
+//!   Allows conversion between Euclidean space \f$\mathbb{R}^n\f$ and a space defined by named variables.
+//!  \details \sa Variable
 template<class T> struct Space
 {
     typedef unsigned int SizeType;

@@ -135,29 +135,7 @@ int main(int argc, const char* argv[])
     evolver.configuration().set_enable_subdivisions(true);
 
 
-
-    // Compute the system evolution
-
-    // Set the initial set.
-    double r=1.0/1024; double Ti=17.0;
-    Real Tinitmin=Ti+r; Real Tinitmax=Ti+3*r; Real Cinitmin=0+r; Real Cinitmax=0+3*r; // Tinit=16.0;
-    HybridSet initial_set(heating|off, (Tinitmin<=T<=Tinitmax,Cinitmin<=C<=Cinitmax) );
-    cout << "initial_set=" << initial_set << endl;
-    // Compute the initial set as a validated enclosure.
-    HybridEnclosure initial_enclosure = evolver.enclosure(initial_set);
-    cout << "initial_enclosure="<<initial_enclosure << endl << endl;
-
-    HybridTime evolution_time(2.75,127);
-    cout << "evolution_time=" << evolution_time << endl;
-
-
-    cout << "\nComputing orbit using series integrator... \n" << flush;
-    evolver.set_integrator(series_integrator);
-    Orbit<HybridEnclosure> series_orbit = evolver.orbit(initial_enclosure,evolution_time,UPPER_SEMANTICS);
-    cout << "    done." << endl;
-
-    cout << "\nComputed " << series_orbit.reach().size() << " reach enclosures and " << series_orbit.final().size() << " final enclosures.\n";
-
+    // Set colours for drawing
     DRAWING_METHOD = AFFINE_DRAW;
     DRAWING_ACCURACY += 1;
 
@@ -168,13 +146,52 @@ int main(int argc, const char* argv[])
     Colour chain_reach_on_colour(0.75,0.0,0.75);
     Colour chain_reach_off_colour(0.0,0.0,1.0);
 
+
+    // Compute the system evolution
+
+    // Set the initial set.
+    double r=1.0/1024; double Ti=16.25;
+    Real Tinitmin=Ti+r; Real Tinitmax=Ti+3*r; Real Cinitmin=0+r; Real Cinitmax=0+3*r; // Tinit=16.0;
+    HybridSet initial_set(heating|off, (Tinitmin<=T<=Tinitmax,Cinitmin<=C<=Cinitmax) );
+    cout << "initial_set=" << initial_set << endl;
+    // Compute the initial set as a validated enclosure.
+    HybridEnclosure initial_enclosure = evolver.enclosure(initial_set);
+    cout << "initial_enclosure="<<initial_enclosure << endl << endl;
+
+    HybridTime evolution_time(2.75,127);
+    cout << "evolution_time=" << evolution_time << endl;
+
+    cout << "\nComputing orbit using series integrator... \n" << flush;
+    evolver.set_integrator(series_integrator);
+    Orbit<HybridEnclosure> series_orbit = evolver.orbit(initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    cout << "    done." << endl;
+
+    cout << "\nComputed " << series_orbit.reach().size() << " reach enclosures and " << series_orbit.final().size() << " final enclosures.\n";
+
     Real tmax=evolution_time.continuous_time();
     double dTmin=Tmin.value().get_d(); double dTmax=Tmax.value().get_d();
     HybridBox guard(heating|off,(Ton_lower.value()<=T<=Ton_upper.value(),0<=C<=1,0<=t<=tmax));
     HybridBox midnight_guard(heating|off,(dTmin<=T<=dTmax,0.0<=C<=1.0,1.0<=t<=2.0));
     cout << "\nPlotting time trace of orbit... " << flush;
-//    plot("heating-orbit-time.png",Axes2d(0.0<=t<=tmax,dTmin<=T<=dTmax), midnight_guard_colour, midnight_guard, guard_colour, guard, series_orbit_colour, series_orbit);
+    plot("heating-orbit-time.png",Axes2d(0.0<=t<=tmax,dTmin<=T<=dTmax), midnight_guard_colour, midnight_guard, guard_colour, guard, series_orbit_colour, series_orbit);
     cout << "done." << endl << endl;
+
+
+    HybridTerminationCriterion evolution_termination(2.75,127,Set<DiscreteEvent>{midnight});
+    cout << "evolution_termination=" << evolution_termination << endl;
+
+    cout << "\nComputing event-terminated orbit using series integrator... \n" << flush;
+    evolver.set_integrator(series_integrator);
+    series_orbit = evolver.orbit(initial_enclosure,evolution_termination,UPPER_SEMANTICS);
+    cout << "    done." << endl;
+
+    cout << "\nComputed " << series_orbit.reach().size() << " reach enclosures and " << series_orbit.final().size() << " final enclosures.\n";
+
+    cout << "\nPlotting time trace of orbit... " << flush;
+    plot("heating-orbit-termination.png",Axes2d(0.0<=t<=1.25,dTmin<=T<=dTmax), midnight_guard_colour, midnight_guard, guard_colour, guard, series_orbit_colour, series_orbit);
+    cout << "done." << endl << endl;
+
+
 
     HybridReachabilityAnalyser analyser(heating_system,evolver);
     analyser.configuration().set_lock_to_grid_time(1+1.0/1024);

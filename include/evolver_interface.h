@@ -49,7 +49,7 @@ enum Semantics {
 //! \brief Interface for evolving a dynamic system.
 //! \sa HybridEvolverInterface
 //! \sa ReachabilityAnalyserInterface
-template<class SYS, class ES>
+template<class SYS, class ES, class TRM>
 class EvolverInterface
 {
   public:
@@ -57,6 +57,8 @@ class EvolverInterface
     typedef SYS SystemType;
     //! \brief The type used to represent the evolution time of the system.
     typedef typename SystemType::TimeType TimeType;
+    //! \brief The type used to represent conditions under which system evolution may be terminated.
+    typedef TRM TerminationType;
     //! \brief The type of set used to enclose the flow tubes.
     typedef ES EnclosureType;
     //! \brief The type of a list of enclosure sets.
@@ -66,7 +68,7 @@ class EvolverInterface
     virtual ~EvolverInterface() {};
 
     //! \brief Cloning operator.
-    virtual EvolverInterface<SystemType,EnclosureType>* clone() const = 0;
+    virtual EvolverInterface<SystemType,EnclosureType,TerminationType>* clone() const = 0;
 
     //! \brief Gets the system associated with the evolver.
     virtual const SystemType& system() const = 0;
@@ -82,28 +84,28 @@ class EvolverInterface
     virtual
     Orbit<EnclosureType>
     orbit(const EnclosureType& initial_set,
-          const TimeType& time,
+          const TerminationType& time,
           Semantics semantics) const = 0;
 
     //! \brief Compute an approximation to the evolved set under the given semantics.
     virtual
     EnclosureListType
     evolve(const EnclosureType& initial_set,
-           const TimeType& time,
+           const TerminationType& time,
            Semantics semantics) const = 0;
 
     //! \brief Compute an approximation to the reachable set under the given semantics.
     virtual
     EnclosureListType
     reach(const EnclosureType& initial_set,
-          const TimeType& time,
+          const TerminationType& time,
           Semantics semantics) const = 0;
 
     //! \brief Compute an approximation to the evolved and reachable sets under the given semantics.
     virtual
     Pair<EnclosureListType,EnclosureListType>
     reach_evolve(const EnclosureType& initial_set,
-                 const TimeType& time,
+                 const TerminationType& time,
                  Semantics semantics) const = 0;
 
     //@}
@@ -111,15 +113,15 @@ class EvolverInterface
 };
 
 
-template<class SYS, class ES> inline
+template<class SYS, class ES, class TRM> inline
 OutputStream&
-operator<<(OutputStream& os, const EvolverInterface<SYS,ES>& e) {
+operator<<(OutputStream& os, const EvolverInterface<SYS,ES,TRM>& e) {
     return e.write(os);
 }
 
 
 //! \brief Factory for evolver interface classes.
-template<class SYS, class ES>
+template<class SYS, class ES, class TRM>
 class EvolverFactoryInterface
 {
   public:
@@ -127,7 +129,7 @@ class EvolverFactoryInterface
     //! \brief Create a copy of the factory.
     virtual EvolverFactoryInterface* clone() const = 0;
     //! \brief Create an evolver interface object around a \a system.
-    virtual EvolverInterface<SYS,ES>* create(const SYS& system) const = 0;
+    virtual EvolverInterface<SYS,ES,TRM>* create(const SYS& system) const = 0;
 };
 
 

@@ -34,6 +34,8 @@
 #include "hybrid_set.h"
 #include "hybrid_orbit.h"
 
+#include "discrete_event.h"
+
 #include "logging.h"
 
 namespace Ariadne {
@@ -41,11 +43,38 @@ namespace Ariadne {
 class HybridAutomatonInterface;
 class HybridEnclosure;
 
-
+class HybridTerminationCriterion {
+  public:
+    typedef HybridTime::ContinuousTimeType ContinuousTimeType;
+    typedef HybridTime::DiscreteTimeType DiscreteTimeType;
+  private:
+    ContinuousTimeType _maximum_time;
+    DiscreteTimeType _maximum_steps;
+    Set<DiscreteEvent> _terminating_events;
+  public:
+    HybridTerminationCriterion(ContinuousTimeType tmax, DiscreteTimeType nmax, Set<DiscreteEvent> evnts)
+        : _maximum_time(tmax), _maximum_steps(nmax), _terminating_events(evnts) { }
+    HybridTerminationCriterion(ContinuousTimeType tmax, DiscreteTimeType nmax)
+        : HybridTerminationCriterion(tmax,nmax,Set<DiscreteEvent>()) { }
+    HybridTerminationCriterion(const HybridTime& maximum_time)
+        : HybridTerminationCriterion(maximum_time.continuous_time(),maximum_time.discrete_time()) { }
+    //! \brief The maximum continuous (real, physical) time.
+    const ContinuousTimeType& maximum_time() const { return this->_maximum_time; }
+    //! \brief The maximum number of discrete steps taken.
+    const DiscreteTimeType& maximum_steps() const { return this->_maximum_steps; }
+    //! \brief The maximum number of discrete steps taken.
+    const Set<DiscreteEvent>& terminating_events() const { return this->_terminating_events; }
+};
+OutputStream& operator<<(OutputStream& os, const HybridTerminationCriterion& termination) {
+    return os << "HybridTerminationCriterion( maximum_time=" << termination.maximum_time()
+              << ", maximum_steps="<<termination.maximum_steps()
+              << ", terminating_events="<<termination.terminating_events() << " )";
+}
+    
 //! \brief Interface for hybrid evolvers using HybridEnclosure as the enclosure type.
 //! \details The class is loggable in order to allow verbosity tuning at the analyser layer.
 class HybridEvolverInterface
-    : public EvolverInterface<HybridAutomatonInterface,HybridEnclosure>
+    : public EvolverInterface<HybridAutomatonInterface,HybridEnclosure,HybridTerminationCriterion>
     , public Loggable
 {
   public:
@@ -57,14 +86,17 @@ class HybridEvolverInterface
 
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from an initial enclosure.
     //!   Useful for continuing a partially-computed orbit.
-    virtual Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure,const TimeType& time,Semantics semantics) const = 0;
+    virtual Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure,const TerminationType& termination,Semantics semantics) const = 0;
+
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from a box.
     //!   Useful for computing the evolution starting from a cell of a grid.
-    virtual Orbit<EnclosureType> orbit(const HybridBox& initial_box,const TimeType& time,Semantics semantics) const = 0;
+    virtual Orbit<EnclosureType> orbit(const HybridBox& initial_box,const TerminationType& termination,Semantics semantics) const = 0;
     //! \brief Compute an approximation to the orbit set using the given semantics, starting from a set described by bounds and constraints.
     //!   Useful for computing the evolution starting from user-provided set.
-    virtual Orbit<EnclosureType> orbit(const HybridSet& initial_set,const TimeType& time,Semantics semantics) const = 0;
+    virtual Orbit<EnclosureType> orbit(const HybridSet& initial_set,const TerminationType& termination,Semantics semantics) const = 0;
 
+    //! \brief Compute an approximation to the evolution set under the given semantics.
+    virtual Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const = 0;
     //@}
 
     //@{
@@ -82,7 +114,7 @@ class HybridEvolverInterface
 
 //! \brief Factory for hybrid evolver interface classes.
 class HybridEvolverFactoryInterface
-    : public EvolverFactoryInterface<HybridAutomatonInterface,HybridEnclosure>
+    : public EvolverFactoryInterface<HybridAutomatonInterface,HybridEnclosure,HybridTerminationCriterion>
 {
   public:
 

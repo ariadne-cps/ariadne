@@ -74,7 +74,7 @@ MapEvolver::MapEvolver(const SystemType& system)
 Orbit<MapEvolver::EnclosureType>
 MapEvolver::
 orbit(const EnclosureType& initial_set,
-      const TimeType& time,
+      const TerminationType& termination,
       Semantics semantics) const
 {
     Orbit<EnclosureType> orbit(initial_set);
@@ -82,7 +82,7 @@ orbit(const EnclosureType& initial_set,
     EnclosureListType reachable;
     EnclosureListType intermediate;
     this->_evolution(final,reachable,intermediate,
-                     initial_set,time,semantics,false);
+                     initial_set,termination,semantics,false);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -103,7 +103,7 @@ _evolution(EnclosureListType& final_sets,
            EnclosureListType& reach_sets,
            EnclosureListType& intermediate_sets,
            const EnclosureType& initial_set,
-           const TimeType& maximum_time,
+           const TerminationType& maximum_time,
            Semantics semantics,
            bool reach) const
 {

@@ -47,7 +47,7 @@
 
 namespace Ariadne {
 
-template<class Sys, class BS> class Evolver;
+template<class Sys, class BS, class TRM> class Evolver;
 
 class VectorField;
 template<class ES> class Orbit;
@@ -63,13 +63,14 @@ class EvolutionProfiler;
  * The actual evolution steps are performed by the VectorFieldEvolver class.
  */
 class VectorFieldEvolver
-    : public EvolverBase< VectorField, Enclosure >
+    : public EvolverBase< VectorField, Enclosure, Float >
     , public Loggable
 {
   public:
     typedef VectorFieldEvolverConfiguration ConfigurationType;
-    typedef VectorField::TimeType TimeType;
     typedef VectorField SystemType;
+    typedef Float TimeType;
+    typedef Float TerminationType;
     typedef Enclosure EnclosureType;
     typedef Pair<TimeType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
@@ -101,8 +102,8 @@ class VectorFieldEvolver
     //! \brief Compute an approximation to the orbit set using upper semantics.
     Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
-    using EvolverBase< VectorField, EnclosureType >::evolve;
-    using EvolverBase< VectorField, EnclosureType >::reach;
+    using EvolverBase< VectorField, EnclosureType, TerminationType >::evolve;
+    using EvolverBase< VectorField, EnclosureType, TerminationType >::reach;
 
     //! \brief Compute an approximation to the evolution set using upper semantics.
     EnclosureListType evolve(const EnclosureType& initial_set, const TimeType& time) const {

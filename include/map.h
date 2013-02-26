@@ -42,9 +42,9 @@ class IteratedMap
 {
   public:
     //! \brief The type used to represent time.
-    typedef Float TimeType;
+    typedef Integer TimeType;
     //! \brief The type used to represent real numbers.
-    typedef Float RealType ;
+    typedef Real RealType ;
     //! \brief The type used to describe the state space.
     typedef EuclideanSpace StateSpaceType;
   public:

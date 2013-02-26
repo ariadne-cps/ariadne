@@ -190,7 +190,7 @@ Set<DiscreteEvent> activating_events(const Map<DiscreteEvent,TransitionData>& tr
 Orbit<HybridEnclosure>
 HybridEvolverBase::
 orbit(const HybridBox& initial_box,
-      const HybridTime& time,
+      const HybridTerminationCriterion& termination,
       Semantics semantics) const
 {
     ARIADNE_LOG(2,"HybridEvolverBase::orbit(HybridAutomaton, HybridBox, HybridTime, Semantics)\n");
@@ -198,26 +198,26 @@ orbit(const HybridBox& initial_box,
     ARIADNE_LOG(3,"initial_box="<<initial_box<<"\n");
     HybridEnclosure initial_enclosure(initial_box,this->function_factory());
     ARIADNE_LOG(3,"initial_enclosure="<<initial_enclosure<<"\n");
-    return this->orbit(initial_enclosure,time,semantics);
+    return this->orbit(initial_enclosure,termination,semantics);
 }
 
 Orbit<HybridEnclosure>
 HybridEvolverBase::
 orbit(const HybridSet& initial_set,
-      const HybridTime& time,
+      const HybridTerminationCriterion& termination,
       Semantics semantics) const
 {
     ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
     HybridEnclosure initial_enclosure(initial_set,_sys_ptr->continuous_state_space(initial_set.location()),this->function_factory());
     ARIADNE_LOG(3,"initial_enclosure="<<initial_enclosure<<"\n");
-    return this->orbit(initial_enclosure,time,semantics);
+    return this->orbit(initial_enclosure,termination,semantics);
 }
 
 
 Orbit<HybridEnclosure>
 HybridEvolverBase::
 orbit(const HybridEnclosure& initial,
-      const HybridTime& time,
+      const HybridTerminationCriterion& termination,
       Semantics semantics) const
 {
     ARIADNE_LOG(2,"\nHybridEvolverBase::orbit(...): verbosity="<<verbosity<<"\n");
@@ -226,7 +226,7 @@ orbit(const HybridEnclosure& initial,
     evolution_data.semantics=semantics;
     evolution_data.initial_sets.push_back(HybridEnclosure(initial));
     while(!evolution_data.initial_sets.empty()) {
-        this->_evolution_in_mode(evolution_data,time);
+        this->_evolution_in_mode(evolution_data,termination);
     }
     ARIADNE_ASSERT(evolution_data.initial_sets.empty());
     ARIADNE_ASSERT(evolution_data.working_sets.empty());
@@ -327,7 +327,7 @@ _evolution(ListSet<HybridEnclosure>& final,
            ListSet<HybridEnclosure>& reachable,
            ListSet<HybridEnclosure>& intermediate,
            HybridEnclosure const& initial_set,
-           HybridTime const& maximum_time,
+           HybridTerminationCriterion const& termination_criterion,
            Semantics semantics,
            bool reach) const
 {
@@ -336,7 +336,7 @@ _evolution(ListSet<HybridEnclosure>& final,
     evolution_data.initial_sets.push_back(HybridEnclosure(initial_set));
 
     while(!evolution_data.initial_sets.empty()) {
-        this->_evolution_in_mode(evolution_data,maximum_time);
+        this->_evolution_in_mode(evolution_data,termination_criterion);
     }
 
     final=evolution_data.final_sets;
@@ -980,7 +980,7 @@ _apply_guard(List<HybridEnclosure>& sets,
 void
 HybridEvolverBase::
 _evolution_in_mode(EvolutionData& evolution_data,
-                   HybridTime const& maximum_hybrid_time) const
+                   HybridTerminationCriterion const& termination_criterion) const
 {
 
     //  Select a working set and evolve this in the current location until either
@@ -993,8 +993,9 @@ _evolution_in_mode(EvolutionData& evolution_data,
     typedef Map<DiscreteEvent,IntervalScalarFunction>::const_iterator constraint_iterator;
     typedef Set<DiscreteEvent>::const_iterator event_iterator;
 
-    const Real final_time=maximum_hybrid_time.continuous_time();
-    const uint maximum_steps=maximum_hybrid_time.discrete_time();
+    const Real final_time=termination_criterion.maximum_time();
+    const uint maximum_steps=termination_criterion.maximum_steps();
+    const Set<DiscreteEvent>& terminating_events=termination_criterion.terminating_events();
 
     // Routine check for emptiness
     if(evolution_data.initial_sets.empty()) { return; }
@@ -1024,6 +1025,14 @@ _evolution_in_mode(EvolutionData& evolution_data,
     // This is not done since the maximum_steps information is not passed to the _apply_evolution_step(...) method.
     if(initial_set.previous_events().size()>=maximum_steps) {
         ARIADNE_LOG(4,"initial_set "<<initial_set<<" has undergone more than maximum number of events "<<maximum_steps<<"\n");
+        this->_apply_invariants(initial_set,transitions);
+        evolution_data.final_sets.append(initial_set);
+        return;
+    }
+
+    // Test if a terminating event has been reached.
+    if(initial_set.previous_events().size()>=1 && terminating_events.contains(initial_set.previous_events().back())) {
+        ARIADNE_LOG(4,"initial_set "<<initial_set<<" has undergone event "<<initial_set.previous_events().back()<<"\n");
         this->_apply_invariants(initial_set,transitions);
         evolution_data.final_sets.append(initial_set);
         return;

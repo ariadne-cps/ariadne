@@ -173,7 +173,7 @@ class HybridReachabilityAnalyser
     HybridGridTreeSet _upper_evolve(const HybridGridTreeSet& set, const HybridTime& time,
             const int accuracy, const HybridEvolverInterface& evolver) const;
     void _adjoin_upper_reach_evolve(HybridGridTreeSet& reach_set, HybridGridTreeSet& final_set,
-                                    const HybridGridTreeSet& set, const HybridTime& time,
+                                    const HybridGridTreeSet& set, const HybridTerminationCriterion& termination,
                                     const int accuracy, const HybridEvolverInterface& evolver) const;
     //! \brief Perform restriction on \a set, using the overspill policy
     void _checked_restriction(HybridGridTreeSet& set, const HybridGridTreeSet& bounding) const;
@@ -245,6 +245,16 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
     //! This property is only used for continuous-time computation.
     RealType _lock_to_grid_time;
 
+    //! \brief A set of events after which an upper evolution or reachability analysis
+    //! routine should approximate computed sets on a grid, in order to use previously
+    //! cached integration results for the grid.
+    //! \details
+    //! Choosing regularly-occurring events may greatly improve the speed and
+    //! accuracy of the computation. 
+    //! <br>
+    //! This property is only used for continuous-time computation.
+    Set<DiscreteEvent> _lock_to_grid_events;
+
     //! \brief The time after which an evolver may approximate computed sets on a grid,
     //! in order to use previously cached results for the grid.
     //! \details
@@ -298,6 +308,9 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
 
     const UnsignedIntType& lock_to_grid_steps() const { return _lock_to_grid_steps; }
     void set_lock_to_grid_steps(const UnsignedIntType value) { _lock_to_grid_steps = value; }
+
+    const Set<DiscreteEvent>& lock_to_grid_events() const { return _lock_to_grid_events; }
+    void set_lock_to_grid_events(const Set<DiscreteEvent> value) { _lock_to_grid_events = value; }
 
     const IntType& maximum_grid_depth() const { return _maximum_grid_depth; }
     void set_maximum_grid_depth(const IntType value) { _maximum_grid_depth = value; }

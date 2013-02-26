@@ -35,16 +35,17 @@ namespace Ariadne {
 
 
 //! \brief Base class for common evolver functionality.
-template<class SYS, class ES> class EvolverBase
-    : public EvolverInterface<SYS,ES>
+template<class SYS, class ES, class TRM> class EvolverBase
+    : public EvolverInterface<SYS,ES,TRM>
 {
-    typedef EvolverInterface<SYS,ES> Interface;
+    typedef EvolverInterface<SYS,ES,TRM> Interface;
 
   public:
-    typedef typename EvolverInterface<SYS,ES>::SystemType SystemType;
-    typedef typename EvolverInterface<SYS,ES>::TimeType TimeType;
-    typedef typename EvolverInterface<SYS,ES>::EnclosureType EnclosureType;
-    typedef typename EvolverInterface<SYS,ES>::EnclosureListType EnclosureListType;
+    typedef typename EvolverInterface<SYS,ES,TRM>::SystemType SystemType;
+    typedef typename EvolverInterface<SYS,ES,TRM>::TimeType TimeType;
+    typedef typename EvolverInterface<SYS,ES,TRM>::TerminationType TerminationType;
+    typedef typename EvolverInterface<SYS,ES,TRM>::EnclosureType EnclosureType;
+    typedef typename EvolverInterface<SYS,ES,TRM>::EnclosureListType EnclosureListType;
 
   public:
 
@@ -55,26 +56,26 @@ template<class SYS, class ES> class EvolverBase
     //@{
     //! \name Main evolution functions.
 
-    virtual Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics) const = 0;
+    virtual Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics) const = 0;
 
-    EnclosureListType evolve(const EnclosureType& initial_set, const TimeType& time, Semantics semantics) const {
+    EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,semantics,false); return final; }
+        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,false); return final; }
 
-    EnclosureListType reach(const EnclosureType& initial_set, const TimeType& time, Semantics semantics) const {
+    EnclosureListType reach(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,semantics,true); return reachable; }
+        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,true); return reachable; }
 
-    Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TimeType& time, Semantics semantics) const {
+    Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,semantics,true); return std::make_pair(reachable,final); }
+        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,true); return std::make_pair(reachable,final); }
 
     //@}
 
   protected:
     //! \brief Main routine for computing the evolution.
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, const EnclosureType& initial,
-                            const TimeType& time, Semantics semantics, bool reach) const = 0;
+                            const TerminationType& termination, Semantics semantics, bool reach) const = 0;
 };
 
 

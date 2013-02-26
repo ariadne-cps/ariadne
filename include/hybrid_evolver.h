@@ -154,27 +154,28 @@ class HybridEvolverBase
     //@{
     //! \name Main evolution functions.
 
-    Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
-    Orbit<EnclosureType> orbit(const HybridBox& initial_box, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
-    Orbit<EnclosureType> orbit(const HybridSet& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const HybridBox& initial_box, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const HybridSet& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
 
+    //! \brief Compute an approximation to the orbit set using the given semantics, starting from an initial enclosure.
+    Orbit<EnclosureType> orbit(const EnclosureType& initial_enclosure, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
 
     //! \brief Compute an approximation to the evolution set using the given semantics.
-    EnclosureListType evolve(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
+    EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,semantics,false);
+        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,false);
         return final; }
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    EnclosureListType reach(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
+    EnclosureListType reach(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,semantics,true);
+        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,true);
         return reachable; }
 
     //! \brief Compute an approximation to the evolution set under the given semantics.
-    Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
+    Pair<EnclosureListType,EnclosureListType> reach_evolve(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,semantics,true);
+        this->_evolution(final,reachable,intermediate,initial_set,termination,semantics,true);
         return make_pair(reachable,final); }
     //@}
 
@@ -206,7 +207,7 @@ class HybridEvolverBase
     //! \param reach A flag indicating whether the reachable sets should
     //!   be computed.
     virtual void _evolution(ListSet<HybridEnclosure>& final, ListSet<HybridEnclosure>& reachable, ListSet<HybridEnclosure>& intermediate,
-                            const EnclosureType& initial, const TimeType& time,
+                            const EnclosureType& initial, const TerminationType& termination,
                             Semantics semantics, bool reach) const;
 
     //! \brief Compute the evolution within a single discrete mode.
@@ -219,7 +220,7 @@ class HybridEvolverBase
     virtual
     void
     _evolution_in_mode(EvolutionData& evolution_data,
-                       TimeType const& maximum_time) const;
+                       TerminationType const& maximum_time) const;
 
     //! \brief Performs an evolution step on one of the sets listed in \a
     //! evolution_data.initial_sets.

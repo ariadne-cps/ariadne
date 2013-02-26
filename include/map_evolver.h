@@ -61,16 +61,17 @@ class EvolutionProfiler;
  * The actual evolution steps are performed by the MapEvolver class.
  */
 class MapEvolver
-    : public EvolverBase< IteratedMap, Enclosure>
+    : public EvolverBase< IteratedMap, Enclosure, Integer>
     , public Loggable
 {
     typedef IntervalTaylorModel VariableType;
   public:
     typedef MapEvolverConfiguration ConfigurationType;
-    typedef IteratedMap::TimeType TimeType;
     typedef IteratedMap SystemType;
+    typedef Integer TimeType;
+    typedef Integer TerminationType;
     typedef Enclosure EnclosureType;
-    typedef Pair<TimeType, EnclosureType> TimedEnclosureType;
+    typedef Pair<TerminationType, EnclosureType> TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
   public:
@@ -97,29 +98,29 @@ class MapEvolver
     //@{
     //! \name Evolution using abstract sets.
     //! \brief Compute an approximation to the orbit set using upper semantics.
-    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
+    Orbit<EnclosureType> orbit(const EnclosureType& initial_set, const TerminationType& termination, Semantics semantics=UPPER_SEMANTICS) const;
 
 
     //! \brief Compute an approximation to the evolution set using upper semantics.
-    EnclosureListType evolve(const EnclosureType& initial_set, const TimeType& time) const {
+    EnclosureListType evolve(const EnclosureType& initial_set, const TerminationType& termination) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,UPPER_SEMANTICS,false);
+        this->_evolution(final,reachable,intermediate,initial_set,termination,UPPER_SEMANTICS,false);
         return final; }
 
     //! \brief Compute an approximation to the evolution set under upper semantics.
-    EnclosureListType reach(const EnclosureType& initial_set, const TimeType& time) const {
+    EnclosureListType reach(const EnclosureType& initial_set, const TerminationType& termination) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
-        this->_evolution(final,reachable,intermediate,initial_set,time,UPPER_SEMANTICS,true);
+        this->_evolution(final,reachable,intermediate,initial_set,termination,UPPER_SEMANTICS,true);
         return intermediate; }
 
   protected:
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-                            const EnclosureType& initial, const TimeType& time,
+                            const EnclosureType& initial, const TerminationType& termination,
                             Semantics semantics, bool reach) const;
 
     virtual void _evolution_step(List< TimedEnclosureType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
-                                 const TimedEnclosureType& current_set, const TimeType& time,
+                                 const TimedEnclosureType& current_set, const TerminationType& termination,
                                  Semantics semantics, bool reach) const;
 
   private:

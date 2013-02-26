@@ -176,7 +176,7 @@ Void
 HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreeSet& reach_cells,
                                                        HybridGridTreeSet& evolve_cells,
                                                        const HybridGridTreeSet& set,
-                                                       const HybridTime& time,
+                                                       const HybridTerminationCriterion& termination,
                                                        const int accuracy,
                                                        const HybridEvolverInterface& evolver) const
 {
@@ -191,7 +191,7 @@ HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreeSet& reach_
         HybridEnclosure initial_enclosure = evolver.enclosure(cell.box());
         ListSet<HybridEnclosure> reach_enclosures;
         ListSet<HybridEnclosure> final_enclosures;
-        make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,time,UPPER_SEMANTICS);
+        make_lpair(reach_enclosures,final_enclosures) = evolver.reach_evolve(initial_enclosure,termination,UPPER_SEMANTICS);
         ARIADNE_LOG(5,"  computed "<<reach_enclosures.size()<<" reach enclosures and "<<final_enclosures.size()<<" final enclosures.\n");
         ARIADNE_LOG(5,"  adjoining reach enclosures to grid... ");
         for(HybridEnclosure const& enclosure : reach_enclosures) {
@@ -537,12 +537,13 @@ outer_chain_reach(
         const CompactSetInterfaceType& initial_set) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::outer_chain_reach(...)\n");
+    Set<DiscreteEvent> lock_to_grid_events=this->_configuration->lock_to_grid_events();
     Float transient_time = this->_configuration->transient_time();
     int transient_steps = this->_configuration->transient_steps();
-    HybridTime hybrid_transient_time(transient_time, transient_steps);
+    HybridTerminationCriterion transient_termination(ExactFloat(transient_time), transient_steps, lock_to_grid_events);
     Float lock_to_grid_time=this->_configuration->lock_to_grid_time();
     int lock_to_grid_steps=this->_configuration->lock_to_grid_steps();
-    HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,lock_to_grid_steps);
+    HybridTerminationCriterion recurrent_termination(ExactFloat(lock_to_grid_time),lock_to_grid_steps,lock_to_grid_events);
     int maximum_grid_depth = this->_configuration->maximum_grid_depth();
     int maximum_grid_height = this->_configuration->maximum_grid_height();
     ARIADNE_LOG(3,"transient_time=("<<transient_time<<","<<transient_steps<<")\n");
@@ -570,7 +571,7 @@ outer_chain_reach(
     HybridGridTreeSet evolve_cells(grid);
     if(transient_time > 0.0 || transient_steps > 0) {
         ARIADNE_LOG(3,"Computing transient evolution...\n");
-        this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,initial_cells,hybrid_transient_time,maximum_grid_depth,*_evolver);
+        this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,initial_cells,transient_termination,maximum_grid_depth,*_evolver);
         _checked_restriction(evolve_cells,bounding);
         evolve_cells.recombine();
         evolve_cells.mince(maximum_grid_depth);
@@ -589,7 +590,7 @@ outer_chain_reach(
     while(!starting_cells.empty()) {
         current_evolve_cells = evolve_cells;
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,starting_cells,
-                                         hybrid_lock_to_grid_time,maximum_grid_depth,*_evolver);
+                                         recurrent_termination,maximum_grid_depth,*_evolver);
         ARIADNE_LOG(5,"reach.size()="<<reach_cells.size()<<"\n");
         ARIADNE_LOG(5,"evolve.size()="<<evolve_cells.size()<<"\n");
         _checked_restriction(evolve_cells,bounding);

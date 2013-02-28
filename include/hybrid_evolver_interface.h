@@ -65,11 +65,7 @@ class HybridTerminationCriterion {
     //! \brief The maximum number of discrete steps taken.
     const Set<DiscreteEvent>& terminating_events() const { return this->_terminating_events; }
 };
-OutputStream& operator<<(OutputStream& os, const HybridTerminationCriterion& termination) {
-    return os << "HybridTerminationCriterion( maximum_time=" << termination.maximum_time()
-              << ", maximum_steps="<<termination.maximum_steps()
-              << ", terminating_events="<<termination.terminating_events() << " )";
-}
+OutputStream& operator<<(OutputStream& os, const HybridTerminationCriterion& termination);
     
 //! \brief Interface for hybrid evolvers using HybridEnclosure as the enclosure type.
 //! \details The class is loggable in order to allow verbosity tuning at the analyser layer.

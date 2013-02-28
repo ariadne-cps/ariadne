@@ -54,6 +54,12 @@ static const DiscreteEvent step_event("_h_");
 typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
 
+std::ostream& operator<<(std::ostream& os, const HybridTerminationCriterion& termination) {
+    return os << "HybridTerminationCriterion( maximum_time=" << termination.maximum_time()
+              << ", maximum_steps="<<termination.maximum_steps()
+              << ", terminating_events="<<termination.terminating_events() << " )";
+}
+
 std::ostream& operator<<(std::ostream& os, const CrossingKind& crk) {
     switch(crk) {
         case CrossingKind::DEGENERATE: os<<"DEGENERATE"; break;

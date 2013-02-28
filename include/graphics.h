@@ -60,14 +60,13 @@ inline FillColour fill_colour(double r, double g, double b) { return FillColour(
 
 struct GraphicsProperties {
     GraphicsProperties()
-        : line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_opacity(1.0), fill_colour(white) { }
-    GraphicsProperties(bool ls, double lw, Colour lc, bool fs, double fo, Colour fc)
-        : line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_opacity(fo), fill_colour(fc) { }
+        : line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(white) { }
+    GraphicsProperties(bool ls, double lw, Colour lc, bool fs, Colour fc)
+        : line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc) { }
     bool line_style;
     double line_width;
     Colour line_colour;
     bool fill_style;
-    double fill_opacity;
     Colour fill_colour;
 };
 
@@ -91,11 +90,11 @@ class Figure
     void set_line_width(double);
     void set_line_colour(Colour);
     void set_fill_style(bool);
-    void set_fill_opacity(double);
     void set_fill_colour(Colour);
 
     void set_line_colour(double, double, double);
     void set_fill_colour(double, double, double);
+    void set_fill_opacity(double);
 
     bool get_line_style() const;
     double get_line_width() const;

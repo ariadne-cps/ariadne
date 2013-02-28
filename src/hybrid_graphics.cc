@@ -113,7 +113,6 @@ class CairoCanvas
     cairo_t *cr;
     double lw; // The line width in pixels
     Colour lc,fc; // The line and fill colours
-    double fo; // The fill opacity
   public:
     ~CairoCanvas();
     CairoCanvas(const ImageSize2d& size, const Box2d& bounds);
@@ -125,11 +124,11 @@ class CairoCanvas
     void circle(double x, double y, double r) { cairo_arc (cr, x, y, r, 0, 2*M_PI); }
     void dot(double x, double y) { static const double RADIUS=0.01; cairo_arc (cr, x, y, RADIUS, 0, 2*M_PI); }
     void stroke();
-    void fill() { cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fo); cairo_fill_preserve (cr); this->stroke(); }
+    void fill() { cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fc.opacity); cairo_fill_preserve (cr); this->stroke(); }
     void set_line_width(double lw) { this->lw=lw; }
     void set_line_colour(double r, double g, double b) { lc=Colour(r,g,b); }
-    void set_fill_opacity(double o) { fo=o; }
-    void set_fill_colour(double r, double g, double b) { fc=Colour(r,g,b); }
+    void set_fill_opacity(double o) { fc.opacity=o; }
+    void set_fill_colour(double r, double g, double b) { fc=Colour(r,g,b,fc.opacity); }
 
     Vector2d scaling() const;
     Box2d bounds() const;

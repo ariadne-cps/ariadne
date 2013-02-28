@@ -153,7 +153,7 @@ void Figure::set_fill_style(bool fs)
 
 void Figure::set_fill_opacity(double fo)
 {
-    this->_data->properties.fill_opacity=fo;
+    this->_data->properties.fill_colour.opacity=fo;
 }
 
 void Figure::set_fill_colour(Colour fc)
@@ -163,7 +163,7 @@ void Figure::set_fill_colour(Colour fc)
 
 void Figure::set_fill_colour(double r, double g, double b)
 {
-    this->set_fill_colour(Colour(r,g,b));
+    this->set_fill_colour(Colour(r,g,b,this->_data->properties.fill_colour.opacity));
 }
 
 bool Figure::get_line_style() const
@@ -189,7 +189,7 @@ bool Figure::get_fill_style() const
 
 double Figure::get_fill_opacity() const
 {
-    return this->_data->properties.fill_opacity;
+    return this->_data->properties.fill_colour.opacity;
 }
 
 Colour Figure::get_fill_colour() const
@@ -219,7 +219,6 @@ class CairoCanvas
     cairo_t *cr;
     double lw; // The line width in pixels
     Colour lc,fc; // The line and fill colours
-    double fo; // The fill opacity
   public:
     ~CairoCanvas();
     CairoCanvas(const ImageSize2d& size, const Box2d& bounds);
@@ -231,11 +230,11 @@ class CairoCanvas
     void circle(double x, double y, double r) { cairo_arc (cr, x, y, r, 0, 2*M_PI); }
     void dot(double x, double y) { static const double RADIUS=0.01; cairo_arc (cr, x, y, RADIUS, 0, 2*M_PI); }
     void stroke();
-    void fill() { cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fo); cairo_fill_preserve (cr); this->stroke(); }
+    void fill() { cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fc.opacity); cairo_fill_preserve (cr); this->stroke(); }
     void set_line_width(double lw) { this->lw=lw; }
-    void set_line_colour(double r, double g, double b) { lc=Colour(r,g,b); }
-    void set_fill_opacity(double o) { fo=o; }
-    void set_fill_colour(double r, double g, double b) { fc=Colour(r,g,b); }
+    void set_line_colour(double r, double g, double b) { lc.red=r; lc.green=g; lc.blue=b; }
+    void set_fill_opacity(double o) { fc.opacity=o; }
+    void set_fill_colour(double r, double g, double b) { fc.red=r; fc.green=g; fc.blue=b; }
 
     Vector2d scaling() const;
     Box2d bounds() const;
@@ -253,13 +252,13 @@ CairoCanvas::~CairoCanvas()
 }
 
 CairoCanvas::CairoCanvas(cairo_t *c)
-    : cr(c), lw(1.0), lc(0,0,0), fc(1,1,1), fo(1.0)
+    : cr(c), lw(1.0), lc(0,0,0), fc(1,1,1, 1.0)
 {
 }
 
 // TODO: This function is incomplete and not ready for use
 CairoCanvas::CairoCanvas(const ImageSize2d& size, const Box2d& bounds)
-    : cr(0), lw(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0), fo(1.0)
+    : cr(0), lw(1.0), lc(0.0,0.0,0.0), fc(1.0,1.0,1.0, 1.0)
 {
     //std::cerr<<"Figure::write(filename="<<cfilename<<")\n";
     cairo_surface_t *surface;
@@ -429,9 +428,9 @@ void CairoCanvas::finalise()
 
 
 void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties) {
-    canvas.set_fill_opacity(properties.fill_opacity);
     const Colour& line_colour=properties.line_colour;
     const Colour& fill_colour=properties.fill_colour;
+    canvas.set_fill_opacity(properties.fill_colour.opacity);
     canvas.set_fill_colour(fill_colour.red, fill_colour.green, fill_colour.blue);
     canvas.set_line_colour(line_colour.red, line_colour.green, line_colour.blue);
 }
@@ -605,13 +604,17 @@ void Figure::display() const
 
 
 Colour::Colour()
-    : name("transparant"), red(1.0), green(1.0), blue(1.0), transparant(true) { }
+    : Colour("transparant", 1.0, 1.0, 1.0, 0.0) { }
 Colour::Colour(double rd, double gr, double bl, bool tr)
-    : name(), red(rd), green(gr), blue(bl), transparant(tr) { }
+    : Colour("",rd,gr,bl,tr?0.0:1.0) { }
+Colour::Colour(double rd, double gr, double bl, double op)
+    : Colour("",rd,gr,bl,op) { }
 Colour::Colour(const char* nm, double rd, double gr, double bl, bool tr)
-    : name(nm), red(rd), green(gr), blue(bl), transparant(tr) { }
+    : Colour("",rd,gr,bl,tr?0.0:1.0) { }
+Colour::Colour(const char* nm, double rd, double gr, double bl, double op)
+    : name(nm), red(rd), green(gr), blue(bl), opacity(op) { }
 std::ostream& operator<<(std::ostream& os, const Colour& c) {
-    return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << " )"; }
+    return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << ", op=" << c.opacity << " )"; }
 
 
 const Colour transparant=Colour();

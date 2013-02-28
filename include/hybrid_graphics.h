@@ -93,17 +93,16 @@ class HybridFigure
     void set_line_width(double lw) { properties.line_width=lw; }
     void set_line_colour(Colour lc) { properties.line_colour=lc; }
     void set_fill_style(bool fs) { properties.fill_style=fs; }
-    void set_fill_opacity(double fo) { properties.fill_opacity=fo; }
     void set_fill_colour(Colour fc) { properties.fill_colour=fc; }
 
+    void set_fill_opacity(double fo) { properties.fill_colour.opacity=fo; }
     void set_line_colour(double r, double g, double b) { properties.line_colour=Colour(r,g,b); }
-    void set_fill_colour(double r, double g, double b) { properties.fill_colour=Colour(r,g,b); }
+    void set_fill_colour(double r, double g, double b) { properties.fill_colour=Colour(r,g,b,properties.fill_colour.opacity); }
 
     bool get_line_style() const { return properties.line_style; }
     double get_line_width() const { return properties.line_width; }
     Colour get_line_colour() const { return properties.line_colour; }
     bool get_fill_style() const { return properties.fill_style; }
-    double get_fill_opacity() const { return properties.fill_opacity; }
     Colour get_fill_colour() const { return properties.fill_colour; }
 
     void draw(const HybridDrawableInterface& shape) { objects.append(HybridGraphicsObject(this->properties,shape)); }

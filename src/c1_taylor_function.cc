@@ -265,7 +265,7 @@ C1TaylorSeries operator*(C1TaylorSeries f1, C1TaylorSeries f2) {
     for(uint ir=1; ir!=f1a.size()+f2a.size()-1; ++ir) {
         vu=0.0;
         mvl=0.0;
-        for(uint i1=max(0,int(ir)-int(f2a.size()-1)); i1!=min(ir+1,f1a.size()); ++i1) {
+        for(uint i1=max(0,int(ir)-int(f2a.size()-1)); i1!=min(int(ir+1),int(f1a.size())); ++i1) {
             uint i2=ir-i1;
             // std::cerr<<"ir="<<ir<<", i1="<<i1<<", i2="<<i2<<"\n";
             ARIADNE_DEBUG_ASSERT(i2<f2a.size());

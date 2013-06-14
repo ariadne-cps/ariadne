@@ -24,6 +24,7 @@
 #include <cstdarg>
 #include "ariadne.h"
 #include "valuation.h"
+#include "operators.h"
 
 using namespace Ariadne;
 
@@ -37,14 +38,15 @@ int main(int argc, char** argv)
 
     // Set up the evolution parameters and grid
     double time(2.0);
-    Real rtime(time);
     int steps = 3;
     Real step_size(1e-1);
 
 
     // Definition of the reference trajectory
     // Constants
-    Real Ax = 60.0/pow(rtime,5);         Real Bx = -150.0/pow(rtime,4);       Real Cx = 100.0/pow(rtime,3);
+    Real Ax = 60.0/pow(time,5);        
+    Real Bx = -150.0/pow(time,4);       
+    Real Cx = 100.0/pow(time,3);
 
     // Variables
     RealVariable x("x");
@@ -74,7 +76,7 @@ int main(int argc, char** argv)
     Real ke = 1000.0;          Real kFx = h_scaling*h_scaling*10.0/m;         Real kFz = (h_scaling*h_scaling/4.0)*10.0/m;
 
     // Constants for the contact point
-    Real xc = 19.5;
+    Real xc = 9.5;
 
     // Dynamics for mode free
     RealExpression dot_x = vx;
@@ -148,13 +150,15 @@ int main(int argc, char** argv)
     std::cout << "Plotting..." << std::flush;
     HybridFigure fig;
     // Plotting x
-    fig.set_axes(Axes2d(0.0<=x<=10.0,0.0<=vx<=1.0));
+    fig.set_axes(Axes2d(0.0<=t<=2.0,0.0<=x<=10.0));
     fig.set_bounds(t,0.0,time);
     fig << line_style(true) << fill_colour(cyan);
     fig << orbit;
 //    fig << fill_colour(red) << orbit.final();
 //    fig << fill_colour(blue) << initial_set;
     fig.write("robotarm-verification-orbit-x");
+
+    std::cout << " done." << endl;
 
     return 0;
 

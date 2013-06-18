@@ -53,7 +53,7 @@ void export_evolver(const char* name)
 {
     typedef typename Ev::SystemType Sys;
     typedef typename Ev::EnclosureType ES;
-    typedef typename Ev::TimeType Tm;
+    typedef typename Ev::TerminationType Tm;
     typedef typename Ev::OrbitType Orb;
 
     class_<Ev> evolver_class(name,Init());

@@ -147,7 +147,7 @@ void export_formula()
     string_expression_class.def(self_ns::str(self));
 
     class_<PrimedStringVariable> string_next_variable_class("PrimedStringVariable", no_init);
-    string_next_variable_class.def("__lshift__", (PrimedStringAssignment(PrimedStringVariable::*)(const StringExpression&)const) &StringExpression::operator=);
+    string_next_variable_class.def("__lshift__", (PrimedStringAssignment(PrimedStringVariable::*)(const StringExpression&)const) &PrimedStringVariable::operator=);
     string_next_variable_class.def(self_ns::str(self));
 
     def("next", (PrimedStringVariable(*)(const StringVariable&)) &next);

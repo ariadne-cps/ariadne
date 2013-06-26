@@ -37,17 +37,15 @@ int main(int argc, char** argv)
     if(argc>1) { verbosity=atoi(argv[1]); }
 
     // Set up the evolution parameters and grid
-    double time(2.0);
+    double time(5.0);
     int steps = 3;
     Real step_size(1e-1);
 
 
     // Definition of the reference trajectory
     // Constants
-    Real Ax = 60.0/pow(time,5);        
-    Real Bx = -150.0/pow(time,4);       
-    Real Cx = 100.0/pow(time,3);
-
+    Real per = time;
+    Real omega = 2*pi/per;
     // Variables
     RealVariable x("x");
     RealVariable vx("vx");
@@ -56,17 +54,19 @@ int main(int argc, char** argv)
     RealExpression dot_t((1.0));
 
     // Algebraic expression for the reference trajectory
-    RealExpression xd = Ax*t*t*t*t*t + Bx*t*t*t*t + Cx*t*t*t;
-    std::cout << "Algebraic expression for xd = " << xd << std::endl;
+    RealExpression ddot_xd = omega/per*sin(omega*t);
+    std::cout << "Expression for dot dot xd = " << ddot_xd << std::endl;
 
 //   return 1;
 
     // First and second derivatives of the reference trajectory
-    RealExpression dot_xd = 5.0*Ax*t*t*t*t + 4.0*Bx*t*t*t + 3.0*Cx*t*t;
+//    RealExpression dot_xd = 5.0*Ax*t*t*t*t + 4.0*Bx*t*t*t + 3.0*Cx*t*t;
+    RealExpression dot_xd = -1/per*cos(omega*t) + 1/per;
     std::cout << "Expression for dot xd = " << dot_xd << std::endl;
 
-    RealExpression ddot_xd = 20.0*Ax*t*t*t + 12.0*Bx*t*t + 6.0*Cx*t;
-    std::cout << "Expression for dot dot xd = " << ddot_xd << std::endl;
+//    RealExpression ddot_xd = 20.0*Ax*t*t*t + 12.0*Bx*t*t + 6.0*Cx*t;
+    RealExpression xd = -1.0/(2*pi)*sin(omega*t) + 1/per*t;
+    std::cout << "Algebraic expression for xd = " << xd << std::endl;
 
 
     // Definition of the arm system
@@ -76,7 +76,8 @@ int main(int argc, char** argv)
     Real ke = 1000.0;          Real kFx = h_scaling*h_scaling*10.0/m;         Real kFz = (h_scaling*h_scaling/4.0)*10.0/m;
 
     // Constants for the contact point
-    Real xc = 9.5;
+    Real xc = 0.95;
+    Real delta = 0.03;
 
     // Dynamics for mode free
     RealExpression dot_x = vx;
@@ -97,6 +98,8 @@ int main(int argc, char** argv)
     DottedRealAssignments free_dyn(( dot(x)=vx, dot(vx) = ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x), dot(t)=1.0));
     std::cout << "free_dyn = " << free_dyn << std::endl;
     robotarm_automaton.new_mode(free, free_dyn);
+    DiscreteEvent finv("finv");
+    robotarm_automaton.new_invariant(free, (x <= xc + delta), finv);
 
     // Second mode: contact
     DiscreteLocation contact(robotarm|"contact");
@@ -105,7 +108,7 @@ int main(int argc, char** argv)
     // transition from free to contact
     DiscreteEvent f2c("f2c");
     PrimedRealAssignments reset_id( (next(x)=x,next(vx)=vx,next(t)=t) );
-    robotarm_automaton.new_transition(free, f2c, contact, reset_id, (x >= xc), urgent);
+    robotarm_automaton.new_transition(free, f2c, contact, reset_id, (x >= xc - delta), permissive);
 
     std::cout << "RobotArm = " << std::endl;
     std::cout << robotarm << std::endl << std::endl;
@@ -150,13 +153,24 @@ int main(int argc, char** argv)
     std::cout << "Plotting..." << std::flush;
     HybridFigure fig;
     // Plotting x
-    fig.set_axes(Axes2d(0.0<=t<=2.0,0.0<=x<=10.0));
+    fig.set_axes(Axes2d(0.0<=t<=time,0.0<=x<=1.0));
     fig.set_bounds(t,0.0,time);
     fig << line_style(true) << fill_colour(cyan);
     fig << orbit;
-//    fig << fill_colour(red) << orbit.final();
+    fig << fill_colour(red) << orbit.final();
 //    fig << fill_colour(blue) << initial_set;
     fig.write("robotarm-verification-orbit-x");
+    fig.clear();
+    
+    // Plotting vx
+    fig.set_axes(Axes2d(0.0<=t<=time,-1.0<=vx<=1.0));
+    fig.set_bounds(t,0.0,time);
+    fig << line_style(true) << fill_colour(cyan);
+    fig << orbit;
+    fig << fill_colour(red) << orbit.final();
+//    fig << fill_colour(blue) << initial_set;
+    fig.write("robotarm-verification-orbit-vx");
+
 
     std::cout << " done." << endl;
 

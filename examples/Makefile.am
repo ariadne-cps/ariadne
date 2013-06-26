@@ -23,7 +23,8 @@ bin_PROGRAMS= \
 	watertank-proportional \
 	watertank-nonlinear \
 	rectifier \
-	robotarm-verification
+	robotarm-verification \
+	robotarm-verification-essay
 
 tutorial_SOURCES = tutorial.cc
 bouncingball_SOURCES = bouncingball.cc
@@ -35,6 +36,7 @@ watertank_nonlinear_SOURCES=watertank-nonlinear.cc
 watertank_compositional_SOURCES=watertank-compositional.cc
 rectifier_SOURCES=rectifier.cc
 robotarm_verification_SOURCES=robotarm-verification.cc
+robotarm_verification_essay_SOURCES=robotarm-verification-essay.cc
 
 
 examples: $(bin_PROGRAMS)

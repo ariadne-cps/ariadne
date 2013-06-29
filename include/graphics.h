@@ -63,6 +63,7 @@ struct GraphicsProperties {
         : line_style(true), line_width(1.0), line_colour(black), fill_style(true), fill_colour(white) { }
     GraphicsProperties(bool ls, double lw, Colour lc, bool fs, Colour fc)
         : line_style(ls), line_width(lw), line_colour(lc), fill_style(fs), fill_colour(fc) { }
+    double dot_radius;
     bool line_style;
     double line_width;
     Colour line_colour;
@@ -86,6 +87,7 @@ class Figure
 
     void set_projection(uint as, uint ix, uint iy);
 
+    void set_dot_radius(double);
     void set_line_style(bool);
     void set_line_width(double);
     void set_line_colour(Colour);

@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "utilities.h"
+
 #include <boost/python.hpp>
 
 #include <iostream>
@@ -47,8 +49,6 @@
 #include "constraint_solver.h"
 
 #include "../src/function_mixin.tcc"
-
-#include "utilities.h"
 
 using namespace boost::python;
 

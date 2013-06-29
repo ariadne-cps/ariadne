@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "utilities.h"
+
 #include "config.h"
 
 #include <boost/python.hpp>
@@ -53,6 +55,7 @@ void export_figure()
     figure_class.def("set_projection_map",(void(Figure::*)(const PlanarProjectionMap&)) &Figure::set_projection_map);
     figure_class.def("set_projection",(void(Figure::*)(uint,uint,uint)) &Figure::set_projection);
     figure_class.def("set_bounding_box",&Figure::set_bounding_box);
+    figure_class.def("set_dot_radius", (void(Figure::*)(double)) &Figure::set_dot_radius);
     figure_class.def("set_line_style", (void(Figure::*)(bool)) &Figure::set_line_style);
     figure_class.def("set_line_width", (void(Figure::*)(double)) &Figure::set_line_width);
     figure_class.def("set_line_colour", (void(Figure::*)(double,double,double)) &Figure::set_line_colour);

@@ -67,6 +67,7 @@ class FigureInterface {
     virtual void set_projection(uint as, uint ix, uint iy) = 0;
     virtual void set_line_style(bool) = 0;
     virtual void set_line_width(double) = 0;
+    virtual void set_dot_radius(double) = 0;
     virtual void set_line_colour(Colour) = 0;
     virtual void set_fill_opacity(double) = 0;
     virtual void set_fill_colour(Colour) = 0;

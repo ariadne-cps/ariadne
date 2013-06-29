@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "utilities.h"
+
 #include <boost/python.hpp>
 
 #include "function_interface.h"
@@ -28,8 +30,6 @@
 #include "function.h"
 #include "function_model.h"
 #include "taylor_function.h"
-
-#include "utilities.h"
 
 using namespace boost::python;
 using namespace Ariadne;

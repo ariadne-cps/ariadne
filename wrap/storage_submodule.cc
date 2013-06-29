@@ -22,14 +22,14 @@
  */
 
 
+#include "utilities.h"
+
 #include <boost/python.hpp>
 
 #include "numeric.h"
 #include "function_set.h"
 #include "grid_set.h"
 #include "list_set.h"
-
-#include "utilities.h"
 
 using namespace boost::python;
 using namespace Ariadne;

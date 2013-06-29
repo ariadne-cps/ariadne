@@ -244,6 +244,15 @@ template<class X> Vector<X> solve(const Matrix<X>& A, const Vector<X>& b) {
     return lu_inverse(A)*b;
 }
 
+template<class X> Vector<X> gs_solve(const Matrix<X>& A, const Vector<X>& b) {
+    Matrix<X> B(b.size(),1u);
+    for(size_t j=0; j!=b.size(); ++j) { B[j][0]=b[j]; }
+    Matrix<X> R=gs_solve(A,B);
+    Vector<X> r(R.row_size());
+    for(size_t i=0; i!=r.size(); ++i) { r[i]=R[i][0]; }
+    return r;
+}
+
 
 template<class X>
 Matrix<X>
@@ -802,6 +811,7 @@ template Matrix<Interval> solve(const Matrix<Interval>&, const Matrix<Interval>&
 template Matrix<Interval> lu_solve(const Matrix<Interval>&, const Matrix<Interval>&);
 template Matrix<Interval> gs_solve(const Matrix<Interval>&, const Matrix<Interval>&);
 template Vector<Interval> solve(const Matrix<Interval>&, const Vector<Interval>&);
+template Vector<Interval> gs_solve(const Matrix<Interval>&, const Vector<Interval>&);
 #ifdef HAVE_GMPXX_H
 template class Matrix<Rational>;
 template Matrix<Rational> inverse(const Matrix<Rational>&);

@@ -548,7 +548,7 @@ double tan_rnd_series(double x) {
     return r;
 }
 
-
+uint Float::output_precision = 6;
 
 Float pow_rnd(Float x, int n)
 {

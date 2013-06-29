@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "utilities.h"
+
 #include <boost/python.hpp>
 
 #include "array.h"
 #include "numeric.h"
 #include "taylor_model.h"
 #include "differential.h"
-
-#include "utilities.h"
 
 using namespace boost::python;
 using namespace Ariadne;

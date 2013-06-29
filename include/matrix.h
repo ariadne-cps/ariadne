@@ -608,9 +608,11 @@ template<class X> Vector<X> solve(const Matrix<X>& A, const Vector<X>& B);
 // Compute the inverse using lower/upper triangular factorization
 template<class X> Matrix<X> lu_inverse(const Matrix<X>& A);
 template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B);
+template<class X> Vector<X> lu_solve(const Matrix<X>& A, const Vector<X>& b);
 // Compute the inverse using Gauss-Seidel iteration
 template<class X> Matrix<X> gs_inverse(const Matrix<X>& A);
 template<class X> Matrix<X> gs_solve(const Matrix<X>& A, const Matrix<X>& B);
+template<class X> Vector<X> gs_solve(const Matrix<X>& A, const Vector<X>& b);
 
 template<class X> Matrix<X> inverse(const PLUMatrix<X>& A);
 template<class X> Matrix<X> solve(const PLUMatrix<X>& A, const Matrix<X>& B);

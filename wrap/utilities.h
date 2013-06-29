@@ -38,6 +38,8 @@
 #include <sstream>
 #include <iostream>
 
+#include "config.h"
+
 #include "array.h"
 #include "tuple.h"
 #include "container.h"

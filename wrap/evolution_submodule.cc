@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "utilities.h"
+
 #include <boost/python.hpp>
 
 #include "orbit.h"
@@ -30,8 +32,6 @@
 #include "hybrid_automaton.h"
 #include "hybrid_enclosure.h"
 #include "hybrid_time.h"
-
-#include "utilities.h"
 
 using namespace boost::python;
 using namespace Ariadne;

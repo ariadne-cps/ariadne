@@ -37,7 +37,7 @@
 #include "point.h"
 #include "box.h"
 #include "list_set.h"
-
+#include "function.h"
 #include "polytope.h"
 #include "geometry2d.h"
 
@@ -194,7 +194,7 @@ Zonotope::Zonotope(std::initializer_list< std::tuple<Float,std::initializer_list
         }
         this->_error[i]=std::get<2>(*aff_iter);
         ARIADNE_ASSERT(this->_error[i]>=0);
-    } 
+    }
 }
 
 
@@ -312,7 +312,13 @@ Box
 Zonotope::bounding_box() const
 {
     const Zonotope& z=*this;
+//    std::cerr<<"zD="<<z.domain()<<"\n";
+//    std::cerr<<"zc="<<make_exact(z.centre())<<"\n";
+//    std::cerr<<"zG="<<make_exact(z.generators())<<"\n";
+//    std::cerr<<"ze"<<make_exact(z.error())*Interval(-1,1)<<"\n";
+//    std::cerr<<"zG*E"<<make_exact(z.generators())*z.domain()<<"\n";
     Box b=make_exact(z.centre())+(make_exact(z.generators())*z.domain())+make_exact(z.error())*Interval(-1,1);
+//    std::cerr<<"bb="<<b<<"\n";
     return b;
 }
 
@@ -736,6 +742,32 @@ orthogonal_over_approximation(const Zonotope< Interval >& z)
 }
 */
 
+Zonotope apply(const VectorFunction<Interval>& f, const Zonotope& z) {
+    std::cerr<<"Zonotope apply(IntervalVectorFunction,Zonotope)\n";
+    IntervalVector zc=z.centre();
+    IntervalMatrix zG=z.generators();
+    IntervalVector ze=z.error()*Interval(-1,+1);
+    IntervalVector zb=z.bounding_box();
+
+    IntervalVector fc=f(zc);
+    IntervalMatrix fJb=f.jacobian(zb);
+    IntervalMatrix fJbzG=fJb*zG;
+
+    std::cerr<<"  fJb="<<fJb<<"\n";
+
+    FloatVector nzc = midpoint(fc);
+    FloatMatrix nzG = midpoint(fJbzG);
+
+    IntervalVector zE(z.number_of_generators(),Interval(-1,+1));
+
+    IntervalVector nzE=(fc-IntervalVector(nzc)) + (fJbzG-IntervalMatrix(nzG))*zE + fJb*ze;
+
+    FloatVector nze(nzE.size()); for(uint i=0; i!=nze.size(); ++i) { nze[i]=nzE[i].upper(); }
+    std::cerr<<"  nzE="<<nzE<<"\n";
+    std::cerr<<"  nze="<<nze<<"\n";
+
+    return Zonotope(nzc,nzG,nze);
+}
 
 
 
@@ -878,9 +910,8 @@ contains(const Zonotope& z, const Point& pt)
 
 struct angle_less {
     bool operator() (const Vector2d& v1, const Vector2d& v2) const {
-        if(v1.y==0) { return true; }
-        else if(v1.y==0) { return false; }
-        else { return (v1.y/v1.x) < (v2.y/v2.x); }
+        assert(v1.x>0 && v2.x>0);
+        return (v1.y/v1.x) < (v2.y/v2.x);
     }
 };
 
@@ -892,15 +923,17 @@ void Zonotope::draw(CanvasInterface& c, const Projection2d& p) const {
     const Matrix<Float>& zg=z.generators();
     const Vector<Float>& ze=z.error();
 
+    double eps=1.0/(1ul<<31);
     Point2d pc(zc[ix],zc[iy]);
     std::vector< Vector2d > pg;
     for(uint j=0; j!=z.number_of_generators(); ++j) {
         Vector2d g(zg[ix][j],zg[iy][j]);
         if(g.x<0) { g=-g; }
+        else if (g.x==0) { g.x=eps; }
         pg.push_back(g);
     }
     if(ze[ix]>0) { pg.push_back(Vector2d(ze[ix],0.0)); }
-    if(ze[iy]>0) { pg.push_back(Vector2d(0.0,ze[iy])); }
+    if(ze[iy]>0) { pg.push_back(Vector2d(eps,ze[iy])); }
 
     std::sort(pg.begin(),pg.end(),angle_less());
 

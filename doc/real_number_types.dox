@@ -223,6 +223,14 @@ A Dyadic type does not in general support exact division.
 The exception is that division by a power of \f$2\f$ yields an exact answer.
 Generic code intended for use with all exact arithmetic types should \em not use division, except by a power of two.
 
+\section floatarithmetic Floating-Point Types.
+
+In Ariadne, rounded floating-point arithmetic is performed using rounded arithmetic.
+
+Alternatives are to use round-to-nearest algorithms. Examples include Dekker's \texttt{Fast2Sum}, Møller & Knuths \texttt{TwoSum} the \texttt{TwoMulFMA} and Kahan's algorithm for $ad=bc$.
+and Pichat, Ogita, Rump and Oishi's algorithm for the sum.
+
+
 
 
 */

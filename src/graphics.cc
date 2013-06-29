@@ -126,6 +126,11 @@ Box Figure::get_bounding_box() const
     return this->_data->bounding_box;
 }
 
+void Figure::set_dot_radius(double dr)
+{
+    this->_data->properties.dot_radius=dr;
+}
+
 void Figure::set_line_style(bool ls)
 {
     this->_data->properties.line_style=ls;
@@ -218,6 +223,7 @@ class CairoCanvas
   private:
     cairo_t *cr;
     double lw; // The line width in pixels
+    double dr; // The dot radius in pixels
     Colour lc,fc; // The line and fill colours
   public:
     ~CairoCanvas();
@@ -228,9 +234,10 @@ class CairoCanvas
     void move_to(double x, double y) { cairo_move_to (cr, x, y); }
     void line_to(double x, double y) { cairo_line_to (cr, x, y); }
     void circle(double x, double y, double r) { cairo_arc (cr, x, y, r, 0, 2*M_PI); }
-    void dot(double x, double y) { static const double RADIUS=0.01; cairo_arc (cr, x, y, RADIUS, 0, 2*M_PI); }
+    void dot(double x, double y) { cairo_arc (cr, x, y, dr/1000, 0, 2*M_PI); }
     void stroke();
     void fill() { cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fc.opacity); cairo_fill_preserve (cr); this->stroke(); }
+    void set_dot_radius(double lw) { this->dr=dr; }
     void set_line_width(double lw) { this->lw=lw; }
     void set_line_colour(double r, double g, double b) { lc.red=r; lc.green=g; lc.blue=b; }
     void set_fill_opacity(double o) { fc.opacity=o; }
@@ -252,7 +259,7 @@ CairoCanvas::~CairoCanvas()
 }
 
 CairoCanvas::CairoCanvas(cairo_t *c)
-    : cr(c), lw(1.0), lc(0,0,0), fc(1,1,1, 1.0)
+    : cr(c), lw(1.0), dr(1.0), lc(0,0,0), fc(1,1,1, 1.0)
 {
 }
 

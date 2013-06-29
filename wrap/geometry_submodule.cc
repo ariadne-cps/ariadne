@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "utilities.h"
+
 #include "config.h"
 
 #include <boost/python.hpp>
@@ -40,7 +42,6 @@
 #include "discrete_location.h"
 #include "hybrid_set.h"
 
-#include "utilities.h"
 
 
 using namespace boost::python;
@@ -216,7 +217,7 @@ void export_set_interface() {
 
 void export_point()
 {
-    class_<Point> point_class("Point",init<Point>());
+    class_<Point,bases<DrawableInterface>> point_class("Point",init<Point>());
     point_class.def(init<uint>());
     point_class.def("__getitem__", &__getitem__<Point,int,Float>);
     point_class.def(self_ns::str(self));
@@ -263,6 +264,12 @@ void export_box()
 
 }
 
+std::pair<Zonotope,Zonotope> split_pair(const Zonotope& z) {
+    ListSet<Zonotope> split_list=split(z);
+    ARIADNE_ASSERT(split_list.size()==2);
+    return std::pair<Zonotope,Zonotope>(split_list[0],split_list[1]);
+}
+
 void export_zonotope()
 {
     class_<Zonotope,bases<CompactSetInterface,OpenSetInterface,DrawableInterface> > zonotope_class("Zonotope",init<Zonotope>());
@@ -273,6 +280,7 @@ void export_zonotope()
     zonotope_class.def("generators",&Zonotope::generators,return_value_policy<copy_const_reference>());
     zonotope_class.def("error",&Zonotope::error,return_value_policy<copy_const_reference>());
     zonotope_class.def("contains",&Zonotope::contains);
+    zonotope_class.def("split", (ListSet<Zonotope>(*)(const Zonotope&)) &split);
     zonotope_class.def("__str__",&__cstr__<Zonotope>);
 
     def("contains", (tribool(*)(const Zonotope&,const Point&)) &contains);
@@ -283,6 +291,11 @@ void export_zonotope()
     def("polytope", (Polytope(*)(const Zonotope&)) &polytope);
     def("orthogonal_approximation", (Zonotope(*)(const Zonotope&)) &orthogonal_approximation);
     def("orthogonal_over_approximation", (Zonotope(*)(const Zonotope&)) &orthogonal_over_approximation);
+    def("error_free_over_approximation", (Zonotope(*)(const Zonotope&)) &error_free_over_approximation);
+
+    def("apply", (Zonotope(*)(const VectorFunction<Interval>&, const Zonotope&)) &apply);
+
+    to_python< ListSet<Zonotope> >();
 
 }
 

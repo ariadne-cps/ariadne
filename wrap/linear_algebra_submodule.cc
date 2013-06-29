@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "utilities.h"
+
 #include "config.h"
 
 #include <boost/python.hpp>
@@ -29,8 +31,6 @@
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
-
-#include "utilities.h"
 
 using namespace boost::python;
 using namespace Ariadne;
@@ -360,6 +360,7 @@ template<> void export_matrix<Interval>()
     //export_matrix_arithmetic<Interval,Interval,Float>(matrix_class);
     def("gs_inverse", (Matrix<Interval>(*)(const Matrix<Interval>&)) &gs_inverse);
     def("lu_inverse", (Matrix<Interval>(*)(const Matrix<Interval>&)) &lu_inverse);
+    def("gs_solve", (Vector<Interval>(*)(const Matrix<Interval>&,const Vector<Interval>&)) &gs_solve);
     def("gs_solve", (Matrix<Interval>(*)(const Matrix<Interval>&,const Matrix<Interval>&)) &gs_solve);
     def("lu_solve", (Matrix<Interval>(*)(const Matrix<Interval>&,const Matrix<Interval>&)) &lu_solve);
     def("midpoint", (Matrix<Float>(*)(const Matrix<Interval>&)) &midpoint);

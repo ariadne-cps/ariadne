@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "utilities.h"
+
 #include "config.h"
 
 #include <boost/python.hpp>
@@ -35,8 +37,6 @@
 #include "linear_programming.h"
 #include "nonlinear_programming.h"
 #include "constraint_solver.h"
-
-#include "utilities.h"
 
 using namespace boost::python;
 using namespace Ariadne;

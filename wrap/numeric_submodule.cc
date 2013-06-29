@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "utilities.h"
+
 #include <iostream>
 #include <iomanip>
 
@@ -30,8 +32,6 @@
 
 #include "tribool.h"
 #include "numeric.h"
-
-#include "utilities.h"
 
 using namespace boost::python;
 using namespace Ariadne;
@@ -169,6 +169,12 @@ void export_integer()
     integer_class.def("__repr__", &__repr__<Integer>);
     integer_class.def("__less__",(bool(*)(const mpz_class&, const mpz_class&)) &operator<);
 
+    integer_class.def("__pos__", &__pos__<Integer,Integer>);
+    integer_class.def("__neg__", &__neg__<Integer,Integer>);
+    integer_class.def("__add__", &__add__<Integer,Integer,Integer>);
+    integer_class.def("__sub__", &__sub__<Integer,Integer,Integer>);
+    integer_class.def("__mul__", &__mul__<Integer,Integer,Integer>);
+
     implicitly_convertible<int,Integer>();
 
 }
@@ -184,6 +190,13 @@ void export_rational()
     rational_class.def(boost::python::self_ns::str(self));
     rational_class.def("__repr__", &__repr__<Rational>);
     rational_class.def("__less__",(bool(*)(const Rational&, const Rational&)) &operator<);
+
+    rational_class.def("__pos__", &__pos__<Rational,Rational>);
+    rational_class.def("__neg__", &__neg__<Rational,Rational>);
+    rational_class.def("__add__", &__add__<Rational,Rational,Rational>);
+    rational_class.def("__sub__", &__sub__<Rational,Rational,Rational>);
+    rational_class.def("__mul__", &__mul__<Rational,Rational,Rational>);
+    rational_class.def("__div__", &__div__<Rational,Rational,Rational>);
 
     implicitly_convertible<int,Rational>();
     implicitly_convertible<Integer,Rational>();
@@ -227,7 +240,8 @@ void export_float()
 
     implicitly_convertible<double,Float>();
 
-    def("set_output_precision", &set_output_precision);
+    float_class.def("set_output_precision", &Float::set_output_precision);
+    float_class.staticmethod("set_output_precision");
 
     def("min",(Float(*)(Float,Float)) &Ariadne::min);
     def("max",(Float(*)(Float,Float)) &Ariadne::max);
@@ -281,6 +295,7 @@ void export_interval()
     interval_class.def(init<double>());
     interval_class.def(init<ExactFloat>());
     interval_class.def(init<Interval>());
+    interval_class.def(init<Float>());
 #ifdef HAVE_GMPXX_H
     interval_class.def(init<Rational>());
     interval_class.def(init<Rational,Rational>());
@@ -312,6 +327,10 @@ void export_interval()
     interval_class.def("empty", (bool(Interval::*)()const) &Interval::empty);
     interval_class.def(boost::python::self_ns::str(self));
     interval_class.def("__repr__", &__repr__<Interval>);
+
+    interval_class.def("set_output_precision", &Interval::set_output_precision);
+    interval_class.staticmethod("set_output_precision");
+
 
     implicitly_convertible<int,Interval>();
     implicitly_convertible<ExactFloat,Interval>();

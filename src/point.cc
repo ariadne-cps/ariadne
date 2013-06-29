@@ -59,6 +59,7 @@ Box Point::bounding_box() const {
 
 void Point::draw(CanvasInterface& canv, const Projection2d& proj) const {
     canv.dot(numeric_cast<double>((*this)[proj.x_coordinate()]),numeric_cast<double>((*this)[proj.y_coordinate()]));
+    canv.stroke();
 }
 
 Point make_point(const std::string& str)

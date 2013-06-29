@@ -75,6 +75,7 @@ const double nan = (1.0/0.0);
 //! \sa Interval, Real, ExactFloat
 class Float {
   public:
+    static uint output_precision;
     double v;
   public:
     typedef Float NumericType;
@@ -98,6 +99,7 @@ class Float {
     Float& operator=(const ExactFloat& x);
     //! \brief An approximation by a built-in double-precision floating-point number.
     double get_d() const { return this->v; }
+    static void set_output_precision(uint p) { output_precision=p; }
 };
 
 template<class R, class A> inline R internal_cast(const A& a) { return static_cast<R>(a); }
@@ -117,7 +119,7 @@ template<class R, class A> inline R approx_cast(const A& a);
 template<> inline double approx_cast(const Float& a) { return a.v; }
 
 
-inline std::ostream& operator<<(std::ostream& os, const Float& x) { return os << x.v; }
+inline std::ostream& operator<<(std::ostream& os, const Float& x) { return os << std::setprecision(Float::output_precision) << x.v; }
 inline std::istream& operator>>(std::istream& is, Float& x) { double v; is >> v; x=Float(v); return is; }
 
 // Constants related to numerical limits

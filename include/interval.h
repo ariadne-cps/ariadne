@@ -150,6 +150,8 @@ class Interval {
   public:
     //! \brief Extract a double-precision point approximation to the value represented by the interval.
     double get_d() const { return (this->l.get_d()+this->u.get_d())/2; }
+    static uint output_precision;
+    static void set_output_precision(uint p) { output_precision=p; }
   private:
     Float l, u;
 };

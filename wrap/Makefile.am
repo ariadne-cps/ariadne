@@ -9,7 +9,7 @@ AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 AM_LDFLAGS = $(EXEC_LDFLAGS) -module
 
 INCLUDES = -iquote$(top_srcdir)/include $(PYTHON_INCLUDES)
-LIBS +=  $(BOOST_PYTHON_LIBS) $(BOOST_SERIALIZATION_LIBS) $(PYTHON_LIB) $(CAIRO_LIBS) $(GTK_LIBS)
+LIBS +=  $(BOOST_PYTHON_LIBS) $(BOOST_SERIALIZATION_LIBS) $(PYTHON_LIB) $(CAIRO_LIBS) $(GTK_LIBS) -lboost_system
 
 pythondir=${pkgpyexecdir}
 libdir=${pyexecdir}

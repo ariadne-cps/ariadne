@@ -115,6 +115,7 @@ class Orbit<HybridEnclosure>
     typedef HybridEnclosure EnclosureType;
     typedef ListSet<HybridEnclosure> EnclosureListType;
 
+    Orbit() { }
     Orbit(const EnclosureType& set) : _initial(set) { }
     void adjoin_reach(const EnclosureType& set) { this->_reach.adjoin(set); }
     void adjoin_intermediate(const EnclosureType& set) { this->_intermediate.adjoin(set); }

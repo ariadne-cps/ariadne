@@ -31,6 +31,88 @@ using namespace Ariadne;
 // Declare the type to be used for the system evolution
 typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
 
+// Auxiliary function for plotting
+void plot_results(const Orbit<HybridEnclosure>& orbit, 
+  double delta, double time, const RealVariable& t, 
+  const RealVariable& x, const RealVariable& vx,
+  const RealVariable& z, const RealVariable& vz, 
+  const RealVariable& phi, const RealVariable& vphi) {
+    // Print the intial, evolve and reach sets
+    // cout << "Plotting sets" << endl;
+    // cout << "evolve_set=" << hybrid_evolve_set << endl;
+    // cout << "reach_set=" << hybrid_reach_set << endl;
+    std::cout << "Plotting..." << std::flush;
+    HybridFigure fig;
+    char filename[50];
+    // Plotting x
+    fig.set_axes(Axes2d(0.0<=t<=time,0.0<=x<=1.0));
+    fig.set_bounds(t,0.0,time);
+    fig << line_style(true) << fill_colour(cyan);
+    fig << orbit;
+    fig << fill_colour(red) << orbit.final();
+//    fig << fill_colour(blue) << initial_set;
+    sprintf(filename,"robotarm-verification-%f-x.png",delta);
+    fig.write(filename);
+
+    // Plotting vx
+    fig.clear();
+    fig.set_axes(Axes2d(0.0<=t<=time,-0.2<=vx<=0.5));
+    fig.set_bounds(t,0.0,time);
+    fig << line_style(true) << fill_colour(cyan);
+    fig << orbit;
+    fig << fill_colour(red) << orbit.final();
+//    fig << fill_colour(blue) << initial_set;
+    sprintf(filename,"robotarm-verification-%f-vx.png",delta);
+    fig.write(filename);
+
+    
+    // Plotting z
+    fig.clear();
+    fig.set_axes(Axes2d(0.0<=t<=time,0.0<=z<=0.2));
+    fig.set_bounds(t,0.0,time);
+    fig << line_style(true) << fill_colour(cyan);
+    fig << orbit;
+    fig << fill_colour(red) << orbit.final();
+//    fig << fill_colour(blue) << initial_set;
+    sprintf(filename,"robotarm-verification-%f-z.png",delta);
+    fig.write(filename);
+
+    // Plotting vz
+    fig.clear();
+    fig.set_axes(Axes2d(0.0<=t<=time,-0.02<=vz<=0.1));
+    fig.set_bounds(t,0.0,time);
+    fig << line_style(true) << fill_colour(cyan);
+    fig << orbit;
+    fig << fill_colour(red) << orbit.final();
+//    fig << fill_colour(blue) << initial_set;
+    sprintf(filename,"robotarm-verification-%f-vz.png",delta);
+    fig.write(filename);
+
+    // Plotting phi
+    fig.clear();
+    fig.set_axes(Axes2d(0.0<=t<=time,0.0<=phi<=pi/2));
+    fig.set_bounds(t,0.0,time);
+    fig << line_style(true) << fill_colour(cyan);
+    fig << orbit;
+    fig << fill_colour(red) << orbit.final();
+//    fig << fill_colour(blue) << initial_set;
+    sprintf(filename,"robotarm-verification-%f-phi.png",delta);
+    fig.write(filename);
+
+    // Plotting vphi
+    fig.clear();
+    fig.set_axes(Axes2d(0.0<=t<=time,-0.7<=vphi<=0.1));
+    fig.set_bounds(t,0.0,time);
+    fig << line_style(true) << fill_colour(cyan);
+    fig << orbit;
+    fig << fill_colour(red) << orbit.final();
+//    fig << fill_colour(blue) << initial_set;
+    sprintf(filename,"robotarm-verification-%f-vphi.png",delta);
+    fig.write(filename);
+
+    std::cout << " done." << endl;
+}
+
 int main(int argc, char** argv)
 {
     uint verbosity = 0;
@@ -98,11 +180,12 @@ int main(int argc, char** argv)
     Real h_scaling = 2.0;
     Real m = 100.0;            Real b = h_scaling*500.0;            Real k = h_scaling*h_scaling*2500.0;
     Real ke = 1000.0;          Real kFx = h_scaling*h_scaling*10.0/m;         Real kFz = (h_scaling*h_scaling/4.0)*10.0/m;
+    Real Fp = 25.0;
 
     // Constants for the contact point
-    double c = 0.95;             double delta=0.03;
+    double c = 0.95;             double delta=0.05;
     Real rc = c;                
-    RealExpression rdelta=Real(delta);
+    Real rdelta = delta;
 
     //
     // Definition of the Hybrid Automaton for the Robot Arm
@@ -122,7 +205,6 @@ int main(int argc, char** argv)
     DiscreteEvent finv("finv");
     robotarm_automaton.new_invariant(free, (x <= rc + rdelta), finv);
 
-
     // Second mode: contact
     DiscreteLocation contact(robotarm|"contact");
     DottedRealAssignments contact_dyn(
@@ -133,6 +215,18 @@ int main(int argc, char** argv)
     std::cout << "contact_dyn = " << contact_dyn << std::endl;
     robotarm_automaton.new_mode(contact, contact_dyn);
 
+    // Third mode: puncturing
+    DiscreteLocation punct(robotarm|"punct");
+    DottedRealAssignments punct_dyn(
+       (dot(x)   = vx,   dot(vx)   = 0.2*b/m * (0.5 - vx) + 0.2*k/m * (xc + 0.5*t - 0.5*per - x) + kFx * ke * (xc - x), 
+        dot(z)   = vz,   dot(vz)   = b/m * (- vz) + k/m * (zc - z) + kFz * ke * (zc - z),
+        dot(phi) = vphi, dot(vphi) = b/m * (- vphi) + k/m * (- phi),
+        dot(t)   = 1.0,  dot(xc)   = 0.0,   dot(zc)  = 0.0));
+    std::cout << "punct_dyn = " << punct_dyn << std::endl;
+    robotarm_automaton.new_mode(punct, punct_dyn);
+    DiscreteEvent pinv("pinv");
+    robotarm_automaton.new_invariant(punct, (x <= Fp/ke + xc), pinv);
+    
     // transition from free to contact
     DiscreteEvent f2c("f2c");
     PrimedRealAssignments reset_id( 
@@ -140,22 +234,17 @@ int main(int argc, char** argv)
          next(t)=t, next(xc)=x,  next(zc)=z) );
     robotarm_automaton.new_transition(free, f2c, contact, reset_id, (x >= rc - rdelta), permissive);
 
+    // transition contact to punct
+    DiscreteEvent c2p("c2p");
+    robotarm_automaton.new_transition(contact, c2p, punct, reset_id, (t >= per), urgent);
+
+
     std::cout << "RobotArm = " << std::endl;
-    std::cout << robotarm << std::endl << std::endl;
+    std::cout << robotarm_automaton << std::endl << std::endl;
 
     //
     // COMPUTE THE EVOLUTION OF THE SYSTEM
     //
-
-    // Set up the evaluators
-    GeneralHybridEvolver evolver(robotarm_automaton);
-    evolver.verbosity = verbosity;
-    evolver.configuration().set_maximum_enclosure_radius(10.0);
-    evolver.configuration().set_maximum_step_size(2.5);
-    evolver.configuration().set_enable_reconditioning(true);
-    evolver.configuration().set_maximum_spacial_error(1e-3);
-
-    std::cout << "Evolution parameters:" << evolver.configuration() << std::endl;
 
     // Define the initial box
     RealVariablesBox initial_box((x==0.0, vx==0.0, z==0.0, vz==0.0, 
@@ -163,195 +252,71 @@ int main(int argc, char** argv)
 
     cout << "initial_box=" << initial_box << endl;
 
-
     HybridSet initial_set(free, initial_box);
     cout << "initial_set=" << initial_set << endl << endl;
 
     Semantics semantics=UPPER_SEMANTICS;
 
-    // Compute the reachable sets
-    cout << "Computing evolution ... " << std::flush;
-    Orbit<HybridEnclosure> orbit = evolver.orbit(initial_set,HybridTime(time,steps),semantics);
-    cout << "done" << std::endl;
+    // safe set
+    Interval zsafe(0.19,0.20);
+    // Inital range for delta
+    double deltamin = 0.0;
+    double deltamax = 0.1;
+    // accuracy
+    double eps = 1e-2;
+    int iter=0; // iteration count
+         
+    Orbit<HybridEnclosure> orbit; 
+    while(deltamax - deltamin >= eps) {
+        // Set up the evaluators
+        GeneralHybridEvolver evolver(robotarm_automaton);
+        evolver.verbosity = verbosity;
+        evolver.configuration().set_maximum_enclosure_radius(10.0);
+        evolver.configuration().set_maximum_step_size(2.5);
+        evolver.configuration().set_enable_reconditioning(true);
+        evolver.configuration().set_maximum_spacial_error(1e-3);
+        
+        if(iter==0) { std::cout << "Evolution parameters:" << evolver.configuration() << std::endl; }
+        
+        std::cout << "Computing evolution for delta = " << rdelta << " .... " <<  std::flush;
+        // Compute the reachable sets
+        double etime = 10.0;
+        orbit = evolver.orbit(initial_set,HybridTime(etime,steps),semantics);
+        cout << "done" << std::endl;
 
 //    cout << "\norbit.final=\n" << orbit.final() << endl << endl;
 //    cout << "\norbit=\n" << orbit << endl << endl;
-    // Show the value of the bounding box of the final set for x and z
-    Box bbox = orbit.reach()[free].bounding_box();
-    std::cout << "Bounding box for location free:" << std::endl;
-    std::cout << "      x = " << bbox[0] << std::endl;
-    std::cout << "      z = " << bbox[2] << std::endl;
-    std::cout << "    phi = " << bbox[4] << std::endl << std::endl;
-    bbox = orbit.reach()[contact].bounding_box();
-    std::cout << "Bounding box for location contact:" << std::endl;
-    std::cout << "      x = " << bbox[0] << std::endl;
-    std::cout << "      z = " << bbox[2] << std::endl;
-    std::cout << "    phi = " << bbox[4] << std::endl << std::endl;
+        // Show the value of the bounding box of the final set for x and z
+        Box bbox = orbit.reach()[punct].bounding_box();
+        std::cout << "Bounding box of the final set:" << std::endl;
+        std::cout << "      x = " << bbox[0] << std::endl;
+        std::cout << "      z = " << bbox[2] << std::endl;
+        std::cout << "    phi = " << bbox[4] << std::endl;
+        
+        std::cout << "Safe set for z: " << zsafe << std::endl;
 
-    // Print the intial, evolve and reach sets
-    // cout << "Plotting sets" << endl;
-    // cout << "evolve_set=" << hybrid_evolve_set << endl;
-    // cout << "reach_set=" << hybrid_reach_set << endl;
-    std::cout << "Plotting..." << std::flush;
-    HybridFigure fig;
-    // Plotting x
-    fig.set_axes(Axes2d(0.0<=t<=time,0.0<=x<=1.0));
-    fig.set_bounds(t,0.0,time);
-    fig << line_style(true) << fill_colour(cyan);
-    fig << orbit;
-    fig << fill_colour(red) << orbit.final();
-//    fig << fill_colour(blue) << initial_set;
-    fig.write("robotarm-verification-orbit-x");
+        // if(iter==0) { 
+        //plot_results(orbit, delta, time, t, x, vx, z, vz, phi, vphi); // }
 
-    // Plotting vx
-    fig.clear();
-    fig.set_axes(Axes2d(0.0<=t<=time,-0.2<=vx<=0.5));
-    fig.set_bounds(t,0.0,time);
-    fig << line_style(true) << fill_colour(cyan);
-    fig << orbit;
-    fig << fill_colour(red) << orbit.final();
-//    fig << fill_colour(blue) << initial_set;
-    fig.write("robotarm-verification-orbit-vx");
 
+        if(subset(bbox[2],zsafe)) {
+            std::cout << "      system is safe, increasing delta." << std::endl  << std::endl;
+            deltamin = delta;
+        } else {
+            std::cout << "      system is possibly unsafe, decreasing delta" << std::endl  << std::endl;
+            deltamax = delta;
+        }
+        iter++;
+        delta = (deltamax+deltamin)/2;
+        rdelta = delta;
+        // change the invariant of location free
+        robotarm_automaton.set_invariant(free, (x <= rc + rdelta), finv);
+        robotarm_automaton.set_guard(free, f2c, (x >= rc - rdelta), permissive);
+    }
     
-    // Plotting z
-    fig.clear();
-    fig.set_axes(Axes2d(0.0<=t<=time,0.0<=z<=0.2));
-    fig.set_bounds(t,0.0,time);
-    fig << line_style(true) << fill_colour(cyan);
-    fig << orbit;
-    fig << fill_colour(red) << orbit.final();
-//    fig << fill_colour(blue) << initial_set;
-    fig.write("robotarm-verification-orbit-z");
-
-    // Plotting vz
-    fig.clear();
-    fig.set_axes(Axes2d(0.0<=t<=time,-0.02<=vz<=0.1));
-    fig.set_bounds(t,0.0,time);
-    fig << line_style(true) << fill_colour(cyan);
-    fig << orbit;
-    fig << fill_colour(red) << orbit.final();
-//    fig << fill_colour(blue) << initial_set;
-    fig.write("robotarm-verification-orbit-vz");
-
-    // Plotting phi
-    fig.clear();
-    fig.set_axes(Axes2d(0.0<=t<=time,0.0<=phi<=pi/2));
-    fig.set_bounds(t,0.0,time);
-    fig << line_style(true) << fill_colour(cyan);
-    fig << orbit;
-    fig << fill_colour(red) << orbit.final();
-//    fig << fill_colour(blue) << initial_set;
-    fig.write("robotarm-verification-orbit-phi");
-
-    // Plotting vphi
-    fig.clear();
-    fig.set_axes(Axes2d(0.0<=t<=time,-0.7<=vphi<=0.1));
-    fig.set_bounds(t,0.0,time);
-    fig << line_style(true) << fill_colour(cyan);
-    fig << orbit;
-    fig << fill_colour(red) << orbit.final();
-//    fig << fill_colour(blue) << initial_set;
-    fig.write("robotarm-verification-orbit-vphi");
-
-
-    std::cout << " done." << endl;
+    std::cout << "Final value for delta is " << deltamin << ", found after " << iter << " iterations" << std::endl << std::endl;
 
     return 0;
-
-    // Set up the evaluators
-//     GeneralHybridEvolver evolver;
-//     evolver.verbosity = 0;
-//     evolver.parameters().maximum_enclosure_radius = 10.0;
-//     evolver.parameters().maximum_step_size = 2.5;
-//     evolver.parameters().enable_reconditioning = true;
-//     evolver.parameters().maximum_spacial_error = 1e-3;
-// 
-//     std::cout << "Evolution parameters:" << evolver.parameters() << std::endl;
-// 
-//     // Define the initial box
-//     Box initial_box(numvar);
-//     initial_box[0] = Interval(0.0,0.0);
-//     initial_box[1] = Interval(0.0,0.0);
-//     initial_box[2] = Interval(10.0,10.0);
-//     initial_box[3] = Interval(0.0,0.0);
-//     initial_box[4] = Interval(pi<Float>()/2.0,pi<Float>()/2.0);
-//     initial_box[5] = Interval(0.0,0.0);
-//     initial_box[6] = Interval(0.0,0.0);
-//  
-//     cout << "initial_box=" << initial_box << endl;
-// 
-// 
-//     HybridEnclosureType initial_set(AtomicDiscreteLocation("free"), initial_box);
-//     cout << "initial_set=" << initial_set << endl << endl;
-// 
-//     Semantics semantics=UPPER_SEMANTICS;
-// 
-//     Interval zsafe(11.85,11.95);
-//     Interval zrange(0.0,12.0);
-//     int i=0;
-//     int imax=2;
-//     
-//     while(!subset(zrange,zsafe) && i <= imax) {
-//         std::cout << "Computing evolution for delta = " << delta << " .... " <<  std::flush;
-//         // Compute the reachable sets
-//         Orbit<HybridEnclosureType> orbit = evolver.orbit(robotarm,initial_set,HybridTime(time,steps),semantics);
-//         cout << "done." << std::endl;
-//     
-//         // cout << "\norbit=\n" << orbit << endl << endl;
-//     
-//         // Show the value of the bounding box of the final set for x and z
-//         Box bbox = orbit.final()[contact].bounding_box();
-//         zrange = bbox[2];
-//         std::cout << "Bounding box of the final set:" << std::endl;
-//         std::cout << "      x = " << bbox[0] << std::endl;
-//         std::cout << "      z = " << zrange << std::endl << std::endl;
-//         
-//         std::cout << "Safe set for z: " << zsafe << std::endl;
-//         
-//         if(subset(zrange,zsafe)) {
-//             std::cout << "      system is safe, exiting the loop." << std::endl;
-//             std::cout << "      the current value of delta is " << delta << std::endl;
-//         } else {
-//             std::cout << "      system is possibly unsafe, decreasing delta" << std::endl;
-//             delta = delta - 0.05;
-//             rdelta = RealExpression::constant(numvar,Real(delta));
-//             robotarm.set_transition(free, f2c, contact, reset_f2c, RealExpression(x - rc + rdelta), permissive);
-//             robotarm.set_invariant(free, ifree, RealExpression(x - rc - rdelta)); 
-//             i++;
-//         }        
-//     }
-/*    
-
-    // Print the intial, evolve and reach sets
-    // cout << "Plotting sets" << endl;
-    // cout << "evolve_set=" << hybrid_evolve_set << endl;
-    // cout << "reach_set=" << hybrid_reach_set << endl;
-    std::cout << "Plotting..." << std::flush;
-    Figure fig;
-    // Plotting x
-    fig.set_projection_map(PlanarProjectionMap(numvar,6,0));
-    fig.set_bounding_box(Box(numvar, 0.0,10.0, 0.0,1.0, 10.0,12.0, 0.0,1.0, 0.0,1.6, 0.0,1.0, 0.0,time, 0.0,0.0, 0.0,0.0));
-    fig << line_style(false) << fill_colour(yellow);
-    fig << Box(numvar, c-delta,c+delta, 0.0,1.0, 10.0,12.0, 0.0,1.0, 0.0,1.6, 0.0,1.0, -0.1,time+0.1, 0.0,0.0, 0.0,0.0);
-    fig << line_style(true) << fill_colour(cyan);
-    fig << orbit;
-    fig.write("robotarm-verification-orbit-x");
-
-    // Plotting z
-    fig.clear();
-    fig.set_projection_map(PlanarProjectionMap(numvar,6,2));
-    fig << line_style(true) << fill_colour(cyan) << orbit;
-    fig.write("robotarm-verification-orbit-z");    
-
-    // Plotting phi
-    fig.clear();
-    fig.set_projection_map(PlanarProjectionMap(numvar,6,4));
-    fig << line_style(true) << fill_colour(cyan) << orbit;
-    fig.write("robotarm-verification-orbit-phi");    
-
-
-    return 0;
-*/
-
 }
+
+

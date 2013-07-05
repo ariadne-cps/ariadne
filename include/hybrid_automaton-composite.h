@@ -349,6 +349,14 @@ class HybridAutomaton
         this->_new_invariant_(location,invariant,event);
     }
 
+    void set_invariant(DiscreteLocation location,
+                       ContinuousPredicate const& invariant, 
+                       DiscreteEvent event) {
+        DiscreteMode& mode=this->_modes.value(location);
+        mode._invariants[event] = invariant;
+        mode._kinds[event] = INVARIANT;
+    }
+
     //! \brief Adds a guard to the automaton.
     void new_guard(DiscreteLocation location,
                    DiscreteEvent event,
@@ -357,6 +365,16 @@ class HybridAutomaton
         //this->_new_action(location,event,ContinuousPredicate(true),guard,kind);
         this->_new_guard_(location,event,guard,kind);
     }
+
+    void set_guard(DiscreteLocation location, 
+                   DiscreteEvent event, 
+                   ContinuousPredicate const& guard, 
+                   EventKind kind) {
+        DiscreteMode& mode=this->_modes.value(location);
+        mode._guards[event] = guard;
+        mode._kinds[event] = kind;
+    }
+
 
     //! \brief Adds an update/reset to the automaton.
     void new_update(DiscreteLocation source,

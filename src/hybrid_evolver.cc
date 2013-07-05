@@ -1715,9 +1715,9 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         //static const ExactFloat CREEP_MAXIMUM=ExactFloat(1.0);
         static const ExactFloat CREEP_MAXIMUM=ExactFloat(15.0/16);
         spacial_evolution_time=this->function_factory().create_constant(flow.space_domain(),flow.step_size()*CREEP_MAXIMUM);
-
+        
         for(Map<DiscreteEvent,CrossingData>::iterator crossing_iter=crossings.begin();
-            crossing_iter!=crossings.end(); ++crossing_iter)
+            crossing_iter!=crossings.end(); )
         {
             DiscreteEvent event=crossing_iter->first;
             EventKind event_kind=transitions[event].event_kind;
@@ -1740,15 +1740,25 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                         ARIADNE_LOG(6,"  guard_creep_time= "<<guard_creep_time<<"\n");
                         ARIADNE_LOG(6,"  guard_creep_time.range()="<<guard_creep_time.range()<<"\n");
                         sucessfully_computed_guard_creep_time=true;
+                        ARIADNE_LOG(9,"  sucessfully_computed_guard_creep_time="<<sucessfully_computed_guard_creep_time<<"\n");
                     }
                     catch(...) {
                         ARIADNE_LOG(6,"  Error in computing guard creep time\n");
                     }
                     if(sucessfully_computed_guard_creep_time) {
                         spacial_evolution_time = spacial_evolution_time * (guard_creep_time/flow.step_size());
-                        crossings.erase(event);
+                        ARIADNE_LOG(9,"  spacial_evolution_time="<<spacial_evolution_time<<"\n");
+                        ARIADNE_LOG(9,"  crossings before erasing="<<crossings<<"\n");
+                        crossings.erase(crossing_iter++);
+                        ARIADNE_LOG(9,"  crossings after erasing="<<crossings<<"\n");
+                    } else {
+                      ++crossing_iter;
                     }
+                } else {
+                  ++crossing_iter;
                 }
+            } else {
+              ++crossing_iter;
             }
         }
         spacial_evolution_time.set_error(0.0);

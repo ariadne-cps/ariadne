@@ -1370,6 +1370,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
     const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& c,
     FloatVector& x, FloatVector& y) const
 {
+    ARIADNE_NOT_IMPLEMENTED;
 }
 
 
@@ -1821,6 +1822,7 @@ feasibility_step(IntervalVector const& D, FloatVectorFunction const& g, Interval
 
     ARIADNE_LOG(4,"NonlinearInfeasibleInteriorPointOptimiser::feasibility_step(D,g,C,x,y,w)\n");
     ARIADNE_LOG(5,"  D="<<D<<", g="<<g<<", C="<<C<<"\n");
+    ARIADNE_LOG(5,"  dl ="<<dl<<", du="<<du<<"\n  cl ="<<cl<<",  cu ="<<cu<<"\n");
     ARIADNE_LOG(5,"  w ="<<w<<",  x ="<<x<<", y ="<<y<<"\n");
 
     static const double gamma=1.0/1024;
@@ -1879,14 +1881,6 @@ feasibility_step(IntervalVector const& D, FloatVectorFunction const& g, Interval
 
     for(uint i=0; i!=n; ++i) { YH[i][i]-=Dx[i]; }
 
-    for(uint j=0; j!=m; ++j) {
-        if(C[j].lower()==C[j].upper()) {
-            Dw[j][j]=1;
-            recwl[j]=0;
-            recwu[j]=0;
-        }
-    }
-
     Matrix<ApproximateFloat> AT=transpose(A);
     Matrix<ApproximateFloat> Znm(n,m);
     Matrix<ApproximateFloat> Zmn(m,n);
@@ -1896,6 +1890,15 @@ feasibility_step(IntervalVector const& D, FloatVectorFunction const& g, Interval
 
     Matrix<ApproximateFloat> S=cojoin(join(Dw,Zmn,Im),join(Znm,-YH,-AT),join(Im,-A,Zmm));
     Vector<ApproximateFloat> r=join(recwu-recwl+y,recxu-recxl-yA,w-gx);
+
+    for(uint j=0; j!=m; ++j) {
+        if(C[j].lower()==C[j].upper()) {
+            S[j][j]=1;
+            S[j][m+n+j]=0;
+            S[m+n+j][j]=0;
+            r[j]=0;
+        }
+    }
 
     Vector<ApproximateFloat> swxy = -solve(S,r);
 
@@ -1908,11 +1911,14 @@ feasibility_step(IntervalVector const& D, FloatVectorFunction const& g, Interval
     ApproximateVector nw=w+al*sw;
     ApproximateVector nx=x+al*sx;
     ApproximateVector ny(m);
-    while(!contains(C,nw) && !contains(D,nx)) {
+    ARIADNE_LOG(5,"sx="<<sx<<"\n");
+    ARIADNE_LOG(5,"sw="<<sw<<"\n");
+    while(!contains(C,nw) || !contains(D,nx)) {
         al*=0.75;
         nw=w+al*sw;
         nx=x+al*sx;
     }
+    ARIADNE_LOG(5,"al="<<sw<<"\n");
     ny=y+al*sy;
 
     w=nw; x=nx; y=ny;
@@ -2147,7 +2153,7 @@ check_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
 
 
 /*
- 
+
 // Solve max log(x-xl) + log(xu-x) + log(zu-z) + log(z-zl) such that g(x)=z
 //   if zl[i]=zu[i] then z=zc is hard constraint
 //   alternatively, use the penalty (z[j]-zc[j])^2/2 instead

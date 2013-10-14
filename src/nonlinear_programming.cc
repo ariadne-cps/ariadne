@@ -48,6 +48,15 @@
 
 namespace Ariadne {
 
+typedef Box ApproximateBox;
+typedef FloatVectorFunction ApproximateVectorFunction;
+typedef VectorFunctionModel<Interval> ValidatedVectorFunctionPatch;
+typedef Point ApproximatePoint;
+typedef Float ApproximateFloat;
+typedef Vector<Float> ApproximateVector;
+typedef Matrix<ApproximateFloat> ApproximateMatrix;
+typedef Differential<ApproximateFloat> ApproximateDifferential;
+
 inline Sweeper default_sweeper() { return Sweeper(); }
 
 static const double error =  1e-2;
@@ -127,10 +136,39 @@ Vector<X> ediv(const X& s, const Vector<X>& z) {
     Vector<X> r(z.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=s/z[i]; } return r;
 }
 
+template<class X> inline
+Vector<X> erec(const Vector<X>& z) {
+    Vector<X> r(z.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=rec(z[i]); } return r;
+}
+
+template<class X> inline
+Vector<X> esqr(const Vector<X>& z) {
+    Vector<X> r(z.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=sqr(z[i]); } return r;
+}
+
 inline
 Interval eivl(const FloatVector& x) {
     ARIADNE_ASSERT(x.size()>0); Interval r(x[0]); for(uint i=0; i!=x.size(); ++i) { r=hull(r,x[i]); } return r;
 }
+
+Matrix<ApproximateFloat> join(Matrix<ApproximateFloat> const& A1, Matrix<ApproximateFloat> const& A2, Matrix<ApproximateFloat> const& A3) {
+    uint m=A1.row_size(); uint n1=A1.column_size(); uint n2=A2.column_size(); uint n3=A3.column_size();
+    Matrix<ApproximateFloat> A123(m,n1+n2+n3);
+    project(A123,range(0,m),range(0,n1))=A1;
+    project(A123,range(0,m),range(n1,n1+n2))=A2;
+    project(A123,range(0,m),range(n1+n2,n1+n2+n3))=A3;
+    return A123;
+}
+
+template<class X> Matrix<X> cojoin(Matrix<X> const& A1, Matrix<X> const& A2, Matrix<X> const& A3) {
+    uint n=A1.column_size(); uint m1=A1.row_size(); uint m2=A2.row_size(); uint m3=A3.row_size();
+    Matrix<X> A123(m1+m2+m3,n);
+    project(A123,range(0,m1),range(0,n))=A1;
+    project(A123,range(m1,m1+m2),range(0,n))=A2;
+    project(A123,range(m1+m2,m1+m2+m3),range(0,n))=A3;
+    return A123;
+}
+
 
 // Compute S+=ADA^T, where D is diagonal and S is symmetric.
 template<class X>
@@ -1759,12 +1797,125 @@ feasibility_step(const IntervalVector& X, const FloatVectorFunction& g, const In
 }
 
 
-
-Void PenaltyFunctionOptimiser::
-feasibility_step(const IntervalVector& X, const IntervalVectorFunction& g, const IntervalVector& W,
+void PenaltyFunctionOptimiser::
+feasibility_step(const IntervalVector& D, const IntervalVectorFunction& g, const IntervalVector& C,
                  IntervalVector& x, IntervalVector& w) const
 {
     ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+// Use a penalty approach without multipliers on the constraint functions
+// Solve g(x)=w, x in D, w in C; Lagrangian y.(g(x)-w)
+void PenaltyFunctionOptimiser::
+feasibility_step(IntervalVector const& D, FloatVectorFunction const& g, IntervalVector const& C,
+                 FloatVector& x, FloatVector& y, FloatVector& w) const
+{
+
+    auto m=y.size(); auto n=x.size();
+
+    FloatVector cl=lower_bounds(C);
+    FloatVector cu=upper_bounds(C);
+    FloatVector dl=lower_bounds(D);
+    FloatVector du=upper_bounds(D);
+
+    ARIADNE_LOG(4,"NonlinearInfeasibleInteriorPointOptimiser::feasibility_step(D,g,C,x,y,w)\n");
+    ARIADNE_LOG(5,"  D="<<D<<", g="<<g<<", C="<<C<<"\n");
+    ARIADNE_LOG(5,"  w ="<<w<<",  x ="<<x<<", y ="<<y<<"\n");
+
+    static const double gamma=1.0/1024;
+    static const double sigma=1.0/8;
+    static const double scale=0.75;
+
+    ARIADNE_ASSERT_MSG(g.argument_size()==D.size(),"D="<<D<<", g="<<g<<", C="<<C);
+    ARIADNE_ASSERT_MSG(g.result_size()==C.size(),  "D="<<D<<", g="<<g<<", C="<<C);
+    ARIADNE_ASSERT(w.size()==m);
+    ARIADNE_ASSERT(x.size()==n);
+    ARIADNE_ASSERT(y.size()==m);
+
+    // Solve the problem
+    //   minimise Sum -log(w-cl)-log(cu-w)-log(x-dl)-log(du-x)
+    //   subject to g(x)-w=0
+
+    // Lagrangian
+    //   -log(w-cl)-log(cu-w)-log(x-dl)-log(du-x) - y.(g(x)-w)
+
+    // Conditions for a constrained minimum
+    // 1/(cu-w)-1/(w-cu) + y       = 0
+    // 1/(du-x)-1/(x-dl) - y.Dg(x) = 0
+    //          w - g(x)           = 0
+
+    // Second-order conditions
+    // (1/(w-cl)^2 + 1/(cu-w)^2) dw                 +   dy = - ( 1/(cu-w) - 1/(w-cl) + y       )
+    //   (1/(x-dl)^2 + 1/(du-x)^2 - y.D^2x) dx - Dg'(x) dy = - ( 1/(du-x) - 1/(x-dl) - y.Dg(x) )
+    //                           dw - Dg(x) dx             = - ( w - g(x) )
+
+    Vector<ApproximateDifferential> ddgx=g.evaluate(ApproximateDifferential::variables(2,x));
+    ARIADNE_LOG(9,"ddgx="<<ddgx<<"\n");
+
+    Vector<ApproximateFloat> gx = ddgx.value();
+    ARIADNE_LOG(7,"g(x)="<<gx<<"\n");
+    Matrix<ApproximateFloat> A = ddgx.jacobian();
+    ARIADNE_LOG(7,"Dg(x)="<<A<<"\n");
+
+    Vector<ApproximateFloat> yA=transpose(A)*y;
+
+    // H is the Hessian matrix H of the Lagrangian $L(x,\lambda) = f(x) + \sum_k g_k(x) $
+    Matrix<ApproximateFloat> YH(x.size(),x.size());
+    for(uint i=0; i!=y.size(); ++i) {
+        YH+=y[i]*ddgx[i].hessian();
+    }
+    ARIADNE_LOG(7,"Y.D2g(x)="<<YH<<"\n");
+
+    Vector<ApproximateFloat> recwu=cu-w; recwu=erec(recwu);
+    Vector<ApproximateFloat> recwl=w-cl; recwl=erec(recwl);
+    Vector<ApproximateFloat> recxu=du-x; recxu=erec(recxu);
+    Vector<ApproximateFloat> recxl=x-dl; recxl=erec(recxl);
+
+    Vector<ApproximateFloat> diagDw=esqr(recwu)+esqr(recwl);
+    Matrix<ApproximateFloat> Dw(m,m); for(uint i=0; i!=m; ++i) { Dw[i][i]=diagDw[i]; }
+    DiagonalMatrix<ApproximateFloat> Dx(esqr(recxu)+esqr(recxl));
+
+
+    for(uint i=0; i!=n; ++i) { YH[i][i]-=Dx[i]; }
+
+    for(uint j=0; j!=m; ++j) {
+        if(C[j].lower()==C[j].upper()) {
+            Dw[j][j]=1;
+            recwl[j]=0;
+            recwu[j]=0;
+        }
+    }
+
+    Matrix<ApproximateFloat> AT=transpose(A);
+    Matrix<ApproximateFloat> Znm(n,m);
+    Matrix<ApproximateFloat> Zmn(m,n);
+    Matrix<ApproximateFloat> Zmm(m,m);
+    Matrix<ApproximateFloat> Im=Matrix<ApproximateFloat>::identity(m);
+
+
+    Matrix<ApproximateFloat> S=cojoin(join(Dw,Zmn,Im),join(Znm,-YH,-AT),join(Im,-A,Zmm));
+    Vector<ApproximateFloat> r=join(recwu-recwl+y,recxu-recxl-yA,w-gx);
+
+    Vector<ApproximateFloat> swxy = -solve(S,r);
+
+    Vector<ApproximateFloat> sw(m),sx(n),sy(m);
+    sw = project(swxy,range(0,m));
+    sx = project(swxy,range(m,m+n));
+    sy = project(swxy,range(m+n,m+n+m));
+
+    ApproximateFloat al=1.0;
+    ApproximateVector nw=w+al*sw;
+    ApproximateVector nx=x+al*sx;
+    ApproximateVector ny(m);
+    while(!contains(C,nw) && !contains(D,nx)) {
+        al*=0.75;
+        nw=w+al*sw;
+        nx=x+al*sx;
+    }
+    ny=y+al*sy;
+
+    w=nw; x=nx; y=ny;
 }
 
 /*
@@ -1995,7 +2146,8 @@ check_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
 
 
 
-
+/*
+ 
 // Solve max log(x-xl) + log(xu-x) + log(zu-z) + log(z-zl) such that g(x)=z
 //   if zl[i]=zu[i] then z=zc is hard constraint
 //   alternatively, use the penalty (z[j]-zc[j])^2/2 instead
@@ -2127,7 +2279,7 @@ feasibility_step(const IntervalVector& D, const FloatVectorFunction& g, const In
     ARIADNE_LOG(4,"g(x)-z="<<g(x)-z<<"\n");
 
 }
-
+*/
 
 // Solve equations y Dh(x) - 1/(x-xl) + 1/(xu-x) = 0; h(x) = 0
 Tribool IntervalOptimiser::

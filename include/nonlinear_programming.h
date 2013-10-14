@@ -148,6 +148,7 @@ class OptimiserBase
 class PenaltyFunctionOptimiser
     : public OptimiserBase
 {
+  public:
     virtual PenaltyFunctionOptimiser* clone() const;
     virtual Tribool check_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C, FloatVector x, FloatVector y) const;
     virtual IntervalVector minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C) const;

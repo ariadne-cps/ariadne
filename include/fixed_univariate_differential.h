@@ -454,10 +454,9 @@ operator> (const UnivariateFirstDifferential<X>& x, const R& c)
     return x._value> static_cast<X>(c);
 }
 
-
 template<class X, class R>
 typename EnableIfNumeric<R,bool>::Type
-operator< (const R& c, const UnivariateFirstDifferential<X>& x)
+operator< (const UnivariateFirstDifferential<X>& x, const R& c)
 {
     return x._value< static_cast<X>(c);
 }
@@ -486,7 +485,7 @@ operator> (const R& c, const UnivariateFirstDifferential<X>& x)
 
 template<class X, class R>
 typename EnableIfNumeric<R,bool>::Type
-operator< (const UnivariateFirstDifferential<X>& x, const R& c)
+operator< (const R& c, const UnivariateFirstDifferential<X>& x)
 {
     return static_cast<X>(c)< x._value;
 }
@@ -542,10 +541,10 @@ class UnivariateSecondDifferential
 
     //! \brief A constant differential of degree \a deg in \a as arguments with value \a c.
     static UnivariateSecondDifferential<X> constant(const X& c) {
-        UnivariateSecondDifferential<X> r(); r._value=c; return r; }
+        UnivariateSecondDifferential<X> r; r._value=c; return r; }
     //! \brief A differential of degree \a deg in \a as arguments representing the quantity \f$v+x_j\f$.
     static UnivariateSecondDifferential<X> variable(const X& v) {
-        UnivariateSecondDifferential<X> r(); r._value=v; r._gradient=1; return r; }
+        UnivariateSecondDifferential<X> r; r._value=v; r._gradient=1; return r; }
 
     //! \brief Equality operator.
     bool operator==(const UnivariateSecondDifferential<X>& other) const {
@@ -585,7 +584,8 @@ template<class X, class R>
 typename EnableIfNumeric<R,UnivariateSecondDifferential<X>&>::Type
 operator+=(UnivariateSecondDifferential<X>& x, const R& c)
 {
-    x._value+=static_cast<X>(c);
+    x._value+=static_cast<X>(c); 
+    return x;
 }
 
 template<class X, class R>
@@ -593,6 +593,7 @@ typename EnableIfNumeric<R,UnivariateSecondDifferential<X>&>::Type
 operator-=(UnivariateSecondDifferential<X>& x, const R& c)
 {
     x._value-=static_cast<X>(c);
+    return x;
 }
 
 template<class X, class R>
@@ -602,6 +603,7 @@ operator*=(UnivariateSecondDifferential<X>& x, const R& c)
     x._value*=static_cast<X>(c);
     x._gradient*=static_cast<X>(c);
     x._hessian*=static_cast<X>(c);
+    return x;
 }
 
 
@@ -612,6 +614,7 @@ operator/=(UnivariateSecondDifferential<X>& x, const R& c)
     x._value/=static_cast<X>(c);
     x._gradient/=static_cast<X>(c);
     x._hessian/=static_cast<X>(c);
+    return x;
 }
 
 template<class X, class R>
@@ -867,6 +870,64 @@ UnivariateSecondDifferential<X> tan(const UnivariateSecondDifferential<X>& x)
     X sqr_sec_val = sqr(rec(cos(x._value)));
     X dbl_tan_sqr_sec_val = 2*tan_val*sqr_sec_val;
     return UnivariateSecondDifferential<X>( tan_val, sqr_sec_val*x._gradient, sqr_sec_val*x._hessian+dbl_tan_sqr_sec_val*sqr(x._gradient) );
+}
+
+template<class X, class R>
+typename EnableIfNumeric<R,bool>::Type
+operator>=(const UnivariateSecondDifferential<X>& x, const R& c)
+{
+    return x._value>=static_cast<X>(c);
+}
+
+
+template<class X, class R>
+typename EnableIfNumeric<R,bool>::Type
+operator<=(const UnivariateSecondDifferential<X>& x, const R& c)
+{
+    return x._value<=static_cast<X>(c);
+}
+
+template<class X, class R>
+typename EnableIfNumeric<R,bool>::Type
+operator> (const UnivariateSecondDifferential<X>& x, const R& c)
+{
+    return x._value> static_cast<X>(c);
+}
+
+template<class X, class R>
+typename EnableIfNumeric<R,bool>::Type
+operator< (const UnivariateSecondDifferential<X>& x, const R& c)
+{
+    return x._value< static_cast<X>(c);
+}
+
+template<class X, class R>
+typename EnableIfNumeric<R,bool>::Type
+operator>=(const R& c, const UnivariateSecondDifferential<X>& x)
+{
+    return static_cast<X>(c)>=x._value;
+}
+
+
+template<class X, class R>
+typename EnableIfNumeric<R,bool>::Type
+operator<=(const R& c, const UnivariateSecondDifferential<X>& x)
+{
+    return static_cast<X>(c)<=x._value;
+}
+
+template<class X, class R>
+typename EnableIfNumeric<R,bool>::Type
+operator> (const R& c, const UnivariateSecondDifferential<X>& x)
+{
+    return static_cast<X>(c)> x._value;
+}
+
+template<class X, class R>
+typename EnableIfNumeric<R,bool>::Type
+operator< (const R& c, const UnivariateSecondDifferential<X>& x)
+{
+    return static_cast<X>(c)< x._value;
 }
 
 

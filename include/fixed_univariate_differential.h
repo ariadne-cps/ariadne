@@ -66,10 +66,10 @@ class UnivariateFirstDifferential
 
     //! \brief A constant differential of degree \a deg in \a as arguments with value \a c.
     static UnivariateFirstDifferential<X> constant(const X& c) {
-        UnivariateFirstDifferential<X> r(); r._value=c; return r; }
+        UnivariateFirstDifferential<X> r; r._value=c; return r; }
     //! \brief A differential of degree \a deg in \a as arguments representing the quantity \f$v+x_j\f$.
     static UnivariateFirstDifferential<X> variable(const X& v) {
-        UnivariateFirstDifferential<X> r(); r._value=v; r._gradient=1; return r; }
+        UnivariateFirstDifferential<X> r; r._value=v; r._gradient=1; return r; }
 
     //! \brief Equality operator.
     bool operator==(const UnivariateFirstDifferential<X>& other) const {
@@ -279,8 +279,6 @@ template<class X> UnivariateFirstDifferential<X> create_zero(const UnivariateFir
 
 
 
-
-
 template<class X>
 UnivariateFirstDifferential<X>
 min(const UnivariateFirstDifferential<X>& x1, const UnivariateFirstDifferential<X>& x2)
@@ -449,16 +447,58 @@ operator<=(const UnivariateFirstDifferential<X>& x, const R& c)
     return x._value<=static_cast<X>(c);
 }
 
+template<class X, class R>
+typename EnableIfNumeric<R,bool>::Type
+operator> (const UnivariateFirstDifferential<X>& x, const R& c)
+{
+    return x._value> static_cast<X>(c);
+}
+
+
+template<class X, class R>
+typename EnableIfNumeric<R,bool>::Type
+operator< (const R& c, const UnivariateFirstDifferential<X>& x)
+{
+    return x._value< static_cast<X>(c);
+}
+
+template<class X, class R>
+typename EnableIfNumeric<R,bool>::Type
+operator>=(const R& c, const UnivariateFirstDifferential<X>& x)
+{
+    return static_cast<X>(c)>=x._value;
+}
+
+
+template<class X, class R>
+typename EnableIfNumeric<R,bool>::Type
+operator<=(const R& c, const UnivariateFirstDifferential<X>& x)
+{
+    return static_cast<X>(c)<=x._value;
+}
+
+template<class X, class R>
+typename EnableIfNumeric<R,bool>::Type
+operator> (const R& c, const UnivariateFirstDifferential<X>& x)
+{
+    return static_cast<X>(c)> x._value;
+}
+
+template<class X, class R>
+typename EnableIfNumeric<R,bool>::Type
+operator< (const UnivariateFirstDifferential<X>& x, const R& c)
+{
+    return static_cast<X>(c)< x._value;
+}
+
+
 
 
 template<class X>
 std::ostream& operator<<(std::ostream& os, const UnivariateFirstDifferential<X>& x)
 {
     os << "D<R"<<x.argument_size()<<","<<x.degree()<<">{ ";
-    os << x._value;
-    for(uint j=0; j!=x.argument_size(); ++j) {
-        os << (j==0?"; ":",") << j << ":" << x[j];
-    }
+    os << x._value << "; " << x._gradient;
     return os << " }";
 }
 

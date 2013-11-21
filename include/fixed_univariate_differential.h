@@ -268,7 +268,7 @@ UnivariateFirstDifferential<X> operator*(const UnivariateFirstDifferential<X>& x
 template<class X>
 UnivariateFirstDifferential<X> operator/(const UnivariateFirstDifferential<X>& x, const UnivariateFirstDifferential<X>& y)
 {
-    return UnivariateFirstDifferential<X>(x._value/y._value,((x._value/y._value)*y._gradient+x._gradient)/y._value);
+    return UnivariateFirstDifferential<X>(x._value/y._value,(x._gradient-(x._value/y._value)*y._gradient)/y._value);
 }
 
 template<class X> UnivariateFirstDifferential<X> create_zero(const UnivariateFirstDifferential<X>& c) {
@@ -698,8 +698,8 @@ template<class X>
 UnivariateSecondDifferential<X>& operator*=(UnivariateSecondDifferential<X>& x, const UnivariateSecondDifferential<X>& y)
 {
     x._hessian *= y._value;
+    x._hessian += 2*x._gradient*y._gradient;
     x._hessian += x._value * y._hessian;
-    x._hessian+=(x._gradient*y._gradient+x._gradient*y._gradient)/2;
     x._gradient *= y._value;
     x._gradient += x._value * y._gradient;
     x._value *= y._value;
@@ -735,16 +735,17 @@ UnivariateSecondDifferential<X> operator-(const UnivariateSecondDifferential<X>&
 template<class X>
 UnivariateSecondDifferential<X> operator*(const UnivariateSecondDifferential<X>& x, const UnivariateSecondDifferential<X>& y)
 {
-    X hessian=(x._gradient*y._gradient+x._gradient*y._gradient)/2;
-    hessian+=x._value*y._hessian;
-    hessian+=y._value*x._hessian;
-    return UnivariateSecondDifferential<X>(x._value*y._value,x._value*y._gradient+y._value*x._gradient,hessian);
+    return UnivariateSecondDifferential<X>(x._value*y._value,x._value*y._gradient+y._value*x._gradient,
+                                           x._value*y._hessian+2*x._gradient*y._gradient+y._value*x._hessian);
 }
 
 template<class X>
 UnivariateSecondDifferential<X> operator/(const UnivariateSecondDifferential<X>& x, const UnivariateSecondDifferential<X>& y)
 {
-    return x*rec(y);
+    return UnivariateSecondDifferential<X>(x._value/y._value,(x._gradient-(x._value/y._value)*y._gradient)/y._value,
+                                           (x._hessian/y._value)-(x._value/y._value)*(y._hessian/y._value)
+                                               -2*(x._gradient/y._value)*(y._gradient/y._value)+2*(x._value/y._value)*sqr(y._gradient/y._value));
+    //return x*rec(y);
 }
 
 
@@ -803,7 +804,10 @@ neg(const UnivariateSecondDifferential<X>& x)
 template<class X>
 UnivariateSecondDifferential<X> rec(const UnivariateSecondDifferential<X>& x)
 {
-    //return UnivariateSecondDifferential<X>( rec(x._value), x._gradient * (neg(sqr(rec(x._value)))) );
+    X rec_val = rec(x._value);
+    X neg_sqr_rec_val = neg(sqr(rec_val));
+    X dbl_cub_rec_val = -2*rec_val*neg_sqr_rec_val;
+    return UnivariateSecondDifferential<X>( rec_val, neg_sqr_rec_val*x._gradient, neg_sqr_rec_val*x._hessian + dbl_cub_rec_val * sqr(x._gradient) );
 }
 
 template<class X>

@@ -29,8 +29,11 @@
 #define ARIADNE_INTEGRATOR_INTERFACE_H
 
 #include <string>
+#include <iosfwd>
 
 namespace Ariadne {
+
+typedef std::ostream OutputStream;
 
 template<class T1,class T2> class Pair;
 template<class T> class List;
@@ -50,76 +53,102 @@ struct FlowBoundsException : public std::runtime_error {
     FlowBoundsException(const std::string& what) : std::runtime_error(what) { }
 };
 
+//! \ingroup SolverModule EvaluationModule
+//! \brief A solution to a differential equation could not be computed within the requested tolerances.
 struct FlowTimeStepException : public std::runtime_error {
     FlowTimeStepException(const std::string& what) : std::runtime_error(what) { }
 };
 
 //! \ingroup SolverModule EvaluationModule
-//! \brief Interface for integrating differential equations of the form \f$\dot{x}=f(x)\f$.
+//! \brief Interface for integrating differential equations of the form \f$\dt{x}=f(x)\f$.
 class IntegratorInterface
 {
   public:
     //! \brief Virtual destructor.
     virtual ~IntegratorInterface() { };
 
-    /*! \brief Make a dynamically-allocated copy. */
+    //! \brief Make a dynamically-allocated copy.
     virtual IntegratorInterface* clone() const = 0;
 
-    /*! \brief Write to an output stream. */
-    virtual void write(std::ostream& os) const = 0;
+    //! \brief Write to an output stream.
+    virtual void write(OutputStream& os) const = 0;
 
-    /*! \brief Get the maximum allowable error in the flow. */
+    //! \brief Get the maximum allowable error in the flow.
     virtual double maximum_error() const = 0;
-    /*! \brief Set the maximum allowable error in the flow. */
+    //! \brief Set the maximum allowable error in the flow.
     virtual void set_maximum_error(double) = 0;
 
-    //! \brief Compute a pair \a (h,B) consisting of a bound \a B for the flow
-    //! starting in the \a state_domain for time step \a h.
+    //! \brief Compute a pair \f$(h,B)\f$ consisting of a bound \a B for the flow
+    //! of \f$\dt{x}=f(x)\f$ starting in \f$D\f$  for time step \f$h\leq h_{\max}\f$.
+    //! <br>
+    //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain and \f$h_{\max}\f$ is the \a maximum_time_step.
     virtual Pair<Float,IntervalVector>
     flow_bounds(const IntervalVectorFunction& vector_field,
                 const IntervalVector& state_domain,
                 const Float& maximum_time_step) const = 0;
 
-    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,h]\f$ where \f$h\f$ is a time step based on \a suggested_time_step.
-    //! The value of \a suggested_time_step is overwritten with the actual time step used.
+    //! \brief Compute a validated version \f$\hat{\phi}\f$ of the flow \f$\phi(x,t)\f$ satisfying \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for \f$x\in D\f$ and \f$t\in[0,h]\f$, where \f$h\f$ is a time step which is taken to be equal to \f$h_\mathrm{sug}\f$ if possible. The value of \f$h_\mathrm{sug}\f$ is overwritten with \f$h\f$, the actual time step used.
+    //! <br>
+    //! Returns: A validated version \f$\hat{\phi}\f$ of the flow over a short step represented as a single function over a box.
+    //! <br>
+    //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, and \f$h_\mathrm{sug}\f$ is the \a suggested_time_step.
     virtual IntervalVectorFunctionModel
     flow_step(const IntervalVectorFunction& vector_field,
               const IntervalVector& state_domain,
               Float& suggested_time_step) const = 0;
 
-    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,h]\f$ where \f$h\f$ is the \a time_step used,
-    //! and \a state_bounding_box is a bound for the trajectories.
-    //! Throws a FlowTimeStepException if the flow cannot be computed sufficiently accurately for the given time step.
+    //! \brief Solve \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for \f$x\in D\f$ and \f$t\in[0,h]\f$, assuming that the flow remains in \f$B\f$.
+    //! If the flow does not remain in \f$B\f$, then \f$\hat{\phi}(x,t)\f$ may not be a bound for \f$\phi(x,t)\f$ if \f$\exists \tau\in[0,t],\ \phi(x,\tau)\not\in B\f$.
+    //! If \f$(h,B)\f$ have been computed using the flow_bounds() method, then the flow is guarenteed to be correct for all \f$x\in D\f$ and \f$t\in[0,h]\f$.
+    //! <br>
+    //! Returns: A validated version \f$\hat{\phi}\f$ of the flow over a short step represented as a single function over a box.
+    //! <br>
+    //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, \f$h\f$ is the \a time_step, and \f$B\f$ is the \a state_bounding_box.
+    //! <br>
+    //! Throws: A FlowTimeStepException if the flow cannot be computed sufficiently accurately for the given time step.
     virtual IntervalVectorFunctionModel
     flow_step(const IntervalVectorFunction& vector_field,
               const IntervalVector& state_domain,
               const Float& time_step,
               const IntervalVector& state_bounding_box) const = 0;
 
-    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
+    //! \brief Solve \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for initial conditions in \f$x\in D\f$ over the interval \f$[0,t_f]\f$.
+    //! <br>
+    //! Returns: A validated version \f$\hat{\phi}\f$ of the flow represented as a single function over a box.
+    //! <br>
+    //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, and \f$t_f\f$ is the \a final_time.
+    //! <br>
+    //! Throws: A FlowTimeStepException if the flow cannot be represented as a single function to sufficiently accurately for the given time interval.
     virtual IntervalVectorFunctionModel
     flow_to(const IntervalVectorFunction& vector_field,
             const IntervalVector& state_domain,
             const Real& final_time) const = 0;
 
-    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$.
+    //! \brief Solve \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for initial conditions in \f$x\in D\f$ over the interval \f$[t_b,t_f]\f$.
+    //! <br>
+    //! Returns: A validated version of the flow represented as a list of functions whose spacial domains are all \f$D\f$ and whose time domains have union \f$[t_b,t_f]\f$.
+    //! <br>
+    //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, \f$t_b\f$ is the \a beginning_time, and \f$t_f\f$ is the \a final_time.
     virtual List<IntervalVectorFunctionModel>
     flow(const IntervalVectorFunction& vector_field,
          const IntervalVector& state_domain,
-         const Real& minimum_time,
-         const Real& maximum_time) const = 0;
+         const Real& beginning_time,
+         const Real& final_time) const = 0;
 
-    //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
+    //! \brief Solve \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for initial conditions in \f$x\in D\f$ over the interval \f$[0,t_f]\f$..
+    //! <br>
+    //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain,  and \f$t_f\f$ is the \a final_time.
     virtual List<IntervalVectorFunctionModel>
     flow(const IntervalVectorFunction& vector_field,
          const IntervalVector& state_domain,
-         const Real& maximum_time) const = 0;
+         const Real& final_time) const = 0;
 
+    //! \brief Write to an output stream.
+    friend inline OutputStream& operator<<(OutputStream& os, const IntegratorInterface& integrator) {
+        integrator.write(os); return os;
+}
 };
 
-inline std::ostream& operator<<(std::ostream& os, const IntegratorInterface& integrator) {
-    integrator.write(os); return os;
-}
 
 
 } // namespace Ariadne

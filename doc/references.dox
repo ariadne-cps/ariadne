@@ -45,6 +45,11 @@ INTLAB <a href="http://www.ti3.tu-harburg.de/~rump/intlab/">http://www.ti3.tu-ha
 
 PROFIL/BIAS <a href="http://www.ti3.tu-harburg.de/Software/PROFILEnglisch.html">http://www.ti3.tu-harburg.de/Software/PROFILEnglisch.html</a>
 
+\section cplusplus_programming C++ Language
+
+1
+Kent G. Budge, James S. Peery, Allen C. Robinson, and Michael K. Won, "C++ and Object-Oriented Numerics",
+  <em>Journal of C Language Translation</em> <b>5</b>(32), 1993.
 
 \section computable_analysis_references Computable Analysis
 

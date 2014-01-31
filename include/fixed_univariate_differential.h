@@ -96,8 +96,8 @@ class UnivariateFirstDifferential
 
 };
 
-template<class X>
-const X UnivariateFirstDifferential<X>::_zero=X(0);
+//template<class X>
+//const X UnivariateFirstDifferential<X>::_zero=X(0);
 
 
 template<class X, class R>
@@ -584,7 +584,7 @@ template<class X, class R>
 typename EnableIfNumeric<R,UnivariateSecondDifferential<X>&>::Type
 operator+=(UnivariateSecondDifferential<X>& x, const R& c)
 {
-    x._value+=static_cast<X>(c); 
+    x._value+=static_cast<X>(c);
     return x;
 }
 

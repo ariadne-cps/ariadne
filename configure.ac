@@ -116,7 +116,7 @@ if test "x$enable_serialization" = "xyes"; then
     AC_DEFINE([ARIADNE_ENABLE_SERIALIZATION],[1],[Define to 1 if you want to use the Boost serialization library.])
 else
     AC_MSG_RESULT(no)
-fi 
+fi
 
 AM_CONDITIONAL([WANT_PYTHON_INTERFACE], [test x$HAVE_BOOST_PYTHON_HPP = xtrue])
 AM_CONDITIONAL([WANT_SERIALIZATION], [test "x$enable_serialization" = "xyes"])
@@ -158,6 +158,7 @@ fi
 #   reinterpret_cast in a way that breaks strict anti-aliasing rules.
 #   Add -frounding-math to allow correctly-rounded arithmetic.
 ARIADNE_CXXFLAGS="${ARIADNE_CXXFLAGS} -Wall -fno-strict-aliasing -frounding-math ${BOOST_CPPFLAGS}"
+ARIADNE_CXXFLAGS+=-lboost_system
 
 AC_MSG_NOTICE([LIBS=$LIBS])
 AC_MSG_NOTICE([GTK_LIBS=$GTK_LIBS])

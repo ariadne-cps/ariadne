@@ -89,11 +89,21 @@ struct interval_from_python_str {
 
 
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Float>& x) {
-    return os << x.reference();
+    return os << std::showpoint << std::setprecision(18) << x.reference().get_d();
 }
 
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Interval>& x) {
-    return os << "{" << x.reference().lower() << ":" << x.reference().upper() << "}";
+    rounding_mode_t rnd=get_rounding_mode();
+    os << '{';
+    set_rounding_downward();
+    os << std::showpoint << std::setprecision(18) << x.reference().lower().get_d();
+    os << ':';
+    set_rounding_upward();
+    os << std::showpoint << std::setprecision(18) << x.reference().upper().get_d();
+    set_rounding_mode(rnd);
+    os << '}';
+    return os;
+
 }
 
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Integer>& x) {

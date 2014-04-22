@@ -119,7 +119,7 @@ template<class R, class A> inline R approx_cast(const A& a);
 template<> inline double approx_cast(const Float& a) { return a.v; }
 
 
-inline std::ostream& operator<<(std::ostream& os, const Float& x) { return os << std::setprecision(Float::output_precision) << x.v; }
+inline std::ostream& operator<<(std::ostream& os, const Float& x) { return os << std::showpoint << std::setprecision(Float::output_precision) << x.v; }
 inline std::istream& operator>>(std::istream& is, Float& x) { double v; is >> v; x=Float(v); return is; }
 
 // Constants related to numerical limits

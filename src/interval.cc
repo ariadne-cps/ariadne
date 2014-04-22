@@ -448,8 +448,18 @@ Interval& Interval::operator=(const Rational& q) {
 std::ostream&
 operator<<(std::ostream& os, const Interval& ivl)
 {
-    if(ivl.lower()==ivl.upper()) { return os << std::setprecision(Interval::output_precision) << ivl.lower().get_d(); }
-    return os << '{' << std::setprecision(Interval::output_precision) << ivl.lower().get_d() << ':' << std::setprecision(Interval::output_precision) << ivl.upper().get_d() << '}';
+    //if(ivl.lower()==ivl.upper()) { return os << "{" << std::setprecision(Interval::output_precision) << ivl.lower().get_d() << ; }
+    rounding_mode_t rnd=get_rounding_mode();
+    os << '{';
+    set_rounding_downward();
+    os << std::showpoint << std::setprecision(Interval::output_precision) << ivl.lower().get_d();
+    os << ':';
+    set_rounding_upward();
+    os << std::showpoint << std::setprecision(Interval::output_precision) << ivl.upper().get_d();
+    set_rounding_mode(rnd);
+    os << '}';
+    return os;
+
 }
 
 /*

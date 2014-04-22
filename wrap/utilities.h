@@ -439,7 +439,6 @@ python_representation(const T& t) {
 
 template<class T> std::string __repr__(const T& t) {
     std::stringstream ss;
-    ss << std::setprecision(17) << std::showpoint;
     ss << PythonRepresentation<T>(t);
     return ss.str();
 }

@@ -587,6 +587,12 @@ Float tan_rnd(Float x)
 
 //ExactFloat inf = ExactFloat(std::numeric_limits< double >::infinity());
 
+#ifdef HAVE_GMPXX_H
+ExactFloat::operator Rational() const {
+    return Rational(this->get_d());
+}
+#endif
+
 } // namespace Ariadne
 
 

@@ -583,6 +583,7 @@ inline Interval operator+(const ExactFloat& x1, const Interval& i2) { return add
 inline Interval operator-(const ExactFloat& x1, const Interval& i2) { return sub(static_cast<Float>(x1),i2); }
 inline Interval operator*(const ExactFloat& x1, const Interval& i2) { return mul(static_cast<Float>(x1),i2); }
 inline Interval operator/(const ExactFloat& x1, const Interval& i2) { return div(static_cast<Float>(x1),i2); }
+inline Interval pow(const ExactFloat& x, int n) { return pow(Interval(x),n); }
 
 inline Interval& operator+=(Interval& i1, const Float& x2) { i1=add(i1,x2); return i1; }
 inline Interval& operator-=(Interval& i1, const Float& x2) { i1=sub(i1,x2); return i1; }

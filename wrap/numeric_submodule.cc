@@ -32,6 +32,7 @@
 
 #include "tribool.h"
 #include "numeric.h"
+#include "exceptions.h"
 
 using namespace boost::python;
 using namespace Ariadne;
@@ -43,6 +44,15 @@ bool definitely(bool b) { return b; }
 bool possibly(bool b) { return b; }
 
 void set_output_precision(uint p) { std::cout << std::setprecision(p); }
+
+Interval operator+(Rational q, ExactFloat x) { return Interval(q+Rational(x)); }
+Interval operator-(Rational q, ExactFloat x) { return Interval(q-Rational(x)); }
+Interval operator*(Rational q, ExactFloat x) { return Interval(q*Rational(x)); }
+Interval operator/(Rational q, ExactFloat x) { return Interval(q/Rational(x)); }
+Interval operator+(ExactFloat x, Rational q) { return Interval(Rational(x)+q); }
+Interval operator-(ExactFloat x, Rational q) { return Interval(Rational(x)-q); }
+Interval operator*(ExactFloat x, Rational q) { return Interval(Rational(x)*q); }
+Interval operator/(ExactFloat x, Rational q) { return Interval(Rational(x)/q); }
 
 
 template<>
@@ -348,7 +358,7 @@ void export_interval()
     implicitly_convertible<Rational,Interval>();
 #endif
 
-    implicitly_convertible<Interval,Float>();
+    // implicitly_convertible<Interval,Float>();
 
     from_python_dict<Interval>();
     from_python_list<Interval>();
@@ -439,13 +449,38 @@ void export_real()
 void export_exact_float()
 {
     class_< ExactFloat > exact_float_class("ExactFloat",init<ExactFloat>());
+    exact_float_class.def(init<int>());
     exact_float_class.def(init<double>());
     exact_float_class.def(init<Float>());
+    exact_float_class.def(+self);
+    exact_float_class.def(-self);
+    exact_float_class.def(self+self);
+    exact_float_class.def(self-self);
+    exact_float_class.def(self*self);
+    exact_float_class.def(self/self);
+
+    exact_float_class.def(Rational()+self);
+    exact_float_class.def(Rational()-self);
+    exact_float_class.def(Rational()*self);
+    exact_float_class.def(Rational()/self);
+    exact_float_class.def(self+Rational());
+    exact_float_class.def(self-Rational());
+    exact_float_class.def(self*Rational());
+    exact_float_class.def(self/Rational());
+
+    def("pow",(Interval(*)(const ExactFloat&,int)) &Ariadne::pow);
+
+//    exact_float_class.def(int()*self);
+//    exact_float_class.def(self*int());
+//    exact_float_class.def(self/int());
+
     exact_float_class.def("__str__", &__cstr__<ExactFloat>);
     exact_float_class.def("__repr__", &__cstr__<ExactFloat>);
 
     def("make_exact", (const ExactFloat&(*)(const Float&)) &Ariadne::make_exact, return_value_policy<copy_const_reference>());
 
+    implicitly_convertible<int,ExactFloat>();
+    implicitly_convertible<ExactFloat,Interval>();
     implicitly_convertible<ExactFloat,Float>();
 }
 

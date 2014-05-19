@@ -42,6 +42,11 @@ class DivideByZeroException : public std::runtime_error {
     DivideByZeroException(const std::string& str) : std::runtime_error(str) { }
 };
 
+class NonExactArithmeticException : public std::logic_error {
+  public:
+    NonExactArithmeticException(const std::string& str) : std::logic_error(str) { }
+};
+
 class DomainException : public std::runtime_error {
   public:
     DomainException(const std::string& str) : std::runtime_error(str) { }

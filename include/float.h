@@ -408,6 +408,10 @@ class ExactFloat {
     explicit ExactFloat(double x) : _x(x) { }
     //! \brief Explicit construction from an approximate floating-point value.
     explicit ExactFloat(const Float& x) : _x(x) { }
+#ifdef HAVE_GMPXX_H
+    //! \brief Convert to a rational number.
+    explicit operator Rational () const;
+#endif
     //! \brief The approximate floating-point number with the same value.
     Float value() const { return _x; }
     //! \brief A double-precision approximateion.
@@ -427,8 +431,9 @@ inline Interval operator+(const ExactFloat& x1,  const Interval& x2);
 inline Interval operator-(const ExactFloat& x1,  const Interval& x2);
 inline Interval operator*(const ExactFloat& x1,  const Interval& x2);
 inline Interval operator/(const ExactFloat& x1,  const Interval& x2);
+inline Interval pow(const ExactFloat& x, int n);
 inline Interval operator/(int n1,  const ExactFloat& x2);
-inline std::ostream& operator<<(std::ostream& os, const ExactFloat& x) { return os << x.value(); }
+inline std::ostream& operator<<(std::ostream& os, const ExactFloat& x) { return os << std::showpoint << std::setprecision(18) << x.value(); }
 
 inline bool operator==(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()==x2.value(); }
 inline bool operator!=(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()!=x2.value(); }

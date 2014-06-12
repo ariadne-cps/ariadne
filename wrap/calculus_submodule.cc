@@ -659,6 +659,7 @@ void export_vector_taylor_function()
     vector_taylor_function_class.def(self-IntervalVector());
     vector_taylor_function_class.def(self*Interval());
     vector_taylor_function_class.def(self/Interval());
+    vector_taylor_function_class.def(self*ScalarTaylorFunction());
     vector_taylor_function_class.def(self+=IntervalVector());
     vector_taylor_function_class.def(self-=IntervalVector());
     vector_taylor_function_class.def(self*=Interval());

@@ -124,7 +124,7 @@ IntervalVectorFunctionModel operator*(const Matrix<Float>& A,const IntervalVecto
     for(uint i=0; i!=r.size(); ++i) {
         IntervalScalarFunctionModel t=r[i];
         for(uint j=0; j!=v.size(); ++j) {
-            t+=ExactFloat(A[i][j])*v[j];
+            t+=Dyadic(A[i][j])*v[j];
         }
         r[i]=t;
     }
@@ -427,7 +427,7 @@ IntervalNewtonSolver::step(const IntervalVectorFunction& f,
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat> m(midpoint(x));
+    Vector<Dyadic> m(midpoint(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<Interval> im(m);
     Vector<Interval> w=f.evaluate(im);
@@ -450,7 +450,7 @@ KrawczykSolver::step(const IntervalVectorFunction& f,
     Matrix<Interval> I=Matrix<Interval>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat> m(midpoint(x));
+    Vector<Dyadic> m(midpoint(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<Interval> im(m);
     Vector<Interval> fm=f.evaluate(im);
@@ -476,7 +476,7 @@ FactoredKrawczykSolver::step(const IntervalVectorFunction& f,
     Matrix<Interval> I=Matrix<Interval>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
     ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat> m(midpoint(x));
+    Vector<Dyadic> m(midpoint(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<Interval> im(m);
     Vector<Interval> fm=f.evaluate(im);
@@ -579,7 +579,7 @@ KrawczykSolver::implicit_step(const IntervalVectorFunction& f,
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
     Vector<Float> ex(nx);
     for(uint i=0; i!=nx; ++i) { ex[i]=x[i].error(); }
-    Vector<Interval> eix=Vector<ExactFloat>(ex)*Interval(-1,+1);
+    Vector<Interval> eix=Vector<Dyadic>(ex)*Interval(-1,+1);
     ARIADNE_LOG(5,"    ex="<<ex<<"\n");
     IntervalVectorFunctionModel fm=compose(f,join(p,mx));
     ARIADNE_LOG(5,"    f(p,mx)="<<fm<<"\n");

@@ -190,7 +190,7 @@ class HybridEnclosure
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
     void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const IntervalVectorFunction& r);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps) and tau'(s)=tau(s)+eps
-    void apply_fixed_evolve_step(const IntervalVectorFunctionModel& phi, const ExactFloat& eps);
+    void apply_fixed_evolve_step(const IntervalVectorFunctionModel& phi, const Dyadic& eps);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s),tau(s))) and tau'(s)=tau(s)+eps(xi(s),tau(s))
     void apply_spacetime_evolve_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& eps);
     //! \brief Apply the reach step \xi'(s) = phi(xi(s),t-tau(s)) and tau'(s)=tau(s)+t for 0<=t<=eps(xi(s),tau(s))

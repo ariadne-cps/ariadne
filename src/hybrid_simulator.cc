@@ -137,7 +137,7 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint
             k4=evaluate(dynamic,pt3);
 
             next_point=pt+(h/6)*(k1+2.0*(k2+k3)+k4);
-            t._continuous_time += Real(ExactFloat(h));
+            t._continuous_time += Real(Dyadic(h));
         }
         point=next_point;
         orbit.insert(t,HybridPoint(location,space,point));

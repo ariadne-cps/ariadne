@@ -59,13 +59,13 @@ TestMatrix::test_concept()
 {
     Float fx(1);
     Interval ix(1);
-    ExactFloat ex(1);
+    Dyadic ex(1);
     Vector<Float> fv;
     Vector<Interval> iv;
-    Vector<ExactFloat> ev;
+    Vector<Dyadic> ev;
     Matrix<Float> fA;
     Matrix<Interval> iA;
-    Matrix<ExactFloat> eA;
+    Matrix<Dyadic> eA;
 
     fv=fv+fv; iv=ev+ev; iv=ev+iv; iv=iv+ev; iv=iv+iv;
     fv=fv-fv; iv=ev-ev; iv=ev-iv; iv=iv-ev; iv=iv-iv;

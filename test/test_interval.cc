@@ -86,7 +86,7 @@ TestInterval::test_concept()
     int n=1;
     uint m=1;
     double d=1;
-    ExactFloat x=1;
+    Dyadic x=1;
     Float a,b;
     Interval i=1;
     Interval j=1;

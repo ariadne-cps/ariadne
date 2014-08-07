@@ -45,15 +45,21 @@ bool possibly(bool b) { return b; }
 
 void set_output_precision(uint p) { std::cout << std::setprecision(p); }
 
-Interval operator+(Rational q, ExactFloat x) { return Interval(q+Rational(x)); }
-Interval operator-(Rational q, ExactFloat x) { return Interval(q-Rational(x)); }
-Interval operator*(Rational q, ExactFloat x) { return Interval(q*Rational(x)); }
-Interval operator/(Rational q, ExactFloat x) { return Interval(q/Rational(x)); }
-Interval operator+(ExactFloat x, Rational q) { return Interval(Rational(x)+q); }
-Interval operator-(ExactFloat x, Rational q) { return Interval(Rational(x)-q); }
-Interval operator*(ExactFloat x, Rational q) { return Interval(Rational(x)*q); }
-Interval operator/(ExactFloat x, Rational q) { return Interval(Rational(x)/q); }
+Interval operator+(Rational q, Dyadic x) { return Interval(q+Rational(x)); }
+Interval operator-(Rational q, Dyadic x) { return Interval(q-Rational(x)); }
+Interval operator*(Rational q, Dyadic x) { return Interval(q*Rational(x)); }
+Interval operator/(Rational q, Dyadic x) { return Interval(q/Rational(x)); }
+Interval operator+(Dyadic x, Rational q) { return Interval(Rational(x)+q); }
+Interval operator-(Dyadic x, Rational q) { return Interval(Rational(x)-q); }
+Interval operator*(Dyadic x, Rational q) { return Interval(Rational(x)*q); }
+Interval operator/(Dyadic x, Rational q) { return Interval(Rational(x)/q); }
 
+class PythonRational : public Rational {
+  public:
+    using Rational::Rational;
+    PythonRational() = default;
+    PythonRational(double x) { throw std::runtime_error("Cannot construct Rational from builtin floating-point number"); }
+};
 
 template<>
 struct from_python_dict<Interval> {
@@ -204,12 +210,14 @@ void export_integer()
 void export_rational()
 {
     class_<Rational> rational_class("Rational");
-    rational_class.def(init<int,int>());
+    rational_class.def(init<Integer,Integer>());
     rational_class.def(init<int>());
+    rational_class.def(init<double>());
+    rational_class.def(init<std::string>());
     rational_class.def(init<Rational>());
     rational_class.def(boost::python::self_ns::str(self));
     rational_class.def("__repr__", &__repr__<Rational>);
-    rational_class.def("__less__",(bool(*)(const Rational&, const Rational&)) &operator<);
+    rational_class.def("__less__",(bool(*)(const mpq_class&, const mpq_class&)) &operator<);
 
     rational_class.def("__pos__", &__pos__<Rational,Rational>);
     rational_class.def("__neg__", &__neg__<Rational,Rational>);
@@ -217,6 +225,8 @@ void export_rational()
     rational_class.def("__sub__", &__sub__<Rational,Rational,Rational>);
     rational_class.def("__mul__", &__mul__<Rational,Rational,Rational>);
     rational_class.def("__div__", &__div__<Rational,Rational,Rational>);
+
+    def("sqr",(Rational(*)(Rational const&)) &sqr);
 
     implicitly_convertible<int,Rational>();
     implicitly_convertible<Integer,Rational>();
@@ -295,25 +305,16 @@ void export_interval()
     using boost::python::copy_const_reference;
     using boost::python::def;
 
-    //typedef Interval (*IFUN)(const Interval&);
-    //typedef Interval (*IZFUN)(const Interval&, int n);
-    //typedef Interval (*INFUN)(const Interval&, unsigned int n);
-
-    typedef Interval (*IFUN)(Interval);
-    typedef Interval (*IIFUN)(Interval,Interval);
-    typedef Interval (*IZFUN)(Interval, int n);
-    typedef Interval (*INFUN)(Interval, unsigned int n);
-    typedef bool (*IIPRED)(Interval,Interval);
-
     def("down",&down);
     def("up",&up);
 
     class_< Interval > interval_class("Interval");
+    interval_class.def(init<double>());
     interval_class.def(init<double,double>());
     interval_class.def(init<Float,Float>());
     interval_class.def(init<Real,Real>());
-    interval_class.def(init<double>());
-    interval_class.def(init<ExactFloat>());
+//    interval_class.def(init<Decimal>());
+    interval_class.def(init<Dyadic>());
     interval_class.def(init<Interval>());
     interval_class.def(init<Float>());
 #ifdef HAVE_GMPXX_H
@@ -353,7 +354,7 @@ void export_interval()
 
 
     implicitly_convertible<int,Interval>();
-    implicitly_convertible<ExactFloat,Interval>();
+    implicitly_convertible<Dyadic,Interval>();
 #ifdef HAVE_GMPXX_H
     implicitly_convertible<Rational,Interval>();
 #endif
@@ -361,42 +362,42 @@ void export_interval()
     // implicitly_convertible<Interval,Float>();
 
     from_python_dict<Interval>();
-    from_python_list<Interval>();
+    //from_python_list<Interval>();
     //from_python_str<Interval>();
 
     def("midpoint", &Interval::midpoint);
     def("radius", &Interval::radius);
 
-    def("disjoint", (IIPRED) &disjoint);
-    def("subset", (IIPRED) &subset);
-    def("intersection", (IIFUN) &intersection);
+    def("disjoint", (bool(*)(Interval,Interval)) &disjoint);
+    def("subset", (bool(*)(Interval,Interval)) &subset);
+    def("intersection", (Interval(*)(Interval,Interval)) &intersection);
 
-    def("hull", (IIFUN) &hull);
+    def("hull", (Interval(*)(Interval,Interval)) &hull);
 
     def("mag", (Float(*)(Interval)) &mag);
 
-    def("med", (IFUN) &med);
-    def("rad", (IFUN) &rad);
-    def("diam", (IFUN) &diam);
+    def("med", (Interval(*)(Interval)) &med);
+    def("rad", (Interval(*)(Interval)) &rad);
+    def("diam", (Interval(*)(Interval)) &diam);
 
-    def("max", (IIFUN) &max);
-    def("min", (IIFUN) &min);
+    def("max", (Interval(*)(Interval,Interval)) &max);
+    def("min", (Interval(*)(Interval,Interval)) &min);
 
-    def("trunc", (INFUN) &trunc, "truncate to n binary digits");
-    def("abs", (IFUN) &abs, "interval absolute value function");
-    def("pow",  (IZFUN) &pow, "interval power function");
-    def("sqr", (IFUN) &sqr, "interval square function");
-    def("rec", (IFUN) &rec);
-    def("sqrt", (IFUN) &sqrt);
-    def("exp", (IFUN) &exp);
-    def("log", (IFUN) &log);
+    def("trunc", (Interval(*)(Interval,uint)) &trunc, "truncate to n binary digits");
+    def("abs", (Interval(*)(Interval)) &abs, "interval absolute value function");
+    def("pow",  (Interval(*)(Interval,int)) &pow, "interval power function");
+    def("sqr", (Interval(*)(Interval)) &sqr, "interval square function");
+    def("rec", (Interval(*)(Interval)) &rec);
+    def("sqrt", (Interval(*)(Interval)) &sqrt);
+    def("exp", (Interval(*)(Interval)) &exp);
+    def("log", (Interval(*)(Interval)) &log);
 
-    def("sin", (IFUN) &sin);
-    def("cos", (IFUN) &cos);
-    def("tan", (IFUN) &tan);
-    def("asin", (IFUN) &asin);
-    def("acos", (IFUN) &acos);
-    def("atan", (IFUN) &atan);
+    def("sin", (Interval(*)(Interval)) &sin);
+    def("cos", (Interval(*)(Interval)) &cos);
+    def("tan", (Interval(*)(Interval)) &tan);
+    def("asin", (Interval(*)(Interval)) &asin);
+    def("acos", (Interval(*)(Interval)) &acos);
+    def("atan", (Interval(*)(Interval)) &atan);
 }
 
 
@@ -406,11 +407,11 @@ void export_real()
 {
     class_<Real> real_class("Real");
 //    real_class.def(init<double>());
+//    real_class.def(init<std::string>());
     real_class.def(init<Real>());
 #ifdef HAVE_GMPXX_H
     real_class.def(init<Rational>());
 #endif
-    real_class.def(init<std::string>());
     real_class.def("radius", &Interval::radius);
     real_class.def(boost::python::self_ns::str(self));
     real_class.def("__repr__", &__repr__<Real>);
@@ -436,8 +437,19 @@ void export_real()
 
     def("pi", (Real(*)()) &pi_function);
 
+    def("pow",  (Real(*)(Real const&, int)) &pow);
+    def("sqr", (Real(*)(Real const&)) &sqr);
+    def("rec", (Real(*)(Real const&)) &rec);
+    def("sqrt", (Real(*)(Real const&)) &sqrt);
+    def("exp", (Real(*)(Real const&)) &exp);
+    def("log", (Real(*)(Real const&)) &log);
+
+    def("sin", (Real(*)(Real const&)) &sin);
+    def("cos", (Real(*)(Real const&)) &cos);
+    def("tan", (Real(*)(Real const&)) &tan);
+    def("atan", (Real(*)(Real const&)) &atan);
     implicitly_convertible<int,Real>();
-    implicitly_convertible<ExactFloat,Real>();
+    implicitly_convertible<Dyadic,Real>();
 #ifdef HAVE_GMPXX_H
     implicitly_convertible<Rational,Real>();
 #endif
@@ -446,43 +458,68 @@ void export_real()
     implicitly_convertible<Real,Interval>();
 }
 
-void export_exact_float()
+void export_dyadic()
 {
-    class_< ExactFloat > exact_float_class("ExactFloat",init<ExactFloat>());
-    exact_float_class.def(init<int>());
-    exact_float_class.def(init<double>());
-    exact_float_class.def(init<Float>());
-    exact_float_class.def(+self);
-    exact_float_class.def(-self);
-    exact_float_class.def(self+self);
-    exact_float_class.def(self-self);
-    exact_float_class.def(self*self);
-    exact_float_class.def(self/self);
+    class_< Dyadic > dyadic_class("Dyadic",init<Dyadic>());
+    dyadic_class.def(init<>());
+    dyadic_class.def(init<int>());
+    dyadic_class.def(init<double>());
+    dyadic_class.def(init<Float>());
+    dyadic_class.def(+self);
+    dyadic_class.def(-self);
+    dyadic_class.def(self+self);
+    dyadic_class.def(self-self);
+    dyadic_class.def(self*self);
+    dyadic_class.def(self/self);
 
-    exact_float_class.def(Rational()+self);
-    exact_float_class.def(Rational()-self);
-    exact_float_class.def(Rational()*self);
-    exact_float_class.def(Rational()/self);
-    exact_float_class.def(self+Rational());
-    exact_float_class.def(self-Rational());
-    exact_float_class.def(self*Rational());
-    exact_float_class.def(self/Rational());
+    dyadic_class.def(Rational()+self);
+    dyadic_class.def(Rational()-self);
+    dyadic_class.def(Rational()*self);
+    dyadic_class.def(Rational()/self);
+    dyadic_class.def(self+Rational());
+    dyadic_class.def(self-Rational());
+    dyadic_class.def(self*Rational());
+    dyadic_class.def(self/Rational());
 
-    def("pow",(Interval(*)(const ExactFloat&,int)) &Ariadne::pow);
+    def("pow",(Interval(*)(const Dyadic&,int)) &Ariadne::pow);
 
-//    exact_float_class.def(int()*self);
-//    exact_float_class.def(self*int());
-//    exact_float_class.def(self/int());
+//    dyadic_class.def(int()*self);
+//    dyadic_class.def(self*int());
+//    dyadic_class.def(self/int());
 
-    exact_float_class.def("__str__", &__cstr__<ExactFloat>);
-    exact_float_class.def("__repr__", &__cstr__<ExactFloat>);
+    dyadic_class.def("__str__", &__cstr__<Dyadic>);
+    dyadic_class.def("__repr__", &__cstr__<Dyadic>);
 
-    def("make_exact", (const ExactFloat&(*)(const Float&)) &Ariadne::make_exact, return_value_policy<copy_const_reference>());
+    def("make_exact", (const Dyadic&(*)(const Float&)) &Ariadne::make_exact, return_value_policy<copy_const_reference>());
 
-    implicitly_convertible<int,ExactFloat>();
-    implicitly_convertible<ExactFloat,Interval>();
-    implicitly_convertible<ExactFloat,Float>();
+    implicitly_convertible<int,Dyadic>();
+    implicitly_convertible<Dyadic,Interval>();
+    implicitly_convertible<Dyadic,Float>();
 }
+
+void export_decimal()
+{
+    class_< Decimal > decimal_class("Decimal");
+    decimal_class.def(init<double>());
+    decimal_class.def(init<std::string>());
+    decimal_class.def(boost::python::self_ns::str(self));
+
+    implicitly_convertible<Decimal,Rational>();
+    implicitly_convertible<Decimal,Real>();
+//    implicitly_convertible<Decimal,Interval>();
+//    implicitly_convertible<Decimal,Float>();
+}
+
+
+using namespace Ariadne;
+
+void foo(Integer) { }
+void foo(Rational) { }
+void foo(Real) { }
+void foo(Float) { }
+void foo(Interval) { }
+void foo(Dyadic) { }
+void foo(Decimal) { }
 
 void
 numeric_submodule()
@@ -491,7 +528,16 @@ numeric_submodule()
     export_float();
     export_interval();
     export_real();
-    export_exact_float();
+    export_dyadic();
+    export_decimal();
+
+    def("fooz", (void(*)(Integer)) &foo);
+    def("fooq", (void(*)(Rational)) &foo);
+    def("foor", (void(*)(Real)) &foo);
+    def("fooi", (void(*)(Interval)) &foo);
+    def("foox", (void(*)(Dyadic)) &foo);
+    def("food", (void(*)(Decimal)) &foo);
+    def("fooa", (void(*)(Float)) &foo);
 
 #ifdef HAVE_GMPXX_H
     export_integer();

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            rational.h
+ *            decimal.h
  *
- *  Copyright 2008-10  Pieter Collins
+ *  Copyright 2014  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,34 +21,39 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file rational.h
- *  \brief Rational number class.
+/*! \file decimal.h
+ *  \brief Exact decimal numbers, useful for user input.
  */
-#ifndef ARIADNE_RATIONAL_H
-#define ARIADNE_RATIONAL_H
 
-#ifdef HAVE_GMPXX_H
-#include <gmpxx.h>
-#endif // HAVE_GMPXX_H
+#ifndef ARIADNE_DECIMAL_H
+#define ARIADNE_DECIMAL_H
 
-typedef unsigned int uint;
+#include <string>
 
 namespace Ariadne {
 
-#ifdef HAVE_GMPXX_H
-//! \ingroup NumericModule
-//! \brief %Rational numbers with exact arithmetic.
-//! (Only available if the Gnu Multiple Precision library (GMP) is installed.)
-class Rational : public mpq_class {
-  public:
-    using mpq_class::mpq_class;
-};
-Rational sqr(const Rational& q);
-Rational pow(const Rational& q, uint n);
-Rational pow(const Rational& q, int n);
-#else
-#endif // HAVE_GMPXX_H
+class Interval;
 
+//! \ingroup NumericModule
+//! \related Rational, Real
+//! \brief A decimal number.
+class Decimal {
+    std::string _str;
+  public:
+    //! \brief Default constructor creates the number 0 (zero).
+    Decimal() : _str("0.0") { }
+    //! \brief Construct from a double-precision floating-point number representation.
+    explicit Decimal(double d);
+    //! \brief Construct from a string representation.
+    explicit Decimal(std::string);
+#ifdef HAVE_GMPXX_H
+    //! \brief Convert to a rational number.
+    operator Rational () const;
+#endif // HAVE_GMPXX_H
+    //! \brief Convert to a floating-point interval.
+    operator Interval () const;
+    friend std::ostream& operator<<(std::ostream& os, Decimal const& d);
+};
 } // namespace Ariadne
 
 #endif

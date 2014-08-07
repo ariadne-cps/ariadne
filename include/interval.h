@@ -37,6 +37,8 @@
 #include "tribool.h"
 #include "rounding.h"
 #include "float.h"
+#include "dyadic.h"
+#include "decimal.h"
 
 // Simplifying typedefs for unsigned types
 typedef unsigned int uint;
@@ -99,7 +101,7 @@ class Interval {
     //! \brief Convert from a general real number. Yields an interval containing the exact value.
     Interval(const Real& x);
     //! \brief Convert from a floating-point number with an exact representation.
-    Interval(const ExactFloat& x) : l(x.value()), u(x.value()) { }
+    Interval(const Dyadic& x) : l(x.value()), u(x.value()) { }
 
     //! \brief Convert to a floating-point approximation.
     operator Float () const { return this->midpoint(); }
@@ -110,7 +112,6 @@ class Interval {
     Interval(const Float& lower, const Float& upper) : l(lower), u(upper) { }
         // ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper);
 #ifdef HAVE_GMPXX_H
-    typedef mpq_class Rational;
     Interval(const Rational& q);
     Interval& operator=(const Rational& q);
     Interval(const Rational& lower, const Rational& upper);
@@ -121,7 +122,7 @@ class Interval {
     Interval& operator=(double c) { l=c; u=c; return *this; }
     Interval& operator=(const Float& x) { l=x; u=x; return *this; }
     Interval& operator=(const Real& x);
-    Interval& operator=(const ExactFloat& x) { l=x.value(); u=x.value(); return *this; };
+    Interval& operator=(const Dyadic& x) { l=x.value(); u=x.value(); return *this; };
 
     //! \brief The lower bound of the interval.
     const Float& lower() const { return l; }
@@ -571,19 +572,19 @@ inline Interval operator-(const Float& x1, const Interval& i2) { return sub(x1,i
 inline Interval operator*(const Float& x1, const Interval& i2) { return mul(i2,x1); }
 inline Interval operator/(const Float& x1, const Interval& i2) { return div(x1,i2); }
 
-inline Interval operator+(const ExactFloat& x1, const ExactFloat& x2) { return add_ivl(x1,x2); }
-inline Interval operator-(const ExactFloat& x1, const ExactFloat& x2) { return sub_ivl(x1,x2); }
-inline Interval operator*(const ExactFloat& x1, const ExactFloat& x2) { return mul_ivl(x1,x2); }
-inline Interval operator/(const ExactFloat& x1, const ExactFloat& x2) { return div_ivl(x1,x2); }
-inline Interval operator+(const Interval& i1, const ExactFloat& x2) { return add(i1,static_cast<Float>(x2)); }
-inline Interval operator-(const Interval& i1, const ExactFloat& x2) { return sub(i1,static_cast<Float>(x2)); }
-inline Interval operator*(const Interval& i1, const ExactFloat& x2) { return mul(i1,static_cast<Float>(x2)); }
-inline Interval operator/(const Interval& i1, const ExactFloat& x2) { return div(i1,static_cast<Float>(x2)); }
-inline Interval operator+(const ExactFloat& x1, const Interval& i2) { return add(static_cast<Float>(x1),i2); }
-inline Interval operator-(const ExactFloat& x1, const Interval& i2) { return sub(static_cast<Float>(x1),i2); }
-inline Interval operator*(const ExactFloat& x1, const Interval& i2) { return mul(static_cast<Float>(x1),i2); }
-inline Interval operator/(const ExactFloat& x1, const Interval& i2) { return div(static_cast<Float>(x1),i2); }
-inline Interval pow(const ExactFloat& x, int n) { return pow(Interval(x),n); }
+inline Interval operator+(const Dyadic& x1, const Dyadic& x2) { return add_ivl(x1,x2); }
+inline Interval operator-(const Dyadic& x1, const Dyadic& x2) { return sub_ivl(x1,x2); }
+inline Interval operator*(const Dyadic& x1, const Dyadic& x2) { return mul_ivl(x1,x2); }
+inline Interval operator/(const Dyadic& x1, const Dyadic& x2) { return div_ivl(x1,x2); }
+inline Interval operator+(const Interval& i1, const Dyadic& x2) { return add(i1,static_cast<Float>(x2)); }
+inline Interval operator-(const Interval& i1, const Dyadic& x2) { return sub(i1,static_cast<Float>(x2)); }
+inline Interval operator*(const Interval& i1, const Dyadic& x2) { return mul(i1,static_cast<Float>(x2)); }
+inline Interval operator/(const Interval& i1, const Dyadic& x2) { return div(i1,static_cast<Float>(x2)); }
+inline Interval operator+(const Dyadic& x1, const Interval& i2) { return add(static_cast<Float>(x1),i2); }
+inline Interval operator-(const Dyadic& x1, const Interval& i2) { return sub(static_cast<Float>(x1),i2); }
+inline Interval operator*(const Dyadic& x1, const Interval& i2) { return mul(static_cast<Float>(x1),i2); }
+inline Interval operator/(const Dyadic& x1, const Interval& i2) { return div(static_cast<Float>(x1),i2); }
+inline Interval pow(const Dyadic& x, int n) { return pow(Interval(x),n); }
 
 inline Interval& operator+=(Interval& i1, const Float& x2) { i1=add(i1,x2); return i1; }
 inline Interval& operator-=(Interval& i1, const Float& x2) { i1=sub(i1,x2); return i1; }

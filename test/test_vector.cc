@@ -61,10 +61,10 @@ TestVector::test_concept()
 {
     Float fx(1);
     Interval ix(1);
-    ExactFloat ex(1);
+    Dyadic ex(1);
     Vector<Float> fv;
     Vector<Interval> iv;
-    Vector<ExactFloat> ev;
+    Vector<Dyadic> ev;
 
     iv=Vector<Interval>(ev);
 
@@ -209,8 +209,8 @@ TestVector::test_misc()
     cout << iv1 << " = " << iv2 << " / " << ix << endl;
     cout << endl;
 
-    Vector<ExactFloat> ev1(v1);
-    ExactFloat ex(x);
+    Vector<Dyadic> ev1(v1);
+    Dyadic ex(x);
     iv0=iv1+ev1;
     cout << iv0 << " = " << iv1 << " + " << ev1 << endl;
     iv0=ev1+iv1;

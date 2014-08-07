@@ -181,7 +181,7 @@ template<> Matrix<Interval> gs_solve(const Matrix<Interval>& A, const Matrix<Int
     const size_t m=B.column_size();
 
     // Precondition A and B
-    Matrix<ExactFloat> J(inverse(midpoint(A)));
+    Matrix<Dyadic> J(inverse(midpoint(A)));
     Matrix<Interval> JA=J*A;
     Matrix<Interval> JB=J*B;
     //std::cerr<<"J="<<J<<"\nJA="<<JA<<"\nJB="<<JB<<"\n";

@@ -59,11 +59,7 @@ class Integer { };
 #ifdef HAVE_GMPXX_H
 class Integer : public mpz_class {
   public:
-    Integer() : mpz_class() { }
-    Integer(const int& n) : mpz_class(n) { }
-    Integer(const std::string& s) : mpz_class(s) { }
-    Integer(const mpz_class& z) : mpz_class(z) { }
-    template<class Z> Integer(const Z& z) : mpz_class(z) { }
+    using mpz_class::mpz_class;
 };
 #else
 class Integer {

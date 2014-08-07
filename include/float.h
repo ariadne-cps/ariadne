@@ -45,7 +45,7 @@ namespace Ariadne {
 class Float;
 class Interval;
 class Real;
-class ExactFloat;
+class Dyadic;
 
 using std::min;
 using std::max;
@@ -72,7 +72,7 @@ const double nan = (1.0/0.0);
 //! Note that the value of a built-in floating-point value may differ from the mathematical value of the literal.
 //! For example, while <c>%Float(3.25)</c> is represented exactly, <c>%Float(3.3)</c> has a value of \f$3.2999999999999998224\ldots\f$.
 //! \note In the future, the construction of a \c %Float from a string literal may be supported.
-//! \sa Interval, Real, ExactFloat
+//! \sa Interval, Real, Dyadic
 class Float {
   public:
     static uint output_precision;
@@ -92,11 +92,11 @@ class Float {
     //! not necessarily the nearest.
     Float(const Real& x);
     //! \brief Convert from a floating-point number with an exact representation.
-    Float(const ExactFloat& x);
+    Float(const Dyadic& x);
     Float& operator=(double x) { v=x; return *this; }
     Float& operator=(const Float& x) { v=x.v; return *this; }
     Float& operator=(const Real& x);
-    Float& operator=(const ExactFloat& x);
+    Float& operator=(const Dyadic& x);
     //! \brief An approximation by a built-in double-precision floating-point number.
     double get_d() const { return this->v; }
     static void set_output_precision(uint p) { output_precision=p; }
@@ -387,107 +387,6 @@ inline Float med_approx(Float x, Float y) {
 inline Float rad_up(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
     Float r=sub_rnd(y,x)/2; set_rounding_mode(rounding_mode); return r; }
-
-class Interval;
-
-//! \ingroup NumericModule
-//! \related ExactFloat
-//! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
-class ExactFloat {
-    Float _x;
-  public:
-    //! \brief Default constructor creates the number 0 (zero).
-    ExactFloat() : _x(0) { }
-    //! \brief Convert from a built-in positive integer.
-    ExactFloat(unsigned int n) : _x(n) { }
-    //! \brief Convert from a built-in integer.
-    ExactFloat(int n) : _x(n) { }
-    //! \brief Explicit construction from a built-in double-precision value.
-    //! \details Tests to ensure that the number is not 'accidentally' created from a rounded version of a string literal,
-    //! by comparing the input with it's single-precision approximation.
-    explicit ExactFloat(double x) : _x(x) { }
-    //! \brief Explicit construction from an approximate floating-point value.
-    explicit ExactFloat(const Float& x) : _x(x) { }
-#ifdef HAVE_GMPXX_H
-    //! \brief Convert to a rational number.
-    explicit operator Rational () const;
-#endif
-    //! \brief The approximate floating-point number with the same value.
-    Float value() const { return _x; }
-    //! \brief A double-precision approximateion.
-    double get_d() const { return _x.get_d(); }
-};
-inline ExactFloat operator+(const ExactFloat& x) { return ExactFloat(+x.value()); }
-inline ExactFloat operator-(const ExactFloat& x) { return ExactFloat(-x.value()); }
-inline Interval operator+(const ExactFloat& x1,  const ExactFloat& x2);
-inline Interval operator-(const ExactFloat& x1,  const ExactFloat& x2);
-inline Interval operator*(const ExactFloat& x1,  const ExactFloat& x2);
-inline Interval operator/(const ExactFloat& x1,  const ExactFloat& x2);
-inline Interval operator+(const Interval& x1,  const ExactFloat& x2);
-inline Interval operator-(const Interval& x1,  const ExactFloat& x2);
-inline Interval operator*(const Interval& x1,  const ExactFloat& x2);
-inline Interval operator/(const Interval& x1,  const ExactFloat& x2);
-inline Interval operator+(const ExactFloat& x1,  const Interval& x2);
-inline Interval operator-(const ExactFloat& x1,  const Interval& x2);
-inline Interval operator*(const ExactFloat& x1,  const Interval& x2);
-inline Interval operator/(const ExactFloat& x1,  const Interval& x2);
-inline Interval pow(const ExactFloat& x, int n);
-inline Interval operator/(int n1,  const ExactFloat& x2);
-inline std::ostream& operator<<(std::ostream& os, const ExactFloat& x) { return os << std::showpoint << std::setprecision(18) << x.value(); }
-
-inline bool operator==(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()==x2.value(); }
-inline bool operator!=(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()!=x2.value(); }
-inline bool operator<=(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()<=x2.value(); }
-inline bool operator>=(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()>=x2.value(); }
-inline bool operator< (const ExactFloat& x1, const ExactFloat& x2) { return x1.value()< x2.value(); }
-inline bool operator> (const ExactFloat& x1, const ExactFloat& x2) { return x1.value()> x2.value(); }
-
-inline bool operator==(const ExactFloat& x1, double x2) { return x1.value()==x2; }
-inline bool operator!=(const ExactFloat& x1, double x2) { return x1.value()!=x2; }
-inline bool operator<=(const ExactFloat& x1, double x2) { return x1.value()<=x2; }
-inline bool operator>=(const ExactFloat& x1, double x2) { return x1.value()>=x2; }
-inline bool operator< (const ExactFloat& x1, double x2) { return x1.value()< x2; }
-inline bool operator> (const ExactFloat& x1, double x2) { return x1.value()> x2; }
-
-inline Float::Float(const ExactFloat& x) : v(x.value().get_d()) { }
-inline Float& Float::operator=(const ExactFloat& x) { this->operator=(x.value()); return *this; }
-
-inline const ExactFloat& make_exact(const Float& x) { return reinterpret_cast<const ExactFloat&>(x); }
-template<template<class>class T> inline const T<ExactFloat>& make_exact(const T<Float>& t) { return reinterpret_cast<const T<ExactFloat>&>(t); }
-
-//! \related Float \brief The constant infinity
-//extern ExactFloat inf;
-
-class Interval;
-inline Interval sqr_ivl(Float x);
-inline Interval rec_ivl(Float x);
-inline Interval add_ivl(Float x, Float y);
-inline Interval sub_ivl(Float x, Float y);
-inline Interval mul_ivl(Float x, Float y);
-inline Interval div_ivl(Float x, Float y);
-inline Interval pow_ivl(Float x, int n);
-
-inline Interval rad_ivl(Float x, Float y);
-inline Interval med_ivl(Float x, Float y);
-
-
-#ifdef HAVE_GMPXX_H
-inline bool operator==(const ExactFloat& x, const Rational& q) { return x.get_d()==static_cast<const mpq_class&>(q); }
-inline bool operator!=(const ExactFloat& x, const Rational& q) { return x.get_d()!=static_cast<const mpq_class&>(q); }
-inline bool operator<=(const ExactFloat& x, const Rational& q) { return x.get_d()<=static_cast<const mpq_class&>(q); }
-inline bool operator>=(const ExactFloat& x, const Rational& q) { return x.get_d()>=static_cast<const mpq_class&>(q); }
-inline bool operator< (const ExactFloat& x, const Rational& q) { return x.get_d()< static_cast<const mpq_class&>(q); }
-inline bool operator> (const ExactFloat& x, const Rational& q) { return x.get_d()> static_cast<const mpq_class&>(q); }
-
-inline bool operator==(const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)==x.get_d(); }
-inline bool operator!=(const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)!=x.get_d(); }
-inline bool operator<=(const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)<=x.get_d(); }
-inline bool operator>=(const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)>=x.get_d(); }
-inline bool operator< (const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)< x.get_d(); }
-inline bool operator> (const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)> x.get_d(); }
-#endif // HAVE_GMPXX_H
-
-
 
 
 } // namespace Ariadne

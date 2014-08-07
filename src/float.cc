@@ -53,6 +53,8 @@
 #endif
 
 #include "float.h"
+#include "dyadic.h"
+
 
 namespace Ariadne {
 
@@ -585,10 +587,10 @@ Float tan_rnd(Float x)
     return tan_rnd(x.v);
 }
 
-//ExactFloat inf = ExactFloat(std::numeric_limits< double >::infinity());
+//Dyadic inf = Dyadic(std::numeric_limits< double >::infinity());
 
 #ifdef HAVE_GMPXX_H
-ExactFloat::operator Rational() const {
+Dyadic::operator Rational() const {
     return Rational(this->get_d());
 }
 #endif

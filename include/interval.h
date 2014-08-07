@@ -38,7 +38,6 @@
 #include "rounding.h"
 #include "float.h"
 #include "dyadic.h"
-#include "decimal.h"
 
 // Simplifying typedefs for unsigned types
 typedef unsigned int uint;
@@ -50,6 +49,10 @@ class Float;
 class Interval;
 class Real;
 
+class Integer;
+class Rational;
+class Dyadic;
+class Decimal;
 
 //! \ingroup NumericModule
 //! \brief Intervals with floating-point endpoints supporting outwardly-rounded arithmetic.
@@ -102,6 +105,8 @@ class Interval {
     Interval(const Real& x);
     //! \brief Convert from a floating-point number with an exact representation.
     Interval(const Dyadic& x) : l(x.value()), u(x.value()) { }
+    //! \brief Convert from a decimal number.
+    Interval(const Decimal& x);
 
     //! \brief Convert to a floating-point approximation.
     operator Float () const { return this->midpoint(); }
@@ -112,6 +117,7 @@ class Interval {
     Interval(const Float& lower, const Float& upper) : l(lower), u(upper) { }
         // ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper);
 #ifdef HAVE_GMPXX_H
+    Interval(const Integer& z);
     Interval(const Rational& q);
     Interval& operator=(const Rational& q);
     Interval(const Rational& lower, const Rational& upper);

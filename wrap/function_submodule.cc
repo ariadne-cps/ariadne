@@ -411,8 +411,6 @@ void function_submodule() {
     from_python< Array<std::string> >();
 
     export_multi_index();
-    export_monomial<Real>();
-    export_polynomial<Real>();
 
     export_scalar_function();
     export_vector_function();

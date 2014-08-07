@@ -32,7 +32,9 @@
 
 namespace Ariadne {
 
+class Float;
 class Interval;
+class Rational;
 
 //! \ingroup NumericModule
 //! \related Rational, Real
@@ -48,10 +50,12 @@ class Decimal {
     explicit Decimal(std::string);
 #ifdef HAVE_GMPXX_H
     //! \brief Convert to a rational number.
-    operator Rational () const;
+    explicit operator Rational () const;
 #endif // HAVE_GMPXX_H
     //! \brief Convert to a floating-point interval.
-    operator Interval () const;
+    explicit operator Interval () const;
+    //! \brief Convert to a floating-point interval.
+    explicit operator Float () const;
     friend std::ostream& operator<<(std::ostream& os, Decimal const& d);
 };
 } // namespace Ariadne

@@ -25,6 +25,7 @@ ARIADNE_KERNEL_SRC = \
 	logging.cc \
 	integer.cc \
 	rational.cc \
+	decimal.cc \
 	float.cc \
 	interval.cc \
 	real.cc \

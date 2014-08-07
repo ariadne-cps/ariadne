@@ -76,6 +76,7 @@ struct from_python_dict<Interval> {
     }
 };
 
+
 template<>
 struct from_python_list<Interval> {
     from_python_list() { converter::registry::push_back(&convertible,&construct,type_id<Interval>()); }
@@ -202,7 +203,6 @@ void export_integer()
     integer_class.def("__mul__", &__mul__<Integer,Integer,Integer>);
 
     implicitly_convertible<int,Integer>();
-
 }
 #endif
 
@@ -228,18 +228,223 @@ void export_rational()
 
     def("sqr",(Rational(*)(Rational const&)) &sqr);
 
-    implicitly_convertible<int,Rational>();
     implicitly_convertible<Integer,Rational>();
 
 }
 #endif
 
+void export_dyadic()
+{
+    class_< Dyadic > dyadic_class("Dyadic",init<Dyadic>());
+    dyadic_class.def(init<>());
+    dyadic_class.def(init<int>());
+    dyadic_class.def(init<double>());
+    dyadic_class.def(init<Float>());
+    dyadic_class.def(+self);
+    dyadic_class.def(-self);
+    dyadic_class.def(self+self);
+    dyadic_class.def(self-self);
+    dyadic_class.def(self*self);
+    dyadic_class.def(self/self);
+
+    dyadic_class.def(Rational()+self);
+    dyadic_class.def(Rational()-self);
+    dyadic_class.def(Rational()*self);
+    dyadic_class.def(Rational()/self);
+    dyadic_class.def(self+Rational());
+    dyadic_class.def(self-Rational());
+    dyadic_class.def(self*Rational());
+    dyadic_class.def(self/Rational());
+
+    def("pow",(Interval(*)(const Dyadic&,int)) &Ariadne::pow);
+
+//    dyadic_class.def(int()*self);
+//    dyadic_class.def(self*int());
+//    dyadic_class.def(self/int());
+
+    dyadic_class.def("__str__", &__cstr__<Dyadic>);
+    dyadic_class.def("__repr__", &__cstr__<Dyadic>);
+
+    def("make_exact", (const Dyadic&(*)(const Float&)) &Ariadne::make_exact, return_value_policy<copy_const_reference>());
+}
+
+void export_decimal()
+{
+    class_< Decimal > decimal_class("Decimal");
+    decimal_class.def(init<double>());
+    decimal_class.def(init<std::string>());
+    decimal_class.def(boost::python::self_ns::str(self));
+}
+
+Real pi_function() { return pi; }
+
+void export_real()
+{
+    class_<Real> real_class("Real",init<Real>());
+    real_class.def(init<int>());
+#ifdef HAVE_GMPXX_H
+    real_class.def(init<Integer>());
+    real_class.def(init<Rational>());
+#endif
+    real_class.def(init<Dyadic>());
+    real_class.def(init<Decimal>());
+
+    real_class.def("radius", &Interval::radius);
+    real_class.def(boost::python::self_ns::str(self));
+    real_class.def("__repr__", &__repr__<Real>);
+
+    real_class.def(+self);
+    real_class.def(-self);
+    real_class.def(self + self);
+    real_class.def(self - self);
+    real_class.def(self * self);
+    real_class.def(self / self);
+
+    real_class.def(int() + self);
+    real_class.def(int() - self);
+    real_class.def(int() * self);
+    real_class.def(int() / self);
+
+    real_class.def(self == self);
+    real_class.def(self != self);
+    real_class.def(self >= self);
+    real_class.def(self <= self);
+    real_class.def(self > self);
+    real_class.def(self < self);
+
+    def("pi", (Real(*)()) &pi_function);
+
+    def("pow",  (Real(*)(Real const&, int)) &pow);
+    def("sqr", (Real(*)(Real const&)) &sqr);
+    def("rec", (Real(*)(Real const&)) &rec);
+    def("sqrt", (Real(*)(Real const&)) &sqrt);
+    def("exp", (Real(*)(Real const&)) &exp);
+    def("log", (Real(*)(Real const&)) &log);
+
+    def("sin", (Real(*)(Real const&)) &sin);
+    def("cos", (Real(*)(Real const&)) &cos);
+    def("tan", (Real(*)(Real const&)) &tan);
+    def("atan", (Real(*)(Real const&)) &atan);
+
+    implicitly_convertible<int,Real>();
+#ifdef HAVE_GMPXX_H
+    implicitly_convertible<Integer,Real>();
+    implicitly_convertible<Rational,Real>();
+#endif
+    implicitly_convertible<Decimal,Real>();
+    implicitly_convertible<Dyadic,Real>();
+}
+
+
+
+
+void export_interval()
+{
+    using boost::python::class_;
+    using boost::python::init;
+    using boost::python::self;
+    using boost::python::return_value_policy;
+    using boost::python::copy_const_reference;
+    using boost::python::def;
+
+    def("down",&down);
+    def("up",&up);
+
+    class_< Interval > interval_class("Interval");
+    interval_class.def(init<double>());
+    interval_class.def(init<double,double>());
+    interval_class.def(init<Float,Float>());
+    interval_class.def(init<Real,Real>());
+    interval_class.def(init<Decimal>());
+    interval_class.def(init<Dyadic>());
+    interval_class.def(init<Interval>());
+    interval_class.def(init<Float>());
+#ifdef HAVE_GMPXX_H
+    interval_class.def(init<Rational>());
+    interval_class.def(init<Rational,Rational>());
+#endif
+    interval_class.def(+self);
+    interval_class.def(-self);
+    interval_class.def(self + self);
+    interval_class.def(self - self);
+    interval_class.def(self * self);
+    interval_class.def(self / self);
+
+    interval_class.def(Real() + self);
+    interval_class.def(Real() - self);
+    interval_class.def(Real() * self);
+    interval_class.def(Real() / self);
+
+    interval_class.def(self == self);
+    interval_class.def(self != self);
+    interval_class.def(self >= self);
+    interval_class.def(self <= self);
+    interval_class.def(self > self);
+    interval_class.def(self < self);
+    interval_class.def("lower", &Interval::lower, return_value_policy<copy_const_reference>());
+    interval_class.def("upper", &Interval::upper, return_value_policy<copy_const_reference>());
+    interval_class.def("midpoint", &Interval::midpoint);
+    interval_class.def("radius", &Interval::radius);
+    interval_class.def("width", &Interval::width);
+    interval_class.def("contains", (bool(*)(Interval,Float)) &contains);
+    interval_class.def("empty", (bool(Interval::*)()const) &Interval::empty);
+    interval_class.def(boost::python::self_ns::str(self));
+    interval_class.def("__repr__", &__repr__<Interval>);
+
+    interval_class.def("set_output_precision", &Interval::set_output_precision);
+    interval_class.staticmethod("set_output_precision");
+
+
+    implicitly_convertible<Real,Interval>();
+    implicitly_convertible<Interval,Float>();
+
+    from_python_dict<Interval>();
+    from_python_list<Interval>();
+    //from_python_str<Interval>();
+
+    def("midpoint", &Interval::midpoint);
+    def("radius", &Interval::radius);
+
+    def("disjoint", (bool(*)(Interval,Interval)) &disjoint);
+    def("subset", (bool(*)(Interval,Interval)) &subset);
+    def("intersection", (Interval(*)(Interval,Interval)) &intersection);
+
+    def("hull", (Interval(*)(Interval,Interval)) &hull);
+
+    def("mag", (Float(*)(Interval)) &mag);
+
+    def("med", (Interval(*)(Interval)) &med);
+    def("rad", (Interval(*)(Interval)) &rad);
+    def("diam", (Interval(*)(Interval)) &diam);
+
+    def("max", (Interval(*)(Interval,Interval)) &max);
+    def("min", (Interval(*)(Interval,Interval)) &min);
+
+    def("trunc", (Interval(*)(Interval,uint)) &trunc, "truncate to n binary digits");
+    def("abs", (Interval(*)(Interval)) &abs, "interval absolute value function");
+    def("pow",  (Interval(*)(Interval,int)) &pow, "interval power function");
+    def("sqr", (Interval(*)(Interval)) &sqr, "interval square function");
+    def("rec", (Interval(*)(Interval)) &rec);
+    def("sqrt", (Interval(*)(Interval)) &sqrt);
+    def("exp", (Interval(*)(Interval)) &exp);
+    def("log", (Interval(*)(Interval)) &log);
+
+    def("sin", (Interval(*)(Interval)) &sin);
+    def("cos", (Interval(*)(Interval)) &cos);
+    def("tan", (Interval(*)(Interval)) &tan);
+    def("asin", (Interval(*)(Interval)) &asin);
+    def("acos", (Interval(*)(Interval)) &acos);
+    def("atan", (Interval(*)(Interval)) &atan);
+}
 
 void export_float()
 {
     class_< Float > float_class("Float");
     float_class.def(init<double>());
     float_class.def(init<Float>());
+#ifdef HAVE_GMPXX_H
+    float_class.def(init<Rational>());
+#endif
     float_class.def(init<Real>());
     float_class.def(boost::python::self_ns::str(self));
     float_class.def("__repr__", &__repr__<Float>);
@@ -296,231 +501,6 @@ void export_float()
 }
 
 
-void export_interval()
-{
-    using boost::python::class_;
-    using boost::python::init;
-    using boost::python::self;
-    using boost::python::return_value_policy;
-    using boost::python::copy_const_reference;
-    using boost::python::def;
-
-    def("down",&down);
-    def("up",&up);
-
-    class_< Interval > interval_class("Interval");
-    interval_class.def(init<double>());
-    interval_class.def(init<double,double>());
-    interval_class.def(init<Float,Float>());
-    interval_class.def(init<Real,Real>());
-//    interval_class.def(init<Decimal>());
-    interval_class.def(init<Dyadic>());
-    interval_class.def(init<Interval>());
-    interval_class.def(init<Float>());
-#ifdef HAVE_GMPXX_H
-    interval_class.def(init<Rational>());
-    interval_class.def(init<Rational,Rational>());
-#endif
-    interval_class.def(+self);
-    interval_class.def(-self);
-    interval_class.def(self + self);
-    interval_class.def(self - self);
-    interval_class.def(self * self);
-    interval_class.def(self / self);
-
-    interval_class.def(Real() + self);
-    interval_class.def(Real() - self);
-    interval_class.def(Real() * self);
-    interval_class.def(Real() / self);
-
-    interval_class.def(self == self);
-    interval_class.def(self != self);
-    interval_class.def(self >= self);
-    interval_class.def(self <= self);
-    interval_class.def(self > self);
-    interval_class.def(self < self);
-    interval_class.def("lower", &Interval::lower, return_value_policy<copy_const_reference>());
-    interval_class.def("upper", &Interval::upper, return_value_policy<copy_const_reference>());
-    interval_class.def("midpoint", &Interval::midpoint);
-    interval_class.def("radius", &Interval::radius);
-    interval_class.def("width", &Interval::width);
-    interval_class.def("contains", (bool(*)(Interval,Float)) &contains);
-    interval_class.def("empty", (bool(Interval::*)()const) &Interval::empty);
-    interval_class.def(boost::python::self_ns::str(self));
-    interval_class.def("__repr__", &__repr__<Interval>);
-
-    interval_class.def("set_output_precision", &Interval::set_output_precision);
-    interval_class.staticmethod("set_output_precision");
-
-
-    implicitly_convertible<int,Interval>();
-    implicitly_convertible<Dyadic,Interval>();
-#ifdef HAVE_GMPXX_H
-    implicitly_convertible<Rational,Interval>();
-#endif
-
-    // implicitly_convertible<Interval,Float>();
-
-    from_python_dict<Interval>();
-    //from_python_list<Interval>();
-    //from_python_str<Interval>();
-
-    def("midpoint", &Interval::midpoint);
-    def("radius", &Interval::radius);
-
-    def("disjoint", (bool(*)(Interval,Interval)) &disjoint);
-    def("subset", (bool(*)(Interval,Interval)) &subset);
-    def("intersection", (Interval(*)(Interval,Interval)) &intersection);
-
-    def("hull", (Interval(*)(Interval,Interval)) &hull);
-
-    def("mag", (Float(*)(Interval)) &mag);
-
-    def("med", (Interval(*)(Interval)) &med);
-    def("rad", (Interval(*)(Interval)) &rad);
-    def("diam", (Interval(*)(Interval)) &diam);
-
-    def("max", (Interval(*)(Interval,Interval)) &max);
-    def("min", (Interval(*)(Interval,Interval)) &min);
-
-    def("trunc", (Interval(*)(Interval,uint)) &trunc, "truncate to n binary digits");
-    def("abs", (Interval(*)(Interval)) &abs, "interval absolute value function");
-    def("pow",  (Interval(*)(Interval,int)) &pow, "interval power function");
-    def("sqr", (Interval(*)(Interval)) &sqr, "interval square function");
-    def("rec", (Interval(*)(Interval)) &rec);
-    def("sqrt", (Interval(*)(Interval)) &sqrt);
-    def("exp", (Interval(*)(Interval)) &exp);
-    def("log", (Interval(*)(Interval)) &log);
-
-    def("sin", (Interval(*)(Interval)) &sin);
-    def("cos", (Interval(*)(Interval)) &cos);
-    def("tan", (Interval(*)(Interval)) &tan);
-    def("asin", (Interval(*)(Interval)) &asin);
-    def("acos", (Interval(*)(Interval)) &acos);
-    def("atan", (Interval(*)(Interval)) &atan);
-}
-
-
-Real pi_function() { return pi; }
-
-void export_real()
-{
-    class_<Real> real_class("Real");
-//    real_class.def(init<double>());
-//    real_class.def(init<std::string>());
-    real_class.def(init<Real>());
-#ifdef HAVE_GMPXX_H
-    real_class.def(init<Rational>());
-#endif
-    real_class.def("radius", &Interval::radius);
-    real_class.def(boost::python::self_ns::str(self));
-    real_class.def("__repr__", &__repr__<Real>);
-
-    real_class.def(+self);
-    real_class.def(-self);
-    real_class.def(self + self);
-    real_class.def(self - self);
-    real_class.def(self * self);
-    real_class.def(self / self);
-
-    real_class.def(int() + self);
-    real_class.def(int() - self);
-    real_class.def(int() * self);
-    real_class.def(int() / self);
-
-    real_class.def(self == self);
-    real_class.def(self != self);
-    real_class.def(self >= self);
-    real_class.def(self <= self);
-    real_class.def(self > self);
-    real_class.def(self < self);
-
-    def("pi", (Real(*)()) &pi_function);
-
-    def("pow",  (Real(*)(Real const&, int)) &pow);
-    def("sqr", (Real(*)(Real const&)) &sqr);
-    def("rec", (Real(*)(Real const&)) &rec);
-    def("sqrt", (Real(*)(Real const&)) &sqrt);
-    def("exp", (Real(*)(Real const&)) &exp);
-    def("log", (Real(*)(Real const&)) &log);
-
-    def("sin", (Real(*)(Real const&)) &sin);
-    def("cos", (Real(*)(Real const&)) &cos);
-    def("tan", (Real(*)(Real const&)) &tan);
-    def("atan", (Real(*)(Real const&)) &atan);
-    implicitly_convertible<int,Real>();
-    implicitly_convertible<Dyadic,Real>();
-#ifdef HAVE_GMPXX_H
-    implicitly_convertible<Rational,Real>();
-#endif
-
-    implicitly_convertible<Real,Float>();
-    implicitly_convertible<Real,Interval>();
-}
-
-void export_dyadic()
-{
-    class_< Dyadic > dyadic_class("Dyadic",init<Dyadic>());
-    dyadic_class.def(init<>());
-    dyadic_class.def(init<int>());
-    dyadic_class.def(init<double>());
-    dyadic_class.def(init<Float>());
-    dyadic_class.def(+self);
-    dyadic_class.def(-self);
-    dyadic_class.def(self+self);
-    dyadic_class.def(self-self);
-    dyadic_class.def(self*self);
-    dyadic_class.def(self/self);
-
-    dyadic_class.def(Rational()+self);
-    dyadic_class.def(Rational()-self);
-    dyadic_class.def(Rational()*self);
-    dyadic_class.def(Rational()/self);
-    dyadic_class.def(self+Rational());
-    dyadic_class.def(self-Rational());
-    dyadic_class.def(self*Rational());
-    dyadic_class.def(self/Rational());
-
-    def("pow",(Interval(*)(const Dyadic&,int)) &Ariadne::pow);
-
-//    dyadic_class.def(int()*self);
-//    dyadic_class.def(self*int());
-//    dyadic_class.def(self/int());
-
-    dyadic_class.def("__str__", &__cstr__<Dyadic>);
-    dyadic_class.def("__repr__", &__cstr__<Dyadic>);
-
-    def("make_exact", (const Dyadic&(*)(const Float&)) &Ariadne::make_exact, return_value_policy<copy_const_reference>());
-
-    implicitly_convertible<int,Dyadic>();
-    implicitly_convertible<Dyadic,Interval>();
-    implicitly_convertible<Dyadic,Float>();
-}
-
-void export_decimal()
-{
-    class_< Decimal > decimal_class("Decimal");
-    decimal_class.def(init<double>());
-    decimal_class.def(init<std::string>());
-    decimal_class.def(boost::python::self_ns::str(self));
-
-    implicitly_convertible<Decimal,Rational>();
-    implicitly_convertible<Decimal,Real>();
-//    implicitly_convertible<Decimal,Interval>();
-//    implicitly_convertible<Decimal,Float>();
-}
-
-
-using namespace Ariadne;
-
-void foo(Integer) { }
-void foo(Rational) { }
-void foo(Real) { }
-void foo(Float) { }
-void foo(Interval) { }
-void foo(Dyadic) { }
-void foo(Decimal) { }
-
 void
 numeric_submodule()
 {
@@ -530,15 +510,6 @@ numeric_submodule()
     export_real();
     export_dyadic();
     export_decimal();
-
-    def("fooz", (void(*)(Integer)) &foo);
-    def("fooq", (void(*)(Rational)) &foo);
-    def("foor", (void(*)(Real)) &foo);
-    def("fooi", (void(*)(Interval)) &foo);
-    def("foox", (void(*)(Dyadic)) &foo);
-    def("food", (void(*)(Decimal)) &foo);
-    def("fooa", (void(*)(Float)) &foo);
-
 #ifdef HAVE_GMPXX_H
     export_integer();
     export_rational();

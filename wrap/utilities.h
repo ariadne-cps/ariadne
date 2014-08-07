@@ -68,6 +68,7 @@ template<class T> struct from_python;
 template<class T> struct from_python_list;
 template<class T> struct from_python_tuple;
 template<class T> struct from_python_dict;
+template<class T> struct from_python_set;
 
 
 #ifdef HAVE_GMPXX_H

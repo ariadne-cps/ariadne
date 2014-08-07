@@ -46,6 +46,7 @@ class Float;
 class Interval;
 class Real;
 class Dyadic;
+class Decimal;
 
 using std::min;
 using std::max;
@@ -88,9 +89,15 @@ class Float {
     Float(double x) : v(x) { }
     //! \brief Copy constructor.
     Float(const Float& x) : v(x.v) { }
+    //! \brief Convert approximately from a decimal number.
+    Float(const Decimal& d);
+#ifdef HAVE_GMPXX_H
+    //! \brief Construct from a rational number.
+    explicit Float(const Rational& q);
+#endif // HAVE_GMPXX_H
     //! \brief Convert from a general real number by generating a representable approximation,
     //! not necessarily the nearest.
-    Float(const Real& x);
+    Float(const Real& r);
     //! \brief Convert from a floating-point number with an exact representation.
     Float(const Dyadic& x);
     Float& operator=(double x) { v=x; return *this; }

@@ -29,6 +29,7 @@
 #include "config.h"
 
 #include "macros.h"
+#include "decimal.h"
 #include "rational.h"
 #include "rounding.h"
 
@@ -588,10 +589,14 @@ Float tan_rnd(Float x)
 }
 
 //Dyadic inf = Dyadic(std::numeric_limits< double >::infinity());
+Float::Float(Decimal const& d) : Float(d.operator Float()) { }
+
 
 #ifdef HAVE_GMPXX_H
 Dyadic::operator Rational() const {
     return Rational(this->get_d());
+}
+Float::Float(Rational const& q) : Float(q.get_d()) {
 }
 #endif
 

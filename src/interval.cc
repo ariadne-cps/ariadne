@@ -31,6 +31,7 @@
 #include "integer.h"
 #include "float.h"
 #include "rational.h"
+#include "decimal.h"
 #include "interval.h"
 
 
@@ -415,9 +416,13 @@ Interval atan(Interval i)
 }
 
 
+Interval::Interval(const Decimal& d) : Interval(d.operator Interval()) { }
+
 
 #ifdef HAVE_GMPXX_H
 
+Interval::Interval(const Integer& z) : Interval(Rational(z)) {
+}
 
 Interval::Interval(const Rational& q) : l(q.get_d()), u(l) {
     rounding_mode_t rounding_mode=get_rounding_mode();

@@ -429,7 +429,7 @@ class Expansion
     template<class CMP> RealType& _at(const MultiIndex& a,const CMP& cmp) {
         iterator p=std::lower_bound(this->begin(),this->end(),a,cmp);
         if(p!=this->end() && p->key()==a) { return p->data(); }
-        else { p=this->_insert(p,a,0.0); return p->data(); }
+        else { p=this->_insert(p,a,X(0)); return p->data(); }
     }
     template<class CMP> iterator _insert(const MultiIndex& a, const RealType& x,const CMP& cmp) {
         //std::cerr<<"_insert "<<*this<<" "<<a<<" "<<x<<std::endl;

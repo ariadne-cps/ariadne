@@ -36,6 +36,7 @@
 #include "tribool.h"
 #include "rounding.h"
 #include "macros.h"
+#include "integer.h"
 #include "rational.h"
 #include "interval.h"
 
@@ -83,8 +84,10 @@ class Real {
     //! \brief Convert from a builtin double-precision floating-point value.
     //! A numeric literal is first processed by the language support, and the resulting %Real may not have
     //! the same value as the mathematical literal. e.g. \c %Real(4.2) has the value 4.2000000000000002 to 16 decimal places.
-    Real(double x);
+    explicit Real(double x);
 #ifdef HAVE_GMPXX_H
+    //! \brief Convert from an integer.
+    Real(const Integer& z);
     //! \brief Convert from a rational number.
     Real(const Rational& q);
 #endif

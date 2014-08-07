@@ -631,27 +631,29 @@ template<class F> NamedArgumentRepresentation<F> named_argument_repr(const F& fu
 template<class X>
 std::ostream& operator<<(std::ostream& os, const Polynomial<X>& q) {
     bool first_term=true;
-    bool zero=true;
+    bool identically_zero=true;
+    std::cerr<<"  "<<q.expansion()<<"\n";
     Polynomial<X> p=q;
     p.expansion().graded_sort();
     for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
         MultiIndex a=iter->key();
         X v=iter->data();
         if(v!=0) {
-            zero=false;
-            if(v>0 && !first_term) { os<<"+"; }
-            first_term=false;
+            identically_zero=false;
             bool first_factor=true;
-            if(v<0) { os<<"-"; }
-            if(abs(v)!=1 || a.degree()==0) { os<<abs(v); first_factor=false; }
+            if(v>0 && !first_term) { os << "+"; }
+            first_term=false;
+            if(v==1) { } else if (v==-1) { os << '-'; }
+            else { os << 'v'; first_factor=false; }
             for(uint j=0; j!=a.size(); ++j) {
                 if(a[j]!=0) {
                     if(first_factor) { first_factor=false; } else { os <<"*"; }
                     os<<"x"<<j; if(a[j]!=1) { os<<"^"<<int(a[j]); } }
             }
+            if(first_factor) { os << v; }
         }
     }
-    if(zero) { os << "0"; }
+    if(identically_zero) { os << "0"; }
     return os;
 }
 
@@ -660,25 +662,26 @@ std::ostream& operator<<(std::ostream& os, const NamedArgumentRepresentation< Po
     const Polynomial<X>& p=repr.function;
     const std::vector<std::string>& n=repr.argument_names;
     bool first_term=true;
-    bool zero=true;
+    bool identically_zero=true;
     for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
         MultiIndex a=iter->key();
         X v=iter->data();
         if(v!=0) {
-            zero=false;
-            if(v>0 && !first_term) { os<<"+"; }
-            first_term=false;
+            identically_zero=false;
             bool first_factor=true;
-            if(v<0) { os<<"-"; }
-            if(abs(v)!=1 || a.degree()==0) { os<<abs(v); first_factor=false; }
+            if(v>0 && !first_term) { os << "+"; }
+            first_term=false;
+            if(v==1) { } else if (v==-1) { os << '-'; }
+            else { os << 'v'; first_factor=false; }
             for(uint j=0; j!=a.size(); ++j) {
                 if(a[j]!=0) {
                     if(first_factor) { first_factor=false; } else { os <<"*"; }
                     os<<n[j]; if(a[j]!=1) { os<<"^"<<int(a[j]); } }
             }
+            if(first_factor) { os << v; }
         }
     }
-    if(zero) { os << "0"; }
+    if(identically_zero) { os << "0"; }
     return os;
 }
 

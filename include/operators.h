@@ -161,6 +161,7 @@ template<class X> inline X compute(OperatorCode op, const X& x) {
         case SIN: return sin(x);
         case COS: return cos(x);
         case TAN: return tan(x);
+//        case ABS: return abs(x);
         default: ARIADNE_FAIL_MSG("Cannot compute "<<op<<" on "<<x);
     }
 }

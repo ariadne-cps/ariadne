@@ -124,10 +124,12 @@ OperatorKind kind(OperatorCode op) {
         case VAR:
             return VARIABLE;
         case ADD: case SUB: case MUL: case DIV:
+        case MAX: case MIN:
             return BINARY;
         case POS: case NEG: case REC: case SQR:
         case SQRT: case EXP: case LOG:
         case SIN: case COS: case TAN: case ATAN:
+        case ABS:
             return UNARY;
         case POW:
             return SCALAR;

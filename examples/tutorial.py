@@ -23,9 +23,6 @@
 # Import all classes in the ariadne module
 from ariadne import *
 
-# Set Ariadne name of builtin float type
-Float=float
-
 # Print a list of all available classes and functions
 print dir(),"\n"
 
@@ -41,43 +38,55 @@ print z
 q=Rational(8,6)
 print q
 
-# Create a float
-x=Float(1.25)
+# Create an exact float (dyadic)
+x=Dyadic(1.25)
 print x
+
+# Create a decimal number
+g=Decimal(9.81)
+g=Decimal("9.81")
+print g
+
+# Create a real number
+r=sin(1)
+print r
 
 # Create an interval
 i=Interval(1.5,2.25) # Creates the interval [1.5,2.25]
-print "i:",i
+print "Interval(1.5,2.25):",i
 
 # Create an interval
 i=Interval(1.2) # Creates the interval [1.19999999999999996:19999999999999996]
-print "i:",i
+print "Interval(1.2):",i
+#i=Interval("1.2") # Creates the interval [1.19999999999999996:19999999999999996]
+#print "Interval(\"1.2\"):",i
 
 # Create an interval
 i=Interval(1.1,1.4) # Creates the interval [1.10000000000000009:1.39999999999999991]
-
-print "i:",i
+print "Interval(1.1,1.4):",i
 
 # Create an interval
 i=Interval(Rational(12,10)) # Creates the interval [1.19999999999999996:1.20000000000000018]
-print "i:",i
+print "Interval(Rational(12,10)):",i
 
 # Create an interval
 i=Interval(Rational(11,10),Rational(14,10)) # Creates the interval [1.09999999999999987:1.40000000000000013]
-print "i:",i
+print "Interval(Rational(11,10),Rational(14,10)):",i
 
-print "\n\n"
+# Create an approximate float
+x=Float(1.23)
+print x
 
 ###############################################################################
 # Linear Algebra submodule
 ###############################################################################
 
 # Create an interval vector
-b=IntervalVector([1,[2,3],4])
+b=IntervalVector([1,{2:3},4])
 print "b:",b
 
 # Create an interval matrix
-A=IntervalMatrix([[1,[2,3],4],[1.5,1.1,2],[0,0,1]])
+A=IntervalMatrix([[1,{2:3},4],[{1.5:1.5},Decimal("1.1"),2],[0,0,1]])
 print "A:",A
 
 # Solve the linear equation Ax=b
@@ -109,40 +118,13 @@ print evaluate(f,(IntervalVector([4,3,0])))
 
 
 
-# Create a scalar polynomial function in three unknowns, with value \f$x_0\f$.
-p=RealPolynomial.coordinate(3,0)
-print p
-
-# Make a shorthand for constructing polynomial functions.
-def poly(n,j):
-    return RealPolynomial.coordinate(n,j)
-
-# Arithmetic for Polynomial expressions
-p=RealPolynomial.coordinate(3,0)
-q=RealPolynomial.coordinate(3,1)
-c=Real(1.0)
-
-print +p, -p;
-print p+q, p-q, p*q;
-
-print p+c, p-c, p*c, p/c;
-print c+p, c-p, c*p;
-
-p+=q; p-=q;
-p+=c; p-=c; p*=c; p/=c;
-
-print "\n\n"
-
-
-
-
 ###############################################################################
 # Calculus submodule
 ###############################################################################
 
 
 # Create a box to act as the domain of a Taylor function
-d=IntervalVector([[4,7],[1,6],[-1,1]])
+d=IntervalVector([{4:7},{1:6},{-1:+1}])
 print "d:",d
 
 # Create a sweeper to control the accuracy of a Taylor function

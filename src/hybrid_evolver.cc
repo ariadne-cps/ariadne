@@ -835,7 +835,7 @@ _apply_guard_step(HybridEnclosure& set,
                         jump_set.new_invariant(event,-lie_derivative(transition_data.guard_function,dynamic));
                     } else {
                         // Make the empty set
-                        jump_set.new_invariant(event,transition_data.guard_function*0.0+1.0);
+                        jump_set.new_invariant(event,transition_data.guard_function*Real(0)+Real(1));
                     }
                     break;
                 case CrossingKind::NEGATIVE:
@@ -843,7 +843,7 @@ _apply_guard_step(HybridEnclosure& set,
                 case CrossingKind::DECREASING:
                     // Since guard must be satisfied on impact, the jump set is empty
                     if(transition_data.event_kind==IMPACT) {
-                        jump_set.new_invariant(event,transition_data.guard_function*0.0+1.0);
+                        jump_set.new_invariant(event,transition_data.guard_function*Real(0)+Real(1));
                     } else {
                         ARIADNE_WARN("Crossing "<<crossing_data<<" does not introduce additional restrictions on flow\n");
                     }
@@ -1715,7 +1715,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         //static const Dyadic CREEP_MAXIMUM=Dyadic(1.0);
         static const Dyadic CREEP_MAXIMUM=Dyadic(15.0/16);
         spacial_evolution_time=this->function_factory().create_constant(flow.space_domain(),flow.step_size()*CREEP_MAXIMUM);
-        
+
         for(Map<DiscreteEvent,CrossingData>::iterator crossing_iter=crossings.begin();
             crossing_iter!=crossings.end(); )
         {

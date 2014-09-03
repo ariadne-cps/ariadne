@@ -219,7 +219,7 @@ void TestPaving::test_approximation() const {
 
     RealVectorFunction x=RealVectorFunction::identity(2);
     RealConstrainedImageSet set(BoxSet(IntervalVector({{-1.0,1.0},{-1.0,1.0}})));
-    set.apply( (2*x[0]+x[1]+0.25*x[0]*x[0],x[0]+x[1]) );
+    set.apply( (2*x[0]+x[1]+x[0]*x[0]/4,x[0]+x[1]) );
     Nat depth = 2;
     paving.adjoin_outer_approximation(set,depth);
     paving.recombine();

@@ -51,7 +51,7 @@ using namespace std;
 int evolver_verbosity=0;
 
 
-RealScalarFunction c=RealScalarFunction::constant(2,1.0);
+RealScalarFunction c=RealScalarFunction::constant(2,1);
 RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
 RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
 DiscreteLocation q("q");
@@ -101,7 +101,7 @@ void TestHybridEvolution::test_bouncing_ball() const {
     RealVariable x("x");
     RealVariable v("v");
 
-    Real lambda=0.5;
+    Real lambda(0.5);
     bouncing_ball.new_mode(q,(dot(x)=v,dot(v)=-one));
     bouncing_ball.new_transition(q,e,q,(next(x)=x,next(v)=-lambda*v),x<=0,impact);
     ARIADNE_TEST_PRINT(bouncing_ball);
@@ -123,7 +123,8 @@ void TestHybridEvolution::test_bouncing_ball() const {
     }
 
 
-    HybridBox expected_orbit_final_bounding_box=HybridBox(q,{x.in(0.12,0.13),v.in(-0.04,0.04)});
+    Decimal exl(0.12), exu(+0.13), evl(-0.04), evu(+0.04); // Expected bounds
+    HybridBox expected_orbit_final_bounding_box=HybridBox(q,{x.in(exl,exu),v.in(evl,evu)});
     for(ListSet<HybridEnclosure>::const_iterator iter=orbit_final.begin(); iter!=orbit_final.end(); ++iter) {
         const HybridEnclosure& orbit_final_set=*iter;
         ARIADNE_TEST_PRINT(orbit_final_set.bounding_box());
@@ -132,7 +133,8 @@ void TestHybridEvolution::test_bouncing_ball() const {
     ARIADNE_TEST_PRINT(orbit.final().size());
     ARIADNE_TEST_PRINT(expected_orbit_final_bounding_box);
 
-    Axes2d bounding_box(-0.5<=x<=+2.5,-4.0<=v<=+4.0);
+    Dyadic xl(-0.5), xu(+2.5), vl(-4.0), vu(+4.0);
+    Axes2d bounding_box(xl<=x<=xu,vl<=v<=vu);
     plot("test_hybrid_evolution-bouncing_ball",bounding_box,
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
@@ -198,9 +200,11 @@ void TestHybridEvolution::test_water_tank() const {
     }
     HybridEnclosure final_enclosure=HybridEnclosure(*orbit.final().begin());
     ARIADNE_TEST_PRINT(final_enclosure.bounding_box());
-    ARIADNE_TEST_BINARY_PREDICATE(inside,final_enclosure,HybridBox(open,(height.in(7.7,8.0),aperture.in(0.999,1.001))));
+    Dyadic ehl(7.6875), ehu(8.0); Decimal eal(0.999), eau(1.001); // Expected bounds
+    ARIADNE_TEST_BINARY_PREDICATE(inside,final_enclosure,HybridBox(open,(height.in(ehl,ehu),aperture.in(eal,eau))));
 
-    Axes2d bounding_box(-0.1<=height<=9.1, -0.3<=aperture<=+1.3);
+    Decimal hl(-0.1), hu(+9.1), al(-0.3), au(+1.3);
+    Axes2d bounding_box(hl<=height<=hu, al<=aperture<=au);
     plot("test_hybrid_evolution-water_tank",bounding_box,
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),

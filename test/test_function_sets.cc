@@ -64,9 +64,9 @@ class TestConstrainedImageSet
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
 
         BoxSet d(3,IntervalSet(-1,+2));
-        RealConstrainedImageSet set(d,(s[0],0.25*s[0]*s[0]+s[1]+0.5*s[2]));
+        RealConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
-        set.new_space_constraint(x[0]+x[1]<=2.0);
+        set.new_space_constraint(x[0]+x[1]<=2);
         set.apply((x[0]+x[1],x[0]-x[1]*x[1]));
     }
 
@@ -83,7 +83,7 @@ class TestConstrainedImageSet
 
         // Test the polytope
         RealConstrainedImageSet polytope((IntervalSet(-2,+2),IntervalSet(-2,+2)),(x[0],x[1]));
-        polytope.new_parameter_constraint(x[0]+1.5*+x[1]<=1);
+        polytope.new_parameter_constraint(x[0]+Dyadic(1.5)*+x[1]<=1);
         box1=Box( (Interval(1.0,2.0),Interval(0.5,1.0)) );
         box2=Box( (Interval(0.0,1.0),Interval(0.5,1.0)) );
         ARIADNE_TEST_ASSERT(polytope.separated(box1));
@@ -114,8 +114,10 @@ class TestConstrainedImageSet
         plot("test_function_sets-geometry-parabola",widen(parabola.bounding_box(),0.5),set_colour,parabola,box_colour,box1,box_colour,box2);
 
         // Test whether the second iterate of the Henon map intersects a box
-        BoxSet d(2,IntervalSet(-0.5,+0.5));
-        RealVectorFunction h((1.5-x[0]*x[0]-0.375*x[1],x[0]));
+        Dyadic half(0.5);
+        BoxSet d(2,IntervalSet(-half,+half));
+        Dyadic a(1.5); Dyadic b(0.375);
+        RealVectorFunction h((a-x[0]*x[0]-b*x[1],x[0]));
         RealVectorFunction f=compose(h,h);
         RealConstrainedImageSet set(d,f);
         set.new_parameter_constraint(0<=x[0]+x[1]<=1);
@@ -142,8 +144,8 @@ class TestConstrainedImageSet
         List<RealScalarFunction> s=RealScalarFunction::coordinates(3);
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
 
-        BoxSet d(3,IntervalSet(-1.1,+2.1));
-        RealConstrainedImageSet set(d,(s[0],0.25*s[0]*s[0]+s[1]+0.5*s[2]));
+        BoxSet d(3,IntervalSet(Decimal(-1.1),Decimal(+2.1)));
+        RealConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
 
         Figure figure;
@@ -181,7 +183,7 @@ class TestConstrainedImageSet
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
 
         BoxSet d(3,IntervalSet(-1,+2));
-        RealConstrainedImageSet set(d,(s[0],0.25*s[0]*s[0]+s[1]+0.5*s[2]));
+        RealConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
         set.new_space_constraint(x[0]+x[1]<=2.0);
         ARIADNE_TEST_PRINT(set);
@@ -194,15 +196,15 @@ class TestConstrainedImageSet
 
 
     void test_split() {
-        RealScalarFunction o=RealScalarFunction::constant(3,1.0);
+        RealScalarFunction o=RealScalarFunction::constant(3,1);
         RealScalarFunction s0=RealScalarFunction::coordinate(3,0);
         RealScalarFunction s1=RealScalarFunction::coordinate(3,1);
         RealScalarFunction s2=RealScalarFunction::coordinate(3,2);
         RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
         RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
         BoxSet d(3,IntervalSet(-1,+1));
-        RealConstrainedImageSet set(d,(s0,s1+0.5*s2*s2));
-        set.new_parameter_constraint(s0+0.75*s1+s2<=0.0);
+        RealConstrainedImageSet set(d,(s0,s1+s2*s2/2));
+        set.new_parameter_constraint(s0+Dyadic(0.75)*s1+s2<=0.0);
 
         RealConstrainedImageSet subset1,subset2;
         make_lpair(subset1,subset2)=set.split(0);
@@ -215,10 +217,10 @@ class TestConstrainedImageSet
         make_lpair(subset11,subset12)=subset1.split(0);
         make_lpair(subset21,subset22)=subset2.split(0);
         ARIADNE_TEST_PRINT(subset11);
-        subset11.apply(RealVectorFunction((x0+2.5,x1)));
+        subset11.apply(RealVectorFunction((x0+Dyadic(2.5),x1)));
         ARIADNE_TEST_PRINT(subset11);
 
-        set.apply(RealVectorFunction((x0-2.5,x1)));
+        set.apply(RealVectorFunction((x0-Dyadic(2.5),x1)));
         Figure figure;
         figure.set_bounding_box(Box({{-4.0,+4.0},{-4.0,+4.0}}));
         figure.set_fill_colour(1.0,1.0,1.0);
@@ -239,7 +241,7 @@ class TestConstrainedImageSet
     void test_affine_approximation() {
         // Test conversionn is exact for the affine set -2<x<1; 0<y<2 3x+y<1
         List<RealScalarFunction> s=RealScalarFunction::coordinates(2);
-        BoxSet d( (IntervalSet(-2.0,1.0),IntervalSet(0.0,2.0)) );
+        BoxSet d( (IntervalSet(-2,1),IntervalSet(0,2)) );
         RealConstrainedImageSet set(d,(s[0],s[1]));
         set.new_parameter_constraint(3*s[0]+s[1]<=1);
         IntervalAffineConstrainedImageSet affine_set=set.affine_approximation();
@@ -307,7 +309,7 @@ class TestConstrainedImageSet
         RealScalarFunction y=RealScalarFunction::coordinate(2,1);
         uint acc = 2u;
 
-        test_draw("ellipse",RealConstrainedImageSet(BoxSet(2,IntervalSet(-1.0,1.0)),(2*s+t,s+t),(s*s+t*t<=0.75)),acc+1u);
+        test_draw("ellipse",RealConstrainedImageSet(BoxSet(2,IntervalSet(-1,1)),(2*s+t,s+t),(s*s+t*t<=0.75)),acc+1u);
         //test_draw("concave",RealConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,1.0*s*s+t),(2*s+0.25*s*s+t-2.0<=0)),acc);
     }
 };

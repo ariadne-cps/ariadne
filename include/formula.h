@@ -168,7 +168,7 @@ template<class X> inline Formula<X>::Formula() : _root(new ConstantFormulaNode<X
 template<class X> inline Formula<X>::Formula(const X& c) : _root(new ConstantFormulaNode<X>(c)) { }
 template<class X> inline Formula<X>::Formula(const Index& i) : _root(new IndexFormulaNode<X>(i)) { }
 template<class X> inline Formula<X>& Formula<X>::operator=(const X& c) { return *this=Formula(c); }
-template<class X> inline Formula<X>& Formula<X>::operator=(double c) { return *this=Formula<X>(static_cast<X>(c)); }
+template<class X> inline Formula<X>& Formula<X>::operator=(double c) { return *this=Formula<X>::constant(static_cast<X>(c)); }
 
 template<class X> inline Formula<X> Formula<X>::zero() {
     return new ConstantFormulaNode<X>(numeric_cast<X>(0)); }
@@ -181,7 +181,9 @@ template<class X> inline Vector< Formula<X> > Formula<X>::identity(Nat n) {
 
 template<class X, class R> inline Formula<X> make_formula(const R& c) {
     return new ConstantFormulaNode<X>(static_cast<X>(c)); }
-template<class X> inline Formula<X> make_formula(Nat j) {
+template<class X, class R> inline Formula<X> make_formula(Cnst op, const R& c) {
+    return new ConstantFormulaNode<X>(static_cast<X>(c)); }
+template<class X> inline Formula<X> make_formula(Ind op, Nat j) {
     return new IndexFormulaNode<X>(j); }
 template<class X> inline Formula<X> make_formula(const Operator& op, const Formula<X>& arg) {
     return new UnaryFormulaNode<X>(op,arg); }
@@ -284,10 +286,10 @@ template<class X> Formula<X> derivative(const Formula<X>& f, uint j)
 {
     switch(f.op()) {
         case CNST:
-            return Formula<X>(0.0);
+            return Formula<X>::constant(0);
         case IND:
-            if(f.ind()==j) { return Formula<X>(1.0); }
-            else { return Formula<X>(0.0); }
+            if(f.ind()==j) { return Formula<X>::constant(1); }
+            else { return Formula<X>::constant(0); }
         case ADD:
             return derivative(f.arg1(),j)+derivative(f.arg2(),j);
         case SUB:

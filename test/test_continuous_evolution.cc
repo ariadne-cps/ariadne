@@ -115,7 +115,7 @@ void TestContinuousEvolution::test() const
     // cout << "initial_box=" << initial_box << endl;
 
     // Set up the vector field
-    Real mu=0.5;
+    Real mu=Dyadic(0.5);
     RealScalarFunction x=RealScalarFunction::coordinate(2,0);
     RealScalarFunction xp=RealScalarFunction::coordinate(2,1);
     RealVectorFunction vdp((x,mu*(1-x*x)*xp-x));
@@ -175,7 +175,7 @@ void TestContinuousEvolution::failure_test() const
     // cout << "initial_box=" << initial_box << endl;
 
     // Set up the vector field for the first test
-    Vector<Real> p = {200.0};
+    Vector<Real> p = {200};
     VectorUserFunction<FailOne> failone(p);
     VectorField failone_vf(failone);
 

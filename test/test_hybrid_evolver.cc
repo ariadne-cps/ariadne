@@ -55,8 +55,8 @@ int evolver_verbosity=0;
 
 RealVariable v0=RealVariable("x0");
 RealVariable v1=RealVariable("x1");
-RealScalarFunction z=RealScalarFunction::constant(2,0.0);
-RealScalarFunction c=RealScalarFunction::constant(2,1.0);
+RealScalarFunction z=RealScalarFunction::constant(2,0);
+RealScalarFunction c=RealScalarFunction::constant(2,1);
 RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
 RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
 DiscreteLocation q("q");
@@ -212,7 +212,8 @@ void TestHybridEvolver::test_exact_final_time() const {
 void TestHybridEvolver::test_maximum_steps() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
-    automaton.new_transition(q,e,q,(x0-1.5,x1),x0+x1/16-0.5,urgent);
+    const Dyadic c1(1.5); const Dyadic c2(1.0/16); const Dyadic c3(0.5);
+    automaton.new_transition(q,e,q,(x0-c1,x1),x0+c2*x1-c3,urgent);
     //automaton.new_transition(e,q,q,(x0-1.5,x1),x0-0.5,urgent);
     // FIXME: Change so that hitting coordinate guard is not an error.
 
@@ -242,7 +243,8 @@ void TestHybridEvolver::test_maximum_steps() const {
 void TestHybridEvolver::test_urgent_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
-    automaton.new_transition(q,e,q,{x0-1.5,x1},x0+x1/16-0.5,urgent);
+    const Dyadic c1(1.5); const Dyadic c2(1.0/16); const Dyadic c3(0.5);
+    automaton.new_transition(q,e,q,{x0-c1,x1},x0+c2*x1-c3,urgent);
     //automaton.new_transition(e,q,q,(x0-1.5,x1),x0-0.5,urgent);
     // FIXME: Change so that hitting coordinate guard is not an error.
 
@@ -331,7 +333,7 @@ void TestHybridEvolver::test_partial_event() const {
 void TestHybridEvolver::test_step_size_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
-    automaton.new_transition(q,e,q,(x0-2,x1),x0-2.0,urgent);
+    automaton.new_transition(q,e,q,(x0-2,x1),x0-2,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
     HybridBox initial(q,space,Box{{-0.125,0.125},{-0.125,0.125}});
@@ -384,8 +386,8 @@ void TestHybridEvolver::test_initially_active_event() const {
 
 void TestHybridEvolver::test_initially_active_attracting_event() const {
     MonolithicHybridAutomaton automaton;
-    automaton.new_mode(q,(-0.5*c,c));
-    automaton.new_transition(q,e,q,(x0+1.0,x1),-x0-x1*1.0/256,urgent);
+    automaton.new_mode(q,(-c/2,c));
+    automaton.new_transition(q,e,q,(x0+1,x1),-x0-x1/256,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
     HybridBox initial(q,space,Box{{-0.125,0.25},{-0.125,0.125}});
@@ -408,7 +410,7 @@ void TestHybridEvolver::test_initially_active_attracting_event() const {
 
 void TestHybridEvolver::test_initially_active_repelling_event() const {
     MonolithicHybridAutomaton automaton;
-    automaton.new_mode(q,(+0.5*c,c));
+    automaton.new_mode(q,(+c/2,c));
     automaton.new_transition(q,e,q,(x0+1,x1),-x0,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
@@ -487,8 +489,8 @@ void TestHybridEvolver::test_simultaneous_events() const {
     DiscreteEvent e1("e1");
     DiscreteEvent e2("e2");
     automaton.new_mode(q,(c,c));
-    automaton.new_transition(q,e1,q,(x0-1,x1-2),x0-1.0,urgent);
-    automaton.new_transition(q,e2,q,(x0-2,x1-1),x1-1.0,urgent);
+    automaton.new_transition(q,e1,q,(x0-1,x1-2),x0-1,urgent);
+    automaton.new_transition(q,e2,q,(x0-2,x1-1),x1-1,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
     HybridBox initial(q,space,Box{{-0.25,0.125},{-0.125,0.25}});
@@ -514,7 +516,7 @@ void TestHybridEvolver::test_creep() const {
     MonolithicHybridAutomaton automaton;
     DiscreteEvent e("e");
     automaton.new_mode(q,(c,c));
-    automaton.new_transition(q,e,q,(x0-1,x1),x0-1.0,urgent);
+    automaton.new_transition(q,e,q,(x0-1,x1),x0-1,urgent);
 
     RealSpace space=automaton.continuous_state_space(q);
     HybridBox initial(q,space,Box{{-0.25,0.125},{-0.125,0.25}});
@@ -569,8 +571,9 @@ void TestHybridEvolver::test_permissive() const {
     automaton.new_mode(q,(c,c/2));
     DiscreteEvent i("i");
     // Invariant has form f(x)<=0
-    automaton.new_invariant(q,i,(x0-2.125));
-    automaton.new_transition(q,e,q,(x0-3,x1),x0-1.875,permissive);
+    const Dyadic eps(0.125);
+    automaton.new_invariant(q,i,(x0-2+eps));
+    automaton.new_transition(q,e,q,(x0-3,x1),x0-2-eps,permissive);
     ARIADNE_TEST_PRINT(automaton);
 
     RealSpace space=automaton.continuous_state_space(q);
@@ -613,7 +616,7 @@ TestHybridEvolver::test_affine_flow() const
     _set_evolver(system);
     evolver_ptr->configuration().set_maximum_step_size(0.5);
 
-    const double r=0.125;
+    const Real r(0.125);
     HybridSet initial_set(q,(2-r<=x0<=2+r,-r<=x1<=r));
     HybridEnclosure initial_enclosure=this->evolver_ptr->enclosure(initial_set);
 
@@ -657,7 +660,7 @@ TestHybridEvolver::test_splitting_on_urgent_event() const
     evolver_ptr->configuration().set_maximum_step_size(2.0);
 
     DiscreteLocation initial_location(upwards);
-    const double r=0.125;
+    const Real r(0.125);
     RealVariablesBox initial_box((-r<=x<=+r, -r<=y<=+r));
     HybridEnclosure initial_enclosure=this->evolver_ptr->enclosure(HybridSet(initial_location,initial_box));
     HybridTime evolution_time=HybridTime(4.0,2);
@@ -667,7 +670,7 @@ TestHybridEvolver::test_splitting_on_urgent_event() const
     ARIADNE_TEST_CHECK_WARN(orbit.reach().size(),4u);
 
     Axes2d axes(-1.0,x,11.0, -6.0,y,6.0);
-    HybridSet guard_set(upwards,(-1.0<=x<=11.0,2.0<=y<=6.0));
+    HybridSet guard_set(upwards,(-1<=x<=11,2<=y<=6));
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-splitting_on_urgent_event"), axes, guard_set_colour,guard_set,
          reach_set_colour,orbit.reach(), intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(), initial_set_colour,orbit.initial());
@@ -707,13 +710,13 @@ TestHybridEvolver::test_affine_flow_system() const
     evolver_ptr->configuration().set_maximum_step_size(8.0);
 
     DiscreteLocation initial_location(upwards);
-    Real r=0.125;
+    Dyadic r(0.125);
     RealVariablesBox initial_box((-r<=x<=+r, -r<=y<=+r));
     HybridEnclosure initial_enclosure=this->evolver_ptr->enclosure(HybridSet(initial_location,initial_box));
     HybridTime evolution_time(0.0,0u);
 
     Axes2d axes(-1.0,x,3.0, -1.0,y,3.0);
-    HybridSet guard_set_changeup(downwards,(-1.0<=x<=11.0,-2.0<=y<=-1.5));
+    HybridSet guard_set_changeup(downwards,(-1<=x<=11,-2<=y<=-Dyadic(1.5)));
 
     evolution_time=HybridTime(1.0,3);
     ARIADNE_TEST_PRINT(evolution_time);
@@ -778,7 +781,7 @@ void TestHybridEvolver::test_constant_derivative_system() const
     system.new_mode(q2,(dot(x)=1,dot(y)=0));
     system.new_transition(q1,e,q2,(prime(x)=x-2,prime(y)=y),x+y>=0,urgent);
 
-    Real r=0.0625;
+    Real r(0.0625);
     RealVariablesBox initial_box((-r<=x<=+r,-r<=y<=+r));
     HybridSet initial_set(q1,initial_box);
 
@@ -809,7 +812,7 @@ void TestHybridEvolver::test_transverse_linear_crossing() const
 {
     DiscreteLocation q1("q1"), q2("q2");
     RealVariable x("x"), y("y");
-    Real r=1.0/8;
+    Real r(1.0/8);
     Float tol=1e-5;
     RealExpression guard=x+y/2-1;
 
@@ -836,8 +839,9 @@ void TestHybridEvolver::test_transverse_linear_crossing() const
     ARIADNE_TEST_BINARY_PREDICATE(refines,expected_final_enclosure.space_function()[0],final_enclosure.space_function()[0]);
     ARIADNE_TEST_BINARY_PREDICATE(refines,final_enclosure.space_function()[0],expected_final_enclosure.space_function()[0]+tolerance[0]);
 
-    Axes2d axes(-1.0<=x<=3.0, -1.0<=y<=3.0);
-    HybridSet guard_set(q1,(-1.0<=x<=3.0,-1.0<=y<=3.0),guard>=0);
+    Real xl(-1.0), xu(3.0), yl(-1.0), yu(3.0);
+    Axes2d axes(xl<=x<=xu, yl<=y<=yu);
+    HybridSet guard_set(q1,(xl<=x<=xu,yl<=y<=yu),guard>=0);
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-transverse_linear_crossing"), axes, guard_set_colour,guard_set,
          reach_set_colour,orbit.reach(), intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(), initial_set_colour,orbit.initial());
@@ -847,7 +851,7 @@ void TestHybridEvolver::test_transverse_cubic_crossing() const
 {
     DiscreteLocation q1("q1"), q2("q2");
     RealVariable x("x"), y("y");
-    Real r=1.0/8;
+    Real r(1.0/8);
     RealExpression guard=x-(1+y/2+y*y*y);
     HybridAutomaton system;
     system.new_mode(q1,(dot(x)=1,dot(y)=0));
@@ -860,8 +864,9 @@ void TestHybridEvolver::test_transverse_cubic_crossing() const
 
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(initial_set,evolution_time,UPPER_SEMANTICS);
 
-    Axes2d axes(-1.0<=x<=3.0, -1.0<=y<=3.0);
-    HybridSet guard_set(q1,(-1.0<=x<=3.0,-1.0<=y<=3.0),guard>=0);
+    Real xl(-1.0), xu(3.0), yl(-1.0), yu(3.0);
+    Axes2d axes(xl<=x<=xu, yl<=y<=yu);
+    HybridSet guard_set(q1,(xl<=x<=xu,yl<=y<=yu),guard>=0);
     HybridEnclosure guard_enclosure=evolver_ptr->enclosure(guard_set);
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-transverse_cubic_crossing"), axes, guard_set_colour,guard_enclosure,
          reach_set_colour,orbit.reach(), intermediate_set_colour,orbit.intermediate(),
@@ -873,7 +878,9 @@ void TestHybridEvolver::test_transverse_cube_root_crossing() const
     DiscreteLocation q1("q1"), q2("q2");
     RealVariable x("x"), y("y");
     Real r=Real(1.0/32);
-    RealExpression guard=((x-1)*(x-1)+1.0)*(x-1)-y-1./64;
+    Real eps(1.0/64);
+    Real a(1);
+    RealExpression guard=((x-a)*(x-a)+1)*(x-a)-y-eps;
     HybridAutomaton system;
     system.new_mode(q1,(dot(x)=1,dot(y)=0));
     system.new_mode(q2,(dot(x)=0,dot(y)=1));
@@ -885,8 +892,9 @@ void TestHybridEvolver::test_transverse_cube_root_crossing() const
 
     Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(initial_set,evolution_time,UPPER_SEMANTICS);
 
-    Axes2d axes(-1.0<=x<=3.0, -1.0<=y<=3.0);
-    HybridSet guard_set(q1,(-1.0<=x<=3.0,-1.0<=y<=3.0),guard>=0);
+    Real xl(-1.0), xu(3.0), yl(-1.0), yu(3.0);
+    Axes2d axes(xl<=x<=xu, yl<=y<=yu);
+    HybridSet guard_set(q1,(xl<=x<=xu,yl<=y<=yu),guard>=0);
     HybridEnclosure guard_enclosure=evolver_ptr->enclosure(guard_set);
     plot(cstr("test_hybrid_evolver-"+evolver_name+"-transverse_cube_root_crossing"), axes, guard_set_colour,guard_enclosure,
          reach_set_colour,orbit.reach(), intermediate_set_colour,orbit.intermediate(),

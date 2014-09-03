@@ -96,7 +96,8 @@ class TestSolver
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
         bb=RealScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
-        e=RealVectorFunction( { 0.682328+bb*(0.0521547+bb*(-0.0023232+bb*0.000147778)) } );
+        Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
+        e=RealVectorFunction( { a0+bb*(a1+bb*(a2+bb*a3)) } );
         ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
 
@@ -108,7 +109,8 @@ class TestSolver
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
         bb=RealScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
-        e=RealVectorFunction( { 0.828427+bb*(0.0441942+bb*(-0.000345267+bb*0.00000539468)) } );
+        Decimal c0(0.828427), c1(0.0441942), c2(-0.000345267), c3(0.00000539468);
+        e=RealVectorFunction( { c0+bb*(c1+bb*(c2+bb*c3)) } );
         ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
 
@@ -143,7 +145,7 @@ class TestSolver
         IntervalScalarFunctionModel h;
 
         ARIADNE_TEST_PRINT(*solver);
-        
+
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
         p=IntervalVector({Interval(0.875,1.125)});
         r=Interval(0.25,1.25);
@@ -152,7 +154,8 @@ class TestSolver
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
         s=RealScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
-        e=RealScalarFunction( 0.682328+s*(0.0521547+s*(-0.0023232+s*0.000147778)) );
+        Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
+        e=RealScalarFunction( a0+s*(a1+s*(a2+s*a3)) );
         ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(mag((h-e).range()),<,1e-4);
 
@@ -198,7 +201,7 @@ int main(int argc, const char **argv) {
     std::cerr<<"unscale(dx,D)="<<unscale(dx,D)<<"\n";
     std::cerr<<"f(dx)="<<f.evaluate(dx)<<"\n";
     return 0;
-*/    
+*/
     int verbosity=get_verbosity(argc,argv);
 
     IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5,maximum_number_of_steps=12);

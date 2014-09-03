@@ -84,7 +84,7 @@ class TestHybridReachabilityAnalyser
     Interval bound;
     HybridSet initial_set;
     HybridTime reach_time;
-
+    Axes2d axes;
   public:
 
     static HybridAutomaton build_system()
@@ -120,7 +120,8 @@ class TestHybridReachabilityAnalyser
           analyser(build_analyser(system)),
           grid(2),
           bound(-4,4),
-          reach_time(3.0,4)
+          reach_time(3.0,4),
+          axes(-1<=RealVariable("x")<=3,-2<=RealVariable("y")<=2)
     {
         analyser.verbosity=analyser_verbosity;
         DiscreteLocation location(StringVariable("q")|"1");
@@ -129,7 +130,8 @@ class TestHybridReachabilityAnalyser
         RealVariable y("y");
 
         //ImageSet initial_box(make_box("[1.99,2.01]x[-0.01,0.01]"));
-        initial_set=HybridSet(location,(x.in(2.01,2.02),y.in(0.01,0.02)));
+        Decimal x0l(2.01), x0u(2.02), y0l(0.01), y0u(0.02);
+        initial_set=HybridSet(location,(x.in(x0l,x0u),y.in(y0l,y0u)));
         cout << "Done creating initial set\n" << endl;
 
         cout << "system=" << system << endl;
@@ -156,8 +158,7 @@ class TestHybridReachabilityAnalyser
 
         cout << "Reached " << lower_reach.size() << " cells " << endl << endl;
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
-        RealVariable x("x"); RealVariable y("y");
-        Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
+
         plot("test_reachability_analyser-map_lower_reach_lower_evolve.png",axes,
              reach_set_colour,hybrid_lower_reach,evolve_set_colour,hybrid_lower_evolve);
     }
@@ -176,8 +177,6 @@ class TestHybridReachabilityAnalyser
         ARIADNE_TEST_ASSERT(lower_reach.size() > 0);
         ARIADNE_TEST_ASSERT(lower_evolve.size() > 0);
 
-        RealVariable x("x"); RealVariable y("y");
-        Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
         plot("test_reachability_analyser-map_lower_reach_evolve.png",axes,
              reach_set_colour,reach_evolve_set.first,evolve_set_colour,reach_evolve_set.second);
     }
@@ -197,8 +196,6 @@ class TestHybridReachabilityAnalyser
 
         ARIADNE_TEST_ASSERT(upper_evolve_set.size() > 0);
 
-        RealVariable x("x"); RealVariable y("y");
-        Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
         plot("test_reachability_analyser-map_upper_reach_upper_evolve.png",axes,
              reach_set_colour,upper_reach_set,evolve_set_colour,upper_evolve_set);
     }
@@ -212,8 +209,6 @@ class TestHybridReachabilityAnalyser
         ARIADNE_TEST_ASSERT(reach_evolve_set.first.size() > 0);
         ARIADNE_TEST_ASSERT(reach_evolve_set.second.size() > 0);
 
-        RealVariable x("x"); RealVariable y("y");
-        Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
         plot("test_reachability_analyser-map_upper_reach_evolve.png",axes,
              reach_set_colour,reach_evolve_set.first,final_set_colour,reach_evolve_set.second);
     }
@@ -234,8 +229,6 @@ class TestHybridReachabilityAnalyser
 
         ARIADNE_TEST_ASSERT(lower_reach_set.size() > 0);
 
-        RealVariable x("x"); RealVariable y("y");
-        Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
         plot("test_reachability_analyser-map_infinite_time_lower_reach.png",axes,
              reach_set_colour,lower_reach_set);
     }
@@ -255,8 +248,6 @@ class TestHybridReachabilityAnalyser
 
         ARIADNE_TEST_ASSERT(outer_chain_reach_set.size() > 0);
 
-        RealVariable x("x"); RealVariable y("y");
-        Axes2d axes(-1.0<=x<=+3.0,-2.0<=y<=+2.0);
         plot("test_reachability_analyser-map_outer_chain_reach.png",axes,
              reach_set_colour,outer_chain_reach_set);
 

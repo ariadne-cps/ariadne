@@ -113,7 +113,7 @@ void export_formula()
     implicitly_convertible<Integer,IntegerExpression>();
     implicitly_convertible<IntegerVariable,IntegerExpression>();
 
-    implicitly_convertible<double,RealExpression>();
+    implicitly_convertible<Real,RealExpression>();
     implicitly_convertible<RealVariable,RealExpression>();
 
     to_python< List<RealExpression> >();

@@ -74,7 +74,7 @@ void TestMapEvolver::test() const
 
     // Set up the map field
     // The Henon map \f$(x,y)\mapsto(a-x^2+by,x)
-    Real a=1.5; Real b=0.375;
+    Real a=Dyadic(1.5); Real b=Dyadic(0.375);
     RealVectorFunction henon;
     {
         RealScalarFunction x=RealScalarFunction::coordinate(2,0);

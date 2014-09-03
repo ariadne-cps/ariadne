@@ -45,6 +45,9 @@ inline Vector<Interval> operator,(const Interval& ivl1, const Interval& ivl2) {
 inline RealScalarFunction operator^(RealScalarFunction f, int m) { return pow(f,m); }
 //inline double operator^(double f, uint m) { return pow(f,m); }
 
+RealScalarFunction operator*(double c, RealScalarFunction f) { return Real(c)*f; }
+struct UnsafeReal : Real { UnsafeReal(double d) : Real(d) { } };
+
 class TestIntegrator
 {
     typedef Vector<Interval> IntervalVector;
@@ -55,7 +58,7 @@ class TestIntegrator
     TestIntegrator(const IntegratorInterface& i)
         : integrator_ptr(i.clone())
     {
-        o=RealScalarFunction::constant(2,1.0);
+        o=RealScalarFunction::constant(2,1);
         x=RealScalarFunction::coordinate(2,0);
         y=RealScalarFunction::coordinate(2,1);
         x0=RealScalarFunction::coordinate(3,0);
@@ -121,11 +124,12 @@ class TestIntegrator
     };
 
     void test_spiral() {
-        RealVectorFunction f=(-0.5*x-y,x-0.5*y);
+        Dyadic half(0.5);
+        RealVectorFunction f=(-half*x-y,x-half*y);
         IntervalVector d=(Interval(0.75,1.25),Interval(-0.25,0.25));
         Float h=0.25;
         IntervalVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
-        RealVectorFunction expected_flow( (exp(-0.5*t)*(x0*cos(t)-y0*sin(t)),exp(-0.5*t)*(x0*sin(t)+y0*cos(t))) );
+        RealVectorFunction expected_flow( (exp(-half*t)*(x0*cos(t)-y0*sin(t)),exp(-half*t)*(x0*sin(t)+y0*cos(t))) );
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
@@ -136,7 +140,7 @@ class TestIntegrator
     };
 
     void test_logistic() {
-        o=RealScalarFunction::constant(1,1.0);
+        o=RealScalarFunction::constant(1,1);
         x=RealScalarFunction::coordinate(1,0);
         x0=RealScalarFunction::coordinate(2,0);
         t=RealScalarFunction::coordinate(2,1);

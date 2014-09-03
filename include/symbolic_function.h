@@ -106,7 +106,7 @@ struct ConstantFunction
     operator X() const { return _value; }
 
     virtual Nat argument_size() const { return _argument_size; }
-    virtual ScalarFunctionInterface<X>* _derivative(uint j) const { return new ConstantFunction<X>(_argument_size,0.0); }
+    virtual ScalarFunctionInterface<X>* _derivative(uint j) const { return new ConstantFunction<X>(_argument_size,X(0)); }
     virtual std::ostream& repr(std::ostream& os) const { return os << this->_value; }
     virtual std::ostream& write(std::ostream& os) const { return os << "CF[R"<<this->_argument_size<<"]("<<_value<<")"; }
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
@@ -126,8 +126,8 @@ struct CoordinateFunction
 
     virtual Nat argument_size() const { return _argument_size; }
     virtual ScalarFunctionInterface<X>* _derivative(uint j) const {
-        if(j==_index) { return new CoordinateFunction<X>(_argument_size,1.0); }
-        else { return new CoordinateFunction<X>(_argument_size,0.0); } }
+        if(j==_index) { return new CoordinateFunction<X>(_argument_size,X(1)); }
+        else { return new CoordinateFunction<X>(_argument_size,X(0)); } }
     virtual std::ostream& repr(std::ostream& os) const { return os << "x"<<this->_index; }
     virtual std::ostream& write(std::ostream& os) const { return os << "IF[R"<<this->_argument_size<<"](x"<<this->_index<<")"; }
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
@@ -156,8 +156,8 @@ struct UnaryFunction
             case POS: return _arg.derivative(j);
             case NEG: return -_arg.derivative(j);
             case REC: return -_arg.derivative(j)/sqr(_arg);
-            case SQR: return 2.0*_arg.derivative(j)*_arg;
-            case SQRT: return _arg.derivative(j)/(2.0*sqrt(_arg));
+            case SQR: return 2*_arg.derivative(j)*_arg;
+            case SQRT: return _arg.derivative(j)/(2*sqrt(_arg));
             case EXP: return _arg*_arg.derivative(j);
             case LOG: return _arg.derivative(j)/_arg;
             case SIN: return _arg.derivative(j)*cos(_arg);
@@ -253,7 +253,7 @@ class PowerFunction
     }
 
     virtual ScalarFunction<X> derivative(uint j) const {
-        if(_arg2==0) { return ScalarFunction<X>::constant(this->argument_size(),0.0); }
+        if(_arg2==0) { return ScalarFunction<X>::constant(this->argument_size(),X(0)); }
         if(_arg2==1) { return _arg1.derivative(j); }
         if(_arg2==2) { return 2*_arg1.derivative(j)*_arg1; }
         return _arg2*_arg1.derivative(j)*pow(_arg1,_arg2-1);

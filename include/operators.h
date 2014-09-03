@@ -308,6 +308,15 @@ struct NotOp {
     template<class T> T operator()(const T& a) const { return !a; }
     OperatorCode code() const { return NOT; } OperatorKind kind() const { return UNARY; }
 };
+
+struct Cnst {
+    OperatorCode code() const { return CNST; } OperatorKind kind() const { return NULLARY; }
+};
+
+struct Ind {
+    OperatorCode code() const { return IND; } OperatorKind kind() const { return COORDINATE; }
+};
+
 struct Add {
     OperatorCode code() const { return ADD; } OperatorKind kind() const { return BINARY; }
     template<class T> T operator()(const T& a1, const T& a2) const { return a1+a2; }

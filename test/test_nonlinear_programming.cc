@@ -60,7 +60,7 @@ class TestOptimiser
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         RealScalarFunction x0s = sqr(x[0]);
-        RealScalarFunction f(x0s*(12+x0s*(6.3+x0s))+6*x[1]*(x[1]-x[0]));
+        RealScalarFunction f(x0s*(12+x0s*(Decimal(6.3)+x0s))+6*x[1]*(x[1]-x[0]));
         ARIADNE_TEST_PRINT(f);
         RealVectorFunction g(0u,2u);
         ARIADNE_TEST_PRINT(g);
@@ -78,7 +78,8 @@ class TestOptimiser
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         RealScalarFunction f=(sqr(x[0])+sqr(x[1]));
         ARIADNE_TEST_PRINT(f);
-        RealVectorFunction g={1.5+x[0]+2*x[1]+0.25*x[0]*x[1]};
+        Dyadic a(1.5); Dyadic b(0.25);
+        RealVectorFunction g={a+x[0]+2*x[1]+b*x[0]*x[1]};
         ARIADNE_TEST_PRINT(g);
         IntervalVector C={{0.0,0.0}};
         Box D=Box{{-1.0,2.0},{-3.0,5.0}};
@@ -92,12 +93,12 @@ class TestOptimiser
     void test_constrained_optimisation() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(3);
         RealScalarFunction x0s = sqr(x[0]);
-        RealScalarFunction f = x0s*(12+x0s*(6.3+x0s))+6*x[1]*(x[1]-x[0])+x[2];
+        RealScalarFunction f = x0s*(12+x0s*(Decimal(6.3)+x0s))+6*x[1]*(x[1]-x[0])+x[2];
         ARIADNE_TEST_PRINT(f);
         //RealVectorFunction g( (x[0]-1, x[0]+x[1]*x[1], x[1]*x[1]) );
         Box D = Box{{-1.0,2.0},{-3.0,5.0},{-3.0,5.0}};
         ARIADNE_TEST_PRINT(D);
-        RealVectorFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-0.875};
+        RealVectorFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-Dyadic(0.875)};
         ARIADNE_TEST_PRINT(g);
         Box C = Box{{0.0,inf},{0.0,inf}};
         ARIADNE_TEST_PRINT(C);
@@ -114,8 +115,8 @@ class TestOptimiser
         ARIADNE_TEST_PRINT(f);
         Box D = Box{{-1.0,2.0},{-3.0,5.0},{1.25,2.25}};
         ARIADNE_TEST_PRINT(D);
-        RealScalarFunction g = x[0]*x[1]-x[0]*1.25;
-        RealVectorFunction h = {1.5+x[0]+2*x[1]+0.25*x[0]*x[1]};
+        RealScalarFunction g = x[0]*x[1]-x[0]*Dyadic(1.25);
+        RealVectorFunction h = {Dyadic(1.5)+x[0]+2*x[1]+Dyadic(0.25)*x[0]*x[1]};
         RealVectorFunction gh=join(g,h);
         ARIADNE_TEST_PRINT(gh);
         Box C = Box {{-1.0,-0.5},{0.0,0.0}};
@@ -143,7 +144,7 @@ class TestOptimiser
     void test_nonlinear_feasibility() {
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
-        RealVectorFunction g = {2*x[0]+x[1]+0.125*x[0]*x[1]};
+        RealVectorFunction g = {2*x[0]+x[1]+x[0]*x[1]/8};
         ARIADNE_TEST_PRINT(g);
         Box D = Box{{0.0,2.0},{0.0,2.0}};
         Box C = Box{{-2.0,1.0}};
@@ -158,7 +159,7 @@ class TestOptimiser
     void test_nonlinear_equality_feasibility() {
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
-        RealVectorFunction h = { 2*x[0]-x[1]+0.125*x[0]*x[1] };
+        RealVectorFunction h = { 2*x[0]-x[1]+x[0]*x[1]/8 };
         ARIADNE_TEST_PRINT(h);
         Box D = Box{{0.0,2.0},{0.0,2.0}};
         Box C = Box{{0.0,0.0}};

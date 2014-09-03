@@ -85,7 +85,7 @@ void TestFunction::test_concept()
 
 void TestFunction::test_scalar_function()
 {
-    ARIADNE_TEST_NAMED_CONSTRUCT(RealScalarFunction,o,constant(3,1.0));
+    ARIADNE_TEST_NAMED_CONSTRUCT(RealScalarFunction,o,constant(3,1));
     ARIADNE_TEST_NAMED_CONSTRUCT(RealScalarFunction,x,coordinate(3,0));
     ARIADNE_TEST_NAMED_CONSTRUCT(RealScalarFunction,y,coordinate(3,1));
 
@@ -127,8 +127,8 @@ void TestFunction::test_conversions()
 
 void TestFunction::test_differentiation()
 {
-    RealScalarFunction z=RealScalarFunction::constant(2,0.0);
-    RealScalarFunction o=RealScalarFunction::constant(2,1.0);
+    RealScalarFunction z=RealScalarFunction::constant(2,0);
+    RealScalarFunction o=RealScalarFunction::constant(2,1);
     RealScalarFunction x=RealScalarFunction::coordinate(2,0);
     RealScalarFunction y=RealScalarFunction::coordinate(2,1);
 

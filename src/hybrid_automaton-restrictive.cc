@@ -350,7 +350,7 @@ RestrictiveDiscreteMode HybridSystem::compute_mode(const DiscreteLocation& locat
 
     // The set of events leading to discrete transitions
     Set<DiscreteEvent> transition_events = nonjumping_events._underlying_set();
-    
+
     // Compute the discrete transitions
     for(Set<DiscreteEvent>::const_iterator event_iter=transition_events.begin(); event_iter!=transition_events.end(); ++event_iter) {
         DiscreteEvent event=*event_iter;
@@ -500,8 +500,11 @@ void HybridSystem::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteL
 RealVectorFunction
 dynamic_function(Space<Real>& space, const List<RealAssignment>& algebraic, const List<DottedRealAssignment>& differential)
 {
-    List<RealExpression> results(differential.size(),RealExpression(0.0));
-    for(uint i=0; i!=differential.size(); ++i) { results[space.index(differential[i].lhs.base())]=substitute(differential[i].rhs,algebraic); }
+    RealExpression default_expression;
+    List<RealExpression> results(differential.size(),default_expression);
+    for(uint i=0; i!=differential.size(); ++i) {
+        results[space.index(differential[i].lhs.base())]=substitute(differential[i].rhs,algebraic);
+    }
 
     return RealVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
 }
@@ -520,7 +523,7 @@ dynamic_function(Space<Real>& space, const List<RealAssignment>& algebraic, cons
 
 
 
-    
+
 
 #ifdef ARIADNE_DISABLE
 

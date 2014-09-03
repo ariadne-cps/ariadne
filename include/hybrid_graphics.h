@@ -61,6 +61,7 @@ struct Variables2d {
 
 Interval approximate_interval(const RealVariableInterval&);
 
+
 struct Axes2d {
     Axes2d(const RealVariableInterval x, const RealVariableInterval& y)
             : variables(x.variable(),y.variable()), bounds() {

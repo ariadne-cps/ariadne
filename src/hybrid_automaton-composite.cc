@@ -159,7 +159,8 @@ RealVectorFunction dynamic_function(
     List<RealAssignment> const& algebraic,
     List<DottedRealAssignment> const& differential)
 {
-    List<RealExpression> results(differential.size(),RealExpression(0.0));
+    RealExpression default_expression;
+    List<RealExpression> results(differential.size(),default_expression);
     for(uint i=0; i!=differential.size(); ++i) { results[space.index(differential[i].lhs.base())]=substitute(differential[i].rhs,algebraic); }
 
     return RealVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
@@ -170,7 +171,8 @@ RealVectorFunction reset_function(
     List<RealAssignment> const& algebraic,
     List<PrimedRealAssignment> const& primed)
 {
-    List<RealExpression> results(primed.size(),RealExpression(0.0));
+    RealExpression default_expression;
+    List<RealExpression> results(primed.size(),default_expression);
     for(uint i=0; i!=primed.size(); ++i) { results[i]=substitute(primed[i].rhs,algebraic); }
 
     return RealVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
@@ -1048,19 +1050,21 @@ CompositeHybridAutomaton::guard_predicate(DiscreteLocation location, DiscreteEve
 
 RealVectorFunction
 CompositeHybridAutomaton::auxiliary_function(DiscreteLocation location) const {
+    RealExpression default_expression;
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
-    List<RealExpression> results(algebraic.size(),RealExpression(0.0));
+    List<RealExpression> results(algebraic.size(),default_expression);
     for(uint i=0; i!=algebraic.size(); ++i) { results[i]=algebraic[i].lhs; }
     return RealVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
 }
 
 RealVectorFunction
 CompositeHybridAutomaton::dynamic_function(DiscreteLocation location) const {
+    RealExpression default_expression;
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->auxiliary_assignments(location);
     List<DottedRealAssignment> differential=this->dynamic_assignments(location);
-    List<RealExpression> results(differential.size(),RealExpression(0.0));
+    List<RealExpression> results(differential.size(),default_expression);
     for(uint i=0; i!=differential.size(); ++i) { results[space.index(differential[i].lhs.base())]=substitute(differential[i].rhs,algebraic); }
 
     return RealVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
@@ -1068,12 +1072,13 @@ CompositeHybridAutomaton::dynamic_function(DiscreteLocation location) const {
 
 RealVectorFunction
 CompositeHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent event) const {
+    RealExpression default_expression;
     DiscreteLocation target=this->target(source,event);
     Space<Real> source_space=this->state_variables(source);
     Space<Real> target_space=this->state_variables(target);
     List<RealAssignment> algebraic=this->auxiliary_assignments(source);
     List<PrimedRealAssignment> update=this->reset_assignments(source,event);
-    List<RealExpression> results(update.size(),RealExpression(0.0));
+    List<RealExpression> results(update.size(),default_expression);
     for(uint i=0; i!=update.size(); ++i) { results[target_space.index(update[i].lhs.base())]=update[i].rhs; }
     return RealVectorFunction(Ariadne::dimension(source_space),Ariadne::formula(results,algebraic,source_space));
 }

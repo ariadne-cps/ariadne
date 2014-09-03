@@ -123,7 +123,7 @@ class Expression {
   public:
     //! \brief Construct the constant expression with the default value of \a T.
     Expression();
-    //! \brief Construct an expression from a value.
+    //! \brief Construct a constant expression from a value.
     Expression(const T& c);
     //! \brief Construct an expression from a name.
     Expression(const Identifier& v);
@@ -131,6 +131,8 @@ class Expression {
     Expression(const Constant<T>& c);
     //! \brief Construct an expression from a variable.
     Expression(const Variable<T>& v);
+    //! \brief Construct a constant expression from a value.
+    static Expression<T> constant(const T& v);
 
   public:
     const Operator& op() const;

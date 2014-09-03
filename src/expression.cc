@@ -507,9 +507,9 @@ Expression<Real> indicator(Expression<Tribool> e, Sign sign) {
     switch(e.op()) {
         case CNST:
             value=( sign==POSITIVE ? e.val() : !e.val() );
-            if(value==true) { return Expression<Real>(+1.0); }
-            else if(value==false) {  return Expression<Real>(-1.0); }
-            else { return Expression<Real>(0.0); }
+            if(value==true) { return Expression<Real>(+1); }
+            else if(value==false) {  return Expression<Real>(-1); }
+            else { return Expression<Real>(0); }
         case VAR:
             return Expression<Real>(Variable<Real>(e.var()));
         case GEQ: case GT:

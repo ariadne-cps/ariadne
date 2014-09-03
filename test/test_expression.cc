@@ -100,14 +100,14 @@ class TestExpression {
     void test_function()
     {
         // Test to ensure that constants are handled correctly.
-        Real tc=5.0;
-        Real tx=1.125;
-        Real ty=2.375;
-        Real tz=3.750;
+        Real tc=Dyadic(5.0);
+        Real tx=Dyadic(1.125);
+        Real ty=Dyadic(2.375);
+        Real tz=Dyadic(3.750);
 
         Vector<Real> tv=Vector<Real>((tx,ty,tz));
 
-        RealConstant c("5",5.0);
+        RealConstant c("5",Dyadic(5.0));
         RealVariable x("x");
         RealVariable y("y");
         RealVariable z("z");

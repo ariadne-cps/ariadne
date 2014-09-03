@@ -37,6 +37,9 @@
 using namespace Ariadne;
 
 
+RealScalarFunction operator+(RealScalarFunction f, double c) { return f+Real(c); }
+RealScalarFunction operator*(double c, RealScalarFunction f) { return Real(c)*f; }
+//struct UnsafeReal : Real { UnsafeReal(double d) : Real(d) { } };
 
 
 int main(int argc, char **argv)
@@ -50,7 +53,7 @@ int main(int argc, char **argv)
 
     //Zonotope z1(z1c,z1g);
     //Polytope p1=polytope(z1);
-    Real p = 0.5;
+    Real p = Dyadic(0.5);
     RealVectorFunction x=RealVectorFunction::identity(3);
     RealVectorFunction afn1((0.05*x[0]+0.05*x[2]+0.15,0.05*x[1]+0.05*x[2]+0.6));
     IntervalConstrainedImageSet s1(Box::unit_box(3),afn1);

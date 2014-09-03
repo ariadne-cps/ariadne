@@ -59,7 +59,7 @@ class TestConstraintSolver
     void test_empty_reduce_inequality() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         Box D = Box{{0.0,1.0},{0.0,1.0}};
-        List<RealConstraint> c = {4.0<=2*x[0]+x[1]};
+        List<RealConstraint> c = {4<=2*x[0]+x[1]};
 
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
@@ -130,7 +130,7 @@ class TestConstraintSolver
     void test_hull_reduce() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         Box D = Box{{0.0,2.0},{0.0,2.0}};
-        List<RealConstraint> c = {-2.0<=2*x[0]+x[1]<=1.0};
+        List<RealConstraint> c = {-2<=2*x[0]+x[1]<=1};
 
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
@@ -142,7 +142,7 @@ class TestConstraintSolver
     void test_box_reduce() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         Box D = Box{{0.0,2.0},{0.0,2.0}};
-        RealConstraint c = (-2.0<=2*x[0]+x[1]<=1.0);
+        RealConstraint c = (-2<=2*x[0]+x[1]<=1);
 
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;
@@ -157,7 +157,7 @@ class TestConstraintSolver
     void test_monotone_reduce() {
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         Box D = Box{{0.0,2.0},{0.0,2.0}};
-        RealConstraint c = (-2.0<=2*x[0]+x[1]<=1.0);
+        RealConstraint c = (-2<=2*x[0]+x[1]<=1);
 
         ConstraintSolver propagator;
         propagator.verbosity=this->verbosity;

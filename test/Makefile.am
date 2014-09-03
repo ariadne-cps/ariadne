@@ -9,9 +9,6 @@ show-env:
 profile-lib: $(bin_PROGRAMS)
 	for file in $(bin_PROGRAMS); do ./run_profile.sh $$file; done
 
-TESTS_ENVIRONMENT = ./run_test.sh
-PROFILES_ENVIRONMENT = ./run_profile.sh
-
 AM_CXXFLAGS = $(ARIADNE_CXXFLAGS)
 AM_LDFLAGS = $(EXEC_LDFLAGS)
 

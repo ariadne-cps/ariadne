@@ -177,7 +177,7 @@ int main(int argc, const char* argv[])
     cout << "done." << endl << endl;
 
 
-    HybridTerminationCriterion evolution_termination(Real(2.75),127,Set<DiscreteEvent>{midnight});
+    HybridTerminationCriterion evolution_termination(2.75_bin,127,Set<DiscreteEvent>{midnight});
     cout << "evolution_termination=" << evolution_termination << endl;
 
     cout << "\nComputing event-terminated orbit using series integrator... \n" << flush;

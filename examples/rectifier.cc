@@ -64,7 +64,7 @@ int main(int argc, const char* argv[])
     Real amplitude(4.0);
     Real frequency(50.0);
     Real Ron (10.0);
-    Real Cl = Decimal(0.0001);
+    Real Cl = 0.0001_dec;
     Real Rl (1000.0);
 
     /// Introduces the dynamics parameters
@@ -203,7 +203,7 @@ int main(int argc, const char* argv[])
 
     std::cout << "Computing evolution..." << std::endl;
 
-    RealVariablesBox initial_box((t==0, vi==0, vo==Real(Decimal(0.8))*dp[0]));
+    RealVariablesBox initial_box((t==0, vi==0, vo==Real(0.8_dec)*dp[0]));
     HybridSet initial_set(rectifier|offoff,initial_box);
 
 //    Box initial_box(3, 0.002836,0.002836, 3.110529,3.110529, 3.110529,3.110529);

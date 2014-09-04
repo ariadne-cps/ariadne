@@ -32,6 +32,11 @@
 
 namespace Ariadne {
 
+Decimal operator"" _dec(long double x)
+{
+    return Decimal(static_cast<double>(x));
+}
+
 Decimal::Decimal(double x)
 {
     std::stringstream ss;

@@ -67,7 +67,11 @@ class Dyadic {
     Float value() const { return _x; }
     //! \brief A double-precision approximateion.
     double get_d() const { return _x.get_d(); }
+    friend Dyadic operator"" _bin(long double x);
 };
+
+inline Dyadic operator"" _bin(long double x) { return Dyadic(static_cast<double>(x)); }
+
 inline Dyadic operator+(const Dyadic& x) { return Dyadic(+x.value()); }
 inline Dyadic operator-(const Dyadic& x) { return Dyadic(-x.value()); }
 inline Interval operator+(const Dyadic& x1,  const Dyadic& x2);

@@ -59,9 +59,9 @@ int main(int argc,char *argv[])
     }
 
     /// Set the system parameters
-    Real a(Decimal(0.02));
-    Real r(Decimal(1.25));
-    Real Rif = Decimal(5.67);
+    Real a(0.02_dec);
+    Real r(1.25_dec);
+    Real Rif = 5.67_dec;
     int Kp = 15;
 
     double bmin = atoi(argv[1])*0.0001;

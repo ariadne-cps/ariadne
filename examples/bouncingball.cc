@@ -34,8 +34,8 @@ int main(int argc, const char* argv[])
     typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
     /// Set the system parameters
-    Real a = Decimal(0.5);  // Coefficient of restitution
-    Real g = Decimal(9.8);
+    Real a = 0.5_dec;  // Coefficient of restitution
+    Real g = 9.8_dec;
 
     /// Set the position and velocity functions.
     RealVariable x("x");

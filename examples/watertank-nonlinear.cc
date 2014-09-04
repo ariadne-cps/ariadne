@@ -88,12 +88,12 @@ int main()
 {
 
     /// Set the system parameters
-    Real a = Decimal(0.065);
-    Real b = Decimal(0.3);
-    Real T = Decimal(4.0);
-    Real hmin = Decimal(5.5);
-    Real Delta = Decimal(0.05);
-    Real hmax = Decimal(8.0);
+    Real a = 0.065_dec;
+    Real b = 0.3_dec;
+    Real T = 4.0_dec;
+    Real hmin = 5.5_dec;
+    Real Delta = 0.05_dec;
+    Real hmax = 8.0_dec;
 
     Real zero = 0;
     Real one = 1;

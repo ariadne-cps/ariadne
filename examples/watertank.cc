@@ -42,11 +42,11 @@ int main(int argc, const char* argv[])
 
     /// Set the system parameters
     RealConstant a("a", Decimal(-0.02));
-    RealConstant b("b", Decimal(0.3));
-    RealConstant T("T", Decimal(4.0));
-    RealConstant hmin("hmin", Decimal(5.5));
-    RealConstant Delta("Delta", Decimal(0.05));
-    RealConstant hmax("hmax", Decimal(8.0));
+    RealConstant b("b", 0.3_dec);
+    RealConstant T("T", 4.0_dec);
+    RealConstant hmin("hmin", 5.5_dec);
+    RealConstant Delta("Delta", 0.05_dec);
+    RealConstant hmax("hmax", 8.0_dec);
 
     /// Build the Hybrid System
 

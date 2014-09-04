@@ -38,8 +38,8 @@ int main(int argc, const char* argv[])
     typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
     /// Set the system parameters
-    Real ax = Dyadic(0.75);  // Coefficient of restitution for bounces with vertical walls
-    Real ay = Dyadic(0.5);  // Coefficient of restitution for bounces with horizontal walls
+    Real ax = 0.75_bin;  // Coefficient of restitution for bounces with vertical walls
+    Real ay = 0.5_bin;  // Coefficient of restitution for bounces with horizontal walls
 
     /// Set the position and velocity functions.
     RealVariable x("x"); // X position

@@ -57,7 +57,11 @@ class Decimal {
     //! \brief Convert to a floating-point interval.
     explicit operator Float () const;
     friend std::ostream& operator<<(std::ostream& os, Decimal const& d);
+    friend Decimal operator"" _dec (long double dbl);
 };
+Decimal operator"" _dec (long double dbl);
+
+
 } // namespace Ariadne
 
 #endif

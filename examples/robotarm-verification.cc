@@ -76,11 +76,11 @@ int main(int argc, char** argv)
     Real ke = 1000;          Real kFx = h_scaling*h_scaling*10/m;         Real kFz = (h_scaling*h_scaling/4)*10/m;
 
     // Constants for the contact point
-    Real xc = Decimal(0.95);
-    Real delta = Decimal(0.03);
+    Real xc = 0.95_dec;
+    Real delta = 0.03_dec;
 
     // Dynamics for mode free
-    Real fifth=Decimal(0.2);
+    Real fifth=0.2_dec;
     RealExpression dot_x = vx;
     RealExpression dot_vx = ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x);
     std::cout << "Expression for dot vx = " << dot_vx << std::endl;

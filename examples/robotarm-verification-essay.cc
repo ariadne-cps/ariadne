@@ -181,7 +181,7 @@ int main(int argc, char** argv)
     Real Fp = 25;
 
     // Constants for the contact point
-    Real c(Decimal(0.95)); Rational delta(Decimal(0.05));
+    Real c(0.95_dec); Rational delta(0.05_dec);
     //
     // Definition of the Hybrid Automaton for the Robot Arm
     //
@@ -190,7 +190,7 @@ int main(int argc, char** argv)
     // First mode: free run
     StringVariable robotarm("robot_arm");
     DiscreteLocation free(robotarm|"free");
-    Real fifth=Decimal(0.2); Real half=Dyadic(0.5);
+    Real fifth=0.2_dec; Real half=0.5_bin;
     DottedRealAssignments free_dyn(
        (dot(x)   = vx,   dot(vx)   = ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x),
         dot(z)   = vz,   dot(vz)   = ddot_zd + b/m * (dot_zd - vz) + k/m * (zd - z),
@@ -256,8 +256,8 @@ int main(int argc, char** argv)
     // safe set
     Interval zsafe(0.19,0.20);
     // Inital range for delta
-    Rational deltamin ( Decimal(0.0) );
-    Rational deltamax ( Decimal(0.1) );
+    Rational deltamin ( 0.0_dec );
+    Rational deltamax ( 0.1_dec );
     // accuracy
     double eps = 1e-2;
     int iter=0; // iteration count

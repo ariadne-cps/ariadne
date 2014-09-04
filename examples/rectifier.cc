@@ -61,19 +61,19 @@ int main(int argc, const char* argv[])
     uint evolver_verbosity = 0;
     if(argc>1) { evolver_verbosity=atoi(argv[1]); }
 
-    double amplitude=4.0;
-    double frequency=50.0;
-    double Ron = 10.0;
-    double Cl = 0.0001;
-    double Rl = 1000.0;
+    Real amplitude(4.0);
+    Real frequency(50.0);
+    Real Ron (10.0);
+    Real Cl = Decimal(0.0001);
+    Real Rl (1000.0);
 
     /// Introduces the dynamics parameters
-    Vector<double> dp(5);
+    Vector<Real> dp(5);
     dp[0] = amplitude; /// Amplitude of the input voltage, Vi
     dp[1] = frequency; /// Sinusoid frequency, f
-    dp[2] = 10.0; /// Diode resistance when on, Ron
-    dp[3] = 0.0001; /// Load capacitance, Cl
-    dp[4] = 1000.0; /// Load resistance, Rl
+    dp[2] = Ron; /// Diode resistance when on, Ron
+    dp[3] = Cl; /// Load capacitance, Cl
+    dp[4] = Rl; /// Load resistance, Rl
 
     RealConstant pi_c("pi",pi);
 
@@ -82,7 +82,7 @@ int main(int argc, const char* argv[])
     //float TIME_LIMIT = 0.0042;
     int TRAN_LIMIT = 1;
     double MAX_ENCL_RADIUS = 1.0;
-    double MAX_STEP_SIZE = 1e-2/frequency;
+    double MAX_STEP_SIZE = 1e-2/frequency.get_d();
     //float LOCK_TOGRID_TIME = 2.0/frequency;
     //double LOCK_TOGRID_TIME = 0.25/frequency;
     //int MAX_GRID_DEPTH = 7;
@@ -148,13 +148,13 @@ int main(int argc, const char* argv[])
     DottedRealAssignments offoff_d( dot((t,vi,vo)) = (one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)) );
     /// Dynamics for the case of the first diode being on, the second being off
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)
-    RealExpressions onoff_d((one,amplitude*2.0*pi*frequency*cos(2.0*pi*frequency*t),-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)));
+    RealExpressions onoff_d((one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)+(vi-vo)/(Ron*Cl)));
     /// Dynamics for the case of the first diode being off, the second being on
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-(vi+vo)/(Ron*Cl)
-    RealExpressions offon_d((one,amplitude*2.0*pi*frequency*cos(2.0*pi*frequency*t),-vo/(Rl*Cl)+(vo-vi)/(Ron*Cl)));
+    RealExpressions offon_d((one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)+(vo-vi)/(Ron*Cl)));
     /// Dynamics for the case of both diodes being on
     /// t'=1, vi'= A*cos(2*pi*f*t), vo'=-vo/(Rl*Cl)-2*vo/(Ron*Cl)
-    RealExpressions onon_d((one,amplitude*2.0*pi*frequency*cos(2.0*pi*frequency*t),-vo/(Rl*Cl)-2.0*vo/(Ron*Cl)));
+    RealExpressions onon_d((one,amplitude*2*pi*frequency*cos(2*pi*frequency*t),-vo/(Rl*Cl)-2*vo/(Ron*Cl)));
 
     List<RealVariable> space( (t,vi,vo) );
     /// Locations
@@ -203,7 +203,7 @@ int main(int argc, const char* argv[])
 
     std::cout << "Computing evolution..." << std::endl;
 
-    RealVariablesBox initial_box((t==0.0, vi==0.0, vo==0.8*dp[0]));
+    RealVariablesBox initial_box((t==0, vi==0, vo==Real(Decimal(0.8))*dp[0]));
     HybridSet initial_set(rectifier|offoff,initial_box);
 
 //    Box initial_box(3, 0.002836,0.002836, 3.110529,3.110529, 3.110529,3.110529);

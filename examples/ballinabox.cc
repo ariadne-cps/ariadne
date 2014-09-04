@@ -38,8 +38,8 @@ int main(int argc, const char* argv[])
     typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
     /// Set the system parameters
-    Real ax = 0.75;  // Coefficient of restitution for bounces with vertical walls
-    Real ay = 0.5;  // Coefficient of restitution for bounces with horizontal walls
+    Real ax = Dyadic(0.75);  // Coefficient of restitution for bounces with vertical walls
+    Real ay = Dyadic(0.5);  // Coefficient of restitution for bounces with horizontal walls
 
     /// Set the position and velocity functions.
     RealVariable x("x"); // X position
@@ -101,7 +101,8 @@ int main(int argc, const char* argv[])
 
     std::cout << "Computing evolution..." << std::endl;
 
-    RealVariablesBox initial_box((0.48<=x<=0.52, 2.5<=vx<=2.5, 0.78<=y<=0.81, 1.0<=vy<=1.0));
+    Decimal x0l(0.48), x0u(0.52), vx0(2.5), y0l(0.78), y0u(0.81), vy0(1.0);
+    RealVariablesBox initial_box((x0l<=x<=x0u, vx0<=vx<=vx0, y0l<=y<=y0u, vy0<=vy<=vy0));
     HybridSet initial_set(free,initial_box);
 
     HybridTime evolution_time(10.0,3);

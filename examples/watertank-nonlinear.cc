@@ -88,12 +88,12 @@ int main()
 {
 
     /// Set the system parameters
-    double a = 0.065;
-    double b = 0.3;
-    Real T = 4.0;
-    double hmin = 5.5;
-    double Delta = 0.05;
-    double hmax = 8.0;
+    Real a = Decimal(0.065);
+    Real b = Decimal(0.3);
+    Real T = Decimal(4.0);
+    Real hmin = Decimal(5.5);
+    Real Delta = Decimal(0.05);
+    Real hmax = Decimal(8.0);
 
     Real zero = 0;
     Real one = 1;
@@ -207,7 +207,8 @@ int main()
     std::cout << "Computing evolution starting from location l2, x = 6.0, y = 1.0" << std::endl;
 
     //RealVariablesBox initial_box((height==0.5, aperture==0.0));
-    RealVariablesBox initial_box((0.5<=height<=0.5001, 0.00<=aperture<=0.0001));
+    Decimal h0l(0.5),h0u(0.5001), a0l(0.0),a0u(0.0001);
+    RealVariablesBox initial_box((h0l<=height<=h0u, a0l<=aperture<=a0u));
     HybridSet initial_set(opening,initial_box);
 
     HybridTime evolution_time(tmax,jmax);

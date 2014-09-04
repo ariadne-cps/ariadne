@@ -32,10 +32,10 @@ using namespace Ariadne;
 typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
 
 // Auxiliary function for plotting
-void plot_results(const Orbit<HybridEnclosure>& orbit, 
-  double delta, double time, const RealVariable& t, 
+void plot_results(const Orbit<HybridEnclosure>& orbit,
+  double delta, double time, const RealVariable& t,
   const RealVariable& x, const RealVariable& vx,
-  const RealVariable& z, const RealVariable& vz, 
+  const RealVariable& z, const RealVariable& vz,
   const RealVariable& phi, const RealVariable& vphi) {
     // Print the intial, evolve and reach sets
     // cout << "Plotting sets" << endl;
@@ -65,7 +65,7 @@ void plot_results(const Orbit<HybridEnclosure>& orbit,
     sprintf(filename,"robotarm-verification-%f-vx.png",delta);
     fig.write(filename);
 
-    
+
     // Plotting z
     fig.clear();
     fig.set_axes(Axes2d(0.0<=t<=time,0.0<=z<=0.2));
@@ -132,10 +132,8 @@ int main(int argc, char** argv)
 
     // Definition of the reference trajectory
     // Constants
-    Real Pi = 3.1415926535897931;
-    // Constants
-    Real per = time;
-    Real omega = 2*pi/per;
+    Real period ( time );
+    Real omega = 2*pi/period;
 
     // Variables
     RealVariable x("x");
@@ -143,50 +141,47 @@ int main(int argc, char** argv)
     RealVariable z("z");
     RealVariable vz("vz");
     RealVariable phi("phi");
-    RealVariable vphi("vphi");    
+    RealVariable vphi("vphi");
     RealVariable t("t");
     RealVariable xc("xc");
     RealVariable zc("zc");
 
-    RealExpression dot_t((1.0));
+    RealExpression dot_t=RealExpression::constant(1);
 
     // Algebraic expression for the reference trajectory
-    RealExpression xd = -1.0/(2*pi)*sin(omega*t) + 1/per*t;
-    RealExpression zd = -1.0/(2*pi*per)*sin(omega*t) + 1/(per*per)*t;
-    RealExpression phid = 1.0/4*sin(omega*t) - pi/(2*per)*t+pi/2;
+    RealExpression xd = -1/(2*pi)*sin(omega*t) + 1/period*t;
+    RealExpression zd = -1/(2*pi*period)*sin(omega*t) + 1/(period*period)*t;
+    RealExpression phid = sin(omega*t)/4 - pi/(2*period)*t+pi/2;
     std::cout << "Algebraic expression for xd = " << xd << std::endl;
     std::cout << "Algebraic expression for zd = " << zd << std::endl;
     std::cout << "Algebraic expression for phid = " << phid << std::endl;
-   
+
 //   return 1;
-   
+
     // First and second derivatives of the reference trajectory
-    RealExpression dot_xd = -1/per*cos(omega*t) + 1/per;
-    RealExpression dot_zd = -1/(per*per)*cos(omega*t) + 1/(per*per);
-    RealExpression dot_phid = pi/(2*per)*cos(omega*t) - pi/(2*per);       
+    RealExpression dot_xd = -1/period*cos(omega*t) + 1/period;
+    RealExpression dot_zd = -1/(period*period)*cos(omega*t) + 1/(period*period);
+    RealExpression dot_phid = pi/(2*period)*cos(omega*t) - pi/(2*period);
     std::cout << "Expression for dot xd = " << dot_xd << std::endl;
     std::cout << "Expression for dot zd = " << dot_zd << std::endl;
     std::cout << "Expression for dot phid = " << dot_phid << std::endl;
 
-    RealExpression ddot_xd = omega/per*sin(omega*t);
-    RealExpression ddot_zd = omega/(per*per)*sin(omega*t);
-    RealExpression ddot_phid = (pi*pi)/(per*per)*sin(omega*t);       
+    RealExpression ddot_xd = omega/period*sin(omega*t);
+    RealExpression ddot_zd = omega/(period*period)*sin(omega*t);
+    RealExpression ddot_phid = (pi*pi)/(period*period)*sin(omega*t);
     std::cout << "Expression for dot dot xd = " << ddot_xd << std::endl;
     std::cout << "Expression for dot dot zd = " << ddot_zd << std::endl;
     std::cout << "Expression for dot dot phid = " << ddot_phid << std::endl;
 
     // Definition of the arm system
     // Constants for the dynamics
-    Real h_scaling = 2.0;
-    Real m = 100.0;            Real b = h_scaling*500.0;            Real k = h_scaling*h_scaling*2500.0;
-    Real ke = 1000.0;          Real kFx = h_scaling*h_scaling*10.0/m;         Real kFz = (h_scaling*h_scaling/4.0)*10.0/m;
-    Real Fp = 25.0;
+    Real h_scaling = 2;
+    Real m = 100;            Real b = h_scaling*500;            Real k = h_scaling*h_scaling*2500;
+    Real ke = 1000;          Real kFx = h_scaling*h_scaling*10/m;         Real kFz = (h_scaling*h_scaling/4)*10/m;
+    Real Fp = 25;
 
     // Constants for the contact point
-    double c = 0.95;             double delta=0.05;
-    Real rc = c;                
-    Real rdelta = delta;
-
+    Real c(Decimal(0.95)); Rational delta(Decimal(0.05));
     //
     // Definition of the Hybrid Automaton for the Robot Arm
     //
@@ -195,48 +190,49 @@ int main(int argc, char** argv)
     // First mode: free run
     StringVariable robotarm("robot_arm");
     DiscreteLocation free(robotarm|"free");
+    Real fifth=Decimal(0.2); Real half=Dyadic(0.5);
     DottedRealAssignments free_dyn(
-       (dot(x)   = vx,   dot(vx)   = ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x), 
+       (dot(x)   = vx,   dot(vx)   = ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x),
         dot(z)   = vz,   dot(vz)   = ddot_zd + b/m * (dot_zd - vz) + k/m * (zd - z),
         dot(phi) = vphi, dot(vphi) = ddot_phid + b/m * (dot_phid - vphi) + k/m * (phid - phi),
-        dot(t)   = 1.0,  dot(xc)   = 0.0,   dot(zc)  = 0.0));
+        dot(t)   = 1,  dot(xc)   = 0,   dot(zc)  = 0));
     std::cout << "free_dyn = " << free_dyn << std::endl;
     robotarm_automaton.new_mode(free, free_dyn);
     DiscreteEvent finv("finv");
-    robotarm_automaton.new_invariant(free, (x <= rc + rdelta), finv);
+    robotarm_automaton.new_invariant(free, (x <= c + Real(delta)), finv);
 
     // Second mode: contact
     DiscreteLocation contact(robotarm|"contact");
     DottedRealAssignments contact_dyn(
-       (dot(x)   = vx,   dot(vx)   = ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x) + kFx * ke * (xc - x), 
+       (dot(x)   = vx,   dot(vx)   = ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x) + kFx * ke * (xc - x),
         dot(z)   = vz,   dot(vz)   = ddot_zd + b/m * (dot_zd - vz) + k/m * (zd - z) + kFz * ke * (zc - z),
         dot(phi) = vphi, dot(vphi) = ddot_phid + b/m * (dot_phid - vphi) + k/m * (phid - phi),
-        dot(t)   = 1.0,  dot(xc)   = 0.0,   dot(zc)  = 0.0));
+        dot(t)   = 1,  dot(xc)   = 0,   dot(zc)  = 0));
     std::cout << "contact_dyn = " << contact_dyn << std::endl;
     robotarm_automaton.new_mode(contact, contact_dyn);
 
     // Third mode: puncturing
     DiscreteLocation punct(robotarm|"punct");
     DottedRealAssignments punct_dyn(
-       (dot(x)   = vx,   dot(vx)   = 0.2*b/m * (0.5 - vx) + 0.2*k/m * (xc + 0.5*t - 0.5*per - x) + kFx * ke * (xc - x), 
+       (dot(x)   = vx,   dot(vx)   = fifth*b/m * (half - vx) + fifth*k/m * (xc + half*t - half*period - x) + kFx * ke * (xc - x),
         dot(z)   = vz,   dot(vz)   = b/m * (- vz) + k/m * (zc - z) + kFz * ke * (zc - z),
         dot(phi) = vphi, dot(vphi) = b/m * (- vphi) + k/m * (- phi),
-        dot(t)   = 1.0,  dot(xc)   = 0.0,   dot(zc)  = 0.0));
+        dot(t)   = 1,  dot(xc)   = 0,   dot(zc)  = 0));
     std::cout << "punct_dyn = " << punct_dyn << std::endl;
     robotarm_automaton.new_mode(punct, punct_dyn);
     DiscreteEvent pinv("pinv");
     robotarm_automaton.new_invariant(punct, (x <= Fp/ke + xc), pinv);
-    
+
     // transition from free to contact
     DiscreteEvent f2c("f2c");
-    PrimedRealAssignments reset_id( 
+    PrimedRealAssignments reset_id(
         (next(x)=x, next(vx)=vx, next(z)=z, next(vz)=vz, next(phi)=phi, next(vphi)=vphi,
          next(t)=t, next(xc)=x,  next(zc)=z) );
-    robotarm_automaton.new_transition(free, f2c, contact, reset_id, (x >= rc - rdelta), permissive);
+    robotarm_automaton.new_transition(free, f2c, contact, reset_id, (x >= c - Real(delta)), permissive);
 
     // transition contact to punct
     DiscreteEvent c2p("c2p");
-    robotarm_automaton.new_transition(contact, c2p, punct, reset_id, (t >= per), urgent);
+    robotarm_automaton.new_transition(contact, c2p, punct, reset_id, (t >= period), urgent);
 
 
     std::cout << "RobotArm = " << std::endl;
@@ -247,8 +243,8 @@ int main(int argc, char** argv)
     //
 
     // Define the initial box
-    RealVariablesBox initial_box((x==0.0, vx==0.0, z==0.0, vz==0.0, 
-        phi==pi.get_d()/2, vphi==0.0, t==0.0, xc==0.0, zc==0.0));
+    RealVariablesBox initial_box((x==0, vx==0, z==0, vz==0,
+        phi==pi/2, vphi==0, t==0, xc==0, zc==0));
 
     cout << "initial_box=" << initial_box << endl;
 
@@ -260,13 +256,13 @@ int main(int argc, char** argv)
     // safe set
     Interval zsafe(0.19,0.20);
     // Inital range for delta
-    double deltamin = 0.0;
-    double deltamax = 0.1;
+    Rational deltamin ( Decimal(0.0) );
+    Rational deltamax ( Decimal(0.1) );
     // accuracy
     double eps = 1e-2;
     int iter=0; // iteration count
-         
-    Orbit<HybridEnclosure> orbit; 
+
+    Orbit<HybridEnclosure> orbit;
     while(deltamax - deltamin >= eps) {
         // Set up the evaluators
         GeneralHybridEvolver evolver(robotarm_automaton);
@@ -275,10 +271,10 @@ int main(int argc, char** argv)
         evolver.configuration().set_maximum_step_size(2.5);
         evolver.configuration().set_enable_reconditioning(true);
         evolver.configuration().set_maximum_spacial_error(1e-3);
-        
+
         if(iter==0) { std::cout << "Evolution parameters:" << evolver.configuration() << std::endl; }
-        
-        std::cout << "Computing evolution for delta = " << rdelta << " .... " <<  std::flush;
+
+        std::cout << "Computing evolution for delta = " << delta << " .... " <<  std::flush;
         // Compute the reachable sets
         double etime = 10.0;
         orbit = evolver.orbit(initial_set,HybridTime(etime,steps),semantics);
@@ -292,10 +288,10 @@ int main(int argc, char** argv)
         std::cout << "      x = " << bbox[0] << std::endl;
         std::cout << "      z = " << bbox[2] << std::endl;
         std::cout << "    phi = " << bbox[4] << std::endl;
-        
+
         std::cout << "Safe set for z: " << zsafe << std::endl;
 
-        // if(iter==0) { 
+        // if(iter==0) {
         //plot_results(orbit, delta, time, t, x, vx, z, vz, phi, vphi); // }
 
 
@@ -308,12 +304,11 @@ int main(int argc, char** argv)
         }
         iter++;
         delta = (deltamax+deltamin)/2;
-        rdelta = delta;
         // change the invariant of location free
-        robotarm_automaton.set_invariant(free, (x <= rc + rdelta), finv);
-        robotarm_automaton.set_guard(free, f2c, (x >= rc - rdelta), permissive);
+        robotarm_automaton.set_invariant(free, (x <= c + Real(delta)), finv);
+        robotarm_automaton.set_guard(free, f2c, (x >= c - Real(delta)), permissive);
     }
-    
+
     std::cout << "Final value for delta is " << deltamin << ", found after " << iter << " iterations" << std::endl << std::endl;
 
     return 0;

@@ -228,7 +228,7 @@ template<class T> inline Expression<T>::Expression(const T& c) : _root(new Const
 template<class T> inline Expression<T>::Expression(const Identifier& v) : _root(new VariableExpressionNode<T>(v)) { }
 template<class T> inline Expression<T>::Expression(const Constant<T>& c): _root(new ConstantExpressionNode<T>(c.value())) { };
 template<class T> inline Expression<T>::Expression(const Variable<T>& v) : _root(new VariableExpressionNode<T>(v.name())) { }
-
+template<class T> inline Expression<T> Expression<T>::constant(const T& c) { return Expression<T>(c); }
 
 template<class R> inline
 Expression<R> make_expression(const R& c) {
@@ -610,26 +610,23 @@ Expression<Real> abs(Expression<Real> e);
 
 //@}
 
-template<class T> Expression<T> make_expression(double c) { return Expression<T>(static_cast<T>(c)); }
+inline Expression<Real> operator+(Expression<Real> e, Real c) { return e + Expression<Real>::constant(c); }
+inline Expression<Real> operator-(Expression<Real> e, Real c) { return e - Expression<Real>::constant(c); }
+inline Expression<Real> operator*(Expression<Real> e, Real c) { return e * Expression<Real>::constant(c); }
+inline Expression<Real> operator/(Expression<Real> e, Real c) { return e / Expression<Real>::constant(c); }
+inline Expression<Real> operator+(Real c, Expression<Real> e) { return Expression<Real>::constant(c) + e; }
+inline Expression<Real> operator-(Real c, Expression<Real> e) { return Expression<Real>::constant(c) - e; }
+inline Expression<Real> operator*(Real c, Expression<Real> e) { return Expression<Real>::constant(c) * e; }
+inline Expression<Real> operator/(Real c, Expression<Real> e) { return Expression<Real>::constant(c) / e; }
 
-inline Expression<Real> operator+(Expression<Real> e, double c) { return e + make_expression<Real>(c); }
-inline Expression<Real> operator-(Expression<Real> e, double c) { return e - make_expression<Real>(c); }
-inline Expression<Real> operator*(Expression<Real> e, double c) { return e * make_expression<Real>(c); }
-inline Expression<Real> operator/(Expression<Real> e, double c) { return e / make_expression<Real>(c); }
-inline Expression<Real> operator+(double c, Expression<Real> e) { return make_expression<Real>(c) + e; }
-inline Expression<Real> operator-(double c, Expression<Real> e) { return make_expression<Real>(c) - e; }
-inline Expression<Real> operator*(double c, Expression<Real> e) { return make_expression<Real>(c) * e; }
-inline Expression<Real> operator/(double c, Expression<Real> e) { return make_expression<Real>(c) / e; }
-
-inline Expression<Tribool> operator<=(Expression<Real> e, double c) { return e <= make_expression<Real>(c); }
-inline Expression<Tribool> operator< (Expression<Real> e, double c) { return e < make_expression<Real>(c); }
-inline Expression<Tribool> operator>=(Expression<Real> e, double c) { return e >= make_expression<Real>(c); }
-inline Expression<Tribool> operator> (Expression<Real> e, double c) { return e >  make_expression<Real>(c); }
-inline Expression<Tribool> operator<=(double c, Expression<Real> e) { return make_expression<Real>(c) <= e; }
-inline Expression<Tribool> operator< (double c, Expression<Real> e) { return make_expression<Real>(c) <  e; }
-inline Expression<Tribool> operator>=(double c, Expression<Real> e) { return make_expression<Real>(c) >= e; }
-inline Expression<Tribool> operator> (double c, Expression<Real> e) { return make_expression<Real>(c) >  e; }
-
+inline Expression<Tribool> operator<=(Expression<Real> e, Real c) { return e <= Expression<Real>::constant(c); }
+inline Expression<Tribool> operator< (Expression<Real> e, Real c) { return e <  Expression<Real>::constant(c); }
+inline Expression<Tribool> operator>=(Expression<Real> e, Real c) { return e >= Expression<Real>::constant(c); }
+inline Expression<Tribool> operator> (Expression<Real> e, Real c) { return e >  Expression<Real>::constant(c); }
+inline Expression<Tribool> operator<=(Real c, Expression<Real> e) { return Expression<Real>::constant(c) <= e; }
+inline Expression<Tribool> operator< (Real c, Expression<Real> e) { return Expression<Real>::constant(c) <  e; }
+inline Expression<Tribool> operator>=(Real c, Expression<Real> e) { return Expression<Real>::constant(c) >= e; }
+inline Expression<Tribool> operator> (Real c, Expression<Real> e) { return Expression<Real>::constant(c) >  e; }
 
 
 } // namespace Ariadne

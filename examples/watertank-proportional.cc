@@ -59,10 +59,10 @@ int main(int argc,char *argv[])
     }
 
     /// Set the system parameters
-    Real a("0.02");
-    Real r("1.25");
-    double Rif = 5.67;
-    double Kp = 15;
+    Real a(Decimal(0.02));
+    Real r(Decimal(1.25));
+    Real Rif = Decimal(5.67);
+    int Kp = 15;
 
     double bmin = atoi(argv[1])*0.0001;
     double bmax = atoi(argv[2])*0.0001;
@@ -194,7 +194,7 @@ int main(int argc,char *argv[])
     for(double b=bmin ; b < bmax+bstep ; b += bstep) {
         for(double d=-Delta ; d < Delta+dstep ; d += dstep) {
             cout << "b = "<< b <<", Delta = "<<d<<std::endl;
-            RealVariablesBox initial_box((water==0.0, aperture==1.0, pressure==b, error==d, time==0.0));
+            RealVariablesBox initial_box((water==0, aperture==1, pressure==Real(b), error==Real(d), time==0));
             HybridSet initial_set(one_saturated,initial_box);
             OrbitType result = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
             cout<<"Orbit.final=" << result.final() << endl;

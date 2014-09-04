@@ -611,7 +611,7 @@ TestHybridEvolver::test_affine_flow() const
     DiscreteLocation q("q");
 
     HybridAutomaton system;
-    system.new_mode(q,(dot(x0)=1.0-x0-2*x1,dot(x1)=+2*x0-x1));
+    system.new_mode(q,(dot(x0)=1-x0-2*x1,dot(x1)=+2*x0-x1));
 
     _set_evolver(system);
     evolver_ptr->configuration().set_maximum_step_size(0.5);
@@ -648,10 +648,10 @@ TestHybridEvolver::test_splitting_on_urgent_event() const
     DiscreteEvent block("block");
 
     HybridAutomaton system;
-    system.new_mode(upwards,(dot(x)=1.0,dot(y)=1.0));
-    system.new_mode(downwards,(dot(x)=1.0,dot(y)=-1.0));
+    system.new_mode(upwards,(dot(x)=1,dot(y)=1));
+    system.new_mode(downwards,(dot(x)=1,dot(y)=-1));
 
-    system.new_guard(upwards,changedown,y>=2.0,urgent);
+    system.new_guard(upwards,changedown,y>=2,urgent);
     system.new_transition(upwards,changedown,downwards,(next(x)=x+1,next(y)=y));
 
     ARIADNE_TEST_PRINT(system);
@@ -695,12 +695,12 @@ TestHybridEvolver::test_affine_flow_system() const
     DiscreteEvent block("block");
 
     HybridAutomaton system;
-    system.new_mode(upwards,(dot(x)=1.0,dot(y)=1.0));
-    system.new_mode(downwards,(dot(x)=1.0,dot(y)=-1.0));
+    system.new_mode(upwards,(dot(x)=1,dot(y)=1));
+    system.new_mode(downwards,(dot(x)=1,dot(y)=-1));
 
-    system.new_guard(upwards,changedown,y>=2.0,urgent);
-    system.new_invariant(downwards,y>=-2.0,block);
-    system.new_guard(downwards,changeup,y<=-1.5,permissive);
+    system.new_guard(upwards,changedown,y>=2,urgent);
+    system.new_invariant(downwards,y>=-2,block);
+    system.new_guard(downwards,changeup,y<=Dyadic(-1.5),permissive);
     system.new_transition(upwards,changedown,downwards,(next(x)=x+1,next(y)=y));
     system.new_transition(downwards,changeup,upwards,(next(x)=x+1,next(y)=y));
 

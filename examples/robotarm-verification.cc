@@ -44,14 +44,14 @@ int main(int argc, char** argv)
 
     // Definition of the reference trajectory
     // Constants
-    Real per = time;
+    Real per = Real(time);
     Real omega = 2*pi/per;
     // Variables
     RealVariable x("x");
     RealVariable vx("vx");
     RealVariable t("t");
 
-    RealExpression dot_t((1.0));
+    RealExpression dot_t=RealExpression::constant(1);
 
     // Algebraic expression for the reference trajectory
     RealExpression ddot_xd = omega/per*sin(omega*t);
@@ -65,27 +65,28 @@ int main(int argc, char** argv)
     std::cout << "Expression for dot xd = " << dot_xd << std::endl;
 
 //    RealExpression ddot_xd = 20.0*Ax*t*t*t + 12.0*Bx*t*t + 6.0*Cx*t;
-    RealExpression xd = -1.0/(2*pi)*sin(omega*t) + 1/per*t;
+    RealExpression xd = -1/(2*pi)*sin(omega*t) + 1/per*t;
     std::cout << "Algebraic expression for xd = " << xd << std::endl;
 
 
     // Definition of the arm system
     // Constants for the dynamics
-    Real h_scaling = 2.0;
-    Real m = 100.0;            Real b = h_scaling*500.0;            Real k = h_scaling*h_scaling*2500.0;
-    Real ke = 1000.0;          Real kFx = h_scaling*h_scaling*10.0/m;         Real kFz = (h_scaling*h_scaling/4.0)*10.0/m;
+    Real h_scaling = 2;
+    Real m = 100;            Real b = h_scaling*500;            Real k = h_scaling*h_scaling*2500;
+    Real ke = 1000;          Real kFx = h_scaling*h_scaling*10/m;         Real kFz = (h_scaling*h_scaling/4)*10/m;
 
     // Constants for the contact point
-    Real xc = 0.95;
-    Real delta = 0.03;
+    Real xc = Decimal(0.95);
+    Real delta = Decimal(0.03);
 
     // Dynamics for mode free
+    Real fifth=Decimal(0.2);
     RealExpression dot_x = vx;
-    RealExpression dot_vx = ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x);
+    RealExpression dot_vx = ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x);
     std::cout << "Expression for dot vx = " << dot_vx << std::endl;
 
     // Dynamics for mode contact
-    RealExpression cdot_vx = ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x) + kFx * ke * (xc - x); // * cos(phi);
+    RealExpression cdot_vx = ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x) + kFx * ke * (xc - x); // * cos(phi);
 
     //
     // Definition of the Hybrid Automaton for the Robot Arm
@@ -95,7 +96,7 @@ int main(int argc, char** argv)
     // First mode: free run
     StringVariable robotarm("robot_arm");
     DiscreteLocation free(robotarm|"free");
-    DottedRealAssignments free_dyn(( dot(x)=vx, dot(vx) = ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x), dot(t)=1.0));
+    DottedRealAssignments free_dyn(( dot(x)=vx, dot(vx) = ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x), dot(t)=1.0));
     std::cout << "free_dyn = " << free_dyn << std::endl;
     robotarm_automaton.new_mode(free, free_dyn);
     DiscreteEvent finv("finv");
@@ -103,7 +104,7 @@ int main(int argc, char** argv)
 
     // Second mode: contact
     DiscreteLocation contact(robotarm|"contact");
-    robotarm_automaton.new_mode(contact, (dot(x)=vx,dot(vx)=ddot_xd + 0.2*b/m * (dot_xd - vx) + 0.2*k/m * (xd - x) + kFx * ke * (xc - x),dot(t)=1.0));
+    robotarm_automaton.new_mode(contact, (dot(x)=vx,dot(vx)=ddot_xd + fifth*b/m * (dot_xd - vx) + fifth*k/m * (xd - x) + kFx * ke * (xc - x),dot(t)=1));
 
     // transition from free to contact
     DiscreteEvent f2c("f2c");
@@ -129,7 +130,7 @@ int main(int argc, char** argv)
     std::cout << "Evolution parameters:" << evolver.configuration() << std::endl;
 
     // Define the initial box
-    RealVariablesBox initial_box((x==0.0,vx==0.0,t==0.0));
+    RealVariablesBox initial_box((x==0,vx==0,t==0));
 
     cout << "initial_box=" << initial_box << endl;
 
@@ -161,7 +162,7 @@ int main(int argc, char** argv)
 //    fig << fill_colour(blue) << initial_set;
     fig.write("robotarm-verification-orbit-x");
     fig.clear();
-    
+
     // Plotting vx
     fig.set_axes(Axes2d(0.0<=t<=time,-1.0<=vx<=1.0));
     fig.set_bounds(t,0.0,time);

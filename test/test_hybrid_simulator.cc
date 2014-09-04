@@ -69,8 +69,9 @@ TestHybridSimulator::system()
     const RealVariable z("z");
 
     HybridAutomaton automaton;
-    automaton.new_mode(location1,(dot(x)=-0.5*x-1.0*y+3.0,dot(y)=1.0*x-0.5*y) );
-    automaton.new_mode(location2,(dot(x)=-0.5*x-1.0*y-1.0,dot(y)=1.0*x-0.5*y,dot(z)=1.0));
+    Dyadic a(-0.5); Dyadic b(1.0); Dyadic cx1(3.0); Dyadic cx2(-1.0); Dyadic cz(1.0);
+    automaton.new_mode(location1,(dot(x)= a*x-b*y+cx1,dot(y)=b*x+a*y) );
+    automaton.new_mode(location2,(dot(x)= a*x-b*y+cx2,dot(y)=b*x+a*y,dot(z)=cz));
     automaton.new_transition(location1,event3,location2,(next(x)=x,next(y)=y,next(z)=y),x>=1,urgent);
     automaton.new_transition(location2,event4,location1,(next(x)=x,next(y)=y),x<=-1,urgent);
 

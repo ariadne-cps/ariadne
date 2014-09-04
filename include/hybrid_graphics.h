@@ -62,11 +62,34 @@ struct Variables2d {
 Interval approximate_interval(const RealVariableInterval&);
 
 
+struct FloatVariableLowerInterval {
+    Float _lower; RealVariable _variable;
+    FloatVariableLowerInterval(const Float& l, const RealVariable& v) : _lower(l), _variable(v) { }
+};
+
+class FloatVariableInterval {
+  private:
+    Float _lower; Variable<Real> _variable; Float _upper;
+  public:
+    FloatVariableInterval(const Float& l, const Variable<Real>& v, const Float& u)
+        : _lower(l), _variable(v), _upper(u) { ARIADNE_ASSERT_MSG(l<=u,"Interval("<<l<<","<<u<<") not provably nonempty"); }
+    FloatVariableInterval(const RealVariableInterval& rvivl)
+        : _lower(rvivl.lower()), _variable(rvivl.variable()), _upper(rvivl.upper()) { }
+    Variable<Real> const& variable() const { return this->_variable; }
+    const Interval interval() const { return Interval(this->_lower,this->_upper); }
+    const Float lower() const { return this->_lower; }
+    const Float upper() const { return this->_upper; }
+};
+inline FloatVariableLowerInterval operator<=(double l, RealVariable const& v) {
+    return FloatVariableLowerInterval(l,v); }
+inline FloatVariableInterval operator<=(FloatVariableLowerInterval lv, Float u) {
+    return FloatVariableInterval(lv._lower,lv._variable,u); }
+
 struct Axes2d {
-    Axes2d(const RealVariableInterval x, const RealVariableInterval& y)
+    Axes2d(const FloatVariableInterval x, const FloatVariableInterval& y)
             : variables(x.variable(),y.variable()), bounds() {
-        bounds.insert(x.variable(),x.approximate_interval());
-        bounds.insert(y.variable(),y.approximate_interval()); }
+        bounds.insert(x.variable(),x.interval());
+        bounds.insert(y.variable(),y.interval()); }
     Axes2d(double xl, const RealVariable& x, double xu, double yl, const RealVariable& y, double yu)
             : variables(x,y), bounds() {
         bounds.insert(x,Interval(xl,xu));

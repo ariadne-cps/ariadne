@@ -98,7 +98,8 @@ class TestHybridReachabilityAnalyser
 
         RealVariable x("x");
         RealVariable y("y");
-        sys.new_mode(location,(dot(x)=-0.5*x-1.0*y,dot(y)=1.0*x-0.5*y) );
+        Real a(-0.5); Real b(1.0);
+        sys.new_mode(location,(dot(x)=-a*x-b*y,dot(y)=b*x+a*y) );
         cout << "Done building system\n";
         return sys;
     }

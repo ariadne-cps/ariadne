@@ -41,12 +41,12 @@ int main(int argc, const char* argv[])
     DRAWING_ACCURACY = 1;
 
     /// Set the system parameters
-    RealConstant a("a","-0.02");
-    RealConstant b("b", "0.3");
-    RealConstant T("T","4.0");
-    RealConstant hmin("hmin","5.5");
-    RealConstant Delta("Delta","0.05");
-    RealConstant hmax("hmax","8.0");
+    RealConstant a("a", Decimal(-0.02));
+    RealConstant b("b", Decimal(0.3));
+    RealConstant T("T", Decimal(4.0));
+    RealConstant hmin("hmin", Decimal(5.5));
+    RealConstant Delta("Delta", Decimal(0.05));
+    RealConstant hmax("hmax", Decimal(8.0));
 
     /// Build the Hybrid System
 
@@ -144,7 +144,8 @@ int main(int argc, const char* argv[])
     typedef GeneralHybridEvolverType::OrbitType OrbitType;
 
     //HybridSet initial_set(opening,(height==0.0, aperture==0.0));
-    HybridSet initial_set(opening,(0.0<=height<=1.0/256, 0.0<=aperture<=1.0/256));
+    Dyadic eps(1.0/256);
+    HybridSet initial_set(opening,(0<=height<=eps, 0<=aperture<=eps));
     std::cout << "Initial set = " << initial_set << "\n" ;
     HybridTime evolution_time(80.0,10);
     std::cout << "Evolution time = "  << evolution_time << "\n" ;

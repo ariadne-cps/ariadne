@@ -117,7 +117,7 @@ CompositeHybridAutomaton create_heating_system()
     // Create the clock subsystem
     HybridAutomaton clock;
     clock.new_mode( (dot(C)=1.0) );
-    clock.new_transition( midnight, next(C)=0.0, C>=1.0, urgent );
+    clock.new_transition( midnight, next(C)=0, C>=1, urgent );
 
     CompositeHybridAutomaton heating_system((clock,heater));
     std::cout << "heating_system=" << heating_system << "\n" << "\n";
@@ -139,7 +139,6 @@ HybridEvolverType create_evolver(const CompositeHybridAutomaton& heating_system)
 
     return evolver;
 }
-
 
 void compute_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
 {
@@ -178,7 +177,8 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
 
 
     // Set the initial set.
-    HybridSet initial_set(heating_off, (T==17.0,0.0<=C<=1.0/1024) );
+    Dyadic Tinit=17; Dyadic Cinit_max(1.0/1024);
+    HybridSet initial_set(heating_off, (T==Tinit,0<=C<=Cinit_max) );
     cout << "initial_set=" << initial_set << endl;
     // Compute the initial set as a validated enclosure.
     HybridEnclosure initial_enclosure = evolver.enclosure(initial_set);

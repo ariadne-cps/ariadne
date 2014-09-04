@@ -114,8 +114,8 @@ TestHybridSystem::test_build_hybrid_system()
     valve_component.new_auxiliary(valve==open,(alpha=1.0));
     valve_component.new_auxiliary(valve==closed,(alpha=-1.0));
     // Specify the differential equation for how the valve opens/closes.
-    valve_component.new_dynamic(valve==opening,(dot(alpha)=1.0/T));
-    valve_component.new_dynamic(valve==closing,(dot(alpha)=-1.0/T));
+    valve_component.new_dynamic(valve==opening,(dot(alpha)=1/T));
+    valve_component.new_dynamic(valve==closing,(dot(alpha)=-1/T));
 
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to
@@ -123,10 +123,10 @@ TestHybridSystem::test_build_hybrid_system()
     //valve_automaton.new_invariant(open,start_closing,height<=hmax || (height>=hmin && !(height<=hmin+1)));
     valve_component.new_invariant(valve==open,start_closing,height<=hmax);
     valve_component.new_invariant(valve==opening,start_closing,height<=hmax);
-    valve_component.new_invariant(valve==opening,finished_opening,alpha<=1.0);
+    valve_component.new_invariant(valve==opening,finished_opening,alpha<=1);
     valve_component.new_invariant(valve==closed,start_opening,height>=hmin);
     valve_component.new_invariant(valve==closing,start_opening,height>=hmin);
-    valve_component.new_invariant(valve==closing,finished_closing,alpha>=0.0);
+    valve_component.new_invariant(valve==closing,finished_closing,alpha>=0);
 
     valve_component.new_transition(valve==closed,start_opening,(next(valve)=opening),(next(alpha)=alpha),height<=hmin);
     valve_component.new_transition(valve==closing,start_opening,next(valve)=opening,(next(alpha)=alpha),height<=hmin);
@@ -136,8 +136,8 @@ TestHybridSystem::test_build_hybrid_system()
     // Set the transitions for when the valve finished opening.
     // Since alpha is defined by an algebraic equation in the new mode,
     // it may not be specified in the reset.
-    valve_component.new_transition(valve==opening,finished_opening,next(valve)=open,alpha>=1.0);
-    valve_component.new_transition(valve==closing,finished_closing,next(valve)=closed,alpha<=0.0);
+    valve_component.new_transition(valve==opening,finished_opening,next(valve)=open,alpha>=1);
+    valve_component.new_transition(valve==closing,finished_closing,next(valve)=closed,alpha<=0);
 
     ARIADNE_TEST_PRINT(valve_component.mode((valve|opening)));
     ARIADNE_TEST_PRINT(valve_component.mode((valve|closing)));
@@ -290,12 +290,13 @@ TestHybridAutomaton::test_multiple_guard()
     DiscreteEvent e2("e2");
     RealVariable x("x");
     RealVariable y("y");
+    Dyadic c(0.125);
     ARIADNE_TEST_EXECUTE( system.new_mode( q1,(dot(x)=1,dot(y)=1) ) );
     ARIADNE_TEST_EXECUTE( system.new_mode( q2,(dot(x)=2) ) );
-    ARIADNE_TEST_EXECUTE( system.new_action( q1, x<=0.125, e1, x>=0 ) );
-    ARIADNE_TEST_EXECUTE( system.new_action( q2, x<=0.125, e1, x>=0 ) );
-    ARIADNE_TEST_EXECUTE( system.new_action( q1, y<=0.125, e2, y>=0 ) );
-    ARIADNE_TEST_THROWS( system.new_action( q1, x+y<=0.125, e1, x+y>=0 ), MultipleGuardError );
+    ARIADNE_TEST_EXECUTE( system.new_action( q1, x<=c, e1, x>=0 ) );
+    ARIADNE_TEST_EXECUTE( system.new_action( q2, x<=c, e1, x>=0 ) );
+    ARIADNE_TEST_EXECUTE( system.new_action( q1, y<=c, e2, y>=0 ) );
+    ARIADNE_TEST_THROWS( system.new_action( q1, x+y<=c, e1, x+y>=0 ), MultipleGuardError );
 }
 
 void
@@ -450,11 +451,11 @@ TestHybridAutomaton::test_build_hybrid_system()
 
     // Since alpha is a known constant when the valve is open or closed,
     // specify alpha by an algebraic equation.
-    valve_automaton.new_mode((valve|open),(alpha=1.0));
-    valve_automaton.new_mode((valve|closed),(alpha=-1.0));
+    valve_automaton.new_mode((valve|open),(alpha=1));
+    valve_automaton.new_mode((valve|closed),(alpha=-1));
     // Specify the differential equation for how the valve opens/closes.
-    valve_automaton.new_mode((valve|opening),(dot(alpha)=1.0/T));
-    valve_automaton.new_mode((valve|closing),(dot(alpha)=-1.0/T));
+    valve_automaton.new_mode((valve|opening),(dot(alpha)=1/T));
+    valve_automaton.new_mode((valve|closing),(dot(alpha)=-1/T));
 
     ARIADNE_TEST_PRINT(valve_automaton);
 
@@ -464,10 +465,10 @@ TestHybridAutomaton::test_build_hybrid_system()
     //valve_automaton.new_invariant(open,start_closing,height<=hmax || (height>=hmin && !(height<=hmin+1)));
     valve_automaton.new_invariant((valve|open),height<=hmax,start_closing);
     valve_automaton.new_invariant((valve|opening),height<=hmax,start_closing);
-    valve_automaton.new_invariant((valve|opening),alpha<=1.0,finished_opening);
+    valve_automaton.new_invariant((valve|opening),alpha<=1,finished_opening);
     valve_automaton.new_invariant((valve|closed),height>=hmin,start_opening);
     valve_automaton.new_invariant((valve|closing),height>=hmin,start_opening);
-    valve_automaton.new_invariant((valve|closing),alpha>=0.0,finished_closing);
+    valve_automaton.new_invariant((valve|closing),alpha>=0,finished_closing);
 
     valve_automaton.new_transition((valve|closed),start_opening,(valve|opening),(next(alpha)=alpha),height<=hmin,PERMISSIVE);
     valve_automaton.new_transition((valve|closing),start_opening,(valve|opening),(next(alpha)=alpha),height<=hmin,PERMISSIVE);
@@ -477,8 +478,8 @@ TestHybridAutomaton::test_build_hybrid_system()
     // Set the transitions for when the valve finished opening.
     // Since alpha is defined by an algebraic equation in the new mode,
     // it may not be specified in the reset.
-    valve_automaton.new_transition((valve|opening),finished_opening,(valve|open),alpha>=1.0,PERMISSIVE);
-    valve_automaton.new_transition((valve|closing),finished_closing,(valve|closed),alpha<=0.0,PERMISSIVE);
+    valve_automaton.new_transition((valve|opening),finished_opening,(valve|open),alpha>=1,PERMISSIVE);
+    valve_automaton.new_transition((valve|closing),finished_closing,(valve|closed),alpha<=0,PERMISSIVE);
 
     ARIADNE_TEST_PRINT(valve_automaton);
 
@@ -555,8 +556,8 @@ TestHybridAutomaton::test_build_atomic_hybrid_automaton()
     valve_automaton.new_mode(open,(alpha=1.0));
     valve_automaton.new_mode(closed,(alpha=-1.0));
     // Specify the differential equation for how the valve opens/closes.
-    valve_automaton.new_mode(opening,(dot(alpha)=1.0/T));
-    valve_automaton.new_mode(closing,(dot(alpha)=-1.0/T));
+    valve_automaton.new_mode(opening,(dot(alpha)=1/T));
+    valve_automaton.new_mode(closing,(dot(alpha)=-1/T));
 
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to
@@ -564,10 +565,10 @@ TestHybridAutomaton::test_build_atomic_hybrid_automaton()
     //valve_automaton.new_invariant(open,start_closing,height<=hmax || (height>=hmin && !(height<=hmin+1)));
     valve_automaton.new_invariant(open,height<=hmax,start_closing);
     valve_automaton.new_invariant(opening,height<=hmax,start_closing);
-    valve_automaton.new_invariant(opening,alpha<=1.0,finished_opening);
+    valve_automaton.new_invariant(opening,alpha<=1,finished_opening);
     valve_automaton.new_invariant(closed,height>=hmin,start_opening);
     valve_automaton.new_invariant(closing,height>=hmin,start_opening);
-    valve_automaton.new_invariant(closing,alpha>=0.0,finished_closing);
+    valve_automaton.new_invariant(closing,alpha>=0,finished_closing);
 
     valve_automaton.new_transition(closed,start_opening,opening,(next(alpha)=alpha),height<=hmin,PERMISSIVE);
     valve_automaton.new_transition((closing),start_opening,(opening),(next(alpha)=alpha),height<=hmin,PERMISSIVE);
@@ -577,8 +578,8 @@ TestHybridAutomaton::test_build_atomic_hybrid_automaton()
     // Set the transitions for when the valve finished opening.
     // Since alpha is defined by an algebraic equation in the new mode,
     // it may not be specified in the reset.
-    valve_automaton.new_transition((opening),finished_opening,open,alpha>=1.0,PERMISSIVE);
-    valve_automaton.new_transition((closing),finished_closing,(closed),alpha<=0.0,PERMISSIVE);
+    valve_automaton.new_transition((opening),finished_opening,open,alpha>=1,PERMISSIVE);
+    valve_automaton.new_transition((closing),finished_closing,(closed),alpha<=0,PERMISSIVE);
 
     ARIADNE_TEST_PRINT(valve_automaton);
 
@@ -621,11 +622,11 @@ TestHybridAutomaton::test_build_intensional_hybrid_automaton()
 
     // Since alpha is a known constant when the valve is open or closed,
     // specify alpha by an algebraic equation.
-    valve_automaton.new_mode((valve|open),(alpha=1.0));
-    valve_automaton.new_mode((valve|closed),(alpha=-1.0));
+    valve_automaton.new_mode((valve|open),(alpha=1));
+    valve_automaton.new_mode((valve|closed),(alpha=-1));
     // Specify the differential equation for how the valve opens/closes.
-    valve_automaton.new_mode((valve|opening),(dot(alpha)=1.0/T));
-    valve_automaton.new_mode((valve|closing),(dot(alpha)=-1.0/T));
+    valve_automaton.new_mode((valve|opening),(dot(alpha)=1/T));
+    valve_automaton.new_mode((valve|closing),(dot(alpha)=-1/T));
 
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to
@@ -635,8 +636,8 @@ TestHybridAutomaton::test_build_intensional_hybrid_automaton()
     valve_automaton.new_action((valve|opening),height<=hmax,start_closing,height>=hmax-delta,PERMISSIVE);
     valve_automaton.new_action((valve|closed),height>=hmin,start_opening,height<=hmin+delta,PERMISSIVE);
     valve_automaton.new_action((valve|opening),height>=hmin,start_closing,height<=hmin+delta,PERMISSIVE);
-    valve_automaton.new_action((valve|closing),finished_closing,alpha>=0.0,URGENT);
-    valve_automaton.new_action((valve|opening),finished_opening,alpha<=1.0,URGENT);
+    valve_automaton.new_action((valve|closing),finished_closing,alpha>=0,URGENT);
+    valve_automaton.new_action((valve|opening),finished_opening,alpha<=1,URGENT);
 
     valve_automaton.new_update((valve|closed),start_opening,(valve|opening),(next(alpha)=alpha));
     valve_automaton.new_update((valve|closing),start_opening,(valve|opening),(next(alpha)=alpha));

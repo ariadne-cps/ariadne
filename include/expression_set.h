@@ -138,13 +138,8 @@ inline RealVariableInterval operator==(const RealVariable& v, const Real& x) {
 inline RealVariableInterval operator==(const Real& x, const RealVariable& v) {
     return RealVariableInterval(x,v,x); }
 
-inline RealVariableLowerInterval operator<=(double l, const RealVariable& v) { return Real(l)<=v; }
-inline RealVariableLowerInterval operator>=(const RealVariable& v, double l) { return v>=Real(l); }
-inline RealVariableUpperInterval operator<=(const RealVariable& v, double u) { return v<=Real(u); }
-inline RealVariableUpperInterval operator>=(double u, const RealVariable& v) { return Real(u)>=v; }
-
-inline RealVariableInterval operator==(const RealVariable& v, double x) { return v==Real(x); }
-inline RealVariableInterval operator==(double x, const RealVariable& v) { return Real(x)==v; }
+inline RealVariableLowerInterval operator<=(int l, RealVariable const& v) {
+    return RealVariableLowerInterval(l,v); }
 
 //! \ingroup ExpressionSetSubModule
 //! \brief An box defining ranges for a collection of real variables.

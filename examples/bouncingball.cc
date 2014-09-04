@@ -34,8 +34,8 @@ int main(int argc, const char* argv[])
     typedef GeneralHybridEvolver GeneralHybridEvolverType;
 
     /// Set the system parameters
-    Real a = 0.5;  // Coefficient of restitution
-    Real g = 9.8;
+    Real a = Decimal(0.5);  // Coefficient of restitution
+    Real g = Decimal(9.8);
 
     /// Set the position and velocity functions.
     RealVariable x("x");
@@ -80,7 +80,7 @@ int main(int argc, const char* argv[])
 
     std::cout << "Computing evolution starting from location l1, x = 2.0, v = 0.0" << std::endl;
 
-    HybridSet initial_set(freefall,(2.0<=x<=2.0,v.in(0.0,0.0)));
+    HybridSet initial_set(freefall,(2<=x<=2,v.in(0,0)));
     HybridTime evolution_time(1.5,4);
 
     std::cout << "Computing orbit... " << std::flush;
@@ -93,7 +93,7 @@ int main(int argc, const char* argv[])
     plot("bouncingball-x",Axes2d(0.0,TimeVariable(),1.5,- 0.1,x,2.1), Colour(0.0,0.5,1.0), orbit);
 
     std::cout << "\norbit: 1 initial set, "<<orbit.reach().size()<<" reach sets, "<<orbit.intermediate().size()<<" intermediate sets, "<<orbit.final().size()<<" final sets\n\n";
-    
+
 /*
     std::cout << "Computing reach set using GeneralHybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(initial_enclosure,evolution_time);

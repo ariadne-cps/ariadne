@@ -157,7 +157,7 @@ class Enclosure
     //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
     void apply_map(IntervalVectorFunction r);
     //! \brief Apply the flow \f$\phi(x,h)\f$ to the map \f$f\f$.
-    void apply_fixed_evolve_step(IntervalVectorFunction phi, Dyadic h);
+    void apply_fixed_evolve_step(IntervalVectorFunction phi, ExactFloat h);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.
     void apply_space_evolve_step(IntervalVectorFunction phi, IntervalScalarFunction elps);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s),\tau(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s),\tau(s))\f$.

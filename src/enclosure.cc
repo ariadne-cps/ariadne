@@ -440,10 +440,10 @@ void Enclosure::apply_flow(IntervalVectorFunction flow, Interval time)
 }
 */
 
-void Enclosure::apply_fixed_evolve_step(IntervalVectorFunction flow, Dyadic time)
+void Enclosure::apply_fixed_evolve_step(IntervalVectorFunction flow, ExactFloat time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
-    IntervalScalarFunctionModel evolve_time_function=this->function_factory().create_constant(this->domain(),Dyadic(time));
+    IntervalScalarFunctionModel evolve_time_function=this->function_factory().create_constant(this->domain(),ExactFloat(time));
     this->_space_function=compose(flow,join(this->_space_function,evolve_time_function));
     this->_time_function=this->_time_function + evolve_time_function;
     this->_dwell_time_function=this->_dwell_time_function + evolve_time_function;
@@ -499,7 +499,7 @@ void Enclosure::apply_full_reach_step(IntervalVectorFunctionModel phi)
     ARIADNE_ASSERT(phi.result_size()==this->dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
     Float h=phi.domain()[phi.result_size()].upper();
-    IntervalScalarFunctionModel elps=this->function_factory().create_constant(this->domain(),Dyadic(h));
+    IntervalScalarFunctionModel elps=this->function_factory().create_constant(this->domain(),ExactFloat(h));
     this->apply_parameter_reach_step(phi,elps);
 }
 

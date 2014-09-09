@@ -325,7 +325,7 @@ void TestVectorTaylorFunction::test_constructors()
 
     Vector<Interval> domain={{0.25,1.25},{0.5,1.0}};
     RealVectorFunction x=RealVectorFunction::identity(2);
-    Dyadic a(1.5); Dyadic b(0.25);
+    ExactFloat a(1.5); ExactFloat b(0.25);
     RealVectorFunction henon_function( (a-x[0]*x[0]+b*x[1], x[0]*1) );
     ARIADNE_TEST_CONSTRUCT(VectorTaylorFunction,henon_model,(domain,henon_function,swp));
     ARIADNE_TEST_EQUAL(henon_model.models()[0].expansion(),expansion[0])
@@ -366,7 +366,7 @@ void TestVectorTaylorFunction::test_restrict()
 void TestVectorTaylorFunction::test_jacobian()
 {
     RealVectorFunction x=RealVectorFunction::identity(2);
-    Dyadic a(1.5); Dyadic b(0.25);
+    ExactFloat a(1.5); ExactFloat b(0.25);
     RealVectorFunction henon( (a-x[0]*x[0]+b*x[1], x[0]*1) );
     Vector<Interval> domain1={{-1.0,+1.0},{-1.0,+1.0}};
     Vector<Interval> domain2={{-0.5,+0.5},{-0.25,+0.25}};
@@ -383,7 +383,7 @@ void TestVectorTaylorFunction::test_jacobian()
 
 void TestVectorTaylorFunction::test_compose()
 {
-    Real a=Dyadic(1.5); Real b=Dyadic(0.25);
+    Real a=ExactFloat(1.5); Real b=ExactFloat(0.25);
     RealScalarFunction x=RealScalarFunction::coordinate(2,0);
     RealScalarFunction y=RealScalarFunction::coordinate(2,1);
     RealVectorFunction henon_polynomial=(a-x*x+b*y)*e(2,0)+x*e(2,1);

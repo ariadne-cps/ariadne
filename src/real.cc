@@ -117,8 +117,17 @@ class DyadicReal
 {
     Dyadic _value;
   public:
-    DyadicReal(double x) : DyadicReal(Dyadic(x)) { }
     DyadicReal(const Dyadic& x) : RealBody(Interval(x),Float(x)), _value(x) { }
+    virtual Void write(OutputStream& os) const final { os << _value; }
+};
+
+class ExactFloatReal
+    : public RealBody
+{
+    ExactFloat _value;
+  public:
+    ExactFloatReal(double x) : ExactFloatReal(ExactFloat(x)) { }
+    ExactFloatReal(const ExactFloat& x) : RealBody(Interval(x),Float(x)), _value(x) { }
     virtual Void write(OutputStream& os) const final { os << _value; }
 };
 
@@ -152,17 +161,16 @@ Real::Real(double l, double x, double u) : _ptr(new IntervalReal(l,x,u)) { }
 
 Real::Real(unsigned int m) : _ptr(new IntegerReal(m)) { }
 Real::Real(int n) : _ptr(new IntegerReal(n)) { }
-Real::Real(double x) : _ptr(new DyadicReal(x)) { }
-Real::Real(const Dyadic& x) : _ptr(new DyadicReal(x)) { }
+Real::Real(double x) : _ptr(new ExactFloatReal(x)) { }
+Real::Real(const Dyadic& d) : _ptr(new DyadicReal(d)) { }
 Real::Real(const Decimal& d) : _ptr(new DecimalReal(d)) { }
 #ifdef HAVE_GMPXX_H
 Real::Real(const Integer& z) : _ptr(new IntegerReal(z)) { }
 Real::Real(const Rational& q) : _ptr(new RationalReal(q)) { }
 #endif // HAVE_GMPXX_H
+Real::Real(const ExactFloat& x) : _ptr(new ExactFloatReal(x)) { }
 
 Real::Real(const Real& x) : _ptr(x._ptr) { }
-Real& Real::operator=(double x) { *this=Real(x); return *this; }
-Real& Real::operator=(const Dyadic& x) { *this=Real(x); return *this; }
 Real& Real::operator=(const Real& x) { this->_ptr=x._ptr; return *this; }
 double Real::get_d() const { return this->_ptr->operator Float().get_d(); }
 

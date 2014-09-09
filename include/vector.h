@@ -125,7 +125,7 @@ class Vector
     static Vector<X> one(size_t n) { return Vector<Float>(n,1.0); }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
     static Vector<X> unit(size_t n,size_t i) {
-        ARIADNE_ASSERT(i<n); Vector<X> result(n,static_cast<X>(0.0)); result[i]=1.0; return result; }
+        ARIADNE_ASSERT(i<n); Vector<X> result(n,static_cast<X>(0.0)); result[i]=static_cast<X>(1.0); return result; }
     static Vector<X> unit_box(size_t n) {
         Vector<X> result(n,Interval(-1,1)); return result; }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.

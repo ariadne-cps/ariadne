@@ -666,7 +666,7 @@ IntervalScalarFunction operator-(IntervalScalarFunction const& f, Interval const
     std::shared_ptr<IntervalScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f.managed_pointer());
     if(fp) { return IntervalScalarFunctionModel(*fp) - c; }
     std::shared_ptr<RealScalarFunctionInterface const> rfp=std::dynamic_pointer_cast<RealScalarFunctionInterface const>(f.managed_pointer());
-    if(rfp && c.lower()==c.upper()) { return RealScalarFunction(*rfp) - Dyadic(c.lower()); }
+    if(rfp && c.lower()==c.upper()) { return RealScalarFunction(*rfp) - ExactFloat(c.lower()); }
     return new BinaryFunction<Interval>(SUB,f,IntervalScalarFunction::constant(f.argument_size(),c));
 }
 

@@ -61,10 +61,10 @@ TestVector::test_concept()
 {
     Float fx(1);
     Interval ix(1);
-    Dyadic ex(1);
+    ExactFloat ex(1);
     Vector<Float> fv;
     Vector<Interval> iv;
-    Vector<Dyadic> ev;
+    Vector<ExactFloat> ev;
 
     iv=Vector<Interval>(ev);
 
@@ -89,7 +89,7 @@ TestVector::test_constructors()
     ARIADNE_TEST_ASSERT( v0[0]==0.0 );
     ARIADNE_TEST_ASSERT( v0[1]==0.0 );
     ARIADNE_TEST_ASSERT( v0[2]==0.0 );
-    
+
     ARIADNE_TEST_CONSTRUCT( FloatVector, v1, ({3.25,-0.75,0.0,1.375}) );
     ARIADNE_TEST_ASSERT( v1.size()==4 );
     ARIADNE_TEST_ASSERT( v1[0]==3.25 );
@@ -209,8 +209,8 @@ TestVector::test_misc()
     cout << iv1 << " = " << iv2 << " / " << ix << endl;
     cout << endl;
 
-    Vector<Dyadic> ev1(v1);
-    Dyadic ex(x);
+    Vector<ExactFloat> ev1(v1);
+    ExactFloat ex(x);
     iv0=iv1+ev1;
     cout << iv0 << " = " << iv1 << " + " << ev1 << endl;
     iv0=ev1+iv1;

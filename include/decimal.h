@@ -52,10 +52,6 @@ class Decimal {
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
 #endif // HAVE_GMPXX_H
-    //! \brief Convert to a floating-point interval.
-    explicit operator Interval () const;
-    //! \brief Convert to a floating-point interval.
-    explicit operator Float () const;
     friend std::ostream& operator<<(std::ostream& os, Decimal const& d);
     friend Decimal operator"" _dec (long double dbl);
 };

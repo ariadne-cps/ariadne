@@ -45,14 +45,14 @@ bool possibly(bool b) { return b; }
 
 void set_output_precision(uint p) { std::cout << std::setprecision(p); }
 
-Interval operator+(Rational q, Dyadic x) { return Interval(q+Rational(x)); }
-Interval operator-(Rational q, Dyadic x) { return Interval(q-Rational(x)); }
-Interval operator*(Rational q, Dyadic x) { return Interval(q*Rational(x)); }
-Interval operator/(Rational q, Dyadic x) { return Interval(q/Rational(x)); }
-Interval operator+(Dyadic x, Rational q) { return Interval(Rational(x)+q); }
-Interval operator-(Dyadic x, Rational q) { return Interval(Rational(x)-q); }
-Interval operator*(Dyadic x, Rational q) { return Interval(Rational(x)*q); }
-Interval operator/(Dyadic x, Rational q) { return Interval(Rational(x)/q); }
+Dyadic operator+(Dyadic const& x1, Dyadic const& x2) {
+    Dyadic r(x1.value()+x2.value()); ARIADNE_ASSERT(Rational(r)==Rational(x1)+Rational(x2)); return r; }
+Dyadic operator-(Dyadic const& x1, Dyadic const& x2) {
+    Dyadic r(x1.value()-x2.value()); ARIADNE_ASSERT(Rational(r)==Rational(x1)-Rational(x2)); return r; }
+Dyadic operator*(Dyadic const& x1, Dyadic const& x2) {
+    Dyadic r(x1.value()*x2.value()); ARIADNE_ASSERT(Rational(r)==Rational(x1)*Rational(x2)); return r; }
+Rational operator/(Dyadic const& x1, Dyadic const& x2) {
+    return Rational(x1)/Rational(x2); }
 
 class PythonRational : public Rational {
   public:
@@ -239,7 +239,6 @@ void export_dyadic()
     dyadic_class.def(init<>());
     dyadic_class.def(init<int>());
     dyadic_class.def(init<double>());
-    dyadic_class.def(init<Float>());
     dyadic_class.def(+self);
     dyadic_class.def(-self);
     dyadic_class.def(self+self);
@@ -247,25 +246,8 @@ void export_dyadic()
     dyadic_class.def(self*self);
     dyadic_class.def(self/self);
 
-    dyadic_class.def(Rational()+self);
-    dyadic_class.def(Rational()-self);
-    dyadic_class.def(Rational()*self);
-    dyadic_class.def(Rational()/self);
-    dyadic_class.def(self+Rational());
-    dyadic_class.def(self-Rational());
-    dyadic_class.def(self*Rational());
-    dyadic_class.def(self/Rational());
-
-    def("pow",(Interval(*)(const Dyadic&,int)) &Ariadne::pow);
-
-//    dyadic_class.def(int()*self);
-//    dyadic_class.def(self*int());
-//    dyadic_class.def(self/int());
-
     dyadic_class.def("__str__", &__cstr__<Dyadic>);
     dyadic_class.def("__repr__", &__cstr__<Dyadic>);
-
-    def("make_exact", (const Dyadic&(*)(const Float&)) &Ariadne::make_exact, return_value_policy<copy_const_reference>());
 }
 
 void export_decimal()
@@ -337,6 +319,22 @@ void export_real()
 
 
 
+
+void export_exact_float()
+{
+    class_< ExactFloat > exact_float_class("ExactFloat",init<ExactFloat>());
+    exact_float_class.def(init<>());
+    exact_float_class.def(init<Float>());
+    exact_float_class.def(+self);
+    exact_float_class.def(-self);
+    exact_float_class.def(self+self);
+    exact_float_class.def(self-self);
+    exact_float_class.def(self*self);
+    exact_float_class.def(self/self);
+
+    exact_float_class.def("__str__", &__cstr__<ExactFloat>);
+    exact_float_class.def("__repr__", &__cstr__<ExactFloat>);
+}
 
 void export_interval()
 {
@@ -507,6 +505,7 @@ numeric_submodule()
     export_tribool();
     export_float();
     export_interval();
+    export_exact_float();
     export_real();
     export_dyadic();
     export_decimal();

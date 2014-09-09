@@ -78,7 +78,7 @@ class TestOptimiser
         List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
         RealScalarFunction f=(sqr(x[0])+sqr(x[1]));
         ARIADNE_TEST_PRINT(f);
-        Dyadic a(1.5); Dyadic b(0.25);
+        ExactFloat a(1.5); ExactFloat b(0.25);
         RealVectorFunction g={a+x[0]+2*x[1]+b*x[0]*x[1]};
         ARIADNE_TEST_PRINT(g);
         IntervalVector C={{0.0,0.0}};
@@ -98,7 +98,7 @@ class TestOptimiser
         //RealVectorFunction g( (x[0]-1, x[0]+x[1]*x[1], x[1]*x[1]) );
         Box D = Box{{-1.0,2.0},{-3.0,5.0},{-3.0,5.0}};
         ARIADNE_TEST_PRINT(D);
-        RealVectorFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-Dyadic(0.875)};
+        RealVectorFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-ExactFloat(0.875)};
         ARIADNE_TEST_PRINT(g);
         Box C = Box{{0.0,inf},{0.0,inf}};
         ARIADNE_TEST_PRINT(C);
@@ -115,8 +115,8 @@ class TestOptimiser
         ARIADNE_TEST_PRINT(f);
         Box D = Box{{-1.0,2.0},{-3.0,5.0},{1.25,2.25}};
         ARIADNE_TEST_PRINT(D);
-        RealScalarFunction g = x[0]*x[1]-x[0]*Dyadic(1.25);
-        RealVectorFunction h = {Dyadic(1.5)+x[0]+2*x[1]+Dyadic(0.25)*x[0]*x[1]};
+        RealScalarFunction g = x[0]*x[1]-x[0]*ExactFloat(1.25);
+        RealVectorFunction h = {ExactFloat(1.5)+x[0]+2*x[1]+ExactFloat(0.25)*x[0]*x[1]};
         RealVectorFunction gh=join(g,h);
         ARIADNE_TEST_PRINT(gh);
         Box C = Box {{-1.0,-0.5},{0.0,0.0}};

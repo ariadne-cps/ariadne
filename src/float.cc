@@ -29,6 +29,7 @@
 #include "config.h"
 
 #include "macros.h"
+#include "dyadic.h"
 #include "decimal.h"
 #include "rational.h"
 #include "rounding.h"
@@ -54,7 +55,7 @@
 #endif
 
 #include "float.h"
-#include "dyadic.h"
+#include "float-exact.h"
 
 
 namespace Ariadne {
@@ -588,12 +589,13 @@ Float tan_rnd(Float x)
     return tan_rnd(x.v);
 }
 
-//Dyadic inf = Dyadic(std::numeric_limits< double >::infinity());
-Float::Float(Decimal const& d) : Float(d.operator Float()) { }
+//ExactFloat inf = ExactFloat(std::numeric_limits< double >::infinity());
+Float::Float(Dyadic const& b) : Float(b.operator Rational()) { }
+Float::Float(Decimal const& d) : Float(d.operator Rational()) { }
 
 
 #ifdef HAVE_GMPXX_H
-Dyadic::operator Rational() const {
+ExactFloat::operator Rational() const {
     return Rational(this->get_d());
 }
 Float::Float(Rational const& q) : Float(q.get_d()) {

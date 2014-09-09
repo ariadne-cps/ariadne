@@ -204,11 +204,11 @@ IntegratorBase::flow(const IntervalVectorFunction& vf, const IntervalVector& dx0
         IntervalVectorFunctionModel flow_step_function=this->flow_step(vf,dx,h,bx);
         Float new_t=add_down(t,h);
         Interval dt(t,new_t);
-        IntervalScalarFunctionModel step_time_function=this->function_factory().create_identity(dt)-Dyadic(t);
+        IntervalScalarFunctionModel step_time_function=this->function_factory().create_identity(dt)-ExactFloat(t);
         IntervalVectorFunctionModel flow_function=compose(flow_step_function,combine(evolve_function,step_time_function));
         ARIADNE_ASSERT(flow_function.domain()[dx0.size()].upper()==new_t);
         result.append(flow_function);
-        evolve_function=partial_evaluate(flow_function,dx0.size(),Dyadic(new_t));
+        evolve_function=partial_evaluate(flow_function,dx0.size(),ExactFloat(new_t));
         t=new_t;
     }
     return result;
@@ -461,7 +461,7 @@ differential_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx
     Vector<IntervalDifferential> idb(n,n+1,so+to);
     Vector<IntervalDifferential> dphic(n,n+1,so+to);
     Vector<IntervalDifferential> dphib(n,n+1,so+to);
-    Dyadic h(flth);
+    ExactFloat h(flth);
     for(uint i=0; i!=n; ++i) {
         idc[i]=IntervalDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(midpoint(dx[i]));
         idb[i]=IntervalDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(bx[i]);

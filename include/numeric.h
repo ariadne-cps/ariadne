@@ -34,6 +34,7 @@
 #include "decimal.h"
 #include "dyadic.h"
 #include "float.h"
+#include "float-exact.h"
 #include "interval.h"
 #include "real.h"
 
@@ -41,7 +42,7 @@ namespace Ariadne {
 
 template<class R, class A> inline R numeric_cast(const A& a);
 template<> inline double numeric_cast(const Real& a) { return a.get_d(); }
-template<> inline Real numeric_cast(const Float& a) { return Real(Dyadic(a)); }
+template<> inline Real numeric_cast(const Float& a) { return Real(ExactFloat(a)); }
 template<> inline Real numeric_cast(const Interval& a) { return Real(a.lower().get_d(),a.upper().get_d()); }
 
 //! \ingroup NumericModule
@@ -76,7 +77,7 @@ template<> struct IsNumeric<unsigned int> { static const bool value = true; };
 template<> struct IsNumeric<int> { static const bool value = true; };
 template<> struct IsNumeric<double> { static const bool value = true; };
 template<> struct IsNumeric<Float> { static const bool value = true; };
-template<> struct IsNumeric<Dyadic> { static const bool value = true; };
+template<> struct IsNumeric<ExactFloat> { static const bool value = true; };
 template<> struct IsNumeric<Interval> { static const bool value = true; };
 template<> struct IsNumeric<Real> { static const bool value = true; };
 
@@ -88,9 +89,9 @@ template<> struct IsNumeric<Rational> { static const bool value = true; };
 template<class X, class T> struct EnableIfNumeric : EnableIf<IsNumeric<X>,T> { };
 
 template<class F, class T> struct IsSafelyConvertible : False { };
-template<> struct IsSafelyConvertible<Dyadic,Dyadic> : True { };
-template<> struct IsSafelyConvertible<Dyadic,Real> : True { };
-template<> struct IsSafelyConvertible<Dyadic,Interval> : True { };
+template<> struct IsSafelyConvertible<ExactFloat,ExactFloat> : True { };
+template<> struct IsSafelyConvertible<ExactFloat,Real> : True { };
+template<> struct IsSafelyConvertible<ExactFloat,Interval> : True { };
 template<> struct IsSafelyConvertible<Real,Real> : True { };
 template<> struct IsSafelyConvertible<Real,Interval> : True { };
 template<> struct IsSafelyConvertible<Real,Float> : True { };
@@ -106,19 +107,19 @@ template<> struct IsSafelyConvertible<uint,Rational> : True { };
 template<> struct IsSafelyConvertible<int,Rational> : True { };
 #endif // HAVE_GMPXX_H
 template<> struct IsSafelyConvertible<uint,Real> : True { };
-template<> struct IsSafelyConvertible<uint,Dyadic> : True { };
+template<> struct IsSafelyConvertible<uint,ExactFloat> : True { };
 template<> struct IsSafelyConvertible<uint,Interval> : True { };
 template<> struct IsSafelyConvertible<uint,Float> : True { };
 template<> struct IsSafelyConvertible<int,Real> : True { };
-template<> struct IsSafelyConvertible<int,Dyadic> : True { };
+template<> struct IsSafelyConvertible<int,ExactFloat> : True { };
 template<> struct IsSafelyConvertible<int,Interval> : True { };
 template<> struct IsSafelyConvertible<int,Float> : True { };
-template<> struct IsSafelyConvertible<double,Dyadic> : True { };
+template<> struct IsSafelyConvertible<double,ExactFloat> : True { };
 template<> struct IsSafelyConvertible<double,Interval> : True { };
 template<> struct IsSafelyConvertible<double,Float> : True { };
 
 template<class FROM, class TO> struct IsNumericCastable : IsSafelyConvertible<FROM,TO> { };
-template<> struct IsNumericCastable<Float,Dyadic> : True { };
+template<> struct IsNumericCastable<Float,ExactFloat> : True { };
 template<> struct IsNumericCastable<Float,Interval> : True { };
 
 // Type deduction for numerical arithmetic
@@ -130,14 +131,14 @@ template<> struct Arithmetic<Real,double> { typedef Real ResultType; };
 template<> struct Arithmetic<Float,double> { typedef Float ResultType; };
 template<> struct Arithmetic<Interval,double> { typedef Interval ResultType; };
 template<> struct Arithmetic<Real,Real> { typedef Real ResultType; };
-template<> struct Arithmetic<Dyadic,Dyadic> { typedef Interval ResultType; };
-template<> struct Arithmetic<Interval,Dyadic> { typedef Interval ResultType; };
-template<> struct Arithmetic<Dyadic,Interval> { typedef Interval ResultType; };
+template<> struct Arithmetic<ExactFloat,ExactFloat> { typedef Interval ResultType; };
+template<> struct Arithmetic<Interval,ExactFloat> { typedef Interval ResultType; };
+template<> struct Arithmetic<ExactFloat,Interval> { typedef Interval ResultType; };
 template<> struct Arithmetic<Interval,Real> { typedef Interval ResultType; };
 template<> struct Arithmetic<Real,Interval> { typedef Interval ResultType; };
 template<> struct Arithmetic<Interval,Interval> { typedef Interval ResultType; };
-template<> struct Arithmetic<Float,Dyadic> { typedef Float ResultType; };
-template<> struct Arithmetic<Dyadic,Float> { typedef Float ResultType; };
+template<> struct Arithmetic<Float,ExactFloat> { typedef Float ResultType; };
+template<> struct Arithmetic<ExactFloat,Float> { typedef Float ResultType; };
 template<> struct Arithmetic<Float,Interval> { typedef Float ResultType; };
 template<> struct Arithmetic<Interval,Float> { typedef Float ResultType; };
 template<> struct Arithmetic<Float,Float> { typedef Float ResultType; };

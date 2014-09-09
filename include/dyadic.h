@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dyadic.h
+ *            float-exact.h
  *
  *  Copyright 2008-14  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file dyadic.h
+/*! \file float-exact.h
  *  \brief Exact floating-point number class, a subset of dyadic numbers.
  */
 #ifndef ARIADNE_DYADIC_H
@@ -74,20 +74,10 @@ inline Dyadic operator"" _bin(long double x) { return Dyadic(static_cast<double>
 
 inline Dyadic operator+(const Dyadic& x) { return Dyadic(+x.value()); }
 inline Dyadic operator-(const Dyadic& x) { return Dyadic(-x.value()); }
-inline Interval operator+(const Dyadic& x1,  const Dyadic& x2);
-inline Interval operator-(const Dyadic& x1,  const Dyadic& x2);
-inline Interval operator*(const Dyadic& x1,  const Dyadic& x2);
-inline Interval operator/(const Dyadic& x1,  const Dyadic& x2);
-inline Interval operator+(const Interval& x1,  const Dyadic& x2);
-inline Interval operator-(const Interval& x1,  const Dyadic& x2);
-inline Interval operator*(const Interval& x1,  const Dyadic& x2);
-inline Interval operator/(const Interval& x1,  const Dyadic& x2);
-inline Interval operator+(const Dyadic& x1,  const Interval& x2);
-inline Interval operator-(const Dyadic& x1,  const Interval& x2);
-inline Interval operator*(const Dyadic& x1,  const Interval& x2);
-inline Interval operator/(const Dyadic& x1,  const Interval& x2);
-inline Interval pow(const Dyadic& x, int n);
-inline Interval operator/(int n1,  const Dyadic& x2);
+inline Dyadic operator+(const Dyadic& x1,  const Dyadic& x2);
+inline Dyadic operator-(const Dyadic& x1,  const Dyadic& x2);
+inline Dyadic operator*(const Dyadic& x1,  const Dyadic& x2);
+inline Rational operator/(const Dyadic& x1,  const Dyadic& x2);
 inline std::ostream& operator<<(std::ostream& os, const Dyadic& x) { return os << std::showpoint << std::setprecision(18) << x.value(); }
 
 inline bool operator==(const Dyadic& x1, const Dyadic& x2) { return x1.value()==x2.value(); }
@@ -104,29 +94,10 @@ inline bool operator>=(const Dyadic& x1, double x2) { return x1.value()>=x2; }
 inline bool operator< (const Dyadic& x1, double x2) { return x1.value()< x2; }
 inline bool operator> (const Dyadic& x1, double x2) { return x1.value()> x2; }
 
-inline Float::Float(const Dyadic& x) : v(x.value().get_d()) { }
-inline Float& Float::operator=(const Dyadic& x) { this->operator=(x.value()); return *this; }
-
-inline const Dyadic& make_exact(const Float& x) { return reinterpret_cast<const Dyadic&>(x); }
-template<template<class>class T> inline const T<Dyadic>& make_exact(const T<Float>& t) { return reinterpret_cast<const T<Dyadic>&>(t); }
-
-//! \related Float \brief The constant infinity
-//extern Dyadic inf;
-
-class Interval;
-inline Interval sqr_ivl(Float x);
-inline Interval rec_ivl(Float x);
-inline Interval add_ivl(Float x, Float y);
-inline Interval sub_ivl(Float x, Float y);
-inline Interval mul_ivl(Float x, Float y);
-inline Interval div_ivl(Float x, Float y);
-inline Interval pow_ivl(Float x, int n);
-
-inline Interval rad_ivl(Float x, Float y);
-inline Interval med_ivl(Float x, Float y);
-
 
 #ifdef HAVE_GMPXX_H
+inline Dyadic::operator Rational () const { return Rational(this->get_d()); }
+
 inline bool operator==(const Dyadic& x, const Rational& q) { return x.get_d()==static_cast<const mpq_class&>(q); }
 inline bool operator!=(const Dyadic& x, const Rational& q) { return x.get_d()!=static_cast<const mpq_class&>(q); }
 inline bool operator<=(const Dyadic& x, const Rational& q) { return x.get_d()<=static_cast<const mpq_class&>(q); }

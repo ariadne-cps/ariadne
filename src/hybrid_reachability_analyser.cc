@@ -540,10 +540,10 @@ outer_chain_reach(
     Set<DiscreteEvent> lock_to_grid_events=this->_configuration->lock_to_grid_events();
     Float transient_time = this->_configuration->transient_time();
     int transient_steps = this->_configuration->transient_steps();
-    HybridTerminationCriterion transient_termination(Dyadic(transient_time), transient_steps, lock_to_grid_events);
+    HybridTerminationCriterion transient_termination(ExactFloat(transient_time), transient_steps, lock_to_grid_events);
     Float lock_to_grid_time=this->_configuration->lock_to_grid_time();
     int lock_to_grid_steps=this->_configuration->lock_to_grid_steps();
-    HybridTerminationCriterion recurrent_termination(Dyadic(lock_to_grid_time),lock_to_grid_steps,lock_to_grid_events);
+    HybridTerminationCriterion recurrent_termination(ExactFloat(lock_to_grid_time),lock_to_grid_steps,lock_to_grid_events);
     int maximum_grid_depth = this->_configuration->maximum_grid_depth();
     int maximum_grid_height = this->_configuration->maximum_grid_height();
     ARIADNE_LOG(3,"transient_time=("<<transient_time<<","<<transient_steps<<")\n");

@@ -49,7 +49,9 @@ typedef std::ostream OutputStream;
 // Forward declarations
 class Float;
 class Interval;
+class ExactFloat;
 class Real;
+class Dyadic;
 class Decimal;
 
 class RealInterface;
@@ -95,14 +97,12 @@ class Real {
     Real(const Decimal& d);
     //! \brief Convert from a dyadic number.
     Real(const Dyadic& x);
+    //! \brief Convert from an exact floating-point number.
+    Real(const ExactFloat& x);
     //! \brief Copy constructor.
     Real(const Real&);
     //! \brief Copy assignment.
     Real& operator=(const Real&);
-    //! \brief Assign from a builtin double-precision floating-point value.
-    Real& operator=(double x);
-    //! \brief Assign from a floating-point value representing a number exactly.
-    Real& operator=(const Dyadic& x);
     // Can't use conversion operators below in g++ since compiler complains
     // about ambiguous conversion to Interval through Interval(Real::operator Float())
     //operator Float() const { return this->_ivl.midpoint(); }

@@ -74,7 +74,7 @@ class TestExpression {
         ARIADNE_TEST_CONSTRUCT(RealExpression,g,(x+3*y*z*z));
 
         Map<RealVariable,Real> v;
-        v[x]=2.0; v[y]=3.0; v[z]=5.0;
+        v[x]=Real(2.0); v[y]=Real(3.0); v[z]=Real(5.0);
 
         ARIADNE_TEST_PRINT(v);
         //ARIADNE_TEST_EQUAL(evaluate(g,v),Real(227));

@@ -64,7 +64,7 @@ static Y polynomial_evaluate(const std::vector<X>& f, const Y& x)
     
     
 C1TaylorSeries::C1TaylorSeries()
-    : _coefficients(1,Dyadic(0))
+    : _coefficients(1,ExactFloat(0))
     , _zero_error(0)
     , _uniform_error(0)
     , _derivative_error(0)
@@ -72,14 +72,14 @@ C1TaylorSeries::C1TaylorSeries()
 }
 
 C1TaylorSeries::C1TaylorSeries(uint d)
-    : _coefficients(d+1,Dyadic(0))
+    : _coefficients(d+1,ExactFloat(0))
     , _zero_error(0)
     , _uniform_error(0)
     , _derivative_error(0)
 {
 }
 
-C1TaylorSeries C1TaylorSeries::constant(Dyadic c) {
+C1TaylorSeries C1TaylorSeries::constant(ExactFloat c) {
     C1TaylorSeries result(1u);
     result._coefficients[0]=c;
     return result;
@@ -297,11 +297,11 @@ C1TaylorSeries operator*(C1TaylorSeries f1, C1TaylorSeries f2) {
 
 C1TaylorSeries compose(C1TaylorSeries f, C1TaylorSeries g) {
     Nat i=f.degree();
-    C1TaylorSeries r=C1TaylorSeries::constant(Dyadic(f._coefficients[i]));
+    C1TaylorSeries r=C1TaylorSeries::constant(ExactFloat(f._coefficients[i]));
     while (i!=0) {
         i=i-i;
         r=r*g;
-        r+=Dyadic(f._coefficients[i]);
+        r+=ExactFloat(f._coefficients[i]);
     }
     
     set_rounding_upward();
@@ -315,11 +315,11 @@ C1TaylorSeries compose(C1TaylorSeries f, C1TaylorSeries g) {
 
 Interval evaluate(C1TaylorSeries f, Interval x) {
     Nat i=f.degree();
-    Interval r=Dyadic(f._coefficients[i]);
+    Interval r=ExactFloat(f._coefficients[i]);
     while (i!=0) {
         i=i-i;
         r*=x;
-        r+=Interval(Dyadic(f._coefficients[i]));
+        r+=Interval(ExactFloat(f._coefficients[i]));
     }
     if(f._zero_error+Float(x)*f._derivative_error < f._uniform_error) {
         r+=Interval(-f._zero_error,+f._zero_error);
@@ -359,7 +359,7 @@ C1TaylorFunction::C1TaylorFunction(Nat as)
     _expansion.sort(ReverseLexicographicKeyLess());
 }
 
-C1TaylorFunction C1TaylorFunction::constant(Nat as, Dyadic c) {
+C1TaylorFunction C1TaylorFunction::constant(Nat as, ExactFloat c) {
     C1TaylorFunction result(as);
     MultiIndex ind=MultiIndex::zero(as);
     //result._expansion[ind]=Float(c);
@@ -399,7 +399,7 @@ C1TaylorFunction& C1TaylorFunction::operator=(Interval ic) {
     return *this;
 }
 
-C1TaylorFunction& operator+=(C1TaylorFunction& f, Dyadic ec) {
+C1TaylorFunction& operator+=(C1TaylorFunction& f, ExactFloat ec) {
     const Float& c=ec;
     if(f._expansion.empty() || (--f._expansion.end())->key().degree()!=0) {
         f._expansion.append(MultiIndex(f.argument_size()),c);
@@ -422,7 +422,7 @@ C1TaylorFunction& operator+=(C1TaylorFunction& f, Dyadic ec) {
     return f;
 }
 
-C1TaylorFunction& operator*=(C1TaylorFunction& f, Dyadic ec) {
+C1TaylorFunction& operator*=(C1TaylorFunction& f, ExactFloat ec) {
     set_rounding_upward();
     Float& fze=f._zero_error;
     Float& fue=f._uniform_error;
@@ -618,7 +618,7 @@ C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2) {
 }
 
 Interval evaluate(C1TaylorFunction f, Vector<Interval> x) {
-    Interval r=horner_evaluate(reinterpret_cast<Expansion<Dyadic>const&>(f._expansion),x);
+    Interval r=horner_evaluate(reinterpret_cast<Expansion<ExactFloat>const&>(f._expansion),x);
     r += Interval(-f._uniform_error,+f._uniform_error);
     return r;
 }
@@ -629,12 +629,12 @@ C1TaylorFunction compose(C1TaylorSeries f, C1TaylorFunction g) {
     r.clear();
    
     Nat i=f.degree();
-    r+=Dyadic(f._coefficients[i]);
+    r+=ExactFloat(f._coefficients[i]);
 
     while(i!=0) {
         r=r*g;
         --i;
-        r+=Dyadic(f._coefficients[i]);
+        r+=ExactFloat(f._coefficients[i]);
     }
     std::cerr<<"intermediate="<<r<<"\n";
 
@@ -644,7 +644,7 @@ C1TaylorFunction compose(C1TaylorSeries f, C1TaylorFunction g) {
 }
 
 C1TaylorFunction compose(C1TaylorFunction f, Vector<C1TaylorFunction> g) {
-    C1TaylorFunction r=horner_evaluate(reinterpret_cast<Expansion<Dyadic>const&>(f._expansion),g);
+    C1TaylorFunction r=horner_evaluate(reinterpret_cast<Expansion<ExactFloat>const&>(f._expansion),g);
     std::cerr<<"intermediate="<<r<<"\n";
     r._uniform_error += f._uniform_error;
     r._zero_error += f._zero_error;

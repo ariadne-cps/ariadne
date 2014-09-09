@@ -145,14 +145,6 @@ Decimal::operator Rational() const {
 
 #endif // HAVE_GMPXX_H
 
-Decimal::operator Interval() const {
-    return Interval(this->operator Rational());
-}
-
-Decimal::operator Float() const {
-    return Float(this->operator Rational());
-}
-
 
 } // namespace Ariadne
 

@@ -124,7 +124,7 @@ class TestIntegrator
     };
 
     void test_spiral() {
-        Dyadic half(0.5);
+        ExactFloat half(0.5);
         RealVectorFunction f=(-half*x-y,x-half*y);
         IntervalVector d=(Interval(0.75,1.25),Interval(-0.25,0.25));
         Float h=0.25;

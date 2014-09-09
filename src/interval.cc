@@ -31,7 +31,9 @@
 #include "integer.h"
 #include "float.h"
 #include "rational.h"
+#include "float-exact.h"
 #include "decimal.h"
+#include "dyadic.h"
 #include "interval.h"
 
 
@@ -416,7 +418,9 @@ Interval atan(Interval i)
 }
 
 
-Interval::Interval(const Decimal& d) : Interval(d.operator Interval()) { }
+Interval::Interval(const Dyadic& b) : Interval(b.operator Rational()) { }
+
+Interval::Interval(const Decimal& d) : Interval(d.operator Rational()) { }
 
 
 #ifdef HAVE_GMPXX_H

@@ -194,7 +194,7 @@ Pair<uint,double> nonlinearity_index_and_error(const VectorTaylorFunction& funct
 
 BoxSet::BoxSet(const IntervalVector& bx) : _ary(bx.size()) {
     for(uint i=0; i!=bx.size(); ++i) {
-        this->_ary[i]=IntervalSet(Dyadic(bx[i].lower()),Dyadic(bx[i].upper()));
+        this->_ary[i]=IntervalSet(ExactFloat(bx[i].lower()),ExactFloat(bx[i].upper()));
     }
 }
 
@@ -1130,7 +1130,7 @@ join(const IntervalConstrainedImageSet& set1, const IntervalConstrainedImageSet&
     function2.clobber();
     function2.restrict(new_domain);
 
-    IntervalVectorFunctionModel new_function=(function1+function2)*Dyadic(0.5);
+    IntervalVectorFunctionModel new_function=(function1+function2)*ExactFloat(0.5);
     new_function.clobber();
     for(uint i=0; i!=new_function.result_size(); ++i) {
         function_error1[i]=add_up(norm(new_function[i]-function1[i]),function_error1[i]);

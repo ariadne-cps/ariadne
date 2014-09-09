@@ -44,6 +44,7 @@ namespace Ariadne {
 
 class Float;
 class Interval;
+class ExactFloat;
 class Real;
 class Dyadic;
 class Decimal;
@@ -73,7 +74,7 @@ const double nan = (1.0/0.0);
 //! Note that the value of a built-in floating-point value may differ from the mathematical value of the literal.
 //! For example, while <c>%Float(3.25)</c> is represented exactly, <c>%Float(3.3)</c> has a value of \f$3.2999999999999998224\ldots\f$.
 //! \note In the future, the construction of a \c %Float from a string literal may be supported.
-//! \sa Interval, Real, Dyadic
+//! \sa Interval, Real, ExactFloat
 class Float {
   public:
     static uint output_precision;
@@ -90,6 +91,8 @@ class Float {
     //! \brief Copy constructor.
     Float(const Float& x) : v(x.v) { }
     //! \brief Convert approximately from a decimal number.
+    Float(const Dyadic& d);
+    //! \brief Convert approximately from a decimal number.
     Float(const Decimal& d);
 #ifdef HAVE_GMPXX_H
     //! \brief Construct from a rational number.
@@ -99,11 +102,11 @@ class Float {
     //! not necessarily the nearest.
     Float(const Real& r);
     //! \brief Convert from a floating-point number with an exact representation.
-    Float(const Dyadic& x);
+    Float(const ExactFloat& x);
     Float& operator=(double x) { v=x; return *this; }
     Float& operator=(const Float& x) { v=x.v; return *this; }
     Float& operator=(const Real& x);
-    Float& operator=(const Dyadic& x);
+    Float& operator=(const ExactFloat& x);
     //! \brief An approximation by a built-in double-precision floating-point number.
     double get_d() const { return this->v; }
     static void set_output_precision(uint p) { output_precision=p; }

@@ -51,7 +51,7 @@ using namespace std;
 struct FailOne : VectorFunctionData<2,2,1> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
-          r[0] = 1.0;
+          r[0] = 1;
           r[1] = -p[0] * x[1] + p[0];
     }
 };
@@ -60,9 +60,9 @@ struct FailOne : VectorFunctionData<2,2,1> {
 struct FailTwo : VectorFunctionData<3,3,1> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
-          r[0] = 1.0;
+          r[0] = 1;
           r[1] = x[1] * x[2]/p[0];
-          r[2] = 0.0;
+          r[2] = 0;
     }
 };
 
@@ -210,7 +210,7 @@ void TestContinuousEvolution::failure_test() const
     fig.write("test_continuous_evolution-failone");
 
     // Set up the vector field for the second test
-    p[0] = 0.1;
+    p[0] = Rational(1,10);
     VectorUserFunction<FailTwo> failtwo(p);
     VectorField failtwo_vf(failtwo);
 

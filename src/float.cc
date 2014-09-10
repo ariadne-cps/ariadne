@@ -552,55 +552,40 @@ double tan_rnd_series(double x) {
     return r;
 }
 
-uint Float::output_precision = 6;
-
 Float pow_rnd(Float x, int n)
 {
-    return pow_rnd(x.v,n);
+    return pow_rnd(x.dbl,n);
 }
 
 Float sqrt_rnd(Float x)
 {
-    return sqrt_rnd(x.v);
+    return sqrt_rnd(x.dbl);
 }
 
 Float exp_rnd(Float x)
 {
-    return exp_rnd(x.v);
+    return exp_rnd(x.dbl);
 }
 
 Float log_rnd(Float x)
 {
-    return log_rnd(x.v);
+    return log_rnd(x.dbl);
 }
 
 Float sin_rnd(Float x)
 {
-    return sin_rnd(x.v);
+    return sin_rnd(x.dbl);
 }
 
 Float cos_rnd(Float x)
 {
-    return cos_rnd(x.v);
+    return cos_rnd(x.dbl);
 }
 
 Float tan_rnd(Float x)
 {
-    return tan_rnd(x.v);
+    return tan_rnd(x.dbl);
 }
-
-//ExactFloat inf = ExactFloat(std::numeric_limits< double >::infinity());
-Float::Float(Dyadic const& b) : Float(b.operator Rational()) { }
-Float::Float(Decimal const& d) : Float(d.operator Rational()) { }
-
-
-#ifdef HAVE_GMPXX_H
-ExactFloat::operator Rational() const {
-    return Rational(this->get_d());
-}
-Float::Float(Rational const& q) : Float(q.get_d()) {
-}
-#endif
 
 } // namespace Ariadne
 

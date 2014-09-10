@@ -109,6 +109,10 @@ std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Float>& x)
     return os << std::showpoint << std::setprecision(18) << x.reference().get_d();
 }
 
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ApproximateFloat>& x) {
+    return os << std::showpoint << std::setprecision(18) << x.reference().get_d();
+}
+
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ValidatedFloat>& x) {
     rounding_mode_t rnd=get_rounding_mode();
     os << '{';
@@ -332,6 +336,7 @@ void export_exact_float()
     exact_float_class.def(self*self);
     exact_float_class.def(self/self);
 
+    exact_float_class.def("set_output_precision", &ExactFloat::set_output_precision);
     exact_float_class.def("__str__", &__cstr__<ExactFloat>);
     exact_float_class.def("__repr__", &__cstr__<ExactFloat>);
 }
@@ -352,14 +357,13 @@ void export_validated_float()
     validated_float_class.def(init<double>());
     validated_float_class.def(init<double,double>());
     validated_float_class.def(init<Float,Float>());
-    validated_float_class.def(init<Real,Real>());
+    validated_float_class.def(init<Real>());
     validated_float_class.def(init<Decimal>());
     validated_float_class.def(init<Dyadic>());
     validated_float_class.def(init<ValidatedFloat>());
     validated_float_class.def(init<Float>());
 #ifdef HAVE_GMPXX_H
     validated_float_class.def(init<Rational>());
-    validated_float_class.def(init<Rational,Rational>());
 #endif
     validated_float_class.def(+self);
     validated_float_class.def(-self);
@@ -391,7 +395,7 @@ void export_validated_float()
     validated_float_class.staticmethod("set_output_precision");
 
     implicitly_convertible<Real,ValidatedFloat>();
-    implicitly_convertible<ValidatedFloat,Float>();
+    implicitly_convertible<ExactFloat,ValidatedFloat>();
 
     from_python_dict<ValidatedFloat>();
     from_python_list<ValidatedFloat>();
@@ -419,15 +423,78 @@ void export_validated_float()
     def("atan", (ValidatedFloat(*)(ValidatedFloat)) &atan);
 }
 
+void export_approximate_float()
+{
+    using boost::python::class_;
+    using boost::python::init;
+    using boost::python::self;
+    using boost::python::return_value_policy;
+    using boost::python::copy_const_reference;
+    using boost::python::def;
+
+    def("down",&down);
+    def("up",&up);
+
+    class_< ApproximateFloat > approximate_float_class("ApproximateFloat");
+    approximate_float_class.def(init<double>());
+    approximate_float_class.def(init<Float>());
+    approximate_float_class.def(init<Decimal>());
+    approximate_float_class.def(init<Dyadic>());
+    approximate_float_class.def(init<ApproximateFloat>());
+    approximate_float_class.def(init<ValidatedFloat>());
+#ifdef HAVE_GMPXX_H
+    approximate_float_class.def(init<Rational>());
+#endif
+    approximate_float_class.def(+self);
+    approximate_float_class.def(-self);
+    approximate_float_class.def(self + self);
+    approximate_float_class.def(self - self);
+    approximate_float_class.def(self * self);
+    approximate_float_class.def(self / self);
+
+    approximate_float_class.def(Real() + self);
+    approximate_float_class.def(Real() - self);
+    approximate_float_class.def(Real() * self);
+    approximate_float_class.def(Real() / self);
+
+    approximate_float_class.def(self == self);
+    approximate_float_class.def(self != self);
+    approximate_float_class.def(self >= self);
+    approximate_float_class.def(self <= self);
+    approximate_float_class.def(self > self);
+    approximate_float_class.def(self < self);
+    approximate_float_class.def(boost::python::self_ns::str(self));
+    approximate_float_class.def("__repr__", &__repr__<ApproximateFloat>);
+
+    approximate_float_class.def("set_output_precision", &ApproximateFloat::set_output_precision);
+    approximate_float_class.staticmethod("set_output_precision");
+
+    implicitly_convertible<ValidatedFloat,ApproximateFloat>();
+
+    def("max", (ApproximateFloat(*)(ApproximateFloat,ApproximateFloat)) &max);
+    def("min", (ApproximateFloat(*)(ApproximateFloat,ApproximateFloat)) &min);
+
+    def("abs", (ApproximateFloat(*)(ApproximateFloat)) &abs);
+    def("pow",  (ApproximateFloat(*)(ApproximateFloat,int)) &pow);
+    def("sqr", (ApproximateFloat(*)(ApproximateFloat)) &sqr);
+    def("rec", (ApproximateFloat(*)(ApproximateFloat)) &rec);
+    def("sqrt", (ApproximateFloat(*)(ApproximateFloat)) &sqrt);
+    def("exp", (ApproximateFloat(*)(ApproximateFloat)) &exp);
+    def("log", (ApproximateFloat(*)(ApproximateFloat)) &log);
+
+    def("sin", (ApproximateFloat(*)(ApproximateFloat)) &sin);
+    def("cos", (ApproximateFloat(*)(ApproximateFloat)) &cos);
+    def("tan", (ApproximateFloat(*)(ApproximateFloat)) &tan);
+    def("asin", (ApproximateFloat(*)(ApproximateFloat)) &asin);
+    def("acos", (ApproximateFloat(*)(ApproximateFloat)) &acos);
+    def("atan", (ApproximateFloat(*)(ApproximateFloat)) &atan);
+}
+
 void export_float()
 {
     class_< Float > float_class("Float");
     float_class.def(init<double>());
     float_class.def(init<Float>());
-#ifdef HAVE_GMPXX_H
-    float_class.def(init<Rational>());
-#endif
-    float_class.def(init<Real>());
     float_class.def(boost::python::self_ns::str(self));
     float_class.def("__repr__", &__repr__<Float>);
 
@@ -452,7 +519,6 @@ void export_float()
 
     implicitly_convertible<double,Float>();
 
-    float_class.def("set_output_precision", &Float::set_output_precision);
     float_class.staticmethod("set_output_precision");
 
     def("min",(Float(*)(Float,Float)) &Ariadne::min);

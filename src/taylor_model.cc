@@ -299,7 +299,7 @@ inline void _scal_approx4(IntervalTaylorModel& r, const Float& c)
     // General case with error analysis
     Float& re=r.error();
     set_rounding_upward();
-    volatile Float u,ml;
+    Float u,ml;
     //Float u,ml;
     Float te=0; // Twice the maximum accumulated error
     Float pc=c;
@@ -307,9 +307,9 @@ inline void _scal_approx4(IntervalTaylorModel& r, const Float& c)
     for(IntervalTaylorModel::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
         const Float& rv=riter->data();
         //volatile Float& rv=const_cast<volatile Float&>(riter->data());
-        u.v=rv.v*pc.v;
-        ml.v=rv.v*mc.v;
-        te.v+=u.v+ml.v;
+        u=rv*pc;
+        ml=rv*mc;
+        te+=u+ml;
     }
     re*=abs(pc);
     re+=te/2;
@@ -411,8 +411,8 @@ inline void _scal_approx1(IntervalTaylorModel& rr, const Float& cc)
 inline void _scal_approx0(IntervalTaylorModel& rr, const Float& cc)
 {
     Expansion<double>& r=reinterpret_cast<Expansion<double>&>(rr.expansion());
-    volatile double& re=rr.error().v;
-    const volatile double& c=cc.v;
+    volatile double& re=static_cast<volatile double&>(rr.error());
+    volatile double c=static_cast<const double&>(cc);
     //const double& c=cc.v;
 
     set_rounding_upward();
@@ -441,9 +441,9 @@ void _scal(IntervalTaylorModel& r, const Float& c)
 {
     // No measurable speedup in general case by avoiding checks
     _scal_approx4(r,c); return;
-    if(c.v==0.0) { r.expansion().clear(); r.error()=0; }
-    else if(c.v==1.0) { }
-    else if(c.v==2.0 || c.v==0.5) { _scal_exact(r,c); }
+    if(c==0.0) { r.expansion().clear(); r.error()=0; }
+    else if(c==1.0) { }
+    else if(c==2.0 || c==0.5) { _scal_exact(r,c); }
     else { _scal_approx(r,c); }
 }
 

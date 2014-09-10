@@ -68,7 +68,7 @@ Orbit<HybridPoint>::insert(HybridTime ht, const HybridPoint& hpt)
     if(this->size()==(uint)ht.discrete_time()) {
         this->_curves_ptr->push_back(HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(Float(ht.continuous_time()),hpt.point())));
     } else {
-        (*this->_curves_ptr)[ht.discrete_time()].continuous_set().insert(ht.continuous_time(),hpt.point());
+        (*this->_curves_ptr)[ht.discrete_time()].continuous_set().insert(static_cast<Float>(ht.continuous_time()),hpt.point());
     }
 }
 
@@ -208,7 +208,7 @@ HybridPoint::HybridPoint(const DiscreteLocation& q, const List<RealConstantAssig
 {
     uint i=0;
     for(List<RealConstantAssignment>::const_iterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
-        this->point()[i]=iter->right_hand_side();
+        this->point()[i]=static_cast<Float>(iter->right_hand_side());
     }
 }
 

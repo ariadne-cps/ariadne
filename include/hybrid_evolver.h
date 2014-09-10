@@ -616,7 +616,7 @@ struct TimingData
     StepKind step_kind; //!< The kind of step taken in the evolution
     FinishingKind finishing_kind; //!< The relationship between the finishing time of the step, and the final time of the evolution trace.
     Real final_time; //!< The time \f$t_{\max}\f$ specified as the final time of the evolution trace.
-    Float step_size; //!< The maximum step size \f$h\f$ allowed by the computed flow function.
+    ExactFloat step_size; //!< The maximum step size \f$h\f$ allowed by the computed flow function.
     IntervalScalarFunctionModel spacetime_dependent_evolution_time;
         //!< The evolution time \f$\varepsilon(x,t)\f$ used in a \a SPACETIME_DEPENDENT_EVOLUTION_TIME step.
     IntervalScalarFunctionModel spacetime_dependent_finishing_time;

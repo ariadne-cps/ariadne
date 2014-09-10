@@ -91,10 +91,10 @@ struct from_python<Point> {
         Point pt;
         if(xtup.check()) {
             boost::python::tuple tup=xtup(); pt=Point(len(tup));
-            for(int i=0; i!=len(tup); ++i) { pt[i]=extract<double>(tup[i]); }
+            for(int i=0; i!=len(tup); ++i) { pt[i]=Float(extract<double>(tup[i])); }
         } else if(xlst.check()) {
             boost::python::list lst=xlst(); pt=Point(len(lst));
-            for(int i=0; i!=len(lst); ++i) { pt[i]=extract<double>(lst[i]); }
+            for(int i=0; i!=len(lst); ++i) { pt[i]=Float(extract<double>(lst[i])); }
         }
         void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
         new (storage) Point(pt);

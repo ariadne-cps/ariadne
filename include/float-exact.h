@@ -62,16 +62,22 @@ class ExactFloat {
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
 #endif
-    //! \brief The approximate floating-point number with the same value.
+    //! \brief Explicit conversion to raw data type.
+    explicit operator Float () const { return _v; }
+    //! \brief The raw floating-point number with the same value.
     Float const& value() const { return _v; }
     //! \brief A double-precision approximateion.
     double get_d() const { return _v.get_d(); }
+
+  public:
+    static uint output_precision;
+    static void set_output_precision(uint p) { output_precision=p; }
 };
 
 class ValidatedFloat;
 
-inline ExactFloat operator+(const ExactFloat& x) { return ExactFloat(+x.value()); }
-inline ExactFloat operator-(const ExactFloat& x) { return ExactFloat(-x.value()); }
+inline ExactFloat operator+(const ExactFloat& x) { return ExactFloat(pos_exact(x.value())); }
+inline ExactFloat operator-(const ExactFloat& x) { return ExactFloat(neg_exact(x.value())); }
 inline ValidatedFloat operator+(const ExactFloat& x1,  const ExactFloat& x2);
 inline ValidatedFloat operator-(const ExactFloat& x1,  const ExactFloat& x2);
 inline ValidatedFloat operator*(const ExactFloat& x1,  const ExactFloat& x2);
@@ -86,7 +92,9 @@ inline ValidatedFloat operator*(const ExactFloat& x1,  const ValidatedFloat& x2)
 inline ValidatedFloat operator/(const ExactFloat& x1,  const ValidatedFloat& x2);
 inline ValidatedFloat pow(const ExactFloat& x, int n);
 inline ValidatedFloat operator/(int n1,  const ExactFloat& x2);
-inline std::ostream& operator<<(std::ostream& os, const ExactFloat& x) { return os << std::showpoint << std::setprecision(18) << x.value(); }
+
+inline std::ostream& operator<<(std::ostream& os, const ExactFloat& x) {
+    return os << std::showpoint << std::setprecision(ExactFloat::output_precision) << x.value(); }
 
 inline bool operator==(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()==x2.value(); }
 inline bool operator!=(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()!=x2.value(); }
@@ -102,18 +110,18 @@ inline bool operator>=(const ExactFloat& x1, double x2) { return x1.value()>=x2;
 inline bool operator< (const ExactFloat& x1, double x2) { return x1.value()< x2; }
 inline bool operator> (const ExactFloat& x1, double x2) { return x1.value()> x2; }
 
-inline Float::Float(const ExactFloat& x) : v(x.value().get_d()) { }
-inline Float& Float::operator=(const ExactFloat& x) { this->operator=(x.value()); return *this; }
-
+class ApproximateFloat;
 inline const ExactFloat& make_exact(const Float& x) { return reinterpret_cast<const ExactFloat&>(x); }
+inline const ExactFloat& make_exact(const ApproximateFloat& x) { return reinterpret_cast<const ExactFloat&>(x); }
+template<template<class>class T> inline const T<ExactFloat>& make_exact(const T<ApproximateFloat>& t) { return reinterpret_cast<const T<ExactFloat>&>(t); }
 template<template<class>class T> inline const T<ExactFloat>& make_exact(const T<Float>& t) { return reinterpret_cast<const T<ExactFloat>&>(t); }
 
 //! \related Float \brief The constant infinity
 //extern ExactFloat inf;
 
-inline ExactFloat half(ExactFloat x) { return ExactFloat(x.value()/2); }
-inline ExactFloat pos(ExactFloat x) { return ExactFloat(+x.value()); }
-inline ExactFloat neg(ExactFloat x) { return ExactFloat(-x.value()); }
+inline ExactFloat half(ExactFloat x) { return ExactFloat(half_exact(x.value())); }
+inline ExactFloat pos(ExactFloat x) { return ExactFloat(pos_exact(x.value())); }
+inline ExactFloat neg(ExactFloat x) { return ExactFloat(neg_exact(x.value())); }
 
 inline ValidatedFloat sqr(ExactFloat x);
 inline ValidatedFloat rec(ExactFloat x);

@@ -40,8 +40,9 @@
 namespace Ariadne {
 
 namespace {
-static const double pi_up  =3.1415926535897936;
-static const double pi_down=3.1415926535897931;
+static const double _pi_up  =3.1415926535897936;
+static const double _pi_down=3.1415926535897931;
+static const double _pi_approx=3.1415926535897931;
 inline double _add_down(volatile double x, volatile double y) { set_rounding_downward(); return x+y; }
 inline double _add_up(volatile double x, volatile double y) { set_rounding_upward(); return x+y; }
 inline double _sub_down(volatile double x, volatile double y) { set_rounding_downward(); return x-y; }
@@ -53,6 +54,7 @@ inline double _div_up(volatile double x, volatile double y) { set_rounding_upwar
 inline Float cos_down(Float x) { set_rounding_downward(); Float y=cos_rnd(x); return y; }
 inline Float cos_up(Float x) { set_rounding_upward(); Float y=cos_rnd(x); return y; }
 } // namespace
+
 
 const Interval pi_ivl=Interval(pi_down,pi_up);
 
@@ -371,7 +373,7 @@ Interval cos(Interval i)
 
     if(i.radius()>2*pi_down) { return Interval(-1.0,+1.0); }
 
-    Float n=floor(i.lower()/(2*pi_approx)+0.5);
+    Float n=floor(i.lower()/(2*_pi_approx)+0.5);
     i=i-(2*n)*pi_ivl;
 
     ARIADNE_ASSERT(i.lower()<=pi_up);
@@ -428,22 +430,21 @@ Interval::Interval(const Decimal& d) : Interval(d.operator Rational()) { }
 Interval::Interval(const Integer& z) : Interval(Rational(z)) {
 }
 
-Interval::Interval(const Rational& q) : l(q.get_d()), u(l) {
-    rounding_mode_t rounding_mode=get_rounding_mode();
-    set_rounding_mode(downward);
-    while(l.get_d()>static_cast<mpq_class const&>(q)) { l-=std::numeric_limits<double>::min(); }
-    set_rounding_mode(upward);
-    while(u.get_d()<static_cast<mpq_class const&>(q)) { u+=std::numeric_limits<double>::min(); }
-    set_rounding_mode(rounding_mode);
+Interval::Interval(const Rational& q) : Interval(q,q) {
 }
 
 Interval::Interval(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu.get_d())  {
+    static const double min_dbl=std::numeric_limits<double>::min();
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(downward);
-    while(l.get_d()>static_cast<mpq_class const&>(ql)) { l-=std::numeric_limits<double>::min(); }
+    while(l.get_d()>static_cast<mpq_class const&>(ql)) { l=sub_rnd(l,min_dbl); }
     set_rounding_mode(upward);
-    while(u.get_d()<static_cast<mpq_class const&>(qu)) { u+=std::numeric_limits<double>::min(); }
+    while(u.get_d()<static_cast<mpq_class const&>(qu)) { u=add_rnd(u,min_dbl); }
     set_rounding_mode(rounding_mode);
+}
+
+Interval::Interval(const Real& lower, const Real& upper)
+    : l(ValidatedFloat(lower).lower()), u(ValidatedFloat(upper).upper()) {
 }
 
 Interval& Interval::operator=(const Rational& q) {

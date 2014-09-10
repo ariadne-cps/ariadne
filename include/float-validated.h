@@ -141,9 +141,9 @@ class ValidatedFloat {
     //! \brief The upper bound of the interval.
     const Float& upper() const { return u; }
     //! \brief An approximation to the midpoint of the interval.
-    const Float midpoint() const { return add_approx(l,u)/2; }
+    const Float midpoint() const { return half_exact(add_approx(l,u)); }
     //! \brief An over-approximation to the radius of the interval.
-    const Float radius() const { return sub_up(u,l)/2; }
+    const Float radius() const { return half_exact(sub_up(u,l)); }
     //! \brief An over-approximation to the width of the interval.
     const Float width() const { return sub_up(u,l); }
 
@@ -172,11 +172,11 @@ class ValidatedFloat {
 std::ostream& operator<<(std::ostream& os, const ValidatedFloat& ivl);
 
 inline Float midpoint(ValidatedFloat i) {
-    return add_approx(i.lower(),i.upper())/2;
+    return half_exact(add_approx(i.lower(),i.upper()));
 }
 
 inline Float radius(ValidatedFloat i) {
-    return sub_up(i.upper(),i.lower())/2;
+    return half_exact(sub_up(i.upper(),i.lower()));
 }
 
 inline Float width(ValidatedFloat i) {
@@ -288,9 +288,9 @@ inline ValidatedFloat abs(ValidatedFloat i)
     if(i.lower()>=0) {
         return ValidatedFloat(i.lower(),i.upper());
     } else if(i.upper()<=0) {
-        return ValidatedFloat(-i.upper(),-i.lower());
+        return ValidatedFloat(neg(i.upper()),neg(i.lower()));
     } else {
-        return ValidatedFloat(static_cast<Float>(0.0),max(-i.lower(),i.upper()));
+        return ValidatedFloat(static_cast<Float>(0.0),max(neg(i.lower()),i.upper()));
     }
 }
 
@@ -309,7 +309,7 @@ inline ValidatedFloat neg(ValidatedFloat i)
 inline ExactFloat neg(ExactFloat x);
 
 inline ValidatedFloat half(ValidatedFloat i) {
-    return ValidatedFloat(i.lower()/2,i.upper()/2);
+    return ValidatedFloat(half(i.lower()),half(i.upper()));
 }
 
 inline ValidatedFloat sqr(ExactFloat x)
@@ -545,51 +545,52 @@ inline bool operator!=(const ValidatedFloat& i1, const ValidatedFloat& i2) { ret
 
 //! \related ValidatedFloat \brief Equality operator. Tests equality of represented real-point value.
 //! Hence \c [0.0,2.0]==1.0 yields \c indeterminate since the interval may represent a real number other than \c 1.0 .
-inline tribool operator==(const ValidatedFloat& i1, const Float& x2) {
-    if(i1.upper()<x2 || i1.lower()>x2) { return false; }
-    else if(i1.lower()==x2 && i1.upper()==x2) { return true; }
+inline tribool operator==(const ValidatedFloat& i1, const ExactFloat& x2) {
+    if(i1.upper()<x2.value() || i1.lower()>x2.value() ) { return false; }
+    else if(i1.lower()==x2.value()  && i1.upper()==x2.value() ) { return true; }
     else { return indeterminate; }
 }
 
 //! \related ValidatedFloat \brief Equality operator. Tests equality of represented real-point value.
 //! Hence \c [0.0,2.0]!=1.0 yields \c indeterminate since the interval may represent a real number equal to \c 1.0 .
-inline tribool operator!=(const ValidatedFloat& i1, const Float& x2) {
-    if(i1.upper()<x2 || i1.lower()>x2) { return true; }
-    else if(i1.lower()==x2 && i1.upper()==x2) { return false; }
+inline tribool operator!=(const ValidatedFloat& i1, const ExactFloat& x2) {
+    if(i1.upper()<x2.value()  || i1.lower()>x2.value() ) { return true; }
+    else if(i1.lower()==x2.value()  && i1.upper()==x2.value() ) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator> (const ValidatedFloat& i1, const Float& x2) {
-    if(i1.lower()> x2) { return true; }
-    else if(i1.upper()<=x2) { return false; }
+inline tribool operator> (const ValidatedFloat& i1, const ExactFloat& x2) {
+    if(i1.lower()> x2.value() ) { return true; }
+    else if(i1.upper()<=x2.value() ) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator< (const ValidatedFloat& i1, const Float& x2) {
-    if(i1.upper()< x2) { return true; }
-    else if(i1.lower()>=x2) { return false; }
+inline tribool operator< (const ValidatedFloat& i1, const ExactFloat& x2) {
+    if(i1.upper()< x2.value() ) { return true; }
+    else if(i1.lower()>=x2.value() ) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator>=(const ValidatedFloat& i1, const Float& x2) {
-    if(i1.lower()>=x2) { return true; }
-    else if(i1.upper()< x2) { return false; }
+inline tribool operator>=(const ValidatedFloat& i1, const ExactFloat& x2) {
+    if(i1.lower()>=x2.value() ) { return true; }
+    else if(i1.upper()< x2.value() ) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator<=(const ValidatedFloat& i1, const Float& x2) {
-    if(i1.upper()<=x2) { return true; }
-    else if(i1.lower()> x2) { return false; }
+inline tribool operator<=(const ValidatedFloat& i1, const ExactFloat& x2) {
+    if(i1.upper()<=x2.value() ) { return true; }
+    else if(i1.lower()> x2.value() ) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator==(const ValidatedFloat& i1, double x2) { return i1==static_cast<Float>(x2); }
-inline tribool operator!=(const ValidatedFloat& i1, double x2) { return i1!=static_cast<Float>(x2); }
-inline tribool operator<=(const ValidatedFloat& i1, double x2) { return i1<=static_cast<Float>(x2); }
-inline tribool operator>=(const ValidatedFloat& i1, double x2) { return i1>=static_cast<Float>(x2); }
-inline tribool operator< (const ValidatedFloat& i1, double x2) { return i1< static_cast<Float>(x2); }
-inline tribool operator> (const ValidatedFloat& i1, double x2) { return i1> static_cast<Float>(x2); }
-
+/*
+inline tribool operator==(const ValidatedFloat& i1, double x2) { return i1==static_cast<ExactFloat>(x2); }
+inline tribool operator!=(const ValidatedFloat& i1, double x2) { return i1!=static_cast<ExactFloat>(x2); }
+inline tribool operator<=(const ValidatedFloat& i1, double x2) { return i1<=static_cast<ExactFloat>(x2); }
+inline tribool operator>=(const ValidatedFloat& i1, double x2) { return i1>=static_cast<ExactFloat>(x2); }
+inline tribool operator< (const ValidatedFloat& i1, double x2) { return i1< static_cast<ExactFloat>(x2); }
+inline tribool operator> (const ValidatedFloat& i1, double x2) { return i1> static_cast<ExactFloat>(x2); }
+*/
 
 
 //! \related ValidatedFloat \brief Strict greater-than comparison operator. Tests equality of represented real-point value.

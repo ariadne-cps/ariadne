@@ -381,7 +381,7 @@ template<> class VectorFunctionModel<Interval>
     inline Void set(Nat i, ScalarFunctionModel<Interval> const& sf) { this->_ptr->_set(i,sf); }
     inline ScalarFunctionModel<Interval> const operator[](Nat i) const { return this->get(i); }
     inline VectorFunctionModelElement<Interval> operator[](Nat i) { return VectorFunctionModelElement<Interval>(this,i); }
-    inline Box const& domain() const { return this->_ptr->domain(); }
+    inline Box const domain() const { return this->_ptr->domain(); }
     inline Box const range() const { return this->_ptr->range(); }
     inline Box const codomain() const { return this->_ptr->codomain(); }
     inline Vector<Float> const errors() const { return this->_ptr->errors(); }

@@ -56,7 +56,18 @@ std::ostream& operator<<(std::ostream& os, Slackness t) {
     return os << (t==BASIS ? 'B' : t==LOWER ? 'L' : t==UPPER ? 'U' : t==FIXED ? 'E' : '?');
 }
 
+// Add functions to remove dependencies
+inline bool operator==(Rational q, int n) { return q==Rational(n); }
+inline bool operator!=(Rational q, int n) { return q!=Rational(n); }
+inline bool operator<=(Rational q, int n) { return q<=Rational(n); }
+inline bool operator>=(Rational q, int n) { return q>=Rational(n); }
+inline bool operator> (Rational q, int n) { return q> Rational(n); }
+inline bool operator< (Rational q, int n) { return q< Rational(n); }
 
+inline bool operator==(Rational q, double n) { return q==Rational(n); }
+
+template<class X> struct RigorousNumericsTraits { typedef X Type; };
+template<> struct RigorousNumericsTraits<Float> { typedef Interval Type; };
 
 // Extend an Array of size m to an Array of size n
 // such that the first m elements are the same,
@@ -188,7 +199,7 @@ SimplexSolver<X>::consistency_check(const Vector<X>& xl, const Vector<X>& xu, co
     ARIADNE_LOG(9,"          p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I<<"\n");
     Matrix<X> Z=I;
     for(size_t i=0; i!=m; ++i) { Z[i][i]-=1; }
-    ARIADNE_ASSERT_MSG(norm(Z)<=1e-5,"vt="<<vt<<" p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I<<"\n");
+    ARIADNE_ASSERT_MSG(norm(Z)*10000<=1,"vt="<<vt<<" p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B="<<I<<"\n");
 
     Vector<X> Ax=A*x;
     ARIADNE_LOG(9,"          A="<<A<<" x="<<x<<" b="<<b<<" Ax="<<Ax<<"\n");
@@ -201,7 +212,7 @@ SimplexSolver<X>::consistency_check(const Vector<X>& xl, const Vector<X>& xu, co
         ARIADNE_ASSERT_MSG(x[j]==xj,"x["<<j<<"]="<<x[j]<<" xj="<<xj<<"\n  A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
     }
     Vector<X> Axmb = Ax-b;
-    ARIADNE_ASSERT_MSG(norm(Axmb)<1e-5,"A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
+    ARIADNE_ASSERT_MSG(norm(Axmb)*10000<=1,"A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
 }
 
 
@@ -462,7 +473,7 @@ compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Ve
 
     Vector<XX> Ax=Matrix<XX>(A)*x;
     Vector<XX> Axmb=Ax-Vector<XX>(b);
-    ARIADNE_ASSERT_MSG(norm(Axmb)<0.00001,"A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
+    ARIADNE_ASSERT_MSG(norm(Axmb)*10000<=1,"A="<<A<<", b="<<b<<", xl="<<xl<<", xu="<<xu<<", vt="<<vt<<", p="<<p<<", x="<<x<<", Ax="<<Ax);
     return x;
 }
 
@@ -612,8 +623,8 @@ compute_s_nocycling(const size_t m, const Array<Slackness>& vt, const Array<size
 {
     const size_t n=z.size();
     for(size_t j=0; j!=n; ++j) {
-        if( (vt[j]==LOWER && z[j]< -PROGRESS_THRESHOLD)
-                || (vt[j]==UPPER && z[j]> +PROGRESS_THRESHOLD) ) {
+        if( (vt[j]==LOWER && z[j]< static_cast<X>(-PROGRESS_THRESHOLD))
+                || (vt[j]==UPPER && z[j]> static_cast<X>(+PROGRESS_THRESHOLD)) ) {
             for(size_t k=m; k!=n; ++k) {
                 if(p[k]==j) { return k; }
             }
@@ -875,7 +886,7 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
     const size_t n=A.column_size();
     static const X inf = Ariadne::inf;
 
-    typedef Interval XX;
+    typedef typename RigorousNumericsTraits<X>::Type XX;
 
     ARIADNE_LOG(9,"vt="<<vt<<" p="<<p<<"\n");
     Matrix<XX> B=compute_B<XX>(A,p);
@@ -1266,9 +1277,6 @@ SimplexSolver<X>::hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, 
     return fs;
 }
 
-template<class X> struct RigorousNumericsTraits { typedef X Type; };
-template<> struct RigorousNumericsTraits<Float> { typedef Interval Type; };
-
 // A point x is strictly feasible for the basis B with lower variables L and upper variables U if
 //   x_B = A_B^{-1} (b - A_L x_L - A_U x_U) is definitely within (x_B), the open interval (x_BL,x_BU).
 // To prove infeasibility, choose a vector c (typically c_L=c_U=0, (c_B)_i = +1 if x_i>u_i and -1 if x_i<u_i)
@@ -1282,7 +1290,7 @@ SimplexSolver<X>::verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, c
     ARIADNE_LOG(5,"A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<"\n");
     const Array<size_t> p=compute_p(vt);
 
-    typedef Interval XX;
+    typedef typename RigorousNumericsTraits<X>::Type XX;
     const size_t m=A.row_size();
     const size_t n=A.column_size();
     ARIADNE_ASSERT(b.size()==m);
@@ -1461,12 +1469,12 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
 template class SimplexSolver<Float>;
 
 #ifdef HAVE_GMPXX_H
-inline Interval operator+(const Interval& ivl, const Rational& q) { return ivl+Interval(q); }
-inline Interval operator+(const Rational& q, const Interval& ivl) { return Interval(q)+ivl; }
-inline Interval operator-(const Interval& ivl, const Rational& q) { return ivl-Interval(q); }
-inline Interval operator-(const Rational& q, const Interval& ivl) { return Interval(q)-ivl; }
-inline Interval operator*(const Interval& ivl, const Rational& q) { return ivl*Interval(q); }
-inline Interval operator*(const Rational& q, const Interval& ivl) { return Interval(q)-ivl; }
+//inline Interval operator+(const Interval& ivl, const Rational& q) { return ivl+Interval(q); }
+//inline Interval operator+(const Rational& q, const Interval& ivl) { return Interval(q)+ivl; }
+//inline Interval operator-(const Interval& ivl, const Rational& q) { return ivl-Interval(q); }
+//inline Interval operator-(const Rational& q, const Interval& ivl) { return Interval(q)-ivl; }
+//inline Interval operator*(const Interval& ivl, const Rational& q) { return ivl*Interval(q); }
+//inline Interval operator*(const Rational& q, const Interval& ivl) { return Interval(q)-ivl; }
 template class SimplexSolver<Rational>;
 #endif // HAVE_GMPXX_H
 

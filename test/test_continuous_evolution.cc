@@ -44,6 +44,18 @@
 
 #include "test.h"
 
+namespace Ariadne {
+// FIXME: These are a temporary fix around deprecated use of Float
+inline Float operator+(Float x1, Real x2) { return x1+Float(x2); }
+inline Float operator-(Float x1, Real x2) { return x1-Float(x2); }
+inline Float operator*(Float x1, Real x2) { return x1*Float(x2); }
+inline Float operator/(Float x1, Real x2) { return x1/Float(x2); }
+inline Float operator+(Real x1, Float x2) { return Float(x1)+x2; }
+inline Float operator-(Real x1, Float x2) { return Float(x1)-x2; }
+inline Float operator*(Real x1, Float x2) { return Float(x1)*x2; }
+inline Float operator/(Real x1, Float x2) { return Float(x1)/x2; }
+}
+
 using namespace Ariadne;
 using namespace std;
 
@@ -61,7 +73,7 @@ struct FailTwo : VectorFunctionData<3,3,1> {
     template<class R, class A, class P> static void
     compute(R& r, const A& x, const P& p) {
           r[0] = 1;
-          r[1] = x[1] * x[2]/p[0];
+          r[1] = x[1] * x[2] / p[0];
           r[2] = 0;
     }
 };

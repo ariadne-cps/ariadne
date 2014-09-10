@@ -84,7 +84,7 @@ void TestMapEvolver::test() const
     cout << "henon_function=" << henon << endl;
 
     //VectorUserFunction evaluation sanity check
-    Vector<Float> p(2); p[0]=a; p[1]=b;
+    Vector<Float> p(2); p[0]=Float(a); p[1]=Float(b);
     Vector<Float> x(2); x[0]=0.5; x[1]=0.25;
     Vector<Float> hx(2); hx[0]=p[0]-x[0]*x[0]+x[1]*p[1]; hx[1]=x[0];
     ARIADNE_TEST_EQUAL(henon.evaluate(x),hx);

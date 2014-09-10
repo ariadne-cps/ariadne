@@ -27,6 +27,7 @@ ARIADNE_KERNEL_SRC = \
 	rational.cc \
 	decimal.cc \
 	float.cc \
+	float-approximate.cc \
 	float-validated.cc \
 	interval.cc \
 	real.cc \

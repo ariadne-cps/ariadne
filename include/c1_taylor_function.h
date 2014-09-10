@@ -69,7 +69,7 @@ class C1TaylorSeries
     C1TaylorSeries(Nat d);
   public:
     C1TaylorSeries();
-    static C1TaylorSeries constant(ExactFloat);
+    static C1TaylorSeries constant(Float);
     static C1TaylorSeries coordinate();
   public:
     Interval domain() const;
@@ -99,7 +99,7 @@ class C1TaylorFunction
     C1TaylorFunction() { };
     C1TaylorFunction(Nat as);
   public:
-    static C1TaylorFunction constant(Nat as, ExactFloat c);
+    static C1TaylorFunction constant(Nat as, Float c);
     static C1TaylorFunction coordinate(Nat as, Nat ind);
   public:
     Box domain() const;
@@ -108,8 +108,8 @@ class C1TaylorFunction
     C1TaylorFunction& operator=(Interval c);
     Void clear();
   public:
-    friend C1TaylorFunction& operator+=(C1TaylorFunction& f, ExactFloat c);
-    friend C1TaylorFunction& operator*=(C1TaylorFunction& f, ExactFloat c);
+    friend C1TaylorFunction& operator+=(C1TaylorFunction& f, Float c);
+    friend C1TaylorFunction& operator*=(C1TaylorFunction& f, Float c);
     friend C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2);
     friend C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2);
     friend Interval evaluate(C1TaylorFunction f, Vector<Interval> x);

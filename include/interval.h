@@ -47,7 +47,8 @@ namespace Ariadne {
 
 // Forward declarations
 class Float;
-class Interval;
+class ApproximateFloat;
+class ValidatedFloat;
 class ExactFloat;
 
 class Real;
@@ -57,7 +58,8 @@ class Rational;
 class Dyadic;
 class Decimal;
 
-
+class Interval;
+typedef Interval NumericInterval;
 
 //! \ingroup NumericModule
 //! \brief Intervals with floating-point endpoints supporting outwardly-rounded arithmetic.
@@ -124,7 +126,11 @@ class Interval {
     Interval(double lower, double upper) : l(lower), u(upper) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     Interval(const Float& lower, const Float& upper) : l(lower), u(upper) { }
+    //! \brief Convert from a floating-point number with an exact representation.
+    Interval(const ExactFloat& lower, const ExactFloat& upper) : l(lower.value()), u(upper.value()) { }
         // ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper);
+    //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
+    explicit Interval(const Real& lower, const Real& upper);
 #ifdef HAVE_GMPXX_H
     Interval(const Integer& z);
     Interval(const Rational& q);
@@ -144,9 +150,9 @@ class Interval {
     //! \brief The upper bound of the interval.
     const Float& upper() const { return u; }
     //! \brief An approximation to the midpoint of the interval.
-    const Float midpoint() const { return add_approx(l,u)/2; }
+    const Float midpoint() const { return half_exact(add_approx(l,u)); }
     //! \brief An over-approximation to the radius of the interval.
-    const Float radius() const { return sub_up(u,l)/2; }
+    const Float radius() const { return half_exact(sub_up(u,l)); }
     //! \brief An over-approximation to the width of the interval.
     const Float width() const { return sub_up(u,l); }
 
@@ -175,11 +181,11 @@ class Interval {
 std::ostream& operator<<(std::ostream& os, const Interval& ivl);
 
 inline Float midpoint(Interval i) {
-    return add_approx(i.lower(),i.upper())/2;
+    return half_exact(add_approx(i.lower(),i.upper()));
 }
 
 inline Float radius(Interval i) {
-    return sub_up(i.upper(),i.lower())/2;
+    return half_exact(sub_up(i.upper(),i.lower()));
 }
 
 inline Float width(Interval i) {
@@ -229,12 +235,12 @@ Interval narrow(Interval i);
 Interval trunc(Interval);
 Interval trunc(Interval, uint eps);
 
-//! \related Interval \brief The midpoint of the interval.
-inline Float med(Interval i) { return (i.lower()+i.upper())/2; }
+//! \related Interval \brief The nearest representable number to the midpoint of the interval.
+inline Float med(Interval i) { return half_exact(add_near(i.lower(),i.upper())); }
 //! \related Interval \brief An over-approximation to the radius of the interval.
-inline Float rad(Interval i) { return up((i.upper()-i.lower())/2); }
+inline Float rad(Interval i) { return half_exact(sub_up(i.upper(),i.lower())); }
 //! \related Interval \brief An over-approximation to the width of the interval.
-inline Float diam(Interval i) { return up(i.upper()-i.lower()); }
+inline Float diam(Interval i) { return sub_up(i.upper(),i.lower()); }
 
 //! \related Interval \brief The interval of possible maximum values. Yields the interval between \c i1.upper() and \c i2.upper().
 inline Interval max(Interval i1,Interval i2);
@@ -539,20 +545,20 @@ inline Interval pow_ivl(Float x1, int n2)
 
 inline Interval med_ivl(Float x1, Float x2)
 {
-    return add_ivl(x1/2,x2/2);
+    return add_ivl(half(x1),half(x2));
 }
 
 inline Interval rad_ivl(Float x1, Float x2)
 {
-    return sub_ivl(x2/2,x1/2);
+    return sub_ivl(half(x2),half(x1));
 }
 
 inline Interval med_ivl(Interval i) {
-    return add_ivl(i.lower()/2,i.upper()/2);
+    return add_ivl(half(i.lower()),half(i.upper()));
 }
 
 inline Interval rad_ivl(Interval i) {
-    return sub_ivl(i.upper()/2,i.lower()/2);
+    return sub_ivl(half(i.upper()),half(i.lower()));
 }
 
 
@@ -587,14 +593,14 @@ inline Interval operator-(const Float& x1, const Interval& i2) { return sub(x1,i
 inline Interval operator*(const Float& x1, const Interval& i2) { return mul(i2,x1); }
 inline Interval operator/(const Float& x1, const Interval& i2) { return div(x1,i2); }
 
-inline Interval operator+(const Interval& i1, const ExactFloat& x2) { return add(i1,static_cast<Float>(x2)); }
-inline Interval operator-(const Interval& i1, const ExactFloat& x2) { return sub(i1,static_cast<Float>(x2)); }
-inline Interval operator*(const Interval& i1, const ExactFloat& x2) { return mul(i1,static_cast<Float>(x2)); }
-inline Interval operator/(const Interval& i1, const ExactFloat& x2) { return div(i1,static_cast<Float>(x2)); }
-inline Interval operator+(const ExactFloat& x1, const Interval& i2) { return add(static_cast<Float>(x1),i2); }
-inline Interval operator-(const ExactFloat& x1, const Interval& i2) { return sub(static_cast<Float>(x1),i2); }
-inline Interval operator*(const ExactFloat& x1, const Interval& i2) { return mul(static_cast<Float>(x1),i2); }
-inline Interval operator/(const ExactFloat& x1, const Interval& i2) { return div(static_cast<Float>(x1),i2); }
+inline Interval operator+(const Interval& i1, const ExactFloat& x2) { return add(i1,static_cast<Interval>(x2)); }
+inline Interval operator-(const Interval& i1, const ExactFloat& x2) { return sub(i1,static_cast<Interval>(x2)); }
+inline Interval operator*(const Interval& i1, const ExactFloat& x2) { return mul(i1,static_cast<Interval>(x2)); }
+inline Interval operator/(const Interval& i1, const ExactFloat& x2) { return div(i1,static_cast<Interval>(x2)); }
+inline Interval operator+(const ExactFloat& x1, const Interval& i2) { return add(static_cast<Interval>(x1),i2); }
+inline Interval operator-(const ExactFloat& x1, const Interval& i2) { return sub(static_cast<Interval>(x1),i2); }
+inline Interval operator*(const ExactFloat& x1, const Interval& i2) { return mul(static_cast<Interval>(x1),i2); }
+inline Interval operator/(const ExactFloat& x1, const Interval& i2) { return div(static_cast<Interval>(x1),i2); }
 
 inline Interval& operator+=(Interval& i1, const ValidatedFloat& x2) { i1=add(i1,Interval(x2)); return i1; }
 inline Interval& operator-=(Interval& i1, const ValidatedFloat& x2) { i1=sub(i1,Interval(x2)); return i1; }

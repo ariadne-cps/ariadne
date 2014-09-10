@@ -173,7 +173,7 @@ int main(int argc, const char* argv[])
     HybridBox guard(heating|off,(Ton_lower.value()<=T<=Ton_upper.value(),0<=C<=1,0<=t<=tmax));
     HybridBox midnight_guard(heating|off,(dTmin<=T<=dTmax,0<=C<=1,1<=t<=2));
     cout << "\nPlotting time trace of orbit... " << flush;
-    plot("heating-orbit-time.png",Axes2d(0.0<=t<=tmax,dTmin<=T<=dTmax), midnight_guard_colour, midnight_guard, guard_colour, guard, series_orbit_colour, series_orbit);
+    plot("heating-orbit-time.png",Axes2d(0<=t<=tmax,dTmin<=T<=dTmax), midnight_guard_colour, midnight_guard, guard_colour, guard, series_orbit_colour, series_orbit);
     cout << "done." << endl << endl;
 
 

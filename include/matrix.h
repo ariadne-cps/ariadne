@@ -55,6 +55,9 @@ class SingularMatrixException {
 template<class X> class Matrix;
 typedef Matrix<Float> FloatMatrix;
 typedef Matrix<Interval> IntervalMatrix;
+
+typedef Matrix<ApproximateFloat> ApproximateFloatMatrix;
+typedef Matrix<ValidatedFloat> ValidatedFloatMatrix;
 typedef Matrix<ExactFloat> ExactFloatMatrix;
 
 struct Uninitialised { };

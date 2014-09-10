@@ -1406,13 +1406,13 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 {
     // Compute the evolution time for the given step.
     ARIADNE_LOG(7,"HybridEvolverBase::_estimate_timing(...)\n");
-    const Float step_size=flow.domain()[flow.domain().size()-1].upper();
+    const ExactFloat step_size=static_cast<ExactFloat>(flow.domain()[flow.domain().size()-1].upper());
     TimingData result;
     result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
     result.finishing_kind=FinishingKind::STRADDLE_FINAL_TIME;
     result.step_size=step_size;
     result.final_time=final_time;
-    result.evolution_time_domain=Interval(0.0,step_size);
+    result.evolution_time_domain=Interval(ExactFloat(0.0),step_size);
     result.evolution_time_coordinate=this->function_factory().create_identity(result.evolution_time_domain);
     result.parameter_dependent_evolution_time=this->function_factory().create_constant(initial_set.parameter_domain(),ExactFloat(result.step_size));
     ARIADNE_LOG(8,"  timing_data="<<result<<"\n");
@@ -1526,16 +1526,16 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 // Within one time step we can go beyond final time
                 result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
                 result.finishing_kind=FinishingKind::AFTER_FINAL_TIME;
-                temporal_evolution_time=ExactFloat(step_size); //   remaining_time_range.upper();
+                temporal_evolution_time=NumericInterval(step_size); //   remaining_time_range.upper();
             } else {
                 result.step_kind=StepKind::CONSTANT_FINISHING_TIME;
                 result.finishing_kind=FinishingKind::AT_FINAL_TIME;
-                temporal_evolution_time=ExactFloat(final_time)-time_identity;
+                temporal_evolution_time=NumericInterval(final_time)-time_identity;
             }
         } else {
             result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
             result.finishing_kind=FinishingKind::STRADDLE_FINAL_TIME;
-            temporal_evolution_time=ExactFloat(step_size);
+            temporal_evolution_time=NumericInterval(step_size);
         }
     } else if(remaining_time_range.upper()<=result.step_size) {
         // The rest of the evolution can be computed within a single time step.
@@ -1547,7 +1547,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         // a Float
         result.step_kind=StepKind::CONSTANT_FINISHING_TIME;
         result.finishing_kind=FinishingKind::AT_FINAL_TIME;
-        temporal_evolution_time=ExactFloat(final_time)-time_identity;
+        temporal_evolution_time=NumericInterval(final_time)-time_identity;
     } else if(remaining_time_range.lower()<=step_size && ALLOW_CREEP) {
         // Some of the evolved points can be evolved to the final time in a single step
         // The evolution is performed over a step size which moves points closer to the final time, but does not cross.
@@ -1558,7 +1558,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         result.finishing_kind=FinishingKind::BEFORE_FINAL_TIME;
         Float sf=1.0;
         while(remaining_time_range.upper()*sf>step_size) { sf /= 2; }
-        temporal_evolution_time= ExactFloat(sf)*(ExactFloat(final_time)-time_identity);
+        temporal_evolution_time= NumericInterval(sf)*(NumericInterval(final_time)-time_identity);
     } else { // remaining_time_range.lower()>step_size)
         // As far as timing goes, perform the evolution over a full time step
         result.step_kind=StepKind::CONSTANT_EVOLUTION_TIME;
@@ -1729,7 +1729,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 ARIADNE_ASSERT(guard_range.lower()<0);
                 Interval guard_derivative_range = compose(lie_derivative(guard_function,dynamic),flow).range();
 
-                ExactFloat alpha=numeric_cast<ExactFloat>(1+Float(flow.step_size())*guard_derivative_range.lower()/guard_range.lower());
+                ExactFloat alpha=numeric_cast<ExactFloat>(1+NumericInterval(flow.step_size())*guard_derivative_range.lower()/guard_range.lower());
                 ARIADNE_LOG(6,"  step_size: "<<flow.step_size()<<", guard_range: "<<guard_range<<", guard_derivative_range: "<<guard_derivative_range<<", alpha: "<<alpha<<"\n");
                 if(alpha>0 && alpha<=1) {
                     IntervalScalarFunctionModel guard_creep_time;
@@ -1796,7 +1796,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             // Corresponds to setting omega(smin)=tau(smin)+h, omega(smax)=tau(smax)+h/2
             // Taking omega(s)=a tau(s) + b, we obtain
             //   a=1-h/2(tmax-tmin);  b=h(tmax-tmin/2)/(tmax-tmin) = (2tmax-tmin)a
-            Float h=result.step_size; Float tmin=starting_time_range.lower(); Float tmax=starting_time_range.upper();
+            Float h=static_cast<Float>(result.step_size); Float tmin=starting_time_range.lower(); Float tmax=starting_time_range.upper();
             Float a=1-((h/2)/(tmax-tmin)); Float b=h*(tmax-tmin/2)/(tmax-tmin);
             result.parameter_dependent_finishing_time=ExactFloat(a)*starting_time_function+ExactFloat(b);
         }

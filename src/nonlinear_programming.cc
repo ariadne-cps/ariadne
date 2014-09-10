@@ -52,10 +52,10 @@ typedef Box ApproximateBox;
 typedef FloatVectorFunction ApproximateVectorFunction;
 typedef VectorFunctionModel<Interval> ValidatedVectorFunctionPatch;
 typedef Point ApproximatePoint;
-typedef Float ApproximateFloat;
+typedef Float ApproximateNumber;
 typedef Vector<Float> ApproximateVector;
-typedef Matrix<ApproximateFloat> ApproximateMatrix;
-typedef Differential<ApproximateFloat> ApproximateDifferential;
+typedef Matrix<ApproximateNumber> ApproximateMatrix;
+typedef Differential<ApproximateNumber> ApproximateDifferential;
 
 inline Sweeper default_sweeper() { return Sweeper(); }
 
@@ -151,9 +151,9 @@ Interval eivl(const FloatVector& x) {
     ARIADNE_ASSERT(x.size()>0); Interval r(x[0]); for(uint i=0; i!=x.size(); ++i) { r=hull(r,x[i]); } return r;
 }
 
-Matrix<ApproximateFloat> join(Matrix<ApproximateFloat> const& A1, Matrix<ApproximateFloat> const& A2, Matrix<ApproximateFloat> const& A3) {
+Matrix<ApproximateNumber> join(Matrix<ApproximateNumber> const& A1, Matrix<ApproximateNumber> const& A2, Matrix<ApproximateNumber> const& A3) {
     uint m=A1.row_size(); uint n1=A1.column_size(); uint n2=A2.column_size(); uint n3=A3.column_size();
-    Matrix<ApproximateFloat> A123(m,n1+n2+n3);
+    Matrix<ApproximateNumber> A123(m,n1+n2+n3);
     project(A123,range(0,m),range(0,n1))=A1;
     project(A123,range(0,m),range(n1,n1+n2))=A2;
     project(A123,range(0,m),range(n1+n2,n1+n2+n3))=A3;
@@ -1855,41 +1855,41 @@ feasibility_step(IntervalVector const& D, FloatVectorFunction const& g, Interval
     Vector<ApproximateDifferential> ddgx=g.evaluate(ApproximateDifferential::variables(2,x));
     ARIADNE_LOG(9,"ddgx="<<ddgx<<"\n");
 
-    Vector<ApproximateFloat> gx = ddgx.value();
+    Vector<ApproximateNumber> gx = ddgx.value();
     ARIADNE_LOG(7,"g(x)="<<gx<<"\n");
-    Matrix<ApproximateFloat> A = ddgx.jacobian();
+    Matrix<ApproximateNumber> A = ddgx.jacobian();
     ARIADNE_LOG(7,"Dg(x)="<<A<<"\n");
 
-    Vector<ApproximateFloat> yA=transpose(A)*y;
+    Vector<ApproximateNumber> yA=transpose(A)*y;
 
     // H is the Hessian matrix H of the Lagrangian $L(x,\lambda) = f(x) + \sum_k g_k(x) $
-    Matrix<ApproximateFloat> YH(x.size(),x.size());
+    Matrix<ApproximateNumber> YH(x.size(),x.size());
     for(uint i=0; i!=y.size(); ++i) {
         YH+=y[i]*ddgx[i].hessian();
     }
     ARIADNE_LOG(7,"Y.D2g(x)="<<YH<<"\n");
 
-    Vector<ApproximateFloat> recwu=cu-w; recwu=erec(recwu);
-    Vector<ApproximateFloat> recwl=w-cl; recwl=erec(recwl);
-    Vector<ApproximateFloat> recxu=du-x; recxu=erec(recxu);
-    Vector<ApproximateFloat> recxl=x-dl; recxl=erec(recxl);
+    Vector<ApproximateNumber> recwu=cu-w; recwu=erec(recwu);
+    Vector<ApproximateNumber> recwl=w-cl; recwl=erec(recwl);
+    Vector<ApproximateNumber> recxu=du-x; recxu=erec(recxu);
+    Vector<ApproximateNumber> recxl=x-dl; recxl=erec(recxl);
 
-    Vector<ApproximateFloat> diagDw=esqr(recwu)+esqr(recwl);
-    Matrix<ApproximateFloat> Dw(m,m); for(uint i=0; i!=m; ++i) { Dw[i][i]=diagDw[i]; }
-    DiagonalMatrix<ApproximateFloat> Dx(esqr(recxu)+esqr(recxl));
+    Vector<ApproximateNumber> diagDw=esqr(recwu)+esqr(recwl);
+    Matrix<ApproximateNumber> Dw(m,m); for(uint i=0; i!=m; ++i) { Dw[i][i]=diagDw[i]; }
+    DiagonalMatrix<ApproximateNumber> Dx(esqr(recxu)+esqr(recxl));
 
 
     for(uint i=0; i!=n; ++i) { YH[i][i]-=Dx[i]; }
 
-    Matrix<ApproximateFloat> AT=transpose(A);
-    Matrix<ApproximateFloat> Znm(n,m);
-    Matrix<ApproximateFloat> Zmn(m,n);
-    Matrix<ApproximateFloat> Zmm(m,m);
-    Matrix<ApproximateFloat> Im=Matrix<ApproximateFloat>::identity(m);
+    Matrix<ApproximateNumber> AT=transpose(A);
+    Matrix<ApproximateNumber> Znm(n,m);
+    Matrix<ApproximateNumber> Zmn(m,n);
+    Matrix<ApproximateNumber> Zmm(m,m);
+    Matrix<ApproximateNumber> Im=Matrix<ApproximateNumber>::identity(m);
 
 
-    Matrix<ApproximateFloat> S=cojoin(join(Dw,Zmn,Im),join(Znm,-YH,-AT),join(Im,-A,Zmm));
-    Vector<ApproximateFloat> r=join(recwu-recwl+y,recxu-recxl-yA,w-gx);
+    Matrix<ApproximateNumber> S=cojoin(join(Dw,Zmn,Im),join(Znm,-YH,-AT),join(Im,-A,Zmm));
+    Vector<ApproximateNumber> r=join(recwu-recwl+y,recxu-recxl-yA,w-gx);
 
     for(uint j=0; j!=m; ++j) {
         if(C[j].lower()==C[j].upper()) {
@@ -1900,14 +1900,14 @@ feasibility_step(IntervalVector const& D, FloatVectorFunction const& g, Interval
         }
     }
 
-    Vector<ApproximateFloat> swxy = -solve(S,r);
+    Vector<ApproximateNumber> swxy = -solve(S,r);
 
-    Vector<ApproximateFloat> sw(m),sx(n),sy(m);
+    Vector<ApproximateNumber> sw(m),sx(n),sy(m);
     sw = project(swxy,range(0,m));
     sx = project(swxy,range(m,m+n));
     sy = project(swxy,range(m+n,m+n+m));
 
-    ApproximateFloat al=1.0;
+    ApproximateNumber al=1.0;
     ApproximateVector nw=w+al*sw;
     ApproximateVector nx=x+al*sx;
     ApproximateVector ny(m);

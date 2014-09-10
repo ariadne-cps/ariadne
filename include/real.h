@@ -38,6 +38,11 @@
 #include "macros.h"
 #include "integer.h"
 #include "rational.h"
+
+#include "float-approximate.h"
+#include "float-validated.h"
+#include "float-exact.h"
+
 #include "interval.h"
 
 typedef unsigned int uint;
@@ -48,7 +53,8 @@ typedef std::ostream OutputStream;
 
 // Forward declarations
 class Float;
-class Interval;
+class ApproximateFloat;
+class ValidatedFloat;
 class ExactFloat;
 class Real;
 class Dyadic;
@@ -103,16 +109,15 @@ class Real {
     Real(const Real&);
     //! \brief Copy assignment.
     Real& operator=(const Real&);
-    // Can't use conversion operators below in g++ since compiler complains
-    // about ambiguous conversion to Interval through Interval(Real::operator Float())
-    //operator Float() const { return this->_ivl.midpoint(); }
-    //operator Interval() const { return this->_ivl; }
+
+    explicit operator Float() const;
+    explicit operator Interval() const;
   public:
     //! \brief Get an approximation as a builtin double-precision floating-point number.
     double get_d() const;
   private:
-    friend Float::Float(const Real&);
-    friend ValidatedFloat::ValidatedFloat(const Real&);
+    friend class ApproximateFloat;
+    friend class ValidatedFloat;
     friend OutputStream& operator<<(OutputStream& os, const Real& x);
 };
 
@@ -152,18 +157,18 @@ inline Real operator-(double x, const Real& y) { return static_cast<Real>(x)-y; 
 inline Real operator*(double x, const Real& y) { return static_cast<Real>(x)*y; }
 inline Real operator/(double x, const Real& y) { return static_cast<Real>(x)/y; }
 
-inline Float operator+(const Real& x, const Float& y) { return static_cast<Float>(x)+y; }
-inline Float operator-(const Real& x, const Float& y) { return static_cast<Float>(x)-y; }
-inline Float operator*(const Real& x, const Float& y) { return static_cast<Float>(x)*y; }
-inline Float operator/(const Real& x, const Float& y) { return static_cast<Float>(x)/y; }
-inline Float operator+(const Float& x, const Real& y) { return x+static_cast<Float>(y); }
-inline Float operator-(const Float& x, const Real& y) { return x-static_cast<Float>(y); }
-inline Float operator*(const Float& x, const Real& y) { return x*static_cast<Float>(y); }
-inline Float operator/(const Float& x, const Real& y) { return x/static_cast<Float>(y); }
-inline Float& operator+=(Float& x, const Real& y) { return x+=static_cast<Float>(y); }
-inline Float& operator-=(Float& x, const Real& y) { return x-=static_cast<Float>(y); }
-inline Float& operator*=(Float& x, const Real& y) { return x*=static_cast<Float>(y); }
-inline Float& operator/=(Float& x, const Real& y) { return x/=static_cast<Float>(y); }
+inline ApproximateFloat operator+(const Real& x, const ApproximateFloat& y) { return static_cast<ApproximateFloat>(x)+y; }
+inline ApproximateFloat operator-(const Real& x, const ApproximateFloat& y) { return static_cast<ApproximateFloat>(x)-y; }
+inline ApproximateFloat operator*(const Real& x, const ApproximateFloat& y) { return static_cast<ApproximateFloat>(x)*y; }
+inline ApproximateFloat operator/(const Real& x, const ApproximateFloat& y) { return static_cast<ApproximateFloat>(x)/y; }
+inline ApproximateFloat operator+(const ApproximateFloat& x, const Real& y) { return x+static_cast<ApproximateFloat>(y); }
+inline ApproximateFloat operator-(const ApproximateFloat& x, const Real& y) { return x-static_cast<ApproximateFloat>(y); }
+inline ApproximateFloat operator*(const ApproximateFloat& x, const Real& y) { return x*static_cast<ApproximateFloat>(y); }
+inline ApproximateFloat operator/(const ApproximateFloat& x, const Real& y) { return x/static_cast<ApproximateFloat>(y); }
+inline ApproximateFloat& operator+=(ApproximateFloat& x, const Real& y) { return x+=static_cast<ApproximateFloat>(y); }
+inline ApproximateFloat& operator-=(ApproximateFloat& x, const Real& y) { return x-=static_cast<ApproximateFloat>(y); }
+inline ApproximateFloat& operator*=(ApproximateFloat& x, const Real& y) { return x*=static_cast<ApproximateFloat>(y); }
+inline ApproximateFloat& operator/=(ApproximateFloat& x, const Real& y) { return x/=static_cast<ApproximateFloat>(y); }
 
 inline ValidatedFloat operator+(const Real& x, const ValidatedFloat& y) { return static_cast<ValidatedFloat>(x)+y; }
 inline ValidatedFloat operator-(const Real& x, const ValidatedFloat& y) { return static_cast<ValidatedFloat>(x)-y; }

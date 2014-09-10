@@ -592,7 +592,7 @@ RealConstrainedImageSet::split() const
     for(uint j=0; j!=this->number_of_parameters(); ++j) {
         if(Float(this->domain()[j].radius())>rmax) {
             k=j;
-            rmax=this->domain()[j].radius();
+            rmax=Float(this->domain()[j].radius());
         }
     }
     return this->split(k);

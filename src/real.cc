@@ -31,6 +31,10 @@
 #include "real.h"
 #include "operators.h"
 
+#include "float.h"
+#include "float-approximate.h"
+#include "float-validated.h"
+#include "float-exact.h"
 
 namespace Ariadne {
 
@@ -44,7 +48,7 @@ static const double _infinity=std::numeric_limits<double>::infinity();
 class RealInterface {
   public:
     virtual ~RealInterface() { }
-    virtual operator Float () const = 0;
+    virtual operator ApproximateFloat () const = 0;
     virtual operator ValidatedFloat () const = 0;
     virtual Void write(OutputStream& os) const = 0;
 };
@@ -52,12 +56,13 @@ class RealInterface {
 class RealBody : public RealInterface {
   private:
     ValidatedFloat _ivl;
-    Float _flt;
+    ApproximateFloat _flt;
   protected:
-    RealBody(const ValidatedFloat& ivl, const Float& flt) : _ivl(ivl), _flt(flt) { ARIADNE_ASSERT(contains(ivl,flt)); }
+    RealBody(const ValidatedFloat& ivl, const ApproximateFloat& flt) : _ivl(ivl), _flt(flt) {
+        ARIADNE_ASSERT((ivl.lower()<=flt.get_flt()) && (flt.get_flt()<=ivl.upper())); }
     RealBody(const ValidatedFloat& ivl) : _ivl(ivl), _flt(midpoint(ivl)) { }
   public:
-    virtual operator Float () const final { return _flt; }
+    virtual operator ApproximateFloat () const final { return _flt; }
     virtual operator ValidatedFloat () const final { return _ivl; }
     virtual Void write(OutputStream& os) const = 0;
 };
@@ -68,8 +73,8 @@ class RealConstant
     String _name;
   public:
     RealConstant(const String& name, double lower, double nearest, double upper)
-        : RealBody(ValidatedFloat(lower,upper),Float(nearest)), _name(name) { }
-    RealConstant(const String& name, ValidatedFloat bounds, Float approx) : RealBody(bounds,approx), _name(name) { }
+        : RealBody(ValidatedFloat(lower,upper),ApproximateFloat(nearest)), _name(name) { }
+    RealConstant(const String& name, ValidatedFloat bounds, ApproximateFloat approx) : RealBody(bounds,approx), _name(name) { }
     RealConstant(const String& name, ValidatedFloat bounds) : RealBody(bounds), _name(name) { }
     virtual Void write(OutputStream& os) const final { os << _name; }
 };
@@ -78,8 +83,8 @@ class IntervalReal
     : public RealBody
 {
   public:
-    IntervalReal(double l, double u) : RealBody(ValidatedFloat(l,u),Float((l+u)/2)) { }
-    IntervalReal(double l, double x, double u) : RealBody(ValidatedFloat(l,u),Float(x)) { }
+    IntervalReal(double l, double u) : RealBody(ValidatedFloat(l,u),ApproximateFloat((l+u)/2)) { }
+    IntervalReal(double l, double x, double u) : RealBody(ValidatedFloat(l,u),ApproximateFloat(x)) { }
     virtual Void write(OutputStream& os) const final { os << this->operator ValidatedFloat(); }
 };
 
@@ -88,7 +93,7 @@ class IntegerReal
 {
     Integer _value;
   public:
-    IntegerReal(const Integer& z) : RealBody(ValidatedFloat(z),Float(midpoint(ValidatedFloat(z)))), _value(z) { }
+    IntegerReal(const Integer& z) : RealBody(ValidatedFloat(z),ApproximateFloat(midpoint(ValidatedFloat(z)))), _value(z) { }
     virtual Void write(OutputStream& os) const final { os << _value; }
 };
 
@@ -98,7 +103,7 @@ class RationalReal
 {
     Rational _value;
   public:
-    RationalReal(const Rational& q) : RealBody(ValidatedFloat(q),Float(q)), _value(q) { }
+    RationalReal(const Rational& q) : RealBody(ValidatedFloat(q),ApproximateFloat(q)), _value(q) { }
     virtual Void write(OutputStream& os) const final { os << _value; }
 };
 #endif // HAVE_GMPXX_H
@@ -108,7 +113,7 @@ class DecimalReal
 {
     Decimal _value;
   public:
-    DecimalReal(const Decimal& d) : RealBody(ValidatedFloat(d),Float(d)), _value(d) { }
+    DecimalReal(const Decimal& d) : RealBody(ValidatedFloat(d),ApproximateFloat(d)), _value(d) { }
     virtual Void write(OutputStream& os) const final { os << _value; }
 };
 
@@ -117,7 +122,7 @@ class DyadicReal
 {
     Dyadic _value;
   public:
-    DyadicReal(const Dyadic& x) : RealBody(ValidatedFloat(x),Float(x)), _value(x) { }
+    DyadicReal(const Dyadic& x) : RealBody(ValidatedFloat(x),ApproximateFloat(x)), _value(x) { }
     virtual Void write(OutputStream& os) const final { os << _value; }
 };
 
@@ -127,11 +132,12 @@ class ExactFloatReal
     ExactFloat _value;
   public:
     ExactFloatReal(double x) : ExactFloatReal(ExactFloat(x)) { }
-    ExactFloatReal(const ExactFloat& x) : RealBody(ValidatedFloat(x),Float(x)), _value(x) { }
+    ExactFloatReal(const ExactFloat& x) : RealBody(ValidatedFloat(x),ApproximateFloat(x)), _value(x) { }
     virtual Void write(OutputStream& os) const final { os << _value; }
 };
 
 // Needed for rec
+static inline ApproximateFloat operator/(int n, ApproximateFloat x) { return ApproximateFloat(n)/x; }
 static inline ValidatedFloat operator/(int n, ValidatedFloat x) { return ExactFloat(n)/x; }
 
 class UnaryReal
@@ -140,7 +146,7 @@ class UnaryReal
     Operator _op; Real _arg;
   public:
     UnaryReal(Operator op, const Real& arg)
-        : RealBody(compute(op,ValidatedFloat(arg)),compute(op,Float(arg))), _op(op), _arg(arg) { }
+        : RealBody(compute(op,ValidatedFloat(arg)),compute(op,ApproximateFloat(arg))), _op(op), _arg(arg) { }
     virtual Void write(OutputStream& os) const final { os << _op << "(" << _arg << ")"; }
 };
 
@@ -150,7 +156,7 @@ class BinaryReal
     Operator _op; Real _arg1; Real _arg2;
   public:
     BinaryReal(Operator op, const Real& arg1, const Real& arg2)
-        : RealBody(compute(op,ValidatedFloat(arg1),ValidatedFloat(arg2)),compute(op,Float(arg1),Float(arg2)))
+        : RealBody(compute(op,ValidatedFloat(arg1),ValidatedFloat(arg2)),compute(op,ApproximateFloat(arg1),ApproximateFloat(arg2)))
         , _op(op), _arg1(arg1), _arg2(arg2) { }
     virtual Void write(OutputStream& os) const final { os << _op << "(" << _arg1 << "," << _arg2 << ")"; }
 };
@@ -175,15 +181,15 @@ Real::Real(const ExactFloat& x) : _ptr(new ExactFloatReal(x)) { }
 
 Real::Real(const Real& x) : _ptr(x._ptr) { }
 Real& Real::operator=(const Real& x) { this->_ptr=x._ptr; return *this; }
-double Real::get_d() const { return this->_ptr->operator Float().get_d(); }
+double Real::get_d() const { return this->_ptr->operator ApproximateFloat().get_d(); }
 
-Float::Float(const Real& x) : Float(x._ptr->operator Float()) { }
-Float& Float::operator=(const Real& x) { *this=Float(x); return *this; }
+Real::operator Interval() const { return Ariadne::Interval(this->_ptr->operator ValidatedFloat()); }
+Real::operator Float() const { return Ariadne::Float(this->_ptr->operator ApproximateFloat().get_flt()); }
+
+ApproximateFloat::ApproximateFloat(const Real& x) : ApproximateFloat(x._ptr->operator ApproximateFloat()) { }
 ValidatedFloat::ValidatedFloat(const Real& x) : ValidatedFloat(x._ptr->operator ValidatedFloat()) { }
-ValidatedFloat& ValidatedFloat::operator=(const Real& x) { *this=ValidatedFloat(x); return *this; }
 
 Interval::Interval(const Real& x) : Interval(ValidatedFloat(x)) { }
-Interval& Interval::operator=(const Real& x) { *this=Interval(x); return *this; }
 
 Real _make_real(const Interval& ivl) { return Real(ivl.lower().get_d(),ivl.upper().get_d()); }
 

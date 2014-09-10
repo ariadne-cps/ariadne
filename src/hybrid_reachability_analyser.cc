@@ -402,7 +402,7 @@ upper_evolve(const CompactSetInterfaceType& initial_set,
     int grid_depth = this->_configuration->maximum_grid_depth();
     evolve_cells.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial_evolve.size()="<<evolve_cells.size()<<"\n");
-    Float real_time=time.continuous_time();
+    Float real_time=static_cast<Float>(time.continuous_time());
     uint discrete_steps=time.discrete_time();
     Float lock_to_grid_time=this->_configuration->lock_to_grid_time();
     uint time_steps=integer_cast<uint>(real_time/lock_to_grid_time);
@@ -443,7 +443,7 @@ upper_reach(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(4,"initial size = "<<evolve_cells.size()<<"\n");
     HybridGridTreeSet reach_cells(evolve_cells);
     ARIADNE_LOG(4,"reach size ="<<reach_cells.size()<<"\n");
-    Float real_time=time.continuous_time();
+    Float real_time=static_cast<Float>(time.continuous_time());
     uint discrete_steps=time.discrete_time();
     Float lock_to_grid_time = this->_configuration->lock_to_grid_time();
     uint time_steps=integer_cast<uint>(real_time/lock_to_grid_time);
@@ -498,7 +498,7 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(4,"initial_evolve"<<evolve_cells<<"\n");
     HybridGridTreeSet reach_cells(evolve_cells);
     ARIADNE_LOG(4,"reach="<<reach_cells<<"\n");
-    Float real_time=time.continuous_time();
+    Float real_time=static_cast<Float>(time.continuous_time());
     uint discrete_steps=time.discrete_time();
     Float lock_to_grid_time = this->_configuration->lock_to_grid_time();
     uint time_steps=integer_cast<uint>(real_time/lock_to_grid_time);

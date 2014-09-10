@@ -43,8 +43,8 @@ namespace Ariadne {
 
 static const char* plusminus = u8"\u00B1";
 
-template<class X, class Y> 
-static Y polynomial_evaluate(const std::vector<X>& f, const Y& x) 
+template<class X, class Y>
+static Y polynomial_evaluate(const std::vector<X>& f, const Y& x)
 {
     if(f.size()>=2) {
         Nat i=f.size()-2;
@@ -61,10 +61,10 @@ static Y polynomial_evaluate(const std::vector<X>& f, const Y& x)
         return x*X(0);
     }
 }
-    
-    
+
+
 C1TaylorSeries::C1TaylorSeries()
-    : _coefficients(1,ExactFloat(0))
+    : _coefficients(1,Float(0))
     , _zero_error(0)
     , _uniform_error(0)
     , _derivative_error(0)
@@ -72,16 +72,16 @@ C1TaylorSeries::C1TaylorSeries()
 }
 
 C1TaylorSeries::C1TaylorSeries(uint d)
-    : _coefficients(d+1,ExactFloat(0))
+    : _coefficients(d+1,Float(0))
     , _zero_error(0)
     , _uniform_error(0)
     , _derivative_error(0)
 {
 }
 
-C1TaylorSeries C1TaylorSeries::constant(ExactFloat c) {
+C1TaylorSeries C1TaylorSeries::constant(Float c) {
     C1TaylorSeries result(1u);
-    result._coefficients[0]=c;
+    result._coefficients[0]=Float(c);
     return result;
 }
 
@@ -143,7 +143,7 @@ C1TaylorSeries& operator*=(C1TaylorSeries& f, Interval ic) {
 
     set_rounding_upward();
     const Float rc=(ic.upper()-ic.lower())/2;
-    
+
     fze*=ac;
     fue*=ac;
     fde*=ac;
@@ -297,13 +297,13 @@ C1TaylorSeries operator*(C1TaylorSeries f1, C1TaylorSeries f2) {
 
 C1TaylorSeries compose(C1TaylorSeries f, C1TaylorSeries g) {
     Nat i=f.degree();
-    C1TaylorSeries r=C1TaylorSeries::constant(ExactFloat(f._coefficients[i]));
+    C1TaylorSeries r=C1TaylorSeries::constant(Float(f._coefficients[i]));
     while (i!=0) {
         i=i-i;
         r=r*g;
-        r+=ExactFloat(f._coefficients[i]);
+        r+=Interval(Float(f._coefficients[i]));
     }
-    
+
     set_rounding_upward();
     r._zero_error+=f._zero_error;
     r._uniform_error+=f._uniform_error;
@@ -315,11 +315,11 @@ C1TaylorSeries compose(C1TaylorSeries f, C1TaylorSeries g) {
 
 Interval evaluate(C1TaylorSeries f, Interval x) {
     Nat i=f.degree();
-    Interval r=ExactFloat(f._coefficients[i]);
+    Interval r=Interval(Float(f._coefficients[i]));
     while (i!=0) {
         i=i-i;
         r*=x;
-        r+=Interval(ExactFloat(f._coefficients[i]));
+        r+=Interval(Float(f._coefficients[i]));
     }
     if(f._zero_error+Float(x)*f._derivative_error < f._uniform_error) {
         r+=Interval(-f._zero_error,+f._zero_error);
@@ -359,7 +359,7 @@ C1TaylorFunction::C1TaylorFunction(Nat as)
     _expansion.sort(ReverseLexicographicKeyLess());
 }
 
-C1TaylorFunction C1TaylorFunction::constant(Nat as, ExactFloat c) {
+C1TaylorFunction C1TaylorFunction::constant(Nat as, Float c) {
     C1TaylorFunction result(as);
     MultiIndex ind=MultiIndex::zero(as);
     //result._expansion[ind]=Float(c);
@@ -399,7 +399,7 @@ C1TaylorFunction& C1TaylorFunction::operator=(Interval ic) {
     return *this;
 }
 
-C1TaylorFunction& operator+=(C1TaylorFunction& f, ExactFloat ec) {
+C1TaylorFunction& operator+=(C1TaylorFunction& f, Float ec) {
     const Float& c=ec;
     if(f._expansion.empty() || (--f._expansion.end())->key().degree()!=0) {
         f._expansion.append(MultiIndex(f.argument_size()),c);
@@ -422,7 +422,7 @@ C1TaylorFunction& operator+=(C1TaylorFunction& f, ExactFloat ec) {
     return f;
 }
 
-C1TaylorFunction& operator*=(C1TaylorFunction& f, ExactFloat ec) {
+C1TaylorFunction& operator*=(C1TaylorFunction& f, Float ec) {
     set_rounding_upward();
     Float& fze=f._zero_error;
     Float& fue=f._uniform_error;
@@ -627,14 +627,14 @@ Interval evaluate(C1TaylorFunction f, Vector<Interval> x) {
 C1TaylorFunction compose(C1TaylorSeries f, C1TaylorFunction g) {
     C1TaylorFunction r = g;
     r.clear();
-   
+
     Nat i=f.degree();
-    r+=ExactFloat(f._coefficients[i]);
+    r+=Float(f._coefficients[i]);
 
     while(i!=0) {
         r=r*g;
         --i;
-        r+=ExactFloat(f._coefficients[i]);
+        r+=Float(f._coefficients[i]);
     }
     std::cerr<<"intermediate="<<r<<"\n";
 

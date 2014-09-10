@@ -82,8 +82,12 @@ class FloatVariableInterval {
 };
 inline FloatVariableLowerInterval operator<=(double l, RealVariable const& v) {
     return FloatVariableLowerInterval(l,v); }
+inline FloatVariableInterval operator<=(FloatVariableLowerInterval lv, double u) {
+    return FloatVariableInterval(lv._lower,lv._variable,u); }
 inline FloatVariableInterval operator<=(FloatVariableLowerInterval lv, Float u) {
     return FloatVariableInterval(lv._lower,lv._variable,u); }
+inline FloatVariableInterval operator<=(FloatVariableLowerInterval lv, Real u) {
+    return FloatVariableInterval(lv._lower,lv._variable,Float(u)); }
 
 struct Axes2d {
     Axes2d(const FloatVariableInterval x, const FloatVariableInterval& y)

@@ -166,7 +166,7 @@ IntegratorBase::flow_to(const IntervalVectorFunction& vf, const IntervalVector& 
     IntervalVectorFunctionModel step_function;
     while(t<tmax) {
         IntervalVector dx=flow_function.range();
-        Float h=tmax-t;
+        Float h=static_cast<Float>(tmax)-t;
         IntervalVector bx;
         make_lpair(h,bx) = this->flow_bounds(vf,dx,h);
         bool flow_successfully_computed=false;

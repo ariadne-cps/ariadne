@@ -50,13 +50,13 @@ class Interval;
 template<class X> class Vector;
 template<class X> class LinearProgram;
 template<class X> class ScalarFunction;
-typedef ScalarFunction<Interval> IntervalScalarFunction;
+typedef ValidatedScalarFunction ValidatedScalarFunction;
 template<class X> class VectorFunction;
-typedef VectorFunction<Interval> IntervalVectorFunction;
+typedef ValidatedVectorFunction ValidatedVectorFunction;
 template<class X> class ScalarFunctionModel;
-typedef ScalarFunctionModel<Interval> IntervalScalarFunctionModel;
+typedef ScalarFunctionModel<Interval> ValidatedScalarFunctionModel;
 template<class X> class VectorFunctionModel;
-typedef VectorFunctionModel<Interval> IntervalVectorFunctionModel;
+typedef VectorFunctionModel<Interval> ValidatedVectorFunctionModel;
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<Interval> IntervalFunctionModelFactoryInterface;
 class Enclosure;
@@ -167,14 +167,14 @@ class HybridEnclosure
     //! \brief The continuous state set.
     const IntervalVector parameter_domain() const;
     //! \brief The function related to space.
-    const IntervalVectorFunctionModel& space_function() const;
+    const ValidatedVectorFunctionModel& space_function() const;
     //! \brief The function related to time.
-    const IntervalScalarFunctionModel& time_function() const;
+    const ValidatedScalarFunctionModel& time_function() const;
     //! \brief The function giving the time since the last event.
-    const IntervalScalarFunctionModel& dwell_time_function() const;
+    const ValidatedScalarFunctionModel& dwell_time_function() const;
 
     //! \brief Set the evolution time function to \a omega.
-    void set_time_function(const IntervalScalarFunctionModel& omega);
+    void set_time_function(const ValidatedScalarFunctionModel& omega);
 
     //! \brief A bounding box for the space.
     IntervalVector space_bounding_box() const;
@@ -188,21 +188,21 @@ class HybridEnclosure
 
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
-    void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const IntervalVectorFunction& r);
+    void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorFunction& r);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps) and tau'(s)=tau(s)+eps
-    void apply_fixed_evolve_step(const IntervalVectorFunctionModel& phi, const ExactFloat& eps);
+    void apply_fixed_evolve_step(const ValidatedVectorFunctionModel& phi, const ExactFloat& eps);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s),tau(s))) and tau'(s)=tau(s)+eps(xi(s),tau(s))
-    void apply_spacetime_evolve_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& eps);
+    void apply_spacetime_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
     //! \brief Apply the reach step \xi'(s) = phi(xi(s),t-tau(s)) and tau'(s)=tau(s)+t for 0<=t<=eps(xi(s),tau(s))
-    void apply_spacetime_reach_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& eps);
+    void apply_spacetime_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
-    void apply_evolve_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& eps);
+    void apply_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),\omega(s)-tau(s)) and tau'(s)=omega(s)
-    void apply_finishing_evolve_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& omega);
+    void apply_finishing_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& omega);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(s) , assuming eps(s)<= h throughout.
-    void apply_reach_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& eps);
+    void apply_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h].
-    void apply_full_reach_step(const IntervalVectorFunctionModel& phi);
+    void apply_full_reach_step(const ValidatedVectorFunctionModel& phi);
 
 
     //! \brief Set the time of evolution to \a \f$t_{\max}\f$.
@@ -210,9 +210,9 @@ class HybridEnclosure
     void set_time(Real tmax);
     //! \brief Set the time of evolution to \a omega.
     //! Corresponds to introducting the constraint \f$\tau(s) = \omega(s)\f$.
-    void set_time(IntervalScalarFunction omega);
+    void set_time(ValidatedScalarFunction omega);
     //! \brief Introduces the constraint \f$\tau(s)\leq \omega(s)\f$.
-    void bound_time(IntervalScalarFunction omega);
+    void bound_time(ValidatedScalarFunction omega);
     //! \brief Introduces the constraint \f$\tau(s)\leq t_{\max}\f$.
     void bound_time(Real tmax);
 
@@ -222,7 +222,7 @@ class HybridEnclosure
     //! \brief Set the current time-step to \f$h\f$. \deprecated
     void set_step_time(Float h);
     //! \brief \deprecated
-    void new_time_step_bound(DiscreteEvent e, IntervalScalarFunction tau);
+    void new_time_step_bound(DiscreteEvent e, ValidatedScalarFunction tau);
 
     //! \brief Introduces a new parameter with domain \a ivl.
     void new_parameter(Interval ivl, EnclosureVariableType);
@@ -235,14 +235,14 @@ class HybridEnclosure
     //! \brief Introduces a new constraint \f$C\f$ on \f$s\f$.
     void new_parameter_constraint(DiscreteEvent e, IntervalConstraint c);
     //! \brief Introduces the new invariant (progress predicate) \f$c(x)\leq0\f$.
-    void new_invariant(DiscreteEvent e, IntervalScalarFunction c);
+    void new_invariant(DiscreteEvent e, ValidatedScalarFunction c);
     //! \brief Introduces the new activation condition \f$g(x)\geq0\f$ for the event \a e.
-    void new_activation(DiscreteEvent e,IntervalScalarFunction g);
+    void new_activation(DiscreteEvent e,ValidatedScalarFunction g);
     //! \brief Introduces the new guard condition \f$g(x)=0\f$ for the event \a e.
     //! More precisely, the continuous dynamics is restricted to \f$c(x)\leq0\f$, and the event happens when \f$c(x)\geq0\f$.
-    void new_guard(DiscreteEvent e, IntervalScalarFunction g);
+    void new_guard(DiscreteEvent e, ValidatedScalarFunction g);
     //! \brief Introduces the new guard condition \f$g(x)=0\f$ for the event \a e, with computed crossing time \f$\tau(s)\f$.
-    void new_guard(DiscreteEvent e, IntervalScalarFunction g, IntervalScalarFunction ct);
+    void new_guard(DiscreteEvent e, ValidatedScalarFunction g, ValidatedScalarFunction ct);
 
 
     //! \brief The dimension of the set.
@@ -287,11 +287,11 @@ class HybridEnclosure
   private:
   public:
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] .
-    void _apply_flow(IntervalVectorFunction phi, Float step);
+    void _apply_flow(ValidatedVectorFunction phi, Float step);
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(xi(s)) .
-    void _apply_flow(IntervalVectorFunction phi, Float step, IntervalScalarFunction elps);
+    void _apply_flow(ValidatedVectorFunction phi, Float step, ValidatedScalarFunction elps);
     // Compute the flow evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
-    void _apply_flow_step(IntervalVectorFunction phi, IntervalScalarFunction elps);
+    void _apply_flow_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     void _check() const; // Check that set is well-formed.
     // Compute constraints of the set
     List<IntervalConstraint> constraints() const;

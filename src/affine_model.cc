@@ -174,12 +174,12 @@ Vector< AffineModel<Interval> > affine_models(const Vector< TaylorModel<Interval
     return result;
 }
 
-AffineModel<Interval> affine_model(const IntervalVector& domain, const ScalarFunction<Interval>& function)
+AffineModel<Interval> affine_model(const IntervalVector& domain, const ValidatedScalarFunction& function)
 {
     return affine_model(ScalarTaylorFunction(domain,function,AffineSweeper()).model());
 }
 
-Vector< AffineModel<Interval> > affine_models(const IntervalVector& domain, const VectorFunction<Interval>& function)
+Vector< AffineModel<Interval> > affine_models(const IntervalVector& domain, const ValidatedVectorFunction& function)
 {
     return affine_models(VectorTaylorFunction(domain,function,AffineSweeper()).models());
 }

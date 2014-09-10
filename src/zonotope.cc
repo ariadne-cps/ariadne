@@ -742,8 +742,8 @@ orthogonal_over_approximation(const Zonotope< Interval >& z)
 }
 */
 
-Zonotope apply(const VectorFunction<Interval>& f, const Zonotope& z) {
-    std::cerr<<"Zonotope apply(IntervalVectorFunction,Zonotope)\n";
+Zonotope apply(const ValidatedVectorFunction& f, const Zonotope& z) {
+    std::cerr<<"Zonotope apply(ValidatedVectorFunction,Zonotope)\n";
     IntervalVector zc=z.centre();
     IntervalMatrix zG=z.generators();
     IntervalVector ze=z.error()*Interval(-1,+1);

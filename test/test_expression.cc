@@ -113,30 +113,30 @@ class TestExpression {
         RealVariable z("z");
 
         RealExpression e1=c;
-        RealScalarFunction f1=make_function(e1,RealSpace((x,y,z)));
+        EffectiveScalarFunction f1=make_function(e1,RealSpace((x,y,z)));
         ARIADNE_TEST_PRINT(f1);
         ARIADNE_TEST_EQUAL(f1.evaluate(tv), tc);
 
         RealExpression e2=c+x;
-        RealScalarFunction f2=make_function(e2,RealSpace((x,y,z)));
+        EffectiveScalarFunction f2=make_function(e2,RealSpace((x,y,z)));
         ARIADNE_TEST_PRINT(f2);
         ARIADNE_TEST_EQUAL(f2.evaluate(tv), tc+tx);
 
         RealExpression e3=c+x+c*y;
-        RealScalarFunction f3=make_function(e3,(x,y,z));
+        EffectiveScalarFunction f3=make_function(e3,(x,y,z));
         ARIADNE_TEST_PRINT(f3);
         ARIADNE_TEST_EQUAL(f3.evaluate(tv), tc+tx+tc*ty);
 
         RealExpression e4=exp(c+x);
-        RealScalarFunction f4=make_function(e4,(x,y,z));
+        EffectiveScalarFunction f4=make_function(e4,(x,y,z));
         ARIADNE_TEST_PRINT(f4);
         ARIADNE_TEST_EQUAL(f4.evaluate(tv), exp(tc+tx));
 
-        //ARIADNE_TEST_EVALUATE(RealVectorFunction((x+y,y+z*z),(x,y,z))[0]);
-        //ARIADNE_TEST_EQUAL(RealVectorFunction((x+y,y+z*z),(x,y,z))[0],RealScalarFunction(x+y,(x,y,z)));
+        //ARIADNE_TEST_EVALUATE(EffectiveVectorFunction((x+y,y+z*z),(x,y,z))[0]);
+        //ARIADNE_TEST_EQUAL(EffectiveVectorFunction((x+y,y+z*z),(x,y,z))[0],EffectiveScalarFunction(x+y,(x,y,z)));
 
-        //ARIADNE_TEST_EVALUATE(RealVectorFunction((dot(x),dot(y)),(dot(x)=x+y,dot(y)=y+z*z),(x,y,z))[0]);
-        //ARIADNE_TEST_EQUAL(RealVectorFunction((x+y,y+z*z),(x,y,z))[0],RealScalarFunction(x+y,(x,y,z)));
+        //ARIADNE_TEST_EVALUATE(EffectiveVectorFunction((dot(x),dot(y)),(dot(x)=x+y,dot(y)=y+z*z),(x,y,z))[0]);
+        //ARIADNE_TEST_EQUAL(EffectiveVectorFunction((x+y,y+z*z),(x,y,z))[0],EffectiveScalarFunction(x+y,(x,y,z)));
     }
 
     void test() {

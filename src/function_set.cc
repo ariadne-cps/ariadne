@@ -67,9 +67,9 @@ unsigned int DRAWING_ACCURACY=1u;
 template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; return ss.str(); }
 
 
-Matrix<Float> nonlinearities_zeroth_order(const IntervalVectorFunction& f, const Box& dom);
-Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& function, const Box domain);
-Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& function, const Box& domain);
+Matrix<Float> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const Box& dom);
+Pair<uint,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const Box domain);
+Pair<uint,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const Box& domain);
 
 Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const Box& dom)
 {
@@ -94,7 +94,7 @@ Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const B
     return nonlinearities;
 }
 
-Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& f, const Box& dom)
+Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface& f, const Box& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -129,7 +129,7 @@ Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& 
     return nonlinearities;
 }
 
-Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface& f, const Box& dom)
+Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface& f, const Box& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -233,8 +233,8 @@ uint argument_size(const List<RealConstraint>& c) {
     return as;
 }
 
-RealVectorFunction constraint_function(uint as, const List<RealConstraint>& c) {
-    RealVectorFunction f(c.size(),as);
+EffectiveVectorFunction constraint_function(uint as, const List<RealConstraint>& c) {
+    EffectiveVectorFunction f(c.size(),as);
     for(uint i=0; i!=c.size(); ++i) {
         //f[i]=c[i].function();
         f.set(i,c[i].function());
@@ -250,7 +250,7 @@ BoxSet constraint_bounds(const List<RealConstraint>& c) {
     return b;
 }
 
-List<RealConstraint> constraints(const RealVectorFunction& f, const BoxSet& b) {
+List<RealConstraint> constraints(const EffectiveVectorFunction& f, const BoxSet& b) {
     ARIADNE_ASSERT(f.result_size()==b.size());
     List<RealConstraint> c; c.reserve(b.size());
     for(uint i=0; i!=b.size(); ++i) {
@@ -262,7 +262,7 @@ List<RealConstraint> constraints(const RealVectorFunction& f, const BoxSet& b) {
 } //namespace
 
 
-ConstraintSet::ConstraintSet(const RealVectorFunction& f, const BoxSet& b)
+ConstraintSet::ConstraintSet(const EffectiveVectorFunction& f, const BoxSet& b)
     : _dimension(f.argument_size()), _constraints()
 {
     this->_constraints=::constraints(f,b);
@@ -273,7 +273,7 @@ ConstraintSet::ConstraintSet(const List<RealConstraint>& c)
 {
 }
 
-RealVectorFunction const ConstraintSet::constraint_function() const
+EffectiveVectorFunction const ConstraintSet::constraint_function() const
 {
     return ::constraint_function(this->dimension(),this->constraints());
 }
@@ -333,7 +333,7 @@ BoundedConstraintSet::BoundedConstraintSet(const BoxSet& bx)
 {
 }
 
-BoundedConstraintSet::BoundedConstraintSet(const BoxSet& d, const RealVectorFunction& f, const BoxSet& b)
+BoundedConstraintSet::BoundedConstraintSet(const BoxSet& d, const EffectiveVectorFunction& f, const BoxSet& b)
     : _domain(d), _constraints(::constraints(f,b))
 {
     ARIADNE_ASSERT(b.size()==f.result_size());
@@ -345,7 +345,7 @@ BoundedConstraintSet::BoundedConstraintSet(const BoxSet& d, const List<RealConst
 {
 }
 
-RealVectorFunction const BoundedConstraintSet::constraint_function() const
+EffectiveVectorFunction const BoundedConstraintSet::constraint_function() const
 {
     return ::constraint_function(this->dimension(),this->constraints());
 }
@@ -440,7 +440,7 @@ intersection(const ConstraintSet& cs,const BoxSet& bx)
 
 
 RealConstrainedImageSet::RealConstrainedImageSet(const BoundedConstraintSet& set)
-    : _domain(over_approximation(set.domain())), _function(RealVectorFunction::identity(set.dimension()))
+    : _domain(over_approximation(set.domain())), _function(EffectiveVectorFunction::identity(set.dimension()))
 {
     for(uint i=0; i!=set.number_of_constraints(); ++i) {
         this->new_parameter_constraint(set.constraint(i));
@@ -448,9 +448,9 @@ RealConstrainedImageSet::RealConstrainedImageSet(const BoundedConstraintSet& set
 }
 
 
-const RealVectorFunction RealConstrainedImageSet::constraint_function() const
+const EffectiveVectorFunction RealConstrainedImageSet::constraint_function() const
 {
-    RealVectorFunction result(this->number_of_constraints(),this->number_of_parameters());
+    EffectiveVectorFunction result(this->number_of_constraints(),this->number_of_parameters());
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
         result[i]=this->constraint(i).function();
     }
@@ -506,7 +506,7 @@ tribool RealConstrainedImageSet::satisfies(const RealConstraint& nc) const
     ConstraintSolver solver;
     const BoxSet& domain=this->_domain;
     List<RealConstraint> all_constraints=this->_constraints;
-    RealScalarFunction composed_function = compose(nc.function(),this->_function);
+    EffectiveScalarFunction composed_function = compose(nc.function(),this->_function);
     const Real& lower_bound = nc.lower_bound();
     const Real& upper_bound = nc.upper_bound();
 
@@ -528,7 +528,7 @@ tribool RealConstrainedImageSet::satisfies(const RealConstraint& nc) const
 tribool RealConstrainedImageSet::separated(const Box& bx) const
 {
     Box subdomain = over_approximation(this->_domain);
-    RealVectorFunction function = join(this->function(),this->constraint_function());
+    EffectiveVectorFunction function = join(this->function(),this->constraint_function());
     Box codomain = product(bx,Box(over_approximation(this->constraint_bounds())));
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
@@ -544,7 +544,7 @@ tribool RealConstrainedImageSet::overlaps(const Box& bx) const
     return indeterminate;
     //ARIADNE_NOT_IMPLEMENTED;
     Box subdomain = under_approximation(this->_domain);
-    RealVectorFunction function = join(this->function(),this->constraint_function());
+    EffectiveVectorFunction function = join(this->function(),this->constraint_function());
     Box codomain = product(bx,Box(under_approximation(this->constraint_bounds())));
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
@@ -557,8 +557,8 @@ RealConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, 
 {
     ARIADNE_ASSERT(paving.dimension()==this->dimension());
     const Box domain=over_approximation(this->domain());
-    const RealVectorFunction& space_function=this->function();
-    RealVectorFunction constraint_function(this->number_of_constraints(),domain.size());
+    const EffectiveVectorFunction& space_function=this->function();
+    EffectiveVectorFunction constraint_function(this->number_of_constraints(),domain.size());
     BoxSet codomain(this->number_of_constraints());
 
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
@@ -611,7 +611,7 @@ RealConstrainedImageSet::split(uint j) const
 }
 
 
-RealConstrainedImageSet image(const BoundedConstraintSet& set, const RealVectorFunction& function) {
+RealConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVectorFunction& function) {
     ARIADNE_ASSERT(set.dimension()==function.argument_size());
     RealConstrainedImageSet result(set.domain(),function);
     for(uint i=0; i!=set.number_of_constraints(); ++i) {
@@ -641,14 +641,14 @@ RealConstrainedImageSet image(const BoundedConstraintSet& set, const RealVectorF
 Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const Box& dom);
 
 
-Matrix<Float> nonlinearities_zeroth_order(const IntervalVectorFunction& f, const Box& dom)
+Matrix<Float> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const Box& dom)
 {
     ARIADNE_ASSERT(dynamic_cast<const VectorTaylorFunction*>(f.raw_pointer()));
     return nonlinearities_zeroth_order(dynamic_cast<const VectorTaylorFunction&>(*f.raw_pointer()),dom);
 }
 
 /*
-Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& f, const Box& dom)
+Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface& f, const Box& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -683,7 +683,7 @@ Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& 
     return nonlinearities;
 }
 
-Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface& f, const Box& dom)
+Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface& f, const Box& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -719,7 +719,7 @@ Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface&
 }
 */
 
-Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& function, const Box& domain)
+Pair<uint,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const Box& domain)
 {
     Matrix<Interval> jacobian=function.jacobian(domain);
 
@@ -741,7 +741,7 @@ Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& functi
     return make_pair(jmax,numeric_cast<double>(max_column_norm));
 }
 
-Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& function, const Box& domain)
+Pair<uint,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const Box& domain)
 {
     Matrix<Float> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
@@ -814,9 +814,9 @@ template<class SF> class TemplatedConstrainedImageSet;
 
 
 
-IntervalVectorFunction IntervalConstrainedImageSet::constraint_function() const
+ValidatedVectorFunction IntervalConstrainedImageSet::constraint_function() const
 {
-    IntervalVectorFunction result(this->number_of_constraints(),this->number_of_parameters());
+    ValidatedVectorFunction result(this->number_of_constraints(),this->number_of_parameters());
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
         result[i]=this->constraint(i).function();
     }
@@ -977,10 +977,10 @@ tribool IntervalConstrainedImageSet::inside(const Box& bx) const
 tribool IntervalConstrainedImageSet::separated(const Box& bx) const
 {
     Box subdomain = this->_reduced_domain;
-    IntervalVectorFunction function(this->dimension()+this->number_of_constraints(),this->number_of_parameters());
+    ValidatedVectorFunction function(this->dimension()+this->number_of_constraints(),this->number_of_parameters());
     for(uint i=0; i!=this->dimension(); ++i) { function[i]=this->_function[i]; }
     for(uint i=0; i!=this->number_of_constraints(); ++i) { function[i+this->dimension()]=this->_constraints[i].function(); }
-    //IntervalVectorFunction function = join(this->_function,this->constraint_function());
+    //ValidatedVectorFunction function = join(this->_function,this->constraint_function());
     IntervalVector codomain = join(bx,this->constraint_bounds());
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
@@ -993,9 +993,9 @@ tribool IntervalConstrainedImageSet::overlaps(const Box& bx) const
     //std::cerr<<"subdomain="<<this->_reduced_domain<<"\n";
 
     Box subdomain = this->_reduced_domain;
-    IntervalVectorFunction space_function = this->_function;
-    IntervalVectorFunction constraint_function = this->constraint_function();
-    IntervalVectorFunction function = join(space_function,constraint_function);
+    ValidatedVectorFunction space_function = this->_function;
+    ValidatedVectorFunction constraint_function = this->constraint_function();
+    ValidatedVectorFunction function = join(space_function,constraint_function);
     //std::cerr<<"function="<<function<<"\n";
     IntervalVector constraint_bounds = intersection(this->constraint_bounds(),this->constraint_function().evaluate(subdomain));
     IntervalVector codomain = join(bx,constraint_bounds);
@@ -1031,8 +1031,8 @@ tribool IntervalConstrainedImageSet::overlaps(const Box& bx) const
 void IntervalConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
     const IntervalVector subdomain=this->_reduced_domain;
-    const IntervalVectorFunction function = this->function();
-    const IntervalVectorFunction constraint_function = this->constraint_function();
+    const ValidatedVectorFunction function = this->function();
+    const ValidatedVectorFunction constraint_function = this->constraint_function();
     const IntervalVector constraint_bounds = this->constraint_bounds();
 
     switch(DISCRETISATION_METHOD) {
@@ -1063,7 +1063,7 @@ tribool IntervalConstrainedImageSet::satisfies(const IntervalConstraint& nc) con
     ConstraintSolver solver;
     const Box& domain=this->_domain;
     List<IntervalConstraint> all_constraints=this->constraints();
-    IntervalScalarFunction composed_function = compose(nc.function(),this->_function);
+    ValidatedScalarFunction composed_function = compose(nc.function(),this->_function);
     const Interval& bounds = nc.bounds();
 
     Tribool result;
@@ -1118,19 +1118,19 @@ join(const IntervalConstrainedImageSet& set1, const IntervalConstrainedImageSet&
 
     Box new_domain = hull(domain1,domain2);
 
-    IntervalVectorFunctionModel function1
-        = IntervalVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<Interval> const&>(set1.function().reference()));
+    ValidatedVectorFunctionModel function1
+        = ValidatedVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<Interval> const&>(set1.function().reference()));
     Vector<Float> function_error1=function1.errors();
     function1.clobber();
     function1.restrict(new_domain);
 
-    IntervalVectorFunctionModel function2
-        = IntervalVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<Interval> const&>(set2.function().reference()));
+    ValidatedVectorFunctionModel function2
+        = ValidatedVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<Interval> const&>(set2.function().reference()));
     Vector<Float> function_error2=function2.errors();
     function2.clobber();
     function2.restrict(new_domain);
 
-    IntervalVectorFunctionModel new_function=(function1+function2)*ExactFloat(0.5);
+    ValidatedVectorFunctionModel new_function=(function1+function2)*ExactFloat(0.5);
     new_function.clobber();
     for(uint i=0; i!=new_function.result_size(); ++i) {
         function_error1[i]=add_up(norm(new_function[i]-function1[i]),function_error1[i]);

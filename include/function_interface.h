@@ -39,9 +39,29 @@ typedef void Void;
 typedef unsigned int Nat;
 typedef int Int;
 
+struct ExactTag { };
+struct EffectiveTag { };
+struct ValidatedTag { };
+struct ApproximateTag { };
+
 class Float;
 class Interval;
 class Real;
+
+class ApproximateFloat;
+class ValidatedFloat;
+class ExactFloat;
+
+typedef Float ApproximateNumberType;
+typedef Interval ValidatedNumberType;
+typedef Real EffectiveNumberType;
+
+template<class I> struct CanonicalNumberTypedef;
+template<> struct CanonicalNumberTypedef<ExactTag> { typedef EffectiveNumberType Type; };
+template<> struct CanonicalNumberTypedef<EffectiveTag> { typedef EffectiveNumberType Type; };
+template<> struct CanonicalNumberTypedef<ValidatedTag> { typedef ValidatedNumberType Type; };
+template<> struct CanonicalNumberTypedef<ApproximateTag> { typedef ApproximateNumberType Type; };
+template<class I> using CanonicalNumberType = typename CanonicalNumberTypedef<I>::Type;
 
 class Interval;
 class Box;
@@ -53,29 +73,28 @@ template<class X> class TaylorModel;
 template<class X> class Formula;
 template<class X> class Algebra;
 
-typedef Vector<Float> FloatVector;
-typedef Vector<Interval> IntervalVector;
-
 template<class X> class ScalarFunctionInterface;
 template<class X> class VectorFunctionInterface;
 
-typedef ScalarFunctionInterface<Float> FloatScalarFunctionInterface;
-typedef ScalarFunctionInterface<Interval> IntervalScalarFunctionInterface;
-typedef ScalarFunctionInterface<Real> RealScalarFunctionInterface;
+typedef ScalarFunctionInterface<ApproximateNumberType> ApproximateScalarFunctionInterface;
+typedef ScalarFunctionInterface<ValidatedNumberType> ValidatedScalarFunctionInterface;
+typedef ScalarFunctionInterface<EffectiveNumberType> EffectiveScalarFunctionInterface;
 
-typedef VectorFunctionInterface<Float> FloatVectorFunctionInterface;
-typedef VectorFunctionInterface<Interval> IntervalVectorFunctionInterface;
-typedef VectorFunctionInterface<Real> RealVectorFunctionInterface;
+typedef VectorFunctionInterface<ApproximateNumberType> ApproximateVectorFunctionInterface;
+typedef VectorFunctionInterface<ValidatedNumberType> ValidatedVectorFunctionInterface;
+typedef VectorFunctionInterface<EffectiveNumberType> EffectiveVectorFunctionInterface;
 
 template<class X> class ScalarFunction;
-typedef ScalarFunction<Float> FloatScalarFunction;
-typedef ScalarFunction<Interval> IntervalScalarFunction;
+typedef ScalarFunction<ApproximateNumberType> ApproximateScalarFunction;
+typedef ScalarFunction<ValidatedNumberType> ValidatedScalarFunction;
+typedef ScalarFunction<EffectiveNumberType> EffectiveScalarFunction;
 typedef ScalarFunction<Real> RealScalarFunction;
 
 template<class X> class VectorFunction;
-typedef VectorFunction<Float> FloatVectorFunction;
-typedef VectorFunction<Interval> IntervalVectorFunction;
-typedef VectorFunction<Real> RealVectorFunction;
+typedef VectorFunction<ApproximateNumberType> ApproximateVectorFunction;
+typedef VectorFunction<ValidatedNumberType> ValidatedVectorFunction;
+typedef VectorFunction<EffectiveNumberType> EffectiveVectorFunction;
+typedef EffectiveVectorFunction RealVectorFunction;
 
 template<>
 class ScalarFunctionInterface<Void>
@@ -101,102 +120,102 @@ class ScalarFunctionInterface<Void>
 //! \brief Interface for scalar functions \f$\mathbb{F}^n\rightarrow\mathbb{F}\f$ which can only be evaluated approximately.
 //! \sa \ref VectorFunctionInterface.
 template<>
-class ScalarFunctionInterface<Float>
+class ScalarFunctionInterface<ApproximateNumberType>
     : public ScalarFunctionInterface<Void>
 {
   public:
     //! \brief Return a copy of the function.
-    inline ScalarFunction<Float> clone() const;
+    inline ScalarFunction<ApproximateNumberType> clone() const;
     //! \brief Compute an approximation to the value of the function at the point \a x.
-    virtual Float evaluate(const Vector<Float>& x) const = 0;
-    inline Float operator() (const Vector<Float>& x) const;
+    virtual ApproximateNumberType evaluate(const Vector<ApproximateNumberType>& x) const = 0;
+    inline ApproximateNumberType operator() (const Vector<ApproximateNumberType>& x) const;
     //! \brief Evaluate the function over a vector of differentials.
-    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const = 0;
+    virtual Differential<ApproximateNumberType> evaluate(const Vector< Differential<ApproximateNumberType> >& x) const = 0;
     //! \brief Evaluate the function over a vector of approximate Taylor models.
-    virtual TaylorModel<Float> evaluate(const Vector< TaylorModel<Float> >& x) const = 0;
+    virtual TaylorModel<ApproximateNumberType> evaluate(const Vector< TaylorModel<ApproximateNumberType> >& x) const = 0;
     //! \brief Evaluate the function over a vector of formulae to create the composed function.
-    virtual Formula<Float> evaluate(const Vector< Formula<Float> >& x) const = 0;
+    virtual Formula<ApproximateNumberType> evaluate(const Vector< Formula<ApproximateNumberType> >& x) const = 0;
     //! \brief Evaluate the function over a vector of elements of an algebra.
-    virtual Algebra<Float> evaluate(const Vector< Algebra<Float> >& x) const = 0;
+    virtual Algebra<ApproximateNumberType> evaluate(const Vector< Algebra<ApproximateNumberType> >& x) const = 0;
 
-    Vector<Float> gradient(const Vector<Float>& x) const;
-    Differential<Float> differential(const Vector<Float>& x, Nat d) const;
+    Vector<ApproximateNumberType> gradient(const Vector<ApproximateNumberType>& x) const;
+    Differential<ApproximateNumberType> differential(const Vector<ApproximateNumberType>& x, Nat d) const;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<Float> derivative(Nat i) const;
+    inline ScalarFunction<ApproximateNumberType> derivative(Nat i) const;
   private:
-    virtual ScalarFunctionInterface<Float>* _derivative(Nat i) const = 0;
+    virtual ScalarFunctionInterface<ApproximateNumberType>* _derivative(Nat i) const = 0;
   public:
-    virtual ScalarFunctionInterface<Float>* _clone() const = 0;
+    virtual ScalarFunctionInterface<ApproximateNumberType>* _clone() const = 0;
 };
 
 //! \ingroup FunctionModule
 //! \brief Interface for scalar functions \f$\mathbb{I}^n\rightarrow\mathbb{I}\f$ which can be evaluated over intervals.
 //! \sa \ref VectorFunctionInterface.
 template<>
-class ScalarFunctionInterface<Interval>
-    : public ScalarFunctionInterface<Float>
+class ScalarFunctionInterface<ValidatedNumberType>
+    : public ScalarFunctionInterface<ApproximateNumberType>
 {
   public:
 
-    inline ScalarFunction<Interval> clone() const;
+    inline ScalarFunction<ValidatedNumberType> clone() const;
 
-    using ScalarFunctionInterface<Float>::evaluate;
+    using ScalarFunctionInterface<ApproximateNumberType>::evaluate;
 
     //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
-    virtual Interval evaluate(const Vector<Interval>& x) const = 0;
-    inline Interval operator() (const Vector<Interval>& x) const;
+    virtual ValidatedNumberType evaluate(const Vector<ValidatedNumberType>& x) const = 0;
+    inline ValidatedNumberType operator() (const Vector<ValidatedNumberType>& x) const;
     //! \brief Evaluate the function over a vector of interval differentials.
-    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const = 0;
+    virtual Differential<ValidatedNumberType> evaluate(const Vector< Differential<ValidatedNumberType> >& x) const = 0;
     //! \brief Evaluate the function over a vector of Taylor models with interval error.
-    virtual TaylorModel<Interval> evaluate(const Vector< TaylorModel<Interval> >& x) const = 0;
+    virtual TaylorModel<ValidatedNumberType> evaluate(const Vector< TaylorModel<ValidatedNumberType> >& x) const = 0;
 
     //! \brief Apply the function to a formula. Can be used to obtain a tree structure from the function.
-    virtual Formula<Interval> evaluate(const Vector< Formula<Interval> >& x) const = 0;
+    virtual Formula<ValidatedNumberType> evaluate(const Vector< Formula<ValidatedNumberType> >& x) const = 0;
     //! \brief Apply the function to an algebra.
-    virtual Algebra<Interval> evaluate(const Vector< Algebra<Interval> >& x) const = 0;
+    virtual Algebra<ValidatedNumberType> evaluate(const Vector< Algebra<ValidatedNumberType> >& x) const = 0;
 
-    using ScalarFunctionInterface<Float>::gradient;
-    Vector<Interval> gradient(const Vector<Interval>& x) const;
-    using ScalarFunctionInterface<Float>::differential;
-    Differential<Interval> differential(const Vector<Interval>& x, Nat d) const;
+    using ScalarFunctionInterface<ApproximateNumberType>::gradient;
+    Vector<ValidatedNumberType> gradient(const Vector<ValidatedNumberType>& x) const;
+    using ScalarFunctionInterface<ApproximateNumberType>::differential;
+    Differential<ValidatedNumberType> differential(const Vector<ValidatedNumberType>& x, Nat d) const;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<Interval> derivative(Nat i) const;
+    inline ScalarFunction<ValidatedNumberType> derivative(Nat i) const;
   private:
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    virtual ScalarFunctionInterface<Interval>* _derivative(Nat i) const = 0;
+    virtual ScalarFunctionInterface<ValidatedNumberType>* _derivative(Nat i) const = 0;
   public:
-    virtual ScalarFunctionInterface<Interval>* _clone() const = 0;
+    virtual ScalarFunctionInterface<ValidatedNumberType>* _clone() const = 0;
 };
 
 //! \ingroup FunctionModule
 //! \brief Interface for scalar functions \f$\R^n\rightarrow\R\f$ which can be evaluated exactly.
 //! \sa \ref VectorFunctionInterface.
 template<>
-class ScalarFunctionInterface<Real>
-    : public ScalarFunctionInterface<Interval>
+class ScalarFunctionInterface<EffectiveNumberType>
+    : public ScalarFunctionInterface<ValidatedNumberType>
 {
   public:
-    inline ScalarFunction<Real> clone() const;
+    inline ScalarFunction<EffectiveNumberType> clone() const;
 
-    using ScalarFunctionInterface<Interval>::evaluate;
+    using ScalarFunctionInterface<ValidatedNumberType>::evaluate;
 
     //! \brief Evaluate over computable reals.
-    virtual Real evaluate(const Vector<Real>& x) const = 0;
-    inline Real operator() (const Vector<Real>& x) const;
+    virtual EffectiveNumberType evaluate(const Vector<EffectiveNumberType>& x) const = 0;
+    inline EffectiveNumberType operator() (const Vector<EffectiveNumberType>& x) const;
     //! \brief Apply the function to a formula. Can be used to obtain a tree structure from the function.
-    virtual Formula<Real> evaluate(const Vector< Formula<Real> >& x) const = 0;
+    virtual Formula<EffectiveNumberType> evaluate(const Vector< Formula<EffectiveNumberType> >& x) const = 0;
     //! \brief Apply the function to an algebra.
-    virtual Algebra<Real> evaluate(const Vector< Algebra<Real> >& x) const = 0;
+    virtual Algebra<EffectiveNumberType> evaluate(const Vector< Algebra<EffectiveNumberType> >& x) const = 0;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<Real> derivative(Nat i) const;
+    inline ScalarFunction<EffectiveNumberType> derivative(Nat i) const;
   private:
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    virtual ScalarFunctionInterface<Real>* _derivative(Nat i) const = 0;
+    virtual ScalarFunctionInterface<EffectiveNumberType>* _derivative(Nat i) const = 0;
   public:
-    virtual ScalarFunctionInterface<Real>* _clone() const = 0;
+    virtual ScalarFunctionInterface<EffectiveNumberType>* _clone() const = 0;
 };
 
 //! \relates ScalarFunctionInterface
@@ -236,63 +255,63 @@ class VectorFunctionInterface<Void>
 //! \brief Interface for vector functions \f$\F^n\rightarrow\F^m\f$ whose derivatives can be computed.
 //! \sa \ref ScalarFunctionInterface
 template<>
-class VectorFunctionInterface<Float>
+class VectorFunctionInterface<ApproximateNumberType>
     : public VectorFunctionInterface<Void>
 {
   public:
     //! \brief Compute an approximation to the value of the function at the point \a x.
-    virtual Vector<Float> evaluate(const Vector<Float>& x) const = 0;
+    virtual Vector<ApproximateNumberType> evaluate(const Vector<ApproximateNumberType>& x) const = 0;
     //! \brief Evaluate the function over a vector of differentials.
-    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const = 0;
+    virtual Vector< Differential<ApproximateNumberType> > evaluate(const Vector< Differential<ApproximateNumberType> >& x) const = 0;
     //! \brief Evaluate the function over a vector of approximate Taylor models.
-    virtual Vector< TaylorModel<Float> > evaluate(const Vector< TaylorModel<Float> >& x) const = 0;
+    virtual Vector< TaylorModel<ApproximateNumberType> > evaluate(const Vector< TaylorModel<ApproximateNumberType> >& x) const = 0;
     //! \brief Evaluate the function over a vector of formulae to create the composed function.
-    virtual Vector< Formula<Float> > evaluate(const Vector< Formula<Float> >& x) const = 0;
+    virtual Vector< Formula<ApproximateNumberType> > evaluate(const Vector< Formula<ApproximateNumberType> >& x) const = 0;
     //! \brief Apply the function to an algebra.
-    virtual Vector< Algebra<Float> > evaluate(const Vector< Algebra<Float> >& x) const = 0;
+    virtual Vector< Algebra<ApproximateNumberType> > evaluate(const Vector< Algebra<ApproximateNumberType> >& x) const = 0;
 
-    Matrix<Float> jacobian(const Vector<Float>& x) const;
-    Vector< Differential<Float> > differentials(const Vector<Float>& x, Nat d) const;
+    Matrix<ApproximateNumberType> jacobian(const Vector<ApproximateNumberType>& x) const;
+    Vector< Differential<ApproximateNumberType> > differentials(const Vector<ApproximateNumberType>& x, Nat d) const;
 
     //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<Float> operator[](Nat i) const;
+    inline ScalarFunction<ApproximateNumberType> operator[](Nat i) const;
   public:
-    virtual ScalarFunctionInterface<Float>* _get(Nat i) const = 0;
-    virtual VectorFunctionInterface<Float>* _clone() const = 0;
+    virtual ScalarFunctionInterface<ApproximateNumberType>* _get(Nat i) const = 0;
+    virtual VectorFunctionInterface<ApproximateNumberType>* _clone() const = 0;
 };
 
 //! \ingroup FunctionModule
 //! \brief Interface for vector functions \f$\I^n\rightarrow\I^m\f$ whose derivatives can be computed.
 //! \sa \ref ScalarFunctionInterface
 template<>
-class VectorFunctionInterface<Interval>
-    : public VectorFunctionInterface<Float>
+class VectorFunctionInterface<ValidatedNumberType>
+    : public VectorFunctionInterface<ApproximateNumberType>
 {
   public:
-    using VectorFunctionInterface<Float>::evaluate;
+    using VectorFunctionInterface<ApproximateNumberType>::evaluate;
 
     //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
-    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const = 0;
+    virtual Vector<ValidatedNumberType> evaluate(const Vector<ValidatedNumberType>& x) const = 0;
     //! \brief Evaluate the function over a vector of interval differentials.
-    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const = 0;
+    virtual Vector< Differential<ValidatedNumberType> > evaluate(const Vector< Differential<ValidatedNumberType> >& x) const = 0;
     //! \brief Evaluate the function over a vector of Taylor models with interval error.
-    virtual Vector< TaylorModel<Interval> > evaluate(const Vector< TaylorModel<Interval> >& x) const = 0;
+    virtual Vector< TaylorModel<ValidatedNumberType> > evaluate(const Vector< TaylorModel<ValidatedNumberType> >& x) const = 0;
 
     //! \brief Evaluate the function over a vector of formulae.
-    virtual Vector< Formula<Interval> > evaluate(const Vector< Formula<Interval> >& x) const = 0;
+    virtual Vector< Formula<ValidatedNumberType> > evaluate(const Vector< Formula<ValidatedNumberType> >& x) const = 0;
     //! \brief Apply the function to an algebra.
-    virtual Vector< Algebra<Interval> > evaluate(const Vector< Algebra<Interval> >& x) const = 0;
+    virtual Vector< Algebra<ValidatedNumberType> > evaluate(const Vector< Algebra<ValidatedNumberType> >& x) const = 0;
 
-    using VectorFunctionInterface<Float>::jacobian;
-    Matrix<Interval> jacobian(const Vector<Interval>& x) const;
-    using VectorFunctionInterface<Float>::differentials;
-    Vector< Differential<Interval> > differentials(const Vector<Interval>& x, Nat d) const;
+    using VectorFunctionInterface<ApproximateNumberType>::jacobian;
+    Matrix<ValidatedNumberType> jacobian(const Vector<ValidatedNumberType>& x) const;
+    using VectorFunctionInterface<ApproximateNumberType>::differentials;
+    Vector< Differential<ValidatedNumberType> > differentials(const Vector<ValidatedNumberType>& x, Nat d) const;
 
     //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<Interval> operator[](Nat i) const;
+    inline ScalarFunction<ValidatedNumberType> operator[](Nat i) const;
   public:
-    virtual ScalarFunctionInterface<Interval>* _get(Nat i) const = 0;
-    virtual VectorFunctionInterface<Interval>* _clone() const = 0;
+    virtual ScalarFunctionInterface<ValidatedNumberType>* _get(Nat i) const = 0;
+    virtual VectorFunctionInterface<ValidatedNumberType>* _clone() const = 0;
 
 };
 
@@ -300,24 +319,24 @@ class VectorFunctionInterface<Interval>
 //! \brief Interface for vector functions \f$\R^n\rightarrow\R^m\f$ whose derivatives can be computed.
 //! \sa \ref ScalarFunctionInterface
 template<>
-class VectorFunctionInterface<Real>
-    : public VectorFunctionInterface<Interval>
+class VectorFunctionInterface<EffectiveNumberType>
+    : public VectorFunctionInterface<ValidatedNumberType>
 {
   public:
-    using VectorFunctionInterface<Interval>::evaluate;
+    using VectorFunctionInterface<ValidatedNumberType>::evaluate;
 
     //! \brief Evaluate over computable reals.
-    virtual Vector<Real> evaluate(const Vector<Real>& x) const = 0;
+    virtual Vector<EffectiveNumberType> evaluate(const Vector<EffectiveNumberType>& x) const = 0;
     //! \brief Evaluate the function over a vector of formulae.
-    virtual Vector< Formula<Real> > evaluate(const Vector< Formula<Real> >& x) const = 0;
+    virtual Vector< Formula<EffectiveNumberType> > evaluate(const Vector< Formula<EffectiveNumberType> >& x) const = 0;
     //! \brief Apply the function to an algebra.
-    virtual Vector< Algebra<Real> > evaluate(const Vector< Algebra<Real> >& x) const = 0;
+    virtual Vector< Algebra<EffectiveNumberType> > evaluate(const Vector< Algebra<EffectiveNumberType> >& x) const = 0;
 
     //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<Real> operator[](Nat i) const;
+    inline ScalarFunction<EffectiveNumberType> operator[](Nat i) const;
   public:
-    virtual ScalarFunctionInterface<Real>* _get(Nat i) const = 0;
-    virtual VectorFunctionInterface<Real>* _clone() const = 0;
+    virtual ScalarFunctionInterface<EffectiveNumberType>* _get(Nat i) const = 0;
+    virtual VectorFunctionInterface<EffectiveNumberType>* _clone() const = 0;
 };
 
 //! \relates VectorFunctionInterface
@@ -331,27 +350,27 @@ inline std::ostream& operator<<(std::ostream& os, const VectorFunctionInterface<
 //! \brief An interface for scalar function models on a restricted domain.
 class ScalarModelInterface {
     virtual Box domain() const = 0;
-    virtual Interval evaluate(const Vector<Interval>&) const = 0;
+    virtual ValidatedNumberType evaluate(const Vector<ValidatedNumberType>&) const = 0;
 };
 
 template<class X> class FunctionFactoryInterface;
 
-template<> class FunctionFactoryInterface<Interval>
+template<> class FunctionFactoryInterface<ValidatedNumberType>
 {
-    typedef IntervalVector DomainType;
+    typedef Box DomainType;
   public:
-    virtual FunctionFactoryInterface<Interval>* clone() const = 0;
+    virtual FunctionFactoryInterface<ValidatedNumberType>* clone() const = 0;
     virtual Void write(OutputStream& os) const = 0;
-    inline ScalarFunction<Interval> create(const Box& domain, const ScalarFunctionInterface<Interval>& function) const;
-    inline VectorFunction<Interval> create(const Box& domain, const VectorFunctionInterface<Interval>& function) const;
-    inline ScalarFunction<Interval> create_zero(const Box& domain) const;
-    inline VectorFunction<Interval> create_identity(const Box& domain) const;
+    inline ScalarFunction<ValidatedNumberType> create(const Box& domain, const ScalarFunctionInterface<ValidatedNumberType>& function) const;
+    inline VectorFunction<ValidatedNumberType> create(const Box& domain, const VectorFunctionInterface<ValidatedNumberType>& function) const;
+    inline ScalarFunction<ValidatedNumberType> create_zero(const Box& domain) const;
+    inline VectorFunction<ValidatedNumberType> create_identity(const Box& domain) const;
   private:
-    virtual ScalarFunctionInterface<Interval>* _create(const Box& domain, const ScalarFunctionInterface<Interval>& function) const = 0;
-    virtual VectorFunctionInterface<Interval>* _create(const Box& domain, const VectorFunctionInterface<Interval>& function) const = 0;
+    virtual ScalarFunctionInterface<ValidatedNumberType>* _create(const Box& domain, const ScalarFunctionInterface<ValidatedNumberType>& function) const = 0;
+    virtual VectorFunctionInterface<ValidatedNumberType>* _create(const Box& domain, const VectorFunctionInterface<ValidatedNumberType>& function) const = 0;
 };
 
-template<class X> inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<Interval>& factory) {
+template<class X> inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<ValidatedNumberType>& factory) {
     factory.write(os); return os;
 }
 

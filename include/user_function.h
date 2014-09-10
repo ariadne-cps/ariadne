@@ -72,7 +72,7 @@ struct ScalarFunctionData
 //!
 //! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
 template<class T> class ScalarUserFunction
-    : public RealScalarFunction
+    : public EffectiveScalarFunction
 {
   private:
     class Representation
@@ -92,7 +92,7 @@ template<class T> class ScalarUserFunction
         virtual SizeType parameter_size() const { return T::parameter_size(); }
 
 
-        virtual RealScalarFunction derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual EffectiveScalarFunction derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
 
         virtual Vector<Float> gradient(const Vector<Float>& x) const {
             return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
@@ -105,10 +105,10 @@ template<class T> class ScalarUserFunction
             return os << "ScalarUserFunction( argument_size="<<this->argument_size()<<" )"; }
     };
   public:
-    ScalarUserFunction() : RealScalarFunction(new Representation(Vector<Real>(this->parameter_size()))) { }
-    ScalarUserFunction(const Vector<Float>& p) : RealScalarFunction(new Representation(Vector<Real>(p))) { }
-    ScalarUserFunction(const Vector<Interval>& p) : RealScalarFunction(new Representation(Vector<Real>(p))) { }
-    ScalarUserFunction(const Vector<Real>& p) : RealScalarFunction(new Representation(p)) { }
+    ScalarUserFunction() : EffectiveScalarFunction(new Representation(Vector<Real>(this->parameter_size()))) { }
+    ScalarUserFunction(const Vector<Float>& p) : EffectiveScalarFunction(new Representation(Vector<Real>(p))) { }
+    ScalarUserFunction(const Vector<Interval>& p) : EffectiveScalarFunction(new Representation(Vector<Real>(p))) { }
+    ScalarUserFunction(const Vector<Real>& p) : EffectiveScalarFunction(new Representation(p)) { }
 
     uint parameter_size() const { return T().parameter_size(); }
     //const Vector<Interval> parameters() const { return _p; }
@@ -148,7 +148,7 @@ class VectorFunctionData
 //!
 //! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
 template<class T> class VectorUserFunction
-    : public RealVectorFunction
+    : public EffectiveVectorFunction
 {
   private:
     class Representation
@@ -171,8 +171,8 @@ template<class T> class VectorUserFunction
         virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
             return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
 
-        virtual RealScalarFunctionInterface* _get(uint i) const { ARIADNE_NOT_IMPLEMENTED; }
-        virtual RealScalarFunction operator[](uint i) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual EffectiveScalarFunctionInterface* _get(uint i) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual EffectiveScalarFunction operator[](uint i) const { ARIADNE_NOT_IMPLEMENTED; }
 
         // TODO: Find a better way for writing functions which can handle transformations which may not have a
         // write() method or operator<<.
@@ -185,7 +185,7 @@ template<class T> class VectorUserFunction
     //VectorUserFunction() : VectorFunction(new Representation(Vector<Real>(this->parameter_size()))) { }
     //VectorUserFunction(const Vector<Float>& p) : VectorFunction(new Representation(Vector<Real>(p))) { }
     //VectorUserFunction(const Vector<Interval>& p) : VectorFunction(new Representation(Vector<Real>(p))) { }
-    VectorUserFunction(const Vector<Real>& p) : RealVectorFunction(new Representation(p)) { }
+    VectorUserFunction(const Vector<Real>& p) : EffectiveVectorFunction(new Representation(p)) { }
     const Vector<Real>& parameters() const { return dynamic_cast<const Representation*>(this->raw_pointer())->_p; }
 };
 

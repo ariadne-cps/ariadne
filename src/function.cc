@@ -54,10 +54,10 @@ Nat dimension(const Space<Real>& spc);
 Nat len(const List< Variable<Real> >& vars);
 Formula<Real> formula(const Expression<Real>& expr, const Space<Real>& spc);
 Formula<Real> formula(const Expression<Real>& expr, const List< Variable<Real> >& vars);
-ScalarFunction<Real> make_function(const Expression<Real>& expr, const Space<Real>& spc) {
-    return ScalarFunction<Real>(dimension(spc),formula(expr,spc)); }
-ScalarFunction<Real> make_function(const Expression<Real>& expr, const List< Variable<Real> >& vars) {
-    return ScalarFunction<Real>(len(vars),formula(expr,vars)); }
+EffectiveScalarFunction make_function(const Expression<Real>& expr, const Space<Real>& spc) {
+    return EffectiveScalarFunction(dimension(spc),formula(expr,spc)); }
+EffectiveScalarFunction make_function(const Expression<Real>& expr, const List< Variable<Real> >& vars) {
+    return EffectiveScalarFunction(len(vars),formula(expr,vars)); }
 
 
 
@@ -169,7 +169,7 @@ struct FunctionElement
 
 //------------------------ Conversion to a formula -----------------------------------//
 
-Formula<Real> formula(const ScalarFunction<Real>& f) {
+Formula<Real> formula(const EffectiveScalarFunction& f) {
     const ScalarFunctionInterface<Real>* fptr=f.raw_pointer();
     const ScalarFormulaFunction<Real>* ff=dynamic_cast<const ScalarFormulaFunction<Real>*>(fptr);
     if(ff) { return ff->_formula; }
@@ -186,7 +186,7 @@ Formula<Real> formula(const ScalarFunction<Real>& f) {
     ARIADNE_FAIL_MSG("Cannot compute formula for function "<<f<<"\n");
 }
 
-Vector< Formula<Real> > formula(const VectorFunction<Real>& f) {
+Vector< Formula<Real> > formula(const EffectiveVectorFunction& f) {
     const VectorFunctionInterface<Real>& fi=f;
     const VectorFormulaFunction<Real>* ff;
     const VectorOfScalarFunction<Real>* vf;
@@ -200,8 +200,6 @@ Vector< Formula<Real> > formula(const VectorFunction<Real>& f) {
         ARIADNE_FAIL_MSG("Cannot compute formula for function "<<f<<"\n");
     }
 }
-
-
 
 
 
@@ -244,9 +242,9 @@ template<class X> List< ScalarFunction<X> > ScalarFunction<X>::coordinates(Nat n
     return lsf;
 }
 
-template class ScalarFunction<Float>;
-template class ScalarFunction<Interval>;
-template class ScalarFunction<Real>;
+template class ScalarFunction<ApproximateNumberType>;
+template class ScalarFunction<ValidatedNumberType>;
+template class ScalarFunction<EffectiveNumberType>;
 
 
 
@@ -257,31 +255,31 @@ template class ScalarFunction<Real>;
 
 
 template<class OP> inline
-RealScalarFunction make_unary_function(OP op, const RealScalarFunction& f) {
-    return RealScalarFunction(new RealUnaryFunction(op.code(),f)); }
+EffectiveScalarFunction make_unary_function(OP op, const EffectiveScalarFunction& f) {
+    return EffectiveScalarFunction(new RealUnaryFunction(op.code(),f)); }
 
 template<class OP> inline
-RealScalarFunction make_binary_function(OP op, const RealScalarFunction& f1, const RealScalarFunction& f2) {
-    return RealScalarFunction(new RealBinaryFunction(op.code(),f1,f2)); }
+EffectiveScalarFunction make_binary_function(OP op, const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2) {
+    return EffectiveScalarFunction(new RealBinaryFunction(op.code(),f1,f2)); }
 
 template<class OP> inline
-RealScalarFunction make_binary_function(OP op, const RealScalarFunction& f1, const Int& n2) {
-    return RealScalarFunction(new RealPowerFunction(op.code(),f1,n2)); }
+EffectiveScalarFunction make_binary_function(OP op, const EffectiveScalarFunction& f1, const Int& n2) {
+    return EffectiveScalarFunction(new RealPowerFunction(op.code(),f1,n2)); }
 
 
-RealScalarFunction operator+(const RealScalarFunction& f)
+EffectiveScalarFunction operator+(const EffectiveScalarFunction& f)
 {
     return f;
 }
 
-RealScalarFunction operator-(const RealScalarFunction& f)
+EffectiveScalarFunction operator-(const EffectiveScalarFunction& f)
 {
     const RealScalarFormulaFunction* ff=dynamic_cast<const RealScalarFormulaFunction*>(f.raw_pointer());
     if(ff) { return function(ff->_argument_size,-ff->_formula); }
     return make_unary_function(Neg(),f);
 }
 
-RealScalarFunction operator+(const RealScalarFunction& f1, const RealScalarFunction& f2)
+EffectiveScalarFunction operator+(const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2)
 {
     const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
     const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
@@ -291,7 +289,7 @@ RealScalarFunction operator+(const RealScalarFunction& f1, const RealScalarFunct
     return make_binary_function(Add(),f1,f2);
 }
 
-RealScalarFunction operator-(const RealScalarFunction& f1, const RealScalarFunction& f2)
+EffectiveScalarFunction operator-(const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2)
 {
     const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
     const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
@@ -301,7 +299,7 @@ RealScalarFunction operator-(const RealScalarFunction& f1, const RealScalarFunct
     return make_binary_function(Sub(),f1,f2);
 }
 
-RealScalarFunction operator*(const RealScalarFunction& f1, const RealScalarFunction& f2)
+EffectiveScalarFunction operator*(const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2)
 {
     const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
     const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
@@ -311,7 +309,7 @@ RealScalarFunction operator*(const RealScalarFunction& f1, const RealScalarFunct
     return make_binary_function(Mul(),f1,f2);
 }
 
-RealScalarFunction operator/(const RealScalarFunction& f1, const RealScalarFunction& f2)
+EffectiveScalarFunction operator/(const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2)
 {
     const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
     const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
@@ -322,64 +320,64 @@ RealScalarFunction operator/(const RealScalarFunction& f1, const RealScalarFunct
 }
 
 
-RealScalarFunction operator+(const RealScalarFunction& f1, const Real& s2)
+EffectiveScalarFunction operator+(const EffectiveScalarFunction& f1, const Real& s2)
 {
     const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
     if(e1) { return function(e1->_argument_size,e1->_formula+s2); }
-    return f1+RealScalarFunction::constant(f1.argument_size(),s2);
+    return f1+EffectiveScalarFunction::constant(f1.argument_size(),s2);
 }
 
-RealScalarFunction operator-(const RealScalarFunction& f1, const Real& s2)
+EffectiveScalarFunction operator-(const EffectiveScalarFunction& f1, const Real& s2)
 {
     const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
     if(e1) { return function(e1->_argument_size,e1->_formula-s2); }
-    return f1-RealScalarFunction::constant(f1.argument_size(),s2);
+    return f1-EffectiveScalarFunction::constant(f1.argument_size(),s2);
 }
 
-RealScalarFunction operator*(const RealScalarFunction& f1, const Real& s2)
+EffectiveScalarFunction operator*(const EffectiveScalarFunction& f1, const Real& s2)
 {
     const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
     if(e1) { return function(e1->_argument_size,e1->_formula*s2); }
-    return f1*RealScalarFunction::constant(f1.argument_size(),s2);
+    return f1*EffectiveScalarFunction::constant(f1.argument_size(),s2);
 }
 
-RealScalarFunction operator/(const RealScalarFunction& f1, const Real& s2)
+EffectiveScalarFunction operator/(const EffectiveScalarFunction& f1, const Real& s2)
 {
     const RealScalarFormulaFunction* e1=dynamic_cast<const RealScalarFormulaFunction*>(f1.raw_pointer());
     if(e1) { return function(e1->_argument_size,e1->_formula/s2); }
-    return f1/RealScalarFunction::constant(f1.argument_size(),s2);
+    return f1/EffectiveScalarFunction::constant(f1.argument_size(),s2);
 }
 
-RealScalarFunction operator/(const RealScalarFunction& f1, int s2)
+EffectiveScalarFunction operator/(const EffectiveScalarFunction& f1, int s2)
 {
     return f1/Real(s2);
 }
 
-RealScalarFunction operator+(const Real& s1, const RealScalarFunction& f2)
+EffectiveScalarFunction operator+(const Real& s1, const EffectiveScalarFunction& f2)
 {
     return f2+s1;
 }
 
-RealScalarFunction operator-(const Real& s1, const RealScalarFunction& f2)
+EffectiveScalarFunction operator-(const Real& s1, const EffectiveScalarFunction& f2)
 {
     const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
     if(e2) { return function(e2->_argument_size,s1-e2->_formula); }
-    return RealScalarFunction::constant(f2.argument_size(),s1)-f2;
+    return EffectiveScalarFunction::constant(f2.argument_size(),s1)-f2;
 }
 
-RealScalarFunction operator*(const Real& s1, const RealScalarFunction& f2)
+EffectiveScalarFunction operator*(const Real& s1, const EffectiveScalarFunction& f2)
 {
     return f2*s1;
 }
 
-RealScalarFunction operator/(const Real& s1, const RealScalarFunction& f2)
+EffectiveScalarFunction operator/(const Real& s1, const EffectiveScalarFunction& f2)
 {
     const RealScalarFormulaFunction* e2=dynamic_cast<const RealScalarFormulaFunction*>(f2.raw_pointer());
     if(e2) { return function(e2->_argument_size,s1/e2->_formula); }
-    return RealScalarFunction::constant(f2.argument_size(),s1)/f2;
+    return EffectiveScalarFunction::constant(f2.argument_size(),s1)/f2;
 }
 
-RealScalarFunction pow(const RealScalarFunction& f, Nat m)
+EffectiveScalarFunction pow(const EffectiveScalarFunction& f, Nat m)
 {
     const RealScalarFormulaFunction* e=dynamic_cast<const RealScalarFormulaFunction*>(f.raw_pointer());
     if(e) { return function(e->_argument_size,pow(e->_formula,m)); }
@@ -387,38 +385,38 @@ RealScalarFunction pow(const RealScalarFunction& f, Nat m)
 }
 
 
-RealScalarFunction pow(const RealScalarFunction& f, Int n)
+EffectiveScalarFunction pow(const EffectiveScalarFunction& f, Int n)
 {
     const RealScalarFormulaFunction* e=dynamic_cast<const RealScalarFormulaFunction*>(f.raw_pointer());
     if(e) { return function(e->_argument_size, pow(e->_formula,n)); }
     return make_binary_function(Pow(),f,n);
 }
 
-RealScalarFunction neg(const RealScalarFunction& f) {
+EffectiveScalarFunction neg(const EffectiveScalarFunction& f) {
     return make_unary_function(Neg(),f); }
 
-RealScalarFunction rec(const RealScalarFunction& f) {
+EffectiveScalarFunction rec(const EffectiveScalarFunction& f) {
     return make_unary_function(Rec(),f); }
 
-RealScalarFunction sqr(const RealScalarFunction& f) {
+EffectiveScalarFunction sqr(const EffectiveScalarFunction& f) {
     return make_unary_function(Sqr(),f); }
 
-RealScalarFunction sqrt(const RealScalarFunction& f) {
+EffectiveScalarFunction sqrt(const EffectiveScalarFunction& f) {
     return make_unary_function(Sqrt(),f); }
 
-RealScalarFunction exp(const RealScalarFunction& f) {
+EffectiveScalarFunction exp(const EffectiveScalarFunction& f) {
     return make_unary_function(Exp(),f); }
 
-RealScalarFunction log(const RealScalarFunction& f) {
+EffectiveScalarFunction log(const EffectiveScalarFunction& f) {
     return make_unary_function(Log(),f); }
 
-RealScalarFunction sin(const RealScalarFunction& f) {
+EffectiveScalarFunction sin(const EffectiveScalarFunction& f) {
     return make_unary_function(Sin(),f); }
 
-RealScalarFunction cos(const RealScalarFunction& f) {
+EffectiveScalarFunction cos(const EffectiveScalarFunction& f) {
     return make_unary_function(Cos(),f); }
 
-RealScalarFunction tan(const RealScalarFunction& f) {
+EffectiveScalarFunction tan(const EffectiveScalarFunction& f) {
     return make_unary_function(Tan(),f); }
 
 
@@ -509,63 +507,63 @@ template<class X> Void VectorFunction<X>::set(Nat i, ScalarFunction<X> sf)
     }
 }
 
-template class VectorFunction<Float>;
-template class VectorFunction<Interval>;
-template class VectorFunction<Real>;
+template class VectorFunction<ApproximateNumberType>;
+template class VectorFunction<ValidatedNumberType>;
+template class VectorFunction<EffectiveNumberType>;
 
 
 
 //------------------------ Vector function operators -------------------------------//
 
-RealVectorFunction operator*(const RealScalarFunction& f, const Vector<Real>& e) {
+EffectiveVectorFunction operator*(const EffectiveScalarFunction& f, const Vector<Real>& e) {
     for(uint i=0; i!=e.size(); ++i) { ARIADNE_ASSERT(e[i]==Real(0) || e[i]==Real(1)); }
-    RealVectorFunction r(e.size(),f.argument_size());
+    EffectiveVectorFunction r(e.size(),f.argument_size());
     for(uint i=0; i!=e.size(); ++i) {
         if(e[i]==Real(1)) { r.set(i,f); }
     }
     return r;
 }
 
-RealVectorFunction operator+(const RealVectorFunction& f1, const RealVectorFunction& f2) {
+EffectiveVectorFunction operator+(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    RealVectorFunction r(f1.result_size(),f1.argument_size());
+    EffectiveVectorFunction r(f1.result_size(),f1.argument_size());
     for(uint i=0; i!=r.result_size(); ++i) {
         r.set(i,f1[i]+f2[i]);
     }
     return r;
 }
 
-RealVectorFunction operator-(const RealVectorFunction& f1, const RealVectorFunction& f2) {
+EffectiveVectorFunction operator-(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    RealVectorFunction r(f1.result_size(),f1.argument_size());
+    EffectiveVectorFunction r(f1.result_size(),f1.argument_size());
     for(uint i=0; i!=r.result_size(); ++i) {
         r.set(i,f1[i]-f2[i]);
     }
     return r;
 }
 
-VectorFunction<Real> operator*(const VectorFunction<Real>& vf, const ScalarFunction<Real>& sf) {
+EffectiveVectorFunction operator*(const EffectiveVectorFunction& vf, const EffectiveScalarFunction& sf) {
     ARIADNE_ASSERT(vf.argument_size()==sf.argument_size());
-    RealVectorFunction r(vf.result_size(),vf.argument_size());
+    EffectiveVectorFunction r(vf.result_size(),vf.argument_size());
     for(uint i=0; i!=r.result_size(); ++i) {
         r.set(i,vf[i]*sf);
     }
     return r;
 }
 
-VectorFunction<Real> operator*(const ScalarFunction<Real>& sf, const VectorFunction<Real>& vf) {
+EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const EffectiveVectorFunction& vf) {
     ARIADNE_ASSERT(sf.argument_size()==vf.argument_size());
-    RealVectorFunction r(vf.result_size(),vf.argument_size());
+    EffectiveVectorFunction r(vf.result_size(),vf.argument_size());
     for(uint i=0; i!=r.result_size(); ++i) {
         r.set(i,sf*vf[i]);
     }
     return r;
 }
 
-VectorFunction<Real> operator*(const Real& c, const VectorFunction<Real>& vf) {
-    RealVectorFunction r(vf.result_size(),vf.argument_size());
+EffectiveVectorFunction operator*(const Real& c, const EffectiveVectorFunction& vf) {
+    EffectiveVectorFunction r(vf.result_size(),vf.argument_size());
     for(uint i=0; i!=r.result_size(); ++i) {
         r.set(i,c*vf[i]);
     }
@@ -574,17 +572,17 @@ VectorFunction<Real> operator*(const Real& c, const VectorFunction<Real>& vf) {
 
 
 
-RealVectorFunction join(const RealScalarFunction& f1, const RealScalarFunction& f2) {
+EffectiveVectorFunction join(const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    RealVectorFunction r(2,f1.argument_size());
+    EffectiveVectorFunction r(2,f1.argument_size());
     r.set(0,f1);
     r.set(1,f2);
     return r;
 }
 
-RealVectorFunction join(const RealVectorFunction& f1, const RealScalarFunction& f2) {
+EffectiveVectorFunction join(const EffectiveVectorFunction& f1, const EffectiveScalarFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    RealVectorFunction r(f1.result_size()+1u,f1.argument_size());
+    EffectiveVectorFunction r(f1.result_size()+1u,f1.argument_size());
     for(uint i=0u; i!=f1.result_size(); ++i) {
         r.set(i,f1.get(i));
     }
@@ -592,9 +590,9 @@ RealVectorFunction join(const RealVectorFunction& f1, const RealScalarFunction& 
     return r;
 }
 
-RealVectorFunction join(const RealScalarFunction& f1, const RealVectorFunction& f2) {
+EffectiveVectorFunction join(const EffectiveScalarFunction& f1, const EffectiveVectorFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    RealVectorFunction r(f2.result_size()+1u,f1.argument_size());
+    EffectiveVectorFunction r(f2.result_size()+1u,f1.argument_size());
     r.set(0u,f1);
     for(uint i=0u; i!=f2.result_size(); ++i) {
         r.set(i+1u,f2.get(i));
@@ -602,9 +600,9 @@ RealVectorFunction join(const RealScalarFunction& f1, const RealVectorFunction& 
     return r;
 }
 
-RealVectorFunction join(const RealVectorFunction& f1, const RealVectorFunction& f2) {
+EffectiveVectorFunction join(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2) {
     ARIADNE_ASSERT(f1.argument_size()==f2.argument_size());
-    RealVectorFunction r(f1.result_size()+f2.result_size(),f1.argument_size());
+    EffectiveVectorFunction r(f1.result_size()+f2.result_size(),f1.argument_size());
     for(uint i=0u; i!=f1.result_size(); ++i) {
         r.set(i,f1.get(i));
     }
@@ -614,31 +612,31 @@ RealVectorFunction join(const RealVectorFunction& f1, const RealVectorFunction& 
     return r;
 }
 
-RealScalarFunction embed(Nat as1, const RealScalarFunction& f2, Nat as3) {
+EffectiveScalarFunction embed(Nat as1, const EffectiveScalarFunction& f2, Nat as3) {
     return new ScalarEmbeddedFunction<Real>(as1,f2,as3);
 }
 
-RealVectorFunction embed(Nat as1, const RealVectorFunction& f2, Nat as3) {
+EffectiveVectorFunction embed(Nat as1, const EffectiveVectorFunction& f2, Nat as3) {
     return new VectorEmbeddedFunction<Real>(as1,f2,as3);
 }
 
-RealScalarFunction compose(const RealScalarFunction& f, const RealVectorFunction& g) {
+EffectiveScalarFunction compose(const EffectiveScalarFunction& f, const EffectiveVectorFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
     return new ScalarComposedFunction<Real>(f,g);
 }
 
-RealVectorFunction compose(const RealVectorFunction& f, const RealVectorFunction& g) {
+EffectiveVectorFunction compose(const EffectiveVectorFunction& f, const EffectiveVectorFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
     return new VectorComposedFunction<Real>(f,g);
 }
 
-RealScalarFunction lie_derivative(const RealScalarFunction& g, const RealVectorFunction& f) {
+EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const EffectiveVectorFunction& f) {
     ARIADNE_ASSERT_MSG(g.argument_size()==f.result_size(),"f="<<f<<", g="<<g<<"\n");
     ARIADNE_ASSERT_MSG(f.result_size()==f.argument_size(),"f="<<f<<", g="<<g<<"\n");
     ARIADNE_ASSERT_MSG(f.result_size()>0,"f="<<f<<", g="<<g<<"\n");
 
     try {
-        RealScalarFunction r=g.derivative(0)*f[0];
+        EffectiveScalarFunction r=g.derivative(0)*f[0];
         for(uint i=1; i!=g.argument_size(); ++i) {
             r=r+g.derivative(i)*f[i];
         }
@@ -653,40 +651,40 @@ RealScalarFunction lie_derivative(const RealScalarFunction& g, const RealVectorF
 
 //------------------------ Interval function operators -------------------------------//
 
-IntervalScalarFunction operator-(IntervalScalarFunction const& f1, IntervalScalarFunction const& f2) {
-    std::shared_ptr<IntervalScalarFunctionModelInterface const> f1p=std::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f1.managed_pointer());
-    std::shared_ptr<IntervalScalarFunctionModelInterface const> f2p=std::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f2.managed_pointer());
+ValidatedScalarFunction operator-(ValidatedScalarFunction const& f1, ValidatedScalarFunction const& f2) {
+    std::shared_ptr<ValidatedScalarFunctionModelInterface const> f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedScalarFunctionModelInterface const> f2p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        return IntervalScalarFunctionModel(*f1p) - IntervalScalarFunctionModel(*f2p);
+        return ValidatedScalarFunctionModel(*f1p) - ValidatedScalarFunctionModel(*f2p);
     }
     return new BinaryFunction<Interval>(SUB,f1,f2);
 }
 
-IntervalScalarFunction operator-(IntervalScalarFunction const& f, Interval const& c) {
-    std::shared_ptr<IntervalScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f.managed_pointer());
-    if(fp) { return IntervalScalarFunctionModel(*fp) - c; }
-    std::shared_ptr<RealScalarFunctionInterface const> rfp=std::dynamic_pointer_cast<RealScalarFunctionInterface const>(f.managed_pointer());
-    if(rfp && c.lower()==c.upper()) { return RealScalarFunction(*rfp) - ExactFloat(c.lower()); }
-    return new BinaryFunction<Interval>(SUB,f,IntervalScalarFunction::constant(f.argument_size(),c));
+ValidatedScalarFunction operator-(ValidatedScalarFunction const& f, Interval const& c) {
+    std::shared_ptr<ValidatedScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f.managed_pointer());
+    if(fp) { return ValidatedScalarFunctionModel(*fp) - c; }
+    std::shared_ptr<EffectiveScalarFunctionInterface const> rfp=std::dynamic_pointer_cast<EffectiveScalarFunctionInterface const>(f.managed_pointer());
+    if(rfp && c.lower()==c.upper()) { return EffectiveScalarFunction(*rfp) - ExactFloat(c.lower()); }
+    return new BinaryFunction<Interval>(SUB,f,ValidatedScalarFunction::constant(f.argument_size(),c));
 }
 
-IntervalScalarFunction operator-(Interval const& c, IntervalScalarFunction const& f) {
-    std::shared_ptr<IntervalScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<IntervalScalarFunctionModelInterface const>(f.managed_pointer());
-    if(fp) { return c - IntervalScalarFunctionModel(*fp); }
-    return new BinaryFunction<Interval>(SUB,IntervalScalarFunction::constant(f.argument_size(),c),f);
+ValidatedScalarFunction operator-(Interval const& c, ValidatedScalarFunction const& f) {
+    std::shared_ptr<ValidatedScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f.managed_pointer());
+    if(fp) { return c - ValidatedScalarFunctionModel(*fp); }
+    return new BinaryFunction<Interval>(SUB,ValidatedScalarFunction::constant(f.argument_size(),c),f);
 }
 
-IntervalVectorFunction operator-(IntervalVectorFunction const& f1, IntervalVectorFunction const& f2) {
-    std::shared_ptr<IntervalVectorFunctionModelInterface const> f1p=std::dynamic_pointer_cast<IntervalVectorFunctionModelInterface const>(f1.managed_pointer());
-    std::shared_ptr<IntervalVectorFunctionModelInterface const> f2p=std::dynamic_pointer_cast<IntervalVectorFunctionModelInterface const>(f2.managed_pointer());
+ValidatedVectorFunction operator-(ValidatedVectorFunction const& f1, ValidatedVectorFunction const& f2) {
+    std::shared_ptr<ValidatedVectorFunctionModelInterface const> f1p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelInterface const>(f1.managed_pointer());
+    std::shared_ptr<ValidatedVectorFunctionModelInterface const> f2p=std::dynamic_pointer_cast<ValidatedVectorFunctionModelInterface const>(f2.managed_pointer());
     if(f1p && f2p) {
-        return IntervalVectorFunctionModel(*f1p) - IntervalVectorFunctionModel(*f2p);
+        return ValidatedVectorFunctionModel(*f1p) - ValidatedVectorFunctionModel(*f2p);
     } else if(f1p) {
-        return IntervalVectorFunctionModel(*f1p) - f2.reference();
+        return ValidatedVectorFunctionModel(*f1p) - f2.reference();
     } else if(f2p) {
-        return f1.reference() - IntervalVectorFunctionModel(*f2p);
+        return f1.reference() - ValidatedVectorFunctionModel(*f2p);
     } else {
-        VectorOfScalarFunction<Interval> r(f1.result_size(),IntervalScalarFunction(f1.argument_size()));
+        VectorOfScalarFunction<ValidatedNumberType> r(f1.result_size(),ValidatedScalarFunction(f1.argument_size()));
         for(uint i=0; i!=r.result_size(); ++i) {
             r[i]=f1[i]-f2[i];
         }
@@ -694,21 +692,21 @@ IntervalVectorFunction operator-(IntervalVectorFunction const& f1, IntervalVecto
     }
 }
 
-IntervalScalarFunction compose(const IntervalScalarFunction& f, const IntervalVectorFunction& g) {
+ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    return compose(f,IntervalVectorFunctionModel(dynamic_cast<IntervalVectorFunctionModelInterface const&>(*g.raw_pointer())));
+    return compose(f,ValidatedVectorFunctionModel(dynamic_cast<ValidatedVectorFunctionModelInterface const&>(*g.raw_pointer())));
 }
 
-IntervalVectorFunction compose(const IntervalVectorFunction& f, const IntervalVectorFunction& g) {
+ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const ValidatedVectorFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    return compose(f,IntervalVectorFunctionModel(dynamic_cast<IntervalVectorFunctionModelInterface const&>(*g.raw_pointer())));
+    return compose(f,ValidatedVectorFunctionModel(dynamic_cast<ValidatedVectorFunctionModelInterface const&>(*g.raw_pointer())));
 }
 
-IntervalVectorFunction join(IntervalVectorFunction const& f1, const IntervalVectorFunction& f2) {
+ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedVectorFunction& f2) {
     if(dynamic_cast<VectorTaylorFunction const*>(f1.raw_pointer()) && dynamic_cast<VectorTaylorFunction const*>(f2.raw_pointer())) {
         return join(dynamic_cast<VectorTaylorFunction const&>(*f1.raw_pointer()),dynamic_cast<VectorTaylorFunction const&>(*f2.raw_pointer()));
     }
-    VectorOfScalarFunction<Interval> r(f1.result_size()+f2.result_size(),f1.argument_size());
+    VectorOfScalarFunction<ValidatedNumberType> r(f1.result_size()+f2.result_size(),f1.argument_size());
     for(uint i=0; i!=f1.result_size(); ++i) { r[i]=f1[i]; }
     for(uint i=0; i!=f2.result_size(); ++i) { r[i+f1.result_size()]=f2[i]; }
     return r;

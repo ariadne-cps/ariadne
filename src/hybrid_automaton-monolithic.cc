@@ -37,7 +37,7 @@ namespace Ariadne {
 typedef uint DimensionType;
 
 
-MonolithicHybridAutomaton::Mode::Mode(DiscreteLocation q, RealSpace s, RealVectorFunction f)
+MonolithicHybridAutomaton::Mode::Mode(DiscreteLocation q, RealSpace s, EffectiveVectorFunction f)
     : _location(q), _variable_names(s.variable_names()), _dynamic(f)
 {
 }
@@ -61,7 +61,7 @@ MonolithicHybridAutomaton::~MonolithicHybridAutomaton()
 
 void
 MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
-                                    RealVectorFunction dynamic)
+                                    EffectiveVectorFunction dynamic)
 {
     List<Identifier> names;
     for(uint i=0; i!=dynamic.result_size(); ++i) {
@@ -76,7 +76,7 @@ MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
 void
 MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
                                     RealSpace space,
-                                    RealVectorFunction dynamic)
+                                    EffectiveVectorFunction dynamic)
 {
     if(this->has_mode(location)) {
         ARIADNE_THROW(std::runtime_error,"MonolithicHybridAutomaton::new_mode(location,dynamic)",
@@ -98,7 +98,7 @@ MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
 void
 MonolithicHybridAutomaton::new_invariant(DiscreteLocation location,
                                          DiscreteEvent event,
-                                         RealScalarFunction invariant,
+                                         EffectiveScalarFunction invariant,
                                          EventKind kind)
 {
     if(!this->has_mode(location)) {
@@ -124,8 +124,8 @@ void
 MonolithicHybridAutomaton::new_transition(DiscreteLocation source,
                                           DiscreteEvent event,
                                           DiscreteLocation target,
-                                          RealVectorFunction reset,
-                                          RealScalarFunction guard,
+                                          EffectiveVectorFunction reset,
+                                          EffectiveScalarFunction guard,
                                           EventKind kind)
 {
     if(!this->has_mode(source)) {
@@ -210,7 +210,7 @@ MonolithicHybridAutomaton::dimension(DiscreteLocation location) const
     return this->mode(location).dimension();
 }
 
-RealVectorFunction
+EffectiveVectorFunction
 MonolithicHybridAutomaton::dynamic_function(DiscreteLocation location) const
 {
     return this->mode(location)._dynamic;
@@ -238,7 +238,7 @@ MonolithicHybridAutomaton::event_kind(DiscreteLocation location, DiscreteEvent e
     else { return mode._transitions[event]._kind; }
 }
 
-RealScalarFunction
+EffectiveScalarFunction
 MonolithicHybridAutomaton::invariant_function(DiscreteLocation location, DiscreteEvent event) const
 {
     ARIADNE_ASSERT_MSG(this->has_invariant(location,event),"No invariant "<<event<<" in location "<<location);
@@ -247,7 +247,7 @@ MonolithicHybridAutomaton::invariant_function(DiscreteLocation location, Discret
 }
 
 
-RealScalarFunction
+EffectiveScalarFunction
 MonolithicHybridAutomaton::guard_function(DiscreteLocation location, DiscreteEvent event) const
 {
     ARIADNE_ASSERT_MSG(this->has_guard(location,event),"No guard "<<event<<" in location "<<location);
@@ -262,7 +262,7 @@ MonolithicHybridAutomaton::target(DiscreteLocation source, DiscreteEvent event) 
     return this->transition(source,event)._target;
 }
 
-RealVectorFunction
+EffectiveVectorFunction
 MonolithicHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEvent event) const
 {
     return this->transition(source,event)._reset;

@@ -181,16 +181,16 @@ class HybridAutomatonInterface {
     virtual uint dimension(DiscreteLocation location) const = 0;
 
     //! \brief The dynamic valid in the mode \a location.
-    virtual RealVectorFunction dynamic_function(DiscreteLocation location) const = 0;
+    virtual EffectiveVectorFunction dynamic_function(DiscreteLocation location) const = 0;
 
     //! \brief The constraint function defining the invariant or time-can-progress predicate \f$p(x)\leq0\f$.
-    virtual RealScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const = 0;
+    virtual EffectiveScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const = 0;
 
     //! \brief The constraint function defining the condition \f$c(x)\geq0\f$ under which a transition occurs.
-    virtual RealScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const = 0;
+    virtual EffectiveScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const = 0;
 
     //! \brief The dynamic valid in the mode \a location.
-    virtual RealVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const = 0;
+    virtual EffectiveVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const = 0;
 
     //! \brief The hybrid state space.
     virtual HybridSpace state_space() const = 0;

@@ -118,11 +118,11 @@ static const bool ALLOW_PARTIAL_FUNCTION = true;
 
 FunctionModelFactoryInterface<Interval>* make_taylor_function_factory();
 
-IntervalVectorFunctionModel operator*(const Matrix<Float>& A,const IntervalVectorFunctionModel& v) {
+ValidatedVectorFunctionModel operator*(const Matrix<Float>& A,const ValidatedVectorFunctionModel& v) {
     ARIADNE_ASSERT(v.size()!=0);
-    IntervalVectorFunctionModel r(A.row_size(),v[0].create_zero());
+    ValidatedVectorFunctionModel r(A.row_size(),v[0].create_zero());
     for(uint i=0; i!=r.size(); ++i) {
-        IntervalScalarFunctionModel t=r[i];
+        ValidatedScalarFunctionModel t=r[i];
         for(uint j=0; j!=v.size(); ++j) {
             t+=ExactFloat(A[i][j])*v[j];
         }
@@ -131,11 +131,11 @@ IntervalVectorFunctionModel operator*(const Matrix<Float>& A,const IntervalVecto
     return r;
 }
 
-IntervalVectorFunctionModel operator*(const Matrix<Interval>& A,const IntervalVectorFunctionModel& v) {
+ValidatedVectorFunctionModel operator*(const Matrix<Interval>& A,const ValidatedVectorFunctionModel& v) {
     ARIADNE_ASSERT(v.size()!=0);
-    IntervalVectorFunctionModel r(A.row_size(),v[0].create_zero());
+    ValidatedVectorFunctionModel r(A.row_size(),v[0].create_zero());
     for(uint i=0; i!=r.size(); ++i) {
-        IntervalScalarFunctionModel t=r[i];
+        ValidatedScalarFunctionModel t=r[i];
         for(uint j=0; j!=v.size(); ++j) {
             t+=A[i][j]*v[j];
         }
@@ -144,7 +144,7 @@ IntervalVectorFunctionModel operator*(const Matrix<Interval>& A,const IntervalVe
     return r;
 }
 
-Float radius(const IntervalVectorFunctionModel& x) {
+Float radius(const ValidatedVectorFunctionModel& x) {
     Float r=0.0;
     for(uint i=0; i!=x.size(); ++i) { r=std::max(r,x[i].error()); }
     return r;
@@ -175,7 +175,7 @@ SolverBase::function_factory() const
 
 
 Vector<Interval>
-SolverBase::solve(const IntervalVectorFunction& f,
+SolverBase::solve(const ValidatedVectorFunction& f,
                   const Vector<Interval>& ix) const
 {
     Set< Vector<Interval> > r = this->solve_all(f,ix);
@@ -187,11 +187,11 @@ SolverBase::solve(const IntervalVectorFunction& f,
 void
 solve_all(Set< Vector<Interval> >& r,
           const SolverInterface& s,
-          const IntervalVectorFunction& f,
+          const ValidatedVectorFunction& f,
           const Vector<Interval>& ix);
 
 Set< Vector<Interval> >
-SolverBase::solve_all(const IntervalVectorFunction& f,
+SolverBase::solve_all(const ValidatedVectorFunction& f,
                       const Vector<Interval>& ix) const
 {
     ARIADNE_LOG(5,"SolverBase::solve_all(f,ix): f="<<f<<", ix="<<ix<<"\n");
@@ -273,7 +273,7 @@ SolverBase::solve_all(const IntervalVectorFunction& f,
 
 
 Vector<Interval>
-SolverBase::zero(const IntervalVectorFunction& f,
+SolverBase::zero(const ValidatedVectorFunction& f,
                  const Vector<Interval>& ix) const
 {
     const double& e=this->maximum_error();
@@ -315,19 +315,19 @@ SolverBase::zero(const IntervalVectorFunction& f,
 
 
 Vector<Interval>
-SolverBase::fixed_point(const IntervalVectorFunction& f, const Vector<Interval>& pt) const
+SolverBase::fixed_point(const ValidatedVectorFunction& f, const Vector<Interval>& pt) const
 {
-    IntervalVectorFunction id=IntervalVectorFunction::identity(pt.size());
+    ValidatedVectorFunction id=ValidatedVectorFunction::identity(pt.size());
     return this->solve(f-id,pt);
 }
 
 
-IntervalVectorFunctionModel
-SolverBase::implicit(const IntervalVectorFunction& f,
+ValidatedVectorFunctionModel
+SolverBase::implicit(const ValidatedVectorFunction& f,
                       const Vector<Interval>& ip,
                       const Vector<Interval>& ix) const
 {
-    ARIADNE_LOG(4,"SolverBase::implicit(IntervalVectorFunction f, IntervalVector ip, IntervalVector ix)\n");
+    ARIADNE_LOG(4,"SolverBase::implicit(ValidatedVectorFunction f, IntervalVector ip, IntervalVector ix)\n");
     ARIADNE_LOG(5,"f="<<f<<"\n");
     ARIADNE_ASSERT(f.result_size()==ix.size());
     ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
@@ -335,10 +335,10 @@ SolverBase::implicit(const IntervalVectorFunction& f,
     const uint n=ix.size();
     const double err=this->maximum_error();
 
-    IntervalVectorFunctionModel id(this->function_factory().create_identity(ip));
-    IntervalVectorFunctionModel h(this->function_factory().create_constants(ip,ix));
-    IntervalVectorFunctionModel nh(this->function_factory().create_zeros(n,ip));
-    IntervalVectorFunctionModel fnh(this->function_factory().create_zeros(n,ip));
+    ValidatedVectorFunctionModel id(this->function_factory().create_identity(ip));
+    ValidatedVectorFunctionModel h(this->function_factory().create_constants(ip,ix));
+    ValidatedVectorFunctionModel nh(this->function_factory().create_zeros(n,ip));
+    ValidatedVectorFunctionModel fnh(this->function_factory().create_zeros(n,ip));
 
     uint steps_remaining=this->maximum_number_of_steps();
     uint number_unrefined=n;
@@ -359,7 +359,7 @@ SolverBase::implicit(const IntervalVectorFunction& f,
                     if(refines(nh[i],h[i])) {
                         refinement[i]=true;
                         --number_unrefined;
-                    } else if(disjoint(IntervalScalarFunctionModel(nh[i]).range(),ix[i])) {
+                    } else if(disjoint(ValidatedScalarFunctionModel(nh[i]).range(),ix[i])) {
                         ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","No result found in "<<ix<<"; function "<<nh<<" is disjoint from "<<h<<" for at least one point.");
                     }
                 }
@@ -398,19 +398,19 @@ SolverBase::implicit(const IntervalVectorFunction& f,
 
 }
 
-IntervalScalarFunctionModel
-SolverBase::implicit(const IntervalScalarFunction& f,
+ValidatedScalarFunctionModel
+SolverBase::implicit(const ValidatedScalarFunction& f,
                      const Vector<Interval>& ip,
                      const Interval& ix) const
 {
-    ARIADNE_LOG(4,"SolverBase::implicit(IntervalScalarFunction f, IntervalVector ip, Interval ix)\n");
+    ARIADNE_LOG(4,"SolverBase::implicit(ValidatedScalarFunction f, IntervalVector ip, Interval ix)\n");
     ARIADNE_LOG(5,"f="<<f<<"\n");
-    IntervalVectorFunctionModel res=this->implicit(IntervalVectorFunction(List<IntervalScalarFunction>(1u,f)),ip,Vector<Interval>(1u,ix));
+    ValidatedVectorFunctionModel res=this->implicit(ValidatedVectorFunction(List<ValidatedScalarFunction>(1u,f)),ip,Vector<Interval>(1u,ix));
     return res[0];
 }
 
-IntervalVectorFunctionModel
-SolverBase::continuation(const IntervalVectorFunction& f,
+ValidatedVectorFunctionModel
+SolverBase::continuation(const ValidatedVectorFunction& f,
                          const Vector<Float>& p,
                          const Vector<Interval>& ix,
                          const Vector<Interval>& ip) const
@@ -422,7 +422,7 @@ SolverBase::continuation(const IntervalVectorFunction& f,
 
 
 Vector<Interval>
-IntervalNewtonSolver::step(const IntervalVectorFunction& f,
+IntervalNewtonSolver::step(const ValidatedVectorFunction& f,
                            const Vector<Interval>& x) const
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
@@ -444,7 +444,7 @@ IntervalNewtonSolver::step(const IntervalVectorFunction& f,
 }
 
 Vector<Interval>
-KrawczykSolver::step(const IntervalVectorFunction& f,
+KrawczykSolver::step(const ValidatedVectorFunction& f,
                      const Vector<Interval>& x) const
 {
     Matrix<Interval> I=Matrix<Interval>::identity(x.size());
@@ -470,7 +470,7 @@ KrawczykSolver::step(const IntervalVectorFunction& f,
 
 
 Vector<Interval>
-FactoredKrawczykSolver::step(const IntervalVectorFunction& f,
+FactoredKrawczykSolver::step(const ValidatedVectorFunction& f,
                              const Vector<Interval>& x) const
 {
     Matrix<Interval> I=Matrix<Interval>::identity(x.size());
@@ -496,22 +496,22 @@ FactoredKrawczykSolver::step(const IntervalVectorFunction& f,
 }
 
 
-IntervalVectorFunctionModel
-IntervalNewtonSolver::implicit_step(const IntervalVectorFunction& f,
-                                    const IntervalVectorFunctionModel& id,
-                                    const IntervalVectorFunctionModel& h) const
+ValidatedVectorFunctionModel
+IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
+                                    const ValidatedVectorFunctionModel& id,
+                                    const ValidatedVectorFunctionModel& h) const
 {
     const uint m=id.size();
     const uint n=h.size();
 
-    ARIADNE_LOG(6,"IntervalNewtonSolver::implicit_step(IntervalVectorFunction f, IntervalVectorFunctionModel id, IntervalVectorFunctionModel h)\n");
+    ARIADNE_LOG(6,"IntervalNewtonSolver::implicit_step(ValidatedVectorFunction f, ValidatedVectorFunctionModel id, ValidatedVectorFunctionModel h)\n");
     ARIADNE_LOG(7,"f="<<f<<"\n");
     ARIADNE_LOG(7,"h="<<h<<"\n");
 
-    IntervalVectorFunctionModel mh=h; mh.clobber();
+    ValidatedVectorFunctionModel mh=h; mh.clobber();
     ARIADNE_LOG(7,"midpoint(h)="<<mh<<"\n");
 
-    Matrix<IntervalScalarFunction> D2f(n,n);
+    Matrix<ValidatedScalarFunction> D2f(n,n);
     for(uint i=0; i!=n; ++i) {
         for(uint j=0; j!=n; ++j) {
             D2f[i][j]=f[i].derivative(m+j);
@@ -519,10 +519,10 @@ IntervalNewtonSolver::implicit_step(const IntervalVectorFunction& f,
     }
     ARIADNE_LOG(7,"D2f="<<D2f<<"\n");
 
-    IntervalScalarFunctionModel z=h[0]*Real(0);
-    IntervalVectorFunctionModel idh=join(id,h);
+    ValidatedScalarFunctionModel z=h[0]*Real(0);
+    ValidatedVectorFunctionModel idh=join(id,h);
     
-    Matrix<IntervalScalarFunctionModel> J(n,n,z);
+    Matrix<ValidatedScalarFunctionModel> J(n,n,z);
     for(uint i=0; i!=n; ++i) {
         for(uint j=0; j!=n; ++j) {
             J[i][j]=compose(D2f[i][j],idh);
@@ -538,10 +538,10 @@ IntervalNewtonSolver::implicit_step(const IntervalVectorFunction& f,
     }
     ARIADNE_LOG(7,"rngJ="<<rngJ<<"\n");
 
-    IntervalVectorFunctionModel fidmh=compose(f,join(id,mh));
+    ValidatedVectorFunctionModel fidmh=compose(f,join(id,mh));
     ARIADNE_LOG(7,"compose(f,join(id,midpoint(h)))="<<fidmh<<"\n");
 
-    IntervalVectorFunctionModel dh(n,z);
+    ValidatedVectorFunctionModel dh(n,z);
     if(n==1) {
         if(contains(rngJ[0][0],0.0)) {
             ARIADNE_THROW(SingularJacobianException,"IntervalNewtonSolver","D2f(P,X)="<<rngJ[0][0]<<" which contains zero.");
@@ -556,16 +556,16 @@ IntervalNewtonSolver::implicit_step(const IntervalVectorFunction& f,
     }
     ARIADNE_LOG(7,"dh="<<dh<<"\n");
 
-    IntervalVectorFunctionModel nh=mh-dh;
+    ValidatedVectorFunctionModel nh=mh-dh;
     ARIADNE_LOG(7,"nh="<<nh<<"\n");
     return nh;
 }
 
 
-IntervalVectorFunctionModel
-KrawczykSolver::implicit_step(const IntervalVectorFunction& f,
-                              const IntervalVectorFunctionModel& p,
-                              const IntervalVectorFunctionModel& x) const
+ValidatedVectorFunctionModel
+KrawczykSolver::implicit_step(const ValidatedVectorFunction& f,
+                              const ValidatedVectorFunctionModel& p,
+                              const ValidatedVectorFunctionModel& x) const
 {
     const uint np=p.size();
     const uint nx=x.size();
@@ -574,14 +574,14 @@ KrawczykSolver::implicit_step(const IntervalVectorFunction& f,
     ARIADNE_LOG(4,"    p="<<p<<"\n");
     ARIADNE_LOG(4,"    f="<<f<<"\n");
     //ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
-    IntervalVectorFunctionModel mx(x);
+    ValidatedVectorFunctionModel mx(x);
     for(uint i=0; i!=mx.size(); ++i) { mx[i].set_error(0.0); }
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
     Vector<Float> ex(nx);
     for(uint i=0; i!=nx; ++i) { ex[i]=x[i].error(); }
     Vector<Interval> eix=Vector<ExactFloat>(ex)*Interval(-1,+1);
     ARIADNE_LOG(5,"    ex="<<ex<<"\n");
-    IntervalVectorFunctionModel fm=compose(f,join(p,mx));
+    ValidatedVectorFunctionModel fm=compose(f,join(p,mx));
     ARIADNE_LOG(5,"    f(p,mx)="<<fm<<"\n");
     Vector<Interval> rp(np);
     for(uint i=0; i!=np; ++i) { rp[i]=p[i].range(); }
@@ -594,28 +594,28 @@ KrawczykSolver::implicit_step(const IntervalVectorFunction& f,
     ARIADNE_LOG(5,"    M*f(p,mx)="<<M*fm<<"\n");
     ARIADNE_LOG(5,"    (I-M*J)="<<(I-M*J)<<"\n");
     ARIADNE_LOG(5,"    (I-M*J) * (ex*Interval(-1,+1))="<<(I-M*J)<<"*"<<eix<<"="<<(I-M*J) * eix<<"\n");
-    IntervalVectorFunctionModel dx= M*fm - (I-M*J) * eix;
+    ValidatedVectorFunctionModel dx= M*fm - (I-M*J) * eix;
     ARIADNE_LOG(5,"    dx="<<dx<<"\n");
-    IntervalVectorFunctionModel nwx= mx - dx;
+    ValidatedVectorFunctionModel nwx= mx - dx;
     ARIADNE_LOG(5,"    nwx="<<nwx<<"\n");
     return nwx;
 }
 
 
 /*
-IntervalScalarFunctionModel
-IntervalNewtonSolver::implicit(const IntervalScalarFunction& f,
+ValidatedScalarFunctionModel
+IntervalNewtonSolver::implicit(const ValidatedScalarFunction& f,
                                const Vector<Interval>& ip,
                                const Interval& ix) const
 {
     return this->SolverBase::implicit(f,ip,ix);
-    ARIADNE_LOG(4,"IntervalNewtonSolver::implicit(IntervalScalarFunction f, IntervalVector P, Interval X)\n");
+    ARIADNE_LOG(4,"IntervalNewtonSolver::implicit(ValidatedScalarFunction f, IntervalVector P, Interval X)\n");
     ARIADNE_LOG(5,"f="<<f<<"\n");
     ARIADNE_LOG(5,"P="<<ip<<"\n");
     ARIADNE_LOG(5,"X="<<std::setprecision(17)<<ix<<"\n");
     ARIADNE_ASSERT_MSG(f.argument_size()==ip.size()+1u,"f="<<f<<", P="<<ip<<", X="<<ix<<"\n");
     const uint n=ip.size();
-    IntervalScalarFunction df=f.derivative(n);
+    ValidatedScalarFunction df=f.derivative(n);
     ARIADNE_LOG(5,"df="<<df<<"\n");
 
     // Simple check to see if there is definitely no solution
@@ -635,13 +635,13 @@ IntervalNewtonSolver::implicit(const IntervalScalarFunction& f,
 
 
     // Set up auxiliary functions
-    IntervalScalarFunctionModel h=this->function_factory().create_constant(ip,ix);
-    IntervalVectorFunctionModel id=this->function_factory().create_identity(ip);
-    IntervalScalarFunctionModel dh=this->function_factory().create_zero(ip);
-    IntervalScalarFunctionModel mh=this->function_factory().create_zero(ip);
-    IntervalScalarFunctionModel nh=this->function_factory().create_zero(ip);
-    IntervalScalarFunctionModel dfidh=this->function_factory().create_zero(ip);
-    IntervalScalarFunctionModel fidmh=this->function_factory().create_zero(ip);
+    ValidatedScalarFunctionModel h=this->function_factory().create_constant(ip,ix);
+    ValidatedVectorFunctionModel id=this->function_factory().create_identity(ip);
+    ValidatedScalarFunctionModel dh=this->function_factory().create_zero(ip);
+    ValidatedScalarFunctionModel mh=this->function_factory().create_zero(ip);
+    ValidatedScalarFunctionModel nh=this->function_factory().create_zero(ip);
+    ValidatedScalarFunctionModel dfidh=this->function_factory().create_zero(ip);
+    ValidatedScalarFunctionModel fidmh=this->function_factory().create_zero(ip);
 
     ARIADNE_LOG(5,"f="<<f<<"\n");
     ARIADNE_LOG(5,"df="<<df<<"\n");

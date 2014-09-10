@@ -72,16 +72,16 @@ typedef Vector<Interval> IntervalVector;
 template<class X> class Matrix;
 
 template<class X> class ScalarFunction;
-typedef ScalarFunction<Interval> IntervalScalarFunction;
+typedef ValidatedScalarFunction ValidatedScalarFunction;
 template<class X> class VectorFunction;
-typedef VectorFunction<Interval> IntervalVectorFunction;
+typedef ValidatedVectorFunction ValidatedVectorFunction;
 
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<Interval> IntervalFunctionModelFactoryInterface;
 
 template<class X, class R> class Constraint;
-typedef Constraint<RealScalarFunction,Real> RealConstraint;
-typedef Constraint<IntervalScalarFunction,Float> IntervalConstraint;
+typedef Constraint<EffectiveScalarFunction,Real> RealConstraint;
+typedef Constraint<ValidatedScalarFunction,Float> IntervalConstraint;
 
 class IntervalAffineConstrainedImageSet;
 class BoundedConstraintSet;
@@ -91,7 +91,7 @@ template<class BS> class ListSet;
 class Grid;
 class PavingInterface;
 
-typedef Constraint<IntervalScalarFunctionModel,Float> IntervalConstraintModel;
+typedef Constraint<ValidatedScalarFunctionModel,Float> IntervalConstraintModel;
 
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
@@ -99,9 +99,9 @@ class Enclosure
     , public CompactSetInterface
 {
     Box _domain;
-    IntervalVectorFunctionModel _space_function;
-    IntervalScalarFunctionModel _time_function;
-    IntervalScalarFunctionModel _dwell_time_function;
+    ValidatedVectorFunctionModel _space_function;
+    ValidatedScalarFunctionModel _time_function;
+    ValidatedScalarFunctionModel _dwell_time_function;
     List<IntervalConstraintModel> _constraints;
     IntervalFunctionModelFactoryInterface* _function_factory_ptr;
     mutable Box _reduced_domain;
@@ -112,14 +112,14 @@ class Enclosure
     //! \brief Construct a representation of the box \a bx.
     explicit Enclosure(const Box& bx, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d and image function \a f.
-    explicit Enclosure(const Box& d, const IntervalVectorFunction& f, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const Box& d, const ValidatedVectorFunction& f, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.
-    explicit Enclosure(const Box& d, const IntervalVectorFunction& f, const List<IntervalConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const Box& d, const ValidatedVectorFunction& f, const List<IntervalConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d, image function \a sf, time function \a tf and constraints \a c.
-    explicit Enclosure(const Box& d, const IntervalVectorFunction& sf, const IntervalScalarFunction& tf, const List<IntervalConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const Box& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction& tf, const List<IntervalConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with domain \a d, space function \a sf, time function \a tf, negative constraints \a g and equality constraints \a h.
     //!   (Not currently implemented.)
-    explicit Enclosure(const Box& d, const IntervalVectorFunction& sf, const IntervalScalarFunction tf, const IntervalVectorFunction& g, const IntervalVectorFunction& h, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const Box& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction tf, const ValidatedVectorFunction& g, const ValidatedVectorFunction& h, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct from an exact bounded constraint \a set.
     explicit Enclosure(const BoundedConstraintSet& set, const IntervalFunctionModelFactoryInterface& fac);
 
@@ -136,11 +136,11 @@ class Enclosure
     //! \brief An over-approximation to the image of \f$D\f$ under \f$f\f$.
     Box codomain() const;
     //! \brief The image function \f$f\f$.
-    IntervalVectorFunctionModel const& function() const;
-    IntervalVectorFunctionModel const& space_function() const;
-    IntervalScalarFunctionModel const& time_function() const;
-    IntervalScalarFunctionModel const& dwell_time_function() const;
-    IntervalVectorFunctionModel const constraint_function() const;
+    ValidatedVectorFunctionModel const& function() const;
+    ValidatedVectorFunctionModel const& space_function() const;
+    ValidatedScalarFunctionModel const& time_function() const;
+    ValidatedScalarFunctionModel const& dwell_time_function() const;
+    ValidatedVectorFunctionModel const constraint_function() const;
     Box const constraint_bounds() const;
 
     //! \brief Introduces a new parameter with values in the interval \a ivl. The set itself does not change.
@@ -150,33 +150,33 @@ class Enclosure
     void new_variable(Interval ivl);
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
-    void substitute(uint j, IntervalScalarFunctionModel v);
+    void substitute(uint j, ValidatedScalarFunctionModel v);
     //! \brief Substitutes the expression \f$x_j=c\f$ into the function and constraints.
     void substitute(uint j, Float c);
 
     //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
-    void apply_map(IntervalVectorFunction r);
+    void apply_map(ValidatedVectorFunction r);
     //! \brief Apply the flow \f$\phi(x,h)\f$ to the map \f$f\f$.
-    void apply_fixed_evolve_step(IntervalVectorFunction phi, ExactFloat h);
+    void apply_fixed_evolve_step(ValidatedVectorFunction phi, ExactFloat h);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.
-    void apply_space_evolve_step(IntervalVectorFunction phi, IntervalScalarFunction elps);
+    void apply_space_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s),\tau(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s),\tau(s))\f$.
-    void apply_spacetime_evolve_step(IntervalVectorFunction phi, IntervalScalarFunction elps);
+    void apply_spacetime_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     //! \brief Set \f$\xi'(s)=\phi(\xi(s),\epsilon(s))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(s)\f$.
-    void apply_parameter_evolve_step(IntervalVectorFunction phi, IntervalScalarFunction elps);
+    void apply_parameter_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     //! \brief Set \f$\xi'(s)=\phi(\xi(s),\omega(s)-\tau(s))\f$ and \f$\tau'(s)=\omega(s)\f$.
-    void apply_finishing_parameter_evolve_step(IntervalVectorFunction phi, IntervalScalarFunction omega);
+    void apply_finishing_parameter_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction omega);
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $r\leq h.
-    void apply_full_reach_step(IntervalVectorFunctionModel phi);
+    void apply_full_reach_step(ValidatedVectorFunctionModel phi);
     //! \brief Apply the flow \f$xi'(s,r)=\phi(\xi(s),r)\f$, \f$\tau'(s,r)=\tau(s)+r\f$, \f$r\leq\epsilon(s)\f$
-    void apply_spacetime_reach_step(IntervalVectorFunctionModel phi, IntervalScalarFunction elps);
+    void apply_spacetime_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps);
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $r-\epsilon(s)\leq 0$.
-    void apply_parameter_reach_step(IntervalVectorFunctionModel phi, IntervalScalarFunction elps);
+    void apply_parameter_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps);
 /*
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,h]\f$
-    void apply_reach_step(IntervalVectorFunction phi, Float h);
+    void apply_reach_step(ValidatedVectorFunction phi, Float h);
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,\max(h,\epsilon(x))]\f$
-    void apply_reach_step(IntervalVectorFunction phi, IntervalScalarFunction elps);
+    void apply_reach_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
 */
 
     //! \brief Introduces the constraint \f$c\f$ applied to the state \f$x=f(s)\f$.
@@ -185,15 +185,15 @@ class Enclosure
     void new_parameter_constraint(IntervalConstraint c);
 
     //! \brief Introduces the constraint \f$-g(\xi(s)) \leq 0\f$.
-    void new_positive_state_constraint(IntervalScalarFunction g);
+    void new_positive_state_constraint(ValidatedScalarFunction g);
     //! \brief Introduces the constraint \f$g(\xi(s)) \leq 0\f$.
-    void new_negative_state_constraint(IntervalScalarFunction g);
+    void new_negative_state_constraint(ValidatedScalarFunction g);
     //! \brief Introduces the constraint \f$h(\xi(s)) = 0\f$.
-    void new_zero_state_constraint(IntervalScalarFunction h);
+    void new_zero_state_constraint(ValidatedScalarFunction h);
     //! \brief Introduces the constraint \f$g(s) \leq 0\f$.
-    void new_negative_parameter_constraint(IntervalScalarFunction g);
+    void new_negative_parameter_constraint(ValidatedScalarFunction g);
     //! \brief Introduces the constraint \f$h(s) = 0\f$.
-    void new_zero_parameter_constraint(IntervalScalarFunction h);
+    void new_zero_parameter_constraint(ValidatedScalarFunction h);
 
     //! \brief The number of negative constraints.
     uint number_of_constraints() const;
@@ -207,7 +207,7 @@ class Enclosure
     //! \brief  Returns true if \f$g(x)>0\f$ over the whole set,
     //! false \f$g(x)<0\f$ over the whole set,
     //! and indeterminate otherwise.
-    tribool satisfies(IntervalScalarFunction g) const;
+    tribool satisfies(ValidatedScalarFunction g) const;
     //! \brief Tests if the set satisfies the constraint \a c. Returns \c true if all points in the set satisfy
     //! the constraint, and \c false if no points in the set satisfy the constraint.
     virtual tribool satisfies(IntervalConstraint c) const;
@@ -323,7 +323,7 @@ class Enclosure
   private:
     void _check() const;
     void _solve_zero_constraints();
-    RealVectorFunction real_function() const;
+    EffectiveVectorFunction real_function() const;
   private:
     friend Enclosure product(const Enclosure&, const Interval&);
     friend Enclosure product(const Enclosure&, const Box&);
@@ -342,9 +342,9 @@ Enclosure product(const Enclosure& set, const Box& bx);
 Enclosure product(const Enclosure& set1, const Enclosure& set2);
 
 //! \related Enclosure \brief The image of the \a set under the \a function.
-Enclosure apply(const IntervalVectorFunction& function, const Enclosure& set);
+Enclosure apply(const ValidatedVectorFunction& function, const Enclosure& set);
 //! \related Enclosure \brief The image of the \a set under the \a function. Does not perform domain-checking.
-Enclosure unchecked_apply(const IntervalVectorFunctionModel& function, const Enclosure& set);
+Enclosure unchecked_apply(const ValidatedVectorFunctionModel& function, const Enclosure& set);
 
 } //namespace Ariadne
 

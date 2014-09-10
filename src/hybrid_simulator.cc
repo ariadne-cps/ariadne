@@ -71,12 +71,12 @@ Point make_point(const HybridPoint& hpt, const RealSpace& spc) {
     return pt;
 }
 
-inline Float evaluate(const ScalarFunction<Real>& f, const Vector<Float>& x) { return f(x); }
-inline Vector<Float> evaluate(const VectorFunction<Real>& f, const Vector<Float>& x) { return f(x); }
+inline Float evaluate(const EffectiveScalarFunction& f, const Vector<Float>& x) { return f(x); }
+inline Vector<Float> evaluate(const EffectiveVectorFunction& f, const Vector<Float>& x) { return f(x); }
 
-Map<DiscreteEvent,RealScalarFunction> guard_functions(const HybridAutomatonInterface& system, const DiscreteLocation& location) {
+Map<DiscreteEvent,EffectiveScalarFunction> guard_functions(const HybridAutomatonInterface& system, const DiscreteLocation& location) {
     Set<DiscreteEvent> events=system.events(location);
-    Map<DiscreteEvent,RealScalarFunction> guards;
+    Map<DiscreteEvent,EffectiveScalarFunction> guards;
     for(Set<DiscreteEvent>::const_iterator iter=events.begin(); iter!=events.end(); ++iter) {
         guards.insert(*iter,system.guard_function(location,*iter));
     }
@@ -96,14 +96,14 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint
 
     Orbit<HybridPoint> orbit(HybridPoint(location,space,point));
 
-    RealVectorFunction dynamic=system.dynamic_function(location);
-    Map<DiscreteEvent,RealScalarFunction> guards=guard_functions(system,location);
+    EffectiveVectorFunction dynamic=system.dynamic_function(location);
+    Map<DiscreteEvent,EffectiveScalarFunction> guards=guard_functions(system,location);
 
     while(t<tmax) {
 
         bool enabled=false;
         DiscreteEvent event;
-        for(Map<DiscreteEvent,RealScalarFunction>::const_iterator guard_iter=guards.begin(); guard_iter!=guards.end(); ++guard_iter) {
+        for(Map<DiscreteEvent,EffectiveScalarFunction>::const_iterator guard_iter=guards.begin(); guard_iter!=guards.end(); ++guard_iter) {
             if(evaluate(guard_iter->second,point)>0) {
                 enabled=true;
                 event=guard_iter->first;
@@ -113,7 +113,7 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint
 
         if(enabled) {
             DiscreteLocation target=system.target(location,event);
-            RealVectorFunction reset=system.reset_function(location,event);
+            EffectiveVectorFunction reset=system.reset_function(location,event);
             location=target;
             space=system.continuous_state_space(location);
             next_point=reset(point);

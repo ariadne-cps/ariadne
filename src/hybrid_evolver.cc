@@ -46,7 +46,7 @@ namespace {
 
 namespace Ariadne {
 
-ScalarTaylorFunction unchecked_compose(const IntervalScalarFunctionModel& f, const VectorTaylorFunction& g);
+ScalarTaylorFunction unchecked_compose(const ValidatedScalarFunctionModel& f, const VectorTaylorFunction& g);
 
 static const DiscreteEvent final_event("_tmax_");
 static const DiscreteEvent step_event("_h_");
@@ -393,7 +393,7 @@ HybridEvolverBase::
 _extract_transitions(DiscreteLocation const& location) const
 {
     ARIADNE_LOG(3,"HybridEvolverBase::_extract_transitions(...)\n");
-    const RealVectorFunction& dynamic=_sys_ptr->dynamic_function(location);
+    const EffectiveVectorFunction& dynamic=_sys_ptr->dynamic_function(location);
 
     Map<DiscreteEvent,TransitionData> transitions;
     Set<DiscreteEvent> events = _sys_ptr->events(location);
@@ -403,15 +403,15 @@ _extract_transitions(DiscreteLocation const& location) const
         DiscreteEvent event=*event_iter;
         EventKind event_kind=_sys_ptr->event_kind(location,event);
         ARIADNE_LOG(5,"event="<<event<<", kind="<<event_kind<<"\n");
-        RealScalarFunction constraint_function;
+        EffectiveScalarFunction constraint_function;
         if(is_activating(event_kind)) {
             constraint_function=_sys_ptr->guard_function(location,event);
         } else {
             constraint_function=_sys_ptr->invariant_function(location,event);
         }
         ARIADNE_LOG(5,"constraint_function="<<constraint_function<<"\n");
-        RealScalarFunction constraint_flow_derivative_function=lie_derivative(constraint_function,dynamic);
-        RealVectorFunction reset_function; DiscreteLocation target; RealSpace target_space;
+        EffectiveScalarFunction constraint_flow_derivative_function=lie_derivative(constraint_function,dynamic);
+        EffectiveVectorFunction reset_function; DiscreteLocation target; RealSpace target_space;
         if(is_activating(event_kind)) {
             reset_function=_sys_ptr->reset_function(location,event);
             target=_sys_ptr->target(location,event);
@@ -504,9 +504,9 @@ _process_starting_events(EvolutionData& evolution_data,
     }
 }
 
-IntervalVectorFunctionModel
+ValidatedVectorFunctionModel
 HybridEvolverBase::
-_compute_flow(RealVectorFunction dynamic,
+_compute_flow(EffectiveVectorFunction dynamic,
               Box const& initial_box,
               const Float& maximum_step_size) const
 {
@@ -523,7 +523,7 @@ _compute_flow(RealVectorFunction dynamic,
     // more accurate, and the time domain might be used explicitly for the domain
     // of the resulting set.
     Float step_size=maximum_step_size;
-    IntervalVectorFunctionModel flow_model=static_cast<IntervalVectorFunctionModel>(integrator.flow_step(dynamic,initial_box,step_size));
+    ValidatedVectorFunctionModel flow_model=static_cast<ValidatedVectorFunctionModel>(integrator.flow_step(dynamic,initial_box,step_size));
 
     ARIADNE_LOG(6,"twosided_flow_model="<<flow_model<<"\n");
     IntervalVector flow_domain=flow_model.domain();
@@ -537,9 +537,9 @@ _compute_flow(RealVectorFunction dynamic,
 
 Set<DiscreteEvent>
 HybridEvolverBase::
-_compute_active_events(RealVectorFunction const& dynamic,
-                       Map<DiscreteEvent,RealScalarFunction> const& guards,
-                       IntervalVectorFunctionModel const& flow,
+_compute_active_events(EffectiveVectorFunction const& dynamic,
+                       Map<DiscreteEvent,EffectiveScalarFunction> const& guards,
+                       ValidatedVectorFunctionModel const& flow,
                        HybridEnclosure const& starting_set) const
 {
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_active_events(...)\n");
@@ -552,7 +552,7 @@ _compute_active_events(RealVectorFunction const& dynamic,
     ARIADNE_LOG(8,"reach_set="<<reach_set<<"\n");
     for(Set<DiscreteEvent>::iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
         const DiscreteEvent event=*event_iter;
-        const RealScalarFunction& guard_function=guards[event];
+        const EffectiveScalarFunction& guard_function=guards[event];
         ARIADNE_LOG(8,"event="<<event<<", guard="<<guard_function<<", flow_derivative="<<lie_derivative(guard_function,dynamic)<<"\n");
         // First try a simple test based on the bounding box
         if(guard_function(reach_set.space_bounding_box()).upper()>=0.0) {
@@ -566,7 +566,7 @@ _compute_active_events(RealVectorFunction const& dynamic,
 /*
                 // FIXME: Need to allow permissive events with strictly decreasing guard.
                 // Test direction of guard increase
-                RealScalarFunction flow_derivative = lie_derivative(guard_function,dynamic);
+                EffectiveScalarFunction flow_derivative = lie_derivative(guard_function,dynamic);
                 Interval flow_derivative_range = flow_derivative(flow_bounds);
                 if(flow_derivative_range.upper()>0.0) {
                     active_events.insert(*event_iter);
@@ -582,8 +582,8 @@ _compute_active_events(RealVectorFunction const& dynamic,
 Map<DiscreteEvent,CrossingData>
 HybridEvolverBase::
 _compute_crossings(Set<DiscreteEvent> const& active_events,
-                   RealVectorFunction const& dynamic,
-                   Map<DiscreteEvent,RealScalarFunction> const& guards,
+                   EffectiveVectorFunction const& dynamic,
+                   Map<DiscreteEvent,EffectiveScalarFunction> const& guards,
                    FlowFunctionModel const& flow,
                    HybridEnclosure const& initial_set) const
 {
@@ -601,11 +601,11 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
         event_iter!=active_events.end(); ++event_iter)
     {
         const DiscreteEvent event=*event_iter;
-        RealScalarFunction const& guard=guards[event];
+        EffectiveScalarFunction const& guard=guards[event];
 
         // Compute the derivative of the guard function g along flow lines of $\dot(x)=f(x)$
         // This is given by the Lie derivative at a point x, defined as $L_{f}g(x) = (\nabla g\cdot f)(x)$
-        RealScalarFunction derivative=lie_derivative(guard,dynamic);
+        EffectiveScalarFunction derivative=lie_derivative(guard,dynamic);
         Interval derivative_range=derivative.evaluate(flow_bounds);
         if(derivative_range.lower()>0.0) {
             // If the derivative $L_{f}g$is strictly positive over the bounding box for the flow,
@@ -614,7 +614,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             // crossing must be the time of the event along the trajectory.
             // The crossing time $\gamma(x_0)$ given the initial state can usually be computed
             // by solving the equation $g(\phi(x_0,\gamma(x_0))) = 0$
-            IntervalScalarFunctionModel crossing_time;
+            ValidatedScalarFunctionModel crossing_time;
             try {
                 crossing_time=solver.implicit(compose(guard,flow),flow_spacial_domain,flow_time_domain);
                 if(crossing_time.error()>1e-8) { ARIADNE_LOG(2,event<<": crossing_time: error="<<crossing_time.error()<<", range="<<crossing_time.range()<<"\n"); }
@@ -648,7 +648,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             // If the derivative of the guard function along flow lines cannot be shown
             // to have a definite sign over the entire flow box, then try to compute
             // the sign of the second derivative $L_{f}^{2}g(x)=L_{f}L_{f}g(x)$.
-            IntervalScalarFunction second_derivative=lie_derivative(derivative,dynamic);
+            ValidatedScalarFunction second_derivative=lie_derivative(derivative,dynamic);
             Interval second_derivative_bounds_range=second_derivative.evaluate(flow_bounds);
             Interval second_derivative_flow_range=compose(second_derivative,flow).range();
             Interval second_derivative_range=intersection(second_derivative_bounds_range,second_derivative_flow_range);
@@ -695,7 +695,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
                 // sufficient condition for no crossing involving the critical
                 // time is $(g(\phi(x_0,t))<=0 /\ t<=\mu(x_0)) \/ g(\phi(x_0,\mu(x_0)))<=0$
                 try {
-                    IntervalScalarFunctionModel critical_time=solver.implicit(compose(derivative,flow),flow_spacial_domain,flow_time_domain);
+                    ValidatedScalarFunctionModel critical_time=solver.implicit(compose(derivative,flow),flow_spacial_domain,flow_time_domain);
                     if(critical_time.error()>1e-8) { ARIADNE_LOG(2,event<<": critical_time: error="<<critical_time.error()<<", range="<<critical_time.range()<<"\n"); }
                     crossings[event]=CrossingData(CrossingKind::GRAZING);
                     crossings[event].critical_time=critical_time;
@@ -752,7 +752,7 @@ _recondition(HybridEnclosure& set) const
 void
 HybridEvolverBase::
 _apply_reach_step(HybridEnclosure& set,
-                  IntervalVectorFunctionModel const& flow,
+                  ValidatedVectorFunctionModel const& flow,
                   TimingData const& timing_data) const
 {
     set.apply_reach_step(flow,timing_data.parameter_dependent_evolution_time);
@@ -761,7 +761,7 @@ _apply_reach_step(HybridEnclosure& set,
 void
 HybridEvolverBase::
 _apply_evolve_step(HybridEnclosure& set,
-                  IntervalVectorFunctionModel const& flow,
+                  ValidatedVectorFunctionModel const& flow,
                   TimingData const& timing_data) const
 {
 
@@ -786,8 +786,8 @@ _apply_evolve_step(HybridEnclosure& set,
 void
 HybridEvolverBase::
 _apply_guard_step(HybridEnclosure& set,
-                  RealVectorFunction const& dynamic,
-                  IntervalVectorFunctionModel const& flow,
+                  EffectiveVectorFunction const& dynamic,
+                  ValidatedVectorFunctionModel const& flow,
                   TimingData const& timing_data,
                   TransitionData const& transition_data,
                   CrossingData const& crossing_data,
@@ -797,10 +797,10 @@ _apply_guard_step(HybridEnclosure& set,
     // Compute flow to guard set up to evolution time.
     HybridEnclosure& jump_set=set;
     const DiscreteEvent event=transition_data.event;
-    IntervalVectorFunctionModel starting_state=set.space_function();
-    IntervalVectorFunctionModel reach_starting_state=embed(starting_state,timing_data.evolution_time_domain);
-    IntervalScalarFunctionModel reach_step_time=embed(starting_state.domain(),timing_data.evolution_time_coordinate);
-    IntervalScalarFunctionModel step_time;
+    ValidatedVectorFunctionModel starting_state=set.space_function();
+    ValidatedVectorFunctionModel reach_starting_state=embed(starting_state,timing_data.evolution_time_domain);
+    ValidatedScalarFunctionModel reach_step_time=embed(starting_state.domain(),timing_data.evolution_time_coordinate);
+    ValidatedScalarFunctionModel step_time;
 
     switch(transition_data.event_kind) {
         case PERMISSIVE:
@@ -866,8 +866,8 @@ _apply_guard_step(HybridEnclosure& set,
 void HybridEvolverBase::
 _apply_guard(List<HybridEnclosure>& sets,
              const HybridEnclosure& starting_set,
-             const IntervalVectorFunctionModel& flow,
-             const IntervalScalarFunctionModel& elapsed_time,
+             const ValidatedVectorFunctionModel& flow,
+             const ValidatedScalarFunctionModel& elapsed_time,
              const TransitionData& transition_data,
              const CrossingData crossing_data,
              const Semantics semantics) const
@@ -875,9 +875,9 @@ _apply_guard(List<HybridEnclosure>& sets,
     ARIADNE_LOG(3,"HybridEvolverBase::_apply_guard(...)\n");
     static const uint SUBDIVISIONS_FOR_DEGENERATE_CROSSING = 2;
     const DiscreteEvent event=transition_data.event;
-    const IntervalScalarFunction& guard_function=transition_data.guard_function;
-    //const IntervalScalarFunction& guard_flow_derivative_function=transition_data.guard_flow_derivative_function;
-    IntervalVectorFunctionModel starting_state=starting_set.space_function();
+    const ValidatedScalarFunction& guard_function=transition_data.guard_function;
+    //const ValidatedScalarFunction& guard_flow_derivative_function=transition_data.guard_flow_derivative_function;
+    ValidatedVectorFunctionModel starting_state=starting_set.space_function();
     if(elapsed_time.argument_size()>starting_state.argument_size()) {
         starting_state=embed(starting_state,elapsed_time.domain()[elapsed_time.domain().size()-1]);
     }
@@ -899,10 +899,10 @@ _apply_guard(List<HybridEnclosure>& sets,
                 set.new_invariant(event, guard_function);
                 break;
             case CrossingKind::GRAZING: {
-                IntervalScalarFunctionModel critical_time = unchecked_compose(crossing_data.critical_time,starting_state);
-                IntervalScalarFunctionModel final_guard
+                ValidatedScalarFunctionModel critical_time = unchecked_compose(crossing_data.critical_time,starting_state);
+                ValidatedScalarFunctionModel final_guard
                     = compose( guard_function, unchecked_compose( flow, join(starting_state, elapsed_time) ) );
-                IntervalScalarFunctionModel maximal_guard
+                ValidatedScalarFunctionModel maximal_guard
                     = compose( guard_function, unchecked_compose( flow, join(starting_state, critical_time) ) );
                 ARIADNE_ASSERT_MSG(starting_state.argument_size()==set.parameter_domain().size(),
                                    starting_state<<" "<<set);
@@ -953,7 +953,7 @@ _apply_guard(List<HybridEnclosure>& sets,
                     case UPPER_SEMANTICS:
                         for(uint i=0; i!=n; ++i) {
                             Float alpha=Float(i+1)/n;
-                            IntervalScalarFunctionModel intermediate_guard
+                            ValidatedScalarFunctionModel intermediate_guard
                                 = compose( guard_function, unchecked_compose( flow, join(starting_state, ExactFloat(alpha)*elapsed_time) ) );
                             set.new_parameter_constraint(event, intermediate_guard <= 0.0);
                         }
@@ -996,7 +996,7 @@ _evolution_in_mode(EvolutionData& evolution_data,
     // and means that initially active events are tested for only once.
     ARIADNE_LOG(3,"HybridEvolverBase::_evolution_in_mode\n");
 
-    typedef Map<DiscreteEvent,IntervalScalarFunction>::const_iterator constraint_iterator;
+    typedef Map<DiscreteEvent,ValidatedScalarFunction>::const_iterator constraint_iterator;
     typedef Set<DiscreteEvent>::const_iterator event_iterator;
 
     const Real final_time=termination_criterion.maximum_time();
@@ -1019,7 +1019,7 @@ _evolution_in_mode(EvolutionData& evolution_data,
     const DiscreteLocation location=initial_set.location();
 
     // Cache dynamic and constraint functions
-    RealVectorFunction dynamic=_sys_ptr->dynamic_function(location);
+    EffectiveVectorFunction dynamic=_sys_ptr->dynamic_function(location);
     Map<DiscreteEvent,TransitionData> transitions = this->_extract_transitions(location);
     Set<DiscreteEvent> events = transitions.keys();
 
@@ -1062,7 +1062,7 @@ _evolution_in_mode(EvolutionData& evolution_data,
 void
 HybridEvolverBase::
 _evolution_step(EvolutionData& evolution_data,
-                RealVectorFunction const& dynamic,
+                EffectiveVectorFunction const& dynamic,
                 Map<DiscreteEvent,TransitionData> const& transitions,
                 Real const& final_time) const
 {
@@ -1113,7 +1113,7 @@ _evolution_step(EvolutionData& evolution_data,
         }
     }
 
-    Map<DiscreteEvent,RealScalarFunction> guard_functions;
+    Map<DiscreteEvent,EffectiveScalarFunction> guard_functions;
     for(Map<DiscreteEvent,TransitionData>::const_iterator transition_iter=transitions.begin();
         transition_iter!=transitions.end(); ++transition_iter)
     {
@@ -1154,10 +1154,10 @@ _evolution_step(EvolutionData& evolution_data,
 void HybridEvolverBase::
 _apply_evolution_step(EvolutionData& evolution_data,
                       HybridEnclosure const& starting_set,
-                      IntervalVectorFunctionModel const& flow,
+                      ValidatedVectorFunctionModel const& flow,
                       TimingData const& timing_data,
                       Map<DiscreteEvent,CrossingData> const& crossings,
-                      RealVectorFunction const& dynamic,
+                      EffectiveVectorFunction const& dynamic,
                       Map<DiscreteEvent,TransitionData> const& transitions) const
 {
     ARIADNE_LOG(3,"GeneralHybridEvolver::_apply_evolution_step(...)\n");
@@ -1188,8 +1188,8 @@ _apply_evolution_step(EvolutionData& evolution_data,
     ARIADNE_LOG(6,"activating_events="<<activating_events<<"\n");
     ARIADNE_LOG(6,"blocking_events="<<blocking_events<<"\n");
 
-    IntervalScalarFunctionModel const& evolve_step_time=timing_data.parameter_dependent_evolution_time;
-    IntervalScalarFunctionModel reach_step_time=embed(starting_set.parameter_domain(),timing_data.evolution_time_coordinate);
+    ValidatedScalarFunctionModel const& evolve_step_time=timing_data.parameter_dependent_evolution_time;
+    ValidatedScalarFunctionModel reach_step_time=embed(starting_set.parameter_domain(),timing_data.evolution_time_coordinate);
 
     ARIADNE_LOG(8,"evolve_step_time="<<evolve_step_time<<"\n")
     ARIADNE_LOG(8,"reach_step_time="<<reach_step_time<<"\n")
@@ -1333,7 +1333,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
         HybridEnclosure& jump_set=jump_sets.front();
         ARIADNE_LOG(3,"  "<<event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind<<"\n");
         _apply_guard_step(jump_set,dynamic,flow,timing_data,transitions[event],crossings[event],semantics);
-        IntervalScalarFunctionModel jump_step_time;
+        ValidatedScalarFunctionModel jump_step_time;
         switch(crossings[event].crossing_kind) {
             case CrossingKind::INCREASING: case CrossingKind::CONVEX: case CrossingKind::CONCAVE: case CrossingKind::DEGENERATE:
                 jump_step_time=reach_step_time;
@@ -1492,9 +1492,9 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     Interval time_domain = initial_set.time_range()+Interval(0.0,step_size);
     IntervalVector spacetime_domain = join(space_domain,time_domain);
 
-    //IntervalVectorFunctionModel space_coordinates=this->function_factory().create_identity(space_domain);
-    IntervalScalarFunctionModel time_coordinate=this->function_factory().create_coordinate(spacetime_domain,n);
-    IntervalScalarFunctionModel time_identity=this->function_factory().create_identity(time_domain);
+    //ValidatedVectorFunctionModel space_coordinates=this->function_factory().create_identity(space_domain);
+    ValidatedScalarFunctionModel time_coordinate=this->function_factory().create_coordinate(spacetime_domain,n);
+    ValidatedScalarFunctionModel time_identity=this->function_factory().create_identity(time_domain);
 
     result.evolution_time_domain=Interval(0.0,step_size);
     result.evolution_time_coordinate=this->function_factory().create_identity(result.evolution_time_domain);
@@ -1507,8 +1507,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 
     // NOTE: The starting time function may be negative or greater than the final time
     // over part of the parameter domain.
-    IntervalVectorFunctionModel const& starting_space_function=initial_set.space_function();
-    IntervalScalarFunctionModel const& starting_time_function=initial_set.time_function();
+    ValidatedVectorFunctionModel const& starting_space_function=initial_set.space_function();
+    ValidatedScalarFunctionModel const& starting_time_function=initial_set.time_function();
     Interval starting_time_range=initial_set.time_range();
     Interval remaining_time_range=final_time-starting_time_range;
 
@@ -1516,7 +1516,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 
 
     // The time-dependent part of the evolution time
-    IntervalScalarFunctionModel temporal_evolution_time=this->function_factory().create_zero(IntervalVector(1u,time_domain));
+    ValidatedScalarFunctionModel temporal_evolution_time=this->function_factory().create_zero(IntervalVector(1u,time_domain));
 
     if(remaining_time_range.lower()<0.0) {
         // Some of the points may already have reached the final time.
@@ -1570,7 +1570,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     ARIADNE_LOG(7,"temporal_evolution_time="<<temporal_evolution_time<<"\n");
 
 
-    IntervalScalarFunctionModel spacial_evolution_time=this->function_factory().create_constant(space_domain,ExactFloat(step_size));
+    ValidatedScalarFunctionModel spacial_evolution_time=this->function_factory().create_constant(space_domain,ExactFloat(step_size));
 
     // Select one of GUARD_CREEP or TIME_CREEP
     static const bool GUARD_CREEP=true;
@@ -1608,7 +1608,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                     && event_kind!=PERMISSIVE)
             {
                 ARIADNE_LOG(6,"  crossing_time_range="<<crossing_iter->second.crossing_time.range()<<"\n");
-                const IntervalScalarFunctionModel& crossing_time=crossing_iter->second.crossing_time;
+                const ValidatedScalarFunctionModel& crossing_time=crossing_iter->second.crossing_time;
                 Interval crossing_time_range=crossing_time.range();
                 if(Ariadne::is_blocking(event_kind) && crossing_time_range.upper()<step_size) {
                     // NOTE: Use strict comparison here so that guard is fully crossed
@@ -1617,9 +1617,9 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 
                     // This event ensures that the evolve set is empty after a full step, so use this.
                     ARIADNE_LOG(6,std::setprecision(18)<<"crossing_time_range="<<crossing_time_range<<", crossing_time_range .upper()="<<crossing_time_range.upper()<<", step_size="<<step_size<<"\n");
-                    RealScalarFunction guard=transitions[event].guard_function;
-                    IntervalVectorFunctionModel identity=this->function_factory().create_identity(crossing_time.domain());
-                    IntervalScalarFunctionModel step_time=crossing_time*0.0+ExactFloat(step_size);
+                    EffectiveScalarFunction guard=transitions[event].guard_function;
+                    ValidatedVectorFunctionModel identity=this->function_factory().create_identity(crossing_time.domain());
+                    ValidatedScalarFunctionModel step_time=crossing_time*0.0+ExactFloat(step_size);
                     ARIADNE_LOG(6,"full flow="<<compose(flow,join(identity,step_time))<<"\n");
                     ARIADNE_LOG(6,"guard range at crossing time="<<compose(guard,compose(flow,join(initial_set.space_function(),compose(crossing_time,initial_set.space_function())))).range()<<"\n");
                     ARIADNE_LOG(6,"guard range at crossing time="<<compose(guard,compose(flow,join(identity,crossing_time))).range());
@@ -1659,7 +1659,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             if(crossing_iter->second.crossing_kind==CrossingKind::TRANSVERSE) {
                 // Modify the crossing time function to be the smallest possible; this ensures that the evaluation time is
                 // essentially exact
-                IntervalScalarFunctionModel lower_crossing_time=crossing_iter->second.crossing_time;
+                ValidatedScalarFunctionModel lower_crossing_time=crossing_iter->second.crossing_time;
                 Float crossing_time_error=lower_crossing_time.error();
                 lower_crossing_time.set_error(0.0);
                 lower_crossing_time-=ExactFloat(crossing_time_error);
@@ -1704,12 +1704,12 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
 
         HybridEnclosure evolve_set=initial_set;
         evolve_set.apply_fixed_evolve_step(flow,flow.step_size());
-        RealVectorFunction dynamic=this->_sys_ptr->dynamic_function(initial_set.location());
+        EffectiveVectorFunction dynamic=this->_sys_ptr->dynamic_function(initial_set.location());
         IntervalVector flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
         Interval flow_time_domain=flow.domain()[flow.argument_size()-1u];
-        IntervalScalarFunctionModel zero=flow[0].create_zero();
-        IntervalVectorFunctionModel identity=flow.create_identity();
-        IntervalVectorFunctionModel space_projection=flow*Interval(0.0);
+        ValidatedScalarFunctionModel zero=flow[0].create_zero();
+        ValidatedVectorFunctionModel identity=flow.create_identity();
+        ValidatedVectorFunctionModel space_projection=flow*Interval(0.0);
         for(uint i=0; i!=n; ++i) { space_projection[i]=space_projection[i]+identity[i]; }
 
         //static const ExactFloat CREEP_MAXIMUM=ExactFloat(1.0);
@@ -1722,7 +1722,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             DiscreteEvent event=crossing_iter->first;
             EventKind event_kind=transitions[event].event_kind;
             CrossingKind crossing_kind=crossing_iter->second.crossing_kind;
-            RealScalarFunction guard_function=transitions[event].guard_function;
+            EffectiveScalarFunction guard_function=transitions[event].guard_function;
             ARIADNE_LOG(6,"  Event "<<event<<": "<<event_kind<<": "<<crossing_kind<<"\n");
             if(event_kind!=PERMISSIVE) {
                 Interval guard_range = compose(guard_function,flow).range();
@@ -1732,7 +1732,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 ExactFloat alpha=numeric_cast<ExactFloat>(1+NumericInterval(flow.step_size())*guard_derivative_range.lower()/guard_range.lower());
                 ARIADNE_LOG(6,"  step_size: "<<flow.step_size()<<", guard_range: "<<guard_range<<", guard_derivative_range: "<<guard_derivative_range<<", alpha: "<<alpha<<"\n");
                 if(alpha>0 && alpha<=1) {
-                    IntervalScalarFunctionModel guard_creep_time;
+                    ValidatedScalarFunctionModel guard_creep_time;
                     bool sucessfully_computed_guard_creep_time=false;
                     try {
                         guard_creep_time=solver.implicit(compose(guard_function,flow)-alpha*compose(guard_function,space_projection),
@@ -1772,8 +1772,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     }
 
 
-    IntervalScalarFunctionModel evolution_time = embed(spacial_evolution_time,time_domain) * embed(space_domain,temporal_evolution_time/ExactFloat(step_size));
-    IntervalScalarFunctionModel finishing_time=evolution_time+time_coordinate;
+    ValidatedScalarFunctionModel evolution_time = embed(spacial_evolution_time,time_domain) * embed(space_domain,temporal_evolution_time/ExactFloat(step_size));
+    ValidatedScalarFunctionModel finishing_time=evolution_time+time_coordinate;
 
     ARIADNE_LOG(7,"evolution_time="<<(evolution_time)<<"\n");
     ARIADNE_LOG(7,"finishing_time="<<(finishing_time)<<"\n");

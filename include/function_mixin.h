@@ -41,6 +41,14 @@ typedef Algebra<Float> FloatAlgebra;
 typedef Algebra<Interval> IntervalAlgebra;
 typedef Algebra<Real> RealAlgebra;
 
+typedef ScalarFunctionInterface<Float> FloatScalarFunctionInterface;
+typedef ScalarFunctionInterface<Interval> IntervalScalarFunctionInterface;
+typedef ScalarFunctionInterface<Real> RealScalarFunctionInterface;
+
+typedef VectorFunctionInterface<Float> FloatVectorFunctionInterface;
+typedef VectorFunctionInterface<Interval> IntervalVectorFunctionInterface;
+typedef VectorFunctionInterface<Real> RealVectorFunctionInterface;
+
 template<class T, class X> class ScalarFunctionMixin { };
 template<class T, class X> class VectorFunctionMixin { };
 

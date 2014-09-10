@@ -58,9 +58,9 @@ template<class X> class TaylorModel;
 AffineModel<Interval> affine_model(const Affine<Interval>& affine);
 AffineModel<Interval> affine_model(const Affine<Real>& affine);
 AffineModel<Interval> affine_model(const TaylorModel<Interval>& taylor_model);
-AffineModel<Interval> affine_model(const IntervalVector& domain, const ScalarFunction<Interval>& function);
+AffineModel<Interval> affine_model(const IntervalVector& domain, const ValidatedScalarFunction& function);
 Vector< AffineModel<Interval> > affine_models(const Vector< TaylorModel<Interval> >& taylor_models);
-Vector< AffineModel<Interval> > affine_models(const IntervalVector& domain, const VectorFunction<Interval>& function);
+Vector< AffineModel<Interval> > affine_models(const IntervalVector& domain, const ValidatedVectorFunction& function);
 
 //! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x) \approx \sum_{i=0}^{n-1} a_i x_i + b\f$.
 template<>

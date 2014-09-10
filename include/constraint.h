@@ -57,38 +57,38 @@ class Constraint {
     R _upper_bound;
 };
 
-typedef Constraint<RealScalarFunction,Real> RealConstraint;
-typedef Constraint<IntervalScalarFunction,Float> IntervalConstraint;
+typedef Constraint<EffectiveScalarFunction,Real> RealConstraint;
+typedef Constraint<ValidatedScalarFunction,Float> IntervalConstraint;
 
-inline RealConstraint operator<=(const Real& c, const RealScalarFunction& f) {
+inline RealConstraint operator<=(const Real& c, const EffectiveScalarFunction& f) {
     return RealConstraint(c,f,infinity);
 }
 
-inline RealConstraint operator>=(const Real& c, const RealScalarFunction& f) {
+inline RealConstraint operator>=(const Real& c, const EffectiveScalarFunction& f) {
     return RealConstraint(-infinity,f,c);
 }
 
-inline RealConstraint operator<=(const RealScalarFunction& f, const Real& c) {
+inline RealConstraint operator<=(const EffectiveScalarFunction& f, const Real& c) {
     return RealConstraint(-infinity,f,c);
 }
 
-inline RealConstraint operator>=(const RealScalarFunction& f, const Real& c) {
+inline RealConstraint operator>=(const EffectiveScalarFunction& f, const Real& c) {
     return RealConstraint(c,f,infinity);
 }
 
-inline RealConstraint operator==(const RealScalarFunction& f, const Real& c) {
+inline RealConstraint operator==(const EffectiveScalarFunction& f, const Real& c) {
     return RealConstraint(f,c);
 }
 
-inline RealConstraint operator<=(const RealScalarFunction& f, double c) {
+inline RealConstraint operator<=(const EffectiveScalarFunction& f, double c) {
     return RealConstraint(-infinity,f,Real(c));
 }
 
-inline RealConstraint operator>=(const RealScalarFunction& f, double c) {
+inline RealConstraint operator>=(const EffectiveScalarFunction& f, double c) {
     return RealConstraint(Real(c),f,infinity);
 }
 
-inline RealConstraint operator==(const RealScalarFunction& f, double c) {
+inline RealConstraint operator==(const EffectiveScalarFunction& f, double c) {
     return RealConstraint(f,Real(c));
 }
 
@@ -99,39 +99,39 @@ inline RealConstraint operator<=(const RealConstraint& nc, const Real& c) {
 }
 
 
-inline IntervalConstraint operator<=(const Float& c, const IntervalScalarFunction& f) {
+inline IntervalConstraint operator<=(const Float& c, const ValidatedScalarFunction& f) {
     return IntervalConstraint(c,f,+inf);
 }
 
-inline IntervalConstraint operator<=(const IntervalScalarFunction& f, const Float& c) {
+inline IntervalConstraint operator<=(const ValidatedScalarFunction& f, const Float& c) {
     return IntervalConstraint(-inf,f,c);
 }
 
-inline IntervalConstraint operator>=(const IntervalScalarFunction& f, const Float& c) {
+inline IntervalConstraint operator>=(const ValidatedScalarFunction& f, const Float& c) {
     return IntervalConstraint(c,f,+inf);
 }
 
-inline IntervalConstraint operator==(const IntervalScalarFunction& f, const Float& c) {
+inline IntervalConstraint operator==(const ValidatedScalarFunction& f, const Float& c) {
     return IntervalConstraint(c,f,c);
 }
 
-inline IntervalConstraint operator<=(const IntervalScalarFunction& f, double c) {
+inline IntervalConstraint operator<=(const ValidatedScalarFunction& f, double c) {
     return IntervalConstraint(-inf,f,Float(c));
 }
 
-inline IntervalConstraint operator>=(const IntervalScalarFunction& f, double c) {
+inline IntervalConstraint operator>=(const ValidatedScalarFunction& f, double c) {
     return IntervalConstraint(-inf,f,c);
 }
 
-inline IntervalConstraint operator==(const IntervalScalarFunction& f, double c) {
+inline IntervalConstraint operator==(const ValidatedScalarFunction& f, double c) {
     return IntervalConstraint(Float(c),f,Float(c));
 }
 
-inline IntervalConstraint operator<=(const IntervalScalarFunction& f1, const IntervalScalarFunction& f2) {
+inline IntervalConstraint operator<=(const ValidatedScalarFunction& f1, const ValidatedScalarFunction& f2) {
     return (f1-f2) <= 0.0;
 }
 
-inline IntervalConstraint operator>=(const IntervalScalarFunction& f1, const IntervalScalarFunction& f2) {
+inline IntervalConstraint operator>=(const ValidatedScalarFunction& f1, const ValidatedScalarFunction& f2) {
     return (f1-f2) >= 0.0;
 }
 

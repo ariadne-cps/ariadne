@@ -553,15 +553,15 @@ class HybridAutomaton
     virtual DiscreteLocation target(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The function outputting the auxiliary variables \f$y=h(x)\f$ in the location.
-    virtual RealVectorFunction auxiliary_function(DiscreteLocation location) const;
+    virtual EffectiveVectorFunction auxiliary_function(DiscreteLocation location) const;
     //! \brief The function outputting the differential equations \f$\dot{x}=f(x)\f$ in the location.
-    virtual RealVectorFunction dynamic_function(DiscreteLocation location) const;
+    virtual EffectiveVectorFunction dynamic_function(DiscreteLocation location) const;
     //! \brief The invariant function \f$i(x)\leq 0\f$ corresponding to the given event.
-    virtual RealScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual EffectiveScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The guard function \f$g(x)\geq 0\f$ corresponding to the given event.
-    virtual RealScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual EffectiveScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The reset function \f$x'=r(x)\f$ for the given event.
-    virtual RealVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual EffectiveVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
 
     //@}
 
@@ -689,15 +689,15 @@ class CompositeHybridAutomaton
     DiscreteLocation target(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The function outputting the auxiliary variables \f$y=h(x)\f$ in the location.
-    RealVectorFunction auxiliary_function(DiscreteLocation location) const;
+    EffectiveVectorFunction auxiliary_function(DiscreteLocation location) const;
     //! \brief The function outputting the differential equations \f$\dot{x}=f(x)\f$ in the location.
-    RealVectorFunction dynamic_function(DiscreteLocation location) const;
+    EffectiveVectorFunction dynamic_function(DiscreteLocation location) const;
     //! \brief The reset function \f$x'=r(x)\f$ for the given event.
-    RealVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
+    EffectiveVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The invariant function \f$i(x)\leq 0\f$ corresponding to the given event.
-    RealScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
+    EffectiveScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The guard function \f$g(x)\geq 0\f$ corresponding to the given event.
-    RealScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
+    EffectiveScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The type of the event (urgent, permissive, impact etc).
     EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const;
 

@@ -45,11 +45,11 @@ template<class X> class Matrix;
 template<class X> class Polynomial;
 
 template<class X> class ScalarFunction;
-typedef ScalarFunction<Real> RealScalarFunction;
-typedef ScalarFunction<Interval> IntervalScalarFunction;
+typedef EffectiveScalarFunction EffectiveScalarFunction;
+typedef ValidatedScalarFunction ValidatedScalarFunction;
 template<class X> class VectorFunction;
-typedef VectorFunction<Real> RealVectorFunction;
-typedef VectorFunction<Interval> IntervalVectorFunction;
+typedef EffectiveVectorFunction EffectiveVectorFunction;
+typedef ValidatedVectorFunction ValidatedVectorFunction;
 
 class MultiIndex;
 template<class X> class TaylorModel;
@@ -107,7 +107,7 @@ ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, const Box& d);
 ScalarTaylorFunction extend(const ScalarTaylorFunction& x, const Box& d);
 
 // Compose with an function.
-ScalarTaylorFunction compose(const IntervalScalarFunction& x, const VectorTaylorFunction& y);
+ScalarTaylorFunction compose(const ValidatedScalarFunction& x, const VectorTaylorFunction& y);
 
 // Substitute \a h into the \a k<sup>th</sup> argument of \a f.
 ScalarTaylorFunction substitute(const ScalarTaylorFunction& f, uint k, const ScalarTaylorFunction& h);
@@ -194,7 +194,7 @@ class ScalarTaylorFunction
     ScalarTaylorFunction& operator=(const ScalarFunctionModel<Interval>& f);
 
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the function \a f.
-    explicit ScalarTaylorFunction(const DomainType& d, const IntervalScalarFunction& f, Sweeper swp);
+    explicit ScalarTaylorFunction(const DomainType& d, const ValidatedScalarFunction& f, Sweeper swp);
     //@}
 
     //@{
@@ -269,7 +269,7 @@ class ScalarTaylorFunction
     //! \brief A polynomial representation.
     Polynomial<Interval> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.
-    IntervalScalarFunction function() const;
+    ValidatedScalarFunction function() const;
 
     //! \brief Set the error of the expansion.
     void set_error(const Float& ne) { this->_model.set_error(ne); }
@@ -468,21 +468,21 @@ inline tribool operator<(const ScalarTaylorFunction& x, const Float& c) {
 inline tribool operator>(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)>0; }
 inline tribool operator<(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)<0; }
 
-inline ScalarTaylorFunction operator+(const RealScalarFunction& f1, const ScalarTaylorFunction& tf2) {
+inline ScalarTaylorFunction operator+(const EffectiveScalarFunction& f1, const ScalarTaylorFunction& tf2) {
     return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())+tf2; }
-inline ScalarTaylorFunction operator-(const RealScalarFunction& f1, const ScalarTaylorFunction& tf2) {
+inline ScalarTaylorFunction operator-(const EffectiveScalarFunction& f1, const ScalarTaylorFunction& tf2) {
     return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())-tf2; }
-inline ScalarTaylorFunction operator*(const RealScalarFunction& f1, const ScalarTaylorFunction& tf2) {
+inline ScalarTaylorFunction operator*(const EffectiveScalarFunction& f1, const ScalarTaylorFunction& tf2) {
     return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())*tf2; }
-inline ScalarTaylorFunction operator/(const RealScalarFunction& f1, const ScalarTaylorFunction& tf2) {
+inline ScalarTaylorFunction operator/(const EffectiveScalarFunction& f1, const ScalarTaylorFunction& tf2) {
     return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())/tf2; }
-inline ScalarTaylorFunction operator+(const ScalarTaylorFunction& tf1, const RealScalarFunction& f2) {
+inline ScalarTaylorFunction operator+(const ScalarTaylorFunction& tf1, const EffectiveScalarFunction& f2) {
     return tf1+ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-inline ScalarTaylorFunction operator-(const ScalarTaylorFunction& tf1, const RealScalarFunction& f2) {
+inline ScalarTaylorFunction operator-(const ScalarTaylorFunction& tf1, const EffectiveScalarFunction& f2) {
     return tf1-ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-inline ScalarTaylorFunction operator*(const ScalarTaylorFunction& tf1, const RealScalarFunction& f2) {
+inline ScalarTaylorFunction operator*(const ScalarTaylorFunction& tf1, const EffectiveScalarFunction& f2) {
     return tf1*ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-inline ScalarTaylorFunction operator/(const ScalarTaylorFunction& tf1, const RealScalarFunction& f2) {
+inline ScalarTaylorFunction operator/(const ScalarTaylorFunction& tf1, const EffectiveScalarFunction& f2) {
     return tf1/ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
 
 ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f, const Interval& c);
@@ -583,18 +583,18 @@ VectorTaylorFunction restrict(const VectorTaylorFunction&, const Box& bx);
 bool refines(const VectorTaylorFunction&, const VectorTaylorFunction&);
 bool disjoint(const VectorTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction intersection(const VectorTaylorFunction&, const VectorTaylorFunction&);
-ScalarTaylorFunction compose(const RealScalarFunction&, const VectorTaylorFunction&);
-ScalarTaylorFunction compose(const IntervalScalarFunction&, const VectorTaylorFunction&);
+ScalarTaylorFunction compose(const EffectiveScalarFunction&, const VectorTaylorFunction&);
+ScalarTaylorFunction compose(const ValidatedScalarFunction&, const VectorTaylorFunction&);
 ScalarTaylorFunction compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
-VectorTaylorFunction compose(const IntervalVectorFunction&, const VectorTaylorFunction&);
-VectorTaylorFunction compose(const RealVectorFunction&, const VectorTaylorFunction&);
+VectorTaylorFunction compose(const ValidatedVectorFunction&, const VectorTaylorFunction&);
+VectorTaylorFunction compose(const EffectiveVectorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint);
 VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint, Float);
 VectorTaylorFunction derivative(const VectorTaylorFunction&, uint);
 Float norm(const ScalarTaylorFunction& f);
 Float distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
-Float distance(const VectorTaylorFunction& f1, const RealVectorFunction& f2);
+Float distance(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2);
 
 
 Interval unchecked_evaluate(const ScalarTaylorFunction&, const Vector<Interval>&);
@@ -646,7 +646,7 @@ class VectorTaylorFunction
 
     /*! \brief Construct from a domain, a function, and a sweeper determining the accuracy. */
     VectorTaylorFunction(const Box& domain,
-                         const IntervalVectorFunction& function,
+                         const ValidatedVectorFunction& function,
                          const Sweeper& sweeper);
 
     /*! \brief Construct from a vector of scalar Taylor functions. */
@@ -741,7 +741,7 @@ class VectorTaylorFunction
     /*! \brief The maximum roundoff/truncation error of the components. */
     Float const error() const;
     //! \brief A multivalued function equal to the model on the domain.
-    IntervalVectorFunction function() const;
+    ValidatedVectorFunction function() const;
 
     /*! \brief Truncate terms higher than \a bd. */
     VectorTaylorFunction& truncate(const MultiIndexBound& bd);
@@ -796,7 +796,7 @@ class VectorTaylorFunction
     friend VectorTaylorFunction operator*(const Matrix<Interval>& A, const VectorTaylorFunction& f);
 
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    friend VectorTaylorFunction compose(const RealVectorFunction& f, const VectorTaylorFunction& g);
+    friend VectorTaylorFunction compose(const EffectiveVectorFunction& f, const VectorTaylorFunction& g);
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
     friend ScalarTaylorFunction compose(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
@@ -841,7 +841,7 @@ class VectorTaylorFunction
     Vector< TaylorModel<Interval> > _models;
 };
 
-VectorTaylorFunction operator-(const VectorTaylorFunction& f1, const RealVectorFunction& f2);
+VectorTaylorFunction operator-(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2);
 
 // Set the value of the \a kth variable to c
 VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, const Interval& c);
@@ -858,7 +858,7 @@ VectorTaylorFunction extend(const VectorTaylorFunction& f, const Box& d);
 // The argument size of the result is the same as that of \a e, and must be either the same as that of \a f, or one less.
 VectorTaylorFunction compose(const VectorTaylorFunction& f, const VectorTaylorFunction& e);
 // Compose a vector function with a Taylor function.
-VectorTaylorFunction compose(const RealVectorFunction& f, const VectorTaylorFunction& e);
+VectorTaylorFunction compose(const EffectiveVectorFunction& f, const VectorTaylorFunction& e);
 
 // Substitute \a h into the \a k<sup>th</sup> argument of \a f.
 VectorTaylorFunction substitute(const VectorTaylorFunction& f, uint k, const ScalarTaylorFunction& h);
@@ -936,8 +936,8 @@ class TaylorFunctionFactory
     Sweeper sweeper() const { return this->_sweeper; }
     TaylorFunctionFactory* clone() const { return new TaylorFunctionFactory(this->_sweeper); }
     Void write(OutputStream& os) const { os << "TaylorFunctionFactory( sweeper=" << this->_sweeper << " )"; }
-    ScalarTaylorFunction create(const Box& domain, const IntervalScalarFunctionInterface& function) const;
-    VectorTaylorFunction create(const Box& domain, const IntervalVectorFunctionInterface& function) const;
+    ScalarTaylorFunction create(const Box& domain, const ValidatedScalarFunctionInterface& function) const;
+    VectorTaylorFunction create(const Box& domain, const ValidatedVectorFunctionInterface& function) const;
     ScalarTaylorFunction create_zero(const Box& domain) const;
     ScalarTaylorFunction create_constant(const Box& domain, Interval c) const;
     ScalarTaylorFunction create_coordinate(const Box& domain, uint k) const;
@@ -945,8 +945,8 @@ class TaylorFunctionFactory
     ScalarTaylorFunction create_identity(const Interval& domain) const;
     VectorTaylorFunction create_identity(const Box& domain) const;
   private:
-    ScalarTaylorFunction* _create(const Box& domain, const IntervalScalarFunctionInterface& function) const;
-    VectorTaylorFunction* _create(const Box& domain, const IntervalVectorFunctionInterface& function) const;
+    ScalarTaylorFunction* _create(const Box& domain, const ValidatedScalarFunctionInterface& function) const;
+    VectorTaylorFunction* _create(const Box& domain, const ValidatedVectorFunctionInterface& function) const;
 };
 
 

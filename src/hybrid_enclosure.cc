@@ -145,25 +145,25 @@ HybridEnclosure::function_factory() const
     return this->_set.function_factory();
 }
 
-IntervalVectorFunctionModel const&
+ValidatedVectorFunctionModel const&
 HybridEnclosure::space_function() const
 {
     return this->_set.space_function();
 }
 
-IntervalScalarFunctionModel const&
+ValidatedScalarFunctionModel const&
 HybridEnclosure::time_function() const
 {
     return this->_set.time_function();
 }
 
-IntervalScalarFunctionModel const&
+ValidatedScalarFunctionModel const&
 HybridEnclosure::dwell_time_function() const
 {
     return this->_set.dwell_time_function();
 }
 
-void HybridEnclosure::set_time_function(const IntervalScalarFunctionModel& time_function)
+void HybridEnclosure::set_time_function(const ValidatedScalarFunctionModel& time_function)
 {
     ARIADNE_NOT_IMPLEMENTED;
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->parameter_domain(),time_function.domain()),
@@ -234,16 +234,16 @@ void HybridEnclosure::new_variable(Interval ivl, EnclosureVariableType vt)
     this->_variables.append(vt);
 }
 
-void HybridEnclosure::new_invariant(DiscreteEvent event, IntervalScalarFunction constraint_function) {
+void HybridEnclosure::new_invariant(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
     this->_set.new_negative_state_constraint(constraint_function);
 }
 
 
-void HybridEnclosure::new_activation(DiscreteEvent event, IntervalScalarFunction constraint_function) {
+void HybridEnclosure::new_activation(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
     this->_set.new_positive_state_constraint(constraint_function);
 }
 
-void HybridEnclosure::new_guard(DiscreteEvent event, IntervalScalarFunction constraint_function) {
+void HybridEnclosure::new_guard(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
     this->_set.new_zero_state_constraint(constraint_function);
 }
 
@@ -261,7 +261,7 @@ void HybridEnclosure::new_constraint(DiscreteEvent event, IntervalConstraint con
 }
 
 
-void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealSpace space, const IntervalVectorFunction& map)
+void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealSpace space, const ValidatedVectorFunction& map)
 {
     ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"*this="<<*this<<", event="<<event<<", space="<<space<<", target="<<target<<", map="<<map);
     this->_events.append(event);
@@ -270,39 +270,39 @@ void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, 
     this->_set.apply_map(map);
 }
 
-void HybridEnclosure::apply_fixed_evolve_step(const IntervalVectorFunctionModel& phi, const ExactFloat& elps)
+void HybridEnclosure::apply_fixed_evolve_step(const ValidatedVectorFunctionModel& phi, const ExactFloat& elps)
 {
     this->_set.apply_fixed_evolve_step(phi,elps);
 }
 
-void HybridEnclosure::apply_spacetime_evolve_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& elps)
+void HybridEnclosure::apply_spacetime_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
 {
     this->_set.apply_spacetime_evolve_step(phi,elps);
 }
 
-void HybridEnclosure::apply_spacetime_reach_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& elps)
+void HybridEnclosure::apply_spacetime_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
 {
     this->_set.apply_spacetime_reach_step(phi,elps);
 }
 
 
-void HybridEnclosure::apply_evolve_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& elps)
+void HybridEnclosure::apply_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
 {
     this->_set.apply_parameter_evolve_step(phi,elps);
 }
 
-void HybridEnclosure::apply_finishing_evolve_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& omega)
+void HybridEnclosure::apply_finishing_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& omega)
 {
     this->_set.apply_finishing_parameter_evolve_step(phi,omega);
 }
 
 
-void HybridEnclosure::apply_reach_step(const IntervalVectorFunctionModel& phi, const IntervalScalarFunctionModel& elps)
+void HybridEnclosure::apply_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
 {
     this->_set.apply_parameter_reach_step(phi,elps);
 }
 
-void HybridEnclosure::apply_full_reach_step(const IntervalVectorFunctionModel& phi)
+void HybridEnclosure::apply_full_reach_step(const ValidatedVectorFunctionModel& phi)
 {
     this->_set.apply_full_reach_step(phi);
 }
@@ -315,7 +315,7 @@ void HybridEnclosure::bound_time(Real tmax) {
     }
 }
 
-void HybridEnclosure::bound_time(IntervalScalarFunction tmax) {
+void HybridEnclosure::bound_time(ValidatedScalarFunction tmax) {
     this->_set.new_negative_parameter_constraint(this->time_function()-this->_set.function_factory().create(this->_set.domain(),tmax));
 }
 
@@ -324,7 +324,7 @@ void HybridEnclosure::set_time(Real time)
     this->_set.new_zero_parameter_constraint(this->time_function()-Interval(time));
 }
 
-void HybridEnclosure::set_time(IntervalScalarFunction time)
+void HybridEnclosure::set_time(ValidatedScalarFunction time)
 {
     this->_set.new_zero_parameter_constraint(this->time_function()-this->function_factory().create(this->_set.domain(),time));
 }
@@ -335,7 +335,7 @@ void HybridEnclosure::set_maximum_time(DiscreteEvent event, Float final_time)
     this->_set.new_negative_parameter_constraint(this->time_function()-final_time); // Deprecated
 }
 
-void HybridEnclosure::new_time_step_bound(DiscreteEvent event, IntervalScalarFunction constraint) {
+void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ValidatedScalarFunction constraint) {
     ARIADNE_NOT_IMPLEMENTED; // Deprecated
 }
 

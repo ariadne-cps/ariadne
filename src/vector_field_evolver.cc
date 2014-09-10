@@ -114,10 +114,10 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics,
            bool reach) const
 {
-    typedef RealVectorFunction FunctionType;
+    typedef EffectiveVectorFunction FunctionType;
     typedef Vector<Interval> BoxType;
-    typedef IntervalVectorFunctionModel FunctionModelType;
-    typedef IntervalVectorFunctionModel FlowModelType;
+    typedef ValidatedVectorFunctionModel FunctionModelType;
+    typedef ValidatedVectorFunctionModel FlowModelType;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
@@ -190,10 +190,10 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 Semantics semantics,
                 bool reach) const
 {
-    typedef RealVectorFunction FunctionType;
+    typedef EffectiveVectorFunction FunctionType;
     typedef Vector<Interval> BoxType;
-    typedef IntervalVectorFunctionModel MapModelType;
-    typedef IntervalVectorFunctionModel FlowModelType;
+    typedef ValidatedVectorFunctionModel MapModelType;
+    typedef ValidatedVectorFunctionModel FlowModelType;
     typedef Enclosure EnclosureType;
 
     EnclosureType current_set_model;

@@ -72,9 +72,9 @@ IntegratorBase::function_factory() const
 
 
 Pair<Float,IntervalVector>
-IntegratorBase::flow_bounds(const IntervalVectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
+IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
 {
-    ARIADNE_LOG(3,"IntegratorBase::flow_bounds(IntervalVectorFunction vf, IntervalVector dx, Float hmax)\n");
+    ARIADNE_LOG(3,"IntegratorBase::flow_bounds(ValidatedVectorFunction vf, IntervalVector dx, Float hmax)\n");
     ARIADNE_ASSERT_MSG(vf.result_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
     ARIADNE_ASSERT_MSG(vf.argument_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
     ARIADNE_ASSERT(hmax>0);
@@ -154,16 +154,16 @@ IntegratorBase::flow_bounds(const IntervalVectorFunction& vf, const IntervalVect
 
 
 
-IntervalVectorFunctionModel
-IntegratorBase::flow_to(const IntervalVectorFunction& vf, const IntervalVector& dx0, const Real& tmax) const
+ValidatedVectorFunctionModel
+IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const IntervalVector& dx0, const Real& tmax) const
 {
-    ARIADNE_LOG(1,"IntegratorBase::flow_to(IntervalVectorFunction vf, IntervalVector dx0, Real tmax)\n");
+    ARIADNE_LOG(1,"IntegratorBase::flow_to(ValidatedVectorFunction vf, IntervalVector dx0, Real tmax)\n");
     ARIADNE_LOG(2,"vf="<<vf<<"\n");
     ARIADNE_LOG(2,"dom(x0)="<<dx0<<" tmax="<<tmax<<"\n");
     const uint n=dx0.size(); // Dimension of the state space
-    IntervalVectorFunctionModel flow_function=this->function_factory().create_identity(dx0);
+    ValidatedVectorFunctionModel flow_function=this->function_factory().create_identity(dx0);
     Float t=0.0;
-    IntervalVectorFunctionModel step_function;
+    ValidatedVectorFunctionModel step_function;
     while(t<tmax) {
         IntervalVector dx=flow_function.range();
         Float h=static_cast<Float>(tmax)-t;
@@ -186,26 +186,26 @@ IntegratorBase::flow_to(const IntervalVectorFunction& vf, const IntervalVector& 
 }
 
 
-List<IntervalVectorFunctionModel>
-IntegratorBase::flow(const IntervalVectorFunction& vf, const IntervalVector& dx0, const Real& tmin, const Real& tmax) const
+List<ValidatedVectorFunctionModel>
+IntegratorBase::flow(const ValidatedVectorFunction& vf, const IntervalVector& dx0, const Real& tmin, const Real& tmax) const
 {
-    ARIADNE_LOG(1,"IntegratorBase::flow(IntervalVectorFunction vf, IntervalVector dx0, Float tmin, Float tmax)\n");
+    ARIADNE_LOG(1,"IntegratorBase::flow(ValidatedVectorFunction vf, IntervalVector dx0, Float tmin, Float tmax)\n");
     Float tminl=Interval(tmin).lower();
     Float tmaxu=Interval(tmax).upper();
-    IntervalVectorFunctionModel evolve_function=this->flow_to(vf,dx0,tmin);
+    ValidatedVectorFunctionModel evolve_function=this->flow_to(vf,dx0,tmin);
     Float t=tminl;
-    List<IntervalVectorFunctionModel> result;
+    List<ValidatedVectorFunctionModel> result;
 
     while(t<tmaxu) {
         IntervalVector dx=evolve_function.range();
         Float h=Float(float(sub_up(tmaxu,t).get_d()));
         IntervalVector bx;
         make_lpair(h,bx) = this->flow_bounds(vf,dx,h);
-        IntervalVectorFunctionModel flow_step_function=this->flow_step(vf,dx,h,bx);
+        ValidatedVectorFunctionModel flow_step_function=this->flow_step(vf,dx,h,bx);
         Float new_t=add_down(t,h);
         Interval dt(t,new_t);
-        IntervalScalarFunctionModel step_time_function=this->function_factory().create_identity(dt)-ExactFloat(t);
-        IntervalVectorFunctionModel flow_function=compose(flow_step_function,combine(evolve_function,step_time_function));
+        ValidatedScalarFunctionModel step_time_function=this->function_factory().create_identity(dt)-ExactFloat(t);
+        ValidatedVectorFunctionModel flow_function=compose(flow_step_function,combine(evolve_function,step_time_function));
         ARIADNE_ASSERT(flow_function.domain()[dx0.size()].upper()==new_t);
         result.append(flow_function);
         evolve_function=partial_evaluate(flow_function,dx0.size(),ExactFloat(new_t));
@@ -214,18 +214,18 @@ IntegratorBase::flow(const IntervalVectorFunction& vf, const IntervalVector& dx0
     return result;
 }
 
-List<IntervalVectorFunctionModel>
-IntegratorBase::flow(const IntervalVectorFunction& vf, const IntervalVector& dx0, const Real& tmax) const
+List<ValidatedVectorFunctionModel>
+IntegratorBase::flow(const ValidatedVectorFunction& vf, const IntervalVector& dx0, const Real& tmax) const
 {
     return flow(vf,dx0,Real(0),tmax);
 }
 
 
 
-IntervalVectorFunctionModel
-IntegratorBase::flow_step(const IntervalVectorFunction& vf, const IntervalVector& dx, Float& h) const
+ValidatedVectorFunctionModel
+IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const IntervalVector& dx, Float& h) const
 {
-    ARIADNE_LOG(3,"IntegratorBase::flow_step(IntervalVectorFunction vf, IntervalVector dx, Float hmax)\n");
+    ARIADNE_LOG(3,"IntegratorBase::flow_step(ValidatedVectorFunction vf, IntervalVector dx, Float hmax)\n");
     Float hmax=h;
     IntervalVector bx;
     make_lpair(h,bx)=this->flow_bounds(vf,dx,hmax);
@@ -238,10 +238,10 @@ IntegratorBase::flow_step(const IntervalVectorFunction& vf, const IntervalVector
     }
 }
 
-IntervalVectorFunctionModel
-TaylorPicardIntegrator::flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
+ValidatedVectorFunctionModel
+TaylorPicardIntegrator::flow_step(const ValidatedVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
 {
-    ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(IntervalVectorFunction vf, IntervalVector dx, Float h, IntervalVector bx)\n");
+    ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorFunction vf, IntervalVector dx, Float h, IntervalVector bx)\n");
     ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
     const uint nx=dx.size();
     Sweeper sweeper(new ThresholdSweeper(this->_step_sweep_threshold));
@@ -249,17 +249,17 @@ TaylorPicardIntegrator::flow_step(const IntervalVectorFunction& f, const Interva
     IntervalVector dom=join(dx,Interval(-h,h));
     ARIADNE_LOG(7,"dom="<<dom<<"\n");
 
-    IntervalVectorFunctionModel phi0=this->function_factory().create_zeros(nx,dom);
+    ValidatedVectorFunctionModel phi0=this->function_factory().create_zeros(nx,dom);
     for(uint i=0; i!=nx; ++i) { phi0[i]=this->function_factory().create_coordinate(dom,i); }
     ARIADNE_LOG(5,"phi0="<<phi0<<"\n");
 
-    IntervalVectorFunctionModel phi=this->function_factory().create_zeros(nx,dom);
+    ValidatedVectorFunctionModel phi=this->function_factory().create_zeros(nx,dom);
     for(uint i=0; i!=nx; ++i) { phi[i]=this->function_factory().create_constant(dom,bx[i]); }
 
     ARIADNE_LOG(5,"phi="<<phi<<"\n");
     for(uint k=0; k!=this->_maximum_temporal_order; ++k) {
         bool last_step=(phi.error()<this->maximum_error());
-        IntervalVectorFunctionModel fphi=compose(f,phi);
+        ValidatedVectorFunctionModel fphi=compose(f,phi);
         ARIADNE_LOG(5,"fphi="<<fphi<<"\n");
         for(uint i=0; i!=nx; ++i) {
             phi[i]=antiderivative(fphi[i],nx)+phi0[i];
@@ -272,7 +272,7 @@ TaylorPicardIntegrator::flow_step(const IntervalVectorFunction& f, const Interva
         ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
     }
 
-    IntervalVectorFunctionModel res=this->function_factory().create_zeros(nx,dom);
+    ValidatedVectorFunctionModel res=this->function_factory().create_zeros(nx,dom);
     ARIADNE_LOG(4,"res_init="<<res<<"\n");
     for(uint i=0; i!=nx; ++i) { res[i]=phi[i]; }
     //res.sweep();
@@ -354,7 +354,7 @@ inline Vector<GradedIntervalDifferential> graded_variables(int so, const Interva
 }
 
 
-Vector<IntervalFormula> formula(const IntervalVectorFunction& f) {
+Vector<IntervalFormula> formula(const ValidatedVectorFunction& f) {
     return f.evaluate(IntervalFormula::identity(f.argument_size()));
 }
 
@@ -452,8 +452,8 @@ VectorTaylorFunction flow_function(const Vector<IntervalDifferential>& dphi, con
     return tphi;
 }
 
-IntervalVectorFunctionModel
-differential_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, const Float& flth, const IntervalVector& bx,
+ValidatedVectorFunctionModel
+differential_flow_step(const ValidatedVectorFunction& f, const IntervalVector& dx, const Float& flth, const IntervalVector& bx,
                        double swpt, uint so, uint to, uint verbosity=0)
 {
     uint n=f.result_size();
@@ -507,8 +507,8 @@ differential_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx
     return tphi;
 }
 
-IntervalVectorFunctionModel
-differential_space_time_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx,
+ValidatedVectorFunctionModel
+differential_space_time_flow_step(const ValidatedVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx,
                                   double swpt, uint so, uint to, uint verbosity=0)
 {
     uint n=f.result_size();
@@ -563,8 +563,8 @@ differential_space_time_flow_step(const IntervalVectorFunction& f, const Interva
     return tphi;
 }
 
-IntervalVectorFunctionModel
-series_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx,
+ValidatedVectorFunctionModel
+series_flow_step(const ValidatedVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx,
                  double max_err, double swpt, uint init_so, uint init_to, uint max_so, uint max_to, uint verbosity)
 {
     static const double TRY_SPACIAL_ORDER_INCREASE_FACTOR=4;
@@ -677,16 +677,16 @@ series_flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, cons
     return tphi;
 }
 
-IntervalVectorFunctionModel
-TaylorSeriesIntegrator::flow_step(const IntervalVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
+ValidatedVectorFunctionModel
+TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
 {
-    IntervalVectorFunctionModel tphi=Ariadne::series_flow_step(f,dx,h,bx,
+    ValidatedVectorFunctionModel tphi=Ariadne::series_flow_step(f,dx,h,bx,
         this->step_maximum_error(),this->step_sweep_threshold(),
         this->minimum_spacial_order(),this->minimum_temporal_order(),
         this->maximum_spacial_order(),this->maximum_temporal_order(),this->verbosity);
 
 /*
-    IntervalVectorFunctionModel tphi=Ariadne::differential_space_time_flow_step(f,dx,h,bx,
+    ValidatedVectorFunctionModel tphi=Ariadne::differential_space_time_flow_step(f,dx,h,bx,
         this->step_sweep_threshold(),6,4,this->verbosity);
 */
 
@@ -701,9 +701,9 @@ TaylorSeriesIntegrator::flow_step(const IntervalVectorFunction& f, const Interva
 }
 
 Pair<Float,IntervalVector>
-TaylorSeriesIntegrator::flow_bounds(const IntervalVectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
+TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
 {
-    ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_bounds(IntervalVectorFunction vf, IntervalVector dx, Float hmax)\n");
+    ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_bounds(ValidatedVectorFunction vf, IntervalVector dx, Float hmax)\n");
     ARIADNE_ASSERT_MSG(vf.result_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
     ARIADNE_ASSERT_MSG(vf.argument_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
     ARIADNE_ASSERT(hmax>0);
@@ -812,7 +812,7 @@ template<class X> void truncate(Vector< Differential<X> >& x, uint spacial_order
 
 
 IntervalDifferentialVector
-AffineIntegrator::flow_derivative(const IntervalVectorFunction& f, const IntervalVector& dom) const
+AffineIntegrator::flow_derivative(const ValidatedVectorFunction& f, const IntervalVector& dom) const
 {
     IntervalDifferentialVector dx=IntervalDifferential::variables(this->_spacial_order+this->_temporal_order,join(dom,Interval(0.0)));
     dx[dom.size()]=0.0;
@@ -824,8 +824,8 @@ AffineIntegrator::flow_derivative(const IntervalVectorFunction& f, const Interva
     return dphi;
 }
 
-IntervalVectorFunctionModel
-AffineIntegrator::flow_step(const IntervalVectorFunction& f, const IntervalVector& dom, const Float& h, const IntervalVector& bbox) const
+ValidatedVectorFunctionModel
+AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const IntervalVector& dom, const Float& h, const IntervalVector& bbox) const
 {
     IntervalVector mid = IntervalVector(midpoint(dom));
 
@@ -861,10 +861,10 @@ AffineIntegrator::flow_step(const IntervalVectorFunction& f, const IntervalVecto
 
     IntervalVector flow_domain = join(dom,Interval(0,h));
 
-    IntervalVectorFunctionModel id = this->function_factory().create_identity(flow_domain);
-    IntervalVectorFunctionModel res = this->function_factory().create_zeros(n,flow_domain);
+    ValidatedVectorFunctionModel id = this->function_factory().create_identity(flow_domain);
+    ValidatedVectorFunctionModel res = this->function_factory().create_zeros(n,flow_domain);
     for(uint i=0; i!=n; ++i) {
-        IntervalScalarFunctionModel res_model = res[i] + mdphi[i].expansion()[MultiIndex::zero(n+1)];
+        ValidatedScalarFunctionModel res_model = res[i] + mdphi[i].expansion()[MultiIndex::zero(n+1)];
         for(uint j=0; j!=mdphi[i].argument_size()-1; ++j) { res_model+=mdphi[i].expansion()[MultiIndex::unit(n+1,j)]*(id[j]-Interval(midpoint(flow_domain[j]))); }
         uint j=mdphi[i].argument_size()-1; { res_model+=mdphi[i].expansion()[MultiIndex::unit(n+1,j)]*id[j]; }
         res_model += Interval(-err[i],+err[i]);

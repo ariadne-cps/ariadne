@@ -359,9 +359,9 @@ void export_hybrid_automaton()
     hybrid_automaton_class.def("dynamic_function", &MonolithicHybridAutomaton::dynamic_function);
     hybrid_automaton_class.def("guard_function", &MonolithicHybridAutomaton::guard_function);
     hybrid_automaton_class.def("reset_function", &MonolithicHybridAutomaton::reset_function);
-    hybrid_automaton_class.def("new_mode",(void(MonolithicHybridAutomaton::*)(DiscreteLocation,RealVectorFunction)) &MonolithicHybridAutomaton::new_mode, return_value_policy<reference_existing_object>());
-    hybrid_automaton_class.def("new_invariant",(void(MonolithicHybridAutomaton::*)(DiscreteLocation,RealScalarFunction,DiscreteEvent)) &MonolithicHybridAutomaton::new_invariant);
-    hybrid_automaton_class.def("new_transition",(void(MonolithicHybridAutomaton::*)(DiscreteLocation,DiscreteEvent,DiscreteLocation,RealVectorFunction,RealScalarFunction,EventKind)) &MonolithicHybridAutomaton::new_transition);
+    hybrid_automaton_class.def("new_mode",(void(MonolithicHybridAutomaton::*)(DiscreteLocation,EffectiveVectorFunction)) &MonolithicHybridAutomaton::new_mode, return_value_policy<reference_existing_object>());
+    hybrid_automaton_class.def("new_invariant",(void(MonolithicHybridAutomaton::*)(DiscreteLocation,EffectiveScalarFunction,DiscreteEvent)) &MonolithicHybridAutomaton::new_invariant);
+    hybrid_automaton_class.def("new_transition",(void(MonolithicHybridAutomaton::*)(DiscreteLocation,DiscreteEvent,DiscreteLocation,EffectiveVectorFunction,EffectiveScalarFunction,EventKind)) &MonolithicHybridAutomaton::new_transition);
     hybrid_automaton_class.def(self_ns::str(self));
 
 }

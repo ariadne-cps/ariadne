@@ -43,12 +43,15 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Polynomial;
 
+typedef Real EffectiveNumberType;
+typedef Interval ValidatedNumberType;
+
 template<class X> class ScalarFunction;
-typedef ScalarFunction<Real> RealScalarFunction;
-typedef ScalarFunction<Interval> IntervalScalarFunction;
+typedef ScalarFunction<EffectiveNumberType> EffectiveScalarFunction;
+typedef ScalarFunction<ValidatedNumberType> ValidatedScalarFunction;
 template<class X> class VectorFunction;
-typedef VectorFunction<Real> RealVectorFunction;
-typedef VectorFunction<Interval> IntervalVectorFunction;
+typedef VectorFunction<EffectiveNumberType> EffectiveVectorFunction;
+typedef VectorFunction<ValidatedNumberType> ValidatedVectorFunction;
 
 class MultiIndex;
 class C1TaylorSeries;

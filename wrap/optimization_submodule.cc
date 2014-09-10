@@ -80,15 +80,15 @@ void export_variable_type()
 
 void export_constraint()
 {
-    class_<RealConstraint> real_nonlinear_constraint_class("RealConstraint",init<Real,RealScalarFunction,Real>());
+    class_<RealConstraint> real_nonlinear_constraint_class("RealConstraint",init<Real,EffectiveScalarFunction,Real>());
     real_nonlinear_constraint_class.def(self_ns::str(self));
 
-    class_<IntervalConstraint> interval_nonlinear_constraint_class("IntervalConstraint",init<Float,IntervalScalarFunction,Float>());
+    class_<IntervalConstraint> interval_nonlinear_constraint_class("IntervalConstraint",init<Float,ValidatedScalarFunction,Float>());
     interval_nonlinear_constraint_class.def(init<IntervalConstraint>());
     interval_nonlinear_constraint_class.def(init<RealConstraint>());
     interval_nonlinear_constraint_class.def("lower_bound", &IntervalConstraint::lower_bound, return_value_policy<copy_const_reference>());
     interval_nonlinear_constraint_class.def("upper_bound", &IntervalConstraint::upper_bound, return_value_policy<copy_const_reference>());
-    interval_nonlinear_constraint_class.def("function", (const IntervalScalarFunction&(IntervalConstraint::*)()const) &IntervalConstraint::function, return_value_policy<copy_const_reference>());
+    interval_nonlinear_constraint_class.def("function", (const ValidatedScalarFunction&(IntervalConstraint::*)()const) &IntervalConstraint::function, return_value_policy<copy_const_reference>());
     interval_nonlinear_constraint_class.def(self_ns::str(self));
 }
 
@@ -106,11 +106,11 @@ void export_interior_point_solver()
 void export_constraint_solver()
 {
     class_<ConstraintSolver> constraint_solver_class("ConstraintSolver", init<>());
-    constraint_solver_class.def("hull_reduce", (bool(ConstraintSolver::*)(Box&,const IntervalScalarFunctionInterface&,const Interval&)const) &ConstraintSolver::hull_reduce);
-    constraint_solver_class.def("box_reduce", (bool(ConstraintSolver::*)(Box&,const IntervalScalarFunctionInterface&,const Interval&,uint)const) &ConstraintSolver::box_reduce);
-    constraint_solver_class.def("monotone_reduce", (bool(ConstraintSolver::*)(Box&,const IntervalScalarFunctionInterface&,const Interval&,uint)const) &ConstraintSolver::monotone_reduce);
+    constraint_solver_class.def("hull_reduce", (bool(ConstraintSolver::*)(Box&,const ValidatedScalarFunctionInterface&,const Interval&)const) &ConstraintSolver::hull_reduce);
+    constraint_solver_class.def("box_reduce", (bool(ConstraintSolver::*)(Box&,const ValidatedScalarFunctionInterface&,const Interval&,uint)const) &ConstraintSolver::box_reduce);
+    constraint_solver_class.def("monotone_reduce", (bool(ConstraintSolver::*)(Box&,const ValidatedScalarFunctionInterface&,const Interval&,uint)const) &ConstraintSolver::monotone_reduce);
     constraint_solver_class.def("reduce", (bool(ConstraintSolver::*)(Box&,const List<IntervalConstraint>&)const) &ConstraintSolver::reduce);
-    constraint_solver_class.def("reduce", (bool(ConstraintSolver::*)(Box&,const IntervalVectorFunction&,const Box&)const) &ConstraintSolver::reduce);
+    constraint_solver_class.def("reduce", (bool(ConstraintSolver::*)(Box&,const ValidatedVectorFunction&,const Box&)const) &ConstraintSolver::reduce);
 }
 
 

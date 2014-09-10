@@ -84,7 +84,7 @@ class Curve
     /*! \brief Destructor. */
     virtual ~Curve();
     /*! \brief Constructor. */
-    Curve(const RealVectorFunction& f);
+    Curve(const EffectiveVectorFunction& f);
     /*! \brief Copy constructor. */
     Curve(const Curve& c);
     /*! \brief Return a new dynamically-allocated copy of the constraint. */
@@ -102,7 +102,7 @@ class Curve
     /*! \brief Write to an output stream. */
     virtual std::ostream& write(std::ostream& os) const;
   private:
-    RealVectorFunction _function;
+    EffectiveVectorFunction _function;
 };
 
 

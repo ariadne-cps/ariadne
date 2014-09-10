@@ -66,7 +66,7 @@ struct ScalarFormulaFunction
     template<class Y> void _compute(Y& r, const Vector<Y>& x) const { r=Ariadne::evaluate(_formula,x); }
 };
 
-inline ScalarFunction<Real> function(Nat n, Formula<Real> f) { return new ScalarFormulaFunction<Real>(n,f); }
+inline EffectiveScalarFunction function(Nat n, Formula<Real> f) { return new ScalarFormulaFunction<Real>(n,f); }
 
 typedef ScalarFormulaFunction<Real> RealScalarFormulaFunction;
 

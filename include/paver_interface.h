@@ -36,7 +36,7 @@ class Interval;
 template<class X> class Vector;
 typedef Vector<Interval> IntervalVector;
 template<class X> class VectorFunctionInterface;
-typedef VectorFunctionInterface<Interval> IntervalVectorFunctionInterface;
+typedef VectorFunctionInterface<Interval> ValidatedVectorFunctionInterface;
 class PavingInterface;
 
 //! \brief A class for computing outer approximations to sets defined by functions.
@@ -46,8 +46,8 @@ class PaverInterface
     typedef IntervalVector DomainType;
   public:
     virtual Void
-    adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const IntervalVectorFunctionInterface& space_function,
-                               const IntervalVectorFunctionInterface& constraint_function, const IntervalVector& constraint_bounds, Int depth) const = 0;
+    adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunctionInterface& space_function,
+                               const ValidatedVectorFunctionInterface& constraint_function, const IntervalVector& constraint_bounds, Int depth) const = 0;
 
 };
 

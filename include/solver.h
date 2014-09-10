@@ -72,27 +72,27 @@ class SolverBase
     void set_function_factory(const FunctionModelFactoryInterface<Interval>& factory);
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Vector<Interval> zero(const IntervalVectorFunction& f,const Vector<Interval>& pt) const;
+    virtual Vector<Interval> zero(const ValidatedVectorFunction& f,const Vector<Interval>& pt) const;
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Vector<Interval> fixed_point(const IntervalVectorFunction& f,const Vector<Interval>& pt) const;
+    virtual Vector<Interval> fixed_point(const ValidatedVectorFunction& f,const Vector<Interval>& pt) const;
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Vector<Interval> solve(const IntervalVectorFunction& f,const Vector<Interval>& pt) const;
+    virtual Vector<Interval> solve(const ValidatedVectorFunction& f,const Vector<Interval>& pt) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual IntervalVectorFunctionModel implicit(const IntervalVectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
+    virtual ValidatedVectorFunctionModel implicit(const ValidatedVectorFunction& f, const Vector<Interval>& par, const Vector<Interval>& ix) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual IntervalScalarFunctionModel implicit(const IntervalScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
+    virtual ValidatedScalarFunctionModel implicit(const ValidatedScalarFunction& f, const Vector<Interval>& par, const Interval& ix) const;
     //! \brief Solve \f$f(a,x)=0\f$ yielding a function \f$x=h(a)\f$ for a in \a A, looking for a solution with \f$h(A) \subset X\f$ and $h(a)\in x\f$.
-    virtual IntervalVectorFunctionModel continuation(const IntervalVectorFunction& f, const Vector<Float>& a, const Vector<Interval>& X, const Vector<Interval>& A) const;
+    virtual ValidatedVectorFunctionModel continuation(const ValidatedVectorFunction& f, const Vector<Float>& a, const Vector<Interval>& X, const Vector<Interval>& A) const;
 
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Set< Vector<Interval> > solve_all(const IntervalVectorFunction& f,const Vector<Interval>& pt) const;
+    virtual Set< Vector<Interval> > solve_all(const ValidatedVectorFunction& f,const Vector<Interval>& pt) const;
   protected:
     /*! \brief Perform one iterative step of the contractor. */
-    virtual Vector<Interval> step(const IntervalVectorFunction& f,const Vector<Interval>& pt) const = 0;
+    virtual Vector<Interval> step(const ValidatedVectorFunction& f,const Vector<Interval>& pt) const = 0;
     /*! \brief Perform one iterative step of the contractor. */
-    virtual IntervalVectorFunctionModel implicit_step(const IntervalVectorFunction& f,const IntervalVectorFunctionModel& p,const IntervalVectorFunctionModel& x) const = 0;
+    virtual ValidatedVectorFunctionModel implicit_step(const ValidatedVectorFunction& f,const ValidatedVectorFunctionModel& p,const ValidatedVectorFunctionModel& x) const = 0;
   private:
     double _max_error;
     uint _max_steps;
@@ -117,9 +117,9 @@ class IntervalNewtonSolver
 
     using SolverBase::implicit;
   public:
-    virtual IntervalVectorFunctionModel implicit_step(const IntervalVectorFunction& f, const IntervalVectorFunctionModel& p, const IntervalVectorFunctionModel& x) const;
+    virtual ValidatedVectorFunctionModel implicit_step(const ValidatedVectorFunction& f, const ValidatedVectorFunctionModel& p, const ValidatedVectorFunctionModel& x) const;
 
-    virtual Vector<Interval> step(const IntervalVectorFunction& f, const Vector<Interval>& pt) const;
+    virtual Vector<Interval> step(const ValidatedVectorFunction& f, const Vector<Interval>& pt) const;
 };
 
 
@@ -140,12 +140,12 @@ class KrawczykSolver
     virtual void write(std::ostream& os) const;
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
-    virtual IntervalVectorFunctionModel implicit_step(const IntervalVectorFunction& f, const IntervalVectorFunctionModel& p, const IntervalVectorFunctionModel& x) const;
+    virtual ValidatedVectorFunctionModel implicit_step(const ValidatedVectorFunction& f, const ValidatedVectorFunctionModel& p, const ValidatedVectorFunctionModel& x) const;
 
   public:
     /*! \brief A single step of the Krawczyk contractor. */
     virtual Vector<Interval>
-    step(const IntervalVectorFunction& f,
+    step(const ValidatedVectorFunction& f,
           const Vector<Interval>& pt) const;
 };
 
@@ -168,7 +168,7 @@ class FactoredKrawczykSolver
   public:
     /*! \brief A single step of the modified Krawczyk contractor. */
     virtual Vector<Interval>
-    step(const IntervalVectorFunction& f,
+    step(const ValidatedVectorFunction& f,
           const Vector<Interval>& pt) const;
 };
 

@@ -40,7 +40,7 @@ RungeKutta4Integrator::RungeKutta4Integrator(double step_size)
 }
 
 FloatVector
-RungeKutta4Integrator::step(const FloatVectorFunctionInterface& f, const FloatVector& x, const Float& h) const
+RungeKutta4Integrator::step(const ApproximateVectorFunctionInterface& f, const FloatVector& x, const Float& h) const
 {
     FloatVector k1=f.evaluate(x);
     FloatVector k2=f.evaluate(FloatVector(x+(h/2)*k1));
@@ -51,7 +51,7 @@ RungeKutta4Integrator::step(const FloatVectorFunctionInterface& f, const FloatVe
 }
 
 List< Pair<Float,FloatVector> >
-RungeKutta4Integrator::evolve(const FloatVectorFunctionInterface& f, const FloatVector& x0, const Float& tmax) const
+RungeKutta4Integrator::evolve(const ApproximateVectorFunctionInterface& f, const FloatVector& x0, const Float& tmax) const
 {
     static const Float h=this->_step_size;
 

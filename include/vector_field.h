@@ -48,13 +48,13 @@ class VectorField
     //! \brief The type used to describe the state space.
     typedef EuclideanSpace StateSpaceType;
   public:
-    VectorField(const RealVectorFunction& f) : _function(f) { }
+    VectorField(const EffectiveVectorFunction& f) : _function(f) { }
     virtual ~VectorField() { }
     virtual VectorField* clone() const { return new VectorField(*this); }
-    const RealVectorFunction& function() const { return _function; }
+    const EffectiveVectorFunction& function() const { return _function; }
     Grid grid() const { return Grid(_function.argument_size()); }
   private:
-    RealVectorFunction _function;
+    EffectiveVectorFunction _function;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const VectorField& vf) {

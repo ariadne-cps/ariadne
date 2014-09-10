@@ -46,7 +46,7 @@ Polynomial<Float> p(uint n, uint j) { return Polynomial<Float>::variable(n,j); }
 ScalarTaylorFunction t(Vector<Interval> d, uint j,Sweeper swp) { return ScalarTaylorFunction::variable(d,j,swp); }
 
 namespace Ariadne {
-std::pair<Float, Vector<Interval> > flow_bounds(RealVectorFunction const&,Vector<Interval> const&,Float const&);
+std::pair<Float, Vector<Interval> > flow_bounds(EffectiveVectorFunction const&,Vector<Interval> const&,Float const&);
 }
 
 
@@ -253,9 +253,9 @@ void TestScalarTaylorFunction::test_conversion() {
     Vector<Interval> D={{-0.5,0.5},{-1.0,2.0}};
     Vector<Float> pt={-0.25,0.25};
     Vector<Interval> ipt(pt);
-    RealVectorFunction x=RealVectorFunction::identity(2);
+    EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
 
-    RealScalarFunction f=(1-x[0]*x[0]-x[1]/2);
+    EffectiveScalarFunction f=(1-x[0]*x[0]-x[1]/2);
     ScalarTaylorFunction tf(D,f,swp);
 
     ARIADNE_TEST_PRINT(f);
@@ -324,9 +324,9 @@ void TestVectorTaylorFunction::test_constructors()
     expansion[0].reverse_lexicographic_sort(); expansion[1].reverse_lexicographic_sort();
 
     Vector<Interval> domain={{0.25,1.25},{0.5,1.0}};
-    RealVectorFunction x=RealVectorFunction::identity(2);
+    EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
     ExactFloat a(1.5); ExactFloat b(0.25);
-    RealVectorFunction henon_function( (a-x[0]*x[0]+b*x[1], x[0]*1) );
+    EffectiveVectorFunction henon_function( (a-x[0]*x[0]+b*x[1], x[0]*1) );
     ARIADNE_TEST_CONSTRUCT(VectorTaylorFunction,henon_model,(domain,henon_function,swp));
     ARIADNE_TEST_EQUAL(henon_model.models()[0].expansion(),expansion[0])
     ARIADNE_TEST_EQUAL(henon_model.models()[1].expansion(),expansion[1])
@@ -365,9 +365,9 @@ void TestVectorTaylorFunction::test_restrict()
 
 void TestVectorTaylorFunction::test_jacobian()
 {
-    RealVectorFunction x=RealVectorFunction::identity(2);
+    EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
     ExactFloat a(1.5); ExactFloat b(0.25);
-    RealVectorFunction henon( (a-x[0]*x[0]+b*x[1], x[0]*1) );
+    EffectiveVectorFunction henon( (a-x[0]*x[0]+b*x[1], x[0]*1) );
     Vector<Interval> domain1={{-1.0,+1.0},{-1.0,+1.0}};
     Vector<Interval> domain2={{-0.5,+0.5},{-0.25,+0.25}};
     Vector<Interval> domain3={{-0.25,+0.75},{0.0,+0.50}};
@@ -384,10 +384,10 @@ void TestVectorTaylorFunction::test_jacobian()
 void TestVectorTaylorFunction::test_compose()
 {
     Real a=ExactFloat(1.5); Real b=ExactFloat(0.25);
-    RealScalarFunction x=RealScalarFunction::coordinate(2,0);
-    RealScalarFunction y=RealScalarFunction::coordinate(2,1);
-    RealVectorFunction henon_polynomial=(a-x*x+b*y)*e(2,0)+x*e(2,1);
-    RealVectorFunction henon_square_polynomial=
+    EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
+    EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
+    EffectiveVectorFunction henon_polynomial=(a-x*x+b*y)*e(2,0)+x*e(2,1);
+    EffectiveVectorFunction henon_square_polynomial=
         (a*(1-a)+b*x-2*a*b*y+2*a*x*x-b*b*y*y+2*b*x*x*y-x*x*x*x)*e(2,0)
             + (a-x*x+b*y)*e(2,1);
     //    compose(henon_polynomial,henon_polynomial);
@@ -436,10 +436,10 @@ void TestVectorTaylorFunction::test_antiderivative()
 void TestVectorTaylorFunction::test_join()
 {
     Vector<Interval> domain={{-0.25,+0.25},{-0.5,+0.5}};
-    RealVectorFunction x=RealVectorFunction::identity(2);
-    RealVectorFunction function1 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(1,0);
-    RealVectorFunction function2 = (4*x[0]*x[0]+5*x[0]*x[1]+6*x[1]*x[1])*e(2,1);
-    RealVectorFunction function3 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(3,0)
+    EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
+    EffectiveVectorFunction function1 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(1,0);
+    EffectiveVectorFunction function2 = (4*x[0]*x[0]+5*x[0]*x[1]+6*x[1]*x[1])*e(2,1);
+    EffectiveVectorFunction function3 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(3,0)
         + (4*x[0]*x[0]+5*x[0]*x[1]+6*x[1]*x[1])*e(3,2);
     VectorTaylorFunction taylorfunction1(domain,function1,swp);
     VectorTaylorFunction taylorfunction2(domain,function2,swp);
@@ -454,13 +454,13 @@ void TestVectorTaylorFunction::test_combine()
     Vector<Interval> domain1={{-0.25,+0.25},{-0.5,+0.5}};
     Vector<Interval> domain2={{-0.75,+0.75},{-1.0,+1.0},{-1.25,+1.25}};
     Vector<Interval> domain3={{-0.25,+0.25},{-0.5,+0.5},{-0.75,+0.75},{-1.0,+1.0},{-1.25,+1.25}};
-    RealVectorFunction x;
-    x=RealVectorFunction::identity(2);
-    RealVectorFunction function1 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(1,0);
-    x=RealVectorFunction::identity(3);
-    RealVectorFunction function2 = (4*x[0]*x[0]+5*x[0]*x[1]+6*x[1]*x[2])*e(2,1);
-    x=RealVectorFunction::identity(5);
-    RealVectorFunction function3 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(3,0)
+    EffectiveVectorFunction x;
+    x=EffectiveVectorFunction::identity(2);
+    EffectiveVectorFunction function1 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(1,0);
+    x=EffectiveVectorFunction::identity(3);
+    EffectiveVectorFunction function2 = (4*x[0]*x[0]+5*x[0]*x[1]+6*x[1]*x[2])*e(2,1);
+    x=EffectiveVectorFunction::identity(5);
+    EffectiveVectorFunction function3 = (x[0]*x[0]+2*x[0]*x[1]+3*x[1]*x[1])*e(3,0)
         + (4*x[2]*x[2]+5*x[2]*x[3]+6*x[3]*x[4])*e(3,2);
     VectorTaylorFunction taylorfunction1(domain1,function1,swp);
     VectorTaylorFunction taylorfunction2(domain2,function2,swp);
@@ -475,9 +475,9 @@ void TestVectorTaylorFunction::test_conversion()
     Vector<Interval> D={{-0.5,0.5},{-1.0,2.0}};
     Vector<Float> pt={-0.25,0.25};
     Vector<Interval> ipt(pt);
-    RealVectorFunction x=RealVectorFunction::identity(2);
+    EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
 
-    RealVectorFunction h=RealVectorFunction((1-x[0]*x[0]-x[1]/2,x[0]+Real(0)));
+    EffectiveVectorFunction h=EffectiveVectorFunction((1-x[0]*x[0]-x[1]/2,x[0]+Real(0)));
     VectorTaylorFunction th(D,h,swp);
 
     ARIADNE_TEST_PRINT(h);
@@ -494,10 +494,10 @@ void TestVectorTaylorFunction::test_conversion()
 // Regression test for domain with empty interior
 void TestVectorTaylorFunction::test_domain()
 {
-    RealScalarFunction z=RealScalarFunction::constant(2,0);
-    RealScalarFunction o=RealScalarFunction::constant(2,1);
-    RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
-    RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
+    EffectiveScalarFunction z=EffectiveScalarFunction::constant(2,0);
+    EffectiveScalarFunction o=EffectiveScalarFunction::constant(2,1);
+    EffectiveScalarFunction x0=EffectiveScalarFunction::coordinate(2,0);
+    EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(2,1);
 
     Vector<Interval> D1={{-1.0,1.0},{-1.0,1.0}};
     VectorTaylorFunction t1(D1, (o,x0+x1), swp);
@@ -563,12 +563,12 @@ void TestTaylorFunctionFactory::test_create()
 
     IntervalVector dom={{-1,+1},{0.5,3.5}};
 
-    ScalarTaylorFunction stf=factory.create(dom, RealScalarFunction::zero(dom.size()) );
+    ScalarTaylorFunction stf=factory.create(dom, EffectiveScalarFunction::zero(dom.size()) );
     ARIADNE_TEST_PRINT(stf);
     ARIADNE_TEST_EQUALS(&stf.sweeper(),&sweeper);
     ARIADNE_TEST_EQUALS(stf.evaluate(dom),Interval(0.0));
 
-    VectorTaylorFunction vtf=factory.create(dom, RealVectorFunction::identity(dom.size()) );
+    VectorTaylorFunction vtf=factory.create(dom, EffectiveVectorFunction::identity(dom.size()) );
     ARIADNE_TEST_PRINT(vtf);
 
     // Test evaluation gives a superset with small additional error

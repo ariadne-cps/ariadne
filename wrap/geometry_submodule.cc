@@ -374,7 +374,7 @@ void export_zonotope()
     def("orthogonal_over_approximation", (Zonotope(*)(const Zonotope&)) &orthogonal_over_approximation);
     def("error_free_over_approximation", (Zonotope(*)(const Zonotope&)) &error_free_over_approximation);
 
-    def("apply", (Zonotope(*)(const VectorFunction<Interval>&, const Zonotope&)) &apply);
+    def("apply", (Zonotope(*)(const ValidatedVectorFunction&, const Zonotope&)) &apply);
 
     to_python< ListSet<Zonotope> >();
 
@@ -455,10 +455,10 @@ void export_constrained_image_set()
     class_<IntervalConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> >
         constrained_image_set_class("IntervalConstrainedImageSet",init<IntervalConstrainedImageSet>());
     constrained_image_set_class.def(init<Box>());
-    constrained_image_set_class.def(init<Box,RealVectorFunction>());
-    constrained_image_set_class.def(init<Box,IntervalVectorFunction>());
-    constrained_image_set_class.def(init<Box,IntervalVectorFunction,List<IntervalConstraint> >());
-    constrained_image_set_class.def(init<Box,IntervalVectorFunctionModel>());
+    constrained_image_set_class.def(init<Box,EffectiveVectorFunction>());
+    constrained_image_set_class.def(init<Box,ValidatedVectorFunction>());
+    constrained_image_set_class.def(init<Box,ValidatedVectorFunction,List<IntervalConstraint> >());
+    constrained_image_set_class.def(init<Box,ValidatedVectorFunctionModel>());
     constrained_image_set_class.def("domain", &IntervalConstrainedImageSet::domain,return_value_policy<copy_const_reference>());
     constrained_image_set_class.def("function", &IntervalConstrainedImageSet::function,return_value_policy<copy_const_reference>());
     constrained_image_set_class.def("constraint", &IntervalConstrainedImageSet::constraint);

@@ -45,20 +45,20 @@ class Box;
 class GridTreeSet;
 
 template<class X, class R> class Constraint;
-typedef Constraint<RealScalarFunction,Real> RealConstraint;
-typedef Constraint<IntervalScalarFunction,Float> IntervalConstraint;
+typedef Constraint<EffectiveScalarFunction,Real> RealConstraint;
+typedef Constraint<ValidatedScalarFunction,Float> IntervalConstraint;
 
 template<class X> class Procedure;
 typedef Procedure<Interval> IntervalProcedure;
 
 template<class X> class ScalarFunctionInterface;
-typedef ScalarFunctionInterface<Interval> IntervalScalarFunctionInterface;
+typedef ScalarFunctionInterface<Interval> ValidatedScalarFunctionInterface;
 template<class X> class ScalarFunction;
-typedef ScalarFunction<Interval> IntervalScalarFunction;
+typedef ValidatedScalarFunction ValidatedScalarFunction;
 template<class X> class VectorFunctionInterface;
-typedef VectorFunctionInterface<Interval> IntervalVectorFunctionInterface;
+typedef VectorFunctionInterface<Interval> ValidatedVectorFunctionInterface;
 template<class X> class VectorFunction;
-typedef VectorFunction<Interval> IntervalVectorFunction;
+typedef ValidatedVectorFunction ValidatedVectorFunction;
 
 class VectorTaylorFunction;
 
@@ -75,11 +75,11 @@ template<class X> struct FeasibilityState {
 class ConstraintSolverInterface {
   public:
     //! \brief Test if the image of the box \a domain under the function \a function intersects \a codomain.
-    virtual Pair<Tribool,Point> feasible(const Box& domain, const IntervalVectorFunction& function, const Box& codomain) const = 0;
+    virtual Pair<Tribool,Point> feasible(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const = 0;
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
-    virtual Tribool check_feasibility(const Box& domain, const IntervalVectorFunction& function, const Box& codomain, const Point& point) const = 0;
+    virtual Tribool check_feasibility(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain, const Point& point) const = 0;
     //! \brief Try to reduce the size of the domain by propagating interval constraints. Returns \c true if the reduced domain is empty.
-    virtual bool reduce(Box& domain, const IntervalVectorFunction& function, const Box& codomain) const = 0;
+    virtual bool reduce(Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const = 0;
 
 };
 
@@ -94,11 +94,11 @@ class ConstraintSolver
     typedef Vector<Interval> IntervalVector;
   public:
     //! \brief Test if the image of the box \a domain under the function \a function intersects \a codomain.
-    virtual Pair<Tribool,Point> feasible(const Box& domain, const IntervalVectorFunction& function, const Box& codomain) const;
+    virtual Pair<Tribool,Point> feasible(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const;
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
-    virtual Tribool check_feasibility(const Box& domain, const IntervalVectorFunction& function, const Box& codomain, const Point& point) const;
+    virtual Tribool check_feasibility(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain, const Point& point) const;
     //! \brief Try to reduce the size of the domain by propagating interval constraints.
-    virtual bool reduce(Box& domain, const IntervalVectorFunction& function, const Box& codomain) const;
+    virtual bool reduce(Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const;
 
 
     //! \brief Test if the constraints are solvable using a nonlinear feasibility test. Returns an approximate feasible point if the result is true. (Deprecated)
@@ -108,11 +108,11 @@ class ConstraintSolver
 
     //! \brief Try to enforce hull consistency by propagating several interval constraints at once.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    bool hull_reduce(Box& bx, const IntervalVectorFunctionInterface& function, const IntervalVector& codomain) const;
+    bool hull_reduce(Box& bx, const ValidatedVectorFunctionInterface& function, const IntervalVector& codomain) const;
     bool hull_reduce(Box& bx, const Vector<IntervalProcedure>& procedure, const IntervalVector& codomain) const;
     //! \brief Try to enforce hull consistency by propagating an interval constraint.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    bool hull_reduce(Box& bx, const IntervalScalarFunctionInterface& function, const Interval& codomain) const;
+    bool hull_reduce(Box& bx, const ValidatedScalarFunctionInterface& function, const Interval& codomain) const;
     bool hull_reduce(Box& bx, const IntervalProcedure& procedure, const Interval& codomain) const;
 
     //! \brief Reduce the \a domain by testing intersection of \a multipliers inner product \a function(\a domain)
@@ -121,13 +121,13 @@ class ConstraintSolver
     bool lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const IntervalVector& codomain,
                          FloatVector centre, FloatVector multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.
-    bool box_reduce(Box& bx, const IntervalScalarFunctionInterface& function, const Interval&, uint j) const;
+    bool box_reduce(Box& bx, const ValidatedScalarFunctionInterface& function, const Interval&, uint j) const;
     //! \brief Try to enforce hull consistency by reducing an a monotone dimension.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    bool monotone_reduce(Box& bx, const IntervalScalarFunctionInterface& function, const Interval&, uint j) const;
+    bool monotone_reduce(Box& bx, const ValidatedScalarFunctionInterface& function, const Interval&, uint j) const;
 
     //! Split the domain into two pieces to help try to solve the constraints.
-    Pair<Box,Box> split(const Box& domain, const IntervalVectorFunction& function, const IntervalVector& codomain) const;
+    Pair<Box,Box> split(const Box& domain, const ValidatedVectorFunction& function, const IntervalVector& codomain) const;
 
     // Deprecated functions.
     bool hull_reduce(Box& bx, const IntervalConstraint& constraint) const {

@@ -95,7 +95,7 @@ ScalarTaylorFunction::ScalarTaylorFunction(const Box& d, const IntervalTaylorMod
 {
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const Box& d, const IntervalScalarFunction& f, Sweeper swp)
+ScalarTaylorFunction::ScalarTaylorFunction(const Box& d, const ValidatedScalarFunction& f, Sweeper swp)
     : _domain(d), _model(f.argument_size(),swp)
 {
     ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
@@ -104,12 +104,12 @@ ScalarTaylorFunction::ScalarTaylorFunction(const Box& d, const IntervalScalarFun
     this->_model.sweep();
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const IntervalScalarFunctionModel& f) {
+ScalarTaylorFunction::ScalarTaylorFunction(const ValidatedScalarFunctionModel& f) {
      ARIADNE_ASSERT_MSG(dynamic_cast<const ScalarTaylorFunction*>(f._ptr.operator->())," f="<<f);
      *this=dynamic_cast<const ScalarTaylorFunction&>(*f._ptr);
 }
 
-ScalarTaylorFunction& ScalarTaylorFunction::operator=(const IntervalScalarFunctionModel& f)
+ScalarTaylorFunction& ScalarTaylorFunction::operator=(const ValidatedScalarFunctionModel& f)
 {
     return (*this)=ScalarTaylorFunction(this->domain(),f,this->sweeper());
 }
@@ -220,7 +220,7 @@ ScalarTaylorFunction::polynomial() const
     return compose(p,s);
 }
 
-IntervalScalarFunction
+ValidatedScalarFunction
 ScalarTaylorFunction::function() const
 {
     return new ScalarTaylorFunction(*this);
@@ -404,19 +404,19 @@ unchecked_evaluate(const ScalarTaylorFunction& f, const Vector<Interval>& x) {
 
 
 ScalarTaylorFunction
-compose(const RealScalarFunction& g, const VectorTaylorFunction& f)
+compose(const EffectiveScalarFunction& g, const VectorTaylorFunction& f)
 {
     return ScalarTaylorFunction(f.domain(),g.evaluate(f.models()));
 }
 
 ScalarTaylorFunction
-compose(const IntervalScalarFunction& g, const VectorTaylorFunction& f)
+compose(const ValidatedScalarFunction& g, const VectorTaylorFunction& f)
 {
     return ScalarTaylorFunction(f.domain(),g.evaluate(f.models()));
 }
 
 ScalarTaylorFunction
-compose(const IntervalScalarFunctionInterface& g, const VectorTaylorFunction& f)
+compose(const ValidatedScalarFunctionInterface& g, const VectorTaylorFunction& f)
 {
     return ScalarTaylorFunction(f.domain(),g.evaluate(f.models()));
 }
@@ -546,7 +546,7 @@ Float distance(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2) {
     return norm(f1-f2);
 }
 
-Float distance(const ScalarTaylorFunction& f1, const RealScalarFunction& f2) {
+Float distance(const ScalarTaylorFunction& f1, const EffectiveScalarFunction& f2) {
     return distance(f1,ScalarTaylorFunction(f1.domain(),f2,f1.sweeper()));
 }
 
@@ -586,7 +586,7 @@ midpoint(const ScalarTaylorFunction& f)
 
 
 ScalarTaylorFunction
-compose(const RealScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
+compose(const EffectiveScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
 {
     ARIADNE_ASSERT(f.argument_size()==g.size());
     for(uint i=0; i!=g.size(); ++i) {
@@ -874,14 +874,14 @@ VectorTaylorFunction::VectorTaylorFunction(uint k, const ScalarTaylorFunction& f
 {
 }
 
-VectorTaylorFunction::VectorTaylorFunction(const IntervalVectorFunctionModel& f)
+VectorTaylorFunction::VectorTaylorFunction(const ValidatedVectorFunctionModel& f)
     : _domain(), _models()
 {
     ARIADNE_ASSERT(dynamic_cast<const VectorTaylorFunction*>(&f.reference()));
     *this = dynamic_cast<const VectorTaylorFunction&>(f.reference());
 }
 
-VectorTaylorFunction& VectorTaylorFunction::operator=(const IntervalVectorFunctionModel& f)
+VectorTaylorFunction& VectorTaylorFunction::operator=(const ValidatedVectorFunctionModel& f)
 {
     ARIADNE_ASSERT(dynamic_cast<const VectorTaylorFunction*>(&f.reference()));
     *this = dynamic_cast<const VectorTaylorFunction&>(f.reference());
@@ -939,7 +939,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Box& d,
 
 
 VectorTaylorFunction::VectorTaylorFunction(const Box& d,
-                                           const IntervalVectorFunction& f,
+                                           const ValidatedVectorFunction& f,
                                            const Sweeper& swp)
     : _domain(d), _models(f.result_size())
 {
@@ -952,7 +952,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Box& d,
 
 /*
 VectorTaylorFunction::VectorTaylorFunction(const Box& d,
-                                           const RealVectorFunction& f,
+                                           const EffectiveVectorFunction& f,
                                            const Sweeper& swp)
     : _domain(d), _models(f.result_size())
 {
@@ -1098,7 +1098,7 @@ VectorTaylorFunction::error() const
     return e;
 }
 
-IntervalVectorFunction
+ValidatedVectorFunction
 VectorTaylorFunction::function() const
 {
     return new VectorTaylorFunction(*this);
@@ -1646,7 +1646,7 @@ operator*(const Matrix<Interval>& A, const VectorTaylorFunction& f)
 
 
 VectorTaylorFunction
-operator-(const VectorTaylorFunction& f1, const RealVectorFunction& f2) {
+operator-(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2) {
     return f1 - VectorTaylorFunction(f1.domain(),f2,f1.sweeper());
 }
 
@@ -1711,13 +1711,13 @@ unchecked_evaluate(const VectorTaylorFunction& f, const Vector<Interval>& x) {
 }
 
 VectorTaylorFunction
-compose(const RealVectorFunction& g, const VectorTaylorFunction& f)
+compose(const EffectiveVectorFunction& g, const VectorTaylorFunction& f)
 {
     return VectorTaylorFunction(f.domain(),g.evaluate(f.models()));
 }
 
 VectorTaylorFunction
-compose(const IntervalVectorFunction& g, const VectorTaylorFunction& f)
+compose(const ValidatedVectorFunction& g, const VectorTaylorFunction& f)
 {
     return VectorTaylorFunction(f.domain(),g.evaluate(f.models()));
 }
@@ -1794,7 +1794,7 @@ Float distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
     return norm(f1-f2);
 }
 
-Float distance(const VectorTaylorFunction& f1, const RealVectorFunction& f2) {
+Float distance(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2) {
     return distance(f1,VectorTaylorFunction(f1.domain(),f2,f1.sweeper()));
 }
 
@@ -1876,25 +1876,25 @@ List< Polynomial<Interval> > polynomials(const List<ScalarTaylorFunction>& tfns)
 
 
 ScalarTaylorFunction
-TaylorFunctionFactory::create(const Box& domain, const IntervalScalarFunctionInterface& function) const
+TaylorFunctionFactory::create(const Box& domain, const ValidatedScalarFunctionInterface& function) const
 {
     return ScalarTaylorFunction(domain,function,this->_sweeper);
 }
 
 ScalarTaylorFunction*
-TaylorFunctionFactory::_create(const Box& domain, const IntervalScalarFunctionInterface& function) const
+TaylorFunctionFactory::_create(const Box& domain, const ValidatedScalarFunctionInterface& function) const
 {
     return new ScalarTaylorFunction(domain,function,this->_sweeper);
 }
 
 VectorTaylorFunction
-TaylorFunctionFactory::create(const Box& domain, const IntervalVectorFunctionInterface& function) const
+TaylorFunctionFactory::create(const Box& domain, const ValidatedVectorFunctionInterface& function) const
 {
     return VectorTaylorFunction(domain,function,this->_sweeper);
 }
 
 VectorTaylorFunction*
-TaylorFunctionFactory::_create(const Box& domain, const IntervalVectorFunctionInterface& function) const
+TaylorFunctionFactory::_create(const Box& domain, const ValidatedVectorFunctionInterface& function) const
 {
     return new VectorTaylorFunction(domain,function,this->_sweeper);
 }

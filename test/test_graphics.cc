@@ -37,8 +37,8 @@
 using namespace Ariadne;
 
 
-RealScalarFunction operator+(RealScalarFunction f, double c) { return f+Real(c); }
-RealScalarFunction operator*(double c, RealScalarFunction f) { return Real(c)*f; }
+EffectiveScalarFunction operator+(EffectiveScalarFunction f, double c) { return f+Real(c); }
+EffectiveScalarFunction operator*(double c, EffectiveScalarFunction f) { return Real(c)*f; }
 //struct UnsafeReal : Real { UnsafeReal(double d) : Real(d) { } };
 
 
@@ -54,12 +54,12 @@ int main(int argc, char **argv)
     //Zonotope z1(z1c,z1g);
     //Polytope p1=polytope(z1);
     Real p = ExactFloat(0.5);
-    RealVectorFunction x=RealVectorFunction::identity(3);
-    RealVectorFunction afn1((0.05*x[0]+0.05*x[2]+0.15,0.05*x[1]+0.05*x[2]+0.6));
+    EffectiveVectorFunction x=EffectiveVectorFunction::identity(3);
+    EffectiveVectorFunction afn1((0.05*x[0]+0.05*x[2]+0.15,0.05*x[1]+0.05*x[2]+0.6));
     IntervalConstrainedImageSet s1(Box::unit_box(3),afn1);
     Box bbx1=s1.bounding_box()+Vector<Interval>(2, Interval(-0.25,+0.25));
 
-    RealVectorFunction rf(1u, sqr(x[0])+sqr(x[1])-sqr(p));
+    EffectiveVectorFunction rf(1u, sqr(x[0])+sqr(x[1])-sqr(p));
     ConstraintSet cs1(rf,BoxSet(1u,IntervalSet(-1,0)));
 
     {

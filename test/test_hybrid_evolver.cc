@@ -55,10 +55,10 @@ int evolver_verbosity=0;
 
 RealVariable v0=RealVariable("x0");
 RealVariable v1=RealVariable("x1");
-RealScalarFunction z=RealScalarFunction::constant(2,0);
-RealScalarFunction c=RealScalarFunction::constant(2,1);
-RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
-RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
+EffectiveScalarFunction z=EffectiveScalarFunction::constant(2,0);
+EffectiveScalarFunction c=EffectiveScalarFunction::constant(2,1);
+EffectiveScalarFunction x0=EffectiveScalarFunction::coordinate(2,0);
+EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(2,1);
 DiscreteLocation q("q");
 DiscreteEvent e("e");
 
@@ -830,8 +830,8 @@ void TestHybridEvolver::test_transverse_linear_crossing() const
 
     RealSpace final_space=system.continuous_state_space(q2);
     RealExpression ct=-guard; // Crossing time
-    //RealVectorFunction function=make_function((x+ct,y+2-ct),final_space);
-    RealVectorFunction function=join(make_function(x+ct,final_space),make_function(y+2-ct,final_space));
+    //EffectiveVectorFunction function=make_function((x+ct,y+2-ct),final_space);
+    EffectiveVectorFunction function=join(make_function(x+ct,final_space),make_function(y+2-ct,final_space));
     Enclosure expected_final_enclosure(initial_set.euclidean_set(q1,final_space),evolver_ptr->function_factory());
     expected_final_enclosure.apply_map(function);
 

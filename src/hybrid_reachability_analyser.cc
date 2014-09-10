@@ -115,7 +115,7 @@ HybridReachabilityAnalyser::_reach_evolve_resume(const ListSet<HybridEnclosure>&
             const Enclosure& orig_encl = enclosure_iter->continuous_set();
             evolve_enclosures.adjoin(HybridEnclosure(enclosure_iter->location(),enclosure_iter->space(),
                                                         Enclosure(orig_encl.domain(),orig_encl.space_function(),
-                                                                  ScalarFunction<Interval>::zero(orig_encl.time_function().argument_size()),
+                                                                  ValidatedScalarFunction::zero(orig_encl.time_function().argument_size()),
                                                                   orig_encl.constraints(),orig_encl.function_factory())));
             enclosure_iter->adjoin_outer_approximation_to(evolve_cells,accuracy);
         }

@@ -60,8 +60,8 @@ class TestConstrainedImageSet
     }
 
     void test_constructor() {
-        List<RealScalarFunction> s=RealScalarFunction::coordinates(3);
-        List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
+        List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(3);
+        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
 
         BoxSet d(3,IntervalSet(-1,+2));
         RealConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
@@ -71,9 +71,9 @@ class TestConstrainedImageSet
     }
 
     void test_geometry() {
-        List<RealScalarFunction> p=RealScalarFunction::coordinates(1);
-        List<RealScalarFunction> s=RealScalarFunction::coordinates(3);
-        List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
+        List<EffectiveScalarFunction> p=EffectiveScalarFunction::coordinates(1);
+        List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(3);
+        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         Box box1(2);
         Box box2(2);
         Box box3(2);
@@ -117,8 +117,8 @@ class TestConstrainedImageSet
         ExactFloat half(0.5);
         BoxSet d(2,IntervalSet(-half,+half));
         ExactFloat a(1.5); ExactFloat b(0.375);
-        RealVectorFunction h((a-x[0]*x[0]-b*x[1],x[0]));
-        RealVectorFunction f=compose(h,h);
+        EffectiveVectorFunction h((a-x[0]*x[0]-b*x[1],x[0]));
+        EffectiveVectorFunction f=compose(h,h);
         RealConstrainedImageSet set(d,f);
         set.new_parameter_constraint(0<=x[0]+x[1]<=1);
 
@@ -141,8 +141,8 @@ class TestConstrainedImageSet
     }
 
     void test_separated() {
-        List<RealScalarFunction> s=RealScalarFunction::coordinates(3);
-        List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
+        List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(3);
+        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
 
         BoxSet d(3,IntervalSet(Decimal(-1.1),Decimal(+2.1)));
         RealConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
@@ -179,8 +179,8 @@ class TestConstrainedImageSet
     }
 
     void test_approximation() {
-        List<RealScalarFunction> s=RealScalarFunction::coordinates(3);
-        List<RealScalarFunction> x=RealScalarFunction::coordinates(2);
+        List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(3);
+        List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
 
         BoxSet d(3,IntervalSet(-1,+2));
         RealConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
@@ -196,12 +196,12 @@ class TestConstrainedImageSet
 
 
     void test_split() {
-        RealScalarFunction o=RealScalarFunction::constant(3,1);
-        RealScalarFunction s0=RealScalarFunction::coordinate(3,0);
-        RealScalarFunction s1=RealScalarFunction::coordinate(3,1);
-        RealScalarFunction s2=RealScalarFunction::coordinate(3,2);
-        RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
-        RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
+        EffectiveScalarFunction o=EffectiveScalarFunction::constant(3,1);
+        EffectiveScalarFunction s0=EffectiveScalarFunction::coordinate(3,0);
+        EffectiveScalarFunction s1=EffectiveScalarFunction::coordinate(3,1);
+        EffectiveScalarFunction s2=EffectiveScalarFunction::coordinate(3,2);
+        EffectiveScalarFunction x0=EffectiveScalarFunction::coordinate(2,0);
+        EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(2,1);
         BoxSet d(3,IntervalSet(-1,+1));
         RealConstrainedImageSet set(d,(s0,s1+s2*s2/2));
         set.new_parameter_constraint(s0+ExactFloat(0.75)*s1+s2<=0.0);
@@ -217,10 +217,10 @@ class TestConstrainedImageSet
         make_lpair(subset11,subset12)=subset1.split(0);
         make_lpair(subset21,subset22)=subset2.split(0);
         ARIADNE_TEST_PRINT(subset11);
-        subset11.apply(RealVectorFunction((x0+ExactFloat(2.5),x1)));
+        subset11.apply(EffectiveVectorFunction((x0+ExactFloat(2.5),x1)));
         ARIADNE_TEST_PRINT(subset11);
 
-        set.apply(RealVectorFunction((x0-ExactFloat(2.5),x1)));
+        set.apply(EffectiveVectorFunction((x0-ExactFloat(2.5),x1)));
         Figure figure;
         figure.set_bounding_box(Box({{-4.0,+4.0},{-4.0,+4.0}}));
         figure.set_fill_colour(1.0,1.0,1.0);
@@ -240,7 +240,7 @@ class TestConstrainedImageSet
 
     void test_affine_approximation() {
         // Test conversionn is exact for the affine set -2<x<1; 0<y<2 3x+y<1
-        List<RealScalarFunction> s=RealScalarFunction::coordinates(2);
+        List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(2);
         BoxSet d( (IntervalSet(-2,1),IntervalSet(0,2)) );
         RealConstrainedImageSet set(d,(s[0],s[1]));
         set.new_parameter_constraint(3*s[0]+s[1]<=1);
@@ -303,10 +303,10 @@ class TestConstrainedImageSet
     }
 
     void test_draw() {
-        RealScalarFunction s=RealScalarFunction::coordinate(2,0);
-        RealScalarFunction t=RealScalarFunction::coordinate(2,1);
-        RealScalarFunction x=RealScalarFunction::coordinate(2,0);
-        RealScalarFunction y=RealScalarFunction::coordinate(2,1);
+        EffectiveScalarFunction s=EffectiveScalarFunction::coordinate(2,0);
+        EffectiveScalarFunction t=EffectiveScalarFunction::coordinate(2,1);
+        EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
+        EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
         uint acc = 2u;
 
         test_draw("ellipse",RealConstrainedImageSet(BoxSet(2,IntervalSet(-1,1)),(2*s+t,s+t),(s*s+t*t<=0.75)),acc+1u);

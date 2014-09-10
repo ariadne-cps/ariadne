@@ -103,35 +103,35 @@ class IntegratorBase
 
 
     virtual Pair<Float,IntervalVector>
-    flow_bounds(const IntervalVectorFunction& vector_field,
+    flow_bounds(const ValidatedVectorFunction& vector_field,
                 const IntervalVector& state_domain,
                 const Float& suggested_time_step) const;
 
-    virtual IntervalVectorFunctionModel
-    flow_step(const IntervalVectorFunction& vector_field,
+    virtual ValidatedVectorFunctionModel
+    flow_step(const ValidatedVectorFunction& vector_field,
               const IntervalVector& state_domain,
               Float& suggested_time_step) const;
 
-    virtual IntervalVectorFunctionModel
-    flow_to(const IntervalVectorFunction& vector_field,
+    virtual ValidatedVectorFunctionModel
+    flow_to(const ValidatedVectorFunction& vector_field,
          const IntervalVector& state_domain,
          const Real& time) const;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
-    virtual List<IntervalVectorFunctionModel>
-    flow(const IntervalVectorFunction& vector_field,
+    virtual List<ValidatedVectorFunctionModel>
+    flow(const ValidatedVectorFunction& vector_field,
          const IntervalVector& state_domain,
          const Real& minimum_time,
          const Real& maximum_time) const;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
-    virtual List<IntervalVectorFunctionModel>
-    flow(const IntervalVectorFunction& vector_field,
+    virtual List<ValidatedVectorFunctionModel>
+    flow(const ValidatedVectorFunction& vector_field,
          const IntervalVector& state_domain,
          const Real& maximum_time) const;
 
-    virtual IntervalVectorFunctionModel
-    flow_step(const IntervalVectorFunction& vector_field,
+    virtual ValidatedVectorFunctionModel
+    flow_step(const ValidatedVectorFunction& vector_field,
               const IntervalVector& state_domain,
               const Float& suggested_time_step,
               const IntervalVector& bounding_box) const = 0;
@@ -174,8 +174,8 @@ class TaylorPicardIntegrator
     virtual TaylorPicardIntegrator* clone() const { return new TaylorPicardIntegrator(*this); }
     virtual void write(std::ostream& os) const;
 
-    virtual IntervalVectorFunctionModel
-    flow_step(const IntervalVectorFunction& vector_field,
+    virtual ValidatedVectorFunctionModel
+    flow_step(const ValidatedVectorFunction& vector_field,
               const IntervalVector& state_domain,
               const Float& time_step,
               const IntervalVector& bounding_box) const;
@@ -235,12 +235,12 @@ class TaylorSeriesIntegrator
     virtual void write(std::ostream& os) const;
 
     virtual Pair<Float,IntervalVector>
-    flow_bounds(const IntervalVectorFunction& vector_field,
+    flow_bounds(const ValidatedVectorFunction& vector_field,
                 const IntervalVector& state_domain,
                 const Float& suggested_time_step) const;
 
-    virtual IntervalVectorFunctionModel
-    flow_step(const IntervalVectorFunction& vector_field,
+    virtual ValidatedVectorFunctionModel
+    flow_step(const ValidatedVectorFunction& vector_field,
               const IntervalVector& state_domain,
               const Float& time_step,
               const IntervalVector& bounding_box) const;
@@ -269,8 +269,8 @@ class AffineIntegrator
     virtual AffineIntegrator* clone() const { return new AffineIntegrator(*this); }
     virtual void write(std::ostream& os) const;
 
-    virtual IntervalVectorFunctionModel
-    flow_step(const IntervalVectorFunction& vector_field,
+    virtual ValidatedVectorFunctionModel
+    flow_step(const ValidatedVectorFunction& vector_field,
               const IntervalVector& state_domain,
               const Float& time_step,
               const IntervalVector& bounding_box) const;
@@ -279,7 +279,7 @@ class AffineIntegrator
 
     //! \brief Compute the derivative of the flow of f at time zero within \a dom.
     IntervalDifferentialVector
-    flow_derivative(const IntervalVectorFunction& f,
+    flow_derivative(const ValidatedVectorFunction& f,
                     const IntervalVector& dom) const;
 };
 

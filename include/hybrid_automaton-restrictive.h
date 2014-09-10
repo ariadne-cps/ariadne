@@ -62,8 +62,8 @@ class CompositeHybridAutomaton;
 
 typedef ContinuousPredicate RealPredicate;
 
-RealVectorFunction dynamic_function(Space<Real>& space, const List<RealAssignment>& algebraic, const List<DottedRealAssignment>& differential);
-RealScalarFunction constraint_function(Space<Real>& space, const List<RealAssignment>& algebraic, const RealPredicate& constraint);
+EffectiveVectorFunction dynamic_function(Space<Real>& space, const List<RealAssignment>& algebraic, const List<DottedRealAssignment>& differential);
+EffectiveScalarFunction constraint_function(Space<Real>& space, const List<RealAssignment>& algebraic, const RealPredicate& constraint);
 
 
 template<class T> class FinitarySet
@@ -244,12 +244,12 @@ class HybridSystem
     HybridSpace state_space() const;
     uint dimension(DiscreteLocation) const;
     RealSpace continuous_state_space(DiscreteLocation) const;
-    RealVectorFunction output_function(DiscreteLocation) const;
-    RealVectorFunction dynamic_function(DiscreteLocation) const;
-    RealVectorFunction reset_function(DiscreteLocation, DiscreteEvent) const;
-    RealScalarFunction constraint_function(DiscreteLocation, DiscreteEvent) const;
-    RealScalarFunction invariant_function(DiscreteLocation, DiscreteEvent) const;
-    RealScalarFunction guard_function(DiscreteLocation, DiscreteEvent) const;
+    EffectiveVectorFunction output_function(DiscreteLocation) const;
+    EffectiveVectorFunction dynamic_function(DiscreteLocation) const;
+    EffectiveVectorFunction reset_function(DiscreteLocation, DiscreteEvent) const;
+    EffectiveScalarFunction constraint_function(DiscreteLocation, DiscreteEvent) const;
+    EffectiveScalarFunction invariant_function(DiscreteLocation, DiscreteEvent) const;
+    EffectiveScalarFunction guard_function(DiscreteLocation, DiscreteEvent) const;
 
     //@}
 
@@ -308,15 +308,15 @@ class HybridSystem
     //! \brief The dimension of the state spacec in the given \a location.
     virtual uint dimension(DiscreteLocation location) const;
     //! \brief The output function on Euclidean state space. Used for outputting auxiliary variables.
-    virtual RealVectorFunction output_function(DiscreteLocation location) const;
+    virtual EffectiveVectorFunction output_function(DiscreteLocation location) const;
     //! \brief The function defining the differential equation \f$\dot{x}=f(x)\f$ valid in the \a location.
-    virtual RealVectorFunction dynamic_function(DiscreteLocation location) const;
+    virtual EffectiveVectorFunction dynamic_function(DiscreteLocation location) const;
     //! \brief The function defining the reset \f$x'=r(x)\f$ when the \a event occurs in the \a source location.
-    virtual RealVectorFunction reset_function(DiscreteLocation source, DiscreteEvent event) const;
+    virtual EffectiveVectorFunction reset_function(DiscreteLocation source, DiscreteEvent event) const;
     //! \brief The function defining the guard \f$g(x) \geq 0\f$ for the given \a event to occur in \a location.
-    virtual RealScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual EffectiveScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief The function defining the invariant \f$p(x)\leq 0\f$ for continuous evolution to be blocked in \a location.
-    virtual RealScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual EffectiveScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The grid for the state variables in \a location.
     virtual Grid grid(DiscreteLocation location) const;

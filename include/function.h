@@ -58,14 +58,23 @@ template<class X> class Vector< Differential<X> >;
 template<class X> class Formula;
 
 template<class X> class ScalarFunction;
-typedef ScalarFunction<Float> FloatScalarFunction;
-typedef ScalarFunction<Interval> IntervalScalarFunction;
-typedef ScalarFunction<Real> RealScalarFunction;
+typedef ScalarFunction<ApproximateNumberType> ApproximateScalarFunction;
+typedef ScalarFunction<ValidatedNumberType> ValidatedScalarFunction;
+typedef ScalarFunction<EffectiveNumberType> EffectiveScalarFunction;
 
 template<class X> class VectorFunction;
-typedef VectorFunction<Float> FloatVectorFunction;
-typedef VectorFunction<Interval> IntervalVectorFunction;
-typedef VectorFunction<Real> RealVectorFunction;
+typedef VectorFunction<ApproximateNumberType> ApproximateVectorFunction;
+typedef VectorFunction<ValidatedNumberType> ValidatedVectorFunction;
+typedef VectorFunction<EffectiveNumberType> EffectiveVectorFunction;
+
+// Deprecated typedefs
+typedef ApproximateScalarFunction FloatScalarFunction;
+typedef ValidatedScalarFunction IntervalScalarFunction;
+typedef EffectiveScalarFunction RealScalarFunction;
+
+typedef ApproximateVectorFunction FloatVectorFunction;
+typedef ValidatedVectorFunction IntervalVectorFunction;
+typedef EffectiveVectorFunction RealVectorFunction;
 
 template<class X> class VectorFunctionElementReference;
 
@@ -124,18 +133,22 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, const Scalar
 template<class X, class XX> inline XX evaluate(const ScalarFunction<X>& f, const Vector<XX>& x) { return f(x); }
 template<class X, class XX> inline Vector<XX> gradient(const ScalarFunction<X>& f, const Vector<XX>& x) { return f.gradient(x); }
 
-//template<class X> inline ScalarFunction<X> ScalarFunctionInterface<X>::clone() const { return this->_clone(); }
-//template<class X> inline X ScalarFunctionInterface<X>::operator() (const Vector<X>& x) const { return this->evaluate(x); }
-//template<class X> inline X ScalarFunctionInterface<X>::derivative(Nat j) const { return this->_derivative(j); }
-inline ScalarFunction<Float> ScalarFunctionInterface<Float>::clone() const { return this->_clone(); }
-inline ScalarFunction<Interval> ScalarFunctionInterface<Interval>::clone() const { return this->_clone(); }
-inline ScalarFunction<Real> ScalarFunctionInterface<Real>::clone() const { return this->_clone(); }
-inline Float ScalarFunctionInterface<Float>::operator() (const Vector<Float>& x) const { return this->evaluate(x); }
-inline Interval ScalarFunctionInterface<Interval>::operator() (const Vector<Interval>& x) const { return this->evaluate(x); }
-inline Real ScalarFunctionInterface<Real>::operator() (const Vector<Real>& x) const { return this->evaluate(x); }
-inline ScalarFunction<Float> ScalarFunctionInterface<Float>::derivative(Nat j) const { return this->_derivative(j); }
-inline ScalarFunction<Interval> ScalarFunctionInterface<Interval>::derivative(Nat j) const { return this->_derivative(j); }
-inline ScalarFunction<Real> ScalarFunctionInterface<Real>::derivative(Nat j) const { return this->_derivative(j); }
+ApproximateScalarFunction ScalarFunctionInterface<ApproximateNumberType>::clone() const { return this->_clone(); }
+ValidatedScalarFunction ScalarFunctionInterface<ValidatedNumberType>::clone() const { return this->_clone(); }
+EffectiveScalarFunction ScalarFunctionInterface<EffectiveNumberType>::clone() const { return this->_clone(); }
+inline ApproximateNumberType ScalarFunctionInterface<ApproximateNumberType>::operator() (const Vector<ApproximateNumberType>& x) const {
+    return this->evaluate(x); }
+inline ValidatedNumberType ScalarFunctionInterface<ValidatedNumberType>::operator() (const Vector<ValidatedNumberType>& x) const {
+    return this->evaluate(x); }
+inline EffectiveNumberType ScalarFunctionInterface<EffectiveNumberType>::operator() (const Vector<EffectiveNumberType>& x) const {
+    return this->evaluate(x); }
+inline ApproximateScalarFunction ScalarFunctionInterface<ApproximateNumberType>::derivative(Nat j) const {
+    return this->_derivative(j); }
+inline ValidatedScalarFunction ScalarFunctionInterface<ValidatedNumberType>::derivative(Nat j) const {
+    return this->_derivative(j); }
+inline EffectiveScalarFunction ScalarFunctionInterface<EffectiveNumberType>::derivative(Nat j) const {
+    return this->_derivative(j); }
+
 
 /*
 template<class X> ScalarFunction<X> operator+(const ScalarFunction<X>&);
@@ -173,31 +186,31 @@ template<class X> ScalarFunction<X> cos(const ScalarFunction<X>&);
 template<class X> ScalarFunction<X> tan(const ScalarFunction<X>&);
 */
 
-ScalarFunction<Real> operator+(const ScalarFunction<Real>&);
-ScalarFunction<Real> operator-(const ScalarFunction<Real>&);
-ScalarFunction<Real> operator+(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
-ScalarFunction<Real> operator-(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
-ScalarFunction<Real> operator*(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
-ScalarFunction<Real> operator/(const ScalarFunction<Real>&, const ScalarFunction<Real>&);
-ScalarFunction<Real> operator+(const ScalarFunction<Real>&, const Real&);
-ScalarFunction<Real> operator-(const ScalarFunction<Real>&, const Real&);
-ScalarFunction<Real> operator*(const ScalarFunction<Real>&, const Real&);
-ScalarFunction<Real> operator/(const ScalarFunction<Real>&, const Real&);
-ScalarFunction<Real> operator+(const Real&, const ScalarFunction<Real>&);
-ScalarFunction<Real> operator-(const Real&, const ScalarFunction<Real>&);
-ScalarFunction<Real> operator*(const Real&, const ScalarFunction<Real>&);
-ScalarFunction<Real> operator/(const Real&, const ScalarFunction<Real>&);
+EffectiveScalarFunction operator+(const EffectiveScalarFunction&);
+EffectiveScalarFunction operator-(const EffectiveScalarFunction&);
+EffectiveScalarFunction operator+(const EffectiveScalarFunction&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator-(const EffectiveScalarFunction&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator*(const EffectiveScalarFunction&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator/(const EffectiveScalarFunction&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator+(const EffectiveScalarFunction&, const EffectiveNumberType&);
+EffectiveScalarFunction operator-(const EffectiveScalarFunction&, const EffectiveNumberType&);
+EffectiveScalarFunction operator*(const EffectiveScalarFunction&, const EffectiveNumberType&);
+EffectiveScalarFunction operator/(const EffectiveScalarFunction&, const EffectiveNumberType&);
+EffectiveScalarFunction operator+(const EffectiveNumberType&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator-(const EffectiveNumberType&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator*(const EffectiveNumberType&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator/(const EffectiveNumberType&, const EffectiveScalarFunction&);
 
-ScalarFunction<Real> pow(const ScalarFunction<Real>&, Int);
-ScalarFunction<Real> neg(const ScalarFunction<Real>&);
-ScalarFunction<Real> rec(const ScalarFunction<Real>&);
-ScalarFunction<Real> sqr(const ScalarFunction<Real>&);
-ScalarFunction<Real> sqrt(const ScalarFunction<Real>&);
-ScalarFunction<Real> exp(const ScalarFunction<Real>&);
-ScalarFunction<Real> log(const ScalarFunction<Real>&);
-ScalarFunction<Real> sin(const ScalarFunction<Real>&);
-ScalarFunction<Real> cos(const ScalarFunction<Real>&);
-ScalarFunction<Real> tan(const ScalarFunction<Real>&);
+EffectiveScalarFunction pow(const EffectiveScalarFunction&, Int);
+EffectiveScalarFunction neg(const EffectiveScalarFunction&);
+EffectiveScalarFunction rec(const EffectiveScalarFunction&);
+EffectiveScalarFunction sqr(const EffectiveScalarFunction&);
+EffectiveScalarFunction sqrt(const EffectiveScalarFunction&);
+EffectiveScalarFunction exp(const EffectiveScalarFunction&);
+EffectiveScalarFunction log(const EffectiveScalarFunction&);
+EffectiveScalarFunction sin(const EffectiveScalarFunction&);
+EffectiveScalarFunction cos(const EffectiveScalarFunction&);
+EffectiveScalarFunction tan(const EffectiveScalarFunction&);
 
 
 
@@ -278,37 +291,37 @@ template<class X> VectorFunction<X> compose(const VectorFunction<X>& f, const Ve
 template<class X> ScalarFunction<X> lie_derivative(const ScalarFunction<X>& g, const VectorFunction<X>& f);
 */
 
-VectorFunction<Real> operator*(const ScalarFunction<Real>& sf, const Vector<Real>& e);
-VectorFunction<Real> operator+(const VectorFunction<Real>& f1, const VectorFunction<Real>& f2);
-VectorFunction<Real> operator-(const VectorFunction<Real>& f1, const VectorFunction<Real>& f2);
-VectorFunction<Real> operator*(const VectorFunction<Real>& vf, const ScalarFunction<Real>& sf);
-VectorFunction<Real> operator*(const ScalarFunction<Real>& sf, const VectorFunction<Real>& vf);
-VectorFunction<Real> operator*(const Real& c, const VectorFunction<Real>& vf);
+EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const Vector<EffectiveNumberType>& e);
+EffectiveVectorFunction operator+(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2);
+EffectiveVectorFunction operator-(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2);
+EffectiveVectorFunction operator*(const EffectiveVectorFunction& vf, const EffectiveScalarFunction& sf);
+EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const EffectiveVectorFunction& vf);
+EffectiveVectorFunction operator*(const EffectiveNumberType& c, const EffectiveVectorFunction& vf);
 
-ScalarFunction<Real> embed(Nat as1, const ScalarFunction<Real>& f2, Nat as3);
-VectorFunction<Real> embed(Nat as1, const VectorFunction<Real>& f2, Nat as3);
+EffectiveScalarFunction embed(Nat as1, const EffectiveScalarFunction& f2, Nat as3);
+EffectiveVectorFunction embed(Nat as1, const EffectiveVectorFunction& f2, Nat as3);
 
-VectorFunction<Real> join(const ScalarFunction<Real>& f1, const ScalarFunction<Real>& f2);
-VectorFunction<Real> join(const ScalarFunction<Real>& f1, const VectorFunction<Real>& f2);
-VectorFunction<Real> join(const VectorFunction<Real>& f1, const ScalarFunction<Real>& f2);
-VectorFunction<Real> join(const VectorFunction<Real>& f1, const VectorFunction<Real>& f2);
+EffectiveVectorFunction join(const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2);
+EffectiveVectorFunction join(const EffectiveScalarFunction& f1, const EffectiveVectorFunction& f2);
+EffectiveVectorFunction join(const EffectiveVectorFunction& f1, const EffectiveScalarFunction& f2);
+EffectiveVectorFunction join(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2);
 
-ScalarFunction<Real> compose(const ScalarFunction<Real>& f, const VectorFunction<Real>& g);
-VectorFunction<Real> compose(const VectorFunction<Real>& f, const VectorFunction<Real>& g);
+EffectiveScalarFunction compose(const EffectiveScalarFunction& f, const EffectiveVectorFunction& g);
+EffectiveVectorFunction compose(const EffectiveVectorFunction& f, const EffectiveVectorFunction& g);
 
-ScalarFunction<Real> lie_derivative(const ScalarFunction<Real>& g, const VectorFunction<Real>& f);
+EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const EffectiveVectorFunction& f);
 
-Formula<Real> formula(const ScalarFunction<Real>& f);
-Vector< Formula<Real> > formula(const VectorFunction<Real>& f);
+Formula<EffectiveNumberType> formula(const EffectiveScalarFunction& f);
+Vector< Formula<EffectiveNumberType> > formula(const EffectiveVectorFunction& f);
 
 
-ScalarFunction<Interval> operator-(const ScalarFunction<Interval>&, const ScalarFunction<Interval>&);
-ScalarFunction<Interval> operator-(const ScalarFunction<Interval>&, const Interval&);
-ScalarFunction<Interval> operator-(const Interval&, const ScalarFunction<Interval>&);
-VectorFunction<Interval> operator-(const VectorFunction<Interval>&, const VectorFunction<Interval>&);
-VectorFunction<Interval> join(const VectorFunction<Interval>& f1, const VectorFunction<Interval>& f2);
-ScalarFunction<Interval> compose(const ScalarFunction<Interval>& f, const VectorFunction<Interval>& g);
-VectorFunction<Interval> compose(const VectorFunction<Interval>& f, const VectorFunction<Interval>& g);
+ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
+ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedNumberType&);
+ValidatedScalarFunction operator-(const ValidatedNumberType&, const ValidatedScalarFunction&);
+ValidatedVectorFunction operator-(const ValidatedVectorFunction&, const ValidatedVectorFunction&);
+ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedVectorFunction& f2);
+ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g);
+ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const ValidatedVectorFunction& g);
 
 
 template<class X>
@@ -333,58 +346,58 @@ template<class X> template<class XX> inline XX VectorFunctionElementReference<X>
 template<class X> template<class XX> inline XX VectorFunctionElementReference<X>::operator()(const Vector<XX> & x) const {
     return static_cast< ScalarFunction<X> >(*this).evaluate(x); }
 
-inline ScalarFunction<Float> VectorFunctionInterface<Float>::operator[](Nat i) const { return this->_get(i); }
-inline ScalarFunction<Interval> VectorFunctionInterface<Interval>::operator[](Nat i) const { return this->_get(i); }
-inline ScalarFunction<Real> VectorFunctionInterface<Real>::operator[](Nat i) const { return this->_get(i); }
+inline ApproximateScalarFunction VectorFunctionInterface<ApproximateNumberType>::operator[](Nat i) const { return this->_get(i); }
+inline ValidatedScalarFunction VectorFunctionInterface<ValidatedNumberType>::operator[](Nat i) const { return this->_get(i); }
+inline EffectiveScalarFunction VectorFunctionInterface<EffectiveNumberType>::operator[](Nat i) const { return this->_get(i); }
 
 
-inline List< ScalarFunction<Real> > operator,(const Real& c1, const ScalarFunction<Real>& sf2) {
-    return (ScalarFunction<Real>::constant(sf2.argument_size(),c1),sf2); }
-inline List< ScalarFunction<Real> > operator,(const ScalarFunction<Real>& sf1, const Real& c2) {
-    return (sf1,ScalarFunction<Real>::constant(sf1.argument_size(),c2)); }
-inline List< ScalarFunction<Real> > operator,(const List< ScalarFunction<Real> >& vf1, const Real& c2) {
-    return (vf1,ScalarFunction<Real>::constant(vf1.back().argument_size(),c2)); }
+inline List< EffectiveScalarFunction > operator,(const EffectiveNumberType& c1, const EffectiveScalarFunction& sf2) {
+    return (EffectiveScalarFunction::constant(sf2.argument_size(),c1),sf2); }
+inline List< EffectiveScalarFunction > operator,(const EffectiveScalarFunction& sf1, const EffectiveNumberType& c2) {
+    return (sf1,EffectiveScalarFunction::constant(sf1.argument_size(),c2)); }
+inline List< EffectiveScalarFunction > operator,(const List< EffectiveScalarFunction >& vf1, const EffectiveNumberType& c2) {
+    return (vf1,EffectiveScalarFunction::constant(vf1.back().argument_size(),c2)); }
 
 
 
 
 template<class X> class FunctionFactory;
-typedef FunctionFactory<Interval> IntervalFunctionFactory;
+typedef FunctionFactory<ValidatedNumberType> ValidatedFunctionFactory;
 
 template<>
-class FunctionFactory<Interval>
+class FunctionFactory<ValidatedNumberType>
 {
-    std::shared_ptr< const FunctionFactoryInterface<Interval> > _ptr;
+    std::shared_ptr< const FunctionFactoryInterface<ValidatedNumberType> > _ptr;
   public:
-    FunctionFactory(const FunctionFactoryInterface<Interval>& ref) : _ptr(ref.clone()) { }
-    FunctionFactory(const FunctionFactoryInterface<Interval>* ptr) : _ptr(ptr) { }
-    FunctionFactory(std::shared_ptr< const FunctionFactoryInterface<Interval> > ptr) : _ptr(ptr) { }
-    inline ScalarFunction<Interval> create(const Box& d, const ScalarFunctionInterface<Interval>& f) const;
-    inline VectorFunction<Interval> create(const Box& d, const VectorFunctionInterface<Interval>& f) const;
-    inline ScalarFunction<Interval> create_zero(const Box& d) const;
-    inline VectorFunction<Interval> create_identity(const Box& d) const;
-    friend OutputStream& operator<<(OutputStream& os, const FunctionFactory<Interval>& factory);
+    FunctionFactory(const FunctionFactoryInterface<ValidatedNumberType>& ref) : _ptr(ref.clone()) { }
+    FunctionFactory(const FunctionFactoryInterface<ValidatedNumberType>* ptr) : _ptr(ptr) { }
+    FunctionFactory(std::shared_ptr< const FunctionFactoryInterface<ValidatedNumberType> > ptr) : _ptr(ptr) { }
+    inline ValidatedScalarFunction create(const Box& d, const ScalarFunctionInterface<ValidatedNumberType>& f) const;
+    inline ValidatedVectorFunction create(const Box& d, const VectorFunctionInterface<ValidatedNumberType>& f) const;
+    inline ValidatedScalarFunction create_zero(const Box& d) const;
+    inline ValidatedVectorFunction create_identity(const Box& d) const;
+    friend OutputStream& operator<<(OutputStream& os, const FunctionFactory<ValidatedNumberType>& factory);
 };
 
-inline ScalarFunction<Interval> FunctionFactoryInterface<Interval>::create(const Box& domain, const ScalarFunctionInterface<Interval>& function) const {
+inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedNumberType>::create(const Box& domain, const ScalarFunctionInterface<ValidatedNumberType>& function) const {
     return this->_create(domain,function); }
-inline VectorFunction<Interval> FunctionFactoryInterface<Interval>::create(const Box& domain, const VectorFunctionInterface<Interval>& function) const {
+inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedNumberType>::create(const Box& domain, const VectorFunctionInterface<ValidatedNumberType>& function) const {
     return this->_create(domain,function); }
-inline ScalarFunction<Interval> FunctionFactoryInterface<Interval>::create_zero(const Box& domain) const {
-    return this->_create(domain,RealScalarFunction::zero(domain.size())); }
-inline VectorFunction<Interval> FunctionFactoryInterface<Interval>::create_identity(const Box& domain) const {
-    return this->_create(domain,RealVectorFunction::identity(domain.size())); }
+inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedNumberType>::create_zero(const Box& domain) const {
+    return this->_create(domain,EffectiveScalarFunction::zero(domain.size())); }
+inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedNumberType>::create_identity(const Box& domain) const {
+    return this->_create(domain,EffectiveVectorFunction::identity(domain.size())); }
 
-inline ScalarFunction<Interval> FunctionFactory<Interval>::create(const Box& domain, const ScalarFunctionInterface<Interval>& function) const {
+inline ValidatedScalarFunction FunctionFactory<ValidatedNumberType>::create(const Box& domain, const ScalarFunctionInterface<ValidatedNumberType>& function) const {
     return this->_ptr->create(domain,function); }
-inline VectorFunction<Interval> FunctionFactory<Interval>::create(const Box& domain, const VectorFunctionInterface<Interval>& function) const {
+inline ValidatedVectorFunction FunctionFactory<ValidatedNumberType>::create(const Box& domain, const VectorFunctionInterface<ValidatedNumberType>& function) const {
     return this->_ptr->create(domain,function); }
-inline ScalarFunction<Interval> FunctionFactory<Interval>::create_zero(const Box& domain) const {
+inline ValidatedScalarFunction FunctionFactory<ValidatedNumberType>::create_zero(const Box& domain) const {
     return this->_ptr->create_zero(domain); }
-inline VectorFunction<Interval> FunctionFactory<Interval>::create_identity(const Box& domain) const {
+inline ValidatedVectorFunction FunctionFactory<ValidatedNumberType>::create_identity(const Box& domain) const {
     return this->_ptr->create_identity(domain); }
 
-inline OutputStream& operator<<(OutputStream& os, const FunctionFactory<Interval>& factory) {
+inline OutputStream& operator<<(OutputStream& os, const FunctionFactory<ValidatedNumberType>& factory) {
     factory._ptr->write(os); return os; }
 
 } // namespace Ariadne

@@ -63,14 +63,14 @@ class GeneralHybridEvolverConfiguration;
 //! \ingroup FunctionModule
 //! \brief A class representing the flow \f$\phi(x,t)\f$ of a differential equation \f$\frac{dx}{dt}=f(x)\f$.
 class FlowFunctionModel
-    : public IntervalVectorFunctionModel
+    : public ValidatedVectorFunctionModel
 {
   public:
-    FlowFunctionModel(const IntervalVectorFunctionModel& f) : IntervalVectorFunctionModel(f) { }
+    FlowFunctionModel(const ValidatedVectorFunctionModel& f) : ValidatedVectorFunctionModel(f) { }
     ExactFloat step_size() const { return make_exact(this->time_domain().upper()); }
     Interval time_domain() const { return this->domain()[this->domain().size()-1]; }
     IntervalVector space_domain() const { return project(this->domain(),Ariadne::range(0,this->domain().size()-1)); }
-    IntervalVector const codomain() const { return this->IntervalVectorFunctionModel::codomain(); }
+    IntervalVector const codomain() const { return this->ValidatedVectorFunctionModel::codomain(); }
 };
 
 struct TransitionData;
@@ -227,7 +227,7 @@ class HybridEvolverBase
     virtual
     void
     _evolution_step(EvolutionData& evolution_data,
-                    RealVectorFunction const& dynamic,
+                    EffectiveVectorFunction const& dynamic,
                     Map<DiscreteEvent,TransitionData> const& transitions,
                     Real const& final_time) const;
 
@@ -245,8 +245,8 @@ class HybridEvolverBase
     //! defined on a domain \f$B\times [0,h]\f$, where \f$B\f$ is the bounding
     //! box for the set, and \f$h\f$ is the step size actually used.
     virtual
-    IntervalVectorFunctionModel
-    _compute_flow(RealVectorFunction vector_field,
+    ValidatedVectorFunctionModel
+    _compute_flow(EffectiveVectorFunction vector_field,
                   Box const& initial_set,
                   const Float& maximum_step_size) const;
 
@@ -259,9 +259,9 @@ class HybridEvolverBase
     //! compute.
     virtual
     Set<DiscreteEvent>
-    _compute_active_events(RealVectorFunction const& dynamic,
-                           Map<DiscreteEvent,RealScalarFunction> const& guards,
-                           IntervalVectorFunctionModel const& flow,
+    _compute_active_events(EffectiveVectorFunction const& dynamic,
+                           Map<DiscreteEvent,EffectiveScalarFunction> const& guards,
+                           ValidatedVectorFunctionModel const& flow,
                            HybridEnclosure const& starting_set) const;
 
     //! \brief Compute data on how trajectories of the \a flow
@@ -281,8 +281,8 @@ class HybridEvolverBase
     virtual
     Map<DiscreteEvent,CrossingData>
     _compute_crossings(Set<DiscreteEvent> const& active_events,
-                       RealVectorFunction const& dynamic,
-                       Map<DiscreteEvent,RealScalarFunction> const& guards,
+                       EffectiveVectorFunction const& dynamic,
+                       Map<DiscreteEvent,EffectiveScalarFunction> const& guards,
                        FlowFunctionModel const& flow,
                        HybridEnclosure const& initial_set) const;
 
@@ -348,7 +348,7 @@ class HybridEvolverBase
     virtual
     void
     _apply_reach_step(HybridEnclosure& set,
-                      IntervalVectorFunctionModel const& flow,
+                      ValidatedVectorFunctionModel const& flow,
                       TimingData const& timing_data) const;
 
     //! \brief Apply the \a flow to the \a set for the time specified by \a timing_data
@@ -356,7 +356,7 @@ class HybridEvolverBase
     virtual
     void
     _apply_evolve_step(HybridEnclosure& set,
-                       IntervalVectorFunctionModel const& flow,
+                       ValidatedVectorFunctionModel const& flow,
                        TimingData const& timing_data) const;
 
     //! \brief Apply the \a flow to the \a set for to reach the
@@ -368,8 +368,8 @@ class HybridEvolverBase
     virtual
     void
     _apply_guard_step(HybridEnclosure& set,
-                      RealVectorFunction const& dynamic,
-                      IntervalVectorFunctionModel const& flow,
+                      EffectiveVectorFunction const& dynamic,
+                      ValidatedVectorFunctionModel const& flow,
                       TimingData const& timing_data,
                       TransitionData const& transition_data,
                       CrossingData const& crossing_data,
@@ -393,8 +393,8 @@ class HybridEvolverBase
     void
     _apply_guard(List<HybridEnclosure>& sets,
                  const HybridEnclosure& starting_set,
-                 const IntervalVectorFunctionModel& flow,
-                 const IntervalScalarFunctionModel& evolve_time,
+                 const ValidatedVectorFunctionModel& flow,
+                 const ValidatedScalarFunctionModel& evolve_time,
                  const TransitionData& transition_data,
                  const CrossingData crossing_data,
                  const Semantics semantics) const;
@@ -442,10 +442,10 @@ class HybridEvolverBase
     void
     _apply_evolution_step(EvolutionData& evolution_data,
                           HybridEnclosure const& starting_set,
-                          IntervalVectorFunctionModel const& flow,
+                          ValidatedVectorFunctionModel const& flow,
                           TimingData const& timing_data,
                           Map<DiscreteEvent,CrossingData> const& crossing_data,
-                          RealVectorFunction const& dynamic,
+                          EffectiveVectorFunction const& dynamic,
                           Map<DiscreteEvent,TransitionData> const& transitions) const;
 
     //! \brief Output a one-line summary of the current evolution state to the logging stream.
@@ -481,17 +481,17 @@ struct TransitionData
     EventKind event_kind;
     //! \brief The guard function of the event, the event being active when
     //! \f$g(x)\geq0\f$.
-    RealScalarFunction guard_function;
+    EffectiveScalarFunction guard_function;
     //! \brief The Lie derivative of the guard function along the flow.
-    RealScalarFunction guard_flow_derivative_function;
+    EffectiveScalarFunction guard_flow_derivative_function;
     //! \brief The target location of the transition.
     DiscreteLocation target;
     //! \brief The reset function \f$x'=r(x)\f$ of the transition.
-    RealVectorFunction reset_function;
+    EffectiveVectorFunction reset_function;
     //! \brief The state space in the target location.
     RealSpace target_space;
     //TransitionData() { }
-    //TransitionData(DiscreteLocation t, IntervalScalarFunction g, IntervalVectorFunction r)
+    //TransitionData(DiscreteLocation t, ValidatedScalarFunction g, ValidatedVectorFunction r)
     //    : target(t), guard_function(g), reset_function(r) { }
 };
 
@@ -550,7 +550,7 @@ struct CrossingData
 {
     CrossingData() : crossing_kind() { }
     CrossingData(CrossingKind crk) : crossing_kind(crk) { }
-    CrossingData(CrossingKind crk, const IntervalScalarFunctionModel& crt)
+    CrossingData(CrossingKind crk, const ValidatedScalarFunctionModel& crt)
         : crossing_kind(crk), crossing_time(crt) { }
     //! \brief The way in which the guard function changes along trajectories
     DirectionKind direction_kind;
@@ -561,10 +561,10 @@ struct CrossingData
     Interval crossing_time_range;
     //! \brief The time \f$\gamma(x)\f$ at which the crossing occurs,
     //! as a function of the initial point in space. Satisfies \f$g(\phi(x,\gamma(x)))=0\f$.
-    IntervalScalarFunctionModel crossing_time;
+    ValidatedScalarFunctionModel crossing_time;
     //! \brief The time \f$\mu(x)\f$ at which the guard function reaches a maximum or minimum
     //! i.e. \f$L_{f}g(\phi(x,\mu(x))) = 0\f$.
-    IntervalScalarFunctionModel critical_time;
+    ValidatedScalarFunctionModel critical_time;
 };
 std::ostream& operator<<(std::ostream& os, const CrossingData& crk);
 
@@ -617,18 +617,18 @@ struct TimingData
     FinishingKind finishing_kind; //!< The relationship between the finishing time of the step, and the final time of the evolution trace.
     Real final_time; //!< The time \f$t_{\max}\f$ specified as the final time of the evolution trace.
     ExactFloat step_size; //!< The maximum step size \f$h\f$ allowed by the computed flow function.
-    IntervalScalarFunctionModel spacetime_dependent_evolution_time;
+    ValidatedScalarFunctionModel spacetime_dependent_evolution_time;
         //!< The evolution time \f$\varepsilon(x,t)\f$ used in a \a SPACETIME_DEPENDENT_EVOLUTION_TIME step.
-    IntervalScalarFunctionModel spacetime_dependent_finishing_time;
+    ValidatedScalarFunctionModel spacetime_dependent_finishing_time;
         //!< The final time \f$\omega(x,t)\f$ used in a \a SPACETIME_DEPENDENT_FINISHING_TIME step.
-    IntervalScalarFunctionModel parameter_dependent_finishing_time;
+    ValidatedScalarFunctionModel parameter_dependent_finishing_time;
         //!< The time \f$\omega(s)\f$ reached after an \a PARAMETER_DEPENDENT_FINISHING_TIME as a function of the parameters.
-    IntervalScalarFunctionModel parameter_dependent_evolution_time;
+    ValidatedScalarFunctionModel parameter_dependent_evolution_time;
         //!< The time \f$\delta(s)\f$ used in a \a PARAMETER_DEPENDENT_EVOLUTION_TIME step.
         //! Set equal to \f$\varepsilon(\xi(s))\f$ for a \a SPACE_DEPENDENT_EVOLUTION_TIME
         //! and \f$\omega(s)-\varepsilon(s)\f$ for an \a PARAMETER_DEPENDENT_FINISHING_TIME.
     Interval evolution_time_domain; //!< The time domain of the flow function, equal to \f$[0,h]\f$.
-    IntervalScalarFunctionModel evolution_time_coordinate; //!< The time coordinate of the flow function, equal to the identity on \f$[0,h]\f$.
+    ValidatedScalarFunctionModel evolution_time_coordinate; //!< The time coordinate of the flow function, equal to the identity on \f$[0,h]\f$.
 };
 
 //! \brief A data type used to store information about the kind of time step taken during hybrid evolution.

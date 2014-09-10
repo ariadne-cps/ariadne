@@ -43,7 +43,7 @@ Curve::~Curve()
 
 
 
-Curve::Curve(const RealVectorFunction& f)
+Curve::Curve(const EffectiveVectorFunction& f)
     : _function(f)
 {
     assert(this->_function.argument_size()==1);

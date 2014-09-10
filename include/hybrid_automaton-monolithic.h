@@ -67,10 +67,10 @@ class DiscreteMode {
     DiscreteLocation _location;
 
     // The discrete mode's vector field.
-    RealVectorFunction _dynamic;
+    EffectiveVectorFunction _dynamic;
 
     // The discrete mode's invariants.
-    Map< DiscreteEvent, Pair<EventKind,RealScalarFunction> _invariants;
+    Map< DiscreteEvent, Pair<EventKind,EffectiveScalarFunction> _invariants;
 
   public:
     //! \brief The mode's discrete state.
@@ -78,14 +78,14 @@ class DiscreteMode {
         return this->_location; }
 
     //! \brief The discrete mode's dynamic (a vector field).
-    const RealVectorFunction& dynamic() const {
+    const EffectiveVectorFunction& dynamic() const {
         return this->_dynamic; }
 
     //! \brief The discrete mode's invariants.
-    const Map< DiscreteEvent, RealScalarFunction >& invariants() const {
+    const Map< DiscreteEvent, EffectiveScalarFunction >& invariants() const {
         return this->_invariants; }
 
-    const RealScalarFunction& invariant(const DiscreteEvent& event) const {
+    const EffectiveScalarFunction& invariant(const DiscreteEvent& event) const {
         return this->_invariants.find(event)->second; }
 
     //! \brief The dimension of the discrete mode.
@@ -101,7 +101,7 @@ class DiscreteMode {
     // \param dynamic is the mode's vector field.
     // \param invariants is the mode's invariants.
     DiscreteMode(DiscreteLocation location,
-                 const RealVectorFunction& dynamic);
+                 const EffectiveVectorFunction& dynamic);
 
 };
 
@@ -147,28 +147,28 @@ class MonolithicHybridAutomaton
     : public HybridAutomatonInterface
 {
     struct Invariant {
-        Invariant(DiscreteLocation q, DiscreteEvent e, RealScalarFunction g, EventKind k)
+        Invariant(DiscreteLocation q, DiscreteEvent e, EffectiveScalarFunction g, EventKind k)
             : _location(q), _event(e), _guard(g), _kind(k) { }
         DiscreteLocation _location;
         DiscreteEvent _event;
-        RealScalarFunction _guard;
+        EffectiveScalarFunction _guard;
         EventKind _kind;
     };
     struct Transition {
-        Transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, RealVectorFunction r, RealScalarFunction g, EventKind k)
+        Transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, EffectiveVectorFunction r, EffectiveScalarFunction g, EventKind k)
             : _source(s), _event(e), _target(t), _reset(r), _guard(g), _kind(k) { }
         DiscreteLocation _source;
         DiscreteEvent _event;
         DiscreteLocation _target;
-        RealVectorFunction _reset;
-        RealScalarFunction _guard;
+        EffectiveVectorFunction _reset;
+        EffectiveScalarFunction _guard;
         EventKind _kind;
     };
     struct Mode {
-        Mode(DiscreteLocation q, RealSpace s, RealVectorFunction f);
+        Mode(DiscreteLocation q, RealSpace s, EffectiveVectorFunction f);
         DiscreteLocation _location;
         List<Identifier> _variable_names;
-        RealVectorFunction _dynamic;
+        EffectiveVectorFunction _dynamic;
         Map< DiscreteEvent, Invariant >  _invariants;
         Map< DiscreteEvent, Transition >  _transitions;
         uint dimension() const { return _dynamic.result_size(); }
@@ -214,7 +214,7 @@ class MonolithicHybridAutomaton
     //!
     //! The variables are given default names x0, x1 etc.
     void new_mode(DiscreteLocation state,
-                  RealVectorFunction dynamic);
+                  EffectiveVectorFunction dynamic);
 
     //! \brief Adds a discrete mode to the automaton.
     //!
@@ -223,7 +223,7 @@ class MonolithicHybridAutomaton
     //!   \param dynamic is the mode's vector field.
     void new_mode(DiscreteLocation state,
                   RealSpace space,
-                  RealVectorFunction dynamic);
+                  EffectiveVectorFunction dynamic);
 
     //! \brief Adds an invariant to a mode of the automaton.
     //!
@@ -235,7 +235,7 @@ class MonolithicHybridAutomaton
 
     void new_invariant(DiscreteLocation state,
                        DiscreteEvent label,
-                       RealScalarFunction invariant,
+                       EffectiveScalarFunction invariant,
                        EventKind kind=PROGRESS
                       );
 
@@ -251,8 +251,8 @@ class MonolithicHybridAutomaton
     void new_transition(DiscreteLocation source,
                         DiscreteEvent event,
                         DiscreteLocation target,
-                        RealVectorFunction reset,
-                        RealScalarFunction guard,
+                        EffectiveVectorFunction reset,
+                        EffectiveScalarFunction guard,
                         EventKind kind);
 
     //@}
@@ -279,7 +279,7 @@ class MonolithicHybridAutomaton
     uint dimension(DiscreteLocation location) const;
 
     //! \brief The dynamic valid in the mode \a location.
-    virtual RealVectorFunction dynamic_function(DiscreteLocation location) const;
+    virtual EffectiveVectorFunction dynamic_function(DiscreteLocation location) const;
 
     //! \brief The set of all events possible in the given \a location.
     virtual Set<DiscreteEvent> events(DiscreteLocation location) const;
@@ -288,16 +288,16 @@ class MonolithicHybridAutomaton
     virtual EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The constraint function defining the invariant or time-can-progress predicate \f$p(x)\leq0\f$.
-    virtual RealScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual EffectiveScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The constraint function defining the condition \f$c(x)\geq0\f$ under which a transition occurs.
-    virtual RealScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual EffectiveScalarFunction guard_function(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The target location of \a event starting in the \a source location.
     virtual DiscreteLocation target(DiscreteLocation source, DiscreteEvent event) const;
 
     //! \brief The dynamic valid in the mode \a location.
-    virtual RealVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
+    virtual EffectiveVectorFunction reset_function(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief The discrete mode for the given \a location.
     const Mode& mode(DiscreteLocation source) const;

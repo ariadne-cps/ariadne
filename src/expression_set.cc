@@ -177,7 +177,7 @@ ConstraintSet RealExpressionConstraintSet::euclidean_set(const RealSpace& space)
     List<RealConstraint> constraints;
     for(uint i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
-        RealScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
+        EffectiveScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
         constraints.append( constraint_function <= Real(0) );
     }
     return ConstraintSet(constraints);
@@ -211,7 +211,7 @@ BoundedConstraintSet RealExpressionBoundedConstraintSet::euclidean_set(const Rea
     List<RealConstraint> constraints;
     for(uint i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
-        RealScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
+        EffectiveScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
         constraints.append( constraint_function <= Real(0) );
     }
     return BoundedConstraintSet(domain,constraints);}
@@ -229,13 +229,13 @@ OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraint
 
 IntervalConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
     IntervalVector domain=approximation(RealVariablesBox(set.bounds()).euclidean_set(space));
-    IntervalVectorFunction identity=IntervalVectorFunction::identity(domain.size());
+    ValidatedVectorFunction identity=ValidatedVectorFunction::identity(domain.size());
 
     IntervalConstrainedImageSet result(domain,identity);
     //List<IntervalConstraint> constraints;
     for(uint i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
-        IntervalScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
+        ValidatedScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
         result.new_parameter_constraint(constraint_function <= Float(0) );
         //constraints.append( constraint_function <= 0.0 );
     }

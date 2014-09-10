@@ -51,9 +51,9 @@ using namespace std;
 int evolver_verbosity=0;
 
 
-RealScalarFunction c=RealScalarFunction::constant(2,1);
-RealScalarFunction x0=RealScalarFunction::coordinate(2,0);
-RealScalarFunction x1=RealScalarFunction::coordinate(2,1);
+EffectiveScalarFunction c=EffectiveScalarFunction::constant(2,1);
+EffectiveScalarFunction x0=EffectiveScalarFunction::coordinate(2,0);
+EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(2,1);
 DiscreteLocation q("q");
 DiscreteEvent e("e");
 

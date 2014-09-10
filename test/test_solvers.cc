@@ -58,9 +58,9 @@ class TestSolver
     }
 
     void test_solve() {
-        RealScalarFunction x=RealScalarFunction::coordinate(1,0);
+        EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(1,0);
         IntervalVector d({Interval(0.0,1.0)});
-        RealVectorFunction f({(x*x+1)*x-1});
+        EffectiveVectorFunction f({(x*x+1)*x-1});
         IntervalVector p=solver->solve(f,d);
         ARIADNE_TEST_BINARY_PREDICATE(subset,p[0],Interval(0.6823,0.6824));
     }
@@ -68,49 +68,49 @@ class TestSolver
     void test_implicit() {
         //TaylorModelAccuracy::set_default_sweep_threshold(1e-12);
 
-        RealScalarFunction aa=RealScalarFunction::coordinate(1,0);
-        RealScalarFunction a=RealScalarFunction::coordinate(2,0);
-        RealScalarFunction x=RealScalarFunction::coordinate(2,1);
-        RealScalarFunction bb;
+        EffectiveScalarFunction aa=EffectiveScalarFunction::coordinate(1,0);
+        EffectiveScalarFunction a=EffectiveScalarFunction::coordinate(2,0);
+        EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,1);
+        EffectiveScalarFunction bb;
         IntervalVector p,r;
-        RealVectorFunction f;
-        IntervalVectorFunctionModel h;
-        RealVectorFunction e;
+        EffectiveVectorFunction f;
+        ValidatedVectorFunctionModel h;
+        EffectiveVectorFunction e;
 
         // Test solution of x-a=0. This should be very easy to solve.
         p=IntervalVector({Interval(-0.25,0.25)});
         r=IntervalVector({Interval(-2.0,2.0)});
-        f=RealVectorFunction({x-a});
+        f=EffectiveVectorFunction({x-a});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        e=RealVectorFunction(1u,aa);
+        e=EffectiveVectorFunction(1u,aa);
         ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-8);
 
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
         p=IntervalVector({Interval(0.875,1.125)});
         r=IntervalVector({Interval(0.25,1.25)});
-        f=RealVectorFunction({(x*x+1)*x-a});
+        f=EffectiveVectorFunction({(x*x+1)*x-a});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        bb=RealScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
+        bb=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
         Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
-        e=RealVectorFunction( { a0+bb*(a1+bb*(a2+bb*a3)) } );
+        e=EffectiveVectorFunction( { a0+bb*(a1+bb*(a2+bb*a3)) } );
         ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
 
         // Test solution of 4x^2+x-4-a=0 on [-0.25,0.25]. There is a unique solution with positive derivative.
         p=IntervalVector({Interval(-0.25,0.25)});
         r=IntervalVector({Interval(0.25,2.0)});
-        f=RealVectorFunction({4*x+x*x-a-4});
+        f=EffectiveVectorFunction({4*x+x*x-a-4});
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        bb=RealScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
+        bb=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
         Decimal c0(0.828427), c1(0.0441942), c2(-0.000345267), c3(0.00000539468);
-        e=RealVectorFunction( { c0+bb*(c1+bb*(c2+bb*c3)) } );
+        e=EffectiveVectorFunction( { c0+bb*(c1+bb*(c2+bb*c3)) } );
         ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
 
@@ -119,7 +119,7 @@ class TestSolver
         // Should obtain PartialSolutionException
         p=IntervalVector({Interval(-1,1)});
         r=IntervalVector({Interval(-1,1)});
-        f=RealVectorFunction({x-2*a});
+        f=EffectiveVectorFunction({x-2*a});
         ARIADNE_TEST_PRINT(f);
         try {
             h=solver->implicit(f,p,r);
@@ -135,27 +135,27 @@ class TestSolver
     void test_scalar_implicit() {
         //TaylorModelAccuracy::set_default_sweep_threshold(1e-12);
 
-        RealScalarFunction aa=RealScalarFunction::coordinate(1,0);
-        RealScalarFunction a=RealScalarFunction::coordinate(2,0);
-        RealScalarFunction x=RealScalarFunction::coordinate(2,1);
+        EffectiveScalarFunction aa=EffectiveScalarFunction::coordinate(1,0);
+        EffectiveScalarFunction a=EffectiveScalarFunction::coordinate(2,0);
+        EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,1);
         // Test solution of x-2*a=0 on [-1,+1], taking values in [-1,+1]. There is at most one solution.
         // Uses scalar implicit
         IntervalVector p; Interval r;
-        RealScalarFunction e,f,s; // s is unscaling functions
-        IntervalScalarFunctionModel h;
+        EffectiveScalarFunction e,f,s; // s is unscaling functions
+        ValidatedScalarFunctionModel h;
 
         ARIADNE_TEST_PRINT(*solver);
 
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
         p=IntervalVector({Interval(0.875,1.125)});
         r=Interval(0.25,1.25);
-        f=RealScalarFunction((x*x+1)*x-a);
+        f=EffectiveScalarFunction((x*x+1)*x-a);
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        s=RealScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
+        s=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
         Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
-        e=RealScalarFunction( a0+s*(a1+s*(a2+s*a3)) );
+        e=EffectiveScalarFunction( a0+s*(a1+s*(a2+s*a3)) );
         ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(mag((h-e).range()),<,1e-4);
 
@@ -164,9 +164,9 @@ class TestSolver
         // Should obtain PartialSolutionException
         p=IntervalVector({Interval(-1,1)});
         r=Interval(-1,1);
-        f=RealScalarFunction(x-2*a);
+        f=EffectiveScalarFunction(x-2*a);
         ARIADNE_TEST_PRINT(f);
-        IntervalScalarFunctionModel g=ScalarTaylorFunction(join(p,r),f,ThresholdSweeper(1e-12));
+        ValidatedScalarFunctionModel g=ScalarTaylorFunction(join(p,r),f,ThresholdSweeper(1e-12));
         ARIADNE_TEST_PRINT(g);
         try {
             h=solver->implicit(g,p,r);

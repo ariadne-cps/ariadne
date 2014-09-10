@@ -83,7 +83,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<Int
 {
     if(constraints.empty()) { return make_pair(!domain.empty(),domain.centre()); }
 
-    IntervalVectorFunction function(constraints.size());
+    ValidatedVectorFunction function(constraints.size());
     Box bounds(constraints.size());
 
     for(uint i=0; i!=constraints.size(); ++i) {
@@ -94,7 +94,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<Int
 }
 
 
-Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const IntervalVectorFunction& function, const Box& codomain) const
+Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const
 {
 
     static const double XSIGMA=0.125;
@@ -123,7 +123,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Interval
     Point slack(l); // The slack between the test point and the violated constraints
 
     Float& t=violation; Point& x=multipliers; Point& y=point; Point& z=slack; // Aliases for the main quantities used
-    const Box& d=domain; const IntervalVectorFunction& fn=function; const Box& c=codomain; // Aliases for the main quantities used
+    const Box& d=domain; const ValidatedVectorFunction& fn=function; const Box& c=codomain; // Aliases for the main quantities used
     VectorTaylorFunction tfn(d,fn,default_sweeper());
 
     point=midpoint(d);
@@ -198,7 +198,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Interval
 }
 
 
-bool ConstraintSolver::reduce(Box& domain, const IntervalVectorFunction& function, const Box& codomain) const
+bool ConstraintSolver::reduce(Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const
 {
     const double MINIMUM_REDUCTION = 0.75;
     ARIADNE_ASSERT(function.argument_size()==domain.size());
@@ -301,9 +301,9 @@ bool ConstraintSolver::hull_reduce(Box& domain, const Vector<IntervalProcedure>&
     return domain.empty();
 }
 
-bool ConstraintSolver::hull_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds) const
+bool ConstraintSolver::hull_reduce(Box& domain, const ValidatedScalarFunctionInterface& function, const Interval& bounds) const
 {
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, IntervalScalarFunction function, Interval bounds): "
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, ValidatedScalarFunction function, Interval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Formula<Interval> formula=function.evaluate(Formula<Interval>::identity(function.argument_size()));
@@ -311,9 +311,9 @@ bool ConstraintSolver::hull_reduce(Box& domain, const IntervalScalarFunctionInte
     return this->hull_reduce(domain,procedure,bounds);
 }
 
-bool ConstraintSolver::hull_reduce(Box& domain, const IntervalVectorFunctionInterface& function, const IntervalVector& bounds) const
+bool ConstraintSolver::hull_reduce(Box& domain, const ValidatedVectorFunctionInterface& function, const IntervalVector& bounds) const
 {
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, IntervalScalarFunction function, Interval bounds): "
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, ValidatedScalarFunction function, Interval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Vector< Formula<Interval> > formula=function.evaluate(Formula<Interval>::identity(function.argument_size()));
@@ -321,9 +321,9 @@ bool ConstraintSolver::hull_reduce(Box& domain, const IntervalVectorFunctionInte
     return this->hull_reduce(domain,procedure,bounds);
 }
 
-bool ConstraintSolver::monotone_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds, uint variable) const
+bool ConstraintSolver::monotone_reduce(Box& domain, const ValidatedScalarFunctionInterface& function, const Interval& bounds, uint variable) const
 {
-    IntervalScalarFunction derivative=function.derivative(variable);
+    ValidatedScalarFunction derivative=function.derivative(variable);
 
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
 
@@ -392,7 +392,7 @@ bool ConstraintSolver::lyapunov_reduce(Box& domain, const VectorTaylorFunction& 
     return domain.empty();
 }
 
-bool ConstraintSolver::box_reduce(Box& domain, const IntervalScalarFunctionInterface& function, const Interval& bounds, uint variable) const
+bool ConstraintSolver::box_reduce(Box& domain, const ValidatedScalarFunctionInterface& function, const Interval& bounds, uint variable) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::box_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<"\n");
 
@@ -468,13 +468,13 @@ void compute_monotonicity(Box& domain, const RealConstraint& constraint) {
 } // namespace
 
 
-Pair<Box,Box> ConstraintSolver::split(const Box& d, const IntervalVectorFunction& f, const IntervalVector& c) const
+Pair<Box,Box> ConstraintSolver::split(const Box& d, const ValidatedVectorFunction& f, const IntervalVector& c) const
 {
     return d.split();
 }
 
 
-tribool ConstraintSolver::check_feasibility(const Box& d, const IntervalVectorFunction& f, const Box& c, const Point& y) const
+tribool ConstraintSolver::check_feasibility(const Box& d, const ValidatedVectorFunction& f, const Box& c, const Point& y) const
 {
     for(uint i=0; i!=y.size(); ++i) {
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }

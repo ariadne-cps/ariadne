@@ -229,12 +229,12 @@ List<MultiIndex> keys(const IntervalTaylorModel& tm) {
     return r;
 }
 
-IntervalScalarFunction unrestrict(const IntervalScalarFunctionModel& fm) {
-    return IntervalScalarFunction(fm.raw_pointer()->_clone());
+ValidatedScalarFunction unrestrict(const ValidatedScalarFunctionModel& fm) {
+    return ValidatedScalarFunction(fm.raw_pointer()->_clone());
 }
 
-IntervalVectorFunction unrestrict(const IntervalVectorFunctionModel& fm) {
-    return IntervalVectorFunction(fm.raw_pointer()->_clone());
+ValidatedVectorFunction unrestrict(const ValidatedVectorFunctionModel& fm) {
+    return ValidatedVectorFunction(fm.raw_pointer()->_clone());
 }
 
 
@@ -383,15 +383,15 @@ void export_taylor_model()
 
 void export_scalar_function_model()
 {
-    class_<IntervalScalarFunctionModel> scalar_function_model_class("IntervalScalarFunctionModel",init<IntervalScalarFunctionModel>());
+    class_<ValidatedScalarFunctionModel> scalar_function_model_class("ValidatedScalarFunctionModel",init<ValidatedScalarFunctionModel>());
     scalar_function_model_class.def(init<ScalarTaylorFunction>());
-    scalar_function_model_class.def("argument_size", &IntervalScalarFunctionModel::argument_size);
-    scalar_function_model_class.def("domain", &IntervalScalarFunctionModel::domain);
-    scalar_function_model_class.def("codomain", &IntervalScalarFunctionModel::codomain);
-    scalar_function_model_class.def("range", &IntervalScalarFunctionModel::range);
-    scalar_function_model_class.def("clobber", &IntervalScalarFunctionModel::clobber);
-    scalar_function_model_class.def("error", &IntervalScalarFunctionModel::error);
-    scalar_function_model_class.def("__call__", (Interval(IntervalScalarFunctionModel::*)(const IntervalVector&)const) &IntervalScalarFunctionModel::operator());
+    scalar_function_model_class.def("argument_size", &ValidatedScalarFunctionModel::argument_size);
+    scalar_function_model_class.def("domain", &ValidatedScalarFunctionModel::domain);
+    scalar_function_model_class.def("codomain", &ValidatedScalarFunctionModel::codomain);
+    scalar_function_model_class.def("range", &ValidatedScalarFunctionModel::range);
+    scalar_function_model_class.def("clobber", &ValidatedScalarFunctionModel::clobber);
+    scalar_function_model_class.def("error", &ValidatedScalarFunctionModel::error);
+    scalar_function_model_class.def("__call__", (Interval(ValidatedScalarFunctionModel::*)(const IntervalVector&)const) &ValidatedScalarFunctionModel::operator());
     scalar_function_model_class.def(self+self);
     scalar_function_model_class.def(self-self);
     scalar_function_model_class.def(self*self);
@@ -404,47 +404,47 @@ void export_scalar_function_model()
     scalar_function_model_class.def(Interval()-self);
     scalar_function_model_class.def(Interval()*self);
     scalar_function_model_class.def(Interval()/self);
-    scalar_function_model_class.def("__str__", &__cstr__<IntervalScalarFunctionModel>);
-    scalar_function_model_class.def("__repr__", &__crepr__<IntervalScalarFunctionModel>);
-    //scalar_function_model_class.def("__repr__",&__repr__<IntervalScalarFunctionModel>);
+    scalar_function_model_class.def("__str__", &__cstr__<ValidatedScalarFunctionModel>);
+    scalar_function_model_class.def("__repr__", &__crepr__<ValidatedScalarFunctionModel>);
+    //scalar_function_model_class.def("__repr__",&__repr__<ValidatedScalarFunctionModel>);
 
-    def("evaluate", (Interval(*)(const IntervalScalarFunctionModel&,const IntervalVector&)) &evaluate);
-    //def("partial_evaluate", (IntervalScalarFunctionModel(*)(const IntervalScalarFunctionModel&,Nat,const Interval&)) &partial_evaluate);
-    def("compose", (IntervalScalarFunctionModel(*)(const IntervalScalarFunctionModel&,const IntervalVectorFunctionModel&)) &compose);
-    def("compose", (IntervalScalarFunctionModel(*)(const IntervalScalarFunction&,const IntervalVectorFunctionModel&)) &compose);
+    def("evaluate", (Interval(*)(const ValidatedScalarFunctionModel&,const IntervalVector&)) &evaluate);
+    //def("partial_evaluate", (ValidatedScalarFunctionModel(*)(const ValidatedScalarFunctionModel&,Nat,const Interval&)) &partial_evaluate);
+    def("compose", (ValidatedScalarFunctionModel(*)(const ValidatedScalarFunctionModel&,const ValidatedVectorFunctionModel&)) &compose);
+    def("compose", (ValidatedScalarFunctionModel(*)(const ValidatedScalarFunction&,const ValidatedVectorFunctionModel&)) &compose);
 
-    def("unrestrict", (IntervalScalarFunction(*)(const IntervalScalarFunctionModel&)) &unrestrict);
+    def("unrestrict", (ValidatedScalarFunction(*)(const ValidatedScalarFunctionModel&)) &unrestrict);
 }
 
 void export_vector_function_model()
 {
-    class_<IntervalVectorFunctionModel> vector_function_model_class("IntervalVectorFunctionModel",init<IntervalVectorFunctionModel>());
+    class_<ValidatedVectorFunctionModel> vector_function_model_class("ValidatedVectorFunctionModel",init<ValidatedVectorFunctionModel>());
     vector_function_model_class.def(init<VectorTaylorFunction>());
-    vector_function_model_class.def("result_size", &IntervalVectorFunctionModel::result_size);
-    vector_function_model_class.def("argument_size", &IntervalVectorFunctionModel::argument_size);
-    vector_function_model_class.def("domain", &IntervalVectorFunctionModel::domain);
-    vector_function_model_class.def("codomain", &IntervalVectorFunctionModel::codomain);
-    vector_function_model_class.def("range", &IntervalVectorFunctionModel::range);
+    vector_function_model_class.def("result_size", &ValidatedVectorFunctionModel::result_size);
+    vector_function_model_class.def("argument_size", &ValidatedVectorFunctionModel::argument_size);
+    vector_function_model_class.def("domain", &ValidatedVectorFunctionModel::domain);
+    vector_function_model_class.def("codomain", &ValidatedVectorFunctionModel::codomain);
+    vector_function_model_class.def("range", &ValidatedVectorFunctionModel::range);
     //vector_function_model_class.def("__getslice__", (VectorTaylorFunction(*)(const VectorTaylorFunction&,int,int))&__getslice__);
-    vector_function_model_class.def("__getitem__", &__getitem__<IntervalVectorFunctionModel,uint,IntervalScalarFunctionModel>);
-    vector_function_model_class.def("__setitem__",&__setitem__<IntervalVectorFunctionModel,uint,IntervalScalarFunctionModel>);
-    //vector_function_model_class.def("__setitem__",&__setitem__<IntervalVectorFunctionModel,uint,IntervalScalarFunction>);
-    vector_function_model_class.def("__call__", (IntervalVector(IntervalVectorFunctionModel::*)(const IntervalVector&)const) &IntervalVectorFunctionModel::operator());
+    vector_function_model_class.def("__getitem__", &__getitem__<ValidatedVectorFunctionModel,uint,ValidatedScalarFunctionModel>);
+    vector_function_model_class.def("__setitem__",&__setitem__<ValidatedVectorFunctionModel,uint,ValidatedScalarFunctionModel>);
+    //vector_function_model_class.def("__setitem__",&__setitem__<ValidatedVectorFunctionModel,uint,ValidatedScalarFunction>);
+    vector_function_model_class.def("__call__", (IntervalVector(ValidatedVectorFunctionModel::*)(const IntervalVector&)const) &ValidatedVectorFunctionModel::operator());
     vector_function_model_class.def(self*Interval());
-    vector_function_model_class.def("__str__", &__cstr__<IntervalVectorFunctionModel>);
-    vector_function_model_class.def("__repr__", &__crepr__<IntervalVectorFunctionModel>);
-    //export_vector_function_model.def("__repr__",&__repr__<IntervalVectorFunctionModel>);
+    vector_function_model_class.def("__str__", &__cstr__<ValidatedVectorFunctionModel>);
+    vector_function_model_class.def("__repr__", &__crepr__<ValidatedVectorFunctionModel>);
+    //export_vector_function_model.def("__repr__",&__repr__<ValidatedVectorFunctionModel>);
 
-    def("evaluate", (IntervalVector(*)(const IntervalVectorFunctionModel&,const IntervalVector&)) &evaluate);
-    def("partial_evaluate", (IntervalVectorFunctionModel(*)(const IntervalVectorFunctionModel&,Nat,const Interval&)) &partial_evaluate);
-    def("compose", (IntervalVectorFunctionModel(*)(const IntervalVectorFunctionModel&,const IntervalVectorFunctionModel&)) &compose);
-    def("compose", (IntervalVectorFunctionModel(*)(const IntervalVectorFunction&,const IntervalVectorFunctionModel&)) &compose);
+    def("evaluate", (IntervalVector(*)(const ValidatedVectorFunctionModel&,const IntervalVector&)) &evaluate);
+    def("partial_evaluate", (ValidatedVectorFunctionModel(*)(const ValidatedVectorFunctionModel&,Nat,const Interval&)) &partial_evaluate);
+    def("compose", (ValidatedVectorFunctionModel(*)(const ValidatedVectorFunctionModel&,const ValidatedVectorFunctionModel&)) &compose);
+    def("compose", (ValidatedVectorFunctionModel(*)(const ValidatedVectorFunction&,const ValidatedVectorFunctionModel&)) &compose);
 
-    def("unrestrict", (IntervalVectorFunction(*)(const IntervalVectorFunctionModel&)) &unrestrict);
+    def("unrestrict", (ValidatedVectorFunction(*)(const ValidatedVectorFunctionModel&)) &unrestrict);
 
-    def("join", (IntervalVectorFunctionModel(*)(const IntervalVectorFunctionModel&,const IntervalScalarFunctionModel&)) &join);
+    def("join", (ValidatedVectorFunctionModel(*)(const ValidatedVectorFunctionModel&,const ValidatedScalarFunctionModel&)) &join);
 
-    to_python< List<IntervalVectorFunctionModel> >();
+    to_python< List<ValidatedVectorFunctionModel> >();
 
 }
 
@@ -458,7 +458,7 @@ void export_scalar_taylor_function()
     class_<ScalarTaylorFunction> scalar_taylor_function_class("ScalarTaylorFunction",init<ScalarTaylorFunction>());
     scalar_taylor_function_class.def(init<Box,IntervalTaylorModel>());
     scalar_taylor_function_class.def(init< Box,Sweeper >());
-    scalar_taylor_function_class.def(init< Box, const RealScalarFunction&,Sweeper >());
+    scalar_taylor_function_class.def(init< Box, const EffectiveScalarFunction&,Sweeper >());
     scalar_taylor_function_class.def(init< Box, Expansion<Float>, Float, Sweeper >());
     scalar_taylor_function_class.def("error", (const Float&(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::error, return_value_policy<copy_const_reference>());
     scalar_taylor_function_class.def("set_error", (void(ScalarTaylorFunction::*)(const Float&)) &ScalarTaylorFunction::set_error);
@@ -505,14 +505,14 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def(self-=Interval());
     scalar_taylor_function_class.def(self*=Interval());
     scalar_taylor_function_class.def(self/=Interval());
-    scalar_taylor_function_class.def(self+RealScalarFunction());
-    scalar_taylor_function_class.def(self-RealScalarFunction());
-    scalar_taylor_function_class.def(self*RealScalarFunction());
-    scalar_taylor_function_class.def(self/RealScalarFunction());
-    scalar_taylor_function_class.def(RealScalarFunction()+self);
-    scalar_taylor_function_class.def(RealScalarFunction()-self);
-    scalar_taylor_function_class.def(RealScalarFunction()*self);
-    scalar_taylor_function_class.def(RealScalarFunction()/self);
+    scalar_taylor_function_class.def(self+EffectiveScalarFunction());
+    scalar_taylor_function_class.def(self-EffectiveScalarFunction());
+    scalar_taylor_function_class.def(self*EffectiveScalarFunction());
+    scalar_taylor_function_class.def(self/EffectiveScalarFunction());
+    scalar_taylor_function_class.def(EffectiveScalarFunction()+self);
+    scalar_taylor_function_class.def(EffectiveScalarFunction()-self);
+    scalar_taylor_function_class.def(EffectiveScalarFunction()*self);
+    scalar_taylor_function_class.def(EffectiveScalarFunction()/self);
     scalar_taylor_function_class.def(self+=self);
     scalar_taylor_function_class.def(self-=self);
     scalar_taylor_function_class.def(self>Float());
@@ -539,7 +539,7 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def("evaluate", (Float(ScalarTaylorFunction::*)(const Vector<Float>&)const) &ScalarTaylorFunction::evaluate);
     scalar_taylor_function_class.def("evaluate", (Interval(ScalarTaylorFunction::*)(const Vector<Interval>&)const) &ScalarTaylorFunction::evaluate);
     //scalar_taylor_function_class.def("gradient", (Vector<Interval>(ScalarTaylorFunction::*)(const Vector<Interval>&)const) &ScalarTaylorFunction::gradient);
-    scalar_taylor_function_class.def("function", (RealScalarFunction(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::function);
+    scalar_taylor_function_class.def("function", (EffectiveScalarFunction(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::function);
     scalar_taylor_function_class.def("polynomial", (Polynomial<Interval>(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::polynomial);
     scalar_taylor_function_class.def("set", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint j, const Interval&)) &partial_evaluate);
     scalar_taylor_function_class.def("restrict", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Box&)) &restrict);
@@ -617,7 +617,7 @@ void export_vector_taylor_function()
 
     class_<VectorTaylorFunction> vector_taylor_function_class("VectorTaylorFunction", init<VectorTaylorFunction>());
     vector_taylor_function_class.def( init< Nat, Box, Sweeper >());
-    vector_taylor_function_class.def( init< Box,const RealVectorFunction&,Sweeper >());
+    vector_taylor_function_class.def( init< Box,const EffectiveVectorFunction&,Sweeper >());
     vector_taylor_function_class.def(init< Box, Vector< Expansion<Float> >, Vector<Float>, Sweeper >());
     vector_taylor_function_class.def( init< Vector<ScalarTaylorFunction> >());
     vector_taylor_function_class.def("__len__", &VectorTaylorFunction::result_size);
@@ -661,7 +661,7 @@ void export_vector_taylor_function()
     vector_taylor_function_class.def("evaluate", (IntervalVector(VectorTaylorFunction::*)(const IntervalVector&)const) &VectorTaylorFunction::evaluate);
     //vector_taylor_function_class.def("jacobian", (Vector<Interval>(ScalarTaylorFunction::*)(const Vector<Interval>&)const) &ScalarTaylorFunction::gradient);
     vector_taylor_function_class.def("polynomials", (Vector< Polynomial<Interval> >(VectorTaylorFunction::*)()const) &VectorTaylorFunction::polynomials);
-    vector_taylor_function_class.def("function", (RealVectorFunction(VectorTaylorFunction::*)()const) &VectorTaylorFunction::function);
+    vector_taylor_function_class.def("function", (EffectiveVectorFunction(VectorTaylorFunction::*)()const) &VectorTaylorFunction::function);
 
 
     vector_taylor_function_class.def("constant",(VectorTaylorFunction(*)(const Box&, const FloatVector&,Sweeper))&VectorTaylorFunction::constant);
@@ -700,8 +700,8 @@ void export_vector_taylor_function()
     //def("compose",(ScalarTaylorFunction(*)(const RP&,const VectorTaylorFunction&)) &compose);
     def("compose",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const VectorTaylorFunction&)) &compose);
     def("compose",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &compose);
-    def("compose",(ScalarTaylorFunction(*)(const RealScalarFunction&,const VectorTaylorFunction&)) &compose);
-    def("compose",(VectorTaylorFunction(*)(const RealVectorFunction&,const VectorTaylorFunction&)) &compose);
+    def("compose",(ScalarTaylorFunction(*)(const EffectiveScalarFunction&,const VectorTaylorFunction&)) &compose);
+    def("compose",(VectorTaylorFunction(*)(const EffectiveVectorFunction&,const VectorTaylorFunction&)) &compose);
     def("derivative",(VectorTaylorFunction(*)(const VectorTaylorFunction&,Nat)) &derivative);
     def("antiderivative",(VectorTaylorFunction(*)(const VectorTaylorFunction&,Nat)) &antiderivative);
     def("antiderivative",(VectorTaylorFunction(*)(const VectorTaylorFunction&,Nat,Float)) &antiderivative);

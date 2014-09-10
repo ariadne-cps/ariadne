@@ -38,7 +38,7 @@
 using namespace Ariadne;
 
 
-struct RadiusSquare : RealVectorFunctionData<1,2,1> {
+struct RadiusSquare : EffectiveVectorFunctionData<1,2,1> {
     template<class R, class A, class P>
     static void compute(R& r, const A& x, const P& p) {
         r[0]=sqr(x[0])+sqr(x[1])-sqr(p[0]);

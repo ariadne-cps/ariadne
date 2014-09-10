@@ -49,7 +49,7 @@
 namespace Ariadne {
 
 typedef Box ApproximateBox;
-typedef FloatVectorFunction ApproximateVectorFunction;
+typedef ApproximateVectorFunction ApproximateVectorFunction;
 typedef VectorFunctionModel<Interval> ValidatedVectorFunctionPatch;
 typedef Point ApproximatePoint;
 typedef Float ApproximateNumber;
@@ -264,7 +264,7 @@ template<class X> inline bool all_greater(const Vector<X>& x, const X& e) {
 
 
 
-template<class X> Vector< Differential<X> > second_derivative(const IntervalVectorFunction& f, const Vector<X>& x) {
+template<class X> Vector< Differential<X> > second_derivative(const ValidatedVectorFunction& f, const Vector<X>& x) {
     Vector< Differential<X> > d=Differential<X>::variables(f.result_size(),f.argument_size(),2);
     return f.evaluate(d);
 }
@@ -454,7 +454,7 @@ inline ConstraintKind constraint_kind(Interval C) {
 
 
 Bool OptimiserBase::
-almost_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C, FloatVector x, Float error) const
+almost_feasible_point(IntervalVector D, ValidatedVectorFunction g, IntervalVector C, FloatVector x, Float error) const
 {
     if(!contains(D,x)) { return false; }
     IntervalVector gx=g(IntervalVector(x));
@@ -463,7 +463,7 @@ almost_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector
 
 
 Bool OptimiserBase::
-is_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C, FloatVector x) const
+is_feasible_point(IntervalVector D, ValidatedVectorFunction g, IntervalVector C, FloatVector x) const
 {
     if(!contains(D,x)) { return false; }
     IntervalVector gx=g(IntervalVector(x));
@@ -472,7 +472,7 @@ is_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C, 
 
 
 Tribool OptimiserBase::
-contains_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVector C, IntervalVector X) const
+contains_feasible_point(IntervalVector D, ValidatedVectorFunction g, IntervalVector C, IntervalVector X) const
 {
     ARIADNE_LOG(4,"OptimiserBase::contains_feasible_point(D,g,C,X):\n");
     ARIADNE_LOG(5,"  D="<<D<<", g="<<g<<", C="<<C<<", X="<<X<<"\n");
@@ -506,7 +506,7 @@ contains_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVect
 
     // Construct the function g_e(x) = g_{e_i}(x)
     ARIADNE_ASSERT(g.result_size()>0);
-    IntervalVectorFunction ge(equality_constraints.size(),g.argument_size());
+    ValidatedVectorFunction ge(equality_constraints.size(),g.argument_size());
     IntervalVector ce(equality_constraints.size());
     for(uint i=0; i!=ge.result_size(); ++i) {
         ge[i]=g[equality_constraints[i]];
@@ -557,14 +557,14 @@ contains_feasible_point(IntervalVector D, IntervalVectorFunction g, IntervalVect
 
 
 Bool OptimiserBase::
-validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+validate_feasibility(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
                      FloatVector x0, FloatVector y0) const
 {
     return this->validate_feasibility(D,g,C,x0);
 }
 
 Bool OptimiserBase::
-validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+validate_feasibility(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
                      FloatVector x0) const
 {
     ARIADNE_PRECONDITION(D.size()==g.argument_size());
@@ -596,7 +596,7 @@ validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector 
 
     Nat k=equalities.size();
     Nat n=D.size();
-    IntervalVectorFunction h(equalities.size(),g.argument_size());
+    ValidatedVectorFunction h(equalities.size(),g.argument_size());
     FloatVector c(equalities.size());
     for(uint i=0; i!=equalities.size(); ++i) {
         h[i] = g[equalities[i]];
@@ -668,7 +668,7 @@ validate_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector 
 
 
 Bool OptimiserBase::
-validate_infeasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+validate_infeasibility(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
                        FloatVector x, FloatVector y) const
 {
     ARIADNE_PRECONDITION(D.size()==g.argument_size());
@@ -707,7 +707,7 @@ validate_infeasibility(IntervalVector D, IntervalVectorFunction g, IntervalVecto
 
 // FIXME: Look at this code again, especially relating to generalised Lagrange multipliers
 Bool OptimiserBase::
-is_infeasibility_certificate(IntervalVector d, IntervalVectorFunction g, IntervalVector c, FloatVector y) const
+is_infeasibility_certificate(IntervalVector d, ValidatedVectorFunction g, IntervalVector c, FloatVector y) const
 {
     // Try to prove lambda.(g(y)-c) != 0
     const uint n=c.size();
@@ -736,10 +736,10 @@ is_infeasibility_certificate(IntervalVector d, IntervalVectorFunction g, Interva
 
 
 IntervalVector OptimiserBase::
-minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVectorFunction h) const
+minimise(ValidatedScalarFunction f, IntervalVector D, ValidatedVectorFunction g, ValidatedVectorFunction h) const
 {
     ARIADNE_LOG(2,"minimise::feasible(f,D,g,h)\n");
-    IntervalVectorFunction gh=join(g,h);
+    ValidatedVectorFunction gh=join(g,h);
     IntervalVector C(gh.result_size(),Interval(0.0));
     for(uint i=0; i!=g.result_size(); ++i) { C[i]=Interval(-inf,0.0); }
     return this->minimise(f,D,gh,C);
@@ -748,10 +748,10 @@ minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, I
 
 
 Tribool OptimiserBase::
-feasible(IntervalVector D, IntervalVectorFunction g, IntervalVectorFunction h) const
+feasible(IntervalVector D, ValidatedVectorFunction g, ValidatedVectorFunction h) const
 {
     ARIADNE_LOG(2,"OptimiserBase::feasible(D,g,h)\n");
-    IntervalVectorFunction gh=join(g,h);
+    ValidatedVectorFunction gh=join(g,h);
     IntervalVector C(gh.result_size(),Interval(0.0));
     for(uint i=0; i!=g.result_size(); ++i) { C[i]=Interval(-inf,0.0); }
     return this->feasible(D,gh,C);
@@ -769,7 +769,7 @@ struct NonlinearInfeasibleInteriorPointOptimiser::StepData : public PrimalDualDa
 };
 
 IntervalVector NonlinearInfeasibleInteriorPointOptimiser::
-minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C) const
+minimise(ValidatedScalarFunction f, IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const
 {
     ARIADNE_LOG(2,"NonlinearInfeasibleInteriorPointOptimiser::minimise(f,D,g,C)\n");
     ARIADNE_LOG(2,"  f="<<f<<", D="<<D<<", g="<<g<<", C="<<C<<"\n");
@@ -820,7 +820,7 @@ minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, I
 }
 
 Tribool NonlinearInfeasibleInteriorPointOptimiser::
-feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const
+feasible(IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const
 {
     ARIADNE_LOG(2,"NonlinearInfeasibleInteriorPointOptimiser::feasible(D,g,C)\n");
     ARIADNE_LOG(3,"D="<<D<<", g="<<g<<", C="<<C<<"\n");
@@ -832,7 +832,7 @@ feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const
     FloatVector& x=v.x;
     FloatVector& y=v.y;
 
-    FloatScalarFunction f(D.size());
+    ApproximateScalarFunction f(D.size());
     IntervalVector R=intersection(g(D)+IntervalVector(C.size(),Interval(-1,+1)),C);
     this->setup_feasibility(D,g,R,v);
 
@@ -862,7 +862,7 @@ feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const
 }
 
 Void NonlinearInfeasibleInteriorPointOptimiser::
-setup_feasibility(const IntervalVector& D, const FloatVectorFunctionInterface& g, const IntervalVector& C,
+setup_feasibility(const IntervalVector& D, const ApproximateVectorFunctionInterface& g, const IntervalVector& C,
                   StepData& v) const
 {
     Interval I(-1,+1);
@@ -887,7 +887,7 @@ setup_feasibility(const IntervalVector& D, const FloatVectorFunctionInterface& g
 
 Void
 NonlinearInfeasibleInteriorPointOptimiser::step(
-    const FloatScalarFunctionInterface& f, const IntervalVector& d, const FloatVectorFunctionInterface& g, const IntervalVector& c,
+    const ApproximateScalarFunctionInterface& f, const IntervalVector& d, const ApproximateVectorFunctionInterface& g, const IntervalVector& c,
     StepData& v) const
 {
     FloatVector& w=v.w; FloatVector& x=v.x; FloatVector& y=v.y; Float& mu=v.mu;
@@ -1138,11 +1138,11 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
 //------- NonlinearInteriorPointOptimiser -----------------------------------//
 
 IntervalVector NonlinearInteriorPointOptimiser::
-minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C) const
+minimise(ValidatedScalarFunction f, IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const
 {
     ARIADNE_LOG(2,"NonlinearInteriorPointOptimiser::minimise(f,D,g,C)\n");
     ARIADNE_LOG(3,"f="<<f<<" D="<<D<<" g="<<g<<" C="<<C<<"\n");
-    IntervalVectorFunction h(0,D.size());
+    ValidatedVectorFunction h(0,D.size());
 
     IntervalVector gD = g(D);
     if(disjoint(gD,C)) { throw InfeasibleProblemException(); }
@@ -1173,7 +1173,7 @@ minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, I
 // min f(x) | x\in D & w\in C | g(x) = w & h(x) = 0
 // Lagrange multipliers kappa d(g(x)-w); lambda dh(x)
 Void NonlinearInteriorPointOptimiser::
-minimisation_step(const FloatScalarFunction& f, const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& c, const FloatVectorFunction& h,
+minimisation_step(const ApproximateScalarFunction& f, const IntervalVector& d, const ApproximateVectorFunction& g, const IntervalVector& c, const ApproximateVectorFunction& h,
                   FloatVector& x, FloatVector& w, FloatVector& kappa, FloatVector& lambda, const Float& mu) const
 {
     const uint n=x.size();
@@ -1334,7 +1334,7 @@ minimisation_step(const FloatScalarFunction& f, const IntervalVector& d, const F
 
 
 Tribool NonlinearInteriorPointOptimiser::
-feasible(IntervalVector d, IntervalVectorFunction g, IntervalVector c) const
+feasible(IntervalVector d, ValidatedVectorFunction g, IntervalVector c) const
 {
     ARIADNE_LOG(2,"NonlinearInteriorPointOptimiser::feasible(D,g,C,h)\n");
     ARIADNE_LOG(2,"  d="<<d<<", g="<<g<<", c="<<c<<"\n");
@@ -1367,7 +1367,7 @@ feasible(IntervalVector d, IntervalVectorFunction g, IntervalVector c) const
 
 void
 NonlinearInteriorPointOptimiser::feasibility_step(
-    const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& c,
+    const IntervalVector& d, const ApproximateVectorFunction& g, const IntervalVector& c,
     FloatVector& x, FloatVector& y) const
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -1376,7 +1376,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 
 void
 NonlinearInteriorPointOptimiser::feasibility_step(
-    const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& c,
+    const IntervalVector& d, const ApproximateVectorFunction& g, const IntervalVector& c,
     FloatVector& x, FloatVector& y, Float& t) const
 {
     static const double inf = std::numeric_limits<double>::infinity();
@@ -1515,7 +1515,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 
 /*
 Void NonlinearInteriorPointOptimiser::linearised_feasibility_step(
-    const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& c,
+    const IntervalVector& d, const ApproximateVectorFunction& g, const IntervalVector& c,
     Float& t, FloatVector& x, FloatVector& y) const
 {
     static const double gamma=1.0/1024;
@@ -1635,7 +1635,7 @@ Void NonlinearInteriorPointOptimiser::linearised_feasibility_step(
 
 
 Float NonlinearInteriorPointOptimiser::
-compute_mu(const IntervalVector& D, const FloatVectorFunction& g, const IntervalVector& C,
+compute_mu(const IntervalVector& D, const ApproximateVectorFunction& g, const IntervalVector& C,
            const FloatVector& x, const FloatVector& lambda) const
 {
     // Compute the relaxation parameter mu as the average of the product of the Lyapunov exponents and constraint satisfactions
@@ -1657,7 +1657,7 @@ compute_mu(const IntervalVector& D, const FloatVectorFunction& g, const Interval
 
 
 void NonlinearInteriorPointOptimiser::
-setup_feasibility(const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& c,
+setup_feasibility(const IntervalVector& d, const ApproximateVectorFunction& g, const IntervalVector& c,
                   FloatVector& x, FloatVector& y) const
 {
     const uint l=2*(d.size()+c.size());
@@ -1678,13 +1678,13 @@ clone() const
 }
 
 IntervalVector PenaltyFunctionOptimiser::
-minimise(IntervalScalarFunction f, IntervalVector D, IntervalVectorFunction g, IntervalVector C) const
+minimise(ValidatedScalarFunction f, IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 Tribool PenaltyFunctionOptimiser::
-feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const
+feasible(IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const
 {
     ARIADNE_LOG(2,"PenaltyFunctionOptimiser::feasible(D,g,C)\n");
     ARIADNE_LOG(3,"D="<<D<<" g="<<g<<" C="<<C<<" \n");
@@ -1708,10 +1708,10 @@ feasible(IntervalVector D, IntervalVectorFunction g, IntervalVector C) const
 }
 
 Void PenaltyFunctionOptimiser::
-feasibility_step(const IntervalVector& X, const FloatVectorFunction& g, const IntervalVector& W,
+feasibility_step(const IntervalVector& X, const ApproximateVectorFunction& g, const IntervalVector& W,
                  FloatVector& x, FloatVector& w, Float& mu) const
 {
-    FloatVectorFunction h(0u,X.size());
+    ApproximateVectorFunction h(0u,X.size());
     const uint n=X.size();
     const uint m=W.size();
     const uint l=h.result_size();
@@ -1799,7 +1799,7 @@ feasibility_step(const IntervalVector& X, const FloatVectorFunction& g, const In
 
 
 void PenaltyFunctionOptimiser::
-feasibility_step(const IntervalVector& D, const IntervalVectorFunction& g, const IntervalVector& C,
+feasibility_step(const IntervalVector& D, const ValidatedVectorFunction& g, const IntervalVector& C,
                  IntervalVector& x, IntervalVector& w) const
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -1809,7 +1809,7 @@ feasibility_step(const IntervalVector& D, const IntervalVectorFunction& g, const
 // Use a penalty approach without multipliers on the constraint functions
 // Solve g(x)=w, x in D, w in C; Lagrangian y.(g(x)-w)
 void PenaltyFunctionOptimiser::
-feasibility_step(IntervalVector const& D, FloatVectorFunction const& g, IntervalVector const& C,
+feasibility_step(IntervalVector const& D, ApproximateVectorFunction const& g, IntervalVector const& C,
                  FloatVector& x, FloatVector& y, FloatVector& w) const
 {
 
@@ -1926,7 +1926,7 @@ feasibility_step(IntervalVector const& D, FloatVectorFunction const& g, Interval
 
 /*
 void NonlinearInteriorPointOptimiser::
-compute_tz(const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& b,
+compute_tz(const IntervalVector& d, const ApproximateVectorFunction& g, const IntervalVector& b,
            const FloatVector& y, Float& t, FloatVector& z) const
 {
     static const double ZMIN=0.5;
@@ -1962,7 +1962,7 @@ compute_tz(const IntervalVector& d, const FloatVectorFunction& g, const Interval
     }
 }
 
-void NonlinearInteriorPointOptimiser::compute_z(const IntervalVector& d, const FloatVectorFunction& g, const IntervalVector& b,
+void NonlinearInteriorPointOptimiser::compute_z(const IntervalVector& d, const ApproximateVectorFunction& g, const IntervalVector& b,
                                                 const FloatVector& y, const Float& t, FloatVector& z) const
 {
     const uint m=g.argument_size();
@@ -1988,7 +1988,7 @@ void NonlinearInteriorPointOptimiser::compute_z(const IntervalVector& d, const F
 
 
 Tribool ApproximateOptimiser::
-feasible(IntervalVector D, IntervalVectorFunction h) const
+feasible(IntervalVector D, ValidatedVectorFunction h) const
 {
     ARIADNE_LOG(2,"ApproximateOptimiser::feasible(D,h)\n");
     ARIADNE_LOG(3,"D="<<D<<", h="<<h<<"\n");
@@ -2007,7 +2007,7 @@ feasible(IntervalVector D, IntervalVectorFunction h) const
 }
 
 Void ApproximateOptimiser::
-feasibility_step(const IntervalVector& D, const FloatVectorFunction& h,
+feasibility_step(const IntervalVector& D, const ApproximateVectorFunction& h,
                  FloatVector& x, FloatVector& y) const
 {
     ARIADNE_LOG(4,"ApproximateOptimiser::feasibility_step(D,h,x,y)\n");
@@ -2063,7 +2063,7 @@ feasibility_step(const IntervalVector& D, const FloatVectorFunction& h,
 
 
 Tribool PenaltyFunctionOptimiser::
-check_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
+check_feasibility(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
                      FloatVector fltx, FloatVector flty) const
 {
     ARIADNE_PRECONDITION(D.size()==g.argument_size());
@@ -2095,7 +2095,7 @@ check_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
     if(definitely(result)) {
         if(equalities.empty()) { ARIADNE_LOG(2,"feasible\n"); return true; }
 
-        IntervalVectorFunction h(equalities.size(),g.argument_size());
+        ValidatedVectorFunction h(equalities.size(),g.argument_size());
         FloatVector c(equalities.size());
         for(uint i=0; i!=equalities.size(); ++i) {
             h[i] = g[equalities[i]];
@@ -2193,7 +2193,7 @@ check_feasibility(IntervalVector D, IntervalVectorFunction g, IntervalVector C,
 //     Dg dx - I dz
 //    2y . dy - dmu
 Void PenaltyFunctionOptimiser::
-feasibility_step(const IntervalVector& D, const FloatVectorFunction& g, const IntervalVector& C,
+feasibility_step(const IntervalVector& D, const ApproximateVectorFunction& g, const IntervalVector& C,
                  FloatVector& x, FloatVector& y, FloatVector& z) const
 {
     ARIADNE_LOG(2,"feasibility_step\n");
@@ -2289,7 +2289,7 @@ feasibility_step(const IntervalVector& D, const FloatVectorFunction& g, const In
 
 // Solve equations y Dh(x) - 1/(x-xl) + 1/(xu-x) = 0; h(x) = 0
 Tribool IntervalOptimiser::
-feasible(IntervalVector D, IntervalVectorFunction h) const
+feasible(IntervalVector D, ValidatedVectorFunction h) const
 {
     ARIADNE_LOG(2,"IntervalOptimiser::feasible(D,h)\n");
     ARIADNE_LOG(3,"D="<<D<<", h="<<h<<"\n");
@@ -2312,7 +2312,7 @@ feasible(IntervalVector D, IntervalVectorFunction h) const
 }
 
 Void IntervalOptimiser::
-feasibility_step(const FloatVector& xl, const FloatVector& xu, const IntervalVectorFunction& h,
+feasibility_step(const FloatVector& xl, const FloatVector& xu, const ValidatedVectorFunction& h,
                  IntervalVector& x, IntervalVector& y, IntervalVector& zl, IntervalVector zu, Interval& mu) const
 {
     ARIADNE_LOG(4,"IntervalOptimiser::feasibility_step(D,h,X,Lambda)\n");
@@ -2380,12 +2380,12 @@ feasibility_step(const FloatVector& xl, const FloatVector& xu, const IntervalVec
 
 struct KuhnTuckerFunctionBody : VectorFunctionMixin<KuhnTuckerFunctionBody,Interval>
 {
-    IntervalScalarFunction f;
-    Array<IntervalScalarFunction> g;
-    Array<IntervalScalarFunction> df;
-    Array<Array<IntervalScalarFunction> > dg;
+    ValidatedScalarFunction f;
+    Array<ValidatedScalarFunction> g;
+    Array<ValidatedScalarFunction> df;
+    Array<Array<ValidatedScalarFunction> > dg;
 
-    KuhnTuckerFunctionBody(IntervalScalarFunction _f, IntervalVectorFunction _g) {
+    KuhnTuckerFunctionBody(ValidatedScalarFunction _f, ValidatedVectorFunction _g) {
         ARIADNE_ASSERT(_f.argument_size()==_g.argument_size());
         const uint m=_g.argument_size();
         const uint n=_g.result_size();
@@ -2398,7 +2398,7 @@ struct KuhnTuckerFunctionBody : VectorFunctionMixin<KuhnTuckerFunctionBody,Inter
 
     uint result_size() const { return g.size()*2+f.argument_size(); }
     uint argument_size() const { return g.size()*2+f.argument_size(); }
-    IntervalScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
+    ValidatedScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
     std::ostream& write(std::ostream&) const { ARIADNE_NOT_IMPLEMENTED; }
 
     template<class X> void _compute(Vector<X>& res, const Vector<X>& arg) const {
@@ -2419,10 +2419,10 @@ struct KuhnTuckerFunctionBody : VectorFunctionMixin<KuhnTuckerFunctionBody,Inter
 
 struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTuckerFunctionBody,Interval>
 {
-    Array<IntervalScalarFunction> g;
-    Array<Array<IntervalScalarFunction> > dg;
+    Array<ValidatedScalarFunction> g;
+    Array<Array<ValidatedScalarFunction> > dg;
 
-    FeasibilityKuhnTuckerFunctionBody(IntervalVectorFunction _g) {
+    FeasibilityKuhnTuckerFunctionBody(ValidatedVectorFunction _g) {
         const uint m=_g.argument_size();
         const uint n=_g.result_size();
         g.resize(n); dg.resize(n); for(uint j=0; j!=n; ++j) { dg[j].resize(m); }
@@ -2431,7 +2431,7 @@ struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTu
 
     uint result_size() const { return g.size()*2+g[0].argument_size()+1; }
     uint argument_size() const { return g.size()*2+g[0].argument_size()+1; }
-    IntervalScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
+    ValidatedScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
     std::ostream& write(std::ostream&) const { ARIADNE_NOT_IMPLEMENTED; }
 
     template<class X> void _compute(Vector<X>& res, const Vector<X>& arg) const {
@@ -2460,11 +2460,11 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<Feasib
     uint m;
     uint n;
     IntervalVector d;
-    Array<IntervalScalarFunction> g;
+    Array<ValidatedScalarFunction> g;
     IntervalVector c;
-    Array<Array<IntervalScalarFunction> > dg;
+    Array<Array<ValidatedScalarFunction> > dg;
 
-    ConstrainedFeasibilityKuhnTuckerFunctionBody(IntervalVector D, IntervalVectorFunction _g, IntervalVector C) {
+    ConstrainedFeasibilityKuhnTuckerFunctionBody(IntervalVector D, ValidatedVectorFunction _g, IntervalVector C) {
         m=_g.argument_size();
         n=_g.result_size();
         d=D; c=C;
@@ -2474,7 +2474,7 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<Feasib
 
     uint result_size() const { return 5*m+4*n+1u; }
     uint argument_size() const { return 5*m+4*n+1u; }
-    IntervalScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
+    ValidatedScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
     std::ostream& write(std::ostream& os) const { return os << "KuhnTuckerFunctionBody"; }
 
     template<class X> void _compute(Vector<X>& res, const Vector<X>& arg) const {
@@ -2509,16 +2509,16 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<Feasib
 
 
 IntervalVector KrawczykOptimiser::
-minimise(IntervalScalarFunction f, IntervalVector d, IntervalVectorFunction g, IntervalVector c) const
+minimise(ValidatedScalarFunction f, IntervalVector d, ValidatedVectorFunction g, IntervalVector c) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 Tribool KrawczykOptimiser::
-feasible(IntervalVector d, IntervalVectorFunction g, IntervalVector c) const
+feasible(IntervalVector d, ValidatedVectorFunction g, IntervalVector c) const
 {
-    ARIADNE_LOG(2,"KrawczykOptimiser::feasible(IntervalVector d, IntervalVectorFunction g, IntervalVector c)\n");
+    ARIADNE_LOG(2,"KrawczykOptimiser::feasible(IntervalVector d, ValidatedVectorFunction g, IntervalVector c)\n");
     ARIADNE_LOG(2,"  d="<<d<<", g="<<g<<", c="<<c<<"\n");
 
     ARIADNE_ASSERT(g.argument_size()==d.size());
@@ -2561,7 +2561,7 @@ feasible(IntervalVector d, IntervalVectorFunction g, IntervalVector c) const
 
 
 
-void KrawczykOptimiser::setup_feasibility(const IntervalVector& d, const IntervalVectorFunction& g, const IntervalVector& c,
+void KrawczykOptimiser::setup_feasibility(const IntervalVector& d, const ValidatedVectorFunction& g, const IntervalVector& c,
                                           IntervalVector& x, IntervalVector& y, IntervalVector& z, Interval& t) const
 {
     const uint m=g.argument_size();
@@ -2574,7 +2574,7 @@ void KrawczykOptimiser::setup_feasibility(const IntervalVector& d, const Interva
 }
 
 
-void KrawczykOptimiser::compute_tz(const IntervalVector& d, const IntervalVectorFunction& g, const IntervalVector& c,
+void KrawczykOptimiser::compute_tz(const IntervalVector& d, const ValidatedVectorFunction& g, const IntervalVector& c,
                                    const IntervalVector& y, Interval& t, IntervalVector& z) const
 {
     ARIADNE_ASSERT(d.size()>0u);
@@ -2649,7 +2649,7 @@ void KrawczykOptimiser::compute_tz(const IntervalVector& d, const IntervalVector
 
 
 void KrawczykOptimiser::
-minimisation_step(const IntervalScalarFunction& f, const IntervalVectorFunction& g,
+minimisation_step(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g,
                   IntervalVector& x, IntervalVector& y, IntervalVector& z) const
 {
     const uint m=f.argument_size();
@@ -2674,7 +2674,7 @@ minimisation_step(const IntervalScalarFunction& f, const IntervalVectorFunction&
 
 
 
-void KrawczykOptimiser::feasibility_step(const IntervalVectorFunction& g,
+void KrawczykOptimiser::feasibility_step(const ValidatedVectorFunction& g,
                                          IntervalVector& x, IntervalVector& y, IntervalVector& z, Interval& t) const
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -2718,7 +2718,7 @@ void KrawczykOptimiser::feasibility_step(const IntervalVectorFunction& g,
 // Feasibility step for dual (inequality constrained) problem without using slack variables
 // FIXME: Do we need a slackness parameter mu? Probably not; hopefully the infinities are kept in check...
 // This method has the advantage of not needing to update the primal variables
-void KrawczykOptimiser::feasibility_step(const IntervalVector& d, const IntervalVectorFunction& g, const IntervalVector& c,
+void KrawczykOptimiser::feasibility_step(const IntervalVector& d, const ValidatedVectorFunction& g, const IntervalVector& c,
                                          IntervalVector& y, Interval& t) const
 {
     const uint m=d.size();
@@ -2797,7 +2797,7 @@ void KrawczykOptimiser::feasibility_step(const IntervalVector& d, const Interval
 
 
 
-void KrawczykOptimiser::feasibility_step(const IntervalVector& d, const IntervalVectorFunction& g, const IntervalVector& c,
+void KrawczykOptimiser::feasibility_step(const IntervalVector& d, const ValidatedVectorFunction& g, const IntervalVector& c,
                                          IntervalVector& x, IntervalVector& y, IntervalVector& z, Interval& t) const
 {
     const uint m=d.size();

@@ -78,7 +78,7 @@ class CalculusBase
 
     typedef Float RealType;
     typedef Interval IntervalType;
-    typedef Vector<Interval> BoxType;
+    typedef Box BoxType;
 
     typedef Float TimeType;
     typedef VectorFunction VectorFunctionType;

@@ -112,14 +112,14 @@ class Enclosure
     //! \brief Construct a representation of the box \a bx.
     explicit Enclosure(const Box& bx, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d and image function \a f.
-    explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& f, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const Box& d, const IntervalVectorFunction& f, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.
-    explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& f, const List<IntervalConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const Box& d, const IntervalVectorFunction& f, const List<IntervalConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d, image function \a sf, time function \a tf and constraints \a c.
-    explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& sf, const IntervalScalarFunction& tf, const List<IntervalConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const Box& d, const IntervalVectorFunction& sf, const IntervalScalarFunction& tf, const List<IntervalConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with domain \a d, space function \a sf, time function \a tf, negative constraints \a g and equality constraints \a h.
     //!   (Not currently implemented.)
-    explicit Enclosure(const IntervalVector& d, const IntervalVectorFunction& sf, const IntervalScalarFunction tf, const IntervalVectorFunction& g, const IntervalVectorFunction& h, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const Box& d, const IntervalVectorFunction& sf, const IntervalScalarFunction tf, const IntervalVectorFunction& g, const IntervalVectorFunction& h, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief Construct from an exact bounded constraint \a set.
     explicit Enclosure(const BoundedConstraintSet& set, const IntervalFunctionModelFactoryInterface& fac);
 
@@ -129,19 +129,19 @@ class Enclosure
     //! \brief The class used to create new function instances.
     const IntervalFunctionModelFactoryInterface& function_factory() const;
     //! \brief The parameter domain \f$D\f$.
-    Vector<Interval> domain() const;
-    Vector<Interval> parameter_domain() const;
+    Box domain() const;
+    Box parameter_domain() const;
     //! \brief A subset of the parameter domain containing all feasible points.
-    Vector<Interval> reduced_domain() const;
+    Box reduced_domain() const;
     //! \brief An over-approximation to the image of \f$D\f$ under \f$f\f$.
-    Vector<Interval> codomain() const;
+    Box codomain() const;
     //! \brief The image function \f$f\f$.
     IntervalVectorFunctionModel const& function() const;
     IntervalVectorFunctionModel const& space_function() const;
     IntervalScalarFunctionModel const& time_function() const;
     IntervalScalarFunctionModel const& dwell_time_function() const;
     IntervalVectorFunctionModel const constraint_function() const;
-    IntervalVector const constraint_bounds() const;
+    Box const constraint_bounds() const;
 
     //! \brief Introduces a new parameter with values in the interval \a ivl. The set itself does not change.
     void new_parameter(Interval ivl);
@@ -246,9 +246,9 @@ class Enclosure
     //! \brief Restrict the parameter domain to \a subdomain.
     //! \details May also restrict the domain of the defining function models,
     //! resulting in more accurate computations.
-    void restrict(const IntervalVector& subdomain);
+    void restrict(const Box& subdomain);
     //! \brief The set obtained by restricting to the \a subdomain.
-    Enclosure restriction(const Vector<Interval>& subdomain) const;
+    Enclosure restriction(const Box& subdomain) const;
 
     //! \brief Compute an outer approximation on the \a grid to the given \a depth.
     GridTreeSet outer_approximation(const Grid& grid, int depth) const;
@@ -285,11 +285,11 @@ class Enclosure
     IntervalAffineConstrainedImageSet affine_over_approximation() const;
 
     //! \brief A collection of parameter subdomains chosen to make the bounding boxes as small as possible.
-    List<IntervalVector> splitting_subdomains_zeroth_order() const;
+    List<Box> splitting_subdomains_zeroth_order() const;
     //! \brief A collection of parameter subdomains chosen to make the set as close to affine as possible.
-    List<IntervalVector> splitting_subdomains_first_order() const;
+    List<Box> splitting_subdomains_first_order() const;
     //! \brief Split into subsets based on the given subdomains.
-    List<Enclosure> split(const List<IntervalVector>& subdomains);
+    List<Enclosure> split(const List<Box>& subdomains);
 
     //! \brief The direction along which the set should be split to reduce the bounding box.
     uint splitting_index_zeroth_order() const;

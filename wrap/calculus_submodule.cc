@@ -183,6 +183,9 @@ template<class X> std::ostream& operator<<(std::ostream& os, const PythonReprese
     return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Box >& bx) {
+    return os << PythonRepresentation< Vector<Interval> >(bx.reference()); }
+
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Sweeper>& repr) {
     const Sweeper& swp=repr.reference();
     const SweeperInterface* swp_ptr = &static_cast<const SweeperInterface&>(swp);
@@ -271,25 +274,13 @@ void export_sweeper()
 
 void export_taylor_model()
 {
-    typedef int Z;
-    typedef uint N;
-    typedef double D;
-    typedef Float Float;
-    typedef Interval Interval;
-    typedef MultiIndex A;
-    typedef Vector<Float> RV;
-    typedef Vector<Interval> IV;
-    typedef Matrix<Float> RMx;
+    typedef uint Nat;
     typedef IntervalTaylorModel IntervalTaylorModel;
-    typedef Vector<IntervalTaylorModel> TMV;
     typedef VectorTaylorFunction VectorTaylorFunction;
-    typedef Polynomial<Float> RP;
-    typedef Polynomial<Interval> IP;
-    typedef RealScalarFunction FI;
 
 
     class_<IntervalTaylorModel> taylor_model_class("IntervalTaylorModel", init<IntervalTaylorModel>());
-    taylor_model_class.def( init< N,Sweeper >());
+    taylor_model_class.def( init< Nat,Sweeper >());
     taylor_model_class.def("keys", (List<MultiIndex>(*)(const IntervalTaylorModel&))&keys);
     taylor_model_class.def("value", (const Float&(IntervalTaylorModel::*)()const) &IntervalTaylorModel::value, return_value_policy<copy_const_reference>());
     taylor_model_class.def("gradient", (const Float&(IntervalTaylorModel::*)(uint)const) &IntervalTaylorModel::gradient, return_value_policy<copy_const_reference>());
@@ -343,8 +334,8 @@ void export_taylor_model()
     taylor_model_class.def(self<self);
     taylor_model_class.def(self_ns::str(self));
 
-    taylor_model_class.def("constant",(IntervalTaylorModel(*)(N, const Interval&,Sweeper))&IntervalTaylorModel::constant);
-    taylor_model_class.def("variable",(IntervalTaylorModel(*)(N, N,Sweeper))&IntervalTaylorModel::variable);
+    taylor_model_class.def("constant",(IntervalTaylorModel(*)(Nat, const Interval&,Sweeper))&IntervalTaylorModel::constant);
+    taylor_model_class.def("variable",(IntervalTaylorModel(*)(Nat, Nat,Sweeper))&IntervalTaylorModel::variable);
 
     taylor_model_class.staticmethod("constant");
     taylor_model_class.staticmethod("variable");
@@ -395,7 +386,7 @@ void export_scalar_function_model()
     class_<IntervalScalarFunctionModel> scalar_function_model_class("IntervalScalarFunctionModel",init<IntervalScalarFunctionModel>());
     scalar_function_model_class.def(init<ScalarTaylorFunction>());
     scalar_function_model_class.def("argument_size", &IntervalScalarFunctionModel::argument_size);
-    scalar_function_model_class.def("domain", &IntervalScalarFunctionModel::domain, return_value_policy<copy_const_reference>());
+    scalar_function_model_class.def("domain", &IntervalScalarFunctionModel::domain);
     scalar_function_model_class.def("codomain", &IntervalScalarFunctionModel::codomain);
     scalar_function_model_class.def("range", &IntervalScalarFunctionModel::range);
     scalar_function_model_class.def("clobber", &IntervalScalarFunctionModel::clobber);
@@ -431,7 +422,7 @@ void export_vector_function_model()
     vector_function_model_class.def(init<VectorTaylorFunction>());
     vector_function_model_class.def("result_size", &IntervalVectorFunctionModel::result_size);
     vector_function_model_class.def("argument_size", &IntervalVectorFunctionModel::argument_size);
-    vector_function_model_class.def("domain", &IntervalVectorFunctionModel::domain, return_value_policy<copy_const_reference>());
+    vector_function_model_class.def("domain", &IntervalVectorFunctionModel::domain);
     vector_function_model_class.def("codomain", &IntervalVectorFunctionModel::codomain);
     vector_function_model_class.def("range", &IntervalVectorFunctionModel::range);
     //vector_function_model_class.def("__getslice__", (VectorTaylorFunction(*)(const VectorTaylorFunction&,int,int))&__getslice__);
@@ -465,10 +456,10 @@ void export_scalar_taylor_function()
     typedef Vector<Interval> IntervalVector;
 
     class_<ScalarTaylorFunction> scalar_taylor_function_class("ScalarTaylorFunction",init<ScalarTaylorFunction>());
-    scalar_taylor_function_class.def(init<IntervalVector,IntervalTaylorModel>());
-    scalar_taylor_function_class.def(init< IntervalVector,Sweeper >());
-    scalar_taylor_function_class.def(init< IntervalVector, const RealScalarFunction&,Sweeper >());
-    scalar_taylor_function_class.def(init< IntervalVector, Expansion<Float>, Float, Sweeper >());
+    scalar_taylor_function_class.def(init<Box,IntervalTaylorModel>());
+    scalar_taylor_function_class.def(init< Box,Sweeper >());
+    scalar_taylor_function_class.def(init< Box, const RealScalarFunction&,Sweeper >());
+    scalar_taylor_function_class.def(init< Box, Expansion<Float>, Float, Sweeper >());
     scalar_taylor_function_class.def("error", (const Float&(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::error, return_value_policy<copy_const_reference>());
     scalar_taylor_function_class.def("set_error", (void(ScalarTaylorFunction::*)(const Float&)) &ScalarTaylorFunction::set_error);
     scalar_taylor_function_class.def("argument_size", &ScalarTaylorFunction::argument_size);
@@ -551,9 +542,9 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def("function", (RealScalarFunction(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::function);
     scalar_taylor_function_class.def("polynomial", (Polynomial<Interval>(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::polynomial);
     scalar_taylor_function_class.def("set", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint j, const Interval&)) &partial_evaluate);
-    scalar_taylor_function_class.def("restrict", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Vector<Interval>&)) &restrict);
+    scalar_taylor_function_class.def("restrict", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Box&)) &restrict);
     scalar_taylor_function_class.def("restrict", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint,const Interval&)) &restrict);
-    scalar_taylor_function_class.def("extend", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Vector<Interval>&)) &extend);
+    scalar_taylor_function_class.def("extend", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Box&)) &extend);
     //scalar_taylor_function_class.staticmethod("set_default_maximum_degree");
     //scalar_taylor_function_class.staticmethod("set_default_sweep_threshold");
     //scalar_taylor_function_class.staticmethod("default_maximum_degree");
@@ -561,12 +552,12 @@ void export_scalar_taylor_function()
 
 
 
-    scalar_taylor_function_class.def("zero",(ScalarTaylorFunction(*)(const IntervalVector&,Sweeper))&ScalarTaylorFunction::zero);
-    scalar_taylor_function_class.def("constant",(ScalarTaylorFunction(*)(const IntervalVector&,const Float&,Sweeper))&ScalarTaylorFunction::constant);
-    scalar_taylor_function_class.def("constant",(ScalarTaylorFunction(*)(const IntervalVector&,const Interval&,Sweeper))&ScalarTaylorFunction::constant);
-    scalar_taylor_function_class.def("coordinate",(ScalarTaylorFunction(*)(const IntervalVector&,uint,Sweeper))&ScalarTaylorFunction::coordinate);
-    scalar_taylor_function_class.def("variable",(ScalarTaylorFunction(*)(const IntervalVector&,uint,Sweeper))&ScalarTaylorFunction::variable);
-    scalar_taylor_function_class.def("variables",(Vector<ScalarTaylorFunction>(*)(const IntervalVector&,Sweeper)) &ScalarTaylorFunction::variables);
+    scalar_taylor_function_class.def("zero",(ScalarTaylorFunction(*)(const Box&,Sweeper))&ScalarTaylorFunction::zero);
+    scalar_taylor_function_class.def("constant",(ScalarTaylorFunction(*)(const Box&,const Float&,Sweeper))&ScalarTaylorFunction::constant);
+    scalar_taylor_function_class.def("constant",(ScalarTaylorFunction(*)(const Box&,const Interval&,Sweeper))&ScalarTaylorFunction::constant);
+    scalar_taylor_function_class.def("coordinate",(ScalarTaylorFunction(*)(const Box&,uint,Sweeper))&ScalarTaylorFunction::coordinate);
+    scalar_taylor_function_class.def("variable",(ScalarTaylorFunction(*)(const Box&,uint,Sweeper))&ScalarTaylorFunction::variable);
+    scalar_taylor_function_class.def("variables",(Vector<ScalarTaylorFunction>(*)(const Box&,Sweeper)) &ScalarTaylorFunction::variables);
 
 
     scalar_taylor_function_class.staticmethod("constant");
@@ -588,12 +579,12 @@ void export_scalar_taylor_function()
     def("disjoint",(bool(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&)) &disjoint);
     def("intersection",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&)) &intersection);
 
-    def("restrict",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const IntervalVector&)) &restrict);
+    def("restrict",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Box&)) &restrict);
     def("restrict",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint,const Interval&)) &restrict);
 
     def("embed",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Interval&)) &embed);
-    def("embed",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const IntervalVector&)) &embed);
-    def("embed",(ScalarTaylorFunction(*)(const IntervalVector&,const ScalarTaylorFunction&)) &embed);
+    def("embed",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Box&)) &embed);
+    def("embed",(ScalarTaylorFunction(*)(const Box&,const ScalarTaylorFunction&)) &embed);
 
     def("max",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&))&max);
     def("min",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&))&min);
@@ -621,18 +612,13 @@ void export_vector_taylor_function()
     typedef Vector<Float> FloatVector;
     typedef Vector<Interval> IntervalVector;
     typedef Matrix<Float> FloatMatrix;
-    typedef Polynomial<Float> RP;
-    typedef Polynomial<Interval> IP;
-    typedef Vector<Polynomial<Float> > RPV;
-    typedef Vector<Polynomial<Interval> > IPV;
-    typedef Vector<RealScalarFunction> EV;
     typedef ScalarTaylorFunction ScalarTaylorFunction;
     typedef VectorTaylorFunction VectorTaylorFunction;
 
     class_<VectorTaylorFunction> vector_taylor_function_class("VectorTaylorFunction", init<VectorTaylorFunction>());
-    vector_taylor_function_class.def( init< Nat, IntervalVector, Sweeper >());
-    vector_taylor_function_class.def( init< IntervalVector,const RealVectorFunction&,Sweeper >());
-    vector_taylor_function_class.def(init< IntervalVector, Vector< Expansion<Float> >, Vector<Float>, Sweeper >());
+    vector_taylor_function_class.def( init< Nat, Box, Sweeper >());
+    vector_taylor_function_class.def( init< Box,const RealVectorFunction&,Sweeper >());
+    vector_taylor_function_class.def(init< Box, Vector< Expansion<Float> >, Vector<Float>, Sweeper >());
     vector_taylor_function_class.def( init< Vector<ScalarTaylorFunction> >());
     vector_taylor_function_class.def("__len__", &VectorTaylorFunction::result_size);
     vector_taylor_function_class.def("result_size", &VectorTaylorFunction::result_size);
@@ -678,9 +664,9 @@ void export_vector_taylor_function()
     vector_taylor_function_class.def("function", (RealVectorFunction(VectorTaylorFunction::*)()const) &VectorTaylorFunction::function);
 
 
-    vector_taylor_function_class.def("constant",(VectorTaylorFunction(*)(const IntervalVector&, const FloatVector&,Sweeper))&VectorTaylorFunction::constant);
-    vector_taylor_function_class.def("constant",(VectorTaylorFunction(*)(const IntervalVector&, const IntervalVector&,Sweeper))&VectorTaylorFunction::constant);
-    vector_taylor_function_class.def("identity",(VectorTaylorFunction(*)(const IntervalVector&,Sweeper))&VectorTaylorFunction::identity);
+    vector_taylor_function_class.def("constant",(VectorTaylorFunction(*)(const Box&, const FloatVector&,Sweeper))&VectorTaylorFunction::constant);
+    vector_taylor_function_class.def("constant",(VectorTaylorFunction(*)(const Box&, const IntervalVector&,Sweeper))&VectorTaylorFunction::constant);
+    vector_taylor_function_class.def("identity",(VectorTaylorFunction(*)(const Box&,Sweeper))&VectorTaylorFunction::identity);
 
     vector_taylor_function_class.staticmethod("constant");
     vector_taylor_function_class.staticmethod("identity");
@@ -700,10 +686,10 @@ void export_vector_taylor_function()
     def("combine", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &combine);
 
     def("embed",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const Interval&)) &embed);
-    def("embed",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const IntervalVector&)) &embed);
-    def("embed",(VectorTaylorFunction(*)(const IntervalVector&,const VectorTaylorFunction&)) &embed);
+    def("embed",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const Box&)) &embed);
+    def("embed",(VectorTaylorFunction(*)(const Box&,const VectorTaylorFunction&)) &embed);
 
-    def("restrict", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const Vector<Interval>&)) &restrict);
+    def("restrict", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const Box&)) &restrict);
     def("restrict", (VectorTaylorFunction(*)(const VectorTaylorFunction&,uint,const Interval&)) &restrict);
 
     def("split", (std::pair<VectorTaylorFunction,VectorTaylorFunction>(*)(const VectorTaylorFunction&,uint)) &Ariadne::split);

@@ -33,6 +33,7 @@
 #include "numeric.h"
 #include "float.h"
 #include "expansion.h"
+#include "box.h"
 
 namespace Ariadne {
 
@@ -101,7 +102,7 @@ class C1TaylorFunction
     static C1TaylorFunction constant(Nat as, ExactFloat c);
     static C1TaylorFunction coordinate(Nat as, Nat ind);
   public:
-    Vector<Interval> domain() const;
+    Box domain() const;
     Nat argument_size() const;
     Void sweep(Float threshold);
     C1TaylorFunction& operator=(Interval c);

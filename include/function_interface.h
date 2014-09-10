@@ -43,6 +43,9 @@ class Float;
 class Interval;
 class Real;
 
+class Interval;
+class Box;
+
 template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Differential;
@@ -327,7 +330,7 @@ inline std::ostream& operator<<(std::ostream& os, const VectorFunctionInterface<
 
 //! \brief An interface for scalar function models on a restricted domain.
 class ScalarModelInterface {
-    virtual Vector<Interval> domain() const = 0;
+    virtual Box domain() const = 0;
     virtual Interval evaluate(const Vector<Interval>&) const = 0;
 };
 
@@ -339,13 +342,13 @@ template<> class FunctionFactoryInterface<Interval>
   public:
     virtual FunctionFactoryInterface<Interval>* clone() const = 0;
     virtual Void write(OutputStream& os) const = 0;
-    inline ScalarFunction<Interval> create(const IntervalVector& domain, const ScalarFunctionInterface<Interval>& function) const;
-    inline VectorFunction<Interval> create(const IntervalVector& domain, const VectorFunctionInterface<Interval>& function) const;
-    inline ScalarFunction<Interval> create_zero(const IntervalVector& domain) const;
-    inline VectorFunction<Interval> create_identity(const IntervalVector& domain) const;
+    inline ScalarFunction<Interval> create(const Box& domain, const ScalarFunctionInterface<Interval>& function) const;
+    inline VectorFunction<Interval> create(const Box& domain, const VectorFunctionInterface<Interval>& function) const;
+    inline ScalarFunction<Interval> create_zero(const Box& domain) const;
+    inline VectorFunction<Interval> create_identity(const Box& domain) const;
   private:
-    virtual ScalarFunctionInterface<Interval>* _create(const IntervalVector& domain, const ScalarFunctionInterface<Interval>& function) const = 0;
-    virtual VectorFunctionInterface<Interval>* _create(const IntervalVector& domain, const VectorFunctionInterface<Interval>& function) const = 0;
+    virtual ScalarFunctionInterface<Interval>* _create(const Box& domain, const ScalarFunctionInterface<Interval>& function) const = 0;
+    virtual VectorFunctionInterface<Interval>* _create(const Box& domain, const VectorFunctionInterface<Interval>& function) const = 0;
 };
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<Interval>& factory) {

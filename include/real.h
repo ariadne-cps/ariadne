@@ -112,7 +112,7 @@ class Real {
     double get_d() const;
   private:
     friend Float::Float(const Real&);
-    friend Interval::Interval(const Real&);
+    friend ValidatedFloat::ValidatedFloat(const Real&);
     friend OutputStream& operator<<(OutputStream& os, const Real& x);
 };
 

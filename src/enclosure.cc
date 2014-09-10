@@ -136,12 +136,12 @@ inline void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
 } // namespace
 
 Pair<IntervalScalarFunctionModel,IntervalScalarFunctionModel> split(const IntervalScalarFunctionModel& f, Nat k) {
-    Pair<IntervalVector,IntervalVector> domains=split(f.domain(),k);
+    Pair<Box,Box> domains=split(f.domain(),k);
     return make_pair(restrict(f,domains.first),restrict(f,domains.second));
 }
 
 Pair<IntervalVectorFunctionModel,IntervalVectorFunctionModel> split(const IntervalVectorFunctionModel& f, Nat k) {
-    Pair<IntervalVector,IntervalVector> domains=split(f.domain(),k);
+    Pair<Box,Box> domains=split(f.domain(),k);
     return make_pair(restrict(f,domains.first),restrict(f,domains.second));
 }
 
@@ -165,7 +165,7 @@ Enclosure::function_factory() const {
 void Enclosure::_solve_zero_constraints() {
     this->_check();
     for(List<IntervalScalarFunctionModel>::iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ) {
-        const Vector<Interval>& domain=this->domain();
+        const Box& domain=this->domain();
         const IntervalTaylorModel& model=iter->model();
         const uint k=model.argument_size()-1u;
         IntervalTaylorModel zeroth_order(k,this->sweeper());
@@ -187,7 +187,7 @@ void Enclosure::_solve_zero_constraints() {
             }
         }
         if(is_first_order && !is_zeroth_order) {
-            const Vector<Interval> new_domain=project(domain,range(0,k));
+            const Box new_domain=project(domain,range(0,k));
             IntervalTaylorModel substitution_model=-zeroth_order/first_order;
             this->_space_function=this->function_factory().create(new_domain,Ariadne::substitute(this->_space_function.models(),k,substitution_model));
             for(List<IntervalScalarFunctionModel>::iterator constraint_iter=this->_negative_constraints.begin();
@@ -248,7 +248,7 @@ Enclosure::Enclosure(const Box& box, const IntervalFunctionModelFactoryInterface
             proper_coordinates.append(i);
         }
     }
-    this->_domain=IntervalVector(proper_coordinates.size());
+    this->_domain=Box(proper_coordinates.size());
     for(uint j=0; j!=this->_domain.size(); ++j) {
         this->_domain[j]=box[proper_coordinates[j]];
     }
@@ -256,7 +256,7 @@ Enclosure::Enclosure(const Box& box, const IntervalFunctionModelFactoryInterface
     // HACK: Make a dummy variable for the domain to avoid bugs which occur
     // with a zero-dimensional domain.
     // FIXME: Fix issues with TaylorFunction on zero-dimensional domain.
-    if(proper_coordinates.size()==0) { this->_domain=IntervalVector(1u,Interval(-1,+1)); }
+    if(proper_coordinates.size()==0) { this->_domain=Box(1u,Interval(-1,+1)); }
 
 
     this->_space_function=this->function_factory().create_zeros(box.dimension(),this->_domain);
@@ -278,7 +278,7 @@ Enclosure::Enclosure(const Box& box, const IntervalFunctionModelFactoryInterface
 }
 
 
-Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& function, const IntervalFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const Box& domain, const IntervalVectorFunction& function, const IntervalFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
@@ -290,7 +290,7 @@ Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction&
     this->_check();
 }
 
-Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& function, const List<IntervalConstraint>& constraints, const IntervalFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const Box& domain, const IntervalVectorFunction& function, const List<IntervalConstraint>& constraints, const IntervalFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
@@ -317,7 +317,7 @@ Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction&
     this->_check();
 }
 
-Enclosure::Enclosure(const IntervalVector& domain, const IntervalVectorFunction& space_function, const IntervalScalarFunction& time_function, const List<IntervalConstraint>& constraints, const IntervalFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const Box& domain, const IntervalVectorFunction& space_function, const IntervalScalarFunction& time_function, const List<IntervalConstraint>& constraints, const IntervalFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     ARIADNE_ASSERT_MSG(domain.size()==space_function.argument_size(),"domain="<<domain<<", space_function="<<space_function);
@@ -429,7 +429,7 @@ void Enclosure::apply_map(IntervalVectorFunction map)
 void Enclosure::apply_flow(IntervalVectorFunction flow, Interval time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
-    this->_space_function=compose(flow,combine(this->_space_function,this->function_factory().create_identity(Vector<Interval>(1u,time))));
+    this->_space_function=compose(flow,combine(this->_space_function,this->function_factory().create_identity(Box(1u,time))));
     for(List<IntervalScalarFunctionModel>::iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
         *iter=embed(*iter,time);
     }
@@ -519,13 +519,13 @@ void Enclosure::apply_parameter_reach_step(IntervalVectorFunctionModel phi, Inte
     ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
     ARIADNE_ASSERT(elps.argument_size()==this->number_of_parameters());
     Float h=phi.domain()[phi.result_size()].upper();
-    IntervalVector parameter_domain=this->parameter_domain();
+    Box parameter_domain=this->parameter_domain();
     Interval time_domain=Interval(0,h);
     IntervalScalarFunctionModel time_function=this->function_factory().create_identity(time_domain);
     this->new_variable(time_domain);
     ARIADNE_ASSERT(phi.argument_size()==this->dimension());
     this->apply_map(phi);
-    IntervalVector new_domain=this->parameter_domain();
+    Box new_domain=this->parameter_domain();
     IntervalScalarFunctionModel time_step_function=this->function_factory().create_coordinate(new_domain,new_domain.size()-1u);
     this->_time_function=this->_time_function+time_step_function;
     this->_dwell_time_function=this->_dwell_time_function+time_step_function;
@@ -584,19 +584,19 @@ void Enclosure::new_zero_parameter_constraint(IntervalScalarFunction constraint_
 
 
 
-IntervalVector Enclosure::domain() const {
+Box Enclosure::domain() const {
     return this->_domain;
 }
 
-IntervalVector Enclosure::parameter_domain() const {
+Box Enclosure::parameter_domain() const {
     return this->_domain;
 }
 
-IntervalVector Enclosure::reduced_domain() const {
+Box Enclosure::reduced_domain() const {
     return this->_reduced_domain;
 }
 
-IntervalVector Enclosure::codomain() const {
+Box Enclosure::codomain() const {
     return Box(this->_space_function.range()).bounding_box();
 }
 
@@ -644,8 +644,8 @@ IntervalVectorFunctionModel const Enclosure::constraint_function() const {
     return g;
 }
 
-IntervalVector const Enclosure::constraint_bounds() const {
-    IntervalVector c(this->number_of_constraints());
+Box const Enclosure::constraint_bounds() const {
+    Box c(this->number_of_constraints());
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
         c[i]=this->constraint(i).bounds();
     }
@@ -765,9 +765,9 @@ void Enclosure::reduce() const
 
 
 
-Matrix<Float> nonlinearities_zeroth_order(const IntervalVectorFunction& f, const IntervalVector& dom);
-Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& function, const IntervalVector domain);
-Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& function, const IntervalVector& domain);
+Matrix<Float> nonlinearities_zeroth_order(const IntervalVectorFunction& f, const Box& dom);
+Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& function, const Box& domain);
+Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& function, const Box& domain);
 
 Pair<Enclosure,Enclosure>
 Enclosure::split_zeroth_order() const
@@ -776,15 +776,15 @@ Enclosure::split_zeroth_order() const
 }
 
 
-List<IntervalVector>
+List<Box>
 Enclosure::splitting_subdomains_zeroth_order() const
 {
-    List<IntervalVector> result;
+    List<Box> result;
     uint k=this->splitting_index_zeroth_order();
     if(k==this->number_of_parameters()) {
         result.append(this->_reduced_domain);
     } else {
-        Pair<IntervalVector,IntervalVector> subdomains = this->_reduced_domain.split(this->splitting_index_zeroth_order());
+        Pair<Box,Box> subdomains = this->_reduced_domain.split(this->splitting_index_zeroth_order());
         result.append(subdomains.first);
         result.append(subdomains.second);
     }
@@ -861,7 +861,7 @@ Pair<Enclosure,Enclosure>
 Enclosure::split(uint d) const
 {
     ARIADNE_PRECONDITION(d<this->number_of_parameters());
-    Vector<Interval> subdomain1,subdomain2;
+    Box subdomain1,subdomain2;
     make_lpair(subdomain1,subdomain2)=Ariadne::split(this->_space_function.domain(),d);
 
     IntervalVectorFunctionModel function1,function2;
@@ -1020,12 +1020,12 @@ uniform_error_recondition()
         }
     }
 
-    IntervalVector error_domains(large_error_indices.size());
+    Box error_domains(large_error_indices.size());
     for(uint i=0; i!=large_error_indices.size(); ++i) {
         Float error=this->_space_function.get(large_error_indices[i]).error();
         error_domains[i]=Interval(-error,+error);
     }
-    error_domains=IntervalVector(large_error_indices.size(),Interval(-1,+1));
+    error_domains=Box(large_error_indices.size(),Interval(-1,+1));
     uint k=this->number_of_parameters();
 
     this->_domain=join(this->_domain,error_domains);
@@ -1103,8 +1103,8 @@ Enclosure::kuhn_recondition()
         new_models[i] = Ariadne::recondition(models[i],discarded_parameters,number_of_error_parameters,i);
     }
 
-    Vector<Interval> new_domain(number_of_kept_parameters+number_of_error_parameters);
-    Vector<Interval> new_reduced_domain(number_of_kept_parameters+number_of_error_parameters);
+    Box new_domain(number_of_kept_parameters+number_of_error_parameters);
+    Box new_reduced_domain(number_of_kept_parameters+number_of_error_parameters);
     for(Nat j=0; j!=number_of_kept_parameters; ++j) {
         new_domain[j]=this->parameter_domain()[kept_parameters[j]];
         new_reduced_domain[j]=this->reduced_domain()[kept_parameters[j]];
@@ -1137,13 +1137,13 @@ Enclosure::kuhn_recondition()
 
 
 
-void Enclosure::restrict(const Vector<Interval>& subdomain)
+void Enclosure::restrict(const Box& subdomain)
 {
     ARIADNE_ASSERT_MSG(subdomain.size()==this->number_of_parameters(),"set="<<*this<<", subdomain="<<subdomain);
     ARIADNE_ASSERT_MSG(Ariadne::subset(subdomain,this->domain()),"set.domain()="<<this->domain()<<", subdomain="<<subdomain);
     Enclosure& result(*this);
     result._domain=subdomain;
-    result._reduced_domain=Ariadne::intersection(static_cast<const Vector<Interval>&>(result._reduced_domain),subdomain);
+    result._reduced_domain=Ariadne::intersection(static_cast<const Box&>(result._reduced_domain),subdomain);
     result._space_function=Ariadne::restrict(result._space_function,subdomain);
     result._time_function=Ariadne::restrict(result._time_function,subdomain);
     result._dwell_time_function=Ariadne::restrict(result._dwell_time_function,subdomain);
@@ -1157,7 +1157,7 @@ void Enclosure::restrict(const Vector<Interval>& subdomain)
     this->reduce();
 }
 
-Enclosure Enclosure::restriction(const Vector<Interval>& subdomain) const
+Enclosure Enclosure::restriction(const Box& subdomain) const
 {
     Enclosure result(*this);
     result.restrict(subdomain);

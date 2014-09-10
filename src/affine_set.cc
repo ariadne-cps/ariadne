@@ -83,7 +83,7 @@ IntervalAffineModelConstraint operator<=(const IntervalAffineModelConstraint& c,
 
 IntervalAffineModel affine_model(const IntervalAffine& a);
 
-IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Vector<Interval>& d,
+IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Box& d,
                      const Vector<IntervalAffine>& f)
     : _domain(d), _space_models(f.size(),IntervalAffineModel(d.size()))
 {
@@ -94,7 +94,7 @@ IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Vecto
     }
 }
 
-IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Vector<Interval>& d,
+IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Box& d,
                      const Vector<IntervalAffine>& f,
                      const List<IntervalAffineConstraint>& c)
     : _domain(d), _space_models(f.size(),IntervalAffineModel(d.size())), _constraint_models()
@@ -111,7 +111,7 @@ IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Vecto
     }
 }
 
-IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Vector<Interval>& d,
+IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Box& d,
                      const Vector<IntervalAffineModel>& f,
                      const List<IntervalAffineModelConstraint>& c)
     : _domain(d), _space_models(f), _constraint_models(c)
@@ -129,7 +129,7 @@ IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Vecto
 {
 }
 
-IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& h)
+IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Box& D, const Matrix<Float>& G, const Vector<Float>& h)
 {
     this->construct(D,G,h);
 }
@@ -139,7 +139,7 @@ IntervalAffineConstrainedImageSet::IntervalAffineConstrainedImageSet(const Matri
     this->construct(Vector<Interval>(G.column_size(),Interval(-1,+1)),G,h);
 }
 
-void IntervalAffineConstrainedImageSet::construct(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& h)
+void IntervalAffineConstrainedImageSet::construct(const Box& D, const Matrix<Float>& G, const Vector<Float>& h)
 {
     ARIADNE_ASSERT_MSG(G.row_size()==h.size() && G.row_size()>0,"G="<<G<<", h="<<h);
     this->_domain=D;
@@ -200,7 +200,7 @@ IntervalAffineConstrainedImageSet::number_of_constraints() const
     return this->_constraint_models.size();
 }
 
-Vector<Interval>
+Box
 IntervalAffineConstrainedImageSet::domain() const
 {
     return this->_domain;
@@ -212,7 +212,7 @@ tribool IntervalAffineConstrainedImageSet::bounded() const {
 
 Box IntervalAffineConstrainedImageSet::bounding_box() const {
     Box result(this->dimension());
-    Vector<Interval> domain=this->domain();
+    Box domain=this->domain();
     for(uint i=0; i!=this->dimension(); ++i) {
         //result[i]=evaluate(this->_space_models[i],domain);
         result[i]=this->_space_models[i].evaluate(domain);
@@ -329,7 +329,7 @@ IntervalAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float>
     // Spacial dimension nx; parameter dimension ne; number of constraints nc
 
 	// Warning: Uniform part of space function is not included!
-	
+
     const uint nx=this->dimension();
     const uint np=this->number_of_parameters();
     const uint nc=this->_constraint_models.size();
@@ -576,7 +576,7 @@ IntervalAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingIn
 	for(uint i=0; i!=this->dimension(); ++i) {
 		errors[i]=this->_space_models[i].error();
 	}
-	
+
     ARIADNE_LOG(9,"A="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n");
     tribool feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
     ARIADNE_LOG(9,"  vt="<<lp.vt<<"\nx="<<lp.x<<"\n");
@@ -601,7 +601,7 @@ IntervalAffineConstrainedImageSet::boundary(uint xind, uint yind) const
 
     SimplexSolver<Float> lpsolver;
     PerturbationGenerator eps;
-    
+
     static const int MAX_STEPS=1000;
     static const double ERROR_TOLERANCE = std::numeric_limits<float>::epsilon();
     static const Float inf = Ariadne::inf;

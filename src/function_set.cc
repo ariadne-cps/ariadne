@@ -67,11 +67,11 @@ unsigned int DRAWING_ACCURACY=1u;
 template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; return ss.str(); }
 
 
-Matrix<Float> nonlinearities_zeroth_order(const IntervalVectorFunction& f, const IntervalVector& dom);
-Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& function, const IntervalVector domain);
-Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& function, const IntervalVector& domain);
+Matrix<Float> nonlinearities_zeroth_order(const IntervalVectorFunction& f, const Box& dom);
+Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& function, const Box domain);
+Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& function, const Box& domain);
 
-Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const IntervalVector& dom)
+Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const Box& dom)
 {
     const uint m=f.result_size();
     const uint n=f.argument_size();
@@ -94,7 +94,7 @@ Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const I
     return nonlinearities;
 }
 
-Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& f, const IntervalVector& dom)
+Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& f, const Box& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -129,7 +129,7 @@ Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& 
     return nonlinearities;
 }
 
-Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface& f, const IntervalVector& dom)
+Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface& f, const Box& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -164,7 +164,7 @@ Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface&
     return nonlinearities;
 }
 
-Pair<uint,double> nonlinearity_index_and_error(const VectorTaylorFunction& function, const IntervalVector domain) {
+Pair<uint,double> nonlinearity_index_and_error(const VectorTaylorFunction& function, const Box domain) {
     Matrix<Float> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
@@ -638,17 +638,17 @@ RealConstrainedImageSet image(const BoundedConstraintSet& set, const RealVectorF
 
 
 
-Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const IntervalVector& dom);
+Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const Box& dom);
 
 
-Matrix<Float> nonlinearities_zeroth_order(const IntervalVectorFunction& f, const IntervalVector& dom)
+Matrix<Float> nonlinearities_zeroth_order(const IntervalVectorFunction& f, const Box& dom)
 {
     ARIADNE_ASSERT(dynamic_cast<const VectorTaylorFunction*>(f.raw_pointer()));
     return nonlinearities_zeroth_order(dynamic_cast<const VectorTaylorFunction&>(*f.raw_pointer()),dom);
 }
 
 /*
-Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& f, const IntervalVector& dom)
+Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& f, const Box& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -683,7 +683,7 @@ Matrix<Float> nonlinearities_first_order(const IntervalVectorFunctionInterface& 
     return nonlinearities;
 }
 
-Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface& f, const IntervalVector& dom)
+Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface& f, const Box& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -719,7 +719,7 @@ Matrix<Float> nonlinearities_second_order(const IntervalVectorFunctionInterface&
 }
 */
 
-Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& function, const IntervalVector& domain)
+Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& function, const Box& domain)
 {
     Matrix<Interval> jacobian=function.jacobian(domain);
 
@@ -741,7 +741,7 @@ Pair<uint,double> lipschitz_index_and_error(const IntervalVectorFunction& functi
     return make_pair(jmax,numeric_cast<double>(max_column_norm));
 }
 
-Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& function, const IntervalVector domain)
+Pair<uint,double> nonlinearity_index_and_error(const IntervalVectorFunction& function, const Box& domain)
 {
     Matrix<Float> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 

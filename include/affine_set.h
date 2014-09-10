@@ -92,18 +92,18 @@ class IntervalAffineConstrainedImageSet
     List<IntervalAffineModelConstraint> _constraint_models;
   public:
     //!\brief The set \f$\{ Gy+c \mid y\in D\}\f$.
-    IntervalAffineConstrainedImageSet(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& c);
+    IntervalAffineConstrainedImageSet(const Box& D, const Matrix<Float>& G, const Vector<Float>& c);
     //!\brief The set \f$\{ Gy+c \mid ||y||_\infty\leq 1\}\f$. \deprecated
     IntervalAffineConstrainedImageSet(const Matrix<Float>& G, const Vector<Float>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \}\f$.
-    IntervalAffineConstrainedImageSet(const IntervalVector& D, const Vector<IntervalAffine>& f);
+    IntervalAffineConstrainedImageSet(const Box& D, const Vector<IntervalAffine>& f);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \mid c(s) \}\f$.
-    IntervalAffineConstrainedImageSet(const IntervalVector& D, const Vector<IntervalAffine>& f, const List<IntervalAffineConstraint>& c);
+    IntervalAffineConstrainedImageSet(const Box& D, const Vector<IntervalAffine>& f, const List<IntervalAffineConstraint>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in [-1,+1]^n \mid c(s) \}\f$.
     explicit IntervalAffineConstrainedImageSet(const Vector<IntervalAffineModel>& f, const List<IntervalAffineModelConstraint>& c);
     explicit IntervalAffineConstrainedImageSet(const Vector<IntervalAffineModel>& f);
 
-    IntervalAffineConstrainedImageSet(const IntervalVector& D, const Vector<IntervalAffineModel>& f, const List<IntervalAffineModelConstraint>& c);
+    IntervalAffineConstrainedImageSet(const Box& D, const Vector<IntervalAffineModel>& f, const List<IntervalAffineModelConstraint>& c);
 
     IntervalAffineConstrainedImageSet* clone() const;
     void new_parameter_constraint(const RealAffineConstraint& c);
@@ -113,7 +113,7 @@ class IntervalAffineConstrainedImageSet
     uint dimension() const;
     uint number_of_parameters() const;
     uint number_of_constraints() const;
-    IntervalVector domain() const;
+    Box domain() const;
 
     tribool bounded() const;
     Box bounding_box() const;
@@ -131,7 +131,7 @@ class IntervalAffineConstrainedImageSet
     virtual std::ostream& write(std::ostream& os) const;
 
   private:
-    void construct(const Vector<Interval>& D, const Matrix<Float>& G, const Vector<Float>& c);
+    void construct(const Box& D, const Matrix<Float>& G, const Vector<Float>& c);
     void construct_linear_program(LinearProgram<Float>& lp) const;
     static void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth);
     static void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth);

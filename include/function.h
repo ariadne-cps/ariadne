@@ -42,6 +42,8 @@
 #include "numeric.h"
 #include "vector.h"
 
+#include "box.h"
+
 namespace Ariadne {
 
 typedef uint Nat;
@@ -357,29 +359,29 @@ class FunctionFactory<Interval>
     FunctionFactory(const FunctionFactoryInterface<Interval>& ref) : _ptr(ref.clone()) { }
     FunctionFactory(const FunctionFactoryInterface<Interval>* ptr) : _ptr(ptr) { }
     FunctionFactory(std::shared_ptr< const FunctionFactoryInterface<Interval> > ptr) : _ptr(ptr) { }
-    inline ScalarFunction<Interval> create(const IntervalVector& d, const ScalarFunctionInterface<Interval>& f) const;
-    inline VectorFunction<Interval> create(const IntervalVector& d, const VectorFunctionInterface<Interval>& f) const;
-    inline ScalarFunction<Interval> create_zero(const IntervalVector& d) const;
-    inline VectorFunction<Interval> create_identity(const IntervalVector& d) const;
+    inline ScalarFunction<Interval> create(const Box& d, const ScalarFunctionInterface<Interval>& f) const;
+    inline VectorFunction<Interval> create(const Box& d, const VectorFunctionInterface<Interval>& f) const;
+    inline ScalarFunction<Interval> create_zero(const Box& d) const;
+    inline VectorFunction<Interval> create_identity(const Box& d) const;
     friend OutputStream& operator<<(OutputStream& os, const FunctionFactory<Interval>& factory);
 };
 
-inline ScalarFunction<Interval> FunctionFactoryInterface<Interval>::create(const IntervalVector& domain, const ScalarFunctionInterface<Interval>& function) const {
+inline ScalarFunction<Interval> FunctionFactoryInterface<Interval>::create(const Box& domain, const ScalarFunctionInterface<Interval>& function) const {
     return this->_create(domain,function); }
-inline VectorFunction<Interval> FunctionFactoryInterface<Interval>::create(const IntervalVector& domain, const VectorFunctionInterface<Interval>& function) const {
+inline VectorFunction<Interval> FunctionFactoryInterface<Interval>::create(const Box& domain, const VectorFunctionInterface<Interval>& function) const {
     return this->_create(domain,function); }
-inline ScalarFunction<Interval> FunctionFactoryInterface<Interval>::create_zero(const IntervalVector& domain) const {
+inline ScalarFunction<Interval> FunctionFactoryInterface<Interval>::create_zero(const Box& domain) const {
     return this->_create(domain,RealScalarFunction::zero(domain.size())); }
-inline VectorFunction<Interval> FunctionFactoryInterface<Interval>::create_identity(const IntervalVector& domain) const {
+inline VectorFunction<Interval> FunctionFactoryInterface<Interval>::create_identity(const Box& domain) const {
     return this->_create(domain,RealVectorFunction::identity(domain.size())); }
 
-inline ScalarFunction<Interval> FunctionFactory<Interval>::create(const IntervalVector& domain, const ScalarFunctionInterface<Interval>& function) const {
+inline ScalarFunction<Interval> FunctionFactory<Interval>::create(const Box& domain, const ScalarFunctionInterface<Interval>& function) const {
     return this->_ptr->create(domain,function); }
-inline VectorFunction<Interval> FunctionFactory<Interval>::create(const IntervalVector& domain, const VectorFunctionInterface<Interval>& function) const {
+inline VectorFunction<Interval> FunctionFactory<Interval>::create(const Box& domain, const VectorFunctionInterface<Interval>& function) const {
     return this->_ptr->create(domain,function); }
-inline ScalarFunction<Interval> FunctionFactory<Interval>::create_zero(const IntervalVector& domain) const {
+inline ScalarFunction<Interval> FunctionFactory<Interval>::create_zero(const Box& domain) const {
     return this->_ptr->create_zero(domain); }
-inline VectorFunction<Interval> FunctionFactory<Interval>::create_identity(const IntervalVector& domain) const {
+inline VectorFunction<Interval> FunctionFactory<Interval>::create_identity(const Box& domain) const {
     return this->_ptr->create_identity(domain); }
 
 inline OutputStream& operator<<(OutputStream& os, const FunctionFactory<Interval>& factory) {

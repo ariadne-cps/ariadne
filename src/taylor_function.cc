@@ -48,9 +48,6 @@ namespace Ariadne {
 
 typedef unsigned int uint;
 
-typedef Vector<Float> Point;
-typedef Vector<Interval> Box;
-
 static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
 
 void _set_scaling(ScalarTaylorFunction& x, const Interval& ivl, uint j)
@@ -83,22 +80,22 @@ ScalarTaylorFunction::ScalarTaylorFunction()
     : _domain(), _model()
 { }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, Sweeper swp)
+ScalarTaylorFunction::ScalarTaylorFunction(const Box& d, Sweeper swp)
     : _domain(d), _model(d.size(),swp)
 {
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const Expansion<Float>& p, const Float& e, const Sweeper& swp)
+ScalarTaylorFunction::ScalarTaylorFunction(const Box& d, const Expansion<Float>& p, const Float& e, const Sweeper& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const IntervalTaylorModel& m)
+ScalarTaylorFunction::ScalarTaylorFunction(const Box& d, const IntervalTaylorModel& m)
     : _domain(d), _model(m)
 {
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const DomainType& d, const IntervalScalarFunction& f, Sweeper swp)
+ScalarTaylorFunction::ScalarTaylorFunction(const Box& d, const IntervalScalarFunction& f, Sweeper swp)
     : _domain(d), _model(f.argument_size(),swp)
 {
     ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
@@ -119,12 +116,12 @@ ScalarTaylorFunction& ScalarTaylorFunction::operator=(const IntervalScalarFuncti
 
 
 
-ScalarTaylorFunction ScalarTaylorFunction::zero(const Vector<Interval>& d, Sweeper swp)
+ScalarTaylorFunction ScalarTaylorFunction::zero(const Box& d, Sweeper swp)
 {
     return ScalarTaylorFunction(d,IntervalTaylorModel::zero(d.size(),swp));
 }
 
-ScalarTaylorFunction ScalarTaylorFunction::constant(const Vector<Interval>& d, const Interval& c, Sweeper swp)
+ScalarTaylorFunction ScalarTaylorFunction::constant(const Box& d, const Interval& c, Sweeper swp)
 {
     return ScalarTaylorFunction(d,IntervalTaylorModel::constant(d.size(),c,swp));
 }
@@ -135,13 +132,13 @@ ScalarTaylorFunction ScalarTaylorFunction::identity(const Interval& ivl, Sweeper
     return ScalarTaylorFunction(d,IntervalTaylorModel::scaling(d.size(),0u,d[0u],swp));
 }
 
-ScalarTaylorFunction ScalarTaylorFunction::coordinate(const Vector<Interval>& d, uint j, Sweeper swp)
+ScalarTaylorFunction ScalarTaylorFunction::coordinate(const Box& d, uint j, Sweeper swp)
 {
     ARIADNE_ASSERT(j<d.size());
     return ScalarTaylorFunction(d,IntervalTaylorModel::scaling(d.size(),j,d[j],swp));
 }
 
-ScalarTaylorFunction ScalarTaylorFunction::variable(const Vector<Interval>& d, uint j, Sweeper swp)
+ScalarTaylorFunction ScalarTaylorFunction::variable(const Box& d, uint j, Sweeper swp)
 {
     ARIADNE_DEPRECATED("ScalarTaylorFunction::variable","Use ScalarTaylorFunction::coordinate instead");
     ARIADNE_ASSERT(j<d.size());
@@ -149,7 +146,7 @@ ScalarTaylorFunction ScalarTaylorFunction::variable(const Vector<Interval>& d, u
 }
 
 
-Vector<ScalarTaylorFunction> ScalarTaylorFunction::constants(const Vector<Interval>& d, const Vector<Interval>& c, Sweeper swp)
+Vector<ScalarTaylorFunction> ScalarTaylorFunction::constants(const Box& d, const Vector<Interval>& c, Sweeper swp)
 {
     ARIADNE_DEPRECATED("ScalarTaylorFunction::constants","Use VectorTaylorFunction::constant instead");
     Vector<ScalarTaylorFunction> x(c.size(),ScalarTaylorFunction(d,swp));
@@ -159,13 +156,13 @@ Vector<ScalarTaylorFunction> ScalarTaylorFunction::constants(const Vector<Interv
     return x;
 }
 
-Vector<ScalarTaylorFunction> ScalarTaylorFunction::variables(const Vector<Interval>& d, Sweeper swp)
+Vector<ScalarTaylorFunction> ScalarTaylorFunction::variables(const Box& d, Sweeper swp)
 {
     ARIADNE_DEPRECATED("ScalarTaylorFunction::variables","Use VectorTaylorFunction::identity instead");
     return variables(d,0u,d.size(),swp);
 }
 
-Vector<ScalarTaylorFunction> ScalarTaylorFunction::variables(const Vector<Interval>& d, uint imin, uint imax, Sweeper swp)
+Vector<ScalarTaylorFunction> ScalarTaylorFunction::variables(const Box& d, uint imin, uint imax, Sweeper swp)
 {
     ARIADNE_DEPRECATED("ScalarTaylorFunction::variables","Use VectorTaylorFunction::projection instead");
     ARIADNE_ASSERT(imin<=imax);
@@ -285,7 +282,7 @@ ScalarTaylorFunction operator+(const ScalarTaylorFunction& x1, const ScalarTaylo
     if(x1._domain==x2._domain) {
         return ScalarTaylorFunction(x1._domain,x1._model+x2._model); }
     else {
-        ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
+        Box domain=intersection(x1._domain,x2._domain);
         return ScalarTaylorFunction(domain,restrict(x1,domain)._model+restrict(x2,domain)._model);}
 }
 
@@ -293,7 +290,7 @@ ScalarTaylorFunction operator-(const ScalarTaylorFunction& x1, const ScalarTaylo
     if(x1._domain==x2._domain) {
         return ScalarTaylorFunction(x1._domain,x1._model-x2._model); }
     else {
-        ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
+        Box domain=intersection(x1._domain,x2._domain);
         return ScalarTaylorFunction(domain,restrict(x1,domain)._model-restrict(x2,domain)._model);}
 }
 
@@ -301,7 +298,7 @@ ScalarTaylorFunction operator*(const ScalarTaylorFunction& x1, const ScalarTaylo
     if(x1._domain==x2._domain) {
         return ScalarTaylorFunction(x1._domain,x1._model*x2._model); }
     else {
-        ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
+        Box domain=intersection(x1._domain,x2._domain);
         return ScalarTaylorFunction(domain,restrict(x1,domain)._model*restrict(x2,domain)._model);}
 }
 
@@ -309,7 +306,7 @@ ScalarTaylorFunction operator/(const ScalarTaylorFunction& x1, const ScalarTaylo
     if(x1._domain==x2._domain) {
         return ScalarTaylorFunction(x1._domain,x1._model/x2._model); }
     else {
-        ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
+        Box domain=intersection(x1._domain,x2._domain);
         return ScalarTaylorFunction(domain,restrict(x1,domain)._model/restrict(x2,domain)._model);}
 }
 
@@ -321,7 +318,7 @@ ScalarTaylorFunction max(const ScalarTaylorFunction& x1, const ScalarTaylorFunct
     if(x1._domain==x2._domain) {
         return ScalarTaylorFunction(x1._domain,max(x1._model,x2._model)); }
     else {
-        ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
+        Box domain=intersection(x1._domain,x2._domain);
         return ScalarTaylorFunction(domain,max(restrict(x1,domain)._model,restrict(x2,domain)._model));}
 }
 
@@ -329,7 +326,7 @@ ScalarTaylorFunction min(const ScalarTaylorFunction& x1, const ScalarTaylorFunct
     if(x1._domain==x2._domain) {
         return ScalarTaylorFunction(x1._domain,min(x1._model,x2._model)); }
     else {
-        ScalarTaylorFunction::DomainType domain=intersection(x1._domain,x2._domain);
+        Box domain=intersection(x1._domain,x2._domain);
         return ScalarTaylorFunction(domain,min(restrict(x1,domain)._model,restrict(x2,domain)._model));}
 }
 
@@ -365,17 +362,17 @@ ScalarTaylorFunction::operator()(const Vector<Interval>& x) const
 }
 
 
-void ScalarTaylorFunction::restrict(const Vector<Interval>& d) {
+void ScalarTaylorFunction::restrict(const Box& d) {
     ARIADNE_ASSERT(subset(d,this->domain()));
-    const Vector<Interval>& od=this->domain();
+    const Box& od=this->domain();
     for(uint j=0; j!=d.size(); ++j) {
         if(od[j]!=d[j]) { *this=Ariadne::restrict(*this,j,d[j]); }
     }
 }
 
-ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, const Vector<Interval>& d) {
+ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, const Box& d) {
     ARIADNE_ASSERT(subset(d,tv.domain()));
-    const Vector<Interval>& od=tv.domain();
+    const Box& od=tv.domain();
     ScalarTaylorFunction r=tv;
     for(uint j=0; j!=d.size(); ++j) {
         if(od[j]!=d[j]) { r=restrict(r,j,d[j]); }
@@ -383,8 +380,8 @@ ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, const Vector<Inter
     return r;
 }
 
-ScalarTaylorFunction extend(const ScalarTaylorFunction& tv, const Vector<Interval>& d) {
-    const Vector<Interval>& domain=tv.domain();
+ScalarTaylorFunction extend(const ScalarTaylorFunction& tv, const Box& d) {
+    const Box& domain=tv.domain();
     ARIADNE_ASSERT(subset(domain,d));
     for(uint i=0; i!=d.size(); ++i) {
         ARIADNE_ASSERT(domain[i]==d[i] || domain[i].lower()==domain[i].upper());
@@ -453,11 +450,11 @@ partial_evaluate(const ScalarTaylorFunction& te, uint k, const Interval& c)
     // Scale c to domain
     const uint as=te.argument_size();
     ARIADNE_ASSERT(k<as);
-    const Vector<Interval>& domain=te.domain();
+    const Box& domain=te.domain();
     const Interval& dk=domain[k];
     Interval sc=(c-med_ivl(dk))/rad_ivl(dk);
 
-    Vector<Interval> new_domain(as-1);
+    Box new_domain(as-1);
     for(uint i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
     for(uint i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
 
@@ -482,7 +479,7 @@ ScalarTaylorFunction partial_restrict(const ScalarTaylorFunction& tv, uint k, co
     Interval s=sub_ivl(d,c)/sub_ivl(b,a);
     // Interval t=(mul_ivl(b,c)-mul_ivl(a,d))/sub_ivl(b,a);  // WRONG!!
     Interval t=(add_ivl(c,d)-add_ivl(a,b))/sub_ivl(b,a);
-    Vector<Interval> new_dom=tv.domain();
+    Box new_dom=tv.domain();
     new_dom[k]=new_ivl;
     return ScalarTaylorFunction(new_dom,preaffine(tv.model(),k,s,t));
 }
@@ -530,7 +527,7 @@ bool disjoint(const ScalarTaylorFunction& tv1, const ScalarTaylorFunction& tv2)
     if(tv1.domain()==tv2.domain()) {
         return disjoint(tv1.model(),tv2.model());
     } else {
-        Vector<Interval> domain=intersection(tv1.domain(),tv2.domain());
+        Box domain=intersection(tv1.domain(),tv2.domain());
         return disjoint(restrict(tv1,domain).model(),restrict(tv2,domain).model());
     }
 }
@@ -577,7 +574,7 @@ prod(const Matrix<Interval>& A,
 }
 
 Matrix<Interval>
-jacobian(const Vector<ScalarTaylorFunction>& tv, const Vector<Interval>& x);
+jacobian(const Vector<ScalarTaylorFunction>& tv, const Box& x);
 
 ScalarTaylorFunction
 midpoint(const ScalarTaylorFunction& f)
@@ -596,7 +593,7 @@ compose(const RealScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
         ARIADNE_ASSERT(g.zero_element().domain()==g[i].domain());
     }
 
-    Vector<Interval> gdomain=g.zero_element().domain();
+    Box gdomain=g.zero_element().domain();
     Vector<IntervalTaylorModel> gmodels(g.size());
     for(uint i=0; i!=g.size(); ++i) { gmodels[i]=g[i].model(); }
 
@@ -655,6 +652,18 @@ template<class X> std::ostream& operator<<(std::ostream& os, const Representatio
 template std::ostream& operator<< <Float> (std::ostream&, const Representation< Vector<Float> >&);
 template std::ostream& operator<< <Interval> (std::ostream&, const Representation< Vector<Interval> >&);
 
+std::ostream& operator<<(std::ostream& os, const Representation< Box >& box_repr)
+{
+    const Vector<Interval>& vec=*box_repr.pointer;
+    ARIADNE_ASSERT(vec.size()!=0);
+    os << "(";
+    for(uint i=0; i!=vec.size(); ++i) {
+        if(i!=0) { os << ","; }
+        os << representation(vec[i]);
+    }
+    os << ")";
+    return os;
+}
 std::ostream& operator<<(std::ostream& os, const Representation< Sweeper >& swp_repr)
 {
     const Sweeper& swp=*swp_repr.pointer;
@@ -855,7 +864,7 @@ VectorTaylorFunction::VectorTaylorFunction(uint k)
 {
 }
 
-VectorTaylorFunction::VectorTaylorFunction(uint m, const Vector<Interval>& d, Sweeper swp)
+VectorTaylorFunction::VectorTaylorFunction(uint m, const Box& d, Sweeper swp)
     : _domain(d), _models(m,IntervalTaylorModel(d.size(),swp))
 {
 }
@@ -894,7 +903,7 @@ ScalarTaylorFunction substitute(const ScalarTaylorFunction& f, uint k, const Sca
 }
 
 
-VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
+VectorTaylorFunction::VectorTaylorFunction(const Box& d,
                                            const Vector<IntervalTaylorModel>& f)
     : _domain(d), _models(f)
 {
@@ -903,7 +912,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
     }
 }
 
-VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
+VectorTaylorFunction::VectorTaylorFunction(const Box& d,
                                            const Vector< Expansion<Float> >& f,
                                            Sweeper swp)
     : _domain(d), _models(f.size())
@@ -914,7 +923,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
     }
 }
 
-VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
+VectorTaylorFunction::VectorTaylorFunction(const Box& d,
                                            const Vector< Expansion<Float> >& f,
                                            const Vector<Float>& e,
                                            Sweeper swp)
@@ -929,7 +938,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
 
 
 
-VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
+VectorTaylorFunction::VectorTaylorFunction(const Box& d,
                                            const IntervalVectorFunction& f,
                                            const Sweeper& swp)
     : _domain(d), _models(f.result_size())
@@ -942,7 +951,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
 }
 
 /*
-VectorTaylorFunction::VectorTaylorFunction(const Vector<Interval>& d,
+VectorTaylorFunction::VectorTaylorFunction(const Box& d,
                                            const RealVectorFunction& f,
                                            const Sweeper& swp)
     : _domain(d), _models(f.result_size())
@@ -1021,25 +1030,25 @@ Void VectorTaylorFunction::adjoin(const ScalarTaylorFunction& sf)
 
 
 VectorTaylorFunction
-VectorTaylorFunction::constant(const Vector<Interval>& d, const Vector<Float>& c, Sweeper swp)
+VectorTaylorFunction::constant(const Box& d, const Vector<Float>& c, Sweeper swp)
 {
     return VectorTaylorFunction(d,IntervalTaylorModel::constants(d.size(),c,swp));
 }
 
 VectorTaylorFunction
-VectorTaylorFunction::constant(const Vector<Interval>& d, const Vector<Interval>& c, Sweeper swp)
+VectorTaylorFunction::constant(const Box& d, const Vector<Interval>& c, Sweeper swp)
 {
     return VectorTaylorFunction(d,IntervalTaylorModel::constants(d.size(),c,swp));
 }
 
 VectorTaylorFunction
-VectorTaylorFunction::identity(const Vector<Interval>& d, Sweeper swp)
+VectorTaylorFunction::identity(const Box& d, Sweeper swp)
 {
     return VectorTaylorFunction(d,IntervalTaylorModel::scalings(d,swp));
 }
 
 VectorTaylorFunction
-VectorTaylorFunction::projection(const Vector<Interval>& d, uint imin, uint imax, Sweeper swp)
+VectorTaylorFunction::projection(const Box& d, uint imin, uint imax, Sweeper swp)
 {
     return VectorTaylorFunction(ScalarTaylorFunction::variables(d,imin,imax,swp));
 }
@@ -1126,14 +1135,25 @@ VectorTaylorFunction::set_sweeper(Sweeper swp)
     }
 }
 
-const Vector<Interval>&
+const Box&
 VectorTaylorFunction::domain() const
 {
     return this->_domain;
 }
 
-const Vector<Interval>
+const Box
 VectorTaylorFunction::codomain() const
+{
+    Box result(this->result_size());
+    for(uint i=0; i!=result.size(); ++i) {
+        result[i]=this->_models[i].range();
+    }
+    return result;
+}
+
+
+const Box
+VectorTaylorFunction::range() const
 {
     Vector<Interval> result(this->result_size());
     for(uint i=0; i!=result.size(); ++i) {
@@ -1152,17 +1172,6 @@ VectorTaylorFunction::centre() const
     }
     return result;
 }
-
-const Vector<Interval>
-VectorTaylorFunction::range() const
-{
-    Vector<Interval> result(this->result_size());
-    for(uint i=0; i!=result.size(); ++i) {
-        result[i]=this->_models[i].range();
-    }
-    return result;
-}
-
 
 
 const Vector<IntervalTaylorModel>&
@@ -1336,7 +1345,7 @@ VectorTaylorFunction::jacobian(const Vector<Interval>& x) const
 }
 
 Void
-VectorTaylorFunction::restrict(const Vector<Interval>& x)
+VectorTaylorFunction::restrict(const Box& x)
 {
     *this=Ariadne::restrict(*this,x);
 }
@@ -1398,29 +1407,29 @@ combine(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
 VectorTaylorFunction
 embed(const VectorTaylorFunction& f, const Interval& d)
 {
-    return embed(IntervalVector(),f,IntervalVector(1u,d));
+    return embed(Box(),f,Box(1u,d));
 }
 
 VectorTaylorFunction
-embed(const VectorTaylorFunction& f, const Vector<Interval>& d)
+embed(const VectorTaylorFunction& f, const Box& d)
 {
-    return embed(IntervalVector(),f,d);
+    return embed(Box(),f,d);
 }
 
 VectorTaylorFunction
-embed(const Vector<Interval>& d, const VectorTaylorFunction& f)
+embed(const Box& d, const VectorTaylorFunction& f)
 {
-    return embed(d,f,IntervalVector());
+    return embed(d,f,Box());
 }
 
 VectorTaylorFunction
-embed(const Vector<Interval>& d1, const VectorTaylorFunction& f, const Vector<Interval>& d2)
+embed(const Box& d1, const VectorTaylorFunction& f, const Box& d2)
 {
     return VectorTaylorFunction(join(d1,f.domain(),d2),embed(embed(d1.size(),f.models()),d2.size()));
 }
 
 VectorTaylorFunction
-restrict(const VectorTaylorFunction& f, const Vector<Interval>& d)
+restrict(const VectorTaylorFunction& f, const Box& d)
 {
     ARIADNE_ASSERT_MSG(subset(d,f.domain()),"Cannot restrict "<<f<<" to non-sub-domain "<<d);
     if(d==f.domain()) { return f; }
@@ -1867,43 +1876,43 @@ List< Polynomial<Interval> > polynomials(const List<ScalarTaylorFunction>& tfns)
 
 
 ScalarTaylorFunction
-TaylorFunctionFactory::create(const IntervalVector& domain, const IntervalScalarFunctionInterface& function) const
+TaylorFunctionFactory::create(const Box& domain, const IntervalScalarFunctionInterface& function) const
 {
     return ScalarTaylorFunction(domain,function,this->_sweeper);
 }
 
 ScalarTaylorFunction*
-TaylorFunctionFactory::_create(const IntervalVector& domain, const IntervalScalarFunctionInterface& function) const
+TaylorFunctionFactory::_create(const Box& domain, const IntervalScalarFunctionInterface& function) const
 {
     return new ScalarTaylorFunction(domain,function,this->_sweeper);
 }
 
 VectorTaylorFunction
-TaylorFunctionFactory::create(const IntervalVector& domain, const IntervalVectorFunctionInterface& function) const
+TaylorFunctionFactory::create(const Box& domain, const IntervalVectorFunctionInterface& function) const
 {
     return VectorTaylorFunction(domain,function,this->_sweeper);
 }
 
 VectorTaylorFunction*
-TaylorFunctionFactory::_create(const IntervalVector& domain, const IntervalVectorFunctionInterface& function) const
+TaylorFunctionFactory::_create(const Box& domain, const IntervalVectorFunctionInterface& function) const
 {
     return new VectorTaylorFunction(domain,function,this->_sweeper);
 }
 
 ScalarTaylorFunction
-TaylorFunctionFactory::create_zero(const IntervalVector& domain) const
+TaylorFunctionFactory::create_zero(const Box& domain) const
 {
     return ScalarTaylorFunction::zero(domain,this->_sweeper);
 }
 
 ScalarTaylorFunction
-TaylorFunctionFactory::create_constant(const IntervalVector& domain, Interval value) const
+TaylorFunctionFactory::create_constant(const Box& domain, Interval value) const
 {
     return ScalarTaylorFunction::constant(domain,value,this->_sweeper);
 }
 
 ScalarTaylorFunction
-TaylorFunctionFactory::create_coordinate(const IntervalVector& domain, uint k) const
+TaylorFunctionFactory::create_coordinate(const Box& domain, uint k) const
 {
     return ScalarTaylorFunction::coordinate(domain,k,this->_sweeper);
 }
@@ -1915,7 +1924,7 @@ TaylorFunctionFactory::create_identity(const Interval& domain) const
 }
 
 VectorTaylorFunction
-TaylorFunctionFactory::create_identity(const IntervalVector& domain) const
+TaylorFunctionFactory::create_identity(const Box& domain) const
 {
     return VectorTaylorFunction::identity(domain,this->_sweeper);
 }

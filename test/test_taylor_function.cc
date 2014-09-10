@@ -130,7 +130,7 @@ void TestScalarTaylorFunction::test_concept()
 
 void TestScalarTaylorFunction::test_constructors()
 {
-    ARIADNE_TEST_CONSTRUCT(ScalarTaylorFunction,tv1,({{-1,+1},{-1,+1}},{{{0,0},1.},{{1,0},2.},{{0,1},3.},{{2,0},4.},{{1,1},5.},{{0,2},6.},{{3,0},7.},{{2,1},8.},{{1,2},9.},{{0,3},10.}},0.25,swp));
+    ARIADNE_TEST_CONSTRUCT(ScalarTaylorFunction,tv1,(Box{{-1,+1},{-1,+1}},{{{0,0},1.},{{1,0},2.},{{0,1},3.},{{2,0},4.},{{1,1},5.},{{0,2},6.},{{3,0},7.},{{2,1},8.},{{1,2},9.},{{0,3},10.}},0.25,swp));
 
     ARIADNE_ASSERT_EQUAL(tv1.domain(),Vector<Interval>({{-1,+1},{-1,+1}}));
     ARIADNE_ASSERT_EQUAL(tv1.argument_size(),2);

@@ -82,7 +82,7 @@ inline Interval unscale(const Interval& x, const Interval& d) {
     return (x-c)/r;
 }
 
-template<class X> Vector<X> unscale(const Vector<X>& x, const Vector<Interval>& d) {
+template<class X> Vector<X> unscale(const Vector<X>& x, const Box& d) {
     Vector<X> r(x);
     for(uint i=0; i!=r.size(); ++i) {
         r[i]=unscale(x[i],d[i]);
@@ -102,9 +102,9 @@ Interval evaluate(const ScalarTaylorFunction& x, const Vector<Interval>& sy);
 // Restrict the \a kth variable to lie in the interval \a d.
 ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, uint k, const Interval& d);
 // Restrict to a smaller domain. REQUIRED
-ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, const Vector<Interval>& d);
+ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, const Box& d);
 // Extend to a larger domain. REQUIRED
-ScalarTaylorFunction extend(const ScalarTaylorFunction& x, const Vector<Interval>& d);
+ScalarTaylorFunction extend(const ScalarTaylorFunction& x, const Box& d);
 
 // Compose with an function.
 ScalarTaylorFunction compose(const IntervalScalarFunction& x, const VectorTaylorFunction& y);
@@ -126,8 +126,8 @@ pair<ScalarTaylorFunction,ScalarTaylorFunction> split(const ScalarTaylorFunction
 
 // Embed the variable in a space of higher dimension
 ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const Interval& d2);
-ScalarTaylorFunction embed(const Vector<Interval>& d1, const ScalarTaylorFunction& tv2);
-ScalarTaylorFunction embed(const Vector<Interval>& d1, const ScalarTaylorFunction& tv2, const Vector<Interval>& d3);
+ScalarTaylorFunction embed(const Box& d1, const ScalarTaylorFunction& tv2);
+ScalarTaylorFunction embed(const Box& d1, const ScalarTaylorFunction& tv2, const Box& d3);
 
 // Antidifferentiation operator
 ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, uint k, Float c);
@@ -162,11 +162,14 @@ class VectorTaylorFunctionElementReference;
 class ScalarTaylorFunction
     : public ScalarFunctionModelMixin<ScalarTaylorFunction, Interval>
 {
+  public:
+    typedef Box DomainType;
+    typedef Interval RangeType;
     typedef Interval NumericType;
-    typedef Vector<Interval> DomainType;
     typedef TaylorModel<Interval> ModelType;
     typedef Expansion<Float> ExpansionType;
     typedef Float ErrorType;
+  private:
     static const Float _zero;
     DomainType _domain;
     ModelType _model;
@@ -560,11 +563,11 @@ inline ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, uint k) {
 
 inline ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const Interval& dom2) {
     return ScalarTaylorFunction(join(tv1.domain(),dom2),embed(tv1.model(),1u)); }
-inline ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const Vector<Interval>& dom2) {
+inline ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const Box& dom2) {
     return ScalarTaylorFunction(join(tv1.domain(),dom2),embed(tv1.model(),dom2.size())); }
-inline ScalarTaylorFunction embed(const Vector<Interval>& dom1, const ScalarTaylorFunction& tv2) {
+inline ScalarTaylorFunction embed(const Box& dom1, const ScalarTaylorFunction& tv2) {
     return ScalarTaylorFunction(join(dom1,tv2.domain()),embed(dom1.size(),tv2.model())); }
-inline ScalarTaylorFunction embed(const Vector<Interval>& dom1, const ScalarTaylorFunction& tv2,const Vector<Interval>& dom3) {
+inline ScalarTaylorFunction embed(const Box& dom1, const ScalarTaylorFunction& tv2,const Box& dom3) {
     return ScalarTaylorFunction(join(join(dom1,tv2.domain()),dom3),embed(embed(dom1.size(),tv2.model()),dom3.size())); }
 
 
@@ -572,11 +575,11 @@ inline ScalarTaylorFunction embed(const Vector<Interval>& dom1, const ScalarTayl
 Vector<Interval> evaluate(const VectorTaylorFunction& f, const Vector<Interval>& x);
 VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, const Float& c);
 VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, const Interval& c);
-VectorTaylorFunction embed(const VectorTaylorFunction& tv1, const Vector<Interval>& d2);
+VectorTaylorFunction embed(const VectorTaylorFunction& tv1, const Box& d2);
 VectorTaylorFunction embed(const VectorTaylorFunction& tv1, const Interval& d2);
-VectorTaylorFunction embed(const Vector<Interval>& d1, const VectorTaylorFunction& tv2);
-VectorTaylorFunction embed(const Vector<Interval>& d1, const VectorTaylorFunction& tv2,const Vector<Interval>& d3);
-VectorTaylorFunction restrict(const VectorTaylorFunction&, const Vector<Interval>& bx);
+VectorTaylorFunction embed(const Box& d1, const VectorTaylorFunction& tv2);
+VectorTaylorFunction embed(const Box& d1, const VectorTaylorFunction& tv2,const Box& d3);
+VectorTaylorFunction restrict(const VectorTaylorFunction&, const Box& bx);
 bool refines(const VectorTaylorFunction&, const VectorTaylorFunction&);
 bool disjoint(const VectorTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction intersection(const VectorTaylorFunction&, const VectorTaylorFunction&);
@@ -613,7 +616,7 @@ class VectorTaylorFunction
     typedef Float R;
     typedef Interval I;
   public:
-    typedef Vector<Interval> DomainType;
+    typedef Box DomainType;
 
     /*! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables. */
     VectorTaylorFunction();
@@ -622,27 +625,27 @@ class VectorTaylorFunction
     explicit VectorTaylorFunction(unsigned int result_size);
 
     /*! \brief Construct from a result size and a domain. */
-    VectorTaylorFunction(unsigned int result_size, const Vector<Interval>& domain, Sweeper swp);
+    VectorTaylorFunction(unsigned int result_size, const Box& domain, Sweeper swp);
 
     /*! \brief Construct a vector function all of whose components are the same. */
     VectorTaylorFunction(unsigned int result_size, const ScalarTaylorFunction& scalar_function);
 
     /*! \brief Construct from a domain and the expansion. */
-    VectorTaylorFunction(const Vector<Interval>& domain,
+    VectorTaylorFunction(const Box& domain,
                          const Vector< Expansion<Float> >& expansion,
                          Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
-    VectorTaylorFunction(const Vector<Interval>& domain,
+    VectorTaylorFunction(const Box& domain,
                          const Vector< Expansion<Float> >& expansion,
                          const Vector<Float>& error,
                          Sweeper swp);
 
     /*! \brief Construct from a domain and the models. */
-    explicit VectorTaylorFunction(const Vector<Interval>& domain, const Vector< TaylorModel<Interval> >& variables);
+    explicit VectorTaylorFunction(const Box& domain, const Vector< TaylorModel<Interval> >& variables);
 
     /*! \brief Construct from a domain, a function, and a sweeper determining the accuracy. */
-    VectorTaylorFunction(const Vector<Interval>& domain,
+    VectorTaylorFunction(const Box& domain,
                          const IntervalVectorFunction& function,
                          const Sweeper& sweeper);
 
@@ -672,13 +675,13 @@ class VectorTaylorFunction
     /*! \brief Set the sweeper used to control approximation of the Taylor function. */
     void set_sweeper(Sweeper swp);
     /*! \brief The data used to define the domain of the Taylor model. */
-    const Vector<Interval>& domain() const;
+    const Box& domain() const;
     /*! \brief A rough bound for the range of the function. */
-    const Vector<Interval> codomain() const;
+    const Box codomain() const;
     /*! \brief The centre of the Taylor model. */
     const Vector<Float> centre() const;
     /*! \brief The range of the Taylor model. */
-    const Vector<Interval> range() const;
+    const Box range() const;
     /*! \brief The data used to define the Taylor models. */
     const Vector< TaylorModel<Interval> >& models() const;
     /*! \brief The data used to define the centre of the Taylor models. */
@@ -723,13 +726,13 @@ class VectorTaylorFunction
     Void clobber();
 
     /*! \brief The constant Taylor model with range \a r and argument domain \a d. */
-    static VectorTaylorFunction constant(const Vector<Interval>& d, const Vector<Interval>& r, Sweeper swp);
+    static VectorTaylorFunction constant(const Box& d, const Vector<Interval>& r, Sweeper swp);
     /*! \brief The constant Taylor model with result \a c and argument domain \a d. */
-    static VectorTaylorFunction constant(const Vector<Interval>& d, const Vector<Float>& c, Sweeper swp);
+    static VectorTaylorFunction constant(const Box& d, const Vector<Float>& c, Sweeper swp);
     /*! \brief The identity Taylor model on domain \a d. */
-    static VectorTaylorFunction identity(const Vector<Interval>& d, Sweeper swp);
+    static VectorTaylorFunction identity(const Box& d, Sweeper swp);
     //! \brief Return the vector of variables in the range with values \a x over domain \a d.
-    static VectorTaylorFunction projection(const Vector<Interval>& d, uint imin, uint imax, Sweeper swp);
+    static VectorTaylorFunction projection(const Box& d, uint imin, uint imax, Sweeper swp);
 
     /*! \brief Convert to an interval polynomial. */
     Vector< Polynomial<Interval> > polynomials() const;
@@ -743,7 +746,7 @@ class VectorTaylorFunction
     /*! \brief Truncate terms higher than \a bd. */
     VectorTaylorFunction& truncate(const MultiIndexBound& bd);
     /*! \brief Restrict to a subdomain. */
-    Void restrict(const IntervalVector& d);
+    Void restrict(const Box& d);
     //! \brief Adjoin a scalar function.
     Void adjoin(const ScalarTaylorFunction& sf);
 
@@ -810,7 +813,7 @@ class VectorTaylorFunction
     friend VectorTaylorFunction combine(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
     friend VectorTaylorFunction combine(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
     //! \brief Restrict the function \a f to a subdomain \a d.
-    friend VectorTaylorFunction restrict(const VectorTaylorFunction& f, const Vector<Interval>& d);
+    friend VectorTaylorFunction restrict(const VectorTaylorFunction& f, const Box& d);
     //! \brief Tests if a function \a f refines another function \a g.
     //! To be a refinement, the domain of \a f must contain the domain of \a g.
     friend bool refines(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
@@ -834,7 +837,7 @@ class VectorTaylorFunction
     template<class X> void _compute(Vector<X>& r, const Vector<X>& a) const;
   private:
     /* Domain of definition. */
-    Vector<Interval> _domain;
+    Box _domain;
     Vector< TaylorModel<Interval> > _models;
 };
 
@@ -848,9 +851,9 @@ Vector<Interval> evaluate(const VectorTaylorFunction& f, const Vector<Interval>&
 // Restrict the \a kth variable to lie in the interval \a d.
 VectorTaylorFunction restrict(const VectorTaylorFunction& f, uint k, const Interval& d);
 // Restrict to a smaller domain. REQUIRED
-VectorTaylorFunction restrict(const VectorTaylorFunction& f, const Vector<Interval>& d);
+VectorTaylorFunction restrict(const VectorTaylorFunction& f, const Box& d);
 // Extend to a larger domain. REQUIRED
-VectorTaylorFunction extend(const VectorTaylorFunction& f, const Vector<Interval>& d);
+VectorTaylorFunction extend(const VectorTaylorFunction& f, const Box& d);
 
 // The argument size of the result is the same as that of \a e, and must be either the same as that of \a f, or one less.
 VectorTaylorFunction compose(const VectorTaylorFunction& f, const VectorTaylorFunction& e);
@@ -933,17 +936,17 @@ class TaylorFunctionFactory
     Sweeper sweeper() const { return this->_sweeper; }
     TaylorFunctionFactory* clone() const { return new TaylorFunctionFactory(this->_sweeper); }
     Void write(OutputStream& os) const { os << "TaylorFunctionFactory( sweeper=" << this->_sweeper << " )"; }
-    ScalarTaylorFunction create(const IntervalVector& domain, const IntervalScalarFunctionInterface& function) const;
-    VectorTaylorFunction create(const IntervalVector& domain, const IntervalVectorFunctionInterface& function) const;
-    ScalarTaylorFunction create_zero(const IntervalVector& domain) const;
-    ScalarTaylorFunction create_constant(const IntervalVector& domain, Interval c) const;
-    ScalarTaylorFunction create_coordinate(const IntervalVector& domain, uint k) const;
-    VectorTaylorFunction create_zero(uint i, const IntervalVector& domain) const;
+    ScalarTaylorFunction create(const Box& domain, const IntervalScalarFunctionInterface& function) const;
+    VectorTaylorFunction create(const Box& domain, const IntervalVectorFunctionInterface& function) const;
+    ScalarTaylorFunction create_zero(const Box& domain) const;
+    ScalarTaylorFunction create_constant(const Box& domain, Interval c) const;
+    ScalarTaylorFunction create_coordinate(const Box& domain, uint k) const;
+    VectorTaylorFunction create_zero(uint i, const Box& domain) const;
     ScalarTaylorFunction create_identity(const Interval& domain) const;
-    VectorTaylorFunction create_identity(const IntervalVector& domain) const;
+    VectorTaylorFunction create_identity(const Box& domain) const;
   private:
-    ScalarTaylorFunction* _create(const IntervalVector& domain, const IntervalScalarFunctionInterface& function) const;
-    VectorTaylorFunction* _create(const IntervalVector& domain, const IntervalVectorFunctionInterface& function) const;
+    ScalarTaylorFunction* _create(const Box& domain, const IntervalScalarFunctionInterface& function) const;
+    VectorTaylorFunction* _create(const Box& domain, const IntervalVectorFunctionInterface& function) const;
 };
 
 

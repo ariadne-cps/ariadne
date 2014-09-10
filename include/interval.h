@@ -38,6 +38,7 @@
 #include "rounding.h"
 #include "float.h"
 #include "float-exact.h"
+#include "float-validated.h"
 
 // Simplifying typedefs for unsigned types
 typedef unsigned int uint;
@@ -109,6 +110,8 @@ class Interval {
     Interval(const Real& x);
     //! \brief Convert from a floating-point number with an exact representation.
     Interval(const ExactFloat& x) : l(x.value()), u(x.value()) { }
+    //! \brief Convert from a floating-point number with an exact representation.
+    Interval(const ValidatedFloat& x) : l(x.lower()), u(x.upper()) { }
     //! \brief Convert from a dyadic number.
     Interval(const Dyadic& x);
     //! \brief Convert from a decimal number.
@@ -584,10 +587,6 @@ inline Interval operator-(const Float& x1, const Interval& i2) { return sub(x1,i
 inline Interval operator*(const Float& x1, const Interval& i2) { return mul(i2,x1); }
 inline Interval operator/(const Float& x1, const Interval& i2) { return div(x1,i2); }
 
-inline Interval operator+(const ExactFloat& x1, const ExactFloat& x2) { return add_ivl(x1,x2); }
-inline Interval operator-(const ExactFloat& x1, const ExactFloat& x2) { return sub_ivl(x1,x2); }
-inline Interval operator*(const ExactFloat& x1, const ExactFloat& x2) { return mul_ivl(x1,x2); }
-inline Interval operator/(const ExactFloat& x1, const ExactFloat& x2) { return div_ivl(x1,x2); }
 inline Interval operator+(const Interval& i1, const ExactFloat& x2) { return add(i1,static_cast<Float>(x2)); }
 inline Interval operator-(const Interval& i1, const ExactFloat& x2) { return sub(i1,static_cast<Float>(x2)); }
 inline Interval operator*(const Interval& i1, const ExactFloat& x2) { return mul(i1,static_cast<Float>(x2)); }
@@ -596,7 +595,11 @@ inline Interval operator+(const ExactFloat& x1, const Interval& i2) { return add
 inline Interval operator-(const ExactFloat& x1, const Interval& i2) { return sub(static_cast<Float>(x1),i2); }
 inline Interval operator*(const ExactFloat& x1, const Interval& i2) { return mul(static_cast<Float>(x1),i2); }
 inline Interval operator/(const ExactFloat& x1, const Interval& i2) { return div(static_cast<Float>(x1),i2); }
-inline Interval pow(const ExactFloat& x, int n) { return pow(Interval(x),n); }
+
+inline Interval& operator+=(Interval& i1, const ValidatedFloat& x2) { i1=add(i1,Interval(x2)); return i1; }
+inline Interval& operator-=(Interval& i1, const ValidatedFloat& x2) { i1=sub(i1,Interval(x2)); return i1; }
+inline Interval& operator*=(Interval& i1, const ValidatedFloat& x2) { i1=mul(i1,Interval(x2)); return i1; }
+inline Interval& operator/=(Interval& i1, const ValidatedFloat& x2) { i1=div(i1,Interval(x2)); return i1; }
 
 inline Interval& operator+=(Interval& i1, const Float& x2) { i1=add(i1,x2); return i1; }
 inline Interval& operator-=(Interval& i1, const Float& x2) { i1=sub(i1,x2); return i1; }

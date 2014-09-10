@@ -40,49 +40,52 @@
 namespace Ariadne {
 
 //! \ingroup NumericModule
-//! \related Float, Interval
+//! \related Float, ValidatedFloat
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
 class ExactFloat {
-    Float _x;
+  private:
+    Float _v;
   public:
     //! \brief Default constructor creates the number 0 (zero).
-    ExactFloat() : _x(0) { }
+    ExactFloat() : _v(0) { }
     //! \brief Convert from a built-in positive integer.
-    ExactFloat(unsigned int n) : _x(n) { }
+    ExactFloat(unsigned int n) : _v(n) { }
     //! \brief Convert from a built-in integer.
-    ExactFloat(int n) : _x(n) { }
+    ExactFloat(int n) : _v(n) { }
     //! \brief Explicit construction from a built-in double-precision value.
     //! \details Tests to ensure that the number is not 'accidentally' created from a rounded version of a string literal,
     //! by comparing the input with it's single-precision approximation.
-    explicit ExactFloat(double x) : _x(x) { }
+    explicit ExactFloat(double x) : _v(x) { }
     //! \brief Explicit construction from an approximate floating-point value.
-    explicit ExactFloat(const Float& x) : _x(x) { }
+    explicit ExactFloat(const Float& x) : _v(x) { }
 #ifdef HAVE_GMPXX_H
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
 #endif
     //! \brief The approximate floating-point number with the same value.
-    Float value() const { return _x; }
+    Float const& value() const { return _v; }
     //! \brief A double-precision approximateion.
-    double get_d() const { return _x.get_d(); }
+    double get_d() const { return _v.get_d(); }
 };
+
+class ValidatedFloat;
 
 inline ExactFloat operator+(const ExactFloat& x) { return ExactFloat(+x.value()); }
 inline ExactFloat operator-(const ExactFloat& x) { return ExactFloat(-x.value()); }
-inline Interval operator+(const ExactFloat& x1,  const ExactFloat& x2);
-inline Interval operator-(const ExactFloat& x1,  const ExactFloat& x2);
-inline Interval operator*(const ExactFloat& x1,  const ExactFloat& x2);
-inline Interval operator/(const ExactFloat& x1,  const ExactFloat& x2);
-inline Interval operator+(const Interval& x1,  const ExactFloat& x2);
-inline Interval operator-(const Interval& x1,  const ExactFloat& x2);
-inline Interval operator*(const Interval& x1,  const ExactFloat& x2);
-inline Interval operator/(const Interval& x1,  const ExactFloat& x2);
-inline Interval operator+(const ExactFloat& x1,  const Interval& x2);
-inline Interval operator-(const ExactFloat& x1,  const Interval& x2);
-inline Interval operator*(const ExactFloat& x1,  const Interval& x2);
-inline Interval operator/(const ExactFloat& x1,  const Interval& x2);
-inline Interval pow(const ExactFloat& x, int n);
-inline Interval operator/(int n1,  const ExactFloat& x2);
+inline ValidatedFloat operator+(const ExactFloat& x1,  const ExactFloat& x2);
+inline ValidatedFloat operator-(const ExactFloat& x1,  const ExactFloat& x2);
+inline ValidatedFloat operator*(const ExactFloat& x1,  const ExactFloat& x2);
+inline ValidatedFloat operator/(const ExactFloat& x1,  const ExactFloat& x2);
+inline ValidatedFloat operator+(const ValidatedFloat& x1,  const ExactFloat& x2);
+inline ValidatedFloat operator-(const ValidatedFloat& x1,  const ExactFloat& x2);
+inline ValidatedFloat operator*(const ValidatedFloat& x1,  const ExactFloat& x2);
+inline ValidatedFloat operator/(const ValidatedFloat& x1,  const ExactFloat& x2);
+inline ValidatedFloat operator+(const ExactFloat& x1,  const ValidatedFloat& x2);
+inline ValidatedFloat operator-(const ExactFloat& x1,  const ValidatedFloat& x2);
+inline ValidatedFloat operator*(const ExactFloat& x1,  const ValidatedFloat& x2);
+inline ValidatedFloat operator/(const ExactFloat& x1,  const ValidatedFloat& x2);
+inline ValidatedFloat pow(const ExactFloat& x, int n);
+inline ValidatedFloat operator/(int n1,  const ExactFloat& x2);
 inline std::ostream& operator<<(std::ostream& os, const ExactFloat& x) { return os << std::showpoint << std::setprecision(18) << x.value(); }
 
 inline bool operator==(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()==x2.value(); }
@@ -108,17 +111,20 @@ template<template<class>class T> inline const T<ExactFloat>& make_exact(const T<
 //! \related Float \brief The constant infinity
 //extern ExactFloat inf;
 
-class Interval;
-inline Interval sqr_ivl(Float x);
-inline Interval rec_ivl(Float x);
-inline Interval add_ivl(Float x, Float y);
-inline Interval sub_ivl(Float x, Float y);
-inline Interval mul_ivl(Float x, Float y);
-inline Interval div_ivl(Float x, Float y);
-inline Interval pow_ivl(Float x, int n);
+inline ExactFloat half(ExactFloat x) { return ExactFloat(x.value()/2); }
+inline ExactFloat pos(ExactFloat x) { return ExactFloat(+x.value()); }
+inline ExactFloat neg(ExactFloat x) { return ExactFloat(-x.value()); }
 
-inline Interval rad_ivl(Float x, Float y);
-inline Interval med_ivl(Float x, Float y);
+inline ValidatedFloat sqr(ExactFloat x);
+inline ValidatedFloat rec(ExactFloat x);
+inline ValidatedFloat add(ExactFloat x, ExactFloat y);
+inline ValidatedFloat sub(ExactFloat x, ExactFloat y);
+inline ValidatedFloat mul(ExactFloat x, ExactFloat y);
+inline ValidatedFloat div(ExactFloat x, ExactFloat y);
+inline ValidatedFloat pow(ExactFloat x, int n);
+
+inline ValidatedFloat rad(ExactFloat x, ExactFloat y);
+inline ValidatedFloat med(ExactFloat x, ExactFloat y);
 
 
 #ifdef HAVE_GMPXX_H

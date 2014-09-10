@@ -165,6 +165,19 @@ inline Float& operator-=(Float& x, const Real& y) { return x-=static_cast<Float>
 inline Float& operator*=(Float& x, const Real& y) { return x*=static_cast<Float>(y); }
 inline Float& operator/=(Float& x, const Real& y) { return x/=static_cast<Float>(y); }
 
+inline ValidatedFloat operator+(const Real& x, const ValidatedFloat& y) { return static_cast<ValidatedFloat>(x)+y; }
+inline ValidatedFloat operator-(const Real& x, const ValidatedFloat& y) { return static_cast<ValidatedFloat>(x)-y; }
+inline ValidatedFloat operator*(const Real& x, const ValidatedFloat& y) { return static_cast<ValidatedFloat>(x)*y; }
+inline ValidatedFloat operator/(const Real& x, const ValidatedFloat& y) { return static_cast<ValidatedFloat>(x)/y; }
+inline ValidatedFloat operator+(const ValidatedFloat& x, const Real& y) { return x+static_cast<ValidatedFloat>(y); }
+inline ValidatedFloat operator-(const ValidatedFloat& x, const Real& y) { return x-static_cast<ValidatedFloat>(y); }
+inline ValidatedFloat operator*(const ValidatedFloat& x, const Real& y) { return x*static_cast<ValidatedFloat>(y); }
+inline ValidatedFloat operator/(const ValidatedFloat& x, const Real& y) { return x/static_cast<ValidatedFloat>(y); }
+inline ValidatedFloat& operator+=(ValidatedFloat& x, const Real& y) { return x+=static_cast<ValidatedFloat>(y); }
+inline ValidatedFloat& operator-=(ValidatedFloat& x, const Real& y) { return x-=static_cast<ValidatedFloat>(y); }
+inline ValidatedFloat& operator*=(ValidatedFloat& x, const Real& y) { return x*=static_cast<ValidatedFloat>(y); }
+inline ValidatedFloat& operator/=(ValidatedFloat& x, const Real& y) { return x/=static_cast<ValidatedFloat>(y); }
+
 inline Interval operator+(const Real& x, const Interval& y) { return static_cast<Interval>(x)+y; }
 inline Interval operator-(const Real& x, const Interval& y) { return static_cast<Interval>(x)-y; }
 inline Interval operator*(const Real& x, const Interval& y) { return static_cast<Interval>(x)*y; }

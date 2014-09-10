@@ -31,6 +31,7 @@
 #include "geometry2d.h"
 #include "point.h"
 #include "curve.h"
+#include "interval.h"
 #include "box.h"
 #include "zonotope.h"
 #include "polytope.h"
@@ -49,6 +50,36 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
+
+template<>
+struct from_python_dict<Interval> {
+    from_python_dict() { converter::registry::push_back(&convertible,&construct,type_id<Interval>()); }
+    static void* convertible(PyObject* obj_ptr) {
+        if (!PyDict_Check(obj_ptr) || len(boost::python::extract<boost::python::dict>(obj_ptr))!=1) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        boost::python::dict dct = boost::python::extract<boost::python::dict>(obj_ptr);
+        boost::python::list lst=dct.items();
+        assert(boost::python::len(lst)==1);
+        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+        new (storage) Interval(boost::python::extract<Float>(lst[0][0]),boost::python::extract<Float>(lst[0][1]));
+        data->convertible = storage;
+    }
+};
+
+
+template<>
+struct from_python_list<Interval> {
+    from_python_list() { converter::registry::push_back(&convertible,&construct,type_id<Interval>()); }
+    static void* convertible(PyObject* obj_ptr) {
+        if (!PyList_Check(obj_ptr) || len(boost::python::extract<boost::python::list>(obj_ptr))!=2) { return 0; } return obj_ptr; }
+    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
+        assert(boost::python::len(lst)==2);
+        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+        new (storage) Interval(boost::python::extract<Float>(lst[0]),boost::python::extract<Float>(lst[1]));
+        data->convertible = storage;
+    }
+};
 
 template<>
 struct from_python<Point> {
@@ -225,6 +256,56 @@ void export_point()
     from_python<Point>();
     implicitly_convertible<Vector<Float>,Point>();
 
+}
+
+
+void export_interval()
+{
+    using boost::python::class_;
+    using boost::python::init;
+    using boost::python::self;
+    using boost::python::return_value_policy;
+    using boost::python::copy_const_reference;
+    using boost::python::def;
+
+    class_< Interval > interval_class("Interval");
+    interval_class.def(init<double>());
+    interval_class.def(init<double,double>());
+    interval_class.def(init<Float,Float>());
+    interval_class.def(init<Real,Real>());
+    interval_class.def(init<Decimal>());
+    interval_class.def(init<Dyadic>());
+    interval_class.def(init<ValidatedFloat>());
+    interval_class.def(init<Float>());
+#ifdef HAVE_GMPXX_H
+    interval_class.def(init<Rational>());
+    interval_class.def(init<Rational,Rational>());
+#endif
+
+    interval_class.def(self == self);
+    interval_class.def(self != self);
+    interval_class.def("lower", &Interval::lower, return_value_policy<copy_const_reference>());
+    interval_class.def("upper", &Interval::upper, return_value_policy<copy_const_reference>());
+    interval_class.def("midpoint", &Interval::midpoint);
+    interval_class.def("radius", &Interval::radius);
+    interval_class.def("width", &Interval::width);
+    interval_class.def("contains", (bool(*)(Interval,Float)) &contains);
+    interval_class.def("empty", (bool(Interval::*)()const) &Interval::empty);
+    interval_class.def(boost::python::self_ns::str(self));
+
+    from_python_dict<Interval>();
+    from_python_list<Interval>();
+    //from_python_str<Interval>();
+
+    def("midpoint", &Interval::midpoint);
+    def("radius", &Interval::radius);
+    def("width", &Interval::width);
+
+    def("disjoint", (bool(*)(Interval,Interval)) &disjoint);
+    def("subset", (bool(*)(Interval,Interval)) &subset);
+    def("intersection", (Interval(*)(Interval,Interval)) &intersection);
+
+    def("hull", (Interval(*)(Interval,Interval)) &hull);
 }
 
 void export_box()

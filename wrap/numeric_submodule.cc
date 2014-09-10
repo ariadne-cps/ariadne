@@ -62,43 +62,43 @@ class PythonRational : public Rational {
 };
 
 template<>
-struct from_python_dict<Interval> {
-    from_python_dict() { converter::registry::push_back(&convertible,&construct,type_id<Interval>()); }
+struct from_python_dict<ValidatedFloat> {
+    from_python_dict() { converter::registry::push_back(&convertible,&construct,type_id<ValidatedFloat>()); }
     static void* convertible(PyObject* obj_ptr) {
         if (!PyDict_Check(obj_ptr) || len(extract<dict>(obj_ptr))!=1) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         boost::python::dict dct = boost::python::extract<boost::python::dict>(obj_ptr);
         boost::python::list lst=dct.items();
         assert(boost::python::len(lst)==1);
-        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-        new (storage) Interval(boost::python::extract<Float>(lst[0][0]),boost::python::extract<Float>(lst[0][1]));
+        void* storage = ((converter::rvalue_from_python_storage<ValidatedFloat>*)data)->storage.bytes;
+        new (storage) ValidatedFloat(boost::python::extract<Float>(lst[0][0]),boost::python::extract<Float>(lst[0][1]));
         data->convertible = storage;
     }
 };
 
 
 template<>
-struct from_python_list<Interval> {
-    from_python_list() { converter::registry::push_back(&convertible,&construct,type_id<Interval>()); }
+struct from_python_list<ValidatedFloat> {
+    from_python_list() { converter::registry::push_back(&convertible,&construct,type_id<ValidatedFloat>()); }
     static void* convertible(PyObject* obj_ptr) {
         if (!PyList_Check(obj_ptr) || len(extract<list>(obj_ptr))!=2) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
         assert(boost::python::len(lst)==2);
-        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-        new (storage) Interval(boost::python::extract<Float>(lst[0]),boost::python::extract<Float>(lst[1]));
+        void* storage = ((converter::rvalue_from_python_storage<ValidatedFloat>*)data)->storage.bytes;
+        new (storage) ValidatedFloat(boost::python::extract<Float>(lst[0]),boost::python::extract<Float>(lst[1]));
         data->convertible = storage;
     }
 };
 
 /*
 struct interval_from_python_str {
-    interval_from_python_str() { converter::registry::push_back(&convertible,&construct,type_id<Interval>()); }
+    interval_from_python_str() { converter::registry::push_back(&convertible,&construct,type_id<ValidatedFloat>()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyString_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         std::string str = boost::python::extract<std::string>(obj_ptr);
-        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-        storage = new Interval(str);
+        void* storage = ((converter::rvalue_from_python_storage<ValidatedFloat>*)data)->storage.bytes;
+        storage = new ValidatedFloat(str);
         data->convertible = storage;
     }
 };
@@ -109,7 +109,7 @@ std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Float>& x)
     return os << std::showpoint << std::setprecision(18) << x.reference().get_d();
 }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Interval>& x) {
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ValidatedFloat>& x) {
     rounding_mode_t rnd=get_rounding_mode();
     os << '{';
     set_rounding_downward();
@@ -271,7 +271,7 @@ void export_real()
     real_class.def(init<Dyadic>());
     real_class.def(init<Decimal>());
 
-    real_class.def("radius", &Interval::radius);
+    real_class.def("radius", &ValidatedFloat::radius);
     real_class.def(boost::python::self_ns::str(self));
     real_class.def("__repr__", &__repr__<Real>);
 
@@ -336,7 +336,7 @@ void export_exact_float()
     exact_float_class.def("__repr__", &__cstr__<ExactFloat>);
 }
 
-void export_interval()
+void export_validated_float()
 {
     using boost::python::class_;
     using boost::python::init;
@@ -348,91 +348,75 @@ void export_interval()
     def("down",&down);
     def("up",&up);
 
-    class_< Interval > interval_class("Interval");
-    interval_class.def(init<double>());
-    interval_class.def(init<double,double>());
-    interval_class.def(init<Float,Float>());
-    interval_class.def(init<Real,Real>());
-    interval_class.def(init<Decimal>());
-    interval_class.def(init<Dyadic>());
-    interval_class.def(init<Interval>());
-    interval_class.def(init<Float>());
+    class_< ValidatedFloat > validated_float_class("ValidatedFloat");
+    validated_float_class.def(init<double>());
+    validated_float_class.def(init<double,double>());
+    validated_float_class.def(init<Float,Float>());
+    validated_float_class.def(init<Real,Real>());
+    validated_float_class.def(init<Decimal>());
+    validated_float_class.def(init<Dyadic>());
+    validated_float_class.def(init<ValidatedFloat>());
+    validated_float_class.def(init<Float>());
 #ifdef HAVE_GMPXX_H
-    interval_class.def(init<Rational>());
-    interval_class.def(init<Rational,Rational>());
+    validated_float_class.def(init<Rational>());
+    validated_float_class.def(init<Rational,Rational>());
 #endif
-    interval_class.def(+self);
-    interval_class.def(-self);
-    interval_class.def(self + self);
-    interval_class.def(self - self);
-    interval_class.def(self * self);
-    interval_class.def(self / self);
+    validated_float_class.def(+self);
+    validated_float_class.def(-self);
+    validated_float_class.def(self + self);
+    validated_float_class.def(self - self);
+    validated_float_class.def(self * self);
+    validated_float_class.def(self / self);
 
-    interval_class.def(Real() + self);
-    interval_class.def(Real() - self);
-    interval_class.def(Real() * self);
-    interval_class.def(Real() / self);
+    validated_float_class.def(Real() + self);
+    validated_float_class.def(Real() - self);
+    validated_float_class.def(Real() * self);
+    validated_float_class.def(Real() / self);
 
-    interval_class.def(self == self);
-    interval_class.def(self != self);
-    interval_class.def(self >= self);
-    interval_class.def(self <= self);
-    interval_class.def(self > self);
-    interval_class.def(self < self);
-    interval_class.def("lower", &Interval::lower, return_value_policy<copy_const_reference>());
-    interval_class.def("upper", &Interval::upper, return_value_policy<copy_const_reference>());
-    interval_class.def("midpoint", &Interval::midpoint);
-    interval_class.def("radius", &Interval::radius);
-    interval_class.def("width", &Interval::width);
-    interval_class.def("contains", (bool(*)(Interval,Float)) &contains);
-    interval_class.def("empty", (bool(Interval::*)()const) &Interval::empty);
-    interval_class.def(boost::python::self_ns::str(self));
-    interval_class.def("__repr__", &__repr__<Interval>);
+    validated_float_class.def(self == self);
+    validated_float_class.def(self != self);
+    validated_float_class.def(self >= self);
+    validated_float_class.def(self <= self);
+    validated_float_class.def(self > self);
+    validated_float_class.def(self < self);
+    validated_float_class.def("lower", &ValidatedFloat::lower, return_value_policy<copy_const_reference>());
+    validated_float_class.def("upper", &ValidatedFloat::upper, return_value_policy<copy_const_reference>());
+    validated_float_class.def("midpoint", &ValidatedFloat::midpoint);
+    validated_float_class.def("radius", &ValidatedFloat::radius);
+    validated_float_class.def("width", &ValidatedFloat::width);
+    validated_float_class.def(boost::python::self_ns::str(self));
+    validated_float_class.def("__repr__", &__repr__<ValidatedFloat>);
 
-    interval_class.def("set_output_precision", &Interval::set_output_precision);
-    interval_class.staticmethod("set_output_precision");
+    validated_float_class.def("set_output_precision", &ValidatedFloat::set_output_precision);
+    validated_float_class.staticmethod("set_output_precision");
 
+    implicitly_convertible<Real,ValidatedFloat>();
+    implicitly_convertible<ValidatedFloat,Float>();
 
-    implicitly_convertible<Real,Interval>();
-    implicitly_convertible<Interval,Float>();
+    from_python_dict<ValidatedFloat>();
+    from_python_list<ValidatedFloat>();
+    //from_python_str<ValidatedFloat>();
 
-    from_python_dict<Interval>();
-    from_python_list<Interval>();
-    //from_python_str<Interval>();
+    def("mag", (Float(*)(ValidatedFloat)) &mag);
 
-    def("midpoint", &Interval::midpoint);
-    def("radius", &Interval::radius);
+    def("max", (ValidatedFloat(*)(ValidatedFloat,ValidatedFloat)) &max);
+    def("min", (ValidatedFloat(*)(ValidatedFloat,ValidatedFloat)) &min);
 
-    def("disjoint", (bool(*)(Interval,Interval)) &disjoint);
-    def("subset", (bool(*)(Interval,Interval)) &subset);
-    def("intersection", (Interval(*)(Interval,Interval)) &intersection);
+    def("trunc", (ValidatedFloat(*)(ValidatedFloat,uint)) &trunc, "truncate to n binary digits");
+    def("abs", (ValidatedFloat(*)(ValidatedFloat)) &abs, "validated_float absolute value function");
+    def("pow",  (ValidatedFloat(*)(ValidatedFloat,int)) &pow, "validated_float power function");
+    def("sqr", (ValidatedFloat(*)(ValidatedFloat)) &sqr, "validated_float square function");
+    def("rec", (ValidatedFloat(*)(ValidatedFloat)) &rec);
+    def("sqrt", (ValidatedFloat(*)(ValidatedFloat)) &sqrt);
+    def("exp", (ValidatedFloat(*)(ValidatedFloat)) &exp);
+    def("log", (ValidatedFloat(*)(ValidatedFloat)) &log);
 
-    def("hull", (Interval(*)(Interval,Interval)) &hull);
-
-    def("mag", (Float(*)(Interval)) &mag);
-
-    def("med", (Interval(*)(Interval)) &med);
-    def("rad", (Interval(*)(Interval)) &rad);
-    def("diam", (Interval(*)(Interval)) &diam);
-
-    def("max", (Interval(*)(Interval,Interval)) &max);
-    def("min", (Interval(*)(Interval,Interval)) &min);
-
-    def("trunc", (Interval(*)(Interval,uint)) &trunc, "truncate to n binary digits");
-    def("abs", (Interval(*)(Interval)) &abs, "interval absolute value function");
-    def("pow",  (Interval(*)(Interval,int)) &pow, "interval power function");
-    def("sqr", (Interval(*)(Interval)) &sqr, "interval square function");
-    def("rec", (Interval(*)(Interval)) &rec);
-    def("sqrt", (Interval(*)(Interval)) &sqrt);
-    def("exp", (Interval(*)(Interval)) &exp);
-    def("log", (Interval(*)(Interval)) &log);
-
-    def("sin", (Interval(*)(Interval)) &sin);
-    def("cos", (Interval(*)(Interval)) &cos);
-    def("tan", (Interval(*)(Interval)) &tan);
-    def("asin", (Interval(*)(Interval)) &asin);
-    def("acos", (Interval(*)(Interval)) &acos);
-    def("atan", (Interval(*)(Interval)) &atan);
+    def("sin", (ValidatedFloat(*)(ValidatedFloat)) &sin);
+    def("cos", (ValidatedFloat(*)(ValidatedFloat)) &cos);
+    def("tan", (ValidatedFloat(*)(ValidatedFloat)) &tan);
+    def("asin", (ValidatedFloat(*)(ValidatedFloat)) &asin);
+    def("acos", (ValidatedFloat(*)(ValidatedFloat)) &acos);
+    def("atan", (ValidatedFloat(*)(ValidatedFloat)) &atan);
 }
 
 void export_float()
@@ -458,11 +442,6 @@ void export_float()
     float_class.def(double() - self);
     float_class.def(double() * self);
     float_class.def(double() / self);
-
-    float_class.def(Interval() + self);
-    float_class.def(Interval() - self);
-    float_class.def(Interval() * self);
-    float_class.def(Interval() / self);
 
     float_class.def(self == self);
     float_class.def(self != self);
@@ -504,7 +483,7 @@ numeric_submodule()
 {
     export_tribool();
     export_float();
-    export_interval();
+    export_validated_float();
     export_exact_float();
     export_real();
     export_dyadic();

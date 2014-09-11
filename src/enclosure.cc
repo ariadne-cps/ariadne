@@ -103,7 +103,7 @@ Interval make_domain(const IntervalSet& ivl) {
 }
 
 
-ValidatedVectorFunctionModel make_identity(const BoxSet& bx, const IntervalFunctionModelFactoryInterface& fac) {
+ValidatedVectorFunctionModel make_identity(const BoxSet& bx, const ValidatedFunctionModelFactoryInterface& fac) {
     IntervalVector dom(bx.dimension());
     FloatVector errs(bx.dimension());
 
@@ -150,12 +150,12 @@ void Enclosure::_check() const {
     ARIADNE_ASSERT_MSG(this->_space_function.argument_size()==this->domain().size(),*this);
     ARIADNE_ASSERT_MSG(this->_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_time_function<<"\n\n");
     ARIADNE_ASSERT_MSG(this->_dwell_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_dwell_time_function<<"\n\n");
-    for(List<IntervalConstraintModel>::const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+    for(List<ValidatedConstraintModel>::const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
         ARIADNE_ASSERT_MSG(iter->function().argument_size()==this->domain().size(),*this);
     }
 }
 
-IntervalFunctionModelFactoryInterface const&
+ValidatedFunctionModelFactoryInterface const&
 Enclosure::function_factory() const {
     return *this->_function_factory_ptr;
 }
@@ -166,15 +166,15 @@ void Enclosure::_solve_zero_constraints() {
     this->_check();
     for(List<ValidatedScalarFunctionModel>::iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ) {
         const Box& domain=this->domain();
-        const IntervalTaylorModel& model=iter->model();
+        const ValidatedTaylorModel& model=iter->model();
         const uint k=model.argument_size()-1u;
-        IntervalTaylorModel zeroth_order(k,this->sweeper());
-        IntervalTaylorModel first_order(k,this->sweeper());
+        ValidatedTaylorModel zeroth_order(k,this->sweeper());
+        ValidatedTaylorModel first_order(k,this->sweeper());
         bool is_zeroth_order=true;
         bool is_first_order=true;
         MultiIndex r(k);
         // Try linear approach in last coefficient
-        for(IntervalTaylorModel::const_iterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
+        for(ValidatedTaylorModel::const_iterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
             if(tmiter->key()[k]==0) {
                 assign_all_but_last(r,tmiter->key());
                 zeroth_order.expansion().append(r,tmiter->data());
@@ -188,7 +188,7 @@ void Enclosure::_solve_zero_constraints() {
         }
         if(is_first_order && !is_zeroth_order) {
             const Box new_domain=project(domain,range(0,k));
-            IntervalTaylorModel substitution_model=-zeroth_order/first_order;
+            ValidatedTaylorModel substitution_model=-zeroth_order/first_order;
             this->_space_function=this->function_factory().create(new_domain,Ariadne::substitute(this->_space_function.models(),k,substitution_model));
             for(List<ValidatedScalarFunctionModel>::iterator constraint_iter=this->_negative_constraints.begin();
                     constraint_iter!=this->_negative_constraints.end(); ++constraint_iter) {
@@ -221,7 +221,7 @@ Enclosure* Enclosure::clone() const
     return new Enclosure(*this);
 }
 
-Enclosure::Enclosure(const BoundedConstraintSet& set, const IntervalFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const BoundedConstraintSet& set, const ValidatedFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     this->_space_function=make_identity(set.domain(),this->function_factory());
@@ -236,7 +236,7 @@ Enclosure::Enclosure(const BoundedConstraintSet& set, const IntervalFunctionMode
     this->_check();
 }
 
-Enclosure::Enclosure(const Box& box, const IntervalFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const Box& box, const ValidatedFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     // Ensure domain elements have nonempty radius
@@ -278,7 +278,7 @@ Enclosure::Enclosure(const Box& box, const IntervalFunctionModelFactoryInterface
 }
 
 
-Enclosure::Enclosure(const Box& domain, const ValidatedVectorFunction& function, const IntervalFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const Box& domain, const ValidatedVectorFunction& function, const ValidatedFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
@@ -290,7 +290,7 @@ Enclosure::Enclosure(const Box& domain, const ValidatedVectorFunction& function,
     this->_check();
 }
 
-Enclosure::Enclosure(const Box& domain, const ValidatedVectorFunction& function, const List<IntervalConstraint>& constraints, const IntervalFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const Box& domain, const ValidatedVectorFunction& function, const List<ValidatedConstraint>& constraints, const ValidatedFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
@@ -317,7 +317,7 @@ Enclosure::Enclosure(const Box& domain, const ValidatedVectorFunction& function,
     this->_check();
 }
 
-Enclosure::Enclosure(const Box& domain, const ValidatedVectorFunction& space_function, const ValidatedScalarFunction& time_function, const List<IntervalConstraint>& constraints, const IntervalFunctionModelFactoryInterface& factory)
+Enclosure::Enclosure(const Box& domain, const ValidatedVectorFunction& space_function, const ValidatedScalarFunction& time_function, const List<ValidatedConstraint>& constraints, const ValidatedFunctionModelFactoryInterface& factory)
     : _function_factory_ptr(factory.clone())
 {
     ARIADNE_ASSERT_MSG(domain.size()==space_function.argument_size(),"domain="<<domain<<", space_function="<<space_function);
@@ -396,7 +396,7 @@ void Enclosure::new_parameter(Interval ivl)
     this->_time_function=embed(this->_time_function,ivl);
     this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
     for(uint i=0; i!=this->_constraints.size(); ++i) {
-        IntervalConstraintModel& constraint=this->_constraints[i];
+        ValidatedConstraintModel& constraint=this->_constraints[i];
         constraint.set_function(embed(constraint.function(),ivl));
     }
     this->_check();
@@ -411,7 +411,7 @@ void Enclosure::new_variable(Interval ivl)
     this->_time_function=embed(this->_time_function,ivl);
     this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
     for(uint i=0; i!=this->_constraints.size(); ++i) {
-        IntervalConstraintModel& constraint=this->_constraints[i];
+        ValidatedConstraintModel& constraint=this->_constraints[i];
         constraint.set_function(embed(constraint.function(),ivl));
     }
     this->_check();
@@ -535,18 +535,18 @@ void Enclosure::apply_parameter_reach_step(ValidatedVectorFunctionModel phi, Val
     this->_check();
 }
 
-void Enclosure::new_state_constraint(IntervalConstraint constraint) {
+void Enclosure::new_state_constraint(ValidatedConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->dimension());
     this->_is_fully_reduced=false;
     ValidatedScalarFunctionModel composed_function_model=compose(constraint.function(),this->_space_function);
-    this->_constraints.append(IntervalConstraintModel(constraint.lower_bound(),composed_function_model,constraint.upper_bound()));
+    this->_constraints.append(ValidatedConstraintModel(constraint.lower_bound(),composed_function_model,constraint.upper_bound()));
 }
 
-void Enclosure::new_parameter_constraint(IntervalConstraint constraint) {
+void Enclosure::new_parameter_constraint(ValidatedConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->number_of_parameters());
     this->_is_fully_reduced=false;
     ValidatedScalarFunctionModel function_model=this->function_factory().create(this->domain(),constraint.function());
-    this->_constraints.append(IntervalConstraintModel(constraint.lower_bound(),function_model,constraint.upper_bound()));
+    this->_constraints.append(ValidatedConstraintModel(constraint.lower_bound(),function_model,constraint.upper_bound()));
 }
 
 
@@ -620,19 +620,19 @@ uint Enclosure::number_of_constraints() const {
     return this->_constraints.size();
 }
 
-List<IntervalConstraintModel> const& Enclosure::constraint_models() const {
+List<ValidatedConstraintModel> const& Enclosure::constraint_models() const {
     return this->_constraints;
 }
 
-List<IntervalConstraint> const Enclosure::constraints() const {
-    List<IntervalConstraint> result;
+List<ValidatedConstraint> const Enclosure::constraints() const {
+    List<ValidatedConstraint> result;
     for(uint i=0; i!=this->_constraints.size(); ++i) {
-        result.append(IntervalConstraint(this->_constraints[i].lower_bound(),this->_constraints[i].function(),this->_constraints[i].upper_bound()));
+        result.append(ValidatedConstraint(this->_constraints[i].lower_bound(),this->_constraints[i].function(),this->_constraints[i].upper_bound()));
     }
     return result;
 }
 
-IntervalConstraintModel const& Enclosure::constraint(uint i) const {
+ValidatedConstraintModel const& Enclosure::constraint(uint i) const {
     return this->_constraints[i];
 }
 
@@ -674,7 +674,7 @@ Point Enclosure::centre() const {
 
 
 tribool
-Enclosure::satisfies(IntervalConstraint c) const
+Enclosure::satisfies(ValidatedConstraint c) const
 {
     Enclosure copy=*this;
     copy.new_state_constraint(c);
@@ -720,7 +720,7 @@ tribool Enclosure::subset(const Box& bx) const
 tribool Enclosure::separated(const Box& bx) const
 {
     ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Enclosure::subset(Box): self="<<*this<<", box="<<bx);
-    List<IntervalConstraint> constraints = this->constraints();
+    List<ValidatedConstraint> constraints = this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
     contractor.reduce(this->_reduced_domain,constraints);
 
@@ -736,7 +736,7 @@ tribool Enclosure::separated(const Box& bx) const
 
 void Enclosure::reduce() const
 {
-    List<IntervalConstraint> constraints=this->constraints();
+    List<ValidatedConstraint> constraints=this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
     contractor.reduce(this->_reduced_domain,constraints);
 
@@ -874,13 +874,13 @@ Enclosure::split(uint d) const
     Enclosure& result2=result.second;
 
     ValidatedScalarFunctionModel constraint_function1,constraint_function2;
-    for(List<IntervalConstraintModel>::const_iterator iter=this->_constraints.begin();
+    for(List<ValidatedConstraintModel>::const_iterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
-        const IntervalConstraintModel& constraint=*iter;
+        const ValidatedConstraintModel& constraint=*iter;
         make_lpair(constraint_function1,constraint_function2)=Ariadne::split(constraint.function(),d);
-        result1._constraints.append(IntervalConstraintModel(constraint.lower_bound(),constraint_function1,constraint.upper_bound()));
-        result2._constraints.append(IntervalConstraintModel(constraint.lower_bound(),constraint_function2,constraint.upper_bound()));
+        result1._constraints.append(ValidatedConstraintModel(constraint.lower_bound(),constraint_function1,constraint.upper_bound()));
+        result2._constraints.append(ValidatedConstraintModel(constraint.lower_bound(),constraint_function2,constraint.upper_bound()));
     }
 
     ValidatedScalarFunctionModel time_function1,time_function2;
@@ -1071,10 +1071,10 @@ Enclosure::kuhn_recondition()
     }
 
     const VectorTaylorFunction& function=dynamic_cast<const VectorTaylorFunction&>(this->space_function().reference());
-    const Vector<IntervalTaylorModel>& models = function.models();
+    const Vector<ValidatedTaylorModel>& models = function.models();
     Matrix<Float> dependencies(this->dimension(),this->number_of_parameters());
     for(uint i=0; i!=dependencies.row_size(); ++i) {
-        for(IntervalTaylorModel::const_iterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
+        for(ValidatedTaylorModel::const_iterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
             for(uint j=0; j!=dependencies.column_size(); ++j) {
                 if(iter->key()[j]!=0) {
                     dependencies[i][j]+=abs(iter->data());
@@ -1098,7 +1098,7 @@ Enclosure::kuhn_recondition()
     std::sort(kept_parameters.begin(),kept_parameters.end());
     std::sort(discarded_parameters.begin(),discarded_parameters.end());
 
-    Vector<IntervalTaylorModel> new_models(models.size(),IntervalTaylorModel(number_of_kept_parameters+number_of_error_parameters,function.sweeper()));
+    Vector<ValidatedTaylorModel> new_models(models.size(),ValidatedTaylorModel(number_of_kept_parameters+number_of_error_parameters,function.sweeper()));
     for(uint i=0; i!=this->dimension(); ++i) {
         new_models[i] = Ariadne::recondition(models[i],discarded_parameters,number_of_error_parameters,i);
     }
@@ -1118,10 +1118,10 @@ Enclosure::kuhn_recondition()
 
     Enclosure new_set(new_domain,VectorTaylorFunction(new_domain,new_models),this->function_factory());
     for(uint i=0; i!=this->_constraints.size(); ++i) {
-        const IntervalConstraintModel& constraint=this->_constraints[i];
+        const ValidatedConstraintModel& constraint=this->_constraints[i];
         ScalarTaylorFunction const& constraint_function=dynamic_cast<const ScalarTaylorFunction&>(constraint.function().reference());
         ValidatedScalarFunctionModel new_constraint_function=ScalarTaylorFunction(new_domain,Ariadne::recondition(constraint_function.model(),discarded_parameters,number_of_error_parameters));
-        new_set._constraints.append(IntervalConstraintModel(constraint.lower_bound(),new_constraint_function,constraint.upper_bound()));
+        new_set._constraints.append(ValidatedConstraintModel(constraint.lower_bound(),new_constraint_function,constraint.upper_bound()));
     }
     ScalarTaylorFunction const& time=dynamic_cast<const ScalarTaylorFunction&>(this->_time_function.reference());
     new_set._time_function=ScalarTaylorFunction(new_domain,Ariadne::recondition(time.model(),discarded_parameters,number_of_error_parameters));
@@ -1148,7 +1148,7 @@ void Enclosure::restrict(const Box& subdomain)
     result._time_function=Ariadne::restrict(result._time_function,subdomain);
     result._dwell_time_function=Ariadne::restrict(result._dwell_time_function,subdomain);
     ValidatedScalarFunctionModel new_constraint;
-    for(List<IntervalConstraintModel>::iterator iter=result._constraints.begin();
+    for(List<ValidatedConstraintModel>::iterator iter=result._constraints.begin();
         iter!=result._constraints.end(); ++iter)
     {
         ValidatedScalarFunctionModel& constraint_function=iter->function();
@@ -1310,7 +1310,7 @@ std::ostream& Enclosure::write(std::ostream& os) const {
 
 
 /*
-IntervalAffineConstrainedImageSet
+ValidatedAffineConstrainedImageSet
 Enclosure::affine_approximation() const
 {
     this->_check();
@@ -1333,7 +1333,7 @@ Enclosure::affine_approximation() const
             G[i][j]=component.model().gradient(j);
         }
     }
-    IntervalAffineConstrainedImageSet result(G,h);
+    ValidatedAffineConstrainedImageSet result(G,h);
 
     Vector<Float> a(np);
     Float b;
@@ -1358,15 +1358,15 @@ Enclosure::affine_approximation() const
 */
 
 /*
-struct IntervalAffineModel {
+struct ValidatedAffineModel {
     Float _c; Vector<Float> _g; Float _e;
-    IntervalAffineModel(Float c, const Vector<Float>& g, Float e) : _c(c), _g(g), _e(e) { }
+    ValidatedAffineModel(Float c, const Vector<Float>& g, Float e) : _c(c), _g(g), _e(e) { }
 };
 
-IntervalAffineModel _affine_model(const IntervalTaylorModel& tm) {
-    IntervalAffineModel result(0.0,Vector<Float>(tm.argument_size(),0.0),tm.error());
+ValidatedAffineModel _affine_model(const ValidatedTaylorModel& tm) {
+    ValidatedAffineModel result(0.0,Vector<Float>(tm.argument_size(),0.0),tm.error());
     set_rounding_upward();
-    for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(ValidatedTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()>=2) { result._e+=abs(iter->data()); }
         else if(iter->key().degree()==0) {result. _c=iter->data(); }
         else {
@@ -1381,7 +1381,7 @@ IntervalAffineModel _affine_model(const IntervalTaylorModel& tm) {
 */
 
 
-IntervalAffineConstrainedImageSet
+ValidatedAffineConstrainedImageSet
 Enclosure::affine_over_approximation() const
 {
     this->_check();
@@ -1399,16 +1399,16 @@ Enclosure::affine_over_approximation() const
 
     //std::cerr<<"\n"<<space_function<<"\n"<<time_function<<"\n"<<constraint_functions<<"\n\n";
 
-    Vector< IntervalAffineModel > affine_function_models(space_function.result_size());
+    Vector< ValidatedAffineModel > affine_function_models(space_function.result_size());
     for(uint i=0; i!=space_function.result_size(); ++i) { affine_function_models[i]=affine_model(space_function.models()[i]); }
     //affine_function_models[space_function.result_size()]=affine_model(time_function.model());
 
-    IntervalAffineConstrainedImageSet result(affine_function_models);
+    ValidatedAffineConstrainedImageSet result(affine_function_models);
     //std::cerr<<"\n"<<*this<<"\n"<<result<<"\n\n";
 
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
-        IntervalTaylorModel const& constraint_model=constraint_functions[i].model();
-        IntervalAffineModel affine_constraint_model=affine_model(constraint_model);
+        ValidatedTaylorModel const& constraint_model=constraint_functions[i].model();
+        ValidatedAffineModel affine_constraint_model=affine_model(constraint_model);
         Interval constraint_bound=this->constraint(i).bounds();
         result.new_constraint(constraint_bound.lower()<=affine_constraint_model<=constraint_bound.upper());
     }
@@ -1420,13 +1420,13 @@ Enclosure::affine_over_approximation() const
 
 
 Enclosure product(const Enclosure& set, const Interval& ivl) {
-    typedef List<IntervalConstraintModel>::const_iterator const_iterator;
+    typedef List<ValidatedConstraintModel>::const_iterator const_iterator;
 
     ValidatedVectorFunctionModel new_function=combine(set.function(),set.function_factory().create_identity(ivl));
 
     Enclosure result(new_function.domain(),new_function,set.function_factory());
     for(const_iterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
-        result._constraints.append(IntervalConstraintModel(iter->lower_bound(),embed(iter->function(),ivl),iter->upper_bound()));
+        result._constraints.append(ValidatedConstraintModel(iter->lower_bound(),embed(iter->function(),ivl),iter->upper_bound()));
     }
     result._time_function=embed(set._time_function,ivl);
     result._dwell_time_function=embed(set._dwell_time_function,ivl);
@@ -1435,13 +1435,13 @@ Enclosure product(const Enclosure& set, const Interval& ivl) {
 }
 
 Enclosure product(const Enclosure& set, const Box& bx) {
-    typedef List<IntervalConstraintModel>::const_iterator const_iterator;
+    typedef List<ValidatedConstraintModel>::const_iterator const_iterator;
 
     ValidatedVectorFunctionModel new_function=combine(set.function(),set.function_factory().create_identity(bx));
 
     Enclosure result(new_function.domain(),new_function,set.function_factory());
     for(const_iterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
-        result._constraints.append(IntervalConstraintModel(iter->lower_bound(),embed(iter->function(),bx),iter->upper_bound()));
+        result._constraints.append(ValidatedConstraintModel(iter->lower_bound(),embed(iter->function(),bx),iter->upper_bound()));
     }
     result._time_function=embed(set._time_function,bx);
     result._dwell_time_function=embed(set._dwell_time_function,bx);
@@ -1453,16 +1453,16 @@ Enclosure product(const Enclosure& set1, const Enclosure& set2) {
     ARIADNE_ASSERT(set1.time_function().range() == set2.time_function().range());
     ARIADNE_ASSERT(set1.dwell_time_function().range() == set2.dwell_time_function().range());
 
-    typedef List<IntervalConstraintModel>::const_iterator const_iterator;
+    typedef List<ValidatedConstraintModel>::const_iterator const_iterator;
 
     ValidatedVectorFunctionModel new_function=combine(set1.function(),set2.function());
 
     Enclosure result(new_function.domain(),new_function,set1.function_factory());
     for(const_iterator iter=set1._constraints.begin(); iter!=set1._constraints.end(); ++iter) {
-        result._constraints.append(IntervalConstraintModel(iter->lower_bound(),embed(iter->function(),set2.domain()),iter->upper_bound()));
+        result._constraints.append(ValidatedConstraintModel(iter->lower_bound(),embed(iter->function(),set2.domain()),iter->upper_bound()));
     }
     for(const_iterator iter=set2._constraints.begin(); iter!=set2._constraints.end(); ++iter) {
-        result._constraints.append(IntervalConstraintModel(iter->lower_bound(),embed(set1.domain(),iter->function()),iter->upper_bound()));
+        result._constraints.append(ValidatedConstraintModel(iter->lower_bound(),embed(set1.domain(),iter->function()),iter->upper_bound()));
     }
     result._time_function=embed(set1.time_function(),set2.time_function().domain());
     result._dwell_time_function=embed(set1.dwell_time_function(),set2.dwell_time_function().domain());

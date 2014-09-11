@@ -72,7 +72,7 @@ class TestScalarTaylorFunction
   private:
     Vector<Interval> d(unsigned int n) { return Vector<Interval>(n,Interval(-1,+1)); }
     typedef Expansion<Float> e;
-    typedef TaylorModel<Interval> TM;
+    typedef TaylorModel<ValidatedTag> TM;
 };
 
 

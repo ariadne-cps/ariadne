@@ -303,11 +303,11 @@ export_differential_vector(const char* name)
 
 template void export_differential< Differential<Float> >(const char*);
 template void export_differential< Differential<Interval> >(const char*);
-//template void export_differential< Differential<IntervalTaylorModel> >(const char*);
+//template void export_differential< Differential<ValidatedTaylorModel> >(const char*);
 
 template void export_differential_vector< Differential<Float> >(const char*);
 template void export_differential_vector< Differential<Interval> >(const char*);
-//template void export_differential_vector< Differential<IntervalTaylorModel> >(const char*);
+//template void export_differential_vector< Differential<ValidatedTaylorModel> >(const char*);
 
 void differentiation_submodule()
 {
@@ -316,10 +316,10 @@ void differentiation_submodule()
 
     export_differential< Differential<Float> >("FloatDifferential");
     export_differential< Differential<Interval> >("IntervalDifferential");
-    //export_differential< Differential<IntervalTaylorModel> >("TaylorModelDifferential");
+    //export_differential< Differential<ValidatedTaylorModel> >("TaylorModelDifferential");
 
     export_differential_vector< Differential<Float> >("FloatDifferentialVector");
     export_differential_vector< Differential<Interval> >("IntervalDifferentialVector");
-    //export_differential_vector< Differential<IntervalTaylorModel> >("TaylorModelDifferentialVector");
+    //export_differential_vector< Differential<ValidatedTaylorModel> >("TaylorModelDifferentialVector");
 }
 

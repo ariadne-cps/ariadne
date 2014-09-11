@@ -59,22 +59,22 @@ IntegratorBase::IntegratorBase(MaximumError e, SweepThreshold s, LipschitzConsta
 }
 
 void
-IntegratorBase::set_function_factory(const IntervalFunctionModelFactoryInterface& factory)
+IntegratorBase::set_function_factory(const ValidatedFunctionModelFactoryInterface& factory)
 {
     this->_function_factory_ptr=FunctionFactoryPointer(factory.clone());
 }
 
-const IntervalFunctionModelFactoryInterface&
+const ValidatedFunctionModelFactoryInterface&
 IntegratorBase::function_factory() const
 {
     return *this->_function_factory_ptr;
 }
 
 
-Pair<Float,IntervalVector>
-IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
+Pair<Float,Vector<ValidatedNumberType>>
+IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const Vector<ValidatedNumberType>& dx, const Float& hmax) const
 {
-    ARIADNE_LOG(3,"IntegratorBase::flow_bounds(ValidatedVectorFunction vf, IntervalVector dx, Float hmax)\n");
+    ARIADNE_LOG(3,"IntegratorBase::flow_bounds(ValidatedVectorFunction vf, Vector<ValidatedNumberType> dx, Float hmax)\n");
     ARIADNE_ASSERT_MSG(vf.result_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
     ARIADNE_ASSERT_MSG(vf.argument_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
     ARIADNE_ASSERT(hmax>0);
@@ -88,7 +88,7 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const IntervalVec
     const uint REDUCTION_STEPS=8;
     const uint REFINEMENT_STEPS=4;
 
-    IntervalVector delta=(dx-Vector<Interval>(midpoint(dx)))*(BOX_RADIUS_MULTIPLIER-1);
+    Vector<ValidatedNumberType> delta=(dx-Vector<Interval>(midpoint(dx)))*(BOX_RADIUS_MULTIPLIER-1);
 
     // Compute the Lipschitz constant over the initial box
     Float lip = norm(vf.jacobian(dx)).upper();
@@ -100,7 +100,7 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const IntervalVec
     ARIADNE_LOG(4,"L="<<lip<<", hL="<<hlip<<", hmax="<<hmax<<"\n");
 
     bool success=false;
-    IntervalVector bx,nbx,df;
+    Vector<ValidatedNumberType> bx,nbx,df;
     Interval ih(0,h);
 
     while(!success) {
@@ -124,7 +124,7 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const IntervalVec
 
     ARIADNE_ASSERT(subset(nbx,bx));
 
-    IntervalVector vfbx;
+    Vector<ValidatedNumberType> vfbx;
     vfbx=vf.evaluate(bx);
 
     for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
@@ -145,7 +145,7 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const IntervalVec
     ARIADNE_ASSERT(subset(dx,bx));
 
     ARIADNE_ASSERT_MSG(subset(dx+make_exact(h)*vf.evaluate(bx),bx),
-        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<vf.evaluate(bx)<<"\nd+hf(b)="<<IntervalVector(dx+make_exact(h)*vf.evaluate(bx))<<"\nb="<<bx<<"\n");
+        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<vf.evaluate(bx)<<"\nd+hf(b)="<<Vector<ValidatedNumberType>(dx+make_exact(h)*vf.evaluate(bx))<<"\nb="<<bx<<"\n");
 
     return std::make_pair(h,bx);
 }
@@ -155,9 +155,9 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const IntervalVec
 
 
 ValidatedVectorFunctionModel
-IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const IntervalVector& dx0, const Real& tmax) const
+IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const Vector<ValidatedNumberType>& dx0, const Real& tmax) const
 {
-    ARIADNE_LOG(1,"IntegratorBase::flow_to(ValidatedVectorFunction vf, IntervalVector dx0, Real tmax)\n");
+    ARIADNE_LOG(1,"IntegratorBase::flow_to(ValidatedVectorFunction vf, Vector<ValidatedNumberType> dx0, Real tmax)\n");
     ARIADNE_LOG(2,"vf="<<vf<<"\n");
     ARIADNE_LOG(2,"dom(x0)="<<dx0<<" tmax="<<tmax<<"\n");
     const uint n=dx0.size(); // Dimension of the state space
@@ -165,9 +165,9 @@ IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const IntervalVector&
     Float t=0.0;
     ValidatedVectorFunctionModel step_function;
     while(t<tmax) {
-        IntervalVector dx=flow_function.range();
+        Vector<ValidatedNumberType> dx=flow_function.range();
         Float h=static_cast<Float>(tmax)-t;
-        IntervalVector bx;
+        Vector<ValidatedNumberType> bx;
         make_lpair(h,bx) = this->flow_bounds(vf,dx,h);
         bool flow_successfully_computed=false;
         while(!flow_successfully_computed) {
@@ -187,9 +187,9 @@ IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const IntervalVector&
 
 
 List<ValidatedVectorFunctionModel>
-IntegratorBase::flow(const ValidatedVectorFunction& vf, const IntervalVector& dx0, const Real& tmin, const Real& tmax) const
+IntegratorBase::flow(const ValidatedVectorFunction& vf, const Vector<ValidatedNumberType>& dx0, const Real& tmin, const Real& tmax) const
 {
-    ARIADNE_LOG(1,"IntegratorBase::flow(ValidatedVectorFunction vf, IntervalVector dx0, Float tmin, Float tmax)\n");
+    ARIADNE_LOG(1,"IntegratorBase::flow(ValidatedVectorFunction vf, Vector<ValidatedNumberType> dx0, Float tmin, Float tmax)\n");
     Float tminl=Interval(tmin).lower();
     Float tmaxu=Interval(tmax).upper();
     ValidatedVectorFunctionModel evolve_function=this->flow_to(vf,dx0,tmin);
@@ -197,9 +197,9 @@ IntegratorBase::flow(const ValidatedVectorFunction& vf, const IntervalVector& dx
     List<ValidatedVectorFunctionModel> result;
 
     while(t<tmaxu) {
-        IntervalVector dx=evolve_function.range();
+        Vector<ValidatedNumberType> dx=evolve_function.range();
         Float h=Float(float(sub_up(tmaxu,t).get_d()));
-        IntervalVector bx;
+        Vector<ValidatedNumberType> bx;
         make_lpair(h,bx) = this->flow_bounds(vf,dx,h);
         ValidatedVectorFunctionModel flow_step_function=this->flow_step(vf,dx,h,bx);
         Float new_t=add_down(t,h);
@@ -215,7 +215,7 @@ IntegratorBase::flow(const ValidatedVectorFunction& vf, const IntervalVector& dx
 }
 
 List<ValidatedVectorFunctionModel>
-IntegratorBase::flow(const ValidatedVectorFunction& vf, const IntervalVector& dx0, const Real& tmax) const
+IntegratorBase::flow(const ValidatedVectorFunction& vf, const Vector<ValidatedNumberType>& dx0, const Real& tmax) const
 {
     return flow(vf,dx0,Real(0),tmax);
 }
@@ -223,11 +223,11 @@ IntegratorBase::flow(const ValidatedVectorFunction& vf, const IntervalVector& dx
 
 
 ValidatedVectorFunctionModel
-IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const IntervalVector& dx, Float& h) const
+IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const Vector<ValidatedNumberType>& dx, Float& h) const
 {
-    ARIADNE_LOG(3,"IntegratorBase::flow_step(ValidatedVectorFunction vf, IntervalVector dx, Float hmax)\n");
+    ARIADNE_LOG(3,"IntegratorBase::flow_step(ValidatedVectorFunction vf, Vector<ValidatedNumberType> dx, Float hmax)\n");
     Float hmax=h;
-    IntervalVector bx;
+    Vector<ValidatedNumberType> bx;
     make_lpair(h,bx)=this->flow_bounds(vf,dx,hmax);
     while(true) {
         try {
@@ -239,14 +239,14 @@ IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const IntervalVecto
 }
 
 ValidatedVectorFunctionModel
-TaylorPicardIntegrator::flow_step(const ValidatedVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
+TaylorPicardIntegrator::flow_step(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& dx, const Float& h, const Vector<ValidatedNumberType>& bx) const
 {
-    ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorFunction vf, IntervalVector dx, Float h, IntervalVector bx)\n");
+    ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorFunction vf, Vector<ValidatedNumberType> dx, Float h, Vector<ValidatedNumberType> bx)\n");
     ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
     const uint nx=dx.size();
     Sweeper sweeper(new ThresholdSweeper(this->_step_sweep_threshold));
 
-    IntervalVector dom=join(dx,Interval(-h,h));
+    Vector<ValidatedNumberType> dom=join(dx,Interval(-h,h));
     ARIADNE_LOG(7,"dom="<<dom<<"\n");
 
     ValidatedVectorFunctionModel phi0=this->function_factory().create_zeros(nx,dom);
@@ -298,11 +298,18 @@ void TaylorPicardIntegrator::write(std::ostream& os) const {
 #include <include/taylor_function.h>
 namespace Ariadne {
 
+class FormulaFunction;
+typedef Procedure<ValidatedNumberType> ValidatedProcedure;
+typedef Differential<ValidatedNumberType> ValidatedDifferential;
+typedef Polynomial<ValidatedNumberType> ValidatedPolynomial;
+typedef Graded<ValidatedDifferential> GradedValidatedDifferential;
+bool operator<(const MultiIndex& a1, const MultiIndex& a2);
 
-template<class F> Graded< Differential<Interval> > flow(const F& f, const Interval& c, Nat M, Nat N) {
-    Differential<Interval> x=make_differential_variable(1u,M,c,0u);
-    Graded< Differential<Interval> > y=make_graded(x);
-    Graded< Differential<Interval> > t=create_graded(x);
+
+template<class F> GradedValidatedDifferential flow(const F& f, const Interval& c, Nat M, Nat N) {
+    ValidatedProcedure x=make_differential_variable(1u,M,c,0u);
+    GradedValidatedDifferential y=make_graded(x);
+    GradedValidatedDifferential t=create_graded(x);
 
     for(Nat n=0; n!=N; ++n) {
         t=f(y);
@@ -312,13 +319,13 @@ template<class F> Graded< Differential<Interval> > flow(const F& f, const Interv
     return y;
 }
 
-Vector< Graded< Differential<Interval> > > flow(const Vector< Procedure<Interval> >& f, const Vector<Interval>& c, Nat M, Nat N) {
-    Graded< Differential<Interval> > null;
-    Vector< Graded< Differential<Interval> > > y(f.result_size(),null);
-    Vector< Graded< Differential<Interval> > > fy(f.result_size(),null);
-    List< Graded< Differential<Interval> > > t(f.temporaries_size(),null);
+Vector< GradedValidatedDifferential > flow(const Vector<ValidatedProcedure>& f, const Vector<ValidatedNumberType>& c, Nat M, Nat N) {
+    GradedValidatedDifferential null;
+    Vector< GradedValidatedDifferential > y(f.result_size(),null);
+    Vector< GradedValidatedDifferential > fy(f.result_size(),null);
+    List< GradedValidatedDifferential > t(f.temporaries_size(),null);
     for(Nat i=0; i!=y.size(); ++i) {
-        y[i]=Graded< Differential<Interval> >(Differential<Interval>::variable(y.size(),M,c[i],i));
+        y[i]=GradedValidatedDifferential(ValidatedDifferential::variable(y.size(),M,c[i],i));
     }
 
     for(Nat n=0; n!=N; ++n) {
@@ -331,13 +338,6 @@ Vector< Graded< Differential<Interval> > > flow(const Vector< Procedure<Interval
     return y;
 }
 
-class FormulaFunction;
-typedef Procedure<Interval> IntervalProcedure;
-typedef Differential<Interval> IntervalDifferential;
-typedef Polynomial<Interval> IntervalPolynomial;
-typedef Graded<IntervalDifferential> GradedIntervalDifferential;
-bool operator<(const MultiIndex& a1, const MultiIndex& a2);
-
 template<class X> inline void append_join(Expansion<X>& e, const MultiIndex& a1, const uint a2, const X& c) {
     MultiIndex a(a1.size()+1);
     for(uint i=0; i!=a1.size(); ++i) { a[i]=a1[i]; }
@@ -345,34 +345,34 @@ template<class X> inline void append_join(Expansion<X>& e, const MultiIndex& a1,
     e.append(a,c);
 }
 
-inline Vector<GradedIntervalDifferential> graded_variables(int so, const IntervalVector& x) {
-    Vector<GradedIntervalDifferential> r(x.size(),GradedIntervalDifferential());
+inline Vector<GradedValidatedDifferential> graded_variables(int so, const Vector<ValidatedNumberType>& x) {
+    Vector<GradedValidatedDifferential> r(x.size(),GradedValidatedDifferential());
     for(uint i=0; i!=x.size(); ++i) {
-        r[i]=GradedIntervalDifferential(IntervalDifferential::variable(x.size(),so,x[i],i));
+        r[i]=GradedValidatedDifferential(ValidatedDifferential::variable(x.size(),so,x[i],i));
     }
     return r;
 }
 
 
-Vector<IntervalFormula> formula(const ValidatedVectorFunction& f) {
-    return f.evaluate(IntervalFormula::identity(f.argument_size()));
+Vector<ValidatedFormula> formula(const ValidatedVectorFunction& f) {
+    return f.evaluate(ValidatedFormula::identity(f.argument_size()));
 }
 
-void flow_init(const Vector<IntervalProcedure>& p,
-               Vector<GradedIntervalDifferential>& fy, List<GradedIntervalDifferential>& t, Vector<GradedIntervalDifferential>& y,
-               const Vector<Interval>& x, const Vector<Interval>& r,  uint so)
+void flow_init(const Vector<ValidatedProcedure>& p,
+               Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& t, Vector<GradedValidatedDifferential>& y,
+               const Vector<ValidatedNumberType>& x, const Vector<ValidatedNumberType>& r,  uint so)
 {
-    Graded< Differential<Interval> > null;
-    y=Vector< Graded< Differential<Interval> > >(p.result_size(),null);
-    fy=Vector< Graded< Differential<Interval> > >(p.result_size(),null);
-    t=List< Graded< Differential<Interval> > >(p.temporaries_size(),null);
+    GradedValidatedDifferential null;
+    y=Vector< GradedValidatedDifferential >(p.result_size(),null);
+    fy=Vector< GradedValidatedDifferential >(p.result_size(),null);
+    t=List< GradedValidatedDifferential >(p.temporaries_size(),null);
     for(Nat i=0; i!=y.size(); ++i) {
-        y[i]=Graded< Differential<Interval> >(Differential<Interval>::variable(y.size(),so,Interval(0.0),i)*r[i]+x[i]);
+        y[i]=GradedValidatedDifferential(Differential<Interval>::variable(y.size(),so,Interval(0.0),i)*r[i]+x[i]);
     }
 }
 
-void flow_iterate(const Vector<IntervalProcedure>& p, Float h,
-                  Vector<GradedIntervalDifferential>& fy, List<GradedIntervalDifferential>& t, Vector<GradedIntervalDifferential>& y)
+void flow_iterate(const Vector<ValidatedProcedure>& p, Float h,
+                  Vector<GradedValidatedDifferential>& fy, List<GradedValidatedDifferential>& t, Vector<GradedValidatedDifferential>& y)
 {
     Ariadne::compute(p,fy,t,y);
     for(Nat i=0; i!=y.size(); ++i) {
@@ -382,12 +382,12 @@ void flow_iterate(const Vector<IntervalProcedure>& p, Float h,
 }
 
 
-Vector<IntervalDifferential> flow_differential(Vector<GradedIntervalDifferential> const& dphia, Vector<GradedIntervalDifferential> const& dphib,
-                                               Vector<GradedIntervalDifferential> const& dphic, Vector<GradedIntervalDifferential> const& dphid,
+Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferential> const& dphia, Vector<GradedValidatedDifferential> const& dphib,
+                                               Vector<GradedValidatedDifferential> const& dphic, Vector<GradedValidatedDifferential> const& dphid,
                                                uint so, uint to, int verbosity=0)
 {
     uint nx=dphia.size();
-    Vector<GradedIntervalDifferential> gdphi(nx,GradedIntervalDifferential(List<IntervalDifferential>(to+1u,IntervalDifferential(nx,so))));
+    Vector<GradedValidatedDifferential> gdphi(nx,GradedValidatedDifferential(List<ValidatedDifferential>(to+1u,ValidatedDifferential(nx,so))));
     for(uint i=0; i!=nx; ++i) {
         for(uint j=0; j!=to; ++j) {
             for(Differential<Interval>::const_iterator iter=dphic[i][j].begin(); iter!=dphic[i][j].end(); ++iter) {
@@ -407,7 +407,7 @@ Vector<IntervalDifferential> flow_differential(Vector<GradedIntervalDifferential
     }
     ARIADNE_LOG(4,"gdphi="<<gdphi<<"\n");
 
-    Vector<IntervalDifferential> dphi(nx,IntervalDifferential(nx+1u,so+to));
+    Vector<ValidatedDifferential> dphi(nx,ValidatedDifferential(nx+1u,so+to));
     for(uint i=0; i!=nx; ++i) {
         Expansion<Interval>& component=dphi[i].expansion();
         for(uint j=0; j<=to; ++j) {
@@ -422,13 +422,13 @@ Vector<IntervalDifferential> flow_differential(Vector<GradedIntervalDifferential
     return dphi;
 }
 
-VectorTaylorFunction flow_function(const Vector<IntervalDifferential>& dphi, const IntervalVector& dx, const Float& h, double swpt, int verbosity=0) {
+VectorTaylorFunction flow_function(const Vector<ValidatedDifferential>& dphi, const Vector<ValidatedNumberType>& dx, const Float& h, double swpt, int verbosity=0) {
     const uint n=dphi.size();
     Sweeper sweeper(new ThresholdSweeper(swpt));
     VectorTaylorFunction tphi(n,join(dx,Interval(-h,+h)),sweeper);
 
     for(uint i=0; i!=n; ++i) {
-        IntervalTaylorModel& model=tphi.model(i);
+        ValidatedTaylorModel& model=tphi.model(i);
         Expansion<Float>& expansion=model.expansion();
         Float& error=model.error();
         error=0.0;
@@ -453,18 +453,18 @@ VectorTaylorFunction flow_function(const Vector<IntervalDifferential>& dphi, con
 }
 
 ValidatedVectorFunctionModel
-differential_flow_step(const ValidatedVectorFunction& f, const IntervalVector& dx, const Float& flth, const IntervalVector& bx,
+differential_flow_step(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& dx, const Float& flth, const Vector<ValidatedNumberType>& bx,
                        double swpt, uint so, uint to, uint verbosity=0)
 {
     uint n=f.result_size();
-    Vector<IntervalDifferential> idc(n,n+1,so+to);
-    Vector<IntervalDifferential> idb(n,n+1,so+to);
-    Vector<IntervalDifferential> dphic(n,n+1,so+to);
-    Vector<IntervalDifferential> dphib(n,n+1,so+to);
+    Vector<ValidatedDifferential> idc(n,n+1,so+to);
+    Vector<ValidatedDifferential> idb(n,n+1,so+to);
+    Vector<ValidatedDifferential> dphic(n,n+1,so+to);
+    Vector<ValidatedDifferential> dphib(n,n+1,so+to);
     ExactFloat h(flth);
     for(uint i=0; i!=n; ++i) {
-        idc[i]=IntervalDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(midpoint(dx[i]));
-        idb[i]=IntervalDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(bx[i]);
+        idc[i]=ValidatedDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(midpoint(dx[i]));
+        idb[i]=ValidatedDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(bx[i]);
         dphic[i]=idc[i];
         dphib[i]=idb[i];
     }
@@ -475,7 +475,7 @@ differential_flow_step(const ValidatedVectorFunction& f, const IntervalVector& d
 
     VectorTaylorFunction tphi(n,join(dx,Interval(-h,+h)),ThresholdSweeper(swpt));
     for(uint i=0; i!=n; ++i) {
-        IntervalTaylorModel& model=tphi.model(i);
+        ValidatedTaylorModel& model=tphi.model(i);
         Expansion<Float>& expansion=model.expansion();
         Float& error=model.error();
         error=0.0;
@@ -508,17 +508,17 @@ differential_flow_step(const ValidatedVectorFunction& f, const IntervalVector& d
 }
 
 ValidatedVectorFunctionModel
-differential_space_time_flow_step(const ValidatedVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx,
+differential_space_time_flow_step(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& dx, const Float& h, const Vector<ValidatedNumberType>& bx,
                                   double swpt, uint so, uint to, uint verbosity=0)
 {
     uint n=f.result_size();
-    Vector<IntervalDifferential> idc(n,n+1,so+to);
-    Vector<IntervalDifferential> idb(n,n+1,so+to);
-    Vector<IntervalDifferential> dphic(n,n+1,so+to);
-    Vector<IntervalDifferential> dphib(n,n+1,so+to);
+    Vector<ValidatedDifferential> idc(n,n+1,so+to);
+    Vector<ValidatedDifferential> idb(n,n+1,so+to);
+    Vector<ValidatedDifferential> dphic(n,n+1,so+to);
+    Vector<ValidatedDifferential> dphib(n,n+1,so+to);
     for(uint i=0; i!=n; ++i) {
-        idc[i]=IntervalDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(midpoint(dx[i]));
-        idb[i]=IntervalDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(bx[i]);
+        idc[i]=ValidatedDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(midpoint(dx[i]));
+        idb[i]=ValidatedDifferential::variable(n+1,so+to,0.0,i)*Interval(dx[i].radius())+Interval(bx[i]);
         dphic[i]=idc[i];
         dphib[i]=idb[i];
     }
@@ -529,7 +529,7 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const Interv
 
     VectorTaylorFunction tphi(n,join(dx,Interval(-h,+h)),ThresholdSweeper(swpt));
     for(uint i=0; i!=n; ++i) {
-        IntervalTaylorModel& model=tphi.model(i);
+        ValidatedTaylorModel& model=tphi.model(i);
         Expansion<Float>& expansion=model.expansion();
         Float& error=model.error();
         error=0.0;
@@ -564,17 +564,17 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const Interv
 }
 
 ValidatedVectorFunctionModel
-series_flow_step(const ValidatedVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx,
+series_flow_step(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& dx, const Float& h, const Vector<ValidatedNumberType>& bx,
                  double max_err, double swpt, uint init_so, uint init_to, uint max_so, uint max_to, uint verbosity)
 {
     static const double TRY_SPACIAL_ORDER_INCREASE_FACTOR=4;
 
-    Vector<IntervalFormula> ff = formula(f);
-    Vector< Procedure<Interval> > p(ff);
+    Vector<ValidatedFormula> ff = formula(f);
+    Vector<ValidatedProcedure> p(ff);
     ARIADNE_LOG(4,"p="<<p<<"\n");
 
-    IntervalVector cx=midpoint(dx);
-    IntervalVector ax=cx+Interval(0,h)*evaluate(p,bx);
+    Vector<ValidatedNumberType> cx=midpoint(dx);
+    Vector<ValidatedNumberType> ax=cx+ValidatedNumberType(0,h)*evaluate(p,bx);
     ax=cx+Interval(0,h)*evaluate(p,ax);
 
     uint so=init_so;
@@ -587,10 +587,10 @@ series_flow_step(const ValidatedVectorFunction& f, const IntervalVector& dx, con
     Vector<Interval> rdx(n);
     for(uint i=0; i!=n; ++i) { rdx[i]=rad_ivl(dx[i].lower(),dx[i].upper()); }
 
-    Vector<GradedIntervalDifferential> dphia,fdphia,dphib,fdphib,dphic,fdphic,dphid,fdphid;
-    List<GradedIntervalDifferential> tdphia,tdphib,tdphic,tdphid;
-    Vector<GradedIntervalDifferential> ndphia,nfdphia,ndphib,nfdphib,ndphic,nfdphic,ndphid,nfdphid;
-    List<GradedIntervalDifferential> ntdphia,ntdphib,ntdphic,ntdphid;
+    Vector<GradedValidatedDifferential> dphia,fdphia,dphib,fdphib,dphic,fdphic,dphid,fdphid;
+    List<GradedValidatedDifferential> tdphia,tdphib,tdphic,tdphid;
+    Vector<GradedValidatedDifferential> ndphia,nfdphia,ndphib,nfdphib,ndphic,nfdphic,ndphid,nfdphid;
+    List<GradedValidatedDifferential> ntdphia,ntdphib,ntdphic,ntdphid;
 
     flow_init(p,fdphia,tdphia,dphia,ax,rdx,so);
     flow_init(p,fdphib,tdphib,dphib,bx,rdx,so);
@@ -604,7 +604,7 @@ series_flow_step(const ValidatedVectorFunction& f, const IntervalVector& dx, con
         Ariadne::flow_iterate(p,h,fdphid,tdphid,dphid);
     }
 
-    Vector<IntervalDifferential> dphi=flow_differential(dphia,dphib,dphic,dphid,so,to,verbosity);
+    Vector<ValidatedDifferential> dphi=flow_differential(dphia,dphib,dphic,dphid,so,to,verbosity);
     ARIADNE_LOG(5,"dphi="<<dphi<<"\n");
 
     VectorTaylorFunction tphi=flow_function(dphi,dx,h,swpt,verbosity);
@@ -642,7 +642,7 @@ series_flow_step(const ValidatedVectorFunction& f, const IntervalVector& dx, con
                 Ariadne::flow_iterate(p,h,nfdphic,ntdphic,ndphic);
                 Ariadne::flow_iterate(p,h,nfdphid,ntdphid,ndphid);
             }
-            Vector<IntervalDifferential> ndphi=flow_differential(ndphia,ndphib,ndphic,ndphid,nso,nto,verbosity);
+            Vector<ValidatedDifferential> ndphi=flow_differential(ndphia,ndphib,ndphic,ndphid,nso,nto,verbosity);
             VectorTaylorFunction ntphi=flow_function(ndphi,dx,h,swpt,verbosity);
 
             uint nnnz=0; for(uint i=0; i!=tphi.size(); ++i) { nnnz+=tphi.model(i).number_of_nonzeros(); }
@@ -678,7 +678,7 @@ series_flow_step(const ValidatedVectorFunction& f, const IntervalVector& dx, con
 }
 
 ValidatedVectorFunctionModel
-TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const IntervalVector& dx, const Float& h, const IntervalVector& bx) const
+TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& dx, const Float& h, const Vector<ValidatedNumberType>& bx) const
 {
     ValidatedVectorFunctionModel tphi=Ariadne::series_flow_step(f,dx,h,bx,
         this->step_maximum_error(),this->step_sweep_threshold(),
@@ -700,10 +700,10 @@ TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const Interv
     return tphi;
 }
 
-Pair<Float,IntervalVector>
-TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const IntervalVector& dx, const Float& hmax) const
+Pair<Float,Vector<ValidatedNumberType>>
+TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Vector<ValidatedNumberType>& dx, const Float& hmax) const
 {
-    ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_bounds(ValidatedVectorFunction vf, IntervalVector dx, Float hmax)\n");
+    ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_bounds(ValidatedVectorFunction vf, Vector<ValidatedNumberType> dx, Float hmax)\n");
     ARIADNE_ASSERT_MSG(vf.result_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
     ARIADNE_ASSERT_MSG(vf.argument_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
     ARIADNE_ASSERT(hmax>0);
@@ -717,7 +717,7 @@ TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Int
     const uint REDUCTION_STEPS=8;
     const uint REFINEMENT_STEPS=4;
 
-    IntervalVector delta=(dx-IntervalVector(midpoint(dx)))*(BOX_RADIUS_MULTIPLIER-1);
+    Vector<ValidatedNumberType> delta=(dx-Vector<ValidatedNumberType>(midpoint(dx)))*(BOX_RADIUS_MULTIPLIER-1);
 
     Float hmin=hmax/(1<<REDUCTION_STEPS);
     Float h=hmax;
@@ -725,7 +725,7 @@ TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Int
     ARIADNE_LOG(4,"hmax="<<hmax<<"\n");
 
     bool success=false;
-    IntervalVector bx,nbx,df;
+    Vector<ValidatedNumberType> bx,nbx,df;
     Interval ih(0,h);
 
     while(!success) {
@@ -749,7 +749,7 @@ TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Int
 
     ARIADNE_ASSERT(subset(nbx,bx));
 
-    IntervalVector vfbx;
+    Vector<ValidatedNumberType> vfbx;
     vfbx=vf.evaluate(bx);
 
     for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
@@ -770,7 +770,7 @@ TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Int
     ARIADNE_ASSERT(subset(dx,bx));
 
     ARIADNE_ASSERT_MSG(subset(dx+make_exact(h)*vf.evaluate(bx),bx),
-        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<vf.evaluate(bx)<<"\nd+hf(b)="<<IntervalVector(dx+make_exact(h)*vf.evaluate(bx))<<"\nb="<<bx<<"\n");
+        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<vf.evaluate(bx)<<"\nd+hf(b)="<<Vector<ValidatedNumberType>(dx+make_exact(h)*vf.evaluate(bx))<<"\nb="<<bx<<"\n");
 
     return std::make_pair(h,bx);
 }
@@ -811,12 +811,12 @@ template<class X> void truncate(Vector< Differential<X> >& x, uint spacial_order
 }
 
 
-IntervalDifferentialVector
-AffineIntegrator::flow_derivative(const ValidatedVectorFunction& f, const IntervalVector& dom) const
+Vector<ValidatedDifferential>
+AffineIntegrator::flow_derivative(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& dom) const
 {
-    IntervalDifferentialVector dx=IntervalDifferential::variables(this->_spacial_order+this->_temporal_order,join(dom,Interval(0.0)));
+    Vector<ValidatedDifferential> dx=ValidatedDifferential::variables(this->_spacial_order+this->_temporal_order,join(dom,Interval(0.0)));
     dx[dom.size()]=0.0;
-    IntervalDifferentialVector dphi = dx;
+    Vector<ValidatedDifferential> dphi = dx;
     for(uint i=0; i!=_temporal_order; ++i) {
         dphi = antiderivative(f.evaluate(dphi),dom.size())+dx;
     }
@@ -825,12 +825,12 @@ AffineIntegrator::flow_derivative(const ValidatedVectorFunction& f, const Interv
 }
 
 ValidatedVectorFunctionModel
-AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const IntervalVector& dom, const Float& h, const IntervalVector& bbox) const
+AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& dom, const Float& h, const Vector<ValidatedNumberType>& bbox) const
 {
-    IntervalVector mid = IntervalVector(midpoint(dom));
+    Vector<ValidatedNumberType> mid = Vector<ValidatedNumberType>(midpoint(dom));
 
-    IntervalDifferentialVector mdphi = this->flow_derivative(f,mid);
-    IntervalDifferentialVector bdphi = this->flow_derivative(f,bbox);
+    Vector<ValidatedDifferential> mdphi = this->flow_derivative(f,mid);
+    Vector<ValidatedDifferential> bdphi = this->flow_derivative(f,bbox);
 
     ARIADNE_WARN("AffineIntegrator may compute overly optimistic error bounds.");
 
@@ -838,18 +838,18 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const IntervalVect
     Vector<Float> err(n);
 
     set_rounding_upward();
-    Vector<Float> rad(n+1);
+    Vector<ApproximateNumberType> rad(n+1);
     for(uint i=0; i!=n; ++i) {
         rad[i] = max(dom[i].upper()-mid[i].lower(),mid[i].upper()-dom[i].lower());
     }
     rad[n] = h;
 
     for(uint i=0; i!=n; ++i) {
-        for(Expansion<Interval>::const_iterator iter=bdphi[i].begin(); iter!=bdphi[i].end(); ++iter) {
+        for(Expansion<ValidatedNumberType>::const_iterator iter=bdphi[i].begin(); iter!=bdphi[i].end(); ++iter) {
             const MultiIndex& a=iter->key();
             if(a[n]==this->_temporal_order && a[n]+this->_spacial_order==a.degree()) {
-                const Interval& rng = iter->data();
-                const Interval& mid = mdphi[i][a];
+                const ValidatedNumberType& rng = iter->data();
+                const ValidatedNumberType& mid = mdphi[i][a];
                 ARIADNE_ASSERT(rng.lower()<=mid.lower() && mid.upper()<=rng.upper());
                 Float mag = max(rng.upper()-mid.upper(),mid.lower()-rng.lower());
                 for(uint j=0; j!=n+1; ++j) { mag *= pow(rad[j],a[j]); }
@@ -859,13 +859,13 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const IntervalVect
     }
     set_rounding_to_nearest();
 
-    IntervalVector flow_domain = join(dom,Interval(0,h));
+    Vector<ValidatedNumberType> flow_domain = join(dom,Interval(0,h));
 
     ValidatedVectorFunctionModel id = this->function_factory().create_identity(flow_domain);
     ValidatedVectorFunctionModel res = this->function_factory().create_zeros(n,flow_domain);
     for(uint i=0; i!=n; ++i) {
         ValidatedScalarFunctionModel res_model = res[i] + mdphi[i].expansion()[MultiIndex::zero(n+1)];
-        for(uint j=0; j!=mdphi[i].argument_size()-1; ++j) { res_model+=mdphi[i].expansion()[MultiIndex::unit(n+1,j)]*(id[j]-Interval(midpoint(flow_domain[j]))); }
+        for(uint j=0; j!=mdphi[i].argument_size()-1; ++j) { res_model+=mdphi[i].expansion()[MultiIndex::unit(n+1,j)]*(id[j]-ValidatedNumberType(midpoint(flow_domain[j]))); }
         uint j=mdphi[i].argument_size()-1; { res_model+=mdphi[i].expansion()[MultiIndex::unit(n+1,j)]*id[j]; }
         res_model += Interval(-err[i],+err[i]);
         res[i]=res_model;

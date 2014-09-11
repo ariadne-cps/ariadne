@@ -51,8 +51,8 @@ template<class X> class Polynomial;
 typedef Vector< Procedure<Interval> > IntervalVectorProcedure;
 typedef Vector< Differential<Interval> > IntervalDifferentialVector;
 template<class X> class FunctionModelFactoryInterface;
-typedef FunctionModelFactoryInterface<Interval> IntervalFunctionModelFactoryInterface;
-typedef std::shared_ptr<const IntervalFunctionModelFactoryInterface> FunctionFactoryPointer;
+typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
+typedef std::shared_ptr<const ValidatedFunctionModelFactoryInterface> FunctionFactoryPointer;
 
 class Sweeper;
 
@@ -97,9 +97,9 @@ class IntegratorBase
     void set_maximum_step_size(double hmax) { this->_maximum_step_size = hmax; }
 
     //! \brief The class which constructs functions for representing the flow.
-    const IntervalFunctionModelFactoryInterface& function_factory() const;
+    const ValidatedFunctionModelFactoryInterface& function_factory() const;
     //! \brief Set the class which constructs functions for representing the flow.
-    void set_function_factory(const IntervalFunctionModelFactoryInterface& factory);
+    void set_function_factory(const ValidatedFunctionModelFactoryInterface& factory);
 
 
     virtual Pair<Float,IntervalVector>

@@ -204,9 +204,9 @@ typedef Matrix<Float> FMx;
 typedef Matrix<Interval> IMx;
 typedef Vector< Differential<Float> > FSDV;
 typedef Vector< Differential<Interval> > ISDV;
-typedef Vector<IntervalTaylorModel> TMV;
+typedef Vector<ValidatedTaylorModel> TMV;
 typedef VectorTaylorFunction TFM;
-typedef IntervalTaylorModel TM;
+typedef ValidatedTaylorModel TM;
 
 
 
@@ -302,9 +302,9 @@ void export_scalar_function()
     scalar_function_class.def("__rsub__", &__rsub__<EffectiveScalarFunction,EffectiveScalarFunction,Real>);
     scalar_function_class.def("__rmul__", &__rmul__<EffectiveScalarFunction,EffectiveScalarFunction,Real>);
     scalar_function_class.def("__rdiv__", &__rdiv__<EffectiveScalarFunction,EffectiveScalarFunction,Real>);
-    scalar_function_class.def("__eq__", &__eq__<RealConstraint,EffectiveScalarFunction,Real>);
-    scalar_function_class.def("__le__", &__le__<RealConstraint,EffectiveScalarFunction,Real>);
-    scalar_function_class.def("__ge__", &__ge__<RealConstraint,EffectiveScalarFunction,Real>);
+    scalar_function_class.def("__eq__", &__eq__<EffectiveConstraint,EffectiveScalarFunction,Real>);
+    scalar_function_class.def("__le__", &__le__<EffectiveConstraint,EffectiveScalarFunction,Real>);
+    scalar_function_class.def("__ge__", &__ge__<EffectiveConstraint,EffectiveScalarFunction,Real>);
     scalar_function_class.def("__str__", &__cstr__<EffectiveScalarFunction>);
     scalar_function_class.def("__repr__", &__crepr__<EffectiveScalarFunction>);
 

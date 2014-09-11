@@ -144,12 +144,12 @@ namespace {
 using Ariadne::verbosity;
 
 void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, const IntervalVector& subdomain, const ValidatedVectorFunction& function,
-                                                      const List<IntervalConstraint>& constraints, const int depth, const FloatVector& errors)
+                                                      const List<ValidatedConstraint>& constraints, const int depth, const FloatVector& errors)
 {
     // How small an over-approximating box needs to be relative to the cell size
     static const double RELATIVE_SMALLNESS=0.5;
 
-    for(List<IntervalConstraint>::const_iterator iter=constraints.begin();
+    for(List<ValidatedConstraint>::const_iterator iter=constraints.begin();
         iter!=constraints.end(); ++iter)
     {
         Interval constraint_range=iter->function().evaluate(subdomain);
@@ -396,7 +396,7 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
         ARIADNE_LOG(6,"    txg="<<txg<<"\n");
 
-        IntervalConstraint constraint=(txg>=0.0);
+        ValidatedConstraint constraint=(txg>=0.0);
 
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
         solver.hull_reduce(nd,txg,Interval(0,inf));
@@ -519,7 +519,7 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         }
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
 
-        //Pair<Box,Box> sd=solver.split(List<RealConstraint>(1u,constraint),d);
+        //Pair<Box,Box> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<Box,Box> sd=split(d);
         Point nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
@@ -556,9 +556,9 @@ void subdivision_adjoin_outer_approximation(PavingInterface& paving,
                                             const IntervalVector& constraint_bounds,
                                             int depth)
 {
-    List<IntervalConstraint> constraints;
+    List<ValidatedConstraint> constraints;
     for(uint i=0; i!=constraint_functions.result_size(); ++i) {
-        constraints.append(IntervalConstraint(constraint_bounds[i].lower(),constraint_functions[i],constraint_bounds[i].upper()));
+        constraints.append(ValidatedConstraint(constraint_bounds[i].lower(),constraint_functions[i],constraint_bounds[i].upper()));
     }
 
     FloatVector errors(paving.dimension());

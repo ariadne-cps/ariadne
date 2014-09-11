@@ -40,16 +40,16 @@ using namespace Ariadne;
 
 
 
-Vector<Interval> ranges(const Vector<IntervalTaylorModel>& f) {
+Vector<Interval> ranges(const Vector<ValidatedTaylorModel>& f) {
     Vector<Interval> r(f.size()); for(uint i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
 }
 
-Vector<IntervalTaylorModel>& clobber(Vector<IntervalTaylorModel>& h) {
+Vector<ValidatedTaylorModel>& clobber(Vector<ValidatedTaylorModel>& h) {
     for(uint i=0; i!=h.size(); ++i) { h[i].set_error(0.0); } return h; }
 
 // Compute the Jacobian over an arbitrary domain
 Matrix<Interval>
-jacobian2(const Vector<IntervalTaylorModel>& f, const Vector<Interval>& x)
+jacobian2(const Vector<ValidatedTaylorModel>& f, const Vector<Interval>& x)
 {
     Vector< Differential<Interval> > dx(x.size());
     for(uint i=0; i!=x.size()-f.size(); ++i) {
@@ -67,7 +67,7 @@ jacobian2(const Vector<IntervalTaylorModel>& f, const Vector<Interval>& x)
 
 // Compute the Jacobian over the unit domain
 Matrix<Float>
-jacobian2_value(const Vector<IntervalTaylorModel>& f)
+jacobian2_value(const Vector<ValidatedTaylorModel>& f)
 {
     const uint rs=f.size();
     const uint fas=f.zero_element().argument_size();
@@ -84,14 +84,14 @@ jacobian2_value(const Vector<IntervalTaylorModel>& f)
 
 // Compute the Jacobian over the unit domain
 Matrix<Interval>
-jacobian2_range(const Vector<IntervalTaylorModel>& f)
+jacobian2_range(const Vector<ValidatedTaylorModel>& f)
 {
     uint rs=f.size();
     uint fas=f.zero_element().argument_size();
     uint has=fas-rs;
     Matrix<Interval> J(rs,rs);
     for(uint i=0; i!=rs; ++i) {
-        for(IntervalTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+        for(ValidatedTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             for(uint k=0; k!=rs; ++k) {
                 const uint c=iter->key()[has+k];
                 if(c>0) {

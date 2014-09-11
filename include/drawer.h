@@ -40,7 +40,7 @@ struct Depth { Int _d; explicit Depth(Int d) : _d(d) { } operator Int() const { 
 //! \brief Draw a box over-approximation to the set.
 class BoxDrawer : public DrawerInterface
 {
-    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const IntervalConstrainedImageSet& set);
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set);
 };
 
 //! \brief Draw an affine over-approximation to the set.
@@ -49,19 +49,19 @@ class AffineDrawer : public DrawerInterface
     Int _depth;
   public:
     AffineDrawer(Int depth) : _depth(depth) { }
-    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const IntervalConstrainedImageSet& set);
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set);
 };
 
 //! \brief Subdivide the set and draw affine approximations to small pieces.
 class SubdivisionDrawer : public DrawerInterface
 {
-    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const IntervalConstrainedImageSet& set);
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set);
 };
 
 //! \brief Pave the set and draw the computed cells.
 class GridDrawer : public DrawerInterface
 {
-    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const IntervalConstrainedImageSet& set);
+    Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set);
 };
 
 

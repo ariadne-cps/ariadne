@@ -77,13 +77,13 @@ template<class X> class VectorFunction;
 typedef ValidatedVectorFunction ValidatedVectorFunction;
 
 template<class X> class FunctionModelFactoryInterface;
-typedef FunctionModelFactoryInterface<Interval> IntervalFunctionModelFactoryInterface;
+typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
 
 template<class X, class R> class Constraint;
-typedef Constraint<EffectiveScalarFunction,Real> RealConstraint;
-typedef Constraint<ValidatedScalarFunction,Float> IntervalConstraint;
+typedef Constraint<EffectiveScalarFunction,EffectiveNumberType> EffectiveConstraint;
+typedef Constraint<ValidatedScalarFunction,RawNumberType> ValidatedConstraint;
 
-class IntervalAffineConstrainedImageSet;
+class ValidatedAffineConstrainedImageSet;
 class BoundedConstraintSet;
 
 template<class BS> class ListSet;
@@ -91,7 +91,7 @@ template<class BS> class ListSet;
 class Grid;
 class PavingInterface;
 
-typedef Constraint<ValidatedScalarFunctionModel,Float> IntervalConstraintModel;
+typedef Constraint<ValidatedScalarFunctionModel,RawNumberType> ValidatedConstraintModel;
 
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure
@@ -102,32 +102,32 @@ class Enclosure
     ValidatedVectorFunctionModel _space_function;
     ValidatedScalarFunctionModel _time_function;
     ValidatedScalarFunctionModel _dwell_time_function;
-    List<IntervalConstraintModel> _constraints;
-    IntervalFunctionModelFactoryInterface* _function_factory_ptr;
+    List<ValidatedConstraintModel> _constraints;
+    ValidatedFunctionModelFactoryInterface* _function_factory_ptr;
     mutable Box _reduced_domain;
     mutable bool _is_fully_reduced;
   public:
     //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
     explicit Enclosure();
     //! \brief Construct a representation of the box \a bx.
-    explicit Enclosure(const Box& bx, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const Box& bx, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d and image function \a f.
-    explicit Enclosure(const Box& d, const ValidatedVectorFunction& f, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const Box& d, const ValidatedVectorFunction& f, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.
-    explicit Enclosure(const Box& d, const ValidatedVectorFunction& f, const List<IntervalConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const Box& d, const ValidatedVectorFunction& f, const List<ValidatedConstraint>& c, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d, image function \a sf, time function \a tf and constraints \a c.
-    explicit Enclosure(const Box& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction& tf, const List<IntervalConstraint>& c, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const Box& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction& tf, const List<ValidatedConstraint>& c, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with domain \a d, space function \a sf, time function \a tf, negative constraints \a g and equality constraints \a h.
     //!   (Not currently implemented.)
-    explicit Enclosure(const Box& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction tf, const ValidatedVectorFunction& g, const ValidatedVectorFunction& h, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const Box& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction tf, const ValidatedVectorFunction& g, const ValidatedVectorFunction& h, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief Construct from an exact bounded constraint \a set.
-    explicit Enclosure(const BoundedConstraintSet& set, const IntervalFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const BoundedConstraintSet& set, const ValidatedFunctionModelFactoryInterface& fac);
 
     //! \brief Create a dynamically-allocated copy.
     Enclosure* clone() const;
 
     //! \brief The class used to create new function instances.
-    const IntervalFunctionModelFactoryInterface& function_factory() const;
+    const ValidatedFunctionModelFactoryInterface& function_factory() const;
     //! \brief The parameter domain \f$D\f$.
     Box domain() const;
     Box parameter_domain() const;
@@ -180,9 +180,9 @@ class Enclosure
 */
 
     //! \brief Introduces the constraint \f$c\f$ applied to the state \f$x=f(s)\f$.
-    void new_state_constraint(IntervalConstraint c);
+    void new_state_constraint(ValidatedConstraint c);
     //! \brief Introduces the constraint \f$c\f$ applied to the parameter \f$s\f$.
-    void new_parameter_constraint(IntervalConstraint c);
+    void new_parameter_constraint(ValidatedConstraint c);
 
     //! \brief Introduces the constraint \f$-g(\xi(s)) \leq 0\f$.
     void new_positive_state_constraint(ValidatedScalarFunction g);
@@ -198,11 +198,11 @@ class Enclosure
     //! \brief The number of negative constraints.
     uint number_of_constraints() const;
     //! \brief All equality and inequality constraints.
-    List<IntervalConstraintModel> const& constraint_models() const;
+    List<ValidatedConstraintModel> const& constraint_models() const;
     //! \brief All equality and inequality constraints.
-    List<IntervalConstraint> const constraints() const;
+    List<ValidatedConstraint> const constraints() const;
     //! \brief The \a i<sup>th</sup> constraint.
-    IntervalConstraintModel const& constraint(uint i) const;
+    ValidatedConstraintModel const& constraint(uint i) const;
 
     //! \brief  Returns true if \f$g(x)>0\f$ over the whole set,
     //! false \f$g(x)<0\f$ over the whole set,
@@ -210,7 +210,7 @@ class Enclosure
     tribool satisfies(ValidatedScalarFunction g) const;
     //! \brief Tests if the set satisfies the constraint \a c. Returns \c true if all points in the set satisfy
     //! the constraint, and \c false if no points in the set satisfy the constraint.
-    virtual tribool satisfies(IntervalConstraint c) const;
+    virtual tribool satisfies(ValidatedConstraint c) const;
 
     //! \brief The dimension of the set.
     uint dimension() const;
@@ -276,13 +276,13 @@ class Enclosure
     //! \brief An approximation as an affine set.
     //! \details Most easily computed by dropping all nonlinear terms in the
     //! image and constraint functions. Potentially a very poor approximation.
-    IntervalAffineConstrainedImageSet affine_approximation() const;
+    ValidatedAffineConstrainedImageSet affine_approximation() const;
     //! \brief An over-approximation as an affine set.
     //! \details Most easily computed by sweeping all nonlinear terms in the
     //! image and constraint function to constant error terms.
     //! Potentially a very poor approximation, but guaranteed to be an over-
     //! approximation.
-    IntervalAffineConstrainedImageSet affine_over_approximation() const;
+    ValidatedAffineConstrainedImageSet affine_over_approximation() const;
 
     //! \brief A collection of parameter subdomains chosen to make the bounding boxes as small as possible.
     List<Box> splitting_subdomains_zeroth_order() const;

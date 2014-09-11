@@ -39,11 +39,6 @@ typedef void Void;
 typedef unsigned int Nat;
 typedef int Int;
 
-struct ExactTag { };
-struct EffectiveTag { };
-struct ValidatedTag { };
-struct ApproximateTag { };
-
 class Float;
 class Interval;
 class Real;
@@ -55,6 +50,20 @@ class ExactFloat;
 typedef Float ApproximateNumberType;
 typedef Interval ValidatedNumberType;
 typedef Real EffectiveNumberType;
+typedef Float RawNumberType;
+
+typedef ApproximateNumberType ApproximateNumber;
+typedef ValidatedNumberType ValidatedNumber;
+typedef EffectiveNumberType EffectiveNumber;
+
+//typedef ApproximateFloat ApproximateNumberType;
+//typedef ValidatedFloat ValidatedNumberType;
+//typedef Real EffectiveNumberType;
+
+struct ExactTag { };
+typedef EffectiveNumberType EffectiveTag;
+typedef ValidatedNumberType ValidatedTag;
+typedef ApproximateNumberType ApproximateTag;
 
 template<class I> struct CanonicalNumberTypedef;
 template<> struct CanonicalNumberTypedef<ExactTag> { typedef EffectiveNumberType Type; };
@@ -76,24 +85,24 @@ template<class X> class Algebra;
 template<class X> class ScalarFunctionInterface;
 template<class X> class VectorFunctionInterface;
 
-typedef ScalarFunctionInterface<ApproximateNumberType> ApproximateScalarFunctionInterface;
-typedef ScalarFunctionInterface<ValidatedNumberType> ValidatedScalarFunctionInterface;
-typedef ScalarFunctionInterface<EffectiveNumberType> EffectiveScalarFunctionInterface;
+typedef ScalarFunctionInterface<ApproximateTag> ApproximateScalarFunctionInterface;
+typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;
+typedef ScalarFunctionInterface<EffectiveTag> EffectiveScalarFunctionInterface;
 
-typedef VectorFunctionInterface<ApproximateNumberType> ApproximateVectorFunctionInterface;
-typedef VectorFunctionInterface<ValidatedNumberType> ValidatedVectorFunctionInterface;
-typedef VectorFunctionInterface<EffectiveNumberType> EffectiveVectorFunctionInterface;
+typedef VectorFunctionInterface<ApproximateTag> ApproximateVectorFunctionInterface;
+typedef VectorFunctionInterface<ValidatedTag> ValidatedVectorFunctionInterface;
+typedef VectorFunctionInterface<EffectiveTag> EffectiveVectorFunctionInterface;
 
 template<class X> class ScalarFunction;
-typedef ScalarFunction<ApproximateNumberType> ApproximateScalarFunction;
-typedef ScalarFunction<ValidatedNumberType> ValidatedScalarFunction;
-typedef ScalarFunction<EffectiveNumberType> EffectiveScalarFunction;
+typedef ScalarFunction<ApproximateTag> ApproximateScalarFunction;
+typedef ScalarFunction<ValidatedTag> ValidatedScalarFunction;
+typedef ScalarFunction<EffectiveTag> EffectiveScalarFunction;
 typedef ScalarFunction<Real> RealScalarFunction;
 
 template<class X> class VectorFunction;
-typedef VectorFunction<ApproximateNumberType> ApproximateVectorFunction;
-typedef VectorFunction<ValidatedNumberType> ValidatedVectorFunction;
-typedef VectorFunction<EffectiveNumberType> EffectiveVectorFunction;
+typedef VectorFunction<ApproximateTag> ApproximateVectorFunction;
+typedef VectorFunction<ValidatedTag> ValidatedVectorFunction;
+typedef VectorFunction<EffectiveTag> EffectiveVectorFunction;
 typedef EffectiveVectorFunction RealVectorFunction;
 
 template<>
@@ -120,12 +129,12 @@ class ScalarFunctionInterface<Void>
 //! \brief Interface for scalar functions \f$\mathbb{F}^n\rightarrow\mathbb{F}\f$ which can only be evaluated approximately.
 //! \sa \ref VectorFunctionInterface.
 template<>
-class ScalarFunctionInterface<ApproximateNumberType>
+class ScalarFunctionInterface<ApproximateTag>
     : public ScalarFunctionInterface<Void>
 {
   public:
     //! \brief Return a copy of the function.
-    inline ScalarFunction<ApproximateNumberType> clone() const;
+    inline ScalarFunction<ApproximateTag> clone() const;
     //! \brief Compute an approximation to the value of the function at the point \a x.
     virtual ApproximateNumberType evaluate(const Vector<ApproximateNumberType>& x) const = 0;
     inline ApproximateNumberType operator() (const Vector<ApproximateNumberType>& x) const;
@@ -153,14 +162,14 @@ class ScalarFunctionInterface<ApproximateNumberType>
 //! \brief Interface for scalar functions \f$\mathbb{I}^n\rightarrow\mathbb{I}\f$ which can be evaluated over intervals.
 //! \sa \ref VectorFunctionInterface.
 template<>
-class ScalarFunctionInterface<ValidatedNumberType>
-    : public ScalarFunctionInterface<ApproximateNumberType>
+class ScalarFunctionInterface<ValidatedTag>
+    : public ScalarFunctionInterface<ApproximateTag>
 {
   public:
 
-    inline ScalarFunction<ValidatedNumberType> clone() const;
+    inline ScalarFunction<ValidatedTag> clone() const;
 
-    using ScalarFunctionInterface<ApproximateNumberType>::evaluate;
+    using ScalarFunctionInterface<ApproximateTag>::evaluate;
 
     //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
     virtual ValidatedNumberType evaluate(const Vector<ValidatedNumberType>& x) const = 0;
@@ -175,31 +184,31 @@ class ScalarFunctionInterface<ValidatedNumberType>
     //! \brief Apply the function to an algebra.
     virtual Algebra<ValidatedNumberType> evaluate(const Vector< Algebra<ValidatedNumberType> >& x) const = 0;
 
-    using ScalarFunctionInterface<ApproximateNumberType>::gradient;
+    using ScalarFunctionInterface<ApproximateTag>::gradient;
     Vector<ValidatedNumberType> gradient(const Vector<ValidatedNumberType>& x) const;
-    using ScalarFunctionInterface<ApproximateNumberType>::differential;
+    using ScalarFunctionInterface<ApproximateTag>::differential;
     Differential<ValidatedNumberType> differential(const Vector<ValidatedNumberType>& x, Nat d) const;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<ValidatedNumberType> derivative(Nat i) const;
+    inline ScalarFunction<ValidatedTag> derivative(Nat i) const;
   private:
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    virtual ScalarFunctionInterface<ValidatedNumberType>* _derivative(Nat i) const = 0;
+    virtual ScalarFunctionInterface<ValidatedTag>* _derivative(Nat i) const = 0;
   public:
-    virtual ScalarFunctionInterface<ValidatedNumberType>* _clone() const = 0;
+    virtual ScalarFunctionInterface<ValidatedTag>* _clone() const = 0;
 };
 
 //! \ingroup FunctionModule
 //! \brief Interface for scalar functions \f$\R^n\rightarrow\R\f$ which can be evaluated exactly.
 //! \sa \ref VectorFunctionInterface.
 template<>
-class ScalarFunctionInterface<EffectiveNumberType>
-    : public ScalarFunctionInterface<ValidatedNumberType>
+class ScalarFunctionInterface<EffectiveTag>
+    : public ScalarFunctionInterface<ValidatedTag>
 {
   public:
-    inline ScalarFunction<EffectiveNumberType> clone() const;
+    inline ScalarFunction<EffectiveTag> clone() const;
 
-    using ScalarFunctionInterface<ValidatedNumberType>::evaluate;
+    using ScalarFunctionInterface<ValidatedTag>::evaluate;
 
     //! \brief Evaluate over computable reals.
     virtual EffectiveNumberType evaluate(const Vector<EffectiveNumberType>& x) const = 0;
@@ -210,12 +219,12 @@ class ScalarFunctionInterface<EffectiveNumberType>
     virtual Algebra<EffectiveNumberType> evaluate(const Vector< Algebra<EffectiveNumberType> >& x) const = 0;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<EffectiveNumberType> derivative(Nat i) const;
+    inline ScalarFunction<EffectiveTag> derivative(Nat i) const;
   private:
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    virtual ScalarFunctionInterface<EffectiveNumberType>* _derivative(Nat i) const = 0;
+    virtual ScalarFunctionInterface<EffectiveTag>* _derivative(Nat i) const = 0;
   public:
-    virtual ScalarFunctionInterface<EffectiveNumberType>* _clone() const = 0;
+    virtual ScalarFunctionInterface<EffectiveTag>* _clone() const = 0;
 };
 
 //! \relates ScalarFunctionInterface
@@ -255,7 +264,7 @@ class VectorFunctionInterface<Void>
 //! \brief Interface for vector functions \f$\F^n\rightarrow\F^m\f$ whose derivatives can be computed.
 //! \sa \ref ScalarFunctionInterface
 template<>
-class VectorFunctionInterface<ApproximateNumberType>
+class VectorFunctionInterface<ApproximateTag>
     : public VectorFunctionInterface<Void>
 {
   public:
@@ -274,21 +283,21 @@ class VectorFunctionInterface<ApproximateNumberType>
     Vector< Differential<ApproximateNumberType> > differentials(const Vector<ApproximateNumberType>& x, Nat d) const;
 
     //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<ApproximateNumberType> operator[](Nat i) const;
+    inline ScalarFunction<ApproximateTag> operator[](Nat i) const;
   public:
-    virtual ScalarFunctionInterface<ApproximateNumberType>* _get(Nat i) const = 0;
-    virtual VectorFunctionInterface<ApproximateNumberType>* _clone() const = 0;
+    virtual ScalarFunctionInterface<ApproximateTag>* _get(Nat i) const = 0;
+    virtual VectorFunctionInterface<ApproximateTag>* _clone() const = 0;
 };
 
 //! \ingroup FunctionModule
 //! \brief Interface for vector functions \f$\I^n\rightarrow\I^m\f$ whose derivatives can be computed.
 //! \sa \ref ScalarFunctionInterface
 template<>
-class VectorFunctionInterface<ValidatedNumberType>
-    : public VectorFunctionInterface<ApproximateNumberType>
+class VectorFunctionInterface<ValidatedTag>
+    : public VectorFunctionInterface<ApproximateTag>
 {
   public:
-    using VectorFunctionInterface<ApproximateNumberType>::evaluate;
+    using VectorFunctionInterface<ApproximateTag>::evaluate;
 
     //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
     virtual Vector<ValidatedNumberType> evaluate(const Vector<ValidatedNumberType>& x) const = 0;
@@ -302,16 +311,16 @@ class VectorFunctionInterface<ValidatedNumberType>
     //! \brief Apply the function to an algebra.
     virtual Vector< Algebra<ValidatedNumberType> > evaluate(const Vector< Algebra<ValidatedNumberType> >& x) const = 0;
 
-    using VectorFunctionInterface<ApproximateNumberType>::jacobian;
+    using VectorFunctionInterface<ApproximateTag>::jacobian;
     Matrix<ValidatedNumberType> jacobian(const Vector<ValidatedNumberType>& x) const;
-    using VectorFunctionInterface<ApproximateNumberType>::differentials;
+    using VectorFunctionInterface<ApproximateTag>::differentials;
     Vector< Differential<ValidatedNumberType> > differentials(const Vector<ValidatedNumberType>& x, Nat d) const;
 
     //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<ValidatedNumberType> operator[](Nat i) const;
+    inline ScalarFunction<ValidatedTag> operator[](Nat i) const;
   public:
-    virtual ScalarFunctionInterface<ValidatedNumberType>* _get(Nat i) const = 0;
-    virtual VectorFunctionInterface<ValidatedNumberType>* _clone() const = 0;
+    virtual ScalarFunctionInterface<ValidatedTag>* _get(Nat i) const = 0;
+    virtual VectorFunctionInterface<ValidatedTag>* _clone() const = 0;
 
 };
 
@@ -319,11 +328,11 @@ class VectorFunctionInterface<ValidatedNumberType>
 //! \brief Interface for vector functions \f$\R^n\rightarrow\R^m\f$ whose derivatives can be computed.
 //! \sa \ref ScalarFunctionInterface
 template<>
-class VectorFunctionInterface<EffectiveNumberType>
-    : public VectorFunctionInterface<ValidatedNumberType>
+class VectorFunctionInterface<EffectiveTag>
+    : public VectorFunctionInterface<ValidatedTag>
 {
   public:
-    using VectorFunctionInterface<ValidatedNumberType>::evaluate;
+    using VectorFunctionInterface<ValidatedTag>::evaluate;
 
     //! \brief Evaluate over computable reals.
     virtual Vector<EffectiveNumberType> evaluate(const Vector<EffectiveNumberType>& x) const = 0;
@@ -333,10 +342,10 @@ class VectorFunctionInterface<EffectiveNumberType>
     virtual Vector< Algebra<EffectiveNumberType> > evaluate(const Vector< Algebra<EffectiveNumberType> >& x) const = 0;
 
     //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<EffectiveNumberType> operator[](Nat i) const;
+    inline ScalarFunction<EffectiveTag> operator[](Nat i) const;
   public:
-    virtual ScalarFunctionInterface<EffectiveNumberType>* _get(Nat i) const = 0;
-    virtual VectorFunctionInterface<EffectiveNumberType>* _clone() const = 0;
+    virtual ScalarFunctionInterface<EffectiveTag>* _get(Nat i) const = 0;
+    virtual VectorFunctionInterface<EffectiveTag>* _clone() const = 0;
 };
 
 //! \relates VectorFunctionInterface
@@ -359,18 +368,18 @@ template<> class FunctionFactoryInterface<ValidatedNumberType>
 {
     typedef Box DomainType;
   public:
-    virtual FunctionFactoryInterface<ValidatedNumberType>* clone() const = 0;
+    virtual FunctionFactoryInterface<ValidatedTag>* clone() const = 0;
     virtual Void write(OutputStream& os) const = 0;
-    inline ScalarFunction<ValidatedNumberType> create(const Box& domain, const ScalarFunctionInterface<ValidatedNumberType>& function) const;
-    inline VectorFunction<ValidatedNumberType> create(const Box& domain, const VectorFunctionInterface<ValidatedNumberType>& function) const;
-    inline ScalarFunction<ValidatedNumberType> create_zero(const Box& domain) const;
-    inline VectorFunction<ValidatedNumberType> create_identity(const Box& domain) const;
+    inline ScalarFunction<ValidatedTag> create(const Box& domain, const ScalarFunctionInterface<ValidatedTag>& function) const;
+    inline VectorFunction<ValidatedTag> create(const Box& domain, const VectorFunctionInterface<ValidatedTag>& function) const;
+    inline ScalarFunction<ValidatedTag> create_zero(const Box& domain) const;
+    inline VectorFunction<ValidatedTag> create_identity(const Box& domain) const;
   private:
-    virtual ScalarFunctionInterface<ValidatedNumberType>* _create(const Box& domain, const ScalarFunctionInterface<ValidatedNumberType>& function) const = 0;
-    virtual VectorFunctionInterface<ValidatedNumberType>* _create(const Box& domain, const VectorFunctionInterface<ValidatedNumberType>& function) const = 0;
+    virtual ScalarFunctionInterface<ValidatedTag>* _create(const Box& domain, const ScalarFunctionInterface<ValidatedTag>& function) const = 0;
+    virtual VectorFunctionInterface<ValidatedTag>* _create(const Box& domain, const VectorFunctionInterface<ValidatedTag>& function) const = 0;
 };
 
-template<class X> inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<ValidatedNumberType>& factory) {
+template<class X> inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<ValidatedTag>& factory) {
     factory.write(os); return os;
 }
 

@@ -36,12 +36,12 @@ typedef void Void;
 class CanvasInterface;
 class PlanarProjectionMap;
 typedef PlanarProjectionMap Projection2d;
-class IntervalConstrainedImageSet;
+class ValidatedConstrainedImageSet;
 
 //! \brief A class for computing outer approximations to sets defined by functions.
 class DrawerInterface
 {
-    virtual Void draw(CanvasInterface& cnvs, const Projection2d& proj, const IntervalConstrainedImageSet& set) = 0;
+    virtual Void draw(CanvasInterface& cnvs, const Projection2d& proj, const ValidatedConstrainedImageSet& set) = 0;
 };
 
 

@@ -57,87 +57,88 @@ class Constraint {
     R _upper_bound;
 };
 
-typedef Constraint<EffectiveScalarFunction,Real> RealConstraint;
-typedef Constraint<ValidatedScalarFunction,Float> IntervalConstraint;
+typedef Constraint<RealScalarFunction,Real> RealConstraint;
+typedef Constraint<EffectiveScalarFunction,EffectiveNumberType> EffectiveConstraint;
+typedef Constraint<ValidatedScalarFunction,RawNumberType> ValidatedConstraint;
 
-inline RealConstraint operator<=(const Real& c, const EffectiveScalarFunction& f) {
-    return RealConstraint(c,f,infinity);
+inline EffectiveConstraint operator<=(const EffectiveNumberType& c, const EffectiveScalarFunction& f) {
+    return EffectiveConstraint(c,f,infinity);
 }
 
-inline RealConstraint operator>=(const Real& c, const EffectiveScalarFunction& f) {
-    return RealConstraint(-infinity,f,c);
+inline EffectiveConstraint operator>=(const EffectiveNumberType& c, const EffectiveScalarFunction& f) {
+    return EffectiveConstraint(-infinity,f,c);
 }
 
-inline RealConstraint operator<=(const EffectiveScalarFunction& f, const Real& c) {
-    return RealConstraint(-infinity,f,c);
+inline EffectiveConstraint operator<=(const EffectiveScalarFunction& f, const EffectiveNumberType& c) {
+    return EffectiveConstraint(-infinity,f,c);
 }
 
-inline RealConstraint operator>=(const EffectiveScalarFunction& f, const Real& c) {
-    return RealConstraint(c,f,infinity);
+inline EffectiveConstraint operator>=(const EffectiveScalarFunction& f, const EffectiveNumberType& c) {
+    return EffectiveConstraint(c,f,infinity);
 }
 
-inline RealConstraint operator==(const EffectiveScalarFunction& f, const Real& c) {
-    return RealConstraint(f,c);
+inline EffectiveConstraint operator==(const EffectiveScalarFunction& f, const EffectiveNumberType& c) {
+    return EffectiveConstraint(f,c);
 }
 
-inline RealConstraint operator<=(const EffectiveScalarFunction& f, double c) {
-    return RealConstraint(-infinity,f,Real(c));
+inline EffectiveConstraint operator<=(const EffectiveScalarFunction& f, double c) {
+    return EffectiveConstraint(-infinity,f,Real(c));
 }
 
-inline RealConstraint operator>=(const EffectiveScalarFunction& f, double c) {
-    return RealConstraint(Real(c),f,infinity);
+inline EffectiveConstraint operator>=(const EffectiveScalarFunction& f, double c) {
+    return EffectiveConstraint(Real(c),f,infinity);
 }
 
-inline RealConstraint operator==(const EffectiveScalarFunction& f, double c) {
-    return RealConstraint(f,Real(c));
+inline EffectiveConstraint operator==(const EffectiveScalarFunction& f, double c) {
+    return EffectiveConstraint(f,Real(c));
 }
 
 
-inline RealConstraint operator<=(const RealConstraint& nc, const Real& c) {
+inline EffectiveConstraint operator<=(const EffectiveConstraint& nc, const EffectiveNumberType& c) {
     ARIADNE_ASSERT(Float(nc.upper_bound())==inf);
-    return RealConstraint(nc.lower_bound(),nc.function(),c);
+    return EffectiveConstraint(nc.lower_bound(),nc.function(),c);
 }
 
 
-inline IntervalConstraint operator<=(const Float& c, const ValidatedScalarFunction& f) {
-    return IntervalConstraint(c,f,+inf);
+inline ValidatedConstraint operator<=(const RawNumberType& c, const ValidatedScalarFunction& f) {
+    return ValidatedConstraint(c,f,+inf);
 }
 
-inline IntervalConstraint operator<=(const ValidatedScalarFunction& f, const Float& c) {
-    return IntervalConstraint(-inf,f,c);
+inline ValidatedConstraint operator<=(const ValidatedScalarFunction& f, const RawNumberType& c) {
+    return ValidatedConstraint(-inf,f,c);
 }
 
-inline IntervalConstraint operator>=(const ValidatedScalarFunction& f, const Float& c) {
-    return IntervalConstraint(c,f,+inf);
+inline ValidatedConstraint operator>=(const ValidatedScalarFunction& f, const RawNumberType& c) {
+    return ValidatedConstraint(c,f,+inf);
 }
 
-inline IntervalConstraint operator==(const ValidatedScalarFunction& f, const Float& c) {
-    return IntervalConstraint(c,f,c);
+inline ValidatedConstraint operator==(const ValidatedScalarFunction& f, const RawNumberType& c) {
+    return ValidatedConstraint(c,f,c);
 }
 
-inline IntervalConstraint operator<=(const ValidatedScalarFunction& f, double c) {
-    return IntervalConstraint(-inf,f,Float(c));
+inline ValidatedConstraint operator<=(const ValidatedScalarFunction& f, double c) {
+    return ValidatedConstraint(-inf,f,Float(c));
 }
 
-inline IntervalConstraint operator>=(const ValidatedScalarFunction& f, double c) {
-    return IntervalConstraint(-inf,f,c);
+inline ValidatedConstraint operator>=(const ValidatedScalarFunction& f, double c) {
+    return ValidatedConstraint(-inf,f,c);
 }
 
-inline IntervalConstraint operator==(const ValidatedScalarFunction& f, double c) {
-    return IntervalConstraint(Float(c),f,Float(c));
+inline ValidatedConstraint operator==(const ValidatedScalarFunction& f, double c) {
+    return ValidatedConstraint(Float(c),f,Float(c));
 }
 
-inline IntervalConstraint operator<=(const ValidatedScalarFunction& f1, const ValidatedScalarFunction& f2) {
+inline ValidatedConstraint operator<=(const ValidatedScalarFunction& f1, const ValidatedScalarFunction& f2) {
     return (f1-f2) <= 0.0;
 }
 
-inline IntervalConstraint operator>=(const ValidatedScalarFunction& f1, const ValidatedScalarFunction& f2) {
+inline ValidatedConstraint operator>=(const ValidatedScalarFunction& f1, const ValidatedScalarFunction& f2) {
     return (f1-f2) >= 0.0;
 }
 
-inline IntervalConstraint operator<=(const IntervalConstraint& nc, const Float& c) {
+inline ValidatedConstraint operator<=(const ValidatedConstraint& nc, const RawNumberType& c) {
     ARIADNE_ASSERT(nc.upper_bound()==inf);
-    return IntervalConstraint(nc.lower_bound(),nc.function(),c);
+    return ValidatedConstraint(nc.lower_bound(),nc.function(),c);
 }
 
 

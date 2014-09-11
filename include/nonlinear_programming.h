@@ -48,8 +48,8 @@ typedef ValidatedVectorFunction ValidatedVectorFunction;
 typedef ApproximateVectorFunction ApproximateVectorFunction;
 
 template<class X, class R> class Constraint;
-typedef Constraint<EffectiveScalarFunction,Real> RealConstraint;
-typedef Constraint<ValidatedScalarFunction,Float> IntervalConstraint;
+typedef Constraint<EffectiveScalarFunction,EffectiveNumberType> EffectiveConstraint;
+typedef Constraint<ValidatedScalarFunction,RawNumberType> ValidatedConstraint;
 
 class InfeasibleProblemException : public std::runtime_error {
   public: InfeasibleProblemException() : std::runtime_error("InfeasibleProblemException") { }

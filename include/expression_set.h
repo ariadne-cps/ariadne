@@ -49,7 +49,7 @@ class ConstraintSet;
 class BoundedConstraintSet;
 
 class Box;
-class IntervalConstrainedImageSet;
+class ValidatedConstrainedImageSet;
 
 template<class X> class Variable;
 typedef Variable<Real> RealVariable;

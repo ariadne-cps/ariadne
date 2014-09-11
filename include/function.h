@@ -80,41 +80,46 @@ template<class X> class VectorFunctionElementReference;
 
 //! \ingroup FunctionModule
 //! \brief A generic scalar function which can be evaluated over the number type \a X,  \f$f:\X^n\rightarrow\X\f$.
-template<class X>
+template<class P>
 class ScalarFunction
 {
+    typedef P X;
   private:
-    std::shared_ptr< const ScalarFunctionInterface<X> > _ptr;
+    std::shared_ptr< const ScalarFunctionInterface<P> > _ptr;
   public:
-    static ScalarFunction<X> zero(Nat m);
-    static ScalarFunction<X> constant(Nat m, X c);
-    static ScalarFunction<X> coordinate(Nat m, Nat j);
-    static List< ScalarFunction<X> > coordinates(Nat n);
+    typedef P InformationTag;
+    typedef X NumericType;
+
+    static ScalarFunction<P> zero(Nat m);
+    static ScalarFunction<P> constant(Nat m, NumericType c);
+    static ScalarFunction<P> coordinate(Nat m, Nat j);
+    static List< ScalarFunction<P> > coordinates(Nat n);
 
     explicit ScalarFunction(Nat as);
-    explicit ScalarFunction(Nat as, Formula<X> f);
+    explicit ScalarFunction(Nat as, Formula<NumericType> f);
 
     ScalarFunction();
-    ScalarFunction(ScalarFunctionInterface<X>* p) : _ptr(p) { }
-    ScalarFunction(const ScalarFunctionInterface<X>& t) : _ptr(t._clone()) { }
-    ScalarFunction(std::shared_ptr< const ScalarFunctionInterface<X> > p) : _ptr(p) { }
-    ScalarFunction<X>& operator=(const ScalarFunctionInterface<X>& f) { _ptr=std::shared_ptr< const ScalarFunctionInterface<X> >(f._clone()); return *this; }
+    ScalarFunction(ScalarFunctionInterface<P>* p) : _ptr(p) { }
+    ScalarFunction(const ScalarFunctionInterface<P>& t) : _ptr(t._clone()) { }
+    ScalarFunction(std::shared_ptr< const ScalarFunctionInterface<P> > p) : _ptr(p) { }
+    ScalarFunction<P>& operator=(const ScalarFunctionInterface<P>& f) {
+        _ptr=std::shared_ptr< const ScalarFunctionInterface<P> >(f._clone()); return *this; }
 
-    template<class XX> ScalarFunction(const ScalarFunction<XX>& f, typename EnableIf<IsSafelyConvertible<XX,X>,Void>::Type* = 0)
-        : _ptr(std::dynamic_pointer_cast< const ScalarFunctionInterface<X> >(f.managed_pointer())) { }
-    template<class XX> inline ScalarFunction(const VectorFunctionElementReference<XX>& vfe,
-                                             typename EnableIf<IsSafelyConvertible<XX,X>,Void>::Type* = 0);
+    template<class PP> ScalarFunction(const ScalarFunction<PP>& f, typename EnableIf<IsSafelyConvertible<PP,P>,Void>::Type* = 0)
+        : _ptr(std::dynamic_pointer_cast< const ScalarFunctionInterface<P> >(f.managed_pointer())) { }
+    template<class PP> inline ScalarFunction(const VectorFunctionElementReference<PP>& vfe,
+                                             typename EnableIf<IsSafelyConvertible<PP,P>,Void>::Type* = 0);
 
-    std::shared_ptr< const ScalarFunctionInterface<X> > managed_pointer() const  { return _ptr; }
-    const ScalarFunctionInterface<X>* raw_pointer() const  { return _ptr.operator->(); }
-    const ScalarFunctionInterface<X>& reference() const  { return _ptr.operator*(); }
-    operator const ScalarFunctionInterface<X>& () const { return _ptr.operator*(); }
+    std::shared_ptr< const ScalarFunctionInterface<P> > managed_pointer() const  { return _ptr; }
+    const ScalarFunctionInterface<P>* raw_pointer() const  { return _ptr.operator->(); }
+    const ScalarFunctionInterface<P>& reference() const  { return _ptr.operator*(); }
+    operator const ScalarFunctionInterface<P>& () const { return _ptr.operator*(); }
 
     Nat argument_size() const { return this->reference().argument_size(); }
     template<class XX> XX evaluate(const Vector<XX>& x) const { return this->reference().evaluate(x); }
     template<class XX> XX operator() (const Vector<XX>& x) const { return this->reference().evaluate(x); }
 
-    ScalarFunction<X> derivative(Nat j) const { return this->reference().derivative(j); }
+    ScalarFunction<P> derivative(Nat j) const { return this->reference().derivative(j); }
 
     template<class XX> Vector<XX> gradient(const Vector<XX>& x) const { return this->reference().gradient(x); }
     template<class XX> Differential<XX> differential(const Vector<XX>& x, Nat d) const { return this->_ptr->differential(x,d); }
@@ -122,16 +127,16 @@ class ScalarFunction
     OutputStream& write(OutputStream& os) const { return this->_ptr->write(os); }
 };
 
-template<class X> template<class XX> inline
-ScalarFunction<X>::ScalarFunction(const VectorFunctionElementReference<XX>& vfe,
-                                  typename EnableIf<IsSafelyConvertible<XX,X>,Void>::Type*)
+template<class P> template<class PP> inline
+ScalarFunction<P>::ScalarFunction(const VectorFunctionElementReference<PP>& vfe,
+                                  typename EnableIf<IsSafelyConvertible<PP,P>,Void>::Type*)
     : _ptr(vfe._vf.raw_pointer()->_get(vfe._i))
 {
 }
 
-template<class X> inline OutputStream& operator<<(OutputStream& os, const ScalarFunction<X>& f) { return f.write(os); }
-template<class X, class XX> inline XX evaluate(const ScalarFunction<X>& f, const Vector<XX>& x) { return f(x); }
-template<class X, class XX> inline Vector<XX> gradient(const ScalarFunction<X>& f, const Vector<XX>& x) { return f.gradient(x); }
+template<class P> inline OutputStream& operator<<(OutputStream& os, const ScalarFunction<P>& f) { return f.write(os); }
+template<class P, class XX> inline XX evaluate(const ScalarFunction<P>& f, const Vector<XX>& x) { return f(x); }
+template<class P, class XX> inline Vector<XX> gradient(const ScalarFunction<P>& f, const Vector<XX>& x) { return f.gradient(x); }
 
 ApproximateScalarFunction ScalarFunctionInterface<ApproximateNumberType>::clone() const { return this->_clone(); }
 ValidatedScalarFunction ScalarFunctionInterface<ValidatedNumberType>::clone() const { return this->_clone(); }
@@ -217,39 +222,42 @@ EffectiveScalarFunction tan(const EffectiveScalarFunction&);
 
 //! \ingroup FunctionModule
 //! \brief A generic vector function which can be evaluated over the number type \a X,  \f$f:\X^n\rightarrow\X^m\f$.
-template<class X>
+template<class P>
 class VectorFunction
 {
+    typedef P X;
   public:
-    static VectorFunction<X> zeros(Nat rs, Nat as);
-    static VectorFunction<X> identity(Nat n);
+    typedef X NumericType;
+
+    static VectorFunction<P> zeros(Nat rs, Nat as);
+    static VectorFunction<P> identity(Nat n);
 
     VectorFunction();
     VectorFunction(Nat rs, Nat as);
     VectorFunction(Nat as, const List< Formula<X> >& flst);
-    VectorFunction(Nat rs, ScalarFunction<X> sf);
+    VectorFunction(Nat rs, ScalarFunction<P> sf);
 
-    VectorFunction(VectorFunctionInterface<X>* fptr) : _ptr(fptr) { }
-    VectorFunction(std::shared_ptr< VectorFunctionInterface<X> > fptr) : _ptr(fptr) { }
-    VectorFunction(const VectorFunctionInterface<X>& fref) : _ptr(fref._clone()) { }
-    std::shared_ptr< const VectorFunctionInterface<X> > managed_pointer() const { return this->_ptr; }
-    const VectorFunctionInterface<X>* raw_pointer() const { return this->_ptr.operator->(); }
-    const VectorFunctionInterface<X>& reference() const { return this->_ptr.operator*(); }
-    operator const VectorFunctionInterface<X>& () const { return *this->_ptr; }
+    VectorFunction(VectorFunctionInterface<P>* fptr) : _ptr(fptr) { }
+    VectorFunction(std::shared_ptr< VectorFunctionInterface<P> > fptr) : _ptr(fptr) { }
+    VectorFunction(const VectorFunctionInterface<P>& fref) : _ptr(fref._clone()) { }
+    std::shared_ptr< const VectorFunctionInterface<P> > managed_pointer() const { return this->_ptr; }
+    const VectorFunctionInterface<P>* raw_pointer() const { return this->_ptr.operator->(); }
+    const VectorFunctionInterface<P>& reference() const { return this->_ptr.operator*(); }
+    operator const VectorFunctionInterface<P>& () const { return *this->_ptr; }
 
-    VectorFunction(const List< ScalarFunction<X> >& lsf);
-    VectorFunction(std::initializer_list< ScalarFunction<X> > lsf);
-    template<class XX> VectorFunction(const List< ScalarFunction<XX> >& lsf, typename EnableIf< IsSafelyConvertible<XX,X>, Void >::Type* = 0) {
-        *this=VectorFunction<X>(List< ScalarFunction<X> >(lsf)); }
-    template<class XX> VectorFunction(const VectorFunction<XX>& vf, typename EnableIf< IsSafelyConvertible<XX,X>, Void >::Type* = 0)
-        : _ptr(std::dynamic_pointer_cast< const VectorFunctionInterface<X> >(vf.managed_pointer())) { }
+    VectorFunction(const List< ScalarFunction<P> >& lsf);
+    VectorFunction(std::initializer_list< ScalarFunction<P> > lsf);
+    template<class PP> VectorFunction(const List< ScalarFunction<PP> >& lsf, typename EnableIf< IsSafelyConvertible<PP,P>, Void >::Type* = 0) {
+        *this=VectorFunction<P>(List< ScalarFunction<P> >(lsf)); }
+    template<class PP> VectorFunction(const VectorFunction<PP>& vf, typename EnableIf< IsSafelyConvertible<PP,P>, Void >::Type* = 0)
+        : _ptr(std::dynamic_pointer_cast< const VectorFunctionInterface<P> >(vf.managed_pointer())) { }
 
-    ScalarFunction<X> get(Nat i) const { return this->_ptr->_get(i); }
-    //Void set(Nat i, ScalarFunction<X> f) { this->_ptr->_set(i,f); };
-    Void set(Nat i, ScalarFunction<X> f);
+    ScalarFunction<P> get(Nat i) const { return this->_ptr->_get(i); }
+    //Void set(Nat i, ScalarFunction<P> f) { this->_ptr->_set(i,f); };
+    Void set(Nat i, ScalarFunction<P> f);
 
-    ScalarFunction<X> operator[](Nat i) const { return this->get(i); }
-    VectorFunctionElementReference<X> operator[](Nat i);
+    ScalarFunction<P> operator[](Nat i) const { return this->get(i); }
+    VectorFunctionElementReference<P> operator[](Nat i);
 
     Nat result_size() const { return this->_ptr->result_size(); }
     Nat argument_size() const { return this->_ptr->argument_size(); }
@@ -265,13 +273,13 @@ class VectorFunction
     std::shared_ptr< const VectorFunctionInterface<X> > _ptr;
 };
 
-template<class X> inline OutputStream& operator<<(OutputStream& os, const VectorFunction<X>& f) { return f.write(os); }
+template<class P> inline OutputStream& operator<<(OutputStream& os, const VectorFunction<P>& f) { return f.write(os); }
 
-template<class X, class XX> inline Vector<XX> evaluate(const VectorFunction<X>& f, const Vector<XX>& x) { return f(x); }
-template<class X, class XX> inline Matrix<XX> jacobian(const VectorFunction<X>& f, const Vector<XX>& x) { return f.jacobian(x); }
+template<class P, class XX> inline Vector<XX> evaluate(const VectorFunction<P>& f, const Vector<XX>& x) { return f(x); }
+template<class P, class XX> inline Matrix<XX> jacobian(const VectorFunction<P>& f, const Vector<XX>& x) { return f.jacobian(x); }
 
 /*
-template<class X> VectorFunction<X> operator*(const ScalarFunction<X>& sf, const Vector<X>& e);
+template<class X> VectorFunction<P> operator*(const ScalarFunction<X>& sf, const Vector<X>& e);
 template<class X> VectorFunction<X> operator+(const VectorFunction<X>& f1, const VectorFunction<X>& f2);
 template<class X> VectorFunction<X> operator-(const VectorFunction<X>& f1, const VectorFunction<X>& f2);
 template<class X> VectorFunction<X> operator*(const VectorFunction<X>& vf, const ScalarFunction<X>& sf);
@@ -324,27 +332,27 @@ ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const Validate
 ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const ValidatedVectorFunction& g);
 
 
-template<class X>
+template<class P>
 struct VectorFunctionElementReference {
-    VectorFunction<X>& _vf; Nat _i;
-    VectorFunctionElementReference<X>(VectorFunction<X>& vf, Nat i) : _vf(vf), _i(i) { }
-    void operator=(const ScalarFunction<X>& sf);
-    VectorFunctionElementReference<X>& operator=(const VectorFunctionElementReference<X>& sfr);
+    VectorFunction<P>& _vf; Nat _i;
+    VectorFunctionElementReference<P>(VectorFunction<P>& vf, Nat i) : _vf(vf), _i(i) { }
+    void operator=(const ScalarFunction<P>& sf);
+    VectorFunctionElementReference<P>& operator=(const VectorFunctionElementReference<P>& sfr);
     template<class XX> XX evaluate(const Vector<XX> & x) const;
     template<class XX> XX operator()(const Vector<XX> & x) const;
 };
 
-template<class X> inline VectorFunctionElementReference<X> VectorFunction<X>::operator[](Nat i) { return VectorFunctionElementReference<X>(*this,i); }
-template<class X> inline OutputStream& operator<<(OutputStream& os, const VectorFunctionElementReference<X>& vfe) {
-    return  os << static_cast< ScalarFunction<X> >(vfe); }
+template<class P> inline VectorFunctionElementReference<P> VectorFunction<P>::operator[](Nat i) { return VectorFunctionElementReference<P>(*this,i); }
+template<class P> inline OutputStream& operator<<(OutputStream& os, const VectorFunctionElementReference<P>& vfe) {
+    return  os << static_cast< ScalarFunction<P> >(vfe); }
 
-template<class X> inline void VectorFunctionElementReference<X>::operator=(const ScalarFunction<X>& sf) { _vf.set(_i,sf); }
-template<class X> inline VectorFunctionElementReference<X>& VectorFunctionElementReference<X>::operator=(const VectorFunctionElementReference<X>& sfr) {
-    _vf.set(_i,static_cast< ScalarFunction<X> >(sfr)); return *this; }
-template<class X> template<class XX> inline XX VectorFunctionElementReference<X>::evaluate(const Vector<XX> & x) const {
-    return static_cast< ScalarFunction<X> >(*this).evaluate(x); }
-template<class X> template<class XX> inline XX VectorFunctionElementReference<X>::operator()(const Vector<XX> & x) const {
-    return static_cast< ScalarFunction<X> >(*this).evaluate(x); }
+template<class P> inline void VectorFunctionElementReference<P>::operator=(const ScalarFunction<P>& sf) { _vf.set(_i,sf); }
+template<class P> inline VectorFunctionElementReference<P>& VectorFunctionElementReference<P>::operator=(const VectorFunctionElementReference<P>& sfr) {
+    _vf.set(_i,static_cast< ScalarFunction<P> >(sfr)); return *this; }
+template<class P> template<class XX> inline XX VectorFunctionElementReference<P>::evaluate(const Vector<XX> & x) const {
+    return static_cast< ScalarFunction<P> >(*this).evaluate(x); }
+template<class P> template<class XX> inline XX VectorFunctionElementReference<P>::operator()(const Vector<XX> & x) const {
+    return static_cast< ScalarFunction<P> >(*this).evaluate(x); }
 
 inline ApproximateScalarFunction VectorFunctionInterface<ApproximateNumberType>::operator[](Nat i) const { return this->_get(i); }
 inline ValidatedScalarFunction VectorFunctionInterface<ValidatedNumberType>::operator[](Nat i) const { return this->_get(i); }
@@ -361,43 +369,43 @@ inline List< EffectiveScalarFunction > operator,(const List< EffectiveScalarFunc
 
 
 
-template<class X> class FunctionFactory;
-typedef FunctionFactory<ValidatedNumberType> ValidatedFunctionFactory;
+template<class P> class FunctionFactory;
+typedef FunctionFactory<ValidatedTag> ValidatedFunctionFactory;
 
 template<>
-class FunctionFactory<ValidatedNumberType>
+class FunctionFactory<ValidatedTag>
 {
-    std::shared_ptr< const FunctionFactoryInterface<ValidatedNumberType> > _ptr;
+    std::shared_ptr< const FunctionFactoryInterface<ValidatedTag> > _ptr;
   public:
-    FunctionFactory(const FunctionFactoryInterface<ValidatedNumberType>& ref) : _ptr(ref.clone()) { }
-    FunctionFactory(const FunctionFactoryInterface<ValidatedNumberType>* ptr) : _ptr(ptr) { }
-    FunctionFactory(std::shared_ptr< const FunctionFactoryInterface<ValidatedNumberType> > ptr) : _ptr(ptr) { }
-    inline ValidatedScalarFunction create(const Box& d, const ScalarFunctionInterface<ValidatedNumberType>& f) const;
-    inline ValidatedVectorFunction create(const Box& d, const VectorFunctionInterface<ValidatedNumberType>& f) const;
+    FunctionFactory(const FunctionFactoryInterface<ValidatedTag>& ref) : _ptr(ref.clone()) { }
+    FunctionFactory(const FunctionFactoryInterface<ValidatedTag>* ptr) : _ptr(ptr) { }
+    FunctionFactory(std::shared_ptr< const FunctionFactoryInterface<ValidatedTag> > ptr) : _ptr(ptr) { }
+    inline ValidatedScalarFunction create(const Box& d, const ValidatedScalarFunctionInterface& f) const;
+    inline ValidatedVectorFunction create(const Box& d, const ValidatedVectorFunctionInterface& f) const;
     inline ValidatedScalarFunction create_zero(const Box& d) const;
     inline ValidatedVectorFunction create_identity(const Box& d) const;
-    friend OutputStream& operator<<(OutputStream& os, const FunctionFactory<ValidatedNumberType>& factory);
+    friend OutputStream& operator<<(OutputStream& os, const FunctionFactory<ValidatedTag>& factory);
 };
 
-inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedNumberType>::create(const Box& domain, const ScalarFunctionInterface<ValidatedNumberType>& function) const {
+inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create(const Box& domain, const ValidatedScalarFunctionInterface& function) const {
     return this->_create(domain,function); }
-inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedNumberType>::create(const Box& domain, const VectorFunctionInterface<ValidatedNumberType>& function) const {
+inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create(const Box& domain, const ValidatedVectorFunctionInterface& function) const {
     return this->_create(domain,function); }
-inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedNumberType>::create_zero(const Box& domain) const {
+inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create_zero(const Box& domain) const {
     return this->_create(domain,EffectiveScalarFunction::zero(domain.size())); }
-inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedNumberType>::create_identity(const Box& domain) const {
+inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create_identity(const Box& domain) const {
     return this->_create(domain,EffectiveVectorFunction::identity(domain.size())); }
 
-inline ValidatedScalarFunction FunctionFactory<ValidatedNumberType>::create(const Box& domain, const ScalarFunctionInterface<ValidatedNumberType>& function) const {
+inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create(const Box& domain, const ValidatedScalarFunctionInterface& function) const {
     return this->_ptr->create(domain,function); }
-inline ValidatedVectorFunction FunctionFactory<ValidatedNumberType>::create(const Box& domain, const VectorFunctionInterface<ValidatedNumberType>& function) const {
+inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create(const Box& domain, const ValidatedVectorFunctionInterface& function) const {
     return this->_ptr->create(domain,function); }
-inline ValidatedScalarFunction FunctionFactory<ValidatedNumberType>::create_zero(const Box& domain) const {
+inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create_zero(const Box& domain) const {
     return this->_ptr->create_zero(domain); }
-inline ValidatedVectorFunction FunctionFactory<ValidatedNumberType>::create_identity(const Box& domain) const {
+inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create_identity(const Box& domain) const {
     return this->_ptr->create_identity(domain); }
 
-inline OutputStream& operator<<(OutputStream& os, const FunctionFactory<ValidatedNumberType>& factory) {
+inline OutputStream& operator<<(OutputStream& os, const ValidatedFunctionFactory& factory) {
     factory._ptr->write(os); return os; }
 
 } // namespace Ariadne

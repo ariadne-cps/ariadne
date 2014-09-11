@@ -64,7 +64,7 @@ class TestConstrainedImageSet
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
 
         BoxSet d(3,IntervalSet(-1,+2));
-        RealConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
+        EffectiveConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
         set.new_space_constraint(x[0]+x[1]<=2);
         set.apply((x[0]+x[1],x[0]-x[1]*x[1]));
@@ -82,7 +82,7 @@ class TestConstrainedImageSet
         Colour box_colour(1,0,1);
 
         // Test the polytope
-        RealConstrainedImageSet polytope((IntervalSet(-2,+2),IntervalSet(-2,+2)),(x[0],x[1]));
+        EffectiveConstrainedImageSet polytope((IntervalSet(-2,+2),IntervalSet(-2,+2)),(x[0],x[1]));
         polytope.new_parameter_constraint(x[0]+ExactFloat(1.5)*+x[1]<=1);
         box1=Box( (Interval(1.0,2.0),Interval(0.5,1.0)) );
         box2=Box( (Interval(0.0,1.0),Interval(0.5,1.0)) );
@@ -92,7 +92,7 @@ class TestConstrainedImageSet
         plot("test_function_sets-geometry-polytope",widen(polytope.bounding_box(),0.5),set_colour,polytope,box_colour,box1,box_colour,box2);
 
         // Test the unit disc
-        RealConstrainedImageSet disc((IntervalSet(-2,+2),IntervalSet(-2,+2)),(x[0],x[1]));
+        EffectiveConstrainedImageSet disc((IntervalSet(-2,+2),IntervalSet(-2,+2)),(x[0],x[1]));
         disc.new_parameter_constraint(x[0]*x[0]+x[1]*x[1]<=1);
         box1=Box( (Interval(-0.5,0.5),Interval(0.25,0.5)) );
         box2=Box( (Interval(1,2),Interval(0.5,1)) );
@@ -104,7 +104,7 @@ class TestConstrainedImageSet
         plot("test_function_sets-geometry-disc",widen(disc.bounding_box(),0.5),set_colour,disc,box_colour,box1,box_colour,box2,box_colour,box3);
 
         // Test a one-dimensional parabolic set
-        RealConstrainedImageSet parabola(BoxSet(1u,IntervalSet(-1,+1)),(p[0],p[0]*p[0]));
+        EffectiveConstrainedImageSet parabola(BoxSet(1u,IntervalSet(-1,+1)),(p[0],p[0]*p[0]));
         box1=Box( (Interval(0,0.5),Interval(0.5,1)) );
         box2=Box( (Interval(0.75,2),Interval(0.5,1)) );
         ARIADNE_TEST_PRINT(parabola);
@@ -119,7 +119,7 @@ class TestConstrainedImageSet
         ExactFloat a(1.5); ExactFloat b(0.375);
         EffectiveVectorFunction h((a-x[0]*x[0]-b*x[1],x[0]));
         EffectiveVectorFunction f=compose(h,h);
-        RealConstrainedImageSet set(d,f);
+        EffectiveConstrainedImageSet set(d,f);
         set.new_parameter_constraint(0<=x[0]+x[1]<=1);
 
         ARIADNE_TEST_PRINT(set);
@@ -128,7 +128,7 @@ class TestConstrainedImageSet
         ARIADNE_TEST_PRINT(f(Point{0.375,-0.375}));
 
 
-        IntervalConstrainedImageSet idisc(Box({{-2.0,+2.0},{-2.0,+2.0}}),(x[0],x[1]));
+        ValidatedConstrainedImageSet idisc(Box({{-2.0,+2.0},{-2.0,+2.0}}),(x[0],x[1]));
         idisc.new_parameter_constraint(x[0]*x[0]+x[1]*x[1]<=1);
         box1=Box( (Interval(-0.5,0.5),Interval(0.25,0.75)) );
         box1=Box( (Interval(-0.5,0.75),Interval(0.25,0.75)) );
@@ -145,7 +145,7 @@ class TestConstrainedImageSet
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
 
         BoxSet d(3,IntervalSet(Decimal(-1.1),Decimal(+2.1)));
-        RealConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
+        EffectiveConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
 
         Figure figure;
@@ -183,7 +183,7 @@ class TestConstrainedImageSet
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
 
         BoxSet d(3,IntervalSet(-1,+2));
-        RealConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
+        EffectiveConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
         set.new_space_constraint(x[0]+x[1]<=2.0);
         ARIADNE_TEST_PRINT(set);
@@ -203,17 +203,17 @@ class TestConstrainedImageSet
         EffectiveScalarFunction x0=EffectiveScalarFunction::coordinate(2,0);
         EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(2,1);
         BoxSet d(3,IntervalSet(-1,+1));
-        RealConstrainedImageSet set(d,(s0,s1+s2*s2/2));
+        EffectiveConstrainedImageSet set(d,(s0,s1+s2*s2/2));
         set.new_parameter_constraint(s0+ExactFloat(0.75)*s1+s2<=0.0);
 
-        RealConstrainedImageSet subset1,subset2;
+        EffectiveConstrainedImageSet subset1,subset2;
         make_lpair(subset1,subset2)=set.split(0);
         ARIADNE_TEST_PRINT(set);
         ARIADNE_TEST_PRINT(subset1);
         ARIADNE_TEST_PRINT(subset2);
         ARIADNE_TEST_PRINT(set.split(1));
 
-        RealConstrainedImageSet subset11,subset12,subset21,subset22;
+        EffectiveConstrainedImageSet subset11,subset12,subset21,subset22;
         make_lpair(subset11,subset12)=subset1.split(0);
         make_lpair(subset21,subset22)=subset2.split(0);
         ARIADNE_TEST_PRINT(subset11);
@@ -242,15 +242,15 @@ class TestConstrainedImageSet
         // Test conversionn is exact for the affine set -2<x<1; 0<y<2 3x+y<1
         List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(2);
         BoxSet d( (IntervalSet(-2,1),IntervalSet(0,2)) );
-        RealConstrainedImageSet set(d,(s[0],s[1]));
+        EffectiveConstrainedImageSet set(d,(s[0],s[1]));
         set.new_parameter_constraint(3*s[0]+s[1]<=1);
-        IntervalAffineConstrainedImageSet affine_set=set.affine_approximation();
+        ValidatedAffineConstrainedImageSet affine_set=set.affine_approximation();
         ARIADNE_TEST_PRINT(set);
         ARIADNE_TEST_PRINT(affine_set);
         //ARIADNE_TEST_PRINT(set.affine_approximation());
     }
 
-    void test_draw(const std::string& str, const RealConstrainedImageSet& set, uint acc) {
+    void test_draw(const std::string& str, const EffectiveConstrainedImageSet& set, uint acc) {
         figure.clear();
         figure.set_bounding_box(Box({{-2.75,+2.75},{-1.5,+2.0}}));
         GridTreeSet paving(set.dimension());
@@ -261,7 +261,7 @@ class TestConstrainedImageSet
         figure.draw(paving);
         figure.set_fill_colour(green);
         figure.set_fill_opacity(0.5);
-        typedef RealConstrainedImageSet CIS;
+        typedef EffectiveConstrainedImageSet CIS;
         CIS s1,s2,s3,s4,s5,s6,s7,s8, s9,s10,s11,s12,s13,s14,s15,s16;;
         make_lpair(s1,s2)=set.split();
         make_lpair(s3,s4)=s2.split(); make_lpair(s1,s2)=s1.split();
@@ -276,7 +276,7 @@ class TestConstrainedImageSet
         figure.clear();
     }
 
-    void test_draw2(const std::string& str, const RealConstrainedImageSet& set, uint acc) {
+    void test_draw2(const std::string& str, const EffectiveConstrainedImageSet& set, uint acc) {
         figure.clear();
         figure.set_bounding_box(Box{{-1.75,+1.75},{-1.5,+2.0}});
         GridTreeSet paving(set.dimension());
@@ -287,7 +287,7 @@ class TestConstrainedImageSet
         figure.draw(paving);
         figure.set_fill_colour(green);
         figure.set_fill_opacity(0.5);
-        typedef RealConstrainedImageSet CIS;
+        typedef EffectiveConstrainedImageSet CIS;
         CIS s1,s2,s3,s4,s5,s6,s7,s8, s9,s10,s11,s12,s13,s14,s15,s16;;
         make_lpair(s1,s2)=set.split();
         make_lpair(s3,s4)=s2.split(); make_lpair(s1,s2)=s1.split();
@@ -309,8 +309,8 @@ class TestConstrainedImageSet
         EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
         uint acc = 2u;
 
-        test_draw("ellipse",RealConstrainedImageSet(BoxSet(2,IntervalSet(-1,1)),(2*s+t,s+t),(s*s+t*t<=0.75)),acc+1u);
-        //test_draw("concave",RealConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,1.0*s*s+t),(2*s+0.25*s*s+t-2.0<=0)),acc);
+        test_draw("ellipse",EffectiveConstrainedImageSet(BoxSet(2,IntervalSet(-1,1)),(2*s+t,s+t),(s*s+t*t<=0.75)),acc+1u);
+        //test_draw("concave",EffectiveConstrainedImageSet(Box(2,-1.01,1.01,-1.01,1.01),(s,1.0*s*s+t),(2*s+0.25*s*s+t-2.0<=0)),acc);
     }
 };
 

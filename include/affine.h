@@ -42,11 +42,16 @@ namespace Ariadne {
 
 class Float;
 class Interval;
+class Real;
+
+typedef Float ApproximateNumberType;
+typedef Interval ValidatedNumberType;
+typedef Real EffectiveNumberType;
 
 template<class X> class Affine;
-typedef Affine<Float> FloatAffine;
-typedef Affine<Interval> IntervalAffine;
-typedef Affine<Real> RealAffine;
+typedef Affine<ApproximateNumberType> ApproximateAffine;
+typedef Affine<ValidatedNumberType> ValidatedAffine;
+typedef Affine<EffectiveNumberType> EffectiveAffine;
 
 template<class X> bool operator==(const Affine<X>&, const Affine<X>&);
 template<class X> Affine<X> operator-(const Affine<X>&);

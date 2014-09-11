@@ -56,7 +56,7 @@ int main(int argc, char **argv)
     Real p = ExactFloat(0.5);
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(3);
     EffectiveVectorFunction afn1((0.05*x[0]+0.05*x[2]+0.15,0.05*x[1]+0.05*x[2]+0.6));
-    IntervalConstrainedImageSet s1(Box::unit_box(3),afn1);
+    ValidatedConstrainedImageSet s1(Box::unit_box(3),afn1);
     Box bbx1=s1.bounding_box()+Vector<Interval>(2, Interval(-0.25,+0.25));
 
     EffectiveVectorFunction rf(1u, sqr(x[0])+sqr(x[1])-sqr(p));

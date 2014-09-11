@@ -51,7 +51,7 @@
 namespace Ariadne {
 
 template<class X> class FunctionModelFactoryInterface;
-typedef FunctionModelFactoryInterface<Interval> IntervalFunctionModelFactoryInterface;
+typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
 
 typedef Map< DiscreteLocation, Vector<Float> > HybridFloatVector;
 
@@ -101,7 +101,7 @@ class HybridEvolverBase
     friend class HybridEvolverBaseConfiguration;
   public:
     typedef HybridEvolverBaseConfiguration ConfigurationType;
-    typedef IntervalFunctionModelFactoryInterface FunctionFactoryType;
+    typedef ValidatedFunctionModelFactoryInterface FunctionFactoryType;
     typedef HybridAutomatonInterface SystemType;
     typedef SystemType::TimeType TimeType;
     typedef TimeType::ContinuousTimeType ContinuousTimeType;
@@ -743,7 +743,7 @@ class GeneralHybridEvolver
 
     GeneralHybridEvolver(const SystemType& system);
     GeneralHybridEvolver(const SystemType& system,
-                         const IntervalFunctionModelFactoryInterface& factory);
+                         const ValidatedFunctionModelFactoryInterface& factory);
     virtual GeneralHybridEvolver* clone() const { return new GeneralHybridEvolver(*this); }
     virtual OutputStream& write(OutputStream& os) const { return os << "GeneralHybridEvolver( " << this->configuration() << ")"; }
 
@@ -801,13 +801,13 @@ class GeneralHybridEvolverFactory
 {
   private:
 
-    std::shared_ptr<IntervalFunctionModelFactoryInterface> _function_factory;
+    std::shared_ptr<ValidatedFunctionModelFactoryInterface> _function_factory;
 
   public:
 
     GeneralHybridEvolverFactory();
 
-    GeneralHybridEvolverFactory(const IntervalFunctionModelFactoryInterface& factory);
+    GeneralHybridEvolverFactory(const ValidatedFunctionModelFactoryInterface& factory);
 
     virtual GeneralHybridEvolverFactory* clone() const { return new GeneralHybridEvolverFactory(*this); }
 

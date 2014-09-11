@@ -1462,7 +1462,7 @@ GeneralHybridEvolver::GeneralHybridEvolver(const SystemType& system)
 
 GeneralHybridEvolver::GeneralHybridEvolver(
         const SystemType& system,
-        const IntervalFunctionModelFactoryInterface& factory)
+        const ValidatedFunctionModelFactoryInterface& factory)
     : HybridEvolverBase(system,factory)
 {
     this->_configuration_ptr.reset(new GeneralHybridEvolverConfiguration(*this));
@@ -1821,7 +1821,7 @@ GeneralHybridEvolverFactory::GeneralHybridEvolverFactory()
 {
 }
 
-GeneralHybridEvolverFactory::GeneralHybridEvolverFactory(const IntervalFunctionModelFactoryInterface& factory)
+GeneralHybridEvolverFactory::GeneralHybridEvolverFactory(const ValidatedFunctionModelFactoryInterface& factory)
     : _function_factory(factory.clone())
 {
 }

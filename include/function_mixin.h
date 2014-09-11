@@ -30,24 +30,23 @@
 
 namespace Ariadne {
 
-typedef Differential<Float> FloatDifferential;
-typedef Differential<Interval> IntervalDifferential;
-typedef TaylorModel<Float> FloatTaylorModel;
-typedef TaylorModel<Interval> IntervalTaylorModel;
-typedef Formula<Float> FloatFormula;
-typedef Formula<Interval> IntervalFormula;
-typedef Formula<Real> RealFormula;
-typedef Algebra<Float> FloatAlgebra;
-typedef Algebra<Interval> IntervalAlgebra;
-typedef Algebra<Real> RealAlgebra;
+typedef ApproximateNumberType ApproximateTag;
+typedef ValidatedNumberType ValidatedTag;
+typedef EffectiveNumberType EffectiveTag;
 
-typedef ScalarFunctionInterface<Float> FloatScalarFunctionInterface;
-typedef ScalarFunctionInterface<Interval> IntervalScalarFunctionInterface;
-typedef ScalarFunctionInterface<Real> RealScalarFunctionInterface;
-
-typedef VectorFunctionInterface<Float> FloatVectorFunctionInterface;
-typedef VectorFunctionInterface<Interval> IntervalVectorFunctionInterface;
-typedef VectorFunctionInterface<Real> RealVectorFunctionInterface;
+typedef ApproximateNumberType ApproximateNumber;
+typedef ValidatedNumberType ValidatedNumber;
+typedef EffectiveNumberType EffectiveNumber;
+typedef Differential<ApproximateNumber> ApproximateDifferential;
+typedef Differential<ValidatedNumber> ValidatedDifferential;
+typedef TaylorModel<ApproximateNumber> ApproximateTaylorModel;
+typedef TaylorModel<ValidatedNumber> ValidatedTaylorModel;
+typedef Formula<ApproximateNumber> ApproximateFormula;
+typedef Formula<ValidatedNumber> ValidatedFormula;
+typedef Formula<EffectiveNumber> EffectiveFormula;
+typedef Algebra<ApproximateNumber> ApproximateAlgebra;
+typedef Algebra<ValidatedNumber> ValidatedAlgebra;
+typedef Algebra<EffectiveNumber> EffectiveAlgebra;
 
 template<class T, class X> class ScalarFunctionMixin { };
 template<class T, class X> class VectorFunctionMixin { };
@@ -55,8 +54,8 @@ template<class T, class X> class VectorFunctionMixin { };
 template<class T> T* heap_copy(const T& t) { return new T(t); }
 
 template<class F>
-class ScalarFunctionMixin<F,Float>
-    : public virtual ScalarFunctionInterface<Float>
+class ScalarFunctionMixin<F,ApproximateTag>
+    : public virtual ScalarFunctionInterface<ApproximateTag>
 {
   private:
     template<class X> X _base_evaluate(const Vector<X>& x) const {
@@ -64,20 +63,20 @@ class ScalarFunctionMixin<F,Float>
   protected:
     ScalarFunctionMixin() { }
   public:
-    virtual Float evaluate(const Vector<Float>& x) const;
-    virtual FloatDifferential evaluate(const Vector<FloatDifferential>& x) const;
-    virtual FloatFormula evaluate(const Vector<FloatFormula>& x) const;
-    virtual FloatTaylorModel evaluate(const Vector<FloatTaylorModel>& x) const;
-    virtual FloatAlgebra evaluate(const Vector<FloatAlgebra>& x) const;
+    virtual ApproximateNumber evaluate(const Vector<ApproximateNumber>& x) const;
+    virtual ApproximateDifferential evaluate(const Vector<ApproximateDifferential>& x) const;
+    virtual ApproximateFormula evaluate(const Vector<ApproximateFormula>& x) const;
+    virtual ApproximateTaylorModel evaluate(const Vector<ApproximateTaylorModel>& x) const;
+    virtual ApproximateAlgebra evaluate(const Vector<ApproximateAlgebra>& x) const;
 
     virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
-    virtual ScalarFunctionInterface<Float>* _clone() const;
+    virtual ScalarFunctionInterface<ApproximateTag>* _clone() const;
 };
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
 template<class F>
-class ScalarFunctionMixin<F,Interval>
-    : public virtual ScalarFunctionInterface<Interval>
+class ScalarFunctionMixin<F,ValidatedTag>
+    : public virtual ScalarFunctionInterface<ValidatedTag>
 {
   private:
     template<class X> X _base_evaluate(const Vector<X>& x) const {
@@ -85,25 +84,25 @@ class ScalarFunctionMixin<F,Interval>
   protected:
     ScalarFunctionMixin() { }
   public:
-    virtual Float evaluate(const Vector<Float>& x) const;
-    virtual Interval evaluate(const Vector<Interval>& x) const;
-    virtual FloatDifferential evaluate(const Vector<FloatDifferential>& x) const;
-    virtual IntervalDifferential evaluate(const Vector<IntervalDifferential>& x) const;
-    virtual FloatFormula evaluate(const Vector<FloatFormula>& x) const;
-    virtual FloatAlgebra evaluate(const Vector<FloatAlgebra>& x) const;
-    virtual IntervalFormula evaluate(const Vector<IntervalFormula>& x) const;
-    virtual FloatTaylorModel evaluate(const Vector<FloatTaylorModel>& x) const;
-    virtual IntervalTaylorModel evaluate(const Vector<IntervalTaylorModel>& x) const;
-    virtual IntervalAlgebra evaluate(const Vector<IntervalAlgebra>& x) const;
+    virtual ApproximateNumber evaluate(const Vector<ApproximateNumber>& x) const;
+    virtual ValidatedNumber evaluate(const Vector<ValidatedNumber>& x) const;
+    virtual ApproximateDifferential evaluate(const Vector<ApproximateDifferential>& x) const;
+    virtual ValidatedDifferential evaluate(const Vector<ValidatedDifferential>& x) const;
+    virtual ApproximateFormula evaluate(const Vector<ApproximateFormula>& x) const;
+    virtual ApproximateAlgebra evaluate(const Vector<ApproximateAlgebra>& x) const;
+    virtual ValidatedFormula evaluate(const Vector<ValidatedFormula>& x) const;
+    virtual ApproximateTaylorModel evaluate(const Vector<ApproximateTaylorModel>& x) const;
+    virtual ValidatedTaylorModel evaluate(const Vector<ValidatedTaylorModel>& x) const;
+    virtual ValidatedAlgebra evaluate(const Vector<ValidatedAlgebra>& x) const;
 
     virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
-    virtual ScalarFunctionInterface<Interval>* _clone() const;
+    virtual ScalarFunctionInterface<ValidatedTag>* _clone() const;
 };
 
 // A wrapper for classes with non-static _compute and _compute_approx methods
 template<class F>
-class ScalarFunctionMixin<F,Real>
-    : public virtual ScalarFunctionInterface<Real>
+class ScalarFunctionMixin<F,EffectiveTag>
+    : public virtual ScalarFunctionInterface<EffectiveTag>
 {
   private:
     template<class X> X _base_evaluate(const Vector<X>& x) const {
@@ -111,31 +110,31 @@ class ScalarFunctionMixin<F,Real>
   protected:
     ScalarFunctionMixin() { }
   public:
-    virtual Float evaluate(const Vector<Float>& x) const;
-    virtual Interval evaluate(const Vector<Interval>& x) const;
-    virtual Real evaluate(const Vector<Real>& x) const;
-    virtual FloatDifferential evaluate(const Vector<FloatDifferential>& x) const;
-    virtual IntervalDifferential evaluate(const Vector<IntervalDifferential>& x) const;
-    virtual FloatFormula evaluate(const Vector<FloatFormula>& x) const;
-    virtual IntervalFormula evaluate(const Vector<IntervalFormula>& x) const;
-    virtual RealFormula evaluate(const Vector<RealFormula>& x) const;
-    virtual FloatTaylorModel evaluate(const Vector<FloatTaylorModel>& x) const;
-    virtual IntervalTaylorModel evaluate(const Vector<IntervalTaylorModel>& x) const;
-    virtual FloatAlgebra evaluate(const Vector<FloatAlgebra>& x) const;
-    virtual IntervalAlgebra evaluate(const Vector<IntervalAlgebra>& x) const;
-    virtual RealAlgebra evaluate(const Vector<RealAlgebra>& x) const;
+    virtual ApproximateNumber evaluate(const Vector<ApproximateNumber>& x) const;
+    virtual ValidatedNumber evaluate(const Vector<ValidatedNumber>& x) const;
+    virtual EffectiveNumber evaluate(const Vector<EffectiveNumber>& x) const;
+    virtual ApproximateDifferential evaluate(const Vector<ApproximateDifferential>& x) const;
+    virtual ValidatedDifferential evaluate(const Vector<ValidatedDifferential>& x) const;
+    virtual ApproximateFormula evaluate(const Vector<ApproximateFormula>& x) const;
+    virtual ValidatedFormula evaluate(const Vector<ValidatedFormula>& x) const;
+    virtual EffectiveFormula evaluate(const Vector<EffectiveFormula>& x) const;
+    virtual ApproximateTaylorModel evaluate(const Vector<ApproximateTaylorModel>& x) const;
+    virtual ValidatedTaylorModel evaluate(const Vector<ValidatedTaylorModel>& x) const;
+    virtual ApproximateAlgebra evaluate(const Vector<ApproximateAlgebra>& x) const;
+    virtual ValidatedAlgebra evaluate(const Vector<ValidatedAlgebra>& x) const;
+    virtual EffectiveAlgebra evaluate(const Vector<EffectiveAlgebra>& x) const;
 
     virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
-    virtual ScalarFunctionInterface<Real>* _clone() const;
+    virtual ScalarFunctionInterface<EffectiveTag>* _clone() const;
 
-    Vector<Float> gradient(const Vector<Float>& v) const;
-    Vector<Interval> gradient(const Vector<Interval>& v) const;
+    Vector<ApproximateNumber> gradient(const Vector<ApproximateNumber>& v) const;
+    Vector<ValidatedNumber> gradient(const Vector<ValidatedNumber>& v) const;
 };
 
 
 template<class F>
-class VectorFunctionMixin<F,Float>
-    : public virtual VectorFunctionInterface<Float>
+class VectorFunctionMixin<F,ApproximateTag>
+    : public virtual VectorFunctionInterface<ApproximateTag>
 {
   private:
     template<class X> Vector<X> _base_evaluate(const Vector<X>& a) const {
@@ -143,19 +142,19 @@ class VectorFunctionMixin<F,Float>
   protected:
     VectorFunctionMixin() { }
   public:
-    virtual Vector<Float> evaluate(const Vector<Float>& x) const;
-    virtual Vector<FloatDifferential> evaluate(const Vector<FloatDifferential>& x) const;
-    virtual Vector<FloatTaylorModel> evaluate(const Vector<FloatTaylorModel>& x) const;
-    virtual Vector<FloatFormula> evaluate(const Vector<FloatFormula>& x) const;
-    virtual Vector<FloatAlgebra> evaluate(const Vector<FloatAlgebra>& x) const;
-    virtual VectorFunctionInterface<Float>* _clone() const;
+    virtual Vector<ApproximateNumber> evaluate(const Vector<ApproximateNumber>& x) const;
+    virtual Vector<ApproximateDifferential> evaluate(const Vector<ApproximateDifferential>& x) const;
+    virtual Vector<ApproximateTaylorModel> evaluate(const Vector<ApproximateTaylorModel>& x) const;
+    virtual Vector<ApproximateFormula> evaluate(const Vector<ApproximateFormula>& x) const;
+    virtual Vector<ApproximateAlgebra> evaluate(const Vector<ApproximateAlgebra>& x) const;
+    virtual VectorFunctionInterface<ApproximateTag>* _clone() const;
 
     virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
 };
 
 template<class F>
-class VectorFunctionMixin<F,Interval>
-    : public virtual VectorFunctionInterface<Interval>
+class VectorFunctionMixin<F,ValidatedTag>
+    : public virtual VectorFunctionInterface<ValidatedTag>
 {
   private:
     template<class X> Vector<X> _base_evaluate(const Vector<X>& a) const {
@@ -163,25 +162,25 @@ class VectorFunctionMixin<F,Interval>
   protected:
     VectorFunctionMixin() { }
   public:
-    virtual Vector<Float> evaluate(const Vector<Float>& x) const;
-    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const;
-    virtual Vector<FloatDifferential> evaluate(const Vector<FloatDifferential>& x) const;
-    virtual Vector<IntervalDifferential> evaluate(const Vector<IntervalDifferential>& x) const;
-    virtual Vector<FloatTaylorModel> evaluate(const Vector<FloatTaylorModel>& x) const;
-    virtual Vector<IntervalTaylorModel> evaluate(const Vector<IntervalTaylorModel>& x) const;
-    virtual Vector<FloatFormula> evaluate(const Vector<FloatFormula>& x) const;
-    virtual Vector<IntervalFormula> evaluate(const Vector<IntervalFormula>& x) const;
-    virtual Vector<FloatAlgebra> evaluate(const Vector<FloatAlgebra>& x) const;
-    virtual Vector<IntervalAlgebra> evaluate(const Vector<IntervalAlgebra>& x) const;
-    virtual VectorFunctionInterface<Interval>* _clone() const;
+    virtual Vector<ApproximateNumber> evaluate(const Vector<ApproximateNumber>& x) const;
+    virtual Vector<ValidatedNumber> evaluate(const Vector<ValidatedNumber>& x) const;
+    virtual Vector<ApproximateDifferential> evaluate(const Vector<ApproximateDifferential>& x) const;
+    virtual Vector<ValidatedDifferential> evaluate(const Vector<ValidatedDifferential>& x) const;
+    virtual Vector<ApproximateTaylorModel> evaluate(const Vector<ApproximateTaylorModel>& x) const;
+    virtual Vector<ValidatedTaylorModel> evaluate(const Vector<ValidatedTaylorModel>& x) const;
+    virtual Vector<ApproximateFormula> evaluate(const Vector<ApproximateFormula>& x) const;
+    virtual Vector<ValidatedFormula> evaluate(const Vector<ValidatedFormula>& x) const;
+    virtual Vector<ApproximateAlgebra> evaluate(const Vector<ApproximateAlgebra>& x) const;
+    virtual Vector<ValidatedAlgebra> evaluate(const Vector<ValidatedAlgebra>& x) const;
+    virtual VectorFunctionInterface<ValidatedTag>* _clone() const;
 
     virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
 };
 
 // A wrapper for classes with non-static _compute methods
 template<class F>
-class VectorFunctionMixin<F,Real>
-    : public virtual VectorFunctionInterface<Real>
+class VectorFunctionMixin<F,EffectiveTag>
+    : public virtual VectorFunctionInterface<EffectiveTag>
 {
   private:
     template<class X> Vector<X> _base_evaluate(const Vector<X>& a) const {
@@ -189,20 +188,20 @@ class VectorFunctionMixin<F,Real>
   protected:
     VectorFunctionMixin() { }
   public:
-    virtual Vector<Float> evaluate(const Vector<Float>& x) const;
-    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const;
-    virtual Vector<Real> evaluate(const Vector<Real>& x) const;
-    virtual Vector<FloatDifferential> evaluate(const Vector<FloatDifferential>& x) const;
-    virtual Vector<IntervalDifferential> evaluate(const Vector<IntervalDifferential>& x) const;
-    virtual Vector<FloatTaylorModel> evaluate(const Vector<FloatTaylorModel>& x) const;
-    virtual Vector<IntervalTaylorModel> evaluate(const Vector<IntervalTaylorModel>& x) const;
-    virtual Vector<FloatFormula> evaluate(const Vector<FloatFormula>& x) const;
-    virtual Vector<IntervalFormula> evaluate(const Vector<IntervalFormula>& x) const;
-    virtual Vector<RealFormula> evaluate(const Vector<RealFormula>& x) const;
-    virtual Vector<FloatAlgebra> evaluate(const Vector<FloatAlgebra>& x) const;
-    virtual Vector<IntervalAlgebra> evaluate(const Vector<IntervalAlgebra>& x) const;
-    virtual Vector<RealAlgebra> evaluate(const Vector<RealAlgebra>& x) const;
-    virtual VectorFunctionInterface<Real>* _clone() const;
+    virtual Vector<ApproximateNumber> evaluate(const Vector<ApproximateNumber>& x) const;
+    virtual Vector<ValidatedNumber> evaluate(const Vector<ValidatedNumber>& x) const;
+    virtual Vector<EffectiveNumber> evaluate(const Vector<EffectiveNumber>& x) const;
+    virtual Vector<ApproximateDifferential> evaluate(const Vector<ApproximateDifferential>& x) const;
+    virtual Vector<ValidatedDifferential> evaluate(const Vector<ValidatedDifferential>& x) const;
+    virtual Vector<ApproximateTaylorModel> evaluate(const Vector<ApproximateTaylorModel>& x) const;
+    virtual Vector<ValidatedTaylorModel> evaluate(const Vector<ValidatedTaylorModel>& x) const;
+    virtual Vector<ApproximateFormula> evaluate(const Vector<ApproximateFormula>& x) const;
+    virtual Vector<ValidatedFormula> evaluate(const Vector<ValidatedFormula>& x) const;
+    virtual Vector<EffectiveFormula> evaluate(const Vector<EffectiveFormula>& x) const;
+    virtual Vector<ApproximateAlgebra> evaluate(const Vector<ApproximateAlgebra>& x) const;
+    virtual Vector<ValidatedAlgebra> evaluate(const Vector<ValidatedAlgebra>& x) const;
+    virtual Vector<EffectiveAlgebra> evaluate(const Vector<EffectiveAlgebra>& x) const;
+    virtual VectorFunctionInterface<EffectiveTag>* _clone() const;
 
     virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
 

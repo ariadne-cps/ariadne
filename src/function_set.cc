@@ -80,8 +80,8 @@ Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const B
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
     MultiIndex a;
     for(uint i=0; i!=m; ++i) {
-        const IntervalTaylorModel& tm=g.model(i);
-        for(IntervalTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+        const ValidatedTaylorModel& tm=g.model(i);
+        for(ValidatedTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
             a=iter->key();
             if(a.degree()>1) {
                 for(uint j=0; j!=n; ++j) {
@@ -225,7 +225,7 @@ Box approximation(const BoxSet& rbx) {
 
 namespace {
 
-uint argument_size(const List<RealConstraint>& c) {
+uint argument_size(const List<EffectiveConstraint>& c) {
     uint as = ( c.size()==0 ? 0 : c[0].function().argument_size() );
     for(uint i=0; i!=c.size(); ++i) {
         ARIADNE_ASSERT_MSG(c[i].function().argument_size()==as,"c="<<c);
@@ -233,7 +233,7 @@ uint argument_size(const List<RealConstraint>& c) {
     return as;
 }
 
-EffectiveVectorFunction constraint_function(uint as, const List<RealConstraint>& c) {
+EffectiveVectorFunction constraint_function(uint as, const List<EffectiveConstraint>& c) {
     EffectiveVectorFunction f(c.size(),as);
     for(uint i=0; i!=c.size(); ++i) {
         //f[i]=c[i].function();
@@ -242,7 +242,7 @@ EffectiveVectorFunction constraint_function(uint as, const List<RealConstraint>&
     return f;
 }
 
-BoxSet constraint_bounds(const List<RealConstraint>& c) {
+BoxSet constraint_bounds(const List<EffectiveConstraint>& c) {
     BoxSet b(c.size());
     for(uint i=0; i!=c.size(); ++i) {
         b[i]=IntervalSet(c[i].lower_bound(),c[i].upper_bound());
@@ -250,11 +250,11 @@ BoxSet constraint_bounds(const List<RealConstraint>& c) {
     return b;
 }
 
-List<RealConstraint> constraints(const EffectiveVectorFunction& f, const BoxSet& b) {
+List<EffectiveConstraint> constraints(const EffectiveVectorFunction& f, const BoxSet& b) {
     ARIADNE_ASSERT(f.result_size()==b.size());
-    List<RealConstraint> c; c.reserve(b.size());
+    List<EffectiveConstraint> c; c.reserve(b.size());
     for(uint i=0; i!=b.size(); ++i) {
-        c.append(RealConstraint(b[i].lower(),f[i],b[i].upper()));
+        c.append(EffectiveConstraint(b[i].lower(),f[i],b[i].upper()));
     }
     return c;
 }
@@ -268,7 +268,7 @@ ConstraintSet::ConstraintSet(const EffectiveVectorFunction& f, const BoxSet& b)
     this->_constraints=::constraints(f,b);
 }
 
-ConstraintSet::ConstraintSet(const List<RealConstraint>& c)
+ConstraintSet::ConstraintSet(const List<EffectiveConstraint>& c)
     : _dimension(argument_size(c)), _constraints(c)
 {
 }
@@ -301,14 +301,14 @@ tribool
 ConstraintSet::separated(const Box& bx) const
 {
     Box codomain=over_approximation(this->codomain());
-    return IntervalConstrainedImageSet(bx,this->constraint_function()).separated(codomain) || indeterminate;
+    return ValidatedConstrainedImageSet(bx,this->constraint_function()).separated(codomain) || indeterminate;
 }
 
 tribool
 ConstraintSet::overlaps(const Box& bx) const
 {
     Box codomain=under_approximation(this->codomain());
-    return IntervalConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain) || indeterminate;
+    return ValidatedConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain) || indeterminate;
 }
 
 tribool
@@ -340,7 +340,7 @@ BoundedConstraintSet::BoundedConstraintSet(const BoxSet& d, const EffectiveVecto
     ARIADNE_ASSERT(d.size()==f.argument_size());
 }
 
-BoundedConstraintSet::BoundedConstraintSet(const BoxSet& d, const List<RealConstraint>& c)
+BoundedConstraintSet::BoundedConstraintSet(const BoxSet& d, const List<EffectiveConstraint>& c)
     : _domain(d), _constraints(c)
 {
 }
@@ -375,7 +375,7 @@ BoundedConstraintSet::separated(const Box& bx) const
     Box domain=over_approximation(this->domain());
     if(Ariadne::disjoint(domain,bx)) { return true; }
     Box codomain=over_approximation(this->codomain());
-    return IntervalConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).separated(codomain) || indeterminate;
+    return ValidatedConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).separated(codomain) || indeterminate;
 }
 
 
@@ -385,7 +385,7 @@ BoundedConstraintSet::overlaps(const Box& bx) const
     if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
     Box domain=under_approximation(this->domain());
     Box codomain=under_approximation(this->codomain());
-    return IntervalConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).overlaps(codomain) || indeterminate;
+    return ValidatedConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).overlaps(codomain) || indeterminate;
 }
 
 
@@ -422,7 +422,7 @@ BoundedConstraintSet::write(std::ostream& os) const
 void
 BoundedConstraintSet::draw(CanvasInterface& c, const Projection2d& p) const
 {
-    return RealConstrainedImageSet(*this).draw(c,p);
+    return ConstrainedImageSet(*this).draw(c,p);
 }
 
 
@@ -439,7 +439,7 @@ intersection(const ConstraintSet& cs,const BoxSet& bx)
 
 
 
-RealConstrainedImageSet::RealConstrainedImageSet(const BoundedConstraintSet& set)
+ConstrainedImageSet::ConstrainedImageSet(const BoundedConstraintSet& set)
     : _domain(over_approximation(set.domain())), _function(EffectiveVectorFunction::identity(set.dimension()))
 {
     for(uint i=0; i!=set.number_of_constraints(); ++i) {
@@ -448,7 +448,7 @@ RealConstrainedImageSet::RealConstrainedImageSet(const BoundedConstraintSet& set
 }
 
 
-const EffectiveVectorFunction RealConstrainedImageSet::constraint_function() const
+const EffectiveVectorFunction ConstrainedImageSet::constraint_function() const
 {
     EffectiveVectorFunction result(this->number_of_constraints(),this->number_of_parameters());
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
@@ -457,7 +457,7 @@ const EffectiveVectorFunction RealConstrainedImageSet::constraint_function() con
     return result;
 }
 
-const BoxSet RealConstrainedImageSet::constraint_bounds() const
+const BoxSet ConstrainedImageSet::constraint_bounds() const
 {
     BoxSet result(this->number_of_constraints());
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
@@ -467,25 +467,25 @@ const BoxSet RealConstrainedImageSet::constraint_bounds() const
 }
 
 
-Box RealConstrainedImageSet::bounding_box() const
+Box ConstrainedImageSet::bounding_box() const
 {
     return this->_function(over_approximation(this->_domain));
 }
 
 
-IntervalAffineConstrainedImageSet
-RealConstrainedImageSet::affine_approximation() const
+ValidatedAffineConstrainedImageSet
+ConstrainedImageSet::affine_approximation() const
 {
     const Vector<Interval> D=approximation(this->domain());
     Vector<Float> m=midpoint(D);
     Matrix<Float> G=this->_function.jacobian(m);
     Vector<Float> h=this->_function.evaluate(m)-G*m;
-    IntervalAffineConstrainedImageSet result(D,G,h);
+    ValidatedAffineConstrainedImageSet result(D,G,h);
 
 
     Vector<Float> a(this->number_of_parameters());
     Float b,l,u;
-    for(List<RealConstraint>::const_iterator iter=this->_constraints.begin();
+    for(List<EffectiveConstraint>::const_iterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
         AffineModel<Interval> a=affine_model(D,iter->function());
@@ -497,7 +497,7 @@ RealConstrainedImageSet::affine_approximation() const
 }
 
 
-tribool RealConstrainedImageSet::satisfies(const RealConstraint& nc) const
+tribool ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
 {
     if( subset(nc.function().evaluate(this->bounding_box()),nc.bounds()) ) {
         return true;
@@ -505,7 +505,7 @@ tribool RealConstrainedImageSet::satisfies(const RealConstraint& nc) const
 
     ConstraintSolver solver;
     const BoxSet& domain=this->_domain;
-    List<RealConstraint> all_constraints=this->_constraints;
+    List<EffectiveConstraint> all_constraints=this->_constraints;
     EffectiveScalarFunction composed_function = compose(nc.function(),this->_function);
     const Real& lower_bound = nc.lower_bound();
     const Real& upper_bound = nc.upper_bound();
@@ -525,7 +525,7 @@ tribool RealConstrainedImageSet::satisfies(const RealConstraint& nc) const
 }
 
 
-tribool RealConstrainedImageSet::separated(const Box& bx) const
+tribool ConstrainedImageSet::separated(const Box& bx) const
 {
     Box subdomain = over_approximation(this->_domain);
     EffectiveVectorFunction function = join(this->function(),this->constraint_function());
@@ -538,9 +538,9 @@ tribool RealConstrainedImageSet::separated(const Box& bx) const
 }
 
 
-tribool RealConstrainedImageSet::overlaps(const Box& bx) const
+tribool ConstrainedImageSet::overlaps(const Box& bx) const
 {
-    return IntervalConstrainedImageSet(under_approximation(this->_domain),this->_function,this->_constraints).overlaps(bx);
+    return ValidatedConstrainedImageSet(under_approximation(this->_domain),this->_function,this->_constraints).overlaps(bx);
     return indeterminate;
     //ARIADNE_NOT_IMPLEMENTED;
     Box subdomain = under_approximation(this->_domain);
@@ -553,7 +553,7 @@ tribool RealConstrainedImageSet::overlaps(const Box& bx) const
 
 
 void
-RealConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
+ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
     ARIADNE_ASSERT(paving.dimension()==this->dimension());
     const Box domain=over_approximation(this->domain());
@@ -584,8 +584,8 @@ RealConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, 
 }
 
 
-Pair<RealConstrainedImageSet,RealConstrainedImageSet>
-RealConstrainedImageSet::split() const
+Pair<ConstrainedImageSet,ConstrainedImageSet>
+ConstrainedImageSet::split() const
 {
     uint k=this->number_of_parameters();
     Float rmax=0.0;
@@ -598,22 +598,22 @@ RealConstrainedImageSet::split() const
     return this->split(k);
 }
 
-Pair<RealConstrainedImageSet,RealConstrainedImageSet>
-RealConstrainedImageSet::split(uint j) const
+Pair<ConstrainedImageSet,ConstrainedImageSet>
+ConstrainedImageSet::split(uint j) const
 {
     IntervalSet interval = this->domain()[j];
     Real midpoint = interval.midpoint();
     Pair<BoxSet,BoxSet> subdomains(this->domain(),this->domain());
     subdomains.first[j]=IntervalSet(interval.lower(),midpoint);
     subdomains.second[j]=IntervalSet(midpoint,interval.upper());
-    return make_pair(RealConstrainedImageSet(subdomains.first,this->_function,this->_constraints),
-                     RealConstrainedImageSet(subdomains.second,this->_function,this->_constraints));
+    return make_pair(ConstrainedImageSet(subdomains.first,this->_function,this->_constraints),
+                     ConstrainedImageSet(subdomains.second,this->_function,this->_constraints));
 }
 
 
-RealConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVectorFunction& function) {
+ConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVectorFunction& function) {
     ARIADNE_ASSERT(set.dimension()==function.argument_size());
-    RealConstrainedImageSet result(set.domain(),function);
+    ConstrainedImageSet result(set.domain(),function);
     for(uint i=0; i!=set.number_of_constraints(); ++i) {
         result.new_parameter_constraint(set.constraint(i));
     }
@@ -777,17 +777,17 @@ Pair<uint,double> nonlinearity_index_and_error(const ValidatedVectorFunction& fu
 
 
 void
-RealConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
+ConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
 {
-    IntervalConstrainedImageSet(approximation(this->_domain),this->_function,this->_constraints).draw(cnvs,proj);
+    ValidatedConstrainedImageSet(approximation(this->_domain),this->_function,this->_constraints).draw(cnvs,proj);
 }
 
 
 
 std::ostream&
-RealConstrainedImageSet::write(std::ostream& os) const
+ConstrainedImageSet::write(std::ostream& os) const
 {
-    return os << "RealConstrainedImageSet( domain=" << this->_domain
+    return os << "ConstrainedImageSet( domain=" << this->_domain
               << ", function=" << this->_function << ", constraints=" << this->_constraints << " )";
 }
 
@@ -814,7 +814,7 @@ template<class SF> class TemplatedConstrainedImageSet;
 
 
 
-ValidatedVectorFunction IntervalConstrainedImageSet::constraint_function() const
+ValidatedVectorFunction ValidatedConstrainedImageSet::constraint_function() const
 {
     ValidatedVectorFunction result(this->number_of_constraints(),this->number_of_parameters());
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
@@ -823,7 +823,7 @@ ValidatedVectorFunction IntervalConstrainedImageSet::constraint_function() const
     return result;
 }
 
-IntervalVector IntervalConstrainedImageSet::constraint_bounds() const
+IntervalVector ValidatedConstrainedImageSet::constraint_bounds() const
 {
     IntervalVector result(this->number_of_constraints());
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
@@ -834,27 +834,27 @@ IntervalVector IntervalConstrainedImageSet::constraint_bounds() const
 
 
 Box
-IntervalConstrainedImageSet::bounding_box() const
+ValidatedConstrainedImageSet::bounding_box() const
 {
     return this->_function(this->_reduced_domain);
 }
 
 
-IntervalAffineConstrainedImageSet
-IntervalConstrainedImageSet::affine_over_approximation() const
+ValidatedAffineConstrainedImageSet
+ValidatedConstrainedImageSet::affine_over_approximation() const
 {
-    typedef List<IntervalConstraint>::const_iterator const_iterator;
+    typedef List<ValidatedConstraint>::const_iterator const_iterator;
 
     Vector<Interval> domain = this->domain();
-    Vector<IntervalAffineModel> space_models=affine_models(domain,this->function());
-    List<IntervalAffineModelConstraint> constraint_models;
+    Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function());
+    List<ValidatedAffineModelConstraint> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
-        const IntervalConstraint& constraint=this->constraint(i);
-        constraint_models.append(IntervalAffineModelConstraint(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
+        const ValidatedConstraint& constraint=this->constraint(i);
+        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
     }
 
-    return IntervalAffineConstrainedImageSet(domain,space_models,constraint_models);
+    return ValidatedAffineConstrainedImageSet(domain,space_models,constraint_models);
 
 /*
     const uint nx=this->dimension();
@@ -883,7 +883,7 @@ IntervalConstrainedImageSet::affine_over_approximation() const
         }
     }
 
-    IntervalAffineConstrainedImageSet result(G,h);
+    ValidatedAffineConstrainedImageSet result(G,h);
 
     Vector<Float> a(np+nerr, 0.0);
     Float b;
@@ -902,35 +902,35 @@ IntervalConstrainedImageSet::affine_over_approximation() const
 */
 }
 
-IntervalAffineConstrainedImageSet IntervalConstrainedImageSet::affine_approximation() const
+ValidatedAffineConstrainedImageSet ValidatedConstrainedImageSet::affine_approximation() const
 {
-    typedef List<IntervalConstraint>::const_iterator const_iterator;
+    typedef List<ValidatedConstraint>::const_iterator const_iterator;
 
     Vector<Interval> domain = this->domain();
-    Vector<IntervalAffineModel> space_models=affine_models(domain,this->function());
-    List<IntervalAffineModelConstraint> constraint_models;
+    Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function());
+    List<ValidatedAffineModelConstraint> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
-        const IntervalConstraint& constraint=this->constraint(i);
-        constraint_models.append(IntervalAffineModelConstraint(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
+        const ValidatedConstraint& constraint=this->constraint(i);
+        constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
     }
 
     for(uint i=0; i!=space_models.size(); ++i) { space_models[i].set_error(0.0); }
     for(uint i=0; i!=constraint_models.size(); ++i) { constraint_models[i].function().set_error(0.0); }
 
-    return IntervalAffineConstrainedImageSet(domain,space_models,constraint_models);
+    return ValidatedAffineConstrainedImageSet(domain,space_models,constraint_models);
 }
 
 
-Pair<IntervalConstrainedImageSet,IntervalConstrainedImageSet> IntervalConstrainedImageSet::split(uint j) const
+Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> ValidatedConstrainedImageSet::split(uint j) const
 {
     Pair<Box,Box> subdomains = Ariadne::split(this->_domain,j);
     subdomains.first=intersection(subdomains.first,this->_reduced_domain);
     subdomains.second=intersection(subdomains.second,this->_reduced_domain);
 
-    Pair<IntervalConstrainedImageSet,IntervalConstrainedImageSet> result(
-        IntervalConstrainedImageSet(subdomains.first,this->_function),
-        IntervalConstrainedImageSet(subdomains.second,this->_function));
+    Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> result(
+        ValidatedConstrainedImageSet(subdomains.first,this->_function),
+        ValidatedConstrainedImageSet(subdomains.second,this->_function));
 
     for(uint i=0; i!=this->_constraints.size(); ++i) {
         result.first.new_parameter_constraint(this->_constraints[i]);
@@ -941,8 +941,8 @@ Pair<IntervalConstrainedImageSet,IntervalConstrainedImageSet> IntervalConstraine
     return result;
 }
 
-Pair<IntervalConstrainedImageSet,IntervalConstrainedImageSet>
-IntervalConstrainedImageSet::split() const
+Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet>
+ValidatedConstrainedImageSet::split() const
 {
     uint k=this->number_of_parameters();
     Float rmax=0.0;
@@ -957,24 +957,24 @@ IntervalConstrainedImageSet::split() const
 
 
 void
-IntervalConstrainedImageSet::reduce()
+ValidatedConstrainedImageSet::reduce()
 {
     ConstraintSolver solver;
     solver.reduce(this->_reduced_domain, this->constraint_function(), this->constraint_bounds());
 }
 
-tribool IntervalConstrainedImageSet::empty() const
+tribool ValidatedConstrainedImageSet::empty() const
 {
-    const_cast<IntervalConstrainedImageSet*>(this)->reduce();
+    const_cast<ValidatedConstrainedImageSet*>(this)->reduce();
     return this->_reduced_domain.empty();
 }
 
-tribool IntervalConstrainedImageSet::inside(const Box& bx) const
+tribool ValidatedConstrainedImageSet::inside(const Box& bx) const
 {
     return Ariadne::inside(this->bounding_box(),bx);
 }
 
-tribool IntervalConstrainedImageSet::separated(const Box& bx) const
+tribool ValidatedConstrainedImageSet::separated(const Box& bx) const
 {
     Box subdomain = this->_reduced_domain;
     ValidatedVectorFunction function(this->dimension()+this->number_of_constraints(),this->number_of_parameters());
@@ -987,7 +987,7 @@ tribool IntervalConstrainedImageSet::separated(const Box& bx) const
     return tribool(subdomain.empty()) || indeterminate;
 }
 
-tribool IntervalConstrainedImageSet::overlaps(const Box& bx) const
+tribool ValidatedConstrainedImageSet::overlaps(const Box& bx) const
 {
     //std::cerr<<"domain="<<this->_domain<<"\n";
     //std::cerr<<"subdomain="<<this->_reduced_domain<<"\n";
@@ -1028,7 +1028,7 @@ tribool IntervalConstrainedImageSet::overlaps(const Box& bx) const
 
 }
 
-void IntervalConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
+void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
     const IntervalVector subdomain=this->_reduced_domain;
     const ValidatedVectorFunction function = this->function();
@@ -1054,7 +1054,7 @@ void IntervalConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface&
 
 
 
-tribool IntervalConstrainedImageSet::satisfies(const IntervalConstraint& nc) const
+tribool ValidatedConstrainedImageSet::satisfies(const ValidatedConstraint& nc) const
 {
     if( subset(nc.function().evaluate(this->bounding_box()),nc.bounds()) ) {
         return true;
@@ -1062,7 +1062,7 @@ tribool IntervalConstrainedImageSet::satisfies(const IntervalConstraint& nc) con
 
     ConstraintSolver solver;
     const Box& domain=this->_domain;
-    List<IntervalConstraint> all_constraints=this->constraints();
+    List<ValidatedConstraint> all_constraints=this->constraints();
     ValidatedScalarFunction composed_function = compose(nc.function(),this->_function);
     const Interval& bounds = nc.bounds();
 
@@ -1082,13 +1082,13 @@ tribool IntervalConstrainedImageSet::satisfies(const IntervalConstraint& nc) con
 
 
 void
-IntervalConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
+ValidatedConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
 {
     AffineDrawer(Depth(8)).draw(cnvs,proj,*this);
 }
 
-IntervalConstrainedImageSet
-join(const IntervalConstrainedImageSet& set1, const IntervalConstrainedImageSet& set2)
+ValidatedConstrainedImageSet
+join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSet& set2)
 {
     ARIADNE_ASSERT(set1.dimension()==set2.dimension());
     ARIADNE_ASSERT(set1.number_of_parameters()==set2.number_of_parameters());
@@ -1140,16 +1140,16 @@ join(const IntervalConstrainedImageSet& set1, const IntervalConstrainedImageSet&
     }
 
     ARIADNE_ASSERT(set1.number_of_constraints()==0);
-    return IntervalConstrainedImageSet(new_domain,new_function);
+    return ValidatedConstrainedImageSet(new_domain,new_function);
 }
 
 
-std::ostream& IntervalConstrainedImageSet::write(std::ostream& os) const
+std::ostream& ValidatedConstrainedImageSet::write(std::ostream& os) const
 {
-    return os << "IntervalConstrainedImageSet( domain=" << this->domain() << ", function="<< this->function() << ", constraints=" << this->constraints() << " )";
+    return os << "ValidatedConstrainedImageSet( domain=" << this->domain() << ", function="<< this->function() << ", constraints=" << this->constraints() << " )";
 }
 
-std::ostream& operator<<(std::ostream& os, const IntervalConstrainedImageSet& set) {
+std::ostream& operator<<(std::ostream& os, const ValidatedConstrainedImageSet& set) {
     return set.write(os);
 }
 

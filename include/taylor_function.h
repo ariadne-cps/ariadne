@@ -57,28 +57,28 @@ class ScalarTaylorFunction;
 class VectorTaylorFunction;
 class TaylorFunctionFactory;
 
-template<template<class> class T> inline T<Float> unscale(const T<Float>& x, const Interval& d) {
-    Float c(add_approx(d.lower()/2,d.upper()/2));
-    Float r(sub_approx(d.upper()/2,d.lower()/2));
+template<template<class> class T> inline T<ApproximateTag> unscale(const T<ApproximateTag>& x, const Interval& d) {
+    ApproximateNumberType c(add_approx(d.lower()/2,d.upper()/2));
+    ApproximateNumberType r(sub_approx(d.upper()/2,d.lower()/2));
     return (x-c)/r;
 }
 
-template<template<class> class T> inline T<Interval> unscale(const T<Interval>& x, const Interval& d) {
-    Interval c(add_ivl(d.lower()/2,d.upper()/2));
-    Interval r(sub_ivl(d.upper()/2,d.lower()/2));
+template<template<class> class T> inline T<ValidatedTag> unscale(const T<ValidatedTag>& x, const Interval& d) {
+    ValidatedNumberType c(add_ivl(d.lower()/2,d.upper()/2));
+    ValidatedNumberType r(sub_ivl(d.upper()/2,d.lower()/2));
     return (x-c)/r;
 }
 
 
-inline Float unscale(const Float& x, const Interval& d) {
-    Float c(add_approx(d.lower()/2,d.upper()/2));
-    Float r(sub_approx(d.upper()/2,d.lower()/2));
+inline ApproximateNumberType unscale(const ApproximateNumberType& x, const Interval& d) {
+    ApproximateNumberType c(add_approx(d.lower()/2,d.upper()/2));
+    ApproximateNumberType r(sub_approx(d.upper()/2,d.lower()/2));
     return (x-c)/r;
 }
 
-inline Interval unscale(const Interval& x, const Interval& d) {
-    Interval c(add_ivl(d.lower()/2,d.upper()/2));
-    Interval r(sub_ivl(d.upper()/2,d.lower()/2));
+inline ValidatedTag unscale(const ValidatedTag& x, const Interval& d) {
+    ValidatedTag c(add_ivl(d.lower()/2,d.upper()/2));
+    ValidatedTag r(sub_ivl(d.upper()/2,d.lower()/2));
     return (x-c)/r;
 }
 
@@ -94,10 +94,10 @@ template<class X> Vector<X> unscale(const Vector<X>& x, const Box& d) {
 ScalarTaylorFunction midpoint(const ScalarTaylorFunction& x);
 
 // Set the value of the \a kth variable to c
-ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, uint k, const Float& c);
-ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, uint k, const Interval& c);
+ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, uint k, const RawNumberType& c);
+ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, uint k, const ValidatedNumberType& c);
 // Evaluate a scalar Taylor function on a vector.
-Interval evaluate(const ScalarTaylorFunction& x, const Vector<Interval>& sy);
+ValidatedNumberType evaluate(const ScalarTaylorFunction& x, const Vector<ValidatedNumberType>& sy);
 
 // Restrict the \a kth variable to lie in the interval \a d.
 ScalarTaylorFunction restrict(const ScalarTaylorFunction& x, uint k, const Interval& d);
@@ -130,7 +130,7 @@ ScalarTaylorFunction embed(const Box& d1, const ScalarTaylorFunction& tv2);
 ScalarTaylorFunction embed(const Box& d1, const ScalarTaylorFunction& tv2, const Box& d3);
 
 // Antidifferentiation operator
-ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, uint k, Float c);
+ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, uint k, ExactNumberType c);
 ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, uint k);
 ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, uint k);
 
@@ -160,13 +160,13 @@ class VectorTaylorFunctionElementReference;
  * \sa Expansion, TaylorModel, VectorTaylorFunction, TaylorConstrainedImageSet.
  */
 class ScalarTaylorFunction
-    : public ScalarFunctionModelMixin<ScalarTaylorFunction, Interval>
+    : public ScalarFunctionModelMixin<ScalarTaylorFunction, ValidatedTag>
 {
   public:
     typedef Box DomainType;
     typedef Interval RangeType;
-    typedef Interval NumericType;
-    typedef TaylorModel<Interval> ModelType;
+    typedef ValidatedNumberType NumericType;
+    typedef TaylorModel<ValidatedTag> ModelType;
     typedef Expansion<Float> ExpansionType;
     typedef Float ErrorType;
   private:
@@ -187,11 +187,11 @@ class ScalarTaylorFunction
     //explicit ScalarTaylorFunction(const DomainType& d);
     explicit ScalarTaylorFunction(const DomainType& d, Sweeper swp);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d, based on the scaled model \a m.
-    explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel<Interval>& m);
+    explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel<ValidatedTag>& m);
     explicit ScalarTaylorFunction(const DomainType& d, const Expansion<Float>& p, const Float& e, const Sweeper& swp);
 
-    ScalarTaylorFunction(const ScalarFunctionModel<Interval>& f);
-    ScalarTaylorFunction& operator=(const ScalarFunctionModel<Interval>& f);
+    ScalarTaylorFunction(const ScalarFunctionModel<ValidatedTag>& f);
+    ScalarTaylorFunction& operator=(const ScalarFunctionModel<ValidatedTag>& f);
 
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the function \a f.
     explicit ScalarTaylorFunction(const DomainType& d, const ValidatedScalarFunction& f, Sweeper swp);
@@ -202,11 +202,11 @@ class ScalarTaylorFunction
     //! \brief Set equal to a built-in constant, keeping the same number of arguments.
     ScalarTaylorFunction& operator=(double c) { this->_model=c; return *this; }
     //! \brief Set equal to a constant, keeping the same number of arguments.
-    ScalarTaylorFunction& operator=(const Float& c) { this->_model=c; return *this; }
+    ScalarTaylorFunction& operator=(const ExactNumberType& c) { this->_model=c; return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    ScalarTaylorFunction& operator=(const Interval& c) { this->_model=c; return *this; }
+    ScalarTaylorFunction& operator=(const ValidatedNumberType& c) { this->_model=c; return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    ScalarTaylorFunction& operator=(const Real& c) { this->_model=Interval(c); return *this; }
+    ScalarTaylorFunction& operator=(const EffectiveNumberType& c) { this->_model=ValidatedNumberType(c); return *this; }
     //@}
 
     //@{
@@ -216,9 +216,9 @@ class ScalarTaylorFunction
     //! \brief Construct a zero function over domain \a d.
     static ScalarTaylorFunction zero(const DomainType& d, Sweeper swp);
     //! \brief Construct a constant quantity in \a as independent variables.
-    static ScalarTaylorFunction constant(const DomainType& d, const Interval& c, Sweeper swp);
+    static ScalarTaylorFunction constant(const DomainType& d, const ValidatedNumberType& c, Sweeper swp);
     template<class X> static ScalarTaylorFunction constant(const DomainType& d, const X& c, Sweeper swp) {
-        return constant(d,numeric_cast<Interval>(c),swp); }
+        return constant(d,numeric_cast<ValidatedNumberType>(c),swp); }
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
     static ScalarTaylorFunction coordinate(const DomainType& d, unsigned int j, Sweeper swp);
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d (Deprecated).
@@ -231,7 +231,7 @@ class ScalarTaylorFunction
     //! \brief Return the vector of constants with values \a c over domain \a d.
     static Vector<ScalarTaylorFunction> constants(const DomainType& d, const Vector<Float>& c, Sweeper swp);
     //! \brief Return the vector of constants with interval values \a c over domain \a d.
-    static Vector<ScalarTaylorFunction> constants(const DomainType& d, const Vector<Interval>& c, Sweeper swp);
+    static Vector<ScalarTaylorFunction> constants(const DomainType& d, const Vector<ValidatedNumberType>& c, Sweeper swp);
     //! \brief Return the vector of variables with values \a x over domain \a d.
     static Vector<ScalarTaylorFunction> variables(const DomainType& d, Sweeper swp);
     //! \brief Return the vector of variables in the range \a imin to \a imax with values \a x over domain \a d.
@@ -267,7 +267,7 @@ class ScalarTaylorFunction
     //! \brief The gradient at the centre of the domain.
     const Float gradient_value(Nat i) const { return this->_model.gradient(i)/this->_domain[i].radius(); }
     //! \brief A polynomial representation.
-    Polynomial<Interval> polynomial() const;
+    Polynomial<ValidatedNumberType> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.
     ValidatedScalarFunction function() const;
 
@@ -311,12 +311,12 @@ class ScalarTaylorFunction
     //! \brief An over-approximation to the range of the quantity.
     Interval range() const { return this->_model.range(); }
     //! \brief Evaluate the quantity at the point \a x.
-    Float evaluate(const Vector<Float>& x) const;
+    ApproximateNumberType evaluate(const Vector<ApproximateNumberType>& x) const;
     //! \brief Evaluate the quantity over the interval of points \a x.
-    Interval evaluate(const Vector<Interval>& x) const;
+    ValidatedNumberType evaluate(const Vector<ValidatedNumberType>& x) const;
     //! \brief Evaluate the quantity over the interval of points \a x.
-    Interval operator()(const Vector<Interval>& x) const;
-    using ScalarFunctionMixin< ScalarTaylorFunction, Interval>::evaluate;
+    ValidatedNumberType operator()(const Vector<ValidatedNumberType>& x) const;
+    using ScalarFunctionMixin< ScalarTaylorFunction, ValidatedTag>::evaluate;
 
     //@}
 
@@ -332,7 +332,7 @@ class ScalarTaylorFunction
 
     //@{
     /*! \name Accuracy parameters. */
-    //! \copydoc TaylorModel<Interval>::set_sweeper()
+    //! \copydoc TaylorModel<ValidatedTag>::set_sweeper()
     void set_sweeper(const Sweeper& swp) { this->_model.set_sweeper(swp); }
     //@}
 
@@ -363,13 +363,13 @@ class ScalarTaylorFunction
     //! \brief Inplace addition of a product of two variables.
     friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const Product<ScalarTaylorFunction,ScalarTaylorFunction>& y);
     //! \brief Inplace addition of an interval constant.
-    friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const Interval& c);
+    friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const ValidatedNumberType& c);
     //! \brief Inplace subtraction of an interval constant.
-    friend ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const Interval& c);
+    friend ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const ValidatedNumberType& c);
     //! \brief Inplace multiplication by an approximate scalar.
-    friend ScalarTaylorFunction& operator*=(ScalarTaylorFunction& x, const Interval& c);
+    friend ScalarTaylorFunction& operator*=(ScalarTaylorFunction& x, const ValidatedNumberType& c);
     //! \brief Inplace division by an approximate scalar.
-    friend ScalarTaylorFunction& operator/=(ScalarTaylorFunction& x, const Interval& c);
+    friend ScalarTaylorFunction& operator/=(ScalarTaylorFunction& x, const ValidatedNumberType& c);
 
     //! \brief Unary plus.
     friend ScalarTaylorFunction operator+(const ScalarTaylorFunction& x);
@@ -439,8 +439,8 @@ class ScalarTaylorFunction
     Void clobber() { this->_model.clobber(); }
   private:
     friend class TaylorFunctionFactory;
-    friend class ScalarFunctionMixin<ScalarTaylorFunction, Interval>;
-    friend class ScalarFunctionModelMixin<ScalarTaylorFunction, Interval>;
+    friend class ScalarFunctionMixin<ScalarTaylorFunction, ValidatedTag>;
+    friend class ScalarFunctionModelMixin<ScalarTaylorFunction, ValidatedTag>;
     template<class T> void _compute(T& r, const Vector<T>& a) const {
         typedef typename T::NumericType R;
         r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
@@ -449,21 +449,21 @@ class ScalarTaylorFunction
     ScalarTaylorFunction* _derivative(uint j) const;
     ScalarTaylorFunction* _clone() const;
     ScalarTaylorFunction* _create() const;
-    VectorFunctionModelInterface<Interval>* _create_vector(uint i) const;
+    VectorFunctionModelInterface<ValidatedTag>* _create_vector(uint i) const;
 };
 
-template<> struct Arithmetic<Float,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
-template<> struct Arithmetic<Interval,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
-template<> struct Arithmetic<Real,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
-template<> struct Arithmetic<ScalarTaylorFunction,Float> { typedef ScalarTaylorFunction ResultType; };
-template<> struct Arithmetic<ScalarTaylorFunction,Interval> { typedef ScalarTaylorFunction ResultType; };
-template<> struct Arithmetic<ScalarTaylorFunction,Real> { typedef ScalarTaylorFunction ResultType; };
+template<> struct Arithmetic<RawNumberType,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
+template<> struct Arithmetic<ValidatedNumberType,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
+template<> struct Arithmetic<EffectiveNumberType,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
+template<> struct Arithmetic<ScalarTaylorFunction,RawNumberType> { typedef ScalarTaylorFunction ResultType; };
+template<> struct Arithmetic<ScalarTaylorFunction,ValidatedNumberType> { typedef ScalarTaylorFunction ResultType; };
+template<> struct Arithmetic<ScalarTaylorFunction,EffectiveNumberType> { typedef ScalarTaylorFunction ResultType; };
 template<> struct Arithmetic<ScalarTaylorFunction,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
 
-inline tribool operator>(const ScalarTaylorFunction& x, const Float& c) {
-    Interval r=x.range(); if(r.lower()>c) { return true; } else if(r.upper()<=c) { return false; } else { return indeterminate; } }
-inline tribool operator<(const ScalarTaylorFunction& x, const Float& c) {
-    Interval r=x.range(); if(r.lower()<c) { return true; } else if(r.upper()>=c) { return false; } else { return indeterminate; } }
+inline tribool operator>(const ScalarTaylorFunction& x, const RawNumberType& c) {
+    ValidatedNumberType r=x.range(); if(r.lower()>c) { return true; } else if(r.upper()<=c) { return false; } else { return indeterminate; } }
+inline tribool operator<(const ScalarTaylorFunction& x, const RawNumberType& c) {
+    ValidatedNumberType r=x.range(); if(r.lower()<c) { return true; } else if(r.upper()>=c) { return false; } else { return indeterminate; } }
 
 inline tribool operator>(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)>0; }
 inline tribool operator<(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)<0; }
@@ -485,10 +485,10 @@ inline ScalarTaylorFunction operator*(const ScalarTaylorFunction& tf1, const Eff
 inline ScalarTaylorFunction operator/(const ScalarTaylorFunction& tf1, const EffectiveScalarFunction& f2) {
     return tf1/ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
 
-ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f, const Interval& c);
-ScalarTaylorFunction& operator-=(ScalarTaylorFunction& f, const Interval& c);
-ScalarTaylorFunction& operator*=(ScalarTaylorFunction& f, const Interval& c);
-ScalarTaylorFunction& operator/=(ScalarTaylorFunction& f, const Interval& c);
+ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f, const ValidatedNumberType& c);
+ScalarTaylorFunction& operator-=(ScalarTaylorFunction& f, const ValidatedNumberType& c);
+ScalarTaylorFunction& operator*=(ScalarTaylorFunction& f, const ValidatedNumberType& c);
+ScalarTaylorFunction& operator/=(ScalarTaylorFunction& f, const ValidatedNumberType& c);
 ScalarTaylorFunction operator+(const ScalarTaylorFunction& x);
 ScalarTaylorFunction operator-(const ScalarTaylorFunction& x);
 ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
@@ -497,30 +497,30 @@ ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const ScalarTaylor
 ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
 
 template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type&
-operator+=(ScalarTaylorFunction& f, const X& c) { f.model()+=Interval(c); return f; }
+operator+=(ScalarTaylorFunction& f, const X& c) { f.model()+=ValidatedNumberType(c); return f; }
 template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type&
-operator-=(ScalarTaylorFunction& f, const X& c) { f.model()-=Interval(c); return f; }
+operator-=(ScalarTaylorFunction& f, const X& c) { f.model()-=ValidatedNumberType(c); return f; }
 template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type&
-operator*=(ScalarTaylorFunction& f, const X& c) { f.model()*=Interval(c); return f; }
+operator*=(ScalarTaylorFunction& f, const X& c) { f.model()*=ValidatedNumberType(c); return f; }
 template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type&
-operator/=(ScalarTaylorFunction& f, const X& c) { f.model()/=Interval(c); return f; }
+operator/=(ScalarTaylorFunction& f, const X& c) { f.model()/=ValidatedNumberType(c); return f; }
 
 template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
-operator+(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r+=Interval(c); return r; }
+operator+(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r+=ValidatedNumberType(c); return r; }
 template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
-operator-(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r+=neg(Interval(c)); return r; }
+operator-(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r+=neg(ValidatedNumberType(c)); return r; }
 template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
-operator*(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r*=Interval(c); return r; }
+operator*(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r*=ValidatedNumberType(c); return r; }
 template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
-operator/(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r*=(rec(Interval(c))); return r; }
+operator/(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r*=(rec(ValidatedNumberType(c))); return r; }
 template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
-operator+(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(f); r+=Interval(c); return r; }
+operator+(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(f); r+=ValidatedNumberType(c); return r; }
 template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
-operator-(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(neg(f)); r+=Interval(c); return r; }
+operator-(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(neg(f)); r+=ValidatedNumberType(c); return r; }
 template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
-operator*(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(f); r*=Interval(c); return r; }
+operator*(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(f); r*=ValidatedNumberType(c); return r; }
 template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
-operator/(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(rec(f)); r*=Interval(c); return r; }
+operator/(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(rec(f)); r*=ValidatedNumberType(c); return r; }
 
 inline ScalarTaylorFunction abs(const ScalarTaylorFunction& x) {
     return ScalarTaylorFunction(x._domain,abs(x._model)); }
@@ -554,11 +554,11 @@ inline ScalarTaylorFunction atan(const ScalarTaylorFunction& x) {
 
 
 inline ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, uint k) {
-    Interval sf=rad_ivl(x.domain()[k]);
+    ValidatedNumberType sf=rad_ivl(x.domain()[k]);
     return ScalarTaylorFunction(x.domain(),antiderivative(x.model(),k)*sf); }
 
 inline ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, uint k) {
-    Interval sf=1/rad_ivl(x.domain()[k]);
+    ValidatedNumberType sf=1/rad_ivl(x.domain()[k]);
     return ScalarTaylorFunction(x.domain(),derivative(x.model(),k)*sf); }
 
 inline ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const Interval& dom2) {
@@ -572,9 +572,9 @@ inline ScalarTaylorFunction embed(const Box& dom1, const ScalarTaylorFunction& t
 
 
 
-Vector<Interval> evaluate(const VectorTaylorFunction& f, const Vector<Interval>& x);
-VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, const Float& c);
-VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, const Interval& c);
+Vector<ValidatedNumberType> evaluate(const VectorTaylorFunction& f, const Vector<ValidatedNumberType>& x);
+VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, const ExactNumberType& c);
+VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, const ValidatedNumberType& c);
 VectorTaylorFunction embed(const VectorTaylorFunction& tv1, const Box& d2);
 VectorTaylorFunction embed(const VectorTaylorFunction& tv1, const Interval& d2);
 VectorTaylorFunction embed(const Box& d1, const VectorTaylorFunction& tv2);
@@ -590,15 +590,15 @@ VectorTaylorFunction compose(const VectorTaylorFunction&, const VectorTaylorFunc
 VectorTaylorFunction compose(const ValidatedVectorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction compose(const EffectiveVectorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint);
-VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint, Float);
+VectorTaylorFunction antiderivative(const VectorTaylorFunction&, uint, ExactNumberType);
 VectorTaylorFunction derivative(const VectorTaylorFunction&, uint);
-Float norm(const ScalarTaylorFunction& f);
-Float distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
-Float distance(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2);
+NormType norm(const ScalarTaylorFunction& f);
+NormType distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
+NormType distance(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2);
 
 
-Interval unchecked_evaluate(const ScalarTaylorFunction&, const Vector<Interval>&);
-Vector<Interval> unchecked_evaluate(const VectorTaylorFunction&, const Vector<Interval>&);
+ValidatedNumberType unchecked_evaluate(const ScalarTaylorFunction&, const Vector<ValidatedNumberType>&);
+Vector<ValidatedNumberType> unchecked_evaluate(const VectorTaylorFunction&, const Vector<ValidatedNumberType>&);
 ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
 VectorTaylorFunction unchecked_compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
 
@@ -609,7 +609,7 @@ VectorTaylorFunction unchecked_compose(const VectorTaylorFunction&, const Vector
  *  See also TaylorModel, ScalarTaylorFunction, VectorTaylorFunction.
  */
 class VectorTaylorFunction
-    : public VectorFunctionModelMixin<VectorTaylorFunction,Interval>
+    : public VectorFunctionModelMixin<VectorTaylorFunction,ValidatedTag>
 {
     friend class VectorTaylorFunctionElementReference;
 
@@ -642,7 +642,7 @@ class VectorTaylorFunction
                          Sweeper swp);
 
     /*! \brief Construct from a domain and the models. */
-    explicit VectorTaylorFunction(const Box& domain, const Vector< TaylorModel<Interval> >& variables);
+    explicit VectorTaylorFunction(const Box& domain, const Vector< TaylorModel<ValidatedTag> >& variables);
 
     /*! \brief Construct from a domain, a function, and a sweeper determining the accuracy. */
     VectorTaylorFunction(const Box& domain,
@@ -661,8 +661,8 @@ class VectorTaylorFunction
     /*! \brief Construct from a vector expression. */
     template<class E> explicit VectorTaylorFunction(const VectorExpression<E>& ve);
 
-    explicit VectorTaylorFunction (const VectorFunctionModel<Interval>& f);
-    VectorTaylorFunction& operator=(const VectorFunctionModel<Interval>& f);
+    explicit VectorTaylorFunction (const VectorFunctionModel<ValidatedTag>& f);
+    VectorTaylorFunction& operator=(const VectorFunctionModel<ValidatedTag>& f);
 
     /*! \brief Equality operator. */
     bool operator==(const VectorTaylorFunction& p) const;
@@ -683,14 +683,14 @@ class VectorTaylorFunction
     /*! \brief The range of the Taylor model. */
     const Box range() const;
     /*! \brief The data used to define the Taylor models. */
-    const Vector< TaylorModel<Interval> >& models() const;
+    const Vector< TaylorModel<ValidatedTag> >& models() const;
     /*! \brief The data used to define the centre of the Taylor models. */
     const Vector< Expansion<Float> > expansions() const;
 
     /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
-    const TaylorModel<Interval>& model(uint i) const;
+    const TaylorModel<ValidatedTag>& model(uint i) const;
     /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
-    TaylorModel<Interval>& model(uint i);
+    TaylorModel<ValidatedTag>& model(uint i);
 
     /*! \brief The size of the argument. */
     uint argument_size() const;
@@ -706,16 +706,16 @@ class VectorTaylorFunction
     /*! \brief The \a ith Taylor variable */
     VectorTaylorFunctionElementReference operator[](uint i);
     /*! \brief Evaluate the Taylor model at the point \a x. */
-    Vector<Interval> evaluate(const Vector<Interval>& x) const;
+    Vector<ValidatedNumberType> evaluate(const Vector<ValidatedNumberType>& x) const;
 
-    using VectorFunctionMixin< VectorTaylorFunction, Interval>::evaluate;
+    using VectorFunctionMixin< VectorTaylorFunction, ValidatedTag>::evaluate;
 
     /*! \brief Evaluate the Taylor model at the point \a x. */
-    Vector<Interval> operator()(const Vector<Interval>& x) const;
+    Vector<ValidatedNumberType> operator()(const Vector<ValidatedNumberType>& x) const;
     /*! \brief Evaluate the Taylor model at the point \a x. */
-    Vector<Float> evaluate(const Vector<Float>& x) const;
+    Vector<ApproximateNumberType> evaluate(const Vector<ApproximateNumberType>& x) const;
     /*! \brief Compute an approximation to Jacobian derivative of the Taylor model sat the point \a x. */
-    Matrix<Interval> jacobian(const Vector<Interval>& x) const;
+    Matrix<ValidatedNumberType> jacobian(const Vector<ValidatedNumberType>& x) const;
 
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
@@ -726,7 +726,7 @@ class VectorTaylorFunction
     Void clobber();
 
     /*! \brief The constant Taylor model with range \a r and argument domain \a d. */
-    static VectorTaylorFunction constant(const Box& d, const Vector<Interval>& r, Sweeper swp);
+    static VectorTaylorFunction constant(const Box& d, const Vector<ValidatedNumberType>& r, Sweeper swp);
     /*! \brief The constant Taylor model with result \a c and argument domain \a d. */
     static VectorTaylorFunction constant(const Box& d, const Vector<Float>& c, Sweeper swp);
     /*! \brief The identity Taylor model on domain \a d. */
@@ -735,7 +735,7 @@ class VectorTaylorFunction
     static VectorTaylorFunction projection(const Box& d, uint imin, uint imax, Sweeper swp);
 
     /*! \brief Convert to an interval polynomial. */
-    Vector< Polynomial<Interval> > polynomials() const;
+    Vector< Polynomial<ValidatedNumberType> > polynomials() const;
     /*! \brief The vector of roundoff/truncation errors of each component. */
     Vector< Float > const errors() const;
     /*! \brief The maximum roundoff/truncation error of the components. */
@@ -761,13 +761,13 @@ class VectorTaylorFunction
     /*! \brief Inplace subtraction. */
     friend VectorTaylorFunction& operator-=(VectorTaylorFunction& f, const VectorTaylorFunction& g);
     /*! \brief Inplace addition. */
-    friend VectorTaylorFunction& operator+=(VectorTaylorFunction& f, const Vector<Interval>& c);
+    friend VectorTaylorFunction& operator+=(VectorTaylorFunction& f, const Vector<ValidatedNumberType>& c);
     /*! \brief Inplace subtraction. */
-    friend VectorTaylorFunction& operator-=(VectorTaylorFunction& f, const Vector<Interval>& c);
+    friend VectorTaylorFunction& operator-=(VectorTaylorFunction& f, const Vector<ValidatedNumberType>& c);
     /*! \brief Inplace scalar multiplication. */
-    friend VectorTaylorFunction& operator*=(VectorTaylorFunction& f, const Interval& c);
+    friend VectorTaylorFunction& operator*=(VectorTaylorFunction& f, const ValidatedNumberType& c);
     /*! \brief Inplace scalar division. */
-    friend VectorTaylorFunction& operator/=(VectorTaylorFunction& f, const Interval& c);
+    friend VectorTaylorFunction& operator/=(VectorTaylorFunction& f, const ValidatedNumberType& c);
 
     /*! \brief Negation. */
     friend VectorTaylorFunction operator-(const VectorTaylorFunction& f);
@@ -781,19 +781,19 @@ class VectorTaylorFunction
     friend VectorTaylorFunction operator*(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2);
 
     /*! \brief Addition of a constant. */
-    friend VectorTaylorFunction operator+(const VectorTaylorFunction& f, const Vector<Interval>& c);
+    friend VectorTaylorFunction operator+(const VectorTaylorFunction& f, const Vector<ValidatedNumberType>& c);
     /*! \brief Subtraction of a constant. */
-    friend VectorTaylorFunction operator-(const VectorTaylorFunction& f, const Vector<Interval>& c);
+    friend VectorTaylorFunction operator-(const VectorTaylorFunction& f, const Vector<ValidatedNumberType>& c);
     /*! \brief Multiplication by a scalar. */
-    friend VectorTaylorFunction operator*(const Interval& c, const VectorTaylorFunction& f);
+    friend VectorTaylorFunction operator*(const ValidatedNumberType& c, const VectorTaylorFunction& f);
     /*! \brief Multiplication by a scalar. */
-    friend VectorTaylorFunction operator*(const VectorTaylorFunction& f, const Interval& c);
+    friend VectorTaylorFunction operator*(const VectorTaylorFunction& f, const ValidatedNumberType& c);
     /*! \brief Division by a scalar. */
-    friend VectorTaylorFunction operator/(const VectorTaylorFunction& f, const Interval& c);
+    friend VectorTaylorFunction operator/(const VectorTaylorFunction& f, const ValidatedNumberType& c);
     /*! \brief Multiplication by a matrix. */
     friend VectorTaylorFunction operator*(const Matrix<Float>& A, const VectorTaylorFunction& f);
     /*! \brief Multiplication by a matrix. */
-    friend VectorTaylorFunction operator*(const Matrix<Interval>& A, const VectorTaylorFunction& f);
+    friend VectorTaylorFunction operator*(const Matrix<ValidatedNumberType>& A, const VectorTaylorFunction& f);
 
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
     friend VectorTaylorFunction compose(const EffectiveVectorFunction& f, const VectorTaylorFunction& g);
@@ -821,7 +821,7 @@ class VectorTaylorFunction
     // For compatibility wit Vector.
     uint size() const { return this->result_size(); }
   private:
-    Array< Array<Interval> > _powers(const Vector<Interval>&) const;
+    Array< Array<ValidatedNumberType> > _powers(const Vector<ValidatedNumberType>&) const;
     void _compute_jacobian() const;
     void _set_argument_size(uint n);
     uint _compute_maximum_component_size() const;
@@ -832,21 +832,21 @@ class VectorTaylorFunction
     virtual VectorTaylorFunction* _create_identity() const;
     virtual ScalarTaylorFunction* _create_zero() const;
   private:
-    friend class VectorFunctionMixin<VectorTaylorFunction,Interval>;
+    friend class VectorFunctionMixin<VectorTaylorFunction,ValidatedTag>;
     friend class TaylorFunctionFactory;
     template<class X> void _compute(Vector<X>& r, const Vector<X>& a) const;
   private:
     /* Domain of definition. */
     Box _domain;
-    Vector< TaylorModel<Interval> > _models;
+    Vector< TaylorModel<ValidatedTag> > _models;
 };
 
 VectorTaylorFunction operator-(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2);
 
 // Set the value of the \a kth variable to c
-VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, const Interval& c);
+VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, uint k, const ValidatedNumberType& c);
 // Evaluate a scalar Taylor function on a vector.
-Vector<Interval> evaluate(const VectorTaylorFunction& f, const Vector<Interval>& c);
+Vector<ValidatedNumberType> evaluate(const VectorTaylorFunction& f, const Vector<ValidatedNumberType>& c);
 
 // Restrict the \a kth variable to lie in the interval \a d.
 VectorTaylorFunction restrict(const VectorTaylorFunction& f, uint k, const Interval& d);
@@ -875,14 +875,14 @@ VectorTaylorFunction combine(const VectorTaylorFunction& f, const ScalarTaylorFu
 VectorTaylorFunction combine(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
 VectorTaylorFunction combine(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
 
-Float norm(const VectorTaylorFunction& f);
+NormType norm(const VectorTaylorFunction& f);
 
 std::ostream& operator<<(std::ostream&, const VectorTaylorFunction&);
 
 // Conversion operatations
-Polynomial<Interval> polynomial(const ScalarTaylorFunction& tfn);
-Vector< Polynomial<Interval> > polynomial(const VectorTaylorFunction& tfn);
-List< Polynomial<Interval> > polynomials(const List<ScalarTaylorFunction>& tfns);
+Polynomial<ValidatedNumberType> polynomial(const ScalarTaylorFunction& tfn);
+Vector< Polynomial<ValidatedNumberType> > polynomial(const VectorTaylorFunction& tfn);
+List< Polynomial<ValidatedNumberType> > polynomials(const List<ScalarTaylorFunction>& tfns);
 
 // Sanitised output
 std::ostream& operator<<(std::ostream&, const Representation<ScalarTaylorFunction>&);
@@ -915,7 +915,7 @@ class VectorTaylorFunctionElementReference
     operator ScalarTaylorFunction () const { return this->_c->get(this->_i); }
     void operator=(const VectorTaylorFunctionElementReference& x) { this->_c->set(this->_i,x._c->get(x._i)); }
     void operator=(const ScalarTaylorFunction& x) { this->_c->set(this->_i,x); }
-    const TaylorModel<Interval>& model() const { return this->_c->_models[this->_i]; }
+    const TaylorModel<ValidatedTag>& model() const { return this->_c->_models[this->_i]; }
     Float error() const { return this->_c->_models[this->_i].error(); }
     void set_error(const Float& e) { this->_c->_models[this->_i].set_error(e); }
     void sweep() { this->_c->_models[this->_i].sweep(); }
@@ -928,7 +928,7 @@ class VectorTaylorFunctionElementReference
 
 
 class TaylorFunctionFactory
-    : public FunctionModelFactoryInterface<Interval>
+    : public FunctionModelFactoryInterface<ValidatedTag>
 {
     Sweeper _sweeper;
   public:
@@ -939,7 +939,7 @@ class TaylorFunctionFactory
     ScalarTaylorFunction create(const Box& domain, const ValidatedScalarFunctionInterface& function) const;
     VectorTaylorFunction create(const Box& domain, const ValidatedVectorFunctionInterface& function) const;
     ScalarTaylorFunction create_zero(const Box& domain) const;
-    ScalarTaylorFunction create_constant(const Box& domain, Interval c) const;
+    ScalarTaylorFunction create_constant(const Box& domain, ValidatedNumberType c) const;
     ScalarTaylorFunction create_coordinate(const Box& domain, uint k) const;
     VectorTaylorFunction create_zero(uint i, const Box& domain) const;
     ScalarTaylorFunction create_identity(const Interval& domain) const;

@@ -247,16 +247,16 @@ void HybridEnclosure::new_guard(DiscreteEvent event, ValidatedScalarFunction con
     this->_set.new_zero_state_constraint(constraint_function);
 }
 
-void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, IntervalConstraint constraint) {
+void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
     this->_set.new_parameter_constraint(constraint);
 }
 
-void HybridEnclosure::new_state_constraint(DiscreteEvent event, IntervalConstraint constraint) {
+void HybridEnclosure::new_state_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
     this->_set.new_state_constraint(constraint);
 }
 
 
-void HybridEnclosure::new_constraint(DiscreteEvent event, IntervalConstraint constraint) {
+void HybridEnclosure::new_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
     this->new_state_constraint(event,constraint);
 }
 
@@ -351,8 +351,8 @@ const DiscreteLocation& HybridEnclosure::location() const {
 }
 
 /*
-IntervalConstrainedImageSet HybridEnclosure::continuous_set() const {
-    return IntervalConstrainedImageSet(this->_set.domain(),this->space_function(),this->_constraints);
+ValidatedConstrainedImageSet HybridEnclosure::continuous_set() const {
+    return ValidatedConstrainedImageSet(this->_set.domain(),this->space_function(),this->_constraints);
 }
 */
 
@@ -381,13 +381,13 @@ tribool HybridEnclosure::separated(const HybridBox& hbx) const {
     else { return true; }
 }
 
-tribool HybridEnclosure::satisfies(RealConstraint c) const
+tribool HybridEnclosure::satisfies(EffectiveConstraint c) const
 {
     return this->continuous_set().satisfies(c);
 }
 
 
-List<IntervalConstraint> HybridEnclosure::constraints() const {
+List<ValidatedConstraint> HybridEnclosure::constraints() const {
     return this->continuous_set().constraints();
 }
 

@@ -67,9 +67,9 @@ class SolverBase
     void set_maximum_number_of_steps(uint max_steps) { this->_max_steps=max_steps; };
 
     /*! \brief The class which constructs functions for the implicit function solver. */
-    const FunctionModelFactoryInterface<Interval>& function_factory() const;
+    const FunctionModelFactoryInterface<ValidatedTag>& function_factory() const;
     /*! \brief Set the class which constructs functions for the implicit function solver. */
-    void set_function_factory(const FunctionModelFactoryInterface<Interval>& factory);
+    void set_function_factory(const FunctionModelFactoryInterface<ValidatedTag>& factory);
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
     virtual Vector<Interval> zero(const ValidatedVectorFunction& f,const Vector<Interval>& pt) const;
@@ -96,7 +96,7 @@ class SolverBase
   private:
     double _max_error;
     uint _max_steps;
-    std::shared_ptr< FunctionModelFactoryInterface<Interval> > _function_factory_ptr;
+    std::shared_ptr< FunctionModelFactoryInterface<ValidatedTag> > _function_factory_ptr;
 };
 
 

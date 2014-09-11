@@ -227,12 +227,12 @@ OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraint
     return os << eset._bounds << eset._constraints;
 }
 
-IntervalConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
+ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
     IntervalVector domain=approximation(RealVariablesBox(set.bounds()).euclidean_set(space));
     ValidatedVectorFunction identity=ValidatedVectorFunction::identity(domain.size());
 
-    IntervalConstrainedImageSet result(domain,identity);
-    //List<IntervalConstraint> constraints;
+    ValidatedConstrainedImageSet result(domain,identity);
+    //List<ValidatedConstraint> constraints;
     for(uint i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
         ValidatedScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
@@ -240,7 +240,7 @@ IntervalConstrainedImageSet approximate_euclidean_set(const RealExpressionBounde
         //constraints.append( constraint_function <= 0.0 );
     }
     return result;
-    //return IntervalConstrainedImageSet(domain,identity,constraints);
+    //return ValidatedConstrainedImageSet(domain,identity,constraints);
 }
 
 

@@ -45,18 +45,18 @@ class Box;
 class GridTreeSet;
 
 template<class X, class R> class Constraint;
-typedef Constraint<EffectiveScalarFunction,Real> RealConstraint;
-typedef Constraint<ValidatedScalarFunction,Float> IntervalConstraint;
+typedef Constraint<EffectiveScalarFunction,EffectiveNumberType> EffectiveConstraint;
+typedef Constraint<ValidatedScalarFunction,RawNumberType> ValidatedConstraint;
 
 template<class X> class Procedure;
 typedef Procedure<Interval> IntervalProcedure;
 
 template<class X> class ScalarFunctionInterface;
-typedef ScalarFunctionInterface<Interval> ValidatedScalarFunctionInterface;
+typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;
 template<class X> class ScalarFunction;
 typedef ValidatedScalarFunction ValidatedScalarFunction;
 template<class X> class VectorFunctionInterface;
-typedef VectorFunctionInterface<Interval> ValidatedVectorFunctionInterface;
+typedef VectorFunctionInterface<ValidatedTag> ValidatedVectorFunctionInterface;
 template<class X> class VectorFunction;
 typedef ValidatedVectorFunction ValidatedVectorFunction;
 
@@ -102,9 +102,9 @@ class ConstraintSolver
 
 
     //! \brief Test if the constraints are solvable using a nonlinear feasibility test. Returns an approximate feasible point if the result is true. (Deprecated)
-    virtual Pair<Tribool,Point> feasible(const Box& domain, const List<IntervalConstraint>& constraints) const;
+    virtual Pair<Tribool,Point> feasible(const Box& domain, const List<ValidatedConstraint>& constraints) const;
     //! \brief Try to reduce the size of the domain by propagating interval constraints. (Deprecated)
-    virtual bool reduce(Box& domain, const List<IntervalConstraint>& constraints) const;
+    virtual bool reduce(Box& domain, const List<ValidatedConstraint>& constraints) const;
 
     //! \brief Try to enforce hull consistency by propagating several interval constraints at once.
     //! This method is sharp if each variable occurs at most once in the constraint.
@@ -130,11 +130,11 @@ class ConstraintSolver
     Pair<Box,Box> split(const Box& domain, const ValidatedVectorFunction& function, const IntervalVector& codomain) const;
 
     // Deprecated functions.
-    bool hull_reduce(Box& bx, const IntervalConstraint& constraint) const {
+    bool hull_reduce(Box& bx, const ValidatedConstraint& constraint) const {
         return this->hull_reduce(bx,constraint.function(),constraint.bounds()); }
-    bool box_reduce(Box& bx, const IntervalConstraint& constraint, uint j) const {
+    bool box_reduce(Box& bx, const ValidatedConstraint& constraint, uint j) const {
         return this->box_reduce(bx,constraint.function(),constraint.bounds(),j); }
-    bool monotone_reduce(Box& bx, const IntervalConstraint& constraint, uint j) const {
+    bool monotone_reduce(Box& bx, const ValidatedConstraint& constraint, uint j) const {
         return this->monotone_reduce(bx,constraint.function(),constraint.bounds(),j); }
 
 };

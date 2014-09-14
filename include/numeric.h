@@ -22,7 +22,7 @@
  */
 
 /*! \file numeric.h
- *  \brief Numerical classes.
+ *  \brief Number classes. File suitable for use as a pre-compiled header.
  */
 #ifndef ARIADNE_NUMERIC_H
 #define ARIADNE_NUMERIC_H

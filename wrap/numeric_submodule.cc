@@ -426,6 +426,37 @@ void export_validated_float()
     def("atan", (ValidatedFloat(*)(ValidatedFloat)) &atan);
 }
 
+void export_upper_float()
+{
+    class_< UpperFloat > upper_float_class("UpperFloat");
+    upper_float_class.def(init<double>());
+    upper_float_class.def(init<ValidatedFloat>());
+    upper_float_class.def(init<ExactFloat>());
+
+    upper_float_class.def(-self);
+    upper_float_class.def(self + self);
+    upper_float_class.def(self - LowerFloat());
+
+    upper_float_class.def(boost::python::self_ns::str(self));
+    implicitly_convertible<ValidatedFloat,UpperFloat>();
+}
+
+void export_lower_float()
+{
+    class_< LowerFloat > lower_float_class("LowerFloat");
+    lower_float_class.def(init<double>());
+    lower_float_class.def(init<Float>());
+    lower_float_class.def(init<ValidatedFloat>());
+    lower_float_class.def(init<ExactFloat>());
+
+    lower_float_class.def(-self);
+    lower_float_class.def(self + self);
+    lower_float_class.def(self - UpperFloat());
+
+    lower_float_class.def(boost::python::self_ns::str(self));
+    implicitly_convertible<ValidatedFloat,LowerFloat>();
+}
+
 void export_approximate_float()
 {
     using boost::python::class_;
@@ -444,6 +475,8 @@ void export_approximate_float()
     approximate_float_class.def(init<Decimal>());
     approximate_float_class.def(init<Dyadic>());
     approximate_float_class.def(init<ApproximateFloat>());
+    approximate_float_class.def(init<LowerFloat>());
+    approximate_float_class.def(init<UpperFloat>());
     approximate_float_class.def(init<ValidatedFloat>());
 #ifdef HAVE_GMPXX_H
     approximate_float_class.def(init<Rational>());
@@ -472,6 +505,8 @@ void export_approximate_float()
     approximate_float_class.def("set_output_precision", &ApproximateFloat::set_output_precision);
     approximate_float_class.staticmethod("set_output_precision");
 
+    implicitly_convertible<LowerFloat,ApproximateFloat>();
+    implicitly_convertible<UpperFloat,ApproximateFloat>();
     implicitly_convertible<ValidatedFloat,ApproximateFloat>();
 
     def("max", (ApproximateFloat(*)(ApproximateFloat,ApproximateFloat)) &max);
@@ -551,6 +586,8 @@ numeric_submodule()
     export_tribool();
     export_float();
     export_approximate_float();
+    export_lower_float();
+    export_upper_float();
     export_validated_float();
     export_exact_float();
     export_real();

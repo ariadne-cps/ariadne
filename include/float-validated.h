@@ -71,6 +71,8 @@ class LowerFloat {
     LowerFloat(double x) : l(x) { }
     //! \brief Explicitly construct from a raw floating-point value.
     explicit LowerFloat(Float x) : l(x) { }
+    //! \brief Convert from floating-point bounds on a number.
+    inline LowerFloat(const ValidatedFloat& x);
     //! \brief Convert from a floating-point number with an exact representation.
     LowerFloat(const ExactFloat& x) : l(x.value()) { }
     //! \brief Explicitly convert to the raw floating-point value.
@@ -100,6 +102,8 @@ class UpperFloat {
     UpperFloat(double x) : u(x) { }
     //! \brief Explicitly construct from a raw floating-point value.
     UpperFloat(Float x) : u(x) { }
+    //! \brief Convert from floating-point bounds on a number.
+    inline UpperFloat(const ValidatedFloat& x);
     //! \brief Convert from a floating-point number with an exact representation.
     UpperFloat(const ExactFloat& x) : u(x.value()) { }
     //! \brief Explicitly convert to the raw floating-point value.
@@ -237,6 +241,12 @@ class ValidatedFloat {
 };
 
 std::ostream& operator<<(std::ostream& os, const ValidatedFloat& ivl);
+
+inline LowerFloat::LowerFloat(ValidatedFloat const& i) : l(i.lower_value()) {
+}
+
+inline UpperFloat::UpperFloat(ValidatedFloat const& i) : u(i.upper_value()) {
+}
 
 inline Float midpoint(ValidatedFloat i) {
     return half_exact(add_approx(i.lower_value(),i.upper_value()));

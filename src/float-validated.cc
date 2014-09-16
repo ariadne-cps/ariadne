@@ -55,6 +55,82 @@ inline Float cos_down(Float x) { set_rounding_downward(); Float y=cos_rnd(x); re
 inline Float cos_up(Float x) { set_rounding_upward(); Float y=cos_rnd(x); return y; }
 } // namespace
 
+UpperFloat operator-(LowerFloat x)
+{
+    volatile double xl=internal_cast<volatile double&>(x.value());
+    volatile double ru=-xl;
+    return UpperFloat(ru);
+}
+
+LowerFloat operator-(UpperFloat x)
+{
+    volatile double xu=internal_cast<volatile double&>(x.value());
+    volatile double rl=-xu;
+    return LowerFloat(rl);
+}
+
+LowerFloat operator+(LowerFloat x1, LowerFloat x2)
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double x1l=internal_cast<volatile double&>(x1.value());
+    volatile double x2l=internal_cast<volatile double&>(x2.value());
+    set_rounding_mode(downward);
+    volatile double rl=x1l+x2l;
+    set_rounding_mode(rnd);
+    return LowerFloat(rl);
+}
+
+UpperFloat operator+(UpperFloat x1, UpperFloat x2)
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double x1u=internal_cast<volatile double&>(x1.value());
+    volatile double x2u=internal_cast<volatile double&>(x2.value());
+    set_rounding_mode(upward);
+    volatile double ru=x1u+x2u;
+    set_rounding_mode(rnd);
+    return UpperFloat(ru);
+}
+
+LowerFloat operator-(LowerFloat x1, UpperFloat x2)
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double x1l=internal_cast<volatile double&>(x1.value());
+    volatile double x2u=internal_cast<volatile double&>(x2.value());
+    set_rounding_mode(downward);
+    volatile double rl=x1l-x2u;
+    set_rounding_mode(rnd);
+    return LowerFloat(rl);
+}
+
+UpperFloat operator-(UpperFloat x1, LowerFloat x2)
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double x1u=internal_cast<volatile double&>(x1.value());
+    volatile double x2l=internal_cast<volatile double&>(x2.value());
+    set_rounding_mode(upward);
+    volatile double ru=x1u-x2l;
+    set_rounding_mode(rnd);
+    return UpperFloat(ru);
+}
+
+std::ostream& operator<<(std::ostream& os, LowerFloat x) {
+    rounding_mode_t rnd=get_rounding_mode();
+    set_rounding_downward();
+    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << x.value();
+    set_rounding_mode(rnd);
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, UpperFloat x) {
+    rounding_mode_t rnd=get_rounding_mode();
+    set_rounding_upward();
+    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << x.value();
+    set_rounding_mode(rnd);
+    return os;
+}
+
+
+
 static const ValidatedFloat pi_val=ValidatedFloat(pi_down,pi_up);
 
 uint ValidatedFloat::output_precision = 6;

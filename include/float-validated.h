@@ -56,7 +56,54 @@ class Rational;
 class Dyadic;
 class Decimal;
 
+class LowerFloat;
+class UpperFloat;
 
+//! \ingroup NumericModule
+//! \brief Floating-point lower bounds for real numbers.
+class LowerFloat {
+  public:
+    typedef LowerFloat NumericType;
+  public:
+    //! \brief Default constructor yields a lower bound of \a 0.
+    LowerFloat() : l(0.0) { }
+    //! \brief Explicitly construct from a raw floating-point value.
+    explicit LowerFloat(Float x) : l(x) { }
+    //! \brief Explicitly convert to the raw floating-point value.
+    explicit operator Float const& () const { return l; }
+    //! \brief Get the raw value.
+    Float const& value() const { return l; }
+    friend UpperFloat operator-(LowerFloat);
+    friend LowerFloat operator+(LowerFloat, LowerFloat);
+    friend LowerFloat operator-(LowerFloat, UpperFloat);
+    friend UpperFloat operator-(UpperFloat, LowerFloat);
+    friend std::ostream& operator<<(std::ostream& os, LowerFloat);
+  private:
+    Float l;
+};
+
+//! \ingroup NumericModule
+//! \brief Floating-point upper bounds for real numbers.
+class UpperFloat {
+  public:
+    typedef UpperFloat NumericType;
+  public:
+    //! \brief Default constructor yields an upper bound of \a 0.
+    UpperFloat() : u(0.0) { }
+    //! \brief Explicitly construct from a raw floating-point value.
+    UpperFloat(Float x) : u(x) { }
+    //! \brief Explicitly convert to the raw floating-point value.
+    explicit operator Float const& () const { return u; }
+    //! \brief Get the raw value.
+    Float const& value() const { return u; }
+    friend LowerFloat operator-(UpperFloat);
+    friend UpperFloat operator+(UpperFloat, UpperFloat);
+    friend UpperFloat operator-(UpperFloat, LowerFloat);
+    friend LowerFloat operator-(LowerFloat, UpperFloat);
+    friend std::ostream& operator<<(std::ostream& os, UpperFloat);
+  private:
+    Float u;
+};
 
 //! \ingroup NumericModule
 //! \brief Intervals with floating-point endpoints supporting outwardly-rounded arithmetic.

@@ -66,7 +66,7 @@ class ExactFloat {
     explicit operator Float () const { return _v; }
     //! \brief The raw floating-point number with the same value.
     Float const& value() const { return _v; }
-    //! \brief A double-precision approximateion.
+    //! \brief The double-precision value.
     double get_d() const { return _v.get_d(); }
 
   public:

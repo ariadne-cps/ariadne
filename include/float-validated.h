@@ -67,12 +67,18 @@ class LowerFloat {
   public:
     //! \brief Default constructor yields a lower bound of \a 0.
     LowerFloat() : l(0.0) { }
+    //! \brief Convert from a builtin double-precision floating-point value.
+    LowerFloat(double x) : l(x) { }
     //! \brief Explicitly construct from a raw floating-point value.
     explicit LowerFloat(Float x) : l(x) { }
+    //! \brief Convert from a floating-point number with an exact representation.
+    LowerFloat(const ExactFloat& x) : l(x.value()) { }
     //! \brief Explicitly convert to the raw floating-point value.
     explicit operator Float const& () const { return l; }
     //! \brief Get the raw value.
     Float const& value() const { return l; }
+    //! \brief Get the value to double-precision.
+    double get_d() const { return l.get_d(); }
     friend UpperFloat operator-(LowerFloat);
     friend LowerFloat operator+(LowerFloat, LowerFloat);
     friend LowerFloat operator-(LowerFloat, UpperFloat);
@@ -90,12 +96,18 @@ class UpperFloat {
   public:
     //! \brief Default constructor yields an upper bound of \a 0.
     UpperFloat() : u(0.0) { }
+    //! \brief Convert from a builtin double-precision floating-point value.
+    UpperFloat(double x) : u(x) { }
     //! \brief Explicitly construct from a raw floating-point value.
     UpperFloat(Float x) : u(x) { }
+    //! \brief Convert from a floating-point number with an exact representation.
+    UpperFloat(const ExactFloat& x) : u(x.value()) { }
     //! \brief Explicitly convert to the raw floating-point value.
     explicit operator Float const& () const { return u; }
     //! \brief Get the raw value.
     Float const& value() const { return u; }
+    //! \brief Get the value to double-precision.
+    double get_d() const { return u.get_d(); }
     friend LowerFloat operator-(UpperFloat);
     friend UpperFloat operator+(UpperFloat, UpperFloat);
     friend UpperFloat operator-(UpperFloat, LowerFloat);
@@ -169,6 +181,9 @@ class ValidatedFloat {
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     ValidatedFloat(const Float& lower, const Float& upper) : l(lower), u(upper) { }
         // ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper);
+    //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
+    ValidatedFloat(const LowerFloat& lower, const UpperFloat& upper) : l(lower.value()), u(upper.value()) { }
+        // ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper);
 #ifdef HAVE_GMPXX_H
     ValidatedFloat(const Integer& z);
     ValidatedFloat(const Rational& q);
@@ -184,9 +199,14 @@ class ValidatedFloat {
     ValidatedFloat& operator=(const ExactFloat& x) { l=x.value(); u=x.value(); return *this; };
 
     //! \brief The lower bound of the interval.
-    const Float& lower() const { return l; }
+    LowerFloat lower() const { return LowerFloat(u); }
     //! \brief The upper bound of the interval.
-    const Float& upper() const { return u; }
+    UpperFloat upper() const { return UpperFloat(u); }
+
+    //! \brief The lower bound of the interval.
+    const Float& lower_value() const { return l; }
+    //! \brief The upper bound of the interval.
+    const Float& upper_value() const { return u; }
     //! \brief An approximation to the midpoint of the interval.
     const Float midpoint() const { return half_exact(add_approx(l,u)); }
     //! \brief An over-approximation to the radius of the interval.
@@ -219,21 +239,21 @@ class ValidatedFloat {
 std::ostream& operator<<(std::ostream& os, const ValidatedFloat& ivl);
 
 inline Float midpoint(ValidatedFloat i) {
-    return half_exact(add_approx(i.lower(),i.upper()));
+    return half_exact(add_approx(i.lower_value(),i.upper_value()));
 }
 
 inline Float radius(ValidatedFloat i) {
-    return half_exact(sub_up(i.upper(),i.lower()));
+    return half_exact(sub_up(i.upper_value(),i.lower_value()));
 }
 
 inline Float width(ValidatedFloat i) {
-    return sub_up(i.upper(),i.lower());
+    return sub_up(i.upper_value(),i.lower_value());
 }
 
 //! \related ValidatedFloat \brief Test if the intervals are equal (as sets).
 inline bool equal(ValidatedFloat i1, ValidatedFloat i2) {
     //std::cerr<<"equal(i1,i2) with i1="<<i1<<"; i2="<<i2<<std::endl;
-    return i1.lower()==i2.lower() && i1.upper()==i2.upper();
+    return i1.lower_value()==i2.lower_value() && i1.upper_value()==i2.upper_value();
 }
 
 // An interval one ulp wider
@@ -315,48 +335,48 @@ ValidatedFloat atan(ValidatedFloat);
 
 
 //! \related ValidatedFloat \brief The magnitude of the interval \a I. Yields \f$ \max\{ |x|\,\mid\,x\in I \}\f$.
-inline Float mag(ValidatedFloat i) { return max(abs(i.lower()),abs(i.upper())); }
+inline Float mag(ValidatedFloat i) { return max(abs(i.lower_value()),abs(i.upper_value())); }
 //! \related ValidatedFloat \brief The mignitude of the interval \a I. Yields \f$ \min\{ |x|\,\mid\,x\in I \}\f$.
-inline Float mig(ValidatedFloat i) { return min(abs(i.lower()),abs(i.upper())); }
+inline Float mig(ValidatedFloat i) { return min(abs(i.lower_value()),abs(i.upper_value())); }
 
 inline ValidatedFloat max(ValidatedFloat i1, ValidatedFloat i2)
 {
-    return ValidatedFloat(max(i1.lower(),i2.lower()),max(i1.upper(),i2.upper()));
+    return ValidatedFloat(max(i1.lower_value(),i2.lower_value()),max(i1.upper_value(),i2.upper_value()));
 }
 
 inline ValidatedFloat min(ValidatedFloat i1, ValidatedFloat i2)
 {
-    return ValidatedFloat(min(i1.lower(),i2.lower()),min(i1.upper(),i2.upper()));
+    return ValidatedFloat(min(i1.lower_value(),i2.lower_value()),min(i1.upper_value(),i2.upper_value()));
 }
 
 
 inline ValidatedFloat abs(ValidatedFloat i)
 {
-    if(i.lower()>=0) {
-        return ValidatedFloat(i.lower(),i.upper());
-    } else if(i.upper()<=0) {
-        return ValidatedFloat(neg(i.upper()),neg(i.lower()));
+    if(i.lower_value()>=0) {
+        return ValidatedFloat(i.lower_value(),i.upper_value());
+    } else if(i.upper_value()<=0) {
+        return ValidatedFloat(neg(i.upper_value()),neg(i.lower_value()));
     } else {
-        return ValidatedFloat(static_cast<Float>(0.0),max(neg(i.lower()),i.upper()));
+        return ValidatedFloat(static_cast<Float>(0.0),max(neg(i.lower_value()),i.upper_value()));
     }
 }
 
 inline ValidatedFloat pos(ValidatedFloat i)
 {
-    return ValidatedFloat(+i.lower(),+i.upper());
+    return ValidatedFloat(+i.lower_value(),+i.upper_value());
 }
 
 inline ExactFloat pos(ExactFloat x);
 
 inline ValidatedFloat neg(ValidatedFloat i)
 {
-    return ValidatedFloat(-i.upper(),-i.lower());
+    return ValidatedFloat(-i.upper_value(),-i.lower_value());
 }
 
 inline ExactFloat neg(ExactFloat x);
 
 inline ValidatedFloat half(ValidatedFloat i) {
-    return ValidatedFloat(half(i.lower()),half(i.upper()));
+    return ValidatedFloat(half(i.lower_value()),half(i.upper_value()));
 }
 
 inline ValidatedFloat sqr(ExactFloat x)
@@ -388,10 +408,10 @@ inline ValidatedFloat rec(ExactFloat x)
 inline ValidatedFloat add(ValidatedFloat i1, ValidatedFloat i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double i1u=internal_cast<volatile double&>(i1.upper());
-    volatile double i2l=internal_cast<volatile double&>(i2.lower());
-    volatile double i2u=internal_cast<volatile double&>(i2.upper());
+    volatile double i1l=internal_cast<volatile double&>(i1.lower_value());
+    volatile double i1u=internal_cast<volatile double&>(i1.upper_value());
+    volatile double i2l=internal_cast<volatile double&>(i2.lower_value());
+    volatile double i2u=internal_cast<volatile double&>(i2.upper_value());
     set_rounding_mode(downward);
     volatile double rl=i1l+i2l;
     set_rounding_mode(upward);
@@ -403,8 +423,8 @@ inline ValidatedFloat add(ValidatedFloat i1, ValidatedFloat i2)
 inline ValidatedFloat add(ValidatedFloat i1, ExactFloat x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double i1l=internal_cast<volatile double&>(i1.lower_value());
+    volatile double i1u=internal_cast<volatile double&>(i1.upper_value());
     volatile double x2v=internal_cast<volatile double&>(x2.value());
     set_rounding_mode(downward);
     volatile double rl=i1l+x2v;
@@ -435,10 +455,10 @@ inline ValidatedFloat add(ExactFloat x1, ExactFloat x2)
 inline ValidatedFloat sub(ValidatedFloat i1, ValidatedFloat i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double i1u=internal_cast<volatile double&>(i1.upper());
-    volatile double i2l=internal_cast<volatile double&>(i2.lower());
-    volatile double i2u=internal_cast<volatile double&>(i2.upper());
+    volatile double i1l=internal_cast<volatile double&>(i1.lower_value());
+    volatile double i1u=internal_cast<volatile double&>(i1.upper_value());
+    volatile double i2l=internal_cast<volatile double&>(i2.lower_value());
+    volatile double i2u=internal_cast<volatile double&>(i2.upper_value());
     set_rounding_mode(downward);
     volatile double rl=i1l-i2u;
     set_rounding_mode(upward);
@@ -450,8 +470,8 @@ inline ValidatedFloat sub(ValidatedFloat i1, ValidatedFloat i2)
 inline ValidatedFloat sub(ValidatedFloat i1, ExactFloat x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double i1l=internal_cast<volatile double&>(i1.lower_value());
+    volatile double i1u=internal_cast<volatile double&>(i1.upper_value());
     volatile double x2v=internal_cast<volatile double&>(x2.value());
     set_rounding_mode(downward);
     volatile double rl=i1l-x2v;
@@ -465,8 +485,8 @@ inline ValidatedFloat sub(ExactFloat x1, ValidatedFloat i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double x1v=internal_cast<volatile double&>(x1.value());
-    volatile double i2l=internal_cast<volatile double&>(i2.lower());
-    volatile double i2u=internal_cast<volatile double&>(i2.upper());
+    volatile double i2l=internal_cast<volatile double&>(i2.lower_value());
+    volatile double i2u=internal_cast<volatile double&>(i2.upper_value());
     set_rounding_mode(downward);
     volatile double rl=x1v-i2u;
     set_rounding_mode(upward);
@@ -580,53 +600,53 @@ inline ValidatedFloat& operator/=(ValidatedFloat& i1, const ExactFloat& x2) { i1
 
 // Standard equality operators
 //! \related ValidatedFloat \brief Equality operator. Tests equality of intervals as geometric objects, so \c [0,1]==[0,1] returns \c true.
-inline bool operator==(const ValidatedFloat& i1, const ValidatedFloat& i2) { return i1.lower()==i2.lower() && i1.upper()==i2.upper(); }
+inline bool operator==(const ValidatedFloat& i1, const ValidatedFloat& i2) { return i1.lower_value()==i2.lower_value() && i1.upper_value()==i2.upper_value(); }
 //! \related ValidatedFloat \brief Inequality operator. Tests equality of intervals as geometric objects, so \c [0,2]!=[1,3] returns \c true,
 //! even though the intervals possibly represent the same exact real value.
-inline bool operator!=(const ValidatedFloat& i1, const ValidatedFloat& i2) { return i1.lower()!=i2.lower() || i1.upper()!=i2.upper(); }
+inline bool operator!=(const ValidatedFloat& i1, const ValidatedFloat& i2) { return i1.lower_value()!=i2.lower_value() || i1.upper_value()!=i2.upper_value(); }
 
 // Boost-style tribool (in)equality operators
 //inline tribool operator==(const ValidatedFloat& i1, const ValidatedFloat& i2) {
-//  if(i1.lower()>i2.upper() || i1.upper()<i2.lower()) { return false; } else if(i1.lower()==i2.upper() && i1.upper()==i2.lower()) { return true; } else { return indeterminate; } }
+//  if(i1.lower_value()>i2.upper_value() || i1.upper_value()<i2.lower_value()) { return false; } else if(i1.lower_value()==i2.upper_value() && i1.upper_value()==i2.lower_value()) { return true; } else { return indeterminate; } }
 //inline tribool operator!=(const ValidatedFloat& i1, const ValidatedFloat& i2) { return !(i1==i2); }
 
 //! \related ValidatedFloat \brief Equality operator. Tests equality of represented real-point value.
 //! Hence \c [0.0,2.0]==1.0 yields \c indeterminate since the interval may represent a real number other than \c 1.0 .
 inline tribool operator==(const ValidatedFloat& i1, const ExactFloat& x2) {
-    if(i1.upper()<x2.value() || i1.lower()>x2.value() ) { return false; }
-    else if(i1.lower()==x2.value()  && i1.upper()==x2.value() ) { return true; }
+    if(i1.upper_value()<x2.value() || i1.lower_value()>x2.value() ) { return false; }
+    else if(i1.lower_value()==x2.value()  && i1.upper_value()==x2.value() ) { return true; }
     else { return indeterminate; }
 }
 
 //! \related ValidatedFloat \brief Equality operator. Tests equality of represented real-point value.
 //! Hence \c [0.0,2.0]!=1.0 yields \c indeterminate since the interval may represent a real number equal to \c 1.0 .
 inline tribool operator!=(const ValidatedFloat& i1, const ExactFloat& x2) {
-    if(i1.upper()<x2.value()  || i1.lower()>x2.value() ) { return true; }
-    else if(i1.lower()==x2.value()  && i1.upper()==x2.value() ) { return false; }
+    if(i1.upper_value()<x2.value()  || i1.lower_value()>x2.value() ) { return true; }
+    else if(i1.lower_value()==x2.value()  && i1.upper_value()==x2.value() ) { return false; }
     else { return indeterminate; }
 }
 
 inline tribool operator> (const ValidatedFloat& i1, const ExactFloat& x2) {
-    if(i1.lower()> x2.value() ) { return true; }
-    else if(i1.upper()<=x2.value() ) { return false; }
+    if(i1.lower_value()> x2.value() ) { return true; }
+    else if(i1.upper_value()<=x2.value() ) { return false; }
     else { return indeterminate; }
 }
 
 inline tribool operator< (const ValidatedFloat& i1, const ExactFloat& x2) {
-    if(i1.upper()< x2.value() ) { return true; }
-    else if(i1.lower()>=x2.value() ) { return false; }
+    if(i1.upper_value()< x2.value() ) { return true; }
+    else if(i1.lower_value()>=x2.value() ) { return false; }
     else { return indeterminate; }
 }
 
 inline tribool operator>=(const ValidatedFloat& i1, const ExactFloat& x2) {
-    if(i1.lower()>=x2.value() ) { return true; }
-    else if(i1.upper()< x2.value() ) { return false; }
+    if(i1.lower_value()>=x2.value() ) { return true; }
+    else if(i1.upper_value()< x2.value() ) { return false; }
     else { return indeterminate; }
 }
 
 inline tribool operator<=(const ValidatedFloat& i1, const ExactFloat& x2) {
-    if(i1.upper()<=x2.value() ) { return true; }
-    else if(i1.lower()> x2.value() ) { return false; }
+    if(i1.upper_value()<=x2.value() ) { return true; }
+    else if(i1.lower_value()> x2.value() ) { return false; }
     else { return indeterminate; }
 }
 
@@ -643,35 +663,35 @@ inline tribool operator> (const ValidatedFloat& i1, double x2) { return i1> stat
 //! \related ValidatedFloat \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
 //! Hence \c [1.0,3.0]>[0.0,2.0] yields \c indeterminate since the first interval could represent the number 1.25 and the second 1.75.
 inline tribool operator> (ValidatedFloat i1, ValidatedFloat i2) {
-    if(i1.lower()> i2.upper()) { return true; }
-    else if(i1.upper()<=i2.lower()) { return false; }
+    if(i1.lower_value()> i2.upper_value()) { return true; }
+    else if(i1.upper_value()<=i2.lower_value()) { return false; }
     else { return indeterminate; }
 }
 
 //! \related ValidatedFloat \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
 inline tribool operator< (ValidatedFloat i1, ValidatedFloat i2) {
-    if(i1.upper()< i2.lower()) { return true; }
-    else if(i1.lower()>=i2.upper()) { return false; }
+    if(i1.upper_value()< i2.lower_value()) { return true; }
+    else if(i1.lower_value()>=i2.upper_value()) { return false; }
     else { return indeterminate; }
 }
 
 //! \related ValidatedFloat \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
 inline tribool operator>=(ValidatedFloat i1, ValidatedFloat i2) {
-    if(i1.lower()>=i2.upper()) { return true; }
-    else if(i1.upper()< i2.lower()) { return false; }
+    if(i1.lower_value()>=i2.upper_value()) { return true; }
+    else if(i1.upper_value()< i2.lower_value()) { return false; }
     else { return indeterminate; }
 }
 
 //! \related ValidatedFloat \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
 inline tribool operator<=(ValidatedFloat i1, ValidatedFloat i2) {
-    if(i1.upper()<=i2.lower()) { return true; }
-    else if(i1.lower()> i2.upper()) { return false; }
+    if(i1.upper_value()<=i2.lower_value()) { return true; }
+    else if(i1.lower_value()> i2.upper_value()) { return false; }
     else { return indeterminate; }
 }
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
   template<class A> void serialize(A& a, ValidatedFloat& ivl, const uint version) {
-    a & ivl.lower() & ivl.upper(); }
+    a & ivl.lower_value() & ivl.upper_value(); }
 #endif
 
 std::ostream& operator<<(std::ostream&, const ValidatedFloat&);

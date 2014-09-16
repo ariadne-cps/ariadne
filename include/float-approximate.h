@@ -48,6 +48,8 @@ class Decimal;
 class Float;
 
 class ApproximateFloat;
+class LowerFloat;
+class UpperFloat;
 class ValidatedFloat;
 class ExactFloat;
 
@@ -99,10 +101,14 @@ class ApproximateFloat {
     ApproximateFloat(const ExactFloat& x);
     //! \brief Convert from a floating-point bounds on a number.
     ApproximateFloat(const ValidatedFloat& x);
+    //! \brief Convert from a floating-point upper bound on a number.
+    ApproximateFloat(const UpperFloat& x);
+    //! \brief Convert from a floating-point lower bound on a number.
+    ApproximateFloat(const LowerFloat& x);
     //! \brief Explicit conversion to extract raw data.
     operator Float const& () const { return this->a; }
     //! \brief An approximation by a built-in double-precision floating-point number.
-    Float const& get_flt() const { return this->a; }
+    Float const& value() const { return this->a; }
     //! \brief An approximation by a built-in double-precision floating-point number.
     double get_d() const { return this->a.get_d(); }
     static void set_output_precision(uint p) { output_precision=p; }

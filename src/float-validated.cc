@@ -138,8 +138,8 @@ uint ValidatedFloat::output_precision = 6;
 ValidatedFloat widen(ValidatedFloat x)
 {
     rounding_mode_t rm=get_rounding_mode();
-    const double& xl=internal_cast<const double&>(x.lower());
-    const double& xu=internal_cast<const double&>(x.upper());
+    const double& xl=internal_cast<const double&>(x.lower_value());
+    const double& xu=internal_cast<const double&>(x.upper_value());
     const double m=std::numeric_limits<float>::min();
     set_rounding_upward();
     volatile double wu=xu+m;
@@ -153,8 +153,8 @@ ValidatedFloat widen(ValidatedFloat x)
 ValidatedFloat narrow(ValidatedFloat x)
 {
     rounding_mode_t rm=get_rounding_mode();
-    const double& xl=internal_cast<const double&>(x.lower());
-    const double& xu=internal_cast<const double&>(x.upper());
+    const double& xl=internal_cast<const double&>(x.lower_value());
+    const double& xu=internal_cast<const double&>(x.upper_value());
     const double m=std::numeric_limits<float>::min();
     set_rounding_upward();
     volatile double mnu=-xu+m;
@@ -169,8 +169,8 @@ ValidatedFloat trunc(ValidatedFloat x)
 {
 
     rounding_mode_t rm=get_rounding_mode();
-    const double& xl=internal_cast<const double&>(x.lower());
-    const double& xu=internal_cast<const double&>(x.upper());
+    const double& xl=internal_cast<const double&>(x.lower_value());
+    const double& xu=internal_cast<const double&>(x.upper_value());
     // Use machine epsilon instead of minimum to move away from zero
     const float fm=std::numeric_limits<float>::epsilon();
     volatile float tu=xu;
@@ -191,8 +191,8 @@ ValidatedFloat trunc(ValidatedFloat x, uint n)
 
 ValidatedFloat rec(ValidatedFloat i)
 {
-    volatile double& il=internal_cast<volatile double&>(i.lower());
-    volatile double& iu=internal_cast<volatile double&>(i.upper());
+    volatile double& il=internal_cast<volatile double&>(i.lower_value());
+    volatile double& iu=internal_cast<volatile double&>(i.upper_value());
     volatile double rl,ru;
     if(il>0 || iu<0) {
         rounding_mode_t rnd=get_rounding_mode();
@@ -210,10 +210,10 @@ ValidatedFloat rec(ValidatedFloat i)
 
 ValidatedFloat mul(ValidatedFloat i1, ValidatedFloat i2)
 {
-    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
-    volatile double& i2l=internal_cast<volatile double&>(i2.lower());
-    volatile double& i2u=internal_cast<volatile double&>(i2.upper());
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower_value());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper_value());
+    volatile double& i2l=internal_cast<volatile double&>(i2.lower_value());
+    volatile double& i2u=internal_cast<volatile double&>(i2.upper_value());
     volatile double rl,ru;
     rounding_mode_t rnd=get_rounding_mode();
     if(i1l>=0) {
@@ -253,8 +253,8 @@ ValidatedFloat mul(ValidatedFloat i1, ValidatedFloat i2)
 ValidatedFloat mul(ValidatedFloat i1, ExactFloat x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower_value());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper_value());
     volatile double& x2v=internal_cast<volatile double&>(x2.value());
     volatile double rl,ru;
     if(x2>=0) {
@@ -276,10 +276,10 @@ ValidatedFloat mul(ExactFloat x1, ValidatedFloat i2)
 ValidatedFloat div(ValidatedFloat i1, ValidatedFloat i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
-    volatile double& i2l=internal_cast<volatile double&>(i2.lower());
-    volatile double& i2u=internal_cast<volatile double&>(i2.upper());
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower_value());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper_value());
+    volatile double& i2l=internal_cast<volatile double&>(i2.lower_value());
+    volatile double& i2u=internal_cast<volatile double&>(i2.upper_value());
     volatile double rl,ru;
     if(i2l>0) {
         if(i1l>=0) {
@@ -313,8 +313,8 @@ ValidatedFloat div(ValidatedFloat i1, ValidatedFloat i2)
 ValidatedFloat div(ValidatedFloat i1, ExactFloat x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower_value());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper_value());
     volatile double& x2v=internal_cast<volatile double&>(x2.value());
     volatile double rl,ru;
     if(x2v>0) {
@@ -334,8 +334,8 @@ ValidatedFloat div(ExactFloat x1, ValidatedFloat i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& x1v=internal_cast<volatile double&>(x1.value());
-    volatile double& i2l=internal_cast<volatile double&>(i2.lower());
-    volatile double& i2u=internal_cast<volatile double&>(i2.upper());
+    volatile double& i2l=internal_cast<volatile double&>(i2.lower_value());
+    volatile double& i2u=internal_cast<volatile double&>(i2.upper_value());
     volatile double rl,ru;
     if(i2l<=0 && i2u>=0) {
         ARIADNE_THROW(DivideByZeroException,"ValidatedFloat div(Float x1, ValidatedFloat ivl2)","x1="<<x1<<", ivl2="<<i2);
@@ -353,8 +353,8 @@ ValidatedFloat div(ExactFloat x1, ValidatedFloat i2)
 ValidatedFloat sqr(ValidatedFloat i)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& il=internal_cast<volatile double&>(i.lower());
-    volatile double& iu=internal_cast<volatile double&>(i.upper());
+    volatile double& il=internal_cast<volatile double&>(i.lower_value());
+    volatile double& iu=internal_cast<volatile double&>(i.upper_value());
     volatile double rl,ru;
     if(il>0.0) {
         set_rounding_mode(downward);
@@ -392,9 +392,9 @@ ValidatedFloat pow(ValidatedFloat i, uint m)
     const ValidatedFloat& nvi=i;
     if(m%2==0) { i=abs(nvi); }
     set_rounding_mode(downward);
-    Float rl=pow_rnd(i.lower(),m);
+    Float rl=pow_rnd(i.lower_value(),m);
     set_rounding_mode(upward);
-    Float ru=pow_rnd(i.upper(),m);
+    Float ru=pow_rnd(i.upper_value(),m);
     set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
@@ -405,9 +405,9 @@ ValidatedFloat sqrt(ValidatedFloat i)
 {
     rounding_mode_t rnd = get_rounding_mode();
     set_rounding_downward();
-    Float rl=sqrt_rnd(i.lower());
+    Float rl=sqrt_rnd(i.lower_value());
     set_rounding_upward();
-    Float ru=sqrt_rnd(i.upper());
+    Float ru=sqrt_rnd(i.upper_value());
     set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
@@ -416,9 +416,9 @@ ValidatedFloat exp(ValidatedFloat i)
 {
     rounding_mode_t rnd = get_rounding_mode();
     set_rounding_downward();
-    Float rl=exp_rnd(i.lower());
+    Float rl=exp_rnd(i.lower_value());
     set_rounding_upward();
-    Float ru=exp_rnd(i.upper());
+    Float ru=exp_rnd(i.upper_value());
     set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
@@ -427,9 +427,9 @@ ValidatedFloat log(ValidatedFloat i)
 {
     rounding_mode_t rnd = get_rounding_mode();
     set_rounding_downward();
-    Float rl=log_rnd(i.lower());
+    Float rl=log_rnd(i.lower_value());
     set_rounding_upward();
-    Float ru=log_rnd(i.upper());
+    Float ru=log_rnd(i.upper_value());
     set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
@@ -443,30 +443,30 @@ ValidatedFloat sin(ValidatedFloat i)
 
 ValidatedFloat cos(ValidatedFloat i)
 {
-    ARIADNE_ASSERT(i.lower()<=i.upper());
+    ARIADNE_ASSERT(i.lower_value()<=i.upper_value());
     rounding_mode_t rnd = get_rounding_mode();
 
     static const ExactFloat two(2);
 
     if(i.radius()>2*_pi_down) { return ValidatedFloat(-1.0,+1.0); }
 
-    Float n=floor(i.lower().get_d()/(2*_pi_approx)+0.5);
+    Float n=floor(i.lower_value().get_d()/(2*_pi_approx)+0.5);
     i=i-two*ExactFloat(n)*pi_val;
 
-    ARIADNE_ASSERT(i.lower()<=pi_up);
-    ARIADNE_ASSERT(i.upper()>=-pi_up);
+    ARIADNE_ASSERT(i.lower_value()<=pi_up);
+    ARIADNE_ASSERT(i.upper_value()>=-pi_up);
 
     Float rl,ru;
-    if(i.lower()<=-pi_down) {
-        if(i.upper()<=0.0) { rl=-1.0; ru=cos_up(i.upper()); }
+    if(i.lower_value()<=-pi_down) {
+        if(i.upper_value()<=0.0) { rl=-1.0; ru=cos_up(i.upper_value()); }
         else { rl=-1.0; ru=+1.0; }
-    } else if(i.lower()<=0.0) {
-        if(i.upper()<=0.0) { rl=cos_down(i.lower()); ru=cos_up(i.upper()); }
-        else if(i.upper()<=pi_down) { rl=cos_down(max(-i.lower(),i.upper())); ru=+1.0; }
+    } else if(i.lower_value()<=0.0) {
+        if(i.upper_value()<=0.0) { rl=cos_down(i.lower_value()); ru=cos_up(i.upper_value()); }
+        else if(i.upper_value()<=pi_down) { rl=cos_down(max(-i.lower_value(),i.upper_value())); ru=+1.0; }
         else { rl=-1.0; ru=+1.0; }
-    } else if(i.lower()<=pi_up) {
-        if(i.upper()<=pi_down) { rl=cos_down(i.upper()); ru=cos_up(i.lower()); }
-        else if(i.upper()<=2*_pi_down) { rl=-1.0; ru=cos_up(min(i.lower(),sub_down(2*_pi_down,i.upper()))); }
+    } else if(i.lower_value()<=pi_up) {
+        if(i.upper_value()<=pi_down) { rl=cos_down(i.upper_value()); ru=cos_up(i.lower_value()); }
+        else if(i.upper_value()<=2*_pi_down) { rl=-1.0; ru=cos_up(min(i.lower_value(),sub_down(2*_pi_down,i.upper_value()))); }
         else { rl=-1.0; ru=+1.0; }
     } else {
         assert(false);
@@ -531,14 +531,14 @@ ValidatedFloat& ValidatedFloat::operator=(const Rational& q) {
 std::ostream&
 operator<<(std::ostream& os, const ValidatedFloat& ivl)
 {
-    //if(ivl.lower()==ivl.upper()) { return os << "{" << std::setprecision(ValidatedFloat::output_precision) << ivl.lower().get_d() << ; }
+    //if(ivl.lower_value()==ivl.upper_value()) { return os << "{" << std::setprecision(ValidatedFloat::output_precision) << ivl.lower_value().get_d() << ; }
     rounding_mode_t rnd=get_rounding_mode();
     os << '{';
     set_rounding_downward();
-    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << ivl.lower().get_d();
+    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << ivl.lower_value().get_d();
     os << ':';
     set_rounding_upward();
-    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << ivl.upper().get_d();
+    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << ivl.upper_value().get_d();
     set_rounding_mode(rnd);
     os << '}';
     return os;
@@ -557,13 +557,13 @@ operator<<(std::ostream& os, const ValidatedFloat& ivl)
 std::ostream&
 operator<<(std::ostream& os, const ValidatedFloat& ivl)
 {
-    if(ivl.lower()==ivl.upper()) {
-        return os << std::setprecision(18) << ivl.lower();
+    if(ivl.lower_value()==ivl.upper_value()) {
+        return os << std::setprecision(18) << ivl.lower_value();
     }
 
     std::stringstream iss,uss;
-    iss << std::setprecision(18) << ivl.lower();
-    uss << std::setprecision(18) << ivl.upper();
+    iss << std::setprecision(18) << ivl.lower_value();
+    uss << std::setprecision(18) << ivl.upper_value();
 
     std::string lstr,ustr;
     iss >> lstr; uss >> ustr;

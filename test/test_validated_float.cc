@@ -134,10 +134,10 @@ void
 TestValidatedFloat::test_correct_rounded_arithmetic()
 {
     ValidatedFloat onethird=ValidatedFloat(1)/ValidatedFloat(3);
-    ARIADNE_TEST_COMPARE( onethird.lower(), < , onethird.upper() );
+    ARIADNE_TEST_COMPARE( onethird.lower_value(), < , onethird.upper_value() );
     ValidatedFloat one_approx=onethird*ValidatedFloat(3);
-    ARIADNE_TEST_COMPARE( one_approx.lower(), < , 1.0 );
-    ARIADNE_TEST_COMPARE( one_approx.upper(), > , 1.0 );
+    ARIADNE_TEST_COMPARE( one_approx.lower_value(), < , 1.0 );
+    ARIADNE_TEST_COMPARE( one_approx.upper_value(), > , 1.0 );
 }
 
 
@@ -265,11 +265,11 @@ TestValidatedFloat::test_constructors()
 
     // Construct from pair
     ValidatedFloat ivld1(Float(1.125),Float(2.25));
-    ARIADNE_TEST_ASSERT(ivld1.lower()==1.125); ARIADNE_TEST_ASSERT(ivld1.upper()==2.25);
+    ARIADNE_TEST_ASSERT(ivld1.lower_value()==1.125); ARIADNE_TEST_ASSERT(ivld1.upper_value()==2.25);
 
     // Default constructor
     ValidatedFloat ivld2;
-    if(ivld2.lower()>ivld2.upper()) {
+    if(ivld2.lower_value()>ivld2.upper_value()) {
         ARIADNE_TEST_WARN("ValidatedFloat default constructor returns an empty set.");
     } else {
         ARIADNE_TEST_ASSERT((bool)(ivld2==ValidatedFloat(zero,zero)));
@@ -279,35 +279,35 @@ TestValidatedFloat::test_constructors()
 #ifdef HAVE_GMPXX_H
     ValidatedFloat ivld3(Rational(21,10),Rational(16,5));
     cout<<ivld3<<std::endl;
-    ARIADNE_TEST_COMPARE(make_exact(ivld3.lower()),<,Rational(21,10));
-    ARIADNE_TEST_COMPARE(make_exact(ivld3.upper()),>,Rational(16,5));
+    ARIADNE_TEST_COMPARE(make_exact(ivld3.lower_value()),<,Rational(21,10));
+    ARIADNE_TEST_COMPARE(make_exact(ivld3.upper_value()),>,Rational(16,5));
 #else
     ValidatedFloat ivld3(2.1,3.2);
 #endif // HAVE_GMPXX_H
 
     // Constructor from approximate values
     ValidatedFloat ivld4(2.1,3.2);
-    ARIADNE_TEST_COMPARE(ivld4.lower(),<=,2.1);
-    ARIADNE_TEST_COMPARE(ivld4.upper(),>=,3.2);
+    ARIADNE_TEST_COMPARE(ivld4.lower_value(),<=,2.1);
+    ARIADNE_TEST_COMPARE(ivld4.upper_value(),>=,3.2);
 
 #ifdef HAVE_GMPXX_H
     // Approximate constructor from a single value
     ValidatedFloat ivld5(Rational(1,3));
-    ARIADNE_TEST_COMPARE(make_exact(ivld5.lower()),<,Rational(1,3));
-    ARIADNE_TEST_COMPARE(make_exact(ivld5.upper()),>,Rational(1,3));
+    ARIADNE_TEST_COMPARE(make_exact(ivld5.lower_value()),<,Rational(1,3));
+    ARIADNE_TEST_COMPARE(make_exact(ivld5.upper_value()),>,Rational(1,3));
 #else
     ValidatedFloat ivld5(1./3.);
 #endif // HAVE_GMPXX_H
 
     // Exact constructor from a single value
     ValidatedFloat ivld6(Float(1.25));
-    ARIADNE_TEST_EQUAL(ivld6.lower(),Float(1.25));
-    ARIADNE_TEST_EQUAL(ivld6.upper(),Float(1.25));
+    ARIADNE_TEST_EQUAL(ivld6.lower_value(),Float(1.25));
+    ARIADNE_TEST_EQUAL(ivld6.upper_value(),Float(1.25));
 
     // Empty interval
     ValidatedFloat ivld7;
     ARIADNE_TEST_EXECUTE(ivld7.set_empty());
-    ARIADNE_TEST_ASSERT(ivld7.lower()==+inf); ARIADNE_TEST_ASSERT(ivld7.upper()==-inf);
+    ARIADNE_TEST_ASSERT(ivld7.lower_value()==+inf); ARIADNE_TEST_ASSERT(ivld7.upper_value()==-inf);
 }
 
 void TestValidatedFloat::test_class()
@@ -315,22 +315,22 @@ void TestValidatedFloat::test_class()
     // Test lower, upper, midpoint, radius, width
 
     // Tests for exact operations
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).lower(),-0.25);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).upper(),0.5);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).lower_value(),-0.25);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).upper_value(),0.5);
     ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).midpoint(),0.125);
     ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).radius(),0.375)
     ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).width(),0.75);
 
     // Tests for inexact operations
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).lower(),-0.33333333333333331483);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).upper(),0.66666666666666662966);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).lower_value(),-0.33333333333333331483);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).upper_value(),0.66666666666666662966);
     ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).midpoint(),0.16666666666666665741);
     ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).radius(),0.5)
     ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).width(),1.0);
 
     // Tests for inexact operations
-    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).lower(),-0.33333333333333337034);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).upper(),0.66666666666666674068);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).lower_value(),-0.33333333333333337034);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).upper_value(),0.66666666666666674068);
     ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).midpoint(),0.16666666666666668517);
     ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).radius(),0.50000000000000011102)
     ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).width(),1.000000000000000222);
@@ -347,7 +347,7 @@ void TestValidatedFloat::test_input()
 
     cout << "ivl1=" << ivl1 << "  ivl2=" << ivl2 << endl;
     ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,ivl2);
-    ARIADNE_TEST_ASSERT(ivl1.lower()==ivl2.lower() && ivl1.upper()==ivl2.upper());
+    ARIADNE_TEST_ASSERT(ivl1.lower_value()==ivl2.lower_value() && ivl1.upper_value()==ivl2.upper_value());
     ARIADNE_TEST_ASSERT(equal(ivl1,ivl2));
 
     iss >> ivl1;
@@ -368,7 +368,7 @@ void TestValidatedFloat::test_comparison() {
     ValidatedFloat& ivl1ref=ivl1;
     ivl1ref=ValidatedFloat(5.25,7.375);
     cout << "ivl1ref=" << ivl1ref << endl;
-    ARIADNE_TEST_ASSERT(ivl1ref.lower()==Float(5.25));
+    ARIADNE_TEST_ASSERT(ivl1ref.lower_value()==Float(5.25));
 }
 
 void TestValidatedFloat::test_aliasing() {
@@ -397,27 +397,27 @@ void TestValidatedFloat::test_monotone_functions()
     ValidatedFloat two(2.0);
     ValidatedFloat sqrttwo=sqrt(two);
     ARIADNE_TEST_PRINT(sqrttwo);
-    ARIADNE_TEST_COMPARE(sqrttwo.lower(),<=,1.4142135623730949);
-    ARIADNE_TEST_COMPARE(sqrttwo.lower(),> ,1.4142135623730947);
-    ARIADNE_TEST_COMPARE(sqrttwo.upper(),>=,1.4142135623730951);
-    ARIADNE_TEST_COMPARE(sqrttwo.upper(),< ,1.4142135623730954);
+    ARIADNE_TEST_COMPARE(sqrttwo.lower_value(),<=,1.4142135623730949);
+    ARIADNE_TEST_COMPARE(sqrttwo.lower_value(),> ,1.4142135623730947);
+    ARIADNE_TEST_COMPARE(sqrttwo.upper_value(),>=,1.4142135623730951);
+    ARIADNE_TEST_COMPARE(sqrttwo.upper_value(),< ,1.4142135623730954);
 
     ValidatedFloat one(1.0);
     ValidatedFloat expone=exp(one);
     ARIADNE_TEST_PRINT(expone);
-    ARIADNE_TEST_COMPARE(expone.lower(),<,2.71828182845905);
-    ARIADNE_TEST_COMPARE(expone.lower(),>,2.71828182845903);
-    ARIADNE_TEST_COMPARE(expone.upper(),>,2.71828182845904);
-    ARIADNE_TEST_COMPARE(expone.upper(),<,2.71828182845906);
-    ARIADNE_TEST_ASSERT(expone.lower()<expone.upper());
+    ARIADNE_TEST_COMPARE(expone.lower_value(),<,2.71828182845905);
+    ARIADNE_TEST_COMPARE(expone.lower_value(),>,2.71828182845903);
+    ARIADNE_TEST_COMPARE(expone.upper_value(),>,2.71828182845904);
+    ARIADNE_TEST_COMPARE(expone.upper_value(),<,2.71828182845906);
+    ARIADNE_TEST_ASSERT(expone.lower_value()<expone.upper_value());
 
     ValidatedFloat e(2.7182818284590451,2.7182818284590455);
     ValidatedFloat loge=log(e);
     ARIADNE_TEST_PRINT(e);
-    ARIADNE_TEST_COMPARE(loge.lower(),<,1);
-    ARIADNE_TEST_COMPARE(loge.lower(),>,0.9999999999998);
-    ARIADNE_TEST_COMPARE(loge.upper(),>,1);
-    ARIADNE_TEST_COMPARE(loge.upper(),<,1.000000000002);
+    ARIADNE_TEST_COMPARE(loge.lower_value(),<,1);
+    ARIADNE_TEST_COMPARE(loge.lower_value(),>,0.9999999999998);
+    ARIADNE_TEST_COMPARE(loge.upper_value(),>,1);
+    ARIADNE_TEST_COMPARE(loge.upper_value(),<,1.000000000002);
 }
 
 void TestValidatedFloat::test_trigonometric_functions()
@@ -426,11 +426,11 @@ void TestValidatedFloat::test_trigonometric_functions()
         ValidatedFloat x(6.283185307179586,6.283185307179587);
         ValidatedFloat sinx=sin(x);
         ARIADNE_TEST_PRINT(x);
-        ARIADNE_TEST_COMPARE(sinx.lower(),<,0.0);
-        ARIADNE_TEST_COMPARE(sinx.lower(),>,-1e-14);
-        ARIADNE_TEST_COMPARE(sinx.upper(),>,0.0);
-        ARIADNE_TEST_COMPARE(sinx.upper(),<,+1e-14);
-        ARIADNE_TEST_ASSERT(sinx.lower()<sinx.upper());
+        ARIADNE_TEST_COMPARE(sinx.lower_value(),<,0.0);
+        ARIADNE_TEST_COMPARE(sinx.lower_value(),>,-1e-14);
+        ARIADNE_TEST_COMPARE(sinx.upper_value(),>,0.0);
+        ARIADNE_TEST_COMPARE(sinx.upper_value(),<,+1e-14);
+        ARIADNE_TEST_ASSERT(sinx.lower_value()<sinx.upper_value());
     }
     catch(...) { }
 
@@ -438,9 +438,9 @@ void TestValidatedFloat::test_trigonometric_functions()
         ValidatedFloat x(7.0685834705770345);
         ValidatedFloat sinx=sin(x);
         ARIADNE_TEST_PRINT(x);
-        ARIADNE_TEST_COMPARE(sinx.lower(),<,0.7071067811866);
-        ARIADNE_TEST_COMPARE(sinx.upper(),>,0.7071067811865);
-        ARIADNE_TEST_ASSERT(sinx.lower()<sinx.upper());
+        ARIADNE_TEST_COMPARE(sinx.lower_value(),<,0.7071067811866);
+        ARIADNE_TEST_COMPARE(sinx.upper_value(),>,0.7071067811865);
+        ARIADNE_TEST_ASSERT(sinx.lower_value()<sinx.upper_value());
     }
     catch(...) { }
 
@@ -453,11 +453,11 @@ void TestValidatedFloat::regression_tests() {
         ValidatedFloat x(1.5707963267948966,1.5707963267948968);
         ValidatedFloat cosx=cos(x);
         ARIADNE_TEST_PRINT(x);
-        ARIADNE_TEST_COMPARE(cosx.lower(),<,0.0);
-        ARIADNE_TEST_COMPARE(cosx.lower(),>,-1e-14);
-        ARIADNE_TEST_COMPARE(cosx.upper(),>,0.0);
-        ARIADNE_TEST_COMPARE(cosx.upper(),<,+1e-14);
-        ARIADNE_TEST_ASSERT(cosx.lower()<cosx.upper());
+        ARIADNE_TEST_COMPARE(cosx.lower_value(),<,0.0);
+        ARIADNE_TEST_COMPARE(cosx.lower_value(),>,-1e-14);
+        ARIADNE_TEST_COMPARE(cosx.upper_value(),>,0.0);
+        ARIADNE_TEST_COMPARE(cosx.upper_value(),<,+1e-14);
+        ARIADNE_TEST_ASSERT(cosx.lower_value()<cosx.upper_value());
     }
 
 }

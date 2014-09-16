@@ -59,7 +59,7 @@ class RealBody : public RealInterface {
     ApproximateFloat _flt;
   protected:
     RealBody(const ValidatedFloat& ivl, const ApproximateFloat& flt) : _ivl(ivl), _flt(flt) {
-        ARIADNE_ASSERT((ivl.lower()<=flt.get_flt()) && (flt.get_flt()<=ivl.upper())); }
+        ARIADNE_ASSERT((ivl.lower_value()<=flt.value()) && (flt.value()<=ivl.upper_value())); }
     RealBody(const ValidatedFloat& ivl) : _ivl(ivl), _flt(midpoint(ivl)) { }
   public:
     virtual operator ApproximateFloat () const final { return _flt; }
@@ -184,7 +184,7 @@ Real& Real::operator=(const Real& x) { this->_ptr=x._ptr; return *this; }
 double Real::get_d() const { return this->_ptr->operator ApproximateFloat().get_d(); }
 
 Real::operator Interval() const { return Ariadne::Interval(this->_ptr->operator ValidatedFloat()); }
-Real::operator Float() const { return Ariadne::Float(this->_ptr->operator ApproximateFloat().get_flt()); }
+Real::operator Float() const { return Ariadne::Float(this->_ptr->operator ApproximateFloat()); }
 
 ApproximateFloat::ApproximateFloat(const Real& x) : ApproximateFloat(x._ptr->operator ApproximateFloat()) { }
 ValidatedFloat::ValidatedFloat(const Real& x) : ValidatedFloat(x._ptr->operator ValidatedFloat()) { }

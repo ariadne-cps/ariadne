@@ -384,8 +384,10 @@ void export_validated_float()
     validated_float_class.def(self <= self);
     validated_float_class.def(self > self);
     validated_float_class.def(self < self);
-    validated_float_class.def("lower", &ValidatedFloat::lower, return_value_policy<copy_const_reference>());
-    validated_float_class.def("upper", &ValidatedFloat::upper, return_value_policy<copy_const_reference>());
+    validated_float_class.def("lower", &ValidatedFloat::lower);
+    validated_float_class.def("upper", &ValidatedFloat::upper);
+    validated_float_class.def("lower_value", &ValidatedFloat::lower_value, return_value_policy<copy_const_reference>());
+    validated_float_class.def("upper_value", &ValidatedFloat::upper_value, return_value_policy<copy_const_reference>());
     validated_float_class.def("midpoint", &ValidatedFloat::midpoint);
     validated_float_class.def("radius", &ValidatedFloat::radius);
     validated_float_class.def("width", &ValidatedFloat::width);

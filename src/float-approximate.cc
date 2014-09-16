@@ -49,8 +49,10 @@ uint ExactFloat::output_precision = 18;
 ApproximateFloat::ApproximateFloat(Dyadic const& b) : ApproximateFloat(b.operator Rational()) { }
 ApproximateFloat::ApproximateFloat(Decimal const& d) : ApproximateFloat(d.operator Rational()) { }
 
-ApproximateFloat::ApproximateFloat(ExactFloat const& x) : ApproximateFloat(x.operator Float()) { }
-ApproximateFloat::ApproximateFloat(ValidatedFloat const& x) : ApproximateFloat(half_exact(add_near(x.lower(),x.upper()))) { }
+ApproximateFloat::ApproximateFloat(ExactFloat const& x) : ApproximateFloat(x.value()) { }
+ApproximateFloat::ApproximateFloat(ValidatedFloat const& x) : ApproximateFloat(half_exact(add_near(x.lower_value(),x.upper_value()))) { }
+ApproximateFloat::ApproximateFloat(UpperFloat const& x) : ApproximateFloat(x.value()) { }
+ApproximateFloat::ApproximateFloat(LowerFloat const& x) : ApproximateFloat(x.value()) { }
 
 #ifdef HAVE_GMPXX_H
 ExactFloat::operator Rational() const {

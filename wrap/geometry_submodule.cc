@@ -145,6 +145,11 @@ struct to_python< ListSet< HybridBasicSet<ES> > > {
     static const PyTypeObject* get_pytype() { return &PyDict_Type; }
 };
 
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ValidatedFloat>& x);
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Interval>& x) {
+    return os << PythonRepresentation<ValidatedFloat>(ValidatedFloat(x.reference()));
+}
+
 
 
 class OpenSetWrapper

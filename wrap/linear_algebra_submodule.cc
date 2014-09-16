@@ -144,7 +144,10 @@ struct from_python< Matrix<X> >
 
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Float>& repr);
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Interval>& repr);
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ApproximateFloat>& repr);
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ValidatedFloat>& repr);
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Rational>& repr);
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Real>& repr);
 
 template<class X> std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Vector<X> >& repr) {
     Vector<X> const& v=repr.reference();

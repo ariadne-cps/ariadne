@@ -337,6 +337,7 @@ void export_exact_float()
     exact_float_class.def(self/self);
 
     exact_float_class.def("set_output_precision", &ExactFloat::set_output_precision);
+    exact_float_class.staticmethod("set_output_precision");
     exact_float_class.def("__str__", &__cstr__<ExactFloat>);
     exact_float_class.def("__repr__", &__cstr__<ExactFloat>);
 }
@@ -519,8 +520,6 @@ void export_float()
 
     implicitly_convertible<double,Float>();
 
-    float_class.staticmethod("set_output_precision");
-
     def("min",(Float(*)(Float,Float)) &Ariadne::min);
     def("max",(Float(*)(Float,Float)) &Ariadne::max);
     def("abs", (Float(*)(Float)) &Ariadne::abs);
@@ -549,6 +548,7 @@ numeric_submodule()
 {
     export_tribool();
     export_float();
+    export_approximate_float();
     export_validated_float();
     export_exact_float();
     export_real();

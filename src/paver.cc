@@ -42,7 +42,7 @@
 
 namespace Ariadne {
 
-Pair<uint,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const IntervalVector& domain);
+Pair<uint,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const Box& domain);
 
 namespace {
 

@@ -33,21 +33,18 @@ add_library(ariadne
 	box.cc 
 	curve.cc 
 	orbit.cc 
-	function_set.cc 
-	taylor_set.cc 
+	function_set.cc
 	grid_set.cc 
 	affine_set.cc 
 	map_evolver.cc 
 	vector_field_evolver.cc 
-	discretiser.cc 
 	logging.cc 
 	graphics.cc 
 	hybrid_set.cc 
 	hybrid_enclosure.cc 
 	hybrid_automaton-monolithic.cc 
 	hybrid_automaton-composite.cc 
-	hybrid_evolver.cc 
-	hybrid_discretiser.cc 
+	hybrid_evolver.cc
 	hybrid_reachability_analyser.cc
 )
 

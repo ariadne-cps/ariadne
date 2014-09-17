@@ -14,7 +14,6 @@ set(UNIT_TESTS
 	test_taylor_function
 	test_function_sets
 	test_affine_sets
-	test_taylor_sets
 	test_grid_set
 	test_linear_programming
 	test_nonlinear_programming
@@ -23,14 +22,12 @@ set(UNIT_TESTS
 	test_solvers
 	test_discrete_evolution
 	test_continuous_evolution
-	test_discretiser
 	test_graphics
 	test_serialization
 	test_hybrid_set
 	test_hybrid_automaton
 	test_hybrid_evolver
 	test_hybrid_evolution
-	test_hybrid_discretiser
 	test_hybrid_reachability_analyser
 )
 

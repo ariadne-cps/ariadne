@@ -1,6 +1,7 @@
-set(UNIT_TESTS 
+set(UNIT_TESTS
  	test_float
-	test_interval 
+    test_validated_float
+	test_interval
 	test_vector
 	test_matrix
 	test_multi_index

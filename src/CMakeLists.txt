@@ -11,6 +11,8 @@ add_library(ariadne
     integer.cc 
 	rational.cc 
 	float.cc 
+    float-approximate.cc
+    float-validated.cc
 	interval.cc 
 	real.cc 
 	vector.cc 
@@ -18,7 +20,8 @@ add_library(ariadne
 	differential.cc 
 	affine.cc 
 	polynomial.cc 
-	expression.cc 
+	expression.cc
+    enclosure.cc
 	function.cc 
 	algebra.cc 
 	taylor_model.cc  
@@ -35,11 +38,14 @@ add_library(ariadne
 	orbit.cc 
 	function_set.cc
 	grid_set.cc 
-	affine_set.cc 
+	affine_set.cc
+    expression_set.cc 
 	map_evolver.cc 
+    paver.cc
 	vector_field_evolver.cc 
 	logging.cc 
 	graphics.cc 
+    drawer.cc
 	hybrid_set.cc 
 	hybrid_enclosure.cc 
 	hybrid_automaton-monolithic.cc 

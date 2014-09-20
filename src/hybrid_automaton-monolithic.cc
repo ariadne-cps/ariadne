@@ -21,9 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <map>
-
+#include "functional.h"
 #include "config.h"
+
+#include <map>
 
 #include "macros.h"
 #include "stlio.h"

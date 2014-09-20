@@ -21,10 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "functional.h"
+#include "config.h"
+
 #include <map>
 #include <boost/weak_ptr.hpp>
-
-#include "config.h"
 
 #include "macros.h"
 #include "stlio.h"

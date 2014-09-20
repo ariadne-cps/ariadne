@@ -21,12 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "standard.h"
+#include "config.h"
+
 #include <cstdarg>
 #include <sstream>
 #include <string>
 #include <vector>
-
-#include "config.h"
 
 #include "point.h"
 #include "box.h"

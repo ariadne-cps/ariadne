@@ -1,8 +1,8 @@
 /***************************************************************************
- *            curve.code.h
+ *            curve.cc
  *
  *  Copyright  2007  Pieter Collins
- *  pieter.collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*
@@ -21,9 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <cassert>
+#include "functional.h"
 
 #include "config.h"
+
+#include <cassert>
 
 #include "vector.h"
 #include "matrix.h"

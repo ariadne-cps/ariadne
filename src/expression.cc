@@ -20,6 +20,8 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include "standard.h"
 #include "config.h"
 
 #include "expression.h"
@@ -27,7 +29,6 @@
 #include "space.h"
 #include "valuation.h"
 
-#include "numeric.h"
 #include "formula.h"
 
 namespace Ariadne {

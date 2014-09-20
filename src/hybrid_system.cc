@@ -23,6 +23,8 @@
 
 #include <map>
 
+#include "functional.h"
+
 #include "config.h"
 
 #include "macros.h"

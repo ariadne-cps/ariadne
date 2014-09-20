@@ -25,9 +25,10 @@
 // "Interior-point methods for nonconvex nonlinear programming: Jamming and comparative numerical testing"
 // For some of the terminology used
 
-#include <limits>
-
+#include "functional.h"
 #include "config.h"
+
+#include <limits>
 
 #include "macros.h"
 #include "logging.h"

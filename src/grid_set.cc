@@ -22,10 +22,11 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "functional.h"
+#include "config.h"
+
 #include <iostream>
 #include <iomanip>
-
-#include "config.h"
 
 #include "macros.h"
 #include "exceptions.h"

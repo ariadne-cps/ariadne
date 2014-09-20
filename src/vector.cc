@@ -20,10 +20,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include "numeric.h"
 #include "config.h"
 
 #include "macros.h"
-#include "numeric.h"
 #include "vector.h"
 
 namespace Ariadne {
@@ -171,6 +172,26 @@ Vector<Float> upper_bounds(const Vector<Interval>& v)
     Vector<Float> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
         r[i]=v[i].upper();
+    }
+    return r;
+}
+
+Vector<Interval> hull(const Vector<Float>& v1, const Vector<Float>& v2)
+{
+    ARIADNE_ASSERT(v1.size()==v2.size());
+    Vector<Interval> r(v1.size());
+    for(size_t i=0; i!=v1.size(); ++i) {
+        r[i]=hull(v1[i],v2[i]);
+    }
+    return r;
+}
+
+Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Float>& v2)
+{
+    ARIADNE_ASSERT(v1.size()==v2.size());
+    Vector<Interval> r(v1.size());
+    for(size_t i=0; i!=v1.size(); ++i) {
+        r[i]=hull(v1[i],v2[i]);
     }
     return r;
 }

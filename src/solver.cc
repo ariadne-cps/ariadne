@@ -20,7 +20,10 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include "functional.h"
 #include "config.h"
+
 #include "interval.h"
 #include "function_model.h"
 
@@ -392,7 +395,7 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
             return h;
         }
     }
-    
+
     ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","Could not prove existence of a solution in "<<ix<<".");
 
 
@@ -521,7 +524,7 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
 
     ValidatedScalarFunctionModel z=h[0]*Real(0);
     ValidatedVectorFunctionModel idh=join(id,h);
-    
+
     Matrix<ValidatedScalarFunctionModel> J(n,n,z);
     for(uint i=0; i!=n; ++i) {
         for(uint j=0; j!=n; ++j) {

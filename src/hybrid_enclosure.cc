@@ -20,6 +20,8 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include "functional.h"
 #include "config.h"
 
 #include "numeric.h"
@@ -321,7 +323,7 @@ void HybridEnclosure::bound_time(ValidatedScalarFunction tmax) {
 
 void HybridEnclosure::set_time(Real time)
 {
-    this->_set.new_zero_parameter_constraint(this->time_function()-Interval(time));
+    this->_set.new_zero_parameter_constraint(this->time_function()-ValidatedNumberType(time));
 }
 
 void HybridEnclosure::set_time(ValidatedScalarFunction time)
@@ -332,7 +334,7 @@ void HybridEnclosure::set_time(ValidatedScalarFunction time)
 
 void HybridEnclosure::set_maximum_time(DiscreteEvent event, Float final_time)
 {
-    this->_set.new_negative_parameter_constraint(this->time_function()-final_time); // Deprecated
+    this->_set.new_negative_parameter_constraint(this->time_function()-ValidatedNumberType(final_time)); // Deprecated
 }
 
 void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ValidatedScalarFunction constraint) {

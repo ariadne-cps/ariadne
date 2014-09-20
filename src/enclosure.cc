@@ -21,9 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <iomanip>
-
+#include "functional.h"
 #include "config.h"
+
+#include <iomanip>
 
 #include "enclosure.h"
 
@@ -59,6 +60,8 @@
 #include "discrete_event.h"
 
 #include "logging.h"
+
+#include "functional.h"
 
 #include "config.h"
 #ifdef HAVE_CAIRO_H

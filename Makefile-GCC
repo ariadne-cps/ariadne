@@ -1,0 +1,221 @@
+all: lib tests wrap examples
+
+VPATH = include src test wrap examples
+
+HDR = \
+	numeric.h functional.h ariadne.h
+
+LIB_NUMERIC_SRC = \
+	logging.cc operators.cc integer.cc rational.cc decimal.cc \
+	float.cc float-approximate.cc float-validated.cc \
+	interval.cc real.cc
+
+LIB_ALGEBRA_SRC = \
+	vector.cc matrix.cc differential.cc algebra.cc \
+
+LIB_FUNCTION_SRC = \
+	affine.cc polynomial.cc affine_model.cc taylor_model.cc  \
+	function.cc symbolic_function.cc taylor_function.cc  \
+
+LIB_SOLVER_SRC = \
+	solver.cc \
+	integrator.cc \
+	constraint_solver.cc \
+	simplex_algorithm.cc \
+	linear_programming.cc \
+	nonlinear_programming.cc
+
+LIB_GEOMETRY_SRC = \
+	point.cc \
+	box.cc \
+	curve.cc \
+	orbit.cc \
+	function_set.cc \
+	grid_set.cc \
+	paver.cc \
+	affine_set.cc \
+	enclosure.cc \
+	drawer.cc \
+	graphics.cc
+
+LIB_DYNAMICS_SRC = \
+	map_evolver.cc \
+	vector_field_evolver.cc
+
+LIB_EXPRESSION_SRC = \
+	expression.cc \
+	expression_set.cc \
+
+LIB_HYBRID_SRC = \
+	hybrid_set.cc \
+	hybrid_enclosure.cc \
+	hybrid_automaton-monolithic.cc \
+	hybrid_automaton-composite.cc \
+	hybrid_automaton-restrictive.cc \
+	hybrid_simulator.cc \
+	hybrid_evolver.cc \
+	hybrid_reachability_analyser.cc \
+	hybrid_graphics.cc
+
+LIB_EXTRAS_SRC = \
+	c1_taylor_function.cc \
+	runge_kutta_integrator.cc \
+	geometry.cc \
+	zonotope.cc \
+	polytope.cc \
+	polyhedron.cc \
+	textplot.cc
+
+LIB_SRC = $(LIB_NUMERIC_SRC) $(LIB_ALGEBRA_SRC) $(LIB_FUNCTION_SRC) $(LIB_SOLVER_SRC) $(LIB_GEOMETRY_SRC) $(LIB_EXPRESSION_SRC) $(LIB_HYBRID_SRC)
+
+WRAP_PYTHON_SRC = \
+	ariadne_module.cc utilities.cc \
+	numeric_submodule.cc linear_algebra_submodule.cc optimization_submodule.cc \
+	differentiation_submodule.cc function_submodule.cc calculus_submodule.cc \
+	geometry_submodule.cc solver_submodule.cc storage_submodule.cc \
+	system_submodule.cc evolution_submodule.cc graphics_submodule.cc
+
+WRAP_SRC = $(WRAP_PYTHON_SRC)
+
+TESTS_SRC = \
+	test_float.cc test_validated_float.cc \
+	test_vector.cc test_matrix.cc test_multi_index.cc test_expansion.cc test_differential.cc \
+	test_polynomial.cc test_procedure.cc test_function.cc test_taylor_model.cc test_taylor_function.cc \
+	test_interval.cc test_function_sets.cc test_affine_sets.cc test_paving.cc test_grid_set.cc \
+	test_linear_programming.cc test_nonlinear_programming.cc test_integrator.cc test_constraint_solver.cc test_solvers.cc \
+	test_graphics.cc \
+	test_expression.cc \
+	test_hybrid_set.cc test_hybrid_automaton.cc \
+	test_hybrid_simulator.cc test_hybrid_evolver.cc \
+	test_hybrid_evolution.cc test_hybrid_reachability_analyser.cc test_hybrid_graphics.cc \
+
+UNUSED_TESTS_SRC = \
+
+#	test_discrete_evolution test_continuous_evolution
+
+EXAMPLES_SRC = \
+	tutorial.cc \
+	bouncingball.cc \
+	watertank.cc \
+	heating.cc \
+	ballinabox.cc \
+	watertank-compositional.cc \
+	watertank-proportional.cc \
+	watertank-nonlinear.cc \
+	rectifier.cc \
+	robotarm-verification.cc \
+	robotarm-verification-essay.cc \
+
+ARIADNE_LIB = libariadne.so
+
+DEPS = $(patsubst %.cc,.deps/%.d,$(LIB_SRC) $(LIB_EXTRAS_SRC) $(TEST_SRC) $(WRAP_SRC) $(EXAMPLES_SRC))
+
+PCH = $(patsubst %.h,%.h.gch,$(HDR))
+LIB_OBJ = $(patsubst %.cc,obj/lib/%.o,$(LIB_SRC))
+LIB_EXTRAS_OBJ = $(patsubst %.cc,obj/lib/%.o,$(LIB_EXTRAS_SRC))
+TESTS_OBJ = $(patsubst %.cc,obj/test/%.o,$(TESTS_SRC))
+TESTS_BIN = $(patsubst obj/test/%.o,bin/%,$(TESTS_OBJ))
+WRAP_OBJ = $(patsubst %.cc,obj/wrap/%.o,$(WRAP_SRC))
+EXAMPLES_OBJ = $(patsubst %.cc,obj/examples/%.o,$(EXAMPLES_SRC))
+EXAMPLES_BIN = $(patsubst obj/examples/%.o,bin/%,$(EXAMPLES_OBJ))
+
+CXXFLAGS = -std=c++11 -fPIC
+
+INCLUDE_PATHS =  -iquote. -iquote./include
+LINK_LIBS=-lgmpxx -lgmp -lcairo -lboost_system
+
+PYTHON_VERSION=2.7
+PYTHON_INCLUDE_PATH=/usr/include/python$(PYTHON_VERSION)
+PYTHON_LIBRARY=python$(PYTHON_VERSION)
+PYTHON_LINK_LIBS=-lboost_python -l$(PYTHON_LIBRARY)
+
+
+phony: all help dirs deps lib tests wrap examples check
+
+help:
+#	@echo "\nDEPS"=$(DEPS)
+	@echo "\nPCH"=$(PCH)
+	@echo "\nLIB_SRC="$(LIB_SRC)
+#	@echo "LIB_OBJ="$(LIB_OBJ)
+	@echo "\nTESTS_SRC="$(TESTS_SRC)
+#	@echo "TESTS_OBJ="$(TESTS_OBJ)
+#	@echo "TESTS_BIN="$(TESTS_BIN)
+	@echo "\nWRAP_SRC="$(WRAP_SRC)
+#	@echo "WRAP_OBJ="$(WRAP_OBJ)
+	@echo "\nEXAMPLES_SRC="$(EXAMPLES_SRC)
+#	@echo "EXAMPLES_OBJ="$(EXAMPLES_OBJ)
+#	@echo "EXAMPLES_BIN="$(EXAMPLES_BIN)
+
+dirs:
+	@mkdir -p obj
+	@mkdir -p obj/lib/
+	@mkdir -p obj/wrap/
+	@mkdir -p obj/test/
+	@mkdir -p obj/examples/
+	@mkdir -p bin/
+	@mkdir -p check/
+	@mkdir -p bin/test/
+	@mkdir -p bin/examples/
+
+deps: dirs $(DEPS)
+
+lib: dirs deps libariadne.so
+
+wrap: lib $(WRAP_OBJ) ariadne.so
+
+tests: dirs $(TESTS_BIN) $(TESTS_OBJ) lib
+
+check: tests
+	@tried=0; failed=0; red='[0;31m'; green='[0;32m'; blue='[1;34m'; black='[m'; for test_exe in $(TESTS_BIN); do test_name=`basename $$test_exe`; echo "$$test_name:"; ./$$test_exe 1>$$test_exe.log; fails=$$?; tried=$$((tried+1)); if test $$fails -gt 0; then echo $$red"FAIL $$test_name: $$fails check(s) failed"$$black; failed=$$((failed+1)); else echo $$green"PASS $$test_name"$$black; fi; done; echo "$$failed out of $$tried tests failed"; mv test_*.png bin;
+
+examples: dirs $(EXAMPLES_BIN) $(EXAMPLES_OBJ) lib
+
+%.h.d: %.h
+	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > $*.h.d
+	@sed -i 's|.*.o:|$*.h.gch:|' $*.h.d
+
+.deps/%.d: %.cc | dirs
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -MM $< > .deps/$*.d
+	sed -i 's|.*.o:|.libs/$*.o:|' .deps/$*.d
+
+
+libariadne.so: $(PCH) $(LIB_OBJ)
+	g++ $(LIB_OBJ) $(LINK_LIBS) -shared -o libariadne.so
+
+ariadne.so: $(PCH) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) libariadne.so
+	g++ $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) $(PYTHON_LINK_LIBS) libariadne.so -shared -o ariadne.so
+
+%.h.gch: %.h
+	$(CXX) $(CXXFLAGS) $<
+
+obj/lib/%.o: src/%.cc
+	g++ $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
+
+obj/test/%.o: test/%.cc
+	g++ $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
+
+obj/wrap/%.o: wrap/%.cc
+	g++ $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -c -o $@ $<
+
+obj/examples/%.o: examples/%.cc
+	g++ $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
+
+bin/test_%: obj/test/test_%.o | libariadne.so
+#	@echo "\nlinking TESTS " $< " with libariadne.so to " $@
+	g++ $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
+
+bin/%: obj/examples/%.o libariadne.so
+#	@echo "\nlinking EXAMPLES " $< " with libariadne.so to " $@
+	g++ $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
+
+
+
+
+#wrap/boost_python.h.gch: boost_python.h
+#	$(CXX) $(CXXFLAGS) $< -I$(PYTHON_INCLUDE_PATH)
+
+#.libs/numeric_submodule.o: numeric_submodule.cc boost_python.h.gch integer.h rational.h float64.h
+#	$(CXX) $(CXXFLAGS) -c -o $@ $< -I$(PYTHON_INCLUDE_PATH)
+
+#ariadne_lite.so: $(WRAP_OBJ) .libs/logical.o .libs/integer.o .libs/rational.o .libs/real.o .libs/float64.o .libs/floatmp.o .libs/number.o \
+#		.libs/vector.o .libs/matrix.o .libs/multi_index.o .libs/expansion.o .libs/differential.o \

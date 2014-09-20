@@ -796,8 +796,8 @@ ConstrainedImageSet::write(std::ostream& os) const
 } // namespace Ariadne
 
 #include "procedure.h"
-#include <include/container.h>
-#include <include/vector.h>
+#include "container.h"
+#include "vector.h"
 
 namespace Ariadne {
 

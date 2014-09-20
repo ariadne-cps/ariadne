@@ -43,8 +43,8 @@
 
 #include "nonlinear_programming.h"
 #include "solver.h"
-#include <include/multi_index-noaliasing.h>
-#include <include/constraint_solver.h>
+#include "multi_index-noaliasing.h"
+#include "constraint_solver.h"
 
 namespace Ariadne {
 

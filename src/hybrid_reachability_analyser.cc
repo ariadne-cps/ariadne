@@ -57,7 +57,7 @@
 
 #include "logging.h"
 #include "graphics.h"
-#include <include/linear_programming.h>
+#include "linear_programming.h"
 
 
 namespace Ariadne {

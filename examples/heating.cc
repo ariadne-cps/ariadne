@@ -31,7 +31,7 @@
 #include "hybrid_evolver.h"
 #include "hybrid_simulator.h"
 #include "hybrid_graphics.h"
-#include <include/hybrid_enclosure.h>
+#include "hybrid_enclosure.h"
 
 using namespace Ariadne;
 

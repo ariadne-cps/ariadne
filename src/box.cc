@@ -32,7 +32,7 @@
 #include "box.h"
 #include "stlio.h"
 #include "point.h"
-#include <include/box.h>
+#include "box.h"
 
 typedef unsigned int uint;
 

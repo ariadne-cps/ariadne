@@ -31,7 +31,7 @@
 
 #include "affine.h"
 #include "taylor_function.h"
-#include <include/vector.h>
+#include "vector.h"
 
 namespace Ariadne {
 

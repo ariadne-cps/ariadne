@@ -36,7 +36,7 @@
 #include "hybrid_space.h"
 
 #include "hybrid_automaton-composite.h"
-#include <include/container.h>
+#include "container.h"
 
 namespace Ariadne {
 

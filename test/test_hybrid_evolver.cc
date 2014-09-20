@@ -482,7 +482,7 @@ void TestHybridEvolver::test_tangency() const {
 }
 
 #include "affine_set.h"
-#include <include/hybrid_set.h>
+#include "hybrid_set.h"
 
 void TestHybridEvolver::test_simultaneous_events() const {
     MonolithicHybridAutomaton automaton;

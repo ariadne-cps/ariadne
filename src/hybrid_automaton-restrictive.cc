@@ -37,7 +37,7 @@
 #include "hybrid_space.h"
 
 #include "hybrid_automaton-restrictive.h"
-#include <include/assignment.h>
+#include "assignment.h"
 
 namespace Ariadne {
 

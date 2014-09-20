@@ -38,7 +38,7 @@
 #include "integrator.h"
 #include "solver.h"
 #include <boost/concept_check.hpp>
-#include <include/hybrid_evolver.h>
+#include "hybrid_evolver.h"
 
 namespace {
 

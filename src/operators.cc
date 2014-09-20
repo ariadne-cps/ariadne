@@ -23,7 +23,7 @@
 #include "config.h"
 
 #include "operators.h"
-#include <include/operators.h>
+#include "operators.h"
 
 namespace Ariadne {
 

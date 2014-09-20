@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <include/interval.h>
-#include <include/function_model.h>
+#include "interval.h"
+#include "function_model.h"
 
 #include "solver.h"
 

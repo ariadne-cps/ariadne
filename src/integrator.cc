@@ -37,7 +37,7 @@
 #include "function_model.h"
 
 #include "polynomial.h"
-#include <include/function.h>
+#include "function.h"
 
 namespace Ariadne {
 
@@ -295,7 +295,7 @@ void TaylorPicardIntegrator::write(std::ostream& os) const {
 } // namespace Ariadne
 #include "graded.h"
 #include "procedure.h"
-#include <include/taylor_function.h>
+#include "taylor_function.h"
 namespace Ariadne {
 
 class FormulaFunction;

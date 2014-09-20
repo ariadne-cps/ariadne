@@ -65,8 +65,8 @@
 #include <cairo/cairo.h>
 #endif // HAVE_CAIRO_H
 #include <boost/concept_check.hpp>
-#include <include/operators.h>
-#include <include/space.h>
+#include "operators.h"
+#include "space.h"
 
 
 namespace Ariadne {

@@ -36,10 +36,10 @@
 #include "graphics.h"
 #include "hybrid_graphics.h"
 #include <boost/concept_check.hpp>
-#include <include/rounding.h>
-#include <include/assignment.h>
-#include <include/graphics_interface.h>
-#include <include/function_set.h>
+#include "rounding.h"
+#include "assignment.h"
+#include "graphics_interface.h"
+#include "function_set.h"
 
 namespace Ariadne {
 

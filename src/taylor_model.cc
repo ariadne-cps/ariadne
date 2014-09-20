@@ -41,9 +41,9 @@
 #include "algebra_mixin.tcc"
 
 #define VOLATILE ;
-#include <include/multi_index-noaliasing.h>
-#include <include/function_mixin.h>
-#include <include/vector.h>
+#include "multi_index-noaliasing.h"
+#include "function_mixin.h"
+#include "vector.h"
 
 namespace Ariadne {
 

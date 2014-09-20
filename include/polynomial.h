@@ -632,7 +632,7 @@ template<class X>
 std::ostream& operator<<(std::ostream& os, const Polynomial<X>& q) {
     bool first_term=true;
     bool identically_zero=true;
-    std::cerr<<"  "<<q.expansion()<<"\n";
+
     Polynomial<X> p=q;
     p.expansion().graded_sort();
     for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {

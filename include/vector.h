@@ -595,6 +595,8 @@ Vector<Interval> split(const Vector<Interval>& v, tribool lr);
 std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v);
 std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v, uint k);
 
+Vector<Interval> hull(const Vector<Float>& v1, const Vector<Float>& v2);
+Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Float>& v2);
 Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Interval>& v2);
 Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>& v2);
 Vector<Float> midpoint(const Vector<Interval>& v);

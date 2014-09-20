@@ -224,6 +224,11 @@ inline Interval hull(Interval i1, Float x2) {
     return Interval(min(i1.lower(),x2),max(i1.upper(),x2));
 }
 
+//! \related Interval \brief The hull of two points, equal to the smallest interval containing both.
+inline Interval hull(Float x1, Float x2) {
+    return Interval(min(x1,x2),max(x1,x2));
+}
+
 // An interval one ulp wider
 //! \related Interval \brief An interval containing the given interval in its interior.
 Interval widen(Interval i);

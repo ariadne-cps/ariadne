@@ -21,12 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "standard.h"
+#include "config.h"
+
 #include <iostream>
 #include <iomanip>
 #include <cassert>
 #include "container.h"
 
-#include "config.h"
 #include "macros.h"
 #include "integer.h"
 #include "float.h"

@@ -285,6 +285,8 @@ class Box
 Box product(const Box& bx1, const Box& bx2);
 //! \relates Box \brief The smallest box containing the two boxes.
 Box hull(const Box& bx1, const Box& bx2);
+Box hull(const Box& bx1, const Point& pt2);
+Box hull(const Point& pt1, const Point& pt2);
 //! \relates Box \brief The intersection of the two boxes.
 Box intersection(const Box& bx1, const Box& bx2);
 //! \relates Box \brief A box which is wider than the input, and has single-precision values.

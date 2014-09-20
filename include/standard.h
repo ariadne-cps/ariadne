@@ -1,7 +1,7 @@
 /***************************************************************************
- *            functional.h
+ *            standard.h
  *
- *  Copyright 2008-10  Pieter Collins
+ *  Copyright 2014  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,24 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file functional.h
- *  \brief Function classes. File suitable for use as a pre-compiled header.
+/*! \file standard.h
+ *  \brief Standard library and utility classes. File suitable for use as a pre-compiled header.
  */
 
-#ifndef ARIADNE_FUNCTIONAL_H
-#define ARIADNE_FUNCTIONAL_H
+#ifndef ARIADNE_STANDARD_H
+#define ARIADNE_STANDARD_H
 
-#include "numeric.h"
+#include <iostream>
+#include <iomanip>
+#include <cassert>
+#include <limits>
+#include <string>
+#include <cstdlib>
+#include <cmath>
+#include <limits>
 
-#include "differential.h"
+#include <stdint.h>
 
-#include "formula.h"
-#include "procedure.h"
-#include "affine.h"
-#include "polynomial.h"
-#include "function.h"
-#include "function_model.h"
-#include "taylor_function.h"
-#include "symbolic_function.h"
+#include "macros.h"
+#include "metaprogramming.h"
 
 #endif

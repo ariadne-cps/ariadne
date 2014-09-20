@@ -24,10 +24,13 @@
 /*! \file numeric.h
  *  \brief Number classes. File suitable for use as a pre-compiled header.
  */
+
 #ifndef ARIADNE_NUMERIC_H
 #define ARIADNE_NUMERIC_H
 
-#include "metaprogramming.h"
+#include "standard.h"
+
+#include "config.h"
 
 #include "integer.h"
 #include "rational.h"
@@ -35,6 +38,8 @@
 #include "dyadic.h"
 #include "float.h"
 #include "float-exact.h"
+#include "float-validated.h"
+#include "float-approximate.h"
 #include "interval.h"
 #include "real.h"
 

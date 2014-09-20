@@ -190,7 +190,7 @@ class ScalarTaylorFunction
     explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel<ValidatedTag>& m);
     explicit ScalarTaylorFunction(const DomainType& d, const Expansion<Float>& p, const Float& e, const Sweeper& swp);
 
-    ScalarTaylorFunction(const ScalarFunctionModel<ValidatedTag>& f);
+    explicit ScalarTaylorFunction(const ScalarFunctionModel<ValidatedTag>& f);
     ScalarTaylorFunction& operator=(const ScalarFunctionModel<ValidatedTag>& f);
 
     //! \brief Construct a ScalarTaylorFunction over the domain \a d from the function \a f.

@@ -22,6 +22,7 @@
  */
 
 
+#include "boost_python.h"
 #include "utilities.h"
 
 #include <boost/python.hpp>

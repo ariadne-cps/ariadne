@@ -37,6 +37,7 @@
 #include "hybrid_time.h"
 #include "hybrid_set.h"
 
+#include "boost_python.h"
 #include "utilities.h"
 
 using namespace boost::python;

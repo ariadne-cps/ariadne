@@ -3,7 +3,7 @@ all: lib tests wrap examples
 VPATH = include src test wrap examples
 
 HDR = \
-	numeric.h functional.h ariadne.h
+	standard.h numeric.h functional.h ariadne.h
 
 LIB_NUMERIC_SRC = \
 	logging.cc operators.cc integer.cc rational.cc decimal.cc \
@@ -26,13 +26,13 @@ LIB_SOLVER_SRC = \
 	nonlinear_programming.cc
 
 LIB_GEOMETRY_SRC = \
+	paver.cc \
 	point.cc \
 	box.cc \
 	curve.cc \
 	orbit.cc \
 	function_set.cc \
 	grid_set.cc \
-	paver.cc \
 	affine_set.cc \
 	enclosure.cc \
 	drawer.cc \
@@ -76,6 +76,8 @@ WRAP_PYTHON_SRC = \
 	system_submodule.cc evolution_submodule.cc graphics_submodule.cc
 
 WRAP_SRC = $(WRAP_PYTHON_SRC)
+
+WRAP_HDR = utility.h
 
 TESTS_SRC = \
 	test_float.cc test_validated_float.cc \
@@ -174,39 +176,50 @@ examples: dirs $(EXAMPLES_BIN) $(EXAMPLES_OBJ) lib
 	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > $*.h.d
 	@sed -i 's|.*.o:|$*.h.gch:|' $*.h.d
 
+.deps/numeric.d: include/numeric.h | dirs
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > .deps/numeric.d
+	sed -i 's|.*.o:|.libs/$*.o:|' .deps/$*.d
+
+.deps/functional.d: include/functional.h | dirs
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > .deps/$*.d
+	sed -i 's|.*.o:|.libs/$*.o:|' .deps/$*.d
+
 .deps/%.d: %.cc | dirs
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -MM $< > .deps/$*.d
 	sed -i 's|.*.o:|.libs/$*.o:|' .deps/$*.d
 
 
 libariadne.so: $(PCH) $(LIB_OBJ)
-	g++ $(LIB_OBJ) $(LINK_LIBS) -shared -o libariadne.so
+	$(CXX) $(LIB_OBJ) $(LINK_LIBS) -shared -o libariadne.so
 
 ariadne.so: $(PCH) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) libariadne.so
-	g++ $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) $(PYTHON_LINK_LIBS) libariadne.so -shared -o ariadne.so
+	$(CXX) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) $(PYTHON_LINK_LIBS) libariadne.so -shared -o ariadne.so
 
 %.h.gch: %.h
-	$(CXX) $(CXXFLAGS) $<
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) $<
+
+wrap/boost_python.h.gch: wrap/boost_python.h
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) $<
 
 obj/lib/%.o: src/%.cc
-	g++ $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
 obj/test/%.o: test/%.cc
-	g++ $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
-obj/wrap/%.o: wrap/%.cc
-	g++ $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -c -o $@ $<
+obj/wrap/%.o: wrap/%.cc wrap/boost_python.h.gch
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -c -o $@ $<
 
 obj/examples/%.o: examples/%.cc
-	g++ $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
 bin/test_%: obj/test/test_%.o | libariadne.so
 #	@echo "\nlinking TESTS " $< " with libariadne.so to " $@
-	g++ $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
 
 bin/%: obj/examples/%.o libariadne.so
 #	@echo "\nlinking EXAMPLES " $< " with libariadne.so to " $@
-	g++ $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
 
 
 

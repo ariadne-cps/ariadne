@@ -1,7 +1,7 @@
 /***************************************************************************
- *            ariadne_module.cc
+ *            boost_python.h
  *
- *  Copyright  2007-8  Pieter Collins
+ *  Copyright  2014  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,33 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "boost_python.h"
+/*! \file boost_python.h
+ *  Boost python headers for precompiling.
+ */
 
-void numeric_submodule();
-void linear_algebra_submodule();
-void optimization_submodule();
-void differentiation_submodule();
-void function_submodule();
-void calculus_submodule();
-void geometry_submodule();
-void solver_submodule();
-void storage_submodule();
-void system_submodule();
-void evolution_submodule();
-void graphics_submodule();
+#ifndef ARIADNE_BOOST_PYTHON_H
+#define ARIADNE_BOOST_PYTHON_H
 
-BOOST_PYTHON_MODULE(ariadne)
-{
-    numeric_submodule();
-    linear_algebra_submodule();
-    optimization_submodule();
-    differentiation_submodule();
-    function_submodule();
-    calculus_submodule();
-    geometry_submodule();
-    solver_submodule();
-    storage_submodule();
-    system_submodule();
-    evolution_submodule();
-    graphics_submodule();
-}
+#include <boost/python.hpp>
+#include <boost/python/detail/api_placeholder.hpp>
+
+#include <string>
+#include <vector>
+#include <set>
+#include <map>
+#include <sstream>
+#include <iostream>
+
+#include "config.h"
+
+#endif /* ARIADNE_BOOST_PYTHON_H */

@@ -24,6 +24,7 @@
 /*! \file declarations.h
  *  \brief Forward declarations of types and classes.
  */
+
 #ifndef ARIADNE_DECLARATIONS_H
 #define ARIADNE_DECLARATIONS_H
 
@@ -45,6 +46,108 @@ typedef std::string String;
 typedef unsigned int Nat;
 //! Internal name for builtin integers.
 typedef int Int;
+
+
+
+// Numeric declarations
+class Integer;
+class Rational;
+class Real;
+
+class Float;
+class ExactFloat;
+class ValidatedFloat;
+class UpperFloat;
+class LowerFloat;
+class ApproximateFloat;
+
+// Deprecated as numeric type
+class Interval;
+
+typedef Float ApproximateNumberType;
+typedef Interval ValidatedNumberType;
+typedef Real EffectiveNumberType;
+typedef ExactFloat ExactNumberType;
+
+typedef Float ErrorNumberType;
+typedef Float ValueNumberType;
+typedef Float RawNumberType;
+
+typedef ApproximateNumberType ApproximateNumber;
+typedef ValidatedNumberType ValidatedNumber;
+typedef EffectiveNumberType EffectiveNumber;
+typedef ExactNumberType ExactNumber;
+
+//typedef ApproximateFloat ApproximateNumberType;
+//typedef ValidatedFloat ValidatedNumberType;
+//typedef Real EffectiveNumberType;
+
+// Information level declarations
+struct ExactTag { };
+typedef EffectiveNumberType EffectiveTag;
+typedef ValidatedNumberType ValidatedTag;
+typedef ApproximateNumberType ApproximateTag;
+
+template<class I> struct CanonicalNumberTypedef;
+template<> struct CanonicalNumberTypedef<ExactTag> { typedef ExactNumberType Type; };
+template<> struct CanonicalNumberTypedef<EffectiveTag> { typedef EffectiveNumberType Type; };
+template<> struct CanonicalNumberTypedef<ValidatedTag> { typedef ValidatedNumberType Type; };
+template<> struct CanonicalNumberTypedef<ApproximateTag> { typedef ApproximateNumberType Type; };
+template<class I> using CanonicalNumberType = typename CanonicalNumberTypedef<I>::Type;
+
+// Concrete class declarations
+template<class X> class Vector;
+template<class X> class Matrix;
+template<class X> class Differential;
+template<class X> class Vector;
+template<class X> class Matrix;
+template<class X> class Differential;
+
+template<class X> class AffineModel;
+template<class X> class TaylorModel;
+template<class X> class Formula;
+template<class X> class Algebra;
+
+class Interval;
+class Box;
+
+typedef Vector<Float> FloatVector;
+typedef Vector<Interval> IntervalVector;
+
+// Function interface declarations
+template<class X> class ScalarFunctionInterface;
+template<class X> class VectorFunctionInterface;
+
+typedef ScalarFunctionInterface<ApproximateTag> ApproximateScalarFunctionInterface;
+typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;
+typedef ScalarFunctionInterface<EffectiveTag> EffectiveScalarFunctionInterface;
+
+typedef VectorFunctionInterface<ApproximateTag> ApproximateVectorFunctionInterface;
+typedef VectorFunctionInterface<ValidatedTag> ValidatedVectorFunctionInterface;
+typedef VectorFunctionInterface<EffectiveTag> EffectiveVectorFunctionInterface;
+
+// Function declarations
+template<class X> class ScalarFunction;
+template<class X> class VectorFunction;
+
+typedef ScalarFunction<ApproximateTag> ApproximateScalarFunction;
+typedef ScalarFunction<ValidatedTag> ValidatedScalarFunction;
+typedef ScalarFunction<EffectiveTag> EffectiveScalarFunction;
+typedef ScalarFunction<Real> RealScalarFunction;
+
+typedef VectorFunction<ApproximateTag> ApproximateVectorFunction;
+typedef VectorFunction<ValidatedTag> ValidatedVectorFunction;
+typedef VectorFunction<EffectiveTag> EffectiveVectorFunction;
+typedef EffectiveVectorFunction RealVectorFunction;
+
+// Deprecated typedefs
+typedef ApproximateScalarFunction FloatScalarFunction;
+typedef ValidatedScalarFunction IntervalScalarFunction;
+typedef EffectiveScalarFunction RealScalarFunction;
+
+typedef ApproximateVectorFunction FloatVectorFunction;
+typedef ValidatedVectorFunction IntervalVectorFunction;
+typedef EffectiveVectorFunction RealVectorFunction;
 
 } // namespace Ariadne
 

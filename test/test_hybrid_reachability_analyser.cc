@@ -269,7 +269,8 @@ class TestHybridReachabilityAnalyser
         ARIADNE_TEST_CALL(test_upper_reach_upper_evolve());
         ARIADNE_TEST_CALL(test_upper_reach_evolve());
         ARIADNE_TEST_CALL(test_infinite_time_lower_reach());
-        ARIADNE_TEST_CALL(test_outer_chain_reach());
+
+        ARIADNE_TEST_SKIP(test_outer_chain_reach());
     }
 
 };

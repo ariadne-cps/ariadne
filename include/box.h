@@ -103,8 +103,6 @@ class Box
       public Vector<Interval>
 {
   public:
-    typedef Float real_type;
-
     //! Construct a singleton point in zero dimensions.
     Box() : Vector<Interval>() { }
     //! Construct an empty box in \a d dimensions.
@@ -144,9 +142,9 @@ class Box
         return Point(midpoint(static_cast<const Vector<Interval>&>(*this)));
     }
 
-    //! The radius of the box in the supremum norm.
-    Float radius() const {
-        Float dmax=0;
+    //! An over-approximation to radius of the box in the supremum norm.
+    ErrorType radius() const {
+        ErrorType dmax=0;
         for(uint i=0; i!=this->size(); ++i) {
             dmax = max( dmax, (*this)[i].width() );
         }
@@ -154,8 +152,8 @@ class Box
     }
 
     //! An approximation to the Lesbegue measure (area, volume) of the box.
-    Float measure() const {
-        Float meas=1;
+    ApproximateNumberType measure() const {
+        ApproximateNumberType meas=1;
         for(uint i=0; i!=this->size(); ++i) {
             meas *= (*this)[i].width();
         }

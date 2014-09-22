@@ -97,7 +97,7 @@ template<class T> class ScalarUserFunction
         virtual Vector<Float> gradient(const Vector<Float>& x) const {
             return this->evaluate(Differential<Float>::variables(1u,x)).gradient(); }
         virtual Vector<Interval> gradient(const Vector<Interval>& x) const {
-            return this->evaluate(Differential<Interval>::variables(1u,x)).gradient(); }
+            return this->evaluate(Differential<ValidatedNumberType>::variables(1u,x)).gradient(); }
 
          virtual std::ostream& repr(std::ostream& os) const  {
             return os << "USER"; }
@@ -169,7 +169,7 @@ template<class T> class VectorUserFunction
         virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
             return Ariadne::jacobian(this->evaluate(Differential<Float>::variables(1u,x))); }
         virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-            return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
+            return Ariadne::jacobian(this->evaluate(Differential<ValidatedNumberType>::variables(1u,x))); }
 
         virtual EffectiveScalarFunctionInterface* _get(uint i) const { ARIADNE_NOT_IMPLEMENTED; }
         virtual EffectiveScalarFunction operator[](uint i) const { ARIADNE_NOT_IMPLEMENTED; }

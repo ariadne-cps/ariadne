@@ -50,9 +50,8 @@ class GridCell;
  *  as well as different types of covers.
  */
 class Grid {
-    typedef double dyadic_type;
-    typedef int integer_type;
-    typedef Float real_type;
+    typedef double DyadicType;
+    typedef int IntegerType;
   private:
     // Structure containing actual data values
     struct Data;
@@ -67,13 +66,13 @@ class Grid {
     explicit Grid(uint d);
 
     //! Construct from a dimension and a spacing in each direction.
-    explicit Grid(uint d, Float l);
+    explicit Grid(uint d, RawFloatType l);
 
     //! Construct from a vector of offsets.
-    explicit Grid(const Vector<Float>& lengths);
+    explicit Grid(const Vector<RawFloatType>& lengths);
 
     //! Construct from a centre point and a vector of offsets.
-    explicit Grid(const Vector<Float>& origin, const Vector<Float>& lengths);
+    explicit Grid(const Vector<RawFloatType>& origin, const Vector<RawFloatType>& lengths);
 
     //! Copy constructor. Copies a reference to the grid data.
     Grid(const Grid& g);
@@ -88,33 +87,33 @@ class Grid {
     bool operator!=(const Grid& g) const;
 
     //! The origin of the grid.
-    const Vector<Float>& origin() const;
+    const Vector<RawFloatType>& origin() const;
 
     //! The strides between successive integer points.
-    const Vector<Float>& lengths() const;
+    const Vector<RawFloatType>& lengths() const;
 
     //! Write to an output stream.
     friend std::ostream& operator<<(std::ostream& os, const Grid& g);
 
-    Float coordinate(uint d, dyadic_type x) const;
-    Float subdivision_coordinate(uint d, dyadic_type x) const;
-    Float subdivision_coordinate(uint d, integer_type n) const;
+    ExactNumberType coordinate(uint d, DyadicType x) const;
+    ExactNumberType subdivision_coordinate(uint d, DyadicType x) const;
+    ExactNumberType subdivision_coordinate(uint d, IntegerType n) const;
 
-    int subdivision_index(uint d, const Float& x) const;
-    int subdivision_lower_index(uint d, const Float& x) const;
-    int subdivision_upper_index(uint d, const Float& x) const;
+    int subdivision_index(uint d, const ExactNumberType& x) const;
+    int subdivision_lower_index(uint d, const LowerNumberType& x) const;
+    int subdivision_upper_index(uint d, const UpperNumberType& x) const;
 
-    Array<double> index(const Vector<Float>& pt) const;
-    Array<double> lower_index(const Vector<Interval>& bx) const;
-    Array<double> upper_index(const Vector<Interval>& bx) const;
+    Array<DyadicType> index(const Point& pt) const;
+    Array<DyadicType> lower_index(const Box& bx) const;
+    Array<DyadicType> upper_index(const Box& bx) const;
 
-    Vector<Float> point(const Array<int>& a) const;
-    Vector<Float> point(const Array<double>& a) const;
-    Box box(const Array<double>& l, const Array<double>& u) const;
+    Vector<ExactNumberType> point(const Array<IntegerType>& a) const;
+    Vector<ExactNumberType> point(const Array<DyadicType>& a) const;
+    Box box(const Array<DyadicType>& l, const Array<DyadicType>& u) const;
     Box box(const GridCell& cell) const;
   private:
     // Create new data
-    void _create(const Vector<Float>& o, const Vector<Float>& l);
+    void _create(const Vector<RawFloatType>& o, const Vector<RawFloatType>& l);
   private:
     // Pointer to data. We can test grids for equality using reference semantics since data is a constant.
     std::shared_ptr<Data> _data;

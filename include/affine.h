@@ -32,6 +32,8 @@
 #include <iosfwd>
 #include <iostream>
 
+#include "declarations.h"
+
 #include "macros.h"
 #include "pointer.h"
 
@@ -39,14 +41,6 @@
 #include "matrix.h"
 
 namespace Ariadne {
-
-class Float;
-class Interval;
-class Real;
-
-typedef Float ApproximateNumberType;
-typedef Interval ValidatedNumberType;
-typedef Real EffectiveNumberType;
 
 template<class X> class Affine;
 typedef Affine<ApproximateNumberType> ApproximateAffine;

@@ -54,7 +54,7 @@ typedef AffineModel<ApproximateNumberType> ApproximateAffineModel;
 typedef AffineModel<ValidatedNumberType> ValidatedAffineModel;
 
 template<class F, class B> class Constraint;
-typedef Constraint<ValidatedAffineModel,RawNumberType> ValidatedAffineModelConstraint;
+typedef Constraint<ValidatedAffineModel,RawFloatType> ValidatedAffineModelConstraint;
 
 template<class X> class ScalarFunction;
 template<class X> class TaylorModel;

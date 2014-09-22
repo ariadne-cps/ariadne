@@ -48,7 +48,7 @@ template<class X> class Vector;
 template<class X> class Differential;
 template<class X> class Procedure;
 template<class X> class Polynomial;
-typedef Vector< Procedure<Interval> > IntervalVectorProcedure;
+typedef Vector< Procedure<ValidatedNumberType> > ValidatedVectorProcedure;
 typedef Vector< Differential<Interval> > IntervalDifferentialVector;
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
@@ -102,39 +102,39 @@ class IntegratorBase
     void set_function_factory(const ValidatedFunctionModelFactoryInterface& factory);
 
 
-    virtual Pair<Float,IntervalVector>
+    virtual Pair<ExactFloat,Box>
     flow_bounds(const ValidatedVectorFunction& vector_field,
-                const IntervalVector& state_domain,
-                const Float& suggested_time_step) const;
+                const Box& state_domain,
+                const RawFloatType& suggested_time_step) const;
 
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
-              const IntervalVector& state_domain,
-              Float& suggested_time_step) const;
+              const Box& state_domain,
+              RawFloatType& suggested_time_step) const;
 
     virtual ValidatedVectorFunctionModel
     flow_to(const ValidatedVectorFunction& vector_field,
-         const IntervalVector& state_domain,
+         const Box& state_domain,
          const Real& time) const;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
     virtual List<ValidatedVectorFunctionModel>
     flow(const ValidatedVectorFunction& vector_field,
-         const IntervalVector& state_domain,
+         const Box& state_domain,
          const Real& minimum_time,
          const Real& maximum_time) const;
 
     //! \brief Solve \f$\dot{\phi}(x,t)=f(\phi(x,t))\f$ for \f$t\in[0,T_{\max}]\f$.
     virtual List<ValidatedVectorFunctionModel>
     flow(const ValidatedVectorFunction& vector_field,
-         const IntervalVector& state_domain,
+         const Box& state_domain,
          const Real& maximum_time) const;
 
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
-              const IntervalVector& state_domain,
-              const Float& suggested_time_step,
-              const IntervalVector& bounding_box) const = 0;
+              const Box& state_domain,
+              const ExactFloat& suggested_time_step,
+              const Box& bounding_box) const = 0;
 
   public:
     double _maximum_error;
@@ -176,9 +176,9 @@ class TaylorPicardIntegrator
 
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
-              const IntervalVector& state_domain,
-              const Float& time_step,
-              const IntervalVector& bounding_box) const;
+              const Box& state_domain,
+              const ExactFloat& time_step,
+              const Box& bounding_box) const;
 
     using IntegratorBase::flow_step;
 };
@@ -234,16 +234,16 @@ class TaylorSeriesIntegrator
     virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
     virtual void write(std::ostream& os) const;
 
-    virtual Pair<Float,IntervalVector>
+    virtual Pair<ExactFloat,Box>
     flow_bounds(const ValidatedVectorFunction& vector_field,
-                const IntervalVector& state_domain,
-                const Float& suggested_time_step) const;
+                const Box& state_domain,
+                const RawFloatType& suggested_time_step) const;
 
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
-              const IntervalVector& state_domain,
-              const Float& time_step,
-              const IntervalVector& bounding_box) const;
+              const Box& state_domain,
+              const ExactFloat& time_step,
+              const Box& bounding_box) const;
 
     using IntegratorBase::flow_step;
 };
@@ -271,16 +271,16 @@ class AffineIntegrator
 
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
-              const IntervalVector& state_domain,
-              const Float& time_step,
-              const IntervalVector& bounding_box) const;
+              const Box& state_domain,
+              const ExactFloat& time_step,
+              const Box& bounding_box) const;
 
     using IntegratorBase::flow_step;
 
     //! \brief Compute the derivative of the flow of f at time zero within \a dom.
     IntervalDifferentialVector
     flow_derivative(const ValidatedVectorFunction& f,
-                    const IntervalVector& dom) const;
+                    const Box& dom) const;
 };
 
 

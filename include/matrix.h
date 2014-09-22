@@ -693,7 +693,7 @@ struct PivotMatrix {
     size_t size() const { return _ary.size(); }
     size_t const& operator[](size_t i) const { return _ary[i]; }
     size_t& operator[](size_t i) { return _ary[i]; }
-    operator Matrix<ExactFloat> () const;
+    operator Matrix<ExactFloatType> () const;
 };
 std::ostream& operator<<(std::ostream& os, const PivotMatrix& pv);
 
@@ -706,7 +706,7 @@ template<class X> struct QRMatrix {
 };
 
 
-Tuple< PivotMatrix, Matrix<ApproximateApproximateFloatType>, Matrix<ApproximateApproximateFloatType> > triangular_decomposition(const Matrix<ApproximateFloatType>& A);
+Tuple< PivotMatrix, Matrix<ApproximateFloatType>, Matrix<ApproximateFloatType> > triangular_decomposition(const Matrix<ApproximateFloatType>& A);
 
 Vector<ApproximateErrorType> row_norms(const Matrix<ApproximateFloatType>& A);
 Tuple< Matrix<ApproximateFloatType>, PivotMatrix> triangular_factor(const Matrix<ApproximateFloatType>& A);

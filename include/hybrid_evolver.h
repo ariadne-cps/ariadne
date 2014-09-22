@@ -53,7 +53,7 @@ namespace Ariadne {
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
 
-typedef Map< DiscreteLocation, Vector<Float> > HybridFloatVector;
+typedef Map< DiscreteLocation, Vector<ExactFloatType> > HybridExactFloatVector;
 
 class IntegratorInterface;
 class SolverInterface;
@@ -69,8 +69,8 @@ class FlowFunctionModel
     FlowFunctionModel(const ValidatedVectorFunctionModel& f) : ValidatedVectorFunctionModel(f) { }
     ExactFloat step_size() const { return make_exact(this->time_domain().upper()); }
     Interval time_domain() const { return this->domain()[this->domain().size()-1]; }
-    IntervalVector space_domain() const { return project(this->domain(),Ariadne::range(0,this->domain().size()-1)); }
-    IntervalVector const codomain() const { return this->ValidatedVectorFunctionModel::codomain(); }
+    Box space_domain() const { return project(this->domain(),Ariadne::range(0,this->domain().size()-1)); }
+    Box const codomain() const { return this->ValidatedVectorFunctionModel::codomain(); }
 };
 
 struct TransitionData;
@@ -135,7 +135,7 @@ class HybridEvolverBase
     const ConfigurationType& configuration() const;
 
     //! \brief Change the configuration from a \a domain and \a lengths (NOT IMPLEMENTED).
-    virtual void reconfigure(const HybridBoxes& domain, const HybridFloatVector& lengths) { }
+    virtual void reconfigure(const HybridBoxes& domain, const HybridExactFloatVector& lengths) { }
 
     //! \brief The class which constructs functions for the enclosures.
     const FunctionFactoryType& function_factory() const;
@@ -248,7 +248,7 @@ class HybridEvolverBase
     ValidatedVectorFunctionModel
     _compute_flow(EffectiveVectorFunction vector_field,
                   Box const& initial_set,
-                  const Float& maximum_step_size) const;
+                  const ExactFloatType& maximum_step_size) const;
 
     //! \brief Compute the active events for the \a flow \f$\phi\f$ with
     //! time step \f$h\f$ starting in the given \a starting_set \f$S\f$.

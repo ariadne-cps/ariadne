@@ -85,14 +85,14 @@ ValidatedTaylorModel tan(const ValidatedTaylorModel& x);
  */
 template<>
 class TaylorModel<ValidatedTag>
-    : public NormedAlgebraMixin<TaylorModel<ValidatedTag>,Interval>
+    : public NormedAlgebraMixin<TaylorModel<ValidatedTag>,ValidatedNumberType>
 {
     friend class ScalarTaylorFunction;
     friend class VectorTaylorFunction;
     typedef Expansion<CoefficientType> ExpansionType;
     typedef ReverseLexicographicKeyLess ComparisonType;
   public:
-    typedef Interval NumericType;
+    typedef ValidatedNumberType NumericType;
   private:
     ExpansionType _expansion;
     ErrorType _error;
@@ -133,7 +133,7 @@ class TaylorModel<ValidatedTag>
     /*! \name Assignment to constant values. */
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
     TaylorModel<ValidatedTag>& operator=(const ValidatedNumberType& c);
-    template<class X, typename std::enable_if<std::is_same<X,Float>::value,int>::type=0>
+    template<class X, typename std::enable_if<std::is_same<X,RawFloatType>::value,int>::type=0>
         TaylorModel<ValidatedTag>& operator=(const X& c) { return (*this)=static_cast<ValidatedNumberType>(c); }
     template<class X, typename std::enable_if<std::is_same<X,double>::value,int>::type=0>
         TaylorModel<ValidatedTag>& operator=(const X& c) { return (*this)=static_cast<ValidatedNumberType>(c); }
@@ -151,8 +151,8 @@ class TaylorModel<ValidatedTag>
     static TaylorModel<ValidatedTag> constant(uint as, const CoefficientType& c, Sweeper swp) {
         TaylorModel<ValidatedTag> r(as,swp); r.set_value(c); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<ValidatedTag> constant(uint as, const Interval& d, Sweeper swp) {
-        TaylorModel<ValidatedTag> r(as,swp); r.set_value(1.0); r*=d; return r; }
+    static TaylorModel<ValidatedTag> constant(uint as, const ValidatedNumberType& c, Sweeper swp) {
+        TaylorModel<ValidatedTag> r(as,swp); r.set_value(1.0); r*=c; return r; }
     //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
     static TaylorModel<ValidatedTag> variable(uint as, uint j, Sweeper swp) {
         TaylorModel<ValidatedTag> r(as,swp); r.set_gradient(j,1.0); return r; }
@@ -229,7 +229,7 @@ class TaylorModel<ValidatedTag>
     //! \brief An over-approximation to the supremum norm.
     NormType norm() const;
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e. Equal to the sweep threshold.
-    Float tolerance() const;
+    RawFloatType tolerance() const;
 
     //! \brief Set the error of the expansion.
     void set_error(const ErrorType& ne) {
@@ -267,6 +267,8 @@ class TaylorModel<ValidatedTag>
     /*! \name Function evaluation. */
     //! \brief The domain of the quantity, always given by \f$[-1,1]^{\mathrm{as}}\f$.
     Vector<UnitInterval> domain() const;
+    //! \brief The codomain of the quantity.
+    Interval codomain() const;
     //! \brief An over-approximation to the range of the quantity.
     Interval range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
@@ -330,11 +332,11 @@ class TaylorModel<ValidatedTag>
     //@{
     /*! \name Inplace arithmetic operations. */
     //! \brief Add a constant numerical scalar \c r+=c .
-    void iadd(const Interval& c);
+    void iadd(const ValidatedNumberType& c);
     //! \brief Multiply by a numerical scalar \c r*=c .
-    void imul(const Interval& c);
+    void imul(const ValidatedNumberType& c);
     //! \brief Scalar multiply and add \c r+=c*x .
-    void isma(const Interval& c, const TaylorModel<ValidatedTag>& x);
+    void isma(const ValidatedNumberType& c, const TaylorModel<ValidatedTag>& x);
     //! \brief Fused multiply and add \c r+=x1*x2 .
     void ifma(const TaylorModel<ValidatedTag>& x1, const TaylorModel<ValidatedTag>& x2);
     //@}
@@ -398,7 +400,7 @@ TaylorModel<ValidatedTag> antiderivative(const TaylorModel<ValidatedTag>& x, uin
 TaylorModel<ValidatedTag> derivative(const TaylorModel<ValidatedTag>& x, uint k);
 
 //! \relates TaylorModel<ValidatedTag> \brief Replace the variale x[k] with a*x[k]+b
-TaylorModel<ValidatedTag> preaffine(const TaylorModel<ValidatedTag>&, uint k, const Interval& a, const Interval& b);
+TaylorModel<ValidatedTag> preaffine(const TaylorModel<ValidatedTag>&, uint k, const ValidatedNumberType& a, const ValidatedNumberType& b);
 //! \relates TaylorModel<ValidatedTag> \brief Restricts the range of the variable x[k] to the interval d.
 //! \pre -1 <= d.lower() <= d.upper() <= 1 .
 TaylorModel<ValidatedTag> restrict(const TaylorModel<ValidatedTag>&, uint k, const Interval& d);
@@ -471,22 +473,22 @@ Vector< TaylorModel<ValidatedTag> > unchecked_compose(const Vector< TaylorModel<
  */
 template<>
 class TaylorModel<ApproximateTag>
-    : public NormedAlgebraMixin<TaylorModel<ApproximateTag>,Float>
+    : public NormedAlgebraMixin<TaylorModel<ApproximateTag>,ApproximateNumberType>
 {
-    typedef Expansion<Float> ExpansionType;
+    typedef Expansion<ApproximateCoefficientType> ExpansionType;
   private:
     ExpansionType _expansion;
     mutable Sweeper _sweeper;
   private:
-    static const Float _zero;
+    static const ApproximateCoefficientType _zero;
 
   public:
     //! \brief The type used for the coefficients.
-    typedef Float NumericType;
+    typedef ApproximateNumberType NumericType;
     //! \brief The type used to index the coefficients.
     typedef MultiIndex IndexType;
     //! \brief The type used for the coefficients.
-    typedef Float ValueType;
+    typedef ApproximateCoefficientType ValueType;
 
     //! \brief An iterator through the (index,coefficient) pairs of the expansion.
     typedef ExpansionType::iterator iterator;
@@ -501,7 +503,7 @@ class TaylorModel<ApproximateTag>
     TaylorModel<ApproximateTag>(uint as, Sweeper swp);
 
     TaylorModel<ApproximateTag> create() const { return TaylorModel<ApproximateTag>(this->argument_size(),this->_sweeper); }
-    TaylorModel<ApproximateTag> create_ball(Float r) const { return TaylorModel<ApproximateTag>(this->argument_size(),this->_sweeper); }
+    TaylorModel<ApproximateTag> create_ball(ApproximateErrorType r) const { return TaylorModel<ApproximateTag>(this->argument_size(),this->_sweeper); }
     //! \brief Fast swap with another Taylor model.
     void swap(TaylorModel<ApproximateTag>& other) { this->_expansion.swap(other._expansion); }
     //! \brief Set to zero.
@@ -514,14 +516,14 @@ class TaylorModel<ApproximateTag>
     /*! \name Assignment to constant values. */
     //! \brief Set equal to a built-in, keeping the same number of arguments.
     TaylorModel<ApproximateTag>& operator=(double c) {
-        this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),Float(c)); return *this; }
+        this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),ApproximateCoefficientType(c)); return *this; }
     //! \brief Set equal to a constant, keeping the same number of arguments.
-    TaylorModel<ApproximateTag>& operator=(const Float& c) {
+    TaylorModel<ApproximateTag>& operator=(const ApproximateNumberType& c) {
         this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),c); return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorModel<ApproximateTag>& operator=(const Interval& c) { return (*this)=midpoint(c); }
+    TaylorModel<ApproximateTag>& operator=(const ValidatedNumberType& c) { return (*this)=midpoint(c); }
     //! \brief Set equal to a real constant, keeping the same number of arguments.
-    TaylorModel<ApproximateTag>& operator=(const Real& c) { return (*this)=Float(c); }
+    TaylorModel<ApproximateTag>& operator=(const EffectiveNumberType& c) { return (*this)=ApproximateNumberType(c); }
     //@}
 
     //@{
@@ -539,13 +541,15 @@ class TaylorModel<ApproximateTag>
     //! \brief The number of variables in the argument of the quantity.
     uint argument_size() const { return this->_expansion.argument_size(); }
     //! \brief The coefficient of the term in $x^a$.
-    const Float& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
+    const ApproximateCoefficientType& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
     //! \brief The error of the expansion over the domain.
-    const Float& error() const { return _zero; }
+    const ApproximateErrorType& error() const { return _zero; }
     //@}
 
     //@{
     /*! \name Function evaluation. */
+    //! \brief The domain of the quantity.
+    Vector<UnitInterval> domain() const;
     //! \brief A coarse over-approximation to the range of the quantity.
     Interval codomain() const;
     //! \brief An over-approximation to the range of the quantity.
@@ -585,21 +589,21 @@ class TaylorModel<ApproximateTag>
     //@{
     /*! \name Standard algebra interface. */
     //! \brief An approximation to the norm of the function.
-    virtual Float norm() const;
+    virtual ApproximateErrorType norm() const;
     //! \brief An approximation to the average value of the function.
-    virtual Float average() const;
+    virtual ApproximateCoefficientType average() const;
     //! \brief The tolerance to which analytic functions should be computed.
-    virtual Float tolerance() const;
+    virtual RawFloatType tolerance() const;
     //! \brief The radius of the ball containing the functions.
-    virtual Float radius() const;
+    virtual ApproximateErrorType radius() const;
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream&) const;
     //! \brief Inplace addition of a scalar constant.
-    virtual void iadd(const Float& c);
+    virtual void iadd(const ApproximateNumberType& c);
     //! \brief Inplace multiplication of a scalar constant.
-    virtual void imul(const Float& c);
+    virtual void imul(const ApproximateNumberType& c);
     //! \brief Inplace addition of a scalar multiple of a Taylor model.
-    virtual void isma(const Float& c, const TaylorModel<ApproximateTag>& x);
+    virtual void isma(const ApproximateNumberType& c, const TaylorModel<ApproximateTag>& x);
     //! \brief Inplace addition of a product of Taylor models.
     virtual void ifma(const TaylorModel<ApproximateTag>& x1, const TaylorModel<ApproximateTag>& x2);
 

@@ -28,28 +28,18 @@
 #ifndef ARIADNE_NONLINEAR_PROGRAMMING_H
 #define ARIADNE_NONLINEAR_PROGRAMMING_H
 
+#include "declarations.h"
+
 #include "logging.h"
 #include "numeric.h"
 #include "tuple.h"
 
-namespace Ariadne {
 
-typedef void Void;
-typedef bool Bool;
-typedef tribool Tribool;
-template<class X> class Vector;
-typedef Vector<Float> FloatVector;
-typedef Vector<Interval> IntervalVector;
-template<class X> class ScalarFunction;
-typedef ValidatedScalarFunction ValidatedScalarFunction;
-typedef ApproximateScalarFunction ApproximateScalarFunction;
-template<class X> class VectorFunction;
-typedef ValidatedVectorFunction ValidatedVectorFunction;
-typedef ApproximateVectorFunction ApproximateVectorFunction;
+namespace Ariadne {
 
 template<class X, class R> class Constraint;
 typedef Constraint<EffectiveScalarFunction,EffectiveNumberType> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,RawNumberType> ValidatedConstraint;
+typedef Constraint<ValidatedScalarFunction,ExactNumberType> ValidatedConstraint;
 
 class InfeasibleProblemException : public std::runtime_error {
   public: InfeasibleProblemException() : std::runtime_error("InfeasibleProblemException") { }
@@ -68,45 +58,43 @@ class NearBoundaryOfFeasibleDomainException : public std::runtime_error {
 //! Interface for nonlinear programming solvers.
 class OptimiserInterface {
   public:
-    typedef Vector<Interval> BoxType;
-  public:
     //! \brief Virtual destructor.
     virtual ~OptimiserInterface() { }
     //! \brief Create a dynamically-allocated copy.
     virtual OptimiserInterface* clone() const = 0;
 
     //! \brief Solve the general nonlinear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
-    virtual IntervalVector minimise(ValidatedScalarFunction f, IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const = 0;
+    virtual Vector<ValidatedNumberType> minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C) const = 0;
     //! \brief Solve the standard nonlinear programming problem \f$\min f(x) \text{ such that } x\in ,D\ g(x)\leq 0  \text{ and } h(x) = 0\f$.
-    virtual IntervalVector minimise(ValidatedScalarFunction f, IntervalVector D, ValidatedVectorFunction g, ValidatedVectorFunction h) const = 0;
+    virtual Vector<ValidatedNumberType> minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, ValidatedVectorFunction h) const = 0;
 
     //! \brief Tests is the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual Tribool feasible(IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const = 0;
+    virtual Tribool feasible(Box D, ValidatedVectorFunction g, Box C) const = 0;
     //! \brief Tests is the standard nonlinear feasibility problem \f$x\in D,\ g(x)\leq 0 \text{ and } h(x) = 0\f$ is feasible. Assumes \fD\f$ is bounded with nonempty interior.
     //! \internal This is one of the simplest nonlinear programming problems, and is a good test case for new algorithms.
-    virtual Tribool feasible(IntervalVector D, ValidatedVectorFunction g, ValidatedVectorFunction h) const = 0;
+    virtual Tribool feasible(Box D, ValidatedVectorFunction g, ValidatedVectorFunction h) const = 0;
 
     //! \brief Tests if the point \a x is feasible, in that \f$x\in D\f$ and \f$g(x)\in N_\epsilon(C)\f$.
-    virtual Bool almost_feasible_point(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                       FloatVector x, Float eps) const = 0;
+    virtual Bool almost_feasible_point(Box D, ValidatedVectorFunction g, Box C,
+                                       ApproximateFloatVectorType x, ApproximateFloat eps) const = 0;
     //! \brief Tests if the point \a x is feasible.
-    virtual Bool is_feasible_point(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                   FloatVector x) const = 0;
+    virtual Bool is_feasible_point(Box D, ValidatedVectorFunction g, Box C,
+                                   ApproximateFloatVectorType x) const = 0;
     //! \brief Tests if the point \a x is near feasible.
-    virtual Bool validate_feasibility(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                      FloatVector x) const = 0;
+    virtual Bool validate_feasibility(Box D, ValidatedVectorFunction g, Box C,
+                                      ApproximateFloatVectorType x) const = 0;
     //! \brief Tests if the point \a x is near feasible, using approximate multipliers \a y to guide the search.
-    virtual Bool validate_feasibility(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                      FloatVector x, FloatVector y) const = 0;
+    virtual Bool validate_feasibility(Box D, ValidatedVectorFunction g, Box C,
+                                      ApproximateFloatVectorType x, ApproximateFloatVectorType y) const = 0;
     //! \brief Tests if the feasibility problem is definitely unsolvable, using multipliers \a y and local centering point \a x.
-    virtual Bool validate_infeasibility(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                      FloatVector x, FloatVector y) const = 0;
-    //! \brief Tests if the interval box \a X definitely contains a feasible point.
-    virtual Tribool contains_feasible_point(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                            IntervalVector X) const = 0;
+    virtual Bool validate_infeasibility(Box D, ValidatedVectorFunction g, Box C,
+                                      ApproximateFloatVectorType x, ApproximateFloatVectorType y) const = 0;
+    //! \brief Tests if the box \a X definitely contains a feasible point.
+    virtual Tribool contains_feasible_point(Box D, ValidatedVectorFunction g, Box C,
+                                            ValidatedFloatVectorType X) const = 0;
     //! \brief Tests if the Lagrange multipliers \a y are a certificate of infeasiblity.
-    virtual Bool is_infeasibility_certificate(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                              FloatVector y) const = 0;
+    virtual Bool is_infeasibility_certificate(Box D, ValidatedVectorFunction g, Box C,
+                                              ApproximateFloatVectorType y) const = 0;
 };
 
 //! \ingroup OptimisationModule
@@ -116,26 +104,26 @@ class OptimiserBase
     , public Loggable
 {
   public:
-    virtual IntervalVector minimise(ValidatedScalarFunction f, IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const = 0;
-    virtual IntervalVector minimise(ValidatedScalarFunction f, IntervalVector D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
+    virtual ValidatedPointType minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C) const = 0;
+    virtual ValidatedPointType minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
 
-    virtual Tribool feasible(IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const = 0;
-    virtual Tribool feasible(IntervalVector D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
+    virtual Tribool feasible(Box D, ValidatedVectorFunction g, Box C) const = 0;
+    virtual Tribool feasible(Box D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
 
-    virtual Bool almost_feasible_point(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                       FloatVector x, Float error) const;
-    virtual Bool is_feasible_point(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                   FloatVector x) const;
-    virtual Bool validate_feasibility(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                      FloatVector x) const;
-    virtual Bool validate_feasibility(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                      FloatVector x, FloatVector y) const;
-    virtual Bool validate_infeasibility(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                        FloatVector x, FloatVector y) const;
-    virtual Tribool contains_feasible_point(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                            IntervalVector X) const;
-    virtual Bool is_infeasibility_certificate(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                              FloatVector lambda) const;
+    virtual Bool almost_feasible_point(Box D, ValidatedVectorFunction g, Box C,
+                                       ApproximatePointType x, ApproximateFloat error) const;
+    virtual Bool is_feasible_point(Box D, ValidatedVectorFunction g, Box C,
+                                   ExactPointType x) const;
+    virtual Bool validate_feasibility(Box D, ValidatedVectorFunction g, Box C,
+                                      ExactPointType x) const;
+    virtual Bool validate_feasibility(Box D, ValidatedVectorFunction g, Box C,
+                                      ExactPointType x, ExactPointType y) const;
+    virtual Bool validate_infeasibility(Box D, ValidatedVectorFunction g, Box C,
+                                        ExactPointType x, ExactVectorType y) const;
+    virtual Tribool contains_feasible_point(Box D, ValidatedVectorFunction g, Box C,
+                                            ValidatedPointType X) const;
+    virtual Bool is_infeasibility_certificate(Box D, ValidatedVectorFunction g, Box C,
+                                              ExactVectorType lambda) const;
 };
 
 //! \ingroup OptimisationModule
@@ -150,15 +138,15 @@ class PenaltyFunctionOptimiser
 {
   public:
     virtual PenaltyFunctionOptimiser* clone() const;
-    virtual Tribool check_feasibility(IntervalVector D, ValidatedVectorFunction g, IntervalVector C, FloatVector x, FloatVector y) const;
-    virtual IntervalVector minimise(ValidatedScalarFunction f, IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const;
-    virtual Tribool feasible(IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const;
-    virtual Void feasibility_step(const IntervalVector& D, const ApproximateVectorFunction& g, const IntervalVector& C,
-                                  FloatVector& x, FloatVector& w, Float& mu) const;
-    virtual Void feasibility_step(const IntervalVector& D, const ValidatedVectorFunction& g, const IntervalVector& C,
-                                  IntervalVector& x, IntervalVector& w) const;
-    virtual Void feasibility_step(const IntervalVector& D, const ApproximateVectorFunction& g, const IntervalVector& C,
-                                  FloatVector& x, FloatVector& y, FloatVector& z) const;
+    virtual Tribool check_feasibility(Box D, ValidatedVectorFunction g, Box C, ExactPointType x, ExactVectorType y) const;
+    virtual ValidatedPointType minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C) const;
+    virtual Tribool feasible(Box D, ValidatedVectorFunction g, Box C) const;
+    virtual Void feasibility_step(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+                                  ApproximateFloatVectorType& x, ApproximateFloatVectorType& w, ApproximateFloat& mu) const;
+    virtual Void feasibility_step(const Box& D, const ValidatedVectorFunction& g, const Box& C,
+                                  ValidatedFloatVectorType& x, ValidatedFloatVectorType& w) const;
+    virtual Void feasibility_step(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+                                  ApproximateFloatVectorType& x, ApproximateFloatVectorType& y, ApproximateFloatVectorType& z) const;
 };
 
 
@@ -183,21 +171,21 @@ class NonlinearInfeasibleInteriorPointOptimiser
     //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
     //! \precondition The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
-    virtual IntervalVector minimise(ValidatedScalarFunction f, IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const;
+    virtual ValidatedPointType minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual Tribool feasible(IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const;
+    virtual Tribool feasible(Box D, ValidatedVectorFunction g, Box C) const;
 
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall primal and dual variables.
-    Pair<Tribool,FloatVector> feasible_hotstarted(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
+    Pair<Tribool,ApproximateFloatVectorType> feasible_hotstarted(Box D, ValidatedVectorFunction g, Box C,
                                                   const PrimalDualData& wxy0) const;
 
-    Void setup_feasibility(const IntervalVector& D, const ApproximateVectorFunctionInterface& g, const IntervalVector& C,
+    Void setup_feasibility(const Box& D, const ApproximateVectorFunctionInterface& g, const Box& C,
                            StepData& stp) const;
-    Void step(const ApproximateScalarFunctionInterface& f, const IntervalVector& d, const ApproximateVectorFunctionInterface& g, const IntervalVector& c,
+    Void step(const ApproximateScalarFunctionInterface& f, const Box& D, const ApproximateVectorFunctionInterface& g, const Box& C,
               StepData& stp) const;
-//    Float compute_mu(const IntervalVector& D, const ApproximateVectorFunction& g, const IntervalVector& C,
-//                     FloatVector& w, FloatVector& x, FloatVector& y) const;
+//    ApproximateFloat compute_mu(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+//                     ApproximateFloatVectorType& w, ApproximateFloatVectorType& x, ApproximateFloatVectorType& y) const;
 };
 
 
@@ -215,49 +203,49 @@ class NonlinearInteriorPointOptimiser
     //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
     //! \precondition The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
-    virtual IntervalVector minimise(ValidatedScalarFunction f, IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const;
+    virtual ValidatedPointType minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D, g(x)\in C \text{ and } h(x)= 0 \f$ is feasible.
-    virtual Tribool feasible(IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const;
+    virtual Tribool feasible(Box D, ValidatedVectorFunction g, Box C) const;
 
     //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall constraint violation, primal and dual variables.
-    Pair<Tribool,FloatVector> feasible_hotstarted(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                                  const FloatVector& x0, const FloatVector& lambda0, const Float& violation0) const;
+    Pair<Tribool,ApproximateFloatVectorType> feasible_hotstarted(Box D, ValidatedVectorFunction g, Box C,
+                                                  const ApproximateFloatVectorType& x0, const ApproximateFloatVectorType& lambda0, const ApproximateFloat& violation0) const;
 
     //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the primal and dual.
-    Pair<Tribool,FloatVector> feasible_hotstarted(IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                                                  const FloatVector& x0, const FloatVector& lambda0) const;
+    Pair<Tribool,ApproximateFloatVectorType> feasible_hotstarted(Box D, ValidatedVectorFunction g, Box C,
+                                                  const ApproximateFloatVectorType& x0, const ApproximateFloatVectorType& lambda0) const;
 
-    Void minimisation_step(const ApproximateScalarFunction& f, const IntervalVector& D, const ApproximateVectorFunction& g, const IntervalVector& C, const ApproximateVectorFunction& h,
-                           FloatVector& x, FloatVector& w, FloatVector& kappa, FloatVector& lambda, const Float& mu) const;
-    Void setup_feasibility(const IntervalVector& d, const ApproximateVectorFunction& g, const IntervalVector& c,
-                           FloatVector& x, FloatVector& lambda) const;
-    Void setup_feasibility(const IntervalVector& d, const ApproximateVectorFunction& g, const IntervalVector& c,
-                           FloatVector& x, FloatVector& lambda, Float& t) const;
-    Void feasibility_step(const IntervalVector& D, const ApproximateVectorFunction& g, const IntervalVector& C,
-                          FloatVector& x, FloatVector& lambda) const;
-    Void feasibility_step(const IntervalVector& D, const ApproximateVectorFunction& g, const IntervalVector& C,
-                          FloatVector& x, FloatVector& lambda, Float& violation) const;
-    Void initialise_lagrange_multipliers(const IntervalVector& D, const ApproximateVectorFunction& g, const IntervalVector& C,
-                                         const FloatVector& x, FloatVector& lambda) const;
-    Float compute_mu(const IntervalVector& D, const ApproximateVectorFunction& g, const IntervalVector& C,
-                     const FloatVector& x, const FloatVector& lambda) const;
+    Void minimisation_step(const ApproximateScalarFunction& f, const Box& D, const ApproximateVectorFunction& g, const Box& C, const ApproximateVectorFunction& h,
+                           ApproximateFloatVectorType& x, ApproximateFloatVectorType& w, ApproximateFloatVectorType& kappa, ApproximateFloatVectorType& lambda, const ApproximateFloat& mu) const;
+    Void setup_feasibility(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+                           ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda) const;
+    Void setup_feasibility(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+                           ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda, ApproximateFloat& t) const;
+    Void feasibility_step(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+                          ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda) const;
+    Void feasibility_step(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+                          ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda, ApproximateFloat& violation) const;
+    Void initialise_lagrange_multipliers(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+                                         const ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda) const;
+    ApproximateFloat compute_mu(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+                     const ApproximateFloatVectorType& x, const ApproximateFloatVectorType& lambda) const;
 
   public: // Deprecated
-    Void compute_tz(const IntervalVector& D, const ApproximateVectorFunction& g, const IntervalVector& C,
-                          FloatVector& x, Float& t, FloatVector& z) const { }
-    Void feasibility_step(const IntervalVector& D, const ApproximateVectorFunction& g, const IntervalVector& C,
-                          FloatVector& x, FloatVector& y, FloatVector& z, Float& violation) const { };
-    Void linearised_feasibility_step(const IntervalVector& d, const ApproximateVectorFunction& g, const IntervalVector& c,
-                                     Float& slack, FloatVector& x, FloatVector& lambda) const { };
-    Void linearised_feasibility_step(const IntervalVector& d, const ApproximateVectorFunction& g, const IntervalVector& c,
-                                     FloatVector& x, FloatVector& y, FloatVector& z, Float& t) const { };
+    Void compute_tz(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+                          ApproximateFloatVectorType& x, ApproximateFloat& t, ApproximateFloatVectorType& z) const { }
+    Void feasibility_step(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+                          ApproximateFloatVectorType& x, ApproximateFloatVectorType& y, ApproximateFloatVectorType& z, ApproximateFloat& violation) const { };
+    Void linearised_feasibility_step(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+                                     ApproximateFloat& slack, ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda) const { };
+    Void linearised_feasibility_step(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+                                     ApproximateFloatVectorType& x, ApproximateFloatVectorType& y, ApproximateFloatVectorType& z, ApproximateFloat& t) const { };
   private:
-    Float compute_mu(const ApproximateScalarFunction& f, const IntervalVector& d, const ValidatedVectorFunction& g, const IntervalVector& c,
-                     const FloatVector& x, const FloatVector& y) const;
-    Void compute_violation(const IntervalVector& d, const ApproximateVectorFunction& g, const IntervalVector& c,
-                           FloatVector& x, Float& t) const;
+    ApproximateFloat compute_mu(const ApproximateScalarFunction& f, const Box& D, const ValidatedVectorFunction& g, const Box& C,
+                     const ApproximateFloatVectorType& x, const ApproximateFloatVectorType& y) const;
+    Void compute_violation(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+                           ApproximateFloatVectorType& x, ApproximateFloat& t) const;
 };
 
 
@@ -267,9 +255,9 @@ class IntervalOptimiser
     : public NonlinearInteriorPointOptimiser
 {
     virtual IntervalOptimiser* clone() const { return new IntervalOptimiser(*this); }
-    virtual Tribool feasible(IntervalVector D, ValidatedVectorFunction h) const;
-    Void feasibility_step(const FloatVector& xl, const FloatVector& xu, const ValidatedVectorFunction& h,
-                          IntervalVector& x, IntervalVector& y, IntervalVector& zl, IntervalVector zu, Interval& mu) const;
+    virtual Tribool feasible(Box D, ValidatedVectorFunction h) const;
+    Void feasibility_step(const ApproximateFloatVectorType& xl, const ApproximateFloatVectorType& xu, const ValidatedVectorFunction& h,
+                          ValidatedFloatVectorType& x, ValidatedFloatVectorType& y, ValidatedFloatVectorType& zl, ValidatedFloatVectorType zu, ValidatedFloatType& mu) const;
 };
 
 
@@ -277,9 +265,9 @@ class ApproximateOptimiser
     : public NonlinearInteriorPointOptimiser
 {
     virtual ApproximateOptimiser* clone() const { return new ApproximateOptimiser(*this); }
-    virtual Tribool feasible(IntervalVector D, ValidatedVectorFunction h) const;
-    Void feasibility_step(const IntervalVector& D, const ApproximateVectorFunction& h,
-                          FloatVector& X, FloatVector& Lambda) const;
+    virtual Tribool feasible(Box D, ValidatedVectorFunction h) const;
+    Void feasibility_step(const Box& D, const ApproximateVectorFunction& h,
+                          ApproximateFloatVectorType& X, ApproximateFloatVectorType& Lambda) const;
 };
 
 
@@ -294,37 +282,37 @@ class KrawczykOptimiser
     virtual KrawczykOptimiser* clone() const { return new KrawczykOptimiser(*this); }
 
     //! \brief Solve the linear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
-    virtual IntervalVector minimise(ValidatedScalarFunction f, IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const;
+    virtual Vector<ValidatedNumberType> minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual tribool feasible(IntervalVector D, ValidatedVectorFunction g, IntervalVector C) const;
+    virtual tribool feasible(Box D, ValidatedVectorFunction g, Box C) const;
 
   public:
     //! \brief Try to solve the nonlinear constraint problem by applying the Krawczyk contractor to the Kuhn-Tucker conditions,
     //! hotstarting the iteration with the primal and dual variables.
-    tribool minimise(ValidatedScalarFunction f, IntervalVector D, ValidatedVectorFunction g, IntervalVector C,
-                     const Interval& t0, const IntervalVector& x0, const IntervalVector& y0, const IntervalVector& z0) const;
+    tribool minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C,
+                     const ValidatedFloatType& t0, const ValidatedFloatVectorType& x0, const ValidatedFloatVectorType& y0, const ValidatedFloatVectorType& z0) const;
 
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.
-    void minimisation_step(const IntervalVector& D, const ValidatedVectorFunction& g, const IntervalVector& C,
-                           IntervalVector& x, IntervalVector& y, IntervalVector& z, Interval& t) const;
+    void minimisation_step(const Box& D, const ValidatedVectorFunction& g, const Box& C,
+                           ValidatedFloatVectorType& x, ValidatedFloatVectorType& y, ValidatedFloatVectorType& z, ValidatedFloatType& t) const;
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.
-    void feasibility_step(const IntervalVector& D, const ValidatedVectorFunction& g, const IntervalVector& C,
-                          IntervalVector& x, IntervalVector& y, IntervalVector& z, Interval& t) const;
+    void feasibility_step(const Box& D, const ValidatedVectorFunction& g, const Box& C,
+                          ValidatedFloatVectorType& x, ValidatedFloatVectorType& y, ValidatedFloatVectorType& z, ValidatedFloatType& t) const;
 
     //! \brief A primal feasibility step for the problem \f$g(y)\in C;\ y\in D\f$. \deprecated
-    void feasibility_step(const IntervalVector& D, const ValidatedVectorFunction& g, const IntervalVector& C,
-                          IntervalVector& y, Interval& t) const;
+    void feasibility_step(const Box& D, const ValidatedVectorFunction& g, const Box& C,
+                          ValidatedFloatVectorType& y, ValidatedFloatType& t) const;
     //! \brief A feasibility step for the problem \f$g(y)\leq 0\f$. \deprecated
     void feasibility_step(const ValidatedVectorFunction& g,
-                          IntervalVector& x, IntervalVector& y, IntervalVector& z, Interval& t) const;
+                          ValidatedFloatVectorType& x, ValidatedFloatVectorType& y, ValidatedFloatVectorType& z, ValidatedFloatType& t) const;
     //! \brief An optimization step for the problem \f$\max f(y) \text{ s.t. } g(y)\leq 0\f$. \deprecated
     void minimisation_step(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g,
-                           IntervalVector& x, IntervalVector& y, IntervalVector& z) const;
+                           ValidatedFloatVectorType& x, ValidatedFloatVectorType& y, ValidatedFloatVectorType& z) const;
   protected:
-    void setup_feasibility(const IntervalVector& d, const ValidatedVectorFunction& g, const IntervalVector& c,
-                           IntervalVector& x, IntervalVector& y, IntervalVector& z, Interval& t) const;
+    void setup_feasibility(const Box& D, const ValidatedVectorFunction& g, const Box& C,
+                           ValidatedFloatVectorType& x, ValidatedFloatVectorType& y, ValidatedFloatVectorType& z, ValidatedFloatType& t) const;
     protected:
-    void compute_tz(const IntervalVector& d, const ValidatedVectorFunction& g, const IntervalVector& b, const IntervalVector& y, Interval& t, IntervalVector& z) const;
+    void compute_tz(const Box& D, const ValidatedVectorFunction& g, const Box& C, const ValidatedFloatVectorType& y, ValidatedFloatType& t, ValidatedFloatVectorType& z) const;
 };
 
 */

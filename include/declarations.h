@@ -64,17 +64,30 @@ class ApproximateFloat;
 // Deprecated as numeric type
 class Interval;
 
-typedef Float ApproximateNumberType;
-typedef Interval ValidatedNumberType;
-typedef Real EffectiveNumberType;
-typedef Float ExactNumberType;
+typedef Float RawFloat;
+typedef Float RawFloatType;
+typedef Float ApproximateFloatType;
+typedef Float LowerFloatType;
+typedef Float UpperFloatType;
+typedef Interval ValidatedFloatType;
+typedef Float ExactFloatType;
 
-typedef Float PositiveUpperNumberType;
-typedef Float RawNumberType;
+typedef ApproximateFloatType ApproximateNumberType;
+typedef LowerFloatType LowerNumberType;
+typedef UpperFloatType UpperNumberType;
+typedef ValidatedFloatType ValidatedNumberType;
+typedef Real EffectiveNumberType;
+typedef ExactFloatType ExactNumberType;
+
+typedef UpperFloatType PositiveUpperNumberType;
 
 typedef PositiveUpperNumberType NormType;
 typedef PositiveUpperNumberType ErrorType;
 typedef ExactNumberType CoefficientType;
+
+typedef ApproximateNumberType ApproximateNormType;
+typedef ApproximateNumberType ApproximateErrorType;
+typedef ApproximateNumberType ApproximateCoefficientType;
 
 typedef ApproximateNumberType ApproximateNumber;
 typedef ValidatedNumberType ValidatedNumber;
@@ -105,6 +118,8 @@ template<class X> class Differential;
 template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Differential;
+template<class X> class Series;
+
 
 template<class X> class AffineModel;
 template<class X> class TaylorModel;
@@ -114,8 +129,25 @@ template<class X> class Algebra;
 class Interval;
 class Box;
 
+typedef Interval IntervalType;
+
 typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
+
+typedef Vector<RawFloatType> RawFloatVectorType;
+typedef Vector<ApproximateFloatType> ApproximateFloatVectorType;
+typedef Vector<ValidatedFloatType> ValidatedFloatVectorType;
+typedef Vector<ExactFloatType> ExactFloatVectorType;
+
+typedef Vector<ApproximateNumberType> ApproximateVectorType;
+typedef Vector<ValidatedNumberType> ValidatedVectorType;
+typedef Vector<EffectiveNumberType> EffectiveVectorType;
+typedef Vector<ExactNumberType> ExactVectorType;
+
+typedef Vector<ApproximateNumberType> ApproximatePointType;
+typedef Vector<ValidatedNumberType> ValidatedPointType;
+typedef Vector<EffectiveNumberType> EffectivePointType;
+typedef Vector<ExactNumberType> ExactPointType;
 
 // Function interface declarations
 template<class X> class ScalarFunctionInterface;

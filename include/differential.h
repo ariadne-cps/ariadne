@@ -50,6 +50,7 @@ template<class X> class Series;
 
 template<class X> class Expansion;
 template<class X> class Differential;
+template<class X> class Vector<Differential<X>>;
 
 typedef Differential<Float> FloatDifferential;
 typedef Differential<Interval> IntervalDifferential;

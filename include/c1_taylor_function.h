@@ -83,7 +83,7 @@ class C1TaylorSeries
     friend C1TaylorSeries& operator*=(C1TaylorSeries&, Interval);
     friend C1TaylorSeries operator+(C1TaylorSeries, C1TaylorSeries);
     friend C1TaylorSeries operator*(C1TaylorSeries, C1TaylorSeries);
-    friend Interval evaluate(C1TaylorSeries, Interval);
+    friend ValidatedNumberType evaluate(C1TaylorSeries, ValidatedNumberType);
     friend C1TaylorSeries compose(C1TaylorSeries, C1TaylorSeries);
     friend OutputStream& operator<< (OutputStream& os, const C1TaylorSeries& f);
 };
@@ -115,7 +115,7 @@ class C1TaylorFunction
     friend C1TaylorFunction& operator*=(C1TaylorFunction& f, Float c);
     friend C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2);
     friend C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2);
-    friend Interval evaluate(C1TaylorFunction f, Vector<Interval> x);
+    friend ValidatedNumberType evaluate(C1TaylorFunction f, Vector<ValidatedNumberType> x);
     friend C1TaylorFunction compose(C1TaylorSeries f, C1TaylorFunction g);
     friend C1TaylorFunction compose(C1TaylorFunction f, Vector<C1TaylorFunction> g);
     friend OutputStream& operator<< (OutputStream& os, const C1TaylorFunction& f);

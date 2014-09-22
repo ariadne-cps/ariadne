@@ -50,7 +50,7 @@ class PredicateInterface {
 
     virtual size_type argument_size() const = 0;
     virtual tribool evaluate(const Vector<Float>& x) const = 0;
-    virtual tribool evaluate(const Vector<Interval>& x) const = 0;
+    virtual tribool evaluate(const Vector<ValidatedNumberType>& x) const = 0;
 };
 
 class ExpressionPredicate
@@ -77,7 +77,7 @@ class ExpressionPredicate
         if(value<0) { return true; }
         else if(value>0) { return false; }
         else { return indeterminate; } }
-    tribool evaluate(const Vector<Interval>& x) const {
+    tribool evaluate(const Vector<ValidatedNumberType>& x) const {
         Interval range=_expression.evaluate(x)*_sign;
         if(range.upper()<0) { return true; }
         else if(range.lower()>0) { return false; }
@@ -114,7 +114,7 @@ class DisjunctivePredicate
 
     virtual size_type argument_size() const;
     virtual tribool evaluate(const Vector<Float>& x) const;
-    virtual tribool evaluate(const Vector<Interval>& x) const;
+    virtual tribool evaluate(const Vector<ValidatedNumberType>& x) const;
 
   private:
     std::vector<ExpressionPredicate> _predicates;
@@ -139,7 +139,7 @@ class ConjunctiveNormalFormPredicate
 
     virtual size_type argument_size() const;
     virtual tribool evaluate(const Vector<Float>& x) const;
-    virtual tribool evaluate(const Vector<Interval>& x) const;
+    virtual tribool evaluate(const Vector<ValidatedNumberType>& x) const;
   private:
     std::vector<DisjunctivePredicate> _cnf;
 };

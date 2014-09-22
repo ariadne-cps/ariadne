@@ -24,26 +24,18 @@
 /*! \file algebra_interface.h
  *  \brief Interface for function algebras.
  */
+
 #ifndef ARIADNE_ALGEBRA_INTERFACE_H
 #define ARIADNE_ALGEBRA_INTERFACE_H
 
 #include <iosfwd>
 #include <iostream>
+
 #include "numeric.h"
 #include "pointer.h"
 #include "operators.h"
 
 namespace Ariadne {
-
-class Float;
-class Interval;
-class Real;
-
-template<class X> class Vector;
-template<class X> class Matrix;
-template<class X> class Differential;
-
-template<class X> class Series;
 
 template<class X> class AlgebraInterface;
 template<class X> class Algebra;
@@ -60,8 +52,8 @@ inline std::ostream& operator<<(std::ostream& os, const WritableInterface& w) {
     w.write(os); return os; }
 
 struct Ball {
-    explicit Ball(Float r) : _radius(r) { }
-    Float _radius;
+    explicit Ball(ErrorType r) : _radius(r) { }
+    ErrorType _radius;
 };
 
 //! \brief Interface for a unital algebra over a field \a X.
@@ -103,18 +95,18 @@ template<class X> class NormedAlgebraInterface
     // Overrides for AlgebraInterface operations
     virtual NormedAlgebraInterface<X>* _clone() const = 0;
     virtual NormedAlgebraInterface<X>* _create() const = 0;
-    virtual NormedAlgebraInterface<X>* _create_ball(Float r) const = 0;
+    virtual NormedAlgebraInterface<X>* _create_ball(ErrorType r) const = 0;
 
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e.
-    virtual Float tolerance() const = 0;
+    virtual RawFloatType tolerance() const = 0;
     //! \brief A value \c c such that \c |a-c1| is approximately minimised.
-    virtual Float average() const = 0;
+    virtual ExactFloatType average() const = 0;
     //! \brief A value \c c such that \c |a-c1| is approximately minimised.
-    virtual Float radius() const = 0;
+    virtual ErrorType radius() const = 0;
     //! \brief The interval \c [c-r,c+r] where \c |a-c1|<=r.
     virtual Interval range() const = 0;
     //! \brief An over-approximation to the norm.
-    virtual Float norm() const = 0;
+    virtual ErrorType norm() const = 0;
 };
 
 //! \brief Interface for a unital algebra over a field with support for composition with a power series.

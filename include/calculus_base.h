@@ -253,7 +253,7 @@ class CalculusBase
     tribool active(const ScalarFunctionType& guard,  const BoxType& box) const {
         return this->_tribool(guard.evaluate(box)); }
     tribool active(const VectorFunctionType& guard,  const BoxType& box) const {
-        Vector<Interval> range=guard.evaluate(box);
+        BoxType range=guard.evaluate(box);
         return this->_tribool(range[0]); }
 
     //! \brief Test if a set satisfied the constraint given by the guard. Returns \a true is all points

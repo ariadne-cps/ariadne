@@ -57,8 +57,8 @@ class CanvasInterface;
 class Point2d;
 
 
-typedef Constraint<AffineModel<ValidatedNumberType>,RawNumberType> ValidatedAffineModelConstraint;
-typedef Constraint<Affine<ValidatedNumberType>,RawNumberType> ValidatedAffineConstraint;
+typedef Constraint<AffineModel<ValidatedNumberType>,RawFloatType> ValidatedAffineModelConstraint;
+typedef Constraint<Affine<ValidatedNumberType>,RawFloatType> ValidatedAffineConstraint;
 typedef Constraint<Affine<EffectiveNumberType>,EffectiveNumberType> EffectiveAffineConstraint;
 typedef Affine<Interval> ValidatedAffineFunction;
 
@@ -67,15 +67,15 @@ EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveN
 EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumberType& u);
 EffectiveAffineConstraint operator==(const EffectiveAffine& am, const EffectiveNumberType& b);
 
-ValidatedAffineConstraint operator<=(const RawNumberType& l, const ValidatedAffineFunction& am);
-ValidatedAffineConstraint operator<=(const ValidatedAffineFunction& am, const RawNumberType& u);
-ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& am, const RawNumberType& u);
-ValidatedAffineConstraint operator==(const ValidatedAffineFunction& am, const RawNumberType& b);
+ValidatedAffineConstraint operator<=(const RawFloatType& l, const ValidatedAffineFunction& am);
+ValidatedAffineConstraint operator<=(const ValidatedAffineFunction& am, const RawFloatType& u);
+ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& am, const RawFloatType& u);
+ValidatedAffineConstraint operator==(const ValidatedAffineFunction& am, const RawFloatType& b);
 
-ValidatedAffineModelConstraint operator<=(const RawNumberType& l, const ValidatedAffineModel& am);
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& am, const RawNumberType& u);
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& am, const RawNumberType& u);
-ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& am, const RawNumberType& b);
+ValidatedAffineModelConstraint operator<=(const RawFloatType& l, const ValidatedAffineModel& am);
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& am, const RawFloatType& u);
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& am, const RawFloatType& u);
+ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& am, const RawFloatType& b);
 
 //! \brief A constrained image set defined by affine functions.
 //!  Defines a set of the form \f$S=\{ f(x) \mid x\in D \mid g(x)\leq 0 \wedge h(x)=0 \}\f$

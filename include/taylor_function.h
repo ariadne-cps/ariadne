@@ -94,7 +94,7 @@ template<class X> Vector<X> unscale(const Vector<X>& x, const Box& d) {
 ScalarTaylorFunction midpoint(const ScalarTaylorFunction& x);
 
 // Set the value of the \a kth variable to c
-ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, uint k, const RawNumberType& c);
+ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, uint k, const RawFloatType& c);
 ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, uint k, const ValidatedNumberType& c);
 // Evaluate a scalar Taylor function on a vector.
 ValidatedNumberType evaluate(const ScalarTaylorFunction& x, const Vector<ValidatedNumberType>& sy);
@@ -448,17 +448,17 @@ class ScalarTaylorFunction
     VectorFunctionModelInterface<ValidatedTag>* _create_vector(uint i) const;
 };
 
-template<> struct Arithmetic<RawNumberType,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
+template<> struct Arithmetic<RawFloatType,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
 template<> struct Arithmetic<ValidatedNumberType,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
 template<> struct Arithmetic<EffectiveNumberType,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
-template<> struct Arithmetic<ScalarTaylorFunction,RawNumberType> { typedef ScalarTaylorFunction ResultType; };
+template<> struct Arithmetic<ScalarTaylorFunction,RawFloatType> { typedef ScalarTaylorFunction ResultType; };
 template<> struct Arithmetic<ScalarTaylorFunction,ValidatedNumberType> { typedef ScalarTaylorFunction ResultType; };
 template<> struct Arithmetic<ScalarTaylorFunction,EffectiveNumberType> { typedef ScalarTaylorFunction ResultType; };
 template<> struct Arithmetic<ScalarTaylorFunction,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
 
-inline tribool operator>(const ScalarTaylorFunction& x, const RawNumberType& c) {
+inline tribool operator>(const ScalarTaylorFunction& x, const RawFloatType& c) {
     ValidatedNumberType r=x.range(); if(r.lower()>c) { return true; } else if(r.upper()<=c) { return false; } else { return indeterminate; } }
-inline tribool operator<(const ScalarTaylorFunction& x, const RawNumberType& c) {
+inline tribool operator<(const ScalarTaylorFunction& x, const RawFloatType& c) {
     ValidatedNumberType r=x.range(); if(r.lower()<c) { return true; } else if(r.upper()>=c) { return false; } else { return indeterminate; } }
 
 inline tribool operator>(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)>0; }

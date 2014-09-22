@@ -24,6 +24,7 @@
 /*! \file real.h
  *  \brief General (computable) real number class.
  */
+
 #ifndef ARIADNE_REAL_H
 #define ARIADNE_REAL_H
 
@@ -32,6 +33,8 @@
 #include <cstdlib>
 #include <string>
 #include <memory>
+
+#include "declarations.h"
 
 #include "tribool.h"
 #include "rounding.h"
@@ -45,20 +48,7 @@
 
 #include "interval.h"
 
-typedef unsigned int uint;
-
 namespace Ariadne {
-
-typedef std::ostream OutputStream;
-
-// Forward declarations
-class Float;
-class ApproximateFloat;
-class ValidatedFloat;
-class ExactFloat;
-class Real;
-class Dyadic;
-class Decimal;
 
 class RealInterface;
 
@@ -110,8 +100,8 @@ class Real {
     //! \brief Copy assignment.
     Real& operator=(const Real&);
 
-    explicit operator Float() const;
-    explicit operator Interval() const;
+    explicit operator ApproximateNumberType() const;
+    explicit operator ValidatedNumberType() const;
   public:
     //! \brief Get an approximation as a builtin double-precision floating-point number.
     double get_d() const;

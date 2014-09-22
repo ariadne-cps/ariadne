@@ -80,9 +80,6 @@ class HybridBox;
 class HybridGridTreeSet;
 class HybridBoundedConstraintSet;
 
-typedef Vector<Float> FloatVector;
-typedef Vector<Interval> IntervalVector;
-
 
 enum EnclosureVariableType { INITIAL, TEMPORAL, PARAMETER, INPUT, NOISE, ERROR, UNKNOWN };
 
@@ -165,7 +162,7 @@ class HybridEnclosure
     //! \brief The number of constraints.
     uint number_of_constraints() const;
     //! \brief The continuous state set.
-    const IntervalVector parameter_domain() const;
+    const Box parameter_domain() const;
     //! \brief The function related to space.
     const ValidatedVectorFunctionModel& space_function() const;
     //! \brief The function related to time.
@@ -177,7 +174,7 @@ class HybridEnclosure
     void set_time_function(const ValidatedScalarFunctionModel& omega);
 
     //! \brief A bounding box for the space.
-    IntervalVector space_bounding_box() const;
+    Box space_bounding_box() const;
     //! \brief The range of times since the starting time that the set represents.
     Interval time_range() const;
     //! \brief The range of times since the last event.
@@ -218,9 +215,9 @@ class HybridEnclosure
 
     //! \brief Set the maximum time of evolution to \a \f$t_{\max}\f$. \deprecated
     //! Corresponds to introducting the constraint \f$\tau(s)\leq t_{\max}\f$.
-    void set_maximum_time(DiscreteEvent event, Float tmax);
+    void set_maximum_time(DiscreteEvent event, RawFloatType tmax);
     //! \brief Set the current time-step to \f$h\f$. \deprecated
-    void set_step_time(Float h);
+    void set_step_time(ExactFloatType h);
     //! \brief \deprecated
     void new_time_step_bound(DiscreteEvent e, ValidatedScalarFunction tau);
 
@@ -259,7 +256,7 @@ class HybridEnclosure
     //! \brief Tests whether the set is a subset of the interior of the box \a hbx.
     tribool inside(const HybridBox& hbx) const;
     //! \brief Restricts to a subdomain of the \em parameter domain.
-    void restrict(const IntervalVector& subdomain);
+    void restrict(const Box& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
     //! \a depth subdivisions in each component.
     void adjoin_outer_approximation_to(HybridGridTreeSet& paving, int depth) const;
@@ -287,9 +284,9 @@ class HybridEnclosure
   private:
   public:
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] .
-    void _apply_flow(ValidatedVectorFunction phi, Float step);
+    void _apply_flow(ValidatedVectorFunction phi, ExactFloatType step);
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(xi(s)) .
-    void _apply_flow(ValidatedVectorFunction phi, Float step, ValidatedScalarFunction elps);
+    void _apply_flow(ValidatedVectorFunction phi, ExactFloatType step, ValidatedScalarFunction elps);
     // Compute the flow evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
     void _apply_flow_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     void _check() const; // Check that set is well-formed.

@@ -46,7 +46,7 @@
 
 namespace Ariadne {
 
-template<class Sys, class BS> class Evolver;
+template<class Sys, class BS, class TRM> class Evolver;
 
 class Enclosure;
 class IteratedMap;

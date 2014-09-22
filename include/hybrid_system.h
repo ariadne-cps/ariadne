@@ -37,6 +37,8 @@
 #include <memory>
 #include <boost/shared_array.hpp>
 
+#include "declarations.h"
+
 #include "logging.h"
 
 #include "formula.h"
@@ -60,9 +62,6 @@ typedef HybridRealExpressionBoundedConstraintSet HybridExpressionSet;
 
 class DiscreteLocation;
 class DiscreteSpace;
-
-class ScalarFunction;
-class VectorFunction;
 
 template<class R> class ExpressionInterface;
 class Grid;
@@ -89,8 +88,8 @@ class HybridSystem
     //! \brief The type used to describe the state space.
     typedef HybridSpace StateSpaceType;
 
-    typedef std::shared_ptr<const ScalarFunction> ScalarFunctionPtr;
-    typedef std::shared_ptr<const VectorFunction> VectorFunctionPtr;
+    typedef std::shared_ptr<const RealScalarFunction> ScalarFunctionPtr;
+    typedef std::shared_ptr<const RealVectorFunction> VectorFunctionPtr;
 
 
 /*

@@ -145,7 +145,7 @@ class Zonotope
     uint number_of_generators() const;
 
     /*! \brief The domain. */
-    Vector<Interval> domain() const;
+    Box domain() const;
 
     /*! \brief The centre. */
     const Vector<Float>& centre() const;

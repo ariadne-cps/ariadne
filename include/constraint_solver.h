@@ -46,10 +46,10 @@ class GridTreeSet;
 
 template<class X, class R> class Constraint;
 typedef Constraint<EffectiveScalarFunction,EffectiveNumberType> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,RawNumberType> ValidatedConstraint;
+typedef Constraint<ValidatedScalarFunction,RawFloatType> ValidatedConstraint;
 
 template<class X> class Procedure;
-typedef Procedure<Interval> IntervalProcedure;
+typedef Procedure<ValidatedNumberType> ValidatedProcedure;
 
 template<class X> class ScalarFunctionInterface;
 typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;
@@ -90,8 +90,6 @@ class ConstraintSolverInterface {
 class ConstraintSolver
     : public ConstraintSolverInterface, public Loggable
 {
-    typedef Vector<Float> FloatVector;
-    typedef Vector<Interval> IntervalVector;
   public:
     //! \brief Test if the image of the box \a domain under the function \a function intersects \a codomain.
     virtual Pair<Tribool,Point> feasible(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const;
@@ -108,18 +106,18 @@ class ConstraintSolver
 
     //! \brief Try to enforce hull consistency by propagating several interval constraints at once.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    bool hull_reduce(Box& bx, const ValidatedVectorFunctionInterface& function, const IntervalVector& codomain) const;
-    bool hull_reduce(Box& bx, const Vector<IntervalProcedure>& procedure, const IntervalVector& codomain) const;
+    bool hull_reduce(Box& bx, const ValidatedVectorFunctionInterface& function, const Box& codomain) const;
+    bool hull_reduce(Box& bx, const Vector<ValidatedProcedure>& procedure, const Box& codomain) const;
     //! \brief Try to enforce hull consistency by propagating an interval constraint.
     //! This method is sharp if each variable occurs at most once in the constraint.
     bool hull_reduce(Box& bx, const ValidatedScalarFunctionInterface& function, const Interval& codomain) const;
-    bool hull_reduce(Box& bx, const IntervalProcedure& procedure, const Interval& codomain) const;
+    bool hull_reduce(Box& bx, const ValidatedProcedure& procedure, const Interval& codomain) const;
 
     //! \brief Reduce the \a domain by testing intersection of \a multipliers inner product \a function(\a domain)
     //! with \a multipliers innner product \a codomain, centering at \a centre.
     //! Reduces \f$(\lambda\cdot f)(X) \cap (\lambda\cdot C)\f$, evaluating \f$g(x)=g(x^*)+Dg(X) (X-x^*)\f$.
-    bool lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const IntervalVector& codomain,
-                         FloatVector centre, FloatVector multpliers) const;
+    bool lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const Box& codomain,
+                         Vector<ApproximateNumberType> centre, Vector<ApproximateNumberType> multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.
     bool box_reduce(Box& bx, const ValidatedScalarFunctionInterface& function, const Interval&, uint j) const;
     //! \brief Try to enforce hull consistency by reducing an a monotone dimension.
@@ -127,7 +125,7 @@ class ConstraintSolver
     bool monotone_reduce(Box& bx, const ValidatedScalarFunctionInterface& function, const Interval&, uint j) const;
 
     //! Split the domain into two pieces to help try to solve the constraints.
-    Pair<Box,Box> split(const Box& domain, const ValidatedVectorFunction& function, const IntervalVector& codomain) const;
+    Pair<Box,Box> split(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const;
 
     // Deprecated functions.
     bool hull_reduce(Box& bx, const ValidatedConstraint& constraint) const {

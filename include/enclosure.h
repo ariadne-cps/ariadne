@@ -65,23 +65,12 @@ extern DiscretisationMethod DISCRETISATION_METHOD;
 
 namespace Ariadne {
 
-class Float;
-class Interval;
-template<class X> class Vector;
-typedef Vector<Interval> IntervalVector;
-template<class X> class Matrix;
-
-template<class X> class ScalarFunction;
-typedef ValidatedScalarFunction ValidatedScalarFunction;
-template<class X> class VectorFunction;
-typedef ValidatedVectorFunction ValidatedVectorFunction;
-
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
 
 template<class X, class R> class Constraint;
 typedef Constraint<EffectiveScalarFunction,EffectiveNumberType> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,RawNumberType> ValidatedConstraint;
+typedef Constraint<ValidatedScalarFunction,RawFloatType> ValidatedConstraint;
 
 class ValidatedAffineConstrainedImageSet;
 class BoundedConstraintSet;
@@ -91,7 +80,7 @@ template<class BS> class ListSet;
 class Grid;
 class PavingInterface;
 
-typedef Constraint<ValidatedScalarFunctionModel,RawNumberType> ValidatedConstraintModel;
+typedef Constraint<ValidatedScalarFunctionModel,RawFloatType> ValidatedConstraintModel;
 
 //! \brief A set of the form \f$x=f(s)\f$ for \f$s\in D\f$ satisfying \f$g(s)\leq0\f$ and \f$h(s)=0\f$.
 class Enclosure

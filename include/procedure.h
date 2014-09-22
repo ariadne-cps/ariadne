@@ -34,6 +34,8 @@
 #include "container.h"
 #include "vector.h"
 
+#include "box.h"
+
 #include "operators.h"
 #include "formula.h"
 #include "expansion.h"
@@ -351,7 +353,7 @@ void restrict(Interval& r, const Interval& x) {
 };
 
 template<class X>
-void simple_hull_reduce(Vector<Interval>& dom, const Procedure<X>& f, Interval codom)
+void simple_hull_reduce(Box& dom, const Procedure<X>& f, Interval codom)
 {
     const List<ProcedureInstruction>& p=f._instructions;
     const List<X>& c=f._constants;
@@ -363,7 +365,7 @@ void simple_hull_reduce(Vector<Interval>& dom, const Procedure<X>& f, Interval c
 }
 
 template<class X>
-void simple_hull_reduce(Vector<Interval>& dom, const Vector< Procedure<X> >& f, Vector<Interval> codom)
+void simple_hull_reduce(Box& dom, const Vector< Procedure<X> >& f, Box codom)
 {
     const List<ProcedureInstruction>& p=f._instructions;
     const List<X>& c=f._constants;

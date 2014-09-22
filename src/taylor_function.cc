@@ -1031,7 +1031,7 @@ Void VectorTaylorFunction::adjoin(const ScalarTaylorFunction& sf)
 
 
 VectorTaylorFunction
-VectorTaylorFunction::constant(const Box& d, const Vector<Float>& c, Sweeper swp)
+VectorTaylorFunction::constant(const Box& d, const Vector<ExactNumberType>& c, Sweeper swp)
 {
     return VectorTaylorFunction(d,ValidatedTaylorModel::constants(d.size(),c,swp));
 }

@@ -80,7 +80,7 @@ class BoxSet {
     Array<IntervalSet> _ary;
   public:
     BoxSet() : _ary() { }
-    explicit BoxSet(const IntervalVector& iv);
+    explicit BoxSet(const Vector<Interval>& iv);
     BoxSet(const List<IntervalSet>& t) : _ary(t.begin(),t.end()) { }
     BoxSet(Nat n, const IntervalSet& ivl) : _ary(n,ivl) { }
     Nat size() const { return _ary.size(); }
@@ -113,7 +113,7 @@ class Box
     //! giving lower and upper bounds.
     explicit Box(std::initializer_list<Interval> lst);
 
-    Box(const IntervalVector& ivec) : Vector<Interval>(ivec) { }
+    Box(const Vector<Interval>& ivec) : Vector<Interval>(ivec) { }
     Box(const List<Interval>& ilst) : Vector<Interval>(ilst) { }
 
     // Templated constructor; useful for automatic conversion from vector expressions

@@ -33,14 +33,17 @@
 #include "numeric.h"
 #include "vector.h"
 
+#include "point.h"
+#include "box.h"
+
 namespace Ariadne {
 
 class Grid;
 class GridCell;
 
 /*! \brief An infinite, uniform grid of rectangles in Euclidean space.
- *  
- *  \internal Maybe a Grid should be a type of Paving or Cover. 
+ *
+ *  \internal Maybe a Grid should be a type of Paving or Cover.
  *  Then rather than having GridXXX classes, we can have classes such that cells of
  *  some type are mapped into concrete sets by a Paving or Cover.
  *  This should be more general, and will unify the concepts of Paving and Cover,
@@ -56,50 +59,50 @@ class Grid {
   public:
     //! Destructor.
     ~Grid();
-                
+
     //! Default constructor constructs a grid from a null pointer. Needed for some iterators.
     explicit Grid();
-                
-    //! Construct from a dimension and a spacing in each direction. 
+
+    //! Construct from a dimension and a spacing in each direction.
     explicit Grid(uint d);
-                
-    //! Construct from a dimension and a spacing in each direction. 
+
+    //! Construct from a dimension and a spacing in each direction.
     explicit Grid(uint d, Float l);
-                
+
     //! Construct from a vector of offsets.
     explicit Grid(const Vector<Float>& lengths);
-                
+
     //! Construct from a centre point and a vector of offsets.
     explicit Grid(const Vector<Float>& origin, const Vector<Float>& lengths);
-                
+
     //! Copy constructor. Copies a reference to the grid data.
     Grid(const Grid& g);
-                
+
     //! The underlying dimension of the grid.
     uint dimension() const;
-                
+
     //! Tests equality of two grids. Tests equality of references first.
     bool operator==(const Grid& g) const;
-                
+
     //! Tests inequality of two grids.
     bool operator!=(const Grid& g) const;
-                
+
     //! The origin of the grid.
     const Vector<Float>& origin() const;
-                
+
     //! The strides between successive integer points.
     const Vector<Float>& lengths() const;
-                
+
     //! Write to an output stream.
     friend std::ostream& operator<<(std::ostream& os, const Grid& g);
 
     Float coordinate(uint d, dyadic_type x) const;
     Float subdivision_coordinate(uint d, dyadic_type x) const;
-    Float subdivision_coordinate(uint d, integer_type n) const; 
+    Float subdivision_coordinate(uint d, integer_type n) const;
 
-    int subdivision_index(uint d, const Float& x) const; 
-    int subdivision_lower_index(uint d, const Float& x) const; 
-    int subdivision_upper_index(uint d, const Float& x) const; 
+    int subdivision_index(uint d, const Float& x) const;
+    int subdivision_lower_index(uint d, const Float& x) const;
+    int subdivision_upper_index(uint d, const Float& x) const;
 
     Array<double> index(const Vector<Float>& pt) const;
     Array<double> lower_index(const Vector<Interval>& bx) const;
@@ -107,8 +110,8 @@ class Grid {
 
     Vector<Float> point(const Array<int>& a) const;
     Vector<Float> point(const Array<double>& a) const;
-    Vector<Interval> box(const Array<double>& l, const Array<double>& u) const;
-    Vector<Interval> box(const GridCell& cell) const;
+    Box box(const Array<double>& l, const Array<double>& u) const;
+    Box box(const GridCell& cell) const;
   private:
     // Create new data
     void _create(const Vector<Float>& o, const Vector<Float>& l);

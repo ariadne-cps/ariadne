@@ -28,82 +28,11 @@
 #define ARIADNE_FUNCTION_INTERFACE_H
 
 #include <iosfwd>
+#include "declarations.h"
 
 namespace Ariadne {
 
-typedef std::ostream OutputStream;
-
 static const int SMOOTH=255;
-
-typedef void Void;
-typedef unsigned int Nat;
-typedef int Int;
-
-class Float;
-class Interval;
-class Real;
-
-class ApproximateFloat;
-class ValidatedFloat;
-class ExactFloat;
-
-typedef Float ApproximateNumberType;
-typedef Interval ValidatedNumberType;
-typedef Real EffectiveNumberType;
-typedef Float RawNumberType;
-
-typedef ApproximateNumberType ApproximateNumber;
-typedef ValidatedNumberType ValidatedNumber;
-typedef EffectiveNumberType EffectiveNumber;
-
-//typedef ApproximateFloat ApproximateNumberType;
-//typedef ValidatedFloat ValidatedNumberType;
-//typedef Real EffectiveNumberType;
-
-struct ExactTag { };
-typedef EffectiveNumberType EffectiveTag;
-typedef ValidatedNumberType ValidatedTag;
-typedef ApproximateNumberType ApproximateTag;
-
-template<class I> struct CanonicalNumberTypedef;
-template<> struct CanonicalNumberTypedef<ExactTag> { typedef EffectiveNumberType Type; };
-template<> struct CanonicalNumberTypedef<EffectiveTag> { typedef EffectiveNumberType Type; };
-template<> struct CanonicalNumberTypedef<ValidatedTag> { typedef ValidatedNumberType Type; };
-template<> struct CanonicalNumberTypedef<ApproximateTag> { typedef ApproximateNumberType Type; };
-template<class I> using CanonicalNumberType = typename CanonicalNumberTypedef<I>::Type;
-
-class Interval;
-class Box;
-
-template<class X> class Vector;
-template<class X> class Matrix;
-template<class X> class Differential;
-template<class X> class TaylorModel;
-template<class X> class Formula;
-template<class X> class Algebra;
-
-template<class X> class ScalarFunctionInterface;
-template<class X> class VectorFunctionInterface;
-
-typedef ScalarFunctionInterface<ApproximateTag> ApproximateScalarFunctionInterface;
-typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;
-typedef ScalarFunctionInterface<EffectiveTag> EffectiveScalarFunctionInterface;
-
-typedef VectorFunctionInterface<ApproximateTag> ApproximateVectorFunctionInterface;
-typedef VectorFunctionInterface<ValidatedTag> ValidatedVectorFunctionInterface;
-typedef VectorFunctionInterface<EffectiveTag> EffectiveVectorFunctionInterface;
-
-template<class X> class ScalarFunction;
-typedef ScalarFunction<ApproximateTag> ApproximateScalarFunction;
-typedef ScalarFunction<ValidatedTag> ValidatedScalarFunction;
-typedef ScalarFunction<EffectiveTag> EffectiveScalarFunction;
-typedef ScalarFunction<Real> RealScalarFunction;
-
-template<class X> class VectorFunction;
-typedef VectorFunction<ApproximateTag> ApproximateVectorFunction;
-typedef VectorFunction<ValidatedTag> ValidatedVectorFunction;
-typedef VectorFunction<EffectiveTag> EffectiveVectorFunction;
-typedef EffectiveVectorFunction RealVectorFunction;
 
 template<>
 class ScalarFunctionInterface<Void>

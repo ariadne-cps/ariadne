@@ -32,6 +32,8 @@
 
 #include "config.h"
 
+#include "declarations.h"
+
 #include "integer.h"
 #include "rational.h"
 #include "decimal.h"

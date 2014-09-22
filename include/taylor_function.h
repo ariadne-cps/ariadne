@@ -167,10 +167,10 @@ class ScalarTaylorFunction
     typedef Interval RangeType;
     typedef ValidatedNumberType NumericType;
     typedef TaylorModel<ValidatedTag> ModelType;
-    typedef Expansion<Float> ExpansionType;
-    typedef Float ErrorType;
+    typedef Expansion<CoefficientType> ExpansionType;
+    typedef Ariadne::ErrorType ErrorType;
   private:
-    static const Float _zero;
+    static const CoefficientType _zero;
     DomainType _domain;
     ModelType _model;
   public:
@@ -188,7 +188,7 @@ class ScalarTaylorFunction
     explicit ScalarTaylorFunction(const DomainType& d, Sweeper swp);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d, based on the scaled model \a m.
     explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel<ValidatedTag>& m);
-    explicit ScalarTaylorFunction(const DomainType& d, const Expansion<Float>& p, const Float& e, const Sweeper& swp);
+    explicit ScalarTaylorFunction(const DomainType& d, const Expansion<CoefficientType>& p, const ErrorType& e, const Sweeper& swp);
 
     explicit ScalarTaylorFunction(const ScalarFunctionModel<ValidatedTag>& f);
     ScalarTaylorFunction& operator=(const ScalarFunctionModel<ValidatedTag>& f);
@@ -199,14 +199,10 @@ class ScalarTaylorFunction
 
     //@{
     /*! \name Assignment to constant values. */
-    //! \brief Set equal to a built-in constant, keeping the same number of arguments.
-    ScalarTaylorFunction& operator=(double c) { this->_model=c; return *this; }
-    //! \brief Set equal to a constant, keeping the same number of arguments.
-    ScalarTaylorFunction& operator=(const ExactNumberType& c) { this->_model=c; return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
     ScalarTaylorFunction& operator=(const ValidatedNumberType& c) { this->_model=c; return *this; }
-    //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    ScalarTaylorFunction& operator=(const EffectiveNumberType& c) { this->_model=ValidatedNumberType(c); return *this; }
+    template<class X, typename std::enable_if<std::is_same<X,int>::value,int>::type=0>
+        ScalarTaylorFunction& operator=(const X& c) { return (*this)=static_cast<ValidatedNumberType>(c); }
     //@}
 
     //@{
@@ -224,12 +220,12 @@ class ScalarTaylorFunction
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d (Deprecated).
     static ScalarTaylorFunction variable(const DomainType& d, unsigned int j, Sweeper swp);
     //! \brief Construct the quantity \f$c+\sum g_jx_j\f$ over the domain \a d.
-    static ScalarTaylorFunction affine(const DomainType& d, const Float& c, const Vector<Float>& g, Sweeper swp);
+    static ScalarTaylorFunction affine(const DomainType& d, const CoefficientType& c, const Vector<CoefficientType>& g, Sweeper swp);
     //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$ over domain \a d.
-    static ScalarTaylorFunction affine(const DomainType& d, const Float& x, const Vector<Float>& g, const Float& e, Sweeper swp) ;
+    static ScalarTaylorFunction affine(const DomainType& d, const CoefficientType& x, const Vector<CoefficientType>& g, const ErrorType& e, Sweeper swp) ;
 
     //! \brief Return the vector of constants with values \a c over domain \a d.
-    static Vector<ScalarTaylorFunction> constants(const DomainType& d, const Vector<Float>& c, Sweeper swp);
+    static Vector<ScalarTaylorFunction> constants(const DomainType& d, const Vector<ExactNumberType>& c, Sweeper swp);
     //! \brief Return the vector of constants with interval values \a c over domain \a d.
     static Vector<ScalarTaylorFunction> constants(const DomainType& d, const Vector<ValidatedNumberType>& c, Sweeper swp);
     //! \brief Return the vector of variables with values \a x over domain \a d.
@@ -259,27 +255,27 @@ class ScalarTaylorFunction
     //! \brief A reference to the error of the expansion over the domain.
     ErrorType& error() { return this->_model._error; }
     //! \brief The centre of the expansion (the value of the constant term).
-    Float centre() { return this->_model.value(); }
+    CoefficientType centre() { return this->_model.value(); }
     //! \brief A reference to the constant term in the expansion.
-    Float& value() { return this->_model.value(); }
+    CoefficientType& value() { return this->_model.value(); }
     //! \brief The constant term in the expansion.
-    const Float& value() const { return this->_model.value(); }
+    const CoefficientType& value() const { return this->_model.value(); }
     //! \brief The gradient at the centre of the domain.
-    const Float gradient_value(Nat i) const { return this->_model.gradient(i)/this->_domain[i].radius(); }
+    const CoefficientType gradient_value(Nat i) const { return this->_model.gradient(i)/this->_domain[i].radius(); }
     //! \brief A polynomial representation.
     Polynomial<ValidatedNumberType> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.
     ValidatedScalarFunction function() const;
 
     //! \brief Set the error of the expansion.
-    void set_error(const Float& ne) { this->_model.set_error(ne); }
+    void set_error(const ErrorType& ne) { this->_model.set_error(ne); }
     //! \brief Set the constant term in the expansion.
-    void set_value(const Float& c) { this->_model.set_value(c); }
+    void set_value(const CoefficientType& c) { this->_model.set_value(c); }
 
     //! \brief The coefficient of the term in $x^a$.
-    const Float& operator[](const MultiIndex& a) const { return this->_model[a]; }
+    const CoefficientType& operator[](const MultiIndex& a) const { return this->_model[a]; }
     //! \brief A read/write reference to the coefficient of the term in $x^a$.
-    Float& operator[](const MultiIndex& a) { return this->_model[a]; }
+    CoefficientType& operator[](const MultiIndex& a) { return this->_model[a]; }
 
     //! \brief An iterator to the first term in the expansion expansion.
     iterator begin() { return this->_model.begin(); }
@@ -612,9 +608,6 @@ class VectorTaylorFunction
     : public VectorFunctionModelMixin<VectorTaylorFunction,ValidatedTag>
 {
     friend class VectorTaylorFunctionElementReference;
-
-    typedef Float R;
-    typedef Interval I;
   public:
     typedef Box DomainType;
 
@@ -632,13 +625,13 @@ class VectorTaylorFunction
 
     /*! \brief Construct from a domain and the expansion. */
     VectorTaylorFunction(const Box& domain,
-                         const Vector< Expansion<Float> >& expansion,
+                         const Vector< Expansion<CoefficientType> >& expansion,
                          Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
     VectorTaylorFunction(const Box& domain,
-                         const Vector< Expansion<Float> >& expansion,
-                         const Vector<Float>& error,
+                         const Vector< Expansion<CoefficientType> >& expansion,
+                         const Vector<ErrorType>& error,
                          Sweeper swp);
 
     /*! \brief Construct from a domain and the models. */
@@ -679,13 +672,13 @@ class VectorTaylorFunction
     /*! \brief A rough bound for the range of the function. */
     const Box codomain() const;
     /*! \brief The centre of the Taylor model. */
-    const Vector<Float> centre() const;
+    const Vector<CoefficientType> centre() const;
     /*! \brief The range of the Taylor model. */
     const Box range() const;
     /*! \brief The data used to define the Taylor models. */
     const Vector< TaylorModel<ValidatedTag> >& models() const;
     /*! \brief The data used to define the centre of the Taylor models. */
-    const Vector< Expansion<Float> > expansions() const;
+    const Vector< Expansion<CoefficientType> > expansions() const;
 
     /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
     const TaylorModel<ValidatedTag>& model(uint i) const;
@@ -728,7 +721,7 @@ class VectorTaylorFunction
     /*! \brief The constant Taylor model with range \a r and argument domain \a d. */
     static VectorTaylorFunction constant(const Box& d, const Vector<ValidatedNumberType>& r, Sweeper swp);
     /*! \brief The constant Taylor model with result \a c and argument domain \a d. */
-    static VectorTaylorFunction constant(const Box& d, const Vector<Float>& c, Sweeper swp);
+    static VectorTaylorFunction constant(const Box& d, const Vector<ExactNumberType>& c, Sweeper swp);
     /*! \brief The identity Taylor model on domain \a d. */
     static VectorTaylorFunction identity(const Box& d, Sweeper swp);
     //! \brief Return the vector of variables in the range with values \a x over domain \a d.
@@ -737,9 +730,9 @@ class VectorTaylorFunction
     /*! \brief Convert to an interval polynomial. */
     Vector< Polynomial<ValidatedNumberType> > polynomials() const;
     /*! \brief The vector of roundoff/truncation errors of each component. */
-    Vector< Float > const errors() const;
+    Vector< ErrorType > const errors() const;
     /*! \brief The maximum roundoff/truncation error of the components. */
-    Float const error() const;
+    ErrorType const error() const;
     //! \brief A multivalued function equal to the model on the domain.
     ValidatedVectorFunction function() const;
 
@@ -791,7 +784,7 @@ class VectorTaylorFunction
     /*! \brief Division by a scalar. */
     friend VectorTaylorFunction operator/(const VectorTaylorFunction& f, const ValidatedNumberType& c);
     /*! \brief Multiplication by a matrix. */
-    friend VectorTaylorFunction operator*(const Matrix<Float>& A, const VectorTaylorFunction& f);
+    friend VectorTaylorFunction operator*(const Matrix<ExactNumberType>& A, const VectorTaylorFunction& f);
     /*! \brief Multiplication by a matrix. */
     friend VectorTaylorFunction operator*(const Matrix<ValidatedNumberType>& A, const VectorTaylorFunction& f);
 
@@ -916,8 +909,8 @@ class VectorTaylorFunctionElementReference
     void operator=(const VectorTaylorFunctionElementReference& x) { this->_c->set(this->_i,x._c->get(x._i)); }
     void operator=(const ScalarTaylorFunction& x) { this->_c->set(this->_i,x); }
     const TaylorModel<ValidatedTag>& model() const { return this->_c->_models[this->_i]; }
-    Float error() const { return this->_c->_models[this->_i].error(); }
-    void set_error(const Float& e) { this->_c->_models[this->_i].set_error(e); }
+    ErrorType error() const { return this->_c->_models[this->_i].error(); }
+    void set_error(const ErrorType& e) { this->_c->_models[this->_i].set_error(e); }
     void sweep() { this->_c->_models[this->_i].sweep(); }
     template<class X> X evaluate(const Vector<X>& x) const { return this->_c->get(this->_i).evaluate(x); }
     template<class X> X operator()(const Vector<X>& x) const { return this->_c->get(this->_i).operator()(x); }

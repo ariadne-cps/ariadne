@@ -43,20 +43,6 @@
 
 namespace Ariadne {
 
-class Float;
-class Interval;
-class Real;
-
-class Interval;
-class Box;
-
-template<class X> class ScalarFunctionInterface;
-typedef ScalarFunctionInterface<ValidatedNumberType> ValidatedScalarFunctionInterface;
-template<class X> class VectorFunctionInterface;
-typedef VectorFunctionInterface<ValidatedNumberType> ValidatedVectorFunctionInterface;
-
-typedef Float ErrorType;
-typedef Float NormType;
 
 template<class X> class ScalarFunctionModelInterface;
 template<class F,class X> class ScalarFunctionModelMixin;
@@ -76,6 +62,7 @@ template<class X> class FunctionModelFactory;
 typedef FunctionModelFactory<ValidatedNumberType> ValidatedFunctionModelFactory;
 
 class ScalarTaylorFunction;
+class VectorTaylorFunction;
 
 template<> class ScalarFunctionModelInterface<ValidatedNumberType>
     : public virtual ScalarFunctionInterface<ValidatedNumberType>
@@ -85,8 +72,8 @@ template<> class ScalarFunctionModelInterface<ValidatedNumberType>
     virtual Interval range() const = 0;
     virtual Interval const codomain() const = 0;
 
-    virtual Float const& value() const = 0;
-    virtual Float const gradient_value(Nat i) const = 0;
+    virtual CoefficientType const& value() const = 0;
+    virtual CoefficientType const gradient_value(Nat i) const = 0;
     virtual ErrorType const& error() const = 0;
 
     virtual Void set_error(const ErrorType& e) = 0;
@@ -181,8 +168,8 @@ template<> class ScalarFunctionModel<ValidatedNumberType>
     inline Interval const range() const { return this->_ptr->range(); }
     inline Interval const codomain() const { return this->_ptr->codomain(); }
 
-    inline Float value() const { return this->_ptr->value(); }
-    inline Float gradient_value(Nat j) const { return this->_ptr->gradient_value(j); }
+    inline CoefficientType value() const { return this->_ptr->value(); }
+    inline CoefficientType gradient_value(Nat j) const { return this->_ptr->gradient_value(j); }
     inline ErrorType error() const { return this->_ptr->error(); }
 
     inline Void set_error(const ErrorType& e) { return this->_ptr->set_error(e); }

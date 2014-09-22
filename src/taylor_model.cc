@@ -159,7 +159,7 @@ ValidatedTaylorModel::TaylorModel(uint as, Sweeper swp)
 {
 }
 
-ValidatedTaylorModel::TaylorModel(const Expansion<Float>& f, const Float& e, Sweeper swp)
+ValidatedTaylorModel::TaylorModel(const Expansion<Float>& f, const ErrorType& e, Sweeper swp)
     : _expansion(f), _error(e), _sweeper(swp)
 {
     this->unique_sort();
@@ -174,7 +174,7 @@ ValidatedTaylorModel::create() const
 }
 
 ValidatedTaylorModel
-ValidatedTaylorModel::create_ball(Float e) const
+ValidatedTaylorModel::create_ball(ErrorType e) const
 {
     ARIADNE_PRECONDITION(e>=0);
     ValidatedTaylorModel r(this->argument_size(),this->_sweeper);
@@ -207,28 +207,6 @@ ValidatedTaylorModel::degree() const
     return deg;
 }
 
-ValidatedTaylorModel&
-ValidatedTaylorModel::operator=(double c)
-{
-    return this->operator=(Float(c));
-}
-
-ValidatedTaylorModel&
-ValidatedTaylorModel::operator=(const Float& c)
-{
-    this->_expansion.clear();
-    if(c!=0) {
-        this->_expansion.append(MultiIndex::zero(this->argument_size()),c);
-    }
-    this->_error=0;
-    return *this;
-}
-
-ValidatedTaylorModel&
-ValidatedTaylorModel::operator=(const Real& c)
-{
-    return this->operator=(ValidatedNumberType(c));
-}
 
 ValidatedTaylorModel&
 ValidatedTaylorModel::operator=(const ValidatedNumberType& c)
@@ -1343,7 +1321,7 @@ ValidatedTaylorModel abs(const ValidatedTaylorModel& x) {
         Float xmag=mag(xr);
         ValidatedTaylorModel s=x/xmag;
         s=sqr(s);
-        r=p[n-1];
+        r=static_cast<ExactNumberType>(p[n-1]);
         for(uint i=0; i!=(n-1); ++i) {
             uint j=(n-2)-i;
             r=s*r+p[j];
@@ -1460,10 +1438,10 @@ ValidatedTaylorModel::range() const {
 }
 
 
-Vector<Interval>
+Vector<UnitInterval>
 ValidatedTaylorModel::domain() const
 {
-    return Vector<Interval>(this->argument_size(),Interval(-1,1));
+    return Vector<UnitInterval>(this->argument_size(),UnitInterval());
 }
 
 
@@ -1796,12 +1774,14 @@ ValidatedTaylorModel sin(const ValidatedTaylorModel& x) {
     ValidatedTaylorModel r(x.argument_size(),x.sweeper());
     ValidatedTaylorModel t(x.argument_size(),x.sweeper());
 
+    ExactNumberType one(1.0);
+
     Float two_pi_approx=2*pi_approx;
     int n=integer_cast<int>(floor(x.value()/two_pi_approx + 0.5));
     y=x-(n*2*pi_ivl);
 
     if(y.error()>two_pi_approx/2) {
-        r.error()=1.0;
+        r.error()=one;
     } else {
         _mul(s,y,y);
 
@@ -1810,11 +1790,11 @@ ValidatedTaylorModel sin(const ValidatedTaylorModel& x) {
         Float truncation_error=pow_up(srad,d+1)*rec_fac_up((d+1)*2);
 
         // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
-        r=1.0;
+        r=one;
         for(int i=0; i!=d; ++i) {
             r/=Float(-2*(d-i)*(2*(d-i)+1));
             _mul(t,s,r); r.swap(t); t.clear();
-            r+=1.0;
+            r+=one;
         }
         _mul(t,y,r); r.swap(t);
 
@@ -1837,9 +1817,10 @@ ValidatedTaylorModel cos(const ValidatedTaylorModel& x) {
     int n=integer_cast<int>(floor(x.value()/two_pi + 0.5));
 
     y=x-2*n*pi_ivl;
+    ExactNumberType one(1.0);
 
     if(y.error()>two_pi/2) {
-        r.error()=1.0;
+        r.error()=one;
     } else {
         _mul(s,y,y);
 
@@ -1848,11 +1829,11 @@ ValidatedTaylorModel cos(const ValidatedTaylorModel& x) {
         Float truncation_error=pow_up(srad,d+1)*rec_fac_up((d+1)*2);
 
         // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
-        r=1.0;
+        r=one;
         for(int i=0; i!=d; ++i) {
             r/=double(-2*(d-i)*(2*(d-i)-1));
             _mul(t,s,r); r.swap(t); t.clear();
-            r+=1.0;
+            r+=one;
         }
 
         r.error()+=truncation_error;
@@ -2466,8 +2447,8 @@ unscale(const ValidatedTaylorModel& tv, const Interval& ivl)
     // The motivation for mapping to everything is that any function on the
     // resulting interval should be independent of the unneeded component
 
-    const ExactNumberType& l=ivl.lower();
-    const ExactNumberType& u=ivl.upper();
+    auto& l=ivl.lower();
+    auto& u=ivl.upper();
     ARIADNE_ASSERT_MSG(l<=u,"Cannot unscale ValidatedTaylorModel "<<tv<<" from empty interval "<<ivl);
 
     if(l==u) {
@@ -2520,9 +2501,9 @@ Float ValidatedTaylorModel::radius() const {
     return r;
 }
 
-Float ValidatedTaylorModel::norm() const {
+NormType ValidatedTaylorModel::norm() const {
     set_rounding_mode(upward);
-    Float r=this->error();
+    ErrorType r=this->error();
     for(ValidatedTaylorModel::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         r+=abs(iter->data());
     }
@@ -2530,7 +2511,7 @@ Float ValidatedTaylorModel::norm() const {
     return r;
 }
 
-Float norm(const ValidatedTaylorModel& tv) {
+NormType norm(const ValidatedTaylorModel& tv) {
     return tv.norm();
 }
 
@@ -3101,7 +3082,7 @@ _compose1(const Vector<ValidatedTaylorModel>& x,
     for(uint i=0; i!=x.size(); ++i) {
         r[i].set_error(x[i].error());
         for(ValidatedTaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
-            t=iter->data();
+            t=static_cast<ExactNumberType>(iter->data());
             for(uint j=0; j!=iter->key().size(); ++j) {
                 ValidatedTaylorModel p=pow(ys[j],iter->key()[j]);
                 t=t*p;
@@ -3160,7 +3141,7 @@ _compose2(const Vector<ValidatedTaylorModel>& x,
         for(ValidatedTaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
             a=iter->key();
             c=iter->data();
-            t=c;
+            t=static_cast<ExactNumberType>(c);
             for(uint j=0; j!=a.size(); ++j) {
                 if(a[j]>0) {
                     t=t*powers[j][a[j]];

@@ -46,36 +46,6 @@
 
 namespace Ariadne {
 
-typedef uint Nat;
-typedef int Int;
-
-template<class X> class Vector;
-template<class X> class Matrix;
-
-template<class X> class Differential;
-template<class X> class Vector< Differential<X> >;
-
-template<class X> class Formula;
-
-template<class X> class ScalarFunction;
-typedef ScalarFunction<ApproximateNumberType> ApproximateScalarFunction;
-typedef ScalarFunction<ValidatedNumberType> ValidatedScalarFunction;
-typedef ScalarFunction<EffectiveNumberType> EffectiveScalarFunction;
-
-template<class X> class VectorFunction;
-typedef VectorFunction<ApproximateNumberType> ApproximateVectorFunction;
-typedef VectorFunction<ValidatedNumberType> ValidatedVectorFunction;
-typedef VectorFunction<EffectiveNumberType> EffectiveVectorFunction;
-
-// Deprecated typedefs
-typedef ApproximateScalarFunction FloatScalarFunction;
-typedef ValidatedScalarFunction IntervalScalarFunction;
-typedef EffectiveScalarFunction RealScalarFunction;
-
-typedef ApproximateVectorFunction FloatVectorFunction;
-typedef ValidatedVectorFunction IntervalVectorFunction;
-typedef EffectiveVectorFunction RealVectorFunction;
-
 template<class X> class VectorFunctionElementReference;
 
 //! \ingroup FunctionModule

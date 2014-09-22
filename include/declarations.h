@@ -67,11 +67,14 @@ class Interval;
 typedef Float ApproximateNumberType;
 typedef Interval ValidatedNumberType;
 typedef Real EffectiveNumberType;
-typedef ExactFloat ExactNumberType;
+typedef Float ExactNumberType;
 
-typedef Float ErrorNumberType;
-typedef Float ValueNumberType;
+typedef Float PositiveUpperNumberType;
 typedef Float RawNumberType;
+
+typedef PositiveUpperNumberType NormType;
+typedef PositiveUpperNumberType ErrorType;
+typedef ExactNumberType CoefficientType;
 
 typedef ApproximateNumberType ApproximateNumber;
 typedef ValidatedNumberType ValidatedNumber;

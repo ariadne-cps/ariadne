@@ -59,6 +59,8 @@ class Dyadic;
 class Decimal;
 
 class Interval;
+class UnitInterval;
+
 typedef Interval NumericInterval;
 
 //! \ingroup NumericModule
@@ -732,6 +734,12 @@ inline tribool operator<=(Interval i1, Interval i2) {
 std::ostream& operator<<(std::ostream&, const Interval&);
 std::istream& operator>>(std::istream&, Interval&);
 
+class UnitInterval
+    : public Interval
+{
+  public:
+    UnitInterval() : Interval(-1,+1) { }
+};
 
 } // namespace Ariadne
 

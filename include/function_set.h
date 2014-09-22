@@ -238,7 +238,7 @@ class ConstrainedImageSet
 class ValidatedConstrainedImageSet
     : public virtual LocatedSetInterface, public virtual DrawableInterface
 {
-    IntervalVector _domain;
+    Box _domain;
     Box _reduced_domain;
     ValidatedVectorFunction _function;
     List< ValidatedConstraint > _constraints;
@@ -250,16 +250,16 @@ class ValidatedConstrainedImageSet
         : _domain(dom), _reduced_domain(dom)
         , _function(static_cast<ValidatedVectorFunctionInterface const&>(EffectiveVectorFunction::identity(dom.size()))) { }
     //! \brief Construct the image of \a dom under \a fn.
-    ValidatedConstrainedImageSet(const Vector<Interval>& dom, const ValidatedVectorFunction& fn) : _domain(dom), _reduced_domain(dom), _function(fn) {
+    ValidatedConstrainedImageSet(const Box& dom, const ValidatedVectorFunction& fn) : _domain(dom), _reduced_domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
-    ValidatedConstrainedImageSet(const Vector<Interval>& dom, const ValidatedVectorFunctionModel& fn) : _domain(dom), _reduced_domain(dom), _function(fn.raw_pointer()->_clone()) {
+    ValidatedConstrainedImageSet(const Box& dom, const ValidatedVectorFunctionModel& fn) : _domain(dom), _reduced_domain(dom), _function(fn.raw_pointer()->_clone()) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn.
-    ValidatedConstrainedImageSet(const Vector<Interval>& dom, const ValidatedVectorFunction& fn, const List<ValidatedConstraint>& cnstr) : _domain(dom), _reduced_domain(dom), _function(fn), _constraints(cnstr) {
+    ValidatedConstrainedImageSet(const Box& dom, const ValidatedVectorFunction& fn, const List<ValidatedConstraint>& cnstr) : _domain(dom), _reduced_domain(dom), _function(fn), _constraints(cnstr) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
 
     //! \brief The domain of the set.
-    const IntervalVector& domain() const { return this->_domain; }
+    const Box& domain() const { return this->_domain; }
     //! \brief The function used to define the set.
     const ValidatedVectorFunction& function() const { return this->_function; }
     //! \brief The constraints used to define the set.
@@ -292,7 +292,7 @@ class ValidatedConstrainedImageSet
     Nat dimension() const { return this->_function.result_size(); }
 
     ValidatedVectorFunction constraint_function() const;
-    IntervalVector constraint_bounds() const;
+    Box constraint_bounds() const;
 
     //! \brief Reduce the size of the domain by constraint propagation, if possible.
     Void reduce();

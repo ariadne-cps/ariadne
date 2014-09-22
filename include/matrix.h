@@ -693,7 +693,7 @@ struct PivotMatrix {
     size_t size() const { return _ary.size(); }
     size_t const& operator[](size_t i) const { return _ary[i]; }
     size_t& operator[](size_t i) { return _ary[i]; }
-    operator Matrix<Float> () const;
+    operator Matrix<ExactFloat> () const;
 };
 std::ostream& operator<<(std::ostream& os, const PivotMatrix& pv);
 
@@ -706,21 +706,21 @@ template<class X> struct QRMatrix {
 };
 
 
-Tuple< PivotMatrix, Matrix<Float>, Matrix<Float> > triangular_decomposition(const Matrix<Float>& A);
+Tuple< PivotMatrix, Matrix<ApproximateApproximateFloatType>, Matrix<ApproximateApproximateFloatType> > triangular_decomposition(const Matrix<ApproximateFloatType>& A);
 
-Vector<Float> row_norms(const Matrix<Float>& A);
-Tuple< Matrix<Float>, PivotMatrix> triangular_factor(const Matrix<Float>& A);
-Matrix<Float> triangular_multiplier(const Matrix<Float>& A);
-Tuple< Matrix<Float>, Matrix<Float>, PivotMatrix > orthogonal_decomposition(const Matrix<Float>&, bool allow_pivoting=true);
-Matrix<Float> normalise_rows(const Matrix<Float>& A);
+Vector<ApproximateErrorType> row_norms(const Matrix<ApproximateFloatType>& A);
+Tuple< Matrix<ApproximateFloatType>, PivotMatrix> triangular_factor(const Matrix<ApproximateFloatType>& A);
+Matrix<ApproximateFloatType> triangular_multiplier(const Matrix<ApproximateFloatType>& A);
+Tuple< Matrix<ApproximateFloatType>, Matrix<ApproximateFloatType>, PivotMatrix > orthogonal_decomposition(const Matrix<ApproximateFloatType>&, bool allow_pivoting=true);
+Matrix<ApproximateFloatType> normalise_rows(const Matrix<ApproximateFloatType>& A);
 
 Matrix<Float> midpoint(const Matrix<Interval>&);
 
-inline std::ostream& operator<<(std::ostream& os, const Pretty< Interval >& pI) {
+inline std::ostream& operator<<(std::ostream& os, const Pretty< ValidatedFloatType >& pI) {
     Interval const& I(pI); return os << std::setprecision(5) << std::fixed << "{" << std::setw(8) << I.lower() << ":" << std::setw(8) << I.upper() << "}";
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Pretty< Float >& px) {
+inline std::ostream& operator<<(std::ostream& os, const Pretty< ApproximateFloatType >& px) {
     Float const& x(px); return os << std::setprecision(5) << std::fixed << std::setw(8) << x;
 }
 

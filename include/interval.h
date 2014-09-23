@@ -34,6 +34,8 @@
 #include <iostream>
 #include <cassert>
 
+#include "declarations.h"
+
 #include "tribool.h"
 #include "rounding.h"
 #include "float.h"
@@ -73,7 +75,7 @@ typedef Interval NumericInterval;
 //! Hence a test \f$[l_1,u_1]\leq [l_2,u_2]\f$ returns \c True if \f$u_1\leq u_2\f$, since in this case \f$x_1\leq x_2\f$ whenever \f$x_1\in[l_1,u_2]\f$ and \f$x_2\in[l_2,u_2]\f$, \c False if \f$l_1>u_2\f$, since in this case we know \f$x_1>x_2\f$, and \c Indeterminate otherwise, since in this case we can find \f$x_1,x_2\f$ making the result either true or false.
 //! In the case of equality, the comparison \f$[l_1,u_1]\f$==\f$[l_2,u_2]\f$ only returns \c True if both intervals are singletons, since otherwise we can find values making the result either true of false.
 //!
-//! To obtain the lower and upper bounds of an interval, use \c ivl.lower() and \c ivl.upper().
+//! To obtain the lower and upper bounds of an interval, use \c ivl.lower() and \c ivl.upper_value().
 //! To obtain the midpoint and radius, use \c ivl.midpoint() and \c ivl.radius().
 //! Alternatives \c midpoint(ivl) and \c radius(ivl) are also provided.
 //! Note that \c midpoint and \c radius return approximations to the true midpoint and radius of the interval. If \f$m\f$ and \f$r\f$ are the returned midpoint and radius of the interval \f$[l,u]\f$, the using exact arithmetic, we guarentee \f$m-r\leq l\f$ and \f$m+r\geq u\f$
@@ -115,14 +117,14 @@ class Interval {
     //! \brief Convert from a floating-point number with an exact representation.
     Interval(const ExactFloat& x) : l(x.value()), u(x.value()) { }
     //! \brief Convert from a floating-point number with an exact representation.
-    Interval(const ValidatedFloat& x) : l(x.lower()), u(x.upper()) { }
+    Interval(const ValidatedFloat& x) : l(x.lower()), u(x.upper_value()) { }
     //! \brief Convert from a dyadic number.
     Interval(const Dyadic& x);
     //! \brief Convert from a decimal number.
     Interval(const Decimal& x);
 
     //! \brief Convert to a floating-point approximation.
-    operator Float () const { return this->midpoint(); }
+    explicit operator Float () const { return this->midpoint().value(); }
 
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     Interval(double lower, double upper) : l(lower), u(upper) { }
@@ -148,15 +150,20 @@ class Interval {
     Interval& operator=(const ExactFloat& x) { l=x.value(); u=x.value(); return *this; };
 
     //! \brief The lower bound of the interval.
-    const Float& lower() const { return l; }
+    const Float& lower_value() const { return l; }
     //! \brief The upper bound of the interval.
-    const Float& upper() const { return u; }
+    const Float& upper_value() const { return u; }
+
+    //! \brief The lower bound of the interval.
+    const ExactFloatType& lower() const { return reinterpret_cast<ExactFloatType const&>(l); }
+    //! \brief The upper bound of the interval.
+    const ExactFloatType& upper() const { return reinterpret_cast<ExactFloatType const&>(u); }
     //! \brief An approximation to the midpoint of the interval.
-    const Float midpoint() const { return half_exact(add_approx(l,u)); }
+    const ExactFloatType midpoint() const { return ExactFloatType(half_exact(add_approx(l,u))); }
     //! \brief An over-approximation to the radius of the interval.
-    const Float radius() const { return half_exact(sub_up(u,l)); }
+    const ErrorFloatType radius() const { return ErrorFloatType(half_exact(sub_up(u,l))); }
     //! \brief An over-approximation to the width of the interval.
-    const Float width() const { return sub_up(u,l); }
+    const ErrorFloatType width() const { return ErrorFloatType(sub_up(u,l)); }
 
     //! \brief Tests if the interval is empty.
     bool empty() const { return l>u; }
@@ -165,6 +172,12 @@ class Interval {
 
     //! \brief Sets the interval to a "canonical" empty interval \a [1,0].
     void set_empty() { l=+std::numeric_limits< double >::infinity(); u=-std::numeric_limits< double >::infinity(); }
+    void set_lower(const ExactFloatType& lower) { l=lower.value(); }
+        // ARIADNE_ASSERT(lower<=this->u);
+    void set_upper(const ExactFloatType& upper) { u=upper.value(); }
+        // ARIADNE_ASSERT(this->l<=upper);
+    void set(const ExactFloatType& lower, const ExactFloatType& upper) { l=lower.value(); u=upper.value(); }
+        // ARIADNE_ASSERT(lower<=upper);
     void set_lower(const Float& lower) { l=lower; }
         // ARIADNE_ASSERT(lower<=this->u);
     void set_upper(const Float& upper) { u=upper; }
@@ -182,48 +195,48 @@ class Interval {
 
 std::ostream& operator<<(std::ostream& os, const Interval& ivl);
 
-inline Float midpoint(Interval i) {
-    return half_exact(add_approx(i.lower(),i.upper()));
+inline RawFloatType midpoint(Interval i) {
+    return static_cast<RawFloatType>(i.midpoint());
 }
 
-inline Float radius(Interval i) {
-    return half_exact(sub_up(i.upper(),i.lower()));
+inline ErrorFloatType radius(Interval i) {
+    return i.radius();
 }
 
-inline Float width(Interval i) {
-    return sub_up(i.upper(),i.lower());
+inline ErrorFloatType width(Interval i) {
+    return i.width();
 }
 
 //! \related Interval \brief Test if the intervals are equal (as sets).
 inline bool equal(Interval i1, Interval i2) {
     //std::cerr<<"equal(i1,i2) with i1="<<i1<<"; i2="<<i2<<std::endl;
-    return i1.lower()==i2.lower() && i1.upper()==i2.upper();
+    return i1.lower_value()==i2.lower_value() && i1.upper_value()==i2.upper_value();
 }
 
 //! \related Interval \brief Test if the interval is empty.
 inline bool empty(Interval i) {
-    return i.lower()>i.upper();
+    return i.lower_value()>i.upper_value();
 }
 
 //! \related Interval \brief Test if the interval is bounded.
 inline bool bounded(Interval i) {
-    return i.lower()!=-inf && i.upper()!=+inf;
+    return i.lower_value()!=-inf && i.upper_value()!=+inf;
 }
 
 //! \related Interval \brief The intersection of two intervals.
 inline Interval intersection(Interval i1, Interval i2) {
-    return Interval(max(i1.lower(),i2.lower()),min(i1.upper(),i2.upper()));
+    return Interval(max(i1.lower_value(),i2.lower_value()),min(i1.upper_value(),i2.upper_value()));
 }
 
 //! \related Interval \brief The hull of two intervals, equal to the smallest interval containing both as subsets.
 inline Interval hull(Interval i1, Interval i2) {
-    assert(i1.lower()<=i1.upper() && i2.lower()<=i2.upper());
-    return Interval(min(i1.lower(),i2.lower()),max(i1.upper(),i2.upper()));
+    assert(i1.lower_value()<=i1.upper_value() && i2.lower_value()<=i2.upper_value());
+    return Interval(min(i1.lower_value(),i2.lower_value()),max(i1.upper_value(),i2.upper_value()));
 }
 
 //! \related Interval \brief The hull of an interval and a point, equal to the smallest interval containing both.
 inline Interval hull(Interval i1, Float x2) {
-    return Interval(min(i1.lower(),x2),max(i1.upper(),x2));
+    return Interval(min(i1.lower_value(),x2),max(i1.upper_value(),x2));
 }
 
 //! \related Interval \brief The hull of two points, equal to the smallest interval containing both.
@@ -243,13 +256,13 @@ Interval trunc(Interval);
 Interval trunc(Interval, uint eps);
 
 //! \related Interval \brief The nearest representable number to the midpoint of the interval.
-inline Float med(Interval i) { return half_exact(add_near(i.lower(),i.upper())); }
+inline Float med(Interval i) { return half_exact(add_near(i.lower_value(),i.upper_value())); }
 //! \related Interval \brief An over-approximation to the radius of the interval.
-inline Float rad(Interval i) { return half_exact(sub_up(i.upper(),i.lower())); }
+inline Float rad(Interval i) { return half_exact(sub_up(i.upper_value(),i.lower_value())); }
 //! \related Interval \brief An over-approximation to the width of the interval.
-inline Float diam(Interval i) { return sub_up(i.upper(),i.lower()); }
+inline Float diam(Interval i) { return sub_up(i.upper_value(),i.lower_value()); }
 
-//! \related Interval \brief The interval of possible maximum values. Yields the interval between \c i1.upper() and \c i2.upper().
+//! \related Interval \brief The interval of possible maximum values. Yields the interval between \c i1.upper_value() and \c i2.upper_value().
 inline Interval max(Interval i1,Interval i2);
 //! \related Interval \brief The interval of possible minimum values. Yields the interval between \c i1.lower() and \c i2.lower().
 inline Interval min(Interval,Interval);
@@ -320,59 +333,59 @@ Interval atan(Interval);
 
 
 //! \related Interval \brief The magnitude of the interval \a I. Yields \f$ \max\{ |x|\,\mid\,x\in I \}\f$.
-inline Float mag(Interval i) { return max(abs(i.lower()),abs(i.upper())); }
+inline Float mag(Interval i) { return max(abs(i.lower_value()),abs(i.upper_value())); }
 //! \related Interval \brief The mignitude of the interval \a I. Yields \f$ \min\{ |x|\,\mid\,x\in I \}\f$.
-inline Float mig(Interval i) { return min(abs(i.lower()),abs(i.upper())); }
+inline Float mig(Interval i) { return min(abs(i.lower_value()),abs(i.upper_value())); }
 
 //! \related Interval \brief Test if the interval \a I contains the number \a x.
-inline bool contains(Interval i, Float x) { return i.lower()<=x && x<=i.upper(); }
+inline bool contains(Interval i, Float x) { return i.lower_value()<=x && x<=i.upper_value(); }
 
 //! \related Interval \brief Test if the interval \a I1 is a subset of \a I2.
-inline bool subset(Interval i1, Interval i2) { return i1.lower()>=i2.lower() && i1.upper()<=i2.upper(); }
+inline bool subset(Interval i1, Interval i2) { return i1.lower_value()>=i2.lower_value() && i1.upper_value()<=i2.upper_value(); }
 //! \related Interval \brief Test if the interval \a I1 is a superset of \a I2.
-inline bool superset(Interval i1, Interval i2) { return i1.lower()<=i2.lower() && i1.upper()>=i2.upper(); }
+inline bool superset(Interval i1, Interval i2) { return i1.lower_value()<=i2.lower_value() && i1.upper_value()>=i2.upper_value(); }
 //! \related Interval \brief Test if the interval \a I1 is disjoint from \a I2. Returns \c false even if the two intervals only have an endpoint in common.
-inline bool disjoint(Interval i1, Interval i2) { return i1.lower()>i2.upper() || i1.upper()<i2.lower(); }
+inline bool disjoint(Interval i1, Interval i2) { return i1.lower_value()>i2.upper_value() || i1.upper_value()<i2.lower_value(); }
 //! \related Interval \brief Test if the interval \a I1 intersects \a I2. Returns \c true even if the two intervals only have an endpoint in common.
-inline bool intersect(Interval i1, Interval i2) { return i1.lower()<=i2.upper() && i1.upper()>=i2.lower(); }
+inline bool intersect(Interval i1, Interval i2) { return i1.lower_value()<=i2.upper_value() && i1.upper_value()>=i2.lower_value(); }
 
 //! \related Interval \brief Test if the closed interval \a I1 is disjoint from the closed interval \a I2.
 //! Returns \c false if the two intervals only have an endpoint in common.
-inline bool separated(Interval i1, Interval i2) { return i1.lower()>i2.upper() || i1.upper()<i2.lower(); }
+inline bool separated(Interval i1, Interval i2) { return i1.lower_value()>i2.upper_value() || i1.upper_value()<i2.lower_value(); }
 //! \related Interval \brief Test if the interval \a I1 overlaps \a I2.
 //! Returns \c false if the two intervals only have an endpoint in common.
 //! Returns \c true if one of the intervals is a singleton in the interior of the other.
-inline bool overlap(Interval i1, Interval i2) { return i1.lower()<i2.upper() && i1.upper()>i2.lower(); }
+inline bool overlap(Interval i1, Interval i2) { return i1.lower_value()<i2.upper_value() && i1.upper_value()>i2.lower_value(); }
 //! \related Interval \brief Test if the (closed) interval \a I1 is a subset of the interior of \a I2.
-inline bool inside(Interval i1, Interval i2) { return i1.lower()>i2.lower() && i1.upper()<i2.upper(); }
+inline bool inside(Interval i1, Interval i2) { return i1.lower_value()>i2.lower_value() && i1.upper_value()<i2.upper_value(); }
 //! \related Interval \brief Test if the interior of the interval \a I1 is a superset of the (closed) interval \a I2.
-inline bool covers(Interval i1, Interval i2) { return i1.lower()<i2.lower() && i1.upper()>i2.upper(); }
+inline bool covers(Interval i1, Interval i2) { return i1.lower_value()<i2.lower_value() && i1.upper_value()>i2.upper_value(); }
 
 inline Interval max(Interval i1, Interval i2)
 {
-    return Interval(max(i1.lower(),i2.lower()),max(i1.upper(),i2.upper()));
+    return Interval(max(i1.lower_value(),i2.lower_value()),max(i1.upper_value(),i2.upper_value()));
 }
 
 inline Interval min(Interval i1, Interval i2)
 {
-    return Interval(min(i1.lower(),i2.lower()),min(i1.upper(),i2.upper()));
+    return Interval(min(i1.lower_value(),i2.lower_value()),min(i1.upper_value(),i2.upper_value()));
 }
 
 
 inline Interval abs(Interval i)
 {
-    if(i.lower()>=0) {
-        return Interval(i.lower(),i.upper());
-    } else if(i.upper()<=0) {
-        return Interval(-i.upper(),-i.lower());
+    if(i.lower_value()>=0) {
+        return Interval(i.lower_value(),i.upper_value());
+    } else if(i.upper_value()<=0) {
+        return Interval(-i.upper_value(),-i.lower_value());
     } else {
-        return Interval(static_cast<Float>(0.0),max(-i.lower(),i.upper()));
+        return Interval(static_cast<Float>(0.0),max(-i.lower_value(),i.upper_value()));
     }
 }
 
 inline Interval pos(Interval i)
 {
-    return Interval(+i.lower(),+i.upper());
+    return Interval(+i.lower_value(),+i.upper_value());
 }
 
 inline Interval pos_ivl(Float x)
@@ -382,7 +395,7 @@ inline Interval pos_ivl(Float x)
 
 inline Interval neg(Interval i)
 {
-    return Interval(-i.upper(),-i.lower());
+    return Interval(-i.upper_value(),-i.lower_value());
 }
 
 inline Interval neg_ivl(Float x)
@@ -419,10 +432,10 @@ inline Interval rec_ivl(Float x)
 inline Interval add(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double i1u=internal_cast<volatile double&>(i1.upper());
-    volatile double i2l=internal_cast<volatile double&>(i2.lower());
-    volatile double i2u=internal_cast<volatile double&>(i2.upper());
+    volatile double i1l=internal_cast<volatile double&>(i1.lower_value());
+    volatile double i1u=internal_cast<volatile double&>(i1.upper_value());
+    volatile double i2l=internal_cast<volatile double&>(i2.lower_value());
+    volatile double i2u=internal_cast<volatile double&>(i2.upper_value());
     set_rounding_mode(downward);
     volatile double rl=i1l+i2l;
     set_rounding_mode(upward);
@@ -434,8 +447,8 @@ inline Interval add(Interval i1, Interval i2)
 inline Interval add(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double i1l=internal_cast<volatile double&>(i1.lower_value());
+    volatile double i1u=internal_cast<volatile double&>(i1.upper_value());
     volatile double x2v=internal_cast<volatile double&>(x2);
     set_rounding_mode(downward);
     volatile double rl=i1l+x2v;
@@ -466,10 +479,10 @@ inline Interval add_ivl(Float x1, Float x2)
 inline Interval sub(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double i1u=internal_cast<volatile double&>(i1.upper());
-    volatile double i2l=internal_cast<volatile double&>(i2.lower());
-    volatile double i2u=internal_cast<volatile double&>(i2.upper());
+    volatile double i1l=internal_cast<volatile double&>(i1.lower_value());
+    volatile double i1u=internal_cast<volatile double&>(i1.upper_value());
+    volatile double i2l=internal_cast<volatile double&>(i2.lower_value());
+    volatile double i2u=internal_cast<volatile double&>(i2.upper_value());
     set_rounding_mode(downward);
     volatile double rl=i1l-i2u;
     set_rounding_mode(upward);
@@ -481,8 +494,8 @@ inline Interval sub(Interval i1, Interval i2)
 inline Interval sub(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double i1l=internal_cast<volatile double&>(i1.lower_value());
+    volatile double i1u=internal_cast<volatile double&>(i1.upper_value());
     volatile double x2v=internal_cast<volatile double&>(x2);
     set_rounding_mode(downward);
     volatile double rl=i1l-x2v;
@@ -496,8 +509,8 @@ inline Interval sub(Float x1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double x1v=internal_cast<volatile double&>(x1);
-    volatile double i2l=internal_cast<volatile double&>(i2.lower());
-    volatile double i2u=internal_cast<volatile double&>(i2.upper());
+    volatile double i2l=internal_cast<volatile double&>(i2.lower_value());
+    volatile double i2u=internal_cast<volatile double&>(i2.upper_value());
     set_rounding_mode(downward);
     volatile double rl=x1v-i2u;
     set_rounding_mode(upward);
@@ -561,18 +574,18 @@ inline Interval rad_ivl(Float x1, Float x2)
 }
 
 inline Interval med_ivl(Interval i) {
-    return add_ivl(half(i.lower()),half(i.upper()));
+    return add_ivl(half(i.lower_value()),half(i.upper_value()));
 }
 
 inline Interval rad_ivl(Interval i) {
-    return sub_ivl(half(i.upper()),half(i.lower()));
+    return sub_ivl(half(i.upper_value()),half(i.lower_value()));
 }
 
 
 //! \related Interval \brief Unary plus operator. Should be implemented exactly and yield \f$\{ +x \mid x\in I\}\f$.
-inline Interval operator+(const Interval& i) { return Interval(i.lower(),i.upper()); }
+inline Interval operator+(const Interval& i) { return Interval(i.lower_value(),i.upper_value()); }
 //! \related Interval \brief Unary negation operator. Should be implemented exactly and yield \f$\{ -x \mid x\in I\}\f$.
-inline Interval operator-(const Interval& i) { return Interval(-i.upper(),-i.lower()); }
+inline Interval operator-(const Interval& i) { return Interval(-i.upper_value(),-i.lower_value()); }
 //! \related Interval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1+x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
 inline Interval operator+(const Interval& i1, const Interval& i2) { return add(i1,i2); }
 //! \related Interval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1-x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
@@ -638,53 +651,53 @@ inline Interval& operator/=(Interval& i1, double x2) { i1=div(i1,static_cast<Flo
 
 // Standard equality operators
 //! \related Interval \brief Equality operator. Tests equality of intervals as geometric objects, so \c [0,1]==[0,1] returns \c true.
-inline bool operator==(const Interval& i1, const Interval& i2) { return i1.lower()==i2.lower() && i1.upper()==i2.upper(); }
+inline bool operator==(const Interval& i1, const Interval& i2) { return i1.lower_value()==i2.lower_value() && i1.upper_value()==i2.upper_value(); }
 //! \related Interval \brief Inequality operator. Tests equality of intervals as geometric objects, so \c [0,2]!=[1,3] returns \c true,
 //! even though the intervals possibly represent the same exact real value.
-inline bool operator!=(const Interval& i1, const Interval& i2) { return i1.lower()!=i2.lower() || i1.upper()!=i2.upper(); }
+inline bool operator!=(const Interval& i1, const Interval& i2) { return i1.lower_value()!=i2.lower_value() || i1.upper_value()!=i2.upper_value(); }
 
 // Boost-style tribool (in)equality operators
 //inline tribool operator==(const Interval& i1, const Interval& i2) {
-//  if(i1.lower()>i2.upper() || i1.upper()<i2.lower()) { return false; } else if(i1.lower()==i2.upper() && i1.upper()==i2.lower()) { return true; } else { return indeterminate; } }
+//  if(i1.lower_value()>i2.upper_value() || i1.upper_value()<i2.lower_value()) { return false; } else if(i1.lower_value()==i2.upper_value() && i1.upper_value()==i2.lower_value()) { return true; } else { return indeterminate; } }
 //inline tribool operator!=(const Interval& i1, const Interval& i2) { return !(i1==i2); }
 
 //! \related Interval \brief Equality operator. Tests equality of represented real-point value.
 //! Hence \c [0.0,2.0]==1.0 yields \c indeterminate since the interval may represent a real number other than \c 1.0 .
 inline tribool operator==(const Interval& i1, const Float& x2) {
-    if(i1.upper()<x2 || i1.lower()>x2) { return false; }
-    else if(i1.lower()==x2 && i1.upper()==x2) { return true; }
+    if(i1.upper_value()<x2 || i1.lower_value()>x2) { return false; }
+    else if(i1.lower_value()==x2 && i1.upper_value()==x2) { return true; }
     else { return indeterminate; }
 }
 
 //! \related Interval \brief Equality operator. Tests equality of represented real-point value.
 //! Hence \c [0.0,2.0]!=1.0 yields \c indeterminate since the interval may represent a real number equal to \c 1.0 .
 inline tribool operator!=(const Interval& i1, const Float& x2) {
-    if(i1.upper()<x2 || i1.lower()>x2) { return true; }
-    else if(i1.lower()==x2 && i1.upper()==x2) { return false; }
+    if(i1.upper_value()<x2 || i1.lower_value()>x2) { return true; }
+    else if(i1.lower_value()==x2 && i1.upper_value()==x2) { return false; }
     else { return indeterminate; }
 }
 
 inline tribool operator> (const Interval& i1, const Float& x2) {
-    if(i1.lower()> x2) { return true; }
-    else if(i1.upper()<=x2) { return false; }
+    if(i1.lower_value()> x2) { return true; }
+    else if(i1.upper_value()<=x2) { return false; }
     else { return indeterminate; }
 }
 
 inline tribool operator< (const Interval& i1, const Float& x2) {
-    if(i1.upper()< x2) { return true; }
-    else if(i1.lower()>=x2) { return false; }
+    if(i1.upper_value()< x2) { return true; }
+    else if(i1.lower_value()>=x2) { return false; }
     else { return indeterminate; }
 }
 
 inline tribool operator>=(const Interval& i1, const Float& x2) {
-    if(i1.lower()>=x2) { return true; }
-    else if(i1.upper()< x2) { return false; }
+    if(i1.lower_value()>=x2) { return true; }
+    else if(i1.upper_value()< x2) { return false; }
     else { return indeterminate; }
 }
 
 inline tribool operator<=(const Interval& i1, const Float& x2) {
-    if(i1.upper()<=x2) { return true; }
-    else if(i1.lower()> x2) { return false; }
+    if(i1.upper_value()<=x2) { return true; }
+    else if(i1.lower_value()> x2) { return false; }
     else { return indeterminate; }
 }
 
@@ -700,35 +713,35 @@ inline tribool operator> (const Interval& i1, double x2) { return i1> static_cas
 //! \related Interval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
 //! Hence \c [1.0,3.0]>[0.0,2.0] yields \c indeterminate since the first interval could represent the number 1.25 and the second 1.75.
 inline tribool operator> (Interval i1, Interval i2) {
-    if(i1.lower()> i2.upper()) { return true; }
-    else if(i1.upper()<=i2.lower()) { return false; }
+    if(i1.lower_value()> i2.upper_value()) { return true; }
+    else if(i1.upper_value()<=i2.lower_value()) { return false; }
     else { return indeterminate; }
 }
 
 //! \related Interval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
 inline tribool operator< (Interval i1, Interval i2) {
-    if(i1.upper()< i2.lower()) { return true; }
-    else if(i1.lower()>=i2.upper()) { return false; }
+    if(i1.upper_value()< i2.lower_value()) { return true; }
+    else if(i1.lower_value()>=i2.upper_value()) { return false; }
     else { return indeterminate; }
 }
 
 //! \related Interval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
 inline tribool operator>=(Interval i1, Interval i2) {
-    if(i1.lower()>=i2.upper()) { return true; }
-    else if(i1.upper()< i2.lower()) { return false; }
+    if(i1.lower_value()>=i2.upper_value()) { return true; }
+    else if(i1.upper_value()< i2.lower_value()) { return false; }
     else { return indeterminate; }
 }
 
 //! \related Interval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
 inline tribool operator<=(Interval i1, Interval i2) {
-    if(i1.upper()<=i2.lower()) { return true; }
-    else if(i1.lower()> i2.upper()) { return false; }
+    if(i1.upper_value()<=i2.lower_value()) { return true; }
+    else if(i1.lower_value()> i2.upper_value()) { return false; }
     else { return indeterminate; }
 }
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
   template<class A> void serialize(A& a, Interval& ivl, const uint version) {
-    a & ivl.lower() & ivl.upper(); }
+    a & ivl.lower_value() & ivl.upper_value(); }
 #endif
 
 std::ostream& operator<<(std::ostream&, const Interval&);

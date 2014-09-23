@@ -152,16 +152,16 @@ class TaylorModel<ValidatedTag>
         TaylorModel<ValidatedTag> r(as,swp); r.set_value(c); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
     static TaylorModel<ValidatedTag> constant(uint as, const ValidatedNumberType& c, Sweeper swp) {
-        TaylorModel<ValidatedTag> r(as,swp); r.set_value(1.0); r*=c; return r; }
+        TaylorModel<ValidatedTag> r(as,swp); r.set_value(1); r*=c; return r; }
     //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
     static TaylorModel<ValidatedTag> variable(uint as, uint j, Sweeper swp) {
-        TaylorModel<ValidatedTag> r(as,swp); r.set_gradient(j,1.0); return r; }
+        TaylorModel<ValidatedTag> r(as,swp); r.set_gradient(j,1); return r; }
     //! \brief Construct the quantity which scales the unit interval into the domain \a dom.
     static TaylorModel<ValidatedTag> scaling(uint as, uint j, const Interval& dom, Sweeper swp) {
-        TaylorModel<ValidatedTag> r(as,swp); r.set_gradient(j,1.0); r.rescale(Interval(-1,1),dom); return r; }
+        TaylorModel<ValidatedTag> r(as,swp); r.set_gradient(j,1); r.rescale(Interval(-1,1),dom); return r; }
     //! \brief Construct the quantity which scales the codomain \a codom into the unit interval.
     static TaylorModel<ValidatedTag> unscaling(uint as, uint j, const Interval& codom, Sweeper swp) {
-        TaylorModel<ValidatedTag> r(as,swp); r.set_gradient(j,1.0); r.rescale(codom,Interval(-1,+1)); return r; }
+        TaylorModel<ValidatedTag> r(as,swp); r.set_gradient(j,1); r.rescale(codom,Interval(-1,+1)); return r; }
     //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a e
     static TaylorModel<ValidatedTag> error(uint as, ErrorType e, Sweeper swp) {
         TaylorModel<ValidatedTag> r(as,swp); r.set_error(e); return r; }
@@ -589,13 +589,13 @@ class TaylorModel<ApproximateTag>
     //@{
     /*! \name Standard algebra interface. */
     //! \brief An approximation to the norm of the function.
-    virtual ApproximateErrorType norm() const;
+    virtual ErrorType norm() const;
     //! \brief An approximation to the average value of the function.
-    virtual ApproximateCoefficientType average() const;
+    virtual CoefficientType average() const;
     //! \brief The tolerance to which analytic functions should be computed.
     virtual RawFloatType tolerance() const;
     //! \brief The radius of the ball containing the functions.
-    virtual ApproximateErrorType radius() const;
+    virtual ErrorType radius() const;
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream&) const;
     //! \brief Inplace addition of a scalar constant.

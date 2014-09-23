@@ -717,11 +717,11 @@ Matrix<ApproximateFloatType> normalise_rows(const Matrix<ApproximateFloatType>& 
 Matrix<Float> midpoint(const Matrix<Interval>&);
 
 inline std::ostream& operator<<(std::ostream& os, const Pretty< ValidatedFloatType >& pI) {
-    Interval const& I(pI); return os << std::setprecision(5) << std::fixed << "{" << std::setw(8) << I.lower() << ":" << std::setw(8) << I.upper() << "}";
+    ValidatedFloatType const& I(pI); return os << std::setprecision(5) << std::fixed << "{" << std::setw(8) << I.lower() << ":" << std::setw(8) << I.upper() << "}";
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Pretty< ApproximateFloatType >& px) {
-    Float const& x(px); return os << std::setprecision(5) << std::fixed << std::setw(8) << x;
+    ApproximateFloatType const& x(px); return os << std::setprecision(5) << std::fixed << std::setw(8) << x;
 }
 
 template<class X> inline std::ostream& operator<<(std::ostream& os, const Pretty< Vector<X> >& pv) {

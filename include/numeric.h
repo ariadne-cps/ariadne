@@ -50,7 +50,7 @@ namespace Ariadne {
 template<class R, class A> inline R numeric_cast(const A& a);
 template<> inline double numeric_cast(const Real& a) { return a.get_d(); }
 template<> inline Real numeric_cast(const Float& a) { return Real(ExactFloat(a)); }
-template<> inline Real numeric_cast(const Interval& a) { return Real(a.lower().get_d(),a.upper().get_d()); }
+template<> inline Real numeric_cast(const Interval& a) { assert(false); }
 
 //! \ingroup NumericModule
 //! \related Float \related Interval \related Real
@@ -59,7 +59,7 @@ template<class R, class A> inline R numeric_cast(const A& a) { return R(a); }
 template<> inline int numeric_cast(const Float& a) { return int(a.get_d()); }
 template<> inline double numeric_cast(const Float& a) { return a.get_d(); }
 template<> inline double numeric_cast(const Interval& a) { return a.get_d(); }
-template<> inline Float numeric_cast(const Interval& a) { return a.midpoint(); }
+template<> inline Float numeric_cast(const Interval& a) { return a.midpoint().value(); }
 template<> inline Interval numeric_cast(const Float& a) { return Interval(a); }
 
 template<> inline float numeric_cast(const double& a) { return a; }
@@ -85,7 +85,9 @@ template<> struct IsNumeric<int> { static const bool value = true; };
 template<> struct IsNumeric<double> { static const bool value = true; };
 template<> struct IsNumeric<Float> { static const bool value = true; };
 template<> struct IsNumeric<ExactFloat> { static const bool value = true; };
-template<> struct IsNumeric<Interval> { static const bool value = true; };
+template<> struct IsNumeric<ValidatedFloat> { static const bool value = true; };
+template<> struct IsNumeric<ApproximateFloat> { static const bool value = true; };
+//template<> struct IsNumeric<Interval> { static const bool value = true; };
 template<> struct IsNumeric<Real> { static const bool value = true; };
 
 #ifdef HAVE_GMPXX_H
@@ -98,10 +100,18 @@ template<class X, class T> struct EnableIfNumeric : EnableIf<IsNumeric<X>,T> { }
 template<class F, class T> struct IsSafelyConvertible : False { };
 template<> struct IsSafelyConvertible<ExactFloat,ExactFloat> : True { };
 template<> struct IsSafelyConvertible<ExactFloat,Real> : True { };
-template<> struct IsSafelyConvertible<ExactFloat,Interval> : True { };
+template<> struct IsSafelyConvertible<ExactFloat,ValidatedFloat> : True { };
+template<> struct IsSafelyConvertible<ExactFloat,ApproximateFloat> : True { };
 template<> struct IsSafelyConvertible<Real,Real> : True { };
+template<> struct IsSafelyConvertible<Real,ValidatedFloat> : True { };
+template<> struct IsSafelyConvertible<Real,ApproximateFloat> : True { };
+template<> struct IsSafelyConvertible<ValidatedFloat,ValidatedFloat> : True { };
+template<> struct IsSafelyConvertible<ValidatedFloat,ApproximateFloat> : True { };
+template<> struct IsSafelyConvertible<ApproximateFloat,ApproximateFloat> : True { };
+
 template<> struct IsSafelyConvertible<Real,Interval> : True { };
 template<> struct IsSafelyConvertible<Real,Float> : True { };
+template<> struct IsSafelyConvertible<ExactFloat,Interval> : True { };
 template<> struct IsSafelyConvertible<Interval,Interval> : True { };
 template<> struct IsSafelyConvertible<Interval,Float> : True { };
 template<> struct IsSafelyConvertible<Float,Float> : True { };

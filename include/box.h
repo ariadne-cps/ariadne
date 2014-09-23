@@ -70,7 +70,7 @@ inline Interval over_approximation(const IntervalSet& rivl) {
     return Interval(Interval(rivl.lower()).lower(),Interval(rivl.upper()).upper());
 }
 inline Interval approximation(const IntervalSet& rivl) {
-    return Interval(Float(rivl.lower()),Float(rivl.upper()));
+    return Interval(ApproximateNumberType(rivl.lower()),ApproximateNumberType(rivl.upper()));
 }
 
 
@@ -148,7 +148,7 @@ class Box
         for(uint i=0; i!=this->size(); ++i) {
             dmax = max( dmax, (*this)[i].width() );
         }
-        return up(dmax/2);
+        return half(dmax);
     }
 
     //! An approximation to the Lesbegue measure (area, volume) of the box.

@@ -57,28 +57,48 @@ class ScalarTaylorFunction;
 class VectorTaylorFunction;
 class TaylorFunctionFactory;
 
+inline ApproximateNumberType med_apprx(Interval const& ivl) {
+    return half_exact(add_approx(ivl.lower_value(),ivl.upper_value()));
+}
+
+inline ApproximateNumberType rad_apprx(Interval const& ivl) {
+    return half_exact(sub_approx(ivl.upper_value(),ivl.lower_value()));
+}
+
+inline ValidatedNumberType med_val(Interval const& ivl) {
+    return half(ivl.lower()+ivl.upper());
+}
+
+inline ValidatedNumberType rad_val(Interval const& ivl) {
+    return half(ivl.upper()-ivl.lower());
+}
+
+inline ValidatedNumberType make_singleton(Interval const& ivl) {
+    return ValidatedNumberType(ivl.lower_value(),ivl.upper_value());
+}
+
 template<template<class> class T> inline T<ApproximateTag> unscale(const T<ApproximateTag>& x, const Interval& d) {
-    ApproximateNumberType c(add_approx(d.lower()/2,d.upper()/2));
-    ApproximateNumberType r(sub_approx(d.upper()/2,d.lower()/2));
+    ApproximateNumberType c(med_apprx(d));
+    ApproximateNumberType r(rad_apprx(d));
     return (x-c)/r;
 }
 
 template<template<class> class T> inline T<ValidatedTag> unscale(const T<ValidatedTag>& x, const Interval& d) {
-    ValidatedNumberType c(add_ivl(d.lower()/2,d.upper()/2));
-    ValidatedNumberType r(sub_ivl(d.upper()/2,d.lower()/2));
+    ValidatedNumberType c(med_val(d));
+    ValidatedNumberType r(rad_val(d));
     return (x-c)/r;
 }
 
 
 inline ApproximateNumberType unscale(const ApproximateNumberType& x, const Interval& d) {
-    ApproximateNumberType c(add_approx(d.lower()/2,d.upper()/2));
-    ApproximateNumberType r(sub_approx(d.upper()/2,d.lower()/2));
+    ApproximateNumberType c(med_apprx(d));
+    ApproximateNumberType r(rad_apprx(d));
     return (x-c)/r;
 }
 
-inline ValidatedTag unscale(const ValidatedTag& x, const Interval& d) {
-    ValidatedTag c(add_ivl(d.lower()/2,d.upper()/2));
-    ValidatedTag r(sub_ivl(d.upper()/2,d.lower()/2));
+inline ValidatedNumberType unscale(const ValidatedNumberType& x, const Interval& d) {
+    ValidatedNumberType c(med_val(d));
+    ValidatedNumberType r(rad_val(d));
     return (x-c)/r;
 }
 
@@ -261,7 +281,8 @@ class ScalarTaylorFunction
     //! \brief The constant term in the expansion.
     const CoefficientType& value() const { return this->_model.value(); }
     //! \brief The gradient at the centre of the domain.
-    const CoefficientType gradient_value(Nat i) const { return this->_model.gradient(i)/this->_domain[i].radius(); }
+    const CoefficientType gradient_value(Nat i) const {
+        return static_cast<CoefficientType>(this->_model.gradient(i).value()/this->_domain[i].radius().value()); }
     //! \brief A polynomial representation.
     Polynomial<ValidatedNumberType> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.
@@ -458,9 +479,9 @@ template<> struct Arithmetic<ScalarTaylorFunction,EffectiveNumberType> { typedef
 template<> struct Arithmetic<ScalarTaylorFunction,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
 
 inline tribool operator>(const ScalarTaylorFunction& x, const RawFloatType& c) {
-    ValidatedNumberType r=x.range(); if(r.lower()>c) { return true; } else if(r.upper()<=c) { return false; } else { return indeterminate; } }
+    Interval r=x.range(); if(r.lower_value()>c) { return true; } else if(r.upper_value()<=c) { return false; } else { return indeterminate; } }
 inline tribool operator<(const ScalarTaylorFunction& x, const RawFloatType& c) {
-    ValidatedNumberType r=x.range(); if(r.lower()<c) { return true; } else if(r.upper()>=c) { return false; } else { return indeterminate; } }
+    Interval r=x.range(); if(r.lower_value()<c) { return true; } else if(r.upper_value()>=c) { return false; } else { return indeterminate; } }
 
 inline tribool operator>(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)>0; }
 inline tribool operator<(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)<0; }
@@ -551,11 +572,11 @@ inline ScalarTaylorFunction atan(const ScalarTaylorFunction& x) {
 
 
 inline ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, uint k) {
-    ValidatedNumberType sf=rad_ivl(x.domain()[k]);
+    ValidatedNumberType sf=rad_val(x.domain()[k]);
     return ScalarTaylorFunction(x.domain(),antiderivative(x.model(),k)*sf); }
 
 inline ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, uint k) {
-    ValidatedNumberType sf=1/rad_ivl(x.domain()[k]);
+    ValidatedNumberType sf=rec(rad_val(x.domain()[k]));
     return ScalarTaylorFunction(x.domain(),derivative(x.model(),k)*sf); }
 
 inline ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const Interval& dom2) {

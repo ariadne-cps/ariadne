@@ -116,6 +116,7 @@ class UpperFloat {
     friend UpperFloat operator+(UpperFloat, UpperFloat);
     friend UpperFloat operator-(UpperFloat, LowerFloat);
     friend LowerFloat operator-(LowerFloat, UpperFloat);
+    friend UpperFloat half(UpperFloat);
     friend std::ostream& operator<<(std::ostream& os, UpperFloat);
   private:
     Float u;

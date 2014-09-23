@@ -69,11 +69,19 @@ class Interval;
 
 typedef Float RawFloat;
 typedef Float RawFloatType;
-typedef Float ApproximateFloatType;
-typedef Float LowerFloatType;
-typedef Float UpperFloatType;
-typedef Interval ValidatedFloatType;
-typedef Float ExactFloatType;
+//typedef Float ApproximateFloatType;
+//typedef Float LowerFloatType;
+//typedef Float UpperFloatType;
+//typedef Interval ValidatedFloatType;
+//typedef Float ExactFloatType;
+
+typedef ApproximateFloat ApproximateFloatType;
+typedef LowerFloat LowerFloatType;
+typedef UpperFloat UpperFloatType;
+typedef ValidatedFloat ValidatedFloatType;
+typedef ExactFloat ExactFloatType;
+typedef UpperFloatType PositiveUpperFloatType;
+typedef PositiveUpperFloatType ErrorFloatType;
 
 typedef ApproximateFloatType ApproximateNumberType;
 typedef LowerFloatType LowerNumberType;
@@ -82,11 +90,11 @@ typedef ValidatedFloatType ValidatedNumberType;
 typedef Real EffectiveNumberType;
 typedef ExactFloatType ExactNumberType;
 
-typedef UpperFloatType PositiveUpperNumberType;
+typedef PositiveUpperFloatType PositiveUpperNumberType;
 
-typedef PositiveUpperNumberType NormType;
-typedef PositiveUpperNumberType ErrorType;
-typedef ExactNumberType CoefficientType;
+typedef ErrorFloatType NormType;
+typedef ErrorFloatType ErrorType;
+typedef ExactFloatType CoefficientType;
 
 typedef ApproximateNumberType ApproximateNormType;
 typedef ApproximateNumberType ApproximateErrorType;
@@ -96,10 +104,6 @@ typedef ApproximateNumberType ApproximateNumber;
 typedef ValidatedNumberType ValidatedNumber;
 typedef EffectiveNumberType EffectiveNumber;
 typedef ExactNumberType ExactNumber;
-
-//typedef ApproximateFloat ApproximateNumberType;
-//typedef ValidatedFloat ValidatedNumberType;
-//typedef Real EffectiveNumberType;
 
 // Information level declarations
 struct ExactTag { };

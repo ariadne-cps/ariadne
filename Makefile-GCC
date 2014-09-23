@@ -3,7 +3,9 @@ all: lib tests wrap examples
 VPATH = include src test wrap examples
 
 HDR = \
-	standard.h numeric.h functional.h ariadne.h
+    standard.h numeric.h functional.h
+
+# ariadne.h
 
 LIB_NUMERIC_SRC = \
 	logging.cc operators.cc integer.cc rational.cc decimal.cc \
@@ -110,16 +112,16 @@ EXAMPLES_SRC = \
 
 ARIADNE_LIB = libariadne.so
 
-DEPS = $(patsubst %.cc,.deps/%.d,$(LIB_SRC) $(LIB_EXTRAS_SRC) $(TEST_SRC) $(WRAP_SRC) $(EXAMPLES_SRC))
+DEPS = $(patsubst %.cc,.deps/%.d,$(LIB_SRC) $(LIB_EXTRAS_SRC) $(TEST_SRC) $(EXAMPLES_SRC))
 
 PCH = $(patsubst %.h,%.h.gch,$(HDR))
-LIB_OBJ = $(patsubst %.cc,obj/lib/%.o,$(LIB_SRC))
-LIB_EXTRAS_OBJ = $(patsubst %.cc,obj/lib/%.o,$(LIB_EXTRAS_SRC))
-TESTS_OBJ = $(patsubst %.cc,obj/test/%.o,$(TESTS_SRC))
-TESTS_BIN = $(patsubst obj/test/%.o,bin/%,$(TESTS_OBJ))
-WRAP_OBJ = $(patsubst %.cc,obj/wrap/%.o,$(WRAP_SRC))
-EXAMPLES_OBJ = $(patsubst %.cc,obj/examples/%.o,$(EXAMPLES_SRC))
-EXAMPLES_BIN = $(patsubst obj/examples/%.o,bin/%,$(EXAMPLES_OBJ))
+LIB_OBJ = $(patsubst %.cc,obj/%.o,$(LIB_SRC))
+LIB_EXTRAS_OBJ = $(patsubst %.cc,obj/%.o,$(LIB_EXTRAS_SRC))
+TESTS_OBJ = $(patsubst %.cc,obj/%.o,$(TESTS_SRC))
+TESTS_BIN = $(patsubst obj/%.o,bin/%,$(TESTS_OBJ))
+WRAP_OBJ = $(patsubst %.cc,obj/%.o,$(WRAP_SRC))
+EXAMPLES_OBJ = $(patsubst %.cc,obj/%.o,$(EXAMPLES_SRC))
+EXAMPLES_BIN = $(patsubst obj/%.o,bin/%,$(EXAMPLES_OBJ))
 
 CXXFLAGS = -std=c++11 -fPIC
 
@@ -131,11 +133,14 @@ PYTHON_INCLUDE_PATH=/usr/include/python$(PYTHON_VERSION)
 PYTHON_LIBRARY=python$(PYTHON_VERSION)
 PYTHON_LINK_LIBS=-lboost_python -l$(PYTHON_LIBRARY)
 
+# Pull in dependency information
+include $(PCH:.gch=.d)
+include $(DEPS)
 
 phony: all help dirs deps lib tests wrap examples check
 
 help:
-#	@echo "\nDEPS"=$(DEPS)
+	@echo "\nDEPS"=$(DEPS)
 	@echo "\nPCH"=$(PCH)
 	@echo "\nLIB_SRC="$(LIB_SRC)
 #	@echo "LIB_OBJ="$(LIB_OBJ)
@@ -149,15 +154,9 @@ help:
 #	@echo "EXAMPLES_BIN="$(EXAMPLES_BIN)
 
 dirs:
-	@mkdir -p obj
-	@mkdir -p obj/lib/
-	@mkdir -p obj/wrap/
-	@mkdir -p obj/test/
-	@mkdir -p obj/examples/
+	@mkdir -p obj/
 	@mkdir -p bin/
 	@mkdir -p check/
-	@mkdir -p bin/test/
-	@mkdir -p bin/examples/
 
 deps: dirs $(DEPS)
 
@@ -172,21 +171,23 @@ check: tests
 
 examples: dirs $(EXAMPLES_BIN) $(EXAMPLES_OBJ) lib
 
+
 %.h.d: %.h
 	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > $*.h.d
 	@sed -i 's|.*.o:|$*.h.gch:|' $*.h.d
 
 .deps/numeric.d: include/numeric.h | dirs
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > .deps/numeric.d
-	sed -i 's|.*.o:|.libs/$*.o:|' .deps/$*.d
+	sed -i 's|.*.o:|obj/$*.o:|' .deps/$*.d
 
 .deps/functional.d: include/functional.h | dirs
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > .deps/$*.d
-	sed -i 's|.*.o:|.libs/$*.o:|' .deps/$*.d
+	sed -i 's|.*.o:|obj/$*.o:|' .deps/$*.d
 
 .deps/%.d: %.cc | dirs
-	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -MM $< > .deps/$*.d
-	sed -i 's|.*.o:|.libs/$*.o:|' .deps/$*.d
+	@echo "Making dependencies for "$<
+	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -MM $< > .deps/$*.d
+	@sed -i 's|.*.o:|obj/$*.o:|' .deps/$*.d
 
 
 libariadne.so: $(PCH) $(LIB_OBJ)
@@ -201,10 +202,7 @@ ariadne.so: $(PCH) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) libariadne.so
 wrap/boost_python.h.gch: wrap/boost_python.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) $<
 
-obj/lib/%.o: src/%.cc
-	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
-
-obj/test/%.o: test/%.cc
+obj/%.o: src/%.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
 obj/wrap/%.o: wrap/%.cc wrap/boost_python.h.gch
@@ -213,7 +211,7 @@ obj/wrap/%.o: wrap/%.cc wrap/boost_python.h.gch
 obj/examples/%.o: examples/%.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
-bin/test_%: obj/test/test_%.o | libariadne.so
+bin/test_%: obj/test_%.o | libariadne.so
 #	@echo "\nlinking TESTS " $< " with libariadne.so to " $@
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
 

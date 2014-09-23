@@ -36,6 +36,9 @@ namespace Ariadne {
 //! Internal name for output stream.
 typedef std::ostream OutputStream;
 
+//! Internal name for void type.
+typedef void Void;
+
 //! Internal name for builtin boolean type.
 typedef bool Bool;
 //! Internal name for three-valued logical type.
@@ -175,6 +178,16 @@ typedef VectorFunction<ApproximateTag> ApproximateVectorFunction;
 typedef VectorFunction<ValidatedTag> ValidatedVectorFunction;
 typedef VectorFunction<EffectiveTag> EffectiveVectorFunction;
 typedef EffectiveVectorFunction RealVectorFunction;
+
+// Function model declarations
+template<class X> class ScalarFunctionModel;
+template<class X> class VectorFunctionModel;
+
+typedef ScalarFunctionModel<ApproximateTag> ApproximateScalarFunctionModel;
+typedef ScalarFunctionModel<ValidatedTag> ValidatedScalarFunctionModel;
+
+typedef VectorFunctionModel<ApproximateTag> ApproximateVectorFunctionModel;
+typedef VectorFunctionModel<ValidatedTag> ValidatedVectorFunctionModel;
 
 // Deprecated typedefs
 typedef ApproximateScalarFunction FloatScalarFunction;

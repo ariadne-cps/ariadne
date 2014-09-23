@@ -601,22 +601,22 @@ Matrix<Float> pivot_matrix(const Array<size_t>& pv)
     return P;
 }
 
-PivotMatrix::operator Matrix<Float> () const {
+PivotMatrix::operator Matrix<ExactFloatType> () const {
     return pivot_matrix(this->_ary);
 }
 
 std::ostream& operator<<(std::ostream& os, const PivotMatrix& pv) {
-    return os << static_cast< Matrix<Float> >(pv);
+    return os << static_cast< Matrix<ExactFloatType> >(pv);
 }
 
 // Compute the orthogonal decomposition A=QR with or without column pivoting. The
 // matrix Q is built up as a composition of elementary Householder
 // transformations H=I-vv' with |v|=1. Note that inv(H)=H'=H. The vector v is
 // chosen to be a multiple of the first working column of A.
-Tuple< Matrix<Float>, Matrix<Float>, PivotMatrix >
-orthogonal_decomposition(const Matrix<Float>& A, bool allow_pivoting)
+Tuple< Matrix<ApproximateFloatType>, Matrix<ApproximateFloatType>, PivotMatrix >
+orthogonal_decomposition(const Matrix<ApproximateFloatType>& A, bool allow_pivoting)
 {
-    typedef Float X;
+    typedef ApproximateFloatType X;
 
     size_t m=A.row_size();
     size_t n=A.column_size();
@@ -663,11 +663,11 @@ orthogonal_decomposition(const Matrix<Float>& A, bool allow_pivoting)
         }
 
         // Compute |a| where a is the working column
-        Float nrmas=0.0;
+        ApproximateFloatType nrmas=0.0;
         for(size_t i=k; i!=m; ++i) {
             nrmas+=R[i][k]*R[i][k];
         }
-        Float nrma=sqrt(nrmas);
+        ApproximateFloatType nrma=sqrt(nrmas);
 
         // Compute u=a +/- |a|e
         for(size_t i=0; i!=k; ++i) {
@@ -680,23 +680,23 @@ orthogonal_decomposition(const Matrix<Float>& A, bool allow_pivoting)
         else { u[k]-=nrma; }
 
         // Compute -2/u.u
-        Float nrmus=0.0;
+        ApproximateFloatType nrmus=0.0;
         for(size_t i=k; i!=m; ++i) {
             nrmus+=sqr(u[i]);
         }
-        Float mtdnu=(-2)/nrmus;
+        ApproximateFloatType mtdnu=(-2)/nrmus;
 
         // Compute H=(1-2uu'/u'u)
-        // Matrix<Float> H(n,n); for(size_t i=0; i!=n; ++i) {
+        // Matrix<ApproximateFloatType> H(n,n); for(size_t i=0; i!=n; ++i) {
         // H[i][i]=1.0; for(size_t j=0; j!=n; ++j) { H[i][j]+=u[i]*u[j]*mtdnu; } }
 
         // For each column b of R, compute b-=2u(u.b)/u.u
         for(size_t j=k; j!=n; ++j) {
-            Float udtb=0.0;
+            ApproximateFloatType udtb=0.0;
             for(size_t i=k; i!=m; ++i) {
                 udtb+=u[i]*R[i][j];
             }
-            Float scl=udtb*mtdnu;
+            ApproximateFloatType scl=udtb*mtdnu;
             for(size_t i=k; i!=m; ++i) {
                 R[i][j]+=scl*u[i];
             }
@@ -712,11 +712,11 @@ orthogonal_decomposition(const Matrix<Float>& A, bool allow_pivoting)
         // Update Q'=QH = Q(I-2uu'/u'u)
         // For each row q, compute q-=2u(u.q)/(u.u)
         for(size_t i=0; i!=m; ++i) {
-            Float qdtu=0.0;
+            ApproximateFloatType qdtu=0.0;
             for(size_t j=k; j!=m; ++j) {
                 qdtu+=Q[i][j]*u[j];
             }
-            Float scl=qdtu*mtdnu;
+            ApproximateFloatType scl=qdtu*mtdnu;
             for(size_t j=k; j!=m; ++j) {
                 Q[i][j]+=scl*u[j];
             }
@@ -728,10 +728,10 @@ orthogonal_decomposition(const Matrix<Float>& A, bool allow_pivoting)
 }
 
 /*
-Tuple< Matrix<Float>, Matrix<Float> >
-orthogonal_decomposition(const Matrix<Float>& A)
+Tuple< Matrix<ApproximateFloatType>, Matrix<ApproximateFloatType> >
+orthogonal_decomposition(const Matrix<ApproximateFloatType>& A)
 {
-    typedef Float X;
+    typedef ApproximateFloatType X;
 
     size_t m=A.row_size();
     size_t n=A.column_size();
@@ -800,19 +800,19 @@ orthogonal_decomposition(const Matrix<Float>& A)
 */
 
 
-template class Matrix<Float>;
-template Matrix<Float> inverse(const Matrix<Float>&);
-template Matrix<Float> solve(const Matrix<Float>&, const Matrix<Float>&);
-template Vector<Float> solve(const Matrix<Float>&, const Vector<Float>&);
-template class Matrix<Interval>;
-template Matrix<Interval> inverse(const Matrix<Interval>&);
-template Matrix<Interval> lu_inverse(const Matrix<Interval>&);
-template Matrix<Interval> gs_inverse(const Matrix<Interval>&);
-template Matrix<Interval> solve(const Matrix<Interval>&, const Matrix<Interval>&);
-template Matrix<Interval> lu_solve(const Matrix<Interval>&, const Matrix<Interval>&);
-template Matrix<Interval> gs_solve(const Matrix<Interval>&, const Matrix<Interval>&);
-template Vector<Interval> solve(const Matrix<Interval>&, const Vector<Interval>&);
-template Vector<Interval> gs_solve(const Matrix<Interval>&, const Vector<Interval>&);
+template class Matrix<ApproximateFloatType>;
+template Matrix<ApproximateFloatType> inverse(const Matrix<ApproximateFloatType>&);
+template Matrix<ApproximateFloatType> solve(const Matrix<ApproximateFloatType>&, const Matrix<ApproximateFloatType>&);
+template Vector<ApproximateFloatType> solve(const Matrix<ApproximateFloatType>&, const Vector<ApproximateFloatType>&);
+template class Matrix<ValidatedFloatType>;
+template Matrix<ValidatedFloatType> inverse(const Matrix<ValidatedFloatType>&);
+template Matrix<ValidatedFloatType> lu_inverse(const Matrix<ValidatedFloatType>&);
+template Matrix<ValidatedFloatType> gs_inverse(const Matrix<ValidatedFloatType>&);
+template Matrix<ValidatedFloatType> solve(const Matrix<ValidatedFloatType>&, const Matrix<ValidatedFloatType>&);
+template Matrix<ValidatedFloatType> lu_solve(const Matrix<ValidatedFloatType>&, const Matrix<ValidatedFloatType>&);
+template Matrix<ValidatedFloatType> gs_solve(const Matrix<ValidatedFloatType>&, const Matrix<ValidatedFloatType>&);
+template Vector<ValidatedFloatType> solve(const Matrix<ValidatedFloatType>&, const Vector<ValidatedFloatType>&);
+template Vector<ValidatedFloatType> gs_solve(const Matrix<ValidatedFloatType>&, const Vector<ValidatedFloatType>&);
 #ifdef HAVE_GMPXX_H
 template class Matrix<Rational>;
 template Matrix<Rational> inverse(const Matrix<Rational>&);

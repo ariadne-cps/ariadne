@@ -107,8 +107,8 @@ class Grid {
     Array<DyadicType> lower_index(const Box& bx) const;
     Array<DyadicType> upper_index(const Box& bx) const;
 
-    Vector<ExactNumberType> point(const Array<IntegerType>& a) const;
-    Vector<ExactNumberType> point(const Array<DyadicType>& a) const;
+    Point point(const Array<IntegerType>& a) const;
+    Point point(const Array<DyadicType>& a) const;
     Box box(const Array<DyadicType>& l, const Array<DyadicType>& u) const;
     Box box(const GridCell& cell) const;
   private:

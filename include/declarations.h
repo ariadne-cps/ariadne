@@ -118,6 +118,7 @@ template<class X> class Differential;
 template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Differential;
+template<class X> class Vector<Differential<X>>;
 template<class X> class Series;
 
 

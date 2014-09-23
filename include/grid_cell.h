@@ -73,6 +73,8 @@ class GridAbstractCell;
 class GridCell;
 class GridOpenCell;
 
+typedef Vector<Interval> LatticeBoxType;
+
 std::ostream& operator<<(std::ostream& os, const GridCell& theGridCell);
 std::ostream& operator<<(std::ostream& os, const GridOpenCell& theGridOpenCell );
 
@@ -191,13 +193,13 @@ class GridAbstractCell {
      * \a theHeight defines the height of the primary cell above the zero level and
      * \a dimensions is the number of dimension in the considered space
      */
-    static Box primary_cell_lattice_box( const uint theHeight, const dimension_type dimensions );
+    static LatticeBoxType primary_cell_lattice_box( const uint theHeight, const dimension_type dimensions );
 
     /*! \brief Takes the lattice box \a theLatticeBox related to some (unknown) grid and computes the
      *   smallest primary cell on that grid that will contain this box.
      *   The method returns the hight of that primary cell.
      */
-    static uint smallest_enclosing_primary_cell_height( const Box& theLatticeBox );
+    static uint smallest_enclosing_primary_cell_height( const LatticeBoxType& theLatticeBox );
 
     /*! /brief Computes the height of the primary cell that encloses
      *  (may be exactly) the given box on the given grid.
@@ -213,7 +215,7 @@ class GridAbstractCell {
     /*! \brief Apply grid data \a theGrid to \a theLatticeBox in order to compute
      * the box dimensions in the original space
      */
-    static Box lattice_box_to_space(const Box & theLatticeBox, const Grid& theGrid );
+    static Box lattice_box_to_space(const LatticeBoxType & theLatticeBox, const Grid& theGrid );
 };
 
 /*! \ingroup BasicSetSubModule
@@ -272,7 +274,7 @@ class GridCell : public GridAbstractCell {
     GridOpenCell interior() const;
 
     /*! \brief this method computes the box corresponding to this cell in the grid lattice.*/
-    static Box compute_lattice_box( const uint dimensions, const uint theHeight, const BinaryWord& theWord );
+    static LatticeBoxType compute_lattice_box( const uint dimensions, const uint theHeight, const BinaryWord& theWord );
 
     /*! \brief this method computes the box in the original space based on the \a theGrid,
      *  and a cell which is obtained by traversing the path given by \a _theWord from the

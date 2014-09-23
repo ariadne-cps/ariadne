@@ -175,7 +175,7 @@ void HybridEnclosure::set_time_function(const ValidatedScalarFunctionModel& time
     //this->_set._time_function=time_function;
 }
 
-IntervalVector
+Box
 HybridEnclosure::space_bounding_box() const
 {
     ARIADNE_LOG(8,"space_codomain="<<this->space_function().codomain()<<" space_range="<<this->space_function()(this->_set.reduced_domain())<<"\n");
@@ -211,7 +211,7 @@ HybridEnclosure::number_of_parameters() const
     return this->_set.number_of_parameters();
 }
 
-const IntervalVector
+const Box
 HybridEnclosure::parameter_domain() const
 {
     return this->_set.domain();
@@ -394,7 +394,7 @@ List<ValidatedConstraint> HybridEnclosure::constraints() const {
 }
 
 void
-HybridEnclosure::restrict(const IntervalVector& subdomain)
+HybridEnclosure::restrict(const Box& subdomain)
 {
     this->_set.restrict(subdomain);
 }

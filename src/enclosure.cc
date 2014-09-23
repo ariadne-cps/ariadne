@@ -908,8 +908,6 @@ Enclosure::split(uint d) const
 
 
 
-typedef Procedure<Interval> IntervalProcedure;
-
 
 void adjoin_outer_approximation(PavingInterface&, const Box& domain, const ValidatedVectorFunction& function, const ValidatedVectorFunction& negative_constraints, const ValidatedVectorFunction& equality_constraints, int depth);
 

@@ -153,7 +153,7 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
     Vector<Interval> ivlx = x;
     Vector<Interval> ivle = make_exact(b)-make_exact(A)*ivlx;
 
-    Matrix<Interval> ivlS(m,m);
+    Matrix<ValidatedNumberType> ivlS(m,m);
     for(uint i1=0; i1!=m; ++i1) {
         for(uint i2=i1; i2!=m; ++i2) {
             for(uint j=0; j!=n; ++j) {

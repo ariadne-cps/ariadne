@@ -48,23 +48,23 @@ namespace {
 
 static const uint verbosity = 0u;
 
-void subdivision_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const ValidatedVectorFunction& function,
-                                            const ValidatedVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
+void subdivision_adjoin_outer_approximation(PavingInterface& paving, const Box& domain, const ValidatedVectorFunction& function,
+                                            const ValidatedVectorFunction& constraint_function, const Box& constraint_bounds, int depth);
 
-void affine_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const ValidatedVectorFunction& function,
-                                       const ValidatedVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
+void affine_adjoin_outer_approximation(PavingInterface& paving, const Box& domain, const ValidatedVectorFunction& function,
+                                       const ValidatedVectorFunction& constraint_function, const Box& constraint_bounds, int depth);
 
-void constraint_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const ValidatedVectorFunction& function,
-                                           const ValidatedVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
+void constraint_adjoin_outer_approximation(PavingInterface& paving, const Box& domain, const ValidatedVectorFunction& function,
+                                           const ValidatedVectorFunction& constraint_function, const Box& constraint_bounds, int depth);
 
-void optimal_constraint_adjoin_outer_approximation(PavingInterface& paving, const IntervalVector& domain, const ValidatedVectorFunction& function,
-                                                   const ValidatedVectorFunction& constraint_function, const IntervalVector& constraint_bounds, int depth);
+void optimal_constraint_adjoin_outer_approximation(PavingInterface& paving, const Box& domain, const ValidatedVectorFunction& function,
+                                                   const ValidatedVectorFunction& constraint_function, const Box& constraint_bounds, int depth);
 
 } // namespace
 
 namespace {
 
-IntervalProcedure make_procedure(const ValidatedScalarFunctionInterface& f) {
+ValidatedProcedure make_procedure(const ValidatedScalarFunctionInterface& f) {
     Formula<Interval> e=f.evaluate(Formula<Interval>::identity(f.argument_size()));
     return Procedure<Interval>(e);
 }
@@ -75,7 +75,7 @@ Interval emulrng(const FloatVector& x, const FloatVector& z) {
     return r;
 }
 
-Float widths(const IntervalVector& bx) {
+Float widths(const Box& bx) {
     Float res=0.0;
     for(uint i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width());
@@ -83,7 +83,7 @@ Float widths(const IntervalVector& bx) {
     return res;
 }
 
-Float maximum_scaled_width(const IntervalVector& bx, const FloatVector& sf) {
+Float maximum_scaled_width(const Box& bx, const FloatVector& sf) {
     Float res=0.0;
     for(uint i=0; i!=bx.size(); ++i) {
         res=max(bx[i].width()/sf[i],res);
@@ -91,7 +91,7 @@ Float maximum_scaled_width(const IntervalVector& bx, const FloatVector& sf) {
     return res;
 }
 
-Float average_scaled_width(const IntervalVector& bx, const FloatVector& sf) {
+Float average_scaled_width(const Box& bx, const FloatVector& sf) {
     Float res=0.0;
     for(uint i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width()/sf[i]);
@@ -99,7 +99,7 @@ Float average_scaled_width(const IntervalVector& bx, const FloatVector& sf) {
     return res/bx.size();
 }
 
-Float average_width(const IntervalVector& bx) {
+Float average_width(const Box& bx) {
     Float res=0.0;
     for(uint i=0; i!=bx.size(); ++i) {
         if(bx[i].lower()>bx[i].upper()) { return -inf; }
@@ -112,28 +112,28 @@ Float average_width(const IntervalVector& bx) {
 
 void SubdivisionPaver::
 adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunctionInterface& space_function,
-                           const ValidatedVectorFunctionInterface& constraint_function, const IntervalVector& constraint_bounds, Int depth) const
+                           const ValidatedVectorFunctionInterface& constraint_function, const Box& constraint_bounds, Int depth) const
 {
     return Ariadne::subdivision_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
 }
 
 void AffinePaver::
 adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunctionInterface& space_function,
-                           const ValidatedVectorFunctionInterface& constraint_function, const IntervalVector& constraint_bounds, Int depth) const
+                           const ValidatedVectorFunctionInterface& constraint_function, const Box& constraint_bounds, Int depth) const
 {
     return Ariadne::affine_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
 }
 
 void ConstraintPaver::
 adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunctionInterface& space_function,
-                           const ValidatedVectorFunctionInterface& constraint_function, const IntervalVector& constraint_bounds, Int depth) const
+                           const ValidatedVectorFunctionInterface& constraint_function, const Box& constraint_bounds, Int depth) const
 {
     return Ariadne::constraint_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
 }
 
 void OptimalConstraintPaver::
 adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunctionInterface& space_function,
-                           const ValidatedVectorFunctionInterface& constraint_function, const IntervalVector& constraint_bounds, Int depth) const
+                           const ValidatedVectorFunctionInterface& constraint_function, const Box& constraint_bounds, Int depth) const
 {
     return Ariadne::optimal_constraint_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
 }
@@ -143,7 +143,7 @@ namespace {
 
 using Ariadne::verbosity;
 
-void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, const IntervalVector& subdomain, const ValidatedVectorFunction& function,
+void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, const Box& subdomain, const ValidatedVectorFunction& function,
                                                       const List<ValidatedConstraint>& constraints, const int depth, const FloatVector& errors)
 {
     // How small an over-approximating box needs to be relative to the cell size
@@ -168,7 +168,7 @@ void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, c
     if(small) {
         paving.adjoin_outer_approximation(range,depth);
     } else {
-        IntervalVector subdomain1,subdomain2;
+        Box subdomain1,subdomain2;
         make_lpair(subdomain1,subdomain2)=Ariadne::split(subdomain);
         subdivision_adjoin_outer_approximation_recursion(paving,subdomain1,function,constraints,depth,errors);
         subdivision_adjoin_outer_approximation_recursion(paving,subdomain2,function,constraints,depth,errors);
@@ -181,8 +181,8 @@ static uint COUNT_TESTS=0u;
 
 // Adjoin an over-approximation to the solution of $f(dom)$ such that $g(D) in C$ to the paving p, looking only at solutions in b.
 void procedure_constraint_adjoin_outer_approximation_recursion(
-        PavingInterface& paving, const IntervalVector& domain, const ValidatedVectorFunction& f,
-        const ValidatedVectorFunction& g, const Box& codomain, const GridCell& cell, int max_dpth, uint splt, const List<IntervalProcedure>& procedures)
+        PavingInterface& paving, const Box& domain, const ValidatedVectorFunction& f,
+        const ValidatedVectorFunction& g, const Box& codomain, const GridCell& cell, int max_dpth, uint splt, const List<ValidatedProcedure>& procedures)
 {
     const uint m=domain.size();
     const uint nf=f.result_size();
@@ -296,7 +296,7 @@ void procedure_constraint_adjoin_outer_approximation_recursion(
 
 void hotstarted_constraint_adjoin_outer_approximation_recursion(
     PavingInterface& r, const Box& d, const ValidatedVectorFunction& f,
-    const ValidatedVectorFunction& g, const IntervalVector& c, const GridCell& b, Point x, Point y, int e)
+    const ValidatedVectorFunction& g, const Box& c, const GridCell& b, Point x, Point y, int e)
 {
     uint verbosity=0;
 
@@ -327,7 +327,7 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
         return;
     }
 
-    Box bx=join(static_cast<const IntervalVector&>(b.box()),static_cast<const IntervalVector&>(c));
+    Box bx=join(static_cast<const Box&>(b.box()),static_cast<const Box&>(c));
 
     ARIADNE_LOG(2,"  fg(d)="<<fg(d)<<", bx="<<bx<<"\n");
     if(disjoint(fg(d),bx)) {
@@ -448,7 +448,7 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
 }
 
 
-void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const IntervalVector& d, const VectorTaylorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
+void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const Box& d, const VectorTaylorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
 {
     Sweeper sweeper = fg.sweeper();
 
@@ -473,7 +473,7 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         return;
     }
 
-    Box bx=join(static_cast<const IntervalVector&>(b.box()),static_cast<const IntervalVector&>(c));
+    Box bx=join(static_cast<const Box&>(b.box()),static_cast<const Box&>(c));
 
     optimiser.compute_tz(d,fg,bx,y,t,z);
     for(uint i=0; i!=12; ++i) {
@@ -550,10 +550,10 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
 
 
 void subdivision_adjoin_outer_approximation(PavingInterface& paving,
-                                            const IntervalVector& subdomain,
+                                            const Box& subdomain,
                                             const ValidatedVectorFunction& function,
                                             const ValidatedVectorFunction& constraint_functions,
-                                            const IntervalVector& constraint_bounds,
+                                            const Box& constraint_bounds,
                                             int depth)
 {
     List<ValidatedConstraint> constraints;
@@ -570,24 +570,24 @@ void subdivision_adjoin_outer_approximation(PavingInterface& paving,
 }
 
 void affine_adjoin_outer_approximation(PavingInterface& paving,
-                                       const IntervalVector& subdomain,
+                                       const Box& subdomain,
                                        const ValidatedVectorFunction& function,
                                        const ValidatedVectorFunction& constraints,
-                                       const IntervalVector& bounds,
+                                       const Box& bounds,
                                        int depth)
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 void
-constraint_adjoin_outer_approximation(PavingInterface& p, const IntervalVector& d, const ValidatedVectorFunction& f,
-                                      const ValidatedVectorFunction& g, const IntervalVector& c, int e)
+constraint_adjoin_outer_approximation(PavingInterface& p, const Box& d, const ValidatedVectorFunction& f,
+                                      const ValidatedVectorFunction& g, const Box& c, int e)
 {
     ARIADNE_ASSERT(p.dimension()==f.result_size());
 
     GridCell b=GridCell::smallest_enclosing_primary_cell(f(d),p.grid());
-    IntervalVector r=g(d)+IntervalVector(g.result_size(),Interval(-1,1));
-    IntervalVector rc=intersection(r,c);
+    Box r=g(d)+Box(g.result_size(),Interval(-1,1));
+    Box rc=intersection(r,c);
 
     Point y=midpoint(d);
     const uint l=(d.size()+f.result_size()+g.result_size())*2;
@@ -597,12 +597,12 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const IntervalVector& 
 }
 
 void
-procedure_constraint_adjoin_outer_approximation(PavingInterface& p, const IntervalVector& d, const ValidatedVectorFunction& f,
-                                                const ValidatedVectorFunction& g, const IntervalVector& c, int e)
+procedure_constraint_adjoin_outer_approximation(PavingInterface& p, const Box& d, const ValidatedVectorFunction& f,
+                                                const ValidatedVectorFunction& g, const Box& c, int e)
 {
     GridCell b=p.smallest_enclosing_primary_cell(f(d));
 
-    List<IntervalProcedure> procedures;
+    List<ValidatedProcedure> procedures;
     procedures.reserve(f.result_size()+g.result_size());
     for(uint i=0; i!=f.result_size(); ++i) { procedures.append(make_procedure(f[i])); }
     for(uint i=0; i!=g.result_size(); ++i) { procedures.append(make_procedure(g[i])); }
@@ -614,11 +614,11 @@ procedure_constraint_adjoin_outer_approximation(PavingInterface& p, const Interv
     if(dynamic_cast<GridTreeSet*>(&p)) { dynamic_cast<GridTreeSet&>(p).recombine(); }
 }
 
-void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const IntervalVector& d, const ValidatedVectorFunction& f,
-                                                   const ValidatedVectorFunction& g, const IntervalVector& c, int e)
+void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Box& d, const ValidatedVectorFunction& f,
+                                                   const ValidatedVectorFunction& g, const Box& c, int e)
 {
     GridCell b=GridCell::smallest_enclosing_primary_cell(g(d),p.grid());
-    Box rc=intersection(g(d)+IntervalVector(g.result_size(),Interval(-1,1)),c);
+    Box rc=intersection(g(d)+Box(g.result_size(),Interval(-1,1)),c);
 
     Point y=midpoint(d);
     const uint l=(d.size()+f.result_size()+g.result_size())*2;

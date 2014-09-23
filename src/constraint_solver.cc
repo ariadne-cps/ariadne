@@ -66,7 +66,7 @@ typedef Matrix<Float> FloatMatrix;
 typedef VectorRange<FloatVector> FloatVectorRange;
 
 typedef Vector<Interval> IntervalVector;
-typedef Matrix<Interval> IntervalMatrix;
+typedef Matrix<ValidatedNumberType> IntervalMatrix;
 typedef VectorRange<IntervalVector> IntervalVectorRange;
 
 
@@ -284,18 +284,18 @@ bool ConstraintSolver::reduce(Box& domain, const List<ValidatedConstraint>& cons
 }
 
 
-bool ConstraintSolver::hull_reduce(Box& domain, const IntervalProcedure& procedure, const Interval& bounds) const
+bool ConstraintSolver::hull_reduce(Box& domain, const ValidatedProcedure& procedure, const Interval& bounds) const
 {
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, IntervalProcedure procedure, Interval bounds): "
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, ValidatedProcedure procedure, Interval bounds): "
                   "procedure="<<procedure<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Ariadne::simple_hull_reduce(domain, procedure, bounds);
     return domain.empty();
 }
 
-bool ConstraintSolver::hull_reduce(Box& domain, const Vector<IntervalProcedure>& procedure, const IntervalVector& bounds) const
+bool ConstraintSolver::hull_reduce(Box& domain, const Vector<ValidatedProcedure>& procedure, const Box& bounds) const
 {
-    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, Vector<IntervalProcedure> procedure, Box bounds): "
+    ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, Vector<ValidatedProcedure> procedure, Box bounds): "
                   "procedure="<<procedure<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Ariadne::simple_hull_reduce(domain, procedure, bounds);
@@ -312,7 +312,7 @@ bool ConstraintSolver::hull_reduce(Box& domain, const ValidatedScalarFunctionInt
     return this->hull_reduce(domain,procedure,bounds);
 }
 
-bool ConstraintSolver::hull_reduce(Box& domain, const ValidatedVectorFunctionInterface& function, const IntervalVector& bounds) const
+bool ConstraintSolver::hull_reduce(Box& domain, const ValidatedVectorFunctionInterface& function, const Box& bounds) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, ValidatedScalarFunction function, Interval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
@@ -360,7 +360,7 @@ bool ConstraintSolver::monotone_reduce(Box& domain, const ValidatedScalarFunctio
 
 
 
-bool ConstraintSolver::lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const IntervalVector& bounds,
+bool ConstraintSolver::lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const Box& bounds,
                                        FloatVector centre, FloatVector multipliers) const
 {
     ScalarTaylorFunction g(function.domain(),default_sweeper());
@@ -469,7 +469,7 @@ void compute_monotonicity(Box& domain, const EffectiveConstraint& constraint) {
 } // namespace
 
 
-Pair<Box,Box> ConstraintSolver::split(const Box& d, const ValidatedVectorFunction& f, const IntervalVector& c) const
+Pair<Box,Box> ConstraintSolver::split(const Box& d, const ValidatedVectorFunction& f, const Box& c) const
 {
     return d.split();
 }

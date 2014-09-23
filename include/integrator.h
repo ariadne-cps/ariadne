@@ -102,7 +102,7 @@ class IntegratorBase
     void set_function_factory(const ValidatedFunctionModelFactoryInterface& factory);
 
 
-    virtual Pair<ExactFloat,Box>
+    virtual Pair<ExactFloatType,Box>
     flow_bounds(const ValidatedVectorFunction& vector_field,
                 const Box& state_domain,
                 const RawFloatType& suggested_time_step) const;
@@ -133,7 +133,7 @@ class IntegratorBase
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const Box& state_domain,
-              const ExactFloat& suggested_time_step,
+              const ExactFloatType& suggested_time_step,
               const Box& bounding_box) const = 0;
 
   public:
@@ -177,7 +177,7 @@ class TaylorPicardIntegrator
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const Box& state_domain,
-              const ExactFloat& time_step,
+              const ExactFloatType& time_step,
               const Box& bounding_box) const;
 
     using IntegratorBase::flow_step;
@@ -234,7 +234,7 @@ class TaylorSeriesIntegrator
     virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
     virtual void write(std::ostream& os) const;
 
-    virtual Pair<ExactFloat,Box>
+    virtual Pair<ExactFloatType,Box>
     flow_bounds(const ValidatedVectorFunction& vector_field,
                 const Box& state_domain,
                 const RawFloatType& suggested_time_step) const;
@@ -242,7 +242,7 @@ class TaylorSeriesIntegrator
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const Box& state_domain,
-              const ExactFloat& time_step,
+              const ExactFloatType& time_step,
               const Box& bounding_box) const;
 
     using IntegratorBase::flow_step;
@@ -272,7 +272,7 @@ class AffineIntegrator
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const Box& state_domain,
-              const ExactFloat& time_step,
+              const ExactFloatType& time_step,
               const Box& bounding_box) const;
 
     using IntegratorBase::flow_step;

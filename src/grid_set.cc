@@ -119,22 +119,22 @@ const Vector<Float>& Grid::lengths() const
     return this->_data->_lengths;
 }
 
-Float Grid::coordinate(uint d, dyadic_type x) const
+Float Grid::coordinate(uint d, DyadicType x) const
 {
     return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x));
 }
 
-Float Grid::subdivision_coordinate(uint d, dyadic_type x) const
+Float Grid::subdivision_coordinate(uint d, DyadicType x) const
 {
     return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x));
 }
 
-Float Grid::subdivision_coordinate(uint d, integer_type n) const
+Float Grid::subdivision_coordinate(uint d, IntegerType n) const
 {
     return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
 }
 
-int Grid::subdivision_index(uint d, const real_type& x) const
+int Grid::subdivision_index(uint d, const ExactNumberType& x) const
 {
     Float half=0.5;
     int n=integer_cast<int>(floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half)));
@@ -142,11 +142,11 @@ int Grid::subdivision_index(uint d, const real_type& x) const
     if(sc == x) {
         return n;
     } else {
-        ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(uint d,real_type x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
+        ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(uint d,ExactNumberType x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
     }
 }
 
-int Grid::subdivision_lower_index(uint d, const real_type& x) const
+int Grid::subdivision_lower_index(uint d, const LowerNumberType& x) const
 {
     int n=integer_cast<int>(floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d])));
     if(x>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
@@ -156,7 +156,7 @@ int Grid::subdivision_lower_index(uint d, const real_type& x) const
     }
 }
 
-int Grid::subdivision_upper_index(uint d, const real_type& x) const
+int Grid::subdivision_upper_index(uint d, const UpperNumberType& x) const
 {
     int n=integer_cast<int>(ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d])));
     if(x<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
@@ -180,7 +180,7 @@ bool Grid::operator!=(const Grid& g) const
     return !(*this==g);
 }
 
-Array<double> Grid::index(const Vector<Float>& pt) const
+Array<double> Grid::index(const Point& pt) const
 {
     Array<double> res(pt.size());
     for(size_t i=0; i!=res.size(); ++i) {
@@ -189,7 +189,7 @@ Array<double> Grid::index(const Vector<Float>& pt) const
     return res;
 }
 
-Array<double> Grid::lower_index(const Vector<Interval>& bx) const {
+Array<double> Grid::lower_index(const Box& bx) const {
     Array<double> res(bx.size());
     for(size_t i=0; i!=res.size(); ++i) {
         res[i]=subdivision_lower_index(i,bx[i].lower());
@@ -197,7 +197,7 @@ Array<double> Grid::lower_index(const Vector<Interval>& bx) const {
     return res;
 }
 
-Array<double> Grid::upper_index(const Vector<Interval>& bx) const {
+Array<double> Grid::upper_index(const Box& bx) const {
     Array<double> res(bx.size());
     for(size_type i=0; i!=res.size(); ++i) {
         res[i]=subdivision_upper_index(i,bx[i].upper());
@@ -205,7 +205,7 @@ Array<double> Grid::upper_index(const Vector<Interval>& bx) const {
     return res;
 }
 
-Vector<Float> Grid::point(const Array<int>& a) const
+Point Grid::point(const Array<IntegerType>& a) const
 {
     Vector<Float> res(a.size());
     for(size_type i=0; i!=res.size(); ++i) {
@@ -214,7 +214,7 @@ Vector<Float> Grid::point(const Array<int>& a) const
     return res;
 }
 
-Vector<Float> Grid::point(const Array<double>& a) const
+Point Grid::point(const Array<DyadicType>& a) const
 {
     Vector<Float> res(a.size());
     for(size_type i=0; i!=res.size(); ++i) {
@@ -223,7 +223,7 @@ Vector<Float> Grid::point(const Array<double>& a) const
     return res;
 }
 
-Vector<Interval> Grid::box(const Array<double>& lower, const Array<double>& upper) const
+Box Grid::box(const Array<DyadicType>& lower, const Array<DyadicType>& upper) const
 {
     Vector<Interval> res(lower.size());
     for(size_type i=0; i!=res.size(); ++i) {
@@ -744,7 +744,7 @@ bool GridTreeConstIterator::navigate_to(bool firstLast){
 
 /*****************************************GridAbstractCell*******************************************/
 
-Vector<Interval> GridAbstractCell::primary_cell_lattice_box( const uint theHeight, const dimension_type dimensions ) {
+LatticeBoxType GridAbstractCell::primary_cell_lattice_box( const uint theHeight, const dimension_type dimensions ) {
     int leftBottomCorner = 0, rightTopCorner = 1;
     //The zero level coordinates are known, so we need to iterate only for higher level primary cells
     for(uint i = 1; i <= theHeight; i++){
@@ -755,7 +755,7 @@ Vector<Interval> GridAbstractCell::primary_cell_lattice_box( const uint theHeigh
     return Vector< Interval >( dimensions, Interval( leftBottomCorner, rightTopCorner ) );
 }
 
-uint GridAbstractCell::smallest_enclosing_primary_cell_height( const Vector<Interval>& theLatticeBox ) {
+uint GridAbstractCell::smallest_enclosing_primary_cell_height( const LatticeBoxType& theLatticeBox ) {
     const dimension_type dimensions = theLatticeBox.size();
     int leftBottomCorner = 0, rightTopCorner = 1;
     uint height = 0;
@@ -785,7 +785,7 @@ uint GridAbstractCell::smallest_enclosing_primary_cell_height( const Box& theBox
 }
 
 /*! \brief Apply grid data \a theGrid to \a theLatticeBox in order to compute the box dimensions in the original space*/
-Box GridAbstractCell::lattice_box_to_space(const Vector<Interval> & theLatticeBox, const Grid& theGrid ){
+Box GridAbstractCell::lattice_box_to_space(const LatticeBoxType & theLatticeBox, const Grid& theGrid ){
     const uint dimensions = theGrid.dimension();
     Box theTmpBox( dimensions );
 

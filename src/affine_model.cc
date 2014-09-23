@@ -46,17 +46,17 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAf
 
     set_rounding_upward();
 
-    RawNumberType te=0.0;
+    RawFloatType te=0.0;
     for(uint j=0; j!=n; ++j) {
-        RawNumberType mrjl = (-a1.gradient(j))-a2.gradient(j);
-        RawNumberType  rju = ( a1.gradient(j))+a2.gradient(j);
+        RawFloatType mrjl = (-a1.gradient(j))-a2.gradient(j);
+        RawFloatType  rju = ( a1.gradient(j))+a2.gradient(j);
         te+=(rju+mrjl);
     }
-    RawNumberType mrl = (-a1.value())-a2.value();
-    RawNumberType  ru = ( a1.value())+a2.value();
+    RawFloatType mrl = (-a1.value())-a2.value();
+    RawFloatType  ru = ( a1.value())+a2.value();
     te += (ru+mrl);
 
-    RawNumberType re=0.0;
+    RawFloatType re=0.0;
     r.set_error( te/2 + (a1.error()+a2.error()) );
 
     set_rounding_to_nearest();
@@ -66,14 +66,14 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAf
 
 ValidatedAffineModel operator+(const ValidatedNumberType& c, const ValidatedAffineModel& a) {
     ValidatedAffineModel r=a;
-    RawNumberType cm=midpoint(c);
+    RawFloatType cm=midpoint(c);
     r.set_value( cm + a.value() );
 
     set_rounding_upward();
 
-    RawNumberType mrl = (-a.value())-cm;
-    RawNumberType  ru = ( a.value())+cm;
-    RawNumberType te = (ru+mrl)/2;
+    RawFloatType mrl = (-a.value())-cm;
+    RawFloatType  ru = ( a.value())+cm;
+    RawFloatType te = (ru+mrl)/2;
 
     r.set_error( a.error() + max(c.upper()-cm,cm-c.lower()) + te);
 
@@ -88,7 +88,7 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a, const ValidatedNum
 
 ValidatedAffineModel operator*(const ValidatedNumberType& c, const ValidatedAffineModel& a) {
     Nat n=a.argument_size();
-    RawNumberType cm=midpoint(c);
+    RawFloatType cm=midpoint(c);
     ValidatedAffineModel r(n);
     r=a.value()*cm;
     for(uint i=0; i!=n; ++i) {
@@ -97,18 +97,18 @@ ValidatedAffineModel operator*(const ValidatedNumberType& c, const ValidatedAffi
 
     set_rounding_upward();
 
-    RawNumberType te=0.0;
+    RawFloatType te=0.0;
     for(uint j=0; j!=n; ++j) {
-        RawNumberType mca=(-cm)*a.gradient(j);
-        RawNumberType ca= cm*a.gradient(j);
+        RawFloatType mca=(-cm)*a.gradient(j);
+        RawFloatType ca= cm*a.gradient(j);
         te+=(ca+mca);
     }
-    RawNumberType mca=(-cm)*a.value();
-    RawNumberType ca= cm*a.value();
+    RawFloatType mca=(-cm)*a.value();
+    RawFloatType ca= cm*a.value();
 
-    RawNumberType re=0.0;
+    RawFloatType re=0.0;
     if(c.lower()!=c.upper()) {
-        RawNumberType ce=max(c.upper()-cm,cm-c.lower());
+        RawFloatType ce=max(c.upper()-cm,cm-c.lower());
         for(uint j=0; j!=n; ++j) {
             re+=abs(a.gradient(j)*ce);
         }
@@ -132,7 +132,7 @@ ValidatedAffineModel affine_model(const ValidatedAffine& a) {
         am[j] = midpoint(a[j]);
     }
     set_rounding_upward();
-    RawNumberType e = 0.0;
+    RawFloatType e = 0.0;
     for(uint j=0; j!=a.argument_size(); ++j) {
         e += max(a.gradient(j).upper()-am.gradient(j),am.gradient(j)-a.gradient(j).lower());
     }

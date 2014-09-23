@@ -72,10 +72,10 @@ IntegratorBase::function_factory() const
 }
 
 
-Pair<Float,Vector<ValidatedNumberType>>
-IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const Vector<ValidatedNumberType>& dx, const Float& hmax) const
+Pair<ExactFloatType,Box>
+IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const Box& dx, const RawFloatType& hmax) const
 {
-    ARIADNE_LOG(3,"IntegratorBase::flow_bounds(ValidatedVectorFunction vf, Vector<ValidatedNumberType> dx, Float hmax)\n");
+    ARIADNE_LOG(3,"IntegratorBase::flow_bounds(ValidatedVectorFunction vf, Box dx, Float hmax)\n");
     ARIADNE_ASSERT_MSG(vf.result_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
     ARIADNE_ASSERT_MSG(vf.argument_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
     ARIADNE_ASSERT(hmax>0);
@@ -101,7 +101,8 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const Vector<Vali
     ARIADNE_LOG(4,"L="<<lip<<", hL="<<hlip<<", hmax="<<hmax<<"\n");
 
     bool success=false;
-    Vector<ValidatedNumberType> bx,nbx,df;
+    Box bx,nbx;
+    Vector<ValidatedNumberType> df;
     Interval ih(0,h);
 
     while(!success) {
@@ -156,20 +157,21 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const Vector<Vali
 
 
 ValidatedVectorFunctionModel
-IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const Vector<ValidatedNumberType>& dx0, const Real& tmax) const
+IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const Box& dx0, const Real& tmax) const
 {
-    ARIADNE_LOG(1,"IntegratorBase::flow_to(ValidatedVectorFunction vf, Vector<ValidatedNumberType> dx0, Real tmax)\n");
+    ARIADNE_LOG(1,"IntegratorBase::flow_to(ValidatedVectorFunction vf, Box dx0, Real tmax)\n");
     ARIADNE_LOG(2,"vf="<<vf<<"\n");
     ARIADNE_LOG(2,"dom(x0)="<<dx0<<" tmax="<<tmax<<"\n");
     const uint n=dx0.size(); // Dimension of the state space
     ValidatedVectorFunctionModel flow_function=this->function_factory().create_identity(dx0);
-    Float t=0.0;
+    Rational t=0.0;
     ValidatedVectorFunctionModel step_function;
     while(t<tmax) {
-        Vector<ValidatedNumberType> dx=flow_function.range();
-        Float h=static_cast<Float>(tmax)-t;
-        Vector<ValidatedNumberType> bx;
-        make_lpair(h,bx) = this->flow_bounds(vf,dx,h);
+        Box dx=flow_function.range();
+        RawFloatType h_max=static_cast<RawFloatType>(tmax-Real(t));
+        ExactFloatType h;
+        Box bx;
+        make_lpair(h,bx) = this->flow_bounds(vf,dx,h_max);
         bool flow_successfully_computed=false;
         while(!flow_successfully_computed) {
             try {
@@ -181,16 +183,16 @@ IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const Vector<Validate
         }
         step_function=partial_evaluate(step_function,n,numeric_cast<Interval>(h));
         flow_function=compose(step_function,flow_function);
-        t=t+h;
+        t=t+Rational(h.get_d());
     }
     return flow_function;
 }
 
 
 List<ValidatedVectorFunctionModel>
-IntegratorBase::flow(const ValidatedVectorFunction& vf, const Vector<ValidatedNumberType>& dx0, const Real& tmin, const Real& tmax) const
+IntegratorBase::flow(const ValidatedVectorFunction& vf, const Box& dx0, const Real& tmin, const Real& tmax) const
 {
-    ARIADNE_LOG(1,"IntegratorBase::flow(ValidatedVectorFunction vf, Vector<ValidatedNumberType> dx0, Float tmin, Float tmax)\n");
+    ARIADNE_LOG(1,"IntegratorBase::flow(ValidatedVectorFunction vf, Box dx0, Real tmin, Real tmax)\n");
     Float tminl=Interval(tmin).lower();
     Float tmaxu=Interval(tmax).upper();
     ValidatedVectorFunctionModel evolve_function=this->flow_to(vf,dx0,tmin);
@@ -216,7 +218,7 @@ IntegratorBase::flow(const ValidatedVectorFunction& vf, const Vector<ValidatedNu
 }
 
 List<ValidatedVectorFunctionModel>
-IntegratorBase::flow(const ValidatedVectorFunction& vf, const Vector<ValidatedNumberType>& dx0, const Real& tmax) const
+IntegratorBase::flow(const ValidatedVectorFunction& vf, const Box& dx0, const Real& tmax) const
 {
     return flow(vf,dx0,Real(0),tmax);
 }
@@ -224,11 +226,11 @@ IntegratorBase::flow(const ValidatedVectorFunction& vf, const Vector<ValidatedNu
 
 
 ValidatedVectorFunctionModel
-IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const Vector<ValidatedNumberType>& dx, Float& h) const
+IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const Box& dx, Float& h) const
 {
-    ARIADNE_LOG(3,"IntegratorBase::flow_step(ValidatedVectorFunction vf, Vector<ValidatedNumberType> dx, Float hmax)\n");
+    ARIADNE_LOG(3,"IntegratorBase::flow_step(ValidatedVectorFunction vf, Box dx, Float hmax)\n");
     Float hmax=h;
-    Vector<ValidatedNumberType> bx;
+    Box bx;
     make_lpair(h,bx)=this->flow_bounds(vf,dx,hmax);
     while(true) {
         try {
@@ -240,14 +242,14 @@ IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const Vector<Valida
 }
 
 ValidatedVectorFunctionModel
-TaylorPicardIntegrator::flow_step(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& dx, const Float& h, const Vector<ValidatedNumberType>& bx) const
+TaylorPicardIntegrator::flow_step(const ValidatedVectorFunction& f, const Box& dx, const Float& h, const Box& bx) const
 {
-    ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorFunction vf, Vector<ValidatedNumberType> dx, Float h, Vector<ValidatedNumberType> bx)\n");
+    ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorFunction vf, Box dx, Float h, Box bx)\n");
     ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
     const uint nx=dx.size();
     Sweeper sweeper(new ThresholdSweeper(this->_step_sweep_threshold));
 
-    Vector<ValidatedNumberType> dom=join(dx,Interval(-h,h));
+    Box dom=join(dx,Interval(-h,h));
     ARIADNE_LOG(7,"dom="<<dom<<"\n");
 
     ValidatedVectorFunctionModel phi0=this->function_factory().create_zeros(nx,dom);
@@ -320,7 +322,7 @@ template<class F> GradedValidatedDifferential flow(const F& f, const Interval& c
     return y;
 }
 
-Vector< GradedValidatedDifferential > flow(const Vector<ValidatedProcedure>& f, const Vector<ValidatedNumberType>& c, Nat M, Nat N) {
+Vector< GradedValidatedDifferential > flow(const Vector<ValidatedProcedure>& f, const Box& c, Nat M, Nat N) {
     GradedValidatedDifferential null;
     Vector< GradedValidatedDifferential > y(f.result_size(),null);
     Vector< GradedValidatedDifferential > fy(f.result_size(),null);
@@ -423,7 +425,7 @@ Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferenti
     return dphi;
 }
 
-VectorTaylorFunction flow_function(const Vector<ValidatedDifferential>& dphi, const Vector<ValidatedNumberType>& dx, const Float& h, double swpt, int verbosity=0) {
+VectorTaylorFunction flow_function(const Vector<ValidatedDifferential>& dphi, const Box& dx, const Float& h, double swpt, int verbosity=0) {
     const uint n=dphi.size();
     Sweeper sweeper(new ThresholdSweeper(swpt));
     VectorTaylorFunction tphi(n,join(dx,Interval(-h,+h)),sweeper);
@@ -454,7 +456,7 @@ VectorTaylorFunction flow_function(const Vector<ValidatedDifferential>& dphi, co
 }
 
 ValidatedVectorFunctionModel
-differential_flow_step(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& dx, const Float& flth, const Vector<ValidatedNumberType>& bx,
+differential_flow_step(const ValidatedVectorFunction& f, const Box& dx, const ExactFloat& flth, const Box& bx,
                        double swpt, uint so, uint to, uint verbosity=0)
 {
     uint n=f.result_size();
@@ -509,7 +511,7 @@ differential_flow_step(const ValidatedVectorFunction& f, const Vector<ValidatedN
 }
 
 ValidatedVectorFunctionModel
-differential_space_time_flow_step(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& dx, const Float& h, const Vector<ValidatedNumberType>& bx,
+differential_space_time_flow_step(const ValidatedVectorFunction& f, const Box& dx, const Float& h, const Box& bx,
                                   double swpt, uint so, uint to, uint verbosity=0)
 {
     uint n=f.result_size();
@@ -565,7 +567,7 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const Vector
 }
 
 ValidatedVectorFunctionModel
-series_flow_step(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& dx, const Float& h, const Vector<ValidatedNumberType>& bx,
+series_flow_step(const ValidatedVectorFunction& f, const Box& dx, const Float& h, const Box& bx,
                  double max_err, double swpt, uint init_so, uint init_to, uint max_so, uint max_to, uint verbosity)
 {
     static const double TRY_SPACIAL_ORDER_INCREASE_FACTOR=4;
@@ -679,7 +681,7 @@ series_flow_step(const ValidatedVectorFunction& f, const Vector<ValidatedNumberT
 }
 
 ValidatedVectorFunctionModel
-TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& dx, const Float& h, const Vector<ValidatedNumberType>& bx) const
+TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const Box& dx, const Float& h, const Box& bx) const
 {
     ValidatedVectorFunctionModel tphi=Ariadne::series_flow_step(f,dx,h,bx,
         this->step_maximum_error(),this->step_sweep_threshold(),
@@ -701,10 +703,10 @@ TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const Vector
     return tphi;
 }
 
-Pair<Float,Vector<ValidatedNumberType>>
-TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Vector<ValidatedNumberType>& dx, const Float& hmax) const
+Pair<Float,Box>
+TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Box& dx, const Float& hmax) const
 {
-    ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_bounds(ValidatedVectorFunction vf, Vector<ValidatedNumberType> dx, Float hmax)\n");
+    ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_bounds(ValidatedVectorFunction vf, Box dx, Float hmax)\n");
     ARIADNE_ASSERT_MSG(vf.result_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
     ARIADNE_ASSERT_MSG(vf.argument_size()==dx.size(),"vector_field="<<vf<<", states="<<dx);
     ARIADNE_ASSERT(hmax>0);
@@ -726,7 +728,8 @@ TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Vec
     ARIADNE_LOG(4,"hmax="<<hmax<<"\n");
 
     bool success=false;
-    Vector<ValidatedNumberType> bx,nbx,df;
+    Box bx,nbx;
+    Vector<ValidatedNumberType> df;
     Interval ih(0,h);
 
     while(!success) {
@@ -813,7 +816,7 @@ template<class X> void truncate(Vector< Differential<X> >& x, uint spacial_order
 
 
 Vector<ValidatedDifferential>
-AffineIntegrator::flow_derivative(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& dom) const
+AffineIntegrator::flow_derivative(const ValidatedVectorFunction& f, const Box& dom) const
 {
     Vector<ValidatedDifferential> dx=ValidatedDifferential::variables(this->_spacial_order+this->_temporal_order,join(dom,Interval(0.0)));
     dx[dom.size()]=0.0;
@@ -826,7 +829,7 @@ AffineIntegrator::flow_derivative(const ValidatedVectorFunction& f, const Vector
 }
 
 ValidatedVectorFunctionModel
-AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& dom, const Float& h, const Vector<ValidatedNumberType>& bbox) const
+AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const Box& dom, const Float& h, const Box& bbox) const
 {
     Vector<ValidatedNumberType> mid = Vector<ValidatedNumberType>(midpoint(dom));
 
@@ -860,7 +863,7 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const Vector<Valid
     }
     set_rounding_to_nearest();
 
-    Vector<ValidatedNumberType> flow_domain = join(dom,Interval(0,h));
+    Box flow_domain = join(dom,Interval(0,h));
 
     ValidatedVectorFunctionModel id = this->function_factory().create_identity(flow_domain);
     ValidatedVectorFunctionModel res = this->function_factory().create_zeros(n,flow_domain);

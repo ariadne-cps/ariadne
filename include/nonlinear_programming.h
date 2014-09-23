@@ -76,7 +76,7 @@ class OptimiserInterface {
 
     //! \brief Tests if the point \a x is feasible, in that \f$x\in D\f$ and \f$g(x)\in N_\epsilon(C)\f$.
     virtual Bool almost_feasible_point(Box D, ValidatedVectorFunction g, Box C,
-                                       ApproximateFloatVectorType x, ApproximateFloat eps) const = 0;
+                                       ApproximateFloatVectorType x, ApproximateFloatType eps) const = 0;
     //! \brief Tests if the point \a x is feasible.
     virtual Bool is_feasible_point(Box D, ValidatedVectorFunction g, Box C,
                                    ApproximateFloatVectorType x) const = 0;
@@ -111,7 +111,7 @@ class OptimiserBase
     virtual Tribool feasible(Box D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
 
     virtual Bool almost_feasible_point(Box D, ValidatedVectorFunction g, Box C,
-                                       ApproximatePointType x, ApproximateFloat error) const;
+                                       ApproximatePointType x, ApproximateFloatType error) const;
     virtual Bool is_feasible_point(Box D, ValidatedVectorFunction g, Box C,
                                    ExactPointType x) const;
     virtual Bool validate_feasibility(Box D, ValidatedVectorFunction g, Box C,
@@ -142,7 +142,7 @@ class PenaltyFunctionOptimiser
     virtual ValidatedPointType minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C) const;
     virtual Tribool feasible(Box D, ValidatedVectorFunction g, Box C) const;
     virtual Void feasibility_step(const Box& D, const ApproximateVectorFunction& g, const Box& C,
-                                  ApproximateFloatVectorType& x, ApproximateFloatVectorType& w, ApproximateFloat& mu) const;
+                                  ApproximateFloatVectorType& x, ApproximateFloatVectorType& w, ApproximateFloatType& mu) const;
     virtual Void feasibility_step(const Box& D, const ValidatedVectorFunction& g, const Box& C,
                                   ValidatedFloatVectorType& x, ValidatedFloatVectorType& w) const;
     virtual Void feasibility_step(const Box& D, const ApproximateVectorFunction& g, const Box& C,
@@ -184,7 +184,7 @@ class NonlinearInfeasibleInteriorPointOptimiser
                            StepData& stp) const;
     Void step(const ApproximateScalarFunctionInterface& f, const Box& D, const ApproximateVectorFunctionInterface& g, const Box& C,
               StepData& stp) const;
-//    ApproximateFloat compute_mu(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+//    ApproximateFloatType compute_mu(const Box& D, const ApproximateVectorFunction& g, const Box& C,
 //                     ApproximateFloatVectorType& w, ApproximateFloatVectorType& x, ApproximateFloatVectorType& y) const;
 };
 
@@ -210,7 +210,7 @@ class NonlinearInteriorPointOptimiser
     //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall constraint violation, primal and dual variables.
     Pair<Tribool,ApproximateFloatVectorType> feasible_hotstarted(Box D, ValidatedVectorFunction g, Box C,
-                                                  const ApproximateFloatVectorType& x0, const ApproximateFloatVectorType& lambda0, const ApproximateFloat& violation0) const;
+                                                  const ApproximateFloatVectorType& x0, const ApproximateFloatVectorType& lambda0, const ApproximateFloatType& violation0) const;
 
     //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the primal and dual.
@@ -218,34 +218,34 @@ class NonlinearInteriorPointOptimiser
                                                   const ApproximateFloatVectorType& x0, const ApproximateFloatVectorType& lambda0) const;
 
     Void minimisation_step(const ApproximateScalarFunction& f, const Box& D, const ApproximateVectorFunction& g, const Box& C, const ApproximateVectorFunction& h,
-                           ApproximateFloatVectorType& x, ApproximateFloatVectorType& w, ApproximateFloatVectorType& kappa, ApproximateFloatVectorType& lambda, const ApproximateFloat& mu) const;
+                           ApproximateFloatVectorType& x, ApproximateFloatVectorType& w, ApproximateFloatVectorType& kappa, ApproximateFloatVectorType& lambda, const ApproximateFloatType& mu) const;
     Void setup_feasibility(const Box& D, const ApproximateVectorFunction& g, const Box& C,
                            ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda) const;
     Void setup_feasibility(const Box& D, const ApproximateVectorFunction& g, const Box& C,
-                           ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda, ApproximateFloat& t) const;
+                           ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda, ApproximateFloatType& t) const;
     Void feasibility_step(const Box& D, const ApproximateVectorFunction& g, const Box& C,
                           ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda) const;
     Void feasibility_step(const Box& D, const ApproximateVectorFunction& g, const Box& C,
-                          ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda, ApproximateFloat& violation) const;
+                          ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda, ApproximateFloatType& violation) const;
     Void initialise_lagrange_multipliers(const Box& D, const ApproximateVectorFunction& g, const Box& C,
                                          const ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda) const;
-    ApproximateFloat compute_mu(const Box& D, const ApproximateVectorFunction& g, const Box& C,
+    ApproximateFloatType compute_mu(const Box& D, const ApproximateVectorFunction& g, const Box& C,
                      const ApproximateFloatVectorType& x, const ApproximateFloatVectorType& lambda) const;
 
   public: // Deprecated
     Void compute_tz(const Box& D, const ApproximateVectorFunction& g, const Box& C,
-                          ApproximateFloatVectorType& x, ApproximateFloat& t, ApproximateFloatVectorType& z) const { }
+                          ApproximateFloatVectorType& x, ApproximateFloatType& t, ApproximateFloatVectorType& z) const { }
     Void feasibility_step(const Box& D, const ApproximateVectorFunction& g, const Box& C,
-                          ApproximateFloatVectorType& x, ApproximateFloatVectorType& y, ApproximateFloatVectorType& z, ApproximateFloat& violation) const { };
+                          ApproximateFloatVectorType& x, ApproximateFloatVectorType& y, ApproximateFloatVectorType& z, ApproximateFloatType& violation) const { };
     Void linearised_feasibility_step(const Box& D, const ApproximateVectorFunction& g, const Box& C,
-                                     ApproximateFloat& slack, ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda) const { };
+                                     ApproximateFloatType& slack, ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda) const { };
     Void linearised_feasibility_step(const Box& D, const ApproximateVectorFunction& g, const Box& C,
-                                     ApproximateFloatVectorType& x, ApproximateFloatVectorType& y, ApproximateFloatVectorType& z, ApproximateFloat& t) const { };
+                                     ApproximateFloatVectorType& x, ApproximateFloatVectorType& y, ApproximateFloatVectorType& z, ApproximateFloatType& t) const { };
   private:
-    ApproximateFloat compute_mu(const ApproximateScalarFunction& f, const Box& D, const ValidatedVectorFunction& g, const Box& C,
+    ApproximateFloatType compute_mu(const ApproximateScalarFunction& f, const Box& D, const ValidatedVectorFunction& g, const Box& C,
                      const ApproximateFloatVectorType& x, const ApproximateFloatVectorType& y) const;
     Void compute_violation(const Box& D, const ApproximateVectorFunction& g, const Box& C,
-                           ApproximateFloatVectorType& x, ApproximateFloat& t) const;
+                           ApproximateFloatVectorType& x, ApproximateFloatType& t) const;
 };
 
 

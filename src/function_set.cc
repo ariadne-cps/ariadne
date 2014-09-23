@@ -824,9 +824,9 @@ ValidatedVectorFunction ValidatedConstrainedImageSet::constraint_function() cons
     return result;
 }
 
-IntervalVector ValidatedConstrainedImageSet::constraint_bounds() const
+Box ValidatedConstrainedImageSet::constraint_bounds() const
 {
-    IntervalVector result(this->number_of_constraints());
+    Box result(this->number_of_constraints());
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
         result[i]=Interval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
     }
@@ -982,7 +982,7 @@ tribool ValidatedConstrainedImageSet::separated(const Box& bx) const
     for(uint i=0; i!=this->dimension(); ++i) { function[i]=this->_function[i]; }
     for(uint i=0; i!=this->number_of_constraints(); ++i) { function[i+this->dimension()]=this->_constraints[i].function(); }
     //ValidatedVectorFunction function = join(this->_function,this->constraint_function());
-    IntervalVector codomain = join(bx,this->constraint_bounds());
+    Box codomain = join(bx,this->constraint_bounds());
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
     return tribool(subdomain.empty()) || indeterminate;
@@ -998,8 +998,8 @@ tribool ValidatedConstrainedImageSet::overlaps(const Box& bx) const
     ValidatedVectorFunction constraint_function = this->constraint_function();
     ValidatedVectorFunction function = join(space_function,constraint_function);
     //std::cerr<<"function="<<function<<"\n";
-    IntervalVector constraint_bounds = intersection(this->constraint_bounds(),this->constraint_function().evaluate(subdomain));
-    IntervalVector codomain = join(bx,constraint_bounds);
+    Box constraint_bounds = intersection(this->constraint_bounds(),Box(this->constraint_function().evaluate(subdomain)));
+    Box codomain = join(bx,constraint_bounds);
     //std::cerr<<"codomain="<<codomain<<"\n";
     NonlinearInfeasibleInteriorPointOptimiser optimiser;
     optimiser.verbosity=0;
@@ -1031,10 +1031,10 @@ tribool ValidatedConstrainedImageSet::overlaps(const Box& bx) const
 
 void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
-    const IntervalVector subdomain=this->_reduced_domain;
+    const Box subdomain=this->_reduced_domain;
     const ValidatedVectorFunction function = this->function();
     const ValidatedVectorFunction constraint_function = this->constraint_function();
-    const IntervalVector constraint_bounds = this->constraint_bounds();
+    const Box constraint_bounds = this->constraint_bounds();
 
     switch(DISCRETISATION_METHOD) {
         case SUBDIVISION_DISCRETISE:

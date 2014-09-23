@@ -43,9 +43,9 @@ using namespace Ariadne;
 
 class TestProcedure
 {
-    //static Formula<Float> o;;
-    //static Formula<Float> x;
-    //static Formula<Float> y;
+    //static ApproximateFormula o;;
+    //static ApproximateFormula x;
+    //static ApproximateFormula y;
   public:
     TestProcedure();
     void test();
@@ -57,9 +57,9 @@ class TestProcedure
     void test_propagate();
 };
 
-//Formula<Float> TestProcedure::o(Formula<Float>::constant(1.0));
-//Formula<Float> TestProcedure::x(Formula<Float>::coordinate(0));
-//Formula<Float> TestProcedure::y(Formula<Float>::coordinate(1));
+//ApproximateFormula TestProcedure::o(ApproximateFormula::constant(1.0));
+//ApproximateFormula TestProcedure::x(ApproximateFormula::coordinate(0));
+//ApproximateFormula TestProcedure::y(ApproximateFormula::coordinate(1));
 
 
 TestProcedure::TestProcedure()
@@ -77,31 +77,31 @@ void TestProcedure::test()
 
 void TestProcedure::test_formula()
 {
-    Formula<Float> o(Formula<Float>::constant(1.0));
-    Formula<Float> x(Formula<Float>::coordinate(0));
-    Formula<Float> y(Formula<Float>::coordinate(1));
+    ApproximateFormula o(ApproximateFormula::constant(1.0));
+    ApproximateFormula x(ApproximateFormula::coordinate(0));
+    ApproximateFormula y(ApproximateFormula::coordinate(1));
 
-    Formula<Float> r(sqrt(pow(x,2)+pow(y,2)));
+    ApproximateFormula r(sqrt(pow(x,2)+pow(y,2)));
     ARIADNE_TEST_PRINT(r);
 
-    //Vector< Formula<Float> > f((sqrt(pow(x,2)+pow(y,2)), atan(y/x)));
+    //Vector< ApproximateFormula > f((sqrt(pow(x,2)+pow(y,2)), atan(y/x)));
 }
 
 void TestProcedure::test_construct_from_formula()
 {
-    Formula<Float> o(Formula<Float>::constant(1.0));
-    Formula<Float> x(Formula<Float>::coordinate(0));
-    Formula<Float> y(Formula<Float>::coordinate(1));
+    ApproximateFormula o(ApproximateFormula::constant(1.0));
+    ApproximateFormula x(ApproximateFormula::coordinate(0));
+    ApproximateFormula y(ApproximateFormula::coordinate(1));
 
-    Formula<Float> xs=pow(x,2);
-    Formula<Float> ys=pow(y,2);
+    ApproximateFormula xs=pow(x,2);
+    ApproximateFormula ys=pow(y,2);
 
-    Vector< Formula<Float> > f((sqrt(xs+ys), atan(y/x), xs-ys));
+    Vector< ApproximateFormula > f((sqrt(xs+ys), atan(y/x), xs-ys));
     ARIADNE_TEST_PRINT(f);
 
-    Procedure<Float> p0(f[0]);
+    ApproximateProcedure p0(f[0]);
     ARIADNE_TEST_PRINT(p0);
-    Vector< Procedure<Float> > p(f);
+    Vector< ApproximateProcedure > p(f);
     ARIADNE_TEST_PRINT(p);
 
     p0+=Float(5);
@@ -115,7 +115,7 @@ void TestProcedure::test_construct_from_expansion()
         ARIADNE_TEST_PRINT(e);
         e.reverse_lexicographic_sort();
         ARIADNE_TEST_PRINT(e);
-        Procedure<Float> p(e);
+        ApproximateProcedure p(e);
         ARIADNE_TEST_PRINT(p);
         Vector<Float> x={2.0,3.0};
         ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
@@ -124,7 +124,7 @@ void TestProcedure::test_construct_from_expansion()
     {
         Expansion<Float> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0} });
         e.reverse_lexicographic_sort();
-        Procedure<Float> p(e);
+        ApproximateProcedure p(e);
         ARIADNE_TEST_PRINT(p);
     }
 }
@@ -132,7 +132,7 @@ void TestProcedure::test_construct_from_expansion()
 
 void TestProcedure::test_evaluate()
 {
-    Procedure<Float> p;
+    ApproximateProcedure p;
     p.new_unary_instruction(IND,0u);
     p.new_unary_instruction(IND,1u);
     p.new_power_instruction(POW,0u,2);
@@ -150,7 +150,7 @@ void TestProcedure::test_evaluate()
 void TestProcedure::test_propagate()
 {
     {
-        Procedure<Float> p;
+        ApproximateProcedure p;
         p.new_unary_instruction(IND,0u);
         p.new_unary_instruction(IND,1u);
         p.new_unary_instruction(SQR,0u);
@@ -159,7 +159,7 @@ void TestProcedure::test_propagate()
         p.new_unary_instruction(SQRT,4u);
         ARIADNE_TEST_PRINT(p);
 
-        Vector<Interval> x={ {0.25,2.0}, {0.5,3.0} };
+        Box x=Box{ {0.25,2.0}, {0.5,3.0} };
         ARIADNE_TEST_PRINT(x);
 
         simple_hull_reduce(x,p,Interval(1,1));
@@ -168,15 +168,15 @@ void TestProcedure::test_propagate()
         ARIADNE_TEST_PRINT(x);
     }
 
-    Formula<Float> x(Formula<Float>::coordinate(0));
-    Formula<Float> y(Formula<Float>::coordinate(1));
+    ApproximateFormula x(ApproximateFormula::coordinate(0));
+    ApproximateFormula y(ApproximateFormula::coordinate(1));
 
-    Vector< Formula<Float> > ff((sqrt(sqr(x)+sqr(y)),2*x-y));
+    Vector< ApproximateFormula > ff((sqrt(sqr(x)+sqr(y)),2*x-y));
     ARIADNE_TEST_PRINT(ff);
-    Vector< Procedure<Float> > pp(ff);
+    Vector< ApproximateProcedure > pp(ff);
     ARIADNE_TEST_PRINT(pp);
-    Vector<Interval> xx={ {0.125,2.0}, {0.25,3.0} };
-    Vector<Interval> cc={ {1.0,1.0}, {1.0,1.0} };
+    Box xx=Box{ {0.125,2.0}, {0.25,3.0} };
+    Box cc=Box{ {1.0,1.0}, {1.0,1.0} };
     ARIADNE_TEST_PRINT(xx);
     ARIADNE_TEST_PRINT(evaluate(pp,xx));
     simple_hull_reduce(xx,pp,cc);

@@ -46,7 +46,9 @@ typedef uint Nat;
 template<class X> class Formula;
 template<class X> class Graded;
 
-
+template<class X> class Procedure;
+typedef Procedure<ApproximateNumberType> ApproximateProcedure;
+typedef Procedure<ValidatedNumberType> ValidatedProcedure;
 
 struct ProcedureInstruction
 {

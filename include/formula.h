@@ -48,6 +48,10 @@
 
 namespace Ariadne {
 
+template<class X> class Formula;
+typedef Formula<ApproximateNumberType> ApproximateFormula;
+typedef Formula<ValidatedNumberType> ValidatedFormula;
+
 struct Index {
     Nat _i;
   public:

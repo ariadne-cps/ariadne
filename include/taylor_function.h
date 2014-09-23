@@ -445,6 +445,7 @@ class ScalarTaylorFunction
     ScalarTaylorFunction* _derivative(uint j) const;
     ScalarTaylorFunction* _clone() const;
     ScalarTaylorFunction* _create() const;
+    VectorFunctionModelInterface<ValidatedTag>* _create_identity() const;
     VectorFunctionModelInterface<ValidatedTag>* _create_vector(uint i) const;
 };
 

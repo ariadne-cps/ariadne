@@ -187,6 +187,14 @@ ScalarTaylorFunction* ScalarTaylorFunction::_create() const
     return new ScalarTaylorFunction(this->domain(),this->_model.sweeper());
 }
 
+VectorFunctionModelInterface<ValidatedTag>* ScalarTaylorFunction::_create_identity() const
+{
+    Sweeper sweeper=this->sweeper();
+    VectorTaylorFunction* result = new VectorTaylorFunction(this->domain().size(), ScalarTaylorFunction(this->domain(),sweeper));
+    for(uint i=0; i!=result->size(); ++i) { (*result)[i]=ScalarTaylorFunction::coordinate(this->domain(),i,sweeper); }
+    return result;
+}
+
 VectorFunctionModelInterface<ValidatedTag>* ScalarTaylorFunction::_create_vector(Nat i) const
 {
     return new VectorTaylorFunction(i,this->domain(),this->_model.sweeper());

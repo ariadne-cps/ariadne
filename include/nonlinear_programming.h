@@ -79,22 +79,22 @@ class OptimiserInterface {
                                        ApproximateFloatVectorType x, ApproximateFloatType eps) const = 0;
     //! \brief Tests if the point \a x is feasible.
     virtual Bool is_feasible_point(Box D, ValidatedVectorFunction g, Box C,
-                                   ApproximateFloatVectorType x) const = 0;
+                                   ExactFloatVectorType x) const = 0;
     //! \brief Tests if the point \a x is near feasible.
     virtual Bool validate_feasibility(Box D, ValidatedVectorFunction g, Box C,
-                                      ApproximateFloatVectorType x) const = 0;
+                                      ExactPointType x) const = 0;
     //! \brief Tests if the point \a x is near feasible, using approximate multipliers \a y to guide the search.
     virtual Bool validate_feasibility(Box D, ValidatedVectorFunction g, Box C,
-                                      ApproximateFloatVectorType x, ApproximateFloatVectorType y) const = 0;
+                                      ExactPointType x, ExactPointType y) const = 0;
     //! \brief Tests if the feasibility problem is definitely unsolvable, using multipliers \a y and local centering point \a x.
     virtual Bool validate_infeasibility(Box D, ValidatedVectorFunction g, Box C,
-                                      ApproximateFloatVectorType x, ApproximateFloatVectorType y) const = 0;
-    //! \brief Tests if the box \a X definitely contains a feasible point.
+                                      ExactPointType x, ExactPointType y) const = 0;
+    //! \brief Tests if the box \a X definitely containss a feasible point.
     virtual Tribool contains_feasible_point(Box D, ValidatedVectorFunction g, Box C,
                                             ValidatedFloatVectorType X) const = 0;
     //! \brief Tests if the Lagrange multipliers \a y are a certificate of infeasiblity.
     virtual Bool is_infeasibility_certificate(Box D, ValidatedVectorFunction g, Box C,
-                                              ApproximateFloatVectorType y) const = 0;
+                                              ExactPointType y) const = 0;
 };
 
 //! \ingroup OptimisationModule

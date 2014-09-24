@@ -69,6 +69,7 @@ class Interval;
 
 typedef Float RawFloat;
 typedef Float RawFloatType;
+
 //typedef Float ApproximateFloatType;
 //typedef Float LowerFloatType;
 //typedef Float UpperFloatType;
@@ -80,6 +81,7 @@ typedef LowerFloat LowerFloatType;
 typedef UpperFloat UpperFloatType;
 typedef ValidatedFloat ValidatedFloatType;
 typedef ExactFloat ExactFloatType;
+
 typedef UpperFloatType PositiveUpperFloatType;
 typedef PositiveUpperFloatType ErrorFloatType;
 

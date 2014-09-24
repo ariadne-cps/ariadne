@@ -46,10 +46,10 @@ class GridTreeSet;
 
 template<class X, class R> class Constraint;
 typedef Constraint<EffectiveScalarFunction,EffectiveNumberType> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,RawFloatType> ValidatedConstraint;
+typedef Constraint<ValidatedScalarFunction,ExactFloatType> ValidatedConstraint;
 
 template<class X> class Procedure;
-typedef Procedure<ValidatedNumberType> ValidatedProcedure;
+typedef Procedure<ValidatedTag> ValidatedProcedure;
 
 template<class X> class ScalarFunctionInterface;
 typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;

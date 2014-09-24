@@ -35,7 +35,7 @@ typedef int Int;
 class Interval;
 template<class X> class Vector;
 template<class X> class VectorFunctionInterface;
-typedef VectorFunctionInterface<Interval> ValidatedVectorFunctionInterface;
+typedef VectorFunctionInterface<ValidatedTag> ValidatedVectorFunctionInterface;
 class PavingInterface;
 
 //! \brief A class for computing outer approximations to sets defined by functions.

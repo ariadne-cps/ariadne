@@ -74,7 +74,7 @@ class FloatVariableInterval {
     FloatVariableInterval(const RawFloatType& l, const Variable<Real>& v, const RawFloatType& u)
         : _lower(l), _variable(v), _upper(u) { ARIADNE_ASSERT_MSG(l<=u,"Interval("<<l<<","<<u<<") not provably nonempty"); }
     FloatVariableInterval(const RealVariableInterval& rvivl)
-        : _lower(rvivl.lower()), _variable(rvivl.variable()), _upper(rvivl.upper()) { }
+        : _lower(rvivl.lower().get_d()), _variable(rvivl.variable()), _upper(rvivl.upper().get_d()) { }
     Variable<Real> const& variable() const { return this->_variable; }
     const Interval interval() const { return Interval(this->_lower,this->_upper); }
     const RawFloatType lower() const { return this->_lower; }
@@ -87,7 +87,7 @@ inline FloatVariableInterval operator<=(FloatVariableLowerInterval lv, double u)
 inline FloatVariableInterval operator<=(FloatVariableLowerInterval lv, RawFloatType u) {
     return FloatVariableInterval(lv._lower,lv._variable,u); }
 inline FloatVariableInterval operator<=(FloatVariableLowerInterval lv, Real u) {
-    return FloatVariableInterval(lv._lower,lv._variable,RawFloatType(u)); }
+    return FloatVariableInterval(lv._lower,lv._variable,RawFloatType(u.get_d())); }
 
 struct Axes2d {
     Axes2d(const FloatVariableInterval x, const FloatVariableInterval& y)

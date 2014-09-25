@@ -35,7 +35,7 @@
 
 namespace Ariadne {
 
-typedef Series<Interval>(*series_function_pointer)(uint,const Interval&);
+typedef Series<ValidatedNumberType>(*ValidatedSeriesFunctionPointer)(uint,const ValidatedNumberType&);
 
 // A deprecated class for computing power series expansions
 // The difference between this and the Series class is that a TaylorSeries
@@ -43,40 +43,40 @@ typedef Series<Interval>(*series_function_pointer)(uint,const Interval&);
 // valid on a subdomain, while a Series class uses arbitrary coefficients
 // and is valid within the entire radius of convergence
 class TaylorSeries {
-    typedef Series<Interval>(*series_function_pointer)(uint,const Interval&);
+    typedef Series<ValidatedNumberType>(*ValidatedSeriesFunctionPointer)(uint,const ValidatedNumberType&);
   public:
     TaylorSeries(uint d) : expansion(d+1), error(0) { }
-    TaylorSeries(uint degree, series_function_pointer function,
-                 const Float& centre, const Interval& domain);
+    TaylorSeries(uint degree, ValidatedSeriesFunctionPointer function,
+                 const ExactFloatType& centre, const ValidatedNumberType& domain);
     uint degree() const { return expansion.size()-1; }
-    Float& operator[](uint i) { return expansion[i]; }
-    Array<Float> expansion;
-    Interval error;
-    void sweep(Float e) {
+    ExactFloatType& operator[](uint i) { return expansion[i]; }
+    Array<ExactFloatType> expansion;
+    ValidatedNumberType error;
+    void sweep(ExactFloatType e) {
         for(uint i=0; i<=degree(); ++i) {
             if(abs(expansion[i])<=e) {
-                error+=expansion[i]*Interval(-1,1);
+                error+=expansion[i]*ValidatedNumberType(-1,1);
                 expansion[i]=0; } } }
 };
 
 inline
-TaylorSeries::TaylorSeries(uint d, series_function_pointer fn,
-                           const Float& c, const Interval& r)
+TaylorSeries::TaylorSeries(uint d, ValidatedSeriesFunctionPointer fn,
+                           const ExactFloatType& c, const ValidatedNumberType& r)
     : expansion(d+1), error(0)
 {
-    Series<Interval> centre_series=fn(d,Interval(c));
-    Series<Interval> range_series=fn(d,r);
-    Interval p=1;
-    Interval e=r-c;
+    Series<ValidatedNumberType> centre_series=fn(d,ValidatedNumberType(c));
+    Series<ValidatedNumberType> range_series=fn(d,r);
+    ValidatedNumberType p=1;
+    ValidatedNumberType e=r-c;
     //std::cerr<<"\nc="<<c<<" r="<<r<<" e="<<e<<"\n";
     //std::cerr<<"centre_series="<<centre_series<<"\nrange_series="<<range_series<<"\n";
     for(uint i=0; i!=d; ++i) {
-        this->expansion[i]=midpoint(centre_series[i]);
+        this->expansion[i]=centre_series[i].midpoint();
         this->error+=(centre_series[i]-this->expansion[i])*p;
         p*=e;
     }
     //this->expansion[d]=midpoint(centre_series[d]);
-    this->expansion[d]=midpoint(range_series[d]);
+    this->expansion[d]=range_series[d].midpoint();
     this->error+=(range_series[d]-this->expansion[d])*p;
     //std::cerr<<"expansion="<<this->expansion<<"\nerror="<<this->error<<"\n";
 }

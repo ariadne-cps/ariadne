@@ -495,7 +495,7 @@ template<class X, class R>
 Differential<X>& operator*=(Differential<X>& x, const R& c)
 {
     typedef typename Differential<X>::iterator iterator;
-    if(c==0) {
+    if(c==static_cast<X>(0)) {
         x.clear();
     } else {
         for(iterator iter=x.begin(); iter!=x.end(); ++iter) {

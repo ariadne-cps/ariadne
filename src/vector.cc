@@ -105,9 +105,9 @@ bool empty(const Vector<Interval>& v)
 
 uint irmax(const Vector<Interval>& v) {
     uint imw(0);
-    Float mw=v[0].width();
+    Float mw=v[0].width().raw();
     for(uint i=1; i!=v.size(); ++i) {
-        if(v[i].width()>mw) { imw=i; mw=v[i].width(); }
+        if(v[i].width().raw()>mw) { imw=i; mw=v[i].width().raw(); }
     }
     return imw;
 }
@@ -116,14 +116,14 @@ uint irmax(const Vector<Interval>& v) {
 Vector<Interval> split(const Vector<Interval>& v, uint k, tribool lr) {
     ARIADNE_ASSERT(k<v.size());
     Vector<Interval> r(v);
-    Float c=v[k].midpoint();
+    Float c=v[k].midpoint().raw();
     if(lr) {
         r[k].set_upper(c);
     } else if(!lr) {
         r[k].set_lower(c);
     } else {
-        Float cl=(3*v[k].lower()+v[k].upper())/4;
-        Float cu=(v[k].lower()+3*v[k].upper())/4;
+        Float cl=(3*v[k].lower().raw()+v[k].upper().raw())/4;
+        Float cu=(v[k].lower().raw()+3*v[k].upper().raw())/4;
         r[k].set_lower(cl);
         r[k].set_upper(cu);
     }
@@ -133,7 +133,7 @@ Vector<Interval> split(const Vector<Interval>& v, uint k, tribool lr) {
 std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v, uint k) {
     ARIADNE_ASSERT(k<v.size());
     std::pair< Vector<Interval>, Vector<Interval> > r(v,v);
-    Float c=v[k].midpoint();
+    Float c=v[k].midpoint().raw();
     r.first[k].set_upper(c);
     r.second[k].set_lower(c);
     return r;
@@ -153,7 +153,7 @@ Vector<Float> midpoint(const Vector<Interval>& v)
 {
     Vector<Float> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
-        r[i]=v[i].midpoint();
+        r[i]=v[i].midpoint().raw();
     }
     return r;
 }
@@ -162,7 +162,7 @@ Vector<Float> lower_bounds(const Vector<Interval>& v)
 {
     Vector<Float> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
-        r[i]=v[i].lower();
+        r[i]=v[i].lower().raw();
     }
     return r;
 }
@@ -171,7 +171,7 @@ Vector<Float> upper_bounds(const Vector<Interval>& v)
 {
     Vector<Float> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
-        r[i]=v[i].upper();
+        r[i]=v[i].upper().raw();
     }
     return r;
 }
@@ -220,7 +220,7 @@ Float radius(const Vector<Interval>& v)
 {
     Float r=0;
     for(size_t i=0; i!=v.size(); ++i) {
-        r=Ariadne::max(r,v[i].radius());
+        r=Ariadne::max(r,v[i].radius().raw());
     }
     return r;
 }

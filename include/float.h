@@ -89,6 +89,7 @@ class Float {
     Float(const Float& x) : dbl(x.dbl) { }
     explicit operator volatile double& () { return dbl; }
     explicit operator const double& () const { return dbl; }
+    Float const& raw() const { return *this; } // FIXME: Included for compatibility with user floats
     //! \brief An approximation by a built-in double-precision floating-point number.
     double get_d() const { return this->dbl; }
 };

@@ -39,7 +39,7 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAf
     ARIADNE_ASSERT_MSG(a1.argument_size()==a2.argument_size(),"a1="<<a1<<" a2="<<a2);
     Nat n=a1.argument_size();
     ValidatedAffineModel r(n);
-    r=a1.value()+a2.value();
+    r=CoefficientType( a1.value().raw()+a2.value().raw() );
     for(uint i=0; i!=n; ++i) {
         r[i]=a1[i]+a2[i];
     }
@@ -48,16 +48,16 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAf
 
     RawFloatType te=0.0;
     for(uint j=0; j!=n; ++j) {
-        RawFloatType mrjl = (-a1.gradient(j))-a2.gradient(j);
-        RawFloatType  rju = ( a1.gradient(j))+a2.gradient(j);
+        RawFloatType mrjl = (-a1.gradient(j).raw())-a2.gradient(j).raw();
+        RawFloatType  rju = ( a1.gradient(j).raw())+a2.gradient(j).raw();
         te+=(rju+mrjl);
     }
-    RawFloatType mrl = (-a1.value())-a2.value();
-    RawFloatType  ru = ( a1.value())+a2.value();
+    RawFloatType mrl = (-a1.value().raw())-a2.value().raw();
+    RawFloatType  ru = ( a1.value().raw())+a2.value().raw();
     te += (ru+mrl);
 
     RawFloatType re=0.0;
-    r.set_error( te/2 + (a1.error()+a2.error()) );
+    r.set_error( ErrorType(te/2 + (a1.error().raw()+a2.error().raw()) ) );
 
     set_rounding_to_nearest();
 
@@ -66,16 +66,16 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAf
 
 ValidatedAffineModel operator+(const ValidatedNumberType& c, const ValidatedAffineModel& a) {
     ValidatedAffineModel r=a;
-    RawFloatType cm=midpoint(c);
-    r.set_value( cm + a.value() );
+    RawFloatType cm=c.midpoint().raw();
+    r.set_value( static_cast<CoefficientType>( cm + a.value().raw() ) );
 
     set_rounding_upward();
 
-    RawFloatType mrl = (-a.value())-cm;
-    RawFloatType  ru = ( a.value())+cm;
+    RawFloatType mrl = (-a.value().raw())-cm;
+    RawFloatType  ru = ( a.value().raw())+cm;
     RawFloatType te = (ru+mrl)/2;
 
-    r.set_error( a.error() + max(c.upper()-cm,cm-c.lower()) + te);
+    r.set_error( ErrorType( a.error().raw() + max(c.upper().raw()-cm,cm-c.lower().raw()) + te) );
 
     set_rounding_to_nearest();
 
@@ -88,33 +88,33 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a, const ValidatedNum
 
 ValidatedAffineModel operator*(const ValidatedNumberType& c, const ValidatedAffineModel& a) {
     Nat n=a.argument_size();
-    RawFloatType cm=midpoint(c);
+    RawFloatType cm=c.midpoint().raw();
     ValidatedAffineModel r(n);
-    r=a.value()*cm;
+    r=CoefficientType(a.value().raw()*cm);
     for(uint i=0; i!=n; ++i) {
-        r[i]=a[i]*cm;
+        r[i].raw()=a[i].raw()*cm;
     }
 
     set_rounding_upward();
 
     RawFloatType te=0.0;
     for(uint j=0; j!=n; ++j) {
-        RawFloatType mca=(-cm)*a.gradient(j);
-        RawFloatType ca= cm*a.gradient(j);
+        RawFloatType mca=(-cm)*a.gradient(j).raw();
+        RawFloatType ca= cm*a.gradient(j).raw();
         te+=(ca+mca);
     }
-    RawFloatType mca=(-cm)*a.value();
-    RawFloatType ca= cm*a.value();
+    RawFloatType mca=(-cm)*a.value().raw();
+    RawFloatType ca= cm*a.value().raw();
 
     RawFloatType re=0.0;
     if(c.lower()!=c.upper()) {
-        RawFloatType ce=max(c.upper()-cm,cm-c.lower());
+        RawFloatType ce=max(c.upper().raw()-cm,cm-c.lower().raw());
         for(uint j=0; j!=n; ++j) {
-            re+=abs(a.gradient(j)*ce);
+            re+=abs(a.gradient(j).raw()*ce);
         }
     }
 
-    r.set_error(abs(cm)*a.error() + ((ca+mca) + te)/2 + re);
+    r.set_error(ErrorType(abs(cm)*a.error().raw() + ((ca+mca) + te)/2 + re));
 
     set_rounding_to_nearest();
 
@@ -127,17 +127,17 @@ ValidatedAffineModel operator*(const ValidatedAffineModel& a, const ValidatedNum
 
 ValidatedAffineModel affine_model(const ValidatedAffine& a) {
     ValidatedAffineModel am(a.argument_size());
-    am = midpoint(a.value());
+    am = CoefficientType( midpoint(a.value()).raw() );
     for(uint j=0; j!=a.argument_size(); ++j) {
         am[j] = midpoint(a[j]);
     }
     set_rounding_upward();
     RawFloatType e = 0.0;
     for(uint j=0; j!=a.argument_size(); ++j) {
-        e += max(a.gradient(j).upper()-am.gradient(j),am.gradient(j)-a.gradient(j).lower());
+        e += max(a.gradient(j).upper().raw()-am.gradient(j).raw(),am.gradient(j).raw()-a.gradient(j).lower().raw());
     }
-    e += max(a.value().upper()-am.value(),am.value()-a.value().lower());
-    am.set_error(e);
+    e += max(a.value().upper().raw()-am.value().raw(),am.value().raw()-a.value().lower().raw());
+    am.set_error(ErrorType(e));
     set_rounding_to_nearest();
     return am;
 }
@@ -186,7 +186,7 @@ Vector< ValidatedAffineModel > affine_models(const Box& domain, const ValidatedV
 
 std::ostream& operator<<(std::ostream& os, const ValidatedAffineModel& f)
 {
-    os << f.value();
+    os << f.value().raw();
     for(uint j=0; j!=f.argument_size(); ++j) {
         if(f.gradient(j)>0.0) { os << "+"; }
         if(f.gradient(j)!=0.0) { os << f.gradient(j) << "*x" << j; }

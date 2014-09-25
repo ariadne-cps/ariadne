@@ -187,8 +187,8 @@ Real::Real(const Real& x) : _ptr(x._ptr) { }
 Real& Real::operator=(const Real& x) { this->_ptr=x._ptr; return *this; }
 double Real::get_d() const { return this->_ptr->operator ApproximateFloat().get_d(); }
 
-Real::operator Interval() const { return Ariadne::Interval(this->_ptr->operator ValidatedFloat()); }
-Real::operator Float() const { return Ariadne::Float(this->_ptr->operator ApproximateFloat()); }
+Real::operator ValidatedFloatType() const { return this->_ptr->operator ValidatedFloatType(); }
+Real::operator ApproximateFloatType() const { return this->_ptr->operator ApproximateFloatType(); }
 
 ApproximateFloat::ApproximateFloat(const Real& x) : ApproximateFloat(x._ptr->operator ApproximateFloat()) { }
 ValidatedFloat::ValidatedFloat(const Real& x) : ValidatedFloat(x._ptr->operator ValidatedFloat()) { }

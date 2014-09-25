@@ -100,8 +100,10 @@ class Real {
     //! \brief Copy assignment.
     Real& operator=(const Real&);
 
-    explicit operator ApproximateNumberType() const;
-    explicit operator ValidatedNumberType() const;
+    operator ApproximateFloatType() const;
+    operator ValidatedFloatType() const;
+    //explicit operator ApproximateFloatType() const;
+    //explicit operator ValidatedFloatType() const;
   public:
     //! \brief Get an approximation as a builtin double-precision floating-point number.
     double get_d() const;
@@ -138,6 +140,16 @@ inline Real& operator/=(Real& x, const Real& y) { return x=x/y; }
 
 //@}
 
+template<class N, typename std::enable_if<std::is_integral<N>::value,int>::type=0>
+    inline Real operator*(const Real& i1, N n2) { return operator*(i1,Real(n2)); };
+template<class N, typename std::enable_if<std::is_integral<N>::value,int>::type=0>
+    inline Real operator*(N n1, const Real& i2) { return operator*(Real(n1),i2); };
+template<class N, typename std::enable_if<std::is_integral<N>::value,int>::type=0>
+    inline Real operator/(const Real& i1, N n2) { return operator/(i1,Real(n2)); };
+template<class N, typename std::enable_if<std::is_integral<N>::value,int>::type=0>
+    inline Real operator/(N n1, const Real& i2) { return operator/(Real(n1),i2); };
+
+/*
 inline Real operator+(const Real& x, double y) { return x+static_cast<Real>(y); }
 inline Real operator-(const Real& x, double y) { return x-static_cast<Real>(y); }
 inline Real operator*(const Real& x, double y) { return x*static_cast<Real>(y); }
@@ -146,7 +158,9 @@ inline Real operator+(double x, const Real& y) { return static_cast<Real>(x)+y; 
 inline Real operator-(double x, const Real& y) { return static_cast<Real>(x)-y; }
 inline Real operator*(double x, const Real& y) { return static_cast<Real>(x)*y; }
 inline Real operator/(double x, const Real& y) { return static_cast<Real>(x)/y; }
+*/
 
+/*
 inline ApproximateFloat operator+(const Real& x, const ApproximateFloat& y) { return static_cast<ApproximateFloat>(x)+y; }
 inline ApproximateFloat operator-(const Real& x, const ApproximateFloat& y) { return static_cast<ApproximateFloat>(x)-y; }
 inline ApproximateFloat operator*(const Real& x, const ApproximateFloat& y) { return static_cast<ApproximateFloat>(x)*y; }
@@ -185,6 +199,7 @@ inline Interval& operator+=(Interval& x, const Real& y) { return x+=static_cast<
 inline Interval& operator-=(Interval& x, const Real& y) { return x-=static_cast<Interval>(y); }
 inline Interval& operator*=(Interval& x, const Real& y) { return x*=static_cast<Interval>(y); }
 inline Interval& operator/=(Interval& x, const Real& y) { return x/=static_cast<Interval>(y); }
+*/
 
 //@{
 //! \related Real \name Comparison Operators

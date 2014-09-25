@@ -165,7 +165,7 @@ struct DataLess {
 };
 
 struct DataIsZero {
-    template<class X> bool operator()(const ExpansionValue<X>& v) { return v.data()==0; }
+    template<class X> bool operator()(const ExpansionValue<X>& v) { return v.data()==static_cast<X>(0); }
 };
 
 struct KeyEquals {
@@ -312,6 +312,9 @@ class Expansion
     Expansion(unsigned int as, std::initializer_list< std::pair<std::initializer_list<int>,X> > lst);
     template<class XX> Expansion(const std::map<MultiIndex,XX>& m);
     template<class XX> Expansion(const Expansion<XX>& p);
+
+    Expansion<RawFloatType>& raw() { return reinterpret_cast<Expansion<RawFloatType>&>(*this); }
+    Expansion<RawFloatType>const& raw() const { return reinterpret_cast<Expansion<RawFloatType>const&>(*this); }
 
     Expansion<X>& operator=(const X& x);
 
@@ -483,7 +486,7 @@ class Expansion
 template<> class Expansion<Rational>;
 #endif
 
-template<class X> X Expansion<X>::_zero = 0.0;
+template<class X> X Expansion<X>::_zero = static_cast<X>(0);
 
 template<class X>
 Expansion<X>::Expansion(unsigned int as, unsigned int deg, std::initializer_list<X> lst)

@@ -117,7 +117,7 @@ class TaylorModel<ValidatedTag>
     //! \brief Construct a TaylorModel<ValidatedTag> in \a as arguments with the given accuracy control.
     TaylorModel<ValidatedTag>(uint as, Sweeper swp);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
-    TaylorModel<ValidatedTag>(const Expansion<CoefficientType>& f, const CoefficientType& e, Sweeper swp);
+    TaylorModel<ValidatedTag>(const Expansion<CoefficientType>& f, const ErrorType& e, Sweeper swp);
     //! \brief Fast swap with another Taylor model.
     void swap(TaylorModel<ValidatedTag>& tm);
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
@@ -521,7 +521,7 @@ class TaylorModel<ApproximateTag>
     TaylorModel<ApproximateTag>& operator=(const ApproximateNumberType& c) {
         this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),c); return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorModel<ApproximateTag>& operator=(const ValidatedNumberType& c) { return (*this)=midpoint(c); }
+    TaylorModel<ApproximateTag>& operator=(const ValidatedNumberType& c) { return (*this)=ApproximateNumberType(c); }
     //! \brief Set equal to a real constant, keeping the same number of arguments.
     TaylorModel<ApproximateTag>& operator=(const EffectiveNumberType& c) { return (*this)=ApproximateNumberType(c); }
     //@}

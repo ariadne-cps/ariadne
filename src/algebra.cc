@@ -28,50 +28,50 @@
 
 namespace Ariadne {
 
-template GradedAlgebra<Float> compose(const Series<Float>&, const GradedAlgebra<Float>&);
-template GradedAlgebra<Interval> compose(const Series<Interval>&, const GradedAlgebra<Interval>&);
-template GradedAlgebra<Real> compose(const Series<Real>&, const GradedAlgebra<Real>&);
+template GradedAlgebra<ApproximateNumberType> compose(const Series<ApproximateNumberType>&, const GradedAlgebra<ApproximateNumberType>&);
+template GradedAlgebra<ValidatedNumberType> compose(const Series<ValidatedNumberType>&, const GradedAlgebra<ValidatedNumberType>&);
+template GradedAlgebra<EffectiveNumberType> compose(const Series<EffectiveNumberType>&, const GradedAlgebra<EffectiveNumberType>&);
 
-template NormedAlgebra<Float> rec(const NormedAlgebra<Float>&);
-template NormedAlgebra<Interval> rec(const NormedAlgebra<Interval>&);
-template NormedAlgebra<Real> rec(const NormedAlgebra<Real>&);
+template NormedAlgebra<ApproximateNumberType> rec(const NormedAlgebra<ApproximateNumberType>&);
+template NormedAlgebra<ValidatedNumberType> rec(const NormedAlgebra<ValidatedNumberType>&);
+template NormedAlgebra<EffectiveNumberType> rec(const NormedAlgebra<EffectiveNumberType>&);
 
-template NormedAlgebra<Float> sqrt(const NormedAlgebra<Float>&);
-template NormedAlgebra<Interval> sqrt(const NormedAlgebra<Interval>&);
-template NormedAlgebra<Real> sqrt(const NormedAlgebra<Real>&);
+template NormedAlgebra<ApproximateNumberType> sqrt(const NormedAlgebra<ApproximateNumberType>&);
+template NormedAlgebra<ValidatedNumberType> sqrt(const NormedAlgebra<ValidatedNumberType>&);
+template NormedAlgebra<EffectiveNumberType> sqrt(const NormedAlgebra<EffectiveNumberType>&);
 
-template NormedAlgebra<Float> exp(const NormedAlgebra<Float>&);
-template NormedAlgebra<Interval> exp(const NormedAlgebra<Interval>&);
-template NormedAlgebra<Real> exp(const NormedAlgebra<Real>&);
+template NormedAlgebra<ApproximateNumberType> exp(const NormedAlgebra<ApproximateNumberType>&);
+template NormedAlgebra<ValidatedNumberType> exp(const NormedAlgebra<ValidatedNumberType>&);
+template NormedAlgebra<EffectiveNumberType> exp(const NormedAlgebra<EffectiveNumberType>&);
 
-template NormedAlgebra<Float> log(const NormedAlgebra<Float>&);
-template NormedAlgebra<Interval> log(const NormedAlgebra<Interval>&);
-template NormedAlgebra<Real> log(const NormedAlgebra<Real>&);
+template NormedAlgebra<ApproximateNumberType> log(const NormedAlgebra<ApproximateNumberType>&);
+template NormedAlgebra<ValidatedNumberType> log(const NormedAlgebra<ValidatedNumberType>&);
+template NormedAlgebra<EffectiveNumberType> log(const NormedAlgebra<EffectiveNumberType>&);
 
-template NormedAlgebra<Float> sin(const NormedAlgebra<Float>&);
-template NormedAlgebra<Interval> sin(const NormedAlgebra<Interval>&);
-template NormedAlgebra<Real> sin(const NormedAlgebra<Real>&);
+template NormedAlgebra<ApproximateNumberType> sin(const NormedAlgebra<ApproximateNumberType>&);
+template NormedAlgebra<ValidatedNumberType> sin(const NormedAlgebra<ValidatedNumberType>&);
+template NormedAlgebra<EffectiveNumberType> sin(const NormedAlgebra<EffectiveNumberType>&);
 
-template NormedAlgebra<Float> cos(const NormedAlgebra<Float>&);
-template NormedAlgebra<Interval> cos(const NormedAlgebra<Interval>&);
-template NormedAlgebra<Real> cos(const NormedAlgebra<Real>&);
+template NormedAlgebra<ApproximateNumberType> cos(const NormedAlgebra<ApproximateNumberType>&);
+template NormedAlgebra<ValidatedNumberType> cos(const NormedAlgebra<ValidatedNumberType>&);
+template NormedAlgebra<EffectiveNumberType> cos(const NormedAlgebra<EffectiveNumberType>&);
 
-template NormedAlgebra<Float> tan(const NormedAlgebra<Float>&);
-template NormedAlgebra<Interval> tan(const NormedAlgebra<Interval>&);
-template NormedAlgebra<Real> tan(const NormedAlgebra<Real>&);
+template NormedAlgebra<ApproximateNumberType> tan(const NormedAlgebra<ApproximateNumberType>&);
+template NormedAlgebra<ValidatedNumberType> tan(const NormedAlgebra<ValidatedNumberType>&);
+template NormedAlgebra<EffectiveNumberType> tan(const NormedAlgebra<EffectiveNumberType>&);
 
 /*
-template NormedAlgebra<Float> asin(const NormedAlgebra<Float>&);
-template NormedAlgebra<Interval> asin(const NormedAlgebra<Interval>&);
-template NormedAlgebra<Real> asin(const NormedAlgebra<Real>&);
+template NormedAlgebra<ApproximateNumberType> asin(const NormedAlgebra<ApproximateNumberType>&);
+template NormedAlgebra<ValidatedNumberType> asin(const NormedAlgebra<ValidatedNumberType>&);
+template NormedAlgebra<EffectiveNumberType> asin(const NormedAlgebra<EffectiveNumberType>&);
 
-template NormedAlgebra<Float> acos(const NormedAlgebra<Float>&);
-template NormedAlgebra<Interval> acos(const NormedAlgebra<Interval>&);
-template NormedAlgebra<Real> acos(const NormedAlgebra<Real>&);
+template NormedAlgebra<ApproximateNumberType> acos(const NormedAlgebra<ApproximateNumberType>&);
+template NormedAlgebra<ValidatedNumberType> acos(const NormedAlgebra<ValidatedNumberType>&);
+template NormedAlgebra<EffectiveNumberType> acos(const NormedAlgebra<EffectiveNumberType>&);
 
-template NormedAlgebra<Float> atan(const NormedAlgebra<Float>&);
-template NormedAlgebra<Interval> atan(const NormedAlgebra<Interval>&);
-template NormedAlgebra<Real> atan(const NormedAlgebra<Real>&);
+template NormedAlgebra<ApproximateNumberType> atan(const NormedAlgebra<ApproximateNumberType>&);
+template NormedAlgebra<ValidatedNumberType> atan(const NormedAlgebra<ValidatedNumberType>&);
+template NormedAlgebra<EffectiveNumberType> atan(const NormedAlgebra<EffectiveNumberType>&);
 */
 
 } // namespace Ariadne

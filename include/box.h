@@ -70,7 +70,7 @@ inline Interval over_approximation(const IntervalSet& rivl) {
     return Interval(Interval(rivl.lower()).lower(),Interval(rivl.upper()).upper());
 }
 inline Interval approximation(const IntervalSet& rivl) {
-    return Interval(ApproximateNumberType(rivl.lower()),ApproximateNumberType(rivl.upper()));
+    return Interval(RawFloatType(ApproximateNumberType(rivl.lower())),RawFloatType(ApproximateNumberType(rivl.upper())));
 }
 
 

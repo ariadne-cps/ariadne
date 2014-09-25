@@ -135,7 +135,7 @@ std::ostream& operator<<(std::ostream& os, UpperFloat x) {
 
 
 
-static const ValidatedFloat pi_val=ValidatedFloat(pi_down,pi_up);
+const ValidatedFloat pi_val=ValidatedFloat(pi_down,pi_up);
 
 uint ValidatedFloat::output_precision = 6;
 
@@ -452,7 +452,7 @@ ValidatedFloat cos(ValidatedFloat i)
 
     static const ExactFloat two(2);
 
-    if(i.radius()>2*_pi_down) { return ValidatedFloat(-1.0,+1.0); }
+    if(i.radius().value()>2*_pi_down) { return ValidatedFloat(-1.0,+1.0); }
 
     Float n=floor(i.lower_value().get_d()/(2*_pi_approx)+0.5);
     i=i-two*ExactFloat(n)*pi_val;

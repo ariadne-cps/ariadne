@@ -51,6 +51,7 @@ template<class R, class A> inline R numeric_cast(const A& a);
 template<> inline double numeric_cast(const Real& a) { return a.get_d(); }
 template<> inline Real numeric_cast(const Float& a) { return Real(ExactFloat(a)); }
 template<> inline Real numeric_cast(const Interval& a) { assert(false); }
+template<> inline Real numeric_cast(const ValidatedFloat& a) { return Real(make_exact(ApproximateFloat(a))); }
 
 //! \ingroup NumericModule
 //! \related Float \related Interval \related Real
@@ -76,6 +77,10 @@ template<> inline float numeric_cast(const Real& a) { return a.get_d(); }
 template<class X> inline X convert_error(const Float& e);
 template<> inline Float convert_error<Float>(const Float& e) { return 0.0; }
 template<> inline Interval convert_error<Interval>(const Float& e) { return Interval(-e,+e); }
+
+template<class X> inline X convert_error(const ApproximateFloat& e);
+template<> inline ApproximateFloat convert_error<ApproximateFloat>(const ApproximateFloat& e) { return 0.0; }
+template<> inline ValidatedFloat convert_error<ValidatedFloat>(const ApproximateFloat& e) { return ValidatedFloat(-e.value(),+e.value()); }
 
 // Use 'enable_if' style template to restrict allowable instances. See the Boost documentation
 // for enable_if to see how this works.
@@ -141,14 +146,17 @@ template<> struct IsNumericCastable<Float,Interval> : True { };
 
 // Type deduction for numerical arithmetic
 template<class X1, class X2> struct Arithmetic { };
-template<> struct Arithmetic<double,Real> { typedef Real ResultType; };
-template<> struct Arithmetic<double,Float> { typedef Float ResultType; };
-template<> struct Arithmetic<double,Interval> { typedef Interval ResultType; };
-template<> struct Arithmetic<Real,double> { typedef Real ResultType; };
-template<> struct Arithmetic<Float,double> { typedef Float ResultType; };
-template<> struct Arithmetic<Interval,double> { typedef Interval ResultType; };
 template<> struct Arithmetic<Real,Real> { typedef Real ResultType; };
-template<> struct Arithmetic<ExactFloat,ExactFloat> { typedef Interval ResultType; };
+template<> struct Arithmetic<ExactFloat,ExactFloat> { typedef ValidatedFloat ResultType; };
+template<> struct Arithmetic<ExactFloat,ValidatedFloat> { typedef ValidatedFloat ResultType; };
+template<> struct Arithmetic<ExactFloat,ApproximateFloat> { typedef ApproximateFloat ResultType; };
+template<> struct Arithmetic<ValidatedFloat,ExactFloat> { typedef ValidatedFloat ResultType; };
+template<> struct Arithmetic<ValidatedFloat,ValidatedFloat> { typedef ValidatedFloat ResultType; };
+template<> struct Arithmetic<ValidatedFloat,ApproximateFloat> { typedef ApproximateFloat ResultType; };
+template<> struct Arithmetic<ApproximateFloat,ExactFloat> { typedef ApproximateFloat ResultType; };
+template<> struct Arithmetic<ApproximateFloat,ValidatedFloat> { typedef ApproximateFloat ResultType; };
+template<> struct Arithmetic<ApproximateFloat,ApproximateFloat> { typedef ApproximateFloat ResultType; };
+
 template<> struct Arithmetic<Interval,ExactFloat> { typedef Interval ResultType; };
 template<> struct Arithmetic<ExactFloat,Interval> { typedef Interval ResultType; };
 template<> struct Arithmetic<Interval,Real> { typedef Interval ResultType; };
@@ -161,6 +169,12 @@ template<> struct Arithmetic<Interval,Float> { typedef Float ResultType; };
 template<> struct Arithmetic<Float,Float> { typedef Float ResultType; };
 template<> struct Arithmetic<Float,Real> { typedef Float ResultType; };
 template<> struct Arithmetic<Real,Float> { typedef Float ResultType; };
+template<> struct Arithmetic<double,Real> { typedef Real ResultType; };
+template<> struct Arithmetic<double,Float> { typedef Float ResultType; };
+template<> struct Arithmetic<double,Interval> { typedef Interval ResultType; };
+template<> struct Arithmetic<Real,double> { typedef Real ResultType; };
+template<> struct Arithmetic<Float,double> { typedef Float ResultType; };
+template<> struct Arithmetic<Interval,double> { typedef Interval ResultType; };
 #ifdef HAVE_GMPXX_H
 template<> struct Arithmetic<Rational,Rational> { typedef Rational ResultType; };
 template<> struct Arithmetic<Rational,double> { typedef Rational ResultType; };

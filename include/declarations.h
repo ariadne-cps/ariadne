@@ -63,6 +63,7 @@ class ValidatedFloat;
 class UpperFloat;
 class LowerFloat;
 class ApproximateFloat;
+typedef UpperFloat PositiveUpperFloat;
 
 // Deprecated as numeric type
 class Interval;
@@ -81,8 +82,8 @@ typedef LowerFloat LowerFloatType;
 typedef UpperFloat UpperFloatType;
 typedef ValidatedFloat ValidatedFloatType;
 typedef ExactFloat ExactFloatType;
+typedef PositiveUpperFloat PositiveUpperFloatType;
 
-typedef UpperFloatType PositiveUpperFloatType;
 typedef PositiveUpperFloatType ErrorFloatType;
 
 typedef ApproximateFloatType ApproximateNumberType;

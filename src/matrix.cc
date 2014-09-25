@@ -32,9 +32,15 @@
 
 namespace Ariadne {
 
-Matrix<Float>
-midpoint(const Matrix<Interval>& A) {
-    Matrix<Float> R(A.row_size(),A.column_size());
+namespace {
+ValidatedFloatType intersection(ValidatedFloatType x1, ValidatedFloatType x2) {
+    Interval i=intersection(Interval(x1),Interval(x2)); return reinterpret_cast<ValidatedFloatType&>(i);
+}
+} // namespace
+
+Matrix<ExactFloatType>
+midpoint(const Matrix<ValidatedFloatType>& A) {
+    Matrix<ExactFloatType> R(A.row_size(),A.column_size());
     for(size_t i=0; i!=A.row_size(); ++i) {
         for(size_t j=0; j!=A.column_size(); ++j) {
             R[i][j]=A[i][j].midpoint();
@@ -135,7 +141,7 @@ template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B) {
 }
 
 // Find a starting solution for a diagonally dominant system
-Matrix<Interval> dd_solve(const Matrix<Interval>& A, const Matrix<Interval>& B)
+Matrix<ValidatedFloatType> dd_solve(const Matrix<ValidatedFloatType>& A, const Matrix<ValidatedFloatType>& B)
 {
     const size_t n=B.row_size();
     const size_t m=B.column_size();
@@ -143,9 +149,9 @@ Matrix<Interval> dd_solve(const Matrix<Interval>& A, const Matrix<Interval>& B)
     //Compute 1/(|aii|-sum|aij|) using outward rounding
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(upward);
-    Vector<Float> c(n,0.0);
+    Vector<RawFloatType> c(n,0.0);
     for(size_t i=0; i!=n; ++i) {
-        Float ci=c[i];
+        RawFloatType ci=c[i];
         for(size_t j=0; j!=n; ++j) {
             if(j!=i) {
                 ci=add_rnd(ci,mag(A[i][j]));
@@ -154,7 +160,7 @@ Matrix<Interval> dd_solve(const Matrix<Interval>& A, const Matrix<Interval>& B)
         ci=sub_rnd(ci,mig(A[i][i]));
         ci=-ci;
         if(ci<=0.0) {
-            ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<Interval> A, Matrix<Interval> B)",
+            ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<ValidatedFloatType> A, Matrix<ValidatedFloatType> B)",
                           "Interval matrix A="<<A<<" is not diagonally-dominant.");
         }
         ci=rec_rnd(ci);
@@ -162,9 +168,9 @@ Matrix<Interval> dd_solve(const Matrix<Interval>& A, const Matrix<Interval>& B)
     set_rounding_mode(rounding_mode);
 
     // Compute initial solution
-    Matrix<Interval> R(n,m);
+    Matrix<ValidatedFloatType> R(n,m);
     for(size_t i=0; i!=n; ++i) {
-        Interval ci(-c[i],+c[i]);
+        ValidatedFloatType ci(-c[i],+c[i]);
         for(size_t j=0; j!=m; ++j) {
             R[i][j]=B[i][j]*ci;
         }
@@ -174,7 +180,7 @@ Matrix<Interval> dd_solve(const Matrix<Interval>& A, const Matrix<Interval>& B)
 }
 
 
-template<> Matrix<Interval> gs_solve(const Matrix<Interval>& A, const Matrix<Interval>& B)
+template<> Matrix<ValidatedFloatType> gs_solve(const Matrix<ValidatedFloatType>& A, const Matrix<ValidatedFloatType>& B)
 {
     ARIADNE_ASSERT(A.row_size()==A.column_size());
     ARIADNE_ASSERT(B.row_size()==A.column_size());
@@ -182,13 +188,15 @@ template<> Matrix<Interval> gs_solve(const Matrix<Interval>& A, const Matrix<Int
     const size_t m=B.column_size();
 
     // Precondition A and B
-    Matrix<ExactFloat> J(inverse(midpoint(A)));
-    Matrix<Interval> JA=J*A;
-    Matrix<Interval> JB=J*B;
+    Matrix<ApproximateFloatType> mA=midpoint(A);
+    Matrix<ApproximateFloatType> aJ=inverse(mA);
+    Matrix<ExactFloat> const& J=reinterpret_cast<Matrix<ExactFloat>const&>(aJ);
+    Matrix<ValidatedFloatType> JA=J*A;
+    Matrix<ValidatedFloatType> JB=J*B;
     //std::cerr<<"J="<<J<<"\nJA="<<JA<<"\nJB="<<JB<<"\n";
 
-    //Matrix<Interval> R=dd_solve(JA,JB);
-    Matrix<Interval> R=lu_inverse(A);
+    //Matrix<ValidatedFloatType> R=dd_solve(JA,JB);
+    Matrix<ValidatedFloatType> R=lu_inverse(A);
     //std::cerr<<"R="<<R<<"\n";
 
     // Perform Gauss-Seidel iteration
@@ -197,7 +205,7 @@ template<> Matrix<Interval> gs_solve(const Matrix<Interval>& A, const Matrix<Int
         for(size_t i=0; i!=n; ++i) {
             for(size_t j=0; j!=m; ++j) {
                 // compute R'[i][j] := (JB[i][j] - Sum{k!=j}JA[i][k]*R[k][j]) / JA[i][i]
-                Interval Rij=JB[i][j];
+                ValidatedFloatType Rij=JB[i][j];
                 for(size_t k=0; k!=n; ++k) {
                     if(k!=i) {
                         Rij-=JA[i][k]*R[k][j];
@@ -223,7 +231,7 @@ template<class X> Matrix<X> inverse(const Matrix<X>& A) {
     return lu_inverse(A);
 }
 
-template<> Matrix<Interval> inverse<Interval>(const Matrix<Interval>& A) {
+template<> Matrix<ValidatedFloatType> inverse<ValidatedFloatType>(const Matrix<ValidatedFloatType>& A) {
     try {
         return lu_inverse(A);
     } catch(const DivideByZeroException& e) {
@@ -237,7 +245,7 @@ template<class X> Matrix<X> solve(const Matrix<X>& A, const Matrix<X>& B) {
     Matrix<X> Ainv=inverse(A); return Ainv*B;
 }
 
-template<> Matrix<Interval> solve(const Matrix<Interval>& A, const Matrix<Interval>& B) {
+template<> Matrix<ValidatedFloatType> solve(const Matrix<ValidatedFloatType>& A, const Matrix<ValidatedFloatType>& B) {
     return gs_solve(A,B);
 }
 
@@ -317,12 +325,12 @@ solve(const PLUMatrix<X>& A, const Matrix<X>& B)
 
 
 // Compute the vector of row norms (sums of absolute values) of A
-Vector<Float>
-row_norms(const Matrix<Float>& A)
+Vector<ApproximateFloatType>
+row_norms(const Matrix<ApproximateFloatType>& A)
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
-    Vector<Float> r(m);
+    Vector<ApproximateFloatType> r(m);
 
     rounding_mode_t prev_rounding_mode=get_rounding_mode();
     set_rounding_mode(upward);
@@ -340,15 +348,15 @@ row_norms(const Matrix<Float>& A)
 
 
 // Scale the rows of A to each have some of absolute values equal to one
-Matrix<Float>
-normalise_rows(const Matrix<Float>& A)
+Matrix<ApproximateFloatType>
+normalise_rows(const Matrix<ApproximateFloatType>& A)
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
 
-    Matrix<Float> R=A;
+    Matrix<ApproximateFloatType> R=A;
 
-    Array<Float> row_asums(m);
+    Array<ApproximateFloatType> row_asums(m);
     rounding_mode_t prev_rounding_mode=get_rounding_mode();
     set_rounding_mode(upward);
     for(size_t i=0; i!=m; ++i) {
@@ -371,10 +379,10 @@ normalise_rows(const Matrix<Float>& A)
 
 // Returns a pivot P and matrices L and U such that L is unit lower-triangular,
 // U is upper-trianguler and A=PLU.
-Tuple< PivotMatrix, Matrix<Float>, Matrix<Float> >
-triangular_decomposition(const Matrix<Float>& A)
+Tuple< PivotMatrix, Matrix<ApproximateFloatType>, Matrix<ApproximateFloatType> >
+triangular_decomposition(const Matrix<ApproximateFloatType>& A)
 {
-    typedef Float RealType;
+    typedef ApproximateFloatType RealType;
     ARIADNE_ASSERT(A.row_size()==A.column_size());
 
     size_t m=A.row_size();
@@ -438,19 +446,21 @@ triangular_decomposition(const Matrix<Float>& A)
 // Use Householder transformation H=I-vv' where v=u/|u|
 // and u=a +/- |a|e with a and e the working column of A
 // and corresponding unit vector.
-Tuple< Matrix<Float>, PivotMatrix>
-triangular_factor(const Matrix<Float>& A)
+Tuple< Matrix<ApproximateFloatType>, PivotMatrix>
+triangular_factor(const Matrix<ApproximateFloatType>& A)
 {
+    typedef ApproximateFloatType X;
+
     const size_t m=A.row_size();
     const size_t n=A.column_size();
 
-    Matrix<Float> R=A;
+    Matrix<X> R=A;
     PivotMatrix P(n); for(uint i=0; i!=n; ++i) { P[i]=i; }
 
     // Array of column norm squares
-    Array<Float> cns(n);
+    Array<X> cns(n);
 
-    Vector<Float> u(m);
+    Vector<X> u(m);
 
     for(size_t k=0; k!=min(m,n); ++k) {
         //std::cerr<<"k="<<k<<" R="<<R<<std::endl;
@@ -466,7 +476,7 @@ triangular_factor(const Matrix<Float>& A)
             }
 
             // Find largest column norm
-            size_t l=k; Float cnsmax=cns[k];
+            size_t l=k; X cnsmax=cns[k];
             for(size_t j=k+1; j!=n; ++j) {
                 if(cns[j]>cnsmax) {
                     l=j; cnsmax=cns[j];
@@ -475,7 +485,7 @@ triangular_factor(const Matrix<Float>& A)
 
             // Swap columns l and k
             for(size_t i=0; i!=m; ++i) {
-                Float tmp=R[i][k];
+                ApproximateFloatType tmp=R[i][k];
                 R[i][k]=R[i][l];
                 R[i][l]=tmp;
             }
@@ -485,11 +495,11 @@ triangular_factor(const Matrix<Float>& A)
         }
 
         // Compute |a| where a is the working column
-        Float nrmas=0.0;
+        ApproximateFloatType nrmas=0.0;
         for(size_t i=k; i!=m; ++i) {
             nrmas+=R[i][k]*R[i][k];
         }
-        Float nrma=sqrt(nrmas);
+        ApproximateFloatType nrma=sqrt(nrmas);
 
         // Compute u=a +/- |a|e
         for(size_t i=k; i!=m; ++i) {
@@ -499,19 +509,19 @@ triangular_factor(const Matrix<Float>& A)
         else { u[k]-=nrma; }
 
         // Compute -2/u.u
-        Float nrmus=0.0;
+        ApproximateFloatType nrmus=0.0;
         for(size_t i=k; i!=m; ++i) {
             nrmus+=sqr(u[i]);
         }
-        Float mtdnu=(-2)/nrmus;
+        ApproximateFloatType mtdnu=(-2)/nrmus;
 
         // For each column b, compute b-=2u(u.b)/u.u
         for(size_t j=k; j!=n; ++j) {
-            Float udtb=0.0;
+            ApproximateFloatType udtb=0.0;
             for(size_t i=k; i!=m; ++i) {
                 udtb+=u[i]*R[i][j];
             }
-            Float scl=udtb*mtdnu;
+            ApproximateFloatType scl=udtb*mtdnu;
             for(size_t i=k; i!=m; ++i) {
                 R[i][j]+=scl*u[i];
             }
@@ -530,7 +540,7 @@ triangular_factor(const Matrix<Float>& A)
     rounding_mode_t prev_rounding_mode=get_rounding_mode();
     for(size_t i=0; i!=m; ++i) {
         set_rounding_mode(upward);
-        Float rsum=0.0;
+        ApproximateFloatType rsum=0.0;
         for(size_t j=i; j!=n; ++j) {
             rsum+=abs(R[i][j]);
         }
@@ -549,24 +559,26 @@ triangular_factor(const Matrix<Float>& A)
 // orthogonal rows, and such that the row absolute value sums of the inverse of
 // T are at most 1. Then the image of the unit box under the matrix T is
 // an over-approximation of the unit box.
-Matrix<Float>
-triangular_multiplier(const Matrix<Float>& A)
+Matrix<ApproximateFloatType>
+triangular_multiplier(const Matrix<ApproximateFloatType>& A)
 {
+    typedef ApproximateFloatType X;
+
     ARIADNE_ASSERT(A.row_size()<=A.column_size());
     const size_t m=A.row_size();
     const size_t n=A.column_size();
 
-    Matrix<Float> R; PivotMatrix P;
+    Matrix<X> R; PivotMatrix P;
     make_ltuple(R,P)=triangular_factor(A);
 
-    Matrix<Float> T(n,m); for(size_t i=0; i!=m; ++i) { T[i][i]=1.0; }
+    Matrix<X> T(n,m); for(size_t i=0; i!=m; ++i) { T[i][i]=1; }
 
-    for(size_t i=0; i!=m; ++i) { assert(R[i][i]!=0.0); }
+    for(size_t i=0; i!=m; ++i) { assert(R[i][i]!=0); }
 
     for(size_t k=m-1; k!=size_t(-1); --k) {
-        Float r=1.0/R[k][k];
+        X r=1/R[k][k];
         for(size_t i=0; i!=k; ++i) {
-            Float s=R[i][k]*r;
+            X s=R[i][k]*r;
             for(size_t j=k; j!=m; ++j) {
                 T[i][j]-=s*T[k][j];
             }
@@ -579,7 +591,7 @@ triangular_multiplier(const Matrix<Float>& A)
     for(size_t k=m-1; k!=size_t(-1); --k) {
         size_t p=P[k];
         for(size_t i=0; i!=m; ++i) {
-            Float tmp=T[p][i]; T[p][i]=T[k][i]; T[k][i]=tmp;
+            X tmp=T[p][i]; T[p][i]=T[k][i]; T[k][i]=tmp;
         }
     }
 
@@ -587,14 +599,14 @@ triangular_multiplier(const Matrix<Float>& A)
 }
 
 
-Matrix<Float> pivot_matrix(const Array<size_t>& pv)
+Matrix<ExactFloatType> pivot_matrix(const Array<size_t>& pv)
 {
     const size_t n=pv.size();
     Array<size_t> perm(n); for(uint i=0; i!=n; ++i) { perm[i]=i; }
     for(size_t i=0; i!=n; ++i) {
         std::swap(perm[i],perm[pv[i]]);
     }
-    Matrix<Float> P(n,n);
+    Matrix<ExactFloatType> P(n,n);
     for(size_t i=0; i!=n; ++i) {
         P[i][perm[i]]=1;
     }
@@ -629,9 +641,9 @@ orthogonal_decomposition(const Matrix<ApproximateFloatType>& A, bool allow_pivot
 
     for(size_t i=0; i!=m; ++i) {
         for(size_t j=0; j!=m; ++j) {
-            Q[i][j]=0.0;
+            Q[i][j]=0;
         }
-        Q[i][i]=1.0;
+        Q[i][i]=1;
     }
 
     for(size_t k=0; k!=min(m,n); ++k) {
@@ -640,9 +652,9 @@ orthogonal_decomposition(const Matrix<ApproximateFloatType>& A, bool allow_pivot
         if(allow_pivoting) {
             // Find a pivot column
             size_t pivot_column=k;
-            X max_column_norm=0.0;
+            X max_column_norm=0;
             for(size_t j=k; j!=n; ++j) {
-                X column_norm=0.0;
+                X column_norm=0;
                 for(size_t i=k; i!=m; ++i) {
                     column_norm+=abs(R[i][j]);
                 }
@@ -663,40 +675,40 @@ orthogonal_decomposition(const Matrix<ApproximateFloatType>& A, bool allow_pivot
         }
 
         // Compute |a| where a is the working column
-        ApproximateFloatType nrmas=0.0;
+        X nrmas=0;
         for(size_t i=k; i!=m; ++i) {
             nrmas+=R[i][k]*R[i][k];
         }
-        ApproximateFloatType nrma=sqrt(nrmas);
+        X nrma=sqrt(nrmas);
 
         // Compute u=a +/- |a|e
         for(size_t i=0; i!=k; ++i) {
-            u[i]=0.0;
+            u[i]=0;
         }
         for(size_t i=k; i!=m; ++i) {
             u[i]=R[i][k];
         }
-        if(u[k]>=0) { u[k]+=nrma; }
+        if(u[k].value()>=0) { u[k]+=nrma; }
         else { u[k]-=nrma; }
 
         // Compute -2/u.u
-        ApproximateFloatType nrmus=0.0;
+        X nrmus=0;
         for(size_t i=k; i!=m; ++i) {
             nrmus+=sqr(u[i]);
         }
-        ApproximateFloatType mtdnu=(-2)/nrmus;
+        X mtdnu=X(-2)/nrmus;
 
         // Compute H=(1-2uu'/u'u)
-        // Matrix<ApproximateFloatType> H(n,n); for(size_t i=0; i!=n; ++i) {
-        // H[i][i]=1.0; for(size_t j=0; j!=n; ++j) { H[i][j]+=u[i]*u[j]*mtdnu; } }
+        // Matrix<X> H(n,n); for(size_t i=0; i!=n; ++i) {
+        // H[i][i]=1; for(size_t j=0; j!=n; ++j) { H[i][j]+=u[i]*u[j]*mtdnu; } }
 
         // For each column b of R, compute b-=2u(u.b)/u.u
         for(size_t j=k; j!=n; ++j) {
-            ApproximateFloatType udtb=0.0;
+            X udtb=0;
             for(size_t i=k; i!=m; ++i) {
                 udtb+=u[i]*R[i][j];
             }
-            ApproximateFloatType scl=udtb*mtdnu;
+            X scl=udtb*mtdnu;
             for(size_t i=k; i!=m; ++i) {
                 R[i][j]+=scl*u[i];
             }
@@ -705,18 +717,18 @@ orthogonal_decomposition(const Matrix<ApproximateFloatType>& A, bool allow_pivot
         // For the kth column, set R[k][k]=-/+ |a|
         // and R[i][k]=0 for i>k
         for(size_t i=k+1; i!=m; ++i) {
-            R[i][k]=0.0;
+            R[i][k]=0;
         }
-        if(u[k]>=0) { R[k][k]=-nrma; } else { R[k][k]=nrma; }
+        if(u[k].value()>=0) { R[k][k]=-nrma; } else { R[k][k]=nrma; }
 
         // Update Q'=QH = Q(I-2uu'/u'u)
         // For each row q, compute q-=2u(u.q)/(u.u)
         for(size_t i=0; i!=m; ++i) {
-            ApproximateFloatType qdtu=0.0;
+            X qdtu=0;
             for(size_t j=k; j!=m; ++j) {
                 qdtu+=Q[i][j]*u[j];
             }
-            ApproximateFloatType scl=qdtu*mtdnu;
+            X scl=qdtu*mtdnu;
             for(size_t j=k; j!=m; ++j) {
                 Q[i][j]+=scl*u[j];
             }
@@ -735,7 +747,7 @@ orthogonal_decomposition(const Matrix<ApproximateFloatType>& A)
 
     size_t m=A.row_size();
     size_t n=A.column_size();
-    Matrix<X> O(m,m,0.0);
+    Matrix<X> O(m,m,0);
     Matrix<X> R(A);
 
     Array<X> p(n);
@@ -744,9 +756,9 @@ orthogonal_decomposition(const Matrix<ApproximateFloatType>& A)
 
         // Find a pivot column
         size_t pivot_column=c;
-        X max_column_norm=0.0;
+        X max_column_norm=0;
         for(size_t j=c; j!=n; ++j) {
-            X column_norm=0.0;
+            X column_norm=0;
             for(size_t i=c; i!=m; ++i) {
                 column_norm+=abs(R[i][j]);
             }
@@ -764,14 +776,14 @@ orthogonal_decomposition(const Matrix<ApproximateFloatType>& A)
         }
 
         // Compute inner product of pivot column with remaining columns
-        X pivot_norm_square=0.0;
+        X pivot_norm_square=0;
         for(size_t i=c; i!=m; ++i) {
             pivot_norm_square += R[i][c]*R[i][c];
         }
 
-        X inner_product_sum=0.0;
+        X inner_product_sum=0;
         for(size_t j=c; j!=n; ++j) {
-            X inner_product=0.0;
+            X inner_product=0;
             for(size_t i=c; i!=m; ++i) {
                 inner_product += R[i][c]*R[i][j];
             }

@@ -78,14 +78,14 @@ class ApproximateFloat {
     static uint output_precision;
     Float a;
   public:
-    typedef Float NumericType;
+    typedef ApproximateFloat NumericType;
   public:
     //! \brief Default constructor creates an uninitialised number.
     ApproximateFloat() : a() { }
     //! \brief Convert from a built-in double-precision floating-point number.
     ApproximateFloat(double x) : a(x) { }
     //! \brief Copy constructor.
-    ApproximateFloat(const Float& x) : a(x) { }
+    explicit ApproximateFloat(const Float& x) : a(x) { }
     //! \brief Convert approximately from a decimal number.
     explicit ApproximateFloat(const Dyadic& d);
     //! \brief Convert approximately from a decimal number.
@@ -106,9 +106,11 @@ class ApproximateFloat {
     //! \brief Convert from a floating-point lower bound on a number.
     ApproximateFloat(const LowerFloat& x);
     //! \brief Explicit conversion to extract raw data.
-    operator Float const& () const { return this->a; }
+    explicit operator Float const& () const { return this->a; }
     //! \brief An approximation by a built-in double-precision floating-point number.
     Float const& value() const { return this->a; }
+    Float const& raw() const { return this->a; }
+    Float& raw() { return this->a; }
     //! \brief An approximation by a built-in double-precision floating-point number.
     double get_d() const { return this->a.get_d(); }
     static void set_output_precision(uint p) { output_precision=p; }
@@ -126,66 +128,66 @@ template<> inline uint integer_cast(const ApproximateFloat& x) { return static_c
 
 // Discontinuous integer-valued functions
 //! \related ApproximateFloat \brief The next lowest integer, represented as a floating-point type.
-inline ApproximateFloat floor(ApproximateFloat x) { return floor(x.a); }
+inline ApproximateFloat floor(ApproximateFloat x) { return ApproximateFloat(floor(x.a)); }
 //! \related ApproximateFloat \brief The next highest integer, represented as a floating-point type.
-inline ApproximateFloat ceil(ApproximateFloat x) { return ceil(x.a); }
+inline ApproximateFloat ceil(ApproximateFloat x) { return ApproximateFloat(ceil(x.a)); }
 
 // Non-smooth operations
 //! \related ApproximateFloat \brief The magnitude of a floating-point number. Equal to the absolute value.
-inline ApproximateFloat mag(ApproximateFloat x) { return abs(x.a); }
+inline ApproximateFloat mag(ApproximateFloat x) { return ApproximateFloat(abs(x.a)); }
 //! \related ApproximateFloat \brief The absolute value of a floating-point number. Can be computed exactly.
-inline ApproximateFloat abs(ApproximateFloat x) { return abs(x.a); }
+inline ApproximateFloat abs(ApproximateFloat x) { return ApproximateFloat(abs(x.a)); }
 //! \related ApproximateFloat \brief The maximum of two floating-point numbers. Can be computed exactly.
-inline ApproximateFloat max(ApproximateFloat x, ApproximateFloat y) { return max(x.a,y.a); }
+inline ApproximateFloat max(ApproximateFloat x, ApproximateFloat y) { return ApproximateFloat(max(x.a,y.a)); }
 //! \related ApproximateFloat \brief The minimum of two floating-point numbers. Can be computed exactly.
-inline ApproximateFloat min(ApproximateFloat x, ApproximateFloat y) { return min(x.a,y.a); }
+inline ApproximateFloat min(ApproximateFloat x, ApproximateFloat y) { return ApproximateFloat(min(x.a,y.a)); }
 
 // Standard arithmetic functions
 //! \related ApproximateFloat \brief The unary plus function \c +x.
-inline ApproximateFloat pos(ApproximateFloat x) { return pos_exact(x.a); }
+inline ApproximateFloat pos(ApproximateFloat x) { return ApproximateFloat(pos_exact(x.a)); }
 //! \related ApproximateFloat \brief The unary negation function \c -x.
-inline ApproximateFloat neg(ApproximateFloat x) { return neg_exact(x.a); }
+inline ApproximateFloat neg(ApproximateFloat x) { return ApproximateFloat(neg_exact(x.a)); }
 //! \related ApproximateFloat \brief The square function \c x*x.
-inline ApproximateFloat sqr(ApproximateFloat x) { return mul_near(x.a,x.a); }
+inline ApproximateFloat sqr(ApproximateFloat x) { return ApproximateFloat(mul_near(x.a,x.a)); }
 //! \related ApproximateFloat \brief The reciprocal function \c 1/x.
-inline ApproximateFloat rec(ApproximateFloat x) { return div_near(1.0,x.a); }
+inline ApproximateFloat rec(ApproximateFloat x) { return ApproximateFloat(div_near(1.0,x.a)); }
 //! \related ApproximateFloat \brief The binary addition function \c x+y.
-inline ApproximateFloat add(ApproximateFloat x, ApproximateFloat y) { return add_near(x.a,y.a); }
+inline ApproximateFloat add(ApproximateFloat x, ApproximateFloat y) { return ApproximateFloat(add_near(x.a,y.a)); }
 //! \related ApproximateFloat \brief The subtraction function \c x-y.
-inline ApproximateFloat sub(ApproximateFloat x, ApproximateFloat y) { return sub_near(x.a,y.a); }
+inline ApproximateFloat sub(ApproximateFloat x, ApproximateFloat y) { return ApproximateFloat(sub_near(x.a,y.a)); }
 //! \related ApproximateFloat \brief The binary multiplication function \c x*y.
-inline ApproximateFloat mul(ApproximateFloat x, ApproximateFloat y) { return mul_near(x.a,y.a); }
+inline ApproximateFloat mul(ApproximateFloat x, ApproximateFloat y) { return ApproximateFloat(mul_near(x.a,y.a)); }
 //! \related ApproximateFloat \brief The division function \c x/y.
-inline ApproximateFloat div(ApproximateFloat x, ApproximateFloat y) { return div_near(x.a,y.a); }
+inline ApproximateFloat div(ApproximateFloat x, ApproximateFloat y) { return ApproximateFloat(div_near(x.a,y.a)); }
 
 //! \related ApproximateFloat \brief The positive integer power operator \c x^m.
 //! Note that there is no power operator in C++, so the named version must be used. In Python, the power operator is \c x**m.
-inline ApproximateFloat pow(ApproximateFloat x, uint m) { return pow_approx(x.a,m); }
+inline ApproximateFloat pow(ApproximateFloat x, uint m) { return ApproximateFloat(pow_approx(x.a,m)); }
 //! \related ApproximateFloat \brief The integer power operator \c x^n.
 //! Note that there is no power operator in C++, so the named version must be used. In Python, the power operator is \c x**n.
-inline ApproximateFloat pow(ApproximateFloat x, int n) { return pow_approx(x.a,n); }
+inline ApproximateFloat pow(ApproximateFloat x, int n) { return ApproximateFloat(pow_approx(x.a,n)); }
 
 // Standard algebraic and transcendental functions
 //! \related ApproximateFloat \brief The square-root function. Not guaranteed to be correctly rounded.
-inline ApproximateFloat sqrt(ApproximateFloat x) { return sqrt_approx(x.a); }
+inline ApproximateFloat sqrt(ApproximateFloat x) { return ApproximateFloat(sqrt_approx(x.a)); }
 //! \related ApproximateFloat \brief The exponential function. Not guaranteed to be correctly rounded.
-inline ApproximateFloat exp(ApproximateFloat x) { return exp_approx(x.a); }
+inline ApproximateFloat exp(ApproximateFloat x) { return ApproximateFloat(exp_approx(x.a)); }
 //! \related ApproximateFloat \brief The logarithm function. Not guaranteed to be correctly rounded.
-inline ApproximateFloat log(ApproximateFloat x) { return log_approx(x.a); }
+inline ApproximateFloat log(ApproximateFloat x) { return ApproximateFloat(log_approx(x.a)); }
 
 
 //! \related ApproximateFloat \brief The sine function. Not guaranteed to be correctly rounded. Also available with \c _rnd suffix.
-inline ApproximateFloat sin(ApproximateFloat x) { return sin_approx(x.a); }
+inline ApproximateFloat sin(ApproximateFloat x) { return ApproximateFloat(sin_approx(x.a)); }
 //! \related ApproximateFloat \brief The cosine function. Not guaranteed to be correctly rounded. Also available with \c _rnd suffix.
-inline ApproximateFloat cos(ApproximateFloat x) { return cos_approx(x.a); }
+inline ApproximateFloat cos(ApproximateFloat x) { return ApproximateFloat(cos_approx(x.a)); }
 //! \related ApproximateFloat \brief The tangent function. Not guaranteed to be correctly rounded. Also available with \c _rnd suffix.
-inline ApproximateFloat tan(ApproximateFloat x) { return tan_approx(x.a); }
+inline ApproximateFloat tan(ApproximateFloat x) { return ApproximateFloat(tan_approx(x.a)); }
 //! \related ApproximateFloat \brief The arcsine function. Not guaranteed to be correctly rounded.
-inline ApproximateFloat asin(ApproximateFloat x) { return asin_approx(x.a); }
+inline ApproximateFloat asin(ApproximateFloat x) { return ApproximateFloat(asin_approx(x.a)); }
 //! \related ApproximateFloat \brief The arccosine function. Not guaranteed to be correctly rounded.
-inline ApproximateFloat acos(ApproximateFloat x) { return acos_approx(x.a); }
+inline ApproximateFloat acos(ApproximateFloat x) { return ApproximateFloat(acos_approx(x.a)); }
 //! \related ApproximateFloat \brief The arctangent function. Not guaranteed to be correctly rounded.
-inline ApproximateFloat atan(ApproximateFloat x) { return atan_approx(x.a); }
+inline ApproximateFloat atan(ApproximateFloat x) { return ApproximateFloat(atan_approx(x.a)); }
 
 
 // Arithmetic operators
@@ -201,6 +203,11 @@ inline ApproximateFloat operator-(const ApproximateFloat& x1, const ApproximateF
 inline ApproximateFloat operator*(const ApproximateFloat& x1, const ApproximateFloat& x2) { return mul(x1,x2); }
 //! \related ApproximateFloat \brief The division operator. Guaranteed to respect the current rounding mode.
 inline ApproximateFloat operator/(const ApproximateFloat& x1, const ApproximateFloat& x2) { return div(x1,x2); }
+
+//template<class N, typename std::enable_if<std::is_integral<N>::value,int>::type=0>
+//    inline ApproximateFloat operator/(N n1, const ApproximateFloat& x2) { return div(ApproximateFloat(n1),x2); };
+//template<class N, typename std::enable_if<std::is_integral<N>::value,int>::type=0>
+//    inline ApproximateFloat operator/(const ApproximateFloat& x1, N n2) { return div(x1,ApproximateFloat(n2)); };
 
 //! \related ApproximateFloat \brief The in-place addition operator. Guaranteed to respect the current rounding mode.
 inline ApproximateFloat& operator+=(ApproximateFloat& x, const ApproximateFloat& y) { x.a.dbl+=y.a.dbl; return x; }

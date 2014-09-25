@@ -65,8 +65,8 @@ uint Interval::output_precision = 6;
 Interval widen(Interval x)
 {
     rounding_mode_t rm=get_rounding_mode();
-    const double& xl=internal_cast<const double&>(x.lower());
-    const double& xu=internal_cast<const double&>(x.upper());
+    const double& xl=internal_cast<const double&>(x.lower().value());
+    const double& xu=internal_cast<const double&>(x.upper().value());
     const double m=std::numeric_limits<float>::min();
     set_rounding_upward();
     volatile double wu=xu+m;
@@ -80,8 +80,8 @@ Interval widen(Interval x)
 Interval narrow(Interval x)
 {
     rounding_mode_t rm=get_rounding_mode();
-    const double& xl=internal_cast<const double&>(x.lower());
-    const double& xu=internal_cast<const double&>(x.upper());
+    const double& xl=internal_cast<const double&>(x.lower().value());
+    const double& xu=internal_cast<const double&>(x.upper().value());
     const double m=std::numeric_limits<float>::min();
     set_rounding_upward();
     volatile double mnu=-xu+m;
@@ -96,8 +96,8 @@ Interval trunc(Interval x)
 {
 
     rounding_mode_t rm=get_rounding_mode();
-    const double& xl=internal_cast<const double&>(x.lower());
-    const double& xu=internal_cast<const double&>(x.upper());
+    const double& xl=internal_cast<const double&>(x.lower().value());
+    const double& xu=internal_cast<const double&>(x.upper().value());
     // Use machine epsilon instead of minimum to move away from zero
     const float fm=std::numeric_limits<float>::epsilon();
     volatile float tu=xu;
@@ -118,8 +118,8 @@ Interval trunc(Interval x, uint n)
 
 Interval rec(Interval i)
 {
-    volatile double& il=internal_cast<volatile double&>(i.lower());
-    volatile double& iu=internal_cast<volatile double&>(i.upper());
+    volatile double& il=internal_cast<volatile double&>(i.lower().value());
+    volatile double& iu=internal_cast<volatile double&>(i.upper().value());
     volatile double rl,ru;
     if(il>0 || iu<0) {
         rounding_mode_t rnd=get_rounding_mode();
@@ -137,10 +137,10 @@ Interval rec(Interval i)
 
 Interval mul(Interval i1, Interval i2)
 {
-    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
-    volatile double& i2l=internal_cast<volatile double&>(i2.lower());
-    volatile double& i2u=internal_cast<volatile double&>(i2.upper());
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower().value());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper().value());
+    volatile double& i2l=internal_cast<volatile double&>(i2.lower().value());
+    volatile double& i2u=internal_cast<volatile double&>(i2.upper().value());
     volatile double rl,ru;
     rounding_mode_t rnd=get_rounding_mode();
     if(i1l>=0) {
@@ -180,8 +180,8 @@ Interval mul(Interval i1, Interval i2)
 Interval mul(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower().value());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper().value());
     volatile double& x2v=internal_cast<volatile double&>(x2);
     volatile double rl,ru;
     if(x2>=0) {
@@ -203,10 +203,10 @@ Interval mul(Float x1, Interval i2)
 Interval div(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
-    volatile double& i2l=internal_cast<volatile double&>(i2.lower());
-    volatile double& i2u=internal_cast<volatile double&>(i2.upper());
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower().value());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper().value());
+    volatile double& i2l=internal_cast<volatile double&>(i2.lower().value());
+    volatile double& i2u=internal_cast<volatile double&>(i2.upper().value());
     volatile double rl,ru;
     if(i2l>0) {
         if(i1l>=0) {
@@ -240,8 +240,8 @@ Interval div(Interval i1, Interval i2)
 Interval div(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=internal_cast<volatile double&>(i1.lower());
-    volatile double& i1u=internal_cast<volatile double&>(i1.upper());
+    volatile double& i1l=internal_cast<volatile double&>(i1.lower().value());
+    volatile double& i1u=internal_cast<volatile double&>(i1.upper().value());
     volatile double& x2v=internal_cast<volatile double&>(x2);
     volatile double rl,ru;
     if(x2v>0) {
@@ -261,8 +261,8 @@ Interval div(Float x1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& x1v=internal_cast<volatile double&>(x1);
-    volatile double& i2l=internal_cast<volatile double&>(i2.lower());
-    volatile double& i2u=internal_cast<volatile double&>(i2.upper());
+    volatile double& i2l=internal_cast<volatile double&>(i2.lower().value());
+    volatile double& i2u=internal_cast<volatile double&>(i2.upper().value());
     volatile double rl,ru;
     if(i2l<=0 && i2u>=0) {
         ARIADNE_THROW(DivideByZeroException,"Interval div(Float x1, Interval ivl2)","x1="<<x1<<", ivl2="<<i2);
@@ -280,8 +280,8 @@ Interval div(Float x1, Interval i2)
 Interval sqr(Interval i)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& il=internal_cast<volatile double&>(i.lower());
-    volatile double& iu=internal_cast<volatile double&>(i.upper());
+    volatile double& il=internal_cast<volatile double&>(i.lower().value());
+    volatile double& iu=internal_cast<volatile double&>(i.upper().value());
     volatile double rl,ru;
     if(il>0.0) {
         set_rounding_mode(downward);
@@ -319,9 +319,9 @@ Interval pow(Interval i, uint m)
     const Interval& nvi=i;
     if(m%2==0) { i=abs(nvi); }
     set_rounding_mode(downward);
-    Float rl=pow_rnd(i.lower(),m);
+    Float rl=pow_rnd(i.lower().value(),m);
     set_rounding_mode(upward);
-    Float ru=pow_rnd(i.upper(),m);
+    Float ru=pow_rnd(i.upper().value(),m);
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
@@ -332,9 +332,9 @@ Interval sqrt(Interval i)
 {
     rounding_mode_t rnd = get_rounding_mode();
     set_rounding_downward();
-    Float rl=sqrt_rnd(i.lower());
+    Float rl=sqrt_rnd(i.lower().value());
     set_rounding_upward();
-    Float ru=sqrt_rnd(i.upper());
+    Float ru=sqrt_rnd(i.upper().value());
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
@@ -343,9 +343,9 @@ Interval exp(Interval i)
 {
     rounding_mode_t rnd = get_rounding_mode();
     set_rounding_downward();
-    Float rl=exp_rnd(i.lower());
+    Float rl=exp_rnd(i.lower().value());
     set_rounding_upward();
-    Float ru=exp_rnd(i.upper());
+    Float ru=exp_rnd(i.upper().value());
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
@@ -354,9 +354,9 @@ Interval log(Interval i)
 {
     rounding_mode_t rnd = get_rounding_mode();
     set_rounding_downward();
-    Float rl=log_rnd(i.lower());
+    Float rl=log_rnd(i.lower().value());
     set_rounding_upward();
-    Float ru=log_rnd(i.upper());
+    Float ru=log_rnd(i.upper().value());
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
@@ -370,28 +370,28 @@ Interval sin(Interval i)
 
 Interval cos(Interval i)
 {
-    ARIADNE_ASSERT(i.lower()<=i.upper());
+    ARIADNE_ASSERT(i.lower().value()<=i.upper().value());
     rounding_mode_t rnd = get_rounding_mode();
 
-    if(i.radius()>2*pi_down) { return Interval(-1.0,+1.0); }
+    if(i.radius().value()>2*pi_down) { return Interval(-1.0,+1.0); }
 
-    Float n=floor(i.lower()/(2*_pi_approx)+0.5);
+    Float n=floor(i.lower().value()/(2*_pi_approx)+0.5);
     i=i-(2*n)*pi_ivl;
 
-    ARIADNE_ASSERT(i.lower()<=pi_up);
-    ARIADNE_ASSERT(i.upper()>=-pi_up);
+    ARIADNE_ASSERT(i.lower().value()<=pi_up);
+    ARIADNE_ASSERT(i.upper().value()>=-pi_up);
 
     Float rl,ru;
-    if(i.lower()<=-pi_down) {
-        if(i.upper()<=0.0) { rl=-1.0; ru=cos_up(i.upper()); }
+    if(i.lower().value()<=-pi_down) {
+        if(i.upper().value()<=0.0) { rl=-1.0; ru=cos_up(i.upper().value()); }
         else { rl=-1.0; ru=+1.0; }
-    } else if(i.lower()<=0.0) {
-        if(i.upper()<=0.0) { rl=cos_down(i.lower()); ru=cos_up(i.upper()); }
-        else if(i.upper()<=pi_down) { rl=cos_down(max(-i.lower(),i.upper())); ru=+1.0; }
+    } else if(i.lower().value()<=0.0) {
+        if(i.upper().value()<=0.0) { rl=cos_down(i.lower().value()); ru=cos_up(i.upper().value()); }
+        else if(i.upper().value()<=pi_down) { rl=cos_down(max(-i.lower().value(),i.upper().value())); ru=+1.0; }
         else { rl=-1.0; ru=+1.0; }
-    } else if(i.lower()<=pi_up) {
-        if(i.upper()<=pi_down) { rl=cos_down(i.upper()); ru=cos_up(i.lower()); }
-        else if(i.upper()<=2*pi_down) { rl=-1.0; ru=cos_up(min(i.lower(),sub_down(2*pi_down,i.upper()))); }
+    } else if(i.lower().value()<=pi_up) {
+        if(i.upper().value()<=pi_down) { rl=cos_down(i.upper().value()); ru=cos_up(i.lower().value()); }
+        else if(i.upper().value()<=2*pi_down) { rl=-1.0; ru=cos_up(min(i.lower().value(),sub_down(2*pi_down,i.upper().value()))); }
         else { rl=-1.0; ru=+1.0; }
     } else {
         assert(false);
@@ -446,7 +446,7 @@ Interval::Interval(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu
 }
 
 Interval::Interval(const Real& lower, const Real& upper)
-    : l(ValidatedFloat(lower).lower()), u(ValidatedFloat(upper).upper()) {
+    : l(ValidatedFloat(lower).lower().value()), u(ValidatedFloat(upper).upper().value()) {
 }
 
 Interval& Interval::operator=(const Rational& q) {
@@ -460,14 +460,14 @@ Interval& Interval::operator=(const Rational& q) {
 std::ostream&
 operator<<(std::ostream& os, const Interval& ivl)
 {
-    //if(ivl.lower()==ivl.upper()) { return os << "{" << std::setprecision(Interval::output_precision) << ivl.lower().get_d() << ; }
+    //if(ivl.lower()==ivl.upper().value()) { return os << "{" << std::setprecision(Interval::output_precision) << ivl.lower().value().get_d() << ; }
     rounding_mode_t rnd=get_rounding_mode();
     os << '{';
     set_rounding_downward();
-    os << std::showpoint << std::setprecision(Interval::output_precision) << ivl.lower().get_d();
+    os << std::showpoint << std::setprecision(Interval::output_precision) << ivl.lower().value().get_d();
     os << ':';
     set_rounding_upward();
-    os << std::showpoint << std::setprecision(Interval::output_precision) << ivl.upper().get_d();
+    os << std::showpoint << std::setprecision(Interval::output_precision) << ivl.upper().value().get_d();
     set_rounding_mode(rnd);
     os << '}';
     return os;
@@ -486,13 +486,13 @@ operator<<(std::ostream& os, const Interval& ivl)
 std::ostream&
 operator<<(std::ostream& os, const Interval& ivl)
 {
-    if(ivl.lower()==ivl.upper()) {
-        return os << std::setprecision(18) << ivl.lower();
+    if(ivl.lower().value()==ivl.upper().value()) {
+        return os << std::setprecision(18) << ivl.lower().value();
     }
 
     std::stringstream iss,uss;
-    iss << std::setprecision(18) << ivl.lower();
-    uss << std::setprecision(18) << ivl.upper();
+    iss << std::setprecision(18) << ivl.lower().value();
+    uss << std::setprecision(18) << ivl.upper().value();
 
     std::string lstr,ustr;
     iss >> lstr; uss >> ustr;
@@ -535,7 +535,7 @@ operator<<(std::ostream& os, const Interval& ivl)
 std::istream&
 operator>>(std::istream& is, Interval& ivl)
 {
-    double l,u;
+    Float l,u;
     char cl,cm,cr;
     is >> cl >> l >> cm >> u >> cr;
     ARIADNE_ASSERT(is);

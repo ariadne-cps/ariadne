@@ -46,6 +46,8 @@ class ExactFloat {
   private:
     Float _v;
   public:
+    typedef ExactFloat NumericType;
+
     //! \brief Default constructor creates the number 0 (zero).
     ExactFloat() : _v(0) { }
     //! \brief Convert from a built-in positive integer.
@@ -66,6 +68,8 @@ class ExactFloat {
     explicit operator Float () const { return _v; }
     //! \brief The raw floating-point number with the same value.
     Float const& value() const { return _v; }
+    Float const& raw() const { return _v; }
+    Float& raw() { return _v; }
     //! \brief The double-precision value.
     double get_d() const { return _v.get_d(); }
 
@@ -92,6 +96,9 @@ inline ValidatedFloat operator*(const ExactFloat& x1,  const ValidatedFloat& x2)
 inline ValidatedFloat operator/(const ExactFloat& x1,  const ValidatedFloat& x2);
 inline ValidatedFloat pow(const ExactFloat& x, int n);
 inline ValidatedFloat operator/(int n1,  const ExactFloat& x2);
+
+inline ExactFloat neg(const ExactFloat& x) { return ExactFloat(neg_exact(x.value())); }
+inline ExactFloat abs(const ExactFloat& x) { return ExactFloat(abs_exact(x.value())); }
 
 inline std::ostream& operator<<(std::ostream& os, const ExactFloat& x) {
     return os << std::showpoint << std::setprecision(ExactFloat::output_precision) << x.value(); }

@@ -113,18 +113,20 @@ class Interval {
     //! \brief Copy constructor.
     Interval(const Interval& i) : l(i.l), u(i.u) { }
     //! \brief Convert from a general real number. Yields an interval containing the exact value.
-    Interval(const Real& x);
+    explicit Interval(const Real& x);
     //! \brief Convert from a floating-point number with an exact representation.
-    Interval(const ExactFloat& x) : l(x.value()), u(x.value()) { }
+    explicit Interval(const ExactFloat& x) : l(x.value()), u(x.value()) { }
     //! \brief Convert from a floating-point number with an exact representation.
-    Interval(const ValidatedFloat& x) : l(x.lower()), u(x.upper_value()) { }
+    explicit Interval(const ValidatedFloat& x) : l(x.lower()), u(x.upper_value()) { }
     //! \brief Convert from a dyadic number.
-    Interval(const Dyadic& x);
+    explicit Interval(const Dyadic& x);
     //! \brief Convert from a decimal number.
-    Interval(const Decimal& x);
+    explicit Interval(const Decimal& x);
 
     //! \brief Convert to a floating-point approximation.
     explicit operator Float () const { return this->midpoint().value(); }
+    //! \brief Convert from a floating-point number with an exact representation.
+    explicit operator ValidatedFloat () const { return ValidatedFloat(this->lower(),this->upper()); }
 
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     Interval(double lower, double upper) : l(lower), u(upper) { }
@@ -151,8 +153,10 @@ class Interval {
 
     //! \brief The lower bound of the interval.
     const Float& lower_value() const { return l; }
+    const Float& lower_raw() const { return l; }
     //! \brief The upper bound of the interval.
     const Float& upper_value() const { return u; }
+    const Float& upper_raw() const { return u; }
 
     //! \brief The lower bound of the interval.
     const ExactFloatType& lower() const { return reinterpret_cast<ExactFloatType const&>(l); }

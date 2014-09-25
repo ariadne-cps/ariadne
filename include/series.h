@@ -125,9 +125,9 @@ template<class X>
 Series<X>
 Series<X>::sqrt(uint d, const X& c)
 {
-    Series<X> y(d,c*0);
+    Series<X> y(d,c*X(0));
     y[0]=Ariadne::sqrt(c);
-    X mhr=-0.5/c;
+    X mhr=(-1/c)/2;
     for(uint i=1; i<=y.degree(); ++i) {
         // Need to convert uint to int to prevent wraparound for 2*1u-3
         y[i]=((2*int(i)-3)*mhr)/i*y[i-1];

@@ -81,15 +81,17 @@ template<class X> class NormedAlgebra
     NormedAlgebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
     NormedAlgebra<X>& operator=(const NormedAlgebra<X>& a) { this->_ptr=std::shared_ptr< NormedAlgebraInterface<X> >(a._ptr->_clone()); return *this; }
     //! \brief The norm of the element.
-    Float norm() const { return _ptr->norm(); }
+    ErrorFloatType norm() const { return _ptr->norm(); }
     //! \brief A value \a c minimising |a-c|.
-    Float average() const { return _ptr->average(); }
+    ExactFloatType average() const { return _ptr->average(); }
     //! \brief The tolerance used to determine the truncation error when applying an analytic function.
     Float tolerance() const { return _ptr->tolerance(); }
     //! \brief A value \c r such that \c |a-c1|<=r.
-    Float radius() const { return _ptr->radius(); }
+    ErrorFloatType radius() const { return _ptr->radius(); }
     NormedAlgebra<X> create_zero() const { return NormedAlgebra<X>(_ptr->_create()); }
-    NormedAlgebra<X> create_ball(Float r) const { return NormedAlgebra<X>(_ptr->_create_ball(r)); }
+    NormedAlgebra<X> create_ball(ErrorFloatType r) const { return NormedAlgebra<X>(_ptr->_create_ball(r)); }
+    NormedAlgebra<X> create_ball(ApproximateFloatType r) const {
+        return create_ball(ErrorFloatType(RawFloatType(r))); }
     NormedAlgebra<X> create() const { return NormedAlgebra<X>(_ptr->_create()); }
     NormedAlgebra<X> clone() const { return NormedAlgebra<X>(_ptr->_clone()); }
     void clear() { this->imul(0); }

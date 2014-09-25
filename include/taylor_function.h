@@ -58,11 +58,11 @@ class VectorTaylorFunction;
 class TaylorFunctionFactory;
 
 inline ApproximateNumberType med_apprx(Interval const& ivl) {
-    return half_exact(add_approx(ivl.lower_value(),ivl.upper_value()));
+    return ApproximateNumberType(half_exact(add_approx(ivl.lower_raw(),ivl.upper_raw())));
 }
 
 inline ApproximateNumberType rad_apprx(Interval const& ivl) {
-    return half_exact(sub_approx(ivl.upper_value(),ivl.lower_value()));
+    return ApproximateNumberType(half_exact(sub_approx(ivl.upper_raw(),ivl.lower_raw())));
 }
 
 inline ValidatedNumberType med_val(Interval const& ivl) {
@@ -74,7 +74,7 @@ inline ValidatedNumberType rad_val(Interval const& ivl) {
 }
 
 inline ValidatedNumberType make_singleton(Interval const& ivl) {
-    return ValidatedNumberType(ivl.lower_value(),ivl.upper_value());
+    return ValidatedNumberType(ivl.lower_raw(),ivl.upper_raw());
 }
 
 template<template<class> class T> inline T<ApproximateTag> unscale(const T<ApproximateTag>& x, const Interval& d) {
@@ -209,6 +209,7 @@ class ScalarTaylorFunction
     //! \brief Construct a ScalarTaylorFunction over the domain \a d, based on the scaled model \a m.
     explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel<ValidatedTag>& m);
     explicit ScalarTaylorFunction(const DomainType& d, const Expansion<CoefficientType>& p, const ErrorType& e, const Sweeper& swp);
+    explicit ScalarTaylorFunction(const DomainType& d, const Expansion<RawFloatType>& p, const RawFloatType& e, const Sweeper& swp);
 
     explicit ScalarTaylorFunction(const ScalarFunctionModel<ValidatedTag>& f);
     ScalarTaylorFunction& operator=(const ScalarFunctionModel<ValidatedTag>& f);
@@ -479,9 +480,9 @@ template<> struct Arithmetic<ScalarTaylorFunction,EffectiveNumberType> { typedef
 template<> struct Arithmetic<ScalarTaylorFunction,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
 
 inline tribool operator>(const ScalarTaylorFunction& x, const RawFloatType& c) {
-    Interval r=x.range(); if(r.lower_value()>c) { return true; } else if(r.upper_value()<=c) { return false; } else { return indeterminate; } }
+    Interval r=x.range(); if(r.lower_raw()>c) { return true; } else if(r.upper_raw()<=c) { return false; } else { return indeterminate; } }
 inline tribool operator<(const ScalarTaylorFunction& x, const RawFloatType& c) {
-    Interval r=x.range(); if(r.lower_value()<c) { return true; } else if(r.upper_value()>=c) { return false; } else { return indeterminate; } }
+    Interval r=x.range(); if(r.lower_raw()<c) { return true; } else if(r.upper_raw()>=c) { return false; } else { return indeterminate; } }
 
 inline tribool operator>(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)>0; }
 inline tribool operator<(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)<0; }
@@ -654,6 +655,12 @@ class VectorTaylorFunction
     VectorTaylorFunction(const Box& domain,
                          const Vector< Expansion<CoefficientType> >& expansion,
                          const Vector<ErrorType>& error,
+                         Sweeper swp);
+
+    /*! \brief Construct from a domain, and expansion and errors. */
+    VectorTaylorFunction(const Box& domain,
+                         const Vector< Expansion<RawFloatType> >& expansion,
+                         const Vector<RawFloatType>& error,
                          Sweeper swp);
 
     /*! \brief Construct from a domain and the models. */

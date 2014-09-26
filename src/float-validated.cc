@@ -59,6 +59,20 @@ inline Float cos_down(Float x) { set_rounding_downward(); Float y=cos_rnd(x); re
 inline Float cos_up(Float x) { set_rounding_upward(); Float y=cos_rnd(x); return y; }
 } // namespace
 
+LowerFloat operator+(LowerFloat x)
+{
+    volatile double xl=internal_cast<volatile double&>(x.value());
+    volatile double rl=+xl;
+    return LowerFloat(rl);
+}
+
+UpperFloat operator+(UpperFloat x)
+{
+    volatile double xu=internal_cast<volatile double&>(x.value());
+    volatile double ru=-xu;
+    return UpperFloat(ru);
+}
+
 UpperFloat operator-(LowerFloat x)
 {
     volatile double xl=internal_cast<volatile double&>(x.value());
@@ -133,6 +147,24 @@ std::ostream& operator<<(std::ostream& os, UpperFloat x) {
     return os;
 }
 
+UpperFloat operator*(UpperFloat x1, UpperFloat x2) {
+    assert(x1.raw()>=0.0 && x2.raw() >= 0.0);
+    return UpperFloat(x1.raw()*x2.raw());
+}
+
+UpperFloat operator/(UpperFloat x1, LowerFloat x2) {
+    assert(x1.raw()>=0.0 && x2.raw() > 0.0);
+    return UpperFloat(x1.raw()/x2.raw());
+}
+
+UpperFloat pow(UpperFloat x, uint n) {
+    assert(x.raw()>=0.0);
+    return UpperFloat(pow_up(x.raw(),n));
+}
+
+UpperFloat abs(UpperFloat x) {
+    return UpperFloat(abs(Float(x)));
+}
 
 
 const ValidatedFloat pi_val=ValidatedFloat(pi_down,pi_up);

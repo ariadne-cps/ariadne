@@ -571,10 +571,10 @@ operator<<(std::ostream& os, const ValidatedFloat& ivl)
     rounding_mode_t rnd=get_rounding_mode();
     os << '{';
     set_rounding_downward();
-    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << ivl.lower_value().get_d();
+    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << ivl.lower().get_d();
     os << ':';
     set_rounding_upward();
-    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << ivl.upper_value().get_d();
+    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << ivl.upper().get_d();
     set_rounding_mode(rnd);
     os << '}';
     return os;

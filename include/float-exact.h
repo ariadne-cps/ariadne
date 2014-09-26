@@ -80,6 +80,8 @@ class ExactFloat {
 
 class ValidatedFloat;
 
+inline ExactFloat operator"" _exact(long double lx) { double x=lx; assert(x==lx); return ExactFloat(x); }
+
 inline ExactFloat operator+(const ExactFloat& x) { return ExactFloat(pos_exact(x.value())); }
 inline ExactFloat operator-(const ExactFloat& x) { return ExactFloat(neg_exact(x.value())); }
 inline ValidatedFloat operator+(const ExactFloat& x1,  const ExactFloat& x2);

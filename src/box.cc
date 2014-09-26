@@ -39,6 +39,8 @@ typedef unsigned int uint;
 
 namespace Ariadne {
 
+bool contains(const Vector<Interval>& v1, const Vector<ExactFloatType>& v2);
+
 //
 // Helper functions needed to extract the set of vertices from a box
 //
@@ -104,11 +106,11 @@ Box hull(const Box& bx1, const Box& bx2) {
 }
 
 Box hull(const Box& bx1, const Point& pt2) {
-    return Box(Ariadne::hull(static_cast<const Vector<Interval>&>(bx1),static_cast<const Vector<Float>&>(pt2)));
+    return Box(Ariadne::hull(static_cast<const Vector<Interval>&>(bx1),reinterpret_cast<const Vector<Float>&>(pt2)));
 }
 
 Box hull(const Point& pt1, const Point& pt2) {
-    return Box(Ariadne::hull(static_cast<const Vector<Float>&>(pt1),static_cast<const Vector<Float>&>(pt2)));
+    return Box(Ariadne::hull(reinterpret_cast<const Vector<Float>&>(pt1),reinterpret_cast<const Vector<Float>&>(pt2)));
 }
 
 Box intersection(const Box& bx1, const Box& bx2) {
@@ -140,6 +142,8 @@ Box narrow(const Box& bx) {
     }
     return result;
 }
+
+template<> inline double approx_cast(const ExactFloat& a) { return a.raw().get_d(); }
 
 void Box::draw(CanvasInterface& c, const Projection2d& p) const
 {

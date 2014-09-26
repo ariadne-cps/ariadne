@@ -36,8 +36,8 @@
 namespace Ariadne {
 
 
-Point::Point(std::initializer_list<Float> lst)
-    : Vector<Float>(lst)
+Point::Point(std::initializer_list<double> lst)
+    : Vector<ExactFloatType>(Vector<Float>(Vector<double>(lst)))
 {
 }
 
@@ -65,10 +65,12 @@ void Point::draw(CanvasInterface& canv, const Projection2d& proj) const {
 
 Point make_point(const std::string& str)
 {
-    std::vector<Float> vec;
+    std::vector<Float> lst;
     std::stringstream ss(str);
-    read_sequence(ss,vec,'(',')',',');
-    return Point(vec.size(),&vec[0]);
+    read_sequence(ss,lst,'(',')',',');
+    Vector<Float> vec(lst);
+
+    return Point(Vector<ExactFloatType>(lst));
 }
 
 } //namespace Ariadne

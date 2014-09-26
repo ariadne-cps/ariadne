@@ -90,6 +90,8 @@ class Vector
     template<class XX> Vector(size_t n, const XX* ptr) : _ary(ptr,ptr+n) { }
     //! \brief Convert from an initializer list of the same type.
     Vector(std::initializer_list<X> lst) : _ary(lst.begin(),lst.end()) { }
+    template<class XX, typename std::enable_if<std::is_constructible<X,XX>::value and not std::is_convertible<XX,X>::value,int>::type=0>
+        explicit Vector(std::initializer_list<XX> lst) : _ary(lst.begin(),lst.end()) { }
     //! \brief Convert from a list of the same type.
     Vector(const std::vector<X>& lst) : _ary(lst.begin(),lst.end()) { }
     //! \brief Construct from a list of a possibly different type.
@@ -110,6 +112,10 @@ class Vector
    //! \brief Copy assignement allows conversion from a vector using another numerical type.
     template<class XX> Vector<X>& operator=(const Vector<XX> &v);
 #endif
+    template<class XX, typename std::enable_if<std::is_convertible<XX,X>::value,int>::type=0>
+        Vector(const Vector<XX>& v) : _ary(v.size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=v[i]; } }
+    template<class XX, typename std::enable_if<std::is_constructible<X,XX>::value and not std::is_convertible<XX,X>::value,int>::type=0>
+        explicit Vector(Vector<XX> v) : _ary(v.size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=X(v[i]); } }
     template<class V> Vector(const VectorExpression<V>& ve, typename EnableIf<Or<IsSame<typename V::ValueType,X>, IsNumericCastable<typename V::ValueType,X> >,Void>::Type* = 0)
         : _ary(ve().size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=static_cast<X>(ve()[i]); } }
     template<class V> typename EnableIf<IsSafelyConvertible<typename V::ValueType,X>,Vector<X>&>::Type operator=(const VectorExpression<V>& ve) {
@@ -579,6 +585,13 @@ typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
 typedef Vector<Real> RealVector;
 
+template<class X> bool refines(const Vector<X>& v1, const Vector<X>& v2) {
+    assert(v1.size()==v2.size());
+    for(size_t i=0; i!=v1.size(); ++i) {
+        if(!refines(v1[i],v2[i])) { return false; }
+    }
+    return true;
+}
 
 bool contains(const Vector<Interval>& v1, const Vector<Float>& v2);
 bool intersect(const Vector<Interval>& v1, const Vector<Interval>& v2);

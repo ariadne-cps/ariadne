@@ -49,6 +49,7 @@ namespace Ariadne {
 
 template<class R, class A> inline R numeric_cast(const A& a);
 template<> inline double numeric_cast(const Real& a) { return a.get_d(); }
+template<> inline double numeric_cast(const ExactFloat& a) { return a.raw().get_d(); }
 template<> inline Real numeric_cast(const Float& a) { return Real(ExactFloat(a)); }
 template<> inline Real numeric_cast(const Interval& a) { assert(false); }
 template<> inline Real numeric_cast(const ValidatedFloat& a) { return Real(make_exact(ApproximateFloat(a))); }

@@ -110,7 +110,6 @@ WRAP_SRC = $(WRAP_PYTHON_SRC)
 
 WRAP_HDR = utility.h
 
-
 UNUSED_TESTS_SRC = \
 
 #	test_discrete_evolution test_continuous_evolution
@@ -289,20 +288,23 @@ bin/test_differential: obj/test/test_differential.o  libariadne-algebra.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
 
 
+TEST_FUNCTION_EXTRA_OBJ = \
+    $(LIB_OBJ_DIR)/box.o $(LIB_OBJ_DIR)/point.o $(LIB_OBJ_DIR)/expression.o
+
 bin/test_polynomial: obj/test/test_polynomial.o  libariadne-function.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
 bin/test_taylor_model: obj/test/test_taylor_model.o obj/taylor_model.o libariadne-algebra.so
 	$(CXX) $< obj/taylor_model.o $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
 
-bin/test_procedure: obj/test/test_procedure.o  libariadne-function.so
-	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
+bin/test_procedure: obj/test/test_procedure.o  libariadne-function.so $(TEST_FUNCTION_EXTRA_OBJ)
+	$(CXX) $< $(LINK_FLAGS) $(TEST_FUNCTION_EXTRA_OBJ) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
-bin/test_function: obj/test/test_function.o  libariadne-function.so
-	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
+bin/test_function: obj/test/test_function.o  libariadne-function.so $(TEST_FUNCTION_EXTRA_OBJ)
+	$(CXX) $< $(LINK_FLAGS) $(TEST_FUNCTION_EXTRA_OBJ) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
-bin/test_taylor_function: obj/test/test_taylor_function.o  libariadne-function.so
-	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
+bin/test_taylor_function: obj/test/test_taylor_function.o  libariadne-function.so $(TEST_FUNCTION_EXTRA_OBJ)
+	$(CXX) $< $(LINK_FLAGS) $(TEST_FUNCTION_EXTRA_OBJ) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
 
 bin/%: obj/examples/%.o libariadne.so

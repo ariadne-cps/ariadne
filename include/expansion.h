@@ -311,7 +311,9 @@ class Expansion
     Expansion(std::initializer_list< std::pair<std::initializer_list<int>,X> > lst);
     Expansion(unsigned int as, std::initializer_list< std::pair<std::initializer_list<int>,X> > lst);
     template<class XX> Expansion(const std::map<MultiIndex,XX>& m);
-    template<class XX> Expansion(const Expansion<XX>& p);
+    template<class XX, typename std::enable_if<std::is_convertible<XX,X>::value,int>::type=0> Expansion(const Expansion<XX>& p);
+    template<class XX, typename std::enable_if<std::is_constructible<X,XX>::value and not std::is_convertible<XX,X>::value,int>::type=0>
+        explicit Expansion(const Expansion<XX>& p);
 
     Expansion<RawFloatType>& raw() { return reinterpret_cast<Expansion<RawFloatType>&>(*this); }
     Expansion<RawFloatType>const& raw() const { return reinterpret_cast<Expansion<RawFloatType>const&>(*this); }
@@ -542,7 +544,17 @@ Expansion<X>::Expansion(const std::map<MultiIndex,XX>& m)
     }
 }
 
-template<class X> template<class XX> inline
+template<class X> template<class XX, typename std::enable_if<std::is_convertible<XX,X>::value,int>::type> inline
+Expansion<X>::Expansion(const Expansion<XX>& p)
+    : _argument_size(p.argument_size())
+{
+    for(typename Expansion<XX>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+        this->append(iter->key(),X(iter->data())); }
+}
+
+template<class X>
+template<class XX, typename std::enable_if<std::is_constructible<X,XX>::value and not std::is_convertible<XX,X>::value,int>::type>
+inline
 Expansion<X>::Expansion(const Expansion<XX>& p)
     : _argument_size(p.argument_size())
 {

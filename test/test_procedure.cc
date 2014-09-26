@@ -104,25 +104,25 @@ void TestProcedure::test_construct_from_formula()
     Vector< ApproximateProcedure > p(f);
     ARIADNE_TEST_PRINT(p);
 
-    p0+=Float(5);
+    p0+=ApproximateFloatType(5);
     ARIADNE_TEST_PRINT(p0);
 }
 
 void TestProcedure::test_construct_from_expansion()
 {
     {
-        Expansion<Float> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,2},3.0}, {{1,4},4.0} });
+        Expansion<ApproximateFloatType> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,2},3.0}, {{1,4},4.0} });
         ARIADNE_TEST_PRINT(e);
         e.reverse_lexicographic_sort();
         ARIADNE_TEST_PRINT(e);
         ApproximateProcedure p(e);
         ARIADNE_TEST_PRINT(p);
-        Vector<Float> x={2.0,3.0};
+        Vector<ApproximateFloatType> x={2.0,3.0};
         ARIADNE_TEST_EQUAL(evaluate(p,x),simple_evaluate(e,x));
     }
 
     {
-        Expansion<Float> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0} });
+        Expansion<ApproximateFloatType> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0} });
         e.reverse_lexicographic_sort();
         ApproximateProcedure p(e);
         ARIADNE_TEST_PRINT(p);
@@ -141,7 +141,7 @@ void TestProcedure::test_evaluate()
     p.new_unary_instruction(SQRT,4u);
     ARIADNE_TEST_PRINT(p);
 
-    Vector<Float> x={3.0,4.0};
+    Vector<ApproximateFloatType> x={3.0,4.0};
     ARIADNE_TEST_PRINT(x);
 
     ARIADNE_TEST_EQUALS(evaluate(p,x),5.0);
@@ -150,7 +150,7 @@ void TestProcedure::test_evaluate()
 void TestProcedure::test_propagate()
 {
     {
-        ApproximateProcedure p;
+        ValidatedProcedure p;
         p.new_unary_instruction(IND,0u);
         p.new_unary_instruction(IND,1u);
         p.new_unary_instruction(SQR,0u);
@@ -168,12 +168,12 @@ void TestProcedure::test_propagate()
         ARIADNE_TEST_PRINT(x);
     }
 
-    ApproximateFormula x(ApproximateFormula::coordinate(0));
-    ApproximateFormula y(ApproximateFormula::coordinate(1));
+    ValidatedFormula x(ValidatedFormula::coordinate(0));
+    ValidatedFormula y(ValidatedFormula::coordinate(1));
 
-    Vector< ApproximateFormula > ff((sqrt(sqr(x)+sqr(y)),2*x-y));
+    Vector< ValidatedFormula > ff((sqrt(sqr(x)+sqr(y)),2*x-y));
     ARIADNE_TEST_PRINT(ff);
-    Vector< ApproximateProcedure > pp(ff);
+    Vector< ValidatedProcedure > pp(ff);
     ARIADNE_TEST_PRINT(pp);
     Box xx=Box{ {0.125,2.0}, {0.25,3.0} };
     Box cc=Box{ {1.0,1.0}, {1.0,1.0} };

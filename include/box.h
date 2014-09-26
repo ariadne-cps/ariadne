@@ -48,6 +48,8 @@ class BoxSet;
 class Point;
 class Box;
 
+bool contains(const Vector<Interval>& v1, const Vector<ExactFloatType>& v2);
+
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief An exact interval in \f$\mathbb{R}\f$.
 class IntervalSet {
@@ -109,7 +111,7 @@ class Box
     explicit Box(uint d) : Vector<Interval>(d) { }
     //! Construct from an initializer list of pairs of floating-point values
     //! giving lower and upper bounds.
-    explicit Box(std::initializer_list<Interval> lst);
+    Box(std::initializer_list<Interval> lst);
 
     Box(const Vector<Interval>& ivec) : Vector<Interval>(ivec) { }
     Box(const List<Interval>& ilst) : Vector<Interval>(ilst) { }

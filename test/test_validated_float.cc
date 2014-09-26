@@ -154,8 +154,8 @@ TestValidatedFloat::test_accurate_rounded_arithmetic()
     ARIADNE_TEST_EQUAL(ValidatedFloat(1)/ValidatedFloat(3),ValidatedFloat(0.33333333333333331,0.33333333333333337));
     ARIADNE_TEST_EQUAL(ValidatedFloat(2)/ValidatedFloat(5),ValidatedFloat(0.39999999999999997,0.40000000000000002));
 
-    ARIADNE_TEST_EQUAL(ValidatedFloat(1.5)+Float(min),ValidatedFloat(1.5,1.5+eps));
-    ARIADNE_TEST_EQUAL(ValidatedFloat(1.5)-Float(min),ValidatedFloat(1.5-eps,1.5));
+    ARIADNE_TEST_EQUAL(ValidatedFloat(1.5)+ExactFloat(min),ValidatedFloat(1.5,1.5+eps));
+    ARIADNE_TEST_EQUAL(ValidatedFloat(1.5)-ExactFloat(min),ValidatedFloat(1.5-eps,1.5));
     ARIADNE_TEST_EQUAL(ValidatedFloat(1+eps,1+2*eps)*ExactFloat(1+eps),ValidatedFloat(1+2*eps,1+4*eps));
     ARIADNE_TEST_EQUAL(ValidatedFloat(1+3*eps,1+5*eps)/ExactFloat(1+eps),ValidatedFloat(1+eps,1+4*eps));
 
@@ -315,25 +315,25 @@ void TestValidatedFloat::test_class()
     // Test lower, upper, midpoint, radius, width
 
     // Tests for exact operations
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).lower_value(),-0.25);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).upper_value(),0.5);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).midpoint(),0.125);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).radius(),0.375)
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).width(),0.75);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).lower().raw(),-0.25);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).upper().raw(),0.5);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).midpoint().raw(),0.125);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).radius().raw(),0.375)
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).width().raw(),0.75);
 
     // Tests for inexact operations
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).lower_value(),-0.33333333333333331483);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).upper_value(),0.66666666666666662966);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).midpoint(),0.16666666666666665741);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).radius(),0.5)
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).width(),1.0);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).lower().raw(),-0.33333333333333331483);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).upper().raw(),0.66666666666666662966);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).midpoint().raw(),0.16666666666666665741);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).radius().raw(),0.5)
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).width().raw(),1.0);
 
     // Tests for inexact operations
-    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).lower_value(),-0.33333333333333337034);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).upper_value(),0.66666666666666674068);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).midpoint(),0.16666666666666668517);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).radius(),0.50000000000000011102)
-    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).width(),1.000000000000000222);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).lower().raw(),-0.33333333333333337034);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).upper().raw(),0.66666666666666674068);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).midpoint().raw(),0.16666666666666668517);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).radius().raw(),0.50000000000000011102)
+    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).width().raw(),1.000000000000000222);
 }
 
 void TestValidatedFloat::test_input()
@@ -373,8 +373,8 @@ void TestValidatedFloat::test_comparison() {
 
 void TestValidatedFloat::test_aliasing() {
 
-    Float x2=1.5;
-    Float x3=2.25;
+    ExactFloat x2(1.5);
+    ExactFloat x3(2.25);
 
     ValidatedFloat ivl1;
     ValidatedFloat ivl2(1.5,2.25);

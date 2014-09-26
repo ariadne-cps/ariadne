@@ -618,6 +618,10 @@ inline ValidatedFloat operator*(const ExactFloat& x1, const ExactFloat& x2) { re
 inline ValidatedFloat operator/(const ExactFloat& x1, const ExactFloat& x2) { return div(x1,x2); }
 inline ValidatedFloat pow(const ExactFloat& x, int n) { return pow(ValidatedFloat(x),n); }
 
+// Standard equality operators
+//! \related ValidatedFloat \brief Tests if \a i1 provides tighter bounds than \a i2.
+inline bool refines(const ValidatedFloat& i1, const ValidatedFloat& i2) { return i1.lower_raw()>=i2.lower_raw() && i1.upper_raw()<=i2.upper_raw(); }
+
 //inline ValidatedFloat& operator+=(ValidatedFloat& i1, const ExactFloat& x2) { i1=add(i1,x2); return i1; }
 //inline ValidatedFloat& operator-=(ValidatedFloat& i1, const ExactFloat& x2) { i1=sub(i1,x2); return i1; }
 //inline ValidatedFloat& operator*=(ValidatedFloat& i1, const ExactFloat& x2) { i1=mul(i1,x2); return i1; }

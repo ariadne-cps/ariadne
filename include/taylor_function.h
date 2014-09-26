@@ -209,7 +209,7 @@ class ScalarTaylorFunction
     //! \brief Construct a ScalarTaylorFunction over the domain \a d, based on the scaled model \a m.
     explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel<ValidatedTag>& m);
     explicit ScalarTaylorFunction(const DomainType& d, const Expansion<CoefficientType>& p, const ErrorType& e, const Sweeper& swp);
-    explicit ScalarTaylorFunction(const DomainType& d, const Expansion<RawFloatType>& p, const RawFloatType& e, const Sweeper& swp);
+    explicit ScalarTaylorFunction(const DomainType& d, const Expansion<RawFloatType>& p, const double& e, const Sweeper& swp);
 
     explicit ScalarTaylorFunction(const ScalarFunctionModel<ValidatedTag>& f);
     ScalarTaylorFunction& operator=(const ScalarFunctionModel<ValidatedTag>& f);
@@ -663,6 +663,11 @@ class VectorTaylorFunction
                          const Vector<RawFloatType>& error,
                          Sweeper swp);
 
+    /*! \brief Construct from a domain, and expansion and errors. */
+    VectorTaylorFunction(const Box& domain,
+                         const Vector< Expansion<RawFloatType> >& expansion,
+                         Sweeper swp);
+
     /*! \brief Construct from a domain and the models. */
     explicit VectorTaylorFunction(const Box& domain, const Vector< TaylorModel<ValidatedTag> >& variables);
 
@@ -734,6 +739,7 @@ class VectorTaylorFunction
 
     /*! \brief Evaluate the Taylor model at the point \a x. */
     Vector<ValidatedNumberType> operator()(const Vector<ValidatedNumberType>& x) const;
+    Vector<ApproximateNumberType> operator()(const Vector<ApproximateNumberType>& x) const;
     /*! \brief Evaluate the Taylor model at the point \a x. */
     Vector<ApproximateNumberType> evaluate(const Vector<ApproximateNumberType>& x) const;
     /*! \brief Compute an approximation to Jacobian derivative of the Taylor model sat the point \a x. */

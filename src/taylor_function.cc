@@ -86,7 +86,7 @@ ScalarTaylorFunction::ScalarTaylorFunction(const Box& d, Sweeper swp)
 {
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const Box& d, const Expansion<Float>& p, const Float& e, const Sweeper& swp)
+ScalarTaylorFunction::ScalarTaylorFunction(const Box& d, const Expansion<Float>& p, const double& e, const Sweeper& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
@@ -515,7 +515,7 @@ ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, uint k, const Inte
     return partial_restrict(tv,k,new_ivl);
 }
 
-ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& f, uint k, Float c)
+ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& f, uint k, ExactFloatType c)
 {
     ARIADNE_ASSERT(k<f.argument_size());
     ARIADNE_ASSERT(contains(f.domain()[k],c));
@@ -731,6 +731,10 @@ template<class T> std::ostream& operator<<(std::ostream& os, const Representatio
 std::ostream&
 ScalarTaylorFunction::write(std::ostream& os) const
 {
+    os << (this->expansion());
+    return os;
+    os << (this->polynomial());
+    return os;
     os << midpoint(this->polynomial());
     if(this->error()>0.0) { os << "+/-" << this->error(); }
     return os;
@@ -954,17 +958,6 @@ VectorTaylorFunction::VectorTaylorFunction(const Box& d,
 
 VectorTaylorFunction::VectorTaylorFunction(const Box& d,
                                            const Vector< Expansion<ExactFloatType> >& f,
-                                           Sweeper swp)
-    : _domain(d), _models(f.size())
-{
-    for(uint i=0; i!=f.size(); ++i) {
-        ARIADNE_ASSERT(d.size()==f[i].argument_size());
-        _models[i]=ValidatedTaylorModel(f[i],0.0,swp);
-    }
-}
-
-VectorTaylorFunction::VectorTaylorFunction(const Box& d,
-                                           const Vector< Expansion<ExactFloatType> >& f,
                                            const Vector<ErrorFloatType>& e,
                                            Sweeper swp)
     : _domain(d), _models(f.size(),ValidatedTaylorModel(d.size(),swp))
@@ -977,11 +970,25 @@ VectorTaylorFunction::VectorTaylorFunction(const Box& d,
 }
 
 VectorTaylorFunction::VectorTaylorFunction(const Box& d,
+                                           const Vector< Expansion<ExactFloatType> >& f,
+                                           Sweeper swp)
+    : VectorTaylorFunction(d,f,Vector<ErrorFloatType>(f.size()),swp)
+{
+}
+
+VectorTaylorFunction::VectorTaylorFunction(const Box& d,
                                            const Vector< Expansion<Float> >& f,
                                            const Vector<Float>& e,
                                            Sweeper swp)
     : VectorTaylorFunction(d,reinterpret_cast<Vector<Expansion<ExactFloatType>>const&>(f),
                            reinterpret_cast<Vector<ErrorFloatType>const&>(e),swp)
+{
+}
+
+VectorTaylorFunction::VectorTaylorFunction(const Box& d,
+                                           const Vector< Expansion<Float> >& f,
+                                           Sweeper swp)
+    : VectorTaylorFunction(d,reinterpret_cast<Vector<Expansion<ExactFloatType>>const&>(f),Vector<ErrorFloatType>(f.size()),swp)
 {
 }
 
@@ -1372,6 +1379,12 @@ VectorTaylorFunction::evaluate(const Vector<ValidatedNumberType>& x) const
     }
     Vector<ValidatedNumberType> sx=Ariadne::unscale(x,f._domain);
     return Ariadne::evaluate(f._models,sx);
+}
+
+Vector<ApproximateNumberType>
+VectorTaylorFunction::operator()(const Vector<ApproximateNumberType>& x) const
+{
+    return this->evaluate(x);
 }
 
 Vector<ValidatedNumberType>

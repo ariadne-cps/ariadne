@@ -115,7 +115,7 @@ template<class X, class T> void _execute(List<T>& v, const List<ProcedureInstruc
     for(size_t i=0; i!=p.size(); ++i) {
         const ProcedureInstruction& instruction=p[i];
         switch(instruction.op) {
-            case CNST: v.append(z+c[instruction.arg]); break;
+            case CNST: v.append(z+static_cast<T>(c[instruction.arg])); break;
             case IND:  v.append(x[instruction.arg]); break;
             case ADD:  v.append(v[instruction.arg1]+v[instruction.arg2]); break;
             case SUB:  v.append(v[instruction.arg1]-v[instruction.arg2]); break;
@@ -173,6 +173,8 @@ template<class X, class T> void _compute(List<T>& v, const List<ProcedureInstruc
 
 template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<ProcedureInstruction>& p)
 {
+    ExactFloatType infty(inf);
+
     ARIADNE_ASSERT(v.size()==p.size());
     size_t r=p.size();
     while(r!=0u) {
@@ -199,7 +201,7 @@ template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<Procedure
             case TAN: restrict(v[a],atan(v[r])); break;
             case ATAN: restrict(v[a],tan(v[r])); break;
             case EQ: restrict(v[a1],v[r]); restrict(v[a2],v[r]); break;
-            case LEQ: restrict(v[a1],Interval(-inf,v[a2].upper())); restrict(v[a1],Interval(v[a2].lower(),+inf)); break;
+            case LEQ: restrict(v[a1],T(-infty,v[a2].upper())); restrict(v[a1],T(v[a2].lower(),+infty)); break;
             default: ARIADNE_THROW(std::runtime_error,"_propagate(Vector<T>,List<T>,List<ProcedureInstruction>)","Unhandled operator "<<p[r].op<<" at instruction "<<r<<"\n");
         }
     }

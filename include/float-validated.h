@@ -224,7 +224,7 @@ class ValidatedFloat {
     const Float& upper_raw() const { return u; }
 
     //! \brief The lower bound of the interval.
-    LowerFloat lower() const { return LowerFloat(u); }
+    LowerFloat lower() const { return LowerFloat(l); }
     //! \brief The upper bound of the interval.
     UpperFloat upper() const { return UpperFloat(u); }
     //! \brief An approximation to the midpoint of the interval.

@@ -118,6 +118,7 @@ class TaylorModel<ValidatedTag>
     TaylorModel<ValidatedTag>(uint as, Sweeper swp);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
     TaylorModel<ValidatedTag>(const Expansion<CoefficientType>& f, const ErrorType& e, Sweeper swp);
+    TaylorModel<ValidatedTag>(const Expansion<RawFloatType>& f, const double& e, Sweeper swp);
     //! \brief Fast swap with another Taylor model.
     void swap(TaylorModel<ValidatedTag>& tm);
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.

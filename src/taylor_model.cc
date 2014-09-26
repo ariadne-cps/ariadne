@@ -167,6 +167,11 @@ ValidatedTaylorModel::TaylorModel(const Expansion<CoefficientType>& f, const Err
     this->sweep();
 }
 
+ValidatedTaylorModel::TaylorModel(const Expansion<Float>& f, const double& e, Sweeper swp)
+    : TaylorModel(reinterpret_cast<Expansion<CoefficientType>const&>(f),reinterpret_cast<ErrorType const&>(e),swp)
+{
+}
+
 
 ValidatedTaylorModel
 ValidatedTaylorModel::create() const

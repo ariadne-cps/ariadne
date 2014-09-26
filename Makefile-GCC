@@ -137,6 +137,7 @@ EXAMPLES_BIN_DIR = bin/
 
 ARIADNE_LIB = libariadne.so
 ARIADNE_NUMERIC_LIB = libariadne-numeric.so
+ARIADNE_ALGEBRA_LIB = libariadne-algebra.so
 ARIADNE_FUNCTION_LIB = libariadne-function.so
 
 DEPS = $(patsubst %.cc,.deps/%.d,$(LIB_SRC) $(LIB_EXTRAS_SRC) $(TEST_SRC) $(EXAMPLES_SRC))
@@ -234,6 +235,9 @@ libariadne.so: $(PCH) $(LIB_OBJ)
 libariadne-numeric.so: $(PCH) $(LIB_NUMERIC_OBJ)
 	$(CXX) $(LIB_NUMERIC_OBJ) $(LINK_LIBS) -shared -o libariadne-numeric.so
 
+libariadne-algebra.so: $(PCH) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ)
+	$(CXX) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LINK_LIBS) -shared -o libariadne-algebra.so
+
 libariadne-function.so: $(PCH) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ)
 	$(CXX) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ) $(LINK_LIBS) -shared -o libariadne-function.so
 
@@ -259,7 +263,6 @@ obj/examples/%.o: examples/%.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
 bin/%: obj/test/%.o | libariadne.so
-#   @echo "\nlinking TESTS " $< " with libariadne.so to " $@
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
 
 
@@ -270,36 +273,37 @@ bin/test_validated_float: obj/test/test_validated_float.o | libariadne-numeric.s
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
 
 
-bin/test_vector: obj/test/test_vector.o | libariadne-algebra.so
+bin/test_vector: obj/test/test_vector.o  libariadne-algebra.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
 
-bin/test_matrix: obj/test/test_matrix.o | libariadne-algebra.so
+bin/test_matrix: obj/test/test_matrix.o  libariadne-algebra.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
 
-bin/test_multi_index: obj/test/test_multi_index.o | libariadne-algebra.so
+bin/test_multi_index: obj/test/test_multi_index.o  libariadne-algebra.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
 
-bin/test_expansion: obj/test/test_expansion.o | libariadne-algebra.so
+bin/test_expansion: obj/test/test_expansion.o  libariadne-algebra.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
 
-bin/test_differential: obj/test/test_differential.o | libariadne-algebra.so
+bin/test_differential: obj/test/test_differential.o  libariadne-algebra.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
 
 
-bin/test_polynomial: obj/test/test_polynomial.o | libariadne-function.so
+bin/test_polynomial: obj/test/test_polynomial.o  libariadne-function.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
-bin/test_taylor_model: obj/test/test_affine_model.o | libariadne-function.so
+bin/test_taylor_model: obj/test/test_taylor_model.o obj/taylor_model.o libariadne-algebra.so
+	$(CXX) $< obj/taylor_model.o $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
+
+bin/test_procedure: obj/test/test_procedure.o  libariadne-function.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
-bin/test_procedure: obj/test/test_procedure.o | libariadne-function.so
+bin/test_function: obj/test/test_function.o  libariadne-function.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
-bin/test_function: obj/test/test_affine_model.o | libariadne-function.so
+bin/test_taylor_function: obj/test/test_taylor_function.o  libariadne-function.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
-bin/test_taylor_function: obj/test/test_taylor_function.o | libariadne-function.so
-	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
 bin/%: obj/examples/%.o libariadne.so
 #	@echo "\nlinking EXAMPLES " $< " with libariadne.so to " $@
@@ -310,6 +314,3 @@ bin/%: obj/examples/%.o libariadne.so
 
 #.libs/numeric_submodule.o: numeric_submodule.cc boost_python.h.gch integer.h rational.h float64.h
 #	$(CXX) $(CXXFLAGS) -c -o $@ $< -I$(PYTHON_INCLUDE_PATH)
-
-#ariadne_lite.so: $(WRAP_OBJ) .libs/logical.o .libs/integer.o .libs/rational.o .libs/real.o .libs/float64.o .libs/floatmp.o .libs/number.o \
-#		.libs/vector.o .libs/matrix.o .libs/multi_index.o .libs/expansion.o .libs/differential.o \

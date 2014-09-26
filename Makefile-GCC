@@ -3,21 +3,31 @@ all: lib tests wrap examples
 VPATH = include src test wrap examples
 
 HDR = \
-    standard.h numeric.h functional.h
+	standard.h numeric.h functional.h
 
 # ariadne.h
 
 LIB_NUMERIC_SRC = \
 	logging.cc operators.cc integer.cc rational.cc decimal.cc \
 	float.cc float-approximate.cc float-validated.cc \
-	interval.cc real.cc
+	interval.cc real.cc \
+
+TEST_NUMERIC_SRC = \
+	test_float.cc test_validated_float.cc \
+
 
 LIB_ALGEBRA_SRC = \
 	vector.cc matrix.cc differential.cc algebra.cc \
 
+TEST_ALGEBRA_SRC = \
+	test_vector.cc test_matrix.cc test_multi_index.cc test_expansion.cc test_differential.cc \
+
 LIB_FUNCTION_SRC = \
 	affine.cc polynomial.cc affine_model.cc taylor_model.cc  \
 	function.cc symbolic_function.cc taylor_function.cc  \
+
+TEST_FUNCTION_SRC = \
+	test_polynomial.cc test_procedure.cc test_function.cc test_taylor_model.cc test_taylor_function.cc \
 
 LIB_SOLVER_SRC = \
 	solver.cc \
@@ -26,6 +36,9 @@ LIB_SOLVER_SRC = \
 	simplex_algorithm.cc \
 	linear_programming.cc \
 	nonlinear_programming.cc
+
+TEST_SOLVER_SRC = \
+	test_linear_programming.cc test_nonlinear_programming.cc test_integrator.cc test_constraint_solver.cc test_solvers.cc \
 
 LIB_GEOMETRY_SRC = \
 	paver.cc \
@@ -40,13 +53,22 @@ LIB_GEOMETRY_SRC = \
 	drawer.cc \
 	graphics.cc
 
+TEST_GEOMETRY_SRC = \
+	test_interval.cc test_function_sets.cc test_affine_sets.cc test_paving.cc test_grid_set.cc \
+	test_graphics.cc \
+
 LIB_DYNAMICS_SRC = \
 	map_evolver.cc \
 	vector_field_evolver.cc
 
+TEST_DYNAMICS_SRC = \
+
 LIB_EXPRESSION_SRC = \
 	expression.cc \
 	expression_set.cc \
+
+TEST_EXPRESSION_SRC = \
+	test_expression.cc \
 
 LIB_HYBRID_SRC = \
 	hybrid_set.cc \
@@ -59,6 +81,11 @@ LIB_HYBRID_SRC = \
 	hybrid_reachability_analyser.cc \
 	hybrid_graphics.cc
 
+TEST_HYBRID_SRC = \
+	test_hybrid_set.cc test_hybrid_automaton.cc \
+	test_hybrid_simulator.cc test_hybrid_evolver.cc \
+	test_hybrid_evolution.cc test_hybrid_reachability_analyser.cc test_hybrid_graphics.cc \
+
 LIB_EXTRAS_SRC = \
 	c1_taylor_function.cc \
 	runge_kutta_integrator.cc \
@@ -69,6 +96,8 @@ LIB_EXTRAS_SRC = \
 	textplot.cc
 
 LIB_SRC = $(LIB_NUMERIC_SRC) $(LIB_ALGEBRA_SRC) $(LIB_FUNCTION_SRC) $(LIB_SOLVER_SRC) $(LIB_GEOMETRY_SRC) $(LIB_EXPRESSION_SRC) $(LIB_HYBRID_SRC)
+
+TESTS_SRC = $(TEST_NUMERIC_SRC) $(TEST_ALGEBRA_SRC) $(TEST_FUNCTION_SRC) $(TEST_SOLVER_SRC) $(TEST_GEOMETRY_SRC) $(TEST_EXPRESSION_SRC) $(TEST_HYBRID_SRC)
 
 WRAP_PYTHON_SRC = \
 	ariadne_module.cc utilities.cc \
@@ -81,17 +110,6 @@ WRAP_SRC = $(WRAP_PYTHON_SRC)
 
 WRAP_HDR = utility.h
 
-TESTS_SRC = \
-	test_float.cc test_validated_float.cc \
-	test_vector.cc test_matrix.cc test_multi_index.cc test_expansion.cc test_differential.cc \
-	test_polynomial.cc test_procedure.cc test_function.cc test_taylor_model.cc test_taylor_function.cc \
-	test_interval.cc test_function_sets.cc test_affine_sets.cc test_paving.cc test_grid_set.cc \
-	test_linear_programming.cc test_nonlinear_programming.cc test_integrator.cc test_constraint_solver.cc test_solvers.cc \
-	test_graphics.cc \
-	test_expression.cc \
-	test_hybrid_set.cc test_hybrid_automaton.cc \
-	test_hybrid_simulator.cc test_hybrid_evolver.cc \
-	test_hybrid_evolution.cc test_hybrid_reachability_analyser.cc test_hybrid_graphics.cc \
 
 UNUSED_TESTS_SRC = \
 
@@ -110,18 +128,33 @@ EXAMPLES_SRC = \
 	robotarm-verification.cc \
 	robotarm-verification-essay.cc \
 
+LIB_OBJ_DIR = obj/
+TESTS_OBJ_DIR = obj/test/
+TESTS_BIN_DIR = bin/
+WRAP_OBJ_DIR = obj/wrap/
+EXAMPLES_OBJ_DIR = obj/examples/
+EXAMPLES_BIN_DIR = bin/
+
 ARIADNE_LIB = libariadne.so
+ARIADNE_NUMERIC_LIB = libariadne-numeric.so
+ARIADNE_FUNCTION_LIB = libariadne-function.so
 
 DEPS = $(patsubst %.cc,.deps/%.d,$(LIB_SRC) $(LIB_EXTRAS_SRC) $(TEST_SRC) $(EXAMPLES_SRC))
 
 PCH = $(patsubst %.h,%.h.gch,$(HDR))
-LIB_OBJ = $(patsubst %.cc,obj/%.o,$(LIB_SRC))
-LIB_EXTRAS_OBJ = $(patsubst %.cc,obj/%.o,$(LIB_EXTRAS_SRC))
-TESTS_OBJ = $(patsubst %.cc,obj/%.o,$(TESTS_SRC))
-TESTS_BIN = $(patsubst obj/%.o,bin/%,$(TESTS_OBJ))
-WRAP_OBJ = $(patsubst %.cc,obj/%.o,$(WRAP_SRC))
-EXAMPLES_OBJ = $(patsubst %.cc,obj/%.o,$(EXAMPLES_SRC))
-EXAMPLES_BIN = $(patsubst obj/%.o,bin/%,$(EXAMPLES_OBJ))
+LIB_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_SRC))
+LIB_NUMERIC_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_NUMERIC_SRC))
+LIB_ALGEBRA_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_ALGEBRA_SRC))
+LIB_FUNCTION_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_FUNCTION_SRC))
+LIB_EXTRAS_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_EXTRAS_SRC))
+TESTS_OBJ = $(patsubst %.cc,$(TESTS_OBJ_DIR)/%.o,$(TESTS_SRC))
+TESTS_BIN = $(patsubst %.cc.o,$(TESTS_BIN_DIR)/%,$(TESTS_SRC))
+TEST_NUMERIC_BIN = $(patsubst %.cc.o,$(TESTS_BIN_DIR)/%,$(TEST_NUMERIC_SRC))
+TEST_ALGEBRA_BIN = $(patsubst %.cc.o,$(TESTS_BIN_DIR)/%,$(TEST_ALGEBRA_SRC))
+TEST_FUNCTION_BIN = $(patsubst %.cc,$(TESTS_BIN_DIR)/%,$(TEST_FUNCTION_SRC))
+WRAP_OBJ = $(patsubst %.cc,$(WRAP_BIN_DIR)/%.o,$(WRAP_SRC))
+EXAMPLES_OBJ = $(patsubst %.cc,$(EXAMPLES_OBJ_DIR)/%.o,$(EXAMPLES_SRC))
+EXAMPLES_BIN = $(patsubst obj/%.o,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_OBJ))
 
 CXXFLAGS = -std=c++11 -fPIC
 
@@ -145,7 +178,7 @@ help:
 	@echo "\nLIB_SRC="$(LIB_SRC)
 #	@echo "LIB_OBJ="$(LIB_OBJ)
 	@echo "\nTESTS_SRC="$(TESTS_SRC)
-#	@echo "TESTS_OBJ="$(TESTS_OBJ)
+	@echo "TESTS_OBJ="$(TESTS_OBJ)
 #	@echo "TESTS_BIN="$(TESTS_BIN)
 	@echo "\nWRAP_SRC="$(WRAP_SRC)
 #	@echo "WRAP_OBJ="$(WRAP_OBJ)
@@ -154,13 +187,18 @@ help:
 #	@echo "EXAMPLES_BIN="$(EXAMPLES_BIN)
 
 dirs:
-	@mkdir -p obj/
-	@mkdir -p bin/
+	@mkdir -p .deps/
+	@mkdir -p $(LIB_OBJ_DIR)
+	@mkdir -p $(TESTS_OBJ_DIR)
+	@mkdir -p $(WRAP_OBJ_DIR)
+	@mkdir -p $(EXAMPLES_OBJ_DIR)
+	@mkdir -p $(TESTS_BIN_DIR)
+	@mkdir -p $(EXAMPLES_BIN_DIR)
 	@mkdir -p check/
 
 deps: dirs $(DEPS)
 
-lib: dirs deps libariadne.so
+lib: dirs deps libariadne.so libariadne-function.so
 
 wrap: lib $(WRAP_OBJ) ariadne.so
 
@@ -193,6 +231,12 @@ examples: dirs $(EXAMPLES_BIN) $(EXAMPLES_OBJ) lib
 libariadne.so: $(PCH) $(LIB_OBJ)
 	$(CXX) $(LIB_OBJ) $(LINK_LIBS) -shared -o libariadne.so
 
+libariadne-numeric.so: $(PCH) $(LIB_NUMERIC_OBJ)
+	$(CXX) $(LIB_NUMERIC_OBJ) $(LINK_LIBS) -shared -o libariadne-numeric.so
+
+libariadne-function.so: $(PCH) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ)
+	$(CXX) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ) $(LINK_LIBS) -shared -o libariadne-function.so
+
 ariadne.so: $(PCH) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) libariadne.so
 	$(CXX) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) $(PYTHON_LINK_LIBS) libariadne.so -shared -o ariadne.so
 
@@ -205,22 +249,61 @@ wrap/boost_python.h.gch: wrap/boost_python.h
 obj/%.o: src/%.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
+obj/test/%.o: test/%.cc
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
+
 obj/wrap/%.o: wrap/%.cc wrap/boost_python.h.gch
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -c -o $@ $<
 
 obj/examples/%.o: examples/%.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
-bin/test_%: obj/test_%.o | libariadne.so
-#	@echo "\nlinking TESTS " $< " with libariadne.so to " $@
+bin/%: obj/test/%.o | libariadne.so
+#   @echo "\nlinking TESTS " $< " with libariadne.so to " $@
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
+
+
+bin/test_float: obj/test/test_float.o | libariadne-numeric.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
+
+bin/test_validated_float: obj/test/test_validated_float.o | libariadne-numeric.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
+
+
+bin/test_vector: obj/test/test_vector.o | libariadne-algebra.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
+
+bin/test_matrix: obj/test/test_matrix.o | libariadne-algebra.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
+
+bin/test_multi_index: obj/test/test_multi_index.o | libariadne-algebra.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
+
+bin/test_expansion: obj/test/test_expansion.o | libariadne-algebra.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
+
+bin/test_differential: obj/test/test_differential.o | libariadne-algebra.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
+
+
+bin/test_polynomial: obj/test/test_polynomial.o | libariadne-function.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
+
+bin/test_taylor_model: obj/test/test_affine_model.o | libariadne-function.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
+
+bin/test_procedure: obj/test/test_procedure.o | libariadne-function.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
+
+bin/test_function: obj/test/test_affine_model.o | libariadne-function.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
+
+bin/test_taylor_function: obj/test/test_taylor_function.o | libariadne-function.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
 bin/%: obj/examples/%.o libariadne.so
 #	@echo "\nlinking EXAMPLES " $< " with libariadne.so to " $@
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
-
-
-
 
 #wrap/boost_python.h.gch: boost_python.h
 #	$(CXX) $(CXXFLAGS) $< -I$(PYTHON_INCLUDE_PATH)

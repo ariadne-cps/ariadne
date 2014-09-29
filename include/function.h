@@ -115,6 +115,8 @@ inline ApproximateNumberType ScalarFunctionInterface<ApproximateNumberType>::ope
     return this->evaluate(x); }
 inline ValidatedNumberType ScalarFunctionInterface<ValidatedNumberType>::operator() (const Vector<ValidatedNumberType>& x) const {
     return this->evaluate(x); }
+inline Interval ScalarFunctionInterface<ValidatedNumberType>::operator() (const Vector<Interval>& x) const {
+    return this->evaluate(x); }
 inline EffectiveNumberType ScalarFunctionInterface<EffectiveNumberType>::operator() (const Vector<EffectiveNumberType>& x) const {
     return this->evaluate(x); }
 inline ApproximateScalarFunction ScalarFunctionInterface<ApproximateNumberType>::derivative(Nat j) const {
@@ -196,6 +198,8 @@ template<class P>
 class VectorFunction
 {
     typedef P X;
+  private:
+    std::shared_ptr< const VectorFunctionInterface<X> > _ptr;
   public:
     typedef X NumericType;
 
@@ -232,15 +236,15 @@ class VectorFunction
     Nat result_size() const { return this->_ptr->result_size(); }
     Nat argument_size() const { return this->_ptr->argument_size(); }
 
-    template<class XX> Vector<XX> evaluate(const Vector<XX>& x) const { return this->_ptr->evaluate(x); }
-    template<class XX> Vector<XX> operator() (const Vector<XX>& x) const { return this->_ptr->evaluate(x); }
+    template<class XX> auto evaluate(const Vector<XX>& x) const -> decltype(this->_ptr->evaluate(x)) { return this->_ptr->evaluate(x); }
+    template<class XX> auto operator() (const Vector<XX>& x) const -> decltype(this->_ptr->evaluate(x)) { return this->_ptr->evaluate(x); }
 
-    template<class XX> Matrix<XX> jacobian(const Vector<XX>& x) const { return this->_ptr->jacobian(x); }
-    template<class XX> Vector< Differential<XX> > differentials(const Vector<XX>& x, Nat d) const { return this->_ptr->differentials(x,d); }
+    template<class XX> auto jacobian(const Vector<XX>& x) const -> decltype(this->_ptr->jacobian(x)) {
+        return this->_ptr->jacobian(x); }
+    template<class XX> auto differentials(const Vector<XX>& x, Nat d) const -> decltype(this->_ptr->differentials(x,d)) {
+        return this->_ptr->differentials(x,d); }
 
     OutputStream& write(OutputStream& os) const { return this->_ptr->write(os); }
-  private:
-    std::shared_ptr< const VectorFunctionInterface<X> > _ptr;
 };
 
 template<class P> inline OutputStream& operator<<(OutputStream& os, const VectorFunction<P>& f) { return f.write(os); }

@@ -36,11 +36,15 @@ namespace Ariadne {
 
 template<class F, class R>
 class Constraint {
+  public:
     typedef F FunctionType;
     typedef R BoundType;
+    typedef R UpperBoundType;
+    typedef decltype(-std::declval<R>()) LowerBoundType;
 //    typedef typename IntervalOfType<Real>::Type IntervalBoundsType;
   public:
-    Constraint(BoundType const& l, FunctionType const& f, BoundType const& u) : _function(f), _lower_bound(l), _upper_bound(u) { ARIADNE_ASSERT(l<=u); }
+    Constraint(LowerBoundType const& l, FunctionType const& f, UpperBoundType const& u)
+        : _function(f), _lower_bound(l), _upper_bound(u) { ARIADNE_ASSERT(l<=u); }
     Constraint(FunctionType const& f, BoundType const& x) : _function(f), _lower_bound(x), _upper_bound(x) { }
     template<class FF,class RR> Constraint(const Constraint<FF,RR>& c)
         : _function(static_cast<F>(c.function())), _lower_bound(c.lower_bound()), _upper_bound(c.upper_bound()) { }
@@ -48,8 +52,8 @@ class Constraint {
     FunctionType& function() { return this->_function; }
     FunctionType const& function() const { return this->_function; }
     Nat argument_size() const { return this->_function.argument_size(); }
-    BoundType const& lower_bound() const { return this->_lower_bound; }
-    BoundType const& upper_bound() const { return this->_upper_bound; }
+    LowerBoundType const& lower_bound() const { return this->_lower_bound; }
+    UpperBoundType const& upper_bound() const { return this->_upper_bound; }
     const Interval bounds() const { return Interval(this->_lower_bound,this->_upper_bound); }
   private:
     F _function;
@@ -59,7 +63,7 @@ class Constraint {
 
 typedef Constraint<RealScalarFunction,Real> RealConstraint;
 typedef Constraint<EffectiveScalarFunction,EffectiveNumberType> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ExactNumberType> ValidatedConstraint;
+typedef Constraint<ValidatedScalarFunction,ValidatedNumberType> ValidatedConstraint;
 
 inline EffectiveConstraint operator<=(const EffectiveNumberType& c, const EffectiveScalarFunction& f) {
     return EffectiveConstraint(c,f,infinity);
@@ -137,7 +141,7 @@ inline ValidatedConstraint operator>=(const ValidatedScalarFunction& f1, const V
 }
 
 inline ValidatedConstraint operator<=(const ValidatedConstraint& nc, const ExactNumberType& c) {
-    ARIADNE_ASSERT(nc.upper_bound()==inf);
+    ARIADNE_ASSERT(nc.upper_bound()==infty);
     return ValidatedConstraint(nc.lower_bound(),nc.function(),c);
 }
 

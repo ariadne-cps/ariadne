@@ -113,6 +113,7 @@ class Box
     //! giving lower and upper bounds.
     Box(std::initializer_list<Interval> lst);
 
+    explicit Box(const Vector<ValidatedFloat>& vec) : Vector<Interval>(vec) { }
     Box(const Vector<Interval>& ivec) : Vector<Interval>(ivec) { }
     Box(const List<Interval>& ilst) : Vector<Interval>(ilst) { }
 

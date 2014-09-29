@@ -102,9 +102,13 @@ class ScalarFunctionInterface<ValidatedTag>
 
     //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
     virtual ValidatedNumberType evaluate(const Vector<ValidatedNumberType>& x) const = 0;
+    virtual Interval evaluate(const Vector<Interval>& x) const = 0;
+    inline ValidatedNumberType evaluate(const Vector<ExactNumberType>& x) const;
     inline ValidatedNumberType operator() (const Vector<ValidatedNumberType>& x) const;
+    inline Interval operator() (const Vector<Interval>& x) const;
     //! \brief Evaluate the function over a vector of interval differentials.
     virtual Differential<ValidatedNumberType> evaluate(const Vector< Differential<ValidatedNumberType> >& x) const = 0;
+    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const;
     //! \brief Evaluate the function over a vector of Taylor models with interval error.
     virtual TaylorModel<ValidatedNumberType> evaluate(const Vector< TaylorModel<ValidatedNumberType> >& x) const = 0;
 
@@ -230,8 +234,11 @@ class VectorFunctionInterface<ValidatedTag>
 
     //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
     virtual Vector<ValidatedNumberType> evaluate(const Vector<ValidatedNumberType>& x) const = 0;
+    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const = 0;
+    inline Vector<ValidatedNumberType> evaluate(const Vector<ExactNumberType>& x) const;
     //! \brief Evaluate the function over a vector of interval differentials.
     virtual Vector< Differential<ValidatedNumberType> > evaluate(const Vector< Differential<ValidatedNumberType> >& x) const = 0;
+    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const = 0;
     //! \brief Evaluate the function over a vector of Taylor models with interval error.
     virtual Vector< TaylorModel<ValidatedNumberType> > evaluate(const Vector< TaylorModel<ValidatedNumberType> >& x) const = 0;
 
@@ -242,6 +249,8 @@ class VectorFunctionInterface<ValidatedTag>
 
     using VectorFunctionInterface<ApproximateTag>::jacobian;
     Matrix<ValidatedNumberType> jacobian(const Vector<ValidatedNumberType>& x) const;
+    Matrix<ValidatedNumberType> jacobian(const Vector<ExactNumberType>& x) const;
+    Matrix<Interval> jacobian(const Vector<Interval>& x) const;
     using VectorFunctionInterface<ApproximateTag>::differentials;
     Vector< Differential<ValidatedNumberType> > differentials(const Vector<ValidatedNumberType>& x, Nat d) const;
 

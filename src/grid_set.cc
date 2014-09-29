@@ -119,27 +119,27 @@ const Vector<Float>& Grid::lengths() const
     return this->_data->_lengths;
 }
 
-Float Grid::coordinate(uint d, DyadicType x) const
+ExactNumberType Grid::coordinate(uint d, DyadicType x) const
 {
-    return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x));
+    return ExactNumberType(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x)));
 }
 
-Float Grid::subdivision_coordinate(uint d, DyadicType x) const
+ExactNumberType Grid::subdivision_coordinate(uint d, DyadicType x) const
 {
-    return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x));
+    return ExactNumberType(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x)));
 }
 
-Float Grid::subdivision_coordinate(uint d, IntegerType n) const
+ExactNumberType Grid::subdivision_coordinate(uint d, IntegerType n) const
 {
-    return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
+    return ExactNumberType(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n)));
 }
 
 int Grid::subdivision_index(uint d, const ExactNumberType& x) const
 {
     Float half=0.5;
-    int n=integer_cast<int>(floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half)));
+    int n=integer_cast<int>(floor(add_approx(div_approx(sub_approx(x.raw(),this->_data->_origin[d]),this->_data->_lengths[d]),half)));
     Float sc=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
-    if(sc == x) {
+    if(sc == x.raw()) {
         return n;
     } else {
         ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(uint d,ExactNumberType x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
@@ -148,8 +148,8 @@ int Grid::subdivision_index(uint d, const ExactNumberType& x) const
 
 int Grid::subdivision_lower_index(uint d, const LowerNumberType& x) const
 {
-    int n=integer_cast<int>(floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d])));
-    if(x>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
+    int n=integer_cast<int>(floor(div_down(sub_down(x.raw(),this->_data->_origin[d]),this->_data->_lengths[d])));
+    if(x.raw()>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
         return n+1;
     } else {
         return n;
@@ -158,8 +158,8 @@ int Grid::subdivision_lower_index(uint d, const LowerNumberType& x) const
 
 int Grid::subdivision_upper_index(uint d, const UpperNumberType& x) const
 {
-    int n=integer_cast<int>(ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d])));
-    if(x<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
+    int n=integer_cast<int>(ceil(div_up(sub_up(x.raw(),this->_data->_origin[d]),this->_data->_lengths[d])));
+    if(x.raw()<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
         return n-1;
     } else {
         return n;
@@ -798,8 +798,8 @@ Box GridAbstractCell::lattice_box_to_space(const LatticeBoxType & theLatticeBox,
         //Recompute the new dimension coordinates, detaching them from the grid
         //Compute lower and upper bounds separately, and then set the box lower
         //and upper values simultaneously to prevent lower temporarily higher than upper.
-        Float lower = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].lower() ) );
-        Float upper = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].upper() ) );
+        Float lower = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].lower().raw() ) );
+        Float upper = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].upper().raw() ) );
         theTmpBox[current_dimension].set(lower,upper);
     }
 
@@ -897,7 +897,7 @@ Vector<Interval> GridCell::compute_lattice_box( const uint dimensions, const uin
         current_dimension = i % dimensions;
         //Compute the middle point of the box's projection onto
         //the dimension \a current_dimension (relative to the grid)
-        Float middlePointInCurrDim = theResultLatticeBox[current_dimension].midpoint();
+        Float middlePointInCurrDim = theResultLatticeBox[current_dimension].midpoint().raw();
         if( theWord[i] ){
             //Choose the right half
             theResultLatticeBox[current_dimension].set_lower( middlePointInCurrDim );
@@ -930,7 +930,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, c
     //   we are sure that we get a box that overlaps with the required neighboring cell.
     //NOTE: This box is in the original space, but not on the lattice
     Vector<Interval> baseCellBoxInLattice =  GridCell::compute_lattice_box( dimensions, theHeight, theWord );
-    const Float upperBorderOverlapping = add_approx( baseCellBoxInLattice[dim].upper(), baseCellBoxInLattice[dim].width() / 2 );
+    const Float upperBorderOverlapping = add_approx( baseCellBoxInLattice[dim].upper().raw(), baseCellBoxInLattice[dim].width().raw() / 2 );
 
     //2. Now check if the neighboring cell can be rooted to the given primary cell. For that
     //   we simply use the box computed in 1. and get the primary cell that encloses it.
@@ -998,10 +998,10 @@ Box GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const B
     for( uint dim = 0; dim < theGrid.dimension(); dim++){
         Interval openCellBoxInLatticeDimInterval;
         Interval baseCellBoxInLatticeDimInterval = baseCellBoxInLattice[dim];
-        Float lower = baseCellBoxInLatticeDimInterval.lower();
-        Float upper = baseCellBoxInLatticeDimInterval.upper() +
-                        ( baseCellBoxInLatticeDimInterval.upper() -
-                          baseCellBoxInLatticeDimInterval.lower() );
+        Float lower = baseCellBoxInLatticeDimInterval.lower().raw();
+        Float upper = baseCellBoxInLatticeDimInterval.upper().raw() +
+                        ( baseCellBoxInLatticeDimInterval.upper().raw() -
+                          baseCellBoxInLatticeDimInterval.lower().raw() );
         openCellBoxInLatticeDimInterval.set(lower,upper);
 
         openCellBoxInLattice[dim] = openCellBoxInLatticeDimInterval;
@@ -1291,7 +1291,7 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
         //Get the number of required subdivisions in this dimension
         //IVAN S ZAPREEV:
         //NOTE: We compute sub_up because we do not want to have insufficient number of subdivisions
-        num_subdiv = compute_number_subdiv( sub_up( theRootCellBox[i].upper(), theRootCellBox[i].lower() ) , theMaxCellWidth );
+        num_subdiv = compute_number_subdiv( sub_up( theRootCellBox[i].upper().raw(), theRootCellBox[i].lower().raw() ) , theMaxCellWidth );
 
         //Compute the max number of subdivisions and the dimension where to do them
         if( num_subdiv >= max_num_subdiv_dim ){
@@ -1337,7 +1337,7 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
 double GridTreeSubset::measure() const {
     Float result=0.0;
     for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        result+=iter->box().measure();
+        result+=iter->box().measure().raw();
     }
     return approx_cast<double>(result);
 }

@@ -385,6 +385,7 @@ template<> class VectorFunctionModel<ValidatedTag>
     inline ErrorType const error() const { return this->_ptr->error(); }
     inline Void clobber() { this->_ptr->clobber(); }
     inline Matrix<ValidatedNumberType> const jacobian(const Vector<ValidatedNumberType>& x) const { return this->_ptr->jacobian(x); }
+    inline Matrix<Interval> const jacobian(const Vector<Interval>& x) const { return this->_ptr->jacobian(x); }
 
     inline Void restrict(const Box& d) { this->_ptr->restrict(d); }
 

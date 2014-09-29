@@ -2576,7 +2576,7 @@ operator<<(std::ostream& os, const ValidatedTaylorModel& tm) {
 
     //os << "ValidatedTaylorModel";
     os << "TM["<<tm.argument_size()<<"](";
-    Expansion<Float> e=tm.expansion();
+    Expansion<RawFloatType> e=tm.expansion().raw();
     e.graded_sort();
     e.write(os,variable_names);
     return os << "+/-" << tm.error().raw() << ")";

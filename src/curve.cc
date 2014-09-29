@@ -80,19 +80,21 @@ Curve::smoothness() const
 
 
 
-Point
-Curve::value(const Float& s) const
+Curve::PointType
+Curve::value(const ParameterType& s) const
 {
-    Vector<Float> v(1,&s);
-    return Point(this->_function.evaluate(v));
+    Vector<ApproximateFloatType> v(1,ApproximateFloatType(s));
+    Vector<ApproximateFloatType> fv=this->_function.evaluate(v);
+    return PointType(fv);
 }
 
 
 Vector< Float >
 Curve::tangent(const Float& s) const
 {
-    Vector<Float> v(1,&s);
-    return column(this->_function.jacobian(v),0);
+    Vector<ExactFloatType> v(1,ExactFloatType(s));
+    auto col=column(this->_function.jacobian(v),0);
+    return reinterpret_cast<Vector<Float>const&>(col);
 }
 
 
@@ -111,12 +113,18 @@ InterpolatedCurve::clone() const
     return new InterpolatedCurve(*this);
 }
 
+void
+InterpolatedCurve::insert(const ParameterType& s, const PointType& pt) {
+    if(!this->_points.empty()) { ARIADNE_ASSERT(pt.size()==this->dimension()); }
+    this->_points.insert(std::pair< ParameterType, PointType >(s,pt));
+}
+
 Box
 InterpolatedCurve::bounding_box() const
 {
     Box bx(this->_points.begin()->second);
     for(const_iterator iter=this->_points.begin(); iter!=this->_points.end(); ++iter) {
-        bx=hull(bx,iter->second);
+        bx=hull(bx,Point(iter->second));
     }
     return bx;
 }
@@ -126,7 +134,7 @@ InterpolatedCurve::draw(CanvasInterface& c, const Projection2d& p) const
 {
     uint xi=p.x_coordinate(); uint yi=p.y_coordinate();
     const_iterator iter=this->begin();
-    FloatVector pt=join(iter->second,iter->first);
+    Point pt=join(iter->second,iter->first);
     c.move_to(pt[xi],pt[yi]);
     while(iter!=this->end()) {
         ++iter;

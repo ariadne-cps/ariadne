@@ -86,7 +86,7 @@ Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const B
             a=iter->key();
             if(a.degree()>1) {
                 for(uint j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()).raw(); }
                 }
             }
         }
@@ -104,7 +104,7 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
     Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 1, dom);
     MultiIndex a(n);
     for(uint i=0; i!=n; ++i) {
-        Float sf=dom[i].radius();
+        Float sf=dom[i].radius().raw();
         ++a[i];
         ivl_dx[i].expansion().append(a,Interval(sf));
         --a[i];
@@ -120,7 +120,7 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
             a=iter->key();
             if(a.degree()==1) {
                 for(uint j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=radius(iter->data()); }
+                    if(a[j]>0) { nonlinearities[i][j]+=radius(iter->data()).raw(); }
                 }
             }
         }
@@ -139,7 +139,7 @@ Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface
     Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 2, dom);
     MultiIndex a(n);
     for(uint i=0; i!=n; ++i) {
-        Float sf=dom[i].radius();
+        Float sf=dom[i].radius().raw();
         ++a[i];
         ivl_dx[i].expansion().append(a,Interval(sf));
         --a[i];
@@ -473,23 +473,27 @@ Box ConstrainedImageSet::bounding_box() const
     return this->_function(over_approximation(this->_domain));
 }
 
+Matrix<ExactFloat> make_exact(Matrix<ValidatedFloat> vA) {
+    Matrix<ApproximateFloat> aA=vA;
+    return reinterpret_cast<Matrix<ExactFloat>&>(aA);
+}
 
 ValidatedAffineConstrainedImageSet
 ConstrainedImageSet::affine_approximation() const
 {
     const Vector<Interval> D=approximation(this->domain());
-    Vector<Float> m=midpoint(D);
-    Matrix<Float> G=this->_function.jacobian(m);
-    Vector<Float> h=this->_function.evaluate(m)-G*m;
+    Vector<ExactFloat> m=midpoint(D);
+    Matrix<ExactFloat> G=make_exact(this->_function.jacobian(m));
+    Vector<ExactFloat> h=make_exact(this->_function.evaluate(m)-G*m);
     ValidatedAffineConstrainedImageSet result(D,G,h);
 
 
-    Vector<Float> a(this->number_of_parameters());
-    Float b,l,u;
+    Vector<ApproximateFloat> a(this->number_of_parameters());
+    ApproximateFloat b,l,u;
     for(List<EffectiveConstraint>::const_iterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
-        AffineModel<Interval> a=affine_model(D,iter->function());
+        AffineModel<ValidatedTag> a=affine_model(D,iter->function());
         Interval b=iter->bounds();
         result.new_constraint(b.lower()<=a<=b.upper());
     }
@@ -591,9 +595,10 @@ ConstrainedImageSet::split() const
     uint k=this->number_of_parameters();
     Float rmax=0.0;
     for(uint j=0; j!=this->number_of_parameters(); ++j) {
-        if(Float(this->domain()[j].radius())>rmax) {
+       UpperFloat rj=this->domain()[j].radius();
+       if(rj.raw()>rmax) {
             k=j;
-            rmax=Float(this->domain()[j].radius());
+            rmax=rj.raw();
         }
     }
     return this->split(k);
@@ -733,7 +738,7 @@ Pair<uint,double> lipschitz_index_and_error(const ValidatedVectorFunction& funct
         for(uint i=0; i!=function.result_size(); ++i) {
             column_norm+=mag(jacobian[i][j]);
         }
-        column_norm *= domain[j].radius();
+        column_norm *= domain[j].radius().raw();
         if(column_norm>max_column_norm) {
             max_column_norm=column_norm;
             jmax=j;
@@ -948,9 +953,10 @@ ValidatedConstrainedImageSet::split() const
     uint k=this->number_of_parameters();
     Float rmax=0.0;
     for(uint j=0; j!=this->number_of_parameters(); ++j) {
-        if(this->domain()[j].radius()>rmax) {
+        UpperFloat rj=this->domain()[j].radius();
+        if(rj.raw()>rmax) {
             k=j;
-            rmax=this->domain()[j].radius();
+            rmax=rj.raw();
         }
     }
     return this->split(k);
@@ -1120,24 +1126,24 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
     Box new_domain = hull(domain1,domain2);
 
     ValidatedVectorFunctionModel function1
-        = ValidatedVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<Interval> const&>(set1.function().reference()));
-    Vector<Float> function_error1=function1.errors();
+        = ValidatedVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<ValidatedTag> const&>(set1.function().reference()));
+    Vector<ErrorFloatType> function_error1=function1.errors();
     function1.clobber();
     function1.restrict(new_domain);
 
     ValidatedVectorFunctionModel function2
-        = ValidatedVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<Interval> const&>(set2.function().reference()));
-    Vector<Float> function_error2=function2.errors();
+        = ValidatedVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<ValidatedTag> const&>(set2.function().reference()));
+    Vector<ErrorFloatType> function_error2=function2.errors();
     function2.clobber();
     function2.restrict(new_domain);
 
     ValidatedVectorFunctionModel new_function=(function1+function2)*ExactFloat(0.5);
     new_function.clobber();
     for(uint i=0; i!=new_function.result_size(); ++i) {
-        function_error1[i]=add_up(norm(new_function[i]-function1[i]),function_error1[i]);
-        function_error2[i]=add_up(norm(new_function[i]-function2[i]),function_error2[i]);
-        Float new_function_error = max(function_error1[i],function_error2[i]);
-        new_function[i] = new_function[i] + Interval(-new_function_error,+new_function_error);
+        function_error1[i]=norm(new_function[i]-function1[i])+function_error1[i];
+        function_error2[i]=norm(new_function[i]-function2[i])+function_error2[i];
+        ErrorFloatType new_function_error = max(function_error1[i],function_error2[i]);
+        new_function[i] = new_function[i] + ValidatedFloatType(-new_function_error,+new_function_error);
     }
 
     ARIADNE_ASSERT(set1.number_of_constraints()==0);

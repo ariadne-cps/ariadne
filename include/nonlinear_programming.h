@@ -39,7 +39,7 @@ namespace Ariadne {
 
 template<class X, class R> class Constraint;
 typedef Constraint<EffectiveScalarFunction,EffectiveNumberType> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ExactNumberType> ValidatedConstraint;
+typedef Constraint<ValidatedScalarFunction,ValidatedNumberType> ValidatedConstraint;
 
 class InfeasibleProblemException : public std::runtime_error {
   public: InfeasibleProblemException() : std::runtime_error("InfeasibleProblemException") { }
@@ -256,7 +256,7 @@ class IntervalOptimiser
 {
     virtual IntervalOptimiser* clone() const { return new IntervalOptimiser(*this); }
     virtual Tribool feasible(Box D, ValidatedVectorFunction h) const;
-    Void feasibility_step(const ApproximateFloatVectorType& xl, const ApproximateFloatVectorType& xu, const ValidatedVectorFunction& h,
+    Void feasibility_step(const ExactFloatVectorType& xl, const ExactFloatVectorType& xu, const ValidatedVectorFunction& h,
                           ValidatedFloatVectorType& x, ValidatedFloatVectorType& y, ValidatedFloatVectorType& zl, ValidatedFloatVectorType zu, ValidatedFloatType& mu) const;
 };
 

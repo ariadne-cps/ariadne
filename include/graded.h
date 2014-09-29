@@ -338,7 +338,7 @@ template<class A> Void sincos(Graded<A>& s, Graded<A>& c, const Graded<A>& f) {
 }
 
 template<class A> Void sin(Graded<A>& r, const Graded<A>& a) {
-    Graded<A> s; 
+    Graded<A> s;
     Graded<A> c;
     sincos(s,c,a);
     r=s;
@@ -378,8 +378,8 @@ Pair<List<Float>,Float> midpoint_error(const Graded<Interval>& x) {
     List<Float> m(x.degree()+1);
     Float e;
     for(uint i=0; i<=x.degree(); ++i) {
-        m[i]=midpoint(x[i]);
-        e=add_up(e,max(sub_up(m[i],x[i].lower()),sub_up(x[i].upper(),m[i])));
+        m[i]=static_cast<Float>(midpoint(x[i]));
+        e=add_up(e,max(sub_up(m[i],x[i].lower_raw()),sub_up(x[i].upper_raw(),m[i])));
     }
     return Pair<List<Float>,Float>(m,e);
 }

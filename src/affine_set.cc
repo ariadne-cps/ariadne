@@ -64,21 +64,21 @@ struct LinearProgram {
 };
 
 
-ValidatedAffineConstraint operator<=(const RawFloatType& l, const ValidatedAffine& a) { return ValidatedAffineConstraint(l,a,+inf); }
-ValidatedAffineConstraint operator<=(const ValidatedAffine& a, const RawFloatType& u) { return ValidatedAffineConstraint(-inf,a,u); }
-ValidatedAffineConstraint operator==(const ValidatedAffine& a, const RawFloatType& b) { return ValidatedAffineConstraint(b,a,b); }
+ValidatedAffineConstraint operator<=(const ValidatedFloatType& l, const ValidatedAffine& a) { return ValidatedAffineConstraint(l,a,+inf); }
+ValidatedAffineConstraint operator<=(const ValidatedAffine& a, const ValidatedFloatType& u) { return ValidatedAffineConstraint(-inf,a,u); }
+ValidatedAffineConstraint operator==(const ValidatedAffine& a, const ValidatedFloatType& b) { return ValidatedAffineConstraint(b,a,b); }
 
-ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& c, const RawFloatType& u) {
-    ARIADNE_ASSERT(c.upper_bound()==inf);
+ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& c, const ValidatedFloatType& u) {
+    ARIADNE_ASSERT(c.upper_bound()==infty);
     return ValidatedAffineConstraint(c.lower_bound(),c.function(),u);
 }
 
-ValidatedAffineModelConstraint operator<=(const RawFloatType& l, const ValidatedAffineModel& a) { return ValidatedAffineModelConstraint(l,a,+inf); }
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& a, const RawFloatType& u) { return ValidatedAffineModelConstraint(-inf,a,u); }
-ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& a, const RawFloatType& b) { return ValidatedAffineModelConstraint(b,a,b); }
+ValidatedAffineModelConstraint operator<=(const ValidatedFloatType& l, const ValidatedAffineModel& a) { return ValidatedAffineModelConstraint(l,a,+inf); }
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& a, const ValidatedFloatType& u) { return ValidatedAffineModelConstraint(-inf,a,u); }
+ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& a, const ValidatedFloatType& b) { return ValidatedAffineModelConstraint(b,a,b); }
 
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& c, const RawFloatType& u) {
-    ARIADNE_ASSERT(c.upper_bound()==inf);
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& c, const ValidatedFloatType& u) {
+    ARIADNE_ASSERT(c.upper_bound()==infty);
     return ValidatedAffineModelConstraint(c.lower_bound(),c.function(),u);
 }
 
@@ -130,23 +130,23 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vec
 {
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Box& D, const Matrix<RawFloatType>& G, const Vector<RawFloatType>& h)
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Box& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& h)
 {
     this->construct(D,G,h);
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Matrix<RawFloatType>& G, const Vector<RawFloatType>& h)
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& h)
 {
     this->construct(Vector<Interval>(G.column_size(),Interval(-1,+1)),G,h);
 }
 
-void ValidatedAffineConstrainedImageSet::construct(const Box& D, const Matrix<RawFloatType>& G, const Vector<RawFloatType>& h)
+void ValidatedAffineConstrainedImageSet::construct(const Box& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& h)
 {
     ARIADNE_ASSERT_MSG(G.row_size()==h.size() && G.row_size()>0,"G="<<G<<", h="<<h);
     this->_domain=D;
     this->_space_models=Vector<ValidatedAffineModel>(G.row_size(),ValidatedAffineModel(G.column_size()));
     for(uint i=0; i!=G.row_size(); ++i) {
-        AffineModel<Interval> x(G.column_size());
+        AffineModel<ValidatedTag> x(G.column_size());
         x=h[i];
         for(uint j=0; j!=G.column_size(); ++j) {
             x[j]=G[i][j];
@@ -231,8 +231,8 @@ tribool ValidatedAffineConstrainedImageSet::separated(const Box& bx) const {
     LinearProgram<Float> lp;
     this->construct_linear_program(lp);
     for(uint i=0; i!=bx.size(); ++i) {
-        lp.l[i]=sub_down(wbx[i].lower(),this->_space_models[i].error());
-        lp.u[i]=add_up(wbx[i].upper(),this->_space_models[i].error());
+        lp.l[i]=sub_down(wbx[i].lower().raw(),this->_space_models[i].error().raw());
+        lp.u[i]=add_up(wbx[i].upper().raw(),this->_space_models[i].error().raw());
     }
     //std::cerr<<"\ns="<<*this<<"\nbx="<<bx<<"\n\nA="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n\n";
     tribool feasible=indeterminate;
@@ -280,8 +280,8 @@ void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
     for(uint i=0; i!=cell.dimension(); ++i) {
         //lp.l[i]=bx[i].lower();
         //lp.u[i]=bx[i].upper();
-        lp.l[i]=sub_down(bx[i].lower(),errors[i]);
-        lp.u[i]=add_up(bx[i].upper(),errors[i]);
+        lp.l[i]=sub_down(bx[i].lower().raw(),errors[i].raw());
+        lp.u[i]=add_up(bx[i].upper().raw(),errors[i].raw());
     }
 
     int cell_tree_depth=(cell.depth()-cell.height());
@@ -349,25 +349,25 @@ ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float
         }
         lp.A[i][i] = -1;
         for(uint j=0; j!=np; ++j) {
-            lp.A[i][nx+j] = +this->_space_models[i].gradient(j);
+            lp.A[i][nx+j] = +this->_space_models[i].gradient(j).raw();
         }
         for(uint j=0; j!=nc; ++j) {
             lp.A[i][nx+np+j]=0;
         }
-        lp.b[i] = -this->_space_models[i].value();
+        lp.b[i] = -this->_space_models[i].value().raw();
     }
     for(uint i=0; i!=nc; ++i) {
         for(uint j=0; j!=nx; ++j) {
             lp.A[nx+i][j]=0;
         }
         for(uint j=0; j!=np; ++j) {
-            lp.A[nx+i][nx+j] = +this->_constraint_models[i].function().gradient(j);
+            lp.A[nx+i][nx+j] = +this->_constraint_models[i].function().gradient(j).raw();
         }
         for(uint j=0; j!=nc; ++j) {
             lp.A[nx+i][nx+np+j]=0;
         }
         lp.A[nx+i][nx+np+i] = +1;
-        lp.b[nx+i] = -this->_constraint_models[i].function().value();
+        lp.b[nx+i] = -this->_constraint_models[i].function().value().raw();
     }
 
     for(uint i=0; i!=np; ++i) {
@@ -377,8 +377,8 @@ ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float
         lp.u[nx+i]=+1.0;
     }
     for(uint i=0; i!=nc; ++i) {
-        lp.l[nx+np+i]=-this->_constraint_models[i].upper_bound();
-        lp.u[nx+np+i]=-this->_constraint_models[i].lower_bound();
+        lp.l[nx+np+i]=-this->_constraint_models[i].upper_bound().midpoint().raw();
+        lp.u[nx+np+i]=-this->_constraint_models[i].lower_bound().midpoint().raw();
     }
 
     // Make part of linear program dependent on cell be +/-infinity
@@ -401,10 +401,10 @@ ValidatedAffineConstrainedImageSet::adjoin_outer_approximation_to(PavingInterfac
     // Create linear program
     LinearProgram<Float> lp;
     this->construct_linear_program(lp);
-	Vector<Float> errors(this->dimension());
-	for(uint i=0; i!=this->dimension(); ++i) {
-		errors[i]=this->_space_models[i].error();
-	}
+    Vector<Float> errors(this->dimension());
+    for(uint i=0; i!=this->dimension(); ++i) {
+        errors[i]=this->_space_models[i].error().raw();
+    }
     _adjoin_outer_approximation_to(paving,lp,errors,bounding_cell,depth);
 }
 
@@ -430,8 +430,8 @@ void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
 
     // Make part of linear program dependent on cell
     for(uint i=0; i!=nx; ++i) {
-        lp.l[i]=bx[i].lower();
-        lp.u[i]=bx[i].upper();
+        lp.l[i]=bx[i].lower().raw();
+        lp.u[i]=bx[i].upper().raw();
     }
 
     int cell_tree_depth=(cell.depth()-cell.height());
@@ -505,7 +505,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     // Need to set all values since matrix is uninitialised
     for(uint i=0; i!=nx; ++i) {
         for(uint j=0; j!=ne; ++j) {
-            lp.A[i][j]=-this->_space_models[i].gradient(j);
+            lp.A[i][j]=-this->_space_models[i].gradient(j).raw();
         }
         for(uint j=0; j!=nx; ++j) {
             lp.A[i][ne+j]=0;
@@ -514,11 +514,11 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
         for(uint j=0; j!=nc; ++j) {
             lp.A[i][ne+nx+j]=0;
         }
-        lp.b[i]=this->_space_models[i].value();
+        lp.b[i]=this->_space_models[i].value().raw();
     }
     for(uint i=0; i!=nc; ++i) {
         for(uint j=0; j!=ne; ++j) {
-            lp.A[nx+i][j]=this->_constraint_models[i].function().gradient(j);
+            lp.A[nx+i][j]=this->_constraint_models[i].function().gradient(j).raw();
         }
         for(uint j=0; j!=nx; ++j) {
             lp.A[nx+i][ne+j]=0;
@@ -527,7 +527,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
             lp.A[nx+i][ne+nx+j]=0;
         }
         lp.A[nx+i][nx+ne+i]=+1;
-        lp.b[nx+i]=-this->_constraint_models[i].function().value();
+        lp.b[nx+i]=-this->_constraint_models[i].function().value().raw();
     }
     for(uint i=0; i!=ne; ++i) {
         lp.l[i]=-1;
@@ -557,8 +557,8 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     // Make part of linear program dependent on cell
     const Box bx=bounding_cell.box();
     for(uint i=0; i!=nx; ++i) {
-        lp.l[ne+i]=bx[i].lower();
-        lp.u[ne+i]=bx[i].upper();
+        lp.l[ne+i]=bx[i].lower().raw();
+        lp.u[ne+i]=bx[i].upper().raw();
     }
 
     // Take x and s variables to be basic, so the initial basis matrix is the
@@ -573,10 +573,10 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     }
     lp.B=Matrix<Float>::identity(nx+nc);
 
-	Vector<Float> errors(this->dimension());
-	for(uint i=0; i!=this->dimension(); ++i) {
-		errors[i]=this->_space_models[i].error();
-	}
+    Vector<Float> errors(this->dimension());
+    for(uint i=0; i!=this->dimension(); ++i) {
+        errors[i]=this->_space_models[i].error().raw();
+    }
 
     ARIADNE_LOG(9,"A="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n");
     tribool feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
@@ -613,15 +613,15 @@ ValidatedAffineConstrainedImageSet::boundary(uint xind, uint yind) const
     const size_t np=nx+ne+nc;
 
     // Set up matrix of function values
-    AffineModel<Interval> const& xa=this->_space_models[xind];
-    AffineModel<Interval> const& ya=this->_space_models[yind];
+    AffineModel<ValidatedTag> const& xa=this->_space_models[xind];
+    AffineModel<ValidatedTag> const& ya=this->_space_models[yind];
 
     // The set is given by (x,y)=Gs+h, where As=b and l<=s<=u
     Matrix<Float> G=Matrix<Float>::zero(2,np);
-    for(uint j=0; j!=nx; ++j) { G[0][j]=numeric_cast<float>(xa.gradient(j))+eps(); G[1][j]=numeric_cast<float>(ya.gradient(j))+eps(); }
-    G[0][nx+0]=xa.error()+std::abs(eps()); G[1][nx+1]=ya.error()+std::abs(eps());
+    for(uint j=0; j!=nx; ++j) { G[0][j]=numeric_cast<RawFloatType>(xa.gradient(j))+eps(); G[1][j]=numeric_cast<RawFloatType>(ya.gradient(j))+eps(); }
+    G[0][nx+0]=xa.error().raw()+std::abs(eps()); G[1][nx+1]=ya.error().raw()+std::abs(eps());
     Vector<Float> h(2);
-    h[0]=numeric_cast<float>(xa.value()); h[1]=numeric_cast<float>(ya.value());
+    h[0]=numeric_cast<RawFloatType>(xa.value()); h[1]=numeric_cast<RawFloatType>(ya.value());
     ARIADNE_LOG(5,"G="<<G<<" h="<<h<<"\n");
 
     // Set up linear programming problem Ax=b; l<=x<=u
@@ -638,16 +638,16 @@ ValidatedAffineConstrainedImageSet::boundary(uint xind, uint yind) const
     }
     for(uint i=0; i!=nc; ++i) {
         for(uint j=0; j!=nx; ++j) {
-            A[i][j] = neg( this->_constraint_models[i].function().gradient(j) );
+            A[i][j] = neg( this->_constraint_models[i].function().gradient(j).raw() );
         }
         for(uint j=nx; j!=nx+nc; ++j) {
             A[i][j] = 0.0;
         }
         A[i][nx+i]=1.0;
-        Float fb=this->_constraint_models[i].function().value();
-        Float fe=this->_constraint_models[i].function().error();
-        Float cl=this->_constraint_models[i].lower_bound();
-        Float cu=this->_constraint_models[i].upper_bound();
+        Float fb=this->_constraint_models[i].function().value().raw();
+        Float fe=this->_constraint_models[i].function().error().raw();
+        Float cl=this->_constraint_models[i].lower_bound().midpoint().raw();
+        Float cu=this->_constraint_models[i].upper_bound().midpoint().raw();
         b[i]=fb;
         l[nx+i]=cl-fe;
         u[nx+i]=cu+fe;

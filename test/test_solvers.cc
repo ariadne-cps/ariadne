@@ -40,6 +40,8 @@
 using namespace Ariadne;
 using namespace std;
 
+typedef Vector<ValidatedFloat> ValidatedFloatVector;
+
 class TestSolver
 {
   private:
@@ -61,8 +63,8 @@ class TestSolver
         EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(1,0);
         IntervalVector d({Interval(0.0,1.0)});
         EffectiveVectorFunction f({(x*x+1)*x-1});
-        IntervalVector p=solver->solve(f,d);
-        ARIADNE_TEST_BINARY_PREDICATE(subset,p[0],Interval(0.6823,0.6824));
+        ValidatedFloatVector p=solver->solve(f,d);
+        ARIADNE_TEST_BINARY_PREDICATE(contains,Interval(0.6823,0.6824),p[0]);
     }
 
     void test_implicit() {
@@ -95,7 +97,7 @@ class TestSolver
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        bb=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
+        bb=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius().raw());
         Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
         e=EffectiveVectorFunction( { a0+bb*(a1+bb*(a2+bb*a3)) } );
         ARIADNE_TEST_PRINT(e);
@@ -108,7 +110,7 @@ class TestSolver
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        bb=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
+        bb=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius().raw());
         Decimal c0(0.828427), c1(0.0441942), c2(-0.000345267), c3(0.00000539468);
         e=EffectiveVectorFunction( { c0+bb*(c1+bb*(c2+bb*c3)) } );
         ARIADNE_TEST_PRINT(e);
@@ -153,7 +155,7 @@ class TestSolver
         ARIADNE_TEST_PRINT(f);
         h=solver->implicit(f,p,r);
         ARIADNE_TEST_PRINT(h);
-        s=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius());
+        s=EffectiveScalarFunction(aa-numeric_cast<Real>(p[0].midpoint()))/numeric_cast<Real>(p[0].radius().raw());
         Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
         e=EffectiveScalarFunction( a0+s*(a1+s*(a2+s*a3)) );
         ARIADNE_TEST_PRINT(e);

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            interval.cc
+ *            float-validated.cc
  *
- *  Copyright 2008-10  Pieter Collins
+ *  Copyright 2008-14  Pieter Collins
  *
  ****************************************************************************/
 
@@ -164,6 +164,14 @@ UpperFloat pow(UpperFloat x, uint n) {
 
 UpperFloat abs(UpperFloat x) {
     return UpperFloat(abs(Float(x)));
+}
+
+UpperFloat& operator+=(UpperFloat& x1, UpperFloat x2) {
+     return x1=x1+x2;
+}
+
+UpperFloat& operator*=(UpperFloat& x1, UpperFloat x2) {
+     return x1=x1*x2;
 }
 
 

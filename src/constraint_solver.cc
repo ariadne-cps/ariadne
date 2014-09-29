@@ -45,6 +45,11 @@
 
 namespace Ariadne {
 
+typedef Vector<ApproximateFloatType> ApproximateFloatVector;
+typedef Vector<ExactFloatType> ExactFloatVector;
+
+static const ExactFloat infty = ExactFloat(inf);
+
 inline Sweeper default_sweeper() { return Sweeper(); }
 
 static const double error =  1e-2;
@@ -61,20 +66,12 @@ Sign sign(const Interval& ivl) {
     else { return ZERO; }
 }
 
-typedef Vector<Float> FloatVector;
-typedef Matrix<Float> FloatMatrix;
-typedef VectorRange<FloatVector> FloatVectorRange;
-
-typedef Vector<Interval> IntervalVector;
-typedef Matrix<ValidatedNumberType> IntervalMatrix;
-typedef VectorRange<IntervalVector> IntervalVectorRange;
-
 
 std::ostream& operator<<(std::ostream& os, const EffectiveConstraint& c) {
     static const Float inf = Ariadne::inf;
     if(c.bounds().lower()==c.bounds().upper()) { return os << c.function() << "==" << c.bounds().upper(); }
-    if(c.bounds().upper()==inf) { return os << c.bounds().lower() << "<=" << c.function(); }
-    if(c.bounds().lower()==-inf) { return os << c.function() << "<=" << c.bounds().upper(); }
+    if(c.bounds().upper()==infty) { return os << c.bounds().lower() << "<=" << c.function(); }
+    if(c.bounds().lower()==-infty) { return os << c.function() << "<=" << c.bounds().upper(); }
     return os << c.bounds().lower() << "<=" << c.function() << "<=" << c.bounds().upper();
 }
 
@@ -118,16 +115,16 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Validate
     const uint n=codomain.size(); // The total number of nontrivial constraints
     const uint l=(m+n)*2; // The total number of lagrange multipliers
 
-    Point point(m); // The point in the domain which is the current test point
-    Float violation; // An upper bound on amount by which the constraints are violated by the test point
-    Point multipliers(l); // The lagrange multipliers for the constraints
-    Point slack(l); // The slack between the test point and the violated constraints
+    ApproximateFloatVector point(m); // The point in the domain which is the current test point
+    ApproximateFloat violation; // An upper bound on amount by which the constraints are violated by the test point
+    ApproximateFloatVector multipliers(l); // The lagrange multipliers for the constraints
+    ApproximateFloatVector slack(l); // The slack between the test point and the violated constraints
 
-    Float& t=violation; Point& x=multipliers; Point& y=point; Point& z=slack; // Aliases for the main quantities used
+    ApproximateFloat& t=violation; ApproximateFloatVector& x=multipliers; ApproximateFloatVector& y=point; ApproximateFloatVector& z=slack; // Aliases for the main quantities used
     const Box& d=domain; const ValidatedVectorFunction& fn=function; const Box& c=codomain; // Aliases for the main quantities used
     VectorTaylorFunction tfn(d,fn,default_sweeper());
 
-    point=midpoint(d);
+    point=static_cast<ApproximateFloatVector>(midpoint(d));
     for(uint k=0; k!=l; ++k) { multipliers[k]=1.0/l; }
 
     NonlinearInteriorPointOptimiser optimiser;
@@ -142,8 +139,8 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Validate
         optimiser.feasibility_step(d,fn,c,x,y,z,t);
         if(t>=TERR) {
             ARIADNE_LOG(4,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z<<"\n");
-            if(this->check_feasibility(domain,function,codomain,point)) { return make_pair(true,point); }
-            else { ARIADNE_LOG(2,"f(y)="<<fn(IntervalVector(y))<<"\n"); return make_pair(indeterminate,point); }
+            if(this->check_feasibility(domain,function,codomain,make_exact(point))) { return make_pair(true,make_exact(point)); }
+            else { ARIADNE_LOG(2,"f(y)="<<fn(make_exact(y))<<"\n"); return make_pair(indeterminate,make_exact(point)); }
         }
     }
     ARIADNE_LOG(4,"  t="<<t<<", y="<<y<<", x="<<x<<", z="<<z<<"\n");
@@ -152,17 +149,18 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Validate
         // Probably disjoint, so try to prove this
         Box subdomain=domain;
 
+        Vector<ExactFloat> x_exact=make_exact(x);
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
         ScalarTaylorFunction txg=ScalarTaylorFunction::zero(d,default_sweeper());
-        Interval cnst=0.0;
+        ValidatedNumberType cnst=0.0;
         for(uint j=0; j!=n; ++j) {
-            txg = txg - Interval(x[j]-x[n+j])*tfn[j];
-            cnst += (c[j].upper()*x[j]-c[j].lower()*x[n+j]);
+            txg = txg - (x_exact[j]-x_exact[n+j])*tfn[j];
+            cnst += (c[j].upper()*x_exact[j]-c[j].lower()*x_exact[n+j]);
         }
         for(uint i=0; i!=m; ++i) {
-            txg = txg - (x[2*n+i]-x[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i,default_sweeper());
-            cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
+            txg = txg - (x_exact[2*n+i]-x_exact[2*n+m+i])*ScalarTaylorFunction::coordinate(d,i,default_sweeper());
+            cnst += (d[i].upper()*x_exact[2*n+i]-d[i].lower()*x_exact[2*n+m+i]);
         }
         txg = cnst + txg;
 
@@ -186,10 +184,10 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Validate
         //Pair<Box,Box> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<Box,Box> sd=d.split();
-        Point nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
-        Point ny = midpoint(sd.first);
+        Vector<ApproximateFloatType> nx = ApproximateFloatType(1.0-XSIGMA)*x + Vector<ApproximateFloatType>(x.size(),XSIGMA/x.size());
+        Vector<ApproximateFloatType> ny = midpoint(sd.first);
         tribool result=this->feasible(sd.first, fn, c).first;
-        nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
+        nx = ApproximateFloatType(1.0-XSIGMA)*x + Vector<ApproximateFloatType>(x.size(),XSIGMA/x.size());
         ny = midpoint(sd.second);
         result = result || this->feasible(sd.second, fn, c).first;
         return make_pair(result,Point());
@@ -209,7 +207,7 @@ bool ConstraintSolver::reduce(Box& domain, const ValidatedVectorFunction& functi
 
     Float domain_magnitude=0.0;
     for(uint j=0; j!=domain.size(); ++j) {
-        domain_magnitude+=domain[j].width();
+        domain_magnitude+=domain[j].width().raw();
     }
     Float old_domain_magnitude=domain_magnitude;
 
@@ -228,7 +226,7 @@ bool ConstraintSolver::reduce(Box& domain, const ValidatedVectorFunction& functi
         old_domain_magnitude=domain_magnitude;
         domain_magnitude=0.0;
         for(uint j=0; j!=domain.size(); ++j) {
-            domain_magnitude+=domain[j].width();
+            domain_magnitude+=domain[j].width().raw();
         }
     } while(domain_magnitude/old_domain_magnitude <= MINIMUM_REDUCTION);
 
@@ -239,7 +237,7 @@ inline bool is_nan(const Float& x) { return isnan(x.get_d()); }
 
 bool has_nan(const Box& domain) {
     for(uint i=0; i!=domain.size(); ++i) {
-        if(is_nan(domain[i].lower()) || is_nan(domain[i].upper())) { return true; }
+        if(is_nan(domain[i].lower().raw()) || is_nan(domain[i].upper().raw())) { return true; }
     }
     return false;
 }
@@ -254,7 +252,7 @@ bool ConstraintSolver::reduce(Box& domain, const List<ValidatedConstraint>& cons
 
     Float domain_magnitude=0.0;
     for(uint j=0; j!=domain.size(); ++j) {
-        domain_magnitude+=domain[j].width();
+        domain_magnitude+=domain[j].width().raw();
     }
     Float old_domain_magnitude=domain_magnitude;
 
@@ -276,7 +274,7 @@ bool ConstraintSolver::reduce(Box& domain, const List<ValidatedConstraint>& cons
         old_domain_magnitude=domain_magnitude;
         domain_magnitude=0.0;
         for(uint j=0; j!=domain.size(); ++j) {
-            domain_magnitude+=domain[j].width();
+            domain_magnitude+=domain[j].width().raw();
         }
     } while(domain_magnitude/old_domain_magnitude <= MINIMUM_REDUCTION);
 
@@ -307,8 +305,8 @@ bool ConstraintSolver::hull_reduce(Box& domain, const ValidatedScalarFunctionInt
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, ValidatedScalarFunction function, Interval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
-    Formula<Interval> formula=function.evaluate(Formula<Interval>::identity(function.argument_size()));
-    Procedure<Interval> procedure(formula);
+    Formula<ValidatedNumberType> formula=function.evaluate(Formula<ValidatedNumberType>::identity(function.argument_size()));
+    Procedure<ValidatedNumberType> procedure(formula);
     return this->hull_reduce(domain,procedure,bounds);
 }
 
@@ -317,8 +315,8 @@ bool ConstraintSolver::hull_reduce(Box& domain, const ValidatedVectorFunctionInt
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, ValidatedScalarFunction function, Interval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
-    Vector< Formula<Interval> > formula=function.evaluate(Formula<Interval>::identity(function.argument_size()));
-    Vector< Procedure<Interval> > procedure(formula);
+    Vector< Formula<ValidatedNumberType> > formula=function.evaluate(Formula<ValidatedNumberType>::identity(function.argument_size()));
+    Vector< Procedure<ValidatedNumberType> > procedure(formula);
     return this->hull_reduce(domain,procedure,bounds);
 }
 
@@ -328,23 +326,23 @@ bool ConstraintSolver::monotone_reduce(Box& domain, const ValidatedScalarFunctio
 
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
 
-    Float midpoint;
+    ExactFloatType midpoint;
     Interval lower=domain[variable];
     Interval upper=domain[variable];
     Vector<Interval> slice=domain;
     Vector<Interval> subdomain=domain;
 
     static const int MAX_STEPS=3;
-    const Float size = lower.radius() / (1<<MAX_STEPS);
+    const Float size = lower.radius().raw() / (1<<MAX_STEPS);
     do {
-        if(lower.radius()>size) {
+        if(lower.radius().raw()>size) {
             midpoint=lower.midpoint();
             slice[variable]=midpoint;
             Interval new_lower=midpoint+(bounds-function(slice)).lower()/derivative(subdomain);
-            if(new_lower.upper()<lower.lower()) { lower=lower.lower(); }
+            if(new_lower.upper().raw()<lower.lower().raw()) { lower=lower.lower().raw(); }
             else { lower=intersection(lower,new_lower); }
         }
-        if(upper.radius()>size) {
+        if(upper.radius().raw()>size) {
             midpoint=upper.midpoint();
             slice[variable]=midpoint;
             Interval new_upper=midpoint+(bounds-function(slice)).upper()/derivative(subdomain);
@@ -352,7 +350,7 @@ bool ConstraintSolver::monotone_reduce(Box& domain, const ValidatedScalarFunctio
             else { upper=intersection(upper,new_upper); }
         }
         subdomain[variable]=Interval(lower.lower(),upper.upper());
-    } while(lower.radius()>size && upper.radius()>size);
+    } while(lower.radius().raw()>size && upper.radius().raw()>size);
     domain=subdomain;
 
     return domain.empty();
@@ -361,17 +359,24 @@ bool ConstraintSolver::monotone_reduce(Box& domain, const ValidatedScalarFunctio
 
 
 bool ConstraintSolver::lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const Box& bounds,
-                                       FloatVector centre, FloatVector multipliers) const
+                                       ApproximateFloatVector centre, ApproximateFloatVector multipliers) const
+{
+    return this->lyapunov_reduce(domain,function,bounds,make_exact(centre),make_exact(multipliers));
+}
+
+
+bool ConstraintSolver::lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const Box& bounds,
+                                       ExactFloatVector centre, ExactFloatVector multipliers) const
 {
     ScalarTaylorFunction g(function.domain(),default_sweeper());
     Interval C(0);
     for(uint i=0; i!=function.result_size(); ++i) {
-        g += multipliers[i] * function[i];
-        C += multipliers[i] * bounds[i];
+        g += make_exact(multipliers[i]) * function[i];
+        C += make_exact(multipliers[i]) * bounds[i];
     }
     IntervalDifferentialVector dx = IntervalDifferential::variables(1u,domain);
     IntervalVector dg = g.evaluate(dx).gradient();
-    C -= g(IntervalVector(centre));
+    C -= g(centre);
 
     Box new_domain(domain);
     IntervalVector ranges(domain.size());
@@ -402,8 +407,8 @@ bool ConstraintSolver::box_reduce(Box& domain, const ValidatedScalarFunctionInte
     // Try to reduce the size of the set by "shaving" off along a coordinate axis
     //
     Interval interval=domain[variable];
-    Float l=interval.lower();
-    Float u=interval.upper();
+    RawFloatType l=interval.lower().raw();
+    RawFloatType u=interval.upper().raw();
     Interval subinterval;
     Interval new_interval(interval);
     Vector<Interval> slice=domain;
@@ -481,7 +486,7 @@ tribool ConstraintSolver::check_feasibility(const Box& d, const ValidatedVectorF
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }
     }
 
-    Vector<Interval> fy=f(Vector<Interval>(y));
+    Vector<ValidatedFloatType> fy=f(Vector<ValidatedFloatType>(y));
     ARIADNE_LOG(4,"d="<<d<<" f="<<f<<", c="<<c<<"\n  y="<<y<<", f(y)="<<fy<<"\n");
     tribool result=true;
     for(uint j=0; j!=fy.size(); ++j) {

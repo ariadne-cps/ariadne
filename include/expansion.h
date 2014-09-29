@@ -724,7 +724,7 @@ Expansion<X> embed(unsigned int before_size, const Expansion<X>& x, unsigned int
 inline Expansion<Float> midpoint(const Expansion<Interval>& pse) {
     Expansion<Float> r(pse.argument_size());
     for(Expansion<Interval>::const_iterator iter=pse.begin(); iter!=pse.end(); ++iter) {
-        r.append(iter->key(),midpoint(iter->data())); }
+        r.append(iter->key(),static_cast<Float>(midpoint(iter->data()))); }
     return r;
 }
 

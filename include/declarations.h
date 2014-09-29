@@ -150,6 +150,11 @@ typedef Vector<ApproximateFloatType> ApproximateFloatVectorType;
 typedef Vector<ValidatedFloatType> ValidatedFloatVectorType;
 typedef Vector<ExactFloatType> ExactFloatVectorType;
 
+typedef Vector<RawFloatType> RawFloatVector;
+typedef Vector<ApproximateFloatType> ApproximateFloatVector;
+typedef Vector<ValidatedFloatType> ValidatedFloatVector;
+typedef Vector<ExactFloatType> ExactFloatVector;
+
 typedef Vector<ApproximateNumberType> ApproximateVectorType;
 typedef Vector<ValidatedNumberType> ValidatedVectorType;
 typedef Vector<EffectiveNumberType> EffectiveVectorType;

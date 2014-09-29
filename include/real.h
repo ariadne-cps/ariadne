@@ -102,6 +102,7 @@ class Real {
 
     operator ApproximateFloatType() const;
     operator ValidatedFloatType() const;
+    operator UpperFloatType() const;
     //explicit operator ApproximateFloatType() const;
     //explicit operator ValidatedFloatType() const;
   public:

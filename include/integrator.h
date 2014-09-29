@@ -35,6 +35,7 @@
 #include "integrator_interface.h"
 #include "function_interface.h"
 
+#include "declarations.h"
 #include "attribute.h"
 #include "logging.h"
 #include "pointer.h"
@@ -48,6 +49,7 @@ template<class X> class Vector;
 template<class X> class Differential;
 template<class X> class Procedure;
 template<class X> class Polynomial;
+typedef Differential<ValidatedNumberType> ValidatedDifferential;
 typedef Vector< Procedure<ValidatedNumberType> > ValidatedVectorProcedure;
 typedef Vector< Differential<Interval> > IntervalDifferentialVector;
 template<class X> class FunctionModelFactoryInterface;
@@ -278,9 +280,9 @@ class AffineIntegrator
     using IntegratorBase::flow_step;
 
     //! \brief Compute the derivative of the flow of f at time zero within \a dom.
-    IntervalDifferentialVector
+    Vector<ValidatedDifferential>
     flow_derivative(const ValidatedVectorFunction& f,
-                    const Box& dom) const;
+                    const Vector<ValidatedNumberType>& dom) const;
 };
 
 

@@ -71,13 +71,14 @@ class SolverBase
     /*! \brief Set the class which constructs functions for the implicit function solver. */
     void set_function_factory(const FunctionModelFactoryInterface<ValidatedTag>& factory);
 
-    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Vector<ValidatedNumberType> zero(const ValidatedVectorFunction& f,const Vector<ValidatedNumberType>& pt) const;
-    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Vector<ValidatedNumberType> fixed_point(const ValidatedVectorFunction& f,const Vector<ValidatedNumberType>& pt) const;
+    /*! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. */
+    virtual Vector<ValidatedNumberType> zero(const ValidatedVectorFunction& f,const Box& bx) const;
+    /*! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. */
+    virtual Vector<ValidatedNumberType> fixed_point(const ValidatedVectorFunction& f,const Box& bx) const;
 
-    /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Vector<ValidatedNumberType> solve(const ValidatedVectorFunction& f,const Vector<ValidatedNumberType>& pt) const;
+    /*! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. */
+    virtual Vector<ValidatedNumberType> solve(const ValidatedVectorFunction& f,const Box& bx) const;
+    virtual Vector<ValidatedNumberType> solve(const ValidatedVectorFunction& f,const Vector<ValidatedNumberType>& ipt) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
     virtual ValidatedVectorFunctionModel implicit(const ValidatedVectorFunction& f, const Box& par, const Box& ix) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */

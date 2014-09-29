@@ -87,8 +87,8 @@ Interval make_domain(const IntervalSet& ivl) {
     rounding_mode_t rnd=get_rounding_mode();
     Interval dom_lower_ivl=Interval(ivl.lower());
     Interval dom_upper_ivl=Interval(ivl.upper());
-    Float dom_lower=dom_lower_ivl.lower();
-    Float dom_upper=dom_upper_ivl.upper();
+    Float dom_lower=dom_lower_ivl.lower().raw();
+    Float dom_upper=dom_upper_ivl.upper().raw();
     set_rounding_downward();
     float flt_dom_lower=numeric_cast<double>(dom_lower);
     while(double(flt_dom_lower)>dom_lower) {
@@ -117,8 +117,8 @@ ValidatedVectorFunctionModel make_identity(const BoxSet& bx, const ValidatedFunc
         Float dom_lower_flt=numeric_cast<float>(bx[i].lower());
         Float dom_upper_flt=numeric_cast<float>(bx[i].upper());
         set_rounding_upward();
-        Float err=max( max(dom_upper_ivl.upper()-dom_upper_flt,dom_upper_flt-dom_upper_ivl.lower()),
-                       max(dom_lower_ivl.upper()-dom_lower_flt,dom_lower_flt-dom_lower_ivl.lower()) );
+        Float err=max( max(dom_upper_ivl.upper().raw()-dom_upper_flt,dom_upper_flt-dom_upper_ivl.lower().raw()),
+                       max(dom_lower_ivl.upper().raw()-dom_lower_flt,dom_lower_flt-dom_lower_ivl.lower().raw()) );
         set_rounding_to_nearest();
         dom[i]=Interval(dom_lower_flt,dom_upper_flt);
         errs[i]=err;
@@ -126,7 +126,7 @@ ValidatedVectorFunctionModel make_identity(const BoxSet& bx, const ValidatedFunc
 
     ValidatedVectorFunctionModel res=fac.create_identity(dom);
     for(uint i=0; i!=bx.dimension(); ++i) {
-        res[i]=res[i]+Interval(-errs[i],+errs[i]);
+        res[i]=res[i]+ValidatedNumberType(-errs[i],+errs[i]);
     }
 
     return res;
@@ -272,7 +272,7 @@ Enclosure::Enclosure(const Box& box, const ValidatedFunctionModelFactoryInterfac
             this->_space_function[i]=this->function_factory().create_coordinate(this->_domain,j);
             ++j;
         } else {
-            this->_space_function[i]=this->function_factory().create_constant(this->_domain,box[i]);
+            this->_space_function[i]=this->function_factory().create_constant(this->_domain,make_singleton(box[i]));
         }
     }
     this->_reduced_domain=this->_domain;
@@ -501,7 +501,7 @@ void Enclosure::apply_full_reach_step(ValidatedVectorFunctionModel phi)
     // tau'(s) = tau(s)+t
     ARIADNE_ASSERT(phi.result_size()==this->dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
-    Float h=phi.domain()[phi.result_size()].upper();
+    Float h=phi.domain()[phi.result_size()].upper().raw();
     ValidatedScalarFunctionModel elps=this->function_factory().create_constant(this->domain(),ExactFloat(h));
     this->apply_parameter_reach_step(phi,elps);
 }
@@ -521,7 +521,7 @@ void Enclosure::apply_parameter_reach_step(ValidatedVectorFunctionModel phi, Val
     ARIADNE_ASSERT(phi.result_size()==this->dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
     ARIADNE_ASSERT(elps.argument_size()==this->number_of_parameters());
-    Float h=phi.domain()[phi.result_size()].upper();
+    Float h=phi.domain()[phi.result_size()].upper().raw();
     Box parameter_domain=this->parameter_domain();
     Interval time_domain=Interval(0,h);
     ValidatedScalarFunctionModel time_function=this->function_factory().create_identity(time_domain);
@@ -667,7 +667,7 @@ Box Enclosure::bounding_box() const {
     return Box(this->_space_function.codomain()).bounding_box();
 }
 
-Float Enclosure::radius() const {
+ErrorFloatType Enclosure::radius() const {
     return this->bounding_box().radius();
 }
 
@@ -809,7 +809,7 @@ Enclosure::splitting_index_zeroth_order() const
         for(uint i=0; i!=this->dimension(); ++i) {
             column_norm+=mag(jacobian[i][j]);
         }
-        column_norm *= this->reduced_domain()[j].radius();
+        column_norm *= this->reduced_domain()[j].radius().raw();
         if(column_norm>max_column_norm) {
             max_column_norm=column_norm;
             jmax=j;
@@ -1015,7 +1015,7 @@ uniform_error_recondition()
     List<uint> large_error_indices;
 
     for(uint i=0; i!=this->_space_function.result_size(); ++i) {
-        Float error=this->_space_function.get(i).error();
+        Float error=this->_space_function.get(i).error().raw();
         if(error > MAXIMUM_ERROR) {
             large_error_indices.append(i);
         }
@@ -1023,7 +1023,7 @@ uniform_error_recondition()
 
     Box error_domains(large_error_indices.size());
     for(uint i=0; i!=large_error_indices.size(); ++i) {
-        Float error=this->_space_function.get(large_error_indices[i]).error();
+        Float error=this->_space_function.get(large_error_indices[i]).error().raw();
         error_domains[i]=Interval(-error,+error);
     }
     error_domains=Box(large_error_indices.size(),Interval(-1,+1));
@@ -1037,10 +1037,10 @@ uniform_error_recondition()
     }
 
     for(uint i=0; i!=large_error_indices.size(); ++i) {
-        Float error=this->_space_function.get(large_error_indices[i]).error();
+        Float error=this->_space_function.get(large_error_indices[i]).error().raw();
         if(error > MAXIMUM_ERROR) {
             this->_space_function[i].set_error(0.0);
-            this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*Interval(error);
+            this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*ValidatedFloatType(+error);
             ++k;
         }
     }
@@ -1078,7 +1078,7 @@ Enclosure::kuhn_recondition()
         for(ValidatedTaylorModel::const_iterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
             for(uint j=0; j!=dependencies.column_size(); ++j) {
                 if(iter->key()[j]!=0) {
-                    dependencies[i][j]+=abs(iter->data());
+                    dependencies[i][j]+=abs(iter->data()).raw();
                 }
             }
         }

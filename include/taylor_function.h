@@ -73,10 +73,6 @@ inline ValidatedNumberType rad_val(Interval const& ivl) {
     return half(ivl.upper()-ivl.lower());
 }
 
-inline ValidatedNumberType make_singleton(Interval const& ivl) {
-    return ValidatedNumberType(ivl.lower_raw(),ivl.upper_raw());
-}
-
 template<template<class> class T> inline T<ApproximateTag> unscale(const T<ApproximateTag>& x, const Interval& d) {
     ApproximateNumberType c(med_apprx(d));
     ApproximateNumberType r(rad_apprx(d));

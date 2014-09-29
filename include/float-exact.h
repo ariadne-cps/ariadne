@@ -80,6 +80,8 @@ class ExactFloat {
 
 class ValidatedFloat;
 
+extern const ExactFloat infty;
+
 inline ExactFloat operator"" _exact(long double lx) { double x=lx; assert(x==lx); return ExactFloat(x); }
 
 inline ExactFloat operator+(const ExactFloat& x) { return ExactFloat(pos_exact(x.value())); }
@@ -101,6 +103,7 @@ inline ValidatedFloat operator/(int n1,  const ExactFloat& x2);
 
 inline ExactFloat neg(const ExactFloat& x) { return ExactFloat(neg_exact(x.value())); }
 inline ExactFloat abs(const ExactFloat& x) { return ExactFloat(abs_exact(x.value())); }
+inline ExactFloat mag(const ExactFloat& x) { return ExactFloat(abs_exact(x.value())); }
 
 inline std::ostream& operator<<(std::ostream& os, const ExactFloat& x) {
     return os << std::showpoint << std::setprecision(ExactFloat::output_precision) << x.value(); }

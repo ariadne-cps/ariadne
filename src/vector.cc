@@ -149,29 +149,29 @@ std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v)
 
 
 
-Vector<Float> midpoint(const Vector<Interval>& v)
+Vector<ExactFloatType> midpoint(const Vector<Interval>& v)
 {
-    Vector<Float> r(v.size());
+    Vector<ExactFloatType> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
-        r[i]=v[i].midpoint().raw();
+        r[i]=v[i].midpoint();
     }
     return r;
 }
 
-Vector<Float> lower_bounds(const Vector<Interval>& v)
+Vector<LowerFloatType> lower_bounds(const Vector<Interval>& v)
 {
-    Vector<Float> r(v.size());
+    Vector<LowerFloatType> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
-        r[i]=v[i].lower().raw();
+        r[i]=v[i].lower();
     }
     return r;
 }
 
-Vector<Float> upper_bounds(const Vector<Interval>& v)
+Vector<UpperFloatType> upper_bounds(const Vector<Interval>& v)
 {
-    Vector<Float> r(v.size());
+    Vector<UpperFloatType> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
-        r[i]=v[i].upper().raw();
+        r[i]=v[i].upper();
     }
     return r;
 }

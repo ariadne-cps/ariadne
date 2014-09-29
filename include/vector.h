@@ -115,7 +115,7 @@ class Vector
     template<class XX, typename std::enable_if<std::is_convertible<XX,X>::value,int>::type=0>
         Vector(const Vector<XX>& v) : _ary(v.size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=v[i]; } }
     template<class XX, typename std::enable_if<std::is_constructible<X,XX>::value and not std::is_convertible<XX,X>::value,int>::type=0>
-        explicit Vector(Vector<XX> v) : _ary(v.size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=X(v[i]); } }
+        explicit Vector(const Vector<XX>& v) : _ary(v.size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=X(v[i]); } }
     template<class V> Vector(const VectorExpression<V>& ve, typename EnableIf<Or<IsSame<typename V::ValueType,X>, IsNumericCastable<typename V::ValueType,X> >,Void>::Type* = 0)
         : _ary(ve().size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=static_cast<X>(ve()[i]); } }
     template<class V> typename EnableIf<IsSafelyConvertible<typename V::ValueType,X>,Vector<X>&>::Type operator=(const VectorExpression<V>& ve) {
@@ -612,11 +612,26 @@ Vector<Interval> hull(const Vector<Float>& v1, const Vector<Float>& v2);
 Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Float>& v2);
 Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Interval>& v2);
 Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>& v2);
-Vector<Float> midpoint(const Vector<Interval>& v);
-Vector<Float> lower_bounds(const Vector<Interval>& v);
-Vector<Float> upper_bounds(const Vector<Interval>& v);
+//Vector<Float> midpoint(const Vector<Interval>& v);
 Float radius(const Vector<Interval>& z);
 Float volume(const Vector<Interval>& z);
+
+Vector<ExactFloatType> midpoint(const Vector<Interval>& v);
+Vector<ExactFloatType> lower_bounds(const Vector<Interval>& v);
+Vector<ExactFloatType> upper_bounds(const Vector<Interval>& v);
+
+Vector<ExactFloatType>const& make_exact(const Vector<ApproximateFloatType>& av);
+Vector<ValidatedFloatType> make_bounds(const Vector<ErrorFloatType>& ev);
+Vector<ValidatedFloatType>const& make_singleton(const Vector<Interval>& ivlv);
+Matrix<ValidatedFloatType>const& make_singleton(const Matrix<Interval>& ivlA);
+
+UpperFloatType sup_error(const Vector<ValidatedFloatType>& x);
+Vector<ExactFloatType> midpoint(const Vector<ValidatedFloatType>& x);
+bool models(const Vector<ValidatedFloatType>& x1, const Vector<ExactFloatType>& x2);
+bool consistent(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2);
+bool inconsistent(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2);
+bool refines(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2);
+Vector<ValidatedFloatType> refinement(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2);
 
 
 

@@ -127,6 +127,8 @@ class UpperFloat {
     friend LowerFloat operator-(LowerFloat, UpperFloat);
     friend UpperFloat operator*(UpperFloat, UpperFloat);
     friend UpperFloat operator/(UpperFloat, LowerFloat);
+    friend UpperFloat& operator+=(UpperFloat&, UpperFloat);
+    friend UpperFloat& operator*=(UpperFloat&, UpperFloat);
     friend UpperFloat pow(UpperFloat, uint);
     friend UpperFloat half(UpperFloat);
     friend UpperFloat abs(UpperFloat);
@@ -229,8 +231,10 @@ class ValidatedFloat {
     UpperFloat upper() const { return UpperFloat(u); }
     //! \brief An approximation to the midpoint of the interval.
     const ExactFloat midpoint() const { return ExactFloat(half_exact(add_approx(l,u))); }
+    const ExactFloat value() const { return ExactFloat(half_exact(add_approx(l,u))); }
     //! \brief An over-approximation to the radius of the interval.
     const UpperFloat radius() const { return UpperFloat(half_exact(sub_up(u,l))); }
+    const UpperFloat error() const { return UpperFloat(half_exact(sub_up(u,l))); }
     //! \brief An over-approximation to the width of the interval.
     const UpperFloat width() const { return UpperFloat(sub_up(u,l)); }
 
@@ -259,6 +263,10 @@ class ValidatedFloat {
 std::ostream& operator<<(std::ostream& os, const ValidatedFloat& ivl);
 
 extern const ValidatedFloat pi_val;
+
+inline ValidatedFloat make_bounds(const PositiveUpperFloat& e) {
+    return ValidatedFloat(-e,+e);
+}
 
 inline LowerFloat::LowerFloat(ValidatedFloat const& i) : l(i.lower_raw()) {
 }
@@ -620,7 +628,24 @@ inline ValidatedFloat pow(const ExactFloat& x, int n) { return pow(ValidatedFloa
 
 // Standard equality operators
 //! \related ValidatedFloat \brief Tests if \a i1 provides tighter bounds than \a i2.
-inline bool refines(const ValidatedFloat& i1, const ValidatedFloat& i2) { return i1.lower_raw()>=i2.lower_raw() && i1.upper_raw()<=i2.upper_raw(); }
+inline bool refines(const ValidatedFloat& i1, const ValidatedFloat& i2) {
+    return i1.lower_raw()>=i2.lower_raw() && i1.upper_raw()<=i2.upper_raw(); }
+
+//! \related ValidatedFloat \brief The common refinement of \a i1 and \a i2.
+inline ValidatedFloat refinement(const ValidatedFloat& i1, const ValidatedFloat& i2) {
+    return ValidatedFloat(max(i1.lower_raw(),i2.lower_raw()),min(i1.upper_raw(),i2.upper_raw())); }
+
+//! \related ValidatedFloat \brief Tests if \a i1 and \a i2 are consistent with representing the same number.
+inline bool consistent(const ValidatedFloat& i1, const ValidatedFloat& i2) {
+    return i1.lower_raw()<=i2.upper_raw() && i1.upper_raw()>=i2.lower_raw(); }
+
+//! \related ValidatedFloat \brief  Tests if \a i1 and \a i2 are inconsistent with representing the same number.
+inline bool inconsistent(const ValidatedFloat& i1, const ValidatedFloat& i2) {
+    return not consistent(i1,i2); }
+
+//! \related ValidatedFloat \brief  Tests if \a i1 is a model for the exact value \a x2. number.
+inline bool models(const ValidatedFloat& i1, const ExactFloat& x2) {
+    return i1.lower_raw()<=x2.raw() && i1.upper_raw()>=x2.raw(); }
 
 //inline ValidatedFloat& operator+=(ValidatedFloat& i1, const ExactFloat& x2) { i1=add(i1,x2); return i1; }
 //inline ValidatedFloat& operator-=(ValidatedFloat& i1, const ExactFloat& x2) { i1=sub(i1,x2); return i1; }

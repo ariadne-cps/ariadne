@@ -138,6 +138,9 @@ Float compute_mu(const Vector<Float>& xl, const Vector<Float>& xu,
 
 
 
+inline ValidatedFloat mul_val(Float x1, Float x2) { return ValidatedFloat(mul_down(x1,x2),mul_up(x1,x2)); }
+inline Vector<ExactFloatType> const& make_exact(Vector<Float> const& v) { return reinterpret_cast<Vector<ExactFloatType>const&>(v); }
+inline Matrix<ExactFloatType> const& make_exact(Matrix<Float> const& A) { return reinterpret_cast<Matrix<ExactFloatType>const&>(A); }
 
 
 tribool InteriorPointSolver::
@@ -150,14 +153,14 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
 
     // x should be an approximate solution to Ax=b
     // Use the fact that for any x, x'=(x + A^T (AA^T)^{-1}(b-Ax)) satisfies Ax'=0
-    Vector<Interval> ivlx = x;
-    Vector<Interval> ivle = make_exact(b)-make_exact(A)*ivlx;
+    Vector<ValidatedNumberType> ivlx = make_exact(x);
+    Vector<ValidatedNumberType> ivle = make_exact(b)-make_exact(A)*ivlx;
 
     Matrix<ValidatedNumberType> ivlS(m,m);
     for(uint i1=0; i1!=m; ++i1) {
         for(uint i2=i1; i2!=m; ++i2) {
             for(uint j=0; j!=n; ++j) {
-                ivlS[i1][i2] += mul_ivl(A[i1][j],A[i2][j]);
+                ivlS[i1][i2] += mul_val(A[i1][j],A[i2][j]);
             }
         }
     }
@@ -167,14 +170,14 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
         }
     }
 
-    Vector<Interval> ivld = solve(ivlS,ivle) * make_exact(A);
+    Vector<ValidatedNumberType> ivld = solve(ivlS,ivle) * make_exact(A);
 
     ivlx += ivld;
 
     ARIADNE_LOG(2,"[x] = "<<ivlx);
     tribool result=true;
     for(uint i=0; i!=n; ++i) {
-        if(ivlx[i].lower()<=xl[i] || ivlx[i].upper()>=xu[i]) {
+        if(ivlx[i].lower().raw()<=xl[i] || ivlx[i].upper().raw()>=xu[i]) {
             result = indeterminate; break;
         }
     }
@@ -183,16 +186,16 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
 
     // If yb - max(yA,0) xu + min(yA,0) xl > 0, then problem is infeasible
     // Evaluate lower bound for yb - max(z,0) xu + min(z,0) xl
-    Vector<Interval> z=make_exact(y)*make_exact(A);
+    Vector<ValidatedNumberType> z=make_exact(y)*make_exact(A);
     Float mx = 0.0;
     set_rounding_downward();
     for(uint i=0; i!=y.size(); ++i) {
-        mx += b[i]*y[i];
+        mx += (b[i]*y[i]).raw();
     }
     for(uint i=0; i!=x.size(); ++i) {
         Float neg_xui = -xu[i];
-        if(z[i].upper()>0.0) { mx += z[i].upper() * neg_xui; }
-        if(z[i].lower()<0.0) { mx += z[i].lower() * xl[i]; }
+        if(z[i].upper()>0.0) { mx += z[i].upper().raw() * neg_xui; }
+        if(z[i].lower()<0.0) { mx += z[i].lower().raw() * xl[i]; }
     }
     set_rounding_to_nearest();
     if(mx>0.0) { return false; }
@@ -315,7 +318,7 @@ feasible(const Vector<Float>& xl, const Vector<Float>& xu,
             if(definitely(validated_feasible)) { return true; }
         }
         Interval yb=dot(IntervalVector(y),IntervalVector(b));
-        Interval yAX = dot( make_exact(y)*make_exact(A), X );
+        Interval yAX = dot( IntervalVector(y)*IntervalMatrix(A), X );
         if(disjoint(yb,yAX)) { return false; }
         if(result==DEGENERATE_FEASIBILITY) { ARIADNE_LOG(2,"  degenerate\n"); return indeterminate; }
         if(compute_mu(xl,xu, x,zl,zu)<THRESHOLD ) { ARIADNE_LOG(2,"  threshold\n"); return indeterminate; }

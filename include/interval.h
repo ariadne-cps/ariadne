@@ -134,7 +134,8 @@ class Interval {
     Interval(const Float& lower, const Float& upper) : l(lower), u(upper) { }
     //! \brief Convert from a floating-point number with an exact representation.
     Interval(const ExactFloat& lower, const ExactFloat& upper) : l(lower.raw()), u(upper.raw()) { }
-        // ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper);
+    //! \brief Construct an over-approximating interval.
+    explicit Interval(const LowerFloat& lower, const UpperFloat& upper) : l(lower.raw()), u(upper.raw()) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     explicit Interval(const Real& lower, const Real& upper);
 #ifdef HAVE_GMPXX_H
@@ -199,8 +200,8 @@ class Interval {
 
 std::ostream& operator<<(std::ostream& os, const Interval& ivl);
 
-inline RawFloatType midpoint(Interval i) {
-    return static_cast<RawFloatType>(i.midpoint());
+inline ExactFloatType midpoint(Interval i) {
+    return i.midpoint();
 }
 
 inline ErrorFloatType radius(Interval i) {
@@ -343,6 +344,8 @@ inline Float mig(Interval i) { return min(abs(i.lower_raw()),abs(i.upper_raw()))
 
 //! \related Interval \brief Test if the interval \a I contains the number \a x.
 inline bool contains(Interval i, ExactFloatType x) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
+inline bool contains(Interval i, ValidatedFloatType x) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
+inline bool contains(Interval i, RawFloatType x) { return i.lower_raw()<=x && x<=i.upper_raw(); }
 
 //! \related Interval \brief Test if the interval \a I1 is a subset of \a I2.
 inline bool subset(Interval i1, Interval i2) { return i1.lower_raw()>=i2.lower_raw() && i1.upper_raw()<=i2.upper_raw(); }
@@ -750,6 +753,11 @@ inline tribool operator<=(Interval i1, Interval i2) {
 
 std::ostream& operator<<(std::ostream&, const Interval&);
 std::istream& operator>>(std::istream&, Interval&);
+
+inline ValidatedNumberType make_singleton(Interval const& ivl) {
+    return ValidatedNumberType(ivl.lower_raw(),ivl.upper_raw());
+}
+
 
 class UnitInterval
     : public Interval

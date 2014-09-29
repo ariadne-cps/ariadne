@@ -39,6 +39,7 @@ typedef ValidatedNumberType ValidatedNumber;
 typedef EffectiveNumberType EffectiveNumber;
 typedef Differential<ApproximateNumber> ApproximateDifferential;
 typedef Differential<ValidatedNumber> ValidatedDifferential;
+typedef Differential<Interval> IntervalDifferential;
 typedef TaylorModel<ApproximateNumber> ApproximateTaylorModel;
 typedef TaylorModel<ValidatedNumber> ValidatedTaylorModel;
 typedef Formula<ApproximateNumber> ApproximateFormula;
@@ -86,8 +87,10 @@ class ScalarFunctionMixin<F,ValidatedTag>
   public:
     virtual ApproximateNumber evaluate(const Vector<ApproximateNumber>& x) const;
     virtual ValidatedNumber evaluate(const Vector<ValidatedNumber>& x) const;
+    virtual Interval evaluate(const Vector<Interval>& x) const;
     virtual ApproximateDifferential evaluate(const Vector<ApproximateDifferential>& x) const;
     virtual ValidatedDifferential evaluate(const Vector<ValidatedDifferential>& x) const;
+    virtual IntervalDifferential evaluate(const Vector<IntervalDifferential>& x) const;
     virtual ApproximateFormula evaluate(const Vector<ApproximateFormula>& x) const;
     virtual ApproximateAlgebra evaluate(const Vector<ApproximateAlgebra>& x) const;
     virtual ValidatedFormula evaluate(const Vector<ValidatedFormula>& x) const;
@@ -113,8 +116,10 @@ class ScalarFunctionMixin<F,EffectiveTag>
     virtual ApproximateNumber evaluate(const Vector<ApproximateNumber>& x) const;
     virtual ValidatedNumber evaluate(const Vector<ValidatedNumber>& x) const;
     virtual EffectiveNumber evaluate(const Vector<EffectiveNumber>& x) const;
+    virtual Interval evaluate(const Vector<Interval>& x) const;
     virtual ApproximateDifferential evaluate(const Vector<ApproximateDifferential>& x) const;
     virtual ValidatedDifferential evaluate(const Vector<ValidatedDifferential>& x) const;
+    virtual IntervalDifferential evaluate(const Vector<IntervalDifferential>& x) const;
     virtual ApproximateFormula evaluate(const Vector<ApproximateFormula>& x) const;
     virtual ValidatedFormula evaluate(const Vector<ValidatedFormula>& x) const;
     virtual EffectiveFormula evaluate(const Vector<EffectiveFormula>& x) const;
@@ -164,8 +169,10 @@ class VectorFunctionMixin<F,ValidatedTag>
   public:
     virtual Vector<ApproximateNumber> evaluate(const Vector<ApproximateNumber>& x) const;
     virtual Vector<ValidatedNumber> evaluate(const Vector<ValidatedNumber>& x) const;
+    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const;
     virtual Vector<ApproximateDifferential> evaluate(const Vector<ApproximateDifferential>& x) const;
     virtual Vector<ValidatedDifferential> evaluate(const Vector<ValidatedDifferential>& x) const;
+    virtual Vector<IntervalDifferential> evaluate(const Vector<IntervalDifferential>& x) const;
     virtual Vector<ApproximateTaylorModel> evaluate(const Vector<ApproximateTaylorModel>& x) const;
     virtual Vector<ValidatedTaylorModel> evaluate(const Vector<ValidatedTaylorModel>& x) const;
     virtual Vector<ApproximateFormula> evaluate(const Vector<ApproximateFormula>& x) const;
@@ -191,8 +198,10 @@ class VectorFunctionMixin<F,EffectiveTag>
     virtual Vector<ApproximateNumber> evaluate(const Vector<ApproximateNumber>& x) const;
     virtual Vector<ValidatedNumber> evaluate(const Vector<ValidatedNumber>& x) const;
     virtual Vector<EffectiveNumber> evaluate(const Vector<EffectiveNumber>& x) const;
+    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const;
     virtual Vector<ApproximateDifferential> evaluate(const Vector<ApproximateDifferential>& x) const;
     virtual Vector<ValidatedDifferential> evaluate(const Vector<ValidatedDifferential>& x) const;
+    virtual Vector<IntervalDifferential> evaluate(const Vector<IntervalDifferential>& x) const;
     virtual Vector<ApproximateTaylorModel> evaluate(const Vector<ApproximateTaylorModel>& x) const;
     virtual Vector<ValidatedTaylorModel> evaluate(const Vector<ValidatedTaylorModel>& x) const;
     virtual Vector<ApproximateFormula> evaluate(const Vector<ApproximateFormula>& x) const;

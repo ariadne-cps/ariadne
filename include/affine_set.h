@@ -57,8 +57,8 @@ class CanvasInterface;
 class Point2d;
 
 
-typedef Constraint<AffineModel<ValidatedNumberType>,RawFloatType> ValidatedAffineModelConstraint;
-typedef Constraint<Affine<ValidatedNumberType>,RawFloatType> ValidatedAffineConstraint;
+typedef Constraint<AffineModel<ValidatedNumberType>,ValidatedFloatType> ValidatedAffineModelConstraint;
+typedef Constraint<Affine<ValidatedNumberType>,ValidatedFloatType> ValidatedAffineConstraint;
 typedef Constraint<Affine<EffectiveNumberType>,EffectiveNumberType> EffectiveAffineConstraint;
 typedef Affine<Interval> ValidatedAffineFunction;
 
@@ -67,15 +67,15 @@ EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveN
 EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumberType& u);
 EffectiveAffineConstraint operator==(const EffectiveAffine& am, const EffectiveNumberType& b);
 
-ValidatedAffineConstraint operator<=(const RawFloatType& l, const ValidatedAffineFunction& am);
-ValidatedAffineConstraint operator<=(const ValidatedAffineFunction& am, const RawFloatType& u);
-ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& am, const RawFloatType& u);
-ValidatedAffineConstraint operator==(const ValidatedAffineFunction& am, const RawFloatType& b);
+ValidatedAffineConstraint operator<=(const ExactFloatType& l, const ValidatedAffineFunction& am);
+ValidatedAffineConstraint operator<=(const ValidatedAffineFunction& am, const ExactFloatType& u);
+ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& am, const ExactFloatType& u);
+ValidatedAffineConstraint operator==(const ValidatedAffineFunction& am, const ExactFloatType& b);
 
-ValidatedAffineModelConstraint operator<=(const RawFloatType& l, const ValidatedAffineModel& am);
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& am, const RawFloatType& u);
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& am, const RawFloatType& u);
-ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& am, const RawFloatType& b);
+ValidatedAffineModelConstraint operator<=(const ExactFloatType& l, const ValidatedAffineModel& am);
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& am, const ExactFloatType& u);
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& am, const ExactFloatType& u);
+ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& am, const ExactFloatType& b);
 
 //! \brief A constrained image set defined by affine functions.
 //!  Defines a set of the form \f$S=\{ f(x) \mid x\in D \mid g(x)\leq 0 \wedge h(x)=0 \}\f$
@@ -93,9 +93,9 @@ class ValidatedAffineConstrainedImageSet
     List<ValidatedAffineModelConstraint> _constraint_models;
   public:
     //!\brief The set \f$\{ Gy+c \mid y\in D\}\f$.
-    ValidatedAffineConstrainedImageSet(const Box& D, const Matrix<Float>& G, const Vector<Float>& c);
+    ValidatedAffineConstrainedImageSet(const Box& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& c);
     //!\brief The set \f$\{ Gy+c \mid ||y||_\infty\leq 1\}\f$. \deprecated
-    ValidatedAffineConstrainedImageSet(const Matrix<Float>& G, const Vector<Float>& c);
+    ValidatedAffineConstrainedImageSet(const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \}\f$.
     ValidatedAffineConstrainedImageSet(const Box& D, const Vector<ValidatedAffine>& f);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \mid c(s) \}\f$.
@@ -132,7 +132,7 @@ class ValidatedAffineConstrainedImageSet
     virtual std::ostream& write(std::ostream& os) const;
 
   private:
-    void construct(const Box& D, const Matrix<Float>& G, const Vector<Float>& c);
+    void construct(const Box& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& c);
     void construct_linear_program(LinearProgram<Float>& lp) const;
     static void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth);
     static void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth);

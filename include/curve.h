@@ -52,6 +52,10 @@ class CurveInterface;
 class CurveInterface
 {
   public:
+    typedef Float ParameterType;
+    typedef Vector<Float> PointType;
+    typedef Vector<Float> TangentVectorType;
+  public:
     /*! \brief Destructor. */
     virtual ~CurveInterface() { };
     /*! \brief Return a new dynamically-allocated copy of the curve. */
@@ -62,9 +66,9 @@ class CurveInterface
     virtual ushort smoothness() const = 0;
 
     /*! \brief The point on the curve at a parameter value. */
-    virtual Point value(const Float& s) const = 0;
+    virtual PointType value(const ParameterType& s) const = 0;
     /*! \brief The tangent vector to the curve at a parameter value. */
-    virtual Vector<Float> tangent(const Float& s) const = 0;
+    virtual TangentVectorType tangent(const ParameterType& s) const = 0;
 
     /*! \brief Write to an output stream. */
     virtual std::ostream& write(std::ostream& os) const = 0;
@@ -81,6 +85,10 @@ class Curve
     : public CurveInterface
 {
   public:
+    typedef CurveInterface::ParameterType ParameterType;
+    typedef CurveInterface::PointType PointType;
+    typedef CurveInterface::TangentVectorType TangentVectorType;
+  public:
     /*! \brief Destructor. */
     virtual ~Curve();
     /*! \brief Constructor. */
@@ -95,9 +103,9 @@ class Curve
     virtual ushort smoothness() const;
 
     /*! \brief The value at a point. */
-    virtual Point value(const Float& s) const;
+    virtual PointType value(const ParameterType& s) const;
     /*! \brief The tangent at a point. */
-    virtual Vector<Float> tangent(const Float& s) const;
+    virtual TangentVectorType tangent(const ParameterType& s) const;
 
     /*! \brief Write to an output stream. */
     virtual std::ostream& write(std::ostream& os) const;
@@ -112,32 +120,33 @@ class InterpolatedCurve
     : public DrawableInterface
 {
   public:
-    typedef std::map< Float, Point >::const_iterator const_iterator;
-
+    typedef CurveInterface::ParameterType ParameterType;
+    typedef CurveInterface::PointType PointType;
+    typedef CurveInterface::TangentVectorType TangentVectorType;
+  public:
+    typedef std::map< ParameterType, PointType >::const_iterator const_iterator;
   public:
     /*! \brief Create an empty curve. */
     InterpolatedCurve() : _points() { }
     /*! \brief Create a curve with a single point \a pt at parameter value 0. */
-    InterpolatedCurve(const Point& pt)
+    InterpolatedCurve(const PointType& pt)
         : _points() { this->insert(0,pt); }
     /*! \brief Create a curve with a single point \a pt at parameter value \a s. */
-    InterpolatedCurve(double s, const Point& pt)
+    InterpolatedCurve(double s, const PointType& pt)
         : _points() { this->insert(s,pt); }
     /*! \brief Create a curve with a single point \a pt at parameter value \a s. */
-    InterpolatedCurve(const Float& s, const Point& pt)
+    InterpolatedCurve(const ParameterType& s, const PointType& pt)
         : _points() { this->insert(s,pt); }
     /*! \brief Create a segment from \a pt0 at parameter value 0 to \a pt1 at parameter value 1. */
-    InterpolatedCurve(const Point& pt0, const Point& pt1)
+    InterpolatedCurve(const PointType& pt0, const PointType& pt1)
         : _points() { this->insert(0,pt0); this->insert(1,pt1); }
     /*! \brief Insert a point with parameter value \a s and spacial value \a pt. */
-    void insert(const Float& s, const Point& pt) {
-        if(!this->_points.empty()) { ARIADNE_ASSERT(pt.dimension()==this->dimension()); }
-        this->_points.insert(std::pair< Float, Point >(s,pt)); }
+    void insert(const ParameterType& s, const PointType& pt);
 
     /*! \brief The number of segments in the curve. */
     size_t size() const { return this->_points.size(); }
     /*! \brief The dimension of the Euclidean space the line segment lies in. */
-    uint dimension() const { return this->_points.begin()->second.dimension(); }
+    uint dimension() const { return this->_points.begin()->second.size(); }
     /*! \brief An iterator to the first point in the curve. */
     const_iterator begin() const { return this->_points.begin(); }
     /*! \brief An iterator to the end point in the curve, NOT the one-past-the-end! */
@@ -156,7 +165,7 @@ class InterpolatedCurve
   private:
     friend std::ostream& operator<<(std::ostream&, const InterpolatedCurve&);
   private:
-    std::map< Float, Point > _points;
+    std::map< ParameterType, PointType > _points;
 };
 
 inline

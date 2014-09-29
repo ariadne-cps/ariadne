@@ -370,7 +370,7 @@ template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, double c) {
 inline Polynomial<Float> midpoint(const Polynomial<Interval>& p) {
     Polynomial<Float> r(p.argument_size());
     for(Polynomial<Interval>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-        r.append(iter->key(),midpoint(iter->data())); }
+        r.append(iter->key(),static_cast<Float>(midpoint(iter->data()))); }
     return r;
 }
 

@@ -65,8 +65,12 @@ void optimal_constraint_adjoin_outer_approximation(PavingInterface& paving, cons
 namespace {
 
 ValidatedProcedure make_procedure(const ValidatedScalarFunctionInterface& f) {
-    Formula<Interval> e=f.evaluate(Formula<Interval>::identity(f.argument_size()));
-    return Procedure<Interval>(e);
+    Formula<ValidatedNumberType> e=f.evaluate(Formula<ValidatedNumberType>::identity(f.argument_size()));
+    return Procedure<ValidatedNumberType>(e);
+}
+
+Interval emulrng(const ExactFloatVector& x, const ExactFloatVector& z) {
+    return emulrng(reinterpret_cast<Vector<Float>const&>(x),reinterpret_cast<Vector<Float>const&>(z));
 }
 
 Interval emulrng(const FloatVector& x, const FloatVector& z) {
@@ -75,35 +79,35 @@ Interval emulrng(const FloatVector& x, const FloatVector& z) {
     return r;
 }
 
-Float widths(const Box& bx) {
-    Float res=0.0;
+UpperFloatType total_widths(const Box& bx) {
+    UpperFloatType res=0.0;
     for(uint i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width());
     }
     return res;
 }
 
-Float maximum_scaled_width(const Box& bx, const FloatVector& sf) {
-    Float res=0.0;
+UpperFloatType average_width(const Box& bx) {
+    UpperFloatType res=0.0;
+    for(uint i=0; i!=bx.size(); ++i) {
+        if(bx[i].lower()>bx[i].upper()) { return -inf; }
+        res+=bx[i].width();
+    }
+    return res/bx.size();
+}
+
+UpperFloatType maximum_scaled_width(const Box& bx, const Vector<ExactFloat>& sf) {
+    UpperFloatType res=0.0;
     for(uint i=0; i!=bx.size(); ++i) {
         res=max(bx[i].width()/sf[i],res);
     }
     return res;
 }
 
-Float average_scaled_width(const Box& bx, const FloatVector& sf) {
-    Float res=0.0;
+UpperFloatType average_scaled_width(const Box& bx, const Vector<ExactFloat>& sf) {
+    UpperFloatType res=0.0;
     for(uint i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width()/sf[i]);
-    }
-    return res/bx.size();
-}
-
-Float average_width(const Box& bx) {
-    Float res=0.0;
-    for(uint i=0; i!=bx.size(); ++i) {
-        if(bx[i].lower()>bx[i].upper()) { return -inf; }
-        res+=bx[i].width();
     }
     return res/bx.size();
 }
@@ -159,7 +163,7 @@ void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, c
     Box range=evaluate(function,subdomain);
     bool small=true;
     for(uint i=0; i!=range.size(); ++i) {
-        if(range[i].radius()>errors[i]*RELATIVE_SMALLNESS) {
+        if(range[i].radius().raw()>errors[i]*RELATIVE_SMALLNESS) {
             small=false;
             break;
         }
@@ -193,9 +197,9 @@ void procedure_constraint_adjoin_outer_approximation_recursion(
 
     Box bbox = f(domain);
 
-    Float domwdth = average_width(domain);
-    Float bbxwdth = average_scaled_width(bbox,paving.grid().lengths());
-    Float clwdth = average_scaled_width(cell_box,paving.grid().lengths());
+    Float domwdth = average_width(domain).raw();
+    Float bbxwdth = average_scaled_width(bbox,paving.grid().lengths()).raw();
+    Float clwdth = average_scaled_width(cell_box,paving.grid().lengths()).raw();
 
     ARIADNE_LOG(2,"\nconstraint_adjoin_outer_approximation(...)\n");
     ARIADNE_LOG(2,"   splt="<<splt<<" dpth="<<cell.tree_depth()<<" max_dpth="<<max_dpth<<"\n");
@@ -213,7 +217,7 @@ void procedure_constraint_adjoin_outer_approximation_recursion(
     // Try to prove disjointness
     const Box& old_domain=domain;
     Box new_domain=old_domain;
-    Float olddomwdth = average_width(domain);
+    Float olddomwdth = average_width(domain).raw();
     Float newdomwdth = olddomwdth;
 
     static const double ACCEPTABLE_REDUCTION_FACTOR = 0.75;
@@ -232,7 +236,7 @@ void procedure_constraint_adjoin_outer_approximation_recursion(
             if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
         }
     }
-    newdomwdth=average_width(new_domain);
+    newdomwdth=average_width(new_domain).raw();
     ARIADNE_LOG(6,"     domwdth="<<newdomwdth<<" olddomwdth="<<olddomwdth<<" dom="<<new_domain<<" box reduce\n");
 
     // Hull reduction steps
@@ -248,16 +252,16 @@ void procedure_constraint_adjoin_outer_approximation_recursion(
             if(new_domain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n"); return; }
             //constraint_solver.hull_reduce(new_domain,g[i],codomain[i]);
         }
-        newdomwdth=average_width(new_domain);
+        newdomwdth=average_width(new_domain).raw();
         ARIADNE_LOG(6,"     domwdth="<<newdomwdth<<" dom="<<new_domain<<"\n");
     } while( !new_domain.empty() && (newdomwdth < ACCEPTABLE_REDUCTION_FACTOR * olddomwdth) );
 
     ARIADNE_LOG(6,"new_domain="<<new_domain);
 
 
-    domwdth = average_scaled_width(new_domain,FloatVector(new_domain.size(),1.0));
+    domwdth = average_scaled_width(new_domain,FloatVector(new_domain.size(),1.0)).raw();
     bbox=f(new_domain);
-    bbxwdth=average_scaled_width(bbox,paving.grid().lengths());
+    bbxwdth=average_scaled_width(bbox,paving.grid().lengths()).raw();
     if(bbox.disjoint(cell_box) || disjoint(g(new_domain),codomain)) {
         ARIADNE_LOG(4,"  Proved disjointness using image of new domain\n");
         return;
@@ -270,8 +274,8 @@ void procedure_constraint_adjoin_outer_approximation_recursion(
     // It seems that a more efficient algorithm results if the domain
     // is only split if the bounding box is much larger, so we preferentiably
     // split the cell unless the bounding box is 4 times as large
-    Float bbxmaxwdth = maximum_scaled_width(bbox,scalings);
-    Float clmaxwdth = maximum_scaled_width(cell_box,scalings);
+    Float bbxmaxwdth = maximum_scaled_width(bbox,scalings).raw();
+    Float clmaxwdth = maximum_scaled_width(cell_box,scalings).raw();
 
     if( (bbxmaxwdth > 4.0*clmaxwdth) || (cell.tree_depth()>=max_dpth && (bbxmaxwdth > clmaxwdth)) ) {
         Pair<uint,double> lipsch = lipschitz_index_and_error(f,new_domain);
@@ -319,8 +323,13 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
     ARIADNE_LOG(2,"  dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.tree_depth()<<" e="<<e<<"\n");
     ARIADNE_LOG(2,"  x0="<<x<<", y0="<<y<<"\n");
 
-    Float t;
-    FloatVector z(x.size());
+    Point z(x.size());
+    ExactFloat t;
+
+    Vector<ApproximateFloat>& ax=reinterpret_cast<Vector<ApproximateFloat>&>(x);
+    Vector<ApproximateFloat>& ay=reinterpret_cast<Vector<ApproximateFloat>&>(y);
+    Vector<ApproximateFloat> az=reinterpret_cast<Vector<ApproximateFloat>&>(z);
+    ApproximateFloat at=reinterpret_cast<ApproximateFloat&>(t);
 
     if(r.superset(b)) {
         ARIADNE_LOG(2,"  Cell already in set\n");
@@ -337,13 +346,13 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
 
     // Relax x away from boundary
-    optimiser.compute_tz(d,fg,bx,y,t,z);
-    ARIADNE_LOG(2,"  z0="<<z<<", t0="<<t<<"\n");
+    optimiser.compute_tz(d,fg,bx,ay,at,az);
+    ARIADNE_LOG(2,"  z0="<<az<<", t0="<<at<<"\n");
     for(uint i=0; i!=12; ++i) {
-        ARIADNE_LOG(4," t="<<t);
+        ARIADNE_LOG(4," t="<<at);
         //optimiser.linearised_feasibility_step(d,fg,bx,x,y,z,t);
         try {
-            optimiser.feasibility_step(d,fg,bx,x,y,z,t);
+            optimiser.feasibility_step(d,fg,bx,ax,ay,az,at);
         }
         catch(NearBoundaryOfFeasibleDomainException e) {
             break;
@@ -352,7 +361,7 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
             ARIADNE_ERROR(""<<e.what()<<"\n");
             break;
         }
-        ARIADNE_LOG(6,", x="<<x<<", y="<<y<<", z="<<z<<"\n");
+        ARIADNE_LOG(6,", x="<<ax<<", y="<<ay<<", z="<<az<<"\n");
         ARIADNE_LOG(6,"  x.z="<<emulrng(x,z)<<"\n");
         if(t>0) { break; }
         if(emulrng(x,z).upper()<XZMIN) { break; }
@@ -363,11 +372,11 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
     if(!(t<=1e10)) {
         ARIADNE_WARN("feasibility failed\n");
         char c; cin >> c;
-        t=0.0;
-        y=midpoint(d);
-        x=FloatVector(x.size(),1.0/x.size());
+        at=0;
+        ay=midpoint(d);
+        ax=ApproximateFloatVector(x.size(),1.0/x.size());
     }
-        x = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
+    ax = ApproximateFloat(1-XSIGMA)*ax + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size());
 
     //assert(t>=-1000);
 
@@ -383,16 +392,16 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
         EffectiveScalarFunction zero_function=EffectiveScalarFunction::zero(m);
         EffectiveVectorFunction identity_function=EffectiveVectorFunction::identity(m);
         ScalarTaylorFunction txg(domain,zero_function,sweeper);
-        Interval cnst=0.0;
+        ValidatedFloat cnst=0.0;
         for(uint j=0; j!=n; ++j) {
-            txg = txg - (Interval(x[j])-Interval(x[n+j]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(fg[j]),sweeper);
+            txg = txg - (ValidatedFloat(x[j])-ValidatedFloat(x[n+j]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(fg[j]),sweeper);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
         }
         for(uint i=0; i!=m; ++i) {
-            txg = txg - (Interval(x[2*n+i])-Interval(x[2*n+m+i]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(identity_function[i]),sweeper);
+            txg = txg - (ValidatedFloat(x[2*n+i])-ValidatedFloat(x[2*n+m+i]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(identity_function[i]),sweeper);
             cnst += (d[i].upper()*x[2*n+i]-d[i].lower()*x[2*n+m+i]);
         }
-        txg = Interval(cnst) + txg;
+        txg = ValidatedFloat(cnst) + txg;
 
         ARIADNE_LOG(6,"    txg="<<txg<<"\n");
 
@@ -424,10 +433,10 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
     if(t<=0.0 && Box(f(d)).radius()>b.box().radius()) {
         ARIADNE_LOG(2,"  Splitting domain\n");
         Pair<Box,Box> sd=d.split();
-        x = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
-        y=midpoint(sd.first);
+        ax = ApproximateFloat(1-XSIGMA)*ax + Vector<ApproximateFloat>(ax.size(),XSIGMA/x.size());
+        ay=midpoint(sd.first);
         hotstarted_constraint_adjoin_outer_approximation_recursion(r, sd.first, f,g, c, b, x, y, e);
-        y = midpoint(sd.second);
+        ay = midpoint(sd.second);
         hotstarted_constraint_adjoin_outer_approximation_recursion(r, sd.second, f,g, c, b, x, y, e);
         return;
     }
@@ -466,8 +475,13 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     ConstraintSolver solver;
     NonlinearInteriorPointOptimiser optimiser;
 
-    Float t;
+    ExactFloatType t;
     Point z(x.size());
+
+    ApproximateFloatVector& ax=reinterpret_cast<ApproximateFloatVector&>(x);
+    ApproximateFloatVector& ay=reinterpret_cast<ApproximateFloatVector&>(y);
+    ApproximateFloatVector& az=reinterpret_cast<ApproximateFloatVector&>(z);
+    ApproximateFloat& at=reinterpret_cast<ApproximateFloat&>(t);
 
     if(r.superset(b)) {
         return;
@@ -475,10 +489,10 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
 
     Box bx=join(static_cast<const Box&>(b.box()),static_cast<const Box&>(c));
 
-    optimiser.compute_tz(d,fg,bx,y,t,z);
+    optimiser.compute_tz(d,fg,bx,ay,at,az);
     for(uint i=0; i!=12; ++i) {
         ARIADNE_LOG(4," t="<<t);
-        optimiser.linearised_feasibility_step(d,fg,bx,x,y,z,t);
+        optimiser.linearised_feasibility_step(d,fg,bx,ax,ay,az,at);
         if(t>0) { break; }
     }
     ARIADNE_LOG(4,"\n  t="<<t<<"\n  y="<<y<<"\n    x="<<x<<"\n    z="<<z<<"\n");
@@ -490,7 +504,7 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
         ScalarTaylorFunction xg=ScalarTaylorFunction::zero(d,sweeper);
-        Interval cnst=0.0;
+        ValidatedFloat cnst=0;
         for(uint j=0; j!=n; ++j) {
             xg = xg - (x[j]-x[n+j])*ScalarTaylorFunction(d,fg[j],sweeper);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
@@ -522,10 +536,10 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         //Pair<Box,Box> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<Box,Box> sd=split(d);
-        Point nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
+        Point nx = make_exact(ApproximateFloat(1.0-XSIGMA)*ax + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size()));
         Point ny = midpoint(sd.first);
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r, sd.first, fg, c, b, nx, ny, e);
-        nx = (1.0-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
+        nx = make_exact(ApproximateFloat(1.0-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size()));
         ny = midpoint(sd.second);
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r, sd.second, fg, c, b, x, ny, e);
     }
@@ -536,10 +550,10 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     } else {
         ARIADNE_LOG(4,"  Splitting cell; t="<<t<<"\n");
         Pair<GridCell,GridCell> sb = b.split();
-        Point sx = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
+        Point sx = make_exact(ApproximateFloat(1-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size()));
         Point sy = y;
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r,d,fg,c,sb.first,sx,sy,e);
-        sx = (1-XSIGMA)*x + Vector<Float>(x.size(),XSIGMA/x.size());
+        sx = make_exact(ApproximateFloat(1-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size()));
         sy = y;
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r,d,fg,c,sb.second,sx,sy,e);
     }
@@ -591,7 +605,7 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const Box& d, const Va
 
     Point y=midpoint(d);
     const uint l=(d.size()+f.result_size()+g.result_size())*2;
-    Point x(l); for(uint k=0; k!=l; ++k) { x[k]=1.0/l; }
+    Point x(l); for(uint k=0; k!=l; ++k) { x[k]=ExactFloatType(1.0/l); }
 
     ::hotstarted_constraint_adjoin_outer_approximation_recursion(p,d,f,g,rc,b,x,y,e);
 }
@@ -622,7 +636,7 @@ void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Box
 
     Point y=midpoint(d);
     const uint l=(d.size()+f.result_size()+g.result_size())*2;
-    Point x(l); for(uint k=0; k!=l; ++k) { x[k]=1.0/l; }
+    Point x(l); for(uint k=0; k!=l; ++k) { x[k]=ExactFloatType(1.0/l); }
 
     VectorTaylorFunction fg;
     const VectorTaylorFunction* tfptr;

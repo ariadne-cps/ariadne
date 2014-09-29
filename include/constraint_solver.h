@@ -46,7 +46,7 @@ class GridTreeSet;
 
 template<class X, class R> class Constraint;
 typedef Constraint<EffectiveScalarFunction,EffectiveNumberType> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ExactFloatType> ValidatedConstraint;
+typedef Constraint<ValidatedScalarFunction,ValidatedNumberType> ValidatedConstraint;
 
 template<class X> class Procedure;
 typedef Procedure<ValidatedTag> ValidatedProcedure;
@@ -116,6 +116,8 @@ class ConstraintSolver
     //! \brief Reduce the \a domain by testing intersection of \a multipliers inner product \a function(\a domain)
     //! with \a multipliers innner product \a codomain, centering at \a centre.
     //! Reduces \f$(\lambda\cdot f)(X) \cap (\lambda\cdot C)\f$, evaluating \f$g(x)=g(x^*)+Dg(X) (X-x^*)\f$.
+    bool lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const Box& codomain,
+                         Vector<ExactFloatType> centre, Vector<ExactFloatType> multpliers) const;
     bool lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const Box& codomain,
                          Vector<ApproximateNumberType> centre, Vector<ApproximateNumberType> multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.

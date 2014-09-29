@@ -297,6 +297,10 @@ inline Float& operator-=(Float& x1, Float x2) { x1.dbl-=x2.dbl; return x1; }
 inline Float& operator*=(Float& x1, Float x2) { x1.dbl*=x2.dbl; return x1; }
 inline Float& operator/=(Float& x1, Float x2) { x1.dbl/=x2.dbl; return x1; }
 
+inline Float add(Float x1, Float x2) { return x1.dbl+x2.dbl; }
+inline Float sub(Float x1, Float x2) { return x1.dbl-x2.dbl; }
+inline Float mul(Float x1, Float x2) { return x1.dbl*x2.dbl; }
+inline Float div(Float x1, Float x2) { return x1.dbl/x2.dbl; }
 inline Float pow(Float x, uint n) { return std::pow(x.dbl,double(n)); }
 inline Float pow(Float x, int n) { return std::pow(x.dbl,double(n)); }
 inline Float sqr(Float x) { return x.dbl * x.dbl; }

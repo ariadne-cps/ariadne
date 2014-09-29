@@ -37,11 +37,73 @@
 #include "function.h"
 #include "function_model.h"
 
+namespace Ariadne {
+
+Vector<ExactFloatType>const& make_exact(const Vector<ApproximateFloatType>& av) {
+    return reinterpret_cast<Vector<ExactFloatType>const&>(av);
+}
+
+Vector<ValidatedFloatType> make_bounds(const Vector<ErrorFloatType>& ev) {
+    Vector<ValidatedFloatType> r(ev.size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=make_bounds(ev[i]);
+    }
+    return r;
+}
+
+Vector<ValidatedFloatType>const& make_singleton(const Vector<Interval>& ivlv) {
+    return reinterpret_cast<Vector<ValidatedFloatType>const&>(ivlv);
+}
+
+Matrix<ValidatedFloatType>const& make_singleton(const Matrix<Interval>& ivlA) {
+    return reinterpret_cast<Matrix<ValidatedFloatType>const&>(ivlA);
+}
+
+UpperFloatType sup_error(const Vector<ValidatedFloatType>& x) {
+    UpperFloatType e(0);
+    for(uint i=0; i!=x.size(); ++i) {
+        e=max(e,x[i].error());
+    }
+}
+
+bool models(const Vector<ValidatedFloatType>& x1, const Vector<ExactFloatType>& x2) {
+    assert(x1.size()==x2.size());
+    for(uint i=0; i!=x1.size(); ++i) {
+        if(!models(x1[i],x2[i])) { return false; }
+    }
+    return true;
+}
+
+bool consistent(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2) {
+    assert(x1.size()==x2.size());
+    for(uint i=0; i!=x1.size(); ++i) {
+        if(!consistent(x1[i],x2[i])) { return false; }
+    }
+    return true;
+}
+
+bool inconsistent(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2) {
+    return !consistent(x1,x2);
+}
+
+bool refines(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2) {
+    assert(x1.size()==x2.size());
+    for(uint i=0; i!=x1.size(); ++i) {
+        if(!refines(x1[i],x2[i])) { return false; }
+    }
+    return true;
+}
+
+Vector<ValidatedFloatType> refinement(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2) {
+    assert(x1.size()==x2.size());
+    Vector<ValidatedFloatType> r(x1.size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=refinement(x1[i],x2[i]);
+    }
+    return r;
+}
+
 namespace {
-
-using namespace Ariadne;
-
-
 
 Vector<Interval> ranges(const Vector<ValidatedTaylorModel>& f) {
     Vector<Interval> r(f.size()); for(uint i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
@@ -69,17 +131,17 @@ jacobian2(const Vector<ValidatedTaylorModel>& f, const Vector<ValidatedNumberTyp
 }
 
 // Compute the Jacobian over the unit domain
-Matrix<Float>
+Matrix<ExactFloatType>
 jacobian2_value(const Vector<ValidatedTaylorModel>& f)
 {
     const uint rs=f.size();
     const uint fas=f.zero_element().argument_size();
     const uint has=fas-rs;
-    Matrix<Float> J(rs,rs);
+    Matrix<ExactFloatType> J(rs,rs);
     MultiIndex a(fas);
     for(uint i=0; i!=rs; ++i) {
         for(uint j=0; j!=rs; ++j) {
-            a[has+j]=1; const Float x=f[i][a]; J[i][j]=x; a[has+j]=0;
+            a[has+j]=1; const ExactFloatType x=f[i][a]; J[i][j]=x; a[has+j]=0;
         }
     }
     return J;
@@ -98,7 +160,7 @@ jacobian2_range(const Vector<ValidatedTaylorModel>& f)
             for(uint k=0; k!=rs; ++k) {
                 const uint c=iter->key()[has+k];
                 if(c>0) {
-                    const Float& x=iter->data();
+                    const ExactFloatType& x=iter->data();
                     if(iter->key().degree()==1) { J[i][k]+=x; }
                     else { J[i][k]+=ValidatedNumberType(-1,1)*x*c; }
                     //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
@@ -114,14 +176,11 @@ jacobian2_range(const Vector<ValidatedTaylorModel>& f)
 } // namespace
 
 
-
-namespace Ariadne {
-
 static const bool ALLOW_PARTIAL_FUNCTION = true;
 
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
 
-ValidatedVectorFunctionModel operator*(const Matrix<Float>& A,const ValidatedVectorFunctionModel& v) {
+ValidatedVectorFunctionModel operator*(const Matrix<ExactFloatType>& A,const ValidatedVectorFunctionModel& v) {
     ARIADNE_ASSERT(v.size()!=0);
     ValidatedVectorFunctionModel r(A.row_size(),v[0].create_zero());
     for(uint i=0; i!=r.size(); ++i) {
@@ -147,8 +206,8 @@ ValidatedVectorFunctionModel operator*(const Matrix<ValidatedNumberType>& A,cons
     return r;
 }
 
-Float radius(const ValidatedVectorFunctionModel& x) {
-    Float r=0.0;
+ErrorFloatType sup_error(const ValidatedVectorFunctionModel& x) {
+    ErrorFloatType r=0.0;
     for(uint i=0; i!=x.size(); ++i) { r=std::max(r,x[i].error()); }
     return r;
 }
@@ -181,9 +240,16 @@ Vector<ValidatedNumberType>
 SolverBase::solve(const ValidatedVectorFunction& f,
                   const Vector<ValidatedNumberType>& ix) const
 {
-    Set< Vector<ValidatedNumberType> > r = this->solve_all(f,ix);
-    if(r.size()==0u) { ARIADNE_THROW(NoSolutionException,"SolverBase::solve","no solution in solve("<<f<<","<<ix<<")"); }
-    if(r.size()!=1u) { ARIADNE_THROW(SolverException,"SolverBase::solve","non-unique solution in solve("<<f<<","<<ix<<")"); }
+    return this->solve(f,static_cast<Vector<Interval>>(ix));
+}
+
+Vector<ValidatedNumberType>
+SolverBase::solve(const ValidatedVectorFunction& f,
+                  const Box& bx) const
+{
+    Set< Vector<ValidatedNumberType> > r = this->solve_all(f,bx);
+    if(r.size()==0u) { ARIADNE_THROW(NoSolutionException,"SolverBase::solve","no solution in solve("<<f<<","<<bx<<")"); }
+    if(r.size()!=1u) { ARIADNE_THROW(SolverException,"SolverBase::solve","non-unique solution in solve("<<f<<","<<bx<<")"); }
     return *r.begin();
 }
 
@@ -202,15 +268,17 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
     // Create result set
     Set< Vector<ValidatedNumberType> > r;
 
+    Vector<ValidatedFloatType> x=make_singleton(ix);
+
     // Test for no solution
     const Vector<ValidatedNumberType> z(ix.size());
-    if(disjoint(f.evaluate(ix),z)) {
+    if(inconsistent(f.evaluate(x),z)) {
         return r;
     }
 
     bool invertible_jacobian=true;
-    //Vector<ValidatedNumberType> nx=2*ix-midpoint(ix);
-    Vector<ValidatedNumberType> nx=ix;
+    //Vector<ValidatedNumberType> nx=2*ix-make_exact(ix);
+    Vector<ValidatedNumberType> nx=x;
     try {
         Matrix<ValidatedNumberType> Jinv=inverse(f.jacobian(nx));
     }
@@ -223,10 +291,10 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
     if(invertible_jacobian) {
         //std::cerr<<"Nonsingular matrix -- applying contractor\n";
         try {
-            Vector<ValidatedNumberType> y=this->zero(f,nx);
+            Vector<ValidatedNumberType> y=this->solve(f,nx);
             bool is_new=true;
             for(Set<Vector<ValidatedNumberType> >::const_iterator iter=r.begin(); iter!=r.end(); ++iter) {
-                if(!disjoint(y,*iter)) {
+                if(consistent(y,*iter)) {
                     is_new=false;
                     break;
                 }
@@ -250,14 +318,14 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
     }
 
     if(need_to_split) {
-        // If radius is too small, assume solution is not verified
-        if(radius(ix)<this->maximum_error()) {
+        // If sup_error is too small, assume solution is not verified
+        if(sup_error(make_singleton(ix))<this->maximum_error()) {
             if(!invertible_jacobian) {
-                ARIADNE_WARN("Cannot verify solution in "<<ix<<" with f="<<f(ix)<<"); "
+                ARIADNE_WARN("Cannot verify solution in "<<ix<<" with f="<<f(make_singleton(ix))<<"); "
                              <<"Jacobian "<<f.jacobian(nx)<<" is not invertible; "
                              <<"approximate inverse="<<inverse(midpoint(f.jacobian(nx)))<<"\n");
             } else {
-                ARIADNE_WARN("Cannot verify or falsify solution in "<<ix<<"; f("<<ix<<")="<<f(ix)<<".\n");
+                ARIADNE_WARN("Cannot verify or falsify solution in "<<ix<<"; f("<<ix<<")="<<f(make_singleton(ix))<<".\n");
             }
             return r;
         }
@@ -277,51 +345,52 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
 
 Vector<ValidatedNumberType>
 SolverBase::zero(const ValidatedVectorFunction& f,
-                 const Vector<ValidatedNumberType>& ix) const
+                 const Box& bx) const
 {
     const double& e=this->maximum_error();
     uint n=this->maximum_number_of_steps();
     ARIADNE_LOG(1,"verbosity="<<verbosity<<"\n");
-    Vector<ValidatedNumberType> r(ix);
+    Vector<ValidatedNumberType> r=make_singleton(bx);
     Vector<ValidatedNumberType> nr(r.size());
     bool has_solution=false;
     while(n>0) {
         nr=this->step(f,r);
         ARIADNE_LOG(5,"  nr="<<nr<<"\n");
 
-        if(!has_solution && subset(nr,r)) {
+        if(!has_solution && refines(nr,r)) {
             has_solution=true;
         }
 
-        if(has_solution && radius(nr) < e) {
+        if(has_solution && sup_error(nr) < e) {
             return nr;
         }
 
-        if(disjoint(nr,r)) {
-            ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<ix<<"; "<<nr<<" is disjoint from "<<r);
+        if(!consistent(nr,r)) {
+            ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<bx<<"; "<<nr<<" is inconsistent with "<<r);
         }
-        r=intersection(nr,r);
+        r=refinement(nr,r);
         n=n-1;
     }
-    if(disjoint(f.evaluate(r),Vector<ValidatedNumberType>(f.result_size()))) {
-        ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<ix<<"; f("<<r<<") is disjoint from zero");
+    if(!consistent(f.evaluate(r),Vector<ValidatedNumberType>(f.result_size()))) {
+        ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<bx<<"; f("<<r<<") is inconsistent with zero");
     } else {
-        r+=add_ivl(eps(),radius(r))*Vector<ValidatedNumberType>(r.size(),ValidatedNumberType(-1,+1));
+        UpperFloatType widen=ExactFloatType(eps())*sup_error(r);
+        r+=Vector<ValidatedNumberType>(r.size(),ValidatedNumberType(-widen,+widen));
         nr=this->step(f,r);
-        if(subset(nr,r)) {
+        if(refines(nr,r)) {
             return nr;
         }
-        ARIADNE_THROW(SolverException,"SolverBase::zero","No result verified in "<<ix<<"; maximum number of steps reached with approximation "<<r<<" which cannot be robustly checked");
+        ARIADNE_THROW(SolverException,"SolverBase::zero","No result verified in "<<bx<<"; maximum number of steps reached with approximation "<<r<<" which cannot be robustly checked");
     }
 }
 
 
 
 Vector<ValidatedNumberType>
-SolverBase::fixed_point(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& pt) const
+SolverBase::fixed_point(const ValidatedVectorFunction& f, const Box& bx) const
 {
-    ValidatedVectorFunction id=ValidatedVectorFunction::identity(pt.size());
-    return this->solve(f-id,pt);
+    ValidatedVectorFunction id=ValidatedVectorFunction::identity(f.argument_size());
+    return this->solve(f-id,bx);
 }
 
 
@@ -339,7 +408,7 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
     const double err=this->maximum_error();
 
     ValidatedVectorFunctionModel id(this->function_factory().create_identity(ip));
-    ValidatedVectorFunctionModel h(this->function_factory().create_constants(ip,ix));
+    ValidatedVectorFunctionModel h(this->function_factory().create_constants(ip,make_singleton(ix)));
     ValidatedVectorFunctionModel nh(this->function_factory().create_zeros(n,ip));
     ValidatedVectorFunctionModel fnh(this->function_factory().create_zeros(n,ip));
 
@@ -370,8 +439,8 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
 
             ARIADNE_LOG(6,"refinement="<<refinement<<"\n");
             ARIADNE_LOG(6,"nh.range()="<<nh.range()<<"\n");
-            ARIADNE_LOG(6,"radius(nh)="<<radius(nh)<<"\n");
-            ARIADNE_LOG(6,"radius(fnh)="<<radius(fnh)<<"\n");
+            ARIADNE_LOG(6,"sup_error(nh)="<<sup_error(nh)<<"\n");
+            ARIADNE_LOG(6,"sup_error(fnh)="<<sup_error(fnh)<<"\n");
 
             h=nh;
 
@@ -391,7 +460,7 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
         }
 
         steps_remaining=steps_remaining-1;
-        if( (number_unrefined==0) && ( (steps_remaining==0) || ((radius(nh)<err) && (radius(fnh)<err)) ) ) {
+        if( (number_unrefined==0) && ( (steps_remaining==0) || ((sup_error(nh)<err) && (sup_error(fnh)<err)) ) ) {
             return h;
         }
     }
@@ -429,8 +498,8 @@ IntervalNewtonSolver::step(const ValidatedVectorFunction& f,
                            const Vector<ValidatedNumberType>& x) const
 {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
-    ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat> m(midpoint(x));
+    ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
+    Vector<ExactFloat> m(make_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumberType> im(m);
     Vector<ValidatedNumberType> w=f.evaluate(im);
@@ -452,8 +521,8 @@ KrawczykSolver::step(const ValidatedVectorFunction& f,
 {
     Matrix<ValidatedNumberType> I=Matrix<ValidatedNumberType>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
-    ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat> m(midpoint(x));
+    ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
+    Vector<ExactFloat> m(make_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumberType> im(m);
     Vector<ValidatedNumberType> fm=f.evaluate(im);
@@ -478,8 +547,8 @@ FactoredKrawczykSolver::step(const ValidatedVectorFunction& f,
 {
     Matrix<ValidatedNumberType> I=Matrix<ValidatedNumberType>::identity(x.size());
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
-    ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
-    Vector<ExactFloat> m(midpoint(x));
+    ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
+    Vector<ExactFloat> m(make_exact(x));
     ARIADNE_LOG(5,"  m="<<m<<"\n");
     Vector<ValidatedNumberType> im(m);
     Vector<ValidatedNumberType> fm=f.evaluate(im);
@@ -533,10 +602,11 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     }
     ARIADNE_LOG(7,"J="<<J<<"\n");
 
-    IntervalMatrix rngJ(n,n);
+    Matrix<Interval> rngJ(n,n);
     for(uint i=0; i!=n; ++i) {
         for(uint j=0; j!=n; ++j) {
-            rngJ[i][j]=intersection(J[i][j].range(),unchecked_evaluate(D2f[i][j],join(id.range(),h.range())));
+            Interval D2fij=Interval(unchecked_evaluate(D2f[i][j],make_singleton(join(id.range(),h.range()))));
+            rngJ[i][j]=intersection(J[i][j].range(),D2fij);
         }
     }
     ARIADNE_LOG(7,"rngJ="<<rngJ<<"\n");
@@ -546,16 +616,16 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
 
     ValidatedVectorFunctionModel dh(n,z);
     if(n==1) {
-        if(contains(rngJ[0][0],0.0)) {
+        if(contains(rngJ[0][0],ExactFloatType(0.0))) {
             ARIADNE_THROW(SingularJacobianException,"IntervalNewtonSolver","D2f(P,X)="<<rngJ[0][0]<<" which contains zero.");
         }
-        if(contains(J[0][0].range(),0.0)) {
-            dh[0]=fidmh[0]/rngJ[0][0];
+        if(contains(J[0][0].range(),ExactFloatType(0.0))) {
+            dh[0]=fidmh[0]/make_singleton(rngJ[0][0]);
         } else {
             dh[0]=fidmh[0]/J[0][0];
         }
     } else {
-        dh=inverse(rngJ)*fidmh;
+        dh=inverse(make_singleton(rngJ))*fidmh;
     }
     ARIADNE_LOG(7,"dh="<<dh<<"\n");
 
@@ -576,20 +646,20 @@ KrawczykSolver::implicit_step(const ValidatedVectorFunction& f,
     ARIADNE_LOG(4,"  Contracting x="<<x<<"\n");
     ARIADNE_LOG(4,"    p="<<p<<"\n");
     ARIADNE_LOG(4,"    f="<<f<<"\n");
-    //ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
+    //ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
     ValidatedVectorFunctionModel mx(x);
     for(uint i=0; i!=mx.size(); ++i) { mx[i].set_error(0.0); }
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
-    Vector<Float> ex(nx);
+    Vector<ErrorFloatType> ex(nx);
     for(uint i=0; i!=nx; ++i) { ex[i]=x[i].error(); }
-    Vector<ValidatedNumberType> eix=Vector<ExactFloat>(ex)*ValidatedNumberType(-1,+1);
+    Vector<ValidatedNumberType> eix=make_bounds(ex);
     ARIADNE_LOG(5,"    ex="<<ex<<"\n");
     ValidatedVectorFunctionModel fm=compose(f,join(p,mx));
     ARIADNE_LOG(5,"    f(p,mx)="<<fm<<"\n");
     Vector<ValidatedNumberType> rp(np);
-    for(uint i=0; i!=np; ++i) { rp[i]=p[i].range(); }
+    for(uint i=0; i!=np; ++i) { rp[i]=make_singleton(p[i].range()); }
     Vector<ValidatedNumberType> rx(nx);
-    for(uint i=0; i!=nx; ++i) { rx[i]=x[i].range(); }
+    for(uint i=0; i!=nx; ++i) { rx[i]=make_singleton(x[i].range()); }
     Matrix<ValidatedNumberType> J=project(f.jacobian(join(rp,rx)),range(0,nx),range(np,np+nx));
     ARIADNE_LOG(5,"    D2f(r)=J="<<J<<"\n");
     Matrix<ValidatedNumberType> M=inverse(midpoint(J));
@@ -665,7 +735,7 @@ IntervalNewtonSolver::implicit(const ValidatedScalarFunction& f,
         fidmh=compose(f,join(id,mh));
         ARIADNE_LOG(7,"f(p,mh(p))="<<fidmh<<"\n");
         // Prefer to divide by df(id,h), but may divide by constant df(P,h(P)) if latter is tighter
-        if(subset(dfidh.range(),dfiph)) {
+        if(refines(dfidh.range(),dfiph)) {
             dh=fidmh/dfidh;
         } else {
             dh=fidmh/dfiph;
@@ -673,8 +743,8 @@ IntervalNewtonSolver::implicit(const ValidatedScalarFunction& f,
         ARIADNE_LOG(6,"dh="<<dh<<"\n");
         ARIADNE_LOG(6,"dh.range()="<<dh.range()<<"\n");
         ARIADNE_LOG(8,"norm(dh)="<<norm(dh)<<", h.error()="<<h.error()<<"\n");
-        Float herr=h.error();
-        Float dhnrm=norm(dh);
+        ErrorFloatType herr=h.error();
+        ErrorFloatType dhnrm=norm(dh);
         // Prefer to check refinement using norm of dh, since this is faster
         // if(refines(nh,h)) { refinement=true; }
         if(dhnrm<=herr) { refinement=true; }
@@ -694,7 +764,7 @@ IntervalNewtonSolver::implicit(const ValidatedScalarFunction& f,
         ARIADNE_THROW(UnknownSolutionException,"IntervalNewtonSolver",
                       "Cannot find solution of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix<<".");
     }
-    if(!subset(h.range(),ix)) {
+    if(!refines(h.range(),ix)) {
         ARIADNE_LOG(6,"(h.range(),ix)="<<h.range()<<" "<<ix<<"\n");
         ARIADNE_THROW(UnknownSolutionException,"IntervalNewtonSolver",
                       "Range "<<h.range()<<" of solution h of f(x,h(x))=0 with f="<<f<<", x="<<ip<<", h in "<<ix<<" lies outside permitted interval.");

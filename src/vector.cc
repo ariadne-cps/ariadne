@@ -29,6 +29,15 @@
 
 namespace Ariadne {
 
+bool refines(const Vector<ValidatedFloat>& v1, const Vector<ValidatedFloat>& v2)
+{
+    ARIADNE_ASSERT(v1.size()==v2.size());
+    for(size_t i=0; i!=v1.size(); ++i) {
+        if(!refines(v1[i],v2[i])) { return false; }
+    }
+    return true;
+}
+
 
 bool contains(const Vector<Interval>& v1, const Vector<Float>& v2)
 {
@@ -158,18 +167,18 @@ Vector<ExactFloatType> midpoint(const Vector<Interval>& v)
     return r;
 }
 
-Vector<LowerFloatType> lower_bounds(const Vector<Interval>& v)
+Vector<ExactFloatType> lower_bounds(const Vector<Interval>& v)
 {
-    Vector<LowerFloatType> r(v.size());
+    Vector<ExactFloatType> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
         r[i]=v[i].lower();
     }
     return r;
 }
 
-Vector<UpperFloatType> upper_bounds(const Vector<Interval>& v)
+Vector<ExactFloatType> upper_bounds(const Vector<Interval>& v)
 {
-    Vector<UpperFloatType> r(v.size());
+    Vector<ExactFloatType> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
         r[i]=v[i].upper();
     }

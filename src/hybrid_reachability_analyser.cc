@@ -72,6 +72,32 @@ HybridReachabilityAnalyser::
 {
 }
 
+inline Real operator-(Real const& r1, Rational const& q2) {
+    return r1-Real(q2);
+}
+
+inline ValidatedFloat operator*(Integer n1,  const ExactFloat& x2) {
+    ARIADNE_ASSERT(n1==n1.get_si());
+    ExactFloat x1((int)n1.get_si());
+    return x1*x2;
+}
+
+template<> inline ApproximateFloat numeric_cast<ApproximateFloat>(Real const& x) {
+    return ApproximateFloat(x);
+}
+
+template<> inline ExactFloat numeric_cast<ExactFloat>(Real const& x) {
+    return ExactFloat(ApproximateFloat(x).raw());
+}
+
+inline DiscreteTimeType div_floor(Real const& t, ExactNumberType h) {
+    return integer_cast<uint>(numeric_cast<ApproximateFloatType>(t)/h);
+}
+
+template<> inline Nat integer_cast<Nat>(ValidatedFloat const& x) {
+    return integer_cast<Nat>(ApproximateFloat(x).raw());
+}
+
 
 HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(
@@ -314,10 +340,10 @@ HybridReachabilityAnalyser::
 lower_reach(const OvertSetInterfaceType& initial_set) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_reach(set)\n");
-    Float transient_time = this->_configuration->transient_time();
+    ExactNumberType transient_time = this->_configuration->transient_time();
     int transient_steps = this->_configuration->transient_steps();
     HybridTime hybrid_transient_time(transient_time, transient_steps);
-    Float lock_to_grid_time=this->_configuration->lock_to_grid_time();
+    ExactNumberType lock_to_grid_time=this->_configuration->lock_to_grid_time();
     int lock_to_grid_steps=this->_configuration->lock_to_grid_steps();
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,lock_to_grid_steps);
     int maximum_grid_depth = this->_configuration->maximum_grid_depth();
@@ -404,11 +430,11 @@ upper_evolve(const CompactSetInterfaceType& initial_set,
     int grid_depth = this->_configuration->maximum_grid_depth();
     evolve_cells.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial_evolve.size()="<<evolve_cells.size()<<"\n");
-    Float real_time=static_cast<Float>(time.continuous_time());
-    uint discrete_steps=time.discrete_time();
-    Float lock_to_grid_time=this->_configuration->lock_to_grid_time();
-    uint time_steps=integer_cast<uint>(real_time/lock_to_grid_time);
-    Float remainder_time=real_time-time_steps*lock_to_grid_time;
+    Real real_time=time.continuous_time();
+    DiscreteTimeType discrete_steps=time.discrete_time();
+    ExactNumberType lock_to_grid_time=this->_configuration->lock_to_grid_time();
+    DiscreteTimeType time_steps=integer_cast<uint>(numeric_cast<ExactFloatType>(real_time)/lock_to_grid_time);
+    Real remainder_time=real_time-Real(time_steps*Rational(lock_to_grid_time));
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
     HybridTime hybrid_remainder_time(remainder_time,discrete_steps);
     ARIADNE_LOG(3,"real_time="<<real_time<<"\n");
@@ -445,11 +471,11 @@ upper_reach(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(4,"initial size = "<<evolve_cells.size()<<"\n");
     HybridGridTreeSet reach_cells(evolve_cells);
     ARIADNE_LOG(4,"reach size ="<<reach_cells.size()<<"\n");
-    Float real_time=static_cast<Float>(time.continuous_time());
-    uint discrete_steps=time.discrete_time();
-    Float lock_to_grid_time = this->_configuration->lock_to_grid_time();
-    uint time_steps=integer_cast<uint>(real_time/lock_to_grid_time);
-    Float remainder_time=real_time-time_steps*lock_to_grid_time;
+    Real real_time=time.continuous_time();
+    DiscreteTimeType discrete_steps=time.discrete_time();
+    ExactNumberType lock_to_grid_time = this->_configuration->lock_to_grid_time();
+    DiscreteTimeType time_steps=div_floor(real_time,lock_to_grid_time);
+    Real remainder_time=real_time-time_steps*Rational(lock_to_grid_time);
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
     HybridTime hybrid_remainder_time(remainder_time,discrete_steps);
 
@@ -500,11 +526,11 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(4,"initial_evolve"<<evolve_cells<<"\n");
     HybridGridTreeSet reach_cells(evolve_cells);
     ARIADNE_LOG(4,"reach="<<reach_cells<<"\n");
-    Float real_time=static_cast<Float>(time.continuous_time());
-    uint discrete_steps=time.discrete_time();
-    Float lock_to_grid_time = this->_configuration->lock_to_grid_time();
-    uint time_steps=integer_cast<uint>(real_time/lock_to_grid_time);
-    Float remainder_time=real_time-time_steps*lock_to_grid_time;
+    Real real_time=time.continuous_time();
+    DiscreteTimeType discrete_steps=time.discrete_time();
+    ExactNumberType lock_to_grid_time = this->_configuration->lock_to_grid_time();
+    DiscreteTimeType time_steps=div_floor(real_time,lock_to_grid_time);
+    Real remainder_time=real_time-time_steps*Rational(lock_to_grid_time);
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
     HybridTime hybrid_remainder_time(remainder_time,discrete_steps);
     ARIADNE_LOG(3,"real_time="<<real_time<<"\n");
@@ -540,11 +566,11 @@ outer_chain_reach(
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::outer_chain_reach(...)\n");
     Set<DiscreteEvent> lock_to_grid_events=this->_configuration->lock_to_grid_events();
-    Float transient_time = this->_configuration->transient_time();
-    int transient_steps = this->_configuration->transient_steps();
+    ExactNumberType transient_time = this->_configuration->transient_time();
+    DiscreteTimeType transient_steps = this->_configuration->transient_steps();
     HybridTerminationCriterion transient_termination(ExactFloat(transient_time), transient_steps, lock_to_grid_events);
-    Float lock_to_grid_time=this->_configuration->lock_to_grid_time();
-    int lock_to_grid_steps=this->_configuration->lock_to_grid_steps();
+    ExactNumberType lock_to_grid_time=this->_configuration->lock_to_grid_time();
+    DiscreteTimeType lock_to_grid_steps=this->_configuration->lock_to_grid_steps();
     HybridTerminationCriterion recurrent_termination(ExactFloat(lock_to_grid_time),lock_to_grid_steps,lock_to_grid_events);
     int maximum_grid_depth = this->_configuration->maximum_grid_depth();
     int maximum_grid_height = this->_configuration->maximum_grid_height();
@@ -638,9 +664,9 @@ void HybridReachabilityAnalyser::_checked_restriction(HybridGridTreeSet& set, co
 HybridReachabilityAnalyserConfiguration::HybridReachabilityAnalyserConfiguration(HybridReachabilityAnalyser& analyser)
     : _analyser(analyser)
 {
-    set_transient_time(0.0);
+    set_transient_time(0.0_exact);
     set_transient_steps(0);
-    set_lock_to_grid_time(1.0);
+    set_lock_to_grid_time(1.0_exact);
     set_lock_to_grid_steps(1);
     set_maximum_grid_depth(3);
     set_maximum_grid_height(16);

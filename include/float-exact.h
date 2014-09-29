@@ -99,7 +99,6 @@ inline ValidatedFloat operator-(const ExactFloat& x1,  const ValidatedFloat& x2)
 inline ValidatedFloat operator*(const ExactFloat& x1,  const ValidatedFloat& x2);
 inline ValidatedFloat operator/(const ExactFloat& x1,  const ValidatedFloat& x2);
 inline ValidatedFloat pow(const ExactFloat& x, int n);
-inline ValidatedFloat operator/(int n1,  const ExactFloat& x2);
 
 inline ExactFloat neg(const ExactFloat& x) { return ExactFloat(neg_exact(x.value())); }
 inline ExactFloat abs(const ExactFloat& x) { return ExactFloat(abs_exact(x.value())); }

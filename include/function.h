@@ -111,6 +111,8 @@ template<class P, class XX> inline Vector<XX> gradient(const ScalarFunction<P>& 
 ApproximateScalarFunction ScalarFunctionInterface<ApproximateNumberType>::clone() const { return this->_clone(); }
 ValidatedScalarFunction ScalarFunctionInterface<ValidatedNumberType>::clone() const { return this->_clone(); }
 EffectiveScalarFunction ScalarFunctionInterface<EffectiveNumberType>::clone() const { return this->_clone(); }
+inline ValidatedNumberType ScalarFunctionInterface<ValidatedNumberType>::evaluate(const Vector<ExactNumberType>& x) const {
+    return this->evaluate(Vector<ValidatedNumberType>(x)); }
 inline ApproximateNumberType ScalarFunctionInterface<ApproximateNumberType>::operator() (const Vector<ApproximateNumberType>& x) const {
     return this->evaluate(x); }
 inline ValidatedNumberType ScalarFunctionInterface<ValidatedNumberType>::operator() (const Vector<ValidatedNumberType>& x) const {
@@ -296,6 +298,9 @@ EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const E
 Formula<EffectiveNumberType> formula(const EffectiveScalarFunction& f);
 Vector< Formula<EffectiveNumberType> > formula(const EffectiveVectorFunction& f);
 
+inline Vector<ValidatedNumberType> VectorFunctionInterface<ValidatedTag>::evaluate(const Vector<ExactNumberType> & x) const {
+    return this->evaluate(Vector<ValidatedNumberType>(x)); }
+
 
 ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
 ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedNumberType&);
@@ -304,7 +309,6 @@ ValidatedVectorFunction operator-(const ValidatedVectorFunction&, const Validate
 ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedVectorFunction& f2);
 ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g);
 ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const ValidatedVectorFunction& g);
-
 
 template<class P>
 struct VectorFunctionElementReference {

@@ -60,7 +60,7 @@ template<class E> class Orbit {
 };
 #endif
 
-typedef double Time;
+typedef Real TimeType;
 
 template<class ES> class Orbit;
 template<class ES> std::ostream& operator<<(std::ostream&, const Orbit<ES>&);
@@ -74,11 +74,11 @@ class GridTreeSet;
 
 
 template<>
-class Orbit<Point>
+class Orbit<ExactPoint>
 {
   public:
-    Orbit(const Point& pt);
-    void insert(Time t, const Point& hpt);
+    Orbit(const ExactPoint& pt);
+    void insert(ExactFloat t, const ExactPoint& hpt);
     const InterpolatedCurve& curve() const { return *this->_curve; }
   private:
     std::shared_ptr< InterpolatedCurve > _curve;

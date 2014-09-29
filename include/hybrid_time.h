@@ -32,6 +32,8 @@
 
 namespace Ariadne {
 
+typedef Integer DiscreteTimeType;
+
 //! \ingroup SystemModule
 //! \brief A value in a hybrid time domain, being a pair comprising a real \a continuous_time
 //! and an integer \a discrete_time.
@@ -45,7 +47,7 @@ struct HybridTime
     //! \brief The type used for continuous (real, physical) time.
     typedef Real ContinuousTimeType;
     //! \brief The type used for discrete time (steps).
-    typedef int DiscreteTimeType;
+    typedef Integer DiscreteTimeType;
 
     //! \brief The continuous (real, physical) time.
     const ContinuousTimeType& continuous_time() const { return this->_continuous_time; }
@@ -57,11 +59,11 @@ struct HybridTime
     //! \brief The number of discrete steps taken.
     DiscreteTimeType _discrete_time;
   public:
-    HybridTime(Real t, int n)
+    HybridTime(Real t, Integer n)
       : _continuous_time(t), _discrete_time(n) { }
-    HybridTime(RawFloatType t, int n)
+    HybridTime(RawFloatType t, Integer n)
       : _continuous_time(ExactFloat(t)), _discrete_time(n) { }
-    HybridTime(ExactFloat t, int n)
+    HybridTime(ExactFloat t, Integer n)
       : _continuous_time(t), _discrete_time(n) { }
     HybridTime(double t, int n)
       : _continuous_time(t), _discrete_time(n) { }

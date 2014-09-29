@@ -35,13 +35,17 @@
 
 namespace Ariadne {
 
+class Point;
+typedef Point ExactPoint;
+typedef Vector<ApproximateFloatType> ApproximatePoint;
+
 //! A point in Euclidean space.
 class Point
     : public Vector<ExactFloatType>
     , public DrawableInterface
 {
   public:
-    typedef ExactFloatType real_type;
+    typedef ExactFloatType RealType;
     //! Default constructor contructs the singleton point in zero dimensions.
     Point() : Vector<ExactFloatType>() { }
     //! The origin in \a n dimensions.

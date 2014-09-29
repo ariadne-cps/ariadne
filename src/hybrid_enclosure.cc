@@ -312,8 +312,8 @@ void HybridEnclosure::apply_full_reach_step(const ValidatedVectorFunctionModel& 
 
 
 void HybridEnclosure::bound_time(Real tmax) {
-    if(this->time_range().upper()>Interval(tmax).lower()) {
-        this->_set.new_negative_parameter_constraint(this->time_function()-Interval(tmax));
+    if(this->time_range().upper()>ValidatedNumberType(tmax).lower()) {
+        this->_set.new_negative_parameter_constraint(this->time_function()-ValidatedNumberType(tmax));
     }
 }
 
@@ -341,7 +341,7 @@ void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ValidatedScalarFu
     ARIADNE_NOT_IMPLEMENTED; // Deprecated
 }
 
-void HybridEnclosure::set_step_time(Float time)
+void HybridEnclosure::set_step_time(ExactFloatType time)
 {
     ARIADNE_NOT_IMPLEMENTED; // Deprecated
 }

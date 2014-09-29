@@ -190,7 +190,7 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
     //! \brief The unsigned integer type.
     typedef uint UnsignedIntType;
     //! \brief The real type.
-    typedef double RealType;
+    typedef ExactNumberType RealType;
 
     //! \brief Default constructor gives reasonable values.
     HybridReachabilityAnalyserConfiguration(HybridReachabilityAnalyser& analyser);
@@ -250,7 +250,7 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
     //! cached integration results for the grid.
     //! \details
     //! Choosing regularly-occurring events may greatly improve the speed and
-    //! accuracy of the computation. 
+    //! accuracy of the computation.
     //! <br>
     //! This property is only used for continuous-time computation.
     Set<DiscreteEvent> _lock_to_grid_events;

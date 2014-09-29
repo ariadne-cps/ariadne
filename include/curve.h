@@ -41,6 +41,8 @@ namespace Ariadne {
 template<class X> class Vector;
 
 class Point;
+typedef Point ExactPoint;
+
 class Box;
 
 
@@ -137,11 +139,14 @@ class InterpolatedCurve
     /*! \brief Create a curve with a single point \a pt at parameter value \a s. */
     InterpolatedCurve(const ParameterType& s, const PointType& pt)
         : _points() { this->insert(s,pt); }
+    InterpolatedCurve(const ExactFloatType& s, const Vector<ExactFloatType>& pt)
+        : _points() { this->insert(s,pt); }
     /*! \brief Create a segment from \a pt0 at parameter value 0 to \a pt1 at parameter value 1. */
     InterpolatedCurve(const PointType& pt0, const PointType& pt1)
         : _points() { this->insert(0,pt0); this->insert(1,pt1); }
     /*! \brief Insert a point with parameter value \a s and spacial value \a pt. */
     void insert(const ParameterType& s, const PointType& pt);
+    void insert(const ExactFloatType& s, const Vector<ExactFloatType>& pt);
 
     /*! \brief The number of segments in the curve. */
     size_t size() const { return this->_points.size(); }

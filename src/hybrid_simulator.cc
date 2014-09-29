@@ -51,7 +51,6 @@ template<class T> class Orbit;
 
 class DegenerateCrossingException { };
 
-
 HybridSimulator::HybridSimulator()
     : _step_size(0.125)
 {
@@ -65,7 +64,7 @@ void HybridSimulator::set_step_size(double h)
 
 Point make_point(const HybridPoint& hpt, const RealSpace& spc) {
     if(hpt.space()==spc) { return hpt.point(); }
-    Map<RealVariable,Float> values=hpt.values();
+    Map<RealVariable,ExactFloatType> values=hpt.values();
     Point pt(spc.dimension());
     for(uint i=0; i!=pt.size(); ++i) {
         pt[i]=values[spc.variable(i)];
@@ -73,8 +72,8 @@ Point make_point(const HybridPoint& hpt, const RealSpace& spc) {
     return pt;
 }
 
-inline Float evaluate(const EffectiveScalarFunction& f, const Vector<Float>& x) { return f(x); }
-inline Vector<Float> evaluate(const EffectiveVectorFunction& f, const Vector<Float>& x) { return f(x); }
+inline ApproximateFloatType evaluate(const EffectiveScalarFunction& f, const Vector<ApproximateFloatType>& x) { return f(x); }
+inline Vector<ApproximateFloatType> evaluate(const EffectiveVectorFunction& f, const Vector<ApproximateFloatType>& x) { return f(x); }
 
 Map<DiscreteEvent,EffectiveScalarFunction> guard_functions(const HybridAutomatonInterface& system, const DiscreteLocation& location) {
     Set<DiscreteEvent> events=system.events(location);
@@ -89,14 +88,14 @@ Orbit<HybridPoint>
 HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint& init_pt, const HybridTime& tmax) const
 {
     HybridTime t(0.0,0);
-    Float h=this->_step_size;
+    ApproximateFloatType h=this->_step_size;
 
     DiscreteLocation location=init_pt.location();
     RealSpace space=system.continuous_state_space(location);
-    Point point=make_point(init_pt,space);
-    Point next_point;
+    ApproximatePoint point=make_point(init_pt,space);
+    ApproximatePoint next_point;
 
-    Orbit<HybridPoint> orbit(HybridPoint(location,space,point));
+    Orbit<HybridPoint> orbit(HybridPoint(location,space,make_exact(point)));
 
     EffectiveVectorFunction dynamic=system.dynamic_function(location);
     Map<DiscreteEvent,EffectiveScalarFunction> guards=guard_functions(system,location);
@@ -124,9 +123,10 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint
             guards=guard_functions(system,location);
             t._discrete_time+=1;
         } else {
-            FloatVector k1,k2,k3,k4;
-            Point pt1,pt2,pt3,pt4;
-            Point const& pt=point;
+            ApproximateFloatVector k1,k2,k3,k4;
+            ApproximatePoint pt1,pt2,pt3,pt4;
+
+            ApproximatePoint const& pt=point;
             k1=evaluate(dynamic,pt);
             pt1=pt+h*k1;
 
@@ -138,11 +138,11 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint
 
             k4=evaluate(dynamic,pt3);
 
-            next_point=pt+(h/6)*(k1+2.0*(k2+k3)+k4);
-            t._continuous_time += Real(ExactFloat(h));
+            next_point=pt+(h/6)*(k1+ApproximateFloatType(2.0)*(k2+k3)+k4);
+            t._continuous_time += Real(ExactFloatType(h.raw()));
         }
         point=next_point;
-        orbit.insert(t,HybridPoint(location,space,point));
+        orbit.insert(t,HybridPoint(location,space,make_exact(point)));
     }
 
     return orbit;

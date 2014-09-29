@@ -41,7 +41,7 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAf
     ValidatedAffineModel r(n);
     r=CoefficientType( a1.value().raw()+a2.value().raw() );
     for(uint i=0; i!=n; ++i) {
-        r[i]=a1[i]+a2[i];
+        r[i]=CoefficientType(a1[i].raw()+a2[i].raw());
     }
 
     set_rounding_upward();

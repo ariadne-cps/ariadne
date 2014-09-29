@@ -102,7 +102,6 @@ class ScalarFunctionInterface<ValidatedTag>
 
     //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
     virtual ValidatedNumberType evaluate(const Vector<ValidatedNumberType>& x) const = 0;
-    virtual Interval evaluate(const Vector<Interval>& x) const = 0;
     inline ValidatedNumberType evaluate(const Vector<ExactNumberType>& x) const;
     inline ValidatedNumberType operator() (const Vector<ValidatedNumberType>& x) const;
     inline Interval operator() (const Vector<Interval>& x) const;

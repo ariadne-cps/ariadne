@@ -48,8 +48,6 @@ namespace Ariadne {
 typedef Vector<ApproximateFloatType> ApproximateFloatVector;
 typedef Vector<ExactFloatType> ExactFloatVector;
 
-static const ExactFloat infty = ExactFloat(inf);
-
 inline Sweeper default_sweeper() { return Sweeper(); }
 
 static const double error =  1e-2;

@@ -98,23 +98,52 @@ std::vector<Point> Box::vertices() const {
 }
 
 Box product(const Box& bx1, const Box& bx2) {
-    return Box(Ariadne::join(static_cast<const Vector<Interval>&>(bx1),static_cast<const Vector<Interval>&>(bx2)));
+    size_t n1=bx1.dimension();
+    size_t n2=bx2.dimension();
+    Box r(n1+n2);
+    for(size_t i=0; i!=n1; ++i) {
+        r[i]=bx1[i];
+    }
+    for(size_t i=0; i!=n2; ++i) {
+        r[n1+i]=bx2[i];
+    }
+    return r;
 }
 
 Box hull(const Box& bx1, const Box& bx2) {
-    return Box(Ariadne::hull(static_cast<const Vector<Interval>&>(bx1),static_cast<const Vector<Interval>&>(bx2)));
+    ARIADNE_ASSERT(bx1.dimension()==bx2.dimension());
+    Box r(bx1.dimension());
+    for(size_t i=0; i!=r.dimension(); ++i) {
+        r[i]=hull(bx1[i],bx2[i]);
+    }
+    return r;
 }
 
 Box hull(const Box& bx1, const Point& pt2) {
-    return Box(Ariadne::hull(static_cast<const Vector<Interval>&>(bx1),reinterpret_cast<const Vector<Float>&>(pt2)));
+    ARIADNE_ASSERT(bx1.dimension()==pt2.dimension());
+    Box r(bx1.dimension());
+    for(size_t i=0; i!=r.dimension(); ++i) {
+        r[i]=hull(bx1[i],pt2[i].raw());
+    }
+    return r;
 }
 
 Box hull(const Point& pt1, const Point& pt2) {
-    return Box(Ariadne::hull(reinterpret_cast<const Vector<Float>&>(pt1),reinterpret_cast<const Vector<Float>&>(pt2)));
+    ARIADNE_ASSERT(pt1.dimension()==pt2.dimension());
+    Box r(pt1.dimension());
+    for(size_t i=0; i!=r.dimension(); ++i) {
+        r[i]=hull(pt1[i].raw(),pt2[i].raw());
+    }
+    return r;
 }
 
 Box intersection(const Box& bx1, const Box& bx2) {
-    return Box(Ariadne::intersection(static_cast<const Vector<Interval>&>(bx1),static_cast<const Vector<Interval>&>(bx2)));
+    ARIADNE_ASSERT(bx1.dimension()==bx2.dimension());
+    Box r(bx1.dimension());
+    for(size_t i=0; i!=r.dimension(); ++i) {
+        r[i]=intersection(bx1[i],bx2[i]);
+    }
+    return r;
 }
 
 Box widen(const Box& bx) {

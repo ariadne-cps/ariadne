@@ -128,9 +128,11 @@ InterpolatedCurve::insert(const ExactFloatType& s, const ExactPointType& pt) {
 Box
 InterpolatedCurve::bounding_box() const
 {
-    Box bx(this->_points.begin()->second);
+    Point pt=this->_points.begin()->second;
+    Box bx(pt);
     for(const_iterator iter=this->_points.begin(); iter!=this->_points.end(); ++iter) {
-        bx=hull(bx,Point(iter->second));
+        pt=iter->second;
+        bx=hull(bx,pt);
     }
     return bx;
 }

@@ -67,11 +67,22 @@ bool contains(const Vector<Interval>& v1, const Vector<ValidatedFloat>& v2)
     return true;
 }
 
+bool element(const Vector<ExactFloat>& v1, const Vector<Interval>& v2)
+{
+    return contains(v2,v1);
+}
+
+bool element(const Vector<ValidatedFloat>& v1, const Vector<Interval>& v2)
+{
+    return contains(v2,v1);
+}
+
 UpperFloatType sup_error(const Vector<ValidatedFloatType>& x) {
     UpperFloatType e(0);
     for(uint i=0; i!=x.size(); ++i) {
         e=max(e,x[i].error());
     }
+    return e;
 }
 
 Vector<ExactFloatType> midpoint(const Vector<ValidatedFloatType>& x) {

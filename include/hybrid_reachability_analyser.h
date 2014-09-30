@@ -298,13 +298,13 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
   public:
 
     const RealType& transient_time() const { return _transient_time; }
-    void set_transient_time(const RealType value) { _transient_time = value; }
+    void set_transient_time(const RawFloatType value) { _transient_time = RealType(value); }
 
     const UnsignedIntType& transient_steps() const { return _transient_steps; }
     void set_transient_steps(const UnsignedIntType value) { _transient_steps = value; }
 
     const RealType& lock_to_grid_time() const { return _lock_to_grid_time; }
-    void set_lock_to_grid_time(const RealType value) { _lock_to_grid_time = value; }
+    void set_lock_to_grid_time(const RawFloatType value) { _lock_to_grid_time = RealType(value); }
 
     const UnsignedIntType& lock_to_grid_steps() const { return _lock_to_grid_steps; }
     void set_lock_to_grid_steps(const UnsignedIntType value) { _lock_to_grid_steps = value; }
@@ -327,8 +327,8 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
     //! \brief Check the consistency in respect to the system space, then set the grid.
     void set_grid(const std::shared_ptr<HybridGrid> value_ptr);
 
-    void set_scaling(const RealVariable& v, ExactFloatType s) {
-        dynamic_cast<SimpleHybridScaling&>(this->grid().scalings()).set_scaling(v,s); }
+    void set_scaling(const RealVariable& v, RawFloatType s) {
+        dynamic_cast<SimpleHybridScaling&>(this->grid().scalings()).set_scaling(v,ExactFloatType(s)); }
 
     const ChainOverspillPolicy& outer_overspill_policy() const { return _outer_overspill_policy; }
     void set_outer_overspill_policy(const ChainOverspillPolicy value) { _outer_overspill_policy = value; }

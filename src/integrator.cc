@@ -321,6 +321,21 @@ typedef Polynomial<ValidatedNumberType> ValidatedPolynomial;
 typedef Graded<ValidatedDifferential> GradedValidatedDifferential;
 bool operator<(const MultiIndex& a1, const MultiIndex& a2);
 
+TaylorSeriesIntegrator::TaylorSeriesIntegrator(MaximumError err)
+    : TaylorSeriesIntegrator(err,SweepThreshold(err/1024),LipschitzConstant(0.5))
+{ }
+
+TaylorSeriesIntegrator::TaylorSeriesIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip)
+    : TaylorSeriesIntegrator(err,swp,lip,StepMaximumError(err/128),StepSweepThreshold(swp/1024),MaximumTemporalOrder(12))
+{ }
+
+TaylorSeriesIntegrator::TaylorSeriesIntegrator(MaximumError err, SweepThreshold gswp, LipschitzConstant lip,
+                           StepMaximumError lerr, StepSweepThreshold lswp,
+                           MinimumSpacialOrder minso, MinimumTemporalOrder minto,
+                           MaximumSpacialOrder maxso, MaximumTemporalOrder maxto)
+    : TaylorSeriesIntegrator(err,gswp,lip,lerr,lswp,maxto)
+{ }
+
 TaylorSeriesIntegrator::TaylorSeriesIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip,
                         StepMaximumError lerr, StepSweepThreshold lswp, MaximumTemporalOrder maxto)
     : TaylorPicardIntegrator(err,swp,lip,lerr,lswp,maxto)
@@ -331,6 +346,28 @@ TaylorSeriesIntegrator::TaylorSeriesIntegrator(MaximumError err, SweepThreshold 
         first_time=false;
         std::cerr<<"WARNING: TaylorSeriesIntegrator not currently supported; reverting to TaylorPicardIntegrator.\n";
     }
+}
+
+void
+TaylorSeriesIntegrator::write(std::ostream& os) const {
+    this->TaylorPicardIntegrator::write(os);
+}
+
+Pair<ExactFloatType,Box>
+TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vector_field,
+                                    const Box& state_domain,
+                                    const RawFloatType& suggested_time_step) const
+{
+    return this->TaylorPicardIntegrator::flow_bounds(vector_field,state_domain,suggested_time_step);
+}
+
+ValidatedVectorFunctionModel
+TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& vector_field,
+                                  const Box& state_domain,
+                                  const ExactFloatType& time_step,
+                                  const Box& bounding_box) const
+{
+    return this->TaylorPicardIntegrator::flow_step(vector_field,state_domain,time_step,bounding_box);
 }
 
 /*

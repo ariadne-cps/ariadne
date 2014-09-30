@@ -664,9 +664,9 @@ void HybridReachabilityAnalyser::_checked_restriction(HybridGridTreeSet& set, co
 HybridReachabilityAnalyserConfiguration::HybridReachabilityAnalyserConfiguration(HybridReachabilityAnalyser& analyser)
     : _analyser(analyser)
 {
-    set_transient_time(0.0_exact);
+    set_transient_time(0.0);
     set_transient_steps(0);
-    set_lock_to_grid_time(1.0_exact);
+    set_lock_to_grid_time(1.0);
     set_lock_to_grid_steps(1);
     set_maximum_grid_depth(3);
     set_maximum_grid_height(16);

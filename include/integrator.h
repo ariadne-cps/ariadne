@@ -185,32 +185,9 @@ class TaylorPicardIntegrator
     using IntegratorBase::flow_step;
 };
 
-class TaylorSeriesIntegrator
-    : public TaylorPicardIntegrator
-{
-    TaylorSeriesIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip,
-                           StepMaximumError lerr, StepSweepThreshold lswp, MaximumTemporalOrder maxto);
-  public:
-    //! \brief Constructor.
-    TaylorSeriesIntegrator(MaximumError err) : TaylorSeriesIntegrator(err,err/1024) { }
-
-    TaylorSeriesIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip=0.5)
-        : TaylorSeriesIntegrator(err,swp,lip,err/128,swp/1024) { }
-
-    //! \brief Constructor.
-    TaylorSeriesIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip,
-                           StepMaximumError lerr, StepSweepThreshold lswp,
-                           MinimumSpacialOrder minso=1, MinimumTemporalOrder minto=4,
-                           MaximumSpacialOrder maxso=4, MaximumTemporalOrder maxto=12)
-        : TaylorSeriesIntegrator(err,swp,lip,lerr,lswp,maxto) { }
-
-    TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
-};
-
-/*
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.
 class TaylorSeriesIntegrator
-    : public IntegratorBase
+    : public TaylorPicardIntegrator
 {
     double _step_maximum_error;
     double _step_sweep_threshold;
@@ -220,22 +197,20 @@ class TaylorSeriesIntegrator
     uint _maximum_temporal_order;
   public:
     //! \brief Constructor.
-    TaylorSeriesIntegrator(MaximumError err)
-        : IntegratorBase(err,SweepThreshold(err/1024),LipschitzConstant(0.5)), _step_maximum_error(err/128), _step_sweep_threshold(err/(128*1024))
-        , _minimum_spacial_order(1), _minimum_temporal_order(4), _maximum_spacial_order(4), _maximum_temporal_order(12) { }
+    TaylorSeriesIntegrator(MaximumError err);
 
     //! \brief Constructor.
-    TaylorSeriesIntegrator(MaximumError err, SweepThreshold swp)
-        : IntegratorBase(err,swp,LipschitzConstant(0.5)), _step_maximum_error(err/128), _step_sweep_threshold(swp/1024)
-        , _minimum_spacial_order(1), _minimum_temporal_order(4), _maximum_spacial_order(4), _maximum_temporal_order(12) { }
+    TaylorSeriesIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip=0.5);
+
+    //! \brief Constructor.
+    TaylorSeriesIntegrator(MaximumError err, SweepThreshold gswp, LipschitzConstant lip,
+                           StepMaximumError lerr, StepSweepThreshold lswp, MaximumTemporalOrder maxto);
 
     //! \brief Constructor.
     TaylorSeriesIntegrator(MaximumError err, SweepThreshold gswp, LipschitzConstant lip,
                            StepMaximumError lerr, StepSweepThreshold lswp,
                            MinimumSpacialOrder minso, MinimumTemporalOrder minto,
-                           MaximumSpacialOrder maxso, MaximumTemporalOrder maxto)
-        : IntegratorBase(err,gswp,lip), _step_maximum_error(lerr), _step_sweep_threshold(lswp)
-        , _minimum_spacial_order(minso), _minimum_temporal_order(minto), _maximum_spacial_order(maxso), _maximum_temporal_order(maxto) { }
+                           MaximumSpacialOrder maxso, MaximumTemporalOrder maxto);
 
     //! \brief The order of the method in space.
     uint minimum_spacial_order() const { return this->_minimum_spacial_order; }
@@ -272,7 +247,7 @@ class TaylorSeriesIntegrator
 
     using IntegratorBase::flow_step;
 };
-*/
+
 
 //! \brief An integrator computes a approximation to the flow which is affine in space.
 //! \internal This code is written to allow higher-spacial order approximations.

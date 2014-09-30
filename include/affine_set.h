@@ -60,7 +60,7 @@ class Point2d;
 typedef Constraint<AffineModel<ValidatedNumberType>,ValidatedFloatType> ValidatedAffineModelConstraint;
 typedef Constraint<Affine<ValidatedNumberType>,ValidatedFloatType> ValidatedAffineConstraint;
 typedef Constraint<Affine<EffectiveNumberType>,EffectiveNumberType> EffectiveAffineConstraint;
-typedef Affine<Interval> ValidatedAffineFunction;
+typedef Affine<ValidatedNumberType> ValidatedAffineFunction;
 
 EffectiveAffineConstraint operator<=(const EffectiveNumberType& l, const EffectiveAffine& am);
 EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumberType& u);

@@ -51,19 +51,21 @@ template<class X> bool operator==(const Affine<X>&, const Affine<X>&);
 template<class X> Affine<X> operator-(const Affine<X>&);
 template<class X> Affine<X> operator+(const Affine<X>&, const Affine<X>&);
 template<class X> Affine<X> operator-(const Affine<X>&, const Affine<X>&);
-template<class X> Affine<X> operator+(const X&, const Affine<X>&);
-template<class X> Affine<X> operator+(const Affine<X>&, const X&);
-template<class X> Affine<X> operator-(const X&, const Affine<X>&);
-template<class X> Affine<X> operator-(const Affine<X>&, const X&);
-template<class X> Affine<X> operator*(const X&, const Affine<X>&);
-template<class X> Affine<X> operator*(const Affine<X>&, const X&);
-template<class X> Affine<X> operator/(const Affine<X>&, const X&);
+template<class X> Affine<X> operator+(const typename Affine<X>::NumericType&, const Affine<X>&);
+template<class X> Affine<X> operator+(const Affine<X>&, const typename Affine<X>::NumericType&);
+template<class X> Affine<X> operator-(const typename Affine<X>::NumericType&, const Affine<X>&);
+template<class X> Affine<X> operator-(const Affine<X>&, const typename Affine<X>::NumericType&);
+template<class X> Affine<X> operator*(const typename Affine<X>::NumericType&, const Affine<X>&);
+template<class X> Affine<X> operator*(const Affine<X>&, const typename Affine<X>::NumericType&);
+template<class X> Affine<X> operator/(const Affine<X>&, const typename Affine<X>::NumericType&);
 template<class X> X derivative(const Affine<X>&, uint);
 
 //! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b\f$.
 template<class X>
 class Affine
 {
+  public:
+    typedef X NumericType;
   public:
     explicit Affine() : _c(), _g() { }
     explicit Affine(uint n) : _c(0), _g(n) { }
@@ -134,30 +136,30 @@ template<class X> inline Affine<X> operator-(const Affine<X>& f1, const Affine<X
     return Affine<X>(Vector<X>(f1._g-f2._g),f1._c-f2._c); }
 //! \relates Affine
 //! \brief Addition of a constant to an affine expression.
-template<class X> inline Affine<X> operator+(const Affine<X>& f1, const X& c2) {
+template<class X> inline Affine<X> operator+(const Affine<X>& f1, const typename Affine<X>::NumericType& c2) {
     return Affine<X>(Vector<X>(f1._g),f1._c+c2); }
 //! \relates Affine
 //! \brief Addition of a constant to an affine expression.
-template<class X> inline Affine<X> operator+(const X& c1, const Affine<X>& f2) {
+template<class X> inline Affine<X> operator+(const typename Affine<X>::NumericType& c1, const Affine<X>& f2) {
     return Affine<X>(Vector<X>(f2._g),c1+f2._c); }
 //! \relates Affine
 //! \brief Subtraction of a constant to an affine expression.
-template<class X> inline Affine<X> operator-(const Affine<X>& f1, const X& c2) {
+template<class X> inline Affine<X> operator-(const Affine<X>& f1, const typename Affine<X>::NumericType& c2) {
     return Affine<X>(Vector<X>(f1._g),f1._c-c2); }
 //! \relates Affine
 //! \brief Subtraction of an affine expression from a constant.
-template<class X> inline Affine<X> operator-(const X& c1, const Affine<X>& f2) {
+template<class X> inline Affine<X> operator-(const typename Affine<X>::NumericType& c1, const Affine<X>& f2) {
     return Affine<X>(Vector<X>(-f2._g),c1-f2._c); }
 //! \relates Affine
 //! \brief Scalar multiplication of an affine expression.
-template<class X> inline Affine<X> operator*(const X& c, const Affine<X>& f) {
+template<class X> inline Affine<X> operator*(const typename Affine<X>::NumericType& c, const Affine<X>& f) {
     return Affine<X>(Vector<X>(c*f._g),c*f._c); }
 //! \relates Affine
 //! \brief Scalar multiplication of an affine expression.
-template<class X> inline Affine<X> operator*(const Affine<X>& f, const X& c) { return c*f; }
+template<class X> inline Affine<X> operator*(const Affine<X>& f, const typename Affine<X>::NumericType& c) { return c*f; }
 //! \relates Affine
 //! \brief Scalar division of an affine expression.
-template<class X> inline Affine<X> operator/(const Affine<X>& f, const X& c) { return (1/c)*f; }
+template<class X> inline Affine<X> operator/(const Affine<X>& f, const typename Affine<X>::NumericType& c) { return (1/c)*f; }
 //! \relates Affine
 //! \brief The derivative of an affine expression gives a constant.
 template<class X> inline X derivative(const Affine<X>& f, uint k) { return f.derivative(k); }

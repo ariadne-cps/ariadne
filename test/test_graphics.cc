@@ -32,8 +32,6 @@
 #include "function_set.h"
 #include "grid_set.h"
 
-#include "user_function.h"
-
 using namespace Ariadne;
 
 
@@ -112,12 +110,11 @@ int main(int argc, char **argv)
     g.write("test_graphics-set");
     g.clear();
 
-    InterpolatedCurve cv(Point(2,0.0));
+    InterpolatedCurve cv(0,Point(2,0.0));
     for(int i=1; i<=10; ++i) {
-        Point pt(2); pt[0]=i/10.; pt[1]=sqr(pt[0]);
+        Point pt(2); pt[0]=ExactFloat(i/10.); pt[1]=ExactFloat(i*i/100.);
         cv.insert(i,pt);
     }
-
     g.set_bounding_box(cv.bounding_box());
     g.set_line_colour(1,0,0);
     g.draw(cv);

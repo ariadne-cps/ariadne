@@ -83,7 +83,8 @@ TestHybridEvolution::TestHybridEvolution(const int verb) : verbosity(verb) { }
 void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) const
 {
     evolver.reset(new GeneralHybridEvolver(system));
-    evolver->set_integrator(TaylorSeriesIntegrator(1e-5));
+    //evolver->set_integrator(TaylorSeriesIntegrator(1e-5));
+    evolver->set_integrator(TaylorPicardIntegrator(1e-5));
     evolver->verbosity=verbosity;
     evolver->configuration().set_maximum_step_size(1./4);
     evolver->configuration().set_maximum_enclosure_radius(1./8);

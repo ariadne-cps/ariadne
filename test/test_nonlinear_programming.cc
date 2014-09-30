@@ -68,10 +68,11 @@ class TestOptimiser
         Box C=Box{};
         ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
 
-        IntervalVector x_optimal=optimiser->minimise(f,D,g,C);
-        ARIADNE_TEST_BINARY_PREDICATE(subset,x_optimal,D);
-        ARIADNE_TEST_BINARY_PREDICATE(subset,g(x_optimal),C);
-        //ARIADNE_TEST_LESS(norm(x_optimal),1e-8);
+        ValidatedFloatVector x_optimal=optimiser->minimise(f,D,g,C);
+        ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
+        ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
+        ExactFloat required_accuracy(1e-8);
+        //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
     }
 
     void test_equality_constrained_optimisation() {
@@ -85,9 +86,10 @@ class TestOptimiser
         Box D=Box{{-1.0,2.0},{-3.0,5.0}};
         ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
 
-        IntervalVector x_optimal=optimiser->minimise(f,D,g,C);
-        ARIADNE_TEST_BINARY_PREDICATE(subset,x_optimal,D);
-        ARIADNE_TEST_LESS(norm(g(x_optimal)),1e-7);
+        ExactFloat required_accuracy(1e-7);
+        ValidatedFloatVector x_optimal=optimiser->minimise(f,D,g,C);
+        ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
+        ARIADNE_TEST_LESS(norm(g(x_optimal)),required_accuracy);
     }
 
     void test_constrained_optimisation() {
@@ -103,10 +105,11 @@ class TestOptimiser
         Box C = Box{{0.0,inf},{0.0,inf}};
         ARIADNE_TEST_PRINT(C);
 
-        IntervalVector x_optimal=optimiser->minimise(f,D,g,C);
-        ARIADNE_TEST_BINARY_PREDICATE(subset,x_optimal,D);
-        ARIADNE_TEST_BINARY_PREDICATE(subset,g(x_optimal),C);
-        //ARIADNE_TEST_LESS(norm(x_optimal),1e-6);
+        ValidatedFloatVector x_optimal=optimiser->minimise(f,D,g,C);
+        ARIADNE_TEST_BINARY_PREDICATE(element,x_optimal,D);
+        ARIADNE_TEST_BINARY_PREDICATE(element,g(x_optimal),C);
+        ExactFloat required_accuracy(1e-6);
+        //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
     }
 
     void test_mixed_constrained_optimisation() {
@@ -122,8 +125,9 @@ class TestOptimiser
         Box C = Box {{-1.0,-0.5},{0.0,0.0}};
         ARIADNE_TEST_PRINT(C);
 
-        IntervalVector x_optimal=optimiser->minimise(f,D,gh,C);
-        ARIADNE_TEST_LESS(norm(h(x_optimal)),1e-8);
+        ValidatedFloatVector x_optimal=optimiser->minimise(f,D,gh,C);
+        ExactFloat required_accuracy(1e-8);
+        ARIADNE_TEST_LESS(norm(h(x_optimal)),required_accuracy);
     }
 
     void test_linear_feasibility() {
@@ -173,18 +177,18 @@ class TestOptimiser
         ARIADNE_TEST_CONSTRUCT( IntervalVector, D, ({{-1.0, 1.0},{-1.0,1.0}}) );
         ARIADNE_TEST_CONSTRUCT( IntervalVector, C, ({{0.0,0.0}}) );
 
-        ARIADNE_TEST_CONSTRUCT( IntervalVector, X1, ({{0.30,0.40},{0.60,0.70}}) );
+        ARIADNE_TEST_CONSTRUCT( ValidatedFloatVector, X1, ({{0.30,0.40},{0.60,0.70}}) );
         ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X1)) );
 
         // The following test fails since it is difficult to find the feasible
         // point in the box.
-        ARIADNE_TEST_CONSTRUCT( IntervalVector, X2, ({{0.30,0.40},{0.65,0.65}}) );
+        ARIADNE_TEST_CONSTRUCT( ValidatedFloatVector, X2, ({{0.30,0.40},{0.65,0.65}}) );
         ARIADNE_TEST_ASSERT( optimiser->contains_feasible_point(D,g,C,X2) );
 
-        ARIADNE_TEST_CONSTRUCT( IntervalVector, X3, ({{0.30,0.40},{0.65,0.68}}) );
+        ARIADNE_TEST_CONSTRUCT( ValidatedFloatVector, X3, ({{0.30,0.40},{0.65,0.68}}) );
         ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X3)) );
 
-        ARIADNE_TEST_CONSTRUCT(FloatVector, x2, ({0.35,0.655}) );
+        ARIADNE_TEST_CONSTRUCT(ExactFloatVector, x2, ({0.35,0.655}) );
         ARIADNE_TEST_ASSERT( optimiser->validate_feasibility(D,g,C,x2) );
     }
 

@@ -37,8 +37,9 @@
 using namespace Ariadne;
 using namespace std;
 
-
-
+namespace Ariadne {
+inline ExactFloatType const& make_exact(ExactFloatType const& x) { return x; }
+}
 
 class TestInterval
 {
@@ -309,8 +310,8 @@ TestInterval::test_constructors()
 
     // Exact constructor from a single value
     Interval ivld6(Float(1.25));
-    ARIADNE_TEST_EQUAL(ivld6.lower(),Float(1.25));
-    ARIADNE_TEST_EQUAL(ivld6.upper(),Float(1.25));
+    ARIADNE_TEST_EQUAL(ivld6.lower().raw(),Float(1.25));
+    ARIADNE_TEST_EQUAL(ivld6.upper().raw(),Float(1.25));
 
     // Empty interval
     Interval ivld7;
@@ -323,25 +324,25 @@ void TestInterval::test_class()
     // Test lower, upper, midpoint, radius, width
 
     // Tests for exact operations
-    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).lower(),-0.25);
-    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).upper(),0.5);
-    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).midpoint(),0.125);
-    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).radius(),0.375)
-    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).width(),0.75);
+    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).lower().raw(),-0.25);
+    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).upper().raw(),0.5);
+    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).midpoint().raw(),0.125);
+    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).radius().raw(),0.375)
+    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).width().raw(),0.75);
 
     // Tests for inexact operations
-    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).lower(),-0.33333333333333331483);
-    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).upper(),0.66666666666666662966);
-    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).midpoint(),0.16666666666666665741);
-    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).radius(),0.5)
-    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).width(),1.0);
+    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).lower().raw(),-0.33333333333333331483);
+    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).upper().raw(),0.66666666666666662966);
+    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).midpoint().raw(),0.16666666666666665741);
+    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).radius().raw(),0.5)
+    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).width().raw(),1.0);
 
     // Tests for inexact operations
-    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).lower(),-0.33333333333333337034);
-    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).upper(),0.66666666666666674068);
-    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).midpoint(),0.16666666666666668517);
-    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).radius(),0.50000000000000011102)
-    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).width(),1.000000000000000222);
+    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).lower().raw(),-0.33333333333333337034);
+    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).upper().raw(),0.66666666666666674068);
+    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).midpoint().raw(),0.16666666666666668517);
+    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).radius().raw(),0.50000000000000011102)
+    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).width().raw(),1.000000000000000222);
 }
 
 void TestInterval::test_input()
@@ -376,7 +377,7 @@ void TestInterval::test_comparison() {
     Interval& ivl1ref=ivl1;
     ivl1ref=Interval(5.25,7.375);
     cout << "ivl1ref=" << ivl1ref << endl;
-    ARIADNE_TEST_ASSERT(ivl1ref.lower()==Float(5.25));
+    ARIADNE_TEST_ASSERT(ivl1ref.lower().raw()==Float(5.25));
 }
 
 void TestInterval::test_aliasing() {

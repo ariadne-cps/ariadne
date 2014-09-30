@@ -1444,8 +1444,8 @@ HybridEvolverBaseConfiguration::HybridEvolverBaseConfiguration(HybridEvolverBase
 void
 HybridEvolverBaseConfiguration::set_flow_accuracy(const RealType value)
 {
-    //_evolver._integrator_ptr=std::shared_ptr<TaylorSeriesIntegrator>(new TaylorSeriesIntegrator(value));
-    _evolver._integrator_ptr=std::shared_ptr<TaylorPicardIntegrator>(new TaylorPicardIntegrator(value));
+    _evolver._integrator_ptr=std::shared_ptr<TaylorSeriesIntegrator>(new TaylorSeriesIntegrator(value));
+    //_evolver._integrator_ptr=std::shared_ptr<TaylorPicardIntegrator>(new TaylorPicardIntegrator(value));
     _flow_accuracy = value;
 }
 

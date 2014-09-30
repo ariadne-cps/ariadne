@@ -185,6 +185,34 @@ class TaylorPicardIntegrator
     using IntegratorBase::flow_step;
 };
 
+class TaylorSeriesIntegrator
+    : public TaylorPicardIntegrator
+{
+    TaylorSeriesIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip,
+                           StepMaximumError lerr, StepSweepThreshold lswp, MaximumTemporalOrder maxto)
+        : TaylorPicardIntegrator(err,swp,lip,lerr,lswp,maxto)
+    {
+        std::cerr<<"WARNING: TaylorSeriesIntegrator not currently supported; reverting to TaylorPicardIntegrator.\n";
+    }
+  public:
+    //! \brief Constructor.
+    TaylorSeriesIntegrator(MaximumError err) : TaylorSeriesIntegrator(err,err/1024) { }
+
+    TaylorSeriesIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip=0.5)
+        : TaylorSeriesIntegrator(err,swp,lip,err/128,swp/1024) { }
+
+    //! \brief Constructor.
+    TaylorSeriesIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip,
+                           StepMaximumError lerr, StepSweepThreshold lswp,
+                           MinimumSpacialOrder minso=1, MinimumTemporalOrder minto=4,
+                           MaximumSpacialOrder maxso=4, MaximumTemporalOrder maxto=12)
+        : TaylorPicardIntegrator(err,swp,lip,lerr,lswp,maxto)
+    {
+        std::cerr<<"WARNING: TaylorSeriesIntegrator not currently supported; reverting to TaylorPicardIntegrator.\n";
+    }
+
+};
+
 /*
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.
 class TaylorSeriesIntegrator

@@ -176,7 +176,8 @@ Vector<ValidatedNumberType>
 SolverBase::solve(const ValidatedVectorFunction& f,
                   const Vector<ValidatedNumberType>& ix) const
 {
-    return this->solve(f,static_cast<Vector<Interval>>(ix));
+    Box bx(ix);
+    return this->solve(f,bx);
 }
 
 Vector<ValidatedNumberType>
@@ -197,23 +198,23 @@ solve_all(Set< Vector<ValidatedNumberType> >& r,
 
 Set< Vector<ValidatedNumberType> >
 SolverBase::solve_all(const ValidatedVectorFunction& f,
-                      const Box& ix) const
+                      const Box& bx) const
 {
-    ARIADNE_LOG(5,"SolverBase::solve_all(f,ix): f="<<f<<", ix="<<ix<<"\n");
+    ARIADNE_LOG(5,"SolverBase::solve_all(f,bx): f="<<f<<", ix="<<bx<<"\n");
 
     // Create result set
     Set< Vector<ValidatedNumberType> > r;
 
-    Vector<ValidatedFloatType> x=make_singleton(ix);
+    Vector<ValidatedFloatType> x=make_singleton(bx);
 
     // Test for no solution
-    const Vector<ValidatedNumberType> z(ix.size());
+    const Vector<ValidatedNumberType> z(bx.size());
     if(inconsistent(f.evaluate(x),z)) {
         return r;
     }
 
     bool invertible_jacobian=true;
-    //Vector<ValidatedNumberType> nx=2*ix-make_exact(ix);
+    //Vector<ValidatedNumberType> nx=2*ix-make_exact(bx);
     Vector<ValidatedNumberType> nx=x;
     try {
         Matrix<ValidatedNumberType> Jinv=inverse(f.jacobian(nx));
@@ -227,7 +228,7 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
     if(invertible_jacobian) {
         //std::cerr<<"Nonsingular matrix -- applying contractor\n";
         try {
-            Vector<ValidatedNumberType> y=this->solve(f,nx);
+            Vector<ValidatedNumberType> y=this->zero(f,bx);
             bool is_new=true;
             for(Set<Vector<ValidatedNumberType> >::const_iterator iter=r.begin(); iter!=r.end(); ++iter) {
                 if(consistent(y,*iter)) {
@@ -255,19 +256,19 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
 
     if(need_to_split) {
         // If sup_error is too small, assume solution is not verified
-        if(sup_error(make_singleton(ix))<this->maximum_error()) {
+        if(sup_error(make_singleton(bx))<this->maximum_error()) {
             if(!invertible_jacobian) {
-                ARIADNE_WARN("Cannot verify solution in "<<ix<<" with f="<<f(make_singleton(ix))<<"); "
+                ARIADNE_WARN("Cannot verify solution in "<<bx<<" with f="<<f(make_singleton(bx))<<"); "
                              <<"Jacobian "<<f.jacobian(nx)<<" is not invertible; "
                              <<"approximate inverse="<<inverse(midpoint(f.jacobian(nx)))<<"\n");
             } else {
-                ARIADNE_WARN("Cannot verify or falsify solution in "<<ix<<"; f("<<ix<<")="<<f(make_singleton(ix))<<".\n");
+                ARIADNE_WARN("Cannot verify or falsify solution in "<<bx<<"; f("<<bx<<")="<<f(make_singleton(bx))<<".\n");
             }
             return r;
         }
 
-        //std::cerr<<"  Splitting "<<ix<<"\n";
-        std::pair< Vector<Interval>, Vector<Interval> > splt=split(ix);
+        //std::cerr<<"  Splitting "<<bx<<"\n";
+        std::pair< Vector<Interval>, Vector<Interval> > splt=split(bx);
         r.adjoin(this->solve_all(f,splt.first));
         r.adjoin(this->solve_all(f,splt.second));
     }

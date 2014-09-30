@@ -67,15 +67,15 @@ EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveN
 EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumberType& u);
 EffectiveAffineConstraint operator==(const EffectiveAffine& am, const EffectiveNumberType& b);
 
-ValidatedAffineConstraint operator<=(const ExactFloatType& l, const ValidatedAffineFunction& am);
-ValidatedAffineConstraint operator<=(const ValidatedAffineFunction& am, const ExactFloatType& u);
-ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& am, const ExactFloatType& u);
-ValidatedAffineConstraint operator==(const ValidatedAffineFunction& am, const ExactFloatType& b);
+ValidatedAffineConstraint operator<=(const ValidatedFloatType& l, const ValidatedAffineFunction& am);
+ValidatedAffineConstraint operator<=(const ValidatedAffineFunction& am, const ValidatedFloatType& u);
+ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& am, const ValidatedFloatType& u);
+ValidatedAffineConstraint operator==(const ValidatedAffineFunction& am, const ValidatedFloatType& b);
 
-ValidatedAffineModelConstraint operator<=(const ExactFloatType& l, const ValidatedAffineModel& am);
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& am, const ExactFloatType& u);
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& am, const ExactFloatType& u);
-ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& am, const ExactFloatType& b);
+ValidatedAffineModelConstraint operator<=(const ValidatedFloatType& l, const ValidatedAffineModel& am);
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& am, const ValidatedFloatType& u);
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& am, const ValidatedFloatType& u);
+ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& am, const ValidatedFloatType& b);
 
 //! \brief A constrained image set defined by affine functions.
 //!  Defines a set of the form \f$S=\{ f(x) \mid x\in D \mid g(x)\leq 0 \wedge h(x)=0 \}\f$

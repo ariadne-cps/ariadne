@@ -29,14 +29,97 @@
 
 namespace Ariadne {
 
-bool refines(const Vector<ValidatedFloat>& v1, const Vector<ValidatedFloat>& v2)
+Vector<ExactFloatType>const& make_exact(const Vector<ApproximateFloatType>& av) {
+    return reinterpret_cast<Vector<ExactFloatType>const&>(av);
+}
+
+Vector<ValidatedFloatType> make_bounds(const Vector<ErrorFloatType>& ev) {
+    Vector<ValidatedFloatType> r(ev.size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=make_bounds(ev[i]);
+    }
+    return r;
+}
+
+Vector<ValidatedFloatType>const& make_singleton(const Vector<Interval>& ivlv) {
+    return reinterpret_cast<Vector<ValidatedFloatType>const&>(ivlv);
+}
+
+Matrix<ValidatedFloatType>const& make_singleton(const Matrix<Interval>& ivlA) {
+    return reinterpret_cast<Matrix<ValidatedFloatType>const&>(ivlA);
+}
+
+bool contains(const Vector<Interval>& v1, const Vector<ExactFloat>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
-        if(!refines(v1[i],v2[i])) { return false; }
+        if(!contains(v1[i],v2[i])) { return false; }
     }
     return true;
 }
+
+bool contains(const Vector<Interval>& v1, const Vector<ValidatedFloat>& v2)
+{
+    ARIADNE_ASSERT(v1.size()==v2.size());
+    for(size_t i=0; i!=v1.size(); ++i) {
+        if(!contains(v1[i],v2[i])) { return false; }
+    }
+    return true;
+}
+
+UpperFloatType sup_error(const Vector<ValidatedFloatType>& x) {
+    UpperFloatType e(0);
+    for(uint i=0; i!=x.size(); ++i) {
+        e=max(e,x[i].error());
+    }
+}
+
+Vector<ExactFloatType> midpoint(const Vector<ValidatedFloatType>& x) {
+    Vector<ExactFloatType> r(x.size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=midpoint(x[i]);
+    }
+    return r;
+}
+
+bool models(const Vector<ValidatedFloatType>& x1, const Vector<ExactFloatType>& x2) {
+    assert(x1.size()==x2.size());
+    for(uint i=0; i!=x1.size(); ++i) {
+        if(!models(x1[i],x2[i])) { return false; }
+    }
+    return true;
+}
+
+bool consistent(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2) {
+    assert(x1.size()==x2.size());
+    for(uint i=0; i!=x1.size(); ++i) {
+        if(!consistent(x1[i],x2[i])) { return false; }
+    }
+    return true;
+}
+
+bool inconsistent(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2) {
+    return !consistent(x1,x2);
+}
+
+bool refines(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2) {
+    assert(x1.size()==x2.size());
+    for(uint i=0; i!=x1.size(); ++i) {
+        if(!refines(x1[i],x2[i])) { return false; }
+    }
+    return true;
+}
+
+Vector<ValidatedFloatType> refinement(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2) {
+    assert(x1.size()==x2.size());
+    Vector<ValidatedFloatType> r(x1.size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=refinement(x1[i],x2[i]);
+    }
+    return r;
+}
+
+
 
 
 bool contains(const Vector<Interval>& v1, const Vector<Float>& v2)

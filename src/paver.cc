@@ -156,7 +156,7 @@ void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, c
     for(List<ValidatedConstraint>::const_iterator iter=constraints.begin();
         iter!=constraints.end(); ++iter)
     {
-        Interval constraint_range=iter->function().evaluate(subdomain);
+        Interval constraint_range=apply(iter->function(),subdomain);
         if(constraint_range.lower() > iter->bounds().upper() || constraint_range.upper() < iter->bounds().lower() ) { return; }
     }
 
@@ -195,7 +195,7 @@ void procedure_constraint_adjoin_outer_approximation_recursion(
     const Box& cell_box=cell.box();
     const FloatVector scalings=paving.grid().lengths();
 
-    Box bbox = f(domain);
+    Box bbox = apply(f,domain);
 
     Float domwdth = average_width(domain).raw();
     Float bbxwdth = average_scaled_width(bbox,paving.grid().lengths()).raw();
@@ -260,9 +260,9 @@ void procedure_constraint_adjoin_outer_approximation_recursion(
 
 
     domwdth = average_scaled_width(new_domain,FloatVector(new_domain.size(),1.0)).raw();
-    bbox=f(new_domain);
+    bbox=apply(f,new_domain);
     bbxwdth=average_scaled_width(bbox,paving.grid().lengths()).raw();
-    if(bbox.disjoint(cell_box) || disjoint(g(new_domain),codomain)) {
+    if(bbox.disjoint(cell_box) || disjoint(apply(g,new_domain),codomain)) {
         ARIADNE_LOG(4,"  Proved disjointness using image of new domain\n");
         return;
     }
@@ -338,8 +338,8 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
     Box bx=join(static_cast<const Box&>(b.box()),static_cast<const Box&>(c));
 
-    ARIADNE_LOG(2,"  fg(d)="<<fg(d)<<", bx="<<bx<<"\n");
-    if(disjoint(fg(d),bx)) {
+    ARIADNE_LOG(2,"  fg(d)="<<apply(fg,d)<<", bx="<<bx<<"\n");
+    if(disjoint(apply(fg,d),bx)) {
         ARIADNE_LOG(2,"  Proved disjointness using direct evaluation\n");
         return;
     }
@@ -430,7 +430,7 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
         }
     }
 
-    if(t<=0.0 && Box(f(d)).radius()>b.box().radius()) {
+    if(t<=0.0 && Box(apply(f,d)).radius()>b.box().radius()) {
         ARIADNE_LOG(2,"  Splitting domain\n");
         Pair<Box,Box> sd=d.split();
         ax = ApproximateFloat(1-XSIGMA)*ax + Vector<ApproximateFloat>(ax.size(),XSIGMA/x.size());
@@ -599,8 +599,8 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const Box& d, const Va
 {
     ARIADNE_ASSERT(p.dimension()==f.result_size());
 
-    GridCell b=GridCell::smallest_enclosing_primary_cell(f(d),p.grid());
-    Box r=g(d)+Box(g.result_size(),Interval(-1,1));
+    GridCell b=GridCell::smallest_enclosing_primary_cell(apply(f,d),p.grid());
+    Box r=apply(g,d)+Box(g.result_size(),Interval(-1,1));
     Box rc=intersection(r,c);
 
     Point y=midpoint(d);
@@ -614,7 +614,7 @@ void
 procedure_constraint_adjoin_outer_approximation(PavingInterface& p, const Box& d, const ValidatedVectorFunction& f,
                                                 const ValidatedVectorFunction& g, const Box& c, int e)
 {
-    GridCell b=p.smallest_enclosing_primary_cell(f(d));
+    GridCell b=p.smallest_enclosing_primary_cell(apply(f,d));
 
     List<ValidatedProcedure> procedures;
     procedures.reserve(f.result_size()+g.result_size());
@@ -631,8 +631,8 @@ procedure_constraint_adjoin_outer_approximation(PavingInterface& p, const Box& d
 void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Box& d, const ValidatedVectorFunction& f,
                                                    const ValidatedVectorFunction& g, const Box& c, int e)
 {
-    GridCell b=GridCell::smallest_enclosing_primary_cell(g(d),p.grid());
-    Box rc=intersection(g(d)+Box(g.result_size(),Interval(-1,1)),c);
+    GridCell b=GridCell::smallest_enclosing_primary_cell(apply(g,d),p.grid());
+    Box rc=intersection(apply(g,d)+Box(g.result_size(),Interval(-1,1)),c);
 
     Point y=midpoint(d);
     const uint l=(d.size()+f.result_size()+g.result_size())*2;

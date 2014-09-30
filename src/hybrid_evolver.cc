@@ -566,7 +566,7 @@ _compute_active_events(EffectiveVectorFunction const& dynamic,
         const EffectiveScalarFunction& guard_function=guards[event];
         ARIADNE_LOG(8,"event="<<event<<", guard="<<guard_function<<", flow_derivative="<<lie_derivative(guard_function,dynamic)<<"\n");
         // First try a simple test based on the bounding box
-        if(guard_function(reach_set.space_bounding_box()).upper()>=0.0) {
+        if(apply(guard_function,reach_set.space_bounding_box()).upper()>=0.0) {
             // Now make a set containing the complement of the constraint,
             // and test for emptiness. If the set is empty, then the guard is
             // not satisfied anywhere.
@@ -617,7 +617,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
         // Compute the derivative of the guard function g along flow lines of $\dot(x)=f(x)$
         // This is given by the Lie derivative at a point x, defined as $L_{f}g(x) = (\nabla g\cdot f)(x)$
         EffectiveScalarFunction derivative=lie_derivative(guard,dynamic);
-        Interval derivative_range=derivative.evaluate(flow_bounds);
+        Interval derivative_range=apply(derivative,flow_bounds);
         if(derivative_range.lower()>0.0) {
             // If the derivative $L_{f}g$is strictly positive over the bounding box for the flow,
             // then the guard function is strictly increasing.
@@ -660,7 +660,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
             // to have a definite sign over the entire flow box, then try to compute
             // the sign of the second derivative $L_{f}^{2}g(x)=L_{f}L_{f}g(x)$.
             ValidatedScalarFunction second_derivative=lie_derivative(derivative,dynamic);
-            Interval second_derivative_bounds_range=second_derivative.evaluate(flow_bounds);
+            Interval second_derivative_bounds_range=apply(second_derivative,flow_bounds);
             Interval second_derivative_flow_range=compose(second_derivative,flow).range();
             Interval second_derivative_range=intersection(second_derivative_bounds_range,second_derivative_flow_range);
             if(second_derivative_range.lower()>0.0) {
@@ -1444,7 +1444,8 @@ HybridEvolverBaseConfiguration::HybridEvolverBaseConfiguration(HybridEvolverBase
 void
 HybridEvolverBaseConfiguration::set_flow_accuracy(const RealType value)
 {
-    _evolver._integrator_ptr=std::shared_ptr<TaylorSeriesIntegrator>(new TaylorSeriesIntegrator(value));
+    //_evolver._integrator_ptr=std::shared_ptr<TaylorSeriesIntegrator>(new TaylorSeriesIntegrator(value));
+    _evolver._integrator_ptr=std::shared_ptr<TaylorPicardIntegrator>(new TaylorPicardIntegrator(value));
     _flow_accuracy = value;
 }
 

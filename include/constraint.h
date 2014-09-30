@@ -140,7 +140,7 @@ inline ValidatedConstraint operator>=(const ValidatedScalarFunction& f1, const V
     return (f1-f2) >= 0.0;
 }
 
-inline ValidatedConstraint operator<=(const ValidatedConstraint& nc, const ExactNumberType& c) {
+inline ValidatedConstraint operator<=(const ValidatedConstraint& nc, const ValidatedNumberType& c) {
     ARIADNE_ASSERT(nc.upper_bound()==infty);
     return ValidatedConstraint(nc.lower_bound(),nc.function(),c);
 }

@@ -101,7 +101,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Validate
 
     // Make codomain bounded
     IntervalVector bounds=codomain;
-    IntervalVector image=function(domain);
+    IntervalVector image=apply(function,domain);
     ARIADNE_LOG(4,"image="<<image<<"\n");
     for(uint i=0; i!=image.size(); ++i) {
         if(disjoint(image[i],codomain[i])) { ARIADNE_LOG(4,"  Proved disjointness using direct evaluation\n");  return make_pair(false,Point()); }
@@ -336,14 +336,14 @@ bool ConstraintSolver::monotone_reduce(Box& domain, const ValidatedScalarFunctio
         if(lower.radius().raw()>size) {
             midpoint=lower.midpoint();
             slice[variable]=midpoint;
-            Interval new_lower=midpoint+(bounds-function(slice)).lower()/derivative(subdomain);
+            Interval new_lower=midpoint+(bounds-apply(function,slice)).lower()/apply(derivative,subdomain);
             if(new_lower.upper().raw()<lower.lower().raw()) { lower=lower.lower().raw(); }
             else { lower=intersection(lower,new_lower); }
         }
         if(upper.radius().raw()>size) {
             midpoint=upper.midpoint();
             slice[variable]=midpoint;
-            Interval new_upper=midpoint+(bounds-function(slice)).upper()/derivative(subdomain);
+            Interval new_upper=midpoint+(bounds-apply(function,slice)).upper()/apply(derivative,subdomain);
             if(new_upper.lower()>upper.upper()) { upper=upper.upper(); }
             else { upper=intersection(upper,new_upper); }
         }
@@ -372,8 +372,7 @@ bool ConstraintSolver::lyapunov_reduce(Box& domain, const VectorTaylorFunction& 
         g += make_exact(multipliers[i]) * function[i];
         C += make_exact(multipliers[i]) * bounds[i];
     }
-    IntervalDifferentialVector dx = IntervalDifferential::variables(1u,domain);
-    IntervalVector dg = g.evaluate(dx).gradient();
+    IntervalVector dg = gradient(g,domain);
     C -= g(centre);
 
     Box new_domain(domain);
@@ -419,7 +418,7 @@ bool ConstraintSolver::box_reduce(Box& domain, const ValidatedScalarFunctionInte
     for(uint i=0; i!=n; ++i) {
         subinterval=Interval((l*(n-i)+u*i)/n,(l*(n-i-1)+u*(i+1))/n);
         slice[variable]=subinterval;
-        Interval slice_image=function(slice);
+        Interval slice_image=apply(function,slice);
         if(intersection(slice_image,bounds).empty()) {
             new_interval.set_lower(subinterval.upper());
         } else {
@@ -437,7 +436,7 @@ bool ConstraintSolver::box_reduce(Box& domain, const ValidatedScalarFunctionInte
     for(uint j=n-1; j!=imax; --j) {
         subinterval=Interval((l*(n-j)+u*j)/n,(l*(n-j-1)+u*(j+1))/n);
         slice[variable]=subinterval;
-        Interval slice_image=function(slice);
+        Interval slice_image=apply(function,slice);
         if(intersection(slice_image,bounds).empty()) {
             new_interval.set_upper(subinterval.lower());
         } else {

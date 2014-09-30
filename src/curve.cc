@@ -119,6 +119,12 @@ InterpolatedCurve::insert(const ParameterType& s, const PointType& pt) {
     this->_points.insert(std::pair< ParameterType, PointType >(s,pt));
 }
 
+void
+InterpolatedCurve::insert(const ExactFloatType& s, const ExactPointType& pt) {
+    if(!this->_points.empty()) { ARIADNE_ASSERT(pt.size()==this->dimension()); }
+    this->_points.insert(std::pair< ParameterType, PointType >(reinterpret_cast<ParameterType const&>(s),reinterpret_cast<PointType const&>(pt)));
+}
+
 Box
 InterpolatedCurve::bounding_box() const
 {

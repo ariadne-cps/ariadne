@@ -347,6 +347,10 @@ inline bool contains(Interval i, ExactFloatType x) { return i.lower_raw()<=x.raw
 inline bool contains(Interval i, ValidatedFloatType x) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
 inline bool contains(Interval i, RawFloatType x) { return i.lower_raw()<=x && x<=i.upper_raw(); }
 
+inline bool element(ExactFloatType x, Interval i) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
+inline bool element(ValidatedFloatType x, Interval i) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
+inline bool element(RawFloatType x, Interval i) { return i.lower_raw()<=x && x<=i.upper_raw(); }
+
 //! \related Interval \brief Test if the interval \a I1 is a subset of \a I2.
 inline bool subset(Interval i1, Interval i2) { return i1.lower_raw()>=i2.lower_raw() && i1.upper_raw()<=i2.upper_raw(); }
 //! \related Interval \brief Test if the interval \a I1 is a superset of \a I2.

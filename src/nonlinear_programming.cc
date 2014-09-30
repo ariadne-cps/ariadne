@@ -486,8 +486,8 @@ Bool OptimiserBase::
 is_feasible_point(Box D, ValidatedVectorFunction g, Box C, ExactPointType x) const
 {
     if(!contains(D,x)) { return false; }
-    IntervalVector gx=g(IntervalVector(x));
-    return subset(gx,C);
+    Vector<ValidatedFloatType> gx=g(x);
+    return contains(C,gx);
 }
 
 
@@ -595,10 +595,10 @@ validate_feasibility(Box D, ValidatedVectorFunction g, Box C,
     ARIADNE_LOG(3,"D="<<D<<", g="<<g<<", C="<<C<<"\n");
     ARIADNE_LOG(3,"x0="<<x0<<"\n");
 
-    IntervalVector x(x0);
+    Vector<ValidatedFloatType> x(x0);
     ARIADNE_LOG(3,"x="<<x<<"\n");
 
-    IntervalVector gx=g(x);
+    Vector<ValidatedFloatType> gx=g(x);
     ARIADNE_LOG(4,"gx="<<gx<<"\n");
 
     List<Nat> equalities, inequalities;
@@ -607,7 +607,7 @@ validate_feasibility(Box D, ValidatedVectorFunction g, Box C,
             equalities.append(i);
         } else {
             inequalities.append(i);
-            if(!subset(gx[i],C[i])) {
+            if(!contains(C[i],gx[i])) {
                 ARIADNE_LOG(3,"g["<<i<<"](x)="<<gx[i]<<", C["<<i<<"]="<<C[i]<<"\n");
                 return false; }
         }
@@ -626,38 +626,39 @@ validate_feasibility(Box D, ValidatedVectorFunction g, Box C,
     ARIADNE_LOG(5,"h="<<h<<" c="<<c<<" h(x)-c="<<(h(x0)-c)<<"\n");
 
     // Attempt to solve h(x0+AT*w)=0
-    IntervalMatrix AT = transpose(h.jacobian(ValidatedFloatVector(x0)));
+    // TODO: Change to use validated numbers
+    Matrix<ValidatedFloatType> AT = transpose(h.jacobian(x0));
     ARIADNE_LOG(5,"A="<<transpose(AT)<<"\n");
-    IntervalVector w0(k,Interval(0));
+    Vector<ValidatedFloatType> w0(k,ValidatedFloatType(0));
 
     bool found_solution=false;
     bool validated_solution=false;
 
-    IntervalVector w(k), mw(k), nw(k);
-    IntervalVector mx(n);
+    Vector<ValidatedFloatType> w(k), mw(k), nw(k);
+    Vector<ValidatedFloatType> mx(n);
 
     for(uint ii=0; ii!=12; ++ii) {
         mw=midpoint(w);
-        x=make_exact(x0)+AT*w;
+        x=x0+AT*w;
         mx=make_exact(x0)+AT*mw;
-        nw = mw - solve(h.jacobian(x)*AT,IntervalVector(h(mx)-make_exact(c)));
-        ARIADNE_LOG(7,"w="<<w<<", h(x0+AT*w)="<<h(x)<<", nw="<<nw<<", subset="<<subset(nw,w)<<"\n");
+        nw = mw - solve(h.jacobian(x)*AT,Vector<ValidatedFloatType>(h(mx)-make_exact(c)));
+        ARIADNE_LOG(7,"w="<<w<<", h(x0+AT*w)="<<h(x)<<", nw="<<nw<<", refines="<<refines(nw,w)<<"\n");
 
         if(!found_solution) {
-            if(subset(nw,w)) {
+            if(refines(nw,w)) {
                 found_solution=true;
-                w=hull(w0,w);
+                w=w+ValidatedFloat(0,1)*(w0-w);
             } else {
-                w=hull(w,IntervalVector(2.0*nw-w));
+                w=w+ValidatedFloatType(0,1)*(ValidatedFloatType(2)*nw-w);
             }
         } else {
-            if(subset(nw,w)) {
+            if(refines(nw,w)) {
                 validated_solution=true;
             } else if(validated_solution) {
                 // Not a contraction, so presumably accurate enough
                 break;
             }
-            w=intersection(nw,w);
+            w=refinement(nw,w);
         }
 
     }
@@ -672,14 +673,14 @@ validate_feasibility(Box D, ValidatedVectorFunction g, Box C,
     ARIADNE_LOG(3,"g(x)="<<gx<<"\n");
 
     // Check that equality constraints are plausible
-    ARIADNE_DEBUG_ASSERT(contains(h(x)-make_exact(c),FloatVector(k)));
+    ARIADNE_DEBUG_ASSERT(models(h(x)-make_exact(c),ExactFloatVector(k)));
 
     // Check inequality constraints once more
     for(uint i=0; i!=C.size(); ++i) {
         if(C[i].lower()==C[i].upper()) {
-            ARIADNE_DEBUG_ASSERT(subset(C[i],gx[i]));
+            ARIADNE_DEBUG_ASSERT(models(gx[i],C[i].midpoint()));
         } else {
-            if(!subset(gx[i],C[i])) {
+            if(!element(gx[i],C[i])) {
                 return false;
             }
         }
@@ -708,12 +709,12 @@ validate_infeasibility(Box D, ValidatedVectorFunction g, Box C,
     VectorTaylorFunction tg(D,g,default_sweeper());
     ScalarTaylorFunction tyg(D,default_sweeper());
     for(uint j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
-    Interval tygD = tyg.evaluate(D);
+    Interval tygD = apply(tyg,D);
 
-    IntervalMatrix dgD = g.jacobian(D);
+    IntervalMatrix dgD = jacobian(g,D);
     IntervalVector ydgD = IntervalVector(y) * dgD;
 
-    Interval ygx = dot(IntervalVector(y),g(IntervalVector(x)));
+    Interval ygx = dot(IntervalVector(y),apply(g,IntervalVector(x)));
 
     Interval ygD = ygx;
     for(uint i=0; i!=x.size(); ++i) {
@@ -805,7 +806,7 @@ minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C) con
     StepData v;
     ApproximateFloatVector& x=make_approximate(v.x);
     ApproximateFloatVector& y=make_approximate(v.y);
-    C=intersection(C,g(D)+Box(C.size(),Interval(-1,+1)));
+    C=intersection(C,apply(g,D)+Box(C.size(),Interval(-1,+1)));
     this->setup_feasibility(D,g,C,v);
     ApproximateFloatVector oldx=x;
 
@@ -854,7 +855,7 @@ feasible(Box D, ValidatedVectorFunction g, Box C) const
     ApproximateFloatVector& y=make_approximate(v.y);
 
     ApproximateScalarFunction f(D.size());
-    Box R=intersection(g(D)+Box(C.size(),Interval(-1,+1)),C);
+    Box R=intersection(apply(g,D)+Box(C.size(),Interval(-1,+1)),C);
     this->setup_feasibility(D,g,R,v);
 
     static const float MU_MIN = 1e-12;
@@ -1166,7 +1167,7 @@ minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C) con
     ARIADNE_LOG(3,"f="<<f<<" D="<<D<<" g="<<g<<" C="<<C<<"\n");
     ValidatedVectorFunction h(0,D.size());
 
-    IntervalVector gD = g(D);
+    IntervalVector gD = apply(g,D);
     if(disjoint(gD,C)) { throw InfeasibleProblemException(); }
 
     ApproximateFloatVector x = midpoint(D);
@@ -2026,7 +2027,7 @@ feasible(Box D, ValidatedVectorFunction h) const
 
     if(norm(h(x))<1e-10) { return true; }
 
-    if(!contains(Interval(dot(IntervalVector(make_exact(y)),h(D))),ExactFloatType(0.0))) { return false; }
+    if(!contains(Interval(dot(IntervalVector(make_exact(y)),apply(h,D))),ExactFloatType(0.0))) { return false; }
 
     return indeterminate;
 }
@@ -2157,7 +2158,7 @@ check_feasibility(Box D, ValidatedVectorFunction g, Box C,
     for(uint j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
     Interval tygD = Interval(tyg(make_singleton(D)));
 
-    IntervalMatrix dgD = g.jacobian(D);
+    IntervalMatrix dgD = jacobian(g,D);
     IntervalVector ydgD = IntervalVector(y) * dgD;
 
     ValidatedFloat ygx = dot(y,gx);

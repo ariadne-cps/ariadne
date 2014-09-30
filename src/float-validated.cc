@@ -166,6 +166,10 @@ UpperFloat abs(UpperFloat x) {
     return UpperFloat(abs(Float(x)));
 }
 
+UpperFloat half(UpperFloat x) {
+    return UpperFloat(half(Float(x)));
+}
+
 UpperFloat& operator+=(UpperFloat& x1, UpperFloat x2) {
      return x1=x1+x2;
 }

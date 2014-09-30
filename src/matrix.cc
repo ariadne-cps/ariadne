@@ -49,6 +49,17 @@ midpoint(const Matrix<ValidatedFloatType>& A) {
     return R;
 }
 
+Matrix<Float>
+midpoint(const Matrix<Interval>& A) {
+    Matrix<Float> R(A.row_size(),A.column_size());
+    for(size_t i=0; i!=A.row_size(); ++i) {
+        for(size_t j=0; j!=A.column_size(); ++j) {
+            R[i][j]=A[i][j].midpoint().raw();
+        }
+    }
+    return R;
+}
+
 template<class X>
 Matrix<X>
 lu_inverse(const Matrix<X>& M)
@@ -811,6 +822,12 @@ orthogonal_decomposition(const Matrix<ApproximateFloatType>& A)
 }
 */
 
+template class Matrix<RawFloatType>;
+template Matrix<RawFloatType> inverse(const Matrix<RawFloatType>&);
+template Matrix<RawFloatType> solve(const Matrix<RawFloatType>&, const Matrix<RawFloatType>&);
+template Vector<RawFloatType> solve(const Matrix<RawFloatType>&, const Vector<RawFloatType>&);
+
+template Matrix<Interval> inverse(const Matrix<Interval>&);
 
 template class Matrix<ApproximateFloatType>;
 template Matrix<ApproximateFloatType> inverse(const Matrix<ApproximateFloatType>&);

@@ -178,7 +178,7 @@ void HybridEnclosure::set_time_function(const ValidatedScalarFunctionModel& time
 Box
 HybridEnclosure::space_bounding_box() const
 {
-    ARIADNE_LOG(8,"space_codomain="<<this->space_function().codomain()<<" space_range="<<this->space_function()(this->_set.reduced_domain())<<"\n");
+    ARIADNE_LOG(8,"space_codomain="<<this->space_function().codomain()<<" space_range="<<apply(this->space_function(),this->_set.reduced_domain())<<"\n");
     //return this->space_function()(this->_set.reduced_domain());
     return this->_set.bounding_box();
 }
@@ -186,17 +186,17 @@ HybridEnclosure::space_bounding_box() const
 Interval
 HybridEnclosure::time_range() const
 {
-    ARIADNE_LOG(8,"time_codomain="<<this->time_function().codomain()<<" time_range="<<this->time_function()(this->_set.reduced_domain())<<"\n");
+    ARIADNE_LOG(8,"time_codomain="<<this->time_function().codomain()<<" time_range="<<apply(this->time_function(),this->_set.reduced_domain())<<"\n");
     //return this->time_function().codomain();
-    return this->time_function().evaluate(this->_set.reduced_domain());
+    return apply(this->time_function(),this->_set.reduced_domain());
 }
 
 Interval
 HybridEnclosure::dwell_time_range() const
 {
     ARIADNE_LOG(8,"dwell_time_codomain="<<this->dwell_time_function().codomain()<<
-                  " dwell_time_range="<<this->dwell_time_function().evaluate(this->_set.reduced_domain())<<"\n");
-    return this->dwell_time_function().evaluate(this->_set.reduced_domain());
+                  " dwell_time_range="<<apply(this->dwell_time_function(),this->_set.reduced_domain())<<"\n");
+    return apply(this->dwell_time_function(),this->_set.reduced_domain());
 }
 
 uint
@@ -472,7 +472,7 @@ std::ostream& HybridEnclosure::write(std::ostream& os) const
               << ", events=" << this->_events
               << ", location=" << this->_location
               << ", space=" << this->space()
-              << ", range=" << this->space_function()(this->_set.domain())
+              << ", range=" << apply(this->space_function(),this->_set.domain())
               << ", domain=" << this->_set.domain()
               << ", subdomain=" << this->_set.reduced_domain()
               << ", empty=" << Ariadne::empty(this->_set.reduced_domain())
@@ -487,7 +487,7 @@ std::ostream& HybridEnclosure::print(std::ostream& os) const
     return os << "HybridEnclosure"
               << "( events=" << this->_events
               << ", location=" << this->_location
-              << ", range=" << this->space_function()(this->_set.domain())
+              << ", range=" << apply(this->space_function(),this->_set.domain())
               << ", domain=" << this->_set.domain()
               << ", subdomain=" << this->_set.reduced_domain()
               << ", subdomain=" << this->_set.reduced_domain()

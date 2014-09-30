@@ -110,7 +110,7 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
-    Vector<IntervalDifferential> df=f.evaluate(ivl_dx);
+    Vector<IntervalDifferential> df=evaluate(f,ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
@@ -145,7 +145,7 @@ Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
-    Vector<IntervalDifferential> df=f.evaluate(ivl_dx);
+    Vector<IntervalDifferential> df=evaluate(f,ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
@@ -316,7 +316,7 @@ tribool
 ConstraintSet::covers(const Box& bx) const
 {
     Box codomain=under_approximation(this->codomain());
-    return Box(this->constraint_function().evaluate(bx)).inside(codomain) || indeterminate;
+    return Box(apply(this->constraint_function(),bx)).inside(codomain) || indeterminate;
 }
 
 
@@ -396,7 +396,7 @@ BoundedConstraintSet::covers(const Box& bx) const
     Box domain=under_approximation(this->domain());
     Box codomain=under_approximation(this->codomain());
     if(!Ariadne::covers(domain,bx)) { return false; }
-    return Box(this->constraint_function().evaluate(bx)).inside(codomain) || indeterminate;
+    return Box(apply(this->constraint_function(),bx)).inside(codomain) || indeterminate;
 }
 
 tribool
@@ -470,7 +470,7 @@ const BoxSet ConstrainedImageSet::constraint_bounds() const
 
 Box ConstrainedImageSet::bounding_box() const
 {
-    return this->_function(over_approximation(this->_domain));
+    return Ariadne::apply(this->_function,over_approximation(this->_domain));
 }
 
 Matrix<ExactFloat> make_exact(Matrix<ValidatedFloat> vA) {
@@ -504,7 +504,7 @@ ConstrainedImageSet::affine_approximation() const
 
 tribool ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
 {
-    if( subset(nc.function().evaluate(this->bounding_box()),nc.bounds()) ) {
+    if( subset(Ariadne::apply(nc.function(),this->bounding_box()),nc.bounds()) ) {
         return true;
     }
 
@@ -727,7 +727,7 @@ Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface
 
 Pair<uint,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const Box& domain)
 {
-    Matrix<Interval> jacobian=function.jacobian(domain);
+    Matrix<Interval> jacobian=Ariadne::jacobian(function,domain);
 
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
@@ -842,7 +842,7 @@ Box ValidatedConstrainedImageSet::constraint_bounds() const
 Box
 ValidatedConstrainedImageSet::bounding_box() const
 {
-    return this->_function(this->_reduced_domain);
+    return Ariadne::apply(this->_function,this->_reduced_domain);
 }
 
 
@@ -1004,7 +1004,7 @@ tribool ValidatedConstrainedImageSet::overlaps(const Box& bx) const
     ValidatedVectorFunction constraint_function = this->constraint_function();
     ValidatedVectorFunction function = join(space_function,constraint_function);
     //std::cerr<<"function="<<function<<"\n";
-    Box constraint_bounds = intersection(this->constraint_bounds(),Box(this->constraint_function().evaluate(subdomain)));
+    Box constraint_bounds = intersection(this->constraint_bounds(),Box(Ariadne::apply(this->constraint_function(),subdomain)));
     Box codomain = join(bx,constraint_bounds);
     //std::cerr<<"codomain="<<codomain<<"\n";
     NonlinearInfeasibleInteriorPointOptimiser optimiser;
@@ -1063,7 +1063,7 @@ void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface
 
 tribool ValidatedConstrainedImageSet::satisfies(const ValidatedConstraint& nc) const
 {
-    if( subset(nc.function().evaluate(this->bounding_box()),nc.bounds()) ) {
+    if( subset(Ariadne::apply(nc.function(),this->bounding_box()),nc.bounds()) ) {
         return true;
     }
 

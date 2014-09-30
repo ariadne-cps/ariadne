@@ -355,7 +355,7 @@ Enclosure::Enclosure(const Box& domain, const ValidatedVectorFunction& space_fun
 // Returns true if the entire set is positive; false if entire set is negative
 tribool Enclosure::satisfies(ValidatedScalarFunction constraint) const
 {
-    Interval constraint_range=constraint(this->codomain());
+    Interval constraint_range=apply(constraint,this->codomain());
     if(constraint_range.upper()<0.0) { return false; }
     if(constraint_range.lower()>0.0) { return true; }
     return indeterminate;
@@ -697,7 +697,7 @@ tribool Enclosure::empty() const
     if(!this->_is_fully_reduced) { this->reduce(); this->reduce(); this->reduce(); }
 
     for(uint i=0; i!=this->_constraints.size(); ++i) {
-        Interval constraint_range = this->_constraints[i].function().evaluate(this->_reduced_domain);
+        Interval constraint_range = Ariadne::apply(this->_constraints[i].function(),this->_reduced_domain);
         if( disjoint(constraint_range,this->_constraints[i].bounds()) ) {
             if(this->_reduced_domain.size()>0) { this->_reduced_domain[0] = Interval(1,-1); }
             return true;
@@ -709,14 +709,14 @@ tribool Enclosure::empty() const
 
 tribool Enclosure::inside(const Box& bx) const
 {
-    return Ariadne::subset(this->_space_function.evaluate(this->_reduced_domain),bx);
+    return Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx);
 }
 
 tribool Enclosure::subset(const Box& bx) const
 {
     this->reduce();
 
-    return Ariadne::subset(this->_space_function.evaluate(this->_reduced_domain),bx) || indeterminate;
+    return Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx) || indeterminate;
 
 }
 
@@ -798,7 +798,7 @@ Enclosure::splitting_subdomains_zeroth_order() const
 uint
 Enclosure::splitting_index_zeroth_order() const
 {
-    Matrix<Interval> jacobian=this->function().jacobian(this->reduced_domain());
+    Matrix<Interval> jacobian=Ariadne::jacobian(this->function(),this->reduced_domain());
 
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
@@ -1185,7 +1185,7 @@ void Enclosure::draw(CanvasInterface& canvas, const Projection2d& projection) co
 
 void Enclosure::box_draw(CanvasInterface& canvas, const Projection2d& projection) const {
     this->reduce();
-    Box(join(this->_space_function(this->_reduced_domain),this->_time_function(this->_reduced_domain))).draw(canvas,projection);
+    Box(join(Ariadne::apply(this->_space_function,this->_reduced_domain),Ariadne::apply(this->_time_function,this->_reduced_domain))).draw(canvas,projection);
 }
 
 ValidatedVectorFunctionModel join(const ValidatedVectorFunctionModel& f1, const ValidatedScalarFunctionModel& f2, const ValidatedVectorFunctionModel& f3) {

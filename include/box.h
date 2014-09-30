@@ -49,6 +49,8 @@ class Point;
 class Box;
 
 bool contains(const Vector<Interval>& v1, const Vector<ExactFloatType>& v2);
+bool contains(const Vector<Interval>& v1, const Vector<ValidatedFloatType>& v2);
+bool element(const Vector<ValidatedFloatType>& v1, const Vector<Interval>& v2);
 
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief An exact interval in \f$\mathbb{R}\f$.

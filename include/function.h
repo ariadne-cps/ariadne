@@ -41,7 +41,9 @@
 
 #include "numeric.h"
 #include "vector.h"
+#include "differential.h"
 
+#include "interval.h"
 #include "box.h"
 
 namespace Ariadne {
@@ -117,8 +119,6 @@ inline ApproximateNumberType ScalarFunctionInterface<ApproximateNumberType>::ope
     return this->evaluate(x); }
 inline ValidatedNumberType ScalarFunctionInterface<ValidatedNumberType>::operator() (const Vector<ValidatedNumberType>& x) const {
     return this->evaluate(x); }
-inline Interval ScalarFunctionInterface<ValidatedNumberType>::operator() (const Vector<Interval>& x) const {
-    return this->evaluate(x); }
 inline EffectiveNumberType ScalarFunctionInterface<EffectiveNumberType>::operator() (const Vector<EffectiveNumberType>& x) const {
     return this->evaluate(x); }
 inline ApproximateScalarFunction ScalarFunctionInterface<ApproximateNumberType>::derivative(Nat j) const {
@@ -127,7 +127,6 @@ inline ValidatedScalarFunction ScalarFunctionInterface<ValidatedNumberType>::der
     return this->_derivative(j); }
 inline EffectiveScalarFunction ScalarFunctionInterface<EffectiveNumberType>::derivative(Nat j) const {
     return this->_derivative(j); }
-
 
 /*
 template<class X> ScalarFunction<X> operator+(const ScalarFunction<X>&);
@@ -254,6 +253,9 @@ template<class P> inline OutputStream& operator<<(OutputStream& os, const Vector
 template<class P, class XX> inline Vector<XX> evaluate(const VectorFunction<P>& f, const Vector<XX>& x) { return f(x); }
 template<class P, class XX> inline Matrix<XX> jacobian(const VectorFunction<P>& f, const Vector<XX>& x) { return f.jacobian(x); }
 
+inline Matrix<ValidatedNumberType> VectorFunctionInterface<ValidatedTag>::jacobian(const Vector<ExactNumberType>& x) const {
+    return this->jacobian(Vector<ValidatedNumberType>(x)); }
+
 /*
 template<class X> VectorFunction<P> operator*(const ScalarFunction<X>& sf, const Vector<X>& e);
 template<class X> VectorFunction<X> operator+(const VectorFunction<X>& f1, const VectorFunction<X>& f2);
@@ -344,6 +346,28 @@ inline List< EffectiveScalarFunction > operator,(const EffectiveScalarFunction& 
 inline List< EffectiveScalarFunction > operator,(const List< EffectiveScalarFunction >& vf1, const EffectiveNumberType& c2) {
     return (vf1,EffectiveScalarFunction::constant(vf1.back().argument_size(),c2)); }
 
+
+inline Interval apply(ScalarFunction<ValidatedTag>const& f, const Vector<Interval>& x) {
+    return static_cast<Interval>(f.evaluate(reinterpret_cast<Vector<ValidatedNumberType>const&>(x))); }
+inline Interval evaluate(ScalarFunction<ValidatedTag>const& f, const Vector<Interval>& x) {
+    return static_cast<Interval>(f.evaluate(reinterpret_cast<Vector<ValidatedNumberType>const&>(x))); }
+inline Differential<Interval> evaluate(ScalarFunction<ValidatedTag>const& f, const Vector<Differential<Interval>>& x) {
+    return static_cast<Differential<Interval>>(f.evaluate(reinterpret_cast<Vector<Differential<ValidatedFloatType>>const&>(x))); }
+inline Differential<Interval> differential(ScalarFunction<ValidatedTag>const& f, const Vector<Interval>& x, Nat d) {
+    return static_cast<Differential<Interval>>(f.differential(reinterpret_cast<Vector<ValidatedFloatType>const&>(x),d)); }
+inline Vector<Interval> gradient(ScalarFunction<ValidatedTag>const& f, const Vector<Interval>& x) {
+    return static_cast<Vector<Interval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
+
+inline Vector<Interval> apply(VectorFunction<ValidatedTag>const& f, const Vector<Interval>& x) {
+    return static_cast<Vector<Interval>>(f.evaluate(reinterpret_cast<Vector<ValidatedNumberType>const&>(x))); }
+inline Vector<Interval> evaluate(VectorFunction<ValidatedTag>const& f, const Vector<Interval>& x) {
+    return static_cast<Vector<Interval>>(f.evaluate(reinterpret_cast<Vector<ValidatedNumberType>const&>(x))); }
+inline Vector<Differential<Interval>> evaluate(VectorFunction<ValidatedTag>const& f, const Vector<Differential<Interval>>& x) {
+    return static_cast<Vector<Differential<Interval>>>(f.evaluate(reinterpret_cast<Vector<Differential<ValidatedFloatType>>const&>(x))); }
+inline Vector<Differential<Interval>> differentials(VectorFunction<ValidatedTag>const& f, const Vector<Interval>& x, Nat d) {
+    return static_cast<Vector<Differential<Interval>>>(f.differentials(reinterpret_cast<Vector<ValidatedFloatType>const&>(x),d)); }
+inline Matrix<Interval> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<Interval>& x) {
+    return static_cast<Matrix<Interval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
 
 
 

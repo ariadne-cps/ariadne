@@ -78,10 +78,6 @@ IntegratorBase::function_factory() const
     return *this->_function_factory_ptr;
 }
 
-Vector<Interval> evaluate(ValidatedVectorFunction const& vf, Vector<Interval> const& bx) {
-    return Vector<Interval>(vf.evaluate(make_singleton(bx)));
-}
-
 Pair<ExactFloatType,Box>
 IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const Box& domx, const RawFloatType& hmax) const
 {

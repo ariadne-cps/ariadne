@@ -185,6 +185,7 @@ class TaylorPicardIntegrator
     using IntegratorBase::flow_step;
 };
 
+/*
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.
 class TaylorSeriesIntegrator
     : public IntegratorBase
@@ -249,7 +250,7 @@ class TaylorSeriesIntegrator
 
     using IntegratorBase::flow_step;
 };
-
+*/
 
 //! \brief An integrator computes a approximation to the flow which is affine in space.
 //! \internal This code is written to allow higher-spacial order approximations.

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tutorial.cc
+ *            heating.cc
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -22,7 +22,7 @@
  */
 
 
-//! \file tutorial.cc
+//! \file heating.cc
 
 #include "ariadne.h"
 
@@ -96,8 +96,8 @@ int main(int argc, const char* argv[])
     cerr<<"WARNING: Using different event labels for guard and invariant.\n";
     // Create the heater subsystem
     HybridAutomaton heater;
-    heater.new_mode( heating|on, (dot(T)=P+K*(Tav-Tamp*cos(2.0*pi*C)-T)) );
-    heater.new_mode( heating|off, (dot(T)=K*(Tav-Tamp*cos(2.0*pi*C)-T)) );
+    heater.new_mode( heating|on, (dot(T)=P+K*(Tav-Tamp*cos(2*pi*C)-T)) );
+    heater.new_mode( heating|off, (dot(T)=K*(Tav-Tamp*cos(2*pi*C)-T)) );
     heater.new_invariant( heating|off, T>=Ton_lower, must_switch_on );
     heater.new_transition( heating|off, switch_on, heating|on, (next(T)=T), T<=Ton_upper, permissive );
     // Comment out above two lines and uncomment the line below to make the switch_on transition urgent
@@ -198,9 +198,9 @@ int main(int argc, const char* argv[])
     analyser.configuration().set_lock_to_grid_steps(1);
     analyser.configuration().set_scaling(T,8.0);
     analyser.configuration().set_scaling(C,1.0);
-    std::cerr<<"max grid depth="<<analyser.configuration().maximum_grid_depth();
-    std::cerr<<"transient_time="<<analyser.configuration().transient_time();
-    std::cerr<<"transient_steps="<<analyser.configuration().transient_steps();
+    std::cerr<<"max grid depth="<<analyser.configuration().maximum_grid_depth()<<"\n";
+    std::cerr<<"transient_time="<<analyser.configuration().transient_time()<<"\n";
+    std::cerr<<"transient_steps="<<analyser.configuration().transient_steps()<<"\n";
     analyser.configuration().set_maximum_grid_depth(5);
     analyser.verbosity=0;
     cout << "\nComputing chain-reachable set... \n" << flush;

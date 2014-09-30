@@ -49,7 +49,6 @@ using std::ofstream; using std::ifstream;
 #include "matrix.h"
 
 #include "function.h"
-#include "user_function.h"
 #include "taylor_model.h"
 
 #include "function_set.h"

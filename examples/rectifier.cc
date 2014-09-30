@@ -32,7 +32,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
         rect[yaxis] = bbox[1];
         // While between the interval
-        while (pos_x < bbox[0].upper())
+        while (pos_x < bbox[0].upper().raw())
         {
             rect[xaxis] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
             pos_x += step_x; // Shifts the x position
@@ -43,7 +43,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
         Float pos_y = bbox[1].lower();
         rect[xaxis] = bbox[0];
-        while (pos_y < bbox[1].upper())
+        while (pos_y < bbox[1].upper().raw())
         {
             rect[yaxis] = Interval(pos_y,pos_y+step_y);
             fig << rect;
@@ -78,7 +78,7 @@ int main(int argc, const char* argv[])
     RealConstant pi_c("pi",pi);
 
     /// Introduces the global parameters
-    Real TIME_LIMIT = 1.0/frequency;
+    Real TIME_LIMIT = 1/frequency;
     //float TIME_LIMIT = 0.0042;
     int TRAN_LIMIT = 1;
     double MAX_ENCL_RADIUS = 1.0;
@@ -220,7 +220,7 @@ int main(int argc, const char* argv[])
 
     std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
 
-    Axes2d graphic_axes(0.0<=t<=1.0/dp[1],-dp[0]<=vi<=dp[0]);
+    Axes2d graphic_axes(0.0<=t<=1.0/dp[1].get_d(),-dp[0]<=vi<=dp[0]);
     Axes2d graphic_axes2(-dp[0]<=t<=dp[0],2.0<=vi<=dp[0]);
 
     std::cout << "Plotting results..." << std::flush;

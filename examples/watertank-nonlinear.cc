@@ -59,7 +59,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
         rect[yaxis] = bbox[1];
         // While between the interval
-        while (pos_x < bbox[0].upper())
+        while (pos_x < bbox[0].upper().raw())
         {
             rect[xaxis] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
             pos_x += step_x; // Shifts the x position
@@ -70,7 +70,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
         Float pos_y = bbox[1].lower();
         rect[xaxis] = bbox[0];
-        while (pos_y < bbox[1].upper())
+        while (pos_y < bbox[1].upper().raw())
         {
             rect[yaxis] = Interval(pos_y,pos_y+step_y);
             fig << rect;

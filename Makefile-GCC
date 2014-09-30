@@ -127,12 +127,12 @@ EXAMPLES_SRC = \
 	robotarm-verification.cc \
 	robotarm-verification-essay.cc \
 
-LIB_OBJ_DIR = obj/
-TESTS_OBJ_DIR = obj/test/
-TESTS_BIN_DIR = bin/
-WRAP_OBJ_DIR = obj/wrap/
-EXAMPLES_OBJ_DIR = obj/examples/
-EXAMPLES_BIN_DIR = bin/
+LIB_OBJ_DIR = obj
+TESTS_OBJ_DIR = obj/test
+TESTS_BIN_DIR = bin
+WRAP_OBJ_DIR = obj/wrap
+EXAMPLES_OBJ_DIR = obj/examples
+EXAMPLES_BIN_DIR = bin
 
 ARIADNE_LIB = libariadne.so
 ARIADNE_NUMERIC_LIB = libariadne-numeric.so
@@ -148,13 +148,13 @@ LIB_ALGEBRA_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_ALGEBRA_SRC))
 LIB_FUNCTION_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_FUNCTION_SRC))
 LIB_EXTRAS_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_EXTRAS_SRC))
 TESTS_OBJ = $(patsubst %.cc,$(TESTS_OBJ_DIR)/%.o,$(TESTS_SRC))
-TESTS_BIN = $(patsubst %.cc.o,$(TESTS_BIN_DIR)/%,$(TESTS_SRC))
+TESTS_BIN = $(patsubst %.cc,$(TESTS_BIN_DIR)/%,$(TESTS_SRC))
 TEST_NUMERIC_BIN = $(patsubst %.cc.o,$(TESTS_BIN_DIR)/%,$(TEST_NUMERIC_SRC))
 TEST_ALGEBRA_BIN = $(patsubst %.cc.o,$(TESTS_BIN_DIR)/%,$(TEST_ALGEBRA_SRC))
 TEST_FUNCTION_BIN = $(patsubst %.cc,$(TESTS_BIN_DIR)/%,$(TEST_FUNCTION_SRC))
 WRAP_OBJ = $(patsubst %.cc,$(WRAP_BIN_DIR)/%.o,$(WRAP_SRC))
 EXAMPLES_OBJ = $(patsubst %.cc,$(EXAMPLES_OBJ_DIR)/%.o,$(EXAMPLES_SRC))
-EXAMPLES_BIN = $(patsubst obj/%.o,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_OBJ))
+EXAMPLES_BIN = $(patsubst %.cc,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_SRC))
 
 CXXFLAGS = -std=c++11 -fPIC
 
@@ -176,15 +176,15 @@ help:
 	@echo "\nDEPS"=$(DEPS)
 	@echo "\nPCH"=$(PCH)
 	@echo "\nLIB_SRC="$(LIB_SRC)
-#	@echo "LIB_OBJ="$(LIB_OBJ)
+	@echo "LIB_OBJ="$(LIB_OBJ)
 	@echo "\nTESTS_SRC="$(TESTS_SRC)
 	@echo "TESTS_OBJ="$(TESTS_OBJ)
-#	@echo "TESTS_BIN="$(TESTS_BIN)
+	@echo "TESTS_BIN="$(TESTS_BIN)
 	@echo "\nWRAP_SRC="$(WRAP_SRC)
-#	@echo "WRAP_OBJ="$(WRAP_OBJ)
+	@echo "WRAP_OBJ="$(WRAP_OBJ)
 	@echo "\nEXAMPLES_SRC="$(EXAMPLES_SRC)
-#	@echo "EXAMPLES_OBJ="$(EXAMPLES_OBJ)
-#	@echo "EXAMPLES_BIN="$(EXAMPLES_BIN)
+	@echo "EXAMPLES_OBJ="$(EXAMPLES_OBJ)
+	@echo "EXAMPLES_BIN="$(EXAMPLES_BIN)
 
 dirs:
 	@mkdir -p .deps/

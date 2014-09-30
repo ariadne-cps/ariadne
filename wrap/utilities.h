@@ -53,8 +53,22 @@ class Real;
 template<class X> inline const char* python_name(const char* name);
 template<> inline const char* python_name<Float>(const char* name) {
     return (std::string("Float")+name).c_str(); }
+template<> inline const char* python_name<Integer>(const char* name) {
+    return (std::string("Integer")+name).c_str(); }
+template<> inline const char* python_name<Rational>(const char* name) {
+    return (std::string("Rational")+name).c_str(); }
 template<> inline const char* python_name<Real>(const char* name) {
     return (std::string("Real")+name).c_str(); }
+
+template<> inline const char* python_name<ExactFloat>(const char* name) {
+    return (std::string("ExactFloat")+name).c_str(); }
+template<> inline const char* python_name<ValidatedFloat>(const char* name) {
+    return (std::string("ValidatedFloat")+name).c_str(); }
+template<> inline const char* python_name<UpperFloat>(const char* name) {
+    return (std::string("UpperFloat")+name).c_str(); }
+template<> inline const char* python_name<ApproximateFloat>(const char* name) {
+    return (std::string("ApproximateFloat")+name).c_str(); }
+
 template<> inline const char* python_name<Interval>(const char* name) {
     return (std::string("Interval")+name).c_str(); }
 

@@ -39,11 +39,6 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-#ifdef HAVE_GMPXX_H
-template<> const char* python_name<Rational>(const char* name) {
-    return (std::string("Q")+name).c_str(); }
-#endif
-
 
 template<class X>
 X __vgetitem__(const Vector<X>& v, int i)
@@ -143,10 +138,10 @@ struct from_python< Matrix<X> >
     }
 };
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Float>& repr);
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Interval>& repr);
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ApproximateFloat>& repr);
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ValidatedFloat>& repr);
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ExactFloat>& repr);
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<RawFloat>& repr);
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Rational>& repr);
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Real>& repr);
 
@@ -161,8 +156,8 @@ template<class X> std::ostream& operator<<(std::ostream& os, const PythonReprese
         if(j!=0) { os << ","; } os << python_representation(A[i][j]); } os << "]"; } os << "]"; return os;
 }
 
-template<class X> X __norm__(const Vector<X>& v) { return norm(v); }
-template<class X> X __dot__(const Vector<X>& v1, const Vector<X>& v2) { return dot(v1,v2); }
+template<class X> auto __norm__(const Vector<X>& v) -> decltype(norm(v)) { return norm(v); }
+template<class X> auto __dot__(const Vector<X>& v1, const Vector<X>& v2) -> decltype(dot(v1,v2)) { return dot(v1,v2); }
 template<class X> Vector<X> __join__(const Vector<X>& v1, const Vector<X>& v2) { return join(v1,v2); }
 template<class X> Vector<X> __join__(const Vector<X>& v1, const X& s2) { return join(v1,s2); }
 template<class X> Vector<X> __join__(const X& s1, const Vector<X>& v2) { return join(s1,v2); }
@@ -193,8 +188,6 @@ void export_vector_class(class_<Vector<X> >& vector_class)
     vector_class.staticmethod("unit");
     vector_class.staticmethod("basis");
 
-    def("norm",(X(*)(const Vector<X>&)) &__norm__);
-    def("dot",(X(*)(const Vector<X>&,const Vector<X>&)) &__dot__);
     def("join",(Vector<X>(*)(const Vector<X>&,const Vector<X>&)) &__join__);
     def("join",(Vector<X>(*)(const Vector<X>&,const X&)) &__join__);
     def("join",(Vector<X>(*)(const X&,const Vector<X>&)) &__join__);
@@ -237,36 +230,36 @@ template<class X> void export_vector()
 }
 
 
-template<> void export_vector<Float>()
+template<> void export_vector<ExactFloat>()
 {
-    class_< Vector<Float> > float_vector_class("FloatVector",init< Vector<Float> >());
-    export_vector_class<Float>(float_vector_class);
-    export_vector_conversion<Float,Float>(float_vector_class);
-    export_vector_arithmetic<Float,Float,Float>(float_vector_class);
-    //export_vector_arithmetic<Interval,Float,Interval>(float_vector_class);
-    float_vector_class.def("__rmul__",__rmul__< Vector<Float>, Vector<Float>, double >);
-    float_vector_class.def("__mul__",__mul__< Vector<Float>, Vector<Float>, double >);
-    float_vector_class.def("__div__",__div__< Vector<Float>, Vector<Float>, double >);
+    class_< Vector<ExactFloat> > exact_vector_class("ExactFloatVector",init< Vector<ExactFloat> >());
+    export_vector_class<ExactFloat>(exact_vector_class);
 }
 
-template<> void export_vector<Interval>()
+template<> void export_vector<ValidatedFloat>()
 {
-    class_< Vector<Interval> > interval_vector_class("IntervalVector",init< Vector<Interval> >());
-    export_vector_class<Interval>(interval_vector_class);
-    export_vector_conversion<Interval,Float>(interval_vector_class);
-    export_vector_conversion<Interval,Interval>(interval_vector_class);
-    //export_vector_arithmetic<Interval,Interval,Float>(interval_vector_class);
-    export_vector_arithmetic<Interval,Interval,Interval>(interval_vector_class);
-    def("midpoint", (Vector<Float>(*)(const Vector<Interval>&)) &midpoint);
-    def("intersection", (Vector<Interval>(*)(const Vector<Interval>&,const Vector<Interval>&)) &intersection);
-    def("hull", (Vector<Interval>(*)(const Vector<Interval>&,const Vector<Interval>&)) &intersection);
-    def("subset", (bool(*)(const Vector<Interval>&, const Vector<Interval>&)) &subset);
-    def("disjoint", (bool(*)(const Vector<Interval>&, const Vector<Interval>&)) &disjoint);
+    class_< Vector<ValidatedFloat> > validated_vector_class("ValidatedFloatVector",init< Vector<ValidatedFloat> >());
+    export_vector_class<ValidatedFloat>(validated_vector_class);
+    export_vector_conversion<ValidatedFloat,ExactFloat>(validated_vector_class);
+    export_vector_arithmetic<ValidatedFloat,ValidatedFloat,ValidatedFloat>(validated_vector_class);
+    def("norm",&__norm__<ValidatedFloat>);
+    def("dot", &__dot__<ValidatedFloat>);
 
-    //implicitly_convertible< Vector<Float>, Vector<Interval> >();
-
-
+    implicitly_convertible< Vector<ExactFloat>, Vector<ValidatedFloat> >();
 }
+
+template<> void export_vector<ApproximateFloat>()
+{
+    class_< Vector<ApproximateFloat> > approximate_vector_class("FloatVector",init< Vector<ApproximateFloat> >());
+    export_vector_class<ApproximateFloat>(approximate_vector_class);
+    export_vector_conversion<ApproximateFloat,ValidatedFloat>(approximate_vector_class);
+    export_vector_arithmetic<ApproximateFloat,ApproximateFloat,ApproximateFloat>(approximate_vector_class);
+    //export_vector_arithmetic<ValidatedFloat,ApproximateFloat,ValidatedFloat>(approximate_vector_class);
+    approximate_vector_class.def("__rmul__",__rmul__< Vector<ApproximateFloat>, Vector<ApproximateFloat>, ApproximateFloat >);
+    approximate_vector_class.def("__mul__",__mul__< Vector<ApproximateFloat>, Vector<ApproximateFloat>, ApproximateFloat >);
+    approximate_vector_class.def("__div__",__div__< Vector<ApproximateFloat>, Vector<ApproximateFloat>, ApproximateFloat >);
+}
+
 
 
 
@@ -287,7 +280,7 @@ void export_matrix_class(class_<Matrix<X> >& matrix_class)
     matrix_class.def("__str__",&__cstr__< Matrix<X> >);
     matrix_class.def("__repr__",&__repr__<Matrix<X> >);
 
-    def("norm",(X(*)(const Matrix<X>&)) &norm);
+//    def("norm",(X(*)(const Matrix<X>&)) &norm);
     def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);
 
     def("inverse",(Matrix<X>(*)(const Matrix<X>&)) &inverse);
@@ -335,41 +328,45 @@ template<class X> void export_matrix()
 
 }
 
-template<> void export_matrix<Float>()
+template<> void export_matrix<ExactFloat>()
 {
-    class_< Matrix<Float> > matrix_class(python_name<Float>("Matrix"),no_init);
+    class_< Matrix<ExactFloat> > matrix_class(python_name<ExactFloat>("Matrix"),no_init);
     matrix_class.def(init<PivotMatrix>());
-    export_matrix_class<Float>(matrix_class);
-    export_matrix_conversion<Float,Float>(matrix_class);
-    export_matrix_arithmetic<Float,Float,Float>(matrix_class);
-    //export_matrix_arithmetic<Interval,Float,Interval>(matrix_class);
+    export_matrix_class<ExactFloat>(matrix_class);
+}
+
+template<> void export_matrix<ValidatedFloat>()
+{
+    class_< Matrix<ValidatedFloat> > matrix_class(python_name<ValidatedFloat>("Matrix"),no_init);
+    export_matrix_class<ValidatedFloat>(matrix_class);
+    export_matrix_conversion<ValidatedFloat,ExactFloat>(matrix_class);
+    export_matrix_arithmetic<ValidatedFloat,ValidatedFloat,ValidatedFloat>(matrix_class);
+    //export_matrix_arithmetic<ValidatedFloat,ValidatedFloat,ApproximateFloat>(matrix_class);
+    def("gs_inverse", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&)) &gs_inverse);
+    def("lu_inverse", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&)) &lu_inverse);
+    def("gs_solve", (Vector<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Vector<ValidatedFloat>&)) &gs_solve);
+    def("gs_solve", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Matrix<ValidatedFloat>&)) &gs_solve);
+    def("lu_solve", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Matrix<ValidatedFloat>&)) &lu_solve);
+
+    //implicitly_convertible< Matrix<ApproximateFloat>, Matrix<ValidatedFloat> >();
+}
+
+template<> void export_matrix<ApproximateFloat>()
+{
+    class_< Matrix<ApproximateFloat> > matrix_class(python_name<ApproximateFloat>("Matrix"),no_init);
+    export_matrix_class<ApproximateFloat>(matrix_class);
+    export_matrix_conversion<ApproximateFloat,ValidatedFloat>(matrix_class);
+    export_matrix_arithmetic<ApproximateFloat,ApproximateFloat,ApproximateFloat>(matrix_class);
+    //export_matrix_arithmetic<ValidatedFloat,ApproximateFloat,ValidatedFloat>(matrix_class);
 
     def("triangular_decomposition",&triangular_decomposition);
     def("orthogonal_decomposition", &orthogonal_decomposition);
     def("triangular_factor",&triangular_factor);
     def("triangular_multiplier", &triangular_multiplier);
-    def("row_norms",(Vector<Float>(*)(const Matrix<Float>&)) &row_norms);
-    def("normalise_rows",(Matrix<Float>(*)(const Matrix<Float>&)) &normalise_rows);
+    def("row_norms",(Vector<ApproximateFloat>(*)(const Matrix<ApproximateFloat>&)) &row_norms);
+    def("normalise_rows",(Matrix<ApproximateFloat>(*)(const Matrix<ApproximateFloat>&)) &normalise_rows);
 
     to_python< Tuple<FloatMatrix,FloatMatrix,PivotMatrix> >();
-}
-
-template<> void export_matrix<Interval>()
-{
-    class_< Matrix<Interval> > matrix_class(python_name<Interval>("Matrix"),no_init);
-    export_matrix_class<Interval>(matrix_class);
-    export_matrix_conversion<Interval,Float>(matrix_class);
-    export_matrix_conversion<Interval,Interval>(matrix_class);
-    export_matrix_arithmetic<Interval,Interval,Interval>(matrix_class);
-    //export_matrix_arithmetic<Interval,Interval,Float>(matrix_class);
-    def("gs_inverse", (Matrix<Interval>(*)(const Matrix<Interval>&)) &gs_inverse);
-    def("lu_inverse", (Matrix<Interval>(*)(const Matrix<Interval>&)) &lu_inverse);
-    def("gs_solve", (Vector<Interval>(*)(const Matrix<Interval>&,const Vector<Interval>&)) &gs_solve);
-    def("gs_solve", (Matrix<Interval>(*)(const Matrix<Interval>&,const Matrix<Interval>&)) &gs_solve);
-    def("lu_solve", (Matrix<Interval>(*)(const Matrix<Interval>&,const Matrix<Interval>&)) &lu_solve);
-    def("midpoint", (Matrix<Float>(*)(const Matrix<Interval>&)) &midpoint);
-
-    //implicitly_convertible< Matrix<Float>, Matrix<Interval> >();
 }
 
 
@@ -399,7 +396,7 @@ template<class X> void export_diagonal_matrix()
 void export_pivot_matrix()
 {
 
-    implicitly_convertible< PivotMatrix, Matrix<Float> >();
+    implicitly_convertible< PivotMatrix, Matrix<ExactFloat> >();
 
     class_<PivotMatrix> pivot_matrix_class("PivotMatrix",no_init);
     pivot_matrix_class.def("__str__",&__cstr__<PivotMatrix>);
@@ -407,12 +404,12 @@ void export_pivot_matrix()
 }
 
 
-template void export_vector<Float>();
-template void export_vector<Interval>();
-template void export_matrix<Float>();
-template void export_matrix<Interval>();
+template void export_vector<ApproximateFloat>();
+template void export_vector<ValidatedFloat>();
+template void export_matrix<ApproximateFloat>();
+template void export_matrix<ValidatedFloat>();
 
-template void export_diagonal_matrix<Float>();
+template void export_diagonal_matrix<ApproximateFloat>();
 
 #ifdef HAVE_GMPXX_H
 template void export_vector<Rational>();
@@ -421,14 +418,14 @@ template void export_matrix<Rational>();
 
 
 void linear_algebra_submodule() {
-    export_vector<Float>();
-    export_vector<Interval>();
+    export_vector<ApproximateFloat>();
+    export_vector<ValidatedFloat>();
 
-    export_matrix<Float>();
-    export_matrix<Interval>();
+    export_matrix<ApproximateFloat>();
+    export_matrix<ValidatedFloat>();
 
     export_pivot_matrix();
-    export_diagonal_matrix<Float>();
+    export_diagonal_matrix<ApproximateFloat>();
 
 #ifdef HAVE_GMPXX_H
     export_vector<Rational>();

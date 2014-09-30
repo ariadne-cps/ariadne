@@ -189,11 +189,7 @@ class TaylorSeriesIntegrator
     : public TaylorPicardIntegrator
 {
     TaylorSeriesIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip,
-                           StepMaximumError lerr, StepSweepThreshold lswp, MaximumTemporalOrder maxto)
-        : TaylorPicardIntegrator(err,swp,lip,lerr,lswp,maxto)
-    {
-        std::cerr<<"WARNING: TaylorSeriesIntegrator not currently supported; reverting to TaylorPicardIntegrator.\n";
-    }
+                           StepMaximumError lerr, StepSweepThreshold lswp, MaximumTemporalOrder maxto);
   public:
     //! \brief Constructor.
     TaylorSeriesIntegrator(MaximumError err) : TaylorSeriesIntegrator(err,err/1024) { }
@@ -206,11 +202,9 @@ class TaylorSeriesIntegrator
                            StepMaximumError lerr, StepSweepThreshold lswp,
                            MinimumSpacialOrder minso=1, MinimumTemporalOrder minto=4,
                            MaximumSpacialOrder maxso=4, MaximumTemporalOrder maxto=12)
-        : TaylorPicardIntegrator(err,swp,lip,lerr,lswp,maxto)
-    {
-        std::cerr<<"WARNING: TaylorSeriesIntegrator not currently supported; reverting to TaylorPicardIntegrator.\n";
-    }
+        : TaylorSeriesIntegrator(err,swp,lip,lerr,lswp,maxto) { }
 
+    TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
 };
 
 /*

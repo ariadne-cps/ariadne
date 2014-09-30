@@ -321,9 +321,19 @@ typedef Polynomial<ValidatedNumberType> ValidatedPolynomial;
 typedef Graded<ValidatedDifferential> GradedValidatedDifferential;
 bool operator<(const MultiIndex& a1, const MultiIndex& a2);
 
+TaylorSeriesIntegrator::TaylorSeriesIntegrator(MaximumError err, SweepThreshold swp, LipschitzConstant lip,
+                        StepMaximumError lerr, StepSweepThreshold lswp, MaximumTemporalOrder maxto)
+    : TaylorPicardIntegrator(err,swp,lip,lerr,lswp,maxto)
+{
+    static bool first_time=true;
+
+    if(first_time) {
+        first_time=false;
+        std::cerr<<"WARNING: TaylorSeriesIntegrator not currently supported; reverting to TaylorPicardIntegrator.\n";
+    }
+}
+
 /*
-
-
 template<class F> GradedValidatedDifferential flow(const F& f, const Interval& c, Nat M, Nat N) {
     ValidatedProcedure x=make_differential_variable(1u,M,c,0u);
     GradedValidatedDifferential y=make_graded(x);

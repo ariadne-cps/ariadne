@@ -90,9 +90,6 @@ LIB_EXTRAS_SRC = \
 	c1_taylor_function.cc \
 	runge_kutta_integrator.cc \
 	geometry.cc \
-	zonotope.cc \
-	polytope.cc \
-	polyhedron.cc \
 	textplot.cc
 
 LIB_SRC = $(LIB_NUMERIC_SRC) $(LIB_ALGEBRA_SRC) $(LIB_FUNCTION_SRC) $(LIB_SOLVER_SRC) $(LIB_GEOMETRY_SRC) $(LIB_EXPRESSION_SRC) $(LIB_HYBRID_SRC)

@@ -86,10 +86,12 @@ EXTRAS_SRC = \
 	c1_taylor_function.cc \
 	runge_kutta_integrator.cc \
 	geometry.cc \
+	textplot.cc
+
+UNUSED_SRC = \
 	zonotope.cc \
 	polytope.cc \
 	polyhedron.cc \
-	textplot.cc
 
 CALCULUS_SRC = \
 	float.cc \

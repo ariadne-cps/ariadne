@@ -121,12 +121,12 @@ C1TaylorSeries& operator+=(C1TaylorSeries& f, Interval ic) {
 }
 
 #elif defined ARIADNE_BOUNDS_INTERVAL_SUM
-C1TaylorSeries& operator+=(C1TaylorSeries& f, Interval ic) {
+C1TaylorSeries& operator+=(C1TaylorSeries& f, ValidatedNumberType ic) {
     set_rounding_upward();
     Float& fv=f._coefficients[0];
     set_rounding_upward();
-    VOLATILE Float fvu=fv+ic.upper();
-    VOLATILE Float mfvl=(-fv)-ic.lower();
+    VOLATILE Float fvu=fv+ic.upper().raw();
+    VOLATILE Float mfvl=(-fv)-ic.lower().raw();
     Float e=(fvu+mfvl)/2;
     f._zero_error+=e;
     f._uniform_error+=e;
@@ -136,20 +136,20 @@ C1TaylorSeries& operator+=(C1TaylorSeries& f, Interval ic) {
 }
 #endif
 
-C1TaylorSeries& operator*=(C1TaylorSeries& f, Interval ic) {
+C1TaylorSeries& operator*=(C1TaylorSeries& f, ValidatedNumberType ic) {
     Float& fze=f._zero_error;
     Float& fue=f._uniform_error;
     Float& fde=f._derivative_error;
-    const Float c=ic.midpoint();
-    const Float ac=max(abs(ic.lower()),abs(ic.upper()));
+    const Float c=ic.midpoint().raw();
+    const Float ac=max(abs(ic.lower().raw()),abs(ic.upper().raw()));
 
     set_rounding_upward();
-    const Float rc=(ic.upper()-ic.lower())/2;
+    const Float rc=(ic.upper().raw()-ic.lower().raw())/2;
 
     fze*=ac;
     fue*=ac;
     fde*=ac;
-    std::cerr<<"WARNING: operator*=(C1TaylorSeries&,Interval): Mistake in errors\n";
+    std::cerr<<"WARNING: operator*=(C1TaylorSeries&,ValidatedNumberType): Mistake in errors\n";
     {
         Float& fv=f._coefficients[0];
         VOLATILE Float fvu=fv*c;
@@ -303,7 +303,7 @@ C1TaylorSeries compose(C1TaylorSeries f, C1TaylorSeries g) {
     while (i!=0) {
         i=i-i;
         r=r*g;
-        r+=Interval(Float(f._coefficients[i]));
+        r+=ValidatedNumberType(f._coefficients[i]);
     }
 
     set_rounding_upward();
@@ -393,11 +393,11 @@ Void C1TaylorFunction::clear() {
 C1TaylorFunction& C1TaylorFunction::operator=(Interval ic) {
     this->clear();
     set_rounding_upward();
-    Float e=(ic.upper()-ic.lower())/2;
+    Float e=(ic.upper().raw()-ic.lower().raw())/2;
     this->_zero_error=e;
     this->_uniform_error=e;
     set_rounding_to_nearest();
-    this->_expansion.append(MultiIndex(this->argument_size()),ic.midpoint());
+    this->_expansion.append(MultiIndex(this->argument_size()),ic.midpoint().raw());
     return *this;
 }
 

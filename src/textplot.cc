@@ -33,8 +33,8 @@
 #include "point.h"
 #include "box.h"
 #include "curve.h"
-#include "polytope.h"
-#include "zonotope.h"
+//#include "polytope.h"
+//#include "zonotope.h"
 #include "textplot.h"
 #include "grid_set.h"
 
@@ -103,8 +103,8 @@ void TextPlot::draw(const DrawableInterface& shape) {
         this->draw(dynamic_cast<const Point&>(shape));
     } else if(dynamic_cast<const Box*>(&shape)) {
         this->draw(dynamic_cast<const Box&>(shape));
-    } else if(dynamic_cast<const Polytope*>(&shape)) {
-        this->draw(dynamic_cast<const Polytope&>(shape));
+//    } else if(dynamic_cast<const Polytope*>(&shape)) {
+//        this->draw(dynamic_cast<const Polytope&>(shape));
     } else if(dynamic_cast<const InterpolatedCurve*>(&shape)) {
         this->draw(dynamic_cast<const InterpolatedCurve&>(shape));
     } else if(dynamic_cast<const GridTreeSubset*>(&shape)) {
@@ -133,13 +133,13 @@ void TextPlot::draw(const Box& bx) {
     this->_draw(bx.vertices());
 }
 
-void TextPlot::draw(const Polytope& p) {
-    this->_draw(p.vertices());
-}
+//void TextPlot::draw(const Polytope& p) {
+//    this->_draw(p.vertices());
+//}
 
 void TextPlot::draw(const InterpolatedCurve& c) {
     for(InterpolatedCurve::const_iterator iter = c.begin() ; iter != c.end() ; ++iter) {
-        this->draw(iter->second);
+        this->draw(Point(iter->second));
     }
     this->_fstream << std::endl;
 }

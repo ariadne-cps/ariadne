@@ -45,7 +45,6 @@ using namespace std;
 
 class Point;
 class Box;
-class Polytope;
 class InterpolatedCurve;
 class Zonotope;
 class TaylorConstrainedImageSet;
@@ -85,7 +84,7 @@ class TextPlot
     void open(const char* filename, ios::openmode mode);
     void draw(const Point&);
     void draw(const Box&);
-    void draw(const Polytope&);
+//    void draw(const Polytope&);
     void draw(const InterpolatedCurve&);
     void draw(const GridTreeSubset&);
     void draw(const DrawableInterface&);

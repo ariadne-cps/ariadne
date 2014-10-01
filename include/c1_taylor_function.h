@@ -29,6 +29,7 @@
 #define ARIADNE_C1_TAYLOR_FUNCTION_H
 
 #include <iosfwd>
+#include "declarations.h"
 #include "container.h"
 #include "numeric.h"
 #include "float.h"
@@ -37,21 +38,6 @@
 
 namespace Ariadne {
 
-typedef uint Nat;
-
-template<class X> class Vector;
-template<class X> class Matrix;
-template<class X> class Polynomial;
-
-typedef Real EffectiveNumberType;
-typedef Interval ValidatedNumberType;
-
-template<class X> class ScalarFunction;
-typedef ScalarFunction<EffectiveNumberType> EffectiveScalarFunction;
-typedef ScalarFunction<ValidatedNumberType> ValidatedScalarFunction;
-template<class X> class VectorFunction;
-typedef VectorFunction<EffectiveNumberType> EffectiveVectorFunction;
-typedef VectorFunction<ValidatedNumberType> ValidatedVectorFunction;
 
 class MultiIndex;
 class C1TaylorSeries;
@@ -79,8 +65,8 @@ class C1TaylorSeries
     Nat degree() const;
     Void sweep(Float threshold);
   public:
-    friend C1TaylorSeries& operator+=(C1TaylorSeries&, Interval);
-    friend C1TaylorSeries& operator*=(C1TaylorSeries&, Interval);
+    friend C1TaylorSeries& operator+=(C1TaylorSeries&, ValidatedNumberType);
+    friend C1TaylorSeries& operator*=(C1TaylorSeries&, ValidatedNumberType);
     friend C1TaylorSeries operator+(C1TaylorSeries, C1TaylorSeries);
     friend C1TaylorSeries operator*(C1TaylorSeries, C1TaylorSeries);
     friend ValidatedNumberType evaluate(C1TaylorSeries, ValidatedNumberType);

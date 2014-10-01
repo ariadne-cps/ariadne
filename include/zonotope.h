@@ -145,7 +145,7 @@ class Zonotope
     uint number_of_generators() const;
 
     /*! \brief The domain. */
-    Box domain() const;
+    Vector<Interval> domain() const;
 
     /*! \brief The centre. */
     const Vector<Float>& centre() const;
@@ -205,7 +205,7 @@ class Zonotope
     //! \name Function operations.
     /*! \brief Compute the image of \a z under a function given by the affine form \a af. */
     friend Zonotope apply(const Vector<Affine<Interval>>& af, const Zonotope& z);
-    friend Zonotope apply(const VectorFunction<Interval>& f, const Zonotope& z);
+    friend Zonotope apply(const VectorFunction<ValidatedTag>& f, const Zonotope& z);
     //@}
 
     //@{
@@ -242,7 +242,7 @@ Zonotope cascade_over_approximation(const Zonotope& z, uint b);
 Zonotope orthogonal_approximation(const Zonotope& z);
 
 Zonotope apply(const Affine<Interval>& af, const Zonotope& z);
-Zonotope apply(const VectorFunction<Interval>& f, const Zonotope& z);
+Zonotope apply(const VectorFunction<ValidatedTag>& f, const Zonotope& z);
 
 std::ostream& operator<<(std::ostream& os, const Zonotope& z);
 std::istream& operator>>(std::istream& is, Zonotope& z);

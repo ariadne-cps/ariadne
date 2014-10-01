@@ -41,7 +41,7 @@ uint irmax(const Box& bx) {
     Float dmax=0.0;
     uint imax=0;
     for(uint i=0; i!=bx.size(); ++i) {
-        Float d=bx[i].width();
+        Float d=bx[i].width().raw();
         if(d>dmax) {
             imax=i;
             dmax=d;
@@ -50,15 +50,19 @@ uint irmax(const Box& bx) {
     return imax;
 }
 
+inline ExactFloatType mid(ExactFloatType l, ExactFloatType u) {
+    return ExactFloatType(med_approx(l.raw(),u.raw()));
+}
+
 inline
 Box split(const Box& bx, uint i, Piece lr) {
     Box result(bx);
     Interval& ivl=result[i];
-    const Float& l=ivl.lower();
-    const Float& u=ivl.upper();
-    Float c=med_approx(l,u);
+    const ExactFloatType& l=ivl.lower();
+    const ExactFloatType& u=ivl.upper();
+    ExactFloatType c=mid(l,u);
     if(lr==middle) {
-        ivl.set(med_approx(l,c),med_approx(c,u));
+        ivl.set(mid(l,c),mid(c,u));
     } else {
         if(lr==left) { ivl.set_upper(c); }
         else { ivl.set_lower(c); }
@@ -70,7 +74,7 @@ inline
 std::pair<Box,Box> split(const Box& bx, uint i)
 {
     std::pair<Box,Box> result(bx,bx);
-    Float c=med_approx(bx[i].lower(),bx[i].upper());
+    ExactFloatType c=mid(bx[i].lower(),bx[i].upper());
     result.first[i].set_upper(c);
     result.second[i].set_lower(c);
     return result;
@@ -91,7 +95,7 @@ std::pair<Box,Box> split(const Box& bx) {
 
 template<class F>
 tribool
-separated(const Box& d, const F& f, const Box& b, const Float& eps)
+separated(const Box& d, const F& f, const Box& b, const RawFloatType& eps)
 {
 
     Box fd=f.evaluate(d);
@@ -104,7 +108,7 @@ separated(const Box& d, const F& f, const Box& b, const Float& eps)
     } else if(definitely(inside(fc,b))) {
     	//cout << "evaluation of the midpoint is inside\n";
         return false;
-    } else if(d.radius()<eps) {
+    } else if(d.radius().raw()<eps) {
     	//cout << "radius limit reached\n";
         return indeterminate;
     } else {
@@ -117,7 +121,7 @@ separated(const Box& d, const F& f, const Box& b, const Float& eps)
 
 template<class F>
 tribool
-inside(const Box& d, const F& f, const Box& b, const Float& eps)
+inside(const Box& d, const F& f, const Box& b, const RawFloatType& eps)
 {
 
     Box fd=f.evaluate(d);
@@ -130,7 +134,7 @@ inside(const Box& d, const F& f, const Box& b, const Float& eps)
     } else if(definitely(inside(fd,b))) {
     	//cout << "evaluation is definitely inside\n";
         return true;
-    } else if(d.radius()<eps) {
+    } else if(d.radius().raw()<eps) {
     	//cout << "radius limit reached\n";
         return indeterminate;
     } else {

@@ -81,8 +81,8 @@ accumulate(Float& value, Float& error, uint n, const Float* aptr, const Float* b
     for(uint i=0; i!=n; ++i) {
         v+=aptr[i]*bptr[i];
     }
-    value=v.midpoint();
-    error=add_up(error,v.radius());
+    value=v.midpoint().raw();
+    error=add_up(error,v.radius().raw());
 }
 
 Vector<Float>
@@ -107,7 +107,7 @@ row_errors(const Matrix<Interval>& A)
     Vector<Float> e(m);
     for(uint i=0; i!=m; ++i) {
         for(uint j=0; j!=n; ++j) {
-            e[i]=add_up(e[i],A[i][j].radius());
+            e[i]=add_up(e[i],A[i][j].radius().raw());
         }
     }
     return e;
@@ -118,7 +118,7 @@ errors(const Vector<Interval>& pt)
 {
     Vector<Float> result(pt.size());
     for(uint i=0; i!=pt.size(); ++i) {
-        result[i]=pt[i].radius();
+        result[i]=pt[i].radius().raw();
     }
     return result;
 }
@@ -130,9 +130,9 @@ row_errors(const Vector<Interval>& pt, const Matrix<Interval>& A)
     assert(pt.size()==A.row_size());
     Vector<Float> result(pt.size());
     for(uint i=0; i!=A.row_size(); ++i) {
-        result[i]=pt[i].radius();
+        result[i]=pt[i].radius().raw();
         for(uint j=0; j!=A.column_size(); ++j) {
-            result[i]=add_up(result[i],A[i][j].radius());
+            result[i]=add_up(result[i],A[i][j].radius().raw());
         }
     }
     return result;
@@ -475,11 +475,11 @@ Zonotope::Zonotope(const Box& r)
     Matrix<Float>& G=this->_generators;
     Vector<Float>& e=this->_error;
     for(uint i=0; i!=d; ++i) {
-        c[i]=med_approx(r[i].lower(),r[i].upper());
+        c[i]=med_approx(r[i].lower().raw(),r[i].upper().raw());
         for(uint j=0; j!=d; ++j) {
             G[i][j]=0;
         }
-        G[i][i]=rad_up(r[i].lower(),r[i].upper());
+        G[i][i]=rad_up(r[i].lower().raw(),r[i].upper().raw());
         e[i]=0;
     }
 }
@@ -620,6 +620,14 @@ orthogonal_over_approximation(const Zonotope& z)
 // Choose
 }
 
+Tuple< Matrix<Float>, Matrix<Float>, PivotMatrix > orthogonal_decomposition(const Matrix<Float>& A, bool allow_pivoting=true) {
+    Matrix<ApproximateFloatType> approximate_matrix=reinterpret_cast<Matrix<ApproximateFloatType>const&>(A);
+    Tuple< Matrix<ApproximateFloatType>, Matrix<ApproximateFloatType>, PivotMatrix >
+        approximate_decomposition=orthogonal_decomposition(approximate_matrix);
+    return reinterpret_cast<Tuple<Matrix<Float>, Matrix<Float>, PivotMatrix >const&>(approximate_decomposition);
+}
+
+
 Zonotope
 orthogonal_approximation(const Zonotope& z)
 {
@@ -750,8 +758,8 @@ Zonotope apply(const ValidatedVectorFunction& f, const Zonotope& z) {
     IntervalVector ze=z.error()*Interval(-1,+1);
     IntervalVector zb=z.bounding_box();
 
-    IntervalVector fc=f(zc);
-    IntervalMatrix fJb=f.jacobian(zb);
+    IntervalVector fc=apply(f,zc);
+    IntervalMatrix fJb=jacobian(f,zb);
     IntervalMatrix fJbzG=fJb*zG;
 
     std::cerr<<"  fJb="<<fJb<<"\n";

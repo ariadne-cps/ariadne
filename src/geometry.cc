@@ -69,7 +69,7 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box&
     else if(rs.covers(bx)) {
         return true;
     }
-    else if(bx.radius()<eps) {
+    else if(bx.radius().raw()<eps) {
         return indeterminate;
     } else {
         Box bx1,bx2;
@@ -90,7 +90,7 @@ inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& 
 {
     if(ls.separated(bx) || rs.separated(bx)) {
         return true;
-    } else if(bx.radius()<eps) {
+    } else if(bx.radius().raw()<eps) {
         return indeterminate;
     } else {
         Box bx1,bx2;
@@ -111,7 +111,7 @@ separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Bo
 {
     if(ls.separated(bx) || rs.separated(bx)) {
         return true;
-    } else if(bx.radius()<eps) {
+    } else if(bx.radius().raw()<eps) {
         return indeterminate;
     } else {
         Box bx1,bx2;
@@ -135,7 +135,7 @@ overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Box& bx
     if(ovs.overlaps(bx)) {
         if(ops.covers(bx)) {
             return true;
-        } else if(bx.radius()<eps) {
+        } else if(bx.radius().raw()<eps) {
             return indeterminate;
         } else {
             Box bx1,bx2;
@@ -157,7 +157,7 @@ inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const Box& bx
 {
     if(cls.separated(bx) || ops.covers(bx)) {
         return true;
-    } else if(bx.radius()<eps) {
+    } else if(bx.radius().raw()<eps) {
         return indeterminate;
     } else {
         Box bx1,bx2;
@@ -176,7 +176,7 @@ separated(const ClosedSetInterface& cls1, const ClosedSetInterface& cls2, const 
 {
     if(cls1.separated(bx) || cls2.separated(bx)) {
         return true;
-    } else if(bx.radius()<eps) {
+    } else if(bx.radius().raw()<eps) {
         return indeterminate;
     } else {
         Box bx1,bx2;

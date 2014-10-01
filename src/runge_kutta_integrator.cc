@@ -35,30 +35,32 @@
 
 namespace Ariadne {
 
+inline auto operator*(double s, ApproximateFloatVector v) -> decltype(ApproximateFloat(s)*v) { return ApproximateFloat(s)*v; }
+
 RungeKutta4Integrator::RungeKutta4Integrator(double step_size)
     : _step_size(step_size)
 {
 }
 
-FloatVector
-RungeKutta4Integrator::step(const ApproximateVectorFunctionInterface& f, const FloatVector& x, const Float& h) const
+ApproximateFloatVector
+RungeKutta4Integrator::step(const ApproximateVectorFunctionInterface& f, const ApproximateFloatVector& x, const ApproximateFloat& h) const
 {
-    FloatVector k1=f.evaluate(x);
-    FloatVector k2=f.evaluate(FloatVector(x+(h/2)*k1));
-    FloatVector k3=f.evaluate(FloatVector(x+(h/2)*k2));
-    FloatVector k4=f.evaluate(FloatVector(x+h*k3));
+    ApproximateFloatVector k1=f.evaluate(x);
+    ApproximateFloatVector k2=f.evaluate(ApproximateFloatVector(x+(h/2)*k1));
+    ApproximateFloatVector k3=f.evaluate(ApproximateFloatVector(x+(h/2)*k2));
+    ApproximateFloatVector k4=f.evaluate(ApproximateFloatVector(x+h*k3));
     //std::cerr<<"k1,2,3,4="<<k1<<k2<<k3<<k4<<"\n";
     return x+(h/6)*(k1+2.0*k3+2.0*k4+k2);
 }
 
-List< Pair<Float,FloatVector> >
-RungeKutta4Integrator::evolve(const ApproximateVectorFunctionInterface& f, const FloatVector& x0, const Float& tmax) const
+List< Pair<ApproximateFloat,ApproximateFloatVector> >
+RungeKutta4Integrator::evolve(const ApproximateVectorFunctionInterface& f, const ApproximateFloatVector& x0, const ApproximateFloat& tmax) const
 {
-    static const Float h=this->_step_size;
+    static const ApproximateFloat h=this->_step_size;
 
-    List< Pair<Float,FloatVector> > res;
-    Float t=0.0;
-    FloatVector x=x0;
+    List< Pair<ApproximateFloat,ApproximateFloatVector> > res;
+    ApproximateFloat t=0.0;
+    ApproximateFloatVector x=x0;
 
     res.push_back(make_pair(t,x));
     while(t<tmax) {

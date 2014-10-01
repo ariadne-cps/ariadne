@@ -520,7 +520,8 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     ValidatedVectorFunctionModel mh=h; mh.clobber();
     ARIADNE_LOG(7,"midpoint(h)="<<mh<<"\n");
 
-    Matrix<ValidatedScalarFunction> D2f(n,n);
+    ValidatedScalarFunction zero_function(f.argument_size());
+    Matrix<ValidatedScalarFunction> D2f(n,n,zero_function);
     for(uint i=0; i!=n; ++i) {
         for(uint j=0; j!=n; ++j) {
             D2f[i][j]=f[i].derivative(m+j);

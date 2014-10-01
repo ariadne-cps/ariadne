@@ -24,13 +24,16 @@
 /*! \file metaprogramming.h
  *  \brief Classes for template metaprogramming.
  */
+
 #ifndef ARIADNE_METAPROGRAMMING_H
 #define ARIADNE_METAPROGRAMMING_H
 
+#include <type_traits>
 
 namespace Ariadne {
 
 typedef void Void;
+typedef bool Bool;
 
 struct True { static const bool value = true; };
 struct False { static const bool value = false; };
@@ -54,6 +57,7 @@ template<class T> struct IsSame<T,T> : True { };
 
 template<class X> struct IsDefined : public True { };
 
+template<class FROM, class TO> using IsConvertible = std::is_convertible<FROM,TO>;
 
 } // namespace Ariadne
 

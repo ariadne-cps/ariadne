@@ -405,7 +405,7 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
         ARIADNE_LOG(6,"    txg="<<txg<<"\n");
 
-        ValidatedConstraint constraint=(txg>=0.0);
+        ValidatedConstraint constraint=(txg>=0);
 
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
         solver.hull_reduce(nd,txg,Interval(0,inf));

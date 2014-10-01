@@ -39,6 +39,12 @@ inline uint compute_polynomial_data_size(uint rs, uint as, uint d) { return rs*A
 
 namespace Ariadne {
 
+// FIXME: Ensure all valid arithmetic and comparisons are defined!
+inline auto operator==(ValidatedFloat x, int n) -> decltype(x==ExactFloat(n)) { return x==ExactFloat(n); }
+inline auto operator!=(ValidatedFloat x, int n) -> decltype(x!=ExactFloat(n)) { return x!=ExactFloat(n); }
+inline auto operator> (ValidatedFloat x, int n) -> decltype(x> ExactFloat(n)) { return x> ExactFloat(n); }
+inline auto operator*=(ApproximateFloat x, int n) -> decltype(x*=ApproximateFloat(n)) { return x*=ApproximateFloat(n); }
+
 template<class X>
 struct to_python_dict< Ariadne::Expansion<X>  > {
     to_python_dict() { boost::python::to_python_converter< Ariadne::Expansion<X>, to_python_dict< Ariadne::Expansion<X> > >(); }
@@ -302,25 +308,25 @@ export_differential_vector(const char* name)
     def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
 }
 
-template void export_differential< Differential<Float> >(const char*);
-template void export_differential< Differential<Interval> >(const char*);
+template void export_differential< Differential<ApproximateFloatType> >(const char*);
+template void export_differential< Differential<ValidatedFloatType> >(const char*);
 //template void export_differential< Differential<ValidatedTaylorModel> >(const char*);
 
-template void export_differential_vector< Differential<Float> >(const char*);
-template void export_differential_vector< Differential<Interval> >(const char*);
+template void export_differential_vector< Differential<ApproximateFloatType> >(const char*);
+template void export_differential_vector< Differential<ValidatedFloatType> >(const char*);
 //template void export_differential_vector< Differential<ValidatedTaylorModel> >(const char*);
 
 void differentiation_submodule()
 {
-    to_python_dict < Expansion<Float> >();
-    to_python_dict < Expansion<Interval> >();
+    to_python_dict < Expansion<ApproximateFloatType> >();
+    to_python_dict < Expansion<ValidatedFloatType> >();
 
-    export_differential< Differential<Float> >("FloatDifferential");
-    export_differential< Differential<Interval> >("IntervalDifferential");
+    export_differential< Differential<ApproximateFloatType> >("ApproximateDifferential");
+    export_differential< Differential<ValidatedFloatType> >("ValidatedDifferential");
     //export_differential< Differential<ValidatedTaylorModel> >("TaylorModelDifferential");
 
-    export_differential_vector< Differential<Float> >("FloatDifferentialVector");
-    export_differential_vector< Differential<Interval> >("IntervalDifferentialVector");
+    export_differential_vector< Differential<ApproximateFloatType> >("ApproximateDifferentialVector");
+    export_differential_vector< Differential<ValidatedFloatType> >("ValidatedDifferentialVector");
     //export_differential_vector< Differential<ValidatedTaylorModel> >("TaylorModelDifferentialVector");
 }
 

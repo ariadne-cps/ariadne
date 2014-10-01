@@ -114,6 +114,10 @@ std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Approximat
     return os << std::showpoint << std::setprecision(18) << x.reference().get_d();
 }
 
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<UpperFloat>& x) {
+    return os << std::showpoint << std::setprecision(18) << x.reference().get_d();
+}
+
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ValidatedFloat>& x) {
     rounding_mode_t rnd=get_rounding_mode();
     os << '{';
@@ -126,6 +130,10 @@ std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ValidatedF
     os << '}';
     return os;
 
+}
+
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ExactFloat>& x) {
+    return os << std::showpoint << std::setprecision(18) << x.reference().get_d();
 }
 
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Integer>& x) {

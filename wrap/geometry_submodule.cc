@@ -83,22 +83,22 @@ struct from_python_list<Interval> {
 };
 
 template<>
-struct from_python<Point> {
-    from_python() { converter::registry::push_back(&convertible,&construct,type_id<Point>()); }
+struct from_python<ExactPoint> {
+    from_python() { converter::registry::push_back(&convertible,&construct,type_id<ExactPoint>()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr) && !PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         extract<boost::python::tuple> xtup(obj_ptr);
         extract<boost::python::list> xlst(obj_ptr);
-        Point pt;
+        ExactPoint pt;
         if(xtup.check()) {
-            boost::python::tuple tup=xtup(); pt=Point(len(tup));
-            for(int i=0; i!=len(tup); ++i) { pt[i]=Float(extract<double>(tup[i])); }
+            boost::python::tuple tup=xtup(); pt=ExactPoint(len(tup));
+            for(int i=0; i!=len(tup); ++i) { pt[i]=ExactFloatType(extract<double>(tup[i])); }
         } else if(xlst.check()) {
-            boost::python::list lst=xlst(); pt=Point(len(lst));
-            for(int i=0; i!=len(lst); ++i) { pt[i]=Float(extract<double>(lst[i])); }
+            boost::python::list lst=xlst(); pt=ExactPoint(len(lst));
+            for(int i=0; i!=len(lst); ++i) { pt[i]=ExactFloatType(extract<double>(lst[i])); }
         }
         void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
-        new (storage) Point(pt);
+        new (storage) ExactPoint(pt);
         data->convertible = storage;
     }
 };
@@ -254,13 +254,13 @@ void export_set_interface() {
 
 void export_point()
 {
-    class_<Point,bases<DrawableInterface>> point_class("Point",init<Point>());
+    class_<ExactPoint,bases<DrawableInterface>> point_class("ExactPoint",init<ExactPoint>());
     point_class.def(init<uint>());
-    point_class.def("__getitem__", &__getitem__<Point,int,Float>);
+    point_class.def("__getitem__", &__getitem__<ExactPoint,int,ExactFloatType>);
     point_class.def(self_ns::str(self));
 
-    from_python<Point>();
-    implicitly_convertible<Vector<Float>,Point>();
+    from_python<ExactPoint>();
+    implicitly_convertible<Vector<Float>,ExactPoint>();
 
 }
 
@@ -317,13 +317,14 @@ void export_interval()
 void export_box()
 {
     typedef Vector<Interval> IVector;
+    class_<Vector<Interval>> interval_vector_class("IntervalVector");
 
     class_<Box,bases<CompactSetInterface,OpenSetInterface,Vector<Interval>,DrawableInterface > > box_class("Box",init<Box>());
     box_class.def(init<uint>());
     box_class.def(init< Vector<Interval> >());
     box_class.def("__eq__", (bool(*)(const Vector<Interval>&,const Vector<Interval>&)) &operator==);
     box_class.def("dimension", (uint(Box::*)()const) &Box::dimension);
-    box_class.def("centre", (Point(Box::*)()const) &Box::centre);
+    box_class.def("centre", (ExactPoint(Box::*)()const) &Box::centre);
     box_class.def("radius", (Float(Box::*)()const) &Box::radius);
     box_class.def("separated", (tribool(Box::*)(const Box&)const) &Box::separated);
     box_class.def("overlaps", (tribool(Box::*)(const Box&)const) &Box::overlaps);
@@ -351,6 +352,7 @@ void export_box()
 
 }
 
+/*
 std::pair<Zonotope,Zonotope> split_pair(const Zonotope& z) {
     ListSet<Zonotope> split_list=split(z);
     ARIADNE_ASSERT(split_list.size()==2);
@@ -360,8 +362,8 @@ std::pair<Zonotope,Zonotope> split_pair(const Zonotope& z) {
 void export_zonotope()
 {
     class_<Zonotope,bases<CompactSetInterface,OpenSetInterface,DrawableInterface> > zonotope_class("Zonotope",init<Zonotope>());
-    zonotope_class.def(init< Point, Matrix<Float>, Vector<Float> >());
-    zonotope_class.def(init< Point, Matrix<Float> >());
+    zonotope_class.def(init< Vector<ExactFloatType>, Matrix<ExactFloatType>, Vector<ErrorFloatType> >());
+    zonotope_class.def(init< Vector<ExactFloatType>, Matrix<ExactFloatType> >());
     zonotope_class.def(init< Box >());
     zonotope_class.def("centre",&Zonotope::centre,return_value_policy<copy_const_reference>());
     zonotope_class.def("generators",&Zonotope::generators,return_value_policy<copy_const_reference>());
@@ -370,7 +372,7 @@ void export_zonotope()
     zonotope_class.def("split", (ListSet<Zonotope>(*)(const Zonotope&)) &split);
     zonotope_class.def("__str__",&__cstr__<Zonotope>);
 
-    def("contains", (tribool(*)(const Zonotope&,const Point&)) &contains);
+    def("contains", (tribool(*)(const Zonotope&,const ExactPoint&)) &contains);
     def("separated", (tribool(*)(const Zonotope&,const Box&)) &separated);
     def("overlaps", (tribool(*)(const Zonotope&,const Box&)) &overlaps);
     def("separated", (tribool(*)(const Zonotope&,const Zonotope&)) &separated);
@@ -380,11 +382,11 @@ void export_zonotope()
     def("orthogonal_over_approximation", (Zonotope(*)(const Zonotope&)) &orthogonal_over_approximation);
     def("error_free_over_approximation", (Zonotope(*)(const Zonotope&)) &error_free_over_approximation);
 
-    def("apply", (Zonotope(*)(const ValidatedVectorFunction&, const Zonotope&)) &apply);
+//    def("apply", (Zonotope(*)(const ValidatedVectorFunction&, const Zonotope&)) &apply);
 
     to_python< ListSet<Zonotope> >();
-
 }
+
 
 void export_polytope()
 {
@@ -395,14 +397,15 @@ void export_polytope()
     polytope_class.def(self_ns::str(self));
 
 }
+*/
 
 void export_curve()
 {
-    to_python< std::pair<const Float,Point> >();
+    to_python< std::pair<const ExactFloat,ExactPoint> >();
 
     class_<InterpolatedCurve,bases<DrawableInterface> > interpolated_curve_class("InterpolatedCurve",init<InterpolatedCurve>());
-    interpolated_curve_class.def(init<Float,Point>());
-    interpolated_curve_class.def("insert", &InterpolatedCurve::insert);
+    interpolated_curve_class.def(init<ExactFloat,ExactPoint>());
+    interpolated_curve_class.def("insert", (void(InterpolatedCurve::*)(const ExactFloat&, const Vector<ExactFloat>&)) &InterpolatedCurve::insert);
     interpolated_curve_class.def("__iter__",boost::python::range(&InterpolatedCurve::begin,&InterpolatedCurve::end));
     interpolated_curve_class.def(self_ns::str(self));
 
@@ -416,10 +419,10 @@ void export_affine_set()
 
     class_<ValidatedAffineConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> >
         affine_set_class("ValidatedAffineConstrainedImageSet",init<ValidatedAffineConstrainedImageSet>());
-    affine_set_class.def(init<Vector<Interval>, Matrix<Float>, Vector<Float> >());
-    affine_set_class.def(init<Matrix<Float>, Vector<Float> >());
-    affine_set_class.def("new_parameter_constraint", (void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<Interval>,Float>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
-    affine_set_class.def("new_constraint", (void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<Interval>,Float>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
+    affine_set_class.def(init<Vector<Interval>, Matrix<ExactFloatType>, Vector<ExactFloatType> >());
+    affine_set_class.def(init<Matrix<ExactFloatType>, Vector<ExactFloatType> >());
+    affine_set_class.def("new_parameter_constraint", (void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<ValidatedFloatType>,ValidatedFloatType>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
+    affine_set_class.def("new_constraint", (void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<ValidatedFloatType>,ValidatedFloatType>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
     affine_set_class.def("dimension", &ValidatedAffineConstrainedImageSet::dimension);
     affine_set_class.def("bounded", &ValidatedAffineConstrainedImageSet::bounded);
     affine_set_class.def("empty", &ValidatedAffineConstrainedImageSet::empty);
@@ -496,8 +499,8 @@ void geometry_submodule() {
     export_set_interface();
     export_point();
     export_box();
-    export_zonotope();
-    export_polytope();
+//    export_zonotope();
+//    export_polytope();
     export_curve();
 
     export_affine_set();

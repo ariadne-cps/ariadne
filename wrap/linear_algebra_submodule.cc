@@ -280,21 +280,11 @@ void export_matrix_class(class_<Matrix<X> >& matrix_class)
     matrix_class.def("__str__",&__cstr__< Matrix<X> >);
     matrix_class.def("__repr__",&__repr__<Matrix<X> >);
 
-//    def("norm",(X(*)(const Matrix<X>&)) &norm);
-    def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);
-
-    def("inverse",(Matrix<X>(*)(const Matrix<X>&)) &inverse);
-    def("solve",(Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &solve);
-    def("solve",(Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &solve);
-
     matrix_class.def("identity",(Matrix<X>(*)(size_t)) &Matrix<X>::identity);
     matrix_class.staticmethod("identity");
 
-
     from_python< Matrix<X> >();
-
 }
-
 
 
 template<class X, class Y>
@@ -316,6 +306,17 @@ void export_matrix_arithmetic(class_<Matrix<X> >& matrix_class)
     matrix_class.def("__rmul__", &__rmul__< Vector<R>, Matrix<X>, Vector<Y> >);
 }
 
+template<class X>
+void export_matrix_operations(class_<Matrix<X> >& matrix_class)
+{
+    def("norm",(X(*)(const Matrix<X>&)) &norm);
+    def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);
+
+    def("inverse",(Matrix<X>(*)(const Matrix<X>&)) &inverse);
+    def("solve",(Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &solve);
+    def("solve",(Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &solve);
+}
+
 
 template<class X> void export_matrix()
 {
@@ -324,6 +325,7 @@ template<class X> void export_matrix()
     export_matrix_conversion<X,X>(matrix_class);
     export_matrix_arithmetic<X,X,X>(matrix_class);
     export_matrix_arithmetic<X,X,double>(matrix_class);
+    export_matrix_operations<X>(matrix_class);
 
 
 }

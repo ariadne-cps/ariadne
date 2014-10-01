@@ -450,8 +450,14 @@ inline VectorFunctionModel<ValidatedTag> unchecked_compose(const ValidatedVector
 
 //inline VectorFunctionModel<ValidatedTag> compose(const VectorFunctionModel<ValidatedTag>& f, const VectorFunctionModel<ValidatedTag>& g) { return g._ptr->_compose(f); }
 
-inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionInterface<ValidatedTag>& f2) {
+inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunction<ValidatedTag>& f2) {
+    return f1+compose(f2,f1.create_identity()); }
+inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunction<ValidatedTag>& f2) {
     return f1-compose(f2,f1.create_identity()); }
+inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunction<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
+    return compose(f1,f2.create_identity())+f2; }
+inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunction<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
+    return compose(f1,f2.create_identity())-f2; }
 
 inline VectorFunctionModel<ValidatedTag> join(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2);
 inline VectorFunctionModel<ValidatedTag> join(const ScalarFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2);

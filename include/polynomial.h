@@ -644,7 +644,7 @@ std::ostream& operator<<(std::ostream& os, const Polynomial<X>& q) {
             if(v>0 && !first_term) { os << "+"; }
             first_term=false;
             if(v==1) { } else if (v==-1) { os << '-'; }
-            else { os << 'v'; first_factor=false; }
+            else { os << v; first_factor=false; }
             for(uint j=0; j!=a.size(); ++j) {
                 if(a[j]!=0) {
                     if(first_factor) { first_factor=false; } else { os <<"*"; }

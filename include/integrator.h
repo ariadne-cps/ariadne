@@ -187,7 +187,7 @@ class TaylorPicardIntegrator
 
 //! \brief An integrator which computes the Taylor series of the flow function with remainder term.
 class TaylorSeriesIntegrator
-    : public TaylorPicardIntegrator
+    : public IntegratorBase
 {
     double _step_maximum_error;
     double _step_sweep_threshold;

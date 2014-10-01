@@ -111,7 +111,7 @@ class TestHybridReachabilityAnalyser
 
         HybridReachabilityAnalyser analyser(system,evolver);
         analyser.configuration().set_maximum_grid_depth(4);
-        analyser.configuration().set_lock_to_grid_time(1.0_exact);
+        analyser.configuration().set_lock_to_grid_time(1.0);
         cout << "Done building analyser\n";
         return analyser;
     }
@@ -221,7 +221,7 @@ class TestHybridReachabilityAnalyser
             =Ariadne::bounding_boxes(system.state_space(),bound);
         VariablesBox bounding_box=bounding_boxes[loc];
 
-        analyser.configuration().set_transient_time(4.0_exact);
+        analyser.configuration().set_transient_time(4.0);
         analyser.configuration().set_bounding_domain_ptr(shared_ptr<HybridBoxes>(new HybridBoxes(bounding_boxes)));
         cout << analyser.configuration();
 
@@ -241,7 +241,7 @@ class TestHybridReachabilityAnalyser
             =Ariadne::bounding_boxes(system.state_space(),bound);
         VariablesBox bounding_box=bounding_boxes[loc];
 
-        analyser.configuration().set_transient_time(4.0_exact);
+        analyser.configuration().set_transient_time(4.0);
         analyser.configuration().set_bounding_domain_ptr(shared_ptr<HybridBoxes>(new HybridBoxes(bounding_boxes)));
         cout << analyser.configuration();
 

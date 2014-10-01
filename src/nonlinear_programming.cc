@@ -678,7 +678,7 @@ validate_feasibility(Box D, ValidatedVectorFunction g, Box C,
     // Check inequality constraints once more
     for(uint i=0; i!=C.size(); ++i) {
         if(C[i].lower()==C[i].upper()) {
-            ARIADNE_DEBUG_ASSERT(models(gx[i],C[i].midpoint()));
+            ARIADNE_DEBUG_ASSERT(models(gx[i],C[i].centre()));
         } else {
             if(!element(gx[i],C[i])) {
                 return false;

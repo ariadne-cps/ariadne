@@ -234,7 +234,7 @@ class ValidatedFloat {
     const ExactFloat value() const { return ExactFloat(half_exact(add_approx(l,u))); }
     //! \brief An over-approximation to the radius of the interval.
     const UpperFloat radius() const { return UpperFloat(half_exact(sub_up(u,l))); }
-    const UpperFloat error() const { return UpperFloat(half_exact(sub_up(u,l))); }
+    const UpperFloat error() const { Float c=half_exact(add_approx(l,u)); Float e=max(sub_up(u,c),sub_up(c,l)); return UpperFloat(e); }
     //! \brief An over-approximation to the width of the interval.
     const UpperFloat width() const { return UpperFloat(sub_up(u,l)); }
 

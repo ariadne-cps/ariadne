@@ -324,31 +324,31 @@ bool ConstraintSolver::monotone_reduce(Box& domain, const ValidatedScalarFunctio
 
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
 
-    ExactFloatType midpoint;
+    ExactFloatType splitpoint;
     Interval lower=domain[variable];
     Interval upper=domain[variable];
     Vector<Interval> slice=domain;
     Vector<Interval> subdomain=domain;
 
     static const int MAX_STEPS=3;
-    const Float size = lower.radius().raw() / (1<<MAX_STEPS);
+    const Float size = lower.width().raw() / (1<<MAX_STEPS);
     do {
-        if(lower.radius().raw()>size) {
-            midpoint=lower.midpoint();
-            slice[variable]=midpoint;
-            Interval new_lower=midpoint+(bounds-apply(function,slice)).lower()/apply(derivative,subdomain);
+        if(lower.width().raw()>size) {
+            splitpoint=lower.centre();
+            slice[variable]=splitpoint;
+            Interval new_lower=splitpoint+(bounds-apply(function,slice)).lower()/apply(derivative,subdomain);
             if(new_lower.upper().raw()<lower.lower().raw()) { lower=lower.lower().raw(); }
             else { lower=intersection(lower,new_lower); }
         }
-        if(upper.radius().raw()>size) {
-            midpoint=upper.midpoint();
-            slice[variable]=midpoint;
-            Interval new_upper=midpoint+(bounds-apply(function,slice)).upper()/apply(derivative,subdomain);
+        if(upper.width().raw()>size) {
+            splitpoint=upper.centre();
+            slice[variable]=splitpoint;
+            Interval new_upper=splitpoint+(bounds-apply(function,slice)).upper()/apply(derivative,subdomain);
             if(new_upper.lower()>upper.upper()) { upper=upper.upper(); }
             else { upper=intersection(upper,new_upper); }
         }
         subdomain[variable]=Interval(lower.lower(),upper.upper());
-    } while(lower.radius().raw()>size && upper.radius().raw()>size);
+    } while(lower.width().raw()>size && upper.width().raw()>size);
     domain=subdomain;
 
     return domain.empty();

@@ -897,7 +897,7 @@ Vector<Interval> GridCell::compute_lattice_box( const uint dimensions, const uin
         current_dimension = i % dimensions;
         //Compute the middle point of the box's projection onto
         //the dimension \a current_dimension (relative to the grid)
-        Float middlePointInCurrDim = theResultLatticeBox[current_dimension].midpoint().raw();
+        Float middlePointInCurrDim = theResultLatticeBox[current_dimension].centre().raw();
         if( theWord[i] ){
             //Choose the right half
             theResultLatticeBox[current_dimension].set_lower( middlePointInCurrDim );

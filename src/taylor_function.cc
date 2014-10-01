@@ -235,7 +235,7 @@ ScalarTaylorFunction::polynomial() const
 
     Vector<Polynomial<ValidatedNumberType> > s(this->argument_size());
     for(uint j=0; j!=this->argument_size(); ++j) {
-        if(this->domain()[j].radius()<=0) {
+        if(this->domain()[j].width()<=0) {
             ARIADNE_ASSERT(this->domain()[j].radius()==0);
             s[j]=Polynomial<ValidatedNumberType>::constant(this->argument_size(),this->domain()[j].midpoint());
         } else {

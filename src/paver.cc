@@ -163,7 +163,7 @@ void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, c
     Box range=evaluate(function,subdomain);
     bool small=true;
     for(uint i=0; i!=range.size(); ++i) {
-        if(range[i].radius().raw()>errors[i]*RELATIVE_SMALLNESS) {
+        if(range[i].width().raw()>errors[i]*RELATIVE_SMALLNESS*2) {
             small=false;
             break;
         }

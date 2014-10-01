@@ -1889,7 +1889,7 @@ ValidatedTaylorModel& ValidatedTaylorModel::rescale(const Interval& ocd, const I
     // alpha=(d-c)/(b-a) and beta=(cb-ad)/(b-a)
     // If a==b, return a ValidatedTaylorModel with unbounded error
 
-    ARIADNE_ASSERT_MSG(ocd.radius()>=0,"Illegal scaling from interval "<<ocd<<" with zero radius to interval "<<ncd);
+    ARIADNE_ASSERT_MSG(ocd.radius().lower().raw()>=0,"Illegal scaling from interval "<<ocd<<" with zero radius to interval "<<ncd);
     if(ocd.lower()==ocd.upper()) {
         x.clear();
         x.set_error(+inf);
@@ -2052,7 +2052,7 @@ ValidatedTaylorModel& ValidatedTaylorModel::restrict(const Vector<Interval>& nd)
             for(uint j=0; j!=as; ++j) {
                 ci*=sf[j][iter->key()[j]];
             }
-            iter->data().raw()=ci.midpoint().raw();
+            iter->data().raw()=ci.centre().raw();
             x._error.raw()=add_up(x._error.raw(),mag(ci-iter->data().raw()));
         }
     }

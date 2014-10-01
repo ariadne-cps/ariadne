@@ -247,7 +247,7 @@ Enclosure::Enclosure(const Box& box, const ValidatedFunctionModelFactoryInterfac
     List<uint> proper_coordinates;
     proper_coordinates.reserve(box.dimension());
     for(uint i=0; i!=box.dimension(); ++i) {
-        if(box[i].radius()>=min_float) {
+        if(box[i].width()>=min_float) {
             proper_coordinates.append(i);
         }
     }
@@ -300,7 +300,7 @@ Enclosure::Enclosure(const Box& domain, const ValidatedVectorFunction& function,
     const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
     for(uint i=0; i!=this->_domain.size(); ++i) {
-        if(this->_domain[i].radius()==0) {
+        if(this->_domain[i].width()==0) {
             this->_domain[i]+=Interval(-min,+min);
         }
     }
@@ -328,7 +328,7 @@ Enclosure::Enclosure(const Box& domain, const ValidatedVectorFunction& space_fun
     const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
     for(uint i=0; i!=this->_domain.size(); ++i) {
-        if(this->_domain[i].radius()==0) {
+        if(this->_domain[i].width()==0) {
             this->_domain[i]+=Interval(-min,+min);
         }
     }
@@ -809,7 +809,7 @@ Enclosure::splitting_index_zeroth_order() const
         for(uint i=0; i!=this->dimension(); ++i) {
             column_norm+=mag(jacobian[i][j]);
         }
-        column_norm *= this->reduced_domain()[j].radius().raw();
+        column_norm *= this->reduced_domain()[j].error().raw();
         if(column_norm>max_column_norm) {
             max_column_norm=column_norm;
             jmax=j;

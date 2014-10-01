@@ -124,7 +124,7 @@ class Interval {
     explicit Interval(const Decimal& x);
 
     //! \brief Convert to a floating-point approximation.
-    explicit operator Float () const { return this->midpoint().raw(); }
+    explicit operator Float () const { return half_exact(add_near(l.raw(),u.raw())); }
     //! \brief Convert from a floating-point number with an exact representation.
     explicit operator ValidatedFloat () const { return ValidatedFloat(this->lower(),this->upper()); }
 
@@ -163,12 +163,17 @@ class Interval {
     const ExactFloatType& lower() const { return reinterpret_cast<ExactFloatType const&>(l); }
     //! \brief The upper bound of the interval.
     const ExactFloatType& upper() const { return reinterpret_cast<ExactFloatType const&>(u); }
-    //! \brief An approximation to the midpoint of the interval.
-    const ExactFloatType midpoint() const { return ExactFloatType(half_exact(add_approx(l,u))); }
-    //! \brief An over-approximation to the radius of the interval.
-    const ErrorFloatType radius() const { return ErrorFloatType(half_exact(sub_up(u,l))); }
+    //! \brief The midpoint of the interval.
+    const ValidatedFloatType midpoint() const { return half(this->lower()+this->upper()); }
+    //! \brief The radius of the interval.
+    const ValidatedFloatType radius() const { return half(this->upper()-this->lower()); }
     //! \brief An over-approximation to the width of the interval.
     const ErrorFloatType width() const { return ErrorFloatType(sub_up(u,l)); }
+
+    //! \brief An approximation to the midpoint of the interval.
+    const ExactFloatType centre() const { return ExactFloatType(half(add_near(l,u))); }
+    //! \brief An over-approximation to the distance between the centre and the endpoints.
+    const ErrorFloatType error() const { Float c=half(add_near(l,u)); return ErrorFloatType(max(sub_up(u,c),sub_up(c,l))); }
 
     //! \brief Tests if the interval is empty.
     bool empty() const { return l>u; }
@@ -200,11 +205,11 @@ class Interval {
 
 std::ostream& operator<<(std::ostream& os, const Interval& ivl);
 
-inline ExactFloatType midpoint(Interval i) {
+inline ValidatedFloatType midpoint(Interval i) {
     return i.midpoint();
 }
 
-inline ErrorFloatType radius(Interval i) {
+inline ValidatedFloatType radius(Interval i) {
     return i.radius();
 }
 

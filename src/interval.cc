@@ -373,7 +373,7 @@ Interval cos(Interval i)
     ARIADNE_ASSERT(i.lower().value()<=i.upper().value());
     rounding_mode_t rnd = get_rounding_mode();
 
-    if(i.radius().value()>2*pi_down) { return Interval(-1.0,+1.0); }
+    if(i.radius().value().raw()>2*pi_down) { return Interval(-1.0,+1.0); }
 
     Float n=floor(i.lower().value()/(2*_pi_approx)+0.5);
     i=i-(2*n)*pi_ivl;

@@ -511,7 +511,7 @@ Differential<X>& operator/=(Differential<X>& x, const R& c)
 {
     typedef typename Differential<X>::iterator iterator;
     for(iterator iter=x.begin(); iter!=x.end(); ++iter) {
-        static_cast<X&>(iter->data())/=c;
+        static_cast<X&>(iter->data())/=static_cast<X>(c);
     }
     return x;
 }

@@ -61,7 +61,7 @@ template<class R, class A> inline R numeric_cast(const A& a) { return R(a); }
 template<> inline int numeric_cast(const Float& a) { return int(a.get_d()); }
 template<> inline double numeric_cast(const Float& a) { return a.get_d(); }
 template<> inline double numeric_cast(const Interval& a) { return a.get_d(); }
-template<> inline Float numeric_cast(const Interval& a) { return a.midpoint().value(); }
+template<> inline Float numeric_cast(const Interval& a) { return Float(a); }
 template<> inline Interval numeric_cast(const Float& a) { return Interval(a); }
 
 template<> inline float numeric_cast(const double& a) { return a; }

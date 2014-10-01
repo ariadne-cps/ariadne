@@ -397,7 +397,7 @@ C1TaylorFunction& C1TaylorFunction::operator=(Interval ic) {
     this->_zero_error=e;
     this->_uniform_error=e;
     set_rounding_to_nearest();
-    this->_expansion.append(MultiIndex(this->argument_size()),ic.midpoint().raw());
+    this->_expansion.append(MultiIndex(this->argument_size()),ic.centre().raw());
     return *this;
 }
 

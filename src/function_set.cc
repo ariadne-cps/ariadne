@@ -104,7 +104,7 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
     Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 1, dom);
     MultiIndex a(n);
     for(uint i=0; i!=n; ++i) {
-        Float sf=dom[i].radius().raw();
+        Float sf=dom[i].error().raw();
         ++a[i];
         ivl_dx[i].expansion().append(a,Interval(sf));
         --a[i];
@@ -120,7 +120,7 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
             a=iter->key();
             if(a.degree()==1) {
                 for(uint j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=radius(iter->data()).raw(); }
+                    if(a[j]>0) { nonlinearities[i][j]+=iter->data().error().raw(); }
                 }
             }
         }
@@ -139,7 +139,7 @@ Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface
     Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 2, dom);
     MultiIndex a(n);
     for(uint i=0; i!=n; ++i) {
-        Float sf=dom[i].radius().raw();
+        Float sf=dom[i].error().raw();
         ++a[i];
         ivl_dx[i].expansion().append(a,Interval(sf));
         --a[i];
@@ -738,7 +738,7 @@ Pair<uint,double> lipschitz_index_and_error(const ValidatedVectorFunction& funct
         for(uint i=0; i!=function.result_size(); ++i) {
             column_norm+=mag(jacobian[i][j]);
         }
-        column_norm *= domain[j].radius().raw();
+        column_norm *= domain[j].error().raw();
         if(column_norm>max_column_norm) {
             max_column_norm=column_norm;
             jmax=j;

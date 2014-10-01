@@ -279,7 +279,7 @@ class ScalarTaylorFunction
     const CoefficientType& value() const { return this->_model.value(); }
     //! \brief The gradient at the centre of the domain.
     const CoefficientType gradient_value(Nat i) const {
-        return static_cast<CoefficientType>(this->_model.gradient(i).value()/this->_domain[i].radius().value()); }
+        return make_exact(this->_model.gradient(i)/this->_domain[i].radius()); }
     //! \brief A polynomial representation.
     Polynomial<ValidatedNumberType> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.

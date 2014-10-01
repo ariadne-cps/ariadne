@@ -249,7 +249,7 @@ ScalarTaylorFunction::polynomial() const
 ValidatedScalarFunction
 ScalarTaylorFunction::function() const
 {
-    return new ScalarTaylorFunction(*this);
+    return ValidatedScalarFunction(new ScalarTaylorFunction(*this));
 }
 
 
@@ -1157,7 +1157,7 @@ VectorTaylorFunction::error() const
 ValidatedVectorFunction
 VectorTaylorFunction::function() const
 {
-    return new VectorTaylorFunction(*this);
+    return ValidatedVectorFunction(new VectorTaylorFunction(*this));
 }
 
 bool

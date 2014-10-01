@@ -66,7 +66,7 @@ struct ScalarFormulaFunction
     template<class Y> void _compute(Y& r, const Vector<Y>& x) const { r=Ariadne::evaluate(_formula,x); }
 };
 
-inline EffectiveScalarFunction function(Nat n, Formula<Real> f) { return new ScalarFormulaFunction<Real>(n,f); }
+inline EffectiveScalarFunction function(Nat n, Formula<Real> f) { return EffectiveScalarFunction(new ScalarFormulaFunction<Real>(n,f)); }
 
 typedef ScalarFormulaFunction<Real> RealScalarFormulaFunction;
 
@@ -180,13 +180,13 @@ struct UnaryFunction
 
 
 template<class X> ScalarFunction<X> sqr(const ScalarFunction<X>& f) {
-    return new UnaryFunction<X>(SQR,f); }
+    return ScalarFunction<X>(new UnaryFunction<X>(SQR,f)); }
 template<class X> ScalarFunction<X> sqrt(const ScalarFunction<X>& f) {
-    return new UnaryFunction<X>(SQRT,f); }
+    return ScalarFunction<X>(new UnaryFunction<X>(SQRT,f)); }
 template<class X> ScalarFunction<X> sin(const ScalarFunction<X>& f) {
-    return new UnaryFunction<X>(SIN,f); }
+    return ScalarFunction<X>(new UnaryFunction<X>(SIN,f)); }
 template<class X> ScalarFunction<X> cos(const ScalarFunction<X>& f) {
-    return new UnaryFunction<X>(COS,f); }
+    return ScalarFunction<X>(new UnaryFunction<X>(COS,f)); }
 
 template<class X>
 struct BinaryFunction

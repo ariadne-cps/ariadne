@@ -71,7 +71,7 @@ class ScalarFunction
     explicit ScalarFunction(Nat as, Formula<NumericType> f);
 
     ScalarFunction();
-    ScalarFunction(ScalarFunctionInterface<P>* p) : _ptr(p) { }
+    explicit ScalarFunction(ScalarFunctionInterface<P>* p) : _ptr(p) { }
     ScalarFunction(const ScalarFunctionInterface<P>& t) : _ptr(t._clone()) { }
     ScalarFunction(std::shared_ptr< const ScalarFunctionInterface<P> > p) : _ptr(p) { }
     ScalarFunction<P>& operator=(const ScalarFunctionInterface<P>& f) {
@@ -110,23 +110,23 @@ template<class P> inline OutputStream& operator<<(OutputStream& os, const Scalar
 template<class P, class XX> inline XX evaluate(const ScalarFunction<P>& f, const Vector<XX>& x) { return f(x); }
 template<class P, class XX> inline Vector<XX> gradient(const ScalarFunction<P>& f, const Vector<XX>& x) { return f.gradient(x); }
 
-ApproximateScalarFunction ScalarFunctionInterface<ApproximateNumberType>::clone() const { return this->_clone(); }
-ValidatedScalarFunction ScalarFunctionInterface<ValidatedNumberType>::clone() const { return this->_clone(); }
-EffectiveScalarFunction ScalarFunctionInterface<EffectiveNumberType>::clone() const { return this->_clone(); }
-inline ValidatedNumberType ScalarFunctionInterface<ValidatedNumberType>::evaluate(const Vector<ExactNumberType>& x) const {
+ApproximateScalarFunction ScalarFunctionInterface<ApproximateTag>::clone() const { return ApproximateScalarFunction(this->_clone()); }
+ValidatedScalarFunction ScalarFunctionInterface<ValidatedTag>::clone() const { return ValidatedScalarFunction(this->_clone()); }
+EffectiveScalarFunction ScalarFunctionInterface<EffectiveTag>::clone() const { return EffectiveScalarFunction(this->_clone()); }
+inline ValidatedNumberType ScalarFunctionInterface<ValidatedTag>::evaluate(const Vector<ExactNumberType>& x) const {
     return this->evaluate(Vector<ValidatedNumberType>(x)); }
-inline ApproximateNumberType ScalarFunctionInterface<ApproximateNumberType>::operator() (const Vector<ApproximateNumberType>& x) const {
+inline ApproximateNumberType ScalarFunctionInterface<ApproximateTag>::operator() (const Vector<ApproximateNumberType>& x) const {
     return this->evaluate(x); }
-inline ValidatedNumberType ScalarFunctionInterface<ValidatedNumberType>::operator() (const Vector<ValidatedNumberType>& x) const {
+inline ValidatedNumberType ScalarFunctionInterface<ValidatedTag>::operator() (const Vector<ValidatedNumberType>& x) const {
     return this->evaluate(x); }
-inline EffectiveNumberType ScalarFunctionInterface<EffectiveNumberType>::operator() (const Vector<EffectiveNumberType>& x) const {
+inline EffectiveNumberType ScalarFunctionInterface<EffectiveTag>::operator() (const Vector<EffectiveNumberType>& x) const {
     return this->evaluate(x); }
-inline ApproximateScalarFunction ScalarFunctionInterface<ApproximateNumberType>::derivative(Nat j) const {
-    return this->_derivative(j); }
-inline ValidatedScalarFunction ScalarFunctionInterface<ValidatedNumberType>::derivative(Nat j) const {
-    return this->_derivative(j); }
-inline EffectiveScalarFunction ScalarFunctionInterface<EffectiveNumberType>::derivative(Nat j) const {
-    return this->_derivative(j); }
+inline ApproximateScalarFunction ScalarFunctionInterface<ApproximateTag>::derivative(Nat j) const {
+    return ApproximateScalarFunction(this->_derivative(j)); }
+inline ValidatedScalarFunction ScalarFunctionInterface<ValidatedTag>::derivative(Nat j) const {
+    return ValidatedScalarFunction(this->_derivative(j)); }
+inline EffectiveScalarFunction ScalarFunctionInterface<EffectiveTag>::derivative(Nat j) const {
+    return EffectiveScalarFunction(this->_derivative(j)); }
 
 /*
 template<class X> ScalarFunction<X> operator+(const ScalarFunction<X>&);
@@ -212,7 +212,7 @@ class VectorFunction
     VectorFunction(Nat as, const List< Formula<X> >& flst);
     VectorFunction(Nat rs, ScalarFunction<P> sf);
 
-    VectorFunction(VectorFunctionInterface<P>* fptr) : _ptr(fptr) { }
+    explicit VectorFunction(VectorFunctionInterface<P>* fptr) : _ptr(fptr) { }
     VectorFunction(std::shared_ptr< VectorFunctionInterface<P> > fptr) : _ptr(fptr) { }
     VectorFunction(const VectorFunctionInterface<P>& fref) : _ptr(fref._clone()) { }
     std::shared_ptr< const VectorFunctionInterface<P> > managed_pointer() const { return this->_ptr; }
@@ -227,7 +227,7 @@ class VectorFunction
     template<class PP> VectorFunction(const VectorFunction<PP>& vf, typename EnableIf< IsSafelyConvertible<PP,P>, Void >::Type* = 0)
         : _ptr(std::dynamic_pointer_cast< const VectorFunctionInterface<P> >(vf.managed_pointer())) { }
 
-    ScalarFunction<P> get(Nat i) const { return this->_ptr->_get(i); }
+    ScalarFunction<P> get(Nat i) const { return ScalarFunction<P>(this->_ptr->_get(i)); }
     //Void set(Nat i, ScalarFunction<P> f) { this->_ptr->_set(i,f); };
     Void set(Nat i, ScalarFunction<P> f);
 
@@ -334,9 +334,12 @@ template<class P> template<class XX> inline XX VectorFunctionElementReference<P>
 template<class P> template<class XX> inline XX VectorFunctionElementReference<P>::operator()(const Vector<XX> & x) const {
     return static_cast< ScalarFunction<P> >(*this).evaluate(x); }
 
-inline ApproximateScalarFunction VectorFunctionInterface<ApproximateNumberType>::operator[](Nat i) const { return this->_get(i); }
-inline ValidatedScalarFunction VectorFunctionInterface<ValidatedNumberType>::operator[](Nat i) const { return this->_get(i); }
-inline EffectiveScalarFunction VectorFunctionInterface<EffectiveNumberType>::operator[](Nat i) const { return this->_get(i); }
+inline ApproximateScalarFunction VectorFunctionInterface<ApproximateTag>::operator[](Nat i) const {
+    return ApproximateScalarFunction(this->_get(i)); }
+inline ValidatedScalarFunction VectorFunctionInterface<ValidatedTag>::operator[](Nat i) const {
+    return ValidatedScalarFunction(this->_get(i)); }
+inline EffectiveScalarFunction VectorFunctionInterface<EffectiveTag>::operator[](Nat i) const {
+    return EffectiveScalarFunction(this->_get(i)); }
 
 
 inline List< EffectiveScalarFunction > operator,(const EffectiveNumberType& c1, const EffectiveScalarFunction& sf2) {
@@ -390,13 +393,13 @@ class FunctionFactory<ValidatedTag>
 };
 
 inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create(const Box& domain, const ValidatedScalarFunctionInterface& function) const {
-    return this->_create(domain,function); }
+    return ValidatedScalarFunction(this->_create(domain,function)); }
 inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create(const Box& domain, const ValidatedVectorFunctionInterface& function) const {
-    return this->_create(domain,function); }
+    return ValidatedVectorFunction(this->_create(domain,function)); }
 inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create_zero(const Box& domain) const {
-    return this->_create(domain,EffectiveScalarFunction::zero(domain.size())); }
+    return ValidatedScalarFunction(this->_create(domain,EffectiveScalarFunction::zero(domain.size()))); }
 inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create_identity(const Box& domain) const {
-    return this->_create(domain,EffectiveVectorFunction::identity(domain.size())); }
+    return ValidatedVectorFunction(this->_create(domain,EffectiveVectorFunction::identity(domain.size()))); }
 
 inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create(const Box& domain, const ValidatedScalarFunctionInterface& function) const {
     return this->_ptr->create(domain,function); }

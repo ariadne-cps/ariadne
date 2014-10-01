@@ -141,7 +141,7 @@ class ScalarPythonFunction
         if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }
         os << "argument_size="<<this->_argument_size;
         return os << " )"; }
-    EffectiveScalarFunction derivative(uint j) const { return this->_derivative(j); }
+    EffectiveScalarFunction derivative(uint j) const { return EffectiveScalarFunction(this->_derivative(j)); }
   private:
     std::string _name;
     uint _argument_size;

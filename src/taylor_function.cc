@@ -235,11 +235,13 @@ ScalarTaylorFunction::polynomial() const
 
     Vector<Polynomial<ValidatedNumberType> > s(this->argument_size());
     for(uint j=0; j!=this->argument_size(); ++j) {
-        if(this->domain()[j].width()<=0) {
-            ARIADNE_ASSERT(this->domain()[j].radius()==0);
-            s[j]=Polynomial<ValidatedNumberType>::constant(this->argument_size(),this->domain()[j].midpoint());
+        Interval const& domj=this->domain()[j];
+        if(domj.width()<=0) {
+            ARIADNE_ASSERT(this->domain()[j].width()==0);
+            s[j]=Polynomial<ValidatedNumberType>::constant(this->argument_size(),0);
         } else {
-            s[j]=Ariadne::polynomial(ValidatedTaylorModel::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper()));
+            //s[j]=Ariadne::polynomial(ValidatedTaylorModel::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper()));
+            s[j]=(Polynomial<ValidatedNumberType>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
         }
     }
 
@@ -731,11 +733,9 @@ template<class T> std::ostream& operator<<(std::ostream& os, const Representatio
 std::ostream&
 ScalarTaylorFunction::write(std::ostream& os) const
 {
-    os << (this->expansion());
-    return os;
-    os << (this->polynomial());
-    return os;
-    os << midpoint(this->polynomial());
+    Polynomial<ValidatedFloatType> p=this->polynomial();
+    Polynomial<ApproximateFloatType> ap=p;
+    os << ap;
     if(this->error()>0.0) { os << "+/-" << this->error(); }
     return os;
 }
@@ -1864,18 +1864,11 @@ ErrorFloatType distance(const VectorTaylorFunction& f1, const EffectiveVectorFun
 std::ostream&
 VectorTaylorFunction::write(std::ostream& os) const
 {
-    // FIXME: !!
-
-    //Vector< Polynomial<ValidatedNumberType> > vp=this->polynomials();
-    //Vector< Polynomial<ApproximateNumberType> > ap(vp);
-    Vector<Expansion<ExactFloatType>> p=this->expansions();
-    Vector<ErrorFloatType> e=this->errors();
-
     os << "[";
     for(uint i=0; i!=this->result_size(); ++i) {
         if(i!=0) { os << ", "; }
-        os << p[i];
-        if(e[i].raw()!=0) { os << "+/-" << e[i]; }
+        ScalarTaylorFunction tfi=(*this)[i];
+        os << tfi;
     }
     os << "]";
     return os;

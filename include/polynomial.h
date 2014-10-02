@@ -94,6 +94,8 @@ class Polynomial
     //! \brief Create a polynomial in \a as variables which returns the value of the \a j<sup>th</sup> variable.
     static Polynomial<X> variable(unsigned int as, unsigned int j) {
         ARIADNE_ASSERT(j<as); Polynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r; }
+    static Polynomial<X> coordinate(unsigned int as, unsigned int j) {
+        ARIADNE_ASSERT(j<as); Polynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r; }
     //! \brief Create an Array of polynomials in \a as variables,
     //! the i<sup>th</sup> of  which returns the value of the i<sup>th</sup> variable.
     static Vector< Polynomial<X> > variables(unsigned int as) {
@@ -643,14 +645,15 @@ std::ostream& operator<<(std::ostream& os, const Polynomial<X>& q) {
             bool first_factor=true;
             if(v>0 && !first_term) { os << "+"; }
             first_term=false;
-            if(v==1) { } else if (v==-1) { os << '-'; }
+            if(v==1) { }
+            else if (v==-1) { os << '-'; }
             else { os << v; first_factor=false; }
             for(uint j=0; j!=a.size(); ++j) {
                 if(a[j]!=0) {
                     if(first_factor) { first_factor=false; } else { os <<"*"; }
                     os<<"x"<<j; if(a[j]!=1) { os<<"^"<<int(a[j]); } }
             }
-            if(first_factor) { os << v; }
+            if(first_factor) { os << '1'; }
         }
     }
     if(identically_zero) { os << "0"; }

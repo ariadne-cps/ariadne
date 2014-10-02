@@ -556,7 +556,7 @@ void Enclosure::new_parameter_constraint(ValidatedConstraint constraint) {
 void Enclosure::new_positive_state_constraint(ValidatedScalarFunction constraint_function) {
     ARIADNE_ASSERT_MSG(constraint_function.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", constraint_function="<<constraint_function);
     this->_is_fully_reduced=false;
-    this->_constraints.append(-compose(constraint_function,this->space_function())>=0);
+    this->_constraints.append(compose(constraint_function,this->space_function())>=0);
 }
 
 void Enclosure::new_negative_state_constraint(ValidatedScalarFunction constraint_function) {

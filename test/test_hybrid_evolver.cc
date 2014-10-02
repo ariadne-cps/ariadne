@@ -105,7 +105,7 @@ class TestHybridEvolver
     void test_permissive() const;
 
     void test_splitting_on_urgent_event() const;
-    void test_affine_flow_system() const;
+    void test_affine_hysteresis() const;
     void test_transverse_linear_crossing() const;
     void test_transverse_cubic_crossing() const;
     void test_transverse_cube_root_crossing() const;
@@ -152,7 +152,7 @@ void TestHybridEvolver::test_all() const {
     ARIADNE_TEST_CALL(test_permissive());
 
     ARIADNE_TEST_CALL(test_splitting_on_urgent_event());
-    ARIADNE_TEST_CALL(test_affine_flow_system());
+    ARIADNE_TEST_CALL(test_affine_hysteresis());
     ARIADNE_TEST_CALL(test_transverse_linear_crossing());
     ARIADNE_TEST_CALL(test_transverse_cubic_crossing());
     ARIADNE_TEST_CALL(test_transverse_cube_root_crossing());
@@ -678,12 +678,13 @@ TestHybridEvolver::test_splitting_on_urgent_event() const
 
 
 void
-TestHybridEvolver::test_affine_flow_system() const
+TestHybridEvolver::test_affine_hysteresis() const
 {
     // A hybrid automaton with a single component and two locations,
     // with an affine flow in each, and affine guards and resets.
     // This should be very easy to analyse numerically, and is there to test
     // switching logic
+    ExactFloatType::set_output_precision(2);
 
     RealVariable x("x");
     RealVariable y("y");
@@ -698,9 +699,13 @@ TestHybridEvolver::test_affine_flow_system() const
     system.new_mode(upwards,(dot(x)=1,dot(y)=1));
     system.new_mode(downwards,(dot(x)=1,dot(y)=-1));
 
-    system.new_guard(upwards,changedown,y>=2,urgent);
-    system.new_invariant(downwards,y>=-2,block);
-    system.new_guard(downwards,changeup,y<=Dyadic(-1.5),permissive);
+    Real changedown_theshold=Dyadic(2);
+    Real changeup_lower=Dyadic(-2);
+    Real changeup_upper=Dyadic(-1.5);
+
+    system.new_guard(upwards,changedown,y>=changedown_theshold,urgent);
+    system.new_invariant(downwards,y>=changeup_lower,block);
+    system.new_guard(downwards,changeup,y<=changeup_upper,permissive);
     system.new_transition(upwards,changedown,downwards,(next(x)=x+1,next(y)=y));
     system.new_transition(downwards,changeup,upwards,(next(x)=x+1,next(y)=y));
 
@@ -710,20 +715,25 @@ TestHybridEvolver::test_affine_flow_system() const
     evolver_ptr->configuration().set_maximum_step_size(8.0);
 
     DiscreteLocation initial_location(upwards);
+//    DiscreteLocation initial_location(downwards);
     Dyadic r(0.125);
     RealVariablesBox initial_box((-r<=x<=+r, -r<=y<=+r));
     HybridEnclosure initial_enclosure=this->evolver_ptr->enclosure(HybridSet(initial_location,initial_box));
     HybridTime evolution_time(0.0,0u);
 
-    Axes2d axes(-1.0,x,3.0, -1.0,y,3.0);
+    Axes2d axes(-1.0,x,11.0, -3.0,y,3.0);
     HybridSet guard_set_changeup(downwards,(-1<=x<=11,-2<=y<=-Dyadic(1.5)));
+    Orbit<HybridEnclosure> orbit;
 
     evolution_time=HybridTime(1.0,3);
     ARIADNE_TEST_PRINT(evolution_time);
-    Orbit<HybridEnclosure> orbit=evolver_ptr->orbit(initial_enclosure,evolution_time);
+    orbit=evolver_ptr->orbit(initial_enclosure,evolution_time);
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_EQUAL(orbit.final().size(),1u);
     ARIADNE_TEST_EQUAL(orbit.reach().size(),1u);
+    plot(cstr("test_hybrid_evolver-"+evolver_name+"-affine_hysteresis-t=1"), axes, guard_set_colour,guard_set_changeup,
+         reach_set_colour,orbit.reach(), intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(), initial_set_colour,orbit.initial());
 
     evolution_time=HybridTime(2.0,3);
     ARIADNE_TEST_PRINT(evolution_time);
@@ -731,7 +741,7 @@ TestHybridEvolver::test_affine_flow_system() const
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_EQUAL(orbit.reach().size(),2u);
     ARIADNE_TEST_EQUAL(orbit.final().size(),2u);
-    plot(cstr("test_hybrid_evolver-"+evolver_name+"-hysterestis-t=2"), axes, guard_set_colour,guard_set_changeup,
+    plot(cstr("test_hybrid_evolver-"+evolver_name+"-affine_hysteresis-t=2"), axes, guard_set_colour,guard_set_changeup,
          reach_set_colour,orbit.reach(), intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(), initial_set_colour,orbit.initial());
 
@@ -741,6 +751,9 @@ TestHybridEvolver::test_affine_flow_system() const
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_EQUAL(orbit.reach().size(),2u);
     ARIADNE_TEST_EQUAL(orbit.final().size(),1u);
+    plot(cstr("test_hybrid_evolver-"+evolver_name+"-affine_hysteresis-t=4"), axes, guard_set_colour,guard_set_changeup,
+         reach_set_colour,orbit.reach(), intermediate_set_colour,orbit.intermediate(),
+         final_set_colour,orbit.final(), initial_set_colour,orbit.initial());
 
     evolution_time=HybridTime(6.0,3);
     ARIADNE_TEST_PRINT(evolution_time);
@@ -749,7 +762,7 @@ TestHybridEvolver::test_affine_flow_system() const
     ARIADNE_TEST_EQUAL(orbit.reach().size(),3u);
     ARIADNE_TEST_EQUAL(orbit.final().size(),2u);
 
-    plot(cstr("test_hybrid_evolver-"+evolver_name+"-hysterestis-t=6"), axes, guard_set_colour,guard_set_changeup,
+    plot(cstr("test_hybrid_evolver-"+evolver_name+"-affine_hysteresis-t=6"), axes, guard_set_colour,guard_set_changeup,
          reach_set_colour,orbit.reach(), intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(), initial_set_colour,orbit.initial());
 
@@ -759,7 +772,7 @@ TestHybridEvolver::test_affine_flow_system() const
     ARIADNE_TEST_PRINT(orbit);
     ARIADNE_TEST_EQUAL(orbit.reach().size(),3u);
     ARIADNE_TEST_EQUAL(orbit.final().size(),1u);
-    plot(cstr("test_hybrid_evolver-"+evolver_name+"-hysterestis-t=8"), axes, guard_set_colour,guard_set_changeup,
+    plot(cstr("test_hybrid_evolver-"+evolver_name+"-affine_hysteresis-t=8"), axes, guard_set_colour,guard_set_changeup,
          reach_set_colour,orbit.reach(), intermediate_set_colour,orbit.intermediate(),
          final_set_colour,orbit.final(), initial_set_colour,orbit.initial());
 }

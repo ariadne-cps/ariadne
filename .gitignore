@@ -1,6 +1,8 @@
 build/
+*~
 m4/
 INSTALL
+config.h
 Makefile.in
 aclocal.m4
 autom4te.cache/

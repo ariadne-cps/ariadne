@@ -10,6 +10,8 @@ set (Ariadne_VERSION_MINOR 5)
 
 set(BUILD_SHARED_LIBS ON)
 
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 include (CheckTypeSize)
 include (CheckIncludeFile) 
 include (CheckIncludeFileCXX)
@@ -46,6 +48,8 @@ ENDIF()
 find_package(Boost ${Boost_REQUIRED_VERSION} COMPONENTS serialization) 
 IF(Boost_SERIALIZATION_FOUND)
     set(HAVE_LIBBOOST_SERIALIZATION ON)
+ELSEIF(NOT Boost_FOUND)
+  message(FATAL_ERROR "Unable to find correct Boost Serialization version.")
 ENDIF()
 
 configure_file (${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/config.h)

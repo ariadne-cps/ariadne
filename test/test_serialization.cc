@@ -28,6 +28,8 @@
 
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 #include <boost/serialization/string.hpp>
 
 #include "config.h"
@@ -61,14 +63,14 @@ class TestSerialization
         double data[]={5,23,42,111,242};
         const Array<double> oary1(data,data+5);
         const Array<double> oary2(data,data+3);
-        ofstream ofs("test_serialization-Array.txt");
-        text_oarchive txtoa(ofs);
+        std::ofstream ofs("test_serialization-Array.txt");
+        boost::archive::text_oarchive txtoa(ofs);
         txtoa << oary1 << oary2;
         ofs.close();
 
         Array<double> iary1(100),iary2(1);
-        ifstream ifs("test_serialization-Array.txt");
-        text_iarchive txtia(ifs);
+        std::ifstream ifs("test_serialization-Array.txt");
+        boost::archive::text_iarchive txtia(ifs);
         txtia >> iary1 >> iary2;
         ifs.close();
 
@@ -81,8 +83,8 @@ class TestSerialization
         const Float nan = 0.0/0.0;
         const Float inf = 1.0/0.0;
 
-        ofstream ofs("test_serialization-numeric.txt");
-        text_oarchive txtoa(ofs);
+        std::ofstream ofs("test_serialization-numeric.txt");
+        boost::archive::text_oarchive txtoa(ofs);
 
         double xary[] = { 0.0, 1.0, 4.2, 1e-72, 1.2e+72 };
         const Array<Float> oxary(xary,xary+5);
@@ -97,8 +99,8 @@ class TestSerialization
         ofs.close();
 
         Array<Float> ixary(oxary.size());
-        ifstream ifs("test_serialization-numeric.txt");
-        text_iarchive txtia(ifs);
+        std::ifstream ifs("test_serialization-numeric.txt");
+        boost::archive::text_iarchive txtia(ifs);
 
         for(uint i=0; i!=ixary.size(); ++i) {
             txtia >> ixary[i];
@@ -125,7 +127,7 @@ class TestSerialization
             txtia >> input_nan;
         } catch(...) {
         }
-        ARIADNE_TEST_ASSERT( isnan(input_nan.get_d()) );
+        ARIADNE_TEST_ASSERT( std::isnan(input_nan.get_d()) );
         ifs.close();
 
     }

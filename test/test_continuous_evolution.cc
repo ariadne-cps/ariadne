@@ -44,18 +44,6 @@
 
 #include "test.h"
 
-namespace Ariadne {
-// FIXME: These are a temporary fix around deprecated use of Float
-inline Float operator+(Float x1, Real x2) { return x1+Float(x2); }
-inline Float operator-(Float x1, Real x2) { return x1-Float(x2); }
-inline Float operator*(Float x1, Real x2) { return x1*Float(x2); }
-inline Float operator/(Float x1, Real x2) { return x1/Float(x2); }
-inline Float operator+(Real x1, Float x2) { return Float(x1)+x2; }
-inline Float operator-(Real x1, Float x2) { return Float(x1)-x2; }
-inline Float operator*(Real x1, Float x2) { return Float(x1)*x2; }
-inline Float operator/(Real x1, Float x2) { return Float(x1)/x2; }
-}
-
 using namespace Ariadne;
 using namespace std;
 

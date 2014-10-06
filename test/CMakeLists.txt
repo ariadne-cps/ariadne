@@ -21,8 +21,8 @@ set(UNIT_TESTS
     test_integrator
     test_constraint_solver
     test_solvers
-#    test_discrete_evolution
-#    test_continuous_evolution
+    test_discrete_evolution
+    test_continuous_evolution
     test_graphics
 #    test_serialization
     test_hybrid_set

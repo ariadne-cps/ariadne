@@ -62,6 +62,8 @@ LIB_DYNAMICS_SRC = \
 	vector_field_evolver.cc
 
 TEST_DYNAMICS_SRC = \
+	test_discrete_evolution.cc \
+	test_continuous_evolution.cc
 
 LIB_EXPRESSION_SRC = \
 	expression.cc \
@@ -92,9 +94,9 @@ LIB_EXTRAS_SRC = \
 	geometry.cc \
 	textplot.cc
 
-LIB_SRC = $(LIB_NUMERIC_SRC) $(LIB_ALGEBRA_SRC) $(LIB_FUNCTION_SRC) $(LIB_SOLVER_SRC) $(LIB_GEOMETRY_SRC) $(LIB_EXPRESSION_SRC) $(LIB_HYBRID_SRC)
+LIB_SRC = $(LIB_NUMERIC_SRC) $(LIB_ALGEBRA_SRC) $(LIB_FUNCTION_SRC) $(LIB_SOLVER_SRC) $(LIB_GEOMETRY_SRC) $(LIB_DYNAMICS_SRC) $(LIB_EXPRESSION_SRC) $(LIB_HYBRID_SRC)
 
-TESTS_SRC = $(TEST_NUMERIC_SRC) $(TEST_ALGEBRA_SRC) $(TEST_FUNCTION_SRC) $(TEST_SOLVER_SRC) $(TEST_GEOMETRY_SRC) $(TEST_EXPRESSION_SRC) $(TEST_HYBRID_SRC)
+TESTS_SRC = $(TEST_NUMERIC_SRC) $(TEST_ALGEBRA_SRC) $(TEST_FUNCTION_SRC) $(TEST_SOLVER_SRC) $(TEST_GEOMETRY_SRC) $(TEST_DYNAMICS_SRC) $(TEST_EXPRESSION_SRC) $(TEST_HYBRID_SRC)
 
 WRAP_PYTHON_SRC = \
 	ariadne_module.cc utilities.cc \
@@ -286,7 +288,7 @@ bin/test_differential: obj/test/test_differential.o  libariadne-algebra.so
 
 
 TEST_FUNCTION_EXTRA_OBJ = \
-    $(LIB_OBJ_DIR)/box.o $(LIB_OBJ_DIR)/point.o $(LIB_OBJ_DIR)/expression.o
+	$(LIB_OBJ_DIR)/box.o $(LIB_OBJ_DIR)/point.o $(LIB_OBJ_DIR)/expression.o
 
 bin/test_polynomial: obj/test/test_polynomial.o  libariadne-function.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@

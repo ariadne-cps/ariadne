@@ -360,6 +360,8 @@ inline Differential<Interval> differential(ScalarFunction<ValidatedTag>const& f,
     return static_cast<Differential<Interval>>(f.differential(reinterpret_cast<Vector<ValidatedFloatType>const&>(x),d)); }
 inline Vector<Interval> gradient(ScalarFunction<ValidatedTag>const& f, const Vector<Interval>& x) {
     return static_cast<Vector<Interval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
+inline Vector<Interval> gradient_range(ScalarFunction<ValidatedTag>const& f, const Vector<Interval>& x) {
+    return static_cast<Vector<Interval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
 
 inline Vector<Interval> apply(VectorFunction<ValidatedTag>const& f, const Vector<Interval>& x) {
     return static_cast<Vector<Interval>>(f.evaluate(reinterpret_cast<Vector<ValidatedNumberType>const&>(x))); }
@@ -371,8 +373,14 @@ inline Vector<Differential<Interval>> differentials(VectorFunction<ValidatedTag>
     return static_cast<Vector<Differential<Interval>>>(f.differentials(reinterpret_cast<Vector<ValidatedFloatType>const&>(x),d)); }
 inline Matrix<Interval> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<Interval>& x) {
     return static_cast<Matrix<Interval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
+inline Matrix<Interval> jacobian_range(VectorFunction<ValidatedTag>const& f, const Vector<Interval>& x) {
+    return static_cast<Matrix<Interval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
 
-
+// FIXME: Needed to override templated gradient and jacobian
+inline Vector<Interval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<Interval>& x) {
+    return static_cast<Vector<Interval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
+inline Matrix<Interval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<Interval>& x) {
+    return static_cast<Matrix<Interval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
 
 template<class P> class FunctionFactory;
 typedef FunctionFactory<ValidatedTag> ValidatedFunctionFactory;

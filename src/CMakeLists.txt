@@ -46,6 +46,7 @@ add_library(ariadne
     expression_set.cc
     map_evolver.cc
     paver.cc
+    map_evolver.cc
     vector_field_evolver.cc
     logging.cc
     graphics.cc

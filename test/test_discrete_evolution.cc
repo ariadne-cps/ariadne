@@ -84,17 +84,17 @@ void TestMapEvolver::test() const
     cout << "henon_function=" << henon << endl;
 
     //VectorUserFunction evaluation sanity check
-    Vector<Float> p(2); p[0]=Float(a); p[1]=Float(b);
-    Vector<Float> x(2); x[0]=0.5; x[1]=0.25;
-    Vector<Float> hx(2); hx[0]=p[0]-x[0]*x[0]+x[1]*p[1]; hx[1]=x[0];
+    Vector<ApproximateNumberType> p(2); p[0]=ApproximateNumberType(a); p[1]=ApproximateNumberType(b);
+    Vector<ApproximateNumberType> x(2); x[0]=0.5; x[1]=0.25;
+    Vector<ApproximateNumberType> hx(2); hx[0]=p[0]-x[0]*x[0]+x[1]*p[1]; hx[1]=x[0];
     ARIADNE_TEST_EQUAL(henon.evaluate(x),hx);
-    Matrix<Float> dhx(2,2); dhx[0][0]=-2*x[0]; dhx[0][1]=p[1]; dhx[1][0]=1.0;
+    Matrix<ApproximateNumberType> dhx(2,2); dhx[0][0]=-2*x[0]; dhx[0][1]=p[1]; dhx[1][0]=1.0;
     ARIADNE_TEST_EQUAL(henon.jacobian(x),dhx);
 
 
     //VectorUserFunction evaluation sanity check
-    cout << "henon.evaluate(" << initial_box << ") " << flush; cout << " = " << henon.evaluate(initial_box) << endl;
-    cout << "henon.jacobian(" << initial_box << ") = " << henon.jacobian(initial_box) << endl;
+    cout << "henon.evaluate(" << initial_box << ") " << flush; cout << " = " << apply(henon,initial_box) << endl;
+    cout << "henon.jacobian(" << initial_box << ") = " << jacobian(henon,initial_box) << endl;
 
 
 

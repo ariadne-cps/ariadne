@@ -43,7 +43,9 @@ namespace Ariadne {
 
 using namespace std;
 
-class Point;
+template<class X> class Point;
+typedef Point<ExactNumberType> ExactPoint;
+
 class Box;
 class InterpolatedCurve;
 class Zonotope;
@@ -86,7 +88,7 @@ class TextPlot
 
     void open(const char* filename);
     void open(const char* filename, ios::openmode mode);
-    void draw(const Point&);
+    void draw(const ExactPoint&);
     void draw(const Box&);
 //    void draw(const Polytope&);
     void draw(const InterpolatedCurve&);
@@ -94,7 +96,7 @@ class TextPlot
     void draw(const DrawableInterface&);
     void close();
   private:
-    void _draw(const std::vector<Point>&);
+    void _draw(const std::vector<ExactPoint>&);
   private:
     std::ofstream _fstream;
 };

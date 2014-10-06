@@ -35,42 +35,50 @@
 
 namespace Ariadne {
 
+inline Interval make_interval(ApproximateNumberType x) { return Interval(x.raw()); }
+inline Interval make_interval(ExactNumberType x) { return Interval(x.raw()); }
 
-Point::Point(std::initializer_list<double> lst)
-    : Vector<ExactFloatType>(Vector<Float>(Vector<double>(lst)))
+template<> inline double numeric_cast<double,ApproximateNumberType>(ApproximateNumberType const& x) { return x.get_d(); }
+
+template<class X> Point<X>::Point(std::initializer_list<double> lst)
+    : Vector<X>(Vector<Float>(Vector<double>(lst)))
 {
 }
 
-Point::Point(const std::string& str)
+template<class X> Point<X>::Point(const std::string& str)
 {
     *this=make_point(str);
 }
 
-Point* Point::clone() const {
-    return new Point(*this);
+template<class X> Point<X>* Point<X>::clone() const {
+    return new Point<X>(*this);
 }
 
-Box Point::bounding_box() const {
+template<class X> Box Point<X>::bounding_box() const {
     Box r(this->dimension());
     Float e=eps();
     for(uint i=0; i!=this->dimension(); ++i) {
-        r[i]=(*this)[i]+Interval(-e,+e); }
+        r[i]=make_interval((*this)[i])+Interval(-e,+e); }
     return r;
 }
 
-void Point::draw(CanvasInterface& canv, const Projection2d& proj) const {
+template<class X> void Point<X>::draw(CanvasInterface& canv, const Projection2d& proj) const {
     canv.dot(numeric_cast<double>((*this)[proj.x_coordinate()]),numeric_cast<double>((*this)[proj.y_coordinate()]));
     canv.stroke();
 }
 
-Point make_point(const std::string& str)
+template class Point<ExactNumberType>;
+template class Point<ApproximateNumberType>;
+
+
+ExactPoint make_point(const std::string& str)
 {
     std::vector<Float> lst;
     std::stringstream ss(str);
     read_sequence(ss,lst,'(',')',',');
     Vector<Float> vec(lst);
 
-    return Point(Vector<ExactFloatType>(lst));
+    return ExactPoint(Vector<ExactFloatType>(lst));
 }
 
 } //namespace Ariadne

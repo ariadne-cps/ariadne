@@ -90,9 +90,9 @@ int main(int argc, char **argv)
     //g.close();
 
     std::cout << "Testing interpolated curves.." << std::endl;
-    InterpolatedCurve cv(Point(2,0.0));
+    InterpolatedCurve cv(ExactPoint(2,0.0));
     for(int i=1; i<=10; ++i) {
-        Point pt(2); pt[0]=i/10.; pt[1]=sqr(pt[0]);
+        ExactPoint pt(2); pt[0]=i/10.; pt[1]=sqr(pt[0]);
         cv.insert(i,pt);
     }
 

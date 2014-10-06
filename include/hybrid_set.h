@@ -209,18 +209,18 @@ bool operator==(const HybridBasicSet<EBS> hset1, const HybridBasicSet<EBS>& hset
 }
 
 class HybridPoint
-    : public HybridBasicSet<Point>
+    : public HybridBasicSet<ExactPoint>
 {
-    typedef Point::ValueType ValueType;
+    typedef ExactPoint::ValueType ValueType;
   public:
-    HybridPoint() : HybridBasicSet<Point>() { }
-    HybridPoint(const DiscreteLocation& q, const RealSpace& spc, const Point& pt) : HybridBasicSet<Point>(q,spc,pt) { }
+    HybridPoint() : HybridBasicSet<ExactPoint>() { }
+    HybridPoint(const DiscreteLocation& q, const RealSpace& spc, const ExactPoint& pt) : HybridBasicSet<ExactPoint>(q,spc,pt) { }
     HybridPoint(const DiscreteLocation& q, const Map<Identifier,ValueType>& val);
     HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& val);
     HybridPoint(const DiscreteLocation& q, const List< Assignment<RealVariable,Real> >& val);
-    Point& point() { return this->continuous_set(); }
-    const Point& point() const { return this->continuous_set(); }
-    const Point& real_values() const { return this->continuous_set(); }
+    ExactPoint& point() { return this->continuous_set(); }
+    const ExactPoint& point() const { return this->continuous_set(); }
+    const ExactPoint& real_values() const { return this->continuous_set(); }
     Map<RealVariable,ValueType> values() const;
 };
 

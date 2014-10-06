@@ -125,7 +125,7 @@ class TestConstrainedImageSet
         ARIADNE_TEST_PRINT(set);
         ARIADNE_TEST_ASSERT(set.separated(Box{{1.0,1.25},{1.0,1.25}}));
         //ARIADNE_TEST_ASSERT(set.overlaps(Box(2, -1.0,-0.875, 1.375,1.625)));
-        ARIADNE_TEST_PRINT(f(Point{0.375,-0.375}));
+        ARIADNE_TEST_PRINT(f(ExactPoint{0.375,-0.375}));
 
 
         ValidatedConstrainedImageSet idisc(Box({{-2.0,+2.0},{-2.0,+2.0}}),(x[0],x[1]));

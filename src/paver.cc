@@ -300,7 +300,7 @@ void procedure_constraint_adjoin_outer_approximation_recursion(
 
 void hotstarted_constraint_adjoin_outer_approximation_recursion(
     PavingInterface& r, const Box& d, const ValidatedVectorFunction& f,
-    const ValidatedVectorFunction& g, const Box& c, const GridCell& b, Point x, Point y, int e)
+    const ValidatedVectorFunction& g, const Box& c, const GridCell& b, ExactPoint x, ExactPoint y, int e)
 {
     uint verbosity=0;
 
@@ -323,7 +323,7 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
     ARIADNE_LOG(2,"  dom="<<d<<" cnst="<<c<<" cell="<<b.box()<<" dpth="<<b.tree_depth()<<" e="<<e<<"\n");
     ARIADNE_LOG(2,"  x0="<<x<<", y0="<<y<<"\n");
 
-    Point z(x.size());
+    ExactPoint z(x.size());
     ExactFloat t;
 
     Vector<ApproximateFloat>& ax=reinterpret_cast<Vector<ApproximateFloat>&>(x);
@@ -457,7 +457,7 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
 }
 
 
-void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const Box& d, const VectorTaylorFunction& fg, const Box& c, const GridCell& b, Point& x, Point& y, int e)
+void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingInterface& r, const Box& d, const VectorTaylorFunction& fg, const Box& c, const GridCell& b, ExactPoint& x, ExactPoint& y, int e)
 {
     Sweeper sweeper = fg.sweeper();
 
@@ -476,7 +476,7 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     NonlinearInteriorPointOptimiser optimiser;
 
     ExactFloatType t;
-    Point z(x.size());
+    ExactPoint z(x.size());
 
     ApproximateFloatVector& ax=reinterpret_cast<ApproximateFloatVector&>(x);
     ApproximateFloatVector& ay=reinterpret_cast<ApproximateFloatVector&>(y);
@@ -536,8 +536,8 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         //Pair<Box,Box> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<Box,Box> sd=split(d);
-        Point nx = make_exact(ApproximateFloat(1.0-XSIGMA)*ax + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size()));
-        Point ny = midpoint(sd.first);
+        ExactPoint nx = make_exact(ApproximateFloat(1.0-XSIGMA)*ax + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size()));
+        ExactPoint ny = midpoint(sd.first);
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r, sd.first, fg, c, b, nx, ny, e);
         nx = make_exact(ApproximateFloat(1.0-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size()));
         ny = midpoint(sd.second);
@@ -550,8 +550,8 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     } else {
         ARIADNE_LOG(4,"  Splitting cell; t="<<t<<"\n");
         Pair<GridCell,GridCell> sb = b.split();
-        Point sx = make_exact(ApproximateFloat(1-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size()));
-        Point sy = y;
+        ExactPoint sx = make_exact(ApproximateFloat(1-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size()));
+        ExactPoint sy = y;
         hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(r,d,fg,c,sb.first,sx,sy,e);
         sx = make_exact(ApproximateFloat(1-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size()));
         sy = y;
@@ -603,9 +603,9 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const Box& d, const Va
     Box r=apply(g,d)+Box(g.result_size(),Interval(-1,1));
     Box rc=intersection(r,c);
 
-    Point y=midpoint(d);
+    ExactPoint y=midpoint(d);
     const uint l=(d.size()+f.result_size()+g.result_size())*2;
-    Point x(l); for(uint k=0; k!=l; ++k) { x[k]=ExactFloatType(1.0/l); }
+    ExactPoint x(l); for(uint k=0; k!=l; ++k) { x[k]=ExactFloatType(1.0/l); }
 
     ::hotstarted_constraint_adjoin_outer_approximation_recursion(p,d,f,g,rc,b,x,y,e);
 }
@@ -634,9 +634,9 @@ void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Box
     GridCell b=GridCell::smallest_enclosing_primary_cell(apply(g,d),p.grid());
     Box rc=intersection(apply(g,d)+Box(g.result_size(),Interval(-1,1)),c);
 
-    Point y=midpoint(d);
+    ExactPoint y=midpoint(d);
     const uint l=(d.size()+f.result_size()+g.result_size())*2;
-    Point x(l); for(uint k=0; k!=l; ++k) { x[k]=ExactFloatType(1.0/l); }
+    ExactPoint x(l); for(uint k=0; k!=l; ++k) { x[k]=ExactFloatType(1.0/l); }
 
     VectorTaylorFunction fg;
     const VectorTaylorFunction* tfptr;

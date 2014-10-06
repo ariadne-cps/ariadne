@@ -671,7 +671,7 @@ ErrorFloatType Enclosure::radius() const {
     return this->bounding_box().radius();
 }
 
-Point Enclosure::centre() const {
+ExactPoint Enclosure::centre() const {
     return this->bounding_box().centre();
 }
 

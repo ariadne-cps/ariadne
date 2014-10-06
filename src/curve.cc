@@ -128,7 +128,7 @@ InterpolatedCurve::insert(const ExactFloatType& s, const ExactPointType& pt) {
 Box
 InterpolatedCurve::bounding_box() const
 {
-    Point pt=this->_points.begin()->second;
+    ExactPoint pt=this->_points.begin()->second;
     Box bx(pt);
     for(const_iterator iter=this->_points.begin(); iter!=this->_points.end(); ++iter) {
         pt=iter->second;
@@ -142,7 +142,7 @@ InterpolatedCurve::draw(CanvasInterface& c, const Projection2d& p) const
 {
     uint xi=p.x_coordinate(); uint yi=p.y_coordinate();
     const_iterator iter=this->begin();
-    Point pt=join(iter->second,iter->first);
+    ExactPoint pt=join(iter->second,iter->first);
     c.move_to(pt[xi],pt[yi]);
     while(iter!=this->end()) {
         ++iter;

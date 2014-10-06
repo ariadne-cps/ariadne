@@ -180,7 +180,7 @@ bool Grid::operator!=(const Grid& g) const
     return !(*this==g);
 }
 
-Array<double> Grid::index(const Point& pt) const
+Array<double> Grid::index(const ExactPoint& pt) const
 {
     Array<double> res(pt.size());
     for(size_t i=0; i!=res.size(); ++i) {
@@ -205,7 +205,7 @@ Array<double> Grid::upper_index(const Box& bx) const {
     return res;
 }
 
-Point Grid::point(const Array<IntegerType>& a) const
+ExactPoint Grid::point(const Array<IntegerType>& a) const
 {
     Vector<Float> res(a.size());
     for(size_type i=0; i!=res.size(); ++i) {
@@ -214,7 +214,7 @@ Point Grid::point(const Array<IntegerType>& a) const
     return res;
 }
 
-Point Grid::point(const Array<DyadicType>& a) const
+ExactPoint Grid::point(const Array<DyadicType>& a) const
 {
     Vector<Float> res(a.size());
     for(size_type i=0; i!=res.size(); ++i) {
@@ -1791,7 +1791,7 @@ GridTreeSet::GridTreeSet(const Grid& theGrid, const Box & theLatticeBox ) :
                     BinaryWord(), new BinaryTreeNode( false ) ) {
     //1. The main point here is that we have to compute the smallest primary cell that contains theBoundingBox
     //2. This cell is defined by it's height and becomes the root of the GridTreeSet
-    //3. Point 2. implies that the word to the root of GridTreeSubset should be set to
+    //3. ExactPoint 2. implies that the word to the root of GridTreeSubset should be set to
     //   empty and we have only one disabled node in the binary tree
 }
 

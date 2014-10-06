@@ -99,8 +99,8 @@ void TextPlot::open(const char* cfilename, ios_base::openmode mode)
 inline std::ostream& operator<<(std::ostream& os, const DrawableInterface& sh) { return sh.write(os); }
 
 void TextPlot::draw(const DrawableInterface& shape) {
-    if(dynamic_cast<const Point*>(&shape)) {
-        this->draw(dynamic_cast<const Point&>(shape));
+    if(dynamic_cast<const ExactPoint*>(&shape)) {
+        this->draw(dynamic_cast<const ExactPoint&>(shape));
     } else if(dynamic_cast<const Box*>(&shape)) {
         this->draw(dynamic_cast<const Box&>(shape));
 //    } else if(dynamic_cast<const Polytope*>(&shape)) {
@@ -114,14 +114,14 @@ void TextPlot::draw(const DrawableInterface& shape) {
     }
 }
 
-void TextPlot::_draw(const std::vector<Point>& pts) {
-    for(std::vector<Point>::const_iterator iter = pts.begin() ; iter != pts.end() ; iter++) {
+void TextPlot::_draw(const std::vector<ExactPoint>& pts) {
+    for(std::vector<ExactPoint>::const_iterator iter = pts.begin() ; iter != pts.end() ; iter++) {
         this->draw(*iter);
     }
     this->_fstream << std::endl;
 }
 
-void TextPlot::draw(const Point& pt) {
+void TextPlot::draw(const ExactPoint& pt) {
     for(uint i = 0; i < pt.dimension(); i++) {
         this->_fstream << approx_cast<double>(pt[i]) << " ";
     }
@@ -139,7 +139,7 @@ void TextPlot::draw(const Box& bx) {
 
 void TextPlot::draw(const InterpolatedCurve& c) {
     for(InterpolatedCurve::const_iterator iter = c.begin() ; iter != c.end() ; ++iter) {
-        this->draw(Point(iter->second));
+        this->draw(ExactPoint(iter->second));
     }
     this->_fstream << std::endl;
 }

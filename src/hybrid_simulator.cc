@@ -62,10 +62,10 @@ void HybridSimulator::set_step_size(double h)
 }
 
 
-Point make_point(const HybridPoint& hpt, const RealSpace& spc) {
+ExactPoint make_point(const HybridPoint& hpt, const RealSpace& spc) {
     if(hpt.space()==spc) { return hpt.point(); }
     Map<RealVariable,ExactFloatType> values=hpt.values();
-    Point pt(spc.dimension());
+    ExactPoint pt(spc.dimension());
     for(uint i=0; i!=pt.size(); ++i) {
         pt[i]=values[spc.variable(i)];
     }

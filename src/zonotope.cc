@@ -332,7 +332,7 @@ Zonotope::radius() const
 
 
 tribool
-Zonotope::contains(const Point& pt) const
+Zonotope::contains(const ExactPoint& pt) const
 {
     return Ariadne::contains(*this,pt);
 }
@@ -679,7 +679,7 @@ orthogonal_over_approximation(const Zonotope<R,R>& z)
     Zonotope<R,R> oaz=over_approximation(z);
 
     QRMatrix< Interval > QR(oaz.generators());
-    Point< Interval > c(oaz.centre());
+    ExactPoint< Interval > c(oaz.centre());
     Matrix<Float> G(z.size(),z.number_of_generators());
 
     Matrix< Interval > q=QR.Q();
@@ -705,7 +705,7 @@ orthogonal_over_approximation(const Zonotope<Interval,R>& z)
     Zonotope<R,R> oaz=over_approximation(z);
 
     QRMatrix< Interval > QR(oaz.generators());
-    Point< Interval > c(oaz.centre());
+    ExactPoint< Interval > c(oaz.centre());
     Matrix<Float> G(z.size(),z.number_of_generators());
 
     Matrix< Interval > q=QR.Q();
@@ -731,7 +731,7 @@ orthogonal_over_approximation(const Zonotope< Interval >& z)
     Zonotope<R,R> oaz=over_approximation(z);
 
     QRMatrix< Interval > QR(oaz.generators());
-    Point< Interval > c(oaz.centre());
+    ExactPoint< Interval > c(oaz.centre());
     Matrix<Float> G(z.size(),z.number_of_generators());
 
     Matrix< Interval > q=QR.Q();
@@ -901,7 +901,7 @@ separated(const Zonotope& z1, const Zonotope& z2)
 /* Set up LP problem to solve \f$c+Ge=p\f$; \f$-1<=e<=1\f$.
  */
 tribool
-contains(const Zonotope& z, const Point& pt)
+contains(const Zonotope& z, const ExactPoint& pt)
 {
     //std::clog << "Zonotope::contains(const Vector<Float>& )" << std::endl;
     assert(z.dimension()==pt.dimension());

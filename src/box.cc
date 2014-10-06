@@ -44,9 +44,9 @@ bool contains(const Vector<Interval>& v1, const Vector<ExactFloatType>& v2);
 //
 // Helper functions needed to extract the set of vertices from a box
 //
-void make_vertices_down(const Box& bx, uint i, uint n, Point& pt, std::vector<Point>& v);
+void make_vertices_down(const Box& bx, uint i, uint n, ExactPoint& pt, std::vector<ExactPoint>& v);
 
-void make_vertices_up(const Box& bx, uint i, uint n, Point& pt, std::vector<Point>& v) {
+void make_vertices_up(const Box& bx, uint i, uint n, ExactPoint& pt, std::vector<ExactPoint>& v) {
     ARIADNE_ASSERT(i <= n);
     if(i == n) {    // base case: we are at the last dimension of the box
         pt[i] = bx[i].lower();
@@ -61,7 +61,7 @@ void make_vertices_up(const Box& bx, uint i, uint n, Point& pt, std::vector<Poin
     }
 }
 
-void make_vertices_down(const Box& bx, uint i, uint n, Point& pt, std::vector<Point>& v) {
+void make_vertices_down(const Box& bx, uint i, uint n, ExactPoint& pt, std::vector<ExactPoint>& v) {
     ARIADNE_ASSERT(i <= n);
     if(i == n) {    // base case: we are at the last dimension of the box
         pt[i] = bx[i].upper();
@@ -87,11 +87,11 @@ Box::Box(const std::string& str)
     *this=make_box(str);
 }
 
-std::vector<Point> Box::vertices() const {
-    std::vector<Point> v;
+std::vector<ExactPoint> Box::vertices() const {
+    std::vector<ExactPoint> v;
     uint n = this->dimension();
     if(n > 0) {
-        Point pt(n);
+        ExactPoint pt(n);
         make_vertices_up(*this, 0, n-1, pt, v);
     }
     return v;
@@ -119,7 +119,7 @@ Box hull(const Box& bx1, const Box& bx2) {
     return r;
 }
 
-Box hull(const Box& bx1, const Point& pt2) {
+Box hull(const Box& bx1, const ExactPoint& pt2) {
     ARIADNE_ASSERT(bx1.dimension()==pt2.dimension());
     Box r(bx1.dimension());
     for(size_t i=0; i!=r.dimension(); ++i) {
@@ -128,7 +128,7 @@ Box hull(const Box& bx1, const Point& pt2) {
     return r;
 }
 
-Box hull(const Point& pt1, const Point& pt2) {
+Box hull(const ExactPoint& pt1, const ExactPoint& pt2) {
     ARIADNE_ASSERT(pt1.dimension()==pt2.dimension());
     Box r(pt1.dimension());
     for(size_t i=0; i!=r.dimension(); ++i) {

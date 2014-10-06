@@ -76,7 +76,7 @@ Polytope::write(std::ostream& os) const
 
 
 Float
-slope2d(const Point& pt1, const Point& pt2)
+slope2d(const ExactPoint& pt1, const ExactPoint& pt2)
 {
     ARIADNE_ASSERT(pt1.dimension()==2 && pt2.dimension()==2);
     return (pt2[1]-pt1[1])/(pt2[0]-pt1[0]);
@@ -97,7 +97,7 @@ Polytope polytope(const Zonotope& z)
     size_t ng=z.generators().column_size();
     size_t nv=1<<ng;
     for(size_t i=0; i!=nv; ++i) {
-        Point pt=z.centre();
+        ExactPoint pt=z.centre();
         for(size_t j=0; j!=ng; ++j) {
             if(i & 1<<j) {
                 pt+=column(z.generators(),j);
@@ -133,18 +133,18 @@ Polytope& reduce2d(Polytope& p)
     std::sort(p.vertices().begin(),p.vertices().end());
     //std::cerr << this->_vertices << std::endl;
 
-    const std::vector<Point>& old_vertices=p.vertices();
-    std::vector<Point> new_vertices;
+    const std::vector<ExactPoint>& old_vertices=p.vertices();
+    std::vector<ExactPoint> new_vertices;
 
     // Sweep lower boundary from bottom-left to top right
     size_t min_size=1;
-    for(std::vector<Point>::const_iterator vertex_iter=old_vertices.begin();
+    for(std::vector<ExactPoint>::const_iterator vertex_iter=old_vertices.begin();
         vertex_iter!=old_vertices.end(); ++vertex_iter)
         {
-            const Point& vertex=*vertex_iter;
+            const ExactPoint& vertex=*vertex_iter;
             while(new_vertices.size()>min_size) {
-                const Point& penultimate=new_vertices[new_vertices.size()-2];
-                const Point& last=new_vertices[new_vertices.size()-1];
+                const ExactPoint& penultimate=new_vertices[new_vertices.size()-2];
+                const ExactPoint& last=new_vertices[new_vertices.size()-1];
                 if(penultimate[0]==last[0]) {
                     new_vertices.pop_back();
                 } else if(last[0]==vertex[0]) {
@@ -162,13 +162,13 @@ Polytope& reduce2d(Polytope& p)
     // Upper sweep
     //std::cerr << "Forward pass\n";
     min_size=new_vertices.size()+1;
-    for(std::vector<Point>::const_reverse_iterator vertex_iter=old_vertices.rbegin();
+    for(std::vector<ExactPoint>::const_reverse_iterator vertex_iter=old_vertices.rbegin();
         vertex_iter!=old_vertices.rend(); ++vertex_iter)
         {
-            const Point& vertex=*vertex_iter;
+            const ExactPoint& vertex=*vertex_iter;
             while(new_vertices.size()>min_size) {
-                const Point& penultimate=new_vertices[new_vertices.size()-2];
-                const Point& last=new_vertices[new_vertices.size()-1];
+                const ExactPoint& penultimate=new_vertices[new_vertices.size()-2];
+                const ExactPoint& last=new_vertices[new_vertices.size()-1];
                 if(penultimate[0]==last[0]) {
                     new_vertices.pop_back();
                 } else if(last[0]==vertex[0]) {
@@ -188,11 +188,11 @@ Polytope& reduce2d(Polytope& p)
 }
 
 
-Point
+ExactPoint
 baricentre(const Polytope& p)
 {
-    const std::vector<Point>& vertices=p.vertices();
-    Point baricentre(p.dimension());
+    const std::vector<ExactPoint>& vertices=p.vertices();
+    ExactPoint baricentre(p.dimension());
 
     for (size_t j=0; j!=vertices.size(); ++j) {
         for (size_t i=0; i<2; i++) {
@@ -218,11 +218,11 @@ void Polytope::draw(CanvasInterface& c, const Projection2d& p) const {
     ARIADNE_ASSERT(max(xi,yi)<this->dimension());
 
     Polytope pr(2);
-    Point prv(2);
+    ExactPoint prv(2);
 
     // Project polytope onto canvas coordinates
     for(uint i=0; i!=this->number_of_vertices(); ++i) {
-        const Point& v=this->vertex(i);
+        const ExactPoint& v=this->vertex(i);
         prv[0]=v[xi]; prv[1]=v[yi];
         pr.new_vertex(prv);
     }

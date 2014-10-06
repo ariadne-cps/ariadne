@@ -40,7 +40,9 @@ namespace Ariadne {
 class Real;
 class Interval;
 typedef tribool Tribool;
-class Point;
+
+template<class X> class Point;
+typedef Point<ExactNumberType> ExactPoint;
 class Box;
 class GridTreeSet;
 
@@ -75,9 +77,9 @@ template<class X> struct FeasibilityState {
 class ConstraintSolverInterface {
   public:
     //! \brief Test if the image of the box \a domain under the function \a function intersects \a codomain.
-    virtual Pair<Tribool,Point> feasible(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const = 0;
+    virtual Pair<Tribool,ExactPoint> feasible(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const = 0;
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
-    virtual Tribool check_feasibility(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain, const Point& point) const = 0;
+    virtual Tribool check_feasibility(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain, const ExactPoint& point) const = 0;
     //! \brief Try to reduce the size of the domain by propagating interval constraints. Returns \c true if the reduced domain is empty.
     virtual bool reduce(Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const = 0;
 
@@ -92,15 +94,15 @@ class ConstraintSolver
 {
   public:
     //! \brief Test if the image of the box \a domain under the function \a function intersects \a codomain.
-    virtual Pair<Tribool,Point> feasible(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const;
+    virtual Pair<Tribool,ExactPoint> feasible(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const;
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
-    virtual Tribool check_feasibility(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain, const Point& point) const;
+    virtual Tribool check_feasibility(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain, const ExactPoint& point) const;
     //! \brief Try to reduce the size of the domain by propagating interval constraints.
     virtual bool reduce(Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const;
 
 
     //! \brief Test if the constraints are solvable using a nonlinear feasibility test. Returns an approximate feasible point if the result is true. (Deprecated)
-    virtual Pair<Tribool,Point> feasible(const Box& domain, const List<ValidatedConstraint>& constraints) const;
+    virtual Pair<Tribool,ExactPoint> feasible(const Box& domain, const List<ValidatedConstraint>& constraints) const;
     //! \brief Try to reduce the size of the domain by propagating interval constraints. (Deprecated)
     virtual bool reduce(Box& domain, const List<ValidatedConstraint>& constraints) const;
 

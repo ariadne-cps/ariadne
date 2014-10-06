@@ -45,7 +45,9 @@
 namespace Ariadne {
 
 template<class X> class Vector;
-class Point;
+template<class X> class Point;
+typedef Point<ExactNumberType> ExactPoint;
+
 class Box;
 class Zonotope;
 class Polytope;
@@ -55,10 +57,10 @@ Polytope polytope(const Box& bx);
 Polytope polytope(const Zonotope& z);
 Polytope polytope(const Polytope& p);
 
-Point baricentre(const Polytope& p);
+ExactPoint baricentre(const Polytope& p);
 
 Polytope& reduce2d(Polytope& p);
-Float slope2d(const Point& pt1, const Point& pt2);
+Float slope2d(const ExactPoint& pt1, const ExactPoint& pt2);
 
 
 //! A polytope in Euclidean space, defined by a list of extreme points.
@@ -67,25 +69,25 @@ class Polytope
     , public DrawableInterface
 {
   public:
-    typedef std::vector<Point>::const_iterator const_iterator;
+    typedef std::vector<ExactPoint>::const_iterator const_iterator;
 
     //! \brief Default constructor constructs an empty polytope in zero dimensions.
     Polytope() { }
     //! \brief Construct an empty polytope in \a d dimensions.
     Polytope(uint d) { }
     //! \brief Construct polytope with vertices in \a v.
-    Polytope(const std::vector<Point>& v) : _vertices(v) { }
+    Polytope(const std::vector<ExactPoint>& v) : _vertices(v) { }
 
     //! \brief Add a new vertex \a v to the current vertices.
-    void new_vertex(const Point& v) {
+    void new_vertex(const ExactPoint& v) {
         ARIADNE_ASSERT(this->_vertices.size()==0 || v.dimension()==this->_vertices.front().dimension());
         this->_vertices.push_back(v); }
     //! \brief The number of points defining the polytope. Note that an interior point is counted by this method.
     size_t number_of_vertices() const { return this->_vertices.size(); }
     //! \brief The \a i<sup>th</sup> vertex.
-    const Point& vertex(size_t i) const { return this->_vertices[i]; }
-    const std::vector<Point>& vertices() const { return this->_vertices; }
-    std::vector<Point>& vertices() { return this->_vertices; }
+    const ExactPoint& vertex(size_t i) const { return this->_vertices[i]; }
+    const std::vector<ExactPoint>& vertices() const { return this->_vertices; }
+    std::vector<ExactPoint>& vertices() { return this->_vertices; }
     //! \brief A constant iterator pointing to the first vertex.
     const_iterator vertices_begin() const { return this->_vertices.begin(); }
     //! \brief A constant iterator pointing to the past-the-end vertex.
@@ -105,9 +107,9 @@ class Polytope
     //! \brief The convex hull of two polytopes.
     friend Polytope convex_hull(const Polytope& p1, const Polytope& p2);
     //! \brief The baricentre of a polytope.
-    friend Point baricentre(const Polytope& p);
+    friend ExactPoint baricentre(const Polytope& p);
   private:
-    std::vector<Point> _vertices;
+    std::vector<ExactPoint> _vertices;
 };
 inline std::ostream& operator<<(std::ostream& os, const Polytope& p) { return p.write(os); }
 

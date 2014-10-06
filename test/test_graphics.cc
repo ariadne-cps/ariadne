@@ -110,9 +110,9 @@ int main(int argc, char **argv)
     g.write("test_graphics-set");
     g.clear();
 
-    InterpolatedCurve cv(0,Point(2,0.0));
+    InterpolatedCurve cv(0,ExactPoint(2,0.0));
     for(int i=1; i<=10; ++i) {
-        Point pt(2); pt[0]=ExactFloat(i/10.); pt[1]=ExactFloat(i*i/100.);
+        ExactPoint pt(2); pt[0]=ExactFloat(i/10.); pt[1]=ExactFloat(i*i/100.);
         cv.insert(i,pt);
     }
     g.set_bounding_box(cv.bounding_box());

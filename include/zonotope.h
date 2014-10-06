@@ -43,8 +43,10 @@ namespace Ariadne {
 
 template<class X> class Vector;
 template<class X> class Matrix;
+template<class X> class Point;
 
-class Point;
+typedef Point<ExactNumberType> ExactPoint;
+
 class Box;
 class Zonotope;
 template<class BS> class ListSet;
@@ -163,7 +165,7 @@ class Zonotope
     Float radius() const;
 
     /*! \brief Test if the set contains a point. */
-    tribool contains(const Point& pt) const;
+    tribool contains(const ExactPoint& pt) const;
 
     /*! \brief Test if the set is disjoint from a box. */
     tribool separated(const Box& bx) const;
@@ -224,7 +226,7 @@ Float radius(const Zonotope& z);
 Box bounding_box(const Zonotope& z);
 
 
-tribool contains(const Zonotope& z, const Point& pt);
+tribool contains(const Zonotope& z, const ExactPoint& pt);
 tribool separated(const Zonotope& z, const Box& r);
 tribool overlaps(const Zonotope& z, const Box& r);
 tribool inside(const Zonotope& z, const Box& r);

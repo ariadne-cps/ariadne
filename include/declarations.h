@@ -201,6 +201,10 @@ typedef ScalarFunctionModel<ValidatedTag> ValidatedScalarFunctionModel;
 typedef VectorFunctionModel<ApproximateTag> ApproximateVectorFunctionModel;
 typedef VectorFunctionModel<ValidatedTag> ValidatedVectorFunctionModel;
 
+// Geometric declarations
+template<class X> class Point;
+typedef Point<ExactNumberType> ExactPoint;
+
 // Deprecated typedefs
 typedef ApproximateScalarFunction FloatScalarFunction;
 typedef ValidatedScalarFunction IntervalScalarFunction;

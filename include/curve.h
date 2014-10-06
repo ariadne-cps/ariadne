@@ -40,8 +40,8 @@ namespace Ariadne {
 
 template<class X> class Vector;
 
-class Point;
-typedef Point ExactPoint;
+template<class X> class Point;
+typedef Point<ExactNumberType> ExactPoint;
 
 class Box;
 

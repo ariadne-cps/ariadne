@@ -43,7 +43,7 @@ class SimulationToolboxInterface
   public:
     typedef Float RealType;
     typedef Float TimeType;
-    typedef Point StateType;
+    typedef ExactPoint StateType;
     typedef ScalarFunction PredicateType;
     typedef VectorFunction MapType;
     typedef VectorFunction VectorFieldType;
@@ -56,7 +56,7 @@ class SimulationToolboxInterface
     //! indeterminate if the point lies on the boundary.
     virtual tribool
     active(const ScalarFunction& guard,
-           const Point& state) const = 0;
+           const ExactPoint& state) const = 0;
 
     //! \brief Computes the time at which points in the \a initial_point cross the zero-set of the
     //! the \a guard under evolution of the \a vector_field, for times up to \a maximum_time.
@@ -64,19 +64,19 @@ class SimulationToolboxInterface
     virtual TimeType
     crossing_time(const ScalarFunction& guard,
                   const VectorFunction& vector_field,
-                  const Point& initial_state,
+                  const ExactPoint& initial_state,
                   const TimeType& maximum_time) const = 0;
 
     //! \brief Computes the image of the set defined by \a state under the \a map.
     virtual StateType
     reset_step(const MapType& map,
-               const Point& state) const = 0;
+               const ExactPoint& state) const = 0;
 
     //! \brief Computes the points reached by evolution of the \a initial_state under the flow
     //! given by \a vector_field. The \a step_size gives the time the points should be flowed.
     virtual StateType
     integration_step(const VectorFunction& vector_field,
-                     const Point& initial_state,
+                     const ExactPoint& initial_state,
                      const TimeType& step_size) const = 0;
 
 };

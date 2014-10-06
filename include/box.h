@@ -45,7 +45,8 @@ typedef uint Nat;
 class IntervalSet;
 class BoxSet;
 
-class Point;
+template<class X> class Point;
+typedef Point<ExactFloatType> ExactPoint;
 class Box;
 
 bool contains(const Vector<Interval>& v1, const Vector<ExactFloatType>& v2);
@@ -140,11 +141,11 @@ class Box
     const Vector<Interval>& vector() const { return *this; }
 
     //! The set of vertices of the box.
-    std::vector<Point> vertices() const;
+    std::vector<ExactPoint> vertices() const;
 
     //! An approximation to the centre of the box.
-    Point centre() const {
-        return Point(midpoint(static_cast<const Vector<Interval>&>(*this)));
+    ExactPoint centre() const {
+        return ExactPoint(midpoint(static_cast<const Vector<Interval>&>(*this)));
     }
 
     //! An over-approximation to radius of the box in the supremum norm.
@@ -186,7 +187,7 @@ class Box
     }
 
     //! \brief Test if the box is a superset of another box.
-    bool contains(const Point& pt) const {
+    bool contains(const ExactPoint& pt) const {
         return Ariadne::contains(this->vector(),pt.vector());
     }
 
@@ -288,8 +289,8 @@ class Box
 Box product(const Box& bx1, const Box& bx2);
 //! \relates Box \brief The smallest box containing the two boxes.
 Box hull(const Box& bx1, const Box& bx2);
-Box hull(const Box& bx1, const Point& pt2);
-Box hull(const Point& pt1, const Point& pt2);
+Box hull(const Box& bx1, const ExactPoint& pt2);
+Box hull(const ExactPoint& pt1, const ExactPoint& pt2);
 //! \relates Box \brief The intersection of the two boxes.
 Box intersection(const Box& bx1, const Box& bx2);
 //! \relates Box \brief A box which is wider than the input, and has single-precision values.

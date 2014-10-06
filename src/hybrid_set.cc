@@ -191,7 +191,7 @@ Map<RealVariable,IntervalSet> make_map(const List<RealVariableInterval>& b) {
 }
 
 HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& x)
-    : HybridBasicSet<Point>(q,make_list(x.keys()),Point(x.size()))
+    : HybridBasicSet<ExactPoint>(q,make_list(x.keys()),ExactPoint(x.size()))
 {
     uint i=0;
     for(Map<Identifier,Real>::const_iterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
@@ -200,7 +200,7 @@ HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& 
 }
 
 HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,ExactFloatType>& x)
-    : HybridBasicSet<Point>(q,make_list(x.keys()),Point(x.size()))
+    : HybridBasicSet<ExactPoint>(q,make_list(x.keys()),ExactPoint(x.size()))
 {
     uint i=0;
     for(Map<Identifier,ExactFloatType>::const_iterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
@@ -209,7 +209,7 @@ HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,ExactFl
 }
 
 HybridPoint::HybridPoint(const DiscreteLocation& q, const List<RealConstantAssignment>& x)
-    : HybridBasicSet<Point>(q,left_hand_sides(x),Point(x.size()))
+    : HybridBasicSet<ExactPoint>(q,left_hand_sides(x),ExactPoint(x.size()))
 {
     uint i=0;
     for(List<RealConstantAssignment>::const_iterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {

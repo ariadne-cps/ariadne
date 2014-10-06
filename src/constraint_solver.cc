@@ -75,7 +75,7 @@ std::ostream& operator<<(std::ostream& os, const EffectiveConstraint& c) {
 
 
 
-Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<ValidatedConstraint>& constraints) const
+Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const Box& domain, const List<ValidatedConstraint>& constraints) const
 {
     if(constraints.empty()) { return make_pair(!domain.empty(),domain.centre()); }
 
@@ -90,7 +90,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const List<Val
 }
 
 
-Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const
+Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const
 {
 
     static const double XSIGMA=0.125;
@@ -104,7 +104,7 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Validate
     IntervalVector image=apply(function,domain);
     ARIADNE_LOG(4,"image="<<image<<"\n");
     for(uint i=0; i!=image.size(); ++i) {
-        if(disjoint(image[i],codomain[i])) { ARIADNE_LOG(4,"  Proved disjointness using direct evaluation\n");  return make_pair(false,Point()); }
+        if(disjoint(image[i],codomain[i])) { ARIADNE_LOG(4,"  Proved disjointness using direct evaluation\n");  return make_pair(false,ExactPoint()); }
         else bounds[i]=intersection(codomain[i],image[i]);
     }
 
@@ -169,13 +169,13 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Validate
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
         if(subdomain.empty()) {
             ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
-            return make_pair(false,Point());
+            return make_pair(false,ExactPoint());
         }
 
         for(uint i=0; i!=m; ++i) {
             this->box_reduce(subdomain,txg,Interval(0,inf),i);
             ARIADNE_LOG(8,"  dom="<<subdomain<<"\n");
-            if(subdomain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return make_pair(false,Point()); }
+            if(subdomain.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return make_pair(false,ExactPoint()); }
         }
         ARIADNE_LOG(6,"  dom="<<subdomain<<"\n");
 
@@ -188,10 +188,10 @@ Pair<Tribool,Point> ConstraintSolver::feasible(const Box& domain, const Validate
         nx = ApproximateFloatType(1.0-XSIGMA)*x + Vector<ApproximateFloatType>(x.size(),XSIGMA/x.size());
         ny = midpoint(sd.second);
         result = result || this->feasible(sd.second, fn, c).first;
-        return make_pair(result,Point());
+        return make_pair(result,ExactPoint());
     }
 
-    return make_pair(indeterminate,Point());
+    return make_pair(indeterminate,ExactPoint());
 }
 
 
@@ -477,7 +477,7 @@ Pair<Box,Box> ConstraintSolver::split(const Box& d, const ValidatedVectorFunctio
 }
 
 
-tribool ConstraintSolver::check_feasibility(const Box& d, const ValidatedVectorFunction& f, const Box& c, const Point& y) const
+tribool ConstraintSolver::check_feasibility(const Box& d, const ValidatedVectorFunction& f, const Box& c, const ExactPoint& y) const
 {
     for(uint i=0; i!=y.size(); ++i) {
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }

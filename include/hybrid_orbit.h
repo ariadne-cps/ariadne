@@ -49,7 +49,8 @@ typedef Float Time;
 template<class ES> class Orbit;
 
 template<class BS> class ListSet;
-class Point;
+template<class X> class Point;
+typedef Point<ExactNumberType> ExactPoint;
 class Grid;
 class GridCell;
 class GridTreeSet;

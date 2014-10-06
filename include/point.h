@@ -35,48 +35,51 @@
 
 namespace Ariadne {
 
-class Point;
-typedef Point ExactPoint;
-typedef Vector<ApproximateFloatType> ApproximatePoint;
+template<class X> class Point;
+typedef Point<ExactNumberType> ExactPoint;
+typedef Point<EffectiveNumberType> EffectivePoint;
+typedef Point<ValidatedNumberType> ValidatedPoint;
+typedef Point<ApproximateNumberType> ApproximatePoint;
 
 //! A point in Euclidean space.
+template<class X>
 class Point
-    : public Vector<ExactFloatType>
+    : public Vector<X>
     , public DrawableInterface
 {
   public:
-    typedef ExactFloatType RealType;
+    typedef X RealType;
     //! Default constructor contructs the singleton point in zero dimensions.
-    Point() : Vector<ExactFloatType>() { }
+    Point() : Vector<RealType>() { }
     //! The origin in \a n dimensions.
-    explicit Point(uint n) : Vector<ExactFloatType>(n) { }
+    explicit Point(uint n) : Vector<RealType>(n) { }
     //! Construct from a string literal of the form "(x1,x2,...,xd)".
     explicit Point(const std::string& str);
-    Point(const Vector<ExactFloatType>& v) : Vector<ExactFloatType>(v) { }
-    template<class E> Point(const VectorExpression<E>& ve) : Vector<ExactFloatType>(ve) { }
-    template<class N, class T> Point(const N& n, const T& t) : Vector<ExactFloatType>(n,ExactFloatType(t)) { }
+    Point(const Vector<RealType>& v) : Vector<RealType>(v) { }
+    template<class E> Point(const VectorExpression<E>& ve) : Vector<RealType>(ve) { }
+    template<class N, class T> Point(const N& n, const T& t) : Vector<RealType>(n,RealType(t)) { }
     //! Construct from an initializer list of floating-point values.
     explicit Point(std::initializer_list<double> lst);
     //! The origin in \a n dimensions.
-    static Point origin(uint n) { return Point(n,0.0); }
+    static Point origin(uint n) { return Point(n,RealType(0)); }
     //! A dynamically-allocated copy.
-    virtual Point* clone() const;
+    virtual Point<X>* clone() const;
     //! The dimension of the point.
     uint dimension() const { return this->size(); }
     //! An explicit cast to a float vector. Useful to prevent ambiguous function overloads.
-    const Vector<ExactFloatType>& vector() const { return *this; }
+    const Vector<RealType>& vector() const { return *this; }
 
-    Vector<ExactFloatType> centre() const { return *this; }
+    Vector<RealType> centre() const { return *this; }
 
     //! Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const {
-        return os << static_cast<const Vector<ExactFloatType>&>(*this); }
+        return os << static_cast<const Vector<RealType>&>(*this); }
 
     virtual void draw(CanvasInterface& c, const Projection2d& p) const;
     virtual Box bounding_box() const;
 };
 
-Point make_point(const std::string&);
+ExactPoint make_point(const std::string&);
 
 } // namespace Ariadne
 

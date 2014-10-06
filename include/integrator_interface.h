@@ -71,7 +71,7 @@ class IntegratorInterface
     //! of \f$\dt{x}=f(x)\f$ starting in \f$D\f$  for time step \f$h\leq h_{\max}\f$.
     //! <br>
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain and \f$h_{\max}\f$ is the \a maximum_time_step.
-    virtual Pair<ExactFloatType,Box>
+    virtual Pair<ExactFloatType,UpperBox>
     flow_bounds(const ValidatedVectorFunction& vector_field,
                 const Box& state_domain,
                 const RawFloatType& maximum_time_step) const = 0;
@@ -99,7 +99,7 @@ class IntegratorInterface
     flow_step(const ValidatedVectorFunction& vector_field,
               const Box& state_domain,
               const ExactFloatType& time_step,
-              const Box& state_bounding_box) const = 0;
+              const UpperBox& state_bounding_box) const = 0;
 
     //! \brief Solve \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for initial conditions in \f$x\in D\f$ over the interval \f$[0,t_f]\f$.
     //! <br>

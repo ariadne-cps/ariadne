@@ -258,7 +258,7 @@ class ScalarTaylorFunction
     //! \brief The domain of the quantity.
     const DomainType& domain() const { return this->_domain; }
     //! \brief An over-approximation to the range of the quantity; not necessarily tight.
-    const Interval codomain() const { return this->_model.range(); }
+    const Interval codomain() const { UpperInterval rng=this->_model.range(); return Interval(rng.lower_raw(),rng.upper_raw()); }
     //! \brief The scaled expansion over a unit box with error bound.
     const ModelType& model() const { return this->_model; }
     //! \brief The scaled expansion over a unit box.
@@ -323,7 +323,7 @@ class ScalarTaylorFunction
     //@{
     /*! \name Function operations. */
     //! \brief An over-approximation to the range of the quantity.
-    Interval range() const { return this->_model.range(); }
+    UpperInterval range() const { return this->_model.range(); }
     //! \brief Evaluate the quantity at the point \a x.
     ApproximateNumberType evaluate(const Vector<ApproximateNumberType>& x) const;
     //! \brief Evaluate the quantity over the interval of points \a x.
@@ -476,9 +476,9 @@ template<> struct Arithmetic<ScalarTaylorFunction,EffectiveNumberType> { typedef
 template<> struct Arithmetic<ScalarTaylorFunction,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
 
 inline tribool operator>(const ScalarTaylorFunction& x, const RawFloatType& c) {
-    Interval r=x.range(); if(r.lower_raw()>c) { return true; } else if(r.upper_raw()<=c) { return false; } else { return indeterminate; } }
+    UpperInterval r=x.range(); if(r.lower_raw()>c) { return true; } else if(r.upper_raw()<=c) { return false; } else { return indeterminate; } }
 inline tribool operator<(const ScalarTaylorFunction& x, const RawFloatType& c) {
-    Interval r=x.range(); if(r.lower_raw()<c) { return true; } else if(r.upper_raw()>=c) { return false; } else { return indeterminate; } }
+    UpperInterval r=x.range(); if(r.lower_raw()<c) { return true; } else if(r.upper_raw()>=c) { return false; } else { return indeterminate; } }
 
 inline tribool operator>(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)>0; }
 inline tribool operator<(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)<0; }
@@ -704,7 +704,7 @@ class VectorTaylorFunction
     /*! \brief The centre of the Taylor model. */
     const Vector<CoefficientType> centre() const;
     /*! \brief The range of the Taylor model. */
-    const Box range() const;
+    const UpperBox range() const;
     /*! \brief The data used to define the Taylor models. */
     const Vector< TaylorModel<ValidatedTag> >& models() const;
     /*! \brief The data used to define the centre of the Taylor models. */

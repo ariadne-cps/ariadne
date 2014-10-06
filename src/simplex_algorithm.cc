@@ -69,7 +69,7 @@ inline bool operator< (Rational q, int n) { return q< Rational(n); }
 inline bool operator==(Rational q, double n) { return q==Rational(n); }
 
 template<class X> struct RigorousNumericsTraits { typedef X Type; };
-template<> struct RigorousNumericsTraits<Float> { typedef Interval Type; };
+template<> struct RigorousNumericsTraits<Float> { typedef UpperInterval Type; };
 
 // Extend an Array of size m to an Array of size n
 // such that the first m elements are the same,
@@ -381,7 +381,7 @@ compute_B(const Matrix<X>& A, const Array<size_t>& p)
     for(size_t k=0; k!=m; ++k) {
         size_t j=p[k];
         for(size_t i=0; i!=m; ++i) {
-            A_B[i][k]=A[i][j];
+            A_B[i][k]=static_cast<XX>(A[i][j]);
         }
     }
 
@@ -418,7 +418,7 @@ compute_c(const size_t m, const Vector<X>& xl, const Vector<X>& xu, const Array<
 }
 
 template<> Vector<Float>
-compute_c(const size_t m, const Vector<Float>& xl, const Vector<Float>& xu, const Array<size_t>& p, const Vector<Interval>& x)
+compute_c(const size_t m, const Vector<Float>& xl, const Vector<Float>& xu, const Array<size_t>& p, const Vector<UpperInterval>& x)
 {
     const size_t n=x.size();
     Vector<Float> c(n);
@@ -717,11 +717,11 @@ compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt,
     return make_pair(r,t);
 }
 
-std::pair<size_t,Interval>
-compute_rt(const Vector<Float>& xl, const Vector<Float>& xu, const Array<Slackness>& vt, const Array<size_t>& p, const Vector<Interval>& x, const Vector<Interval>& d, const size_t s)
+std::pair<size_t,UpperInterval>
+compute_rt(const Vector<Float>& xl, const Vector<Float>& xu, const Array<Slackness>& vt, const Array<size_t>& p, const Vector<UpperInterval>& x, const Vector<UpperInterval>& d, const size_t s)
 {
     typedef Float X;
-    typedef Interval XX;
+    typedef UpperInterval XX;
     const X inf=Ariadne::inf;
 
     // Choose variable to take out of basis
@@ -747,7 +747,7 @@ compute_rt(const Vector<Float>& xl, const Vector<Float>& xu, const Array<Slackne
             //if( r==n || tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
             if( tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
         } else {
-            tk=inf;
+            tk=UpperInterval(inf);
         }
         ARIADNE_LOG(7,"    k="<<k<<" j=p[k]="<<j<<" xl[j]="<<xl[j]<<" x[j]="<<x[j]<<" xu[j]="<<xu[j]<<" d[k]="<<d[k]<<" t[k]="<<tk<<" r="<<r<<" t[r]="<<t<<"\n");
     }
@@ -1315,7 +1315,7 @@ SimplexSolver<X>::verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, c
     }
 
     const Matrix<XX> B=compute_B<XX>(A,p);
-    ARIADNE_LOG(9," B="<<B<<"; B*A="<<midpoint(B*Matrix<XX>(A))<<"\n");
+    ARIADNE_LOG(9," B="<<B<<"; B*A="<<(midpoint(B*Matrix<XX>(A)))<<"\n");
 
     const Vector<XX> x=Ariadne::compute_x(xl,xu,A,b,vt,p,B);
     ARIADNE_LOG(9," x="<<x<<"; A*x="<<(Matrix<XX>(A)*x)<<"\n");
@@ -1471,12 +1471,12 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
 template class SimplexSolver<Float>;
 
 #ifdef HAVE_GMPXX_H
-//inline Interval operator+(const Interval& ivl, const Rational& q) { return ivl+Interval(q); }
-//inline Interval operator+(const Rational& q, const Interval& ivl) { return Interval(q)+ivl; }
-//inline Interval operator-(const Interval& ivl, const Rational& q) { return ivl-Interval(q); }
-//inline Interval operator-(const Rational& q, const Interval& ivl) { return Interval(q)-ivl; }
-//inline Interval operator*(const Interval& ivl, const Rational& q) { return ivl*Interval(q); }
-//inline Interval operator*(const Rational& q, const Interval& ivl) { return Interval(q)-ivl; }
+//inline UpperInterval operator+(const UpperInterval& ivl, const Rational& q) { return ivl+UpperInterval(q); }
+//inline UpperInterval operator+(const Rational& q, const UpperInterval& ivl) { return UpperInterval(q)+ivl; }
+//inline UpperInterval operator-(const UpperInterval& ivl, const Rational& q) { return ivl-UpperInterval(q); }
+//inline UpperInterval operator-(const Rational& q, const UpperInterval& ivl) { return UpperInterval(q)-ivl; }
+//inline UpperInterval operator*(const UpperInterval& ivl, const Rational& q) { return ivl*UpperInterval(q); }
+//inline UpperInterval operator*(const Rational& q, const UpperInterval& ivl) { return UpperInterval(q)-ivl; }
 template class SimplexSolver<Rational>;
 #endif // HAVE_GMPXX_H
 

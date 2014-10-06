@@ -130,13 +130,13 @@ Vector<X> emul(const Vector<X>& x, const Vector<X>& z) {
 }
 
 inline
-Vector<Interval> emul(const Vector<Interval>& x, const Vector<Float>& z) {
-    Vector<Interval> r(x.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=x[i]*z[i]; } return r;
+Vector<UpperInterval> emul(const Vector<Interval>& x, const Vector<Float>& z) {
+    Vector<UpperInterval> r(x.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=x[i]*z[i]; } return r;
 }
 
 inline
-Vector<Interval> emul(const Vector<Float>& x, const Vector<Interval>& z) {
-    Vector<Interval> r(x.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=x[i]*z[i]; } return r;
+Vector<UpperInterval> emul(const Vector<Float>& x, const Vector<UpperInterval>& z) {
+    Vector<UpperInterval> r(x.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=x[i]*z[i]; } return r;
 }
 
 template<class X, class XX> inline
@@ -536,7 +536,7 @@ contains_feasible_point(Box D, ValidatedVectorFunction g, Box C, ValidatedPointT
     ARIADNE_LOG(7,"ge="<<ge<<", ce="<<ce<<"\n");
 
     // FIXME: Carefully change this code!
-    IntervalMatrix ivlA=ge.jacobian(X);
+    UpperIntervalMatrix ivlA=ge.jacobian(X);
     ARIADNE_LOG(7,"ivlA="<<ivlA<<"\n");
     FloatVector fltD(X.size());
     for(uint i=0; i!=X.size(); ++i) { fltD[i]=rec(sqr(X[i].error().raw())); }
@@ -546,10 +546,10 @@ contains_feasible_point(Box D, ValidatedVectorFunction g, Box C, ValidatedPointT
     FloatMatrix fltL = FloatDiagonalMatrix(fltD)*FloatMatrix(transpose(fltA));
     ARIADNE_LOG(7,"L="<<fltL<<"\n");
 
-    IntervalMatrix ivlS = ivlA * make_exact(fltL);
+    UpperIntervalMatrix ivlS = ivlA * make_exact(fltL);
     ARIADNE_LOG(7,"ivlS="<<ivlS<<"\n");
 
-    IntervalMatrix ivlR = inverse(ivlS);
+    UpperIntervalMatrix ivlR = inverse(ivlS);
     try {
         ivlR=inverse(ivlS);
     }
@@ -703,20 +703,20 @@ validate_infeasibility(Box D, ValidatedVectorFunction g, Box C,
     // Estimate y g(X) = y g(x) + y Dg(X).(X-x)
 
     // Compute y.C
-    Interval yC = dot(IntervalVector(y),C);
+    UpperInterval yC = dot(UpperIntervalVector(y),UpperIntervalVector(C));
 
     // Compute Taylor estimate of y g(X)
     VectorTaylorFunction tg(D,g,default_sweeper());
     ScalarTaylorFunction tyg(D,default_sweeper());
     for(uint j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
-    Interval tygD = apply(tyg,D);
+    UpperInterval tygD = apply(tyg,D);
 
-    IntervalMatrix dgD = jacobian(g,D);
-    IntervalVector ydgD = IntervalVector(y) * dgD;
+    UpperIntervalMatrix dgD = jacobian(g,D);
+    UpperIntervalVector ydgD = UpperIntervalVector(y) * dgD;
 
-    Interval ygx = dot(IntervalVector(y),apply(g,IntervalVector(x)));
+    UpperInterval ygx = dot(UpperIntervalVector(y),apply(g,UpperIntervalVector(x)));
 
-    Interval ygD = ygx;
+    UpperInterval ygD = ygx;
     for(uint i=0; i!=x.size(); ++i) {
         ygD += ydgD[i] * (D[i]-x[i]);
     }
@@ -740,12 +740,12 @@ is_infeasibility_certificate(Box d, ValidatedVectorFunction g, Box c, ExactFloat
     }
     ValidatedNumberType iygx = tyg(make_singleton(d));
 
-    Interval iyc = 0;
+    UpperInterval iyc = 0;
     for(uint i=0; i!=n; ++i) {
         iyc+=y[i]*c[i];
     }
 
-    if(disjoint(iyc,Interval(iygx))) {
+    if(disjoint(iyc,UpperInterval(iygx))) {
         return true;
     } else {
         return false;
@@ -806,7 +806,7 @@ minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C) con
     StepData v;
     ApproximateFloatVector& x=make_approximate(v.x);
     ApproximateFloatVector& y=make_approximate(v.y);
-    C=intersection(C,apply(g,D)+Box(C.size(),Interval(-1,+1)));
+    C=intersection(C,make_exact_box(UpperBox(apply(g,D)+UpperBox(C.size(),UpperInterval(-1,+1)))));
     this->setup_feasibility(D,g,C,v);
     ApproximateFloatVector oldx=x;
 
@@ -855,7 +855,7 @@ feasible(Box D, ValidatedVectorFunction g, Box C) const
     ApproximateFloatVector& y=make_approximate(v.y);
 
     ApproximateScalarFunction f(D.size());
-    Box R=intersection(apply(g,D)+Box(C.size(),Interval(-1,+1)),C);
+    Box R=make_exact_box(intersection(UpperBox(apply(g,D)+UpperBox(C.size(),UpperInterval(-1,+1))),UpperBox(C)));
     this->setup_feasibility(D,g,R,v);
 
     static const float MU_MIN = 1e-12;
@@ -1167,11 +1167,11 @@ minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C) con
     ARIADNE_LOG(3,"f="<<f<<" D="<<D<<" g="<<g<<" C="<<C<<"\n");
     ValidatedVectorFunction h(0,D.size());
 
-    IntervalVector gD = apply(g,D);
-    if(disjoint(gD,C)) { throw InfeasibleProblemException(); }
+    UpperIntervalVector gD = apply(g,D);
+    if(disjoint(gD,UpperBox(C))) { throw InfeasibleProblemException(); }
 
     ApproximateFloatVector x = midpoint(D);
-    ApproximateFloatVector w = midpoint(intersection(Box(gD),C));
+    ApproximateFloatVector w = midpoint(intersection(make_exact_box(gD),C));
 
     ApproximateFloatVector kappa(g.result_size(),0.0);
     ApproximateFloatVector lambda(h.result_size(),0.0);
@@ -2027,7 +2027,7 @@ feasible(Box D, ValidatedVectorFunction h) const
 
     if(norm(h(x))<1e-10) { return true; }
 
-    if(!contains(Interval(dot(IntervalVector(make_exact(y)),apply(h,D))),ExactFloatType(0.0))) { return false; }
+    if(!contains(UpperInterval(dot(UpperIntervalVector(make_exact(y)),apply(h,D))),ExactFloatType(0.0))) { return false; }
 
     return indeterminate;
 }
@@ -2149,23 +2149,23 @@ check_feasibility(Box D, ValidatedVectorFunction g, Box C,
     // Estimate y g(X) = y g(x) + y Dg(X).(X-x)
 
     // Compute y.C
-    IntervalVector iy(y);
-    Interval yC = dot(iy,C);
+    UpperIntervalVector iy(y);
+    UpperInterval yC = dot(iy,UpperIntervalVector(C));
 
     // Compute Taylor estimate of y g(X)
     VectorTaylorFunction tg(D,g,default_sweeper());
     ScalarTaylorFunction tyg(D,default_sweeper());
     for(uint j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
-    Interval tygD = Interval(tyg(make_singleton(D)));
+    UpperInterval tygD = Interval(tyg(make_singleton(D)));
 
-    IntervalMatrix dgD = jacobian(g,D);
-    IntervalVector ydgD = IntervalVector(y) * dgD;
+    UpperIntervalMatrix dgD = jacobian(g,D);
+    UpperIntervalVector ydgD = UpperIntervalVector(y) * dgD;
 
     ValidatedFloat ygx = dot(y,gx);
 
-    Interval ygD = Interval(ygx);
+    UpperInterval ygD = UpperInterval(ygx);
     for(uint i=0; i!=x.size(); ++i) {
-        ygD += ydgD[i] * (D[i]-Interval(x[i]));
+        ygD += ydgD[i] * (D[i]-UpperInterval(x[i]));
     }
 
     ARIADNE_LOG(4,"yC="<<yC<<" tygD="<<tygD<<" ygD="<<ygD<<"\n");

@@ -109,7 +109,7 @@ class Vector< Procedure<X> > {
 };
 
 // \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
-template<class X, class T> void _execute(List<T>& v, const List<ProcedureInstruction>& p, const List<X>& c, const Vector<T>& x)
+template<class S, class X, class T> void _execute(List<S>& v, const List<ProcedureInstruction>& p, const List<X>& c, const Vector<T>& x)
 {
     T z=x.zero_element();
     for(size_t i=0; i!=p.size(); ++i) {
@@ -171,7 +171,7 @@ template<class X, class T> void _compute(List<T>& v, const List<ProcedureInstruc
     }
 }
 
-template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<ProcedureInstruction>& p)
+template<class S, class T> void _propagate(Vector<S>& x, List<T>& v, const List<ProcedureInstruction>& p)
 {
     ExactFloatType infty(inf);
 
@@ -351,17 +351,21 @@ namespace Ariadne {
 // NOTE: Ordering of r and x is important, since nan elements of r are preserved,
 // but nan elements of x do not affect r
 inline
-void restrict(Interval& r, const Interval& x) {
-    r.set_lower(max(r.lower(),x.lower()));
-    r.set_upper(min(r.upper(),x.upper()));
+void restrict(UpperInterval& r, const UpperInterval& x) {
+    r=UpperInterval(max(r.lower(),x.lower()),min(r.upper(),x.upper()));
+};
+
+inline
+void restrict(Interval& r, const UpperInterval& x) {
+    r=Interval(max(r.lower_raw(),x.lower_raw()),min(r.upper_raw(),x.upper_raw()));
 };
 
 template<class X>
-void simple_hull_reduce(Box& dom, const Procedure<X>& f, Interval codom)
+void simple_hull_reduce(UpperBox& dom, const Procedure<X>& f, UpperInterval codom)
 {
     const List<ProcedureInstruction>& p=f._instructions;
     const List<X>& c=f._constants;
-    List<Interval> v; v.reserve(p.size());
+    List<UpperInterval> v; v.reserve(p.size());
 
     _execute(v,p,c,dom);
     restrict(v.back(),codom);
@@ -369,11 +373,11 @@ void simple_hull_reduce(Box& dom, const Procedure<X>& f, Interval codom)
 }
 
 template<class X>
-void simple_hull_reduce(Box& dom, const Vector< Procedure<X> >& f, Box codom)
+void simple_hull_reduce(UpperBox& dom, const Vector< Procedure<X> >& f, UpperBox codom)
 {
     const List<ProcedureInstruction>& p=f._instructions;
     const List<X>& c=f._constants;
-    List<Interval> v; v.reserve(p.size());
+    List<UpperInterval> v; v.reserve(p.size());
 
     ARIADNE_ASSERT(codom.size()==f._results.size());
 

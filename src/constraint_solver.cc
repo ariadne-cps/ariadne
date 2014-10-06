@@ -47,6 +47,7 @@ namespace Ariadne {
 
 typedef Vector<ApproximateFloatType> ApproximateFloatVector;
 typedef Vector<ExactFloatType> ExactFloatVector;
+typedef Vector<UpperInterval> UpperIntervalVector;
 
 inline Sweeper default_sweeper() { return Sweeper(); }
 
@@ -100,8 +101,8 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const Box& domain, const Val
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
 
     // Make codomain bounded
-    IntervalVector bounds=codomain;
-    IntervalVector image=apply(function,domain);
+    UpperIntervalVector bounds=codomain;
+    UpperIntervalVector image=apply(function,domain);
     ARIADNE_LOG(4,"image="<<image<<"\n");
     for(uint i=0; i!=image.size(); ++i) {
         if(disjoint(image[i],codomain[i])) { ARIADNE_LOG(4,"  Proved disjointness using direct evaluation\n");  return make_pair(false,ExactPoint()); }
@@ -126,7 +127,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const Box& domain, const Val
     for(uint k=0; k!=l; ++k) { multipliers[k]=1.0/l; }
 
     NonlinearInteriorPointOptimiser optimiser;
-    optimiser.compute_tz(domain,function,bounds,point,violation,slack);
+    optimiser.compute_tz(domain,function,make_exact_box(bounds),point,violation,slack);
 
     ARIADNE_LOG(4,"d="<<d<<", f="<<fn<<", c="<<c<<"\n");
 
@@ -145,7 +146,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const Box& domain, const Val
 
     if(t<TERR) {
         // Probably disjoint, so try to prove this
-        Box subdomain=domain;
+        UpperBox subdomain=domain;
 
         Vector<ExactFloat> x_exact=make_exact(x);
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
@@ -195,7 +196,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const Box& domain, const Val
 }
 
 
-bool ConstraintSolver::reduce(Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const
+bool ConstraintSolver::reduce(UpperBox& domain, const ValidatedVectorFunction& function, const Box& codomain) const
 {
     const double MINIMUM_REDUCTION = 0.75;
     ARIADNE_ASSERT(function.argument_size()==domain.size());
@@ -233,14 +234,14 @@ bool ConstraintSolver::reduce(Box& domain, const ValidatedVectorFunction& functi
 
 inline bool is_nan(const Float& x) { return isnan(x.get_d()); }
 
-bool has_nan(const Box& domain) {
+bool has_nan(const UpperBox& domain) {
     for(uint i=0; i!=domain.size(); ++i) {
         if(is_nan(domain[i].lower().raw()) || is_nan(domain[i].upper().raw())) { return true; }
     }
     return false;
 }
 
-bool ConstraintSolver::reduce(Box& domain, const List<ValidatedConstraint>& constraints) const
+bool ConstraintSolver::reduce(UpperBox& domain, const List<ValidatedConstraint>& constraints) const
 {
     static const bool USE_BOX_REDUCE = false;
 
@@ -280,7 +281,7 @@ bool ConstraintSolver::reduce(Box& domain, const List<ValidatedConstraint>& cons
 }
 
 
-bool ConstraintSolver::hull_reduce(Box& domain, const ValidatedProcedure& procedure, const Interval& bounds) const
+bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedProcedure& procedure, const Interval& bounds) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, ValidatedProcedure procedure, Interval bounds): "
                   "procedure="<<procedure<<", bounds="<<bounds<<", domain="<<domain<<"\n");
@@ -289,7 +290,7 @@ bool ConstraintSolver::hull_reduce(Box& domain, const ValidatedProcedure& proced
     return domain.empty();
 }
 
-bool ConstraintSolver::hull_reduce(Box& domain, const Vector<ValidatedProcedure>& procedure, const Box& bounds) const
+bool ConstraintSolver::hull_reduce(UpperBox& domain, const Vector<ValidatedProcedure>& procedure, const Box& bounds) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, Vector<ValidatedProcedure> procedure, Box bounds): "
                   "procedure="<<procedure<<", bounds="<<bounds<<", domain="<<domain<<"\n");
@@ -298,7 +299,7 @@ bool ConstraintSolver::hull_reduce(Box& domain, const Vector<ValidatedProcedure>
     return domain.empty();
 }
 
-bool ConstraintSolver::hull_reduce(Box& domain, const ValidatedScalarFunctionInterface& function, const Interval& bounds) const
+bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedScalarFunctionInterface& function, const Interval& bounds) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, ValidatedScalarFunction function, Interval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
@@ -308,7 +309,7 @@ bool ConstraintSolver::hull_reduce(Box& domain, const ValidatedScalarFunctionInt
     return this->hull_reduce(domain,procedure,bounds);
 }
 
-bool ConstraintSolver::hull_reduce(Box& domain, const ValidatedVectorFunctionInterface& function, const Box& bounds) const
+bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedVectorFunctionInterface& function, const Box& bounds) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain, ValidatedScalarFunction function, Interval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
@@ -318,36 +319,36 @@ bool ConstraintSolver::hull_reduce(Box& domain, const ValidatedVectorFunctionInt
     return this->hull_reduce(domain,procedure,bounds);
 }
 
-bool ConstraintSolver::monotone_reduce(Box& domain, const ValidatedScalarFunctionInterface& function, const Interval& bounds, uint variable) const
+bool ConstraintSolver::monotone_reduce(UpperBox& domain, const ValidatedScalarFunctionInterface& function, const Interval& bounds, uint variable) const
 {
     ValidatedScalarFunction derivative=function.derivative(variable);
 
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
 
     ExactFloatType splitpoint;
-    Interval lower=domain[variable];
-    Interval upper=domain[variable];
-    Vector<Interval> slice=domain;
-    Vector<Interval> subdomain=domain;
+    UpperInterval lower=domain[variable];
+    UpperInterval upper=domain[variable];
+    Vector<UpperInterval> slice=domain;
+    Vector<UpperInterval> subdomain=domain;
 
     static const int MAX_STEPS=3;
     const Float size = lower.width().raw() / (1<<MAX_STEPS);
     do {
         if(lower.width().raw()>size) {
             splitpoint=lower.centre();
-            slice[variable]=splitpoint;
-            Interval new_lower=splitpoint+(bounds-apply(function,slice)).lower()/apply(derivative,subdomain);
-            if(new_lower.upper().raw()<lower.lower().raw()) { lower=lower.lower().raw(); }
+            slice[variable]=UpperInterval(splitpoint);
+            UpperInterval new_lower=splitpoint+make_exact((bounds-apply(function,slice)).lower())/apply(derivative,subdomain);
+            if(new_lower.upper().raw()<lower.lower().raw()) { lower=UpperInterval(lower.lower().raw()); }
             else { lower=intersection(lower,new_lower); }
         }
         if(upper.width().raw()>size) {
             splitpoint=upper.centre();
-            slice[variable]=splitpoint;
-            Interval new_upper=splitpoint+(bounds-apply(function,slice)).upper()/apply(derivative,subdomain);
-            if(new_upper.lower()>upper.upper()) { upper=upper.upper(); }
+            slice[variable]=UpperInterval(splitpoint);
+            UpperInterval new_upper=splitpoint+make_exact((bounds-apply(function,slice)).upper())/apply(derivative,subdomain);
+            if(new_upper.lower()>upper.upper()) { upper=UpperInterval(upper.upper().raw()); }
             else { upper=intersection(upper,new_upper); }
         }
-        subdomain[variable]=Interval(lower.lower(),upper.upper());
+        subdomain[variable]=UpperInterval(lower.lower(),upper.upper());
     } while(lower.width().raw()>size && upper.width().raw()>size);
     domain=subdomain;
 
@@ -356,46 +357,46 @@ bool ConstraintSolver::monotone_reduce(Box& domain, const ValidatedScalarFunctio
 
 
 
-bool ConstraintSolver::lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const Box& bounds,
+bool ConstraintSolver::lyapunov_reduce(UpperBox& domain, const VectorTaylorFunction& function, const Box& bounds,
                                        ApproximateFloatVector centre, ApproximateFloatVector multipliers) const
 {
     return this->lyapunov_reduce(domain,function,bounds,make_exact(centre),make_exact(multipliers));
 }
 
 
-bool ConstraintSolver::lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const Box& bounds,
+bool ConstraintSolver::lyapunov_reduce(UpperBox& domain, const VectorTaylorFunction& function, const Box& bounds,
                                        ExactFloatVector centre, ExactFloatVector multipliers) const
 {
     ScalarTaylorFunction g(function.domain(),default_sweeper());
-    Interval C(0);
+    UpperInterval C(0);
     for(uint i=0; i!=function.result_size(); ++i) {
         g += make_exact(multipliers[i]) * function[i];
         C += make_exact(multipliers[i]) * bounds[i];
     }
-    IntervalVector dg = gradient(g,domain);
+    UpperIntervalVector dg = gradient(g,domain);
     C -= g(centre);
 
-    Box new_domain(domain);
-    IntervalVector ranges(domain.size());
+    UpperBox new_domain(domain);
+    UpperIntervalVector ranges(domain.size());
     for(uint j=0; j!=domain.size(); ++j) {
         ranges[j] = dg[j]*(domain[j]-centre[j]);
     }
 
     // We now have sum dg(xi)[j] * (x[j]-x0[j]) in C, so we can reduce each component
     for(uint j=0; j!=domain.size(); ++j) {
-        Interval E = C;
+        UpperInterval E = C;
         for(uint k=0; k!=domain.size(); ++k) {
             if(j!=k) { E-=ranges[k]; }
         }
-        Interval estimated_domain = E/dg[j]+centre[j];
-        new_domain[j] = intersection(domain[j],estimated_domain);
+        UpperInterval estimated_domain = E/dg[j]+centre[j];
+        new_domain[j] = intersection(domain[j],make_exact_interval(estimated_domain));
     }
 
     domain=new_domain;
     return domain.empty();
 }
 
-bool ConstraintSolver::box_reduce(Box& domain, const ValidatedScalarFunctionInterface& function, const Interval& bounds, uint variable) const
+bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctionInterface& function, const Interval& bounds, uint variable) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::box_reduce(Box domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<"\n");
 
@@ -403,12 +404,12 @@ bool ConstraintSolver::box_reduce(Box& domain, const ValidatedScalarFunctionInte
 
     // Try to reduce the size of the set by "shaving" off along a coordinate axis
     //
-    Interval interval=domain[variable];
+    UpperInterval interval=domain[variable];
     RawFloatType l=interval.lower().raw();
     RawFloatType u=interval.upper().raw();
     Interval subinterval;
-    Interval new_interval(interval);
-    Vector<Interval> slice=domain;
+    UpperInterval new_interval(interval);
+    Vector<UpperInterval> slice=domain;
 
     static const uint MAX_SLICES=(1<<3);
     const uint n=MAX_SLICES;
@@ -418,7 +419,7 @@ bool ConstraintSolver::box_reduce(Box& domain, const ValidatedScalarFunctionInte
     for(uint i=0; i!=n; ++i) {
         subinterval=Interval((l*(n-i)+u*i)/n,(l*(n-i-1)+u*(i+1))/n);
         slice[variable]=subinterval;
-        Interval slice_image=apply(function,slice);
+        UpperInterval slice_image=make_exact_interval(apply(function,slice));
         if(intersection(slice_image,bounds).empty()) {
             new_interval.set_lower(subinterval.upper());
         } else {
@@ -436,7 +437,7 @@ bool ConstraintSolver::box_reduce(Box& domain, const ValidatedScalarFunctionInte
     for(uint j=n-1; j!=imax; --j) {
         subinterval=Interval((l*(n-j)+u*j)/n,(l*(n-j-1)+u*(j+1))/n);
         slice[variable]=subinterval;
-        Interval slice_image=apply(function,slice);
+        Interval slice_image=make_exact_interval(apply(function,slice));
         if(intersection(slice_image,bounds).empty()) {
             new_interval.set_upper(subinterval.lower());
         } else {
@@ -456,7 +457,7 @@ bool ConstraintSolver::box_reduce(Box& domain, const ValidatedScalarFunctionInte
 
 namespace {
 
-void compute_monotonicity(Box& domain, const EffectiveConstraint& constraint) {
+void compute_monotonicity(UpperBox& domain, const EffectiveConstraint& constraint) {
 /*
     static const uint n = domain.size();
 

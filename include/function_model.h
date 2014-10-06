@@ -69,8 +69,8 @@ template<> class ScalarFunctionModelInterface<ValidatedTag>
 {
   public:
     virtual Box const& domain() const = 0;
-    virtual Interval range() const = 0;
     virtual Interval const codomain() const = 0;
+    virtual UpperInterval range() const = 0;
 
     virtual CoefficientType const& value() const = 0;
     virtual CoefficientType const gradient_value(Nat i) const = 0;
@@ -167,8 +167,8 @@ template<> class ScalarFunctionModel<ValidatedTag>
     template<class XX> inline XX operator()(const Vector<XX>& v) const { return this->_ptr->evaluate(v); }
     template<class XX> inline XX evaluate(const Vector<XX>& v) const { return this->_ptr->evaluate(v); }
     inline Box const domain() const { return this->_ptr->domain(); }
-    inline Interval const range() const { return this->_ptr->range(); }
     inline Interval const codomain() const { return this->_ptr->codomain(); }
+    inline UpperInterval const range() const { return this->_ptr->range(); }
 
     inline CoefficientType value() const { return this->_ptr->value(); }
     inline CoefficientType gradient_value(Nat j) const { return this->_ptr->gradient_value(j); }
@@ -269,8 +269,8 @@ template<> class VectorFunctionModelInterface<ValidatedTag>
 {
   public:
     virtual Box const& domain() const = 0;
-    virtual Box const range() const = 0;
     virtual Box const codomain() const = 0;
+    virtual UpperBox const range() const = 0;
     virtual Vector<ErrorType> const errors() const = 0;
     virtual ErrorType const error() const = 0;
     virtual Void clobber() = 0;
@@ -379,8 +379,8 @@ template<> class VectorFunctionModel<ValidatedTag>
     inline ScalarFunctionModel<ValidatedTag> const operator[](Nat i) const { return this->get(i); }
     inline VectorFunctionModelElement<ValidatedTag> operator[](Nat i) { return VectorFunctionModelElement<ValidatedTag>(this,i); }
     inline Box const domain() const { return this->_ptr->domain(); }
-    inline Box const range() const { return this->_ptr->range(); }
     inline Box const codomain() const { return this->_ptr->codomain(); }
+    inline UpperBox const range() const { return this->_ptr->range(); }
     inline Vector<ErrorType> const errors() const { return this->_ptr->errors(); }
     inline ErrorType const error() const { return this->_ptr->error(); }
     inline Void clobber() { this->_ptr->clobber(); }

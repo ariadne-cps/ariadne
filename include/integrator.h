@@ -104,7 +104,7 @@ class IntegratorBase
     void set_function_factory(const ValidatedFunctionModelFactoryInterface& factory);
 
 
-    virtual Pair<ExactFloatType,Box>
+    virtual Pair<ExactFloatType,UpperBox>
     flow_bounds(const ValidatedVectorFunction& vector_field,
                 const Box& state_domain,
                 const RawFloatType& suggested_time_step) const;
@@ -136,7 +136,7 @@ class IntegratorBase
     flow_step(const ValidatedVectorFunction& vector_field,
               const Box& state_domain,
               const ExactFloatType& suggested_time_step,
-              const Box& bounding_box) const = 0;
+              const UpperBox& bounding_box) const = 0;
 
   public:
     double _maximum_error;
@@ -180,7 +180,7 @@ class TaylorPicardIntegrator
     flow_step(const ValidatedVectorFunction& vector_field,
               const Box& state_domain,
               const ExactFloatType& time_step,
-              const Box& bounding_box) const;
+              const UpperBox& bounding_box) const;
 
     using IntegratorBase::flow_step;
 };
@@ -234,7 +234,7 @@ class TaylorSeriesIntegrator
     virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
     virtual void write(std::ostream& os) const;
 
-    virtual Pair<ExactFloatType,Box>
+    virtual Pair<ExactFloatType,UpperBox>
     flow_bounds(const ValidatedVectorFunction& vector_field,
                 const Box& state_domain,
                 const RawFloatType& suggested_time_step) const;
@@ -243,7 +243,7 @@ class TaylorSeriesIntegrator
     flow_step(const ValidatedVectorFunction& vector_field,
               const Box& state_domain,
               const ExactFloatType& time_step,
-              const Box& bounding_box) const;
+              const UpperBox& bounding_box) const;
 
     using IntegratorBase::flow_step;
 };
@@ -273,7 +273,7 @@ class AffineIntegrator
     flow_step(const ValidatedVectorFunction& vector_field,
               const Box& state_domain,
               const ExactFloatType& time_step,
-              const Box& bounding_box) const;
+              const UpperBox& bounding_box) const;
 
     using IntegratorBase::flow_step;
 

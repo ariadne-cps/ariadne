@@ -63,8 +63,9 @@ class Decimal;
 
 class Interval;
 class UnitInterval;
+class UpperInterval;
 
-typedef Interval NumericInterval;
+typedef UpperInterval NumericInterval;
 
 //! \ingroup NumericModule
 //! \brief Intervals with floating-point endpoints supporting outwardly-rounded arithmetic.
@@ -256,153 +257,6 @@ inline Interval hull(Float x1, Float x2) {
 }
 
 
-
-//! \brief An over-approximation to an interval set.
-class UpperInterval {
-  public:
-    //! \brief Default constructor yields the singleton zero interval \a [0,0].
-    explicit UpperInterval() : l(0.0), u(0.0) { }
-    //! \brief Construct a singleton interval.
-    explicit UpperInterval(Float point) : l(point), u(point) { }
-    //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
-    explicit UpperInterval(Float lower, Float upper) : l(lower), u(upper) { }
-    explicit UpperInterval(double lower, double upper) : l(lower), u(upper) { }
-
-    //! \brief Construct an over-approximating interval.
-    UpperInterval(LowerFloat lower, UpperFloat upper) : UpperInterval(lower.raw(),upper.raw()) { }
-    //! \brief Convert from an exact interval.
-    UpperInterval(Interval ivl) : UpperInterval(ivl.lower_raw(),ivl.upper_raw()) { }
-
-    //! \brief Construct a singleton interval.
-    explicit UpperInterval(ExactFloat point) : l(point.raw()), u(point.raw()) { }
-    explicit UpperInterval(ValidatedFloat point) : l(point.lower_raw()), u(point.upper_raw()) { }
-
-    //! \brief The lower bound of the interval.
-    const Float& lower_raw() const { return l; }
-    //! \brief The upper bound of the interval.
-    const Float& upper_raw() const { return u; }
-
-    //! \brief The lower bound of the interval.
-    const LowerFloat& lower() const { return reinterpret_cast<LowerFloat const&>(l); }
-    //! \brief The upper bound of the interval.
-    const UpperFloat& upper() const { return reinterpret_cast<UpperFloat const&>(u); }
-    //! \brief The midpoint of the interval.
-    const ApproximateFloatType midpoint() const { return half(this->lower()+this->upper()); }
-    //! \brief The radius of the interval.
-    const PositiveUpperFloat radius() const { return half(this->upper()-this->lower()); }
-    //! \brief An over-approximation to the width of the interval.
-    const PositiveUpperFloat width() const { return this->upper()-this->lower(); }
-
-    friend const ApproximateFloatType midpoint(UpperInterval const& ivl) { return ivl.midpoint(); }
-    friend bool bounded(UpperInterval const& ivl) { return -inf<ivl.l && ivl.u<+inf; }
-    friend bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2) { return (ivl1.l>=ivl2.l || ivl1.u<=ivl2.u); }
-    friend tribool disjoint(UpperInterval const& ivl1, UpperInterval const& ivl2) { return (ivl1.u<ivl2.l || ivl2.u<ivl1.l) || indeterminate; }
-    friend UpperInterval widen(UpperInterval x) { return UpperInterval(widen(ValidatedFloat(x.lower_raw(),x.upper_raw()))); }
-    friend std::ostream& operator<<(std::ostream& os, UpperInterval const& ivl) { return os << Interval(ivl.lower_raw(),ivl.upper_raw()); }
-  private:
-    Float l, u;
-};
-
-const ApproximateFloatType midpoint(UpperInterval const& ivl);
-bool bounded(UpperInterval const& ivl);
-bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2);
-tribool disjoint(UpperInterval const& ivl1, UpperInterval const& ivl2);
-UpperInterval widen(UpperInterval i);
-
-
-// An interval one ulp wider
-//! \related Interval \brief An interval containing the given interval in its interior.
-Interval widen(Interval i);
-//! \related Interval \brief An interval contained in the interior of the given interval.
-Interval narrow(Interval i);
-
-// Over-approximate by an interval with float coefficients
-//! \related Interval \brief Over-approximate the interval by one using builtin single-precision floating-point values as endpoints.
-Interval trunc(Interval);
-Interval trunc(Interval, uint eps);
-
-//! \related Interval \brief The nearest representable number to the midpoint of the interval.
-inline Float med(Interval i) { return half_exact(add_near(i.lower_raw(),i.upper_raw())); }
-//! \related Interval \brief An over-approximation to the radius of the interval.
-inline Float rad(Interval i) { return half_exact(sub_up(i.upper_raw(),i.lower_raw())); }
-//! \related Interval \brief An over-approximation to the width of the interval.
-inline Float diam(Interval i) { return sub_up(i.upper_raw(),i.lower_raw()); }
-
-//! \related Interval \brief The interval of possible maximum values. Yields the interval between \c i1.upper_raw() and \c i2.upper_raw().
-inline Interval max(Interval i1,Interval i2);
-//! \related Interval \brief The interval of possible minimum values. Yields the interval between \c i1.lower() and \c i2.lower().
-inline Interval min(Interval,Interval);
-//! \related Interval \brief The interval of possible absolute values. Yields \f$\{ |x| \mid x\in I\}\f$.
-inline Interval abs(Interval);
-
-//! \related Interval \brief Unary plus function. Yields the identity \f$I=\{+x | x\in I\}\f$.
-inline Interval pos(Interval i);
-//! \related Interval \brief Unary negation function. Yields the exact interval \f$\{-x | x\in I\}\f$.
-inline Interval neg(Interval i);
-//! \related Interval \brief Unary square function. Yields an over-approximation to \f$\{ x^2 \mid x\in I\}\f$.
-//! Note that if \a I contains positive and negative values, \c sqr(I) is tighter than \c I*I .
-Interval sqr(Interval i);
-//! \related Interval \brief Unary reciprocal function. Yields an over-approximation to \f$\{ 1/x \mid x\in I\}\f$.
-//! Yields \f$[-\infty,+\infty]\f$ if \a I contains \a 0 in its interior, and an interval containing \f$[1/u,+\infty]\f$ if \a I=[0,u] .
-Interval rec(Interval i);
-
-//! \related Interval \brief Binary addition function. Yields an over-approximation to \f$\{ x_1+x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-inline Interval add(Interval, Interval);
-//! \related Interval \brief Subtraction function. Yields an over-approximation to \f$\{ x_1-x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-inline Interval sub(Interval, Interval);
-//! \related Interval \brief Binary multiplication function. Yields an over-approximation to \f$\{ x_1\times x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-Interval mul(Interval, Interval);
-//! \related Interval \brief Division function. Yields an over-approximation to \f$\{ x_1 \div x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-Interval div(Interval, Interval);
-
-inline Interval add(Interval, Float);
-inline Interval add(Float, Interval);
-inline Interval sub(Interval, Float);
-inline Interval sub(Float, Interval);
-Interval mul(Interval, Float);
-Interval mul(Float,Interval);
-Interval div(Interval, Float);
-Interval div(Float, Interval);
-
-extern const Interval pi_ivl;
-
-inline Interval neg_ivl(Float);
-inline Interval rec_ivl(Float);
-inline Interval add_ivl(Float, Float);
-inline Interval sub_ivl(Float, Float);
-inline Interval mul_ivl(Float, Float);
-inline Interval div_ivl(Float, Float);
-
-//! \related Interval \brief Positive integer power function. Yields an over-approximation to \f$\{ x^m \mid x\in I\}\f$.
-Interval pow(Interval i, uint m);
-//! \related Interval \brief %Integer power function. Yields an over-approximation to \f$\{ x^n \mid x\in I\}\f$.
-Interval pow(Interval i, int n);
-
-//! \related Interval \brief Square-root function. Yields an over-approximation to \f$\{ \sqrt{x} \mid x\in I\}\f$.
-//! Requires \c I.lower()>=0 .
-Interval sqrt(Interval);
-//! \related Interval \brief Exponential function. Yields an over-approximation to \f$\{ \exp{x} \mid x\in I\}\f$.
-Interval exp(Interval);
-//! \related Interval \brief Natural logarithm function. Yields an over-approximation to \f$\{ \log{x} \mid x\in I\}\f$.
-//! Requires \c I.lower()>0 .
-Interval log(Interval);
-
-//! \related Interval \brief Sine function. Yields an over-approximation to \f$\{ \sin{x} \mid x\in I\}\f$.
-Interval sin(Interval);
-//! \related Interval \brief Cosine function. Yields an over-approximation to \f$\{ \sin{x} \mid x\in I\}\f$.
-Interval cos(Interval);
-//! \related Interval \brief Tangent function. Yields an over-approximation to \f$\{ \sin{x} \mid x\in I\}\f$.
-Interval tan(Interval);
-Interval asin(Interval);
-Interval acos(Interval);
-Interval atan(Interval);
-
-
-//! \related Interval \brief The magnitude of the interval \a I. Yields \f$ \max\{ |x|\,\mid\,x\in I \}\f$.
-inline Float mag(Interval i) { return max(abs(i.lower_raw()),abs(i.upper_raw())); }
-//! \related Interval \brief The mignitude of the interval \a I. Yields \f$ \min\{ |x|\,\mid\,x\in I \}\f$.
-inline Float mig(Interval i) { return min(abs(i.lower_raw()),abs(i.upper_raw())); }
-
 //! \related Interval \brief Test if the interval \a I contains the number \a x.
 inline bool contains(Interval i, ExactFloatType x) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
 inline bool contains(Interval i, ValidatedFloatType x) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
@@ -433,49 +287,227 @@ inline bool inside(Interval i1, Interval i2) { return i1.lower_raw()>i2.lower_ra
 //! \related Interval \brief Test if the interior of the interval \a I1 is a superset of the (closed) interval \a I2.
 inline bool covers(Interval i1, Interval i2) { return i1.lower_raw()<i2.lower_raw() && i1.upper_raw()>i2.upper_raw(); }
 
-inline Interval max(Interval i1, Interval i2)
+
+//! \brief An over-approximation to an interval set.
+class UpperInterval {
+  public:
+    typedef UpperInterval NumericType;
+
+    //! \brief Default constructor yields the singleton zero interval \a [0,0].
+    explicit UpperInterval() : l(0.0), u(0.0) { }
+    //! \brief Construct a singleton interval.
+    // FIXME: Should make explicit, but this interferes with role as a numeric type
+    UpperInterval(Float point) : l(point), u(point) { }
+    // FIXME: Should make explicit, but this interferes with role as a numeric type
+    UpperInterval(int  point) : l(point), u(point) { }
+    //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
+    explicit UpperInterval(Float lower, Float upper) : l(lower), u(upper) { }
+    explicit UpperInterval(double lower, double upper) : l(lower), u(upper) { }
+
+    //! \brief Construct an over-approximating interval.
+    UpperInterval(LowerFloat lower, UpperFloat upper) : UpperInterval(lower.raw(),upper.raw()) { }
+    //! \brief Convert from an exact interval.
+    UpperInterval(Interval ivl) : UpperInterval(ivl.lower_raw(),ivl.upper_raw()) { }
+
+    //! \brief Construct a singleton interval.
+    explicit UpperInterval(ExactFloat point) : l(point.raw()), u(point.raw()) { }
+    explicit UpperInterval(ValidatedFloat point) : l(point.lower_raw()), u(point.upper_raw()) { }
+
+    //! \brief Set the lower bound of the interval.
+    void set_lower(LowerFloat lower) { l=lower.raw(); }
+    //! \brief Set the upper bound of the interval.
+    void set_upper(UpperFloat upper) { u=upper.raw(); }
+
+    //! \brief The lower bound of the interval.
+    const Float& lower_raw() const { return l; }
+    //! \brief The upper bound of the interval.
+    const Float& upper_raw() const { return u; }
+
+    //! \brief The lower bound of the interval.
+    const LowerFloat& lower() const { return reinterpret_cast<LowerFloat const&>(l); }
+    //! \brief The upper bound of the interval.
+    const UpperFloat& upper() const { return reinterpret_cast<UpperFloat const&>(u); }
+    //! \brief The midpoint of the interval.
+    const ApproximateFloatType midpoint() const { return half(this->lower()+this->upper()); }
+    const ExactFloatType centre() const { return make_exact(half(this->lower()+this->upper())); }
+    //! \brief The radius of the interval.
+    const PositiveUpperFloat radius() const { return half(this->upper()-this->lower()); }
+    //! \brief An over-approximation to the width of the interval.
+    const PositiveUpperFloat width() const { return this->upper()-this->lower(); }
+
+    explicit operator ValidatedFloatType() const { return ValidatedFloatType(l,u); }
+
+    tribool empty() const { return (l>u) || tribool(indeterminate); }
+
+    friend const ApproximateFloatType midpoint(UpperInterval const& ivl) {
+        return ivl.midpoint(); }
+    friend bool empty(UpperInterval const& ivl) {
+        return (ivl.l>ivl.u); }
+    friend bool bounded(UpperInterval const& ivl) {
+        return -inf<ivl.l && ivl.u<+inf; }
+    friend bool contains(UpperInterval const& ivl, ExactNumber const& x) {
+        return ivl.lower_raw() <= x.raw() && x.raw() <= ivl.upper_raw(); }
+    friend bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2) {
+        return ivl1.l>=ivl2.l || ivl1.u<=ivl2.u; }
+    friend tribool disjoint(UpperInterval const& ivl1, UpperInterval const& ivl2) {
+        return (ivl1.u<ivl2.l || ivl2.u<ivl1.l) || indeterminate; }
+    friend UpperInterval hull(UpperInterval const& ivl1, UpperInterval const& ivl2) {
+        return UpperInterval(min(ivl1.l,ivl2.l),max(ivl1.u,ivl2.u)); }
+    friend UpperInterval intersection(UpperInterval const& ivl1, UpperInterval const& ivl2) {
+        return UpperInterval(max(ivl1.l,ivl2.l),min(ivl1.u,ivl2.u)); }
+    friend UpperInterval widen(UpperInterval x) {
+        return UpperInterval(widen(ValidatedFloat(x.lower_raw(),x.upper_raw()))); }
+    friend std::ostream& operator<<(std::ostream& os, UpperInterval const& ivl) {
+        return os << Interval(ivl.lower_raw(),ivl.upper_raw()); }
+  private:
+    Float l, u;
+};
+
+const ApproximateFloatType midpoint(UpperInterval const& ivl);
+bool bounded(UpperInterval const& ivl);
+bool contains(UpperInterval const& ivl, ExactNumber const& x);
+bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2);
+tribool disjoint(UpperInterval const& ivl1, UpperInterval const& ivl2);
+UpperInterval widen(UpperInterval i);
+
+inline Interval make_exact_interval(UpperInterval ivl) { return Interval(ivl.lower_raw(),ivl.upper_raw()); }
+
+// An interval one ulp wider
+//! \related Interval \brief An interval containing the given interval in its interior.
+Interval widen(Interval i);
+//! \related Interval \brief An interval contained in the interior of the given interval.
+Interval narrow(Interval i);
+
+// Over-approximate by an interval with float coefficients
+//! \related Interval \brief Over-approximate the interval by one using builtin single-precision floating-point values as endpoints.
+Interval trunc(Interval);
+Interval trunc(Interval, uint eps);
+
+//! \related Interval \brief The nearest representable number to the midpoint of the interval.
+inline Float med(Interval i) { return half_exact(add_near(i.lower_raw(),i.upper_raw())); }
+//! \related Interval \brief An over-approximation to the radius of the interval.
+inline Float rad(Interval i) { return half_exact(sub_up(i.upper_raw(),i.lower_raw())); }
+//! \related Interval \brief An over-approximation to the width of the interval.
+inline Float diam(Interval i) { return sub_up(i.upper_raw(),i.lower_raw()); }
+
+//! \related UpperInterval \brief The interval of possible maximum values. Yields the interval between \c i1.upper_raw() and \c i2.upper_raw().
+inline UpperInterval max(UpperInterval i1,UpperInterval i2);
+//! \related UpperInterval \brief The interval of possible minimum values. Yields the interval between \c i1.lower() and \c i2.lower().
+inline UpperInterval min(UpperInterval,UpperInterval);
+//! \related UpperInterval \brief The interval of possible absolute values. Yields \f$\{ |x| \mid x\in I\}\f$.
+inline UpperInterval abs(UpperInterval);
+
+//! \related UpperInterval \brief Unary plus function. Yields the identity \f$I=\{+x | x\in I\}\f$.
+inline UpperInterval pos(UpperInterval i);
+//! \related UpperInterval \brief Unary negation function. Yields the exact interval \f$\{-x | x\in I\}\f$.
+inline UpperInterval neg(UpperInterval i);
+//! \related UpperInterval \brief Unary square function. Yields an over-approximation to \f$\{ x^2 \mid x\in I\}\f$.
+//! Note that if \a I contains positive and negative values, \c sqr(I) is tighter than \c I*I .
+UpperInterval sqr(UpperInterval i);
+//! \related UpperInterval \brief Unary reciprocal function. Yields an over-approximation to \f$\{ 1/x \mid x\in I\}\f$.
+//! Yields \f$[-\infty,+\infty]\f$ if \a I contains \a 0 in its interior, and an interval containing \f$[1/u,+\infty]\f$ if \a I=[0,u] .
+UpperInterval rec(UpperInterval i);
+
+//! \related UpperInterval \brief Binary addition function. Yields an over-approximation to \f$\{ x_1+x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
+inline UpperInterval add(UpperInterval, UpperInterval);
+//! \related UpperInterval \brief Subtraction function. Yields an over-approximation to \f$\{ x_1-x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
+inline UpperInterval sub(UpperInterval, UpperInterval);
+//! \related UpperInterval \brief Binary multiplication function. Yields an over-approximation to \f$\{ x_1\times x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
+UpperInterval mul(UpperInterval, UpperInterval);
+//! \related UpperInterval \brief Division function. Yields an over-approximation to \f$\{ x_1 \div x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
+UpperInterval div(UpperInterval, UpperInterval);
+
+inline UpperInterval add(UpperInterval, Float);
+inline UpperInterval add(Float, UpperInterval);
+inline UpperInterval sub(UpperInterval, Float);
+inline UpperInterval sub(Float, UpperInterval);
+UpperInterval mul(UpperInterval, Float);
+UpperInterval mul(Float,UpperInterval);
+UpperInterval div(UpperInterval, Float);
+UpperInterval div(Float, UpperInterval);
+
+extern const UpperInterval pi_ivl;
+
+inline UpperInterval neg_ivl(Float);
+inline UpperInterval rec_ivl(Float);
+inline UpperInterval add_ivl(Float, Float);
+inline UpperInterval sub_ivl(Float, Float);
+inline UpperInterval mul_ivl(Float, Float);
+inline UpperInterval div_ivl(Float, Float);
+
+//! \related UpperInterval \brief Positive integer power function. Yields an over-approximation to \f$\{ x^m \mid x\in I\}\f$.
+UpperInterval pow(UpperInterval i, uint m);
+//! \related UpperInterval \brief %Integer power function. Yields an over-approximation to \f$\{ x^n \mid x\in I\}\f$.
+UpperInterval pow(UpperInterval i, int n);
+
+//! \related UpperInterval \brief Square-root function. Yields an over-approximation to \f$\{ \sqrt{x} \mid x\in I\}\f$.
+//! Requires \c I.lower()>=0 .
+UpperInterval sqrt(UpperInterval);
+//! \related UpperInterval \brief Exponential function. Yields an over-approximation to \f$\{ \exp{x} \mid x\in I\}\f$.
+UpperInterval exp(UpperInterval);
+//! \related UpperInterval \brief Natural logarithm function. Yields an over-approximation to \f$\{ \log{x} \mid x\in I\}\f$.
+//! Requires \c I.lower()>0 .
+UpperInterval log(UpperInterval);
+
+//! \related UpperInterval \brief Sine function. Yields an over-approximation to \f$\{ \sin{x} \mid x\in I\}\f$.
+UpperInterval sin(UpperInterval);
+//! \related UpperInterval \brief Cosine function. Yields an over-approximation to \f$\{ \sin{x} \mid x\in I\}\f$.
+UpperInterval cos(UpperInterval);
+//! \related UpperInterval \brief Tangent function. Yields an over-approximation to \f$\{ \sin{x} \mid x\in I\}\f$.
+UpperInterval tan(UpperInterval);
+UpperInterval asin(UpperInterval);
+UpperInterval acos(UpperInterval);
+UpperInterval atan(UpperInterval);
+
+
+//! \related UpperInterval \brief The magnitude of the interval \a I. Yields \f$ \max\{ |x|\,\mid\,x\in I \}\f$.
+inline Float mag(UpperInterval i) { return max(abs(i.lower_raw()),abs(i.upper_raw())); }
+//! \related UpperInterval \brief The mignitude of the interval \a I. Yields \f$ \min\{ |x|\,\mid\,x\in I \}\f$.
+inline Float mig(UpperInterval i) { return min(abs(i.lower_raw()),abs(i.upper_raw())); }
+
+inline UpperInterval max(UpperInterval i1, UpperInterval i2)
 {
-    return Interval(max(i1.lower_raw(),i2.lower_raw()),max(i1.upper_raw(),i2.upper_raw()));
+    return UpperInterval(max(i1.lower_raw(),i2.lower_raw()),max(i1.upper_raw(),i2.upper_raw()));
 }
 
-inline Interval min(Interval i1, Interval i2)
+inline UpperInterval min(UpperInterval i1, UpperInterval i2)
 {
-    return Interval(min(i1.lower_raw(),i2.lower_raw()),min(i1.upper_raw(),i2.upper_raw()));
+    return UpperInterval(min(i1.lower_raw(),i2.lower_raw()),min(i1.upper_raw(),i2.upper_raw()));
 }
 
 
-inline Interval abs(Interval i)
+inline UpperInterval abs(UpperInterval i)
 {
     if(i.lower_raw()>=0) {
-        return Interval(i.lower_raw(),i.upper_raw());
+        return UpperInterval(i.lower_raw(),i.upper_raw());
     } else if(i.upper_raw()<=0) {
-        return Interval(-i.upper_raw(),-i.lower_raw());
+        return UpperInterval(-i.upper_raw(),-i.lower_raw());
     } else {
-        return Interval(static_cast<Float>(0.0),max(-i.lower_raw(),i.upper_raw()));
+        return UpperInterval(static_cast<Float>(0.0),max(-i.lower_raw(),i.upper_raw()));
     }
 }
 
-inline Interval pos(Interval i)
+inline UpperInterval pos(UpperInterval i)
 {
-    return Interval(+i.lower_raw(),+i.upper_raw());
+    return UpperInterval(+i.lower_raw(),+i.upper_raw());
 }
 
-inline Interval pos_ivl(Float x)
+inline UpperInterval pos_ivl(Float x)
 {
-    return Interval(+x,+x);
+    return UpperInterval(+x,+x);
 }
 
-inline Interval neg(Interval i)
+inline UpperInterval neg(UpperInterval i)
 {
-    return Interval(-i.upper_raw(),-i.lower_raw());
+    return UpperInterval(-i.upper_raw(),-i.lower_raw());
 }
 
-inline Interval neg_ivl(Float x)
+inline UpperInterval neg_ivl(Float x)
 {
-    return Interval(-x,-x);
+    return UpperInterval(-x,-x);
 }
 
-inline Interval sqr_ivl(Float x)
+inline UpperInterval sqr_ivl(Float x)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double xv=internal_cast<volatile double&>(x);
@@ -484,10 +516,10 @@ inline Interval sqr_ivl(Float x)
     set_rounding_mode(upward);
     volatile double ru=xv*xv;
     set_rounding_mode(rnd);
-    return Interval(rl,ru);
+    return UpperInterval(rl,ru);
 }
 
-inline Interval rec_ivl(Float x)
+inline UpperInterval rec_ivl(Float x)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double xv=internal_cast<volatile double&>(x);
@@ -496,12 +528,12 @@ inline Interval rec_ivl(Float x)
     set_rounding_mode(upward);
     volatile double ru=1.0/xv;
     set_rounding_mode(rnd);
-    return Interval(rl,ru);
+    return UpperInterval(rl,ru);
 }
 
 
 
-inline Interval add(Interval i1, Interval i2)
+inline UpperInterval add(UpperInterval i1, UpperInterval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double i1l=internal_cast<volatile double&>(i1.lower_raw());
@@ -513,10 +545,10 @@ inline Interval add(Interval i1, Interval i2)
     set_rounding_mode(upward);
     volatile double ru=i1u+i2u;
     set_rounding_mode(rnd);
-    return Interval(rl,ru);
+    return UpperInterval(rl,ru);
 }
 
-inline Interval add(Interval i1, Float x2)
+inline UpperInterval add(UpperInterval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double i1l=internal_cast<volatile double&>(i1.lower_raw());
@@ -527,15 +559,15 @@ inline Interval add(Interval i1, Float x2)
     set_rounding_mode(upward);
     volatile double ru=i1u+x2v;
     set_rounding_mode(rnd);
-    return Interval(rl,ru);
+    return UpperInterval(rl,ru);
 }
 
-inline Interval add(Float x1, Interval i2)
+inline UpperInterval add(Float x1, UpperInterval i2)
 {
     return add(i2,x1);
 }
 
-inline Interval add_ivl(Float x1, Float x2)
+inline UpperInterval add_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double x1v=internal_cast<volatile double&>(x1);
@@ -545,10 +577,10 @@ inline Interval add_ivl(Float x1, Float x2)
     set_rounding_mode(upward);
     volatile double ru=x1v+x2v;
     set_rounding_mode(rnd);
-    return Interval(rl,ru);
+    return UpperInterval(rl,ru);
 }
 
-inline Interval sub(Interval i1, Interval i2)
+inline UpperInterval sub(UpperInterval i1, UpperInterval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double i1l=internal_cast<volatile double&>(i1.lower_raw());
@@ -560,10 +592,10 @@ inline Interval sub(Interval i1, Interval i2)
     set_rounding_mode(upward);
     volatile double ru=i1u-i2l;
     set_rounding_mode(rnd);
-    return Interval(rl,ru);
+    return UpperInterval(rl,ru);
 }
 
-inline Interval sub(Interval i1, Float x2)
+inline UpperInterval sub(UpperInterval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double i1l=internal_cast<volatile double&>(i1.lower_raw());
@@ -574,10 +606,10 @@ inline Interval sub(Interval i1, Float x2)
     set_rounding_mode(upward);
     volatile double ru=i1u-x2v;
     set_rounding_mode(rnd);
-    return Interval(rl,ru);
+    return UpperInterval(rl,ru);
 }
 
-inline Interval sub(Float x1, Interval i2)
+inline UpperInterval sub(Float x1, UpperInterval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double x1v=internal_cast<volatile double&>(x1);
@@ -588,10 +620,10 @@ inline Interval sub(Float x1, Interval i2)
     set_rounding_mode(upward);
     volatile double ru=x1v-i2l;
     set_rounding_mode(rnd);
-    return Interval(rl,ru);
+    return UpperInterval(rl,ru);
 }
 
-inline Interval sub_ivl(Float x1, Float x2)
+inline UpperInterval sub_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double x1v=internal_cast<volatile double&>(x1);
@@ -601,10 +633,10 @@ inline Interval sub_ivl(Float x1, Float x2)
     set_rounding_mode(upward);
     volatile double ru=x1v-x2v;
     set_rounding_mode(rnd);
-    return Interval(rl,ru);
+    return UpperInterval(rl,ru);
 }
 
-inline Interval mul_ivl(Float x1, Float x2)
+inline UpperInterval mul_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double x1v=internal_cast<volatile double&>(x1);
@@ -614,10 +646,10 @@ inline Interval mul_ivl(Float x1, Float x2)
     set_rounding_mode(upward);
     volatile double ru=x1v*x2v;
     set_rounding_mode(rnd);
-    return Interval(rl,ru);
+    return UpperInterval(rl,ru);
 }
 
-inline Interval div_ivl(Float x1, Float x2)
+inline UpperInterval div_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double x1v=internal_cast<volatile double&>(x1);
@@ -627,185 +659,185 @@ inline Interval div_ivl(Float x1, Float x2)
     set_rounding_mode(upward);
     volatile double ru=x1v/x2v;
     set_rounding_mode(rnd);
-    return Interval(rl,ru);
+    return UpperInterval(rl,ru);
 }
 
-inline Interval pow_ivl(Float x1, int n2)
+inline UpperInterval pow_ivl(Float x1, int n2)
 {
-    return pow(Interval(x1),n2);
+    return pow(UpperInterval(x1),n2);
 }
 
-inline Interval med_ivl(Float x1, Float x2)
+inline UpperInterval med_ivl(Float x1, Float x2)
 {
     return add_ivl(half(x1),half(x2));
 }
 
-inline Interval rad_ivl(Float x1, Float x2)
+inline UpperInterval rad_ivl(Float x1, Float x2)
 {
     return sub_ivl(half(x2),half(x1));
 }
 
-inline Interval med_ivl(Interval i) {
+inline UpperInterval med_ivl(UpperInterval i) {
     return add_ivl(half(i.lower_raw()),half(i.upper_raw()));
 }
 
-inline Interval rad_ivl(Interval i) {
+inline UpperInterval rad_ivl(UpperInterval i) {
     return sub_ivl(half(i.upper_raw()),half(i.lower_raw()));
 }
 
 
-//! \related Interval \brief Unary plus operator. Should be implemented exactly and yield \f$\{ +x \mid x\in I\}\f$.
-inline Interval operator+(const Interval& i) { return Interval(i.lower_raw(),i.upper_raw()); }
-//! \related Interval \brief Unary negation operator. Should be implemented exactly and yield \f$\{ -x \mid x\in I\}\f$.
-inline Interval operator-(const Interval& i) { return Interval(-i.upper_raw(),-i.lower_raw()); }
-//! \related Interval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1+x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-inline Interval operator+(const Interval& i1, const Interval& i2) { return add(i1,i2); }
-//! \related Interval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1-x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-inline Interval operator-(const Interval& i1, const Interval& i2) { return sub(i1,i2); }
-//! \related Interval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1*x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
-inline Interval operator*(const Interval& i1, const Interval& i2) { return mul(i1,i2); }
-//! \related Interval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1/x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$. Yields \f$[-\infty,+\infty]\f$ if \f$0\in I_2\f$.
-inline Interval operator/(const Interval& i1, const Interval& i2) { return div(i1,i2); };
+//! \related UpperInterval \brief Unary plus operator. Should be implemented exactly and yield \f$\{ +x \mid x\in I\}\f$.
+inline UpperInterval operator+(const UpperInterval& i) { return UpperInterval(i.lower_raw(),i.upper_raw()); }
+//! \related UpperInterval \brief Unary negation operator. Should be implemented exactly and yield \f$\{ -x \mid x\in I\}\f$.
+inline UpperInterval operator-(const UpperInterval& i) { return UpperInterval(-i.upper_raw(),-i.lower_raw()); }
+//! \related UpperInterval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1+x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
+inline UpperInterval operator+(const UpperInterval& i1, const UpperInterval& i2) { return add(i1,i2); }
+//! \related UpperInterval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1-x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
+inline UpperInterval operator-(const UpperInterval& i1, const UpperInterval& i2) { return sub(i1,i2); }
+//! \related UpperInterval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1*x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
+inline UpperInterval operator*(const UpperInterval& i1, const UpperInterval& i2) { return mul(i1,i2); }
+//! \related UpperInterval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1/x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$. Yields \f$[-\infty,+\infty]\f$ if \f$0\in I_2\f$.
+inline UpperInterval operator/(const UpperInterval& i1, const UpperInterval& i2) { return div(i1,i2); };
 
-//! \related Interval \brief Inplace addition operator.
-inline Interval& operator+=(Interval& i1, const Interval& i2) { i1=add(i1,i2); return i1; }
-//! \related Interval \brief Inplace subtraction operator.
-inline Interval& operator-=(Interval& i1, const Interval& i2) { i1=sub(i1,i2); return i1; }
-//! \related Interval \brief Inplace multiplication operator.
-inline Interval& operator*=(Interval& i1, const Interval& i2) { i1=mul(i1,i2); return i1; }
-//! \related Interval \brief Inplace division operator.
-inline Interval& operator/=(Interval& i1, const Interval& i2) { i1=div(i1,i2); return i1; }
+//! \related UpperInterval \brief Inplace addition operator.
+inline UpperInterval& operator+=(UpperInterval& i1, const UpperInterval& i2) { i1=add(i1,i2); return i1; }
+//! \related UpperInterval \brief Inplace subtraction operator.
+inline UpperInterval& operator-=(UpperInterval& i1, const UpperInterval& i2) { i1=sub(i1,i2); return i1; }
+//! \related UpperInterval \brief Inplace multiplication operator.
+inline UpperInterval& operator*=(UpperInterval& i1, const UpperInterval& i2) { i1=mul(i1,i2); return i1; }
+//! \related UpperInterval \brief Inplace division operator.
+inline UpperInterval& operator/=(UpperInterval& i1, const UpperInterval& i2) { i1=div(i1,i2); return i1; }
 
-inline Interval operator+(const Interval& i1, const Float& x2) { return add(i1,x2); }
-inline Interval operator-(const Interval& i1, const Float& x2) { return sub(i1,x2); }
-inline Interval operator*(const Interval& i1, const Float& x2) { return mul(i1,x2); }
-inline Interval operator/(const Interval& i1, const Float& x2) { return div(i1,x2); }
-inline Interval operator+(const Float& x1, const Interval& i2) { return add(i2,x1); }
-inline Interval operator-(const Float& x1, const Interval& i2) { return sub(x1,i2); }
-inline Interval operator*(const Float& x1, const Interval& i2) { return mul(i2,x1); }
-inline Interval operator/(const Float& x1, const Interval& i2) { return div(x1,i2); }
+inline UpperInterval operator+(const UpperInterval& i1, const Float& x2) { return add(i1,x2); }
+inline UpperInterval operator-(const UpperInterval& i1, const Float& x2) { return sub(i1,x2); }
+inline UpperInterval operator*(const UpperInterval& i1, const Float& x2) { return mul(i1,x2); }
+inline UpperInterval operator/(const UpperInterval& i1, const Float& x2) { return div(i1,x2); }
+inline UpperInterval operator+(const Float& x1, const UpperInterval& i2) { return add(i2,x1); }
+inline UpperInterval operator-(const Float& x1, const UpperInterval& i2) { return sub(x1,i2); }
+inline UpperInterval operator*(const Float& x1, const UpperInterval& i2) { return mul(i2,x1); }
+inline UpperInterval operator/(const Float& x1, const UpperInterval& i2) { return div(x1,i2); }
 
-inline Interval operator+(const Interval& i1, const ExactFloat& x2) { return add(i1,static_cast<Interval>(x2)); }
-inline Interval operator-(const Interval& i1, const ExactFloat& x2) { return sub(i1,static_cast<Interval>(x2)); }
-inline Interval operator*(const Interval& i1, const ExactFloat& x2) { return mul(i1,static_cast<Interval>(x2)); }
-inline Interval operator/(const Interval& i1, const ExactFloat& x2) { return div(i1,static_cast<Interval>(x2)); }
-inline Interval operator+(const ExactFloat& x1, const Interval& i2) { return add(static_cast<Interval>(x1),i2); }
-inline Interval operator-(const ExactFloat& x1, const Interval& i2) { return sub(static_cast<Interval>(x1),i2); }
-inline Interval operator*(const ExactFloat& x1, const Interval& i2) { return mul(static_cast<Interval>(x1),i2); }
-inline Interval operator/(const ExactFloat& x1, const Interval& i2) { return div(static_cast<Interval>(x1),i2); }
+inline UpperInterval operator+(const UpperInterval& i1, const ExactFloat& x2) { return add(i1,static_cast<UpperInterval>(x2)); }
+inline UpperInterval operator-(const UpperInterval& i1, const ExactFloat& x2) { return sub(i1,static_cast<UpperInterval>(x2)); }
+inline UpperInterval operator*(const UpperInterval& i1, const ExactFloat& x2) { return mul(i1,static_cast<UpperInterval>(x2)); }
+inline UpperInterval operator/(const UpperInterval& i1, const ExactFloat& x2) { return div(i1,static_cast<UpperInterval>(x2)); }
+inline UpperInterval operator+(const ExactFloat& x1, const UpperInterval& i2) { return add(static_cast<UpperInterval>(x1),i2); }
+inline UpperInterval operator-(const ExactFloat& x1, const UpperInterval& i2) { return sub(static_cast<UpperInterval>(x1),i2); }
+inline UpperInterval operator*(const ExactFloat& x1, const UpperInterval& i2) { return mul(static_cast<UpperInterval>(x1),i2); }
+inline UpperInterval operator/(const ExactFloat& x1, const UpperInterval& i2) { return div(static_cast<UpperInterval>(x1),i2); }
 
-inline Interval& operator+=(Interval& i1, const ValidatedFloat& x2) { i1=add(i1,Interval(x2)); return i1; }
-inline Interval& operator-=(Interval& i1, const ValidatedFloat& x2) { i1=sub(i1,Interval(x2)); return i1; }
-inline Interval& operator*=(Interval& i1, const ValidatedFloat& x2) { i1=mul(i1,Interval(x2)); return i1; }
-inline Interval& operator/=(Interval& i1, const ValidatedFloat& x2) { i1=div(i1,Interval(x2)); return i1; }
+inline UpperInterval& operator+=(UpperInterval& i1, const ValidatedFloat& x2) { i1=add(i1,UpperInterval(x2)); return i1; }
+inline UpperInterval& operator-=(UpperInterval& i1, const ValidatedFloat& x2) { i1=sub(i1,UpperInterval(x2)); return i1; }
+inline UpperInterval& operator*=(UpperInterval& i1, const ValidatedFloat& x2) { i1=mul(i1,UpperInterval(x2)); return i1; }
+inline UpperInterval& operator/=(UpperInterval& i1, const ValidatedFloat& x2) { i1=div(i1,UpperInterval(x2)); return i1; }
 
-inline Interval& operator+=(Interval& i1, const Float& x2) { i1=add(i1,x2); return i1; }
-inline Interval& operator-=(Interval& i1, const Float& x2) { i1=sub(i1,x2); return i1; }
-inline Interval& operator*=(Interval& i1, const Float& x2) { i1=mul(i1,x2); return i1; }
-inline Interval& operator/=(Interval& i1, const Float& x2) { i1=div(i1,x2); return i1; }
+inline UpperInterval& operator+=(UpperInterval& i1, const Float& x2) { i1=add(i1,x2); return i1; }
+inline UpperInterval& operator-=(UpperInterval& i1, const Float& x2) { i1=sub(i1,x2); return i1; }
+inline UpperInterval& operator*=(UpperInterval& i1, const Float& x2) { i1=mul(i1,x2); return i1; }
+inline UpperInterval& operator/=(UpperInterval& i1, const Float& x2) { i1=div(i1,x2); return i1; }
 
-inline Interval operator+(const Interval& i1, double x2) { return add(i1,static_cast<Float>(x2)); }
-inline Interval operator+(double x1, const Interval& i2) { return add(i2,static_cast<Float>(x1)); }
-inline Interval operator-(const Interval& i1, double x2) { return sub(i1,static_cast<Float>(x2)); }
-inline Interval operator-(double x1, const Interval& i2) { return sub(static_cast<Float>(x1),i2); }
-inline Interval operator*(const Interval& i1, double x2) { return mul(i1,static_cast<Float>(x2)); }
-inline Interval operator*(double x1, const Interval& i2) { return mul(i2,static_cast<Float>(x1)); }
-inline Interval operator/(const Interval& i1, double x2) { return div(i1,static_cast<Float>(x2)); }
-inline Interval operator/(double x1, const Interval& i2) { return div(static_cast<Float>(x1),i2); }
+inline UpperInterval operator+(const UpperInterval& i1, double x2) { return add(i1,static_cast<Float>(x2)); }
+inline UpperInterval operator+(double x1, const UpperInterval& i2) { return add(i2,static_cast<Float>(x1)); }
+inline UpperInterval operator-(const UpperInterval& i1, double x2) { return sub(i1,static_cast<Float>(x2)); }
+inline UpperInterval operator-(double x1, const UpperInterval& i2) { return sub(static_cast<Float>(x1),i2); }
+inline UpperInterval operator*(const UpperInterval& i1, double x2) { return mul(i1,static_cast<Float>(x2)); }
+inline UpperInterval operator*(double x1, const UpperInterval& i2) { return mul(i2,static_cast<Float>(x1)); }
+inline UpperInterval operator/(const UpperInterval& i1, double x2) { return div(i1,static_cast<Float>(x2)); }
+inline UpperInterval operator/(double x1, const UpperInterval& i2) { return div(static_cast<Float>(x1),i2); }
 
-inline Interval& operator+=(Interval& i1, double x2) { i1=add(i1,static_cast<Float>(x2)); return i1; }
-inline Interval& operator-=(Interval& i1, double x2) { i1=sub(i1,static_cast<Float>(x2)); return i1; }
-inline Interval& operator*=(Interval& i1, double x2) { i1=mul(i1,static_cast<Float>(x2)); return i1; }
-inline Interval& operator/=(Interval& i1, double x2) { i1=div(i1,static_cast<Float>(x2)); return i1; }
+inline UpperInterval& operator+=(UpperInterval& i1, double x2) { i1=add(i1,static_cast<Float>(x2)); return i1; }
+inline UpperInterval& operator-=(UpperInterval& i1, double x2) { i1=sub(i1,static_cast<Float>(x2)); return i1; }
+inline UpperInterval& operator*=(UpperInterval& i1, double x2) { i1=mul(i1,static_cast<Float>(x2)); return i1; }
+inline UpperInterval& operator/=(UpperInterval& i1, double x2) { i1=div(i1,static_cast<Float>(x2)); return i1; }
 
-//inline Interval operator/(const Interval& i1, int n2) { return div(i1,Float(n2)); }
-//inline Interval operator/(const Interval& i1, double x2) { return div(i1,Float(x2)); }
+//inline UpperInterval operator/(const UpperInterval& i1, int n2) { return div(i1,Float(n2)); }
+//inline UpperInterval operator/(const UpperInterval& i1, double x2) { return div(i1,Float(x2)); }
 
 // Standard equality operators
-//! \related Interval \brief Equality operator. Tests equality of intervals as geometric objects, so \c [0,1]==[0,1] returns \c true.
-inline bool operator==(const Interval& i1, const Interval& i2) { return i1.lower_raw()==i2.lower_raw() && i1.upper_raw()==i2.upper_raw(); }
-//! \related Interval \brief Inequality operator. Tests equality of intervals as geometric objects, so \c [0,2]!=[1,3] returns \c true,
+//! \related UpperInterval \brief Equality operator. Tests equality of intervals as geometric objects, so \c [0,1]==[0,1] returns \c true.
+inline bool operator==(const UpperInterval& i1, const UpperInterval& i2) { return i1.lower_raw()==i2.lower_raw() && i1.upper_raw()==i2.upper_raw(); }
+//! \related UpperInterval \brief Inequality operator. Tests equality of intervals as geometric objects, so \c [0,2]!=[1,3] returns \c true,
 //! even though the intervals possibly represent the same exact real value.
-inline bool operator!=(const Interval& i1, const Interval& i2) { return i1.lower_raw()!=i2.lower_raw() || i1.upper_raw()!=i2.upper_raw(); }
+inline bool operator!=(const UpperInterval& i1, const UpperInterval& i2) { return i1.lower_raw()!=i2.lower_raw() || i1.upper_raw()!=i2.upper_raw(); }
 
 // Boost-style tribool (in)equality operators
-//inline tribool operator==(const Interval& i1, const Interval& i2) {
+//inline tribool operator==(const UpperInterval& i1, const UpperInterval& i2) {
 //  if(i1.lower_raw()>i2.upper_raw() || i1.upper_raw()<i2.lower_raw()) { return false; } else if(i1.lower_raw()==i2.upper_raw() && i1.upper_raw()==i2.lower_raw()) { return true; } else { return indeterminate; } }
-//inline tribool operator!=(const Interval& i1, const Interval& i2) { return !(i1==i2); }
+//inline tribool operator!=(const UpperInterval& i1, const UpperInterval& i2) { return !(i1==i2); }
 
-//! \related Interval \brief Equality operator. Tests equality of represented real-point value.
+//! \related UpperInterval \brief Equality operator. Tests equality of represented real-point value.
 //! Hence \c [0.0,2.0]==1.0 yields \c indeterminate since the interval may represent a real number other than \c 1.0 .
-inline tribool operator==(const Interval& i1, const Float& x2) {
+inline tribool operator==(const UpperInterval& i1, const Float& x2) {
     if(i1.upper_raw()<x2 || i1.lower_raw()>x2) { return false; }
     else if(i1.lower_raw()==x2 && i1.upper_raw()==x2) { return true; }
     else { return indeterminate; }
 }
 
-//! \related Interval \brief Equality operator. Tests equality of represented real-point value.
+//! \related UpperInterval \brief Equality operator. Tests equality of represented real-point value.
 //! Hence \c [0.0,2.0]!=1.0 yields \c indeterminate since the interval may represent a real number equal to \c 1.0 .
-inline tribool operator!=(const Interval& i1, const Float& x2) {
+inline tribool operator!=(const UpperInterval& i1, const Float& x2) {
     if(i1.upper_raw()<x2 || i1.lower_raw()>x2) { return true; }
     else if(i1.lower_raw()==x2 && i1.upper_raw()==x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator> (const Interval& i1, const Float& x2) {
+inline tribool operator> (const UpperInterval& i1, const Float& x2) {
     if(i1.lower_raw()> x2) { return true; }
     else if(i1.upper_raw()<=x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator< (const Interval& i1, const Float& x2) {
+inline tribool operator< (const UpperInterval& i1, const Float& x2) {
     if(i1.upper_raw()< x2) { return true; }
     else if(i1.lower_raw()>=x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator>=(const Interval& i1, const Float& x2) {
+inline tribool operator>=(const UpperInterval& i1, const Float& x2) {
     if(i1.lower_raw()>=x2) { return true; }
     else if(i1.upper_raw()< x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator<=(const Interval& i1, const Float& x2) {
+inline tribool operator<=(const UpperInterval& i1, const Float& x2) {
     if(i1.upper_raw()<=x2) { return true; }
     else if(i1.lower_raw()> x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator==(const Interval& i1, double x2) { return i1==static_cast<Float>(x2); }
-inline tribool operator!=(const Interval& i1, double x2) { return i1!=static_cast<Float>(x2); }
-inline tribool operator<=(const Interval& i1, double x2) { return i1<=static_cast<Float>(x2); }
-inline tribool operator>=(const Interval& i1, double x2) { return i1>=static_cast<Float>(x2); }
-inline tribool operator< (const Interval& i1, double x2) { return i1< static_cast<Float>(x2); }
-inline tribool operator> (const Interval& i1, double x2) { return i1> static_cast<Float>(x2); }
+inline tribool operator==(const UpperInterval& i1, double x2) { return i1==static_cast<Float>(x2); }
+inline tribool operator!=(const UpperInterval& i1, double x2) { return i1!=static_cast<Float>(x2); }
+inline tribool operator<=(const UpperInterval& i1, double x2) { return i1<=static_cast<Float>(x2); }
+inline tribool operator>=(const UpperInterval& i1, double x2) { return i1>=static_cast<Float>(x2); }
+inline tribool operator< (const UpperInterval& i1, double x2) { return i1< static_cast<Float>(x2); }
+inline tribool operator> (const UpperInterval& i1, double x2) { return i1> static_cast<Float>(x2); }
 
 
 
-//! \related Interval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+//! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
 //! Hence \c [1.0,3.0]>[0.0,2.0] yields \c indeterminate since the first interval could represent the number 1.25 and the second 1.75.
-inline tribool operator> (Interval i1, Interval i2) {
+inline tribool operator> (UpperInterval i1, UpperInterval i2) {
     if(i1.lower_raw()> i2.upper_raw()) { return true; }
     else if(i1.upper_raw()<=i2.lower_raw()) { return false; }
     else { return indeterminate; }
 }
 
-//! \related Interval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-inline tribool operator< (Interval i1, Interval i2) {
+//! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+inline tribool operator< (UpperInterval i1, UpperInterval i2) {
     if(i1.upper_raw()< i2.lower_raw()) { return true; }
     else if(i1.lower_raw()>=i2.upper_raw()) { return false; }
     else { return indeterminate; }
 }
 
-//! \related Interval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-inline tribool operator>=(Interval i1, Interval i2) {
+//! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+inline tribool operator>=(UpperInterval i1, UpperInterval i2) {
     if(i1.lower_raw()>=i2.upper_raw()) { return true; }
     else if(i1.upper_raw()< i2.lower_raw()) { return false; }
     else { return indeterminate; }
 }
 
-//! \related Interval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-inline tribool operator<=(Interval i1, Interval i2) {
+//! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
+inline tribool operator<=(UpperInterval i1, UpperInterval i2) {
     if(i1.upper_raw()<=i2.lower_raw()) { return true; }
     else if(i1.lower_raw()> i2.upper_raw()) { return false; }
     else { return indeterminate; }
@@ -820,6 +852,10 @@ std::ostream& operator<<(std::ostream&, const Interval&);
 std::istream& operator>>(std::istream&, Interval&);
 
 inline ValidatedNumberType make_singleton(Interval const& ivl) {
+    return ValidatedNumberType(ivl.lower_raw(),ivl.upper_raw());
+}
+
+inline ValidatedNumberType make_singleton(UpperInterval const& ivl) {
     return ValidatedNumberType(ivl.lower_raw(),ivl.upper_raw());
 }
 

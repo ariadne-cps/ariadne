@@ -81,7 +81,7 @@ class ConstraintSolverInterface {
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
     virtual Tribool check_feasibility(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain, const ExactPoint& point) const = 0;
     //! \brief Try to reduce the size of the domain by propagating interval constraints. Returns \c true if the reduced domain is empty.
-    virtual bool reduce(Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const = 0;
+    virtual bool reduce(UpperBox& domain, const ValidatedVectorFunction& function, const Box& codomain) const = 0;
 
 };
 
@@ -98,45 +98,45 @@ class ConstraintSolver
     //! \brief Test if \a point is in \a domain and the image of \a point under the function \a function lies in \a codomain.
     virtual Tribool check_feasibility(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain, const ExactPoint& point) const;
     //! \brief Try to reduce the size of the domain by propagating interval constraints.
-    virtual bool reduce(Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const;
+    virtual bool reduce(UpperBox& domain, const ValidatedVectorFunction& function, const Box& codomain) const;
 
 
     //! \brief Test if the constraints are solvable using a nonlinear feasibility test. Returns an approximate feasible point if the result is true. (Deprecated)
     virtual Pair<Tribool,ExactPoint> feasible(const Box& domain, const List<ValidatedConstraint>& constraints) const;
     //! \brief Try to reduce the size of the domain by propagating interval constraints. (Deprecated)
-    virtual bool reduce(Box& domain, const List<ValidatedConstraint>& constraints) const;
+    virtual bool reduce(UpperBox& domain, const List<ValidatedConstraint>& constraints) const;
 
     //! \brief Try to enforce hull consistency by propagating several interval constraints at once.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    bool hull_reduce(Box& bx, const ValidatedVectorFunctionInterface& function, const Box& codomain) const;
-    bool hull_reduce(Box& bx, const Vector<ValidatedProcedure>& procedure, const Box& codomain) const;
+    bool hull_reduce(UpperBox& bx, const ValidatedVectorFunctionInterface& function, const Box& codomain) const;
+    bool hull_reduce(UpperBox& bx, const Vector<ValidatedProcedure>& procedure, const Box& codomain) const;
     //! \brief Try to enforce hull consistency by propagating an interval constraint.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    bool hull_reduce(Box& bx, const ValidatedScalarFunctionInterface& function, const Interval& codomain) const;
-    bool hull_reduce(Box& bx, const ValidatedProcedure& procedure, const Interval& codomain) const;
+    bool hull_reduce(UpperBox& bx, const ValidatedScalarFunctionInterface& function, const Interval& codomain) const;
+    bool hull_reduce(UpperBox& bx, const ValidatedProcedure& procedure, const Interval& codomain) const;
 
     //! \brief Reduce the \a domain by testing intersection of \a multipliers inner product \a function(\a domain)
     //! with \a multipliers innner product \a codomain, centering at \a centre.
     //! Reduces \f$(\lambda\cdot f)(X) \cap (\lambda\cdot C)\f$, evaluating \f$g(x)=g(x^*)+Dg(X) (X-x^*)\f$.
-    bool lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const Box& codomain,
+    bool lyapunov_reduce(UpperBox& domain, const VectorTaylorFunction& function, const Box& codomain,
                          Vector<ExactFloatType> centre, Vector<ExactFloatType> multpliers) const;
-    bool lyapunov_reduce(Box& domain, const VectorTaylorFunction& function, const Box& codomain,
+    bool lyapunov_reduce(UpperBox& domain, const VectorTaylorFunction& function, const Box& codomain,
                          Vector<ApproximateNumberType> centre, Vector<ApproximateNumberType> multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.
-    bool box_reduce(Box& bx, const ValidatedScalarFunctionInterface& function, const Interval&, uint j) const;
+    bool box_reduce(UpperBox& bx, const ValidatedScalarFunctionInterface& function, const Interval&, uint j) const;
     //! \brief Try to enforce hull consistency by reducing an a monotone dimension.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    bool monotone_reduce(Box& bx, const ValidatedScalarFunctionInterface& function, const Interval&, uint j) const;
+    bool monotone_reduce(UpperBox& bx, const ValidatedScalarFunctionInterface& function, const Interval&, uint j) const;
 
     //! Split the domain into two pieces to help try to solve the constraints.
     Pair<Box,Box> split(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const;
 
     // Deprecated functions.
-    bool hull_reduce(Box& bx, const ValidatedConstraint& constraint) const {
+    bool hull_reduce(UpperBox& bx, const ValidatedConstraint& constraint) const {
         return this->hull_reduce(bx,constraint.function(),constraint.bounds()); }
-    bool box_reduce(Box& bx, const ValidatedConstraint& constraint, uint j) const {
+    bool box_reduce(UpperBox& bx, const ValidatedConstraint& constraint, uint j) const {
         return this->box_reduce(bx,constraint.function(),constraint.bounds(),j); }
-    bool monotone_reduce(Box& bx, const ValidatedConstraint& constraint, uint j) const {
+    bool monotone_reduce(UpperBox& bx, const ValidatedConstraint& constraint, uint j) const {
         return this->monotone_reduce(bx,constraint.function(),constraint.bounds(),j); }
 
 };

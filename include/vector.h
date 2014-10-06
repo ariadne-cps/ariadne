@@ -624,6 +624,8 @@ Vector<ExactFloatType>const& make_exact(const Vector<ApproximateFloatType>& av);
 Vector<ValidatedFloatType> make_bounds(const Vector<ErrorFloatType>& ev);
 Vector<ValidatedFloatType>const& make_singleton(const Vector<Interval>& ivlv);
 Matrix<ValidatedFloatType>const& make_singleton(const Matrix<Interval>& ivlA);
+Vector<ValidatedFloatType>const& make_singleton(const Vector<UpperInterval>& ivlv);
+Matrix<ValidatedFloatType>const& make_singleton(const Matrix<UpperInterval>& ivlA);
 
 UpperFloatType sup_error(const Vector<ValidatedFloatType>& x);
 Vector<ExactFloatType> midpoint(const Vector<ValidatedFloatType>& x);

@@ -138,12 +138,15 @@ template<class X> class Formula;
 template<class X> class Algebra;
 
 class Interval;
+class UpperInterval;
 class Box;
+class UpperBox;
 
 typedef Interval IntervalType;
 
 typedef Vector<Float> FloatVector;
 typedef Vector<Interval> IntervalVector;
+typedef Vector<UpperInterval> UpperIntervalVector;
 
 typedef Vector<RawFloatType> RawFloatVectorType;
 typedef Vector<ApproximateFloatType> ApproximateFloatVectorType;

@@ -54,11 +54,13 @@ template<class X> Point<X>* Point<X>::clone() const {
     return new Point<X>(*this);
 }
 
+UpperInterval operator+(ApproximateNumberType x, UpperInterval y) { return UpperInterval(x.raw())+y; }
+
 template<class X> Box Point<X>::bounding_box() const {
     Box r(this->dimension());
     Float e=eps();
     for(uint i=0; i!=this->dimension(); ++i) {
-        r[i]=make_interval((*this)[i])+Interval(-e,+e); }
+        r[i]=make_exact_interval((*this)[i]+UpperInterval(-e,+e)); }
     return r;
 }
 

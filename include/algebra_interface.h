@@ -104,7 +104,7 @@ template<class X> class NormedAlgebraInterface
     //! \brief A value \c c such that \c |a-c1| is approximately minimised.
     virtual ErrorType radius() const = 0;
     //! \brief The interval \c [c-r,c+r] where \c |a-c1|<=r.
-    virtual Interval range() const = 0;
+    virtual UpperInterval range() const = 0;
     //! \brief An over-approximation to the norm.
     virtual ErrorType norm() const = 0;
 };

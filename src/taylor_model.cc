@@ -1294,8 +1294,8 @@ ValidatedTaylorModel::tolerance() const
 
 
 ValidatedTaylorModel max(const ValidatedTaylorModel& x, const ValidatedTaylorModel& y) {
-    Interval xr=x.range();
-    Interval yr=y.range();
+    UpperInterval xr=x.range();
+    UpperInterval yr=y.range();
     if(xr.lower().raw()>=yr.upper().raw()) {
         return x;
     } else if(yr.lower().raw()>=xr.upper().raw()) {
@@ -1311,7 +1311,7 @@ ValidatedTaylorModel min(const ValidatedTaylorModel& x, const ValidatedTaylorMod
 }
 
 ValidatedTaylorModel abs(const ValidatedTaylorModel& x) {
-    Interval xr=x.range();
+    UpperInterval xr=x.range();
     if(xr.lower().raw()>=0.0) {
         return x;
     } else if(xr.upper().raw()<=0.0) {
@@ -1373,7 +1373,7 @@ ValidatedTaylorModel pow(const ValidatedTaylorModel& x, int n) {
 // Basic function operators (domain, range, evaluate)
 
 /* FIXME: The following code does not work with optimisation turned on using gcc */
-Interval _range1(const ValidatedTaylorModel& tm) {
+UpperInterval _range1(const ValidatedTaylorModel& tm) {
     set_rounding_mode(upward);
     VOLATILE Float t=tm.error().raw();
     VOLATILE Float v=0.0;
@@ -1385,17 +1385,17 @@ Interval _range1(const ValidatedTaylorModel& tm) {
         }
     }
     set_rounding_mode(to_nearest);
-    return v+Interval(-t,t);
+    return v+UpperInterval(-t,t);
 }
 
 
-Interval _range2(const ValidatedTaylorModel& tm) {
-    Interval r(-tm.error().raw(),+tm.error().raw());
+UpperInterval _range2(const ValidatedTaylorModel& tm) {
+    UpperInterval r(-tm.error().raw(),+tm.error().raw());
     for(ValidatedTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()==0) {
             r+=iter->data().raw();
         } else {
-            r+=abs(iter->data().raw())*Interval(-1,1);
+            r+=abs(iter->data().raw())*UpperInterval(-1,1);
         }
     }
     return r;
@@ -1403,11 +1403,11 @@ Interval _range2(const ValidatedTaylorModel& tm) {
 
 // Compute the range by grouping all quadratic terms x[i]^2 with linear terms x[i]
 // The range of ax^2+bx+c is a([-1,1]+b/2a)^2+(c-b^2/4a)
-Interval _range3(const ValidatedTaylorModel& tm) {
+UpperInterval _range3(const ValidatedTaylorModel& tm) {
     const uint as=tm.argument_size();
     Array<Float> linear_terms(as,0.0);
     Array<Float> quadratic_terms(as,0.0);
-    Interval r(-tm.error().raw(),+tm.error().raw());
+    UpperInterval r(-tm.error().raw(),+tm.error().raw());
     for(ValidatedTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()==0) {
             r+=iter->data().raw();
@@ -1418,10 +1418,10 @@ Interval _range3(const ValidatedTaylorModel& tm) {
         } else if(iter->key().degree()==2) {
             for(uint j=0; j!=tm.argument_size(); ++j) {
                 if(iter->key()[j]==2) { quadratic_terms[j]=iter->data().raw(); break; }
-                if(iter->key()[j]==1) { r+=abs(iter->data().raw())*Interval(-1,1); break; }
+                if(iter->key()[j]==1) { r+=abs(iter->data().raw())*UpperInterval(-1,1); break; }
             }
         } else {
-            r+=abs(iter->data().raw())*Interval(-1,1);
+            r+=abs(iter->data().raw())*UpperInterval(-1,1);
         }
     }
     // If the ratio b/a is very large, then roundoff error can cause a significant
@@ -1429,8 +1429,8 @@ Interval _range3(const ValidatedTaylorModel& tm) {
     for(uint j=0; j!=as; ++j) {
         const Float& a=quadratic_terms[j];
         const Float& b=linear_terms[j];
-        Interval ql=abs(a)*Interval(-1,1) + abs(b)*Interval(-1,+1);
-        Interval qf=a*(sqr(Interval(-1,+1)+Interval(b)/(2*a)))-sqr(Interval(b))/(4*a);
+        UpperInterval ql=abs(a)*UpperInterval(-1,1) + abs(b)*UpperInterval(-1,+1);
+        UpperInterval qf=a*(sqr(UpperInterval(-1,+1)+UpperInterval(b)/(2*a)))-sqr(UpperInterval(b))/(4*a);
         r += intersection(ql,qf); // NOTE: ql must be the first term in case of NaN in qf
     }
     return r;
@@ -1438,7 +1438,7 @@ Interval _range3(const ValidatedTaylorModel& tm) {
 
 
 
-Interval
+UpperInterval
 ValidatedTaylorModel::range() const {
     return Ariadne::_range3(*this);
 }
@@ -1502,7 +1502,7 @@ _compose1(const ValidatedSeriesFunctionPointer& fn, const ValidatedTaylorModel& 
     static const double TRUNCATION_ERROR=1e-8;
     uint d=DEGREE;
     ExactFloatType c=tm.value();
-    Interval r=tm.range();
+    UpperInterval r=tm.range();
     Series<ValidatedFloatType> centre_series=fn(d,c);
     Series<ValidatedFloatType> range_series=fn(d,static_cast<ValidatedFloatType>(r));
 
@@ -1536,7 +1536,7 @@ _compose2(const ValidatedSeriesFunctionPointer& fn, const ValidatedTaylorModel& 
     static const Float TRUNCATION_ERROR=1e-8;
     uint d=DEGREE;
     ExactFloatType c=tm.value();
-    Interval r=tm.range();
+    UpperInterval r=tm.range();
     Series<ValidatedFloatType> centre_series=fn(d,c);
     Series<ValidatedFloatType> range_series=fn(d,static_cast<ValidatedFloatType>(r));
 
@@ -1573,7 +1573,7 @@ _compose3(const ValidatedSeriesFunctionPointer& fn, const ValidatedTaylorModel& 
     static const Float TRUNCATION_ERROR=1e-8;
     uint d=DEGREE;
     ExactFloatType c=tm.value();
-    Interval r=tm.range();
+    UpperInterval r=tm.range();
     Series<ValidatedFloatType> centre_series=fn(d,c);
     Series<ValidatedFloatType> range_series=fn(d,static_cast<ValidatedFloatType>(r));
 
@@ -1625,7 +1625,7 @@ ValidatedTaylorModel sqrt(const ValidatedTaylorModel& x) {
     //std::cerr<<"rec(ValidatedTaylorModel)\n";
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
-    Interval r=x.range();
+    UpperInterval r=x.range();
 
     if(r.lower().raw()<=0) {
         ARIADNE_THROW(DomainException,"sqrt",x.range());
@@ -1706,7 +1706,7 @@ ValidatedTaylorModel rec(const ValidatedTaylorModel& x) {
 ValidatedTaylorModel log(const ValidatedTaylorModel& x) {
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
-    Interval r=x.range();
+    UpperInterval r=x.range();
     if(r.lower().raw()<=0) {
         ARIADNE_THROW(DomainException,"sqrt",x.range());
     }
@@ -2048,7 +2048,7 @@ ValidatedTaylorModel& ValidatedTaylorModel::restrict(const Vector<Interval>& nd)
     for(iterator iter=x.begin(); iter!=x.end(); ++iter) {
         for(uint j=0; j!=as; ++j) {
             Float& c=iter->data().raw();
-            Interval ci=Interval(c);
+            UpperInterval ci=UpperInterval(c);
             for(uint j=0; j!=as; ++j) {
                 ci*=sf[j][iter->key()[j]];
             }
@@ -2875,8 +2875,8 @@ ValidatedTaylorModel intersection(const ValidatedTaylorModel& x, const Validated
     return r;
 }
 
-Vector<Interval> ranges(const Vector<ValidatedTaylorModel>& f) {
-    Vector<Interval> r(f.size()); for(uint i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
+Vector<UpperInterval> ranges(const Vector<ValidatedTaylorModel>& f) {
+    Vector<UpperInterval> r(f.size()); for(uint i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
 }
 
 inline Vector<ValidatedTaylorModel>& clobber(Vector<ValidatedTaylorModel>& h) {
@@ -2997,12 +2997,12 @@ jacobian2_value(const Vector<ValidatedTaylorModel>& f)
 
 
 // Compute the Jacobian over the unit domain
-Matrix<Interval>
+Matrix<UpperInterval>
 jacobian_range(const Vector<ValidatedTaylorModel>& f)
 {
     uint rs=f.size();
     uint as=f.zero_element().argument_size();
-    Matrix<Interval> J(rs,as);
+    Matrix<UpperInterval> J(rs,as);
     for(uint i=0; i!=rs; ++i) {
         for(ValidatedTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             for(uint k=0; k!=as; ++k) {
@@ -3010,7 +3010,7 @@ jacobian_range(const Vector<ValidatedTaylorModel>& f)
                 if(c>0) {
                     const Float& x=iter->data().raw();
                     if(iter->key().degree()==1) { J[i][k]+=x; }
-                    else { J[i][k]+=Interval(-1,1)*x*c; }
+                    else { J[i][k]+=UpperInterval(-1,1)*x*c; }
                     //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
                 }
             }
@@ -3020,13 +3020,13 @@ jacobian_range(const Vector<ValidatedTaylorModel>& f)
 }
 
 // Compute the Jacobian over the unit domain
-Matrix<Interval>
+Matrix<UpperInterval>
 jacobian2_range(const Vector<ValidatedTaylorModel>& f)
 {
     uint rs=f.size();
     uint fas=f.zero_element().argument_size();
     uint has=fas-rs;
-    Matrix<Interval> J(rs,rs);
+    Matrix<UpperInterval> J(rs,rs);
     for(uint i=0; i!=rs; ++i) {
         for(ValidatedTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             for(uint k=0; k!=rs; ++k) {
@@ -3034,7 +3034,7 @@ jacobian2_range(const Vector<ValidatedTaylorModel>& f)
                 if(c>0) {
                     const Float& x=iter->data().raw();
                     if(iter->key().degree()==1) { J[i][k]+=x; }
-                    else { J[i][k]+=Interval(-1,1)*x*c; }
+                    else { J[i][k]+=UpperInterval(-1,1)*x*c; }
                     //std::cerr<<"  J="<<J<<" i="<<i<<" a="<<iter->key()<<" k="<<k<<" c="<<c<<" x="<<x<<std::endl;
                 }
             }
@@ -3056,7 +3056,7 @@ jacobian2_value(const ValidatedTaylorModel& f)
     return jacobian2_value(Vector<ValidatedTaylorModel>(1u,f))[0][0];
 }
 
-Interval jacobian2_range(const ValidatedTaylorModel& f) {
+UpperInterval jacobian2_range(const ValidatedTaylorModel& f) {
     return jacobian2_range(Vector<ValidatedTaylorModel>(1u,f))[0][0];
 }
 
@@ -3372,8 +3372,8 @@ ErrorType ApproximateTaylorModel::radius() const {
     return ErrorType(r.raw());
 }
 
-Interval ApproximateTaylorModel::range() const {
-    ErrorType rad=this->radius(); return this->average()+Interval(-rad.raw(),+rad.raw());
+UpperInterval ApproximateTaylorModel::range() const {
+    ErrorType rad=this->radius(); return this->average()+UpperInterval(-rad.raw(),+rad.raw());
 }
 
 Float ApproximateTaylorModel::tolerance() const {

@@ -55,6 +55,7 @@ class SingularMatrixException {
 template<class X> class Matrix;
 typedef Matrix<Float> FloatMatrix;
 typedef Matrix<Interval> IntervalMatrix;
+typedef Matrix<UpperInterval> UpperIntervalMatrix;
 
 typedef Matrix<ApproximateFloat> ApproximateFloatMatrix;
 typedef Matrix<ValidatedFloat> ValidatedFloatMatrix;
@@ -251,6 +252,7 @@ class Matrix
 
     //! \brief The midpoint of an interval matrix.
     friend Matrix<Float> midpoint(const Matrix<Interval>& A);
+    friend Matrix<Float> midpoint(const Matrix<UpperInterval>& A);
 
     //! \brief Write to an output stream.
     friend template<class X> std::ostream& operator<<(std::ostream& os, const Matrix<X>& A);
@@ -714,7 +716,10 @@ Matrix<ApproximateFloatType> triangular_multiplier(const Matrix<ApproximateFloat
 Tuple< Matrix<ApproximateFloatType>, Matrix<ApproximateFloatType>, PivotMatrix > orthogonal_decomposition(const Matrix<ApproximateFloatType>&, bool allow_pivoting=true);
 Matrix<ApproximateFloatType> normalise_rows(const Matrix<ApproximateFloatType>& A);
 
+Matrix<ExactFloat> midpoint(const Matrix<ValidatedFloat>&);
 Matrix<Float> midpoint(const Matrix<Interval>&);
+Matrix<Float> midpoint(const Matrix<UpperInterval>&);
+Matrix<Rational> midpoint(const Matrix<Rational>&);
 
 inline std::ostream& operator<<(std::ostream& os, const Pretty< ValidatedFloatType >& pI) {
     ValidatedFloatType const& I(pI); return os << std::setprecision(5) << std::fixed << "{" << std::setw(8) << I.lower() << ":" << std::setw(8) << I.upper() << "}";

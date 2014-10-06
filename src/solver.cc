@@ -41,8 +41,8 @@ namespace Ariadne {
 
 namespace {
 
-Vector<Interval> ranges(const Vector<ValidatedTaylorModel>& f) {
-    Vector<Interval> r(f.size()); for(uint i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
+Vector<UpperInterval> ranges(const Vector<ValidatedTaylorModel>& f) {
+    Vector<UpperInterval> r(f.size()); for(uint i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
 }
 
 Vector<ValidatedTaylorModel>& clobber(Vector<ValidatedTaylorModel>& h) {
@@ -540,10 +540,10 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     }
     ARIADNE_LOG(7,"J="<<J<<"\n");
 
-    Matrix<Interval> rngJ(n,n);
+    Matrix<UpperInterval> rngJ(n,n);
     for(uint i=0; i!=n; ++i) {
         for(uint j=0; j!=n; ++j) {
-            Interval D2fij=Interval(unchecked_evaluate(D2f[i][j],make_singleton(join(id.range(),h.range()))));
+            UpperInterval D2fij=Interval(unchecked_evaluate(D2f[i][j],make_singleton(join(id.range(),h.range()))));
             rngJ[i][j]=intersection(J[i][j].range(),D2fij);
         }
     }

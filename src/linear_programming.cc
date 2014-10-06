@@ -307,7 +307,7 @@ feasible(const Vector<Float>& xl, const Vector<Float>& xu,
         if(xl[i]==-inf) { zl[i] = 0.0; } else { zl[i] = 1.0; }
         if(xu[i]==+inf) { zu[i] = 0.0; } else { zu[i] = 1.0; }
     }
-    Vector<Interval> X=hull(xl,xu);
+    Vector<UpperInterval> X=hull(xl,xu);
 
     const double THRESHOLD = 1e-8;
     uint step=0;
@@ -317,8 +317,8 @@ feasible(const Vector<Float>& xl, const Vector<Float>& xu,
             tribool validated_feasible=this->validate_feasibility(xl,xu,A,b, x,y);
             if(definitely(validated_feasible)) { return true; }
         }
-        Interval yb=dot(IntervalVector(y),IntervalVector(b));
-        Interval yAX = dot( IntervalVector(y)*IntervalMatrix(A), X );
+        UpperInterval yb=dot(UpperIntervalVector(y),UpperIntervalVector(b));
+        UpperInterval yAX = dot( UpperIntervalVector(y)*UpperIntervalMatrix(A), X );
         if(disjoint(yb,yAX)) { return false; }
         if(result==DEGENERATE_FEASIBILITY) { ARIADNE_LOG(2,"  degenerate\n"); return indeterminate; }
         if(compute_mu(xl,xu, x,zl,zu)<THRESHOLD ) { ARIADNE_LOG(2,"  threshold\n"); return indeterminate; }

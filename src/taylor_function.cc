@@ -856,10 +856,10 @@ value(const Vector<ScalarTaylorFunction>& x)
     return r;
 }
 
-Vector<Interval>
+Vector<UpperInterval>
 ranges(const Vector<ScalarTaylorFunction>& x)
 {
-    Vector<Interval> r(x.size());
+    Vector<UpperInterval> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
         r[i]=x[i].range();
     }
@@ -1202,20 +1202,20 @@ VectorTaylorFunction::codomain() const
 {
     Box result(this->result_size());
     for(uint i=0; i!=result.size(); ++i) {
-        result[i]=this->_models[i].range();
+        result[i]=this->_models[i].codomain();
     }
     return result;
 }
 
 
-const Box
+const UpperBox
 VectorTaylorFunction::range() const
 {
-    Vector<Interval> result(this->result_size());
+    Vector<UpperInterval> result(this->result_size());
     for(uint i=0; i!=result.size(); ++i) {
         result[i]=this->_models[i].range();
     }
-    return result;
+    return UpperBox(result);
 }
 
 

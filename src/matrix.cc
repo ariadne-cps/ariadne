@@ -50,7 +50,7 @@ midpoint(const Matrix<ValidatedFloatType>& A) {
 }
 
 Matrix<Float>
-midpoint(const Matrix<Interval>& A) {
+midpoint(const Matrix<UpperInterval>& A) {
     Matrix<Float> R(A.row_size(),A.column_size());
     for(size_t i=0; i!=A.row_size(); ++i) {
         for(size_t j=0; j!=A.column_size(); ++j) {
@@ -827,7 +827,7 @@ template Matrix<RawFloatType> inverse(const Matrix<RawFloatType>&);
 template Matrix<RawFloatType> solve(const Matrix<RawFloatType>&, const Matrix<RawFloatType>&);
 template Vector<RawFloatType> solve(const Matrix<RawFloatType>&, const Vector<RawFloatType>&);
 
-template Matrix<Interval> inverse(const Matrix<Interval>&);
+template Matrix<UpperInterval> inverse(const Matrix<UpperInterval>&);
 
 template class Matrix<ApproximateFloatType>;
 template Matrix<ApproximateFloatType> inverse(const Matrix<ApproximateFloatType>&);

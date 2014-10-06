@@ -116,13 +116,10 @@ class Box
     //! giving lower and upper bounds.
     Box(std::initializer_list<Interval> lst);
 
+    explicit Box(uint d, Interval ivl) : Vector<Interval>(d,ivl) { }
     explicit Box(const Vector<ValidatedFloat>& vec) : Vector<Interval>(vec) { }
     Box(const Vector<Interval>& ivec) : Vector<Interval>(ivec) { }
     Box(const List<Interval>& ilst) : Vector<Interval>(ilst) { }
-
-    // Templated constructor; useful for automatic conversion from vector expressions
-    template<class E> Box(const VectorExpression<E>& t) : Vector<Interval>(t) { }
-    template<class T1, class T2> Box(const T1& t1, const T2& t2) : Vector<Interval>(t1,t2) { }
 
     //! Construct from a string literal of the form "[a1,b1]x[a2,b2]x...x[ad,bd]".
     explicit Box(const std::string& str);
@@ -283,6 +280,10 @@ class Box
     virtual std::ostream& write(std::ostream& os) const {
         return os << *static_cast<const Vector<Interval>*>(this);
     }
+
+    operator UpperBox & () { return reinterpret_cast<UpperBox&>(static_cast<Vector<Interval>&>(*this)); }
+    operator UpperBox const& () const { return reinterpret_cast<UpperBox const&>(static_cast<Vector<Interval>const&>(*this)); }
+    operator Vector<UpperInterval> const& () const { return reinterpret_cast<Vector<UpperInterval>const&>(static_cast<Vector<Interval>const&>(*this)); }
 };
 
 //! \relates Box \brief The cartesian product of two boxes.
@@ -315,6 +316,10 @@ class UpperBox
     //! Construct from an initializer list of pairs of floating-point values
     //! giving lower and upper bounds.
     UpperBox(std::initializer_list<UpperInterval> lst);
+
+    UpperBox(Vector<Interval>const& vec) : Vector<UpperInterval>(vec) { }
+    UpperBox(Vector<UpperInterval>const& vec) : Vector<UpperInterval>(vec) { }
+    template<class E> UpperBox(const VectorExpression<E>& t) : Vector<UpperInterval>(t) { }
 
     explicit UpperBox(const Vector<ValidatedFloat>& vec) : Vector<UpperInterval>(vec) { }
 
@@ -366,6 +371,17 @@ class UpperBox
         return true;
     }
 
+    friend bool refines(const UpperBox& bx1, const UpperBox& bx2) {
+        return bx1.refines(bx2);
+    }
+
+    friend UpperBox intersection(const UpperBox& bx1, const UpperBox& bx2) {
+        assert(bx1.dimension()==bx2.dimension());
+        UpperBox rbx(bx1.dimension());
+        for(uint i=0; i!=rbx.dimension(); ++i) { rbx[i]=intersection(bx1[i],bx2[i]); }
+        return rbx;
+    }
+
     //! \brief Test if the box intersects another box. Returns \a false even
     //! if the intersection only occurs only on the boundary of the boxes.
     Tribool disjoint(const UpperBox& bx) const {
@@ -374,9 +390,21 @@ class UpperBox
         return indeterminate;
     }
 
+    friend Tribool disjoint(const UpperBox& bx1, const UpperBox& bx2) {
+        return bx1.disjoint(bx2);
+    }
+
     //! \brief The dimension of the space the box lies in.
     uint dimension() const {
         return this->size();
+    }
+
+    //! \brief Tests if the box is disjoint from another box.
+    //! Only returns true if the closures are disjoint.
+    tribool empty() const{
+        for(uint i=0; i!=this->dimension(); ++i) {
+            if((*this)[i].empty()) { return true; } }
+        return indeterminate;
     }
 
     //! \brief Tests if the box is disjoint from another box.
@@ -412,6 +440,8 @@ class UpperBox
     }
 };
 
+inline Box make_exact_box(UpperBox const& ubx) { return Box(reinterpret_cast<Vector<Interval>const&>(static_cast<Vector<UpperInterval>const&>(ubx))); }
+Tribool disjoint(const UpperBox& bx1, const UpperBox& bx2);
 
 } // namespace Ariadne
 

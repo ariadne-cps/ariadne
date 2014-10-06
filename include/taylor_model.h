@@ -271,7 +271,7 @@ class TaylorModel<ValidatedTag>
     //! \brief The codomain of the quantity.
     Interval codomain() const;
     //! \brief An over-approximation to the range of the quantity.
-    Interval range() const;
+    UpperInterval range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
     Interval gradient_range(uint j) const;
 
@@ -554,9 +554,9 @@ class TaylorModel<ApproximateTag>
     //! \brief A coarse over-approximation to the range of the quantity.
     Interval codomain() const;
     //! \brief An over-approximation to the range of the quantity.
-    Interval range() const;
+    UpperInterval range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
-    Interval gradient_range(uint j) const;
+    UpperInterval gradient_range(uint j) const;
     //@}
 
     //@{

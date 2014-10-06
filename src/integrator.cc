@@ -39,15 +39,21 @@
 
 #include "polynomial.h"
 #include "function.h"
+#include "interval.h"
 
 namespace Ariadne {
 
-Vector<Interval> operator+(Vector<Interval> bx, Vector<ValidatedFloatType> const& v) {
+inline Vector<UpperInterval> operator+(Vector<UpperInterval> bx, Vector<ValidatedFloatType> const& v) {
     for(uint i=0; i!=bx.size(); ++i) {
-        bx[i]=bx[i]+Interval(v[i]);
+        bx[i]=bx[i]+UpperInterval(v[i]);
     }
     return bx;
 }
+
+inline UpperBox operator+(Vector<Interval> bx, Vector<UpperInterval> const& ex) {
+    return Vector<UpperInterval>(bx) + ex;
+}
+
 
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory();
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory(double s);
@@ -78,7 +84,7 @@ IntegratorBase::function_factory() const
     return *this->_function_factory_ptr;
 }
 
-Pair<ExactFloatType,Box>
+Pair<ExactFloatType,UpperBox>
 IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const Box& domx, const RawFloatType& hmax) const
 {
     ARIADNE_LOG(3,"IntegratorBase::flow_bounds(ValidatedVectorFunction vf, Box domx, Float hmax)\n");
@@ -110,9 +116,9 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const Box& domx, 
     ARIADNE_LOG(4,"L="<<lip<<", hL="<<hlip<<", hmax="<<hmax<<"\n");
 
     bool success=false;
-    Box bx,nbx;
-    Vector<Interval> df;
-    Interval ih(0,h);
+    UpperBox bx,nbx;
+    Vector<UpperInterval> df;
+    UpperInterval ih(0,h);
     ValidatedFloatType vh(0,h);
 
     while(!success) {
@@ -122,7 +128,7 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const Box& domx, 
         for(uint i=0; i!=EXPANSION_STEPS; ++i) {
             df=evaluate(vf,bx);
             nbx=domx+delta+ih*df;
-            if(subset(nbx,bx)) {
+            if(refines(nbx,bx)) {
                 success=true;
                 break;
             } else {
@@ -135,29 +141,29 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const Box& domx, 
         }
     }
 
-    ARIADNE_ASSERT(subset(nbx,bx));
+    ARIADNE_ASSERT(refines(nbx,bx));
 
-    Vector<Interval> vfbx;
+    Vector<UpperInterval> vfbx;
     vfbx=evaluate(vf,bx);
 
     for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
         bx=nbx;
         vfbx=evaluate(vf,bx);
         nbx=domx+delta+ih*vfbx;
-        ARIADNE_ASSERT_MSG(subset(nbx,bx),std::setprecision(20)<<"refinement "<<i<<": "<<nbx<<" is not a inside of "<<bx);
+        ARIADNE_ASSERT_MSG(refines(nbx,bx),std::setprecision(20)<<"refinement "<<i<<": "<<nbx<<" is not a inside of "<<bx);
     }
 
 
     // Check result of operation
     // We use subset rather than inner subset here since the bound may touch
-    ARIADNE_ASSERT(subset(nbx,bx));
+    ARIADNE_ASSERT(refines(nbx,bx));
 
     bx=nbx;
 
 
-    ARIADNE_ASSERT(subset(domx,bx));
+    ARIADNE_ASSERT(refines(domx,bx));
 
-    ARIADNE_ASSERT_MSG(subset(domx+ih*evaluate(vf,bx),bx),
+    ARIADNE_ASSERT_MSG(refines(domx+ih*apply(vf,bx),bx),
         "d="<<dx<<"\nh="<<h<<"\nf(b)="<<evaluate(vf,bx)<<"\nd+hf(b)="<<(domx+ih*evaluate(vf,bx))<<"\nb="<<bx<<"\n");
 
     return std::make_pair(ExactFloatType(h),bx);
@@ -178,10 +184,10 @@ IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const Box& dx0, const
     Rational t=0.0;
     ValidatedVectorFunctionModel step_function;
     while(t<tmax) {
-        Box dx=flow_function.range();
+        Box dx=flow_function.codomain();
         RawFloatType h_max=static_cast<RawFloatType>(ValidatedFloatType(tmax-Real(t)));
         ExactFloatType h;
-        Box bx;
+        UpperBox bx;
         make_lpair(h,bx) = this->flow_bounds(vf,dx,h_max);
         bool flow_successfully_computed=false;
         while(!flow_successfully_computed) {
@@ -211,9 +217,9 @@ IntegratorBase::flow(const ValidatedVectorFunction& vf, const Box& dx0, const Re
     List<ValidatedVectorFunctionModel> result;
 
     while(t<tmaxu) {
-        Box dx=evolve_function.range();
+        Box dx=evolve_function.codomain();
         ExactFloatType h=make_exact(tmaxu-t);
-        Box bx;
+        UpperBox bx;
         make_lpair(h,bx) = this->flow_bounds(vf,dx,h.raw());
         ValidatedVectorFunctionModel flow_step_function=this->flow_step(vf,dx,h,bx);
         ExactFloatType new_t=make_exact((t+h).lower());
@@ -241,7 +247,7 @@ IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const Box& dx, Floa
 {
     ARIADNE_LOG(3,"IntegratorBase::flow_step(ValidatedVectorFunction vf, Box dx, Float hmax)\n");
     ExactFloatType& h=reinterpret_cast<ExactFloatType&>(hmax);
-    Box bx;
+    UpperBox bx;
     make_lpair(h,bx)=this->flow_bounds(vf,dx,hmax);
     while(true) {
         try {
@@ -253,9 +259,9 @@ IntegratorBase::flow_step(const ValidatedVectorFunction& vf, const Box& dx, Floa
 }
 
 ValidatedVectorFunctionModel
-TaylorPicardIntegrator::flow_step(const ValidatedVectorFunction& f, const Box& dx, const ExactFloatType& h, const Box& bx) const
+TaylorPicardIntegrator::flow_step(const ValidatedVectorFunction& f, const Box& dx, const ExactFloatType& h, const UpperBox& bx) const
 {
-    ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorFunction vf, Box dx, ExactFloat h, Box bx)\n");
+    ARIADNE_LOG(3,"TaylorPicardIntegrator::flow_step(ValidatedVectorFunction vf, Box dx, ExactFloat h, UpperBox bx)\n");
     ARIADNE_LOG(3," dx="<<dx<<" h="<<h<<" bx="<<bx<<"\n");
     const uint nx=dx.size();
     Sweeper sweeper(new ThresholdSweeper(this->_step_sweep_threshold));
@@ -364,7 +370,7 @@ template<class F> GradedValidatedDifferential flow(const F& f, const Interval& c
     return y;
 }
 
-Vector< GradedValidatedDifferential > flow(const Vector<ValidatedProcedure>& f, const Box& c, Nat M, Nat N) {
+Vector< GradedValidatedDifferential > flow(const Vector<ValidatedProcedure>& f, const UpperBox& c, Nat M, Nat N) {
     GradedValidatedDifferential null;
     Vector< GradedValidatedDifferential > y(f.result_size(),null);
     Vector< GradedValidatedDifferential > fy(f.result_size(),null);
@@ -412,7 +418,7 @@ void flow_init(const Vector<ValidatedProcedure>& p,
     fy=Vector< GradedValidatedDifferential >(p.result_size(),null);
     t=List< GradedValidatedDifferential >(p.temporaries_size(),null);
     for(Nat i=0; i!=y.size(); ++i) {
-        y[i]=GradedValidatedDifferential(Differential<Interval>::variable(y.size(),so,Interval(0.0),i)*r[i]+x[i]);
+        y[i]=GradedValidatedDifferential(Differential<UpperInterval>::variable(y.size(),so,UpperInterval(0.0),i)*r[i]+x[i]);
     }
 }
 
@@ -495,7 +501,7 @@ VectorTaylorFunction flow_function(const Vector<ValidatedDifferential>& dphi, co
 }
 
 ValidatedVectorFunctionModel
-differential_flow_step(const ValidatedVectorFunction& f, const Box& dx, const ExactFloat& flth, const Box& bx,
+differential_flow_step(const ValidatedVectorFunction& f, const Box& dx, const ExactFloat& flth, const UpperBox& bx,
                        double swpt, uint so, uint to, uint verbosity=0)
 {
     uint n=f.result_size();
@@ -548,7 +554,7 @@ differential_flow_step(const ValidatedVectorFunction& f, const Box& dx, const Ex
 }
 
 ValidatedVectorFunctionModel
-differential_space_time_flow_step(const ValidatedVectorFunction& f, const Box& dx, const Float& h, const Box& bx,
+differential_space_time_flow_step(const ValidatedVectorFunction& f, const Box& dx, const Float& h, const UpperBox& bx,
                                   double swpt, uint so, uint to, uint verbosity=0)
 {
     uint n=f.result_size();
@@ -602,7 +608,7 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const Box& d
 }
 
 ValidatedVectorFunctionModel
-series_flow_step(const ValidatedVectorFunction& f, const Box& bdx, const ExactFloatType& h, const Box& bbx,
+series_flow_step(const ValidatedVectorFunction& f, const Box& bdx, const ExactFloatType& h, const UpperBox& bbx,
                  double max_err, double swpt, uint init_so, uint init_to, uint max_so, uint max_to, uint verbosity)
 {
     static const double TRY_SPACIAL_ORDER_INCREASE_FACTOR=4;
@@ -718,7 +724,7 @@ series_flow_step(const ValidatedVectorFunction& f, const Box& bdx, const ExactFl
 }
 
 ValidatedVectorFunctionModel
-TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const Box& dx, const ExactFloatType& h, const Box& bx) const
+TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const Box& dx, const ExactFloatType& h, const UpperBox& bx) const
 {
     ValidatedVectorFunctionModel tphi=Ariadne::series_flow_step(f,dx,h,bx,
         this->step_maximum_error(),this->step_sweep_threshold(),
@@ -738,7 +744,7 @@ TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const Box& d
     return tphi;
 }
 
-Pair<ExactFloatType,Box>
+Pair<ExactFloatType,UpperBox>
 TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Box& dx, const Float& hmax) const
 {
     ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_bounds(ValidatedVectorFunction vf, Box dx, Float hmax)\n");
@@ -763,9 +769,9 @@ TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Box
     ARIADNE_LOG(4,"hmax="<<hmax<<"\n");
 
     bool success=false;
-    Box bx,nbx;
-    Vector<Interval> df;
-    Interval ih(0,h);
+    UpperBox bx,nbx;
+    Vector<UpperInterval> df;
+    UpperInterval ih(0,h);
 
     while(!success) {
         ARIADNE_ASSERT_MSG(h>=hmin," h="<<h<<", hmin="<<hmin);
@@ -773,7 +779,7 @@ TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Box
         for(uint i=0; i!=EXPANSION_STEPS; ++i) {
             df=apply(vf,bx);
             nbx=dx+delta+ih*df;
-            if(subset(nbx,bx)) {
+            if(refines(nbx,bx)) {
                 success=true;
                 break;
             } else {
@@ -782,33 +788,32 @@ TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Box
         }
         if(!success) {
             h/=2;
-            ih=Interval(0,h);
+            ih=UpperInterval(0,h);
         }
     }
 
-    ARIADNE_ASSERT(subset(nbx,bx));
+    ARIADNE_ASSERT(refines(nbx,bx));
 
-    Vector<Interval> vfbx;
+    Vector<UpperInterval> vfbx;
     vfbx=apply(vf,bx);
 
     for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
         bx=nbx;
         vfbx=apply(vf,bx);
         nbx=dx+delta+ih*vfbx;
-        ARIADNE_ASSERT_MSG(subset(nbx,bx),std::setprecision(20)<<"refinement "<<i<<": "<<nbx<<" is not a inside of "<<bx);
+        ARIADNE_ASSERT_MSG(refines(nbx,bx),std::setprecision(20)<<"refinement "<<i<<": "<<nbx<<" is not a inside of "<<bx);
     }
 
 
     // Check result of operation
-    // We use subset rather than inner subset here since the bound may touch
-    ARIADNE_ASSERT(subset(nbx,bx));
+    ARIADNE_ASSERT(refines(nbx,bx));
 
     bx=nbx;
 
 
-    ARIADNE_ASSERT(subset(dx,bx));
+    ARIADNE_ASSERT(refines(dx,bx));
 
-    ARIADNE_ASSERT_MSG(subset(dx+make_exact(h)*apply(vf,bx),bx),
+    ARIADNE_ASSERT_MSG(refines(dx+make_exact(h)*apply(vf,bx),bx),
         "d="<<dx<<"\nh="<<h<<"\nf(b)="<<apply(vf,bx)<<"\nd+hf(b)="<<(dx+make_exact(h)*apply(vf,bx))<<"\nb="<<bx<<"\n");
 
     return std::make_pair(ExactFloatType(h),bx);
@@ -867,7 +872,7 @@ AffineIntegrator::flow_derivative(const ValidatedVectorFunction& f, const Vector
 }
 
 ValidatedVectorFunctionModel
-AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const Box& dom, const ExactFloat& h, const Box& bbox) const
+AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const Box& dom, const ExactFloat& h, const UpperBox& bbox) const
 {
     Vector<ValidatedNumberType> mid = Vector<ValidatedNumberType>(midpoint(dom));
 

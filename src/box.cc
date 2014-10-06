@@ -208,7 +208,12 @@ Box make_box(const std::string& str)
     if(ss) {
         ss.putback(c);
     }
-    return Box(vec.size(),&vec[0]);
+
+    Box bx(vec.size());
+    for(uint i=0; i!=bx.dimension(); ++i) {
+        bx[i]=vec[i];
+    }
+    return bx;
 }
 
 } //namespace Ariadne

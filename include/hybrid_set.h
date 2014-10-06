@@ -817,11 +817,6 @@ HybridSetConstIterator<DS,HBS>::increment_loc()
     }
 }
 
-#ifdef ARIADNE_ENABLE_SERIALIZATION
-  template<class A> void serialize(A& archive, HybridGridTreeSet& set, const unsigned int version) {
-      archive & static_cast<std::map<DiscreteLocation,GridTreeSet>&>(set); }
-#endif /* ARIADNE_ENABLE_SERIALIZATION */
-
 
 } // namespace Ariadne
 

@@ -6,5 +6,6 @@
 #cmakedefine HAVE_CAIRO_H
 
 #cmakedefine HAVE_LIBBOOST_SERIALIZATION
+#cmakedefine ARIADNE_ENABLE_SERIALIZATION
 
 #endif /* ARIADNE_CONFIG_H */

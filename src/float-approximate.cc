@@ -70,29 +70,3 @@ ApproximateFloat::ApproximateFloat(Rational const& q) : ApproximateFloat(q.get_d
 #endif
 
 } // namespace Ariadne
-
-
-#ifdef ARIADNE_ENABLE_SERIALIZATION
-
-#include "serialization.h"
-
-namespace Ariadne {
-
-void serialize(boost::archive::text_oarchive& a, Float& flt, const unsigned int v) {
-    const double x=flt.get_d();
-    a << x;
-};
-
-void serialize(boost::archive::text_iarchive& a, Float& flt, const unsigned int v) {
-    flt=std::numeric_limits<double>::quiet_NaN();
-    double x;
-    a >> x;
-    flt=x;
-}
-
-} // namespace Ariadne
-
-#endif /* ARIADNE_ENABLE_SERIALIZATION */
-
-
-

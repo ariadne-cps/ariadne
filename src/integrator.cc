@@ -352,7 +352,7 @@ TaylorSeriesIntegrator::TaylorSeriesIntegrator(
 
 
 template<class F> GradedValidatedDifferential flow(const F& f, const Interval& c, Nat M, Nat N) {
-    ValidatedProcedure x=make_differential_variable(1u,M,c,0u);
+    ValidatedDifferential x=make_differential_variable(1u,M,make_singleton(c),0u);
     GradedValidatedDifferential y=make_graded(x);
     GradedValidatedDifferential t=create_graded(x);
 

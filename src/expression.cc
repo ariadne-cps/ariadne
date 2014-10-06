@@ -415,7 +415,7 @@ template<class I> inline Expression<Real> _simplify(const Expression<Real>& e) {
         if(sarg.op()==CNST) {
             return Expression<R>(compute(e.op(),sarg.val()));
         } else {
-            return Expression<R>(e.op(),sarg);
+            return make_expression<R>(e.op(),sarg);
         }
     }
 
@@ -464,7 +464,7 @@ template<class I> inline Expression<Tribool> _simplify(const Expression<Tribool>
                 return Expression<T>(compute(e.op(),sarg.val()));
             }
         }
-        return Expression<T>(e.op(),sarg);
+        return make_expression<T>(e.op(),sarg);
     }
 
     if( e.kind()==BINARY ) {
@@ -485,7 +485,7 @@ template<class I> inline Expression<Tribool> _simplify(const Expression<Tribool>
             if(e.op()==OR && sarg2.val()==true) { return sarg2; }
             if(e.op()==OR && sarg2.val()==false) { return sarg1; }
         } else {
-            return Expression<T>(e.op(),sarg1,sarg2);
+            return make_expression<T>(e.op(),sarg1,sarg2);
         }
     }
     return e;

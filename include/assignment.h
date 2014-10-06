@@ -96,7 +96,7 @@ struct Assignment
 //    template<class XLHS> explicit Assignment(const Assignment<XLHS,RHS>& a)
 //        : lhs(a.lhs), rhs(a.rhs) { }
     Assignment(const LHS& l, const RHS& r) : lhs(l), rhs(r) { }
-    operator List< Assignment<LHS,RHS> >() const { return List< Assignment<LHS,RHS> >(1u,*this); }
+//    operator List< Assignment<LHS,RHS> >() const { return List< Assignment<LHS,RHS> >(1u,*this); }
     const LHS& variable() const { return this->lhs; }
     const RHS& expression() const { return this->rhs; }
     const LHS& left_hand_side() const { return this->lhs; }
@@ -298,12 +298,12 @@ inline List<RealConstantAssignment> operator,(const List<RealConstantAssignment>
 inline List<RealConstantAssignment> operator,(const RealConstantAssignment& ac1, const RealConstantAssignment& ac2) {
     List<RealConstantAssignment> r; r.append(ac1); r.append(ac2); return r; }
 
-
-
-
-
-
-
 } // namespace Ariadne
 
-#endif // ARIADNE_FORMULA_H
+#include "valuation.h"
+namespace Ariadne {
+template<class T> inline Assignment< Variable<T>, T>::operator Valuation<T> () const { Valuation<T> r; r.insert(this->lhs,this->rhs); return r; }
+} // namespace Ariadne
+
+
+#endif // ARIADNE_ASSIGNMENT_H

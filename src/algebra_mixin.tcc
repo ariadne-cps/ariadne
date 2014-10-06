@@ -59,7 +59,7 @@ _compose(const TaylorSeries& ts, const A& tv, double eps)
     //std::cerr<<"\n  ts="<<ts<<"\n  tv="<<tv<<"\n";
     ExactFloatType& vref=const_cast<ExactFloatType&>(tv.value());
     ExactFloatType vtmp=vref;
-    vref=0.0;
+    vref=0;
     A r(tv.argument_size());
     r+=ts.expansion[ts.expansion.size()-1];
     for(uint i=1; i!=ts.expansion.size(); ++i) {
@@ -172,10 +172,10 @@ _compose3(const ValidatedSeriesFunctionPointer& fn, const A& tm, Float eps)
     ValidatedFloatType se=range_series[d]-centre_series[d];
     ValidatedFloatType e=r-c;
     ValidatedFloatType p=pow(e,d-1);
-    p=ValidatedFloatType(-p.lower()*e.lower(),p.upper()*e.upper());
+    p=ValidatedFloatType(-(-p.lower()*(-e.lower())),p.upper()*e.upper());
     //std::cerr<<"se="<<se<<" e="<<e<<" p="<<p<<std::endl;
     // FIXME: Here we assume the dth derivative of f is monotone increasing
-    Float truncation_error=max(se.lower()*p.lower(),se.upper()*p.upper());
+    Float truncation_error=max(-(-se.lower()*(-p.lower())),se.upper()*p.upper()).raw();
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error

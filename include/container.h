@@ -265,7 +265,7 @@ template<class K, class V> class Map
     using std::map<K,V>::insert;
 };
 template<class I, class X, class J> inline X& insert(Map<I,X>& m, const J& k, const X& v) {
-    return m.std::map<I,X>::insert(std::make_pair(k,v)).first->second; }
+    return m.std::template map<I,X>::insert(std::make_pair(k,v)).first->second; }
 template<class K,class V> inline Map<K,V> join(const Map<K,V>& m1, const Map<K,V>& m2) {
     Map<K,V> r(m1); for(typename Map<K,V>::const_iterator i=m2.begin(); i!=m2.end(); ++i) { r.insert(*i); } return r; }
 

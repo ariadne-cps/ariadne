@@ -28,7 +28,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         // Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
         Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
         // Initiates the x position to the bounding box left bound
-        Float pos_x = bbox[0].lower();
+        Float pos_x = bbox[0].lower().raw();
         // Sets the rectangle 2-nd interval to the corresponding bounding box interval (while the >2 intervals are kept at [0,0])
         rect[yaxis] = bbox[1];
         // While between the interval
@@ -41,7 +41,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
 
         // Repeats for the rectangles in the y direction
         Float step_y = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > yaxis) ? 1 : 0)));
-        Float pos_y = bbox[1].lower();
+        Float pos_y = bbox[1].lower().raw();
         rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper().raw())
         {

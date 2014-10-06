@@ -40,6 +40,7 @@
 #include "pointer.h"
 #include "container.h"
 
+#include "valuation.h"
 #include "operators.h"
 #include "variables.h"
 
@@ -51,6 +52,7 @@ typedef bool Boolean;
 typedef tribool Tribool;
 //! \brief Internal name for strings.
 typedef std::string String;
+
 class Integer;
 class Real;
 

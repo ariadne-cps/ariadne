@@ -239,7 +239,7 @@ class CairoCanvas
     void dot(double x, double y) { cairo_arc (cr, x, y, dr/1000, 0, 2*M_PI); }
     void stroke();
     void fill() { cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fc.opacity); cairo_fill_preserve (cr); this->stroke(); }
-    void set_dot_radius(double lw) { this->dr=dr; }
+    void set_dot_radius(double dr) { this->dr=dr; }
     void set_line_width(double lw) { this->lw=lw; }
     void set_line_colour(double r, double g, double b) { lc.red=r; lc.green=g; lc.blue=b; }
     void set_fill_opacity(double o) { fc.opacity=o; }

@@ -1302,7 +1302,7 @@ SimplexSolver<X>::verify_feasibility(const Vector<X>& xl, const Vector<X>& xu, c
 
     // Ensure singleton constraints for x are non-basic
     for(size_t j=0; j!=n; ++j) {
-        if(xl[j]==xu[j]) { ARIADNE_ASSERT(!vt[j]==BASIS);}
+        if(xl[j]==xu[j]) { ARIADNE_ASSERT(!(vt[j]==BASIS));}
     }
 
     {

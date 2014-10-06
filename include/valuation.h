@@ -29,6 +29,10 @@
 #ifndef ARIADNE_VALUATION_H
 #define ARIADNE_VALUATION_H
 
+namespace Ariadne {
+template<class T, class X=T> class Valuation;
+}
+
 #include <cstdarg>
 #include <iostream>
 #include <string>
@@ -37,8 +41,9 @@
 #include "container.h"
 #include "tribool.h"
 
+#include "integer.h"
+#include "variables.h"
 #include "expression.h"
-#include "assignment.h"
 
 namespace Ariadne {
 
@@ -51,10 +56,10 @@ template<class K, class V> inline  Map<K,V> operator,(const Map<K,V>& m1, const 
     Map<K,V> r=m1; for(typename Map<K,V>::const_iterator iter=m2.begin(); iter!=m2.end(); ++iter) { r.insert(*iter); } return r; }
 Map<Identifier,String> inline operator|(const Variable<String>& v, const char* c) { return v|String(c); }
 
-template<class T, class X=T> class Valuation;
-typedef Valuation<String> StringValuation;
+template<class T, class X> class Valuation;
 typedef Valuation<Integer> IntegerValuation;
-typedef Valuation<Real> RealValuation;
+typedef Valuation<String> StringValuation;
+
 
 //! \ingroup ExpressionModule
 //! \brief A valuation of named variables of mathematical type \a T, with values represented by values of concrete type \a X,
@@ -126,6 +131,7 @@ class DiscreteValuation
     : public Valuation<String>
     , public Valuation<Integer>
 {
+  public:
     typedef String StringType;
     typedef Integer IntegerType;
   public:
@@ -208,16 +214,12 @@ template<class X> inline std::ostream& operator<<(std::ostream& os, const Valuat
 template<class V, class X> Valuation<V,X>::Valuation(const Assignment<Variable<V>,X>& a) { this->insert(a.lhs,a.rhs); }
 template<class V, class X> Valuation<V,X>::Valuation(const List<Assignment<Variable<V>,X> >& la) {
     for(uint i=0; i!=la.size(); ++i) { this->insert(la[i].lhs,la[i].rhs); } }
-template<class T> inline Assignment< Variable<T>, T>::operator Valuation<T> () const { Valuation<T> r; r.insert(this->lhs,this->rhs); return r; }
-
 Boolean evaluate(const Expression<Boolean>&, const StringValuation&);
 String evaluate(const Expression<String>&, const StringValuation&);
 Integer evaluate(const Expression<Integer>&, const IntegerValuation&);
 Boolean evaluate(const Expression<Boolean>&, const DiscreteValuation&);
 template<class X> X evaluate(const Expression<Real>& e, const ContinuousValuation<X>&);
 template<class X> Tribool evaluate(const Expression<Tribool>&, const ContinuousValuation<X>&);
-
-
 
 } // namespace Ariadne
 

@@ -61,6 +61,10 @@ class TextPlot
     TextPlot(const char* filename);
     TextPlot(const char* filename, ios::openmode mode);
 
+    virtual Void set_projection_map(const PlanarProjectionMap& prj) override { };
+    virtual Void set_bounding_box(const Box& bx) override { };
+    virtual Void set_dot_radius(double) override { };
+
     void set_projection(uint, uint, uint) { };
 
     void set_line_style(bool) { };

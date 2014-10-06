@@ -106,8 +106,7 @@ template<class T> class ScalarUserFunction
     };
   public:
     ScalarUserFunction() : EffectiveScalarFunction(new Representation(Vector<EffectiveNumberType>(this->parameter_size()))) { }
-    ScalarUserFunction(const Vector<ApproximateNumberType>& p) : EffectiveScalarFunction(new Representation(Vector<EffectiveNumberType>(p))) { }
-    ScalarUserFunction(const Vector<ValidatedNumberType>& p) : EffectiveScalarFunction(new Representation(Vector<EffectiveNumberType>(p))) { }
+    ScalarUserFunction(const Vector<ExactNumberType>& p) : EffectiveScalarFunction(new Representation(Vector<EffectiveNumberType>(p))) { }
     ScalarUserFunction(const Vector<EffectiveNumberType>& p) : EffectiveScalarFunction(new Representation(p)) { }
 
     uint parameter_size() const { return T().parameter_size(); }

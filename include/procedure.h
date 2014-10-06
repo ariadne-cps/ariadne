@@ -102,10 +102,10 @@ class Vector< Procedure<X> > {
   public:
     Nat result_size() const { return _results.size(); }
     Nat temporaries_size() const { return _instructions.size(); }
-    void new_instruction(OperatorCode o, Nat a) { _instructions.append(ProcedureInstruction(o,a)); }
-    void new_instruction(OperatorCode o, Nat a, int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
-    void new_instruction(OperatorCode o, Nat a1, Nat a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
-    void set_return(Nat i, Nat a) { _results[i]=a; }
+    void new_instruction(OperatorCode o, size_t a) { _instructions.append(ProcedureInstruction(o,a)); }
+    void new_instruction(OperatorCode o, size_t a, int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
+    void new_instruction(OperatorCode o, size_t a1, size_t a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
+    void set_return(size_t i, size_t a) { _results[i]=a; }
 };
 
 // \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.

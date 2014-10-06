@@ -58,6 +58,7 @@ inline Float cos_up(Float x) { set_rounding_upward(); Float y=cos_rnd(x); return
 } // namespace
 
 
+
 const Interval pi_ivl=Interval(pi_down,pi_up);
 
 uint Interval::output_precision = 6;

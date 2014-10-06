@@ -41,6 +41,7 @@
 #include "float.h"
 #include "float-exact.h"
 #include "float-validated.h"
+#include "float-approximate.h"
 
 // Simplifying typedefs for unsigned types
 typedef unsigned int uint;
@@ -253,6 +254,61 @@ inline Interval hull(Interval i1, Float x2) {
 inline Interval hull(Float x1, Float x2) {
     return Interval(min(x1,x2),max(x1,x2));
 }
+
+
+
+//! \brief An over-approximation to an interval set.
+class UpperInterval {
+  public:
+    //! \brief Default constructor yields the singleton zero interval \a [0,0].
+    explicit UpperInterval() : l(0.0), u(0.0) { }
+    //! \brief Construct a singleton interval.
+    explicit UpperInterval(Float point) : l(point), u(point) { }
+    //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
+    explicit UpperInterval(Float lower, Float upper) : l(lower), u(upper) { }
+    explicit UpperInterval(double lower, double upper) : l(lower), u(upper) { }
+
+    //! \brief Construct an over-approximating interval.
+    UpperInterval(LowerFloat lower, UpperFloat upper) : UpperInterval(lower.raw(),upper.raw()) { }
+    //! \brief Convert from an exact interval.
+    UpperInterval(Interval ivl) : UpperInterval(ivl.lower_raw(),ivl.upper_raw()) { }
+
+    //! \brief Construct a singleton interval.
+    explicit UpperInterval(ExactFloat point) : l(point.raw()), u(point.raw()) { }
+    explicit UpperInterval(ValidatedFloat point) : l(point.lower_raw()), u(point.upper_raw()) { }
+
+    //! \brief The lower bound of the interval.
+    const Float& lower_raw() const { return l; }
+    //! \brief The upper bound of the interval.
+    const Float& upper_raw() const { return u; }
+
+    //! \brief The lower bound of the interval.
+    const LowerFloat& lower() const { return reinterpret_cast<LowerFloat const&>(l); }
+    //! \brief The upper bound of the interval.
+    const UpperFloat& upper() const { return reinterpret_cast<UpperFloat const&>(u); }
+    //! \brief The midpoint of the interval.
+    const ApproximateFloatType midpoint() const { return half(this->lower()+this->upper()); }
+    //! \brief The radius of the interval.
+    const PositiveUpperFloat radius() const { return half(this->upper()-this->lower()); }
+    //! \brief An over-approximation to the width of the interval.
+    const PositiveUpperFloat width() const { return this->upper()-this->lower(); }
+
+    friend const ApproximateFloatType midpoint(UpperInterval const& ivl) { return ivl.midpoint(); }
+    friend bool bounded(UpperInterval const& ivl) { return -inf<ivl.l && ivl.u<+inf; }
+    friend bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2) { return (ivl1.l>=ivl2.l || ivl1.u<=ivl2.u); }
+    friend tribool disjoint(UpperInterval const& ivl1, UpperInterval const& ivl2) { return (ivl1.u<ivl2.l || ivl2.u<ivl1.l) || indeterminate; }
+    friend UpperInterval widen(UpperInterval x) { return UpperInterval(widen(ValidatedFloat(x.lower_raw(),x.upper_raw()))); }
+    friend std::ostream& operator<<(std::ostream& os, UpperInterval const& ivl) { return os << Interval(ivl.lower_raw(),ivl.upper_raw()); }
+  private:
+    Float l, u;
+};
+
+const ApproximateFloatType midpoint(UpperInterval const& ivl);
+bool bounded(UpperInterval const& ivl);
+bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2);
+tribool disjoint(UpperInterval const& ivl1, UpperInterval const& ivl2);
+UpperInterval widen(UpperInterval i);
+
 
 // An interval one ulp wider
 //! \related Interval \brief An interval containing the given interval in its interior.

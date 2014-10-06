@@ -300,6 +300,119 @@ Box narrow(const Box& bx);
 
 Box make_box(const std::string& str);
 
+
+//! \ingroup BasicSetSubModule GeometryModule
+//! \brief A box in Euclidean space.
+class UpperBox
+    : public Vector<UpperInterval>
+{
+  public:
+    //! Construct a singleton point in zero dimensions.
+    UpperBox() : Vector<UpperInterval>() { }
+    //! Construct an empty box in \a d dimensions.
+    explicit UpperBox(uint d) : Vector<UpperInterval>(d,UpperInterval()) { }
+    explicit UpperBox(uint d, UpperInterval ivl) : Vector<UpperInterval>(d,ivl) { }
+    //! Construct from an initializer list of pairs of floating-point values
+    //! giving lower and upper bounds.
+    UpperBox(std::initializer_list<UpperInterval> lst);
+
+    explicit UpperBox(const Vector<ValidatedFloat>& vec) : Vector<UpperInterval>(vec) { }
+
+    //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
+    static UpperBox unit_box(uint n) {
+        return UpperBox(n,UpperInterval(-1.0,1.0));
+    }
+
+    //! The upper quadrant box \f$[0,\infty]^n\f$ in \a n dimensions.
+    static UpperBox upper_quadrant(uint n) {
+        return UpperBox(n,UpperInterval(0,inf));
+    }
+
+    //! An explicit case to an interval vector. Useful to prevent ambiguous function overloads.
+    const Vector<UpperInterval>& vector() const { return *this; }
+
+    //! An approximation to the centre of the box.
+    ApproximatePoint centre() const {
+        ApproximatePoint r(this->dimension());
+        for(uint i=0; i!=this->dimension(); ++i) { r[i]=midpoint((*this)[i]); }
+        return r;
+    }
+
+    //! An over-approximation to radius of the box in the supremum norm.
+    ErrorType radius() const {
+        ErrorType dmax=0;
+        for(uint i=0; i!=this->size(); ++i) { dmax = max( dmax, (*this)[i].width() ); }
+        return half(dmax);
+    }
+
+    //! An approximation to the Lesbegue measure (area, volume) of the box.
+    ApproximateNumberType measure() const {
+        ApproximateNumberType meas=1;
+        for(uint i=0; i!=this->size(); ++i) { meas *= (*this)[i].width(); }
+        return meas;
+    }
+
+    //! \brief Test if the box is bounded.
+    bool bounded() const {
+        for(uint i=0; i!=dimension(); ++i) {
+            if(!Ariadne::bounded((*this)[i])) { return false; } }
+        return true;
+    }
+
+    //! \brief Test if the box is a subset of another box.
+    bool refines(const UpperBox& bx) const {
+        for(uint i=0; i!=dimension(); ++i) {
+            if(!Ariadne::refines((*this)[i],bx[i])) { return false; } }
+        return true;
+    }
+
+    //! \brief Test if the box intersects another box. Returns \a false even
+    //! if the intersection only occurs only on the boundary of the boxes.
+    Tribool disjoint(const UpperBox& bx) const {
+        for(uint i=0; i!=this->dimension(); ++i) {
+            if(Ariadne::disjoint((*this)[i],bx[i])) { return true; } }
+        return indeterminate;
+    }
+
+    //! \brief The dimension of the space the box lies in.
+    uint dimension() const {
+        return this->size();
+    }
+
+    //! \brief Tests if the box is disjoint from another box.
+    //! Only returns true if the closures are disjoint.
+    tribool separated(const UpperBox& other) const {
+        return this->disjoint(other);
+    }
+
+    //! \brief Returns an enclosing bounding box for the set.
+    //! The result is guaranteed to have nonempty interior, and floating-point
+    //! boundary coefficients so the centre and radius are exactly computable.
+    UpperBox bounding_box() const {
+        UpperBox result=*this; result.widen(); return result;
+    }
+
+    //! \brief Widens the box by the minimal floating-point increment.
+    //! The result is guaranteed to contain the box in its interior.
+    Void widen() {
+        UpperBox& result=*this;
+        for(uint i=0; i!=result.dimension(); ++i) {
+            result[i]=Ariadne::widen((*this)[i]);
+        }
+    }
+
+    //! \brief Split into two along the largest side.
+    std::pair<UpperBox,UpperBox> split() const;
+    //! \brief Split into two along side with index \a i.
+    std::pair<UpperBox,UpperBox> split(uint i) const;
+
+    //! \brief Write to an output stream.
+    std::ostream& write(std::ostream& os) const {
+        return os << *static_cast<const Vector<UpperInterval>*>(this);
+    }
+};
+
+
 } // namespace Ariadne
 
 #endif /* ARIADNE_BOX_H */

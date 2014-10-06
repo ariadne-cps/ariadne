@@ -158,7 +158,7 @@ EXAMPLES_BIN = $(patsubst %.cc,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_SRC))
 CXXFLAGS = -std=c++11 -fPIC
 
 INCLUDE_PATHS =  -iquote. -iquote./include
-LINK_LIBS=-lgmpxx -lgmp -lcairo -lboost_system
+LINK_LIBS=-lgmpxx -lgmp -lcairo -lboost_system -lboost_serialization
 
 PYTHON_VERSION=2.7
 PYTHON_INCLUDE_PATH=/usr/include/python$(PYTHON_VERSION)

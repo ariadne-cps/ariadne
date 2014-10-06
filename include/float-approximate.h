@@ -147,6 +147,8 @@ inline ApproximateFloat min(ApproximateFloat x, ApproximateFloat y) { return App
 inline ApproximateFloat pos(ApproximateFloat x) { return ApproximateFloat(pos_exact(x.a)); }
 //! \related ApproximateFloat \brief The unary negation function \c -x.
 inline ApproximateFloat neg(ApproximateFloat x) { return ApproximateFloat(neg_exact(x.a)); }
+//! \related ApproximateFloat \brief The halving function \c x/2.
+inline ApproximateFloat half(ApproximateFloat x) { return ApproximateFloat(half_exact(x.a)); }
 //! \related ApproximateFloat \brief The square function \c x*x.
 inline ApproximateFloat sqr(ApproximateFloat x) { return ApproximateFloat(mul_near(x.a,x.a)); }
 //! \related ApproximateFloat \brief The reciprocal function \c 1/x.

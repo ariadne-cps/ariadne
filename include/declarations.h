@@ -58,68 +58,45 @@ class Rational;
 class Real;
 
 class Float;
+typedef Float RawFloat;
+
 class ExactFloat;
 class ValidatedFloat;
 class UpperFloat;
 class LowerFloat;
 class ApproximateFloat;
 typedef UpperFloat PositiveUpperFloat;
+typedef PositiveUpperFloat ErrorFloat;
 
-// Deprecated as numeric type
-class ExactInterval;
+typedef ApproximateFloat ApproximateNumber;
+typedef LowerFloat LowerNumber;
+typedef UpperFloat UpperNumber;
+typedef ValidatedFloat ValidatedNumber;
+typedef Real EffectiveNumber;
+typedef ExactFloat ExactNumber;
 
-typedef Float RawFloat;
-typedef Float RawFloatType;
+typedef PositiveUpperFloat PositiveUpperNumber;
 
-//typedef Float ApproximateFloatType;
-//typedef Float LowerFloatType;
-//typedef Float UpperFloatType;
-//typedef ExactInterval ValidatedFloatType;
-//typedef Float ExactFloatType;
+typedef ErrorFloat NormType;
+typedef ErrorFloat ErrorType;
+typedef ExactFloat CoefficientType;
 
-typedef ApproximateFloat ApproximateFloatType;
-typedef LowerFloat LowerFloatType;
-typedef UpperFloat UpperFloatType;
-typedef ValidatedFloat ValidatedFloatType;
-typedef ExactFloat ExactFloatType;
-typedef PositiveUpperFloat PositiveUpperFloatType;
-
-typedef PositiveUpperFloatType ErrorFloatType;
-
-typedef ApproximateFloatType ApproximateNumberType;
-typedef LowerFloatType LowerNumberType;
-typedef UpperFloatType UpperNumberType;
-typedef ValidatedFloatType ValidatedNumberType;
-typedef Real EffectiveNumberType;
-typedef ExactFloatType ExactNumberType;
-
-typedef PositiveUpperFloatType PositiveUpperNumberType;
-
-typedef ErrorFloatType NormType;
-typedef ErrorFloatType ErrorType;
-typedef ExactFloatType CoefficientType;
-
-typedef ApproximateNumberType ApproximateNormType;
-typedef ApproximateNumberType ApproximateErrorType;
-typedef ApproximateNumberType ApproximateCoefficientType;
-
-typedef ApproximateNumberType ApproximateNumber;
-typedef ValidatedNumberType ValidatedNumber;
-typedef EffectiveNumberType EffectiveNumber;
-typedef ExactNumberType ExactNumber;
+typedef ApproximateNumber ApproximateNormType;
+typedef ApproximateNumber ApproximateErrorType;
+typedef ApproximateNumber ApproximateCoefficientType;
 
 // Information level declarations
 struct ExactTag { };
-typedef EffectiveNumberType EffectiveTag;
-typedef ValidatedNumberType ValidatedTag;
-typedef ApproximateNumberType ApproximateTag;
+typedef EffectiveNumber EffectiveTag;
+typedef ValidatedNumber ValidatedTag;
+typedef ApproximateNumber ApproximateTag;
 
 template<class I> struct CanonicalNumberTypedef;
-template<> struct CanonicalNumberTypedef<ExactTag> { typedef ExactNumberType Type; };
-template<> struct CanonicalNumberTypedef<EffectiveTag> { typedef EffectiveNumberType Type; };
-template<> struct CanonicalNumberTypedef<ValidatedTag> { typedef ValidatedNumberType Type; };
-template<> struct CanonicalNumberTypedef<ApproximateTag> { typedef ApproximateNumberType Type; };
-template<class I> using CanonicalNumberType = typename CanonicalNumberTypedef<I>::Type;
+template<> struct CanonicalNumberTypedef<ExactTag> { typedef ExactNumber Type; };
+template<> struct CanonicalNumberTypedef<EffectiveTag> { typedef EffectiveNumber Type; };
+template<> struct CanonicalNumberTypedef<ValidatedTag> { typedef ValidatedNumber Type; };
+template<> struct CanonicalNumberTypedef<ApproximateTag> { typedef ApproximateNumber Type; };
+template<class I> using CanonicalNumber = typename CanonicalNumberTypedef<I>::Type;
 
 // Concrete class declarations
 template<class X> class Vector;
@@ -131,12 +108,12 @@ template<class X> class Differential;
 template<class X> class Vector<Differential<X>>;
 template<class X> class Series;
 
-
 template<class X> class AffineModel;
 template<class X> class TaylorModel;
 template<class X> class Formula;
 template<class X> class Algebra;
 
+template<class X> class Point;
 class ExactInterval;
 class UpperInterval;
 class ApproximateInterval;
@@ -144,29 +121,24 @@ class ExactBox;
 class UpperBox;
 class ApproximateBox;
 
-typedef Vector<Float> FloatVector;
+typedef Vector<RawFloat> RawFloatVector;
+typedef Vector<ApproximateFloat> ApproximateFloatVector;
+typedef Vector<ValidatedFloat> ValidatedFloatVector;
+typedef Vector<ExactFloat> ExactFloatVector;
+
 typedef Vector<ExactInterval> ExactIntervalVector;
 typedef Vector<UpperInterval> UpperIntervalVector;
+typedef Vector<ApproximateInterval> ApproximateIntervalVector;
 
-typedef Vector<RawFloatType> RawFloatVectorType;
-typedef Vector<ApproximateFloatType> ApproximateFloatVectorType;
-typedef Vector<ValidatedFloatType> ValidatedFloatVectorType;
-typedef Vector<ExactFloatType> ExactFloatVectorType;
+typedef Vector<ApproximateNumber> ApproximateVector;
+typedef Vector<ValidatedNumber> ValidatedVector;
+typedef Vector<EffectiveNumber> EffectiveVector;
+typedef Vector<ExactNumber> ExactVector;
 
-typedef Vector<RawFloatType> RawFloatVector;
-typedef Vector<ApproximateFloatType> ApproximateFloatVector;
-typedef Vector<ValidatedFloatType> ValidatedFloatVector;
-typedef Vector<ExactFloatType> ExactFloatVector;
-
-typedef Vector<ApproximateNumberType> ApproximateVectorType;
-typedef Vector<ValidatedNumberType> ValidatedVectorType;
-typedef Vector<EffectiveNumberType> EffectiveVectorType;
-typedef Vector<ExactNumberType> ExactVectorType;
-
-typedef Vector<ApproximateNumberType> ApproximatePointType;
-typedef Vector<ValidatedNumberType> ValidatedPointType;
-typedef Vector<EffectiveNumberType> EffectivePointType;
-typedef Vector<ExactNumberType> ExactPointType;
+typedef Point<ApproximateNumber> ApproximatePoint;
+typedef Point<ValidatedNumber> ValidatedPoint;
+typedef Point<EffectiveNumber> EffectivePoint;
+typedef Point<ExactNumber> ExactPoint;
 
 // Function interface declarations
 template<class X> class ScalarFunctionInterface;
@@ -187,7 +159,7 @@ template<class X> class VectorFunction;
 typedef ScalarFunction<ApproximateTag> ApproximateScalarFunction;
 typedef ScalarFunction<ValidatedTag> ValidatedScalarFunction;
 typedef ScalarFunction<EffectiveTag> EffectiveScalarFunction;
-typedef ScalarFunction<Real> RealScalarFunction;
+typedef EffectiveScalarFunction RealScalarFunction;
 
 typedef VectorFunction<ApproximateTag> ApproximateVectorFunction;
 typedef VectorFunction<ValidatedTag> ValidatedVectorFunction;
@@ -204,18 +176,6 @@ typedef ScalarFunctionModel<ValidatedTag> ValidatedScalarFunctionModel;
 typedef VectorFunctionModel<ApproximateTag> ApproximateVectorFunctionModel;
 typedef VectorFunctionModel<ValidatedTag> ValidatedVectorFunctionModel;
 
-// Geometric declarations
-template<class X> class Point;
-typedef Point<ExactNumberType> ExactPoint;
-
-// Deprecated typedefs
-typedef ApproximateScalarFunction FloatScalarFunction;
-typedef ValidatedScalarFunction IntervalScalarFunction;
-typedef EffectiveScalarFunction RealScalarFunction;
-
-typedef ApproximateVectorFunction FloatVectorFunction;
-typedef ValidatedVectorFunction IntervalVectorFunction;
-typedef EffectiveVectorFunction RealVectorFunction;
 
 } // namespace Ariadne
 

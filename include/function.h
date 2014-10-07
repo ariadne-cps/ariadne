@@ -113,13 +113,13 @@ template<class P, class XX> inline Vector<XX> gradient(const ScalarFunction<P>& 
 ApproximateScalarFunction ScalarFunctionInterface<ApproximateTag>::clone() const { return ApproximateScalarFunction(this->_clone()); }
 ValidatedScalarFunction ScalarFunctionInterface<ValidatedTag>::clone() const { return ValidatedScalarFunction(this->_clone()); }
 EffectiveScalarFunction ScalarFunctionInterface<EffectiveTag>::clone() const { return EffectiveScalarFunction(this->_clone()); }
-inline ValidatedNumberType ScalarFunctionInterface<ValidatedTag>::evaluate(const Vector<ExactNumberType>& x) const {
-    return this->evaluate(Vector<ValidatedNumberType>(x)); }
-inline ApproximateNumberType ScalarFunctionInterface<ApproximateTag>::operator() (const Vector<ApproximateNumberType>& x) const {
+inline ValidatedNumber ScalarFunctionInterface<ValidatedTag>::evaluate(const Vector<ExactNumber>& x) const {
+    return this->evaluate(Vector<ValidatedNumber>(x)); }
+inline ApproximateNumber ScalarFunctionInterface<ApproximateTag>::operator() (const Vector<ApproximateNumber>& x) const {
     return this->evaluate(x); }
-inline ValidatedNumberType ScalarFunctionInterface<ValidatedTag>::operator() (const Vector<ValidatedNumberType>& x) const {
+inline ValidatedNumber ScalarFunctionInterface<ValidatedTag>::operator() (const Vector<ValidatedNumber>& x) const {
     return this->evaluate(x); }
-inline EffectiveNumberType ScalarFunctionInterface<EffectiveTag>::operator() (const Vector<EffectiveNumberType>& x) const {
+inline EffectiveNumber ScalarFunctionInterface<EffectiveTag>::operator() (const Vector<EffectiveNumber>& x) const {
     return this->evaluate(x); }
 inline ApproximateScalarFunction ScalarFunctionInterface<ApproximateTag>::derivative(Nat j) const {
     return ApproximateScalarFunction(this->_derivative(j)); }
@@ -170,14 +170,14 @@ EffectiveScalarFunction operator+(const EffectiveScalarFunction&, const Effectiv
 EffectiveScalarFunction operator-(const EffectiveScalarFunction&, const EffectiveScalarFunction&);
 EffectiveScalarFunction operator*(const EffectiveScalarFunction&, const EffectiveScalarFunction&);
 EffectiveScalarFunction operator/(const EffectiveScalarFunction&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator+(const EffectiveScalarFunction&, const EffectiveNumberType&);
-EffectiveScalarFunction operator-(const EffectiveScalarFunction&, const EffectiveNumberType&);
-EffectiveScalarFunction operator*(const EffectiveScalarFunction&, const EffectiveNumberType&);
-EffectiveScalarFunction operator/(const EffectiveScalarFunction&, const EffectiveNumberType&);
-EffectiveScalarFunction operator+(const EffectiveNumberType&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator-(const EffectiveNumberType&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator*(const EffectiveNumberType&, const EffectiveScalarFunction&);
-EffectiveScalarFunction operator/(const EffectiveNumberType&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator+(const EffectiveScalarFunction&, const EffectiveNumber&);
+EffectiveScalarFunction operator-(const EffectiveScalarFunction&, const EffectiveNumber&);
+EffectiveScalarFunction operator*(const EffectiveScalarFunction&, const EffectiveNumber&);
+EffectiveScalarFunction operator/(const EffectiveScalarFunction&, const EffectiveNumber&);
+EffectiveScalarFunction operator+(const EffectiveNumber&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator-(const EffectiveNumber&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator*(const EffectiveNumber&, const EffectiveScalarFunction&);
+EffectiveScalarFunction operator/(const EffectiveNumber&, const EffectiveScalarFunction&);
 
 EffectiveScalarFunction pow(const EffectiveScalarFunction&, Int);
 EffectiveScalarFunction neg(const EffectiveScalarFunction&);
@@ -253,8 +253,8 @@ template<class P> inline OutputStream& operator<<(OutputStream& os, const Vector
 template<class P, class XX> inline Vector<XX> evaluate(const VectorFunction<P>& f, const Vector<XX>& x) { return f(x); }
 template<class P, class XX> inline Matrix<XX> jacobian(const VectorFunction<P>& f, const Vector<XX>& x) { return f.jacobian(x); }
 
-inline Matrix<ValidatedNumberType> VectorFunctionInterface<ValidatedTag>::jacobian(const Vector<ExactNumberType>& x) const {
-    return this->jacobian(Vector<ValidatedNumberType>(x)); }
+inline Matrix<ValidatedNumber> VectorFunctionInterface<ValidatedTag>::jacobian(const Vector<ExactNumber>& x) const {
+    return this->jacobian(Vector<ValidatedNumber>(x)); }
 
 /*
 template<class X> VectorFunction<P> operator*(const ScalarFunction<X>& sf, const Vector<X>& e);
@@ -277,12 +277,12 @@ template<class X> VectorFunction<X> compose(const VectorFunction<X>& f, const Ve
 template<class X> ScalarFunction<X> lie_derivative(const ScalarFunction<X>& g, const VectorFunction<X>& f);
 */
 
-EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const Vector<EffectiveNumberType>& e);
+EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const Vector<EffectiveNumber>& e);
 EffectiveVectorFunction operator+(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2);
 EffectiveVectorFunction operator-(const EffectiveVectorFunction& f1, const EffectiveVectorFunction& f2);
 EffectiveVectorFunction operator*(const EffectiveVectorFunction& vf, const EffectiveScalarFunction& sf);
 EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const EffectiveVectorFunction& vf);
-EffectiveVectorFunction operator*(const EffectiveNumberType& c, const EffectiveVectorFunction& vf);
+EffectiveVectorFunction operator*(const EffectiveNumber& c, const EffectiveVectorFunction& vf);
 
 EffectiveScalarFunction embed(Nat as1, const EffectiveScalarFunction& f2, Nat as3);
 EffectiveVectorFunction embed(Nat as1, const EffectiveVectorFunction& f2, Nat as3);
@@ -297,16 +297,16 @@ EffectiveVectorFunction compose(const EffectiveVectorFunction& f, const Effectiv
 
 EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const EffectiveVectorFunction& f);
 
-Formula<EffectiveNumberType> formula(const EffectiveScalarFunction& f);
-Vector< Formula<EffectiveNumberType> > formula(const EffectiveVectorFunction& f);
+Formula<EffectiveNumber> formula(const EffectiveScalarFunction& f);
+Vector< Formula<EffectiveNumber> > formula(const EffectiveVectorFunction& f);
 
-inline Vector<ValidatedNumberType> VectorFunctionInterface<ValidatedTag>::evaluate(const Vector<ExactNumberType> & x) const {
-    return this->evaluate(Vector<ValidatedNumberType>(x)); }
+inline Vector<ValidatedNumber> VectorFunctionInterface<ValidatedTag>::evaluate(const Vector<ExactNumber> & x) const {
+    return this->evaluate(Vector<ValidatedNumber>(x)); }
 
 
 ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
-ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedNumberType&);
-ValidatedScalarFunction operator-(const ValidatedNumberType&, const ValidatedScalarFunction&);
+ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedNumber&);
+ValidatedScalarFunction operator-(const ValidatedNumber&, const ValidatedScalarFunction&);
 ValidatedVectorFunction operator-(const ValidatedVectorFunction&, const ValidatedVectorFunction&);
 ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedVectorFunction& f2);
 ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g);
@@ -342,51 +342,51 @@ inline EffectiveScalarFunction VectorFunctionInterface<EffectiveTag>::operator[]
     return EffectiveScalarFunction(this->_get(i)); }
 
 
-inline List< EffectiveScalarFunction > operator,(const EffectiveNumberType& c1, const EffectiveScalarFunction& sf2) {
+inline List< EffectiveScalarFunction > operator,(const EffectiveNumber& c1, const EffectiveScalarFunction& sf2) {
     return (EffectiveScalarFunction::constant(sf2.argument_size(),c1),sf2); }
-inline List< EffectiveScalarFunction > operator,(const EffectiveScalarFunction& sf1, const EffectiveNumberType& c2) {
+inline List< EffectiveScalarFunction > operator,(const EffectiveScalarFunction& sf1, const EffectiveNumber& c2) {
     return (sf1,EffectiveScalarFunction::constant(sf1.argument_size(),c2)); }
-inline List< EffectiveScalarFunction > operator,(const List< EffectiveScalarFunction >& vf1, const EffectiveNumberType& c2) {
+inline List< EffectiveScalarFunction > operator,(const List< EffectiveScalarFunction >& vf1, const EffectiveNumber& c2) {
     return (vf1,EffectiveScalarFunction::constant(vf1.back().argument_size(),c2)); }
 
 
 inline UpperInterval apply(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<UpperInterval>(f.evaluate(reinterpret_cast<Vector<ValidatedNumberType>const&>(x))); }
+    return static_cast<UpperInterval>(f.evaluate(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
 inline UpperInterval evaluate(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<UpperInterval>(f.evaluate(reinterpret_cast<Vector<ValidatedNumberType>const&>(x))); }
+    return static_cast<UpperInterval>(f.evaluate(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
 inline Differential<UpperInterval> evaluate(ScalarFunction<ValidatedTag>const& f, const Vector<Differential<UpperInterval>>& x) {
-    return static_cast<Differential<UpperInterval>>(f.evaluate(reinterpret_cast<Vector<Differential<ValidatedFloatType>>const&>(x))); }
+    return static_cast<Differential<UpperInterval>>(f.evaluate(reinterpret_cast<Vector<Differential<ValidatedFloat>>const&>(x))); }
 inline Differential<UpperInterval> differential(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x, Nat d) {
-    return static_cast<Differential<UpperInterval>>(f.differential(reinterpret_cast<Vector<ValidatedFloatType>const&>(x),d)); }
+    return static_cast<Differential<UpperInterval>>(f.differential(reinterpret_cast<Vector<ValidatedFloat>const&>(x),d)); }
 inline Vector<UpperInterval> gradient(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
+    return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
 inline Vector<UpperInterval> gradient(ScalarFunction<ValidatedTag>const& f, const Vector<ExactInterval>& x) {
-    return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
+    return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
 inline Vector<UpperInterval> gradient_range(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
+    return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
 
 inline Vector<UpperInterval> apply(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Vector<UpperInterval>>(f.evaluate(reinterpret_cast<Vector<ValidatedNumberType>const&>(x))); }
+    return static_cast<Vector<UpperInterval>>(f.evaluate(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
 inline Vector<UpperInterval> evaluate(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Vector<UpperInterval>>(f.evaluate(reinterpret_cast<Vector<ValidatedNumberType>const&>(x))); }
+    return static_cast<Vector<UpperInterval>>(f.evaluate(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
 inline Vector<Differential<UpperInterval>> evaluate(VectorFunction<ValidatedTag>const& f, const Vector<Differential<UpperInterval>>& x) {
-    return static_cast<Vector<Differential<UpperInterval>>>(f.evaluate(reinterpret_cast<Vector<Differential<ValidatedFloatType>>const&>(x))); }
+    return static_cast<Vector<Differential<UpperInterval>>>(f.evaluate(reinterpret_cast<Vector<Differential<ValidatedFloat>>const&>(x))); }
 inline Vector<Differential<UpperInterval>> differentials(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x, Nat d) {
-    return static_cast<Vector<Differential<UpperInterval>>>(f.differentials(reinterpret_cast<Vector<ValidatedFloatType>const&>(x),d)); }
+    return static_cast<Vector<Differential<UpperInterval>>>(f.differentials(reinterpret_cast<Vector<ValidatedFloat>const&>(x),d)); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
+    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<ExactInterval>& x) {
-    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
+    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
 inline Matrix<UpperInterval> jacobian_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
+    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
 
 // FIXME: Needed to override templated gradient and jacobian
 inline Vector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
+    return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
 inline Vector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
     return gradient(f,static_cast<Vector<UpperInterval>>(x)); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
+    return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
     return jacobian(f,static_cast<Vector<UpperInterval>>(x)); }
 

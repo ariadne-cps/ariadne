@@ -45,7 +45,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Point;
 
-typedef Point<ExactNumberType> ExactPoint;
+typedef Point<ExactNumber> ExactPoint;
 
 class ExactBox;
 class Zonotope;

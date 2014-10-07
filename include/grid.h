@@ -66,13 +66,13 @@ class Grid {
     explicit Grid(uint d);
 
     //! Construct from a dimension and a spacing in each direction.
-    explicit Grid(uint d, RawFloatType l);
+    explicit Grid(uint d, RawFloat l);
 
     //! Construct from a vector of offsets.
-    explicit Grid(const Vector<RawFloatType>& lengths);
+    explicit Grid(const Vector<RawFloat>& lengths);
 
     //! Construct from a centre point and a vector of offsets.
-    explicit Grid(const Vector<RawFloatType>& origin, const Vector<RawFloatType>& lengths);
+    explicit Grid(const Vector<RawFloat>& origin, const Vector<RawFloat>& lengths);
 
     //! Copy constructor. Copies a reference to the grid data.
     Grid(const Grid& g);
@@ -87,21 +87,21 @@ class Grid {
     bool operator!=(const Grid& g) const;
 
     //! The origin of the grid.
-    const Vector<RawFloatType>& origin() const;
+    const Vector<RawFloat>& origin() const;
 
     //! The strides between successive integer points.
-    const Vector<RawFloatType>& lengths() const;
+    const Vector<RawFloat>& lengths() const;
 
     //! Write to an output stream.
     friend std::ostream& operator<<(std::ostream& os, const Grid& g);
 
-    ExactNumberType coordinate(uint d, DyadicType x) const;
-    ExactNumberType subdivision_coordinate(uint d, DyadicType x) const;
-    ExactNumberType subdivision_coordinate(uint d, IntegerType n) const;
+    ExactNumber coordinate(uint d, DyadicType x) const;
+    ExactNumber subdivision_coordinate(uint d, DyadicType x) const;
+    ExactNumber subdivision_coordinate(uint d, IntegerType n) const;
 
-    int subdivision_index(uint d, const ExactNumberType& x) const;
-    int subdivision_lower_index(uint d, const LowerNumberType& x) const;
-    int subdivision_upper_index(uint d, const UpperNumberType& x) const;
+    int subdivision_index(uint d, const ExactNumber& x) const;
+    int subdivision_lower_index(uint d, const LowerNumber& x) const;
+    int subdivision_upper_index(uint d, const UpperNumber& x) const;
 
     Array<DyadicType> index(const ExactPoint& pt) const;
     Array<DyadicType> lower_index(const ExactBox& bx) const;
@@ -113,7 +113,7 @@ class Grid {
     ExactBox box(const GridCell& cell) const;
   private:
     // Create new data
-    void _create(const Vector<RawFloatType>& o, const Vector<RawFloatType>& l);
+    void _create(const Vector<RawFloat>& o, const Vector<RawFloat>& l);
   private:
     // Pointer to data. We can test grids for equality using reference semantics since data is a constant.
     std::shared_ptr<Data> _data;

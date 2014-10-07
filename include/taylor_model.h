@@ -54,13 +54,13 @@ template<class X> struct IsScalar< TaylorModel<X> > { static const bool value = 
 template<class X> struct IsAlgebra< TaylorModel<X> > { static const bool value = true; };
 template<class X> struct IsNormedAlgebra< TaylorModel<X> > { static const bool value = true; };
 
-template<> struct Arithmetic< TaylorModel<ApproximateTag>,ApproximateNumberType > { typedef TaylorModel<ApproximateTag> ResultType; };
-template<> struct Arithmetic< ApproximateNumberType,TaylorModel<ApproximateTag> > { typedef TaylorModel<ApproximateTag> ResultType; };
+template<> struct Arithmetic< TaylorModel<ApproximateTag>,ApproximateNumber > { typedef TaylorModel<ApproximateTag> ResultType; };
+template<> struct Arithmetic< ApproximateNumber,TaylorModel<ApproximateTag> > { typedef TaylorModel<ApproximateTag> ResultType; };
 template<> struct Arithmetic< TaylorModel<ApproximateTag>,TaylorModel<ApproximateTag> > { typedef TaylorModel<ApproximateTag> ResultType; };
-template<> struct Arithmetic< ExactNumberType,TaylorModel<ValidatedTag> > { typedef TaylorModel<ValidatedTag> ResultType; };
-template<> struct Arithmetic< TaylorModel<ValidatedTag>,ExactNumberType > { typedef TaylorModel<ValidatedTag> ResultType; };
-template<> struct Arithmetic< TaylorModel<ValidatedTag>,ValidatedNumberType > { typedef TaylorModel<ValidatedTag> ResultType; };
-template<> struct Arithmetic< ValidatedNumberType,TaylorModel<ValidatedTag> > { typedef TaylorModel<ValidatedTag> ResultType; };
+template<> struct Arithmetic< ExactNumber,TaylorModel<ValidatedTag> > { typedef TaylorModel<ValidatedTag> ResultType; };
+template<> struct Arithmetic< TaylorModel<ValidatedTag>,ExactNumber > { typedef TaylorModel<ValidatedTag> ResultType; };
+template<> struct Arithmetic< TaylorModel<ValidatedTag>,ValidatedNumber > { typedef TaylorModel<ValidatedTag> ResultType; };
+template<> struct Arithmetic< ValidatedNumber,TaylorModel<ValidatedTag> > { typedef TaylorModel<ValidatedTag> ResultType; };
 template<> struct Arithmetic< TaylorModel<ValidatedTag>,TaylorModel<ValidatedTag> > { typedef TaylorModel<ValidatedTag> ResultType; };
 
 class IntersectionException;
@@ -85,14 +85,14 @@ ValidatedTaylorModel tan(const ValidatedTaylorModel& x);
  */
 template<>
 class TaylorModel<ValidatedTag>
-    : public NormedAlgebraMixin<TaylorModel<ValidatedTag>,ValidatedNumberType>
+    : public NormedAlgebraMixin<TaylorModel<ValidatedTag>,ValidatedNumber>
 {
     friend class ScalarTaylorFunction;
     friend class VectorTaylorFunction;
     typedef Expansion<CoefficientType> ExpansionType;
     typedef ReverseLexicographicKeyLess ComparisonType;
   public:
-    typedef ValidatedNumberType NumericType;
+    typedef ValidatedNumber NumericType;
   private:
     ExpansionType _expansion;
     ErrorType _error;
@@ -118,7 +118,7 @@ class TaylorModel<ValidatedTag>
     TaylorModel<ValidatedTag>(uint as, Sweeper swp);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
     TaylorModel<ValidatedTag>(const Expansion<CoefficientType>& f, const ErrorType& e, Sweeper swp);
-    TaylorModel<ValidatedTag>(const Expansion<RawFloatType>& f, const double& e, Sweeper swp);
+    TaylorModel<ValidatedTag>(const Expansion<RawFloat>& f, const double& e, Sweeper swp);
     //! \brief Fast swap with another Taylor model.
     void swap(TaylorModel<ValidatedTag>& tm);
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
@@ -133,11 +133,11 @@ class TaylorModel<ValidatedTag>
     //@{
     /*! \name Assignment to constant values. */
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorModel<ValidatedTag>& operator=(const ValidatedNumberType& c);
-    template<class X, typename std::enable_if<std::is_same<X,RawFloatType>::value,int>::type=0>
-        TaylorModel<ValidatedTag>& operator=(const X& c) { return (*this)=static_cast<ValidatedNumberType>(c); }
+    TaylorModel<ValidatedTag>& operator=(const ValidatedNumber& c);
+    template<class X, typename std::enable_if<std::is_same<X,RawFloat>::value,int>::type=0>
+        TaylorModel<ValidatedTag>& operator=(const X& c) { return (*this)=static_cast<ValidatedNumber>(c); }
     template<class X, typename std::enable_if<std::is_same<X,double>::value,int>::type=0>
-        TaylorModel<ValidatedTag>& operator=(const X& c) { return (*this)=static_cast<ValidatedNumberType>(c); }
+        TaylorModel<ValidatedTag>& operator=(const X& c) { return (*this)=static_cast<ValidatedNumber>(c); }
     //@}
 
     //@{
@@ -152,7 +152,7 @@ class TaylorModel<ValidatedTag>
     static TaylorModel<ValidatedTag> constant(uint as, const CoefficientType& c, Sweeper swp) {
         TaylorModel<ValidatedTag> r(as,swp); r.set_value(c); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<ValidatedTag> constant(uint as, const ValidatedNumberType& c, Sweeper swp) {
+    static TaylorModel<ValidatedTag> constant(uint as, const ValidatedNumber& c, Sweeper swp) {
         TaylorModel<ValidatedTag> r(as,swp); r.set_value(1); r*=c; return r; }
     //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
     static TaylorModel<ValidatedTag> variable(uint as, uint j, Sweeper swp) {
@@ -170,9 +170,9 @@ class TaylorModel<ValidatedTag>
     //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
     static Vector< TaylorModel<ValidatedTag> > zeros(uint rs, uint as, Sweeper swp);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector< TaylorModel<ValidatedTag> > constants(uint as, const Vector<ExactNumberType>& c, Sweeper swp);
+    static Vector< TaylorModel<ValidatedTag> > constants(uint as, const Vector<ExactNumber>& c, Sweeper swp);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector< TaylorModel<ValidatedTag> > constants(uint as, const Vector<ValidatedNumberType>& c, Sweeper swp);
+    static Vector< TaylorModel<ValidatedTag> > constants(uint as, const Vector<ValidatedNumber>& c, Sweeper swp);
     //! \brief Return the vector of variables on the unit domain.
     static Vector< TaylorModel<ValidatedTag> > variables(uint as, Sweeper swp);
     //! \brief Return the vector scaling the unit interval onto the domain \a d.
@@ -230,7 +230,7 @@ class TaylorModel<ValidatedTag>
     //! \brief An over-approximation to the supremum norm.
     NormType norm() const;
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e. Equal to the sweep threshold.
-    RawFloatType tolerance() const;
+    RawFloat tolerance() const;
 
     //! \brief Set the error of the expansion.
     void set_error(const ErrorType& ne) {
@@ -276,11 +276,11 @@ class TaylorModel<ValidatedTag>
     ExactInterval gradient_range(uint j) const;
 
     //! \brief Evaluate the quantity over the interval of points \a x.
-    friend ValidatedNumberType evaluate(const TaylorModel<ValidatedTag>&, const Vector<ValidatedNumberType>& x);
+    friend ValidatedNumber evaluate(const TaylorModel<ValidatedTag>&, const Vector<ValidatedNumber>& x);
     //! \brief Evaluate the quantity over the interval of points \a x.
     friend TaylorModel<ValidatedTag> compose(const TaylorModel<ValidatedTag>&, const Vector< TaylorModel<ValidatedTag> >& x);
     //! \brief Compose two models, where the second is scaled so that the codomain is a unit box.
-    friend Vector<ValidatedNumberType> evaluate(const Vector< TaylorModel<ValidatedTag> >& f, const Vector<ValidatedNumberType>& x);
+    friend Vector<ValidatedNumber> evaluate(const Vector< TaylorModel<ValidatedTag> >& f, const Vector<ValidatedNumber>& x);
     //! \brief Compose two models, where the second is scaled so that the codomain is a unit box.
     friend Vector< TaylorModel<ValidatedTag> > compose(const Vector< TaylorModel<ValidatedTag> >& f, const Vector< TaylorModel<ValidatedTag> >& g);
     //@}
@@ -333,11 +333,11 @@ class TaylorModel<ValidatedTag>
     //@{
     /*! \name Inplace arithmetic operations. */
     //! \brief Add a constant numerical scalar \c r+=c .
-    void iadd(const ValidatedNumberType& c);
+    void iadd(const ValidatedNumber& c);
     //! \brief Multiply by a numerical scalar \c r*=c .
-    void imul(const ValidatedNumberType& c);
+    void imul(const ValidatedNumber& c);
     //! \brief Scalar multiply and add \c r+=c*x .
-    void isma(const ValidatedNumberType& c, const TaylorModel<ValidatedTag>& x);
+    void isma(const ValidatedNumber& c, const TaylorModel<ValidatedTag>& x);
     //! \brief Fused multiply and add \c r+=x1*x2 .
     void ifma(const TaylorModel<ValidatedTag>& x1, const TaylorModel<ValidatedTag>& x2);
     //@}
@@ -355,7 +355,7 @@ class TaylorModel<ValidatedTag>
 };
 
 // Rescale the vector \a x from the domain \a dom to the unit domain.
-Vector<ValidatedNumberType> unscale(const Vector<ValidatedNumberType>& x, const Vector<ExactInterval>& dom);
+Vector<ValidatedNumber> unscale(const Vector<ValidatedNumber>& x, const Vector<ExactInterval>& dom);
 
 //! \relates TaylorModel<ValidatedTag> \brief The magnitude of the variable
 ErrorType mag(const TaylorModel<ValidatedTag>& tm);
@@ -374,9 +374,9 @@ TaylorModel<ValidatedTag> unscale(const TaylorModel<ValidatedTag>& x, const Exac
 TaylorModel<ValidatedTag> rescale(const TaylorModel<ValidatedTag>& x, const ExactInterval& ivl1, const ExactInterval& ivl2);
 
 //! \relates TaylorModel<ValidatedTag> \brief Evaluate an array of Taylor variables on a vector.
-ValidatedNumberType evaluate(const TaylorModel<ValidatedTag>& x, const Vector<ValidatedNumberType>& sy);
+ValidatedNumber evaluate(const TaylorModel<ValidatedTag>& x, const Vector<ValidatedNumber>& sy);
 //! \relates TaylorModel<ValidatedTag> \brief Substite \a c for the \a k th variable.
-TaylorModel<ValidatedTag> partial_evaluate(const TaylorModel<ValidatedTag>& x, uint k, ValidatedNumberType c);
+TaylorModel<ValidatedTag> partial_evaluate(const TaylorModel<ValidatedTag>& x, uint k, ValidatedNumber c);
 //! \relates TaylorModel<ValidatedTag>
 //! Substitute the TaylorModel<ValidatedTag> y in the  kth variable of \a x.
 //! Precondition: x.argument_size()==y.argument_size()+1
@@ -401,7 +401,7 @@ TaylorModel<ValidatedTag> antiderivative(const TaylorModel<ValidatedTag>& x, uin
 TaylorModel<ValidatedTag> derivative(const TaylorModel<ValidatedTag>& x, uint k);
 
 //! \relates TaylorModel<ValidatedTag> \brief Replace the variale x[k] with a*x[k]+b
-TaylorModel<ValidatedTag> preaffine(const TaylorModel<ValidatedTag>&, uint k, const ValidatedNumberType& a, const ValidatedNumberType& b);
+TaylorModel<ValidatedTag> preaffine(const TaylorModel<ValidatedTag>&, uint k, const ValidatedNumber& a, const ValidatedNumber& b);
 //! \relates TaylorModel<ValidatedTag> \brief Restricts the range of the variable x[k] to the interval d.
 //! \pre -1 <= d.lower() <= d.upper() <= 1 .
 TaylorModel<ValidatedTag> restrict(const TaylorModel<ValidatedTag>&, uint k, const ExactInterval& d);
@@ -446,13 +446,13 @@ std::pair< Vector< TaylorModel<ValidatedTag> >, Vector< TaylorModel<ValidatedTag
 Vector< TaylorModel<ValidatedTag> > split(const Vector< TaylorModel<ValidatedTag> >& x, uint j, bool half);
 Vector< TaylorModel<ValidatedTag> > unscale(const Vector< TaylorModel<ValidatedTag> >& x, const Vector<ExactInterval>& bx);
 Vector< TaylorModel<ValidatedTag> > scale(const Vector< TaylorModel<ValidatedTag> >& x, const Vector<ExactInterval>& bx);
-Vector<ValidatedNumberType> evaluate(const Vector< TaylorModel<ValidatedTag> >& x, const Vector<ValidatedNumberType>& sy);
-Vector< TaylorModel<ValidatedTag> > partial_evaluate(const Vector< TaylorModel<ValidatedTag> >& x, uint k, ValidatedNumberType sy);
+Vector<ValidatedNumber> evaluate(const Vector< TaylorModel<ValidatedTag> >& x, const Vector<ValidatedNumber>& sy);
+Vector< TaylorModel<ValidatedTag> > partial_evaluate(const Vector< TaylorModel<ValidatedTag> >& x, uint k, ValidatedNumber sy);
 Vector< TaylorModel<ValidatedTag> > substitute(const Vector< TaylorModel<ValidatedTag> >& x, uint k, const TaylorModel<ValidatedTag>& y);
 Vector< TaylorModel<ValidatedTag> > antiderivative(const Vector< TaylorModel<ValidatedTag> >& x, uint k);
 Vector< TaylorModel<ValidatedTag> > embed(const Vector< TaylorModel<ValidatedTag> >& x, uint as);
 Vector< TaylorModel<ValidatedTag> > embed(uint as, const Vector< TaylorModel<ValidatedTag> >& x);
-Matrix<ValidatedNumberType> jacobian(const Vector< TaylorModel<ValidatedTag> >& x, const Vector<ValidatedNumberType>& y);
+Matrix<ValidatedNumber> jacobian(const Vector< TaylorModel<ValidatedTag> >& x, const Vector<ValidatedNumber>& y);
 //Matrix<ExactInterval> jacobian(const Vector< TaylorModel<ValidatedTag> >& x);
 bool refines(const Vector< TaylorModel<ValidatedTag> >& x1, const Vector< TaylorModel<ValidatedTag> >& x2);
 Vector< TaylorModel<ValidatedTag> > combine(const Vector< TaylorModel<ValidatedTag> >& x1, const Vector< TaylorModel<ValidatedTag> >& x2);
@@ -474,7 +474,7 @@ Vector< TaylorModel<ValidatedTag> > unchecked_compose(const Vector< TaylorModel<
  */
 template<>
 class TaylorModel<ApproximateTag>
-    : public NormedAlgebraMixin<TaylorModel<ApproximateTag>,ApproximateNumberType>
+    : public NormedAlgebraMixin<TaylorModel<ApproximateTag>,ApproximateNumber>
 {
     typedef Expansion<ApproximateCoefficientType> ExpansionType;
   private:
@@ -485,7 +485,7 @@ class TaylorModel<ApproximateTag>
 
   public:
     //! \brief The type used for the coefficients.
-    typedef ApproximateNumberType NumericType;
+    typedef ApproximateNumber NumericType;
     //! \brief The type used to index the coefficients.
     typedef MultiIndex IndexType;
     //! \brief The type used for the coefficients.
@@ -519,12 +519,12 @@ class TaylorModel<ApproximateTag>
     TaylorModel<ApproximateTag>& operator=(double c) {
         this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),ApproximateCoefficientType(c)); return *this; }
     //! \brief Set equal to a constant, keeping the same number of arguments.
-    TaylorModel<ApproximateTag>& operator=(const ApproximateNumberType& c) {
+    TaylorModel<ApproximateTag>& operator=(const ApproximateNumber& c) {
         this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),c); return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorModel<ApproximateTag>& operator=(const ValidatedNumberType& c) { return (*this)=ApproximateNumberType(c); }
+    TaylorModel<ApproximateTag>& operator=(const ValidatedNumber& c) { return (*this)=ApproximateNumber(c); }
     //! \brief Set equal to a real constant, keeping the same number of arguments.
-    TaylorModel<ApproximateTag>& operator=(const EffectiveNumberType& c) { return (*this)=ApproximateNumberType(c); }
+    TaylorModel<ApproximateTag>& operator=(const EffectiveNumber& c) { return (*this)=ApproximateNumber(c); }
     //@}
 
     //@{
@@ -594,17 +594,17 @@ class TaylorModel<ApproximateTag>
     //! \brief An approximation to the average value of the function.
     virtual CoefficientType average() const;
     //! \brief The tolerance to which analytic functions should be computed.
-    virtual RawFloatType tolerance() const;
+    virtual RawFloat tolerance() const;
     //! \brief The radius of the ball containing the functions.
     virtual ErrorType radius() const;
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream&) const;
     //! \brief Inplace addition of a scalar constant.
-    virtual void iadd(const ApproximateNumberType& c);
+    virtual void iadd(const ApproximateNumber& c);
     //! \brief Inplace multiplication of a scalar constant.
-    virtual void imul(const ApproximateNumberType& c);
+    virtual void imul(const ApproximateNumber& c);
     //! \brief Inplace addition of a scalar multiple of a Taylor model.
-    virtual void isma(const ApproximateNumberType& c, const TaylorModel<ApproximateTag>& x);
+    virtual void isma(const ApproximateNumber& c, const TaylorModel<ApproximateTag>& x);
     //! \brief Inplace addition of a product of Taylor models.
     virtual void ifma(const TaylorModel<ApproximateTag>& x1, const TaylorModel<ApproximateTag>& x2);
 

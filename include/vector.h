@@ -58,9 +58,9 @@ template<class T> struct IsScalar : IsNumeric<T> { };
 //!
 //! \par Python interface
 //!
-//! In the Python interface, classes \c FloatVector and \c ExactIntervalVector are defined.
+//! In the Python interface, classes \c RawFloatVector and \c ExactIntervalVector are defined.
 //! Further, Ariadne vectors can be constructed from literals in the form of a Python list: <br><br>
-//! <code> FloatVector([1.1,2.3,4.2,5]) # Create a FloatVector from a list of Python \c int and \c float types. <br>
+//! <code> RawFloatVector([1.1,2.3,4.2,5]) # Create a RawFloatVector from a list of Python \c int and \c float types. <br>
 //!        ExactIntervalVector([{1:2.1},[-3,4],2.3,5,{-1.1:2.2}]) # Create an ExactIntervalVector from a list of Python types convertible to Interal</code>
 template<class X>
 class Vector
@@ -581,7 +581,7 @@ class Float;
 class ExactInterval;
 class Real;
 
-typedef Vector<Float> FloatVector;
+typedef Vector<Float> RawFloatVector;
 typedef Vector<ExactInterval> ExactIntervalVector;
 typedef Vector<Real> RealVector;
 
@@ -618,24 +618,24 @@ Float volume(const Vector<ExactInterval>& z);
 
 Vector<UpperInterval> intersection(const Vector<UpperInterval>& v1, const Vector<UpperInterval>& v2);
 
-Vector<ExactFloatType> midpoint(const Vector<ExactInterval>& v);
-Vector<ExactFloatType> lower_bounds(const Vector<ExactInterval>& v);
-Vector<ExactFloatType> upper_bounds(const Vector<ExactInterval>& v);
+Vector<ExactFloat> midpoint(const Vector<ExactInterval>& v);
+Vector<ExactFloat> lower_bounds(const Vector<ExactInterval>& v);
+Vector<ExactFloat> upper_bounds(const Vector<ExactInterval>& v);
 
-Vector<ExactFloatType>const& make_exact(const Vector<ApproximateFloatType>& av);
-Vector<ValidatedFloatType> make_bounds(const Vector<ErrorFloatType>& ev);
-Vector<ValidatedFloatType>const& make_singleton(const Vector<ExactInterval>& ivlv);
-Matrix<ValidatedFloatType>const& make_singleton(const Matrix<ExactInterval>& ivlA);
-Vector<ValidatedFloatType>const& make_singleton(const Vector<UpperInterval>& ivlv);
-Matrix<ValidatedFloatType>const& make_singleton(const Matrix<UpperInterval>& ivlA);
+Vector<ExactFloat>const& make_exact(const Vector<ApproximateFloat>& av);
+Vector<ValidatedFloat> make_bounds(const Vector<ErrorFloat>& ev);
+Vector<ValidatedFloat>const& make_singleton(const Vector<ExactInterval>& ivlv);
+Matrix<ValidatedFloat>const& make_singleton(const Matrix<ExactInterval>& ivlA);
+Vector<ValidatedFloat>const& make_singleton(const Vector<UpperInterval>& ivlv);
+Matrix<ValidatedFloat>const& make_singleton(const Matrix<UpperInterval>& ivlA);
 
-UpperFloatType sup_error(const Vector<ValidatedFloatType>& x);
-Vector<ExactFloatType> midpoint(const Vector<ValidatedFloatType>& x);
-bool models(const Vector<ValidatedFloatType>& x1, const Vector<ExactFloatType>& x2);
-bool consistent(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2);
-bool inconsistent(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2);
-bool refines(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2);
-Vector<ValidatedFloatType> refinement(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2);
+UpperFloat sup_error(const Vector<ValidatedFloat>& x);
+Vector<ExactFloat> midpoint(const Vector<ValidatedFloat>& x);
+bool models(const Vector<ValidatedFloat>& x1, const Vector<ExactFloat>& x2);
+bool consistent(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2);
+bool inconsistent(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2);
+bool refines(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2);
+Vector<ValidatedFloat> refinement(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2);
 
 
 

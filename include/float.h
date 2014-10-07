@@ -107,9 +107,6 @@ template<class R, class A> inline R integer_cast(const A& a);
 template<> inline int integer_cast(const Float& a) { return static_cast<int>(a.dbl); }
 template<> inline uint integer_cast(const Float& a) { return static_cast<uint>(a.dbl); }
 
-template<class R, class A> inline R approx_cast(const A& a);
-template<> inline double approx_cast(const Float& a) { return a.dbl; }
-
 inline std::ostream& operator<<(std::ostream& os, const Float& x) { return os << x.dbl; }
 inline std::istream& operator>>(std::istream& is, Float& x) { double dbl; is >> dbl; x=Float(dbl); return is; }
 

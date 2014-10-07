@@ -46,17 +46,17 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAf
 
     set_rounding_upward();
 
-    RawFloatType te=0.0;
+    RawFloat te=0.0;
     for(uint j=0; j!=n; ++j) {
-        RawFloatType mrjl = (-a1.gradient(j).raw())-a2.gradient(j).raw();
-        RawFloatType  rju = ( a1.gradient(j).raw())+a2.gradient(j).raw();
+        RawFloat mrjl = (-a1.gradient(j).raw())-a2.gradient(j).raw();
+        RawFloat  rju = ( a1.gradient(j).raw())+a2.gradient(j).raw();
         te+=(rju+mrjl);
     }
-    RawFloatType mrl = (-a1.value().raw())-a2.value().raw();
-    RawFloatType  ru = ( a1.value().raw())+a2.value().raw();
+    RawFloat mrl = (-a1.value().raw())-a2.value().raw();
+    RawFloat  ru = ( a1.value().raw())+a2.value().raw();
     te += (ru+mrl);
 
-    RawFloatType re=0.0;
+    RawFloat re=0.0;
     r.set_error( ErrorType(te/2 + (a1.error().raw()+a2.error().raw()) ) );
 
     set_rounding_to_nearest();
@@ -64,16 +64,16 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAf
     return r;
 }
 
-ValidatedAffineModel operator+(const ValidatedNumberType& c, const ValidatedAffineModel& a) {
+ValidatedAffineModel operator+(const ValidatedNumber& c, const ValidatedAffineModel& a) {
     ValidatedAffineModel r=a;
-    RawFloatType cm=c.midpoint().raw();
+    RawFloat cm=c.midpoint().raw();
     r.set_value( static_cast<CoefficientType>( cm + a.value().raw() ) );
 
     set_rounding_upward();
 
-    RawFloatType mrl = (-a.value().raw())-cm;
-    RawFloatType  ru = ( a.value().raw())+cm;
-    RawFloatType te = (ru+mrl)/2;
+    RawFloat mrl = (-a.value().raw())-cm;
+    RawFloat  ru = ( a.value().raw())+cm;
+    RawFloat te = (ru+mrl)/2;
 
     r.set_error( ErrorType( a.error().raw() + max(c.upper().raw()-cm,cm-c.lower().raw()) + te) );
 
@@ -82,13 +82,13 @@ ValidatedAffineModel operator+(const ValidatedNumberType& c, const ValidatedAffi
     return r;
 }
 
-ValidatedAffineModel operator+(const ValidatedAffineModel& a, const ValidatedNumberType& c) {
+ValidatedAffineModel operator+(const ValidatedAffineModel& a, const ValidatedNumber& c) {
     return c+a;
 }
 
-ValidatedAffineModel operator*(const ValidatedNumberType& c, const ValidatedAffineModel& a) {
+ValidatedAffineModel operator*(const ValidatedNumber& c, const ValidatedAffineModel& a) {
     Nat n=a.argument_size();
-    RawFloatType cm=c.midpoint().raw();
+    RawFloat cm=c.midpoint().raw();
     ValidatedAffineModel r(n);
     r=CoefficientType(a.value().raw()*cm);
     for(uint i=0; i!=n; ++i) {
@@ -97,18 +97,18 @@ ValidatedAffineModel operator*(const ValidatedNumberType& c, const ValidatedAffi
 
     set_rounding_upward();
 
-    RawFloatType te=0.0;
+    RawFloat te=0.0;
     for(uint j=0; j!=n; ++j) {
-        RawFloatType mca=(-cm)*a.gradient(j).raw();
-        RawFloatType ca= cm*a.gradient(j).raw();
+        RawFloat mca=(-cm)*a.gradient(j).raw();
+        RawFloat ca= cm*a.gradient(j).raw();
         te+=(ca+mca);
     }
-    RawFloatType mca=(-cm)*a.value().raw();
-    RawFloatType ca= cm*a.value().raw();
+    RawFloat mca=(-cm)*a.value().raw();
+    RawFloat ca= cm*a.value().raw();
 
-    RawFloatType re=0.0;
+    RawFloat re=0.0;
     if(c.lower()!=c.upper()) {
-        RawFloatType ce=max(c.upper().raw()-cm,cm-c.lower().raw());
+        RawFloat ce=max(c.upper().raw()-cm,cm-c.lower().raw());
         for(uint j=0; j!=n; ++j) {
             re+=abs(a.gradient(j).raw()*ce);
         }
@@ -121,7 +121,7 @@ ValidatedAffineModel operator*(const ValidatedNumberType& c, const ValidatedAffi
     return r;
 }
 
-ValidatedAffineModel operator*(const ValidatedAffineModel& a, const ValidatedNumberType& c) {
+ValidatedAffineModel operator*(const ValidatedAffineModel& a, const ValidatedNumber& c) {
     return c*a;
 }
 
@@ -132,7 +132,7 @@ ValidatedAffineModel affine_model(const ValidatedAffine& a) {
         am[j] = midpoint(a[j]);
     }
     set_rounding_upward();
-    RawFloatType e = 0.0;
+    RawFloat e = 0.0;
     for(uint j=0; j!=a.argument_size(); ++j) {
         e += max(a.gradient(j).upper().raw()-am.gradient(j).raw(),am.gradient(j).raw()-a.gradient(j).lower().raw());
     }

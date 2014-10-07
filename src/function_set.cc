@@ -1127,13 +1127,13 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
 
     ValidatedVectorFunctionModel function1
         = ValidatedVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<ValidatedTag> const&>(set1.function().reference()));
-    Vector<ErrorFloatType> function_error1=function1.errors();
+    Vector<ErrorFloat> function_error1=function1.errors();
     function1.clobber();
     function1.restrict(new_domain);
 
     ValidatedVectorFunctionModel function2
         = ValidatedVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<ValidatedTag> const&>(set2.function().reference()));
-    Vector<ErrorFloatType> function_error2=function2.errors();
+    Vector<ErrorFloat> function_error2=function2.errors();
     function2.clobber();
     function2.restrict(new_domain);
 
@@ -1142,8 +1142,8 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
     for(uint i=0; i!=new_function.result_size(); ++i) {
         function_error1[i]=norm(new_function[i]-function1[i])+function_error1[i];
         function_error2[i]=norm(new_function[i]-function2[i])+function_error2[i];
-        ErrorFloatType new_function_error = max(function_error1[i],function_error2[i]);
-        new_function[i] = new_function[i] + ValidatedFloatType(-new_function_error,+new_function_error);
+        ErrorFloat new_function_error = max(function_error1[i],function_error2[i]);
+        new_function[i] = new_function[i] + ValidatedFloat(-new_function_error,+new_function_error);
     }
 
     ARIADNE_ASSERT(set1.number_of_constraints()==0);

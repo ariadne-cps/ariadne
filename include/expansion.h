@@ -315,8 +315,8 @@ class Expansion
     template<class XX, typename std::enable_if<std::is_constructible<X,XX>::value and not std::is_convertible<XX,X>::value,int>::type=0>
         explicit Expansion(const Expansion<XX>& p);
 
-    Expansion<RawFloatType>& raw() { return reinterpret_cast<Expansion<RawFloatType>&>(*this); }
-    Expansion<RawFloatType>const& raw() const { return reinterpret_cast<Expansion<RawFloatType>const&>(*this); }
+    Expansion<RawFloat>& raw() { return reinterpret_cast<Expansion<RawFloat>&>(*this); }
+    Expansion<RawFloat>const& raw() const { return reinterpret_cast<Expansion<RawFloat>const&>(*this); }
 
     Expansion<X>& operator=(const X& x);
 

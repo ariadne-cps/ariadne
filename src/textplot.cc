@@ -139,7 +139,7 @@ void TextPlot::draw(const ExactBox& bx) {
 
 void TextPlot::draw(const InterpolatedCurve& c) {
     for(InterpolatedCurve::const_iterator iter = c.begin() ; iter != c.end() ; ++iter) {
-        this->draw(ExactPoint(iter->second));
+        this->draw(ApproximatePoint(iter->second));
     }
     this->_fstream << std::endl;
 }

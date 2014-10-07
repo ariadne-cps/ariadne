@@ -42,14 +42,14 @@ class ExactInterval;
 typedef tribool Tribool;
 
 template<class X> class Point;
-typedef Point<ExactNumberType> ExactPoint;
+typedef Point<ExactNumber> ExactPoint;
 class ExactBox;
 class UpperBox;
 class GridTreeSet;
 
 template<class X, class R> class Constraint;
-typedef Constraint<EffectiveScalarFunction,EffectiveNumberType> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ValidatedNumberType> ValidatedConstraint;
+typedef Constraint<EffectiveScalarFunction,EffectiveNumber> EffectiveConstraint;
+typedef Constraint<ValidatedScalarFunction,ValidatedNumber> ValidatedConstraint;
 
 template<class X> class Procedure;
 typedef Procedure<ValidatedTag> ValidatedProcedure;
@@ -120,9 +120,9 @@ class ConstraintSolver
     //! with \a multipliers innner product \a codomain, centering at \a centre.
     //! Reduces \f$(\lambda\cdot f)(X) \cap (\lambda\cdot C)\f$, evaluating \f$g(x)=g(x^*)+Dg(X) (X-x^*)\f$.
     bool lyapunov_reduce(UpperBox& domain, const VectorTaylorFunction& function, const ExactBox& codomain,
-                         Vector<ExactFloatType> centre, Vector<ExactFloatType> multpliers) const;
+                         Vector<ExactFloat> centre, Vector<ExactFloat> multpliers) const;
     bool lyapunov_reduce(UpperBox& domain, const VectorTaylorFunction& function, const ExactBox& codomain,
-                         Vector<ApproximateNumberType> centre, Vector<ApproximateNumberType> multpliers) const;
+                         Vector<ApproximateNumber> centre, Vector<ApproximateNumber> multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.
     bool box_reduce(UpperBox& bx, const ValidatedScalarFunctionInterface& function, const ExactInterval&, uint j) const;
     //! \brief Try to enforce hull consistency by reducing an a monotone dimension.

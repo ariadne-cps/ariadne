@@ -53,7 +53,7 @@ namespace Ariadne {
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
 
-typedef Map< DiscreteLocation, Vector<ExactFloatType> > HybridExactFloatVector;
+typedef Map< DiscreteLocation, Vector<ExactFloat> > HybridExactFloatVector;
 
 class IntegratorInterface;
 class SolverInterface;
@@ -248,7 +248,7 @@ class HybridEvolverBase
     ValidatedVectorFunctionModel
     _compute_flow(EffectiveVectorFunction vector_field,
                   ExactBox const& initial_set,
-                  const ExactFloatType& maximum_step_size) const;
+                  const ExactFloat& maximum_step_size) const;
 
     //! \brief Compute the active events for the \a flow \f$\phi\f$ with
     //! time step \f$h\f$ starting in the given \a starting_set \f$S\f$.

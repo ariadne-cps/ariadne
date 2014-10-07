@@ -49,8 +49,8 @@
 namespace Ariadne {
 
 template<class X> class Formula;
-typedef Formula<ApproximateNumberType> ApproximateFormula;
-typedef Formula<ValidatedNumberType> ValidatedFormula;
+typedef Formula<ApproximateNumber> ApproximateFormula;
+typedef Formula<ValidatedNumber> ValidatedFormula;
 
 struct Index {
     Nat _i;

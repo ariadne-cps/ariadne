@@ -68,7 +68,7 @@ template<class ES> std::ostream& operator<<(std::ostream&, const Orbit<ES>&);
 template<class BS> class ListSet;
 
 template<class X> class Point;
-typedef Point<ExactNumberType> ExactPoint;
+typedef Point<ExactNumber> ExactPoint;
 
 class InterpolatedCurve;
 class Grid;

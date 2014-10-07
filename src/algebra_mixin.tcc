@@ -57,8 +57,8 @@ _compose(const TaylorSeries& ts, const A& tv, double eps)
 {
     //std::cerr<<"_compose(TaylorSeries,A,Error)\n";
     //std::cerr<<"\n  ts="<<ts<<"\n  tv="<<tv<<"\n";
-    ExactFloatType& vref=const_cast<ExactFloatType&>(tv.value());
-    ExactFloatType vtmp=vref;
+    ExactFloat& vref=const_cast<ExactFloat&>(tv.value());
+    ExactFloat vtmp=vref;
     vref=0;
     A r(tv.argument_size());
     r+=ts.expansion[ts.expansion.size()-1];
@@ -91,10 +91,10 @@ _compose1(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
     static const uint DEGREE=18;
     static const double TRUNCATION_ERROR=1e-8;
     uint d=DEGREE;
-    ExactFloatType c=tm.value();
-    ValidatedFloatType r=tm.range();
-    Series<ValidatedFloatType> centre_series=fn(d,ValidatedFloatType(c));
-    Series<ValidatedFloatType> range_series=fn(d,r);
+    ExactFloat c=tm.value();
+    ValidatedFloat r=tm.range();
+    Series<ValidatedFloat> centre_series=fn(d,ValidatedFloat(c));
+    Series<ValidatedFloat> range_series=fn(d,r);
 
     Float truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
     if(truncation_error_estimate>TRUNCATION_ERROR) {
@@ -124,15 +124,15 @@ _compose2(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
     static const uint DEGREE=20;
     static const Float TRUNCATION_ERROR=1e-8;
     uint d=DEGREE;
-    ExactFloatType c=tm.value();
-    ValidatedFloatType r=tm.range();
-    Series<ValidatedFloatType> centre_series=fn(d,ValidatedFloatType(c));
-    Series<ValidatedFloatType> range_series=fn(d,r);
+    ExactFloat c=tm.value();
+    ValidatedFloat r=tm.range();
+    Series<ValidatedFloat> centre_series=fn(d,ValidatedFloat(c));
+    Series<ValidatedFloat> range_series=fn(d,r);
 
     //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
     //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
     //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
-    ErrorFloatType truncation_error=mag(range_series[d]-centre_series[d])*pow(mag(r-c),d);
+    ErrorFloat truncation_error=mag(range_series[d]-centre_series[d])*pow(mag(r-c),d);
     //std::cerr<<"te="<<truncation_error<<"\n";
     if(truncation_error.raw()>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
@@ -146,7 +146,7 @@ _compose2(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
         res=centre_series[d-i-1]+x*res;
         res.sweep(eps);
     }
-    res+=ValidatedFloatType(-truncation_error,+truncation_error);
+    res+=ValidatedFloat(-truncation_error,+truncation_error);
     return res;
 }
 
@@ -161,18 +161,18 @@ _compose3(const ValidatedSeriesFunctionPointer& fn, const A& tm, Float eps)
     static const uint DEGREE=20;
     static const Float TRUNCATION_ERROR=1e-8;
     uint d=DEGREE;
-    ExactFloatType c=tm.value();
-    ValidatedFloatType r=tm.range();
-    Series<ValidatedFloatType> centre_series=fn(d,ValidatedFloatType(c));
-    Series<ValidatedFloatType> range_series=fn(d,r);
+    ExactFloat c=tm.value();
+    ValidatedFloat r=tm.range();
+    Series<ValidatedFloat> centre_series=fn(d,ValidatedFloat(c));
+    Series<ValidatedFloat> range_series=fn(d,r);
 
     //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
     //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
     //std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
-    ValidatedFloatType se=range_series[d]-centre_series[d];
-    ValidatedFloatType e=r-c;
-    ValidatedFloatType p=pow(e,d-1);
-    p=ValidatedFloatType(-(-p.lower()*(-e.lower())),p.upper()*e.upper());
+    ValidatedFloat se=range_series[d]-centre_series[d];
+    ValidatedFloat e=r-c;
+    ValidatedFloat p=pow(e,d-1);
+    p=ValidatedFloat(-(-p.lower()*(-e.lower())),p.upper()*e.upper());
     //std::cerr<<"se="<<se<<" e="<<e<<" p="<<p<<std::endl;
     // FIXME: Here we assume the dth derivative of f is monotone increasing
     Float truncation_error=max(-(-se.lower()*(-p.lower())),se.upper()*p.upper()).raw();
@@ -189,7 +189,7 @@ _compose3(const ValidatedSeriesFunctionPointer& fn, const A& tm, Float eps)
         res=centre_series[d-i-1]+x*res;
         //res.sweep(eps);
     }
-    res+=ValidatedFloatType(-truncation_error,+truncation_error);
+    res+=ValidatedFloat(-truncation_error,+truncation_error);
     return res;
 }
 
@@ -224,7 +224,7 @@ sqrt(const A& x)
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     auto avg=x.average();
     auto rad=x.radius();
-    ValidatedFloatType rng=avg+ValidatedFloatType(-rad,+rad);
+    ValidatedFloat rng=avg+ValidatedFloat(-rad,+rad);
 
     if(rng.lower()<=0) {
         ARIADNE_THROW(DomainException,"sqrt",x);
@@ -234,7 +234,7 @@ sqrt(const A& x)
     UpperFloat eps=rng.radius()/rng.midpoint();
     set_rounding_to_nearest();
     assert(eps<1);
-    uint d=integer_cast<int>((log((1-eps)*ExactFloatType(x.tolerance()))/log(eps)+1));
+    uint d=integer_cast<int>((log((1-eps)*ExactFloat(x.tolerance()))/log(eps)+1));
     //std::cerr<<"x="<<x<<std::endl;
     //std::cerr<<"x/a="<<x/a<<" a="<<a<<std::endl;
     A y=(x/avg)-X(1.0);
@@ -249,7 +249,7 @@ sqrt(const A& x)
         //std::cerr<<"z="<<z<<std::endl;
     }
     auto trunc_err=pow(eps,d)/(1-eps)*mag(sqrt_series[d]);
-    //std::cerr<<"te="<<trunc_err<<" te*[-1,+1]="<<trunc_err*ValidatedFloatType(-1,1)<<std::endl;
+    //std::cerr<<"te="<<trunc_err<<" te*[-1,+1]="<<trunc_err*ValidatedFloat(-1,1)<<std::endl;
     z+=z.create_ball(trunc_err);
     //std::cerr<<"z="<<z<<std::endl;
     X sqrta=sqrt(numeric_cast<X>(avg));
@@ -266,18 +266,18 @@ rec(const A& x)
     //std::cerr<<"rec(A)\n";
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
-    ExactFloatType avg=x.average();
-    ErrorFloatType rad=x.radius();
-    ValidatedFloatType rng=avg+ValidatedFloatType(-rad,+rad);
+    ExactFloat avg=x.average();
+    ErrorFloat rad=x.radius();
+    ValidatedFloat rng=avg+ValidatedFloat(-rad,+rad);
     if(rng.upper()>=0 && rng.lower()<=0) {
         ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<", x.range()="<<rng);
     }
     set_rounding_upward();
-    ErrorFloatType eps=rng.radius()/abs(rng.midpoint());
+    ErrorFloat eps=rng.radius()/abs(rng.midpoint());
     set_rounding_to_nearest();
     assert(eps<1);
 
-    uint d=integer_cast<uint>((log((1-eps)*ExactFloatType(x.tolerance()))/log(eps))+1);
+    uint d=integer_cast<uint>((log((1-eps)*ExactFloat(x.tolerance()))/log(eps))+1);
 
     A y=1-(x/numeric_cast<X>(avg));
     A z=x.create();
@@ -290,7 +290,7 @@ rec(const A& x)
     }
 
     // Compute the truncation error
-    ErrorFloatType te=pow(eps,d)/(1-eps);
+    ErrorFloat te=pow(eps,d)/(1-eps);
     z+=z.create_ball(te);
     //std::cerr<<"  z="<<z<<"\n";
     z/=avg;
@@ -306,15 +306,15 @@ log(const A& x)
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     auto avg=x.average();
     auto rad=x.radius();
-    ValidatedFloatType rng=avg+ValidatedFloatType(-rad,+rad);
+    ValidatedFloat rng=avg+ValidatedFloat(-rad,+rad);
     if(rng.lower()<=0) {
         ARIADNE_THROW(DomainException,"sqrt",rng);
     }
     set_rounding_upward();
-    ErrorFloatType eps=rng.radius()/avg;
+    ErrorFloat eps=rng.radius()/avg;
     set_rounding_to_nearest();
     assert(eps<1);
-    uint d=integer_cast<uint>((log((1-eps)*ExactFloatType(x.tolerance()))/log(eps)+1));
+    uint d=integer_cast<uint>((log((1-eps)*ExactFloat(x.tolerance()))/log(eps)+1));
     A y=x/avg-X(1);
     A z=x.create();
     z+=Float(d%2?-1:+1)/d;
@@ -322,8 +322,8 @@ log(const A& x)
         z=Float((d-i)%2?+1:-1)/(d-i) + z * y;
     }
     z=z*y;
-    ErrorFloatType trunc_err=pow(eps,d)/(1-eps)/d;
-    return z+log(numeric_cast<X>(avg))+ValidatedFloatType(-trunc_err,+trunc_err);
+    ErrorFloat trunc_err=pow(eps,d)/(1-eps)/d;
+    return z+log(numeric_cast<X>(avg))+ValidatedFloat(-trunc_err,+trunc_err);
 }
 
 // Use special code to utilise exp(ax+b)=exp(x)^a*exp(b)
@@ -333,22 +333,22 @@ template<class A> typename EnableIfNormedAlgebra<A>::Type exp(const A& x)
     // FIXME: Truncation error may be incorrect
 
     // Scale to unit interval
-    ExactFloatType xavg=x.average();
+    ExactFloat xavg=x.average();
     A y = x-xavg;
 
-    ErrorFloatType xrad=x.radius();
-    RawFloatType xtol = x.tolerance();
+    ErrorFloat xrad=x.radius();
+    RawFloat xtol = x.tolerance();
 
     uint sfp=0; // A number such that 2^sfp>rad(x.range())
     while(Float(1<<sfp)<xrad.raw()) { ++sfp; }
-    ExactFloatType sf=ExactFloatType(RawFloatType(1)/(1<<sfp));
+    ExactFloat sf=ExactFloat(RawFloat(1)/(1<<sfp));
     y*=sf;
-    ErrorFloatType yrad=xrad*sf;
+    ErrorFloat yrad=xrad*sf;
 
     static const uint degree = 7;
     A res=x.create();
-    ErrorFloatType truncation_error = (pow(yrad,degree+1));
-    res += numeric_cast<X>(ValidatedFloatType(-truncation_error,+truncation_error));
+    ErrorFloat truncation_error = (pow(yrad,degree+1));
+    res += numeric_cast<X>(ValidatedFloat(-truncation_error,+truncation_error));
     for(uint i=0; i!=degree; ++i) {
         res/=(degree-i);
         res=y*res+1.0;
@@ -362,10 +362,10 @@ template<class A> typename EnableIfNormedAlgebra<A>::Type exp(const A& x)
     }
 
     // Multiply by exp(xv)
-    res*=Ariadne::exp(ValidatedFloatType(xavg));
+    res*=Ariadne::exp(ValidatedFloat(xavg));
 
     return res;
-    //return _compose(&Series<ValidatedFloatType>::exp,x,x.sweep_threshold());
+    //return _compose(&Series<ValidatedFloat>::exp,x,x.sweep_threshold());
 }
 
 // Use special code to utilise sin(x+2pi)=sin(x)
@@ -382,7 +382,7 @@ sin(const A& x)
 
     Float two_pi_approx=2*pi_approx;
     Float xavg=x.average().value();
-    int n=integer_cast<int>(floor(RawFloatType(xavg/two_pi_approx + 0.5)));
+    int n=integer_cast<int>(floor(RawFloat(xavg/two_pi_approx + 0.5)));
 
     Real const& pi=Ariadne::pi;
     auto two_pi=2*pi;
@@ -391,8 +391,8 @@ sin(const A& x)
     s=sqr(y);
 
     int d=8; // TODO: Change number of terms to be dependent on tolerance
-    ErrorFloatType srad=s.radius();
-    ErrorFloatType truncation_error=pow_up(srad.value(),d+1)*rec_fac_up((d+1)*2);
+    ErrorFloat srad=s.radius();
+    ErrorFloat truncation_error=pow_up(srad.value(),d+1)*rec_fac_up((d+1)*2);
 
     // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
     r=1;
@@ -434,8 +434,8 @@ cos(const A& x)
         s=sqr(y);
 
         int d=8; // TODO: Change number of terms to be dependent on tolerance
-        ErrorFloatType srad=s.radius();
-        ErrorFloatType truncation_error=pow_up(srad.value(),d+1)*rec_fac_up((d+1)*2);
+        ErrorFloat srad=s.radius();
+        ErrorFloat truncation_error=pow_up(srad.value(),d+1)*rec_fac_up((d+1)*2);
 
         // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
         r=1.0;
@@ -466,7 +466,7 @@ asin(const A& x)
     typedef typename A::NumericType X;
     Float xavg = x.average();
     Float xrad = x.radius();
-    ValidatedFloatType xrng = xavg + ValidatedFloatType(-xrad,+xrad);
+    ValidatedFloat xrng = xavg + ValidatedFloat(-xrad,+xrad);
     return compose(TaylorSeries(DEG,&Series<X>::asin,xavg,xrng),x);
 */
 }
@@ -480,7 +480,7 @@ acos(const A& x)
     typedef typename A::NumericType X;
     Float xavg = x.average();
     Float xrad = x.radius();
-    ValidatedFloatType xrng = xavg + ValidatedFloatType(-xrad,+xrad);
+    ValidatedFloat xrng = xavg + ValidatedFloat(-xrad,+xrad);
     return compose(TaylorSeries(DEG,&Series<X>::acos,xavg,xrng),x);
 */
 }
@@ -494,7 +494,7 @@ atan(const A& x)
     typedef typename A::NumericType X;
     Float xavg = x.average();
     Float xrad = x.radius();
-    ValidatedFloatType xrng = xavg + ValidatedFloatType(-xrad,+xrad);
+    ValidatedFloat xrng = xavg + ValidatedFloat(-xrad,+xrad);
     return compose(TaylorSeries(DEG,&Series<X>::atan,xavg,xrng),x);
 */
 }

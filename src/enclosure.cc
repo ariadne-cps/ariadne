@@ -78,7 +78,7 @@ static const uint verbosity = 0u;
 
 template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; return ss.str(); }
 
-typedef Vector<Float> FloatVector;
+typedef Vector<Float> RawFloatVector;
 typedef Vector<ExactInterval> ExactIntervalVector;
 
 namespace {
@@ -108,7 +108,7 @@ ExactInterval make_domain(const IntervalSet& ivl) {
 
 ValidatedVectorFunctionModel make_identity(const BoxSet& bx, const ValidatedFunctionModelFactoryInterface& fac) {
     ExactIntervalVector dom(bx.dimension());
-    FloatVector errs(bx.dimension());
+    RawFloatVector errs(bx.dimension());
 
     for(uint i=0; i!=bx.dimension(); ++i) {
         ExactInterval dom_lower_ivl=numeric_cast<ExactInterval>(bx[i].lower());
@@ -126,7 +126,7 @@ ValidatedVectorFunctionModel make_identity(const BoxSet& bx, const ValidatedFunc
 
     ValidatedVectorFunctionModel res=fac.create_identity(dom);
     for(uint i=0; i!=bx.dimension(); ++i) {
-        res[i]=res[i]+ValidatedNumberType(-errs[i],+errs[i]);
+        res[i]=res[i]+ValidatedNumber(-errs[i],+errs[i]);
     }
 
     return res;
@@ -667,7 +667,7 @@ UpperBox Enclosure::bounding_box() const {
     return this->_space_function.codomain().bounding_box();
 }
 
-ErrorFloatType Enclosure::radius() const {
+ErrorFloat Enclosure::radius() const {
     return this->bounding_box().radius();
 }
 
@@ -1040,7 +1040,7 @@ uniform_error_recondition()
         Float error=this->_space_function.get(large_error_indices[i]).error().raw();
         if(error > MAXIMUM_ERROR) {
             this->_space_function[i].set_error(0.0);
-            this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*ValidatedFloatType(+error);
+            this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*ValidatedFloat(+error);
             ++k;
         }
     }

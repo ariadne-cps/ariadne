@@ -91,7 +91,7 @@ ScalarTaylorFunction::ScalarTaylorFunction(const ExactBox& d, const Expansion<Fl
 {
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const ExactBox& d, const Expansion<ExactFloatType>& p, const ErrorFloatType& e, const Sweeper& swp)
+ScalarTaylorFunction::ScalarTaylorFunction(const ExactBox& d, const Expansion<ExactFloat>& p, const ErrorFloat& e, const Sweeper& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
@@ -127,7 +127,7 @@ ScalarTaylorFunction ScalarTaylorFunction::zero(const ExactBox& d, Sweeper swp)
     return ScalarTaylorFunction(d,ValidatedTaylorModel::zero(d.size(),swp));
 }
 
-ScalarTaylorFunction ScalarTaylorFunction::constant(const ExactBox& d, const ValidatedNumberType& c, Sweeper swp)
+ScalarTaylorFunction ScalarTaylorFunction::constant(const ExactBox& d, const ValidatedNumber& c, Sweeper swp)
 {
     return ScalarTaylorFunction(d,ValidatedTaylorModel::constant(d.size(),c,swp));
 }
@@ -152,7 +152,7 @@ ScalarTaylorFunction ScalarTaylorFunction::variable(const ExactBox& d, uint j, S
 }
 
 
-Vector<ScalarTaylorFunction> ScalarTaylorFunction::constants(const ExactBox& d, const Vector<ValidatedNumberType>& c, Sweeper swp)
+Vector<ScalarTaylorFunction> ScalarTaylorFunction::constants(const ExactBox& d, const Vector<ValidatedNumber>& c, Sweeper swp)
 {
     ARIADNE_DEPRECATED("ScalarTaylorFunction::constants","Use VectorTaylorFunction::constant instead");
     Vector<ScalarTaylorFunction> x(c.size(),ScalarTaylorFunction(d,swp));
@@ -213,7 +213,7 @@ Sweeper ScalarTaylorFunction::sweeper() const
 }
 
 
-Polynomial<ValidatedNumberType> polynomial(const ValidatedTaylorModel& tm);
+Polynomial<ValidatedNumber> polynomial(const ValidatedTaylorModel& tm);
 
 inline bool operator==(ExactFloat x1, int n2) { return x1.raw()==Float(n2); }
 inline bool operator==(ValidatedFloat x1, int n2) { return x1.upper_raw()==Float(n2) && x1.lower_raw()==Float(n2); }
@@ -227,21 +227,21 @@ inline bool operator> (ExactFloat x1, int n2) { return x1.raw()> Float(n2); }
 inline bool operator> (ValidatedFloat x1, int n2) { return x1.lower_raw()> Float(n2); }
 inline bool operator> (ApproximateFloat x1, int n2) { return x1.raw()> Float(n2); }
 
-Polynomial<ValidatedNumberType>
+Polynomial<ValidatedNumber>
 ScalarTaylorFunction::polynomial() const
 {
-    Polynomial<ValidatedNumberType> p(this->argument_size());
+    Polynomial<ValidatedNumber> p(this->argument_size());
     p=Ariadne::polynomial(this->model());
 
-    Vector<Polynomial<ValidatedNumberType> > s(this->argument_size());
+    Vector<Polynomial<ValidatedNumber> > s(this->argument_size());
     for(uint j=0; j!=this->argument_size(); ++j) {
         ExactInterval const& domj=this->domain()[j];
         if(domj.width()<=0) {
             ARIADNE_ASSERT(this->domain()[j].width()==0);
-            s[j]=Polynomial<ValidatedNumberType>::constant(this->argument_size(),0);
+            s[j]=Polynomial<ValidatedNumber>::constant(this->argument_size(),0);
         } else {
             //s[j]=Ariadne::polynomial(ValidatedTaylorModel::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper()));
-            s[j]=(Polynomial<ValidatedNumberType>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
+            s[j]=(Polynomial<ValidatedNumber>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
         }
     }
 
@@ -277,22 +277,22 @@ ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const ScalarTaylorFunc
 }
 
 
-ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f, const ValidatedNumberType& c) {
+ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f, const ValidatedNumber& c) {
     f._model+=c;
     return f;
 }
 
-ScalarTaylorFunction& operator-=(ScalarTaylorFunction& f, const ValidatedNumberType& c) {
+ScalarTaylorFunction& operator-=(ScalarTaylorFunction& f, const ValidatedNumber& c) {
     f._model-=c;
     return f;
 }
 
-ScalarTaylorFunction& operator*=(ScalarTaylorFunction& f, const ValidatedNumberType& c) {
+ScalarTaylorFunction& operator*=(ScalarTaylorFunction& f, const ValidatedNumber& c) {
     f._model*=c;
     return f;
 }
 
-ScalarTaylorFunction& operator/=(ScalarTaylorFunction& f, const ValidatedNumberType& c) {
+ScalarTaylorFunction& operator/=(ScalarTaylorFunction& f, const ValidatedNumber& c) {
     f._model/=c;
     return f;
 }
@@ -366,25 +366,25 @@ ScalarTaylorFunction* ScalarTaylorFunction::_derivative(uint j) const
 }
 
 
-ApproximateNumberType
-ScalarTaylorFunction::evaluate(const Vector<ApproximateNumberType>& x) const
+ApproximateNumber
+ScalarTaylorFunction::evaluate(const Vector<ApproximateNumber>& x) const
 {
     const ScalarTaylorFunction& f=*this;
     if(!contains(f.domain(),reinterpret_cast<Vector<Float>const&>(x))) {
         ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
     }
-    Vector<ApproximateNumberType> sx=Ariadne::unscale(x,f._domain);
+    Vector<ApproximateNumber> sx=Ariadne::unscale(x,f._domain);
     return Ariadne::evaluate(this->_model.expansion(),sx);
 }
 
-ValidatedNumberType
-ScalarTaylorFunction::evaluate(const Vector<ValidatedNumberType>& x) const
+ValidatedNumber
+ScalarTaylorFunction::evaluate(const Vector<ValidatedNumber>& x) const
 {
     return Ariadne::evaluate(*this,x);
 }
 
-ValidatedNumberType
-ScalarTaylorFunction::operator()(const Vector<ValidatedNumberType>& x) const
+ValidatedNumber
+ScalarTaylorFunction::operator()(const Vector<ValidatedNumber>& x) const
 {
     return Ariadne::evaluate(*this,x);
 }
@@ -417,16 +417,16 @@ ScalarTaylorFunction extend(const ScalarTaylorFunction& tv, const ExactBox& d) {
     return ScalarTaylorFunction(d,tv._model);
 }
 
-ValidatedNumberType
-evaluate(const ScalarTaylorFunction& f, const Vector<ValidatedNumberType>& x) {
+ValidatedNumber
+evaluate(const ScalarTaylorFunction& f, const Vector<ValidatedNumber>& x) {
     if(!contains(f.domain(),x)) {
         ARIADNE_THROW(DomainException,std::setprecision(17)<<"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
     }
     return unchecked_evaluate(f,x);
 }
 
-ValidatedNumberType
-unchecked_evaluate(const ScalarTaylorFunction& f, const Vector<ValidatedNumberType>& x) {
+ValidatedNumber
+unchecked_evaluate(const ScalarTaylorFunction& f, const Vector<ValidatedNumber>& x) {
     return evaluate(f.model(),unscale(x,f.domain()));
 }
 
@@ -467,20 +467,20 @@ unchecked_compose(const ScalarTaylorFunction& g, const VectorTaylorFunction& f)
 
 
 ScalarTaylorFunction
-partial_evaluate(const ScalarTaylorFunction& tf, uint k, const ExactNumberType& c)
+partial_evaluate(const ScalarTaylorFunction& tf, uint k, const ExactNumber& c)
 {
-    return partial_evaluate(tf,k,ValidatedNumberType(c));
+    return partial_evaluate(tf,k,ValidatedNumber(c));
 }
 
 ScalarTaylorFunction
-partial_evaluate(const ScalarTaylorFunction& te, uint k, const ValidatedNumberType& c)
+partial_evaluate(const ScalarTaylorFunction& te, uint k, const ValidatedNumber& c)
 {
     // Scale c to domain
     const uint as=te.argument_size();
     ARIADNE_ASSERT(k<as);
     const ExactBox& domain=te.domain();
     const ExactInterval& dk=domain[k];
-    ValidatedNumberType sc=(c-med_val(dk))/rad_val(dk);
+    ValidatedNumber sc=(c-med_val(dk))/rad_val(dk);
 
     ExactBox new_domain(as-1);
     for(uint i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
@@ -504,9 +504,9 @@ ScalarTaylorFunction partial_restrict(const ScalarTaylorFunction& tv, uint k, co
     Float a=old_ivl.lower().raw(); Float b=old_ivl.upper().raw();
     Float c=new_ivl.lower().raw(); Float d=new_ivl.upper().raw();
     if(a==b) { ARIADNE_ASSERT( a<b || (a==b && c==d) ); return tv; }
-    ValidatedNumberType s=static_cast<ValidatedNumberType>(sub_ivl(d,c)/sub_ivl(b,a));
-    // ValidatedNumberType t=(mul_ivl(b,c)-mul_ivl(a,d))/sub_ivl(b,a);  // WRONG!!
-    ValidatedNumberType t=static_cast<ValidatedNumberType>((add_ivl(c,d)-add_ivl(a,b))/sub_ivl(b,a));
+    ValidatedNumber s=static_cast<ValidatedNumber>(sub_ivl(d,c)/sub_ivl(b,a));
+    // ValidatedNumber t=(mul_ivl(b,c)-mul_ivl(a,d))/sub_ivl(b,a);  // WRONG!!
+    ValidatedNumber t=static_cast<ValidatedNumber>((add_ivl(c,d)-add_ivl(a,b))/sub_ivl(b,a));
     ExactBox new_dom=tv.domain();
     new_dom[k]=new_ivl;
     return ScalarTaylorFunction(new_dom,preaffine(tv.model(),k,s,t));
@@ -517,7 +517,7 @@ ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, uint k, const Exac
     return partial_restrict(tv,k,new_ivl);
 }
 
-ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& f, uint k, ExactFloatType c)
+ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& f, uint k, ExactFloat c)
 {
     ARIADNE_ASSERT(k<f.argument_size());
     ARIADNE_ASSERT(contains(f.domain()[k],c));
@@ -566,15 +566,15 @@ ScalarTaylorFunction intersection(const ScalarTaylorFunction& tv1, const ScalarT
     return ScalarTaylorFunction(tv1.domain(),intersection(tv1.model(),tv2.model()));
 }
 
-ErrorFloatType norm(const ScalarTaylorFunction& f) {
+ErrorFloat norm(const ScalarTaylorFunction& f) {
     return norm(f.model());
 }
 
-ErrorFloatType distance(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2) {
+ErrorFloat distance(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2) {
     return norm(f1-f2);
 }
 
-ErrorFloatType distance(const ScalarTaylorFunction& f1, const EffectiveScalarFunction& f2) {
+ErrorFloat distance(const ScalarTaylorFunction& f1, const EffectiveScalarFunction& f2) {
     return distance(f1,ScalarTaylorFunction(f1.domain(),f2,f1.sweeper()));
 }
 
@@ -584,7 +584,7 @@ ScalarTaylorFunction compose(const ScalarTaylorFunction& x, const Vector<ScalarT
     ARIADNE_NOT_IMPLEMENTED; }
 
 Vector<ScalarTaylorFunction>
-prod(const Matrix<ValidatedNumberType>& A,
+prod(const Matrix<ValidatedNumber>& A,
      const Vector<ScalarTaylorFunction>& x)
 {
     ARIADNE_ASSERT(x.size()>0);
@@ -595,7 +595,7 @@ prod(const Matrix<ValidatedNumberType>& A,
     for(uint i=0; i!=A.row_size(); ++i) {
         for(uint j=0; j!=A.column_size(); ++j) {
             //r[i]+=A[i][j]*x[j];
-            const ValidatedNumberType& Aij=A[i][j]; const ScalarTaylorFunction& xj=x[j]; ScalarTaylorFunction& ri=r[i]; ri+=Aij*xj;
+            const ValidatedNumber& Aij=A[i][j]; const ScalarTaylorFunction& xj=x[j]; ScalarTaylorFunction& ri=r[i]; ri+=Aij*xj;
         }
     }
     return r;
@@ -671,11 +671,11 @@ std::ostream& operator<<(std::ostream& os, const Representation< Expansion<Float
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const Representation< Expansion<ExactFloatType> >& exp_repr) {
+std::ostream& operator<<(std::ostream& os, const Representation< Expansion<ExactFloat> >& exp_repr) {
     return os << reinterpret_cast<Expansion<Float>const&>(exp_repr);
 }
 
-std::ostream& operator<<(std::ostream& os, const Representation< Expansion<ApproximateFloatType> >& exp_repr) {
+std::ostream& operator<<(std::ostream& os, const Representation< Expansion<ApproximateFloat> >& exp_repr) {
     return os << reinterpret_cast<Expansion<Float>const&>(exp_repr);
 }
 
@@ -733,8 +733,8 @@ template<class T> std::ostream& operator<<(std::ostream& os, const Representatio
 std::ostream&
 ScalarTaylorFunction::write(std::ostream& os) const
 {
-    Polynomial<ValidatedFloatType> p=this->polynomial();
-    Polynomial<ApproximateFloatType> ap=p;
+    Polynomial<ValidatedFloat> p=this->polynomial();
+    Polynomial<ApproximateFloat> ap=p;
     os << ap;
     if(this->error()>0.0) { os << "+/-" << this->error(); }
     return os;
@@ -804,9 +804,9 @@ std::ostream& operator<<(std::ostream& os, const PolynomialRepresentation<Scalar
     ScalarTaylorFunction truncated_function = function;
     truncated_function.clobber();
     truncated_function.sweep(ThresholdSweeper(frepr.threshold));
-    ErrorFloatType truncatation_error = truncated_function.error();
+    ErrorFloat truncatation_error = truncated_function.error();
     truncated_function.clobber();
-    Polynomial<ExactFloatType> polynomial_function = midpoint(polynomial(truncated_function));
+    Polynomial<ExactFloat> polynomial_function = midpoint(polynomial(truncated_function));
     if(frepr.names.empty()) { os << polynomial_function; }
     else { os << named_argument_repr(polynomial_function,frepr.names); }
     os << "+/-" << truncatation_error << "+/-" << function.error();
@@ -826,20 +826,20 @@ check(const Vector<ScalarTaylorFunction>& tv)
     return true;
 }
 
-Vector< Expansion<ExactFloatType> >
+Vector< Expansion<ExactFloat> >
 expansion(const Vector<ScalarTaylorFunction>& x)
 {
-    Vector< Expansion<ExactFloatType> > r(x.size());
+    Vector< Expansion<ExactFloat> > r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
         r[i]=x[i].expansion();
     }
     return r;
 }
 
-Vector<ErrorFloatType>
+Vector<ErrorFloat>
 error(const Vector<ScalarTaylorFunction>& x)
 {
-    Vector<ErrorFloatType> r(x.size());
+    Vector<ErrorFloat> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
         r[i]=x[i].error();
     }
@@ -867,30 +867,30 @@ ranges(const Vector<ScalarTaylorFunction>& x)
 }
 
 
-Vector<ValidatedNumberType>
-evaluate(const Vector<ScalarTaylorFunction>& tv, const Vector<ValidatedNumberType>& x)
+Vector<ValidatedNumber>
+evaluate(const Vector<ScalarTaylorFunction>& tv, const Vector<ValidatedNumber>& x)
 {
-    Vector<ValidatedNumberType> r(tv.size());
+    Vector<ValidatedNumber> r(tv.size());
     for(uint i=0; i!=tv.size(); ++i) {
         r[i]=evaluate(tv[i],x);
     }
     return r;
 }
 
-Matrix<ValidatedNumberType>
-jacobian(const Vector<ScalarTaylorFunction>& tv, const Vector<ValidatedNumberType>& x)
+Matrix<ValidatedNumber>
+jacobian(const Vector<ScalarTaylorFunction>& tv, const Vector<ValidatedNumber>& x)
 {
     ARIADNE_ASSERT(check(tv));
     const Vector<ExactInterval> dom=tv.zero_element().domain();
     const uint n=dom.size();
-    Vector< Differential<ValidatedNumberType> > s(n,n,1u);
+    Vector< Differential<ValidatedNumber> > s(n,n,1u);
     for(uint j=0; j!=n; ++j) {
         ExactInterval dj=dom[j];
         s[j].set_value((x[j]-med_val(dj))/rad_val(dj));
         s[j].set_gradient(j,rec(rad_val(dj)));
     }
-    Vector< Expansion<ExactFloatType> > p=expansion(tv);
-    Vector< Differential<ValidatedNumberType> > d=evaluate(p,s);
+    Vector< Expansion<ExactFloat> > p=expansion(tv);
+    Vector< Differential<ValidatedNumber> > d=evaluate(p,s);
     return d.jacobian();
 }
 
@@ -957,8 +957,8 @@ VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
 }
 
 VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
-                                           const Vector< Expansion<ExactFloatType> >& f,
-                                           const Vector<ErrorFloatType>& e,
+                                           const Vector< Expansion<ExactFloat> >& f,
+                                           const Vector<ErrorFloat>& e,
                                            Sweeper swp)
     : _domain(d), _models(f.size(),ValidatedTaylorModel(d.size(),swp))
 {
@@ -970,9 +970,9 @@ VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
 }
 
 VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
-                                           const Vector< Expansion<ExactFloatType> >& f,
+                                           const Vector< Expansion<ExactFloat> >& f,
                                            Sweeper swp)
-    : VectorTaylorFunction(d,f,Vector<ErrorFloatType>(f.size()),swp)
+    : VectorTaylorFunction(d,f,Vector<ErrorFloat>(f.size()),swp)
 {
 }
 
@@ -980,15 +980,15 @@ VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
                                            const Vector< Expansion<Float> >& f,
                                            const Vector<Float>& e,
                                            Sweeper swp)
-    : VectorTaylorFunction(d,reinterpret_cast<Vector<Expansion<ExactFloatType>>const&>(f),
-                           reinterpret_cast<Vector<ErrorFloatType>const&>(e),swp)
+    : VectorTaylorFunction(d,reinterpret_cast<Vector<Expansion<ExactFloat>>const&>(f),
+                           reinterpret_cast<Vector<ErrorFloat>const&>(e),swp)
 {
 }
 
 VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
                                            const Vector< Expansion<Float> >& f,
                                            Sweeper swp)
-    : VectorTaylorFunction(d,reinterpret_cast<Vector<Expansion<ExactFloatType>>const&>(f),Vector<ErrorFloatType>(f.size()),swp)
+    : VectorTaylorFunction(d,reinterpret_cast<Vector<Expansion<ExactFloat>>const&>(f),Vector<ErrorFloat>(f.size()),swp)
 {
 }
 
@@ -1086,13 +1086,13 @@ Void VectorTaylorFunction::adjoin(const ScalarTaylorFunction& sf)
 
 
 VectorTaylorFunction
-VectorTaylorFunction::constant(const ExactBox& d, const Vector<ExactNumberType>& c, Sweeper swp)
+VectorTaylorFunction::constant(const ExactBox& d, const Vector<ExactNumber>& c, Sweeper swp)
 {
     return VectorTaylorFunction(d,ValidatedTaylorModel::constants(d.size(),c,swp));
 }
 
 VectorTaylorFunction
-VectorTaylorFunction::constant(const ExactBox& d, const Vector<ValidatedNumberType>& c, Sweeper swp)
+VectorTaylorFunction::constant(const ExactBox& d, const Vector<ValidatedNumber>& c, Sweeper swp)
 {
     return VectorTaylorFunction(d,ValidatedTaylorModel::constants(d.size(),c,swp));
 }
@@ -1110,44 +1110,44 @@ VectorTaylorFunction::projection(const ExactBox& d, uint imin, uint imax, Sweepe
 }
 
 
-Polynomial<ValidatedNumberType> polynomial(const ValidatedTaylorModel& tm) {
-    return Polynomial<ValidatedNumberType>(tm.expansion())+ValidatedNumberType(-tm.error(),+tm.error());
+Polynomial<ValidatedNumber> polynomial(const ValidatedTaylorModel& tm) {
+    return Polynomial<ValidatedNumber>(tm.expansion())+ValidatedNumber(-tm.error(),+tm.error());
 }
 
-Vector< Polynomial<ValidatedNumberType> >
+Vector< Polynomial<ValidatedNumber> >
 VectorTaylorFunction::polynomials() const
 {
-    Vector<Polynomial<ValidatedNumberType> > p(this->result_size(),Polynomial<ValidatedNumberType>(this->argument_size()));
+    Vector<Polynomial<ValidatedNumber> > p(this->result_size(),Polynomial<ValidatedNumber>(this->argument_size()));
     for(uint i=0; i!=this->result_size(); ++i) {
         p[i]=static_cast<ScalarTaylorFunction>((*this)[i]).polynomial();
     }
     return p;
 }
 
-Vector< Expansion<ExactFloatType> > const
+Vector< Expansion<ExactFloat> > const
 VectorTaylorFunction::expansions() const
 {
-    Vector< Expansion<ExactFloatType> > e(this->result_size(),Expansion<ExactFloatType>(this->argument_size()));
+    Vector< Expansion<ExactFloat> > e(this->result_size(),Expansion<ExactFloat>(this->argument_size()));
     for(uint i=0; i!=this->result_size(); ++i) {
         e[i]=this->models()[i].expansion();
     }
     return e;
 }
 
-Vector<ErrorFloatType> const
+Vector<ErrorFloat> const
 VectorTaylorFunction::errors() const
 {
-    Vector<ErrorFloatType> e(this->result_size());
+    Vector<ErrorFloat> e(this->result_size());
     for(uint i=0; i!=this->result_size(); ++i) {
         e[i]=this->models()[i].error();
     }
     return e;
 }
 
-ErrorFloatType const
+ErrorFloat const
 VectorTaylorFunction::error() const
 {
-    ErrorFloatType e=0;
+    ErrorFloat e=0;
     for(uint i=0; i!=this->result_size(); ++i) {
         e=max(e,this->models()[i].error());
     }
@@ -1219,10 +1219,10 @@ VectorTaylorFunction::range() const
 }
 
 
-const Vector<ExactFloatType>
+const Vector<ExactFloat>
 VectorTaylorFunction::centre() const
 {
-    Vector<ExactFloatType> result(this->result_size());
+    Vector<ExactFloat> result(this->result_size());
     for(uint i=0; i!=result.size(); ++i) {
         result[i]=this->_models[i].value();
     }
@@ -1354,15 +1354,15 @@ VectorTaylorFunction::clobber()
 
 
 
-Vector<ApproximateNumberType>
-VectorTaylorFunction::evaluate(const Vector<ApproximateNumberType>& x) const
+Vector<ApproximateNumber>
+VectorTaylorFunction::evaluate(const Vector<ApproximateNumber>& x) const
 {
     const VectorTaylorFunction& f=*this;
-    if(!contains(f.domain(),reinterpret_cast<Vector<RawFloatType>const&>(x))) {
+    if(!contains(f.domain(),reinterpret_cast<Vector<RawFloat>const&>(x))) {
         ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
     }
-    Vector<ApproximateNumberType> sx=Ariadne::unscale(x,f._domain);
-    Vector<ApproximateNumberType> r(this->result_size());
+    Vector<ApproximateNumber> sx=Ariadne::unscale(x,f._domain);
+    Vector<ApproximateNumber> r(this->result_size());
     for(uint i=0; i!=r.size(); ++i) {
         r[i]=Ariadne::evaluate(this->_models[i].expansion(),sx);
     }
@@ -1370,35 +1370,35 @@ VectorTaylorFunction::evaluate(const Vector<ApproximateNumberType>& x) const
 }
 
 
-Vector<ValidatedNumberType>
-VectorTaylorFunction::evaluate(const Vector<ValidatedNumberType>& x) const
+Vector<ValidatedNumber>
+VectorTaylorFunction::evaluate(const Vector<ValidatedNumber>& x) const
 {
     const VectorTaylorFunction& f=*this;
     if(!contains(f.domain(),x)) {
         ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
     }
-    Vector<ValidatedNumberType> sx=Ariadne::unscale(x,f._domain);
+    Vector<ValidatedNumber> sx=Ariadne::unscale(x,f._domain);
     return Ariadne::evaluate(f._models,sx);
 }
 
-Vector<ApproximateNumberType>
-VectorTaylorFunction::operator()(const Vector<ApproximateNumberType>& x) const
+Vector<ApproximateNumber>
+VectorTaylorFunction::operator()(const Vector<ApproximateNumber>& x) const
 {
     return this->evaluate(x);
 }
 
-Vector<ValidatedNumberType>
-VectorTaylorFunction::operator()(const Vector<ValidatedNumberType>& x) const
+Vector<ValidatedNumber>
+VectorTaylorFunction::operator()(const Vector<ValidatedNumber>& x) const
 {
     return this->evaluate(x);
 }
 
-Matrix<ValidatedNumberType>
-VectorTaylorFunction::jacobian(const Vector<ValidatedNumberType>& x) const
+Matrix<ValidatedNumber>
+VectorTaylorFunction::jacobian(const Vector<ValidatedNumber>& x) const
 {
-    Matrix<ValidatedNumberType> J=Ariadne::jacobian(this->_models,unscale(x,this->_domain));
+    Matrix<ValidatedNumber> J=Ariadne::jacobian(this->_models,unscale(x,this->_domain));
     for(uint j=0; j!=J.column_size(); ++j) {
-        ValidatedNumberType rad=rad_val(this->_domain[j]);
+        ValidatedNumber rad=rad_val(this->_domain[j]);
         for(uint i=0; i!=J.row_size(); ++i) {
             J[i][j]/=rad;
         }
@@ -1561,7 +1561,7 @@ operator-=(VectorTaylorFunction& f, const VectorTaylorFunction& g)
 }
 
 VectorTaylorFunction&
-operator+=(VectorTaylorFunction& f, const Vector<ValidatedNumberType>& c)
+operator+=(VectorTaylorFunction& f, const Vector<ValidatedNumber>& c)
 {
     ARIADNE_ASSERT(f.result_size()==c.size());
     f._models+=c;
@@ -1569,7 +1569,7 @@ operator+=(VectorTaylorFunction& f, const Vector<ValidatedNumberType>& c)
 }
 
 VectorTaylorFunction&
-operator-=(VectorTaylorFunction& f, const Vector<ValidatedNumberType>& c)
+operator-=(VectorTaylorFunction& f, const Vector<ValidatedNumber>& c)
 {
     ARIADNE_ASSERT(f.result_size()==c.size());
     f._models-=c;
@@ -1577,14 +1577,14 @@ operator-=(VectorTaylorFunction& f, const Vector<ValidatedNumberType>& c)
 }
 
 VectorTaylorFunction&
-operator*=(VectorTaylorFunction& f, const ValidatedNumberType& c)
+operator*=(VectorTaylorFunction& f, const ValidatedNumber& c)
 {
     f._models*=c;
     return f;
 }
 
 VectorTaylorFunction&
-operator/=(VectorTaylorFunction& f, const ValidatedNumberType& c)
+operator/=(VectorTaylorFunction& f, const ValidatedNumber& c)
 {
     f._models/=c;
     return f;
@@ -1651,31 +1651,31 @@ operator-(const VectorTaylorFunction& f)
 }
 
 VectorTaylorFunction
-operator*(const ValidatedNumberType& c, const VectorTaylorFunction& f)
+operator*(const ValidatedNumber& c, const VectorTaylorFunction& f)
 {
     return VectorTaylorFunction(f.domain(),Vector<ValidatedTaylorModel>(f.models()*c));
 }
 
 VectorTaylorFunction
-operator*(const VectorTaylorFunction& f, const ValidatedNumberType& c)
+operator*(const VectorTaylorFunction& f, const ValidatedNumber& c)
 {
     return VectorTaylorFunction(f.domain(),Vector<ValidatedTaylorModel>(f.models()*c));
 }
 
 VectorTaylorFunction
-operator/(const VectorTaylorFunction& f, const ValidatedNumberType& c)
+operator/(const VectorTaylorFunction& f, const ValidatedNumber& c)
 {
     return VectorTaylorFunction(f.domain(),Vector<ValidatedTaylorModel>(f.models()/c));
 }
 
 VectorTaylorFunction
-operator+(const VectorTaylorFunction& f, const Vector<ValidatedNumberType>& c)
+operator+(const VectorTaylorFunction& f, const Vector<ValidatedNumber>& c)
 {
     return VectorTaylorFunction(f.domain(),Vector<ValidatedTaylorModel>(f.models()+c));
 }
 
 VectorTaylorFunction
-operator-(const VectorTaylorFunction& f, const Vector<ValidatedNumberType>& c)
+operator-(const VectorTaylorFunction& f, const Vector<ValidatedNumber>& c)
 {
     return VectorTaylorFunction(f.domain(),Vector<ValidatedTaylorModel>(f.models()-c));
 }
@@ -1694,7 +1694,7 @@ operator*(const Matrix<Float>& A, const VectorTaylorFunction& f)
 }
 
 VectorTaylorFunction
-operator*(const Matrix<ValidatedNumberType>& A, const VectorTaylorFunction& f)
+operator*(const Matrix<ValidatedNumber>& A, const VectorTaylorFunction& f)
 {
     ARIADNE_PRECONDITION(A.column_size()==f.size());
     Vector<ValidatedTaylorModel> models(A.row_size(),ValidatedTaylorModel(f.argument_size(),f.sweeper()));
@@ -1717,20 +1717,20 @@ operator-(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2) {
 
 
 VectorTaylorFunction
-partial_evaluate(const VectorTaylorFunction& tf, uint k, const ExactNumberType& c)
+partial_evaluate(const VectorTaylorFunction& tf, uint k, const ExactNumber& c)
 {
-    return partial_evaluate(tf,k,ValidatedNumberType(c));
+    return partial_evaluate(tf,k,ValidatedNumber(c));
 }
 
 VectorTaylorFunction
-partial_evaluate(const VectorTaylorFunction& tf, uint k, const ValidatedNumberType& c)
+partial_evaluate(const VectorTaylorFunction& tf, uint k, const ValidatedNumber& c)
 {
     // Scale c to domain
     const uint as=tf.argument_size();
     ARIADNE_ASSERT(k<as);
     const Vector<ExactInterval>& domain=tf.domain();
     const ExactInterval& dk=domain[k];
-    ValidatedNumberType sc=(c-med_val(dk))/rad_val(dk);
+    ValidatedNumber sc=(c-med_val(dk))/rad_val(dk);
 
     Vector<ExactInterval> new_domain(as-1);
     for(uint i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
@@ -1759,16 +1759,16 @@ restrict(const VectorTaylorFunction& tf, uint k, const ExactInterval& d)
 }
 
 
-Vector<ValidatedNumberType>
-evaluate(const VectorTaylorFunction& f, const Vector<ValidatedNumberType>& x) {
+Vector<ValidatedNumber>
+evaluate(const VectorTaylorFunction& f, const Vector<ValidatedNumber>& x) {
     if(!contains(f.domain(),x)) {
         ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
     }
     return unchecked_evaluate(f,x);
 }
 
-Vector<ValidatedNumberType>
-unchecked_evaluate(const VectorTaylorFunction& f, const Vector<ValidatedNumberType>& x) {
+Vector<ValidatedNumber>
+unchecked_evaluate(const VectorTaylorFunction& f, const Vector<ValidatedNumber>& x) {
     return evaluate(f.models(),unscale(x,f.domain()));
 }
 
@@ -1806,7 +1806,7 @@ VectorTaylorFunction
 derivative(const VectorTaylorFunction& f, uint k)
 {
     ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
-    ValidatedNumberType fdomkrad=rad_val(f.domain()[k]);
+    ValidatedNumber fdomkrad=rad_val(f.domain()[k]);
     VectorTaylorFunction g=f;
     for(uint i=0; i!=g.size(); ++i) {
         g[i]=derivative(f[i],k);
@@ -1818,7 +1818,7 @@ VectorTaylorFunction
 antiderivative(const VectorTaylorFunction& f, uint k)
 {
     ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
-    ValidatedNumberType fdomkrad=rad_val(f.domain()[k]);
+    ValidatedNumber fdomkrad=rad_val(f.domain()[k]);
     VectorTaylorFunction g=f;
     for(uint i=0; i!=g.size(); ++i) {
         g._models[i].antidifferentiate(k);
@@ -1828,10 +1828,10 @@ antiderivative(const VectorTaylorFunction& f, uint k)
 }
 
 VectorTaylorFunction
-antiderivative(const VectorTaylorFunction& f, uint k, ExactNumberType c)
+antiderivative(const VectorTaylorFunction& f, uint k, ExactNumber c)
 {
     ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
-    ValidatedNumberType fdomkrad=rad_val(f.domain()[k]);
+    ValidatedNumber fdomkrad=rad_val(f.domain()[k]);
     VectorTaylorFunction g=f;
     for(uint i=0; i!=g.size(); ++i) {
         g[i]=antiderivative(f[i],k,c);
@@ -1844,19 +1844,19 @@ antiderivative(const VectorTaylorFunction& f, uint k, ExactNumberType c)
 
 
 
-ErrorFloatType norm(const VectorTaylorFunction& f) {
-    ErrorFloatType res=0.0;
+ErrorFloat norm(const VectorTaylorFunction& f) {
+    ErrorFloat res=0.0;
     for(uint i=0; i!=f.result_size(); ++i) {
         res=max(res,norm(f[i]));
     }
     return res;
 }
 
-ErrorFloatType distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
+ErrorFloat distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
     return norm(f1-f2);
 }
 
-ErrorFloatType distance(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2) {
+ErrorFloat distance(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2) {
     return distance(f1,VectorTaylorFunction(f1.domain(),f2,f1.sweeper()));
 }
 
@@ -1917,16 +1917,16 @@ operator<<(std::ostream& os, const VectorTaylorFunction& p)
     return p.write(os);
 }
 
-Polynomial<ValidatedNumberType> polynomial(const ScalarTaylorFunction& tfn) {
-    return Polynomial<ValidatedNumberType>(tfn.polynomial());
+Polynomial<ValidatedNumber> polynomial(const ScalarTaylorFunction& tfn) {
+    return Polynomial<ValidatedNumber>(tfn.polynomial());
 }
 
-Vector< Polynomial<ValidatedNumberType> > polynomial(const VectorTaylorFunction& tfn) {
+Vector< Polynomial<ValidatedNumber> > polynomial(const VectorTaylorFunction& tfn) {
     return tfn.polynomials();
 }
 
-List< Polynomial<ValidatedNumberType> > polynomials(const List<ScalarTaylorFunction>& tfns) {
-    List< Polynomial<ValidatedNumberType> > result;
+List< Polynomial<ValidatedNumber> > polynomials(const List<ScalarTaylorFunction>& tfns) {
+    List< Polynomial<ValidatedNumber> > result;
     for(uint i=0; i!=tfns.size(); ++i) {
         result.append(polynomial(tfns[i]));
     }
@@ -1965,7 +1965,7 @@ TaylorFunctionFactory::create_zero(const ExactBox& domain) const
 }
 
 ScalarTaylorFunction
-TaylorFunctionFactory::create_constant(const ExactBox& domain, ValidatedNumberType value) const
+TaylorFunctionFactory::create_constant(const ExactBox& domain, ValidatedNumber value) const
 {
     return ScalarTaylorFunction::constant(domain,value,this->_sweeper);
 }
@@ -2010,7 +2010,7 @@ operator<<(Output::latexstream& texs, const VectorTaylorFunction& p)
         bool first = true;
         if(i!=0) { texs << "\\\\"; }
         for(MultiIndex j(p.argument_size()); j.degree()<=p.order(); ++j) {
-            const ValidatedNumberType& a=p.centre_derivatives()[i][j];
+            const ValidatedNumber& a=p.centre_derivatives()[i][j];
             if(a!=0) {
                 if(first) { first=false; }
                 else { if(a>0) { texs << '+'; } }

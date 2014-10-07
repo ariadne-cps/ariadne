@@ -45,8 +45,8 @@
 
 namespace Ariadne {
 
-typedef Vector<ApproximateFloatType> ApproximateFloatVector;
-typedef Vector<ExactFloatType> ExactFloatVector;
+typedef Vector<ApproximateFloat> ApproximateFloatVector;
+typedef Vector<ExactFloat> ExactFloatVector;
 
 inline Sweeper default_sweeper() { return Sweeper(); }
 
@@ -151,7 +151,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
         ScalarTaylorFunction txg=ScalarTaylorFunction::zero(d,default_sweeper());
-        ValidatedNumberType cnst=0.0;
+        ValidatedNumber cnst=0.0;
         for(uint j=0; j!=n; ++j) {
             txg = txg - (x_exact[j]-x_exact[n+j])*tfn[j];
             cnst += (c[j].upper()*x_exact[j]-c[j].lower()*x_exact[n+j]);
@@ -182,10 +182,10 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
         //Pair<ExactBox,ExactBox> sd=solver.split(List<EffectiveConstraint>(1u,constraint),d);
         ARIADNE_LOG(4,"  Splitting domain\n");
         Pair<ExactBox,ExactBox> sd=d.split();
-        Vector<ApproximateFloatType> nx = ApproximateFloatType(1.0-XSIGMA)*x + Vector<ApproximateFloatType>(x.size(),XSIGMA/x.size());
-        Vector<ApproximateFloatType> ny = midpoint(sd.first);
+        Vector<ApproximateFloat> nx = ApproximateFloat(1.0-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size());
+        Vector<ApproximateFloat> ny = midpoint(sd.first);
         tribool result=this->feasible(sd.first, fn, c).first;
-        nx = ApproximateFloatType(1.0-XSIGMA)*x + Vector<ApproximateFloatType>(x.size(),XSIGMA/x.size());
+        nx = ApproximateFloat(1.0-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size());
         ny = midpoint(sd.second);
         result = result || this->feasible(sd.second, fn, c).first;
         return make_pair(result,ExactPoint());
@@ -303,8 +303,8 @@ bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedScalarFuncti
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBox domain, ValidatedScalarFunction function, ExactInterval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
-    Formula<ValidatedNumberType> formula=function.evaluate(Formula<ValidatedNumberType>::identity(function.argument_size()));
-    Procedure<ValidatedNumberType> procedure(formula);
+    Formula<ValidatedNumber> formula=function.evaluate(Formula<ValidatedNumber>::identity(function.argument_size()));
+    Procedure<ValidatedNumber> procedure(formula);
     return this->hull_reduce(domain,procedure,bounds);
 }
 
@@ -313,8 +313,8 @@ bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedVectorFuncti
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBox domain, ValidatedScalarFunction function, ExactInterval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
-    Vector< Formula<ValidatedNumberType> > formula=function.evaluate(Formula<ValidatedNumberType>::identity(function.argument_size()));
-    Vector< Procedure<ValidatedNumberType> > procedure(formula);
+    Vector< Formula<ValidatedNumber> > formula=function.evaluate(Formula<ValidatedNumber>::identity(function.argument_size()));
+    Vector< Procedure<ValidatedNumber> > procedure(formula);
     return this->hull_reduce(domain,procedure,bounds);
 }
 
@@ -324,7 +324,7 @@ bool ConstraintSolver::monotone_reduce(UpperBox& domain, const ValidatedScalarFu
 
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBox domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<", derivative="<<derivative<<"\n");
 
-    ExactFloatType splitpoint;
+    ExactFloat splitpoint;
     UpperInterval lower=domain[variable];
     UpperInterval upper=domain[variable];
     Vector<UpperInterval> slice=domain;
@@ -405,8 +405,8 @@ bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
     // Try to reduce the size of the set by "shaving" off along a coordinate axis
     //
     UpperInterval interval=domain[variable];
-    RawFloatType l=interval.lower().raw();
-    RawFloatType u=interval.upper().raw();
+    RawFloat l=interval.lower().raw();
+    RawFloat u=interval.upper().raw();
     ExactInterval subinterval;
     UpperInterval new_interval(interval);
     Vector<UpperInterval> slice=domain;
@@ -484,7 +484,7 @@ tribool ConstraintSolver::check_feasibility(const ExactBox& d, const ValidatedVe
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }
     }
 
-    Vector<ValidatedFloatType> fy=f(Vector<ValidatedFloatType>(y));
+    Vector<ValidatedFloat> fy=f(Vector<ValidatedFloat>(y));
     ARIADNE_LOG(4,"d="<<d<<" f="<<f<<", c="<<c<<"\n  y="<<y<<", f(y)="<<fy<<"\n");
     tribool result=true;
     for(uint j=0; j!=fy.size(); ++j) {

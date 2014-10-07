@@ -47,8 +47,8 @@ template<class X> class Formula;
 template<class X> class Graded;
 
 template<class X> class Procedure;
-typedef Procedure<ApproximateNumberType> ApproximateProcedure;
-typedef Procedure<ValidatedNumberType> ValidatedProcedure;
+typedef Procedure<ApproximateNumber> ApproximateProcedure;
+typedef Procedure<ValidatedNumber> ValidatedProcedure;
 
 struct ProcedureInstruction
 {
@@ -173,7 +173,7 @@ template<class X, class T> void _compute(List<T>& v, const List<ProcedureInstruc
 
 template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<ProcedureInstruction>& p)
 {
-    ExactFloatType infty(inf);
+    ExactFloat infty(inf);
 
     ARIADNE_ASSERT(v.size()==p.size());
     size_t r=p.size();

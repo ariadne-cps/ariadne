@@ -139,8 +139,8 @@ Float compute_mu(const Vector<Float>& xl, const Vector<Float>& xu,
 
 
 inline ValidatedFloat mul_val(Float x1, Float x2) { return ValidatedFloat(mul_down(x1,x2),mul_up(x1,x2)); }
-inline Vector<ExactFloatType> const& make_exact(Vector<Float> const& v) { return reinterpret_cast<Vector<ExactFloatType>const&>(v); }
-inline Matrix<ExactFloatType> const& make_exact(Matrix<Float> const& A) { return reinterpret_cast<Matrix<ExactFloatType>const&>(A); }
+inline Vector<ExactFloat> const& make_exact(Vector<Float> const& v) { return reinterpret_cast<Vector<ExactFloat>const&>(v); }
+inline Matrix<ExactFloat> const& make_exact(Matrix<Float> const& A) { return reinterpret_cast<Matrix<ExactFloat>const&>(A); }
 
 
 tribool InteriorPointSolver::
@@ -153,10 +153,10 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
 
     // x should be an approximate solution to Ax=b
     // Use the fact that for any x, x'=(x + A^T (AA^T)^{-1}(b-Ax)) satisfies Ax'=0
-    Vector<ValidatedNumberType> ivlx = make_exact(x);
-    Vector<ValidatedNumberType> ivle = make_exact(b)-make_exact(A)*ivlx;
+    Vector<ValidatedNumber> ivlx = make_exact(x);
+    Vector<ValidatedNumber> ivle = make_exact(b)-make_exact(A)*ivlx;
 
-    Matrix<ValidatedNumberType> ivlS(m,m);
+    Matrix<ValidatedNumber> ivlS(m,m);
     for(uint i1=0; i1!=m; ++i1) {
         for(uint i2=i1; i2!=m; ++i2) {
             for(uint j=0; j!=n; ++j) {
@@ -170,7 +170,7 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
         }
     }
 
-    Vector<ValidatedNumberType> ivld = solve(ivlS,ivle) * make_exact(A);
+    Vector<ValidatedNumber> ivld = solve(ivlS,ivle) * make_exact(A);
 
     ivlx += ivld;
 
@@ -186,7 +186,7 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
 
     // If yb - max(yA,0) xu + min(yA,0) xl > 0, then problem is infeasible
     // Evaluate lower bound for yb - max(z,0) xu + min(z,0) xl
-    Vector<ValidatedNumberType> z=make_exact(y)*make_exact(A);
+    Vector<ValidatedNumber> z=make_exact(y)*make_exact(A);
     Float mx = 0.0;
     set_rounding_downward();
     for(uint i=0; i!=y.size(); ++i) {

@@ -235,7 +235,7 @@ ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBound
     for(uint i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
         ValidatedScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
-        result.new_parameter_constraint(constraint_function <= ExactNumberType(0) );
+        result.new_parameter_constraint(constraint_function <= ExactNumber(0) );
         //constraints.append( constraint_function <= 0.0 );
     }
     return result;

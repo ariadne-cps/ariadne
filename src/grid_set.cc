@@ -119,22 +119,22 @@ const Vector<Float>& Grid::lengths() const
     return this->_data->_lengths;
 }
 
-ExactNumberType Grid::coordinate(uint d, DyadicType x) const
+ExactNumber Grid::coordinate(uint d, DyadicType x) const
 {
-    return ExactNumberType(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x)));
+    return ExactNumber(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x)));
 }
 
-ExactNumberType Grid::subdivision_coordinate(uint d, DyadicType x) const
+ExactNumber Grid::subdivision_coordinate(uint d, DyadicType x) const
 {
-    return ExactNumberType(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x)));
+    return ExactNumber(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x)));
 }
 
-ExactNumberType Grid::subdivision_coordinate(uint d, IntegerType n) const
+ExactNumber Grid::subdivision_coordinate(uint d, IntegerType n) const
 {
-    return ExactNumberType(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n)));
+    return ExactNumber(add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n)));
 }
 
-int Grid::subdivision_index(uint d, const ExactNumberType& x) const
+int Grid::subdivision_index(uint d, const ExactNumber& x) const
 {
     Float half=0.5;
     int n=integer_cast<int>(floor(add_approx(div_approx(sub_approx(x.raw(),this->_data->_origin[d]),this->_data->_lengths[d]),half)));
@@ -142,11 +142,11 @@ int Grid::subdivision_index(uint d, const ExactNumberType& x) const
     if(sc == x.raw()) {
         return n;
     } else {
-        ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(uint d,ExactNumberType x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
+        ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(uint d,ExactNumber x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
     }
 }
 
-int Grid::subdivision_lower_index(uint d, const LowerNumberType& x) const
+int Grid::subdivision_lower_index(uint d, const LowerNumber& x) const
 {
     int n=integer_cast<int>(floor(div_down(sub_down(x.raw(),this->_data->_origin[d]),this->_data->_lengths[d])));
     if(x.raw()>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
@@ -156,7 +156,7 @@ int Grid::subdivision_lower_index(uint d, const LowerNumberType& x) const
     }
 }
 
-int Grid::subdivision_upper_index(uint d, const UpperNumberType& x) const
+int Grid::subdivision_upper_index(uint d, const UpperNumber& x) const
 {
     int n=integer_cast<int>(ceil(div_up(sub_up(x.raw(),this->_data->_origin[d]),this->_data->_lengths[d])));
     if(x.raw()<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {

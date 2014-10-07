@@ -38,8 +38,8 @@
 namespace Ariadne {
 
 template<class X, class R> class Constraint;
-typedef Constraint<EffectiveScalarFunction,EffectiveNumberType> EffectiveConstraint;
-typedef Constraint<ValidatedScalarFunction,ValidatedNumberType> ValidatedConstraint;
+typedef Constraint<EffectiveScalarFunction,EffectiveNumber> EffectiveConstraint;
+typedef Constraint<ValidatedScalarFunction,ValidatedNumber> ValidatedConstraint;
 
 class InfeasibleProblemException : public std::runtime_error {
   public: InfeasibleProblemException() : std::runtime_error("InfeasibleProblemException") { }
@@ -64,9 +64,9 @@ class OptimiserInterface {
     virtual OptimiserInterface* clone() const = 0;
 
     //! \brief Solve the general nonlinear programming problem \f$\min f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
-    virtual Vector<ValidatedNumberType> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
+    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
     //! \brief Solve the standard nonlinear programming problem \f$\min f(x) \text{ such that } x\in ,D\ g(x)\leq 0  \text{ and } h(x) = 0\f$.
-    virtual Vector<ValidatedNumberType> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const = 0;
+    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const = 0;
 
     //! \brief Tests is the general nonlinear feasibility problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
@@ -76,25 +76,25 @@ class OptimiserInterface {
 
     //! \brief Tests if the point \a x is feasible, in that \f$x\in D\f$ and \f$g(x)\in N_\epsilon(C)\f$.
     virtual Bool almost_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                       ApproximateFloatVectorType x, ApproximateFloatType eps) const = 0;
+                                       ApproximateFloatVector x, ApproximateFloat eps) const = 0;
     //! \brief Tests if the point \a x is feasible.
     virtual Bool is_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                   ExactFloatVectorType x) const = 0;
+                                   ExactFloatVector x) const = 0;
     //! \brief Tests if the point \a x is near feasible.
     virtual Bool validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                      ExactPointType x) const = 0;
+                                      ExactVector x) const = 0;
     //! \brief Tests if the point \a x is near feasible, using approximate multipliers \a y to guide the search.
     virtual Bool validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                      ExactPointType x, ExactPointType y) const = 0;
+                                      ExactVector x, ExactVector y) const = 0;
     //! \brief Tests if the feasibility problem is definitely unsolvable, using multipliers \a y and local centering point \a x.
     virtual Bool validate_infeasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                      ExactPointType x, ExactPointType y) const = 0;
+                                      ExactVector x, ExactVector y) const = 0;
     //! \brief Tests if the box \a X definitely containss a feasible point.
     virtual Tribool contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                            ValidatedFloatVectorType X) const = 0;
+                                            ValidatedFloatVector X) const = 0;
     //! \brief Tests if the Lagrange multipliers \a y are a certificate of infeasiblity.
     virtual Bool is_infeasibility_certificate(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                              ExactPointType y) const = 0;
+                                              ExactVector y) const = 0;
 };
 
 //! \ingroup OptimisationModule
@@ -104,26 +104,26 @@ class OptimiserBase
     , public Loggable
 {
   public:
-    virtual ValidatedPointType minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
-    virtual ValidatedPointType minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
+    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
+    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
 
     virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const = 0;
     virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const;
 
     virtual Bool almost_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                       ApproximatePointType x, ApproximateFloatType error) const;
+                                       ApproximateVector x, ApproximateFloat error) const;
     virtual Bool is_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                   ExactPointType x) const;
+                                   ExactVector x) const;
     virtual Bool validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                      ExactPointType x) const;
+                                      ExactVector x) const;
     virtual Bool validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                      ExactPointType x, ExactPointType y) const;
+                                      ExactVector x, ExactVector y) const;
     virtual Bool validate_infeasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                        ExactPointType x, ExactVectorType y) const;
+                                        ExactVector x, ExactVector y) const;
     virtual Tribool contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                            ValidatedPointType X) const;
+                                            ValidatedVector X) const;
     virtual Bool is_infeasibility_certificate(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                              ExactVectorType lambda) const;
+                                              ExactVector lambda) const;
 };
 
 //! \ingroup OptimisationModule
@@ -138,15 +138,15 @@ class PenaltyFunctionOptimiser
 {
   public:
     virtual PenaltyFunctionOptimiser* clone() const;
-    virtual Tribool check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C, ExactPointType x, ExactVectorType y) const;
-    virtual ValidatedPointType minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
+    virtual Tribool check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C, ExactVector x, ExactVector y) const;
+    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     virtual Void feasibility_step(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
-                                  ApproximateFloatVectorType& x, ApproximateFloatVectorType& w, ApproximateFloatType& mu) const;
+                                  ApproximateFloatVector& x, ApproximateFloatVector& w, ApproximateFloat& mu) const;
     virtual Void feasibility_step(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
-                                  ValidatedFloatVectorType& x, ValidatedFloatVectorType& w) const;
+                                  ValidatedFloatVector& x, ValidatedFloatVector& w) const;
     virtual Void feasibility_step(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
-                                  ApproximateFloatVectorType& x, ApproximateFloatVectorType& y, ApproximateFloatVectorType& z) const;
+                                  ApproximateFloatVector& x, ApproximateFloatVector& y, ApproximateFloatVector& z) const;
 };
 
 
@@ -171,21 +171,21 @@ class NonlinearInfeasibleInteriorPointOptimiser
     //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
     //! \precondition The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
-    virtual ValidatedPointType minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
+    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
 
     //! \brief Test if the constraints \f$g(x)\in C\f$ are solvable for \f$x\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall primal and dual variables.
-    Pair<Tribool,ApproximateFloatVectorType> feasible_hotstarted(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                                  const PrimalDualData& wxy0) const;
+    Pair<Tribool,ApproximateFloatVector> feasible_hotstarted(ExactBox D, ValidatedVectorFunction g, ExactBox C,
+                                                                const PrimalDualData& wxy0) const;
 
     Void setup_feasibility(const ExactBox& D, const ApproximateVectorFunctionInterface& g, const ExactBox& C,
                            StepData& stp) const;
     Void step(const ApproximateScalarFunctionInterface& f, const ExactBox& D, const ApproximateVectorFunctionInterface& g, const ExactBox& C,
               StepData& stp) const;
-//    ApproximateFloatType compute_mu(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
-//                     ApproximateFloatVectorType& w, ApproximateFloatVectorType& x, ApproximateFloatVectorType& y) const;
+//    ApproximateFloat compute_mu(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
+//                     ApproximateFloatVector& w, ApproximateFloatVector& x, ApproximateFloatVector& y) const;
 };
 
 
@@ -203,49 +203,49 @@ class NonlinearInteriorPointOptimiser
     //! \brief Compute a \em local optimum of linear programming problem \f$\max f(x) \text{ such that } x\in D, g(x)\in C \text{ and } h(x)=0.\f$.
     //! \precondition The domain \f$D\f$ is bounded and has nonempty interior, and the codomain \f$C\f$ is nonempty.
     //! \return A box \f$X\f$ which definitely contains a feasible point, and contains a local optimum.
-    virtual ValidatedPointType minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
+    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D, g(x)\in C \text{ and } h(x)= 0 \f$ is feasible.
     virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
 
     //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the overall constraint violation, primal and dual variables.
-    Pair<Tribool,ApproximateFloatVectorType> feasible_hotstarted(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                                  const ApproximateFloatVectorType& x0, const ApproximateFloatVectorType& lambda0, const ApproximateFloatType& violation0) const;
+    Pair<Tribool,ApproximateFloatVector> feasible_hotstarted(ExactBox D, ValidatedVectorFunction g, ExactBox C,
+                                                  const ApproximateFloatVector& x0, const ApproximateFloatVector& lambda0, const ApproximateFloat& violation0) const;
 
     //! \brief Test if the constraints \f$g(y)\in C\f$ are solvable for \f$y\in D\f$ using a nonlinear feasibility test,
     //! hotstarting the method with the primal and dual.
-    Pair<Tribool,ApproximateFloatVectorType> feasible_hotstarted(ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                                                  const ApproximateFloatVectorType& x0, const ApproximateFloatVectorType& lambda0) const;
+    Pair<Tribool,ApproximateFloatVector> feasible_hotstarted(ExactBox D, ValidatedVectorFunction g, ExactBox C,
+                                                  const ApproximateFloatVector& x0, const ApproximateFloatVector& lambda0) const;
 
     Void minimisation_step(const ApproximateScalarFunction& f, const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C, const ApproximateVectorFunction& h,
-                           ApproximateFloatVectorType& x, ApproximateFloatVectorType& w, ApproximateFloatVectorType& kappa, ApproximateFloatVectorType& lambda, const ApproximateFloatType& mu) const;
+                           ApproximateFloatVector& x, ApproximateFloatVector& w, ApproximateFloatVector& kappa, ApproximateFloatVector& lambda, const ApproximateFloat& mu) const;
     Void setup_feasibility(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
-                           ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda) const;
+                           ApproximateFloatVector& x, ApproximateFloatVector& lambda) const;
     Void setup_feasibility(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
-                           ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda, ApproximateFloatType& t) const;
+                           ApproximateFloatVector& x, ApproximateFloatVector& lambda, ApproximateFloat& t) const;
     Void feasibility_step(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
-                          ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda) const;
+                          ApproximateFloatVector& x, ApproximateFloatVector& lambda) const;
     Void feasibility_step(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
-                          ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda, ApproximateFloatType& violation) const;
+                          ApproximateFloatVector& x, ApproximateFloatVector& lambda, ApproximateFloat& violation) const;
     Void initialise_lagrange_multipliers(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
-                                         const ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda) const;
-    ApproximateFloatType compute_mu(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
-                     const ApproximateFloatVectorType& x, const ApproximateFloatVectorType& lambda) const;
+                                         const ApproximateFloatVector& x, ApproximateFloatVector& lambda) const;
+    ApproximateFloat compute_mu(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
+                     const ApproximateFloatVector& x, const ApproximateFloatVector& lambda) const;
 
   public: // Deprecated
     Void compute_tz(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
-                          ApproximateFloatVectorType& x, ApproximateFloatType& t, ApproximateFloatVectorType& z) const { }
+                          ApproximateFloatVector& x, ApproximateFloat& t, ApproximateFloatVector& z) const { }
     Void feasibility_step(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
-                          ApproximateFloatVectorType& x, ApproximateFloatVectorType& y, ApproximateFloatVectorType& z, ApproximateFloatType& violation) const { };
+                          ApproximateFloatVector& x, ApproximateFloatVector& y, ApproximateFloatVector& z, ApproximateFloat& violation) const { };
     Void linearised_feasibility_step(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
-                                     ApproximateFloatType& slack, ApproximateFloatVectorType& x, ApproximateFloatVectorType& lambda) const { };
+                                     ApproximateFloat& slack, ApproximateFloatVector& x, ApproximateFloatVector& lambda) const { };
     Void linearised_feasibility_step(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
-                                     ApproximateFloatVectorType& x, ApproximateFloatVectorType& y, ApproximateFloatVectorType& z, ApproximateFloatType& t) const { };
+                                     ApproximateFloatVector& x, ApproximateFloatVector& y, ApproximateFloatVector& z, ApproximateFloat& t) const { };
   private:
-    ApproximateFloatType compute_mu(const ApproximateScalarFunction& f, const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
-                     const ApproximateFloatVectorType& x, const ApproximateFloatVectorType& y) const;
+    ApproximateFloat compute_mu(const ApproximateScalarFunction& f, const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
+                     const ApproximateFloatVector& x, const ApproximateFloatVector& y) const;
     Void compute_violation(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
-                           ApproximateFloatVectorType& x, ApproximateFloatType& t) const;
+                           ApproximateFloatVector& x, ApproximateFloat& t) const;
 };
 
 
@@ -256,8 +256,8 @@ class IntervalOptimiser
 {
     virtual IntervalOptimiser* clone() const { return new IntervalOptimiser(*this); }
     virtual Tribool feasible(ExactBox D, ValidatedVectorFunction h) const;
-    Void feasibility_step(const ExactFloatVectorType& xl, const ExactFloatVectorType& xu, const ValidatedVectorFunction& h,
-                          ValidatedFloatVectorType& x, ValidatedFloatVectorType& y, ValidatedFloatVectorType& zl, ValidatedFloatVectorType zu, ValidatedFloatType& mu) const;
+    Void feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const ValidatedVectorFunction& h,
+                          ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& zl, ValidatedFloatVector zu, ValidatedFloat& mu) const;
 };
 
 
@@ -267,7 +267,7 @@ class ApproximateOptimiser
     virtual ApproximateOptimiser* clone() const { return new ApproximateOptimiser(*this); }
     virtual Tribool feasible(ExactBox D, ValidatedVectorFunction h) const;
     Void feasibility_step(const ExactBox& D, const ApproximateVectorFunction& h,
-                          ApproximateFloatVectorType& X, ApproximateFloatVectorType& Lambda) const;
+                          ApproximateFloatVector& X, ApproximateFloatVector& Lambda) const;
 };
 
 
@@ -282,7 +282,7 @@ class KrawczykOptimiser
     virtual KrawczykOptimiser* clone() const { return new KrawczykOptimiser(*this); }
 
     //! \brief Solve the linear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
-    virtual Vector<ValidatedNumberType> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
+    virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
     virtual tribool feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
 
@@ -290,29 +290,29 @@ class KrawczykOptimiser
     //! \brief Try to solve the nonlinear constraint problem by applying the Krawczyk contractor to the Kuhn-Tucker conditions,
     //! hotstarting the iteration with the primal and dual variables.
     tribool minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C,
-                     const ValidatedFloatType& t0, const ValidatedFloatVectorType& x0, const ValidatedFloatVectorType& y0, const ValidatedFloatVectorType& z0) const;
+                     const ValidatedFloat& t0, const ValidatedFloatVector& x0, const ValidatedFloatVector& y0, const ValidatedFloatVector& z0) const;
 
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.
     void minimisation_step(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
-                           ValidatedFloatVectorType& x, ValidatedFloatVectorType& y, ValidatedFloatVectorType& z, ValidatedFloatType& t) const;
+                           ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z, ValidatedFloat& t) const;
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.
     void feasibility_step(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
-                          ValidatedFloatVectorType& x, ValidatedFloatVectorType& y, ValidatedFloatVectorType& z, ValidatedFloatType& t) const;
+                          ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z, ValidatedFloat& t) const;
 
     //! \brief A primal feasibility step for the problem \f$g(y)\in C;\ y\in D\f$. \deprecated
     void feasibility_step(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
-                          ValidatedFloatVectorType& y, ValidatedFloatType& t) const;
+                          ValidatedFloatVector& y, ValidatedFloat& t) const;
     //! \brief A feasibility step for the problem \f$g(y)\leq 0\f$. \deprecated
     void feasibility_step(const ValidatedVectorFunction& g,
-                          ValidatedFloatVectorType& x, ValidatedFloatVectorType& y, ValidatedFloatVectorType& z, ValidatedFloatType& t) const;
+                          ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z, ValidatedFloat& t) const;
     //! \brief An optimization step for the problem \f$\max f(y) \text{ s.t. } g(y)\leq 0\f$. \deprecated
     void minimisation_step(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g,
-                           ValidatedFloatVectorType& x, ValidatedFloatVectorType& y, ValidatedFloatVectorType& z) const;
+                           ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z) const;
   protected:
     void setup_feasibility(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
-                           ValidatedFloatVectorType& x, ValidatedFloatVectorType& y, ValidatedFloatVectorType& z, ValidatedFloatType& t) const;
+                           ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z, ValidatedFloat& t) const;
     protected:
-    void compute_tz(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C, const ValidatedFloatVectorType& y, ValidatedFloatType& t, ValidatedFloatVectorType& z) const;
+    void compute_tz(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C, const ValidatedFloatVector& y, ValidatedFloat& t, ValidatedFloatVector& z) const;
 };
 
 */

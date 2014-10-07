@@ -36,10 +36,10 @@
 namespace Ariadne {
 
 template<class X> class Point;
-typedef Point<ExactNumberType> ExactPoint;
-typedef Point<EffectiveNumberType> EffectivePoint;
-typedef Point<ValidatedNumberType> ValidatedPoint;
-typedef Point<ApproximateNumberType> ApproximatePoint;
+typedef Point<ExactNumber> ExactPoint;
+typedef Point<EffectiveNumber> EffectivePoint;
+typedef Point<ValidatedNumber> ValidatedPoint;
+typedef Point<ApproximateNumber> ApproximatePoint;
 
 //! A point in Euclidean space.
 template<class X>

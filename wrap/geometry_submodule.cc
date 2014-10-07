@@ -92,10 +92,10 @@ struct from_python<ExactPoint> {
         ExactPoint pt;
         if(xtup.check()) {
             boost::python::tuple tup=xtup(); pt=ExactPoint(len(tup));
-            for(int i=0; i!=len(tup); ++i) { pt[i]=ExactFloatType(extract<double>(tup[i])); }
+            for(int i=0; i!=len(tup); ++i) { pt[i]=ExactFloat(extract<double>(tup[i])); }
         } else if(xlst.check()) {
             boost::python::list lst=xlst(); pt=ExactPoint(len(lst));
-            for(int i=0; i!=len(lst); ++i) { pt[i]=ExactFloatType(extract<double>(lst[i])); }
+            for(int i=0; i!=len(lst); ++i) { pt[i]=ExactFloat(extract<double>(lst[i])); }
         }
         void* storage = ((converter::rvalue_from_python_storage<ExactInterval>*)data)->storage.bytes;
         new (storage) ExactPoint(pt);
@@ -256,7 +256,7 @@ void export_point()
 {
     class_<ExactPoint,bases<DrawableInterface>> point_class("ExactPoint",init<ExactPoint>());
     point_class.def(init<uint>());
-    point_class.def("__getitem__", &__getitem__<ExactPoint,int,ExactFloatType>);
+    point_class.def("__getitem__", &__getitem__<ExactPoint,int,ExactFloat>);
     point_class.def(self_ns::str(self));
 
     from_python<ExactPoint>();
@@ -362,8 +362,8 @@ std::pair<Zonotope,Zonotope> split_pair(const Zonotope& z) {
 void export_zonotope()
 {
     class_<Zonotope,bases<CompactSetInterface,OpenSetInterface,DrawableInterface> > zonotope_class("Zonotope",init<Zonotope>());
-    zonotope_class.def(init< Vector<ExactFloatType>, Matrix<ExactFloatType>, Vector<ErrorFloatType> >());
-    zonotope_class.def(init< Vector<ExactFloatType>, Matrix<ExactFloatType> >());
+    zonotope_class.def(init< Vector<ExactFloat>, Matrix<ExactFloat>, Vector<ErrorFloat> >());
+    zonotope_class.def(init< Vector<ExactFloat>, Matrix<ExactFloat> >());
     zonotope_class.def(init< ExactBox >());
     zonotope_class.def("centre",&Zonotope::centre,return_value_policy<copy_const_reference>());
     zonotope_class.def("generators",&Zonotope::generators,return_value_policy<copy_const_reference>());
@@ -405,7 +405,7 @@ void export_curve()
 
     class_<InterpolatedCurve,bases<DrawableInterface> > interpolated_curve_class("InterpolatedCurve",init<InterpolatedCurve>());
     interpolated_curve_class.def(init<ExactFloat,ExactPoint>());
-    interpolated_curve_class.def("insert", (void(InterpolatedCurve::*)(const ExactFloat&, const Vector<ExactFloat>&)) &InterpolatedCurve::insert);
+    interpolated_curve_class.def("insert", (void(InterpolatedCurve::*)(const ApproximateFloat&, const Point<ApproximateFloat>&)) &InterpolatedCurve::insert);
     interpolated_curve_class.def("__iter__",boost::python::range(&InterpolatedCurve::begin,&InterpolatedCurve::end));
     interpolated_curve_class.def(self_ns::str(self));
 
@@ -419,10 +419,10 @@ void export_affine_set()
 
     class_<ValidatedAffineConstrainedImageSet,bases<CompactSetInterface,DrawableInterface> >
         affine_set_class("ValidatedAffineConstrainedImageSet",init<ValidatedAffineConstrainedImageSet>());
-    affine_set_class.def(init<Vector<ExactInterval>, Matrix<ExactFloatType>, Vector<ExactFloatType> >());
-    affine_set_class.def(init<Matrix<ExactFloatType>, Vector<ExactFloatType> >());
-    affine_set_class.def("new_parameter_constraint", (void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<ValidatedFloatType>,ValidatedFloatType>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
-    affine_set_class.def("new_constraint", (void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<ValidatedFloatType>,ValidatedFloatType>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
+    affine_set_class.def(init<Vector<ExactInterval>, Matrix<ExactFloat>, Vector<ExactFloat> >());
+    affine_set_class.def(init<Matrix<ExactFloat>, Vector<ExactFloat> >());
+    affine_set_class.def("new_parameter_constraint", (void(ValidatedAffineConstrainedImageSet::*)(const Constraint<Affine<ValidatedFloat>,ValidatedFloat>&)) &ValidatedAffineConstrainedImageSet::new_parameter_constraint);
+    affine_set_class.def("new_constraint", (void(ValidatedAffineConstrainedImageSet::*)(const Constraint<AffineModel<ValidatedFloat>,ValidatedFloat>&)) &ValidatedAffineConstrainedImageSet::new_constraint);
     affine_set_class.def("dimension", &ValidatedAffineConstrainedImageSet::dimension);
     affine_set_class.def("bounded", &ValidatedAffineConstrainedImageSet::bounded);
     affine_set_class.def("empty", &ValidatedAffineConstrainedImageSet::empty);

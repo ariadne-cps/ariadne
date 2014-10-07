@@ -75,12 +75,12 @@ class InteriorPointSolver
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
     //! Returns the pair (x,y) where x is the optimal point, and y the corresponding dual feasible point.
     Tuple< Float, Vector<Float>, Vector<Float> >
-    minimise(const FloatVector& c, const FloatVector& xl, const FloatVector& xu, const Matrix<Float>& A, const Vector<Float>& b) const;
+    minimise(const RawFloatVector& c, const RawFloatVector& xl, const RawFloatVector& xu, const Matrix<Float>& A, const Vector<Float>& b) const;
 
     //! \brief Find approximate optimal solution of \f$\min c^T x \text{ s.t. } Ax=b; x\geq0\f$.
     //! Returns the triple (x,y,z) where x is the optimal point, and y the corresponding dual feasible point.
     Tuple< Float, Vector<Float>, Vector<Float> >
-    hotstarted_minimise(const FloatVector& c, const FloatVector& xl, const FloatVector& xu, const Matrix<Float>& A, const Vector<Float>& b,
+    hotstarted_minimise(const RawFloatVector& c, const RawFloatVector& xl, const RawFloatVector& xu, const Matrix<Float>& A, const Vector<Float>& b,
                         Vector<Float>& x, Vector<Float>& y, Vector<Float>& zl, Vector<Float>& zu) const;
 
     //! \brief Test feasibility of the problem \f$Ax=b; x_l\leq x\leq x_u\f$.

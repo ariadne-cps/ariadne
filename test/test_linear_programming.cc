@@ -51,54 +51,54 @@ class TestInteriorPointSolver
 
     void test_validate_feasibility() {
         // A feasible instance
-        FloatVector xl={0.0,0.0,0.0};
-        FloatVector xu={inf,inf,inf};
+        RawFloatVector xl={0.0,0.0,0.0};
+        RawFloatVector xu={inf,inf,inf};
         FloatMatrix A={{1.0,0.0,1.0}, {0.0,1.0,2.0}};
-        FloatVector b={1.0,1.0};
-        FloatVector x={0.81,0.51,0.21};
-        FloatVector y={-1.0,-0.5};
+        RawFloatVector b={1.0,1.0};
+        RawFloatVector x={0.81,0.51,0.21};
+        RawFloatVector y={-1.0,-0.5};
         ARIADNE_ASSERT(definitely(optimiser->validate_feasibility(xl,xu,A,b,x,y)));
 
-        b=FloatVector{1.0, -1.0};
-        y=FloatVector{-0.5, -1.0};
+        b=RawFloatVector{1.0, -1.0};
+        y=RawFloatVector{-0.5, -1.0};
         ARIADNE_ASSERT(definitely(!optimiser->validate_feasibility(xl,xu,A,b,x,y)));
     }
 
 
     void test_feasibility() {
         // A feasible instance
-        FloatVector xl={0.0,0.0,0.0};
-        FloatVector xu={inf,inf,inf};
+        RawFloatVector xl={0.0,0.0,0.0};
+        RawFloatVector xu={inf,inf,inf};
         FloatMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
-        FloatVector b={1.0,1.0};
+        RawFloatVector b={1.0,1.0};
         ARIADNE_ASSERT(definitely(optimiser->feasible(xl,xu,A,b)));
 
-        b=FloatVector{1.0,-1.0};
+        b=RawFloatVector{1.0,-1.0};
         ARIADNE_ASSERT(definitely(!optimiser->feasible(xl,xu,A,b)));
     }
 
 
     void test_constrained_feasibility() {
         FloatMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
-        FloatVector b={1.0,1.0};
-        FloatVector xl={0.0,0.0,0.0};
-        FloatVector xu={4.0,2.0,3.0};
+        RawFloatVector b={1.0,1.0};
+        RawFloatVector xl={0.0,0.0,0.0};
+        RawFloatVector xu={4.0,2.0,3.0};
 
         ARIADNE_ASSERT(definitely(optimiser->feasible(xl,xu,A,b)));
 
-        b=FloatVector{1.0,-1.0};
+        b=RawFloatVector{1.0,-1.0};
         ARIADNE_ASSERT(definitely(!optimiser->feasible(xl,xu,A,b)));
 
-        xu=FloatVector{+inf,+inf,3.0};
+        xu=RawFloatVector{+inf,+inf,3.0};
     }
 
 
     void test_optimization() {
         FloatMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
-        FloatVector b={1.0,1.0};
-        FloatVector c={1.0,0.5,-0.75};
-        FloatVector xl={0.0,0.0,0.0};
-        FloatVector xu={+inf,+inf,3.0};
+        RawFloatVector b={1.0,1.0};
+        RawFloatVector c={1.0,0.5,-0.75};
+        RawFloatVector xl={0.0,0.0,0.0};
+        RawFloatVector xu={+inf,+inf,3.0};
 
         ARIADNE_TEST_PRINT(optimiser->minimise(c,xl,xu,A,b));
     }

@@ -312,8 +312,8 @@ void HybridEnclosure::apply_full_reach_step(const ValidatedVectorFunctionModel& 
 
 
 void HybridEnclosure::bound_time(Real tmax) {
-    if(this->time_range().upper()>ValidatedNumberType(tmax).lower()) {
-        this->_set.new_negative_parameter_constraint(this->time_function()-ValidatedNumberType(tmax));
+    if(this->time_range().upper()>ValidatedNumber(tmax).lower()) {
+        this->_set.new_negative_parameter_constraint(this->time_function()-ValidatedNumber(tmax));
     }
 }
 
@@ -323,7 +323,7 @@ void HybridEnclosure::bound_time(ValidatedScalarFunction tmax) {
 
 void HybridEnclosure::set_time(Real time)
 {
-    this->_set.new_zero_parameter_constraint(this->time_function()-ValidatedNumberType(time));
+    this->_set.new_zero_parameter_constraint(this->time_function()-ValidatedNumber(time));
 }
 
 void HybridEnclosure::set_time(ValidatedScalarFunction time)
@@ -334,14 +334,14 @@ void HybridEnclosure::set_time(ValidatedScalarFunction time)
 
 void HybridEnclosure::set_maximum_time(DiscreteEvent event, Float final_time)
 {
-    this->_set.new_negative_parameter_constraint(this->time_function()-ValidatedNumberType(final_time)); // Deprecated
+    this->_set.new_negative_parameter_constraint(this->time_function()-ValidatedNumber(final_time)); // Deprecated
 }
 
 void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ValidatedScalarFunction constraint) {
     ARIADNE_NOT_IMPLEMENTED; // Deprecated
 }
 
-void HybridEnclosure::set_step_time(ExactFloatType time)
+void HybridEnclosure::set_step_time(ExactFloat time)
 {
     ARIADNE_NOT_IMPLEMENTED; // Deprecated
 }

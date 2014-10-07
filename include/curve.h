@@ -41,9 +41,9 @@ namespace Ariadne {
 template<class X> class Vector;
 
 template<class X> class Point;
-typedef Point<ExactNumberType> ExactPoint;
+typedef Point<ExactNumber> ExactPoint;
 
-class ExactBox;
+class UpperBox;
 
 
 // Forward declarations for friends
@@ -54,9 +54,9 @@ class CurveInterface;
 class CurveInterface
 {
   public:
-    typedef Float ParameterType;
-    typedef Vector<Float> PointType;
-    typedef Vector<Float> TangentVectorType;
+    typedef ApproximateFloat ParameterType;
+    typedef Point<ApproximateFloat> PointType;
+    typedef Vector<ApproximateFloat> TangentVectorType;
   public:
     /*! \brief Destructor. */
     virtual ~CurveInterface() { };
@@ -134,19 +134,16 @@ class InterpolatedCurve
     InterpolatedCurve(const PointType& pt)
         : _points() { this->insert(0,pt); }
     /*! \brief Create a curve with a single point \a pt at parameter value \a s. */
-    InterpolatedCurve(double s, const PointType& pt)
+    InterpolatedCurve(ParameterType s, const PointType& pt)
         : _points() { this->insert(s,pt); }
-    /*! \brief Create a curve with a single point \a pt at parameter value \a s. */
-    InterpolatedCurve(const ParameterType& s, const PointType& pt)
-        : _points() { this->insert(s,pt); }
-    InterpolatedCurve(const ExactFloatType& s, const Vector<ExactFloatType>& pt)
+    InterpolatedCurve(const RawFloat& s, const Vector<RawFloat>& pt)
         : _points() { this->insert(s,pt); }
     /*! \brief Create a segment from \a pt0 at parameter value 0 to \a pt1 at parameter value 1. */
     InterpolatedCurve(const PointType& pt0, const PointType& pt1)
         : _points() { this->insert(0,pt0); this->insert(1,pt1); }
     /*! \brief Insert a point with parameter value \a s and spacial value \a pt. */
     void insert(const ParameterType& s, const PointType& pt);
-    void insert(const ExactFloatType& s, const Vector<ExactFloatType>& pt);
+    void insert(const RawFloat& s, const Vector<RawFloat>& pt);
 
     /*! \brief The number of segments in the curve. */
     size_t size() const { return this->_points.size(); }
@@ -162,7 +159,7 @@ class InterpolatedCurve
     /*! \brief Draw on a two-dimensional canvas. */
     virtual void draw(CanvasInterface& c, const Projection2d& p) const;
     /*! \brief A bounding box for the curve. */
-    virtual ExactBox bounding_box() const;
+    virtual UpperBox bounding_box() const;
 
     /*! \brief Write to an output stream. */
     virtual std::ostream& write(std::ostream& os) const;

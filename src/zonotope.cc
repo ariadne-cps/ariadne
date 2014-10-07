@@ -621,8 +621,8 @@ orthogonal_over_approximation(const Zonotope& z)
 }
 
 Tuple< Matrix<Float>, Matrix<Float>, PivotMatrix > orthogonal_decomposition(const Matrix<Float>& A, bool allow_pivoting=true) {
-    Matrix<ApproximateFloatType> approximate_matrix=reinterpret_cast<Matrix<ApproximateFloatType>const&>(A);
-    Tuple< Matrix<ApproximateFloatType>, Matrix<ApproximateFloatType>, PivotMatrix >
+    Matrix<ApproximateFloat> approximate_matrix=reinterpret_cast<Matrix<ApproximateFloat>const&>(A);
+    Tuple< Matrix<ApproximateFloat>, Matrix<ApproximateFloat>, PivotMatrix >
         approximate_decomposition=orthogonal_decomposition(approximate_matrix);
     return reinterpret_cast<Tuple<Matrix<Float>, Matrix<Float>, PivotMatrix >const&>(approximate_decomposition);
 }
@@ -764,14 +764,14 @@ Zonotope apply(const ValidatedVectorFunction& f, const Zonotope& z) {
 
     std::cerr<<"  fJb="<<fJb<<"\n";
 
-    FloatVector nzc = midpoint(fc);
+    RawFloatVector nzc = midpoint(fc);
     FloatMatrix nzG = midpoint(fJbzG);
 
     ExactIntervalVector zE(z.number_of_generators(),ExactInterval(-1,+1));
 
     ExactIntervalVector nzE=(fc-ExactIntervalVector(nzc)) + (fJbzG-ExactIntervalMatrix(nzG))*zE + fJb*ze;
 
-    FloatVector nze(nzE.size()); for(uint i=0; i!=nze.size(); ++i) { nze[i]=nzE[i].upper(); }
+    RawFloatVector nze(nzE.size()); for(uint i=0; i!=nze.size(); ++i) { nze[i]=nzE[i].upper(); }
     std::cerr<<"  nzE="<<nzE<<"\n";
     std::cerr<<"  nze="<<nze<<"\n";
 

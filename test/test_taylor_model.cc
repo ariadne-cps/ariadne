@@ -37,7 +37,7 @@
 using std::cout; using std::cerr; using std::endl;
 using namespace Ariadne;
 
-Vector<ExactFloatType> v(uint n, uint i) { return Vector<ExactFloatType>::unit(n,i); }
+Vector<ExactFloat> v(uint n, uint i) { return Vector<ExactFloat>::unit(n,i); }
 ValidatedTaylorModel ctm(uint m, double c, Sweeper swp) { return ValidatedTaylorModel::constant(m,c,swp); }
 ValidatedTaylorModel ctm(uint m, Sweeper swp) { return ValidatedTaylorModel::constant(m,1.0,swp); }
 //ValidatedTaylorModel tm(uint m, uint i, Sweeper swp) { return ValidatedTaylorModel::variable(m,i,swp); }
@@ -102,10 +102,10 @@ void TestTaylorModel::test()
 
 void TestTaylorModel::test_concept()
 {
-    const ExactFloatType f=0;
-    const ValidatedFloatType i;
-    const Vector<ExactFloatType> vf;
-    const Vector<ValidatedFloatType> vi;
+    const ExactFloat f=0;
+    const ValidatedFloat i;
+    const Vector<ExactFloat> vf;
+    const Vector<ValidatedFloat> vi;
     const ValidatedTaylorModel  t(0,swp);
     ValidatedTaylorModel tr(0,swp);
 
@@ -169,9 +169,9 @@ void TestTaylorModel::test_unscale()
 
 void TestTaylorModel::test_evaluate()
 {
-    Vector<ValidatedFloatType> iv={{0.25,0.5},{-0.75,-0.5}};
+    Vector<ValidatedFloat> iv={{0.25,0.5},{-0.75,-0.5}};
     ValidatedTaylorModel tv({{{0,0},1.0},{{1,0},2.0},{{0,1},3.0},{{2,0},4.0},{{1,1},5.0},{{0,2},6.0}},0.25,swp);
-    ARIADNE_TEST_EQUAL(evaluate(tv,iv),ValidatedFloatType(-1,1));
+    ARIADNE_TEST_EQUAL(evaluate(tv,iv),ValidatedFloat(-1,1));
 }
 
 void TestTaylorModel::test_arithmetic()
@@ -181,10 +181,10 @@ void TestTaylorModel::test_arithmetic()
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-(-3), ValidatedTaylorModel(E(1,2, {4.0,-2.0,3.0}), 0.75,swp));
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*(-3), ValidatedTaylorModel(E(1,2, {-3.0,6.0,-9.0}), 2.25,swp));
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)/(-4), ValidatedTaylorModel(E(1,2, {-0.25,0.5,-0.75}), 0.1875,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+ValidatedFloatType(-1,2), ValidatedTaylorModel(E(1,2, {1.5,-2.0,3.0}), 2.25,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-ValidatedFloatType(-1,2), ValidatedTaylorModel(E(1,2, {0.5,-2.0,3.0}), 2.25,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*ValidatedFloatType(-1,2), ValidatedTaylorModel(E(1,2, {0.5,-1.0,1.5}), 10.5,swp));
-    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)/ValidatedFloatType(0.25,2.0), ValidatedTaylorModel(E(1,2, {2.25,-4.5,6.75}), 13.5,swp));
+    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+ValidatedFloat(-1,2), ValidatedTaylorModel(E(1,2, {1.5,-2.0,3.0}), 2.25,swp));
+    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)-ValidatedFloat(-1,2), ValidatedTaylorModel(E(1,2, {0.5,-2.0,3.0}), 2.25,swp));
+    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*ValidatedFloat(-1,2), ValidatedTaylorModel(E(1,2, {0.5,-1.0,1.5}), 10.5,swp));
+    ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)/ValidatedFloat(0.25,2.0), ValidatedTaylorModel(E(1,2, {2.25,-4.5,6.75}), 13.5,swp));
     ARIADNE_TEST_EQUAL(+ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp), ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp));
     ARIADNE_TEST_EQUAL(-ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp), ValidatedTaylorModel(E(1,2, {-1.0,2.0,-3.0}), 0.75,swp));
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+ValidatedTaylorModel(E(1,2, {3.0,2.0,-4.0}),0.5,swp), ValidatedTaylorModel(E(1,2, {4.0,0.0,-1.0}), 1.25,swp));
@@ -297,7 +297,7 @@ void TestTaylorModel::test_split()
 
 void TestTaylorModel::test_antiderivative()
 {
-    ValidatedFloatType unit_interval(-1,+1);
+    ValidatedFloat unit_interval(-1,+1);
     ValidatedTaylorModel tm=ValidatedTaylorModel::constant(2,1.0,swp);
     ValidatedTaylorModel atm=antiderivative(tm,1);
 
@@ -310,7 +310,7 @@ void TestTaylorModel::test_antiderivative()
 
     // Test error control
     ValidatedTaylorModel x=ValidatedTaylorModel::variable(1,0,swp);
-    ValidatedTaylorModel e=ValidatedTaylorModel::zero(1,swp)+ValidatedFloatType(-1,+1);
+    ValidatedTaylorModel e=ValidatedTaylorModel::zero(1,swp)+ValidatedFloat(-1,+1);
     ARIADNE_TEST_EQUAL(antiderivative(2.0*x*x,0),0.66666666666666663*x*x*x+5.5511151231257827021e-17*e);
     ARIADNE_TEST_EQUAL(antiderivative(2.0*x*x+e,0),0.66666666666666663*x*x*x+1.0000000000000002*e);
     ARIADNE_TEST_EQUAL(antiderivative(T({{{2},2.0}},0.,swp),0),T({{{3},0.66666666666666663}},5.5511151231257827021e-17,swp));

@@ -50,17 +50,17 @@ uint irmax(const ExactBox& bx) {
     return imax;
 }
 
-inline ExactFloatType mid(ExactFloatType l, ExactFloatType u) {
-    return ExactFloatType(med_approx(l.raw(),u.raw()));
+inline ExactFloat mid(ExactFloat l, ExactFloat u) {
+    return ExactFloat(med_approx(l.raw(),u.raw()));
 }
 
 inline
 ExactBox split(const ExactBox& bx, uint i, Piece lr) {
     ExactBox result(bx);
     ExactInterval& ivl=result[i];
-    const ExactFloatType& l=ivl.lower();
-    const ExactFloatType& u=ivl.upper();
-    ExactFloatType c=mid(l,u);
+    const ExactFloat& l=ivl.lower();
+    const ExactFloat& u=ivl.upper();
+    ExactFloat c=mid(l,u);
     if(lr==middle) {
         ivl.set(mid(l,c),mid(c,u));
     } else {
@@ -74,7 +74,7 @@ inline
 std::pair<ExactBox,ExactBox> split(const ExactBox& bx, uint i)
 {
     std::pair<ExactBox,ExactBox> result(bx,bx);
-    ExactFloatType c=mid(bx[i].lower(),bx[i].upper());
+    ExactFloat c=mid(bx[i].lower(),bx[i].upper());
     result.first[i].set_upper(c);
     result.second[i].set_lower(c);
     return result;
@@ -95,7 +95,7 @@ std::pair<ExactBox,ExactBox> split(const ExactBox& bx) {
 
 template<class F>
 tribool
-separated(const ExactBox& d, const F& f, const ExactBox& b, const RawFloatType& eps)
+separated(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat& eps)
 {
 
     ExactBox fd=f.evaluate(d);
@@ -121,7 +121,7 @@ separated(const ExactBox& d, const F& f, const ExactBox& b, const RawFloatType& 
 
 template<class F>
 tribool
-inside(const ExactBox& d, const F& f, const ExactBox& b, const RawFloatType& eps)
+inside(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat& eps)
 {
 
     ExactBox fd=f.evaluate(d);

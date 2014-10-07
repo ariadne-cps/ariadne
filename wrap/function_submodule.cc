@@ -128,10 +128,10 @@ class ScalarPythonFunction
     ScalarPythonFunction* clone() const { return new ScalarPythonFunction(*this); }
     virtual uint argument_size() const { return this->_argument_size; }
 
-    virtual Vector<ApproximateFloatType> gradient(const Vector<ApproximateFloatType>& x) const {
-        return this->evaluate(Differential<ApproximateFloatType>::variables(1u,x)).gradient(); }
-    virtual Vector<ValidatedFloatType> gradient(const Vector<ValidatedFloatType>& x) const {
-        return this->evaluate(Differential<ValidatedFloatType>::variables(1u,x)).gradient(); }
+    virtual Vector<ApproximateFloat> gradient(const Vector<ApproximateFloat>& x) const {
+        return this->evaluate(Differential<ApproximateFloat>::variables(1u,x)).gradient(); }
+    virtual Vector<ValidatedFloat> gradient(const Vector<ValidatedFloat>& x) const {
+        return this->evaluate(Differential<ValidatedFloat>::variables(1u,x)).gradient(); }
 
     virtual EffectiveScalarFunctionInterface* _derivative (uint j) const {
         ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
@@ -168,10 +168,10 @@ class VectorPythonFunction
     virtual uint result_size() const { return this->_result_size; }
     virtual uint argument_size() const { return this->_argument_size; }
 
-    virtual Matrix<ApproximateFloatType> jacobian (const Vector<ApproximateFloatType>& x) const {
-        return this->evaluate(Differential<ApproximateFloatType>::variables(1u,x)).jacobian(); }
-    virtual Matrix<ValidatedFloatType> jacobian (const Vector<ValidatedFloatType>& x) const {
-        return this->evaluate(Differential<ValidatedFloatType>::variables(1u,x)).jacobian(); }
+    virtual Matrix<ApproximateFloat> jacobian (const Vector<ApproximateFloat>& x) const {
+        return this->evaluate(Differential<ApproximateFloat>::variables(1u,x)).jacobian(); }
+    virtual Matrix<ValidatedFloat> jacobian (const Vector<ValidatedFloat>& x) const {
+        return this->evaluate(Differential<ValidatedFloat>::variables(1u,x)).jacobian(); }
 
     virtual EffectiveScalarFunctionInterface* _get(uint i) const {
         ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
@@ -197,13 +197,13 @@ class VectorPythonFunction
 
 using namespace Ariadne;
 
-typedef ApproximateFloatType F;
+typedef ApproximateFloat F;
 typedef ExactInterval I;
-typedef Vector<ApproximateFloatType> FV;
+typedef Vector<ApproximateFloat> FV;
 typedef Vector<ExactInterval> IV;
-typedef Matrix<ApproximateFloatType> FMx;
+typedef Matrix<ApproximateFloat> FMx;
 typedef Matrix<ExactInterval> IMx;
-typedef Vector< Differential<ApproximateFloatType> > FSDV;
+typedef Vector< Differential<ApproximateFloat> > FSDV;
 typedef Vector< Differential<ExactInterval> > ISDV;
 typedef Vector<ValidatedTaylorModel> TMV;
 typedef VectorTaylorFunction TFM;
@@ -282,14 +282,14 @@ void export_scalar_function()
     scalar_function_class.def(init<uint>());
     scalar_function_class.def("argument_size", &EffectiveScalarFunction::argument_size);
     scalar_function_class.def("derivative", &EffectiveScalarFunction::derivative);
-    scalar_function_class.def("__call__", (ValidatedFloatType(EffectiveScalarFunction::*)(const Vector<ValidatedFloatType>&)const)&EffectiveScalarFunction::operator() );
-    scalar_function_class.def("__call__", (ApproximateFloatType(EffectiveScalarFunction::*)(const Vector<ApproximateFloatType>&)const)&EffectiveScalarFunction::operator() );
-    scalar_function_class.def("__call__", (Differential<ValidatedFloatType>(EffectiveScalarFunction::*)(const Vector<Differential<ValidatedFloatType>>&)const)&EffectiveScalarFunction::evaluate );
-    scalar_function_class.def("__call__", (Differential<ApproximateFloatType>(EffectiveScalarFunction::*)(const Vector<Differential<ApproximateFloatType>>&)const)&EffectiveScalarFunction::evaluate );
-    scalar_function_class.def("gradient", (Vector<ValidatedFloatType>(EffectiveScalarFunction::*)(const Vector<ValidatedFloatType>&)const)&EffectiveScalarFunction::gradient );
-    scalar_function_class.def("gradient", (Vector<ValidatedFloatType>(EffectiveScalarFunction::*)(const Vector<ValidatedFloatType>&)const)&EffectiveScalarFunction::gradient );
-    scalar_function_class.def("differential", (Differential<ValidatedFloatType>(EffectiveScalarFunction::*)(const Vector<ValidatedFloatType>&,Nat)const) &EffectiveScalarFunction::differential);
-    scalar_function_class.def("differential", (Differential<ApproximateFloatType>(EffectiveScalarFunction::*)(const Vector<ApproximateFloatType>&,Nat)const) &EffectiveScalarFunction::differential);
+    scalar_function_class.def("__call__", (ValidatedFloat(EffectiveScalarFunction::*)(const Vector<ValidatedFloat>&)const)&EffectiveScalarFunction::operator() );
+    scalar_function_class.def("__call__", (ApproximateFloat(EffectiveScalarFunction::*)(const Vector<ApproximateFloat>&)const)&EffectiveScalarFunction::operator() );
+    scalar_function_class.def("__call__", (Differential<ValidatedFloat>(EffectiveScalarFunction::*)(const Vector<Differential<ValidatedFloat>>&)const)&EffectiveScalarFunction::evaluate );
+    scalar_function_class.def("__call__", (Differential<ApproximateFloat>(EffectiveScalarFunction::*)(const Vector<Differential<ApproximateFloat>>&)const)&EffectiveScalarFunction::evaluate );
+    scalar_function_class.def("gradient", (Vector<ValidatedFloat>(EffectiveScalarFunction::*)(const Vector<ValidatedFloat>&)const)&EffectiveScalarFunction::gradient );
+    scalar_function_class.def("gradient", (Vector<ValidatedFloat>(EffectiveScalarFunction::*)(const Vector<ValidatedFloat>&)const)&EffectiveScalarFunction::gradient );
+    scalar_function_class.def("differential", (Differential<ValidatedFloat>(EffectiveScalarFunction::*)(const Vector<ValidatedFloat>&,Nat)const) &EffectiveScalarFunction::differential);
+    scalar_function_class.def("differential", (Differential<ApproximateFloat>(EffectiveScalarFunction::*)(const Vector<ApproximateFloat>&,Nat)const) &EffectiveScalarFunction::differential);
     scalar_function_class.def("__pos__", &__pos__<EffectiveScalarFunction,EffectiveScalarFunction>);
     scalar_function_class.def("__neg__", &__neg__<EffectiveScalarFunction,EffectiveScalarFunction>);
     scalar_function_class.def("__add__", &__add__<EffectiveScalarFunction,EffectiveScalarFunction,EffectiveScalarFunction>);
@@ -315,8 +315,8 @@ void export_scalar_function()
     scalar_function_class.staticmethod("constant");
     scalar_function_class.staticmethod("coordinate");
 
-    def("evaluate", (ApproximateFloatType(*)(const EffectiveScalarFunction&,const Vector<ApproximateFloatType>&)) &evaluate);
-    def("evaluate", (ValidatedFloatType(*)(const EffectiveScalarFunction&,const Vector<ValidatedFloatType>&)) &evaluate);
+    def("evaluate", (ApproximateFloat(*)(const EffectiveScalarFunction&,const Vector<ApproximateFloat>&)) &evaluate);
+    def("evaluate", (ValidatedFloat(*)(const EffectiveScalarFunction&,const Vector<ValidatedFloat>&)) &evaluate);
 
     def("derivative", (EffectiveScalarFunction(EffectiveScalarFunction::*)(uint)const) &EffectiveScalarFunction::derivative);
 
@@ -354,22 +354,22 @@ void export_vector_function()
     vector_function_class.def("argument_size", &EffectiveVectorFunction::argument_size);
     vector_function_class.def("__getitem__", &EffectiveVectorFunction::get);
     vector_function_class.def("__setitem__", &EffectiveVectorFunction::set);
-    vector_function_class.def("__call__", (Vector<ValidatedFloatType>(EffectiveVectorFunction::*)(const Vector<ValidatedFloatType>&)const)&EffectiveVectorFunction::operator() );
-    vector_function_class.def("__call__", (Vector<ApproximateFloatType>(EffectiveVectorFunction::*)(const Vector<ApproximateFloatType>&)const)&EffectiveVectorFunction::operator() );
-    vector_function_class.def("__call__", (Vector<Differential<ValidatedFloatType>>(EffectiveVectorFunction::*)(const Vector<Differential<ValidatedFloatType>>&)const)&EffectiveVectorFunction::evaluate );
-    vector_function_class.def("__call__", (Vector<Differential<ApproximateFloatType>>(EffectiveVectorFunction::*)(const Vector<Differential<ApproximateFloatType>>&)const)&EffectiveVectorFunction::evaluate );
-    vector_function_class.def("jacobian", (Matrix<ValidatedFloatType>(EffectiveVectorFunction::*)(const Vector<ValidatedFloatType>&)const) &EffectiveVectorFunction::jacobian);
-    vector_function_class.def("jacobian", (Matrix<ApproximateFloatType>(EffectiveVectorFunction::*)(const Vector<ApproximateFloatType>&)const) &EffectiveVectorFunction::jacobian);
-    vector_function_class.def("differentials", (Vector<Differential<ValidatedFloatType> >(EffectiveVectorFunction::*)(const Vector<ValidatedFloatType>&,Nat)const) &EffectiveVectorFunction::differentials);
-    vector_function_class.def("differentials", (Vector<Differential<ApproximateFloatType> >(EffectiveVectorFunction::*)(const Vector<ApproximateFloatType>&,Nat)const) &EffectiveVectorFunction::differentials);
+    vector_function_class.def("__call__", (Vector<ValidatedFloat>(EffectiveVectorFunction::*)(const Vector<ValidatedFloat>&)const)&EffectiveVectorFunction::operator() );
+    vector_function_class.def("__call__", (Vector<ApproximateFloat>(EffectiveVectorFunction::*)(const Vector<ApproximateFloat>&)const)&EffectiveVectorFunction::operator() );
+    vector_function_class.def("__call__", (Vector<Differential<ValidatedFloat>>(EffectiveVectorFunction::*)(const Vector<Differential<ValidatedFloat>>&)const)&EffectiveVectorFunction::evaluate );
+    vector_function_class.def("__call__", (Vector<Differential<ApproximateFloat>>(EffectiveVectorFunction::*)(const Vector<Differential<ApproximateFloat>>&)const)&EffectiveVectorFunction::evaluate );
+    vector_function_class.def("jacobian", (Matrix<ValidatedFloat>(EffectiveVectorFunction::*)(const Vector<ValidatedFloat>&)const) &EffectiveVectorFunction::jacobian);
+    vector_function_class.def("jacobian", (Matrix<ApproximateFloat>(EffectiveVectorFunction::*)(const Vector<ApproximateFloat>&)const) &EffectiveVectorFunction::jacobian);
+    vector_function_class.def("differentials", (Vector<Differential<ValidatedFloat> >(EffectiveVectorFunction::*)(const Vector<ValidatedFloat>&,Nat)const) &EffectiveVectorFunction::differentials);
+    vector_function_class.def("differentials", (Vector<Differential<ApproximateFloat> >(EffectiveVectorFunction::*)(const Vector<ApproximateFloat>&,Nat)const) &EffectiveVectorFunction::differentials);
     vector_function_class.def("__str__", &__cstr__<EffectiveVectorFunction>);
     vector_function_class.def("__repr__", &__crepr__<EffectiveVectorFunction>);
 
     vector_function_class.def("identity", (EffectiveVectorFunction(*)(uint)) &EffectiveVectorFunction::identity);
     vector_function_class.staticmethod("identity");
 
-    def("evaluate", (Vector<ApproximateFloatType>(*)(const EffectiveVectorFunction&,const Vector<ApproximateFloatType>&)) &evaluate);
-    def("evaluate", (Vector<ValidatedFloatType>(*)(const EffectiveVectorFunction&,const Vector<ValidatedFloatType>&)) &evaluate);
+    def("evaluate", (Vector<ApproximateFloat>(*)(const EffectiveVectorFunction&,const Vector<ApproximateFloat>&)) &evaluate);
+    def("evaluate", (Vector<ValidatedFloat>(*)(const EffectiveVectorFunction&,const Vector<ValidatedFloat>&)) &evaluate);
 
     def("join", (EffectiveVectorFunction(*)(const EffectiveScalarFunction&, const EffectiveScalarFunction&)) &join);
     def("join", (EffectiveVectorFunction(*)(const EffectiveVectorFunction&, const EffectiveScalarFunction&)) &join);

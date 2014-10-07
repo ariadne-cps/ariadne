@@ -42,7 +42,7 @@
 
 namespace Ariadne {
 
-typedef Vector<Float> FloatVector;
+typedef Vector<Float> RawFloatVector;
 typedef Vector<ExactInterval> ExactIntervalVector;
 
 
@@ -64,20 +64,20 @@ struct LinearProgram {
 };
 
 
-ValidatedAffineConstraint operator<=(const ValidatedFloatType& l, const ValidatedAffine& a) { return ValidatedAffineConstraint(l,a,+inf); }
-ValidatedAffineConstraint operator<=(const ValidatedAffine& a, const ValidatedFloatType& u) { return ValidatedAffineConstraint(-inf,a,u); }
-ValidatedAffineConstraint operator==(const ValidatedAffine& a, const ValidatedFloatType& b) { return ValidatedAffineConstraint(b,a,b); }
+ValidatedAffineConstraint operator<=(const ValidatedFloat& l, const ValidatedAffine& a) { return ValidatedAffineConstraint(l,a,+inf); }
+ValidatedAffineConstraint operator<=(const ValidatedAffine& a, const ValidatedFloat& u) { return ValidatedAffineConstraint(-inf,a,u); }
+ValidatedAffineConstraint operator==(const ValidatedAffine& a, const ValidatedFloat& b) { return ValidatedAffineConstraint(b,a,b); }
 
-ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& c, const ValidatedFloatType& u) {
+ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& c, const ValidatedFloat& u) {
     ARIADNE_ASSERT(c.upper_bound()==infty);
     return ValidatedAffineConstraint(c.lower_bound(),c.function(),u);
 }
 
-ValidatedAffineModelConstraint operator<=(const ValidatedFloatType& l, const ValidatedAffineModel& a) { return ValidatedAffineModelConstraint(l,a,+inf); }
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& a, const ValidatedFloatType& u) { return ValidatedAffineModelConstraint(-inf,a,u); }
-ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& a, const ValidatedFloatType& b) { return ValidatedAffineModelConstraint(b,a,b); }
+ValidatedAffineModelConstraint operator<=(const ValidatedFloat& l, const ValidatedAffineModel& a) { return ValidatedAffineModelConstraint(l,a,+inf); }
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& a, const ValidatedFloat& u) { return ValidatedAffineModelConstraint(-inf,a,u); }
+ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& a, const ValidatedFloat& b) { return ValidatedAffineModelConstraint(b,a,b); }
 
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& c, const ValidatedFloatType& u) {
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& c, const ValidatedFloat& u) {
     ARIADNE_ASSERT(c.upper_bound()==infty);
     return ValidatedAffineModelConstraint(c.lower_bound(),c.function(),u);
 }
@@ -130,17 +130,17 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vec
 {
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBox& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& h)
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBox& D, const Matrix<ExactFloat>& G, const Vector<ExactFloat>& h)
 {
     this->construct(D,G,h);
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& h)
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Matrix<ExactFloat>& G, const Vector<ExactFloat>& h)
 {
     this->construct(Vector<ExactInterval>(G.column_size(),ExactInterval(-1,+1)),G,h);
 }
 
-void ValidatedAffineConstrainedImageSet::construct(const ExactBox& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& h)
+void ValidatedAffineConstrainedImageSet::construct(const ExactBox& D, const Matrix<ExactFloat>& G, const Vector<ExactFloat>& h)
 {
     ARIADNE_ASSERT_MSG(G.row_size()==h.size() && G.row_size()>0,"G="<<G<<", h="<<h);
     this->_domain=D;
@@ -618,10 +618,10 @@ ValidatedAffineConstrainedImageSet::boundary(uint xind, uint yind) const
 
     // The set is given by (x,y)=Gs+h, where As=b and l<=s<=u
     Matrix<Float> G=Matrix<Float>::zero(2,np);
-    for(uint j=0; j!=nx; ++j) { G[0][j]=numeric_cast<RawFloatType>(xa.gradient(j))+eps(); G[1][j]=numeric_cast<RawFloatType>(ya.gradient(j))+eps(); }
+    for(uint j=0; j!=nx; ++j) { G[0][j]=numeric_cast<RawFloat>(xa.gradient(j))+eps(); G[1][j]=numeric_cast<RawFloat>(ya.gradient(j))+eps(); }
     G[0][nx+0]=xa.error().raw()+std::abs(eps()); G[1][nx+1]=ya.error().raw()+std::abs(eps());
     Vector<Float> h(2);
-    h[0]=numeric_cast<RawFloatType>(xa.value()); h[1]=numeric_cast<RawFloatType>(ya.value());
+    h[0]=numeric_cast<RawFloat>(xa.value()); h[1]=numeric_cast<RawFloat>(ya.value());
     ARIADNE_LOG(5,"G="<<G<<" h="<<h<<"\n");
 
     // Set up linear programming problem Ax=b; l<=x<=u

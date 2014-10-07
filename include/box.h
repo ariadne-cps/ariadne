@@ -46,7 +46,7 @@ class IntervalSet;
 class BoxSet;
 
 template<class X> class Point;
-typedef Point<ExactFloatType> ExactPoint;
+typedef Point<ExactFloat> ExactPoint;
 
 class ExactBox;
 class UpperBox;
@@ -55,9 +55,9 @@ class ApproximateBox;
 typedef ExactBox BoxDomainType;
 typedef UpperBox BoundingBoxType;
 
-bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloatType>& v2);
-bool contains(const Vector<ExactInterval>& v1, const Vector<ValidatedFloatType>& v2);
-bool element(const Vector<ValidatedFloatType>& v1, const Vector<ExactInterval>& v2);
+bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloat>& v2);
+bool contains(const Vector<ExactInterval>& v1, const Vector<ValidatedFloat>& v2);
+bool element(const Vector<ValidatedFloat>& v1, const Vector<ExactInterval>& v2);
 
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief An exact interval in \f$\mathbb{R}\f$.
@@ -81,7 +81,7 @@ inline ExactInterval over_approximation(const IntervalSet& rivl) {
     return ExactInterval(ExactInterval(rivl.lower()).lower(),ExactInterval(rivl.upper()).upper());
 }
 inline ExactInterval approximation(const IntervalSet& rivl) {
-    return ExactInterval(RawFloatType(ApproximateNumberType(rivl.lower())),RawFloatType(ApproximateNumberType(rivl.upper())));
+    return ExactInterval(RawFloat(ApproximateNumber(rivl.lower())),RawFloat(ApproximateNumber(rivl.upper())));
 }
 
 
@@ -161,8 +161,8 @@ class ExactBox
     }
 
     //! An approximation to the Lesbegue measure (area, volume) of the box.
-    ApproximateNumberType measure() const {
-        ApproximateNumberType meas=1;
+    ApproximateNumber measure() const {
+        ApproximateNumber meas=1;
         for(uint i=0; i!=this->size(); ++i) {
             meas *= (*this)[i].width();
         }
@@ -355,8 +355,8 @@ class UpperBox
     }
 
     //! An approximation to the Lesbegue measure (area, volume) of the box.
-    ApproximateNumberType measure() const {
-        ApproximateNumberType meas=1;
+    ApproximateNumber measure() const {
+        ApproximateNumber meas=1;
         for(uint i=0; i!=this->size(); ++i) { meas *= (*this)[i].width(); }
         return meas;
     }
@@ -500,7 +500,7 @@ inline ApproximatePoint midpoint(const UpperBox& bx) {
     return midpoint(static_cast<Vector<UpperInterval>const&>(bx));
 }
 
-inline PositiveUpperFloatType radius(const UpperBox& bx) {
+inline PositiveUpperFloat radius(const UpperBox& bx) {
     return bx.radius();
 }
 

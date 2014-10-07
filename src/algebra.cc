@@ -28,50 +28,50 @@
 
 namespace Ariadne {
 
-template GradedAlgebra<ApproximateNumberType> compose(const Series<ApproximateNumberType>&, const GradedAlgebra<ApproximateNumberType>&);
-template GradedAlgebra<ValidatedNumberType> compose(const Series<ValidatedNumberType>&, const GradedAlgebra<ValidatedNumberType>&);
-template GradedAlgebra<EffectiveNumberType> compose(const Series<EffectiveNumberType>&, const GradedAlgebra<EffectiveNumberType>&);
+template GradedAlgebra<ApproximateNumber> compose(const Series<ApproximateNumber>&, const GradedAlgebra<ApproximateNumber>&);
+template GradedAlgebra<ValidatedNumber> compose(const Series<ValidatedNumber>&, const GradedAlgebra<ValidatedNumber>&);
+template GradedAlgebra<EffectiveNumber> compose(const Series<EffectiveNumber>&, const GradedAlgebra<EffectiveNumber>&);
 
-template NormedAlgebra<ApproximateNumberType> rec(const NormedAlgebra<ApproximateNumberType>&);
-template NormedAlgebra<ValidatedNumberType> rec(const NormedAlgebra<ValidatedNumberType>&);
-template NormedAlgebra<EffectiveNumberType> rec(const NormedAlgebra<EffectiveNumberType>&);
+template NormedAlgebra<ApproximateNumber> rec(const NormedAlgebra<ApproximateNumber>&);
+template NormedAlgebra<ValidatedNumber> rec(const NormedAlgebra<ValidatedNumber>&);
+template NormedAlgebra<EffectiveNumber> rec(const NormedAlgebra<EffectiveNumber>&);
 
-template NormedAlgebra<ApproximateNumberType> sqrt(const NormedAlgebra<ApproximateNumberType>&);
-template NormedAlgebra<ValidatedNumberType> sqrt(const NormedAlgebra<ValidatedNumberType>&);
-template NormedAlgebra<EffectiveNumberType> sqrt(const NormedAlgebra<EffectiveNumberType>&);
+template NormedAlgebra<ApproximateNumber> sqrt(const NormedAlgebra<ApproximateNumber>&);
+template NormedAlgebra<ValidatedNumber> sqrt(const NormedAlgebra<ValidatedNumber>&);
+template NormedAlgebra<EffectiveNumber> sqrt(const NormedAlgebra<EffectiveNumber>&);
 
-template NormedAlgebra<ApproximateNumberType> exp(const NormedAlgebra<ApproximateNumberType>&);
-template NormedAlgebra<ValidatedNumberType> exp(const NormedAlgebra<ValidatedNumberType>&);
-template NormedAlgebra<EffectiveNumberType> exp(const NormedAlgebra<EffectiveNumberType>&);
+template NormedAlgebra<ApproximateNumber> exp(const NormedAlgebra<ApproximateNumber>&);
+template NormedAlgebra<ValidatedNumber> exp(const NormedAlgebra<ValidatedNumber>&);
+template NormedAlgebra<EffectiveNumber> exp(const NormedAlgebra<EffectiveNumber>&);
 
-template NormedAlgebra<ApproximateNumberType> log(const NormedAlgebra<ApproximateNumberType>&);
-template NormedAlgebra<ValidatedNumberType> log(const NormedAlgebra<ValidatedNumberType>&);
-template NormedAlgebra<EffectiveNumberType> log(const NormedAlgebra<EffectiveNumberType>&);
+template NormedAlgebra<ApproximateNumber> log(const NormedAlgebra<ApproximateNumber>&);
+template NormedAlgebra<ValidatedNumber> log(const NormedAlgebra<ValidatedNumber>&);
+template NormedAlgebra<EffectiveNumber> log(const NormedAlgebra<EffectiveNumber>&);
 
-template NormedAlgebra<ApproximateNumberType> sin(const NormedAlgebra<ApproximateNumberType>&);
-template NormedAlgebra<ValidatedNumberType> sin(const NormedAlgebra<ValidatedNumberType>&);
-template NormedAlgebra<EffectiveNumberType> sin(const NormedAlgebra<EffectiveNumberType>&);
+template NormedAlgebra<ApproximateNumber> sin(const NormedAlgebra<ApproximateNumber>&);
+template NormedAlgebra<ValidatedNumber> sin(const NormedAlgebra<ValidatedNumber>&);
+template NormedAlgebra<EffectiveNumber> sin(const NormedAlgebra<EffectiveNumber>&);
 
-template NormedAlgebra<ApproximateNumberType> cos(const NormedAlgebra<ApproximateNumberType>&);
-template NormedAlgebra<ValidatedNumberType> cos(const NormedAlgebra<ValidatedNumberType>&);
-template NormedAlgebra<EffectiveNumberType> cos(const NormedAlgebra<EffectiveNumberType>&);
+template NormedAlgebra<ApproximateNumber> cos(const NormedAlgebra<ApproximateNumber>&);
+template NormedAlgebra<ValidatedNumber> cos(const NormedAlgebra<ValidatedNumber>&);
+template NormedAlgebra<EffectiveNumber> cos(const NormedAlgebra<EffectiveNumber>&);
 
-template NormedAlgebra<ApproximateNumberType> tan(const NormedAlgebra<ApproximateNumberType>&);
-template NormedAlgebra<ValidatedNumberType> tan(const NormedAlgebra<ValidatedNumberType>&);
-template NormedAlgebra<EffectiveNumberType> tan(const NormedAlgebra<EffectiveNumberType>&);
+template NormedAlgebra<ApproximateNumber> tan(const NormedAlgebra<ApproximateNumber>&);
+template NormedAlgebra<ValidatedNumber> tan(const NormedAlgebra<ValidatedNumber>&);
+template NormedAlgebra<EffectiveNumber> tan(const NormedAlgebra<EffectiveNumber>&);
 
 /*
-template NormedAlgebra<ApproximateNumberType> asin(const NormedAlgebra<ApproximateNumberType>&);
-template NormedAlgebra<ValidatedNumberType> asin(const NormedAlgebra<ValidatedNumberType>&);
-template NormedAlgebra<EffectiveNumberType> asin(const NormedAlgebra<EffectiveNumberType>&);
+template NormedAlgebra<ApproximateNumber> asin(const NormedAlgebra<ApproximateNumber>&);
+template NormedAlgebra<ValidatedNumber> asin(const NormedAlgebra<ValidatedNumber>&);
+template NormedAlgebra<EffectiveNumber> asin(const NormedAlgebra<EffectiveNumber>&);
 
-template NormedAlgebra<ApproximateNumberType> acos(const NormedAlgebra<ApproximateNumberType>&);
-template NormedAlgebra<ValidatedNumberType> acos(const NormedAlgebra<ValidatedNumberType>&);
-template NormedAlgebra<EffectiveNumberType> acos(const NormedAlgebra<EffectiveNumberType>&);
+template NormedAlgebra<ApproximateNumber> acos(const NormedAlgebra<ApproximateNumber>&);
+template NormedAlgebra<ValidatedNumber> acos(const NormedAlgebra<ValidatedNumber>&);
+template NormedAlgebra<EffectiveNumber> acos(const NormedAlgebra<EffectiveNumber>&);
 
-template NormedAlgebra<ApproximateNumberType> atan(const NormedAlgebra<ApproximateNumberType>&);
-template NormedAlgebra<ValidatedNumberType> atan(const NormedAlgebra<ValidatedNumberType>&);
-template NormedAlgebra<EffectiveNumberType> atan(const NormedAlgebra<EffectiveNumberType>&);
+template NormedAlgebra<ApproximateNumber> atan(const NormedAlgebra<ApproximateNumber>&);
+template NormedAlgebra<ValidatedNumber> atan(const NormedAlgebra<ValidatedNumber>&);
+template NormedAlgebra<EffectiveNumber> atan(const NormedAlgebra<EffectiveNumber>&);
 */
 
 } // namespace Ariadne

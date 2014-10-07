@@ -57,25 +57,25 @@ class CanvasInterface;
 class Point2d;
 
 
-typedef Constraint<AffineModel<ValidatedNumberType>,ValidatedFloatType> ValidatedAffineModelConstraint;
-typedef Constraint<Affine<ValidatedNumberType>,ValidatedFloatType> ValidatedAffineConstraint;
-typedef Constraint<Affine<EffectiveNumberType>,EffectiveNumberType> EffectiveAffineConstraint;
-typedef Affine<ValidatedNumberType> ValidatedAffineFunction;
+typedef Constraint<AffineModel<ValidatedNumber>,ValidatedFloat> ValidatedAffineModelConstraint;
+typedef Constraint<Affine<ValidatedNumber>,ValidatedFloat> ValidatedAffineConstraint;
+typedef Constraint<Affine<EffectiveNumber>,EffectiveNumber> EffectiveAffineConstraint;
+typedef Affine<ValidatedNumber> ValidatedAffineFunction;
 
-EffectiveAffineConstraint operator<=(const EffectiveNumberType& l, const EffectiveAffine& am);
-EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumberType& u);
-EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumberType& u);
-EffectiveAffineConstraint operator==(const EffectiveAffine& am, const EffectiveNumberType& b);
+EffectiveAffineConstraint operator<=(const EffectiveNumber& l, const EffectiveAffine& am);
+EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumber& u);
+EffectiveAffineConstraint operator<=(const EffectiveAffine& am, const EffectiveNumber& u);
+EffectiveAffineConstraint operator==(const EffectiveAffine& am, const EffectiveNumber& b);
 
-ValidatedAffineConstraint operator<=(const ValidatedFloatType& l, const ValidatedAffineFunction& am);
-ValidatedAffineConstraint operator<=(const ValidatedAffineFunction& am, const ValidatedFloatType& u);
-ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& am, const ValidatedFloatType& u);
-ValidatedAffineConstraint operator==(const ValidatedAffineFunction& am, const ValidatedFloatType& b);
+ValidatedAffineConstraint operator<=(const ValidatedFloat& l, const ValidatedAffineFunction& am);
+ValidatedAffineConstraint operator<=(const ValidatedAffineFunction& am, const ValidatedFloat& u);
+ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& am, const ValidatedFloat& u);
+ValidatedAffineConstraint operator==(const ValidatedAffineFunction& am, const ValidatedFloat& b);
 
-ValidatedAffineModelConstraint operator<=(const ValidatedFloatType& l, const ValidatedAffineModel& am);
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& am, const ValidatedFloatType& u);
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& am, const ValidatedFloatType& u);
-ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& am, const ValidatedFloatType& b);
+ValidatedAffineModelConstraint operator<=(const ValidatedFloat& l, const ValidatedAffineModel& am);
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& am, const ValidatedFloat& u);
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& am, const ValidatedFloat& u);
+ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& am, const ValidatedFloat& b);
 
 //! \brief A constrained image set defined by affine functions.
 //!  Defines a set of the form \f$S=\{ f(x) \mid x\in D \mid g(x)\leq 0 \wedge h(x)=0 \}\f$
@@ -93,9 +93,9 @@ class ValidatedAffineConstrainedImageSet
     List<ValidatedAffineModelConstraint> _constraint_models;
   public:
     //!\brief The set \f$\{ Gy+c \mid y\in D\}\f$.
-    ValidatedAffineConstrainedImageSet(const ExactBox& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& c);
+    ValidatedAffineConstrainedImageSet(const ExactBox& D, const Matrix<ExactFloat>& G, const Vector<ExactFloat>& c);
     //!\brief The set \f$\{ Gy+c \mid ||y||_\infty\leq 1\}\f$. \deprecated
-    ValidatedAffineConstrainedImageSet(const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& c);
+    ValidatedAffineConstrainedImageSet(const Matrix<ExactFloat>& G, const Vector<ExactFloat>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \}\f$.
     ValidatedAffineConstrainedImageSet(const ExactBox& D, const Vector<ValidatedAffine>& f);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \mid c(s) \}\f$.
@@ -132,7 +132,7 @@ class ValidatedAffineConstrainedImageSet
     virtual std::ostream& write(std::ostream& os) const;
 
   private:
-    void construct(const ExactBox& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& c);
+    void construct(const ExactBox& D, const Matrix<ExactFloat>& G, const Vector<ExactFloat>& c);
     void construct_linear_program(LinearProgram<Float>& lp) const;
     static void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth);
     static void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth);

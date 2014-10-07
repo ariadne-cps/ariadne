@@ -121,7 +121,7 @@ C1TaylorSeries& operator+=(C1TaylorSeries& f, ExactInterval ic) {
 }
 
 #elif defined ARIADNE_BOUNDS_INTERVAL_SUM
-C1TaylorSeries& operator+=(C1TaylorSeries& f, ValidatedNumberType ic) {
+C1TaylorSeries& operator+=(C1TaylorSeries& f, ValidatedNumber ic) {
     set_rounding_upward();
     Float& fv=f._coefficients[0];
     set_rounding_upward();
@@ -136,7 +136,7 @@ C1TaylorSeries& operator+=(C1TaylorSeries& f, ValidatedNumberType ic) {
 }
 #endif
 
-C1TaylorSeries& operator*=(C1TaylorSeries& f, ValidatedNumberType ic) {
+C1TaylorSeries& operator*=(C1TaylorSeries& f, ValidatedNumber ic) {
     Float& fze=f._zero_error;
     Float& fue=f._uniform_error;
     Float& fde=f._derivative_error;
@@ -149,7 +149,7 @@ C1TaylorSeries& operator*=(C1TaylorSeries& f, ValidatedNumberType ic) {
     fze*=ac;
     fue*=ac;
     fde*=ac;
-    std::cerr<<"WARNING: operator*=(C1TaylorSeries&,ValidatedNumberType): Mistake in errors\n";
+    std::cerr<<"WARNING: operator*=(C1TaylorSeries&,ValidatedNumber): Mistake in errors\n";
     {
         Float& fv=f._coefficients[0];
         VOLATILE Float fvu=fv*c;
@@ -303,7 +303,7 @@ C1TaylorSeries compose(C1TaylorSeries f, C1TaylorSeries g) {
     while (i!=0) {
         i=i-i;
         r=r*g;
-        r+=ValidatedNumberType(f._coefficients[i]);
+        r+=ValidatedNumber(f._coefficients[i]);
     }
 
     set_rounding_upward();

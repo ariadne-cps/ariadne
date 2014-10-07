@@ -215,9 +215,9 @@ class HybridEnclosure
 
     //! \brief Set the maximum time of evolution to \a \f$t_{\max}\f$. \deprecated
     //! Corresponds to introducting the constraint \f$\tau(s)\leq t_{\max}\f$.
-    void set_maximum_time(DiscreteEvent event, RawFloatType tmax);
+    void set_maximum_time(DiscreteEvent event, RawFloat tmax);
     //! \brief Set the current time-step to \f$h\f$. \deprecated
-    void set_step_time(ExactFloatType h);
+    void set_step_time(ExactFloat h);
     //! \brief \deprecated
     void new_time_step_bound(DiscreteEvent e, ValidatedScalarFunction tau);
 
@@ -284,9 +284,9 @@ class HybridEnclosure
   private:
   public:
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] .
-    void _apply_flow(ValidatedVectorFunction phi, ExactFloatType step);
+    void _apply_flow(ValidatedVectorFunction phi, ExactFloat step);
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(xi(s)) .
-    void _apply_flow(ValidatedVectorFunction phi, ExactFloatType step, ValidatedScalarFunction elps);
+    void _apply_flow(ValidatedVectorFunction phi, ExactFloat step, ValidatedScalarFunction elps);
     // Compute the flow evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
     void _apply_flow_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     void _check() const; // Check that set is well-formed.

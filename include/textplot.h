@@ -44,7 +44,7 @@ namespace Ariadne {
 using namespace std;
 
 template<class X> class Point;
-typedef Point<ExactNumberType> ExactPoint;
+typedef Point<ExactNumber> ExactPoint;
 
 class ExactBox;
 class InterpolatedCurve;

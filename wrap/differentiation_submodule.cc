@@ -308,25 +308,25 @@ export_differential_vector(const char* name)
     def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
 }
 
-template void export_differential< Differential<ApproximateFloatType> >(const char*);
-template void export_differential< Differential<ValidatedFloatType> >(const char*);
+template void export_differential< Differential<ApproximateFloat> >(const char*);
+template void export_differential< Differential<ValidatedFloat> >(const char*);
 //template void export_differential< Differential<ValidatedTaylorModel> >(const char*);
 
-template void export_differential_vector< Differential<ApproximateFloatType> >(const char*);
-template void export_differential_vector< Differential<ValidatedFloatType> >(const char*);
+template void export_differential_vector< Differential<ApproximateFloat> >(const char*);
+template void export_differential_vector< Differential<ValidatedFloat> >(const char*);
 //template void export_differential_vector< Differential<ValidatedTaylorModel> >(const char*);
 
 void differentiation_submodule()
 {
-    to_python_dict < Expansion<ApproximateFloatType> >();
-    to_python_dict < Expansion<ValidatedFloatType> >();
+    to_python_dict < Expansion<ApproximateFloat> >();
+    to_python_dict < Expansion<ValidatedFloat> >();
 
-    export_differential< Differential<ApproximateFloatType> >("ApproximateDifferential");
-    export_differential< Differential<ValidatedFloatType> >("ValidatedDifferential");
+    export_differential< Differential<ApproximateFloat> >("ApproximateDifferential");
+    export_differential< Differential<ValidatedFloat> >("ValidatedDifferential");
     //export_differential< Differential<ValidatedTaylorModel> >("TaylorModelDifferential");
 
-    export_differential_vector< Differential<ApproximateFloatType> >("ApproximateDifferentialVector");
-    export_differential_vector< Differential<ValidatedFloatType> >("ValidatedDifferentialVector");
+    export_differential_vector< Differential<ApproximateFloat> >("ApproximateDifferentialVector");
+    export_differential_vector< Differential<ValidatedFloat> >("ValidatedDifferentialVector");
     //export_differential_vector< Differential<ValidatedTaylorModel> >("TaylorModelDifferentialVector");
 }
 

@@ -47,27 +47,30 @@
 
 namespace Ariadne {
 
-template<class R, class A> inline R numeric_cast(const A& a);
-template<> inline double numeric_cast(const Real& a) { return a.get_d(); }
-template<> inline double numeric_cast(const ExactFloat& a) { return a.raw().get_d(); }
-template<> inline double numeric_cast(const ApproximateFloat& a) { return a.raw().get_d(); }
-template<> inline Real numeric_cast(const Float& a) { return Real(ExactFloat(a)); }
-template<> inline Real numeric_cast(const UpperInterval& a) { assert(false); }
-template<> inline Real numeric_cast(const ValidatedFloat& a) { return Real(make_exact(ApproximateFloat(a))); }
 
 //! \ingroup NumericModule
 //! \brief Cast one %Ariadne numerical type or builtin numerical type to another.
 template<class R, class A> inline R numeric_cast(const A& a) { return R(a); }
 template<> inline int numeric_cast(const Float& a) { return int(a.get_d()); }
 template<> inline double numeric_cast(const Float& a) { return a.get_d(); }
-template<> inline double numeric_cast(const ExactInterval& a) { return a.get_d(); }
-template<> inline double numeric_cast(const UpperInterval& a) { return ValidatedFloat(a).get_d(); }
-template<> inline UpperInterval numeric_cast(const Float& a) { return UpperInterval(a); }
-
+template<> inline double numeric_cast(const Real& a) { return a.get_d(); }
+template<> inline double numeric_cast(const ExactFloat& a) { return a.get_d(); }
+template<> inline double numeric_cast(const ValidatedFloat& a) { return a.get_d(); }
+template<> inline double numeric_cast(const ApproximateFloat& a) { return a.get_d(); }
 template<> inline float numeric_cast(const double& a) { return a; }
 template<> inline float numeric_cast(const Float& a) { return a.get_d(); }
-template<> inline float numeric_cast(const UpperInterval& a) { return ValidatedFloat(a).get_d(); }
 template<> inline float numeric_cast(const Real& a) { return a.get_d(); }
+
+template<> inline Real numeric_cast(const Float& a) { return Real(ExactFloat(a)); }
+template<> inline Real numeric_cast(const ExactFloat& a) { return Real(a); }
+template<> inline Real numeric_cast(const ValidatedFloat& a) { return Real(make_exact(ApproximateFloat(a))); }
+
+template<> inline UpperInterval numeric_cast(const Float& a) { return UpperInterval(a); }
+template<> inline Float numeric_cast(const UpperInterval& a) { return midpoint(a).raw(); }
+
+template<class R, class A> inline R approx_cast(const A& a);
+template<> inline double approx_cast(const Float& a) { return a.get_d(); }
+template<> inline double approx_cast(const ExactFloat& a) { return a.get_d(); }
 
 //! \ingroup NumericModule
 //! \related Float

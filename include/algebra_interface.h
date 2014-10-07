@@ -98,9 +98,9 @@ template<class X> class NormedAlgebraInterface
     virtual NormedAlgebraInterface<X>* _create_ball(ErrorType r) const = 0;
 
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e.
-    virtual RawFloatType tolerance() const = 0;
+    virtual RawFloat tolerance() const = 0;
     //! \brief A value \c c such that \c |a-c1| is approximately minimised.
-    virtual ExactFloatType average() const = 0;
+    virtual ExactFloat average() const = 0;
     //! \brief A value \c c such that \c |a-c1| is approximately minimised.
     virtual ErrorType radius() const = 0;
     //! \brief The interval \c [c-r,c+r] where \c |a-c1|<=r.

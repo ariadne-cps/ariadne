@@ -35,8 +35,8 @@
 
 namespace Ariadne {
 
-inline ExactInterval make_interval(ApproximateNumberType x) { return ExactInterval(x.raw()); }
-inline ExactInterval make_interval(ExactNumberType x) { return ExactInterval(x.raw()); }
+inline ExactInterval make_interval(ApproximateNumber x) { return ExactInterval(x.raw()); }
+inline ExactInterval make_interval(ExactNumber x) { return ExactInterval(x.raw()); }
 
 template<class X> Point<X>::Point(std::initializer_list<double> lst)
     : Vector<X>(Vector<Float>(Vector<double>(lst)))
@@ -52,7 +52,7 @@ template<class X> Point<X>* Point<X>::clone() const {
     return new Point<X>(*this);
 }
 
-UpperInterval operator+(ApproximateNumberType x, UpperInterval y) { return UpperInterval(x.raw())+y; }
+UpperInterval operator+(ApproximateNumber x, UpperInterval y) { return UpperInterval(x.raw())+y; }
 
 template<class X> ExactBox Point<X>::bounding_box() const {
     ExactBox r(this->dimension());
@@ -67,8 +67,8 @@ template<class X> void Point<X>::draw(CanvasInterface& canv, const Projection2d&
     canv.stroke();
 }
 
-template class Point<ExactNumberType>;
-template class Point<ApproximateNumberType>;
+template class Point<ExactNumber>;
+template class Point<ApproximateNumber>;
 
 
 ExactPoint make_point(const std::string& str)
@@ -78,7 +78,7 @@ ExactPoint make_point(const std::string& str)
     read_sequence(ss,lst,'(',')',',');
     Vector<Float> vec(lst);
 
-    return ExactPoint(Vector<ExactFloatType>(lst));
+    return ExactPoint(Vector<ExactFloat>(lst));
 }
 
 } //namespace Ariadne

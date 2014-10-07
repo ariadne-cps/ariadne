@@ -80,7 +80,7 @@ class HybridGrid
 inline Grid HybridGrid::operator[](const DiscreteLocation& loc) const
 {
     RealSpace continuous_space = this->_space[loc];
-    Vector<RawFloatType> lengths(continuous_space.size());
+    Vector<RawFloat> lengths(continuous_space.size());
     for(uint i=0; i!=continuous_space.size(); ++i) {
         lengths[i] = static_cast<RawFloat>(this->_scaling.scaling(loc,continuous_space.variable(i)));
     }

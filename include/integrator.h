@@ -49,8 +49,8 @@ template<class X> class Vector;
 template<class X> class Differential;
 template<class X> class Procedure;
 template<class X> class Polynomial;
-typedef Differential<ValidatedNumberType> ValidatedDifferential;
-typedef Vector< Procedure<ValidatedNumberType> > ValidatedVectorProcedure;
+typedef Differential<ValidatedNumber> ValidatedDifferential;
+typedef Vector< Procedure<ValidatedNumber> > ValidatedVectorProcedure;
 typedef Vector< Differential<ExactInterval> > ExactIntervalDifferentialVector;
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
@@ -104,15 +104,15 @@ class IntegratorBase
     void set_function_factory(const ValidatedFunctionModelFactoryInterface& factory);
 
 
-    virtual Pair<ExactFloatType,UpperBox>
+    virtual Pair<ExactFloat,UpperBox>
     flow_bounds(const ValidatedVectorFunction& vector_field,
                 const ExactBox& state_domain,
-                const RawFloatType& suggested_time_step) const;
+                const RawFloat& suggested_time_step) const;
 
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBox& state_domain,
-              RawFloatType& suggested_time_step) const;
+              RawFloat& suggested_time_step) const;
 
     virtual ValidatedVectorFunctionModel
     flow_to(const ValidatedVectorFunction& vector_field,
@@ -135,7 +135,7 @@ class IntegratorBase
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBox& state_domain,
-              const ExactFloatType& suggested_time_step,
+              const ExactFloat& suggested_time_step,
               const UpperBox& bounding_box) const = 0;
 
   public:
@@ -179,7 +179,7 @@ class TaylorPicardIntegrator
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBox& state_domain,
-              const ExactFloatType& time_step,
+              const ExactFloat& time_step,
               const UpperBox& bounding_box) const;
 
     using IntegratorBase::flow_step;
@@ -234,15 +234,15 @@ class TaylorSeriesIntegrator
     virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
     virtual void write(std::ostream& os) const;
 
-    virtual Pair<ExactFloatType,UpperBox>
+    virtual Pair<ExactFloat,UpperBox>
     flow_bounds(const ValidatedVectorFunction& vector_field,
                 const ExactBox& state_domain,
-                const RawFloatType& suggested_time_step) const;
+                const RawFloat& suggested_time_step) const;
 
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBox& state_domain,
-              const ExactFloatType& time_step,
+              const ExactFloat& time_step,
               const UpperBox& bounding_box) const;
 
     using IntegratorBase::flow_step;
@@ -272,7 +272,7 @@ class AffineIntegrator
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
               const ExactBox& state_domain,
-              const ExactFloatType& time_step,
+              const ExactFloat& time_step,
               const UpperBox& bounding_box) const;
 
     using IntegratorBase::flow_step;
@@ -280,7 +280,7 @@ class AffineIntegrator
     //! \brief Compute the derivative of the flow of f at time zero within \a dom.
     Vector<ValidatedDifferential>
     flow_derivative(const ValidatedVectorFunction& f,
-                    const Vector<ValidatedNumberType>& dom) const;
+                    const Vector<ValidatedNumber>& dom) const;
 };
 
 

@@ -68,30 +68,30 @@ void optimal_constraint_adjoin_outer_approximation(PavingInterface& paving, cons
 namespace {
 
 ValidatedProcedure make_procedure(const ValidatedScalarFunctionInterface& f) {
-    Formula<ValidatedNumberType> e=f.evaluate(Formula<ValidatedNumberType>::identity(f.argument_size()));
-    return Procedure<ValidatedNumberType>(e);
+    Formula<ValidatedNumber> e=f.evaluate(Formula<ValidatedNumber>::identity(f.argument_size()));
+    return Procedure<ValidatedNumber>(e);
 }
 
 UpperInterval emulrng(const ExactFloatVector& x, const ExactFloatVector& z) {
     return emulrng(reinterpret_cast<Vector<Float>const&>(x),reinterpret_cast<Vector<Float>const&>(z));
 }
 
-UpperInterval emulrng(const FloatVector& x, const FloatVector& z) {
+UpperInterval emulrng(const RawFloatVector& x, const RawFloatVector& z) {
     UpperInterval r=mul_ivl(x[0],z[0]);
     for(uint i=0; i!=x.size(); ++i) { r=hull(mul_ivl(x[i],z[i]),r); }
     return r;
 }
 
-UpperFloatType total_widths(const UpperBox& bx) {
-    UpperFloatType res=0.0;
+UpperFloat total_widths(const UpperBox& bx) {
+    UpperFloat res=0.0;
     for(uint i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width());
     }
     return res;
 }
 
-UpperFloatType average_width(const UpperBox& bx) {
-    UpperFloatType res=0.0;
+UpperFloat average_width(const UpperBox& bx) {
+    UpperFloat res=0.0;
     for(uint i=0; i!=bx.size(); ++i) {
         if(bx[i].lower()>bx[i].upper()) { return -inf; }
         res+=bx[i].width();
@@ -99,16 +99,16 @@ UpperFloatType average_width(const UpperBox& bx) {
     return res/bx.size();
 }
 
-UpperFloatType maximum_scaled_width(const UpperBox& bx, const Vector<ExactFloat>& sf) {
-    UpperFloatType res=0.0;
+UpperFloat maximum_scaled_width(const UpperBox& bx, const Vector<ExactFloat>& sf) {
+    UpperFloat res=0.0;
     for(uint i=0; i!=bx.size(); ++i) {
         res=max(bx[i].width()/sf[i],res);
     }
     return res;
 }
 
-UpperFloatType average_scaled_width(const UpperBox& bx, const Vector<ExactFloat>& sf) {
-    UpperFloatType res=0.0;
+UpperFloat average_scaled_width(const UpperBox& bx, const Vector<ExactFloat>& sf) {
+    UpperFloat res=0.0;
     for(uint i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width()/sf[i]);
     }
@@ -151,7 +151,7 @@ namespace {
 using Ariadne::verbosity;
 
 void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, const ExactBox& subdomain, const ValidatedVectorFunction& function,
-                                                      const List<ValidatedConstraint>& constraints, const int depth, const FloatVector& errors)
+                                                      const List<ValidatedConstraint>& constraints, const int depth, const RawFloatVector& errors)
 {
     // How small an over-approximating box needs to be relative to the cell size
     static const double RELATIVE_SMALLNESS=0.5;
@@ -196,7 +196,7 @@ void procedure_constraint_adjoin_outer_approximation_recursion(
     const uint ng=g.result_size();
 
     const ExactBox& cell_box=cell.box();
-    const FloatVector scalings=paving.grid().lengths();
+    const RawFloatVector scalings=paving.grid().lengths();
 
     UpperBox bbox = apply(f,domain);
 
@@ -262,7 +262,7 @@ void procedure_constraint_adjoin_outer_approximation_recursion(
     ARIADNE_LOG(6,"new_domain="<<new_domain);
 
 
-    domwdth = average_scaled_width(new_domain,FloatVector(new_domain.size(),1.0)).raw();
+    domwdth = average_scaled_width(new_domain,RawFloatVector(new_domain.size(),1.0)).raw();
     bbox=apply(f,new_domain);
     bbxwdth=average_scaled_width(bbox,paving.grid().lengths()).raw();
     if(bbox.disjoint(cell_box) || disjoint(apply(g,new_domain),codomain)) {
@@ -478,7 +478,7 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     ConstraintSolver solver;
     NonlinearInteriorPointOptimiser optimiser;
 
-    ExactFloatType t;
+    ExactFloat t;
     ExactPoint z(x.size());
 
     ApproximateFloatVector& ax=reinterpret_cast<ApproximateFloatVector&>(x);
@@ -578,7 +578,7 @@ void subdivision_adjoin_outer_approximation(PavingInterface& paving,
         constraints.append(ValidatedConstraint(constraint_bounds[i].lower(),constraint_functions[i],constraint_bounds[i].upper()));
     }
 
-    FloatVector errors(paving.dimension());
+    RawFloatVector errors(paving.dimension());
     for(uint i=0; i!=errors.size(); ++i) {
         errors[i]=paving.grid().lengths()[i]/(1<<depth);
     }
@@ -608,7 +608,7 @@ constraint_adjoin_outer_approximation(PavingInterface& p, const ExactBox& d, con
 
     ExactPoint y=midpoint(d);
     const uint l=(d.size()+f.result_size()+g.result_size())*2;
-    ExactPoint x(l); for(uint k=0; k!=l; ++k) { x[k]=ExactFloatType(1.0/l); }
+    ExactPoint x(l); for(uint k=0; k!=l; ++k) { x[k]=ExactFloat(1.0/l); }
 
     ::hotstarted_constraint_adjoin_outer_approximation_recursion(p,d,f,g,rc,b,x,y,e);
 }
@@ -639,7 +639,7 @@ void optimal_constraint_adjoin_outer_approximation(PavingInterface& p, const Exa
 
     ExactPoint y=midpoint(d);
     const uint l=(d.size()+f.result_size()+g.result_size())*2;
-    ExactPoint x(l); for(uint k=0; k!=l; ++k) { x[k]=ExactFloatType(1.0/l); }
+    ExactPoint x(l); for(uint k=0; k!=l; ++k) { x[k]=ExactFloat(1.0/l); }
 
     VectorTaylorFunction fg;
     const VectorTaylorFunction* tfptr;

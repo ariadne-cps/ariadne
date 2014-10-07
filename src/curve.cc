@@ -83,18 +83,18 @@ Curve::smoothness() const
 Curve::PointType
 Curve::value(const ParameterType& s) const
 {
-    Vector<ApproximateFloatType> v(1,ApproximateFloatType(s));
-    Vector<ApproximateFloatType> fv=this->_function.evaluate(v);
+    Vector<ApproximateFloat> v(1,ApproximateFloat(s));
+    Vector<ApproximateFloat> fv=this->_function.evaluate(v);
     return PointType(fv);
 }
 
 
-Vector< Float >
-Curve::tangent(const Float& s) const
+Curve::TangentVectorType
+Curve::tangent(const ParameterType& s) const
 {
-    Vector<ExactFloatType> v(1,ExactFloatType(s));
+    TangentVectorType v(1,s);
     auto col=column(this->_function.jacobian(v),0);
-    return reinterpret_cast<Vector<Float>const&>(col);
+    return col;
 }
 
 
@@ -120,18 +120,18 @@ InterpolatedCurve::insert(const ParameterType& s, const PointType& pt) {
 }
 
 void
-InterpolatedCurve::insert(const ExactFloatType& s, const ExactPointType& pt) {
+InterpolatedCurve::insert(const RawFloat& s, const Vector<RawFloat>& pt) {
     if(!this->_points.empty()) { ARIADNE_ASSERT(pt.size()==this->dimension()); }
-    this->_points.insert(std::pair< ParameterType, PointType >(reinterpret_cast<ParameterType const&>(s),reinterpret_cast<PointType const&>(pt)));
+    this->insert(ParameterType(s),PointType(reinterpret_cast<Vector<ExactFloat>const&>(pt)));
 }
 
-ExactBox
+UpperBox
 InterpolatedCurve::bounding_box() const
 {
-    ExactPoint pt=this->_points.begin()->second;
+    ExactPoint pt=make_exact(this->_points.begin()->second);
     ExactBox bx(pt);
     for(const_iterator iter=this->_points.begin(); iter!=this->_points.end(); ++iter) {
-        pt=iter->second;
+        pt=make_exact(iter->second);
         bx=hull(bx,pt);
     }
     return bx;
@@ -142,7 +142,7 @@ InterpolatedCurve::draw(CanvasInterface& c, const Projection2d& p) const
 {
     uint xi=p.x_coordinate(); uint yi=p.y_coordinate();
     const_iterator iter=this->begin();
-    ExactPoint pt=join(iter->second,iter->first);
+    ApproximatePoint pt=join(iter->second,iter->first);
     c.move_to(pt[xi],pt[yi]);
     while(iter!=this->end()) {
         ++iter;

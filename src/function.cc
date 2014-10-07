@@ -63,22 +63,22 @@ EffectiveScalarFunction make_function(const Expression<Real>& expr, const List< 
 
 //------------------------ FunctionInterface forwarded functions  -----------------------------------//
 
-Vector<ApproximateNumberType> ScalarFunctionInterface<ApproximateTag>::gradient(const Vector<ApproximateNumberType>& x) const {
-    return this->evaluate(Differential<ApproximateNumberType>::variables(1u,x)).gradient(); }
-Vector<ValidatedNumberType> ScalarFunctionInterface<ValidatedTag>::gradient(const Vector<ValidatedNumberType>& x) const {
-    return this->evaluate(Differential<ValidatedNumberType>::variables(1u,x)).gradient(); }
-Differential<ApproximateNumberType> ScalarFunctionInterface<ApproximateTag>::differential(const Vector<ApproximateNumberType>& x, Nat d) const {
-    return this->evaluate(Differential<ApproximateNumberType>::variables(d,x)); }
-Differential<ValidatedNumberType> ScalarFunctionInterface<ValidatedTag>::differential(const Vector<ValidatedNumberType>& x, Nat d) const {
-    return this->evaluate(Differential<ValidatedNumberType>::variables(d,x)); }
-Matrix<ApproximateNumberType> VectorFunctionInterface<ApproximateTag>::jacobian(const Vector<ApproximateNumberType>& x) const {
-    return this->evaluate(Differential<ApproximateNumberType>::variables(1u,x)).jacobian(); }
-Matrix<ValidatedNumberType> VectorFunctionInterface<ValidatedTag>::jacobian(const Vector<ValidatedNumberType>& x) const {
-    return this->evaluate(Differential<ValidatedNumberType>::variables(1u,x)).jacobian(); }
-Vector< Differential<ApproximateNumberType> > VectorFunctionInterface<ApproximateTag>::differentials(const Vector<ApproximateNumberType>& x, Nat d) const {
-    return this->evaluate(Differential<ApproximateNumberType>::variables(d,x)); }
-Vector< Differential<ValidatedNumberType> > VectorFunctionInterface<ValidatedTag>::differentials(const Vector<ValidatedNumberType>& x, Nat d) const {
-    return this->evaluate(Differential<ValidatedNumberType>::variables(d,x)); }
+Vector<ApproximateNumber> ScalarFunctionInterface<ApproximateTag>::gradient(const Vector<ApproximateNumber>& x) const {
+    return this->evaluate(Differential<ApproximateNumber>::variables(1u,x)).gradient(); }
+Vector<ValidatedNumber> ScalarFunctionInterface<ValidatedTag>::gradient(const Vector<ValidatedNumber>& x) const {
+    return this->evaluate(Differential<ValidatedNumber>::variables(1u,x)).gradient(); }
+Differential<ApproximateNumber> ScalarFunctionInterface<ApproximateTag>::differential(const Vector<ApproximateNumber>& x, Nat d) const {
+    return this->evaluate(Differential<ApproximateNumber>::variables(d,x)); }
+Differential<ValidatedNumber> ScalarFunctionInterface<ValidatedTag>::differential(const Vector<ValidatedNumber>& x, Nat d) const {
+    return this->evaluate(Differential<ValidatedNumber>::variables(d,x)); }
+Matrix<ApproximateNumber> VectorFunctionInterface<ApproximateTag>::jacobian(const Vector<ApproximateNumber>& x) const {
+    return this->evaluate(Differential<ApproximateNumber>::variables(1u,x)).jacobian(); }
+Matrix<ValidatedNumber> VectorFunctionInterface<ValidatedTag>::jacobian(const Vector<ValidatedNumber>& x) const {
+    return this->evaluate(Differential<ValidatedNumber>::variables(1u,x)).jacobian(); }
+Vector< Differential<ApproximateNumber> > VectorFunctionInterface<ApproximateTag>::differentials(const Vector<ApproximateNumber>& x, Nat d) const {
+    return this->evaluate(Differential<ApproximateNumber>::variables(d,x)); }
+Vector< Differential<ValidatedNumber> > VectorFunctionInterface<ValidatedTag>::differentials(const Vector<ValidatedNumber>& x, Nat d) const {
+    return this->evaluate(Differential<ValidatedNumber>::variables(d,x)); }
 
 //------------------------ Vector of Scalar functions  -----------------------------------//
 
@@ -242,9 +242,9 @@ template<class X> List< ScalarFunction<X> > ScalarFunction<X>::coordinates(Nat n
     return lsf;
 }
 
-template class ScalarFunction<ApproximateNumberType>;
-template class ScalarFunction<ValidatedNumberType>;
-template class ScalarFunction<EffectiveNumberType>;
+template class ScalarFunction<ApproximateNumber>;
+template class ScalarFunction<ValidatedNumber>;
+template class ScalarFunction<EffectiveNumber>;
 
 
 
@@ -507,9 +507,9 @@ template<class X> Void VectorFunction<X>::set(Nat i, ScalarFunction<X> sf)
     }
 }
 
-template class VectorFunction<ApproximateNumberType>;
-template class VectorFunction<ValidatedNumberType>;
-template class VectorFunction<EffectiveNumberType>;
+template class VectorFunction<ApproximateNumber>;
+template class VectorFunction<ValidatedNumber>;
+template class VectorFunction<EffectiveNumber>;
 
 
 
@@ -649,7 +649,7 @@ EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const E
 
 
 
-//------------------------ ValidatedNumberType function operators -------------------------------//
+//------------------------ ValidatedNumber function operators -------------------------------//
 
 ValidatedScalarFunction operator-(ValidatedScalarFunction const& f1, ValidatedScalarFunction const& f2) {
     std::shared_ptr<ValidatedScalarFunctionModelInterface const> f1p=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f1.managed_pointer());
@@ -657,21 +657,21 @@ ValidatedScalarFunction operator-(ValidatedScalarFunction const& f1, ValidatedSc
     if(f1p && f2p) {
         return ValidatedScalarFunctionModel(*f1p) - ValidatedScalarFunctionModel(*f2p);
     }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedNumberType>(SUB,f1,f2));
+    return ValidatedScalarFunction(new BinaryFunction<ValidatedNumber>(SUB,f1,f2));
 }
 
-ValidatedScalarFunction operator-(ValidatedScalarFunction const& f, ValidatedNumberType const& c) {
+ValidatedScalarFunction operator-(ValidatedScalarFunction const& f, ValidatedNumber const& c) {
     std::shared_ptr<ValidatedScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f.managed_pointer());
     if(fp) { return ValidatedScalarFunctionModel(*fp) - c; }
     std::shared_ptr<EffectiveScalarFunctionInterface const> rfp=std::dynamic_pointer_cast<EffectiveScalarFunctionInterface const>(f.managed_pointer());
     if(rfp && c.lower().value()==c.upper().value()) { return EffectiveScalarFunction(*rfp) - ExactFloat(c.lower().value()); }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedNumberType>(SUB,f,ValidatedScalarFunction::constant(f.argument_size(),c)));
+    return ValidatedScalarFunction(new BinaryFunction<ValidatedNumber>(SUB,f,ValidatedScalarFunction::constant(f.argument_size(),c)));
 }
 
-ValidatedScalarFunction operator-(ValidatedNumberType const& c, ValidatedScalarFunction const& f) {
+ValidatedScalarFunction operator-(ValidatedNumber const& c, ValidatedScalarFunction const& f) {
     std::shared_ptr<ValidatedScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f.managed_pointer());
     if(fp) { return c - ValidatedScalarFunctionModel(*fp); }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedNumberType>(SUB,ValidatedScalarFunction::constant(f.argument_size(),c),f));
+    return ValidatedScalarFunction(new BinaryFunction<ValidatedNumber>(SUB,ValidatedScalarFunction::constant(f.argument_size(),c),f));
 }
 
 ValidatedVectorFunction operator-(ValidatedVectorFunction const& f1, ValidatedVectorFunction const& f2) {
@@ -684,7 +684,7 @@ ValidatedVectorFunction operator-(ValidatedVectorFunction const& f1, ValidatedVe
     } else if(f2p) {
         return f1.reference() - ValidatedVectorFunctionModel(*f2p);
     } else {
-        VectorOfScalarFunction<ValidatedNumberType> r(f1.result_size(),ValidatedScalarFunction(f1.argument_size()));
+        VectorOfScalarFunction<ValidatedNumber> r(f1.result_size(),ValidatedScalarFunction(f1.argument_size()));
         for(uint i=0; i!=r.result_size(); ++i) {
             r[i]=f1[i]-f2[i];
         }
@@ -706,7 +706,7 @@ ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedV
     if(dynamic_cast<VectorTaylorFunction const*>(f1.raw_pointer()) && dynamic_cast<VectorTaylorFunction const*>(f2.raw_pointer())) {
         return join(dynamic_cast<VectorTaylorFunction const&>(*f1.raw_pointer()),dynamic_cast<VectorTaylorFunction const&>(*f2.raw_pointer()));
     }
-    VectorOfScalarFunction<ValidatedNumberType> r(f1.result_size()+f2.result_size(),f1.argument_size());
+    VectorOfScalarFunction<ValidatedNumber> r(f1.result_size()+f2.result_size(),f1.argument_size());
     for(uint i=0; i!=f1.result_size(); ++i) { r[i]=f1[i]; }
     for(uint i=0; i!=f2.result_size(); ++i) { r[i+f1.result_size()]=f2[i]; }
     return r;

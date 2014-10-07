@@ -39,7 +39,7 @@ typedef unsigned int uint;
 
 namespace Ariadne {
 
-bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloatType>& v2);
+bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloat>& v2);
 
 //
 // Helper functions needed to extract the set of vertices from a box
@@ -171,8 +171,6 @@ ExactBox narrow(const ExactBox& bx) {
     }
     return result;
 }
-
-template<> inline double approx_cast(const ExactFloat& a) { return a.raw().get_d(); }
 
 void ExactBox::draw(CanvasInterface& c, const Projection2d& p) const
 {

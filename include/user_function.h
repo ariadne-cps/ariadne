@@ -64,7 +64,7 @@ struct ScalarFunctionData
 //! Given a C++ class T with a (static) template method
 //!   <code>template<class R, class A, class P> compute(R& r, const A& a, const P& p);</code>
 //! the type <code>ScalarUserFunction<T></code> is an Ariadne function defined by \f$r=f(a)\f$.
-//! The constructor for ScalarUserFunction<T> takes a Vector<ApproximateNumberType> or Vector<ValidatedNumberType> argument which is used for \a p.
+//! The constructor for ScalarUserFunction<T> takes a Vector<ApproximateNumber> or Vector<ValidatedNumber> argument which is used for \a p.
 //!
 //! The class T must also define meta-data <c>argument_size(), parameter_size()
 //! and smoothness()</c>. These are most easily defined by inheriting from the
@@ -76,13 +76,13 @@ template<class T> class ScalarUserFunction
 {
   private:
     class Representation
-        : public ScalarFunctionMixin< Representation, EffectiveNumberType >
+        : public ScalarFunctionMixin< Representation, EffectiveNumber >
     {
       private:
-        Vector<EffectiveNumberType> _p;
+        Vector<EffectiveNumber> _p;
       public:
         typedef uint SizeType;
-        Representation(const Vector<EffectiveNumberType>& p) : _p(p) { }
+        Representation(const Vector<EffectiveNumber>& p) : _p(p) { }
 
         template<class R, class A> inline void _compute(R& r, const A& a) const { T::compute(r,a,_p); }
 
@@ -94,10 +94,10 @@ template<class T> class ScalarUserFunction
 
         virtual EffectiveScalarFunction derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
 
-        virtual Vector<ApproximateNumberType> gradient(const Vector<ApproximateNumberType>& x) const {
-            return this->evaluate(Differential<ApproximateNumberType>::variables(1u,x)).gradient(); }
-        virtual Vector<ValidatedNumberType> gradient(const Vector<ValidatedNumberType>& x) const {
-            return this->evaluate(Differential<ValidatedNumberType>::variables(1u,x)).gradient(); }
+        virtual Vector<ApproximateNumber> gradient(const Vector<ApproximateNumber>& x) const {
+            return this->evaluate(Differential<ApproximateNumber>::variables(1u,x)).gradient(); }
+        virtual Vector<ValidatedNumber> gradient(const Vector<ValidatedNumber>& x) const {
+            return this->evaluate(Differential<ValidatedNumber>::variables(1u,x)).gradient(); }
 
          virtual std::ostream& repr(std::ostream& os) const  {
             return os << "USER"; }
@@ -105,12 +105,12 @@ template<class T> class ScalarUserFunction
             return os << "ScalarUserFunction( argument_size="<<this->argument_size()<<" )"; }
     };
   public:
-    ScalarUserFunction() : EffectiveScalarFunction(new Representation(Vector<EffectiveNumberType>(this->parameter_size()))) { }
-    ScalarUserFunction(const Vector<ExactNumberType>& p) : EffectiveScalarFunction(new Representation(Vector<EffectiveNumberType>(p))) { }
-    ScalarUserFunction(const Vector<EffectiveNumberType>& p) : EffectiveScalarFunction(new Representation(p)) { }
+    ScalarUserFunction() : EffectiveScalarFunction(new Representation(Vector<EffectiveNumber>(this->parameter_size()))) { }
+    ScalarUserFunction(const Vector<ExactNumber>& p) : EffectiveScalarFunction(new Representation(Vector<EffectiveNumber>(p))) { }
+    ScalarUserFunction(const Vector<EffectiveNumber>& p) : EffectiveScalarFunction(new Representation(p)) { }
 
     uint parameter_size() const { return T().parameter_size(); }
-    //const Vector<ValidatedNumberType> parameters() const { return _p; }
+    //const Vector<ValidatedNumber> parameters() const { return _p; }
 };
 
 
@@ -139,7 +139,7 @@ class VectorFunctionData
 //! Given a C++ class T with a (static) template method
 //!   <code>template<class R, class A, class P> compute(R& r, const A& a, const P& p);</code>
 //! the type <code>VectorUserFunction<T></code> is an Ariadne function defined by \f$r=f(a)\f$.
-//! The constructor for VectorUserFunction<T> takes a Vector<EffectiveNumberType> argument which is used for \a p.
+//! The constructor for VectorUserFunction<T> takes a Vector<EffectiveNumber> argument which is used for \a p.
 //!
 //! The class T must also define meta-data <c>result_size(), argument_size(), parameter_size()
 //! and smoothness()</c> as static functions. These are most easily defined by inheriting from the
@@ -151,11 +151,11 @@ template<class T> class VectorUserFunction
 {
   private:
     class Representation
-        : public VectorFunctionMixin< Representation, EffectiveNumberType >
+        : public VectorFunctionMixin< Representation, EffectiveNumber >
     {
       public:
         typedef uint SizeType;
-        Representation(const Vector<EffectiveNumberType>& p) : _p(p) { }
+        Representation(const Vector<EffectiveNumber>& p) : _p(p) { }
 
         virtual Representation* clone() const { return new Representation(*this); }
 
@@ -165,10 +165,10 @@ template<class T> class VectorUserFunction
 
         template<class R, class A> inline void _compute(R& r, const A& a) const { T::compute(r,a,_p); }
 
-        virtual Matrix<ApproximateNumberType> jacobian(const Vector<ApproximateNumberType>& x) const {
-            return Ariadne::jacobian(this->evaluate(Differential<ApproximateNumberType>::variables(1u,x))); }
-        virtual Matrix<ValidatedNumberType> jacobian(const Vector<ValidatedNumberType>& x) const {
-            return Ariadne::jacobian(this->evaluate(Differential<ValidatedNumberType>::variables(1u,x))); }
+        virtual Matrix<ApproximateNumber> jacobian(const Vector<ApproximateNumber>& x) const {
+            return Ariadne::jacobian(this->evaluate(Differential<ApproximateNumber>::variables(1u,x))); }
+        virtual Matrix<ValidatedNumber> jacobian(const Vector<ValidatedNumber>& x) const {
+            return Ariadne::jacobian(this->evaluate(Differential<ValidatedNumber>::variables(1u,x))); }
 
         virtual EffectiveScalarFunctionInterface* _get(uint i) const { ARIADNE_NOT_IMPLEMENTED; }
         virtual EffectiveScalarFunction operator[](uint i) const { ARIADNE_NOT_IMPLEMENTED; }
@@ -178,14 +178,14 @@ template<class T> class VectorUserFunction
         virtual std::ostream& write(std::ostream& os) const  {
             return os << "VectorUserFunction( result_size="<<this->result_size()<<", argument_size="<<this->argument_size()<<" )"; }
 
-        Vector<EffectiveNumberType> _p;
+        Vector<EffectiveNumber> _p;
     };
   public:
-    //VectorUserFunction() : VectorFunction(new Representation(Vector<EffectiveNumberType>(this->parameter_size()))) { }
-    //VectorUserFunction(const Vector<ApproximateNumberType>& p) : VectorFunction(new Representation(Vector<EffectiveNumberType>(p))) { }
-    //VectorUserFunction(const Vector<ValidatedNumberType>& p) : VectorFunction(new Representation(Vector<EffectiveNumberType>(p))) { }
-    VectorUserFunction(const Vector<EffectiveNumberType>& p) : EffectiveVectorFunction(new Representation(p)) { }
-    const Vector<EffectiveNumberType>& parameters() const { return dynamic_cast<const Representation*>(this->raw_pointer())->_p; }
+    //VectorUserFunction() : VectorFunction(new Representation(Vector<EffectiveNumber>(this->parameter_size()))) { }
+    //VectorUserFunction(const Vector<ApproximateNumber>& p) : VectorFunction(new Representation(Vector<EffectiveNumber>(p))) { }
+    //VectorUserFunction(const Vector<ValidatedNumber>& p) : VectorFunction(new Representation(Vector<EffectiveNumber>(p))) { }
+    VectorUserFunction(const Vector<EffectiveNumber>& p) : EffectiveVectorFunction(new Representation(p)) { }
+    const Vector<EffectiveNumber>& parameters() const { return dynamic_cast<const Representation*>(this->raw_pointer())->_p; }
 };
 
 

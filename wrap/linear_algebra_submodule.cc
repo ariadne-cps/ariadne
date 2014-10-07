@@ -250,7 +250,7 @@ template<> void export_vector<ValidatedFloat>()
 
 template<> void export_vector<ApproximateFloat>()
 {
-    class_< Vector<ApproximateFloat> > approximate_vector_class("FloatVector",init< Vector<ApproximateFloat> >());
+    class_< Vector<ApproximateFloat> > approximate_vector_class("RawFloatVector",init< Vector<ApproximateFloat> >());
     export_vector_class<ApproximateFloat>(approximate_vector_class);
     export_vector_conversion<ApproximateFloat,ValidatedFloat>(approximate_vector_class);
     export_vector_arithmetic<ApproximateFloat,ApproximateFloat,ApproximateFloat>(approximate_vector_class);

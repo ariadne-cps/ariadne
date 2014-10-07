@@ -43,9 +43,9 @@
 namespace Ariadne {
 
 template<class X> class Affine;
-typedef Affine<ApproximateNumberType> ApproximateAffine;
-typedef Affine<ValidatedNumberType> ValidatedAffine;
-typedef Affine<EffectiveNumberType> EffectiveAffine;
+typedef Affine<ApproximateNumber> ApproximateAffine;
+typedef Affine<ValidatedNumber> ValidatedAffine;
+typedef Affine<EffectiveNumber> EffectiveAffine;
 
 template<class X> bool operator==(const Affine<X>&, const Affine<X>&);
 template<class X> Affine<X> operator-(const Affine<X>&);

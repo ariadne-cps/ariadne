@@ -33,14 +33,14 @@
 namespace Ariadne {
 
 namespace {
-ValidatedFloatType intersection(ValidatedFloatType x1, ValidatedFloatType x2) {
-    ExactInterval i=intersection(ExactInterval(x1),ExactInterval(x2)); return reinterpret_cast<ValidatedFloatType&>(i);
+ValidatedFloat intersection(ValidatedFloat x1, ValidatedFloat x2) {
+    ExactInterval i=intersection(ExactInterval(x1),ExactInterval(x2)); return reinterpret_cast<ValidatedFloat&>(i);
 }
 } // namespace
 
-Matrix<ValidatedFloatType>const&
+Matrix<ValidatedFloat>const&
 make_singleton(const Matrix<ExactInterval>& ivlA) {
-    return reinterpret_cast<Matrix<ValidatedFloatType>const&>(ivlA);
+    return reinterpret_cast<Matrix<ValidatedFloat>const&>(ivlA);
 }
 
 Matrix<ValidatedFloat> const&
@@ -48,9 +48,9 @@ make_singleton(const Matrix<UpperInterval>& A) {
     return reinterpret_cast<Matrix<ValidatedFloat>const&>(A);
 }
 
-Matrix<ExactFloatType>
-midpoint(const Matrix<ValidatedFloatType>& A) {
-    Matrix<ExactFloatType> R(A.row_size(),A.column_size());
+Matrix<ExactFloat>
+midpoint(const Matrix<ValidatedFloat>& A) {
+    Matrix<ExactFloat> R(A.row_size(),A.column_size());
     for(size_t i=0; i!=A.row_size(); ++i) {
         for(size_t j=0; j!=A.column_size(); ++j) {
             R[i][j]=A[i][j].midpoint();
@@ -167,7 +167,7 @@ template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B) {
 }
 
 // Find a starting solution for a diagonally dominant system
-Matrix<ValidatedFloatType> dd_solve(const Matrix<ValidatedFloatType>& A, const Matrix<ValidatedFloatType>& B)
+Matrix<ValidatedFloat> dd_solve(const Matrix<ValidatedFloat>& A, const Matrix<ValidatedFloat>& B)
 {
     const size_t n=B.row_size();
     const size_t m=B.column_size();
@@ -175,9 +175,9 @@ Matrix<ValidatedFloatType> dd_solve(const Matrix<ValidatedFloatType>& A, const M
     //Compute 1/(|aii|-sum|aij|) using outward rounding
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(upward);
-    Vector<RawFloatType> c(n,0.0);
+    Vector<RawFloat> c(n,0.0);
     for(size_t i=0; i!=n; ++i) {
-        RawFloatType ci=c[i];
+        RawFloat ci=c[i];
         for(size_t j=0; j!=n; ++j) {
             if(j!=i) {
                 ci=add_rnd(ci,mag(A[i][j]));
@@ -186,7 +186,7 @@ Matrix<ValidatedFloatType> dd_solve(const Matrix<ValidatedFloatType>& A, const M
         ci=sub_rnd(ci,mig(A[i][i]));
         ci=-ci;
         if(ci<=0.0) {
-            ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<ValidatedFloatType> A, Matrix<ValidatedFloatType> B)",
+            ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<ValidatedFloat> A, Matrix<ValidatedFloat> B)",
                           "ExactInterval matrix A="<<A<<" is not diagonally-dominant.");
         }
         ci=rec_rnd(ci);
@@ -194,9 +194,9 @@ Matrix<ValidatedFloatType> dd_solve(const Matrix<ValidatedFloatType>& A, const M
     set_rounding_mode(rounding_mode);
 
     // Compute initial solution
-    Matrix<ValidatedFloatType> R(n,m);
+    Matrix<ValidatedFloat> R(n,m);
     for(size_t i=0; i!=n; ++i) {
-        ValidatedFloatType ci(-c[i],+c[i]);
+        ValidatedFloat ci(-c[i],+c[i]);
         for(size_t j=0; j!=m; ++j) {
             R[i][j]=B[i][j]*ci;
         }
@@ -206,7 +206,7 @@ Matrix<ValidatedFloatType> dd_solve(const Matrix<ValidatedFloatType>& A, const M
 }
 
 
-template<> Matrix<ValidatedFloatType> gs_solve(const Matrix<ValidatedFloatType>& A, const Matrix<ValidatedFloatType>& B)
+template<> Matrix<ValidatedFloat> gs_solve(const Matrix<ValidatedFloat>& A, const Matrix<ValidatedFloat>& B)
 {
     ARIADNE_ASSERT(A.row_size()==A.column_size());
     ARIADNE_ASSERT(B.row_size()==A.column_size());
@@ -214,15 +214,15 @@ template<> Matrix<ValidatedFloatType> gs_solve(const Matrix<ValidatedFloatType>&
     const size_t m=B.column_size();
 
     // Precondition A and B
-    Matrix<ApproximateFloatType> mA=midpoint(A);
-    Matrix<ApproximateFloatType> aJ=inverse(mA);
+    Matrix<ApproximateFloat> mA=midpoint(A);
+    Matrix<ApproximateFloat> aJ=inverse(mA);
     Matrix<ExactFloat> const& J=reinterpret_cast<Matrix<ExactFloat>const&>(aJ);
-    Matrix<ValidatedFloatType> JA=J*A;
-    Matrix<ValidatedFloatType> JB=J*B;
+    Matrix<ValidatedFloat> JA=J*A;
+    Matrix<ValidatedFloat> JB=J*B;
     //std::cerr<<"J="<<J<<"\nJA="<<JA<<"\nJB="<<JB<<"\n";
 
-    //Matrix<ValidatedFloatType> R=dd_solve(JA,JB);
-    Matrix<ValidatedFloatType> R=lu_inverse(A);
+    //Matrix<ValidatedFloat> R=dd_solve(JA,JB);
+    Matrix<ValidatedFloat> R=lu_inverse(A);
     //std::cerr<<"R="<<R<<"\n";
 
     // Perform Gauss-Seidel iteration
@@ -231,7 +231,7 @@ template<> Matrix<ValidatedFloatType> gs_solve(const Matrix<ValidatedFloatType>&
         for(size_t i=0; i!=n; ++i) {
             for(size_t j=0; j!=m; ++j) {
                 // compute R'[i][j] := (JB[i][j] - Sum{k!=j}JA[i][k]*R[k][j]) / JA[i][i]
-                ValidatedFloatType Rij=JB[i][j];
+                ValidatedFloat Rij=JB[i][j];
                 for(size_t k=0; k!=n; ++k) {
                     if(k!=i) {
                         Rij-=JA[i][k]*R[k][j];
@@ -257,7 +257,7 @@ template<class X> Matrix<X> inverse(const Matrix<X>& A) {
     return lu_inverse(A);
 }
 
-template<> Matrix<ValidatedFloatType> inverse<ValidatedFloatType>(const Matrix<ValidatedFloatType>& A) {
+template<> Matrix<ValidatedFloat> inverse<ValidatedFloat>(const Matrix<ValidatedFloat>& A) {
     try {
         return lu_inverse(A);
     } catch(const DivideByZeroException& e) {
@@ -271,7 +271,7 @@ template<class X> Matrix<X> solve(const Matrix<X>& A, const Matrix<X>& B) {
     Matrix<X> Ainv=inverse(A); return Ainv*B;
 }
 
-template<> Matrix<ValidatedFloatType> solve(const Matrix<ValidatedFloatType>& A, const Matrix<ValidatedFloatType>& B) {
+template<> Matrix<ValidatedFloat> solve(const Matrix<ValidatedFloat>& A, const Matrix<ValidatedFloat>& B) {
     return gs_solve(A,B);
 }
 
@@ -351,12 +351,12 @@ solve(const PLUMatrix<X>& A, const Matrix<X>& B)
 
 
 // Compute the vector of row norms (sums of absolute values) of A
-Vector<ApproximateFloatType>
-row_norms(const Matrix<ApproximateFloatType>& A)
+Vector<ApproximateFloat>
+row_norms(const Matrix<ApproximateFloat>& A)
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
-    Vector<ApproximateFloatType> r(m);
+    Vector<ApproximateFloat> r(m);
 
     rounding_mode_t prev_rounding_mode=get_rounding_mode();
     set_rounding_mode(upward);
@@ -374,15 +374,15 @@ row_norms(const Matrix<ApproximateFloatType>& A)
 
 
 // Scale the rows of A to each have some of absolute values equal to one
-Matrix<ApproximateFloatType>
-normalise_rows(const Matrix<ApproximateFloatType>& A)
+Matrix<ApproximateFloat>
+normalise_rows(const Matrix<ApproximateFloat>& A)
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
 
-    Matrix<ApproximateFloatType> R=A;
+    Matrix<ApproximateFloat> R=A;
 
-    Array<ApproximateFloatType> row_asums(m);
+    Array<ApproximateFloat> row_asums(m);
     rounding_mode_t prev_rounding_mode=get_rounding_mode();
     set_rounding_mode(upward);
     for(size_t i=0; i!=m; ++i) {
@@ -405,10 +405,10 @@ normalise_rows(const Matrix<ApproximateFloatType>& A)
 
 // Returns a pivot P and matrices L and U such that L is unit lower-triangular,
 // U is upper-trianguler and A=PLU.
-Tuple< PivotMatrix, Matrix<ApproximateFloatType>, Matrix<ApproximateFloatType> >
-triangular_decomposition(const Matrix<ApproximateFloatType>& A)
+Tuple< PivotMatrix, Matrix<ApproximateFloat>, Matrix<ApproximateFloat> >
+triangular_decomposition(const Matrix<ApproximateFloat>& A)
 {
-    typedef ApproximateFloatType RealType;
+    typedef ApproximateFloat RealType;
     ARIADNE_ASSERT(A.row_size()==A.column_size());
 
     size_t m=A.row_size();
@@ -472,10 +472,10 @@ triangular_decomposition(const Matrix<ApproximateFloatType>& A)
 // Use Householder transformation H=I-vv' where v=u/|u|
 // and u=a +/- |a|e with a and e the working column of A
 // and corresponding unit vector.
-Tuple< Matrix<ApproximateFloatType>, PivotMatrix>
-triangular_factor(const Matrix<ApproximateFloatType>& A)
+Tuple< Matrix<ApproximateFloat>, PivotMatrix>
+triangular_factor(const Matrix<ApproximateFloat>& A)
 {
-    typedef ApproximateFloatType X;
+    typedef ApproximateFloat X;
 
     const size_t m=A.row_size();
     const size_t n=A.column_size();
@@ -511,7 +511,7 @@ triangular_factor(const Matrix<ApproximateFloatType>& A)
 
             // Swap columns l and k
             for(size_t i=0; i!=m; ++i) {
-                ApproximateFloatType tmp=R[i][k];
+                ApproximateFloat tmp=R[i][k];
                 R[i][k]=R[i][l];
                 R[i][l]=tmp;
             }
@@ -521,11 +521,11 @@ triangular_factor(const Matrix<ApproximateFloatType>& A)
         }
 
         // Compute |a| where a is the working column
-        ApproximateFloatType nrmas=0.0;
+        ApproximateFloat nrmas=0.0;
         for(size_t i=k; i!=m; ++i) {
             nrmas+=R[i][k]*R[i][k];
         }
-        ApproximateFloatType nrma=sqrt(nrmas);
+        ApproximateFloat nrma=sqrt(nrmas);
 
         // Compute u=a +/- |a|e
         for(size_t i=k; i!=m; ++i) {
@@ -535,19 +535,19 @@ triangular_factor(const Matrix<ApproximateFloatType>& A)
         else { u[k]-=nrma; }
 
         // Compute -2/u.u
-        ApproximateFloatType nrmus=0.0;
+        ApproximateFloat nrmus=0.0;
         for(size_t i=k; i!=m; ++i) {
             nrmus+=sqr(u[i]);
         }
-        ApproximateFloatType mtdnu=(-2)/nrmus;
+        ApproximateFloat mtdnu=(-2)/nrmus;
 
         // For each column b, compute b-=2u(u.b)/u.u
         for(size_t j=k; j!=n; ++j) {
-            ApproximateFloatType udtb=0.0;
+            ApproximateFloat udtb=0.0;
             for(size_t i=k; i!=m; ++i) {
                 udtb+=u[i]*R[i][j];
             }
-            ApproximateFloatType scl=udtb*mtdnu;
+            ApproximateFloat scl=udtb*mtdnu;
             for(size_t i=k; i!=m; ++i) {
                 R[i][j]+=scl*u[i];
             }
@@ -566,7 +566,7 @@ triangular_factor(const Matrix<ApproximateFloatType>& A)
     rounding_mode_t prev_rounding_mode=get_rounding_mode();
     for(size_t i=0; i!=m; ++i) {
         set_rounding_mode(upward);
-        ApproximateFloatType rsum=0.0;
+        ApproximateFloat rsum=0.0;
         for(size_t j=i; j!=n; ++j) {
             rsum+=abs(R[i][j]);
         }
@@ -585,10 +585,10 @@ triangular_factor(const Matrix<ApproximateFloatType>& A)
 // orthogonal rows, and such that the row absolute value sums of the inverse of
 // T are at most 1. Then the image of the unit box under the matrix T is
 // an over-approximation of the unit box.
-Matrix<ApproximateFloatType>
-triangular_multiplier(const Matrix<ApproximateFloatType>& A)
+Matrix<ApproximateFloat>
+triangular_multiplier(const Matrix<ApproximateFloat>& A)
 {
-    typedef ApproximateFloatType X;
+    typedef ApproximateFloat X;
 
     ARIADNE_ASSERT(A.row_size()<=A.column_size());
     const size_t m=A.row_size();
@@ -625,36 +625,36 @@ triangular_multiplier(const Matrix<ApproximateFloatType>& A)
 }
 
 
-Matrix<ExactFloatType> pivot_matrix(const Array<size_t>& pv)
+Matrix<ExactFloat> pivot_matrix(const Array<size_t>& pv)
 {
     const size_t n=pv.size();
     Array<size_t> perm(n); for(uint i=0; i!=n; ++i) { perm[i]=i; }
     for(size_t i=0; i!=n; ++i) {
         std::swap(perm[i],perm[pv[i]]);
     }
-    Matrix<ExactFloatType> P(n,n);
+    Matrix<ExactFloat> P(n,n);
     for(size_t i=0; i!=n; ++i) {
         P[i][perm[i]]=1;
     }
     return P;
 }
 
-PivotMatrix::operator Matrix<ExactFloatType> () const {
+PivotMatrix::operator Matrix<ExactFloat> () const {
     return pivot_matrix(this->_ary);
 }
 
 std::ostream& operator<<(std::ostream& os, const PivotMatrix& pv) {
-    return os << static_cast< Matrix<ExactFloatType> >(pv);
+    return os << static_cast< Matrix<ExactFloat> >(pv);
 }
 
 // Compute the orthogonal decomposition A=QR with or without column pivoting. The
 // matrix Q is built up as a composition of elementary Householder
 // transformations H=I-vv' with |v|=1. Note that inv(H)=H'=H. The vector v is
 // chosen to be a multiple of the first working column of A.
-Tuple< Matrix<ApproximateFloatType>, Matrix<ApproximateFloatType>, PivotMatrix >
-orthogonal_decomposition(const Matrix<ApproximateFloatType>& A, bool allow_pivoting)
+Tuple< Matrix<ApproximateFloat>, Matrix<ApproximateFloat>, PivotMatrix >
+orthogonal_decomposition(const Matrix<ApproximateFloat>& A, bool allow_pivoting)
 {
-    typedef ApproximateFloatType X;
+    typedef ApproximateFloat X;
 
     size_t m=A.row_size();
     size_t n=A.column_size();
@@ -766,10 +766,10 @@ orthogonal_decomposition(const Matrix<ApproximateFloatType>& A, bool allow_pivot
 }
 
 /*
-Tuple< Matrix<ApproximateFloatType>, Matrix<ApproximateFloatType> >
-orthogonal_decomposition(const Matrix<ApproximateFloatType>& A)
+Tuple< Matrix<ApproximateFloat>, Matrix<ApproximateFloat> >
+orthogonal_decomposition(const Matrix<ApproximateFloat>& A)
 {
-    typedef ApproximateFloatType X;
+    typedef ApproximateFloat X;
 
     size_t m=A.row_size();
     size_t n=A.column_size();
@@ -837,27 +837,27 @@ orthogonal_decomposition(const Matrix<ApproximateFloatType>& A)
 }
 */
 
-template class Matrix<RawFloatType>;
-template Matrix<RawFloatType> inverse(const Matrix<RawFloatType>&);
-template Matrix<RawFloatType> solve(const Matrix<RawFloatType>&, const Matrix<RawFloatType>&);
-template Vector<RawFloatType> solve(const Matrix<RawFloatType>&, const Vector<RawFloatType>&);
+template class Matrix<RawFloat>;
+template Matrix<RawFloat> inverse(const Matrix<RawFloat>&);
+template Matrix<RawFloat> solve(const Matrix<RawFloat>&, const Matrix<RawFloat>&);
+template Vector<RawFloat> solve(const Matrix<RawFloat>&, const Vector<RawFloat>&);
 
 template Matrix<UpperInterval> inverse(const Matrix<UpperInterval>&);
 Matrix<ValidatedFloat> inverse(Matrix<ExactFloat> const& A) { return inverse(Matrix<ValidatedFloat>(A)); }
 
-template class Matrix<ApproximateFloatType>;
-template Matrix<ApproximateFloatType> inverse(const Matrix<ApproximateFloatType>&);
-template Matrix<ApproximateFloatType> solve(const Matrix<ApproximateFloatType>&, const Matrix<ApproximateFloatType>&);
-template Vector<ApproximateFloatType> solve(const Matrix<ApproximateFloatType>&, const Vector<ApproximateFloatType>&);
-template class Matrix<ValidatedFloatType>;
-template Matrix<ValidatedFloatType> inverse(const Matrix<ValidatedFloatType>&);
-template Matrix<ValidatedFloatType> lu_inverse(const Matrix<ValidatedFloatType>&);
-template Matrix<ValidatedFloatType> gs_inverse(const Matrix<ValidatedFloatType>&);
-template Matrix<ValidatedFloatType> solve(const Matrix<ValidatedFloatType>&, const Matrix<ValidatedFloatType>&);
-template Matrix<ValidatedFloatType> lu_solve(const Matrix<ValidatedFloatType>&, const Matrix<ValidatedFloatType>&);
-template Matrix<ValidatedFloatType> gs_solve(const Matrix<ValidatedFloatType>&, const Matrix<ValidatedFloatType>&);
-template Vector<ValidatedFloatType> solve(const Matrix<ValidatedFloatType>&, const Vector<ValidatedFloatType>&);
-template Vector<ValidatedFloatType> gs_solve(const Matrix<ValidatedFloatType>&, const Vector<ValidatedFloatType>&);
+template class Matrix<ApproximateFloat>;
+template Matrix<ApproximateFloat> inverse(const Matrix<ApproximateFloat>&);
+template Matrix<ApproximateFloat> solve(const Matrix<ApproximateFloat>&, const Matrix<ApproximateFloat>&);
+template Vector<ApproximateFloat> solve(const Matrix<ApproximateFloat>&, const Vector<ApproximateFloat>&);
+template class Matrix<ValidatedFloat>;
+template Matrix<ValidatedFloat> inverse(const Matrix<ValidatedFloat>&);
+template Matrix<ValidatedFloat> lu_inverse(const Matrix<ValidatedFloat>&);
+template Matrix<ValidatedFloat> gs_inverse(const Matrix<ValidatedFloat>&);
+template Matrix<ValidatedFloat> solve(const Matrix<ValidatedFloat>&, const Matrix<ValidatedFloat>&);
+template Matrix<ValidatedFloat> lu_solve(const Matrix<ValidatedFloat>&, const Matrix<ValidatedFloat>&);
+template Matrix<ValidatedFloat> gs_solve(const Matrix<ValidatedFloat>&, const Matrix<ValidatedFloat>&);
+template Vector<ValidatedFloat> solve(const Matrix<ValidatedFloat>&, const Vector<ValidatedFloat>&);
+template Vector<ValidatedFloat> gs_solve(const Matrix<ValidatedFloat>&, const Vector<ValidatedFloat>&);
 #ifdef HAVE_GMPXX_H
 template class Matrix<Rational>;
 template Matrix<Rational> inverse(const Matrix<Rational>&);

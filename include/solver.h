@@ -72,26 +72,26 @@ class SolverBase
     void set_function_factory(const FunctionModelFactoryInterface<ValidatedTag>& factory);
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. */
-    virtual Vector<ValidatedNumberType> zero(const ValidatedVectorFunction& f,const ExactBox& bx) const;
+    virtual Vector<ValidatedNumber> zero(const ValidatedVectorFunction& f,const ExactBox& bx) const;
     /*! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. */
-    virtual Vector<ValidatedNumberType> fixed_point(const ValidatedVectorFunction& f,const ExactBox& bx) const;
+    virtual Vector<ValidatedNumber> fixed_point(const ValidatedVectorFunction& f,const ExactBox& bx) const;
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. */
-    virtual Vector<ValidatedNumberType> solve(const ValidatedVectorFunction& f,const ExactBox& bx) const;
-    virtual Vector<ValidatedNumberType> solve(const ValidatedVectorFunction& f,const Vector<ValidatedNumberType>& ipt) const;
+    virtual Vector<ValidatedNumber> solve(const ValidatedVectorFunction& f,const ExactBox& bx) const;
+    virtual Vector<ValidatedNumber> solve(const ValidatedVectorFunction& f,const Vector<ValidatedNumber>& ipt) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
     virtual ValidatedVectorFunctionModel implicit(const ValidatedVectorFunction& f, const ExactBox& par, const ExactBox& ix) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
     virtual ValidatedScalarFunctionModel implicit(const ValidatedScalarFunction& f, const ExactBox& par, const ExactInterval& ix) const;
     //! \brief Solve \f$f(a,x)=0\f$ yielding a function \f$x=h(a)\f$ for a in \a A, looking for a solution with \f$h(A) \subset X\f$ and $h(a)\in x\f$.
-    virtual ValidatedVectorFunctionModel continuation(const ValidatedVectorFunction& f, const Vector<ApproximateNumberType>& a, const ExactBox& X, const ExactBox& A) const;
+    virtual ValidatedVectorFunctionModel continuation(const ValidatedVectorFunction& f, const Vector<ApproximateNumber>& a, const ExactBox& X, const ExactBox& A) const;
 
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Set< Vector<ValidatedNumberType> > solve_all(const ValidatedVectorFunction& f,const ExactBox& bx) const;
+    virtual Set< Vector<ValidatedNumber> > solve_all(const ValidatedVectorFunction& f,const ExactBox& bx) const;
   protected:
     /*! \brief Perform one iterative step of the contractor. */
-    virtual Vector<ValidatedNumberType> step(const ValidatedVectorFunction& f,const Vector<ValidatedNumberType>& pt) const = 0;
+    virtual Vector<ValidatedNumber> step(const ValidatedVectorFunction& f,const Vector<ValidatedNumber>& pt) const = 0;
     /*! \brief Perform one iterative step of the contractor. */
     virtual ValidatedVectorFunctionModel implicit_step(const ValidatedVectorFunction& f,const ValidatedVectorFunctionModel& p,const ValidatedVectorFunctionModel& x) const = 0;
   private:
@@ -120,7 +120,7 @@ class IntervalNewtonSolver
   public:
     virtual ValidatedVectorFunctionModel implicit_step(const ValidatedVectorFunction& f, const ValidatedVectorFunctionModel& p, const ValidatedVectorFunctionModel& x) const;
 
-    virtual Vector<ValidatedNumberType> step(const ValidatedVectorFunction& f, const Vector<ValidatedNumberType>& pt) const;
+    virtual Vector<ValidatedNumber> step(const ValidatedVectorFunction& f, const Vector<ValidatedNumber>& pt) const;
 };
 
 
@@ -145,9 +145,9 @@ class KrawczykSolver
 
   public:
     /*! \brief A single step of the Krawczyk contractor. */
-    virtual Vector<ValidatedNumberType>
+    virtual Vector<ValidatedNumber>
     step(const ValidatedVectorFunction& f,
-          const Vector<ValidatedNumberType>& pt) const;
+          const Vector<ValidatedNumber>& pt) const;
 };
 
 
@@ -168,9 +168,9 @@ class FactoredKrawczykSolver
     virtual void write(std::ostream& os) const;
   public:
     /*! \brief A single step of the modified Krawczyk contractor. */
-    virtual Vector<ValidatedNumberType>
+    virtual Vector<ValidatedNumber>
     step(const ValidatedVectorFunction& f,
-          const Vector<ValidatedNumberType>& pt) const;
+          const Vector<ValidatedNumber>& pt) const;
 };
 
 

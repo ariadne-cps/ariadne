@@ -35,7 +35,7 @@
 
 namespace Ariadne {
 
-typedef Series<ValidatedNumberType>(*ValidatedSeriesFunctionPointer)(uint,const ValidatedNumberType&);
+typedef Series<ValidatedNumber>(*ValidatedSeriesFunctionPointer)(uint,const ValidatedNumber&);
 
 // A deprecated class for computing power series expansions
 // The difference between this and the Series class is that a TaylorSeries
@@ -43,31 +43,31 @@ typedef Series<ValidatedNumberType>(*ValidatedSeriesFunctionPointer)(uint,const 
 // valid on a subdomain, while a Series class uses arbitrary coefficients
 // and is valid within the entire radius of convergence
 class TaylorSeries {
-    typedef Series<ValidatedNumberType>(*ValidatedSeriesFunctionPointer)(uint,const ValidatedNumberType&);
+    typedef Series<ValidatedNumber>(*ValidatedSeriesFunctionPointer)(uint,const ValidatedNumber&);
   public:
     TaylorSeries(uint d) : expansion(d+1), error(0) { }
     TaylorSeries(uint degree, ValidatedSeriesFunctionPointer function,
-                 const ExactFloatType& centre, const ValidatedNumberType& domain);
+                 const ExactFloat& centre, const ValidatedNumber& domain);
     uint degree() const { return expansion.size()-1; }
-    ExactFloatType& operator[](uint i) { return expansion[i]; }
-    Array<ExactFloatType> expansion;
-    ValidatedNumberType error;
-    void sweep(ExactFloatType e) {
+    ExactFloat& operator[](uint i) { return expansion[i]; }
+    Array<ExactFloat> expansion;
+    ValidatedNumber error;
+    void sweep(ExactFloat e) {
         for(uint i=0; i<=degree(); ++i) {
             if(abs(expansion[i])<=e) {
-                error+=expansion[i]*ValidatedNumberType(-1,1);
+                error+=expansion[i]*ValidatedNumber(-1,1);
                 expansion[i]=0; } } }
 };
 
 inline
 TaylorSeries::TaylorSeries(uint d, ValidatedSeriesFunctionPointer fn,
-                           const ExactFloatType& c, const ValidatedNumberType& r)
+                           const ExactFloat& c, const ValidatedNumber& r)
     : expansion(d+1), error(0)
 {
-    Series<ValidatedNumberType> centre_series=fn(d,ValidatedNumberType(c));
-    Series<ValidatedNumberType> range_series=fn(d,r);
-    ValidatedNumberType p=1;
-    ValidatedNumberType e=r-c;
+    Series<ValidatedNumber> centre_series=fn(d,ValidatedNumber(c));
+    Series<ValidatedNumber> range_series=fn(d,r);
+    ValidatedNumber p=1;
+    ValidatedNumber e=r-c;
     //std::cerr<<"\nc="<<c<<" r="<<r<<" e="<<e<<"\n";
     //std::cerr<<"centre_series="<<centre_series<<"\nrange_series="<<range_series<<"\n";
     for(uint i=0; i!=d; ++i) {

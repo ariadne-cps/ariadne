@@ -65,26 +65,26 @@ class ScalarFunctionInterface<ApproximateTag>
     //! \brief Return a copy of the function.
     inline ScalarFunction<ApproximateTag> clone() const;
     //! \brief Compute an approximation to the value of the function at the point \a x.
-    virtual ApproximateNumberType evaluate(const Vector<ApproximateNumberType>& x) const = 0;
-    inline ApproximateNumberType operator() (const Vector<ApproximateNumberType>& x) const;
+    virtual ApproximateNumber evaluate(const Vector<ApproximateNumber>& x) const = 0;
+    inline ApproximateNumber operator() (const Vector<ApproximateNumber>& x) const;
     //! \brief Evaluate the function over a vector of differentials.
-    virtual Differential<ApproximateNumberType> evaluate(const Vector< Differential<ApproximateNumberType> >& x) const = 0;
+    virtual Differential<ApproximateNumber> evaluate(const Vector< Differential<ApproximateNumber> >& x) const = 0;
     //! \brief Evaluate the function over a vector of approximate Taylor models.
-    virtual TaylorModel<ApproximateNumberType> evaluate(const Vector< TaylorModel<ApproximateNumberType> >& x) const = 0;
+    virtual TaylorModel<ApproximateNumber> evaluate(const Vector< TaylorModel<ApproximateNumber> >& x) const = 0;
     //! \brief Evaluate the function over a vector of formulae to create the composed function.
-    virtual Formula<ApproximateNumberType> evaluate(const Vector< Formula<ApproximateNumberType> >& x) const = 0;
+    virtual Formula<ApproximateNumber> evaluate(const Vector< Formula<ApproximateNumber> >& x) const = 0;
     //! \brief Evaluate the function over a vector of elements of an algebra.
-    virtual Algebra<ApproximateNumberType> evaluate(const Vector< Algebra<ApproximateNumberType> >& x) const = 0;
+    virtual Algebra<ApproximateNumber> evaluate(const Vector< Algebra<ApproximateNumber> >& x) const = 0;
 
-    Vector<ApproximateNumberType> gradient(const Vector<ApproximateNumberType>& x) const;
-    Differential<ApproximateNumberType> differential(const Vector<ApproximateNumberType>& x, Nat d) const;
+    Vector<ApproximateNumber> gradient(const Vector<ApproximateNumber>& x) const;
+    Differential<ApproximateNumber> differential(const Vector<ApproximateNumber>& x, Nat d) const;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<ApproximateNumberType> derivative(Nat i) const;
+    inline ScalarFunction<ApproximateNumber> derivative(Nat i) const;
   private:
-    virtual ScalarFunctionInterface<ApproximateNumberType>* _derivative(Nat i) const = 0;
+    virtual ScalarFunctionInterface<ApproximateNumber>* _derivative(Nat i) const = 0;
   public:
-    virtual ScalarFunctionInterface<ApproximateNumberType>* _clone() const = 0;
+    virtual ScalarFunctionInterface<ApproximateNumber>* _clone() const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -101,23 +101,23 @@ class ScalarFunctionInterface<ValidatedTag>
     using ScalarFunctionInterface<ApproximateTag>::evaluate;
 
     //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
-    virtual ValidatedNumberType evaluate(const Vector<ValidatedNumberType>& x) const = 0;
-    inline ValidatedNumberType evaluate(const Vector<ExactNumberType>& x) const;
-    inline ValidatedNumberType operator() (const Vector<ValidatedNumberType>& x) const;
+    virtual ValidatedNumber evaluate(const Vector<ValidatedNumber>& x) const = 0;
+    inline ValidatedNumber evaluate(const Vector<ExactNumber>& x) const;
+    inline ValidatedNumber operator() (const Vector<ValidatedNumber>& x) const;
     //! \brief Evaluate the function over a vector of interval differentials.
-    virtual Differential<ValidatedNumberType> evaluate(const Vector< Differential<ValidatedNumberType> >& x) const = 0;
+    virtual Differential<ValidatedNumber> evaluate(const Vector< Differential<ValidatedNumber> >& x) const = 0;
     //! \brief Evaluate the function over a vector of Taylor models with interval error.
-    virtual TaylorModel<ValidatedNumberType> evaluate(const Vector< TaylorModel<ValidatedNumberType> >& x) const = 0;
+    virtual TaylorModel<ValidatedNumber> evaluate(const Vector< TaylorModel<ValidatedNumber> >& x) const = 0;
 
     //! \brief Apply the function to a formula. Can be used to obtain a tree structure from the function.
-    virtual Formula<ValidatedNumberType> evaluate(const Vector< Formula<ValidatedNumberType> >& x) const = 0;
+    virtual Formula<ValidatedNumber> evaluate(const Vector< Formula<ValidatedNumber> >& x) const = 0;
     //! \brief Apply the function to an algebra.
-    virtual Algebra<ValidatedNumberType> evaluate(const Vector< Algebra<ValidatedNumberType> >& x) const = 0;
+    virtual Algebra<ValidatedNumber> evaluate(const Vector< Algebra<ValidatedNumber> >& x) const = 0;
 
     using ScalarFunctionInterface<ApproximateTag>::gradient;
-    Vector<ValidatedNumberType> gradient(const Vector<ValidatedNumberType>& x) const;
+    Vector<ValidatedNumber> gradient(const Vector<ValidatedNumber>& x) const;
     using ScalarFunctionInterface<ApproximateTag>::differential;
-    Differential<ValidatedNumberType> differential(const Vector<ValidatedNumberType>& x, Nat d) const;
+    Differential<ValidatedNumber> differential(const Vector<ValidatedNumber>& x, Nat d) const;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
     inline ScalarFunction<ValidatedTag> derivative(Nat i) const;
@@ -141,12 +141,12 @@ class ScalarFunctionInterface<EffectiveTag>
     using ScalarFunctionInterface<ValidatedTag>::evaluate;
 
     //! \brief Evaluate over computable reals.
-    virtual EffectiveNumberType evaluate(const Vector<EffectiveNumberType>& x) const = 0;
-    inline EffectiveNumberType operator() (const Vector<EffectiveNumberType>& x) const;
+    virtual EffectiveNumber evaluate(const Vector<EffectiveNumber>& x) const = 0;
+    inline EffectiveNumber operator() (const Vector<EffectiveNumber>& x) const;
     //! \brief Apply the function to a formula. Can be used to obtain a tree structure from the function.
-    virtual Formula<EffectiveNumberType> evaluate(const Vector< Formula<EffectiveNumberType> >& x) const = 0;
+    virtual Formula<EffectiveNumber> evaluate(const Vector< Formula<EffectiveNumber> >& x) const = 0;
     //! \brief Apply the function to an algebra.
-    virtual Algebra<EffectiveNumberType> evaluate(const Vector< Algebra<EffectiveNumberType> >& x) const = 0;
+    virtual Algebra<EffectiveNumber> evaluate(const Vector< Algebra<EffectiveNumber> >& x) const = 0;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
     inline ScalarFunction<EffectiveTag> derivative(Nat i) const;
@@ -199,18 +199,18 @@ class VectorFunctionInterface<ApproximateTag>
 {
   public:
     //! \brief Compute an approximation to the value of the function at the point \a x.
-    virtual Vector<ApproximateNumberType> evaluate(const Vector<ApproximateNumberType>& x) const = 0;
+    virtual Vector<ApproximateNumber> evaluate(const Vector<ApproximateNumber>& x) const = 0;
     //! \brief Evaluate the function over a vector of differentials.
-    virtual Vector< Differential<ApproximateNumberType> > evaluate(const Vector< Differential<ApproximateNumberType> >& x) const = 0;
+    virtual Vector< Differential<ApproximateNumber> > evaluate(const Vector< Differential<ApproximateNumber> >& x) const = 0;
     //! \brief Evaluate the function over a vector of approximate Taylor models.
-    virtual Vector< TaylorModel<ApproximateNumberType> > evaluate(const Vector< TaylorModel<ApproximateNumberType> >& x) const = 0;
+    virtual Vector< TaylorModel<ApproximateNumber> > evaluate(const Vector< TaylorModel<ApproximateNumber> >& x) const = 0;
     //! \brief Evaluate the function over a vector of formulae to create the composed function.
-    virtual Vector< Formula<ApproximateNumberType> > evaluate(const Vector< Formula<ApproximateNumberType> >& x) const = 0;
+    virtual Vector< Formula<ApproximateNumber> > evaluate(const Vector< Formula<ApproximateNumber> >& x) const = 0;
     //! \brief Apply the function to an algebra.
-    virtual Vector< Algebra<ApproximateNumberType> > evaluate(const Vector< Algebra<ApproximateNumberType> >& x) const = 0;
+    virtual Vector< Algebra<ApproximateNumber> > evaluate(const Vector< Algebra<ApproximateNumber> >& x) const = 0;
 
-    Matrix<ApproximateNumberType> jacobian(const Vector<ApproximateNumberType>& x) const;
-    Vector< Differential<ApproximateNumberType> > differentials(const Vector<ApproximateNumberType>& x, Nat d) const;
+    Matrix<ApproximateNumber> jacobian(const Vector<ApproximateNumber>& x) const;
+    Vector< Differential<ApproximateNumber> > differentials(const Vector<ApproximateNumber>& x, Nat d) const;
 
     //! \brief Get the \a i<sup>th</sup> component function.
     inline ScalarFunction<ApproximateTag> operator[](Nat i) const;
@@ -230,23 +230,23 @@ class VectorFunctionInterface<ValidatedTag>
     using VectorFunctionInterface<ApproximateTag>::evaluate;
 
     //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
-    virtual Vector<ValidatedNumberType> evaluate(const Vector<ValidatedNumberType>& x) const = 0;
-    inline Vector<ValidatedNumberType> evaluate(const Vector<ExactNumberType>& x) const;
+    virtual Vector<ValidatedNumber> evaluate(const Vector<ValidatedNumber>& x) const = 0;
+    inline Vector<ValidatedNumber> evaluate(const Vector<ExactNumber>& x) const;
     //! \brief Evaluate the function over a vector of interval differentials.
-    virtual Vector< Differential<ValidatedNumberType> > evaluate(const Vector< Differential<ValidatedNumberType> >& x) const = 0;
+    virtual Vector< Differential<ValidatedNumber> > evaluate(const Vector< Differential<ValidatedNumber> >& x) const = 0;
     //! \brief Evaluate the function over a vector of Taylor models with interval error.
-    virtual Vector< TaylorModel<ValidatedNumberType> > evaluate(const Vector< TaylorModel<ValidatedNumberType> >& x) const = 0;
+    virtual Vector< TaylorModel<ValidatedNumber> > evaluate(const Vector< TaylorModel<ValidatedNumber> >& x) const = 0;
 
     //! \brief Evaluate the function over a vector of formulae.
-    virtual Vector< Formula<ValidatedNumberType> > evaluate(const Vector< Formula<ValidatedNumberType> >& x) const = 0;
+    virtual Vector< Formula<ValidatedNumber> > evaluate(const Vector< Formula<ValidatedNumber> >& x) const = 0;
     //! \brief Apply the function to an algebra.
-    virtual Vector< Algebra<ValidatedNumberType> > evaluate(const Vector< Algebra<ValidatedNumberType> >& x) const = 0;
+    virtual Vector< Algebra<ValidatedNumber> > evaluate(const Vector< Algebra<ValidatedNumber> >& x) const = 0;
 
     using VectorFunctionInterface<ApproximateTag>::jacobian;
-    Matrix<ValidatedNumberType> jacobian(const Vector<ValidatedNumberType>& x) const;
-    Matrix<ValidatedNumberType> jacobian(const Vector<ExactNumberType>& x) const;
+    Matrix<ValidatedNumber> jacobian(const Vector<ValidatedNumber>& x) const;
+    Matrix<ValidatedNumber> jacobian(const Vector<ExactNumber>& x) const;
     using VectorFunctionInterface<ApproximateTag>::differentials;
-    Vector< Differential<ValidatedNumberType> > differentials(const Vector<ValidatedNumberType>& x, Nat d) const;
+    Vector< Differential<ValidatedNumber> > differentials(const Vector<ValidatedNumber>& x, Nat d) const;
 
     //! \brief Get the \a i<sup>th</sup> component function.
     inline ScalarFunction<ValidatedTag> operator[](Nat i) const;
@@ -267,11 +267,11 @@ class VectorFunctionInterface<EffectiveTag>
     using VectorFunctionInterface<ValidatedTag>::evaluate;
 
     //! \brief Evaluate over computable reals.
-    virtual Vector<EffectiveNumberType> evaluate(const Vector<EffectiveNumberType>& x) const = 0;
+    virtual Vector<EffectiveNumber> evaluate(const Vector<EffectiveNumber>& x) const = 0;
     //! \brief Evaluate the function over a vector of formulae.
-    virtual Vector< Formula<EffectiveNumberType> > evaluate(const Vector< Formula<EffectiveNumberType> >& x) const = 0;
+    virtual Vector< Formula<EffectiveNumber> > evaluate(const Vector< Formula<EffectiveNumber> >& x) const = 0;
     //! \brief Apply the function to an algebra.
-    virtual Vector< Algebra<EffectiveNumberType> > evaluate(const Vector< Algebra<EffectiveNumberType> >& x) const = 0;
+    virtual Vector< Algebra<EffectiveNumber> > evaluate(const Vector< Algebra<EffectiveNumber> >& x) const = 0;
 
     //! \brief Get the \a i<sup>th</sup> component function.
     inline ScalarFunction<EffectiveTag> operator[](Nat i) const;
@@ -291,12 +291,12 @@ inline std::ostream& operator<<(std::ostream& os, const VectorFunctionInterface<
 //! \brief An interface for scalar function models on a restricted domain.
 class ScalarModelInterface {
     virtual ExactBox domain() const = 0;
-    virtual ValidatedNumberType evaluate(const Vector<ValidatedNumberType>&) const = 0;
+    virtual ValidatedNumber evaluate(const Vector<ValidatedNumber>&) const = 0;
 };
 
 template<class X> class FunctionFactoryInterface;
 
-template<> class FunctionFactoryInterface<ValidatedNumberType>
+template<> class FunctionFactoryInterface<ValidatedNumber>
 {
     typedef ExactBox DomainType;
   public:

@@ -30,13 +30,13 @@
 
 namespace Ariadne {
 
-typedef ApproximateNumberType ApproximateTag;
-typedef ValidatedNumberType ValidatedTag;
-typedef EffectiveNumberType EffectiveTag;
+typedef ApproximateNumber ApproximateTag;
+typedef ValidatedNumber ValidatedTag;
+typedef EffectiveNumber EffectiveTag;
 
-typedef ApproximateNumberType ApproximateNumber;
-typedef ValidatedNumberType ValidatedNumber;
-typedef EffectiveNumberType EffectiveNumber;
+typedef ApproximateNumber ApproximateNumber;
+typedef ValidatedNumber ValidatedNumber;
+typedef EffectiveNumber EffectiveNumber;
 typedef Differential<ApproximateNumber> ApproximateDifferential;
 typedef Differential<ValidatedNumber> ValidatedDifferential;
 typedef TaylorModel<ApproximateNumber> ApproximateTaylorModel;

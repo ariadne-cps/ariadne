@@ -78,7 +78,7 @@ void TestFunction::test_concept()
     //Polynomial<Real> p;
     //EffectiveScalarFunction pf(p);
 
-    //Vector<ApproximateFloatType> b; Matrix<ApproximateFloatType> A;
+    //Vector<ApproximateFloat> b; Matrix<ApproximateFloat> A;
     //VectorAffineFunction aff(A,b);
 
 }
@@ -90,7 +90,7 @@ void TestFunction::test_scalar_function()
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,y,coordinate(3,1));
 
     ARIADNE_TEST_CONSTRUCT(EffectiveScalarFunction,f,(o+x*y));
-    ARIADNE_TEST_CONSTRUCT(Vector<ApproximateFloatType>,p,({2.0,3.0,5.0}));
+    ARIADNE_TEST_CONSTRUCT(Vector<ApproximateFloat>,p,({2.0,3.0,5.0}));
     ARIADNE_TEST_EQUAL(f(p),7.0);
 
     ARIADNE_TEST_PRINT(cos(f));
@@ -111,9 +111,9 @@ void TestFunction::test_vector_function()
     EffectiveVectorFunction& fr=f;
     ARIADNE_TEST_PRINT(fr[0]);
 
-    ARIADNE_TEST_EQUAL(f[0](Vector<ApproximateFloatType>{2.0,3.0,5.0}),2.0);
+    ARIADNE_TEST_EQUAL(f[0](Vector<ApproximateFloat>{2.0,3.0,5.0}),2.0);
     ARIADNE_TEST_EXECUTE(f[0]=f[1]);
-    ARIADNE_TEST_EQUAL(f[0](Vector<ApproximateFloatType>{2.0,3.0,5.0}),3.0);
+    ARIADNE_TEST_EQUAL(f[0](Vector<ApproximateFloat>{2.0,3.0,5.0}),3.0);
 }
 
 
@@ -134,11 +134,11 @@ void TestFunction::test_differentiation()
 
     EffectiveScalarFunction af=3*x-2*y+1;
     EffectiveScalarFunction daf=af.derivative(1);
-    ARIADNE_TEST_EQUAL(daf.evaluate(Vector<ApproximateFloatType>{2.4,1.3}),-2.0);
+    ARIADNE_TEST_EQUAL(daf.evaluate(Vector<ApproximateFloat>{2.4,1.3}),-2.0);
 
-    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<ApproximateFloatType>{2.4,1.3}),1.0);
-    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<ValidatedFloatType>{{2.4,2.4},{1.3,1.3}}),1.0_dec);
-    ARIADNE_TEST_EQUAL(x.derivative(1).evaluate(Vector<ApproximateFloatType>{2.4, 1.3}),0.0);
+    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<ApproximateFloat>{2.4,1.3}),1.0);
+    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<ValidatedFloat>{{2.4,2.4},{1.3,1.3}}),1.0_dec);
+    ARIADNE_TEST_EQUAL(x.derivative(1).evaluate(Vector<ApproximateFloat>{2.4, 1.3}),0.0);
 
 }
 

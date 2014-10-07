@@ -63,31 +63,31 @@ ExactInterval approximate_interval(const RealVariableInterval&);
 
 
 struct FloatVariableLowerInterval {
-    RawFloatType _lower; RealVariable _variable;
-    FloatVariableLowerInterval(const RawFloatType& l, const RealVariable& v) : _lower(l), _variable(v) { }
+    RawFloat _lower; RealVariable _variable;
+    FloatVariableLowerInterval(const RawFloat& l, const RealVariable& v) : _lower(l), _variable(v) { }
 };
 
 class FloatVariableInterval {
   private:
-    RawFloatType _lower; Variable<Real> _variable; RawFloatType _upper;
+    RawFloat _lower; Variable<Real> _variable; RawFloat _upper;
   public:
-    FloatVariableInterval(const RawFloatType& l, const Variable<Real>& v, const RawFloatType& u)
+    FloatVariableInterval(const RawFloat& l, const Variable<Real>& v, const RawFloat& u)
         : _lower(l), _variable(v), _upper(u) { ARIADNE_ASSERT_MSG(l<=u,"ExactInterval("<<l<<","<<u<<") not provably nonempty"); }
     FloatVariableInterval(const RealVariableInterval& rvivl)
         : _lower(rvivl.lower().get_d()), _variable(rvivl.variable()), _upper(rvivl.upper().get_d()) { }
     Variable<Real> const& variable() const { return this->_variable; }
     const ExactInterval interval() const { return ExactInterval(this->_lower,this->_upper); }
-    const RawFloatType lower() const { return this->_lower; }
-    const RawFloatType upper() const { return this->_upper; }
+    const RawFloat lower() const { return this->_lower; }
+    const RawFloat upper() const { return this->_upper; }
 };
 inline FloatVariableLowerInterval operator<=(double l, RealVariable const& v) {
     return FloatVariableLowerInterval(l,v); }
 inline FloatVariableInterval operator<=(FloatVariableLowerInterval lv, double u) {
     return FloatVariableInterval(lv._lower,lv._variable,u); }
-inline FloatVariableInterval operator<=(FloatVariableLowerInterval lv, RawFloatType u) {
+inline FloatVariableInterval operator<=(FloatVariableLowerInterval lv, RawFloat u) {
     return FloatVariableInterval(lv._lower,lv._variable,u); }
 inline FloatVariableInterval operator<=(FloatVariableLowerInterval lv, Real u) {
-    return FloatVariableInterval(lv._lower,lv._variable,RawFloatType(u.get_d())); }
+    return FloatVariableInterval(lv._lower,lv._variable,RawFloat(u.get_d())); }
 
 struct Axes2d {
     Axes2d(const FloatVariableInterval x, const FloatVariableInterval& y)
@@ -111,7 +111,7 @@ class HybridFigure
 
     void set_locations(const List<DiscreteLocation>& l) { locations=Set<DiscreteLocation>(l); }
     void set_axes(const Axes2d& axes) { bounds=axes.bounds; variables=axes.variables; }
-    void set_bounds(const RealVariable& x, const RawFloatType& l, const RawFloatType& u) { bounds.insert(x,ExactInterval(l,u)); }
+    void set_bounds(const RealVariable& x, const RawFloat& l, const RawFloat& u) { bounds.insert(x,ExactInterval(l,u)); }
     void set_bounds(const RealVariable& x, const ExactInterval& ivl) { bounds.insert(x,ivl); }
     void set_bounds(const Map<RealVariable,ExactInterval>& b) { bounds=b; };
     void set_bounds(const Map<RealVariable,IntervalSet>& b);

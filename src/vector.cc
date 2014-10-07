@@ -29,24 +29,24 @@
 
 namespace Ariadne {
 
-Vector<ExactFloatType>const& make_exact(const Vector<ApproximateFloatType>& av) {
-    return reinterpret_cast<Vector<ExactFloatType>const&>(av);
+Vector<ExactFloat>const& make_exact(const Vector<ApproximateFloat>& av) {
+    return reinterpret_cast<Vector<ExactFloat>const&>(av);
 }
 
-Vector<ValidatedFloatType> make_bounds(const Vector<ErrorFloatType>& ev) {
-    Vector<ValidatedFloatType> r(ev.size());
+Vector<ValidatedFloat> make_bounds(const Vector<ErrorFloat>& ev) {
+    Vector<ValidatedFloat> r(ev.size());
     for(uint i=0; i!=r.size(); ++i) {
         r[i]=make_bounds(ev[i]);
     }
     return r;
 }
 
-Vector<ValidatedFloatType>const& make_singleton(const Vector<ExactInterval>& ivlv) {
-    return reinterpret_cast<Vector<ValidatedFloatType>const&>(ivlv);
+Vector<ValidatedFloat>const& make_singleton(const Vector<ExactInterval>& ivlv) {
+    return reinterpret_cast<Vector<ValidatedFloat>const&>(ivlv);
 }
 
-Vector<ValidatedFloatType>const& make_singleton(const Vector<UpperInterval>& ivlv) {
-    return reinterpret_cast<Vector<ValidatedFloatType>const&>(ivlv);
+Vector<ValidatedFloat>const& make_singleton(const Vector<UpperInterval>& ivlv) {
+    return reinterpret_cast<Vector<ValidatedFloat>const&>(ivlv);
 }
 
 bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloat>& v2)
@@ -77,23 +77,23 @@ bool element(const Vector<ValidatedFloat>& v1, const Vector<ExactInterval>& v2)
     return contains(v2,v1);
 }
 
-UpperFloatType sup_error(const Vector<ValidatedFloatType>& x) {
-    UpperFloatType e(0);
+UpperFloat sup_error(const Vector<ValidatedFloat>& x) {
+    UpperFloat e(0);
     for(uint i=0; i!=x.size(); ++i) {
         e=max(e,x[i].error());
     }
     return e;
 }
 
-Vector<ExactFloatType> midpoint(const Vector<ValidatedFloatType>& x) {
-    Vector<ExactFloatType> r(x.size());
+Vector<ExactFloat> midpoint(const Vector<ValidatedFloat>& x) {
+    Vector<ExactFloat> r(x.size());
     for(uint i=0; i!=r.size(); ++i) {
         r[i]=midpoint(x[i]);
     }
     return r;
 }
 
-bool models(const Vector<ValidatedFloatType>& x1, const Vector<ExactFloatType>& x2) {
+bool models(const Vector<ValidatedFloat>& x1, const Vector<ExactFloat>& x2) {
     assert(x1.size()==x2.size());
     for(uint i=0; i!=x1.size(); ++i) {
         if(!models(x1[i],x2[i])) { return false; }
@@ -101,7 +101,7 @@ bool models(const Vector<ValidatedFloatType>& x1, const Vector<ExactFloatType>& 
     return true;
 }
 
-bool consistent(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2) {
+bool consistent(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2) {
     assert(x1.size()==x2.size());
     for(uint i=0; i!=x1.size(); ++i) {
         if(!consistent(x1[i],x2[i])) { return false; }
@@ -109,11 +109,11 @@ bool consistent(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloa
     return true;
 }
 
-bool inconsistent(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2) {
+bool inconsistent(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2) {
     return !consistent(x1,x2);
 }
 
-bool refines(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2) {
+bool refines(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2) {
     assert(x1.size()==x2.size());
     for(uint i=0; i!=x1.size(); ++i) {
         if(!refines(x1[i],x2[i])) { return false; }
@@ -121,9 +121,9 @@ bool refines(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatTy
     return true;
 }
 
-Vector<ValidatedFloatType> refinement(const Vector<ValidatedFloatType>& x1, const Vector<ValidatedFloatType>& x2) {
+Vector<ValidatedFloat> refinement(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2) {
     assert(x1.size()==x2.size());
-    Vector<ValidatedFloatType> r(x1.size());
+    Vector<ValidatedFloat> r(x1.size());
     for(uint i=0; i!=r.size(); ++i) {
         r[i]=refinement(x1[i],x2[i]);
     }
@@ -252,27 +252,27 @@ std::pair< Vector<ExactInterval>, Vector<ExactInterval> > split(const Vector<Exa
 
 
 
-Vector<ExactFloatType> midpoint(const Vector<ExactInterval>& v)
+Vector<ExactFloat> midpoint(const Vector<ExactInterval>& v)
 {
-    Vector<ExactFloatType> r(v.size());
+    Vector<ExactFloat> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
         r[i]=v[i].centre();
     }
     return r;
 }
 
-Vector<ExactFloatType> lower_bounds(const Vector<ExactInterval>& v)
+Vector<ExactFloat> lower_bounds(const Vector<ExactInterval>& v)
 {
-    Vector<ExactFloatType> r(v.size());
+    Vector<ExactFloat> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
         r[i]=v[i].lower();
     }
     return r;
 }
 
-Vector<ExactFloatType> upper_bounds(const Vector<ExactInterval>& v)
+Vector<ExactFloat> upper_bounds(const Vector<ExactInterval>& v)
 {
-    Vector<ExactFloatType> r(v.size());
+    Vector<ExactFloat> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
         r[i]=v[i].upper();
     }

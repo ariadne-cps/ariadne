@@ -383,8 +383,12 @@ inline Matrix<UpperInterval> jacobian_range(VectorFunction<ValidatedTag>const& f
 // FIXME: Needed to override templated gradient and jacobian
 inline Vector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
+inline Vector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<Interval>& x) {
+    return gradient(f,static_cast<Vector<UpperInterval>>(x)); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
+inline Matrix<UpperInterval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<Interval>& x) {
+    return jacobian(f,static_cast<Vector<UpperInterval>>(x)); }
 
 template<class P> class FunctionFactory;
 typedef FunctionFactory<ValidatedTag> ValidatedFunctionFactory;

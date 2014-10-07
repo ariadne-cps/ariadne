@@ -54,8 +54,10 @@ template<class X> class Vector<Differential<X>>;
 
 typedef Differential<Float> FloatDifferential;
 typedef Differential<Interval> IntervalDifferential;
+typedef Differential<UpperInterval> UpperIntervalDifferential;
 typedef Vector< Differential<Float> > FloatDifferentialVector;
 typedef Vector< Differential<Interval> > IntervalDifferentialVector;
+typedef Vector< Differential<UpperInterval> > UpperIntervalDifferentialVector;
 
 template<class X> Differential<X>& operator+=(Differential<X>& x, const Differential<X>& y);
 template<class X> Differential<X>& operator-=(Differential<X>& x, const Differential<X>& y);

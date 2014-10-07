@@ -159,7 +159,7 @@ void TestProcedure::test_propagate()
         p.new_unary_instruction(SQRT,4u);
         ARIADNE_TEST_PRINT(p);
 
-        Box x=Box{ {0.25,2.0}, {0.5,3.0} };
+        UpperBox x=Box{ {0.25,2.0}, {0.5,3.0} };
         ARIADNE_TEST_PRINT(x);
 
         simple_hull_reduce(x,p,Interval(1,1));
@@ -175,7 +175,7 @@ void TestProcedure::test_propagate()
     ARIADNE_TEST_PRINT(ff);
     Vector< ValidatedProcedure > pp(ff);
     ARIADNE_TEST_PRINT(pp);
-    Box xx=Box{ {0.125,2.0}, {0.25,3.0} };
+    UpperBox xx=Box{ {0.125,2.0}, {0.25,3.0} };
     Box cc=Box{ {1.0,1.0}, {1.0,1.0} };
     ARIADNE_TEST_PRINT(xx);
     ARIADNE_TEST_PRINT(evaluate(pp,xx));

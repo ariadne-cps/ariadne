@@ -202,7 +202,7 @@ void TestContinuousEvolution::failure_test() const
     // cout << "evolve_set=" << hybrid_evolve_set << endl;
     // cout << "reach_set=" << hybrid_reach_set << endl;
     std::cout << "Plotting..."<< std::flush;
-    Figure fig; fig.set_bounding_box( orbit.reach().bounding_box() + Box(2,Interval(-0.25,+0.25)) );
+    Figure fig; fig.set_bounding_box( widen(orbit.reach().bounding_box(),+0.25));
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(magenta) << orbit.intermediate();
     fig << fill_colour(red) << orbit.final();

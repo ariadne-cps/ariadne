@@ -211,12 +211,12 @@ tribool ValidatedAffineConstrainedImageSet::bounded() const {
     return Box(this->domain()).bounded() || indeterminate;
 }
 
-Box ValidatedAffineConstrainedImageSet::bounding_box() const {
-    Box result(this->dimension());
+UpperBox ValidatedAffineConstrainedImageSet::bounding_box() const {
+    UpperBox result(this->dimension());
     Box domain=this->domain();
     for(uint i=0; i!=this->dimension(); ++i) {
         //result[i]=evaluate(this->_space_models[i],domain);
-        result[i]=this->_space_models[i].evaluate(domain);
+        result[i]=this->_space_models[i].evaluate(static_cast<Vector<UpperInterval>>(domain));
     }
     return result;
 }
@@ -248,7 +248,7 @@ tribool ValidatedAffineConstrainedImageSet::separated(const Box& bx) const {
 }
 
 tribool ValidatedAffineConstrainedImageSet::empty() const {
-    return this->separated(this->bounding_box());
+    return this->separated(make_exact_box(this->bounding_box()));
 }
 
 tribool ValidatedAffineConstrainedImageSet::inside(const Box& bx) const {
@@ -444,7 +444,7 @@ void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
     while(!done && lp.x[ne+nx+nc]<0.0) {
         done=lpsolver.lpstep(lp.c,lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x);
     }
-    Vector<Interval> x=lpsolver.compute_x(lp.l,lp.u,lp.A,lp.b,lp.vt);
+    Vector<UpperInterval> x=lpsolver.compute_x(lp.l,lp.u,lp.A,lp.b,lp.vt);
     if(x[ne+nx+nc].upper()<0.0) { return; } // No feasible solution
 
     //feasible=verify_feasibility(lp.A,lp.b,lp.l,lp.u,lp.vt);

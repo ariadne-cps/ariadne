@@ -71,7 +71,7 @@ class BoundedSetInterface
     virtual tribool inside(const Box& bx) const = 0;
     //! \brief Returns a bounding box for the set.
     //! If the set is empty, then the first component of the result should be empty.
-    virtual Box bounding_box() const = 0;
+    virtual UpperBox bounding_box() const = 0;
 };
 
 

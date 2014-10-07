@@ -47,7 +47,6 @@ namespace Ariadne {
 
 typedef Vector<ApproximateFloatType> ApproximateFloatVector;
 typedef Vector<ExactFloatType> ExactFloatVector;
-typedef Vector<UpperInterval> UpperIntervalVector;
 
 inline Sweeper default_sweeper() { return Sweeper(); }
 
@@ -101,8 +100,8 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const Box& domain, const Val
     ARIADNE_LOG(4,"domain="<<domain<<"\nfunction="<<function<<"\ncodomain="<<codomain<<"\n");
 
     // Make codomain bounded
-    UpperIntervalVector bounds=codomain;
-    UpperIntervalVector image=apply(function,domain);
+    UpperBox bounds=codomain;
+    UpperBox image=apply(function,domain);
     ARIADNE_LOG(4,"image="<<image<<"\n");
     for(uint i=0; i!=image.size(); ++i) {
         if(disjoint(image[i],codomain[i])) { ARIADNE_LOG(4,"  Proved disjointness using direct evaluation\n");  return make_pair(false,ExactPoint()); }
@@ -146,7 +145,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const Box& domain, const Val
 
     if(t<TERR) {
         // Probably disjoint, so try to prove this
-        UpperBox subdomain=domain;
+        Box subdomain=domain;
 
         Vector<ExactFloat> x_exact=make_exact(x);
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
@@ -234,7 +233,7 @@ bool ConstraintSolver::reduce(UpperBox& domain, const ValidatedVectorFunction& f
 
 inline bool is_nan(const Float& x) { return isnan(x.get_d()); }
 
-bool has_nan(const UpperBox& domain) {
+bool has_nan(const Box& domain) {
     for(uint i=0; i!=domain.size(); ++i) {
         if(is_nan(domain[i].lower().raw()) || is_nan(domain[i].upper().raw())) { return true; }
     }
@@ -334,18 +333,19 @@ bool ConstraintSolver::monotone_reduce(UpperBox& domain, const ValidatedScalarFu
     static const int MAX_STEPS=3;
     const Float size = lower.width().raw() / (1<<MAX_STEPS);
     do {
+        // Apply Newton contractor on lower and upper strips
         if(lower.width().raw()>size) {
             splitpoint=lower.centre();
-            slice[variable]=UpperInterval(splitpoint);
-            UpperInterval new_lower=splitpoint+make_exact((bounds-apply(function,slice)).lower())/apply(derivative,subdomain);
-            if(new_lower.upper().raw()<lower.lower().raw()) { lower=UpperInterval(lower.lower().raw()); }
+            slice[variable]=splitpoint;
+            UpperInterval new_lower=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
+            if(new_lower.upper_raw()<lower.lower_raw()) { lower=UpperInterval(lower.lower_raw()); }
             else { lower=intersection(lower,new_lower); }
         }
         if(upper.width().raw()>size) {
             splitpoint=upper.centre();
-            slice[variable]=UpperInterval(splitpoint);
-            UpperInterval new_upper=splitpoint+make_exact((bounds-apply(function,slice)).upper())/apply(derivative,subdomain);
-            if(new_upper.lower()>upper.upper()) { upper=UpperInterval(upper.upper().raw()); }
+            slice[variable]=splitpoint;
+            UpperInterval new_upper=splitpoint+(bounds-apply(function,slice))/apply(derivative,subdomain);
+            if(new_upper.lower_raw()>upper.upper_raw()) { upper=UpperInterval(upper.upper_raw()); }
             else { upper=intersection(upper,new_upper); }
         }
         subdomain[variable]=UpperInterval(lower.lower(),upper.upper());
@@ -389,7 +389,7 @@ bool ConstraintSolver::lyapunov_reduce(UpperBox& domain, const VectorTaylorFunct
             if(j!=k) { E-=ranges[k]; }
         }
         UpperInterval estimated_domain = E/dg[j]+centre[j];
-        new_domain[j] = intersection(domain[j],make_exact_interval(estimated_domain));
+        new_domain[j] = intersection(domain[j],estimated_domain);
     }
 
     domain=new_domain;
@@ -419,7 +419,7 @@ bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
     for(uint i=0; i!=n; ++i) {
         subinterval=Interval((l*(n-i)+u*i)/n,(l*(n-i-1)+u*(i+1))/n);
         slice[variable]=subinterval;
-        UpperInterval slice_image=make_exact_interval(apply(function,slice));
+        UpperInterval slice_image=apply(function,slice);
         if(intersection(slice_image,bounds).empty()) {
             new_interval.set_lower(subinterval.upper());
         } else {
@@ -437,7 +437,7 @@ bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
     for(uint j=n-1; j!=imax; --j) {
         subinterval=Interval((l*(n-j)+u*j)/n,(l*(n-j-1)+u*(j+1))/n);
         slice[variable]=subinterval;
-        Interval slice_image=make_exact_interval(apply(function,slice));
+        UpperInterval slice_image=apply(function,slice);
         if(intersection(slice_image,bounds).empty()) {
             new_interval.set_upper(subinterval.lower());
         } else {
@@ -472,7 +472,7 @@ void compute_monotonicity(UpperBox& domain, const EffectiveConstraint& constrain
 } // namespace
 
 
-Pair<Box,Box> ConstraintSolver::split(const Box& d, const ValidatedVectorFunction& f, const Box& c) const
+Pair<UpperBox,UpperBox> ConstraintSolver::split(const UpperBox& d, const ValidatedVectorFunction& f, const Box& c) const
 {
     return d.split();
 }

@@ -204,7 +204,7 @@ class GridAbstractCell {
     /*! /brief Computes the height of the primary cell that encloses
      *  (may be exactly) the given box on the given grid.
      */
-    static uint smallest_enclosing_primary_cell_height( const Box & theBox, const Grid& theGrid );
+    static uint smallest_enclosing_primary_cell_height( const UpperBox & theBox, const Grid& theGrid );
 
     /*! \brief This method returns the path from the \a topPCellHeight to the \a bottomPCellHeight
      *  in the \a dimensions dimensional space. We assume that \a topPCellHeight >= \a bottomPCellHeight
@@ -288,7 +288,7 @@ class GridCell : public GridAbstractCell {
      * smallest primary cell on the Grid, such that it contains \a theBox (after it's
      * mapping on \a theGrid )
      */
-    static GridCell smallest_enclosing_primary_cell( const Box & theBox, const Grid& theGrid );
+    static GridCell smallest_enclosing_primary_cell( const UpperBox & theBox, const Grid& theGrid );
 
     /*! \brief This function allows to compare to cells it is used by the operator== and operator< methods of this class
      *  The value of \a comparator should be either \a COMPARE_EQUAL or \a COMPARE_LESS

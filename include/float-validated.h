@@ -91,6 +91,8 @@ class LowerFloat {
     friend LowerFloat operator+(LowerFloat, LowerFloat);
     friend LowerFloat operator-(LowerFloat, UpperFloat);
     friend UpperFloat operator-(UpperFloat, LowerFloat);
+    friend LowerFloat max(LowerFloat, LowerFloat);
+    friend LowerFloat min(LowerFloat, LowerFloat);
     friend std::ostream& operator<<(std::ostream& os, LowerFloat);
   private:
     Float l;
@@ -132,6 +134,8 @@ class UpperFloat {
     friend UpperFloat pow(UpperFloat, uint);
     friend UpperFloat half(UpperFloat);
     friend UpperFloat abs(UpperFloat);
+    friend UpperFloat max(UpperFloat, UpperFloat);
+    friend UpperFloat min(UpperFloat, UpperFloat);
     friend std::ostream& operator<<(std::ostream& os, UpperFloat);
   private:
     Float u;

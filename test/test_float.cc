@@ -510,13 +510,6 @@ TestFloat::test_arithmetic()
 
     // Check interval conversions
     Float z(0); Float o(1); Float t(3);
-    Interval io(1); Interval it(3);
-
-    cout << "o/t=" << Interval(o/t) << endl;
-
-    Interval iao=Interval((o/t)*t);
-    cout << "(o/t)*t=" << iao << endl;
-    cout << iao.lower() << " " << iao.upper() << endl;
 
     Float odtd=div_down(o,t);
     Float odtu=div_up(o,t);
@@ -525,14 +518,6 @@ TestFloat::test_arithmetic()
     // Regression test to catch errors when Float result is not assigned to a variable
     cout << div_down(o,t) << " <= 1/3 <= " << div_up(o,t) << endl;
     ARIADNE_TEST_COMPARE(div_down(o,t),<,div_up(o,t));
-    cout << Interval(o/t) << endl;
-    ARIADNE_TEST_ASSERT(contains(iao,o));
-    Interval iaz=iao-io;
-    Interval iz=Interval(Float(1)-Float(1));
-    cout << iaz << endl;
-    ARIADNE_TEST_ASSERT(contains(iaz,z));
-    ARIADNE_TEST_ASSERT(!bool(!subset(iz,iaz)));
-    cout << endl;
 
     ARIADNE_TEST_COMPARE(med_approx(Float(2),Float(3)),==,2.5);
     ARIADNE_TEST_COMPARE(rad_up(Float(2),Float(3)),>=,0.5);

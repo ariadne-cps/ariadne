@@ -39,7 +39,9 @@ typedef unsigned int uint;
 
 namespace Ariadne {
 
-class Box;
+class ApproximateBox;
+typedef ApproximateBox GraphicsBoundingBoxType;
+
 class ProjectionFunction;
 
 struct LineStyle { explicit LineStyle(bool ls) : _style(ls) { } operator bool() const { return this->_style; } private: bool _style; };
@@ -80,10 +82,10 @@ class Figure
     ~Figure();
     Figure();
     void set_projection_map(const PlanarProjectionMap&);
-    void set_bounding_box(const Box&);
+    void set_bounding_box(const GraphicsBoundingBoxType&);
 
     PlanarProjectionMap get_projection_map() const;
-    Box get_bounding_box() const;
+    GraphicsBoundingBoxType get_bounding_box() const;
 
     void set_projection(uint as, uint ix, uint iy);
 
@@ -136,29 +138,29 @@ template<class SET> void plot(const char* filename, const SET& set) {
 template<class SET> void plot(const char* filename, const Colour& fc, const SET& set) {
     Figure g; g.set_fill_colour(fc); draw(g,set); g.write(filename); }
 
-template<class SET> void plot(const char* filename, const Box& bbox, const SET& set) {
+template<class SET> void plot(const char* filename, const ApproximateBox& bbox, const SET& set) {
     Figure g; g.set_bounding_box(bbox); draw(g,set); g.write(filename); }
 
-template<class SET> void plot(const char* filename, const Box& bbox, const Colour& fc, const SET& set) {
+template<class SET> void plot(const char* filename, const ApproximateBox& bbox, const Colour& fc, const SET& set) {
     Figure g; g.set_bounding_box(bbox); g.set_fill_colour(fc); draw(g,set); g.write(filename); }
 
-template<class SET> void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox, const Colour& fc, const SET& set) {
+template<class SET> void plot(const char* filename, const PlanarProjectionMap& pr, const ApproximateBox& bbox, const Colour& fc, const SET& set) {
     Figure g; g.set_projection_map(pr), g.set_bounding_box(bbox); g.set_fill_colour(fc); draw(g,set); g.write(filename); }
 
 template<class SET1, class SET2>
-void plot(const char* filename, const Box& bbox, const SET1& set1, const SET2& set2) {
+void plot(const char* filename, const ApproximateBox& bbox, const SET1& set1, const SET2& set2) {
     Figure g; g.set_bounding_box(bbox); draw(g,set1); draw(g,set2); g.write(filename); }
 
 template<class SET1, class SET2>
-void plot(const char* filename, const Box& bbox, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2) {
+void plot(const char* filename, const ApproximateBox& bbox, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2) {
     Figure g; g.set_bounding_box(bbox); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2); g.write(filename); }
 
 template<class SET1, class SET2>
-void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2) {
+void plot(const char* filename, const PlanarProjectionMap& pr, const ApproximateBox& bbox, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2) {
     Figure g; g.set_bounding_box(bbox); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2); g.write(filename); }
 
 template<class SET1, class SET2, class SET3>
-void plot(const char* filename, const Box& bbox,
+void plot(const char* filename, const ApproximateBox& bbox,
           const SET1& set1, const SET2& set2, const SET3& set3)
 {
     Figure g; g.set_bounding_box(bbox);
@@ -166,7 +168,7 @@ void plot(const char* filename, const Box& bbox,
 }
 
 template<class SET1, class SET2, class SET3>
-void plot(const char* filename, const Box& bbox,
+void plot(const char* filename, const ApproximateBox& bbox,
           const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2, const Colour& fc3, const SET3& set3)
 {
     Figure g; g.set_bounding_box(bbox);
@@ -174,7 +176,7 @@ void plot(const char* filename, const Box& bbox,
 }
 
 template<class SET1, class SET2, class SET3>
-void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox,
+void plot(const char* filename, const PlanarProjectionMap& pr, const ApproximateBox& bbox,
           const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2, const Colour& fc3, const SET3& set3)
 {
     Figure g; g.set_projection_map(pr); g.set_bounding_box(bbox);
@@ -182,7 +184,7 @@ void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox,
 }
 
 template<class SET1, class SET2, class SET3, class SET4>
-void plot(const char* filename, const Box& bbox,
+void plot(const char* filename, const ApproximateBox& bbox,
           const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
           const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4)
 {
@@ -195,7 +197,7 @@ void plot(const char* filename, const Box& bbox,
 }
 
 template<class SET1, class SET2, class SET3, class SET4>
-void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox,
+void plot(const char* filename, const PlanarProjectionMap& pr, const ApproximateBox& bbox,
           const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
           const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4)
 {
@@ -208,7 +210,7 @@ void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox,
 }
 
 template<class SET1, class SET2, class SET3, class SET4, class SET5>
-void plot(const char* filename, const Box& bbox,
+void plot(const char* filename, const ApproximateBox& bbox,
           const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
           const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4,
           const Colour& fc5, const SET5& set5)
@@ -223,7 +225,7 @@ void plot(const char* filename, const Box& bbox,
 }
 
 template<class SET1, class SET2, class SET3, class SET4, class SET5>
-void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox,
+void plot(const char* filename, const PlanarProjectionMap& pr, const ApproximateBox& bbox,
         const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
         const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4,
         const Colour& fc5, const SET5& set5)
@@ -238,7 +240,7 @@ void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox,
 }
 
 template<class SET1, class SET2, class SET3, class SET4, class SET5, class SET6>
-void plot(const char* filename, const Box& bbox,
+void plot(const char* filename, const ApproximateBox& bbox,
           const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
           const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4,
           const Colour& fc5, const SET5& set5, const Colour& fc6, const SET6& set6)
@@ -254,7 +256,7 @@ void plot(const char* filename, const Box& bbox,
 }
 
 template<class SET1, class SET2, class SET3, class SET4, class SET5, class SET6>
-void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox,
+void plot(const char* filename, const PlanarProjectionMap& pr, const ApproximateBox& bbox,
           const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
           const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4,
           const Colour& fc5, const SET5& set5, const Colour& fc6, const SET6& set6)

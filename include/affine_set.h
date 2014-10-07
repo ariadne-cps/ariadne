@@ -117,7 +117,7 @@ class ValidatedAffineConstrainedImageSet
     Box domain() const;
 
     tribool bounded() const;
-    Box bounding_box() const;
+    UpperBox bounding_box() const;
     tribool separated(const Box& bx) const;
     tribool inside(const Box& bx) const;
     tribool empty() const;

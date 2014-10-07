@@ -315,19 +315,19 @@ C1TaylorSeries compose(C1TaylorSeries f, C1TaylorSeries g) {
     return r;
 }
 
-Interval evaluate(C1TaylorSeries f, Interval x) {
+UpperInterval evaluate(C1TaylorSeries f, UpperInterval x) {
     Nat i=f.degree();
-    Interval r=Interval(Float(f._coefficients[i]));
+    UpperInterval r=UpperInterval(Float(f._coefficients[i]));
     while (i!=0) {
         i=i-i;
         r*=x;
-        r+=Interval(Float(f._coefficients[i]));
+        r+=UpperInterval(Float(f._coefficients[i]));
     }
-    if(f._zero_error+Float(x)*f._derivative_error < f._uniform_error) {
-        r+=Interval(-f._zero_error,+f._zero_error);
-        r+=Interval(x)*Interval(-f._derivative_error,+f._derivative_error);
+    if(f._zero_error+Float(x.centre())*f._derivative_error < f._uniform_error) {
+        r+=UpperInterval(-f._zero_error,+f._zero_error);
+        r+=UpperInterval(x)*UpperInterval(-f._derivative_error,+f._derivative_error);
     } else {
-        r+=Interval(-f._uniform_error,+f._uniform_error);
+        r+=UpperInterval(-f._uniform_error,+f._uniform_error);
     }
     return r;
 }
@@ -619,9 +619,9 @@ C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2) {
     return *frp;
 }
 
-Interval evaluate(C1TaylorFunction f, Vector<Interval> x) {
-    Interval r=horner_evaluate(reinterpret_cast<Expansion<ExactFloat>const&>(f._expansion),x);
-    r += Interval(-f._uniform_error,+f._uniform_error);
+UpperInterval evaluate(C1TaylorFunction f, Vector<UpperInterval> x) {
+    UpperInterval r=horner_evaluate(reinterpret_cast<Expansion<ExactFloat>const&>(f._expansion),x);
+    r += UpperInterval(-f._uniform_error,+f._uniform_error);
     return r;
 }
 

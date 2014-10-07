@@ -36,14 +36,6 @@
 using namespace Ariadne;
 using namespace std;
 
-Box widen(const Box& bx,Float d) {
-    Box r(bx);
-    for(uint i=0; i!=bx.size(); ++i) {
-        r[i]=bx[i]+Interval(-d,+d);
-    }
-    return r;
-}
-
 class TestConstrainedImageSet
 {
   private:
@@ -149,8 +141,8 @@ class TestConstrainedImageSet
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
 
         Figure figure;
-        figure.set_bounding_box(set.bounding_box()+IntervalVector(2,Interval(-1,+1))*0.5);
-        Box b(set.bounding_box());
+        figure.set_bounding_box(widen(set.bounding_box(),0.5));
+        Box b(make_exact_box(set.bounding_box()));
         List<Box> stack(1u,b);
         while(!stack.empty()) {
             Box bx=stack.back();
@@ -224,7 +216,7 @@ class TestConstrainedImageSet
         Figure figure;
         figure.set_bounding_box(Box({{-4.0,+4.0},{-4.0,+4.0}}));
         figure.set_fill_colour(1.0,1.0,1.0);
-        figure.draw(set.bounding_box());
+        figure.draw(make_exact_box(set.bounding_box()));
         figure.set_fill_colour(0.75,0.75,0.75);
         figure.draw(set.affine_approximation());
         figure.set_fill_colour(0.5,0.5,0.5);

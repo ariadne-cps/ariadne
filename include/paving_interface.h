@@ -174,7 +174,7 @@ class SubPavingInterface
     //! \brief Modify the underlying paving so that the root cell of the subpaving is either enabled or disabled.
     virtual Void set_root_cell(Bool onoff) = 0;
 
-    virtual Box bounding_box() const = 0; // Inherited from CompactSetInterface
+    virtual UpperBox bounding_box() const = 0; // Inherited from CompactSetInterface
     virtual Tribool inside(const Box& bx) const = 0; // Inherited from CompactSetInterface
     virtual Tribool separated(const Box& bx) const = 0; // Inherited from ClosedSetInterface
     virtual Tribool overlaps(const Box& bx) const = 0; // Inherited from OvertSetInterface
@@ -221,7 +221,7 @@ class SubPavingHandle
     ForwardConstantIteratorHandle<GridCell> begin() const { return this->_ptr->_begin(); }
     ForwardConstantIteratorHandle<GridCell> end() const { return this->_ptr->_end(); }
 
-    Box bounding_box() const { return this->_ptr->bounding_box(); };
+    UpperBox bounding_box() const { return this->_ptr->bounding_box(); };
     Tribool inside(const Box& bx) const { return this->_ptr->inside(bx); }
     Tribool separated(const Box& bx) const { return this->_ptr->separated(bx); }
     Tribool overlaps(const Box& bx) const { return this->_ptr->overlaps(bx); }
@@ -242,7 +242,7 @@ class PavingInterface
 {
   public:
     virtual PavingInterface* clone() const = 0;
-    virtual GridCell smallest_enclosing_primary_cell(const Box& bx) const = 0; // Useful query, but can also be implemented at the Grid level.
+    virtual GridCell smallest_enclosing_primary_cell(const UpperBox& bx) const = 0; // Useful query, but can also be implemented at the Grid level.
     virtual Void adjoin_cells(const PredicateInterface<Box>& predicate, const Nat depth) { ARIADNE_ABSTRACT_METHOD; }
     virtual Void adjoin_outer_approximation(const CompactSetInterface& set, const Nat depth) = 0;
     virtual Void adjoin_inner_approximation(const OpenSetInterface& set, const Nat height, const Nat depth) = 0;
@@ -279,7 +279,7 @@ class PavingHandle
 
     ForwardConstantIteratorHandle<GridCell> begin() const { return this->_ptr->_begin(); }
     ForwardConstantIteratorHandle<GridCell> end() const { return this->_ptr->_end(); }
-    Box bounding_box() const { return this->_ptr->bounding_box(); };
+    UpperBox bounding_box() const { return this->_ptr->bounding_box(); };
     Tribool inside(const Box& bx) const { return this->_ptr->inside(bx); }
     Tribool separated(const Box& bx) const { return this->_ptr->separated(bx); }
     Tribool overlaps(const Box& bx) const { return this->_ptr->overlaps(bx); }

@@ -49,6 +49,7 @@ template<class X> class Point;
 typedef Point<ExactNumberType> ExactPoint;
 
 class Box;
+class UpperBox;
 class Zonotope;
 class Polytope;
 class InterpolatedCurve;
@@ -100,7 +101,7 @@ class Polytope
     virtual tribool separated(const Box& bx) const;
     virtual tribool overlaps(const Box& bx) const;
     virtual tribool inside(const Box& bx) const;
-    virtual Box bounding_box() const;
+    virtual UpperBox bounding_box() const;
     virtual void draw(CanvasInterface& c, const Projection2d& p) const;
     virtual std::ostream& write(std::ostream& os) const;
 

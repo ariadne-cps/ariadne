@@ -175,15 +175,15 @@ void HybridEnclosure::set_time_function(const ValidatedScalarFunctionModel& time
     //this->_set._time_function=time_function;
 }
 
-Box
+UpperBox
 HybridEnclosure::space_bounding_box() const
 {
     ARIADNE_LOG(8,"space_codomain="<<this->space_function().codomain()<<" space_range="<<apply(this->space_function(),this->_set.reduced_domain())<<"\n");
     //return this->space_function()(this->_set.reduced_domain());
-    return this->_set.bounding_box();
+    return make_exact_box(this->_set.bounding_box());
 }
 
-Interval
+UpperInterval
 HybridEnclosure::time_range() const
 {
     ARIADNE_LOG(8,"time_codomain="<<this->time_function().codomain()<<" time_range="<<apply(this->time_function(),this->_set.reduced_domain())<<"\n");
@@ -191,7 +191,7 @@ HybridEnclosure::time_range() const
     return apply(this->time_function(),this->_set.reduced_domain());
 }
 
-Interval
+UpperInterval
 HybridEnclosure::dwell_time_range() const
 {
     ARIADNE_LOG(8,"dwell_time_codomain="<<this->dwell_time_function().codomain()<<
@@ -217,10 +217,10 @@ HybridEnclosure::parameter_domain() const
     return this->_set.domain();
 }
 
-HybridBox
+HybridUpperBox
 HybridEnclosure::bounding_box() const
 {
-    return HybridBox(this->_location,this->_space,this->space_bounding_box());
+    return HybridUpperBox(this->_location,this->_space,make_exact_box(this->space_bounding_box()));
 }
 
 

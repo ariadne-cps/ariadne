@@ -301,7 +301,7 @@ Enclosure::Enclosure(const Box& domain, const ValidatedVectorFunction& function,
     this->_domain=domain;
     for(uint i=0; i!=this->_domain.size(); ++i) {
         if(this->_domain[i].width()==0) {
-            this->_domain[i]+=Interval(-min,+min);
+            this->_domain[i]=widen(this->_domain[i]);
         }
     }
 
@@ -329,7 +329,7 @@ Enclosure::Enclosure(const Box& domain, const ValidatedVectorFunction& space_fun
     this->_domain=domain;
     for(uint i=0; i!=this->_domain.size(); ++i) {
         if(this->_domain[i].width()==0) {
-            this->_domain[i]+=Interval(-min,+min);
+            this->_domain[i]=widen(this->_domain[i]);
         }
     }
 
@@ -355,7 +355,7 @@ Enclosure::Enclosure(const Box& domain, const ValidatedVectorFunction& space_fun
 // Returns true if the entire set is positive; false if entire set is negative
 tribool Enclosure::satisfies(ValidatedScalarFunction constraint) const
 {
-    Interval constraint_range=apply(constraint,this->codomain());
+    UpperInterval constraint_range=apply(constraint,this->codomain());
     if(constraint_range.upper()<0.0) { return false; }
     if(constraint_range.lower()>0.0) { return true; }
     return indeterminate;
@@ -600,7 +600,7 @@ Box Enclosure::reduced_domain() const {
 }
 
 Box Enclosure::codomain() const {
-    return Box(this->_space_function.range()).bounding_box();
+    return make_exact_box(widen(this->_space_function.range()));
 }
 
 ValidatedVectorFunctionModel const& Enclosure::function() const {
@@ -663,8 +663,8 @@ uint Enclosure::number_of_parameters() const {
     return this->_space_function.argument_size();
 }
 
-Box Enclosure::bounding_box() const {
-    return Box(this->_space_function.codomain()).bounding_box();
+UpperBox Enclosure::bounding_box() const {
+    return this->_space_function.codomain().bounding_box();
 }
 
 ErrorFloatType Enclosure::radius() const {
@@ -672,7 +672,7 @@ ErrorFloatType Enclosure::radius() const {
 }
 
 ExactPoint Enclosure::centre() const {
-    return this->bounding_box().centre();
+    return make_exact(this->bounding_box().centre());
 }
 
 
@@ -697,7 +697,7 @@ tribool Enclosure::empty() const
     if(!this->_is_fully_reduced) { this->reduce(); this->reduce(); this->reduce(); }
 
     for(uint i=0; i!=this->_constraints.size(); ++i) {
-        Interval constraint_range = Ariadne::apply(this->_constraints[i].function(),this->_reduced_domain);
+        UpperInterval constraint_range = Ariadne::apply(this->_constraints[i].function(),this->_reduced_domain);
         if( disjoint(constraint_range,this->_constraints[i].bounds()) ) {
             if(this->_reduced_domain.size()>0) { this->_reduced_domain[0] = Interval(1,-1); }
             return true;
@@ -798,7 +798,7 @@ Enclosure::splitting_subdomains_zeroth_order() const
 uint
 Enclosure::splitting_index_zeroth_order() const
 {
-    Matrix<Interval> jacobian=Ariadne::jacobian(this->function(),this->reduced_domain());
+    Matrix<UpperInterval> jacobian=Ariadne::jacobian(this->function(),this->reduced_domain());
 
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
@@ -1185,7 +1185,7 @@ void Enclosure::draw(CanvasInterface& canvas, const Projection2d& projection) co
 
 void Enclosure::box_draw(CanvasInterface& canvas, const Projection2d& projection) const {
     this->reduce();
-    Box(join(Ariadne::apply(this->_space_function,this->_reduced_domain),Ariadne::apply(this->_time_function,this->_reduced_domain))).draw(canvas,projection);
+    make_exact_box(join(Ariadne::apply(this->_space_function,this->_reduced_domain),Ariadne::apply(this->_time_function,this->_reduced_domain))).draw(canvas,projection);
 }
 
 ValidatedVectorFunctionModel join(const ValidatedVectorFunctionModel& f1, const ValidatedScalarFunctionModel& f2, const ValidatedVectorFunctionModel& f3) {

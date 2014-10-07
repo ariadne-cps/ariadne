@@ -38,6 +38,16 @@ ValidatedFloatType intersection(ValidatedFloatType x1, ValidatedFloatType x2) {
 }
 } // namespace
 
+Matrix<ValidatedFloatType>const&
+make_singleton(const Matrix<Interval>& ivlA) {
+    return reinterpret_cast<Matrix<ValidatedFloatType>const&>(ivlA);
+}
+
+Matrix<ValidatedFloat> const&
+make_singleton(const Matrix<UpperInterval>& A) {
+    return reinterpret_cast<Matrix<ValidatedFloat>const&>(A);
+}
+
 Matrix<ExactFloatType>
 midpoint(const Matrix<ValidatedFloatType>& A) {
     Matrix<ExactFloatType> R(A.row_size(),A.column_size());
@@ -58,6 +68,11 @@ midpoint(const Matrix<UpperInterval>& A) {
         }
     }
     return R;
+}
+
+Matrix<Rational>
+midpoint(const Matrix<Rational>& A) {
+    return A;
 }
 
 template<class X>
@@ -828,6 +843,7 @@ template Matrix<RawFloatType> solve(const Matrix<RawFloatType>&, const Matrix<Ra
 template Vector<RawFloatType> solve(const Matrix<RawFloatType>&, const Vector<RawFloatType>&);
 
 template Matrix<UpperInterval> inverse(const Matrix<UpperInterval>&);
+Matrix<ValidatedFloat> inverse(Matrix<ExactFloat> const& A) { return inverse(Matrix<ValidatedFloat>(A)); }
 
 template class Matrix<ApproximateFloatType>;
 template Matrix<ApproximateFloatType> inverse(const Matrix<ApproximateFloatType>&);

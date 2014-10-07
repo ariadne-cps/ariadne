@@ -162,7 +162,7 @@ void TestTaylorModel::test_approximation()
 
 void TestTaylorModel::test_unscale()
 {
-    if(unscale(ValidatedTaylorModel({{{0},3.0}},0.0,swp),Interval(1.0)).range()!=Interval(1.0)) {
+    if(unscale(ValidatedTaylorModel({{{0},3.0}},0.0,swp),Interval(1.0)).codomain()!=Interval(1.0)) {
         ARIADNE_TEST_WARN("Unscaling over singleton domain does not yield constant");
     }
 }
@@ -213,8 +213,8 @@ void TestTaylorModel::test_range()
 
     // Test range of quadratic, which could be exact, but need not be
     ValidatedTaylorModel t2 = x0*x0+x0;
-    ARIADNE_TEST_BINARY_PREDICATE(subset,t2.range(),Interval(-2,+2));
-    ARIADNE_TEST_BINARY_PREDICATE(subset,Interval(-0.25,+2),t2.range());
+    ARIADNE_TEST_BINARY_PREDICATE(refines,t2.range(),Interval(-2,+2));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,Interval(-0.25,+2),t2.range());
     if(!subset(t2.range(),Interval(-0.2578125,2.0))) { ARIADNE_TEST_WARN("ValidatedTaylorModel::range() not exact for quadratic functions."); }
 }
 
@@ -331,8 +331,8 @@ void TestTaylorModel::test_compose()
 
 
 namespace Ariadne {
-Vector<Interval> range(const Vector<ValidatedTaylorModel>& tm) {
-    Vector<Interval> r(tm.size()); for(uint i=0; i!=tm.size(); ++i) { r[i]=tm[i].range(); } return r; }
+Vector<UpperInterval> range(const Vector<ValidatedTaylorModel>& tm) {
+    Vector<UpperInterval> r(tm.size()); for(uint i=0; i!=tm.size(); ++i) { r[i]=tm[i].range(); } return r; }
 }
 
 int main() {

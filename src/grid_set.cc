@@ -774,11 +774,11 @@ uint GridAbstractCell::smallest_enclosing_primary_cell_height( const LatticeBoxT
     return height;
 }
 
-uint GridAbstractCell::smallest_enclosing_primary_cell_height( const Box& theBox, const Grid& theGrid) {
+uint GridAbstractCell::smallest_enclosing_primary_cell_height( const UpperBox& theBox, const Grid& theGrid) {
     Vector<Interval> theLatticeBox( theBox.size() );
     //Convert the box to theGrid coordinates
     for( uint i = 0; i != theBox.size(); ++i ) {
-        theLatticeBox[i] = ( theBox[i] - theGrid.origin()[i] ) / theGrid.lengths()[i];
+        theLatticeBox[i] = make_exact_interval( ( theBox[i] - theGrid.origin()[i] ) / theGrid.lengths()[i] );
     }
     //Compute and return the smallest primary cell, enclosing this box on the grid
     return smallest_enclosing_primary_cell_height( theLatticeBox );
@@ -878,7 +878,7 @@ std::pair<GridCell,GridCell> GridCell::split() const {
     return std::make_pair(GridCell( _theGrid, _theHeight, theLeftWord),GridCell( _theGrid, _theHeight, theRightWord));
 }
 
-GridCell GridCell::smallest_enclosing_primary_cell( const Box& theBox, const Grid& theGrid) {
+GridCell GridCell::smallest_enclosing_primary_cell( const UpperBox& theBox, const Grid& theGrid) {
     //Create the GridCell, corresponding to the smallest primary cell, enclosing this box
     return GridCell( theGrid, smallest_enclosing_primary_cell_height(theBox, theGrid), BinaryWord() );
 }
@@ -2015,6 +2015,10 @@ void GridTreeSet::adjoin_over_approximation( const Box& theBox, const uint numSu
     this->adjoin_outer_approximation( theBox, numSubdivInDim );
 }
 
+void GridTreeSet::adjoin_outer_approximation( const UpperBox& theBox, const uint numSubdivInDim ) {
+    this->adjoin_outer_approximation(make_exact_box(theBox),numSubdivInDim);
+}
+
 void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet, const uint numSubdivInDim ) {
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
@@ -2050,7 +2054,7 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
 // TODO:Think of another representation in terms of covers but not pavings, then the implementation
 // will be different, this is why, for now we do not fix these things.
 void GridTreeSet::adjoin_lower_approximation( const LocatedSetInterface& theSet, const uint numSubdivInDim ) {
-    this->adjoin_lower_approximation( theSet, theSet.bounding_box(), numSubdivInDim );
+    this->adjoin_lower_approximation( theSet, make_exact_box(theSet.bounding_box()), numSubdivInDim );
 }
 
 void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const uint height, const uint numSubdivInDim ) {

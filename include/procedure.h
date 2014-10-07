@@ -109,7 +109,7 @@ class Vector< Procedure<X> > {
 };
 
 // \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
-template<class S, class X, class T> void _execute(List<S>& v, const List<ProcedureInstruction>& p, const List<X>& c, const Vector<T>& x)
+template<class X, class T> void _execute(List<T>& v, const List<ProcedureInstruction>& p, const List<X>& c, const Vector<T>& x)
 {
     T z=x.zero_element();
     for(size_t i=0; i!=p.size(); ++i) {
@@ -171,7 +171,7 @@ template<class X, class T> void _compute(List<T>& v, const List<ProcedureInstruc
     }
 }
 
-template<class S, class T> void _propagate(Vector<S>& x, List<T>& v, const List<ProcedureInstruction>& p)
+template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<ProcedureInstruction>& p)
 {
     ExactFloatType infty(inf);
 
@@ -352,16 +352,12 @@ namespace Ariadne {
 // but nan elements of x do not affect r
 inline
 void restrict(UpperInterval& r, const UpperInterval& x) {
-    r=UpperInterval(max(r.lower(),x.lower()),min(r.upper(),x.upper()));
-};
-
-inline
-void restrict(Interval& r, const UpperInterval& x) {
-    r=Interval(max(r.lower_raw(),x.lower_raw()),min(r.upper_raw(),x.upper_raw()));
+    r.set_lower(max(r.lower(),x.lower()));
+    r.set_upper(min(r.upper(),x.upper()));
 };
 
 template<class X>
-void simple_hull_reduce(UpperBox& dom, const Procedure<X>& f, UpperInterval codom)
+void simple_hull_reduce(UpperBox& dom, const Procedure<X>& f, Interval codom)
 {
     const List<ProcedureInstruction>& p=f._instructions;
     const List<X>& c=f._constants;
@@ -373,7 +369,7 @@ void simple_hull_reduce(UpperBox& dom, const Procedure<X>& f, UpperInterval codo
 }
 
 template<class X>
-void simple_hull_reduce(UpperBox& dom, const Vector< Procedure<X> >& f, UpperBox codom)
+void simple_hull_reduce(UpperBox& dom, const Vector< Procedure<X> >& f, Box codom)
 {
     const List<ProcedureInstruction>& p=f._instructions;
     const List<X>& c=f._constants;

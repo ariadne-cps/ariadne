@@ -152,7 +152,7 @@ class TestAffineSet
         ARIADNE_TEST_ASSERT(definitely(affine_set.separated(cell6)));
 
         figure.clear();
-        figure.set_bounding_box(affine_set.bounding_box()+IntervalVector(2,Interval(-0.125,+0.125)) );
+        figure.set_bounding_box(widen(affine_set.bounding_box(),0.125));
         figure << affine_set
                << fill_colour(0,0,1) << cell1
                << fill_colour(0,1,0) << cell2
@@ -180,7 +180,7 @@ class TestAffineSet
             ARIADNE_TEST_PRINT(paving);
 
             Figure figure;
-            figure.set_bounding_box(set.bounding_box()+IntervalVector(2,Interval(-0.125,+0.125)) );
+            figure.set_bounding_box(widen(set.bounding_box(),+0.125));
             figure.set_fill_opacity(0.5);
             figure.set_fill_colour(1.0,0.0,0.0);
             figure.draw(paving);
@@ -197,7 +197,7 @@ class TestAffineSet
             set.new_parameter_constraint(-0.5_ex*x[0]-1.0_ex*x[1]<=0.875_ex);
 
             Figure figure;
-            figure.set_bounding_box(Box{{-1.0,+1.0},{-1.0,+1.0}}+IntervalVector(2,Interval(-0.125,+0.125)));
+            figure.set_bounding_box(widen(Box{{-1.0,+1.0},{-1.0,+1.0}},+0.125));
             figure.set_fill_opacity(0.5);
             figure.set_fill_colour(1.0,0.0,0.0);
             figure.draw(set.outer_approximation(Grid(2),3));
@@ -245,7 +245,7 @@ class TestAffineSet
             ARIADNE_TEST_PRINT(paving);
 
             Figure figure;
-            figure.set_bounding_box(set.bounding_box()+IntervalVector(2,Interval(-0.125,+0.125)) );
+            figure.set_bounding_box(widen(set.bounding_box(),+0.125));
             figure.set_fill_opacity(0.5);
             figure.set_fill_colour(1.0,0.0,0.0);
             figure.draw(paving);

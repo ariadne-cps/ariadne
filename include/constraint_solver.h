@@ -44,6 +44,7 @@ typedef tribool Tribool;
 template<class X> class Point;
 typedef Point<ExactNumberType> ExactPoint;
 class Box;
+class UpperBox;
 class GridTreeSet;
 
 template<class X, class R> class Constraint;
@@ -129,7 +130,7 @@ class ConstraintSolver
     bool monotone_reduce(UpperBox& bx, const ValidatedScalarFunctionInterface& function, const Interval&, uint j) const;
 
     //! Split the domain into two pieces to help try to solve the constraints.
-    Pair<Box,Box> split(const Box& domain, const ValidatedVectorFunction& function, const Box& codomain) const;
+    Pair<UpperBox,UpperBox> split(const UpperBox& domain, const ValidatedVectorFunction& function, const Box& codomain) const;
 
     // Deprecated functions.
     bool hull_reduce(UpperBox& bx, const ValidatedConstraint& constraint) const {

@@ -107,11 +107,11 @@ void export_interior_point_solver()
 void export_constraint_solver()
 {
     class_<ConstraintSolver> constraint_solver_class("ConstraintSolver", init<>());
-    constraint_solver_class.def("hull_reduce", (bool(ConstraintSolver::*)(Box&,const ValidatedScalarFunctionInterface&,const Interval&)const) &ConstraintSolver::hull_reduce);
-    constraint_solver_class.def("box_reduce", (bool(ConstraintSolver::*)(Box&,const ValidatedScalarFunctionInterface&,const Interval&,uint)const) &ConstraintSolver::box_reduce);
-    constraint_solver_class.def("monotone_reduce", (bool(ConstraintSolver::*)(Box&,const ValidatedScalarFunctionInterface&,const Interval&,uint)const) &ConstraintSolver::monotone_reduce);
-    constraint_solver_class.def("reduce", (bool(ConstraintSolver::*)(Box&,const List<ValidatedConstraint>&)const) &ConstraintSolver::reduce);
-    constraint_solver_class.def("reduce", (bool(ConstraintSolver::*)(Box&,const ValidatedVectorFunction&,const Box&)const) &ConstraintSolver::reduce);
+    constraint_solver_class.def("hull_reduce", (bool(ConstraintSolver::*)(UpperBox&,const ValidatedScalarFunctionInterface&,const Interval&)const) &ConstraintSolver::hull_reduce);
+    constraint_solver_class.def("box_reduce", (bool(ConstraintSolver::*)(UpperBox&,const ValidatedScalarFunctionInterface&,const Interval&,uint)const) &ConstraintSolver::box_reduce);
+    constraint_solver_class.def("monotone_reduce", (bool(ConstraintSolver::*)(UpperBox&,const ValidatedScalarFunctionInterface&,const Interval&,uint)const) &ConstraintSolver::monotone_reduce);
+    constraint_solver_class.def("reduce", (bool(ConstraintSolver::*)(UpperBox&,const List<ValidatedConstraint>&)const) &ConstraintSolver::reduce);
+    constraint_solver_class.def("reduce", (bool(ConstraintSolver::*)(UpperBox&,const ValidatedVectorFunction&,const Box&)const) &ConstraintSolver::reduce);
 }
 
 

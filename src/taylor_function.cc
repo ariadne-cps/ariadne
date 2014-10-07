@@ -419,7 +419,7 @@ ScalarTaylorFunction extend(const ScalarTaylorFunction& tv, const Box& d) {
 
 ValidatedNumberType
 evaluate(const ScalarTaylorFunction& f, const Vector<ValidatedNumberType>& x) {
-    if(!subset(reinterpret_cast<Vector<Interval>const&>(x),f.domain())) {
+    if(!contains(f.domain(),x)) {
         ARIADNE_THROW(DomainException,std::setprecision(17)<<"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
     }
     return unchecked_evaluate(f,x);
@@ -1374,7 +1374,7 @@ Vector<ValidatedNumberType>
 VectorTaylorFunction::evaluate(const Vector<ValidatedNumberType>& x) const
 {
     const VectorTaylorFunction& f=*this;
-    if(!subset(reinterpret_cast<Vector<Interval>const&>(x),f.domain())) {
+    if(!contains(f.domain(),x)) {
         ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
     }
     Vector<ValidatedNumberType> sx=Ariadne::unscale(x,f._domain);
@@ -1761,7 +1761,7 @@ restrict(const VectorTaylorFunction& tf, uint k, const Interval& d)
 
 Vector<ValidatedNumberType>
 evaluate(const VectorTaylorFunction& f, const Vector<ValidatedNumberType>& x) {
-    if(!subset(reinterpret_cast<Vector<Interval>const&>(x),f.domain())) {
+    if(!contains(f.domain(),x)) {
         ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
     }
     return unchecked_evaluate(f,x);

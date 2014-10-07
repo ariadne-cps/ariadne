@@ -174,11 +174,11 @@ class HybridEnclosure
     void set_time_function(const ValidatedScalarFunctionModel& omega);
 
     //! \brief A bounding box for the space.
-    Box space_bounding_box() const;
+    UpperBox space_bounding_box() const;
     //! \brief The range of times since the starting time that the set represents.
-    Interval time_range() const;
+    UpperInterval time_range() const;
     //! \brief The range of times since the last event.
-    Interval dwell_time_range() const;
+    UpperInterval dwell_time_range() const;
 
     //! \brief The continuous state set.
     const ContinuousStateSetType& continuous_set() const;

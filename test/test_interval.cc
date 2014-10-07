@@ -101,7 +101,7 @@ TestInterval::test_concept()
     j=n; j=m; j=d; j=x; j=i;
 
     // Exact operations
-    j=abs(i); j=neg(i); j=rec(i);
+    //j=abs(i); j=neg(i); j=rec(i);
 
     // Arithmetic
     //j=add(x,x); j=add(x,i); j=add(i,x); j=add(i,i);
@@ -112,10 +112,10 @@ TestInterval::test_concept()
     //j=pow(x,m); j=pow(x,m);
 
     // Transcendental functions
-    j=sqrt(i);
-    j=exp(i);
-    j=log(i);
     /*
+      j=sqrt(i);
+      j=exp(i);
+      j=log(i);
       j=sin(i);
       j=cos(i);
       j=tan(i);
@@ -139,9 +139,9 @@ TestInterval::test_concept()
 void
 TestInterval::test_correct_rounded_arithmetic()
 {
-    Interval onethird=Interval(1)/Interval(3);
+    UpperInterval onethird=UpperInterval(1)/UpperInterval(3);
     ARIADNE_TEST_COMPARE( onethird.lower(), < , onethird.upper() );
-    Interval one_approx=onethird*Interval(3);
+    UpperInterval one_approx=onethird*UpperInterval(3);
     ARIADNE_TEST_COMPARE( one_approx.lower(), < , 1.0 );
     ARIADNE_TEST_COMPARE( one_approx.upper(), > , 1.0 );
 }
@@ -154,26 +154,26 @@ TestInterval::test_accurate_rounded_arithmetic()
     const double min=std::numeric_limits<double>::min();
     const double eps=std::numeric_limits<double>::epsilon();
 
-    ARIADNE_TEST_EQUAL(Interval(1.5)+Interval(min),Interval(1.5,1.5+eps));
-    ARIADNE_TEST_EQUAL(Interval(1.5)-Interval(min),Interval(1.5-eps,1.5));
-    ARIADNE_TEST_EQUAL(Interval(1+eps,1+2*eps)*Interval(1+eps,1+3*eps),Interval(1+2*eps,1+6*eps));
-    ARIADNE_TEST_EQUAL(Interval(1)/Interval(3),Interval(0.33333333333333331,0.33333333333333337));
-    ARIADNE_TEST_EQUAL(Interval(2)/Interval(5),Interval(0.39999999999999997,0.40000000000000002));
+    ARIADNE_TEST_EQUAL(UpperInterval(1.5)+UpperInterval(min),UpperInterval(1.5,1.5+eps));
+    ARIADNE_TEST_EQUAL(UpperInterval(1.5)-UpperInterval(min),UpperInterval(1.5-eps,1.5));
+    ARIADNE_TEST_EQUAL(UpperInterval(1+eps,1+2*eps)*UpperInterval(1+eps,1+3*eps),UpperInterval(1+2*eps,1+6*eps));
+    ARIADNE_TEST_EQUAL(UpperInterval(1)/UpperInterval(3),UpperInterval(0.33333333333333331,0.33333333333333337));
+    ARIADNE_TEST_EQUAL(UpperInterval(2)/UpperInterval(5),UpperInterval(0.39999999999999997,0.40000000000000002));
 
-    ARIADNE_TEST_EQUAL(Interval(1.5)+Float(min),Interval(1.5,1.5+eps));
-    ARIADNE_TEST_EQUAL(Interval(1.5)-Float(min),Interval(1.5-eps,1.5));
-    ARIADNE_TEST_EQUAL(Interval(1+eps,1+2*eps)*Float(1+eps),Interval(1+2*eps,1+4*eps));
-    ARIADNE_TEST_EQUAL(Interval(1+3*eps,1+5*eps)/Float(1+eps),Interval(1+eps,1+4*eps));
+    ARIADNE_TEST_EQUAL(UpperInterval(1.5)+Float(min),UpperInterval(1.5,1.5+eps));
+    ARIADNE_TEST_EQUAL(UpperInterval(1.5)-Float(min),UpperInterval(1.5-eps,1.5));
+    ARIADNE_TEST_EQUAL(UpperInterval(1+eps,1+2*eps)*Float(1+eps),UpperInterval(1+2*eps,1+4*eps));
+    ARIADNE_TEST_EQUAL(UpperInterval(1+3*eps,1+5*eps)/Float(1+eps),UpperInterval(1+eps,1+4*eps));
 
-    ARIADNE_TEST_EQUAL(Float(min)-Interval(1.5),Interval(-1.5,eps-1.5));
-    ARIADNE_TEST_EQUAL(Float(1+5*eps)/Interval(1+2*eps,1+3*eps),Interval(1+eps,1+3*eps));
+    ARIADNE_TEST_EQUAL(Float(min)-UpperInterval(1.5),UpperInterval(-1.5,eps-1.5));
+    ARIADNE_TEST_EQUAL(Float(1+5*eps)/UpperInterval(1+2*eps,1+3*eps),UpperInterval(1+eps,1+3*eps));
 
-    ARIADNE_TEST_EQUAL(sqr(Interval(1-eps,1+eps)),Interval(1-4*eps/2,1+3*eps));
+    ARIADNE_TEST_EQUAL(sqr(UpperInterval(1-eps,1+eps)),UpperInterval(1-4*eps/2,1+3*eps));
 
-    ARIADNE_TEST_EQUAL(pow(Interval(3,5),-1),Interval(0.19999999999999998,0.33333333333333337));
-    ARIADNE_TEST_EQUAL(pow(Interval(3,5),-2),Interval(0.039999999999999986955,0.11111111111111114658));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(3,5),-1),UpperInterval(0.19999999999999998,0.33333333333333337));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(3,5),-2),UpperInterval(0.039999999999999986955,0.11111111111111114658));
 
-    ARIADNE_TEST_EQUAL(rec(Interval(1+2*eps,1+5*eps)),Interval(1-10*eps/2,1-3*eps/2));
+    ARIADNE_TEST_EQUAL(rec(UpperInterval(1+2*eps,1+5*eps)),UpperInterval(1-10*eps/2,1-3*eps/2));
 
 }
 
@@ -182,84 +182,84 @@ TestInterval::test_accurate_rounded_arithmetic()
 void
 TestInterval::test_exact_rounded_arithmetic()
 {
-    ARIADNE_TEST_EQUAL(Interval(5,7)+Interval(2,4),Interval(7,11));
-    ARIADNE_TEST_EQUAL(Interval(5,7)-Interval(2,6),Interval(-1,5));
+    ARIADNE_TEST_EQUAL(UpperInterval(5,7)+UpperInterval(2,4),UpperInterval(7,11));
+    ARIADNE_TEST_EQUAL(UpperInterval(5,7)-UpperInterval(2,6),UpperInterval(-1,5));
 
-    ARIADNE_TEST_EQUAL(Interval(5,7)*Interval(2,4),Interval(10,28));
-    ARIADNE_TEST_EQUAL(Interval(5,7)*Interval(-2,4),Interval(-14,28));
-    ARIADNE_TEST_EQUAL(Interval(5,7)*Interval(-4,-2),Interval(-28,-10));
-    ARIADNE_TEST_EQUAL(Interval(-7,5)*Interval(2,4),Interval(-28,20));
-    ARIADNE_TEST_EQUAL(Interval(-7,5)*Interval(-2,4),Interval(-28,20));
-    ARIADNE_TEST_EQUAL(Interval(-7,5)*Interval(-4,-2),Interval(-20,28));
-    ARIADNE_TEST_EQUAL(Interval(-7,-5)*Interval(2,4),Interval(-28,-10));
-    ARIADNE_TEST_EQUAL(Interval(-7,-5)*Interval(-2,4),Interval(-28,14));
-    ARIADNE_TEST_EQUAL(Interval(-7,-5)*Interval(-4,-2),Interval(10,28));
+    ARIADNE_TEST_EQUAL(UpperInterval(5,7)*UpperInterval(2,4),UpperInterval(10,28));
+    ARIADNE_TEST_EQUAL(UpperInterval(5,7)*UpperInterval(-2,4),UpperInterval(-14,28));
+    ARIADNE_TEST_EQUAL(UpperInterval(5,7)*UpperInterval(-4,-2),UpperInterval(-28,-10));
+    ARIADNE_TEST_EQUAL(UpperInterval(-7,5)*UpperInterval(2,4),UpperInterval(-28,20));
+    ARIADNE_TEST_EQUAL(UpperInterval(-7,5)*UpperInterval(-2,4),UpperInterval(-28,20));
+    ARIADNE_TEST_EQUAL(UpperInterval(-7,5)*UpperInterval(-4,-2),UpperInterval(-20,28));
+    ARIADNE_TEST_EQUAL(UpperInterval(-7,-5)*UpperInterval(2,4),UpperInterval(-28,-10));
+    ARIADNE_TEST_EQUAL(UpperInterval(-7,-5)*UpperInterval(-2,4),UpperInterval(-28,14));
+    ARIADNE_TEST_EQUAL(UpperInterval(-7,-5)*UpperInterval(-4,-2),UpperInterval(10,28));
 
-    ARIADNE_TEST_EQUAL(Interval(5,7)/Interval(2,4),Interval(1.25,3.50));
-    ARIADNE_TEST_EQUAL(Interval(5,7)/Interval(-4,-2),Interval(-3.50,-1.25));
-    ARIADNE_TEST_EQUAL(Interval(-7,5)/Interval(2,4),Interval(-3.50,2.50));
-    ARIADNE_TEST_EQUAL(Interval(-7,5)/Interval(-4,-2),Interval(-2.50,3.5));
-    ARIADNE_TEST_EQUAL(Interval(-7,-5)/Interval(2,4),Interval(-3.50,-1.25));
-    ARIADNE_TEST_EQUAL(Interval(-7,-5)/Interval(-4,-2),Interval(1.25,3.50));
+    ARIADNE_TEST_EQUAL(UpperInterval(5,7)/UpperInterval(2,4),UpperInterval(1.25,3.50));
+    ARIADNE_TEST_EQUAL(UpperInterval(5,7)/UpperInterval(-4,-2),UpperInterval(-3.50,-1.25));
+    ARIADNE_TEST_EQUAL(UpperInterval(-7,5)/UpperInterval(2,4),UpperInterval(-3.50,2.50));
+    ARIADNE_TEST_EQUAL(UpperInterval(-7,5)/UpperInterval(-4,-2),UpperInterval(-2.50,3.5));
+    ARIADNE_TEST_EQUAL(UpperInterval(-7,-5)/UpperInterval(2,4),UpperInterval(-3.50,-1.25));
+    ARIADNE_TEST_EQUAL(UpperInterval(-7,-5)/UpperInterval(-4,-2),UpperInterval(1.25,3.50));
 
-    ARIADNE_TEST_EQUAL(pow(Interval(5,7),0u),Interval(1,1));
-    ARIADNE_TEST_EQUAL(pow(Interval(-5,7),0u),Interval(1,1));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,5),0u),Interval(1,1));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,-5),0u),Interval(1,1));
-    ARIADNE_TEST_EQUAL(pow(Interval(5,7),1u),Interval(5,7));
-    ARIADNE_TEST_EQUAL(pow(Interval(-5,7),1u),Interval(-5,7));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,5),1u),Interval(-7,5));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,-5),1u),Interval(-7,-5));
-    ARIADNE_TEST_EQUAL(pow(Interval(5,7),2u),Interval(25,49));
-    ARIADNE_TEST_EQUAL(pow(Interval(-5,7),2u),Interval(0,49));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,5),2u),Interval(0,49));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,-5),2u),Interval(25,49));
-    ARIADNE_TEST_EQUAL(pow(Interval(5,7),3u),Interval(125,343));
-    ARIADNE_TEST_EQUAL(pow(Interval(-5,7),3u),Interval(-125,343));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,5),3u),Interval(-343,125));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,-5),3u),Interval(-343,-125));
-    ARIADNE_TEST_EQUAL(pow(Interval(5,7),4u),Interval(625,2401));
-    ARIADNE_TEST_EQUAL(pow(Interval(-5,7),4u),Interval(0,2401));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,5),4u),Interval(0,2401));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,-5),4u),Interval(625,2401));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(5,7),0u),UpperInterval(1,1));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-5,7),0u),UpperInterval(1,1));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,5),0u),UpperInterval(1,1));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,-5),0u),UpperInterval(1,1));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(5,7),1u),UpperInterval(5,7));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-5,7),1u),UpperInterval(-5,7));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,5),1u),UpperInterval(-7,5));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,-5),1u),UpperInterval(-7,-5));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(5,7),2u),UpperInterval(25,49));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-5,7),2u),UpperInterval(0,49));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,5),2u),UpperInterval(0,49));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,-5),2u),UpperInterval(25,49));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(5,7),3u),UpperInterval(125,343));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-5,7),3u),UpperInterval(-125,343));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,5),3u),UpperInterval(-343,125));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,-5),3u),UpperInterval(-343,-125));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(5,7),4u),UpperInterval(625,2401));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-5,7),4u),UpperInterval(0,2401));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,5),4u),UpperInterval(0,2401));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,-5),4u),UpperInterval(625,2401));
 
-    ARIADNE_TEST_EQUAL(pow(Interval(5,7),0),Interval(1,1));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,5),0),Interval(1,1));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,-5),0),Interval(1,1));
-    ARIADNE_TEST_EQUAL(pow(Interval(5,7),1),Interval(5,7));
-    ARIADNE_TEST_EQUAL(pow(Interval(-5,7),1),Interval(-5,7));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,5),1),Interval(-7,5));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,-5),1),Interval(-7,-5));
-    ARIADNE_TEST_EQUAL(pow(Interval(5,7),2),Interval(25,49));
-    ARIADNE_TEST_EQUAL(pow(Interval(-5,7),2),Interval(0,49));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,5),2),Interval(0,49));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,-5),2),Interval(25,49));
-    ARIADNE_TEST_EQUAL(pow(Interval(5,7),3),Interval(125,343));
-    ARIADNE_TEST_EQUAL(pow(Interval(-5,7),3),Interval(-125,343));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,5),3),Interval(-343,125));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,-5),3),Interval(-343,-125));
-    ARIADNE_TEST_EQUAL(pow(Interval(5,7),4),Interval(625,2401));
-    ARIADNE_TEST_EQUAL(pow(Interval(-5,7),4),Interval(0,2401));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,5),4),Interval(0,2401));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,-5),4),Interval(625,2401));
-    ARIADNE_TEST_EQUAL(pow(Interval(5,7),5),Interval(3125,16807));
-    ARIADNE_TEST_EQUAL(pow(Interval(-5,7),5),Interval(-3125,16807));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,5),5),Interval(-16807,3125));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,-5),5),Interval(-16807,-3125));
-    ARIADNE_TEST_EQUAL(pow(Interval(5,7),7),Interval(78125,823543));
-    ARIADNE_TEST_EQUAL(pow(Interval(-5,7),7),Interval(-78125,823543));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,5),7),Interval(-823543,78125));
-    ARIADNE_TEST_EQUAL(pow(Interval(-7,-5),7),Interval(-823543,-78125));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(5,7),0),UpperInterval(1,1));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,5),0),UpperInterval(1,1));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,-5),0),UpperInterval(1,1));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(5,7),1),UpperInterval(5,7));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-5,7),1),UpperInterval(-5,7));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,5),1),UpperInterval(-7,5));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,-5),1),UpperInterval(-7,-5));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(5,7),2),UpperInterval(25,49));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-5,7),2),UpperInterval(0,49));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,5),2),UpperInterval(0,49));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,-5),2),UpperInterval(25,49));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(5,7),3),UpperInterval(125,343));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-5,7),3),UpperInterval(-125,343));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,5),3),UpperInterval(-343,125));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,-5),3),UpperInterval(-343,-125));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(5,7),4),UpperInterval(625,2401));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-5,7),4),UpperInterval(0,2401));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,5),4),UpperInterval(0,2401));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,-5),4),UpperInterval(625,2401));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(5,7),5),UpperInterval(3125,16807));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-5,7),5),UpperInterval(-3125,16807));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,5),5),UpperInterval(-16807,3125));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,-5),5),UpperInterval(-16807,-3125));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(5,7),7),UpperInterval(78125,823543));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-5,7),7),UpperInterval(-78125,823543));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,5),7),UpperInterval(-823543,78125));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-7,-5),7),UpperInterval(-823543,-78125));
 
-    ARIADNE_TEST_EQUAL(pow(Interval(2,4),-1),Interval(0.25,0.5));
-    ARIADNE_TEST_EQUAL(pow(Interval(-4,-2),-1),Interval(-0.5,-0.25));
-    ARIADNE_TEST_EQUAL(pow(Interval(2,4),-2),Interval(0.0625,0.25));
-    ARIADNE_TEST_EQUAL(pow(Interval(-4,-2),-2),Interval(0.0625,0.25));
-    ARIADNE_TEST_EQUAL(pow(Interval(2,4),-3),Interval(0.015625,0.125));
-    ARIADNE_TEST_EQUAL(pow(Interval(-4,-2),-3),Interval(-0.125,-0.015625));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(2,4),-1),UpperInterval(0.25,0.5));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-4,-2),-1),UpperInterval(-0.5,-0.25));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(2,4),-2),UpperInterval(0.0625,0.25));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-4,-2),-2),UpperInterval(0.0625,0.25));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(2,4),-3),UpperInterval(0.015625,0.125));
+    ARIADNE_TEST_EQUAL(pow(UpperInterval(-4,-2),-3),UpperInterval(-0.125,-0.015625));
 
-    ARIADNE_TEST_EQUAL(rec(Interval(2,4)),Interval(0.25,0.50));
-    ARIADNE_TEST_EQUAL(rec(Interval(-4,-2)),Interval(-0.50,-0.25));
+    ARIADNE_TEST_EQUAL(rec(UpperInterval(2,4)),UpperInterval(0.25,0.50));
+    ARIADNE_TEST_EQUAL(rec(UpperInterval(-4,-2)),UpperInterval(-0.50,-0.25));
 }
 
 
@@ -385,34 +385,34 @@ void TestInterval::test_aliasing() {
     Float x2=1.5;
     Float x3=2.25;
 
-    Interval ivl1;
-    Interval ivl2(1.5,2.25);
-    Interval ivl3(3.125,4.0625);
+    UpperInterval ivl1;
+    UpperInterval ivl2(1.5,2.25);
+    UpperInterval ivl3(3.125,4.0625);
 
     // Check to make sure aliases are handled correctly
-    ivl1=ivl3; ivl1=ivl2-ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,Interval(ivl2-ivl3));
-    ivl1=ivl3; ivl1=ivl2*ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,Interval(ivl2*ivl3));
-    ivl1=ivl2; ivl1=ivl1*ivl3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,Interval(ivl2*ivl3));
-    ivl1=ivl2; ivl1=ivl1*x3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,Interval(ivl2*x3));
-    ivl1=ivl3; ivl1=x2*ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,Interval(x2*ivl3));
-    ivl1=ivl2; ivl1=ivl1/ivl3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,Interval(ivl2/ivl3));
-    ivl1=ivl2; ivl1=ivl1/x3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,Interval(ivl2/x3));
-    ivl1=ivl3; ivl1=x2/ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,Interval(x2/ivl3));
+    ivl1=ivl3; ivl1=ivl2-ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,UpperInterval(ivl2-ivl3));
+    ivl1=ivl3; ivl1=ivl2*ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,UpperInterval(ivl2*ivl3));
+    ivl1=ivl2; ivl1=ivl1*ivl3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,UpperInterval(ivl2*ivl3));
+    ivl1=ivl2; ivl1=ivl1*x3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,UpperInterval(ivl2*x3));
+    ivl1=ivl3; ivl1=x2*ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,UpperInterval(x2*ivl3));
+    ivl1=ivl2; ivl1=ivl1/ivl3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,UpperInterval(ivl2/ivl3));
+    ivl1=ivl2; ivl1=ivl1/x3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,UpperInterval(ivl2/x3));
+    ivl1=ivl3; ivl1=x2/ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,UpperInterval(x2/ivl3));
 }
 
 void TestInterval::test_monotone_functions()
 {
 
-    Interval two(2.0);
-    Interval sqrttwo=sqrt(two);
+    UpperInterval two(2.0);
+    UpperInterval sqrttwo=sqrt(two);
     ARIADNE_TEST_PRINT(sqrttwo);
     ARIADNE_TEST_COMPARE(sqrttwo.lower(),<=,1.4142135623730949);
     ARIADNE_TEST_COMPARE(sqrttwo.lower(),> ,1.4142135623730947);
     ARIADNE_TEST_COMPARE(sqrttwo.upper(),>=,1.4142135623730951);
     ARIADNE_TEST_COMPARE(sqrttwo.upper(),< ,1.4142135623730954);
 
-    Interval one(1.0);
-    Interval expone=exp(one);
+    UpperInterval one(1.0);
+    UpperInterval expone=exp(one);
     ARIADNE_TEST_PRINT(expone);
     ARIADNE_TEST_COMPARE(expone.lower(),<,2.71828182845905);
     ARIADNE_TEST_COMPARE(expone.lower(),>,2.71828182845903);
@@ -420,8 +420,8 @@ void TestInterval::test_monotone_functions()
     ARIADNE_TEST_COMPARE(expone.upper(),<,2.71828182845906);
     ARIADNE_TEST_ASSERT(expone.lower()<expone.upper());
 
-    Interval e(2.7182818284590451,2.7182818284590455);
-    Interval loge=log(e);
+    UpperInterval e(2.7182818284590451,2.7182818284590455);
+    UpperInterval loge=log(e);
     ARIADNE_TEST_PRINT(e);
     ARIADNE_TEST_COMPARE(loge.lower(),<,1);
     ARIADNE_TEST_COMPARE(loge.lower(),>,0.9999999999998);
@@ -432,8 +432,8 @@ void TestInterval::test_monotone_functions()
 void TestInterval::test_trigonometric_functions()
 {
     try {
-        Interval x(6.283185307179586,6.283185307179587);
-        Interval sinx=sin(x);
+        UpperInterval x(6.283185307179586,6.283185307179587);
+        UpperInterval sinx=sin(x);
         ARIADNE_TEST_PRINT(x);
         ARIADNE_TEST_COMPARE(sinx.lower(),<,0.0);
         ARIADNE_TEST_COMPARE(sinx.lower(),>,-1e-14);
@@ -444,8 +444,8 @@ void TestInterval::test_trigonometric_functions()
     catch(...) { }
 
     try {
-        Interval x(7.0685834705770345);
-        Interval sinx=sin(x);
+        UpperInterval x(7.0685834705770345);
+        UpperInterval sinx=sin(x);
         ARIADNE_TEST_PRINT(x);
         ARIADNE_TEST_COMPARE(sinx.lower(),<,0.7071067811866);
         ARIADNE_TEST_COMPARE(sinx.upper(),>,0.7071067811865);
@@ -516,8 +516,8 @@ void TestInterval::regression_tests() {
 
     // Regression test; fails dramatically on certain types of rounding
     {
-        Interval x(1.5707963267948966,1.5707963267948968);
-        Interval cosx=cos(x);
+        UpperInterval x(1.5707963267948966,1.5707963267948968);
+        UpperInterval cosx=cos(x);
         ARIADNE_TEST_PRINT(x);
         ARIADNE_TEST_COMPARE(cosx.lower(),<,0.0);
         ARIADNE_TEST_COMPARE(cosx.lower(),>,-1e-14);

@@ -159,7 +159,7 @@ class Zonotope
     const Vector<Float>& error() const;
 
     /*! \brief A bounding box for the set. */
-    Box bounding_box() const;
+    UpperBox bounding_box() const;
 
     /*! \brief The radius of the set in the supremum norm. */
     Float radius() const;

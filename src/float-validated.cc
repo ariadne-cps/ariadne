@@ -179,6 +179,22 @@ UpperFloat& operator*=(UpperFloat& x1, UpperFloat x2) {
 }
 
 
+UpperFloat min(UpperFloat x1, UpperFloat x2) {
+    return UpperFloat(min(x1.raw(),x2.raw()));
+}
+
+UpperFloat max(UpperFloat x1, UpperFloat x2) {
+    return UpperFloat(max(x1.raw(),x2.raw()));
+}
+
+LowerFloat min(LowerFloat x1, LowerFloat x2) {
+    return LowerFloat(min(x1.raw(),x2.raw()));
+}
+
+LowerFloat max(LowerFloat x1, LowerFloat x2) {
+    return LowerFloat(max(x1.raw(),x2.raw()));
+}
+
 const ValidatedFloat pi_val=ValidatedFloat(pi_down,pi_up);
 
 uint ValidatedFloat::output_precision = 6;

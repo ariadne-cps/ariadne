@@ -532,7 +532,7 @@ class GridTreeSubset
     GridCell cell() const { return this->root_cell(); };
 
     /*! \brief Computes a bounding box for a grid set. */
-    Box bounding_box() const;
+    UpperBox bounding_box() const;
 
     /*! \brief Allows to test if the two subpavings are "equal". The method returns true if
      * the grida are equal and the binary trees are equal. Note that, only in case both
@@ -903,7 +903,7 @@ class GridTreeSet
      * smallest primary cell on the Grid, such that it contains \a theBox (after it's
      * mapping on \a theGrid )
      */
-    GridCell smallest_enclosing_primary_cell(const Box& theBox) const;
+    GridCell smallest_enclosing_primary_cell(const UpperBox& theBox) const;
     //@}
 
     //@{
@@ -943,6 +943,7 @@ class GridTreeSet
      * 5. Disables the cells that are disjoint with the \a theSet
      */
     void adjoin_outer_approximation( const CompactSetInterface& theSet, const uint numSubdivInDim );
+    void adjoin_outer_approximation( const UpperBox& theBox, const uint numSubdivInDim );
 
     /*! \brief Adjoin a lower approximation to a given set, computing to the given height and depth:
      *   \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of the
@@ -1692,14 +1693,14 @@ inline void GridTreeSubset::set_root_cell(bool enabled_or_disabled)  {
     this->_pRootTreeNode->set(enabled_or_disabled);
 }
 
-inline Box GridTreeSubset::bounding_box() const {
+inline UpperBox GridTreeSubset::bounding_box() const {
     if(this->empty()) return Box(this->dimension());
 
     GridTreeSet::const_iterator iter=this->begin();
-    Box bbox = iter->box();
+    UpperBox bbox = iter->box();
 
     for( ; iter!=this->end(); ++iter) {
-        Box cell = iter->box();
+        UpperBox cell = iter->box();
         for(uint i = 0; i < cell.dimension(); ++i) {
             if(cell[i].lower() < bbox[i].lower()) bbox[i].set_lower(cell[i].lower());
             if(cell[i].upper() > bbox[i].upper()) bbox[i].set_upper(cell[i].upper());
@@ -1791,7 +1792,7 @@ inline bool GridTreeSubset::intersects(const SubPavingInterface& paving) const {
 
 /*********************************************GridTreeSet*********************************************/
 
-inline GridCell GridTreeSet::smallest_enclosing_primary_cell( const Box& theBox ) const {
+inline GridCell GridTreeSet::smallest_enclosing_primary_cell( const UpperBox& theBox ) const {
     ARIADNE_ASSERT_MSG( this->dimension() == theBox.dimension(), "Cannot find enclosing cell for Box  " << theBox << " for GridTreeSet with grid " << this->grid() );
 
     return GridCell::smallest_enclosing_primary_cell( theBox, this->grid() );

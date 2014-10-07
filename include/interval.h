@@ -300,6 +300,7 @@ class UpperInterval {
     UpperInterval(Float point) : l(point), u(point) { }
     // FIXME: Should make explicit, but this interferes with role as a numeric type
     UpperInterval(int  point) : l(point), u(point) { }
+    UpperInterval(double  point) : l(point), u(point) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     explicit UpperInterval(Float lower, Float upper) : l(lower), u(upper) { }
     explicit UpperInterval(double lower, double upper) : l(lower), u(upper) { }
@@ -310,8 +311,8 @@ class UpperInterval {
     UpperInterval(Interval ivl) : UpperInterval(ivl.lower_raw(),ivl.upper_raw()) { }
 
     //! \brief Construct a singleton interval.
-    explicit UpperInterval(ExactFloat point) : l(point.raw()), u(point.raw()) { }
-    explicit UpperInterval(ValidatedFloat point) : l(point.lower_raw()), u(point.upper_raw()) { }
+    UpperInterval(ExactFloat point) : l(point.raw()), u(point.raw()) { }
+    UpperInterval(ValidatedFloat point) : l(point.lower_raw()), u(point.upper_raw()) { }
 
     //! \brief Set the lower bound of the interval.
     void set_lower(LowerFloat lower) { l=lower.raw(); }
@@ -347,10 +348,18 @@ class UpperInterval {
         return -inf<ivl.l && ivl.u<+inf; }
     friend bool contains(UpperInterval const& ivl, ExactNumber const& x) {
         return ivl.lower_raw() <= x.raw() && x.raw() <= ivl.upper_raw(); }
+    friend tribool inside(UpperInterval const& ivl1, Interval const& ivl2) {
+        return (ivl1.l>ivl2.lower_raw() && ivl1.u<ivl2.upper_raw()) || tribool(indeterminate); }
+    friend tribool subset(UpperInterval const& ivl1, Interval const& ivl2) {
+        return (ivl1.l>=ivl2.lower_raw() && ivl1.u<=ivl2.upper_raw()) || tribool(indeterminate); }
+    friend bool equal(UpperInterval const& ivl1, UpperInterval const& ivl2) {
+        return ivl1.l==ivl2.l && ivl1.u==ivl2.u; }
     friend bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2) {
-        return ivl1.l>=ivl2.l || ivl1.u<=ivl2.u; }
+        return ivl1.l>=ivl2.l && ivl1.u<=ivl2.u; }
+    friend bool models(UpperInterval const& ivl1, Interval const& ivl2) {
+        return ivl1.l>=ivl2.lower_raw() && ivl1.u<=ivl2.upper_raw(); }
     friend tribool disjoint(UpperInterval const& ivl1, UpperInterval const& ivl2) {
-        return (ivl1.u<ivl2.l || ivl2.u<ivl1.l) || indeterminate; }
+        return (ivl1.u<ivl2.l || ivl2.u<ivl1.l) || tribool(indeterminate); }
     friend UpperInterval hull(UpperInterval const& ivl1, UpperInterval const& ivl2) {
         return UpperInterval(min(ivl1.l,ivl2.l),max(ivl1.u,ivl2.u)); }
     friend UpperInterval intersection(UpperInterval const& ivl1, UpperInterval const& ivl2) {
@@ -367,6 +376,9 @@ const ApproximateFloatType midpoint(UpperInterval const& ivl);
 bool bounded(UpperInterval const& ivl);
 bool contains(UpperInterval const& ivl, ExactNumber const& x);
 bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2);
+bool models(UpperInterval const& ivl1, Interval const& ivl2);
+tribool inside(UpperInterval const& ivl1, Interval const& ivl2);
+tribool subset(UpperInterval const& ivl1, Interval const& ivl2);
 tribool disjoint(UpperInterval const& ivl1, UpperInterval const& ivl2);
 UpperInterval widen(UpperInterval i);
 
@@ -859,6 +871,30 @@ inline ValidatedNumberType make_singleton(UpperInterval const& ivl) {
     return ValidatedNumberType(ivl.lower_raw(),ivl.upper_raw());
 }
 
+//! \brief An over-approximation to an interval set.
+class ApproximateInterval {
+  public:
+    explicit ApproximateInterval() : l(0.0), u(0.0) { }
+    explicit ApproximateInterval(Float point) : l(point), u(point) { }
+    explicit ApproximateInterval(Float lower, Float upper) : l(lower), u(upper) { }
+    explicit ApproximateInterval(ApproximateFloat point) : l(point.raw()), u(point.raw()) { }
+    explicit ApproximateInterval(ApproximateFloat lower, ApproximateFloat upper) : l(lower.raw()), u(upper.raw()) { }
+    ApproximateInterval(Interval ivl) : l(ivl.lower_raw()), u(ivl.upper_raw()) { }
+    ApproximateInterval(UpperInterval ivl) : l(ivl.lower_raw()), u(ivl.upper_raw()) { }
+    Float const& lower_raw() const { return l; }
+    Float const& upper_raw() const { return l; }
+    ApproximateFloat lower() const { return ApproximateFloat(l); }
+    ApproximateFloat upper() const { return ApproximateFloat(u); }
+    ApproximateFloat midpoint() const { return ApproximateFloat((l+u)/2); }
+    ApproximateFloat radius() const { return ApproximateFloat((u-l)/2); }
+    ApproximateFloat width() const { return ApproximateFloat(u-l); }
+    friend bool contains(ApproximateInterval const& ivl, ApproximateFloat const& x) {
+        return ivl.lower_raw()<=x.raw() && x.raw()<=ivl.upper_raw(); }
+    friend std::ostream& operator<<(std::ostream& os, const ApproximateInterval& ivl) {
+        return os << Interval(ivl.lower_raw(),ivl.upper_raw()); }
+  private:
+    Float l, u;
+};
 
 class UnitInterval
     : public Interval

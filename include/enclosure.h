@@ -206,7 +206,7 @@ class Enclosure
     //! \brief The number of parameters i.e. the dimension of the parameter domain.
     uint number_of_parameters() const;
     //! \brief A bounding box for the set.
-    Box bounding_box() const;
+    UpperBox bounding_box() const;
     //! \brief A point in the image of the <em>unconstrained</em> parameter domain.
     ExactPoint centre() const;
     //! \brief An over-approximation to the radius of the set.

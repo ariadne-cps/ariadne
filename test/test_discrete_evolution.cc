@@ -35,7 +35,6 @@
 #include "taylor_function.h"
 #include "enclosure.h"
 #include "box.h"
-#include "zonotope.h"
 #include "list_set.h"
 #include "map.h"
 #include "map_evolver.h"

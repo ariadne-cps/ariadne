@@ -47,7 +47,13 @@ class BoxSet;
 
 template<class X> class Point;
 typedef Point<ExactFloatType> ExactPoint;
+
 class Box;
+class UpperBox;
+class ApproximateBox;
+
+typedef Box BoxDomainType;
+typedef UpperBox BoundingBoxType;
 
 bool contains(const Vector<Interval>& v1, const Vector<ExactFloatType>& v2);
 bool contains(const Vector<Interval>& v1, const Vector<ValidatedFloatType>& v2);
@@ -246,9 +252,7 @@ class Box
     //! \brief Returns an enclosing bounding box for the set.
     //! The result is guaranteed to have nonempty interior, and floating-point
     //! boundary coefficients so the centre and radius are exactly computable.
-    virtual Box bounding_box() const {
-        return Ariadne::widen(*this);
-    }
+    virtual inline UpperBox bounding_box() const;
 
     //! \brief Widens the box by the minimal floating-point increment.
     //! The result is guaranteed to contain the box in its interior.
@@ -382,16 +386,33 @@ class UpperBox
         return rbx;
     }
 
+    friend UpperBox hull(const UpperBox& bx1, const UpperBox& bx2) {
+        assert(bx1.dimension()==bx2.dimension());
+        UpperBox rbx(bx1.dimension());
+        for(uint i=0; i!=rbx.dimension(); ++i) { rbx[i]=hull(bx1[i],bx2[i]); }
+        return rbx;
+    }
+
+    //! \brief Test if the box is a subset of another box.
+    Tribool inside(const Box& bx) const {
+        for(uint i=0; i!=dimension(); ++i) {
+            if(!Ariadne::inside((*this)[i],bx[i])) { return indeterminate; } }
+        return true;
+    }
+
+    //! \brief Test if the box is a subset of another box.
+    Tribool subset(const Box& bx) const {
+        for(uint i=0; i!=dimension(); ++i) {
+            if(!Ariadne::subset((*this)[i],bx[i])) { return indeterminate; } }
+        return true;
+    }
+
     //! \brief Test if the box intersects another box. Returns \a false even
     //! if the intersection only occurs only on the boundary of the boxes.
     Tribool disjoint(const UpperBox& bx) const {
         for(uint i=0; i!=this->dimension(); ++i) {
             if(Ariadne::disjoint((*this)[i],bx[i])) { return true; } }
         return indeterminate;
-    }
-
-    friend Tribool disjoint(const UpperBox& bx1, const UpperBox& bx2) {
-        return bx1.disjoint(bx2);
     }
 
     //! \brief The dimension of the space the box lies in.
@@ -430,7 +451,8 @@ class UpperBox
     }
 
     //! \brief Split into two along the largest side.
-    std::pair<UpperBox,UpperBox> split() const;
+    std::pair<UpperBox,UpperBox> split() const {
+        return Box(reinterpret_cast<Vector<Interval>const&>(*this)).split(); }
     //! \brief Split into two along side with index \a i.
     std::pair<UpperBox,UpperBox> split(uint i) const;
 
@@ -438,10 +460,82 @@ class UpperBox
     std::ostream& write(std::ostream& os) const {
         return os << *static_cast<const Vector<UpperInterval>*>(this);
     }
+
+    void draw(CanvasInterface& c, const Projection2d& p) const;
 };
 
-inline Box make_exact_box(UpperBox const& ubx) { return Box(reinterpret_cast<Vector<Interval>const&>(static_cast<Vector<UpperInterval>const&>(ubx))); }
-Tribool disjoint(const UpperBox& bx1, const UpperBox& bx2);
+//! \brief An over-approximation to an interval set.
+class ApproximateBox
+    : public Vector<ApproximateInterval>
+{
+  public:
+    explicit ApproximateBox(Nat d) : ApproximateBox(d,ApproximateInterval()) { }
+    explicit ApproximateBox(Nat d, ApproximateInterval const& ivl) : Vector<ApproximateInterval>(d,ivl) { }
+    explicit ApproximateBox(Vector<ApproximateInterval> const& vec) : Vector<ApproximateInterval>(vec) { }
+    ApproximateBox(Box const& bx) : Vector<ApproximateInterval>(bx) { }
+    ApproximateBox(UpperBox const& bx) : Vector<ApproximateInterval>(bx) { }
+
+    uint dimension() const { return this->Vector<ApproximateInterval>::size(); }
+};
+
+inline Box make_exact_box(UpperBox const& ubx) {
+    return Box(reinterpret_cast<Vector<Interval>const&>(static_cast<Vector<UpperInterval>const&>(ubx)));
+}
+
+
+inline bool subset(const Box& bx1, const Box& bx2) {
+    return bx1.subset(bx2);
+}
+
+inline UpperBox Box::bounding_box() const {
+    return Ariadne::widen(*this);
+}
+
+
+inline UpperBox widen(UpperBox bx) {
+    bx.widen(); return bx;
+}
+
+inline ApproximatePoint midpoint(const UpperBox& bx) {
+    return midpoint(static_cast<Vector<UpperInterval>const&>(bx));
+}
+
+inline PositiveUpperFloatType radius(const UpperBox& bx) {
+    return bx.radius();
+}
+
+inline tribool inside(const UpperBox& bx1, const Box& bx2) {
+    return bx1.inside(bx2);
+}
+
+inline tribool subset(const UpperBox& bx1, const Box& bx2) {
+    return bx1.subset(bx2);
+}
+
+inline tribool disjoint(const UpperBox& bx1, const UpperBox& bx2) {
+    return bx1.disjoint(bx2);
+}
+
+inline void UpperBox::draw(CanvasInterface& c, const Projection2d& p) const {
+    make_exact_box(*this).draw(c,p);
+}
+
+
+inline bool contains(const ApproximateBox& abx, ApproximatePoint apt) {
+    assert(abx.dimension()==apt.dimension());
+    for(uint i=0; i!=abx.dimension(); ++i) {
+        if(!contains(abx[i],apt[i])) { return false; }
+    }
+    return true;
+}
+
+inline ApproximateBox widen(const UpperBox& bx, ApproximateFloat eps) {
+    ApproximateBox r(bx.dimension());
+    for(uint i=0; i!=bx.size(); ++i) {
+        r[i]=ApproximateInterval(bx[i].lower()-eps,bx[i].upper()+eps);
+    }
+    return r;
+}
 
 } // namespace Ariadne
 

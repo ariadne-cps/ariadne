@@ -129,8 +129,8 @@ class ListSet
         this->_data.insert(this->_data.end(),ls.begin(),ls.end()); }
 
     /*! \brief compute a list of the bounding boxes of the set elements. */
-    ListSet<Box> bounding_boxes() const {
-        ListSet<Box> result(this->dimension());
+    ListSet<UpperBox> bounding_boxes() const {
+        ListSet<UpperBox> result(this->dimension());
         for(uint i=0; i!=this->size(); ++i) {
             result.adjoin((*this)[i].bounding_box());
         }
@@ -138,9 +138,9 @@ class ListSet
     }
 
     /*! \brief A bounding box for the whole set. */
-    Box bounding_box() const {
-        if(this->size()==0) { return Box(this->dimension()); }
-        Box result((*this)[0].bounding_box());
+    UpperBox bounding_box() const {
+        if(this->size()==0) { return UpperBox(this->dimension()); }
+        UpperBox result((*this)[0].bounding_box());
         for(uint i=1; i!=this->size(); ++i) {
             result=hull(result,(*this)[i].bounding_box()); }
         return result;

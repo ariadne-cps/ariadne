@@ -62,7 +62,9 @@ namespace Ariadne {
 // Classes defined in this file
 class HybridPoint;
 class HybridBox;
+typedef HybridBox HybridUpperBox;
 class HybridBoxes;
+typedef HybridBoxes HybridUpperBoxes;
 class HybridGridTreeSet;
 template<class ES> class HybridBasicSet;
 template<class ES> class ListSet< HybridBasicSet<ES> >;
@@ -161,7 +163,7 @@ class HybridBoundedConstraintSet
 
     virtual tribool separated(const HybridBox& bx) const override;
     virtual tribool covers(const HybridBox& bx) const override;
-    virtual HybridBoxes bounding_box() const override;
+    virtual HybridUpperBoxes bounding_box() const override;
 
     virtual std::ostream& write(std::ostream& os) const override;
     virtual void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
@@ -423,8 +425,8 @@ class HybridListSet
             _loc_iter!=hls.locations_end(); ++_loc_iter) {
             (*this)[_loc_iter->first].adjoin(_loc_iter->second); } }
 
-    HybridListSet<Box> bounding_boxes() const {
-        HybridListSet<Box> result;
+    HybridListSet<UpperBox> bounding_boxes() const {
+        HybridListSet<UpperBox> result;
         for(locations_const_iterator _loc_iter=this->locations_begin();
             _loc_iter!=this->locations_end(); ++_loc_iter) {
             result[_loc_iter->first]=_loc_iter->second.bounding_boxes(); }
@@ -728,13 +730,13 @@ class HybridGridTreeSet
     }
 
     //!
-    HybridBoxes bounding_box() const {
+    HybridUpperBoxes bounding_box() const {
         HybridBoxes result;
         for( locations_const_iterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
             if( !_loc_iter->second.empty() ) {
                 DiscreteLocation const& loc = _loc_iter->first;
                 RealSpace const& spc=this->space(loc);
-                result.insert(loc,spc,_loc_iter->second.bounding_box());
+                result.insert(loc,spc,make_exact_box(_loc_iter->second.bounding_box()));
             }
         }
         return result;

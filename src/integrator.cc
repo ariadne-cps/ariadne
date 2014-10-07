@@ -43,15 +43,16 @@
 
 namespace Ariadne {
 
-inline Vector<UpperInterval> operator+(Vector<UpperInterval> bx, Vector<ValidatedFloatType> const& v) {
-    for(uint i=0; i!=bx.size(); ++i) {
-        bx[i]=bx[i]+UpperInterval(v[i]);
-    }
-    return bx;
-}
-
 inline UpperBox operator+(Vector<Interval> bx, Vector<UpperInterval> const& ex) {
     return Vector<UpperInterval>(bx) + ex;
+}
+
+inline UpperBox operator+(Vector<UpperInterval> bx, Vector<ValidatedFloatType> const& v) {
+    return bx + Vector<UpperInterval>(v);
+}
+
+inline UpperBox operator+(Vector<Interval> bx, Vector<ValidatedFloatType> const& v) {
+    return Vector<UpperInterval>(bx) + Vector<UpperInterval>(v);
 }
 
 
@@ -754,32 +755,35 @@ TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Box
 
     // Set up constants of the method.
     // TODO: Better estimates of constants
-    const double INITIAL_MULTIPLIER=2.0;
-    const double MULTIPLIER=1.125;
-    const double BOX_RADIUS_MULTIPLIER=1.25;
+    const ExactFloat INITIAL_MULTIPLIER=2.0_exact;
+    const ExactFloat MULTIPLIER=1.1250_exact;
+    const ExactFloat BOX_RADIUS_MULTIPLIER=1.250_exact;
+    const ExactFloat BOX_RADIUS_WIDENING=0.250_exact;
     const uint EXPANSION_STEPS=8;
     const uint REDUCTION_STEPS=8;
     const uint REFINEMENT_STEPS=4;
 
-    Vector<ValidatedNumberType> delta=(make_singleton(dx)-Vector<ValidatedNumberType>(midpoint(dx)))*ExactFloatType(BOX_RADIUS_MULTIPLIER-1);
+    Vector<ValidatedNumberType> delta=(make_singleton(dx)-Vector<ValidatedNumberType>(midpoint(dx)))*BOX_RADIUS_WIDENING;
 
     Float hmin=hmax/(1<<REDUCTION_STEPS);
     Float h=hmax;
     h=min(h,this->maximum_step_size());
-    ARIADNE_LOG(4,"hmax="<<hmax<<"\n");
+    ARIADNE_LOG(4,"vf="<<vf<<" domx="<<dx<<" hmax="<<hmax<<"\n");
 
-    bool success=false;
     UpperBox bx,nbx;
     Vector<UpperInterval> df;
     UpperInterval ih(0,h);
 
+    bool success=false;
     while(!success) {
         ARIADNE_ASSERT_MSG(h>=hmin," h="<<h<<", hmin="<<hmin);
         bx=dx+INITIAL_MULTIPLIER*ih*apply(vf,dx)+delta;
         for(uint i=0; i!=EXPANSION_STEPS; ++i) {
             df=apply(vf,bx);
             nbx=dx+delta+ih*df;
+            ARIADNE_LOG(7,"h="<<h<<" nbx="<<nbx<<" bx="<<bx<<"\n");
             if(refines(nbx,bx)) {
+                ARIADNE_LOG(7,"success!\n");
                 success=true;
                 break;
             } else {
@@ -792,6 +796,7 @@ TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Box
         }
     }
 
+    ARIADNE_LOG(6,"h="<<h<<" nbx="<<nbx<<" bx="<<bx<<", refines(nbx,bx)="<<refines(nbx,bx)<<"\n");
     ARIADNE_ASSERT(refines(nbx,bx));
 
     Vector<UpperInterval> vfbx;

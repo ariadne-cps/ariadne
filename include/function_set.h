@@ -135,7 +135,7 @@ class BoundedConstraintSet
     Tribool overlaps(const Box&) const;
     Tribool covers(const Box&) const;
     Tribool inside(const Box&) const;
-    Box bounding_box() const;
+    UpperBox bounding_box() const;
     OutputStream& write(OutputStream&) const;
     Void draw(CanvasInterface&,const Projection2d&) const;
 };
@@ -201,10 +201,10 @@ class ConstrainedImageSet
 
     ConstrainedImageSet* clone() const { return new ConstrainedImageSet(*this); }
     Nat dimension() const { return this->_function.result_size(); }
-    Tribool inside(const Box& bx) const { return subset(this->bounding_box(),bx); }
+    Tribool inside(const Box& bx) const { return this->bounding_box().inside(bx); }
 
     //! \brief A coarse over-approximation to the set. Computed by taking the interval evaluation \f$h(D)\f$.
-    Box bounding_box() const;
+    UpperBox bounding_box() const;
     //! \brief Construct an affine over-approximation
     ValidatedAffineConstrainedImageSet affine_over_approximation() const;
     //! \brief Construct an affine approximation, with undefined accuracy.
@@ -297,7 +297,7 @@ class ValidatedConstrainedImageSet
     //! \brief Reduce the size of the domain by constraint propagation, if possible.
     Void reduce();
     //! \brief A coarse over-approximation to the set. Computed by taking the interval evaluation \f$h(D)\f$.
-    Box bounding_box() const;
+    UpperBox bounding_box() const;
     //! \brief Construct an affine over-approximation
     ValidatedAffineConstrainedImageSet affine_over_approximation() const;
     //! \brief Construct an affine approximation, with undefined accuracy.

@@ -141,7 +141,7 @@ _evolution(EnclosureListType& final_sets,
         working_sets.pop_back();
         TimeType current_time=current_timed_set.first;
         EnclosureType current_set_model=current_timed_set.second;
-        Float current_set_radius=radius(current_set_model.bounding_box());
+        UpperFloat current_set_radius=radius(current_set_model.bounding_box());
         if(current_time>=maximum_time) {
             final_sets.adjoin(current_set_model);
         } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
@@ -221,7 +221,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
     //const Float zero_time=0.0;
 
     // Get bounding boxes for time and space bounding_box
-    Vector<Interval> current_set_bounds=current_set_model.bounding_box();
+    Box current_set_bounds=make_exact_box(current_set_model.bounding_box());
     ARIADNE_LOG(4,"current_set_bounds = "<<current_set_bounds<<"\n");
 
 

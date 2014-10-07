@@ -38,8 +38,6 @@ namespace Ariadne {
 inline Interval make_interval(ApproximateNumberType x) { return Interval(x.raw()); }
 inline Interval make_interval(ExactNumberType x) { return Interval(x.raw()); }
 
-template<> inline double numeric_cast<double,ApproximateNumberType>(ApproximateNumberType const& x) { return x.get_d(); }
-
 template<class X> Point<X>::Point(std::initializer_list<double> lst)
     : Vector<X>(Vector<Float>(Vector<double>(lst)))
 {

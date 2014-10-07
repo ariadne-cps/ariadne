@@ -45,8 +45,8 @@ Vector<ValidatedFloatType>const& make_singleton(const Vector<Interval>& ivlv) {
     return reinterpret_cast<Vector<ValidatedFloatType>const&>(ivlv);
 }
 
-Matrix<ValidatedFloatType>const& make_singleton(const Matrix<Interval>& ivlA) {
-    return reinterpret_cast<Matrix<ValidatedFloatType>const&>(ivlA);
+Vector<ValidatedFloatType>const& make_singleton(const Vector<UpperInterval>& ivlv) {
+    return reinterpret_cast<Vector<ValidatedFloatType>const&>(ivlv);
 }
 
 bool contains(const Vector<Interval>& v1, const Vector<ExactFloat>& v2)

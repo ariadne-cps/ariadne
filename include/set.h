@@ -56,7 +56,7 @@ class BoundedSet
     template<class ...Args> BoundedSet(Args&&... args) : Handle<BoundedSetInterface>(std::forward<Args>(args)...) { }
     inline uint dimension() const { return this->reference().dimension(); }
     inline Tribool inside(const Box& bx) const { return this->reference().inside(bx); }
-    inline Box bounding_box() const { return this->reference().bounding_box(); }
+    inline UpperBox bounding_box() const { return this->reference().bounding_box(); }
 };
 
 
@@ -104,7 +104,7 @@ class CompactSet
     inline uint dimension() const { return this->reference().dimension(); }
     inline Tribool separated(const Box& bx) const { return this->reference().separated(bx); }
     inline Tribool inside(const Box& bx) const { return this->reference().inside(bx); }
-    inline Box bounding_box() const { return this->reference().bounding_box(); }
+    inline UpperBox bounding_box() const { return this->reference().bounding_box(); }
 };
 
 //! \ingroup GeometryModule SetSubModule
@@ -133,7 +133,7 @@ class LocatedSet
     inline Tribool overlaps(const Box& bx) const { return this->reference().overlaps(bx); }
     inline Tribool separated(const Box& bx) const { return this->reference().separated(bx); }
     inline Tribool inside(const Box& bx) const { return this->reference().inside(bx); }
-    inline Box bounding_box() const { return this->reference().bounding_box(); }
+    inline UpperBox bounding_box() const { return this->reference().bounding_box(); }
 };
 
 //! \ingroup GeometryModule SetSubModule
@@ -148,7 +148,7 @@ class RegularLocatedSet
     inline Tribool covers(const Box& bx) const { return this->reference().covers(bx); }
     inline Tribool separated(const Box& bx) const { return this->reference().separated(bx); }
     inline Tribool inside(const Box& bx) const { return this->reference().inside(bx); }
-    inline Box bounding_box() const { return this->reference().bounding_box(); }
+    inline UpperBox bounding_box() const { return this->reference().bounding_box(); }
 };
 
 

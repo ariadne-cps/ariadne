@@ -1450,6 +1450,12 @@ ValidatedTaylorModel::domain() const
     return Vector<UnitInterval>(this->argument_size(),UnitInterval());
 }
 
+Interval
+ValidatedTaylorModel::codomain() const
+{
+    return make_exact_interval(this->range());
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////

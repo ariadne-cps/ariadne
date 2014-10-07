@@ -195,7 +195,7 @@ class CompactSetWrapper
     tribool separated(const Box& r) const { return this->get_override("separated")(); }
     tribool inside(const Box& r) const { return this->get_override("inside")(); }
     tribool bounded() const { return this->get_override("bounded")(); }
-    Box bounding_box() const { return this->get_override("bounding_box")(); }
+    UpperBox bounding_box() const { return this->get_override("bounding_box")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -221,7 +221,7 @@ class LocatedSetWrapper
     tribool separated(const Box& r) const { return this->get_override("separated")(); }
     tribool inside(const Box& r) const { return this->get_override("inside")(); }
     tribool bounded() const { return this->get_override("bounded")(); }
-    Box bounding_box() const { return this->get_override("bounding_box")(); }
+    UpperBox bounding_box() const { return this->get_override("bounding_box")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 

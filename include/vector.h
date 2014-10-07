@@ -616,6 +616,8 @@ Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>
 Float radius(const Vector<Interval>& z);
 Float volume(const Vector<Interval>& z);
 
+Vector<UpperInterval> intersection(const Vector<UpperInterval>& v1, const Vector<UpperInterval>& v2);
+
 Vector<ExactFloatType> midpoint(const Vector<Interval>& v);
 Vector<ExactFloatType> lower_bounds(const Vector<Interval>& v);
 Vector<ExactFloatType> upper_bounds(const Vector<Interval>& v);

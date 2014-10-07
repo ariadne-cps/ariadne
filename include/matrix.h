@@ -610,6 +610,9 @@ template<class X> Matrix<X> inverse(const Matrix<X>& A);
 template<class X> Matrix<X> solve(const Matrix<X>& A, const Matrix<X>& B);
 template<class X> Vector<X> solve(const Matrix<X>& A, const Vector<X>& B);
 
+// FIXME: Should not need to declare separately
+Matrix<ValidatedFloat> inverse(Matrix<ExactFloat> const& A);
+
 // Compute the inverse using lower/upper triangular factorization
 template<class X> Matrix<X> lu_inverse(const Matrix<X>& A);
 template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B);

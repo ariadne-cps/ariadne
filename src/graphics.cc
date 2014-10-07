@@ -78,7 +78,7 @@ struct GraphicsObject {
 struct Figure::Data
 {
     Data() : bounding_box(0), projection(2,0,1), properties() { }
-    Box bounding_box;
+    ApproximateBox bounding_box;
     PlanarProjectionMap projection;
     GraphicsProperties properties;
     std::vector<GraphicsObject> objects;
@@ -93,7 +93,7 @@ Figure::~Figure()
 Figure::Figure()
     : _data(new Data())
 {
-    this->_data->bounding_box=Box(0);
+    this->_data->bounding_box=ApproximateBox(0);
     this->_data->projection=PlanarProjectionMap(2,0,1);
 }
 
@@ -113,7 +113,7 @@ void Figure::set_projection_map(const PlanarProjectionMap& p)
     this->_data->projection=p;
 }
 
-void Figure::set_bounding_box(const Box& bx)
+void Figure::set_bounding_box(const ApproximateBox& bx)
 {
     this->_data->bounding_box=bx;
 }
@@ -123,7 +123,7 @@ PlanarProjectionMap Figure::get_projection_map() const
     return this->_data->projection;
 }
 
-Box Figure::get_bounding_box() const
+ApproximateBox Figure::get_bounding_box() const
 {
     return this->_data->bounding_box;
 }
@@ -448,7 +448,7 @@ inline std::ostream& operator<<(std::ostream& os, const Box& bx) { return os << 
 
 void Figure::_paint_all(CanvasInterface& canvas) const
 {
-    Box bounding_box=this->_data->bounding_box;
+    ApproximateBox bounding_box=this->_data->bounding_box;
     const PlanarProjectionMap projection=this->_data->projection;
     const std::vector<GraphicsObject>& objects=this->_data->objects;
 

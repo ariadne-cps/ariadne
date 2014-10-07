@@ -84,6 +84,10 @@ inline Vector<ApproximateFloatType>& make_approximate(Vector<RawFloatType>& v) {
     return reinterpret_cast<Vector<ApproximateFloatType>&>(v);
 }
 
+inline UpperInterval dot(Vector<UpperInterval> const& bx1, Vector<Interval> const& bx2) {
+    return dot(bx1,Vector<UpperInterval>(bx2));
+}
+
 template<class X> inline
 DiagonalMatrix<X> const& diagonal_matrix(const Vector<X>& v) {
     return reinterpret_cast<DiagonalMatrix<X>const&>(v);
@@ -130,7 +134,7 @@ Vector<X> emul(const Vector<X>& x, const Vector<X>& z) {
 }
 
 inline
-Vector<UpperInterval> emul(const Vector<Interval>& x, const Vector<Float>& z) {
+Vector<UpperInterval> emul(const Vector<UpperInterval>& x, const Vector<Float>& z) {
     Vector<UpperInterval> r(x.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=x[i]*z[i]; } return r;
 }
 
@@ -473,12 +477,12 @@ Box widen(Box bx, RawFloatType e) {
 
 
 Bool OptimiserBase::
-almost_feasible_point(Box D, ValidatedVectorFunction g, Box C, ApproximatePointType x, ApproximateFloatType error) const
+almost_feasible_point(Box D, ValidatedVectorFunction g, Box C, ApproximatePointType ax, ApproximateFloatType error) const
 {
-    ExactPointType ex=make_exact(x);
+    ExactPointType ex=make_exact(ax);
     if(!contains(D,ex)) { return false; }
-    ValidatedPointType gx=g(ValidatedPointType(ex));
-    return subset(Vector<Interval>(gx),widen(C,error.raw()));
+    ApproximatePointType gx=g(ax);
+    return contains(widen(C,error),gx);
 }
 
 
@@ -499,7 +503,7 @@ contains_feasible_point(Box D, ValidatedVectorFunction g, Box C, ValidatedPointT
 
     // Now test if the (reduced) box X satisfies other constraints
     if(disjoint(Vector<Interval>(X),D)) { return false; }
-    if(!subset(Vector<Interval>(X),D)) { return indeterminate; }
+    if(!subset(Box(Vector<Interval>(X)),D)) { return indeterminate; }
 
     // Test inequality constraints
     Tribool result = true;
@@ -729,23 +733,28 @@ validate_infeasibility(Box D, ValidatedVectorFunction g, Box C,
 
 // FIXME: Look at this code again, especially relating to generalised Lagrange multipliers
 Bool OptimiserBase::
-is_infeasibility_certificate(Box d, ValidatedVectorFunction g, Box c, ExactFloatVector y) const
+is_infeasibility_certificate(Box D, ValidatedVectorFunction g, Box C, ExactFloatVector y) const
 {
+    ARIADNE_LOG(2,"OptimiserBase::is_infeasibility_certificate(D,g,C,y)\n");
+    ARIADNE_LOG(2,"  D="<<D<<", g="<<g<<", C="<<C<<", y="<<y<<"\n");
+
+    if(y.size()==0) { return D.empty(); }
+
     // Try to prove lambda.(g(y)-c) != 0
-    const uint n=c.size();
+    const uint n=C.size();
 
-    ScalarTaylorFunction tyg(d,default_sweeper());
+    ScalarTaylorFunction tyg(D,default_sweeper());
     for(uint i=0; i!=n; ++i) {
-        tyg+=y[i]*ScalarTaylorFunction(d,g[i],default_sweeper());
+        tyg+=y[i]*ScalarTaylorFunction(D,g[i],default_sweeper());
     }
-    ValidatedNumberType iygx = tyg(make_singleton(d));
+    ValidatedNumberType iygx = tyg(make_singleton(D));
 
-    UpperInterval iyc = 0;
+    UpperInterval iyC = 0;
     for(uint i=0; i!=n; ++i) {
-        iyc+=y[i]*c[i];
+        iyC+=y[i]*C[i];
     }
 
-    if(disjoint(iyc,UpperInterval(iygx))) {
+    if(disjoint(iyC,UpperInterval(iygx))) {
         return true;
     } else {
         return false;
@@ -760,7 +769,7 @@ is_infeasibility_certificate(Box d, ValidatedVectorFunction g, Box c, ExactFloat
 ValidatedPointType OptimiserBase::
 minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, ValidatedVectorFunction h) const
 {
-    ARIADNE_LOG(2,"minimise::feasible(f,D,g,h)\n");
+    ARIADNE_LOG(2,"OptimiserBase::minimise(f,D,g,h)\n");
     ValidatedVectorFunction gh=join(g,h);
     Box C(gh.result_size(),Interval(0.0));
     for(uint i=0; i!=g.result_size(); ++i) { C[i]=Interval(-inf,0.0); }
@@ -806,7 +815,7 @@ minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C) con
     StepData v;
     ApproximateFloatVector& x=make_approximate(v.x);
     ApproximateFloatVector& y=make_approximate(v.y);
-    C=intersection(C,make_exact_box(UpperBox(apply(g,D)+UpperBox(C.size(),UpperInterval(-1,+1)))));
+    C=intersection(C,make_exact_box(apply(g,D)+UpperIntervalVector(C.size(),UpperInterval(-1,+1))));
     this->setup_feasibility(D,g,C,v);
     ApproximateFloatVector oldx=x;
 
@@ -833,6 +842,7 @@ minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C) con
         }
     }
     ARIADNE_LOG(2,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
+
     if(this->validate_feasibility(D,g,C,make_exact(x))) {
         ARIADNE_LOG(2,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
         return make_exact(x);
@@ -855,7 +865,7 @@ feasible(Box D, ValidatedVectorFunction g, Box C) const
     ApproximateFloatVector& y=make_approximate(v.y);
 
     ApproximateScalarFunction f(D.size());
-    Box R=make_exact_box(intersection(UpperBox(apply(g,D)+UpperBox(C.size(),UpperInterval(-1,+1))),UpperBox(C)));
+    Box R=intersection(make_exact_box(apply(g,D)+UpperBox(C.size(),UpperInterval(-1,+1))),C);
     this->setup_feasibility(D,g,R,v);
 
     static const float MU_MIN = 1e-12;
@@ -1168,10 +1178,10 @@ minimise(ValidatedScalarFunction f, Box D, ValidatedVectorFunction g, Box C) con
     ValidatedVectorFunction h(0,D.size());
 
     UpperIntervalVector gD = apply(g,D);
-    if(disjoint(gD,UpperBox(C))) { throw InfeasibleProblemException(); }
+    if(disjoint(gD,C)) { throw InfeasibleProblemException(); }
 
     ApproximateFloatVector x = midpoint(D);
-    ApproximateFloatVector w = midpoint(intersection(make_exact_box(gD),C));
+    ApproximateFloatVector w = midpoint(intersection(UpperBox(gD),C));
 
     ApproximateFloatVector kappa(g.result_size(),0.0);
     ApproximateFloatVector lambda(h.result_size(),0.0);
@@ -2150,13 +2160,13 @@ check_feasibility(Box D, ValidatedVectorFunction g, Box C,
 
     // Compute y.C
     UpperIntervalVector iy(y);
-    UpperInterval yC = dot(iy,UpperIntervalVector(C));
+    UpperInterval yC = dot(iy,C);
 
     // Compute Taylor estimate of y g(X)
     VectorTaylorFunction tg(D,g,default_sweeper());
     ScalarTaylorFunction tyg(D,default_sweeper());
     for(uint j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
-    UpperInterval tygD = Interval(tyg(make_singleton(D)));
+    Interval tygD = Interval(tyg(make_singleton(D)));
 
     UpperIntervalMatrix dgD = jacobian(g,D);
     UpperIntervalVector ydgD = UpperIntervalVector(y) * dgD;

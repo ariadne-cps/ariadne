@@ -170,14 +170,14 @@ struct FunctionElement
 //------------------------ Conversion to a formula -----------------------------------//
 
 Formula<Real> formula(const EffectiveScalarFunction& f) {
-    const ScalarFunctionInterface<Real>* fptr=f.raw_pointer();
+    const ScalarFunctionInterface<EffectiveTag>* fptr=f.raw_pointer();
     const ScalarFormulaFunction<Real>* ff=dynamic_cast<const ScalarFormulaFunction<Real>*>(fptr);
     if(ff) { return ff->_formula; }
     const RealConstantFunction* cf=dynamic_cast<const RealConstantFunction*>(fptr);
-    const RealCoordinateFunction* indf=dynamic_cast<const RealCoordinateFunction*>(fptr);
-    const RealUnaryFunction* uf=dynamic_cast<const RealUnaryFunction*>(fptr);
-    const RealBinaryFunction* bf=dynamic_cast<const RealBinaryFunction*>(fptr);
-    const RealPowerFunction* pf=dynamic_cast<const RealPowerFunction*>(fptr);
+    const EffectiveCoordinateFunction* indf=dynamic_cast<const EffectiveCoordinateFunction*>(fptr);
+    const EffectiveUnaryFunction* uf=dynamic_cast<const EffectiveUnaryFunction*>(fptr);
+    const EffectiveBinaryFunction* bf=dynamic_cast<const EffectiveBinaryFunction*>(fptr);
+    const EffectivePowerFunction* pf=dynamic_cast<const EffectivePowerFunction*>(fptr);
     if(cf) { return Formula<Real>::constant(cf->_value); }
     if(indf) { return Formula<Real>::coordinate(indf->_index); }
     if(uf) { return make_formula(uf->_op,formula(uf->_arg)); }
@@ -187,10 +187,10 @@ Formula<Real> formula(const EffectiveScalarFunction& f) {
 }
 
 Vector< Formula<Real> > formula(const EffectiveVectorFunction& f) {
-    const VectorFunctionInterface<Real>& fi=f;
+    const VectorFunctionInterface<EffectiveTag>& fi=f;
     const VectorFormulaFunction<Real>* ff;
-    const VectorOfScalarFunction<Real>* vf;
-    if( (vf=dynamic_cast<const VectorOfScalarFunction<Real>*>(&fi)) ) {
+    const VectorOfScalarFunction<EffectiveTag>* vf;
+    if( (vf=dynamic_cast<const VectorOfScalarFunction<EffectiveTag>*>(&fi)) ) {
         Vector< Formula<Real> > r(vf->result_size());
         for(uint i=0; i!=r.size(); ++i) { r[i]=formula((*vf)[i]); }
         return r;
@@ -205,46 +205,46 @@ Vector< Formula<Real> > formula(const EffectiveVectorFunction& f) {
 
 //------------------------ ScalarFunction -----------------------------------//
 
-template<class X> ScalarFunction<X>::ScalarFunction()
+template<class P> ScalarFunction<P>::ScalarFunction()
     : _ptr(new ScalarFormulaFunction<X>(0u,Formula<X>::zero()))
 {
 }
 
-template<class X> ScalarFunction<X>::ScalarFunction(Nat n)
+template<class P> ScalarFunction<P>::ScalarFunction(Nat n)
     : _ptr(new ScalarFormulaFunction<X>(n,Formula<X>::zero()))
 {
 }
 
-template<class X> ScalarFunction<X>::ScalarFunction(Nat n, Formula<X> e)
+template<class P> ScalarFunction<P>::ScalarFunction(Nat n, Formula<X> e)
     : _ptr(new ScalarFormulaFunction<X>(n,e))
 {
 }
 
-template<class X> ScalarFunction<X> ScalarFunction<X>::zero(Nat n)
+template<class P> ScalarFunction<P> ScalarFunction<P>::zero(Nat n)
 {
-    return ScalarFunction<X>(new ScalarFormulaFunction<X>(n,Formula<X>::zero()));
+    return ScalarFunction<P>(new ScalarFormulaFunction<X>(n,Formula<X>::zero()));
 }
 
-template<class X> ScalarFunction<X> ScalarFunction<X>::constant(Nat n, X c)
+template<class P> ScalarFunction<P> ScalarFunction<P>::constant(Nat n, CanonicalNumberType<P> c)
 {
-    return ScalarFunction<X>(new ScalarFormulaFunction<X>(n,Formula<X>::constant(c)));
+    return ScalarFunction<P>(new ScalarFormulaFunction<X>(n,Formula<X>::constant(c)));
 }
 
-template<class X> ScalarFunction<X> ScalarFunction<X>::coordinate(Nat n, Nat j)
+template<class P> ScalarFunction<P> ScalarFunction<P>::coordinate(Nat n, Nat j)
 {
-    return ScalarFunction<X>(new ScalarFormulaFunction<X>(n,Formula<X>::coordinate(j)));
+    return ScalarFunction<P>(new ScalarFormulaFunction<X>(n,Formula<X>::coordinate(j)));
 }
 
-template<class X> List< ScalarFunction<X> > ScalarFunction<X>::coordinates(Nat n)
+template<class P> List< ScalarFunction<P> > ScalarFunction<P>::coordinates(Nat n)
 {
-    List< ScalarFunction<X> > lsf; lsf.reserve(n);
-    for(Nat i=0; i!=n; ++i) { lsf.append(ScalarFunction<X>::coordinate(n,i)); }
+    List< ScalarFunction<P> > lsf; lsf.reserve(n);
+    for(Nat i=0; i!=n; ++i) { lsf.append(ScalarFunction<P>::coordinate(n,i)); }
     return lsf;
 }
 
-template class ScalarFunction<ApproximateNumber>;
-template class ScalarFunction<ValidatedNumber>;
-template class ScalarFunction<EffectiveNumber>;
+template class ScalarFunction<ApproximateTag>;
+template class ScalarFunction<ValidatedTag>;
+template class ScalarFunction<EffectiveTag>;
 
 
 
@@ -256,15 +256,15 @@ template class ScalarFunction<EffectiveNumber>;
 
 template<class OP> inline
 EffectiveScalarFunction make_unary_function(OP op, const EffectiveScalarFunction& f) {
-    return EffectiveScalarFunction(new RealUnaryFunction(op.code(),f)); }
+    return EffectiveScalarFunction(new EffectiveUnaryFunction(op.code(),f)); }
 
 template<class OP> inline
 EffectiveScalarFunction make_binary_function(OP op, const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2) {
-    return EffectiveScalarFunction(new RealBinaryFunction(op.code(),f1,f2)); }
+    return EffectiveScalarFunction(new EffectiveBinaryFunction(op.code(),f1,f2)); }
 
 template<class OP> inline
 EffectiveScalarFunction make_binary_function(OP op, const EffectiveScalarFunction& f1, const Int& n2) {
-    return EffectiveScalarFunction(new RealPowerFunction(op.code(),f1,n2)); }
+    return EffectiveScalarFunction(new EffectivePowerFunction(op.code(),f1,n2)); }
 
 
 EffectiveScalarFunction operator+(const EffectiveScalarFunction& f)
@@ -427,89 +427,89 @@ EffectiveScalarFunction tan(const EffectiveScalarFunction& f) {
 //------------------------ Vector Function ----------------------------------//
 
 
-template<class X> VectorFunction<X>::VectorFunction()
-    : _ptr(new VectorOfScalarFunction<X>(0u,ScalarFunction<X>()))
+template<class P> VectorFunction<P>::VectorFunction()
+    : _ptr(new VectorOfScalarFunction<P>(0u,ScalarFunction<P>()))
 {
 }
 
-template<class X> VectorFunction<X>::VectorFunction(Nat rs, Nat as)
-    : _ptr(new VectorOfScalarFunction<X>(rs,ScalarFunction<X>::zero(as)))
+template<class P> VectorFunction<P>::VectorFunction(Nat rs, Nat as)
+    : _ptr(new VectorOfScalarFunction<P>(rs,ScalarFunction<P>::zero(as)))
 {
 }
 
-template<class X> VectorFunction<X>::VectorFunction(std::initializer_list< ScalarFunction<X> > lsf)
+template<class P> VectorFunction<P>::VectorFunction(std::initializer_list< ScalarFunction<P> > lsf)
 {
     ARIADNE_ASSERT(lsf.size()>0);
     Nat as=lsf.begin()->argument_size();
-    VectorOfScalarFunction<X>* new_ptr=new VectorOfScalarFunction<X>(lsf.size(),as);
+    VectorOfScalarFunction<P>* new_ptr=new VectorOfScalarFunction<P>(lsf.size(),as);
     for(uint i=0; i!=lsf.size(); ++i) {
         new_ptr->set(i,*(lsf.begin()+i));
     }
-    this->_ptr=std::shared_ptr< const VectorFunctionInterface<X> >(new_ptr);
+    this->_ptr=std::shared_ptr< const VectorFunctionInterface<P> >(new_ptr);
 }
 
-template<class X> VectorFunction<X>::VectorFunction(const List< ScalarFunction<X> >& lsf)
+template<class P> VectorFunction<P>::VectorFunction(const List< ScalarFunction<P> >& lsf)
 {
     ARIADNE_ASSERT(lsf.size()>0);
     Nat as=lsf[0].argument_size();
-    VectorOfScalarFunction<X>* new_ptr=new VectorOfScalarFunction<X>(lsf.size(),as);
+    VectorOfScalarFunction<P>* new_ptr=new VectorOfScalarFunction<P>(lsf.size(),as);
     for(uint i=0; i!=lsf.size(); ++i) {
         new_ptr->set(i,lsf[i]);
     }
-    this->_ptr=std::shared_ptr< const VectorFunctionInterface<X> >(new_ptr);
+    this->_ptr=std::shared_ptr< const VectorFunctionInterface<P> >(new_ptr);
 }
 
-template<class X> VectorFunction<X>::VectorFunction(Nat as, const List< Formula<X> >& le)
+template<class P> VectorFunction<P>::VectorFunction(Nat as, const List< Formula<X> >& le)
 {
     ARIADNE_ASSERT(le.size()>0);
-    VectorOfScalarFunction<X>* new_ptr=new VectorOfScalarFunction<X>(le.size(),as);
+    VectorOfScalarFunction<P>* new_ptr=new VectorOfScalarFunction<P>(le.size(),as);
     for(uint i=0; i!=le.size(); ++i) {
         new_ptr->set(i,ScalarFormulaFunction<X>(as,le[i]));
     }
-    this->_ptr=std::shared_ptr< const VectorFunctionInterface<X> >(new_ptr);
+    this->_ptr=std::shared_ptr< const VectorFunctionInterface<P> >(new_ptr);
 }
 
-template<class X> VectorFunction<X>::VectorFunction(Nat rs, ScalarFunction<X> sf)
-    : _ptr(new VectorOfScalarFunction<X>(rs,sf))
+template<class P> VectorFunction<P>::VectorFunction(Nat rs, ScalarFunction<P> sf)
+    : _ptr(new VectorOfScalarFunction<P>(rs,sf))
 {
 }
 
-template<class X> VectorFunction<X> VectorFunction<X>::zeros(Nat rs, Nat as)
+template<class P> VectorFunction<P> VectorFunction<P>::zeros(Nat rs, Nat as)
 {
-    VectorOfScalarFunction<X>* res = new VectorOfScalarFunction<X>(rs,as);
+    VectorOfScalarFunction<P>* res = new VectorOfScalarFunction<P>(rs,as);
     for(uint i=0; i!=rs; ++i) {
-        res->_vec[i]=ScalarFunction<X>::zero(as);
+        res->_vec[i]=ScalarFunction<P>::zero(as);
     }
-    return VectorFunction<X>(res);
+    return VectorFunction<P>(res);
 }
 
-template<class X> VectorFunction<X> VectorFunction<X>::identity(Nat n)
+template<class P> VectorFunction<P> VectorFunction<P>::identity(Nat n)
 {
-    VectorOfScalarFunction<X>* res = new VectorOfScalarFunction<X>(n,n);
+    VectorOfScalarFunction<P>* res = new VectorOfScalarFunction<P>(n,n);
     for(uint i=0; i!=n; ++i) {
-        res->_vec[i]=ScalarFunction<X>::coordinate(n,i);
+        res->_vec[i]=ScalarFunction<P>::coordinate(n,i);
     }
-    return VectorFunction<X>(res);
+    return VectorFunction<P>(res);
 }
 
-template<class X> Void VectorFunction<X>::set(Nat i, ScalarFunction<X> sf)
+template<class P> Void VectorFunction<P>::set(Nat i, ScalarFunction<P> sf)
 {
     if(!this->_ptr.unique()) {
-        ARIADNE_WARN("VectorFunction<X>::set(Nat, ScalarFunction<X>): Cloning shared pointer.\n");
-        this->_ptr=std::shared_ptr< const VectorFunctionInterface<X> >(this->_ptr->_clone());
+        ARIADNE_WARN("VectorFunction<P>::set(Nat, ScalarFunction<P>): Cloning shared pointer.\n");
+        this->_ptr=std::shared_ptr< const VectorFunctionInterface<P> >(this->_ptr->_clone());
     }
-    VectorFunctionInterface<X>* vf=const_cast<VectorFunctionInterface<X>*>(this->raw_pointer());
-    VectorOfScalarFunction<X>* vsf=dynamic_cast<VectorOfScalarFunction<X>*>(vf);
+    VectorFunctionInterface<P>* vf=const_cast<VectorFunctionInterface<P>*>(this->raw_pointer());
+    VectorOfScalarFunction<P>* vsf=dynamic_cast<VectorOfScalarFunction<P>*>(vf);
     if(vsf) {
         vsf->set(i,sf);
     } else {
-        ARIADNE_THROW(std::runtime_error,"Void VectorFunction<X>::set(Nat i, ScalarFunction<X> sf)","Cannot set element of "<<*vf<<"\n");
+        ARIADNE_THROW(std::runtime_error,"Void VectorFunction<P>::set(Nat i, ScalarFunction<P> sf)","Cannot set element of "<<*vf<<"\n");
     }
 }
 
-template class VectorFunction<ApproximateNumber>;
-template class VectorFunction<ValidatedNumber>;
-template class VectorFunction<EffectiveNumber>;
+template class VectorFunction<ApproximateTag>;
+template class VectorFunction<ValidatedTag>;
+template class VectorFunction<EffectiveTag>;
 
 
 
@@ -613,21 +613,21 @@ EffectiveVectorFunction join(const EffectiveVectorFunction& f1, const EffectiveV
 }
 
 EffectiveScalarFunction embed(Nat as1, const EffectiveScalarFunction& f2, Nat as3) {
-    return EffectiveScalarFunction(new ScalarEmbeddedFunction<Real>(as1,f2,as3));
+    return EffectiveScalarFunction(new ScalarEmbeddedFunction<EffectiveTag>(as1,f2,as3));
 }
 
 EffectiveVectorFunction embed(Nat as1, const EffectiveVectorFunction& f2, Nat as3) {
-    return EffectiveVectorFunction(new VectorEmbeddedFunction<Real>(as1,f2,as3));
+    return EffectiveVectorFunction(new VectorEmbeddedFunction<EffectiveTag>(as1,f2,as3));
 }
 
 EffectiveScalarFunction compose(const EffectiveScalarFunction& f, const EffectiveVectorFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    return EffectiveScalarFunction(new ScalarComposedFunction<Real>(f,g));
+    return EffectiveScalarFunction(new ScalarComposedFunction<EffectiveTag>(f,g));
 }
 
 EffectiveVectorFunction compose(const EffectiveVectorFunction& f, const EffectiveVectorFunction& g) {
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
-    return EffectiveVectorFunction(new VectorComposedFunction<Real>(f,g));
+    return EffectiveVectorFunction(new VectorComposedFunction<EffectiveTag>(f,g));
 }
 
 EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const EffectiveVectorFunction& f) {
@@ -657,7 +657,7 @@ ValidatedScalarFunction operator-(ValidatedScalarFunction const& f1, ValidatedSc
     if(f1p && f2p) {
         return ValidatedScalarFunctionModel(*f1p) - ValidatedScalarFunctionModel(*f2p);
     }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedNumber>(SUB,f1,f2));
+    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(SUB,f1,f2));
 }
 
 ValidatedScalarFunction operator-(ValidatedScalarFunction const& f, ValidatedNumber const& c) {
@@ -665,13 +665,13 @@ ValidatedScalarFunction operator-(ValidatedScalarFunction const& f, ValidatedNum
     if(fp) { return ValidatedScalarFunctionModel(*fp) - c; }
     std::shared_ptr<EffectiveScalarFunctionInterface const> rfp=std::dynamic_pointer_cast<EffectiveScalarFunctionInterface const>(f.managed_pointer());
     if(rfp && c.lower().value()==c.upper().value()) { return EffectiveScalarFunction(*rfp) - ExactFloat(c.lower().value()); }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedNumber>(SUB,f,ValidatedScalarFunction::constant(f.argument_size(),c)));
+    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(SUB,f,ValidatedScalarFunction::constant(f.argument_size(),c)));
 }
 
 ValidatedScalarFunction operator-(ValidatedNumber const& c, ValidatedScalarFunction const& f) {
     std::shared_ptr<ValidatedScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f.managed_pointer());
     if(fp) { return c - ValidatedScalarFunctionModel(*fp); }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedNumber>(SUB,ValidatedScalarFunction::constant(f.argument_size(),c),f));
+    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(SUB,ValidatedScalarFunction::constant(f.argument_size(),c),f));
 }
 
 ValidatedVectorFunction operator-(ValidatedVectorFunction const& f1, ValidatedVectorFunction const& f2) {
@@ -684,7 +684,7 @@ ValidatedVectorFunction operator-(ValidatedVectorFunction const& f1, ValidatedVe
     } else if(f2p) {
         return f1.reference() - ValidatedVectorFunctionModel(*f2p);
     } else {
-        VectorOfScalarFunction<ValidatedNumber> r(f1.result_size(),ValidatedScalarFunction(f1.argument_size()));
+        VectorOfScalarFunction<ValidatedTag> r(f1.result_size(),ValidatedScalarFunction(f1.argument_size()));
         for(uint i=0; i!=r.result_size(); ++i) {
             r[i]=f1[i]-f2[i];
         }
@@ -706,7 +706,7 @@ ValidatedVectorFunction join(ValidatedVectorFunction const& f1, const ValidatedV
     if(dynamic_cast<VectorTaylorFunction const*>(f1.raw_pointer()) && dynamic_cast<VectorTaylorFunction const*>(f2.raw_pointer())) {
         return join(dynamic_cast<VectorTaylorFunction const&>(*f1.raw_pointer()),dynamic_cast<VectorTaylorFunction const&>(*f2.raw_pointer()));
     }
-    VectorOfScalarFunction<ValidatedNumber> r(f1.result_size()+f2.result_size(),f1.argument_size());
+    VectorOfScalarFunction<ValidatedTag> r(f1.result_size()+f2.result_size(),f1.argument_size());
     for(uint i=0; i!=f1.result_size(); ++i) { r[i]=f1[i]; }
     for(uint i=0; i!=f2.result_size(); ++i) { r[i+f1.result_size()]=f2[i]; }
     return r;

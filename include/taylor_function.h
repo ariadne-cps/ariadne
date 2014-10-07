@@ -73,13 +73,13 @@ inline ValidatedNumber rad_val(ExactInterval const& ivl) {
     return half(ivl.upper()-ivl.lower());
 }
 
-template<template<class> class T> inline T<ApproximateTag> unscale(const T<ApproximateTag>& x, const ExactInterval& d) {
+template<template<class> class T> inline T<ApproximateNumber> unscale(const T<ApproximateNumber>& x, const ExactInterval& d) {
     ApproximateNumber c(med_apprx(d));
     ApproximateNumber r(rad_apprx(d));
     return (x-c)/r;
 }
 
-template<template<class> class T> inline T<ValidatedTag> unscale(const T<ValidatedTag>& x, const ExactInterval& d) {
+template<template<class> class T> inline T<ValidatedNumber> unscale(const T<ValidatedNumber>& x, const ExactInterval& d) {
     ValidatedNumber c(med_val(d));
     ValidatedNumber r(rad_val(d));
     return (x-c)/r;
@@ -182,7 +182,7 @@ class ScalarTaylorFunction
     typedef ExactBox DomainType;
     typedef ExactInterval RangeType;
     typedef ValidatedNumber NumericType;
-    typedef TaylorModel<ValidatedTag> ModelType;
+    typedef TaylorModel<ValidatedNumber> ModelType;
     typedef Expansion<CoefficientType> ExpansionType;
     typedef Ariadne::ErrorType ErrorType;
   private:
@@ -203,7 +203,7 @@ class ScalarTaylorFunction
     //explicit ScalarTaylorFunction(const DomainType& d);
     explicit ScalarTaylorFunction(const DomainType& d, Sweeper swp);
     //! \brief Construct a ScalarTaylorFunction over the domain \a d, based on the scaled model \a m.
-    explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel<ValidatedTag>& m);
+    explicit ScalarTaylorFunction(const DomainType& d, const TaylorModel<ValidatedNumber>& m);
     explicit ScalarTaylorFunction(const DomainType& d, const Expansion<CoefficientType>& p, const ErrorType& e, const Sweeper& swp);
     explicit ScalarTaylorFunction(const DomainType& d, const Expansion<RawFloat>& p, const double& e, const Sweeper& swp);
 
@@ -346,7 +346,7 @@ class ScalarTaylorFunction
 
     //@{
     /*! \name Accuracy parameters. */
-    //! \copydoc TaylorModel<ValidatedTag>::set_sweeper()
+    //! \copydoc TaylorModel<ValidatedNumber>::set_sweeper()
     void set_sweeper(const Sweeper& swp) { this->_model.set_sweeper(swp); }
     //@}
 
@@ -665,7 +665,7 @@ class VectorTaylorFunction
                          Sweeper swp);
 
     /*! \brief Construct from a domain and the models. */
-    explicit VectorTaylorFunction(const ExactBox& domain, const Vector< TaylorModel<ValidatedTag> >& variables);
+    explicit VectorTaylorFunction(const ExactBox& domain, const Vector< TaylorModel<ValidatedNumber> >& variables);
 
     /*! \brief Construct from a domain, a function, and a sweeper determining the accuracy. */
     VectorTaylorFunction(const ExactBox& domain,
@@ -706,14 +706,14 @@ class VectorTaylorFunction
     /*! \brief The range of the Taylor model. */
     const UpperBox range() const;
     /*! \brief The data used to define the Taylor models. */
-    const Vector< TaylorModel<ValidatedTag> >& models() const;
+    const Vector< TaylorModel<ValidatedNumber> >& models() const;
     /*! \brief The data used to define the centre of the Taylor models. */
     const Vector< Expansion<CoefficientType> > expansions() const;
 
     /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
-    const TaylorModel<ValidatedTag>& model(uint i) const;
+    const TaylorModel<ValidatedNumber>& model(uint i) const;
     /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
-    TaylorModel<ValidatedTag>& model(uint i);
+    TaylorModel<ValidatedNumber>& model(uint i);
 
     /*! \brief The size of the argument. */
     uint argument_size() const;
@@ -862,7 +862,7 @@ class VectorTaylorFunction
   private:
     /* Domain of definition. */
     ExactBox _domain;
-    Vector< TaylorModel<ValidatedTag> > _models;
+    Vector< TaylorModel<ValidatedNumber> > _models;
 };
 
 VectorTaylorFunction operator-(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2);
@@ -939,7 +939,7 @@ class VectorTaylorFunctionElementReference
     operator ScalarTaylorFunction () const { return this->_c->get(this->_i); }
     void operator=(const VectorTaylorFunctionElementReference& x) { this->_c->set(this->_i,x._c->get(x._i)); }
     void operator=(const ScalarTaylorFunction& x) { this->_c->set(this->_i,x); }
-    const TaylorModel<ValidatedTag>& model() const { return this->_c->_models[this->_i]; }
+    const TaylorModel<ValidatedNumber>& model() const { return this->_c->_models[this->_i]; }
     ErrorType error() const { return this->_c->_models[this->_i].error(); }
     void set_error(const ErrorType& e) { this->_c->_models[this->_i].set_error(e); }
     void sweep() { this->_c->_models[this->_i].sweep(); }

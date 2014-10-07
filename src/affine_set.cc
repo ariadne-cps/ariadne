@@ -146,7 +146,7 @@ void ValidatedAffineConstrainedImageSet::construct(const ExactBox& D, const Matr
     this->_domain=D;
     this->_space_models=Vector<ValidatedAffineModel>(G.row_size(),ValidatedAffineModel(G.column_size()));
     for(uint i=0; i!=G.row_size(); ++i) {
-        AffineModel<ValidatedTag> x(G.column_size());
+        AffineModel<ValidatedNumber> x(G.column_size());
         x=h[i];
         for(uint j=0; j!=G.column_size(); ++j) {
             x[j]=G[i][j];
@@ -613,8 +613,8 @@ ValidatedAffineConstrainedImageSet::boundary(uint xind, uint yind) const
     const size_t np=nx+ne+nc;
 
     // Set up matrix of function values
-    AffineModel<ValidatedTag> const& xa=this->_space_models[xind];
-    AffineModel<ValidatedTag> const& ya=this->_space_models[yind];
+    AffineModel<ValidatedNumber> const& xa=this->_space_models[xind];
+    AffineModel<ValidatedNumber> const& ya=this->_space_models[yind];
 
     // The set is given by (x,y)=Gs+h, where As=b and l<=s<=u
     Matrix<Float> G=Matrix<Float>::zero(2,np);

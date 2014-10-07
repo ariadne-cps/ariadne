@@ -30,6 +30,7 @@
 
 #include <iosfwd>
 #include <boost/logic/tribool.hpp>
+#include "metaprogramming.h"
 
 namespace Ariadne {
 
@@ -86,17 +87,35 @@ typedef ApproximateNumber ApproximateErrorType;
 typedef ApproximateNumber ApproximateCoefficientType;
 
 // Information level declarations
-struct ExactTag { };
-typedef EffectiveNumber EffectiveTag;
-typedef ValidatedNumber ValidatedTag;
-typedef ApproximateNumber ApproximateTag;
+struct ExactTag { ExactTag(){} };
+struct EffectiveTag { EffectiveTag(){} EffectiveTag(ExactTag){} };
+struct ValidatedTag { ValidatedTag(){} ValidatedTag(ExactTag){} ValidatedTag(EffectiveTag){} };
+struct ApproximateTag { ApproximateTag(){} ApproximateTag(ExactTag){} ApproximateTag(EffectiveTag){} ApproximateTag(ValidatedTag){} };
+template<class PS, class PW> struct IsStronger : False { };
+template<> struct IsStronger<ExactTag,ExactTag> : True { };
+template<> struct IsStronger<ExactTag,EffectiveTag> : True { };
+template<> struct IsStronger<ExactTag,ValidatedTag> : True { };
+template<> struct IsStronger<ExactTag,ApproximateTag> : True { };
+template<> struct IsStronger<EffectiveTag,EffectiveTag> : True { };
+template<> struct IsStronger<EffectiveTag,ValidatedTag> : True { };
+template<> struct IsStronger<EffectiveTag,ApproximateTag> : True { };
+template<> struct IsStronger<ValidatedTag,ValidatedTag> : True { };
+template<> struct IsStronger<ValidatedTag,ApproximateTag> : True { };
+template<> struct IsStronger<ApproximateTag,ApproximateTag> : True { };
 
 template<class I> struct CanonicalNumberTypedef;
 template<> struct CanonicalNumberTypedef<ExactTag> { typedef ExactNumber Type; };
 template<> struct CanonicalNumberTypedef<EffectiveTag> { typedef EffectiveNumber Type; };
 template<> struct CanonicalNumberTypedef<ValidatedTag> { typedef ValidatedNumber Type; };
 template<> struct CanonicalNumberTypedef<ApproximateTag> { typedef ApproximateNumber Type; };
-template<class I> using CanonicalNumber = typename CanonicalNumberTypedef<I>::Type;
+template<class I> using CanonicalNumberType = typename CanonicalNumberTypedef<I>::Type;
+
+template<class X> struct InformationTypedef;
+template<> struct InformationTypedef<ExactNumber> { typedef ExactTag Type; };
+template<> struct InformationTypedef<EffectiveNumber> { typedef EffectiveTag Type; };
+template<> struct InformationTypedef<ValidatedNumber> { typedef ValidatedTag Type; };
+template<> struct InformationTypedef<ApproximateNumber> { typedef ApproximateTag Type; };
+template<class X> using InformationTag = typename InformationTypedef<X>::Type;
 
 // Concrete class declarations
 template<class X> class Vector;

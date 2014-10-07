@@ -49,26 +49,25 @@ typedef Affine<ValidatedNumber> ValidatedAffine;
 
 template<class X> class AffineModel;
 typedef AffineModel<Float> FloatAffineModel;
-typedef AffineModel<ExactInterval> IntervalAffineModel;
-typedef AffineModel<ApproximateTag> ApproximateAffineModel;
-typedef AffineModel<ValidatedTag> ValidatedAffineModel;
+typedef AffineModel<ApproximateNumber> ApproximateAffineModel;
+typedef AffineModel<ValidatedNumber> ValidatedAffineModel;
 
 template<class X> class ScalarFunction;
 template<class X> class TaylorModel;
-typedef TaylorModel<ApproximateTag> ApproximateTaylorModel;
-typedef TaylorModel<ValidatedTag> ValidatedTaylorModel;
+typedef TaylorModel<ApproximateNumber> ApproximateTaylorModel;
+typedef TaylorModel<ValidatedNumber> ValidatedTaylorModel;
 
 
-AffineModel<ValidatedTag> affine_model(const Affine<ValidatedNumber>& affine);
-AffineModel<ValidatedTag> affine_model(const Affine<EffectiveNumber>& affine);
-AffineModel<ValidatedTag> affine_model(const TaylorModel<ValidatedTag>& taylor_model);
-AffineModel<ValidatedTag> affine_model(const ExactBox& domain, const ValidatedScalarFunction& function);
-Vector< AffineModel<ValidatedTag> > affine_models(const Vector< TaylorModel<ValidatedTag> >& taylor_models);
-Vector< AffineModel<ValidatedTag> > affine_models(const ExactBox& domain, const ValidatedVectorFunction& function);
+AffineModel<ValidatedNumber> affine_model(const Affine<ValidatedNumber>& affine);
+AffineModel<ValidatedNumber> affine_model(const Affine<EffectiveNumber>& affine);
+AffineModel<ValidatedNumber> affine_model(const TaylorModel<ValidatedNumber>& taylor_model);
+AffineModel<ValidatedNumber> affine_model(const ExactBox& domain, const ValidatedScalarFunction& function);
+Vector< AffineModel<ValidatedNumber> > affine_models(const Vector< TaylorModel<ValidatedNumber> >& taylor_models);
+Vector< AffineModel<ValidatedNumber> > affine_models(const ExactBox& domain, const ValidatedVectorFunction& function);
 
 //! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x) \approx \sum_{i=0}^{n-1} a_i x_i + b\f$.
 template<>
-class AffineModel<ApproximateTag>
+class AffineModel<ApproximateNumber>
 {
   public:
     explicit AffineModel() : _c(), _g() { }
@@ -76,14 +75,14 @@ class AffineModel<ApproximateTag>
     explicit AffineModel(const ApproximateNumber& c, const Vector<ApproximateNumber>& g) : _c(c), _g(g) { }
     explicit AffineModel(ApproximateNumber c, std::initializer_list<ApproximateNumber> g) : _c(c), _g(g) { }
 
-    AffineModel<ApproximateTag>& operator=(const ApproximateNumber& c) {
+    AffineModel<ApproximateNumber>& operator=(const ApproximateNumber& c) {
         this->_c=c; for(uint i=0; i!=this->_g.size(); ++i) { this->_g[i]=0.0; } return *this; }
     ApproximateNumber& operator[](uint i) { return this->_g[i]; }
     const ApproximateNumber& operator[](uint i) const { return this->_g[i]; }
-    static AffineModel<ApproximateTag> constant(uint n, const ApproximateNumber& c) {
-        return AffineModel<ApproximateTag>(c,Vector<ApproximateNumber>(n,0.0)); }
-    static AffineModel<ApproximateTag> variable(uint n, uint j) {
-        return AffineModel<ApproximateTag>(0.0,Vector<ApproximateNumber>::unit(n,j)); }
+    static AffineModel<ApproximateNumber> constant(uint n, const ApproximateNumber& c) {
+        return AffineModel<ApproximateNumber>(c,Vector<ApproximateNumber>(n,0.0)); }
+    static AffineModel<ApproximateNumber> variable(uint n, uint j) {
+        return AffineModel<ApproximateNumber>(0.0,Vector<ApproximateNumber>::unit(n,j)); }
 
     const Vector<ApproximateNumber>& a() const { return this->_g; }
     const ApproximateNumber& b() const { return this->_c; }
@@ -102,31 +101,31 @@ class AffineModel<ApproximateTag>
 
 //! \relates AffineModel
 //! \brief Negation of an affine model.
-AffineModel<ApproximateTag> operator-(const AffineModel<ApproximateTag>& f);
+AffineModel<ApproximateNumber> operator-(const AffineModel<ApproximateNumber>& f);
 //! \relates AffineModel
 //! \brief Addition of two affine models.
-AffineModel<ApproximateTag> operator+(const AffineModel<ApproximateTag>& f1, const AffineModel<ApproximateTag>& f2);
+AffineModel<ApproximateNumber> operator+(const AffineModel<ApproximateNumber>& f1, const AffineModel<ApproximateNumber>& f2);
 //! \relates AffineModel
 //! \brief Subtraction of two affine models.
-AffineModel<ApproximateTag> operator-(const AffineModel<ApproximateTag>& f1, const AffineModel<ApproximateTag>& f2);
+AffineModel<ApproximateNumber> operator-(const AffineModel<ApproximateNumber>& f1, const AffineModel<ApproximateNumber>& f2);
 //! \relates AffineModel
 //! \brief Multiplication of two affine models.
-AffineModel<ApproximateTag> operator*(const AffineModel<ApproximateTag>& f1, const AffineModel<ApproximateTag>& f2);
+AffineModel<ApproximateNumber> operator*(const AffineModel<ApproximateNumber>& f1, const AffineModel<ApproximateNumber>& f2);
 //! \relates AffineModel
 //! \brief Addition of a constant to an affine model.
-AffineModel<ApproximateTag>& operator+=(AffineModel<ApproximateTag>& f1, const ApproximateNumber& c2);
+AffineModel<ApproximateNumber>& operator+=(AffineModel<ApproximateNumber>& f1, const ApproximateNumber& c2);
 //! \relates AffineModel
 //! \brief Scalar multiplication of an affine model.
-AffineModel<ApproximateTag>& operator*=(AffineModel<ApproximateTag>& f1, const ApproximateNumber& c2);
+AffineModel<ApproximateNumber>& operator*=(AffineModel<ApproximateNumber>& f1, const ApproximateNumber& c2);
 
 //! \relates AffineModel
 //! \brief Write to an output stream.
-std::ostream& operator<<(std::ostream& os, const AffineModel<ApproximateTag>& f);
+std::ostream& operator<<(std::ostream& os, const AffineModel<ApproximateNumber>& f);
 
 
 //! An affine expression \f$f:[-1,+1]^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b \pm e\f$.
 template<>
-class AffineModel<ValidatedTag>
+class AffineModel<ValidatedNumber>
 {
   public:
     explicit AffineModel() : _c(), _g() { }
@@ -134,12 +133,12 @@ class AffineModel<ValidatedTag>
     explicit AffineModel(const ExactFloat& c, const Vector<ExactFloat>& g, const ErrorFloat& e) : _c(c), _g(g), _e(e) { }
     explicit AffineModel(ExactFloat c, std::initializer_list<ExactFloat> g) : _c(c), _g(g), _e(0.0) { }
 
-    AffineModel<ValidatedTag>& operator=(const ExactFloat& c) {
+    AffineModel<ValidatedNumber>& operator=(const ExactFloat& c) {
         this->_c=c; for(uint i=0; i!=this->_g.size(); ++i) { this->_g[i]=0; } this->_e=0; return *this; }
-    static AffineModel<ValidatedTag> constant(uint n, const ExactFloat& c) {
-        return AffineModel<ValidatedTag>(c,Vector<ExactFloat>(n,0),ErrorFloat(0)); }
-    static AffineModel<ValidatedTag> variable(uint n, uint j) {
-        return AffineModel<ValidatedTag>(0,Vector<ExactFloat>::unit(n,j),0); }
+    static AffineModel<ValidatedNumber> constant(uint n, const ExactFloat& c) {
+        return AffineModel<ValidatedNumber>(c,Vector<ExactFloat>(n,0),ErrorFloat(0)); }
+    static AffineModel<ValidatedNumber> variable(uint n, uint j) {
+        return AffineModel<ValidatedNumber>(0,Vector<ExactFloat>::unit(n,j),0); }
 
 
     const Vector<ExactFloat>& a() const { return this->_g; }
@@ -176,40 +175,40 @@ class AffineModel<ValidatedTag>
 
 //! \relates AffineModel
 //! \brief Negation of an affine model.
-AffineModel<ValidatedTag> operator-(const AffineModel<ValidatedTag>& f);
+AffineModel<ValidatedNumber> operator-(const AffineModel<ValidatedNumber>& f);
 //! \relates AffineModel
 //! \brief Addition of two affine models.
-AffineModel<ValidatedTag> operator+(const AffineModel<ValidatedTag>& f1, const AffineModel<ValidatedTag>& f2);
+AffineModel<ValidatedNumber> operator+(const AffineModel<ValidatedNumber>& f1, const AffineModel<ValidatedNumber>& f2);
 //! \relates AffineModel
 //! \brief Subtraction of two affine models.
-AffineModel<ValidatedTag> operator-(const AffineModel<ValidatedTag>& f1, const AffineModel<ValidatedTag>& f2);
+AffineModel<ValidatedNumber> operator-(const AffineModel<ValidatedNumber>& f1, const AffineModel<ValidatedNumber>& f2);
 //! \relates AffineModel
 //! \brief Multiplication of two affine models.
-AffineModel<ValidatedTag> operator*(const AffineModel<ValidatedTag>& f1, const AffineModel<ValidatedTag>& f2);
+AffineModel<ValidatedNumber> operator*(const AffineModel<ValidatedNumber>& f1, const AffineModel<ValidatedNumber>& f2);
 //! \relates AffineModel
 //! \brief Addition of a constant to an affine model.
-AffineModel<ValidatedTag>& operator+=(AffineModel<ValidatedTag>& f1, const ValidatedNumber& c2);
+AffineModel<ValidatedNumber>& operator+=(AffineModel<ValidatedNumber>& f1, const ValidatedNumber& c2);
 //! \relates AffineModel
 //! \brief Scalar multiplication of an affine model.
-AffineModel<ValidatedTag>& operator*=(AffineModel<ValidatedTag>& f1, const ValidatedNumber& c2);
+AffineModel<ValidatedNumber>& operator*=(AffineModel<ValidatedNumber>& f1, const ValidatedNumber& c2);
 
 //! \relates AffineModel \brief Scalar addition to an affine model.
-AffineModel<ValidatedTag> operator+(const ValidatedNumber& c1, const AffineModel<ValidatedTag>& f2);
-AffineModel<ValidatedTag> operator+(const AffineModel<ValidatedTag>& f1, const ValidatedNumber& c2);
+AffineModel<ValidatedNumber> operator+(const ValidatedNumber& c1, const AffineModel<ValidatedNumber>& f2);
+AffineModel<ValidatedNumber> operator+(const AffineModel<ValidatedNumber>& f1, const ValidatedNumber& c2);
 //! \relates AffineModel \brief Subtraction of an affine model from a scalar.
-AffineModel<ValidatedTag> operator-(const ValidatedNumber& c1, const AffineModel<ValidatedTag>& f2);
+AffineModel<ValidatedNumber> operator-(const ValidatedNumber& c1, const AffineModel<ValidatedNumber>& f2);
 //! \relates AffineModel \brief Subtraction of a scalar from an affine model.
-AffineModel<ValidatedTag> operator-(const AffineModel<ValidatedTag>& f1, const ValidatedNumber& c2);
+AffineModel<ValidatedNumber> operator-(const AffineModel<ValidatedNumber>& f1, const ValidatedNumber& c2);
 //! \relates AffineModel \brief Scalar multiplication of an affine model.
-AffineModel<ValidatedTag> operator*(const ValidatedNumber& c1, const AffineModel<ValidatedTag>& f2);
+AffineModel<ValidatedNumber> operator*(const ValidatedNumber& c1, const AffineModel<ValidatedNumber>& f2);
 
 //! \relates AffineModel
 //! \brief Write to an output stream.
-std::ostream& operator<<(std::ostream& os, const AffineModel<ValidatedTag>& f);
+std::ostream& operator<<(std::ostream& os, const AffineModel<ValidatedNumber>& f);
 
 //! \relates AffineModel
 //! \brief Create from a Taylor model.
-AffineModel<ValidatedTag> affine_model(const TaylorModel<ValidatedTag>& tm);
+AffineModel<ValidatedNumber> affine_model(const TaylorModel<ValidatedNumber>& tm);
 
 
 

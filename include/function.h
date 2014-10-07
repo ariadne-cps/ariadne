@@ -55,7 +55,8 @@ template<class X> class VectorFunctionElementReference;
 template<class P>
 class ScalarFunction
 {
-    typedef P X;
+    static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
+    typedef CanonicalNumberType<P> X;
   private:
     std::shared_ptr< const ScalarFunctionInterface<P> > _ptr;
   public:
@@ -77,10 +78,10 @@ class ScalarFunction
     ScalarFunction<P>& operator=(const ScalarFunctionInterface<P>& f) {
         _ptr=std::shared_ptr< const ScalarFunctionInterface<P> >(f._clone()); return *this; }
 
-    template<class PP> ScalarFunction(const ScalarFunction<PP>& f, typename EnableIf<IsSafelyConvertible<PP,P>,Void>::Type* = 0)
+    template<class PP> ScalarFunction(const ScalarFunction<PP>& f, typename EnableIf<IsStronger<PP,P>,Void>::Type* = 0)
         : _ptr(std::dynamic_pointer_cast< const ScalarFunctionInterface<P> >(f.managed_pointer())) { }
     template<class PP> inline ScalarFunction(const VectorFunctionElementReference<PP>& vfe,
-                                             typename EnableIf<IsSafelyConvertible<PP,P>,Void>::Type* = 0);
+                                             typename EnableIf<IsStronger<PP,P>,Void>::Type* = 0);
 
     std::shared_ptr< const ScalarFunctionInterface<P> > managed_pointer() const  { return _ptr; }
     const ScalarFunctionInterface<P>* raw_pointer() const  { return _ptr.operator->(); }
@@ -101,7 +102,7 @@ class ScalarFunction
 
 template<class P> template<class PP> inline
 ScalarFunction<P>::ScalarFunction(const VectorFunctionElementReference<PP>& vfe,
-                                  typename EnableIf<IsSafelyConvertible<PP,P>,Void>::Type*)
+                                  typename EnableIf<IsStronger<PP,P>,Void>::Type*)
     : _ptr(vfe._vf.raw_pointer()->_get(vfe._i))
 {
 }
@@ -198,9 +199,10 @@ EffectiveScalarFunction tan(const EffectiveScalarFunction&);
 template<class P>
 class VectorFunction
 {
-    typedef P X;
+    static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
+    typedef CanonicalNumberType<P> X;
   private:
-    std::shared_ptr< const VectorFunctionInterface<X> > _ptr;
+    std::shared_ptr< const VectorFunctionInterface<P> > _ptr;
   public:
     typedef X NumericType;
 
@@ -222,9 +224,9 @@ class VectorFunction
 
     VectorFunction(const List< ScalarFunction<P> >& lsf);
     VectorFunction(std::initializer_list< ScalarFunction<P> > lsf);
-    template<class PP> VectorFunction(const List< ScalarFunction<PP> >& lsf, typename EnableIf< IsSafelyConvertible<PP,P>, Void >::Type* = 0) {
+    template<class PP> VectorFunction(const List< ScalarFunction<PP> >& lsf, typename EnableIf< IsStronger<PP,P>, Void >::Type* = 0) {
         *this=VectorFunction<P>(List< ScalarFunction<P> >(lsf)); }
-    template<class PP> VectorFunction(const VectorFunction<PP>& vf, typename EnableIf< IsSafelyConvertible<PP,P>, Void >::Type* = 0)
+    template<class PP> VectorFunction(const VectorFunction<PP>& vf, typename EnableIf< IsStronger<PP,P>, Void >::Type* = 0)
         : _ptr(std::dynamic_pointer_cast< const VectorFunctionInterface<P> >(vf.managed_pointer())) { }
 
     ScalarFunction<P> get(Nat i) const { return ScalarFunction<P>(this->_ptr->_get(i)); }

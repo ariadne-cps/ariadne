@@ -3234,13 +3234,13 @@ unchecked_compose(const Vector<ValidatedTaylorModel>& x,
 
 
 
-template TaylorModel<ValidatedTag> rec(const TaylorModel<ValidatedTag>&);
-template TaylorModel<ValidatedTag> sqrt(const TaylorModel<ValidatedTag>&);
-template TaylorModel<ValidatedTag> exp(const TaylorModel<ValidatedTag>&);
-template TaylorModel<ValidatedTag> log(const TaylorModel<ValidatedTag>&);
-template TaylorModel<ValidatedTag> sin(const TaylorModel<ValidatedTag>&);
-template TaylorModel<ValidatedTag> cos(const TaylorModel<ValidatedTag>&);
-template TaylorModel<ValidatedTag> tan(const TaylorModel<ValidatedTag>&);
+template TaylorModel<ValidatedNumber> rec(const TaylorModel<ValidatedNumber>&);
+template TaylorModel<ValidatedNumber> sqrt(const TaylorModel<ValidatedNumber>&);
+template TaylorModel<ValidatedNumber> exp(const TaylorModel<ValidatedNumber>&);
+template TaylorModel<ValidatedNumber> log(const TaylorModel<ValidatedNumber>&);
+template TaylorModel<ValidatedNumber> sin(const TaylorModel<ValidatedNumber>&);
+template TaylorModel<ValidatedNumber> cos(const TaylorModel<ValidatedNumber>&);
+template TaylorModel<ValidatedNumber> tan(const TaylorModel<ValidatedNumber>&);
 
 
 
@@ -3392,16 +3392,16 @@ std::ostream& ApproximateTaylorModel::write(std::ostream& os) const {
 }
 
 
-template TaylorModel<ApproximateTag> neg(const TaylorModel<ApproximateTag>&);
-template TaylorModel<ApproximateTag> rec(const TaylorModel<ApproximateTag>&);
-template TaylorModel<ApproximateTag> sqr(const TaylorModel<ApproximateTag>&);
-template TaylorModel<ApproximateTag> pow(const TaylorModel<ApproximateTag>&, int);
-template TaylorModel<ApproximateTag> sqrt(const TaylorModel<ApproximateTag>&);
-template TaylorModel<ApproximateTag> exp(const TaylorModel<ApproximateTag>&);
-template TaylorModel<ApproximateTag> log(const TaylorModel<ApproximateTag>&);
-template TaylorModel<ApproximateTag> sin(const TaylorModel<ApproximateTag>&);
-template TaylorModel<ApproximateTag> cos(const TaylorModel<ApproximateTag>&);
-template TaylorModel<ApproximateTag> tan(const TaylorModel<ApproximateTag>&);
+template TaylorModel<ApproximateNumber> neg(const TaylorModel<ApproximateNumber>&);
+template TaylorModel<ApproximateNumber> rec(const TaylorModel<ApproximateNumber>&);
+template TaylorModel<ApproximateNumber> sqr(const TaylorModel<ApproximateNumber>&);
+template TaylorModel<ApproximateNumber> pow(const TaylorModel<ApproximateNumber>&, int);
+template TaylorModel<ApproximateNumber> sqrt(const TaylorModel<ApproximateNumber>&);
+template TaylorModel<ApproximateNumber> exp(const TaylorModel<ApproximateNumber>&);
+template TaylorModel<ApproximateNumber> log(const TaylorModel<ApproximateNumber>&);
+template TaylorModel<ApproximateNumber> sin(const TaylorModel<ApproximateNumber>&);
+template TaylorModel<ApproximateNumber> cos(const TaylorModel<ApproximateNumber>&);
+template TaylorModel<ApproximateNumber> tan(const TaylorModel<ApproximateNumber>&);
 
 
 std::ostream& ApproximateTaylorModel::str(std::ostream& os) const {

@@ -52,7 +52,7 @@ typedef Constraint<EffectiveScalarFunction,EffectiveNumber> EffectiveConstraint;
 typedef Constraint<ValidatedScalarFunction,ValidatedNumber> ValidatedConstraint;
 
 template<class X> class Procedure;
-typedef Procedure<ValidatedTag> ValidatedProcedure;
+typedef Procedure<ValidatedNumber> ValidatedProcedure;
 
 template<class X> class ScalarFunctionInterface;
 typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;

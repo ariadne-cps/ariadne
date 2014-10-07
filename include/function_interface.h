@@ -80,11 +80,11 @@ class ScalarFunctionInterface<ApproximateTag>
     Differential<ApproximateNumber> differential(const Vector<ApproximateNumber>& x, Nat d) const;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<ApproximateNumber> derivative(Nat i) const;
+    inline ScalarFunction<ApproximateTag> derivative(Nat i) const;
   private:
-    virtual ScalarFunctionInterface<ApproximateNumber>* _derivative(Nat i) const = 0;
+    virtual ScalarFunctionInterface<ApproximateTag>* _derivative(Nat i) const = 0;
   public:
-    virtual ScalarFunctionInterface<ApproximateNumber>* _clone() const = 0;
+    virtual ScalarFunctionInterface<ApproximateTag>* _clone() const = 0;
 };
 
 //! \ingroup FunctionModule
@@ -296,7 +296,7 @@ class ScalarModelInterface {
 
 template<class X> class FunctionFactoryInterface;
 
-template<> class FunctionFactoryInterface<ValidatedNumber>
+template<> class FunctionFactoryInterface<ValidatedTag>
 {
     typedef ExactBox DomainType;
   public:

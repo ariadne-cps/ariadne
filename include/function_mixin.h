@@ -30,10 +30,6 @@
 
 namespace Ariadne {
 
-typedef ApproximateNumber ApproximateTag;
-typedef ValidatedNumber ValidatedTag;
-typedef EffectiveNumber EffectiveTag;
-
 typedef ApproximateNumber ApproximateNumber;
 typedef ValidatedNumber ValidatedNumber;
 typedef EffectiveNumber EffectiveNumber;
@@ -79,8 +75,8 @@ class ScalarFunctionMixin<F,ValidatedTag>
     : public virtual ScalarFunctionInterface<ValidatedTag>
 {
   private:
-    template<class X> X _base_evaluate(const Vector<X>& x) const {
-        X r; static_cast<const F*>(this)->_compute(r,x); return r;}
+    template<class XX> XX _base_evaluate(const Vector<XX>& x) const {
+        XX r; static_cast<const F*>(this)->_compute(r,x); return r;}
   protected:
     ScalarFunctionMixin() { }
   public:

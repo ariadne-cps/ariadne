@@ -112,9 +112,9 @@ template<class X> std::ostream& operator<<(std::ostream& os, const Representatio
 }
 
 class ScalarPythonFunction
-    : public ScalarFunctionMixin<ScalarPythonFunction,Real>
+    : public ScalarFunctionMixin<ScalarPythonFunction,EffectiveTag>
 {
-    friend class ScalarFunctionMixin<ScalarPythonFunction,Real>;
+    friend class ScalarFunctionMixin<ScalarPythonFunction,EffectiveTag>;
     template<class T> void _compute(T& r, const Vector<T>& a) const {
         r=boost::python::extract<T>(this->_pyf(a)); }
   public:
@@ -150,9 +150,9 @@ class ScalarPythonFunction
 
 
 class VectorPythonFunction
-    : public VectorFunctionMixin<VectorPythonFunction,Real>
+    : public VectorFunctionMixin<VectorPythonFunction,EffectiveTag>
 {
-    friend class VectorFunctionMixin<VectorPythonFunction,Real>;
+    friend class VectorFunctionMixin<VectorPythonFunction,EffectiveTag>;
     template<class T> void _compute(Vector<T>& r, const Vector<T>& a) const {
         r=boost::python::extract< Vector<T> >(this->_pyf(a)); }
   public:

@@ -61,22 +61,22 @@ struct ScalarFunctionData
 
 //! \brief A wrapper for converting templated C++ functions to %Ariadne functions.
 //!
-//! Given a C++ class T with a (static) template method
+//! Given a C++ class F with a (static) template method
 //!   <code>template<class R, class A, class P> compute(R& r, const A& a, const P& p);</code>
-//! the type <code>ScalarUserFunction<T></code> is an Ariadne function defined by \f$r=f(a)\f$.
-//! The constructor for ScalarUserFunction<T> takes a Vector<ApproximateNumber> or Vector<ValidatedNumber> argument which is used for \a p.
+//! the type <code>ScalarUserFunction<F></code> is an Ariadne function defined by \f$r=f(a)\f$.
+//! The constructor for ScalarUserFunction<F> takes a Vector<ApproximateNumber> or Vector<ValidatedNumber> argument which is used for \a p.
 //!
-//! The class T must also define meta-data <c>argument_size(), parameter_size()
+//! The class F must also define meta-data <c>argument_size(), parameter_size()
 //! and smoothness()</c>. These are most easily defined by inheriting from the
 //! <tt>ScalarFunctionData<AS,PS,SM=SMOOTH></tt> class.
 //!
 //! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
-template<class T> class ScalarUserFunction
+template<class F> class ScalarUserFunction
     : public EffectiveScalarFunction
 {
   private:
     class Representation
-        : public ScalarFunctionMixin< Representation, EffectiveNumber >
+        : public ScalarFunctionMixin< Representation, EffectiveTag >
     {
       private:
         Vector<EffectiveNumber> _p;
@@ -84,12 +84,12 @@ template<class T> class ScalarUserFunction
         typedef uint SizeType;
         Representation(const Vector<EffectiveNumber>& p) : _p(p) { }
 
-        template<class R, class A> inline void _compute(R& r, const A& a) const { T::compute(r,a,_p); }
+        template<class R, class A> inline void _compute(R& r, const A& a) const { F::compute(r,a,_p); }
 
         virtual Representation* clone() const { return new Representation(*this); }
 
-        virtual SizeType argument_size() const { return T::argument_size(); }
-        virtual SizeType parameter_size() const { return T::parameter_size(); }
+        virtual SizeType argument_size() const { return F::argument_size(); }
+        virtual SizeType parameter_size() const { return F::parameter_size(); }
 
 
         virtual EffectiveScalarFunction derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
@@ -109,7 +109,7 @@ template<class T> class ScalarUserFunction
     ScalarUserFunction(const Vector<ExactNumber>& p) : EffectiveScalarFunction(new Representation(Vector<EffectiveNumber>(p))) { }
     ScalarUserFunction(const Vector<EffectiveNumber>& p) : EffectiveScalarFunction(new Representation(p)) { }
 
-    uint parameter_size() const { return T().parameter_size(); }
+    uint parameter_size() const { return F().parameter_size(); }
     //const Vector<ValidatedNumber> parameters() const { return _p; }
 };
 
@@ -136,22 +136,22 @@ class VectorFunctionData
 
 //! \brief A wrapper for converting templated C++ functions to %Ariadne functions.
 //!
-//! Given a C++ class T with a (static) template method
+//! Given a C++ class F with a (static) template method
 //!   <code>template<class R, class A, class P> compute(R& r, const A& a, const P& p);</code>
-//! the type <code>VectorUserFunction<T></code> is an Ariadne function defined by \f$r=f(a)\f$.
-//! The constructor for VectorUserFunction<T> takes a Vector<EffectiveNumber> argument which is used for \a p.
+//! the type <code>VectorUserFunction<F></code> is an Ariadne function defined by \f$r=f(a)\f$.
+//! The constructor for VectorUserFunction<F> takes a Vector<EffectiveNumber> argument which is used for \a p.
 //!
-//! The class T must also define meta-data <c>result_size(), argument_size(), parameter_size()
+//! The class F must also define meta-data <c>result_size(), argument_size(), parameter_size()
 //! and smoothness()</c> as static functions. These are most easily defined by inheriting from the
 //! <tt>VectorFunctionData<RS,AS,PS,SM=SMOOTH></tt> class.
 //!
 //! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
-template<class T> class VectorUserFunction
+template<class F> class VectorUserFunction
     : public EffectiveVectorFunction
 {
   private:
     class Representation
-        : public VectorFunctionMixin< Representation, EffectiveNumber >
+        : public VectorFunctionMixin< Representation, EffectiveTag >
     {
       public:
         typedef uint SizeType;
@@ -159,11 +159,11 @@ template<class T> class VectorUserFunction
 
         virtual Representation* clone() const { return new Representation(*this); }
 
-        virtual SizeType result_size() const { return T::result_size(); }
-        virtual SizeType argument_size() const { return T::argument_size(); }
-        virtual SizeType parameter_size() const { return T::parameter_size(); }
+        virtual SizeType result_size() const { return F::result_size(); }
+        virtual SizeType argument_size() const { return F::argument_size(); }
+        virtual SizeType parameter_size() const { return F::parameter_size(); }
 
-        template<class R, class A> inline void _compute(R& r, const A& a) const { T::compute(r,a,_p); }
+        template<class R, class A> inline void _compute(R& r, const A& a) const { F::compute(r,a,_p); }
 
         virtual Matrix<ApproximateNumber> jacobian(const Vector<ApproximateNumber>& x) const {
             return Ariadne::jacobian(this->evaluate(Differential<ApproximateNumber>::variables(1u,x))); }

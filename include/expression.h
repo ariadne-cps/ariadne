@@ -468,7 +468,7 @@ Formula<Real> formula(const Expression<Real>& res, const List< Assignment< Varia
 List< Formula<Real> > formula(const List< Expression<Real> >& res, const List< Assignment< Variable<Real>, Expression<Real> > >& aux, const Space<Real> spc);
 
 
-ScalarFunction<Real> make_function(const Expression<Real>& e, const Space<Real>& s);
+ScalarFunction<EffectiveTag> make_function(const Expression<Real>& e, const Space<Real>& s);
 
 
 //@}

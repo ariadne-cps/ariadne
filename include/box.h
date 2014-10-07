@@ -48,16 +48,16 @@ class BoxSet;
 template<class X> class Point;
 typedef Point<ExactFloatType> ExactPoint;
 
-class Box;
+class ExactBox;
 class UpperBox;
 class ApproximateBox;
 
-typedef Box BoxDomainType;
+typedef ExactBox BoxDomainType;
 typedef UpperBox BoundingBoxType;
 
-bool contains(const Vector<Interval>& v1, const Vector<ExactFloatType>& v2);
-bool contains(const Vector<Interval>& v1, const Vector<ValidatedFloatType>& v2);
-bool element(const Vector<ValidatedFloatType>& v1, const Vector<Interval>& v2);
+bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloatType>& v2);
+bool contains(const Vector<ExactInterval>& v1, const Vector<ValidatedFloatType>& v2);
+bool element(const Vector<ValidatedFloatType>& v1, const Vector<ExactInterval>& v2);
 
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief An exact interval in \f$\mathbb{R}\f$.
@@ -74,14 +74,14 @@ class IntervalSet {
 inline OutputStream& operator<<(OutputStream& os, const IntervalSet& ivl) {
     return os << "{" << ivl.lower() << ":" << ivl.upper() << "}";
 }
-inline Interval under_approximation(const IntervalSet& rivl) {
-    return Interval(Interval(rivl.lower()).upper(),Interval(rivl.upper()).lower());
+inline ExactInterval under_approximation(const IntervalSet& rivl) {
+    return ExactInterval(ExactInterval(rivl.lower()).upper(),ExactInterval(rivl.upper()).lower());
 }
-inline Interval over_approximation(const IntervalSet& rivl) {
-    return Interval(Interval(rivl.lower()).lower(),Interval(rivl.upper()).upper());
+inline ExactInterval over_approximation(const IntervalSet& rivl) {
+    return ExactInterval(ExactInterval(rivl.lower()).lower(),ExactInterval(rivl.upper()).upper());
 }
-inline Interval approximation(const IntervalSet& rivl) {
-    return Interval(RawFloatType(ApproximateNumberType(rivl.lower())),RawFloatType(ApproximateNumberType(rivl.upper())));
+inline ExactInterval approximation(const IntervalSet& rivl) {
+    return ExactInterval(RawFloatType(ApproximateNumberType(rivl.lower())),RawFloatType(ApproximateNumberType(rivl.upper())));
 }
 
 
@@ -91,7 +91,7 @@ class BoxSet {
     Array<IntervalSet> _ary;
   public:
     BoxSet() : _ary() { }
-    explicit BoxSet(const Vector<Interval>& iv);
+    explicit BoxSet(const Vector<ExactInterval>& iv);
     BoxSet(const List<IntervalSet>& t) : _ary(t.begin(),t.end()) { }
     BoxSet(Nat n, const IntervalSet& ivl) : _ary(n,ivl) { }
     Nat size() const { return _ary.size(); }
@@ -100,55 +100,55 @@ class BoxSet {
     IntervalSet& operator[](Nat i) { return _ary[i]; }
     friend OutputStream& operator<<(OutputStream& os, const BoxSet& bx) { return os << bx._ary; }
 };
-Box under_approximation(const BoxSet& rbx);
-Box over_approximation(const BoxSet& rbx);
-Box approximation(const BoxSet& rbx);
+ExactBox under_approximation(const BoxSet& rbx);
+ExactBox over_approximation(const BoxSet& rbx);
+ExactBox approximation(const BoxSet& rbx);
 
-Box widen(const Box& bx);
+ExactBox widen(const ExactBox& bx);
 
 //! \ingroup BasicSetSubModule GeometryModule
 //! \brief A box in Euclidean space.
-class Box
+class ExactBox
     : public SetInterface,
       public DrawableInterface,
-      public Vector<Interval>
+      public Vector<ExactInterval>
 {
   public:
     //! Construct a singleton point in zero dimensions.
-    Box() : Vector<Interval>() { }
+    ExactBox() : Vector<ExactInterval>() { }
     //! Construct an empty box in \a d dimensions.
-    explicit Box(uint d) : Vector<Interval>(d) { }
+    explicit ExactBox(uint d) : Vector<ExactInterval>(d) { }
     //! Construct from an initializer list of pairs of floating-point values
     //! giving lower and upper bounds.
-    Box(std::initializer_list<Interval> lst);
+    ExactBox(std::initializer_list<ExactInterval> lst);
 
-    explicit Box(uint d, Interval ivl) : Vector<Interval>(d,ivl) { }
-    explicit Box(const Vector<ValidatedFloat>& vec) : Vector<Interval>(vec) { }
-    Box(const Vector<Interval>& ivec) : Vector<Interval>(ivec) { }
-    Box(const List<Interval>& ilst) : Vector<Interval>(ilst) { }
+    explicit ExactBox(uint d, ExactInterval ivl) : Vector<ExactInterval>(d,ivl) { }
+    explicit ExactBox(const Vector<ValidatedFloat>& vec) : Vector<ExactInterval>(vec) { }
+    ExactBox(const Vector<ExactInterval>& ivec) : Vector<ExactInterval>(ivec) { }
+    ExactBox(const List<ExactInterval>& ilst) : Vector<ExactInterval>(ilst) { }
 
     //! Construct from a string literal of the form "[a1,b1]x[a2,b2]x...x[ad,bd]".
-    explicit Box(const std::string& str);
+    explicit ExactBox(const std::string& str);
 
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
-    static Box unit_box(uint n) {
-        return Box(n,Interval(-1,1));
+    static ExactBox unit_box(uint n) {
+        return ExactBox(n,ExactInterval(-1,1));
     }
 
     //! The upper quadrant box \f$[0,\infty]^n\f$ in \a n dimensions.
-    static Box upper_quadrant(uint n) {
-        return Box(n,Interval(0,inf));
+    static ExactBox upper_quadrant(uint n) {
+        return ExactBox(n,ExactInterval(0,inf));
     }
 
     //! An explicit case to an interval vector. Useful to prevent ambiguous function overloads.
-    const Vector<Interval>& vector() const { return *this; }
+    const Vector<ExactInterval>& vector() const { return *this; }
 
     //! The set of vertices of the box.
     std::vector<ExactPoint> vertices() const;
 
     //! An approximation to the centre of the box.
     ExactPoint centre() const {
-        return ExactPoint(midpoint(static_cast<const Vector<Interval>&>(*this)));
+        return ExactPoint(midpoint(static_cast<const Vector<ExactInterval>&>(*this)));
     }
 
     //! An over-approximation to radius of the box in the supremum norm.
@@ -176,7 +176,7 @@ class Box
 
     //! \brief Test if the box is bounded.
     bool bounded() const {
-        for(uint i=0; i!=this->Vector<Interval>::size(); ++i) {
+        for(uint i=0; i!=this->Vector<ExactInterval>::size(); ++i) {
             if(!Ariadne::bounded((*this)[i])) {
                 return false;
             }
@@ -185,8 +185,8 @@ class Box
     }
 
     //! \brief Make a dynamically-allocated copy.
-    virtual Box* clone() const {
-        return new Box(*this);
+    virtual ExactBox* clone() const {
+        return new ExactBox(*this);
     }
 
     //! \brief Test if the box is a superset of another box.
@@ -195,26 +195,26 @@ class Box
     }
 
     //! \brief Test if the box is a subset of another box.
-    bool subset(const Box& bx) const {
+    bool subset(const ExactBox& bx) const {
         return Ariadne::subset(this->vector(),bx.vector());
     }
 
     //! \brief Test if the box is a superset of another box.
-    bool superset(const Box& bx) const {
+    bool superset(const ExactBox& bx) const {
         return Ariadne::subset(bx.vector(),this->vector());
     }
 
     //! \brief Test if the box intersects another box. Returns \a true even
     //! if the intersection occurs only on the boundary of the boxes.
-    //! Use Box::overlaps(const Box& bx) to test robust intersection
+    //! Use ExactBox::overlaps(const ExactBox& bx) to test robust intersection
     //! of the interiors.
-    bool intersects(const Box& bx) const {
+    bool intersects(const ExactBox& bx) const {
         return Ariadne::intersect(this->vector(),bx.vector());
     }
 
     //! \brief Test if the box intersects another box. Returns \a false even
     //! if the intersection only occurs only on the boundary of the boxes.
-    bool disjoint(const Box& bx) const {
+    bool disjoint(const ExactBox& bx) const {
         return Ariadne::disjoint(this->vector(),bx.vector());
     }
 
@@ -225,27 +225,27 @@ class Box
 
     //! \brief Tests if the box is disjoint from another box.
     //! Only returns true if the closures are disjoint.
-    virtual tribool separated(const Box& other) const {
+    virtual tribool separated(const ExactBox& other) const {
         return Ariadne::disjoint(this->vector(), other.vector());
     }
 
     //! \brief Tests if the box overlaps another box.
     //! Only returns true if the interior of one box intersects the other.
-    virtual tribool overlaps(const Box& other) const {
+    virtual tribool overlaps(const ExactBox& other) const {
         return Ariadne::overlap(this->vector(), other.vector());
     }
 
     //! \brief Tests if the box covers another box.
     //! Only returns true if the interior of the box is a superset
     //! of the closure of the other.
-    virtual tribool covers(const Box& other) const {
+    virtual tribool covers(const ExactBox& other) const {
         return Ariadne::inside(other.vector(), this->vector());
     }
 
     //! \brief Tests if the box covers another box.
     //! Only returns true if the closure of the box is a subset
     //! of the interior of the other.
-    virtual tribool inside(const Box& other) const {
+    virtual tribool inside(const ExactBox& other) const {
         return Ariadne::inside(this->vector(), other.vector());
     }
 
@@ -257,7 +257,7 @@ class Box
     //! \brief Widens the box by the minimal floating-point increment.
     //! The result is guaranteed to contain the box in its interior.
     Void widen() {
-        Box& result=*this;
+        ExactBox& result=*this;
         for(uint i=0; i!=result.dimension(); ++i) {
             result[i]=Ariadne::widen((*this)[i]);
         }
@@ -266,44 +266,44 @@ class Box
     //! \brief Narrows the box by the minimal floating-point increment.
     //! The result is guaranteed to contain the box in its interior.
     Void narrow() {
-        Box& result=*this;
+        ExactBox& result=*this;
         for(uint i=0; i!=result.dimension(); ++i) {
             result[i]=Ariadne::narrow((*this)[i]);
         }
     }
 
     //! \brief Split into two along the largest side.
-    std::pair<Box,Box> split() const { return Ariadne::split(*this); }
+    std::pair<ExactBox,ExactBox> split() const { return Ariadne::split(*this); }
     //! \brief Split into two along side with index \a i.
-    std::pair<Box,Box> split(uint i) const { return Ariadne::split(*this,i); };
+    std::pair<ExactBox,ExactBox> split(uint i) const { return Ariadne::split(*this,i); };
 
     //! \brief Draw on a canvas.
     virtual void draw(CanvasInterface& c, const Projection2d& p) const;
 
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const {
-        return os << *static_cast<const Vector<Interval>*>(this);
+        return os << *static_cast<const Vector<ExactInterval>*>(this);
     }
 
-    operator UpperBox & () { return reinterpret_cast<UpperBox&>(static_cast<Vector<Interval>&>(*this)); }
-    operator UpperBox const& () const { return reinterpret_cast<UpperBox const&>(static_cast<Vector<Interval>const&>(*this)); }
-    operator Vector<UpperInterval> const& () const { return reinterpret_cast<Vector<UpperInterval>const&>(static_cast<Vector<Interval>const&>(*this)); }
+    operator UpperBox & () { return reinterpret_cast<UpperBox&>(static_cast<Vector<ExactInterval>&>(*this)); }
+    operator UpperBox const& () const { return reinterpret_cast<UpperBox const&>(static_cast<Vector<ExactInterval>const&>(*this)); }
+    operator Vector<UpperInterval> const& () const { return reinterpret_cast<Vector<UpperInterval>const&>(static_cast<Vector<ExactInterval>const&>(*this)); }
 };
 
-//! \relates Box \brief The cartesian product of two boxes.
-Box product(const Box& bx1, const Box& bx2);
-//! \relates Box \brief The smallest box containing the two boxes.
-Box hull(const Box& bx1, const Box& bx2);
-Box hull(const Box& bx1, const ExactPoint& pt2);
-Box hull(const ExactPoint& pt1, const ExactPoint& pt2);
-//! \relates Box \brief The intersection of the two boxes.
-Box intersection(const Box& bx1, const Box& bx2);
-//! \relates Box \brief A box which is wider than the input, and has single-precision values.
-Box widen(const Box& bx);
-//! \relates Box \brief A box which is narrower than the input, and has single-precision values.
-Box narrow(const Box& bx);
+//! \relates ExactBox \brief The cartesian product of two boxes.
+ExactBox product(const ExactBox& bx1, const ExactBox& bx2);
+//! \relates ExactBox \brief The smallest box containing the two boxes.
+ExactBox hull(const ExactBox& bx1, const ExactBox& bx2);
+ExactBox hull(const ExactBox& bx1, const ExactPoint& pt2);
+ExactBox hull(const ExactPoint& pt1, const ExactPoint& pt2);
+//! \relates ExactBox \brief The intersection of the two boxes.
+ExactBox intersection(const ExactBox& bx1, const ExactBox& bx2);
+//! \relates ExactBox \brief A box which is wider than the input, and has single-precision values.
+ExactBox widen(const ExactBox& bx);
+//! \relates ExactBox \brief A box which is narrower than the input, and has single-precision values.
+ExactBox narrow(const ExactBox& bx);
 
-Box make_box(const std::string& str);
+ExactBox make_box(const std::string& str);
 
 
 //! \ingroup BasicSetSubModule GeometryModule
@@ -321,7 +321,7 @@ class UpperBox
     //! giving lower and upper bounds.
     UpperBox(std::initializer_list<UpperInterval> lst);
 
-    UpperBox(Vector<Interval>const& vec) : Vector<UpperInterval>(vec) { }
+    UpperBox(Vector<ExactInterval>const& vec) : Vector<UpperInterval>(vec) { }
     UpperBox(Vector<UpperInterval>const& vec) : Vector<UpperInterval>(vec) { }
     template<class E> UpperBox(const VectorExpression<E>& t) : Vector<UpperInterval>(t) { }
 
@@ -394,14 +394,14 @@ class UpperBox
     }
 
     //! \brief Test if the box is a subset of another box.
-    Tribool inside(const Box& bx) const {
+    Tribool inside(const ExactBox& bx) const {
         for(uint i=0; i!=dimension(); ++i) {
             if(!Ariadne::inside((*this)[i],bx[i])) { return indeterminate; } }
         return true;
     }
 
     //! \brief Test if the box is a subset of another box.
-    Tribool subset(const Box& bx) const {
+    Tribool subset(const ExactBox& bx) const {
         for(uint i=0; i!=dimension(); ++i) {
             if(!Ariadne::subset((*this)[i],bx[i])) { return indeterminate; } }
         return true;
@@ -452,7 +452,7 @@ class UpperBox
 
     //! \brief Split into two along the largest side.
     std::pair<UpperBox,UpperBox> split() const {
-        return Box(reinterpret_cast<Vector<Interval>const&>(*this)).split(); }
+        return ExactBox(reinterpret_cast<Vector<ExactInterval>const&>(*this)).split(); }
     //! \brief Split into two along side with index \a i.
     std::pair<UpperBox,UpperBox> split(uint i) const;
 
@@ -472,22 +472,22 @@ class ApproximateBox
     explicit ApproximateBox(Nat d) : ApproximateBox(d,ApproximateInterval()) { }
     explicit ApproximateBox(Nat d, ApproximateInterval const& ivl) : Vector<ApproximateInterval>(d,ivl) { }
     explicit ApproximateBox(Vector<ApproximateInterval> const& vec) : Vector<ApproximateInterval>(vec) { }
-    ApproximateBox(Box const& bx) : Vector<ApproximateInterval>(bx) { }
+    ApproximateBox(ExactBox const& bx) : Vector<ApproximateInterval>(bx) { }
     ApproximateBox(UpperBox const& bx) : Vector<ApproximateInterval>(bx) { }
 
     uint dimension() const { return this->Vector<ApproximateInterval>::size(); }
 };
 
-inline Box make_exact_box(UpperBox const& ubx) {
-    return Box(reinterpret_cast<Vector<Interval>const&>(static_cast<Vector<UpperInterval>const&>(ubx)));
+inline ExactBox make_exact_box(UpperBox const& ubx) {
+    return ExactBox(reinterpret_cast<Vector<ExactInterval>const&>(static_cast<Vector<UpperInterval>const&>(ubx)));
 }
 
 
-inline bool subset(const Box& bx1, const Box& bx2) {
+inline bool subset(const ExactBox& bx1, const ExactBox& bx2) {
     return bx1.subset(bx2);
 }
 
-inline UpperBox Box::bounding_box() const {
+inline UpperBox ExactBox::bounding_box() const {
     return Ariadne::widen(*this);
 }
 
@@ -504,11 +504,11 @@ inline PositiveUpperFloatType radius(const UpperBox& bx) {
     return bx.radius();
 }
 
-inline tribool inside(const UpperBox& bx1, const Box& bx2) {
+inline tribool inside(const UpperBox& bx1, const ExactBox& bx2) {
     return bx1.inside(bx2);
 }
 
-inline tribool subset(const UpperBox& bx1, const Box& bx2) {
+inline tribool subset(const UpperBox& bx1, const ExactBox& bx2) {
     return bx1.subset(bx2);
 }
 

@@ -41,7 +41,7 @@ Vector<ValidatedFloatType> make_bounds(const Vector<ErrorFloatType>& ev) {
     return r;
 }
 
-Vector<ValidatedFloatType>const& make_singleton(const Vector<Interval>& ivlv) {
+Vector<ValidatedFloatType>const& make_singleton(const Vector<ExactInterval>& ivlv) {
     return reinterpret_cast<Vector<ValidatedFloatType>const&>(ivlv);
 }
 
@@ -49,7 +49,7 @@ Vector<ValidatedFloatType>const& make_singleton(const Vector<UpperInterval>& ivl
     return reinterpret_cast<Vector<ValidatedFloatType>const&>(ivlv);
 }
 
-bool contains(const Vector<Interval>& v1, const Vector<ExactFloat>& v2)
+bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloat>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -58,7 +58,7 @@ bool contains(const Vector<Interval>& v1, const Vector<ExactFloat>& v2)
     return true;
 }
 
-bool contains(const Vector<Interval>& v1, const Vector<ValidatedFloat>& v2)
+bool contains(const Vector<ExactInterval>& v1, const Vector<ValidatedFloat>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -67,12 +67,12 @@ bool contains(const Vector<Interval>& v1, const Vector<ValidatedFloat>& v2)
     return true;
 }
 
-bool element(const Vector<ExactFloat>& v1, const Vector<Interval>& v2)
+bool element(const Vector<ExactFloat>& v1, const Vector<ExactInterval>& v2)
 {
     return contains(v2,v1);
 }
 
-bool element(const Vector<ValidatedFloat>& v1, const Vector<Interval>& v2)
+bool element(const Vector<ValidatedFloat>& v1, const Vector<ExactInterval>& v2)
 {
     return contains(v2,v1);
 }
@@ -133,7 +133,7 @@ Vector<ValidatedFloatType> refinement(const Vector<ValidatedFloatType>& x1, cons
 
 
 
-bool contains(const Vector<Interval>& v1, const Vector<Float>& v2)
+bool contains(const Vector<ExactInterval>& v1, const Vector<Float>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -142,7 +142,7 @@ bool contains(const Vector<Interval>& v1, const Vector<Float>& v2)
     return true;
 }
 
-bool subset(const Vector<Interval>& v1, const Vector<Interval>& v2)
+bool subset(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -151,7 +151,7 @@ bool subset(const Vector<Interval>& v1, const Vector<Interval>& v2)
     return true;
 }
 
-bool intersect(const Vector<Interval>& v1, const Vector<Interval>& v2)
+bool intersect(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -161,7 +161,7 @@ bool intersect(const Vector<Interval>& v1, const Vector<Interval>& v2)
 }
 
 
-bool disjoint(const Vector<Interval>& v1, const Vector<Interval>& v2)
+bool disjoint(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -170,7 +170,7 @@ bool disjoint(const Vector<Interval>& v1, const Vector<Interval>& v2)
     return false;
 }
 
-bool overlap(const Vector<Interval>& v1, const Vector<Interval>& v2)
+bool overlap(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -179,7 +179,7 @@ bool overlap(const Vector<Interval>& v1, const Vector<Interval>& v2)
     return true;
 }
 
-bool covers(const Vector<Interval>& v1, const Vector<Interval>& v2)
+bool covers(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -188,7 +188,7 @@ bool covers(const Vector<Interval>& v1, const Vector<Interval>& v2)
     return true;
 }
 
-bool inside(const Vector<Interval>& v1, const Vector<Interval>& v2)
+bool inside(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -197,7 +197,7 @@ bool inside(const Vector<Interval>& v1, const Vector<Interval>& v2)
     return true;
 }
 
-bool empty(const Vector<Interval>& v)
+bool empty(const Vector<ExactInterval>& v)
 {
     for(size_t i=0; i!=v.size(); ++i) {
         if(empty(v[i])) { return true; }
@@ -206,7 +206,7 @@ bool empty(const Vector<Interval>& v)
 }
 
 
-uint irmax(const Vector<Interval>& v) {
+uint irmax(const Vector<ExactInterval>& v) {
     uint imw(0);
     Float mw=v[0].width().raw();
     for(uint i=1; i!=v.size(); ++i) {
@@ -216,9 +216,9 @@ uint irmax(const Vector<Interval>& v) {
 }
 
 
-Vector<Interval> split(const Vector<Interval>& v, uint k, tribool lr) {
+Vector<ExactInterval> split(const Vector<ExactInterval>& v, uint k, tribool lr) {
     ARIADNE_ASSERT(k<v.size());
-    Vector<Interval> r(v);
+    Vector<ExactInterval> r(v);
     Float c=v[k].centre().raw();
     if(lr) {
         r[k].set_upper(c);
@@ -233,26 +233,26 @@ Vector<Interval> split(const Vector<Interval>& v, uint k, tribool lr) {
     return r;
 }
 
-std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v, uint k) {
+std::pair< Vector<ExactInterval>, Vector<ExactInterval> > split(const Vector<ExactInterval>& v, uint k) {
     ARIADNE_ASSERT(k<v.size());
-    std::pair< Vector<Interval>, Vector<Interval> > r(v,v);
+    std::pair< Vector<ExactInterval>, Vector<ExactInterval> > r(v,v);
     Float c=v[k].centre().raw();
     r.first[k].set_upper(c);
     r.second[k].set_lower(c);
     return r;
 }
 
-Vector<Interval> split(const Vector<Interval>& v, tribool lr) {
+Vector<ExactInterval> split(const Vector<ExactInterval>& v, tribool lr) {
     return split(v,irmax(v),lr);
 }
 
-std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v) {
+std::pair< Vector<ExactInterval>, Vector<ExactInterval> > split(const Vector<ExactInterval>& v) {
     return split(v,irmax(v));
 }
 
 
 
-Vector<ExactFloatType> midpoint(const Vector<Interval>& v)
+Vector<ExactFloatType> midpoint(const Vector<ExactInterval>& v)
 {
     Vector<ExactFloatType> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
@@ -261,7 +261,7 @@ Vector<ExactFloatType> midpoint(const Vector<Interval>& v)
     return r;
 }
 
-Vector<ExactFloatType> lower_bounds(const Vector<Interval>& v)
+Vector<ExactFloatType> lower_bounds(const Vector<ExactInterval>& v)
 {
     Vector<ExactFloatType> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
@@ -270,7 +270,7 @@ Vector<ExactFloatType> lower_bounds(const Vector<Interval>& v)
     return r;
 }
 
-Vector<ExactFloatType> upper_bounds(const Vector<Interval>& v)
+Vector<ExactFloatType> upper_bounds(const Vector<ExactInterval>& v)
 {
     Vector<ExactFloatType> r(v.size());
     for(size_t i=0; i!=v.size(); ++i) {
@@ -279,47 +279,47 @@ Vector<ExactFloatType> upper_bounds(const Vector<Interval>& v)
     return r;
 }
 
-Vector<Interval> hull(const Vector<Float>& v1, const Vector<Float>& v2)
+Vector<ExactInterval> hull(const Vector<Float>& v1, const Vector<Float>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
-    Vector<Interval> r(v1.size());
+    Vector<ExactInterval> r(v1.size());
     for(size_t i=0; i!=v1.size(); ++i) {
         r[i]=hull(v1[i],v2[i]);
     }
     return r;
 }
 
-Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Float>& v2)
+Vector<ExactInterval> hull(const Vector<ExactInterval>& v1, const Vector<Float>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
-    Vector<Interval> r(v1.size());
+    Vector<ExactInterval> r(v1.size());
     for(size_t i=0; i!=v1.size(); ++i) {
         r[i]=hull(v1[i],v2[i]);
     }
     return r;
 }
 
-Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Interval>& v2)
+Vector<ExactInterval> hull(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
-    Vector<Interval> r(v1.size());
+    Vector<ExactInterval> r(v1.size());
     for(size_t i=0; i!=v1.size(); ++i) {
         r[i]=hull(v1[i],v2[i]);
     }
     return r;
 }
 
-Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>& v2)
+Vector<ExactInterval> intersection(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
-    Vector<Interval> r(v1.size());
+    Vector<ExactInterval> r(v1.size());
     for(size_t i=0; i!=v1.size(); ++i) {
         r[i]=intersection(v1[i],v2[i]);
     }
     return r;
 }
 
-Float radius(const Vector<Interval>& v)
+Float radius(const Vector<ExactInterval>& v)
 {
     Float r=0;
     for(size_t i=0; i!=v.size(); ++i) {
@@ -328,7 +328,7 @@ Float radius(const Vector<Interval>& v)
     return r;
 }
 
-Float volume(const Vector<Interval>& v)
+Float volume(const Vector<ExactInterval>& v)
 {
     Float r=1.0;
     for(size_t i=0; i!=v.size(); ++i) {

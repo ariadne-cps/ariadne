@@ -58,10 +58,10 @@ template<class T> struct IsScalar : IsNumeric<T> { };
 //!
 //! \par Python interface
 //!
-//! In the Python interface, classes \c FloatVector and \c IntervalVector are defined.
+//! In the Python interface, classes \c FloatVector and \c ExactIntervalVector are defined.
 //! Further, Ariadne vectors can be constructed from literals in the form of a Python list: <br><br>
 //! <code> FloatVector([1.1,2.3,4.2,5]) # Create a FloatVector from a list of Python \c int and \c float types. <br>
-//!        IntervalVector([{1:2.1},[-3,4],2.3,5,{-1.1:2.2}]) # Create an IntervalVector from a list of Python types convertible to Interal</code>
+//!        ExactIntervalVector([{1:2.1},[-3,4],2.3,5,{-1.1:2.2}]) # Create an ExactIntervalVector from a list of Python types convertible to Interal</code>
 template<class X>
 class Vector
     : public VectorContainer< Vector<X> >
@@ -133,7 +133,7 @@ class Vector
     static Vector<X> unit(size_t n,size_t i) {
         ARIADNE_ASSERT(i<n); Vector<X> result(n,static_cast<X>(0.0)); result[i]=static_cast<X>(1.0); return result; }
     static Vector<X> unit_box(size_t n) {
-        Vector<X> result(n,Interval(-1,1)); return result; }
+        Vector<X> result(n,ExactInterval(-1,1)); return result; }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
     static Array< Vector<X> > basis(size_t n) {
         Array< Vector<X> > result(n); for(uint i=0; i!=n; ++i) { result[i]=unit(n,i); } return result; }
@@ -578,11 +578,11 @@ template<class X> std::istream& operator>>(std::istream& is, Vector<X>& v) {
 
 
 class Float;
-class Interval;
+class ExactInterval;
 class Real;
 
 typedef Vector<Float> FloatVector;
-typedef Vector<Interval> IntervalVector;
+typedef Vector<ExactInterval> ExactIntervalVector;
 typedef Vector<Real> RealVector;
 
 template<class X> bool refines(const Vector<X>& v1, const Vector<X>& v2) {
@@ -593,39 +593,39 @@ template<class X> bool refines(const Vector<X>& v1, const Vector<X>& v2) {
     return true;
 }
 
-bool contains(const Vector<Interval>& v1, const Vector<Float>& v2);
-bool intersect(const Vector<Interval>& v1, const Vector<Interval>& v2);
-bool subset(const Vector<Interval>& v1, const Vector<Interval>& v2);
+bool contains(const Vector<ExactInterval>& v1, const Vector<Float>& v2);
+bool intersect(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+bool subset(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
 
-bool disjoint(const Vector<Interval>& v1, const Vector<Interval>& v2);
-bool overlap(const Vector<Interval>& v1, const Vector<Interval>& v2);
-bool inside(const Vector<Interval>& v1, const Vector<Interval>& v2);
-bool covers(const Vector<Interval>& v1, const Vector<Interval>& v2);
-bool empty(const Vector<Interval>& v);
+bool disjoint(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+bool overlap(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+bool inside(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+bool covers(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+bool empty(const Vector<ExactInterval>& v);
 
-Vector<Interval> split(const Vector<Interval>& v, uint k, tribool lr);
-Vector<Interval> split(const Vector<Interval>& v, tribool lr);
-std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v);
-std::pair< Vector<Interval>, Vector<Interval> > split(const Vector<Interval>& v, uint k);
+Vector<ExactInterval> split(const Vector<ExactInterval>& v, uint k, tribool lr);
+Vector<ExactInterval> split(const Vector<ExactInterval>& v, tribool lr);
+std::pair< Vector<ExactInterval>, Vector<ExactInterval> > split(const Vector<ExactInterval>& v);
+std::pair< Vector<ExactInterval>, Vector<ExactInterval> > split(const Vector<ExactInterval>& v, uint k);
 
-Vector<Interval> hull(const Vector<Float>& v1, const Vector<Float>& v2);
-Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Float>& v2);
-Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Interval>& v2);
-Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>& v2);
-//Vector<Float> midpoint(const Vector<Interval>& v);
-Float radius(const Vector<Interval>& z);
-Float volume(const Vector<Interval>& z);
+Vector<ExactInterval> hull(const Vector<Float>& v1, const Vector<Float>& v2);
+Vector<ExactInterval> hull(const Vector<ExactInterval>& v1, const Vector<Float>& v2);
+Vector<ExactInterval> hull(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+Vector<ExactInterval> intersection(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+//Vector<Float> midpoint(const Vector<ExactInterval>& v);
+Float radius(const Vector<ExactInterval>& z);
+Float volume(const Vector<ExactInterval>& z);
 
 Vector<UpperInterval> intersection(const Vector<UpperInterval>& v1, const Vector<UpperInterval>& v2);
 
-Vector<ExactFloatType> midpoint(const Vector<Interval>& v);
-Vector<ExactFloatType> lower_bounds(const Vector<Interval>& v);
-Vector<ExactFloatType> upper_bounds(const Vector<Interval>& v);
+Vector<ExactFloatType> midpoint(const Vector<ExactInterval>& v);
+Vector<ExactFloatType> lower_bounds(const Vector<ExactInterval>& v);
+Vector<ExactFloatType> upper_bounds(const Vector<ExactInterval>& v);
 
 Vector<ExactFloatType>const& make_exact(const Vector<ApproximateFloatType>& av);
 Vector<ValidatedFloatType> make_bounds(const Vector<ErrorFloatType>& ev);
-Vector<ValidatedFloatType>const& make_singleton(const Vector<Interval>& ivlv);
-Matrix<ValidatedFloatType>const& make_singleton(const Matrix<Interval>& ivlA);
+Vector<ValidatedFloatType>const& make_singleton(const Vector<ExactInterval>& ivlv);
+Matrix<ValidatedFloatType>const& make_singleton(const Matrix<ExactInterval>& ivlA);
 Vector<ValidatedFloatType>const& make_singleton(const Vector<UpperInterval>& ivlv);
 Matrix<ValidatedFloatType>const& make_singleton(const Matrix<UpperInterval>& ivlA);
 

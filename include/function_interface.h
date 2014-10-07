@@ -290,7 +290,7 @@ inline std::ostream& operator<<(std::ostream& os, const VectorFunctionInterface<
 
 //! \brief An interface for scalar function models on a restricted domain.
 class ScalarModelInterface {
-    virtual Box domain() const = 0;
+    virtual ExactBox domain() const = 0;
     virtual ValidatedNumberType evaluate(const Vector<ValidatedNumberType>&) const = 0;
 };
 
@@ -298,17 +298,17 @@ template<class X> class FunctionFactoryInterface;
 
 template<> class FunctionFactoryInterface<ValidatedNumberType>
 {
-    typedef Box DomainType;
+    typedef ExactBox DomainType;
   public:
     virtual FunctionFactoryInterface<ValidatedTag>* clone() const = 0;
     virtual Void write(OutputStream& os) const = 0;
-    inline ScalarFunction<ValidatedTag> create(const Box& domain, const ScalarFunctionInterface<ValidatedTag>& function) const;
-    inline VectorFunction<ValidatedTag> create(const Box& domain, const VectorFunctionInterface<ValidatedTag>& function) const;
-    inline ScalarFunction<ValidatedTag> create_zero(const Box& domain) const;
-    inline VectorFunction<ValidatedTag> create_identity(const Box& domain) const;
+    inline ScalarFunction<ValidatedTag> create(const ExactBox& domain, const ScalarFunctionInterface<ValidatedTag>& function) const;
+    inline VectorFunction<ValidatedTag> create(const ExactBox& domain, const VectorFunctionInterface<ValidatedTag>& function) const;
+    inline ScalarFunction<ValidatedTag> create_zero(const ExactBox& domain) const;
+    inline VectorFunction<ValidatedTag> create_identity(const ExactBox& domain) const;
   private:
-    virtual ScalarFunctionInterface<ValidatedTag>* _create(const Box& domain, const ScalarFunctionInterface<ValidatedTag>& function) const = 0;
-    virtual VectorFunctionInterface<ValidatedTag>* _create(const Box& domain, const VectorFunctionInterface<ValidatedTag>& function) const = 0;
+    virtual ScalarFunctionInterface<ValidatedTag>* _create(const ExactBox& domain, const ScalarFunctionInterface<ValidatedTag>& function) const = 0;
+    virtual VectorFunctionInterface<ValidatedTag>* _create(const ExactBox& domain, const VectorFunctionInterface<ValidatedTag>& function) const = 0;
 };
 
 template<class X> inline OutputStream& operator<<(OutputStream& os, const FunctionFactoryInterface<ValidatedTag>& factory) {

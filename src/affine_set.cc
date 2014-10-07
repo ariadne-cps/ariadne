@@ -43,7 +43,7 @@
 namespace Ariadne {
 
 typedef Vector<Float> FloatVector;
-typedef Vector<Interval> IntervalVector;
+typedef Vector<ExactInterval> ExactIntervalVector;
 
 
 
@@ -84,23 +84,23 @@ ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& 
 
 ValidatedAffineModel affine_model(const ValidatedAffine& a);
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Box& d,
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBox& d,
                      const Vector<ValidatedAffine>& f)
     : _domain(d), _space_models(f.size(),ValidatedAffineModel(d.size()))
 {
-    if(d==Box::unit_box(d.size())) {
+    if(d==ExactBox::unit_box(d.size())) {
         for(uint i=0; i!=f.size(); ++i) {
             _space_models[i] = affine_model(f[i]);
         }
     }
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Box& d,
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBox& d,
                      const Vector<ValidatedAffine>& f,
                      const List<ValidatedAffineConstraint>& c)
     : _domain(d), _space_models(f.size(),ValidatedAffineModel(d.size())), _constraint_models()
 {
-    if(d==Box::unit_box(d.size())) {
+    if(d==ExactBox::unit_box(d.size())) {
         for(uint i=0; i!=f.size(); ++i) {
             _space_models[i] = affine_model(f[i]);
         }
@@ -112,7 +112,7 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Box
     }
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Box& d,
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBox& d,
                      const Vector<ValidatedAffineModel>& f,
                      const List<ValidatedAffineModelConstraint>& c)
     : _domain(d), _space_models(f), _constraint_models(c)
@@ -121,26 +121,26 @@ ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Box
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f,
                      const List<ValidatedAffineModelConstraint>& c)
-    : _domain(Box::unit_box(f[0].argument_size())), _space_models(f), _constraint_models(c)
+    : _domain(ExactBox::unit_box(f[0].argument_size())), _space_models(f), _constraint_models(c)
 {
 }
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f)
-    : _domain(Box::unit_box(f[0].argument_size())), _space_models(f)
+    : _domain(ExactBox::unit_box(f[0].argument_size())), _space_models(f)
 {
 }
 
-ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Box& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& h)
+ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const ExactBox& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& h)
 {
     this->construct(D,G,h);
 }
 
 ValidatedAffineConstrainedImageSet::ValidatedAffineConstrainedImageSet(const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& h)
 {
-    this->construct(Vector<Interval>(G.column_size(),Interval(-1,+1)),G,h);
+    this->construct(Vector<ExactInterval>(G.column_size(),ExactInterval(-1,+1)),G,h);
 }
 
-void ValidatedAffineConstrainedImageSet::construct(const Box& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& h)
+void ValidatedAffineConstrainedImageSet::construct(const ExactBox& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& h)
 {
     ARIADNE_ASSERT_MSG(G.row_size()==h.size() && G.row_size()>0,"G="<<G<<", h="<<h);
     this->_domain=D;
@@ -201,19 +201,19 @@ ValidatedAffineConstrainedImageSet::number_of_constraints() const
     return this->_constraint_models.size();
 }
 
-Box
+ExactBox
 ValidatedAffineConstrainedImageSet::domain() const
 {
     return this->_domain;
 }
 
 tribool ValidatedAffineConstrainedImageSet::bounded() const {
-    return Box(this->domain()).bounded() || indeterminate;
+    return ExactBox(this->domain()).bounded() || indeterminate;
 }
 
 UpperBox ValidatedAffineConstrainedImageSet::bounding_box() const {
     UpperBox result(this->dimension());
-    Box domain=this->domain();
+    ExactBox domain=this->domain();
     for(uint i=0; i!=this->dimension(); ++i) {
         //result[i]=evaluate(this->_space_models[i],domain);
         result[i]=this->_space_models[i].evaluate(static_cast<Vector<UpperInterval>>(domain));
@@ -225,9 +225,9 @@ UpperBox ValidatedAffineConstrainedImageSet::bounding_box() const {
 
 
 
-tribool ValidatedAffineConstrainedImageSet::separated(const Box& bx) const {
+tribool ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
-    Box wbx=widen(bx);
+    ExactBox wbx=widen(bx);
     LinearProgram<Float> lp;
     this->construct_linear_program(lp);
     for(uint i=0; i!=bx.size(); ++i) {
@@ -251,7 +251,7 @@ tribool ValidatedAffineConstrainedImageSet::empty() const {
     return this->separated(make_exact_box(this->bounding_box()));
 }
 
-tribool ValidatedAffineConstrainedImageSet::inside(const Box& bx) const {
+tribool ValidatedAffineConstrainedImageSet::inside(const ExactBox& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     return widen(this->bounding_box()).inside(bx) || indeterminate;
 }
@@ -274,7 +274,7 @@ void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
     }
 
     // Find concrete cell box
-    const Box bx=cell.box();
+    const ExactBox bx=cell.box();
 
     // Make part of linear program dependent on cell
     for(uint i=0; i!=cell.dimension(); ++i) {
@@ -426,7 +426,7 @@ void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
     }
 
     // Find concrete cell box
-    const Box& bx=cell.box();
+    const ExactBox& bx=cell.box();
 
     // Make part of linear program dependent on cell
     for(uint i=0; i!=nx; ++i) {
@@ -555,7 +555,7 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
 
 
     // Make part of linear program dependent on cell
-    const Box bx=bounding_cell.box();
+    const ExactBox bx=bounding_cell.box();
     for(uint i=0; i!=nx; ++i) {
         lp.l[ne+i]=bx[i].lower().raw();
         lp.u[ne+i]=bx[i].upper().raw();

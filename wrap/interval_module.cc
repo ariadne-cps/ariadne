@@ -23,7 +23,7 @@
 
 #include "boost_python.h"
 
-namespace Ariadne { class Interval; }
+namespace Ariadne { class ExactInterval; }
 
 void export_interval();
 template<class X> void export_vector();
@@ -34,6 +34,6 @@ using namespace Ariadne;
 BOOST_PYTHON_MODULE(interval)
 {
     export_interval();
-    export_vector<Interval>();
-    export_matrix<Interval>();
+    export_vector<ExactInterval>();
+    export_matrix<ExactInterval>();
 }

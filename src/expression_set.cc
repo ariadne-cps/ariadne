@@ -92,7 +92,7 @@ const IntervalSet RealVariableInterval::interval() const {
     return IntervalSet(this->_lower,this->_upper);
 }
 
-const Interval RealVariableInterval::approximate_interval() const {
+const ExactInterval RealVariableInterval::approximate_interval() const {
     return approximation(this->interval());
 }
 
@@ -135,7 +135,7 @@ OutputStream& operator<<(OutputStream& os, const RealVariablesBox& ebx) {
 
 
 VariablesBox over_approximation(const RealVariablesBox& ebx) {
-    Map<RealVariable,Interval> result;
+    Map<RealVariable,ExactInterval> result;
     for(Map<RealVariable,IntervalSet>::const_iterator iter=ebx.bounds().begin();
         iter!=ebx.bounds().end(); ++iter)
     {
@@ -145,7 +145,7 @@ VariablesBox over_approximation(const RealVariablesBox& ebx) {
 }
 
 VariablesBox approximation(const RealVariablesBox& ebx) {
-    Map<RealVariable,Interval> result;
+    Map<RealVariable,ExactInterval> result;
     for(Map<RealVariable,IntervalSet>::const_iterator iter=ebx.bounds().begin();
         iter!=ebx.bounds().end(); ++iter)
     {
@@ -155,7 +155,7 @@ VariablesBox approximation(const RealVariablesBox& ebx) {
 }
 
 VariablesBox under_approximation(const RealVariablesBox& ebx) {
-    Map<RealVariable,Interval> result;
+    Map<RealVariable,ExactInterval> result;
     for(Map<RealVariable,IntervalSet>::const_iterator iter=ebx.bounds().begin();
         iter!=ebx.bounds().end(); ++iter)
     {
@@ -227,7 +227,7 @@ OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraint
 }
 
 ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBoundedConstraintSet& set, const RealSpace& space) {
-    IntervalVector domain=approximation(RealVariablesBox(set.bounds()).euclidean_set(space));
+    ExactIntervalVector domain=approximation(RealVariablesBox(set.bounds()).euclidean_set(space));
     ValidatedVectorFunction identity=ValidatedVectorFunction::identity(domain.size());
 
     ValidatedConstrainedImageSet result(domain,identity);

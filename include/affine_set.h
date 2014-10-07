@@ -44,10 +44,10 @@
 namespace Ariadne {
 
 class Float;
-class Interval;
+class ExactInterval;
 template<class X> class Vector;
 template<class X> class LinearProgram;
-class Box;
+class ExactBox;
 class Grid;
 class PavingInterface;
 class GridCell;
@@ -88,23 +88,23 @@ class ValidatedAffineConstrainedImageSet
 	, public virtual DrawableInterface
 	, public Loggable
 {
-    Box  _domain;
+    ExactBox  _domain;
     Vector<ValidatedAffineModel> _space_models;
     List<ValidatedAffineModelConstraint> _constraint_models;
   public:
     //!\brief The set \f$\{ Gy+c \mid y\in D\}\f$.
-    ValidatedAffineConstrainedImageSet(const Box& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& c);
+    ValidatedAffineConstrainedImageSet(const ExactBox& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& c);
     //!\brief The set \f$\{ Gy+c \mid ||y||_\infty\leq 1\}\f$. \deprecated
     ValidatedAffineConstrainedImageSet(const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \}\f$.
-    ValidatedAffineConstrainedImageSet(const Box& D, const Vector<ValidatedAffine>& f);
+    ValidatedAffineConstrainedImageSet(const ExactBox& D, const Vector<ValidatedAffine>& f);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in D \mid c(s) \}\f$.
-    ValidatedAffineConstrainedImageSet(const Box& D, const Vector<ValidatedAffine>& f, const List<ValidatedAffineConstraint>& c);
+    ValidatedAffineConstrainedImageSet(const ExactBox& D, const Vector<ValidatedAffine>& f, const List<ValidatedAffineConstraint>& c);
     //!\brief The set \f$\{ x_i=f_i(s) \mid s\in [-1,+1]^n \mid c(s) \}\f$.
     explicit ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f, const List<ValidatedAffineModelConstraint>& c);
     explicit ValidatedAffineConstrainedImageSet(const Vector<ValidatedAffineModel>& f);
 
-    ValidatedAffineConstrainedImageSet(const Box& D, const Vector<ValidatedAffineModel>& f, const List<ValidatedAffineModelConstraint>& c);
+    ValidatedAffineConstrainedImageSet(const ExactBox& D, const Vector<ValidatedAffineModel>& f, const List<ValidatedAffineModelConstraint>& c);
 
     ValidatedAffineConstrainedImageSet* clone() const;
     void new_parameter_constraint(const EffectiveAffineConstraint& c);
@@ -114,12 +114,12 @@ class ValidatedAffineConstrainedImageSet
     uint dimension() const;
     uint number_of_parameters() const;
     uint number_of_constraints() const;
-    Box domain() const;
+    ExactBox domain() const;
 
     tribool bounded() const;
     UpperBox bounding_box() const;
-    tribool separated(const Box& bx) const;
-    tribool inside(const Box& bx) const;
+    tribool separated(const ExactBox& bx) const;
+    tribool inside(const ExactBox& bx) const;
     tribool empty() const;
 
     void adjoin_outer_approximation_to(PavingInterface& g, int depth) const;
@@ -132,7 +132,7 @@ class ValidatedAffineConstrainedImageSet
     virtual std::ostream& write(std::ostream& os) const;
 
   private:
-    void construct(const Box& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& c);
+    void construct(const ExactBox& D, const Matrix<ExactFloatType>& G, const Vector<ExactFloatType>& c);
     void construct_linear_program(LinearProgram<Float>& lp) const;
     static void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth);
     static void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth);

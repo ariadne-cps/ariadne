@@ -155,7 +155,7 @@ class HybridReachabilityAnalyser
   public:
     typedef HybridTime T;
     typedef HybridAutomatonInterface Sys;
-    typedef HybridListSet<Box> BxLS;
+    typedef HybridListSet<ExactBox> BxLS;
     typedef HybridGrid Gr;
     typedef HybridGridCell GC;
     typedef HybridGridTreeSet GCLS;

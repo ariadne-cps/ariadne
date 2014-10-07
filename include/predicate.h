@@ -78,7 +78,7 @@ class ExpressionPredicate
         else if(value>0) { return false; }
         else { return indeterminate; } }
     tribool evaluate(const Vector<ValidatedNumberType>& x) const {
-        Interval range=_expression.evaluate(x)*_sign;
+        ExactInterval range=_expression.evaluate(x)*_sign;
         if(range.upper()<0) { return true; }
         else if(range.lower()>0) { return false; }
         else { return indeterminate; } }

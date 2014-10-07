@@ -32,7 +32,7 @@ namespace Ariadne {
 
 typedef void Void;
 typedef int Int;
-class Interval;
+class ExactInterval;
 template<class X> class Vector;
 template<class X> class VectorFunctionInterface;
 typedef VectorFunctionInterface<ValidatedTag> ValidatedVectorFunctionInterface;
@@ -42,11 +42,11 @@ class PavingInterface;
 class PaverInterface
 {
   public:
-    typedef Box DomainType;
+    typedef ExactBox DomainType;
   public:
     virtual Void
     adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunctionInterface& space_function,
-                               const ValidatedVectorFunctionInterface& constraint_function, const Box& constraint_bounds, Int depth) const = 0;
+                               const ValidatedVectorFunctionInterface& constraint_function, const ExactBox& constraint_bounds, Int depth) const = 0;
 
 };
 

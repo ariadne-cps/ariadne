@@ -68,11 +68,11 @@ unsigned int DRAWING_ACCURACY=1u;
 template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; return ss.str(); }
 
 
-Matrix<Float> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const Box& dom);
-Pair<uint,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const Box domain);
-Pair<uint,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const Box& domain);
+Matrix<Float> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBox& dom);
+Pair<uint,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBox domain);
+Pair<uint,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBox& domain);
 
-Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const Box& dom)
+Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const ExactBox& dom)
 {
     const uint m=f.result_size();
     const uint n=f.argument_size();
@@ -95,7 +95,7 @@ Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const B
     return nonlinearities;
 }
 
-Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface& f, const Box& dom)
+Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface& f, const ExactBox& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -106,7 +106,7 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
     for(uint i=0; i!=n; ++i) {
         Float sf=dom[i].error().raw();
         ++a[i];
-        ivl_dx[i].expansion().append(a,Interval(sf));
+        ivl_dx[i].expansion().append(a,ExactInterval(sf));
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
@@ -130,18 +130,18 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
     return nonlinearities;
 }
 
-Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface& f, const Box& dom)
+Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface& f, const ExactBox& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
     const uint m=f.result_size();
     const uint n=f.argument_size();
-    Vector<UpperIntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 2, dom);
+    Vector<UpperIntervalDifferential> ivl_dx=ExactIntervalDifferential::constants(m,n, 2, dom);
     MultiIndex a(n);
     for(uint i=0; i!=n; ++i) {
         Float sf=dom[i].error().raw();
         ++a[i];
-        ivl_dx[i].expansion().append(a,Interval(sf));
+        ivl_dx[i].expansion().append(a,ExactInterval(sf));
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
@@ -165,7 +165,7 @@ Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface
     return nonlinearities;
 }
 
-Pair<uint,double> nonlinearity_index_and_error(const VectorTaylorFunction& function, const Box domain) {
+Pair<uint,double> nonlinearity_index_and_error(const VectorTaylorFunction& function, const ExactBox domain) {
     Matrix<Float> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
     // Compute the row of the nonlinearities Array which has the highest norm
@@ -193,30 +193,30 @@ Pair<uint,double> nonlinearity_index_and_error(const VectorTaylorFunction& funct
 }
 
 
-BoxSet::BoxSet(const IntervalVector& bx) : _ary(bx.size()) {
+BoxSet::BoxSet(const ExactIntervalVector& bx) : _ary(bx.size()) {
     for(uint i=0; i!=bx.size(); ++i) {
         this->_ary[i]=IntervalSet(ExactFloat(bx[i].lower()),ExactFloat(bx[i].upper()));
     }
 }
 
-Box under_approximation(const BoxSet& rbx) {
-    Box bx(rbx.size());
+ExactBox under_approximation(const BoxSet& rbx) {
+    ExactBox bx(rbx.size());
     for(uint i=0; i!=bx.size(); ++i) {
         bx[i]=under_approximation(rbx[i]);
     }
     return bx;
 }
 
-Box over_approximation(const BoxSet& rbx) {
-    Box bx(rbx.size());
+ExactBox over_approximation(const BoxSet& rbx) {
+    ExactBox bx(rbx.size());
     for(uint i=0; i!=bx.size(); ++i) {
         bx[i]=over_approximation(rbx[i]);
     }
     return bx;
 }
 
-Box approximation(const BoxSet& rbx) {
-    Box bx(rbx.size());
+ExactBox approximation(const BoxSet& rbx) {
+    ExactBox bx(rbx.size());
     for(uint i=0; i!=bx.size(); ++i) {
         bx[i]=approximation(rbx[i]);
     }
@@ -299,23 +299,23 @@ ConstraintSet::dimension() const
 
 
 tribool
-ConstraintSet::separated(const Box& bx) const
+ConstraintSet::separated(const ExactBox& bx) const
 {
-    Box codomain=over_approximation(this->codomain());
+    ExactBox codomain=over_approximation(this->codomain());
     return ValidatedConstrainedImageSet(bx,this->constraint_function()).separated(codomain) || Tribool(indeterminate);
 }
 
 tribool
-ConstraintSet::overlaps(const Box& bx) const
+ConstraintSet::overlaps(const ExactBox& bx) const
 {
-    Box codomain=under_approximation(this->codomain());
+    ExactBox codomain=under_approximation(this->codomain());
     return ValidatedConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain) || Tribool(indeterminate);
 }
 
 tribool
-ConstraintSet::covers(const Box& bx) const
+ConstraintSet::covers(const ExactBox& bx) const
 {
-    Box codomain=under_approximation(this->codomain());
+    ExactBox codomain=under_approximation(this->codomain());
     return UpperBox(apply(this->constraint_function(),bx)).inside(codomain) || Tribool(indeterminate);
 }
 
@@ -371,36 +371,36 @@ BoundedConstraintSet::dimension() const
 
 
 tribool
-BoundedConstraintSet::separated(const Box& bx) const
+BoundedConstraintSet::separated(const ExactBox& bx) const
 {
-    Box domain=over_approximation(this->domain());
+    ExactBox domain=over_approximation(this->domain());
     if(Ariadne::disjoint(domain,bx)) { return true; }
-    Box codomain=over_approximation(this->codomain());
+    ExactBox codomain=over_approximation(this->codomain());
     return ValidatedConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).separated(codomain) || Tribool(indeterminate);
 }
 
 
 tribool
-BoundedConstraintSet::overlaps(const Box& bx) const
+BoundedConstraintSet::overlaps(const ExactBox& bx) const
 {
     if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
-    Box domain=under_approximation(this->domain());
-    Box codomain=under_approximation(this->codomain());
+    ExactBox domain=under_approximation(this->domain());
+    ExactBox codomain=under_approximation(this->codomain());
     return ValidatedConstrainedImageSet(Ariadne::intersection(bx,domain),this->constraint_function()).overlaps(codomain) || Tribool(indeterminate);
 }
 
 
 tribool
-BoundedConstraintSet::covers(const Box& bx) const
+BoundedConstraintSet::covers(const ExactBox& bx) const
 {
-    Box domain=under_approximation(this->domain());
-    Box codomain=under_approximation(this->codomain());
+    ExactBox domain=under_approximation(this->domain());
+    ExactBox codomain=under_approximation(this->codomain());
     if(!Ariadne::covers(domain,bx)) { return false; }
     return UpperBox(apply(this->constraint_function(),bx)).inside(codomain) || Tribool(indeterminate);
 }
 
 tribool
-BoundedConstraintSet::inside(const Box& bx) const
+BoundedConstraintSet::inside(const ExactBox& bx) const
 {
     return Ariadne::inside(UpperBox(over_approximation(this->domain())),bx) || Tribool(indeterminate);
 }
@@ -408,7 +408,7 @@ BoundedConstraintSet::inside(const Box& bx) const
 UpperBox
 BoundedConstraintSet::bounding_box() const
 {
-    Box result=over_approximation(this->_domain);
+    ExactBox result=over_approximation(this->_domain);
     result.widen();
     return result;
 }
@@ -481,7 +481,7 @@ Matrix<ExactFloat> make_exact(Matrix<ValidatedFloat> vA) {
 ValidatedAffineConstrainedImageSet
 ConstrainedImageSet::affine_approximation() const
 {
-    const Vector<Interval> D=approximation(this->domain());
+    const Vector<ExactInterval> D=approximation(this->domain());
     Vector<ExactFloat> m=midpoint(D);
     Matrix<ExactFloat> G=make_exact(this->_function.jacobian(m));
     Vector<ExactFloat> h=make_exact(this->_function.evaluate(m)-G*m);
@@ -494,7 +494,7 @@ ConstrainedImageSet::affine_approximation() const
         iter!=this->_constraints.end(); ++iter)
     {
         AffineModel<ValidatedTag> a=affine_model(D,iter->function());
-        Interval b=iter->bounds();
+        ExactInterval b=iter->bounds();
         result.new_constraint(b.lower()<=a<=b.upper());
     }
 
@@ -530,11 +530,11 @@ tribool ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
 }
 
 
-tribool ConstrainedImageSet::separated(const Box& bx) const
+tribool ConstrainedImageSet::separated(const ExactBox& bx) const
 {
-    Box subdomain = over_approximation(this->_domain);
+    ExactBox subdomain = over_approximation(this->_domain);
     EffectiveVectorFunction function = join(this->function(),this->constraint_function());
-    Box codomain = product(bx,Box(over_approximation(this->constraint_bounds())));
+    ExactBox codomain = product(bx,ExactBox(over_approximation(this->constraint_bounds())));
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
     return tribool(subdomain.empty()) || Tribool(indeterminate);
@@ -543,14 +543,14 @@ tribool ConstrainedImageSet::separated(const Box& bx) const
 }
 
 
-tribool ConstrainedImageSet::overlaps(const Box& bx) const
+tribool ConstrainedImageSet::overlaps(const ExactBox& bx) const
 {
     return ValidatedConstrainedImageSet(under_approximation(this->_domain),this->_function,this->_constraints).overlaps(bx);
     return Tribool(indeterminate);
     //ARIADNE_NOT_IMPLEMENTED;
-    Box subdomain = under_approximation(this->_domain);
+    ExactBox subdomain = under_approximation(this->_domain);
     EffectiveVectorFunction function = join(this->function(),this->constraint_function());
-    Box codomain = product(bx,Box(under_approximation(this->constraint_bounds())));
+    ExactBox codomain = product(bx,ExactBox(under_approximation(this->constraint_bounds())));
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
     return !tribool(subdomain.empty()) || Tribool(indeterminate);
@@ -561,7 +561,7 @@ void
 ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
     ARIADNE_ASSERT(paving.dimension()==this->dimension());
-    const Box domain=over_approximation(this->domain());
+    const ExactBox domain=over_approximation(this->domain());
     const EffectiveVectorFunction& space_function=this->function();
     EffectiveVectorFunction constraint_function(this->number_of_constraints(),domain.size());
     BoxSet codomain(this->number_of_constraints());
@@ -570,7 +570,7 @@ ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int 
         constraint_function.set(i,this->_constraints[i].function());
         codomain[i]=IntervalSet(this->_constraints[i].lower_bound(),this->_constraints[i].upper_bound());
     }
-    Box constraint_bounds=over_approximation(codomain);
+    ExactBox constraint_bounds=over_approximation(codomain);
 
     switch(DISCRETISATION_METHOD) {
         case SUBDIVISION_DISCRETISE:
@@ -644,38 +644,38 @@ ConstrainedImageSet image(const BoundedConstraintSet& set, const EffectiveVector
 
 
 
-Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const Box& dom);
+Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const ExactBox& dom);
 
 
-Matrix<Float> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const Box& dom)
+Matrix<Float> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBox& dom)
 {
     ARIADNE_ASSERT(dynamic_cast<const VectorTaylorFunction*>(f.raw_pointer()));
     return nonlinearities_zeroth_order(dynamic_cast<const VectorTaylorFunction&>(*f.raw_pointer()),dom);
 }
 
 /*
-Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface& f, const Box& dom)
+Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface& f, const ExactBox& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
     const uint m=f.result_size();
     const uint n=f.argument_size();
-    Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 1, dom);
+    Vector<ExactIntervalDifferential> ivl_dx=ExactIntervalDifferential::constants(m,n, 1, dom);
     MultiIndex a(n);
     for(uint i=0; i!=n; ++i) {
         Float sf=dom[i].radius();
         ++a[i];
-        ivl_dx[i].expansion().append(a,Interval(sf));
+        ivl_dx[i].expansion().append(a,ExactInterval(sf));
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
-    Vector<IntervalDifferential> df=f.evaluate(ivl_dx);
+    Vector<ExactIntervalDifferential> df=f.evaluate(ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
     for(uint i=0; i!=m; ++i) {
-        const IntervalDifferential& d=df[i];
-        for(IntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+        const ExactIntervalDifferential& d=df[i];
+        for(ExactIntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->key();
             if(a.degree()==1) {
                 for(uint j=0; j!=n; ++j) {
@@ -689,28 +689,28 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
     return nonlinearities;
 }
 
-Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface& f, const Box& dom)
+Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface& f, const ExactBox& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
     const uint m=f.result_size();
     const uint n=f.argument_size();
-    Vector<IntervalDifferential> ivl_dx=IntervalDifferential::constants(m,n, 2, dom);
+    Vector<ExactIntervalDifferential> ivl_dx=ExactIntervalDifferential::constants(m,n, 2, dom);
     MultiIndex a(n);
     for(uint i=0; i!=n; ++i) {
         Float sf=dom[i].radius();
         ++a[i];
-        ivl_dx[i].expansion().append(a,Interval(sf));
+        ivl_dx[i].expansion().append(a,ExactInterval(sf));
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
-    Vector<IntervalDifferential> df=f.evaluate(ivl_dx);
+    Vector<ExactIntervalDifferential> df=f.evaluate(ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
     for(uint i=0; i!=m; ++i) {
-        const IntervalDifferential& d=df[i];
-        for(IntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+        const ExactIntervalDifferential& d=df[i];
+        for(ExactIntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->key();
             if(a.degree()==2) {
                 for(uint j=0; j!=n; ++j) {
@@ -725,7 +725,7 @@ Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface
 }
 */
 
-Pair<uint,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const Box& domain)
+Pair<uint,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBox& domain)
 {
     Matrix<UpperInterval> jacobian=Ariadne::jacobian(function,domain);
 
@@ -747,7 +747,7 @@ Pair<uint,double> lipschitz_index_and_error(const ValidatedVectorFunction& funct
     return make_pair(jmax,numeric_cast<double>(max_column_norm));
 }
 
-Pair<uint,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const Box& domain)
+Pair<uint,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBox& domain)
 {
     Matrix<Float> nonlinearities=Ariadne::nonlinearities_zeroth_order(function,domain);
 
@@ -829,11 +829,11 @@ ValidatedVectorFunction ValidatedConstrainedImageSet::constraint_function() cons
     return result;
 }
 
-Box ValidatedConstrainedImageSet::constraint_bounds() const
+ExactBox ValidatedConstrainedImageSet::constraint_bounds() const
 {
-    Box result(this->number_of_constraints());
+    ExactBox result(this->number_of_constraints());
     for(uint i=0; i!=this->number_of_constraints(); ++i) {
-        result[i]=Interval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
+        result[i]=ExactInterval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
     }
     return result;
 }
@@ -851,7 +851,7 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
 {
     typedef List<ValidatedConstraint>::const_iterator const_iterator;
 
-    Vector<Interval> domain = this->domain();
+    Vector<ExactInterval> domain = this->domain();
     Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function());
     List<ValidatedAffineModelConstraint> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
@@ -912,7 +912,7 @@ ValidatedAffineConstrainedImageSet ValidatedConstrainedImageSet::affine_approxim
 {
     typedef List<ValidatedConstraint>::const_iterator const_iterator;
 
-    Vector<Interval> domain = this->domain();
+    Vector<ExactInterval> domain = this->domain();
     Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function());
     List<ValidatedAffineModelConstraint> constraint_models;
     constraint_models.reserve(this->number_of_constraints());
@@ -930,7 +930,7 @@ ValidatedAffineConstrainedImageSet ValidatedConstrainedImageSet::affine_approxim
 
 Pair<ValidatedConstrainedImageSet,ValidatedConstrainedImageSet> ValidatedConstrainedImageSet::split(uint j) const
 {
-    Pair<Box,Box> subdomains = Ariadne::split(this->_domain,j);
+    Pair<ExactBox,ExactBox> subdomains = Ariadne::split(this->_domain,j);
     subdomains.first=intersection(subdomains.first,this->_reduced_domain);
     subdomains.second=intersection(subdomains.second,this->_reduced_domain);
 
@@ -976,41 +976,41 @@ tribool ValidatedConstrainedImageSet::empty() const
     return this->_reduced_domain.empty();
 }
 
-tribool ValidatedConstrainedImageSet::inside(const Box& bx) const
+tribool ValidatedConstrainedImageSet::inside(const ExactBox& bx) const
 {
     return Ariadne::inside(this->bounding_box(),bx);
 }
 
-tribool ValidatedConstrainedImageSet::separated(const Box& bx) const
+tribool ValidatedConstrainedImageSet::separated(const ExactBox& bx) const
 {
-    Box subdomain = this->_reduced_domain;
+    ExactBox subdomain = this->_reduced_domain;
     ValidatedVectorFunction function(this->dimension()+this->number_of_constraints(),this->number_of_parameters());
     for(uint i=0; i!=this->dimension(); ++i) { function[i]=this->_function[i]; }
     for(uint i=0; i!=this->number_of_constraints(); ++i) { function[i+this->dimension()]=this->_constraints[i].function(); }
     //ValidatedVectorFunction function = join(this->_function,this->constraint_function());
-    Box codomain = join(bx,this->constraint_bounds());
+    ExactBox codomain = join(bx,this->constraint_bounds());
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
     return tribool(subdomain.empty()) || Tribool(indeterminate);
 }
 
-tribool ValidatedConstrainedImageSet::overlaps(const Box& bx) const
+tribool ValidatedConstrainedImageSet::overlaps(const ExactBox& bx) const
 {
     //std::cerr<<"domain="<<this->_domain<<"\n";
     //std::cerr<<"subdomain="<<this->_reduced_domain<<"\n";
 
-    Box subdomain = this->_reduced_domain;
+    ExactBox subdomain = this->_reduced_domain;
     ValidatedVectorFunction space_function = this->_function;
     ValidatedVectorFunction constraint_function = this->constraint_function();
     ValidatedVectorFunction function = join(space_function,constraint_function);
     //std::cerr<<"function="<<function<<"\n";
-    Box constraint_bounds = intersection(this->constraint_bounds(),make_exact_box(Ariadne::apply(this->constraint_function(),subdomain)));
-    Box codomain = join(bx,constraint_bounds);
+    ExactBox constraint_bounds = intersection(this->constraint_bounds(),make_exact_box(Ariadne::apply(this->constraint_function(),subdomain)));
+    ExactBox codomain = join(bx,constraint_bounds);
     //std::cerr<<"codomain="<<codomain<<"\n";
     NonlinearInfeasibleInteriorPointOptimiser optimiser;
     optimiser.verbosity=0;
 
-    List<Pair<Nat,Box> > subdomains;
+    List<Pair<Nat,ExactBox> > subdomains;
     Nat depth(0);
     Nat MAX_DEPTH=2;
     tribool feasible = false;
@@ -1025,7 +1025,7 @@ tribool ValidatedConstrainedImageSet::overlaps(const Box& bx) const
             if(depth==MAX_DEPTH) {
                 feasible = Tribool(indeterminate);
             } else {
-                Pair<Box,Box> split_subdomains=subdomain.split();
+                Pair<ExactBox,ExactBox> split_subdomains=subdomain.split();
                 subdomains.append(make_pair(depth+1,split_subdomains.first));
                 subdomains.append(make_pair(depth+1,split_subdomains.second));
             }
@@ -1037,10 +1037,10 @@ tribool ValidatedConstrainedImageSet::overlaps(const Box& bx) const
 
 void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
 {
-    const Box subdomain=this->_reduced_domain;
+    const ExactBox subdomain=this->_reduced_domain;
     const ValidatedVectorFunction function = this->function();
     const ValidatedVectorFunction constraint_function = this->constraint_function();
-    const Box constraint_bounds = this->constraint_bounds();
+    const ExactBox constraint_bounds = this->constraint_bounds();
 
     switch(DISCRETISATION_METHOD) {
         case SUBDIVISION_DISCRETISE:
@@ -1068,10 +1068,10 @@ tribool ValidatedConstrainedImageSet::satisfies(const ValidatedConstraint& nc) c
     }
 
     ConstraintSolver solver;
-    const Box& domain=this->_domain;
+    const ExactBox& domain=this->_domain;
     List<ValidatedConstraint> all_constraints=this->constraints();
     ValidatedScalarFunction composed_function = compose(nc.function(),this->_function);
-    const Interval& bounds = nc.bounds();
+    const ExactInterval& bounds = nc.bounds();
 
     Tribool result;
     if(bounds.upper()<+inf) {
@@ -1104,8 +1104,8 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
     const uint np = set1.number_of_parameters();
     const uint nc = set1.number_of_parameters();
 
-    const Box& domain1 = set1.domain();
-    const Box& domain2 = set2.domain();
+    const ExactBox& domain1 = set1.domain();
+    const ExactBox& domain2 = set2.domain();
 
     uint join_parameter=np;
     for(uint i=0; i!=np; ++i) {
@@ -1123,7 +1123,7 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
         }
     }
 
-    Box new_domain = hull(domain1,domain2);
+    ExactBox new_domain = hull(domain1,domain2);
 
     ValidatedVectorFunctionModel function1
         = ValidatedVectorFunctionModel( dynamic_cast<VectorFunctionModelInterface<ValidatedTag> const&>(set1.function().reference()));

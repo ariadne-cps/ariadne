@@ -35,7 +35,7 @@
 
 namespace Ariadne {
 
-class Box;
+class ExactBox;
 
 class BoundedSetInterface;
 class OpenSetInterface;
@@ -68,7 +68,7 @@ class BoundedSetInterface
     //! \brief Tests if the set is a inside of \a bx.
     //! A set \a A is \em inside \a B if the closure of \a A is a subset of the interior of \a B.
     //! A set \f$A\f$ is \em inside \f$B\f$ if \f$\,\overline{\!A} \subset B^\circ\f$.
-    virtual tribool inside(const Box& bx) const = 0;
+    virtual tribool inside(const ExactBox& bx) const = 0;
     //! \brief Returns a bounding box for the set.
     //! If the set is empty, then the first component of the result should be empty.
     virtual UpperBox bounding_box() const = 0;
@@ -85,7 +85,7 @@ class OvertSetInterface
     //! \brief Tests if the set overlaps \a bx.
     //! Sets \a A and \a B \em overlap if the interiors of \a A and \a B intersect.
     //! Sets \f$A\f$ and \f$B\f$ \em overlap if \f$A^\circ \cap B^\circ \neq \emptyset\f$.
-    virtual tribool overlaps(const Box& bx) const = 0;
+    virtual tribool overlaps(const ExactBox& bx) const = 0;
     //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
     friend tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const RawFloatType& eps);
 };
@@ -100,7 +100,7 @@ class OpenSetInterface
     //! \brief Tests if the set covers of \a bx.
     //! A set \a A \em covers \a B if the interiors of \a A is a superset of the closure of \a B.
     //! A set \f$A\f$ \em covers \f$B\f$ if \f$A^\circ \supset \overline{B}\f$.
-    virtual tribool covers(const Box& bx) const = 0;
+    virtual tribool covers(const ExactBox& bx) const = 0;
     //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
     friend tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const RawFloatType& eps);
     //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
@@ -117,7 +117,7 @@ class ClosedSetInterface
     //! \brief Tests if the set is separated from \a bx.
     //! A set \a A is \em separated from \a B if the closures of \a A and \a B are disjoint.
     //! A set \f$A\f$ is \em separated from \f$B\f$ if \f$\,\overline{\!A} \cap \overline{B} = \emptyset\f$.
-    virtual tribool separated(const Box& bx) const = 0;
+    virtual tribool separated(const ExactBox& bx) const = 0;
     //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
     friend tribool separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const RawFloatType& eps);
 };

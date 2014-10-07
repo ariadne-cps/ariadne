@@ -43,7 +43,7 @@ template<class X> class Vector;
 template<class X> class Point;
 typedef Point<ExactNumberType> ExactPoint;
 
-class Box;
+class ExactBox;
 
 
 // Forward declarations for friends
@@ -162,7 +162,7 @@ class InterpolatedCurve
     /*! \brief Draw on a two-dimensional canvas. */
     virtual void draw(CanvasInterface& c, const Projection2d& p) const;
     /*! \brief A bounding box for the curve. */
-    virtual Box bounding_box() const;
+    virtual ExactBox bounding_box() const;
 
     /*! \brief Write to an output stream. */
     virtual std::ostream& write(std::ostream& os) const;

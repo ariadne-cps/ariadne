@@ -189,7 +189,7 @@ Array<double> Grid::index(const ExactPoint& pt) const
     return res;
 }
 
-Array<double> Grid::lower_index(const Box& bx) const {
+Array<double> Grid::lower_index(const ExactBox& bx) const {
     Array<double> res(bx.size());
     for(size_t i=0; i!=res.size(); ++i) {
         res[i]=subdivision_lower_index(i,bx[i].lower());
@@ -197,7 +197,7 @@ Array<double> Grid::lower_index(const Box& bx) const {
     return res;
 }
 
-Array<double> Grid::upper_index(const Box& bx) const {
+Array<double> Grid::upper_index(const ExactBox& bx) const {
     Array<double> res(bx.size());
     for(size_type i=0; i!=res.size(); ++i) {
         res[i]=subdivision_upper_index(i,bx[i].upper());
@@ -223,11 +223,11 @@ ExactPoint Grid::point(const Array<DyadicType>& a) const
     return res;
 }
 
-Box Grid::box(const Array<DyadicType>& lower, const Array<DyadicType>& upper) const
+ExactBox Grid::box(const Array<DyadicType>& lower, const Array<DyadicType>& upper) const
 {
-    Vector<Interval> res(lower.size());
+    Vector<ExactInterval> res(lower.size());
     for(size_type i=0; i!=res.size(); ++i) {
-        res[i]=Interval(this->subdivision_coordinate(i,lower[i]),
+        res[i]=ExactInterval(this->subdivision_coordinate(i,lower[i]),
                         this->subdivision_coordinate(i,upper[i]));
     }
     return res;
@@ -752,7 +752,7 @@ LatticeBoxType GridAbstractCell::primary_cell_lattice_box( const uint theHeight,
     }
     // 1.2 Constructing and return the box defining the primary cell (relative to the grid).
 
-    return Vector< Interval >( dimensions, Interval( leftBottomCorner, rightTopCorner ) );
+    return Vector< ExactInterval >( dimensions, ExactInterval( leftBottomCorner, rightTopCorner ) );
 }
 
 uint GridAbstractCell::smallest_enclosing_primary_cell_height( const LatticeBoxType& theLatticeBox ) {
@@ -762,7 +762,7 @@ uint GridAbstractCell::smallest_enclosing_primary_cell_height( const LatticeBoxT
     //The zero level coordinates are known, so we need to iterate only for higher level primary cells
     do{
         //Check if the given box is a subset of a primary cell
-        Vector< Interval > primaryCellBox( dimensions, Interval( leftBottomCorner, rightTopCorner ) );
+        Vector< ExactInterval > primaryCellBox( dimensions, ExactInterval( leftBottomCorner, rightTopCorner ) );
         if(  inside(theLatticeBox, primaryCellBox ) ) {
             //If yes then we are done
             break;
@@ -775,7 +775,7 @@ uint GridAbstractCell::smallest_enclosing_primary_cell_height( const LatticeBoxT
 }
 
 uint GridAbstractCell::smallest_enclosing_primary_cell_height( const UpperBox& theBox, const Grid& theGrid) {
-    Vector<Interval> theLatticeBox( theBox.size() );
+    Vector<ExactInterval> theLatticeBox( theBox.size() );
     //Convert the box to theGrid coordinates
     for( uint i = 0; i != theBox.size(); ++i ) {
         theLatticeBox[i] = make_exact_interval( ( theBox[i] - theGrid.origin()[i] ) / theGrid.lengths()[i] );
@@ -785,9 +785,9 @@ uint GridAbstractCell::smallest_enclosing_primary_cell_height( const UpperBox& t
 }
 
 /*! \brief Apply grid data \a theGrid to \a theLatticeBox in order to compute the box dimensions in the original space*/
-Box GridAbstractCell::lattice_box_to_space(const LatticeBoxType & theLatticeBox, const Grid& theGrid ){
+ExactBox GridAbstractCell::lattice_box_to_space(const LatticeBoxType & theLatticeBox, const Grid& theGrid ){
     const uint dimensions = theGrid.dimension();
-    Box theTmpBox( dimensions );
+    ExactBox theTmpBox( dimensions );
 
     Vector<Float> theGridOrigin( theGrid.origin() );
     Vector<Float> theGridLengths( theGrid.lengths() );
@@ -887,8 +887,8 @@ GridCell GridCell::smallest_enclosing_primary_cell( const UpperBox& theBox, cons
 //The resulting box is not relaterd to the original space, but is a lattice box.
 // 1. Compute the primary cell located the the height \a theHeight above the zero level,
 // 2. Compute the cell defined by the path \a theWord (from the primary cell).
-Vector<Interval> GridCell::compute_lattice_box( const uint dimensions, const uint theHeight, const BinaryWord& theWord ) {
-    Vector<Interval> theResultLatticeBox( primary_cell_lattice_box( theHeight , dimensions ) );
+Vector<ExactInterval> GridCell::compute_lattice_box( const uint dimensions, const uint theHeight, const BinaryWord& theWord ) {
+    Vector<ExactInterval> theResultLatticeBox( primary_cell_lattice_box( theHeight , dimensions ) );
 
     //2. Compute the cell on some grid, corresponding to the binary path from the primary cell.
     uint current_dimension = 0;
@@ -929,7 +929,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, c
     //1. Extend the base cell in the given dimension (dim) by it's half width. This way
     //   we are sure that we get a box that overlaps with the required neighboring cell.
     //NOTE: This box is in the original space, but not on the lattice
-    Vector<Interval> baseCellBoxInLattice =  GridCell::compute_lattice_box( dimensions, theHeight, theWord );
+    Vector<ExactInterval> baseCellBoxInLattice =  GridCell::compute_lattice_box( dimensions, theHeight, theWord );
     const Float upperBorderOverlapping = add_approx( baseCellBoxInLattice[dim].upper().raw(), baseCellBoxInLattice[dim].width().raw() / 2 );
 
     //2. Now check if the neighboring cell can be rooted to the given primary cell. For that
@@ -990,14 +990,14 @@ uint GridCell::dimension() const {
 
 //NOTE: In this method first works with the boxes on the lattice, to make
 //      computation exact, and then maps them to the original space.
-Box GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) {
-    Vector<Interval> baseCellBoxInLattice =  GridCell::compute_lattice_box( theGrid.dimension(), theHeight, theWord );
-    Box openCellBoxInLattice( theGrid.dimension() );
+ExactBox GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) {
+    Vector<ExactInterval> baseCellBoxInLattice =  GridCell::compute_lattice_box( theGrid.dimension(), theHeight, theWord );
+    ExactBox openCellBoxInLattice( theGrid.dimension() );
 
     //Go through all the dimensions, and double the box size in the positive axis direction.
     for( uint dim = 0; dim < theGrid.dimension(); dim++){
-        Interval openCellBoxInLatticeDimInterval;
-        Interval baseCellBoxInLatticeDimInterval = baseCellBoxInLattice[dim];
+        ExactInterval openCellBoxInLatticeDimInterval;
+        ExactInterval baseCellBoxInLatticeDimInterval = baseCellBoxInLattice[dim];
         Float lower = baseCellBoxInLatticeDimInterval.lower().raw();
         Float upper = baseCellBoxInLatticeDimInterval.upper().raw() +
                         ( baseCellBoxInLatticeDimInterval.upper().raw() -
@@ -1043,7 +1043,7 @@ GridOpenCell GridOpenCell::split(tribool isRight) const {
     return GridOpenCell( _theGrid, theNewPrimaryCellHeight, theNewBaseCellPath );
 }
 
-GridOpenCell * GridOpenCell::smallest_open_subcell( const GridOpenCell &theOpenCell, const Box & theBox ) {
+GridOpenCell * GridOpenCell::smallest_open_subcell( const GridOpenCell &theOpenCell, const ExactBox & theBox ) {
     GridOpenCell * pSmallestOpenCell = NULL;
     //If the box of the givel open cell covers the given box
     if( theOpenCell.box().covers( theBox ) ) {
@@ -1069,8 +1069,8 @@ GridOpenCell * GridOpenCell::smallest_open_subcell( const GridOpenCell &theOpenC
     return pSmallestOpenCell;
 }
 
-GridOpenCell GridOpenCell::outer_approximation( const Box & theBox, const Grid& theGrid ) {
-    //01. First we find the smallest primary GridCell that contain the given Box.
+GridOpenCell GridOpenCell::outer_approximation( const ExactBox & theBox, const Grid& theGrid ) {
+    //01. First we find the smallest primary GridCell that contain the given ExactBox.
     GridCell thePrimaryCell = GridCell::smallest_enclosing_primary_cell( theBox, theGrid );
 
     //02. Second we start subdividing it to find out the root cell for the smallest open cell containing theBox
@@ -1276,10 +1276,10 @@ GridTreeSubset GridTreeSubset::branch(bool left_or_right) const {
 
 
 void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
-    //1. Take the Box of this GridTreeSubset's GridCell
+    //1. Take the ExactBox of this GridTreeSubset's GridCell
     //   I.e. the box that corresponds to the root cell of
     //   the GridTreeSubset in the original space.
-    const Box& theRootCellBox = _theGridCell.box();
+    const ExactBox& theRootCellBox = _theGridCell.box();
 
     //2. Compute the widths of the box in each dimension and the maximum number
     //   among the number of subdivisions that we need to do in each dimension
@@ -1344,8 +1344,8 @@ double GridTreeSubset::measure() const {
 
 
 
-GridTreeSubset::operator ListSet<Box>() const {
-    ListSet<Box> result(this->cell().dimension());
+GridTreeSubset::operator ListSet<ExactBox>() const {
+    ListSet<ExactBox> result(this->cell().dimension());
 
     //IVAN S ZAPREEV:
     //NOTE: Push back the boxes, note that BoxListSet uses a vector, that
@@ -1358,7 +1358,7 @@ GridTreeSubset::operator ListSet<Box>() const {
     return result;
 }
 
-bool GridTreeSubset::superset( const Box& theBox ) const {
+bool GridTreeSubset::superset( const ExactBox& theBox ) const {
     //Check that the box corresponding to the root node of the set
     //is not disjoint from theBox. If it is then the set is not a
     //subset of theBox otherwise we need to traverse the tree and check
@@ -1378,7 +1378,7 @@ bool GridTreeSubset::superset( const Box& theBox ) const {
     }
 }
 
-bool GridTreeSubset::subset( const Box& theBox ) const {
+bool GridTreeSubset::subset( const ExactBox& theBox ) const {
     //Check that the box corresponding to the root node of the set
     //is not disjoint from theBox. If it is then the set is not a
     //subset of theBox otherwise we need to traverse the tree and check
@@ -1391,7 +1391,7 @@ bool GridTreeSubset::subset( const Box& theBox ) const {
     return definitely( GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, theBox ) );
 }
 
-bool GridTreeSubset::disjoint( const Box& theBox ) const {
+bool GridTreeSubset::disjoint( const ExactBox& theBox ) const {
     //Check that the box corresponding to the root node of the set
     //is not disjoint from theBox. If it is then the set is not a
     //subset of theBox otherwise we need to traverse the tree and check
@@ -1404,7 +1404,7 @@ bool GridTreeSubset::disjoint( const Box& theBox ) const {
     return definitely( GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, theBox ) );
 }
 
-bool GridTreeSubset::intersects( const Box& theBox ) const {
+bool GridTreeSubset::intersects( const ExactBox& theBox ) const {
     //Check that the box corresponding to the root node of the set
     //is not disjoint from theBox. If it is then the set is not a
     //subset of theBox otherwise we need to traverse the tree and check
@@ -1417,7 +1417,7 @@ bool GridTreeSubset::intersects( const Box& theBox ) const {
     return definitely( GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, theBox ) );
 }
 
-tribool GridTreeSubset::covers( const Box& theBox ) const {
+tribool GridTreeSubset::covers( const ExactBox& theBox ) const {
     //Simply check if theBox is covered by the set and then make sure that
     //all tree cells that are not disjoint from theBox are enabled
 
@@ -1435,7 +1435,7 @@ tribool GridTreeSubset::covers( const Box& theBox ) const {
     }
 }
 
-tribool GridTreeSubset::inside( const Box& theBox ) const {
+tribool GridTreeSubset::inside( const ExactBox& theBox ) const {
     //Check that the box corresponding to the root node of the set
     //is not disjoint from theBox. If it is then the set is not a
     //subset of theBox otherwise we need to traverse the tree and check
@@ -1448,7 +1448,7 @@ tribool GridTreeSubset::inside( const Box& theBox ) const {
     return GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, narrow(theBox) ) || indeterminate;
 }
 
-tribool GridTreeSubset::separated( const Box& theBox ) const {
+tribool GridTreeSubset::separated( const ExactBox& theBox ) const {
     //Simply check if the box does not intersect with the set
 
     ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
@@ -1458,7 +1458,7 @@ tribool GridTreeSubset::separated( const Box& theBox ) const {
     return GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, widen(theBox) ) || indeterminate;
 }
 
-tribool GridTreeSubset::overlaps( const Box& theBox ) const {
+tribool GridTreeSubset::overlaps( const ExactBox& theBox ) const {
     //Check if the box of the root cell overlaps with theBox,
     //if not then theBox does not intersect with the cell,
     //otherwise we need to find at least one enabled node
@@ -1472,11 +1472,11 @@ tribool GridTreeSubset::overlaps( const Box& theBox ) const {
 }
 
 tribool GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                                  const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
+                                  const uint theHeight, BinaryWord &theWord, const ExactBox& theBox ) {
     tribool result;
 
     //Check if the current node's cell intersects with theBox
-    Box theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
+    ExactBox theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
     tribool doIntersect = theCellsBox.overlaps( theBox );
 
     if( ! definitely(doIntersect) ) {
@@ -1542,11 +1542,11 @@ tribool GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Grid
 }
 
 tribool GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                                const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
+                                const uint theHeight, BinaryWord &theWord, const ExactBox& theBox ) {
     tribool result;
 
     //Check if the current node overlaps with theBox
-    Box theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
+    ExactBox theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
     tribool isASubset = theCellsBox.subset( theBox );
 
     if( isASubset ){
@@ -1613,11 +1613,11 @@ tribool GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& 
 }
 
 tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                                  const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
+                                  const uint theHeight, BinaryWord &theWord, const ExactBox& theBox ) {
     tribool intersect;
 
     //Check if the current node overlaps with theBox
-    Box theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
+    ExactBox theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
     tribool doPossiblyIntersect = !theCellsBox.disjoint( theBox );
 
     if( doPossiblyIntersect || indeterminate( doPossiblyIntersect ) ) {
@@ -1680,11 +1680,11 @@ tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid
 }
 
 tribool GridTreeSubset::intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                                    const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
+                                    const uint theHeight, BinaryWord &theWord, const ExactBox& theBox ) {
     tribool result;
 
     //Check if the current node overlaps with theBox
-    Box theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
+    ExactBox theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
     tribool doPossiblyIntersect = theCellsBox.overlaps( theBox );
 
     if( doPossiblyIntersect || indeterminate( doPossiblyIntersect ) ) {
@@ -1786,7 +1786,7 @@ GridTreeSet::GridTreeSet( const uint theDimension, const bool enable ) :
     //4. A new disabled binary tree node, gives us the root for the paving tree
 }
 
-GridTreeSet::GridTreeSet(const Grid& theGrid, const Box & theLatticeBox ) :
+GridTreeSet::GridTreeSet(const Grid& theGrid, const ExactBox & theLatticeBox ) :
     GridTreeSubset( theGrid, GridCell::smallest_enclosing_primary_cell_height( theLatticeBox ),
                     BinaryWord(), new BinaryTreeNode( false ) ) {
     //1. The main point here is that we have to compute the smallest primary cell that contains theBoundingBox
@@ -2005,11 +2005,11 @@ void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeN
     }
 }
 
-void GridTreeSet::adjoin_over_approximation( const Box& theBox, const uint numSubdivInDim ) {
+void GridTreeSet::adjoin_over_approximation( const ExactBox& theBox, const uint numSubdivInDim ) {
     // FIXME: This adjoins an outer approximation; change to ensure only overlapping cells are adjoined
     for(size_t i=0; i!=theBox.dimension(); ++i) {
         if(theBox[i].lower()>=theBox[i].upper()) {
-            ARIADNE_THROW(std::runtime_error,"GridTreeSet::adjoin_over_approximation(Box,uint)","Box "<<theBox<<" has empty interior.");
+            ARIADNE_THROW(std::runtime_error,"GridTreeSet::adjoin_over_approximation(ExactBox,uint)","ExactBox "<<theBox<<" has empty interior.");
         }
     }
     this->adjoin_outer_approximation( theBox, numSubdivInDim );
@@ -2089,7 +2089,7 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
     }
 }
 
-void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& theBoundingBox, const uint numSubdivInDim ) {
+void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const ExactBox& theBoundingBox, const uint numSubdivInDim ) {
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
     ARIADNE_ASSERT( theBoundingBox.dimension() == this->cell().dimension() );
@@ -2171,7 +2171,7 @@ void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, co
     }
 }
 
-void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const Box& theBoundingBox, const uint numSubdivInDim ) {
+void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const ExactBox& theBoundingBox, const uint numSubdivInDim ) {
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
     ARIADNE_ASSERT( theBoundingBox.dimension() == this->cell().dimension() );
@@ -2853,11 +2853,11 @@ bool intersect( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
 
 /*************************************FRIENDS OF GridTreeSet*****************************************/
 
-GridTreeSet outer_approximation(const Box& theBox, const Grid& theGrid, const uint depth) {
+GridTreeSet outer_approximation(const ExactBox& theBox, const Grid& theGrid, const uint depth) {
     return outer_approximation(static_cast<const CompactSetInterface&>(theBox),theGrid,depth);
 }
 
-GridTreeSet outer_approximation(const Box& theBox, const uint depth) {
+GridTreeSet outer_approximation(const ExactBox& theBox, const uint depth) {
     return outer_approximation(theBox, Grid(theBox.dimension()), depth);
 }
 

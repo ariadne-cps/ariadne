@@ -8,7 +8,7 @@
 using namespace Ariadne;
 
 /// Function for plotting the orbit and reachability set
-template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
+template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const ExactBox& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
     Figure fig;
 
@@ -19,7 +19,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
     if (MAX_GRID_DEPTH >= 0)
     {
         // The rectangle to be drawn
-        Box rect = Box(numVariables);
+        ExactBox rect = ExactBox(numVariables);
         // Chooses the fill colour
         fig << fill_colour(Colour(1.0,1.0,1.0));
 
@@ -34,7 +34,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         // While between the interval
         while (pos_x < bbox[0].upper().raw())
         {
-            rect[xaxis] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
+            rect[xaxis] = ExactInterval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
             pos_x += step_x; // Shifts the x position
             fig << rect; // Appends the rectangle
         }
@@ -45,7 +45,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper().raw())
         {
-            rect[yaxis] = Interval(pos_y,pos_y+step_y);
+            rect[yaxis] = ExactInterval(pos_y,pos_y+step_y);
             fig << rect;
             pos_y += step_y;
         }
@@ -206,7 +206,7 @@ int main(int argc, const char* argv[])
     RealVariablesBox initial_box((t==0, vi==0, vo==Real(0.8_dec)*dp[0]));
     HybridSet initial_set(rectifier|offoff,initial_box);
 
-//    Box initial_box(3, 0.002836,0.002836, 3.110529,3.110529, 3.110529,3.110529);
+//    ExactBox initial_box(3, 0.002836,0.002836, 3.110529,3.110529, 3.110529,3.110529);
 //    HybridEnclosureType initial_enclosure(onoff,initial_box);
 
     std::cout << "Initial set=" << initial_set << std::endl;

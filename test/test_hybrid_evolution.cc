@@ -109,7 +109,7 @@ void TestHybridEvolution::test_bouncing_ball() const {
 
     double height=2.0;
     double radius=1.0/64;
-    HybridBox initial(q,bouncing_ball.continuous_state_space(q),Box{{height-radius,height+radius},{-radius,+radius}});
+    HybridBox initial(q,bouncing_ball.continuous_state_space(q),ExactBox{{height-radius,height+radius},{-radius,+radius}});
     HybridTime time(4.5,3);
 
     this->_set_evolver(bouncing_ball);

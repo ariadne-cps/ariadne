@@ -38,25 +38,25 @@
 namespace Ariadne {
 
 tribool
-Polytope::separated(const Box& bx) const {
+Polytope::separated(const ExactBox& bx) const {
     return this->bounding_box().separated(bx) || indeterminate;
 }
 
 tribool
-Polytope::overlaps(const Box& bx) const {
+Polytope::overlaps(const ExactBox& bx) const {
     return bx.covers(baricentre(*this)) || indeterminate;
 }
 
 tribool
-Polytope::inside(const Box& bx) const {
+Polytope::inside(const ExactBox& bx) const {
     return this->bounding_box().inside(bx) || indeterminate;
 }
 
-Box
+ExactBox
 Polytope::bounding_box() const
 {
     const Polytope& p=*this;
-    Box res(p._vertices[0]);
+    ExactBox res(p._vertices[0]);
     for(uint i=1; i!=p._vertices.size(); ++i) {
         res=hull(res,p._vertices[i]);
     }
@@ -84,7 +84,7 @@ slope2d(const ExactPoint& pt1, const ExactPoint& pt2)
 
 
 
-Polytope polytope(const Box& bx)
+Polytope polytope(const ExactBox& bx)
 {
     return Polytope(bx.vertices());
 }

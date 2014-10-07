@@ -174,12 +174,12 @@ Vector< ValidatedAffineModel > affine_models(const Vector< ValidatedTaylorModel 
     return result;
 }
 
-ValidatedAffineModel affine_model(const Box& domain, const ValidatedScalarFunction& function)
+ValidatedAffineModel affine_model(const ExactBox& domain, const ValidatedScalarFunction& function)
 {
     return affine_model(ScalarTaylorFunction(domain,function,AffineSweeper()).model());
 }
 
-Vector< ValidatedAffineModel > affine_models(const Box& domain, const ValidatedVectorFunction& function)
+Vector< ValidatedAffineModel > affine_models(const ExactBox& domain, const ValidatedVectorFunction& function)
 {
     return affine_models(VectorTaylorFunction(domain,function,AffineSweeper()).models());
 }

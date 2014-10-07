@@ -259,7 +259,7 @@ void test_grid_paving_cursor(){
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Check the created Cursor data on a small subpaving");
-    Box expected_box = make_box("[-0.5,0]x[0.5,1]x[1.25,2.25]");
+    ExactBox expected_box = make_box("[-0.5,0]x[0.5,1]x[1.25,2.25]");
     ARIADNE_TEST_EQUAL( expected_box, theGSPCursorSmall.cell().box() );
 
     // !!!
@@ -738,7 +738,7 @@ void test_grid_paving(){
     ARIADNE_TEST_EQUAL( expected_result1, theTrivialPaving );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Test GridTreeSet (Grid, Box) constructor");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test GridTreeSet (Grid, ExactBox) constructor");
     //Allocate the Grid, one Dimension
     const Grid theTwoDimGrid( Vector<Float>("[-0.25,0.5]"), Vector<Float>("[0.25,0.5]") );
     //Note: the box is related to the grid, but not to the original space
@@ -878,14 +878,14 @@ void test_grid_cell(){
     ARIADNE_PRINT_TEST_CASE_TITLE("Test Cell splitting, dimension: 2");
     string word = "001111";
     GridCell * pThirdCell_To_Split = new GridCell( theGrid, 2, make_binary_word( word ) );
-    Box expected_cell_box = make_box("[0.5,1.0]x[0.5,1.0]");
+    ExactBox expected_cell_box = make_box("[0.5,1.0]x[0.5,1.0]");
     ARIADNE_PRINT_TEST_COMMENT("The initial GridCell, as given by it's box: ");
     ARIADNE_TEST_EQUAL( expected_cell_box, pThirdCell_To_Split->box() );
     ARIADNE_PRINT_TEST_COMMENT("The left sub-box of the initial GridCell, as given by it's box: ");
-    Box expected_left_sub_cell_box = make_box("[0.5,0.75]x[0.5,1.0]");
+    ExactBox expected_left_sub_cell_box = make_box("[0.5,0.75]x[0.5,1.0]");
     ARIADNE_TEST_EQUAL( expected_left_sub_cell_box, pThirdCell_To_Split->split(false).box() );
     ARIADNE_PRINT_TEST_COMMENT("The right sub-box of the initial GridCell, as given by it's box: ");
-    Box expected_right_sub_cell_box = make_box("[0.75,1.0]x[0.5,1.0]");
+    ExactBox expected_right_sub_cell_box = make_box("[0.75,1.0]x[0.5,1.0]");
     ARIADNE_TEST_EQUAL( expected_right_sub_cell_box, pThirdCell_To_Split->split(true).box() );
     ARIADNE_PRINT_TEST_COMMENT("The word of the initial GridCell: ");
     BinaryWord expected_cell_word = make_binary_word( word );
@@ -904,33 +904,33 @@ void test_grid_open_cell_two(){
     //!!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Construct a trivial open cell and split it, dimension: 2");
     GridOpenCell trivialOpenCell = GridOpenCell( theTrivialGrid, 0, BinaryWord() );
-    Box expected_trivial_open_cell_box = make_box("[0.0,2.0]x[0.0,2.0]");
+    ExactBox expected_trivial_open_cell_box = make_box("[0.0,2.0]x[0.0,2.0]");
     ARIADNE_PRINT_TEST_COMMENT("The trivial open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_trivial_open_cell_box, trivialOpenCell.box() );
     ARIADNE_PRINT_TEST_COMMENT("The left open sub cell, as given by its box:");
-    Box expected_left_open_cell_box = make_box("[0.0,1.0]x[0.0,2.0]");
+    ExactBox expected_left_open_cell_box = make_box("[0.0,1.0]x[0.0,2.0]");
     ARIADNE_TEST_EQUAL( expected_left_open_cell_box, trivialOpenCell.split( false ).box() );
     ARIADNE_PRINT_TEST_COMMENT("The middle open sub cell, as given by its box:");
-    Box expected_middle_open_cell_box = make_box("[0.5,1.5]x[0.0,2.0]");
+    ExactBox expected_middle_open_cell_box = make_box("[0.5,1.5]x[0.0,2.0]");
     ARIADNE_TEST_EQUAL( expected_middle_open_cell_box, trivialOpenCell.split( indeterminate ).box() );
     ARIADNE_PRINT_TEST_COMMENT("The right open sub cell, as given by its box:");
-    Box expected_right_open_cell_box = make_box("[1.0,2.0]x[0.0,2.0]");
+    ExactBox expected_right_open_cell_box = make_box("[1.0,2.0]x[0.0,2.0]");
     ARIADNE_TEST_EQUAL( expected_right_open_cell_box, trivialOpenCell.split( true ).box() );
 
     //!!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Construct an open cell 01 height=2 and split it, dimension: 2");
     GridOpenCell openCell01 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "0011111" ) );
-    Box expected_open_cell_box01 = make_box("[0.75,1.25]x[0.5,1.5]");
+    ExactBox expected_open_cell_box01 = make_box("[0.75,1.25]x[0.5,1.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box01, openCell01.box() );
     ARIADNE_PRINT_TEST_COMMENT("The left open sub cell, as given by its box:");
-    Box expected_left_open_cell_box01 = make_box("[0.75,1.25]x[0.5,1.0]");
+    ExactBox expected_left_open_cell_box01 = make_box("[0.75,1.25]x[0.5,1.0]");
     ARIADNE_TEST_EQUAL( expected_left_open_cell_box01, openCell01.split( false ).box() );
     ARIADNE_PRINT_TEST_COMMENT("The middle open sub cell, as given by its box:");
-    Box expected_middle_open_cell_box01 = make_box("[0.75,1.25]x[0.75,1.25]");
+    ExactBox expected_middle_open_cell_box01 = make_box("[0.75,1.25]x[0.75,1.25]");
     ARIADNE_TEST_EQUAL( expected_middle_open_cell_box01, openCell01.split( indeterminate ).box() );
     ARIADNE_PRINT_TEST_COMMENT("The right open sub cell, as given by its box:");
-    Box expected_right_open_cell_box01 = make_box("[0.75,1.25]x[1.0,1.5]");
+    ExactBox expected_right_open_cell_box01 = make_box("[0.75,1.25]x[1.0,1.5]");
     ARIADNE_TEST_EQUAL( expected_right_open_cell_box01, openCell01.split( true ).box() );
 }
 
@@ -940,8 +940,8 @@ void test_grid_open_cell_three(){
 
     //!!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Construct a [0.0,1.0]x[0.0,1.0] box and make and open over approximation, dimension: 2");
-    Box theBox = make_box("[0.0,1.0]x[0.0,1.0]");
-    Box expectedOpenCellBox = make_box("[-1.0,3.0]x[-1.0,3.0]");
+    ExactBox theBox = make_box("[0.0,1.0]x[0.0,1.0]");
+    ExactBox expectedOpenCellBox = make_box("[-1.0,3.0]x[-1.0,3.0]");
     BinaryWord expectedOpenCellWord = make_binary_word("00");
     uint expectedOpenCellHeight = 2;
     GridOpenCell actualOpenCell = GridOpenCell::outer_approximation( theBox, theGrid );
@@ -1039,9 +1039,9 @@ void test_grid_open_cell_four(){
 
     //!!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test that the open cells [0.0,1.0]x[0.0,1.0] and [-0.25,0.25]x[0.0,1.0] intersect, dimension: 2");
-    Box expectedLeftOpenCellBox = make_box("[0.0,1.0]x[0.0,1.0]");
+    ExactBox expectedLeftOpenCellBox = make_box("[0.0,1.0]x[0.0,1.0]");
     leftOpenCell = GridOpenCell( theGrid, 0, make_binary_word( "00" ) );
-    Box expectedRightOpenCellBox = make_box("[-0.25,0.25]x[0.0,1.0]");
+    ExactBox expectedRightOpenCellBox = make_box("[-0.25,0.25]x[0.0,1.0]");
     rightOpenCell = GridOpenCell( theGrid, 1, make_binary_word( "01101" ) );
     //First check that the cells result in correct boxes
     ARIADNE_TEST_EQUAL( expectedLeftOpenCellBox, leftOpenCell.box() );
@@ -1399,147 +1399,147 @@ void test_grid_open_cell_one(){
     //!!! 00
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing a trivial open cell, dimension: 2");
     GridOpenCell trivialOpenCell = GridOpenCell( theTrivialGrid, 0, BinaryWord() );
-    Box expected_trivial_open_cell_box = make_box("[0.0,2.0]x[0.0,2.0]");
+    ExactBox expected_trivial_open_cell_box = make_box("[0.0,2.0]x[0.0,2.0]");
     ARIADNE_PRINT_TEST_COMMENT("The trivial open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_trivial_open_cell_box, trivialOpenCell.box() );
 
     //!!! 01
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 01 height=2, dimension: 2");
     GridOpenCell openCell01 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "0011111" ) );
-    Box expected_open_cell_box01 = make_box("[0.75,1.25]x[0.5,1.5]");
+    ExactBox expected_open_cell_box01 = make_box("[0.75,1.25]x[0.5,1.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box01, openCell01.box() );
 
     //!!! 02
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 01 height=1, dimension: 2");
     GridOpenCell openCell02 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "11111" ) );
-    Box expected_open_cell_box02 = make_box("[0.75,1.25]x[0.5,1.5]");
+    ExactBox expected_open_cell_box02 = make_box("[0.75,1.25]x[0.5,1.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box02, openCell02.box() );
 
     //!!! 03
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 01 height=0, dimension: 2");
     GridOpenCell openCell03 = GridOpenCell( theTrivialGrid, 0, make_binary_word( "111" ) );
-    Box expected_open_cell_box03 = make_box("[0.75,1.25]x[0.5,1.5]");
+    ExactBox expected_open_cell_box03 = make_box("[0.75,1.25]x[0.5,1.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box03, openCell03.box() );
 
     //!!! 04
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 02 height=2, dimension: 2");
     GridOpenCell openCell04 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00110101" ) );
-    Box expected_open_cell_box04 = make_box("[0.0,0.5]x[0.75,1.25]");
+    ExactBox expected_open_cell_box04 = make_box("[0.0,0.5]x[0.75,1.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box04, openCell04.box() );
 
     //!!! 05
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 02 height=1, dimension: 2");
     GridOpenCell openCell05 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "110101" ) );
-    Box expected_open_cell_box05 = make_box("[0.0,0.5]x[0.75,1.25]");
+    ExactBox expected_open_cell_box05 = make_box("[0.0,0.5]x[0.75,1.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box05, openCell05.box() );
 
     //!!! 06
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 02 height=0, dimension: 2");
     GridOpenCell openCell06 = GridOpenCell( theTrivialGrid, 0, make_binary_word( "0101" ) );
-    Box expected_open_cell_box06 = make_box("[0.0,0.5]x[0.75,1.25]");
+    ExactBox expected_open_cell_box06 = make_box("[0.0,0.5]x[0.75,1.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box06, openCell06.box() );
 
     //!!! 07
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 03 height=2, dimension: 2");
     GridOpenCell openCell07 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "000111111" ) );
-    Box expected_open_cell_box07 = make_box("[-0.125,0.125]x[0.75,1.25]");
+    ExactBox expected_open_cell_box07 = make_box("[-0.125,0.125]x[0.75,1.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box07, openCell07.box() );
 
     //!!! 08
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 03 height=1, dimension: 2");
     GridOpenCell openCell08 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "0111111" ) );
-    Box expected_open_cell_box08 = make_box("[-0.125,0.125]x[0.75,1.25]");
+    ExactBox expected_open_cell_box08 = make_box("[-0.125,0.125]x[0.75,1.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box08, openCell08.box() );
 
     //!!! 09
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 04 height=2, dimension: 2");
     GridOpenCell openCell09 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00000001" ) );
-    Box expected_open_cell_box09 = make_box("[-1.0,-0.5]x[-0.75,-0.25]");
+    ExactBox expected_open_cell_box09 = make_box("[-1.0,-0.5]x[-0.75,-0.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box09, openCell09.box() );
 
     //!!! 10
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 04 height=1, dimension: 2");
     GridOpenCell openCell10 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "000001" ) );
-    Box expected_open_cell_box10 = make_box("[-1.0,-0.5]x[-0.75,-0.25]");
+    ExactBox expected_open_cell_box10 = make_box("[-1.0,-0.5]x[-0.75,-0.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box10, openCell10.box() );
 
     //!!! 11
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 05 height=2, dimension: 2");
     GridOpenCell openCell11 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00000011" ) );
-    Box expected_open_cell_box11 = make_box("[-0.75,-0.25]x[-0.75,-0.25]");
+    ExactBox expected_open_cell_box11 = make_box("[-0.75,-0.25]x[-0.75,-0.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box11, openCell11.box() );
 
     //!!! 12
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 05 height=1, dimension: 2");
     GridOpenCell openCell12 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "000011" ) );
-    Box expected_open_cell_box12 = make_box("[-0.75,-0.25]x[-0.75,-0.25]");
+    ExactBox expected_open_cell_box12 = make_box("[-0.75,-0.25]x[-0.75,-0.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box12, openCell12.box() );
 
     //!!! 13
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 06 height=2, dimension: 2");
     GridOpenCell openCell13 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00000010" ) );
-    Box expected_open_cell_box13 = make_box("[-0.75,-0.25]x[-1.0,-0.5]");
+    ExactBox expected_open_cell_box13 = make_box("[-0.75,-0.25]x[-1.0,-0.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box13, openCell13.box() );
 
     //!!! 14
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 06 height=1, dimension: 2");
     GridOpenCell openCell14 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "000010" ) );
-    Box expected_open_cell_box14 = make_box("[-0.75,-0.25]x[-1.0,-0.5]");
+    ExactBox expected_open_cell_box14 = make_box("[-0.75,-0.25]x[-1.0,-0.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box14, openCell14.box() );
 
     //!!! 15
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 07 height=2, dimension: 2");
     GridOpenCell openCell15 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00000000" ) );
-    Box expected_open_cell_box15 = make_box("[-1.0,-0.5]x[-1.0,-0.5]");
+    ExactBox expected_open_cell_box15 = make_box("[-1.0,-0.5]x[-1.0,-0.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box15, openCell15.box() );
 
     //!!! 16
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 07 height=1, dimension: 2");
     GridOpenCell openCell16 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "000000" ) );
-    Box expected_open_cell_box16 = make_box("[-1.0,-0.5]x[-1.0,-0.5]");
+    ExactBox expected_open_cell_box16 = make_box("[-1.0,-0.5]x[-1.0,-0.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box16, openCell16.box() );
 
     //!!! 17
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 08 height=2, dimension: 2");
     GridOpenCell openCell17 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "0000001" ) );
-    Box expected_open_cell_box17 = make_box("[-0.75,-0.25]x[-1.0,0.0]");
+    ExactBox expected_open_cell_box17 = make_box("[-0.75,-0.25]x[-1.0,0.0]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box17, openCell17.box() );
 
     //!!! 18
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 08 height=1, dimension: 2");
     GridOpenCell openCell18 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "00001" ) );
-    Box expected_open_cell_box18 = make_box("[-0.75,-0.25]x[-1.0,0.0]");
+    ExactBox expected_open_cell_box18 = make_box("[-0.75,-0.25]x[-1.0,0.0]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box18, openCell18.box() );
 
     //!!! 19
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 09 height=2, dimension: 2");
     GridOpenCell openCell19 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "0000" ) );
-    Box expected_open_cell_box19 = make_box("[-1.0,1.0]x[-1.0,1.0]");
+    ExactBox expected_open_cell_box19 = make_box("[-1.0,1.0]x[-1.0,1.0]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box19, openCell19.box() );
 
     //!!! 20
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 09 height=1, dimension: 2");
     GridOpenCell openCell20 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "00" ) );
-    Box expected_open_cell_box20 = make_box("[-1.0,1.0]x[-1.0,1.0]");
+    ExactBox expected_open_cell_box20 = make_box("[-1.0,1.0]x[-1.0,1.0]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box20, openCell20.box() );
 }
@@ -1560,7 +1560,7 @@ void test_adjoin_operation_one(){
     GridCell theHigherLevelCell( theGrid, theHigherCellHeight, theHigherCellPath );
 
     ARIADNE_PRINT_TEST_COMMENT("The GridCell with the primary root cell height = 2");
-    Box expected_box = make_box("[2,3]x[-1,0]");
+    ExactBox expected_box = make_box("[2,3]x[-1,0]");
     ARIADNE_PRINT_TEST_COMMENT("The initial GridCell, as given by it's box: ");
     ARIADNE_TEST_EQUAL( expected_box, theHigherLevelCell.box() );
 
@@ -1592,7 +1592,7 @@ void test_adjoin_operation_two(){
     GridCell theLowerLevelCell( theGrid, theLowerCellHeight, theLowerCellPath );
 
     ARIADNE_PRINT_TEST_COMMENT("The GridCell with the primary root cell height = 1");
-    Box expected_box = make_box("[0,1]x[0,1]");
+    ExactBox expected_box = make_box("[0,1]x[0,1]");
     ARIADNE_PRINT_TEST_COMMENT("The box of the initial GridCell: ");
     ARIADNE_TEST_EQUAL( expected_box, theLowerLevelCell.box() );
 
@@ -1636,7 +1636,7 @@ void test_adjoin_operation_three(){
     GridCell theLowerLevelCell( theGrid, theLowerCellHeight, theLowerCellPath );
 
     ARIADNE_PRINT_TEST_COMMENT("The GridCell with the primary root cell height = 2");
-    Box expected_box = make_box("[0,1]x[0,1]");
+    ExactBox expected_box = make_box("[0,1]x[0,1]");
     ARIADNE_PRINT_TEST_COMMENT("The initial GridCell: ");
     ARIADNE_TEST_EQUAL( expected_box, theLowerLevelCell.box() );
 
@@ -1668,7 +1668,7 @@ void test_adjoin_outer_approximation_operation(){
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test adjoining_outer_approximation a SetInterface to the GridTreeSet");
-    Box initialRectangle( make_box("[-0.5,1.5]x[-0.3,1.0]") );
+    ExactBox initialRectangle( make_box("[-0.5,1.5]x[-0.3,1.0]") );
 
     //Define the higth of the primary root cell.
     const uint theHeight = 2;
@@ -1745,8 +1745,8 @@ void test_adjoin_inner_approximation_operation_one(){
     //theSetTwo = empty, with the bounding box [0,1]x[0,1]
     GridTreeSet theSetZero( theTrivialGrid, heightZero, new BinaryTreeNode( make_binary_word("0"), make_binary_word("0") ) );
     GridTreeSet theSetZeroCopy( theSetZero );
-    Box theBoxZeroOne = make_box("[-0.9,-0.1]x[0.1,0.9]");
-    Box theBoundingBoxZeroOne = make_box("[0.01,0.99]x[0.01,0.99]");
+    ExactBox theBoxZeroOne = make_box("[-0.9,-0.1]x[0.1,0.9]");
+    ExactBox theBoundingBoxZeroOne = make_box("[0.01,0.99]x[0.01,0.99]");
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE(" theSetZero.adjoin_inner_approximation( theBoxZeroOne, 0, 4) ");
@@ -1787,8 +1787,8 @@ void test_adjoin_inner_approximation_operation_two(){
     //theSetTwo = empty, with the bounding box [-1,1]x[-1,1]
     GridTreeSet theSetOne( theTrivialGrid, heightOne, new BinaryTreeNode( make_binary_word("0"), make_binary_word("0") ) );
     GridTreeSet theSetOneCopy( theSetOne );
-    Box theBoxOneOne = make_box("[-1.9,-0.1]x[0.1,1.75]");
-    Box theBoundingBoxOneOne = make_box("[-0.99,0.99]x[-0.99,1.99]");
+    ExactBox theBoxOneOne = make_box("[-1.9,-0.1]x[0.1,1.75]");
+    ExactBox theBoundingBoxOneOne = make_box("[-0.99,0.99]x[-0.99,1.99]");
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE(" theSetOne.adjoin_inner_approximation( theBoxOneOne, 1, 2) ");
@@ -1832,7 +1832,7 @@ void test_adjoin_inner_approximation_operation_three(){
     //The set's bounding box is [-1,3]x[-1,3]
     GridTreeSet theSetTwo( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001001") ) );
     GridTreeSet theSetTwoCopy( theSetTwo );
-    Box theBoxTwoOne = make_box("[0.49,1.51]x[0.49,1.51]");
+    ExactBox theBoxTwoOne = make_box("[0.49,1.51]x[0.49,1.51]");
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE(" theSetTwo.adjoin_inner_approximation( theBoxTwoOne, 1, 2) ");
@@ -2676,60 +2676,60 @@ void test_subset_intersects_box() {
     GridTreeSet theSetOne( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001001") ) );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that does not intersects with theSetOne");
-    Box box = make_box("[-2.0,-1.5]x[10,20]");
+    ExactBox box = make_box("[-2.0,-1.5]x[10,20]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that encloses theSetOne as a strict subset");
     box = make_box("[-2.0,4.0]x[-2.0,4.0]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that coincides with one cell of theSetOne");
     box = make_box("[-1.0,0.0]x[-1.0,0.0]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is a subset of one cell of theSetOne");
     box = make_box("[1.5,2.5]x[1.5,2.5]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that intersects two out of three enabled cells of theSetOne");
     box = make_box("[0.3,1.7]x[0.6,1.2]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is located within the bounding box of theSetOne but does not intersect any enabled cells");
     box = make_box("[-0.6,-0.3]x[1.5,3.0]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that shares a border with some of the enabled cells of theSetOne");
     box = make_box("[-1.0,1.0]x[1.0,3.0]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
-    //NOTE: The common border makes Box:intersects(Box) return false so we have no intersection here
+    cout << "ExactBox: " << box << endl;
+    //NOTE: The common border makes ExactBox:intersects(ExactBox) return false so we have no intersection here
     ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), false );
 
     //TODO: I do not know how to test indeterminate result of the intersection here
@@ -2748,105 +2748,105 @@ void test_subset_subset_box(){
     GridTreeSet theSetOne( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001001") ) );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that does not intersect with theSetOne");
-    Box box = make_box("[-2.0,-1.5]x[10,20]");
+    ExactBox box = make_box("[-2.0,-1.5]x[10,20]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.subset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that encloses theSetOne as a strict subset");
     box = make_box("[-2.0,4.0]x[-2.0,4.0]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.subset( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that coincides with one cell of theSetOne");
     box = make_box("[-1.0,0.0]x[-1.0,0.0]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.subset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is a subset of one cell of theSetOne");
     box = make_box("[1.5,2.5]x[1.5,2.5]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.subset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that intersects two out of three enabled cells of theSetOne");
     box = make_box("[0.3,1.7]x[0.6,1.2]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.subset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is located within the bounding box of theSetOne but does not intersect any enabled cells");
     box = make_box("[-0.6,-0.3]x[1.5,3.0]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.subset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that shares a border with some of the enabled cells of theSetOne");
     box = make_box("[-1.0,1.0]x[1.0,3.0]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.subset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is contains the set but is located strictly subset the bounding cell of the set");
     //theSetTwo = [0,1]x[0,1]
     GridTreeSet theSetTwo( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("0001000") ) );
     box = make_box("[-0.5,1.5]x[-0.5, 1.5]");
     cout << "theSetTwo: " << theSetTwo << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetTwo.subset( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that contains the set but is located subset the bounding cell of the set, sharing a border with it");
     //theSetThree = [-1,0]x[-1,0] U [0,1]x[0,1]
     GridTreeSet theSetThree( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001000") ) );
     box = make_box("[-1.0,1.0]x[-1.0, 1.0]");
     cout << "theSetThree: " << theSetThree << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetThree.subset( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that contains the set and is partially located subset the bounding cell of the set, sharing a border with it");
     box = make_box("[-1.0,1.5]x[-1.0, 4.0]");
     cout << "theSetThree: " << theSetThree << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetThree.subset( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that contains the set and is partially located subset the bounding cell of the set");
     //theSetFour = [0,1]x[0,1]
     GridTreeSet theSetFour( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("0001000") ) );
     box = make_box("[-0.5,1.5]x[-0.5, 4.0]");
     cout << "theSetFour: " << theSetFour << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetFour.subset( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that coincides with the set");
     box = make_box("[0.0,1.0]x[0.0,1.0]");
     cout << "theSetFour: " << theSetFour << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetFour.subset( box ), true );
 
     //TODO: I do not know how to test indeterminate result of the subset relation here.
@@ -2865,75 +2865,75 @@ void test_subset_superset_box(){
     GridTreeSet theSetOne( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000101100100"), make_binary_word("1001001111") ) );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is disjoint from the set and is placed outside the set's box");
-    Box box = make_box("[5.0,6.0]x[7.0,8.0]");
+    ExactBox box = make_box("[5.0,6.0]x[7.0,8.0]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is disjoint from the set and is placed within the set's box");
     box = make_box("[-0.5,0.5]x[1.5,2.5]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is disjoint from the set but shares a borders with the set's box");
     box = make_box("[-2.0,-1.0]x[-1.0,2.0]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that only intersects the set and is partially covered by it's cells");
     box = make_box("[1.5,2.5]x[1.5,3.5]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that coincides with a cell of the set");
     box = make_box("[-1.0,-1.0]x[0.0,0.0]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is within the set and shares a border with an enabled cell");
     box = make_box("[-1.0,1.0]x[1.0,2.0]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is partially covered by two enabled cells of the set");
     box = make_box("[-0.5,0.5]x[-0.5,0.5]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is a subset of an enabled cell");
     box = make_box("[1.5,1.8]x[1.3,1.9]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is covered by several enabled cells of the set");
     box = make_box("[1.5,2.5]x[1.5,2.5]");
     cout << "theSetOne: " << theSetOne << endl;
-    cout << "Box: " << box << endl;
+    cout << "ExactBox: " << box << endl;
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), true );
 
     //TODO: I do not know how to test indeterminate result of the superset relation here.

@@ -42,7 +42,7 @@
 namespace Ariadne {
 
 class Float;
-class Interval;
+class ExactInterval;
 
 template<class X> class Vector;
 template<class X> class Matrix;
@@ -53,10 +53,10 @@ template<class X> class Differential;
 template<class X> class Vector<Differential<X>>;
 
 typedef Differential<Float> FloatDifferential;
-typedef Differential<Interval> IntervalDifferential;
+typedef Differential<ExactInterval> ExactIntervalDifferential;
 typedef Differential<UpperInterval> UpperIntervalDifferential;
 typedef Vector< Differential<Float> > FloatDifferentialVector;
-typedef Vector< Differential<Interval> > IntervalDifferentialVector;
+typedef Vector< Differential<ExactInterval> > ExactIntervalDifferentialVector;
 typedef Vector< Differential<UpperInterval> > UpperIntervalDifferentialVector;
 
 template<class X> Differential<X>& operator+=(Differential<X>& x, const Differential<X>& y);

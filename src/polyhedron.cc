@@ -59,7 +59,7 @@ int verbosity=global_verbosity;
 
 void ddconv(std::vector< Vector<Float> >&, const std::vector< Vector<Float> >&);
 
-Polyhedron polyhedron(const Box& bx);
+Polyhedron polyhedron(const ExactBox& bx);
 Polyhedron polyhedron(const Polytope& p);
 Polytope polytope(const Polyhedron& p);
 
@@ -86,7 +86,7 @@ Polyhedron::Polyhedron(const Matrix<Float>& A, const Vector<Float>& b)
 
 
 
-Polyhedron::Polyhedron(const Box& bx)
+Polyhedron::Polyhedron(const ExactBox& bx)
     : _A(bx.dimension()*2,bx.dimension()), _b(bx.dimension()*2)
 {
     const uint n=bx.dimension();
@@ -152,15 +152,15 @@ Polyhedron::halfspace(size_t i) const
 
 
 
-tribool Polyhedron::overlaps(const Box& bx) const {
+tribool Polyhedron::overlaps(const ExactBox& bx) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-tribool Polyhedron::covers(const Box& bx) const {
+tribool Polyhedron::covers(const ExactBox& bx) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-tribool Polyhedron::separated(const Box& bx) const {
+tribool Polyhedron::separated(const ExactBox& bx) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
@@ -185,7 +185,7 @@ intersection(const Polyhedron& plhd1, const Polyhedron& plhd2)
 
 
 Polyhedron
-polyhedron(const Box& bx)
+polyhedron(const ExactBox& bx)
 {
     return Polyhedron(bx);
 }

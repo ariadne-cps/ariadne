@@ -61,7 +61,7 @@ class C1TaylorSeries
     static C1TaylorSeries constant(Float);
     static C1TaylorSeries coordinate();
   public:
-    Interval domain() const;
+    ExactInterval domain() const;
     Nat degree() const;
     Void sweep(Float threshold);
   public:
@@ -77,7 +77,7 @@ class C1TaylorSeries
 class C1TaylorFunction
 {
   public:
-    typedef Interval NumericType;
+    typedef ExactInterval NumericType;
   public:
     Expansion<Float> _expansion;
     Float _zero_error;
@@ -91,10 +91,10 @@ class C1TaylorFunction
     static C1TaylorFunction constant(Nat as, Float c);
     static C1TaylorFunction coordinate(Nat as, Nat ind);
   public:
-    Box domain() const;
+    ExactBox domain() const;
     Nat argument_size() const;
     Void sweep(Float threshold);
-    C1TaylorFunction& operator=(Interval c);
+    C1TaylorFunction& operator=(ExactInterval c);
     Void clear();
   public:
     friend C1TaylorFunction& operator+=(C1TaylorFunction& f, Float c);

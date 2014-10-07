@@ -357,7 +357,7 @@ void restrict(UpperInterval& r, const UpperInterval& x) {
 };
 
 template<class X>
-void simple_hull_reduce(UpperBox& dom, const Procedure<X>& f, Interval codom)
+void simple_hull_reduce(UpperBox& dom, const Procedure<X>& f, ExactInterval codom)
 {
     const List<ProcedureInstruction>& p=f._instructions;
     const List<X>& c=f._constants;
@@ -369,7 +369,7 @@ void simple_hull_reduce(UpperBox& dom, const Procedure<X>& f, Interval codom)
 }
 
 template<class X>
-void simple_hull_reduce(UpperBox& dom, const Vector< Procedure<X> >& f, Box codom)
+void simple_hull_reduce(UpperBox& dom, const Vector< Procedure<X> >& f, ExactBox codom)
 {
     const List<ProcedureInstruction>& p=f._instructions;
     const List<X>& c=f._constants;

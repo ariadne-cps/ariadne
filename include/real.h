@@ -55,7 +55,7 @@ class RealInterface;
 //! \ingroup NumericModule
 //! \brief Computable real numbers.
 //!
-//! Support over-approximation by an Interval and approximation by a Float.
+//! Support over-approximation by an ExactInterval and approximation by a Float.
 class Real {
     std::shared_ptr<RealInterface> _ptr;
   public:
@@ -186,18 +186,18 @@ inline ValidatedFloat& operator-=(ValidatedFloat& x, const Real& y) { return x-=
 inline ValidatedFloat& operator*=(ValidatedFloat& x, const Real& y) { return x*=static_cast<ValidatedFloat>(y); }
 inline ValidatedFloat& operator/=(ValidatedFloat& x, const Real& y) { return x/=static_cast<ValidatedFloat>(y); }
 
-inline Interval operator+(const Real& x, const Interval& y) { return static_cast<Interval>(x)+y; }
-inline Interval operator-(const Real& x, const Interval& y) { return static_cast<Interval>(x)-y; }
-inline Interval operator*(const Real& x, const Interval& y) { return static_cast<Interval>(x)*y; }
-inline Interval operator/(const Real& x, const Interval& y) { return static_cast<Interval>(x)/y; }
-inline Interval operator+(const Interval& x, const Real& y) { return x+static_cast<Interval>(y); }
-inline Interval operator-(const Interval& x, const Real& y) { return x-static_cast<Interval>(y); }
-inline Interval operator*(const Interval& x, const Real& y) { return x*static_cast<Interval>(y); }
-inline Interval operator/(const Interval& x, const Real& y) { return x/static_cast<Interval>(y); }
-inline Interval& operator+=(Interval& x, const Real& y) { return x+=static_cast<Interval>(y); }
-inline Interval& operator-=(Interval& x, const Real& y) { return x-=static_cast<Interval>(y); }
-inline Interval& operator*=(Interval& x, const Real& y) { return x*=static_cast<Interval>(y); }
-inline Interval& operator/=(Interval& x, const Real& y) { return x/=static_cast<Interval>(y); }
+inline ExactInterval operator+(const Real& x, const ExactInterval& y) { return static_cast<ExactInterval>(x)+y; }
+inline ExactInterval operator-(const Real& x, const ExactInterval& y) { return static_cast<ExactInterval>(x)-y; }
+inline ExactInterval operator*(const Real& x, const ExactInterval& y) { return static_cast<ExactInterval>(x)*y; }
+inline ExactInterval operator/(const Real& x, const ExactInterval& y) { return static_cast<ExactInterval>(x)/y; }
+inline ExactInterval operator+(const ExactInterval& x, const Real& y) { return x+static_cast<ExactInterval>(y); }
+inline ExactInterval operator-(const ExactInterval& x, const Real& y) { return x-static_cast<ExactInterval>(y); }
+inline ExactInterval operator*(const ExactInterval& x, const Real& y) { return x*static_cast<ExactInterval>(y); }
+inline ExactInterval operator/(const ExactInterval& x, const Real& y) { return x/static_cast<ExactInterval>(y); }
+inline ExactInterval& operator+=(ExactInterval& x, const Real& y) { return x+=static_cast<ExactInterval>(y); }
+inline ExactInterval& operator-=(ExactInterval& x, const Real& y) { return x-=static_cast<ExactInterval>(y); }
+inline ExactInterval& operator*=(ExactInterval& x, const Real& y) { return x*=static_cast<ExactInterval>(y); }
+inline ExactInterval& operator/=(ExactInterval& x, const Real& y) { return x/=static_cast<ExactInterval>(y); }
 */
 
 //@{
@@ -207,28 +207,28 @@ inline Interval& operator/=(Interval& x, const Real& y) { return x/=static_cast<
 //! Returns \c true if the numbers have the same representation or can be evaluated exactly to the same value.
 //! Returns \c false if the numbers can be evalated to different values.
 //! Returns \c indeterminate if the numbers cannot be shown to be the same or different. Implementation dependent.
-inline tribool operator==(const Real& x, const Real& y) { return static_cast<Interval>(x)==static_cast<Interval>(y); }
+inline tribool operator==(const Real& x, const Real& y) { return static_cast<ExactInterval>(x)==static_cast<ExactInterval>(y); }
 //! \brief Inequality operator.
 //! Returns \c true if the numbers have been proved to be different, such as by evaluation to different values.
 //! Returns \c false if the numbers have the same representation or can be evaluated exactly to the same value.
 //! Returns \c indeterminate if the numbers cannot be shown to be the same or different. Implementation dependent.
-inline tribool operator!=(const Real& x, const Real& y) { return static_cast<Interval>(x)!=static_cast<Interval>(y); }
+inline tribool operator!=(const Real& x, const Real& y) { return static_cast<ExactInterval>(x)!=static_cast<ExactInterval>(y); }
 //! \brief Greater-than-or-equal-to comparison operator.
-inline tribool operator>=(const Real& x, const Real& y) { return static_cast<Interval>(x)>=static_cast<Interval>(y); }
+inline tribool operator>=(const Real& x, const Real& y) { return static_cast<ExactInterval>(x)>=static_cast<ExactInterval>(y); }
 //! \brief Less-than-or-equal-to comparison operator.
-inline tribool operator<=(const Real& x, const Real& y) { return static_cast<Interval>(x)<=static_cast<Interval>(y); }
+inline tribool operator<=(const Real& x, const Real& y) { return static_cast<ExactInterval>(x)<=static_cast<ExactInterval>(y); }
 //! \brief Strictly-greater-than comparison operator.
-inline tribool operator> (const Real& x, const Real& y) { return static_cast<Interval>(x)> static_cast<Interval>(y); }
+inline tribool operator> (const Real& x, const Real& y) { return static_cast<ExactInterval>(x)> static_cast<ExactInterval>(y); }
 //! \brief Strictly-less-than comparison operator.
-inline tribool operator< (const Real& x, const Real& y) { return static_cast<Interval>(x)< static_cast<Interval>(y); }
+inline tribool operator< (const Real& x, const Real& y) { return static_cast<ExactInterval>(x)< static_cast<ExactInterval>(y); }
 //@}
 
-inline tribool operator==(const Real& x, double y) { return static_cast<Interval>(x)==static_cast<Interval>(y); }
-inline tribool operator!=(const Real& x, double y) { return static_cast<Interval>(x)!=static_cast<Interval>(y); }
-inline tribool operator>=(const Real& x, double y) { return static_cast<Interval>(x)>=static_cast<Interval>(y); }
-inline tribool operator<=(const Real& x, double y) { return static_cast<Interval>(x)<=static_cast<Interval>(y); }
-inline tribool operator> (const Real& x, double y) { return static_cast<Interval>(x)> static_cast<Interval>(y); }
-inline tribool operator< (const Real& x, double y) { return static_cast<Interval>(x)< static_cast<Interval>(y); }
+inline tribool operator==(const Real& x, double y) { return static_cast<ExactInterval>(x)==static_cast<ExactInterval>(y); }
+inline tribool operator!=(const Real& x, double y) { return static_cast<ExactInterval>(x)!=static_cast<ExactInterval>(y); }
+inline tribool operator>=(const Real& x, double y) { return static_cast<ExactInterval>(x)>=static_cast<ExactInterval>(y); }
+inline tribool operator<=(const Real& x, double y) { return static_cast<ExactInterval>(x)<=static_cast<ExactInterval>(y); }
+inline tribool operator> (const Real& x, double y) { return static_cast<ExactInterval>(x)> static_cast<ExactInterval>(y); }
+inline tribool operator< (const Real& x, double y) { return static_cast<ExactInterval>(x)< static_cast<ExactInterval>(y); }
 
 //@{
 //! \related Real \name Arithmetical, algebraic and transcendental functions

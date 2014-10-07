@@ -84,7 +84,7 @@ class PythonHybridEvolver
     , public Loggable
 {
     typedef VectorFunction FunctionType;
-    typedef Vector<Interval> BoxType;
+    typedef Vector<ExactInterval> BoxType;
     typedef VectorTaylorFunction FunctionModelType;
     typedef VectorTaylorFunction MapModelType;
     typedef VectorTaylorFunction FlowModelType;

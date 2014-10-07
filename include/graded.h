@@ -73,12 +73,12 @@ template<class X> bool compatible(const Polynomial<X>& x1, const Polynomial<X>& 
 template<class X> bool compatible(const Differential<X>& x1, const Differential<X>& x2) { return x1.argument_size()==x2.argument_size(); }
 
 Float create(const Float& x) { return Float(0); }
-Interval create(const Interval& x) { return Interval(0); }
+ExactInterval create(const ExactInterval& x) { return ExactInterval(0); }
 template<class X> Polynomial<X> create(const Polynomial<X>& x) { return Polynomial<X>(x.argument_size()); }
 template<class X> Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree()); }
 
-std::ostream& operator<<(std::ostream& os, const Differential<Interval>& d) {
-    return os << Polynomial<Interval>(d.expansion());
+std::ostream& operator<<(std::ostream& os, const Differential<ExactInterval>& d) {
+    return os << Polynomial<ExactInterval>(d.expansion());
 }
 
 template<class A> struct Graded : public List<A>
@@ -122,7 +122,7 @@ template<> std::ostream& operator<<(std::ostream& os, const Graded<Float>& g) {
     if(!nonzero) { os << "0"; }
     return os;
 }
-template<> std::ostream& operator<<(std::ostream& os, const Graded<Interval>& g) {
+template<> std::ostream& operator<<(std::ostream& os, const Graded<ExactInterval>& g) {
     if(g.size()==0) { return os << "0"; }
     os << g[0];
     for(uint i=1; i<=g.degree(); ++i) {
@@ -374,7 +374,7 @@ template<class A> ClosureExpression<AntiDiff,Graded<A> > antidifferential(const 
 }
 
 
-Pair<List<Float>,Float> midpoint_error(const Graded<Interval>& x) {
+Pair<List<Float>,Float> midpoint_error(const Graded<ExactInterval>& x) {
     List<Float> m(x.degree()+1);
     Float e;
     for(uint i=0; i<=x.degree(); ++i) {

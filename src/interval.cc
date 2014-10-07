@@ -59,11 +59,11 @@ inline Float cos_up(Float x) { set_rounding_upward(); Float y=cos_rnd(x); return
 
 
 
-const UpperInterval pi_ivl=Interval(pi_down,pi_up);
+const UpperInterval pi_ivl=ExactInterval(pi_down,pi_up);
 
-uint Interval::output_precision = 6;
+uint ExactInterval::output_precision = 6;
 
-Interval widen(Interval x)
+ExactInterval widen(ExactInterval x)
 {
     rounding_mode_t rm=get_rounding_mode();
     const double& xl=internal_cast<const double&>(x.lower().value());
@@ -75,10 +75,10 @@ Interval widen(Interval x)
     volatile double wl=-mwl;
     set_rounding_mode(rm);
     assert(wl<xl); assert(wu>xu);
-    return Interval(wl,wu);
+    return ExactInterval(wl,wu);
 }
 
-Interval narrow(Interval x)
+ExactInterval narrow(ExactInterval x)
 {
     rounding_mode_t rm=get_rounding_mode();
     const double& xl=internal_cast<const double&>(x.lower().value());
@@ -90,10 +90,10 @@ Interval narrow(Interval x)
     volatile double nl=xl+m;
     set_rounding_mode(rm);
     assert(xl<nl); assert(nu<xu);
-    return Interval(nl,nu);
+    return ExactInterval(nl,nu);
 }
 
-Interval trunc(Interval x)
+ExactInterval trunc(ExactInterval x)
 {
 
     rounding_mode_t rm=get_rounding_mode();
@@ -107,15 +107,15 @@ Interval trunc(Interval x)
     if(tl>xl) { set_rounding_downward(); tl-=fm; }
     set_rounding_mode(rm);
     assert(tl<=xl); assert(tu>=xu);
-    return Interval(double(tl),double(tu));
+    return ExactInterval(double(tl),double(tu));
 }
 
-Interval trunc(Interval x, uint n)
+ExactInterval trunc(ExactInterval x, uint n)
 {
-    Interval e=Interval(std::pow(2.0,52-(int)n));
+    ExactInterval e=ExactInterval(std::pow(2.0,52-(int)n));
     UpperInterval y=x+e;
     UpperInterval r=y-e;
-    return Interval(r.lower_raw(),r.upper_raw());
+    return ExactInterval(r.lower_raw(),r.upper_raw());
 }
 
 UpperInterval rec(UpperInterval i)
@@ -424,20 +424,20 @@ UpperInterval atan(UpperInterval i)
 }
 
 
-Interval::Interval(const Dyadic& b) : Interval(b.operator Rational()) { }
+ExactInterval::ExactInterval(const Dyadic& b) : ExactInterval(b.operator Rational()) { }
 
-Interval::Interval(const Decimal& d) : Interval(d.operator Rational()) { }
+ExactInterval::ExactInterval(const Decimal& d) : ExactInterval(d.operator Rational()) { }
 
 
 #ifdef HAVE_GMPXX_H
 
-Interval::Interval(const Integer& z) : Interval(Rational(z)) {
+ExactInterval::ExactInterval(const Integer& z) : ExactInterval(Rational(z)) {
 }
 
-Interval::Interval(const Rational& q) : Interval(q,q) {
+ExactInterval::ExactInterval(const Rational& q) : ExactInterval(q,q) {
 }
 
-Interval::Interval(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu.get_d())  {
+ExactInterval::ExactInterval(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu.get_d())  {
     static const double min_dbl=std::numeric_limits<double>::min();
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(downward);
@@ -447,12 +447,12 @@ Interval::Interval(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu
     set_rounding_mode(rounding_mode);
 }
 
-Interval::Interval(const Real& lower, const Real& upper)
+ExactInterval::ExactInterval(const Real& lower, const Real& upper)
     : l(ValidatedFloat(lower).lower().value()), u(ValidatedFloat(upper).upper().value()) {
 }
 
-Interval& Interval::operator=(const Rational& q) {
-    return *this = Interval(q);
+ExactInterval& ExactInterval::operator=(const Rational& q) {
+    return *this = ExactInterval(q);
 }
 
 
@@ -460,16 +460,16 @@ Interval& Interval::operator=(const Rational& q) {
 
 
 std::ostream&
-operator<<(std::ostream& os, const Interval& ivl)
+operator<<(std::ostream& os, const ExactInterval& ivl)
 {
-    //if(ivl.lower()==ivl.upper().value()) { return os << "{" << std::setprecision(Interval::output_precision) << ivl.lower().value().get_d() << ; }
+    //if(ivl.lower()==ivl.upper().value()) { return os << "{" << std::setprecision(ExactInterval::output_precision) << ivl.lower().value().get_d() << ; }
     rounding_mode_t rnd=get_rounding_mode();
     os << '{';
     set_rounding_downward();
-    os << std::showpoint << std::setprecision(Interval::output_precision) << ivl.lower().value().get_d();
+    os << std::showpoint << std::setprecision(ExactInterval::output_precision) << ivl.lower().value().get_d();
     os << ':';
     set_rounding_upward();
-    os << std::showpoint << std::setprecision(Interval::output_precision) << ivl.upper().value().get_d();
+    os << std::showpoint << std::setprecision(ExactInterval::output_precision) << ivl.upper().value().get_d();
     set_rounding_mode(rnd);
     os << '}';
     return os;
@@ -478,7 +478,7 @@ operator<<(std::ostream& os, const Interval& ivl)
 
 /*
 std::ostream&
-operator<<(std::ostream& os, const Interval& ivl)
+operator<<(std::ostream& os, const ExactInterval& ivl)
 {
     return os << '[' << ivl.l << ':' << ivl.u << ']';
 }
@@ -486,7 +486,7 @@ operator<<(std::ostream& os, const Interval& ivl)
 
 /*
 std::ostream&
-operator<<(std::ostream& os, const Interval& ivl)
+operator<<(std::ostream& os, const ExactInterval& ivl)
 {
     if(ivl.lower().value()==ivl.upper().value()) {
         return os << std::setprecision(18) << ivl.lower().value();
@@ -535,7 +535,7 @@ operator<<(std::ostream& os, const Interval& ivl)
 }
 */
 std::istream&
-operator>>(std::istream& is, Interval& ivl)
+operator>>(std::istream& is, ExactInterval& ivl)
 {
     Float l,u;
     char cl,cm,cr;

@@ -46,7 +46,7 @@ using namespace std;
 template<class X> class Point;
 typedef Point<ExactNumberType> ExactPoint;
 
-class Box;
+class ExactBox;
 class InterpolatedCurve;
 class Zonotope;
 class TaylorConstrainedImageSet;
@@ -89,7 +89,7 @@ class TextPlot
     void open(const char* filename);
     void open(const char* filename, ios::openmode mode);
     void draw(const ExactPoint&);
-    void draw(const Box&);
+    void draw(const ExactBox&);
 //    void draw(const Polytope&);
     void draw(const InterpolatedCurve&);
     void draw(const GridTreeSubset&);

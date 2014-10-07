@@ -48,13 +48,13 @@ template<class X> class Vector;
 template<class X> class Point;
 typedef Point<ExactNumberType> ExactPoint;
 
-class Box;
+class ExactBox;
 class UpperBox;
 class Zonotope;
 class Polytope;
 class InterpolatedCurve;
 
-Polytope polytope(const Box& bx);
+Polytope polytope(const ExactBox& bx);
 Polytope polytope(const Zonotope& z);
 Polytope polytope(const Polytope& p);
 
@@ -98,9 +98,9 @@ class Polytope
 
     virtual Polytope* clone() const { return new Polytope(*this); }
     virtual uint dimension() const { if(this->_vertices.size()==0) { return 0; } return this->_vertices.front().dimension(); }
-    virtual tribool separated(const Box& bx) const;
-    virtual tribool overlaps(const Box& bx) const;
-    virtual tribool inside(const Box& bx) const;
+    virtual tribool separated(const ExactBox& bx) const;
+    virtual tribool overlaps(const ExactBox& bx) const;
+    virtual tribool inside(const ExactBox& bx) const;
     virtual UpperBox bounding_box() const;
     virtual void draw(CanvasInterface& c, const Projection2d& p) const;
     virtual std::ostream& write(std::ostream& os) const;

@@ -99,7 +99,7 @@ GridTreeSet join(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 GridTreeSet intersection(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 GridTreeSet difference(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 
-GridTreeSet outer_approximation(const Box& theBox, const Grid& theGrid, const uint numSubdivInDim);
+GridTreeSet outer_approximation(const ExactBox& theBox, const Grid& theGrid, const uint numSubdivInDim);
 GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const uint numSubdivInDim);
 GridTreeSet outer_approximation(const CompactSetInterface& theSet, const uint numSubdivInDim);
 template<class BS> GridTreeSet outer_approximation(const ListSet<BS>& theSet, const uint numSubdivInDim);
@@ -420,7 +420,7 @@ class GridTreeSubset
      *  cells in \a pCurrentNode that intersect with theBox.
      */
     static tribool superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                             const uint theHeight, BinaryWord &theWord, const Box& theBox );
+                             const uint theHeight, BinaryWord &theWord, const ExactBox& theBox );
 
     /*! \brief This method checks whether the set defined by \a pCurrentNode is a subset
      *  of \a theBox. The set of \a pCurrentNode is defined by \a theGrid, the primary
@@ -429,7 +429,7 @@ class GridTreeSubset
      *  \a pCurrentNode are sub-sets of \a theBox.
      */
     static tribool subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                           const uint theHeight, BinaryWord &theWord, const Box& theBox );
+                           const uint theHeight, BinaryWord &theWord, const ExactBox& theBox );
 
     /*! \brief This method checks whether \a theBox is disjoint from the set defined by
      *  \a pCurrentNode, \a theGrid, the primary cell (\a theHeight) to which this
@@ -440,7 +440,7 @@ class GridTreeSubset
      *  and the sets are disjoint.
      */
     static tribool disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                             const uint theHeight, BinaryWord &theWord, const Box& theBox );
+                             const uint theHeight, BinaryWord &theWord, const ExactBox& theBox );
 
     /*! \brief This method checks whether \a theBox overlaps the set defined by
      *  \a pCurrentNode, \a theGrid, the primary cell (\a theHeight) to which this
@@ -452,7 +452,7 @@ class GridTreeSubset
      *  are disjoint, and overlaps tests if the interiors are not disjoint.
      */
     static tribool intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                               const uint theHeight, BinaryWord &theWord, const Box& theBox );
+                               const uint theHeight, BinaryWord &theWord, const ExactBox& theBox );
 
     /*! Allow to convert the number of subdivisions in each dimension, i.e. \a numSubdivInDim,
      *  starting from the zero cell into the number of subdivisions that have to be done in a
@@ -612,28 +612,28 @@ class GridTreeSubset
     virtual bool intersects(const SubPavingInterface&) const;
 
     /*! \brief Tests if a grid set is a subset of a box. */
-    bool subset( const Box& theBox ) const;
+    bool subset( const ExactBox& theBox ) const;
 
     /*! \brief Tests if a grid set is a superset of a box. */
-    bool superset( const Box& theBox ) const;
+    bool superset( const ExactBox& theBox ) const;
 
     /*! \brief Tests if a grid set intersects (the interior) of a box. */
-    bool intersects( const Box& theBox ) const;
+    bool intersects( const ExactBox& theBox ) const;
 
     /*! \brief Tests if a grid set is disjoint from (the interior of) box. */
-    bool disjoint( const Box& theBox ) const;
+    bool disjoint( const ExactBox& theBox ) const;
 
     /*! \brief Tests if the interior of a grid set is a superset of a box. */
-    tribool covers( const Box& theBox ) const;
+    tribool covers( const ExactBox& theBox ) const;
 
     /*! \brief Tests if (the closure of) a grid set is a subset of the interior of box. */
-    tribool inside( const Box& theBox  ) const;
+    tribool inside( const ExactBox& theBox  ) const;
 
     /*! \brief Tests if (the closure of) a grid set is disjoint from (the closure of) a box. */
-    tribool separated( const Box& theBox  ) const;
+    tribool separated( const ExactBox& theBox  ) const;
 
     /*! \brief Tests if a grid set overlaps (intersects the interior of) a box. */
-    tribool overlaps( const Box& theBox ) const;
+    tribool overlaps( const ExactBox& theBox ) const;
 
     //@}
 
@@ -655,7 +655,7 @@ class GridTreeSubset
     GridTreeSubset& operator=( const GridTreeSubset &otherSubset);
 
     /*! \brief Convert to a list of ordinary boxes, unrelated to the grid. */
-    operator ListSet<Box>() const;
+    operator ListSet<ExactBox>() const;
 
     //@}
 
@@ -825,7 +825,7 @@ class GridTreeSet
     /*! \brief Construct an empty tree. The \a theLatticeBox is used to define the lattice
      *  block (in theGrid) that will correspond to the root of the paving tree \a pRootTreeNode.
      */
-    explicit GridTreeSet( const Grid& theGrid, const Box & theLatticeBox );
+    explicit GridTreeSet( const Grid& theGrid, const ExactBox & theLatticeBox );
 
     /*! \brief Construct the paving based on the block's coordinates, defined by: \a theLeftLowerPoint
      *  and \a theRightUpperPoint. These are the coordinates in the lattice defined by theGrid.
@@ -930,7 +930,7 @@ class GridTreeSet
      *   the zero cell we should make to get the proper cells for outer approximating \a theSet.
      *   \pre The box must have nonempty interior.
      */
-    void adjoin_over_approximation( const Box& theBox, const uint numSubdivInDim );
+    void adjoin_over_approximation( const ExactBox& theBox, const uint numSubdivInDim );
 
     /*! \brief Adjoin an outer approximation to a given set, computing to the given depth.
      *  This method computes an outer approximation for the set \a theSet on the grid \a theGrid.
@@ -957,7 +957,7 @@ class GridTreeSet
      *   dimension from the level of the zero cell we should make to get the proper cells for outer
      *   approximating \a theSet. A lower approximation comprises all cells intersecting a given set.
      */
-    void adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& bounding_box, const uint numSubdivInDim );
+    void adjoin_lower_approximation( const OvertSetInterface& theSet, const ExactBox& bounding_box, const uint numSubdivInDim );
 
     /*! \brief Adjoin a lower approximation to a given set, computing to the given depth
      *   \a numSubdivInDim -- defines, how many subdivisions in each dimension from the level of the
@@ -979,7 +979,7 @@ class GridTreeSet
      *   approximating \a theSet. An inner approximation comprises all cells that are sub-cells of
      *   the given set.
      */
-    void adjoin_inner_approximation( const OpenSetInterface& theSet, const Box& bounding_box, const uint numSubdivInDim );
+    void adjoin_inner_approximation( const OpenSetInterface& theSet, const ExactBox& bounding_box, const uint numSubdivInDim );
 
     //@}
 
@@ -1694,7 +1694,7 @@ inline void GridTreeSubset::set_root_cell(bool enabled_or_disabled)  {
 }
 
 inline UpperBox GridTreeSubset::bounding_box() const {
-    if(this->empty()) return Box(this->dimension());
+    if(this->empty()) return ExactBox(this->dimension());
 
     GridTreeSet::const_iterator iter=this->begin();
     UpperBox bbox = iter->box();
@@ -1793,7 +1793,7 @@ inline bool GridTreeSubset::intersects(const SubPavingInterface& paving) const {
 /*********************************************GridTreeSet*********************************************/
 
 inline GridCell GridTreeSet::smallest_enclosing_primary_cell( const UpperBox& theBox ) const {
-    ARIADNE_ASSERT_MSG( this->dimension() == theBox.dimension(), "Cannot find enclosing cell for Box  " << theBox << " for GridTreeSet with grid " << this->grid() );
+    ARIADNE_ASSERT_MSG( this->dimension() == theBox.dimension(), "Cannot find enclosing cell for ExactBox  " << theBox << " for GridTreeSet with grid " << this->grid() );
 
     return GridCell::smallest_enclosing_primary_cell( theBox, this->grid() );
 }
@@ -1845,7 +1845,7 @@ inline std::ostream& operator<<(std::ostream& os, const GridOpenCell& theGridOpe
     return os << "GridOpenCell( " << theGridOpenCell.grid() <<
         ", Primary cell height: " << theGridOpenCell.height() <<
         ", Base cell path: " << theGridOpenCell.word() <<
-        ", Box (closure): " << theGridOpenCell.box() << " )";
+        ", ExactBox (closure): " << theGridOpenCell.box() << " )";
 }
 
 /****************************************FRIENDS OF GridCell*******************************************/
@@ -1856,7 +1856,7 @@ inline std::ostream& operator<<(std::ostream& os, const GridCell& gridPavingCell
     return os << "GridCell( " << gridPavingCell.grid() <<
         ", Primary cell height: " << gridPavingCell.height() <<
         ", Path to the root: " << gridPavingCell.word() <<
-        ", Box: " << gridPavingCell.box() << " )";
+        ", ExactBox: " << gridPavingCell.box() << " )";
 }
 
 

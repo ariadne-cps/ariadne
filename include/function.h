@@ -360,7 +360,7 @@ inline Differential<UpperInterval> differential(ScalarFunction<ValidatedTag>cons
     return static_cast<Differential<UpperInterval>>(f.differential(reinterpret_cast<Vector<ValidatedFloatType>const&>(x),d)); }
 inline Vector<UpperInterval> gradient(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
-inline Vector<UpperInterval> gradient(ScalarFunction<ValidatedTag>const& f, const Vector<Interval>& x) {
+inline Vector<UpperInterval> gradient(ScalarFunction<ValidatedTag>const& f, const Vector<ExactInterval>& x) {
     return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
 inline Vector<UpperInterval> gradient_range(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
@@ -375,7 +375,7 @@ inline Vector<Differential<UpperInterval>> differentials(VectorFunction<Validate
     return static_cast<Vector<Differential<UpperInterval>>>(f.differentials(reinterpret_cast<Vector<ValidatedFloatType>const&>(x),d)); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
-inline Matrix<UpperInterval> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<Interval>& x) {
+inline Matrix<UpperInterval> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<ExactInterval>& x) {
     return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
 inline Matrix<UpperInterval> jacobian_range(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
@@ -383,11 +383,11 @@ inline Matrix<UpperInterval> jacobian_range(VectorFunction<ValidatedTag>const& f
 // FIXME: Needed to override templated gradient and jacobian
 inline Vector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
-inline Vector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<Interval>& x) {
+inline Vector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
     return gradient(f,static_cast<Vector<UpperInterval>>(x)); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloatType>const&>(x))); }
-inline Matrix<UpperInterval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<Interval>& x) {
+inline Matrix<UpperInterval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
     return jacobian(f,static_cast<Vector<UpperInterval>>(x)); }
 
 template<class P> class FunctionFactory;
@@ -401,29 +401,29 @@ class FunctionFactory<ValidatedTag>
     FunctionFactory(const FunctionFactoryInterface<ValidatedTag>& ref) : _ptr(ref.clone()) { }
     FunctionFactory(const FunctionFactoryInterface<ValidatedTag>* ptr) : _ptr(ptr) { }
     FunctionFactory(std::shared_ptr< const FunctionFactoryInterface<ValidatedTag> > ptr) : _ptr(ptr) { }
-    inline ValidatedScalarFunction create(const Box& d, const ValidatedScalarFunctionInterface& f) const;
-    inline ValidatedVectorFunction create(const Box& d, const ValidatedVectorFunctionInterface& f) const;
-    inline ValidatedScalarFunction create_zero(const Box& d) const;
-    inline ValidatedVectorFunction create_identity(const Box& d) const;
+    inline ValidatedScalarFunction create(const ExactBox& d, const ValidatedScalarFunctionInterface& f) const;
+    inline ValidatedVectorFunction create(const ExactBox& d, const ValidatedVectorFunctionInterface& f) const;
+    inline ValidatedScalarFunction create_zero(const ExactBox& d) const;
+    inline ValidatedVectorFunction create_identity(const ExactBox& d) const;
     friend OutputStream& operator<<(OutputStream& os, const FunctionFactory<ValidatedTag>& factory);
 };
 
-inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create(const Box& domain, const ValidatedScalarFunctionInterface& function) const {
+inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const {
     return ValidatedScalarFunction(this->_create(domain,function)); }
-inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create(const Box& domain, const ValidatedVectorFunctionInterface& function) const {
+inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const {
     return ValidatedVectorFunction(this->_create(domain,function)); }
-inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create_zero(const Box& domain) const {
+inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create_zero(const ExactBox& domain) const {
     return ValidatedScalarFunction(this->_create(domain,EffectiveScalarFunction::zero(domain.size()))); }
-inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create_identity(const Box& domain) const {
+inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create_identity(const ExactBox& domain) const {
     return ValidatedVectorFunction(this->_create(domain,EffectiveVectorFunction::identity(domain.size()))); }
 
-inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create(const Box& domain, const ValidatedScalarFunctionInterface& function) const {
+inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const {
     return this->_ptr->create(domain,function); }
-inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create(const Box& domain, const ValidatedVectorFunctionInterface& function) const {
+inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const {
     return this->_ptr->create(domain,function); }
-inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create_zero(const Box& domain) const {
+inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create_zero(const ExactBox& domain) const {
     return this->_ptr->create_zero(domain); }
-inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create_identity(const Box& domain) const {
+inline ValidatedVectorFunction FunctionFactory<ValidatedTag>::create_identity(const ExactBox& domain) const {
     return this->_ptr->create_identity(domain); }
 
 inline OutputStream& operator<<(OutputStream& os, const ValidatedFunctionFactory& factory) {

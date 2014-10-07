@@ -91,9 +91,9 @@ class ConstraintSet
 
     ConstraintSet* clone() const;
     Nat dimension() const;
-    Tribool separated(const Box&) const;
-    Tribool overlaps(const Box&) const;
-    Tribool covers(const Box&) const;
+    Tribool separated(const ExactBox&) const;
+    Tribool overlaps(const ExactBox&) const;
+    Tribool covers(const ExactBox&) const;
     OutputStream& write(OutputStream&) const;
 };
 
@@ -131,10 +131,10 @@ class BoundedConstraintSet
 
     BoundedConstraintSet* clone() const;
     Nat dimension() const;
-    Tribool separated(const Box&) const;
-    Tribool overlaps(const Box&) const;
-    Tribool covers(const Box&) const;
-    Tribool inside(const Box&) const;
+    Tribool separated(const ExactBox&) const;
+    Tribool overlaps(const ExactBox&) const;
+    Tribool covers(const ExactBox&) const;
+    Tribool inside(const ExactBox&) const;
     UpperBox bounding_box() const;
     OutputStream& write(OutputStream&) const;
     Void draw(CanvasInterface&,const Projection2d&) const;
@@ -201,7 +201,7 @@ class ConstrainedImageSet
 
     ConstrainedImageSet* clone() const { return new ConstrainedImageSet(*this); }
     Nat dimension() const { return this->_function.result_size(); }
-    Tribool inside(const Box& bx) const { return this->bounding_box().inside(bx); }
+    Tribool inside(const ExactBox& bx) const { return this->bounding_box().inside(bx); }
 
     //! \brief A coarse over-approximation to the set. Computed by taking the interval evaluation \f$h(D)\f$.
     UpperBox bounding_box() const;
@@ -215,9 +215,9 @@ class ConstrainedImageSet
     Pair<ConstrainedImageSet,ConstrainedImageSet> split(Nat j) const;
 
     //! \brief Test if the set is disjoint from a (closed) box.
-    Tribool separated(const Box&) const;
+    Tribool separated(const ExactBox&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    Tribool overlaps(const Box&) const;
+    Tribool overlaps(const ExactBox&) const;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
@@ -238,28 +238,28 @@ class ConstrainedImageSet
 class ValidatedConstrainedImageSet
     : public virtual LocatedSetInterface, public virtual DrawableInterface
 {
-    Box _domain;
-    Box _reduced_domain;
+    ExactBox _domain;
+    ExactBox _reduced_domain;
     ValidatedVectorFunction _function;
     List< ValidatedConstraint > _constraints;
   public:
     //! \brief Construct the set with zero-dimensional parameterisation in zero dimensions with no constraints.
     ValidatedConstrainedImageSet() : _domain(), _function() { }
     //! \brief Construct the box \a dom.
-    ValidatedConstrainedImageSet(const Box& dom)
+    ValidatedConstrainedImageSet(const ExactBox& dom)
         : _domain(dom), _reduced_domain(dom)
         , _function(static_cast<ValidatedVectorFunctionInterface const&>(EffectiveVectorFunction::identity(dom.size()))) { }
     //! \brief Construct the image of \a dom under \a fn.
-    ValidatedConstrainedImageSet(const Box& dom, const ValidatedVectorFunction& fn) : _domain(dom), _reduced_domain(dom), _function(fn) {
+    ValidatedConstrainedImageSet(const ExactBox& dom, const ValidatedVectorFunction& fn) : _domain(dom), _reduced_domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
-    ValidatedConstrainedImageSet(const Box& dom, const ValidatedVectorFunctionModel& fn) : _domain(dom), _reduced_domain(dom), _function(fn.raw_pointer()->_clone()) {
+    ValidatedConstrainedImageSet(const ExactBox& dom, const ValidatedVectorFunctionModel& fn) : _domain(dom), _reduced_domain(dom), _function(fn.raw_pointer()->_clone()) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
     //! \brief Construct the image of \a dom under \a fn.
-    ValidatedConstrainedImageSet(const Box& dom, const ValidatedVectorFunction& fn, const List<ValidatedConstraint>& cnstr) : _domain(dom), _reduced_domain(dom), _function(fn), _constraints(cnstr) {
+    ValidatedConstrainedImageSet(const ExactBox& dom, const ValidatedVectorFunction& fn, const List<ValidatedConstraint>& cnstr) : _domain(dom), _reduced_domain(dom), _function(fn), _constraints(cnstr) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
 
     //! \brief The domain of the set.
-    const Box& domain() const { return this->_domain; }
+    const ExactBox& domain() const { return this->_domain; }
     //! \brief The function used to define the set.
     const ValidatedVectorFunction& function() const { return this->_function; }
     //! \brief The constraints used to define the set.
@@ -292,7 +292,7 @@ class ValidatedConstrainedImageSet
     Nat dimension() const { return this->_function.result_size(); }
 
     ValidatedVectorFunction constraint_function() const;
-    Box constraint_bounds() const;
+    ExactBox constraint_bounds() const;
 
     //! \brief Reduce the size of the domain by constraint propagation, if possible.
     Void reduce();
@@ -310,11 +310,11 @@ class ValidatedConstrainedImageSet
     //! \brief Test if the set is empty.
     Tribool empty() const;
     //! \brief Test if the set is a strict subset of a box.
-    Tribool inside(const Box& bx) const;
+    Tribool inside(const ExactBox& bx) const;
     //! \brief Test if the set is disjoint from a box.
-    Tribool separated(const Box&) const;
+    Tribool separated(const ExactBox&) const;
     //! \brief Test if the set overlaps (intersects the interior of) a box.
-    Tribool overlaps(const Box&) const;
+    Tribool overlaps(const ExactBox&) const;
     //! \brief Adjoin an outer approximation to a paving.
     Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 

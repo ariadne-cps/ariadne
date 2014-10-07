@@ -58,7 +58,7 @@ static const DiscreteEvent final_event("_tmax_");
 static const DiscreteEvent step_event("_h_");
 
 typedef Vector<ExactFloatType> ExactFloatVector;
-typedef Vector<Interval> IntervalVector;
+typedef Vector<ExactInterval> ExactIntervalVector;
 
 std::ostream& operator<<(std::ostream& os, const HybridTerminationCriterion& termination) {
     return os << "HybridTerminationCriterion( maximum_time=" << termination.maximum_time()
@@ -513,7 +513,7 @@ _process_starting_events(EvolutionData& evolution_data,
 ValidatedVectorFunctionModel
 HybridEvolverBase::
 _compute_flow(EffectiveVectorFunction dynamic,
-              Box const& initial_box,
+              ExactBox const& initial_box,
               const ExactFloatType& maximum_step_size) const
 {
     ARIADNE_LOG(7,"HybridEvolverBase::_compute_flow(...)\n");
@@ -531,9 +531,9 @@ _compute_flow(EffectiveVectorFunction dynamic,
     ValidatedVectorFunctionModel flow_model=integrator.flow_step(dynamic,initial_box,step_size.raw());
 
     ARIADNE_LOG(6,"twosided_flow_model="<<flow_model<<"\n");
-    IntervalVector flow_domain=flow_model.domain();
+    ExactIntervalVector flow_domain=flow_model.domain();
     ARIADNE_ASSERT(step_size==flow_domain[flow_domain.size()-1u].upper());
-    flow_domain[flow_domain.size()-1u]=Interval(0,step_size);
+    flow_domain[flow_domain.size()-1u]=ExactInterval(0,step_size);
     flow_model=restrict(flow_model,flow_domain);
     ARIADNE_LOG(6,"flow_model="<<flow_model<<"\n");
     ARIADNE_LOG(2,"flow_model: step_size="<<step_size<<", errors="<<std::scientific<<flow_model.errors()<<", range="<<std::fixed<<flow_model.range()<<"\n");
@@ -573,7 +573,7 @@ _compute_active_events(EffectiveVectorFunction const& dynamic,
                 // FIXME: Need to allow permissive events with strictly decreasing guard.
                 // Test direction of guard increase
                 EffectiveScalarFunction flow_derivative = lie_derivative(guard_function,dynamic);
-                Interval flow_derivative_range = flow_derivative(flow_bounds);
+                ExactInterval flow_derivative_range = flow_derivative(flow_bounds);
                 if(flow_derivative_range.upper()>0.0) {
                     active_events.insert(*event_iter);
                 }
@@ -600,8 +600,8 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
     Map<DiscreteEvent,CrossingData> crossings;
     crossings.clear();
 
-    IntervalVector flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
-    Interval flow_time_domain=flow.domain()[flow.argument_size()-1u];
+    ExactIntervalVector flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
+    ExactInterval flow_time_domain=flow.domain()[flow.argument_size()-1u];
     UpperBox flow_bounds=flow.range();
     for(Set<DiscreteEvent>::const_iterator event_iter=active_events.begin();
         event_iter!=active_events.end(); ++event_iter)
@@ -1091,7 +1091,7 @@ _evolution_step(EvolutionData& evolution_data,
 
 
     // Compute the bounding box of the enclosure
-    const Box starting_bounding_box=make_exact_box(starting_set.space_bounding_box());
+    const ExactBox starting_bounding_box=make_exact_box(starting_set.space_bounding_box());
     ARIADNE_LOG(4,"starting_bounding_box="<<starting_bounding_box<<"\n");
 
     // Test to see if set requires reconditioning
@@ -1177,7 +1177,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
     Bool progress = false;
 
     if(definitely(starting_set_empty)) {
-        IntervalVector reduced_domain=starting_set.continuous_set().reduced_domain();
+        ExactIntervalVector reduced_domain=starting_set.continuous_set().reduced_domain();
         ARIADNE_WARN("empty starting_set "<<representation(starting_set)<<"\n");
         return;
     }
@@ -1418,7 +1418,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     result.finishing_kind=FinishingKind::STRADDLE_FINAL_TIME;
     result.step_size=step_size;
     result.final_time=final_time;
-    result.evolution_time_domain=Interval(ExactFloat(0.0),step_size);
+    result.evolution_time_domain=ExactInterval(ExactFloat(0.0),step_size);
     result.evolution_time_coordinate=this->function_factory().create_identity(result.evolution_time_domain);
     result.parameter_dependent_evolution_time=this->function_factory().create_constant(initial_set.parameter_domain(),ExactFloat(result.step_size));
     ARIADNE_LOG(8,"  timing_data="<<result<<"\n");
@@ -1494,18 +1494,18 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     result.step_size=flow.step_size();
     result.final_time=final_time;
 
-    Box space_domain = make_exact_box(initial_set.space_bounding_box());
-    Interval time_domain = make_exact_interval(initial_set.time_range()+Interval(0,step_size));
-    Box spacetime_domain = join(space_domain,time_domain);
+    ExactBox space_domain = make_exact_box(initial_set.space_bounding_box());
+    ExactInterval time_domain = make_exact_interval(initial_set.time_range()+ExactInterval(0,step_size));
+    ExactBox spacetime_domain = join(space_domain,time_domain);
 
     //ValidatedVectorFunctionModel space_coordinates=this->function_factory().create_identity(space_domain);
     ValidatedScalarFunctionModel time_coordinate=this->function_factory().create_coordinate(spacetime_domain,n);
     ValidatedScalarFunctionModel time_identity=this->function_factory().create_identity(time_domain);
 
-    result.evolution_time_domain=Interval(0,step_size);
+    result.evolution_time_domain=ExactInterval(0,step_size);
     result.evolution_time_coordinate=this->function_factory().create_identity(result.evolution_time_domain);
 
-    Box flow_space_domain = Box(project(flow.domain(),range(0,n)));
+    ExactBox flow_space_domain = ExactBox(project(flow.domain(),range(0,n)));
     if(!subset(space_domain,flow_space_domain)) {
         ARIADNE_WARN(std::setprecision(17)<<"Bounding box "<<space_domain<<" is not subset of the flow spacial domain "<<flow_space_domain<<"\n");
         space_domain=hull(space_domain,flow_space_domain);
@@ -1516,13 +1516,13 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     ValidatedVectorFunctionModel const& starting_space_function=initial_set.space_function();
     ValidatedScalarFunctionModel const& starting_time_function=initial_set.time_function();
     UpperInterval starting_time_range=initial_set.time_range();
-    UpperInterval remaining_time_range=static_cast<Interval>(final_time)-starting_time_range;
+    UpperInterval remaining_time_range=static_cast<ExactInterval>(final_time)-starting_time_range;
 
     ARIADNE_LOG(7,std::fixed<<"starting_time_range="<<starting_time_range<<" step_size="<<step_size<<" final_time="<<final_time<<"\n");
 
 
     // The time-dependent part of the evolution time
-    ValidatedScalarFunctionModel temporal_evolution_time=this->function_factory().create_zero(IntervalVector(1u,time_domain));
+    ValidatedScalarFunctionModel temporal_evolution_time=this->function_factory().create_zero(ExactIntervalVector(1u,time_domain));
 
     if(remaining_time_range.lower()<0.0) {
         // Some of the points may already have reached the final time.
@@ -1711,8 +1711,8 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         HybridEnclosure evolve_set=initial_set;
         evolve_set.apply_fixed_evolve_step(flow,flow.step_size());
         EffectiveVectorFunction dynamic=this->_sys_ptr->dynamic_function(initial_set.location());
-        IntervalVector flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
-        Interval flow_time_domain=flow.domain()[flow.argument_size()-1u];
+        ExactIntervalVector flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
+        ExactInterval flow_time_domain=flow.domain()[flow.argument_size()-1u];
         ValidatedScalarFunctionModel zero=flow[0].create_zero();
         ValidatedVectorFunctionModel identity=flow.create_identity();
         ValidatedVectorFunctionModel space_projection=flow*ExactFloatType(0);

@@ -194,9 +194,9 @@ Real::operator ApproximateFloatType() const { return this->_ptr->operator Approx
 ApproximateFloat::ApproximateFloat(const Real& x) : ApproximateFloat(x._ptr->operator ApproximateFloat()) { }
 ValidatedFloat::ValidatedFloat(const Real& x) : ValidatedFloat(x._ptr->operator ValidatedFloat()) { }
 
-Interval::Interval(const Real& x) : Interval(ValidatedFloat(x)) { }
+ExactInterval::ExactInterval(const Real& x) : ExactInterval(ValidatedFloat(x)) { }
 
-Real _make_real(const Interval& ivl) { return Real(ivl.lower().get_d(),ivl.upper().get_d()); }
+Real _make_real(const ExactInterval& ivl) { return Real(ivl.lower().get_d(),ivl.upper().get_d()); }
 
 Real operator+(const Real& x) { return Real(new UnaryReal(POS,x)); }
 Real operator-(const Real& x) { return Real(new UnaryReal(NEG,x)); }

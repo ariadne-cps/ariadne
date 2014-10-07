@@ -129,7 +129,7 @@ void mul_op(Float& te, ApproxFloat& r, const Float& sl, const Float& sm, const F
 
 
 
-Vector<ValidatedNumberType> unscale(const Vector<ValidatedNumberType>& x, const Vector<Interval>& d) {
+Vector<ValidatedNumberType> unscale(const Vector<ValidatedNumberType>& x, const Vector<ExactInterval>& d) {
     Vector<ValidatedNumberType> r(x);
     for(uint i=0; i!=r.size(); ++i) {
         if(d[i].lower().raw()==d[i].upper().raw()) {
@@ -1450,7 +1450,7 @@ ValidatedTaylorModel::domain() const
     return Vector<UnitInterval>(this->argument_size(),UnitInterval());
 }
 
-Interval
+ExactInterval
 ValidatedTaylorModel::codomain() const
 {
     return make_exact_interval(this->range());
@@ -1883,7 +1883,7 @@ ValidatedTaylorModel atan(const ValidatedTaylorModel& x) {
 // Inplace function operators (rescale, restrict, antidifferentiate)
 
 
-ValidatedTaylorModel& ValidatedTaylorModel::rescale(const Interval& ocd, const Interval& ncd)
+ValidatedTaylorModel& ValidatedTaylorModel::rescale(const ExactInterval& ocd, const ExactInterval& ncd)
 {
     ValidatedTaylorModel& x=*this;
 
@@ -2014,7 +2014,7 @@ ValidatedTaylorModel recondition(const ValidatedTaylorModel& tm, Array<uint>& di
 }
 
 
-ValidatedTaylorModel restrict(const ValidatedTaylorModel& tm, uint k, const Interval& nd) {
+ValidatedTaylorModel restrict(const ValidatedTaylorModel& tm, uint k, const ExactInterval& nd) {
     ARIADNE_ASSERT(k<tm.argument_size());
     ARIADNE_ASSERT(nd.lower().raw()>=-1 && nd.upper().raw()<=+1);
     if(nd.lower().raw()==-1 && nd.upper().raw()==1) {
@@ -2033,7 +2033,7 @@ ValidatedTaylorModel restrict(const ValidatedTaylorModel& tm, uint k, const Inte
 }
 
 
-ValidatedTaylorModel& ValidatedTaylorModel::restrict(const Vector<Interval>& nd)
+ValidatedTaylorModel& ValidatedTaylorModel::restrict(const Vector<ExactInterval>& nd)
 {
     ValidatedTaylorModel& x=*this;
     ARIADNE_ASSERT(x.argument_size()==nd.size());
@@ -2374,10 +2374,10 @@ split(const ValidatedTaylorModel& tv, uint j)
     uint as=tv.argument_size();
     Sweeper swp=tv.sweeper();
     Vector<ValidatedTaylorModel> s=ValidatedTaylorModel::variables(as,swp);
-    s[j]=ValidatedTaylorModel::scaling(as,j,Interval(-1,0),swp);
+    s[j]=ValidatedTaylorModel::scaling(as,j,ExactInterval(-1,0),swp);
     ValidatedTaylorModel r1=compose(tv,s);
     r1.set_sweeper(tv.sweeper());
-    s[j]=ValidatedTaylorModel::scaling(as,j,Interval(0,+1),swp);
+    s[j]=ValidatedTaylorModel::scaling(as,j,ExactInterval(0,+1),swp);
     ValidatedTaylorModel r2=compose(tv,s);
     r2.set_sweeper(tv.sweeper());
     return make_pair(r1,r2);
@@ -2445,7 +2445,7 @@ split(const ValidatedTaylorModel& tm, uint j, tribool b)
 }
 
 ValidatedTaylorModel
-unscale(const ValidatedTaylorModel& tv, const Interval& ivl)
+unscale(const ValidatedTaylorModel& tv, const ExactInterval& ivl)
 {
     // Scale tv so that the interval ivl maps into [-1,1]
     // The result is given by  (tv-c)*s where c is the centre
@@ -2482,7 +2482,7 @@ unscale(const ValidatedTaylorModel& tv, const Interval& ivl)
 
 
 ValidatedTaylorModel
-rescale(const ValidatedTaylorModel& tv, const Interval& ivl)
+rescale(const ValidatedTaylorModel& tv, const ExactInterval& ivl)
 {
     // Scale tv so that the interval [-1,1] maps into ivl
     // The result is given by  (tv*s)+c where c is the centre
@@ -2625,7 +2625,7 @@ Vector<ValidatedTaylorModel> ValidatedTaylorModel::variables(uint as, Sweeper sw
     return result;
 }
 
-Vector<ValidatedTaylorModel> ValidatedTaylorModel::scalings(const Vector<Interval>& d, Sweeper swp)
+Vector<ValidatedTaylorModel> ValidatedTaylorModel::scalings(const Vector<ExactInterval>& d, Sweeper swp)
 {
     Vector<ValidatedTaylorModel> result(d.size(),ValidatedTaylorModel::zero(d.size(),swp));
     for(uint i=0; i!=d.size(); ++i) {
@@ -2634,7 +2634,7 @@ Vector<ValidatedTaylorModel> ValidatedTaylorModel::scalings(const Vector<Interva
     return result;
 }
 
-Vector<ValidatedTaylorModel> ValidatedTaylorModel::unscalings(const Vector<Interval>& cd, Sweeper swp)
+Vector<ValidatedTaylorModel> ValidatedTaylorModel::unscalings(const Vector<ExactInterval>& cd, Sweeper swp)
 {
     Vector<ValidatedTaylorModel> result(cd.size(),ValidatedTaylorModel::zero(cd.size(),swp));
     for(uint i=0; i!=cd.size(); ++i) {
@@ -2728,7 +2728,7 @@ split(const Vector<ValidatedTaylorModel>& tv, uint j, bool h)
 }
 
 Vector<ValidatedTaylorModel>
-unscale(const Vector<ValidatedTaylorModel>& tvs, const Vector<Interval>& ivls)
+unscale(const Vector<ValidatedTaylorModel>& tvs, const Vector<ExactInterval>& ivls)
 {
     Vector<ValidatedTaylorModel> r(tvs.size());
     for(uint i=0; i!=r.size(); ++i) {
@@ -2738,19 +2738,19 @@ unscale(const Vector<ValidatedTaylorModel>& tvs, const Vector<Interval>& ivls)
 }
 
 ValidatedTaylorModel
-rescale(const ValidatedTaylorModel& tv, const Interval& old_codom, const Interval& new_codom)
+rescale(const ValidatedTaylorModel& tv, const ExactInterval& old_codom, const ExactInterval& new_codom)
 {
     ValidatedTaylorModel res(tv); res.rescale(old_codom,new_codom); return res;
 }
 
 ValidatedTaylorModel&
-rescale(ValidatedTaylorModel& tv, const Interval& old_codom, const Interval& new_codom)
+rescale(ValidatedTaylorModel& tv, const ExactInterval& old_codom, const ExactInterval& new_codom)
 {
     tv.rescale(old_codom,new_codom); return tv;
 }
 
 Vector<ValidatedTaylorModel>
-rescale(const Vector<ValidatedTaylorModel>& tvs, const Vector<Interval>& old_codom, const Vector<Interval>& new_codom)
+rescale(const Vector<ValidatedTaylorModel>& tvs, const Vector<ExactInterval>& old_codom, const Vector<ExactInterval>& new_codom)
 {
     Vector<ValidatedTaylorModel> r(tvs.size());
     for(uint i=0; i!=r.size(); ++i) {
@@ -2760,7 +2760,7 @@ rescale(const Vector<ValidatedTaylorModel>& tvs, const Vector<Interval>& old_cod
 }
 
 Vector<ValidatedTaylorModel>&
-rescale(Vector<ValidatedTaylorModel>& tvs, const Vector<Interval>& old_codom, const Vector<Interval>& new_codom)
+rescale(Vector<ValidatedTaylorModel>& tvs, const Vector<ExactInterval>& old_codom, const Vector<ExactInterval>& new_codom)
 {
     for(uint i=0; i!=tvs.size(); ++i) {
         rescale(tvs[i],old_codom[i],new_codom[i]);
@@ -2769,11 +2769,11 @@ rescale(Vector<ValidatedTaylorModel>& tvs, const Vector<Interval>& old_codom, co
 }
 
 Vector<ValidatedTaylorModel>
-scale(const Vector<ValidatedTaylorModel>& tvs, const Vector<Interval>& new_codom)
+scale(const Vector<ValidatedTaylorModel>& tvs, const Vector<ExactInterval>& new_codom)
 {
     Vector<ValidatedTaylorModel> r(tvs);
     for(uint i=0; i!=tvs.size(); ++i) {
-        r[i].rescale(Interval(-1,+1),new_codom[i]);
+        r[i].rescale(ExactInterval(-1,+1),new_codom[i]);
     }
     return r;
 }
@@ -2792,7 +2792,7 @@ Vector<ValidatedTaylorModel> antiderivative(const Vector<ValidatedTaylorModel>& 
     return r;
 }
 
-ValidatedTaylorModel antiderivative(const ValidatedTaylorModel& x, const Interval& dk, uint k) {
+ValidatedTaylorModel antiderivative(const ValidatedTaylorModel& x, const ExactInterval& dk, uint k) {
     ValidatedNumberType dkr=static_cast<ValidatedNumberType>(rad_ivl(dk.lower().raw(),dk.upper().raw()));
     ValidatedTaylorModel r(x);
     r.antidifferentiate(k);
@@ -2800,7 +2800,7 @@ ValidatedTaylorModel antiderivative(const ValidatedTaylorModel& x, const Interva
     return r;
 }
 
-Vector<ValidatedTaylorModel> antiderivative(const Vector<ValidatedTaylorModel>& x, const Interval& dk, uint k) {
+Vector<ValidatedTaylorModel> antiderivative(const Vector<ValidatedTaylorModel>& x, const ExactInterval& dk, uint k) {
     Vector<ValidatedTaylorModel> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
         r[i]=antiderivative(x[i],dk,k);
@@ -3210,7 +3210,7 @@ compose(const ValidatedTaylorModel& x,
 
 ValidatedTaylorModel
 compose(const ValidatedTaylorModel& x,
-        const Vector<Interval>& d,
+        const Vector<ExactInterval>& d,
         const Vector<ValidatedTaylorModel>& y)
 {
     return _compose(Vector<ValidatedTaylorModel>(1u,x),unscale(y,d))[0];
@@ -3218,7 +3218,7 @@ compose(const ValidatedTaylorModel& x,
 
 Vector<ValidatedTaylorModel>
 compose(const Vector<ValidatedTaylorModel>& x,
-        const Vector<Interval>& d,
+        const Vector<ExactInterval>& d,
         const Vector<ValidatedTaylorModel>& y)
 {
     return _compose(x,unscale(y,d));
@@ -3226,7 +3226,7 @@ compose(const Vector<ValidatedTaylorModel>& x,
 
 Vector<ValidatedTaylorModel>
 unchecked_compose(const Vector<ValidatedTaylorModel>& x,
-        const Vector<Interval>& d,
+        const Vector<ExactInterval>& d,
         const Vector<ValidatedTaylorModel>& y)
 {
     return _compose(x,unscale(y,d));

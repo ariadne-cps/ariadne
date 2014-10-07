@@ -60,7 +60,7 @@ template<> inline Real numeric_cast(const ValidatedFloat& a) { return Real(make_
 template<class R, class A> inline R numeric_cast(const A& a) { return R(a); }
 template<> inline int numeric_cast(const Float& a) { return int(a.get_d()); }
 template<> inline double numeric_cast(const Float& a) { return a.get_d(); }
-template<> inline double numeric_cast(const Interval& a) { return a.get_d(); }
+template<> inline double numeric_cast(const ExactInterval& a) { return a.get_d(); }
 template<> inline double numeric_cast(const UpperInterval& a) { return ValidatedFloat(a).get_d(); }
 template<> inline UpperInterval numeric_cast(const Float& a) { return UpperInterval(a); }
 
@@ -72,7 +72,7 @@ template<> inline float numeric_cast(const Real& a) { return a.get_d(); }
 //! \ingroup NumericModule
 //! \related Float
 //! \brief Converts \a e to an object of type \a X, which may either be an
-//! \c Float or \c Interval, with the semantics that \a e denotes and error bound.
+//! \c Float or \c ExactInterval, with the semantics that \a e denotes and error bound.
 //! Returns the float 0.0 (since floating-point computations do not keep track of errors)
 //! and the interval [-e,+e].
 template<class X> inline X convert_error(const Float& e);

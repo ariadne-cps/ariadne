@@ -64,8 +64,8 @@ class TestOptimiser
         ARIADNE_TEST_PRINT(f);
         EffectiveVectorFunction g(0u,2u);
         ARIADNE_TEST_PRINT(g);
-        Box D=Box{{-1.0,2.0},{-3.0,5.0}};
-        Box C=Box{};
+        ExactBox D=ExactBox{{-1.0,2.0},{-3.0,5.0}};
+        ExactBox C=ExactBox{};
         ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
 
         ValidatedFloatVector x_optimal=optimiser->minimise(f,D,g,C);
@@ -82,8 +82,8 @@ class TestOptimiser
         ExactFloat a(1.5); ExactFloat b(0.25);
         EffectiveVectorFunction g={a+x[0]+2*x[1]+b*x[0]*x[1]};
         ARIADNE_TEST_PRINT(g);
-        IntervalVector C={{0.0,0.0}};
-        Box D=Box{{-1.0,2.0},{-3.0,5.0}};
+        ExactIntervalVector C={{0.0,0.0}};
+        ExactBox D=ExactBox{{-1.0,2.0},{-3.0,5.0}};
         ARIADNE_TEST_PRINT(Ariadne::make_tuple(f,D,g,C));
 
         ExactFloat required_accuracy(1e-7);
@@ -98,11 +98,11 @@ class TestOptimiser
         EffectiveScalarFunction f = x0s*(12+x0s*(Decimal(6.3)+x0s))+6*x[1]*(x[1]-x[0])+x[2];
         ARIADNE_TEST_PRINT(f);
         //EffectiveVectorFunction g( (x[0]-1, x[0]+x[1]*x[1], x[1]*x[1]) );
-        Box D = Box{{-1.0,2.0},{-3.0,5.0},{-3.0,5.0}};
+        ExactBox D = ExactBox{{-1.0,2.0},{-3.0,5.0},{-3.0,5.0}};
         ARIADNE_TEST_PRINT(D);
         EffectiveVectorFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-ExactFloat(0.875)};
         ARIADNE_TEST_PRINT(g);
-        Box C = Box{{0.0,inf},{0.0,inf}};
+        ExactBox C = ExactBox{{0.0,inf},{0.0,inf}};
         ARIADNE_TEST_PRINT(C);
 
         ValidatedFloatVector x_optimal=optimiser->minimise(f,D,g,C);
@@ -116,13 +116,13 @@ class TestOptimiser
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(3);
         EffectiveScalarFunction f(+(sqr(x[0])+sqr(x[1])+x[1]*x[2]));
         ARIADNE_TEST_PRINT(f);
-        Box D = Box{{-1.0,2.0},{-3.0,5.0},{1.25,2.25}};
+        ExactBox D = ExactBox{{-1.0,2.0},{-3.0,5.0},{1.25,2.25}};
         ARIADNE_TEST_PRINT(D);
         EffectiveScalarFunction g = x[0]*x[1]-x[0]*ExactFloat(1.25);
         EffectiveVectorFunction h = {ExactFloat(1.5)+x[0]+2*x[1]+ExactFloat(0.25)*x[0]*x[1]};
         EffectiveVectorFunction gh=join(g,h);
         ARIADNE_TEST_PRINT(gh);
-        Box C = Box {{-1.0,-0.5},{0.0,0.0}};
+        ExactBox C = ExactBox {{-1.0,-0.5},{0.0,0.0}};
         ARIADNE_TEST_PRINT(C);
 
         ValidatedFloatVector x_optimal=optimiser->minimise(f,D,gh,C);
@@ -135,13 +135,13 @@ class TestOptimiser
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         EffectiveVectorFunction g=EffectiveVectorFunction(1u, 2*x[0]+x[1]);
         ARIADNE_TEST_PRINT(g);
-        Box D = Box{{0.0,2.0},{0.0,2.0}};
-        Box C = Box{{-2.0,1.0}};
+        ExactBox D = ExactBox{{0.0,2.0},{0.0,2.0}};
+        ExactBox C = ExactBox{{-2.0,1.0}};
 
         ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
-        C=Box{{1.0,1.5}};
+        C=ExactBox{{1.0,1.5}};
         ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
-        D=Box{{1.0,1.5},{0.5,1.0}};
+        D=ExactBox{{1.0,1.5},{0.5,1.0}};
         ARIADNE_TEST_ASSERT(!optimiser->feasible(D,g,C));
     }
 
@@ -150,13 +150,13 @@ class TestOptimiser
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         EffectiveVectorFunction g = {2*x[0]+x[1]+x[0]*x[1]/8};
         ARIADNE_TEST_PRINT(g);
-        Box D = Box{{0.0,2.0},{0.0,2.0}};
-        Box C = Box{{-2.0,1.0}};
+        ExactBox D = ExactBox{{0.0,2.0},{0.0,2.0}};
+        ExactBox C = ExactBox{{-2.0,1.0}};
 
         ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
-        C=Box{{1.0,1.5}};
+        C=ExactBox{{1.0,1.5}};
         ARIADNE_TEST_ASSERT(optimiser->feasible(D,g,C));
-        D=Box{{1.0,1.5},{0.5,1.0}};
+        D=ExactBox{{1.0,1.5},{0.5,1.0}};
         ARIADNE_TEST_ASSERT(!optimiser->feasible(D,g,C));
     }
 
@@ -165,8 +165,8 @@ class TestOptimiser
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         EffectiveVectorFunction h = { 2*x[0]-x[1]+x[0]*x[1]/8 };
         ARIADNE_TEST_PRINT(h);
-        Box D = Box{{0.0,2.0},{0.0,2.0}};
-        Box C = Box{{0.0,0.0}};
+        ExactBox D = ExactBox{{0.0,2.0},{0.0,2.0}};
+        ExactBox C = ExactBox{{0.0,0.0}};
 
         ARIADNE_TEST_ASSERT(optimiser->feasible(D,h,C));
     }
@@ -174,8 +174,8 @@ class TestOptimiser
     void test_feasibility_check() {
         EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
         ARIADNE_TEST_CONSTRUCT( EffectiveVectorFunction, g, ({sqr(x[0])+2*sqr(x[1])-1}) );
-        ARIADNE_TEST_CONSTRUCT( IntervalVector, D, ({{-1.0, 1.0},{-1.0,1.0}}) );
-        ARIADNE_TEST_CONSTRUCT( IntervalVector, C, ({{0.0,0.0}}) );
+        ARIADNE_TEST_CONSTRUCT( ExactIntervalVector, D, ({{-1.0, 1.0},{-1.0,1.0}}) );
+        ARIADNE_TEST_CONSTRUCT( ExactIntervalVector, C, ({{0.0,0.0}}) );
 
         ARIADNE_TEST_CONSTRUCT( ValidatedFloatVector, X1, ({{0.30,0.40},{0.60,0.70}}) );
         ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X1)) );

@@ -230,19 +230,19 @@ class HybridPoint
 //! \brief A box in a location of a hybrid space.
 //! \details Primarily used as a basic set against whabstract set properties can be tested.
 class HybridBox
-    : public HybridBasicSet<Box>
+    : public HybridBasicSet<ExactBox>
     , public virtual HybridDrawableInterface
 {
   public:
     HybridBox(const DiscreteLocation& loc, const VariablesBox& bx)
-        : HybridBasicSet<Box>(loc,bx.space(),bx.continuous_set()) { }
+        : HybridBasicSet<ExactBox>(loc,bx.space(),bx.continuous_set()) { }
     HybridBox(const DiscreteLocation& loc, const List<RealVariableInterval>& bnds)
         : HybridBox(loc,VariablesBox(bnds)) { }
-    HybridBox(const DiscreteLocation& loc, const RealSpace& spc, const Box& bx)
-        : HybridBasicSet<Box>(loc,spc,bx) { }
+    HybridBox(const DiscreteLocation& loc, const RealSpace& spc, const ExactBox& bx)
+        : HybridBasicSet<ExactBox>(loc,spc,bx) { }
 
    //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
-    Box euclidean_set(const RealSpace& spc) const {
+    ExactBox euclidean_set(const RealSpace& spc) const {
         if(spc==this->space()) { return this->continuous_set(); }
         else { return VariablesBox(this->space(),this->continuous_set() ).euclidean_set(spc); }
     }
@@ -261,7 +261,7 @@ class HybridBoxes
     void insert(const DiscreteLocation& loc, const VariablesBox& vbx) {
         this->Map<DiscreteLocation,VariablesBox>::insert(loc,vbx); }
     //! \brief Set the continuous state set in location \a loc to box \a bx using \a spc to order the variables.
-    void insert(const DiscreteLocation& loc, const RealSpace& spc, const Box& bx) {
+    void insert(const DiscreteLocation& loc, const RealSpace& spc, const ExactBox& bx) {
         this->insert(loc,VariablesBox(spc,bx)); }
 
     //! \brief The set of discrete locations in which the set is nontrivial.
@@ -269,10 +269,10 @@ class HybridBoxes
     //! \brief The ordering of variables used to define the Euclidean box in location \a loc.
     RealSpace const& space(const DiscreteLocation& loc) const { return this->operator[](loc).space(); }
     //! \brief The Euclidean box in location \a loc.
-    Box const& continuous_set(const DiscreteLocation& loc) const { return this->operator[](loc).continuous_set(); }
+    ExactBox const& continuous_set(const DiscreteLocation& loc) const { return this->operator[](loc).continuous_set(); }
 
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
-    Box euclidean_set(const DiscreteLocation& loc, const RealSpace& spc) const {
+    ExactBox euclidean_set(const DiscreteLocation& loc, const RealSpace& spc) const {
         return this->operator[](loc).euclidean_set(spc); }
 };
 
@@ -672,8 +672,8 @@ class HybridGridTreeSet
         return result; }
 
     //!
-    HybridListSet<Box> boxes() const {
-        HybridListSet<Box> result;
+    HybridListSet<ExactBox> boxes() const {
+        HybridListSet<ExactBox> result;
         for(const_iterator iter=this->begin();
             iter!=this->end(); ++iter) {
             result.adjoin(iter->location(),iter->continuous_set().box()); }

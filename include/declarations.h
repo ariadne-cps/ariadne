@@ -66,7 +66,7 @@ class ApproximateFloat;
 typedef UpperFloat PositiveUpperFloat;
 
 // Deprecated as numeric type
-class Interval;
+class ExactInterval;
 
 typedef Float RawFloat;
 typedef Float RawFloatType;
@@ -74,7 +74,7 @@ typedef Float RawFloatType;
 //typedef Float ApproximateFloatType;
 //typedef Float LowerFloatType;
 //typedef Float UpperFloatType;
-//typedef Interval ValidatedFloatType;
+//typedef ExactInterval ValidatedFloatType;
 //typedef Float ExactFloatType;
 
 typedef ApproximateFloat ApproximateFloatType;
@@ -137,15 +137,15 @@ template<class X> class TaylorModel;
 template<class X> class Formula;
 template<class X> class Algebra;
 
-class Interval;
+class ExactInterval;
 class UpperInterval;
-class Box;
+class ApproximateInterval;
+class ExactBox;
 class UpperBox;
-
-typedef Interval IntervalType;
+class ApproximateBox;
 
 typedef Vector<Float> FloatVector;
-typedef Vector<Interval> IntervalVector;
+typedef Vector<ExactInterval> ExactIntervalVector;
 typedef Vector<UpperInterval> UpperIntervalVector;
 
 typedef Vector<RawFloatType> RawFloatVectorType;

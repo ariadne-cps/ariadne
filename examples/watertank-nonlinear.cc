@@ -35,7 +35,7 @@ Figure& operator<<(Figure& fig, const HybridGridTreeSet& set) {
         fig << loc_iter->second; } return fig; }
 
 /// Function for plotting the orbit and reachability set
-template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const Box& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
+template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const ExactBox& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
     // Assigns local variables
     Figure fig;
 
@@ -46,7 +46,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
     if (MAX_GRID_DEPTH >= 0)
     {
         // The rectangle to be drawn
-        Box rect = Box(numVariables);
+        ExactBox rect = ExactBox(numVariables);
         // Chooses the fill colour
         fig << fill_colour(Colour(1.0,1.0,1.0));
 
@@ -61,7 +61,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         // While between the interval
         while (pos_x < bbox[0].upper().raw())
         {
-            rect[xaxis] = Interval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
+            rect[xaxis] = ExactInterval(pos_x,pos_x+step_x); // Sets the rectangle x coordinate
             pos_x += step_x; // Shifts the x position
             fig << rect; // Appends the rectangle
         }
@@ -72,7 +72,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         rect[xaxis] = bbox[0];
         while (pos_y < bbox[1].upper().raw())
         {
-            rect[yaxis] = Interval(pos_y,pos_y+step_y);
+            rect[yaxis] = ExactInterval(pos_y,pos_y+step_y);
             fig << rect;
             pos_y += step_y;
         }
@@ -275,7 +275,7 @@ int main()
 
     std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
 
-    Box initial_box2(2, 0.0,0.001, 0.0,0.001);
+    ExactBox initial_box2(2, 0.0,0.001, 0.0,0.001);
     HybridImageSet initial_set2;
     initial_set2[l1]=initial_box2;
 

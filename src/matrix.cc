@@ -34,12 +34,12 @@ namespace Ariadne {
 
 namespace {
 ValidatedFloatType intersection(ValidatedFloatType x1, ValidatedFloatType x2) {
-    Interval i=intersection(Interval(x1),Interval(x2)); return reinterpret_cast<ValidatedFloatType&>(i);
+    ExactInterval i=intersection(ExactInterval(x1),ExactInterval(x2)); return reinterpret_cast<ValidatedFloatType&>(i);
 }
 } // namespace
 
 Matrix<ValidatedFloatType>const&
-make_singleton(const Matrix<Interval>& ivlA) {
+make_singleton(const Matrix<ExactInterval>& ivlA) {
     return reinterpret_cast<Matrix<ValidatedFloatType>const&>(ivlA);
 }
 
@@ -187,7 +187,7 @@ Matrix<ValidatedFloatType> dd_solve(const Matrix<ValidatedFloatType>& A, const M
         ci=-ci;
         if(ci<=0.0) {
             ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<ValidatedFloatType> A, Matrix<ValidatedFloatType> B)",
-                          "Interval matrix A="<<A<<" is not diagonally-dominant.");
+                          "ExactInterval matrix A="<<A<<" is not diagonally-dominant.");
         }
         ci=rec_rnd(ci);
     }

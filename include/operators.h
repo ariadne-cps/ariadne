@@ -259,7 +259,7 @@ struct Gtr {
         return (x1==x2) ? indeterminate : tribool(x1>x2); }
     Tribool operator()(const Float& x1, const Float& x2) const {
         return (x1==x2) ? indeterminate : tribool(x1>x2); }
-    Tribool operator()(const Interval& x1, const Interval& x2) const {
+    Tribool operator()(const ExactInterval& x1, const ExactInterval& x2) const {
         if(x1.lower()>x2.upper()) { return true; } else if(x1.upper()<x2.lower()) { return false; } else { return indeterminate; } }
     OperatorCode code() const { return GT; } OperatorKind kind() const { return COMPARISON; }
 };
@@ -271,7 +271,7 @@ struct Less {
         return (x1==x2) ? indeterminate : tribool(x1<x2); }
     Tribool operator()(const Float& x1, const Float& x2) const {
         return (x1==x2) ? indeterminate : tribool(x1<x2); }
-    Tribool operator()(const Interval& x1, const Interval& x2) const {
+    Tribool operator()(const ExactInterval& x1, const ExactInterval& x2) const {
         if(x1.lower()>x2.upper()) { return false; } else if(x1.upper()<x2.lower()) { return true; } else { return indeterminate; } }
     OperatorCode code() const { return LT; } OperatorKind kind() const { return COMPARISON; }
 };

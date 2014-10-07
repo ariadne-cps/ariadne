@@ -125,11 +125,11 @@ InterpolatedCurve::insert(const ExactFloatType& s, const ExactPointType& pt) {
     this->_points.insert(std::pair< ParameterType, PointType >(reinterpret_cast<ParameterType const&>(s),reinterpret_cast<PointType const&>(pt)));
 }
 
-Box
+ExactBox
 InterpolatedCurve::bounding_box() const
 {
     ExactPoint pt=this->_points.begin()->second;
-    Box bx(pt);
+    ExactBox bx(pt);
     for(const_iterator iter=this->_points.begin(); iter!=this->_points.end(); ++iter) {
         pt=iter->second;
         bx=hull(bx,pt);

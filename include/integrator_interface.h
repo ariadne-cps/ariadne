@@ -73,7 +73,7 @@ class IntegratorInterface
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain and \f$h_{\max}\f$ is the \a maximum_time_step.
     virtual Pair<ExactFloatType,UpperBox>
     flow_bounds(const ValidatedVectorFunction& vector_field,
-                const Box& state_domain,
+                const ExactBox& state_domain,
                 const RawFloatType& maximum_time_step) const = 0;
 
     //! \brief Compute a validated version \f$\hat{\phi}\f$ of the flow \f$\phi(x,t)\f$ satisfying \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for \f$x\in D\f$ and \f$t\in[0,h]\f$, where \f$h\f$ is a time step which is taken to be equal to \f$h_\mathrm{sug}\f$ if possible. The value of \f$h_\mathrm{sug}\f$ is overwritten with \f$h\f$, the actual time step used.
@@ -83,7 +83,7 @@ class IntegratorInterface
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, and \f$h_\mathrm{sug}\f$ is the \a suggested_time_step.
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
-              const Box& state_domain,
+              const ExactBox& state_domain,
               RawFloatType& suggested_time_step) const = 0;
 
     //! \brief Solve \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for \f$x\in D\f$ and \f$t\in[0,h]\f$, assuming that the flow remains in \f$B\f$.
@@ -97,7 +97,7 @@ class IntegratorInterface
     //! Throws: A FlowTimeStepException if the flow cannot be computed sufficiently accurately for the given time step.
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
-              const Box& state_domain,
+              const ExactBox& state_domain,
               const ExactFloatType& time_step,
               const UpperBox& state_bounding_box) const = 0;
 
@@ -110,7 +110,7 @@ class IntegratorInterface
     //! Throws: A FlowTimeStepException if the flow cannot be represented as a single function to sufficiently accurately for the given time interval.
     virtual ValidatedVectorFunctionModel
     flow_to(const ValidatedVectorFunction& vector_field,
-            const Box& state_domain,
+            const ExactBox& state_domain,
             const Real& final_time) const = 0;
 
     //! \brief Solve \f$\dt{\phi}(x,t)=f(\phi(x,t))\f$ for initial conditions in \f$x\in D\f$ over the interval \f$[t_b,t_f]\f$.
@@ -120,7 +120,7 @@ class IntegratorInterface
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain, \f$t_b\f$ is the \a beginning_time, and \f$t_f\f$ is the \a final_time.
     virtual List<ValidatedVectorFunctionModel>
     flow(const ValidatedVectorFunction& vector_field,
-         const Box& state_domain,
+         const ExactBox& state_domain,
          const Real& beginning_time,
          const Real& final_time) const = 0;
 
@@ -129,7 +129,7 @@ class IntegratorInterface
     //! Arguments: \f$f\f$ is the \a vector_field, \f$D\f$ is the \a state_domain,  and \f$t_f\f$ is the \a final_time.
     virtual List<ValidatedVectorFunctionModel>
     flow(const ValidatedVectorFunction& vector_field,
-         const Box& state_domain,
+         const ExactBox& state_domain,
          const Real& final_time) const = 0;
 
     //! \brief Write to an output stream.

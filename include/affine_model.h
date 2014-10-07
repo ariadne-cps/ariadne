@@ -43,13 +43,13 @@ namespace Ariadne {
 
 template<class X> class Affine;
 typedef Affine<Float> FloatAffine;
-typedef Affine<Interval> IntervalAffine;
+typedef Affine<ExactInterval> IntervalAffine;
 typedef Affine<ApproximateNumberType> ApproximateAffine;
 typedef Affine<ValidatedNumberType> ValidatedAffine;
 
 template<class X> class AffineModel;
 typedef AffineModel<Float> FloatAffineModel;
-typedef AffineModel<Interval> IntervalAffineModel;
+typedef AffineModel<ExactInterval> IntervalAffineModel;
 typedef AffineModel<ApproximateTag> ApproximateAffineModel;
 typedef AffineModel<ValidatedTag> ValidatedAffineModel;
 
@@ -62,9 +62,9 @@ typedef TaylorModel<ValidatedTag> ValidatedTaylorModel;
 AffineModel<ValidatedTag> affine_model(const Affine<ValidatedNumberType>& affine);
 AffineModel<ValidatedTag> affine_model(const Affine<EffectiveNumberType>& affine);
 AffineModel<ValidatedTag> affine_model(const TaylorModel<ValidatedTag>& taylor_model);
-AffineModel<ValidatedTag> affine_model(const Box& domain, const ValidatedScalarFunction& function);
+AffineModel<ValidatedTag> affine_model(const ExactBox& domain, const ValidatedScalarFunction& function);
 Vector< AffineModel<ValidatedTag> > affine_models(const Vector< TaylorModel<ValidatedTag> >& taylor_models);
-Vector< AffineModel<ValidatedTag> > affine_models(const Box& domain, const ValidatedVectorFunction& function);
+Vector< AffineModel<ValidatedTag> > affine_models(const ExactBox& domain, const ValidatedVectorFunction& function);
 
 //! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x) \approx \sum_{i=0}^{n-1} a_i x_i + b\f$.
 template<>

@@ -79,17 +79,17 @@ TestHybridSet::test_hybrid_grid_set()
 void
 TestHybridSet::test_hybrid_list_set()
 {
-    HybridListSet<Box> hls;
+    HybridListSet<ExactBox> hls;
     DiscreteLocation loc1(123);
     DiscreteLocation loc2(105);
     RealSpace spc1("x");
     RealSpace spc2((Identifier("x"),"y"));
 
-    Box bx1=make_box("[0,1]");
-    Box bx2=make_box("[2,3]");
-    Box bx3=make_box("[1,2]x[2,3]");
-    Box bx4=make_box("[4,5]x[5,6]");
-    Box bx5=make_box("[6,7]x[8,9]");
+    ExactBox bx1=make_box("[0,1]");
+    ExactBox bx2=make_box("[2,3]");
+    ExactBox bx3=make_box("[1,2]x[2,3]");
+    ExactBox bx4=make_box("[4,5]x[5,6]");
+    ExactBox bx5=make_box("[6,7]x[8,9]");
     ARIADNE_TEST_EXECUTE(hls.adjoin(loc1,spc1,bx1));
     ARIADNE_TEST_FAIL(hls.adjoin(loc1,bx3)); // Should fail due to incompatible dimensions
     ARIADNE_TEST_FAIL(hls.adjoin(loc2,bx3)); // Should fail due to unspecified space
@@ -101,7 +101,7 @@ TestHybridSet::test_hybrid_list_set()
 
     ARIADNE_TEST_PRINT(hls);
 
-    HybridListSet<Box>::const_iterator iter=hls.begin();
+    HybridListSet<ExactBox>::const_iterator iter=hls.begin();
     ARIADNE_TEST_EQUAL(*iter,HybridBox(loc2,spc2,bx3));
     ++iter;
     ARIADNE_TEST_EQUAL(*iter,HybridBox(loc2,spc2,bx4));
@@ -114,10 +114,10 @@ TestHybridSet::test_hybrid_list_set()
     ++iter;
     ARIADNE_TEST_ASSERT(iter==hls.end());
 
-    ListSet<Box> ls1; ls1.adjoin(bx1); ls1.adjoin(bx2);
-    ListSet<Box> ls2; ls2.adjoin(bx3); ls2.adjoin(bx4); ls2.adjoin(bx5);
+    ListSet<ExactBox> ls1; ls1.adjoin(bx1); ls1.adjoin(bx2);
+    ListSet<ExactBox> ls2; ls2.adjoin(bx3); ls2.adjoin(bx4); ls2.adjoin(bx5);
 
-    HybridListSet<Box>::locations_const_iterator loc_iter=hls.locations_begin();
+    HybridListSet<ExactBox>::locations_const_iterator loc_iter=hls.locations_begin();
     ARIADNE_TEST_EQUAL(loc_iter->first,loc2);
     ARIADNE_TEST_EQUAL(loc_iter->second.second,ls2);
     ++loc_iter;

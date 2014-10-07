@@ -60,7 +60,7 @@ class Constraint {
     Nat argument_size() const { return this->_function.argument_size(); }
     LowerBoundType const& lower_bound() const { return this->_lower_bound; }
     UpperBoundType const& upper_bound() const { return this->_upper_bound; }
-    const Interval bounds() const { return Interval(this->_lower_bound,this->_upper_bound); }
+    const ExactInterval bounds() const { return ExactInterval(this->_lower_bound,this->_upper_bound); }
   private:
     F _function;
     R _lower_bound;

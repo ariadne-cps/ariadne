@@ -221,7 +221,7 @@ int main(int argc, const char* argv[])
 
     std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
 
-    Box initial_box2(2, 0.0,0.001, 0.0,0.001);
+    ExactBox initial_box2(2, 0.0,0.001, 0.0,0.001);
     HybridImageSet initial_set2;
     initial_set2[l1]=initial_box2;
 

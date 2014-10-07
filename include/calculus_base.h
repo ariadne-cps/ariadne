@@ -44,10 +44,10 @@ using std::pair;
 
 template<class T> class Array;
 
-class Interval;
+class ExactInterval;
 class VectorFunction;
 template<class X> class Vector;
-class Box;
+class ExactBox;
 
 
 
@@ -59,7 +59,7 @@ class CalculusBase
 {
     typedef Float R;
     typedef Float A;
-    typedef Interval I;
+    typedef ExactInterval I;
   public:
     //!
     typedef typename CalculusInterface<Var>::BaseModelType BaseModelType;
@@ -77,8 +77,8 @@ class CalculusBase
     typedef SetModelType FlowSetModelType;
 
     typedef Float RealType;
-    typedef Interval IntervalType;
-    typedef Box BoxType;
+    typedef ExactInterval IntervalType;
+    typedef ExactBox BoxType;
 
     typedef Float TimeType;
     typedef VectorFunction VectorFunctionType;
@@ -105,14 +105,14 @@ class CalculusBase
     //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
     //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
     //! gives the minimum and maximum time for which the evolution is valid.
-    virtual Interval touching_time_interval(const PredicateModelType& guard_model,
+    virtual ExactInterval touching_time_interval(const PredicateModelType& guard_model,
                                             const FlowModelType& flow_model,
                                             const SetModelType& initial_set_model) const = 0;
 
     //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
     //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
     //! gives the minimum and maximum time for which the evolution is valid.
-    virtual Interval touching_time_interval(const ScalarFunction& guard,
+    virtual ExactInterval touching_time_interval(const ScalarFunction& guard,
                                             const FlowModelType& flow_model,
                                             const SetModelType& initial_set_model) const
     {
@@ -121,12 +121,12 @@ class CalculusBase
     }
 
     //! \brief Computes an over-approximation to the touching time interval scaling the flow step to [-1,+1]
-    virtual Interval scaled_touching_time_interval(const BaseModelType& guard_flow_set_model) const = 0;
+    virtual ExactInterval scaled_touching_time_interval(const BaseModelType& guard_flow_set_model) const = 0;
 
     //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
     //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
     //! gives the minimum and maximum time for which the evolution is valid. Deprecated
-    virtual Interval scaled_touching_time_interval(const ScalarFunction& guard,
+    virtual ExactInterval scaled_touching_time_interval(const ScalarFunction& guard,
                                                    const FlowSetModelType& flow_set_model) const
     {
         BaseModelType guard_flow_set_model=apply(guard,flow_set_model);
@@ -263,7 +263,7 @@ class CalculusBase
         return this->active(this->predicate_model(guard,set_model.bounding_box()),set_model); }
     tribool active(const VectorFunctionType& guard,  const SetModelType& set_model) const {
         TimeModelType guard_set_model = apply(guard,set_model)[0];
-        Interval guard_range=guard_set_model.range();
+        ExactInterval guard_range=guard_set_model.range();
         tribool guard_active=guard_range.lower()>0 ? tribool(true) : guard_range.upper()<0 ? tribool(false) : indeterminate;
         return guard_active;
     }

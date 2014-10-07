@@ -158,11 +158,11 @@ class TaylorModel<ValidatedTag>
     static TaylorModel<ValidatedTag> variable(uint as, uint j, Sweeper swp) {
         TaylorModel<ValidatedTag> r(as,swp); r.set_gradient(j,1); return r; }
     //! \brief Construct the quantity which scales the unit interval into the domain \a dom.
-    static TaylorModel<ValidatedTag> scaling(uint as, uint j, const Interval& dom, Sweeper swp) {
-        TaylorModel<ValidatedTag> r(as,swp); r.set_gradient(j,1); r.rescale(Interval(-1,1),dom); return r; }
+    static TaylorModel<ValidatedTag> scaling(uint as, uint j, const ExactInterval& dom, Sweeper swp) {
+        TaylorModel<ValidatedTag> r(as,swp); r.set_gradient(j,1); r.rescale(ExactInterval(-1,1),dom); return r; }
     //! \brief Construct the quantity which scales the codomain \a codom into the unit interval.
-    static TaylorModel<ValidatedTag> unscaling(uint as, uint j, const Interval& codom, Sweeper swp) {
-        TaylorModel<ValidatedTag> r(as,swp); r.set_gradient(j,1); r.rescale(codom,Interval(-1,+1)); return r; }
+    static TaylorModel<ValidatedTag> unscaling(uint as, uint j, const ExactInterval& codom, Sweeper swp) {
+        TaylorModel<ValidatedTag> r(as,swp); r.set_gradient(j,1); r.rescale(codom,ExactInterval(-1,+1)); return r; }
     //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a e
     static TaylorModel<ValidatedTag> error(uint as, ErrorType e, Sweeper swp) {
         TaylorModel<ValidatedTag> r(as,swp); r.set_error(e); return r; }
@@ -176,9 +176,9 @@ class TaylorModel<ValidatedTag>
     //! \brief Return the vector of variables on the unit domain.
     static Vector< TaylorModel<ValidatedTag> > variables(uint as, Sweeper swp);
     //! \brief Return the vector scaling the unit interval onto the domain \a d.
-    static Vector< TaylorModel<ValidatedTag> > scalings(const Vector<Interval>& dom, Sweeper swp);
+    static Vector< TaylorModel<ValidatedTag> > scalings(const Vector<ExactInterval>& dom, Sweeper swp);
     //! \brief Return the vector scaling the unit interval onto the codomain \a cd.
-    static Vector< TaylorModel<ValidatedTag> > unscalings(const Vector<Interval>& dom, Sweeper swp);
+    static Vector< TaylorModel<ValidatedTag> > unscalings(const Vector<ExactInterval>& dom, Sweeper swp);
     //@}
 
     //@{
@@ -269,11 +269,11 @@ class TaylorModel<ValidatedTag>
     //! \brief The domain of the quantity, always given by \f$[-1,1]^{\mathrm{as}}\f$.
     Vector<UnitInterval> domain() const;
     //! \brief The codomain of the quantity.
-    Interval codomain() const;
+    ExactInterval codomain() const;
     //! \brief An over-approximation to the range of the quantity.
     UpperInterval range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
-    Interval gradient_range(uint j) const;
+    ExactInterval gradient_range(uint j) const;
 
     //! \brief Evaluate the quantity over the interval of points \a x.
     friend ValidatedNumberType evaluate(const TaylorModel<ValidatedTag>&, const Vector<ValidatedNumberType>& x);
@@ -289,9 +289,9 @@ class TaylorModel<ValidatedTag>
     /*! \name Inplace modifications. */
     // TODO: Change these to return void
     //! \brief Scale so that the old codomain maps into the new codomain.
-    TaylorModel<ValidatedTag>& rescale(const Interval& old_codomain, const Interval& new_codomain);
+    TaylorModel<ValidatedTag>& rescale(const ExactInterval& old_codomain, const ExactInterval& new_codomain);
     //! \brief Restrict to a subdomain.
-    TaylorModel<ValidatedTag>& restrict(const Vector<Interval>& new_domain);
+    TaylorModel<ValidatedTag>& restrict(const Vector<ExactInterval>& new_domain);
     //! \brief Compute the antiderivative (in place).
     TaylorModel<ValidatedTag>& antidifferentiate(uint k);
     //@}
@@ -355,7 +355,7 @@ class TaylorModel<ValidatedTag>
 };
 
 // Rescale the vector \a x from the domain \a dom to the unit domain.
-Vector<ValidatedNumberType> unscale(const Vector<ValidatedNumberType>& x, const Vector<Interval>& dom);
+Vector<ValidatedNumberType> unscale(const Vector<ValidatedNumberType>& x, const Vector<ExactInterval>& dom);
 
 //! \relates TaylorModel<ValidatedTag> \brief The magnitude of the variable
 ErrorType mag(const TaylorModel<ValidatedTag>& tm);
@@ -367,11 +367,11 @@ std::pair< TaylorModel<ValidatedTag>, TaylorModel<ValidatedTag> > split(const Ta
 TaylorModel<ValidatedTag> split(const TaylorModel<ValidatedTag>& x, uint j, tribool half);
 
 //! \relates TaylorModel<ValidatedTag> \brief Scale the variable by post-composing with an affine map taking the unit interval to ivl.
-TaylorModel<ValidatedTag> scale(const TaylorModel<ValidatedTag>& x, const Interval& ivl);
+TaylorModel<ValidatedTag> scale(const TaylorModel<ValidatedTag>& x, const ExactInterval& ivl);
 //! \relates TaylorModel<ValidatedTag> \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
-TaylorModel<ValidatedTag> unscale(const TaylorModel<ValidatedTag>& x, const Interval& ivl);
+TaylorModel<ValidatedTag> unscale(const TaylorModel<ValidatedTag>& x, const ExactInterval& ivl);
 //! \relates TaylorModel<ValidatedTag> \brief Scale the variable by post-composing with an affine map taking the interval ivl1 to interval \a ivl2
-TaylorModel<ValidatedTag> rescale(const TaylorModel<ValidatedTag>& x, const Interval& ivl1, const Interval& ivl2);
+TaylorModel<ValidatedTag> rescale(const TaylorModel<ValidatedTag>& x, const ExactInterval& ivl1, const ExactInterval& ivl2);
 
 //! \relates TaylorModel<ValidatedTag> \brief Evaluate an array of Taylor variables on a vector.
 ValidatedNumberType evaluate(const TaylorModel<ValidatedTag>& x, const Vector<ValidatedNumberType>& sy);
@@ -404,7 +404,7 @@ TaylorModel<ValidatedTag> derivative(const TaylorModel<ValidatedTag>& x, uint k)
 TaylorModel<ValidatedTag> preaffine(const TaylorModel<ValidatedTag>&, uint k, const ValidatedNumberType& a, const ValidatedNumberType& b);
 //! \relates TaylorModel<ValidatedTag> \brief Restricts the range of the variable x[k] to the interval d.
 //! \pre -1 <= d.lower() <= d.upper() <= 1 .
-TaylorModel<ValidatedTag> restrict(const TaylorModel<ValidatedTag>&, uint k, const Interval& d);
+TaylorModel<ValidatedTag> restrict(const TaylorModel<ValidatedTag>&, uint k, const ExactInterval& d);
 
 //! \brief Abstract away the given variables.
 //! For example, the model tm(x0,x1,x2,x3) becomes tm'(x0,x1)=tm(x0,[-1,+1],x1,[-1,+1]) on discarding x1 and x3.
@@ -428,7 +428,7 @@ TaylorModel<ValidatedTag> intersection(const TaylorModel<ValidatedTag>& x1, cons
 TaylorModel<ValidatedTag> compose(const TaylorModel<ValidatedTag>& x, const Vector< TaylorModel<ValidatedTag> >& y);
 
 // Compose an Array of Taylor variables with another, after scaling by the interval vectors
-TaylorModel<ValidatedTag> compose(const TaylorModel<ValidatedTag>& x, const Vector<Interval>& bx, const Vector< TaylorModel<ValidatedTag> >& y);
+TaylorModel<ValidatedTag> compose(const TaylorModel<ValidatedTag>& x, const Vector<ExactInterval>& bx, const Vector< TaylorModel<ValidatedTag> >& y);
 
 ErrorType norm(const TaylorModel<ValidatedTag>& tm);
 ErrorType norm(const Vector< TaylorModel<ValidatedTag> >& tv);
@@ -444,8 +444,8 @@ bool refines(const Vector< TaylorModel<ValidatedTag> >&,const Vector< TaylorMode
 bool disjoint(const Vector< TaylorModel<ValidatedTag> >&,const Vector< TaylorModel<ValidatedTag> >&);
 std::pair< Vector< TaylorModel<ValidatedTag> >, Vector< TaylorModel<ValidatedTag> > > split(const Vector< TaylorModel<ValidatedTag> >& x, uint j);
 Vector< TaylorModel<ValidatedTag> > split(const Vector< TaylorModel<ValidatedTag> >& x, uint j, bool half);
-Vector< TaylorModel<ValidatedTag> > unscale(const Vector< TaylorModel<ValidatedTag> >& x, const Vector<Interval>& bx);
-Vector< TaylorModel<ValidatedTag> > scale(const Vector< TaylorModel<ValidatedTag> >& x, const Vector<Interval>& bx);
+Vector< TaylorModel<ValidatedTag> > unscale(const Vector< TaylorModel<ValidatedTag> >& x, const Vector<ExactInterval>& bx);
+Vector< TaylorModel<ValidatedTag> > scale(const Vector< TaylorModel<ValidatedTag> >& x, const Vector<ExactInterval>& bx);
 Vector<ValidatedNumberType> evaluate(const Vector< TaylorModel<ValidatedTag> >& x, const Vector<ValidatedNumberType>& sy);
 Vector< TaylorModel<ValidatedTag> > partial_evaluate(const Vector< TaylorModel<ValidatedTag> >& x, uint k, ValidatedNumberType sy);
 Vector< TaylorModel<ValidatedTag> > substitute(const Vector< TaylorModel<ValidatedTag> >& x, uint k, const TaylorModel<ValidatedTag>& y);
@@ -453,24 +453,24 @@ Vector< TaylorModel<ValidatedTag> > antiderivative(const Vector< TaylorModel<Val
 Vector< TaylorModel<ValidatedTag> > embed(const Vector< TaylorModel<ValidatedTag> >& x, uint as);
 Vector< TaylorModel<ValidatedTag> > embed(uint as, const Vector< TaylorModel<ValidatedTag> >& x);
 Matrix<ValidatedNumberType> jacobian(const Vector< TaylorModel<ValidatedTag> >& x, const Vector<ValidatedNumberType>& y);
-//Matrix<Interval> jacobian(const Vector< TaylorModel<ValidatedTag> >& x);
+//Matrix<ExactInterval> jacobian(const Vector< TaylorModel<ValidatedTag> >& x);
 bool refines(const Vector< TaylorModel<ValidatedTag> >& x1, const Vector< TaylorModel<ValidatedTag> >& x2);
 Vector< TaylorModel<ValidatedTag> > combine(const Vector< TaylorModel<ValidatedTag> >& x1, const Vector< TaylorModel<ValidatedTag> >& x2);
 Vector< TaylorModel<ValidatedTag> > combine(const Vector< TaylorModel<ValidatedTag> >& x1, const TaylorModel<ValidatedTag>& x2);
 Vector< TaylorModel<ValidatedTag> > combine(const TaylorModel<ValidatedTag>& x1, const Vector< TaylorModel<ValidatedTag> >& x2);
 Vector< TaylorModel<ValidatedTag> > combine(const TaylorModel<ValidatedTag>& x1, const TaylorModel<ValidatedTag>& x2);
 Vector< TaylorModel<ValidatedTag> > compose(const Vector< TaylorModel<ValidatedTag> >& f, const Vector< TaylorModel<ValidatedTag> >& g);
-Vector< TaylorModel<ValidatedTag> > compose(const Vector< TaylorModel<ValidatedTag> >& f, const Vector<Interval>& dom, const Vector< TaylorModel<ValidatedTag> >& g);
+Vector< TaylorModel<ValidatedTag> > compose(const Vector< TaylorModel<ValidatedTag> >& f, const Vector<ExactInterval>& dom, const Vector< TaylorModel<ValidatedTag> >& g);
 
 TaylorModel<ValidatedTag> unchecked_compose(const TaylorModel<ValidatedTag>& x, const Vector< TaylorModel<ValidatedTag> >& y);
 Vector< TaylorModel<ValidatedTag> > unchecked_compose(const Vector< TaylorModel<ValidatedTag> >& x, const Vector< TaylorModel<ValidatedTag> >& y);
-Vector< TaylorModel<ValidatedTag> > unchecked_compose(const Vector< TaylorModel<ValidatedTag> >& x, const Vector<Interval>& dom, const Vector< TaylorModel<ValidatedTag> >& y);
+Vector< TaylorModel<ValidatedTag> > unchecked_compose(const Vector< TaylorModel<ValidatedTag> >& x, const Vector<ExactInterval>& dom, const Vector< TaylorModel<ValidatedTag> >& y);
 
 
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, Polynomila, TaylorModel<ValidatedTag><Interval>.
+ * See also Expansion, Polynomila, TaylorModel<ValidatedTag><ExactInterval>.
  */
 template<>
 class TaylorModel<ApproximateTag>
@@ -552,7 +552,7 @@ class TaylorModel<ApproximateTag>
     //! \brief The domain of the quantity.
     Vector<UnitInterval> domain() const;
     //! \brief A coarse over-approximation to the range of the quantity.
-    Interval codomain() const;
+    ExactInterval codomain() const;
     //! \brief An over-approximation to the range of the quantity.
     UpperInterval range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
@@ -562,7 +562,7 @@ class TaylorModel<ApproximateTag>
     //@{
     /*! \name Inplace modifications. */
     //! \brief Scale so that the old codomain maps into the unit interval.
-    void unscale(const Interval& codomain);
+    void unscale(const ExactInterval& codomain);
     //! \brief Compute the antiderivative (in place).
     void antidifferentiate(uint k);
     //! \brief Compute the derivative (in place).
@@ -624,8 +624,8 @@ class TaylorModel<ApproximateTag>
 inline std::ostream& operator<<(std::ostream& os, const TaylorModel<ApproximateTag>& x) {
     x.str(os); return os; }
 
-inline Vector<Interval> codomain(const Vector< TaylorModel<ApproximateTag> >& t) {
-    Vector<Interval> r(t.size()); for(uint i=0; i!=t.size(); ++i) { r[i]=t[i].codomain(); } return r; }
+inline Vector<ExactInterval> codomain(const Vector< TaylorModel<ApproximateTag> >& t) {
+    Vector<ExactInterval> r(t.size()); for(uint i=0; i!=t.size(); ++i) { r[i]=t[i].codomain(); } return r; }
 
 
 

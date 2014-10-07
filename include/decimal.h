@@ -33,7 +33,7 @@
 namespace Ariadne {
 
 class Float;
-class Interval;
+class ExactInterval;
 class Rational;
 
 //! \ingroup NumericModule

@@ -72,23 +72,23 @@ class SolverBase
     void set_function_factory(const FunctionModelFactoryInterface<ValidatedTag>& factory);
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. */
-    virtual Vector<ValidatedNumberType> zero(const ValidatedVectorFunction& f,const Box& bx) const;
+    virtual Vector<ValidatedNumberType> zero(const ValidatedVectorFunction& f,const ExactBox& bx) const;
     /*! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. */
-    virtual Vector<ValidatedNumberType> fixed_point(const ValidatedVectorFunction& f,const Box& bx) const;
+    virtual Vector<ValidatedNumberType> fixed_point(const ValidatedVectorFunction& f,const ExactBox& bx) const;
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. */
-    virtual Vector<ValidatedNumberType> solve(const ValidatedVectorFunction& f,const Box& bx) const;
+    virtual Vector<ValidatedNumberType> solve(const ValidatedVectorFunction& f,const ExactBox& bx) const;
     virtual Vector<ValidatedNumberType> solve(const ValidatedVectorFunction& f,const Vector<ValidatedNumberType>& ipt) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual ValidatedVectorFunctionModel implicit(const ValidatedVectorFunction& f, const Box& par, const Box& ix) const;
+    virtual ValidatedVectorFunctionModel implicit(const ValidatedVectorFunction& f, const ExactBox& par, const ExactBox& ix) const;
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for a solution with x in \a ix. */
-    virtual ValidatedScalarFunctionModel implicit(const ValidatedScalarFunction& f, const Box& par, const Interval& ix) const;
+    virtual ValidatedScalarFunctionModel implicit(const ValidatedScalarFunction& f, const ExactBox& par, const ExactInterval& ix) const;
     //! \brief Solve \f$f(a,x)=0\f$ yielding a function \f$x=h(a)\f$ for a in \a A, looking for a solution with \f$h(A) \subset X\f$ and $h(a)\in x\f$.
-    virtual ValidatedVectorFunctionModel continuation(const ValidatedVectorFunction& f, const Vector<ApproximateNumberType>& a, const Box& X, const Box& A) const;
+    virtual ValidatedVectorFunctionModel continuation(const ValidatedVectorFunction& f, const Vector<ApproximateNumberType>& a, const ExactBox& X, const ExactBox& A) const;
 
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-    virtual Set< Vector<ValidatedNumberType> > solve_all(const ValidatedVectorFunction& f,const Box& bx) const;
+    virtual Set< Vector<ValidatedNumberType> > solve_all(const ValidatedVectorFunction& f,const ExactBox& bx) const;
   protected:
     /*! \brief Perform one iterative step of the contractor. */
     virtual Vector<ValidatedNumberType> step(const ValidatedVectorFunction& f,const Vector<ValidatedNumberType>& pt) const = 0;
@@ -102,7 +102,7 @@ class SolverBase
 
 
 /*! \ingroup Solvers
- *  \brief Interval Newton solver. Uses the contractor \f$[x']=x_0-Df^{-1}([x])f(x_0)\f$.
+ *  \brief ExactInterval Newton solver. Uses the contractor \f$[x']=x_0-Df^{-1}([x])f(x_0)\f$.
  */
 class IntervalNewtonSolver
     : public SolverBase

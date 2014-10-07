@@ -46,7 +46,7 @@ namespace Ariadne {
 
 class BoxSet;
 
-class Interval;
+class ExactInterval;
 template<class X> class Vector;
 template<class X> class LinearProgram;
 template<class X> class ScalarFunction;
@@ -60,7 +60,7 @@ typedef VectorFunctionModel<ValidatedTag> ValidatedVectorFunctionModel;
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> IntervalFunctionModelFactoryInterface;
 class Enclosure;
-class Box;
+class ExactBox;
 class Grid;
 class GridTreeSet;
 class AffineSet;
@@ -139,7 +139,7 @@ class HybridEnclosure
     //! \brief An enclosure corresponding to the hybrid set \a set using \a space to order the continuous variables.
     HybridEnclosure(const HybridBoundedConstraintSet& set, const RealSpace& space, const IntervalFunctionModelFactoryInterface& factory);
     //! \brief An enclosure corresponding to a Euclidean box \a bx in location \a q with variables ordered by \a spc.
-    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const Box& bx, const IntervalFunctionModelFactoryInterface& fac);
+    HybridEnclosure(const DiscreteLocation& q, const RealSpace& spc, const ExactBox& bx, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief An enclosure corresponding to a hybrid box \a hbx.
     HybridEnclosure(const HybridBox& hbx, const IntervalFunctionModelFactoryInterface& fac);
     //! \brief An enclosure constructed from a location \a q, a real space \a spc, and a (timed) enclosure \a es.
@@ -162,7 +162,7 @@ class HybridEnclosure
     //! \brief The number of constraints.
     uint number_of_constraints() const;
     //! \brief The continuous state set.
-    const Box parameter_domain() const;
+    const ExactBox parameter_domain() const;
     //! \brief The function related to space.
     const ValidatedVectorFunctionModel& space_function() const;
     //! \brief The function related to time.
@@ -222,9 +222,9 @@ class HybridEnclosure
     void new_time_step_bound(DiscreteEvent e, ValidatedScalarFunction tau);
 
     //! \brief Introduces a new parameter with domain \a ivl.
-    void new_parameter(Interval ivl, EnclosureVariableType);
+    void new_parameter(ExactInterval ivl, EnclosureVariableType);
     //! \brief Introduce a new independent variable with domain \a ivl.
-    void new_variable(Interval ivl, EnclosureVariableType);
+    void new_variable(ExactInterval ivl, EnclosureVariableType);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$. \deprecated
     void new_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.
@@ -256,7 +256,7 @@ class HybridEnclosure
     //! \brief Tests whether the set is a subset of the interior of the box \a hbx.
     tribool inside(const HybridBox& hbx) const;
     //! \brief Restricts to a subdomain of the \em parameter domain.
-    void restrict(const Box& subdomain);
+    void restrict(const ExactBox& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
     //! \a depth subdivisions in each component.
     void adjoin_outer_approximation_to(HybridGridTreeSet& paving, int depth) const;

@@ -54,7 +54,7 @@ Colour bounding_box_colour(0.75,0.75,0.875);
 namespace Ariadne {
 
 HybridBoxes
-bounding_boxes(const HybridSpaceInterface& space, Interval bound)
+bounding_boxes(const HybridSpaceInterface& space, ExactInterval bound)
 {
     HybridBoxes result;
     Set<DiscreteLocation> locations = dynamic_cast<const MonolithicHybridSpace&>(space).locations();
@@ -62,7 +62,7 @@ bounding_boxes(const HybridSpaceInterface& space, Interval bound)
         loc_iter!=locations.end(); ++loc_iter)
         {
             DiscreteLocation const& loc=*loc_iter;
-            result.insert(loc,space[loc],Box(space[loc].dimension(), bound));
+            result.insert(loc,space[loc],ExactBox(space[loc].dimension(), bound));
         }
     return result;
 }
@@ -81,7 +81,7 @@ class TestHybridReachabilityAnalyser
     HybridAutomaton system;
     HybridReachabilityAnalyser analyser;
     Grid grid;
-    Interval bound;
+    ExactInterval bound;
     HybridSet initial_set;
     HybridTime reach_time;
     Axes2d axes;
@@ -144,7 +144,7 @@ class TestHybridReachabilityAnalyser
 
     void test_lower_reach_lower_evolve() {
         DiscreteLocation loc(1);
-        Box bounding_box(2,bound);
+        ExactBox bounding_box(2,bound);
         cout << "Computing timed reachable set" << endl;
         HybridGridTreeSet hybrid_lower_reach=analyser.lower_reach(initial_set,reach_time);
         GridTreeSet& lower_reach=hybrid_lower_reach[loc];
@@ -166,7 +166,7 @@ class TestHybridReachabilityAnalyser
 
     void test_lower_reach_evolve() {
         DiscreteLocation loc(1);
-        Box bounding_box(2,bound);
+        ExactBox bounding_box(2,bound);
 
         cout << "Computing timed reach-evolve set" << endl;
         Pair<HybridGridTreeSet,HybridGridTreeSet> reach_evolve_set = analyser.lower_reach_evolve(initial_set,reach_time);
@@ -184,7 +184,7 @@ class TestHybridReachabilityAnalyser
 
     void test_upper_reach_upper_evolve() {
         DiscreteLocation loc(1);
-        Box bounding_box(2,bound);
+        ExactBox bounding_box(2,bound);
         cout << "Computing timed reachable set" << endl;
         HybridGridTreeSet upper_reach_set=analyser.upper_reach(initial_set,reach_time);
         cout << "upper_reach_set="<<upper_reach_set<<std::endl;
@@ -204,7 +204,7 @@ class TestHybridReachabilityAnalyser
     void test_upper_reach_evolve() {
         cout << "Computing timed reach-evolve set" << endl;
         DiscreteLocation loc(1);
-        Box bounding_box(2,bound);
+        ExactBox bounding_box(2,bound);
         Pair<HybridGridTreeSet,HybridGridTreeSet> reach_evolve_set = analyser.upper_reach_evolve(initial_set,reach_time);
 
         ARIADNE_TEST_ASSERT(reach_evolve_set.first.size() > 0);

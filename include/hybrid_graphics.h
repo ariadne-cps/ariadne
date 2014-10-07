@@ -59,7 +59,7 @@ struct Variables2d {
     RealVariable y_variable() const { return RealVariable(_y); }
 };
 
-Interval approximate_interval(const RealVariableInterval&);
+ExactInterval approximate_interval(const RealVariableInterval&);
 
 
 struct FloatVariableLowerInterval {
@@ -72,11 +72,11 @@ class FloatVariableInterval {
     RawFloatType _lower; Variable<Real> _variable; RawFloatType _upper;
   public:
     FloatVariableInterval(const RawFloatType& l, const Variable<Real>& v, const RawFloatType& u)
-        : _lower(l), _variable(v), _upper(u) { ARIADNE_ASSERT_MSG(l<=u,"Interval("<<l<<","<<u<<") not provably nonempty"); }
+        : _lower(l), _variable(v), _upper(u) { ARIADNE_ASSERT_MSG(l<=u,"ExactInterval("<<l<<","<<u<<") not provably nonempty"); }
     FloatVariableInterval(const RealVariableInterval& rvivl)
         : _lower(rvivl.lower().get_d()), _variable(rvivl.variable()), _upper(rvivl.upper().get_d()) { }
     Variable<Real> const& variable() const { return this->_variable; }
-    const Interval interval() const { return Interval(this->_lower,this->_upper); }
+    const ExactInterval interval() const { return ExactInterval(this->_lower,this->_upper); }
     const RawFloatType lower() const { return this->_lower; }
     const RawFloatType upper() const { return this->_upper; }
 };
@@ -96,10 +96,10 @@ struct Axes2d {
         bounds.insert(y.variable(),y.interval()); }
     Axes2d(double xl, const RealVariable& x, double xu, double yl, const RealVariable& y, double yu)
             : variables(x,y), bounds() {
-        bounds.insert(x,Interval(xl,xu));
-        bounds.insert(y,Interval(yl,yu)); }
+        bounds.insert(x,ExactInterval(xl,xu));
+        bounds.insert(y,ExactInterval(yl,yu)); }
     Variables2d variables;
-    Map<RealVariable,Interval> bounds;
+    Map<RealVariable,ExactInterval> bounds;
 };
 
 //! \brief Class for plotting figures of hybrid sets.
@@ -111,9 +111,9 @@ class HybridFigure
 
     void set_locations(const List<DiscreteLocation>& l) { locations=Set<DiscreteLocation>(l); }
     void set_axes(const Axes2d& axes) { bounds=axes.bounds; variables=axes.variables; }
-    void set_bounds(const RealVariable& x, const RawFloatType& l, const RawFloatType& u) { bounds.insert(x,Interval(l,u)); }
-    void set_bounds(const RealVariable& x, const Interval& ivl) { bounds.insert(x,ivl); }
-    void set_bounds(const Map<RealVariable,Interval>& b) { bounds=b; };
+    void set_bounds(const RealVariable& x, const RawFloatType& l, const RawFloatType& u) { bounds.insert(x,ExactInterval(l,u)); }
+    void set_bounds(const RealVariable& x, const ExactInterval& ivl) { bounds.insert(x,ivl); }
+    void set_bounds(const Map<RealVariable,ExactInterval>& b) { bounds=b; };
     void set_bounds(const Map<RealVariable,IntervalSet>& b);
     void set_variables(const RealVariable& x, const RealVariable& y) { variables=Variables2d(x,y); }
 
@@ -142,7 +142,7 @@ class HybridFigure
     void _paint_all(CanvasInterface& canvas) const; // Writes all shapes to the canvas
   private:
   public:
-    Map<RealVariable,Interval> bounds;
+    Map<RealVariable,ExactInterval> bounds;
     Set<DiscreteLocation> locations;
     Variables2d variables;
     GraphicsProperties properties;
@@ -159,7 +159,7 @@ inline HybridFigure& operator<<(HybridFigure& g, const FillColour& fc) { g.set_f
 inline void draw(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); }
 inline HybridFigure& operator<<(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); return fig; }
 
-Interval approximation(const IntervalSet& rivl);
+ExactInterval approximation(const IntervalSet& rivl);
 
 template<class SET1>
 void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1) {

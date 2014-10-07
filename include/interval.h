@@ -22,7 +22,7 @@
  */
 
 /*! \file interval.h
- *  \brief Interval numeric class.
+ *  \brief ExactInterval numeric class.
  */
 #ifndef ARIADNE_INTERVAL_H
 #define ARIADNE_INTERVAL_H
@@ -61,7 +61,7 @@ class Rational;
 class Dyadic;
 class Decimal;
 
-class Interval;
+class ExactInterval;
 class UnitInterval;
 class UpperInterval;
 
@@ -70,9 +70,9 @@ typedef UpperInterval NumericInterval;
 //! \ingroup NumericModule
 //! \brief Intervals with floating-point endpoints supporting outwardly-rounded arithmetic.
 //! \details
-//! Note that <c>%Interval(3.3)</c> yields the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%Interval("3.3")</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
+//! Note that <c>%ExactInterval(3.3)</c> yields the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%ExactInterval("3.3")</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
 //!
-//! Comparison tests on \c Interval use the idea that an interval represents a single number with an unknown value.
+//! Comparison tests on \c ExactInterval use the idea that an interval represents a single number with an unknown value.
 //! Hence the result is of type \c tribool, which can take values { \c True, \c False, \c Indeterminate }.
 //! Hence a test \f$[l_1,u_1]\leq [l_2,u_2]\f$ returns \c True if \f$u_1\leq u_2\f$, since in this case \f$x_1\leq x_2\f$ whenever \f$x_1\in[l_1,u_2]\f$ and \f$x_2\in[l_2,u_2]\f$, \c False if \f$l_1>u_2\f$, since in this case we know \f$x_1>x_2\f$, and \c Indeterminate otherwise, since in this case we can find \f$x_1,x_2\f$ making the result either true or false.
 //! In the case of equality, the comparison \f$[l_1,u_1]\f$==\f$[l_2,u_2]\f$ only returns \c True if both intervals are singletons, since otherwise we can find values making the result either true of false.
@@ -82,48 +82,48 @@ typedef UpperInterval NumericInterval;
 //! Alternatives \c midpoint(ivl) and \c radius(ivl) are also provided.
 //! Note that \c midpoint and \c radius return approximations to the true midpoint and radius of the interval. If \f$m\f$ and \f$r\f$ are the returned midpoint and radius of the interval \f$[l,u]\f$, the using exact arithmetic, we guarentee \f$m-r\leq l\f$ and \f$m+r\geq u\f$
 //!
-//! To test if an interval contains a point or another interval, use \c encloses(Interval,Float) or \c encloses(Interval,Interval).
-//! The test \c refines(Interval,Interval) can also be used.
+//! To test if an interval contains a point or another interval, use \c encloses(ExactInterval,Float) or \c encloses(ExactInterval,ExactInterval).
+//! The test \c refines(ExactInterval,ExactInterval) can also be used.
 //! \sa Float
 //!
 //! \par Python interface
 //!
 //! In the Python interface, %Ariadne intervals can be constructed from Python literals of the form \c {a:b} or (deprecated) \c [a,b] .
 //! The former is preferred, as it cannot be confused with literals for other classes such as Vector and Array types.
-//! Automatic conversion is used to convert Interval literals of the form \c {a,b} to an Interval in functions.
+//! Automatic conversion is used to convert ExactInterval literals of the form \c {a,b} to an ExactInterval in functions.
 //!
 //! Care must be taken when defining intervals using floating-point coefficients, since values are first converted to the nearest
 //! representable value by the Python interpreter. <br><br>
 //! \code
-//!   Interval({1.1:2.3}) # Create the interval [1.1000000000000001, 2.2999999999999998]
-//!   Interval({2.5:4.25}) # Create the interval [2.5, 4.25], which can be represented exactly
-//!   Interval([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
+//!   ExactInterval({1.1:2.3}) # Create the interval [1.1000000000000001, 2.2999999999999998]
+//!   ExactInterval({2.5:4.25}) # Create the interval [2.5, 4.25], which can be represented exactly
+//!   ExactInterval([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
 //! \endcode
-class Interval {
+class ExactInterval {
   public:
-    typedef Interval NumericType;
+    typedef ExactInterval NumericType;
   public:
     //! \brief Default constructor yields the singleton zero interval \a [0,0].
-    Interval() : l(0.0), u(0.0) { }
-    Interval(uint m) : l(m), u(m) { }
-    Interval(int n) : l(n), u(n) { }
+    ExactInterval() : l(0.0), u(0.0) { }
+    ExactInterval(uint m) : l(m), u(m) { }
+    ExactInterval(int n) : l(n), u(n) { }
     //! \brief Convert from a builtin double-precision floating-point value. Yields the singleton interval \a [x,x].
-    Interval(double x) : l(x), u(x) { }
+    ExactInterval(double x) : l(x), u(x) { }
     //! \brief Create from a floating-point value. Yields the singleton interval \a [x,x].
-    //! Cannot be used in conversions since the \c %Interval class provides stronger accuracy guarantees than the \c %Float class.
-    explicit Interval(const Float& x) : l(x), u(x) { }
+    //! Cannot be used in conversions since the \c %ExactInterval class provides stronger accuracy guarantees than the \c %Float class.
+    explicit ExactInterval(const Float& x) : l(x), u(x) { }
     //! \brief Copy constructor.
-    Interval(const Interval& i) : l(i.l), u(i.u) { }
+    ExactInterval(const ExactInterval& i) : l(i.l), u(i.u) { }
     //! \brief Convert from a general real number. Yields an interval containing the exact value.
-    explicit Interval(const Real& x);
+    explicit ExactInterval(const Real& x);
     //! \brief Convert from a floating-point number with an exact representation.
-    explicit Interval(const ExactFloat& x) : l(x.raw()), u(x.raw()) { }
+    explicit ExactInterval(const ExactFloat& x) : l(x.raw()), u(x.raw()) { }
     //! \brief Convert from a floating-point number with an exact representation.
-    explicit Interval(const ValidatedFloat& x) : l(x.lower()), u(x.upper_raw()) { }
+    explicit ExactInterval(const ValidatedFloat& x) : l(x.lower()), u(x.upper_raw()) { }
     //! \brief Convert from a dyadic number.
-    explicit Interval(const Dyadic& x);
+    explicit ExactInterval(const Dyadic& x);
     //! \brief Convert from a decimal number.
-    explicit Interval(const Decimal& x);
+    explicit ExactInterval(const Decimal& x);
 
     //! \brief Convert to a floating-point approximation.
     explicit operator Float () const { return half_exact(add_near(l.raw(),u.raw())); }
@@ -131,28 +131,28 @@ class Interval {
     explicit operator ValidatedFloat () const { return ValidatedFloat(this->lower(),this->upper()); }
 
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
-    Interval(double lower, double upper) : l(lower), u(upper) { }
+    ExactInterval(double lower, double upper) : l(lower), u(upper) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
-    Interval(const Float& lower, const Float& upper) : l(lower), u(upper) { }
+    ExactInterval(const Float& lower, const Float& upper) : l(lower), u(upper) { }
     //! \brief Convert from a floating-point number with an exact representation.
-    Interval(const ExactFloat& lower, const ExactFloat& upper) : l(lower.raw()), u(upper.raw()) { }
+    ExactInterval(const ExactFloat& lower, const ExactFloat& upper) : l(lower.raw()), u(upper.raw()) { }
     //! \brief Construct an over-approximating interval.
-    explicit Interval(const LowerFloat& lower, const UpperFloat& upper) : l(lower.raw()), u(upper.raw()) { }
+    explicit ExactInterval(const LowerFloat& lower, const UpperFloat& upper) : l(lower.raw()), u(upper.raw()) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
-    explicit Interval(const Real& lower, const Real& upper);
+    explicit ExactInterval(const Real& lower, const Real& upper);
 #ifdef HAVE_GMPXX_H
-    Interval(const Integer& z);
-    Interval(const Rational& q);
-    Interval& operator=(const Rational& q);
-    Interval(const Rational& lower, const Rational& upper);
+    ExactInterval(const Integer& z);
+    ExactInterval(const Rational& q);
+    ExactInterval& operator=(const Rational& q);
+    ExactInterval(const Rational& lower, const Rational& upper);
 #endif // HAVE_GMPXX_H
 
-    Interval& operator=(uint m) { l=m; u=m; return *this; }
-    Interval& operator=(int n) { l=n; u=n; return *this; }
-    Interval& operator=(double c) { l=c; u=c; return *this; }
-    Interval& operator=(const Float& x) { l=x; u=x; return *this; }
-    Interval& operator=(const Real& x);
-    Interval& operator=(const ExactFloat& x) { l=x.raw(); u=x.raw(); return *this; };
+    ExactInterval& operator=(uint m) { l=m; u=m; return *this; }
+    ExactInterval& operator=(int n) { l=n; u=n; return *this; }
+    ExactInterval& operator=(double c) { l=c; u=c; return *this; }
+    ExactInterval& operator=(const Float& x) { l=x; u=x; return *this; }
+    ExactInterval& operator=(const Real& x);
+    ExactInterval& operator=(const ExactFloat& x) { l=x.raw(); u=x.raw(); return *this; };
 
     //! \brief The lower bound of the interval.
     const Float& lower_value() const { return l; }
@@ -205,87 +205,87 @@ class Interval {
     Float l, u;
 };
 
-std::ostream& operator<<(std::ostream& os, const Interval& ivl);
+std::ostream& operator<<(std::ostream& os, const ExactInterval& ivl);
 
-inline ValidatedFloatType midpoint(Interval i) {
+inline ValidatedFloatType midpoint(ExactInterval i) {
     return i.midpoint();
 }
 
-inline ValidatedFloatType radius(Interval i) {
+inline ValidatedFloatType radius(ExactInterval i) {
     return i.radius();
 }
 
-inline ErrorFloatType width(Interval i) {
+inline ErrorFloatType width(ExactInterval i) {
     return i.width();
 }
 
-//! \related Interval \brief Test if the intervals are equal (as sets).
-inline bool equal(Interval i1, Interval i2) {
+//! \related ExactInterval \brief Test if the intervals are equal (as sets).
+inline bool equal(ExactInterval i1, ExactInterval i2) {
     //std::cerr<<"equal(i1,i2) with i1="<<i1<<"; i2="<<i2<<std::endl;
     return i1.lower_raw()==i2.lower_raw() && i1.upper_raw()==i2.upper_raw();
 }
 
-//! \related Interval \brief Test if the interval is empty.
-inline bool empty(Interval i) {
+//! \related ExactInterval \brief Test if the interval is empty.
+inline bool empty(ExactInterval i) {
     return i.lower_raw()>i.upper_raw();
 }
 
-//! \related Interval \brief Test if the interval is bounded.
-inline bool bounded(Interval i) {
+//! \related ExactInterval \brief Test if the interval is bounded.
+inline bool bounded(ExactInterval i) {
     return i.lower_raw()!=-inf && i.upper_raw()!=+inf;
 }
 
-//! \related Interval \brief The intersection of two intervals.
-inline Interval intersection(Interval i1, Interval i2) {
-    return Interval(max(i1.lower_raw(),i2.lower_raw()),min(i1.upper_raw(),i2.upper_raw()));
+//! \related ExactInterval \brief The intersection of two intervals.
+inline ExactInterval intersection(ExactInterval i1, ExactInterval i2) {
+    return ExactInterval(max(i1.lower_raw(),i2.lower_raw()),min(i1.upper_raw(),i2.upper_raw()));
 }
 
-//! \related Interval \brief The hull of two intervals, equal to the smallest interval containing both as subsets.
-inline Interval hull(Interval i1, Interval i2) {
+//! \related ExactInterval \brief The hull of two intervals, equal to the smallest interval containing both as subsets.
+inline ExactInterval hull(ExactInterval i1, ExactInterval i2) {
     assert(i1.lower_raw()<=i1.upper_raw() && i2.lower_raw()<=i2.upper_raw());
-    return Interval(min(i1.lower_raw(),i2.lower_raw()),max(i1.upper_raw(),i2.upper_raw()));
+    return ExactInterval(min(i1.lower_raw(),i2.lower_raw()),max(i1.upper_raw(),i2.upper_raw()));
 }
 
-//! \related Interval \brief The hull of an interval and a point, equal to the smallest interval containing both.
-inline Interval hull(Interval i1, Float x2) {
-    return Interval(min(i1.lower_raw(),x2),max(i1.upper_raw(),x2));
+//! \related ExactInterval \brief The hull of an interval and a point, equal to the smallest interval containing both.
+inline ExactInterval hull(ExactInterval i1, Float x2) {
+    return ExactInterval(min(i1.lower_raw(),x2),max(i1.upper_raw(),x2));
 }
 
-//! \related Interval \brief The hull of two points, equal to the smallest interval containing both.
-inline Interval hull(Float x1, Float x2) {
-    return Interval(min(x1,x2),max(x1,x2));
+//! \related ExactInterval \brief The hull of two points, equal to the smallest interval containing both.
+inline ExactInterval hull(Float x1, Float x2) {
+    return ExactInterval(min(x1,x2),max(x1,x2));
 }
 
 
-//! \related Interval \brief Test if the interval \a I contains the number \a x.
-inline bool contains(Interval i, ExactFloatType x) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
-inline bool contains(Interval i, ValidatedFloatType x) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
-inline bool contains(Interval i, RawFloatType x) { return i.lower_raw()<=x && x<=i.upper_raw(); }
+//! \related ExactInterval \brief Test if the interval \a I contains the number \a x.
+inline bool contains(ExactInterval i, ExactFloatType x) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
+inline bool contains(ExactInterval i, ValidatedFloatType x) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
+inline bool contains(ExactInterval i, RawFloatType x) { return i.lower_raw()<=x && x<=i.upper_raw(); }
 
-inline bool element(ExactFloatType x, Interval i) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
-inline bool element(ValidatedFloatType x, Interval i) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
-inline bool element(RawFloatType x, Interval i) { return i.lower_raw()<=x && x<=i.upper_raw(); }
+inline bool element(ExactFloatType x, ExactInterval i) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
+inline bool element(ValidatedFloatType x, ExactInterval i) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
+inline bool element(RawFloatType x, ExactInterval i) { return i.lower_raw()<=x && x<=i.upper_raw(); }
 
-//! \related Interval \brief Test if the interval \a I1 is a subset of \a I2.
-inline bool subset(Interval i1, Interval i2) { return i1.lower_raw()>=i2.lower_raw() && i1.upper_raw()<=i2.upper_raw(); }
-//! \related Interval \brief Test if the interval \a I1 is a superset of \a I2.
-inline bool superset(Interval i1, Interval i2) { return i1.lower_raw()<=i2.lower_raw() && i1.upper_raw()>=i2.upper_raw(); }
-//! \related Interval \brief Test if the interval \a I1 is disjoint from \a I2. Returns \c false even if the two intervals only have an endpoint in common.
-inline bool disjoint(Interval i1, Interval i2) { return i1.lower_raw()>i2.upper_raw() || i1.upper_raw()<i2.lower_raw(); }
-//! \related Interval \brief Test if the interval \a I1 intersects \a I2. Returns \c true even if the two intervals only have an endpoint in common.
-inline bool intersect(Interval i1, Interval i2) { return i1.lower_raw()<=i2.upper_raw() && i1.upper_raw()>=i2.lower_raw(); }
+//! \related ExactInterval \brief Test if the interval \a I1 is a subset of \a I2.
+inline bool subset(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()>=i2.lower_raw() && i1.upper_raw()<=i2.upper_raw(); }
+//! \related ExactInterval \brief Test if the interval \a I1 is a superset of \a I2.
+inline bool superset(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()<=i2.lower_raw() && i1.upper_raw()>=i2.upper_raw(); }
+//! \related ExactInterval \brief Test if the interval \a I1 is disjoint from \a I2. Returns \c false even if the two intervals only have an endpoint in common.
+inline bool disjoint(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()>i2.upper_raw() || i1.upper_raw()<i2.lower_raw(); }
+//! \related ExactInterval \brief Test if the interval \a I1 intersects \a I2. Returns \c true even if the two intervals only have an endpoint in common.
+inline bool intersect(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()<=i2.upper_raw() && i1.upper_raw()>=i2.lower_raw(); }
 
-//! \related Interval \brief Test if the closed interval \a I1 is disjoint from the closed interval \a I2.
+//! \related ExactInterval \brief Test if the closed interval \a I1 is disjoint from the closed interval \a I2.
 //! Returns \c false if the two intervals only have an endpoint in common.
-inline bool separated(Interval i1, Interval i2) { return i1.lower_raw()>i2.upper_raw() || i1.upper_raw()<i2.lower_raw(); }
-//! \related Interval \brief Test if the interval \a I1 overlaps \a I2.
+inline bool separated(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()>i2.upper_raw() || i1.upper_raw()<i2.lower_raw(); }
+//! \related ExactInterval \brief Test if the interval \a I1 overlaps \a I2.
 //! Returns \c false if the two intervals only have an endpoint in common.
 //! Returns \c true if one of the intervals is a singleton in the interior of the other.
-inline bool overlap(Interval i1, Interval i2) { return i1.lower_raw()<i2.upper_raw() && i1.upper_raw()>i2.lower_raw(); }
-//! \related Interval \brief Test if the (closed) interval \a I1 is a subset of the interior of \a I2.
-inline bool inside(Interval i1, Interval i2) { return i1.lower_raw()>i2.lower_raw() && i1.upper_raw()<i2.upper_raw(); }
-//! \related Interval \brief Test if the interior of the interval \a I1 is a superset of the (closed) interval \a I2.
-inline bool covers(Interval i1, Interval i2) { return i1.lower_raw()<i2.lower_raw() && i1.upper_raw()>i2.upper_raw(); }
+inline bool overlap(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()<i2.upper_raw() && i1.upper_raw()>i2.lower_raw(); }
+//! \related ExactInterval \brief Test if the (closed) interval \a I1 is a subset of the interior of \a I2.
+inline bool inside(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()>i2.lower_raw() && i1.upper_raw()<i2.upper_raw(); }
+//! \related ExactInterval \brief Test if the interior of the interval \a I1 is a superset of the (closed) interval \a I2.
+inline bool covers(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()<i2.lower_raw() && i1.upper_raw()>i2.upper_raw(); }
 
 
 //! \brief An over-approximation to an interval set.
@@ -308,7 +308,7 @@ class UpperInterval {
     //! \brief Construct an over-approximating interval.
     UpperInterval(LowerFloat lower, UpperFloat upper) : UpperInterval(lower.raw(),upper.raw()) { }
     //! \brief Convert from an exact interval.
-    UpperInterval(Interval ivl) : UpperInterval(ivl.lower_raw(),ivl.upper_raw()) { }
+    UpperInterval(ExactInterval ivl) : UpperInterval(ivl.lower_raw(),ivl.upper_raw()) { }
 
     //! \brief Construct a singleton interval.
     UpperInterval(ExactFloat point) : l(point.raw()), u(point.raw()) { }
@@ -348,15 +348,15 @@ class UpperInterval {
         return -inf<ivl.l && ivl.u<+inf; }
     friend bool contains(UpperInterval const& ivl, ExactNumber const& x) {
         return ivl.lower_raw() <= x.raw() && x.raw() <= ivl.upper_raw(); }
-    friend tribool inside(UpperInterval const& ivl1, Interval const& ivl2) {
+    friend tribool inside(UpperInterval const& ivl1, ExactInterval const& ivl2) {
         return (ivl1.l>ivl2.lower_raw() && ivl1.u<ivl2.upper_raw()) || tribool(indeterminate); }
-    friend tribool subset(UpperInterval const& ivl1, Interval const& ivl2) {
+    friend tribool subset(UpperInterval const& ivl1, ExactInterval const& ivl2) {
         return (ivl1.l>=ivl2.lower_raw() && ivl1.u<=ivl2.upper_raw()) || tribool(indeterminate); }
     friend bool equal(UpperInterval const& ivl1, UpperInterval const& ivl2) {
         return ivl1.l==ivl2.l && ivl1.u==ivl2.u; }
     friend bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2) {
         return ivl1.l>=ivl2.l && ivl1.u<=ivl2.u; }
-    friend bool models(UpperInterval const& ivl1, Interval const& ivl2) {
+    friend bool models(UpperInterval const& ivl1, ExactInterval const& ivl2) {
         return ivl1.l>=ivl2.lower_raw() && ivl1.u<=ivl2.upper_raw(); }
     friend tribool disjoint(UpperInterval const& ivl1, UpperInterval const& ivl2) {
         return (ivl1.u<ivl2.l || ivl2.u<ivl1.l) || tribool(indeterminate); }
@@ -367,7 +367,7 @@ class UpperInterval {
     friend UpperInterval widen(UpperInterval x) {
         return UpperInterval(widen(ValidatedFloat(x.lower_raw(),x.upper_raw()))); }
     friend std::ostream& operator<<(std::ostream& os, UpperInterval const& ivl) {
-        return os << Interval(ivl.lower_raw(),ivl.upper_raw()); }
+        return os << ExactInterval(ivl.lower_raw(),ivl.upper_raw()); }
   private:
     Float l, u;
 };
@@ -376,31 +376,31 @@ const ApproximateFloatType midpoint(UpperInterval const& ivl);
 bool bounded(UpperInterval const& ivl);
 bool contains(UpperInterval const& ivl, ExactNumber const& x);
 bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2);
-bool models(UpperInterval const& ivl1, Interval const& ivl2);
-tribool inside(UpperInterval const& ivl1, Interval const& ivl2);
-tribool subset(UpperInterval const& ivl1, Interval const& ivl2);
+bool models(UpperInterval const& ivl1, ExactInterval const& ivl2);
+tribool inside(UpperInterval const& ivl1, ExactInterval const& ivl2);
+tribool subset(UpperInterval const& ivl1, ExactInterval const& ivl2);
 tribool disjoint(UpperInterval const& ivl1, UpperInterval const& ivl2);
 UpperInterval widen(UpperInterval i);
 
-inline Interval make_exact_interval(UpperInterval ivl) { return Interval(ivl.lower_raw(),ivl.upper_raw()); }
+inline ExactInterval make_exact_interval(UpperInterval ivl) { return ExactInterval(ivl.lower_raw(),ivl.upper_raw()); }
 
 // An interval one ulp wider
-//! \related Interval \brief An interval containing the given interval in its interior.
-Interval widen(Interval i);
-//! \related Interval \brief An interval contained in the interior of the given interval.
-Interval narrow(Interval i);
+//! \related ExactInterval \brief An interval containing the given interval in its interior.
+ExactInterval widen(ExactInterval i);
+//! \related ExactInterval \brief An interval contained in the interior of the given interval.
+ExactInterval narrow(ExactInterval i);
 
 // Over-approximate by an interval with float coefficients
-//! \related Interval \brief Over-approximate the interval by one using builtin single-precision floating-point values as endpoints.
-Interval trunc(Interval);
-Interval trunc(Interval, uint eps);
+//! \related ExactInterval \brief Over-approximate the interval by one using builtin single-precision floating-point values as endpoints.
+ExactInterval trunc(ExactInterval);
+ExactInterval trunc(ExactInterval, uint eps);
 
-//! \related Interval \brief The nearest representable number to the midpoint of the interval.
-inline Float med(Interval i) { return half_exact(add_near(i.lower_raw(),i.upper_raw())); }
-//! \related Interval \brief An over-approximation to the radius of the interval.
-inline Float rad(Interval i) { return half_exact(sub_up(i.upper_raw(),i.lower_raw())); }
-//! \related Interval \brief An over-approximation to the width of the interval.
-inline Float diam(Interval i) { return sub_up(i.upper_raw(),i.lower_raw()); }
+//! \related ExactInterval \brief The nearest representable number to the midpoint of the interval.
+inline Float med(ExactInterval i) { return half_exact(add_near(i.lower_raw(),i.upper_raw())); }
+//! \related ExactInterval \brief An over-approximation to the radius of the interval.
+inline Float rad(ExactInterval i) { return half_exact(sub_up(i.upper_raw(),i.lower_raw())); }
+//! \related ExactInterval \brief An over-approximation to the width of the interval.
+inline Float diam(ExactInterval i) { return sub_up(i.upper_raw(),i.lower_raw()); }
 
 //! \related UpperInterval \brief The interval of possible maximum values. Yields the interval between \c i1.upper_raw() and \c i2.upper_raw().
 inline UpperInterval max(UpperInterval i1,UpperInterval i2);
@@ -856,14 +856,14 @@ inline tribool operator<=(UpperInterval i1, UpperInterval i2) {
 }
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
-  template<class A> void serialize(A& a, Interval& ivl, const uint version) {
+  template<class A> void serialize(A& a, ExactInterval& ivl, const uint version) {
     a & ivl.lower_raw() & ivl.upper_raw(); }
 #endif
 
-std::ostream& operator<<(std::ostream&, const Interval&);
-std::istream& operator>>(std::istream&, Interval&);
+std::ostream& operator<<(std::ostream&, const ExactInterval&);
+std::istream& operator>>(std::istream&, ExactInterval&);
 
-inline ValidatedNumberType make_singleton(Interval const& ivl) {
+inline ValidatedNumberType make_singleton(ExactInterval const& ivl) {
     return ValidatedNumberType(ivl.lower_raw(),ivl.upper_raw());
 }
 
@@ -879,7 +879,7 @@ class ApproximateInterval {
     explicit ApproximateInterval(Float lower, Float upper) : l(lower), u(upper) { }
     explicit ApproximateInterval(ApproximateFloat point) : l(point.raw()), u(point.raw()) { }
     explicit ApproximateInterval(ApproximateFloat lower, ApproximateFloat upper) : l(lower.raw()), u(upper.raw()) { }
-    ApproximateInterval(Interval ivl) : l(ivl.lower_raw()), u(ivl.upper_raw()) { }
+    ApproximateInterval(ExactInterval ivl) : l(ivl.lower_raw()), u(ivl.upper_raw()) { }
     ApproximateInterval(UpperInterval ivl) : l(ivl.lower_raw()), u(ivl.upper_raw()) { }
     Float const& lower_raw() const { return l; }
     Float const& upper_raw() const { return l; }
@@ -891,16 +891,16 @@ class ApproximateInterval {
     friend bool contains(ApproximateInterval const& ivl, ApproximateFloat const& x) {
         return ivl.lower_raw()<=x.raw() && x.raw()<=ivl.upper_raw(); }
     friend std::ostream& operator<<(std::ostream& os, const ApproximateInterval& ivl) {
-        return os << Interval(ivl.lower_raw(),ivl.upper_raw()); }
+        return os << ExactInterval(ivl.lower_raw(),ivl.upper_raw()); }
   private:
     Float l, u;
 };
 
 class UnitInterval
-    : public Interval
+    : public ExactInterval
 {
   public:
-    UnitInterval() : Interval(-1,+1) { }
+    UnitInterval() : ExactInterval(-1,+1) { }
 };
 
 } // namespace Ariadne

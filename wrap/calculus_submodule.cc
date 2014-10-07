@@ -158,7 +158,7 @@ std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Approximat
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ValidatedFloat>& repr);
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ExactFloat>& repr);
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<UpperFloat>& repr);
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Interval>& repr);
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ExactInterval>& repr);
 
 template<class X> std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Expansion<X> >& repr) {
     const Expansion<X>& exp=repr.reference();
@@ -189,8 +189,8 @@ template<class X> std::ostream& operator<<(std::ostream& os, const PythonReprese
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Box >& bx) {
-    return os << PythonRepresentation< Vector<Interval> >(bx.reference()); }
+std::ostream& operator<<(std::ostream& os, const PythonRepresentation< ExactBox >& bx) {
+    return os << PythonRepresentation< Vector<ExactInterval> >(bx.reference()); }
 
 std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Sweeper>& repr) {
     const Sweeper& swp=repr.reference();
@@ -244,9 +244,9 @@ ValidatedVectorFunction unrestrict(const ValidatedVectorFunctionModel& fm) {
 }
 
 
-Interval _range1(const ValidatedTaylorModel&);
-Interval _range2(const ValidatedTaylorModel&);
-Interval _range3(const ValidatedTaylorModel&);
+ExactInterval _range1(const ValidatedTaylorModel&);
+ExactInterval _range2(const ValidatedTaylorModel&);
+ExactInterval _range3(const ValidatedTaylorModel&);
 
 } // namespace Ariadne
 
@@ -334,9 +334,9 @@ void export_taylor_model()
     taylor_model_class.staticmethod("variable");
     //taylor_model_class.staticmethod("variables");
 
-    taylor_model_class.def("restrict", (ValidatedTaylorModel&(ValidatedTaylorModel::*)(const Box&))&ValidatedTaylorModel::restrict, return_value_policy<reference_existing_object>());
-    taylor_model_class.def("restrict", (ValidatedTaylorModel(*)(const ValidatedTaylorModel&,uint,const Interval&))&restrict);
-    taylor_model_class.def("preaffine", (ValidatedTaylorModel(*)(const ValidatedTaylorModel&,uint,const Interval&,const Interval&))&preaffine);
+    taylor_model_class.def("restrict", (ValidatedTaylorModel&(ValidatedTaylorModel::*)(const ExactBox&))&ValidatedTaylorModel::restrict, return_value_policy<reference_existing_object>());
+    taylor_model_class.def("restrict", (ValidatedTaylorModel(*)(const ValidatedTaylorModel&,uint,const ExactInterval&))&restrict);
+    taylor_model_class.def("preaffine", (ValidatedTaylorModel(*)(const ValidatedTaylorModel&,uint,const ExactInterval&,const ExactInterval&))&preaffine);
 
     taylor_model_class.def("evaluate", (ValidatedNumberType(*)(const ValidatedTaylorModel&, const Vector<ValidatedNumberType>&))&evaluate);
     taylor_model_class.def("set",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&,uint,ValidatedNumberType))&partial_evaluate);
@@ -357,9 +357,9 @@ void export_taylor_model()
     def("cos", (ValidatedTaylorModel(*)(const ValidatedTaylorModel&))&cos);
     def("tan", (ValidatedTaylorModel(*)(const ValidatedTaylorModel&))&tan);
 
-    taylor_model_class.def("range1", (Interval(*)(const ValidatedTaylorModel&)) &_range1);
-    taylor_model_class.def("range2", (Interval(*)(const ValidatedTaylorModel&)) &_range2);
-    taylor_model_class.def("range3", (Interval(*)(const ValidatedTaylorModel&)) &_range3);
+    taylor_model_class.def("range1", (ExactInterval(*)(const ValidatedTaylorModel&)) &_range1);
+    taylor_model_class.def("range2", (ExactInterval(*)(const ValidatedTaylorModel&)) &_range2);
+    taylor_model_class.def("range3", (ExactInterval(*)(const ValidatedTaylorModel&)) &_range3);
 
     def("split",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&,uint,tribool)) &split);
 
@@ -446,10 +446,10 @@ void export_vector_function_model()
 void export_scalar_taylor_function()
 {
     class_<ScalarTaylorFunction> scalar_taylor_function_class("ScalarTaylorFunction",init<ScalarTaylorFunction>());
-    scalar_taylor_function_class.def(init<Box,ValidatedTaylorModel>());
-    scalar_taylor_function_class.def(init< Box,Sweeper >());
-    scalar_taylor_function_class.def(init< Box, const EffectiveScalarFunction&,Sweeper >());
-    scalar_taylor_function_class.def(init< Box, Expansion<ExactFloatType>, ErrorFloatType, Sweeper >());
+    scalar_taylor_function_class.def(init<ExactBox,ValidatedTaylorModel>());
+    scalar_taylor_function_class.def(init< ExactBox,Sweeper >());
+    scalar_taylor_function_class.def(init< ExactBox, const EffectiveScalarFunction&,Sweeper >());
+    scalar_taylor_function_class.def(init< ExactBox, Expansion<ExactFloatType>, ErrorFloatType, Sweeper >());
     scalar_taylor_function_class.def("error", (const ErrorFloatType&(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::error, return_value_policy<copy_const_reference>());
     scalar_taylor_function_class.def("set_error", (void(ScalarTaylorFunction::*)(const ErrorFloatType&)) &ScalarTaylorFunction::set_error);
     scalar_taylor_function_class.def("argument_size", &ScalarTaylorFunction::argument_size);
@@ -458,7 +458,7 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def("centre", &ScalarTaylorFunction::centre);
     scalar_taylor_function_class.def("range", &ScalarTaylorFunction::range);
     scalar_taylor_function_class.def("model", (const ValidatedTaylorModel&(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::model, return_value_policy<copy_const_reference>());
-    scalar_taylor_function_class.def("polynomial", (Polynomial<Interval>(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::polynomial);
+    scalar_taylor_function_class.def("polynomial", (Polynomial<ExactInterval>(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::polynomial);
     scalar_taylor_function_class.def("number_of_nonzeros", (uint(ScalarTaylorFunction::*)()const)&ScalarTaylorFunction::number_of_nonzeros);
     scalar_taylor_function_class.def("set_sweeper", &ScalarTaylorFunction::set_sweeper);
     scalar_taylor_function_class.def("sweeper", &ScalarTaylorFunction::sweeper);
@@ -520,9 +520,9 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def("function", (EffectiveScalarFunction(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::function);
     scalar_taylor_function_class.def("polynomial", (Polynomial<ValidatedFloatType>(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::polynomial);
     scalar_taylor_function_class.def("set", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint j, const ValidatedFloatType&)) &partial_evaluate);
-    scalar_taylor_function_class.def("restrict", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Box&)) &restrict);
-    scalar_taylor_function_class.def("restrict", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint,const Interval&)) &restrict);
-    scalar_taylor_function_class.def("extend", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Box&)) &extend);
+    scalar_taylor_function_class.def("restrict", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ExactBox&)) &restrict);
+    scalar_taylor_function_class.def("restrict", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint,const ExactInterval&)) &restrict);
+    scalar_taylor_function_class.def("extend", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ExactBox&)) &extend);
     //scalar_taylor_function_class.staticmethod("set_default_maximum_degree");
     //scalar_taylor_function_class.staticmethod("set_default_sweep_threshold");
     //scalar_taylor_function_class.staticmethod("default_maximum_degree");
@@ -530,11 +530,11 @@ void export_scalar_taylor_function()
 
 
 
-    scalar_taylor_function_class.def("zero",(ScalarTaylorFunction(*)(const Box&,Sweeper))&ScalarTaylorFunction::zero);
-    scalar_taylor_function_class.def("constant",(ScalarTaylorFunction(*)(const Box&,const ValidatedNumberType&,Sweeper))&ScalarTaylorFunction::constant);
-    scalar_taylor_function_class.def("coordinate",(ScalarTaylorFunction(*)(const Box&,uint,Sweeper))&ScalarTaylorFunction::coordinate);
-    scalar_taylor_function_class.def("variable",(ScalarTaylorFunction(*)(const Box&,uint,Sweeper))&ScalarTaylorFunction::variable);
-    scalar_taylor_function_class.def("variables",(Vector<ScalarTaylorFunction>(*)(const Box&,Sweeper)) &ScalarTaylorFunction::variables);
+    scalar_taylor_function_class.def("zero",(ScalarTaylorFunction(*)(const ExactBox&,Sweeper))&ScalarTaylorFunction::zero);
+    scalar_taylor_function_class.def("constant",(ScalarTaylorFunction(*)(const ExactBox&,const ValidatedNumberType&,Sweeper))&ScalarTaylorFunction::constant);
+    scalar_taylor_function_class.def("coordinate",(ScalarTaylorFunction(*)(const ExactBox&,uint,Sweeper))&ScalarTaylorFunction::coordinate);
+    scalar_taylor_function_class.def("variable",(ScalarTaylorFunction(*)(const ExactBox&,uint,Sweeper))&ScalarTaylorFunction::variable);
+    scalar_taylor_function_class.def("variables",(Vector<ScalarTaylorFunction>(*)(const ExactBox&,Sweeper)) &ScalarTaylorFunction::variables);
 
 
     scalar_taylor_function_class.staticmethod("constant");
@@ -556,12 +556,12 @@ void export_scalar_taylor_function()
     def("disjoint",(bool(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&)) &disjoint);
     def("intersection",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&)) &intersection);
 
-    def("restrict",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Box&)) &restrict);
-    def("restrict",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint,const Interval&)) &restrict);
+    def("restrict",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ExactBox&)) &restrict);
+    def("restrict",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint,const ExactInterval&)) &restrict);
 
-    def("embed",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Interval&)) &embed);
-    def("embed",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const Box&)) &embed);
-    def("embed",(ScalarTaylorFunction(*)(const Box&,const ScalarTaylorFunction&)) &embed);
+    def("embed",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ExactInterval&)) &embed);
+    def("embed",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ExactBox&)) &embed);
+    def("embed",(ScalarTaylorFunction(*)(const ExactBox&,const ScalarTaylorFunction&)) &embed);
 
     def("max",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&))&max);
     def("min",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,const ScalarTaylorFunction&))&min);
@@ -588,9 +588,9 @@ void export_vector_taylor_function()
     typedef uint Nat;
 
     class_<VectorTaylorFunction> vector_taylor_function_class("VectorTaylorFunction", init<VectorTaylorFunction>());
-    vector_taylor_function_class.def( init< Nat, Box, Sweeper >());
-    vector_taylor_function_class.def( init< Box,const EffectiveVectorFunction&,Sweeper >());
-    vector_taylor_function_class.def(init< Box, Vector< Expansion<ExactFloatType> >, Vector<ErrorFloatType>, Sweeper >());
+    vector_taylor_function_class.def( init< Nat, ExactBox, Sweeper >());
+    vector_taylor_function_class.def( init< ExactBox,const EffectiveVectorFunction&,Sweeper >());
+    vector_taylor_function_class.def(init< ExactBox, Vector< Expansion<ExactFloatType> >, Vector<ErrorFloatType>, Sweeper >());
     vector_taylor_function_class.def( init< Vector<ScalarTaylorFunction> >());
     vector_taylor_function_class.def("__len__", &VectorTaylorFunction::result_size);
     vector_taylor_function_class.def("result_size", &VectorTaylorFunction::result_size);
@@ -636,8 +636,8 @@ void export_vector_taylor_function()
     vector_taylor_function_class.def("function", (EffectiveVectorFunction(VectorTaylorFunction::*)()const) &VectorTaylorFunction::function);
 
 
-    vector_taylor_function_class.def("constant",(VectorTaylorFunction(*)(const Box&, const Vector<ValidatedNumberType>&,Sweeper))&VectorTaylorFunction::constant);
-    vector_taylor_function_class.def("identity",(VectorTaylorFunction(*)(const Box&,Sweeper))&VectorTaylorFunction::identity);
+    vector_taylor_function_class.def("constant",(VectorTaylorFunction(*)(const ExactBox&, const Vector<ValidatedNumberType>&,Sweeper))&VectorTaylorFunction::constant);
+    vector_taylor_function_class.def("identity",(VectorTaylorFunction(*)(const ExactBox&,Sweeper))&VectorTaylorFunction::identity);
 
     vector_taylor_function_class.staticmethod("constant");
     vector_taylor_function_class.staticmethod("identity");
@@ -656,12 +656,12 @@ void export_vector_taylor_function()
     def("combine", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const ScalarTaylorFunction&)) &combine);
     def("combine", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const VectorTaylorFunction&)) &combine);
 
-    def("embed",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const Interval&)) &embed);
-    def("embed",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const Box&)) &embed);
-    def("embed",(VectorTaylorFunction(*)(const Box&,const VectorTaylorFunction&)) &embed);
+    def("embed",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const ExactInterval&)) &embed);
+    def("embed",(VectorTaylorFunction(*)(const VectorTaylorFunction&,const ExactBox&)) &embed);
+    def("embed",(VectorTaylorFunction(*)(const ExactBox&,const VectorTaylorFunction&)) &embed);
 
-    def("restrict", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const Box&)) &restrict);
-    def("restrict", (VectorTaylorFunction(*)(const VectorTaylorFunction&,uint,const Interval&)) &restrict);
+    def("restrict", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const ExactBox&)) &restrict);
+    def("restrict", (VectorTaylorFunction(*)(const VectorTaylorFunction&,uint,const ExactInterval&)) &restrict);
 
     def("split", (std::pair<VectorTaylorFunction,VectorTaylorFunction>(*)(const VectorTaylorFunction&,uint)) &Ariadne::split);
 

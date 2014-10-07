@@ -104,13 +104,13 @@ class Grid {
     int subdivision_upper_index(uint d, const UpperNumberType& x) const;
 
     Array<DyadicType> index(const ExactPoint& pt) const;
-    Array<DyadicType> lower_index(const Box& bx) const;
-    Array<DyadicType> upper_index(const Box& bx) const;
+    Array<DyadicType> lower_index(const ExactBox& bx) const;
+    Array<DyadicType> upper_index(const ExactBox& bx) const;
 
     ExactPoint point(const Array<IntegerType>& a) const;
     ExactPoint point(const Array<DyadicType>& a) const;
-    Box box(const Array<DyadicType>& l, const Array<DyadicType>& u) const;
-    Box box(const GridCell& cell) const;
+    ExactBox box(const Array<DyadicType>& l, const Array<DyadicType>& u) const;
+    ExactBox box(const GridCell& cell) const;
   private:
     // Create new data
     void _create(const Vector<RawFloatType>& o, const Vector<RawFloatType>& l);

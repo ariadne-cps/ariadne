@@ -107,11 +107,11 @@ ValidatedTaylorModel& isweep(ValidatedTaylorModel& x) {
     x.sweep(); return x;
 }
 
-ValidatedTaylorModel& ivladd(ValidatedTaylorModel& x, const Interval& ivl) {
+ValidatedTaylorModel& ivladd(ValidatedTaylorModel& x, const ExactInterval& ivl) {
     return x+=ivl;
 }
 
-ValidatedTaylorModel& ivlscal(ValidatedTaylorModel& x, const Interval& ivl) {
+ValidatedTaylorModel& ivlscal(ValidatedTaylorModel& x, const ExactInterval& ivl) {
     return x*=ivl;
 }
 
@@ -202,7 +202,7 @@ int main(int argc, const char* argv[]) {
     w.set_sweeper(threshold_sweeper);
 
 
-    Interval ivl(0.33,0.49);
+    ExactInterval ivl(0.33,0.49);
     Float cnst=0.41;
     ValidatedTaylorModel x(3,threshold_sweeper);
     ValidatedTaylorModel y(3,threshold_sweeper);
@@ -230,7 +230,7 @@ int main(int argc, const char* argv[]) {
 
     typedef ValidatedTaylorModel TM;
     //std::cerr<<"\n\nexp("<<z<<")=\n  "<<exp(z)<<"\n\n";
-    //std::cerr<<"exp(1)="<<Ariadne::exp(1.0)<<"  exp([1:1])="<<Ariadne::exp(Interval(1))<<"\n";
+    //std::cerr<<"exp(1)="<<Ariadne::exp(1.0)<<"  exp([1:1])="<<Ariadne::exp(ExactInterval(1))<<"\n";
 
     profile(ntries*10000,"isweep-02",inplace_bind(&isweep,w));
     profile(ntries*10000,"copy-02",bind(&copy,w));

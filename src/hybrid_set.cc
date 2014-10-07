@@ -391,7 +391,7 @@ tribool HybridBoundedConstraintSet::inside(const HybridBoxes& bxs) const {
         RealExpressionBoundedConstraintSet const& set = iter->second;
         Set<RealVariable> vars=set.variables();
         RealSpace const& spc = bxs[loc].space();
-        Box const& bx = bxs[loc].continuous_set();
+        ExactBox const& bx = bxs[loc].continuous_set();
         result = result && set.euclidean_set(spc).inside(bx);
     }
     return result;

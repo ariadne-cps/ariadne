@@ -39,14 +39,14 @@ typedef unsigned int uint;
 
 namespace Ariadne {
 
-bool contains(const Vector<Interval>& v1, const Vector<ExactFloatType>& v2);
+bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloatType>& v2);
 
 //
 // Helper functions needed to extract the set of vertices from a box
 //
-void make_vertices_down(const Box& bx, uint i, uint n, ExactPoint& pt, std::vector<ExactPoint>& v);
+void make_vertices_down(const ExactBox& bx, uint i, uint n, ExactPoint& pt, std::vector<ExactPoint>& v);
 
-void make_vertices_up(const Box& bx, uint i, uint n, ExactPoint& pt, std::vector<ExactPoint>& v) {
+void make_vertices_up(const ExactBox& bx, uint i, uint n, ExactPoint& pt, std::vector<ExactPoint>& v) {
     ARIADNE_ASSERT(i <= n);
     if(i == n) {    // base case: we are at the last dimension of the box
         pt[i] = bx[i].lower();
@@ -61,7 +61,7 @@ void make_vertices_up(const Box& bx, uint i, uint n, ExactPoint& pt, std::vector
     }
 }
 
-void make_vertices_down(const Box& bx, uint i, uint n, ExactPoint& pt, std::vector<ExactPoint>& v) {
+void make_vertices_down(const ExactBox& bx, uint i, uint n, ExactPoint& pt, std::vector<ExactPoint>& v) {
     ARIADNE_ASSERT(i <= n);
     if(i == n) {    // base case: we are at the last dimension of the box
         pt[i] = bx[i].upper();
@@ -77,17 +77,17 @@ void make_vertices_down(const Box& bx, uint i, uint n, ExactPoint& pt, std::vect
 }
 
 
-Box::Box(std::initializer_list<Interval> lst)
-    : Vector<Interval>(lst)
+ExactBox::ExactBox(std::initializer_list<ExactInterval> lst)
+    : Vector<ExactInterval>(lst)
 {
 }
 
-Box::Box(const std::string& str)
+ExactBox::ExactBox(const std::string& str)
 {
     *this=make_box(str);
 }
 
-std::vector<ExactPoint> Box::vertices() const {
+std::vector<ExactPoint> ExactBox::vertices() const {
     std::vector<ExactPoint> v;
     uint n = this->dimension();
     if(n > 0) {
@@ -97,10 +97,10 @@ std::vector<ExactPoint> Box::vertices() const {
     return v;
 }
 
-Box product(const Box& bx1, const Box& bx2) {
+ExactBox product(const ExactBox& bx1, const ExactBox& bx2) {
     size_t n1=bx1.dimension();
     size_t n2=bx2.dimension();
-    Box r(n1+n2);
+    ExactBox r(n1+n2);
     for(size_t i=0; i!=n1; ++i) {
         r[i]=bx1[i];
     }
@@ -110,45 +110,45 @@ Box product(const Box& bx1, const Box& bx2) {
     return r;
 }
 
-Box hull(const Box& bx1, const Box& bx2) {
+ExactBox hull(const ExactBox& bx1, const ExactBox& bx2) {
     ARIADNE_ASSERT(bx1.dimension()==bx2.dimension());
-    Box r(bx1.dimension());
+    ExactBox r(bx1.dimension());
     for(size_t i=0; i!=r.dimension(); ++i) {
         r[i]=hull(bx1[i],bx2[i]);
     }
     return r;
 }
 
-Box hull(const Box& bx1, const ExactPoint& pt2) {
+ExactBox hull(const ExactBox& bx1, const ExactPoint& pt2) {
     ARIADNE_ASSERT(bx1.dimension()==pt2.dimension());
-    Box r(bx1.dimension());
+    ExactBox r(bx1.dimension());
     for(size_t i=0; i!=r.dimension(); ++i) {
         r[i]=hull(bx1[i],pt2[i].raw());
     }
     return r;
 }
 
-Box hull(const ExactPoint& pt1, const ExactPoint& pt2) {
+ExactBox hull(const ExactPoint& pt1, const ExactPoint& pt2) {
     ARIADNE_ASSERT(pt1.dimension()==pt2.dimension());
-    Box r(pt1.dimension());
+    ExactBox r(pt1.dimension());
     for(size_t i=0; i!=r.dimension(); ++i) {
         r[i]=hull(pt1[i].raw(),pt2[i].raw());
     }
     return r;
 }
 
-Box intersection(const Box& bx1, const Box& bx2) {
+ExactBox intersection(const ExactBox& bx1, const ExactBox& bx2) {
     ARIADNE_ASSERT(bx1.dimension()==bx2.dimension());
-    Box r(bx1.dimension());
+    ExactBox r(bx1.dimension());
     for(size_t i=0; i!=r.dimension(); ++i) {
         r[i]=intersection(bx1[i],bx2[i]);
     }
     return r;
 }
 
-Box widen(const Box& bx) {
-    Box res=bx; res.widen(); return res;
-    Box result(bx.dimension());
+ExactBox widen(const ExactBox& bx) {
+    ExactBox res=bx; res.widen(); return res;
+    ExactBox result(bx.dimension());
     for(uint i=0; i!=result.dimension(); ++i) {
         if(bx[i].lower()==bx[i].upper()) {
             result[i]=trunc(Ariadne::widen(bx[i]));
@@ -159,9 +159,9 @@ Box widen(const Box& bx) {
     return result;
 }
 
-Box narrow(const Box& bx) {
-    Box res=bx; res.narrow(); return res;
-    Box result(bx.dimension());
+ExactBox narrow(const ExactBox& bx) {
+    ExactBox res=bx; res.narrow(); return res;
+    ExactBox result(bx.dimension());
     for(uint i=0; i!=result.dimension(); ++i) {
         if(bx[i].lower()==bx[i].upper()) {
             result[i]=trunc(Ariadne::narrow(bx[i]));
@@ -174,10 +174,10 @@ Box narrow(const Box& bx) {
 
 template<> inline double approx_cast(const ExactFloat& a) { return a.raw().get_d(); }
 
-void Box::draw(CanvasInterface& c, const Projection2d& p) const
+void ExactBox::draw(CanvasInterface& c, const Projection2d& p) const
 {
     uint ix=p.x_coordinate(); uint iy=p.y_coordinate();
-    Interval x=(*this)[ix]; Interval y=(*this)[iy];
+    ExactInterval x=(*this)[ix]; ExactInterval y=(*this)[iy];
     c.move_to(approx_cast<double>(x.lower()),approx_cast<double>(y.lower()));
     c.line_to(approx_cast<double>(x.upper()),approx_cast<double>(y.lower()));
     c.line_to(approx_cast<double>(x.upper()),approx_cast<double>(y.upper()));
@@ -186,14 +186,14 @@ void Box::draw(CanvasInterface& c, const Projection2d& p) const
     c.fill();
 }
 
-Box make_box(const std::string& str)
+ExactBox make_box(const std::string& str)
 {
     // Representation as a literal
     //   "[a1,b1]x[a2,b2]x...x[an,bn]"
 
     std::stringstream ss(str);
-    std::vector<Interval> vec;
-    Interval ivl;
+    std::vector<ExactInterval> vec;
+    ExactInterval ivl;
     char c;
 
     c='x';
@@ -209,7 +209,7 @@ Box make_box(const std::string& str)
         ss.putback(c);
     }
 
-    Box bx(vec.size());
+    ExactBox bx(vec.size());
     for(uint i=0; i!=bx.dimension(); ++i) {
         bx[i]=vec[i];
     }

@@ -52,7 +52,7 @@ struct from_python< Space<T> > {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id< Space<T> >()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        void* storage = ((converter::rvalue_from_python_storage<Interval>*)data)->storage.bytes;
+        void* storage = ((converter::rvalue_from_python_storage<ExactInterval>*)data)->storage.bytes;
         boost::python::list elements=extract<boost::python::list>(obj_ptr);
         Space<T>* spc_ptr = new (storage) Space<T>();
         for(int i=0; i!=len(elements); ++i) {
@@ -137,7 +137,7 @@ void export_formula()
 
     // TODO: These interval conversions are dangerous since they are applied when they sometimes should not be.
     //implicitly_convertible<double,RealExpression>();
-    //implicitly_convertible<Interval,RealExpression>();
+    //implicitly_convertible<ExactInterval,RealExpression>();
 
     class_<StringVariable> string_variable_class("StringVariable", init<std::string>());
     string_variable_class.def("__eq__", &__eq__<Expression<bool>,StringVariable,std::string>);

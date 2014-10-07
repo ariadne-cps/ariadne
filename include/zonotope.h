@@ -47,7 +47,7 @@ template<class X> class Point;
 
 typedef Point<ExactNumberType> ExactPoint;
 
-class Box;
+class ExactBox;
 class Zonotope;
 template<class BS> class ListSet;
 
@@ -105,11 +105,11 @@ class Zonotope
     /*! \brief Construct from centre and generators. */
     explicit Zonotope(const Vector<Float>& c, const Matrix<Float>& G);
     /*! \brief Construct from interval centre and a generator matrix. */
-    explicit Zonotope(const Vector<Interval>& c, const Matrix<Float>& G);
+    explicit Zonotope(const Vector<ExactInterval>& c, const Matrix<Float>& G);
     /*! \brief Construct from centre and an interval generator matrix. */
-    explicit Zonotope(const Vector<Float>& c, const Matrix<Interval>& G);
+    explicit Zonotope(const Vector<Float>& c, const Matrix<ExactInterval>& G);
     /*! \brief Construct from an interval centre and an interval generator matrix. */
-    explicit Zonotope(const Vector<Interval>& c, const Matrix<Interval>& G);
+    explicit Zonotope(const Vector<ExactInterval>& c, const Matrix<ExactInterval>& G);
 
 
     /*! \brief Construct a zonotope of dimension \a d with centre at the origin and \a m generators from the data beginning at \a ptr. */
@@ -122,7 +122,7 @@ class Zonotope
 
 
     /*! \brief Convert from a box. */
-    Zonotope(const Box& r);
+    Zonotope(const ExactBox& r);
     /*! \brief Copy constructor. */
     Zonotope(const Zonotope& z);
     /*! \brief Copy assignment operator. */
@@ -147,7 +147,7 @@ class Zonotope
     uint number_of_generators() const;
 
     /*! \brief The domain. */
-    Vector<Interval> domain() const;
+    Vector<ExactInterval> domain() const;
 
     /*! \brief The centre. */
     const Vector<Float>& centre() const;
@@ -168,9 +168,9 @@ class Zonotope
     tribool contains(const ExactPoint& pt) const;
 
     /*! \brief Test if the set is disjoint from a box. */
-    tribool separated(const Box& bx) const;
+    tribool separated(const ExactBox& bx) const;
     /*! \brief Test if the set is a inside of a box. */
-    tribool inside(const Box& bx) const;
+    tribool inside(const ExactBox& bx) const;
 
     //@}
 
@@ -178,13 +178,13 @@ class Zonotope
     //@{
     //! \name Geometric binary predicates
     /*! \brief Tests disjointness of \a z and \a r. */
-    friend tribool separated(const Zonotope& z, const Box& r);
+    friend tribool separated(const Zonotope& z, const ExactBox& r);
     /*! \brief Tests if \a z and \a r intersect. */
-    friend tribool overlaps(const Zonotope& z, const Box& r);
+    friend tribool overlaps(const Zonotope& z, const ExactBox& r);
     /*! \brief Tests inclusion of \a z in \a r. */
-    friend tribool inside(const Zonotope& z, const Box& r);
+    friend tribool inside(const Zonotope& z, const ExactBox& r);
     /*! \brief Tests disjointness of \a r and \a z. */
-    friend tribool separated(const Box& r, const Zonotope& z);
+    friend tribool separated(const ExactBox& r, const Zonotope& z);
     //@}
 
     //@{
@@ -206,7 +206,7 @@ class Zonotope
     //@{
     //! \name Function operations.
     /*! \brief Compute the image of \a z under a function given by the affine form \a af. */
-    friend Zonotope apply(const Vector<Affine<Interval>>& af, const Zonotope& z);
+    friend Zonotope apply(const Vector<Affine<ExactInterval>>& af, const Zonotope& z);
     friend Zonotope apply(const VectorFunction<ValidatedTag>& f, const Zonotope& z);
     //@}
 
@@ -223,13 +223,13 @@ class Zonotope
 tribool empty(const Zonotope& z);
 tribool bounded(const Zonotope& z);
 Float radius(const Zonotope& z);
-Box bounding_box(const Zonotope& z);
+ExactBox bounding_box(const Zonotope& z);
 
 
 tribool contains(const Zonotope& z, const ExactPoint& pt);
-tribool separated(const Zonotope& z, const Box& r);
-tribool overlaps(const Zonotope& z, const Box& r);
-tribool inside(const Zonotope& z, const Box& r);
+tribool separated(const Zonotope& z, const ExactBox& r);
+tribool overlaps(const Zonotope& z, const ExactBox& r);
+tribool inside(const Zonotope& z, const ExactBox& r);
 
 tribool separated(const Zonotope& z1, const Zonotope& z2);
 
@@ -243,7 +243,7 @@ Zonotope nonsingular_over_approximation(const Zonotope&);
 Zonotope cascade_over_approximation(const Zonotope& z, uint b);
 Zonotope orthogonal_approximation(const Zonotope& z);
 
-Zonotope apply(const Affine<Interval>& af, const Zonotope& z);
+Zonotope apply(const Affine<ExactInterval>& af, const Zonotope& z);
 Zonotope apply(const VectorFunction<ValidatedTag>& f, const Zonotope& z);
 
 std::ostream& operator<<(std::ostream& os, const Zonotope& z);

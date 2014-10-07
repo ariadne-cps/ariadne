@@ -48,7 +48,7 @@ class BoxSet;
 class ConstraintSet;
 class BoundedConstraintSet;
 
-class Box;
+class ExactBox;
 class ValidatedConstrainedImageSet;
 
 template<class X> class Variable;
@@ -91,13 +91,13 @@ class RealVariableInterval {
     Real _upper;
   public:
     RealVariableInterval(const Real& l, const Variable<Real>& v, const Real& u)
-        : _lower(l), _variable(v), _upper(u) { ARIADNE_ASSERT_MSG(l<=u,"Interval("<<l<<","<<u<<") not provably nonempty"); }
+        : _lower(l), _variable(v), _upper(u) { ARIADNE_ASSERT_MSG(l<=u,"ExactInterval("<<l<<","<<u<<") not provably nonempty"); }
     RealVariableInterval(const RealVariableLowerInterval& lv)
         : _lower(lv._lower), _variable(lv._variable), _upper(+inf) { }
     RealVariableInterval(const RealVariableUpperInterval& vu)
         : _lower(-inf), _variable(vu._variable), _upper(vu._upper) { }
     Variable<Real> const& variable() const { return this->_variable; }
-    const Interval approximate_interval() const;
+    const ExactInterval approximate_interval() const;
     const IntervalSet interval() const;
     const Real lower() const { return this->_lower; }
     const Real upper() const { return this->_upper; }
@@ -165,21 +165,21 @@ class RealVariablesBox {
 //! \brief An box defining ranges for a collection of real variables.
 class VariablesBox {
     RealSpace _spc;
-    Box _bx;
+    ExactBox _bx;
   public:
     VariablesBox() : _spc(), _bx(0) { }
-    VariablesBox(const Map<RealVariable,Interval>& bnds) : _spc(make_list(bnds.keys())), _bx(_spc.dimension()) {
+    VariablesBox(const Map<RealVariable,ExactInterval>& bnds) : _spc(make_list(bnds.keys())), _bx(_spc.dimension()) {
         for(uint i=0; i!=this->_bx.dimension(); ++i) { this->_bx[i] = bnds[this->_spc[i]]; } }
     VariablesBox(const List<RealVariableInterval>& bnds) : _spc(), _bx(bnds.size()) {
         for(uint i=0; i!=bnds.size(); ++i) { this->_spc.append(bnds[i].variable()); this->_bx[i]=bnds[i].approximate_interval(); } }
-    VariablesBox(const RealSpace& spc, const Box& bx) : _spc(spc), _bx(bx) { ARIADNE_ASSERT(spc.dimension()==bx.dimension()); }
+    VariablesBox(const RealSpace& spc, const ExactBox& bx) : _spc(spc), _bx(bx) { ARIADNE_ASSERT(spc.dimension()==bx.dimension()); }
     Set<RealVariable> variables() const { return make_set(_spc.variables()); }
     RealSpace const& space() const { return this->_spc; }
-    Box const& continuous_set() const { return this->_bx; }
-    Box const& box() const { return this->_bx; }
-    const Interval& operator[](const RealVariable& v) const { return this->_bx[this->_spc.index(v)]; }
-    Box euclidean_set(const RealSpace& spc) const {
-        Box res(spc.dimension()); for(uint i=0; i!=res.dimension(); ++i) { res[i]=this->_bx[this->_spc.index(spc[i])]; } return res; }
+    ExactBox const& continuous_set() const { return this->_bx; }
+    ExactBox const& box() const { return this->_bx; }
+    const ExactInterval& operator[](const RealVariable& v) const { return this->_bx[this->_spc.index(v)]; }
+    ExactBox euclidean_set(const RealSpace& spc) const {
+        ExactBox res(spc.dimension()); for(uint i=0; i!=res.dimension(); ++i) { res[i]=this->_bx[this->_spc.index(spc[i])]; } return res; }
     friend OutputStream& operator<<(OutputStream& os, const VariablesBox& ebx) {
         return os << "VariablesBox( space=" << ebx.space() << ", box=" << ebx.box() << " )"; }
 };

@@ -65,9 +65,9 @@ void TestMapEvolver::test() const
     typedef Enclosure EnclosureType;
 
     // Define the initial box
-    Box initial_box(2);
-    initial_box[0]=Interval(1.01,1.03);
-    initial_box[1]=Interval(0.51,0.53);
+    ExactBox initial_box(2);
+    initial_box[0]=ExactInterval(1.01,1.03);
+    initial_box[1]=ExactInterval(0.51,0.53);
 
     cout << "initial_box=" << initial_box << endl;
 

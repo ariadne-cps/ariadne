@@ -162,7 +162,7 @@ void TestTaylorModel::test_approximation()
 
 void TestTaylorModel::test_unscale()
 {
-    if(unscale(ValidatedTaylorModel({{{0},3.0}},0.0,swp),Interval(1.0)).codomain()!=Interval(1.0)) {
+    if(unscale(ValidatedTaylorModel({{{0},3.0}},0.0,swp),ExactInterval(1.0)).codomain()!=ExactInterval(1.0)) {
         ARIADNE_TEST_WARN("Unscaling over singleton domain does not yield constant");
     }
 }
@@ -209,13 +209,13 @@ void TestTaylorModel::test_range()
 
     // Test range of cubic, which should be exact
     ValidatedTaylorModel t1 = x0*x0*x0+x0;
-    ARIADNE_TEST_ASSERT(t1.range()==Interval(-2,+2));
+    ARIADNE_TEST_ASSERT(t1.range()==ExactInterval(-2,+2));
 
     // Test range of quadratic, which could be exact, but need not be
     ValidatedTaylorModel t2 = x0*x0+x0;
-    ARIADNE_TEST_BINARY_PREDICATE(refines,t2.range(),Interval(-2,+2));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,Interval(-0.25,+2),t2.range());
-    if(!subset(t2.range(),Interval(-0.2578125,2.0))) { ARIADNE_TEST_WARN("ValidatedTaylorModel::range() not exact for quadratic functions."); }
+    ARIADNE_TEST_BINARY_PREDICATE(refines,t2.range(),ExactInterval(-2,+2));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,ExactInterval(-0.25,+2),t2.range());
+    if(!subset(t2.range(),ExactInterval(-0.2578125,2.0))) { ARIADNE_TEST_WARN("ValidatedTaylorModel::range() not exact for quadratic functions."); }
 }
 
 void TestTaylorModel::test_functions()

@@ -77,7 +77,7 @@ subdivide(const BS& bs, const Float& r)
 void
 accumulate(Float& value, Float& error, uint n, const Float* aptr, const Float* bptr)
 {
-    Interval v=Interval(value);
+    ExactInterval v=ExactInterval(value);
     for(uint i=0; i!=n; ++i) {
         v+=aptr[i]*bptr[i];
     }
@@ -86,7 +86,7 @@ accumulate(Float& value, Float& error, uint n, const Float* aptr, const Float* b
 }
 
 Vector<Float>
-row_norms(const Matrix<Interval>& A)
+row_norms(const Matrix<ExactInterval>& A)
 {
     uint const& m=A.row_size();
     uint const& n=A.column_size();
@@ -100,7 +100,7 @@ row_norms(const Matrix<Interval>& A)
 }
 
 Vector<Float>
-row_errors(const Matrix<Interval>& A)
+row_errors(const Matrix<ExactInterval>& A)
 {
     uint const& m=A.row_size();
     uint const& n=A.column_size();
@@ -114,7 +114,7 @@ row_errors(const Matrix<Interval>& A)
 }
 
 Vector<Float>
-errors(const Vector<Interval>& pt)
+errors(const Vector<ExactInterval>& pt)
 {
     Vector<Float> result(pt.size());
     for(uint i=0; i!=pt.size(); ++i) {
@@ -125,7 +125,7 @@ errors(const Vector<Interval>& pt)
 
 
 Vector<Float>
-row_errors(const Vector<Interval>& pt, const Matrix<Interval>& A)
+row_errors(const Vector<ExactInterval>& pt, const Matrix<ExactInterval>& A)
 {
     assert(pt.size()==A.row_size());
     Vector<Float> result(pt.size());
@@ -214,21 +214,21 @@ Zonotope::Zonotope(const Vector<Float>& c, const Matrix<Float>& G)
 }
 
 
-Zonotope::Zonotope(const Vector<Interval>& c, const Matrix<Float>& G)
+Zonotope::Zonotope(const Vector<ExactInterval>& c, const Matrix<Float>& G)
     : _centre(midpoint(c)), _generators(G), _error(errors(c))
 {
     assert(c.size()==G.row_size());
 }
 
 
-Zonotope::Zonotope(const Vector<Float>& c, const Matrix<Interval>& G)
+Zonotope::Zonotope(const Vector<Float>& c, const Matrix<ExactInterval>& G)
     : _centre(c), _generators(midpoint(G)), _error(row_errors(G))
 {
     assert(c.size()==G.row_size());
 }
 
 
-Zonotope::Zonotope(const Vector<Interval>& c, const Matrix<Interval>& G)
+Zonotope::Zonotope(const Vector<ExactInterval>& c, const Matrix<ExactInterval>& G)
     : _centre(midpoint(c)), _generators(midpoint(G)), _error(row_errors(c,G))
 {
     assert(c.size()==G.row_size());
@@ -302,23 +302,23 @@ Zonotope::error() const
 }
 
 
-Vector<Interval>
+Vector<ExactInterval>
 Zonotope::domain() const
 {
-    return Vector<Interval>(this->number_of_generators(),Interval(-1,1));
+    return Vector<ExactInterval>(this->number_of_generators(),ExactInterval(-1,1));
 }
 
 
-Box
+ExactBox
 Zonotope::bounding_box() const
 {
     const Zonotope& z=*this;
 //    std::cerr<<"zD="<<z.domain()<<"\n";
 //    std::cerr<<"zc="<<make_exact(z.centre())<<"\n";
 //    std::cerr<<"zG="<<make_exact(z.generators())<<"\n";
-//    std::cerr<<"ze"<<make_exact(z.error())*Interval(-1,1)<<"\n";
+//    std::cerr<<"ze"<<make_exact(z.error())*ExactInterval(-1,1)<<"\n";
 //    std::cerr<<"zG*E"<<make_exact(z.generators())*z.domain()<<"\n";
-    Box b=make_exact(z.centre())+(make_exact(z.generators())*z.domain())+make_exact(z.error())*Interval(-1,1);
+    ExactBox b=make_exact(z.centre())+(make_exact(z.generators())*z.domain())+make_exact(z.error())*ExactInterval(-1,1);
 //    std::cerr<<"bb="<<b<<"\n";
     return b;
 }
@@ -339,16 +339,16 @@ Zonotope::contains(const ExactPoint& pt) const
 
 
 tribool
-Zonotope::separated(const Box& bx) const
+Zonotope::separated(const ExactBox& bx) const
 {
-    return Ariadne::separated(*this,Box(bx));
+    return Ariadne::separated(*this,ExactBox(bx));
 }
 
 
 tribool
-Zonotope::inside(const Box& bx) const
+Zonotope::inside(const ExactBox& bx) const
 {
-    return Ariadne::inside(*this,Box(bx));
+    return Ariadne::inside(*this,ExactBox(bx));
 }
 
 
@@ -394,7 +394,7 @@ radius(const Zonotope& z)
 
 
 
-Box
+ExactBox
 bounding_box(const Zonotope& z)
 {
     return z.bounding_box();
@@ -406,7 +406,7 @@ ListSet< Zonotope >
 split(const Zonotope& z)
 {
     // FIXME: Not quite guarenteed to give an over-approximation
-    typedef Interval I;
+    typedef ExactInterval I;
 
 
     ListSet< Zonotope  > result;
@@ -467,7 +467,7 @@ split(const Zonotope& z)
 
 
 
-Zonotope::Zonotope(const Box& r)
+Zonotope::Zonotope(const ExactBox& r)
     : _centre(r.size()), _generators(r.size(),r.size()), _error(r.size())
 {
     uint d=r.size();
@@ -537,7 +537,7 @@ Zonotope
 orthogonal_over_approximation(const Zonotope& z)
 {
     //assert(iz.size()==iz.number_of_generators());
-    typedef Interval I;
+    typedef ExactInterval I;
     Zonotope ez=error_free_over_approximation(z);
 
     const Vector<Float>& c=ez.centre();
@@ -546,11 +546,11 @@ orthogonal_over_approximation(const Zonotope& z)
     Matrix<Float> aQ,aR;
     make_lpair(aQ,aR)=qr_approx(G);
 
-    Matrix<Interval> aQinv=inverse(aQ);
-    Matrix<Interval> iR=aQinv*G;
+    Matrix<ExactInterval> aQinv=inverse(aQ);
+    Matrix<ExactInterval> iR=aQinv*G;
     DiagonalMatrix<Float> aD(::row_norms(iR));
 
-    Matrix<Interval> niG=aQ*aD;
+    Matrix<ExactInterval> niG=aQ*aD;
 
     return Zonotope(c,niG);
 }
@@ -667,7 +667,7 @@ orthogonal_approximation(const Zonotope& z)
 
 /*
 
-Zonotope<Interval,R>
+Zonotope<ExactInterval,R>
 orthogonal_over_approximation(const Zonotope<R,R>& z)
 {
     // FIXME: Subdivide in zero order as well!
@@ -678,19 +678,19 @@ orthogonal_over_approximation(const Zonotope<R,R>& z)
     }
     Zonotope<R,R> oaz=over_approximation(z);
 
-    QRMatrix< Interval > QR(oaz.generators());
-    ExactPoint< Interval > c(oaz.centre());
+    QRMatrix< ExactInterval > QR(oaz.generators());
+    ExactPoint< ExactInterval > c(oaz.centre());
     Matrix<Float> G(z.size(),z.number_of_generators());
 
-    Matrix< Interval > q=QR.Q();
-    Matrix< Interval > r=QR.R();
+    Matrix< ExactInterval > q=QR.Q();
+    Matrix< ExactInterval > r=QR.R();
     for(uint i=0; i!=z.size();++i) {
-        Interval a=0;
+        ExactInterval a=0;
         for(uint j=i; j!=z.number_of_generators(); ++j) {
             a+=r[i][j];
         }
         for(uint k=0; k!=z.size(); ++k) {
-            Interval b=q(k,i)*a;
+            ExactInterval b=q(k,i)*a;
             G(k,i)=b.midpoint();
             c[k]+=(b-b.midpoint());
         }
@@ -699,77 +699,77 @@ orthogonal_over_approximation(const Zonotope<R,R>& z)
 }
 
 
-Zonotope<Interval,R>
-orthogonal_over_approximation(const Zonotope<Interval,R>& z)
+Zonotope<ExactInterval,R>
+orthogonal_over_approximation(const Zonotope<ExactInterval,R>& z)
 {
     Zonotope<R,R> oaz=over_approximation(z);
 
-    QRMatrix< Interval > QR(oaz.generators());
-    ExactPoint< Interval > c(oaz.centre());
+    QRMatrix< ExactInterval > QR(oaz.generators());
+    ExactPoint< ExactInterval > c(oaz.centre());
     Matrix<Float> G(z.size(),z.number_of_generators());
 
-    Matrix< Interval > q=QR.Q();
-    Matrix< Interval > r=QR.R();
+    Matrix< ExactInterval > q=QR.Q();
+    Matrix< ExactInterval > r=QR.R();
     for(uint i=0; i!=z.size();++i) {
-        Interval a=0;
+        ExactInterval a=0;
         for(uint j=i; j!=z.number_of_generators(); ++j) {
             a+=r[i][j];
         }
         for(uint k=0; k!=z.size(); ++k) {
-            Interval b=q(k,i)*a;
+            ExactInterval b=q(k,i)*a;
             G(k,i)=b.midpoint();
             c[k]+=(b-b.midpoint());
         }
     }
-    return Zonotope<Interval,R>(c,G);
+    return Zonotope<ExactInterval,R>(c,G);
 }
 
 
-Zonotope< Interval >
-orthogonal_over_approximation(const Zonotope< Interval >& z)
+Zonotope< ExactInterval >
+orthogonal_over_approximation(const Zonotope< ExactInterval >& z)
 {
     Zonotope<R,R> oaz=over_approximation(z);
 
-    QRMatrix< Interval > QR(oaz.generators());
-    ExactPoint< Interval > c(oaz.centre());
+    QRMatrix< ExactInterval > QR(oaz.generators());
+    ExactPoint< ExactInterval > c(oaz.centre());
     Matrix<Float> G(z.size(),z.number_of_generators());
 
-    Matrix< Interval > q=QR.Q();
-    Matrix< Interval > r=QR.R();
+    Matrix< ExactInterval > q=QR.Q();
+    Matrix< ExactInterval > r=QR.R();
     for(uint i=0; i!=z.size();++i) {
-        Interval a=0;
+        ExactInterval a=0;
         for(uint j=i; j!=z.number_of_generators(); ++j) {
             a+=r[i][j];
         }
         for(uint k=0; k!=z.size(); ++k) {
-            Interval b=q(k,i)*a;
+            ExactInterval b=q(k,i)*a;
             G(k,i)=b.midpoint();
             c[k]+=(b-b.midpoint());
         }
     }
-    return Zonotope< Interval >(c,G);
+    return Zonotope< ExactInterval >(c,G);
 }
 */
 
 Zonotope apply(const ValidatedVectorFunction& f, const Zonotope& z) {
     std::cerr<<"Zonotope apply(ValidatedVectorFunction,Zonotope)\n";
-    IntervalVector zc=z.centre();
-    IntervalMatrix zG=z.generators();
-    IntervalVector ze=z.error()*Interval(-1,+1);
-    IntervalVector zb=z.bounding_box();
+    ExactIntervalVector zc=z.centre();
+    ExactIntervalMatrix zG=z.generators();
+    ExactIntervalVector ze=z.error()*ExactInterval(-1,+1);
+    ExactIntervalVector zb=z.bounding_box();
 
-    IntervalVector fc=apply(f,zc);
-    IntervalMatrix fJb=jacobian(f,zb);
-    IntervalMatrix fJbzG=fJb*zG;
+    ExactIntervalVector fc=apply(f,zc);
+    ExactIntervalMatrix fJb=jacobian(f,zb);
+    ExactIntervalMatrix fJbzG=fJb*zG;
 
     std::cerr<<"  fJb="<<fJb<<"\n";
 
     FloatVector nzc = midpoint(fc);
     FloatMatrix nzG = midpoint(fJbzG);
 
-    IntervalVector zE(z.number_of_generators(),Interval(-1,+1));
+    ExactIntervalVector zE(z.number_of_generators(),ExactInterval(-1,+1));
 
-    IntervalVector nzE=(fc-IntervalVector(nzc)) + (fJbzG-IntervalMatrix(nzG))*zE + fJb*ze;
+    ExactIntervalVector nzE=(fc-ExactIntervalVector(nzc)) + (fJbzG-ExactIntervalMatrix(nzG))*zE + fJb*ze;
 
     FloatVector nze(nzE.size()); for(uint i=0; i!=nze.size(); ++i) { nze[i]=nzE[i].upper(); }
     std::cerr<<"  nzE="<<nzE<<"\n";
@@ -823,14 +823,14 @@ operator>>(std::istream& is, Zonotope& z)
 
 
 tribool
-inside(const Zonotope& z, const Box& bx)
+inside(const Zonotope& z, const ExactBox& bx)
 {
     return z.bounding_box().inside(bx) || indeterminate;
 }
 
 
 tribool
-overlaps(const Zonotope& z, const Box& bx)
+overlaps(const Zonotope& z, const ExactBox& bx)
 {
     return !separated(z,bx);
 }
@@ -840,12 +840,12 @@ overlaps(const Zonotope& z, const Box& bx)
  * Here, A=[I,z.G], b=z.c, l=[r.l,-o], u=[r.u,+o]
  */
 tribool
-separated(const Zonotope& z, const Box& bx)
+separated(const Zonotope& z, const ExactBox& bx)
 {
     ARIADNE_ASSERT(z.dimension()==bx.dimension());
     size_t d=z.dimension();
     size_t ng=z.number_of_generators();
-    Vector<Interval> ebx=bx+Interval(-1,1)*make_exact(z.error());
+    Vector<ExactInterval> ebx=bx+ExactInterval(-1,1)*make_exact(z.error());
     const Vector<Float>& zc=z.centre();
     const Matrix<Float>& zG=z.generators();
     Matrix<Float> A(d,d+ng);

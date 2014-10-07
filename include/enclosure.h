@@ -87,28 +87,28 @@ class Enclosure
     : public DrawableInterface
     , public CompactSetInterface
 {
-    Box _domain;
+    ExactBox _domain;
     ValidatedVectorFunctionModel _space_function;
     ValidatedScalarFunctionModel _time_function;
     ValidatedScalarFunctionModel _dwell_time_function;
     List<ValidatedConstraintModel> _constraints;
     ValidatedFunctionModelFactoryInterface* _function_factory_ptr;
-    mutable Box _reduced_domain;
+    mutable ExactBox _reduced_domain;
     mutable bool _is_fully_reduced;
   public:
     //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
     explicit Enclosure();
     //! \brief Construct a representation of the box \a bx.
-    explicit Enclosure(const Box& bx, const ValidatedFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const ExactBox& bx, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d and image function \a f.
-    explicit Enclosure(const Box& d, const ValidatedVectorFunction& f, const ValidatedFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const ExactBox& d, const ValidatedVectorFunction& f, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d, image function \a f and constraints \a c.
-    explicit Enclosure(const Box& d, const ValidatedVectorFunction& f, const List<ValidatedConstraint>& c, const ValidatedFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const ExactBox& d, const ValidatedVectorFunction& f, const List<ValidatedConstraint>& c, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with parameter domain \a d, image function \a sf, time function \a tf and constraints \a c.
-    explicit Enclosure(const Box& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction& tf, const List<ValidatedConstraint>& c, const ValidatedFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const ExactBox& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction& tf, const List<ValidatedConstraint>& c, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief Construct the set with domain \a d, space function \a sf, time function \a tf, negative constraints \a g and equality constraints \a h.
     //!   (Not currently implemented.)
-    explicit Enclosure(const Box& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction tf, const ValidatedVectorFunction& g, const ValidatedVectorFunction& h, const ValidatedFunctionModelFactoryInterface& fac);
+    explicit Enclosure(const ExactBox& d, const ValidatedVectorFunction& sf, const ValidatedScalarFunction tf, const ValidatedVectorFunction& g, const ValidatedVectorFunction& h, const ValidatedFunctionModelFactoryInterface& fac);
     //! \brief Construct from an exact bounded constraint \a set.
     explicit Enclosure(const BoundedConstraintSet& set, const ValidatedFunctionModelFactoryInterface& fac);
 
@@ -118,25 +118,25 @@ class Enclosure
     //! \brief The class used to create new function instances.
     const ValidatedFunctionModelFactoryInterface& function_factory() const;
     //! \brief The parameter domain \f$D\f$.
-    Box domain() const;
-    Box parameter_domain() const;
+    ExactBox domain() const;
+    ExactBox parameter_domain() const;
     //! \brief A subset of the parameter domain containing all feasible points.
-    Box reduced_domain() const;
+    ExactBox reduced_domain() const;
     //! \brief An over-approximation to the image of \f$D\f$ under \f$f\f$.
-    Box codomain() const;
+    ExactBox codomain() const;
     //! \brief The image function \f$f\f$.
     ValidatedVectorFunctionModel const& function() const;
     ValidatedVectorFunctionModel const& space_function() const;
     ValidatedScalarFunctionModel const& time_function() const;
     ValidatedScalarFunctionModel const& dwell_time_function() const;
     ValidatedVectorFunctionModel const constraint_function() const;
-    Box const constraint_bounds() const;
+    ExactBox const constraint_bounds() const;
 
     //! \brief Introduces a new parameter with values in the interval \a ivl. The set itself does not change.
-    void new_parameter(Interval ivl);
+    void new_parameter(ExactInterval ivl);
     //! \brief Introduces a new independent variable with values in the interval \a ivl.
     //! Equivalent to constructing the set \f$S\times I\f$.
-    void new_variable(Interval ivl);
+    void new_variable(ExactInterval ivl);
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
     void substitute(uint j, ValidatedScalarFunctionModel v);
@@ -217,11 +217,11 @@ class Enclosure
     //! May return \c false if the set can (easily) be proved to be nonempty.
     tribool empty() const;
     //! \brief Returns \c true if the set can be shown to be disjoint from \a bx.
-    tribool separated(const Box& bx) const;
+    tribool separated(const ExactBox& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
-    tribool inside(const Box& bx) const;
+    tribool inside(const ExactBox& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
-    tribool subset(const Box& bx) const;
+    tribool subset(const ExactBox& bx) const;
 
     //! \brief Reduces the size of the effective parameter domain
     //! by pruning away infeasible points. Does not affect the set as a mathematical entity.
@@ -235,9 +235,9 @@ class Enclosure
     //! \brief Restrict the parameter domain to \a subdomain.
     //! \details May also restrict the domain of the defining function models,
     //! resulting in more accurate computations.
-    void restrict(const Box& subdomain);
+    void restrict(const ExactBox& subdomain);
     //! \brief The set obtained by restricting to the \a subdomain.
-    Enclosure restriction(const Box& subdomain) const;
+    Enclosure restriction(const ExactBox& subdomain) const;
 
     //! \brief Compute an outer approximation on the \a grid to the given \a depth.
     GridTreeSet outer_approximation(const Grid& grid, int depth) const;
@@ -274,11 +274,11 @@ class Enclosure
     ValidatedAffineConstrainedImageSet affine_over_approximation() const;
 
     //! \brief A collection of parameter subdomains chosen to make the bounding boxes as small as possible.
-    List<Box> splitting_subdomains_zeroth_order() const;
+    List<ExactBox> splitting_subdomains_zeroth_order() const;
     //! \brief A collection of parameter subdomains chosen to make the set as close to affine as possible.
-    List<Box> splitting_subdomains_first_order() const;
+    List<ExactBox> splitting_subdomains_first_order() const;
     //! \brief Split into subsets based on the given subdomains.
-    List<Enclosure> split(const List<Box>& subdomains);
+    List<Enclosure> split(const List<ExactBox>& subdomains);
 
     //! \brief The direction along which the set should be split to reduce the bounding box.
     uint splitting_index_zeroth_order() const;
@@ -314,8 +314,8 @@ class Enclosure
     void _solve_zero_constraints();
     EffectiveVectorFunction real_function() const;
   private:
-    friend Enclosure product(const Enclosure&, const Interval&);
-    friend Enclosure product(const Enclosure&, const Box&);
+    friend Enclosure product(const Enclosure&, const ExactInterval&);
+    friend Enclosure product(const Enclosure&, const ExactBox&);
     friend Enclosure product(const Enclosure&, const Enclosure&);
 };
 
@@ -323,9 +323,9 @@ class Enclosure
 inline std::ostream& operator<<(std::ostream& os, const Enclosure& s) { return s.write(os); }
 
 //! \related Enclosure \brief The Cartesian product of a constrained image set with an interval in one dimension.
-Enclosure product(const Enclosure& set, const Interval& ivl);
+Enclosure product(const Enclosure& set, const ExactInterval& ivl);
 //! \related Enclosure \brief The Cartesian product of a constrained image set with a box.
-Enclosure product(const Enclosure& set, const Box& bx);
+Enclosure product(const Enclosure& set, const ExactBox& bx);
 //! \related Enclosure \brief The Cartesian product of two constrained image sets.
 //! \precondition The time function of each set is constant with the same value.
 Enclosure product(const Enclosure& set1, const Enclosure& set2);

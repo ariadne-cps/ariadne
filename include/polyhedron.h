@@ -42,7 +42,7 @@
 namespace Ariadne {
 
 
-class Box;
+class ExactBox;
 class Polytope;
 class Polyhedron;
 
@@ -77,7 +77,7 @@ class Polyhedron
     explicit Polyhedron(const Matrix<Float>& A, const Vector<Float>& b);
 
     //! \brief Convert from a box.
-    explicit Polyhedron(const Box& bx);
+    explicit Polyhedron(const ExactBox& bx);
 
     //! \brief Convert from a polytope.
     explicit Polyhedron(const Polytope& p);
@@ -113,13 +113,13 @@ class Polyhedron
     virtual tribool bounded() const;
 
     //! \brief Tests if the polyhedron intersects a box. (Not currently implemented.)
-    virtual tribool overlaps(const Box& bx) const;
+    virtual tribool overlaps(const ExactBox& bx) const;
 
     //! \brief Tests if the polyhedron is a superset of a box. (Not currently implemented.)
-    virtual tribool covers(const Box& bx) const;
+    virtual tribool covers(const ExactBox& bx) const;
 
     //! \brief Tests if the polyhedron is disjoint from a box. (Not currently implemented.)
-    virtual tribool separated(const Box& bx) const;
+    virtual tribool separated(const ExactBox& bx) const;
 
     //! \brief The \a i<sup>th</sup> defining halfspace.
     Polyhedron halfspace(size_t i) const;
@@ -131,7 +131,7 @@ class Polyhedron
     friend Polyhedron intersection(const Polyhedron& p1, const Polyhedron& p2);
 
     //! \brief Convert a box to a polyhedron.
-    friend Polyhedron polyhedron(const Box& p);
+    friend Polyhedron polyhedron(const ExactBox& p);
 
     //! \brief Convert a polytope to a polyhedron. (Not currently implemented)
     friend Polyhedron polyhedron(const Polytope& p);

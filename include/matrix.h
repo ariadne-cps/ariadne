@@ -54,7 +54,7 @@ class SingularMatrixException {
 
 template<class X> class Matrix;
 typedef Matrix<Float> FloatMatrix;
-typedef Matrix<Interval> IntervalMatrix;
+typedef Matrix<ExactInterval> ExactIntervalMatrix;
 typedef Matrix<UpperInterval> UpperIntervalMatrix;
 
 typedef Matrix<ApproximateFloat> ApproximateFloatMatrix;
@@ -251,7 +251,7 @@ class Matrix
     friend template<class X> Matrix<X> solve(const Matrix<X>& A, const Matrix<X>& b);
 
     //! \brief The midpoint of an interval matrix.
-    friend Matrix<Float> midpoint(const Matrix<Interval>& A);
+    friend Matrix<Float> midpoint(const Matrix<ExactInterval>& A);
     friend Matrix<Float> midpoint(const Matrix<UpperInterval>& A);
 
     //! \brief Write to an output stream.
@@ -720,7 +720,7 @@ Tuple< Matrix<ApproximateFloatType>, Matrix<ApproximateFloatType>, PivotMatrix >
 Matrix<ApproximateFloatType> normalise_rows(const Matrix<ApproximateFloatType>& A);
 
 Matrix<ExactFloat> midpoint(const Matrix<ValidatedFloat>&);
-Matrix<Float> midpoint(const Matrix<Interval>&);
+Matrix<Float> midpoint(const Matrix<ExactInterval>&);
 Matrix<Float> midpoint(const Matrix<UpperInterval>&);
 Matrix<Rational> midpoint(const Matrix<Rational>&);
 

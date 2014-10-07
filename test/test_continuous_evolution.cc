@@ -108,9 +108,9 @@ void TestContinuousEvolution::test() const
     ARIADNE_TEST_PRINT(integrator);
 
     // Define the initial box
-    Box initial_box(2);
-    initial_box[0]=Interval(1.01,1.02);
-    initial_box[1]=Interval(0.51,0.52);
+    ExactBox initial_box(2);
+    initial_box[0]=ExactInterval(1.01,1.02);
+    initial_box[1]=ExactInterval(0.51,0.52);
 
     // cout << "initial_box=" << initial_box << endl;
 
@@ -143,7 +143,7 @@ void TestContinuousEvolution::test() const
     // cout << "evolve_set=" << hybrid_evolve_set << endl;
     // cout << "reach_set=" << hybrid_reach_set << endl;
     Figure fig;
-    fig.set_bounding_box(Box{{-1.0,+21.0},{-1.125,+1.125}});
+    fig.set_bounding_box(ExactBox{{-1.0,+21.0},{-1.125,+1.125}});
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(magenta) << orbit.intermediate();
     fig << fill_colour(red) << orbit.final();
@@ -170,7 +170,7 @@ void TestContinuousEvolution::failure_test() const
                                       step_maximum_error=1e-8,step_sweep_threshold=1e-10,maximum_temporal_order=6);
 
     // Define the initial box
-    Box initial_box = Box{{0.0,0.0},{0.9,0.9}};
+    ExactBox initial_box = ExactBox{{0.0,0.0},{0.9,0.9}};
 
     // cout << "initial_box=" << initial_box << endl;
 
@@ -218,7 +218,7 @@ void TestContinuousEvolution::failure_test() const
     evolvertwo.configuration().maximum_enclosure_radius(enclosure_radius);
     evolvertwo.configuration().maximum_step_size(step_size);
 
-    Box initial_box2 = Box{{0.0,0.0},{1.0,1.0},{1.0,1.0}};
+    ExactBox initial_box2 = ExactBox{{0.0,0.0},{1.0,1.0},{1.0,1.0}};
     initial_set = EnclosureType(initial_box2,function_factory);
 
     time = 1.5;

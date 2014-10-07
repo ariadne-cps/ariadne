@@ -68,9 +68,9 @@ class FlowFunctionModel
   public:
     FlowFunctionModel(const ValidatedVectorFunctionModel& f) : ValidatedVectorFunctionModel(f) { }
     ExactFloat step_size() const { return make_exact(this->time_domain().upper()); }
-    Interval time_domain() const { return this->domain()[this->domain().size()-1]; }
-    Box space_domain() const { return Box(project(this->domain(),Ariadne::range(0,this->domain().size()-1))); }
-    Box const codomain() const { return this->ValidatedVectorFunctionModel::codomain(); }
+    ExactInterval time_domain() const { return this->domain()[this->domain().size()-1]; }
+    ExactBox space_domain() const { return ExactBox(project(this->domain(),Ariadne::range(0,this->domain().size()-1))); }
+    ExactBox const codomain() const { return this->ValidatedVectorFunctionModel::codomain(); }
 };
 
 struct TransitionData;
@@ -247,7 +247,7 @@ class HybridEvolverBase
     virtual
     ValidatedVectorFunctionModel
     _compute_flow(EffectiveVectorFunction vector_field,
-                  Box const& initial_set,
+                  ExactBox const& initial_set,
                   const ExactFloatType& maximum_step_size) const;
 
     //! \brief Compute the active events for the \a flow \f$\phi\f$ with
@@ -558,7 +558,7 @@ struct CrossingData
     //! during a crossing. e.g. INCREASING
     CrossingKind crossing_kind;
     //! \brief The range of times at which the crossing may occur.
-    Interval crossing_time_range;
+    ExactInterval crossing_time_range;
     //! \brief The time \f$\gamma(x)\f$ at which the crossing occurs,
     //! as a function of the initial point in space. Satisfies \f$g(\phi(x,\gamma(x)))=0\f$.
     ValidatedScalarFunctionModel crossing_time;
@@ -627,7 +627,7 @@ struct TimingData
         //!< The time \f$\delta(s)\f$ used in a \a PARAMETER_DEPENDENT_EVOLUTION_TIME step.
         //! Set equal to \f$\varepsilon(\xi(s))\f$ for a \a SPACE_DEPENDENT_EVOLUTION_TIME
         //! and \f$\omega(s)-\varepsilon(s)\f$ for an \a PARAMETER_DEPENDENT_FINISHING_TIME.
-    Interval evolution_time_domain; //!< The time domain of the flow function, equal to \f$[0,h]\f$.
+    ExactInterval evolution_time_domain; //!< The time domain of the flow function, equal to \f$[0,h]\f$.
     ValidatedScalarFunctionModel evolution_time_coordinate; //!< The time coordinate of the flow function, equal to the identity on \f$[0,h]\f$.
 };
 

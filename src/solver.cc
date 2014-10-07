@@ -176,13 +176,13 @@ Vector<ValidatedNumberType>
 SolverBase::solve(const ValidatedVectorFunction& f,
                   const Vector<ValidatedNumberType>& ix) const
 {
-    Box bx(ix);
+    ExactBox bx(ix);
     return this->solve(f,bx);
 }
 
 Vector<ValidatedNumberType>
 SolverBase::solve(const ValidatedVectorFunction& f,
-                  const Box& bx) const
+                  const ExactBox& bx) const
 {
     Set< Vector<ValidatedNumberType> > r = this->solve_all(f,bx);
     if(r.size()==0u) { ARIADNE_THROW(NoSolutionException,"SolverBase::solve","no solution in solve("<<f<<","<<bx<<")"); }
@@ -194,11 +194,11 @@ void
 solve_all(Set< Vector<ValidatedNumberType> >& r,
           const SolverInterface& s,
           const ValidatedVectorFunction& f,
-          const Box& ix);
+          const ExactBox& ix);
 
 Set< Vector<ValidatedNumberType> >
 SolverBase::solve_all(const ValidatedVectorFunction& f,
-                      const Box& bx) const
+                      const ExactBox& bx) const
 {
     ARIADNE_LOG(5,"SolverBase::solve_all(f,bx): f="<<f<<", ix="<<bx<<"\n");
 
@@ -268,7 +268,7 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
         }
 
         //std::cerr<<"  Splitting "<<bx<<"\n";
-        std::pair< Vector<Interval>, Vector<Interval> > splt=split(bx);
+        std::pair< Vector<ExactInterval>, Vector<ExactInterval> > splt=split(bx);
         r.adjoin(this->solve_all(f,splt.first));
         r.adjoin(this->solve_all(f,splt.second));
     }
@@ -282,7 +282,7 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
 
 Vector<ValidatedNumberType>
 SolverBase::zero(const ValidatedVectorFunction& f,
-                 const Box& bx) const
+                 const ExactBox& bx) const
 {
     const double& e=this->maximum_error();
     uint n=this->maximum_number_of_steps();
@@ -324,7 +324,7 @@ SolverBase::zero(const ValidatedVectorFunction& f,
 
 
 Vector<ValidatedNumberType>
-SolverBase::fixed_point(const ValidatedVectorFunction& f, const Box& bx) const
+SolverBase::fixed_point(const ValidatedVectorFunction& f, const ExactBox& bx) const
 {
     ValidatedVectorFunction id=ValidatedVectorFunction::identity(f.argument_size());
     return this->solve(f-id,bx);
@@ -333,10 +333,10 @@ SolverBase::fixed_point(const ValidatedVectorFunction& f, const Box& bx) const
 
 ValidatedVectorFunctionModel
 SolverBase::implicit(const ValidatedVectorFunction& f,
-                      const Box& ip,
-                      const Box& ix) const
+                      const ExactBox& ip,
+                      const ExactBox& ix) const
 {
-    ARIADNE_LOG(4,"SolverBase::implicit(ValidatedVectorFunction f, IntervalVector ip, IntervalVector ix)\n");
+    ARIADNE_LOG(4,"SolverBase::implicit(ValidatedVectorFunction f, ExactIntervalVector ip, ExactIntervalVector ix)\n");
     ARIADNE_LOG(5,"f="<<f<<"\n");
     ARIADNE_ASSERT(f.result_size()==ix.size());
     ARIADNE_ASSERT(f.argument_size()==ip.size()+ix.size());
@@ -409,20 +409,20 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
 
 ValidatedScalarFunctionModel
 SolverBase::implicit(const ValidatedScalarFunction& f,
-                     const Box& ip,
-                     const Interval& ix) const
+                     const ExactBox& ip,
+                     const ExactInterval& ix) const
 {
-    ARIADNE_LOG(4,"SolverBase::implicit(ValidatedScalarFunction f, IntervalVector ip, Interval ix)\n");
+    ARIADNE_LOG(4,"SolverBase::implicit(ValidatedScalarFunction f, ExactIntervalVector ip, ExactInterval ix)\n");
     ARIADNE_LOG(5,"f="<<f<<"\n");
-    ValidatedVectorFunctionModel res=this->implicit(ValidatedVectorFunction(List<ValidatedScalarFunction>(1u,f)),ip,Box(1u,ix));
+    ValidatedVectorFunctionModel res=this->implicit(ValidatedVectorFunction(List<ValidatedScalarFunction>(1u,f)),ip,ExactBox(1u,ix));
     return res[0];
 }
 
 ValidatedVectorFunctionModel
 SolverBase::continuation(const ValidatedVectorFunction& f,
                          const Vector<ApproximateNumberType>& p,
-                         const Box& ix,
-                         const Box& ip) const
+                         const ExactBox& ix,
+                         const ExactBox& ip) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -543,7 +543,7 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     Matrix<UpperInterval> rngJ(n,n);
     for(uint i=0; i!=n; ++i) {
         for(uint j=0; j!=n; ++j) {
-            UpperInterval D2fij=Interval(unchecked_evaluate(D2f[i][j],make_singleton(join(id.range(),h.range()))));
+            UpperInterval D2fij=ExactInterval(unchecked_evaluate(D2f[i][j],make_singleton(join(id.range(),h.range()))));
             rngJ[i][j]=intersection(J[i][j].range(),D2fij);
         }
     }
@@ -616,11 +616,11 @@ KrawczykSolver::implicit_step(const ValidatedVectorFunction& f,
 /*
 ValidatedScalarFunctionModel
 IntervalNewtonSolver::implicit(const ValidatedScalarFunction& f,
-                               const Box& ip,
-                               const Interval& ix) const
+                               const ExactBox& ip,
+                               const ExactInterval& ix) const
 {
     return this->SolverBase::implicit(f,ip,ix);
-    ARIADNE_LOG(4,"IntervalNewtonSolver::implicit(ValidatedScalarFunction f, IntervalVector P, Interval X)\n");
+    ARIADNE_LOG(4,"IntervalNewtonSolver::implicit(ValidatedScalarFunction f, ExactIntervalVector P, ExactInterval X)\n");
     ARIADNE_LOG(5,"f="<<f<<"\n");
     ARIADNE_LOG(5,"P="<<ip<<"\n");
     ARIADNE_LOG(5,"X="<<std::setprecision(17)<<ix<<"\n");
@@ -630,15 +630,15 @@ IntervalNewtonSolver::implicit(const ValidatedScalarFunction& f,
     ARIADNE_LOG(5,"df="<<df<<"\n");
 
     // Simple check to see if there is definitely no solution
-    Interval fipix=evaluate(f,join(ip,ix));
+    ExactInterval fipix=evaluate(f,join(ip,ix));
     ARIADNE_LOG(5,"f(P,X)="<<fipix<<"\n");
-    ARIADNE_LOG(5,"f(p,X)="<<f(join(IntervalVector(midpoint(ip)),ix))<<"\n");
+    ARIADNE_LOG(5,"f(p,X)="<<f(join(ExactIntervalVector(midpoint(ip)),ix))<<"\n");
     if(fipix.lower()>0.0 || fipix.upper()<0.0) {
         ARIADNE_THROW(NoSolutionException,"IntervalNewtonSolver","f(P,X)="<<fipix<<" which does not contain zero.");
     }
 
     // Simple test of nonsingularity of Jacobian
-    Interval dfipix=evaluate(df,join(ip,ix));
+    ExactInterval dfipix=evaluate(df,join(ip,ix));
     ARIADNE_LOG(5,"df(P,X)="<<dfipix<<"\n");
     if(dfipix.lower()<=0.0 && dfipix.upper()>=0.0) {
         ARIADNE_THROW(SingularJacobianException,"IntervalNewtonSolver","df(P,X)="<<dfipix<<" which contains zero.");

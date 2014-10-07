@@ -69,8 +69,8 @@ template<> inline const char* python_name<UpperFloat>(const char* name) {
 template<> inline const char* python_name<ApproximateFloat>(const char* name) {
     return (std::string("ApproximateFloat")+name).c_str(); }
 
-template<> inline const char* python_name<Interval>(const char* name) {
-    return (std::string("Interval")+name).c_str(); }
+template<> inline const char* python_name<ExactInterval>(const char* name) {
+    return (std::string("ExactInterval")+name).c_str(); }
 
 template<class T> struct to_python;
 template<class T> struct to_python_list;

@@ -236,15 +236,15 @@ int main(int argc,char *argv[])
     std::cout << "done." << std::endl;
 
 
-//    Box graphic_box(2, 18.0,32.0 , 5.0,6.0);
-    Box graphic_box(2, skip_time,total_time , 5.0,7.0);
+//    ExactBox graphic_box(2, 18.0,32.0 , 5.0,6.0);
+    ExactBox graphic_box(2, skip_time,total_time , 5.0,7.0);
     Figure g1;
     Array<uint> tx(2,4,0);
     g1.set_bounding_box(graphic_box);
     g1.set_projection_map(ProjectionFunction(tx,5));
-    g1 << Box(2, 18,32, hmax - Delta, hmax + Delta);
+    g1 << ExactBox(2, 18,32, hmax - Delta, hmax + Delta);
     g1 << fill_colour(Colour(0.0,1.0,1.0));
-    g1 << Box(2, 18,32, hmin - Delta, hmin + Delta);
+    g1 << ExactBox(2, 18,32, hmin - Delta, hmin + Delta);
 
     g1 << fill_colour(Colour(0.0,0.5,1.0));
     g1 << result;
@@ -264,7 +264,7 @@ int main(int argc,char *argv[])
     double xmin=100.0;
     double xmax=-100.0;
     for(const_iterator iter=final.begin(); iter != final.end(); ++iter) {
-        Interval x = iter->second.bounding_box()[0];
+        ExactInterval x = iter->second.bounding_box()[0];
         if(x.lower() < xmin) xmin = x.lower();
         if(x.upper() > xmax) xmax = x.upper();
     }
@@ -272,11 +272,11 @@ int main(int argc,char *argv[])
 
     evolution_time.continuous_time=time_step;
 
-    Box graphic_box(2, skip_time-0.1,skip_time+total_time+0.1, -0.1,6.1);
+    ExactBox graphic_box(2, skip_time-0.1,skip_time+total_time+0.1, -0.1,6.1);
     Figure g;
     g.set_bounding_box(graphic_box);
     g << fill_colour(Colour(0.0,1.0,1.0));
-    g << Box(2, skip_time,skip_time+time_step, xmin,xmax);
+    g << ExactBox(2, skip_time,skip_time+time_step, xmin,xmax);
     g << fill_colour(Colour(0.0,0.5,1.0));
 
     std::cout << "Computing upper reach timed set... " << std::flush;
@@ -303,8 +303,8 @@ int main(int argc,char *argv[])
             bool flag = 0;
             for(const_iterator iter2=iter1; iter2 != reach.end() && flag == 0; ++iter2) {
                 if( iter1!= iter2 && iter1->first == iter2->first ) {
-                    Box b1 = iter1->second.bounding_box();
-                    Box b2 = iter2->second.bounding_box();
+                    ExactBox b1 = iter1->second.bounding_box();
+                    ExactBox b2 = iter2->second.bounding_box();
                     if(subset(b1,b2)) {
                         // cout << "iter1 = " << iter1->second << endl ;
                         // cout << "is a subset of iter2 = " << iter1->second << endl;
@@ -323,12 +323,12 @@ int main(int argc,char *argv[])
         xmin=100.0;
         xmax=-100.0;
         for(const_iterator iter=final.begin(); iter != final.end(); ++iter) {
-            Interval x = iter->second.bounding_box()[0];
+            ExactInterval x = iter->second.bounding_box()[0];
             if(x.lower() < xmin) xmin = x.lower();
             if(x.upper() > xmax) xmax = x.upper();
         }
         cout << " xmin = " << xmin << ", xmax = " << xmax << endl << endl;
-        g << Box(2, skip_time+t,skip_time+t+time_step, xmin,xmax);
+        g << ExactBox(2, skip_time+t,skip_time+t+time_step, xmin,xmax);
     }
 
     std::cout << "done." << std::endl;
@@ -336,7 +336,7 @@ int main(int argc,char *argv[])
     g.write("watertank-dominato-orbit");
 
     std::cout << "Orbit="<<orbit<<std::endl;
-    Box bounding_box(2, -0.1,9.1, -0.1,1.1);
+    ExactBox bounding_box(2, -0.1,9.1, -0.1,1.1);
     Figure g;
     g.set_bounding_box(bounding_box);
     Array<uint> p(2,0,1);
@@ -368,7 +368,7 @@ int main(int argc,char *argv[])
 
     std::cout << "Computing evolution starting from location zero_saturated, x = 0.0, y = 0.0" << std::endl;
 
-    Box initial_box2(2, 0.0,0.001, 0.0,0.001);
+    ExactBox initial_box2(2, 0.0,0.001, 0.0,0.001);
     HybridImageSet initial_set2;
     initial_set2[zero_saturated]=initial_box2;
 

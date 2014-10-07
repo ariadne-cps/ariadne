@@ -444,7 +444,7 @@ void set_properties(CanvasInterface& canvas, const GraphicsProperties& propertie
     canvas.set_line_colour(line_colour.red, line_colour.green, line_colour.blue);
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Box& bx) { return os << static_cast<const IntervalVector&>(bx); }
+inline std::ostream& operator<<(std::ostream& os, const ExactBox& bx) { return os << static_cast<const ExactIntervalVector&>(bx); }
 
 void Figure::_paint_all(CanvasInterface& canvas) const
 {
@@ -458,7 +458,7 @@ void Figure::_paint_all(CanvasInterface& canvas) const
     // a drawable object having one. Instead, the bounding box must be
     // specified explicitly
     if(bounding_box.dimension()==0) {
-        bounding_box=Box(dimension,Interval(-1,1));
+        bounding_box=ExactBox(dimension,ExactInterval(-1,1));
     }
 
     // Check projection and bounding box have same values.

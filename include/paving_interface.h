@@ -43,7 +43,7 @@ typedef int Int;
 typedef size_t SizeType;
 typedef std::ostream OutputStream;
 
-class Box;
+class ExactBox;
 class Grid;
 class GridCell;
 
@@ -175,9 +175,9 @@ class SubPavingInterface
     virtual Void set_root_cell(Bool onoff) = 0;
 
     virtual UpperBox bounding_box() const = 0; // Inherited from CompactSetInterface
-    virtual Tribool inside(const Box& bx) const = 0; // Inherited from CompactSetInterface
-    virtual Tribool separated(const Box& bx) const = 0; // Inherited from ClosedSetInterface
-    virtual Tribool overlaps(const Box& bx) const = 0; // Inherited from OvertSetInterface
+    virtual Tribool inside(const ExactBox& bx) const = 0; // Inherited from CompactSetInterface
+    virtual Tribool separated(const ExactBox& bx) const = 0; // Inherited from ClosedSetInterface
+    virtual Tribool overlaps(const ExactBox& bx) const = 0; // Inherited from OvertSetInterface
 
     virtual Void mince(Nat depth) = 0; // Deprecated?
     virtual Void recombine() = 0; // Deprecated?
@@ -222,9 +222,9 @@ class SubPavingHandle
     ForwardConstantIteratorHandle<GridCell> end() const { return this->_ptr->_end(); }
 
     UpperBox bounding_box() const { return this->_ptr->bounding_box(); };
-    Tribool inside(const Box& bx) const { return this->_ptr->inside(bx); }
-    Tribool separated(const Box& bx) const { return this->_ptr->separated(bx); }
-    Tribool overlaps(const Box& bx) const { return this->_ptr->overlaps(bx); }
+    Tribool inside(const ExactBox& bx) const { return this->_ptr->inside(bx); }
+    Tribool separated(const ExactBox& bx) const { return this->_ptr->separated(bx); }
+    Tribool overlaps(const ExactBox& bx) const { return this->_ptr->overlaps(bx); }
 
     Void mince(Nat depth) { this->_ptr->mince(depth); }
     Void recombine() { this->_ptr->recombine(); }
@@ -243,7 +243,7 @@ class PavingInterface
   public:
     virtual PavingInterface* clone() const = 0;
     virtual GridCell smallest_enclosing_primary_cell(const UpperBox& bx) const = 0; // Useful query, but can also be implemented at the Grid level.
-    virtual Void adjoin_cells(const PredicateInterface<Box>& predicate, const Nat depth) { ARIADNE_ABSTRACT_METHOD; }
+    virtual Void adjoin_cells(const PredicateInterface<ExactBox>& predicate, const Nat depth) { ARIADNE_ABSTRACT_METHOD; }
     virtual Void adjoin_outer_approximation(const CompactSetInterface& set, const Nat depth) = 0;
     virtual Void adjoin_inner_approximation(const OpenSetInterface& set, const Nat height, const Nat depth) = 0;
     virtual Void adjoin(const SubPavingInterface& paving) = 0;
@@ -280,12 +280,12 @@ class PavingHandle
     ForwardConstantIteratorHandle<GridCell> begin() const { return this->_ptr->_begin(); }
     ForwardConstantIteratorHandle<GridCell> end() const { return this->_ptr->_end(); }
     UpperBox bounding_box() const { return this->_ptr->bounding_box(); };
-    Tribool inside(const Box& bx) const { return this->_ptr->inside(bx); }
-    Tribool separated(const Box& bx) const { return this->_ptr->separated(bx); }
-    Tribool overlaps(const Box& bx) const { return this->_ptr->overlaps(bx); }
+    Tribool inside(const ExactBox& bx) const { return this->_ptr->inside(bx); }
+    Tribool separated(const ExactBox& bx) const { return this->_ptr->separated(bx); }
+    Tribool overlaps(const ExactBox& bx) const { return this->_ptr->overlaps(bx); }
 
-    //GridCell smallest_enclosing_primary_cell(const Box& bx) const { return this->_ptr->smallest_enclosing_primary_cell(); }
-    Void adjoin_cells(const PredicateInterface<Box>& predicate, const Nat depth) { return this->_ptr->adjoin_cells(predicate,depth); }
+    //GridCell smallest_enclosing_primary_cell(const ExactBox& bx) const { return this->_ptr->smallest_enclosing_primary_cell(); }
+    Void adjoin_cells(const PredicateInterface<ExactBox>& predicate, const Nat depth) { return this->_ptr->adjoin_cells(predicate,depth); }
     Void adjoin_outer_approximation(const CompactSetInterface& set, const Nat depth) { return this->_ptr->adjoin_outer_approximation(set,depth); }
     Void adjoin_inner_approximation(const OpenSetInterface& set, const Nat height, const Nat depth) { return this->_ptr->adjoin_inner_approximation(set,height,depth); }
     Void adjoin(const SubPavingInterface& paving) { return this->_ptr->adjoin(paving); }

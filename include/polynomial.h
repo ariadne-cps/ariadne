@@ -369,14 +369,14 @@ template<class X> inline Polynomial<X>& operator-=(Polynomial<X>& p, double c) {
 template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, double c) { return p*=X(c); }
 template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, double c) { return p/=X(c); }
 
-inline Polynomial<Float> midpoint(const Polynomial<Interval>& p) {
+inline Polynomial<Float> midpoint(const Polynomial<ExactInterval>& p) {
     Polynomial<Float> r(p.argument_size());
-    for(Polynomial<Interval>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+    for(Polynomial<ExactInterval>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
         r.append(iter->key(),static_cast<Float>(midpoint(iter->data()))); }
     return r;
 }
 
-inline Vector< Polynomial<Float> > midpoint(const Vector< Polynomial<Interval> >& p) {
+inline Vector< Polynomial<Float> > midpoint(const Vector< Polynomial<ExactInterval> >& p) {
     Vector< Polynomial<Float> > r(p.size());
     for(uint i=0; i!=p.size(); ++i) {
         r[i]=midpoint(p[i]); }

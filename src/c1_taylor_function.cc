@@ -93,8 +93,8 @@ C1TaylorSeries C1TaylorSeries::coordinate() {
     return result;
 }
 
-Interval C1TaylorSeries::domain() const {
-    return Interval(-1,+1);
+ExactInterval C1TaylorSeries::domain() const {
+    return ExactInterval(-1,+1);
 }
 
 uint C1TaylorSeries::degree() const {
@@ -103,7 +103,7 @@ uint C1TaylorSeries::degree() const {
 
 #define ARIADNE_BOUNDS_INTERVAL_SUM
 #if defined ARIADNE_MIDPOINT_INTERVAL_SUM
-C1TaylorSeries& operator+=(C1TaylorSeries& f, Interval ic) {
+C1TaylorSeries& operator+=(C1TaylorSeries& f, ExactInterval ic) {
     set_rounding_upward();
     Float& fv=f._coefficients[0];
     Float c=ic.midpoint();
@@ -390,7 +390,7 @@ Void C1TaylorFunction::clear() {
     }
 }
 
-C1TaylorFunction& C1TaylorFunction::operator=(Interval ic) {
+C1TaylorFunction& C1TaylorFunction::operator=(ExactInterval ic) {
     this->clear();
     set_rounding_upward();
     Float e=(ic.upper().raw()-ic.lower().raw())/2;

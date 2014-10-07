@@ -37,7 +37,7 @@ namespace Ariadne {
 enum Piece { left=0, right=1, middle=2 };
 
 inline
-uint irmax(const Box& bx) {
+uint irmax(const ExactBox& bx) {
     Float dmax=0.0;
     uint imax=0;
     for(uint i=0; i!=bx.size(); ++i) {
@@ -55,9 +55,9 @@ inline ExactFloatType mid(ExactFloatType l, ExactFloatType u) {
 }
 
 inline
-Box split(const Box& bx, uint i, Piece lr) {
-    Box result(bx);
-    Interval& ivl=result[i];
+ExactBox split(const ExactBox& bx, uint i, Piece lr) {
+    ExactBox result(bx);
+    ExactInterval& ivl=result[i];
     const ExactFloatType& l=ivl.lower();
     const ExactFloatType& u=ivl.upper();
     ExactFloatType c=mid(l,u);
@@ -71,9 +71,9 @@ Box split(const Box& bx, uint i, Piece lr) {
 }
 
 inline
-std::pair<Box,Box> split(const Box& bx, uint i)
+std::pair<ExactBox,ExactBox> split(const ExactBox& bx, uint i)
 {
-    std::pair<Box,Box> result(bx,bx);
+    std::pair<ExactBox,ExactBox> result(bx,bx);
     ExactFloatType c=mid(bx[i].lower(),bx[i].upper());
     result.first[i].set_upper(c);
     result.second[i].set_lower(c);
@@ -81,25 +81,25 @@ std::pair<Box,Box> split(const Box& bx, uint i)
 }
 
 inline
-Box split(const Box& bx, Piece lr)
+ExactBox split(const ExactBox& bx, Piece lr)
 {
     uint i=irmax(bx);
     return split(bx,i,lr);
 }
 
 inline
-std::pair<Box,Box> split(const Box& bx) {
+std::pair<ExactBox,ExactBox> split(const ExactBox& bx) {
     return split(bx,irmax(bx));
 }
 
 
 template<class F>
 tribool
-separated(const Box& d, const F& f, const Box& b, const RawFloatType& eps)
+separated(const ExactBox& d, const F& f, const ExactBox& b, const RawFloatType& eps)
 {
 
-    Box fd=f.evaluate(d);
-    Box fc=f.evaluate(Box(midpoint(d)));
+    ExactBox fd=f.evaluate(d);
+    ExactBox fc=f.evaluate(ExactBox(midpoint(d)));
 
     //cout << "called with " << d << ", having fd=" << fd << " and fc=" << fc << endl;
     if(disjoint(fd,b)) {
@@ -121,11 +121,11 @@ separated(const Box& d, const F& f, const Box& b, const RawFloatType& eps)
 
 template<class F>
 tribool
-inside(const Box& d, const F& f, const Box& b, const RawFloatType& eps)
+inside(const ExactBox& d, const F& f, const ExactBox& b, const RawFloatType& eps)
 {
 
-    Box fd=f.evaluate(d);
-    Box fc=f.evaluate(Box(midpoint(d)));
+    ExactBox fd=f.evaluate(d);
+    ExactBox fc=f.evaluate(ExactBox(midpoint(d)));
 
     //cout << "called with " << d << ", having fd=" << fd << " and fc=" << fc << endl;
     if(disjoint(fc,b)) {
@@ -196,23 +196,23 @@ tribool separated(const CompactSetInterface& cps, const ClosedSetInterface& cls,
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps);
+tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps);
+tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps);
+tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps);
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-tribool overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const Box& bx, const Float& eps);
+tribool overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-tribool inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const Box& bx, const Float& eps);
+tribool inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-tribool separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const Box& bx, const Float& eps);
+tribool separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const ExactBox& bx, const Float& eps);
 
 
 } // namespace Ariadne

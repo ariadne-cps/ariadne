@@ -29,11 +29,11 @@
 
 #include <iosfwd>
 #include <iostream>
-#include "numeric.h"
-#include "pointer.h"
-#include "operators.h"
-#include "algebra_interface.h"
-#include "algebra_mixin.h"
+#include "numeric/numeric.h"
+#include "utility/pointer.h"
+#include "expression/operators.h"
+#include "algebra/algebra_interface.h"
+#include "algebra/algebra_mixin.h"
 
 namespace Ariadne {
 

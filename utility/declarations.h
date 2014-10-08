@@ -30,7 +30,7 @@
 
 #include <iosfwd>
 #include <boost/logic/tribool.hpp>
-#include "metaprogramming.h"
+#include "utility/metaprogramming.h"
 
 namespace Ariadne {
 

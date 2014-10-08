@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 
 #include "config.h"
 
-#include "tuple.h"
-#include "stlio.h"
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
-#include "affine.h"
-#include "linear_programming.h"
+#include "utility/tuple.h"
+#include "utility/stlio.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "function/affine.h"
+#include "solvers/linear_programming.h"
 
-#include "macros.h"
-#include "logging.h"
+#include "utility/macros.h"
+#include "utility/logging.h"
 
 static const int verbosity=0;
 

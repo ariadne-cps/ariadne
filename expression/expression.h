@@ -35,14 +35,14 @@
 
 #include <boost/pool/singleton_pool.hpp>
 
-#include "macros.h"
-#include "declarations.h"
-#include "pointer.h"
-#include "container.h"
+#include "utility/macros.h"
+#include "utility/declarations.h"
+#include "utility/pointer.h"
+#include "utility/container.h"
 
-#include "valuation.h"
-#include "operators.h"
-#include "variables.h"
+#include "expression/valuation.h"
+#include "expression/operators.h"
+#include "expression/variables.h"
 
 namespace Ariadne {
 

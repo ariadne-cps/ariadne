@@ -21,24 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
-#include "paver.h"
+#include "geometry/paver.h"
 
-#include "macros.h"
-#include "logging.h"
-#include "polynomial.h"
-#include "function.h"
-#include "taylor_function.h"
-#include "procedure.h"
-#include "function_set.h"
-#include "affine_set.h"
-#include "paving_interface.h"
-#include "grid_set.h"
-#include "nonlinear_programming.h"
-#include "constraint_solver.h"
-#include "affine_set.h"
+#include "utility/macros.h"
+#include "utility/logging.h"
+#include "function/polynomial.h"
+#include "function/function.h"
+#include "function/taylor_function.h"
+#include "function/procedure.h"
+#include "geometry/function_set.h"
+#include "geometry/affine_set.h"
+#include "geometry/paving_interface.h"
+#include "geometry/grid_set.h"
+#include "solvers/nonlinear_programming.h"
+#include "solvers/constraint_solver.h"
+#include "geometry/affine_set.h"
 
 namespace Ariadne {
 

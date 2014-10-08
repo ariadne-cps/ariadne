@@ -21,21 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
-#include "interval.h"
-#include "function_model.h"
+#include "geometry/interval.h"
+#include "function/function_model.h"
 
-#include "solver.h"
+#include "solvers/solver.h"
 
-#include "logging.h"
-#include "vector.h"
-#include "matrix.h"
-#include "differential.h"
-#include "taylor_model.h"
-#include "function.h"
-#include "function_model.h"
+#include "utility/logging.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "algebra/differential.h"
+#include "function/taylor_model.h"
+#include "function/function.h"
+#include "function/function_model.h"
 
 namespace Ariadne {
 

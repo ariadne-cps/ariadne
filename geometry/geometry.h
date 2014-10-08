@@ -29,8 +29,8 @@
 
 #include <vector>
 
-#include "box.h"
-#include "function_interface.h"
+#include "geometry/box.h"
+#include "function/function_interface.h"
 
 namespace Ariadne {
 

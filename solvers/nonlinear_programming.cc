@@ -25,27 +25,27 @@
 // "Interior-point methods for nonconvex nonlinear programming: Jamming and comparative numerical testing"
 // For some of the terminology used
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
 #include <limits>
 
-#include "macros.h"
-#include "logging.h"
-#include "tuple.h"
-#include "tribool.h"
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
-#include "differential.h"
-#include "function.h"
-#include "function_mixin.h"
-#include "taylor_function.h"
+#include "utility/macros.h"
+#include "utility/logging.h"
+#include "utility/tuple.h"
+#include "utility/tribool.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "algebra/differential.h"
+#include "function/function.h"
+#include "function/function_mixin.h"
+#include "function/taylor_function.h"
 
-#include "nonlinear_programming.h"
-#include "solver.h"
-#include "multi_index-noaliasing.h"
-#include "constraint_solver.h"
+#include "solvers/nonlinear_programming.h"
+#include "solvers/solver.h"
+#include "algebra/multi_index-noaliasing.h"
+#include "solvers/constraint_solver.h"
 
 namespace Ariadne {
 

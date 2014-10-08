@@ -37,9 +37,9 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
-#include "macros.h"
-#include "array.h"
-#include "numeric.h"
+#include "utility/macros.h"
+#include "utility/array.h"
+#include "numeric/numeric.h"
 
 namespace Ariadne {
 

@@ -26,11 +26,11 @@
 
 #include "ariadne.h"
 
-#include "hybrid_automaton-composite.h"
-#include "hybrid_set.h"
-#include "hybrid_evolver.h"
-#include "hybrid_simulator.h"
-#include "hybrid_graphics.h"
+#include "hybrid/hybrid_automaton-composite.h"
+#include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_evolver.h"
+#include "hybrid/hybrid_simulator.h"
+#include "hybrid/hybrid_graphics.h"
 
 template<class T> void write(const char* filename, const T& t) {
     std::ofstream ofs(filename); ofs << t; ofs.close();

@@ -33,10 +33,10 @@
 #include <initializer_list>
 #include <limits>
 
-#include "macros.h"
-#include "exceptions.h"
-#include "numeric.h"
-#include "tuple.h"
+#include "utility/macros.h"
+#include "utility/exceptions.h"
+#include "numeric/numeric.h"
+#include "utility/tuple.h"
 
 namespace Ariadne {
 

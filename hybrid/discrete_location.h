@@ -29,8 +29,8 @@
 #define ARIADNE_DISCRETE_LOCATION_H
 
 #include <string>
-#include "container.h"
-#include "valuation.h"
+#include "utility/container.h"
+#include "expression/valuation.h"
 #include <boost/iterator/iterator_concepts.hpp>
 
 namespace Ariadne {

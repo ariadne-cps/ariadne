@@ -21,24 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
-#include "macros.h"
-#include "array.h"
-#include "tuple.h"
-#include "stlio.h"
-#include "vector.h"
-#include "function.h"
-#include "enclosure.h"
-#include "orbit.h"
+#include "utility/macros.h"
+#include "utility/array.h"
+#include "utility/tuple.h"
+#include "utility/stlio.h"
+#include "algebra/vector.h"
+#include "function/function.h"
+#include "geometry/enclosure.h"
+#include "dynamics/orbit.h"
 
-#include "integrator.h"
+#include "solvers/integrator.h"
 
-#include "logging.h"
+#include "utility/logging.h"
 
-#include "vector_field.h"
-#include "vector_field_evolver.h"
+#include "dynamics/vector_field.h"
+#include "solvers/vector_field_evolver.h"
 
 namespace {
 

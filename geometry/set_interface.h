@@ -30,8 +30,8 @@
 
 #include <iosfwd>
 
-#include "tribool.h"
-#include "numeric.h"
+#include "utility/tribool.h"
+#include "numeric/numeric.h"
 
 namespace Ariadne {
 

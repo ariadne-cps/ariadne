@@ -28,12 +28,12 @@
 
 #include <boost/python.hpp>
 
-#include "graphics_interface.h"
-#include "graphics.h"
-#include "geometry2d.h"
-#include "point.h"
-#include "box.h"
-#include "function.h"
+#include "output/graphics_interface.h"
+#include "output/graphics.h"
+#include "output/geometry2d.h"
+#include "geometry/point.h"
+#include "geometry/box.h"
+#include "function/function.h"
 
 using namespace boost::python;
 

@@ -44,41 +44,41 @@ using std::ofstream; using std::ifstream;
 
 #include "config.h"
 
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
 
-#include "function.h"
-#include "taylor_model.h"
+#include "function/function.h"
+#include "function/taylor_model.h"
 
-#include "function_set.h"
-#include "affine_set.h"
-#include "grid_set.h"
+#include "geometry/function_set.h"
+#include "geometry/affine_set.h"
+#include "geometry/grid_set.h"
 
-#include "point.h"
-#include "box.h"
-#include "curve.h"
-#include "orbit.h"
+#include "geometry/point.h"
+#include "geometry/box.h"
+#include "geometry/curve.h"
+#include "dynamics/orbit.h"
 
-#include "integrator.h"
-#include "solver.h"
+#include "solvers/integrator.h"
+#include "solvers/solver.h"
 
-#include "discrete_location.h"
-#include "discrete_event.h"
-#include "hybrid_set.h"
-#include "hybrid_orbit.h"
-#include "hybrid_time.h"
-#include "hybrid_automaton.h"
+#include "hybrid/discrete_location.h"
+#include "hybrid/discrete_event.h"
+#include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_orbit.h"
+#include "hybrid/hybrid_time.h"
+#include "hybrid/hybrid_automaton.h"
 
-#include "vector_field_evolver.h"
-#include "hybrid_evolver.h"
-#include "hybrid_reachability_analyser.h"
+#include "solvers/vector_field_evolver.h"
+#include "hybrid/hybrid_evolver.h"
+#include "hybrid/hybrid_reachability_analyser.h"
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
-#include "serialization.h"
+#include "output/serialization.h"
 #endif /* ARIADNE_ENABLE_SERIALIZATION */
 
-#include "graphics.h"
-#include "hybrid_graphics.h"
+#include "output/graphics.h"
+#include "hybrid/hybrid_graphics.h"
 
 #endif

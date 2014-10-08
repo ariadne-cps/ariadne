@@ -38,8 +38,8 @@
 #include <vector>
 #include <set>
 #include <map>
-#include "array.h"
-#include "stlio.h"
+#include "utility/array.h"
+#include "utility/stlio.h"
 
 namespace Ariadne {
 

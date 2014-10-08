@@ -35,27 +35,27 @@
 
 #include <memory>
 
-#include "macros.h"
-#include "stlio.h"
-#include "container.h"
-#include "function_set.h"
-#include "list_set.h"
-#include "grid_set.h"
-#include "curve.h"
+#include "utility/macros.h"
+#include "utility/stlio.h"
+#include "utility/container.h"
+#include "geometry/function_set.h"
+#include "geometry/list_set.h"
+#include "geometry/grid_set.h"
+#include "geometry/curve.h"
 
-#include "expression_set.h"
+#include "expression/expression_set.h"
 
-#include "hybrid_set_interface.h"
-#include "hybrid_space.h"
-#include "hybrid_grid.h"
-#include "point.h"
-#include "box.h"
+#include "hybrid/hybrid_set_interface.h"
+#include "hybrid/hybrid_space.h"
+#include "hybrid/hybrid_grid.h"
+#include "geometry/point.h"
+#include "geometry/box.h"
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
-#include "serialization.h"
+#include "output/serialization.h"
 #endif /* ARIADNE_ENABLE_SERIALIZATION */
 
-#include "graphics_interface.h"
+#include "output/graphics_interface.h"
 
 namespace Ariadne {
 

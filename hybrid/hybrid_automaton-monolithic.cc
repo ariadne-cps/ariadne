@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
 #include <map>
 
-#include "macros.h"
-#include "stlio.h"
-#include "function.h"
-#include "hybrid_time.h"
-#include "hybrid_space.h"
-#include "hybrid_automaton-monolithic.h"
+#include "utility/macros.h"
+#include "utility/stlio.h"
+#include "function/function.h"
+#include "hybrid/hybrid_time.h"
+#include "hybrid/hybrid_space.h"
+#include "hybrid/hybrid_automaton-monolithic.h"
 
 namespace Ariadne {
 

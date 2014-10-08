@@ -20,18 +20,18 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include "functional.h"
+#include "function/functional.h"
 
 #include "config.h"
 
-#include "numeric.h"
-#include "differential.h"
-#include "function.h"
-#include "operators.h"
-#include "formula.h"
-#include "algebra.h"
+#include "numeric/numeric.h"
+#include "algebra/differential.h"
+#include "function/function.h"
+#include "expression/operators.h"
+#include "expression/formula.h"
+#include "algebra/algebra.h"
 
-#include "symbolic_function.h"
+#include "function/symbolic_function.h"
 
 
 namespace Ariadne {

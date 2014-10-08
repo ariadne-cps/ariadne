@@ -23,7 +23,7 @@
 
 #include <cstdarg>
 #include "ariadne.h"
-#include "hybrid_set.h"
+#include "hybrid/hybrid_set.h"
 
 using namespace Ariadne;
 

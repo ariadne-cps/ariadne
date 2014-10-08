@@ -21,55 +21,55 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
 #include <iomanip>
 
-#include "enclosure.h"
+#include "geometry/enclosure.h"
 
-#include "macros.h"
-#include "exceptions.h"
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
-#include "multi_index.h"
-#include "differential.h"
-#include "polynomial.h"
-#include "function.h"
-#include "procedure.h"
+#include "utility/macros.h"
+#include "utility/exceptions.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "algebra/multi_index.h"
+#include "algebra/differential.h"
+#include "function/polynomial.h"
+#include "function/function.h"
+#include "function/procedure.h"
 
-#include "function_model.h"
-#include "taylor_function.h"
+#include "function/function_model.h"
+#include "function/taylor_function.h"
 
-#include "box.h"
-#include "grid.h"
+#include "geometry/box.h"
+#include "geometry/grid.h"
 
-#include "function_set.h"
-#include "affine_set.h"
+#include "geometry/function_set.h"
+#include "geometry/affine_set.h"
 
-#include "paving_interface.h"
-#include "paver.h"
-#include "grid_set.h"
+#include "geometry/paving_interface.h"
+#include "geometry/paver.h"
+#include "geometry/grid_set.h"
 
-#include "constraint_solver.h"
-#include "nonlinear_programming.h"
+#include "solvers/constraint_solver.h"
+#include "solvers/nonlinear_programming.h"
 
-#include "graphics_interface.h"
+#include "output/graphics_interface.h"
 
-#include "discrete_event.h"
+#include "hybrid/discrete_event.h"
 
-#include "logging.h"
+#include "utility/logging.h"
 
-#include "functional.h"
+#include "function/functional.h"
 
 #include "config.h"
 #ifdef HAVE_CAIRO_H
 #include <cairo/cairo.h>
 #endif // HAVE_CAIRO_H
 #include <boost/concept_check.hpp>
-#include "operators.h"
-#include "space.h"
+#include "expression/operators.h"
+#include "expression/space.h"
 
 
 namespace Ariadne {

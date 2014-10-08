@@ -21,14 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "standard.h"
+#include "utility/standard.h"
 #include "config.h"
 
-#include "expression_set.h"
-#include "expression.h"
-#include "space.h"
-#include "box.h"
-#include "function_set.h"
+#include "expression/expression_set.h"
+#include "expression/expression.h"
+#include "expression/space.h"
+#include "geometry/box.h"
+#include "geometry/function_set.h"
 
 
 

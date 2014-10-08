@@ -30,9 +30,9 @@
 #include <fenv.h>
 
 #include "config.h"
-#include "rounding.h"
-#include "float.h"
-#include "numeric.h"
+#include "numeric/rounding.h"
+#include "numeric/float.h"
+#include "numeric/numeric.h"
 
 #include "test.h"
 

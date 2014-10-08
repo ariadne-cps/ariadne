@@ -34,13 +34,13 @@
 #include <iostream>
 
 #include <boost/smart_ptr.hpp>
-#include "discrete_location.h"
-#include "discrete_event.h"
-#include "enclosure.h"
-#include "graphics_interface.h"
-#include "container.h"
-#include "box.h"
-#include "logging.h"
+#include "hybrid/discrete_location.h"
+#include "hybrid/discrete_event.h"
+#include "geometry/enclosure.h"
+#include "output/graphics_interface.h"
+#include "utility/container.h"
+#include "geometry/box.h"
+#include "utility/logging.h"
 
 namespace Ariadne {
 

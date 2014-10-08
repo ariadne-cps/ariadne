@@ -26,7 +26,7 @@
 #include <fstream>
 
 #include "config.h"
-#include "multi_index.h"
+#include "algebra/multi_index.h"
 
 #include "test.h"
 

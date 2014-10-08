@@ -28,12 +28,12 @@
 #ifndef ARIADNE_CONSTRAINT_SOLVER_H
 #define ARIADNE_CONSTRAINT_SOLVER_H
 
-#include "logging.h"
-#include "container.h"
+#include "utility/logging.h"
+#include "utility/container.h"
 
-#include "tribool.h"
-#include "numeric.h"
-#include "constraint.h"
+#include "utility/tribool.h"
+#include "numeric/numeric.h"
+#include "function/constraint.h"
 
 namespace Ariadne {
 

@@ -32,9 +32,9 @@
 #include <initializer_list>
 #include <iostream>
 
-#include "macros.h"
-#include "array.h"
-#include "numeric.h"
+#include "utility/macros.h"
+#include "utility/array.h"
+#include "numeric/numeric.h"
 
 namespace Ariadne {
 

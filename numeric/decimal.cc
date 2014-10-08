@@ -21,15 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "standard.h"
+#include "utility/standard.h"
 #include "config.h"
 
-#include "macros.h"
-#include "decimal.h"
+#include "utility/macros.h"
+#include "numeric/decimal.h"
 
-#include "rational.h"
-#include "interval.h"
-#include "float.h"
+#include "numeric/rational.h"
+#include "geometry/interval.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
 

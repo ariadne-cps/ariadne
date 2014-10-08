@@ -32,12 +32,12 @@
 #include <string>
 #include <vector>
 
-#include "colour.h"
-#include "variables.h"
-#include "graphics_interface.h"
-#include "graphics.h"
+#include "output/colour.h"
+#include "expression/variables.h"
+#include "output/graphics_interface.h"
+#include "output/graphics.h"
 
-#include "expression_set.h"
+#include "expression/expression_set.h"
 
 typedef unsigned int uint;
 

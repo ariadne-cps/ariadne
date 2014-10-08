@@ -36,22 +36,22 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <memory>
 
-#include "tribool.h"
-#include "array.h"
+#include "utility/tribool.h"
+#include "utility/array.h"
 
-#include "binary_word.h"
+#include "utility/binary_word.h"
 
-#include "exceptions.h"
-#include "box.h"
-#include "point.h"
-#include "list_set.h"
+#include "utility/exceptions.h"
+#include "geometry/box.h"
+#include "geometry/point.h"
+#include "geometry/list_set.h"
 
-#include "numeric.h"
+#include "numeric/numeric.h"
 
-#include "set_interface.h"
-#include "paving_interface.h"
-#include "vector.h"
-#include "grid.h"
+#include "geometry/set_interface.h"
+#include "geometry/paving_interface.h"
+#include "algebra/vector.h"
+#include "geometry/grid.h"
 
 
 using namespace std;

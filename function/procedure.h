@@ -31,14 +31,14 @@
 
 #include <iostream>
 
-#include "container.h"
-#include "vector.h"
+#include "utility/container.h"
+#include "algebra/vector.h"
 
-#include "box.h"
+#include "geometry/box.h"
 
-#include "operators.h"
-#include "formula.h"
-#include "expansion.h"
+#include "expression/operators.h"
+#include "expression/formula.h"
+#include "algebra/expansion.h"
 
 namespace Ariadne {
 
@@ -344,7 +344,7 @@ std::ostream& operator<<(std::ostream& os, const Vector< Procedure<X> > f) {
 } // namespace Ariadne
 
 
-#include "numeric.h"
+#include "numeric/numeric.h"
 
 namespace Ariadne {
 

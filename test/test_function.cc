@@ -30,9 +30,9 @@
 #include <fenv.h>
 
 #include "config.h"
-#include "function.h"
+#include "function/function.h"
 
-#include "numeric.h"
+#include "numeric/numeric.h"
 
 #include "test.h"
 

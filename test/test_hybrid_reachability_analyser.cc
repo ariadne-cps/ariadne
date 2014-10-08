@@ -26,16 +26,16 @@
 #include <string>
 
 #include "config.h"
-#include "taylor_function.h"
-#include "function_set.h"
-#include "grid_set.h"
-#include "hybrid_time.h"
-#include "hybrid_set.h"
-#include "hybrid_automaton.h"
-#include "hybrid_evolver.h"
-#include "hybrid_reachability_analyser.h"
-#include "hybrid_graphics.h"
-#include "logging.h"
+#include "function/taylor_function.h"
+#include "geometry/function_set.h"
+#include "geometry/grid_set.h"
+#include "hybrid/hybrid_time.h"
+#include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_automaton.h"
+#include "hybrid/hybrid_evolver.h"
+#include "hybrid/hybrid_reachability_analyser.h"
+#include "hybrid/hybrid_graphics.h"
+#include "utility/logging.h"
 
 #include "test.h"
 

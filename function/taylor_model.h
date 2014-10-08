@@ -30,15 +30,15 @@
 
 #include <map>
 
-#include "macros.h"
-#include "declarations.h"
-#include "array.h"
-#include "pointer.h"
-#include "vector.h"
-#include "multi_index.h"
-#include "expansion.h"
-#include "sweeper.h"
-#include "algebra_mixin.h"
+#include "utility/macros.h"
+#include "utility/declarations.h"
+#include "utility/array.h"
+#include "utility/pointer.h"
+#include "algebra/vector.h"
+#include "algebra/multi_index.h"
+#include "algebra/expansion.h"
+#include "algebra/sweeper.h"
+#include "algebra/algebra_mixin.h"
 
 namespace Ariadne {
 

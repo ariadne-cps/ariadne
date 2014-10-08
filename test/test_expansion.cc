@@ -24,8 +24,8 @@
 #include <iostream>
 #include <vector>
 #include "config.h"
-#include "numeric.h"
-#include "expansion.h"
+#include "numeric/numeric.h"
+#include "algebra/expansion.h"
 
 #include "test.h"
 using namespace std;

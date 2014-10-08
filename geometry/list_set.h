@@ -30,13 +30,13 @@
 
 
 #include <vector>
-#include "stlio.h"
-#include "macros.h"
+#include "utility/stlio.h"
+#include "utility/macros.h"
 
-#include "graphics_interface.h"
-#include "discrete_location.h"
+#include "output/graphics_interface.h"
+#include "hybrid/discrete_location.h"
 
-#include "box.h"
+#include "geometry/box.h"
 
 typedef unsigned int uint;
 

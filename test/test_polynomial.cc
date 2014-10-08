@@ -23,11 +23,11 @@
 
 #include <iostream>
 #include "config.h"
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
-#include "multi_index.h"
-#include "polynomial.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "algebra/multi_index.h"
+#include "function/polynomial.h"
 
 #include "test.h"
 using namespace std;

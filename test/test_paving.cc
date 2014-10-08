@@ -25,12 +25,12 @@
 #include <fstream>
 
 #include "config.h"
-#include "paving_interface.h"
-#include "grid_set.h"
-#include "function.h"
-#include "function_set.h"
-#include "graphics.h"
-#include "logging.h"
+#include "geometry/paving_interface.h"
+#include "geometry/grid_set.h"
+#include "function/function.h"
+#include "geometry/function_set.h"
+#include "output/graphics.h"
+#include "utility/logging.h"
 
 #include "test.h"
 

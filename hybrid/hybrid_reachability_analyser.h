@@ -30,16 +30,16 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "configuration_interface.h"
-#include "hybrid_set_interface.h"
-#include "hybrid_evolver_interface.h"
-#include "hybrid_reachability_analyser_interface.h"
+#include "solvers/configuration_interface.h"
+#include "hybrid/hybrid_set_interface.h"
+#include "hybrid/hybrid_evolver_interface.h"
+#include "hybrid/hybrid_reachability_analyser_interface.h"
 
-#include "hybrid_orbit.h"
-#include "hybrid_grid.h"
-#include "hybrid_set.h"
+#include "hybrid/hybrid_orbit.h"
+#include "hybrid/hybrid_grid.h"
+#include "hybrid/hybrid_set.h"
 
-#include "logging.h"
+#include "utility/logging.h"
 
 
 namespace Ariadne {

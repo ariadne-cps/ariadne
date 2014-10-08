@@ -24,16 +24,16 @@
 #include <iostream>
 #include <iomanip>
 #include "config.h"
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
-#include "multi_index.h"
-#include "expansion.h"
-#include "taylor_model.h"
-#include "taylor_function.h"
-#include "differential.h"
-#include "polynomial.h"
-#include "function.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "algebra/multi_index.h"
+#include "algebra/expansion.h"
+#include "function/taylor_model.h"
+#include "function/taylor_function.h"
+#include "algebra/differential.h"
+#include "function/polynomial.h"
+#include "function/function.h"
 
 #include "test.h"
 

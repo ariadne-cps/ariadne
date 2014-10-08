@@ -26,11 +26,11 @@
 
 #include <iostream>
 
-#include "integrator.h"
-#include "container.h"
-#include "numeric.h"
-#include "vector.h"
-#include "function.h"
+#include "solvers/integrator.h"
+#include "utility/container.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "function/function.h"
 
 namespace Ariadne {
 

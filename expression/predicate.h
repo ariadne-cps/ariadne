@@ -31,15 +31,15 @@
 #include <cstdarg>
 #include <iosfwd>
 #include <iostream>
-#include "function_interface.h"
+#include "function/function_interface.h"
 
-#include "macros.h"
-#include "pointer.h"
+#include "utility/macros.h"
+#include "utility/pointer.h"
 
-#include "vector.h"
-#include "matrix.h"
-#include "differential.h"
-#include "taylor_model.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "algebra/differential.h"
+#include "function/taylor_model.h"
 
 namespace Ariadne {
 

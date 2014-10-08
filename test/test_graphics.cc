@@ -24,13 +24,13 @@
 #include "config.h"
 #include "test.h"
 
-#include "function.h"
-#include "graphics.h"
-#include "point.h"
-#include "box.h"
-#include "curve.h"
-#include "function_set.h"
-#include "grid_set.h"
+#include "function/function.h"
+#include "output/graphics.h"
+#include "geometry/point.h"
+#include "geometry/box.h"
+#include "geometry/curve.h"
+#include "geometry/function_set.h"
+#include "geometry/grid_set.h"
 
 using namespace Ariadne;
 

@@ -29,15 +29,15 @@
 #include <string>
 
 #include "config.h"
-#include "stlio.h"
+#include "utility/stlio.h"
 
-#include "macros.h"
-#include "tribool.h"
-#include "numeric.h"
+#include "utility/macros.h"
+#include "utility/tribool.h"
+#include "numeric/numeric.h"
 
-#include "function_set.h"
-#include "grid_set.h"
-#include "set_interface.h"
+#include "geometry/function_set.h"
+#include "geometry/grid_set.h"
+#include "geometry/set_interface.h"
 
 #include "test.h"
 

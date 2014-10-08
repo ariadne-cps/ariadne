@@ -33,12 +33,12 @@
 #include <map>
 
 
-#include "tribool.h"
-#include "set_interface.h"
-#include "discrete_location.h"
-#include "space.h"
-#include "set.h"
-#include "expression_set.h"
+#include "utility/tribool.h"
+#include "geometry/set_interface.h"
+#include "hybrid/discrete_location.h"
+#include "expression/space.h"
+#include "geometry/set.h"
+#include "expression/expression_set.h"
 
 namespace Ariadne {
 

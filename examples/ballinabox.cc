@@ -26,7 +26,7 @@
 
 #include <cstdarg>
 #include "ariadne.h"
-#include "hybrid_graphics.h"
+#include "hybrid/hybrid_graphics.h"
 
 using namespace Ariadne;
 

@@ -28,9 +28,9 @@
 #ifndef ARIADNE_CONSTRAINT_H
 #define ARIADNE_CONSTRAINT_H
 
-#include "numeric.h"
-#include "function.h"
-#include "metaprogramming.h"
+#include "numeric/numeric.h"
+#include "function/function.h"
+#include "utility/metaprogramming.h"
 
 namespace Ariadne {
 

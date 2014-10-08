@@ -21,21 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric.h"
+#include "numeric/numeric.h"
 
-#include "differential.h"
-#include "function.h"
-#include "operators.h"
-#include "formula.h"
-#include "algebra.h"
+#include "algebra/differential.h"
+#include "function/function.h"
+#include "expression/operators.h"
+#include "expression/formula.h"
+#include "algebra/algebra.h"
 
-#include "function_mixin.h"
+#include "function/function_mixin.h"
 #include "function_mixin.tcc"
 
-#include "function_model.h"
+#include "function/function_model.h"
 
-#include "symbolic_function.h"
-#include "taylor_function.h"
+#include "function/symbolic_function.h"
+#include "function/taylor_function.h"
 
 
 namespace Ariadne {

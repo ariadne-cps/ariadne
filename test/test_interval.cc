@@ -29,8 +29,8 @@
 #include <string>
 
 #include "config.h"
-#include "rational.h"
-#include "interval.h"
+#include "numeric/rational.h"
+#include "geometry/interval.h"
 
 #include "test.h"
 

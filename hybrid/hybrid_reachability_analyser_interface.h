@@ -28,12 +28,12 @@
 #ifndef ARIADNE_HYBRID_REACHABILITY_ANALYSER_INTERFACE_H
 #define ARIADNE_HYBRID_REACHABILITY_ANALYSER_INTERFACE_H
 
-#include "reachability_analyser_interface.h"
+#include "solvers/reachability_analyser_interface.h"
 
-#include "hybrid_set_interface.h"
-#include "evolver_interface.h"
+#include "hybrid/hybrid_set_interface.h"
+#include "solvers/evolver_interface.h"
 
-#include "logging.h"
+#include "utility/logging.h"
 
 namespace Ariadne {
 

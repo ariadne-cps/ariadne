@@ -22,20 +22,20 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
 #include <iostream>
 #include <iomanip>
 
-#include "macros.h"
-#include "exceptions.h"
-#include "stlio.h"
-#include "function_set.h"
-#include "list_set.h"
-#include "grid_set.h"
+#include "utility/macros.h"
+#include "utility/exceptions.h"
+#include "utility/stlio.h"
+#include "geometry/function_set.h"
+#include "geometry/list_set.h"
+#include "geometry/grid_set.h"
 
-#include "set_interface.h"
+#include "geometry/set_interface.h"
 
 
 namespace Ariadne {

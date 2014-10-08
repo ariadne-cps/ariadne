@@ -31,9 +31,9 @@
 
 #include <boost/python.hpp>
 
-#include "tribool.h"
-#include "numeric.h"
-#include "exceptions.h"
+#include "utility/tribool.h"
+#include "numeric/numeric.h"
+#include "utility/exceptions.h"
 
 using namespace boost::python;
 using namespace Ariadne;

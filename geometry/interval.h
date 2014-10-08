@@ -34,14 +34,14 @@
 #include <iostream>
 #include <cassert>
 
-#include "declarations.h"
+#include "utility/declarations.h"
 
-#include "tribool.h"
-#include "rounding.h"
-#include "float.h"
-#include "float-exact.h"
-#include "float-validated.h"
-#include "float-approximate.h"
+#include "utility/tribool.h"
+#include "numeric/rounding.h"
+#include "numeric/float.h"
+#include "numeric/float-exact.h"
+#include "numeric/float-validated.h"
+#include "numeric/float-approximate.h"
 
 // Simplifying typedefs for unsigned types
 typedef unsigned int uint;

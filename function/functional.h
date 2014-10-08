@@ -28,17 +28,17 @@
 #ifndef ARIADNE_FUNCTIONAL_H
 #define ARIADNE_FUNCTIONAL_H
 
-#include "numeric.h"
+#include "numeric/numeric.h"
 
-#include "differential.h"
+#include "algebra/differential.h"
 
-#include "formula.h"
-#include "procedure.h"
-#include "affine.h"
-#include "polynomial.h"
-#include "function.h"
-#include "function_model.h"
-#include "taylor_function.h"
-#include "symbolic_function.h"
+#include "expression/formula.h"
+#include "function/procedure.h"
+#include "function/affine.h"
+#include "function/polynomial.h"
+#include "function/function.h"
+#include "function/function_model.h"
+#include "function/taylor_function.h"
+#include "function/symbolic_function.h"
 
 #endif

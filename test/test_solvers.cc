@@ -28,12 +28,12 @@
 
 #include "config.h"
 
-#include "solver.h"
-#include "function.h"
-#include "taylor_function.h"
-#include "vector.h"
-#include "expression.h"
-#include "space.h"
+#include "solvers/solver.h"
+#include "function/function.h"
+#include "function/taylor_function.h"
+#include "algebra/vector.h"
+#include "expression/expression.h"
+#include "expression/space.h"
 
 #include "test.h"
 
@@ -183,7 +183,7 @@ class TestSolver
 
 };
 
-#include "differential.h"
+#include "algebra/differential.h"
 
 int main(int argc, const char **argv) {
 /*

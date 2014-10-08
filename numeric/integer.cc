@@ -25,8 +25,8 @@
 
 #include "config.h"
 
-#include "macros.h"
-#include "integer.h"
+#include "utility/macros.h"
+#include "numeric/integer.h"
 
 namespace Ariadne {
 

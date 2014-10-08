@@ -29,9 +29,9 @@
 #define ARIADNE_PAVING_INTERFACE_H
 
 #include <iosfwd>
-#include "grid_cell.h"
-#include "set_interface.h"
-#include "graphics_interface.h"
+#include "geometry/grid_cell.h"
+#include "geometry/set_interface.h"
+#include "output/graphics_interface.h"
 
 namespace Ariadne {
 

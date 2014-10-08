@@ -28,8 +28,8 @@
 #ifndef ARIADNE_ALGEBRA_MIXIN_H
 #define ARIADNE_ALGEBRA_MIXIN_H
 
-#include "algebra_interface.h"
-#include "operators.h"
+#include "algebra/algebra_interface.h"
+#include "expression/operators.h"
 
 namespace Ariadne {
 

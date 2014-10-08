@@ -24,14 +24,14 @@
 #include <iostream>
 #include <iomanip>
 #include "config.h"
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
-#include "multi_index.h"
-#include "taylor_model.h"
-#include "differential.h"
-#include "function.h"
-#include "polynomial.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "algebra/multi_index.h"
+#include "function/taylor_model.h"
+#include "algebra/differential.h"
+#include "function/function.h"
+#include "function/polynomial.h"
 
 #include "test.h"
 using std::cout; using std::cerr; using std::endl;

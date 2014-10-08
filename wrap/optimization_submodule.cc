@@ -28,16 +28,16 @@
 
 #include <boost/python.hpp>
 
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
-#include "box.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "geometry/box.h"
 
-#include "function.h"
-#include "constraint.h"
-#include "linear_programming.h"
-#include "nonlinear_programming.h"
-#include "constraint_solver.h"
+#include "function/function.h"
+#include "function/constraint.h"
+#include "solvers/linear_programming.h"
+#include "solvers/nonlinear_programming.h"
+#include "solvers/constraint_solver.h"
 
 using namespace boost::python;
 using namespace Ariadne;

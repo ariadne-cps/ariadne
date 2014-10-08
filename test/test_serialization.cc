@@ -33,13 +33,13 @@
 #include <boost/serialization/string.hpp>
 
 #include "config.h"
-#include "macros.h"
-#include "serialization.h"
-#include "array.h"
-#include "numeric.h"
-#include "float.h"
-#include "interval.h"
-#include "stlio.h"
+#include "utility/macros.h"
+#include "output/serialization.h"
+#include "utility/array.h"
+#include "numeric/numeric.h"
+#include "numeric/float.h"
+#include "geometry/interval.h"
+#include "utility/stlio.h"
 
 #include "test.h"
 

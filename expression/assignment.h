@@ -34,15 +34,15 @@
 #include <string>
 
 
-#include "macros.h"
-#include "pointer.h"
-#include "container.h"
-#include "stlio.h"
+#include "utility/macros.h"
+#include "utility/pointer.h"
+#include "utility/container.h"
+#include "utility/stlio.h"
 
-#include "numeric.h"
+#include "numeric/numeric.h"
 
-#include "variables.h"
-#include "expression.h"
+#include "expression/variables.h"
+#include "expression/expression.h"
 
 namespace Ariadne {
 
@@ -300,7 +300,7 @@ inline List<RealConstantAssignment> operator,(const RealConstantAssignment& ac1,
 
 } // namespace Ariadne
 
-#include "valuation.h"
+#include "expression/valuation.h"
 namespace Ariadne {
 template<class T> inline Assignment< Variable<T>, T>::operator Valuation<T> () const { Valuation<T> r; r.insert(this->lhs,this->rhs); return r; }
 } // namespace Ariadne

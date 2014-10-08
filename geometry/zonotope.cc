@@ -21,26 +21,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
-#include "zonotope.h"
+#include "geometry/zonotope.h"
 
 #include <iostream>
 #include <vector>
 #include <algorithm>
 
-#include "macros.h"
-#include "array.h"
-#include "vector.h"
-#include "matrix.h"
-#include "linear_programming.h"
-#include "point.h"
-#include "box.h"
-#include "list_set.h"
-#include "function.h"
-#include "polytope.h"
-#include "geometry2d.h"
+#include "utility/macros.h"
+#include "utility/array.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "solvers/linear_programming.h"
+#include "geometry/point.h"
+#include "geometry/box.h"
+#include "geometry/list_set.h"
+#include "function/function.h"
+#include "geometry/polytope.h"
+#include "output/geometry2d.h"
 
 
 namespace Ariadne {

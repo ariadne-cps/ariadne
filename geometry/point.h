@@ -28,10 +28,10 @@
 #ifndef ARIADNE_POINT_H
 #define ARIADNE_POINT_H
 
-#include "numeric.h"
-#include "vector.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
 
-#include "graphics_interface.h"
+#include "output/graphics_interface.h"
 
 namespace Ariadne {
 

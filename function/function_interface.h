@@ -28,7 +28,7 @@
 #define ARIADNE_FUNCTION_INTERFACE_H
 
 #include <iosfwd>
-#include "declarations.h"
+#include "utility/declarations.h"
 
 namespace Ariadne {
 

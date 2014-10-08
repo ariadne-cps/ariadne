@@ -30,11 +30,11 @@
 
 #include <map>
 
-#include "container.h"
-#include "stlio.h"
-#include "space.h"
-#include "discrete_location.h"
-#include "hybrid_set_interface.h"
+#include "utility/container.h"
+#include "utility/stlio.h"
+#include "expression/space.h"
+#include "hybrid/discrete_location.h"
+#include "hybrid/hybrid_set_interface.h"
 
 
 namespace Ariadne {

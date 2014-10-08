@@ -35,12 +35,12 @@
 #include <memory>
 #include <boost/scoped_ptr.hpp>
 
-#include "numeric.h"
-#include "graphics_interface.h"
-#include "function_set.h"
-#include "hybrid_enclosure.h"
+#include "numeric/numeric.h"
+#include "output/graphics_interface.h"
+#include "geometry/function_set.h"
+#include "hybrid/hybrid_enclosure.h"
 
-#include "orbit.h"
+#include "dynamics/orbit.h"
 
 namespace Ariadne {
 

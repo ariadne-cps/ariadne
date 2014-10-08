@@ -32,7 +32,7 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "pointer.h"
+#include "utility/pointer.h"
 
 namespace Ariadne {
 

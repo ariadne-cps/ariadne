@@ -29,9 +29,9 @@
 #include <boost/python.hpp>
 #include <boost/python/slice.hpp>
 
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
 
 using namespace boost::python;
 using namespace Ariadne;

@@ -33,9 +33,9 @@
 #include <algorithm> // For std::max, std::min
 #include <limits> // For std::numeric_limits<double>
 
-#include "rounding.h"
-#include "rational.h"
-#include "float.h"
+#include "numeric/rounding.h"
+#include "numeric/rational.h"
+#include "numeric/float.h"
 
 namespace Ariadne {
 

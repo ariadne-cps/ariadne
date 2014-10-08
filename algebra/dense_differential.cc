@@ -20,11 +20,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include "functional.h"
+#include "function/functional.h"
 
 #include "config.h"
 
-#include "dense_differential.h"
+#include "algebra/dense_differential.h"
 
 namespace Ariadne {
 template class DenseDifferential<Float>;

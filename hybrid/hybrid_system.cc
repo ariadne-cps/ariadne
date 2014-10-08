@@ -23,19 +23,19 @@
 
 #include <map>
 
-#include "functional.h"
+#include "function/functional.h"
 
 #include "config.h"
 
-#include "macros.h"
-#include "logging.h"
+#include "utility/macros.h"
+#include "utility/logging.h"
 
-#include "stlio.h"
-#include "formula.h"
-#include "function.h"
-#include "hybrid_time.h"
-#include "hybrid_system.h"
-#include "grid.h"
+#include "utility/stlio.h"
+#include "expression/formula.h"
+#include "function/function.h"
+#include "hybrid/hybrid_time.h"
+#include "hybrid/hybrid_system.h"
+#include "geometry/grid.h"
 
 namespace Ariadne {
 

@@ -26,13 +26,13 @@
 
 #include <boost/python.hpp>
 
-#include "orbit.h"
-#include "vector_field_evolver.h"
+#include "dynamics/orbit.h"
+#include "solvers/vector_field_evolver.h"
 
-#include "hybrid_evolver.h"
-#include "hybrid_automaton.h"
-#include "hybrid_enclosure.h"
-#include "hybrid_time.h"
+#include "hybrid/hybrid_evolver.h"
+#include "hybrid/hybrid_automaton.h"
+#include "hybrid/hybrid_enclosure.h"
+#include "hybrid/hybrid_time.h"
 
 using namespace boost::python;
 using namespace Ariadne;

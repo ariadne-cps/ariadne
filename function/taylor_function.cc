@@ -21,27 +21,27 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
 #include <iostream>
 #include <iomanip>
 
-#include "macros.h"
-#include "exceptions.h"
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
-#include "multi_index.h"
-#include "polynomial.h"
-#include "differential.h"
-#include "taylor_model.h"
+#include "utility/macros.h"
+#include "utility/exceptions.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "algebra/multi_index.h"
+#include "function/polynomial.h"
+#include "algebra/differential.h"
+#include "function/taylor_model.h"
 
-#include "function.h"
-#include "taylor_function.h"
+#include "function/function.h"
+#include "function/taylor_function.h"
 
 #include "function_mixin.tcc"
-#include "taylor_function.h"
+#include "function/taylor_function.h"
 
 #define VOLATILE ;
 

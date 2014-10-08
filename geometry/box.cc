@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric.h"
+#include "numeric/numeric.h"
 #include "config.h"
 
 #include <sstream>
@@ -30,9 +30,9 @@
 
 #include <cstdarg>
 
-#include "box.h"
-#include "stlio.h"
-#include "point.h"
+#include "geometry/box.h"
+#include "utility/stlio.h"
+#include "geometry/point.h"
 
 typedef unsigned int uint;
 

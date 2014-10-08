@@ -27,11 +27,11 @@
 #include "config.h"
 #include "test.h"
 
-#include "vector.h"
-#include "matrix.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
 
-#include "function.h"
-#include "hybrid_system.h"
+#include "function/function.h"
+#include "hybrid/hybrid_system.h"
 
 using namespace std;
 using namespace Ariadne;

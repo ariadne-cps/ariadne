@@ -27,15 +27,15 @@
 
 #include <boost/python.hpp>
 
-#include "tribool.h"
-#include "numeric.h"
-#include "function.h"
-#include "expression.h"
-#include "space.h"
-#include "discrete_event.h"
-#include "hybrid_automaton.h"
-#include "hybrid_time.h"
-#include "hybrid_set.h"
+#include "utility/tribool.h"
+#include "numeric/numeric.h"
+#include "function/function.h"
+#include "expression/expression.h"
+#include "expression/space.h"
+#include "hybrid/discrete_event.h"
+#include "hybrid/hybrid_automaton.h"
+#include "hybrid/hybrid_time.h"
+#include "hybrid/hybrid_set.h"
 
 #include "boost_python.h"
 #include "utilities.h"

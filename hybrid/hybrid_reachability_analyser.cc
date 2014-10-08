@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
 #include <string>
@@ -34,32 +34,32 @@
 #include <valarray>
 
 
-#include "exceptions.h"
+#include "utility/exceptions.h"
 
-#include "numeric.h"
+#include "numeric/numeric.h"
 
-#include "vector.h"
-#include "matrix.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
 
-#include "box.h"
-#include "list_set.h"
-#include "grid_set.h"
+#include "geometry/box.h"
+#include "geometry/list_set.h"
+#include "geometry/grid_set.h"
 
-#include "integrator.h"
-#include "solver.h"
+#include "solvers/integrator.h"
+#include "solvers/solver.h"
 
-#include "hybrid_automaton_interface.h"
+#include "hybrid/hybrid_automaton_interface.h"
 
-#include "hybrid_time.h"
-#include "hybrid_space.h"
-#include "hybrid_orbit.h"
-#include "hybrid_set.h"
-#include "hybrid_evolver.h"
-#include "hybrid_reachability_analyser.h"
+#include "hybrid/hybrid_time.h"
+#include "hybrid/hybrid_space.h"
+#include "hybrid/hybrid_orbit.h"
+#include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_evolver.h"
+#include "hybrid/hybrid_reachability_analyser.h"
 
-#include "logging.h"
-#include "graphics.h"
-#include "linear_programming.h"
+#include "utility/logging.h"
+#include "output/graphics.h"
+#include "solvers/linear_programming.h"
 
 
 namespace Ariadne {

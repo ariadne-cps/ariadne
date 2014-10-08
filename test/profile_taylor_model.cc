@@ -33,7 +33,7 @@ using std::string;
 #include <boost/progress.hpp>
 
 #include "config.h"
-#include "taylor_model.h"
+#include "function/taylor_model.h"
 using namespace Ariadne;
 
 template<class A1>

@@ -28,11 +28,11 @@
 
 #include "config.h"
 
-#include "polynomial.h"
-#include "integrator.h"
-#include "function.h"
-#include "taylor_function.h"
-#include "vector.h"
+#include "function/polynomial.h"
+#include "solvers/integrator.h"
+#include "function/function.h"
+#include "function/taylor_function.h"
+#include "algebra/vector.h"
 
 #include "test.h"
 

@@ -30,13 +30,13 @@
 
 #include <map>
 
-#include "macros.h"
-#include "array.h"
-#include "vector.h"
-#include "matrix.h"
-#include "multi_index.h"
-#include "series.h"
-#include "expansion.h"
+#include "utility/macros.h"
+#include "utility/array.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "algebra/multi_index.h"
+#include "algebra/series.h"
+#include "algebra/expansion.h"
 #include <boost/concept_check.hpp>
 
 namespace Ariadne {

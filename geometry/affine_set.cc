@@ -21,23 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
-#include "linear_programming.h"
-#include "function.h"
-#include "affine.h"
-#include "affine_model.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "solvers/linear_programming.h"
+#include "function/function.h"
+#include "function/affine.h"
+#include "function/affine_model.h"
 
-#include "box.h"
-#include "grid_set.h"
-#include "affine_set.h"
+#include "geometry/box.h"
+#include "geometry/grid_set.h"
+#include "geometry/affine_set.h"
 
-#include "graphics_interface.h"
-#include "geometry2d.h"
+#include "output/graphics_interface.h"
+#include "output/geometry2d.h"
 
 
 namespace Ariadne {

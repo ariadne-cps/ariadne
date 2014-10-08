@@ -34,8 +34,8 @@
 #include <fstream>
 #include <iostream>
 
-#include "graphics_interface.h"
-#include "colour.h"
+#include "output/graphics_interface.h"
+#include "output/colour.h"
 
 typedef unsigned int uint;
 

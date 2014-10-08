@@ -31,7 +31,7 @@
 #include <string>
 #include <iosfwd>
 
-#include "declarations.h"
+#include "utility/declarations.h"
 
 namespace Ariadne {
 

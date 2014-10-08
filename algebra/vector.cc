@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric.h"
+#include "numeric/numeric.h"
 #include "config.h"
 
-#include "macros.h"
-#include "vector.h"
+#include "utility/macros.h"
+#include "algebra/vector.h"
 
 namespace Ariadne {
 

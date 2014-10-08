@@ -27,13 +27,13 @@
 #include "config.h"
 #include "test.h"
 
-#include "vector.h"
-#include "matrix.h"
-#include "function.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "function/function.h"
 
-#include "function_set.h"
-#include "hybrid_set.h"
-#include "graphics.h"
+#include "geometry/function_set.h"
+#include "hybrid/hybrid_set.h"
+#include "output/graphics.h"
 
 using namespace std;
 using namespace Ariadne;

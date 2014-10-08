@@ -28,7 +28,7 @@
 #ifndef ARIADNE_HYBRID_SIMULATOR_H
 #define ARIADNE_HYBRID_SIMULATOR_H
 
-#include "logging.h"
+#include "utility/logging.h"
 
 namespace Ariadne {
 

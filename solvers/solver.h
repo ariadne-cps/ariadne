@@ -32,14 +32,14 @@
 #include <stdexcept>
 #include <string>
 
-#include "solver_interface.h"
-#include "function_interface.h"
+#include "solvers/solver_interface.h"
+#include "function/function_interface.h"
 
-#include "logging.h"
-#include "attribute.h"
-#include "pointer.h"
-#include "container.h"
-#include "numeric.h"
+#include "utility/logging.h"
+#include "utility/attribute.h"
+#include "utility/pointer.h"
+#include "utility/container.h"
+#include "numeric/numeric.h"
 
 namespace Ariadne {
 

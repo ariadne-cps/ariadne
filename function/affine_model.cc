@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric.h"
+#include "numeric/numeric.h"
 #include "config.h"
 
-#include "vector.h"
-#include "function.h"
-#include "taylor_model.h"
-#include "affine_model.h"
+#include "algebra/vector.h"
+#include "function/function.h"
+#include "function/taylor_model.h"
+#include "function/affine_model.h"
 
-#include "affine.h"
-#include "taylor_function.h"
-#include "vector.h"
+#include "function/affine.h"
+#include "function/taylor_function.h"
+#include "algebra/vector.h"
 
 namespace Ariadne {
 

@@ -40,11 +40,11 @@
 
 #include "config.h"
 
-#include "array.h"
-#include "tuple.h"
-#include "container.h"
-#include "numeric.h"
-#include "vector.h"
+#include "utility/array.h"
+#include "utility/tuple.h"
+#include "utility/container.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
 
 namespace Ariadne {
 

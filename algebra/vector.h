@@ -33,11 +33,11 @@
 #include <initializer_list>
 #include <vector>
 
-#include "macros.h"
-#include "stlio.h"
-#include "metaprogramming.h"
-#include "numeric.h"
-#include "array.h"
+#include "utility/macros.h"
+#include "utility/stlio.h"
+#include "utility/metaprogramming.h"
+#include "numeric/numeric.h"
+#include "utility/array.h"
 
 #include <boost/type_traits/is_convertible.hpp>
 #include <boost/utility/enable_if.hpp>

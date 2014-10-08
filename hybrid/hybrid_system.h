@@ -37,15 +37,15 @@
 #include <memory>
 #include <boost/shared_array.hpp>
 
-#include "declarations.h"
+#include "utility/declarations.h"
 
-#include "logging.h"
+#include "utility/logging.h"
 
-#include "formula.h"
-#include "container.h"
-#include "valuation.h"
+#include "expression/formula.h"
+#include "utility/container.h"
+#include "expression/valuation.h"
 
-#include "discrete_location.h"
+#include "hybrid/discrete_location.h"
 
 namespace Ariadne {
 

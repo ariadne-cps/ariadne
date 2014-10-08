@@ -24,14 +24,14 @@
 #include <iostream>
 
 #include "config.h"
-#include "container.h"
-#include "stlio.h"
-#include "numeric.h"
-#include "expression.h"
-#include "assignment.h"
-#include "valuation.h"
-#include "space.h"
-#include "function.h"
+#include "utility/container.h"
+#include "utility/stlio.h"
+#include "numeric/numeric.h"
+#include "expression/expression.h"
+#include "expression/assignment.h"
+#include "expression/valuation.h"
+#include "expression/space.h"
+#include "function/function.h"
 
 #include "test.h"
 

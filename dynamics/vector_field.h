@@ -30,9 +30,9 @@
 
 #include <memory>
 
-#include "function.h"
-#include "set_interface.h"
-#include "grid.h"
+#include "function/function.h"
+#include "geometry/set_interface.h"
+#include "geometry/grid.h"
 
 namespace Ariadne {
 

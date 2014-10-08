@@ -21,9 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "standard.h"
+#include "utility/standard.h"
 
-#include "operators.h"
+#include "expression/operators.h"
 
 namespace Ariadne {
 

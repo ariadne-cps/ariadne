@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 
 #include "config.h"
 
 #include <utility>
 
-#include "orbit.h"
+#include "dynamics/orbit.h"
 
-#include "box.h"
-#include "point.h"
-#include "curve.h"
-#include "function_set.h"
-#include "list_set.h"
-#include "grid_set.h"
+#include "geometry/box.h"
+#include "geometry/point.h"
+#include "geometry/curve.h"
+#include "geometry/function_set.h"
+#include "geometry/list_set.h"
+#include "geometry/grid_set.h"
 
 namespace Ariadne {
 

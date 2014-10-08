@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
 #include <iostream>
@@ -33,20 +33,20 @@
 #include <vector>
 #include <valarray>
 
-#include "polyhedron.h"
+#include "geometry/polyhedron.h"
 
-#include "macros.h"
-#include "exceptions.h"
+#include "utility/macros.h"
+#include "utility/exceptions.h"
 
-#include "numeric.h"
+#include "numeric/numeric.h"
 
-#include "vector.h"
-#include "matrix.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
 
-#include "function.h"
+#include "function/function.h"
 
-#include "box.h"
-#include "polytope.h"
+#include "geometry/box.h"
+#include "geometry/polytope.h"
 
 
 

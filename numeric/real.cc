@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "standard.h"
+#include "utility/standard.h"
 
 #include <iostream>
 #include <sstream>
@@ -32,13 +32,13 @@
 
 
 #include "config.h"
-#include "real.h"
-#include "operators.h"
+#include "numeric/real.h"
+#include "expression/operators.h"
 
-#include "float.h"
-#include "float-approximate.h"
-#include "float-validated.h"
-#include "float-exact.h"
+#include "numeric/float.h"
+#include "numeric/float-approximate.h"
+#include "numeric/float-validated.h"
+#include "numeric/float-exact.h"
 
 namespace Ariadne {
 

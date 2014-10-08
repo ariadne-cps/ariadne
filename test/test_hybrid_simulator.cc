@@ -25,15 +25,15 @@
 #include <iostream>
 
 #include "config.h"
-#include "expression.h"
-#include "space.h"
-#include "hybrid_set.h"
-#include "hybrid_orbit.h"
-#include "hybrid_time.h"
-#include "hybrid_automaton.h"
-#include "hybrid_simulator.h"
-#include "graphics.h"
-#include "logging.h"
+#include "expression/expression.h"
+#include "expression/space.h"
+#include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_orbit.h"
+#include "hybrid/hybrid_time.h"
+#include "hybrid/hybrid_automaton.h"
+#include "hybrid/hybrid_simulator.h"
+#include "output/graphics.h"
+#include "utility/logging.h"
 
 #include "test.h"
 

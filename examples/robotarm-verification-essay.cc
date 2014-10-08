@@ -23,8 +23,8 @@
 
 #include <cstdarg>
 #include "ariadne.h"
-#include "valuation.h"
-#include "operators.h"
+#include "expression/valuation.h"
+#include "expression/operators.h"
 
 using namespace Ariadne;
 

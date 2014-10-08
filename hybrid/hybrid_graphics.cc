@@ -21,22 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
 #undef HAVE_GMPXX_H
 
-#include "macros.h"
-#include "stlio.h"
-#include "numeric.h"
-#include "space.h"
-#include "point.h"
-#include "box.h"
-#include "geometry2d.h"
-#include "discrete_location.h"
-#include "function_set.h"
-#include "expression_set.h"
-#include "hybrid_graphics.h"
+#include "utility/macros.h"
+#include "utility/stlio.h"
+#include "numeric/numeric.h"
+#include "expression/space.h"
+#include "geometry/point.h"
+#include "geometry/box.h"
+#include "output/geometry2d.h"
+#include "hybrid/discrete_location.h"
+#include "geometry/function_set.h"
+#include "expression/expression_set.h"
+#include "hybrid/hybrid_graphics.h"
 
 #ifdef HAVE_GTK_H
 #include <gtk/gtk.h>

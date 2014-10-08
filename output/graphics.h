@@ -32,8 +32,8 @@
 #include <string>
 #include <vector>
 
-#include "colour.h"
-#include "graphics_interface.h"
+#include "output/colour.h"
+#include "output/graphics_interface.h"
 
 typedef unsigned int uint;
 

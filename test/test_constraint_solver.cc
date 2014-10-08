@@ -27,12 +27,12 @@
 #include "config.h"
 #include "test.h"
 
-#include "numeric.h"
-#include "vector.h"
-#include "function.h"
-#include "constraint.h"
-#include "constraint_solver.h"
-#include "box.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "function/function.h"
+#include "function/constraint.h"
+#include "solvers/constraint_solver.h"
+#include "geometry/box.h"
 
 
 using namespace std;

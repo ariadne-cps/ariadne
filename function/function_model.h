@@ -32,14 +32,14 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "function_interface.h"
-#include "function_mixin.h"
-#include "function.h"
+#include "function/function_interface.h"
+#include "function/function_mixin.h"
+#include "function/function.h"
 
-#include "operators.h"
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
+#include "expression/operators.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
 
 namespace Ariadne {
 
@@ -550,7 +550,7 @@ FunctionModelFactoryInterface<ValidatedTag>::create(const ExactBox& domain,
 
 } // namespace Ariadne
 
-#include "function.h"
+#include "function/function.h"
 
 namespace Ariadne {
 

@@ -28,16 +28,16 @@
 #ifndef ARIADNE_BOX_H
 #define ARIADNE_BOX_H
 
-#include "container.h"
+#include "utility/container.h"
 
-#include "declarations.h"
-#include "numeric.h"
-#include "vector.h"
-#include "interval.h"
+#include "utility/declarations.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "geometry/interval.h"
 
-#include "set_interface.h"
-#include "graphics_interface.h"
-#include "point.h"
+#include "geometry/set_interface.h"
+#include "output/graphics_interface.h"
+#include "geometry/point.h"
 
 namespace Ariadne {
 

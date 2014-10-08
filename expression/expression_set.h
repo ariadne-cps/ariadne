@@ -30,14 +30,14 @@
 
 #include <iostream>
 
-#include "container.h"
-#include "variables.h"
-#include "expression.h"
-#include "assignment.h"
-#include "space.h"
-#include "float.h"
-#include "real.h"
-#include "box.h"
+#include "utility/container.h"
+#include "expression/variables.h"
+#include "expression/expression.h"
+#include "expression/assignment.h"
+#include "expression/space.h"
+#include "numeric/float.h"
+#include "numeric/real.h"
+#include "geometry/box.h"
 
 namespace Ariadne {
 

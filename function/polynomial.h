@@ -37,10 +37,10 @@
 #include <boost/iterator.hpp>
 #include <boost/iterator_adaptors.hpp>
 
-#include "multi_index.h"
-#include "expansion.h"
-#include "taylor_model.h"
-#include "differential.h"
+#include "algebra/multi_index.h"
+#include "algebra/expansion.h"
+#include "function/taylor_model.h"
+#include "algebra/differential.h"
 
 
 namespace Ariadne {

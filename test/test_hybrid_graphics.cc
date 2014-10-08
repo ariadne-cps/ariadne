@@ -24,12 +24,12 @@
 #include "config.h"
 #include "test.h"
 
-#include "real.h"
-#include "variables.h"
-#include "assignment.h"
+#include "numeric/real.h"
+#include "expression/variables.h"
+#include "expression/assignment.h"
 
-#include "hybrid_graphics.h"
-#include "hybrid_set.h"
+#include "hybrid/hybrid_graphics.h"
+#include "hybrid/hybrid_set.h"
 
 using namespace Ariadne;
 

@@ -21,30 +21,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric.h"
+#include "numeric/numeric.h"
 #include "config.h"
 
 #include <iomanip>
 #include <limits>
 
-#include "rounding.h"
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
-#include "expansion.h"
-#include "series.h"
-#include "differential.h"
-#include "taylor_model.h"
-#include "taylor_series.h"
-#include "function.h"
-#include "exceptions.h"
+#include "numeric/rounding.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "algebra/expansion.h"
+#include "algebra/series.h"
+#include "algebra/differential.h"
+#include "function/taylor_model.h"
+#include "function/taylor_series.h"
+#include "function/function.h"
+#include "utility/exceptions.h"
 
-#include "algebra_mixin.tcc"
+#include "algebra/algebra_mixin.tcc"
 
 #define VOLATILE ;
-#include "multi_index-noaliasing.h"
-#include "function_mixin.h"
-#include "vector.h"
+#include "algebra/multi_index-noaliasing.h"
+#include "function/function_mixin.h"
+#include "algebra/vector.h"
 
 namespace Ariadne {
 

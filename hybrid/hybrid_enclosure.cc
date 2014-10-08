@@ -21,30 +21,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
-#include "numeric.h"
-#include "vector.h"
-#include "operators.h"
-#include "function.h"
-#include "constraint.h"
-#include "polynomial.h"
-#include "taylor_function.h"
-#include "box.h"
-#include "grid_set.h"
-#include "hybrid_time.h"
-#include "discrete_event.h"
-#include "discrete_location.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "expression/operators.h"
+#include "function/function.h"
+#include "function/constraint.h"
+#include "function/polynomial.h"
+#include "function/taylor_function.h"
+#include "geometry/box.h"
+#include "geometry/grid_set.h"
+#include "hybrid/hybrid_time.h"
+#include "hybrid/discrete_event.h"
+#include "hybrid/discrete_location.h"
 
-#include "linear_programming.h"
-#include "nonlinear_programming.h"
-#include "constraint_solver.h"
-#include "affine_set.h"
+#include "solvers/linear_programming.h"
+#include "solvers/nonlinear_programming.h"
+#include "solvers/constraint_solver.h"
+#include "geometry/affine_set.h"
 
-#include "graphics_interface.h"
-#include "hybrid_enclosure.h"
-#include "hybrid_set.h"
+#include "output/graphics_interface.h"
+#include "hybrid/hybrid_enclosure.h"
+#include "hybrid/hybrid_set.h"
 
 
 namespace Ariadne {

@@ -32,19 +32,19 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "function_interface.h"
+#include "function/function_interface.h"
 
-#include "macros.h"
-#include "pointer.h"
-#include "container.h"
-#include "metaprogramming.h"
+#include "utility/macros.h"
+#include "utility/pointer.h"
+#include "utility/container.h"
+#include "utility/metaprogramming.h"
 
-#include "numeric.h"
-#include "vector.h"
-#include "differential.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/differential.h"
 
-#include "interval.h"
-#include "box.h"
+#include "geometry/interval.h"
+#include "geometry/box.h"
 
 namespace Ariadne {
 

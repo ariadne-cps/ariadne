@@ -35,15 +35,15 @@
 #include <string>
 
 
-#include "macros.h"
-#include "pointer.h"
-#include "container.h"
-#include "stlio.h"
+#include "utility/macros.h"
+#include "utility/pointer.h"
+#include "utility/container.h"
+#include "utility/stlio.h"
 
-#include "operators.h"
-#include "numeric.h"
-#include "vector.h"
-#include "expansion.h"
+#include "expression/operators.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/expansion.h"
 #include <boost/concept_check.hpp>
 
 namespace Ariadne {

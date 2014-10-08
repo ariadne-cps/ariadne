@@ -21,27 +21,27 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
-#include "macros.h"
-#include "tuple.h"
-#include "tribool.h"
-#include "numeric.h"
-#include "vector.h"
-#include "box.h"
-#include "grid_set.h"
-#include "polynomial.h"
-#include "function.h"
-#include "formula.h"
-#include "procedure.h"
-#include "constraint.h"
-#include "nonlinear_programming.h"
-#include "function_mixin.h"
-#include "taylor_function.h"
+#include "utility/macros.h"
+#include "utility/tuple.h"
+#include "utility/tribool.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "geometry/box.h"
+#include "geometry/grid_set.h"
+#include "function/polynomial.h"
+#include "function/function.h"
+#include "expression/formula.h"
+#include "function/procedure.h"
+#include "function/constraint.h"
+#include "solvers/nonlinear_programming.h"
+#include "function/function_mixin.h"
+#include "function/taylor_function.h"
 
-#include "constraint_solver.h"
-#include "solver.h"
+#include "solvers/constraint_solver.h"
+#include "solvers/solver.h"
 
 namespace Ariadne {
 

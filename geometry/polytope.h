@@ -36,11 +36,11 @@
 #include <cassert>
 #include <cstring>
 
-#include "macros.h"
-#include "point.h"
+#include "utility/macros.h"
+#include "geometry/point.h"
 
-#include "set_interface.h"
-#include "graphics_interface.h"
+#include "geometry/set_interface.h"
+#include "output/graphics_interface.h"
 
 namespace Ariadne {
 

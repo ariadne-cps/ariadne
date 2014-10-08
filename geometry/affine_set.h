@@ -34,12 +34,12 @@
 #include <iostream>
 
 #include <boost/smart_ptr.hpp>
-#include "graphics_interface.h"
-#include "container.h"
-#include "affine.h"
-#include "affine_model.h"
-#include "constraint.h"
-#include "logging.h"
+#include "output/graphics_interface.h"
+#include "utility/container.h"
+#include "function/affine.h"
+#include "function/affine_model.h"
+#include "function/constraint.h"
+#include "utility/logging.h"
 
 namespace Ariadne {
 

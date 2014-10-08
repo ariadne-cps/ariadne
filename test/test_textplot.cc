@@ -22,18 +22,18 @@
  */
 #include "config.h"
 
-#include "function.h"
-#include "textplot.h"
-#include "point.h"
-#include "box.h"
-#include "zonotope.h"
-#include "polytope.h"
-#include "curve.h"
+#include "function/function.h"
+#include "output/textplot.h"
+#include "geometry/point.h"
+#include "geometry/box.h"
+#include "geometry/zonotope.h"
+#include "geometry/polytope.h"
+#include "geometry/curve.h"
 #include "taylor_set.h"
-#include "function_set.h"
-#include "grid_set.h"
+#include "geometry/function_set.h"
+#include "geometry/grid_set.h"
 
-#include "user_function.h"
+#include "function/user_function.h"
 
 using namespace Ariadne;
 

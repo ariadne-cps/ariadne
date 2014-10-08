@@ -30,9 +30,9 @@
 
 #include "test.h"
 
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
 
 
 using namespace std;

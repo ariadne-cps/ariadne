@@ -28,11 +28,11 @@
 #ifndef ARIADNE_LINEAR_PROGRAMMING_H
 #define ARIADNE_LINEAR_PROGRAMMING_H
 
-#include "logging.h"
-#include "vector.h"
-#include "matrix.h"
-#include "numeric.h"
-#include "tuple.h"
+#include "utility/logging.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "numeric/numeric.h"
+#include "utility/tuple.h"
 
 namespace Ariadne {
 

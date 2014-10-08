@@ -34,14 +34,14 @@
 #include <set>
 #include <map>
 
-#include "function.h"
-#include "discrete_location.h"
-#include "discrete_event.h"
-#include "assignment.h"
-#include "expression.h"
-#include "logging.h"
+#include "function/function.h"
+#include "hybrid/discrete_location.h"
+#include "hybrid/discrete_event.h"
+#include "expression/assignment.h"
+#include "expression/expression.h"
+#include "utility/logging.h"
 
-#include "hybrid_automaton_interface.h"
+#include "hybrid/hybrid_automaton_interface.h"
 
 namespace Ariadne {
 

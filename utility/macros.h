@@ -31,7 +31,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "exceptions.h"
+#include "utility/exceptions.h"
 
 #define ARIADNE_THROW(except,func,msg)          \
     { \

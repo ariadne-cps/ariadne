@@ -25,25 +25,25 @@
 #include <iostream>
 
 #include "config.h"
-#include "tuple.h"
-#include "vector.h"
-#include "matrix.h"
-#include "function.h"
-#include "box.h"
-#include "list_set.h"
-#include "integrator.h"
-#include "orbit.h"
-#include "graphics_interface.h"
-#include "graphics.h"
-#include "hybrid_automaton.h"
-#include "hybrid_time.h"
-#include "hybrid_set.h"
-#include "hybrid_evolver.h"
-#include "hybrid_graphics.h"
-#include "logging.h"
+#include "utility/tuple.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "function/function.h"
+#include "geometry/box.h"
+#include "geometry/list_set.h"
+#include "solvers/integrator.h"
+#include "dynamics/orbit.h"
+#include "output/graphics_interface.h"
+#include "output/graphics.h"
+#include "hybrid/hybrid_automaton.h"
+#include "hybrid/hybrid_time.h"
+#include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_evolver.h"
+#include "hybrid/hybrid_graphics.h"
+#include "utility/logging.h"
 
 
-#include "hybrid_automaton-composite.h"
+#include "hybrid/hybrid_automaton-composite.h"
 
 #include "test.h"
 
@@ -481,8 +481,8 @@ void TestHybridEvolver::test_tangency() const {
          initial_set_colour,orbit.initial());
 }
 
-#include "affine_set.h"
-#include "hybrid_set.h"
+#include "geometry/affine_set.h"
+#include "hybrid/hybrid_set.h"
 
 void TestHybridEvolver::test_simultaneous_events() const {
     MonolithicHybridAutomaton automaton;

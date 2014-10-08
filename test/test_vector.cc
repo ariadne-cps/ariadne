@@ -26,10 +26,10 @@
 #include <cassert>
 
 #include "config.h"
-#include "numeric.h"
-#include "float.h"
-#include "interval.h"
-#include "vector.h"
+#include "numeric/numeric.h"
+#include "numeric/float.h"
+#include "geometry/interval.h"
+#include "algebra/vector.h"
 
 #include "test.h"
 

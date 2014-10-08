@@ -35,18 +35,18 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "tuple.h"
+#include "utility/tuple.h"
 
-#include "hybrid_time.h"
-#include "hybrid_set.h"
+#include "hybrid/hybrid_time.h"
+#include "hybrid/hybrid_set.h"
 
-#include "configuration_interface.h"
-#include "hybrid_enclosure.h"
-#include "hybrid_orbit.h"
-#include "hybrid_automaton_interface.h"
-#include "hybrid_evolver_interface.h"
+#include "solvers/configuration_interface.h"
+#include "hybrid/hybrid_enclosure.h"
+#include "hybrid/hybrid_orbit.h"
+#include "hybrid/hybrid_automaton_interface.h"
+#include "hybrid/hybrid_evolver_interface.h"
 
-#include "logging.h"
+#include "utility/logging.h"
 
 namespace Ariadne {
 

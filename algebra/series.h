@@ -28,9 +28,9 @@
 #ifndef ARIADNE_SERIES_H
 #define ARIADNE_SERIES_H
 
-#include "array.h"
-#include "integer.h"
-#include "operators.h"
+#include "utility/array.h"
+#include "numeric/integer.h"
+#include "expression/operators.h"
 
 namespace Ariadne {
 

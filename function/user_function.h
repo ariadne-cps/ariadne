@@ -31,19 +31,19 @@
 #include <cstdarg>
 #include <iosfwd>
 
-#include "function_interface.h"
-#include "function_mixin.h"
+#include "function/function_interface.h"
+#include "function/function_mixin.h"
 
-#include "macros.h"
-#include "pointer.h"
-#include "container.h"
+#include "utility/macros.h"
+#include "utility/pointer.h"
+#include "utility/container.h"
 
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
-#include "taylor_model.h"
-#include "differential.h"
-#include "formula.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "function/taylor_model.h"
+#include "algebra/differential.h"
+#include "expression/formula.h"
 
 #include "function_mixin.tcc"
 

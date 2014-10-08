@@ -38,21 +38,21 @@
 #include <boost/smart_ptr.hpp>
 #include <boost/python.hpp>
 
-#include "tuple.h"
+#include "utility/tuple.h"
 
-#include "taylor_function.h"
+#include "function/taylor_function.h"
 #include "taylor_set.h"
-#include "hybrid_set.h"
-#include "hybrid_time.h"
+#include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_time.h"
 
-#include "orbit.h"
+#include "dynamics/orbit.h"
 
-#include "hybrid_automaton.h"
-#include "evolver_interface.h"
-#include "evolver_base.h"
+#include "hybrid/hybrid_automaton.h"
+#include "solvers/evolver_interface.h"
+#include "solvers/evolver_base.h"
 #include "evolution_parameters.h"
 
-#include "logging.h"
+#include "utility/logging.h"
 
 namespace Ariadne {
 

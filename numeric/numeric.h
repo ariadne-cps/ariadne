@@ -28,22 +28,22 @@
 #ifndef ARIADNE_NUMERIC_H
 #define ARIADNE_NUMERIC_H
 
-#include "standard.h"
+#include "utility/standard.h"
 
 #include "config.h"
 
-#include "declarations.h"
+#include "utility/declarations.h"
 
-#include "integer.h"
-#include "rational.h"
-#include "decimal.h"
-#include "dyadic.h"
-#include "float.h"
-#include "float-exact.h"
-#include "float-validated.h"
-#include "float-approximate.h"
-#include "interval.h"
-#include "real.h"
+#include "numeric/integer.h"
+#include "numeric/rational.h"
+#include "numeric/decimal.h"
+#include "numeric/dyadic.h"
+#include "numeric/float.h"
+#include "numeric/float-exact.h"
+#include "numeric/float-validated.h"
+#include "numeric/float-approximate.h"
+#include "geometry/interval.h"
+#include "numeric/real.h"
 
 namespace Ariadne {
 

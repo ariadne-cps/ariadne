@@ -21,17 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "standard.h"
+#include "utility/standard.h"
 #include "config.h"
 
 #include <iostream>
 
-#include "runge_kutta_integrator.h"
+#include "solvers/runge_kutta_integrator.h"
 
-#include "container.h"
-#include "numeric.h"
-#include "vector.h"
-#include "function.h"
+#include "utility/container.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "function/function.h"
 
 namespace Ariadne {
 

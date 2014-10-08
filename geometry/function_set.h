@@ -32,17 +32,17 @@
 
 #include <memory>
 
-#include "macros.h"
-#include "container.h"
-#include "numeric.h"
-#include "vector.h"
-#include "set_interface.h"
-#include "function.h"
-#include "function_model.h"
-#include "constraint.h"
-#include "graphics_interface.h"
+#include "utility/macros.h"
+#include "utility/container.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "geometry/set_interface.h"
+#include "function/function.h"
+#include "function/function_model.h"
+#include "function/constraint.h"
+#include "output/graphics_interface.h"
 
-#include "box.h"
+#include "geometry/box.h"
 
 namespace Ariadne {
 

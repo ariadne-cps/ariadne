@@ -26,12 +26,12 @@
 
 #include "ariadne.h"
 
-#include "hybrid_automaton-composite.h"
-#include "hybrid_set.h"
-#include "hybrid_evolver.h"
-#include "hybrid_simulator.h"
-#include "hybrid_graphics.h"
-#include "hybrid_enclosure.h"
+#include "hybrid/hybrid_automaton-composite.h"
+#include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_evolver.h"
+#include "hybrid/hybrid_simulator.h"
+#include "hybrid/hybrid_graphics.h"
+#include "hybrid/hybrid_enclosure.h"
 
 using namespace Ariadne;
 

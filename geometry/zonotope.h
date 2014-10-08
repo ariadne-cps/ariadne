@@ -30,14 +30,14 @@
 
 #include <iosfwd>
 
-#include "tribool.h"
+#include "utility/tribool.h"
 
-#include "vector.h"
-#include "matrix.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
 
-#include "set_interface.h"
+#include "geometry/set_interface.h"
 
-#include "graphics_interface.h"
+#include "output/graphics_interface.h"
 
 namespace Ariadne {
 

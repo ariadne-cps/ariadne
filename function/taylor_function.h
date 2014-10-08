@@ -29,14 +29,14 @@
 #define ARIADNE_TAYLOR_FUNCTION_H
 
 #include <iosfwd>
-#include "container.h"
-#include "numeric.h"
-#include "vector.h"
-#include "taylor_model.h"
+#include "utility/container.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "function/taylor_model.h"
 
-#include "function_interface.h"
-#include "function_mixin.h"
-#include "function_model.h"
+#include "function/function_interface.h"
+#include "function/function_mixin.h"
+#include "function/function_model.h"
 
 namespace Ariadne {
 

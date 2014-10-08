@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "standard.h"
+#include "utility/standard.h"
 
 #include <iostream>
 #include <iomanip>
@@ -32,11 +32,11 @@
 
 #include "config.h"
 
-#include "macros.h"
-#include "dyadic.h"
-#include "decimal.h"
-#include "rational.h"
-#include "rounding.h"
+#include "utility/macros.h"
+#include "numeric/dyadic.h"
+#include "numeric/decimal.h"
+#include "numeric/rational.h"
+#include "numeric/rounding.h"
 
 #if defined ARIADNE_C99_ROUNDING
     #warning "Using standard fenv.h C header file for setting the rounding mode."
@@ -58,8 +58,8 @@
     #warning "No rounding mode defined."
 #endif
 
-#include "float.h"
-#include "float-exact.h"
+#include "numeric/float.h"
+#include "numeric/float-exact.h"
 
 
 namespace Ariadne {
@@ -596,7 +596,7 @@ Float tan_rnd(Float x)
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
 
-#include "serialization.h"
+#include "output/serialization.h"
 
 namespace Ariadne {
 

@@ -30,10 +30,10 @@
 
 #include <iosfwd>
 
-#include "tribool.h"
-#include "box.h"
-#include "handle.h"
-#include "set_interface.h"
+#include "utility/tribool.h"
+#include "geometry/box.h"
+#include "utility/handle.h"
+#include "geometry/set_interface.h"
 
 namespace Ariadne {
 

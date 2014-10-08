@@ -28,7 +28,7 @@
 #ifndef ARIADNE_PAVER_H
 #define ARIADNE_PAVER_H
 
-#include "paver_interface.h"
+#include "geometry/paver_interface.h"
 
 namespace Ariadne {
 

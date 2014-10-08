@@ -24,12 +24,12 @@
 #include <iostream>
 
 #include "config.h"
-#include "function.h"
-#include "box.h"
-#include "grid_set.h"
-#include "affine_set.h"
-#include "function_set.h"
-#include "graphics.h"
+#include "function/function.h"
+#include "geometry/box.h"
+#include "geometry/grid_set.h"
+#include "geometry/affine_set.h"
+#include "geometry/function_set.h"
+#include "output/graphics.h"
 
 #include "test.h"
 

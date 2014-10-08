@@ -30,7 +30,7 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "set_interface.h"
+#include "geometry/set_interface.h"
 
 namespace Ariadne {
 

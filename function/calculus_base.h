@@ -28,13 +28,13 @@
 #ifndef ARIADNE_CALCULUS_BASE_H
 #define ARIADNE_CALCULUS_BASE_H
 
-#include "tribool.h"
-#include "logging.h"
-#include "function_interface.h"
+#include "utility/tribool.h"
+#include "utility/logging.h"
+#include "function/function_interface.h"
 #include "calculus_interface.h"
 
-#include "numeric.h"
-#include "vector.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
 
 /* \brief Top-level namespace. */
 namespace Ariadne {

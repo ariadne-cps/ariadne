@@ -26,10 +26,10 @@
 
 #include <boost/python.hpp>
 
-#include "array.h"
-#include "numeric.h"
-#include "taylor_model.h"
-#include "differential.h"
+#include "utility/array.h"
+#include "numeric/numeric.h"
+#include "function/taylor_model.h"
+#include "algebra/differential.h"
 
 using namespace boost::python;
 using namespace Ariadne;

@@ -32,8 +32,8 @@
 #include <stdexcept>
 #include <string>
 
-#include "declarations.h"
-#include "logging.h"
+#include "utility/declarations.h"
+#include "utility/logging.h"
 
 typedef unsigned int uint;
 

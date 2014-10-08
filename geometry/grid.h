@@ -29,12 +29,12 @@
 #ifndef ARIADNE_GRID_H
 #define ARIADNE_GRID_H
 
-#include "array.h"
-#include "numeric.h"
-#include "vector.h"
+#include "utility/array.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
 
-#include "point.h"
-#include "box.h"
+#include "geometry/point.h"
+#include "geometry/box.h"
 
 namespace Ariadne {
 

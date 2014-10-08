@@ -29,8 +29,8 @@
 #include <string>
 
 #include "config.h"
-#include "rational.h"
-#include "float-validated.h"
+#include "numeric/rational.h"
+#include "numeric/float-validated.h"
 
 #include "test.h"
 

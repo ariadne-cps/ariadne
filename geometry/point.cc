@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "standard.h"
+#include "utility/standard.h"
 #include "config.h"
 
 #include <cstdarg>
@@ -29,9 +29,9 @@
 #include <string>
 #include <vector>
 
-#include "point.h"
-#include "box.h"
-#include "stlio.h"
+#include "geometry/point.h"
+#include "geometry/box.h"
+#include "utility/stlio.h"
 
 namespace Ariadne {
 

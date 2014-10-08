@@ -27,10 +27,10 @@
 #include "config.h"
 #include "test.h"
 
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
-#include "linear_programming.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "solvers/linear_programming.h"
 
 
 using namespace std;

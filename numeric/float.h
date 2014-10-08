@@ -33,8 +33,8 @@
 #include <algorithm> // For std::max, std::min
 #include <limits> // For std::numeric_limits<double>
 
-#include "rounding.h"
-#include "rational.h"
+#include "numeric/rounding.h"
+#include "numeric/rational.h"
 
 
 // Simplifying typedef for unsigned integer type

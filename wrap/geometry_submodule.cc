@@ -28,21 +28,21 @@
 
 #include <boost/python.hpp>
 
-#include "geometry.h"
-#include "geometry2d.h"
-#include "point.h"
-#include "curve.h"
-#include "interval.h"
-#include "box.h"
-#include "zonotope.h"
-#include "polytope.h"
-#include "polyhedron.h"
-#include "grid_set.h"
-#include "function_set.h"
-#include "affine_set.h"
+#include "geometry/geometry.h"
+#include "output/geometry2d.h"
+#include "geometry/point.h"
+#include "geometry/curve.h"
+#include "geometry/interval.h"
+#include "geometry/box.h"
+#include "geometry/zonotope.h"
+#include "geometry/polytope.h"
+#include "geometry/polyhedron.h"
+#include "geometry/grid_set.h"
+#include "geometry/function_set.h"
+#include "geometry/affine_set.h"
 
-#include "discrete_location.h"
-#include "hybrid_set.h"
+#include "hybrid/discrete_location.h"
+#include "hybrid/hybrid_set.h"
 
 
 

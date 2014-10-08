@@ -32,14 +32,14 @@
 #include <stdexcept>
 #include <string>
 
-#include "integrator_interface.h"
-#include "function_interface.h"
+#include "solvers/integrator_interface.h"
+#include "function/function_interface.h"
 
-#include "declarations.h"
-#include "attribute.h"
-#include "logging.h"
-#include "pointer.h"
-#include "affine.h"
+#include "utility/declarations.h"
+#include "utility/attribute.h"
+#include "utility/logging.h"
+#include "utility/pointer.h"
+#include "function/affine.h"
 
 namespace Ariadne {
 

@@ -35,15 +35,15 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "tuple.h"
+#include "utility/tuple.h"
 
-#include "vector_field.h"
-#include "function_interface.h"
-#include "configuration_interface.h"
-#include "integrator_interface.h"
-#include "evolver_base.h"
+#include "dynamics/vector_field.h"
+#include "function/function_interface.h"
+#include "solvers/configuration_interface.h"
+#include "solvers/integrator_interface.h"
+#include "solvers/evolver_base.h"
 
-#include "logging.h"
+#include "utility/logging.h"
 
 namespace Ariadne {
 

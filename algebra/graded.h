@@ -28,7 +28,7 @@
 #ifndef ARIADNE_GRADED_H
 #define ARIADNE_GRADED_H
 
-#include "procedure.h"
+#include "function/procedure.h"
 
 namespace Ariadne {
 

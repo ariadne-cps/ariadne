@@ -32,13 +32,13 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "declarations.h"
+#include "utility/declarations.h"
 
-#include "macros.h"
-#include "pointer.h"
+#include "utility/macros.h"
+#include "utility/pointer.h"
 
-#include "vector.h"
-#include "matrix.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
 
 namespace Ariadne {
 

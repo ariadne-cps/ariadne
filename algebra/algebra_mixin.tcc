@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "algebra_interface.h"
-#include "algebra_mixin.h"
-#include "algebra.h"
+#include "algebra/algebra_interface.h"
+#include "algebra/algebra_mixin.h"
+#include "algebra/algebra.h"
 
-#include "series.h"
-#include "taylor_series.h"
+#include "algebra/series.h"
+#include "function/taylor_series.h"
 
 namespace Ariadne {
 

@@ -26,11 +26,11 @@
 
 #include <boost/python.hpp>
 
-#include "function_interface.h"
-#include "polynomial.h"
-#include "function.h"
-#include "function_model.h"
-#include "taylor_function.h"
+#include "function/function_interface.h"
+#include "function/polynomial.h"
+#include "function/function.h"
+#include "function/function_model.h"
+#include "function/taylor_function.h"
 
 using namespace boost::python;
 using namespace Ariadne;

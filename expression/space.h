@@ -33,11 +33,11 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "macros.h"
-#include "pointer.h"
-#include "container.h"
+#include "utility/macros.h"
+#include "utility/pointer.h"
+#include "utility/container.h"
 
-#include "variables.h"
+#include "expression/variables.h"
 
 namespace Ariadne {
 

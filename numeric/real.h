@@ -34,19 +34,19 @@
 #include <string>
 #include <memory>
 
-#include "declarations.h"
+#include "utility/declarations.h"
 
-#include "tribool.h"
-#include "rounding.h"
-#include "macros.h"
-#include "integer.h"
-#include "rational.h"
+#include "utility/tribool.h"
+#include "numeric/rounding.h"
+#include "utility/macros.h"
+#include "numeric/integer.h"
+#include "numeric/rational.h"
 
-#include "float-approximate.h"
-#include "float-validated.h"
-#include "float-exact.h"
+#include "numeric/float-approximate.h"
+#include "numeric/float-validated.h"
+#include "numeric/float-exact.h"
 
-#include "interval.h"
+#include "geometry/interval.h"
 
 namespace Ariadne {
 

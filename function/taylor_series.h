@@ -29,9 +29,9 @@
 #ifndef ARIADNE_TAYLOR_SERIES_H
 #define ARIADNE_TAYLOR_SERIES_H
 
-#include "numeric.h"
-#include "series.h"
-#include "stlio.h"
+#include "numeric/numeric.h"
+#include "algebra/series.h"
+#include "utility/stlio.h"
 
 namespace Ariadne {
 

@@ -30,11 +30,11 @@
 
 #include "config.h"
 
-#include "procedure.h"
+#include "function/procedure.h"
 
-#include "numeric.h"
-#include "vector.h"
-#include "formula.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "expression/formula.h"
 
 #include "test.h"
 

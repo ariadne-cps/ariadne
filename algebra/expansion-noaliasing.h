@@ -40,8 +40,8 @@
 #include <boost/iterator/zip_iterator.hpp>
 #include <boost/iterator_adaptors.hpp>
 
-#include "vector.h"
-#include "multi_index.h"
+#include "algebra/vector.h"
+#include "algebra/multi_index.h"
 
 
 

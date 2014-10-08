@@ -24,21 +24,21 @@
 #include <typeinfo>
 #include "config.h"
 
-#include "numeric.h"
-#include "vector.h"
-#include "polynomial.h"
-#include "function.h"
-#include "function_model.h"
-#include "grid_set.h"
-#include "hybrid_time.h"
-#include "hybrid_automaton_interface.h"
-#include "hybrid_evolver.h"
-#include "orbit.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "function/polynomial.h"
+#include "function/function.h"
+#include "function/function_model.h"
+#include "geometry/grid_set.h"
+#include "hybrid/hybrid_time.h"
+#include "hybrid/hybrid_automaton_interface.h"
+#include "hybrid/hybrid_evolver.h"
+#include "dynamics/orbit.h"
 
-#include "integrator.h"
-#include "solver.h"
+#include "solvers/integrator.h"
+#include "solvers/solver.h"
 
-#include "hybrid_evolver.h"
+#include "hybrid/hybrid_evolver.h"
 
 namespace {
 

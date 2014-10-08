@@ -30,10 +30,10 @@
 
 #include <memory>
 
-#include "macros.h"
-#include "stlio.h"
-#include "function.h"
-#include "graphics_interface.h"
+#include "utility/macros.h"
+#include "utility/stlio.h"
+#include "function/function.h"
+#include "output/graphics_interface.h"
 
 namespace Ariadne {
 

@@ -21,27 +21,27 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
-#include "hybrid_simulator.h"
+#include "hybrid/hybrid_simulator.h"
 
-#include "array.h"
-#include "container.h"
-#include "tuple.h"
-#include "stlio.h"
-#include "valuation.h"
-#include "assignment.h"
-#include "space.h"
+#include "utility/array.h"
+#include "utility/container.h"
+#include "utility/tuple.h"
+#include "utility/stlio.h"
+#include "expression/valuation.h"
+#include "expression/assignment.h"
+#include "expression/space.h"
 
-#include "function.h"
+#include "function/function.h"
 
-#include "logging.h"
+#include "utility/logging.h"
 
-#include "hybrid_set.h"
-#include "hybrid_orbit.h"
-#include "hybrid_time.h"
-#include "hybrid_automaton_interface.h"
+#include "hybrid/hybrid_set.h"
+#include "hybrid/hybrid_orbit.h"
+#include "hybrid/hybrid_time.h"
+#include "hybrid/hybrid_automaton_interface.h"
 
 
 namespace Ariadne {

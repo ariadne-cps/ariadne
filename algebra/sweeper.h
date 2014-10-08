@@ -28,10 +28,10 @@
 #ifndef ARIADNE_SWEEPER_H
 #define ARIADNE_SWEEPER_H
 
-#include "macros.h"
-#include "attribute.h"
-#include "multi_index.h"
-#include "expansion.h"
+#include "utility/macros.h"
+#include "utility/attribute.h"
+#include "algebra/multi_index.h"
+#include "algebra/expansion.h"
 
 namespace Ariadne {
 

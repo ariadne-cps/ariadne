@@ -28,10 +28,10 @@
 #ifndef ARIADNE_UNIVARIATE_DIFFERENTIAL_H
 #define ARIADNE_UNIVARIATE_DIFFERENTIAL_H
 
-#include "macros.h"
-#include "array.h"
-#include "series.h"
-#include "numeric.h"
+#include "utility/macros.h"
+#include "utility/array.h"
+#include "algebra/series.h"
+#include "numeric/numeric.h"
 
 namespace Ariadne {
 

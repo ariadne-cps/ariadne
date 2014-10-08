@@ -28,7 +28,7 @@
 #ifndef ARIADNE_FIXED_UNIVARIATE_DIFFERENTIAL_H
 #define ARIADNE_FIXED_UNIVARIATE_DIFFERENTIAL_H
 
-#include "macros.h"
+#include "utility/macros.h"
 
 namespace Ariadne {
 

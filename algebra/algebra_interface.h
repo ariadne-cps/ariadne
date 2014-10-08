@@ -31,9 +31,9 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "numeric.h"
-#include "pointer.h"
-#include "operators.h"
+#include "numeric/numeric.h"
+#include "utility/pointer.h"
+#include "expression/operators.h"
 
 namespace Ariadne {
 

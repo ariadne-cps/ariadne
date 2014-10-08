@@ -39,7 +39,7 @@
 
 #include <stdint.h>
 
-#include "macros.h"
-#include "metaprogramming.h"
+#include "utility/macros.h"
+#include "utility/metaprogramming.h"
 
 #endif

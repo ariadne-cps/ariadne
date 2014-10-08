@@ -21,25 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "functional.h"
+#include "function/functional.h"
 #include "config.h"
 
 #include <iomanip>
 
-#include "integrator.h"
+#include "solvers/integrator.h"
 
-#include "logging.h"
-#include "container.h"
-#include "numeric.h"
-#include "vector.h"
-#include "matrix.h"
-#include "differential.h"
-#include "function.h"
-#include "function_model.h"
+#include "utility/logging.h"
+#include "utility/container.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/matrix.h"
+#include "algebra/differential.h"
+#include "function/function.h"
+#include "function/function_model.h"
 
-#include "polynomial.h"
-#include "function.h"
-#include "interval.h"
+#include "function/polynomial.h"
+#include "function/function.h"
+#include "geometry/interval.h"
 
 namespace Ariadne {
 
@@ -316,9 +316,9 @@ void TaylorPicardIntegrator::write(std::ostream& os) const {
 } // namespace Ariadne
 
 
-#include "graded.h"
-#include "procedure.h"
-#include "taylor_function.h"
+#include "algebra/graded.h"
+#include "function/procedure.h"
+#include "function/taylor_function.h"
 namespace Ariadne {
 
 class FormulaFunction;

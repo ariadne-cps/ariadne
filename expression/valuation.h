@@ -37,13 +37,13 @@ template<class T, class X=T> class Valuation;
 #include <iostream>
 #include <string>
 
-#include "macros.h"
-#include "container.h"
-#include "tribool.h"
+#include "utility/macros.h"
+#include "utility/container.h"
+#include "utility/tribool.h"
 
-#include "integer.h"
-#include "variables.h"
-#include "expression.h"
+#include "numeric/integer.h"
+#include "expression/variables.h"
+#include "expression/expression.h"
 
 namespace Ariadne {
 

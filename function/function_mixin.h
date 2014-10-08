@@ -24,7 +24,7 @@
 #ifndef ARIADNE_FUNCTION_MIXIN_H
 #define ARIADNE_FUNCTION_MIXIN_H
 
-#include "function_interface.h"
+#include "function/function_interface.h"
 
 // Adaptors for classes to conform to the Function interface.
 

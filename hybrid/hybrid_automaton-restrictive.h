@@ -34,16 +34,16 @@
 #include <set>
 #include <map>
 
-#include "tuple.h"
-#include "function.h"
-#include "discrete_location.h"
-#include "discrete_event.h"
-#include "assignment.h"
-#include "expression.h"
-#include "valuation.h"
-#include "logging.h"
+#include "utility/tuple.h"
+#include "function/function.h"
+#include "hybrid/discrete_location.h"
+#include "hybrid/discrete_event.h"
+#include "expression/assignment.h"
+#include "expression/expression.h"
+#include "expression/valuation.h"
+#include "utility/logging.h"
 
-#include "hybrid_automaton_interface.h"
+#include "hybrid/hybrid_automaton_interface.h"
 
 namespace Ariadne {
 

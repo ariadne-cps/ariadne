@@ -27,10 +27,10 @@
 
 #include <boost/python.hpp>
 
-#include "numeric.h"
-#include "function_set.h"
-#include "grid_set.h"
-#include "list_set.h"
+#include "numeric/numeric.h"
+#include "geometry/function_set.h"
+#include "geometry/grid_set.h"
+#include "geometry/list_set.h"
 
 using namespace boost::python;
 using namespace Ariadne;

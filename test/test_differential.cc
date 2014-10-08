@@ -30,9 +30,9 @@
 
 #include "config.h"
 
-#include "numeric.h"
-#include "vector.h"
-#include "differential.h"
+#include "numeric/numeric.h"
+#include "algebra/vector.h"
+#include "algebra/differential.h"
 
 #include "test.h"
 

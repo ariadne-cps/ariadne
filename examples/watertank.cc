@@ -25,7 +25,7 @@
 #include "ariadne.h"
 #include <boost/concept_check.hpp>
 
-#include "expression_set.h"
+#include "expression/expression_set.h"
 
 using namespace Ariadne;
 

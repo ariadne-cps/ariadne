@@ -31,10 +31,10 @@
 #include <iostream>
 #include <map>
 
-#include "container.h"
-#include "stlio.h"
+#include "utility/container.h"
+#include "utility/stlio.h"
 
-#include "variables.h"
+#include "expression/variables.h"
 
 typedef void Void;
 typedef std::ostream OutputStream;

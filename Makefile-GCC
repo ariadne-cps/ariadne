@@ -1,6 +1,7 @@
 all: lib tests wrap examples
 
-VPATH = utility numeric expression algebra function geometry solvers dynamics hybrid output
+VPATH = utility numeric expression algebra function geometry solvers dynamics hybrid output \
+	tests wrap examples
 
 HDR = \
 	standard.h numeric.h functional.h
@@ -159,9 +160,7 @@ CXX = g++
 #CXX = clang++
 CXXFLAGS = -std=c++11 -fPIC
 
-INCLUDE_PATHS =  -iquote. -iquote./src/ -iquote./include \
-	-iquote./utility -iquote./numeric -iquote./algebra -iquote./function \
-	-iquote./solvers -iquote./geometry -iquote./expression -iquote./dynamics -iquote./hybrid -iquote./output
+INCLUDE_PATHS =  -iquote.
 LINK_LIBS=-lgmpxx -lgmp -lcairo -lboost_system -lboost_serialization
 
 PYTHON_VERSION=2.7
@@ -262,7 +261,6 @@ obj/test/%.o: test/%.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
 obj/wrap/%.o: wrap/%.cc | wrap/boost_python.h.gch
-	echo $(PYTHON_INCLUDE_PATH)
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -c -o $@ $<
 
 obj/examples/%.o: examples/%.cc

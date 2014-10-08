@@ -27,9 +27,9 @@
 #include "config.h"
 #include "test.h"
 
-#include "expression.h"
-#include "valuation.h"
-#include "hybrid_automaton.h"
+#include "expression/expression.h"
+#include "expression/valuation.h"
+#include "hybrid/hybrid_automaton.h"
 #include <boost/concept_check.hpp>
 
 using namespace std;

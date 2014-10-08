@@ -28,9 +28,9 @@
 #ifndef ARIADNE_HYBRID_AUTOMATON_INTERFACE_H
 #define ARIADNE_HYBRID_AUTOMATON_INTERFACE_H
 
-#include "function.h"
-#include "discrete_event.h"
-#include "discrete_location.h"
+#include "function/function.h"
+#include "hybrid/discrete_event.h"
+#include "hybrid/discrete_location.h"
 
 namespace Ariadne {
 

@@ -26,14 +26,14 @@
 
 #include <boost/python.hpp>
 
-#include "function.h"
-#include "solver_interface.h"
-#include "solver.h"
-#include "taylor_function.h"
+#include "function/function.h"
+#include "solvers/solver_interface.h"
+#include "solvers/solver.h"
+#include "function/taylor_function.h"
 
-#include "integrator_interface.h"
-#include "integrator.h"
-#include "runge_kutta_integrator.h"
+#include "solvers/integrator_interface.h"
+#include "solvers/integrator.h"
+#include "solvers/runge_kutta_integrator.h"
 
 using namespace boost::python;
 using namespace Ariadne;

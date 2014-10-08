@@ -240,7 +240,7 @@ void _neg(ValidatedTaylorModel& r)
 inline void _scal_exact(ValidatedTaylorModel& r, const Float& c)
 {
     // Operation can be performed exactly
-    register RawFloat pc=static_cast<RawFloat>(c);
+    RawFloat pc=static_cast<RawFloat>(c);
     for(ValidatedTaylorModel::iterator iter=r.begin(); iter!=r.end(); ++iter) {
         iter->data().raw()*=pc;
     }
@@ -314,8 +314,8 @@ inline void _scal_approx3(ValidatedTaylorModel& r, const Float& c)
     set_rounding_upward();
     volatile double u,ml;
     double te=0; // Twice the maximum accumulated error
-    register double pc=internal_cast<const double&>(c);
-    register double mc=-pc;
+    double pc=internal_cast<const double&>(c);
+    double mc=-pc;
     for(ValidatedTaylorModel::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
         const double& rv=internal_cast<const double&>(riter->data().raw());
         u=rv*pc;
@@ -341,9 +341,9 @@ inline void _scal_approx2(ValidatedTaylorModel& r, const Float& c)
     Float& re=r.error().raw();
     set_rounding_upward();
     Float u,ml;
-    register Float te=0; // Twice the maximum accumulated error
-    register Float pc=c;
-    register Float mc=-c;
+    Float te=0; // Twice the maximum accumulated error
+    Float pc=c;
+    Float mc=-c;
     for(ValidatedTaylorModel::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
         const Float& rv=riter->data().raw();
         u=mul_rnd(rv,pc);
@@ -372,8 +372,8 @@ inline void _scal_approx1(ValidatedTaylorModel& rr, const Float& cc)
     set_rounding_upward();
     volatile double u,ml;
     double te=0; // Twice the maximum accumulated error
-    register double pc=c;
-    register double mc=-c;
+    double pc=c;
+    double mc=-c;
     for(Expansion<double>::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
         const double& rv=riter->data();
         u=rv*pc;
@@ -403,8 +403,8 @@ inline void _scal_approx0(ValidatedTaylorModel& rr, const Float& cc)
     set_rounding_upward();
     volatile double u,ml;
     double te=0; // Twice the maximum accumulated error
-    register double pc=c;
-    register double mc=-c;
+    double pc=c;
+    double mc=-c;
     for(Expansion<double>::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
         const double& rv=riter->data();
         u=rv*pc;
@@ -445,8 +445,8 @@ void _scal(ValidatedTaylorModel& r, const ValidatedNumber& c)
     set_rounding_upward();
     VOLATILE Float u,ml;
     Float te=0; // Twice the maximum accumulated error
-    register Float cu=c.upper().raw();
-    register Float mcl=-c.lower().raw();
+    Float cu=c.upper().raw();
+    Float mcl=-c.lower().raw();
     for(ValidatedTaylorModel::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
         const Float& rv=riter->data().raw();
         if(rv>=0) {
@@ -766,7 +766,7 @@ inline void _sma(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const F
     set_rounding_upward();
     Float te=0.0;
     VOLATILE Float u,ml;
-    register Float mc=-c;
+    Float mc=-c;
 
     ValidatedTaylorModel::const_iterator xiter=x.begin();
     ValidatedTaylorModel::const_iterator yiter=y.begin();
@@ -834,9 +834,9 @@ inline void _sma(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const V
     set_rounding_upward();
     VOLATILE Float u,ml,myv;
     Float te=0; // Twice the maximum accumulated error
-    register Float cu=c.upper().raw();
-    register Float mcl=-c.lower().raw();
-    register Float cm=c.midpoint().raw();
+    Float cu=c.upper().raw();
+    Float mcl=-c.lower().raw();
+    Float cm=c.midpoint().raw();
 
     // Compute r=x+y, assuming r is empty
     set_rounding_upward();
@@ -2081,8 +2081,8 @@ void _antidifferentiate1(ValidatedTaylorModel& x, uint k)
     VOLATILE Float tre=0; // Twice the maximum accumulated roundoff error
     for(ValidatedTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         const uint c=xiter->key()[k]+1;
-        register Float xv=xiter->data().raw();
-        register Float mxv=-xv;
+        Float xv=xiter->data().raw();
+        Float mxv=-xv;
         assert(c>0);
         //VOLATILE Float ml,u;
         if(xv>=0) {

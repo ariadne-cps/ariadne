@@ -1,6 +1,6 @@
 all: lib tests wrap examples
 
-VPATH = include src test wrap examples
+VPATH = utility numeric expression algebra function geometry solvers dynamics hybrid output
 
 HDR = \
 	standard.h numeric.h functional.h
@@ -46,7 +46,6 @@ LIB_GEOMETRY_SRC = \
 	interval.cc \
 	box.cc \
 	curve.cc \
-	orbit.cc \
 	function_set.cc \
 	grid_set.cc \
 	affine_set.cc \
@@ -59,6 +58,7 @@ TEST_GEOMETRY_SRC = \
 	test_graphics.cc \
 
 LIB_DYNAMICS_SRC = \
+	orbit.cc \
 	map_evolver.cc \
 	vector_field_evolver.cc
 
@@ -112,7 +112,6 @@ WRAP_HDR = utility.h
 
 UNUSED_TESTS_SRC = \
 
-#	test_discrete_evolution test_continuous_evolution
 
 EXAMPLES_SRC = \
 	tutorial.cc \
@@ -127,7 +126,7 @@ EXAMPLES_SRC = \
 	robotarm-verification.cc \
 	robotarm-verification-essay.cc \
 
-LIB_OBJ_DIR = obj
+LIB_OBJ_DIR = obj/lib
 TESTS_OBJ_DIR = obj/test
 TESTS_BIN_DIR = bin
 WRAP_OBJ_DIR = obj/wrap
@@ -160,7 +159,9 @@ CXX = g++
 #CXX = clang++
 CXXFLAGS = -std=c++11 -fPIC
 
-INCLUDE_PATHS =  -iquote. -iquote./include
+INCLUDE_PATHS =  -iquote. -iquote./src/ -iquote./include \
+	-iquote./utility -iquote./numeric -iquote./algebra -iquote./function \
+	-iquote./solvers -iquote./geometry -iquote./expression -iquote./dynamics -iquote./hybrid -iquote./output
 LINK_LIBS=-lgmpxx -lgmp -lcairo -lboost_system -lboost_serialization
 
 PYTHON_VERSION=2.7
@@ -236,11 +237,11 @@ libariadne.so: $(PCH) $(LIB_OBJ)
 libariadne-numeric.so: $(PCH) $(LIB_NUMERIC_OBJ)
 	$(CXX) $(LIB_NUMERIC_OBJ) $(LINK_LIBS) -shared -o libariadne-numeric.so
 
-libariadne-algebra.so: $(PCH) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ)  obj/interval.o obj/point.o obj/box.o
-	$(CXX) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ)  obj/interval.o obj/point.o obj/box.o  $(LINK_LIBS) -shared -o libariadne-algebra.so
+libariadne-algebra.so: $(PCH) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ)  $(LIB_OBJ_DIR)/interval.o $(LIB_OBJ_DIR)/point.o $(LIB_OBJ_DIR)/box.o
+	$(CXX) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ)  $(LIB_OBJ_DIR)/interval.o $(LIB_OBJ_DIR)/point.o $(LIB_OBJ_DIR)/box.o  $(LINK_LIBS) -shared -o libariadne-algebra.so
 
-libariadne-function.so: $(PCH) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ)  obj/expression.o obj/interval.o obj/point.o obj/box.o
-	$(CXX) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ)  obj/expression.o obj/interval.o obj/point.o obj/box.o  $(LINK_LIBS) -shared -o libariadne-function.so
+libariadne-function.so: $(PCH) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ)  $(LIB_OBJ_DIR)/expression.o $(LIB_OBJ_DIR)/interval.o $(LIB_OBJ_DIR)/point.o $(LIB_OBJ_DIR)/box.o
+	$(CXX) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ) $(LIB_OBJ_DIR)/expression.o $(LIB_OBJ_DIR)/interval.o $(LIB_OBJ_DIR)/point.o  $(LIB_OBJ_DIR)/box.o  $(LINK_LIBS) -shared -o libariadne-function.so
 
 ariadne.so: $(PCH) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) libariadne.so
 	$(CXX) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) $(PYTHON_LINK_LIBS) libariadne.so -shared -o ariadne.so
@@ -251,13 +252,17 @@ ariadne.so: $(PCH) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) libariadne.so
 wrap/boost_python.h.gch: wrap/boost_python.h
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) $<
 
-obj/%.o: src/%.cc
+numeric/float.o: numeric/float.cc
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
+
+obj/lib/%.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
 obj/test/%.o: test/%.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
-obj/wrap/%.o: wrap/%.cc wrap/boost_python.h.gch
+obj/wrap/%.o: wrap/%.cc | wrap/boost_python.h.gch
+	echo $(PYTHON_INCLUDE_PATH)
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -c -o $@ $<
 
 obj/examples/%.o: examples/%.cc
@@ -293,24 +298,23 @@ bin/test_differential: obj/test/test_differential.o  libariadne-algebra.so
 TEST_FUNCTION_EXTRA_OBJ = \
 	$(LIB_OBJ_DIR)/box.o $(LIB_OBJ_DIR)/point.o $(LIB_OBJ_DIR)/expression.o
 
-bin/test_polynomial: obj/test/test_polynomial.o  libariadne-function.so
+bin/test_polynomial: $(TESTS_OBJ_DIR)/test_polynomial.o  libariadne-function.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
-bin/test_taylor_model: obj/test/test_taylor_model.o obj/taylor_model.o libariadne-algebra.so
-	$(CXX) $< obj/taylor_model.o $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
+bin/test_taylor_model: $(TESTS_OBJ_DIR)/test_taylor_model.o $(LIB_OBJ_DIR)/taylor_model.o libariadne-function.so
+	$(CXX) $< $(LIB_OBJ_DIR)/taylor_model.o $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
 
-bin/test_procedure: obj/test/test_procedure.o  libariadne-function.so $(TEST_FUNCTION_EXTRA_OBJ)
+bin/test_procedure: $(TESTS_OBJ_DIR)/test_procedure.o  libariadne-function.so $(TEST_FUNCTION_EXTRA_OBJ)
 	$(CXX) $< $(LINK_FLAGS) $(TEST_FUNCTION_EXTRA_OBJ) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
-bin/test_function: obj/test/test_function.o  libariadne-function.so $(TEST_FUNCTION_EXTRA_OBJ)
+bin/test_function: $(TESTS_OBJ_DIR)/test_function.o  libariadne-function.so $(TEST_FUNCTION_EXTRA_OBJ)
 	$(CXX) $< $(LINK_FLAGS) $(TEST_FUNCTION_EXTRA_OBJ) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
-bin/test_taylor_function: obj/test/test_taylor_function.o  libariadne-function.so $(TEST_FUNCTION_EXTRA_OBJ)
+bin/test_taylor_function: $(TESTS_OBJ_DIR)/test_taylor_function.o  libariadne-function.so $(TEST_FUNCTION_EXTRA_OBJ)
 	$(CXX) $< $(LINK_FLAGS) $(TEST_FUNCTION_EXTRA_OBJ) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
 
 bin/%: obj/examples/%.o libariadne.so
-#	@echo "\nlinking EXAMPLES " $< " with libariadne.so to " $@
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
 
 #wrap/boost_python.h.gch: boost_python.h

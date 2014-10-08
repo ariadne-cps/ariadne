@@ -247,13 +247,13 @@ inline ExactInterval hull(ExactInterval i1, ExactInterval i2) {
 }
 
 //! \related ExactInterval \brief The hull of an interval and a point, equal to the smallest interval containing both.
-inline ExactInterval hull(ExactInterval i1, Float x2) {
-    return ExactInterval(min(i1.lower_raw(),x2),max(i1.upper_raw(),x2));
+inline ExactInterval hull(ExactInterval i1, ExactFloat x2) {
+    return ExactInterval(min(i1.lower_raw(),x2.raw()),max(i1.upper_raw(),x2.raw()));
 }
 
 //! \related ExactInterval \brief The hull of two points, equal to the smallest interval containing both.
-inline ExactInterval hull(Float x1, Float x2) {
-    return ExactInterval(min(x1,x2),max(x1,x2));
+inline ExactInterval hull(ExactFloat x1, ExactFloat x2) {
+    return ExactInterval(min(x1.raw(),x2.raw()),max(x1.raw(),x2.raw()));
 }
 
 
@@ -349,7 +349,7 @@ class UpperInterval {
     friend bool contains(UpperInterval const& ivl, ExactNumber const& x) {
         return ivl.lower_raw() <= x.raw() && x.raw() <= ivl.upper_raw(); }
     friend tribool inside(UpperInterval const& ivl1, ExactInterval const& ivl2) {
-        return (ivl1.l>ivl2.lower_raw() && ivl1.u<ivl2.upper_raw()) || tribool(indeterminate); }
+        return (ivl1.lower_raw()>ivl2.lower_raw() && ivl1.upper_raw()<ivl2.upper_raw()) || tribool(indeterminate); }
     friend tribool subset(UpperInterval const& ivl1, ExactInterval const& ivl2) {
         return (ivl1.l>=ivl2.lower_raw() && ivl1.u<=ivl2.upper_raw()) || tribool(indeterminate); }
     friend bool equal(UpperInterval const& ivl1, UpperInterval const& ivl2) {
@@ -895,6 +895,7 @@ class ApproximateInterval {
   private:
     Float l, u;
 };
+
 
 class UnitInterval
     : public ExactInterval

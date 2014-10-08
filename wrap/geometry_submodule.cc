@@ -316,7 +316,7 @@ void export_interval()
 
 void export_box()
 {
-    typedef Vector<ExactInterval> IVector;
+    typedef Vector<ExactInterval> ExactIntervalVector;
     class_<Vector<ExactInterval>> interval_vector_class("ExactIntervalVector");
 
     class_<ExactBox,bases<CompactSetInterface,OpenSetInterface,Vector<ExactInterval>,DrawableInterface > > box_class("ExactBox",init<ExactBox>());
@@ -332,14 +332,14 @@ void export_box()
     box_class.def("inside", (tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::inside);
     box_class.def("empty", (bool(ExactBox::*)()const) &ExactBox::empty);
     box_class.def("widen", (ExactBox(ExactBox::*)()const) &ExactBox::widen);
-    box_class.def("split", (std::pair<ExactBox,ExactBox>(ExactBox::*)()const) &ExactBox::split);
-    box_class.def("split", (std::pair<ExactBox,ExactBox>(ExactBox::*)(uint)const) &ExactBox::split);
-    box_class.def("split", (std::pair<ExactBox,ExactBox>(ExactBox::*)()const) &ExactBox::split);
+    box_class.def("split", (Pair<ExactBox,ExactBox>(ExactBox::*)()const) &ExactBox::split);
+    box_class.def("split", (Pair<ExactBox,ExactBox>(ExactBox::*)(uint)const) &ExactBox::split);
+    box_class.def("split", (Pair<ExactBox,ExactBox>(ExactBox::*)()const) &ExactBox::split);
     box_class.def(self_ns::str(self));
 
-    def("split", (std::pair<ExactBox,ExactBox>(*)(const ExactBox&)) &split);
-    def("disjoint", (bool(*)(const IVector&,const IVector&)) &disjoint);
-    def("subset", (bool(*)(const IVector&,const IVector&)) &subset);
+    def("split", (Pair<ExactIntervalVector,ExactIntervalVector>(*)(const ExactIntervalVector&)) &split);
+    def("disjoint", (bool(*)(const ExactIntervalVector&,const ExactIntervalVector&)) &disjoint);
+    def("subset", (bool(*)(const ExactIntervalVector&,const ExactIntervalVector&)) &subset);
 
     def("product", (ExactBox(*)(const ExactBox&,const ExactInterval&)) &product);
     def("product", (ExactBox(*)(const ExactBox&,const ExactBox&)) &product);
@@ -347,16 +347,16 @@ void export_box()
     def("intersection", (ExactBox(*)(const ExactBox&,const ExactBox&)) &intersection);
 
     from_python<ExactBox>();
-    to_python< std::pair<ExactBox,ExactBox> >();
+    to_python< Pair<ExactBox,ExactBox> >();
     implicitly_convertible<Vector<ExactInterval>,ExactBox>();
 
 }
 
 /*
-std::pair<Zonotope,Zonotope> split_pair(const Zonotope& z) {
+Pair<Zonotope,Zonotope> split_pair(const Zonotope& z) {
     ListSet<Zonotope> split_list=split(z);
     ARIADNE_ASSERT(split_list.size()==2);
-    return std::pair<Zonotope,Zonotope>(split_list[0],split_list[1]);
+    return Pair<Zonotope,Zonotope>(split_list[0],split_list[1]);
 }
 
 void export_zonotope()
@@ -401,7 +401,7 @@ void export_polytope()
 
 void export_curve()
 {
-    to_python< std::pair<const ExactFloat,ExactPoint> >();
+    to_python< Pair<const ExactFloat,ExactPoint> >();
 
     class_<InterpolatedCurve,bases<DrawableInterface> > interpolated_curve_class("InterpolatedCurve",init<InterpolatedCurve>());
     interpolated_curve_class.def(init<ExactFloat,ExactPoint>());

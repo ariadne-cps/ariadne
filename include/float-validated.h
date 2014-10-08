@@ -282,6 +282,10 @@ inline ExactFloat midpoint(ValidatedFloat i) {
     return ExactFloat(half_exact(add_approx(i.lower_raw(),i.upper_raw())));
 }
 
+inline PositiveUpperFloat error(ValidatedFloat i) {
+    return PositiveUpperFloat(half_exact(sub_up(i.upper_raw(),i.lower_raw())));
+}
+
 inline PositiveUpperFloat radius(ValidatedFloat i) {
     return PositiveUpperFloat(half_exact(sub_up(i.upper_raw(),i.lower_raw())));
 }

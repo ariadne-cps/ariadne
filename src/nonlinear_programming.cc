@@ -51,8 +51,6 @@ namespace Ariadne {
 
 inline Sweeper default_sweeper() { return Sweeper(); }
 
-static const double error =  1e-2;
-
 typedef VectorRange<RawFloatVector> RawFloatVectorRange;
 typedef DiagonalMatrix<Float> FloatDiagonalMatrix;
 
@@ -165,7 +163,7 @@ Vector<X> esqr(const Vector<X>& z) {
 
 inline
 ExactInterval eivl(const RawFloatVector& x) {
-    ARIADNE_ASSERT(x.size()>0); ExactInterval r(x[0]); for(uint i=0; i!=x.size(); ++i) { r=hull(r,x[i]); } return r;
+    ARIADNE_ASSERT(x.size()>0); ExactInterval r(x[0]); for(uint i=0; i!=x.size(); ++i) { r=hull(r,ExactFloat(x[i])); } return r;
 }
 
 Matrix<ApproximateNumber> join(Matrix<ApproximateNumber> const& A1, Matrix<ApproximateNumber> const& A2, Matrix<ApproximateNumber> const& A3) {

@@ -140,6 +140,8 @@ class ExactBox;
 class UpperBox;
 class ApproximateBox;
 
+typedef Vector<Rational> RationalVector;
+typedef Vector<Real> RealVector;
 typedef Vector<RawFloat> RawFloatVector;
 typedef Vector<ApproximateFloat> ApproximateFloatVector;
 typedef Vector<ValidatedFloat> ValidatedFloatVector;

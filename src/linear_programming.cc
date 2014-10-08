@@ -307,7 +307,7 @@ feasible(const Vector<Float>& xl, const Vector<Float>& xu,
         if(xl[i]==-inf) { zl[i] = 0.0; } else { zl[i] = 1.0; }
         if(xu[i]==+inf) { zu[i] = 0.0; } else { zu[i] = 1.0; }
     }
-    Vector<UpperInterval> X=hull(xl,xu);
+    Vector<UpperInterval> X=hull(Vector<ExactFloat>(xl),Vector<ExactFloat>(xu));
 
     const double THRESHOLD = 1e-8;
     uint step=0;

@@ -32,6 +32,7 @@
 
 #include "numeric.h"
 #include "vector.h"
+#include "interval.h"
 
 #include "set_interface.h"
 #include "graphics_interface.h"
@@ -55,9 +56,47 @@ class ApproximateBox;
 typedef ExactBox BoxDomainType;
 typedef UpperBox BoundingBoxType;
 
-bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloat>& v2);
-bool contains(const Vector<ExactInterval>& v1, const Vector<ValidatedFloat>& v2);
-bool element(const Vector<ValidatedFloat>& v1, const Vector<ExactInterval>& v2);
+bool element(const Vector<ExactNumber>& v1, const Vector<ExactInterval>& v2);
+bool element(const Vector<ValidatedNumber>& v1, const Vector<ExactInterval>& v2);
+bool contains(const Vector<ExactInterval>& v1, const Vector<ExactNumber>& v2);
+bool contains(const Vector<ExactInterval>& v1, const Vector<ValidatedNumber>& v2);
+
+bool intersect(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+bool subset(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+
+bool disjoint(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+bool overlap(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+bool inside(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+bool covers(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+bool empty(const Vector<ExactInterval>& v);
+
+Vector<ExactInterval> split(const Vector<ExactInterval>& v, uint k, Tribool lr);
+Vector<ExactInterval> split(const Vector<ExactInterval>& v, Tribool lr);
+Pair< Vector<ExactInterval>, Vector<ExactInterval> > split(const Vector<ExactInterval>& v);
+Pair< Vector<ExactInterval>, Vector<ExactInterval> > split(const Vector<ExactInterval>& v, uint k);
+
+Vector<ExactInterval> hull(const Vector<ExactNumber>& v1, const Vector<ExactNumber>& v2);
+Vector<ExactInterval> hull(const Vector<ExactInterval>& v1, const Vector<ExactNumber>& v2);
+Vector<ExactInterval> hull(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+Vector<ExactInterval> intersection(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
+Vector<ExactNumber> midpoint(const Vector<ExactInterval>& v);
+Vector<ExactFloat> lower_bounds(const Vector<ExactInterval>& v);
+Vector<ExactFloat> upper_bounds(const Vector<ExactInterval>& v);
+PositiveUpperNumber radius(const Vector<ExactInterval>& z);
+PositiveUpperNumber volume(const Vector<ExactInterval>& z);
+
+Vector<UpperInterval> hull(const Vector<UpperInterval>& v1, const Vector<UpperInterval>& v2);
+Vector<UpperInterval> intersection(const Vector<UpperInterval>& v1, const Vector<UpperInterval>& v2);
+Tribool subset(const Vector<UpperInterval>& bx1, const Vector<ExactInterval>& bx2);
+Tribool disjoint(const Vector<UpperInterval>& bx1, const Vector<UpperInterval>& bx2);
+Tribool inside(const Vector<UpperInterval>& v1, const Vector<ExactInterval>& v2);
+
+Vector<ValidatedFloat>const& make_singleton(const Vector<ExactInterval>& ivlv);
+Matrix<ValidatedFloat>const& make_singleton(const Matrix<ExactInterval>& ivlA);
+Vector<ValidatedFloat>const& make_singleton(const Vector<UpperInterval>& ivlv);
+Matrix<ValidatedFloat>const& make_singleton(const Matrix<UpperInterval>& ivlA);
+
+
 
 //! \ingroup GeometryModule ExactSetSubModule
 //! \brief An exact interval in \f$\mathbb{R}\f$.
@@ -225,27 +264,27 @@ class ExactBox
 
     //! \brief Tests if the box is disjoint from another box.
     //! Only returns true if the closures are disjoint.
-    virtual tribool separated(const ExactBox& other) const {
+    virtual Tribool separated(const ExactBox& other) const {
         return Ariadne::disjoint(this->vector(), other.vector());
     }
 
     //! \brief Tests if the box overlaps another box.
     //! Only returns true if the interior of one box intersects the other.
-    virtual tribool overlaps(const ExactBox& other) const {
+    virtual Tribool overlaps(const ExactBox& other) const {
         return Ariadne::overlap(this->vector(), other.vector());
     }
 
     //! \brief Tests if the box covers another box.
     //! Only returns true if the interior of the box is a superset
     //! of the closure of the other.
-    virtual tribool covers(const ExactBox& other) const {
+    virtual Tribool covers(const ExactBox& other) const {
         return Ariadne::inside(other.vector(), this->vector());
     }
 
     //! \brief Tests if the box covers another box.
     //! Only returns true if the closure of the box is a subset
     //! of the interior of the other.
-    virtual tribool inside(const ExactBox& other) const {
+    virtual Tribool inside(const ExactBox& other) const {
         return Ariadne::inside(this->vector(), other.vector());
     }
 
@@ -273,9 +312,9 @@ class ExactBox
     }
 
     //! \brief Split into two along the largest side.
-    std::pair<ExactBox,ExactBox> split() const { return Ariadne::split(*this); }
+    Pair<ExactBox,ExactBox> split() const { return Ariadne::split(*this); }
     //! \brief Split into two along side with index \a i.
-    std::pair<ExactBox,ExactBox> split(uint i) const { return Ariadne::split(*this,i); };
+    Pair<ExactBox,ExactBox> split(uint i) const { return Ariadne::split(*this,i); };
 
     //! \brief Draw on a canvas.
     virtual void draw(CanvasInterface& c, const Projection2d& p) const;
@@ -395,24 +434,18 @@ class UpperBox
 
     //! \brief Test if the box is a subset of another box.
     Tribool inside(const ExactBox& bx) const {
-        for(uint i=0; i!=dimension(); ++i) {
-            if(!Ariadne::inside((*this)[i],bx[i])) { return indeterminate; } }
-        return true;
+        return Ariadne::inside(this->vector(),bx.vector());
     }
 
     //! \brief Test if the box is a subset of another box.
     Tribool subset(const ExactBox& bx) const {
-        for(uint i=0; i!=dimension(); ++i) {
-            if(!Ariadne::subset((*this)[i],bx[i])) { return indeterminate; } }
-        return true;
+        return Ariadne::subset(this->vector(),bx.vector());
     }
 
     //! \brief Test if the box intersects another box. Returns \a false even
     //! if the intersection only occurs only on the boundary of the boxes.
     Tribool disjoint(const UpperBox& bx) const {
-        for(uint i=0; i!=this->dimension(); ++i) {
-            if(Ariadne::disjoint((*this)[i],bx[i])) { return true; } }
-        return indeterminate;
+        return Ariadne::disjoint(this->vector(),bx.vector());
     }
 
     //! \brief The dimension of the space the box lies in.
@@ -422,7 +455,7 @@ class UpperBox
 
     //! \brief Tests if the box is disjoint from another box.
     //! Only returns true if the closures are disjoint.
-    tribool empty() const{
+    Tribool empty() const{
         for(uint i=0; i!=this->dimension(); ++i) {
             if((*this)[i].empty()) { return true; } }
         return indeterminate;
@@ -430,7 +463,7 @@ class UpperBox
 
     //! \brief Tests if the box is disjoint from another box.
     //! Only returns true if the closures are disjoint.
-    tribool separated(const UpperBox& other) const {
+    Tribool separated(const UpperBox& other) const {
         return this->disjoint(other);
     }
 
@@ -451,10 +484,10 @@ class UpperBox
     }
 
     //! \brief Split into two along the largest side.
-    std::pair<UpperBox,UpperBox> split() const {
+    Pair<UpperBox,UpperBox> split() const {
         return ExactBox(reinterpret_cast<Vector<ExactInterval>const&>(*this)).split(); }
     //! \brief Split into two along side with index \a i.
-    std::pair<UpperBox,UpperBox> split(uint i) const;
+    Pair<UpperBox,UpperBox> split(uint i) const;
 
     //! \brief Write to an output stream.
     std::ostream& write(std::ostream& os) const {
@@ -502,18 +535,6 @@ inline ApproximatePoint midpoint(const UpperBox& bx) {
 
 inline PositiveUpperFloat radius(const UpperBox& bx) {
     return bx.radius();
-}
-
-inline tribool inside(const UpperBox& bx1, const ExactBox& bx2) {
-    return bx1.inside(bx2);
-}
-
-inline tribool subset(const UpperBox& bx1, const ExactBox& bx2) {
-    return bx1.subset(bx2);
-}
-
-inline tribool disjoint(const UpperBox& bx1, const UpperBox& bx2) {
-    return bx1.disjoint(bx2);
 }
 
 inline void UpperBox::draw(CanvasInterface& c, const Projection2d& p) const {

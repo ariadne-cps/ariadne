@@ -577,13 +577,6 @@ template<class X> std::istream& operator>>(std::istream& is, Vector<X>& v) {
 }
 
 
-class Float;
-class ExactInterval;
-class Real;
-
-typedef Vector<Float> RawFloatVector;
-typedef Vector<ExactInterval> ExactIntervalVector;
-typedef Vector<Real> RealVector;
 
 template<class X> bool refines(const Vector<X>& v1, const Vector<X>& v2) {
     assert(v1.size()==v2.size());
@@ -593,51 +586,16 @@ template<class X> bool refines(const Vector<X>& v1, const Vector<X>& v2) {
     return true;
 }
 
-bool contains(const Vector<ExactInterval>& v1, const Vector<Float>& v2);
-bool intersect(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
-bool subset(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
-
-bool disjoint(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
-bool overlap(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
-bool inside(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
-bool covers(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
-bool empty(const Vector<ExactInterval>& v);
-
-Vector<ExactInterval> split(const Vector<ExactInterval>& v, uint k, tribool lr);
-Vector<ExactInterval> split(const Vector<ExactInterval>& v, tribool lr);
-std::pair< Vector<ExactInterval>, Vector<ExactInterval> > split(const Vector<ExactInterval>& v);
-std::pair< Vector<ExactInterval>, Vector<ExactInterval> > split(const Vector<ExactInterval>& v, uint k);
-
-Vector<ExactInterval> hull(const Vector<Float>& v1, const Vector<Float>& v2);
-Vector<ExactInterval> hull(const Vector<ExactInterval>& v1, const Vector<Float>& v2);
-Vector<ExactInterval> hull(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
-Vector<ExactInterval> intersection(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
-//Vector<Float> midpoint(const Vector<ExactInterval>& v);
-Float radius(const Vector<ExactInterval>& z);
-Float volume(const Vector<ExactInterval>& z);
-
-Vector<UpperInterval> intersection(const Vector<UpperInterval>& v1, const Vector<UpperInterval>& v2);
-
-Vector<ExactFloat> midpoint(const Vector<ExactInterval>& v);
-Vector<ExactFloat> lower_bounds(const Vector<ExactInterval>& v);
-Vector<ExactFloat> upper_bounds(const Vector<ExactInterval>& v);
-
 Vector<ExactFloat>const& make_exact(const Vector<ApproximateFloat>& av);
 Vector<ValidatedFloat> make_bounds(const Vector<ErrorFloat>& ev);
-Vector<ValidatedFloat>const& make_singleton(const Vector<ExactInterval>& ivlv);
-Matrix<ValidatedFloat>const& make_singleton(const Matrix<ExactInterval>& ivlA);
-Vector<ValidatedFloat>const& make_singleton(const Vector<UpperInterval>& ivlv);
-Matrix<ValidatedFloat>const& make_singleton(const Matrix<UpperInterval>& ivlA);
-
-UpperFloat sup_error(const Vector<ValidatedFloat>& x);
 Vector<ExactFloat> midpoint(const Vector<ValidatedFloat>& x);
+PositiveUpperFloat sup_error(const Vector<ValidatedFloat>& x);
+
 bool models(const Vector<ValidatedFloat>& x1, const Vector<ExactFloat>& x2);
 bool consistent(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2);
 bool inconsistent(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2);
 bool refines(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2);
 Vector<ValidatedFloat> refinement(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2);
-
-
 
 
 } // namespace Ariadne

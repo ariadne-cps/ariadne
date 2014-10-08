@@ -50,8 +50,6 @@ typedef Vector<ExactFloat> ExactFloatVector;
 
 inline Sweeper default_sweeper() { return Sweeper(); }
 
-static const double error =  1e-2;
-
 Sign sign(const Float& x) {
     if(x>0) { return NEGATIVE; }
     else if(x<0) {  return POSITIVE; }

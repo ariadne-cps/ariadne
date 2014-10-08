@@ -156,6 +156,8 @@ WRAP_OBJ = $(patsubst %.cc,$(WRAP_OBJ_DIR)/%.o,$(WRAP_SRC))
 EXAMPLES_OBJ = $(patsubst %.cc,$(EXAMPLES_OBJ_DIR)/%.o,$(EXAMPLES_SRC))
 EXAMPLES_BIN = $(patsubst %.cc,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_SRC))
 
+CXX = g++
+#CXX = clang++
 CXXFLAGS = -std=c++11 -fPIC
 
 INCLUDE_PATHS =  -iquote. -iquote./include
@@ -234,11 +236,11 @@ libariadne.so: $(PCH) $(LIB_OBJ)
 libariadne-numeric.so: $(PCH) $(LIB_NUMERIC_OBJ)
 	$(CXX) $(LIB_NUMERIC_OBJ) $(LINK_LIBS) -shared -o libariadne-numeric.so
 
-libariadne-algebra.so: $(PCH) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) obj/interval.o
-	$(CXX) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) obj/interval.o $(LINK_LIBS) -shared -o libariadne-algebra.so
+libariadne-algebra.so: $(PCH) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ)  obj/interval.o obj/point.o obj/box.o
+	$(CXX) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ)  obj/interval.o obj/point.o obj/box.o  $(LINK_LIBS) -shared -o libariadne-algebra.so
 
-libariadne-function.so: $(PCH) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ) obj/interval.o
-	$(CXX) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ)  obj/interval.o $(LINK_LIBS) -shared -o libariadne-function.so
+libariadne-function.so: $(PCH) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ)  obj/expression.o obj/interval.o obj/point.o obj/box.o
+	$(CXX) $(LIB_NUMERIC_OBJ) $(LIB_ALGEBRA_OBJ) $(LIB_FUNCTION_OBJ)  obj/expression.o obj/interval.o obj/point.o obj/box.o  $(LINK_LIBS) -shared -o libariadne-function.so
 
 ariadne.so: $(PCH) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) libariadne.so
 	$(CXX) $(WRAP_OBJ) $(LIB_EXTRAS_OBJ) $(PYTHON_LINK_LIBS) libariadne.so -shared -o ariadne.so

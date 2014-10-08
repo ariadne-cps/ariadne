@@ -358,7 +358,7 @@ tribool Enclosure::satisfies(ValidatedScalarFunction constraint) const
     UpperInterval constraint_range=apply(constraint,this->codomain());
     if(constraint_range.upper()<0.0) { return false; }
     if(constraint_range.lower()>0.0) { return true; }
-    return indeterminate;
+    return Tribool(indeterminate);
 }
 
 
@@ -682,12 +682,12 @@ Enclosure::satisfies(ValidatedConstraint c) const
     Enclosure copy=*this;
     copy.new_state_constraint(c);
     if(copy.empty()) { return false; }
-    else { return indeterminate; }
+    else { return Tribool(indeterminate); }
 }
 
 tribool Enclosure::bounded() const
 {
-    return ExactBox(this->domain()).bounded() || indeterminate;
+    return ExactBox(this->domain()).bounded() || Tribool(indeterminate);
 }
 
 tribool Enclosure::empty() const
@@ -704,7 +704,7 @@ tribool Enclosure::empty() const
         }
     }
     if(Ariadne::empty(this->_reduced_domain)) { return true; }
-    return indeterminate;
+    return Tribool(indeterminate);
 }
 
 tribool Enclosure::inside(const ExactBox& bx) const
@@ -716,7 +716,7 @@ tribool Enclosure::subset(const ExactBox& bx) const
 {
     this->reduce();
 
-    return Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx) || indeterminate;
+    return Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx) || Tribool(indeterminate);
 
 }
 

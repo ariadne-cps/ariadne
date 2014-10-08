@@ -208,7 +208,7 @@ ValidatedAffineConstrainedImageSet::domain() const
 }
 
 tribool ValidatedAffineConstrainedImageSet::bounded() const {
-    return ExactBox(this->domain()).bounded() || indeterminate;
+    return ExactBox(this->domain()).bounded() || Tribool(indeterminate);
 }
 
 UpperBox ValidatedAffineConstrainedImageSet::bounding_box() const {
@@ -253,7 +253,7 @@ tribool ValidatedAffineConstrainedImageSet::empty() const {
 
 tribool ValidatedAffineConstrainedImageSet::inside(const ExactBox& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
-    return widen(this->bounding_box()).inside(bx) || indeterminate;
+    return widen(this->bounding_box()).inside(bx) || Tribool(indeterminate);
 }
 
 

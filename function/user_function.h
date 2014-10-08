@@ -45,7 +45,7 @@
 #include "differential.h"
 #include "formula.h"
 
-#include "../src/function_mixin.tcc"
+#include "function_mixin.tcc"
 
 namespace Ariadne {
 

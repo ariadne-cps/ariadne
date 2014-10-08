@@ -49,7 +49,7 @@
 #include "formula.h"
 #include "constraint_solver.h"
 
-#include "../src/function_mixin.tcc"
+#include "function_mixin.tcc"
 
 using namespace boost::python;
 

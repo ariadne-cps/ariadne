@@ -40,7 +40,7 @@
 #include "function.h"
 #include "taylor_function.h"
 
-#include "../src/function_mixin.tcc"
+#include "function_mixin.tcc"
 #include "taylor_function.h"
 
 #define VOLATILE ;

@@ -43,7 +43,10 @@ typedef int Int;
 typedef size_t SizeType;
 typedef std::ostream OutputStream;
 
-class ExactBox;
+class ExactInterval;
+template<class X> class Box;
+typedef Box<ExactInterval> ExactBox;
+
 class Grid;
 class GridCell;
 

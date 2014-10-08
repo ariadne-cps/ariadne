@@ -30,6 +30,7 @@
 
 #include "container.h"
 
+#include "declarations.h"
 #include "numeric.h"
 #include "vector.h"
 #include "interval.h"
@@ -49,9 +50,10 @@ class BoxSet;
 template<class X> class Point;
 typedef Point<ExactFloat> ExactPoint;
 
-class ExactBox;
-class UpperBox;
-class ApproximateBox;
+template<class IVL> class Box;
+typedef Box<ExactInterval> ExactBox;
+typedef Box<UpperInterval> UpperBox;
+typedef Box<ApproximateInterval> ApproximateBox;
 
 typedef ExactBox BoxDomainType;
 typedef UpperBox BoundingBoxType;
@@ -147,27 +149,27 @@ ExactBox widen(const ExactBox& bx);
 
 //! \ingroup BasicSetSubModule GeometryModule
 //! \brief A box in Euclidean space.
-class ExactBox
+template<> class Box<ExactInterval>
     : public SetInterface,
       public DrawableInterface,
       public Vector<ExactInterval>
 {
   public:
     //! Construct a singleton point in zero dimensions.
-    ExactBox() : Vector<ExactInterval>() { }
+    Box<ExactInterval>() : Vector<ExactInterval>() { }
     //! Construct an empty box in \a d dimensions.
-    explicit ExactBox(uint d) : Vector<ExactInterval>(d) { }
+    explicit Box<ExactInterval>(uint d) : Vector<ExactInterval>(d) { }
     //! Construct from an initializer list of pairs of floating-point values
     //! giving lower and upper bounds.
-    ExactBox(std::initializer_list<ExactInterval> lst);
+    Box<ExactInterval>(std::initializer_list<ExactInterval> lst);
 
-    explicit ExactBox(uint d, ExactInterval ivl) : Vector<ExactInterval>(d,ivl) { }
-    explicit ExactBox(const Vector<ValidatedFloat>& vec) : Vector<ExactInterval>(vec) { }
-    ExactBox(const Vector<ExactInterval>& ivec) : Vector<ExactInterval>(ivec) { }
-    ExactBox(const List<ExactInterval>& ilst) : Vector<ExactInterval>(ilst) { }
+    explicit Box<ExactInterval>(uint d, ExactInterval ivl) : Vector<ExactInterval>(d,ivl) { }
+    explicit Box<ExactInterval>(const Vector<ValidatedFloat>& vec) : Vector<ExactInterval>(vec) { }
+    Box<ExactInterval>(const Vector<ExactInterval>& ivec) : Vector<ExactInterval>(ivec) { }
+    Box<ExactInterval>(const List<ExactInterval>& ilst) : Vector<ExactInterval>(ilst) { }
 
     //! Construct from a string literal of the form "[a1,b1]x[a2,b2]x...x[ad,bd]".
-    explicit ExactBox(const std::string& str);
+    explicit Box<ExactInterval>(const std::string& str);
 
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static ExactBox unit_box(uint n) {
@@ -347,24 +349,24 @@ ExactBox make_box(const std::string& str);
 
 //! \ingroup BasicSetSubModule GeometryModule
 //! \brief A box in Euclidean space.
-class UpperBox
+template<> class Box<UpperInterval>
     : public Vector<UpperInterval>
 {
   public:
     //! Construct a singleton point in zero dimensions.
-    UpperBox() : Vector<UpperInterval>() { }
+    Box<UpperInterval>() : Vector<UpperInterval>() { }
     //! Construct an empty box in \a d dimensions.
-    explicit UpperBox(uint d) : Vector<UpperInterval>(d,UpperInterval()) { }
-    explicit UpperBox(uint d, UpperInterval ivl) : Vector<UpperInterval>(d,ivl) { }
+    explicit Box<UpperInterval>(uint d) : Vector<UpperInterval>(d,UpperInterval()) { }
+    explicit Box<UpperInterval>(uint d, UpperInterval ivl) : Vector<UpperInterval>(d,ivl) { }
     //! Construct from an initializer list of pairs of floating-point values
     //! giving lower and upper bounds.
-    UpperBox(std::initializer_list<UpperInterval> lst);
+    Box<UpperInterval>(std::initializer_list<UpperInterval> lst);
 
-    UpperBox(Vector<ExactInterval>const& vec) : Vector<UpperInterval>(vec) { }
-    UpperBox(Vector<UpperInterval>const& vec) : Vector<UpperInterval>(vec) { }
-    template<class E> UpperBox(const VectorExpression<E>& t) : Vector<UpperInterval>(t) { }
+    Box<UpperInterval>(Vector<ExactInterval>const& vec) : Vector<UpperInterval>(vec) { }
+    Box<UpperInterval>(Vector<UpperInterval>const& vec) : Vector<UpperInterval>(vec) { }
+    template<class E> Box<UpperInterval>(const VectorExpression<E>& t) : Vector<UpperInterval>(t) { }
 
-    explicit UpperBox(const Vector<ValidatedFloat>& vec) : Vector<UpperInterval>(vec) { }
+    explicit Box<UpperInterval>(const Vector<ValidatedFloat>& vec) : Vector<UpperInterval>(vec) { }
 
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static UpperBox unit_box(uint n) {
@@ -498,15 +500,15 @@ class UpperBox
 };
 
 //! \brief An over-approximation to an interval set.
-class ApproximateBox
+template<> class Box<ApproximateInterval>
     : public Vector<ApproximateInterval>
 {
   public:
-    explicit ApproximateBox(Nat d) : ApproximateBox(d,ApproximateInterval()) { }
-    explicit ApproximateBox(Nat d, ApproximateInterval const& ivl) : Vector<ApproximateInterval>(d,ivl) { }
-    explicit ApproximateBox(Vector<ApproximateInterval> const& vec) : Vector<ApproximateInterval>(vec) { }
-    ApproximateBox(ExactBox const& bx) : Vector<ApproximateInterval>(bx) { }
-    ApproximateBox(UpperBox const& bx) : Vector<ApproximateInterval>(bx) { }
+    explicit Box<ApproximateInterval>(Nat d) : ApproximateBox(d,ApproximateInterval()) { }
+    explicit Box<ApproximateInterval>(Nat d, ApproximateInterval const& ivl) : Vector<ApproximateInterval>(d,ivl) { }
+    explicit Box<ApproximateInterval>(Vector<ApproximateInterval> const& vec) : Vector<ApproximateInterval>(vec) { }
+    Box<ApproximateInterval>(ExactBox const& bx) : Vector<ApproximateInterval>(bx) { }
+    Box<ApproximateInterval>(UpperBox const& bx) : Vector<ApproximateInterval>(bx) { }
 
     uint dimension() const { return this->Vector<ApproximateInterval>::size(); }
 };

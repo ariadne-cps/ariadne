@@ -45,8 +45,9 @@ using namespace std;
 
 template<class X> class Point;
 typedef Point<ExactNumber> ExactPoint;
+template<class IVL> class Box;
+typedef Box<ExactInterval> ExactBox;
 
-class ExactBox;
 class InterpolatedCurve;
 class Zonotope;
 class TaylorConstrainedImageSet;

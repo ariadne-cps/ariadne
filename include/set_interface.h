@@ -35,7 +35,21 @@
 
 namespace Ariadne {
 
-class ExactBox;
+template<class X> class Vector;
+
+class ExactInterval;
+class UpperInterval;
+class ApproximateInterval;
+
+template<class X> class Point;
+typedef Point<ExactNumber> ExactPoint;
+typedef Point<ValidatedNumber> ValidatedPoint;
+typedef Point<ApproximateNumber> ApproximatePoint;
+
+template<class IVL> class Box;
+typedef Box<ExactInterval> ExactBox;
+typedef Box<UpperInterval> UpperBox;
+typedef Box<ApproximateInterval> ApproximateBox;
 
 class BoundedSetInterface;
 class OpenSetInterface;

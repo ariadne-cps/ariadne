@@ -39,7 +39,10 @@ struct Vector2d;
 struct Point2d;
 struct Box2d;
 
-class ApproximateBox;
+class ApproximateInterval;
+template<class IVL> class Box;
+typedef Box<ApproximateInterval> ApproximateBox;
+
 typedef ApproximateBox GraphicsBoundingBoxType;
 class Colour;
 

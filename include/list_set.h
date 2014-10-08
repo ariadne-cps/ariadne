@@ -42,7 +42,6 @@ typedef unsigned int uint;
 
 namespace Ariadne {
 
-class ExactBox;
 template<class ES> class ListSet;
 class DiscreteLocation;
 

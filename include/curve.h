@@ -42,8 +42,9 @@ template<class X> class Vector;
 
 template<class X> class Point;
 typedef Point<ExactNumber> ExactPoint;
-
-class UpperBox;
+template<class IVL> class Box;
+typedef Box<ExactInterval> ExactBox;
+typedef Box<UpperInterval> UpperBox;
 
 
 // Forward declarations for friends

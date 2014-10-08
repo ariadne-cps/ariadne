@@ -48,7 +48,10 @@ class BoxSet;
 class ConstraintSet;
 class BoundedConstraintSet;
 
-class ExactBox;
+class ExactInterval;
+template<class IVL> class Box;
+typedef Box<ExactInterval> ExactBox;
+
 class ValidatedConstrainedImageSet;
 
 template<class X> class Variable;

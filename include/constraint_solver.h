@@ -38,13 +38,17 @@
 namespace Ariadne {
 
 class Real;
-class ExactInterval;
 typedef tribool Tribool;
+
+class ExactInterval;
+class UpperInterval;
 
 template<class X> class Point;
 typedef Point<ExactNumber> ExactPoint;
-class ExactBox;
-class UpperBox;
+template<class IVL> class Box;
+typedef Box<ExactInterval> ExactBox;
+typedef Box<UpperInterval> UpperBox;
+
 class GridTreeSet;
 
 template<class X, class R> class Constraint;

@@ -132,13 +132,15 @@ template<class X> class TaylorModel;
 template<class X> class Formula;
 template<class X> class Algebra;
 
-template<class X> class Point;
 class ExactInterval;
 class UpperInterval;
 class ApproximateInterval;
-class ExactBox;
-class UpperBox;
-class ApproximateBox;
+
+template<class X> class Point;
+template<class IVL> class Box;
+typedef Box<ExactInterval> ExactBox;
+typedef Box<UpperInterval> UpperBox;
+typedef Box<ApproximateInterval> ApproximateBox;
 
 typedef Vector<Rational> RationalVector;
 typedef Vector<Real> RealVector;

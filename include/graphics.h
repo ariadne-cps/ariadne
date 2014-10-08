@@ -39,7 +39,10 @@ typedef unsigned int uint;
 
 namespace Ariadne {
 
-class ApproximateBox;
+class ApproximateInterval;
+template<class IVL> class Box;
+typedef Box<ApproximateInterval> ApproximateBox;
+
 typedef ApproximateBox GraphicsBoundingBoxType;
 
 class ProjectionFunction;

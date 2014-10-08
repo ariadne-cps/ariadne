@@ -43,11 +43,12 @@
 
 namespace Ariadne {
 
-class Float;
-class ExactInterval;
-template<class X> class Vector;
 template<class X> class LinearProgram;
-class ExactBox;
+
+class ExactInterval;
+template<class IVL> class Box;
+typedef Box<ExactInterval> ExactBox;
+
 class Grid;
 class PavingInterface;
 class GridCell;

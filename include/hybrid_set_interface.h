@@ -42,7 +42,6 @@
 
 namespace Ariadne {
 
-class ExactBox;
 class BoxSet;
 class VariablesBox;
 class RealVariablesBox;

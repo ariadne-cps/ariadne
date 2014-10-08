@@ -47,6 +47,9 @@ namespace Ariadne {
 class BoxSet;
 
 class ExactInterval;
+template<class IVL> class Box;
+typedef Box<ExactInterval> ExactBox;
+
 template<class X> class Vector;
 template<class X> class LinearProgram;
 template<class X> class ScalarFunction;
@@ -60,7 +63,6 @@ typedef VectorFunctionModel<ValidatedTag> ValidatedVectorFunctionModel;
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> IntervalFunctionModelFactoryInterface;
 class Enclosure;
-class ExactBox;
 class Grid;
 class GridTreeSet;
 class AffineSet;

@@ -41,8 +41,6 @@
 
 namespace Ariadne {
 
-
-class ExactBox;
 class Polytope;
 class Polyhedron;
 

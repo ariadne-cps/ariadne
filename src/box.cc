@@ -361,12 +361,12 @@ void make_vertices_down(const ExactBox& bx, uint i, uint n, ExactPoint& pt, std:
 }
 
 
-ExactBox::ExactBox(std::initializer_list<ExactInterval> lst)
+Box<ExactInterval>::Box(std::initializer_list<ExactInterval> lst)
     : Vector<ExactInterval>(lst)
 {
 }
 
-ExactBox::ExactBox(const std::string& str)
+Box<ExactInterval>::Box(const std::string& str)
 {
     *this=make_box(str);
 }

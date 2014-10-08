@@ -42,7 +42,6 @@ class TestPolynomial
     void test();
   private:
     void test_concept();
-    void test_iterator_concept();
     void test_cleanup();
     void test_constructors();
     void test_indexing();
@@ -101,36 +100,6 @@ void TestPolynomial::test_concept()
 
     evaluate(p,v);
     compose(p,pv);
-
-}
-
-void TestPolynomial::test_iterator_concept()
-{
-    MultiIndex a(3);
-    Polynomial<Float> p(3);
-    const Polynomial<Float> cp(3);
-
-    Polynomial<Float>::iterator iter=p.begin(); iter=p.end(); iter=p.find(a);
-    Polynomial<Float>::const_iterator citer=p.begin(); citer=p.end(); citer=p.find(a);
-    citer=p.begin(); citer=cp.end(); citer=cp.find(a);
-
-    Polynomial<Float>::value_type val=*iter;
-    Polynomial<Float>::reference ref=*iter;
-    //Polynomial<Float>::pointer ptr=iter.operator->();
-    Polynomial<Float>::const_reference ncref=*iter;
-
-    // WARNING: Cannot convert non-constant pointer to constant pointer
-    //Polynomial<Float>::const_pointer ncptr=iter.operator->();
-
-    Polynomial<Float>::value_type cval=*citer;
-    Polynomial<Float>::const_reference cref=*citer;
-    //Polynomial<Float>::const_pointer cptr=citer.operator->();
-
-    ++iter; --iter;
-    ++citer; --citer;
-
-    iter==iter; iter!=iter; citer==citer; citer!=citer;
-    citer==iter; citer!=iter; iter==citer; iter!=citer;
 
 }
 

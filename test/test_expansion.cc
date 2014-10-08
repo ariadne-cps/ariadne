@@ -153,11 +153,13 @@ void TestExpansion::test_iterator_concept()
     Expansion<Float>::const_reference cref=*citer;
     Expansion<Float>::const_pointer cptr=citer.operator->();
 
+    bool res;
+
     ++iter; --iter;
     ++citer; --citer;
 
-    iter==iter; iter!=iter; citer==citer; citer!=citer;
-    citer==iter; citer!=iter; iter==citer; iter!=citer;
+    res=(iter==iter); res=(iter!=iter); res=(citer==citer); res=(citer!=citer);
+    res=(citer==iter); res=(citer!=iter); res=(iter==citer); res=(iter!=citer);
 
     ref=cref; cptr=ptr; ref=ncref; ncptr=ptr;
 }

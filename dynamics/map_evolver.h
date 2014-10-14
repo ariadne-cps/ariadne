@@ -40,7 +40,7 @@
 #include "dynamics/map.h"
 #include "function/function_interface.h"
 #include "solvers/configuration_interface.h"
-#include "solvers/evolver_base.h"
+#include "dynamics/evolver_base.h"
 
 #include "utility/logging.h"
 

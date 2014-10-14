@@ -27,7 +27,7 @@
 #include <boost/python.hpp>
 
 #include "dynamics/orbit.h"
-#include "solvers/vector_field_evolver.h"
+#include "dynamics/vector_field_evolver.h"
 
 #include "hybrid/hybrid_evolver.h"
 #include "hybrid/hybrid_automaton.h"

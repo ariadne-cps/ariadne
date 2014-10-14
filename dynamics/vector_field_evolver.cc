@@ -38,7 +38,7 @@
 #include "utility/logging.h"
 
 #include "dynamics/vector_field.h"
-#include "solvers/vector_field_evolver.h"
+#include "dynamics/vector_field_evolver.h"
 
 namespace {
 

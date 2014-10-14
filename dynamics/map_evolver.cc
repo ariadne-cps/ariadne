@@ -36,7 +36,7 @@
 #include "utility/logging.h"
 
 #include "dynamics/map.h"
-#include "solvers/map_evolver.h"
+#include "dynamics/map_evolver.h"
 
 namespace {
 

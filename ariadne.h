@@ -70,7 +70,7 @@ using std::ofstream; using std::ifstream;
 #include "hybrid/hybrid_time.h"
 #include "hybrid/hybrid_automaton.h"
 
-#include "solvers/vector_field_evolver.h"
+#include "dynamics/vector_field_evolver.h"
 #include "hybrid/hybrid_evolver.h"
 #include "hybrid/hybrid_reachability_analyser.h"
 

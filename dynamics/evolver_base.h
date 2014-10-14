@@ -28,7 +28,7 @@
 #ifndef ARIADNE_EVOLVER_BASE_H
 #define ARIADNE_EVOLVER_BASE_H
 
-#include "solvers/evolver_interface.h"
+#include "dynamics/evolver_interface.h"
 #include "geometry/list_set.h"
 
 namespace Ariadne {

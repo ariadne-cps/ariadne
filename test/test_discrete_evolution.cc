@@ -37,7 +37,7 @@
 #include "geometry/box.h"
 #include "geometry/list_set.h"
 #include "dynamics/map.h"
-#include "solvers/map_evolver.h"
+#include "dynamics/map_evolver.h"
 #include "output/graphics.h"
 #include "utility/logging.h"
 

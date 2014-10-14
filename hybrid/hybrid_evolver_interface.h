@@ -28,7 +28,7 @@
 #ifndef ARIADNE_HYBRID_EVOLVER_INTERFACE_H
 #define ARIADNE_HYBRID_EVOLVER_INTERFACE_H
 
-#include "solvers/evolver_interface.h"
+#include "dynamics/evolver_interface.h"
 
 #include "hybrid/hybrid_time.h"
 #include "hybrid/hybrid_set.h"

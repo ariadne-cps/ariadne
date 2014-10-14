@@ -48,8 +48,8 @@
 #include "dynamics/orbit.h"
 
 #include "hybrid/hybrid_automaton.h"
-#include "solvers/evolver_interface.h"
-#include "solvers/evolver_base.h"
+#include "dynamics/evolver_interface.h"
+#include "dynamics/evolver_base.h"
 #include "evolution_parameters.h"
 
 #include "utility/logging.h"

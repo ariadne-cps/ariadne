@@ -31,7 +31,7 @@
 #include "solvers/reachability_analyser_interface.h"
 
 #include "hybrid/hybrid_set_interface.h"
-#include "solvers/evolver_interface.h"
+#include "dynamics/evolver_interface.h"
 
 #include "utility/logging.h"
 

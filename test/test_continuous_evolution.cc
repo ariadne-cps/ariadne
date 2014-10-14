@@ -34,7 +34,7 @@
 #include "geometry/box.h"
 #include "geometry/list_set.h"
 #include "solvers/integrator.h"
-#include "solvers/vector_field_evolver.h"
+#include "dynamics/vector_field_evolver.h"
 #include "dynamics/orbit.h"
 #include "output/graphics.h"
 #include "output/textplot.h"

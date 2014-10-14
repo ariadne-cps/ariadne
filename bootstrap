@@ -1,7 +1,0 @@
-#! /bin/sh
-
-#echo "autoreconf -i -f"
-autoreconf -i -f
-
-#echo "libtoolize"
-#libtoolize

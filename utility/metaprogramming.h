@@ -32,6 +32,9 @@
 
 namespace Ariadne {
 
+class Dummy { };
+static const Dummy dummy;
+
 typedef void Void;
 typedef bool Bool;
 
@@ -47,10 +50,10 @@ template<bool,class> struct EnableIfBool;
 template<class T> struct EnableIfBool<false,T> { };
 template<class T> struct EnableIfBool<true,T> { typedef T Type; };
 
+
 template<class P, class T> struct EnableIfClass : public EnableIfBool<P::value,T> { };
 
-//template<bool B, class T> struct EnableIf : public EnableIfBool<B,T> { };
-template<class P, class T=Void> struct EnableIf : public EnableIfClass<P,T> { };
+template<class P, class T=Dummy> using EnableIf = typename EnableIfClass<P,T>::Type;
 
 template<class T1, class T2> struct IsSame : False { };
 template<class T> struct IsSame<T,T> : True { };

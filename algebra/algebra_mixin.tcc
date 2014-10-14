@@ -34,7 +34,7 @@ namespace {
 inline ApproximateFloat operator+(ApproximateFloat x1, int n2) { return x1+ApproximateFloat(n2); }
 } // namespace
 
-template<class A> typename EnableIfGradedAlgebra<A>::Type
+template<class A> EnableIfGradedAlgebra<A>
 compose(const Series<typename A::NumericType>& x, const A& y)
 {
     uint d=y.degree();
@@ -52,7 +52,7 @@ compose(const Series<typename A::NumericType>& x, const A& y)
 
 class TaylorSeries;
 
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 _compose(const TaylorSeries& ts, const A& tv, double eps)
 {
     //std::cerr<<"_compose(TaylorSeries,A,Error)\n";
@@ -75,7 +75,7 @@ _compose(const TaylorSeries& ts, const A& tv, double eps)
     return r;
 }
 
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 compose(const TaylorSeries& ts, const A& tm)
 {
     return _compose(ts,tm,tm.tolerance());
@@ -85,7 +85,7 @@ compose(const TaylorSeries& ts, const A& tm)
 // Compose using the Taylor formula directly. The final term is the Taylor series computed
 // over the range of the series. This method tends to suffer from blow-up of the
 // truncation error
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 _compose1(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
 {
     static const uint DEGREE=18;
@@ -118,7 +118,7 @@ _compose1(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
 // is usually better than _compose1 since there is no blow-up of the trunction
 // error. The radius of convergence of this method is still quite low,
 // typically only half of the radius of convergence of the power series itself
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 _compose2(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
 {
     static const uint DEGREE=20;
@@ -155,7 +155,7 @@ _compose2(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
 // is usually better than _compose1 since there is no blow-up of the trunction
 // error. This method is better than _compose2 since the truncation error is
 // assumed at the ends of the intervals
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 _compose3(const ValidatedSeriesFunctionPointer& fn, const A& tm, Float eps)
 {
     static const uint DEGREE=20;
@@ -194,7 +194,7 @@ _compose3(const ValidatedSeriesFunctionPointer& fn, const A& tm, Float eps)
 }
 
 
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 _compose(const ValidatedSeriesFunctionPointer& fn, const A& tm, Float eps)
 {
     return _compose3(fn,tm,eps);
@@ -214,7 +214,7 @@ inline int powm1(uint k) { return (k%2) ? -1 : +1; }
 double rec_fac_up(uint n) { set_rounding_upward(); double r=1.0; for(uint i=1; i<=n; ++i) { r/=i; } return r; }
 }
 
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 sqrt(const A& x)
 {
     typedef typename A::NumericType X;
@@ -259,7 +259,7 @@ sqrt(const A& x)
     return z;
 }
 struct Foo { };
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 rec(const A& x)
 {
     typedef typename A::NumericType X;
@@ -298,7 +298,7 @@ rec(const A& x)
     return z;
 }
 
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 log(const A& x)
 {
     typedef typename A::NumericType X;
@@ -327,7 +327,7 @@ log(const A& x)
 }
 
 // Use special code to utilise exp(ax+b)=exp(x)^a*exp(b)
-template<class A> typename EnableIfNormedAlgebra<A>::Type exp(const A& x)
+template<class A> EnableIfNormedAlgebra<A> exp(const A& x)
 {
     typedef typename A::NumericType X;
     // FIXME: Truncation error may be incorrect
@@ -370,7 +370,7 @@ template<class A> typename EnableIfNormedAlgebra<A>::Type exp(const A& x)
 
 // Use special code to utilise sin(x+2pi)=sin(x)
 // and that the power series is of the form x*f(x^2)
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 sin(const A& x)
 {
     typedef typename A::NumericType X;
@@ -410,7 +410,7 @@ sin(const A& x)
 
 // Use special code to utilise sin(x+2pi)=sin(x)
 // and that the power series is of the form f(x^2)
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 cos(const A& x)
 {
     typedef typename A::NumericType X;
@@ -451,13 +451,13 @@ cos(const A& x)
     return r;
 }
 
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 tan(const A& x)
 {
     return sin(x)*rec(cos(x));
 }
 
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 asin(const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -471,7 +471,7 @@ asin(const A& x)
 */
 }
 
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 acos(const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -485,7 +485,7 @@ acos(const A& x)
 */
 }
 
-template<class A> typename EnableIfNormedAlgebra<A>::Type
+template<class A> EnableIfNormedAlgebra<A>
 atan(const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;

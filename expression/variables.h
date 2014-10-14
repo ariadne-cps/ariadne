@@ -192,9 +192,10 @@ template<class T> class ExtendedVariable
         : UntypedVariable(nm, variable_type<T>(), cat) { }
 };
 
-template<class R, class D, class T=void> struct EnableIfRealBuiltin { };
-template<class T> struct EnableIfRealBuiltin<Real,int,T> { typedef T Type; };
-template<class T> struct EnableIfRealBuiltin<Real,double,T> { typedef T Type; };
+template<class R, class D> struct IsRealBuiltin : False { };
+template<> struct IsRealBuiltin<Real,int> : True { };
+template<> struct IsRealBuiltin<Real,double> : True { };
+template<class R, class D, class T=Dummy> using EnableIfRealBuiltin = EnableIf<IsRealBuiltin<R,D>,T>;
 
 class RealVariableInterval;
 
@@ -217,7 +218,7 @@ template<class T> class Variable
     inline AssignmentType operator=(const Variable<T>& e) const;
     inline AssignmentType operator=(const Expression<T>& e) const;
     template<class XL, class XU> inline RealVariableInterval in(const XL& l, const XU& u);
-    template<class D> inline typename EnableIfRealBuiltin<T,D,ConstantAssignmentType>::Type operator=(D e) const;
+    template<class D> inline EnableIfRealBuiltin<T,D,ConstantAssignmentType> operator=(D e) const;
 };
 
 class TimeVariable : public Variable<Real> {
@@ -242,7 +243,7 @@ template<class T> class LetVariable
     inline AssignmentType operator=(const Variable<T>& var) const;
     //! \brief Construct an assignment statement representing the algebraic equation \a var := \a expr.
     inline Assignment<Variable<T>,Expression<T>> operator=(const Expression<T>& expr) const;
-    template<class D> inline typename EnableIfRealBuiltin<T,D,AssignmentType>::Type operator=(D e) const;
+    template<class D> inline EnableIfRealBuiltin<T,D,AssignmentType> operator=(D e) const;
   private:
     explicit LetVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),simple) { }
 };
@@ -272,7 +273,7 @@ template<class T> class DottedVariable
     inline AssignmentType operator=(const Variable<T>& e) const;
     //! \brief Construct an assignment statement representing the differential equation \a dot(var) := \a expr.
     inline Assignment<DottedVariable<T>,Expression<T>> operator=(const Expression<T>& e) const;
-    template<class D> inline typename EnableIfRealBuiltin<T,D,AssignmentType>::Type operator=(D e) const;
+    template<class D> inline EnableIfRealBuiltin<T,D,AssignmentType> operator=(D e) const;
   private:
     explicit DottedVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),dotted) { }
 };
@@ -300,7 +301,7 @@ template<class T> class PrimedVariable
     inline AssignmentType operator=(const Variable<T>& var) const;
     //! \brief Construct an assignment statement representing the differential equation \a var' := \a expr.
     inline Assignment<PrimedVariable<T>,Expression<T>> operator=(const Expression<T>& expr) const;
-    template<class D> inline typename EnableIfRealBuiltin<T,D,AssignmentType>::Type operator=(D e) const;
+    template<class D> inline EnableIfRealBuiltin<T,D,AssignmentType> operator=(D e) const;
   private:
     explicit PrimedVariable(const Variable<T>& var) : ExtendedVariable<T>(var.name(),primed) { }
 };

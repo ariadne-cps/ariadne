@@ -50,7 +50,7 @@ class Constraint {
     Constraint(FunctionType const& f, BoundType const& x)
         : _function(f), _lower_bound(x), _upper_bound(x) { }
 
-    template< class FF, class RR, class=typename EnableIf<IsConvertible<FF,F>>::Type, class=typename EnableIf<IsConvertible<RR,R>>::Type >
+    template< class FF, class RR, class=EnableIf<IsConvertible<FF,F>>, class=EnableIf<IsConvertible<RR,R>> >
     Constraint(const Constraint<FF,RR>& c)
         : _function(static_cast<F>(c.function())), _lower_bound(c.lower_bound()), _upper_bound(c.upper_bound()) { }
 

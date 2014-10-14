@@ -148,7 +148,7 @@ template<class T> inline Assignment< Variable<T>, Expression<T> >
 Variable<T>::operator=(const Expression<T>& expr) const {
     return Assignment< Variable<T>, Expression<T> >(*this,Expression<T>(expr)); }
 
-template<class T> template<class D> inline typename EnableIfRealBuiltin<T,D,Assignment< Variable<T>, T > >::Type
+template<class T> template<class D> inline EnableIfRealBuiltin<T,D,Assignment< Variable<T>, T > >
 Variable<T>::operator=(D c) const {
     return this->operator=(Real(c)); }
 
@@ -157,7 +157,7 @@ template<class T> inline Assignment< Variable<T>, Expression<T> >
 LetVariable<T>::operator=(const T& c) const {
     return Assignment< Variable<T>, Expression<T> >(this->base(),Expression<T>(c)); }
 
-template<class T> template<class D> inline typename EnableIfRealBuiltin<T,D,Assignment< Variable<T>, Expression<T> > >::Type
+template<class T> template<class D> inline EnableIfRealBuiltin<T,D,Assignment< Variable<T>, Expression<T> > >
 LetVariable<T>::operator=(D c) const {
     return this->operator=(Real(c)); }
 
@@ -179,7 +179,7 @@ template<class T> inline Assignment< PrimedVariable<T>, Expression<T> >
 PrimedVariable<T>::operator=(const Expression<T>& expr) const {
     return Assignment< PrimedVariable<T>, Expression<T> >(*this,Expression<T>(expr)); }
 
-template<class T> template<class D> inline typename EnableIfRealBuiltin<T,D,Assignment< PrimedVariable<T>, Expression<T> > >::Type
+template<class T> template<class D> inline EnableIfRealBuiltin<T,D,Assignment< PrimedVariable<T>, Expression<T> > >
 PrimedVariable<T>::operator=(D c) const {
     return this->operator=(Real(c)); }
 
@@ -200,7 +200,7 @@ template<class T> inline Assignment< DottedVariable<T>, Expression<T> >
 DottedVariable<T>::operator=(const Expression<T>& expr) const {
     return Assignment< DottedVariable<T>, Expression<T> >(*this,Expression<T>(expr)); }
 
-template<class T> template<class D> inline typename EnableIfRealBuiltin<T,D,Assignment< DottedVariable<T>, Expression<T> > >::Type
+template<class T> template<class D> inline EnableIfRealBuiltin<T,D,Assignment< DottedVariable<T>, Expression<T> > >
 DottedVariable<T>::operator=(D c) const {
     return this->operator=(Real(c)); }
 

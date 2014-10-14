@@ -412,23 +412,23 @@ MatrixNegation<M>
 operator-(const MatrixExpression<M>& Ae) { return MatrixNegation<M>(Ae()); }
 
 template<class M1, class M2> inline
-typename EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,typename M2::ValueType>::ResultType>, MatrixSum< M1, M2 > >::Type
+EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,typename M2::ValueType>::ResultType>, MatrixSum< M1, M2 > >
 operator+(const MatrixExpression<M1>& A1e, const MatrixExpression<M2>& A2e) { return MatrixSum<M1,M2>(A1e(),A2e()); }
 
 template<class M1, class M2> inline
-typename EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,typename M2::ValueType>::ResultType>, MatrixDifference< M1, M2 > >::Type
+EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,typename M2::ValueType>::ResultType>, MatrixDifference< M1, M2 > >
 operator-(const MatrixExpression<M1>& A1e, const MatrixExpression<M2>& A2e) { return MatrixDifference<M1,M2>(A1e(),A2e()); }
 
 template<class X1, class M2> inline
-typename EnableIf< IsDefined<typename Arithmetic<X1,typename M2::ValueType>::ResultType>, MatrixScalarProduct< M2, X1 > >::Type
+EnableIf< IsDefined<typename Arithmetic<X1,typename M2::ValueType>::ResultType>, MatrixScalarProduct< M2, X1 > >
 operator*(const X1& x1, const MatrixExpression<M2>& A2e) { return MatrixScalarProduct<M2,X1>(A2e(),x1); }
 
 template<class M1, class X2> inline
-typename EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,X2>::ResultType>, MatrixScalarProduct< M1, X2 > >::Type
+EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,X2>::ResultType>, MatrixScalarProduct< M1, X2 > >
 operator*(const MatrixExpression<M1>& A1e, const X2& x2) { return MatrixScalarProduct<M1,X2>(A1e(),x2); }
 
 template<class M1, class X2> inline
-typename EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,X2>::ResultType>, MatrixScalarQuotient< M1, X2 > >::Type
+EnableIf< IsDefined<typename Arithmetic<typename M1::ValueType,X2>::ResultType>, MatrixScalarQuotient< M1, X2 > >
 operator/(const MatrixExpression<M1>& A1e, const X2& x2) { return MatrixScalarQuotient<M1,X2>(A1e(),x2); }
 
 
@@ -499,12 +499,12 @@ template<class X, class M> inline Matrix<X>& operator-=(Matrix<X>& A, const Matr
     return A;
 }
 
-template<class X1, class X2> inline typename EnableIfNumeric<X2,Matrix<X1>&>::Type operator*=(Matrix<X1>& A, const X2& x) {
+template<class X1, class X2> inline EnableIfNumeric<X2,Matrix<X1>&> operator*=(Matrix<X1>& A, const X2& x) {
     for(size_t i=0; i!=A.row_size(); ++i) { for(size_t j=0; j!=A.column_size(); ++j) { A.at(i,j)*=x; } }
     return A;
 }
 
-template<class X1, class X2> inline typename EnableIfNumeric<X2,Matrix<X1>&>::Type operator/=(Matrix<X1>& A, const X2& x) {
+template<class X1, class X2> inline EnableIfNumeric<X2,Matrix<X1>&> operator/=(Matrix<X1>& A, const X2& x) {
     for(size_t i=0; i!=A.row_size(); ++i) { for(size_t j=0; j!=A.column_size(); ++j) { A.at(i,j)/=x; } }
     return A;
 }

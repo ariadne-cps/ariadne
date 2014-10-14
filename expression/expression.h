@@ -485,20 +485,20 @@ template<class T> struct IsExpression< T, T > : public True { };
 template<class T> struct IsExpression< T, Constant<T> > : public True { };
 template<class T> struct IsExpression< T, Variable<T> > : public True { };
 template<class T> struct IsExpression< T, Expression<T> > : public True { };
-template<class T, class X1, class X2, class R> struct EnableIfExpressions : public EnableIf< And<IsExpression<T,X1>,IsExpression<T,X2> >, R> { };
+template<class T, class X1, class X2, class R=Dummy> using EnableIfExpressions = EnableIf< And<IsExpression<T,X1>,IsExpression<T,X2> >, R>;
 
 template<class X1, class X2> inline
-typename EnableIfExpressions< Real, X1, X2, List<Expression<Real> > >::Type
+EnableIfExpressions< Real, X1, X2, List<Expression<Real> > >
 operator,(const X1& e1, const X2& e2) {
     List< Expression<Real> > r; r.append(e1); r.append(e2); return r; }
 
 template<class X> inline
-typename EnableIf< IsExpression<Real,X>, List<Expression<Real> > >::Type
+EnableIf< IsExpression<Real,X>, List<Expression<Real> > >
 operator,(Int c, const X& e) {
     List< Expression<Real> > r; r.append(Expression<Real>(c)); r.append(Expression<Real>(e)); return r; }
 
 template<class T, class X> inline
-typename EnableIf< IsExpression<T,X>, List<Expression<T> > >::Type
+EnableIf< IsExpression<T,X>, List<Expression<T> > >
 operator,(List<Expression<T> > l, const T& e) {
     List< Expression<T> > r(l); r.append(Expression<Real>(e)); return r; }
 

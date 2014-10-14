@@ -77,11 +77,11 @@ template<class X> UnivariateDifferential<X>& operator*=(UnivariateDifferential<X
     x=x*y; return x; }
 
 template<class X, class Y>
-typename EnableIfNumeric<Y,UnivariateDifferential<X>&>::Type
+EnableIfNumeric<Y,UnivariateDifferential<X>&>
 operator+=(UnivariateDifferential<X>& x, const Y& c) {
     x[0]+=c; return x; }
 template<class X, class Y>
-typename EnableIfNumeric<Y,UnivariateDifferential<X>&>::Type
+EnableIfNumeric<Y,UnivariateDifferential<X>&>
 operator*=(UnivariateDifferential<X>& x, const Y& c) {
     for(uint i=0; i<=x.degree(); ++i) { x[i]*=c; } return x; }
 

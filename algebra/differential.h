@@ -543,7 +543,7 @@ Differential<X> operator-(const Differential<X>& x)
 
 
 template<class X, class R>
-typename EnableIfNumeric<R,Differential<X> >::Type
+EnableIfNumeric<R,Differential<X> >
 operator+(const Differential<X>& x, const R& c)
 {
     Differential<X> r(x); r+=X(c); return r;
@@ -551,49 +551,49 @@ operator+(const Differential<X>& x, const R& c)
 
 
 template<class X, class R>
-typename EnableIfNumeric<R,Differential<X> >::Type
+EnableIfNumeric<R,Differential<X> >
 operator+(const R& c, const Differential<X>& x)
 {
     Differential<X> r(x); r+=X(c); return r;
 }
 
 template<class X, class R>
-typename EnableIfNumeric<R,Differential<X> >::Type
+EnableIfNumeric<R,Differential<X> >
 operator-(const Differential<X>& x, const R& c)
 {
     Differential<X> r(x); r-=X(c); return r;
 }
 
 template<class X, class R>
-typename EnableIfNumeric<R,Differential<X> >::Type
+EnableIfNumeric<R,Differential<X> >
 operator-(const R& c, const Differential<X>& x)
 {
     Differential<X> r(-x); r+=X(c); return r;
 }
 
 template<class X, class R>
-typename EnableIfNumeric<R,Differential<X> >::Type
+EnableIfNumeric<R,Differential<X> >
 operator*(const Differential<X>& x, const R& c)
 {
     Differential<X> r(x); r*=X(c); return r;
 }
 
 template<class X, class R>
-typename EnableIfNumeric<R,Differential<X> >::Type
+EnableIfNumeric<R,Differential<X> >
 operator*(const R& c, const Differential<X>& x)
 {
     Differential<X> r(x); r*=X(c); return r;
 }
 
 template<class X, class R>
-typename EnableIfNumeric<R,Differential<X> >::Type
+EnableIfNumeric<R,Differential<X> >
 operator/(const Differential<X>& x, const R& c)
 {
     Differential<X> r(x); r/=X(c); return r;
 }
 
 template<class X, class R>
-typename EnableIfNumeric<R,Differential<X> >::Type
+EnableIfNumeric<R,Differential<X> >
 operator/(const R& c, const Differential<X>& x)
 {
     Differential<X> r(rec(x)); r*=X(c); return r;

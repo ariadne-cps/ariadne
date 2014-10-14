@@ -102,7 +102,7 @@ template<> struct IsNumeric<Integer> { static const bool value = true; };
 template<> struct IsNumeric<Rational> { static const bool value = true; };
 #endif // HAVE_GMPXX_H
 
-template<class X, class T> struct EnableIfNumeric : EnableIf<IsNumeric<X>,T> { };
+template<class X, class T> using EnableIfNumeric = EnableIf<IsNumeric<X>,T>;
 
 template<class F, class T> struct IsSafelyConvertible : False { };
 template<> struct IsSafelyConvertible<ExactFloat,ExactFloat> : True { };

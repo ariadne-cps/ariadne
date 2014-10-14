@@ -511,30 +511,30 @@ ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, const ScalarTaylor
 ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
 ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
 
-template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type&
+template<class X> inline EnableIfNumeric<X,ScalarTaylorFunction>&
 operator+=(ScalarTaylorFunction& f, const X& c) { f.model()+=ValidatedNumber(c); return f; }
-template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type&
+template<class X> inline EnableIfNumeric<X,ScalarTaylorFunction>&
 operator-=(ScalarTaylorFunction& f, const X& c) { f.model()-=ValidatedNumber(c); return f; }
-template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type&
+template<class X> inline EnableIfNumeric<X,ScalarTaylorFunction>&
 operator*=(ScalarTaylorFunction& f, const X& c) { f.model()*=ValidatedNumber(c); return f; }
-template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type&
+template<class X> inline EnableIfNumeric<X,ScalarTaylorFunction>&
 operator/=(ScalarTaylorFunction& f, const X& c) { f.model()/=ValidatedNumber(c); return f; }
 
-template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
+template<class X> inline EnableIfNumeric<X,ScalarTaylorFunction>
 operator+(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r+=ValidatedNumber(c); return r; }
-template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
+template<class X> inline EnableIfNumeric<X,ScalarTaylorFunction>
 operator-(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r+=neg(ValidatedNumber(c)); return r; }
-template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
+template<class X> inline EnableIfNumeric<X,ScalarTaylorFunction>
 operator*(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r*=ValidatedNumber(c); return r; }
-template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
+template<class X> inline EnableIfNumeric<X,ScalarTaylorFunction>
 operator/(const ScalarTaylorFunction& f, const X& c) { ScalarTaylorFunction r(f); r*=(rec(ValidatedNumber(c))); return r; }
-template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
+template<class X> inline EnableIfNumeric<X,ScalarTaylorFunction>
 operator+(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(f); r+=ValidatedNumber(c); return r; }
-template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
+template<class X> inline EnableIfNumeric<X,ScalarTaylorFunction>
 operator-(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(neg(f)); r+=ValidatedNumber(c); return r; }
-template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
+template<class X> inline EnableIfNumeric<X,ScalarTaylorFunction>
 operator*(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(f); r*=ValidatedNumber(c); return r; }
-template<class X> inline typename EnableIfNumeric<X,ScalarTaylorFunction>::Type
+template<class X> inline EnableIfNumeric<X,ScalarTaylorFunction>
 operator/(const X& c,const ScalarTaylorFunction& f) { ScalarTaylorFunction r(rec(f)); r*=ValidatedNumber(c); return r; }
 
 inline ScalarTaylorFunction abs(const ScalarTaylorFunction& x) {

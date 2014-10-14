@@ -9,6 +9,7 @@ set (Ariadne_VERSION_MAJOR 0)
 set (Ariadne_VERSION_MINOR 5)
 
 set(BUILD_SHARED_LIBS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
@@ -55,18 +56,57 @@ ENDIF()
 
 configure_file (${PROJECT_SOURCE_DIR}/config.h.cmake ${PROJECT_SOURCE_DIR}/config.h)
 
-include_directories(${PROJECT_SOURCE_DIR})
 #Non-portable fix to avoid user header directories being searched for by system headers
-add_definitions(-iquote${PROJECT_SOURCE_DIR}/include)
+add_definitions(-iquote${PROJECT_SOURCE_DIR})
 #Should ideally be able to use line below
-#include_directories(${PROJECT_SOURCE_DIR}/include)
+#include_directories(${PROJECT_SOURCE_DIR})
 
 
-add_subdirectory(include)
-add_subdirectory(src)
+add_subdirectory(utility)
+add_subdirectory(numeric)
+add_subdirectory(algebra)
+add_subdirectory(function)
+add_subdirectory(solvers)
+add_subdirectory(geometry)
+add_subdirectory(dynamics)
+add_subdirectory(expression)
+add_subdirectory(output)
+add_subdirectory(hybrid)
+
 add_subdirectory(test)
 add_subdirectory(wrap)
 add_subdirectory(examples)
 add_subdirectory(python)
 
+add_library(ariadne SHARED
+    $<TARGET_OBJECTS:ariadne-numeric>
+    $<TARGET_OBJECTS:ariadne-expression>
+    $<TARGET_OBJECTS:ariadne-algebra>
+    $<TARGET_OBJECTS:ariadne-function>
+    $<TARGET_OBJECTS:ariadne-solvers>
+    $<TARGET_OBJECTS:ariadne-geometry>
+    $<TARGET_OBJECTS:ariadne-dynamics>
+    $<TARGET_OBJECTS:ariadne-output>
+    $<TARGET_OBJECTS:ariadne-hybrid>
+)
+
+target_link_libraries(ariadne gmpxx gmp)
+#FIXME: Make boost_system non-required
+target_link_libraries(ariadne boost_system)
+#FIXME: Make Cairo and Boost Serialization optional dependencies
+target_link_libraries(ariadne cairo)
+target_link_libraries (ariadne boost_serialization)
+
+add_library(pyariadne $<TARGET_OBJECTS:pyariadne-src>)
+set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne")
+target_link_libraries (pyariadne ariadne boost_python)
+
+
+add_library(pyinterval $<TARGET_OBJECTS:pyinterval-src>)
+set_target_properties(pyinterval PROPERTIES PREFIX "" OUTPUT_NAME "interval")
+target_link_libraries (pyinterval ariadne boost_python)
+
+add_library(pydifferentiation $<TARGET_OBJECTS:pydifferentiation-src>)
+set_target_properties(pydifferentiation PROPERTIES PREFIX "" OUTPUT_NAME "differentiation")
+target_link_libraries (pydifferentiation ariadne boost_python)
 

@@ -11,19 +11,18 @@ ELSE()
 ENDIF()
 
 
-add_library(pyinterval
-    interval_module.cc numeric_submodule.cc linear_algebra_submodule.cc
+add_library(pyinterval-src OBJECT
+    interval_module.cc
+    numeric_submodule.cc
+    linear_algebra_submodule.cc
 )
-set_target_properties(pyinterval PROPERTIES PREFIX "" OUTPUT_NAME "interval")
-target_link_libraries (pyinterval ariadne boost_python)
 
-add_library(pydifferentiation
-    differentiation_module.cc differentiation_submodule.cc
+add_library(pydifferentiation-src OBJECT
+    differentiation_module.cc
+    differentiation_submodule.cc
 )
-set_target_properties(pydifferentiation PROPERTIES PREFIX "" OUTPUT_NAME "differentiation")
-target_link_libraries (pydifferentiation ariadne boost_python)
 
-add_library(pyariadne
+add_library(pyariadne-src OBJECT
     utilities.cc
     ariadne_module.cc
     numeric_submodule.cc
@@ -39,6 +38,4 @@ add_library(pyariadne
     evolution_submodule.cc
     graphics_submodule.cc
 )
-set_target_properties(pyariadne PROPERTIES PREFIX "" OUTPUT_NAME "ariadne")
-target_link_libraries (pyariadne ariadne-extra ariadne boost_python)
 

@@ -250,7 +250,7 @@ template<> void export_vector<ValidatedFloat>()
 
 template<> void export_vector<ApproximateFloat>()
 {
-    class_< Vector<ApproximateFloat> > approximate_vector_class("RawFloatVector",init< Vector<ApproximateFloat> >());
+    class_< Vector<ApproximateFloat> > approximate_vector_class("ApproximateFloatVector",init< Vector<ApproximateFloat> >());
     export_vector_class<ApproximateFloat>(approximate_vector_class);
     export_vector_conversion<ApproximateFloat,ValidatedFloat>(approximate_vector_class);
     export_vector_arithmetic<ApproximateFloat,ApproximateFloat,ApproximateFloat>(approximate_vector_class);
@@ -258,6 +258,9 @@ template<> void export_vector<ApproximateFloat>()
     approximate_vector_class.def("__rmul__",__rmul__< Vector<ApproximateFloat>, Vector<ApproximateFloat>, ApproximateFloat >);
     approximate_vector_class.def("__mul__",__mul__< Vector<ApproximateFloat>, Vector<ApproximateFloat>, ApproximateFloat >);
     approximate_vector_class.def("__div__",__div__< Vector<ApproximateFloat>, Vector<ApproximateFloat>, ApproximateFloat >);
+
+    implicitly_convertible< Vector<ValidatedFloat>, Vector<ApproximateFloat> >();
+
 }
 
 
@@ -332,25 +335,24 @@ template<class X> void export_matrix()
 
 template<> void export_matrix<ExactFloat>()
 {
-    class_< Matrix<ExactFloat> > matrix_class(python_name<ExactFloat>("Matrix"),no_init);
+    class_< Matrix<ExactFloat> > matrix_class(python_name<ExactFloat>("Matrix"),init< Matrix<ExactFloat> >());
     matrix_class.def(init<PivotMatrix>());
     export_matrix_class<ExactFloat>(matrix_class);
 }
 
 template<> void export_matrix<ValidatedFloat>()
 {
-    class_< Matrix<ValidatedFloat> > matrix_class(python_name<ValidatedFloat>("Matrix"),no_init);
+    class_< Matrix<ValidatedFloat> > matrix_class(python_name<ValidatedFloat>("Matrix"),init< Matrix<ValidatedFloat> >());
     export_matrix_class<ValidatedFloat>(matrix_class);
     export_matrix_conversion<ValidatedFloat,ExactFloat>(matrix_class);
     export_matrix_arithmetic<ValidatedFloat,ValidatedFloat,ValidatedFloat>(matrix_class);
-    //export_matrix_arithmetic<ValidatedFloat,ValidatedFloat,ApproximateFloat>(matrix_class);
     def("gs_inverse", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&)) &gs_inverse);
     def("lu_inverse", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&)) &lu_inverse);
     def("gs_solve", (Vector<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Vector<ValidatedFloat>&)) &gs_solve);
     def("gs_solve", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Matrix<ValidatedFloat>&)) &gs_solve);
     def("lu_solve", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Matrix<ValidatedFloat>&)) &lu_solve);
 
-    //implicitly_convertible< Matrix<ApproximateFloat>, Matrix<ValidatedFloat> >();
+    implicitly_convertible< Matrix<ExactFloat>, Matrix<ValidatedFloat> >();
 }
 
 template<> void export_matrix<ApproximateFloat>()
@@ -359,7 +361,6 @@ template<> void export_matrix<ApproximateFloat>()
     export_matrix_class<ApproximateFloat>(matrix_class);
     export_matrix_conversion<ApproximateFloat,ValidatedFloat>(matrix_class);
     export_matrix_arithmetic<ApproximateFloat,ApproximateFloat,ApproximateFloat>(matrix_class);
-    //export_matrix_arithmetic<ValidatedFloat,ApproximateFloat,ValidatedFloat>(matrix_class);
 
     def("triangular_decomposition",&triangular_decomposition);
     def("orthogonal_decomposition", &orthogonal_decomposition);
@@ -368,6 +369,7 @@ template<> void export_matrix<ApproximateFloat>()
     def("row_norms",(Vector<ApproximateFloat>(*)(const Matrix<ApproximateFloat>&)) &row_norms);
     def("normalise_rows",(Matrix<ApproximateFloat>(*)(const Matrix<ApproximateFloat>&)) &normalise_rows);
 
+    implicitly_convertible< Matrix<ValidatedFloat>, Matrix<ApproximateFloat> >();
     to_python< Tuple<FloatMatrix,FloatMatrix,PivotMatrix> >();
 }
 
@@ -408,8 +410,10 @@ void export_pivot_matrix()
 
 template void export_vector<ApproximateFloat>();
 template void export_vector<ValidatedFloat>();
+template void export_vector<ExactFloat>();
 template void export_matrix<ApproximateFloat>();
 template void export_matrix<ValidatedFloat>();
+template void export_matrix<ExactFloat>();
 
 template void export_diagonal_matrix<ApproximateFloat>();
 
@@ -422,9 +426,11 @@ template void export_matrix<Rational>();
 void linear_algebra_submodule() {
     export_vector<ApproximateFloat>();
     export_vector<ValidatedFloat>();
+    export_vector<ExactFloat>();
 
     export_matrix<ApproximateFloat>();
     export_matrix<ValidatedFloat>();
+    export_matrix<ExactFloat>();
 
     export_pivot_matrix();
     export_diagonal_matrix<ApproximateFloat>();

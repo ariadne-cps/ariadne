@@ -1,7 +1,7 @@
 /***************************************************************************
  *            pointer.h
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2008-14  Pieter Collins
  *
  ****************************************************************************/
 
@@ -29,14 +29,12 @@
 #define ARIADNE_POINTER_H
 
 #include <memory>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/intrusive_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <iostream>
 
 
 namespace Ariadne {
 
+using std::shared_ptr;
 
 template<class T>
 class copy_on_write_ptr
@@ -73,8 +71,8 @@ class copy_on_write_ptr
         _ref_count=new int(1); _ptr=pointer; }
 };
 
-template<class T> std::ostream&
-operator<<(std::ostream& os, const copy_on_write_ptr<T>& ptr) {
+template<class T> OutputStream&
+operator<<(OutputStream& os, const copy_on_write_ptr<T>& ptr) {
     return os << "["<<ptr.count()<<"]<"<<ptr.address()<<">("<<ptr.value()<<")";
 }
 
@@ -100,14 +98,14 @@ class clone_on_write_ptr
             _ref_count=other._ref_count; ++(*_ref_count); } return *this; }
     const T& operator*() const { return *_ptr; }
     const T* operator->() const { return _ptr; }
-    T& operator*() { if(*_ref_count>1) { _make_clone(); } return *_ptr; }
-    T* operator->() { if(*_ref_count>1) { _make_clone(); } return _ptr; }
+    T& operator*() { if(*_ref_count>1) { _makeclone(); } return *_ptr; }
+    T* operator->() { if(*_ref_count>1) { _makeclone(); } return _ptr; }
   public:
     int count() const { return *_ref_count; }
     const void* address() const { return _ptr; }
     const T& value() const { return *_ptr; }
   private:
-    void _make_clone() {
+    void _makeclone() {
         --(*_ref_count); _ref_count=new int(1); _ptr=_ptr->clone(); }
     void _deallocate() {
         if(*_ref_count==1) { delete _ptr; _ptr=0; delete _ref_count; }
@@ -116,8 +114,8 @@ class clone_on_write_ptr
         _ref_count=new int(1); _ptr=pointer; }
 };
 
-template<class T> std::ostream&
-operator<<(std::ostream& os, const clone_on_write_ptr<T>& ptr) {
+template<class T> OutputStream&
+operator<<(OutputStream& os, const clone_on_write_ptr<T>& ptr) {
     return os << "["<<ptr.count()<<"]<"<<ptr.address()<<">("<<ptr.value()<<")";
 }
 
@@ -133,11 +131,11 @@ class copy_on_copy_ptr
     template<class S> copy_on_copy_ptr(S* pointer)
         : _ptr(pointer) { }
     copy_on_copy_ptr(const copy_on_copy_ptr<T>& other)
-        : _ptr(other._ptr?other._ptr->_clone():other._ptr) { }
+        : _ptr(other._ptr?other._ptr->clone():other._ptr) { }
     template<class S> copy_on_copy_ptr<T>& operator=(S* pointer) {
         delete _ptr; _ptr=pointer; return *this; }
     copy_on_copy_ptr<T>& operator=(const copy_on_copy_ptr<T>& other) {
-        if(_ptr!=other._ptr) { delete _ptr; _ptr=other._ptr?other._ptr->_clone():other._ptr; } return *this; }
+        if(_ptr!=other._ptr) { delete _ptr; _ptr=other._ptr?other._ptr->clone():other._ptr; } return *this; }
     const T& operator*() const { return *_ptr; }
     const T* operator->() const { return _ptr; }
     T& operator*() { return *_ptr; }
@@ -147,8 +145,8 @@ class copy_on_copy_ptr
     const T& value() const { return *_ptr; }
 };
 
-template<class T> std::ostream&
-operator<<(std::ostream& os, const copy_on_copy_ptr<T>& ptr) {
+template<class T> OutputStream&
+operator<<(OutputStream& os, const copy_on_copy_ptr<T>& ptr) {
     return os<<"<"<<ptr.address()<<">";
 }
 
@@ -163,11 +161,11 @@ class clone_on_copy_ptr
     template<class S> clone_on_copy_ptr(S* pointer)
         : _ptr(pointer) { }
     clone_on_copy_ptr(const clone_on_copy_ptr<T>& other)
-        : _ptr(other._ptr?other._ptr->_clone():other._ptr) { }
+        : _ptr(other._ptr?other._ptr->clone():other._ptr) { }
     template<class S> clone_on_copy_ptr<T>& operator=(S* pointer) {
         delete _ptr; _ptr=pointer; return *this; }
     clone_on_copy_ptr<T>& operator=(const clone_on_copy_ptr<T>& other) {
-        if(_ptr!=other._ptr) { delete _ptr; _ptr=other._ptr?other._ptr->_clone():other._ptr; } return *this; }
+        if(_ptr!=other._ptr) { delete _ptr; _ptr=other._ptr?other._ptr->clone():other._ptr; } return *this; }
     const T& operator*() const { return *_ptr; }
     const T* operator->() const { return _ptr; }
     T& operator*() { return *_ptr; }
@@ -177,8 +175,8 @@ class clone_on_copy_ptr
     const T& value() const { return *_ptr; }
 };
 
-template<class T> std::ostream&
-operator<<(std::ostream& os, const clone_on_copy_ptr<T>& ptr) {
+template<class T> OutputStream&
+operator<<(OutputStream& os, const clone_on_copy_ptr<T>& ptr) {
     return os<<"<"<<ptr.address()<<">";
 }
 

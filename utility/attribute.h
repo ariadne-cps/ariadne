@@ -1,7 +1,7 @@
 /***************************************************************************
  *            attribute.h
  *
- *  Copyright  2011  Pieter Collins
+ *  Copyright 2011-14  Pieter Collins
  *
  ****************************************************************************/
 
@@ -30,7 +30,14 @@
 
 namespace Ariadne {
 
+template<class T> class Generator {
+  public:
+    inline T operator=(const typename T::Type& v) const;
+};
+
 template<class V> class Attribute {
+    template<class T> friend class Generator;
+  private:
     V _v;
   protected:
     Attribute(const V& v) : _v(v) { }
@@ -39,18 +46,28 @@ template<class V> class Attribute {
     operator V() const { return this->_v; }
 };
 
-template<class T> class Generator {
-  public:
-    T operator=(const typename T::Type& v) const { return T(v); }
-};
+template<class T> inline T Generator<T>::operator=(const typename T::Type& v) const {
+    Attribute<typename T::Type> attr(v); return static_cast<const T&>(attr); }
 
-struct MaximumError : Attribute<double> { MaximumError(double v) : Attribute<double>(v) { } };
-struct SweepThreshold : Attribute<double> { SweepThreshold(double v) : Attribute<double>(v) { } };
-struct MaximumNumberOfSteps : Attribute<double> { MaximumNumberOfSteps(double v) : Attribute<double>(v) { } };
+struct MaximumError : Attribute<double> { };
+struct SweepThreshold : Attribute<double> { };
+struct MaximumNumberOfSteps : Attribute<uint> { };
 
 static const Generator<MaximumError> maximum_error = Generator<MaximumError>();
 static const Generator<SweepThreshold> sweep_threshold = Generator<SweepThreshold>();
 static const Generator<MaximumNumberOfSteps> maximum_number_of_steps = Generator<MaximumNumberOfSteps>();
+
+struct Capacity : Attribute<SizeType> { };
+static const Generator<Capacity> capacity = Generator<Capacity>();
+struct Size : Attribute<SizeType> { };
+static const Generator<Size> size = Generator<Size>();
+struct ResultSize : Attribute<SizeType> { };
+static const Generator<ResultSize> result_size = Generator<ResultSize>();
+struct ArgumentSize : Attribute<SizeType> { };
+static const Generator<ArgumentSize> argument_size = Generator<ArgumentSize>();
+struct Degree : Attribute<DegreeType> { };
+static const Generator<Degree> degree = Generator<Degree>();
+
 
 } // namespace Ariadne
 

@@ -380,7 +380,7 @@ template<class M1, class X2> struct MatrixScalarProduct
 };
 
 template<class M1, class X2> struct MatrixScalarQuotient
-    : public MatrixExpression< MatrixScalarProduct<M1,X2> >
+    : public MatrixExpression< MatrixScalarQuotient<M1,X2> >
 {
     typedef typename Arithmetic<typename M1::ValueType, X2>::ResultType ValueType;
     const M1& _A1; const X2& _x2;

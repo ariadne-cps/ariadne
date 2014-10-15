@@ -337,6 +337,7 @@ void export_exact_float()
 {
     class_< ExactFloat > exact_float_class("ExactFloat",init<ExactFloat>());
     exact_float_class.def(init<>());
+    exact_float_class.def(init<int>());
     exact_float_class.def(init<Float>());
     exact_float_class.def(+self);
     exact_float_class.def(-self);
@@ -349,6 +350,9 @@ void export_exact_float()
     exact_float_class.staticmethod("set_output_precision");
     exact_float_class.def("__str__", &__cstr__<ExactFloat>);
     exact_float_class.def("__repr__", &__cstr__<ExactFloat>);
+
+    implicitly_convertible<int,ExactFloat>();
+
 }
 
 void export_validated_float()

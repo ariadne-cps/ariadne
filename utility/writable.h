@@ -1,7 +1,7 @@
 /***************************************************************************
- *            logging.h
+ *            utility/writable.h
  *
- *  Copyright 2007-14  Alberto Casagrande, Pieter Collins
+ *  Copyright 2013-14  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,44 +21,39 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file logging.h
- *  \brief Support for writing debugging output to a logging stream.
+/*! \file utility/writable.h
+ *  \brief 
  */
 
-#ifndef ARIADNE_LOGGING_H
-#define ARIADNE_LOGGING_H
 
-#include <iostream>
-#include <fstream>
 
-// (Placeholder constant required for compilation)
-static const std::string charcode="";
+#ifndef ARIADNE_WRITABLE_H
+#define ARIADNE_WRITABLE_H
 
-//! Send a message to the global logging stream.
-#define ARIADNE_LOG(level,msg) \
-    if(verbosity >= level) { \
-        std::clog << "[" << charcode << ":" << level << "] "; \
-        for(uint _i=0; _i!=level; ++_i) { std::clog<<' '; } \
-        std::clog << msg << std::flush; \
-    }
+#include "typedefs.h"
+#include "metaprogramming.h"
 
 namespace Ariadne {
 
-struct Loggable {
+/************ WritableInterface **********************************************/
+
+class WritableInterface {
   public:
-    Loggable() : verbosity(0),charcode("") { }
-    mutable int verbosity;
+    virtual ~WritableInterface() = default;
+    friend OutputStream& operator<<(OutputStream& os, const WritableInterface& w);
   protected:
-    mutable std::string charcode;
+    virtual OutputStream& _write(OutputStream&) const = 0;
 };
+inline OutputStream& operator<<(OutputStream& os, const WritableInterface& w) { w._write(os); return os; }
 
-// Global log output file
-extern std::ofstream log_file_stream;
 
-//! \brief Redirect logging output to file \a filename.
-void redirect_log(const char* filename);
+template<class T, class = Fallback> struct IsWritable : False { };
+template<class T> struct IsWritable<T, EnableIf<IsDefined<decltype(declval<T>()._write(declval<OutputStream>()))>,Fallback>> : True { };
 
+template<class T> EnableIf<IsWritable<T>,OutputStream&> operator<<(OutputStream& os, const T& t) {
+    return t._write(os);
+}
 
 } // namespace Ariadne
 
-#endif // ARIADNE_LOGGING_H
+#endif

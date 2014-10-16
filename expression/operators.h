@@ -37,6 +37,7 @@
 #include "utility/pointer.h"
 
 #include "utility/tribool.h"
+#include "utility/string.h"
 #include "numeric/numeric.h"
 
 namespace Ariadne {
@@ -48,8 +49,9 @@ typedef tribool Tribool;
 typedef unsigned int Nat;
 typedef int Int;
 
-typedef std::string String;
 typedef std::ostream OutputStream;
+
+class String;
 
 enum OperatorKind {
     VARIABLE,

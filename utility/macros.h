@@ -1,7 +1,7 @@
 /***************************************************************************
- *            macros.h
+ *            utility/macros.h
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2013-14  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,9 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file macros.h
- *  \brief Commonly used macros.
+/*! \file utility/macros.h
+ *  \brief
  */
+
+
 
 #ifndef ARIADNE_MACROS_H
 #define ARIADNE_MACROS_H
@@ -31,7 +33,12 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "utility/exceptions.h"
+#define ARIADNE_USING_CONSTRUCTORS(Class,Base) \
+    template<class T,typename std::enable_if<std::is_convertible<T,Base>::value,int>::type=0> \
+    Class(const T& t) : Base(t) { } \
+    template<class T,typename std::enable_if<std::is_constructible<T,Base>::value and not std::is_convertible<T,Base>::value,int>::type=0> \
+    explicit Class(const T& t) : Base(t) { } \
+    template<class ...Args> Class(Args&&... args) : Base(std::forward<Args>(args)...) { } \
 
 #define ARIADNE_THROW(except,func,msg)          \
     { \
@@ -47,6 +54,21 @@
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
         } \
     } \
+
+
+#ifndef NDEBUG
+#define ARIADNE_DEBUG_ASSERT_MSG(expression,error) \
+    { \
+        bool result = bool(expression); \
+        if(!result) { \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
+        } \
+    } \
+
+#else
+#define ARIADNE_DEBUG_ASSERT_MSG(expression,error) \
+    { }
+#endif
 
 
 #ifndef NDEBUG
@@ -116,7 +138,7 @@
     } \
 
 #define ARIADNE_NOT_IMPLEMENTED                 \
-    throw NotImplemented(ARIADNE_PRETTY_FUNCTION);
+    throw std::runtime_error(std::string("Not implemented: ")+ARIADNE_PRETTY_FUNCTION);
 
 #define ARIADNE_DEPRECATED(fn,msg)          \
     static bool first_time=true; \

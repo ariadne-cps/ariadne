@@ -274,7 +274,7 @@ compute_p(const Array<Slackness>& tv)
 // Compute a basis (p_1,\ldots,p_m) for the matrix A
 // Throws an error if the matrix A has full row rank
 template<class X>
-pair< Array<size_t>, Matrix<X> >
+Pair< Array<size_t>, Matrix<X> >
 SimplexSolver<X>::compute_basis(const Matrix<X>& A) const
 {
     ARIADNE_LOG(9,"compute_basis(A) with A="<<A<<"\n");
@@ -481,7 +481,7 @@ compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Ve
 
 
 template<class X,class XX>
-std::pair<Vector<XX>,Vector<XX> >
+Pair<Vector<XX>,Vector<XX> >
 compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& xl, const Vector<X>& xu, Array<Slackness>& vt, const Array<size_t>& p, const Matrix<XX>& B)
 {
     const size_t m=A.row_size();
@@ -654,7 +654,7 @@ compute_d(const Matrix<X>& A, const Array<size_t>& p, const Matrix<XX>& B, const
 }
 
 template<class X>
-pair<size_t,X>
+Pair<size_t,X>
 compute_rt(const Array<size_t>& p, const Vector<X>& x, const Vector<X>& d)
 {
     const size_t m=d.size();
@@ -674,7 +674,7 @@ compute_rt(const Array<size_t>& p, const Vector<X>& x, const Vector<X>& d)
 
 
 template<class X>
-std::pair<size_t,X>
+Pair<size_t,X>
 compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt, const Array<size_t>& p, const Vector<X>& x, const Vector<X>& d, const size_t s)
 {
     const X inf=Ariadne::inf;
@@ -717,7 +717,7 @@ compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt,
     return make_pair(r,t);
 }
 
-std::pair<size_t,UpperInterval>
+Pair<size_t,UpperInterval>
 compute_rt(const Vector<Float>& xl, const Vector<Float>& xu, const Array<Slackness>& vt, const Array<size_t>& p, const Vector<UpperInterval>& x, const Vector<UpperInterval>& d, const size_t s)
 {
     typedef Float X;

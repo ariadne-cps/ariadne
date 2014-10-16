@@ -2367,7 +2367,7 @@ partial_evaluate(const Vector<ValidatedTaylorModel>& tv, uint k, ValidatedNumber
 }
 
 
-pair<ValidatedTaylorModel,ValidatedTaylorModel>
+Pair<ValidatedTaylorModel,ValidatedTaylorModel>
 split(const ValidatedTaylorModel& tv, uint j)
 {
     // TODO: improve efficiency of implementation
@@ -2706,7 +2706,7 @@ disjoint(const Vector<ValidatedTaylorModel>& tv1, const Vector<ValidatedTaylorMo
     return false;
 }
 
-pair< Vector<ValidatedTaylorModel>, Vector<ValidatedTaylorModel> >
+Pair< Vector<ValidatedTaylorModel>, Vector<ValidatedTaylorModel> >
 split(const Vector<ValidatedTaylorModel>& tv, uint j)
 {
     Vector<ValidatedTaylorModel> r1(tv.size());

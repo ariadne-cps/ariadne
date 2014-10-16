@@ -31,6 +31,7 @@
 #include <iosfwd>
 #include <boost/logic/tribool.hpp>
 #include "utility/metaprogramming.h"
+#include "utility/typedefs.h"
 
 namespace Ariadne {
 
@@ -44,13 +45,13 @@ typedef void Void;
 typedef bool Bool;
 //! Internal name for three-valued logical type.
 typedef boost::tribool Tribool;
-//! Internal name for string objects.
-typedef std::string String;
 //! Internal name for builtin unsigned integers.
 typedef unsigned int Nat;
 //! Internal name for builtin integers.
 typedef int Int;
 
+// Define as a class for consistency with other value types
+class String;
 
 
 // Numeric declarations

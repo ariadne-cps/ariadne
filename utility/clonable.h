@@ -1,7 +1,7 @@
 /***************************************************************************
- *            logging.h
+ *            utility/clonable.h
  *
- *  Copyright 2007-14  Alberto Casagrande, Pieter Collins
+ *  Copyright 2013-14  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,44 +21,27 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file logging.h
- *  \brief Support for writing debugging output to a logging stream.
+/*! \file utility/clonable.h
+ *  \brief 
  */
 
-#ifndef ARIADNE_LOGGING_H
-#define ARIADNE_LOGGING_H
 
-#include <iostream>
-#include <fstream>
 
-// (Placeholder constant required for compilation)
-static const std::string charcode="";
-
-//! Send a message to the global logging stream.
-#define ARIADNE_LOG(level,msg) \
-    if(verbosity >= level) { \
-        std::clog << "[" << charcode << ":" << level << "] "; \
-        for(uint _i=0; _i!=level; ++_i) { std::clog<<' '; } \
-        std::clog << msg << std::flush; \
-    }
+#ifndef ARIADNE_CLONABLE_H
+#define ARIADNE_CLONABLE_H
 
 namespace Ariadne {
 
-struct Loggable {
+/************ ClonableInterface **********************************************/
+
+class ClonableInterface {
   public:
-    Loggable() : verbosity(0),charcode("") { }
-    mutable int verbosity;
+    virtual ~ClonableInterface() { }
   protected:
-    mutable std::string charcode;
+    virtual ClonableInterface* _copy() const = 0;
+    virtual ClonableInterface* _move() = 0;
 };
-
-// Global log output file
-extern std::ofstream log_file_stream;
-
-//! \brief Redirect logging output to file \a filename.
-void redirect_log(const char* filename);
-
 
 } // namespace Ariadne
 
-#endif // ARIADNE_LOGGING_H
+#endif

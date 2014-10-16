@@ -37,6 +37,7 @@
 #include "utility/pointer.h"
 #include "utility/container.h"
 #include "utility/tribool.h"
+#include "utility/string.h"
 
 namespace Ariadne {
 
@@ -48,7 +49,8 @@ typedef unsigned int Nat;
 
 typedef bool Boolean;
 typedef tribool Tribool;
-typedef std::string String;
+
+class String;
 class Integer;
 class Real;
 
@@ -62,7 +64,7 @@ class Identifier : public String
     Identifier() : String() { }
     Identifier(const char* cstr) : String(cstr) { }
     //! \brief Construct an identifier from a standard string.
-    Identifier(const String& str) : String(str) { }
+    Identifier(const std::string& str) : String(str) { }
 };
 
 class UntypedVariable;

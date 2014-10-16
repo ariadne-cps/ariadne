@@ -38,6 +38,7 @@
 #include "output/graphics.h"
 
 #include "expression/expression_set.h"
+#include "hybrid/discrete_location.h"
 
 typedef unsigned int uint;
 

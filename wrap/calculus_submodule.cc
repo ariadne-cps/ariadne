@@ -542,7 +542,7 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.staticmethod("variable");
     scalar_taylor_function_class.staticmethod("variables");
 
-    def("split", (std::pair<ScalarTaylorFunction,ScalarTaylorFunction>(*)(const ScalarTaylorFunction&,uint)) &Ariadne::split);
+    def("split", (Pair<ScalarTaylorFunction,ScalarTaylorFunction>(*)(const ScalarTaylorFunction&,uint)) &Ariadne::split);
     def("evaluate",(ValidatedFloat(*)(const ScalarTaylorFunction&,const Vector<ValidatedFloat>&)) &evaluate);
     def("partial_evaluate",(ScalarTaylorFunction(*)(const ScalarTaylorFunction&,uint,const ValidatedFloat&)) &partial_evaluate);
 
@@ -663,7 +663,7 @@ void export_vector_taylor_function()
     def("restrict", (VectorTaylorFunction(*)(const VectorTaylorFunction&,const ExactBox&)) &restrict);
     def("restrict", (VectorTaylorFunction(*)(const VectorTaylorFunction&,uint,const ExactInterval&)) &restrict);
 
-    def("split", (std::pair<VectorTaylorFunction,VectorTaylorFunction>(*)(const VectorTaylorFunction&,uint)) &Ariadne::split);
+    def("split", (Pair<VectorTaylorFunction,VectorTaylorFunction>(*)(const VectorTaylorFunction&,uint)) &Ariadne::split);
 
     def("evaluate",(Vector<ApproximateFloat>(VectorTaylorFunction::*)(const Vector<ApproximateFloat>&)const) &VectorTaylorFunction::evaluate);
     def("evaluate",(Vector<ValidatedFloat>(VectorTaylorFunction::*)(const Vector<ValidatedFloat>&)const) &VectorTaylorFunction::evaluate);

@@ -50,9 +50,8 @@ namespace Ariadne {
 typedef bool Boolean;
 //! \brief Internal name for three-valued logical expressions.
 typedef tribool Tribool;
-//! \brief Internal name for strings.
-typedef std::string String;
 
+class String;
 class Integer;
 class Real;
 
@@ -360,7 +359,7 @@ evaluate(const Expression<T>& e, const Map<Identifier,T>& x)
 template<class T> Set<UntypedVariable> Expression<T>::arguments() const {
     const Expression<T>& e=*this;
     switch(e.kind()) {
-        case VARIABLE: return Set<UntypedVariable>(Variable<T>(e.var()));
+        case VARIABLE: return Set<UntypedVariable>{Variable<T>(e.var())};
         case NULLARY: return Set<UntypedVariable>();
         case UNARY: return e.arg().arguments();
         case BINARY: return join(e.arg1().arguments(),e.arg2().arguments());
@@ -378,7 +377,7 @@ template<class T> Set<UntypedVariable> Expression<T>::arguments() const {
 template<class T> Set<Identifier> arguments(const Expression<T>& e)
 {
     switch(e.kind()) {
-        case VARIABLE: return Set<Identifier>(e.var());
+        case VARIABLE: return Set<Identifier>{e.var()};
         case NULLARY: return Set<Identifier>();
         case UNARY: return arguments(e.arg());
         case BINARY: return join(arguments(e.arg1()),arguments(e.arg2()));

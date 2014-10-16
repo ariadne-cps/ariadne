@@ -625,9 +625,9 @@ std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
 */
 
 template<class F> struct NamedArgumentRepresentation {
-    const F& function; const std::vector<std::string>& argument_names;
+    const F& function; const std::vector<String>& argument_names;
 };
-template<class F> NamedArgumentRepresentation<F> named_argument_repr(const F& function, const std::vector<std::string>& argument_names) {
+template<class F> NamedArgumentRepresentation<F> named_argument_repr(const F& function, const std::vector<String>& argument_names) {
     NamedArgumentRepresentation<F> r={function,argument_names}; return r; }
 
 template<class X>
@@ -663,7 +663,7 @@ std::ostream& operator<<(std::ostream& os, const Polynomial<X>& q) {
 template<class X>
 std::ostream& operator<<(std::ostream& os, const NamedArgumentRepresentation< Polynomial<X> >& repr) {
     const Polynomial<X>& p=repr.function;
-    const std::vector<std::string>& n=repr.argument_names;
+    const std::vector<String>& n=repr.argument_names;
     bool first_term=true;
     bool identically_zero=true;
     for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {

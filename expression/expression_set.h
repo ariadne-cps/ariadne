@@ -171,12 +171,12 @@ class VariablesBox {
     ExactBox _bx;
   public:
     VariablesBox() : _spc(), _bx(0) { }
-    VariablesBox(const Map<RealVariable,ExactInterval>& bnds) : _spc(make_list(bnds.keys())), _bx(_spc.dimension()) {
+    VariablesBox(const Map<RealVariable,ExactInterval>& bnds) : _spc(List<RealVariable>(bnds.keys())), _bx(_spc.dimension()) {
         for(uint i=0; i!=this->_bx.dimension(); ++i) { this->_bx[i] = bnds[this->_spc[i]]; } }
     VariablesBox(const List<RealVariableInterval>& bnds) : _spc(), _bx(bnds.size()) {
         for(uint i=0; i!=bnds.size(); ++i) { this->_spc.append(bnds[i].variable()); this->_bx[i]=bnds[i].approximate_interval(); } }
     VariablesBox(const RealSpace& spc, const ExactBox& bx) : _spc(spc), _bx(bx) { ARIADNE_ASSERT(spc.dimension()==bx.dimension()); }
-    Set<RealVariable> variables() const { return make_set(_spc.variables()); }
+    Set<RealVariable> variables() const { return Set<RealVariable>(_spc.variables()); }
     RealSpace const& space() const { return this->_spc; }
     ExactBox const& continuous_set() const { return this->_bx; }
     ExactBox const& box() const { return this->_bx; }

@@ -31,6 +31,7 @@
 #include <iosfwd>
 #include <iostream>
 
+#include "utility/writable.h"
 #include "numeric/numeric.h"
 #include "utility/pointer.h"
 #include "expression/operators.h"
@@ -42,14 +43,6 @@ template<class X> class Algebra;
 template<class X> class NormedAlgebra;
 template<class X> class GradedAlgebra;
 template<class X> class SymbolicAlgebra;
-
-class WritableInterface {
-    friend std::ostream& operator<<(std::ostream& os, const WritableInterface& w);
-  public:
-    virtual std::ostream& write(std::ostream&) const = 0;
-};
-inline std::ostream& operator<<(std::ostream& os, const WritableInterface& w) {
-    w.write(os); return os; }
 
 struct Ball {
     explicit Ball(ErrorType r) : _radius(r) { }

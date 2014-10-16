@@ -81,7 +81,7 @@ template<class T> struct Space
     //! \brief A list giving ordered variables.
     List<Identifier> variable_names() const { return this->_variables; }
     //! \brief A list giving ordered variables.
-    List<VariableType> variables() const { return this->_variables; }
+    List<VariableType> variables() const { return List<VariableType>(this->_variables); }
     //! \brief A map giving the index of a given variable.
     Map<Identifier,SizeType> indices_from_names() const {
         Map<Identifier,SizeType> indices;
@@ -132,7 +132,7 @@ template<class T> struct Space
     //! \brief Append the named variable \a v to the variables defining the space.
     Space<T>& operator,(const String& v) { return this->append(v); }
   private:
-    List<String> _variables;
+    List<Identifier> _variables;
 };
 
 template<class T> inline std::ostream& operator<<(std::ostream& os, const Space<T>& spc) { return os << spc.variables(); }

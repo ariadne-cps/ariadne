@@ -77,7 +77,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
 {
     if(constraints.empty()) { return make_pair(!domain.empty(),domain.centre()); }
 
-    ValidatedVectorFunction function(constraints.size());
+    ValidatedVectorFunction function(constraints.size(),constraints[0].function().argument_size());
     ExactBox bounds(constraints.size());
 
     for(uint i=0; i!=constraints.size(); ++i) {

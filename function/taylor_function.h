@@ -137,7 +137,7 @@ ScalarTaylorFunction intersection(const ScalarTaylorFunction& x1, const ScalarTa
 
 
 // Split the variable over two domains, subdividing along the independent variable j.
-pair<ScalarTaylorFunction,ScalarTaylorFunction> split(const ScalarTaylorFunction& x, uint j);
+Pair<ScalarTaylorFunction,ScalarTaylorFunction> split(const ScalarTaylorFunction& x, uint j);
 
 
 // Embed the variable in a space of higher dimension
@@ -888,7 +888,7 @@ VectorTaylorFunction compose(const EffectiveVectorFunction& f, const VectorTaylo
 VectorTaylorFunction substitute(const VectorTaylorFunction& f, uint k, const ScalarTaylorFunction& h);
 
 // Split the domain into halves along the \a j<sup>th</sup> coordinate.
-std::pair<VectorTaylorFunction,VectorTaylorFunction> split(const VectorTaylorFunction& x, uint j);
+Pair<VectorTaylorFunction,VectorTaylorFunction> split(const VectorTaylorFunction& x, uint j);
 
 VectorTaylorFunction join(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
 VectorTaylorFunction join(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);

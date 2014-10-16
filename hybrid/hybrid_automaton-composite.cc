@@ -28,6 +28,7 @@
 #include <boost/weak_ptr.hpp>
 
 #include "utility/macros.h"
+#include "utility/container.h"
 #include "utility/stlio.h"
 #include "expression/formula.h"
 #include "expression/expression.h"
@@ -708,7 +709,7 @@ void HybridAutomaton::check_mode(DiscreteLocation location) const {
             if(!subset(pra_iter->rhs.arguments(),defined_variables)) {
                 ARIADNE_THROW(UnderspecifiedResetError,"HybridAutomaton::check_mode(...)",
                             "Arguments "<<difference(pra_iter->rhs.arguments(),defined_variables)<<
-                            " of reset"<<*pra_iter<<" are not defined in location "<<location<<" with variables "<<defined_variables);
+                            " of reset "<<*pra_iter<<" are not defined in location "<<location<<" with variables "<<defined_variables);
             }
         }
     }

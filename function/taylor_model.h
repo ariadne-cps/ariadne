@@ -360,7 +360,7 @@ Vector<ValidatedNumber> unscale(const Vector<ValidatedNumber>& x, const Vector<E
 //! \relates TaylorModel<ValidatedNumber> \brief The magnitude of the variable
 ErrorType mag(const TaylorModel<ValidatedNumber>& tm);
 //! \relates TaylorModel<ValidatedNumber> \brief Split the variable over two domains, subdividing along the independent variable j.
-std::pair< TaylorModel<ValidatedNumber>, TaylorModel<ValidatedNumber> > split(const TaylorModel<ValidatedNumber>& x, uint j);
+Pair< TaylorModel<ValidatedNumber>, TaylorModel<ValidatedNumber> > split(const TaylorModel<ValidatedNumber>& x, uint j);
 //! \relates TaylorModel<ValidatedNumber>
 //!\brief Split the variable, subdividing along the independent variable j
 //! and taking the lower/middle/upper half depending on whether half is false, indeterminate or true.
@@ -442,7 +442,7 @@ TaylorModel<ValidatedNumber> abs(const TaylorModel<ValidatedNumber>& x);
 // Vector operations which can be evaluated componentwise
 bool refines(const Vector< TaylorModel<ValidatedNumber> >&,const Vector< TaylorModel<ValidatedNumber> >&);
 bool disjoint(const Vector< TaylorModel<ValidatedNumber> >&,const Vector< TaylorModel<ValidatedNumber> >&);
-std::pair< Vector< TaylorModel<ValidatedNumber> >, Vector< TaylorModel<ValidatedNumber> > > split(const Vector< TaylorModel<ValidatedNumber> >& x, uint j);
+Pair< Vector< TaylorModel<ValidatedNumber> >, Vector< TaylorModel<ValidatedNumber> > > split(const Vector< TaylorModel<ValidatedNumber> >& x, uint j);
 Vector< TaylorModel<ValidatedNumber> > split(const Vector< TaylorModel<ValidatedNumber> >& x, uint j, bool half);
 Vector< TaylorModel<ValidatedNumber> > unscale(const Vector< TaylorModel<ValidatedNumber> >& x, const Vector<ExactInterval>& bx);
 Vector< TaylorModel<ValidatedNumber> > scale(const Vector< TaylorModel<ValidatedNumber> >& x, const Vector<ExactInterval>& bx);

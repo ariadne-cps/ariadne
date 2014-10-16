@@ -202,7 +202,7 @@ class SimplexSolver
 
     //! \ingroup LinearProgrammingModule
     //! Compute a permutation \f$p\f$ such that \f$p_{0},\ldots,p_{m-1}\f$ are the basis variables of \f$A\f$, and the inverse matrix \f$A_B^{-1}\f$.
-    pair< Array<size_t>, Matrix<X> >
+    Pair< Array<size_t>, Matrix<X> >
     compute_basis(const Matrix<X>& A) const;
 
     //! \ingroup LinearProgrammingModule

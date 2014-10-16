@@ -47,7 +47,6 @@ template<class T, class X=T> class Valuation;
 
 namespace Ariadne {
 
-typedef std::string String;
 
 // Sequencing operators to make Valuation objects or objects convertible to Valuations.
 template<class X> inline Map<Identifier,X> operator|(const Variable<X>& v, const X& c) { Map<Identifier,X> r; r.insert(v.name(),c); return r; }

@@ -38,6 +38,7 @@
 #include "utility/pointer.h"
 #include "utility/container.h"
 #include "utility/stlio.h"
+#include "utility/string.h"
 
 #include "numeric/numeric.h"
 
@@ -48,9 +49,7 @@ namespace Ariadne {
 
 class Integer;
 class Real;
-
-//! \brief An ASCII string.
-typedef std::string String;
+class String;
 
 class StateSpace;
 

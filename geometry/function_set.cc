@@ -226,7 +226,7 @@ ExactBox approximation(const BoxSet& rbx) {
 
 namespace {
 
-uint argument_size(const List<EffectiveConstraint>& c) {
+uint get_argument_size(const List<EffectiveConstraint>& c) {
     uint as = ( c.size()==0 ? 0 : c[0].function().argument_size() );
     for(uint i=0; i!=c.size(); ++i) {
         ARIADNE_ASSERT_MSG(c[i].function().argument_size()==as,"c="<<c);
@@ -270,7 +270,7 @@ ConstraintSet::ConstraintSet(const EffectiveVectorFunction& f, const BoxSet& b)
 }
 
 ConstraintSet::ConstraintSet(const List<EffectiveConstraint>& c)
-    : _dimension(argument_size(c)), _constraints(c)
+    : _dimension(get_argument_size(c)), _constraints(c)
 {
 }
 

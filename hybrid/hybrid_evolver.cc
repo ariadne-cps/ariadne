@@ -1200,8 +1200,8 @@ _apply_evolution_step(EvolutionData& evolution_data,
     ARIADNE_LOG(8,"reach_step_time="<<reach_step_time<<"\n")
 
     // Compute the reach and evolve sets, without introducing bounds due to the final time.
-    List<HybridEnclosure> reach_sets(starting_set);
-    List<HybridEnclosure> evolve_sets(starting_set);
+    List<HybridEnclosure> reach_sets={starting_set};
+    List<HybridEnclosure> evolve_sets={starting_set};
 
     _apply_reach_step(reach_sets.front(),flow,timing_data);
     _apply_evolve_step(evolve_sets.front(),flow,timing_data);
@@ -1335,7 +1335,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
 
 
         // Compute active set
-        List<HybridEnclosure> jump_sets((starting_set));
+        List<HybridEnclosure> jump_sets={starting_set};
         HybridEnclosure& jump_set=jump_sets.front();
         ARIADNE_LOG(3,"  "<<event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind<<"\n");
         _apply_guard_step(jump_set,dynamic,flow,timing_data,transitions[event],crossings[event],semantics);
@@ -1440,7 +1440,7 @@ HybridEvolverBaseConfiguration::HybridEvolverBaseConfiguration(HybridEvolverBase
 void
 HybridEvolverBaseConfiguration::set_flow_accuracy(const RealType value)
 {
-    _evolver._integrator_ptr=std::shared_ptr<TaylorSeriesIntegrator>(new TaylorSeriesIntegrator(value));
+    _evolver._integrator_ptr=std::shared_ptr<TaylorSeriesIntegrator>(new TaylorSeriesIntegrator(MaximumError(value)));
     _flow_accuracy = value;
 }
 

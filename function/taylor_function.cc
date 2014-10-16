@@ -533,11 +533,11 @@ ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& f, uint k, Exact
 
 
 
-pair<ScalarTaylorFunction,ScalarTaylorFunction>
+Pair<ScalarTaylorFunction,ScalarTaylorFunction>
 split(const ScalarTaylorFunction& tv, uint j)
 {
-    pair<ValidatedTaylorModel,ValidatedTaylorModel> models=split(tv.model(),j);
-    pair<ExactBox,ExactBox> subdomains=split(tv.domain(),j);
+    Pair<ValidatedTaylorModel,ValidatedTaylorModel> models=split(tv.model(),j);
+    Pair<ExactBox,ExactBox> subdomains=split(tv.domain(),j);
     return make_pair(ScalarTaylorFunction(subdomains.first,models.first),
                      ScalarTaylorFunction(subdomains.second,models.second));
 
@@ -1502,11 +1502,11 @@ restrict(const VectorTaylorFunction& f, const ExactBox& d)
     return r;
 }
 
-std::pair<VectorTaylorFunction,VectorTaylorFunction>
+Pair<VectorTaylorFunction,VectorTaylorFunction>
 split(const VectorTaylorFunction& tf, uint j)
 {
-    pair< Vector<ValidatedTaylorModel>,Vector<ValidatedTaylorModel> > models=split(tf.models(),j);
-    pair<ExactBox,ExactBox> subdomains=split(tf.domain(),j);
+    Pair< Vector<ValidatedTaylorModel>,Vector<ValidatedTaylorModel> > models=split(tf.models(),j);
+    Pair<ExactBox,ExactBox> subdomains=split(tf.domain(),j);
     return make_pair(VectorTaylorFunction(subdomains.first,models.first),
                      VectorTaylorFunction(subdomains.second,models.second));
 

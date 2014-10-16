@@ -41,6 +41,7 @@
 #include <map>
 #include "utility/array.h"
 #include "utility/tuple.h"
+#include "utility/container.h"
 
 #include <memory>
 
@@ -185,21 +186,6 @@ read_sequence(std::istream& is, Container& v,
 
 
 
-template<class T> inline
-std::ostream& operator<<(std::ostream& os, const Array<T>& ary) {
-    return Ariadne::write_sequence(os,ary.begin(),ary.end(),'[',']');
-}
-
-
-template<class T> inline
-std::istream&
-operator>>(std::istream& is, Array<T>& a) {
-    std::vector<T> v;
-    read_sequence(is,v);
-    a=Array<T>(v.begin(),v.end());
-    return is;
-}
-
 template<class T1>
 inline
 std::ostream&
@@ -251,6 +237,27 @@ operator<<(std::ostream &os, const std::pair<S,T>& s)
     return os << '(' << s.first << ',' << s.second << ')';
 }
 
+template<class T0> inline
+std::ostream& operator<<(std::ostream &os, const std::tuple<T0>& s) {
+    return os << '(' << get<0>(s) << ')';
+}
+
+template<class T0, class T1> inline
+std::ostream& operator<<(std::ostream &os, const std::tuple<T0,T1>& s) {
+    return os << '(' << get<0>(s) << ',' << get<1>(s) << ')';
+}
+
+template<class T0, class T1, class T2> inline
+std::ostream& operator<<(std::ostream &os, const std::tuple<T0,T1,T2>& s) {
+    return os << '(' << get<0>(s) << ',' << get<1>(s) << ',' << get<2>(s)  << ')';
+}
+
+template<class T0, class T1, class T2, class T3> inline
+std::ostream& operator<<(std::ostream &os, const std::tuple<T0,T1,T2,T3>& s) {
+    return os << '(' << get<0>(s) << ',' << get<1>(s) << ',' << get<2>(s) << ',' << get<3>(s) << ')';
+}
+
+/*
 template<class T>
 inline
 std::ostream&
@@ -258,15 +265,10 @@ operator<< (std::ostream &os, const std::vector<T>& v)
 {
     return Ariadne::write_sequence(os,v.begin(),v.end());
 }
+*/
 
-template<class T>
-inline
-std::ostream&
-operator<< (std::ostream &os, const std::list<T>& l)
-{
-    return Ariadne::write_sequence(os,l.begin(),l.end());
-}
 
+/*
 template<class T>
 inline
 std::ostream&
@@ -306,6 +308,7 @@ operator<<(std::ostream &os, const std::map<K,std::shared_ptr<T>,C>& m)
     return Ariadne::write_map_pointer_sequence(os,m.begin(), m.end(), '{', '}');
 }
 
+*/
 
 template<class T>
 inline

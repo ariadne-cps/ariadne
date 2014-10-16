@@ -32,6 +32,7 @@
 
 #include "config.h"
 #include "utility/macros.h"
+#include "utility/exceptions.h"
 #include "numeric/integer.h"
 #include "numeric/decimal.h"
 #include "numeric/dyadic.h"

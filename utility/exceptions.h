@@ -1,7 +1,7 @@
 /***************************************************************************
  *            exceptions.h
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2008-14  Pieter Collins
  *
  ****************************************************************************/
 
@@ -28,53 +28,59 @@
 #ifndef ARIADNE_EXCEPTIONS_H
 #define ARIADNE_EXCEPTIONS_H
 
+#include "utility/string.h"
+
 #include <exception>
 #include <stdexcept>
 
+namespace Ariadne {
+
+class Exception {
+    String _what;
+  public:
+    Exception(const String& what);
+};
 
 class NotImplemented : public std::logic_error {
   public:
-    NotImplemented(const std::string& str) : std::logic_error(str) { }
+    NotImplemented(const String& str) : std::logic_error(str) { }
 };
 
 class DivideByZeroException : public std::runtime_error {
   public:
-    DivideByZeroException(const std::string& str) : std::runtime_error(str) { }
-};
-
-class NonExactArithmeticException : public std::logic_error {
-  public:
-    NonExactArithmeticException(const std::string& str) : std::logic_error(str) { }
+    DivideByZeroException(const String& str) : std::runtime_error(str) { }
 };
 
 class DomainException : public std::runtime_error {
   public:
-    DomainException(const std::string& str) : std::runtime_error(str) { }
+    DomainException(const String& str) : std::runtime_error(str) { }
 };
 
 class IncompatibleSizes : public std::runtime_error {
   public:
-    IncompatibleSizes(const std::string& str) : std::runtime_error(str) { }
+    IncompatibleSizes(const String& str) : std::runtime_error(str) { }
 };
 
 class InvalidGridPosition : public std::runtime_error {
   public:
-    InvalidGridPosition(const std::string& str) : std::runtime_error(str) { }
+    InvalidGridPosition(const String& str) : std::runtime_error(str) { }
 };
 
 class InvalidCoordinate : public std::runtime_error {
   public:
-    InvalidCoordinate(const std::string& str) : std::runtime_error(str) { }
+    InvalidCoordinate(const String& str) : std::runtime_error(str) { }
 };
 
 class InvalidInput : public std::runtime_error {
   public:
-    InvalidInput(const std::string& str) : std::runtime_error(str) { }
+    InvalidInput(const String& str) : std::runtime_error(str) { }
 };
 
 class OuterChainOverspill : public std::runtime_error {
   public:
-    OuterChainOverspill(const std::string& str) : std::runtime_error(str) { }
+    OuterChainOverspill(const String& str) : std::runtime_error(str) { }
 };
+
+} // namespace Ariadne
 
 #endif

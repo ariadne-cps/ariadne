@@ -34,34 +34,38 @@
 namespace Ariadne {
 
 
-using std::pair;
+template<class T1, class T2> class Pair : public std::pair<T1,T2> {
+  public:
+    using std::pair<T1,T2>::pair;
+};
+
 using std::make_pair;
 
 // A pair of references, suitable as use as an lvalue for a function returning a pair.
 template<class T1, class T2>
-struct lpair
+struct LPair
 {
-    inline lpair(T1& t1, T2& t2) : first(t1), second(t2) { }
-    inline lpair<T1,T2> operator=(const std::pair<T1,T2>& rv) {
+    inline LPair(T1& t1, T2& t2) : first(t1), second(t2) { }
+    inline LPair<T1,T2> operator=(const std::pair<T1,T2>& rv) {
         this->first=rv.first; this->second=rv.second; return *this; }
     T1& first; T2& second;
 };
 
 template<class T1,class T2> inline
-lpair<T1,T2> make_lpair(T1& t1, T2& t2) {
-    return lpair<T1,T2>(t1,t2);
+LPair<T1,T2> make_lpair(T1& t1, T2& t2) {
+    return LPair<T1,T2>(t1,t2);
 }
 
 
 /*! \brief A Tuple of possibly different types. */
-template<class T1, class T2=void, class T3=void, class T4=void> struct Tuple;
+template<class... ARGS> struct Tuple;
 
 /*! \brief A Tuple of references, suitable as use as an lvalue for a function returning a pair. */
 template<class T1, class T2=void, class T3=void, class T4=void> struct LTuple;
 
 
 template<class T1>
-struct Tuple<T1,void,void,void>
+struct Tuple<T1>
 {
     inline Tuple(const T1& t1) : first(t1) { }
     inline Tuple(const std::tuple<T1>& t) : first(std::get<0>(t)) { }
@@ -69,7 +73,7 @@ struct Tuple<T1,void,void,void>
 };
 
 template<class T1, class T2>
-struct Tuple<T1,T2,void,void>
+struct Tuple<T1,T2>
 {
     inline Tuple(const T1& t1, const T2& t2) : first(t1), second(t2) { }
     inline Tuple(const std::tuple<T1,T2>& t) : first(std::get<0>(t)), second(std::get<1>(t)) { }
@@ -77,7 +81,7 @@ struct Tuple<T1,T2,void,void>
 };
 
 template<class T1, class T2, class T3>
-struct Tuple<T1,T2,T3,void>
+struct Tuple<T1,T2,T3>
 {
     inline Tuple(const T1& t1, const T2& t2, const T3& t3) : first(t1), second(t2), third(t3) { }
     inline Tuple(const std::tuple<T1,T2,T3>& t) : first(std::get<0>(t)), second(std::get<1>(t)), third(std::get<2>(t)) { }
@@ -85,7 +89,7 @@ struct Tuple<T1,T2,T3,void>
 };
 
 template<class T1, class T2, class T3, class T4>
-struct Tuple
+struct Tuple<T1,T2,T3,T4>
 {
     inline Tuple(const T1& t1, const T2& t2, const T3& t3, const T4& t4)
         : first(t1), second(t2), third(t3), fourth(t4) { }

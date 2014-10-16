@@ -1,7 +1,7 @@
 /***************************************************************************
- *            logging.h
+ *            string.h
  *
- *  Copyright 2007-14  Alberto Casagrande, Pieter Collins
+ *  Copyright 2013-14  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,44 +21,35 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file logging.h
- *  \brief Support for writing debugging output to a logging stream.
+/*! \file string.h
+ *  \brief Wrapper for string class
  */
 
-#ifndef ARIADNE_LOGGING_H
-#define ARIADNE_LOGGING_H
+#ifndef ARIADNE_STRING_H
+#define ARIADNE_STRING_H
 
-#include <iostream>
-#include <fstream>
-
-// (Placeholder constant required for compilation)
-static const std::string charcode="";
-
-//! Send a message to the global logging stream.
-#define ARIADNE_LOG(level,msg) \
-    if(verbosity >= level) { \
-        std::clog << "[" << charcode << ":" << level << "] "; \
-        for(uint _i=0; _i!=level; ++_i) { std::clog<<' '; } \
-        std::clog << msg << std::flush; \
-    }
+#include <string>
+#include <sstream>
 
 namespace Ariadne {
 
-struct Loggable {
+class String : public std::string {
   public:
-    Loggable() : verbosity(0),charcode("") { }
-    mutable int verbosity;
-  protected:
-    mutable std::string charcode;
+    using std::string::string;
+    String(std::string const& str) : std::string(str) { };
+    String() = default;
+    String(String const&) = default;
 };
 
-// Global log output file
-extern std::ofstream log_file_stream;
+template<class T> String class_name();
+template<> inline String class_name<int>() { return "int"; }
+template<> inline String class_name<double>() { return "double"; }
 
-//! \brief Redirect logging output to file \a filename.
-void redirect_log(const char* filename);
-
+template<class T> inline String to_string(const T& t) {
+    std::stringstream ss; ss << t; return ss.str(); }
+template<class T> inline String to_str(T const& t) {
+    return to_string(t); }
 
 } // namespace Ariadne
 
-#endif // ARIADNE_LOGGING_H
+#endif /* ARIADNE_STRING_H */

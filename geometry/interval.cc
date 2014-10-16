@@ -30,6 +30,7 @@
 #include "utility/container.h"
 
 #include "utility/macros.h"
+#include "utility/exceptions.h"
 #include "numeric/integer.h"
 #include "numeric/float.h"
 #include "numeric/rational.h"

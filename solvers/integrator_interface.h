@@ -35,9 +35,6 @@
 
 namespace Ariadne {
 
-template<class T1,class T2> class Pair;
-template<class T> class List;
-
 struct FlowBoundsException : public std::runtime_error {
     FlowBoundsException(const std::string& what) : std::runtime_error(what) { }
 };

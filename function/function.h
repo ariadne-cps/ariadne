@@ -345,11 +345,11 @@ inline EffectiveScalarFunction VectorFunctionInterface<EffectiveTag>::operator[]
 
 
 inline List< EffectiveScalarFunction > operator,(const EffectiveNumber& c1, const EffectiveScalarFunction& sf2) {
-    return (EffectiveScalarFunction::constant(sf2.argument_size(),c1),sf2); }
+    return List< EffectiveScalarFunction >{EffectiveScalarFunction::constant(sf2.argument_size(),c1),sf2}; }
 inline List< EffectiveScalarFunction > operator,(const EffectiveScalarFunction& sf1, const EffectiveNumber& c2) {
-    return (sf1,EffectiveScalarFunction::constant(sf1.argument_size(),c2)); }
-inline List< EffectiveScalarFunction > operator,(const List< EffectiveScalarFunction >& vf1, const EffectiveNumber& c2) {
-    return (vf1,EffectiveScalarFunction::constant(vf1.back().argument_size(),c2)); }
+    return List< EffectiveScalarFunction >{sf1,EffectiveScalarFunction::constant(sf1.argument_size(),c2)}; }
+inline List< EffectiveScalarFunction > operator,(List< EffectiveScalarFunction > vf1, const EffectiveNumber& c2) {
+    vf1.append(EffectiveScalarFunction::constant(vf1.back().argument_size(),c2)); return std::move(vf1); }
 
 
 inline UpperInterval apply(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {

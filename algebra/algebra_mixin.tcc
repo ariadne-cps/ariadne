@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "utility/exceptions.h"
 #include "algebra/algebra_interface.h"
 #include "algebra/algebra_mixin.h"
 #include "algebra/algebra.h"

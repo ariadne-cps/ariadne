@@ -333,34 +333,13 @@ template<class X> void export_matrix()
 
 }
 
-template<> void export_matrix<ExactFloat>()
-{
-    class_< Matrix<ExactFloat> > matrix_class(python_name<ExactFloat>("Matrix"),init< Matrix<ExactFloat> >());
-    matrix_class.def(init<PivotMatrix>());
-    export_matrix_class<ExactFloat>(matrix_class);
-}
-
-template<> void export_matrix<ValidatedFloat>()
-{
-    class_< Matrix<ValidatedFloat> > matrix_class(python_name<ValidatedFloat>("Matrix"),init< Matrix<ValidatedFloat> >());
-    export_matrix_class<ValidatedFloat>(matrix_class);
-    export_matrix_conversion<ValidatedFloat,ExactFloat>(matrix_class);
-    export_matrix_arithmetic<ValidatedFloat,ValidatedFloat,ValidatedFloat>(matrix_class);
-    def("gs_inverse", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&)) &gs_inverse);
-    def("lu_inverse", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&)) &lu_inverse);
-    def("gs_solve", (Vector<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Vector<ValidatedFloat>&)) &gs_solve);
-    def("gs_solve", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Matrix<ValidatedFloat>&)) &gs_solve);
-    def("lu_solve", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Matrix<ValidatedFloat>&)) &lu_solve);
-
-    implicitly_convertible< Matrix<ExactFloat>, Matrix<ValidatedFloat> >();
-}
-
 template<> void export_matrix<ApproximateFloat>()
 {
     class_< Matrix<ApproximateFloat> > matrix_class(python_name<ApproximateFloat>("Matrix"),no_init);
     export_matrix_class<ApproximateFloat>(matrix_class);
     export_matrix_conversion<ApproximateFloat,ValidatedFloat>(matrix_class);
     export_matrix_arithmetic<ApproximateFloat,ApproximateFloat,ApproximateFloat>(matrix_class);
+    export_matrix_operations<ApproximateFloat>(matrix_class);
 
     def("triangular_decomposition",&triangular_decomposition);
     def("orthogonal_decomposition", &orthogonal_decomposition);
@@ -372,6 +351,37 @@ template<> void export_matrix<ApproximateFloat>()
     implicitly_convertible< Matrix<ValidatedFloat>, Matrix<ApproximateFloat> >();
     to_python< Tuple<FloatMatrix,FloatMatrix,PivotMatrix> >();
 }
+
+template<> void export_matrix<ValidatedFloat>()
+{
+    class_< Matrix<ValidatedFloat> > matrix_class(python_name<ValidatedFloat>("Matrix"),init< Matrix<ValidatedFloat> >());
+    export_matrix_class<ValidatedFloat>(matrix_class);
+    export_matrix_conversion<ValidatedFloat,ExactFloat>(matrix_class);
+    export_matrix_arithmetic<ApproximateFloat,ValidatedFloat,ApproximateFloat>(matrix_class);
+    export_matrix_arithmetic<ValidatedFloat,ValidatedFloat,ValidatedFloat>(matrix_class);
+    export_matrix_operations<ValidatedFloat>(matrix_class);
+    def("gs_inverse", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&)) &gs_inverse);
+    def("lu_inverse", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&)) &lu_inverse);
+    def("gs_solve", (Vector<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Vector<ValidatedFloat>&)) &gs_solve);
+    def("gs_solve", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Matrix<ValidatedFloat>&)) &gs_solve);
+    def("lu_solve", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Matrix<ValidatedFloat>&)) &lu_solve);
+
+
+    implicitly_convertible< Matrix<ExactFloat>, Matrix<ValidatedFloat> >();
+}
+
+template<> void export_matrix<ExactFloat>()
+{
+    class_< Matrix<ExactFloat> > matrix_class(python_name<ExactFloat>("Matrix"),init< Matrix<ExactFloat> >());
+    matrix_class.def(init<PivotMatrix>());
+    export_matrix_class<ExactFloat>(matrix_class);
+    export_matrix_arithmetic<ApproximateFloat,ExactFloat,ApproximateFloat>(matrix_class);
+    export_matrix_arithmetic<ValidatedFloat,ExactFloat,ValidatedFloat>(matrix_class);
+    def("transpose",(Matrix<ExactFloat>(*)(const Matrix<ExactFloat>&)) &transpose);
+    def("inverse",(Matrix<ValidatedFloat>(*)(const Matrix<ExactFloat>&)) &inverse);
+
+}
+
 
 
 template<class X> void export_diagonal_matrix()

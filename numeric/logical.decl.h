@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/float.h
+ *            numeric/logical.decl.h
  *
  *  Copyright 2013-14  Pieter Collins
  *
@@ -21,20 +21,42 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/float.h
- *  \brief 
+/*! \file numeric/logical.decl.h
+ *  \brief
  */
 
 
 
-#ifndef ARIADNE_FLOAT_H
-#define ARIADNE_FLOAT_H
+#ifndef ARIADNE_LOGICAL_DECL_H
+#define ARIADNE_LOGICAL_DECL_H
 
-#include "float.decl.h"
-#include "float64.h"
+#include "numeric/paradigm.h"
 
 namespace Ariadne {
 
-} // namespace Ariadne
+typedef void Void;
+
+enum class LogicalValue : char;
+template<class P=Void> class Logical;
+
+//typedef Logical<Exact> Boolean;
+//typedef Logical<Validated> Tribool;
+//typedef Logical<Upper> Sierpinski;
+//typedef Logical<Approximate> Fuzzy;
+
+class Boolean;
+class Tribool;
+class Sierpinski;
+class NegSierpinski;
+class Fuzzy;
+
+template<class P> using LogicalType = Logical<P>;
+using ExactLogic = Logical<Exact>;
+using EffectiveLogic = Logical<Effective>;
+using ValidatedLogic = Logical<Validated>;
+using UpperLogic = Logical<Upper>;
+using LowerLogic = Logical<Lower>;
+using ApproximateLogic = Logical<Approximate>;
+}
 
 #endif

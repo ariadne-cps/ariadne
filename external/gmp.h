@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/float.h
+ *            external/gmp.h
  *
  *  Copyright 2013-14  Pieter Collins
  *
@@ -21,20 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/float.h
+/*! \file external/gmp.h
  *  \brief 
  */
 
 
 
-#ifndef ARIADNE_FLOAT_H
-#define ARIADNE_FLOAT_H
-
-#include "float.decl.h"
-#include "float64.h"
-
-namespace Ariadne {
-
-} // namespace Ariadne
-
-#endif
+#include <gmp.h>

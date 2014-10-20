@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/float.h
+ *            numeric/float-crtp.h
  *
  *  Copyright 2013-14  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/float.h
+/*! \file numeric/float-crtp.h
  *  \brief 
  */
 
@@ -30,10 +30,19 @@
 #ifndef ARIADNE_FLOAT_H
 #define ARIADNE_FLOAT_H
 
-#include "float.decl.h"
 #include "float64.h"
 
 namespace Ariadne {
+
+typedef Float64 Float;
+typedef ExactFloat64 ExactFloat;
+typedef ValidFloat64 ValidFloat;
+typedef BoundFloat64 BoundFloat;
+typedef ApprxFloat64 ApprxFloat;
+
+typedef ApprxFloat ApproximateFloat;
+typedef BoundFloat BoundFloat;
+typedef ValidFloat ValidatedFloat;
 
 } // namespace Ariadne
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/float.h
+ *            numeric/sign.h
  *
  *  Copyright 2013-14  Pieter Collins
  *
@@ -21,20 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/float.h
+/*! \file numeric/sign.h
  *  \brief 
  */
 
 
 
-#ifndef ARIADNE_FLOAT_H
-#define ARIADNE_FLOAT_H
-
-#include "float.decl.h"
-#include "float64.h"
+#ifndef ARIADNE_SIGN_H
+#define ARIADNE_SIGN_H
 
 namespace Ariadne {
 
-} // namespace Ariadne
+enum class Sign : char { NEGATIVE=-1, ZERO=0, POSITIVE=+1 };
 
-#endif
+enum class Comparison : char { LESS=-1, EQUAL=0, GREATER=+1 };
+
+}
+
+#endif /* ARIADNE_SIGN_H */

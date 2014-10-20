@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/float.h
+ *            numeric/number.decl.h
  *
  *  Copyright 2013-14  Pieter Collins
  *
@@ -21,19 +21,50 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/float.h
- *  \brief 
+/*! \file numeric/number.decl.h
+ *  \brief
  */
 
+#ifndef ARIADNE_NUMBER_DECL_H
+#define ARIADNE_NUMBER_DECL_H
 
+#include <stdexcept>
 
-#ifndef ARIADNE_FLOAT_H
-#define ARIADNE_FLOAT_H
-
-#include "float.decl.h"
-#include "float64.h"
+#include "numeric/paradigm.h"
+#include "is_number.h"
 
 namespace Ariadne {
+
+/************ Number *********************************************************/
+
+class DivideByZeroError : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+
+template<class X> struct IsNumber;
+template<class P=Void> class Number;
+
+class Nat32;
+class Nat64;
+class Int32;
+class Int64;
+
+class Integer;
+class Rational;
+class Real;
+
+template<class P> class Float64;
+
+template<> struct IsNumber<Integer>;
+template<> struct IsNumber<Rational>;
+template<> struct IsNumber<Real>;
+
+using ExactNumber=Number<Exact>;
+using EffectiveNumber=Number<Effective>;
+using ValidatedNumber=Number<Validated>;
+using UpperNumber=Number<Upper>;
+using LowerNumber=Number<Lower>;
+using ApproximateNumber=Number<Approximate>;
 
 } // namespace Ariadne
 

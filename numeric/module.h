@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric/float.h
+ *            numeric/module.h
  *
  *  Copyright 2013-14  Pieter Collins
  *
@@ -21,20 +21,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file numeric/float.h
- *  \brief 
+/*! \file numeric/module.h
+ *  \brief
  */
 
 
 
-#ifndef ARIADNE_FLOAT_H
-#define ARIADNE_FLOAT_H
+#ifndef ARIADNE_NUMERIC_MODULE_H
+#define ARIADNE_NUMERIC_MODULE_H
 
+#include "utility/module.h"
+
+#include "logical.decl.h"
+#include "number.decl.h"
 #include "float.decl.h"
+
+#include "paradigm.h"
+#include "logical.h"
+#include "integer.h"
+#include "rational.h"
+#include "real.h"
 #include "float64.h"
+#include "floatmp.h"
+#include "number.h"
 
-namespace Ariadne {
-
-} // namespace Ariadne
+#include "float.h"
 
 #endif

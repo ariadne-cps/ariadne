@@ -61,7 +61,7 @@ void _set_scaling(ScalarTaylorFunction& x, const ExactInterval& ivl, uint j)
     VOLATILE Float nc=-u; nc-=l;
     VOLATILE Float pg=u; pg-=l;
     VOLATILE Float ng=l; ng-=u;
-    x.error()=(pc+nc+pg+ng)/4;
+    x.error()=ErrorType((pc+nc+pg+ng)/4);
     set_rounding_mode(to_nearest);
     MultiIndex a(x.argument_size());
     x.expansion().raw().append(a,(l+u)/2);
@@ -608,7 +608,7 @@ ScalarTaylorFunction
 midpoint(const ScalarTaylorFunction& f)
 {
     ValidatedTaylorModel tm=f.model();
-    tm.set_error(0.0);
+    tm.set_error(0u);
     return ScalarTaylorFunction(f.domain(),tm);
 }
 
@@ -806,7 +806,8 @@ std::ostream& operator<<(std::ostream& os, const PolynomialRepresentation<Scalar
     truncated_function.sweep(ThresholdSweeper(frepr.threshold));
     ErrorFloat truncatation_error = truncated_function.error();
     truncated_function.clobber();
-    Polynomial<ExactFloat> polynomial_function = midpoint(polynomial(truncated_function));
+    Polynomial<ValidatedFloat> validated_polynomial_function=polynomial(truncated_function);
+    Polynomial<ExactFloat> polynomial_function = midpoint(validated_polynomial_function);
     if(frepr.names.empty()) { os << polynomial_function; }
     else { os << named_argument_repr(polynomial_function,frepr.names); }
     os << "+/-" << truncatation_error << "+/-" << function.error();
@@ -1845,7 +1846,7 @@ antiderivative(const VectorTaylorFunction& f, uint k, ExactNumber c)
 
 
 ErrorFloat norm(const VectorTaylorFunction& f) {
-    ErrorFloat res=0.0;
+    ErrorFloat res=0u;
     for(uint i=0; i!=f.result_size(); ++i) {
         res=max(res,norm(f[i]));
     }

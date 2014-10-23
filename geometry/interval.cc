@@ -442,9 +442,9 @@ ExactInterval::ExactInterval(const Rational& ql, const Rational& qu) : l(ql.get_
     static const double min_dbl=std::numeric_limits<double>::min();
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(downward);
-    while(l.get_d()>static_cast<mpq_class const&>(ql)) { l=sub_rnd(l,min_dbl); }
+    while(Rational(l)>ql) { l=sub_rnd(l,min_dbl); }
     set_rounding_mode(upward);
-    while(u.get_d()<static_cast<mpq_class const&>(qu)) { u=add_rnd(u,min_dbl); }
+    while(Rational(u)<qu) { u=add_rnd(u,min_dbl); }
     set_rounding_mode(rounding_mode);
 }
 

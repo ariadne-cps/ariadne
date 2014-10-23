@@ -30,12 +30,12 @@
 
 #include "utility/macros.h"
 #include "utility/attribute.h"
+#include "numeric/float.decl.h"
 #include "algebra/multi_index.h"
 #include "algebra/expansion.h"
 
 namespace Ariadne {
 
-class Float;
 template<class X> class Expansion;
 
 template<class SWP> class SweeperBase;

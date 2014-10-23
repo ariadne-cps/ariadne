@@ -369,21 +369,21 @@ uint HybridEnclosure::dimension() const {
     return this->space_function().result_size();
 }
 
-tribool HybridEnclosure::empty() const {
+Tribool HybridEnclosure::empty() const {
     return this->_set.empty();
 }
 
-tribool HybridEnclosure::inside(const HybridBox& hbx) const {
+Tribool HybridEnclosure::inside(const HybridBox& hbx) const {
     if(this->_location==hbx.location()) { return this->continuous_set().inside(hbx.continuous_set()); }
     else { return this->continuous_set().empty(); }
 }
 
-tribool HybridEnclosure::separated(const HybridBox& hbx) const {
+Tribool HybridEnclosure::separated(const HybridBox& hbx) const {
     if(this->_location==hbx.location()) { return this->continuous_set().separated(hbx.continuous_set()); }
     else { return true; }
 }
 
-tribool HybridEnclosure::satisfies(EffectiveConstraint c) const
+Tribool HybridEnclosure::satisfies(EffectiveConstraint c) const
 {
     return this->continuous_set().satisfies(c);
 }

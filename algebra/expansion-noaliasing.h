@@ -78,7 +78,7 @@ FwdIter unique_key(FwdIter first, FwdIter last, Op op) {
                 ++next;
             }
         }
-        // Removes zero entries; the code below is preferred to the case "curr->data()!=0" for tribool results
+        // Removes zero entries; the code below is preferred to the case "curr->data()!=0" for Tribool results
         if(curr->data()==0) { }
         else { ++curr; }
     }

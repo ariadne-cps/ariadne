@@ -24,6 +24,7 @@
 /*! \file float.h
  *  \brief Floating-point number class.
  */
+
 #ifndef ARIADNE_FLOAT_H
 #define ARIADNE_FLOAT_H
 
@@ -43,17 +44,14 @@ typedef unsigned int uint;
 namespace Ariadne {
 
 class Float;
-class ExactInterval;
-class ExactFloat;
+typedef Float RawFloat;
+
 class Real;
 class Dyadic;
 class Decimal;
 
 using std::min;
 using std::max;
-
-const double inf = std::numeric_limits<double>::infinity();
-const double nan = (1.0/0.0);
 
 
 //! \ingroup NumericModule
@@ -63,18 +61,17 @@ const double nan = (1.0/0.0);
 //! Unless otherwise mentioned, operations on floating-point numbers are performed approximately, with no guarantees
 //! on the output.
 //!
-//! To implement <em>interval arithmetic</em>, arithmetical operations of \c %Float can be performed with guaranteed rounding by
+//! To implement <em>rounded arithmetic</em>, arithmetical operations of \c %Float can be performed with guaranteed rounding by
 //! specifying \c _up and \c _down suffixes to arithmetical functions \c add, \c sub, \c mul and \c div.
 //! Additionally, operations can be performed in the current <em>rounding mode</em> by using the \c _rnd suffix,
 //! or with rounding reversed using the \c _opp suffix.
-//! Operations can be specified to return an \c %ExactInterval answer by using the \c _ivl suffix.
 //! The \c _approx suffix is provided to specifically indicate that the operation is computed approximately.
 //!
 //! %Ariadne floating-point numbers can be constructed by conversion from built-in C++ types.
 //! Note that the value of a built-in floating-point value may differ from the mathematical value of the literal.
 //! For example, while <c>%Float(3.25)</c> is represented exactly, <c>%Float(3.3)</c> has a value of \f$3.2999999999999998224\ldots\f$.
 //! \note In the future, the construction of a \c %Float from a string literal may be supported.
-//! \sa ExactInterval, Real, ExactFloat
+//! \sa Real, ExactFloat, ValidatedFloat, UpperFloat, LowerFloat, ApproximateFloat
 class Float {
   public:
     double dbl;
@@ -93,6 +90,9 @@ class Float {
     //! \brief An approximation by a built-in double-precision floating-point number.
     double get_d() const { return this->dbl; }
 };
+
+const Float inf = std::numeric_limits<double>::infinity();
+const Float nan = (0.0/0.0);
 
 template<class R, class A> inline R internal_cast(const A& a) { return static_cast<R>(a); }
 template<> inline const double& internal_cast(const Float& x) { return const_cast<const double&>(x.dbl); }

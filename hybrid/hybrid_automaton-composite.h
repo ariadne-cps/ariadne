@@ -345,7 +345,7 @@ class HybridAutomaton
     void new_invariant(DiscreteLocation location,
                        ContinuousPredicate const& invariant,
                        DiscreteEvent event) {
-        //this->_new_action(location,event,invariant,ContinuousPredicate(tribool(false)),INVARIANT);
+        //this->_new_action(location,event,invariant,ContinuousPredicate(Tribool(false)),INVARIANT);
         this->_new_invariant_(location,invariant,event);
     }
 

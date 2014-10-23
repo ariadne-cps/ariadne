@@ -31,7 +31,7 @@
 
 #include "numeric/numeric.h"
 #include "algebra/series.h"
-#include "utility/stlio.h"
+#include "utility/container.h"
 
 namespace Ariadne {
 

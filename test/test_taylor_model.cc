@@ -192,12 +192,12 @@ void TestTaylorModel::test_arithmetic()
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {0.0,0.0,3.0}), 0.75,swp)*ValidatedTaylorModel(E(1,2, {3.0,2.0,-4.0}),0.5,swp), ValidatedTaylorModel(E(1,4, {0.0,0.0,9.0,6.0,-12.0}), 8.625,swp));
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)*ValidatedTaylorModel(E(1,2, {3.0,2.0,-4.0}),0.5,swp), ValidatedTaylorModel(E(1,4, {3.0,-4.0,1.0,14.0,-12.0}), 10.125,swp));
 
-    ValidatedTaylorModel tm_inf(E(2),+inf,swp);
+    ValidatedTaylorModel tm_inf(Expansion<Float>(2),+inf,swp);
     if(isnan(numeric_cast<double>(numeric_cast<Float>((tm_inf * 0.0).error())))) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-NaN");
-    } else if((tm_inf * 0.0).error()==+inf) {
+    } else if((tm_inf * 0).error()==+infty) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-inf");
-    } else if((tm_inf * 0.0).error()==0.0) {
+    } else if((tm_inf * 0).error()==0) {
         ARIADNE_TEST_PRINT("Multiplying 0+/-inf by 0 yields 0+/-0");
     }
 }
@@ -215,7 +215,8 @@ void TestTaylorModel::test_range()
     ValidatedTaylorModel t2 = x0*x0+x0;
     ARIADNE_TEST_BINARY_PREDICATE(refines,t2.range(),ExactInterval(-2,+2));
     ARIADNE_TEST_BINARY_PREDICATE(refines,ExactInterval(-0.25,+2),t2.range());
-    if(!subset(t2.range(),ExactInterval(-0.2578125,2.0))) { ARIADNE_TEST_WARN("ValidatedTaylorModel::range() not exact for quadratic functions."); }
+    if(make_exact_interval(t2.range())!=ExactInterval(-0.2578125,2.0)) {
+        ARIADNE_TEST_WARN("ValidatedTaylorModel::range() not exact for quadratic functions."); }
 }
 
 void TestTaylorModel::test_functions()
@@ -261,7 +262,7 @@ void TestTaylorModel::test_intersection()
 {
     ValidatedTaylorModel x=ValidatedTaylorModel::variable(2,0,swp);
     ValidatedTaylorModel y=ValidatedTaylorModel::variable(2,1,swp);
-    ValidatedTaylorModel e=ValidatedTaylorModel::error(2,1.0,swp);
+    ValidatedTaylorModel e=ValidatedTaylorModel::error(2,1u,swp);
 
     // Test intersection with no roundoff errors
     ARIADNE_TEST_EQUAL(intersection(T(E(1,4, {1.0,-0.75,0.0,3.0,3.25}),0.5,swp),T(E(1,4, {1.0,0.0,0.25,2.0,3.0}),1.0,swp)),

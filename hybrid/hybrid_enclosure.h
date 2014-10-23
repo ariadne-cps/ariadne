@@ -247,16 +247,16 @@ class HybridEnclosure
     //! \brief The dimension of the set.
     uint dimension() const;
     //! \brief Tests whether the set is empty.
-    tribool empty() const;
+    Tribool empty() const;
     //! \brief Tests whether the set satisfies the constraint \a c.
-    tribool satisfies(EffectiveConstraint c) const;
+    Tribool satisfies(EffectiveConstraint c) const;
 
     //! \brief Returns a bounding box for the set. Computed by a simple interval evaluation of \f$f(D)\f$.
     HybridBox bounding_box() const;
     //! \brief Tests whether the set is disjoint from the box \a hbx.
-    tribool separated(const HybridBox& hbx) const;
+    Tribool separated(const HybridBox& hbx) const;
     //! \brief Tests whether the set is a subset of the interior of the box \a hbx.
-    tribool inside(const HybridBox& hbx) const;
+    Tribool inside(const HybridBox& hbx) const;
     //! \brief Restricts to a subdomain of the \em parameter domain.
     void restrict(const ExactBox& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
@@ -297,8 +297,8 @@ class HybridEnclosure
 
 };
 
-inline tribool inside(const HybridEnclosure& he, const HybridBox& hbx) { return he.inside(hbx); }
-inline tribool separated(const HybridEnclosure& he, const HybridBox& hbx) { return he.separated(hbx); }
+inline Tribool inside(const HybridEnclosure& he, const HybridBox& hbx) { return he.inside(hbx); }
+inline Tribool separated(const HybridEnclosure& he, const HybridBox& hbx) { return he.separated(hbx); }
 
 inline std::ostream& operator<<(std::ostream& os, const HybridEnclosure& s) { return s.write(os); }
 inline std::ostream& operator<<(std::ostream& os, const Representation<HybridEnclosure>& s) { return s.pointer->repr(os); }

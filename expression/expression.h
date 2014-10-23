@@ -46,10 +46,8 @@
 
 namespace Ariadne {
 
-//! \brief Internal name for boolean objects.
-typedef bool Boolean;
-//! \brief Internal name for three-valued logical expressions.
-typedef tribool Tribool;
+class Boolean;
+class Tribool;
 
 class String;
 class Integer;
@@ -75,9 +73,6 @@ template<class X> class Vector;
 template<class X> class Formula;
 
 
-//! \brief The sign of a numerical value.
-enum Sign { NEGATIVE=-1, ZERO=0, POSITIVE=+1 };
-
 typedef Expression<Boolean> DiscretePredicate;
 typedef Expression<Tribool> ContinuousPredicate;
 typedef Expression<String> StringExpression;
@@ -86,8 +81,8 @@ typedef Expression<Real> RealExpression;
 
 
 template<class X> struct Logic { };
-template<> struct Logic<String> { typedef Bool Type; };
-template<> struct Logic<Integer> { typedef Bool Type; };
+template<> struct Logic<String> { typedef Boolean Type; };
+template<> struct Logic<Integer> { typedef Boolean Type; };
 template<> struct Logic<Real> { typedef Tribool Type; };
 
 
@@ -274,7 +269,7 @@ template<class T> inline std::ostream& _write_comparison(std::ostream& os, const
     ARIADNE_FAIL_MSG("Comparison must return a logical type."); }
 template<> inline std::ostream& _write_comparison(std::ostream& os, const Expression<Tribool>& f) {
     Real* real_ptr=0; return os << "(" << f.cmp1(real_ptr) << symbol(f.op()) << f.cmp2(real_ptr) << ")"; }
-template<> inline std::ostream& _write_comparison(std::ostream& os, const Expression<Bool>& f) {
+template<> inline std::ostream& _write_comparison(std::ostream& os, const Expression<Boolean>& f) {
     String* string_ptr=0; return os << "(" << f.cmp1(string_ptr) << symbol(f.op()) << f.cmp2(string_ptr) << ")"; }
 //FIXME: Distinguish String and Integer comparisons
 
@@ -395,7 +390,7 @@ template<class T> Set<Identifier> arguments(const Expression<T>& e)
 //! \brief Returns \a true if the expression\a e is syntactically equal to the constant \a c.
 template<class T> Bool is_constant(const Expression<T>& e, const T& c) {
     switch(e.op()) {
-        case CNST: return e.val()==c;
+        case CNST: return decide(e.val()==c);
         default: return false;
     }
 }

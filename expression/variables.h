@@ -46,9 +46,10 @@ class Identifier;
 template<class T> class Set;
 
 typedef unsigned int Nat;
+typedef int Int;
 
-typedef bool Boolean;
-typedef tribool Tribool;
+class Boolean;
+class Tribool;
 
 class String;
 class Integer;

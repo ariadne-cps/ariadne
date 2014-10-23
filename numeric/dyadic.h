@@ -33,7 +33,7 @@
 #include <algorithm> // For std::max, std::min
 #include <limits> // For std::numeric_limits<double>
 
-#include "numeric/rounding.h"
+#include "numeric/logical.h"
 #include "numeric/rational.h"
 #include "numeric/float.h"
 
@@ -45,7 +45,7 @@ class Dyadic;
 //! \related Float, ExactInterval
 //! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
 class Dyadic {
-    Float _x;
+    RawFloat _x;
   public:
     //! \brief Default constructor creates the number 0 (zero).
     Dyadic() : _x(0) { }
@@ -58,13 +58,13 @@ class Dyadic {
     //! by comparing the input with it's single-precision approximation.
     explicit Dyadic(double x) : _x(x) { }
     //! \brief Explicit construction from an approximate floating-point value.
-    explicit Dyadic(const Float& x) : _x(x) { }
+    explicit Dyadic(const RawFloat& x) : _x(x) { }
 #ifdef HAVE_GMPXX_H
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
 #endif
     //! \brief The approximate floating-point number with the same value.
-    Float value() const { return _x; }
+    RawFloat value() const { return _x; }
     //! \brief A double-precision approximateion.
     double get_d() const { return _x.get_d(); }
     friend Dyadic operator"" _bin(long double x);
@@ -98,19 +98,19 @@ inline bool operator> (const Dyadic& x1, double x2) { return x1.value()> x2; }
 #ifdef HAVE_GMPXX_H
 inline Dyadic::operator Rational () const { return Rational(this->get_d()); }
 
-inline bool operator==(const Dyadic& x, const Rational& q) { return x.get_d()==static_cast<const mpq_class&>(q); }
-inline bool operator!=(const Dyadic& x, const Rational& q) { return x.get_d()!=static_cast<const mpq_class&>(q); }
-inline bool operator<=(const Dyadic& x, const Rational& q) { return x.get_d()<=static_cast<const mpq_class&>(q); }
-inline bool operator>=(const Dyadic& x, const Rational& q) { return x.get_d()>=static_cast<const mpq_class&>(q); }
-inline bool operator< (const Dyadic& x, const Rational& q) { return x.get_d()< static_cast<const mpq_class&>(q); }
-inline bool operator> (const Dyadic& x, const Rational& q) { return x.get_d()> static_cast<const mpq_class&>(q); }
+inline bool operator==(const Dyadic& x, const Rational& q) { return Rational(x)==q; }
+inline bool operator!=(const Dyadic& x, const Rational& q) { return Rational(x)!=q; }
+inline bool operator<=(const Dyadic& x, const Rational& q) { return Rational(x)<=q; }
+inline bool operator>=(const Dyadic& x, const Rational& q) { return Rational(x)>=q; }
+inline bool operator< (const Dyadic& x, const Rational& q) { return Rational(x)< q; }
+inline bool operator> (const Dyadic& x, const Rational& q) { return Rational(x)> q; }
 
-inline bool operator==(const Rational& q, const Dyadic& x) { return static_cast<mpq_class>(q)==x.get_d(); }
-inline bool operator!=(const Rational& q, const Dyadic& x) { return static_cast<mpq_class>(q)!=x.get_d(); }
-inline bool operator<=(const Rational& q, const Dyadic& x) { return static_cast<mpq_class>(q)<=x.get_d(); }
-inline bool operator>=(const Rational& q, const Dyadic& x) { return static_cast<mpq_class>(q)>=x.get_d(); }
-inline bool operator< (const Rational& q, const Dyadic& x) { return static_cast<mpq_class>(q)< x.get_d(); }
-inline bool operator> (const Rational& q, const Dyadic& x) { return static_cast<mpq_class>(q)> x.get_d(); }
+inline bool operator==(const Rational& q, const Dyadic& x) { return q==Rational(x); }
+inline bool operator!=(const Rational& q, const Dyadic& x) { return q!=Rational(x); }
+inline bool operator<=(const Rational& q, const Dyadic& x) { return q<=Rational(x); }
+inline bool operator>=(const Rational& q, const Dyadic& x) { return q>=Rational(x); }
+inline bool operator< (const Rational& q, const Dyadic& x) { return q< Rational(x); }
+inline bool operator> (const Rational& q, const Dyadic& x) { return q> Rational(x); }
 #endif // HAVE_GMPXX_H
 
 

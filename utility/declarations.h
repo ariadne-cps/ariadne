@@ -29,9 +29,14 @@
 #define ARIADNE_DECLARATIONS_H
 
 #include <iosfwd>
-#include <boost/logic/tribool.hpp>
+
 #include "utility/metaprogramming.h"
 #include "utility/typedefs.h"
+
+#include "numeric/paradigm.h"
+#include "numeric/logical.h"
+#include "numeric/number.decl.h"
+#include "numeric/float.decl.h"
 
 namespace Ariadne {
 
@@ -43,8 +48,6 @@ typedef void Void;
 
 //! Internal name for builtin boolean type.
 typedef bool Bool;
-//! Internal name for three-valued logical type.
-typedef boost::tribool Tribool;
 //! Internal name for builtin unsigned integers.
 typedef unsigned int Nat;
 //! Internal name for builtin integers.
@@ -52,32 +55,17 @@ typedef int Int;
 
 // Define as a class for consistency with other value types
 class String;
+class Tribool;
 
 
-// Numeric declarations
-class Integer;
-class Rational;
-class Real;
-
-class Float;
-typedef Float RawFloat;
-
-class ExactFloat;
-class ValidatedFloat;
-class UpperFloat;
-class LowerFloat;
-class ApproximateFloat;
-typedef UpperFloat PositiveUpperFloat;
-typedef PositiveUpperFloat ErrorFloat;
-
-typedef ApproximateFloat ApproximateNumber;
-typedef LowerFloat LowerNumber;
-typedef UpperFloat UpperNumber;
-typedef ValidatedFloat ValidatedNumber;
-typedef Real EffectiveNumber;
-typedef ExactFloat ExactNumber;
-
-typedef PositiveUpperFloat PositiveUpperNumber;
+// Paradigm / information declarations
+struct Exact;
+struct Effective;
+struct Validated;
+struct Upper;
+struct Lower;
+struct Approximate;
+template<class PS, class PW> struct IsStronger;
 
 typedef ErrorFloat NormType;
 typedef ErrorFloat ErrorType;
@@ -86,24 +74,6 @@ typedef ExactFloat CoefficientType;
 typedef ApproximateNumber ApproximateNormType;
 typedef ApproximateNumber ApproximateErrorType;
 typedef ApproximateNumber ApproximateCoefficientType;
-
-// Information level declarations
-struct ExactTag { ExactTag(){} };
-struct EffectiveTag { EffectiveTag(){} EffectiveTag(ExactTag){} };
-struct ValidatedTag { ValidatedTag(){} ValidatedTag(ExactTag){} ValidatedTag(EffectiveTag){} };
-struct ApproximateTag { ApproximateTag(){} ApproximateTag(ExactTag){} ApproximateTag(EffectiveTag){} ApproximateTag(ValidatedTag){} };
-template<class PS, class PW> struct IsStronger : False { };
-template<> struct IsStronger<ExactTag,ExactTag> : True { };
-template<> struct IsStronger<ExactTag,EffectiveTag> : True { };
-template<> struct IsStronger<ExactTag,ValidatedTag> : True { };
-template<> struct IsStronger<ExactTag,ApproximateTag> : True { };
-template<> struct IsStronger<EffectiveTag,EffectiveTag> : True { };
-template<> struct IsStronger<EffectiveTag,ValidatedTag> : True { };
-template<> struct IsStronger<EffectiveTag,ApproximateTag> : True { };
-template<> struct IsStronger<ValidatedTag,ValidatedTag> : True { };
-template<> struct IsStronger<ValidatedTag,ApproximateTag> : True { };
-template<> struct IsStronger<ApproximateTag,ApproximateTag> : True { };
-
 template<class I> struct CanonicalNumberTypedef;
 template<> struct CanonicalNumberTypedef<ExactTag> { typedef ExactNumber Type; };
 template<> struct CanonicalNumberTypedef<EffectiveTag> { typedef EffectiveNumber Type; };

@@ -519,7 +519,7 @@ EffectiveVectorFunction operator*(const EffectiveScalarFunction& f, const Vector
     for(uint i=0; i!=e.size(); ++i) { ARIADNE_ASSERT(e[i]==Real(0) || e[i]==Real(1)); }
     EffectiveVectorFunction r(e.size(),f.argument_size());
     for(uint i=0; i!=e.size(); ++i) {
-        if(e[i]==Real(1)) { r.set(i,f); }
+        if(decide(e[i]==Real(1))) { r.set(i,f); }
     }
     return r;
 }

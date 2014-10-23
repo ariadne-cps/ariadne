@@ -507,9 +507,9 @@ Expression<Real> indicator(Expression<Tribool> e, Sign sign) {
     Tribool value;
     switch(e.op()) {
         case CNST:
-            value=( sign==POSITIVE ? e.val() : !e.val() );
-            if(value==true) { return Expression<Real>(+1); }
-            else if(value==false) {  return Expression<Real>(-1); }
+            value=( sign==POSITIVE ? e.val() : Tribool(!e.val()) );
+            if(definitely(value)) { return Expression<Real>(+1); }
+            else if(not possibly(value)) {  return Expression<Real>(-1); }
             else { return Expression<Real>(0); }
         case VAR:
             return Expression<Real>(Variable<Real>(e.var()));
@@ -539,7 +539,7 @@ template<class R> Bool identical(const Expression<R>& e1, const Expression<R>& e
         case VARIABLE:
             return e1.var()==e2.var();
         case NULLARY:
-            return e1.val()==e2.val();
+            return same(e1.val(),e2.val());
         case UNARY:
             return identical(e1.arg(),e2.arg());
         case BINARY:

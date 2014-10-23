@@ -308,9 +308,9 @@ bool BinaryTreeNode::is_equal_nodes( const BinaryTreeNode * pFirstNode, const Bi
 }
 
 bool BinaryTreeNode::operator==(const BinaryTreeNode & otherNode ) const {
-    return ( ( this->_isEnabled == otherNode._isEnabled ) ||
-             ( indeterminate( this->_isEnabled     ) &&
-               indeterminate( otherNode._isEnabled ) ) )            &&
+    return ( ( definitely(this->_isEnabled == otherNode._isEnabled) ) ||
+             ( is_indeterminate( this->_isEnabled     ) &&
+               is_indeterminate( otherNode._isEnabled ) ) )            &&
         is_equal_nodes( this->_pLeftNode , otherNode._pLeftNode )   &&
         is_equal_nodes( this->_pRightNode , otherNode._pRightNode );
 }
@@ -446,7 +446,7 @@ void BinaryTreeNode::recombine_node(BinaryTreeNode * pCurrentNode) {
 
             //Do the recombination for the leaf nodes rooted to pCurrentNode
             if( pLeftNode->is_leaf() && pRightNode->is_leaf() ){
-                if( pLeftNode->_isEnabled == pRightNode->_isEnabled ){
+                if( definitely(pLeftNode->_isEnabled == pRightNode->_isEnabled) ){
                     //Make it the leaf node with the derived _isEnabled value
                     pCurrentNode->make_leaf( pLeftNode->_isEnabled );
                 }
@@ -1010,10 +1010,10 @@ ExactBox GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, co
     return lattice_box_to_space( openCellBoxInLattice, theGrid );
 }
 
-GridOpenCell GridOpenCell::split(tribool isRight) const {
+GridOpenCell GridOpenCell::split(Tribool isRight) const {
     BinaryWord theNewBaseCellPath = _theWord;
     uint theNewPrimaryCellHeight;
-    if( indeterminate( isRight ) ) {
+    if( is_indeterminate( isRight ) ) {
         //Return the middle open cell (isRight == unknown)
         theNewBaseCellPath.push_back( true );
         theNewPrimaryCellHeight = _theHeight;
@@ -1046,7 +1046,7 @@ GridOpenCell GridOpenCell::split(tribool isRight) const {
 GridOpenCell * GridOpenCell::smallest_open_subcell( const GridOpenCell &theOpenCell, const ExactBox & theBox ) {
     GridOpenCell * pSmallestOpenCell = NULL;
     //If the box of the givel open cell covers the given box
-    if( theOpenCell.box().covers( theBox ) ) {
+    if( definitely( theOpenCell.box().covers( theBox ) ) ) {
         //First check the left sub cell
         pSmallestOpenCell = smallest_open_subcell( theOpenCell.split( false ), theBox );
         if( pSmallestOpenCell == NULL ) {
@@ -1225,15 +1225,15 @@ std::vector<GridOpenCell> GridOpenCell::intersection( const GridOpenCell & theLe
     std::vector<GridOpenCell> result;
 
     //01 First check if one open cell is a subset of another open cell or if they overlap
-    if( theLeftOpenCell.box().covers( theRightOpenCell.box() ) ) {
+    if( definitely( theLeftOpenCell.box().covers( theRightOpenCell.box() ) ) ) {
             //If theRightOpenCell is a subset of theLeftOpenCell
         result.push_back( theRightOpenCell );
     } else {
-        if( theRightOpenCell.box().covers( theLeftOpenCell.box() ) ) {
+        if( definitely( theRightOpenCell.box().covers( theLeftOpenCell.box() ) ) ) {
             //If theLeftOpenCell is a subset of theRightOpenCell
             result.push_back( theLeftOpenCell );
         } else {
-            if( theRightOpenCell.box().overlaps( theLeftOpenCell.box() ) ) {
+            if( definitely( theRightOpenCell.box().overlaps( theLeftOpenCell.box() ) ) ) {
                 //02 If the open cells overlap then let us get the cells contained by the two open cells
                 GridTreeSet theLeftCellSet = theLeftOpenCell.closure();
                 GridTreeSet theRightCellSet = theRightOpenCell.closure();
@@ -1374,7 +1374,7 @@ bool GridTreeSubset::superset( const ExactBox& theBox ) const {
     } else {
         //Otherwise, is theBox is possibly a subset then we try to see furhter
         BinaryWord pathCopy( cell().word() );
-        return GridTreeSubset::superset( binary_tree(), grid(), cell().height(), pathCopy, theBox ) ;
+        return definitely( GridTreeSubset::superset( binary_tree(), grid(), cell().height(), pathCopy, theBox ) ) ;
     }
 }
 
@@ -1417,7 +1417,7 @@ bool GridTreeSubset::intersects( const ExactBox& theBox ) const {
     return definitely( GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, theBox ) );
 }
 
-tribool GridTreeSubset::covers( const ExactBox& theBox ) const {
+Tribool GridTreeSubset::covers( const ExactBox& theBox ) const {
     //Simply check if theBox is covered by the set and then make sure that
     //all tree cells that are not disjoint from theBox are enabled
 
@@ -1435,7 +1435,7 @@ tribool GridTreeSubset::covers( const ExactBox& theBox ) const {
     }
 }
 
-tribool GridTreeSubset::inside( const ExactBox& theBox ) const {
+Tribool GridTreeSubset::inside( const ExactBox& theBox ) const {
     //Check that the box corresponding to the root node of the set
     //is not disjoint from theBox. If it is then the set is not a
     //subset of theBox otherwise we need to traverse the tree and check
@@ -1448,7 +1448,7 @@ tribool GridTreeSubset::inside( const ExactBox& theBox ) const {
     return GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, narrow(theBox) ) || indeterminate;
 }
 
-tribool GridTreeSubset::separated( const ExactBox& theBox ) const {
+Tribool GridTreeSubset::separated( const ExactBox& theBox ) const {
     //Simply check if the box does not intersect with the set
 
     ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
@@ -1458,7 +1458,7 @@ tribool GridTreeSubset::separated( const ExactBox& theBox ) const {
     return GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, widen(theBox) ) || indeterminate;
 }
 
-tribool GridTreeSubset::overlaps( const ExactBox& theBox ) const {
+Tribool GridTreeSubset::overlaps( const ExactBox& theBox ) const {
     //Check if the box of the root cell overlaps with theBox,
     //if not then theBox does not intersect with the cell,
     //otherwise we need to find at least one enabled node
@@ -1471,13 +1471,13 @@ tribool GridTreeSubset::overlaps( const ExactBox& theBox ) const {
     return GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, narrow(theBox) ) || indeterminate;
 }
 
-tribool GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+Tribool GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                                   const uint theHeight, BinaryWord &theWord, const ExactBox& theBox ) {
-    tribool result;
+    Tribool result;
 
     //Check if the current node's cell intersects with theBox
     ExactBox theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
-    tribool doIntersect = theCellsBox.overlaps( theBox );
+    Tribool doIntersect = theCellsBox.overlaps( theBox );
 
     if( ! definitely(doIntersect) ) {
         //If theBox does not intersect with the cell then for the covering relation
@@ -1502,10 +1502,10 @@ tribool GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Grid
             //The node is not a leaf so we need to go down and see if the cell
             //falls into sub cells for which we can sort things out
             theWord.push_back(false);
-            const tribool result_left = superset( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
+            const Tribool result_left = superset( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
             theWord.pop_back();
 
-            if( ! result_left) {
+            if( definitely(not result_left) ) {
                 //If there is definitely no covering property then this is all
                 //we need to know so there is not need to check the other branch.
                 result = false;
@@ -1513,19 +1513,19 @@ tribool GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Grid
                 //If the covering property holds or is possible, then we still
                 //need to check the second branch because it can change the outcome.
                 theWord.push_back(true);
-                const tribool result_right = superset( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
+                const Tribool result_right = superset( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
                 theWord.pop_back();
 
-                if( !result_right ) {
+                if( definitely(not result_right) ) {
                     //IF: The right sub-node reports false, then the result is false
                     //NOTE: We already sorted out the case of ( (!result_left) == true) before
                     result = false;
                 } else {
-                    if( result_left && result_right ) {
+                    if( definitely(result_left && result_right) ) {
                         //ELSE: If both sub-nodes report true then it is true
                         result = true;
                     } else {
-                        if( indeterminate(result_left) || indeterminate(result_right) ) {
+                        if( is_indeterminate(result_left) || is_indeterminate(result_right) ) {
                             //ELSE: If one of the sub-nodes reports indeterminate then indeterminate,
                             result = indeterminate;
                         } else {
@@ -1541,26 +1541,26 @@ tribool GridTreeSubset::superset( const BinaryTreeNode* pCurrentNode, const Grid
     return result;
 }
 
-tribool GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+Tribool GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                                 const uint theHeight, BinaryWord &theWord, const ExactBox& theBox ) {
-    tribool result;
+    Tribool result;
 
     //Check if the current node overlaps with theBox
     ExactBox theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
-    tribool isASubset = theCellsBox.subset( theBox );
+    Tribool isASubset = theCellsBox.subset( theBox );
 
-    if( isASubset ){
+    if( definitely(isASubset) ){
         //It does not matter if pCurrentNode has enableds leaves or not we already know that the cell
         //corresponding to this node is geometrically a subset of theBox.
         result = true;
     } else {
         //If the cell corresponding to pCurrentNode is not a subset, then
-        if( pCurrentNode->is_leaf() && ! isASubset ) {
+        if( pCurrentNode->is_leaf() && definitely(not isASubset) ) {
             //If pCurrentNode is a leaf node and geometrically the cell (corresponding to the node theCellsBox) is not a
             //subset of theBox, then: if it is enabled then pCurrentNode is not a subset of theBox but otherwise it is.
             result = ! pCurrentNode->is_enabled();
         } else {
-            if( pCurrentNode->is_leaf() && indeterminate( isASubset ) ) {
+            if( pCurrentNode->is_leaf() && is_indeterminate( isASubset ) ) {
                 //If we are in a leaf node but we do not know for sure if the given cell
                 //is a subset of theBox then we can only check if it is enabled or not
                 if( pCurrentNode->is_enabled() ){
@@ -1574,28 +1574,28 @@ tribool GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& 
                 //The node is not a leaf, and we either know that the cell of pCurrentNode is not a geometrical subset
                 //of theBox or we are not sure that it is, This means that we can do recursion to sort things out.
                 theWord.push_back(false);
-                const tribool result_left = subset( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
+                const Tribool result_left = subset( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
                 theWord.pop_back();
 
-                if( !result_left ) {
+                if( definitely(not result_left) ) {
                     //If the left branch is not a subset, then there is no need to check the right one
                     result = false;
                 } else {
                     //if we still do not know the answer, then we check the right branch
                     theWord.push_back(true);
-                    const tribool result_right = subset( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
+                    const Tribool result_right = subset( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
                     theWord.pop_back();
 
-                    if( !result_right ) {
+                    if( definitely(not result_right) ) {
                         //IF: The right sub-node reports false, then the result is false
                         //NOTE: We already sorted out the case of ( (!result_left) == true) before
                         result = false;
                     } else {
-                        if( result_left && result_right ) {
+                        if( definitely(result_left && result_right) ) {
                             //ELSE: If both sub-nodes report true then it is true
                             result = true;
                         } else {
-                            if( indeterminate(result_left) || indeterminate(result_right) ) {
+                            if( is_indeterminate(result_left) || is_indeterminate(result_right) ) {
                                 //ELSE: If one of the sub-nodes reports indeterminate then indeterminate,
                                 result = indeterminate;
                             } else {
@@ -1612,15 +1612,15 @@ tribool GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& 
     return result;
 }
 
-tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+Tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                                   const uint theHeight, BinaryWord &theWord, const ExactBox& theBox ) {
-    tribool intersect;
+    Tribool intersect;
 
     //Check if the current node overlaps with theBox
     ExactBox theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
-    tribool doPossiblyIntersect = !theCellsBox.disjoint( theBox );
+    Tribool doPossiblyIntersect = !theCellsBox.disjoint( theBox );
 
-    if( doPossiblyIntersect || indeterminate( doPossiblyIntersect ) ) {
+    if( possibly(doPossiblyIntersect) ) {
         //If there is a possible intersection then we do the checking
         if( pCurrentNode->is_leaf() ) {
             //If this is a leaf node then
@@ -1634,7 +1634,7 @@ tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid
         } else {
             //The node is not a leaf and the intersection is possible so check the left sub-node
             theWord.push_back(false);
-            const tribool intersect_left = intersects( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
+            const Tribool intersect_left = intersects( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
             theWord.pop_back();
 
             //
@@ -1644,22 +1644,22 @@ tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid
             //          }
             // I DO NOT DO THIS ON PERPOSE, KEEP THE CODE EASILY UNDERSTANDABLE!
             //
-            if( intersect_left ) {
+            if( definitely(intersect_left) ) {
                 //If we definitely have intersection for the left branch then answer is true
                 intersect = true;
             } else {
                 //If we still not sure/ or do not know then try to search further, i.e. check the right node
                 theWord.push_back(true);
-                const tribool intersect_right = intersects( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
+                const Tribool intersect_right = intersects( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
                 theWord.pop_back();
-                if( intersect_right ) {
+                if( definitely(intersect_right) ) {
                     //If we definitely have intersection for the right branch then answer is true
                     intersect = true;
                 } else {
                     //Now either we have indeterminate answers or we do not know, if one
                     //if the answers for one of the branches was indeterminate then we
                     //report indeterminate, otherwise it is definitely false.
-                    if( indeterminate( intersect_left ) || indeterminate( intersect_right )  ) {
+                    if( is_indeterminate( intersect_left ) || is_indeterminate( intersect_right )  ) {
                         intersect = indeterminate;
                     } else {
                         intersect = false;
@@ -1679,15 +1679,15 @@ tribool GridTreeSubset::disjoint( const BinaryTreeNode* pCurrentNode, const Grid
     return !intersect;
 }
 
-tribool GridTreeSubset::intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+Tribool GridTreeSubset::intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                                     const uint theHeight, BinaryWord &theWord, const ExactBox& theBox ) {
-    tribool result;
+    Tribool result;
 
     //Check if the current node overlaps with theBox
     ExactBox theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
-    tribool doPossiblyIntersect = theCellsBox.overlaps( theBox );
+    Tribool doPossiblyIntersect = theCellsBox.overlaps( theBox );
 
-    if( doPossiblyIntersect || indeterminate( doPossiblyIntersect ) ) {
+    if( possibly(doPossiblyIntersect) ) {
         //If there is a possible intersection then we do the checking
         if( pCurrentNode->is_leaf() ) {
             //If this is a leaf node then
@@ -1701,7 +1701,7 @@ tribool GridTreeSubset::intersects( const BinaryTreeNode* pCurrentNode, const Gr
         } else {
             //The node is not a leaf and the intersection is possible so check the left sub-node
             theWord.push_back(false);
-            const tribool result_left = intersects( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
+            const Tribool result_left = intersects( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
             theWord.pop_back();
 
             //
@@ -1711,22 +1711,22 @@ tribool GridTreeSubset::intersects( const BinaryTreeNode* pCurrentNode, const Gr
             //          }
             // I DO NOT DO THIS ON PERPOSE, KEEP THE CODE EASILY UNDERSTANDABLE!
             //
-            if( result_left ) {
+            if( definitely(result_left) ) {
                 //If we definitely have intersection for the left branch then answer is true
                 result = true;
             } else {
                 //If we still not sure/ or do not know then try to search further, i.e. check the right node
                 theWord.push_back(true);
-                const tribool result_right = intersects( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
+                const Tribool result_right = intersects( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
                 theWord.pop_back();
-                if( result_right ) {
+                if( definitely(result_right) ) {
                     //If we definitely have intersection for the right branch then answer is true
                     result = true;
                 } else {
                     //Now either we have indeterminate answers or we do not know, if one
                     //if the answers for one of the branches was indeterminate then we
                     //report indeterminate, otherwise it is definitely false.
-                    if( indeterminate( result_left ) || indeterminate( result_right )  ) {
+                    if( is_indeterminate( result_left ) || is_indeterminate( result_right )  ) {
                         result = indeterminate;
                     } else {
                         result = false;
@@ -1888,10 +1888,10 @@ void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeN
 
     const OpenSetInterface* pOpenSet=dynamic_cast<const OpenSetInterface*>(static_cast<const SetInterfaceBase*>(&theSet));
 
-    if( bool( theSet.separated( theCurrentCell.box() ) ) ) {
+    if( definitely( theSet.separated( theCurrentCell.box() ) ) ) {
         //DO NOTHING: We are in the node whoes representation in the original space is
         //disjoint from pSet and thus there will be nothing added to this cell.
-    } else if( pOpenSet && bool( pOpenSet->covers( theCurrentCell.box() ) ) ) {
+    } else if( pOpenSet && definitely( pOpenSet->covers( theCurrentCell.box() ) ) ) {
         pBinaryTreeNode->make_leaf(true);
     } else {
         //This node's cell is not disjoint from theSet, thus it is possible to adjoin elements
@@ -1941,7 +1941,7 @@ void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeN
     //Compute the cell correspomding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
 
-    if( bool( theSet.overlaps( theCurrentCell.box() ) ) ) {
+    if( definitely( theSet.overlaps( theCurrentCell.box() ) ) ) {
         if( pPath->size() >= max_mince_depth ) {
             //We should not mince any further.
             //If the cell is not a leaf, then some subset is enabled,
@@ -1974,10 +1974,10 @@ void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeN
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
 
-    if( bool( theSet.covers( theCurrentCell.box() ) ) ) {
+    if( definitely( theSet.covers( theCurrentCell.box() ) ) ) {
         pBinaryTreeNode->make_leaf(true);
         pBinaryTreeNode->mince( max_mince_depth - pPath->size() );
-    } else if ( bool( theSet.overlaps( theCurrentCell.box() ) ) ) {
+    } else if ( definitely( theSet.overlaps( theCurrentCell.box() ) ) ) {
         if( pPath->size() >= max_mince_depth ) {
             //We should not mince any further.
             //If the cell is not a leaf, then some subset is enabled,

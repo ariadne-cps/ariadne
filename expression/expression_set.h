@@ -94,11 +94,11 @@ class RealVariableInterval {
     Real _upper;
   public:
     RealVariableInterval(const Real& l, const Variable<Real>& v, const Real& u)
-        : _lower(l), _variable(v), _upper(u) { ARIADNE_ASSERT_MSG(l<=u,"ExactInterval("<<l<<","<<u<<") not provably nonempty"); }
+        : _lower(l), _variable(v), _upper(u) { ARIADNE_ASSERT_MSG(definitely(l<=u),"RealInterval("<<l<<","<<u<<") not provably nonempty"); }
     RealVariableInterval(const RealVariableLowerInterval& lv)
-        : _lower(lv._lower), _variable(lv._variable), _upper(+inf) { }
+        : _lower(lv._lower), _variable(lv._variable), _upper(+infty) { }
     RealVariableInterval(const RealVariableUpperInterval& vu)
-        : _lower(-inf), _variable(vu._variable), _upper(vu._upper) { }
+        : _lower(-infty), _variable(vu._variable), _upper(vu._upper) { }
     Variable<Real> const& variable() const { return this->_variable; }
     const ExactInterval approximate_interval() const;
     const IntervalSet interval() const;

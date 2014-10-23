@@ -64,6 +64,22 @@
 
 namespace Ariadne {
 
+/************  Publicly-accessible rounding-mode changing *******************/
+
+typedef unsigned short rounding_mode_t;
+
+//! \ingroup NumericModule \brief Set the active rounding mode.
+void set_rounding_mode(RoundingModeType rnd) { _set_rounding_mode(rnd); }
+//! \ingroup NumericModule \brief Get the active rounding mode.
+RoundingModeType get_rounding_mode() { return _get_rounding_mode(); }
+
+void set_rounding_to_nearest() { _set_rounding_to_nearest(); }
+void set_rounding_downward() { _set_rounding_downward(); }
+void set_rounding_upward() { _set_rounding_upward(); }
+void set_rounding_toward_zero() { _set_rounding_toward_zero(); }
+
+void set_default_rounding() { _set_rounding_upward(); }
+
 
 static const double _quarter_pi_up=0.78539816339744839;
 static const double _half_pi_up=1.5707963267948968;

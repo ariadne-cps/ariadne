@@ -406,9 +406,13 @@ void TestVectorTaylorFunction::test_compose()
             + (a-x*x+b*y)*e(2,1);
     //    compose(henon_polynomial,henon_polynomial);
     ExactBox domain1={{0.25,1.25},{0.5,1.0}};
-    VectorTaylorFunction function1(domain1,henon_polynomial,swp);
     ExactBox domain2={{-1.5,2.5},{0.25,1.25}};
-    VectorTaylorFunction function2(domain2,henon_polynomial,swp);
+    ARIADNE_TEST_PRINT((a-x*x+b*y));
+    ARIADNE_TEST_PRINT(e(2,0));
+    ARIADNE_TEST_PRINT((a-x*x+b*y)*e(2,0));
+    ARIADNE_TEST_PRINT(henon_polynomial);
+    ARIADNE_TEST_CONSTRUCT(VectorTaylorFunction,function1,(domain1,henon_polynomial,swp));
+    ARIADNE_TEST_CONSTRUCT(VectorTaylorFunction,function2,(domain2,henon_polynomial,swp));
 
     VectorTaylorFunction composition1(domain1,henon_square_polynomial,swp);
     ARIADNE_TEST_EQUAL(compose(function2,function1),composition1);

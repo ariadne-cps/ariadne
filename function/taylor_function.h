@@ -475,13 +475,13 @@ template<> struct Arithmetic<ScalarTaylorFunction,ValidatedNumber> { typedef Sca
 template<> struct Arithmetic<ScalarTaylorFunction,EffectiveNumber> { typedef ScalarTaylorFunction ResultType; };
 template<> struct Arithmetic<ScalarTaylorFunction,ScalarTaylorFunction> { typedef ScalarTaylorFunction ResultType; };
 
-inline tribool operator>(const ScalarTaylorFunction& x, const RawFloat& c) {
+inline Tribool operator>(const ScalarTaylorFunction& x, const RawFloat& c) {
     UpperInterval r=x.range(); if(r.lower_raw()>c) { return true; } else if(r.upper_raw()<=c) { return false; } else { return indeterminate; } }
-inline tribool operator<(const ScalarTaylorFunction& x, const RawFloat& c) {
+inline Tribool operator<(const ScalarTaylorFunction& x, const RawFloat& c) {
     UpperInterval r=x.range(); if(r.lower_raw()<c) { return true; } else if(r.upper_raw()>=c) { return false; } else { return indeterminate; } }
 
-inline tribool operator>(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)>0; }
-inline tribool operator<(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)<0; }
+inline Tribool operator>(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)>0; }
+inline Tribool operator<(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y) { return (x-y)<0; }
 
 inline ScalarTaylorFunction operator+(const EffectiveScalarFunction& f1, const ScalarTaylorFunction& tf2) {
     return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())+tf2; }

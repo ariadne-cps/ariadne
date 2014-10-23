@@ -167,7 +167,7 @@ ValidatedTaylorModel::TaylorModel(const Expansion<CoefficientType>& f, const Err
     this->sweep();
 }
 
-ValidatedTaylorModel::TaylorModel(const Expansion<Float>& f, const double& e, Sweeper swp)
+ValidatedTaylorModel::TaylorModel(const Expansion<Float>& f, const Float& e, Sweeper swp)
     : TaylorModel(reinterpret_cast<Expansion<CoefficientType>const&>(f),reinterpret_cast<ErrorType const&>(e),swp)
 {
 }
@@ -200,7 +200,7 @@ void
 ValidatedTaylorModel::clear()
 {
     this->_expansion.clear();
-    this->_error=0.0;
+    this->_error=0u;
 }
 
 uint
@@ -459,7 +459,7 @@ void _scal(ValidatedTaylorModel& r, const ValidatedNumber& c)
         }
         te+=(u+ml);
     }
-    re*=mag(c);
+    re*=mag(c).raw();
     re+=te/2;
 
     set_rounding_to_nearest();
@@ -498,7 +498,7 @@ void _scal2(ValidatedTaylorModel& r, const ValidatedNumber& c)
         rv*=cm;
     }
     set_rounding_upward();
-    re*=mag(c);
+    re*=mag(c).raw();
     re+=te/2;
     set_rounding_to_nearest();
 
@@ -561,7 +561,7 @@ void _acc(ValidatedTaylorModel& r, const ValidatedNumber& c)
 
     if(c.lower().raw()==-inf || c.upper().raw()==+inf) {
         r.clear();
-        r.set_error(+inf);
+        r.set_error(+infty);
         return;
     }
 
@@ -1324,7 +1324,7 @@ ValidatedTaylorModel abs(const ValidatedTaylorModel& x) {
         static const double p[n]={0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667};
         static const double err=0.035;
         ValidatedTaylorModel r(x.argument_size(),x.sweeper());
-        Float xmag=mag(xr);
+        Float xmag=mag(xr).raw();
         ValidatedTaylorModel s=x/xmag;
         s=sqr(s);
         r=static_cast<ExactNumber>(p[n-1]);
@@ -1512,7 +1512,7 @@ _compose1(const ValidatedSeriesFunctionPointer& fn, const ValidatedTaylorModel& 
     Series<ValidatedFloat> centre_series=fn(d,c);
     Series<ValidatedFloat> range_series=fn(d,static_cast<ValidatedFloat>(r));
 
-    Float truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
+    Float truncation_error_estimate=(mag(range_series[d])*pow(mag(r-c),d)).raw();
     if(truncation_error_estimate>TRUNCATION_ERROR) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error_estimate
                      <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
@@ -1658,7 +1658,7 @@ ValidatedTaylorModel sqrt(const ValidatedTaylorModel& x) {
         z.sweep();
         //std::cerr<<"z="<<z<<std::endl;
     }
-    Float trunc_err=pow(eps,d)/(1-eps)*mag(sqrt_series[d]);
+    Float trunc_err=(pow(eps,d)/(1-eps))*mag(sqrt_series[d]).raw();
     //std::cerr<<"te="<<trunc_err<<" te*[-1,+1]="<<trunc_err*ValidatedFloat(-1,1)<<std::endl;
     z.error().raw()+=trunc_err;
     //std::cerr<<"z="<<z<<std::endl;
@@ -1745,7 +1745,7 @@ ValidatedTaylorModel exp(const ValidatedTaylorModel& x) {
     ValidatedTaylorModel y=x;
     Float xval=x.value().raw();
     y-=xval;
-    Float xrad=mag(y.range());
+    Float xrad=mag(y.range()).raw();
     uint sfp=0; // A number such that 2^sfp>rad(x.range())
     while(Float(1<<sfp)<xrad) { ++sfp; }
     Float sf=1.0/(1<<sfp);
@@ -1798,7 +1798,7 @@ ValidatedTaylorModel sin(const ValidatedTaylorModel& x) {
         _mul(s,y,y);
 
         int d=(MAXIMUM_DEGREE+3)/2;
-        Float srad=mag(s.range());
+        Float srad=mag(s.range()).raw();
         Float truncation_error=pow_up(srad,d+1)*rec_fac_up((d+1)*2);
 
         // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
@@ -1837,7 +1837,7 @@ ValidatedTaylorModel cos(const ValidatedTaylorModel& x) {
         _mul(s,y,y);
 
         int d=(MAXIMUM_DEGREE+3)/2;
-        Float srad=mag(s.range());
+        Float srad=mag(s.range()).raw();
         Float truncation_error=pow_up(srad,d+1)*rec_fac_up((d+1)*2);
 
         // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
@@ -2059,7 +2059,7 @@ ValidatedTaylorModel& ValidatedTaylorModel::restrict(const Vector<ExactInterval>
                 ci*=sf[j][iter->key()[j]];
             }
             iter->data().raw()=ci.centre().raw();
-            x._error.raw()=add_up(x._error.raw(),mag(ci-iter->data().raw()));
+            x._error.raw()=add_up(x._error.raw(),mag(ci-iter->data()).raw());
         }
     }
 
@@ -2387,7 +2387,7 @@ split(const ValidatedTaylorModel& tv, uint j)
 
 
 ValidatedTaylorModel
-_split1(const ValidatedTaylorModel& tm, uint k, tribool b)
+_split1(const ValidatedTaylorModel& tm, uint k, Tribool b)
 {
     const uint deg=tm.degree();
     const uint as=tm.argument_size();
@@ -2403,7 +2403,7 @@ _split1(const ValidatedTaylorModel& tm, uint k, tribool b)
         c/=(1<<ak);
     }
 
-    int tr=( indeterminate(b) ? 0 : definitely(b) ? +1 : -1 );
+    int tr=( definitely(b) ? +1 : possibly(b) ? 0 : -1 );
 
     if(tr==0) { return r; }
 
@@ -2439,7 +2439,7 @@ _split1(const ValidatedTaylorModel& tm, uint k, tribool b)
 
 
 ValidatedTaylorModel
-split(const ValidatedTaylorModel& tm, uint j, tribool b)
+split(const ValidatedTaylorModel& tm, uint j, Tribool b)
 {
     return _split1(tm,j,b);
 }
@@ -2557,12 +2557,12 @@ disjoint(const ValidatedTaylorModel& tv1, const ValidatedTaylorModel& tv2)
 
 ValidatedTaylorModel embed(const ValidatedTaylorModel& x, uint as)
 {
-    return ValidatedTaylorModel(embed(0u,x.expansion(),as),x.error().raw(),x.sweeper());
+    return ValidatedTaylorModel(embed(0u,x.expansion(),as),x.error(),x.sweeper());
 }
 
 ValidatedTaylorModel embed(uint as, const ValidatedTaylorModel& x)
 {
-    return ValidatedTaylorModel(embed(as,x.expansion(),0u),x.error().raw(),x.sweeper());
+    return ValidatedTaylorModel(embed(as,x.expansion(),0u),x.error(),x.sweeper());
 }
 
 
@@ -2886,10 +2886,10 @@ Vector<UpperInterval> ranges(const Vector<ValidatedTaylorModel>& f) {
 }
 
 inline Vector<ValidatedTaylorModel>& clobber(Vector<ValidatedTaylorModel>& h) {
-    for(uint i=0; i!=h.size(); ++i) { h[i].set_error(0.0); } return h; }
+    for(uint i=0; i!=h.size(); ++i) { h[i].set_error(0u); } return h; }
 
 inline Vector<ErrorFloat> errors(const Vector<ValidatedTaylorModel>& h) {
-    Vector<ErrorFloat> e(h.size()); for(uint i=0; i!=h.size(); ++i) { e[i]=h[i].error().raw(); } return e; }
+    Vector<ErrorFloat> e(h.size()); for(uint i=0; i!=h.size(); ++i) { e[i]=h[i].error(); } return e; }
 
 inline Vector<ErrorFloat> norms(const Vector<ValidatedTaylorModel>& h) {
     Vector<ErrorFloat> r(h.size()); for(uint i=0; i!=h.size(); ++i) { r[i]=norm(h[i]); } return r; }

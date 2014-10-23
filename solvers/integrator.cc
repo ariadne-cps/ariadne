@@ -43,6 +43,8 @@
 
 namespace Ariadne {
 
+static const ExactFloat zero=0;
+
 inline UpperBox operator+(Vector<ExactInterval> bx, Vector<UpperInterval> const& ex) {
     return Vector<UpperInterval>(bx) + ex;
 }
@@ -182,9 +184,9 @@ IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const ExactBox& dx0, 
     ARIADNE_LOG(2,"dom(x0)="<<dx0<<" tmax="<<tmax<<"\n");
     const uint n=dx0.size(); // Dimension of the state space
     ValidatedVectorFunctionModel flow_function=this->function_factory().create_identity(dx0);
-    Rational t=0.0;
+    Rational t=0;
     ValidatedVectorFunctionModel step_function;
-    while(t<tmax) {
+    while(possibly(t<tmax)) {
         ExactBox dx=flow_function.codomain();
         RawFloat h_max=static_cast<RawFloat>(ValidatedFloat(tmax-Real(t)));
         ExactFloat h;
@@ -483,7 +485,7 @@ VectorTaylorFunction flow_function(const Vector<ValidatedDifferential>& dphi, co
         ValidatedTaylorModel& model=tphi.model(i);
         Expansion<ExactFloat>& expansion=model.expansion();
         ErrorFloat& error=model.error();
-        error=0.0;
+        error=0u;
         expansion.reserve(dphi[i].expansion().number_of_nonzeros());
 
         Differential<ValidatedFloat>::const_iterator iter=dphi[i].begin();
@@ -512,8 +514,8 @@ differential_flow_step(const ValidatedVectorFunction& f, const ExactBox& dx, con
     Vector<ValidatedDifferential> dphib(n,n+1,so+to);
     ExactFloat h(flth);
     for(uint i=0; i!=n; ++i) {
-        idc[i]=ValidatedDifferential::variable(n+1,so+to,0.0,i)*dx[i].radius()+dx[i].midpoint();
-        idb[i]=ValidatedDifferential::variable(n+1,so+to,0.0,i)*dx[i].radius()+make_singleton(bx[i]);
+        idc[i]=ValidatedDifferential::variable(n+1,so+to,zero,i)*dx[i].radius()+dx[i].midpoint();
+        idb[i]=ValidatedDifferential::variable(n+1,so+to,zero,i)*dx[i].radius()+make_singleton(bx[i]);
         dphic[i]=idc[i];
         dphib[i]=idb[i];
     }
@@ -527,7 +529,7 @@ differential_flow_step(const ValidatedVectorFunction& f, const ExactBox& dx, con
         ValidatedTaylorModel& model=tphi.model(i);
         Expansion<ExactFloat>& expansion=model.expansion();
         ErrorFloat& error=model.error();
-        error=0.0;
+        error=0u;
         expansion.reserve(dphic[i].expansion().number_of_nonzeros());
 
         ValidatedDifferential::const_iterator citer=dphic[i].begin();
@@ -564,8 +566,8 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactB
     Vector<ValidatedDifferential> dphic(n,n+1,so+to);
     Vector<ValidatedDifferential> dphib(n,n+1,so+to);
     for(uint i=0; i!=n; ++i) {
-        idc[i]=ValidatedDifferential::variable(n+1,so+to,0.0,i)*dx[i].radius()+dx[i].midpoint();
-        idb[i]=ValidatedDifferential::variable(n+1,so+to,0.0,i)*dx[i].radius()+make_singleton(bx[i]);
+        idc[i]=ValidatedDifferential::variable(n+1,so+to,zero,i)*dx[i].radius()+dx[i].midpoint();
+        idb[i]=ValidatedDifferential::variable(n+1,so+to,zero,i)*dx[i].radius()+make_singleton(bx[i]);
         dphic[i]=idc[i];
         dphib[i]=idb[i];
     }
@@ -579,7 +581,7 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactB
         ValidatedTaylorModel& model=tphi.model(i);
         Expansion<ExactFloat>& expansion=model.expansion();
         ErrorFloat& error=model.error();
-        error=0.0;
+        error=0;
         expansion.reserve(dphic[i].expansion().number_of_nonzeros());
 
         ValidatedDifferential::const_iterator citer=dphic[i].begin();
@@ -657,13 +659,13 @@ series_flow_step(const ValidatedVectorFunction& f, const ExactBox& bdx, const Ex
     VectorTaylorFunction tphi=flow_function(dphi,bdx,h,swpt,verbosity);
     ARIADNE_LOG(5,"phi="<<tphi<<"\n");
 
-    ErrorFloat old_error=tphi.error()*TRY_SPACIAL_ORDER_INCREASE_FACTOR*2;
+    ErrorFloat old_error=tphi.error()*ErrorFloat(TRY_SPACIAL_ORDER_INCREASE_FACTOR*2);
 
     while(tphi.error()>max_err && (so<max_so || to<max_to) ) {
         uint nnz=0; for(uint i=0; i!=tphi.size(); ++i) { nnz+=tphi.model(i).number_of_nonzeros(); }
         ARIADNE_LOG(3,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<tphi.error()<<"\n");
 
-        if( (so<max_so) && (tphi.error()*TRY_SPACIAL_ORDER_INCREASE_FACTOR > old_error) ) {
+        if( (so<max_so) && (tphi.error()*ErrorFloat(TRY_SPACIAL_ORDER_INCREASE_FACTOR) > old_error) ) {
             // try increasing spacial degree
             if(nto==0) {
                 // Initialise higher spacial order
@@ -866,8 +868,8 @@ AffineIntegrator::flow_derivative(const ValidatedVectorFunction& f, const Vector
 {
     Vector<ValidatedDifferential> dx=
         ValidatedDifferential::variables(this->_spacial_order+this->_temporal_order,
-                                         join(dom,ValidatedNumber(0.0)));
-    dx[dom.size()]=0.0;
+                                         join(dom,zero));
+    dx[dom.size()]=zero;
     Vector<ValidatedDifferential> dphi = dx;
     for(uint i=0; i!=_temporal_order; ++i) {
         dphi = antiderivative(f.evaluate(dphi),dom.size())+dx;

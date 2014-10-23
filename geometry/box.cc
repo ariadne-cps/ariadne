@@ -32,6 +32,7 @@
 
 #include "geometry/box.h"
 #include "utility/stlio.h"
+#include "numeric/logical.h"
 #include "geometry/point.h"
 
 typedef unsigned int uint;
@@ -152,13 +153,13 @@ uint irmax(const Vector<ExactInterval>& v) {
 }
 
 
-Vector<ExactInterval> split(const Vector<ExactInterval>& v, uint k, tribool lr) {
+Vector<ExactInterval> split(const Vector<ExactInterval>& v, uint k, Tribool lr) {
     ARIADNE_ASSERT(k<v.size());
     Vector<ExactInterval> r(v);
     Float c=v[k].centre().raw();
-    if(lr) {
+    if(definitely(lr==true)) {
         r[k].set_upper(c);
-    } else if(!lr) {
+    } else if(definitely(lr==false)) {
         r[k].set_lower(c);
     } else {
         Float cl=(3*v[k].lower().raw()+v[k].upper().raw())/4;
@@ -178,7 +179,7 @@ Pair< Vector<ExactInterval>, Vector<ExactInterval> > split(const Vector<ExactInt
     return r;
 }
 
-Vector<ExactInterval> split(const Vector<ExactInterval>& v, tribool lr) {
+Vector<ExactInterval> split(const Vector<ExactInterval>& v, Tribool lr) {
     return split(v,irmax(v),lr);
 }
 
@@ -266,7 +267,7 @@ PositiveUpperNumber radius(const Vector<ExactInterval>& v)
 
 PositiveUpperNumber volume(const Vector<ExactInterval>& v)
 {
-    PositiveUpperNumber r=1.0;
+    PositiveUpperNumber r=1u;
     for(size_t i=0; i!=v.size(); ++i) {
         r*=diam(v[i]);
     }

@@ -64,8 +64,8 @@ struct LinearProgram {
 };
 
 
-ValidatedAffineConstraint operator<=(const ValidatedFloat& l, const ValidatedAffine& a) { return ValidatedAffineConstraint(l,a,+inf); }
-ValidatedAffineConstraint operator<=(const ValidatedAffine& a, const ValidatedFloat& u) { return ValidatedAffineConstraint(-inf,a,u); }
+ValidatedAffineConstraint operator<=(const ValidatedFloat& l, const ValidatedAffine& a) { return ValidatedAffineConstraint(l,a,+infty); }
+ValidatedAffineConstraint operator<=(const ValidatedAffine& a, const ValidatedFloat& u) { return ValidatedAffineConstraint(-infty,a,u); }
 ValidatedAffineConstraint operator==(const ValidatedAffine& a, const ValidatedFloat& b) { return ValidatedAffineConstraint(b,a,b); }
 
 ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& c, const ValidatedFloat& u) {
@@ -73,8 +73,8 @@ ValidatedAffineConstraint operator<=(const ValidatedAffineConstraint& c, const V
     return ValidatedAffineConstraint(c.lower_bound(),c.function(),u);
 }
 
-ValidatedAffineModelConstraint operator<=(const ValidatedFloat& l, const ValidatedAffineModel& a) { return ValidatedAffineModelConstraint(l,a,+inf); }
-ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& a, const ValidatedFloat& u) { return ValidatedAffineModelConstraint(-inf,a,u); }
+ValidatedAffineModelConstraint operator<=(const ValidatedFloat& l, const ValidatedAffineModel& a) { return ValidatedAffineModelConstraint(l,a,+infty); }
+ValidatedAffineModelConstraint operator<=(const ValidatedAffineModel& a, const ValidatedFloat& u) { return ValidatedAffineModelConstraint(-infty,a,u); }
 ValidatedAffineModelConstraint operator==(const ValidatedAffineModel& a, const ValidatedFloat& b) { return ValidatedAffineModelConstraint(b,a,b); }
 
 ValidatedAffineModelConstraint operator<=(const ValidatedAffineModelConstraint& c, const ValidatedFloat& u) {
@@ -207,7 +207,7 @@ ValidatedAffineConstrainedImageSet::domain() const
     return this->_domain;
 }
 
-tribool ValidatedAffineConstrainedImageSet::bounded() const {
+Tribool ValidatedAffineConstrainedImageSet::bounded() const {
     return ExactBox(this->domain()).bounded() || Tribool(indeterminate);
 }
 
@@ -225,7 +225,7 @@ UpperBox ValidatedAffineConstrainedImageSet::bounding_box() const {
 
 
 
-tribool ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) const {
+Tribool ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     ExactBox wbx=widen(bx);
     LinearProgram<Float> lp;
@@ -235,7 +235,7 @@ tribool ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) const 
         lp.u[i]=add_up(wbx[i].upper().raw(),this->_space_models[i].error().raw());
     }
     //std::cerr<<"\ns="<<*this<<"\nbx="<<bx<<"\n\nA="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n\n";
-    tribool feasible=indeterminate;
+    Tribool feasible=indeterminate;
     try {
         InteriorPointSolver optimiser;
         feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
@@ -247,11 +247,11 @@ tribool ValidatedAffineConstrainedImageSet::separated(const ExactBox& bx) const 
     return !feasible;
 }
 
-tribool ValidatedAffineConstrainedImageSet::empty() const {
+Tribool ValidatedAffineConstrainedImageSet::empty() const {
     return this->separated(make_exact_box(this->bounding_box()));
 }
 
-tribool ValidatedAffineConstrainedImageSet::inside(const ExactBox& bx) const {
+Tribool ValidatedAffineConstrainedImageSet::inside(const ExactBox& bx) const {
     ARIADNE_PRECONDITION_MSG(this->dimension()==bx.dimension(),"set="<<*this<<", box="<<bx);
     return widen(this->bounding_box()).inside(bx) || Tribool(indeterminate);
 }
@@ -288,9 +288,9 @@ void ValidatedAffineConstrainedImageSet::_adjoin_outer_approximation_to(PavingIn
     int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
-    //tribool feasible=SimplexSolver<Float>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    //Tribool feasible=SimplexSolver<Float>().hotstarted_feasible(lp.A,lp.b,lp.l,lp.u,lp.vt,lp.p,lp.B,lp.x,lp.y);
     InteriorPointSolver optimiser;
-    tribool feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
+    Tribool feasible=optimiser.feasible(lp.l,lp.u,lp.A,lp.b);
     //feasible=verify_feasibility(lp.A,lp.b,lp.l,lp.u,lp.vt);
     if(definitely(!feasible)) { return; }
 
@@ -438,7 +438,7 @@ void ValidatedAffineConstrainedImageSet::_robust_adjoin_outer_approximation_to(P
     int maximum_tree_depth=depth*cell.dimension();
 
     // Check for disjointness using linear program
-    tribool feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    Tribool feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
 
     bool done=false;
     while(!done && lp.x[ne+nx+nc]<0.0) {
@@ -579,9 +579,9 @@ ValidatedAffineConstrainedImageSet::robust_adjoin_outer_approximation_to(PavingI
     }
 
     ARIADNE_LOG(9,"A="<<lp.A<<"\nb="<<lp.b<<"\nl="<<lp.l<<"\nu="<<lp.u<<"\n");
-    tribool feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
+    Tribool feasible=lpsolver.hotstarted_feasible(lp.l,lp.u,lp.A,lp.b,lp.vt,lp.p,lp.B,lp.x,lp.y);
     ARIADNE_LOG(9,"  vt="<<lp.vt<<"\nx="<<lp.x<<"\n");
-    if(!feasible) { return; } // no intersection
+    if(definitely(not feasible)) { return; } // no intersection
 
     _adjoin_outer_approximation_to(paving,lp,errors,bounding_cell,depth);
 }
@@ -672,7 +672,7 @@ ValidatedAffineConstrainedImageSet::boundary(uint xind, uint yind) const
     Vector<Float> x(np); Vector<Float> y(nc);
 
     // Find an initial feasible point
-    tribool feasible = lpsolver.hotstarted_feasible(l,u,A,b, vt, p,B, x,y);
+    Tribool feasible = lpsolver.hotstarted_feasible(l,u,A,b, vt, p,B, x,y);
     ARIADNE_LOG(3," A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<" vt="<<vt<<" p="<<p<<"\n  x="<<x<<" Ax="<< A*x <<"\n");
     lpsolver.consistency_check(l,u,A,b, vt,p,B,x);
 

@@ -24,12 +24,9 @@
 /*! \file interval.h
  *  \brief ExactInterval numeric class.
  */
+
 #ifndef ARIADNE_INTERVAL_H
 #define ARIADNE_INTERVAL_H
-
-#ifdef HAVE_GMPXX_H
-#include <gmpxx.h>
-#endif // HAVE_GMPXX_H
 
 #include <iostream>
 #include <cassert>
@@ -37,6 +34,7 @@
 #include "utility/declarations.h"
 
 #include "utility/tribool.h"
+#include "numeric/logical.h"
 #include "numeric/rounding.h"
 #include "numeric/float.h"
 #include "numeric/float-exact.h"
@@ -48,24 +46,19 @@ typedef unsigned int uint;
 
 namespace Ariadne {
 
-// Forward declarations
-class Float;
-class ApproximateFloat;
-class ValidatedFloat;
-class ExactFloat;
-
-class Real;
-
-class Integer;
-class Rational;
-class Dyadic;
-class Decimal;
+class Tribool;
 
 class ExactInterval;
-class UnitInterval;
 class UpperInterval;
+class ApproximateInterval;
+
+typedef ExactInterval ExactFloatInterval;
+typedef UpperInterval UpperFloatInterval;
+typedef ApproximateInterval ApproximateFloatInterval;
 
 typedef UpperInterval NumericInterval;
+
+class UnitInterval;
 
 //! \ingroup NumericModule
 //! \brief Intervals with floating-point endpoints supporting outwardly-rounded arithmetic.
@@ -73,7 +66,7 @@ typedef UpperInterval NumericInterval;
 //! Note that <c>%ExactInterval(3.3)</c> yields the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%ExactInterval("3.3")</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
 //!
 //! Comparison tests on \c ExactInterval use the idea that an interval represents a single number with an unknown value.
-//! Hence the result is of type \c tribool, which can take values { \c True, \c False, \c Indeterminate }.
+//! Hence the result is of type \c Tribool, which can take values { \c True, \c False, \c Indeterminate }.
 //! Hence a test \f$[l_1,u_1]\leq [l_2,u_2]\f$ returns \c True if \f$u_1\leq u_2\f$, since in this case \f$x_1\leq x_2\f$ whenever \f$x_1\in[l_1,u_2]\f$ and \f$x_2\in[l_2,u_2]\f$, \c False if \f$l_1>u_2\f$, since in this case we know \f$x_1>x_2\f$, and \c Indeterminate otherwise, since in this case we can find \f$x_1,x_2\f$ making the result either true or false.
 //! In the case of equality, the comparison \f$[l_1,u_1]\f$==\f$[l_2,u_2]\f$ only returns \c True if both intervals are singletons, since otherwise we can find values making the result either true of false.
 //!
@@ -114,12 +107,8 @@ class ExactInterval {
     explicit ExactInterval(const Float& x) : l(x), u(x) { }
     //! \brief Copy constructor.
     ExactInterval(const ExactInterval& i) : l(i.l), u(i.u) { }
-    //! \brief Convert from a general real number. Yields an interval containing the exact value.
-    explicit ExactInterval(const Real& x);
     //! \brief Convert from a floating-point number with an exact representation.
     explicit ExactInterval(const ExactFloat& x) : l(x.raw()), u(x.raw()) { }
-    //! \brief Convert from a floating-point number with an exact representation.
-    explicit ExactInterval(const ValidatedFloat& x) : l(x.lower()), u(x.upper_raw()) { }
     //! \brief Convert from a dyadic number.
     explicit ExactInterval(const Dyadic& x);
     //! \brief Convert from a decimal number.
@@ -178,9 +167,9 @@ class ExactInterval {
     const ErrorFloat error() const { Float c=half(add_near(l,u)); return ErrorFloat(max(sub_up(u,c),sub_up(c,l))); }
 
     //! \brief Tests if the interval is empty.
-    bool empty() const { return l>u; }
+    Bool empty() const { return l>u; }
     //! \brief Tests if the interval is a singleton.
-    bool singleton() const { return l==u; }
+    Bool singleton() const { return l==u; }
 
     //! \brief Sets the interval to a "canonical" empty interval \a [1,0].
     void set_empty() { l=+std::numeric_limits< double >::infinity(); u=-std::numeric_limits< double >::infinity(); }
@@ -220,19 +209,19 @@ inline ErrorFloat width(ExactInterval i) {
 }
 
 //! \related ExactInterval \brief Test if the intervals are equal (as sets).
-inline bool equal(ExactInterval i1, ExactInterval i2) {
+inline Bool equal(ExactInterval i1, ExactInterval i2) {
     //std::cerr<<"equal(i1,i2) with i1="<<i1<<"; i2="<<i2<<std::endl;
     return i1.lower_raw()==i2.lower_raw() && i1.upper_raw()==i2.upper_raw();
 }
 
 //! \related ExactInterval \brief Test if the interval is empty.
-inline bool empty(ExactInterval i) {
+inline Bool empty(ExactInterval i) {
     return i.lower_raw()>i.upper_raw();
 }
 
 //! \related ExactInterval \brief Test if the interval is bounded.
-inline bool bounded(ExactInterval i) {
-    return i.lower_raw()!=-inf && i.upper_raw()!=+inf;
+inline Bool bounded(ExactInterval i) {
+    return i.lower_raw()!=-inf.raw() && i.upper_raw()!=+inf.raw();
 }
 
 //! \related ExactInterval \brief The intersection of two intervals.
@@ -258,34 +247,34 @@ inline ExactInterval hull(ExactFloat x1, ExactFloat x2) {
 
 
 //! \related ExactInterval \brief Test if the interval \a I contains the number \a x.
-inline bool contains(ExactInterval i, ExactFloat x) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
-inline bool contains(ExactInterval i, ValidatedFloat x) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
-inline bool contains(ExactInterval i, RawFloat x) { return i.lower_raw()<=x && x<=i.upper_raw(); }
+inline Bool contains(ExactInterval i, ExactFloat x) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
+inline Bool contains(ExactInterval i, ValidatedFloat x) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
+inline Bool contains(ExactInterval i, RawFloat x) { return i.lower_raw()<=x && x<=i.upper_raw(); }
 
-inline bool element(ExactFloat x, ExactInterval i) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
-inline bool element(ValidatedFloat x, ExactInterval i) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
-inline bool element(RawFloat x, ExactInterval i) { return i.lower_raw()<=x && x<=i.upper_raw(); }
+inline Bool element(ExactFloat x, ExactInterval i) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
+inline Bool element(ValidatedFloat x, ExactInterval i) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
+inline Bool element(RawFloat x, ExactInterval i) { return i.lower_raw()<=x && x<=i.upper_raw(); }
 
 //! \related ExactInterval \brief Test if the interval \a I1 is a subset of \a I2.
-inline bool subset(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()>=i2.lower_raw() && i1.upper_raw()<=i2.upper_raw(); }
+inline Bool subset(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()>=i2.lower_raw() && i1.upper_raw()<=i2.upper_raw(); }
 //! \related ExactInterval \brief Test if the interval \a I1 is a superset of \a I2.
-inline bool superset(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()<=i2.lower_raw() && i1.upper_raw()>=i2.upper_raw(); }
+inline Bool superset(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()<=i2.lower_raw() && i1.upper_raw()>=i2.upper_raw(); }
 //! \related ExactInterval \brief Test if the interval \a I1 is disjoint from \a I2. Returns \c false even if the two intervals only have an endpoint in common.
-inline bool disjoint(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()>i2.upper_raw() || i1.upper_raw()<i2.lower_raw(); }
+inline Bool disjoint(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()>i2.upper_raw() || i1.upper_raw()<i2.lower_raw(); }
 //! \related ExactInterval \brief Test if the interval \a I1 intersects \a I2. Returns \c true even if the two intervals only have an endpoint in common.
-inline bool intersect(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()<=i2.upper_raw() && i1.upper_raw()>=i2.lower_raw(); }
+inline Bool intersect(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()<=i2.upper_raw() && i1.upper_raw()>=i2.lower_raw(); }
 
 //! \related ExactInterval \brief Test if the closed interval \a I1 is disjoint from the closed interval \a I2.
 //! Returns \c false if the two intervals only have an endpoint in common.
-inline bool separated(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()>i2.upper_raw() || i1.upper_raw()<i2.lower_raw(); }
+inline Bool separated(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()>i2.upper_raw() || i1.upper_raw()<i2.lower_raw(); }
 //! \related ExactInterval \brief Test if the interval \a I1 overlaps \a I2.
 //! Returns \c false if the two intervals only have an endpoint in common.
 //! Returns \c true if one of the intervals is a singleton in the interior of the other.
-inline bool overlap(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()<i2.upper_raw() && i1.upper_raw()>i2.lower_raw(); }
+inline Bool overlap(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()<i2.upper_raw() && i1.upper_raw()>i2.lower_raw(); }
 //! \related ExactInterval \brief Test if the (closed) interval \a I1 is a subset of the interior of \a I2.
-inline bool inside(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()>i2.lower_raw() && i1.upper_raw()<i2.upper_raw(); }
+inline Bool inside(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()>i2.lower_raw() && i1.upper_raw()<i2.upper_raw(); }
 //! \related ExactInterval \brief Test if the interior of the interval \a I1 is a superset of the (closed) interval \a I2.
-inline bool covers(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()<i2.lower_raw() && i1.upper_raw()>i2.upper_raw(); }
+inline Bool covers(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()<i2.lower_raw() && i1.upper_raw()>i2.upper_raw(); }
 
 
 //! \brief An over-approximation to an interval set.
@@ -331,35 +320,35 @@ class UpperInterval {
     //! \brief The midpoint of the interval.
     const ApproximateFloat midpoint() const { return half(this->lower()+this->upper()); }
     const ExactFloat centre() const { return make_exact(half(this->lower()+this->upper())); }
-    //! \brief The radius of the interval.
-    const PositiveUpperFloat radius() const { return half(this->upper()-this->lower()); }
     //! \brief An over-approximation to the width of the interval.
-    const PositiveUpperFloat width() const { return this->upper()-this->lower(); }
+    const PositiveUpperFloat width() const { return PositiveUpperFloat((this->upper()-this->lower())); }
+    //! \brief The radius of the interval.
+    const PositiveUpperFloat radius() const { return half(this->width()); }
 
     explicit operator ValidatedFloat() const { return ValidatedFloat(l,u); }
 
-    tribool empty() const { return (l>u) || tribool(indeterminate); }
+    Tribool empty() const { return Tribool(l>u) || Tribool(indeterminate); }
 
     friend const ApproximateFloat midpoint(UpperInterval const& ivl) {
         return ivl.midpoint(); }
-    friend bool empty(UpperInterval const& ivl) {
+    friend Bool empty(UpperInterval const& ivl) {
         return (ivl.l>ivl.u); }
-    friend bool bounded(UpperInterval const& ivl) {
-        return -inf<ivl.l && ivl.u<+inf; }
-    friend bool contains(UpperInterval const& ivl, ExactNumber const& x) {
+    friend Bool bounded(UpperInterval const& ivl) {
+        return -inf.raw()<ivl.lower_raw() && ivl.upper_raw()<+inf.raw(); }
+    friend Bool contains(UpperInterval const& ivl, ExactFloat const& x) {
         return ivl.lower_raw() <= x.raw() && x.raw() <= ivl.upper_raw(); }
-    friend tribool inside(UpperInterval const& ivl1, ExactInterval const& ivl2) {
-        return (ivl1.lower_raw()>ivl2.lower_raw() && ivl1.upper_raw()<ivl2.upper_raw()) || tribool(indeterminate); }
-    friend tribool subset(UpperInterval const& ivl1, ExactInterval const& ivl2) {
-        return (ivl1.l>=ivl2.lower_raw() && ivl1.u<=ivl2.upper_raw()) || tribool(indeterminate); }
-    friend bool equal(UpperInterval const& ivl1, UpperInterval const& ivl2) {
+    friend Tribool inside(UpperInterval const& ivl1, ExactInterval const& ivl2) {
+        return (ivl1.lower_raw()>ivl2.lower_raw() && ivl1.upper_raw()<ivl2.upper_raw()) || Tribool(indeterminate); }
+    friend Tribool subset(UpperInterval const& ivl1, ExactInterval const& ivl2) {
+        return (ivl1.l>=ivl2.lower_raw() && ivl1.u<=ivl2.upper_raw()) || Tribool(indeterminate); }
+    friend Bool equal(UpperInterval const& ivl1, UpperInterval const& ivl2) {
         return ivl1.l==ivl2.l && ivl1.u==ivl2.u; }
-    friend bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2) {
+    friend Bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2) {
         return ivl1.l>=ivl2.l && ivl1.u<=ivl2.u; }
-    friend bool models(UpperInterval const& ivl1, ExactInterval const& ivl2) {
+    friend Bool models(UpperInterval const& ivl1, ExactInterval const& ivl2) {
         return ivl1.l>=ivl2.lower_raw() && ivl1.u<=ivl2.upper_raw(); }
-    friend tribool disjoint(UpperInterval const& ivl1, UpperInterval const& ivl2) {
-        return (ivl1.u<ivl2.l || ivl2.u<ivl1.l) || tribool(indeterminate); }
+    friend Tribool disjoint(UpperInterval const& ivl1, UpperInterval const& ivl2) {
+        return (ivl1.u<ivl2.l || ivl2.u<ivl1.l) || Tribool(indeterminate); }
     friend UpperInterval hull(UpperInterval const& ivl1, UpperInterval const& ivl2) {
         return UpperInterval(min(ivl1.l,ivl2.l),max(ivl1.u,ivl2.u)); }
     friend UpperInterval intersection(UpperInterval const& ivl1, UpperInterval const& ivl2) {
@@ -372,14 +361,18 @@ class UpperInterval {
     Float l, u;
 };
 
+template<class R, class A> inline R numeric_cast(A const&);
+template<> inline UpperInterval numeric_cast(const Float& a) { return UpperInterval(a); }
+template<> inline Float numeric_cast(const UpperInterval& a) { return midpoint(a).raw(); }
+
 const ApproximateFloat midpoint(UpperInterval const& ivl);
-bool bounded(UpperInterval const& ivl);
-bool contains(UpperInterval const& ivl, ExactNumber const& x);
-bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2);
-bool models(UpperInterval const& ivl1, ExactInterval const& ivl2);
-tribool inside(UpperInterval const& ivl1, ExactInterval const& ivl2);
-tribool subset(UpperInterval const& ivl1, ExactInterval const& ivl2);
-tribool disjoint(UpperInterval const& ivl1, UpperInterval const& ivl2);
+Bool bounded(UpperInterval const& ivl);
+Bool contains(UpperInterval const& ivl, ExactNumber const& x);
+Bool refines(UpperInterval const& ivl1, UpperInterval const& ivl2);
+Bool models(UpperInterval const& ivl1, ExactInterval const& ivl2);
+Tribool inside(UpperInterval const& ivl1, ExactInterval const& ivl2);
+Tribool subset(UpperInterval const& ivl1, ExactInterval const& ivl2);
+Tribool disjoint(UpperInterval const& ivl1, UpperInterval const& ivl2);
 UpperInterval widen(UpperInterval i);
 
 inline ExactInterval make_exact_interval(UpperInterval ivl) { return ExactInterval(ivl.lower_raw(),ivl.upper_raw()); }
@@ -400,7 +393,7 @@ inline Float med(ExactInterval i) { return half_exact(add_near(i.lower_raw(),i.u
 //! \related ExactInterval \brief An over-approximation to the radius of the interval.
 inline Float rad(ExactInterval i) { return half_exact(sub_up(i.upper_raw(),i.lower_raw())); }
 //! \related ExactInterval \brief An over-approximation to the width of the interval.
-inline Float diam(ExactInterval i) { return sub_up(i.upper_raw(),i.lower_raw()); }
+inline ExactFloat diam(ExactInterval i) { return ExactFloat(sub_up(i.upper_raw(),i.lower_raw())); }
 
 //! \related UpperInterval \brief The interval of possible maximum values. Yields the interval between \c i1.upper_raw() and \c i2.upper_raw().
 inline UpperInterval max(UpperInterval i1,UpperInterval i2);
@@ -473,9 +466,9 @@ UpperInterval atan(UpperInterval);
 
 
 //! \related UpperInterval \brief The magnitude of the interval \a I. Yields \f$ \max\{ |x|\,\mid\,x\in I \}\f$.
-inline Float mag(UpperInterval i) { return max(abs(i.lower_raw()),abs(i.upper_raw())); }
+inline PositiveUpperFloat mag(UpperInterval i) { return PositiveUpperFloat(max(abs(i.lower_raw()),abs(i.upper_raw()))); }
 //! \related UpperInterval \brief The mignitude of the interval \a I. Yields \f$ \min\{ |x|\,\mid\,x\in I \}\f$.
-inline Float mig(UpperInterval i) { return min(abs(i.lower_raw()),abs(i.upper_raw())); }
+inline LowerFloat mig(UpperInterval i) { return LowerFloat(min(Float(0),min(abs(i.lower_raw()),abs(i.upper_raw())))); }
 
 inline UpperInterval max(UpperInterval i1, UpperInterval i2)
 {
@@ -486,7 +479,6 @@ inline UpperInterval min(UpperInterval i1, UpperInterval i2)
 {
     return UpperInterval(min(i1.lower_raw(),i2.lower_raw()),min(i1.upper_raw(),i2.upper_raw()));
 }
-
 
 inline UpperInterval abs(UpperInterval i)
 {
@@ -767,19 +759,19 @@ inline UpperInterval& operator/=(UpperInterval& i1, double x2) { i1=div(i1,stati
 
 // Standard equality operators
 //! \related UpperInterval \brief Equality operator. Tests equality of intervals as geometric objects, so \c [0,1]==[0,1] returns \c true.
-inline bool operator==(const UpperInterval& i1, const UpperInterval& i2) { return i1.lower_raw()==i2.lower_raw() && i1.upper_raw()==i2.upper_raw(); }
+inline Bool operator==(const UpperInterval& i1, const UpperInterval& i2) { return i1.lower_raw()==i2.lower_raw() && i1.upper_raw()==i2.upper_raw(); }
 //! \related UpperInterval \brief Inequality operator. Tests equality of intervals as geometric objects, so \c [0,2]!=[1,3] returns \c true,
 //! even though the intervals possibly represent the same exact real value.
-inline bool operator!=(const UpperInterval& i1, const UpperInterval& i2) { return i1.lower_raw()!=i2.lower_raw() || i1.upper_raw()!=i2.upper_raw(); }
+inline Bool operator!=(const UpperInterval& i1, const UpperInterval& i2) { return i1.lower_raw()!=i2.lower_raw() || i1.upper_raw()!=i2.upper_raw(); }
 
-// Boost-style tribool (in)equality operators
-//inline tribool operator==(const UpperInterval& i1, const UpperInterval& i2) {
+// Boost-style Tribool (in)equality operators
+//inline Tribool operator==(const UpperInterval& i1, const UpperInterval& i2) {
 //  if(i1.lower_raw()>i2.upper_raw() || i1.upper_raw()<i2.lower_raw()) { return false; } else if(i1.lower_raw()==i2.upper_raw() && i1.upper_raw()==i2.lower_raw()) { return true; } else { return indeterminate; } }
-//inline tribool operator!=(const UpperInterval& i1, const UpperInterval& i2) { return !(i1==i2); }
+//inline Tribool operator!=(const UpperInterval& i1, const UpperInterval& i2) { return !(i1==i2); }
 
 //! \related UpperInterval \brief Equality operator. Tests equality of represented real-point value.
 //! Hence \c [0.0,2.0]==1.0 yields \c indeterminate since the interval may represent a real number other than \c 1.0 .
-inline tribool operator==(const UpperInterval& i1, const Float& x2) {
+inline Tribool operator==(const UpperInterval& i1, const Float& x2) {
     if(i1.upper_raw()<x2 || i1.lower_raw()>x2) { return false; }
     else if(i1.lower_raw()==x2 && i1.upper_raw()==x2) { return true; }
     else { return indeterminate; }
@@ -787,69 +779,69 @@ inline tribool operator==(const UpperInterval& i1, const Float& x2) {
 
 //! \related UpperInterval \brief Equality operator. Tests equality of represented real-point value.
 //! Hence \c [0.0,2.0]!=1.0 yields \c indeterminate since the interval may represent a real number equal to \c 1.0 .
-inline tribool operator!=(const UpperInterval& i1, const Float& x2) {
+inline Tribool operator!=(const UpperInterval& i1, const Float& x2) {
     if(i1.upper_raw()<x2 || i1.lower_raw()>x2) { return true; }
     else if(i1.lower_raw()==x2 && i1.upper_raw()==x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator> (const UpperInterval& i1, const Float& x2) {
+inline Tribool operator> (const UpperInterval& i1, const Float& x2) {
     if(i1.lower_raw()> x2) { return true; }
     else if(i1.upper_raw()<=x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator< (const UpperInterval& i1, const Float& x2) {
+inline Tribool operator< (const UpperInterval& i1, const Float& x2) {
     if(i1.upper_raw()< x2) { return true; }
     else if(i1.lower_raw()>=x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator>=(const UpperInterval& i1, const Float& x2) {
+inline Tribool operator>=(const UpperInterval& i1, const Float& x2) {
     if(i1.lower_raw()>=x2) { return true; }
     else if(i1.upper_raw()< x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator<=(const UpperInterval& i1, const Float& x2) {
+inline Tribool operator<=(const UpperInterval& i1, const Float& x2) {
     if(i1.upper_raw()<=x2) { return true; }
     else if(i1.lower_raw()> x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator==(const UpperInterval& i1, double x2) { return i1==static_cast<Float>(x2); }
-inline tribool operator!=(const UpperInterval& i1, double x2) { return i1!=static_cast<Float>(x2); }
-inline tribool operator<=(const UpperInterval& i1, double x2) { return i1<=static_cast<Float>(x2); }
-inline tribool operator>=(const UpperInterval& i1, double x2) { return i1>=static_cast<Float>(x2); }
-inline tribool operator< (const UpperInterval& i1, double x2) { return i1< static_cast<Float>(x2); }
-inline tribool operator> (const UpperInterval& i1, double x2) { return i1> static_cast<Float>(x2); }
+inline Tribool operator==(const UpperInterval& i1, double x2) { return i1==static_cast<Float>(x2); }
+inline Tribool operator!=(const UpperInterval& i1, double x2) { return i1!=static_cast<Float>(x2); }
+inline Tribool operator<=(const UpperInterval& i1, double x2) { return i1<=static_cast<Float>(x2); }
+inline Tribool operator>=(const UpperInterval& i1, double x2) { return i1>=static_cast<Float>(x2); }
+inline Tribool operator< (const UpperInterval& i1, double x2) { return i1< static_cast<Float>(x2); }
+inline Tribool operator> (const UpperInterval& i1, double x2) { return i1> static_cast<Float>(x2); }
 
 
 
 //! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
 //! Hence \c [1.0,3.0]>[0.0,2.0] yields \c indeterminate since the first interval could represent the number 1.25 and the second 1.75.
-inline tribool operator> (UpperInterval i1, UpperInterval i2) {
+inline Tribool operator> (UpperInterval i1, UpperInterval i2) {
     if(i1.lower_raw()> i2.upper_raw()) { return true; }
     else if(i1.upper_raw()<=i2.lower_raw()) { return false; }
     else { return indeterminate; }
 }
 
 //! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-inline tribool operator< (UpperInterval i1, UpperInterval i2) {
+inline Tribool operator< (UpperInterval i1, UpperInterval i2) {
     if(i1.upper_raw()< i2.lower_raw()) { return true; }
     else if(i1.lower_raw()>=i2.upper_raw()) { return false; }
     else { return indeterminate; }
 }
 
 //! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-inline tribool operator>=(UpperInterval i1, UpperInterval i2) {
+inline Tribool operator>=(UpperInterval i1, UpperInterval i2) {
     if(i1.lower_raw()>=i2.upper_raw()) { return true; }
     else if(i1.upper_raw()< i2.lower_raw()) { return false; }
     else { return indeterminate; }
 }
 
 //! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
-inline tribool operator<=(UpperInterval i1, UpperInterval i2) {
+inline Tribool operator<=(UpperInterval i1, UpperInterval i2) {
     if(i1.upper_raw()<=i2.lower_raw()) { return true; }
     else if(i1.lower_raw()> i2.upper_raw()) { return false; }
     else { return indeterminate; }
@@ -863,12 +855,12 @@ inline tribool operator<=(UpperInterval i1, UpperInterval i2) {
 std::ostream& operator<<(std::ostream&, const ExactInterval&);
 std::istream& operator>>(std::istream&, ExactInterval&);
 
-inline ValidatedNumber make_singleton(ExactInterval const& ivl) {
-    return ValidatedNumber(ivl.lower_raw(),ivl.upper_raw());
+inline ValidatedFloat make_singleton(ExactFloatInterval const& ivl) {
+    return ValidatedFloat(ivl.lower_raw(),ivl.upper_raw());
 }
 
-inline ValidatedNumber make_singleton(UpperInterval const& ivl) {
-    return ValidatedNumber(ivl.lower_raw(),ivl.upper_raw());
+inline ValidatedFloat make_singleton(UpperFloatInterval const& ivl) {
+    return ValidatedFloat(ivl.lower_raw(),ivl.upper_raw());
 }
 
 //! \brief An over-approximation to an interval set.
@@ -888,7 +880,7 @@ class ApproximateInterval {
     ApproximateFloat midpoint() const { return ApproximateFloat((l+u)/2); }
     ApproximateFloat radius() const { return ApproximateFloat((u-l)/2); }
     ApproximateFloat width() const { return ApproximateFloat(u-l); }
-    friend bool contains(ApproximateInterval const& ivl, ApproximateFloat const& x) {
+    friend Bool contains(ApproximateInterval const& ivl, ApproximateFloat const& x) {
         return ivl.lower_raw()<=x.raw() && x.raw()<=ivl.upper_raw(); }
     friend std::ostream& operator<<(std::ostream& os, const ApproximateInterval& ivl) {
         return os << ExactInterval(ivl.lower_raw(),ivl.upper_raw()); }

@@ -324,7 +324,6 @@ template<class X> void export_matrix()
     export_matrix_class<X>(matrix_class);
     export_matrix_conversion<X,X>(matrix_class);
     export_matrix_arithmetic<X,X,X>(matrix_class);
-    export_matrix_arithmetic<X,X,double>(matrix_class);
     export_matrix_operations<X>(matrix_class);
 
 

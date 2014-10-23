@@ -39,6 +39,7 @@
 #include "algebra/expansion.h"
 #include "algebra/sweeper.h"
 #include "algebra/algebra_mixin.h"
+#include "geometry/interval.h"
 
 namespace Ariadne {
 
@@ -118,7 +119,7 @@ class TaylorModel<ValidatedNumber>
     TaylorModel<ValidatedNumber>(uint as, Sweeper swp);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
     TaylorModel<ValidatedNumber>(const Expansion<CoefficientType>& f, const ErrorType& e, Sweeper swp);
-    TaylorModel<ValidatedNumber>(const Expansion<RawFloat>& f, const double& e, Sweeper swp);
+    TaylorModel<ValidatedNumber>(const Expansion<RawFloat>& f, const RawFloat& e, Sweeper swp);
     //! \brief Fast swap with another Taylor model.
     void swap(TaylorModel<ValidatedNumber>& tm);
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
@@ -190,17 +191,17 @@ class TaylorModel<ValidatedNumber>
     bool operator!=(const TaylorModel<ValidatedNumber>& sd) const {
         return !(*this==sd); }
     //! \brief Comparison with another Taylor model.
-    tribool operator<(const TaylorModel<ValidatedNumber>& sd) const {
+    Tribool operator<(const TaylorModel<ValidatedNumber>& sd) const {
         return (sd-*this)>0; }
     //! \brief Comparison with another Taylor model.
-    tribool operator>(const TaylorModel<ValidatedNumber>& sd) const {
+    Tribool operator>(const TaylorModel<ValidatedNumber>& sd) const {
         return (*this-sd)>0; }
 
     //! \brief Comparison with a scalar.
-    tribool operator<(double c) const {
+    Tribool operator<(double c) const {
         return this->range()<c; }
     //! \brief Comparison with a scalar.
-    tribool operator>(double c) const {
+    Tribool operator>(double c) const {
         return this->range()>c; }
     //@}
 
@@ -235,6 +236,8 @@ class TaylorModel<ValidatedNumber>
     //! \brief Set the error of the expansion.
     void set_error(const ErrorType& ne) {
         ARIADNE_ASSERT(ne>=0); this->_error=ne; }
+    template<class E, EnableIf<IsSame<E,Float>> =dummy> void set_error(const E& ne) { set_error(ErrorType(ne)); }
+    template<class E, EnableIf<IsSame<E,double>> =dummy> void set_error(const E& ne) { set_error(ErrorType(ne)); }
     //! \brief Set the constant term in the expansion.
     void set_value(const CoefficientType& c) {
         this->_expansion.set(MultiIndex::zero(this->argument_size()),c,ReverseLexicographicKeyLess()); }
@@ -364,7 +367,7 @@ Pair< TaylorModel<ValidatedNumber>, TaylorModel<ValidatedNumber> > split(const T
 //! \relates TaylorModel<ValidatedNumber>
 //!\brief Split the variable, subdividing along the independent variable j
 //! and taking the lower/middle/upper half depending on whether half is false, indeterminate or true.
-TaylorModel<ValidatedNumber> split(const TaylorModel<ValidatedNumber>& x, uint j, tribool half);
+TaylorModel<ValidatedNumber> split(const TaylorModel<ValidatedNumber>& x, uint j, Tribool half);
 
 //! \relates TaylorModel<ValidatedNumber> \brief Scale the variable by post-composing with an affine map taking the unit interval to ivl.
 TaylorModel<ValidatedNumber> scale(const TaylorModel<ValidatedNumber>& x, const ExactInterval& ivl);

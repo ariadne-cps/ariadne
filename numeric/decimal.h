@@ -32,8 +32,6 @@
 
 namespace Ariadne {
 
-class Float;
-class ExactInterval;
 class Rational;
 
 //! \ingroup NumericModule

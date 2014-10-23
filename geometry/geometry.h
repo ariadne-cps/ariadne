@@ -94,7 +94,7 @@ std::pair<ExactBox,ExactBox> split(const ExactBox& bx) {
 
 
 template<class F>
-tribool
+Tribool
 separated(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat& eps)
 {
 
@@ -120,7 +120,7 @@ separated(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat& eps)
 
 
 template<class F>
-tribool
+Tribool
 inside(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat& eps)
 {
 
@@ -174,45 +174,45 @@ DS remove_supersets(const DS& ls)
 
 
 //! \brief Tests if \a ls overlaps \a rs, to a tolerance of \a eps.
-tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
+Tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
 
 //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
-tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
+Tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
 
 //! \brief Tests if \a ls is disjoint from \a rs, to a tolerance of \a eps.
-tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
+Tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
 
 
 //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
-tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Float& eps);
+Tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Float& eps);
 
 //! \brief Tests if \a cps is a inside of \a ops, to a tolerance of \a eps.
-tribool inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const Float& eps);
+Tribool inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const Float& eps);
 
 //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
-tribool separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float& eps);
+Tribool separated(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float& eps);
 
 
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps);
+Tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps);
+Tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps);
+Tribool separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps);
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
-tribool overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float& eps);
+Tribool overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-tribool inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float& eps);
+Tribool inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const ExactBox& bx, const Float& eps);
 
 //! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
-tribool separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const ExactBox& bx, const Float& eps);
+Tribool separated(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const ExactBox& bx, const Float& eps);
 
 
 } // namespace Ariadne

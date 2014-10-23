@@ -9,9 +9,12 @@ HDR = \
 # ariadne.h
 
 LIB_NUMERIC_SRC = \
-	logging.cc operators.cc integer.cc rational.cc decimal.cc \
-	float.cc float-approximate.cc float-validated.cc \
+	logging.cc operators.cc logical.cc integer.cc rational.cc decimal.cc \
+	float.cc float-approximate.cc float-validated.cc float-exact.cc \
+	floatmp.cc \
 	real.cc \
+
+#   float64.cc \
 
 TEST_NUMERIC_SRC = \
 	test_float.cc test_validated_float.cc \
@@ -157,11 +160,12 @@ EXAMPLES_OBJ = $(patsubst %.cc,$(EXAMPLES_OBJ_DIR)/%.o,$(EXAMPLES_SRC))
 EXAMPLES_BIN = $(patsubst %.cc,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_SRC))
 
 CXX = g++
+CXXFLAGS = -std=c++11 -Wno-non-template-friend -fPIC
 #CXX = clang++
-CXXFLAGS = -std=c++11 -fPIC
+#CXXFLAGS = -std=c++11 -fPIC
 
 INCLUDE_PATHS =  -iquote.
-LINK_LIBS=-lgmpxx -lgmp -lcairo -lboost_system -lboost_serialization
+LINK_LIBS=-lgmpxx -lgmp -lmpfr -lcairo -lboost_system -lboost_serialization
 
 PYTHON_VERSION=2.7
 PYTHON_INCLUDE_PATH=/usr/include/python$(PYTHON_VERSION)

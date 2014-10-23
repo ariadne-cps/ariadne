@@ -459,8 +459,8 @@ enum ConstraintKind { EQUALITY, UPPER_BOUNDED, LOWER_BOUNDED, BOUNDED };
 
 inline ConstraintKind constraint_kind(ExactInterval C) {
     if(C.lower()==C.upper()) { return EQUALITY; }
-    else if(C.lower()==-inf) { return UPPER_BOUNDED; }
-    else if(C.upper()==+inf) { return LOWER_BOUNDED; }
+    else if(C.lower()==-infty) { return UPPER_BOUNDED; }
+    else if(C.upper()==+infty) { return LOWER_BOUNDED; }
     else { return BOUNDED; }
 }
 
@@ -500,19 +500,19 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     ARIADNE_LOG(5,"  D="<<D<<", g="<<g<<", C="<<C<<", X="<<X<<"\n");
 
     // Now test if the (reduced) box X satisfies other constraints
-    if(disjoint(Vector<ExactInterval>(X),D)) { return false; }
-    if(!subset(ExactBox(Vector<ExactInterval>(X)),D)) { return indeterminate; }
+    if(definitely(disjoint(Box<UpperInterval>(X),D))) { return false; }
+    if(definitely(not subset(Box<UpperInterval>(X),D))) { return indeterminate; }
 
     // Test inequality constraints
     Tribool result = true;
     Vector<ValidatedFloat> gx=g(X);
     ARIADNE_LOG(7,"g(X)="<<gx<<"\n");
     for(uint i=0; i!=C.size(); ++i) {
-        if(disjoint(ExactInterval(gx[i]),C[i])) {
+        if(definitely(disjoint(UpperInterval(gx[i]),C[i]))) {
             return false;
         }
         if(!C[i].singleton()) {
-            if(!subset(ExactInterval(gx[i]),C[i])) { result = indeterminate; }
+            if(definitely(not subset(UpperInterval(gx[i]),C[i]))) { result = indeterminate; }
         }
     }
 
@@ -752,7 +752,7 @@ is_infeasibility_certificate(ExactBox D, ValidatedVectorFunction g, ExactBox C, 
         iyC+=y[i]*C[i];
     }
 
-    if(disjoint(iyC,UpperInterval(iygx))) {
+    if(definitely(disjoint(iyC,UpperInterval(iygx)))) {
         return true;
     } else {
         return false;
@@ -1176,7 +1176,7 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Exact
     ValidatedVectorFunction h(0,D.size());
 
     UpperIntervalVector gD = apply(g,D);
-    if(disjoint(gD,C)) { throw InfeasibleProblemException(); }
+    if(definitely(disjoint(gD,C))) { throw InfeasibleProblemException(); }
 
     ApproximateFloatVector x = midpoint(D);
     ApproximateFloatVector w = midpoint(intersection(UpperBox(gD),C));
@@ -1676,8 +1676,8 @@ compute_mu(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox
 
     for(uint i=0; i!=C.size(); ++i) {
         if(C[i].lower()==C[i].upper()) { }
-        else if(C[i].lower()==-inf) { mu += lambda[i] * (gx[i] - C[i].upper()); }
-        else if(C[i].upper()==+inf) { mu += lambda[i] * (gx[i] - C[i].lower()); }
+        else if(C[i].lower()==-infty) { mu += lambda[i] * (gx[i] - C[i].upper()); }
+        else if(C[i].upper()==+infty) { mu += lambda[i] * (gx[i] - C[i].lower()); }
         else { // std::cerr<<"FIXME: Compute mu for bounded constraint\n";
             if (lambda[i] <=0.0) { mu += lambda[i] * (gx[i] - C[i].upper()); }
             else { mu += lambda[i] * (gx[i] - C[i].lower()); }
@@ -2112,7 +2112,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     ValidatedFloatVector gx=g(x);
     ARIADNE_LOG(3,"x="<<x<<" y="<<y<<" g(x)="<<gx<<"\n");
 
-    tribool result = true;
+    Tribool result = true;
 
     List<uint> equalities;
     for(uint j=0; j!=C.size(); ++j) {
@@ -2148,7 +2148,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
         // Perform an interval Newton step to try to attain feasibility
         ValidatedFloatVector nW = inverse(IA*AT) * ValidatedFloatVector(h(x)-make_exact(c));
         ARIADNE_LOG(4,"W="<<W<<"\nnew_W="<<nW<<"\n");
-        if(subset(ExactBox(B),D) && refines(nW,W)) { ARIADNE_LOG(3,"feasible\n"); return true; }
+        if(definitely(subset(UpperBox(B),D)) && refines(nW,W)) { ARIADNE_LOG(3,"feasible\n"); return true; }
         else { result=indeterminate; }
     }
 
@@ -2164,7 +2164,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     VectorTaylorFunction tg(D,g,default_sweeper());
     ScalarTaylorFunction tyg(D,default_sweeper());
     for(uint j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
-    ExactInterval tygD = ExactInterval(tyg(make_singleton(D)));
+    UpperInterval tygD = UpperInterval(tyg(make_singleton(D)));
 
     UpperIntervalMatrix dgD = jacobian(g,D);
     UpperIntervalVector ydgD = UpperIntervalVector(y) * dgD;

@@ -100,7 +100,7 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint
     EffectiveVectorFunction dynamic=system.dynamic_function(location);
     Map<DiscreteEvent,EffectiveScalarFunction> guards=guard_functions(system,location);
 
-    while(t<tmax) {
+    while(possibly(t<tmax)) {
 
         bool enabled=false;
         DiscreteEvent event;

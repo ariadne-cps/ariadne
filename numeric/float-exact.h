@@ -24,6 +24,7 @@
 /*! \file float-exact.h
  *  \brief Exact floating-point number class, a subset of dyadic numbers.
  */
+
 #ifndef ARIADNE_FLOAT_EXACT_H
 #define ARIADNE_FLOAT_EXACT_H
 
@@ -50,14 +51,12 @@ class ExactFloat {
 
     //! \brief Default constructor creates the number 0 (zero).
     ExactFloat() : _v(0) { }
-    //! \brief Convert from a built-in positive integer.
-    ExactFloat(unsigned int n) : _v(n) { }
     //! \brief Convert from a built-in integer.
-    ExactFloat(int n) : _v(n) { }
+    template<class N, EnableIf<IsIntegral<N>> =dummy> ExactFloat(N n) : _v(n) { }
     //! \brief Explicit construction from a built-in double-precision value.
     //! \details Tests to ensure that the number is not 'accidentally' created from a rounded version of a string literal,
     //! by comparing the input with it's single-precision approximation.
-    explicit ExactFloat(double x) : _v(x) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> =dummy> explicit ExactFloat(X x) : _v(x) { }
     //! \brief Explicit construction from an approximate floating-point value.
     explicit ExactFloat(const Float& x) : _v(x) { }
 #ifdef HAVE_GMPXX_H
@@ -147,19 +146,19 @@ inline ValidatedFloat med(ExactFloat x, ExactFloat y);
 
 
 #ifdef HAVE_GMPXX_H
-inline bool operator==(const ExactFloat& x, const Rational& q) { return x.get_d()==static_cast<const mpq_class&>(q); }
-inline bool operator!=(const ExactFloat& x, const Rational& q) { return x.get_d()!=static_cast<const mpq_class&>(q); }
-inline bool operator<=(const ExactFloat& x, const Rational& q) { return x.get_d()<=static_cast<const mpq_class&>(q); }
-inline bool operator>=(const ExactFloat& x, const Rational& q) { return x.get_d()>=static_cast<const mpq_class&>(q); }
-inline bool operator< (const ExactFloat& x, const Rational& q) { return x.get_d()< static_cast<const mpq_class&>(q); }
-inline bool operator> (const ExactFloat& x, const Rational& q) { return x.get_d()> static_cast<const mpq_class&>(q); }
+inline bool operator==(const ExactFloat& x, const Rational& q) { return Rational(x)==q; }
+inline bool operator!=(const ExactFloat& x, const Rational& q) { return Rational(x)!=q; }
+inline bool operator<=(const ExactFloat& x, const Rational& q) { return Rational(x)<=q; }
+inline bool operator>=(const ExactFloat& x, const Rational& q) { return Rational(x)>=q; }
+inline bool operator< (const ExactFloat& x, const Rational& q) { return Rational(x)< q; }
+inline bool operator> (const ExactFloat& x, const Rational& q) { return Rational(x)> q; }
 
-inline bool operator==(const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)==x.get_d(); }
-inline bool operator!=(const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)!=x.get_d(); }
-inline bool operator<=(const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)<=x.get_d(); }
-inline bool operator>=(const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)>=x.get_d(); }
-inline bool operator< (const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)< x.get_d(); }
-inline bool operator> (const Rational& q, const ExactFloat& x) { return static_cast<mpq_class>(q)> x.get_d(); }
+inline bool operator==(const Rational& q, const ExactFloat& x) { return q==Rational(x); }
+inline bool operator!=(const Rational& q, const ExactFloat& x) { return q!=Rational(x); }
+inline bool operator<=(const Rational& q, const ExactFloat& x) { return q<=Rational(x); }
+inline bool operator>=(const Rational& q, const ExactFloat& x) { return q>=Rational(x); }
+inline bool operator< (const Rational& q, const ExactFloat& x) { return q< Rational(x); }
+inline bool operator> (const Rational& q, const ExactFloat& x) { return q> Rational(x); }
 #endif // HAVE_GMPXX_H
 
 

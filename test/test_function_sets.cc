@@ -151,8 +151,8 @@ class TestConstrainedImageSet
                 Pair<ExactBox,ExactBox> sbx=bx.split();
                 stack.append(sbx.first); stack.append(sbx.second);
             } else {
-                tribool overlaps = set.overlaps(bx);
-                tribool separated = set.separated(bx);
+                Tribool overlaps = set.overlaps(bx);
+                Tribool separated = set.separated(bx);
             if(definitely(overlaps)) {
                     figure.set_fill_colour(0.0,0.5,0.0);
                 } else if(definitely(separated)) {

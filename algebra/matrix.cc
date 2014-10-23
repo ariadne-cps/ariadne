@@ -28,15 +28,10 @@
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
+#include "geometry/interval.h"
 
 
 namespace Ariadne {
-
-namespace {
-ValidatedFloat intersection(ValidatedFloat x1, ValidatedFloat x2) {
-    ExactInterval i=intersection(ExactInterval(x1),ExactInterval(x2)); return reinterpret_cast<ValidatedFloat&>(i);
-}
-} // namespace
 
 Matrix<ValidatedFloat>const&
 make_singleton(const Matrix<ExactInterval>& ivlA) {
@@ -98,7 +93,7 @@ lu_inverse(const Matrix<X>& M)
         size_t iamax=k;
         X amax=0;
         for(size_t i=k; i!=m; ++i) {
-            if(abs(A[i][k])>amax) {
+            if(decide(abs(A[i][k])>amax)) {
                 iamax=i;
                 amax=abs(A[i][k]);
             }
@@ -180,10 +175,10 @@ Matrix<ValidatedFloat> dd_solve(const Matrix<ValidatedFloat>& A, const Matrix<Va
         RawFloat ci=c[i];
         for(size_t j=0; j!=n; ++j) {
             if(j!=i) {
-                ci=add_rnd(ci,mag(A[i][j]));
+                ci=add_rnd(ci,mag(A[i][j]).raw());
             }
         }
-        ci=sub_rnd(ci,mig(A[i][i]));
+        ci=sub_rnd(ci,mig(A[i][i]).raw());
         ci=-ci;
         if(ci<=0.0) {
             ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<ValidatedFloat> A, Matrix<ValidatedFloat> B)",
@@ -238,7 +233,7 @@ template<> Matrix<ValidatedFloat> gs_solve(const Matrix<ValidatedFloat>& A, cons
                     }
                 }
                 Rij/=JA[i][i];
-                R[i][j]=intersection(R[i][j],Rij);
+                R[i][j]=refinement(R[i][j],Rij);
             }
         }
         ++step;

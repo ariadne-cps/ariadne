@@ -102,18 +102,29 @@ void TestFunction::test_scalar_function()
 
 void TestFunction::test_vector_function()
 {
-    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveVectorFunction,f,identity(3));
+    ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveVectorFunction,id,identity(3));
 
     // Regression tests for element
-    ARIADNE_TEST_PRINT(f[0]);
-    const EffectiveVectorFunction& fcr=f;
-    ARIADNE_TEST_PRINT(fcr[0]);
-    EffectiveVectorFunction& fr=f;
-    ARIADNE_TEST_PRINT(fr[0]);
+    ARIADNE_TEST_PRINT(id[0]);
+    const EffectiveVectorFunction& id_const_ref=id;
+    ARIADNE_TEST_PRINT(id_const_ref[0]);
+    EffectiveVectorFunction& id_ref=id;
+    ARIADNE_TEST_PRINT(id_ref[0]);
 
-    ARIADNE_TEST_EQUAL(f[0](Vector<ApproximateFloat>{2.0,3.0,5.0}),2.0);
+    Vector<ApproximateFloat> v={2.0,3.0,5.0};
+
+    ARIADNE_TEST_CONSTRUCT(EffectiveVectorFunction,f,(id));
+    ARIADNE_TEST_EQUAL(f(v),v);
+    ARIADNE_TEST_EQUAL(f[0](v),v[0]);
     ARIADNE_TEST_EXECUTE(f[0]=f[1]);
-    ARIADNE_TEST_EQUAL(f[0](Vector<ApproximateFloat>{2.0,3.0,5.0}),3.0);
+    ARIADNE_TEST_EQUAL(f[0](v),v[1]);
+    ARIADNE_TEST_EQUAL(f(v)[0],v[1]);
+
+    // Regression test for function - vector product
+    EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(3,1);
+    EffectiveVector e0={1,0};
+    ARIADNE_TEST_EQUAL((x1*e0)(v)[0],v[1]);
+    ARIADNE_TEST_EQUAL((x1*e0)(v)[1],0);
 }
 
 

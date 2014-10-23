@@ -38,7 +38,7 @@
 namespace Ariadne {
 
 class Real;
-typedef tribool Tribool;
+typedef Tribool Tribool;
 
 class ExactInterval;
 class UpperInterval;

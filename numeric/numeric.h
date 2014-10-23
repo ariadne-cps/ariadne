@@ -34,6 +34,7 @@
 
 #include "utility/declarations.h"
 
+#include "numeric/logical.h"
 #include "numeric/integer.h"
 #include "numeric/rational.h"
 #include "numeric/decimal.h"
@@ -42,7 +43,6 @@
 #include "numeric/float-exact.h"
 #include "numeric/float-validated.h"
 #include "numeric/float-approximate.h"
-#include "geometry/interval.h"
 #include "numeric/real.h"
 
 namespace Ariadne {
@@ -65,9 +65,6 @@ template<> inline Real numeric_cast(const Float& a) { return Real(ExactFloat(a))
 template<> inline Real numeric_cast(const ExactFloat& a) { return Real(a); }
 template<> inline Real numeric_cast(const ValidatedFloat& a) { return Real(make_exact(ApproximateFloat(a))); }
 
-template<> inline UpperInterval numeric_cast(const Float& a) { return UpperInterval(a); }
-template<> inline Float numeric_cast(const UpperInterval& a) { return midpoint(a).raw(); }
-
 template<class R, class A> inline R approx_cast(const A& a);
 template<> inline double approx_cast(const Float& a) { return a.get_d(); }
 template<> inline double approx_cast(const ExactFloat& a) { return a.get_d(); }
@@ -83,7 +80,7 @@ template<> inline Float convert_error<Float>(const Float& e) { return 0.0; }
 
 template<class X> inline X convert_error(const ApproximateFloat& e);
 template<> inline ApproximateFloat convert_error<ApproximateFloat>(const ApproximateFloat& e) { return 0.0; }
-template<> inline ValidatedFloat convert_error<ValidatedFloat>(const ApproximateFloat& e) { return ValidatedFloat(-e.value(),+e.value()); }
+template<> inline ValidatedFloat convert_error<ValidatedFloat>(const ApproximateFloat& e) { return ValidatedFloat(-e.raw(),+e.raw()); }
 
 // Use 'enable_if' style template to restrict allowable instances. See the Boost documentation
 // for enable_if to see how this works.

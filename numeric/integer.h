@@ -1,7 +1,7 @@
 /***************************************************************************
- *            integer.h
+ *            numeric/integer.h
  *
- *  Copyright 2008-10  Pieter Collins
+ *  Copyright 2013-14  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,81 +21,68 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file integer.h
- *  \brief Exact integer class and fixed-precision integer functions.
+/*! \file numeric/integer.h
+ *  \brief
  */
+
+
+
 #ifndef ARIADNE_INTEGER_H
 #define ARIADNE_INTEGER_H
 
-#ifdef HAVE_GMPXX_H
-#include <gmpxx.h>
-#endif // HAVE_GMPXX_H
+#include "external/gmp.h"
 
-#include <iostream>
-#include <string>
-#include <cstdlib>
-#include <stdint.h>
+#include <cassert>
 
-// Simplifying typedefs for unsigned types
-// These may be inclused in other headers,
-// but repeating a typedef is not an error
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
+#include "utility/typedefs.h"
+#include "utility/metaprogramming.h"
+#include "numeric/sign.h"
+#include "numeric/logical.h"
+#include "numeric/number.decl.h"
 
 namespace Ariadne {
 
-#ifdef DOXYGEN
-//! \ingroup NumericModule
-//! \brief Integers of arbitrary size with exact arithmetic.
-//! (Only available if the Gnu Multiple Precision library (GMP) is installed.)
-//! \details
-//! Unlike C++ and the Python 2, integer division is performed exactly and returns a rational.
-//! The operations \c quot(Integer,Integer) and \c rem(Integer,Integer) can be used to perform integer division.
-class Integer { };
-#endif // DOXYGEN
+/************  Ints ********************************************************/
 
+template<class X> struct IsNumber;
 
-#ifdef HAVE_GMPXX_H
-class Integer : public mpz_class {
+class Boolean;
+class Integer;
+class Rational;
+
+template<class P> class Number;
+
+class Nat32 {
+    uint32_t _n;
   public:
-    using mpz_class::mpz_class;
+    template<class N, EnableIf<IsIntegral<N>> = dummy> Nat32(N n) : _n(n) { assert(_n==n); }
+    uint32_t get_ui() const { return _n; }
 };
-#else
-class Integer {
+
+class Nat64 {
+    uint64_t _n;
   public:
-    Integer() : _value() { }
-    Integer(const int& n) : _value(n) { }
-    Integer(const std::string& s) : _value(std::atoi(s.c_str())) { }
-    int get_i() const  { return _value; }
-  private:
-    int _value;
+    template<class N, EnableIf<IsIntegral<N>> = dummy> Nat64(N n) : _n(n) { assert(_n==n); }
+    uint64_t get_ui() const { return _n; }
 };
-inline Integer operator+(const Integer& z) {
-    return Integer(+z.get_i()); }
-inline Integer operator-(const Integer& z) {
-    return Integer(-z.get_i()); }
-inline Integer operator+(const Integer& z1, const Integer& z2) {
-    return Integer(z1.get_i()+z2.get_i()); }
-inline Integer operator-(const Integer& z1, const Integer& z2) {
-    return Integer(z1.get_i()-z2.get_i()); }
-inline Integer operator*(const Integer& z1, const Integer& z2) {
-    return Integer(z1.get_i()*z2.get_i()); }
-inline bool operator==(const Integer& z1, const Integer& z2) {
-    return z1.get_i()==z2.get_i(); }
-inline bool operator!=(const Integer& z1, const Integer& z2) {
-    return z1.get_i()!=z2.get_i(); }
-inline bool operator<=(const Integer& z1, const Integer& z2) {
-    return z1.get_i()<=z2.get_i(); }
-inline bool operator>=(const Integer& z1, const Integer& z2) {
-    return z1.get_i()>=z2.get_i(); }
-inline bool operator< (const Integer& z1, const Integer& z2) {
-    return z1.get_i()< z2.get_i(); }
-inline bool operator> (const Integer& z1, const Integer& z2) {
-    return z1.get_i()> z2.get_i(); }
-inline std::ostream& operator<<(std::ostream& os, const Integer& z) {
-    return os << z.get_i(); }
-#endif // HAVE_GMPXX_H
+
+class Int32 {
+    int32_t _n;
+  public:
+    template<class N, EnableIf<IsIntegral<N>> = dummy> Int32(N n) : _n(n) { assert(_n==n); }
+    int32_t get_si() const { return _n; }
+};
+
+class Int64 {
+    int64_t _n;
+  public:
+    Int64() : _n(0) { }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> Int64(N n) : _n(n) { assert(_n==n); }
+    int64_t get_si() const { return _n; }
+};
+
+using std::min;
+using std::max;
 
 uint32_t fac(uint8_t n);
 uint16_t fac(uint16_t n);
@@ -106,8 +93,87 @@ uint16_t bin(uint16_t n, uint16_t k);
 uint32_t bin(uint32_t n, uint32_t k);
 uint64_t bin(uint64_t n, uint64_t k);
 
-using std::min;
-using std::max;
+struct Exact;
+class Integer;
+template<> struct IsNumber<Integer> : True { };
+
+//! \ingroup UserNumberSubModule
+//! \brief Arbitrarily-sized integers.
+class Integer
+{
+  public:
+    mpz_t _mpz;
+  public:
+    typedef Exact Paradigm;
+  public:
+    ~Integer();
+    Integer();
+    template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> = dummy> Integer(M m);
+    template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>> = dummy> Integer(N n);
+    explicit Integer(const mpz_t);
+    Integer(const Integer&);
+    Integer(Integer&&);
+    Integer& operator=(const Integer&);
+    Integer& operator=(Integer&&);
+    operator Number<Exact> () const;
+
+    friend Integer operator+(Integer const& z);
+    friend Integer operator-(Integer const& z);
+    friend Integer operator+(Integer const& z1, Integer const& z2);
+    friend Integer operator-(Integer const& z1, Integer const& z2);
+    friend Integer operator*(Integer const& z1, Integer const& z2);
+    friend Rational operator/(Integer const& z1, Integer const& z2);
+    friend Integer& operator++(Integer& z);
+    friend Integer& operator--(Integer& z);
+    friend Integer& operator+=(Integer& z1, Integer const& z2);
+    friend Integer& operator*=(Integer& z1, Integer const& z2);
+    friend Integer const& max(Integer const& z1, Integer const& z2);
+    friend Integer const& min(Integer const& z1, Integer const& z2);
+    friend Integer abs(Integer const& z);
+    friend Integer pos(Integer const& z);
+    friend Integer neg(Integer const& z);
+    friend Integer sqr(Integer const& z);
+    friend Integer add(Integer const& z1, Integer const& z2);
+    friend Integer sub(Integer const& z1, Integer const& z2);
+    friend Integer mul(Integer const& z1, Integer const& z2);
+    friend Integer pow(Integer const& z, Nat m);
+
+    friend Rational rec(Integer const& z);
+    friend Rational div(Integer const& z1, Integer const& z2);
+    friend Rational pow(Integer const& z, Int n);
+
+    friend Boolean operator==(Integer const& z1, Integer const& z2);
+    friend Boolean operator!=(Integer const& z1, Integer const& z2);
+    friend Boolean operator>=(Integer const& z1, Integer const& z2);
+    friend Boolean operator<=(Integer const& z1, Integer const& z2);
+    friend Boolean operator> (Integer const& z1, Integer const& z2);
+    friend Boolean operator< (Integer const& z1, Integer const& z2);
+
+    friend OutputStream& operator<<(OutputStream& os, Integer const& z);
+    friend Integer operator"" _z(unsigned long long int n);
+  public:
+    long int get_si() const;
+    mpz_t const& get_mpz() const;
+  private:
+  public:
+    Integer(Nat32 m);
+    Integer(Int32 n);
+    Integer(Nat64 m);
+    Integer(Int64 n);
+};
+
+template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>>> inline Integer::Integer(M m) : Integer(Nat64(m)) { }
+template<class N, EnableIf<And<IsIntegral<N>,IsSigned<N>>>> inline Integer::Integer(N n) : Integer(Int64(n)) { }
+Integer operator"" _z(unsigned long long int n);
+
+// Comparisons with arbitary ints go through Int64
+template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator==(Integer const& x, N n) -> decltype(x==Int64(n)) { return x==Int64(n); }
+template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator!=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x!=Int64(n); }
+template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator< (Integer const& x, N n) -> decltype(x!=Int64(n)) { return x< Int64(n); }
+template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator> (Integer const& x, N n) -> decltype(x!=Int64(n)) { return x> Int64(n); }
+template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator<=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x<=Int64(n); }
+template<class N, EnableIf<IsIntegral<N>> = dummy> inline auto operator>=(Integer const& x, N n) -> decltype(x!=Int64(n)) { return x>=Int64(n); }
+
 
 } // namespace Ariadne
 

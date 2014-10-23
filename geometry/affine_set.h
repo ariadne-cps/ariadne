@@ -117,11 +117,11 @@ class ValidatedAffineConstrainedImageSet
     uint number_of_constraints() const;
     ExactBox domain() const;
 
-    tribool bounded() const;
+    Tribool bounded() const;
     UpperBox bounding_box() const;
-    tribool separated(const ExactBox& bx) const;
-    tribool inside(const ExactBox& bx) const;
-    tribool empty() const;
+    Tribool separated(const ExactBox& bx) const;
+    Tribool inside(const ExactBox& bx) const;
+    Tribool empty() const;
 
     void adjoin_outer_approximation_to(PavingInterface& g, int depth) const;
     GridTreeSet outer_approximation(const Grid& g, int depth) const;

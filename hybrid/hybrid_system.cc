@@ -291,7 +291,7 @@ bool HybridSystem::check_guards(const DiscreteValuation& location) const
             if(iter->evnts.finite()) {
                 ARIADNE_ASSERT_MSG(subset(iter->pred.arguments(),variables),"");
             } else {
-                const Expression<tribool>& pred=iter->pred;
+                const Expression<Tribool>& pred=iter->pred;
                 if(!(pred==false)) { ARIADNE_ASSERT_MSG(true,"Nontrivial guard applied to an infinite set of events"); }
             }
             unguarded_events.remove(iter->evnts);
@@ -372,8 +372,8 @@ HybridSystem::guard(const Event& event, const DiscreteValuation& location) const
     RealSpace space=this->state_variables(location);
 
     RealExpression expression(0.0);
-    const ExpressionInterface<tribool>* ptr=guard_predicate._ptr.operator->();
-    const BinaryExpression<tribool,Gtr,Real,Real>* bptr=dynamic_cast< const BinaryExpression<tribool,Gtr,Real,Real>*>(ptr);
+    const ExpressionInterface<Tribool>* ptr=guard_predicate._ptr.operator->();
+    const BinaryExpression<Tribool,Gtr,Real,Real>* bptr=dynamic_cast< const BinaryExpression<Tribool,Gtr,Real,Real>*>(ptr);
     if(bptr) {
         expression = bptr->_arg1 - bptr->_arg2;
     }

@@ -2676,7 +2676,7 @@ void test_subset_intersects_box() {
     GridTreeSet theSetOne( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001001") ) );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::intersects( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that does not intersects with theSetOne");
     ExactBox box = make_box("[-2.0,-1.5]x[10,20]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2684,7 +2684,7 @@ void test_subset_intersects_box() {
     ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::intersects( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that encloses theSetOne as a strict subset");
     box = make_box("[-2.0,4.0]x[-2.0,4.0]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2692,7 +2692,7 @@ void test_subset_intersects_box() {
     ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::intersects( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that coincides with one cell of theSetOne");
     box = make_box("[-1.0,0.0]x[-1.0,0.0]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2700,7 +2700,7 @@ void test_subset_intersects_box() {
     ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::intersects( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is a subset of one cell of theSetOne");
     box = make_box("[1.5,2.5]x[1.5,2.5]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2708,7 +2708,7 @@ void test_subset_intersects_box() {
     ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::intersects( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that intersects two out of three enabled cells of theSetOne");
     box = make_box("[0.3,1.7]x[0.6,1.2]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2716,7 +2716,7 @@ void test_subset_intersects_box() {
     ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::intersects( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is located within the bounding box of theSetOne but does not intersect any enabled cells");
     box = make_box("[-0.6,-0.3]x[1.5,3.0]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2724,7 +2724,7 @@ void test_subset_intersects_box() {
     ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::intersects( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that shares a border with some of the enabled cells of theSetOne");
     box = make_box("[-1.0,1.0]x[1.0,3.0]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2748,7 +2748,7 @@ void test_subset_subset_box(){
     GridTreeSet theSetOne( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001001") ) );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that does not intersect with theSetOne");
     ExactBox box = make_box("[-2.0,-1.5]x[10,20]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2756,7 +2756,7 @@ void test_subset_subset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.subset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that encloses theSetOne as a strict subset");
     box = make_box("[-2.0,4.0]x[-2.0,4.0]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2764,7 +2764,7 @@ void test_subset_subset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.subset( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that coincides with one cell of theSetOne");
     box = make_box("[-1.0,0.0]x[-1.0,0.0]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2772,7 +2772,7 @@ void test_subset_subset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.subset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is a subset of one cell of theSetOne");
     box = make_box("[1.5,2.5]x[1.5,2.5]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2780,7 +2780,7 @@ void test_subset_subset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.subset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that intersects two out of three enabled cells of theSetOne");
     box = make_box("[0.3,1.7]x[0.6,1.2]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2788,7 +2788,7 @@ void test_subset_subset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.subset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is located within the bounding box of theSetOne but does not intersect any enabled cells");
     box = make_box("[-0.6,-0.3]x[1.5,3.0]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2796,7 +2796,7 @@ void test_subset_subset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.subset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that shares a border with some of the enabled cells of theSetOne");
     box = make_box("[-1.0,1.0]x[1.0,3.0]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2804,7 +2804,7 @@ void test_subset_subset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.subset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is contains the set but is located strictly subset the bounding cell of the set");
     //theSetTwo = [0,1]x[0,1]
     GridTreeSet theSetTwo( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("0001000") ) );
@@ -2814,7 +2814,7 @@ void test_subset_subset_box(){
     ARIADNE_TEST_EQUAL( theSetTwo.subset( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that contains the set but is located subset the bounding cell of the set, sharing a border with it");
     //theSetThree = [-1,0]x[-1,0] U [0,1]x[0,1]
     GridTreeSet theSetThree( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001000") ) );
@@ -2824,7 +2824,7 @@ void test_subset_subset_box(){
     ARIADNE_TEST_EQUAL( theSetThree.subset( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that contains the set and is partially located subset the bounding cell of the set, sharing a border with it");
     box = make_box("[-1.0,1.5]x[-1.0, 4.0]");
     cout << "theSetThree: " << theSetThree << endl;
@@ -2832,7 +2832,7 @@ void test_subset_subset_box(){
     ARIADNE_TEST_EQUAL( theSetThree.subset( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that contains the set and is partially located subset the bounding cell of the set");
     //theSetFour = [0,1]x[0,1]
     GridTreeSet theSetFour( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("0001000") ) );
@@ -2842,7 +2842,7 @@ void test_subset_subset_box(){
     ARIADNE_TEST_EQUAL( theSetFour.subset( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::subset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that coincides with the set");
     box = make_box("[0.0,1.0]x[0.0,1.0]");
     cout << "theSetFour: " << theSetFour << endl;
@@ -2865,7 +2865,7 @@ void test_subset_superset_box(){
     GridTreeSet theSetOne( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000101100100"), make_binary_word("1001001111") ) );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is disjoint from the set and is placed outside the set's box");
     ExactBox box = make_box("[5.0,6.0]x[7.0,8.0]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2873,7 +2873,7 @@ void test_subset_superset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is disjoint from the set and is placed within the set's box");
     box = make_box("[-0.5,0.5]x[1.5,2.5]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2881,7 +2881,7 @@ void test_subset_superset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is disjoint from the set but shares a borders with the set's box");
     box = make_box("[-2.0,-1.0]x[-1.0,2.0]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2889,7 +2889,7 @@ void test_subset_superset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that only intersects the set and is partially covered by it's cells");
     box = make_box("[1.5,2.5]x[1.5,3.5]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2897,7 +2897,7 @@ void test_subset_superset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that coincides with a cell of the set");
     box = make_box("[-1.0,-1.0]x[0.0,0.0]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2905,7 +2905,7 @@ void test_subset_superset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is within the set and shares a border with an enabled cell");
     box = make_box("[-1.0,1.0]x[1.0,2.0]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2913,7 +2913,7 @@ void test_subset_superset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is partially covered by two enabled cells of the set");
     box = make_box("[-0.5,0.5]x[-0.5,0.5]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2921,7 +2921,7 @@ void test_subset_superset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is a subset of an enabled cell");
     box = make_box("[1.5,1.8]x[1.3,1.9]");
     cout << "theSetOne: " << theSetOne << endl;
@@ -2929,7 +2929,7 @@ void test_subset_superset_box(){
     ARIADNE_TEST_EQUAL( theSetOne.superset( box ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const ExactBox& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Tribool GridTreeSubset::superset( const ExactBox& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is covered by several enabled cells of the set");
     box = make_box("[1.5,2.5]x[1.5,2.5]");
     cout << "theSetOne: " << theSetOne << endl;

@@ -140,8 +140,8 @@ void export_formula()
     //implicitly_convertible<ExactInterval,RealExpression>();
 
     class_<StringVariable> string_variable_class("StringVariable", init<std::string>());
-    string_variable_class.def("__eq__", &__eq__<Expression<bool>,StringVariable,std::string>);
-    string_variable_class.def("__ne__", &__ne__<Expression<bool>,StringVariable,std::string>);
+    string_variable_class.def("__eq__", &__eq__<Expression<Boolean>,StringVariable,std::string>);
+    string_variable_class.def("__ne__", &__ne__<Expression<Boolean>,StringVariable,std::string>);
     string_variable_class.def(self_ns::str(self));
 
     class_<StringExpression> string_expression_class("StringExpression", init<StringExpression>());
@@ -292,7 +292,7 @@ void export_formula()
     discrete_predicate_class.def(self_ns::str(self));
 
     class_<ContinuousPredicate> continuous_predicate_class("ContinuousPredicate", init<ContinuousPredicate>());
-    continuous_predicate_class.def(init<tribool>());
+    continuous_predicate_class.def(init<Tribool>());
     continuous_predicate_class.def("__and__", &__and__<ContinuousPredicate,ContinuousPredicate,ContinuousPredicate>);
     continuous_predicate_class.def("__or__", &__or__<ContinuousPredicate,ContinuousPredicate,ContinuousPredicate>);
     continuous_predicate_class.def("__invert__", &__not__<ContinuousPredicate,ContinuousPredicate>);

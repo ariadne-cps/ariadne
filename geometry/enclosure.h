@@ -196,10 +196,10 @@ class Enclosure
     //! \brief  Returns true if \f$g(x)>0\f$ over the whole set,
     //! false \f$g(x)<0\f$ over the whole set,
     //! and indeterminate otherwise.
-    tribool satisfies(ValidatedScalarFunction g) const;
+    Tribool satisfies(ValidatedScalarFunction g) const;
     //! \brief Tests if the set satisfies the constraint \a c. Returns \c true if all points in the set satisfy
     //! the constraint, and \c false if no points in the set satisfy the constraint.
-    virtual tribool satisfies(ValidatedConstraint c) const;
+    virtual Tribool satisfies(ValidatedConstraint c) const;
 
     //! \brief The dimension of the set.
     uint dimension() const;
@@ -212,16 +212,16 @@ class Enclosure
     //! \brief An over-approximation to the radius of the set.
     ErrorFloat radius() const;
     //! \brief Returns \c true if the set is definitely bounded.
-    tribool bounded() const;
+    Tribool bounded() const;
     //! \brief Returns \c true if the set is provably empty.
     //! May return \c false if the set can (easily) be proved to be nonempty.
-    tribool empty() const;
+    Tribool empty() const;
     //! \brief Returns \c true if the set can be shown to be disjoint from \a bx.
-    tribool separated(const ExactBox& bx) const;
+    Tribool separated(const ExactBox& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
-    tribool inside(const ExactBox& bx) const;
+    Tribool inside(const ExactBox& bx) const;
     //! \brief Returns \c true if the set can be shown to be a subset of \a bx..
-    tribool subset(const ExactBox& bx) const;
+    Tribool subset(const ExactBox& bx) const;
 
     //! \brief Reduces the size of the effective parameter domain
     //! by pruning away infeasible points. Does not affect the set as a mathematical entity.

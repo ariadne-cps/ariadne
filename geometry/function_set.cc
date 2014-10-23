@@ -155,7 +155,7 @@ Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface
             a=iter->key();
             if(a.degree()==2) {
                 for(uint j=0; j!=n; ++j) {
-                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()); }
+                    if(a[j]>0) { nonlinearities[i][j]+=mag(iter->data()).raw(); }
                 }
             }
         }
@@ -298,21 +298,21 @@ ConstraintSet::dimension() const
 }
 
 
-tribool
+Tribool
 ConstraintSet::separated(const ExactBox& bx) const
 {
     ExactBox codomain=over_approximation(this->codomain());
     return ValidatedConstrainedImageSet(bx,this->constraint_function()).separated(codomain) || Tribool(indeterminate);
 }
 
-tribool
+Tribool
 ConstraintSet::overlaps(const ExactBox& bx) const
 {
     ExactBox codomain=under_approximation(this->codomain());
     return ValidatedConstrainedImageSet(bx,this->constraint_function()).overlaps(codomain) || Tribool(indeterminate);
 }
 
-tribool
+Tribool
 ConstraintSet::covers(const ExactBox& bx) const
 {
     ExactBox codomain=under_approximation(this->codomain());
@@ -370,7 +370,7 @@ BoundedConstraintSet::dimension() const
 }
 
 
-tribool
+Tribool
 BoundedConstraintSet::separated(const ExactBox& bx) const
 {
     ExactBox domain=over_approximation(this->domain());
@@ -380,7 +380,7 @@ BoundedConstraintSet::separated(const ExactBox& bx) const
 }
 
 
-tribool
+Tribool
 BoundedConstraintSet::overlaps(const ExactBox& bx) const
 {
     if(Ariadne::disjoint(over_approximation(this->domain()),bx)) { return false; }
@@ -390,7 +390,7 @@ BoundedConstraintSet::overlaps(const ExactBox& bx) const
 }
 
 
-tribool
+Tribool
 BoundedConstraintSet::covers(const ExactBox& bx) const
 {
     ExactBox domain=under_approximation(this->domain());
@@ -399,7 +399,7 @@ BoundedConstraintSet::covers(const ExactBox& bx) const
     return UpperBox(apply(this->constraint_function(),bx)).inside(codomain) || Tribool(indeterminate);
 }
 
-tribool
+Tribool
 BoundedConstraintSet::inside(const ExactBox& bx) const
 {
     return Ariadne::inside(UpperBox(over_approximation(this->domain())),bx) || Tribool(indeterminate);
@@ -502,9 +502,9 @@ ConstrainedImageSet::affine_approximation() const
 }
 
 
-tribool ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
+Tribool ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
 {
-    if( subset(Ariadne::apply(nc.function(),this->bounding_box()),nc.bounds()) ) {
+    if( definitely(subset(Ariadne::apply(nc.function(),this->bounding_box()),nc.bounds())) ) {
         return true;
     }
 
@@ -516,13 +516,13 @@ tribool ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
     const Real& upper_bound = nc.upper_bound();
 
     Tribool result;
-    if(upper_bound<+infinity) {
+    if(definitely(upper_bound<+infinity)) {
         all_constraints.append( composed_function >= upper_bound );
         result=solver.feasible(over_approximation(domain),all_constraints).first;
         all_constraints.pop_back();
         if(definitely(result)) { return false; }
     }
-    if(lower_bound>-infinity) {
+    if(definitely(lower_bound>-infinity)) {
         all_constraints.append(composed_function <= lower_bound);
         result = result || solver.feasible(over_approximation(domain),all_constraints).first;
     }
@@ -530,20 +530,20 @@ tribool ConstrainedImageSet::satisfies(const EffectiveConstraint& nc) const
 }
 
 
-tribool ConstrainedImageSet::separated(const ExactBox& bx) const
+Tribool ConstrainedImageSet::separated(const ExactBox& bx) const
 {
     ExactBox subdomain = over_approximation(this->_domain);
     EffectiveVectorFunction function = join(this->function(),this->constraint_function());
     ExactBox codomain = product(bx,ExactBox(over_approximation(this->constraint_bounds())));
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
-    return tribool(subdomain.empty()) || Tribool(indeterminate);
+    return Tribool(subdomain.empty()) || Tribool(indeterminate);
 
 
 }
 
 
-tribool ConstrainedImageSet::overlaps(const ExactBox& bx) const
+Tribool ConstrainedImageSet::overlaps(const ExactBox& bx) const
 {
     return ValidatedConstrainedImageSet(under_approximation(this->_domain),this->_function,this->_constraints).overlaps(bx);
     return Tribool(indeterminate);
@@ -553,7 +553,7 @@ tribool ConstrainedImageSet::overlaps(const ExactBox& bx) const
     ExactBox codomain = product(bx,ExactBox(under_approximation(this->constraint_bounds())));
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
-    return !tribool(subdomain.empty()) || Tribool(indeterminate);
+    return !Tribool(subdomain.empty()) || Tribool(indeterminate);
 }
 
 
@@ -736,7 +736,7 @@ Pair<uint,double> lipschitz_index_and_error(const ValidatedVectorFunction& funct
     for(uint j=0; j!=domain.size(); ++j) {
         Float column_norm=0.0;
         for(uint i=0; i!=function.result_size(); ++i) {
-            column_norm+=mag(jacobian[i][j]);
+            column_norm+=mag(jacobian[i][j]).raw();
         }
         column_norm *= domain[j].error().raw();
         if(column_norm>max_column_norm) {
@@ -807,7 +807,7 @@ ConstrainedImageSet::write(std::ostream& os) const
 
 namespace Ariadne {
 
-typedef tribool Tribool;
+typedef Tribool Tribool;
 typedef unsigned int Nat;
 typedef std::ostream OutputStream;
 
@@ -921,8 +921,8 @@ ValidatedAffineConstrainedImageSet ValidatedConstrainedImageSet::affine_approxim
         constraint_models.append(ValidatedAffineModelConstraint(constraint.lower_bound(),affine_model(domain,constraint.function()),constraint.upper_bound()));
     }
 
-    for(uint i=0; i!=space_models.size(); ++i) { space_models[i].set_error(0.0); }
-    for(uint i=0; i!=constraint_models.size(); ++i) { constraint_models[i].function().set_error(0.0); }
+    for(uint i=0; i!=space_models.size(); ++i) { space_models[i].set_error(0u); }
+    for(uint i=0; i!=constraint_models.size(); ++i) { constraint_models[i].function().set_error(0u); }
 
     return ValidatedAffineConstrainedImageSet(domain,space_models,constraint_models);
 }
@@ -970,18 +970,18 @@ ValidatedConstrainedImageSet::reduce()
     solver.reduce(this->_reduced_domain, this->constraint_function(), this->constraint_bounds());
 }
 
-tribool ValidatedConstrainedImageSet::empty() const
+Tribool ValidatedConstrainedImageSet::empty() const
 {
     const_cast<ValidatedConstrainedImageSet*>(this)->reduce();
     return this->_reduced_domain.empty();
 }
 
-tribool ValidatedConstrainedImageSet::inside(const ExactBox& bx) const
+Tribool ValidatedConstrainedImageSet::inside(const ExactBox& bx) const
 {
     return Ariadne::inside(this->bounding_box(),bx);
 }
 
-tribool ValidatedConstrainedImageSet::separated(const ExactBox& bx) const
+Tribool ValidatedConstrainedImageSet::separated(const ExactBox& bx) const
 {
     ExactBox subdomain = this->_reduced_domain;
     ValidatedVectorFunction function(this->dimension()+this->number_of_constraints(),this->number_of_parameters());
@@ -991,10 +991,10 @@ tribool ValidatedConstrainedImageSet::separated(const ExactBox& bx) const
     ExactBox codomain = join(bx,this->constraint_bounds());
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
-    return tribool(subdomain.empty()) || Tribool(indeterminate);
+    return Tribool(subdomain.empty()) || Tribool(indeterminate);
 }
 
-tribool ValidatedConstrainedImageSet::overlaps(const ExactBox& bx) const
+Tribool ValidatedConstrainedImageSet::overlaps(const ExactBox& bx) const
 {
     //std::cerr<<"domain="<<this->_domain<<"\n";
     //std::cerr<<"subdomain="<<this->_reduced_domain<<"\n";
@@ -1013,13 +1013,13 @@ tribool ValidatedConstrainedImageSet::overlaps(const ExactBox& bx) const
     List<Pair<Nat,ExactBox> > subdomains;
     Nat depth(0);
     Nat MAX_DEPTH=2;
-    tribool feasible = false;
+    Tribool feasible = false;
     subdomains.append(make_pair(depth,subdomain));
 
     while(!subdomains.empty()) {
         make_lpair(depth,subdomain)=subdomains.back();
         subdomains.pop_back();
-        tribool found_feasible = optimiser.feasible(subdomain,function,codomain);
+        Tribool found_feasible = optimiser.feasible(subdomain,function,codomain);
         if(definitely(found_feasible)) { return true; }
         if(possibly(found_feasible)) {
             if(depth==MAX_DEPTH) {
@@ -1061,9 +1061,9 @@ void ValidatedConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface
 
 
 
-tribool ValidatedConstrainedImageSet::satisfies(const ValidatedConstraint& nc) const
+Tribool ValidatedConstrainedImageSet::satisfies(const ValidatedConstraint& nc) const
 {
-    if( subset(Ariadne::apply(nc.function(),this->bounding_box()),nc.bounds()) ) {
+    if( definitely(subset(Ariadne::apply(nc.function(),this->bounding_box()),nc.bounds())) ) {
         return true;
     }
 
@@ -1074,13 +1074,13 @@ tribool ValidatedConstrainedImageSet::satisfies(const ValidatedConstraint& nc) c
     const ExactInterval& bounds = nc.bounds();
 
     Tribool result;
-    if(bounds.upper()<+inf) {
+    if(definitely(bounds.upper()<+inf)) {
         all_constraints.append( composed_function >= bounds.upper() );
         result=solver.feasible(domain,all_constraints).first;
         all_constraints.pop_back();
         if(definitely(result)) { return false; }
     }
-    if(bounds.lower()>-inf) {
+    if(definitely(bounds.lower()>-inf)) {
         all_constraints.append(composed_function <= bounds.lower());
         result = result || solver.feasible(domain,all_constraints).first;
     }

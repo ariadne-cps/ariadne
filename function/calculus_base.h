@@ -85,7 +85,7 @@ class CalculusBase
     typedef ScalarFunction ScalarFunctionType;
     typedef SetModelType EnclosureType;
   protected:
-    tribool _tribool(const IntervalType& ivl) const {
+    Tribool _tribool(const IntervalType& ivl) const {
         if(ivl.lower()>0) { return true; } else if(ivl.upper()<0) { return false; } else { return indeterminate; } }
   public:
     //@{ \name Dynamical operations
@@ -99,7 +99,7 @@ class CalculusBase
     //! \brief Test if a set satisfied the constraint given by the guard model. Returns \a true is all
     //! points in the set satisfy the constraint, \a false if all points do not satisfy the constraint,
     //! and indeterminate otherwise.
-    virtual tribool active(const PredicateModelType& guard_model,
+    virtual Tribool active(const PredicateModelType& guard_model,
                            const SetModelType& set_model) const = 0;
 
     //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
@@ -237,7 +237,7 @@ class CalculusBase
     //! \brief Compute an enclosure for the set model \a s.
     virtual EnclosureType enclosure(const SetModelType& s) const = 0;
     //! \brief Tests if the set described by the model \a s is disjoint from the box \a box.
-    virtual tribool separated(const SetModelType& s, const BoxType& bx) const = 0;
+    virtual Tribool separated(const SetModelType& s, const BoxType& bx) const = 0;
     //! \brief A box containing the set \a s.
     virtual BoxType bounding_box(const SetModelType& s) const = 0;
     //! \brief A list of sets obtained by subdividing the set \a s into at least two smaller pieces.
@@ -250,21 +250,21 @@ class CalculusBase
     //! \brief Test if a box satisfies the constraint given by the guard. Returns \a true is all points
     //! in the box satisfy the constraint, \a false if all points do not satisfy the constraint, and
     //! indeterminate otherwise.
-    tribool active(const ScalarFunctionType& guard,  const BoxType& box) const {
+    Tribool active(const ScalarFunctionType& guard,  const BoxType& box) const {
         return this->_tribool(guard.evaluate(box)); }
-    tribool active(const VectorFunctionType& guard,  const BoxType& box) const {
+    Tribool active(const VectorFunctionType& guard,  const BoxType& box) const {
         BoxType range=guard.evaluate(box);
         return this->_tribool(range[0]); }
 
     //! \brief Test if a set satisfied the constraint given by the guard. Returns \a true is all points
     //! in the set satisfy the constraint, \a false if all points do not satisfy the constraint, and
     //! indeterminate otherwise.
-    tribool active(const ScalarFunctionType& guard,  const SetModelType& set_model) const {
+    Tribool active(const ScalarFunctionType& guard,  const SetModelType& set_model) const {
         return this->active(this->predicate_model(guard,set_model.bounding_box()),set_model); }
-    tribool active(const VectorFunctionType& guard,  const SetModelType& set_model) const {
+    Tribool active(const VectorFunctionType& guard,  const SetModelType& set_model) const {
         TimeModelType guard_set_model = apply(guard,set_model)[0];
         ExactInterval guard_range=guard_set_model.range();
-        tribool guard_active=guard_range.lower()>0 ? tribool(true) : guard_range.upper()<0 ? tribool(false) : indeterminate;
+        Tribool guard_active=guard_range.lower()>0 ? Tribool(true) : guard_range.upper()<0 ? Tribool(false) : indeterminate;
         return guard_active;
     }
 

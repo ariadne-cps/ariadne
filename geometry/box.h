@@ -48,7 +48,7 @@ class IntervalSet;
 class BoxSet;
 
 template<class X> class Point;
-typedef Point<ExactFloat> ExactPoint;
+typedef Point<ExactNumber> ExactPoint;
 
 template<class IVL> class Box;
 typedef Box<ExactInterval> ExactBox;
@@ -116,13 +116,13 @@ inline OutputStream& operator<<(OutputStream& os, const IntervalSet& ivl) {
     return os << "{" << ivl.lower() << ":" << ivl.upper() << "}";
 }
 inline ExactInterval under_approximation(const IntervalSet& rivl) {
-    return ExactInterval(ExactInterval(rivl.lower()).upper(),ExactInterval(rivl.upper()).lower());
+    return ExactInterval(rivl.lower().upper().raw(),rivl.upper().lower().raw());
 }
 inline ExactInterval over_approximation(const IntervalSet& rivl) {
-    return ExactInterval(ExactInterval(rivl.lower()).lower(),ExactInterval(rivl.upper()).upper());
+    return ExactInterval(rivl.lower().lower().raw(),rivl.upper().upper().raw());
 }
 inline ExactInterval approximation(const IntervalSet& rivl) {
-    return ExactInterval(RawFloat(ApproximateNumber(rivl.lower())),RawFloat(ApproximateNumber(rivl.upper())));
+    return ExactInterval(rivl.lower().approx().raw(),rivl.upper().approx().raw());
 }
 
 
@@ -165,7 +165,7 @@ template<> class Box<ExactInterval>
     Box<ExactInterval>(std::initializer_list<ExactInterval> lst);
 
     explicit Box<ExactInterval>(uint d, ExactInterval ivl) : Vector<ExactInterval>(d,ivl) { }
-    explicit Box<ExactInterval>(const Vector<ValidatedFloat>& vec) : Vector<ExactInterval>(vec) { }
+    Box<ExactInterval>(const Vector<ExactFloat>& pvec) : Vector<ExactInterval>(pvec) { }
     Box<ExactInterval>(const Vector<ExactInterval>& ivec) : Vector<ExactInterval>(ivec) { }
     Box<ExactInterval>(const List<ExactInterval>& ilst) : Vector<ExactInterval>(ilst) { }
 
@@ -195,7 +195,7 @@ template<> class Box<ExactInterval>
 
     //! An over-approximation to radius of the box in the supremum norm.
     ErrorType radius() const {
-        ErrorType dmax=0;
+        ErrorType dmax=0u;
         for(uint i=0; i!=this->size(); ++i) {
             dmax = max( dmax, (*this)[i].width() );
         }
@@ -204,7 +204,7 @@ template<> class Box<ExactInterval>
 
     //! An approximation to the Lesbegue measure (area, volume) of the box.
     ApproximateNumber measure() const {
-        ApproximateNumber meas=1;
+        ApproximateNumber meas=1u;
         for(uint i=0; i!=this->size(); ++i) {
             meas *= (*this)[i].width();
         }
@@ -367,7 +367,7 @@ template<> class Box<UpperInterval>
     Box<UpperInterval>(Vector<UpperInterval>const& vec) : Vector<UpperInterval>(vec) { }
     template<class E> Box<UpperInterval>(const VectorExpression<E>& t) : Vector<UpperInterval>(t) { }
 
-    explicit Box<UpperInterval>(const Vector<ValidatedFloat>& vec) : Vector<UpperInterval>(vec) { }
+    Box<UpperInterval>(const Vector<ValidatedFloat>& vec) : Vector<UpperInterval>(vec) { }
 
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static UpperBox unit_box(uint n) {
@@ -391,14 +391,14 @@ template<> class Box<UpperInterval>
 
     //! An over-approximation to radius of the box in the supremum norm.
     ErrorType radius() const {
-        ErrorType dmax=0;
+        ErrorType dmax=0u;
         for(uint i=0; i!=this->size(); ++i) { dmax = max( dmax, (*this)[i].width() ); }
         return half(dmax);
     }
 
     //! An approximation to the Lesbegue measure (area, volume) of the box.
     ApproximateNumber measure() const {
-        ApproximateNumber meas=1;
+        ApproximateNumber meas=1u;
         for(uint i=0; i!=this->size(); ++i) { meas *= (*this)[i].width(); }
         return meas;
     }
@@ -460,7 +460,7 @@ template<> class Box<UpperInterval>
     //! Only returns true if the closures are disjoint.
     Tribool empty() const{
         for(uint i=0; i!=this->dimension(); ++i) {
-            if((*this)[i].empty()) { return true; } }
+            if(definitely((*this)[i].empty())) { return true; } }
         return indeterminate;
     }
 

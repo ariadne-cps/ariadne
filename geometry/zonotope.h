@@ -161,12 +161,12 @@ class Zonotope
     Float radius() const;
 
     /*! \brief Test if the set contains a point. */
-    tribool contains(const ExactPoint& pt) const;
+    Tribool contains(const ExactPoint& pt) const;
 
     /*! \brief Test if the set is disjoint from a box. */
-    tribool separated(const ExactBox& bx) const;
+    Tribool separated(const ExactBox& bx) const;
     /*! \brief Test if the set is a inside of a box. */
-    tribool inside(const ExactBox& bx) const;
+    Tribool inside(const ExactBox& bx) const;
 
     //@}
 
@@ -174,13 +174,13 @@ class Zonotope
     //@{
     //! \name Geometric binary predicates
     /*! \brief Tests disjointness of \a z and \a r. */
-    friend tribool separated(const Zonotope& z, const ExactBox& r);
+    friend Tribool separated(const Zonotope& z, const ExactBox& r);
     /*! \brief Tests if \a z and \a r intersect. */
-    friend tribool overlaps(const Zonotope& z, const ExactBox& r);
+    friend Tribool overlaps(const Zonotope& z, const ExactBox& r);
     /*! \brief Tests inclusion of \a z in \a r. */
-    friend tribool inside(const Zonotope& z, const ExactBox& r);
+    friend Tribool inside(const Zonotope& z, const ExactBox& r);
     /*! \brief Tests disjointness of \a r and \a z. */
-    friend tribool separated(const ExactBox& r, const Zonotope& z);
+    friend Tribool separated(const ExactBox& r, const Zonotope& z);
     //@}
 
     //@{
@@ -216,18 +216,18 @@ class Zonotope
 };
 
 
-tribool empty(const Zonotope& z);
-tribool bounded(const Zonotope& z);
+Tribool empty(const Zonotope& z);
+Tribool bounded(const Zonotope& z);
 Float radius(const Zonotope& z);
 ExactBox bounding_box(const Zonotope& z);
 
 
-tribool contains(const Zonotope& z, const ExactPoint& pt);
-tribool separated(const Zonotope& z, const ExactBox& r);
-tribool overlaps(const Zonotope& z, const ExactBox& r);
-tribool inside(const Zonotope& z, const ExactBox& r);
+Tribool contains(const Zonotope& z, const ExactPoint& pt);
+Tribool separated(const Zonotope& z, const ExactBox& r);
+Tribool overlaps(const Zonotope& z, const ExactBox& r);
+Tribool inside(const Zonotope& z, const ExactBox& r);
 
-tribool separated(const Zonotope& z1, const Zonotope& z2);
+Tribool separated(const Zonotope& z1, const Zonotope& z2);
 
 ListSet<Zonotope> split(const Zonotope& z);
 

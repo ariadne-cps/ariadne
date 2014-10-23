@@ -83,10 +83,15 @@ typedef Vector<ExactInterval> ExactIntervalVector;
 
 namespace {
 
+
+ExactInterval make_exact_interval(const Real& x) {
+    return ExactInterval(x.lower().raw(),x.upper().raw());
+}
+
 ExactInterval make_domain(const IntervalSet& ivl) {
     rounding_mode_t rnd=get_rounding_mode();
-    ExactInterval dom_lower_ivl=ExactInterval(ivl.lower());
-    ExactInterval dom_upper_ivl=ExactInterval(ivl.upper());
+    ExactInterval dom_lower_ivl=make_exact_interval(ivl.lower());
+    ExactInterval dom_upper_ivl=make_exact_interval(ivl.upper());
     Float dom_lower=dom_lower_ivl.lower().raw();
     Float dom_upper=dom_upper_ivl.upper().raw();
     set_rounding_downward();
@@ -105,14 +110,13 @@ ExactInterval make_domain(const IntervalSet& ivl) {
     return ExactInterval(dom_lower,dom_upper);
 }
 
-
 ValidatedVectorFunctionModel make_identity(const BoxSet& bx, const ValidatedFunctionModelFactoryInterface& fac) {
     ExactIntervalVector dom(bx.dimension());
     RawFloatVector errs(bx.dimension());
 
     for(uint i=0; i!=bx.dimension(); ++i) {
-        ExactInterval dom_lower_ivl=numeric_cast<ExactInterval>(bx[i].lower());
-        ExactInterval dom_upper_ivl=numeric_cast<ExactInterval>(bx[i].upper());
+        ExactInterval dom_lower_ivl=make_exact_interval(bx[i].lower());
+        ExactInterval dom_upper_ivl=make_exact_interval(bx[i].upper());
         // Convert to single-precision values
         Float dom_lower_flt=numeric_cast<float>(bx[i].lower());
         Float dom_upper_flt=numeric_cast<float>(bx[i].upper());
@@ -353,7 +357,7 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& spac
 
 
 // Returns true if the entire set is positive; false if entire set is negative
-tribool Enclosure::satisfies(ValidatedScalarFunction constraint) const
+Tribool Enclosure::satisfies(ValidatedScalarFunction constraint) const
 {
     UpperInterval constraint_range=apply(constraint,this->codomain());
     if(constraint_range.upper()<0.0) { return false; }
@@ -676,21 +680,21 @@ ExactPoint Enclosure::centre() const {
 }
 
 
-tribool
+Tribool
 Enclosure::satisfies(ValidatedConstraint c) const
 {
     Enclosure copy=*this;
     copy.new_state_constraint(c);
-    if(copy.empty()) { return false; }
+    if(definitely(copy.empty())) { return false; }
     else { return Tribool(indeterminate); }
 }
 
-tribool Enclosure::bounded() const
+Tribool Enclosure::bounded() const
 {
     return ExactBox(this->domain()).bounded() || Tribool(indeterminate);
 }
 
-tribool Enclosure::empty() const
+Tribool Enclosure::empty() const
 {
     if(definitely(Ariadne::empty(this->_reduced_domain))) { return true; }
     if(this->_constraints.empty()) { return Ariadne::empty(this->domain()); }
@@ -698,7 +702,7 @@ tribool Enclosure::empty() const
 
     for(uint i=0; i!=this->_constraints.size(); ++i) {
         UpperInterval constraint_range = Ariadne::apply(this->_constraints[i].function(),this->_reduced_domain);
-        if( disjoint(constraint_range,this->_constraints[i].bounds()) ) {
+        if( definitely(disjoint(constraint_range,this->_constraints[i].bounds())) ) {
             if(this->_reduced_domain.size()>0) { this->_reduced_domain[0] = ExactInterval(1,-1); }
             return true;
         }
@@ -707,12 +711,12 @@ tribool Enclosure::empty() const
     return Tribool(indeterminate);
 }
 
-tribool Enclosure::inside(const ExactBox& bx) const
+Tribool Enclosure::inside(const ExactBox& bx) const
 {
     return Ariadne::subset(Ariadne::apply(this->_space_function,this->_reduced_domain),bx);
 }
 
-tribool Enclosure::subset(const ExactBox& bx) const
+Tribool Enclosure::subset(const ExactBox& bx) const
 {
     this->reduce();
 
@@ -720,7 +724,7 @@ tribool Enclosure::subset(const ExactBox& bx) const
 
 }
 
-tribool Enclosure::separated(const ExactBox& bx) const
+Tribool Enclosure::separated(const ExactBox& bx) const
 {
     ARIADNE_ASSERT_MSG(this->dimension()==bx.dimension(),"Enclosure::subset(ExactBox): self="<<*this<<", box="<<bx);
     List<ValidatedConstraint> constraints = this->constraints();
@@ -807,7 +811,7 @@ Enclosure::splitting_index_zeroth_order() const
     for(uint j=0; j!=this->number_of_parameters(); ++j) {
         Float column_norm=0.0;
         for(uint i=0; i!=this->dimension(); ++i) {
-            column_norm+=mag(jacobian[i][j]);
+            column_norm+=mag(jacobian[i][j]).raw();
         }
         column_norm *= this->reduced_domain()[j].error().raw();
         if(column_norm>max_column_norm) {
@@ -1039,7 +1043,7 @@ uniform_error_recondition()
     for(uint i=0; i!=large_error_indices.size(); ++i) {
         Float error=this->_space_function.get(large_error_indices[i]).error().raw();
         if(error > MAXIMUM_ERROR) {
-            this->_space_function[i].set_error(0.0);
+            this->_space_function[i].set_error(0u);
             this->_space_function[i] = this->_space_function.get(i) + this->function_factory().create_coordinate(this->_domain,k)*ValidatedFloat(+error);
             ++k;
         }

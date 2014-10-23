@@ -72,23 +72,29 @@ struct HybridTime
           ARIADNE_FAIL_MSG("HybridTime(int,double) is incorrect; use HybridTime(Real,Integer) instead."); }
 };
 
-inline bool operator==(const HybridTime& ht1, const HybridTime& ht2) {
+inline bool same(const HybridTime& ht1, const HybridTime& ht2) {
+    return same(ht1._continuous_time,ht2._continuous_time) &&
+        ht1._discrete_time==ht2._discrete_time;
+}
+
+inline NegSierpinski operator==(const HybridTime& ht1, const HybridTime& ht2) {
     return ht1._continuous_time==ht2._continuous_time &&
         ht1._discrete_time==ht2._discrete_time;
 }
 
-inline bool operator!=(const HybridTime& ht1, const HybridTime& ht2) {
+inline Sierpinski operator!=(const HybridTime& ht1, const HybridTime& ht2) {
     return ht1._continuous_time!=ht2._continuous_time ||
         ht1._discrete_time!=ht2._discrete_time;
 }
 
-inline bool operator<=(const HybridTime& ht1, const HybridTime& ht2) {
-    return ht1._continuous_time<=ht2._continuous_time &&
-        ht1._discrete_time<=ht2._discrete_time;
+inline Tribool operator<=(const HybridTime& ht1, const HybridTime& ht2) {
+    return Tribool(ht1._continuous_time<=ht2._continuous_time) &&
+        Boolean(ht1._discrete_time<=ht2._discrete_time);
 }
 
-inline bool operator<(const HybridTime& ht1, const HybridTime& ht2) {
-    return (ht1<=ht2) && (ht1 != ht2);
+inline Tribool operator<(const HybridTime& ht1, const HybridTime& ht2) {
+    return Tribool(ht1._continuous_time< ht2._continuous_time) &&
+        Boolean(ht1._discrete_time<=ht2._discrete_time);
 }
 
 inline std::ostream& operator<<(std::ostream& os, const HybridTime& ht) {

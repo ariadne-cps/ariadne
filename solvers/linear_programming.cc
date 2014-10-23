@@ -143,7 +143,7 @@ inline Vector<ExactFloat> const& make_exact(Vector<Float> const& v) { return rei
 inline Matrix<ExactFloat> const& make_exact(Matrix<Float> const& A) { return reinterpret_cast<Matrix<ExactFloat>const&>(A); }
 
 
-tribool InteriorPointSolver::
+Tribool InteriorPointSolver::
 validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
                      const Matrix<Float>& A, const Vector<Float>& b,
                      const Vector<Float>& x, const Vector<Float>& y) const
@@ -175,14 +175,14 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
     ivlx += ivld;
 
     ARIADNE_LOG(2,"[x] = "<<ivlx);
-    tribool result=true;
+    Tribool result=true;
     for(uint i=0; i!=n; ++i) {
         if(ivlx[i].lower().raw()<=xl[i] || ivlx[i].upper().raw()>=xu[i]) {
             result = indeterminate; break;
         }
     }
 
-    if(result==true) { return result; }
+    if(definitely(result)) { return result; }
 
     // If yb - max(yA,0) xu + min(yA,0) xl > 0, then problem is infeasible
     // Evaluate lower bound for yb - max(z,0) xu + min(z,0) xl
@@ -282,7 +282,7 @@ hotstarted_minimise(const Vector<Float>& c,
 }
 
 
-tribool
+Tribool
 InteriorPointSolver::
 feasible(const Vector<Float>& xl, const Vector<Float>& xu,
          const Matrix<Float>& A, const Vector<Float>& b) const
@@ -314,12 +314,12 @@ feasible(const Vector<Float>& xl, const Vector<Float>& xu,
     while(step++<24) {
         LinearProgramStatus result=this->_feasibility_step(xl,xu,A,b, x,y,zl,zu);
         if(result==PRIMAL_DUAL_FEASIBLE || result==PRIMAL_FEASIBLE) {
-            tribool validated_feasible=this->validate_feasibility(xl,xu,A,b, x,y);
+            Tribool validated_feasible=this->validate_feasibility(xl,xu,A,b, x,y);
             if(definitely(validated_feasible)) { return true; }
         }
         UpperInterval yb=dot(UpperIntervalVector(y),UpperIntervalVector(b));
         UpperInterval yAX = dot( UpperIntervalVector(y)*UpperIntervalMatrix(A), X );
-        if(disjoint(yb,yAX)) { return false; }
+        if(definitely(disjoint(yb,yAX))) { return false; }
         if(result==DEGENERATE_FEASIBILITY) { ARIADNE_LOG(2,"  degenerate\n"); return indeterminate; }
         if(compute_mu(xl,xu, x,zl,zu)<THRESHOLD ) { ARIADNE_LOG(2,"  threshold\n"); return indeterminate; }
     }

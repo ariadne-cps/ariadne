@@ -284,7 +284,7 @@ RegularSetInterface* HybridConstraintSet::_euclidean_set(DiscreteLocation loc, R
     return new ConstraintSet(this->euclidean_set(loc,spc));
 }
 
-tribool HybridConstraintSet::overlaps(const HybridBox& bx) const {
+Tribool HybridConstraintSet::overlaps(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).overlaps(bx.continuous_set());
     } else {
@@ -292,7 +292,7 @@ tribool HybridConstraintSet::overlaps(const HybridBox& bx) const {
     }
 }
 
-tribool HybridConstraintSet::covers(const HybridBox& bx) const {
+Tribool HybridConstraintSet::covers(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).covers(bx.continuous_set());
     } else {
@@ -300,7 +300,7 @@ tribool HybridConstraintSet::covers(const HybridBox& bx) const {
     }
 }
 
-tribool HybridConstraintSet::separated(const HybridBox& bx) const {
+Tribool HybridConstraintSet::separated(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).separated(bx.continuous_set());
     } else {
@@ -360,7 +360,7 @@ BoundedConstraintSet* HybridBoundedConstraintSet::_euclidean_set(DiscreteLocatio
     return new BoundedConstraintSet(this->euclidean_set(loc,spc));
 }
 
-tribool HybridBoundedConstraintSet::overlaps(const HybridBox& bx) const {
+Tribool HybridBoundedConstraintSet::overlaps(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).overlaps(bx.continuous_set());
     } else {
@@ -368,7 +368,7 @@ tribool HybridBoundedConstraintSet::overlaps(const HybridBox& bx) const {
     }
 }
 
-tribool HybridBoundedConstraintSet::covers(const HybridBox& bx) const {
+Tribool HybridBoundedConstraintSet::covers(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).covers(bx.continuous_set());
     } else {
@@ -376,7 +376,7 @@ tribool HybridBoundedConstraintSet::covers(const HybridBox& bx) const {
     }
 }
 
-tribool HybridBoundedConstraintSet::separated(const HybridBox& bx) const {
+Tribool HybridBoundedConstraintSet::separated(const HybridBox& bx) const {
     if(this->_sets.has_key(bx.location())) {
         return this->_sets[bx.location()].euclidean_set(bx.space()).separated(bx.continuous_set());
     } else {
@@ -384,8 +384,8 @@ tribool HybridBoundedConstraintSet::separated(const HybridBox& bx) const {
     }
 }
 
-tribool HybridBoundedConstraintSet::inside(const HybridBoxes& bxs) const {
-    tribool result=true;
+Tribool HybridBoundedConstraintSet::inside(const HybridBoxes& bxs) const {
+    Tribool result=true;
     for(Map<DiscreteLocation,RealExpressionBoundedConstraintSet>::const_iterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
         DiscreteLocation const& loc=iter->first;
         RealExpressionBoundedConstraintSet const& set = iter->second;

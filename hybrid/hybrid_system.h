@@ -176,9 +176,9 @@ class HybridSystem
         InvariantPredicate ieqn={q,i}; _invariant_predicates.push_back(ieqn); }
     //! \brief Adds a guard predicate to the system.
     void new_guard(EventSet e, DiscretePredicate q, bool p) {
-        GuardPredicate eqn={e,q,ContinuousPredicate(tribool(p))}; _guard_predicates.push_back(eqn); }
+        GuardPredicate eqn={e,q,ContinuousPredicate(Tribool(p))}; _guard_predicates.push_back(eqn); }
     void new_guard(DiscretePredicate q, EventSet e, bool p) {
-        GuardPredicate eqn={e,q,ContinuousPredicate(tribool(p))}; _guard_predicates.push_back(eqn); }
+        GuardPredicate eqn={e,q,ContinuousPredicate(Tribool(p))}; _guard_predicates.push_back(eqn); }
     //! \brief Adds an invariant to the system.
     void new_invariant(DiscretePredicate q, ContinuousPredicate p) {
         InvariantPredicate eqn={q,p}; _invariant_predicates.push_back(eqn); }
@@ -200,7 +200,7 @@ class HybridSystem
     //! \brief Adds a guard predicate to the system, valid in all modes.
     void new_guard(EventSet e, ContinuousPredicate p) { this->new_guard(e,DiscretePredicate(true),p); }
     //! \brief Adds a guard predicate to the system, valid in all modes.
-    void new_guard(EventSet e, bool p) { this->new_guard(e,DiscretePredicate(true),ContinuousPredicate(tribool(p))); }
+    void new_guard(EventSet e, bool p) { this->new_guard(e,DiscretePredicate(true),ContinuousPredicate(Tribool(p))); }
     //! \brief Adds an invariant to the system, valid in all modes.
     void new_invariant(ContinuousPredicate p) { this->new_invariant(DiscretePredicate(true),p); }
     //! \brief Disables events in all locations.

@@ -77,7 +77,7 @@ class HybridBoundedSetInterface
     virtual HybridBoundedSetInterface* clone() const = 0;
     virtual Set<DiscreteLocation> locations() const = 0;
     inline BoundedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual tribool inside(const HybridBoxes& bx) const = 0;
+    virtual Tribool inside(const HybridBoxes& bx) const = 0;
     virtual HybridBoxes bounding_box() const = 0;
   protected:
     virtual BoundedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
@@ -90,7 +90,7 @@ class HybridOvertSetInterface
   public:
     virtual HybridOvertSetInterface* clone() const = 0;
     inline OvertSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual tribool overlaps(const HybridBox& bx) const = 0;
+    virtual Tribool overlaps(const HybridBox& bx) const = 0;
   protected:
     virtual OvertSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -102,7 +102,7 @@ class HybridOpenSetInterface
   public:
     virtual HybridOpenSetInterface* clone() const = 0;
     inline OpenSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual tribool covers(const HybridBox& bx) const = 0;
+    virtual Tribool covers(const HybridBox& bx) const = 0;
   protected:
     virtual OpenSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -114,7 +114,7 @@ class HybridClosedSetInterface
   public:
     virtual HybridClosedSetInterface* clone() const = 0;
     inline ClosedSet euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual tribool separated(const HybridBox& bx) const = 0;
+    virtual Tribool separated(const HybridBox& bx) const = 0;
   protected:
     virtual ClosedSetInterface* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };

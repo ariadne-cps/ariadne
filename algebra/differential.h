@@ -32,6 +32,7 @@
 
 #include "utility/macros.h"
 #include "utility/array.h"
+#include "numeric/float.decl.h"
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
 #include "algebra/multi_index.h"
@@ -41,7 +42,6 @@
 
 namespace Ariadne {
 
-class Float;
 class ExactInterval;
 
 template<class X> class Vector;
@@ -136,7 +136,7 @@ class Differential
 
     //! \brief Construct a dense differential of degree \a deg in \a as variables from a list of coefficients beginning at \a ptr.
     template<class XX> Differential(uint as, uint deg, const XX* ptr) : _expansion(as), _degree(deg) {
-        for(MultiIndex j(as); j.degree()<=deg; ++j) { if(*ptr!=0) { _expansion.append(j,*ptr); } ++ptr; } this->cleanup(); }
+        for(MultiIndex j(as); j.degree()<=deg; ++j) { XX const& x=*ptr; if(!decide(x==0)) { _expansion.append(j,*ptr); } ++ptr; } this->cleanup(); }
     //! \brief Conversion constructor from a different numerical type.
     template<class XX> Differential(const Differential<XX>& x)
         : _expansion(x.expansion()), _degree(x.degree()) { }
@@ -728,10 +728,11 @@ template<class X>
 Differential<X>
 abs(const Differential<X>& x)
 {
-    if(x.value()==0) {
+    // FIXME: Maybe need different code for validated and approximate paradigms
+    if(decide(x.value()==0)) {
         ARIADNE_THROW(std::runtime_error,"abs(Differential<X> x)","x[0]==0");
     }
-    return x.value()>0 ? pos(x) : neg(x);
+    return decide(x.value()>0) ? pos(x) : neg(x);
 }
 
 
@@ -1118,7 +1119,7 @@ compose(const Differential<X>& x,
 {
     Vector< Differential<X> >& ync=const_cast< Vector< Differential<X> >&>(y);
     Vector<X> yv(y.size());
-    for(uint i=0; i!=ync.result_size(); ++i) { yv[i]=ync[i].value(); ync[i].set_value(0.0); }
+    for(uint i=0; i!=ync.result_size(); ++i) { yv[i]=ync[i].value(); ync[i].set_value(0); }
     Differential<X> r=evaluate(x,ync);
     for(uint i=0; i!=ync.result_size(); ++i) { ync[i].set_value(yv[i]); }
     return r;
@@ -1135,7 +1136,7 @@ compose(const Vector< Differential<X> >& x,
     //std::cerr<<"compose(DV x, DV y)\n x="<<x<<"\n y="<<y<<std::endl;
     Vector< Differential<X> >& ync=const_cast< Vector< Differential<X> >&>(y);
     Vector<X> yv(y.size());
-    for(uint i=0; i!=ync.result_size(); ++i) { yv[i]=ync[i].value(); ync[i].set_value(0.0); }
+    for(uint i=0; i!=ync.result_size(); ++i) { yv[i]=ync[i].value(); ync[i].set_value(0); }
     Vector< Differential<X> > r(x.size(),y.argument_size(),y.degree());
     for(uint i=0; i!=x.result_size(); ++i) { r[i]=evaluate(x[i],y); }
     for(uint i=0; i!=ync.result_size(); ++i) { ync[i].set_value(yv[i]); }

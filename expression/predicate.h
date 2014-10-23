@@ -49,8 +49,8 @@ class PredicateInterface {
     typedef unsigned int size_type;
 
     virtual size_type argument_size() const = 0;
-    virtual tribool evaluate(const Vector<Float>& x) const = 0;
-    virtual tribool evaluate(const Vector<ValidatedNumber>& x) const = 0;
+    virtual Tribool evaluate(const Vector<Float>& x) const = 0;
+    virtual Tribool evaluate(const Vector<ValidatedNumber>& x) const = 0;
 };
 
 class ExpressionPredicate
@@ -72,12 +72,12 @@ class ExpressionPredicate
     bool operator<(const ExpressionPredicate& p) const {
         return (_expression.pointer()) < (const void*)(p._expression.pointer()); }
     size_type argument_size() const { return _expression.argument_size(); }
-    tribool evaluate(const Vector<Float>& x) const {
+    Tribool evaluate(const Vector<Float>& x) const {
         Float value=_expression.evaluate(x)*_sign;
         if(value<0) { return true; }
         else if(value>0) { return false; }
         else { return indeterminate; } }
-    tribool evaluate(const Vector<ValidatedNumber>& x) const {
+    Tribool evaluate(const Vector<ValidatedNumber>& x) const {
         ExactInterval range=_expression.evaluate(x)*_sign;
         if(range.upper()<0) { return true; }
         else if(range.lower()>0) { return false; }
@@ -113,8 +113,8 @@ class DisjunctivePredicate
         for(uint i=0; i!=p.size(); ++i) { (*this) |= p[i]; } return *this; }
 
     virtual size_type argument_size() const;
-    virtual tribool evaluate(const Vector<Float>& x) const;
-    virtual tribool evaluate(const Vector<ValidatedNumber>& x) const;
+    virtual Tribool evaluate(const Vector<Float>& x) const;
+    virtual Tribool evaluate(const Vector<ValidatedNumber>& x) const;
 
   private:
     std::vector<ExpressionPredicate> _predicates;
@@ -138,8 +138,8 @@ class ConjunctiveNormalFormPredicate
         for(uint i=0; i!=_cnf.size(); ++i) { _cnf[i] |= p; } return *this; }
 
     virtual size_type argument_size() const;
-    virtual tribool evaluate(const Vector<Float>& x) const;
-    virtual tribool evaluate(const Vector<ValidatedNumber>& x) const;
+    virtual Tribool evaluate(const Vector<Float>& x) const;
+    virtual Tribool evaluate(const Vector<ValidatedNumber>& x) const;
   private:
     std::vector<DisjunctivePredicate> _cnf;
 };

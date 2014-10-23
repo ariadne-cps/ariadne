@@ -143,7 +143,7 @@ ValidatedVectorFunctionModel operator*(const Matrix<ValidatedNumber>& A,const Va
 }
 
 ErrorFloat sup_error(const ValidatedVectorFunctionModel& x) {
-    ErrorFloat r=0.0;
+    ErrorFloat r=0u;
     for(uint i=0; i!=x.size(); ++i) { r=std::max(r,x[i].error()); }
     return r;
 }
@@ -176,7 +176,7 @@ Vector<ValidatedNumber>
 SolverBase::solve(const ValidatedVectorFunction& f,
                   const Vector<ValidatedNumber>& ix) const
 {
-    ExactBox bx(ix);
+    ExactBox bx=make_exact_box(ix);
     return this->solve(f,bx);
 }
 
@@ -368,7 +368,7 @@ SolverBase::implicit(const ValidatedVectorFunction& f,
                     if(refines(nh[i],h[i])) {
                         refinement[i]=true;
                         --number_unrefined;
-                    } else if(disjoint(ValidatedScalarFunctionModel(nh[i]).range(),ix[i])) {
+                    } else if(definitely(disjoint(ValidatedScalarFunctionModel(nh[i]).range(),ix[i]))) {
                         ARIADNE_THROW(NoSolutionException,"SolverBase::implicit","No result found in "<<ix<<"; function "<<nh<<" is disjoint from "<<h<<" for at least one point.");
                     }
                 }
@@ -543,7 +543,7 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     Matrix<UpperInterval> rngJ(n,n);
     for(uint i=0; i!=n; ++i) {
         for(uint j=0; j!=n; ++j) {
-            UpperInterval D2fij=ExactInterval(unchecked_evaluate(D2f[i][j],make_singleton(join(id.range(),h.range()))));
+            UpperInterval D2fij=UpperInterval(unchecked_evaluate(D2f[i][j],make_singleton(join(id.range(),h.range()))));
             rngJ[i][j]=intersection(J[i][j].range(),D2fij);
         }
     }
@@ -586,7 +586,7 @@ KrawczykSolver::implicit_step(const ValidatedVectorFunction& f,
     ARIADNE_LOG(4,"    f="<<f<<"\n");
     //ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
     ValidatedVectorFunctionModel mx(x);
-    for(uint i=0; i!=mx.size(); ++i) { mx[i].set_error(0.0); }
+    for(uint i=0; i!=mx.size(); ++i) { mx[i].set_error(0); }
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
     Vector<ErrorFloat> ex(nx);
     for(uint i=0; i!=nx; ++i) { ex[i]=x[i].error(); }

@@ -41,9 +41,6 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-bool definitely(bool b) { return b; }
-bool possibly(bool b) { return b; }
-
 void set_output_precision(uint p) { std::cout << std::setprecision(p); }
 
 Dyadic operator+(Dyadic const& x1, Dyadic const& x2) {
@@ -151,48 +148,55 @@ std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Real>& x) 
 } // namespace Ariadne
 
 
-std::string __str__(tribool tb) {
-  if(indeterminate(tb)) { return "Indeterminate"; }
-  if(tb==true) { return "True"; }
-  else if(tb==false) { return "False"; }
+std::string __str__(Tribool tb) {
+  if(is_indeterminate(tb)) { return "Indeterminate"; }
+  if(definitely(tb)) { return "True"; }
+  else if(not possibly(tb)) { return "False"; }
   else { return "Indeterminate"; }
 }
 
-std::string __repr__(tribool tb) {
-  if(tb==true) { return "tribool(True)"; }
-  else if(tb==false) { return "tribool(False)"; }
-  else { return "tribool(Indeterminate)"; }
+std::string __repr__(Tribool tb) {
+  if(definitely(tb)) { return "Tribool(True)"; }
+  else if(not possibly(tb)) { return "Tribool(False)"; }
+  else { return "Tribool(Indeterminate)"; }
 }
 
-bool __nonzero__(tribool tb) { return tb==true; }
-tribool indeterminate_const() { return indeterminate; }
+bool __nonzero__(Tribool tb) { return definitely(tb); }
+Tribool indeterminate_const() { return indeterminate; }
+
+namespace Ariadne {
+bool possibly(Logical<Validated>);
+bool definitely(Logical<Validated>);
+bool is_determinate(Logical<Validated>);
+}
 
 void export_tribool() {
 
-    class_<tribool> tribool_class("tribool",init<bool>());
+    class_<Tribool> tribool_class("Tribool",init<bool>());
     tribool_class.def(init<int>());
-    tribool_class.def(init<tribool>());
-    tribool_class.def("__eq__", (tribool(*)(tribool,tribool))(&boost::logic::operator==));
-    tribool_class.def("__eq__", (tribool(*)(tribool,bool))(&boost::logic::operator==));
-    tribool_class.def("__neq__", (tribool(*)(tribool,tribool))(&boost::logic::operator!=));
-    tribool_class.def("__neq__", (tribool(*)(tribool,bool))(&boost::logic::operator!=));
-    tribool_class.def("__and__", (tribool(*)(tribool,tribool))(&boost::logic::operator!=));
-    tribool_class.def("__and__", (tribool(*)(tribool,bool))(&boost::logic::operator!=));
-    tribool_class.def("__or__", (tribool(*)(tribool,tribool))(&boost::logic::operator!=));
-    tribool_class.def("__or__", (tribool(*)(tribool,bool))(&boost::logic::operator!=));
+    tribool_class.def(init<Tribool>());
+    tribool_class.def("__eq__", &__eq__<Tribool,Tribool,Tribool>);
+    tribool_class.def("__ne__", &__ne__<Tribool,Tribool,Tribool>);
+    tribool_class.def("__and__", &__and__<Tribool,Tribool,Tribool>);
+    tribool_class.def("__or__", &__or__<Tribool,Tribool,Tribool>);
     // WARNING: __not__ is not a special method!
-    tribool_class.def("__not__", (tribool(*)(tribool))(&boost::logic::operator!));
-    tribool_class.def("__nonzero__", (bool(*)(tribool))&__nonzero__);
-    tribool_class.def("__str__", (std::string(*)(tribool))&__str__);
-    tribool_class.def("__repr__", (std::string(*)(tribool))&__repr__);
+    tribool_class.def("__not__", &__not__<Tribool,Tribool>);
+    tribool_class.def("__nonzero__", (bool(*)(Tribool))&__nonzero__);
 
-    implicitly_convertible<bool,tribool>();
+    //tribool_class.def("__eq__", (Logical<Validated>(*)(Logical<Validated>,bool))(&operator==));
+    //tribool_class.def("__neq__", (Logical<Validated>(*)(Logical<Validated>,bool))(&operator!=));
+    //tribool_class.def("__and__", (Logical<Validated>(*)(Logical<Validated>,bool))(&operator!=));
+    //tribool_class.def("__or__", (Logical<Validated>(*)(Logical<Validated>,bool))(&operator!=));
 
-    def("indeterminate",(tribool(*)(void))&indeterminate_const);
-    def("possibly",(bool(*)(bool))&possibly);
-    def("possibly",(bool(*)(tribool))&possibly);
-    def("definitely",(bool(*)(bool))&definitely);
-    def("definitely",(bool(*)(tribool))&definitely);
+    tribool_class.def("__str__", (std::string(*)(Tribool))&__str__);
+    tribool_class.def("__repr__", (std::string(*)(Tribool))&__repr__);
+
+    implicitly_convertible<bool,Tribool>();
+
+    def("indeterminate",(Tribool(*)(void))&indeterminate_const);
+    def("possibly",(bool(*)(Logical<Validated>))&possibly);
+    def("definitely",(bool(*)(Logical<Validated>))&definitely);
+    def("is_determinate",(bool(*)(Logical<Validated>))&is_determinate);
     // no facility for wrapping C++ constants
     // def("Indeterminate",tribool_indeterminate_constant);
 
@@ -200,6 +204,7 @@ void export_tribool() {
 
 
 #ifdef HAVE_GMPXX_H
+
 void export_integer()
 {
     class_<Integer> integer_class("Integer");
@@ -207,7 +212,7 @@ void export_integer()
     integer_class.def(init<Integer>());
     integer_class.def(boost::python::self_ns::str(self));
     integer_class.def("__repr__", &__repr__<Integer>);
-    integer_class.def("__less__",(bool(*)(const mpz_class&, const mpz_class&)) &operator<);
+    integer_class.def("__lt__",&__lt__<bool,Integer,Integer>);
 
     integer_class.def("__pos__", &__pos__<Integer,Integer>);
     integer_class.def("__neg__", &__neg__<Integer,Integer>);
@@ -220,6 +225,11 @@ void export_integer()
 #endif
 
 #ifdef HAVE_GMPXX_H
+
+namespace Ariadne {
+Rational sqr(Rational const&);
+}
+
 void export_rational()
 {
     class_<Rational> rational_class("Rational");
@@ -230,7 +240,7 @@ void export_rational()
     rational_class.def(init<Rational>());
     rational_class.def(boost::python::self_ns::str(self));
     rational_class.def("__repr__", &__repr__<Rational>);
-    rational_class.def("__less__",(bool(*)(const mpq_class&, const mpq_class&)) &operator<);
+    rational_class.def("__lt__",&__lt__<bool,Rational,Rational>);
 
     rational_class.def("__pos__", &__pos__<Rational,Rational>);
     rational_class.def("__neg__", &__neg__<Rational,Rational>);
@@ -273,6 +283,19 @@ void export_decimal()
 
 Real pi_function() { return pi; }
 
+namespace Ariadne {
+Real pow(Real, Int);
+Real sqr(Real);
+Real rec(Real);
+Real sqrt(Real x);
+Real exp(Real);
+Real log(Real);
+Real sin(Real);
+Real cos(Real);
+Real tan(Real);
+Real atan(Real);
+}
+
 void export_real()
 {
     class_<Real> real_class("Real",init<Real>());
@@ -309,17 +332,17 @@ void export_real()
 
     def("pi", (Real(*)()) &pi_function);
 
-    def("pow",  (Real(*)(Real const&, int)) &pow);
-    def("sqr", (Real(*)(Real const&)) &sqr);
-    def("rec", (Real(*)(Real const&)) &rec);
-    def("sqrt", (Real(*)(Real const&)) &sqrt);
-    def("exp", (Real(*)(Real const&)) &exp);
-    def("log", (Real(*)(Real const&)) &log);
+    def("pow",  (Real(*)(Real, int)) &pow);
+    def("sqr", (Real(*)(Real)) &sqr);
+    def("rec", (Real(*)(Real)) &rec);
+    def("sqrt", (Real(*)(Real)) &sqrt);
+    def("exp", (Real(*)(Real)) &exp);
+    def("log", (Real(*)(Real)) &log);
 
-    def("sin", (Real(*)(Real const&)) &sin);
-    def("cos", (Real(*)(Real const&)) &cos);
-    def("tan", (Real(*)(Real const&)) &tan);
-    def("atan", (Real(*)(Real const&)) &atan);
+    def("sin", (Real(*)(Real)) &sin);
+    def("cos", (Real(*)(Real)) &cos);
+    def("tan", (Real(*)(Real)) &tan);
+    def("atan", (Real(*)(Real)) &atan);
 
     implicitly_convertible<int,Real>();
 #ifdef HAVE_GMPXX_H
@@ -413,7 +436,7 @@ void export_validated_float()
     from_python_list<ValidatedFloat>();
     //from_python_str<ValidatedFloat>();
 
-    def("mag", (Float(*)(ValidatedFloat)) &mag);
+    def("mag", (UpperFloat(*)(ValidatedFloat)) &mag);
 
     def("max", (ValidatedFloat(*)(ValidatedFloat,ValidatedFloat)) &max);
     def("min", (ValidatedFloat(*)(ValidatedFloat,ValidatedFloat)) &min);

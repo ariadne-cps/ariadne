@@ -37,17 +37,17 @@
 
 namespace Ariadne {
 
-tribool
+Tribool
 Polytope::separated(const ExactBox& bx) const {
     return this->bounding_box().separated(bx) || indeterminate;
 }
 
-tribool
+Tribool
 Polytope::overlaps(const ExactBox& bx) const {
     return bx.covers(baricentre(*this)) || indeterminate;
 }
 
-tribool
+Tribool
 Polytope::inside(const ExactBox& bx) const {
     return this->bounding_box().inside(bx) || indeterminate;
 }

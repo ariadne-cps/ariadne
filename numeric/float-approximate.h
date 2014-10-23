@@ -24,6 +24,7 @@
 /*! \file float-approximate.h
  *  \brief Approximate floating-point number class.
  */
+
 #ifndef ARIADNE_FLOAT_APPROXIMATE_H
 #define ARIADNE_FLOAT_APPROXIMATE_H
 

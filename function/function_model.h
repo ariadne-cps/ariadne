@@ -94,8 +94,8 @@ template<> class ScalarFunctionModelInterface<ValidatedTag>
     virtual ScalarFunctionModelInterface<ValidatedTag>* _derivative(Nat j) const = 0;
     virtual ScalarFunctionModelInterface<ValidatedTag>* _antiderivative(Nat j) const = 0;
 
-    virtual Tribool _refines(const ScalarFunctionModelInterface<ValidatedTag>& f) const = 0;
-    virtual Tribool _disjoint(const ScalarFunctionModelInterface<ValidatedTag>& f) const = 0;
+    virtual Boolean _refines(const ScalarFunctionModelInterface<ValidatedTag>& f) const = 0;
+    virtual Boolean _disjoint(const ScalarFunctionModelInterface<ValidatedTag>& f) const = 0;
     virtual ScalarFunctionModelInterface<ValidatedTag>* _intersection(const ScalarFunctionModelInterface<ValidatedTag>& f) const = 0;
 
     virtual Void _iadd(const ValidatedNumber& c) = 0;
@@ -124,9 +124,9 @@ template<class F> class ScalarFunctionModelMixin<F,ValidatedTag>
         return unchecked_evaluate(static_cast<const F&>(*this),x); }
     ScalarFunctionModelInterface<ValidatedTag>* _embed(const ExactBox& d1, const ExactBox& d2) const {
         return new F(embed(d1,static_cast<const F&>(*this),d2)); }
-    Tribool _refines(const ScalarFunctionModelInterface<ValidatedTag>& f) const {
+    Boolean _refines(const ScalarFunctionModelInterface<ValidatedTag>& f) const {
         ARIADNE_ASSERT(dynamic_cast<const F*>(&f)); return refines(static_cast<const F&>(*this),dynamic_cast<const F&>(f)); }
-    Tribool _disjoint(const ScalarFunctionModelInterface<ValidatedTag>& f) const {
+    Boolean _disjoint(const ScalarFunctionModelInterface<ValidatedTag>& f) const {
         ARIADNE_ASSERT(dynamic_cast<const F*>(&f)); return disjoint(static_cast<const F&>(*this),dynamic_cast<const F&>(f)); }
     ScalarFunctionModelInterface<ValidatedTag>* _intersection(const ScalarFunctionModelInterface<ValidatedTag>& f) const {
         ARIADNE_ASSERT(dynamic_cast<const F*>(&f)); return new F(intersection(static_cast<const F&>(*this),dynamic_cast<const F&>(f))); }
@@ -200,9 +200,9 @@ inline ScalarFunctionModel<ValidatedTag> restrict(const ScalarFunctionModel<Vali
 inline ScalarFunctionModel<ValidatedTag> intersection(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
     return f1._ptr->_intersection(f2); }
 
-inline Tribool disjoint(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
+inline Boolean disjoint(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
     return f1._ptr->_disjoint(f2); }
-inline Tribool refines(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
+inline Boolean refines(const ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) {
     return f1._ptr->_refines(f2); }
 
 inline ScalarFunctionModel<ValidatedTag>& operator+=(ScalarFunctionModel<ValidatedTag>& f1, const ScalarFunctionModel<ValidatedTag>& f2) { f1._ptr->_isma(ValidatedNumber(+1),f2); return  f1; }
@@ -245,7 +245,7 @@ inline ScalarFunctionModel<ValidatedTag> operator*(const ValidatedNumber& c1, co
 inline ScalarFunctionModel<ValidatedTag> operator/(const ValidatedNumber& c1, const ScalarFunctionModel<ValidatedTag>& f2) {
     ScalarFunctionModel<ValidatedTag> r=rec(f2); r*=c1; return r; }
 
-inline ScalarFunctionModel<ValidatedTag>& ScalarFunctionModel<ValidatedTag>::operator=(const ValidatedNumber& c) { (*this)*=0.0; (*this)+=c; return *this; }
+inline ScalarFunctionModel<ValidatedTag>& ScalarFunctionModel<ValidatedTag>::operator=(const ValidatedNumber& c) { (*this)*=0; (*this)+=c; return *this; }
 
 template<class F> F ScalarFunctionModelMixin<F,ValidatedTag>::apply(OperatorCode op) const {
     const F& f=static_cast<const F&>(*this);

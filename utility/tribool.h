@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tribool.h
+ *            Tribool.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -21,44 +21,24 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file tribool.h
+/*! \file Tribool.h
  *  \brief Three-valued logic variable.
  */
 
-#ifndef ARIADNE_TRIBOOL_H
-#define ARIADNE_TRIBOOL_H
-
-#include <boost/logic/tribool.hpp>
-#include <boost/logic/tribool_io.hpp>
-
-using boost::logic::tribool;
-using boost::logic::indeterminate;
-
-inline bool definitely(tribool tb) { return tb; }
-inline bool possibly(tribool tb) { return tb || indeterminate(tb); }
-
-inline tribool operator^(tribool tb1, tribool tb2) { return (tb1&&!tb2)||(!tb1&&tb2); }
-
-inline std::ostream& operator<<(std::ostream& os, tribool tb) {  return boost::logic::operator<<(os << std::boolalpha,tb); }
-
-namespace Ariadne {
-typedef tribool Tribool;
-} // namespace Ariadne
+#include "numeric/logical.h"
 
 /*
 #ifdef DOXYGEN
 namespace Ariadne {
     //! \brief A three-valued logic type, with values \f$\top\f$ (true), \f$\bot\f$ (false) and \f$\uparrow\f$ (indeterminate).
-    class tribool {
+    class Tribool {
     //! \brief Returns \c true if \a tb is \c true, and \c false if \a tb is \c indeterminate or \c false.
-    friend bool definitely(tribool tb);
+    friend bool definitely(Tribool tb);
     //! \brief Returns \c true if \a tb is \c true or \c indeteriminate, and \c false if \a tb is \c false.
-    friend bool possibly(tribool tb);
+    friend bool possibly(Tribool tb);
     //! \brief Returns \c true if \a tb is \c indeterminate, and \c false if \a tb is \c true or \c false.
-    friend bool indeterminate(tribool tb);
+    friend bool indeterminate(Tribool tb);
     };
 }
 #endif // DOXYGEN
 */
-
-#endif // ARIADNE_TRIBOOL_H

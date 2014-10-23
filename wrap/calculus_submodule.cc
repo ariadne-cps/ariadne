@@ -361,7 +361,7 @@ void export_taylor_model()
     taylor_model_class.def("range2", (ExactInterval(*)(const ValidatedTaylorModel&)) &_range2);
     taylor_model_class.def("range3", (ExactInterval(*)(const ValidatedTaylorModel&)) &_range3);
 
-    def("split",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&,uint,tribool)) &split);
+    def("split",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&,uint,Tribool)) &split);
 
     from_python< Vector<ValidatedTaylorModel> >();
     to_python< Vector<ValidatedTaylorModel> >();

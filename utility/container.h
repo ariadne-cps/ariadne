@@ -43,10 +43,6 @@ using std::make_pair;
 
 using SizeType=std::size_t;
 
-template<class InputIterator> std::ostream&
-write_sequence(std::ostream& os, InputIterator first, InputIterator last,
-               char opening='[', char closing=']', char separator=',');
-
 template<class T> std::ostream& operator<<(std::ostream& os, const Array<T>& a) {
     bool first=true;
     for(auto x : a) {

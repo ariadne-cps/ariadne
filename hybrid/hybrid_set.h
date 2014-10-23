@@ -118,9 +118,9 @@ class HybridConstraintSet
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
     ConstraintSet const euclidean_set(DiscreteLocation loc, RealSpace spc) const;
 
-    virtual tribool overlaps(const HybridBox& bx) const override;
-    virtual tribool separated(const HybridBox& bx) const override;
-    virtual tribool covers(const HybridBox& bx) const override;
+    virtual Tribool overlaps(const HybridBox& bx) const override;
+    virtual Tribool separated(const HybridBox& bx) const override;
+    virtual Tribool covers(const HybridBox& bx) const override;
 
     virtual std::ostream& write(std::ostream& os) const override;
   protected:
@@ -158,11 +158,11 @@ class HybridBoundedConstraintSet
     //! \brief The subset of \f$\mathbb{R}^n\f$ obtained by restricting to location \a loc and ordering the variables as defined by \a spc.
     BoundedConstraintSet const euclidean_set(DiscreteLocation loc, RealSpace spc) const;
 
-    virtual tribool overlaps(const HybridBox& bx) const override;
-    virtual tribool inside(const HybridBoxes& bx) const override;
+    virtual Tribool overlaps(const HybridBox& bx) const override;
+    virtual Tribool inside(const HybridBoxes& bx) const override;
 
-    virtual tribool separated(const HybridBox& bx) const override;
-    virtual tribool covers(const HybridBox& bx) const override;
+    virtual Tribool separated(const HybridBox& bx) const override;
+    virtual Tribool covers(const HybridBox& bx) const override;
     virtual HybridUpperBoxes bounding_box() const override;
 
     virtual std::ostream& write(std::ostream& os) const override;
@@ -700,25 +700,25 @@ class HybridGridTreeSet
     HybridSpace space() const { return this->grid().space(); }
 
     //!
-    tribool separated(const HybridBox& hbx) const {
+    Tribool separated(const HybridBox& hbx) const {
         locations_const_iterator _loc_iter = this->_map.find( hbx.location() );
         return _loc_iter != this->locations_end() || _loc_iter->second.separated( hbx.continuous_set() );
     }
 
     //!
-    tribool overlaps(const HybridBox& hbx) const {
+    Tribool overlaps(const HybridBox& hbx) const {
         locations_const_iterator _loc_iter = this->_map.find( hbx.location() );
         return _loc_iter != this->locations_end() && _loc_iter->second.overlaps( hbx.continuous_set() );
     }
 
     //!
-    tribool covers(const HybridBox& hbx) const {
+    Tribool covers(const HybridBox& hbx) const {
         locations_const_iterator _loc_iter=this->_map.find(hbx.location());
         return _loc_iter!=this->locations_end() && _loc_iter->second.covers( hbx.continuous_set() );
     }
 
     //!
-    tribool inside(const HybridBoxes& hbx) const  {
+    Tribool inside(const HybridBoxes& hbx) const  {
         for( locations_const_iterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
             if( !_loc_iter->second.empty() ) {
                 DiscreteLocation const& loc = _loc_iter->first;

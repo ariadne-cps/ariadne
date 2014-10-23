@@ -1,7 +1,7 @@
 /***************************************************************************
  *            real.cc
  *
- *  Copyright 2008-10  Pieter Collins
+ *  Copyright 2013-14  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,227 +21,223 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "utility/standard.h"
-
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <cassert>
-#include <limits>
+/*! \file real.cc
+ *  \brief
+ */
 
 
 
-#include "config.h"
-#include "numeric/real.h"
+#include "utility/module.h"
 #include "expression/operators.h"
+#include "expression/templates.h"
 
-#include "numeric/float.h"
-#include "numeric/float-approximate.h"
-#include "numeric/float-validated.h"
-#include "numeric/float-exact.h"
+#include "real.h"
+#include "logical.h"
+#include "integer.h"
+#include "rational.h"
+
+#include "float.h"
+#include "float64.h"
+#include "floatmp.h"
 
 namespace Ariadne {
 
-namespace{
-static const double _pi_up=3.1415926535897936;
-static const double _pi_approx=3.1415926535897931;
-static const double _pi_down=3.1415926535897931;
-static const double _infinity=std::numeric_limits<double>::infinity();
+typedef Real::Interface RealInterface;
+
+struct Real::Interface {
+  public:
+    virtual ~Interface() = default;
+    virtual BoundFloat _value() const = 0;
+    virtual BoundFloat64 _evaluate(Precision64) const = 0;
+    virtual BoundFloatMP _evaluate(PrecisionMP) const = 0;
+  public:
+    virtual OutputStream& _write(OutputStream& os) const = 0;
+};
+
+template<class O, class... AS> struct RealWrapper : virtual RealInterface, ExpressionTemplate<O,AS...>, BoundFloat {
+    RealWrapper(O o, AS... as) : ExpressionTemplate<O,AS...>(o,as...)
+        , BoundFloat(static_cast<ExpressionTemplate<O,AS...>const&>(*this).operator BoundFloat()) { }
+    virtual BoundFloat _value() const { return static_cast<BoundFloat const&>(*this); }
+    //virtual BoundFloat64 _evaluate(Precision64 pr) const { ExpressionTemplate<O,AS...> const& self=*this; return self(pr); }
+    //virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ExpressionTemplate<O,AS...> const& self=*this; return self(pr); }
+    virtual BoundFloat64 _evaluate(Precision64 pr) const {  ARIADNE_NOT_IMPLEMENTED; }
+    virtual BoundFloatMP _evaluate(PrecisionMP pr) const {  ARIADNE_NOT_IMPLEMENTED; }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<O,AS...> const&>(*this); }
+};
+
+template<class X> struct RealConstant : RealInterface, BoundFloat {
+    X _c;
+  public:
+    RealConstant(X const& x) : BoundFloat(x), _c(x) { }
+    virtual BoundFloat _value() const { return static_cast<BoundFloat const&>(*this); }
+    virtual BoundFloat64 _evaluate(Precision64 pr) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
+};
+
+template<> struct RealConstant<Integer> : RealInterface, BoundFloat {
+    typedef Integer X;
+     X _c;
+  public:
+    RealConstant(X const& x) : BoundFloat(x), _c(x) { }
+    virtual BoundFloat _value() const { return static_cast<BoundFloat const&>(*this); }
+    virtual BoundFloat64 _evaluate(Precision64 pr) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
+};
+
+template<> struct RealConstant<BoundFloat> : RealInterface, BoundFloat {
+    typedef BoundFloat X;
+  public:
+    RealConstant(X const& x) : BoundFloat(x) { }
+    virtual BoundFloat _value() const { return static_cast<BoundFloat const&>(*this); }
+    virtual BoundFloat64 _evaluate(Precision64 pr) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<BoundFloat const&>(*this); }
+};
+
+template<class O, class... A> inline Real make_real(O o, A... a) {
+    return Real(new RealWrapper<O,A...>(o,a...));
 }
 
-class RealInterface {
-  public:
-    virtual ~RealInterface() { }
-    virtual operator ApproximateFloat () const = 0;
-    virtual operator ValidatedFloat () const = 0;
-    virtual Void write(OutputStream& os) const = 0;
-};
+inline Real::Real(RealInterface* p) : _ptr(p) { }
 
-class RealBody : public RealInterface {
-  private:
-    ValidatedFloat _ivl;
-    ApproximateFloat _flt;
-  protected:
-    RealBody(const ValidatedFloat& ivl, const ApproximateFloat& flt) : _ivl(ivl), _flt(flt) {
-        ARIADNE_ASSERT((ivl.lower_value()<=flt.value()) && (flt.value()<=ivl.upper_value())); }
-    RealBody(const ValidatedFloat& ivl) : _ivl(ivl), _flt(midpoint(ivl)) { }
-  public:
-    virtual operator ApproximateFloat () const final { return _flt; }
-    virtual operator ValidatedFloat () const final { return _ivl; }
-    virtual Void write(OutputStream& os) const = 0;
-};
 
-class RealConstant
-    : public RealBody
+// FIXME: Is this necessary?
+Real::Real(double l, double a, double u)
+    : Real(new RealConstant<BoundFloat>(BoundFloat(l,u)))
 {
-    String _name;
-  public:
-    RealConstant(const String& name, double lower, double nearest, double upper)
-        : RealBody(ValidatedFloat(lower,upper),ApproximateFloat(nearest)), _name(name) { }
-    RealConstant(const String& name, ValidatedFloat bounds, ApproximateFloat approx) : RealBody(bounds,approx), _name(name) { }
-    RealConstant(const String& name, ValidatedFloat bounds) : RealBody(bounds), _name(name) { }
-    virtual Void write(OutputStream& os) const final { os << _name; }
-};
+}
 
-class IntervalReal
-    : public RealBody
+// FIXME: Is this necessary?
+Real::Real(double x)
+    : Real(new RealConstant<BoundFloat>(BoundFloat(x)))
 {
-  public:
-    IntervalReal(double l, double u) : RealBody(ValidatedFloat(l,u),ApproximateFloat((l+u)/2)) { }
-    IntervalReal(double l, double x, double u) : RealBody(ValidatedFloat(l,u),ApproximateFloat(x)) { }
-    virtual Void write(OutputStream& os) const final { os << this->operator ValidatedFloat(); }
-};
+}
 
-class IntegerReal
-    : public RealBody
-{
-    Integer _value;
-  public:
-    IntegerReal(const Integer& z) : RealBody(ValidatedFloat(z),ApproximateFloat(midpoint(ValidatedFloat(z)))), _value(z) { }
-    virtual Void write(OutputStream& os) const final { os << _value; }
-};
+Real::Real(Dyadic const& d) : Real(Rational(d)) { }
+Real::Real(Decimal const& d) : Real(Rational(d)) { }
 
-#ifdef HAVE_GMPXX_H
-class RationalReal
-    : public RealBody
-{
-    Rational _value;
-  public:
-    RationalReal(const Rational& q) : RealBody(ValidatedFloat(q),ApproximateFloat(q)), _value(q) { }
-    virtual Void write(OutputStream& os) const final { os << _value; }
-};
-#endif // HAVE_GMPXX_H
+Float64Template<Metrc>::Float64Template(Real const& r) : Float64Template<Metrc>(r._ptr->_evaluate(Precision64())) { }
+Float64Template<Bound>::Float64Template(Real const& r) : Float64Template<Bound>(r._ptr->_evaluate(Precision64())) { }
+Float64Template<Upper>::Float64Template(Real const& r) : Float64Template<Upper>(r._ptr->_evaluate(Precision64())) { }
+Float64Template<Lower>::Float64Template(Real const& r) : Float64Template<Lower>(r._ptr->_evaluate(Precision64())) { }
+Float64Template<Apprx>::Float64Template(Real const& r) : Float64Template<Apprx>(r._ptr->_evaluate(Precision64())) { }
 
-class DecimalReal
-    : public RealBody
-{
-    Decimal _value;
-  public:
-    DecimalReal(const Decimal& d) : RealBody(ValidatedFloat(d),ApproximateFloat(d)), _value(d) { }
-    virtual Void write(OutputStream& os) const final { os << _value; }
-};
+FloatMPTemplate<Metrc>::FloatMPTemplate(Real const& r, PrecisionMP pr) : FloatMPTemplate<Metrc>(r._ptr->_evaluate(pr)) { }
+FloatMPTemplate<Bound>::FloatMPTemplate(Real const& r, PrecisionMP pr) : FloatMPTemplate<Bound>(r._ptr->_evaluate(pr)) { }
+FloatMPTemplate<Upper>::FloatMPTemplate(Real const& r, PrecisionMP pr) : FloatMPTemplate<Upper>(r._ptr->_evaluate(pr)) { }
+FloatMPTemplate<Lower>::FloatMPTemplate(Real const& r, PrecisionMP pr) : FloatMPTemplate<Lower>(r._ptr->_evaluate(pr)) { }
+FloatMPTemplate<Apprx>::FloatMPTemplate(Real const& r, PrecisionMP pr) : FloatMPTemplate<Apprx>(r._ptr->_evaluate(pr)) { }
 
-class DyadicReal
-    : public RealBody
-{
-    Dyadic _value;
-  public:
-    DyadicReal(const Dyadic& x) : RealBody(ValidatedFloat(x),ApproximateFloat(x)), _value(x) { }
-    virtual Void write(OutputStream& os) const final { os << _value; }
-};
+UpperFloat Real::upper() const { return this->_ptr->_value(); }
+LowerFloat Real::lower() const { return this->_ptr->_value(); }
+ApproximateFloat Real::approx() const { return this->_ptr->_value(); }
 
-class ExactFloatReal
-    : public RealBody
-{
-    ExactFloat _value;
-  public:
-    ExactFloatReal(double x) : ExactFloatReal(ExactFloat(x)) { }
-    ExactFloatReal(const ExactFloat& x) : RealBody(ValidatedFloat(x),ApproximateFloat(x)), _value(x) { }
-    virtual Void write(OutputStream& os) const final { os << _value; }
-};
+double Real::get_d() const { return this->approx().get_d(); }
 
-// Needed for rec
-static inline ApproximateFloat operator/(int n, ApproximateFloat x) { return ApproximateFloat(n)/x; }
-static inline ValidatedFloat operator/(int n, ValidatedFloat x) { return ExactFloat(n)/x; }
+ValidatedFloat::ValidatedFloat(Real const& x) : ValidatedFloat(x.lower(),x.upper()) { }
+UpperFloat::UpperFloat(Real const& x) : UpperFloat(x.upper()) { }
+LowerFloat::LowerFloat(Real const& x) : LowerFloat(x.lower()) { }
+ApproximateFloat::ApproximateFloat(Real const& x) : ApproximateFloat(x.approx()) { }
 
-class UnaryReal
-    : public RealBody
-{
-    Operator _op; Real _arg;
-  public:
-    UnaryReal(Operator op, const Real& arg)
-        : RealBody(compute(op,ValidatedFloat(arg)),compute(op,ApproximateFloat(arg))), _op(op), _arg(arg) { }
-    virtual Void write(OutputStream& os) const final { os << _op << "(" << _arg << ")"; }
-};
+Real::Real(std::uint64_t m, void*) : Real(new RealConstant<Integer>(m)) { }
+Real::Real(std::int64_t n, void*) : Real(new RealConstant<Integer>(n)) { }
 
-class BinaryReal
-    : public RealBody
-{
-    Operator _op; Real _arg1; Real _arg2;
-  public:
-    BinaryReal(Operator op, const Real& arg1, const Real& arg2)
-        : RealBody(compute(op,ValidatedFloat(arg1),ValidatedFloat(arg2)),compute(op,ApproximateFloat(arg1),ApproximateFloat(arg2)))
-        , _op(op), _arg1(arg1), _arg2(arg2) { }
-    virtual Void write(OutputStream& os) const final { os << _op << "(" << _arg1 << "," << _arg2 << ")"; }
-};
+Real::Real() : Real(new RealConstant<Integer>(0)) { }
+Real::Real(Integer const& x) : Real(new RealConstant<Integer>(x)) { }
+Real::Real(Rational const& x) : Real(new RealConstant<Rational>(x)) { }
+Real::Real(ExactFloat x) : Real(new RealConstant<ExactFloat>(x)) { }
 
-Real::Real(RealInterface* raw_ptr) : _ptr(raw_ptr) { }
+Real add(Real x1, Real x2) { return make_real(Add(),x1,x2); }
+Real sub(Real x1, Real x2) { return make_real(Sub(),x1,x2); }
+Real mul(Real x1, Real x2) { return make_real(Mul(),x1,x2); }
+Real div(Real x1, Real x2) { return make_real(Div(),x1,x2); }
+Real pow(Real x1, Nat m2) { return make_real(Pow(),x1,Int(m2)); }
+Real pow(Real x1, Int n2) { return make_real(Pow(),x1,n2); }
+Real pos(Real x) { return make_real(Pos(),x); }
+Real neg(Real x) { return make_real(Neg(),x); }
+Real sqr(Real x) { return make_real(Sqr(),x); }
+Real rec(Real x) { return make_real(Rec(),x); }
+Real sqrt(Real x) { return make_real(Sqrt(),x); }
+Real exp(Real x) { return make_real(Exp(),x); }
+Real log(Real x) { return make_real(Log(),x); }
+Real sin(Real x) { return make_real(Sin(),x); }
+Real cos(Real x) { return make_real(Cos(),x); }
+Real tan(Real x) { return make_real(Tan(),x); }
+Real atan(Real x) { return make_real(Atan(),x); }
 
-Real::~Real() { }
-Real::Real() : _ptr(new IntegerReal(0)) { }
-Real::Real(double l, double u) : _ptr(new IntervalReal(l,u)) { }
-Real::Real(double l, double x, double u) : _ptr(new IntervalReal(l,x,u)) { }
+Real abs(Real x) { return make_real(Abs(),x); }
+Real max(Real x1, Real x2) { return make_real(Max(),x1,x2); }
+Real min(Real x1, Real x2) { return make_real(Min(),x1,x2); }
 
-Real::Real(unsigned int m) : _ptr(new IntegerReal(m)) { }
-Real::Real(int n) : _ptr(new IntegerReal(n)) { }
-Real::Real(double x) : _ptr(new ExactFloatReal(x)) { }
-Real::Real(const Dyadic& d) : _ptr(new DyadicReal(d)) { }
-Real::Real(const Decimal& d) : _ptr(new DecimalReal(d)) { }
-#ifdef HAVE_GMPXX_H
-Real::Real(const Integer& z) : _ptr(new IntegerReal(z)) { }
-Real::Real(const Rational& q) : _ptr(new RationalReal(q)) { }
-#endif // HAVE_GMPXX_H
-Real::Real(const ExactFloat& x) : _ptr(new ExactFloatReal(x)) { }
+ErrorFloat mag(Real x) { return mag(static_cast<BoundFloat>(x)); }
 
-Real::Real(const Real& x) : _ptr(x._ptr) { }
-Real& Real::operator=(const Real& x) { this->_ptr=x._ptr; return *this; }
-double Real::get_d() const { return this->_ptr->operator ApproximateFloat().get_d(); }
+Real operator+(Real x) { return make_real(Pos(),x); }
+Real operator-(Real x) { return make_real(Neg(),x); }
+Real operator+(Real x1, Real x2) { return make_real(Add(),x1,x2); }
+Real operator-(Real x1, Real x2) { return make_real(Sub(),x1,x2); }
+Real operator*(Real x1, Real x2) { return make_real(Mul(),x1,x2); }
+Real operator/(Real x1, Real x2) { return make_real(Div(),x1,x2); }
+Real& operator+=(Real& x1, Real x2) { return x1=make_real(Add(),x1,x2); }
+Real& operator-=(Real& x1, Real x2) { return x1=make_real(Sub(),x1,x2); }
+Real& operator*=(Real& x1, Real x2) { return x1=make_real(Mul(),x1,x2); }
+Real& operator/=(Real& x1, Real x2) { return x1=make_real(Div(),x1,x2); }
 
-Real::operator UpperFloat() const { return (this->_ptr->operator ValidatedFloat()).upper(); }
-Real::operator ValidatedFloat() const { return this->_ptr->operator ValidatedFloat(); }
-Real::operator ApproximateFloat() const { return this->_ptr->operator ApproximateFloat(); }
+OutputStream& operator<<(OutputStream& os, Real const& x) { return x._ptr->_write(os); }
 
-ApproximateFloat::ApproximateFloat(const Real& x) : ApproximateFloat(x._ptr->operator ApproximateFloat()) { }
-ValidatedFloat::ValidatedFloat(const Real& x) : ValidatedFloat(x._ptr->operator ValidatedFloat()) { }
+Bool same(Real x1, Real x2) { ARIADNE_NOT_IMPLEMENTED; }
 
-ExactInterval::ExactInterval(const Real& x) : ExactInterval(ValidatedFloat(x)) { }
+NegSierpinski eq(Real x1, Real x2) { return BoundFloat(x1)==BoundFloat(x2); }
+Tribool lt(Real x1, Real x2) { return BoundFloat(x1)< BoundFloat(x2); }
 
-Real _make_real(const ExactInterval& ivl) { return Real(ivl.lower().get_d(),ivl.upper().get_d()); }
+NegSierpinski operator==(Real x1, Real x2) { return BoundFloat(x1)==BoundFloat(x2); }
+Sierpinski operator!=(Real x1, Real x2) { return BoundFloat(x1)!=BoundFloat(x2); }
+Tribool operator< (Real x1, Real x2) { return BoundFloat(x1)< BoundFloat(x2); }
+Tribool operator> (Real x1, Real x2) { return BoundFloat(x1)> BoundFloat(x2); }
+Tribool operator<=(Real x1, Real x2) { return BoundFloat(x1)<=BoundFloat(x2); }
+Tribool operator>=(Real x1, Real x2) { return BoundFloat(x1)>=BoundFloat(x2); }
 
-Real operator+(const Real& x) { return Real(new UnaryReal(POS,x)); }
-Real operator-(const Real& x) { return Real(new UnaryReal(NEG,x)); }
-Real operator+(const Real& x, const Real& y) { return Real(new BinaryReal(ADD,x,y)); }
-Real operator-(const Real& x, const Real& y) { return Real(new BinaryReal(SUB,x,y)); }
-Real operator*(const Real& x, const Real& y) { return Real(new BinaryReal(MUL,x,y)); }
-Real operator/(const Real& x, const Real& y) { return Real(new BinaryReal(DIV,x,y)); }
+NegSierpinski operator==(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+Sierpinski operator!=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+Tribool operator< (Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+Tribool operator> (Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+Tribool operator<=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
+Tribool operator>=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 
-Float mag(const Real& x) { ARIADNE_NOT_IMPLEMENTED; }
+template<> String class_name<Real>() { return "Real"; }
 
-const Real pi=Real(new RealConstant("pi",_pi_down,_pi_approx,_pi_up));
-const Real infinity=Real(new RealConstant("inf",inf,inf,inf));
+const Real pi = Real(3.1415926535897930, 3.141592653589793238, 3.1415926535897936);
+const Real infinity = Real(inf.get_d());
 
-Real abs(const Real& x) { return Real(new UnaryReal(ABS,x)); }
-Real pos(const Real& x) { return Real(new UnaryReal(POS,x)); }
-Real neg(const Real& x) { return Real(new UnaryReal(NEG,x)); }
-Real sqr(const Real& x) { return Real(new UnaryReal(SQR,x)); }
-Real rec(const Real& x) { return Real(new UnaryReal(REC,x)); }
-Real add(const Real& x, const Real& y) { return Real(new BinaryReal(ADD,x,y)); }
-Real sub(const Real& x, const Real& y) { return Real(new BinaryReal(SUB,x,y)); }
-Real mul(const Real& x, const Real& y) { return Real(new BinaryReal(MUL,x,y)); }
-Real div(const Real& x, const Real& y) { return Real(new BinaryReal(DIV,x,y)); }
-Real pow(const Real& x, uint m) { return Real(new BinaryReal(POW,x,m)); }
-Real pow(const Real& x, int n) { return Real(new BinaryReal(POW,x,n)); }
-Real sqrt(const Real& x) { return Real(new UnaryReal(SQRT,x)); }
-Real exp(const Real& x) { return Real(new UnaryReal(EXP,x)); }
-Real log(const Real& x) { return Real(new UnaryReal(LOG,x)); }
-Real sin(const Real& x) { return Real(new UnaryReal(SIN,x)); }
-Real cos(const Real& x) { return Real(new UnaryReal(COS,x)); }
-Real tan(const Real& x) { return Real(new UnaryReal(TAN,x)); }
-Real asin(const Real& x) { return Real(new UnaryReal(ASIN,x)); }
-Real acos(const Real& x) { return Real(new UnaryReal(ACOS,x)); }
-Real atan(const Real& x) { return Real(new UnaryReal(ATAN,x)); }
+BoundFloatMP Real::operator() (PrecisionMP pr) const {
+    return this->_ptr->_evaluate(pr);
+}
 
-
-
-std::ostream& operator<<(std::ostream& os, const Real& x)
-{
-    x._ptr->write(os);
-    return os;
-
+BoundFloatMP Real::evaluate(Accuracy accuracy) const {
+    uint effort=1;
+    uint acc=accuracy.bits();
+    PrecisionMP precision=effort*64;
+    ErrorFloatMP error_bound(two_exp(-acc).get_d(),precision);
+        std::cerr << "  acc="<<acc<<" max_err=="<<error_bound<<"\n";
+    ErrorFloatMP error=2*error_bound;
+    BoundFloatMP res;
+    while (!(error.get_flt()<error_bound.get_flt())) {
+        res=(*this)(precision);
+        error=res.error();
+        std::cerr << "  eff="<<effort<<" prec="<<precision<<" err="<<error<<" res="<<res<<"\n";
+        effort+=1;
+        precision=effort*64;
+    }
+    return res;
 }
 
 
-
+// FIXME: Should go in Float64
+Float64Template<Bounded>::operator Float64Template<Metric>() const { ARIADNE_NOT_IMPLEMENTED; }
+Float64Template<Bounded>::operator Float64Template<Upper>() const { ARIADNE_NOT_IMPLEMENTED; }
+Float64Template<Bounded>::operator Float64Template<Lower>() const { ARIADNE_NOT_IMPLEMENTED; }
+Float64Template<Bounded>::operator Float64Template<Approximate>() const { ARIADNE_NOT_IMPLEMENTED; }
 
 } // namespace Ariadne
 

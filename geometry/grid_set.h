@@ -135,13 +135,13 @@ class NotAllowedMoveException : public std::logic_error {
  * space into enabled and disabled cells. This is required for representing
  * subsets of the state space.
  *
- * \b Storage: We only store pointers to the left and right subtrees and the tribool
+ * \b Storage: We only store pointers to the left and right subtrees and the Tribool
  * value indicating whether this cell is enabled/disabled or we do not know.
  */
 class BinaryTreeNode {
   protected:
     /*! \brief Defines whether the given node of the tree is on/off or we do not know*/
-    tribool _isEnabled;
+    Tribool _isEnabled;
 
     /*! \brief The left and right subnodes of the tree. Note that,
      * \a pLeftNode == \a NULL iff \a pRightNode == \a NULL. The latter
@@ -171,14 +171,14 @@ class BinaryTreeNode {
                        const BooleanArray& theTree, const BooleanArray& theEnabledCells);
 
     /*! \brief This method is used in constructors for the node initialization */
-    void init( tribool isEnabled, BinaryTreeNode* pLeftNode, BinaryTreeNode* pRightNode );
+    void init( Tribool isEnabled, BinaryTreeNode* pLeftNode, BinaryTreeNode* pRightNode );
 
   public:
     //@{
     //! \name Constructors
 
     /*! \brief Construct a tree node. */
-    explicit BinaryTreeNode(const tribool _isEnabled = false );
+    explicit BinaryTreeNode(const Tribool _isEnabled = false );
 
     /*! \brief The copy constructor.
      * The the node and all it's sub nodes are copied.
@@ -259,7 +259,7 @@ class BinaryTreeNode {
      * NOTE: the leat and the right sub-trees (are deallocated.
      * WARNING: this method MUST NOT be called on a non-leaf node!!!
      */
-    void make_leaf( tribool is_enabled );
+    void make_leaf( Tribool is_enabled );
 
     /*! \brief Marks the leaf node as enabled, otherwise they through \a NotALeafNodeEsception */
     void set_enabled();
@@ -419,7 +419,7 @@ class GridTreeSubset
      *  This is a recursive procedure and it returns true only if there are no disabled
      *  cells in \a pCurrentNode that intersect with theBox.
      */
-    static tribool superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+    static Tribool superset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                              const uint theHeight, BinaryWord &theWord, const ExactBox& theBox );
 
     /*! \brief This method checks whether the set defined by \a pCurrentNode is a subset
@@ -428,7 +428,7 @@ class GridTreeSubset
      *  This is a recursive procedure and it returns true only if all enabled sub-cells of
      *  \a pCurrentNode are sub-sets of \a theBox.
      */
-    static tribool subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+    static Tribool subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                            const uint theHeight, BinaryWord &theWord, const ExactBox& theBox );
 
     /*! \brief This method checks whether \a theBox is disjoint from the set defined by
@@ -439,7 +439,7 @@ class GridTreeSubset
      *  have an intersection. If there are no such nodes then there is no intersection,
      *  and the sets are disjoint.
      */
-    static tribool disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+    static Tribool disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                              const uint theHeight, BinaryWord &theWord, const ExactBox& theBox );
 
     /*! \brief This method checks whether \a theBox overlaps the set defined by
@@ -451,7 +451,7 @@ class GridTreeSubset
      *  method cannot be implemented using disjoint since disjoint tests if the closures
      *  are disjoint, and overlaps tests if the interiors are not disjoint.
      */
-    static tribool intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+    static Tribool intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                                const uint theHeight, BinaryWord &theWord, const ExactBox& theBox );
 
     /*! Allow to convert the number of subdivisions in each dimension, i.e. \a numSubdivInDim,
@@ -624,16 +624,16 @@ class GridTreeSubset
     bool disjoint( const ExactBox& theBox ) const;
 
     /*! \brief Tests if the interior of a grid set is a superset of a box. */
-    tribool covers( const ExactBox& theBox ) const;
+    Tribool covers( const ExactBox& theBox ) const;
 
     /*! \brief Tests if (the closure of) a grid set is a subset of the interior of box. */
-    tribool inside( const ExactBox& theBox  ) const;
+    Tribool inside( const ExactBox& theBox  ) const;
 
     /*! \brief Tests if (the closure of) a grid set is disjoint from (the closure of) a box. */
-    tribool separated( const ExactBox& theBox  ) const;
+    Tribool separated( const ExactBox& theBox  ) const;
 
     /*! \brief Tests if a grid set overlaps (intersects the interior of) a box. */
-    tribool overlaps( const ExactBox& theBox ) const;
+    Tribool overlaps( const ExactBox& theBox ) const;
 
     //@}
 
@@ -1021,7 +1021,7 @@ class GridTreeCursor {
      * if left_or_right == false then we go left, if left_or_right == true then right
      * if left_or_right == indeterminate then we are going one level up.
      */
-    void updateTheCurrentGridCell( tribool left_or_right );
+    void updateTheCurrentGridCell( Tribool left_or_right );
 
     friend std::ostream& operator<<(std::ostream& os, const GridTreeCursor& theGridTreeCursor);
 
@@ -1174,7 +1174,7 @@ class GridTreeConstIterator
      * on the first enabled leaf node (firstLastNone == true) or the last one (firstLastNone == false)
      * or we are constructing the "end iterator" that does not point anywhere.
      */
-    explicit GridTreeConstIterator( const GridTreeSubset * pSubPaving, const tribool firstLastNone );
+    explicit GridTreeConstIterator( const GridTreeSubset * pSubPaving, const Tribool firstLastNone );
 
     /*! \brief The copy constructor that copies the current state by copying the
      *   underlying GridTreeCursor. The latter is copied by it's copy constructor.
@@ -1216,13 +1216,13 @@ class GridTreeConstIterator
 
 /****************************************BinaryTreeNode**********************************************/
 
-inline void BinaryTreeNode::init( tribool isEnabled, BinaryTreeNode* pLeftNode, BinaryTreeNode* pRightNode ){
+inline void BinaryTreeNode::init( Tribool isEnabled, BinaryTreeNode* pLeftNode, BinaryTreeNode* pRightNode ){
     _isEnabled = isEnabled;
     _pLeftNode = pLeftNode;
     _pRightNode = pRightNode;
 }
 
-inline BinaryTreeNode::BinaryTreeNode(const tribool isEnabled){
+inline BinaryTreeNode::BinaryTreeNode(const Tribool isEnabled){
     init( isEnabled, NULL, NULL );
 }
 
@@ -1326,7 +1326,7 @@ inline void BinaryTreeNode::set_unknown() {
     }
 }
 
-inline void BinaryTreeNode::make_leaf(tribool is_enabled ){
+inline void BinaryTreeNode::make_leaf(Tribool is_enabled ){
     _isEnabled = is_enabled;
     if( _pLeftNode != NULL ) { delete _pLeftNode; _pLeftNode= NULL; }
     if( _pRightNode != NULL ) { delete _pRightNode; _pRightNode= NULL; }
@@ -1500,8 +1500,8 @@ inline GridTreeCursor& GridTreeCursor::move_right() {
     return move(true);
 }
 
-inline void GridTreeCursor::updateTheCurrentGridCell( tribool left_or_right ){
-    if( ! indeterminate(left_or_right) ){
+inline void GridTreeCursor::updateTheCurrentGridCell( Tribool left_or_right ){
+    if( is_determinate(left_or_right) ){
         //Here left_or_right is either true or false, also true defines moving to the right branch
         _theCurrentGridCell._theWord.push_back( definitely( left_or_right ) );
     } else {
@@ -1572,9 +1572,9 @@ inline GridTreeConstIterator& GridTreeConstIterator::operator=( const GridTreeCo
     return *this;
 }
 
-inline GridTreeConstIterator::GridTreeConstIterator( const GridTreeSubset * pSubPaving, const tribool firstLastNone ):
+inline GridTreeConstIterator::GridTreeConstIterator( const GridTreeSubset * pSubPaving, const Tribool firstLastNone ):
     _pGridTreeCursor(pSubPaving) {
-    if( ! indeterminate( firstLastNone ) ){
+    if( is_determinate( firstLastNone ) ){
         //If the first/last enabled node is not found, it means that there are no elements
         //to iterate on, then we switch to the "end iterator" state
         _is_in_end_state = ! navigate_to( definitely( firstLastNone ) );

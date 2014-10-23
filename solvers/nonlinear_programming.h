@@ -284,12 +284,12 @@ class KrawczykOptimiser
     //! \brief Solve the linear programming problem \f$\max f(x) \text{ such that } x\in D \text{ and } g(x)\in C\f$.
     virtual Vector<ValidatedNumber> minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
     //! \brief Tests is the nonlinear programming problem \f$x\in D \text{ and } g(x)\in C\f$ is feasible.
-    virtual tribool feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
+    virtual Tribool feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const;
 
   public:
     //! \brief Try to solve the nonlinear constraint problem by applying the Krawczyk contractor to the Kuhn-Tucker conditions,
     //! hotstarting the iteration with the primal and dual variables.
-    tribool minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C,
+    Tribool minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, ExactBox C,
                      const ValidatedFloat& t0, const ValidatedFloatVector& x0, const ValidatedFloatVector& y0, const ValidatedFloatVector& z0) const;
 
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.

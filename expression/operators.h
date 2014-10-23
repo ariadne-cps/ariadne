@@ -38,20 +38,21 @@
 
 #include "utility/tribool.h"
 #include "utility/string.h"
+#include "numeric/logical.h"
 #include "numeric/numeric.h"
 
 namespace Ariadne {
 
 typedef void Void;
 typedef bool Bool;
-typedef bool Boolean;
-typedef tribool Tribool;
 typedef unsigned int Nat;
 typedef int Int;
 
 typedef std::ostream OutputStream;
 
 class String;
+class Boolean;
+class Tribool;
 
 enum OperatorKind {
     VARIABLE,
@@ -135,8 +136,8 @@ class Operator {
 
 template<class R, class A> inline R compare(OperatorCode op, const A& x1, const A& x2) {
     switch(op) {
-        case EQ: return x1==x2;
-        case NEQ: return x1!=x2;
+        case EQ: return static_cast<R>(x1==x2);
+        case NEQ: return static_cast<R>(x1!=x2);
         case LEQ: return x1<=x2;
         case GEQ: return x1>=x2;
         case LT: return x1< x2;
@@ -144,7 +145,7 @@ template<class R, class A> inline R compare(OperatorCode op, const A& x1, const 
         default: ARIADNE_FAIL_MSG("Cannot compute comparison "<<op<<" on "<<x1<<" and "<<x2);
     }
 }
-template<> inline Bool compare(OperatorCode op, const String& x1, const String& x2) {
+template<> inline Boolean compare(OperatorCode op, const String& x1, const String& x2) {
     switch(op) {
         case EQ: return x1==x2;
         case NEQ: return x1!=x2;
@@ -167,7 +168,7 @@ template<class X> inline X compute(OperatorCode op, const X& x) {
         default: ARIADNE_FAIL_MSG("Cannot compute "<<op<<" on "<<x);
     }
 }
-template<> inline Bool compute(OperatorCode op, const Bool& x) {
+template<> inline Boolean compute(OperatorCode op, const Boolean& x) {
     switch(op) {
         case NOT: return !x;
         default: ARIADNE_FAIL_MSG("Cannot compute "<<op<<" on "<<x);
@@ -200,7 +201,7 @@ template<class X> inline X compute(OperatorCode op, const X& x1, const X& x2) {
         default: ARIADNE_FAIL_MSG("Cannot compute "<<op<<" on "<<x1<<" and "<<x2);
     }
 }
-template<> inline Bool compute(OperatorCode op, const Bool& x1, const Bool& x2) {
+template<> inline Boolean compute(OperatorCode op, const Boolean& x1, const Boolean& x2) {
     switch(op) {
         case AND: return x1 && x2;
         case OR: return x1 || x2;
@@ -255,46 +256,32 @@ template<> inline Integer compute(OperatorCode op, const Integer& x, Int n) {
 struct GtrZero {}; struct LessZero {};
 
 struct Gtr {
-    Bool operator()(const Integer& x1, const Integer& x2) const {
-        return (x1>x2); }
-    Tribool operator()(const Real& x1, const Real& x2) const {
-        return (x1==x2) ? indeterminate : tribool(x1>x2); }
-    Tribool operator()(const Float& x1, const Float& x2) const {
-        return (x1==x2) ? indeterminate : tribool(x1>x2); }
-    Tribool operator()(const ExactInterval& x1, const ExactInterval& x2) const {
-        if(x1.lower()>x2.upper()) { return true; } else if(x1.upper()<x2.lower()) { return false; } else { return indeterminate; } }
+    template<class T1, class T2> auto operator()(const T1& a1, const T2& a2) const -> decltype(a1> a2) { return a1 >  a2; }
     OperatorCode code() const { return GT; } OperatorKind kind() const { return COMPARISON; }
 };
 
 struct Less {
-    Bool operator()(const Integer& x1, const Integer& x2) const {
-        return (x1<x2); }
-    Tribool operator()(const Real& x1, const Real& x2) const {
-        return (x1==x2) ? indeterminate : tribool(x1<x2); }
-    Tribool operator()(const Float& x1, const Float& x2) const {
-        return (x1==x2) ? indeterminate : tribool(x1<x2); }
-    Tribool operator()(const ExactInterval& x1, const ExactInterval& x2) const {
-        if(x1.lower()>x2.upper()) { return false; } else if(x1.upper()<x2.lower()) { return true; } else { return indeterminate; } }
+    template<class T1, class T2> auto operator()(const T1& a1, const T2& a2) const -> decltype(a1< a2) { return a1 <  a2; }
     OperatorCode code() const { return LT; } OperatorKind kind() const { return COMPARISON; }
 };
 
 struct Geq {
-    template<class T1, class T2> bool operator()(const T1& a1, const T2& a2) const { return a1 >= a2; }
+    template<class T1, class T2> auto operator()(const T1& a1, const T2& a2) const -> decltype(a1>=a2) { return a1 >= a2; }
     OperatorCode code() const { return GEQ; } OperatorKind kind() const { return COMPARISON; }
 };
 
 struct Leq {
-    template<class T1, class T2> bool operator()(const T1& a1, const T2& a2) const { return a1 <= a2; }
+    template<class T1, class T2> auto operator()(const T1& a1, const T2& a2) const -> decltype(a1<=a2) { return a1 <= a2; }
     OperatorCode code() const { return LEQ; } OperatorKind kind() const { return COMPARISON; }
 };
 
 struct Equal {
-    template<class T1, class T2> bool operator()(const T1& a1, const T2& a2) const { return a1 == a2; }
+    template<class T1, class T2> auto operator()(const T1& a1, const T2& a2) const -> decltype(a1==a2) { return a1 == a2; }
     OperatorCode code() const { return EQ; } OperatorKind kind() const { return COMPARISON; }
 };
 
 struct Unequal {
-    template<class T1, class T2> bool operator()(const T1& a1, const T2& a2) const { return a1 != a2; }
+    template<class T1, class T2> auto operator()(const T1& a1, const T2& a2) const -> decltype(a1!=a2) { return a1 != a2; }
     OperatorCode code() const { return NEQ; } OperatorKind kind() const { return COMPARISON; }
 };
 
@@ -317,6 +304,10 @@ struct Cnst {
 
 struct Ind {
     OperatorCode code() const { return IND; } OperatorKind kind() const { return COORDINATE; }
+};
+
+struct Var {
+    OperatorCode code() const { return VAR; } OperatorKind kind() const { return COORDINATE; }
 };
 
 struct Add {
@@ -429,7 +420,7 @@ struct Abs {
 
 struct Sgn {
     OperatorCode code() const { return SGN; }
-    Tribool operator()(const Real& a) const { if(a>0) { return true; } else if(a<0) { return false; } else { return indeterminate; } }
+    Tribool operator()(const Real& a) const { if(definitely(a>0)) { return true; } else if(definitely(a<0)) { return false; } else { return indeterminate; } }
 };
 
 

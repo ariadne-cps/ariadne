@@ -92,10 +92,10 @@ struct from_python<ExactPoint> {
         ExactPoint pt;
         if(xtup.check()) {
             boost::python::tuple tup=xtup(); pt=ExactPoint(len(tup));
-            for(int i=0; i!=len(tup); ++i) { pt[i]=ExactFloat(extract<double>(tup[i])); }
+            for(int i=0; i!=len(tup); ++i) { pt[i]=ExactFloat(extract<Float>(tup[i])); }
         } else if(xlst.check()) {
             boost::python::list lst=xlst(); pt=ExactPoint(len(lst));
-            for(int i=0; i!=len(lst); ++i) { pt[i]=ExactFloat(extract<double>(lst[i])); }
+            for(int i=0; i!=len(lst); ++i) { pt[i]=ExactFloat(extract<Float>(lst[i])); }
         }
         void* storage = ((converter::rvalue_from_python_storage<ExactInterval>*)data)->storage.bytes;
         new (storage) ExactPoint(pt);
@@ -159,8 +159,8 @@ class OpenSetWrapper
   public:
     OpenSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
-    tribool covers(const ExactBox& r) const { return this->get_override("covers")(); }
-    tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
+    Tribool covers(const ExactBox& r) const { return this->get_override("covers")(); }
+    Tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -170,7 +170,7 @@ class ClosedSetWrapper
   public:
     ClosedSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
-    tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
+    Tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -181,7 +181,7 @@ class OvertSetWrapper
   public:
     OvertSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
-    tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
+    Tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -192,9 +192,9 @@ class CompactSetWrapper
   public:
     CompactSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
-    tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
-    tribool inside(const ExactBox& r) const { return this->get_override("inside")(); }
-    tribool bounded() const { return this->get_override("bounded")(); }
+    Tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
+    Tribool inside(const ExactBox& r) const { return this->get_override("inside")(); }
+    Tribool bounded() const { return this->get_override("bounded")(); }
     UpperBox bounding_box() const { return this->get_override("bounding_box")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
@@ -205,9 +205,9 @@ class RegularSetWrapper
   public:
     RegularSetWrapper* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
-    tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
-    tribool covers(const ExactBox& r) const { return this->get_override("covers")(); }
-    tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
+    Tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
+    Tribool covers(const ExactBox& r) const { return this->get_override("covers")(); }
+    Tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -217,10 +217,10 @@ class LocatedSetWrapper
   public:
     LocatedSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
-    tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
-    tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
-    tribool inside(const ExactBox& r) const { return this->get_override("inside")(); }
-    tribool bounded() const { return this->get_override("bounded")(); }
+    Tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
+    Tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
+    Tribool inside(const ExactBox& r) const { return this->get_override("inside")(); }
+    Tribool bounded() const { return this->get_override("bounded")(); }
     UpperBox bounding_box() const { return this->get_override("bounding_box")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
@@ -281,7 +281,6 @@ void export_interval()
     interval_class.def(init<Real,Real>());
     interval_class.def(init<Decimal>());
     interval_class.def(init<Dyadic>());
-    interval_class.def(init<ValidatedFloat>());
     interval_class.def(init<Float>());
 #ifdef HAVE_GMPXX_H
     interval_class.def(init<Rational>());
@@ -326,10 +325,10 @@ void export_box()
     box_class.def("dimension", (uint(ExactBox::*)()const) &ExactBox::dimension);
     box_class.def("centre", (ExactPoint(ExactBox::*)()const) &ExactBox::centre);
     box_class.def("radius", (Float(ExactBox::*)()const) &ExactBox::radius);
-    box_class.def("separated", (tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::separated);
-    box_class.def("overlaps", (tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::overlaps);
-    box_class.def("covers", (tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::covers);
-    box_class.def("inside", (tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::inside);
+    box_class.def("separated", (Tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::separated);
+    box_class.def("overlaps", (Tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::overlaps);
+    box_class.def("covers", (Tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::covers);
+    box_class.def("inside", (Tribool(ExactBox::*)(const ExactBox&)const) &ExactBox::inside);
     box_class.def("empty", (bool(ExactBox::*)()const) &ExactBox::empty);
     box_class.def("widen", (ExactBox(ExactBox::*)()const) &ExactBox::widen);
     box_class.def("split", (Pair<ExactBox,ExactBox>(ExactBox::*)()const) &ExactBox::split);
@@ -372,10 +371,10 @@ void export_zonotope()
     zonotope_class.def("split", (ListSet<Zonotope>(*)(const Zonotope&)) &split);
     zonotope_class.def("__str__",&__cstr__<Zonotope>);
 
-    def("contains", (tribool(*)(const Zonotope&,const ExactPoint&)) &contains);
-    def("separated", (tribool(*)(const Zonotope&,const ExactBox&)) &separated);
-    def("overlaps", (tribool(*)(const Zonotope&,const ExactBox&)) &overlaps);
-    def("separated", (tribool(*)(const Zonotope&,const Zonotope&)) &separated);
+    def("contains", (Tribool(*)(const Zonotope&,const ExactPoint&)) &contains);
+    def("separated", (Tribool(*)(const Zonotope&,const ExactBox&)) &separated);
+    def("overlaps", (Tribool(*)(const Zonotope&,const ExactBox&)) &overlaps);
+    def("separated", (Tribool(*)(const Zonotope&,const Zonotope&)) &separated);
 
     def("polytope", (Polytope(*)(const Zonotope&)) &polytope);
     def("orthogonal_approximation", (Zonotope(*)(const Zonotope&)) &orthogonal_approximation);

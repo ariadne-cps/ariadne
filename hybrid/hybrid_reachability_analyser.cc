@@ -445,7 +445,7 @@ upper_evolve(const CompactSetInterfaceType& initial_set,
         evolve_cells=this->_upper_evolve(evolve_cells,hybrid_lock_to_grid_time,grid_depth,*_evolver);
     }
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
-    if(!evolve_cells.empty() && remainder_time > 0) {
+    if(!evolve_cells.empty() && possibly(remainder_time > 0)) {
         ARIADNE_LOG(3,"computing evolution for remainder time...\n");
         evolve_cells=this->_upper_evolve(evolve_cells,hybrid_remainder_time,grid_depth,*_evolver);
     }
@@ -497,7 +497,7 @@ upper_reach(const CompactSetInterfaceType& initial_set,
         ARIADNE_LOG(6,"evolve_cells="<<evolve_cells<<"\n");
     }
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
-    if(!evolve_cells.empty() && remainder_time > 0) {
+    if(!evolve_cells.empty() && possibly(remainder_time > 0)) {
         ARIADNE_LOG(3,"computing evolution for remainder time...\n");
         this->_adjoin_upper_reach_evolve(found_cells,accumulated_evolve_cells,evolve_cells,hybrid_remainder_time,grid_depth,*_evolver);
         reach_cells.adjoin(found_cells);
@@ -546,7 +546,7 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
         ARIADNE_LOG(3,"  found "<<found_cells.size()<<" cells.\n");
     }
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
-    if(!evolve_cells.empty() && remainder_time > 0) {
+    if(!evolve_cells.empty() && possibly(remainder_time > 0)) {
         ARIADNE_LOG(3,"computing evolution for remainder time...\n");
         this->_adjoin_upper_reach_evolve(found_cells,evolve_cells,evolve_cells,hybrid_remainder_time,grid_depth,*_evolver);
         reach_cells.adjoin(found_cells);

@@ -102,8 +102,12 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
     UpperBox image=apply(function,domain);
     ARIADNE_LOG(4,"image="<<image<<"\n");
     for(uint i=0; i!=image.size(); ++i) {
-        if(disjoint(image[i],codomain[i])) { ARIADNE_LOG(4,"  Proved disjointness using direct evaluation\n");  return make_pair(false,ExactPoint()); }
-        else bounds[i]=intersection(codomain[i],image[i]);
+        if(definitely(disjoint(image[i],codomain[i]))) {
+            ARIADNE_LOG(4,"  Proved disjointness using direct evaluation\n");
+            return make_pair(false,ExactPoint());
+        } else {
+            bounds[i]=intersection(codomain[i],image[i]);
+        }
     }
 
 
@@ -135,7 +139,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
         optimiser.feasibility_step(d,fn,c,x,y,z,t);
         if(t>=TERR) {
             ARIADNE_LOG(4,"t="<<t<<", y="<<y<<", x="<<x<<", z="<<z<<"\n");
-            if(this->check_feasibility(domain,function,codomain,make_exact(point))) { return make_pair(true,make_exact(point)); }
+            if(definitely(this->check_feasibility(domain,function,codomain,make_exact(point)))) { return make_pair(true,make_exact(point)); }
             else { ARIADNE_LOG(2,"f(y)="<<fn(make_exact(y))<<"\n"); return make_pair(indeterminate,make_exact(point)); }
         }
     }
@@ -149,7 +153,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
         // Use the computed dual variables to try to make a scalar function which is negative over the entire domain.
         // This should be easier than using all constraints separately
         ScalarTaylorFunction txg=ScalarTaylorFunction::zero(d,default_sweeper());
-        ValidatedNumber cnst=0.0;
+        ValidatedNumber cnst=0;
         for(uint j=0; j!=n; ++j) {
             txg = txg - (x_exact[j]-x_exact[n+j])*tfn[j];
             cnst += (c[j].upper()*x_exact[j]-c[j].lower()*x_exact[n+j]);
@@ -182,7 +186,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
         Pair<ExactBox,ExactBox> sd=d.split();
         Vector<ApproximateFloat> nx = ApproximateFloat(1.0-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size());
         Vector<ApproximateFloat> ny = midpoint(sd.first);
-        tribool result=this->feasible(sd.first, fn, c).first;
+        Tribool result=this->feasible(sd.first, fn, c).first;
         nx = ApproximateFloat(1.0-XSIGMA)*x + Vector<ApproximateFloat>(x.size(),XSIGMA/x.size());
         ny = midpoint(sd.second);
         result = result || this->feasible(sd.second, fn, c).first;
@@ -199,7 +203,7 @@ bool ConstraintSolver::reduce(UpperBox& domain, const ValidatedVectorFunction& f
     ARIADNE_ASSERT(function.argument_size()==domain.size());
     ARIADNE_ASSERT(function.result_size()==codomain.size());
 
-    if(domain.empty()) { return true; }
+    if(definitely(domain.empty())) { return true; }
 
     Float domain_magnitude=0.0;
     for(uint j=0; j!=domain.size(); ++j) {
@@ -209,15 +213,15 @@ bool ConstraintSolver::reduce(UpperBox& domain, const ValidatedVectorFunction& f
 
     do {
         this->hull_reduce(domain,function,codomain);
-        if(domain.empty()) { return true; }
+        if(definitely(domain.empty())) { return true; }
 
         for(uint i=0; i!=codomain.size(); ++i) {
             for(uint j=0; j!=domain.size(); ++j) {
                 this->box_reduce(domain,function[i],codomain[i],j);
-		        if(domain.empty()) { return true; }
+                if(definitely(domain.empty())) { return true; }
             }
         }
-        if(domain.empty()) { return true; }
+        if(definitely(domain.empty())) { return true; }
 
         old_domain_magnitude=domain_magnitude;
         domain_magnitude=0.0;
@@ -244,7 +248,7 @@ bool ConstraintSolver::reduce(UpperBox& domain, const List<ValidatedConstraint>&
 
     const double MINIMUM_REDUCTION = 0.75;
 
-    if(domain.empty()) { return true; }
+    if(definitely(domain.empty())) { return true; }
 
     Float domain_magnitude=0.0;
     for(uint j=0; j!=domain.size(); ++j) {
@@ -256,13 +260,13 @@ bool ConstraintSolver::reduce(UpperBox& domain, const List<ValidatedConstraint>&
         for(uint i=0; i!=constraints.size(); ++i) {
             this->hull_reduce(domain,constraints[i].function(),constraints[i].bounds());
         }
-        if(domain.empty()) { return true; }
+        if(definitely(domain.empty())) { return true; }
 
         if(USE_BOX_REDUCE) {
             for(uint i=0; i!=constraints.size(); ++i) {
                 for(uint j=0; j!=domain.size(); ++j) {
                     this->box_reduce(domain,constraints[i].function(),constraints[i].bounds(),j);
-                    if(domain[j].empty()) { return true; }
+                    if(definitely(domain[j].empty())) { return true; }
                 }
             }
         }
@@ -284,7 +288,7 @@ bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedProcedure& p
                   "procedure="<<procedure<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Ariadne::simple_hull_reduce(domain, procedure, bounds);
-    return domain.empty();
+    return definitely(domain.empty());
 }
 
 bool ConstraintSolver::hull_reduce(UpperBox& domain, const Vector<ValidatedProcedure>& procedure, const ExactBox& bounds) const
@@ -293,7 +297,7 @@ bool ConstraintSolver::hull_reduce(UpperBox& domain, const Vector<ValidatedProce
                   "procedure="<<procedure<<", bounds="<<bounds<<", domain="<<domain<<"\n");
 
     Ariadne::simple_hull_reduce(domain, procedure, bounds);
-    return domain.empty();
+    return definitely(domain.empty());
 }
 
 bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedScalarFunctionInterface& function, const ExactInterval& bounds) const
@@ -350,7 +354,7 @@ bool ConstraintSolver::monotone_reduce(UpperBox& domain, const ValidatedScalarFu
     } while(lower.width().raw()>size && upper.width().raw()>size);
     domain=subdomain;
 
-    return domain.empty();
+    return definitely(domain.empty());
 }
 
 
@@ -391,7 +395,7 @@ bool ConstraintSolver::lyapunov_reduce(UpperBox& domain, const VectorTaylorFunct
     }
 
     domain=new_domain;
-    return domain.empty();
+    return definitely(domain.empty());
 }
 
 bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctionInterface& function, const ExactInterval& bounds, uint variable) const
@@ -418,7 +422,7 @@ bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
         subinterval=ExactInterval((l*(n-i)+u*i)/n,(l*(n-i-1)+u*(i+1))/n);
         slice[variable]=subinterval;
         UpperInterval slice_image=apply(function,slice);
-        if(intersection(slice_image,bounds).empty()) {
+        if(definitely(intersection(slice_image,bounds).empty())) {
             new_interval.set_lower(subinterval.upper());
         } else {
             imax = i; break;
@@ -436,7 +440,7 @@ bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctio
         subinterval=ExactInterval((l*(n-j)+u*j)/n,(l*(n-j-1)+u*(j+1))/n);
         slice[variable]=subinterval;
         UpperInterval slice_image=apply(function,slice);
-        if(intersection(slice_image,bounds).empty()) {
+        if(definitely(intersection(slice_image,bounds).empty())) {
             new_interval.set_upper(subinterval.lower());
         } else {
             break;
@@ -476,7 +480,7 @@ Pair<UpperBox,UpperBox> ConstraintSolver::split(const UpperBox& d, const Validat
 }
 
 
-tribool ConstraintSolver::check_feasibility(const ExactBox& d, const ValidatedVectorFunction& f, const ExactBox& c, const ExactPoint& y) const
+Tribool ConstraintSolver::check_feasibility(const ExactBox& d, const ValidatedVectorFunction& f, const ExactBox& c, const ExactPoint& y) const
 {
     for(uint i=0; i!=y.size(); ++i) {
         if(y[i]<d[i].lower() || y[i]>d[i].upper()) { return false; }
@@ -484,10 +488,10 @@ tribool ConstraintSolver::check_feasibility(const ExactBox& d, const ValidatedVe
 
     Vector<ValidatedFloat> fy=f(Vector<ValidatedFloat>(y));
     ARIADNE_LOG(4,"d="<<d<<" f="<<f<<", c="<<c<<"\n  y="<<y<<", f(y)="<<fy<<"\n");
-    tribool result=true;
+    Tribool result=true;
     for(uint j=0; j!=fy.size(); ++j) {
-        if(fy[j].lower()>c[j].upper() || fy[j].upper()<c[j].lower()) { return false; }
-        if(fy[j].upper()>=c[j].upper() || fy[j].lower()<=c[j].lower()) { result=indeterminate; }
+        if(fy[j].lower().raw()>c[j].upper().raw() || fy[j].upper().raw()<c[j].lower().raw()) { return false; }
+        if(fy[j].upper().raw()>=c[j].upper().raw() || fy[j].lower().raw()<=c[j].lower().raw()) { result=indeterminate; }
     }
     return result;
 }

@@ -369,15 +369,17 @@ template<class X> inline Polynomial<X>& operator-=(Polynomial<X>& p, double c) {
 template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, double c) { return p*=X(c); }
 template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, double c) { return p/=X(c); }
 
-inline Polynomial<Float> midpoint(const Polynomial<ExactInterval>& p) {
-    Polynomial<Float> r(p.argument_size());
-    for(Polynomial<ExactInterval>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-        r.append(iter->key(),static_cast<Float>(midpoint(iter->data()))); }
+template<class X> using MidpointType = decltype(midpoint(declval<X>()));
+
+template<class X> inline Polynomial<MidpointType<X>> midpoint(const Polynomial<X>& p) {
+    Polynomial<MidpointType<X>> r(p.argument_size());
+    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+        r.append(iter->key(),static_cast<MidpointType<X>>(midpoint(iter->data()))); }
     return r;
 }
 
-inline Vector< Polynomial<Float> > midpoint(const Vector< Polynomial<ExactInterval> >& p) {
-    Vector< Polynomial<Float> > r(p.size());
+template<class X> inline Vector< Polynomial<MidpointType<X>> > midpoint(const Vector< Polynomial<X> >& p) {
+    Vector< Polynomial<MidpointType<X>> > r(p.size());
     for(uint i=0; i!=p.size(); ++i) {
         r[i]=midpoint(p[i]); }
     return r;
@@ -640,13 +642,13 @@ std::ostream& operator<<(std::ostream& os, const Polynomial<X>& q) {
     for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
         MultiIndex a=iter->key();
         X v=iter->data();
-        if(v!=0) {
+        if(decide(v!=0)) {
             identically_zero=false;
             bool first_factor=true;
-            if(v>0 && !first_term) { os << "+"; }
+            if(decide(v>0) && !first_term) { os << "+"; }
             first_term=false;
-            if(v==1) { }
-            else if (v==-1) { os << '-'; }
+            if(decide(v==1)) { }
+            else if (decide(v==-1)) { os << '-'; }
             else { os << v; first_factor=false; }
             for(uint j=0; j!=a.size(); ++j) {
                 if(a[j]!=0) {

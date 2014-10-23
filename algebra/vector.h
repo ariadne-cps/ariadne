@@ -133,7 +133,7 @@ class Vector
     static Vector<X> unit(size_t n,size_t i) {
         ARIADNE_ASSERT(i<n); Vector<X> result(n,static_cast<X>(0.0)); result[i]=static_cast<X>(1.0); return result; }
     static Vector<X> unit_box(size_t n) {
-        Vector<X> result(n,ExactInterval(-1,1)); return result; }
+        Vector<X> result(n,X(-1,1)); return result; }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
     static Array< Vector<X> > basis(size_t n) {
         Array< Vector<X> > result(n); for(uint i=0; i!=n; ++i) { result[i]=unit(n,i); } return result; }
@@ -540,8 +540,8 @@ bool operator<(const Vector<X1>& v1, const Vector<X2>& v2)
 {
     if(v1.size()!=v2.size()) { return v1.size()<v2.size(); }
     for(size_t i=0; i!=v1.size(); ++i) {
-        if(v1[i]<v2[i]) { return true; }
-        else if(v1[i]>v2[i]) { return false; }
+        if(decide(v1[i]<v2[i])) { return true; }
+        else if(decide(v1[i]>v2[i])) { return false; }
     }
     return true;
 }
@@ -551,7 +551,7 @@ template<class X>
 bool operator<=(const Vector<X>& v, const X& c)
 {
     for(size_t i=0; i!=v.size(); ++i) {
-        if(v[i]>c) { return false; }
+        if(decide(v[i]>c)) { return false; }
     }
     return true;
 }

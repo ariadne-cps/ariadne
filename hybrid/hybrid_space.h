@@ -54,7 +54,7 @@ class HybridSpaceInterface
   public:
     virtual HybridSpaceInterface* clone() const = 0;
     virtual std::ostream& write(std::ostream& os) const = 0;
-    virtual tribool operator==(const HybridSpaceInterface& other) const = 0;
+    virtual Tribool operator==(const HybridSpaceInterface& other) const = 0;
   public:
     friend std::ostream& operator<<(std::ostream& os, const HybridSpaceInterface& hsp) { return hsp.write(os); }
 };
@@ -87,7 +87,7 @@ class HybridSpace
     bool has_location(const DiscreteLocation& q) const { return this->_ptr->has_location(q); }
     RealSpace operator[](const DiscreteLocation& q) const { return this->_ptr->operator[](q); }
 
-    tribool operator==(const HybridSpace& other) const { return this->_ptr->operator==(other); }
+    Tribool operator==(const HybridSpace& other) const { return this->_ptr->operator==(other); }
 
     operator const HybridSpaceInterface& () const { return *_ptr; }
 
@@ -115,7 +115,7 @@ class MonolithicHybridSpace
 
     bool has_location(const DiscreteLocation& q) const { return _locations.has_key(q); }
 
-    tribool operator==(const HybridSpaceInterface& other) const {
+    Tribool operator==(const HybridSpaceInterface& other) const {
         for (const_iterator iter=this->_locations.begin(); iter!=this->_locations.end(); ++iter) {
             if (!other.has_location(iter->first)) return false;
             if (other[iter->first] != iter->second) return false;

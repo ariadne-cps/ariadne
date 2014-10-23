@@ -30,53 +30,53 @@
 namespace Ariadne {
 
 
-tribool
+Tribool
 separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps)
 {
     ExactBox bb=make_exact_box(ls.bounding_box());
-    if(bb.empty()) { return true; }
+    if(definitely(bb.empty())) { return true; }
     return separated(ls,rs,bb,eps);
 }
 
 
-tribool
+Tribool
 overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps)
 {
     ExactBox bb=make_exact_box(ls.bounding_box());
-    if(bb.empty()) { return false; }
+    if(definitely(bb.empty())) { return false; }
     return overlap(ls,rs,bb,eps);
 }
 
 
-tribool
+Tribool
 inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps)
 {
     ExactBox bb=make_exact_box(ls.bounding_box());
-    if(bb.empty()) { return true; }
+    if(definitely(bb.empty())) { return true; }
     return inside(ls,rs,bb,eps);
 }
 
 
-tribool
+Tribool
 overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps)
 {
-    if(ls.separated(bx)) {
+    if(definitely(ls.separated(bx))) {
         return false;
     }
-    if(rs.separated(bx)) {
+    if(definitely(rs.separated(bx))) {
         return false;
     }
-    else if(rs.covers(bx)) {
+    else if(definitely(rs.covers(bx))) {
         return true;
     }
-    else if(bx.radius().raw()<eps) {
+    else if(definitely(bx.radius().raw()<eps)) {
         return indeterminate;
     } else {
         ExactBox bx1,bx2;
         make_lpair(bx1,bx2)=split(bx);
-        if(ls.separated(bx1)) {
+        if(definitely(ls.separated(bx1))) {
             return overlap(ls,rs,bx2,eps);
-        } else if(ls.separated(bx2)) {
+        } else if(definitely(ls.separated(bx2))) {
             return overlap(ls,rs,bx1,eps);
         } else {
             return overlap(ls,rs,bx1,eps) || overlap(ls,rs,bx2,eps);
@@ -85,19 +85,19 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Exac
 }
 
 
-tribool
+Tribool
 inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps)
 {
-    if(ls.separated(bx) || rs.separated(bx)) {
+    if(definitely(ls.separated(bx) || rs.separated(bx))) {
         return true;
     } else if(bx.radius().raw()<eps) {
         return indeterminate;
     } else {
         ExactBox bx1,bx2;
         make_lpair(bx1,bx2)=split(bx);
-        if(ls.separated(bx1)) {
+        if(definitely(ls.separated(bx1))) {
             return inside(ls,rs,bx2,eps);
-        } else if(ls.separated(bx2)) {
+        } else if(definitely(ls.separated(bx2))) {
             return inside(ls,rs,bx1,eps);
         } else {
             return inside(ls,rs,bx1,eps) && inside(ls,rs,bx2,eps);
@@ -106,19 +106,19 @@ inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Exact
 }
 
 
-tribool
+Tribool
 separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const ExactBox& bx, const Float& eps)
 {
-    if(ls.separated(bx) || rs.separated(bx)) {
+    if(definitely(ls.separated(bx) || rs.separated(bx))) {
         return true;
     } else if(bx.radius().raw()<eps) {
         return indeterminate;
     } else {
         ExactBox bx1,bx2;
         make_lpair(bx1,bx2)=split(bx);
-        if(ls.separated(bx1)) {
+        if(definitely(ls.separated(bx1))) {
             return separated(ls,rs,bx2,eps);
-        } else if(ls.separated(bx2)) {
+        } else if(definitely(ls.separated(bx2))) {
             return separated(ls,rs,bx1,eps);
         } else {
             return separated(ls,rs,bx1,eps) && separated(ls,rs,bx2,eps);
@@ -129,18 +129,18 @@ separated(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Ex
 
 
 
-tribool
+Tribool
 overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const ExactBox& bx, const Float& eps)
 {
-    if(ovs.overlaps(bx)) {
-        if(ops.covers(bx)) {
+    if(definitely(ovs.overlaps(bx))) {
+        if(definitely(ops.covers(bx))) {
             return true;
         } else if(bx.radius().raw()<eps) {
             return indeterminate;
         } else {
             ExactBox bx1,bx2;
             make_lpair(bx1,bx2)=split(bx);
-            if(overlap(ovs,ops,bx1,eps)) {
+            if(definitely(overlap(ovs,ops,bx1,eps))) {
                 return true;
             } else {
                 return overlap(ovs,ops,bx2,eps);
@@ -152,17 +152,17 @@ overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const ExactBo
 }
 
 
-tribool
+Tribool
 inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const ExactBox& bx, const Float& eps)
 {
-    if(cls.separated(bx) || ops.covers(bx)) {
+    if(definitely(cls.separated(bx) || ops.covers(bx))) {
         return true;
     } else if(bx.radius().raw()<eps) {
         return indeterminate;
     } else {
         ExactBox bx1,bx2;
         make_lpair(bx1,bx2)=split(bx);
-        if(inside(cls,ops,bx1,eps)) {
+        if(definitely(inside(cls,ops,bx1,eps))) {
             return inside(cls,ops,bx2,eps);
         } else {
             return indeterminate;
@@ -171,17 +171,17 @@ inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const ExactBo
 }
 
 
-tribool
+Tribool
 separated(const ClosedSetInterface& cls1, const ClosedSetInterface& cls2, const ExactBox& bx, const Float& eps)
 {
-    if(cls1.separated(bx) || cls2.separated(bx)) {
+    if(definitely(cls1.separated(bx) || cls2.separated(bx))) {
         return true;
     } else if(bx.radius().raw()<eps) {
         return indeterminate;
     } else {
         ExactBox bx1,bx2;
         make_lpair(bx1,bx2)=split(bx);
-        if(separated(cls1,cls2,bx1,eps)) {
+        if(definitely(separated(cls1,cls2,bx1,eps))) {
             return separated(cls1,cls2,bx2,eps);
         } else {
             return indeterminate;

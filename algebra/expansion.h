@@ -66,7 +66,7 @@ FwdIter unique_key(FwdIter first, FwdIter last, Op op) {
                 ++next;
             }
         }
-        // Removes zero entries; the code below is preferred to the case "curr->data()!=0" for tribool results
+        // Removes zero entries; the code below is preferred to the case "curr->data()!=0" for Tribool results
         if(curr->data()==0) { }
         else { ++curr; }
     }
@@ -721,10 +721,11 @@ Expansion<X> embed(unsigned int before_size, const Expansion<X>& x, unsigned int
 }
 
 
-inline Expansion<Float> midpoint(const Expansion<ExactInterval>& pse) {
-    Expansion<Float> r(pse.argument_size());
-    for(Expansion<ExactInterval>::const_iterator iter=pse.begin(); iter!=pse.end(); ++iter) {
-        r.append(iter->key(),static_cast<Float>(midpoint(iter->data()))); }
+template<class T> using MidpointType = decltype(midpoint(declval<T>()));
+template<class T> Expansion<MidpointType<T>> midpoint(const Expansion<T>& pse) {
+    Expansion<MidpointType<T>> r(pse.argument_size());
+    for(typename Expansion<T>::const_iterator iter=pse.begin(); iter!=pse.end(); ++iter) {
+        r.append(iter->key(),midpoint(iter->data())); }
     return r;
 }
 
@@ -793,8 +794,9 @@ template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const 
 }
 
 
-inline Vector< Expansion<Float> > midpoint(const Vector< Expansion<ExactInterval> >& pse) {
-    Vector< Expansion<Float> > r(pse.size(),Expansion<Float>());
+template<class T>
+inline Vector< Expansion<MidpointType<T>> > midpoint(const Vector< Expansion<T> >& pse) {
+    Vector< Expansion<MidpointType<T>> > r(pse.size(),Expansion<MidpointType<T>>());
     for(uint i=0; i!=pse.size(); ++i) {
         r[i]=midpoint(pse[i]); }
     return r;

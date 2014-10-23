@@ -37,7 +37,7 @@ namespace Ariadne {
 
 typedef void Void;
 typedef bool Bool;
-typedef tribool Tribool;
+typedef Tribool Tribool;
 typedef uint Nat;
 typedef int Int;
 typedef size_t SizeType;

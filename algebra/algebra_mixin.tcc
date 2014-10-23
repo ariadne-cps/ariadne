@@ -382,7 +382,7 @@ sin(const A& x)
     A r=z;
 
     Float two_pi_approx=2*pi_approx;
-    Float xavg=x.average().value();
+    Float xavg=x.average().raw();
     int n=integer_cast<int>(floor(RawFloat(xavg/two_pi_approx + 0.5)));
 
     Real const& pi=Ariadne::pi;
@@ -393,7 +393,7 @@ sin(const A& x)
 
     int d=8; // TODO: Change number of terms to be dependent on tolerance
     ErrorFloat srad=s.radius();
-    ErrorFloat truncation_error=pow_up(srad.value(),d+1)*rec_fac_up((d+1)*2);
+    ErrorFloat truncation_error=ErrorFloat(pow_up(srad.raw(),d+1)*rec_fac_up((d+1)*2));
 
     // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
     r=1;
@@ -436,7 +436,7 @@ cos(const A& x)
 
         int d=8; // TODO: Change number of terms to be dependent on tolerance
         ErrorFloat srad=s.radius();
-        ErrorFloat truncation_error=pow_up(srad.value(),d+1)*rec_fac_up((d+1)*2);
+        ErrorFloat truncation_error=ErrorFloat(pow_up(srad.raw(),d+1)*rec_fac_up((d+1)*2));
 
         // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
         r=1.0;

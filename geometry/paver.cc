@@ -83,7 +83,7 @@ UpperInterval emulrng(const RawFloatVector& x, const RawFloatVector& z) {
 }
 
 UpperFloat total_widths(const UpperBox& bx) {
-    UpperFloat res=0.0;
+    UpperFloat res=0u;
     for(uint i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width());
     }
@@ -91,16 +91,16 @@ UpperFloat total_widths(const UpperBox& bx) {
 }
 
 UpperFloat average_width(const UpperBox& bx) {
-    UpperFloat res=0.0;
+    UpperFloat res=0u;
     for(uint i=0; i!=bx.size(); ++i) {
-        if(bx[i].lower()>bx[i].upper()) { return -inf; }
+        if(bx[i].lower().raw()>bx[i].upper().raw()) { return -infty; }
         res+=bx[i].width();
     }
     return res/bx.size();
 }
 
 UpperFloat maximum_scaled_width(const UpperBox& bx, const Vector<ExactFloat>& sf) {
-    UpperFloat res=0.0;
+    UpperFloat res=0u;
     for(uint i=0; i!=bx.size(); ++i) {
         res=max(bx[i].width()/sf[i],res);
     }
@@ -108,7 +108,7 @@ UpperFloat maximum_scaled_width(const UpperBox& bx, const Vector<ExactFloat>& sf
 }
 
 UpperFloat average_scaled_width(const UpperBox& bx, const Vector<ExactFloat>& sf) {
-    UpperFloat res=0.0;
+    UpperFloat res=0u;
     for(uint i=0; i!=bx.size(); ++i) {
         res+=(bx[i].width()/sf[i]);
     }
@@ -265,7 +265,7 @@ void procedure_constraint_adjoin_outer_approximation_recursion(
     domwdth = average_scaled_width(new_domain,RawFloatVector(new_domain.size(),1.0)).raw();
     bbox=apply(f,new_domain);
     bbxwdth=average_scaled_width(bbox,paving.grid().lengths()).raw();
-    if(bbox.disjoint(cell_box) || disjoint(apply(g,new_domain),codomain)) {
+    if(definitely(bbox.disjoint(cell_box)) || definitely(disjoint(apply(g,new_domain),codomain))) {
         ARIADNE_LOG(4,"  Proved disjointness using image of new domain\n");
         return;
     }
@@ -342,7 +342,7 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
     ExactBox bx=join(static_cast<const ExactBox&>(b.box()),static_cast<const ExactBox&>(c));
 
     ARIADNE_LOG(2,"  fg(d)="<<apply(fg,d)<<", bx="<<bx<<"\n");
-    if(disjoint(apply(fg,d),bx)) {
+    if(definitely(disjoint(apply(fg,d),bx))) {
         ARIADNE_LOG(2,"  Proved disjointness using direct evaluation\n");
         return;
     }
@@ -395,7 +395,7 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
         EffectiveScalarFunction zero_function=EffectiveScalarFunction::zero(m);
         EffectiveVectorFunction identity_function=EffectiveVectorFunction::identity(m);
         ScalarTaylorFunction txg(domain,zero_function,sweeper);
-        ValidatedFloat cnst=0.0;
+        ValidatedFloat cnst=0;
         for(uint j=0; j!=n; ++j) {
             txg = txg - (ValidatedFloat(x[j])-ValidatedFloat(x[n+j]))*ScalarTaylorFunction(domain,ValidatedScalarFunction(fg[j]),sweeper);
             cnst += (bx[j].upper()*x[j]-bx[j].lower()*x[n+j]);
@@ -413,7 +413,7 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
         solver.hull_reduce(nd,txg,ExactInterval(0,inf));
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-        if(nd.empty()) {
+        if(definitely(nd.empty())) {
             ARIADNE_LOG(2,"  Proved disjointness using hull reduce\n");
             return;
         }
@@ -421,13 +421,13 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
         for(uint i=0; i!=m; ++i) {
             solver.box_reduce(nd,txg,ExactInterval(0,inf),i);
             ARIADNE_LOG(8,"  dom="<<nd<<"\n");
-            if(nd.empty()) { ARIADNE_LOG(2,"  Proved disjointness using box reduce\n"); return; }
+            if(definitely(nd.empty())) { ARIADNE_LOG(2,"  Proved disjointness using box reduce\n"); return; }
         }
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
 
         solver.hull_reduce(nd,txg,ExactInterval(0,inf));
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-        if(nd.empty()) {
+        if(definitely(nd.empty())) {
             ARIADNE_LOG(2,"  Proved disjointness using hull reduce\n");
             return;
         }
@@ -524,7 +524,7 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
         solver.hull_reduce(nd,xg,ExactInterval(0,inf));
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
-        if(nd.empty()) {
+        if(definitely(nd.empty())) {
             ARIADNE_LOG(4,"  Proved disjointness using hull reduce\n");
             return;
         }
@@ -532,7 +532,7 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         for(uint i=0; i!=m; ++i) {
             solver.box_reduce(nd,xg,ExactInterval(0,inf),i);
             ARIADNE_LOG(8,"  dom="<<nd<<"\n");
-            if(nd.empty()) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
+            if(definitely(nd.empty())) { ARIADNE_LOG(4,"  Proved disjointness using box reduce\n"); return; }
         }
         ARIADNE_LOG(6,"  dom="<<nd<<"\n");
 

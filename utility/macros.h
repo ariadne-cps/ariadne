@@ -49,7 +49,7 @@
 
 #define ARIADNE_ASSERT(expression) \
     { \
-        bool result = (expression); \
+        bool result = decide(expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
         } \
@@ -59,7 +59,7 @@
 #ifndef NDEBUG
 #define ARIADNE_DEBUG_ASSERT_MSG(expression,error) \
     { \
-        bool result = bool(expression); \
+        bool result = decide(expression); \
         if(!result) { \
             ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
         } \

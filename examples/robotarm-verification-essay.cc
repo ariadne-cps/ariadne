@@ -259,7 +259,7 @@ int main(int argc, char** argv)
     Rational deltamin ( 0.0_dec );
     Rational deltamax ( 0.1_dec );
     // accuracy
-    double eps = 1e-2;
+    ExactFloat eps = 1e-2_exact;
     int iter=0; // iteration count
 
     Orbit<HybridEnclosure> orbit;
@@ -295,7 +295,7 @@ int main(int argc, char** argv)
         //plot_results(orbit, delta, time, t, x, vx, z, vz, phi, vphi); // }
 
 
-        if(subset(bbox[2],zsafe)) {
+        if(definitely(subset(bbox[2],zsafe))) {
             std::cout << "      system is safe, increasing delta." << std::endl  << std::endl;
             deltamin = delta;
         } else {

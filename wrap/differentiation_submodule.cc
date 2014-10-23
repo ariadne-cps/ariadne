@@ -250,8 +250,6 @@ void export_differential(const char* name)
     differential_class.staticmethod("variable");
     differential_class.staticmethod("variables");
 
-    def("max",(D(*)(const D&,const D&))&max<X>);
-    def("min",(D(*)(const D&,const D&))&min<X>);
     def("abs",(D(*)(const D&))&abs<X>);
     def("pos",(D(*)(const D&))&pos<X>);
     def("neg",(D(*)(const D&))&neg<X>);

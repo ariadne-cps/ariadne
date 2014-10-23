@@ -105,19 +105,19 @@ class Polyhedron
     virtual uint dimension() const;
 
     //! \brief Tests if the polyhedron is empty. (Not currently implemented.)
-    virtual tribool empty() const;
+    virtual Tribool empty() const;
 
     //! \brief Tests if the polyhedron is bounded. (Not currently implemented.)
-    virtual tribool bounded() const;
+    virtual Tribool bounded() const;
 
     //! \brief Tests if the polyhedron intersects a box. (Not currently implemented.)
-    virtual tribool overlaps(const ExactBox& bx) const;
+    virtual Tribool overlaps(const ExactBox& bx) const;
 
     //! \brief Tests if the polyhedron is a superset of a box. (Not currently implemented.)
-    virtual tribool covers(const ExactBox& bx) const;
+    virtual Tribool covers(const ExactBox& bx) const;
 
     //! \brief Tests if the polyhedron is disjoint from a box. (Not currently implemented.)
-    virtual tribool separated(const ExactBox& bx) const;
+    virtual Tribool separated(const ExactBox& bx) const;
 
     //! \brief The \a i<sup>th</sup> defining halfspace.
     Polyhedron halfspace(size_t i) const;

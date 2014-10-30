@@ -988,7 +988,7 @@ Tribool ValidatedConstrainedImageSet::separated(const ExactBox& bx) const
     for(uint i=0; i!=this->dimension(); ++i) { function[i]=this->_function[i]; }
     for(uint i=0; i!=this->number_of_constraints(); ++i) { function[i+this->dimension()]=this->_constraints[i].function(); }
     //ValidatedVectorFunction function = join(this->_function,this->constraint_function());
-    ExactBox codomain = join(bx,this->constraint_bounds());
+    ExactBox codomain = product(bx,this->constraint_bounds());
     ConstraintSolver solver;
     solver.reduce(subdomain,function,codomain);
     return Tribool(subdomain.empty()) || Tribool(indeterminate);
@@ -1005,7 +1005,7 @@ Tribool ValidatedConstrainedImageSet::overlaps(const ExactBox& bx) const
     ValidatedVectorFunction function = join(space_function,constraint_function);
     //std::cerr<<"function="<<function<<"\n";
     ExactBox constraint_bounds = intersection(this->constraint_bounds(),make_exact_box(Ariadne::apply(this->constraint_function(),subdomain)));
-    ExactBox codomain = join(bx,constraint_bounds);
+    ExactBox codomain = product(bx,constraint_bounds);
     //std::cerr<<"codomain="<<codomain<<"\n";
     NonlinearInfeasibleInteriorPointOptimiser optimiser;
     optimiser.verbosity=0;

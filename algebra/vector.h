@@ -1,7 +1,7 @@
 /***************************************************************************
- *            vector.h
+ *            algebra/vector.h
  *
- *  Copyright 2008  Alberto Casagrande, Pieter Collins
+ *  Copyright 2013-14  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,57 +21,77 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file vector.h
- *  \brief Vectors in Euclidean space.
+/*! \file algebra/vector.h
+ *  \brief Vectors over a scalar (number or algebra).
  */
 
 #ifndef ARIADNE_VECTOR_H
 #define ARIADNE_VECTOR_H
 
-#include <string>
-#include <sstream>
-#include <initializer_list>
-#include <vector>
+#define SIMPLE_VECTOR_OPERATORS
 
 #include "utility/macros.h"
-#include "utility/stlio.h"
 #include "utility/metaprogramming.h"
-#include "numeric/numeric.h"
-#include "utility/array.h"
-
-#include <boost/type_traits/is_convertible.hpp>
-#include <boost/utility/enable_if.hpp>
+#include "utility/container.h"
+#include "utility/declarations.h"
 
 namespace Ariadne {
 
-template<class V> struct VectorExpression {
-    const V& operator()() const { return static_cast<const V&>(*this); }
-};
+//! \defgroup LinearAlgebraSubModule Linear Algebra Sub-Module
+//! \ingroup AlgebraModule
+//! \brief %Vector and matrix classes for linear algebra.
 
+/************ Vector *********************************************************/
+
+template<class V> struct VectorExpression { const V& operator()() const { return static_cast<const V&>(*this); } };
 template<class V> struct VectorContainer : public VectorExpression<V> { };
 
-template<class T> struct IsScalar : IsNumeric<T> { };
+template<class X> class Vector;
+template<class X> class Covector;
+template<class X> class Matrix;
+
+template<class V> struct IsVector : False { };
+template<class V> struct IsVectorExpression : IsVector<V> { };
+
+template<class V> struct IsCovector : False { };
+template<class V> struct IsCovectorExpression : IsVector<V> { };
+
+template<class M> struct IsMatrix : False { };
+template<class M> struct IsMatrixExpression : IsMatrix<M> { };
+
+template<class X> struct IsNumber;
+template<class A> struct IsAlgebra;
+
+template<class X> struct IsScalar { static const bool value = !IsVector<X>::value && !IsCovector<X>::value && !IsMatrix<X>::value; };
+
+template<class V> using ScalarType=typename V::ScalarType;
 
 
-//! \ingroup LinearAlgebraModule
-//! \brief A vector over a field. See also \link Ariadne::Matrix \c Matrix<X> \endlink.
-//!
-//! \par Python interface
-//!
-//! In the Python interface, classes \c RawFloatVector and \c ExactIntervalVector are defined.
-//! Further, Ariadne vectors can be constructed from literals in the form of a Python list: <br><br>
-//! <code> RawFloatVector([1.1,2.3,4.2,5]) # Create a RawFloatVector from a list of Python \c int and \c float types. <br>
-//!        ExactIntervalVector([{1:2.1},[-3,4],2.3,5,{-1.1:2.2}]) # Create an ExactIntervalVector from a list of Python types convertible to Interal</code>
+template<class X, class = Fallback> struct HasCreateZero : False { };
+template<class X> struct HasCreateZero<X, EnableIf<IsSame<decltype(declval<X>().create_zero()),X>,Fallback>> : True { };
+
+template<class X, EnableIf<HasCreateZero<X>> = dummy> X create_zero(const X& x) { return x.create_zero(); }
+template<class X, DisableIf<HasCreateZero<X>> = dummy> X create_zero(const X& x) { return static_cast<X>(0u); }
+
+//! \ingroup LinearAlgebraSubModule
+//! \brief Vectors over some type \a X.
+//! Corresponds to elements of a \em module over a mathematical \em ring, or a <em>vector space</em> over a field.
+//! May also be used if \a X is an \em algebra \a A over another field.
+//! It must be possible to add and multiply any two elements of the vector.
 template<class X>
 class Vector
-    : public VectorContainer< Vector<X> >
+    : public VectorContainer<Vector<X>>
 {
     Array<X> _ary;
   public:
     //@{
     //! \name Type definitions
 
+    //! \brief The type used to index the elements.
+    typedef SizeType IndexType;
+
     //! \brief The type of the scalar element.
+    typedef X ScalarType;
     typedef X ValueType;
 
     //@}
@@ -80,62 +100,47 @@ class Vector
     //! \name Constructors
 
     //! \brief Default constructor constructs a vector with no elements.
-    Vector()
-        : _ary() { }
+    Vector() : _ary() { }
     //! \brief Construct a vector of size \a n, with elements initialised to zero.
-    explicit Vector(size_t n) : _ary(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=0; } }
+    explicit Vector(SizeType n) : _ary(n) { for(SizeType i=0; i!=this->size(); ++i) { (*this)[i]=0; } }
     //! \brief Construct a vector of size \a n, with elements initialised to \a t.
-    Vector(size_t n, const X& t) : _ary(n,t) {  }
-    //! \brief Construct a vector of size \a n, with values initialised from the C-style Array beginning at \a ptr.
-    template<class XX> Vector(size_t n, const XX* ptr) : _ary(ptr,ptr+n) { }
+    explicit Vector(SizeType n, const X& t) : _ary(n,t) {  }
+    //! \brief Construct a vector of size \a n, with elements initialised to the array beginning at \a p.
+    explicit Vector(SizeType n, const X* p) : _ary(p,p+n) {  }
+    //! \brief Construct from a list of the same type.
+    explicit Vector(const List<X>& lst) : _ary(lst.begin(),lst.end()) { }
     //! \brief Convert from an initializer list of the same type.
-    Vector(std::initializer_list<X> lst) : _ary(lst.begin(),lst.end()) { }
-    template<class XX, typename std::enable_if<std::is_constructible<X,XX>::value and not std::is_convertible<XX,X>::value,int>::type=0>
-        explicit Vector(std::initializer_list<XX> lst) : _ary(lst.begin(),lst.end()) { }
-    //! \brief Convert from a list of the same type.
-    Vector(const std::vector<X>& lst) : _ary(lst.begin(),lst.end()) { }
-    //! \brief Construct from a list of a possibly different type.
-    template<class XX> explicit Vector(const std::vector<XX>& lst) : _ary(lst.begin(),lst.end()) { }
-    //! \brief Construct a matrix from a string literal, with entries enclosed in square braces and separated by commass. e.g. <tt>"[1, 2.3, 4.2]"</tt>.
-    explicit Vector(const std::string& str)
-        : _ary() { std::stringstream ss(str); ss >> *this; }
-     //! \brief Copy constructor.
-    Vector(const Vector<X>& v)
-        : _ary(v.size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=v[i]; } }
+    Vector(InitializerList<X> lst) : _ary(lst.begin(),lst.end()) { }
+
+    //! \brief Convert from an %VectorExpression of a different type.
+    template<class VE, EnableIf<IsConvertible<typename VE::ScalarType,X>> =dummy>
+        Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),ve().zero_element()) {
+            for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=ve()[i]; } }
+
+    //! \brief Explicitly construct from an %Vector of a different type.
+    template<class XX, EnableIf<IsConstructible<X,XX>> =dummy, DisableIf<IsConvertible<XX,X>> =dummy>
+        explicit Vector(Vector<XX> vec) : _ary(vec.array().begin(),vec.array().end()) { }
+
+    //! \brief Copy constructor.
+    Vector(const Vector<X>& v) = default;
+    //! \brief Move constructor.
+    Vector(Vector<X>&& v) = default;
     //! \brief Copy assignment.
-    Vector<X>& operator=(const Vector<X>& v) {
-        if(this!=&v) { this->_ary = v._ary; } return *this; }
-#ifdef DOXYGEN
-     //! \brief Copy constructor allows conversion from a vector using another numerical type.
-    template<class XX> Vector(const Vector<XX>& v)
-        : _ary(v.size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=v[i]; } }
-   //! \brief Copy assignement allows conversion from a vector using another numerical type.
-    template<class XX> Vector<X>& operator=(const Vector<XX> &v);
-#endif
-    template<class XX, typename std::enable_if<std::is_convertible<XX,X>::value,int>::type=0>
-        Vector(const Vector<XX>& v) : _ary(v.size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=v[i]; } }
-    template<class XX, typename std::enable_if<std::is_constructible<X,XX>::value and not std::is_convertible<XX,X>::value,int>::type=0>
-        explicit Vector(const Vector<XX>& v) : _ary(v.size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=X(v[i]); } }
-    template<class V> Vector(const VectorExpression<V>& ve, EnableIf<Or<IsSame<typename V::ValueType,X>, IsNumericCastable<typename V::ValueType,X> >,Void>* = 0)
-        : _ary(ve().size()) { for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=static_cast<X>(ve()[i]); } }
-    template<class V> EnableIf<IsSafelyConvertible<typename V::ValueType,X>,Vector<X>&> operator=(const VectorExpression<V>& ve) {
-        this->resize(ve().size()); for(size_t i=0; i!=this->size(); ++i) { this->_ary[i]=ve()[i]; } return *this; }
+    Vector<X>& operator=(const Vector<X>& v) = default;
     //@}
 
     //@{
     //! \name Static constructors
 
     //! \brief The zero vector of size \a n.
-    static Vector<X> zero(size_t n) { return Vector<Float>(n,0.0); }
+    static Vector<X> zero(SizeType n) { return Vector<X>(n,static_cast<X>(0)); }
     //! \brief The vector of size \a n with all entries equal to one.
-    static Vector<X> one(size_t n) { return Vector<Float>(n,1.0); }
+    static Vector<X> one(SizeType n) { return Vector<X>(n,static_cast<X>(1)); }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
-    static Vector<X> unit(size_t n,size_t i) {
-        ARIADNE_ASSERT(i<n); Vector<X> result(n,static_cast<X>(0.0)); result[i]=static_cast<X>(1.0); return result; }
-    static Vector<X> unit_box(size_t n) {
-        Vector<X> result(n,X(-1,1)); return result; }
+    static Vector<X> unit(SizeType n,SizeType i) {
+        ARIADNE_ASSERT(i<n); Vector<X> result(n,static_cast<X>(0)); result[i]=static_cast<X>(1); return result; }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
-    static Array< Vector<X> > basis(size_t n) {
+    static Array< Vector<X> > basis(SizeType n) {
         Array< Vector<X> > result(n); for(uint i=0; i!=n; ++i) { result[i]=unit(n,i); } return result; }
     //@}
 
@@ -144,43 +149,47 @@ class Vector
 
     //! \brief Resize to hold \a n elements.
     //! The previous values need not be preserved, and the new values need not be initialised.
-    void resize(size_t n) { this->_ary.resize(n); }
+    Void resize(SizeType n) { this->_ary.resize(n); }
     //! \brief The number of elements of the vector.
-    size_t size() const { return this->_ary.size(); }
+    SizeType size() const { return this->_ary.size(); }
     //! \brief A reference to the value stored in the \a i<sup>th</sup> element.
-    X& at(size_t i) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return (*this)[i]; }
+    X& at(SizeType i) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return (*this)[i]; }
+    //! \brief A constant reference to the value stored in the \a i<sup>th</sup> element.
+    const X& at(SizeType i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return (*this)[i]; }
     //! \brief Get the value stored in the \a i<sup>th</sup> element.
-    const X& get(size_t i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return (*this)[i]; }
+    const X& get(SizeType i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return (*this)[i]; }
     //! \brief Set the value stored in the \a i<sup>th</sup> element to \a x.
-    template<class T> void set(size_t i, const T& x) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); (*this)[i] = x; }
+    Void set(SizeType i, const X& x) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); (*this)[i] = x; }
     //! \brief C-style subscripting operator.
-    X& operator[](size_t i) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return this->_ary[i]; }
+    X& operator[](SizeType i) { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return this->_ary[i]; }
     //! \brief C-style constant subscripting operator.
-    const X& operator[](size_t i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return this->_ary[i]; }
+    const X& operator[](SizeType i) const { ARIADNE_PRECONDITION_MSG(i<this->size(),*this<<"["<<i<<"]"); return this->_ary[i]; }
     //! \brief The zero of the ring containing the Vector's elements. This may be dependent on class parameters.
-    const X zero_element() const { if(this->size()!=0) { return (*this)[0]*0; } else { return X(); } }
+    const X zero_element() const { if(this->size()!=0) { return create_zero((*this)[0]); } else { return X(); } }
+    //! \brief The raw data array.
+    Array<X> const& array() const { return _ary; }
     //@}
 
 #ifdef DOXYGEN
     //! \brief Equality operator.
-    friend template<class X1, class X2> bool operator==(const Vector<X1>& v1, const Vector<X2>& v2);
+    friend template<class X1, class X2> decltype(declval<X1>()==declval<X2>()) operator==(const Vector<X1>& v1, const Vector<X2>& v2);
     //! \brief Inequality operator.
-    friend template<class X1, class X2> bool operator!=(const Vector<X1>& v1, const Vector<X2>& v2);
+    friend template<class X1, class X2> decltype(declval<X1>()!=declval<X2>()) operator!=(const Vector<X1>& v1, const Vector<X2>& v2);
 
      //! \brief %Vector unary plus.
-    friend template<class X> Vector<X> operator+(const Vector<X>& v);
+    friend template<class X> Vector<decltype(+declval<X>())> operator+(const Vector<X>& v);
      //! \brief %Vector negation.
-    friend template<class X> Vector<X> operator-(const Vector<X>& v);
+    friend template<class X> Vector<decltype(-declval<X>())> operator-(const Vector<X>& v);
     //! \brief %Vector addition.
-    friend template<class X> Vector<X> operator+(const Vector<X>& v1, const Vector<X>& v2);
+    friend template<class X1, class X2> Vector<decltype(declval<X1>()+declval<X2>())> operator+(const Vector<X1>& v1, const Vector<X2>& v2);
     //! \brief %Vector subtraction.
-    friend template<class X> Vector<X> operator-(const Vector<X>& v1, const Vector<X>& v2);
+    friend template<class X1, class X2> Vector<decltype(declval<X1>()+declval<X2>())>(const Vector<X1>& v1, const Vector<X>& v2);
     //! \brief %Scalar multiplication.
-    friend template<class X> Vector<X> operator*(const X& s, const Vector<X>& v);
+    friend template<class X1, class X2> Vector<decltype(declval<X1>()+declval<X2>())>(const X1& s, const Vector<X2>& v);
     //! \brief %Scalar multiplication.
-    friend template<class X> Vector<X> operator*(const Vector<X>& v, const X& s);
+    friend template<class X1, class X2> Vector<decltype(declval<X1>()+declval<X2>())>(const Vector<X1>& v, const X2& s);
     //! \brief %Scalar division.
-    friend template<class X> Vector<X> operator/(const Vector<X>& v, const X& s);
+    friend template<class X1, class X2> Vector<decltype(declval<X1>()+declval<X2>())>(const Vector<X1>& v, const X2& s);
 
     //! \brief The supremum norm.
     friend template<class X> X norm(const Vector<X>& v);
@@ -199,220 +208,286 @@ class Vector
     friend template<class X> Vector<X> join(const X& s1, const X& s2);
 
     //! \brief Write to an output stream.
-    friend template<class X> std::ostream& operator<<(std::ostream& os, const Vector<X>& v);
+    friend template<class X> OutputStream& operator<<(OutputStream& os, const Vector<X>& v);
     //! \brief Read from an output stream.
-    friend template<class X> std::istream& operator>>(std::istream& is, Vector<X>& v);
+    friend template<class X> InputStream& operator>>(InputStream& is, Vector<X>& v);
 #endif // DOXYGEN
 };
 
-template<class X> std::ostream& operator<<(std::ostream& os, const Vector<X>& v);
-template<class X> std::istream& operator>>(std::istream& is, Vector<X>& v);
-
-template<class V> std::ostream& operator<<(std::ostream& os, const VectorExpression<V>& ve);
-
+template<class X> struct IsVector<Vector<X>> : True { };
 
 class Range {
-    size_t _start; size_t _stop;
+    SizeType _start; SizeType _stop;
   public:
-    Range(size_t start, size_t stop) : _start(start), _stop(stop) { }
-    size_t size() const { return this->_stop-this->_start; }
-    size_t start() const { return this->_start; }
-    size_t stride() const { return 1u; }
-    size_t stop() const { return this->_stop; }
+    Range(SizeType start, SizeType stop) : _start(start), _stop(stop) { }
+    SizeType size() const { return this->_stop-this->_start; }
+    SizeType start() const { return this->_start; }
+    SizeType stride() const { return 1u; }
+    SizeType stop() const { return this->_stop; }
 };
 
 class Slice {
-    size_t _size; size_t _start; size_t _stride;
+    SizeType _size; SizeType _start; SizeType _stride;
   public:
-    Slice(size_t size, size_t start, size_t stride) : _size(size), _start(start), _stride(stride) { }
-    size_t size() const { return this->_size; }
-    size_t start() const { return this->_start; }
-    size_t stride() const { return this->_stride; }
-    size_t stop() const { return this->_start+this->_size*this->_stride; }
+    Slice(SizeType size, SizeType start, SizeType stride) : _size(size), _start(start), _stride(stride) { }
+    SizeType size() const { return this->_size; }
+    SizeType start() const { return this->_start; }
+    SizeType stride() const { return this->_stride; }
+    SizeType stop() const { return this->_start+this->_size*this->_stride; }
 };
 
-inline Range range(size_t start, size_t stop) { return Range(start,stop); }
-inline Slice slice(size_t size, size_t start, size_t stride) { return Slice(size,start,stride); }
+inline Range range(SizeType start, SizeType stop) { return Range(start,stop); }
+inline Slice slice(SizeType size, SizeType start, SizeType stride) { return Slice(size,start,stride); }
+
 
 template<class V> struct VectorRange
     : public VectorContainer< VectorRange<V> >
 {
+    typedef typename V::ScalarType ScalarType;
     typedef typename V::ValueType ValueType;
     const V& _v; Range _rng;
     VectorRange(const V& v, Range rng) : _v(v), _rng(rng) { }
-    size_t size() const { return _rng.size(); }
-    ValueType operator[](size_t i) const { return _v[i+_rng.start()]; }
+    SizeType size() const { return _rng.size(); }
+    ScalarType zero_element() const { return _v.zero_element(); }
+    ScalarType operator[](SizeType i) const { return _v[i+_rng.start()]; }
 };
 
 template<class V> struct VectorContainerRange
     : public VectorExpression< VectorContainerRange<V> >
 {
+    typedef typename V::ScalarType ScalarType;
     typedef typename V::ValueType ValueType;
     V& _v; Range _rng;
     VectorContainerRange(V& v, Range rng) : _v(v), _rng(rng) { }
-    size_t size() const { return _rng.size(); }
-    ValueType operator[](size_t i) const { return _v[i+_rng.start()]; }
-    ValueType& operator[](size_t i) { return _v[i+_rng.start()]; }
-    const ValueType zero_element() const { return _v.zero_element(); }
-    void set(size_t i, const ValueType& x) { _v[i+_rng.start()]=x; }
+    SizeType size() const { return _rng.size(); }
+    ValueType operator[](SizeType i) const { return _v[i+_rng.start()]; }
+    ValueType& operator[](SizeType i) { return _v[i+_rng.start()]; }
+    const ScalarType zero_element() const { return _v.zero_element(); }
+    Void set(SizeType i, const ValueType& x) { _v[i+_rng.start()]=x; }
     template<class VE> VectorContainerRange<V>& operator=(const VectorExpression<VE>& ve) {
         ARIADNE_PRECONDITION(this->size()==ve().size());
-        for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=ve()[i]; } return *this; }
+        for(SizeType i=0; i!=this->size(); ++i) { (*this)[i]=ve()[i]; } return *this; }
 };
 
-template<class V> struct VectorNegation
-    : public VectorExpression< VectorNegation<V> >
-{
-    const V& _v;
-    VectorNegation(const V& v) : _v(v) { }
-    typedef typename V::ValueType ValueType;
-    size_t size() const { return _v.size(); }
-    ValueType operator[](size_t i) const { return -_v[i]; }
-    const ValueType zero_element() const { return _v.zero_element(); }
-};
-
-template<class V1, class V2> struct VectorSum
-    : public VectorExpression< VectorSum<V1,V2> >
-{
-    const V1& _v1; const V2& _v2;
-    VectorSum(const V1& v1, const V2& v2) : _v1(v1), _v2(v2) { }
-    typedef typename Arithmetic<typename V1::ValueType, typename V2::ValueType>::ResultType ValueType;
-    size_t size() const { return _v1.size(); }
-    ValueType operator[](size_t i) const { return _v1[i]+_v2[i]; }
-    const ValueType zero_element() const { return _v1.zero_element(); }
-};
-
-template<class V1, class V2> struct VectorDifference
-    : public VectorExpression< VectorDifference<V1,V2> >
-{
-    const V1& _v1; const V2& _v2;
-    VectorDifference(const V1& v1, const V2& v2) : _v1(v1), _v2(v2) { }
-    typedef typename Arithmetic<typename V1::ValueType, typename V2::ValueType>::ResultType ValueType;
-    size_t size() const { return _v1.size(); }
-    ValueType operator[](size_t i) const { return _v1[i]-_v2[i]; }
-    const ValueType zero_element() const { return _v1.zero_element(); }
-};
-
-template<class V1, class X2> struct VectorScalarProduct
-    : public VectorExpression< VectorScalarProduct<V1,X2> >
-{
-    const V1& _v1; const X2& _x2;
-    VectorScalarProduct(const V1& v1, const X2& x2) : _v1(v1), _x2(x2) { }
-    typedef typename Arithmetic<typename V1::ValueType, X2>::ResultType ValueType;
-    size_t size() const { return _v1.size(); }
-    ValueType operator[](size_t i) const { return _v1[i]*_x2; }
-    const ValueType zero_element() const { return ValueType(_v1.zero_element()*_x2); }
-};
-
-template<class V1, class X2> struct VectorScalarQuotient
-    : public VectorExpression< VectorScalarQuotient<V1,X2> >
-{
-    const V1& _v1; const X2& _x2;
-    VectorScalarQuotient(const V1& v1, const X2& x2) : _v1(v1), _x2(x2) { }
-    typedef typename Arithmetic<typename V1::ValueType, X2>::ResultType ValueType;
-    size_t size() const { return _v1.size(); }
-    ValueType operator[](size_t i) const { return _v1[i]/_x2; }
-    const ValueType zero_element() const { return ValueType(_v1.zero_element()/_x2); }
-};
-
-template<class V> inline VectorRange<V> project(const VectorExpression<V>& v, Range rng) { return VectorRange<V>(v(),rng); }
-template<class X> inline VectorContainerRange< Vector<X> > project(Vector<X>& v, Range rng) { return VectorContainerRange< Vector<X> >(v,rng); }
-
-template<class V> inline
-const V&
-operator+(const VectorExpression<V>& ve) { return ve(); }
-
-template<class V> inline
-VectorNegation<V>
-operator-(const VectorExpression<V>& ve) { return VectorNegation<V>(ve()); }
-
-// The code below is simpler, but illegal arithmetical operations are not caught until later
-// template<class V1, class V2>
-// VectorSum< V1, V2 >
-// operator+(const VectorExpression<V1>& v1, const VectorExpression<V2>& v2) { return VectorSum<V1,V2>(v1(),v2()); }
+template<class V> inline VectorRange<V> project(const VectorExpression<V>& v, Range rng) {
+    return VectorRange<V>(v(),rng); }
+template<class X> inline VectorContainerRange< Vector<X> > project(Vector<X>& v, Range rng) {
+    return VectorContainerRange< Vector<X> >(v,rng); }
 
 
-// The code below does not require the use of VectorExpression.
-//template<class V1, class V2> inline
-//EnableIf< And< IsVector<V1>, IsVector<V2>, IsDefined<typename Arithmetic<typename V1::ValueType,typename V2::ValueType>::ResultType> >,
-//                   VectorSum< V1, V2 > >::Type
-//operator+(const V1& v1, const V2& v2) { return VectorSum<V1,V2>(v1,v2); }
 
 
-template<class V1, class V2> inline
-EnableIf< IsDefined<typename Arithmetic<typename V1::ValueType,typename V2::ValueType>::ResultType>, VectorSum< V1, V2 > >
-operator+(const VectorExpression<V1>& v1, const VectorExpression<V2>& v2) { return VectorSum<V1,V2>(v1(),v2()); }
-
-template<class V1, class V2> inline
-EnableIf< IsDefined<typename Arithmetic<typename V1::ValueType,typename V2::ValueType>::ResultType>, VectorDifference< V1, V2 > >
-operator-(const VectorExpression<V1>& v1, const VectorExpression<V2>& v2) { return VectorDifference<V1,V2>(v1(),v2()); }
-
-template<class X1, class V2> inline
-EnableIf< IsDefined<typename Arithmetic<X1,typename V2::ValueType>::ResultType>, VectorScalarProduct< V2, X1 > >
-operator*(const X1& x1, const VectorExpression<V2>& v2) { return VectorScalarProduct<V2,X1>(v2(),x1); }
-
-template<class V1, class X2> inline
-EnableIf< IsDefined<typename Arithmetic<typename V1::ValueType,X2>::ResultType>, VectorScalarProduct< V1, X2 > >
-operator*(const VectorExpression<V1>& v1, const X2& x2) { return VectorScalarProduct<V1,X2>(v1(),x2); }
-
-template<class V1, class X2> inline
-EnableIf< IsDefined<typename Arithmetic<typename V1::ValueType,X2>::ResultType>, VectorScalarQuotient< V1, X2 > >
-operator/(const VectorExpression<V1>& v1, const X2& x2) { return VectorScalarQuotient<V1,X2>(v1(),x2); }
-
-template<class X, class V> inline Vector<X>& operator+=(Vector<X>& r, const VectorExpression<V>& ve) {
-    const V& v=ve();
-    ARIADNE_PRECONDITION(r.size()==v.size());
-    for(size_t i=0; i!=r.size(); ++i) { r[i]+=v[i]; }
-    return r;
+template<class X> OutputStream& operator<<(OutputStream& os, Vector<X> const& v) {
+    if(v.size()==0) { os << "{"; }
+    for(SizeType i=0; i!=v.size(); ++i) { os << (i==0u?"{":",") << v[i]; }
+    return os << "}";
 }
 
-template<class X, class V> inline Vector<X>& operator-=(Vector<X>& r, const VectorExpression<V>& ve) {
-    const V& v=ve();
-    ARIADNE_PRECONDITION(r.size()==v.size());
-    for(size_t i=0; i!=r.size(); ++i) { r[i]-=v[i]; }
-    return r;
-}
-
-template<class X1, class X2> inline EnableIfNumeric<X2,Vector<X1>&> operator*=(Vector<X1>& v, const X2& x) {
-    for(size_t i=0; i!=v.size(); ++i) { v[i]*=x; }
-    return v;
-}
-
-template<class X1, class X2> inline EnableIfNumeric<X2,Vector<X1>&> operator/=(Vector<X1>& v, const X2& x) {
-    for(size_t i=0; i!=v.size(); ++i) { v[i]/=x; }
-    return v;
+template<class V, EnableIf<IsVectorExpression<V>> =dummy> OutputStream& operator<<(OutputStream& os, const V& v) {
+    typedef decltype(v[0]) X;
+    return os << Vector<X>(v);
 }
 
 
-
-template<class V>
-typename V::ValueType sup_norm(const VectorExpression<V>& ve)
-{
-    const V& v=ve();
-    typename V::ValueType r=0;
-    for(size_t i=0; i!=v.size(); ++i) {
-        typename V::ValueType absvi=abs(v[i]);
-        // NOTE: The arguments must be this way round to propagate a nan row_sum
-        r=max(absvi,r);
+template<class X1, class X2>
+auto operator==(const Vector<X1>& v1, const Vector<X2>& v2) -> decltype(v1[0]==v2[0]) {
+    decltype(v1[0]==v2[0]) r=true;
+    for(SizeType i=0; i!=v1.size(); ++i) {
+        r = r && (v1[i]==v2[i]);
     }
     return r;
 }
 
-template<class V>
-typename V::ValueType norm(const VectorExpression<V>& ve)
-{
-    const V& v=ve();
-    return Ariadne::sup_norm(v);
+template<class X1, class X2>
+auto operator!=(const Vector<X1>& v1, const Vector<X2>& v2) -> decltype(v1[0]!=v2[0]) {
+    decltype(v1[0]!=v2[0]) r=false;
+    for(SizeType i=0; i!=v1.size(); ++i) {
+        r = r || (v1[i]==v2[i]);
+    }
+    return r;
 }
 
-template<class V1, class V2>
-typename Arithmetic<typename V1::ValueType,typename V2::ValueType>::ResultType
-dot(const VectorExpression<V1>& ve1, const VectorExpression<V2>& ve2)
-{
-    const V1& v1=ve1(); const V2& v2=ve2();
-    ARIADNE_ASSERT(v1.size()==v2.size());
-    typename V1::ValueType r=0;
-    for(size_t i=0; i!=v1.size(); ++i) {
+
+template<class X, class XX, EnableIf<IsConvertible<decltype(declval<X>()+declval<XX>()),X>> =dummy> inline
+Vector<X>& operator+=(Vector<X>& v1, const Vector<XX>& v2) {
+    ARIADNE_PRECONDITION(v1.size()==v2.size());
+    for(SizeType i=0; i!=v1.size(); ++i) { v1[i]+=v2[i]; } return v1;
+}
+
+template<class X, class XX, EnableIf<IsConvertible<decltype(declval<X>()-declval<XX>()),X>> =dummy> inline
+Vector<X>& operator-=(Vector<X>& v1, const Vector<XX>& v2) {
+    ARIADNE_PRECONDITION(v1.size()==v2.size());
+    for(SizeType i=0; i!=v1.size(); ++i) { v1[i]-=v2[i]; } return v1;
+}
+
+template<class X, class XX, EnableIf<IsConvertible<decltype(declval<X>()*declval<XX>()),X>> =dummy> inline
+Vector<X>& operator*=(Vector<X>& v, const XX& s) {
+    for(SizeType i=0; i!=v.size(); ++i) { v[i]*=s; } return v;
+}
+
+template<class X, class XX, EnableIf<IsConvertible<decltype(declval<X>()/declval<XX>()),X>> =dummy> inline
+Vector<X>& operator/=(Vector<X>& v, const XX& s) {
+    for(SizeType i=0; i!=v.size(); ++i) { v[i]/=s; } return v;
+}
+
+
+
+#ifdef SIMPLE_VECTOR_OPERATORS
+
+template<class X> Vector<decltype(+declval<X>())> operator+(Vector<X> const& v) {
+    Vector<decltype(+declval<X>())> r(v.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=+v[i]; }
+    return std::move(r);
+}
+
+template<class X> Vector<X> operator-(Vector<X> const& v) {
+    Vector<decltype(-declval<X>())> r(v.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=-v[i]; }
+    return std::move(r);
+}
+
+template<class X1, class X2> Vector<decltype(declval<X1>()+declval<X2>())> operator+(Vector<X1> const& v1, Vector<X2> const& v2) {
+    ARIADNE_PRECONDITION(v1.size()==v2.size());
+    Vector<decltype(declval<X1>()+declval<X2>())> r(v1.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]+v2[i]; }
+    return std::move(r);
+}
+
+template<class X1, class X2> Vector<decltype(declval<X1>()-declval<X2>())> operator-(Vector<X1> const& v1, Vector<X2> const& v2) {
+    ARIADNE_PRECONDITION(v1.size()==v2.size());
+    Vector<decltype(declval<X1>()-declval<X2>())> r(v1.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]-v2[i]; }
+    return std::move(r);
+}
+
+template<class X1, class X2, EnableIf<IsScalar<X1>> = dummy> Vector<decltype(declval<X1>()*declval<X2>())> operator*(X1 const& x1, Vector<X2> const& v2) {
+    Vector<decltype(declval<X1>()*declval<X2>())> r(v2.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=x1*v2[i]; }
+    return std::move(r);
+}
+
+template<class X1, class X2, EnableIf<IsScalar<X2>> = dummy> Vector<decltype(declval<X1>()*declval<X2>())> operator*(Vector<X1> const& v1, X2 const& x2) {
+    Vector<decltype(declval<X1>()*declval<X2>())> r(v1.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]*x2; }
+    return std::move(r);
+}
+
+template<class X1, class X2, EnableIf<IsScalar<X2>> = dummy> Vector<decltype(declval<X1>()/declval<X2>())> operator/(Vector<X1> const& v1, X2 const& x2) {
+    Vector<decltype(declval<X1>()/declval<X2>())> r(v1.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]/x2; }
+    return std::move(r);
+}
+
+#else
+
+template<class V, EnableIf<IsVectorExpression<V>> =dummy> inline
+const V& operator+(const V& v) {
+    return v; }
+
+
+template<class V> struct VectorNegation {
+    typedef NegationType<typename V::ScalarType> ScalarType;
+    const V& _v;
+    VectorNegation(const V& v) : _v(v) { }
+    SizeType size() const { return _v.size(); }
+    ScalarType zero_element() const { return -_v.zero_element(); }
+    ScalarType operator[](SizeType i) const { return -_v[i]; }
+};
+template<class V> struct IsVectorExpression<VectorNegation<V>> : True { };
+
+template<class V, EnableIf<IsVectorExpression<V>> =dummy> inline
+VectorNegation<V> operator-(const V& v) {
+    return VectorNegation<V>(v); }
+
+
+template<class V1, class V2> struct VectorSum  {
+    typedef SumType<typename V1::ScalarType,typename V2::ScalarType> ScalarType;
+    const V1& _v1; const V2& _v2;
+    VectorSum(const V1& v1, const V2& v2) : _v1(v1), _v2(v2) { }
+    SizeType size() const { return _v1.size(); }
+    ScalarType zero_element() const { return _v1.zero_element()+_v2.zero_element(); }
+    ScalarType operator[](SizeType i) const { return _v1[i]+_v2[i]; }
+};
+template<class V1, class V2> struct IsVectorExpression<VectorSum<V1,V2>> : True { };
+
+template<class V1, class V2, EnableIf<And<IsVectorExpression<V1>,IsVectorExpression<V2>>> =dummy> inline
+VectorSum<V1,V2> operator+(const V1& v1, const V2& v2) {
+    ARIADNE_PRECONDITION(v1.size()==v2.size());
+    return VectorSum<V1,V2>(v1,v2); }
+
+
+template<class V1, class V2> struct VectorDifference {
+    typedef DifferenceType<typename V1::ScalarType,typename V2::ScalarType> ScalarType;
+    const V1& _v1; const V2& _v2;
+    VectorDifference(const V1& v1, const V2& v2) : _v1(v1), _v2(v2) { }
+    SizeType size() const { return _v1.size(); }
+    ScalarType zero_element() const { return _v1.zero_element()-_v2.zero_element(); }
+    ScalarType operator[](SizeType i) const { return _v1[i]-_v2[i]; }
+};
+template<class V1, class V2> struct IsVectorExpression<VectorDifference<V1,V2>> : True { };
+
+template<class V1, class V2, EnableIf<And<IsVectorExpression<V1>,IsVectorExpression<V2>>> =dummy> inline
+VectorDifference<V1,V2> operator-(const V1& v1, const V2& v2) {
+    ARIADNE_PRECONDITION(v1.size()==v2.size());
+    return VectorDifference<V1,V2>(v1,v2); }
+
+
+template<class V1, class X2> struct VectorScalarProduct {
+    typedef ProductType<typename V1::ScalarType,X2> ScalarType;
+    const V1& _v1; const X2& _x2;
+    VectorScalarProduct(const V1& v1, const X2& x2) : _v1(v1), _x2(x2) { }
+    SizeType size() const { return _v1.size(); }
+    ScalarType zero_element() const { return _v1.zero_element()*_x2; }
+    ScalarType operator[](SizeType i) const { return _v1[i]*_x2; }
+};
+template<class V1, class X2> struct IsVectorExpression<VectorScalarProduct<V1,X2>> : True { };
+
+template<class X1, class V2, EnableIf<And<IsScalar<X1>,IsVectorExpression<V2>>> =dummy> inline
+VectorScalarProduct<V2,X1> operator*(const X1& x1, const V2& v2) {
+    return VectorScalarProduct<V2,X1>(v2,x1); }
+
+template<class V1, class X2, EnableIf<And<IsVectorExpression<V1>,IsScalar<X2>>> =dummy> inline
+VectorScalarProduct<V1,X2> operator*(const V1& v1, const X2& x2) {
+    return VectorScalarProduct<V1,X2>(v1,x2); }
+
+template<class V1, class X2> struct VectorScalarQuotient {
+    typedef QuotientType<typename V1::ScalarType,X2> ScalarType;
+    const V1& _v1; const X2& _x2;
+    VectorScalarQuotient(const V1& v1, const X2& x2) : _v1(v1), _x2(x2) { }
+    SizeType size() const { return _v1.size(); }
+    ScalarType zero_element() const { return _v1.zero_element()/_x2; }
+    ScalarType operator[](SizeType i) const { return _v1[i]/_x2; }
+};
+template<class V1, class X2> struct IsVectorExpression<VectorScalarQuotient<V1,X2>> : True { };
+
+template<class V1, class X2, EnableIf<And<IsVectorExpression<V1>,IsScalar<X2>>> =dummy> inline
+VectorScalarQuotient<V1,X2> operator/(const V1& v1, const X2& x2) {
+    return VectorScalarQuotient<V1,X2>(v1,x2); }
+
+template<class V> using ScalarType = typename V::ScalarType;
+
+#endif
+
+template<class X> inline auto norm(const Vector<X>& v) -> decltype(abs(declval<X>())) {
+    decltype(abs(declval<X>())) r=0u;
+    for(SizeType i=0; i!=v.size(); ++i) {
+        r=max(r,abs(v[i]));
+    }
+    return r;
+}
+
+template<class X> inline auto sup_norm(const Vector<X>& v) -> decltype(mag(declval<X>())) {
+    decltype(mag(declval<X>())) r=0u;
+    for(SizeType i=0; i!=v.size(); ++i) {
+        r=max(r,mag(v[i]));
+    }
+    return r;
+}
+
+template<class X1, class X2> inline auto dot(const Vector<X1>& v1, const Vector<X2>& v2) -> decltype(v1[0]*v2[0]+v1[0]*v2[0]) {
+    ARIADNE_PRECONDITION(v1.size()==v2.size());
+    decltype(declval<X1>()*declval<X2>()+declval<X1>()*declval<X2>()) r=0u;
+    for(SizeType i=0; i!=v1.size(); ++i) {
         r+=v1[i]*v2[i];
     }
     return r;
@@ -420,185 +495,175 @@ dot(const VectorExpression<V1>& ve1, const VectorExpression<V2>& ve2)
 
 
 
-template<class V1, class V2>
-Vector<typename V1::ValueType>
-join(const VectorExpression<V1>& ve1, const VectorExpression<V2>& ve2,
-     EnableIf< IsSame<typename V1::ValueType,typename V2::ValueType> >* = 0)
+template<class X>
+Vector<X> join(const Vector<X>& v1, const Vector<X>& v2)
 {
-    const V1& v1=ve1(); const V2& v2=ve2();
     if(v1.size()==0) { return v2; }
     if(v2.size()==0) { return v1; }
-    size_t n1=v1.size();
-    size_t n2=v2.size();
-    Vector<typename V1::ValueType> r(n1+n2,v1[0]);
-    project(r,range(0,n1))=v1;
-    project(r,range(n1,n1+n2))=v2;
+    SizeType n1=v1.size();
+    SizeType n2=v2.size();
+    Vector<X> r(n1+n2,v1[0]);
+    for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
+    for(SizeType i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
     return r;
-}
-
-template<class V1>
-Vector<typename V1::ValueType> join(const VectorExpression<V1>& ve1, const typename V1::ValueType& s2)
-{
-    const V1& v1=ve1();
-    size_t n1=v1.size();
-    Vector<typename V1::ValueType> r(n1+1,s2);
-    project(r,range(0,n1))=v1;
-    return r;
-}
-
-template<class V2>
-Vector<typename V2::ValueType> join(const typename V2::ValueType& s1, const VectorExpression<V2>& ve2)
-{
-    const V2& v2=ve2();
-    size_t n2=v2.size();
-    Vector<typename V2::ValueType> r(1+n2,s1);
-    project(r,range(1,n2+1))=v2;
-    return r;
-}
-
-template<class X>
-Vector<X> join(const X& s1, const X& s2, EnableIf<IsScalar<X>,Void>* = 0)
-{
-    Vector<X> r(2,s1);
-    r[1]=s2;
-    return r;
-}
-
-template<class V1, class V2, class V3>
-Vector<typename V1::ValueType>
-join(const VectorExpression<V1>& ve1, const VectorExpression<V2>& ve2, const VectorExpression<V3>& ve3,
-     EnableIf< And< IsSame<typename V1::ValueType,typename V2::ValueType>,IsSame<typename V1::ValueType,typename V3::ValueType> > >* = 0)
-{
-    const V1& v1=ve1(); const V2& v2=ve2(); const V3& v3=ve3();
-    typedef typename V1::ValueType X;
-    if(v1.size()==0) { return join(v2,v3); }
-    size_t n1=v1.size();
-    size_t n2=v2.size();
-    size_t n3=v3.size();
-    Vector<X> r(n1+n2+n3,v1[0]);
-    project(r,range(0,n1))=v1;
-    project(r,range(n1,n1+n2))=v2;
-    project(r,range(n1+n2,n1+n2+n3))=v3;
-    return r;
-}
-
-template<class V1, class V2> Vector<typename V1::ValueType>
-join(const VectorExpression<V1>& ve1, const VectorExpression<V2>& ve2, const typename V1::ValueType& s3,
-     EnableIf< IsSame<typename V1::ValueType,typename V2::ValueType> >* = 0)
-{
-    const V1& v1=ve1(); const V2& v2=ve2();
-    typedef typename V1::ValueType X;
-    Vector<X> r(v1.size()+v2.size()+1u,s3);
-    for(uint i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
-    for(uint i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
-    return r;
-}
-
-template<class V1, class V2, class V3> Vector<typename V1::ValueType>
-join(const VectorExpression<V1>& ve1, const VectorExpression<V2>& ve2, const VectorExpression<V3>& ve3, const typename V1::ValueType& s4,
-     EnableIf< And< IsSame<typename V1::ValueType,typename V2::ValueType>,IsSame<typename V1::ValueType,typename V3::ValueType> > >* = 0)
-{
-    const V1& v1=ve1(); const V2& v2=ve2(); const V3& v3=ve3();
-    typedef typename V1::ValueType X;
-    Vector<X> r(v1.size()+v2.size()+v3.size()+1u);
-    for(uint i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
-    for(uint i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
-    for(uint i=0; i!=v3.size(); ++i) { r[v1.size()+v2.size()+i]=v3[i]; }
-    r[r.size()-1]=s4;
-    return r;
-}
-
-
-
-template<class X1, class X2>
-bool operator==(const Vector<X1>& v1, const Vector<X2>& v2)
-{
-    if(v1.size()!=v2.size()) { return false; }
-    for(size_t i=0; i!=v1.size(); ++i) {
-        if(v1[i]!=v2[i]) { return false; }
-    }
-    return true;
-}
-
-
-template<class V1, class V2>
-bool operator==(const VectorExpression<V1>& ve1, const VectorExpression<V2>& ve2)
-{
-    return Vector<typename V1::ValueType>(ve1) == Vector<typename V2::ValueType>(ve2);
-}
-
-
-template<class X1, class X2> inline
-bool operator!=(const Vector<X1>& v1, const Vector<X2>& v2)
-{
-    return !(v1==v2);
-}
-
-
-template<class X1, class X2>
-bool operator<(const Vector<X1>& v1, const Vector<X2>& v2)
-{
-    if(v1.size()!=v2.size()) { return v1.size()<v2.size(); }
-    for(size_t i=0; i!=v1.size(); ++i) {
-        if(decide(v1[i]<v2[i])) { return true; }
-        else if(decide(v1[i]>v2[i])) { return false; }
-    }
-    return true;
 }
 
 
 template<class X>
-bool operator<=(const Vector<X>& v, const X& c)
+Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const Vector<X>& v3)
 {
-    for(size_t i=0; i!=v.size(); ++i) {
-        if(decide(v[i]>c)) { return false; }
+    Vector<X> r(v1.size()+v2.size()+v3.size());
+    for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
+    for(SizeType i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
+    for(SizeType i=0; i!=v3.size(); ++i) { r[v1.size()+v2.size()+i]=v3[i]; }
+    return std::move(r);
+}
+
+template<class X>
+Vector<X> join(const typename Vector<X>::ScalarType& x1, const Vector<X>& v2)
+{
+    Vector<X> r(1u+v2.size());
+    r[0u]=x1;
+    for(SizeType i=0; i!=v2.size(); ++i) { r[1u+i]=v2[i]; }
+    return std::move(r);
+}
+
+template<class X>
+Vector<X> join(const Vector<X>& v1, const typename Vector<X>::ScalarType& x2)
+{
+    Vector<X> r(v1.size()+1u);
+    for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
+    r[v1.size()]=x2;
+    return std::move(r);
+}
+
+template<class X, EnableIf<IsScalar<X>> =dummy>
+Vector<X> join(const X& x1, const X& x2)
+{
+    Vector<X> r(2u);
+    r[0u]=x1;
+    r[1u]=x2;
+    return std::move(r);
+}
+
+template<class X>
+Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const typename Vector<X>::ScalarType& x3)
+{
+    Vector<X> r(v1.size()+v2.size()+1u);
+    for(SizeType i=0; i!=v1.size(); ++i) { r[i]=v1[i]; }
+    for(SizeType i=0; i!=v2.size(); ++i) { r[v1.size()+i]=v2[i]; }
+    r[v1.size()+v2.size()]=x3;
+    return std::move(r);
+}
+
+
+template<class X> inline decltype(error(declval<X>())) error(const Vector<X>& v) {
+    decltype(error(declval<X>())) r=0u;
+    for(SizeType i=0; i!=v.size(); ++i) {
+        r=max(r,error(v[i]));
     }
-    return true;
+    return r;
 }
 
-
-template<class V> std::ostream& operator<<(std::ostream& os, const VectorExpression<V>& ve) {
-    return os << Vector<typename V::ValueType>(ve);
-}
-
-template<class X> std::ostream& operator<<(std::ostream& os, const Vector<X>& v) {
-    if(v.size()==0) { os << '['; }
-    for(size_t i=0; i!=v.size(); ++i) {
-        os << (i==0 ? '[' : ',') << v[i]; }
-    return os << ']';
-}
-
-template<class X> std::istream& operator>>(std::istream& is, Vector<X>& v) {
-    std::vector<X> vec;
-    is >> vec;
-    X* ptr=&vec[0];
-    v=Vector<X>(vec.size(),ptr);
-    return is;
+template<class X> inline decltype(error(declval<X>())) sup_error(const Vector<X>& v) {
+    decltype(error(declval<X>())) r=0u;
+    for(SizeType i=0; i!=v.size(); ++i) {
+        r=max(r,error(v[i]));
+    }
+    return r;
 }
 
 
 
-template<class X> bool refines(const Vector<X>& v1, const Vector<X>& v2) {
-    assert(v1.size()==v2.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
+
+template<class X> inline Vector<decltype(refinement(declval<X>(),declval<X>()))> refinement(const Vector<X>& v1, const Vector<X>& v2) {
+    ARIADNE_PRECONDITION(v1.size()==v2.size());
+    Vector<X> r(v1.size(),v1.zero_element());
+    for(SizeType i=0; i!=v1.size(); ++i) {
+        r[i]=refinement(v1[i],v2[i]);
+    }
+    return std::move(r);
+}
+
+template<class X> inline decltype(refines(declval<X>(),declval<X>())) refines(const Vector<X>& v1, const Vector<X>& v2) {
+    ARIADNE_PRECONDITION(v1.size()==v2.size());
+    for(SizeType i=0; i!=v1.size(); ++i) {
         if(!refines(v1[i],v2[i])) { return false; }
     }
     return true;
 }
 
-Vector<ExactFloat>const& make_exact(const Vector<ApproximateFloat>& av);
-Vector<ValidatedFloat> make_bounds(const Vector<ErrorFloat>& ev);
-Vector<ExactFloat> midpoint(const Vector<ValidatedFloat>& x);
-PositiveUpperFloat sup_error(const Vector<ValidatedFloat>& x);
+template<class VX, class EX> inline decltype(models(declval<VX>(),declval<EX>())) models(const Vector<VX>& v1, const Vector<EX>& v2) {
+    ARIADNE_PRECONDITION(v1.size()==v2.size());
+    for(SizeType i=0; i!=v1.size(); ++i) {
+        if(!models(v1[i],v2[i])) { return false; }
+    }
+    return true;
+}
 
-bool models(const Vector<ValidatedFloat>& x1, const Vector<ExactFloat>& x2);
-bool consistent(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2);
-bool inconsistent(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2);
-bool refines(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2);
-Vector<ValidatedFloat> refinement(const Vector<ValidatedFloat>& x1, const Vector<ValidatedFloat>& x2);
+template<class VX, class EX> inline decltype(represents(declval<VX>(),declval<EX>())) represents(const Vector<VX>& v1, const Vector<EX>& v2) {
+    ARIADNE_PRECONDITION(v1.size()==v2.size());
+    for(SizeType i=0; i!=v1.size(); ++i) {
+        if(!represents(v1[i],v2[i])) { return false; }
+    }
+    return true;
+}
+
+template<class X1, class X2> inline decltype(inconsistent(declval<X1>(),declval<X2>())) inconsistent(const Vector<X1>& v1, const Vector<X2>& v2) {
+    ARIADNE_PRECONDITION(v1.size()==v2.size());
+    for(SizeType i=0; i!=v1.size(); ++i) {
+        if(inconsistent(v1[i],v2[i])) { return true; }
+    }
+    return false;
+}
+
+template<class X1, class X2> inline decltype(consistent(declval<X1>(),declval<X2>())) consistent(const Vector<X1>& v1, const Vector<X2>& v2) {
+    ARIADNE_PRECONDITION(v1.size()==v2.size());
+    for(SizeType i=0; i!=v1.size(); ++i) {
+        if(!consistent(v1[i],v2[i])) { return false; }
+    }
+    return true;
+}
+
+
+template<class X> using MidpointType = RemoveConst<decltype(midpoint(declval<X>()))>;
+
+template<class X> inline Vector<MidpointType<X>> midpoint(const Vector<X>& v) {
+    Vector<MidpointType<X>> r(v.size(),midpoint(v.zero_element()));
+    for(SizeType i=0; i!=v.size(); ++i) {
+        r[i]=midpoint(v[i]);
+    }
+    return r;
+}
+
+template<class X> using BoundsType = decltype(make_bounds(declval<X>()));
+
+template<class X> inline Vector<BoundsType<X>> make_bounds(const Vector<X>& v) {
+    Vector<BoundsType<X>> r(v.size(),make_bounds(v.zero_element()));
+    for(SizeType i=0; i!=v.size(); ++i) {
+        r[i]=make_bounds(v[i]);
+    }
+    return std::move(r);
+}
+
+
+template<class X> using ExactType = RemoveConst<RemoveReference<decltype(make_exact(declval<X>()))>>;
+
+template<class X> inline Vector<ExactType<X>> make_exact(const Vector<X>& v) {
+    Vector<ExactType<X>> r(v.size(),make_exact(v.zero_element()));
+    for(SizeType i=0; i!=v.size(); ++i) {
+        r[i]=make_exact(v[i]);
+    }
+    return std::move(r);
+}
+
+class ExactFloat;
+class ApproximateFloat;
+inline Vector<ExactFloat>const& make_exact(Vector<ApproximateFloat>const& v) {
+    return reinterpret_cast<Vector<ExactFloat>const&>(v);
+}
 
 
 } // namespace Ariadne
 
-#endif // ARIADNE_VECTOR_H
-
+#endif

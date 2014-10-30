@@ -242,6 +242,7 @@ class Differential
 
     //! \brief The zero element of the differential algebra.
     Differential<X> create() const { return Differential<X>(this->argument_size(),this->degree()); }
+    Differential<X> create_zero() const { return Differential<X>(this->argument_size(),this->degree()); }
     //! \brief Set all coefficients to zero.
     void clear() { this->_expansion.clear(); }
     //! \brief Remove all terms with coefficient \f$0\f$.
@@ -991,7 +992,9 @@ class Vector< Differential<X> >
     // The value stored in the vector.
     typedef Differential<X> ValueType;
     // The type used for scalars.
-    typedef X ScalarType;
+    typedef Differential<X> ScalarType;
+    // The type used for scalars.
+    typedef X NumericType;
 
     Vector() : _chars(), _ary(0) { }
     Vector(uint rs) : _chars(), _ary(rs) { }

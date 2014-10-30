@@ -91,6 +91,7 @@ template<class A> struct Graded : public List<A>
     template<class Op> Void operator=(const ClosureExpression<Op,SelfType>& expr);
     Void operator=(const ClosureExpression<AntiDiff,SelfType>& ad);
     Graded<A>& operator=(const Graded<A>& a) { this->List<A>::operator=(a); return *this; }
+    Graded<A> create_zero() const { return Ariadne::create_zero((*this)[0]); }
     Nat degree() const { return this->size()-1u; }
     Void extend(const A& a) { this->List<A>::append(a); }
 };

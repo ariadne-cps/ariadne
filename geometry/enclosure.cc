@@ -397,8 +397,8 @@ void Enclosure::substitute(uint j, Float c)
 
 void Enclosure::new_parameter(ExactInterval ivl)
 {
-    this->_domain=join(this->_domain,ivl);
-    this->_reduced_domain=join(this->_reduced_domain,ivl);
+    this->_domain=product(this->_domain,ivl);
+    this->_reduced_domain=product(this->_reduced_domain,ivl);
     this->_space_function=embed(this->_space_function,ivl);
     this->_time_function=embed(this->_time_function,ivl);
     this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
@@ -412,8 +412,8 @@ void Enclosure::new_parameter(ExactInterval ivl)
 void Enclosure::new_variable(ExactInterval ivl)
 {
     ValidatedScalarFunctionModel variable_function = this->function_factory().create_identity(ivl);
-    this->_domain=join(this->_domain,ivl);
-    this->_reduced_domain=join(this->_reduced_domain,ivl);
+    this->_domain=product(this->_domain,ivl);
+    this->_reduced_domain=product(this->_reduced_domain,ivl);
     this->_space_function=combine(this->_space_function,variable_function);
     this->_time_function=embed(this->_time_function,ivl);
     this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
@@ -1033,8 +1033,8 @@ uniform_error_recondition()
     error_domains=ExactBox(large_error_indices.size(),ExactInterval(-1,+1));
     uint k=this->number_of_parameters();
 
-    this->_domain=join(this->_domain,error_domains);
-    this->_reduced_domain=join(this->_reduced_domain,error_domains);
+    this->_domain=product(this->_domain,error_domains);
+    this->_reduced_domain=product(this->_reduced_domain,error_domains);
     this->_space_function=embed(this->_space_function,error_domains);
     for(uint i=0; i!=this->_constraints.size(); ++i) {
         this->_constraints[i].function()=embed(this->_constraints[i].function(),error_domains);
@@ -1189,7 +1189,7 @@ void Enclosure::draw(CanvasInterface& canvas, const Projection2d& projection) co
 
 void Enclosure::box_draw(CanvasInterface& canvas, const Projection2d& projection) const {
     this->reduce();
-    make_exact_box(join(Ariadne::apply(this->_space_function,this->_reduced_domain),Ariadne::apply(this->_time_function,this->_reduced_domain))).draw(canvas,projection);
+    make_exact_box(product(Ariadne::apply(this->_space_function,this->_reduced_domain),Ariadne::apply(this->_time_function,this->_reduced_domain))).draw(canvas,projection);
 }
 
 ValidatedVectorFunctionModel join(const ValidatedVectorFunctionModel& f1, const ValidatedScalarFunctionModel& f2, const ValidatedVectorFunctionModel& f3) {

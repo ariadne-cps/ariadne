@@ -334,6 +334,8 @@ template<> class Box<ExactInterval>
 
 //! \relates ExactBox \brief The cartesian product of two boxes.
 ExactBox product(const ExactBox& bx1, const ExactBox& bx2);
+ExactBox product(const ExactBox& bx1, const ExactInterval& ivl2);
+ExactBox product(const ExactInterval& ivl1, const ExactBox& bx2);
 //! \relates ExactBox \brief The smallest box containing the two boxes.
 ExactBox hull(const ExactBox& bx1, const ExactBox& bx2);
 ExactBox hull(const ExactBox& bx1, const ExactPoint& pt2);
@@ -489,6 +491,7 @@ template<> class Box<UpperInterval>
     //! \brief Split into two along the largest side.
     Pair<UpperBox,UpperBox> split() const {
         return ExactBox(reinterpret_cast<Vector<ExactInterval>const&>(*this)).split(); }
+
     //! \brief Split into two along side with index \a i.
     Pair<UpperBox,UpperBox> split(uint i) const;
 
@@ -499,6 +502,15 @@ template<> class Box<UpperInterval>
 
     void draw(CanvasInterface& c, const Projection2d& p) const;
 };
+
+inline UpperBox product(const Vector<UpperInterval>& bx1, const Vector<UpperInterval>& bx2) {
+    return UpperBox(join(bx1,bx2));
+}
+
+inline UpperBox product(const Vector<UpperInterval>& bx1, const UpperInterval& ivl2) {
+    return UpperBox(join(bx1,ivl2));
+}
+
 
 //! \brief An over-approximation to an interval set.
 template<> class Box<ApproximateInterval>

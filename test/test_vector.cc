@@ -137,7 +137,7 @@ TestVector::test_misc()
     cout << "v0=" << flush; cout << v0 << endl;
     Vector<ApproximateFloat> v1(n,vptr);
     cout << "v1=" << v1 << endl;
-    Vector<ApproximateFloat> v2=Vector<ApproximateFloat>("[2.375,4.25,-1.25]");
+    Vector<ApproximateFloat> v2=Vector<ApproximateFloat>({2.375,4.25,-1.25});
     cout << "v2=" << v2 << endl;
     cout << "norm(v1)=" << norm(v1) << "  norm(v2)=" << norm(v2) << endl;
     assert(norm(v1)==4);
@@ -153,8 +153,8 @@ TestVector::test_misc()
     cout << endl;
 
     Vector<ApproximateFloat> vf0;
-    v1=Vector<ApproximateFloat>("[0.25,-1.5]");
-    v2=Vector<ApproximateFloat>("[-0.5,2.25]");
+    v1=Vector<ApproximateFloat>({0.25,-1.5});
+    v2=Vector<ApproximateFloat>({-0.5,2.25});
     vf0=-v1;
     cout << vf0 << " = -" << v1 << endl;
     vf0=Vector<ApproximateFloat>(v1)+v2;
@@ -169,16 +169,16 @@ TestVector::test_misc()
     cout << vf0 << " = " << v1 << " / " << x << endl;
     cout << endl;
 
-    Vector< ValidatedFloat > iv1=Vector<ValidatedFloat>("[[0.984375,1.015625],[2.25,2.375],[4.0,4.375],[-0.03125,0.015625]]");
+    Vector< ValidatedFloat > iv1=Vector<ValidatedFloat>({ValidatedFloat{0.984375,1.015625},{2.25,2.375},{4.0,4.375},{-0.03125,0.015625}});
     cout << "iv1=" << iv1 << endl;
     cout << "norm(iv1)=" << norm(iv1) << endl;
     cout << "norm(iv1).upper()=" << norm(iv1).upper() << endl;
 
-    Vector< ValidatedFloat > iv2=Vector<ValidatedFloat>("[[-1,1],[-1,1]]");
+    Vector< ValidatedFloat > iv2=Vector<ValidatedFloat>({{-1,1},{-1,1}});
     cout << "iv2=" << iv2 << endl;
     Vector< ValidatedFloat > iv3(3);
     cout << "iv3=" << iv3 << endl;
-    iv3=Vector<ValidatedFloat>("[[4.25,4.25],[2.375,2.375]]");
+    iv3=Vector<ValidatedFloat>({{4.25,4.25},{2.375,2.375}});
     cout << "iv3=" << iv3 << endl;
     ValidatedFloat ix=ValidatedFloat(-2,1);
 
@@ -234,8 +234,8 @@ TestVector::test_misc()
 
     iv0=ev1;
     iv0/=ix;
-    iv0=Vector<ValidatedFloat>("[2,1]");
-    iv1=Vector<ValidatedFloat>("[0,1]");
+    iv0=Vector<ValidatedFloat>({2,1});
+    iv1=Vector<ValidatedFloat>({0,1});
     /*
       ARIADNE_TEST_ASSERT( (iv0+=Vector<ValidatedFloat>("[0,1]")) == Vector<ValidatedFloat>("[2,2]") );
       ARIADNE_TEST_ASSERT( (iv0-=Vector<ValidatedFloat>("[0,1]")) == Vector<ValidatedFloat>("[2,1]") );

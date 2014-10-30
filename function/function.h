@@ -223,6 +223,7 @@ class VectorFunction
     operator const VectorFunctionInterface<P>& () const { return *this->_ptr; }
 
     VectorFunction(const List< ScalarFunction<P> >& lsf);
+    VectorFunction(const Vector< ScalarFunction<P> >& lsf);
     VectorFunction(std::initializer_list< ScalarFunction<P> > lsf);
     template<class PP> VectorFunction(const List< ScalarFunction<PP> >& lsf, EnableIf< IsStronger<PP,P>, Void >* = 0) {
         *this=VectorFunction<P>(List< ScalarFunction<P> >(lsf)); }

@@ -721,7 +721,6 @@ Expansion<X> embed(unsigned int before_size, const Expansion<X>& x, unsigned int
 }
 
 
-template<class T> using MidpointType = decltype(midpoint(declval<T>()));
 template<class T> Expansion<MidpointType<T>> midpoint(const Expansion<T>& pse) {
     Expansion<MidpointType<T>> r(pse.argument_size());
     for(typename Expansion<T>::const_iterator iter=pse.begin(); iter!=pse.end(); ++iter) {

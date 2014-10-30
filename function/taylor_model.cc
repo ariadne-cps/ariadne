@@ -180,6 +180,12 @@ ValidatedTaylorModel::create() const
 }
 
 ValidatedTaylorModel
+ValidatedTaylorModel::create_zero() const
+{
+    return ValidatedTaylorModel(this->argument_size(),this->_sweeper);
+}
+
+ValidatedTaylorModel
 ValidatedTaylorModel::create_ball(ErrorType e) const
 {
     ARIADNE_PRECONDITION(e>=0);

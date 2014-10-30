@@ -72,14 +72,14 @@ ValidatedProcedure make_procedure(const ValidatedScalarFunctionInterface& f) {
     return Procedure<ValidatedNumber>(e);
 }
 
-UpperInterval emulrng(const ExactFloatVector& x, const ExactFloatVector& z) {
-    return emulrng(reinterpret_cast<Vector<Float>const&>(x),reinterpret_cast<Vector<Float>const&>(z));
-}
-
 UpperInterval emulrng(const RawFloatVector& x, const RawFloatVector& z) {
     UpperInterval r=mul_ivl(x[0],z[0]);
     for(uint i=0; i!=x.size(); ++i) { r=hull(mul_ivl(x[i],z[i]),r); }
     return r;
+}
+
+UpperInterval emulrng(const ExactFloatVector& x, const ExactFloatVector& z) {
+    return emulrng(reinterpret_cast<Vector<Float>const&>(x),reinterpret_cast<Vector<Float>const&>(z));
 }
 
 UpperFloat total_widths(const UpperBox& bx) {
@@ -113,6 +113,14 @@ UpperFloat average_scaled_width(const UpperBox& bx, const Vector<ExactFloat>& sf
         res+=(bx[i].width()/sf[i]);
     }
     return res/bx.size();
+}
+
+Float maximum_scaled_width(const UpperBox& bx, const Vector<Float>& sf) {
+    return maximum_scaled_width(bx,reinterpret_cast<Vector<ExactFloat>const&>(sf)).raw();
+}
+
+Float average_scaled_width(const UpperBox& bx, const Vector<Float>& sf) {
+    return average_scaled_width(bx,reinterpret_cast<Vector<ExactFloat>const&>(sf)).raw();
 }
 
 } // namespace
@@ -339,7 +347,7 @@ void hotstarted_constraint_adjoin_outer_approximation_recursion(
         return;
     }
 
-    ExactBox bx=join(static_cast<const ExactBox&>(b.box()),static_cast<const ExactBox&>(c));
+    ExactBox bx=product(static_cast<const ExactBox&>(b.box()),static_cast<const ExactBox&>(c));
 
     ARIADNE_LOG(2,"  fg(d)="<<apply(fg,d)<<", bx="<<bx<<"\n");
     if(definitely(disjoint(apply(fg,d),bx))) {
@@ -490,7 +498,7 @@ void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
         return;
     }
 
-    ExactBox bx=join(static_cast<const ExactBox&>(b.box()),static_cast<const ExactBox&>(c));
+    ExactBox bx=product(static_cast<const ExactBox&>(b.box()),static_cast<const ExactBox&>(c));
 
     optimiser.compute_tz(d,fg,bx,ay,at,az);
     for(uint i=0; i!=12; ++i) {

@@ -52,6 +52,10 @@ class ExactInterval;
 class UpperInterval;
 class ApproximateInterval;
 
+// Allow vector arithmetic on UpperInterval
+template<class X> struct IsScalar;
+template<> struct IsScalar<UpperInterval> : True { };
+
 typedef ExactInterval ExactFloatInterval;
 typedef UpperInterval UpperFloatInterval;
 typedef ApproximateInterval ApproximateFloatInterval;
@@ -288,6 +292,7 @@ class UpperInterval {
     // FIXME: Should make explicit, but this interferes with role as a numeric type
     UpperInterval(Float point) : l(point), u(point) { }
     // FIXME: Should make explicit, but this interferes with role as a numeric type
+    UpperInterval(unsigned int  point) : l(point), u(point) { }
     UpperInterval(int  point) : l(point), u(point) { }
     UpperInterval(double  point) : l(point), u(point) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].

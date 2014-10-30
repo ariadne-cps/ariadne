@@ -369,8 +369,6 @@ template<class X> inline Polynomial<X>& operator-=(Polynomial<X>& p, double c) {
 template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, double c) { return p*=X(c); }
 template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, double c) { return p/=X(c); }
 
-template<class X> using MidpointType = decltype(midpoint(declval<X>()));
-
 template<class X> inline Polynomial<MidpointType<X>> midpoint(const Polynomial<X>& p) {
     Polynomial<MidpointType<X>> r(p.argument_size());
     for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {

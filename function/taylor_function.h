@@ -30,6 +30,7 @@
 
 #include <iosfwd>
 #include "utility/container.h"
+#include "utility/exceptions.h"
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
 #include "function/taylor_model.h"
@@ -577,13 +578,13 @@ inline ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, uint k) {
     return ScalarTaylorFunction(x.domain(),derivative(x.model(),k)*sf); }
 
 inline ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const ExactInterval& dom2) {
-    return ScalarTaylorFunction(join(tv1.domain(),dom2),embed(tv1.model(),1u)); }
+    return ScalarTaylorFunction(product(tv1.domain(),dom2),embed(tv1.model(),1u)); }
 inline ScalarTaylorFunction embed(const ScalarTaylorFunction& tv1, const ExactBox& dom2) {
-    return ScalarTaylorFunction(join(tv1.domain(),dom2),embed(tv1.model(),dom2.size())); }
+    return ScalarTaylorFunction(product(tv1.domain(),dom2),embed(tv1.model(),dom2.size())); }
 inline ScalarTaylorFunction embed(const ExactBox& dom1, const ScalarTaylorFunction& tv2) {
-    return ScalarTaylorFunction(join(dom1,tv2.domain()),embed(dom1.size(),tv2.model())); }
+    return ScalarTaylorFunction(product(dom1,tv2.domain()),embed(dom1.size(),tv2.model())); }
 inline ScalarTaylorFunction embed(const ExactBox& dom1, const ScalarTaylorFunction& tv2,const ExactBox& dom3) {
-    return ScalarTaylorFunction(join(join(dom1,tv2.domain()),dom3),embed(embed(dom1.size(),tv2.model()),dom3.size())); }
+    return ScalarTaylorFunction(product(product(dom1,tv2.domain()),dom3),embed(embed(dom1.size(),tv2.model()),dom3.size())); }
 
 
 

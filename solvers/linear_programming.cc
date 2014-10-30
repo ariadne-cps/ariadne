@@ -28,6 +28,7 @@
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
+#include "algebra/diagonal_matrix.h"
 #include "function/affine.h"
 #include "solvers/linear_programming.h"
 
@@ -38,6 +39,8 @@ static const int verbosity=0;
 
 namespace Ariadne {
 
+typedef Vector<UpperInterval> UpperIntervalVector;
+typedef Matrix<UpperInterval> UpperIntervalMatrix;
 
 
 // Return r[i]=x[i]-c for i=1,...,n
@@ -170,7 +173,7 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
         }
     }
 
-    Vector<ValidatedNumber> ivld = solve(ivlS,ivle) * make_exact(A);
+    Vector<ValidatedNumber> ivld =  transpose(make_exact(A)) * solve(ivlS,ivle);
 
     ivlx += ivld;
 
@@ -186,7 +189,7 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
 
     // If yb - max(yA,0) xu + min(yA,0) xl > 0, then problem is infeasible
     // Evaluate lower bound for yb - max(z,0) xu + min(z,0) xl
-    Vector<ValidatedNumber> z=make_exact(y)*make_exact(A);
+    Vector<ValidatedNumber> z=transpose(make_exact(A)) * make_exact(y);
     Float mx = 0.0;
     set_rounding_downward();
     for(uint i=0; i!=y.size(); ++i) {
@@ -318,7 +321,7 @@ feasible(const Vector<Float>& xl, const Vector<Float>& xu,
             if(definitely(validated_feasible)) { return true; }
         }
         UpperInterval yb=dot(UpperIntervalVector(y),UpperIntervalVector(b));
-        UpperInterval yAX = dot( UpperIntervalVector(y)*UpperIntervalMatrix(A), X );
+        UpperInterval yAX = dot( UpperIntervalVector(y), UpperIntervalMatrix(A) * X );
         if(definitely(disjoint(yb,yAX))) { return false; }
         if(result==DEGENERATE_FEASIBILITY) { ARIADNE_LOG(2,"  degenerate\n"); return indeterminate; }
         if(compute_mu(xl,xu, x,zl,zu)<THRESHOLD ) { ARIADNE_LOG(2,"  threshold\n"); return indeterminate; }
@@ -364,7 +367,7 @@ _minimisation_step(const Vector<Float>& c, const Vector<Float>& xl, const Vector
 
     // rx = Ax-b; ry=yA+zl-zu-c; rzl=(x-xl).zl-mu; rzu=(xu-x).zu-mu.
     rx=A*x-b;
-    ry=y*A+(zl-zu)-c;
+    ry=transpose(A)*y+(zl-zu)-c;
     for(uint i=0; i!=n; ++i) {
         if(xl[i]!=-inf) { rzl[i] = (x[i]-xl[i])*zl[i] - mu; } else { rzl[i]=0.0; }
         if(xu[i]!=+inf) { rzu[i] = (xu[i]-x[i])*zu[i] - mu; } else { rzu[i]=0.0; }
@@ -396,13 +399,13 @@ _minimisation_step(const Vector<Float>& c, const Vector<Float>& xl, const Vector
     // (A D AT) dy = rx + A D ryz
 
     dy = solve(S, Vector<Float>( rx + A * (D * ryz) ) );
-    dx = D * Vector<Float>(dy*A - ryz);
+    dx = D * Vector<Float>(transpose(A)*dy - ryz);
     dzl = Vector<Float>(rzl-Zl*dx)/(X-Xl);
     dzu = Vector<Float>(rzu+Zu*dx)/(Xu-X);
     ARIADNE_LOG(5,"dx="<<dx<<" dy="<<dy<<" dzl="<<dzl<<" dzu="<<dzu<<"\n");
 
-    ARIADNE_LOG(7,"A*dx="<<(A*dx)<<" AT*dy+dzl-dzu="<<(dy*A+dzl-dzu)<<" Zl*dx+(X-Xl)*dzl="<<(Zl*dx+(X-Xl)*dzl)<<" -Zu*dx+(Xu-X)*dzu="<<(-(Zu*dx)+(Xu-X)*dzu)<<"\n");
-    ARIADNE_LOG(7,"A*dx-rx="<<(A*dx-rx)<<" AT*dy+dzl-dzu-ry="<<(dy*A+dzl-dzu-ry)<<" Zl*dx+(X-Xl)*dzl-rzl="<<(Zl*dx+(X-Xl)*dzl-rzl)<<" -Zu*dx+(Xu-X)*dzu-rzu="<<(-(Zu*dx)+(Xu-X)*dzu-rzu)<<"\n");
+    ARIADNE_LOG(7,"A*dx="<<(A*dx)<<" AT*dy+dzl-dzu="<<(transpose(A)*dy+dzl-dzu)<<" Zl*dx+(X-Xl)*dzl="<<(Zl*dx+(X-Xl)*dzl)<<" -Zu*dx+(Xu-X)*dzu="<<(-(Zu*dx)+(Xu-X)*dzu)<<"\n");
+    ARIADNE_LOG(7,"A*dx-rx="<<(A*dx-rx)<<" AT*dy+dzl-dzu-ry="<<(transpose(A)*dy+dzl-dzu-ry)<<" Zl*dx+(X-Xl)*dzl-rzl="<<(Zl*dx+(X-Xl)*dzl-rzl)<<" -Zu*dx+(Xu-X)*dzu-rzu="<<(-(Zu*dx)+(Xu-X)*dzu-rzu)<<"\n");
     // Try to enforce feasibility or dual feasibility
     Float alphax=1.0;
     nx=x-dx;
@@ -425,7 +428,7 @@ _minimisation_step(const Vector<Float>& c, const Vector<Float>& xl, const Vector
     ARIADNE_LOG(5,"alphax="<<alphax<<" nx="<<nx<<" alphaz="<<alphaz<<" ny="<<ny<<" nzl="<<nzl<<" nzu="<<nzu<<"\n");
 
     x=nx; y=ny; zl=nzl; zu=nzu;
-    ARIADNE_LOG(5,"cx="<<dot(c,x)<<" yb="<<dot(y,b)<<" Ax-b="<<(A*x-b)<<" yA+(zl-zu)-c="<<(y*A+(zl-zu)-c)<<"\n");
+    ARIADNE_LOG(5,"cx="<<dot(c,x)<<" yb="<<dot(y,b)<<" Ax-b="<<(A*x-b)<<" yA+(zl-zu)-c="<<(transpose(A)*y+(zl-zu)-c)<<"\n");
 
     if(alphax==1.0 && alphaz==1.0) { return PRIMAL_DUAL_FEASIBLE; }
     if(alphax==1.0) { return PRIMAL_FEASIBLE; }

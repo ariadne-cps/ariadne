@@ -383,8 +383,8 @@ void TestVectorTaylorFunction::test_jacobian()
     ExactBox domain3={{-0.25,+0.75},{0.0,+0.50}};
     //Vector<ApproximateFloat> point1={0.0,0.0};
     //Vector<ApproximateFloat> point2={0.5,0.25};
-    Vector<ValidatedFloat> point1=Vector<ValidatedFloat>{0.0,0.0};
-    Vector<ValidatedFloat> point2=Vector<ValidatedFloat>{0.5,0.25};
+    Vector<ValidatedFloat> point1=Vector<ValidatedFloat>{0,0};
+    Vector<ValidatedFloat> point2=Vector<ValidatedFloat>{0,0.25_exact};
     //Vector<ExactFloat> point1=Vector<ExactFloat>{0.0,0.0};
     //Vector<ExactFloat> point2=Vector<ExactFloat>{0.5,0.25};
     ARIADNE_TEST_EQUAL(VectorTaylorFunction(domain1,henon,swp).jacobian(point1),henon.jacobian(point1));

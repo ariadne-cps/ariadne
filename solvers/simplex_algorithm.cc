@@ -67,9 +67,17 @@ inline bool operator> (Rational q, int n) { return q> Rational(n); }
 inline bool operator< (Rational q, int n) { return q< Rational(n); }
 
 inline bool operator==(Rational q, double n) { return q==Rational(n); }
+Rational midpoint(Rational const& q) { return q; }
+
+inline auto operator<=(ValidatedFloat x1, int x2) -> decltype(x1<=ValidatedFloat(x2)) { return x1<=ValidatedFloat(x2); }
+inline auto operator>=(ValidatedFloat x1, int x2) -> decltype(x1>=ValidatedFloat(x2)) { return x1>=ValidatedFloat(x2); }
+inline auto operator< (ValidatedFloat x1, int x2) -> decltype(x1< ValidatedFloat(x2)) { return x1< ValidatedFloat(x2); }
+inline auto operator> (ValidatedFloat x1, int x2) -> decltype(x1> ValidatedFloat(x2)) { return x1> ValidatedFloat(x2); }
 
 template<class X> struct RigorousNumericsTraits { typedef X Type; };
 template<> struct RigorousNumericsTraits<Float> { typedef UpperInterval Type; };
+//template<> struct RigorousNumericsTraits<Float> { typedef ValidatedFloat Type; };
+template<class X> using RigorousNumericType = typename RigorousNumericsTraits<X>::Type;
 
 // Extend an Array of size m to an Array of size n
 // such that the first m elements are the same,
@@ -717,11 +725,11 @@ compute_rt(const Vector<X>& xl, const Vector<X>& xu, const Array<Slackness>& vt,
     return make_pair(r,t);
 }
 
-Pair<size_t,UpperInterval>
-compute_rt(const Vector<Float>& xl, const Vector<Float>& xu, const Array<Slackness>& vt, const Array<size_t>& p, const Vector<UpperInterval>& x, const Vector<UpperInterval>& d, const size_t s)
+Pair<size_t,RigorousNumericType<Float>>
+compute_rt(const Vector<Float>& xl, const Vector<Float>& xu, const Array<Slackness>& vt, const Array<size_t>& p, const Vector<RigorousNumericType<Float>>& x, const Vector<RigorousNumericType<Float>>& d, const size_t s)
 {
     typedef Float X;
-    typedef UpperInterval XX;
+    typedef RigorousNumericType<X> XX;
     const X inf=Ariadne::inf;
 
     // Choose variable to take out of basis
@@ -732,7 +740,7 @@ compute_rt(const Vector<Float>& xl, const Vector<Float>& xu, const Array<Slackne
     X ds=(vt[p[s]]==LOWER ? +1 : -1);
     XX t=XX(xu[p[s]])-XX(xl[p[s]]);
     if(definitely(t<inf)) { r=s; }
-    XX tk=0.0;
+    XX tk=0;
     ARIADNE_LOG(7,"   xl="<<xl<<" x="<<x<<" xu="<<xu<<"\n");
     ARIADNE_LOG(7,"   vt="<<vt<<" p="<<p<<" d="<<d<<"\n");
     ARIADNE_LOG(7,"   s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" xl[p[s]]="<<xl[p[s]]<<" xu[p[s]]="<<xu[p[s]]<<" r="<<r<<" t[r]="<<t<<"\n");
@@ -1132,9 +1140,9 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
         if(done) {
             ARIADNE_LOG(9,"  Cannot put infeasible variables into basis.");
             Vector<X> y=compute_y(cc,p,B);
-            Vector<X> yA=y*A;
+            Vector<X> ATy=transpose(A)*y;
             X yb=dot(y,b);
-            ARIADNE_LOG(5,"\nCertificate of infeasibility:\n y="<<y<<"\n yA="<<yA<<" yb="<<yb<<"\n");
+            ARIADNE_LOG(5,"\nCertificate of infeasibility:\n y="<<y<<"\n ATy="<<ATy<<" yb="<<yb<<"\n");
             return false;
         }
 
@@ -1153,7 +1161,7 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
             if(verbosity>0) {
                 ARIADNE_WARN("WARNING: Maximum number of steps reached in constrained feasibility problem. "
                              <<"A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" cc="<<cc<<" ll="<<ll<<" uu="<<uu<<" vt="<<vt
-                             <<" x="<<x<<" y="<<compute_y(cc,p,B)<<" Ay="<<(compute_y(cc,p,B)*A)<<"\n");
+                             <<" x="<<x<<" y="<<compute_y(cc,p,B)<<" ATy="<<(transpose(A)*compute_y(cc,p,B))<<"\n");
             }
             throw DegenerateFeasibilityProblemException();
         }

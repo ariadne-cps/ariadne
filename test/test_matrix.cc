@@ -34,6 +34,9 @@
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
 
+namespace Ariadne {
+typedef Matrix<ApproximateFloat> ApproximateFloatMatrix;
+}
 
 using namespace std;
 using namespace Ariadne;
@@ -100,7 +103,7 @@ TestMatrix::test_misc()
     ARIADNE_TEST_PRINT(A1);
     Matrix<ApproximateFloat> A2(3,3,Aptr);
     ARIADNE_TEST_PRINT(A2);
-    Matrix<ApproximateFloat> A3("[-1.0,3.0,1.0; -1.0,1.0,2.0; 2.0,1.0,1.0]");
+    Matrix<ApproximateFloat> A3({{-1.0,3.0,1.0}, {-1.0,1.0,2.0}, {2.0,1.0,1.0}});
     ARIADNE_TEST_PRINT(A3);
 
     for(size_t i=0; i!=A2.row_size(); ++i) {

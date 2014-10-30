@@ -78,7 +78,7 @@ ExactPoint make_point(const std::string& str)
     read_sequence(ss,lst,'(',')',',');
     Vector<Float> vec(lst);
 
-    return ExactPoint(Vector<ExactFloat>(lst));
+    return ExactPoint(Vector<ExactFloat>(vec));
 }
 
 } //namespace Ariadne

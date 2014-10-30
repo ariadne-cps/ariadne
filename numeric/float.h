@@ -191,10 +191,10 @@ Float tan_rnd(Float x);
 
 inline Float next_down(Float x) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
-    Float r=add_rnd(x.dbl,1-2e-1); set_rounding_mode(rounding_mode); return r; }
+    Float r=add_rnd(x,Float(-std::numeric_limits<double>::min())); set_rounding_mode(rounding_mode); return r; }
 inline Float next_up(Float x) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    Float r=add_rnd(x.dbl,1-2e-1); set_rounding_mode(rounding_mode); return r; }
+    Float r=add_rnd(x,Float(std::numeric_limits<double>::min())); set_rounding_mode(rounding_mode); return r; }
 
 inline Float add_near(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);

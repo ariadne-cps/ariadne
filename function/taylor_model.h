@@ -124,6 +124,8 @@ class TaylorModel<ValidatedNumber>
     void swap(TaylorModel<ValidatedNumber>& tm);
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
     TaylorModel<ValidatedNumber> create() const;
+    //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
+    TaylorModel<ValidatedNumber> create_zero() const;
     //! \brief The \a j<sup>th</sup> coordinate element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
     TaylorModel<ValidatedNumber> create_coordinate(uint j) const;
     //! \brief Set to zero.
@@ -507,6 +509,7 @@ class TaylorModel<ApproximateNumber>
     TaylorModel<ApproximateNumber>(uint as, Sweeper swp);
 
     TaylorModel<ApproximateNumber> create() const { return TaylorModel<ApproximateNumber>(this->argument_size(),this->_sweeper); }
+    TaylorModel<ApproximateNumber> create_zero() const { return TaylorModel<ApproximateNumber>(this->argument_size(),this->_sweeper); }
     TaylorModel<ApproximateNumber> create_ball(ApproximateErrorType r) const { return TaylorModel<ApproximateNumber>(this->argument_size(),this->_sweeper); }
     //! \brief Fast swap with another Taylor model.
     void swap(TaylorModel<ApproximateNumber>& other) { this->_expansion.swap(other._expansion); }

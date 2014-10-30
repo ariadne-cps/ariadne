@@ -1,7 +1,7 @@
 /***************************************************************************
- *            vector.cc
+ *            vector_interface.h
  *
- *  Copyright 2013-14  Pieter Collins
+ *  Copyright 2010-14  Pieter Collins
  *
  ****************************************************************************/
 
@@ -20,17 +20,33 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
-/*! \file vector.cc
- *  \brief 
+ 
+/*! \file vector_interface.h
+ *  \brief Interface for vectors.
  */
 
+#ifndef ARIADNE_VECTOR_INTERFACE_H
+#define ARIADNE_VECTOR_INTERFACE_H
 
-
-#include "utility/module.h"
-
-#include "vector.h"
+#include "utility/writable.h"
 
 namespace Ariadne {
 
+template<class X, class I=Void> class VectorInterface;
+
+template<class X, class I> class VectorInterface {
+    typedef I ScalarInterface;
+    typedef X ScalarType;
+    typedef typename ScalarType::NumericType NumericType;
+  public:
+    virtual ScalarInterface* _get(SizeType i) const = 0;
+    virtual Void _set(SizeType i, ScalarType const& x) const = 0;
+    virtual VectorInterface* _add(VectorInterface const*) const = 0;
+    virtual VectorInterface* _sub(VectorInterface const*) const = 0;
+    virtual VectorInterface* _mul(ScalarType const&) const = 0;
+    virtual VectorInterface* _mul(NumericType const&) const = 0;
+};
+
 } // namespace Ariadne
+
+#endif /* ARIADNE_ALGEBRA_INTERFACE_H */

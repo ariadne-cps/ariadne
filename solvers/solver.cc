@@ -196,6 +196,19 @@ solve_all(Set< Vector<ValidatedNumber> >& r,
           const ValidatedVectorFunction& f,
           const ExactBox& ix);
 
+
+template<class X1, class X2>
+bool operator<(const Vector<X1>& v1, const Vector<X2>& v2)
+{
+    if(v1.size()!=v2.size()) { return v1.size()<v2.size(); }
+    for(size_t i=0; i!=v1.size(); ++i) {
+        if(decide(v1[i]<v2[i])) { return true; }
+        else if(decide(v1[i]>v2[i])) { return false; }
+    }
+    return true;
+}
+
+
 Set< Vector<ValidatedNumber> >
 SolverBase::solve_all(const ValidatedVectorFunction& f,
                       const ExactBox& bx) const
@@ -543,7 +556,7 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     Matrix<UpperInterval> rngJ(n,n);
     for(uint i=0; i!=n; ++i) {
         for(uint j=0; j!=n; ++j) {
-            UpperInterval D2fij=UpperInterval(unchecked_evaluate(D2f[i][j],make_singleton(join(id.range(),h.range()))));
+            UpperInterval D2fij=UpperInterval(unchecked_evaluate(D2f[i][j],make_singleton(product(id.range(),h.range()))));
             rngJ[i][j]=intersection(J[i][j].range(),D2fij);
         }
     }

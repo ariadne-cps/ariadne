@@ -56,7 +56,8 @@ class Point
     //! Construct from a string literal of the form "(x1,x2,...,xd)".
     explicit Point(const std::string& str);
     Point(const Vector<RealType>& v) : Vector<RealType>(v) { }
-    template<class E> Point(const VectorExpression<E>& ve) : Vector<RealType>(ve) { }
+    template<class T, EnableIf<IsConvertible<T,X>> =dummy> Point(const Point<T>& pt) : Vector<RealType>(pt.vector()) { }
+    //! Construct from an initializer list of floating-point values.
     template<class N, class T> Point(const N& n, const T& t) : Vector<RealType>(n,RealType(t)) { }
     //! Construct from an initializer list of floating-point values.
     explicit Point(std::initializer_list<double> lst);

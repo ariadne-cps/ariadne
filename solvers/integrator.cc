@@ -43,6 +43,9 @@
 
 namespace Ariadne {
 
+void foo() { UpperInterval x; Vector<UpperInterval> v;  x*x; x*v; v*x; }
+
+
 static const ExactFloat zero=0;
 
 inline UpperBox operator+(Vector<ExactInterval> bx, Vector<UpperInterval> const& ex) {

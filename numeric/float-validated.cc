@@ -179,6 +179,26 @@ UpperFloat& operator*=(UpperFloat& x1, UpperFloat x2) {
      return x1=x1*x2;
 }
 
+UpperFloat rec(LowerFloat x)
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double xl=internal_cast<volatile double&>(x.value());
+    set_rounding_mode(upward);
+    volatile double ru=1/xl;
+    set_rounding_mode(rnd);
+    return UpperFloat(ru);
+}
+
+LowerFloat rec(UpperFloat x)
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double xu=internal_cast<volatile double&>(x.value());
+    set_rounding_mode(downward);
+    volatile double rl=1/xu;
+    set_rounding_mode(rnd);
+    return LowerFloat(rl);
+}
+
 
 UpperFloat min(UpperFloat x1, UpperFloat x2) {
     return UpperFloat(min(x1.raw(),x2.raw()));

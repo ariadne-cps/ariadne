@@ -370,7 +370,7 @@ ApproximateNumber
 ScalarTaylorFunction::evaluate(const Vector<ApproximateNumber>& x) const
 {
     const ScalarTaylorFunction& f=*this;
-    if(!contains(f.domain(),reinterpret_cast<Vector<Float>const&>(x))) {
+    if(!contains(f.domain(),make_exact(x))) {
         ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
     }
     Vector<ApproximateNumber> sx=Ariadne::unscale(x,f._domain);
@@ -1359,7 +1359,7 @@ Vector<ApproximateNumber>
 VectorTaylorFunction::evaluate(const Vector<ApproximateNumber>& x) const
 {
     const VectorTaylorFunction& f=*this;
-    if(!contains(f.domain(),reinterpret_cast<Vector<RawFloat>const&>(x))) {
+    if(!decide(contains(f.domain(),x))) {
         ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
     }
     Vector<ApproximateNumber> sx=Ariadne::unscale(x,f._domain);
@@ -1445,25 +1445,25 @@ join(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2)
 VectorTaylorFunction
 combine(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2)
 {
-    return VectorTaylorFunction(join(f1.domain(),f2.domain()),combine(f1.model(),f2.model()));
+    return VectorTaylorFunction(product(f1.domain(),f2.domain()),combine(f1.model(),f2.model()));
 }
 
 VectorTaylorFunction
 combine(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2)
 {
-    return VectorTaylorFunction(join(f1.domain(),f2.domain()),combine(f1.model(),f2.models()));
+    return VectorTaylorFunction(product(f1.domain(),f2.domain()),combine(f1.model(),f2.models()));
 }
 
 VectorTaylorFunction
 combine(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2)
 {
-    return VectorTaylorFunction(join(f1.domain(),f2.domain()),combine(f1.models(),f2.model()));
+    return VectorTaylorFunction(product(f1.domain(),f2.domain()),combine(f1.models(),f2.model()));
 }
 
 VectorTaylorFunction
 combine(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
 {
-    return VectorTaylorFunction(join(f1.domain(),f2.domain()),combine(f1.models(),f2.models()));
+    return VectorTaylorFunction(product(f1.domain(),f2.domain()),combine(f1.models(),f2.models()));
 }
 
 

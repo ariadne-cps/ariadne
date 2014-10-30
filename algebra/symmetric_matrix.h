@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vector.cc
+ *            algebra/symmetric_matrix.h
  *
  *  Copyright 2013-14  Pieter Collins
  *
@@ -21,16 +21,32 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file vector.cc
+/*! \file algebra/symmetric_matrix.h
  *  \brief 
  */
 
 
 
-#include "utility/module.h"
+#ifndef ARIADNE_SYMMETRIC_MATRIX_H
+#define ARIADNE_SYMMETRIC_MATRIX_H
+
+#include <initializer_list>
 
 #include "vector.h"
+#include "matrix.h"
 
 namespace Ariadne {
 
+/************ SymmetricMatrix *********************************************************/
+
+template<class X> class SymmetricMatrix : public Matrix<X>
+{
+  public:
+    SymmetricMatrix(SizeType n) : Matrix<X>(n,n) { }
+};
+template<class X1, class X2> Covector<ArithmeticType<X1,X2>> operator*(SymmetricMatrix<X1> const& S, Vector<X2> const& v);
+
+
 } // namespace Ariadne
+
+#endif

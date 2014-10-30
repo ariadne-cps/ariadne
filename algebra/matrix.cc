@@ -1,7 +1,7 @@
 /***************************************************************************
  *            matrix.cc
  *
- *  Copyright 2008  Alberto Casagrande, Pieter Collins
+ *  Copyright 2008-14  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,54 +21,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/numeric.h"
+#include "numeric/module.h"
+
 #include "config.h"
 
-#include "numeric/rounding.h"
-#include "numeric/numeric.h"
-#include "algebra/vector.h"
 #include "algebra/matrix.h"
-#include "geometry/interval.h"
 
+#include "numeric/float.h"
+#include "numeric/rational.h"
+#include "algebra/vector.h"
+#include "algebra/covector.h"
+
+#include "matrix.tcc"
 
 namespace Ariadne {
 
-Matrix<ValidatedFloat>const&
-make_singleton(const Matrix<ExactInterval>& ivlA) {
-    return reinterpret_cast<Matrix<ValidatedFloat>const&>(ivlA);
-}
 
-Matrix<ValidatedFloat> const&
-make_singleton(const Matrix<UpperInterval>& A) {
-    return reinterpret_cast<Matrix<ValidatedFloat>const&>(A);
-}
-
-Matrix<ExactFloat>
-midpoint(const Matrix<ValidatedFloat>& A) {
-    Matrix<ExactFloat> R(A.row_size(),A.column_size());
-    for(size_t i=0; i!=A.row_size(); ++i) {
-        for(size_t j=0; j!=A.column_size(); ++j) {
-            R[i][j]=A[i][j].midpoint();
-        }
-    }
-    return R;
-}
-
-Matrix<Float>
-midpoint(const Matrix<UpperInterval>& A) {
-    Matrix<Float> R(A.row_size(),A.column_size());
-    for(size_t i=0; i!=A.row_size(); ++i) {
-        for(size_t j=0; j!=A.column_size(); ++j) {
-            R[i][j]=A[i][j].centre().raw();
-        }
-    }
-    return R;
-}
-
-Matrix<Rational>
-midpoint(const Matrix<Rational>& A) {
-    return A;
-}
 
 template<class X>
 Matrix<X>
@@ -77,22 +45,22 @@ lu_inverse(const Matrix<X>& M)
     typedef X RealType;
     ARIADNE_ASSERT_MSG(M.row_size()==M.column_size(),"A="<<M);
 
-    size_t m=M.row_size();
-    size_t n=M.column_size();
+    SizeType m=M.row_size();
+    SizeType n=M.column_size();
     Matrix<RealType> A=M;
     Matrix<RealType> B=Matrix<RealType>::identity(n);
 
     // Array of row pivots. The value p[i] gives the row
     // swapped with the ith row in the ith stage.
-    Array<size_t> p(m);
-    for(size_t k=0; k!=m; ++k) { p[k]=k; }
+    Array<SizeType> p(m);
+    for(SizeType k=0; k!=m; ++k) { p[k]=k; }
 
 
-    for(size_t k=0; k!=std::min(m,n); ++k) {
+    for(SizeType k=0; k!=std::min(m,n); ++k) {
         // Choose a pivot row
-        size_t iamax=k;
-        X amax=0;
-        for(size_t i=k; i!=m; ++i) {
+        SizeType iamax=k;
+        X amax(0);
+        for(SizeType i=k; i!=m; ++i) {
             if(decide(abs(A[i][k])>amax)) {
                 iamax=i;
                 amax=abs(A[i][k]);
@@ -100,48 +68,48 @@ lu_inverse(const Matrix<X>& M)
         }
 
         // Set pivot row
-        size_t i=iamax;
+        SizeType i=iamax;
         p[k]=i;
 
         // Swap rows of both A and B
-        for(size_t j=k; j!=n; ++j) {
+        for(SizeType j=k; j!=n; ++j) {
             X tmp=A[k][j];
             A[k][j]=A[i][j];
             A[i][j]=tmp;
         }
 
-        for(size_t j=0; j!=n; ++j) {
+        for(SizeType j=0; j!=n; ++j) {
             X tmp=B[k][j];
             B[k][j]=B[i][j];
             B[i][j]=tmp;
         }
 
-        RealType r  = 1/A[k][k];
-        for(size_t i=k+1; i!=n; ++i) {
+        RealType r  = rec(A[k][k]);
+        for(SizeType i=k+1; i!=n; ++i) {
             RealType s=A[i][k] * r;
-            for(size_t j=0; j!=n; ++j) {
+            for(SizeType j=0; j!=n; ++j) {
                 B[i][j] -= s * B[k][j];
             }
-            for(size_t j=k+1; j!=n; ++j) {
+            for(SizeType j=k+1; j!=n; ++j) {
                 A[i][j] -= s * A[k][j];
             }
             A[i][k] = 0;
         }
-        for(size_t j=0; j!=n; ++j) {
+        for(SizeType j=0; j!=n; ++j) {
             B[k][j] *= r;
         }
-        for(size_t j=k+1; j!=n; ++j) {
+        for(SizeType j=k+1; j!=n; ++j) {
             A[k][j] *= r;
         }
         A[k][k] = 1;
     }
 
     // Backsubstitute to find inverse
-    for(size_t k=n; k!=0; ) {
+    for(SizeType k=n; k!=0; ) {
         --k;
-        for(size_t i=0; i!=k; ++i) {
+        for(SizeType i=0; i!=k; ++i) {
             RealType s=A[i][k];
-            for(size_t j=0; j!=n; ++j) {
+            for(SizeType j=0; j!=n; ++j) {
                 B[i][j] -= s * B[k][j];
             }
             A[i][k] = 0;
@@ -161,38 +129,38 @@ template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B) {
     return lu_inverse(A)*B;
 }
 
-// Find a starting solution for a diagonally dominant system
-Matrix<ValidatedFloat> dd_solve(const Matrix<ValidatedFloat>& A, const Matrix<ValidatedFloat>& B)
-{
-    const size_t n=B.row_size();
-    const size_t m=B.column_size();
+template<class X> Vector<X> lu_solve(const Matrix<X>& A, const Vector<X>& b) {
+    return lu_inverse(A)*b;
 
-    //Compute 1/(|aii|-sum|aij|) using outward rounding
-    rounding_mode_t rounding_mode=get_rounding_mode();
-    set_rounding_mode(upward);
-    Vector<RawFloat> c(n,0.0);
-    for(size_t i=0; i!=n; ++i) {
-        RawFloat ci=c[i];
-        for(size_t j=0; j!=n; ++j) {
+}
+
+// Find a starting solution for a diagonally dominant system
+template<> Matrix<BoundFloat> dd_solve(const Matrix<BoundFloat>& A, const Matrix<BoundFloat>& B)
+{
+    const SizeType n=B.row_size();
+    const SizeType m=B.column_size();
+
+    //Compute an upper bound for 1/(|aii|-sum|aij|) using outward rounding
+    Vector<UpperFloat> c(n,0.0_x);
+    for(SizeType i=0; i!=n; ++i) {
+        LowerFloat rci=mig(A[i][i]);
+        for(SizeType j=0; j!=n; ++j) {
             if(j!=i) {
-                ci=add_rnd(ci,mag(A[i][j]).raw());
+                rci=rci-mag(A[i][j] );
             }
         }
-        ci=sub_rnd(ci,mig(A[i][i]).raw());
-        ci=-ci;
-        if(ci<=0.0) {
-            ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<ValidatedFloat> A, Matrix<ValidatedFloat> B)",
-                          "ExactInterval matrix A="<<A<<" is not diagonally-dominant.");
+        if(rci<=0) {
+            ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<BoundFloat> A, Matrix<BoundFloat> B)",
+                          "Matrix A="<<A<<" is not diagonally-dominant.");
         }
-        ci=rec_rnd(ci);
+        c[i]=rec(rci);
     }
-    set_rounding_mode(rounding_mode);
 
     // Compute initial solution
-    Matrix<ValidatedFloat> R(n,m);
-    for(size_t i=0; i!=n; ++i) {
-        ValidatedFloat ci(-c[i],+c[i]);
-        for(size_t j=0; j!=m; ++j) {
+    Matrix<BoundFloat> R(n,m);
+    for(SizeType i=0; i!=n; ++i) {
+        BoundFloat ci(-c[i],+c[i]);
+        for(SizeType j=0; j!=m; ++j) {
             R[i][j]=B[i][j]*ci;
         }
     }
@@ -201,39 +169,61 @@ Matrix<ValidatedFloat> dd_solve(const Matrix<ValidatedFloat>& A, const Matrix<Va
 }
 
 
-template<> Matrix<ValidatedFloat> gs_solve(const Matrix<ValidatedFloat>& A, const Matrix<ValidatedFloat>& B)
+template<> Void gs_step(const Matrix<BoundFloat>& A, const Vector<BoundFloat>& b, Vector<BoundFloat>& x)
+{
+    // Perform Gauss-Seidel iteration
+    const SizeType n=x.size();
+    for(SizeType i=0; i!=n; ++i) {
+        // compute R'[i][j] := (JB[i][j] - Sum{k!=j}JA[i][k]*R[k][j]) / JA[i][i]
+        BoundFloat ri=b[i];
+        for(SizeType k=0; k!=n; ++k) {
+            if(k!=i) {
+                ri-=A[i][k]*x[k];
+            }
+        }
+        if(A[i][i].lower()>0 || A[i][i].upper()<0) {
+            ri/=A[i][i];
+            x[i]=refinement(x[i],ri);
+        }
+    }
+}
+
+template<> Matrix<BoundFloat> gs_solve(const Matrix<BoundFloat>& A, const Matrix<BoundFloat>& B)
 {
     ARIADNE_ASSERT(A.row_size()==A.column_size());
     ARIADNE_ASSERT(B.row_size()==A.column_size());
-    const size_t n=B.row_size();
-    const size_t m=B.column_size();
+    const SizeType n=B.row_size();
+    const SizeType m=B.column_size();
 
     // Precondition A and B
-    Matrix<ApproximateFloat> mA=midpoint(A);
-    Matrix<ApproximateFloat> aJ=inverse(mA);
-    Matrix<ExactFloat> const& J=reinterpret_cast<Matrix<ExactFloat>const&>(aJ);
-    Matrix<ValidatedFloat> JA=J*A;
-    Matrix<ValidatedFloat> JB=J*B;
-    //std::cerr<<"J="<<J<<"\nJA="<<JA<<"\nJB="<<JB<<"\n";
+    Matrix<ApproximateFloat> mA(A);
 
-    //Matrix<ValidatedFloat> R=dd_solve(JA,JB);
-    Matrix<ValidatedFloat> R=lu_inverse(A);
+    Matrix<ExactFloat> J=make_exact(inverse(mA));
+    Matrix<BoundFloat> JA=J*A;
+    Matrix<BoundFloat> JB=J*B;
+
+    //Matrix<BoundFloat> R=dd_solve(JA,JB);
+    Matrix<BoundFloat> R=lu_solve(A,B);
     //std::cerr<<"R="<<R<<"\n";
 
     // Perform Gauss-Seidel iteration
-    size_t step=0;
+    SizeType step=0;
     while(step<1) {
-        for(size_t i=0; i!=n; ++i) {
-            for(size_t j=0; j!=m; ++j) {
+        for(SizeType i=0; i!=n; ++i) {
+            for(SizeType j=0; j!=m; ++j) {
                 // compute R'[i][j] := (JB[i][j] - Sum{k!=j}JA[i][k]*R[k][j]) / JA[i][i]
-                ValidatedFloat Rij=JB[i][j];
-                for(size_t k=0; k!=n; ++k) {
+                BoundFloat Rij=JB[i][j];
+                for(SizeType k=0; k!=n; ++k) {
                     if(k!=i) {
                         Rij-=JA[i][k]*R[k][j];
                     }
                 }
-                Rij/=JA[i][i];
-                R[i][j]=refinement(R[i][j],Rij);
+                if(JA[i][i].lower()>0 || JA[i][i].upper()<0) {
+                    Rij/=JA[i][i];
+                    R[i][j]=refinement(R[i][j],Rij);
+                }
+                // FIXME: Use FloatInterval or Flt here?
+                //R[i][j]=FloatInterval(max(R[i][j].lower(),Rij.lower()),min(R[i][j].upper(),Rij.upper()));
             }
         }
         ++step;
@@ -243,16 +233,31 @@ template<> Matrix<ValidatedFloat> gs_solve(const Matrix<ValidatedFloat>& A, cons
     return R;
 }
 
+template<class X> Vector<X> gs_solve(const Matrix<X>& A, const Vector<X>& b) {
+    Matrix<X> B(b.size(),1u); for(SizeType i=0; i!=b.size(); ++i) { B[i][1]=b[i]; }
+    Matrix<X> R=gs_solve(A,B);
+    Vector<X> r(R.row_size()); for(SizeType i=0; i!=r.size(); ++i) { r[i]=R[i][1]; }
+    return r;
+}
+
+
 template<class X> Matrix<X> gs_inverse(const Matrix<X>& A) {
     return gs_solve(A,Matrix<X>::identity(A.row_size()));
 }
 
 
+Matrix<ValidatedFloat> inverse(const Matrix<ExactFloat>& A) {
+    return lu_inverse(Matrix<ValidatedFloat>(A));
+}
+
 template<class X> Matrix<X> inverse(const Matrix<X>& A) {
     return lu_inverse(A);
 }
 
-template<> Matrix<ValidatedFloat> inverse<ValidatedFloat>(const Matrix<ValidatedFloat>& A) {
+struct DivideByZeroException { };
+struct SingularMatrixException { };
+
+template<> Matrix<BoundFloat> inverse<BoundFloat>(const Matrix<BoundFloat>& A) {
     try {
         return lu_inverse(A);
     } catch(const DivideByZeroException& e) {
@@ -266,7 +271,7 @@ template<class X> Matrix<X> solve(const Matrix<X>& A, const Matrix<X>& B) {
     Matrix<X> Ainv=inverse(A); return Ainv*B;
 }
 
-template<> Matrix<ValidatedFloat> solve(const Matrix<ValidatedFloat>& A, const Matrix<ValidatedFloat>& B) {
+template<> Matrix<BoundFloat> solve(const Matrix<BoundFloat>& A, const Matrix<BoundFloat>& B) {
     return gs_solve(A,B);
 }
 
@@ -274,14 +279,6 @@ template<class X> Vector<X> solve(const Matrix<X>& A, const Vector<X>& b) {
     return lu_inverse(A)*b;
 }
 
-template<class X> Vector<X> gs_solve(const Matrix<X>& A, const Vector<X>& b) {
-    Matrix<X> B(b.size(),1u);
-    for(size_t j=0; j!=b.size(); ++j) { B[j][0]=b[j]; }
-    Matrix<X> R=gs_solve(A,B);
-    Vector<X> r(R.row_size());
-    for(size_t i=0; i!=r.size(); ++i) { r[i]=R[i][0]; }
-    return r;
-}
 
 
 template<class X>
@@ -302,15 +299,15 @@ solve(const PLUMatrix<X>& A, const Matrix<X>& B)
     ARIADNE_ASSERT(B.row_size()==P.size());
 
     // Set constants for sizes
-    const size_t m=B.column_size();
-    const size_t n=B.row_size();
+    const SizeType m=B.column_size();
+    const SizeType n=B.row_size();
 
     Matrix<X> R=B;
 
     // PivotMatrix rows of B
-    for(size_t k=0; k!=n; ++k) {
-        size_t i=P[k];
-        for(size_t j=0; j!=m; ++j) {
+    for(SizeType k=0; k!=n; ++k) {
+        SizeType i=P[k];
+        for(SizeType j=0; j!=m; ++j) {
             X tmp=R[i][j];
             R[i][k]=R[k][j];
             R[k][j]=tmp;
@@ -318,25 +315,25 @@ solve(const PLUMatrix<X>& A, const Matrix<X>& B)
     }
 
     // Backsubstitute on L
-    for(size_t k=0; k!=n; ++k) {
-        for(size_t i=k+1; i!=n; ++i) {
+    for(SizeType k=0; k!=n; ++k) {
+        for(SizeType i=k+1; i!=n; ++i) {
             X s=L[i][k];
-            for(size_t j=0; j!=n; ++j) {
+            for(SizeType j=0; j!=n; ++j) {
                 R[i][j] -= s * R[k][j];
             }
         }
     }
 
     // Backsubstitute on U with row scaling
-    for(size_t k=n; k!=0; ) {
+    for(SizeType k=n; k!=0; ) {
         --k;
         X s=1/U[k][k];
-        for(size_t j=0; j!=m; ++j) {
+        for(SizeType j=0; j!=m; ++j) {
             R[k][j] *= s;
         }
-        for(size_t i=0; i!=k; ++i) {
+        for(SizeType i=0; i!=k; ++i) {
             X s=U[i][k];
-            for(size_t j=0; j!=m; ++j) {
+            for(SizeType j=0; j!=m; ++j) {
                 R[i][j] -= s * R[k][j];
             }
         }
@@ -346,22 +343,19 @@ solve(const PLUMatrix<X>& A, const Matrix<X>& B)
 
 
 // Compute the vector of row norms (sums of absolute values) of A
-Vector<ApproximateFloat>
-row_norms(const Matrix<ApproximateFloat>& A)
+Vector<Flt>
+row_norms(const Matrix<Flt>& A)
 {
-    const size_t m=A.row_size();
-    const size_t n=A.column_size();
-    Vector<ApproximateFloat> r(m);
+    const SizeType m=A.row_size();
+    const SizeType n=A.column_size();
+    Vector<Flt> r(m);
 
-    rounding_mode_t prev_rounding_mode=get_rounding_mode();
-    set_rounding_mode(upward);
-    for(size_t i=0; i!=m; ++i) {
+    for(SizeType i=0; i!=m; ++i) {
         r[i]=0.0;
-        for(size_t j=0; j!=n; ++j) {
+        for(SizeType j=0; j!=n; ++j) {
             r[i]+=abs(A[i][j]);
         }
     }
-    set_rounding_mode(prev_rounding_mode);
 
     return r;
 
@@ -369,26 +363,26 @@ row_norms(const Matrix<ApproximateFloat>& A)
 
 
 // Scale the rows of A to each have some of absolute values equal to one
-Matrix<ApproximateFloat>
-normalise_rows(const Matrix<ApproximateFloat>& A)
+Matrix<Flt>
+normalise_rows(const Matrix<Flt>& A)
 {
-    const size_t m=A.row_size();
-    const size_t n=A.column_size();
+    const SizeType m=A.row_size();
+    const SizeType n=A.column_size();
 
-    Matrix<ApproximateFloat> R=A;
+    Matrix<Flt> R=A;
 
-    Array<ApproximateFloat> row_asums(m);
-    rounding_mode_t prev_rounding_mode=get_rounding_mode();
-    set_rounding_mode(upward);
-    for(size_t i=0; i!=m; ++i) {
+    Array<Flt> row_asums(m);
+    auto prev_rounding_mode=get_rounding_mode();
+    set_rounding_upward();
+    for(SizeType i=0; i!=m; ++i) {
         row_asums[i]=0.0;
-        for(size_t j=0; j!=n; ++j) {
+        for(SizeType j=0; j!=n; ++j) {
             row_asums[i]+=abs(A[i][j]);
         }
     }
-    set_rounding_mode(toward_zero);
-    for(size_t i=0; i!=m; ++i) {
-        for(size_t j=0; j!=n; ++j) {
+    set_rounding_toward_zero();
+    for(SizeType i=0; i!=m; ++i) {
+        for(SizeType j=0; j!=n; ++j) {
             R[i][j]/=row_asums[i];
         }
     }
@@ -400,27 +394,27 @@ normalise_rows(const Matrix<ApproximateFloat>& A)
 
 // Returns a pivot P and matrices L and U such that L is unit lower-triangular,
 // U is upper-trianguler and A=PLU.
-Tuple< PivotMatrix, Matrix<ApproximateFloat>, Matrix<ApproximateFloat> >
-triangular_decomposition(const Matrix<ApproximateFloat>& A)
+Tuple< PivotMatrix, Matrix<Flt>, Matrix<Flt> >
+triangular_decomposition(const Matrix<Flt>& A)
 {
-    typedef ApproximateFloat RealType;
+    typedef Flt RealType;
     ARIADNE_ASSERT(A.row_size()==A.column_size());
 
-    size_t m=A.row_size();
-    size_t n=A.column_size();
+    SizeType m=A.row_size();
+    SizeType n=A.column_size();
     Matrix<RealType> L=Matrix<RealType>::identity(m);
     Matrix<RealType> U=A;
 
     // Array of row pivots. The value P[i] gives the row
     // swapped with the ith row in the ith stage.
     PivotMatrix P(m);
-    for(size_t k=0; k!=m; ++k) { P[k]=k; }
+    for(SizeType k=0; k!=m; ++k) { P[k]=k; }
 
-    for(size_t k=0; k!=std::min(m,n); ++k) {
+    for(SizeType k=0; k!=std::min(m,n); ++k) {
         // Choose a pivot row
-        size_t iamax=k;
+        SizeType iamax=k;
         RealType amax=0;
-        for(size_t i=k; i!=m; ++i) {
+        for(SizeType i=k; i!=m; ++i) {
             if(abs(A[i][k])>amax) {
                 iamax=i;
                 amax=abs(A[i][k]);
@@ -428,26 +422,26 @@ triangular_decomposition(const Matrix<ApproximateFloat>& A)
         }
 
         // Set pivot row
-        size_t l=iamax;
+        SizeType l=iamax;
         P[k]=l;
 
         // Swap rows of L and U
-        for(size_t j=0; j!=k; ++j) {
+        for(SizeType j=0; j!=k; ++j) {
             RealType tmp=L[k][j];
             L[k][j]=L[l][j];
             L[l][j]=tmp;
         }
 
-        for(size_t j=k; j!=n; ++j) {
+        for(SizeType j=k; j!=n; ++j) {
             RealType tmp=U[k][j];
             U[k][j]=U[l][j];
             U[l][j]=tmp;
         }
 
         RealType r  = 1/U[k][k];
-        for(size_t i=k+1; i!=m; ++i) {
+        for(SizeType i=k+1; i!=m; ++i) {
             RealType s=U[i][k] * r;
-            for(size_t j=k+1; j!=n; ++j) {
+            for(SizeType j=k+1; j!=n; ++j) {
                 U[i][j] -= s * U[k][j];
             }
             U[i][k] = 0;
@@ -456,10 +450,11 @@ triangular_decomposition(const Matrix<ApproximateFloat>& A)
 
     }
 
-    return make_tuple(P,L,U);
+    return Tuple<PivotMatrix,Matrix<Flt>,Matrix<Flt>>{P,L,U};
 
 }
 
+using std::min;
 // Returns a matrix R such that A=OR where O is a square matrix with
 // orthogonal rows and the sum of the absolute values of the rows of R are
 // at most one.
@@ -467,46 +462,44 @@ triangular_decomposition(const Matrix<ApproximateFloat>& A)
 // Use Householder transformation H=I-vv' where v=u/|u|
 // and u=a +/- |a|e with a and e the working column of A
 // and corresponding unit vector.
-Tuple< Matrix<ApproximateFloat>, PivotMatrix>
-triangular_factor(const Matrix<ApproximateFloat>& A)
+Tuple< Matrix<Flt>, PivotMatrix>
+triangular_factor(const Matrix<Flt>& A)
 {
-    typedef ApproximateFloat X;
+    const SizeType m=A.row_size();
+    const SizeType n=A.column_size();
 
-    const size_t m=A.row_size();
-    const size_t n=A.column_size();
-
-    Matrix<X> R=A;
+    Matrix<Flt> R=A;
     PivotMatrix P(n); for(uint i=0; i!=n; ++i) { P[i]=i; }
 
     // Array of column norm squares
-    Array<X> cns(n);
+    Array<Flt> cns(n);
 
-    Vector<X> u(m);
+    Vector<Flt> u(m);
 
-    for(size_t k=0; k!=min(m,n); ++k) {
+    for(SizeType k=0; k!=min(m,n); ++k) {
         //std::cerr<<"k="<<k<<" R="<<R<<std::endl;
 
         bool pivoting=true;
         if(pivoting) {
             // Compute column norms
-            for(size_t j=k; j!=n; ++j) {
+            for(SizeType j=k; j!=n; ++j) {
                 cns[j]=0.0;
-                for(size_t i=k; i!=m; ++i) {
+                for(SizeType i=k; i!=m; ++i) {
                     cns[j]+=sqr(R[i][j]);
                 }
             }
 
             // Find largest column norm
-            size_t l=k; X cnsmax=cns[k];
-            for(size_t j=k+1; j!=n; ++j) {
+            SizeType l=k; Flt cnsmax=cns[k];
+            for(SizeType j=k+1; j!=n; ++j) {
                 if(cns[j]>cnsmax) {
                     l=j; cnsmax=cns[j];
                 }
             }
 
             // Swap columns l and k
-            for(size_t i=0; i!=m; ++i) {
-                ApproximateFloat tmp=R[i][k];
+            for(SizeType i=0; i!=m; ++i) {
+                Flt tmp=R[i][k];
                 R[i][k]=R[i][l];
                 R[i][l]=tmp;
             }
@@ -516,41 +509,41 @@ triangular_factor(const Matrix<ApproximateFloat>& A)
         }
 
         // Compute |a| where a is the working column
-        ApproximateFloat nrmas=0.0;
-        for(size_t i=k; i!=m; ++i) {
+        Flt nrmas=0.0;
+        for(SizeType i=k; i!=m; ++i) {
             nrmas+=R[i][k]*R[i][k];
         }
-        ApproximateFloat nrma=sqrt(nrmas);
+        Flt nrma=sqrt(nrmas);
 
         // Compute u=a +/- |a|e
-        for(size_t i=k; i!=m; ++i) {
+        for(SizeType i=k; i!=m; ++i) {
             u[i]=R[i][k];
         }
         if(u[k]>=0) { u[k]+=nrma; }
         else { u[k]-=nrma; }
 
         // Compute -2/u.u
-        ApproximateFloat nrmus=0.0;
-        for(size_t i=k; i!=m; ++i) {
+        Flt nrmus=0.0;
+        for(SizeType i=k; i!=m; ++i) {
             nrmus+=sqr(u[i]);
         }
-        ApproximateFloat mtdnu=(-2)/nrmus;
+        Flt mtdnu=(-2)/nrmus;
 
         // For each column b, compute b-=2u(u.b)/u.u
-        for(size_t j=k; j!=n; ++j) {
-            ApproximateFloat udtb=0.0;
-            for(size_t i=k; i!=m; ++i) {
+        for(SizeType j=k; j!=n; ++j) {
+            Flt udtb=0.0;
+            for(SizeType i=k; i!=m; ++i) {
                 udtb+=u[i]*R[i][j];
             }
-            ApproximateFloat scl=udtb*mtdnu;
-            for(size_t i=k; i!=m; ++i) {
+            Flt scl=udtb*mtdnu;
+            for(SizeType i=k; i!=m; ++i) {
                 R[i][j]+=scl*u[i];
             }
         }
 
         // For the kth column, set R[k][k]=-/+ |a|
         // and R[i][k]=0 for i>k
-        for(size_t i=k+1; i!=m; ++i) {
+        for(SizeType i=k+1; i!=m; ++i) {
             R[i][k]=0.0;
         }
 
@@ -558,21 +551,21 @@ triangular_factor(const Matrix<ApproximateFloat>& A)
 
     // Scale the rows of R to have sum of absolute values equal to 1
 
-    rounding_mode_t prev_rounding_mode=get_rounding_mode();
-    for(size_t i=0; i!=m; ++i) {
-        set_rounding_mode(upward);
-        ApproximateFloat rsum=0.0;
-        for(size_t j=i; j!=n; ++j) {
+    RoundingModeType prev_rounding_mode=get_rounding_mode();
+    for(SizeType i=0; i!=m; ++i) {
+        set_rounding_upward();
+        Flt rsum=0.0;
+        for(SizeType j=i; j!=n; ++j) {
             rsum+=abs(R[i][j]);
         }
-        set_rounding_mode(toward_zero);
-        for(size_t j=i; j!=n; ++j) {
+        set_rounding_toward_zero();
+        for(SizeType j=i; j!=n; ++j) {
             R[i][j]/=rsum;
         }
     }
     set_rounding_mode(prev_rounding_mode);
 
-    return make_tuple(R,P);
+    return Tuple<Matrix<Flt>,PivotMatrix>{R,P};
 
 }
 
@@ -580,39 +573,37 @@ triangular_factor(const Matrix<ApproximateFloat>& A)
 // orthogonal rows, and such that the row absolute value sums of the inverse of
 // T are at most 1. Then the image of the unit box under the matrix T is
 // an over-approximation of the unit box.
-Matrix<ApproximateFloat>
-triangular_multiplier(const Matrix<ApproximateFloat>& A)
+Matrix<Flt>
+triangular_multiplier(const Matrix<Flt>& A)
 {
-    typedef ApproximateFloat X;
-
     ARIADNE_ASSERT(A.row_size()<=A.column_size());
-    const size_t m=A.row_size();
-    const size_t n=A.column_size();
+    const SizeType m=A.row_size();
+    const SizeType n=A.column_size();
 
-    Matrix<X> R; PivotMatrix P;
-    make_ltuple(R,P)=triangular_factor(A);
+    Matrix<Flt> R; PivotMatrix P;
+    std::make_tuple(R,P)=triangular_factor(A);
 
-    Matrix<X> T(n,m); for(size_t i=0; i!=m; ++i) { T[i][i]=1; }
+    Matrix<Flt> T(n,m); for(SizeType i=0; i!=m; ++i) { T[i][i]=1.0; }
 
-    for(size_t i=0; i!=m; ++i) { assert(R[i][i]!=0); }
+    for(SizeType i=0; i!=m; ++i) { assert(R[i][i]!=0.0); }
 
-    for(size_t k=m-1; k!=size_t(-1); --k) {
-        X r=1/R[k][k];
-        for(size_t i=0; i!=k; ++i) {
-            X s=R[i][k]*r;
-            for(size_t j=k; j!=m; ++j) {
+    for(SizeType k=m-1; k!=SizeType(-1); --k) {
+        Flt r=1.0/R[k][k];
+        for(SizeType i=0; i!=k; ++i) {
+            Flt s=R[i][k]*r;
+            for(SizeType j=k; j!=m; ++j) {
                 T[i][j]-=s*T[k][j];
             }
         }
-        for(size_t j=k; j!=m; ++j) {
+        for(SizeType j=k; j!=m; ++j) {
             T[k][j]*=r;
         }
     }
 
-    for(size_t k=m-1; k!=size_t(-1); --k) {
-        size_t p=P[k];
-        for(size_t i=0; i!=m; ++i) {
-            X tmp=T[p][i]; T[p][i]=T[k][i]; T[k][i]=tmp;
+    for(SizeType k=m-1; k!=SizeType(-1); --k) {
+        SizeType p=P[k];
+        for(SizeType i=0; i!=m; ++i) {
+            Flt tmp=T[p][i]; T[p][i]=T[k][i]; T[k][i]=tmp;
         }
     }
 
@@ -620,25 +611,25 @@ triangular_multiplier(const Matrix<ApproximateFloat>& A)
 }
 
 
-Matrix<ExactFloat> pivot_matrix(const Array<size_t>& pv)
+template<class X> Matrix<X> pivot_matrix(const Array<SizeType>& pv)
 {
-    const size_t n=pv.size();
-    Array<size_t> perm(n); for(uint i=0; i!=n; ++i) { perm[i]=i; }
-    for(size_t i=0; i!=n; ++i) {
+    const SizeType n=pv.size();
+    Array<SizeType> perm(n); for(uint i=0; i!=n; ++i) { perm[i]=i; }
+    for(SizeType i=0; i!=n; ++i) {
         std::swap(perm[i],perm[pv[i]]);
     }
-    Matrix<ExactFloat> P(n,n);
-    for(size_t i=0; i!=n; ++i) {
+    Matrix<X> P(n,n);
+    for(SizeType i=0; i!=n; ++i) {
         P[i][perm[i]]=1;
     }
     return P;
 }
 
-PivotMatrix::operator Matrix<ExactFloat> () const {
-    return pivot_matrix(this->_ary);
+template<class X> PivotMatrix::operator Matrix<X> () const {
+    return pivot_matrix<X>(this->_ary);
 }
 
-std::ostream& operator<<(std::ostream& os, const PivotMatrix& pv) {
+OutputStream& operator<<(OutputStream& os, const PivotMatrix& pv) {
     return os << static_cast< Matrix<ExactFloat> >(pv);
 }
 
@@ -646,13 +637,13 @@ std::ostream& operator<<(std::ostream& os, const PivotMatrix& pv) {
 // matrix Q is built up as a composition of elementary Householder
 // transformations H=I-vv' with |v|=1. Note that inv(H)=H'=H. The vector v is
 // chosen to be a multiple of the first working column of A.
-Tuple< Matrix<ApproximateFloat>, Matrix<ApproximateFloat>, PivotMatrix >
-orthogonal_decomposition(const Matrix<ApproximateFloat>& A, bool allow_pivoting)
+Tuple< Matrix<Flt>, Matrix<Flt>, PivotMatrix >
+orthogonal_decomposition(const Matrix<Flt>& A, bool allow_pivoting)
 {
-    typedef ApproximateFloat X;
+    typedef Flt X;
 
-    size_t m=A.row_size();
-    size_t n=A.column_size();
+    SizeType m=A.row_size();
+    SizeType n=A.column_size();
     Matrix<X> Q(m,m);
     Matrix<X> R(A);
     PivotMatrix P(n);
@@ -660,23 +651,23 @@ orthogonal_decomposition(const Matrix<ApproximateFloat>& A, bool allow_pivoting)
     Array<X> p(n);
     Vector<X> u(m);
 
-    for(size_t i=0; i!=m; ++i) {
-        for(size_t j=0; j!=m; ++j) {
-            Q[i][j]=0;
+    for(SizeType i=0; i!=m; ++i) {
+        for(SizeType j=0; j!=m; ++j) {
+            Q[i][j]=0.0;
         }
-        Q[i][i]=1;
+        Q[i][i]=1.0;
     }
 
-    for(size_t k=0; k!=min(m,n); ++k) {
+    for(SizeType k=0; k!=min(m,n); ++k) {
         //std::cerr<<"k="<<k<<" Q="<<Q<<" R="<<R<<std::flush;
 
         if(allow_pivoting) {
             // Find a pivot column
-            size_t pivot_column=k;
-            X max_column_norm=0;
-            for(size_t j=k; j!=n; ++j) {
-                X column_norm=0;
-                for(size_t i=k; i!=m; ++i) {
+            SizeType pivot_column=k;
+            X max_column_norm=0.0;
+            for(SizeType j=k; j!=n; ++j) {
+                X column_norm=0.0;
+                for(SizeType i=k; i!=m; ++i) {
                     column_norm+=abs(R[i][j]);
                 }
                 if(column_norm>max_column_norm) {
@@ -684,10 +675,10 @@ orthogonal_decomposition(const Matrix<ApproximateFloat>& A, bool allow_pivoting)
                     max_column_norm=column_norm;
                 }
             }
-            size_t l=pivot_column;
+            SizeType l=pivot_column;
 
             // Swap working column and pivot column
-            for(size_t i=0; i!=m; ++i) {
+            for(SizeType i=0; i!=m; ++i) {
                 std::swap(R[i][l],R[i][k]);
             }
 
@@ -696,91 +687,91 @@ orthogonal_decomposition(const Matrix<ApproximateFloat>& A, bool allow_pivoting)
         }
 
         // Compute |a| where a is the working column
-        X nrmas=0;
-        for(size_t i=k; i!=m; ++i) {
+        Flt nrmas=0.0;
+        for(SizeType i=k; i!=m; ++i) {
             nrmas+=R[i][k]*R[i][k];
         }
-        X nrma=sqrt(nrmas);
+        Flt nrma=sqrt(nrmas);
 
         // Compute u=a +/- |a|e
-        for(size_t i=0; i!=k; ++i) {
-            u[i]=0;
+        for(SizeType i=0; i!=k; ++i) {
+            u[i]=0.0;
         }
-        for(size_t i=k; i!=m; ++i) {
+        for(SizeType i=k; i!=m; ++i) {
             u[i]=R[i][k];
         }
-        if(u[k].value()>=0) { u[k]+=nrma; }
+        if(u[k]>=0) { u[k]+=nrma; }
         else { u[k]-=nrma; }
 
         // Compute -2/u.u
-        X nrmus=0;
-        for(size_t i=k; i!=m; ++i) {
+        Flt nrmus=0.0;
+        for(SizeType i=k; i!=m; ++i) {
             nrmus+=sqr(u[i]);
         }
-        X mtdnu=X(-2)/nrmus;
+        Flt mtdnu=(-2)/nrmus;
 
         // Compute H=(1-2uu'/u'u)
-        // Matrix<X> H(n,n); for(size_t i=0; i!=n; ++i) {
-        // H[i][i]=1; for(size_t j=0; j!=n; ++j) { H[i][j]+=u[i]*u[j]*mtdnu; } }
+        // Matrix<Flt> H(n,n); for(SizeType i=0; i!=n; ++i) {
+        // H[i][i]=1.0; for(SizeType j=0; j!=n; ++j) { H[i][j]+=u[i]*u[j]*mtdnu; } }
 
         // For each column b of R, compute b-=2u(u.b)/u.u
-        for(size_t j=k; j!=n; ++j) {
-            X udtb=0;
-            for(size_t i=k; i!=m; ++i) {
+        for(SizeType j=k; j!=n; ++j) {
+            Flt udtb=0.0;
+            for(SizeType i=k; i!=m; ++i) {
                 udtb+=u[i]*R[i][j];
             }
-            X scl=udtb*mtdnu;
-            for(size_t i=k; i!=m; ++i) {
+            Flt scl=udtb*mtdnu;
+            for(SizeType i=k; i!=m; ++i) {
                 R[i][j]+=scl*u[i];
             }
         }
 
         // For the kth column, set R[k][k]=-/+ |a|
         // and R[i][k]=0 for i>k
-        for(size_t i=k+1; i!=m; ++i) {
-            R[i][k]=0;
+        for(SizeType i=k+1; i!=m; ++i) {
+            R[i][k]=0.0;
         }
-        if(u[k].value()>=0) { R[k][k]=-nrma; } else { R[k][k]=nrma; }
+        if(u[k]>=0) { R[k][k]=-nrma; } else { R[k][k]=nrma; }
 
         // Update Q'=QH = Q(I-2uu'/u'u)
         // For each row q, compute q-=2u(u.q)/(u.u)
-        for(size_t i=0; i!=m; ++i) {
-            X qdtu=0;
-            for(size_t j=k; j!=m; ++j) {
+        for(SizeType i=0; i!=m; ++i) {
+            Flt qdtu=0.0;
+            for(SizeType j=k; j!=m; ++j) {
                 qdtu+=Q[i][j]*u[j];
             }
-            X scl=qdtu*mtdnu;
-            for(size_t j=k; j!=m; ++j) {
+            Flt scl=qdtu*mtdnu;
+            for(SizeType j=k; j!=m; ++j) {
                 Q[i][j]+=scl*u[j];
             }
         }
 
     }
 
-    return make_tuple(Q,R,P);
+    return std::make_tuple(Q,R,P);
 }
 
 /*
-Tuple< Matrix<ApproximateFloat>, Matrix<ApproximateFloat> >
-orthogonal_decomposition(const Matrix<ApproximateFloat>& A)
+Tuple< Matrix<Flt>, Matrix<Flt> >
+orthogonal_decomposition(const Matrix<Flt>& A)
 {
-    typedef ApproximateFloat X;
+    typedef Flt X;
 
-    size_t m=A.row_size();
-    size_t n=A.column_size();
-    Matrix<X> O(m,m,0);
+    SizeType m=A.row_size();
+    SizeType n=A.column_size();
+    Matrix<X> O(m,m,0.0);
     Matrix<X> R(A);
 
     Array<X> p(n);
 
-    for(size_t c=0; c!=min(m,n); ++c) {
+    for(SizeType c=0; c!=min(m,n); ++c) {
 
         // Find a pivot column
-        size_t pivot_column=c;
-        X max_column_norm=0;
-        for(size_t j=c; j!=n; ++j) {
-            X column_norm=0;
-            for(size_t i=c; i!=m; ++i) {
+        SizeType pivot_column=c;
+        X max_column_norm=0.0;
+        for(SizeType j=c; j!=n; ++j) {
+            X column_norm=0.0;
+            for(SizeType i=c; i!=m; ++i) {
                 column_norm+=abs(R[i][j]);
             }
             if(column_norm>max_column_norm) {
@@ -788,24 +779,24 @@ orthogonal_decomposition(const Matrix<ApproximateFloat>& A)
                 max_column_norm=column_norm;
             }
         }
-        size_t j=pivot_column;
+        SizeType j=pivot_column;
 
         // Swap first column and pivot column
         // FIXME: We do not keep track of column pivoting here.
-        for(size_t i=c; i!=m; ++i) {
+        for(SizeType i=c; i!=m; ++i) {
             std::swap(R[i][j],R[i][c]);
         }
 
         // Compute inner product of pivot column with remaining columns
-        X pivot_norm_square=0;
-        for(size_t i=c; i!=m; ++i) {
+        X pivot_norm_square=0.0;
+        for(SizeType i=c; i!=m; ++i) {
             pivot_norm_square += R[i][c]*R[i][c];
         }
 
-        X inner_product_sum=0;
-        for(size_t j=c; j!=n; ++j) {
-            X inner_product=0;
-            for(size_t i=c; i!=m; ++i) {
+        X inner_product_sum=0.0;
+        for(SizeType j=c; j!=n; ++j) {
+            X inner_product=0.0;
+            for(SizeType i=c; i!=m; ++i) {
                 inner_product += R[i][c]*R[i][j];
             }
             p[j]=inner_product / pivot_norm_square;
@@ -813,16 +804,16 @@ orthogonal_decomposition(const Matrix<ApproximateFloat>& A)
         }
 
         X scale_factor = inner_product_sum / pivot_norm_square;
-        for(size_t i=c; i!=m; ++i) {
+        for(SizeType i=c; i!=m; ++i) {
             O[i][c]=scale_factor * R[i][c];
         }
 
-        for(size_t j=c+1; j!=n; ++j) {
-            for(size_t i=c; i!=m; ++i) {
+        for(SizeType j=c+1; j!=n; ++j) {
+            for(SizeType i=c; i!=m; ++i) {
                 R[i][j] -= R[c][j] * p[j];
             }
         }
-        for(size_t i=c; i!=m; ++i) {
+        for(SizeType i=c; i!=m; ++i) {
             R[i][c] /= pivot_norm_square;
         }
 
@@ -832,27 +823,43 @@ orthogonal_decomposition(const Matrix<ApproximateFloat>& A)
 }
 */
 
-template class Matrix<RawFloat>;
-template Matrix<RawFloat> inverse(const Matrix<RawFloat>&);
-template Matrix<RawFloat> solve(const Matrix<RawFloat>&, const Matrix<RawFloat>&);
-template Vector<RawFloat> solve(const Matrix<RawFloat>&, const Vector<RawFloat>&);
+template<class AX> Matrix<decltype(make_exact(declval<AX>()))> make_exact(Matrix<AX> const& A) {
+    typedef decltype(make_exact(declval<AX>())) EX;
+    return reinterpret_cast<Matrix<EX> const&>(A);
+}
 
-template Matrix<UpperInterval> inverse(const Matrix<UpperInterval>&);
-Matrix<ValidatedFloat> inverse(Matrix<ExactFloat> const& A) { return inverse(Matrix<ValidatedFloat>(A)); }
+
+template class Matrix<Flt>;
 
 template class Matrix<ApproximateFloat>;
 template Matrix<ApproximateFloat> inverse(const Matrix<ApproximateFloat>&);
 template Matrix<ApproximateFloat> solve(const Matrix<ApproximateFloat>&, const Matrix<ApproximateFloat>&);
 template Vector<ApproximateFloat> solve(const Matrix<ApproximateFloat>&, const Vector<ApproximateFloat>&);
-template class Matrix<ValidatedFloat>;
-template Matrix<ValidatedFloat> inverse(const Matrix<ValidatedFloat>&);
-template Matrix<ValidatedFloat> lu_inverse(const Matrix<ValidatedFloat>&);
-template Matrix<ValidatedFloat> gs_inverse(const Matrix<ValidatedFloat>&);
-template Matrix<ValidatedFloat> solve(const Matrix<ValidatedFloat>&, const Matrix<ValidatedFloat>&);
-template Matrix<ValidatedFloat> lu_solve(const Matrix<ValidatedFloat>&, const Matrix<ValidatedFloat>&);
-template Matrix<ValidatedFloat> gs_solve(const Matrix<ValidatedFloat>&, const Matrix<ValidatedFloat>&);
-template Vector<ValidatedFloat> solve(const Matrix<ValidatedFloat>&, const Vector<ValidatedFloat>&);
-template Vector<ValidatedFloat> gs_solve(const Matrix<ValidatedFloat>&, const Vector<ValidatedFloat>&);
+//template Matrix<ApproximateFloat> lu_solve(const Matrix<ApproximateFloat>&, const Matrix<ApproximateFloat>&);
+//template Matrix<ApproximateFloat> lu_inverse(const Matrix<ApproximateFloat>&, const Matrix<ApproximateFloat>&);
+template class Matrix<MetricFloat>;
+template Vector<MetricFloat> solve(const Matrix<MetricFloat>&, const Vector<MetricFloat>&);
+
+template class Matrix<BoundFloat>;
+template Matrix<BoundFloat> inverse(const Matrix<BoundFloat>&);
+template Matrix<BoundFloat> lu_inverse(const Matrix<BoundFloat>&);
+template Matrix<BoundFloat> gs_inverse(const Matrix<BoundFloat>&);
+template Matrix<BoundFloat> solve(const Matrix<BoundFloat>&, const Matrix<BoundFloat>&);
+template Matrix<BoundFloat> lu_solve(const Matrix<BoundFloat>&, const Matrix<BoundFloat>&);
+template Matrix<BoundFloat> gs_solve(const Matrix<BoundFloat>&, const Matrix<BoundFloat>&);
+template Vector<BoundFloat> solve(const Matrix<BoundFloat>&, const Vector<BoundFloat>&);
+template Vector<BoundFloat> lu_solve(const Matrix<BoundFloat>&, const Vector<BoundFloat>&);
+template Vector<BoundFloat> gs_solve(const Matrix<BoundFloat>&, const Vector<BoundFloat>&);
+
+template class Matrix<ExactFloat>;
+
+template class Matrix<Real>;
+
+template ErrorFloat sup_norm(const Matrix<BoundFloat>& A);
+template UpperFloat log_norm(const Matrix<BoundFloat>& A);
+
+template Matrix<ExactFloat64> make_exact(const Matrix<ApprxFloat64>& mx);
+
 #ifdef HAVE_GMPXX_H
 template class Matrix<Rational>;
 template Matrix<Rational> inverse(const Matrix<Rational>&);

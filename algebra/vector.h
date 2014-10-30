@@ -114,12 +114,14 @@ class Vector
 
     //! \brief Convert from an %VectorExpression of a different type.
     template<class VE, EnableIf<IsConvertible<typename VE::ScalarType,X>> =dummy>
-        Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),ve().zero_element()) {
+    Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),ve().zero_element()) {
             for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=ve()[i]; } }
 
-    //! \brief Explicitly construct from an %Vector of a different type.
-    template<class XX, EnableIf<IsConstructible<X,XX>> =dummy, DisableIf<IsConvertible<XX,X>> =dummy>
-        explicit Vector(Vector<XX> vec) : _ary(vec.array().begin(),vec.array().end()) { }
+    //! \brief Construct from an %VectorExpression of a different type.
+    template<class VE, EnableIf<IsConstructible<X,typename VE::ScalarType>> =dummy, DisableIf<IsConvertible<typename VE::ScalarType,X>> =dummy>
+    explicit Vector(VectorExpression<VE> const& ve) : _ary(ve().size(),X(ve().zero_element())) {
+            for(SizeType i=0; i!=this->size(); ++i) { this->_ary[i]=X(ve()[i]); } }
+
 
     //! \brief Copy constructor.
     Vector(const Vector<X>& v) = default;

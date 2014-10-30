@@ -24,10 +24,12 @@
 #include "numeric/numeric.h"
 
 #include "algebra/differential.h"
-#include "function/function.h"
 #include "expression/operators.h"
 #include "expression/formula.h"
 #include "algebra/algebra.h"
+#include "function/taylor_model.h"
+
+#include "function/function.h"
 
 #include "function/function_mixin.h"
 #include "function_mixin.tcc"

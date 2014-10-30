@@ -70,34 +70,46 @@ class Array {
     explicit Array(const SizeType n) : _size(n), _ptr(uninitialized_new(n)) { for(SizeType i=0; i!=n; ++i) { new (_ptr+i) T(); } }
     /*! \brief Constructs an Array of size \a n with elements initialised to \a x. */
     Array(const SizeType n, const ValueType& x) : _size(n), _ptr(uninitialized_new(n)) { this->_uninitialized_fill(x); }
+
     /*! \brief Converts an initializer list to an Array. */
-    template<class TT, EnableIf<IsConvertible<TT,T>> = dummy> Array(InitializerList<TT> lst)
-        : _size(lst.size()), _ptr(uninitialized_new(_size)) {
-        this->_uninitialized_fill(lst.begin());
-    }
+    template<class TT, EnableIf<IsConvertible<TT,T>> = dummy>
+    Array(InitializerList<TT> lst) : _size(lst.size()), _ptr(uninitialized_new(_size)) {
+        this->_uninitialized_fill(lst.begin()); }
     /*! \brief Constructs an Array from an initializer list. */
-    template<class TT, EnableIf<And<IsConstructible<T,TT>,Not<IsConvertible<TT,T>>>> = dummy> explicit Array(InitializerList<TT> lst)
-        : _size(lst.size()), _ptr(uninitialized_new(_size))
-    {
-        this->_uninitialized_fill(lst.begin());
-    }
+    template<class TT, EnableIf<IsConstructible<T,TT>> = dummy, DisableIf<IsConvertible<TT,T>> =dummy>
+    explicit Array(InitializerList<TT> lst) : _size(lst.size()), _ptr(uninitialized_new(_size)) {
+        this->_uninitialized_fill(lst.begin()); }
+
     /*! \brief Constructs an Array from the range \a first to \a last. */
-    template<class ForwardIterator> Array(ForwardIterator first, ForwardIterator last)
-        : _size(std::distance(first,last)), _ptr(uninitialized_new(_size))
-    {
-        this->_uninitialized_fill(first);
-    }
+    template<class ForwardIterator>
+    Array(ForwardIterator first, ForwardIterator last)
+            : _size(std::distance(first,last)), _ptr(uninitialized_new(_size)) {
+        this->_uninitialized_fill(first); }
+
     /*! \brief Conversion constructor. */
-    template<class T1> Array(const Array<T1>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
+    template<class TT, EnableIf<IsConvertible<TT,T>> = dummy>
+    Array(const Array<TT>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
         this->_uninitialized_fill(a.begin()); }
+
+    /*! \brief Explicit conversion constructor. */
+    template<class TT, EnableIf<IsConstructible<T,TT>> = dummy, DisableIf<IsConvertible<TT,T>> =dummy>
+    explicit Array(const Array<TT>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
+        this->_uninitialized_fill(a.begin()); }
+
     /*! \brief Copy constructor. */
     Array(const Array<T>& a) : _size(a.size()), _ptr(uninitialized_new(_size)) {
         this->_uninitialized_fill(a.begin()); }
+    /*! \brief Move constructor. */
+    Array(Array<T>&& a) : _size(a._size), _ptr(a._ptr) {
+        a._ptr=nullptr; }
     /*! \brief Copy assignment. */
     Array<T>& operator=(const Array<T>& a) {
         if(this->size()==a.size()) { fill(a.begin()); }
         else { this->_destroy_elements(); uninitialized_delete(_ptr); _size=a.size(); _ptr=uninitialized_new(_size); this->_uninitialized_fill(a.begin()); }
         return *this; }
+    /*! \brief Move assignment. */
+    Array<T>& operator=(Array<T>&& a) {
+        if(this!=&a) { this->_size=a._size; this->_ptr=a._ptr; a._ptr=nullptr; } return *this; }
 
     /*! \brief True if the Array's size is 0. */
     Bool empty() const { return _size==0u; }
@@ -171,7 +183,7 @@ class Array {
     Void _destroy_elements() { pointer curr=_ptr+_size; while(curr!=_ptr) { --curr; curr->~T(); } }
     Void _uninitialized_fill(const ValueType& x) {
         pointer curr=_ptr; pointer end=_ptr+_size; while(curr!=end) { new (curr) T(x); ++curr; } }
-     template<class InputIterator> Void _uninitialized_fill(InputIterator first) {
+    template<class InputIterator> Void _uninitialized_fill(InputIterator first) {
         pointer curr=_ptr; pointer end=_ptr+_size;
         while(curr!=end) { new (curr) T(*first); ++curr; ++first; } }
   private:

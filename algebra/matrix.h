@@ -112,8 +112,8 @@ template<class X> class Matrix
         Matrix(const M& A);
     template<class M, EnableIf<And<IsMatrixExpression<M>,IsConvertible<typename M::ScalarType,X>>> =dummy>
         Matrix<X>& operator=(const M& A);
-    template<class XX, EnableIf<IsConstructible<X,XX>> =dummy, DisableIf<IsConvertible<XX,X>> =dummy>
-        explicit Matrix(const Matrix<XX>& A);
+    template<class M, EnableIf<And<IsMatrixExpression<M>,IsConstructible<X,typename M::ScalarType>,Not<IsConvertible<typename M::ScalarType,X>>>> =dummy>
+        explicit Matrix(const M& A);
 
     template<class M> Matrix<X>& operator+=(const M& A);
 

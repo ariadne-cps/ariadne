@@ -260,7 +260,7 @@ void export_point()
     point_class.def(self_ns::str(self));
 
     from_python<ExactPoint>();
-    implicitly_convertible<Vector<Float>,ExactPoint>();
+    implicitly_convertible<Vector<ExactFloat>,ExactPoint>();
 
 }
 
@@ -488,7 +488,7 @@ void export_constrained_image_set()
     constrained_image_set_class.def(self_ns::str(self));
     constrained_image_set_class.def("__repr__", &__cstr__<ValidatedConstrainedImageSet>);
 
-    def("product", (ValidatedConstrainedImageSet(*)(const ValidatedConstrainedImageSet&,const ExactIntervalVector&)) &product);
+//    def("product", (ValidatedConstrainedImageSet(*)(const ValidatedConstrainedImageSet&,const ExactBox&)) &product);
 }
 
 

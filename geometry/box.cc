@@ -395,6 +395,11 @@ ExactBox product(const ExactBox& bx1, const ExactBox& bx2) {
     return r;
 }
 
+ExactBox product(const ExactBox& bx1, const ExactInterval& ivl2) {
+    return product(bx1,ExactBox(1u,ivl2));
+}
+
+
 ExactBox hull(const ExactBox& bx1, const ExactBox& bx2) {
     ARIADNE_ASSERT(bx1.dimension()==bx2.dimension());
     ExactBox r(bx1.dimension());

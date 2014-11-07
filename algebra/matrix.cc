@@ -251,12 +251,12 @@ template<class X> Matrix<X> gs_inverse(const Matrix<X>& A) {
 }
 
 
-Matrix<ValidatedFloat> inverse(const Matrix<ExactFloat>& A) {
-    return lu_inverse(Matrix<ValidatedFloat>(A));
+template<class X> Matrix<ArithmeticType<X>> inverse(const Matrix<X>& A) {
+    return lu_inverse(A);
 }
 
-template<class X> Matrix<X> inverse(const Matrix<X>& A) {
-    return lu_inverse(A);
+template<> Matrix<ValidatedFloat> inverse<>(const Matrix<ExactFloat>& A) {
+    return lu_inverse(Matrix<ValidatedFloat>(A));
 }
 
 template<> Matrix<BoundFloat> inverse<BoundFloat>(const Matrix<BoundFloat>& A) {
@@ -268,16 +268,16 @@ template<> Matrix<BoundFloat> inverse<BoundFloat>(const Matrix<BoundFloat>& A) {
 }
 
 
-template<class X> Matrix<X> solve(const Matrix<X>& A, const Matrix<X>& B) {
+template<class X1, class X2> Matrix<ArithmeticType<X1,X2>> solve(const Matrix<X1>& A, const Matrix<X2>& B) {
     //return inverse(A)*B;
-    Matrix<X> Ainv=inverse(A); return Ainv*B;
+    auto Ainv=inverse(A); return Ainv*B;
 }
 
 template<> Matrix<BoundFloat> solve(const Matrix<BoundFloat>& A, const Matrix<BoundFloat>& B) {
     return gs_solve(A,B);
 }
 
-template<class X> Vector<X> solve(const Matrix<X>& A, const Vector<X>& b) {
+template<class X1, class X2> Vector<ArithmeticType<X1,X2>> solve(const Matrix<X1>& A, const Vector<X2>& b) {
     return lu_inverse(A)*b;
 }
 
@@ -825,6 +825,26 @@ orthogonal_decomposition(const Matrix<Float>& A)
 }
 */
 
+template<class X> Matrix<MidpointType<X>> midpoint(Matrix<X> const& A) {
+    Matrix<MidpointType<X>> R(A.row_size(),A.column_size(),midpoint(A.zero_element()));
+    for(SizeType i=0; i!=A.row_size(); ++i) {
+        for(SizeType j=0; j!=A.column_size(); ++j) {
+            R.at(i,j)=midpoint(A.at(i,j));
+        }
+    }
+    return std::move(R);
+}
+
+template<class X> Matrix<SingletonType<X>> make_singleton(Matrix<X> const& A) {
+    Matrix<SingletonType<X>> R(A.row_size(),A.column_size(),make_singleton(A.zero_element()));
+    for(SizeType i=0; i!=A.row_size(); ++i) {
+        for(SizeType j=0; j!=A.column_size(); ++j) {
+            R.at(i,j)=make_singleton(A.at(i,j));
+        }
+    }
+    return std::move(R);
+}
+
 template<class AX> Matrix<decltype(make_exact(declval<AX>()))> make_exact(Matrix<AX> const& A) {
     typedef decltype(make_exact(declval<AX>())) EX;
     return reinterpret_cast<Matrix<EX> const&>(A);
@@ -832,6 +852,8 @@ template<class AX> Matrix<decltype(make_exact(declval<AX>()))> make_exact(Matrix
 
 
 template class Matrix<Float>;
+template Matrix<Float> inverse(const Matrix<Float>&);
+template Vector<Float> solve(const Matrix<Float>&, const Vector<Float>&);
 
 template class Matrix<ApproximateFloat>;
 template Matrix<ApproximateFloat> inverse(const Matrix<ApproximateFloat>&);
@@ -850,10 +872,15 @@ template Matrix<BoundFloat> gs_solve(const Matrix<BoundFloat>&, const Matrix<Bou
 template Vector<BoundFloat> solve(const Matrix<BoundFloat>&, const Vector<BoundFloat>&);
 template Vector<BoundFloat> lu_solve(const Matrix<BoundFloat>&, const Vector<BoundFloat>&);
 template Vector<BoundFloat> gs_solve(const Matrix<BoundFloat>&, const Vector<BoundFloat>&);
+template Matrix<MidpointType<BoundFloat>> midpoint(Matrix<BoundFloat> const&);
 
 template class Matrix<ExactFloat>;
 
 template class Matrix<UpperInterval>;
+template Matrix<SingletonType<UpperInterval>> make_singleton(Matrix<UpperInterval> const&);
+template Matrix<MidpointType<UpperInterval>> midpoint(Matrix<UpperInterval> const&);
+template Matrix<UpperInterval> inverse(const Matrix<UpperInterval>&);
+template Vector<UpperInterval> solve(const Matrix<UpperInterval>&, const Vector<UpperInterval>&);
 
 template class Matrix<Real>;
 
@@ -867,6 +894,8 @@ template class Matrix<Rational>;
 template Matrix<Rational> inverse(const Matrix<Rational>&);
 template Matrix<Rational> solve(const Matrix<Rational>&, const Matrix<Rational>&);
 template Vector<Rational> solve(const Matrix<Rational>&, const Vector<Rational>&);
+Rational midpoint(Rational);
+template<> Matrix<Rational> midpoint(Matrix<Rational> const& A) { return A; }
 #endif
 
 } // namespace Ariadne

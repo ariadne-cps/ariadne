@@ -25,14 +25,6 @@
 
 namespace Ariadne {
 
-template<class X> Matrix<X>::Matrix(SizeType m, SizeType n)
-    : _zero(), _rs(m), _cs(n), _ary(m*n) {
-}
-
-template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X& x)
-    : _zero(0), _rs(m), _cs(n), _ary(m*n,x) {
-}
-
 template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X* p)
     : _zero(0), _rs(m), _cs(n), _ary(p,p+m*n) {
 }
@@ -66,15 +58,6 @@ template<class X> Matrix<X>::Matrix(InitializerList<InitializerList<X>> lst) : _
             this->at(i,j)=*col_iter;
         }
     }
-}
-
-template<class X> OutputStream& Matrix<X>::write(OutputStream& os) const {
-    const Matrix<X>& A=*this;
-    if(A.row_size()==0 || A.column_size()==0) { os << "["; }
-    for(SizeType i=0; i!=A.row_size(); ++i) {
-        for(SizeType j=0; j!=A.column_size(); ++j) {
-            os << (j==0 ? (i==0 ? "[" : "; ") : ",") << A.at(i,j); } }
-    return os << "]";
 }
 
 #ifdef ARIADNE_OMIT

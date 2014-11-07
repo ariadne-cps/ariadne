@@ -100,6 +100,8 @@ struct VectorOfScalarFunction
         : _as(as), _vec(rs,ScalarFunction<X>(as)) { }
     VectorOfScalarFunction(uint rs, const ScalarFunction<X>& f)
         : _as(f.argument_size()), _vec(rs,f) { }
+    VectorOfScalarFunction(const Vector<ScalarFunction<X>>& vsf)
+        : _as(0u), _vec(vsf) { if(vsf.size()!=0) { _as=vsf[0].argument_size(); } }
 
     void set(uint i, const ScalarFunction<X>& f) {
         if(this->argument_size()==0u) { this->_as=f.argument_size(); }
@@ -456,6 +458,12 @@ template<class P> VectorFunction<P>::VectorFunction(const List< ScalarFunction<P
     for(uint i=0; i!=lsf.size(); ++i) {
         new_ptr->set(i,lsf[i]);
     }
+    this->_ptr=std::shared_ptr< const VectorFunctionInterface<P> >(new_ptr);
+}
+
+template<class P> VectorFunction<P>::VectorFunction(const Vector< ScalarFunction<P> >& vsf)
+{
+    VectorOfScalarFunction<P>* new_ptr=new VectorOfScalarFunction<P>(vsf);
     this->_ptr=std::shared_ptr< const VectorFunctionInterface<P> >(new_ptr);
 }
 

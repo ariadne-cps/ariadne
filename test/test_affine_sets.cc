@@ -85,19 +85,19 @@ class TestAffineSet
 {
   private:
     Figure figure;
-    Vector<ExactInterval> D;
-    Vector< Affine<ValidatedNumber> > x;
+    ExactBox D;
+    Vector< ValidatedAffineFunction > x;
     ValidatedAffineConstrainedImageSet set;
   public:
-    TestAffineSet() : set(Matrix<Float>(2,2),Vector<Float>(2)) { }
+    TestAffineSet() : set(Matrix<ExactFloat>(2,2),Vector<ExactFloat>(2)) { }
 
     void test_pure_constraint() {
         figure.clear();
 
-        D = ExactIntervalVector::unit_box(2);
-        x = Affine<ValidatedNumber>::variables(2);
+        D = ExactBox::unit_box(2);
+        x = ValidatedAffineFunction::variables(2);
 
-        set=ValidatedAffineConstrainedImageSet(D, (x[0]+2,x[0]+x[1]) );
+        set=ValidatedAffineConstrainedImageSet(D, {x[0]+2,x[0]+x[1]} );
 
         set.new_parameter_constraint(x[0]+0.5_ex*x[1]+0.75_ex <= 0.0_ex);
         set.new_parameter_constraint(-0.5_ex*x[0]+1.5_ex*x[1]+0.5_ex <= 0.0_ex);
@@ -105,7 +105,7 @@ class TestAffineSet
         ARIADNE_TEST_PRINT(set);
         figure.draw(set);
 
-        set=ValidatedAffineConstrainedImageSet(D, (x[0]+x[1]+2,x[0]+x[1]+2));
+        set=ValidatedAffineConstrainedImageSet(D, {x[0]+x[1]+2,x[0]+x[1]+2});
         set.new_parameter_constraint(-0.5_ex*x[0]-1.5_ex*x[1]+0.5_ex <= 0.0_ex);
 
         ARIADNE_TEST_PRINT(set);
@@ -113,10 +113,10 @@ class TestAffineSet
     }
 
     void test_constrained_image() {
-        D = ExactIntervalVector::unit_box(3);
+        D = ExactBox::unit_box(3);
         x = Affine<ValidatedNumber>::variables(3);
 
-        set=ValidatedAffineConstrainedImageSet(D, (2*x[0]+3*x[1]+x[2],x[0]+x[1]-2) );
+        set=ValidatedAffineConstrainedImageSet(D, {2*x[0]+3*x[1]+x[2],x[0]+x[1]-2} );
 
         set.new_parameter_constraint(1.0_ex*x[0]+0.5_ex*x[1]+0.25_ex*x[2]<=0.75_ex);
         set.new_parameter_constraint(-2.0_ex*x[0]-3.0_ex*x[1]-1.0_ex*x[2]<=3.00_ex);
@@ -132,9 +132,9 @@ class TestAffineSet
 
 
     void test_separated() {
-        D=ExactIntervalVector::unit_box(3);
+        D=ExactBox::unit_box(3);
         x=Affine<ValidatedNumber>::variables(3);
-        ValidatedAffineConstrainedImageSet affine_set(D, (-0.9375_ex+0.0625_ex*x[0]+0.5_ex*x[1],0.87890625_ex-0.1171875_ex*x[0]+x[1]+0.00390625_ex*x[2]));
+        ValidatedAffineConstrainedImageSet affine_set(D, {-0.9375_ex+0.0625_ex*x[0]+0.5_ex*x[1],0.87890625_ex-0.1171875_ex*x[0]+x[1]+0.00390625_ex*x[2]});
         affine_set.new_parameter_constraint(-1.1875_ex+0.0625_ex*x[0]+x[1]<=0.0_ex);
         ARIADNE_TEST_PRINT(affine_set);
         ExactBox cell1({{-1.0,-0.9375},{0.8125, 0.875}}); // subset
@@ -168,9 +168,9 @@ class TestAffineSet
     void test_outer_approximation() {
 
         {
-            D=ExactIntervalVector::unit_box(2);
+            D=ExactBox::unit_box(2);
             x=Affine<ValidatedNumber>::variables(2);
-            ValidatedAffineConstrainedImageSet set(D,(x[0],x[1]));
+            ValidatedAffineConstrainedImageSet set(D,{x[0],x[1]});
             set.new_parameter_constraint(x[0]+x[1]<=-0.5_ex);
             ARIADNE_TEST_PRINT(set);
 
@@ -191,7 +191,7 @@ class TestAffineSet
 
         {
             // The following set has difficulties
-            ValidatedAffineConstrainedImageSet set(D,(x[0],x[1]));
+            ValidatedAffineConstrainedImageSet set(D,{x[0],x[1]});
             set.new_parameter_constraint(2.0_ex*x[0]+1.0_ex*x[1]<=0.5_ex);
             set.new_parameter_constraint(-0.5_ex*x[0]+1.0_ex*x[1]<=0.75_ex);
             set.new_parameter_constraint(-0.5_ex*x[0]-1.0_ex*x[1]<=0.875_ex);
@@ -209,10 +209,10 @@ class TestAffineSet
         }
 
         {
-            D=ExactIntervalVector::unit_box(3);
+            D=ExactBox::unit_box(3);
             x=Affine<ValidatedNumber>::variables(3);
 
-            set=ValidatedAffineConstrainedImageSet( D, (2.0_ex*x[0]+3.0_ex*x[1]+1.0_ex*x[2]+0.05_ex, x[0]+x[1]+2.051_ex) );
+            set=ValidatedAffineConstrainedImageSet( D, {2.0_ex*x[0]+3.0_ex*x[1]+1.0_ex*x[2]+0.05_ex, x[0]+x[1]+2.051_ex} );
 
             set.new_parameter_constraint(+1.01_ex*x[0]+0.51_ex*x[1]+0.251_ex*x[2]<=0.751_ex);
             set.new_parameter_constraint(-0.51_ex*x[0]+1.51_ex*x[1]+0.01_ex*x[2]<=0.51_ex);
@@ -235,7 +235,7 @@ class TestAffineSet
         }
 
         {
-            ValidatedAffineConstrainedImageSet set(ExactBox::unit_box(3),(-0.9375_ex+0.0625_ex*x[0]+0.5_ex*x[1],0.87890625_ex-0.1171875_ex*x[0]+x[1]+0.00390625_ex*x[2]));
+            ValidatedAffineConstrainedImageSet set(ExactBox::unit_box(3),{-0.9375_ex+0.0625_ex*x[0]+0.5_ex*x[1],0.87890625_ex-0.1171875_ex*x[0]+x[1]+0.00390625_ex*x[2]});
             set.new_parameter_constraint(0.0625_ex*x[0]+x[1]<=1.1875_ex);
             ARIADNE_TEST_PRINT(set);
 
@@ -259,10 +259,10 @@ class TestAffineSet
 
 
     void test_empty() {
-        D = ExactIntervalVector::unit_box(2);
+        D = ExactBox::unit_box(2);
         x = Affine<ValidatedNumber>::variables(2);
 
-        set=ValidatedAffineConstrainedImageSet(D, (0.125_ex*x[0]+1.0_ex, 0.125_ex*x[1]+1.0_ex) );
+        set=ValidatedAffineConstrainedImageSet(D, {0.125_ex*x[0]+1.0_ex, 0.125_ex*x[1]+1.0_ex} );
         set.new_parameter_constraint(-1.0_ex*x[1] <= -2.0_ex);
 
         ARIADNE_TEST_PRINT(set);
@@ -277,12 +277,12 @@ class TestAffineSet
         double e=0.25;
         ExactInterval I = ExactInterval(-1,+1);
         ValidatedNumber E = ValidatedNumber(-e,+e);
-        D = ExactIntervalVector::unit_box(2);
+        D = ExactBox::unit_box(2);
         x = Affine<ValidatedNumber>::variables(2);
-        ValidatedAffineConstrainedImageSet set1=ValidatedAffineConstrainedImageSet(D, (0.5_ex*x[0]+0.25_ex*x[1]+E/2, 0.25_ex*x[0]-0.25_ex*x[1]+E) );
-        D = ExactIntervalVector::unit_box(4);
+        ValidatedAffineConstrainedImageSet set1=ValidatedAffineConstrainedImageSet(D, {0.5_ex*x[0]+0.25_ex*x[1]+E/2, 0.25_ex*x[0]-0.25_ex*x[1]+E} );
+        D = ExactBox::unit_box(4);
         x = Affine<ValidatedNumber>::variables(4);
-        ValidatedAffineConstrainedImageSet set2=ValidatedAffineConstrainedImageSet(D, (0.5_ex*x[0]+0.25_ex*x[1]+e*x[2]/2, 0.25_ex*x[0]-0.25_ex*x[1]+e*x[3]) );
+        ValidatedAffineConstrainedImageSet set2=ValidatedAffineConstrainedImageSet(D, {0.5_ex*x[0]+0.25_ex*x[1]+e*x[2]/2, 0.25_ex*x[0]-0.25_ex*x[1]+e*x[3]} );
 
         figure.clear();
         figure.set_bounding_box(ExactBox{{-1.0,+1.0},{-1.0,+1.0}});
@@ -330,9 +330,9 @@ class TestAffineSet
         {
             // Test draw of nondegenerate two-dimensional image set
             a=Affine<ValidatedNumber>::variables(2);
-            dom=Vector<ExactInterval>::unit_box(2);
+            dom=ExactBox::unit_box(2);
             offsets=ExactFloatVector2d{1.0,13.0};
-            set=ValidatedAffineConstrainedImageSet(dom, (o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[1]));
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[1]});
             expected_set=Polytope2d(4, -0.5,-0.25, +0.5,-0.25, +0.5,+0.25,-0.5,+0.25) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -340,9 +340,9 @@ class TestAffineSet
         {
             // Test draw of nondegenerate two-dimensional constrained image set
             a=Affine<ValidatedNumber>::variables(2);
-            dom=Vector<ExactInterval>::unit_box(2);
+            dom=ExactBox::unit_box(2);
             offsets=ExactFloatVector2d(4.0,13.0);
-            set=ValidatedAffineConstrainedImageSet(dom, (o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[1]),(a[0]+a[1]<=0.5_ex));
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[1]},{a[0]+a[1]<=0.5_ex});
             expected_set=Polytope2d(5, -0.5,-0.25, +0.5,-0.25, +0.5,-0.125, -0.25,+0.25,-0.5,+0.25) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -350,11 +350,11 @@ class TestAffineSet
         {
             // Test draw of two-dimensional image set with errors
             a=Affine<ValidatedNumber>::variables(2);
-            dom=Vector<ExactInterval>::unit_box(2);
+            dom=ExactBox::unit_box(2);
             offsets=ExactFloatVector2d{7.0,13.0};
             ValidatedNumber e=ValidatedNumber(-1.0,+1.0);
 
-            set=ValidatedAffineConstrainedImageSet(dom, (o[0]+0.25_ex*a[0]+0.25_ex*a[1]+0.5_ex*e,o[1]+0.5_ex*a[0]-0.5_ex*a[1]));
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.25_ex*a[0]+0.25_ex*a[1]+0.5_ex*e,o[1]+0.5_ex*a[0]-0.5_ex*a[1]});
             expected_set=Polytope2d(6, -1.0,0.0, -0.5,-1.0, +0.5,-1.0, +1.0,0.0, +0.5,+1.0, -0.5,+1.0) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -362,9 +362,9 @@ class TestAffineSet
         {
             // Test draw of nondegenerate one-dimensional image set
             a=Affine<ValidatedNumber>::variables(1);
-            dom=Vector<ExactInterval>::unit_box(1);
+            dom=ExactBox::unit_box(1);
             offsets=ExactFloatVector2d{1.0,1.0};
-            set=ValidatedAffineConstrainedImageSet(dom, (o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[0]),(0*a[0]<=1.0_ex,a[0]==0.75_ex));
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[0]},{0*a[0]<=1.0_ex,a[0]==0.75_ex});
             expected_set=Polytope2d(1, 0.375, 0.1875) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -372,7 +372,7 @@ class TestAffineSet
         {
             // Test draw of one-dimensional image set
             offsets=ExactFloatVector2d{4.0,1.0};
-            set=ValidatedAffineConstrainedImageSet(dom, (o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[0]));
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.5_ex*a[0],o[1]+0.25_ex*a[0]});
             expected_set=Polytope2d(2, -0.5,-0.25, 0.5,0.25) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -380,9 +380,9 @@ class TestAffineSet
         {
             // Test draw of one-dimensional constraint set
             a=Affine<ValidatedNumber>::variables(2);
-            dom=Vector<ExactInterval>::unit_box(2);
+            dom=ExactBox::unit_box(2);
             offsets=ExactFloatVector2d{7.0,1.0};
-            set=ValidatedAffineConstrainedImageSet(dom, (o[0]+a[0],o[1]+a[1]),(0*a[0]<=1.0_ex,a[0]+a[1]==0.5_ex));
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{0*a[0]<=1.0_ex,a[0]+a[1]==0.5_ex});
             expected_set=Polytope2d(2, -0.5,+1.0, +1.0,-0.5) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -390,7 +390,7 @@ class TestAffineSet
         {
             // Test draw of one-dimensional constraint set with one proper constraint on boundary
             offsets=ExactFloatVector2d{10.0,1.0};
-            set=ValidatedAffineConstrainedImageSet(dom, (o[0]+a[0],o[1]+a[1]),(1.0_ex<=a[0], a[1]<=0.5_ex));
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{1.0_ex<=a[0], a[1]<=0.5_ex});
             expected_set=Polytope2d(2, +1.0,-1.0, +1.0,+0.5) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -398,7 +398,7 @@ class TestAffineSet
         {
             // Test draw of set with constraint a<=0 and a>=0
             offsets=ExactFloatVector2d{13.0,1.0};
-            set=ValidatedAffineConstrainedImageSet(dom, (o[0]+a[0],o[1]+a[1]),(a[0]+0.5_ex*a[1]<=0.75_ex,0.75_ex<=a[0]+0.5_ex*a[1]));
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+0.5_ex*a[1]<=0.75_ex,0.75_ex<=a[0]+0.5_ex*a[1]});
             expected_set=Polytope2d(2, +0.25,+1.0, +1.0,-0.5) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -406,7 +406,7 @@ class TestAffineSet
         {
             // Test draw of set with constraint 0<=a<=0
             offsets=ExactFloatVector2d{13.0,1.0};
-            set=ValidatedAffineConstrainedImageSet(dom, (o[0]+a[0],o[1]+a[1]),(0.75_ex<=a[0]+0.5_ex*a[1]<=0.75_ex));
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{0.75_ex<=a[0]+0.5_ex*a[1]<=0.75_ex});
             expected_set=Polytope2d(2, +0.25,+1.0, +1.0,-0.5) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -414,7 +414,7 @@ class TestAffineSet
         {
             // Test draw of set with degenerate constraints at corner of box
             offsets=ExactFloatVector2d{1.0,4.0};
-            set=ValidatedAffineConstrainedImageSet(dom, (o[0]+a[0],o[1]+a[1]),(a[0]+2*a[1]<=3,1.5_ex*(a[0]+a[1])<=3,2*a[0]+a[1]<=3));
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]<=3,1.5_ex*(a[0]+a[1])<=3,2*a[0]+a[1]<=3});
             expected_set=Polytope2d(4, -1.0,-1.0, +1.0,-1.0, +1.0,+1.0, -1.0,+1.0) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -422,7 +422,7 @@ class TestAffineSet
         {
             // Test draw of set with degenerate constraints near corner of box
             offsets=ExactFloatVector2d{4.0,4.0};
-            set=ValidatedAffineConstrainedImageSet(dom, (o[0]+a[0],o[1]+a[1]),(a[0]+2*a[1]<=2,1.5_ex*(a[0]+a[1])<=2,2*a[0]+a[1]<=2));
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]<=2,1.5_ex*(a[0]+a[1])<=2,2*a[0]+a[1]<=2});
             expected_set=Polytope2d(6, -1.0,-1.0, +1.0,-1.0, +1.0,0.0, +0.667,+0.667, 0.0,+1.0, -1.0,+1.0) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -430,7 +430,7 @@ class TestAffineSet
         {
             // Test draw of set repeated constraints
             offsets=ExactFloatVector2d{7.0,4.0};
-            set=ValidatedAffineConstrainedImageSet(dom, (o[0]+a[0],o[1]+a[1]),(a[0]+2*a[1]<=2,a[0]*(1/3.0_ex)+a[1]*(2/3.0_ex)<=(2/3.0_ex)));
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]<=2,a[0]*(1/3.0_ex)+a[1]*(2/3.0_ex)<=(2/3.0_ex)});
             expected_set=Polytope2d(5, -1.0,-1.0, +1.0,-1.0, +1.0,0.5, 0.0,+1.0, -1.0,+1.0) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
@@ -438,16 +438,16 @@ class TestAffineSet
         {
             // Test draw of projection of three-dimensional box with single equality constraint
             a=Affine<ValidatedNumber>::variables(3);
-            dom=Vector<ExactInterval>::unit_box(3);
+            dom=ExactBox::unit_box(3);
             offsets=ExactFloatVector2d{10.0,4.0};
-            set=ValidatedAffineConstrainedImageSet(dom, (o[0]+a[0],o[1]+a[1]),(a[0]+2*a[1]+a[2]==1.5_ex));
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+a[0],o[1]+a[1]},{a[0]+2*a[1]+a[2]==1.5_ex});
             expected_set=Polytope2d(5, +1.0,-0.25, +1.0,+0.75, +0.5,+1.0, -1.0,+1.0, -1.0,+0.75) + offsets;
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }
         {
             // Test draw of two-dimensional set with nondegenerate inequality and equality constraints
             offsets=ExactFloatVector2d{1.0,7.0};
-            set=ValidatedAffineConstrainedImageSet(dom, (o[0]+0.3_ex*a[0]+0.20_ex*a[1]+0.05_ex*a[2],o[1]-0.10_ex*a[0]+0.1_ex*a[1]+0.05_ex*a[2]),(a[1]-a[2]<=-0.25_ex,a[0]+a[1]+a[2]==0.5_ex));
+            set=ValidatedAffineConstrainedImageSet(dom, {o[0]+0.3_ex*a[0]+0.20_ex*a[1]+0.05_ex*a[2],o[1]-0.10_ex*a[0]+0.1_ex*a[1]+0.05_ex*a[2]},{a[1]-a[2]<=-0.25_ex,a[0]+a[1]+a[2]==0.5_ex});
             expected_set=Polytope2d(1, +0.0,0.0) + offsets; // Unknown
             figure << fill_colour(expected_colour) << expected_set << fill_colour(colour) << set;
         }

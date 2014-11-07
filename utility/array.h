@@ -37,6 +37,8 @@ namespace Ariadne {
 using SizeType=std::size_t;
 template<class T> using InitializerList=std::initializer_list<T>;
 
+struct Uninitialised { };
+
 template<class T>
 class Array {
   private:
@@ -66,7 +68,7 @@ class Array {
 
     /*! \brief Default constructor. Constructs an empty Array. */
     Array() : _size(0), _ptr(0) { }
-    /*! \brief Constructs an Array of size \a n with uninitialised elements. */
+    /*! \brief Constructs an Array of size \a n with default-initialised elements. */
     explicit Array(const SizeType n) : _size(n), _ptr(uninitialized_new(n)) { for(SizeType i=0; i!=n; ++i) { new (_ptr+i) T(); } }
     /*! \brief Constructs an Array of size \a n with elements initialised to \a x. */
     Array(const SizeType n, const ValueType& x) : _size(n), _ptr(uninitialized_new(n)) { this->_uninitialized_fill(x); }

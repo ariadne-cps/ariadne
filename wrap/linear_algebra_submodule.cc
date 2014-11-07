@@ -31,7 +31,9 @@
 
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
+#include "algebra/covector.h"
 #include "algebra/matrix.h"
+#include "algebra/diagonal_matrix.h"
 
 using namespace boost::python;
 using namespace Ariadne;
@@ -303,7 +305,7 @@ void export_matrix_arithmetic(class_<Matrix<X> >& matrix_class)
     matrix_class.def("__div__", &__div__< Matrix<R>, Matrix<X>, Y >);
     matrix_class.def("__mul__", &__mul__< Vector<R>, Matrix<X>, Vector<Y> >);
     matrix_class.def("__mul__", &__mul__< Matrix<R>, Matrix<X>, Matrix<Y> >);
-    matrix_class.def("__rmul__", &__rmul__< Vector<R>, Matrix<X>, Vector<Y> >);
+    matrix_class.def("__rmul__", &__rmul__< Covector<R>, Matrix<X>, Covector<Y> >);
 }
 
 template<class X>
@@ -378,12 +380,12 @@ template<class X> void export_diagonal_matrix()
     diagonal_matrix_class.def(init< Vector<X> >());
     diagonal_matrix_class.def("__setitem__", &DiagonalMatrix<X>::set);
     diagonal_matrix_class.def("__getitem__", &DiagonalMatrix<X>::get, return_value_policy<copy_const_reference>());
-    diagonal_matrix_class.def("__add__", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&,const DiagonalMatrix<X>&)) operator+ );
-    diagonal_matrix_class.def("__sub__", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&,const DiagonalMatrix<X>&)) operator- );
-    diagonal_matrix_class.def("__mul__", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&,const DiagonalMatrix<X>&)) operator* );
-    diagonal_matrix_class.def("__div__", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&,const DiagonalMatrix<X>&)) operator/ );
-    diagonal_matrix_class.def("__mul__", (Vector<X>(*)(const DiagonalMatrix<X>&,const Vector<X>&)) operator* );
-    diagonal_matrix_class.def("__mul__", (Matrix<X>(*)(const DiagonalMatrix<X>&,const Matrix<X>&)) operator* );
+    diagonal_matrix_class.def("__add__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator+ );
+    diagonal_matrix_class.def("__sub__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator- );
+    diagonal_matrix_class.def("__mul__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator* );
+    diagonal_matrix_class.def("__div__", (DiagonalMatrix<X>(*)(DiagonalMatrix<X>,const DiagonalMatrix<X>&)) operator/ );
+    diagonal_matrix_class.def("__mul__", (Vector<X>(*)(const DiagonalMatrix<X>&,Vector<X>)) operator* );
+    diagonal_matrix_class.def("__mul__", (Matrix<X>(*)(const DiagonalMatrix<X>&,Matrix<X>)) operator* );
     diagonal_matrix_class.def("__str__",&__cstr__< DiagonalMatrix<X> >);
     //diagonal_matrix_class.def("__mul__", &__mul__< DiagonalMatrix<X>, DiagonalMatrix<X>, DiagonalMatrix<X> >);
     //diagonal_matrix_class.def("__div__", &__div__< DiagonalMatrix<X>, DiagonalMatrix<X>, DiagonalMatrix<X> >);

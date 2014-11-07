@@ -188,7 +188,7 @@ class TestOptimiser
         ARIADNE_TEST_CONSTRUCT( ValidatedFloatVector, X3, ({{0.30,0.40},{0.65,0.68}}) );
         ARIADNE_TEST_ASSERT( definitely(optimiser->contains_feasible_point(D,g,C,X3)) );
 
-        ARIADNE_TEST_CONSTRUCT(ExactFloatVector, x2, ({0.35,0.655}) );
+        ARIADNE_TEST_CONSTRUCT(ExactFloatVector, x2, ({ExactFloat(0.35),ExactFloat(0.655)}) );
         ARIADNE_TEST_ASSERT( optimiser->validate_feasibility(D,g,C,x2) );
     }
 

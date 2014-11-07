@@ -65,6 +65,10 @@ template<class X> class DiagonalMatrix
     OutputStream& write(OutputStream&) const;
 };
 
+template<class X> DiagonalMatrix<X>::DiagonalMatrix(SizeType n)
+    : _zero(0), _ary(n,_zero)
+{ }
+
 template<class X> DiagonalMatrix<X>::DiagonalMatrix(Array<X> ary)
     : _zero(create_zero(ary[0])), _ary(ary)
 { }
@@ -108,6 +112,10 @@ template<class X> X const& DiagonalMatrix<X>::get(SizeType i, SizeType j) const 
 template<class X> Void DiagonalMatrix<X>::set(SizeType i, SizeType j, X const& x) {
     ARIADNE_PRECONDITION(i==j);
     _ary[i]==x;
+}
+
+template<class X> Vector<X> DiagonalMatrix<X>::diagonal () const {
+    return Vector<X>(this->_ary);
 }
 
 template<class X> DiagonalMatrix<X>::operator Matrix<X> () const {

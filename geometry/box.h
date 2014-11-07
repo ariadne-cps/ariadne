@@ -93,10 +93,6 @@ Tribool subset(const Vector<UpperInterval>& bx1, const Vector<ExactInterval>& bx
 Tribool disjoint(const Vector<UpperInterval>& bx1, const Vector<UpperInterval>& bx2);
 Tribool inside(const Vector<UpperInterval>& v1, const Vector<ExactInterval>& v2);
 
-Vector<ValidatedFloat>const& make_singleton(const Vector<ExactInterval>& ivlv);
-Matrix<ValidatedFloat>const& make_singleton(const Matrix<ExactInterval>& ivlA);
-Vector<ValidatedFloat>const& make_singleton(const Vector<UpperInterval>& ivlv);
-Matrix<ValidatedFloat>const& make_singleton(const Matrix<UpperInterval>& ivlA);
 
 
 

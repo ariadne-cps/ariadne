@@ -37,7 +37,6 @@
 namespace Ariadne {
 
 template<class T> using InitializerList = std::initializer_list<T>;
-struct Uninitialised { };
 
 /************ Matrix *********************************************************/
 
@@ -341,6 +340,14 @@ template<class X> inline Matrix<X>::Matrix()
     : _zero(), _rs(0), _cs(0), _ary() {
 }
 
+template<class X> Matrix<X>::Matrix(SizeType m, SizeType n)
+    : _zero(), _rs(m), _cs(n), _ary(m*n) {
+}
+
+template<class X> Matrix<X>::Matrix(SizeType m, SizeType n, const X& x)
+    : _zero(create_zero(x)), _rs(m), _cs(n), _ary(m*n,x) {
+}
+
 template<class X> inline Void Matrix<X>::_check_data_access(SizeType i, SizeType j) const {
     ARIADNE_PRECONDITION_MSG(i<this->row_size()&&j<this->column_size(),"A="<<*this<<" i="<<i<<" j="<<j);
 }
@@ -388,6 +395,16 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, Matrix<X> co
 template<class X> inline InputStream& operator>>(InputStream& is, Matrix<X>& A) {
     A.read(is); return is;
 }
+
+template<class X> OutputStream& Matrix<X>::write(OutputStream& os) const {
+    const Matrix<X>& A=*this;
+    if(A.row_size()==0 || A.column_size()==0) { os << "["; }
+    for(SizeType i=0; i!=A.row_size(); ++i) {
+        for(SizeType j=0; j!=A.column_size(); ++j) {
+            os << (j==0 ? (i==0 ? "[" : "; ") : ",") << A.at(i,j); } }
+    return os << "]";
+}
+
 
 
 template<class M> inline MatrixRange<M> project(const MatrixExpression<M>& Ae, Range rw_rng, Range cl_rng) {
@@ -652,17 +669,40 @@ template<class X1, class X2> Vector<ArithmeticType<X1,X2>> operator*(MatrixTrans
 }
 
 template<class X> Matrix<MidpointType<X>> midpoint(const Matrix<X>&);
+template<class X> Matrix<SingletonType<X>> make_singleton(const Matrix<X>&);
 
-template<class X> Matrix<X> inverse(Matrix<X> const& A);
-template<class X> Vector<X> solve(Matrix<X> const& A, Vector<X> const& b);
+template<class X> Matrix<ArithmeticType<X>> inverse(Matrix<X> const& A);
+template<class X1, class X2> Vector<ArithmeticType<X1,X2>> solve(Matrix<X1> const& A, Vector<X2> const& b);
 
-template<class X> Vector<X> gs_solve(Matrix<X> const& A, Vector<X> const& b);
+// Invert matrices and solve linear systems
+template<class X> Matrix<X> inverse(const Matrix<X>& A);
+template<class X> Matrix<X> solve(const Matrix<X>& A, const Matrix<X>& B);
+template<class X> Vector<X> solve(const Matrix<X>& A, const Vector<X>& B);
+
+// Compute the inverse using lower/upper triangular factorization
+template<class X> Matrix<X> lu_inverse(const Matrix<X>& A);
+template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B);
+template<class X> Vector<X> lu_solve(const Matrix<X>& A, const Vector<X>& b);
+// Compute the inverse using Gauss-Seidel iteration
+template<class X> Matrix<X> gs_inverse(const Matrix<X>& A);
+template<class X> Matrix<X> gs_solve(const Matrix<X>& A, const Matrix<X>& B);
+template<class X> Vector<X> gs_solve(const Matrix<X>& A, const Vector<X>& b);
+
+// Use Gauss-Seidel iteration hotstarted by iX
 template<class X> Vector<X> gs_solve(Matrix<X> const& A, Vector<X> const& b, Vector<X> iX);
 template<class X> Void gs_step(Matrix<X> const& A, Vector<X> const& b, Vector<X>& iX);
 
+// Compute an LU decomposition
+Tuple< PivotMatrix, Matrix<ApproximateFloat>, Matrix<ApproximateFloat> > triangular_decomposition(const Matrix<ApproximateFloat>& A);
+
+Vector<ApproximateErrorType> row_norms(const Matrix<ApproximateFloat>& A);
+Tuple< Matrix<ApproximateFloat>, PivotMatrix> triangular_factor(const Matrix<ApproximateFloat>& A);
+Matrix<ApproximateFloat> triangular_multiplier(const Matrix<ApproximateFloat>& A);
+Tuple< Matrix<ApproximateFloat>, Matrix<ApproximateFloat>, PivotMatrix > orthogonal_decomposition(const Matrix<ApproximateFloat>&, bool allow_pivoting=true);
+Matrix<ApproximateFloat> normalise_rows(const Matrix<ApproximateFloat>& A);
+
 inline Matrix<ExactFloat>& make_exact(Matrix<ApproximateFloat>& A) {
     return reinterpret_cast<Matrix<ExactFloat>&>(A); }
-
 
 } // namespace Ariadne
 

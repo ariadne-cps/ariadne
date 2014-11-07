@@ -115,6 +115,7 @@ typedef Box<ApproximateInterval> ApproximateBox;
 
 typedef Vector<Rational> RationalVector;
 typedef Vector<Real> RealVector;
+typedef Vector<Float> FloatVector;
 typedef Vector<RawFloat> RawFloatVector;
 typedef Vector<ApproximateFloat> ApproximateFloatVector;
 typedef Vector<ValidatedFloat> ValidatedFloatVector;
@@ -128,6 +129,14 @@ typedef Vector<ApproximateNumber> ApproximateVector;
 typedef Vector<ValidatedNumber> ValidatedVector;
 typedef Vector<EffectiveNumber> EffectiveVector;
 typedef Vector<ExactNumber> ExactVector;
+
+typedef Matrix<Rational> RationalMatrix;
+typedef Matrix<Real> RealMatrix;
+typedef Matrix<RawFloat> RawFloatMatrix;
+typedef Matrix<Float> FloatMatrix;
+typedef Matrix<ApproximateFloat> ApproximateFloatMatrix;
+typedef Matrix<ValidatedFloat> ValidatedFloatMatrix;
+typedef Matrix<ExactFloat> ExactFloatMatrix;
 
 typedef Point<ApproximateNumber> ApproximatePoint;
 typedef Point<ValidatedNumber> ValidatedPoint;

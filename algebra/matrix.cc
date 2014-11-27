@@ -753,15 +753,15 @@ orthogonal_decomposition(const Matrix<Float>& A, bool allow_pivoting)
     return std::make_tuple(Q,R,P);
 }
 
-/*
-Tuple< Matrix<Float>, Matrix<Float> >
-orthogonal_decomposition(const Matrix<Float>& A)
-{
-    typedef Float X;
 
+template<class X>
+Tuple< Matrix<X>, Matrix<X> >
+orthogonal_decomposition(const Matrix<X>& A)
+{
     SizeType m=A.row_size();
     SizeType n=A.column_size();
-    Matrix<X> O(m,m,0.0);
+    X z=0;
+    Matrix<X> O(m,m,z);
     Matrix<X> R(A);
 
     Array<X> p(n);
@@ -770,13 +770,13 @@ orthogonal_decomposition(const Matrix<Float>& A)
 
         // Find a pivot column
         SizeType pivot_column=c;
-        X max_column_norm=0.0;
+        X max_column_norm=z;
         for(SizeType j=c; j!=n; ++j) {
-            X column_norm=0.0;
+            X column_norm=z;
             for(SizeType i=c; i!=m; ++i) {
                 column_norm+=abs(R[i][j]);
             }
-            if(column_norm>max_column_norm) {
+            if(decide(column_norm>max_column_norm)) {
                 pivot_column=j;
                 max_column_norm=column_norm;
             }
@@ -790,14 +790,14 @@ orthogonal_decomposition(const Matrix<Float>& A)
         }
 
         // Compute inner product of pivot column with remaining columns
-        X pivot_norm_square=0.0;
+        X pivot_norm_square=z;
         for(SizeType i=c; i!=m; ++i) {
             pivot_norm_square += R[i][c]*R[i][c];
         }
 
-        X inner_product_sum=0.0;
+        X inner_product_sum=z;
         for(SizeType j=c; j!=n; ++j) {
-            X inner_product=0.0;
+            X inner_product=z;
             for(SizeType i=c; i!=m; ++i) {
                 inner_product += R[i][c]*R[i][j];
             }
@@ -823,7 +823,9 @@ orthogonal_decomposition(const Matrix<Float>& A)
 
     return make_tuple(O,R);
 }
-*/
+
+template Tuple<Matrix<ApproximateFloat>,Matrix<ApproximateFloat>> orthogonal_decomposition(Matrix<ApproximateFloat> const&);
+template Tuple<Matrix<ValidatedFloat>,Matrix<ValidatedFloat>> orthogonal_decomposition(Matrix<ValidatedFloat> const&);
 
 template<class X> Matrix<MidpointType<X>> midpoint(Matrix<X> const& A) {
     Matrix<MidpointType<X>> R(A.row_size(),A.column_size(),midpoint(A.zero_element()));

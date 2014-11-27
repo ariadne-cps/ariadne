@@ -671,13 +671,10 @@ template<class X1, class X2> Vector<ArithmeticType<X1,X2>> operator*(MatrixTrans
 template<class X> Matrix<MidpointType<X>> midpoint(const Matrix<X>&);
 template<class X> Matrix<SingletonType<X>> make_singleton(const Matrix<X>&);
 
-template<class X> Matrix<ArithmeticType<X>> inverse(Matrix<X> const& A);
-template<class X1, class X2> Vector<ArithmeticType<X1,X2>> solve(Matrix<X1> const& A, Vector<X2> const& b);
 
 // Invert matrices and solve linear systems
-template<class X> Matrix<X> inverse(const Matrix<X>& A);
-template<class X> Matrix<X> solve(const Matrix<X>& A, const Matrix<X>& B);
-template<class X> Vector<X> solve(const Matrix<X>& A, const Vector<X>& B);
+template<class X> Matrix<ArithmeticType<X>> inverse(Matrix<X> const& A);
+template<class X1, class X2> Vector<ArithmeticType<X1,X2>> solve(Matrix<X1> const& A, Vector<X2> const& b);
 
 // Compute the inverse using lower/upper triangular factorization
 template<class X> Matrix<X> lu_inverse(const Matrix<X>& A);
@@ -700,6 +697,9 @@ Tuple< Matrix<ApproximateFloat>, PivotMatrix> triangular_factor(const Matrix<App
 Matrix<ApproximateFloat> triangular_multiplier(const Matrix<ApproximateFloat>& A);
 Tuple< Matrix<ApproximateFloat>, Matrix<ApproximateFloat>, PivotMatrix > orthogonal_decomposition(const Matrix<ApproximateFloat>&, bool allow_pivoting=true);
 Matrix<ApproximateFloat> normalise_rows(const Matrix<ApproximateFloat>& A);
+
+// Compute an QR decomposition
+template<class X> Tuple< Matrix<X>, Matrix<X> > orthogonal_decomposition(const Matrix<X>& A);
 
 inline Matrix<ExactFloat>& make_exact(Matrix<ApproximateFloat>& A) {
     return reinterpret_cast<Matrix<ExactFloat>&>(A); }

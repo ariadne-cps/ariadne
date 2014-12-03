@@ -315,8 +315,8 @@ void export_matrix_operations(class_<Matrix<X> >& matrix_class)
     def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);
 
     def("inverse",(Matrix<X>(*)(const Matrix<X>&)) &inverse);
-    def("solve",(Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &solve);
-    def("solve",(Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &solve);
+    def("solve",(Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &solve<X>);
+    def("solve",(Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &solve<X>);
 }
 
 
@@ -351,6 +351,9 @@ template<> void export_matrix<ValidatedFloat>()
     def("gs_solve", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Matrix<ValidatedFloat>&)) &gs_solve);
     def("lu_solve", (Matrix<ValidatedFloat>(*)(const Matrix<ValidatedFloat>&,const Matrix<ValidatedFloat>&)) &lu_solve);
 
+    def("triangular_decomposition",&triangular_decomposition<ValidatedFloat>);
+    def("orthogonal_decomposition", &orthogonal_decomposition<ValidatedFloat>);
+
     //implicitly_convertible< Matrix<ApproximateFloat>, Matrix<ValidatedFloat> >();
 }
 
@@ -362,12 +365,13 @@ template<> void export_matrix<ApproximateFloat>()
     export_matrix_arithmetic<ApproximateFloat,ApproximateFloat,ApproximateFloat>(matrix_class);
     //export_matrix_arithmetic<ValidatedFloat,ApproximateFloat,ValidatedFloat>(matrix_class);
 
-    def("triangular_decomposition",&triangular_decomposition);
-    def("orthogonal_decomposition", &orthogonal_decomposition);
+    def("triangular_decomposition",&triangular_decomposition<ApproximateFloat>);
+    def("orthogonal_decomposition", &orthogonal_decomposition<ApproximateFloat>);
+    def("row_norms",(Vector<ApproximateFloat>(*)(const Matrix<ApproximateFloat>&)) &row_norms<ApproximateFloat>);
+    def("normalise_rows",(Matrix<ApproximateFloat>(*)(const Matrix<ApproximateFloat>&)) &normalise_rows<ApproximateFloat>);
+
     def("triangular_factor",&triangular_factor);
     def("triangular_multiplier", &triangular_multiplier);
-    def("row_norms",(Vector<ApproximateFloat>(*)(const Matrix<ApproximateFloat>&)) &row_norms);
-    def("normalise_rows",(Matrix<ApproximateFloat>(*)(const Matrix<ApproximateFloat>&)) &normalise_rows);
 
     to_python< Tuple<FloatMatrix,FloatMatrix,PivotMatrix> >();
 }

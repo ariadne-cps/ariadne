@@ -675,6 +675,7 @@ template<class X> Matrix<SingletonType<X>> make_singleton(const Matrix<X>&);
 // Invert matrices and solve linear systems
 template<class X> Matrix<ArithmeticType<X>> inverse(Matrix<X> const& A);
 template<class X1, class X2> Vector<ArithmeticType<X1,X2>> solve(Matrix<X1> const& A, Vector<X2> const& b);
+template<class X1, class X2> Matrix<ArithmeticType<X1,X2>> solve(Matrix<X1> const& A, Matrix<X2> const& B);
 
 // Compute the inverse using lower/upper triangular factorization
 template<class X> Matrix<X> lu_inverse(const Matrix<X>& A);
@@ -690,16 +691,18 @@ template<class X> Vector<X> gs_solve(Matrix<X> const& A, Vector<X> const& b, Vec
 template<class X> Void gs_step(Matrix<X> const& A, Vector<X> const& b, Vector<X>& iX);
 
 // Compute an LU decomposition
-Tuple< PivotMatrix, Matrix<ApproximateFloat>, Matrix<ApproximateFloat> > triangular_decomposition(const Matrix<ApproximateFloat>& A);
-
-Vector<ApproximateErrorType> row_norms(const Matrix<ApproximateFloat>& A);
-Tuple< Matrix<ApproximateFloat>, PivotMatrix> triangular_factor(const Matrix<ApproximateFloat>& A);
-Matrix<ApproximateFloat> triangular_multiplier(const Matrix<ApproximateFloat>& A);
-Tuple< Matrix<ApproximateFloat>, Matrix<ApproximateFloat>, PivotMatrix > orthogonal_decomposition(const Matrix<ApproximateFloat>&, bool allow_pivoting=true);
-Matrix<ApproximateFloat> normalise_rows(const Matrix<ApproximateFloat>& A);
-
+template<class X> Tuple< PivotMatrix, Matrix<X>, Matrix<X> > triangular_decomposition(const Matrix<X>& A);
 // Compute an QR decomposition
 template<class X> Tuple< Matrix<X>, Matrix<X> > orthogonal_decomposition(const Matrix<X>& A);
+
+template<class X> using RowNormType = decltype(abs(declval<X>())+abs(declval<X>()));
+
+template<class X> Vector<RowNormType<X>> row_norms(const Matrix<X>& A);
+template<class X> Matrix<X> normalise_rows(const Matrix<X>& A);
+
+Tuple< Matrix<ApproximateFloat>, PivotMatrix> triangular_factor(const Matrix<ApproximateFloat>& A);
+Matrix<ApproximateFloat> triangular_multiplier(const Matrix<ApproximateFloat>& A);
+
 
 inline Matrix<ExactFloat>& make_exact(Matrix<ApproximateFloat>& A) {
     return reinterpret_cast<Matrix<ExactFloat>&>(A); }

@@ -103,7 +103,7 @@ class Array {
         this->_uninitialized_fill(a.begin()); }
     /*! \brief Move constructor. */
     Array(Array<T>&& a) : _size(a._size), _ptr(a._ptr) {
-        a._ptr=nullptr; }
+        a._size=0u; a._ptr=nullptr; }
     /*! \brief Copy assignment. */
     Array<T>& operator=(const Array<T>& a) {
         if(this->size()==a.size()) { fill(a.begin()); }
@@ -111,7 +111,7 @@ class Array {
         return *this; }
     /*! \brief Move assignment. */
     Array<T>& operator=(Array<T>&& a) {
-        if(this!=&a) { this->_size=a._size; this->_ptr=a._ptr; a._ptr=nullptr; } return *this; }
+        if(this!=&a) { this->_size=a._size; this->_ptr=a._ptr; a._size=0u; a._ptr=nullptr; } return *this; }
 
     /*! \brief True if the Array's size is 0. */
     Bool empty() const { return _size==0u; }

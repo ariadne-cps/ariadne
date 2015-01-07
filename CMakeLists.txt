@@ -61,6 +61,8 @@ add_definitions(-iquote${PROJECT_SOURCE_DIR})
 #Should ideally be able to use line below
 #include_directories(${PROJECT_SOURCE_DIR})
 
+#Non-portable fix to avoid user header directories being searched for by system headers
+add_definitions(-Wno-non-template-friend)
 
 add_subdirectory(utility)
 add_subdirectory(numeric)
@@ -91,6 +93,8 @@ add_library(ariadne SHARED
 )
 
 target_link_libraries(ariadne gmpxx gmp)
+#FIXME: Make mpfr non-required
+target_link_libraries(ariadne mpfr)
 #FIXME: Make boost_system non-required
 target_link_libraries(ariadne boost_system)
 #FIXME: Make Cairo and Boost Serialization optional dependencies

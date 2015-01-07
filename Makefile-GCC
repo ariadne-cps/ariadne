@@ -130,19 +130,23 @@ EXAMPLES_SRC = \
 	robotarm-verification.cc \
 	robotarm-verification-essay.cc \
 
-LIB_OBJ_DIR = obj/lib
-TESTS_OBJ_DIR = obj/test
-TESTS_BIN_DIR = bin
-WRAP_OBJ_DIR = obj/wrap
-EXAMPLES_OBJ_DIR = obj/examples
-EXAMPLES_BIN_DIR = bin
+DEP_DIR = dep
+OBJ_DIR = obj
+BIN_DIR = bin
+CHECK_DIR = check
+LIB_OBJ_DIR = $(OBJ_DIR)/lib
+TESTS_OBJ_DIR = $(OBJ_DIR)/test
+TESTS_BIN_DIR = $(BIN_DIR)
+WRAP_OBJ_DIR = $(OBJ_DIR)/wrap
+EXAMPLES_OBJ_DIR = $(OBJ_DIR)/examples
+EXAMPLES_BIN_DIR = $(BIN_DIR)
 
 ARIADNE_LIB = libariadne.so
 ARIADNE_NUMERIC_LIB = libariadne-numeric.so
 ARIADNE_ALGEBRA_LIB = libariadne-algebra.so
 ARIADNE_FUNCTION_LIB = libariadne-function.so
 
-DEPS = $(patsubst %.cc,.deps/%.d,$(LIB_SRC) $(LIB_EXTRAS_SRC) $(TEST_SRC) $(EXAMPLES_SRC))
+DEPS = $(patsubst %.cc,$(DEP_DIR)/%.d,$(LIB_SRC) $(LIB_EXTRAS_SRC) $(TEST_SRC) $(EXAMPLES_SRC))
 
 PCH = $(patsubst %.h,%.h.gch,$(HDR))
 LIB_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_SRC))
@@ -176,7 +180,7 @@ PYTHON_LINK_LIBS=-lboost_python -l$(PYTHON_LIBRARY)
 include $(PCH:.gch=.d)
 include $(DEPS)
 
-phony: all help dirs deps lib tests wrap examples check
+phony: all help dirs deps lib tests wrap examples check clean shiny
 
 help:
 	@echo "\nDEPS"=$(DEPS)
@@ -193,14 +197,14 @@ help:
 	@echo "EXAMPLES_BIN="$(EXAMPLES_BIN)
 
 dirs:
-	@mkdir -p .deps/
+	@mkdir -p $(DEP_DIR)
 	@mkdir -p $(LIB_OBJ_DIR)
 	@mkdir -p $(TESTS_OBJ_DIR)
 	@mkdir -p $(WRAP_OBJ_DIR)
 	@mkdir -p $(EXAMPLES_OBJ_DIR)
 	@mkdir -p $(TESTS_BIN_DIR)
 	@mkdir -p $(EXAMPLES_BIN_DIR)
-	@mkdir -p check/
+	@mkdir -p $(CHECK_DIR)
 
 deps: dirs $(DEPS)
 
@@ -215,23 +219,29 @@ check: tests
 
 examples: dirs $(EXAMPLES_BIN) $(EXAMPLES_OBJ) lib
 
+clean:
+	@rm -f */*.gch $(OBJ_DIR)/*/*.o *.so $(BIN_DIR)/*
+
+shiny: clean
+	@rm -rf $(DEP_DIR) $(OBJ_DIR) $(BIN_DIR) $(CHECK_DIR)
+	@rm -f *.png *.d
 
 %.h.d: %.h
 	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > $*.h.d
 	@sed -i 's|.*.o:|$*.h.gch:|' $*.h.d
 
-.deps/numeric.d: include/numeric.h | dirs
-	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > .deps/numeric.d
-	sed -i 's|.*.o:|obj/$*.o:|' .deps/$*.d
+$(DEP_DIR)/numeric.d: include/numeric.h | dirs
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > $(DEP_DIR)/numeric.d
+	sed -i 's|.*.o:|obj/$*.o:|' $(DEP_DIR)/$*.d
 
-.deps/functional.d: include/functional.h | dirs
-	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > .deps/$*.d
-	sed -i 's|.*.o:|obj/$*.o:|' .deps/$*.d
+$(DEP_DIR)/functional.d: include/functional.h | dirs
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > $(DEP_DIR)/$*.d
+	sed -i 's|.*.o:|obj/$*.o:|' $(DEP_DIR)/$*.d
 
-.deps/%.d: %.cc | dirs
+$(DEP_DIR)/%.d: %.cc | dirs
 	@echo "Making dependencies for "$<
-	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -MM $< > .deps/$*.d
-	@sed -i 's|.*.o:|obj/$*.o:|' .deps/$*.d
+	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -MM $< > $(DEP_DIR)/$*.d
+	@sed -i 's|.*.o:|obj/$*.o:|' $(DEP_DIR)/$*.d
 
 
 libariadne.so: $(PCH) $(LIB_OBJ)

@@ -24,7 +24,7 @@ set(UNIT_TESTS
     test_discrete_evolution
     test_continuous_evolution
     test_graphics
-    test_serialization
+#    test_serialization
     test_hybrid_set
     test_hybrid_automaton
     test_hybrid_evolver

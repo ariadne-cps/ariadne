@@ -142,7 +142,7 @@ class TestAffineSet
         ExactBox cell3({{-0.875,-0.75},{0.625,0.7578125}}); // touches at (-0.875,0.7578125);
         ExactBox cell4({{-1.1850,-1.125},{0.0625,0.125}}); // almost touches
         ExactBox cell5({{-0.9375,-0.875},{0.4375,0.5}}); // disjoint
-        ExactBox cell6({{-1.5,-1.375},{0.5,0.625}}); // regression test
+        ExactBox cell6({{-1.5,-1.375},{0.5,0.625}}); // disjoint; regression test
 
         ARIADNE_TEST_ASSERT(definitely(!affine_set.separated(cell1)));
         ARIADNE_TEST_ASSERT(definitely(!affine_set.separated(cell2)));

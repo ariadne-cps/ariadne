@@ -88,6 +88,18 @@ Vector<Float> erec(const Vector<Float>& v) {
     return r;
 }
 
+bool is_nan(Float const& x) {
+    return std::isnan(x.get_d());
+}
+
+bool is_nan(Vector<Float> const& v) {
+    for(uint i=0; i!=v.size(); ++i) {
+        if(is_nan(v[i])) { return true; }
+    }
+    return false;
+}
+
+
 // Compute R=ADA^T for diagonal D
 Matrix<Float> adat(const Matrix<Float>& A, const Vector<Float>& D)
 {
@@ -321,7 +333,8 @@ feasible(const Vector<Float>& xl, const Vector<Float>& xu,
             if(definitely(validated_feasible)) { return true; }
         }
         UpperInterval yb=dot(UpperIntervalVector(y),UpperIntervalVector(b));
-        UpperInterval yAX = dot( UpperIntervalVector(y), UpperIntervalMatrix(A) * X );
+        // NOTTE: Must compute y*A first, as A*X may give NaN.
+        UpperInterval yAX = dot( transpose(UpperIntervalMatrix(A)) * UpperIntervalVector(y), X );
         if(definitely(disjoint(yb,yAX))) { return false; }
         if(result==DEGENERATE_FEASIBILITY) { ARIADNE_LOG(2,"  degenerate\n"); return indeterminate; }
         if(compute_mu(xl,xu, x,zl,zu)<THRESHOLD ) { ARIADNE_LOG(2,"  threshold\n"); return indeterminate; }
@@ -358,7 +371,7 @@ _minimisation_step(const Vector<Float>& c, const Vector<Float>& xl, const Vector
     Vector<Float> dx(n),dy(m),dzl(n),dzu(n);
     Vector<Float> nx,ny,nzl,nzu;
     Vector<Float> rx(m),ry(n),rzl(n),rzu(n);
-    Matrix<Float> S(m,m),Sinv(m,m);
+    Matrix<Float> S(m,m);
     DiagonalMatrix<Float> Xl(xl), Xu(xu), X(x), Zl(zl), Zu(zu);
 
     Float mu = compute_mu(xl,xu, x,zl,zu) * sigma;
@@ -391,7 +404,7 @@ _minimisation_step(const Vector<Float>& c, const Vector<Float>& xl, const Vector
     DiagonalMatrix<Float> D(erec(ediv(zu,xu-x)+ediv(zl,x-xl)));
     Vector<Float> ryz = ry - ediv(rzl,Vector<Float>(x-xl)) + ediv(rzu,Vector<Float>(xu-x));
     S=adat(A,D.diagonal());;
-    ARIADNE_LOG(5,"S="<<S<<"  inverse(S)="<<Sinv<<"\n");
+    ARIADNE_LOG(5,"S="<<S<<"  inverse(S)="<<inverse(S)<<"\n");
 
     // dzl = (rzl - Zl dx) / (X-Xl)
     // dzu = (rzu + Zu dx) / (Xu-X)
@@ -399,6 +412,7 @@ _minimisation_step(const Vector<Float>& c, const Vector<Float>& xl, const Vector
     // (A D AT) dy = rx + A D ryz
 
     dy = solve(S, Vector<Float>( rx + A * (D * ryz) ) );
+    if(is_nan(dy)) { return DEGENERATE_FEASIBILITY; }
     dx = D * Vector<Float>(transpose(A)*dy - ryz);
     dzl = Vector<Float>(rzl-Zl*dx)/(X-Xl);
     dzu = Vector<Float>(rzu+Zu*dx)/(Xu-X);

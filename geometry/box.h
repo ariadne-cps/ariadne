@@ -60,8 +60,10 @@ typedef UpperBox BoundingBoxType;
 
 bool element(const Vector<ExactNumber>& v1, const Vector<ExactInterval>& v2);
 bool element(const Vector<ValidatedNumber>& v1, const Vector<ExactInterval>& v2);
+bool element(const Vector<ApproximateNumber>& v1, const Vector<ExactInterval>& v2);
 bool contains(const Vector<ExactInterval>& v1, const Vector<ExactNumber>& v2);
 bool contains(const Vector<ExactInterval>& v1, const Vector<ValidatedNumber>& v2);
+bool contains(const Vector<ExactInterval>& v1, const Vector<ApproximateNumber>& v2);
 
 bool intersect(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);
 bool subset(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2);

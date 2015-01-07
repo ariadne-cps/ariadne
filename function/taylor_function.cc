@@ -182,6 +182,11 @@ Vector<ScalarTaylorFunction> ScalarTaylorFunction::variables(const ExactBox& d, 
 }
 
 
+ScalarTaylorFunction ScalarTaylorFunction::create_zero() const
+{
+    return ScalarTaylorFunction(this->domain(),this->_model.sweeper());
+}
+
 ScalarTaylorFunction* ScalarTaylorFunction::_clone() const
 {
     return new ScalarTaylorFunction(*this);
@@ -230,10 +235,11 @@ inline bool operator> (ApproximateFloat x1, int n2) { return x1.raw()> Float(n2)
 Polynomial<ValidatedNumber>
 ScalarTaylorFunction::polynomial() const
 {
-    Polynomial<ValidatedNumber> p(this->argument_size());
-    p=Ariadne::polynomial(this->model());
+    Polynomial<ValidatedNumber> z(this->argument_size());
 
-    Vector<Polynomial<ValidatedNumber> > s(this->argument_size());
+    Polynomial<ValidatedNumber> p=Ariadne::polynomial(this->model());
+
+    Vector<Polynomial<ValidatedNumber> > s(this->argument_size(),z);
     for(uint j=0; j!=this->argument_size(); ++j) {
         ExactInterval const& domj=this->domain()[j];
         if(domj.width()<=0) {
@@ -371,7 +377,7 @@ ScalarTaylorFunction::evaluate(const Vector<ApproximateNumber>& x) const
 {
     const ScalarTaylorFunction& f=*this;
     if(!contains(f.domain(),make_exact(x))) {
-        ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
+        ARIADNE_THROW(DomainException,"tf.evaluate(ax) with tf="<<f<<", ax="<<x," ax is not an element of tf.domain()="<<f.domain());
     }
     Vector<ApproximateNumber> sx=Ariadne::unscale(x,f._domain);
     return Ariadne::evaluate(this->_model.expansion(),sx);
@@ -420,7 +426,7 @@ ScalarTaylorFunction extend(const ScalarTaylorFunction& tv, const ExactBox& d) {
 ValidatedNumber
 evaluate(const ScalarTaylorFunction& f, const Vector<ValidatedNumber>& x) {
     if(!contains(f.domain(),x)) {
-        ARIADNE_THROW(DomainException,std::setprecision(17)<<"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
+        ARIADNE_THROW(DomainException,std::setprecision(17)<<"evaluate(tf,vx) with tf="<<f<<", vx="<<x," vx is not a subset of tf.domain()="<<f.domain());
     }
     return unchecked_evaluate(f,x);
 }
@@ -1360,7 +1366,7 @@ VectorTaylorFunction::evaluate(const Vector<ApproximateNumber>& x) const
 {
     const VectorTaylorFunction& f=*this;
     if(!decide(contains(f.domain(),x))) {
-        ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
+        ARIADNE_THROW(DomainException,"tf.evaluate(ax) with tf="<<f<<", ax="<<x,"ax is not an element of tf.domain()="<<f.domain());
     }
     Vector<ApproximateNumber> sx=Ariadne::unscale(x,f._domain);
     Vector<ApproximateNumber> r(this->result_size());
@@ -1376,7 +1382,7 @@ VectorTaylorFunction::evaluate(const Vector<ValidatedNumber>& x) const
 {
     const VectorTaylorFunction& f=*this;
     if(!contains(f.domain(),x)) {
-        ARIADNE_THROW(DomainException,"f.evaluate(x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
+        ARIADNE_THROW(DomainException,"tf.evaluate(vx) with tf="<<f<<", x="<<x,"vx is not a subset of tf.domain()="<<f.domain());
     }
     Vector<ValidatedNumber> sx=Ariadne::unscale(x,f._domain);
     return Ariadne::evaluate(f._models,sx);

@@ -253,6 +253,11 @@ class ScalarTaylorFunction
     //@}
 
     //@{
+    /*! \name Prototype constructors. */
+    ScalarTaylorFunction create_zero() const;
+    //@}
+
+    //@{
     /*! \name Data access */
     /*! \brief The accuracy parameter used to control approximation of the Taylor function. */
     Sweeper sweeper() const;

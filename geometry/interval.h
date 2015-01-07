@@ -253,10 +253,12 @@ inline ExactInterval hull(ExactFloat x1, ExactFloat x2) {
 //! \related ExactInterval \brief Test if the interval \a I contains the number \a x.
 inline Bool contains(ExactInterval i, ExactFloat x) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
 inline Bool contains(ExactInterval i, ValidatedFloat x) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
+inline Bool contains(ExactInterval i, ApproximateFloat x) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
 inline Bool contains(ExactInterval i, RawFloat x) { return i.lower_raw()<=x && x<=i.upper_raw(); }
 
 inline Bool element(ExactFloat x, ExactInterval i) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
 inline Bool element(ValidatedFloat x, ExactInterval i) { return i.lower_raw()<=x.lower_raw() && x.upper_raw()<=i.upper_raw(); }
+inline Bool element(ApproximateFloat x, ExactInterval i) { return i.lower_raw()<=x.raw() && x.raw()<=i.upper_raw(); }
 inline Bool element(RawFloat x, ExactInterval i) { return i.lower_raw()<=x && x<=i.upper_raw(); }
 
 //! \related ExactInterval \brief Test if the interval \a I1 is a subset of \a I2.

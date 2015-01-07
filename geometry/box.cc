@@ -59,6 +59,12 @@ bool element(const Vector<ValidatedFloat>& v1, const Vector<ExactInterval>& v2)
 }
 
 
+bool element(const Vector<ApproximateFloat>& v1, const Vector<ExactInterval>& v2)
+{
+    return contains(v2,v1);
+}
+
+
 bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloat>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
@@ -69,6 +75,15 @@ bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloat>& v2)
 }
 
 bool contains(const Vector<ExactInterval>& v1, const Vector<ValidatedFloat>& v2)
+{
+    ARIADNE_ASSERT(v1.size()==v2.size());
+    for(size_t i=0; i!=v1.size(); ++i) {
+        if(!contains(v1[i],v2[i])) { return false; }
+    }
+    return true;
+}
+
+bool contains(const Vector<ExactInterval>& v1, const Vector<ApproximateFloat>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {

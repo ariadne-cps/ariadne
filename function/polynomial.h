@@ -88,6 +88,10 @@ class Polynomial
     Polynomial(std::initializer_list< std::pair<std::initializer_list<int>,X> > lst);
     //@}
 
+    //! \brief Create the null polynomial in the same number of variables.
+    Polynomial<X> create_zero() const {
+        return Polynomial<X>(this->argument_size()); }
+
     //! \brief Create a constant polynomial in \a as variables with value \a c.
     static Polynomial<X> constant(unsigned int as, const X& c) {
         Polynomial<X> r(as); r[MultiIndex::zero(as)]=c; return r; }
@@ -635,6 +639,7 @@ std::ostream& operator<<(std::ostream& os, const Polynomial<X>& q) {
     bool first_term=true;
     bool identically_zero=true;
 
+    //os <<"[P"<<q.argument_size()<<"]";
     Polynomial<X> p=q;
     p.expansion().graded_sort();
     for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {

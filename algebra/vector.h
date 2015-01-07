@@ -71,6 +71,7 @@ template<class X, class = Fallback> struct HasCreateZero : False { };
 template<class X> struct HasCreateZero<X, EnableIf<IsSame<decltype(declval<X>().create_zero()),X>,Fallback>> : True { };
 
 template<class X, EnableIf<HasCreateZero<X>> = dummy> X create_zero(const X& x) { return x.create_zero(); }
+// FIXME: Below should use a non-integral numeric type to prevent constructor of zero-sized object.
 template<class X, DisableIf<HasCreateZero<X>> = dummy> X create_zero(const X& x) { return static_cast<X>(0u); }
 
 //! \ingroup LinearAlgebraSubModule

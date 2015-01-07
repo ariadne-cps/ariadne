@@ -74,24 +74,25 @@ class Formula {
     typedef X NumericType;
     typedef X ConstantType;
     typedef I IndexType;
-  public:
-    Formula(const FormulaNode<X>* fptr) : _root(fptr) { }
-    Formula(counted_pointer< const FormulaNode<X> > fptr) : _root(fptr) { }
+  private:
+    explicit Formula(const FormulaNode<X>* fptr) : _root(fptr) { }
+    explicit Formula(counted_pointer< const FormulaNode<X> > fptr) : _root(fptr) { }
   public:
     //! \brief Construct the constant expression with the default value of \a X.
     Formula();
-    //! \brief Construct an expression from a value.
-    Formula(const X& c);
-    //! \brief Construct an expression from an index.
-    Formula(const Index& i);
 
     //! \brief Set equal to a constant.
     Formula<X>& operator=(const X& c);
-    Formula<X>& operator=(double c);
+  public:
+    //! \brief Return the constant formula zero.
+    Formula<X> create_zero() const;
   public:
     static Formula<X> zero();
-    template<class R> static Formula<X> constant(const R& c);
+    static Formula<X> constant(const X& c);
     static Formula<X> coordinate(Nat i);
+    static Formula<X> unary(const Operator& op, Formula<X> const& a);
+    static Formula<X> binary(const Operator& op, Formula<X> const& a1, Formula<X> const& a2);
+    static Formula<X> scalar(const Operator& op, Formula<X> const& a1, Int n2);
     static Vector< Formula<X> > identity(Nat n);
   public:
     const Operator& op() const;
@@ -169,32 +170,37 @@ template<class X> inline const Formula<X>& Formula<X>::arg2() const {
 
 
 template<class X> inline Formula<X>::Formula() : _root(new ConstantFormulaNode<X>(X())) { }
-template<class X> inline Formula<X>::Formula(const X& c) : _root(new ConstantFormulaNode<X>(c)) { }
-template<class X> inline Formula<X>::Formula(const Index& i) : _root(new IndexFormulaNode<X>(i)) { }
-template<class X> inline Formula<X>& Formula<X>::operator=(const X& c) { return *this=Formula(c); }
-template<class X> inline Formula<X>& Formula<X>::operator=(double c) { return *this=Formula<X>::constant(static_cast<X>(c)); }
+template<class X> inline Formula<X>& Formula<X>::operator=(const X& c) { return *this=Formula<X>::constant(c); }
+
+template<class X> inline Formula<X> Formula<X>::create_zero() const { return Formula<X>::constant(0); }
 
 template<class X> inline Formula<X> Formula<X>::zero() {
-    return new ConstantFormulaNode<X>(numeric_cast<X>(0)); }
-template<class X> template<class R> inline Formula<X> Formula<X>::constant(const R& c) {
-    return new ConstantFormulaNode<X>(numeric_cast<X>(c)); }
+    return Formula<X>(new ConstantFormulaNode<X>(numeric_cast<X>(0))); }
+template<class X> inline Formula<X> Formula<X>::constant(const X& c) {
+    return Formula<X>(new ConstantFormulaNode<X>(c)); }
 template<class X> inline Formula<X> Formula<X>::coordinate(Nat j) {
-    return new IndexFormulaNode<X>(Index(j)); }
+    return Formula<X>(new IndexFormulaNode<X>(Index(j))); }
+template<class X> inline Formula<X> Formula<X>::unary(const Operator& op, Formula<X> const& a) {
+    return Formula<X>(new UnaryFormulaNode<X>(op,a)); }
+template<class X> inline Formula<X> Formula<X>::binary(const Operator& op, Formula<X> const& a1, Formula<X> const& a2) {
+    return Formula<X>(new BinaryFormulaNode<X>(op,a1,a2)); }
+template<class X> inline Formula<X> Formula<X>::scalar(const Operator& op, Formula<X> const& a1, Int n2) {
+    return Formula<X>(new ScalarFormulaNode<X>(op,a1,n2)); }
 template<class X> inline Vector< Formula<X> > Formula<X>::identity(Nat n) {
     Vector< Formula<X> > r(n); for(uint i=0; i!=n; ++i) { r[i]=Formula<X>::coordinate(i); } return r; }
 
 template<class X, class R> inline Formula<X> make_formula(const R& c) {
-    return new ConstantFormulaNode<X>(static_cast<X>(c)); }
-template<class X, class R> inline Formula<X> make_formula(Cnst op, const R& c) {
-    return new ConstantFormulaNode<X>(static_cast<X>(c)); }
+    return Formula<X>::constant(c); }
+template<class X> inline Formula<X> make_formula(Cnst op, const X& c) {
+    return Formula<X>::constant(c); }
 template<class X> inline Formula<X> make_formula(Ind op, Nat j) {
-    return new IndexFormulaNode<X>(j); }
+    return Formula<X>::index(j); }
 template<class X> inline Formula<X> make_formula(const Operator& op, const Formula<X>& arg) {
-    return new UnaryFormulaNode<X>(op,arg); }
+    return Formula<X>::unary(op,arg); }
 template<class X> inline Formula<X> make_formula(const Operator& op, const Formula<X>& arg1, const Formula<X>& arg2) {
-    return new BinaryFormulaNode<X>(op,arg1,arg2); }
+    return Formula<X>::binary(op,arg1,arg2); }
 template<class X> inline Formula<X> make_formula(const Operator& op, const Formula<X>& arg, Int num) {
-    return new ScalarFormulaNode<X>(op,arg,num); }
+    return Formula<X>::scalar(op,arg,num); }
 
 template<class X> inline Formula<X>& operator+=(Formula<X>& f1, const Formula<X>& f2) { Formula<X> r=f1+f2; return f1=r; }
 template<class X> inline Formula<X>& operator*=(Formula<X>& f1, const Formula<X>& f2) { Formula<X> r=f1*f2; return f1=r; }

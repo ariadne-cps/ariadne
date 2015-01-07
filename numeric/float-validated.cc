@@ -599,9 +599,9 @@ ValidatedFloat::ValidatedFloat(const Rational& ql, const Rational& qu) : l(ql.ge
     static const double min_dbl=std::numeric_limits<double>::min();
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(downward);
-    while(Rational(l.raw())>ql) { l=sub_rnd(l,min_dbl); }
+    while(Rational(l)>ql) { l=sub_rnd(l,min_dbl); }
     set_rounding_mode(upward);
-    while(Rational(u.raw())<qu) { u=add_rnd(u,min_dbl); }
+    while(Rational(u)<qu) { u=add_rnd(u,min_dbl); }
     set_rounding_mode(rounding_mode);
 }
 

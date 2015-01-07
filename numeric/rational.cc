@@ -102,10 +102,10 @@ Rational::Rational(double d) {
     mpq_canonicalize(_mpq);
 }
 
-Rational::Rational(Float x) : Rational(x.dbl) {
+Rational::Rational(Float const& x) : Rational(x.dbl) {
 }
 
-Rational::Rational(Float64 x) : Rational(x.d) {
+Rational::Rational(Float64 const& x) : Rational(x.d) {
 }
 
 Rational::Rational(ExactFloat const& x) : Rational(reinterpret_cast<Float const&>(x)) {

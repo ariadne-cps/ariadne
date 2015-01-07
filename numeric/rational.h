@@ -70,8 +70,8 @@ class Rational
     Rational(const Integer&, const Integer&);
     template<class N, EnableIf<IsIntegral<N>> = dummy> Rational(N n);
     Rational(Int64);
-    explicit Rational(Float);
-    explicit Rational(Float64);
+    explicit Rational(Float const&);
+    explicit Rational(Float64 const&);
     Rational(const Integer&);
     explicit Rational(const String&);
     explicit Rational(const ExactFloat&);

@@ -339,45 +339,45 @@ Vector<X>& operator/=(Vector<X>& v, const XX& s) {
 #ifdef SIMPLE_VECTOR_OPERATORS
 
 template<class X> Vector<decltype(+declval<X>())> operator+(Vector<X> const& v) {
-    Vector<decltype(+declval<X>())> r(v.size());
+    Vector<decltype(+declval<X>())> r(v.size(),+v.zero_element());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=+v[i]; }
     return std::move(r);
 }
 
 template<class X> Vector<X> operator-(Vector<X> const& v) {
-    Vector<decltype(-declval<X>())> r(v.size());
+    Vector<decltype(-declval<X>())> r(v.size(),-v.zero_element());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=-v[i]; }
     return std::move(r);
 }
 
 template<class X1, class X2> Vector<decltype(declval<X1>()+declval<X2>())> operator+(Vector<X1> const& v1, Vector<X2> const& v2) {
     ARIADNE_PRECONDITION(v1.size()==v2.size());
-    Vector<decltype(declval<X1>()+declval<X2>())> r(v1.size());
+    Vector<decltype(declval<X1>()+declval<X2>())> r(v1.size(),v1.zero_element()+v2.zero_element());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]+v2[i]; }
     return std::move(r);
 }
 
 template<class X1, class X2> Vector<decltype(declval<X1>()-declval<X2>())> operator-(Vector<X1> const& v1, Vector<X2> const& v2) {
     ARIADNE_PRECONDITION(v1.size()==v2.size());
-    Vector<decltype(declval<X1>()-declval<X2>())> r(v1.size());
+    Vector<decltype(declval<X1>()-declval<X2>())> r(v1.size(),v1.zero_element()-v2.zero_element());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]-v2[i]; }
     return std::move(r);
 }
 
 template<class X1, class X2, EnableIf<IsScalar<X1>> = dummy> Vector<decltype(declval<X1>()*declval<X2>())> operator*(X1 const& x1, Vector<X2> const& v2) {
-    Vector<decltype(declval<X1>()*declval<X2>())> r(v2.size());
+    Vector<decltype(declval<X1>()*declval<X2>())> r(v2.size(),x1*v2.zero_element());
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=x1*v2[i]; }
     return std::move(r);
 }
 
 template<class X1, class X2, EnableIf<IsScalar<X2>> = dummy> Vector<decltype(declval<X1>()*declval<X2>())> operator*(Vector<X1> const& v1, X2 const& x2) {
-    Vector<decltype(declval<X1>()*declval<X2>())> r(v1.size());
+    Vector<decltype(declval<X1>()*declval<X2>())> r(v1.size(),v1.zero_element()*x2);
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]*x2; }
     return std::move(r);
 }
 
 template<class X1, class X2, EnableIf<IsScalar<X2>> = dummy> Vector<decltype(declval<X1>()/declval<X2>())> operator/(Vector<X1> const& v1, X2 const& x2) {
-    Vector<decltype(declval<X1>()/declval<X2>())> r(v1.size());
+    Vector<decltype(declval<X1>()/declval<X2>())> r(v1.size(),v1.zero_element()/x2);
     for(SizeType i=0; i!=r.size(); ++i) { r[i]=v1[i]/x2; }
     return std::move(r);
 }

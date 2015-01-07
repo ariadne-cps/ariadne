@@ -146,12 +146,14 @@ template<class X> DiagonalMatrix<ProductType<X,X>> operator-(DiagonalMatrix<X> A
 }
 
 template<class X> DiagonalMatrix<ProductType<X,X>> operator*(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
+    if(A1.size()!=A2.size()) { std::cerr<<"A1="<<A1<<", A2="<<A2<<"\n"; }
     ARIADNE_PRECONDITION(A1.size()==A2.size());
     for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))*=A2.at(i,i); }
     return std::move(A1);
 }
 
 template<class X> DiagonalMatrix<ProductType<X,X>> operator/(DiagonalMatrix<X> A1, DiagonalMatrix<X> const& A2) {
+    if(A1.size()!=A2.size()) { std::cerr<<"A1="<<A1<<", A2="<<A2<<"\n"; }
     ARIADNE_PRECONDITION(A1.size()==A2.size());
     for(SizeType i=0; i!=A1.size(); ++i) { const_cast<X&>(A1.at(i,i))/=A2.at(i,i); }
     return std::move(A1);

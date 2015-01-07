@@ -92,8 +92,8 @@ inline UpperInterval dot(Vector<UpperInterval> const& bx1, Vector<ExactInterval>
 }
 
 template<class X> inline
-DiagonalMatrix<X> const& diagonal_matrix(const Vector<X>& v) {
-    return reinterpret_cast<DiagonalMatrix<X>const&>(v);
+DiagonalMatrix<X> diagonal_matrix(const Vector<X>& v) {
+    return DiagonalMatrix<X>(v.array());
 }
 
 template<class X> inline
@@ -550,7 +550,7 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     ApproximateFloatMatrix fltA=midpoint(ivlA);
     ARIADNE_LOG(7,"A="<<fltA<<"\n");
     ARIADNE_LOG(7,"D="<<fltD<<"\n");
-    ApproximateFloatMatrix fltL = ApproximateFloatDiagonalMatrix(fltD)*transpose(fltA);
+    ApproximateFloatMatrix fltL = ApproximateFloatDiagonalMatrix(fltD.array())*transpose(fltA);
     ARIADNE_LOG(7,"L="<<fltL<<"\n");
 
     UpperIntervalMatrix ivlS = ivlA * make_exact(fltL);

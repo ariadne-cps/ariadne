@@ -648,7 +648,7 @@ template<class X1,class X2> Matrix<ArithmeticType<X1,X2>> operator*(MatrixTransp
     Matrix<ArithmeticType<X1,X2>> A0(A1T.column_size(),A2.column_size());
     for(SizeType i=0; i!=A1T.column_size(); ++i) {
         for(SizeType j=0; j!=A2.column_size(); ++j) {
-            for(SizeType k=0; k!=A1.row_size(); ++k) {
+            for(SizeType k=0; k!=A1T.row_size(); ++k) {
                 A0.at(i,j)+=A1T.at(k,i)*A2.at(k,j);
             }
         }

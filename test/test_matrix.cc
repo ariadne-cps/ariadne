@@ -128,12 +128,18 @@ TestMatrix::test_misc()
     A1=Matrix<ApproximateFloat>::identity(4);
     ARIADNE_TEST_PRINT(A1);
 
+    typedef ApproximateFloatMatrix MatrixType;
     ARIADNE_TEST_EQUALS(+ApproximateFloatMatrix({{1.,2.},{3.,4.}}),ApproximateFloatMatrix({{1.,2.},{3.,4.}}));
     ARIADNE_TEST_EQUALS(-ApproximateFloatMatrix({{1.,2.},{3.,4.}}),ApproximateFloatMatrix({{-1.,-2.},{-3.,-4.}}));
     ARIADNE_TEST_EQUALS(ApproximateFloatMatrix({{1.,2.},{3.,4.}})+ApproximateFloatMatrix({{5.,7.},{8.,6.}}),ApproximateFloatMatrix({{6.,9.},{11.,10.}}));
     ARIADNE_TEST_EQUALS(ApproximateFloatMatrix({{1.,2.},{3.,4.}})-ApproximateFloatMatrix({{5.,7.},{8.,6.}}),ApproximateFloatMatrix({{-4.,-5.},{-5.,-2.}}));
     ARIADNE_TEST_EQUALS(ApproximateFloatMatrix({{1.,2.},{3.,4.}})*ApproximateFloatMatrix({{5.,7.},{8.,6.}}),ApproximateFloatMatrix({{21.,19.},{47.,45.}}));
 
+    // Transpose operations
+    ARIADNE_TEST_EQUALS(ApproximateFloatMatrix(transpose(ApproximateFloatMatrix({{1.,2.,3.},{4.,5.,6.}}))),ApproximateFloatMatrix({{1.,4.},{2.,5.},{3.,6.}}));
+    ARIADNE_TEST_EQUALS(transpose(ApproximateFloatMatrix({{1.,2.},{3.,4.}}))*ApproximateFloatMatrix({{5.,7.},{8.,6.}}),ApproximateFloatMatrix({{1.,3.},{2.,4.}})*ApproximateFloatMatrix({{5.,7.},{8.,6.}}));
+    ARIADNE_TEST_EQUALS(ApproximateFloatMatrix({{1.,2.},{3.,4.}})*transpose(ApproximateFloatMatrix({{5.,7.},{8.,6.}})),ApproximateFloatMatrix({{1.,2.},{3.,4.}})*ApproximateFloatMatrix({{5.,8.},{7.,6.}}));
+    ARIADNE_TEST_EQUALS(transpose(ApproximateFloatMatrix({{1.,2.,3.},{4.,5.,6.}}))*ApproximateFloatVector({5.,7.}),ApproximateFloatMatrix({{1.,4.},{2.,5.},{3.,6.}})*ApproximateFloatVector({5.,7.}));
 }
 
 int main() {

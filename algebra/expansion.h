@@ -1,7 +1,7 @@
 /***************************************************************************
  *            expansion.h
  *
- *  Copyright 2008-9  Pieter Collins
+ *  Copyright 2008-15  Pieter Collins
  *
  ****************************************************************************/
 
@@ -46,32 +46,17 @@
 
 namespace Ariadne {
 
+typedef MultiIndex::word_type WordType;
+
 template<class X> class Expansion;
 typedef Expansion<Float> FloatExpansion;
+
 
 template<class X> Expansion<X> embed(unsigned int, const Expansion<X>&, unsigned int);
 
 
 
-template<class FwdIter, class Op>
-FwdIter unique_key(FwdIter first, FwdIter last, Op op) {
-    FwdIter curr=first;
-    FwdIter next=curr;
-    while(next!=last) {
-        if(curr!=next) { *curr=*next; }
-        ++next;
-        while(next!=last && curr->key()==next->key()) {
-            if(curr->key()==next->key()) {
-                curr->data()=op(curr->data(),next->data());
-                ++next;
-            }
-        }
-        // Removes zero entries; the code below is preferred to the case "curr->data()!=0" for Tribool results
-        if(curr->data()==0) { }
-        else { ++curr; }
-    }
-    return curr;
-}
+template<class FwdIter, class Op> FwdIter unique_key(FwdIter first, FwdIter last, Op op);
 
 
 
@@ -304,182 +289,119 @@ class Expansion
     typedef ExpansionValue<X>const* const_pointer;
     typedef ExpansionIterator<X,ExpansionValue<X>&, ExpansionValue<X>* > iterator;
     typedef ExpansionIterator<X,ExpansionValue<X>const&, ExpansionValue<X>const* > const_iterator;
+    typedef ExpansionIterator<X,ExpansionValue<X>&, ExpansionValue<X>* > Iterator;
+    typedef ExpansionIterator<X,ExpansionValue<X>const&, ExpansionValue<X>const* > ConstIterator;
   public:
-    explicit Expansion() : _argument_size() { }
-    explicit Expansion(unsigned int as) : _argument_size(as) { }
+    explicit Expansion();
+    explicit Expansion(unsigned int as);
     Expansion(unsigned int as, unsigned int deg, std::initializer_list<X> lst);
     Expansion(std::initializer_list< std::pair<std::initializer_list<int>,X> > lst);
     Expansion(unsigned int as, std::initializer_list< std::pair<std::initializer_list<int>,X> > lst);
     template<class XX> Expansion(const std::map<MultiIndex,XX>& m);
-    template<class XX, typename std::enable_if<std::is_convertible<XX,X>::value,int>::type=0> Expansion(const Expansion<XX>& p);
+    template<class XX, typename std::enable_if<std::is_convertible<XX,X>::value,int>::type=0>
+        Expansion(const Expansion<XX>& p);
     template<class XX, typename std::enable_if<std::is_constructible<X,XX>::value and not std::is_convertible<XX,X>::value,int>::type=0>
         explicit Expansion(const Expansion<XX>& p);
 
-    Expansion<RawFloat>& raw() { return reinterpret_cast<Expansion<RawFloat>&>(*this); }
-    Expansion<RawFloat>const& raw() const { return reinterpret_cast<Expansion<RawFloat>const&>(*this); }
+    Expansion<RawFloat>& raw();
+    Expansion<RawFloat>const& raw() const;
 
     Expansion<X>& operator=(const X& x);
 
     static Expansion<X> variable(unsigned int as, unsigned int i);
 
-    void swap(Expansion<X>& other) {
-        std::swap(this->_argument_size,other._argument_size);
-        std::swap(this->_coefficients,other._coefficients); }
+    void swap(Expansion<X>& other);
 
-    bool operator==(const Expansion<X>& other) const {
-        if(this->argument_size()!=other.argument_size()) { return false; }
-        if(this->number_of_nonzeros()!=other.number_of_nonzeros()) { return false; }
-        const_iterator self_iter=this->begin(); const_iterator other_iter=other.begin();
-        while(self_iter!=this->end()) {
-            if(self_iter->key()!=other_iter->key() || self_iter->data()!=other_iter->data()) { return false; }
-            ++self_iter; ++other_iter; }
-        return true;
-    }
-    bool operator!=(const Expansion<X>& other) const { return !this->operator==(other); }
+    bool operator==(const Expansion<X>& other) const;
+    bool operator!=(const Expansion<X>& other) const;
 
-    unsigned int argument_size() const { return this->_argument_size; }
-    unsigned int number_of_nonzeros() const { return _coefficients.size()/_element_size(); }
-    unsigned int degree() const {
-        unsigned char deg=0u; for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-            deg=std::max(deg,iter->key().degree()); } return deg; }
-    const std::vector<word_type>& coefficients() const { return this->_coefficients; }
+    unsigned int argument_size() const;
+    unsigned int number_of_nonzeros() const;
+    DegreeType degree() const;
+    const std::vector<word_type>& coefficients() const;
 
-    bool empty() const { return this->_coefficients.empty(); }
-    unsigned int size() const { return this->_coefficients.size()/_element_size(); }
-    void reserve(size_type nnz) { this->_coefficients.reserve(nnz*_element_size()); }
-    void resize(size_type nnz) { this->_coefficients.resize(nnz*_element_size()); }
+    bool empty() const;
+    unsigned int size() const;
+    void reserve(size_type nnz);
+    void resize(size_type nnz);
 
-    template<class CMP> void insert(const MultiIndex& a, const RealType& c, const CMP& cmp) {
-        this->_insert(a,c,cmp); }
-    template<class CMP> void set(const MultiIndex& a, const RealType& c, const CMP& cmp) {
-        this->_at(a,cmp)=c; }
-    template<class CMP> RealType& at(const MultiIndex& a, const CMP& cmp) {
-        return this->_at(a,cmp); }
-    template<class CMP> iterator find(const MultiIndex& a, const CMP& cmp) {
-        iterator iter=std::lower_bound(this->begin(),this->end(),a,cmp); if(iter!=this->end() && iter->key()!=a) { iter=this->end(); } return iter; }
-    template<class CMP> const_iterator find(const MultiIndex& a, const CMP& cmp) const {
-        iterator iter=std::lower_bound(this->begin(),this->end(),a,cmp); if(iter!=this->end() && iter->key()!=a) { iter=this->end(); } return iter; }
+    template<class CMP> void insert(const MultiIndex& a, const RealType& c, const CMP& cmp);
+    template<class CMP> void set(const MultiIndex& a, const RealType& c, const CMP& cmp);
+    template<class CMP> RealType& at(const MultiIndex& a, const CMP& cmp);
+    template<class CMP> iterator find(const MultiIndex& a, const CMP& cmp);
+    template<class CMP> const_iterator find(const MultiIndex& a, const CMP& cmp) const;
 
-    void append(const MultiIndex& a, const RealType& c) {
-        this->_append(a,c); }
-    void prepend(const MultiIndex& a, const RealType& c) {
-        this->_prepend(a,c); }
-    void append(const MultiIndex& a1, const MultiIndex& a2, const RealType& c) {
-        this->_append(a1,a2,c); }
+    void append(const MultiIndex& a, const RealType& c);
+    void prepend(const MultiIndex& a, const RealType& c);
+    void append(const MultiIndex& a1, const MultiIndex& a2, const RealType& c);
 
-    //RealType& operator[](const MultiIndex& a) {
-    //    iterator iter=this->find(a);
-    //    if(iter==this->end()) { iter=this->_insert(iter,a,static_cast<RealType>(0.0)); }
-    //    return iter->data(); }
-    const RealType& operator[](const MultiIndex& a) const {
-        const_iterator iter=this->find(a);
-        if(iter==this->end()) { return _zero; }
-        else { return iter->data(); } }
+    const RealType& operator[](const MultiIndex& a) const;
 
-    iterator begin() { return iterator(_argument_size,_index_size(),_begin_ptr()); }
-    iterator end() { return iterator(_argument_size,_index_size(),_end_ptr()); }
-    iterator find(const MultiIndex& a) {
-        iterator iter=this->end(); while(iter!=this->begin()) { --iter; if(iter->key()==a) { return iter; } } return this->end(); }
+    iterator begin();
+    iterator end();
+    iterator find(const MultiIndex& a);
 
-    const_iterator begin() const { return const_iterator(_argument_size,_index_size(),const_cast<word_type*>(_begin_ptr())); }
-    const_iterator end() const { return const_iterator(_argument_size,_index_size(),const_cast<word_type*>(_end_ptr())); }
-    const_iterator find(const MultiIndex& a) const {
-        const_iterator iter=this->end(); while(iter!=this->begin()) { --iter; if(iter->key()==a) { return iter; } } return this->end(); }
+    const_iterator begin() const;
+    const_iterator end() const;
+    const_iterator find(const MultiIndex& a) const;
 
-    reference front() { return *(this->begin()); }
-    reference back() { return *(--this->end()); }
-    const_reference front() const { return *(this->begin()); }
-    const_reference back() const { return *(--this->end()); }
+    reference front();
+    reference back();
+    const_reference front() const;
+    const_reference back() const;
 
-    void erase(iterator iter) { iter->data()=0.0; }
-    void clear() { _coefficients.clear(); }
+    void erase(iterator iter);
+    void clear();
 
-    void remove_zeros() {
-        this->resize(std::remove_if(this->begin(),this->end(),DataIsZero())-this->begin()); }
-    void combine_terms() {
-        iterator curr=this->begin(); const_iterator adv=this->begin(); const_iterator end=this->end();
-        while(adv!=end) { curr->key()=adv->key(); curr->data()=adv->data(); ++adv;
-            while(adv!=end && curr->key()==adv->key()) { curr->data()+=adv->data(); ++adv; } ++curr; }
-        this->resize(curr-this->begin()); }
+    void remove_zeros();
+    void combine_terms();
 
-    template<class CMP> void sort(const CMP& cmp) {
-        std::sort(this->begin(),this->end(),cmp);
-    }
+    template<class CMP> void sort(const CMP& cmp);
 
-    void graded_sort() {
-        std::sort(this->begin(),this->end(),GradedKeyLess());
-    }
-    void lexicographic_sort() {
-        std::sort(this->begin(),this->end(),LexicographicKeyLess());
-    }
-    void reverse_lexicographic_sort() {
-        std::sort(this->begin(),this->end(),ReverseLexicographicKeyLess());
-    }
+    void graded_sort();
+    void lexicographic_sort();
+    void reverse_lexicographic_sort();
 
-    void check() const { }
+    void check() const;
 
-    Expansion<X> embed(unsigned int before_size, const Expansion<X>&, unsigned int after_size) const;
   public:
-    size_type _vector_size() const {
-        return _coefficients.size(); }
-    size_type _index_size() const {
-        return (_argument_size+sizeof_word)/sizeof_word; }
-    size_type _element_size() const {
-        return (_argument_size+sizeof_word)/sizeof_word+sizeof_data/sizeof_word; }
+    size_type _vector_size() const;
+    size_type _index_size() const;
+    size_type _element_size() const;
   public:
-    const word_type* _begin_ptr() const { return _coefficients.begin().operator->(); }
-    const word_type* _end_ptr() const { return _coefficients.end().operator->(); }
-    word_type* _begin_ptr() { return _coefficients.begin().operator->(); }
-    word_type* _end_ptr() { return _coefficients.end().operator->(); }
-    template<class CMP> RealType& _at(const MultiIndex& a,const CMP& cmp) {
-        iterator p=std::lower_bound(this->begin(),this->end(),a,cmp);
-        if(p!=this->end() && p->key()==a) { return p->data(); }
-        else { p=this->_insert(p,a,X(0)); return p->data(); }
-    }
-    template<class CMP> iterator _insert(const MultiIndex& a, const RealType& x,const CMP& cmp) {
-        //std::cerr<<"_insert "<<*this<<" "<<a<<" "<<x<<std::endl;
-        _coefficients.resize(_coefficients.size()+_element_size());
-        iterator p=std::lower_bound(this->begin(),this->end()-1,a,cmp);
-        return _allocated_insert(p,a,x); }
-    iterator _insert(iterator p, const MultiIndex& a, const RealType& x) {
-        //std::cerr<<"_insert "<<*this<<" "<<p._ptr()<<" "<<a<<" "<<x<<std::endl;
-        if(_coefficients.size()+_element_size()>_coefficients.capacity()) {
-            difference_type i=p-begin();
-            _coefficients.resize(_coefficients.size()+_element_size());
-            p=begin()+i;
-        } else {
-            _coefficients.resize(_coefficients.size()+_element_size());
-        }
-        return _allocated_insert(p,a,x); }
-    iterator _allocated_insert(iterator p, const MultiIndex& a, const RealType& x) {
-        //std::cerr<<"_allocated_insert "<<*this<<" "<<p<<" "<<p-begin()<<" "<<a<<" "<<x<<std::endl;
-        iterator curr=this->end()-1; iterator prev=curr;
-        while(curr!=p) { --prev; *curr=*prev; curr=prev; }
-        curr->key()=a; curr->data()=x; return p; }
-    void _prepend(const MultiIndex& a, const RealType& x) {
-        //std::cerr<<"_prepend "<<*this<<" "<<a<<" "<<x<<std::endl;
-        _coefficients.resize(_coefficients.size()+_element_size());
-        _allocated_insert(begin(),a,x); }
-    void _append(const MultiIndex& a, const RealType& x) {
-        //std::cerr<<"_append "<<*this<<" "<<a<<" "<<x<<"... "<<std::flush;
-        _coefficients.resize(_coefficients.size()+_element_size());
-        word_type* vp=_end_ptr()-_element_size(); const word_type* ap=a.word_begin();
-        for(unsigned int j=0; j!=_index_size(); ++j) { vp[j]=ap[j]; }
-        data_type* xp=reinterpret_cast<data_type*>(this->_end_ptr())-1; *xp=x;
-        //std::cerr<<"done"<<std::endl;
-    }
-    void _append(const MultiIndex&  a1, const MultiIndex&  a2, const RealType& x) {
-        //std::cerr<<"_append "<<*this<<" "<<a1<<" "<<a2<<" "<<x<<std::endl;
-        _coefficients.resize(_coefficients.size()+_element_size());
-        word_type* vp=_end_ptr()-_element_size();
-        const word_type* ap1=a1.word_begin(); const word_type* ap2=a2.word_begin();
-        for(unsigned int j=0; j!=_index_size(); ++j) { vp[j]=ap1[j]+ap2[j]; }
-        data_type* xp=reinterpret_cast<data_type*>(this->_end_ptr())-1; *xp=x; }
+    const word_type* _begin_ptr() const;
+    const word_type* _end_ptr() const;
+    word_type* _begin_ptr();
+    word_type* _end_ptr();
+    template<class CMP> RealType& _at(const MultiIndex& a,const CMP& cmp);
+    template<class CMP> iterator _insert(const MultiIndex& a, const RealType& x,const CMP& cmp);
+    iterator _insert(iterator p, const MultiIndex& a, const RealType& x);
+    iterator _allocated_insert(iterator p, const MultiIndex& a, const RealType& x);
+    void _prepend(const MultiIndex& a, const RealType& x);
+    void _append(const MultiIndex& a, const RealType& x);
+    void _append(const MultiIndex&  a1, const MultiIndex&  a2, const RealType& x);
+    Expansion<X> _embed(unsigned int before_size, unsigned int after_size) const;
   public:
     std::ostream& write(std::ostream& os, const Array<std::string>& variables) const;
+    std::ostream& write(std::ostream& os) const;
   private:
     size_type _argument_size;
     std::vector<word_type> _coefficients;
+};
+
+template<class X, class CMP> class SortedExpansion
+    : public Expansion<X>
+{
+  public:
+    typedef typename Expansion<X>::RealType RealType;
+    using Expansion<X>::Expansion;
+
+    void insert(const MultiIndex& a, const RealType& c) { this->insert(a,c,CMP()); }
+    void set(const MultiIndex& a, const RealType& c) { this->set(a,c,CMP()); }
+    RealType& at(const MultiIndex& a) { return this->at(a,CMP()); }
+    typename Expansion<X>::Iterator find(const MultiIndex& a) { return this->find(a,CMP()); }
+    typename Expansion<X>::ConstIterator find(const MultiIndex& a) const { return this->find(a,CMP()); }
+    void sort() { this->sort(CMP()); }
 };
 
 // Disable construction of Expansion<Rational> since above implementation only
@@ -488,61 +410,50 @@ class Expansion
 template<> class Expansion<Rational>;
 #endif
 
-template<class X> X Expansion<X>::_zero = static_cast<X>(0);
 
-template<class X>
-Expansion<X>::Expansion(unsigned int as, unsigned int deg, std::initializer_list<X> lst)
-    : _argument_size(as)
-{
-    MultiIndex a(as); X x;
-    typename std::initializer_list<X>::const_iterator iter = lst.begin();
-    while(a.degree()<=deg) {
-        x=*iter;
-        if(x!=0) { this->append(a,x); }
-        ++a;
-        ++iter;
-    }
+
+//! \ingroup FunctionModule
+//! \brief Convert a power-series expansion into a formula using a version of Horner's rule.
+//!
+//! For a polynomial in \f$n\f$ variables, Horner's rule is a recursive formula
+//! \f[ p(x) = \bigl( \bigl(  x^{d_k-d_{k-1}} q_k(\hat{x})x^{d_0} + \cdots + q_1(\hat{x}) \bigr) x^{d_1-d_0} + q_0(\hat{x}) \bigr) x^{d_0} \f]
+//! where \f$\hat{x}=(x_1,\ldots,x_{n-1})\f$ and \f$q_i\f$ is the polynomial of terms in \f$x_n^{d_i}\f$.
+//! To evaluate a polynomial using Horner's rule without using recursive function calls, we maintain registers \f$r_k\f$ containing
+//! the current evaluation of a polynomial in \f$(x_1,\ldots,x_k)\f$.
+//!
+//! We list the terms in reverse lexicographic order, defined as \f$\alpha \prec \beta\f$ if \f$\alpha_j>\beta_j\f$,
+//! where \f$j=\max\{i\mid \alpha_i\neq\beta_i\}\f$.
+//! For a given term \f$c_\alpha x^\alpha\f$, let \f$k=\max\{j\mid \alpha_j\neq\beta_j\}\f$, where \f$\beta\f$ is the next multi-index.
+//! We update register \f$r_k\f$ by \f[r'_k=(((c_\alpha + r_1) x^{\alpha_1} + r_2 )x^{\alpha_2}+\cdots r_k)x^{\alpha_k-\beta_k}.\f]
+//! The result is obtained by updating a fictional register \f$r_{n+1}\f$ at the last step.
+//! See J. M. Pena and T. Sauer, "On the multivariate Horner scheme", SIAM J. Numer. Anal. 37(4) 1186-1197, 2000.
+template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector<Y>& x);
+
+template<class X, class Y> Y power_evaluate(const Expansion<X>& e, const Vector<Y>& y);
+
+template<class X, class Y> Y evaluate(const Expansion<X>& e, const Vector<Y>& y);
+
+template<class X, class Y> Y simple_evaluate(const Expansion<X>& e, const Vector<Y>& y);
+
+template<class T> Expansion<MidpointType<T>> midpoint(const Expansion<T>& pse);
+
+template<class X, class Y> Vector<Y> evaluate(const Vector< Expansion<X> >& x, const Vector<Y>& y);
+
+template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const Vector<Float> v);
+
+template<class T> Vector< Expansion<MidpointType<T>> > midpoint(const Vector< Expansion<T> >& pse);
+
+
+
+template<class X> inline Expansion<X> embed(unsigned int before_size, const Expansion<X>& x, unsigned int after_size) {
+    return x._embed(before_size,after_size);
 }
 
-template<class X>
-Expansion<X>::Expansion(unsigned int as, std::initializer_list< std::pair<std::initializer_list<int>,X> > lst)
-    : _argument_size(as)
-{
-    MultiIndex a;
-    X x;
-    for(typename std::initializer_list< std::pair<std::initializer_list<int>,X> >::const_iterator iter=lst.begin();
-        iter!=lst.end(); ++iter)
-    {
-        a=MultiIndex(iter->first);
-        x=iter->second;
-        if(x!=0) { this->append(a,x); }
-    }
+template<class X> inline std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
+    return p.write(os);
 }
 
-template<class X>
-Expansion<X>::Expansion(std::initializer_list< std::pair<std::initializer_list<int>,X> > lst)
-    : _argument_size(lst.size()==0?0u:lst.begin()->first.size())
-{
-    MultiIndex a;
-    X x;
-    for(typename std::initializer_list< std::pair<std::initializer_list<int>,X> >::const_iterator iter=lst.begin();
-        iter!=lst.end(); ++iter)
-    {
-        a=iter->first;
-        x=iter->second;
-        if(x!=0) { this->append(a,x); }
-    }
-}
 
-template<class X> template<class XX>
-Expansion<X>::Expansion(const std::map<MultiIndex,XX>& m)
-{
-    ARIADNE_ASSERT(!m.empty());
-    this->_argument_size=m.begin()->first.size();
-    for(typename std::map<MultiIndex,XX>::const_iterator iter=m.begin(); iter!=m.end(); ++iter) {
-        this->append(iter->first,X(iter->second));
-    }
-}
 
 template<class X> template<class XX, typename std::enable_if<std::is_convertible<XX,X>::value,int>::type> inline
 Expansion<X>::Expansion(const Expansion<XX>& p)
@@ -563,251 +474,39 @@ Expansion<X>::Expansion(const Expansion<XX>& p)
 }
 
 
-template<class X> Expansion<X>& Expansion<X>::operator=(const X& c) {
-    this->clear();
-    this->append(MultiIndex::zero(this->argument_size()),c);
-    return *this;
+
+template<class X> template<class CMP> typename Expansion<X>::RealType& Expansion<X>::_at(const MultiIndex& a,const CMP& cmp) {
+    iterator p=std::lower_bound(this->begin(),this->end(),a,cmp);
+    if(p!=this->end() && p->key()==a) { return p->data(); }
+    else { p=this->_insert(p,a,X(0)); return p->data(); }
 }
 
-template<class X> Expansion<X> Expansion<X>::variable(unsigned int n, unsigned int i) {
-    Expansion<X> p(n); p.append(MultiIndex::unit(n,i),X(1));
-    return p;
+template<class X> template<class CMP> typename Expansion<X>::iterator Expansion<X>::_insert(const MultiIndex& a, const RealType& x,const CMP& cmp) {
+    //std::cerr<<"_insert "<<*this<<" "<<a<<" "<<x<<std::endl;
+    _coefficients.resize(_coefficients.size()+_element_size());
+    iterator p=std::lower_bound(this->begin(),this->end()-1,a,cmp);
+    return _allocated_insert(p,a,x);
 }
 
-
-
-
-//! \ingroup FunctionModule
-//! \brief Convert a power-series expansion into a formula using a version of Horner's rule.
-//!
-//! For a polynomial in \f$n\f$ variables, Horner's rule is a recursive formula
-//! \f[ p(x) = \bigl( \bigl(  x^{d_k-d_{k-1}} q_k(\hat{x})x^{d_0} + \cdots + q_1(\hat{x}) \bigr) x^{d_1-d_0} + q_0(\hat{x}) \bigr) x^{d_0} \f]
-//! where \f$\hat{x}=(x_1,\ldots,x_{n-1})\f$ and \f$q_i\f$ is the polynomial of terms in \f$x_n^{d_i}\f$.
-//! To evaluate a polynomial using Horner's rule without using recursive function calls, we maintain registers \f$r_k\f$ containing
-//! the current evaluation of a polynomial in \f$(x_1,\ldots,x_k)\f$.
-//!
-//! We list the terms in reverse lexicographic order, defined as \f$\alpha \prec \beta\f$ if \f$\alpha_j>\beta_j\f$,
-//! where \f$j=\max\{i\mid \alpha_i\neq\beta_i\}\f$.
-//! For a given term \f$c_\alpha x^\alpha\f$, let \f$k=\max\{j\mid \alpha_j\neq\beta_j\}\f$, where \f$\beta\f$ is the next multi-index.
-//! We update register \f$r_k\f$ by \f[r'_k=(((c_\alpha + r_1) x^{\alpha_1} + r_2 )x^{\alpha_2}+\cdots r_k)x^{\alpha_k-\beta_k}.\f]
-//! The result is obtained by updating a fictional register \f$r_{n+1}\f$ at the last step.
-//! See J. M. Pena and T. Sauer, "On the multivariate Horner scheme", SIAM J. Numer. Anal. 37(4) 1186-1197, 2000.
-template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector<Y>& x)
-{
-    typedef typename Expansion<X>::const_iterator const_iterator;
-    const uint n=e.argument_size();
-    const Y z=x.zero_element(); // The zero element of the ring Y
-    if(e.number_of_nonzeros()==0) { return z; }
-
-    Array< Y > r(e.argument_size(),z); // An Array of "registers" containing working p(x[0],...,x[k])
-    const_iterator iter=e.begin();
-    const_iterator end=e.end();
-    uint k=n;   // The current working register
-    const uchar* na=iter->key().begin(); // The values of the next multi-index
-    uint j=k;   // The lowest register containing a non-zero value
-    X c=iter->data();
-    Y t=z;
-    const uchar* a=na;
-    ++iter;
-    while(iter!=end) {
-        na=iter->key().begin();
-        k=n-1;
-        while(a[k]==na[k]) { --k; }
-        // Since terms are ordered reverse-lexicographically,
-        // previous index must have higher kth value
-        assert(a[k]>na[k]);
-        // Set r[k]=(((c+r[0])*x[0]^a[0]+r[1])*x[1]^a[1]+...+r[k])*x[k]^(a[k]-na[k])
-        // Omit zero terms where possible
-        t=numeric_cast<typename Y::NumericType>(c);
-        for(uint i=0; i!=min(j,k); ++i) {
-            for(uint ii=0; ii!=a[i]; ++ii) {
-                t=t*x[i];
-            }
-        }
-        for(uint i=min(j,k); i!=k; ++i) {
-            t=t+r[i];
-            for(uint ii=0; ii!=a[i]; ++ii) {
-                t=t*x[i];
-            }
-            r[i]=z;
-        }
-        if(j<=k) {
-            t=t+r[k];
-        }
-        for(uint ii=na[k]; ii!=a[k]; ++ii) {
-            t=t*x[k];
-        }
-        r[k]=t;
-        //std::cerr<<"a="<<MultiIndex(n,a)<<" c="<<c<<" k="<<k<<" r="<<r<<"\n";
-        j=k;
-        c=iter->data();
-        a=na;
-        ++iter;
-    }
-    // Set r=(((c+r[0])*x[0]^a[0]+r[1])*x[1]^a[1]+...+r[n-1])*x[n-1]^(a[n-1])
-    t=numeric_cast<typename Y::NumericType>(c);
-    for(uint i=0; i!=j; ++i) {
-        for(uint ii=0; ii!=a[i]; ++ii) {
-            t=t*x[i];
-        }
-    }
-    for(uint i=j; i!=n; ++i) {
-        t=t+r[i];
-        for(uint ii=0; ii!=a[i]; ++ii) {
-            t=t*x[i];
-        }
-    }
-    //std::cerr<<"a="<<MultiIndex(n,a)<<" c="<<c<<" k="<<n<<"\n";
-    //std::cerr<<"  r="<<t<<"\n";
-    return t;
+template<class X> template<class CMP> void Expansion<X>::insert(const MultiIndex& a, const RealType& c, const CMP& cmp) {
+    this->_insert(a,c,cmp);
 }
-
-template<class X, class Y>
-Y power_evaluate(const Expansion<X>& e, const Vector<Y>& y)
-{
-    Y zero = y.zero_element();
-    Y one = zero; one+=1;
-
-    Y r=zero;
-    Y t=zero;
-    for(typename Expansion<X>::const_iterator iter=e.begin();
-        iter!=e.end(); ++iter)
-    {
-        const MultiIndex& j=iter->key();
-        const X& c=iter->data();
-        t=one;
-        for(uint k=0; k!=e.argument_size(); ++k) {
-            for(uint l=0; l!=j[k]; ++l) {
-                t=t*y[k];
-            }
-        }
-        t*=c;
-        r+=t;
-    }
-
-    return r;
+template<class X> template<class CMP> void Expansion<X>::set(const MultiIndex& a, const RealType& c, const CMP& cmp) {
+    this->_at(a,cmp)=c;
+}
+template<class X> template<class CMP> X& Expansion<X>::at(const MultiIndex& a, const CMP& cmp) {
+    return this->_at(a,cmp);
+}
+template<class X> template<class CMP> typename Expansion<X>::iterator Expansion<X>::find(const MultiIndex& a, const CMP& cmp) {
+    iterator iter=std::lower_bound(this->begin(),this->end(),a,cmp); if(iter!=this->end() && iter->key()!=a) { iter=this->end(); } return iter;
+}
+template<class X> template<class CMP> typename Expansion<X>::const_iterator Expansion<X>::find(const MultiIndex& a, const CMP& cmp) const {
+    iterator iter=std::lower_bound(this->begin(),this->end(),a,cmp); if(iter!=this->end() && iter->key()!=a) { iter=this->end(); } return iter;
 }
 
 
-template<class X, class Y>
-Y evaluate(const Expansion<X>& e, const Vector<Y>& y)
-{
-    return power_evaluate(e,y);
-}
+} // namespace Ariadne
 
-template<class X, class Y>
-Y simple_evaluate(const Expansion<X>& e, const Vector<Y>& y)
-{
-    return power_evaluate(e,y);
-}
-
-template<class X>
-Expansion<X> embed(unsigned int before_size, const Expansion<X>& x, unsigned int after_size)
-{
-    uint old_size=x.argument_size();
-    uint new_size=before_size+old_size+after_size;
-    Expansion<X> r(new_size);
-    MultiIndex old_index(old_size);
-    MultiIndex new_index(new_size);
-    for(typename Expansion<X>::const_iterator iter=x.begin(); iter!=x.end(); ++iter) {
-        old_index=iter->key();
-        for(uint j=0; j!=old_size; ++j) {
-            uint aj=old_index[j];
-            new_index[j+before_size]=aj;
-        }
-        r.append(new_index,iter->data());
-    }
-    return r;
-}
-
-
-template<class T> Expansion<MidpointType<T>> midpoint(const Expansion<T>& pse) {
-    Expansion<MidpointType<T>> r(pse.argument_size());
-    for(typename Expansion<T>::const_iterator iter=pse.begin(); iter!=pse.end(); ++iter) {
-        r.append(iter->key(),midpoint(iter->data())); }
-    return r;
-}
-
-
-template<class X>
-std::ostream& Expansion<X>::write(std::ostream& os, const Array<std::string>& variable_names) const
-{
-    ARIADNE_ASSERT(this->argument_size()==variable_names.size());
-    const Expansion<X>& p=*this;
-    if(p.size()==0) {
-        os << "0";
-    } else {
-        bool first_term=true;
-        for(const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-            MultiIndex a=iter->key();
-            X v=iter->data();
-            if(v>=0 && !first_term) { os<<"+"; }
-            first_term=false;
-            bool first_factor=true;
-            if(v<0) { os<<"-"; }
-            if(abs(v)!=1 || a.degree()==0) { os<<abs(v); first_factor=false; }
-            for(uint j=0; j!=a.size(); ++j) {
-                if(a[j]!=0) {
-                    if(first_factor) { first_factor=false; } else { os <<"*"; }
-                    os<<variable_names[j]; if(a[j]!=1) { os<<"^"<<int(a[j]); }
-                }
-            }
-        }
-    }
-    return os;
-}
-
-
-template<class X>
-std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
-    Array<std::string> variable_names(p.argument_size());
-    for(uint j=0; j!=p.argument_size(); ++j) {
-        std::stringstream sstr;
-        sstr << 'x' << j;
-        variable_names[j]=sstr.str();
-    }
-    return p.write(os,variable_names);
-}
-
-
-
-
-template<class X, class Y>
-Vector<Y> evaluate(const Vector< Expansion<X> >& x, const Vector<Y>& y)
-{
-    Vector<Y> r(x.size(),y.zero_element());
-    for(unsigned int i=0; i!=x.size(); ++i) {
-        r[i]=evaluate(x[i],y);
-    }
-    return r;
-}
-
-
-template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const Vector<Float> v) {
-    Vector< Expansion<X> > r(v.size(),Expansion<X>(e.argument_size()));
-    for(uint i=0; i!=r.size(); ++i) {
-        ARIADNE_ASSERT(v[i]==0.0 || v[i]==1.0);
-        if(v[i]==1.0) { r[i]=e; }
-    }
-    return r;
-}
-
-
-template<class T>
-inline Vector< Expansion<MidpointType<T>> > midpoint(const Vector< Expansion<T> >& pse) {
-    Vector< Expansion<MidpointType<T>> > r(pse.size(),Expansion<MidpointType<T>>());
-    for(uint i=0; i!=pse.size(); ++i) {
-        r[i]=midpoint(pse[i]); }
-    return r;
-}
-
-
-
-
-
-
-
-
-}
+#include "evaluate.tcc"
 
 #endif /* ARIADNE_EXPANSION_H */

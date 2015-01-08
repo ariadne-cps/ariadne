@@ -136,8 +136,8 @@ void TestExpansion::test_iterator_concept()
     Expansion<Float> e(3);
     const Expansion<Float> cp(3);
 
-    Expansion<Float>::iterator iter=e.begin(); iter=e.end(); iter=e.find(a);
-    Expansion<Float>::const_iterator citer=e.begin(); citer=e.end(); citer=e.find(a);
+    Expansion<Float>::Iterator iter=e.begin(); iter=e.end(); iter=e.find(a);
+    Expansion<Float>::ConstIterator citer=e.begin(); citer=e.end(); citer=e.find(a);
     citer=e.begin(); citer=cp.end(); citer=cp.find(a);
 
     Expansion<Float>::value_type val=*iter;
@@ -184,12 +184,12 @@ void TestExpansion::test_data_access()
     ARIADNE_TEST_EXECUTE(e.append({0,1,0},5.0));
     ARIADNE_TEST_EXECUTE(e.append({1,0,1},7.0));
 
-    // Test iterator difference
+    // Test Iterator difference
     ARIADNE_TEST_PRINT(e.begin());
     ARIADNE_TEST_PRINT(e.end());
     ARIADNE_TEST_EQUAL(e.begin()+e.number_of_nonzeros(),e.end());
     ARIADNE_TEST_EQUAL(e.end()-e.number_of_nonzeros(),e.begin());
-    ARIADNE_TEST_EQUAL(e.end()-e.begin(),Expansion<Float>::difference_type(e.number_of_nonzeros()));
+    ARIADNE_TEST_EQUAL(e.end()-e.begin(),Expansion<Float>::DifferenceType(e.number_of_nonzeros()));
 
     // Test derefencing of iterators
     ARIADNE_TEST_PRINT(e.begin());
@@ -201,10 +201,10 @@ void TestExpansion::test_data_access()
 
     // The behaviour of iterators is rather odd and not what might be expected
     // A MultiIndex reference assigned to by iter->key() changes its value
-    // when the iterator is incremented, but a Float reference does not.
+    // when the Iterator is incremented, but a Float reference does not.
     // This behaviour should be changed in future versions if technologically
     // feasible.
-    Expansion<Float>::iterator iter=e.begin();
+    Expansion<Float>::Iterator iter=e.begin();
     const MultiIndex& aref=iter->key();
     const Float& xref=iter->data();
     Float x1=iter->data();
@@ -222,8 +222,8 @@ void TestExpansion::test_data_access()
 
 
     // Test hand-coded swap of values
-    ARIADNE_TEST_CONSTRUCT(Expansion<Float>::iterator,iter1,(e.begin()+1));
-    ARIADNE_TEST_CONSTRUCT(Expansion<Float>::iterator,iter2,(e.begin()+3));
+    ARIADNE_TEST_CONSTRUCT(Expansion<Float>::Iterator,iter1,(e.begin()+1));
+    ARIADNE_TEST_CONSTRUCT(Expansion<Float>::Iterator,iter2,(e.begin()+3));
 
     // Perform swap
     ARIADNE_TEST_CONSTRUCT(Expansion<Float>::value_type,tmp,(*iter2));
@@ -358,7 +358,7 @@ void TestExpansion::test_indexing()
     ARIADNE_TEST_EXECUTE(e[MI(3, 0,0,0)]=7);
     ARIADNE_TEST_PRINT(e);
     ARIADNE_TEST_EQUAL(e.number_of_nonzeros(),4);
-    Expansion<Float>::const_iterator iter=e.begin();
+    Expansion<Float>::ConstIterator iter=e.begin();
     ARIADNE_TEST_EQUAL(iter->key(),MI(3, 0,1,0));
     ARIADNE_TEST_EQUAL(iter->data(),2.0);
     ++iter;

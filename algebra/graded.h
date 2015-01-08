@@ -77,7 +77,7 @@ ExactInterval create(const ExactInterval& x) { return ExactInterval(0); }
 template<class X> Polynomial<X> create(const Polynomial<X>& x) { return Polynomial<X>(x.argument_size()); }
 template<class X> Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree()); }
 
-std::ostream& operator<<(std::ostream& os, const Differential<ExactInterval>& d) {
+OutputStream& operator<<(OutputStream& os, const Differential<ExactInterval>& d) {
     return os << Polynomial<ExactInterval>(d.expansion());
 }
 
@@ -95,7 +95,7 @@ template<class A> struct Graded : public List<A>
     Nat degree() const { return this->size()-1u; }
     Void extend(const A& a) { this->List<A>::append(a); }
 };
-template<class A> std::ostream& operator<<(std::ostream& os, const Graded<A>& g) {
+template<class A> OutputStream& operator<<(OutputStream& os, const Graded<A>& g) {
     if(g.size()==0) { return os << "G[-]{}"; }
     os << "G[" << g.degree() << "]{";
     os << "(" << g[0] << ")";
@@ -106,7 +106,7 @@ template<class A> std::ostream& operator<<(std::ostream& os, const Graded<A>& g)
     os << "}";
     return os;
 }
-template<> std::ostream& operator<<(std::ostream& os, const Graded<Float>& g) {
+template<> OutputStream& operator<<(OutputStream& os, const Graded<Float>& g) {
     if(g.size()==0) { return os << "G[-]{}"; }
     os << "G[" << g.degree() << "]{";
     bool nonzero=false;
@@ -127,7 +127,7 @@ template<> std::ostream& operator<<(std::ostream& os, const Graded<Float>& g) {
     os << "}";
     return os;
 }
-template<> std::ostream& operator<<(std::ostream& os, const Graded<ExactInterval>& g) {
+template<> OutputStream& operator<<(OutputStream& os, const Graded<ExactInterval>& g) {
     if(g.size()==0) { return os << "0"; }
     os << g[0];
     for(uint i=1; i<=g.degree(); ++i) {

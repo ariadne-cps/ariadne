@@ -50,10 +50,10 @@ template<class X> X Matrix<X>::zero_element() const {
 }
 
 template<class X> Matrix<X>::Matrix(InitializerList<InitializerList<X>> lst) : _rs(lst.size()), _cs(lst.begin()->size()), _ary(_rs*_cs) {
-    typename std::initializer_list<std::initializer_list<X>>::const_iterator row_iter=lst.begin();
+    typename InitializerList<InitializerList<X>>::const_iterator row_iter=lst.begin();
     for(SizeType i=0; i!=this->row_size(); ++i, ++row_iter) {
         ARIADNE_PRECONDITION(row_iter->size()==this->column_size());
-        typename std::initializer_list<X>::const_iterator col_iter=row_iter->begin();
+        typename InitializerList<X>::const_iterator col_iter=row_iter->begin();
         for(SizeType j=0; j!=this->column_size(); ++j, ++col_iter) {
             this->at(i,j)=*col_iter;
         }

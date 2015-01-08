@@ -210,7 +210,7 @@ template<class X, class XX> DenseDifferential<X> operator*(const XX& c, const De
 template<class X, class XX> DenseDifferential<X> operator/(const DenseDifferential<X>& x, const XX& c) { 
     return DenseDifferential<X>(x)*=(1.0/c); }
 
-template<class X> std::ostream& operator<<(std::ostream& os, const DenseDifferential<X>& x);
+template<class X> OutputStream& operator<<(OutputStream& os, const DenseDifferential<X>& x);
 
 //template<class X> DenseDifferential<X>& acc(DenseDifferential<X>& r, const DenseDifferential<X>& x, const DenseDifferential<X>& y);
 //template<class X> DenseDifferential<X>& acc(DenseDifferential<X>& r, const X& c, const DenseDifferential<X>& x);
@@ -919,8 +919,8 @@ DenseDifferential<X> antiderivative(const DenseDifferential<X>& x, uint i)
 
  
 template<class X>
-std::ostream& 
-operator<<(std::ostream& os, const DenseDifferential<X>& x) {
+OutputStream& 
+operator<<(OutputStream& os, const DenseDifferential<X>& x) {
     //  return os << "DenseDifferential<X>( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
     //os << "DenseDifferential<X>(";
     os << "D("<<x.argument_size()<<","<<x.degree()<<")";

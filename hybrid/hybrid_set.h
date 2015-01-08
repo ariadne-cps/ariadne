@@ -122,7 +122,7 @@ class HybridConstraintSet
     virtual Tribool separated(const HybridBox& bx) const override;
     virtual Tribool covers(const HybridBox& bx) const override;
 
-    virtual std::ostream& write(std::ostream& os) const override;
+    virtual OutputStream& write(OutputStream& os) const override;
   protected:
     virtual RegularSetInterface* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
 };
@@ -165,7 +165,7 @@ class HybridBoundedConstraintSet
     virtual Tribool covers(const HybridBox& bx) const override;
     virtual HybridUpperBoxes bounding_box() const override;
 
-    virtual std::ostream& write(std::ostream& os) const override;
+    virtual OutputStream& write(OutputStream& os) const override;
     virtual void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const override;
   protected:
     virtual BoundedConstraintSet* _euclidean_set(DiscreteLocation loc, RealSpace spc) const override;
@@ -290,7 +290,7 @@ class HybridListSetConstIterator
 
 {
   public:
-    typedef HybridBasicSet<ES> const& reference;
+    typedef HybridBasicSet<ES> const& Reference;
   public:
     HybridListSetConstIterator(const Map<DiscreteLocation,Pair<RealSpace,ListSet<ES> > >& map, bool);
     bool equal(const HybridListSetConstIterator<ES>&) const;
@@ -299,8 +299,8 @@ class HybridListSetConstIterator
   private:
     void _increment_loc();
   private:
-    typedef typename Map< DiscreteLocation, Pair<RealSpace,ListSet<ES> > >::const_iterator LocationsIterator;
-    typedef typename ListSet<ES>::const_iterator BasicSetIterator;
+    typedef typename Map< DiscreteLocation, Pair<RealSpace,ListSet<ES> > >::ConstIterator LocationsIterator;
+    typedef typename ListSet<ES>::ConstIterator BasicSetIterator;
     LocationsIterator _loc_begin;
     LocationsIterator _loc_end;
     LocationsIterator _loc_iter;
@@ -361,7 +361,7 @@ HybridListSetConstIterator<ES>::_increment_loc()
 
 
 template<class ES> class HybridListSet;
-template<class ES> std::ostream& operator<<(std::ostream& os, const HybridListSet<ES>& hls);
+template<class ES> OutputStream& operator<<(OutputStream& os, const HybridListSet<ES>& hls);
 
 //! \ingroup HybridSetSubModule
 //! A set comprising a %ListSet in each location.
@@ -370,27 +370,27 @@ class HybridListSet
 {
     Map<DiscreteLocation, Pair< RealSpace, ListSet<ES> > > _locations;
   public:
-    typedef typename Map<DiscreteLocation,Pair< RealSpace, ListSet<ES> > >::const_iterator locations_const_iterator;
-    typedef typename Map<DiscreteLocation,Pair< RealSpace, ListSet<ES> > >::iterator locations_iterator;
-    typedef HybridListSetConstIterator<ES> const_iterator;
+    typedef typename Map<DiscreteLocation,Pair< RealSpace, ListSet<ES> > >::ConstIterator LocationsConstIterator;
+    typedef typename Map<DiscreteLocation,Pair< RealSpace, ListSet<ES> > >::Iterator LocationsIterator;
+    typedef HybridListSetConstIterator<ES> ConstIterator;
 
     HybridListSet() { }
     HybridListSet(const HybridBasicSet<ES>& hes) { this->adjoin(hes); }
 
-    const_iterator begin() const {
-        return const_iterator(this->_locations,false); }
-    const_iterator end() const {
-        return const_iterator(this->_locations,true); }
+    ConstIterator begin() const {
+        return ConstIterator(this->_locations,false); }
+    ConstIterator end() const {
+        return ConstIterator(this->_locations,true); }
 
-    locations_const_iterator locations_begin() const {
+    LocationsConstIterator locations_begin() const {
         return this->_locations.begin(); }
-    locations_const_iterator locations_end() const {
+    LocationsConstIterator locations_end() const {
         return this->_locations.end(); }
 
     //! \brief Returns the number of basic hybrid sets forming this object.
-    size_t size() const {
-        size_t s = 0;
-        for(locations_const_iterator _loc_iter=this->locations_begin();
+    SizeType size() const {
+        SizeType s = 0;
+        for(LocationsConstIterator _loc_iter=this->locations_begin();
             _loc_iter!=this->locations_end(); ++_loc_iter) {
             s += _loc_iter->second.second.size();
         }
@@ -409,7 +409,7 @@ class HybridListSet
     void insert(const DiscreteLocation& loc, const RealSpace& spc) {
         this->_locations.insert(loc, make_pair(spc,ListSet<ES>())); }
     void adjoin(const DiscreteLocation& loc, const RealSpace& spc, const ES& es) {
-        locations_iterator loc_iter=this->_locations.find(loc);
+        LocationsIterator loc_iter=this->_locations.find(loc);
         if(loc_iter!=this->_locations.end()) {
             ARIADNE_ASSERT_MSG(loc_iter->second.first==spc,
                                "Space "<<loc_iter->second.first<<" of location "<<loc_iter->first<<" differs from "<<spc); }
@@ -421,19 +421,19 @@ class HybridListSet
     void adjoin(const HybridBasicSet<ES>& hes) {
         this->adjoin(hes.location(),hes.space(),hes.continuous_set()); }
     void adjoin(const HybridListSet<ES>& hls) {
-        for(locations_const_iterator _loc_iter=hls.locations_begin();
+        for(LocationsConstIterator _loc_iter=hls.locations_begin();
             _loc_iter!=hls.locations_end(); ++_loc_iter) {
             (*this)[_loc_iter->first].adjoin(_loc_iter->second); } }
 
     HybridListSet<UpperBox> bounding_boxes() const {
         HybridListSet<UpperBox> result;
-        for(locations_const_iterator _loc_iter=this->locations_begin();
+        for(LocationsConstIterator _loc_iter=this->locations_begin();
             _loc_iter!=this->locations_end(); ++_loc_iter) {
             result[_loc_iter->first]=_loc_iter->second.bounding_boxes(); }
         return result; }
 
     friend
-    std::ostream& operator<<(std::ostream& os, const HybridListSet<ES>& hls) {
+    OutputStream& operator<<(OutputStream& os, const HybridListSet<ES>& hls) {
         return os << hls._locations; }
 };
 
@@ -448,8 +448,8 @@ class ListSet< HybridBasicSet<ES> >
 
 
 template<class ES>
-std::ostream&
-operator<<(std::ostream& os,
+OutputStream&
+operator<<(OutputStream& os,
            const ListSet< HybridBasicSet<ES> >& ls) {
     const std::map< DiscreteLocation, ListSet<ES> >& hls=ls;
     return os << "HybridListSet" << hls;
@@ -477,10 +477,10 @@ class HybridGridTreeSet;
 
 template<class HDS1, class HDS2>
 void adjoin_denotable_set(HDS1& hds1, const HDS2 hds2) {
-    for(typename HDS2::locations_const_iterator loc2_iter=
+    for(typename HDS2::LocationsConstIterator loc2_iter=
             hds2.locations_begin(); loc2_iter!=hds2.locations_end(); ++loc2_iter)
         {
-            typename HDS1::locations_iterator loc1_iter=hds1.find(loc2_iter->first);
+            typename HDS1::LocationsIterator loc1_iter=hds1.find(loc2_iter->first);
             if(loc1_iter==hds1.locations_end()) {
                 hds1.insert(make_pair(loc2_iter->first,
                                       typename HDS2::value_type::second_type(loc2_iter->second)));
@@ -501,7 +501,7 @@ class HybridSetConstIterator
 
 {
   public:
-    typedef HBS const& reference;
+    typedef HBS const& Reference;
   public:
     HybridSetConstIterator(const std::map<DiscreteLocation,DS>&, const HybridSpace& hspc, bool);
     bool equal(const HybridSetConstIterator<DS,HBS>&) const;
@@ -513,7 +513,7 @@ class HybridSetConstIterator
     typename std::map< DiscreteLocation,DS>::const_iterator _loc_begin;
     typename std::map< DiscreteLocation,DS>::const_iterator _loc_end;
     typename std::map< DiscreteLocation,DS>::const_iterator _loc_iter;
-    typename DS::const_iterator _bs_iter;
+    typename DS::ConstIterator _bs_iter;
     HybridSpace hspc;
     mutable HBS hybrid_set;
 };
@@ -529,22 +529,22 @@ class HybridGridTreeSet
     HybridGrid _hgrid;
     Map<DiscreteLocation,GridTreeSet> _map;
   public:
-    typedef Map<DiscreteLocation,GridTreeSet>::iterator locations_iterator;
-    typedef Map<DiscreteLocation,GridTreeSet>::const_iterator locations_const_iterator;
-    typedef HybridSetConstIterator<GridTreeSet,HybridGridCell> const_iterator;
+    typedef Map<DiscreteLocation,GridTreeSet>::Iterator LocationsIterator;
+    typedef Map<DiscreteLocation,GridTreeSet>::ConstIterator LocationsConstIterator;
+    typedef HybridSetConstIterator<GridTreeSet,HybridGridCell> ConstIterator;
   public:
     //!
-    locations_iterator locations_begin() { return this->_map.begin(); }
+    LocationsIterator locations_begin() { return this->_map.begin(); }
     //!
-    locations_iterator locations_end() { return this->_map.end(); }
+    LocationsIterator locations_end() { return this->_map.end(); }
     //!
-    locations_const_iterator locations_begin() const { return this->_map.begin(); }
+    LocationsConstIterator locations_begin() const { return this->_map.begin(); }
     //!
-    locations_const_iterator locations_end() const { return this->_map.end(); }
+    LocationsConstIterator locations_end() const { return this->_map.end(); }
     //!
-    const_iterator begin() const { return const_iterator(this->_map,this->_hgrid.space(),false); }
+    ConstIterator begin() const { return ConstIterator(this->_map,this->_hgrid.space(),false); }
     //!
-    const_iterator end() const { return const_iterator(this->_map,this->_hgrid.space(),true); }
+    ConstIterator end() const { return ConstIterator(this->_map,this->_hgrid.space(),true); }
   public:
     //! Construct from a grid.
     HybridGridTreeSet(const HybridGrid& hgrid) : _hgrid(hgrid), _map() { }
@@ -582,32 +582,32 @@ class HybridGridTreeSet
 
     //!
     void adjoin(const ListSet<HybridGridCell>& hgcls) {
-        for(ListSet<HybridGridCell>::const_iterator iter=hgcls.begin(); iter!=hgcls.end(); ++iter) {
+        for(ListSet<HybridGridCell>::ConstIterator iter=hgcls.begin(); iter!=hgcls.end(); ++iter) {
             this ->adjoin(*iter); } }
 
     //!
     void adjoin(const HybridGridTreeSet& hgts) {
-        for(HybridGridTreeSet::locations_const_iterator _loc_iter=hgts.locations_begin(); _loc_iter!=hgts.locations_end(); ++_loc_iter) {
+        for(HybridGridTreeSet::LocationsConstIterator _loc_iter=hgts.locations_begin(); _loc_iter!=hgts.locations_end(); ++_loc_iter) {
             this->_provide_location(_loc_iter->first).adjoin(_loc_iter->second); } }
 
     //!
     void remove(const HybridGridTreeSet& hgts) {
-        for(HybridGridTreeSet::locations_const_iterator _loc_iter=hgts.locations_begin(); _loc_iter!=hgts.locations_end(); ++_loc_iter) {
+        for(HybridGridTreeSet::LocationsConstIterator _loc_iter=hgts.locations_begin(); _loc_iter!=hgts.locations_end(); ++_loc_iter) {
             this->_provide_location(_loc_iter->first).remove(_loc_iter->second); } }
 
     //!
     void restrict(const HybridGridTreeSet& hgts) {
-        for(HybridGridTreeSet::locations_const_iterator _loc_iter=hgts.locations_begin(); _loc_iter!=hgts.locations_end(); ++_loc_iter) {
+        for(HybridGridTreeSet::LocationsConstIterator _loc_iter=hgts.locations_begin(); _loc_iter!=hgts.locations_end(); ++_loc_iter) {
             this->_provide_location(_loc_iter->first).restrict(_loc_iter->second); } }
 
     //!
     void restrict_to_height(uint h) {
-        for(locations_iterator _loc_iter=locations_begin(); _loc_iter!=locations_end(); ++_loc_iter) {
+        for(LocationsIterator _loc_iter=locations_begin(); _loc_iter!=locations_end(); ++_loc_iter) {
             _loc_iter->second.restrict_to_height(h); } }
 
     //!
     void adjoin_inner_approximation(const HybridBoxes& hbxs, const int depth) {
-        for(HybridBoxes::const_iterator _loc_iter=hbxs.begin();
+        for(HybridBoxes::ConstIterator _loc_iter=hbxs.begin();
                 _loc_iter!=hbxs.end(); ++_loc_iter) {
             DiscreteLocation const& loc=_loc_iter->first;
             VariablesBox const& vbx=_loc_iter->second;
@@ -617,7 +617,7 @@ class HybridGridTreeSet
     //!
     void adjoin_lower_approximation(const HybridOvertSetInterface& hs, const int height, const int depth) {
         Set<DiscreteLocation> hlocs=dynamic_cast<const HybridBoundedSetInterface&>(hs).locations();
-        for(Set<DiscreteLocation>::const_iterator _loc_iter=hlocs.begin();
+        for(Set<DiscreteLocation>::ConstIterator _loc_iter=hlocs.begin();
                 _loc_iter!=hlocs.end(); ++_loc_iter) {
             DiscreteLocation loc=*_loc_iter;
             RealSpace spc=this->space(loc);
@@ -626,7 +626,7 @@ class HybridGridTreeSet
     //!
     void adjoin_outer_approximation(const HybridCompactSetInterface& hs, const int depth) {
         Set<DiscreteLocation> hlocs=hs.locations();
-        for(Set<DiscreteLocation>::const_iterator _loc_iter=hlocs.begin();
+        for(Set<DiscreteLocation>::ConstIterator _loc_iter=hlocs.begin();
                 _loc_iter!=hlocs.end(); ++_loc_iter) {
             DiscreteLocation loc=*_loc_iter;
             RealSpace spc=this->space(loc);
@@ -634,7 +634,7 @@ class HybridGridTreeSet
 
     //!
     void adjoin_outer_approximation(const HybridBoxes& hbxs, const int depth) {
-        for(HybridBoxes::const_iterator _loc_iter=hbxs.begin();
+        for(HybridBoxes::ConstIterator _loc_iter=hbxs.begin();
                 _loc_iter!=hbxs.end(); ++_loc_iter) {
             DiscreteLocation const& loc=_loc_iter->first;
             VariablesBox const& vbx=_loc_iter->second;
@@ -658,15 +658,15 @@ class HybridGridTreeSet
 
     //!
     bool empty() const {
-        for(locations_const_iterator _loc_iter=this->locations_begin();
+        for(LocationsConstIterator _loc_iter=this->locations_begin();
             _loc_iter!=this->locations_end(); ++_loc_iter) {
             if(!_loc_iter->second.empty()) { return false; } }
         return true; }
 
     //!
-    size_t size() const {
-        size_t result=0;
-        for(locations_const_iterator _loc_iter=this->locations_begin();
+    SizeType size() const {
+        SizeType result=0;
+        for(LocationsConstIterator _loc_iter=this->locations_begin();
             _loc_iter!=this->locations_end(); ++_loc_iter) {
             result+=_loc_iter->second.size(); }
         return result; }
@@ -674,20 +674,20 @@ class HybridGridTreeSet
     //!
     HybridListSet<ExactBox> boxes() const {
         HybridListSet<ExactBox> result;
-        for(const_iterator iter=this->begin();
+        for(ConstIterator iter=this->begin();
             iter!=this->end(); ++iter) {
             result.adjoin(iter->location(),iter->continuous_set().box()); }
         return result; }
 
     //!
     void mince(int depth) {
-        for(locations_iterator _loc_iter=this->locations_begin();
+        for(LocationsIterator _loc_iter=this->locations_begin();
             _loc_iter!=this->locations_end(); ++_loc_iter) {
             _loc_iter->second.mince(depth); } }
 
     //!
     void recombine() {
-        for(locations_iterator _loc_iter=this->locations_begin();
+        for(LocationsIterator _loc_iter=this->locations_begin();
             _loc_iter!=this->locations_end(); ++_loc_iter) {
             _loc_iter->second.recombine(); } }
   public:
@@ -701,25 +701,25 @@ class HybridGridTreeSet
 
     //!
     Tribool separated(const HybridBox& hbx) const {
-        locations_const_iterator _loc_iter = this->_map.find( hbx.location() );
+        LocationsConstIterator _loc_iter = this->_map.find( hbx.location() );
         return _loc_iter != this->locations_end() || _loc_iter->second.separated( hbx.continuous_set() );
     }
 
     //!
     Tribool overlaps(const HybridBox& hbx) const {
-        locations_const_iterator _loc_iter = this->_map.find( hbx.location() );
+        LocationsConstIterator _loc_iter = this->_map.find( hbx.location() );
         return _loc_iter != this->locations_end() && _loc_iter->second.overlaps( hbx.continuous_set() );
     }
 
     //!
     Tribool covers(const HybridBox& hbx) const {
-        locations_const_iterator _loc_iter=this->_map.find(hbx.location());
+        LocationsConstIterator _loc_iter=this->_map.find(hbx.location());
         return _loc_iter!=this->locations_end() && _loc_iter->second.covers( hbx.continuous_set() );
     }
 
     //!
     Tribool inside(const HybridBoxes& hbx) const  {
-        for( locations_const_iterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
+        for( LocationsConstIterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
             if( !_loc_iter->second.empty() ) {
                 DiscreteLocation const& loc = _loc_iter->first;
                 RealSpace spc=this->space(loc);
@@ -732,7 +732,7 @@ class HybridGridTreeSet
     //!
     HybridUpperBoxes bounding_box() const {
         HybridBoxes result;
-        for( locations_const_iterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
+        for( LocationsConstIterator _loc_iter = this->locations_begin(); _loc_iter != this->locations_end(); ++_loc_iter ) {
             if( !_loc_iter->second.empty() ) {
                 DiscreteLocation const& loc = _loc_iter->first;
                 RealSpace const& spc=this->space(loc);
@@ -743,7 +743,7 @@ class HybridGridTreeSet
     }
 
     //!
-    std::ostream& write(std::ostream& os) const {
+    OutputStream& write(OutputStream& os) const {
         return os << this->_map;
     }
 
@@ -751,8 +751,8 @@ class HybridGridTreeSet
     void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d&v) const;
 
     //!
-    friend inline std::ostream&
-    operator<<(std::ostream& os, const HybridGridTreeSet& hgts) {
+    friend inline OutputStream&
+    operator<<(OutputStream& os, const HybridGridTreeSet& hgts) {
         return os << "HybridGridTreeSet(" << hgts._map << ")"; }
 
   private:

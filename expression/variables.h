@@ -65,7 +65,7 @@ class Identifier : public String
     Identifier() : String() { }
     Identifier(const char* cstr) : String(cstr) { }
     //! \brief Construct an identifier from a standard string.
-    Identifier(const std::string& str) : String(str) { }
+    Identifier(const StringType& str) : String(str) { }
 };
 
 class UntypedVariable;
@@ -137,9 +137,9 @@ class UntypedVariable {
     bool operator!=(const UntypedVariable& other) const { return !(*this==other); }
     bool operator<(const UntypedVariable& other) const {
         return this->name()<other.name() || (this->name()==other.name() && this->_type < other._type); }
-    virtual std::ostream& write(std::ostream&) const;
+    virtual OutputStream& write(OutputStream&) const;
   public:
-    static std::string name(const VariableType& tp) {
+    static StringType name(const VariableType& tp) {
         switch(tp) {
             case type_bool: return "Bool";
             case type_tribool: return "Tribool";
@@ -166,7 +166,7 @@ template<> inline VariableType variable_type<String>() { return type_string; }
 template<> inline VariableType variable_type<Integer>() { return type_integer; }
 template<> inline VariableType variable_type<Real>() { return type_real; }
 
-inline std::ostream& UntypedVariable::write(std::ostream& os) const {
+inline OutputStream& UntypedVariable::write(OutputStream& os) const {
     switch(this->_category) {
         case simple: os << this->name(); break;
         case dotted: os << "dot("<<this->name()<<")"; break;
@@ -176,7 +176,7 @@ inline std::ostream& UntypedVariable::write(std::ostream& os) const {
     return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const UntypedVariable& var) {
+inline OutputStream& operator<<(OutputStream& os, const UntypedVariable& var) {
     return var.write(os); }
 
 

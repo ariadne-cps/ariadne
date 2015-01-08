@@ -487,8 +487,8 @@ void test_grid_paving_const_iterator(){
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_tmp );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Test how the constant Cursor can be retrieved from the Constant iterator");
-    GridTreeSubset::const_iterator it = theGridSubPavingLarge.begin();
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test how the constant Cursor can be retrieved from the Constant Iterator");
+    GridTreeSubset::ConstIterator it = theGridSubPavingLarge.begin();
     const GridTreeCursor theGPCursor = it.cursor();
     ARIADNE_TEST_EQUAL(theGPCursor.is_leaf(), true);
     ARIADNE_TEST_EQUAL(theGPCursor.is_root(), false);

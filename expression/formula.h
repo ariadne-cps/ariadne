@@ -331,7 +331,7 @@ template<class X> Formula<X> derivative(const Formula<X>& f, uint j)
 }
 
 //! \brief Write to an output stream
-template<class X> OutputStream& operator<<(std::ostream& os, const Formula<X>& f) {
+template<class X> OutputStream& operator<<(OutputStream& os, const Formula<X>& f) {
     switch(f.op()) {
         //case CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
         case CNST:

@@ -152,7 +152,7 @@ class MapEvolverConfiguration : public ConfigurationInterface
 
   public:
 
-    virtual std::ostream& write(std::ostream& os) const;
+    virtual OutputStream& write(OutputStream& os) const;
 
 };
 

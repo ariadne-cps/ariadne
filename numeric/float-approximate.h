@@ -118,9 +118,9 @@ class ApproximateFloat {
 };
 
 
-inline std::ostream& operator<<(std::ostream& os, const ApproximateFloat& x) {
+inline OutputStream& operator<<(OutputStream& os, const ApproximateFloat& x) {
     return os << std::showpoint << std::setprecision(ApproximateFloat::output_precision) << x.a; }
-inline std::istream& operator>>(std::istream& is, ApproximateFloat& x) {
+inline InputStream& operator>>(InputStream& is, ApproximateFloat& x) {
     Float a; is >> a; x=ApproximateFloat(a); return is; }
 
 template<class R, class A> inline R integer_cast(const A& a);

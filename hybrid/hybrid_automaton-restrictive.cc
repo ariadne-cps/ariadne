@@ -202,8 +202,8 @@ bool operator==(const DiscreteLocation& q1, const DiscreteLocation& q2) {
     bool identical=true;
     const Map<Identifier,String>& q1sm=q1.values();
     const Map<Identifier,String>& q2sm=q2.values();
-    Map<Identifier,String>::const_iterator q1iter=q1sm.begin();
-    Map<Identifier,String>::const_iterator q2iter=q2sm.begin();
+    Map<Identifier,String>::ConstIterator q1iter=q1sm.begin();
+    Map<Identifier,String>::ConstIterator q2iter=q2sm.begin();
 
     while(q1iter!=q1sm.end() && q2iter!=q2sm.end()) {
         if(q1iter->first==q2iter->first) {
@@ -228,8 +228,8 @@ bool operator!=(const DiscreteLocation& q1, const DiscreteLocation& q2) {
 bool operator<(const DiscreteLocation& q1, const DiscreteLocation& q2) {
     const Map<Identifier,String>& q1sm=q1.values();
     const Map<Identifier,String>& q2sm=q2.values();
-    Map<Identifier,String>::const_iterator q1iter=q1sm.begin();
-    Map<Identifier,String>::const_iterator q2iter=q2sm.begin();
+    Map<Identifier,String>::ConstIterator q1iter=q1sm.begin();
+    Map<Identifier,String>::ConstIterator q2iter=q2sm.begin();
 
     while(q1iter!=q1sm.end() && q2iter!=q2sm.end()) {
         if(q1iter->first!=q2iter->first) {
@@ -246,7 +246,7 @@ bool operator<(const DiscreteLocation& q1, const DiscreteLocation& q2) {
 
 Set<Identifier> names(const Set<RealVariable>& v) {
     Set<Identifier> r;
-    for(Set<RealVariable>::const_iterator viter=v.begin(); viter!=v.end(); ++viter) {
+    for(Set<RealVariable>::ConstIterator viter=v.begin(); viter!=v.end(); ++viter) {
         r.insert(viter->name());
     }
     return r;
@@ -255,7 +255,7 @@ Set<Identifier> names(const Set<RealVariable>& v) {
 // Construct the set of events such that for each variable v in vars , there is a rule saying that v is nonjumping
 EventSet ignorable(const List< Tuple<EventSet,Set<Identifier> > >& rules, const Set<Identifier>& vars) {
     EventSet result;
-    for(Set<Identifier>::const_iterator var_iter=vars.begin(); var_iter!=vars.end(); ++var_iter) {
+    for(Set<Identifier>::ConstIterator var_iter=vars.begin(); var_iter!=vars.end(); ++var_iter) {
         EventSet variable_does_not_jump;
         for(uint i=0; i!=rules.size(); ++i) {
             if(rules[i].second.contains(*var_iter)) {
@@ -276,7 +276,7 @@ EventSet ignorable(const List< Tuple<DiscretePredicate, EventSet, Set<Identifier
 
 List<PrimedRealAssignment> primed_real_assignments(const Set<Identifier>& nonjumping) {
     List<PrimedRealAssignment> result;
-    for(Set<Identifier>::const_iterator var_iter=nonjumping.begin(); var_iter!=nonjumping.end(); ++var_iter) {
+    for(Set<Identifier>::ConstIterator var_iter=nonjumping.begin(); var_iter!=nonjumping.end(); ++var_iter) {
         RealVariable var(*var_iter);
         result.append(next(var)=var);
     }
@@ -353,7 +353,7 @@ RestrictiveDiscreteMode HybridSystem::compute_mode(const DiscreteLocation& locat
     Set<DiscreteEvent> transition_events = nonjumping_events._underlying_set();
 
     // Compute the discrete transitions
-    for(Set<DiscreteEvent>::const_iterator event_iter=transition_events.begin(); event_iter!=transition_events.end(); ++event_iter) {
+    for(Set<DiscreteEvent>::ConstIterator event_iter=transition_events.begin(); event_iter!=transition_events.end(); ++event_iter) {
         DiscreteEvent event=*event_iter;
 
         // Compute the targets
@@ -361,7 +361,7 @@ RestrictiveDiscreteMode HybridSystem::compute_mode(const DiscreteLocation& locat
         for(uint i=0; i!=this->_nonjumping_discrete_variables.size(); ++i) {
             if(this->_nonjumping_discrete_variables[i].first==location && this->_nonjumping_discrete_variables[i].second==event) {
                 Set<Identifier> const& nonjumping_variables=this->_nonjumping_discrete_variables[i].third;
-                for(Set<Identifier>::const_iterator var_iter=nonjumping_variables.begin(); var_iter!=nonjumping_variables.end(); ++var_iter) {
+                for(Set<Identifier>::ConstIterator var_iter=nonjumping_variables.begin(); var_iter!=nonjumping_variables.end(); ++var_iter) {
                     target[StringVariable(*var_iter)]=location[StringVariable(*var_iter)];
                 }
             }
@@ -369,7 +369,7 @@ RestrictiveDiscreteMode HybridSystem::compute_mode(const DiscreteLocation& locat
         for(uint i=0; i!=this->_discrete_updates.size(); ++i) {
             if(this->_discrete_updates[i].first==location && this->_discrete_updates[i].second==event) {
                 List<PrimedStringAssignment> const& updates=this->_discrete_updates[i].third;
-                for(List<PrimedStringAssignment>::const_iterator asn_iter=updates.begin(); asn_iter!=updates.end(); ++asn_iter) {
+                for(List<PrimedStringAssignment>::ConstIterator asn_iter=updates.begin(); asn_iter!=updates.end(); ++asn_iter) {
                     const StringVariable lhs_var=asn_iter->lhs.base();
                     target[asn_iter->lhs.base()]=evaluate(asn_iter->rhs,location);
                 }
@@ -419,7 +419,7 @@ HybridSystem* HybridSystem::clone() const {
 }
 
 
-std::ostream& HybridSystem::write(std::ostream& os) const {
+OutputStream& HybridSystem::write(OutputStream& os) const {
     return os << "HybridSystem"
               << "(\n  updates=" << _discrete_updates
               << ",\n  auxiliary=" << _assignments
@@ -431,7 +431,7 @@ std::ostream& HybridSystem::write(std::ostream& os) const {
 }
 
 
-std::ostream& operator<<(std::ostream& os, const RestrictiveDiscreteMode& mode) {
+OutputStream& operator<<(OutputStream& os, const RestrictiveDiscreteMode& mode) {
     return os << "  DiscreteMode"
               << "(\n    location=" << mode.location
               << ",\n    auxiliary=" << mode.auxiliary
@@ -451,7 +451,7 @@ DiscretePredicate make_predicate(const DiscreteLocation& q) {
     if(q.begin()==q.end()) {
         return p;
     }
-    DiscreteLocation::const_iterator iter = q.begin();
+    DiscreteLocation::ConstIterator iter = q.begin();
     p=(StringVariable(iter->first)==iter->second);
     ++iter;
     for( ; iter!=q.end(); ++iter) {
@@ -462,7 +462,7 @@ DiscretePredicate make_predicate(const DiscreteLocation& q) {
 
 List<PrimedStringAssignment> make_update(const DiscreteLocation& q) {
     List<PrimedStringAssignment> u;
-    for(DiscreteLocation::const_iterator iter=q.begin(); iter!=q.end(); ++iter) {
+    for(DiscreteLocation::ConstIterator iter=q.begin(); iter!=q.end(); ++iter) {
         u.append(next(StringVariable(iter->first))=iter->second);
     }
     return u;
@@ -541,7 +541,7 @@ DiscreteLocation evaluate(const DiscreteUpdate& update, const DiscreteLocation& 
 
 Map<DiscreteEvent,DiscreteLocation> evaluate(const Map<DiscreteEvent,DiscreteUpdate>& updates, const DiscreteLocation& location) {
     Map<DiscreteEvent,DiscreteLocation> result;
-    for(Map<DiscreteEvent,DiscreteUpdate>::const_iterator iter=updates.begin(); iter!=updates.end(); ++iter) {
+    for(Map<DiscreteEvent,DiscreteUpdate>::ConstIterator iter=updates.begin(); iter!=updates.end(); ++iter) {
         result.insert(iter->first,evaluate(iter->second,location));
     }
     return result;
@@ -592,8 +592,8 @@ DiscreteMode(const DiscreteLocation& location,
 {
 }
 
-std::ostream&
-operator<<(std::ostream& os, const DiscreteMode& mode)
+OutputStream&
+operator<<(OutputStream& os, const DiscreteMode& mode)
 {
     os << "DiscreteMode( "
        << "location=" << mode._location;
@@ -631,8 +631,8 @@ DiscreteTransition(const DiscreteEvent& event,
 {
 }
 
-std::ostream&
-operator<<(std::ostream& os, const DiscreteTransition& transition)
+OutputStream&
+operator<<(OutputStream& os, const DiscreteTransition& transition)
 {
     return os << "DiscreteTransition( "
               << "event=" << transition._event << ", "
@@ -660,7 +660,7 @@ CompositionalHybridAutomaton::
 CompositionalHybridAutomaton(const List<StringVariable>& discrete_variables, const List<DiscreteEvent>& discrete_event_list)
 {
     Set<DiscreteEvent> discrete_events(discrete_event_list);
-    for(List<StringVariable>::const_iterator variable_iter=discrete_variables.begin();
+    for(List<StringVariable>::ConstIterator variable_iter=discrete_variables.begin();
         variable_iter!=discrete_variables.end(); ++variable_iter)
     {
         this->_jumping_events.insert(*variable_iter,discrete_events);
@@ -745,8 +745,8 @@ CompositionalHybridAutomaton::invariant_events(DiscreteLocation q) const
 
 
 
-std::ostream&
-CompositionalHybridAutomaton::write(std::ostream& os) const
+OutputStream&
+CompositionalHybridAutomaton::write(OutputStream& os) const
 {
     os << "\nHybridAutomaton( \n";
     os << "  discrete_transitions="<<this->_discrete_updates<<"\n";
@@ -822,7 +822,7 @@ class CompositeHybridSpace
     virtual CompositeHybridSpace* clone() const { return new CompositeHybridSpace(*this); }
     virtual bool has_location(const DiscreteLocation& q) const { return this->_system_ptr->has_mode(q); }
     virtual RealSpace operator[](const DiscreteLocation& q) const { return this->_system_ptr->continuous_state_space(q); }
-    virtual std::ostream& write(std::ostream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
+    virtual OutputStream& write(OutputStream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
   private:
     const CompositeHybridAutomaton* _system_ptr;
 };
@@ -1064,13 +1064,13 @@ CompositionalHybridAutomaton::_order_algebraic_assignments(const List<RealAssign
     while(!unresolved_dependencies.empty()) {
         // Check for an which has been resolved and add to list of ok equations
         bool found=false;
-        for(Map< RealVariable, Set<RealVariable> >::iterator iter=unresolved_dependencies.begin();
+        for(Map< RealVariable, Set<RealVariable> >::Iterator iter=unresolved_dependencies.begin();
             iter!=unresolved_dependencies.end(); ++iter)
         {
             if(iter->second.empty()) {
                 RealVariable variable=iter->first;
                 result.append(assignments[assignment_table[variable]]);
-                for(Map< RealVariable, Set<RealVariable> >::iterator rem_iter=unresolved_dependencies.begin();
+                for(Map< RealVariable, Set<RealVariable> >::Iterator rem_iter=unresolved_dependencies.begin();
                         rem_iter!=unresolved_dependencies.end(); ++rem_iter) {
                     rem_iter->second.erase(variable);
                 }
@@ -1123,7 +1123,7 @@ CompositionalHybridAutomaton::check_overspecification(DiscreteLocation location)
 
     // Check overspecification in reset
     Map<DiscreteEvent,DiscreteLocation> targets = this->_compute_targets(location);
-    for(Map<DiscreteEvent,DiscreteLocation>::const_iterator target_iter=targets.begin(); target_iter!=targets.end(); ++target_iter) {
+    for(Map<DiscreteEvent,DiscreteLocation>::ConstIterator target_iter=targets.begin(); target_iter!=targets.end(); ++target_iter) {
 
         // Compute reset variables and target auxiliary variables
         const DiscreteEvent& event = target_iter->first;
@@ -1177,7 +1177,7 @@ CompositionalHybridAutomaton::check_mode(DiscreteLocation location) const {
     List<RealAssignment> ordered_equations=this->_order_algebraic_assignments(equations);
 
     Map<DiscreteEvent,ContinuousPredicate> const& invariants=this->mode(location)._invariant_predicates;
-    for(Map<DiscreteEvent,ContinuousPredicate>::const_iterator invariant_iter=invariants.begin();
+    for(Map<DiscreteEvent,ContinuousPredicate>::ConstIterator invariant_iter=invariants.begin();
         invariant_iter!=invariants.end(); ++invariant_iter)
     {
         DiscreteEvent action=invariant_iter->first;
@@ -1190,7 +1190,7 @@ CompositionalHybridAutomaton::check_mode(DiscreteLocation location) const {
     }
 
     Set<DiscreteEvent> events=this->events(location);
-    for(Set<DiscreteEvent>::const_iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
+    for(Set<DiscreteEvent>::ConstIterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
 
         // Get transition information
         DiscreteEvent event=*event_iter;
@@ -1248,7 +1248,7 @@ void
 CompositionalHybridAutomaton::check_reachable_modes(const Set<DiscreteLocation>& initial_locations) const
 {
     Set<DiscreteLocation> reachable_locations=this->reachable_locations(initial_locations);
-    for(Set<DiscreteLocation>::const_iterator iter=reachable_locations.begin(); iter!=reachable_locations.end(); ++iter) {
+    for(Set<DiscreteLocation>::ConstIterator iter=reachable_locations.begin(); iter!=reachable_locations.end(); ++iter) {
         this->check_mode(*iter);
     }
 }
@@ -1273,13 +1273,13 @@ CompositionalHybridAutomaton::reachable_locations(const Set<DiscreteLocation>& i
 
     while(!working.empty()) {
         ++step;
-        for(Set<DiscreteLocation>::const_iterator source_iter=working.begin(); source_iter!=working.end(); ++source_iter) {
+        for(Set<DiscreteLocation>::ConstIterator source_iter=working.begin(); source_iter!=working.end(); ++source_iter) {
             DiscreteLocation location=*source_iter;
             ARIADNE_LOG(5,"  mode: "<<location<<":\n");
 
             Set<DiscreteEvent> events=automaton.guard_events(location);
             ARIADNE_LOG(5,"    events: "<<events<<"\n");
-            for(Set<DiscreteEvent>::const_iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
+            for(Set<DiscreteEvent>::ConstIterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
                 DiscreteEvent event=*event_iter;
                 ARIADNE_LOG(5,"      transition: "<<event<<" -> ");
                 DiscreteLocation target=automaton.target(location,event);
@@ -1424,8 +1424,8 @@ new_transition(const DiscretePredicate& sources,
 
 
 
-std::ostream&
-CompositeHybridAutomaton::write(std::ostream& os) const
+OutputStream&
+CompositeHybridAutomaton::write(OutputStream& os) const
 {
     return os << "CompositeHybridAutomaton(\n" << this->_components << "\n)\n";
 }

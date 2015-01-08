@@ -74,10 +74,10 @@ class CurveInterface
     virtual TangentVectorType tangent(const ParameterType& s) const = 0;
 
     /*! \brief Write to an output stream. */
-    virtual std::ostream& write(std::ostream& os) const = 0;
+    virtual OutputStream& write(OutputStream& os) const = 0;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const CurveInterface& c) {
+inline OutputStream& operator<<(OutputStream& os, const CurveInterface& c) {
     return c.write(os); }
 
 
@@ -111,7 +111,7 @@ class Curve
     virtual TangentVectorType tangent(const ParameterType& s) const;
 
     /*! \brief Write to an output stream. */
-    virtual std::ostream& write(std::ostream& os) const;
+    virtual OutputStream& write(OutputStream& os) const;
   private:
     EffectiveVectorFunction _function;
 };
@@ -127,7 +127,7 @@ class InterpolatedCurve
     typedef CurveInterface::PointType PointType;
     typedef CurveInterface::TangentVectorType TangentVectorType;
   public:
-    typedef std::map< ParameterType, PointType >::const_iterator const_iterator;
+    typedef std::map< ParameterType, PointType >::const_iterator ConstIterator;
   public:
     /*! \brief Create an empty curve. */
     InterpolatedCurve() : _points() { }
@@ -147,13 +147,13 @@ class InterpolatedCurve
     void insert(const RawFloat& s, const Vector<RawFloat>& pt);
 
     /*! \brief The number of segments in the curve. */
-    size_t size() const { return this->_points.size(); }
+    SizeType size() const { return this->_points.size(); }
     /*! \brief The dimension of the Euclidean space the line segment lies in. */
     uint dimension() const { return this->_points.begin()->second.size(); }
-    /*! \brief An iterator to the first point in the curve. */
-    const_iterator begin() const { return this->_points.begin(); }
-    /*! \brief An iterator to the end point in the curve, NOT the one-past-the-end! */
-    const_iterator end() const { return --this->_points.end(); }
+    /*! \brief An Iterator to the first point in the curve. */
+    ConstIterator begin() const { return this->_points.begin(); }
+    /*! \brief An Iterator to the end point in the curve, NOT the one-past-the-end! */
+    ConstIterator end() const { return --this->_points.end(); }
 
     /*! \brief A dynamically-allocated copy. */
     virtual InterpolatedCurve* clone() const;
@@ -163,16 +163,16 @@ class InterpolatedCurve
     virtual UpperBox bounding_box() const;
 
     /*! \brief Write to an output stream. */
-    virtual std::ostream& write(std::ostream& os) const;
+    virtual OutputStream& write(OutputStream& os) const;
 
   private:
-    friend std::ostream& operator<<(std::ostream&, const InterpolatedCurve&);
+    friend OutputStream& operator<<(OutputStream&, const InterpolatedCurve&);
   private:
     std::map< ParameterType, PointType > _points;
 };
 
 inline
-std::ostream& operator<<(std::ostream& os, const InterpolatedCurve& curve) {
+OutputStream& operator<<(OutputStream& os, const InterpolatedCurve& curve) {
     return os << "InterpolatedCurve( size=" << curve.size() << ", points=" << curve._points << " )";
 }
 

@@ -65,7 +65,7 @@ DrawingMethod DRAWING_METHOD=AFFINE_DRAW;
 DiscretisationMethod DISCRETISATION_METHOD=SUBDIVISION_DISCRETISE;
 unsigned int DRAWING_ACCURACY=1u;
 
-template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; return ss.str(); }
+template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
 
 Matrix<Float> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBox& dom);
@@ -82,7 +82,7 @@ Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const E
     MultiIndex a;
     for(uint i=0; i!=m; ++i) {
         const ValidatedTaylorModel& tm=g.model(i);
-        for(ValidatedTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+        for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
             a=iter->key();
             if(a.degree()>1) {
                 for(uint j=0; j!=n; ++j) {
@@ -116,7 +116,7 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
     for(uint i=0; i!=m; ++i) {
         const UpperIntervalDifferential& d=df[i];
-        for(UpperIntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+        for(UpperIntervalDifferential::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->key();
             if(a.degree()==1) {
                 for(uint j=0; j!=n; ++j) {
@@ -151,7 +151,7 @@ Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
     for(uint i=0; i!=m; ++i) {
         const UpperIntervalDifferential& d=df[i];
-        for(UpperIntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+        for(UpperIntervalDifferential::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->key();
             if(a.degree()==2) {
                 for(uint j=0; j!=n; ++j) {
@@ -320,8 +320,8 @@ ConstraintSet::covers(const ExactBox& bx) const
 }
 
 
-std::ostream&
-ConstraintSet::write(std::ostream& os) const
+OutputStream&
+ConstraintSet::write(OutputStream& os) const
 {
     return os << "ConstraintSet( constraints=" << this->constraints() << " )";
 }
@@ -414,8 +414,8 @@ BoundedConstraintSet::bounding_box() const
 }
 
 
-std::ostream&
-BoundedConstraintSet::write(std::ostream& os) const
+OutputStream&
+BoundedConstraintSet::write(OutputStream& os) const
 {
     return os << "BoundedConstraintSet( domain=" << this->domain() << ", constraints=" << this->constraints() << ")";
 }
@@ -490,7 +490,7 @@ ConstrainedImageSet::affine_approximation() const
 
     Vector<ApproximateFloat> a(this->number_of_parameters());
     ApproximateFloat b,l,u;
-    for(List<EffectiveConstraint>::const_iterator iter=this->_constraints.begin();
+    for(List<EffectiveConstraint>::ConstIterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
         AffineModel<ValidatedNumber> a=affine_model(D,iter->function());
@@ -675,7 +675,7 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
     for(uint i=0; i!=m; ++i) {
         const ExactIntervalDifferential& d=df[i];
-        for(ExactIntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+        for(ExactIntervalDifferential::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->key();
             if(a.degree()==1) {
                 for(uint j=0; j!=n; ++j) {
@@ -710,7 +710,7 @@ Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
     for(uint i=0; i!=m; ++i) {
         const ExactIntervalDifferential& d=df[i];
-        for(ExactIntervalDifferential::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+        for(ExactIntervalDifferential::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->key();
             if(a.degree()==2) {
                 for(uint j=0; j!=n; ++j) {
@@ -790,8 +790,8 @@ ConstrainedImageSet::draw(CanvasInterface& cnvs, const Projection2d& proj) const
 
 
 
-std::ostream&
-ConstrainedImageSet::write(std::ostream& os) const
+OutputStream&
+ConstrainedImageSet::write(OutputStream& os) const
 {
     return os << "ConstrainedImageSet( domain=" << this->_domain
               << ", function=" << this->_function << ", constraints=" << this->_constraints << " )";
@@ -809,7 +809,7 @@ namespace Ariadne {
 
 typedef Tribool Tribool;
 typedef unsigned int Nat;
-typedef std::ostream OutputStream;
+typedef OutputStream OutputStream;
 
 template<class SF> struct FunctionTraits;
 template<class X> struct FunctionTraits< ScalarFunction<X> > { typedef VectorFunction<X> VectorFunctionType; };
@@ -849,7 +849,7 @@ ValidatedConstrainedImageSet::bounding_box() const
 ValidatedAffineConstrainedImageSet
 ValidatedConstrainedImageSet::affine_over_approximation() const
 {
-    typedef List<ValidatedConstraint>::const_iterator const_iterator;
+    typedef List<ValidatedConstraint>::ConstIterator ConstIterator;
 
     Vector<ExactInterval> domain = this->domain();
     Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function());
@@ -894,7 +894,7 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
     Vector<Float> a(np+nerr, 0.0);
     Float b;
 
-    for(const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+    for(ConstIterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
         ScalarTaylorFunction constraint_function(this->_reduced_domain,iter->function(),affine_sweeper);
         b=sub_up(constraint_function.model().error(),constraint_function.model().value());
         for(uint j=0; j!=np; ++j) { a[j]=constraint_function.model().gradient(j); }
@@ -910,7 +910,7 @@ ValidatedConstrainedImageSet::affine_over_approximation() const
 
 ValidatedAffineConstrainedImageSet ValidatedConstrainedImageSet::affine_approximation() const
 {
-    typedef List<ValidatedConstraint>::const_iterator const_iterator;
+    typedef List<ValidatedConstraint>::ConstIterator ConstIterator;
 
     Vector<ExactInterval> domain = this->domain();
     Vector<ValidatedAffineModel> space_models=affine_models(domain,this->function());
@@ -1151,12 +1151,12 @@ join(const ValidatedConstrainedImageSet& set1, const ValidatedConstrainedImageSe
 }
 
 
-std::ostream& ValidatedConstrainedImageSet::write(std::ostream& os) const
+OutputStream& ValidatedConstrainedImageSet::write(OutputStream& os) const
 {
     return os << "ValidatedConstrainedImageSet( domain=" << this->domain() << ", function="<< this->function() << ", constraints=" << this->constraints() << " )";
 }
 
-std::ostream& operator<<(std::ostream& os, const ValidatedConstrainedImageSet& set) {
+OutputStream& operator<<(OutputStream& os, const ValidatedConstrainedImageSet& set) {
     return set.write(os);
 }
 

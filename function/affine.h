@@ -70,7 +70,7 @@ class Affine
     explicit Affine() : _c(), _g() { }
     explicit Affine(uint n) : _c(0), _g(n) { }
     explicit Affine(const Vector<X>& g, const X& c) : _c(c), _g(g) { }
-    explicit Affine(X c, std::initializer_list<X> g) : _c(c), _g(g) { }
+    explicit Affine(X c, InitializerList<X> g) : _c(c), _g(g) { }
     template<class XX> explicit Affine(const Affine<XX>& aff)
         : _c(aff.b()), _g(aff.a()) { }
 
@@ -180,7 +180,7 @@ template<class X> inline Affine<X> operator/(const Affine<X>& f, double c) {
     return f/static_cast<X>(c); }
 
 /*
-template<class X> std::ostream& operator<<(std::ostream& os, const Affine<X>& f) {
+template<class X> OutputStream& operator<<(OutputStream& os, const Affine<X>& f) {
     bool zero=true;
     if(f.b()!=0) { os<<f.b(); zero=false; }
     for(uint j=0; j!=f.argument_size(); ++j) {
@@ -197,7 +197,7 @@ template<class X> std::ostream& operator<<(std::ostream& os, const Affine<X>& f)
 }
 */
 
-template<class X> std::ostream& operator<<(std::ostream& os, const Affine<X>& f) {
+template<class X> OutputStream& operator<<(OutputStream& os, const Affine<X>& f) {
     os<<f.b();
     for(uint j=0; j!=f.argument_size(); ++j) {
         os<<"+" << "(" << f.a()[j] << ")*x" << j;

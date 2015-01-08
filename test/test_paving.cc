@@ -100,7 +100,7 @@ void TestPaving::test_iterator() const {
     paving.adjoin(cell2);
     paving.adjoin(cell1);
 
-    PavingInterface::const_iterator iter=paving.begin();
+    PavingInterface::ConstIterator iter=paving.begin();
     ARIADNE_TEST_EQUAL(*iter,cell1);
     ++iter;
     ARIADNE_TEST_EQUAL(*iter,cell2);

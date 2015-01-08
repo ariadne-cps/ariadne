@@ -63,7 +63,7 @@ template<class E> class Orbit {
 typedef Real TimeType;
 
 template<class ES> class Orbit;
-template<class ES> std::ostream& operator<<(std::ostream&, const Orbit<ES>&);
+template<class ES> OutputStream& operator<<(OutputStream&, const Orbit<ES>&);
 
 template<class BS> class ListSet;
 
@@ -137,11 +137,11 @@ class Orbit
     ESL _final;
 };
 
-template<class ES> std::ostream& operator<<(std::ostream& os, const Orbit< ES >& orb);
+template<class ES> OutputStream& operator<<(OutputStream& os, const Orbit< ES >& orb);
 
 template<class ES>
-std::ostream&
-operator<<(std::ostream& os, const Orbit< ES >& orb)
+OutputStream&
+operator<<(OutputStream& os, const Orbit< ES >& orb)
 {
     os << "Orbit(\n  initial=" << orb.initial()
        << "\n  intermediate=" << orb.intermediate()

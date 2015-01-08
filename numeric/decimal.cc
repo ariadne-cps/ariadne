@@ -40,7 +40,7 @@ Decimal operator"" _dec(long double x)
 
 Decimal::Decimal(double x)
 {
-    std::stringstream ss;
+    StringStream ss;
     int s=+1;
     if(x<0) { s=-1; ss<<'-'; }
     double y=s*x;
@@ -71,7 +71,7 @@ Decimal::Decimal(double x)
     _str=ss.str();
 }
 
-Decimal::Decimal(std::string str)
+Decimal::Decimal(StringType str)
     : _str(str)
 {
     // Parse string to ensure correctness
@@ -100,7 +100,7 @@ Decimal::Decimal(std::string str)
     }
 }
 
-std::ostream& operator<<(std::ostream& os, Decimal const& d) {
+OutputStream& operator<<(OutputStream& os, Decimal const& d) {
     return os << d._str;
 }
 

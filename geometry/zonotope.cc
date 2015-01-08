@@ -182,10 +182,10 @@ Zonotope::Zonotope(uint d, uint m)
 {
 }
 
-Zonotope::Zonotope(std::initializer_list< std::tuple<Float,std::initializer_list<Float>,Float> > lst)
+Zonotope::Zonotope(InitializerList< std::tuple<Float,InitializerList<Float>,Float> > lst)
     : _centre(lst.size()), _generators(lst.size(),lst.size()==0?0u:std::get<1>(*lst.begin()).size()), _error(lst.size())
 {
-    for(std::initializer_list< std::tuple<Float,std::initializer_list<Float>,Float> >::const_iterator aff_iter=lst.begin();
+    for(InitializerList< std::tuple<Float,InitializerList<Float>,Float> >::ConstIterator aff_iter=lst.begin();
         aff_iter!=lst.end(); ++aff_iter)
     {
         uint i=aff_iter-lst.begin();
@@ -353,8 +353,8 @@ Zonotope::inside(const ExactBox& bx) const
 
 
 
-std::ostream&
-Zonotope::write(std::ostream& os) const
+OutputStream&
+Zonotope::write(OutputStream& os) const
 {
     return os << *this;
 }
@@ -782,8 +782,8 @@ Zonotope apply(const ValidatedVectorFunction& f, const Zonotope& z) {
 
 
 
-std::ostream&
-operator<<(std::ostream& os, const Zonotope& z)
+OutputStream&
+operator<<(OutputStream& os, const Zonotope& z)
 {
     os << "[";
     for(uint i=0; i!=z.dimension(); ++i) {
@@ -807,8 +807,8 @@ operator<<(std::ostream& os, const Zonotope& z)
 
 
 
-std::istream&
-operator>>(std::istream& is, Zonotope& z)
+InputStream&
+operator>>(InputStream& is, Zonotope& z)
 {
     Vector<Float> centre;
     Matrix<Float> generators;
@@ -843,8 +843,8 @@ Tribool
 separated(const Zonotope& z, const ExactBox& bx)
 {
     ARIADNE_ASSERT(z.dimension()==bx.dimension());
-    size_t d=z.dimension();
-    size_t ng=z.number_of_generators();
+    SizeType d=z.dimension();
+    SizeType ng=z.number_of_generators();
     Vector<ExactInterval> ebx=bx+ExactInterval(-1,1)*make_exact(z.error());
     const Vector<Float>& zc=z.centre();
     const Matrix<Float>& zG=z.generators();
@@ -856,11 +856,11 @@ separated(const Zonotope& z, const ExactBox& bx)
     project(A,range(0,d),range(0,d))=Matrix<Float>::identity(d);
     project(A,range(0,d),range(d,d+ng))=zG;
     b=zc;
-    for(size_t j=0; j!=d; ++j) {
+    for(SizeType j=0; j!=d; ++j) {
         xl[j]=ebx[j].lower();
         xu[j]=ebx[j].upper();
     }
-    for(size_t j=0; j!=ng; ++j) {
+    for(SizeType j=0; j!=ng; ++j) {
         xl[d+j]=-1;
         xu[d+j]=+1;
     }
@@ -878,9 +878,9 @@ Tribool
 separated(const Zonotope& z1, const Zonotope& z2)
 {
     ARIADNE_ASSERT(z1.dimension()==z2.dimension());
-    size_t d=z1.dimension();
-    size_t ng1=z1.number_of_generators();
-    size_t ng2=z2.number_of_generators();
+    SizeType d=z1.dimension();
+    SizeType ng1=z1.number_of_generators();
+    SizeType ng2=z2.number_of_generators();
     const Vector<Float>& c1=z1.centre();
     const Matrix<Float>& G1=z1.generators();
     const Vector<Float>& c2=z2.centre();

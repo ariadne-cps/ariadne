@@ -103,11 +103,11 @@ inline Matrix<X> get_jacobian(const Vector<D>& d) {
     return J;
 }
 
-template<class X> std::ostream& operator<<(std::ostream& os, const Representation< ScalarFunction<X> >& frepr) {
+template<class X> OutputStream& operator<<(OutputStream& os, const Representation< ScalarFunction<X> >& frepr) {
     static_cast<const ScalarFunctionInterface<X>&>(frepr.reference()).repr(os); return os;
 }
 
-template<class X> std::ostream& operator<<(std::ostream& os, const Representation< VectorFunction<X> >& frepr) {
+template<class X> OutputStream& operator<<(OutputStream& os, const Representation< VectorFunction<X> >& frepr) {
     static_cast<const VectorFunctionInterface<X>&>(frepr.reference()).repr(os); return os;
 }
 
@@ -118,7 +118,7 @@ class ScalarPythonFunction
     template<class T> void _compute(T& r, const Vector<T>& a) const {
         r=boost::python::extract<T>(this->_pyf(a)); }
   public:
-    ScalarPythonFunction(std::string& nm, uint as, const object& pyf) : _name(nm), _argument_size(as), _pyf(pyf) { }
+    ScalarPythonFunction(StringType& nm, uint as, const object& pyf) : _name(nm), _argument_size(as), _pyf(pyf) { }
     ScalarPythonFunction(uint as, const object& pyf) : _name(),  _argument_size(as), _pyf(pyf) { }
     ScalarPythonFunction(const object& pyf)
         : _name(),
@@ -135,15 +135,15 @@ class ScalarPythonFunction
 
     virtual EffectiveScalarFunctionInterface* _derivative (uint j) const {
         ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
-    virtual std::ostream& repr(std::ostream& os) const { return os; }
-    virtual std::ostream& write(std::ostream& os) const {
+    virtual OutputStream& repr(OutputStream& os) const { return os; }
+    virtual OutputStream& write(OutputStream& os) const {
         os << "ScalarUserFunction( ";
         if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }
         os << "argument_size="<<this->_argument_size;
         return os << " )"; }
     EffectiveScalarFunction derivative(uint j) const { return EffectiveScalarFunction(this->_derivative(j)); }
   private:
-    std::string _name;
+    StringType _name;
     uint _argument_size;
     boost::python::object _pyf;
 };
@@ -156,7 +156,7 @@ class VectorPythonFunction
     template<class T> void _compute(Vector<T>& r, const Vector<T>& a) const {
         r=boost::python::extract< Vector<T> >(this->_pyf(a)); }
   public:
-    VectorPythonFunction(std::string& nm, uint rs, uint as, const object& pyf) : _name(nm), _result_size(rs), _argument_size(as), _pyf(pyf) { }
+    VectorPythonFunction(StringType& nm, uint rs, uint as, const object& pyf) : _name(nm), _result_size(rs), _argument_size(as), _pyf(pyf) { }
     VectorPythonFunction(uint rs, uint as, const object& pyf) : _name(), _result_size(rs), _argument_size(as), _pyf(pyf) { }
     VectorPythonFunction(const object& pyf)
         : _name(),
@@ -178,14 +178,14 @@ class VectorPythonFunction
     virtual EffectiveScalarFunction operator[](uint i) const {
         ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
 
-    virtual std::ostream& write(std::ostream& os) const {
+    virtual OutputStream& write(OutputStream& os) const {
         os << "VectorUserFunction( ";
         if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }
         os << "result_size="<<this->_result_size;
         os << ", argument_size="<<this->_argument_size;
         return os << " )"; }
   private:
-    std::string _name;
+    StringType _name;
     uint _result_size;
     uint _argument_size;
     boost::python::object _pyf;
@@ -268,7 +268,6 @@ void export_polynomial()
     polynomial_class.def(real+self);
     polynomial_class.def(real-self);
     polynomial_class.def(real*self);
-    polynomial_class.def("__iter__",boost::python::iterator< Polynomial<X> >());
     polynomial_class.def(self_ns::str(self));
     //polynomial_class.def(self_ns::repr(self));
 
@@ -409,8 +408,8 @@ void export_vector_python_function()
 
 
 void function_submodule() {
-    to_python< Array<std::string> >();
-    from_python< Array<std::string> >();
+    to_python< Array<StringType> >();
+    from_python< Array<StringType> >();
 
     export_multi_index();
 

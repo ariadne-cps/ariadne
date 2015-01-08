@@ -66,7 +66,7 @@ MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
 {
     List<Identifier> names;
     for(uint i=0; i!=dynamic.result_size(); ++i) {
-        std::stringstream ss;
+        StringStream ss;
         ss << "x" << i;
         names.append(ss.str());
     }
@@ -284,7 +284,7 @@ HybridSpace
 MonolithicHybridAutomaton::state_space() const
 {
     MonolithicHybridSpace result;
-    for(Map<DiscreteLocation,Mode>::const_iterator mode_iter=this->_modes.begin();
+    for(Map<DiscreteLocation,Mode>::ConstIterator mode_iter=this->_modes.begin();
         mode_iter!=this->_modes.end(); ++mode_iter)
     {
         result.new_location(mode_iter->first,continuous_state_space(mode_iter->first));
@@ -294,8 +294,8 @@ MonolithicHybridAutomaton::state_space() const
 
 
 
-std::ostream&
-MonolithicHybridAutomaton::write(std::ostream& os) const
+OutputStream&
+MonolithicHybridAutomaton::write(OutputStream& os) const
 {
     MonolithicHybridAutomaton const& automaton = *this;
     typedef MonolithicHybridAutomaton::Mode Mode;
@@ -303,18 +303,18 @@ MonolithicHybridAutomaton::write(std::ostream& os) const
     typedef MonolithicHybridAutomaton::Invariant Invariant;
 
     os << "MonolithicHybridAutomaton( \n";
-    for(Map<DiscreteLocation,Mode>::const_iterator mode_iter=automaton._modes.begin();
+    for(Map<DiscreteLocation,Mode>::ConstIterator mode_iter=automaton._modes.begin();
         mode_iter!=automaton._modes.end(); ++mode_iter)
     {
         const Mode& mode = mode_iter->second;
         os << "  " << mode._location << ": " << mode._dynamic << ";\n";
-        for(Map<DiscreteEvent,Invariant>::const_iterator invariant_iter=mode._invariants.begin();
+        for(Map<DiscreteEvent,Invariant>::ConstIterator invariant_iter=mode._invariants.begin();
             invariant_iter!=mode._invariants.end(); ++invariant_iter)
         {
             const Invariant& invariant = invariant_iter->second;
             os << "    " << invariant._event << ": "  << invariant._kind << ", " << invariant._guard << "<=0,\n";
         }
-        for(Map<DiscreteEvent,Transition>::const_iterator transition_iter=mode._transitions.begin();
+        for(Map<DiscreteEvent,Transition>::ConstIterator transition_iter=mode._transitions.begin();
             transition_iter!=mode._transitions.end(); ++transition_iter)
         {
             const Transition& transition = transition_iter->second;

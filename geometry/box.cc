@@ -68,7 +68,7 @@ bool element(const Vector<ApproximateFloat>& v1, const Vector<ExactInterval>& v2
 bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloat>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
+    for(SizeType i=0; i!=v1.size(); ++i) {
         if(!contains(v1[i],v2[i])) { return false; }
     }
     return true;
@@ -77,7 +77,7 @@ bool contains(const Vector<ExactInterval>& v1, const Vector<ExactFloat>& v2)
 bool contains(const Vector<ExactInterval>& v1, const Vector<ValidatedFloat>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
+    for(SizeType i=0; i!=v1.size(); ++i) {
         if(!contains(v1[i],v2[i])) { return false; }
     }
     return true;
@@ -86,7 +86,7 @@ bool contains(const Vector<ExactInterval>& v1, const Vector<ValidatedFloat>& v2)
 bool contains(const Vector<ExactInterval>& v1, const Vector<ApproximateFloat>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
+    for(SizeType i=0; i!=v1.size(); ++i) {
         if(!contains(v1[i],v2[i])) { return false; }
     }
     return true;
@@ -97,7 +97,7 @@ bool contains(const Vector<ExactInterval>& v1, const Vector<ApproximateFloat>& v
 bool subset(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
+    for(SizeType i=0; i!=v1.size(); ++i) {
         if(!subset(v1[i],v2[i])) { return false; }
     }
     return true;
@@ -106,7 +106,7 @@ bool subset(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 bool intersect(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
+    for(SizeType i=0; i!=v1.size(); ++i) {
         if(!intersect(v1[i],v2[i])) { return false; }
     }
     return true;
@@ -116,7 +116,7 @@ bool intersect(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 bool disjoint(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
+    for(SizeType i=0; i!=v1.size(); ++i) {
         if(disjoint(v1[i],v2[i])) { return true; }
     }
     return false;
@@ -125,7 +125,7 @@ bool disjoint(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 bool overlap(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
+    for(SizeType i=0; i!=v1.size(); ++i) {
         if(!overlap(v1[i],v2[i])) { return false; }
     }
     return true;
@@ -134,7 +134,7 @@ bool overlap(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 bool covers(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
+    for(SizeType i=0; i!=v1.size(); ++i) {
         if(!covers(v1[i],v2[i])) { return false; }
     }
     return true;
@@ -143,7 +143,7 @@ bool covers(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 bool inside(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
+    for(SizeType i=0; i!=v1.size(); ++i) {
         if(!inside(v1[i],v2[i])) { return false; }
     }
     return true;
@@ -151,7 +151,7 @@ bool inside(const Vector<ExactInterval>& v1, const Vector<ExactInterval>& v2)
 
 bool empty(const Vector<ExactInterval>& v)
 {
-    for(size_t i=0; i!=v.size(); ++i) {
+    for(SizeType i=0; i!=v.size(); ++i) {
         if(empty(v[i])) { return true; }
     }
     return false;
@@ -207,7 +207,7 @@ Pair< Vector<ExactInterval>, Vector<ExactInterval> > split(const Vector<ExactInt
 Vector<ExactFloat> midpoint(const Vector<ExactInterval>& v)
 {
     Vector<ExactFloat> r(v.size());
-    for(size_t i=0; i!=v.size(); ++i) {
+    for(SizeType i=0; i!=v.size(); ++i) {
         r[i]=v[i].centre();
     }
     return r;
@@ -216,7 +216,7 @@ Vector<ExactFloat> midpoint(const Vector<ExactInterval>& v)
 Vector<ExactFloat> lower_bounds(const Vector<ExactInterval>& v)
 {
     Vector<ExactFloat> r(v.size());
-    for(size_t i=0; i!=v.size(); ++i) {
+    for(SizeType i=0; i!=v.size(); ++i) {
         r[i]=v[i].lower();
     }
     return r;
@@ -225,7 +225,7 @@ Vector<ExactFloat> lower_bounds(const Vector<ExactInterval>& v)
 Vector<ExactFloat> upper_bounds(const Vector<ExactInterval>& v)
 {
     Vector<ExactFloat> r(v.size());
-    for(size_t i=0; i!=v.size(); ++i) {
+    for(SizeType i=0; i!=v.size(); ++i) {
         r[i]=v[i].upper();
     }
     return r;
@@ -235,7 +235,7 @@ Vector<ExactInterval> hull(const Vector<ExactFloat>& v1, const Vector<ExactFloat
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     Vector<ExactInterval> r(v1.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
+    for(SizeType i=0; i!=v1.size(); ++i) {
         r[i]=hull(v1[i],v2[i]);
     }
     return r;
@@ -245,7 +245,7 @@ Vector<ExactInterval> hull(const Vector<ExactInterval>& v1, const Vector<ExactFl
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     Vector<ExactInterval> r(v1.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
+    for(SizeType i=0; i!=v1.size(); ++i) {
         r[i]=hull(v1[i],v2[i]);
     }
     return r;
@@ -255,7 +255,7 @@ Vector<ExactInterval> hull(const Vector<ExactInterval>& v1, const Vector<ExactIn
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     Vector<ExactInterval> r(v1.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
+    for(SizeType i=0; i!=v1.size(); ++i) {
         r[i]=hull(v1[i],v2[i]);
     }
     return r;
@@ -265,7 +265,7 @@ Vector<ExactInterval> intersection(const Vector<ExactInterval>& v1, const Vector
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     Vector<ExactInterval> r(v1.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
+    for(SizeType i=0; i!=v1.size(); ++i) {
         r[i]=intersection(v1[i],v2[i]);
     }
     return r;
@@ -274,7 +274,7 @@ Vector<ExactInterval> intersection(const Vector<ExactInterval>& v1, const Vector
 PositiveUpperNumber radius(const Vector<ExactInterval>& v)
 {
     PositiveUpperNumber r=0;
-    for(size_t i=0; i!=v.size(); ++i) {
+    for(SizeType i=0; i!=v.size(); ++i) {
         r=max(r,v[i].radius());
     }
     return r;
@@ -283,7 +283,7 @@ PositiveUpperNumber radius(const Vector<ExactInterval>& v)
 PositiveUpperNumber volume(const Vector<ExactInterval>& v)
 {
     PositiveUpperNumber r=1u;
-    for(size_t i=0; i!=v.size(); ++i) {
+    for(SizeType i=0; i!=v.size(); ++i) {
         r*=diam(v[i]);
     }
     return r;
@@ -294,7 +294,7 @@ PositiveUpperNumber volume(const Vector<ExactInterval>& v)
 Vector<UpperInterval> hull(const Vector<UpperInterval>& bx1, const Vector<UpperInterval>& bx2) {
     ARIADNE_ASSERT(bx1.size()==bx2.size());
     Vector<UpperInterval> r(bx1.size());
-    for(size_t i=0; i!=bx1.size(); ++i) {
+    for(SizeType i=0; i!=bx1.size(); ++i) {
         r[i]=hull(bx1[i],bx2[i]);
     }
     return r;
@@ -303,7 +303,7 @@ Vector<UpperInterval> hull(const Vector<UpperInterval>& bx1, const Vector<UpperI
 Vector<UpperInterval> intersection(const Vector<UpperInterval>& bx1, const Vector<UpperInterval>& bx2) {
     ARIADNE_ASSERT(bx1.size()==bx2.size());
     Vector<UpperInterval> r(bx1.size());
-    for(size_t i=0; i!=bx1.size(); ++i) {
+    for(SizeType i=0; i!=bx1.size(); ++i) {
         r[i]=intersection(bx1[i],bx2[i]);
     }
     return r;
@@ -377,12 +377,12 @@ void make_vertices_down(const ExactBox& bx, uint i, uint n, ExactPoint& pt, std:
 }
 
 
-Box<ExactInterval>::Box(std::initializer_list<ExactInterval> lst)
+Box<ExactInterval>::Box(InitializerList<ExactInterval> lst)
     : Vector<ExactInterval>(lst)
 {
 }
 
-Box<ExactInterval>::Box(const std::string& str)
+Box<ExactInterval>::Box(const StringType& str)
 {
     *this=make_box(str);
 }
@@ -398,13 +398,13 @@ std::vector<ExactPoint> ExactBox::vertices() const {
 }
 
 ExactBox product(const ExactBox& bx1, const ExactBox& bx2) {
-    size_t n1=bx1.dimension();
-    size_t n2=bx2.dimension();
+    SizeType n1=bx1.dimension();
+    SizeType n2=bx2.dimension();
     ExactBox r(n1+n2);
-    for(size_t i=0; i!=n1; ++i) {
+    for(SizeType i=0; i!=n1; ++i) {
         r[i]=bx1[i];
     }
-    for(size_t i=0; i!=n2; ++i) {
+    for(SizeType i=0; i!=n2; ++i) {
         r[n1+i]=bx2[i];
     }
     return r;
@@ -418,7 +418,7 @@ ExactBox product(const ExactBox& bx1, const ExactInterval& ivl2) {
 ExactBox hull(const ExactBox& bx1, const ExactBox& bx2) {
     ARIADNE_ASSERT(bx1.dimension()==bx2.dimension());
     ExactBox r(bx1.dimension());
-    for(size_t i=0; i!=r.dimension(); ++i) {
+    for(SizeType i=0; i!=r.dimension(); ++i) {
         r[i]=hull(bx1[i],bx2[i]);
     }
     return r;
@@ -427,7 +427,7 @@ ExactBox hull(const ExactBox& bx1, const ExactBox& bx2) {
 ExactBox hull(const ExactBox& bx1, const ExactPoint& pt2) {
     ARIADNE_ASSERT(bx1.dimension()==pt2.dimension());
     ExactBox r(bx1.dimension());
-    for(size_t i=0; i!=r.dimension(); ++i) {
+    for(SizeType i=0; i!=r.dimension(); ++i) {
         r[i]=hull(bx1[i],pt2[i]);
     }
     return r;
@@ -436,7 +436,7 @@ ExactBox hull(const ExactBox& bx1, const ExactPoint& pt2) {
 ExactBox hull(const ExactPoint& pt1, const ExactPoint& pt2) {
     ARIADNE_ASSERT(pt1.dimension()==pt2.dimension());
     ExactBox r(pt1.dimension());
-    for(size_t i=0; i!=r.dimension(); ++i) {
+    for(SizeType i=0; i!=r.dimension(); ++i) {
         r[i]=hull(pt1[i],pt2[i]);
     }
     return r;
@@ -445,7 +445,7 @@ ExactBox hull(const ExactPoint& pt1, const ExactPoint& pt2) {
 ExactBox intersection(const ExactBox& bx1, const ExactBox& bx2) {
     ARIADNE_ASSERT(bx1.dimension()==bx2.dimension());
     ExactBox r(bx1.dimension());
-    for(size_t i=0; i!=r.dimension(); ++i) {
+    for(SizeType i=0; i!=r.dimension(); ++i) {
         r[i]=intersection(bx1[i],bx2[i]);
     }
     return r;
@@ -489,12 +489,12 @@ void ExactBox::draw(CanvasInterface& c, const Projection2d& p) const
     c.fill();
 }
 
-ExactBox make_box(const std::string& str)
+ExactBox make_box(const StringType& str)
 {
     // Representation as a literal
     //   "[a1,b1]x[a2,b2]x...x[an,bn]"
 
-    std::stringstream ss(str);
+    StringStream ss(str);
     std::vector<ExactInterval> vec;
     ExactInterval ivl;
     char c;

@@ -634,7 +634,7 @@ compose(const EffectiveScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
     return ScalarTaylorFunction(gdomain,f.evaluate(gmodels));
 }
 
-std::ostream& operator<<(std::ostream& os, const Representation<Float>& flt_repr)
+OutputStream& operator<<(OutputStream& os, const Representation<Float>& flt_repr)
 {
     const Float& flt=*flt_repr.pointer;
     int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
@@ -644,12 +644,12 @@ std::ostream& operator<<(std::ostream& os, const Representation<Float>& flt_repr
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const Representation<UpperFloat>& flt_repr)
+OutputStream& operator<<(OutputStream& os, const Representation<UpperFloat>& flt_repr)
 {
     return os << reinterpret_cast<Representation<Float>const&>(flt_repr);
 }
 
-std::ostream& operator<<(std::ostream& os, const Representation<ExactInterval>& ivl_repr)
+OutputStream& operator<<(OutputStream& os, const Representation<ExactInterval>& ivl_repr)
 {
     const ExactInterval& ivl=*ivl_repr.pointer;
     int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
@@ -660,13 +660,13 @@ std::ostream& operator<<(std::ostream& os, const Representation<ExactInterval>& 
 }
 
 
-std::ostream& operator<<(std::ostream& os, const Representation< Expansion<Float> >& exp_repr)
+OutputStream& operator<<(OutputStream& os, const Representation< Expansion<Float> >& exp_repr)
 {
     const Expansion<Float>& exp=*exp_repr.pointer;
     int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
     os.precision(17); os.setf(std::ios_base::showpoint);
     os << "Expansion<Float>(" << exp.argument_size() << "," << exp.number_of_nonzeros();
-    for(Expansion<Float>::const_iterator iter=exp.begin(); iter!=exp.end(); ++iter) {
+    for(Expansion<Float>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
         for(uint j=0; j!=iter->key().size(); ++j) {
             os << "," << uint(iter->key()[j]);
         }
@@ -677,15 +677,15 @@ std::ostream& operator<<(std::ostream& os, const Representation< Expansion<Float
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const Representation< Expansion<ExactFloat> >& exp_repr) {
+OutputStream& operator<<(OutputStream& os, const Representation< Expansion<ExactFloat> >& exp_repr) {
     return os << reinterpret_cast<Expansion<Float>const&>(exp_repr);
 }
 
-std::ostream& operator<<(std::ostream& os, const Representation< Expansion<ApproximateFloat> >& exp_repr) {
+OutputStream& operator<<(OutputStream& os, const Representation< Expansion<ApproximateFloat> >& exp_repr) {
     return os << reinterpret_cast<Expansion<Float>const&>(exp_repr);
 }
 
-template<class X> std::ostream& operator<<(std::ostream& os, const Representation< Vector<X> >& vec_repr)
+template<class X> OutputStream& operator<<(OutputStream& os, const Representation< Vector<X> >& vec_repr)
 {
     const Vector<X>& vec=*vec_repr.pointer;
     ARIADNE_ASSERT(vec.size()!=0);
@@ -697,10 +697,10 @@ template<class X> std::ostream& operator<<(std::ostream& os, const Representatio
     os << ")";
     return os;
 }
-template std::ostream& operator<< <Float> (std::ostream&, const Representation< Vector<Float> >&);
-template std::ostream& operator<< <ExactInterval> (std::ostream&, const Representation< Vector<ExactInterval> >&);
+template OutputStream& operator<< <Float> (OutputStream&, const Representation< Vector<Float> >&);
+template OutputStream& operator<< <ExactInterval> (OutputStream&, const Representation< Vector<ExactInterval> >&);
 
-std::ostream& operator<<(std::ostream& os, const Representation< ExactBox >& box_repr)
+OutputStream& operator<<(OutputStream& os, const Representation< ExactBox >& box_repr)
 {
     const Vector<ExactInterval>& vec=*box_repr.pointer;
     ARIADNE_ASSERT(vec.size()!=0);
@@ -712,7 +712,7 @@ std::ostream& operator<<(std::ostream& os, const Representation< ExactBox >& box
     os << ")";
     return os;
 }
-std::ostream& operator<<(std::ostream& os, const Representation< Sweeper >& swp_repr)
+OutputStream& operator<<(OutputStream& os, const Representation< Sweeper >& swp_repr)
 {
     const Sweeper& swp=*swp_repr.pointer;
     int precision=os.precision(); std::ios_base::fmtflags flags = os.flags();
@@ -722,7 +722,7 @@ std::ostream& operator<<(std::ostream& os, const Representation< Sweeper >& swp_
     return os;
 }
 
-template<class T> std::ostream& operator<<(std::ostream& os, const Representation< List<T> >& lst_repr)
+template<class T> OutputStream& operator<<(OutputStream& os, const Representation< List<T> >& lst_repr)
 {
     const List<T>& lst=*lst_repr.pointer;
     ARIADNE_ASSERT(lst.size()!=0);
@@ -736,8 +736,8 @@ template<class T> std::ostream& operator<<(std::ostream& os, const Representatio
 }
 
 
-std::ostream&
-ScalarTaylorFunction::write(std::ostream& os) const
+OutputStream&
+ScalarTaylorFunction::write(OutputStream& os) const
 {
     Polynomial<ValidatedFloat> p=this->polynomial();
     Polynomial<ApproximateFloat> ap=p;
@@ -746,26 +746,26 @@ ScalarTaylorFunction::write(std::ostream& os) const
     return os;
 }
 
-std::ostream&
-ScalarTaylorFunction::repr(std::ostream& os) const
+OutputStream&
+ScalarTaylorFunction::repr(OutputStream& os) const
 {
     return os << "ScalarTaylorFunction(" << representation(this->domain()) << ", " << representation(this->model().expansion().raw())
               << "," << representation(this->error().raw())<<","<<this->sweeper()<<")";
 }
 
-std::ostream&
-operator<<(std::ostream& os, const ScalarTaylorFunction& tf)
+OutputStream&
+operator<<(OutputStream& os, const ScalarTaylorFunction& tf)
 {
     return tf.write(os);
 }
 
-std::ostream& operator<<(std::ostream& os, const Representation<ScalarTaylorFunction>& tf)
+OutputStream& operator<<(OutputStream& os, const Representation<ScalarTaylorFunction>& tf)
 {
     return tf.pointer->repr(os);
 }
 
 /*
-std::ostream& operator<<(std::ostream& os, const Representation<ScalarTaylorFunction>& frepr)
+OutputStream& operator<<(OutputStream& os, const Representation<ScalarTaylorFunction>& frepr)
 {
     ScalarTaylorFunction const& function=*frepr.pointer;
     ScalarTaylorFunction truncated_function=function;
@@ -780,12 +780,12 @@ std::ostream& operator<<(std::ostream& os, const Representation<ScalarTaylorFunc
 }
 */
 /*
-std::ostream& operator<<(std::ostream& os, const ModelsRepresentation<ScalarTaylorFunction>& frepr)
+OutputStream& operator<<(OutputStream& os, const ModelsRepresentation<ScalarTaylorFunction>& frepr)
 {
     ScalarTaylorFunction const& f=*frepr.pointer;
     Float truncatation_error = 0.0;
     os << "<"<<f.domain()<<"\n";
-    for(ValidatedTaylorModel::const_iterator iter=f.begin(); iter!=f.end(); ++iter) {
+    for(ValidatedTaylorModel::ConstIterator iter=f.begin(); iter!=f.end(); ++iter) {
         if(abs(iter->data())>frepr.threshold) { truncatation_error+=abs(iter->data()); }
         else { os << iter->key() << ":" << iter->data() << ","; }
     }
@@ -794,7 +794,7 @@ std::ostream& operator<<(std::ostream& os, const ModelsRepresentation<ScalarTayl
 }
 */
 
-std::ostream& operator<<(std::ostream& os, const ModelsRepresentation<ScalarTaylorFunction>& frepr)
+OutputStream& operator<<(OutputStream& os, const ModelsRepresentation<ScalarTaylorFunction>& frepr)
 {
     ScalarTaylorFunction const& f=*frepr.pointer;
     ScalarTaylorFunction tf=f;
@@ -804,7 +804,7 @@ std::ostream& operator<<(std::ostream& os, const ModelsRepresentation<ScalarTayl
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const PolynomialRepresentation<ScalarTaylorFunction>& frepr)
+OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<ScalarTaylorFunction>& frepr)
 {
     ScalarTaylorFunction const& function=*frepr.pointer;
     ScalarTaylorFunction truncated_function = function;
@@ -1050,7 +1050,7 @@ VectorTaylorFunction::VectorTaylorFunction(const List<ScalarTaylorFunction>& v)
     }
 }
 
-VectorTaylorFunction::VectorTaylorFunction(std::initializer_list<ScalarTaylorFunction> lst)
+VectorTaylorFunction::VectorTaylorFunction(InitializerList<ScalarTaylorFunction> lst)
     : _domain(), _models(lst.size())
 {
     *this=VectorTaylorFunction(List<ScalarTaylorFunction>(lst));
@@ -1692,8 +1692,8 @@ operator*(const Matrix<Float>& A, const VectorTaylorFunction& f)
 {
     ARIADNE_PRECONDITION(A.column_size()==f.size());
     Vector<ValidatedTaylorModel> models(A.row_size(),ValidatedTaylorModel(f.argument_size(),f.sweeper()));
-    for(size_t i=0; i!=A.row_size(); ++i) {
-        for(size_t j=0; j!=A.column_size(); ++j) {
+    for(SizeType i=0; i!=A.row_size(); ++i) {
+        for(SizeType j=0; j!=A.column_size(); ++j) {
             models[i] += A.get(i,j) * f.model(j);
         }
     }
@@ -1705,8 +1705,8 @@ operator*(const Matrix<ValidatedNumber>& A, const VectorTaylorFunction& f)
 {
     ARIADNE_PRECONDITION(A.column_size()==f.size());
     Vector<ValidatedTaylorModel> models(A.row_size(),ValidatedTaylorModel(f.argument_size(),f.sweeper()));
-    for(size_t i=0; i!=A.row_size(); ++i) {
-        for(size_t j=0; j!=A.column_size(); ++j) {
+    for(SizeType i=0; i!=A.row_size(); ++i) {
+        for(SizeType j=0; j!=A.column_size(); ++j) {
             models[i] += A.get(i,j) * f.model(j);
         }
     }
@@ -1868,8 +1868,8 @@ ErrorFloat distance(const VectorTaylorFunction& f1, const EffectiveVectorFunctio
 }
 
 
-std::ostream&
-VectorTaylorFunction::write(std::ostream& os) const
+OutputStream&
+VectorTaylorFunction::write(OutputStream& os) const
 {
     os << "[";
     for(uint i=0; i!=this->result_size(); ++i) {
@@ -1881,20 +1881,20 @@ VectorTaylorFunction::write(std::ostream& os) const
     return os;
 }
 
-std::ostream&
-VectorTaylorFunction::repr(std::ostream& os) const
+OutputStream&
+VectorTaylorFunction::repr(OutputStream& os) const
 {
     return os << "VectorTaylorFunction("
               << representation(this->domain()) << ", " << representation(this->expansions()) << ", "
               << representation(this->errors()) << ", " << representation(this->sweeper()) << ")";
 }
 
-std::ostream& operator<<(std::ostream& os, const Representation<VectorTaylorFunction>& repr)
+OutputStream& operator<<(OutputStream& os, const Representation<VectorTaylorFunction>& repr)
 {
     return repr.pointer->repr(os);
 }
 
-std::ostream& operator<<(std::ostream& os, const PolynomialRepresentation<VectorTaylorFunction>& repr)
+OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<VectorTaylorFunction>& repr)
 {
     const VectorTaylorFunction& function = *repr.pointer;
     os << "[";
@@ -1905,7 +1905,7 @@ std::ostream& operator<<(std::ostream& os, const PolynomialRepresentation<Vector
     return os << "]";
 }
 
-std::ostream& operator<<(std::ostream& os, const PolynomialRepresentation< List<ScalarTaylorFunction> >& repr)
+OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation< List<ScalarTaylorFunction> >& repr)
 {
     const List<ScalarTaylorFunction>& functions = *repr.pointer;
     os << "[";
@@ -1918,8 +1918,8 @@ std::ostream& operator<<(std::ostream& os, const PolynomialRepresentation< List<
 
 
 
-std::ostream&
-operator<<(std::ostream& os, const VectorTaylorFunction& p)
+OutputStream&
+operator<<(OutputStream& os, const VectorTaylorFunction& p)
 {
     return p.write(os);
 }

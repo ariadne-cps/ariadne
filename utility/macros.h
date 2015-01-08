@@ -46,7 +46,7 @@ bool decide(bool);
 
 #define ARIADNE_THROW(except,func,msg)          \
     { \
-        std::stringstream ss; \
+        StringStream ss; \
         ss << #except " in " << func << ": " << msg;    \
         throw except(ss.str()); \
     } \
@@ -142,7 +142,7 @@ bool decide(bool);
     } \
 
 #define ARIADNE_NOT_IMPLEMENTED                 \
-    throw std::runtime_error(std::string("Not implemented: ")+ARIADNE_PRETTY_FUNCTION);
+    throw std::runtime_error(StringType("Not implemented: ")+ARIADNE_PRETTY_FUNCTION);
 
 #define ARIADNE_DEPRECATED(fn,msg)          \
     static bool first_time=true; \

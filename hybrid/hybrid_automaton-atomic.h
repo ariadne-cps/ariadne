@@ -216,7 +216,7 @@ class AtomicHybridAutomaton
     //@}
 
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream& os) const {
+    OutputStream& write(OutputStream& os) const {
         return this->HybridAutomaton::write(os); }
 };
 
@@ -224,7 +224,7 @@ inline DiscreteLocation operator|(const AtomicHybridAutomaton& ha, const AtomicD
     return ha.variable() | q;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const AtomicHybridAutomaton& ha) {
+inline OutputStream& operator<<(OutputStream& os, const AtomicHybridAutomaton& ha) {
     return ha.write(os);
 }
 

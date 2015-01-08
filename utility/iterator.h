@@ -1,5 +1,5 @@
 /***************************************************************************
- *            iterator.h
+ *            Iterator.h
  *
  *  Copyright 2013-14  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file iterator.h
- *  \brief Iterator support, similar to boost::iterator package.
+/*! \file Iterator.h
+ *  \brief Iterator support, similar to boost::Iterator package.
  */
 
 #ifndef ARIADNE_ITERATOR_H
 #define ARIADNE_ITERATOR_H
 
-#include <iterator>
+#include <Iterator>
 
 namespace Ariadne {
 
-typedef std::ostream OutputStream;
+typedef OutputStream OutputStream;
 
 struct RandomAccessTraversalTag { };
 struct ForwardTraversalTag { };
@@ -50,6 +50,10 @@ template<class I, class Val, class Ref> class IteratorFacade<I,Val,RandomAccessT
     typedef std::ptrdiff_t difference_type;
     typedef std::random_access_iterator_tag iterator_category;
     typedef Val* pointer;
+
+    // Ariadne typedefs
+    typedef typename std::remove_const<Val>::type ValueType;
+    typedef Ref Reference;
 
     template<class II> bool operator==(const II& other) const { return static_cast<const I&>(*this).equal(other); }
     template<class II> bool operator!=(const II& other) const { return !static_cast<const I&>(*this).equal(other); }
@@ -77,6 +81,10 @@ template<class I, class Val, class Ref> class IteratorFacade<I,Val,ForwardTraver
     typedef std::ptrdiff_t difference_type;
     typedef std::forward_iterator_tag iterator_category;
     typedef Val* pointer;
+
+    // Ariadne typedefs
+    typedef typename std::remove_const<Val>::type ValueType;
+    typedef Ref Reference;
 
     bool operator==(const I& other) const { return static_cast<const I&>(*this).equal(other); }
     bool operator!=(const I& other) const { return !static_cast<const I&>(*this).equal(other); }

@@ -78,7 +78,7 @@ inline Vector<ApproximateFloat> evaluate(const EffectiveVectorFunction& f, const
 Map<DiscreteEvent,EffectiveScalarFunction> guard_functions(const HybridAutomatonInterface& system, const DiscreteLocation& location) {
     Set<DiscreteEvent> events=system.events(location);
     Map<DiscreteEvent,EffectiveScalarFunction> guards;
-    for(Set<DiscreteEvent>::const_iterator iter=events.begin(); iter!=events.end(); ++iter) {
+    for(Set<DiscreteEvent>::ConstIterator iter=events.begin(); iter!=events.end(); ++iter) {
         guards.insert(*iter,system.guard_function(location,*iter));
     }
     return guards;
@@ -104,7 +104,7 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint
 
         bool enabled=false;
         DiscreteEvent event;
-        for(Map<DiscreteEvent,EffectiveScalarFunction>::const_iterator guard_iter=guards.begin(); guard_iter!=guards.end(); ++guard_iter) {
+        for(Map<DiscreteEvent,EffectiveScalarFunction>::ConstIterator guard_iter=guards.begin(); guard_iter!=guards.end(); ++guard_iter) {
             if(evaluate(guard_iter->second,point)>0) {
                 enabled=true;
                 event=guard_iter->first;

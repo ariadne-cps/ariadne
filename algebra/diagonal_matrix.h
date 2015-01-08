@@ -37,7 +37,7 @@
 
 namespace Ariadne {
 
-template<class T> using InitializerList = std::initializer_list<T>;
+template<class T> using InitializerList = InitializerList<T>;
 
 template<class X> class Matrix;
 template<class X> class SymmetricMatrix;

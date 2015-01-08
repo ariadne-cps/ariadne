@@ -50,11 +50,11 @@ ScalarTaylorFunction sin(const ScalarTaylorFunction&);
 ScalarTaylorFunction cos(const ScalarTaylorFunction&);
 ScalarTaylorFunction tan(const ScalarTaylorFunction&);
 
-template<class X> std::ostream& operator<<(std::ostream& os, const Representation< ScalarFunctionModel<X> >& frepr) {
+template<class X> OutputStream& operator<<(OutputStream& os, const Representation< ScalarFunctionModel<X> >& frepr) {
     static_cast<const ScalarFunctionInterface<X>&>(frepr.reference()).repr(os); return os;
 }
 
-template<class X> std::ostream& operator<<(std::ostream& os, const Representation< VectorFunctionModel<X> >& frepr) {
+template<class X> OutputStream& operator<<(OutputStream& os, const Representation< VectorFunctionModel<X> >& frepr) {
     static_cast<const VectorFunctionInterface<X>&>(frepr.reference()).write(os); return os;
 }
 
@@ -153,16 +153,16 @@ struct from_python<VectorTaylorFunction> {
 };
 
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<RawFloat>& repr);
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ApproximateFloat>& repr);
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ValidatedFloat>& repr);
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ExactFloat>& repr);
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<UpperFloat>& repr);
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ExactInterval>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloat>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ApproximateFloat>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ValidatedFloat>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactFloat>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<UpperFloat>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactInterval>& repr);
 
-template<class X> std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Expansion<X> >& repr) {
+template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Expansion<X> >& repr) {
     const Expansion<X>& exp=repr.reference();
-    for(typename Expansion<X>::const_iterator iter=exp.begin(); iter!=exp.end(); ++iter) {
+    for(typename Expansion<X>::ConstIterator iter=exp.begin(); iter!=exp.end(); ++iter) {
         os << (iter==exp.begin()?'{':',') << "(";
         for(uint j=0; j!=iter->key().size(); ++j) {
             if(j!=0) { os << ','; } os << int(iter->key()[j]);
@@ -173,12 +173,12 @@ template<class X> std::ostream& operator<<(std::ostream& os, const PythonReprese
     return os;
 }
 
-template std::ostream& operator<<(std::ostream&, const PythonRepresentation< Expansion<RawFloat> >&);
-template std::ostream& operator<<(std::ostream&, const PythonRepresentation< Expansion<ApproximateFloat> >&);
-template std::ostream& operator<<(std::ostream&, const PythonRepresentation< Expansion<ValidatedFloat> >&);
-template std::ostream& operator<<(std::ostream&, const PythonRepresentation< Expansion<ExactFloat> >&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<RawFloat> >&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<ApproximateFloat> >&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<ValidatedFloat> >&);
+template OutputStream& operator<<(OutputStream&, const PythonRepresentation< Expansion<ExactFloat> >&);
 
-template<class X> std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Vector<X> >& repr) {
+template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Vector<X> >& repr) {
     const Vector<X>& vec=repr.reference();
     os << "[";
     for(uint i=0; i!=vec.size(); ++i) {
@@ -189,10 +189,10 @@ template<class X> std::ostream& operator<<(std::ostream& os, const PythonReprese
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation< ExactBox >& bx) {
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation< ExactBox >& bx) {
     return os << PythonRepresentation< Vector<ExactInterval> >(bx.reference()); }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Sweeper>& repr) {
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Sweeper>& repr) {
     const Sweeper& swp=repr.reference();
     const SweeperInterface* swp_ptr = &static_cast<const SweeperInterface&>(swp);
     if(dynamic_cast<const ThresholdSweeper*>(swp_ptr)) {
@@ -203,7 +203,7 @@ std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Sweeper>& 
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ScalarTaylorFunction>& repr) {
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ScalarTaylorFunction>& repr) {
     const ScalarTaylorFunction& stf=repr.reference();
     os << std::setprecision(17);
     os << "ScalarTaylorFunction"
@@ -215,7 +215,7 @@ std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ScalarTayl
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<VectorTaylorFunction>& repr) {
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<VectorTaylorFunction>& repr) {
     const VectorTaylorFunction& vtf=repr.reference();
     os << std::setprecision(17);
     os << "VectorTaylorFunction"
@@ -229,7 +229,7 @@ std::ostream& operator<<(std::ostream& os, const PythonRepresentation<VectorTayl
 
 List<MultiIndex> keys(const ValidatedTaylorModel& tm) {
     List<MultiIndex> r;
-    for(ValidatedTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         r.append(iter->key());
     }
     return r;
@@ -301,7 +301,6 @@ void export_taylor_model()
     taylor_model_class.def("sweep", (ValidatedTaylorModel&(ValidatedTaylorModel::*)()) &ValidatedTaylorModel::sweep, return_value_policy<reference_existing_object>());
     taylor_model_class.def("__getitem__", &__getitem__<ValidatedTaylorModel,MultiIndex,ExactFloat>);
     taylor_model_class.def("__setitem__",&__setitem__<ValidatedTaylorModel,MultiIndex,ExactFloat>);
-    taylor_model_class.def("__iter__", iterator<ValidatedTaylorModel>()); // TODO: ValidatedTaylorModel iterator does not fit in general Python iterator scheme
     taylor_model_class.def(+self);
     taylor_model_class.def(-self);
     taylor_model_class.def(self+self);
@@ -500,9 +499,9 @@ void export_scalar_taylor_function()
     scalar_taylor_function_class.def("__repr__", &__crepr__<ScalarTaylorFunction>);
     scalar_taylor_function_class.def("__mul__",&__mul__< VectorTaylorFunction, ScalarTaylorFunction, Vector<ValidatedNumber> >);
 
-    //scalar_taylor_function_class.def("__str__",(std::string(*)(const ScalarTaylorFunction&)) &__str__);
-    //scalar_taylor_function_class.def("__cstr__",(std::string(*)(const ScalarTaylorFunction&)) &__cstr__);
-    //scalar_taylor_function_class.def("__repr__",(std::string(*)(const ScalarTaylorFunction&)) &__repr__);
+    //scalar_taylor_function_class.def("__str__",(StringType(*)(const ScalarTaylorFunction&)) &__str__);
+    //scalar_taylor_function_class.def("__cstr__",(StringType(*)(const ScalarTaylorFunction&)) &__cstr__);
+    //scalar_taylor_function_class.def("__repr__",(StringType(*)(const ScalarTaylorFunction&)) &__repr__);
     scalar_taylor_function_class.def("value", (const ExactFloat&(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::value,return_value_policy<copy_const_reference>());
     scalar_taylor_function_class.def("sweep", (ScalarTaylorFunction&(ScalarTaylorFunction::*)())&ScalarTaylorFunction::sweep,return_value_policy<reference_existing_object>());
     scalar_taylor_function_class.def("clobber", (ScalarTaylorFunction&(ScalarTaylorFunction::*)()) &ScalarTaylorFunction::clobber,return_value_policy<reference_existing_object>());

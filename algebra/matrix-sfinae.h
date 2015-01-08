@@ -52,7 +52,7 @@ template<class X> class Matrix {
   public:
     Matrix(SizeType m, SizeType n) : _zero(), _rs(m), _cs(n), _ary(m*n) { }
     Matrix(SizeType m, SizeType n, const X& x) : _zero(x*0), _rs(m), _cs(n), _ary(m*n,x) { }
-//    Matrix(std::initializer_list<X> lst) : _zero(*lst.begin()*0), _ary(lst.begin(),lst.end()) { }
+//    Matrix(InitializerList<X> lst) : _zero(*lst.begin()*0), _ary(lst.begin(),lst.end()) { }
     SizeType row_size() const { return _rs; }
     SizeType column_size() const { return _cs; }
     MatrixRow<const Matrix<X>> operator[](SizeType i) const { return MatrixRow<const Matrix<X>>{this,i}; }

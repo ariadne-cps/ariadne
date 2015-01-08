@@ -213,7 +213,7 @@ uint
 ValidatedTaylorModel::degree() const
 {
     uchar deg=0u;
-    for(ValidatedTaylorModel::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+    for(ValidatedTaylorModel::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         deg=std::max(deg,iter->key().degree());
     }
     return deg;
@@ -238,7 +238,7 @@ namespace { // Internal code for arithmetic
 // Inplace negation
 void _neg(ValidatedTaylorModel& r)
 {
-    for(ValidatedTaylorModel::iterator iter=r.begin(); iter!=r.end(); ++iter) {
+    for(ValidatedTaylorModel::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
         iter->data().raw()=-iter->data().raw();
     }
 }
@@ -247,7 +247,7 @@ inline void _scal_exact(ValidatedTaylorModel& r, const Float& c)
 {
     // Operation can be performed exactly
     RawFloat pc=static_cast<RawFloat>(c);
-    for(ValidatedTaylorModel::iterator iter=r.begin(); iter!=r.end(); ++iter) {
+    for(ValidatedTaylorModel::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
         iter->data().raw()*=pc;
     }
     r.error().raw()*=abs(pc);
@@ -266,7 +266,7 @@ inline void _scal_approx(ValidatedTaylorModel& r, const Float& c)
     Float te=0; // Twice the maximum accumulated error
     Float pc=c;
     Float mc=-c;
-    for(ValidatedTaylorModel::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(ValidatedTaylorModel::ConstIterator riter=r.begin(); riter!=r.end(); ++riter) {
         const Float& rv=riter->data().raw();
         u=rv*pc;
         ml=rv*mc;
@@ -277,7 +277,7 @@ inline void _scal_approx(ValidatedTaylorModel& r, const Float& c)
 
     set_rounding_to_nearest();
     Float m=c;
-    for(ValidatedTaylorModel::iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(ValidatedTaylorModel::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
         riter->data().raw()*=m;
     }
     return;
@@ -295,7 +295,7 @@ inline void _scal_approx4(ValidatedTaylorModel& r, const Float& c)
     Float te=0; // Twice the maximum accumulated error
     Float pc=c;
     Float mc=-pc;
-    for(ValidatedTaylorModel::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(ValidatedTaylorModel::ConstIterator riter=r.begin(); riter!=r.end(); ++riter) {
         const Float& rv=riter->data().raw();
         //volatile Float& rv=const_cast<volatile Float&>(riter->data().raw());
         u=rv*pc;
@@ -307,7 +307,7 @@ inline void _scal_approx4(ValidatedTaylorModel& r, const Float& c)
 
     set_rounding_to_nearest();
     Float m=c;
-    for(ValidatedTaylorModel::iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(ValidatedTaylorModel::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
         riter->data().raw()*=m;
     }
     return;
@@ -322,7 +322,7 @@ inline void _scal_approx3(ValidatedTaylorModel& r, const Float& c)
     double te=0; // Twice the maximum accumulated error
     double pc=internal_cast<const double&>(c);
     double mc=-pc;
-    for(ValidatedTaylorModel::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(ValidatedTaylorModel::ConstIterator riter=r.begin(); riter!=r.end(); ++riter) {
         const double& rv=internal_cast<const double&>(riter->data().raw());
         u=rv*pc;
         ml=rv*mc;
@@ -333,7 +333,7 @@ inline void _scal_approx3(ValidatedTaylorModel& r, const Float& c)
 
     set_rounding_to_nearest();
     Float m=c;
-    for(ValidatedTaylorModel::iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(ValidatedTaylorModel::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
         riter->data().raw()*=m;
     }
     return;
@@ -350,7 +350,7 @@ inline void _scal_approx2(ValidatedTaylorModel& r, const Float& c)
     Float te=0; // Twice the maximum accumulated error
     Float pc=c;
     Float mc=-c;
-    for(ValidatedTaylorModel::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(ValidatedTaylorModel::ConstIterator riter=r.begin(); riter!=r.end(); ++riter) {
         const Float& rv=riter->data().raw();
         u=mul_rnd(rv,pc);
         ml=mul_rnd(rv,mc);
@@ -361,7 +361,7 @@ inline void _scal_approx2(ValidatedTaylorModel& r, const Float& c)
 
     set_rounding_to_nearest();
     Float m=c;
-    for(ValidatedTaylorModel::iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(ValidatedTaylorModel::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
         riter->data().raw()*=m;
     }
     return;
@@ -380,7 +380,7 @@ inline void _scal_approx1(ValidatedTaylorModel& rr, const Float& cc)
     double te=0; // Twice the maximum accumulated error
     double pc=c;
     double mc=-c;
-    for(Expansion<double>::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(Expansion<double>::ConstIterator riter=r.begin(); riter!=r.end(); ++riter) {
         const double& rv=riter->data();
         u=rv*pc;
         ml=rv*mc;
@@ -391,7 +391,7 @@ inline void _scal_approx1(ValidatedTaylorModel& rr, const Float& cc)
 
     set_rounding_to_nearest();
     double m=c;
-    for(Expansion<double>::iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(Expansion<double>::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
         riter->data()*=m;
     }
     return;
@@ -411,7 +411,7 @@ inline void _scal_approx0(ValidatedTaylorModel& rr, const Float& cc)
     double te=0; // Twice the maximum accumulated error
     double pc=c;
     double mc=-c;
-    for(Expansion<double>::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(Expansion<double>::ConstIterator riter=r.begin(); riter!=r.end(); ++riter) {
         const double& rv=riter->data();
         u=rv*pc;
         ml=rv*mc;
@@ -422,7 +422,7 @@ inline void _scal_approx0(ValidatedTaylorModel& rr, const Float& cc)
 
     set_rounding_to_nearest();
     double m=c;
-    for(Expansion<double>::iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(Expansion<double>::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
         riter->data()*=m;
     }
     return;
@@ -453,7 +453,7 @@ void _scal(ValidatedTaylorModel& r, const ValidatedNumber& c)
     Float te=0; // Twice the maximum accumulated error
     Float cu=c.upper().raw();
     Float mcl=-c.lower().raw();
-    for(ValidatedTaylorModel::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(ValidatedTaylorModel::ConstIterator riter=r.begin(); riter!=r.end(); ++riter) {
         const Float& rv=riter->data().raw();
         if(rv>=0) {
             u=rv*cu;
@@ -470,7 +470,7 @@ void _scal(ValidatedTaylorModel& r, const ValidatedNumber& c)
 
     set_rounding_to_nearest();
     Float m=(c.upper().raw()+c.lower().raw())/2;
-    for(ValidatedTaylorModel::iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(ValidatedTaylorModel::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
         riter->data().raw()*=m;
     }
 
@@ -488,7 +488,7 @@ void _scal2(ValidatedTaylorModel& r, const ValidatedNumber& c)
     VOLATILE Float mcl=-c.lower().raw();
     set_rounding_to_nearest();
     Float cm=(c.lower().raw()+c.upper().raw())/2;
-    for(ValidatedTaylorModel::iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(ValidatedTaylorModel::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
         Float& rv=riter->data().raw();
         set_rounding_upward();
         if(rv>=0) {
@@ -518,14 +518,14 @@ struct UnitMultiIndex { uint argument_size; uint unit_index; };
 
 inline void _incr(ValidatedTaylorModel& r, const MultiIndex& a)
 {
-    for(ValidatedTaylorModel::iterator iter=r.begin(); iter!=r.end(); ++iter) {
+    for(ValidatedTaylorModel::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
         static_cast<MultiIndex&>(iter->key())+=a;
     }
 }
 
 inline void _incr(ValidatedTaylorModel& r, uint j)
 {
-    for(ValidatedTaylorModel::iterator iter=r.begin(); iter!=r.end(); ++iter) {
+    for(ValidatedTaylorModel::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
         ++static_cast<MultiIndex&>(iter->key())[j];
     }
 }
@@ -605,8 +605,8 @@ inline void _add1(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const 
     // Compute r=x+y, assuming r is empty
     set_rounding_upward();
     Float te=0.0;
-    ValidatedTaylorModel::const_iterator xiter=x.begin();
-    ValidatedTaylorModel::const_iterator yiter=y.begin();
+    ValidatedTaylorModel::ConstIterator xiter=x.begin();
+    ValidatedTaylorModel::ConstIterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
         if(xiter->key()<yiter->key()) {
             ++xiter;
@@ -663,8 +663,8 @@ inline void _add2(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const 
 {
     set_rounding_upward();
     Float te=0.0;
-    ValidatedTaylorModel::const_iterator xiter=x.begin();
-    ValidatedTaylorModel::const_iterator yiter=y.begin();
+    ValidatedTaylorModel::ConstIterator xiter=x.begin();
+    ValidatedTaylorModel::ConstIterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
         if(xiter->key()<yiter->key()) {
             r.expansion().raw().append(xiter->key(),xiter->data().raw());
@@ -722,8 +722,8 @@ inline void _sub(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const V
     // Compute r=x+y, assuming r is empty
     set_rounding_upward();
     Float te=0.0;
-    ValidatedTaylorModel::const_iterator xiter=x.begin();
-    ValidatedTaylorModel::const_iterator yiter=y.begin();
+    ValidatedTaylorModel::ConstIterator xiter=x.begin();
+    ValidatedTaylorModel::ConstIterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
         if(xiter->key()<yiter->key()) {
             r.expansion().raw().append(xiter->key(),xiter->data().raw());
@@ -774,8 +774,8 @@ inline void _sma(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const F
     VOLATILE Float u,ml;
     Float mc=-c;
 
-    ValidatedTaylorModel::const_iterator xiter=x.begin();
-    ValidatedTaylorModel::const_iterator yiter=y.begin();
+    ValidatedTaylorModel::ConstIterator xiter=x.begin();
+    ValidatedTaylorModel::ConstIterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
         if(xiter->key()<yiter->key()) {
             r.expansion().raw().append(xiter->key(),xiter->data().raw());
@@ -846,8 +846,8 @@ inline void _sma(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const V
 
     // Compute r=x+y, assuming r is empty
     set_rounding_upward();
-    ValidatedTaylorModel::const_iterator xiter=x.begin();
-    ValidatedTaylorModel::const_iterator yiter=y.begin();
+    ValidatedTaylorModel::ConstIterator xiter=x.begin();
+    ValidatedTaylorModel::ConstIterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
         if(xiter->key()<yiter->key()) {
             r.expansion().raw().append(xiter->key(),xiter->data().raw());
@@ -922,14 +922,14 @@ struct Ivl { Float u; Float ml; };
 inline void _mul1(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
 {
     // Compute r+=x*y
-    typedef ValidatedTaylorModel::const_iterator const_iterator;
-    typedef std::map<MultiIndex,Ivl>::const_iterator ivl_const_iterator;
+    typedef ValidatedTaylorModel::ConstIterator ConstIterator;
+    typedef std::map<MultiIndex,Ivl>::ConstIterator ivl_const_iterator;
     Float& re=r.error().raw();
     std::map<MultiIndex,Ivl> z;
 
     set_rounding_upward();
-    for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        for(const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+    for(ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        for(ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
             const Float& xv=xiter->data().raw();;
             const Float& yv=yiter->data().raw();;
             Ivl& zv=z[xiter->key()+yiter->key()];
@@ -939,7 +939,7 @@ inline void _mul1(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const 
         }
     }
 
-    for(const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
+    for(ConstIterator riter=r.begin(); riter!=r.end(); ++riter) {
         Ivl& zv=z[riter->key()];
         const Float& rv=riter->data().raw();
         zv.u+=rv; zv.ml-=rv;
@@ -953,12 +953,12 @@ inline void _mul1(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const 
     te/=2;
 
     Float xs=0;
-    for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    for(ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         xs+=abs(xiter->data().raw());
     }
 
     Float ys=0;
-    for(const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+    for(ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
         ys+=abs(yiter->data().raw());
     }
 
@@ -986,10 +986,10 @@ void _mul2(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const Validat
 {
     ValidatedTaylorModel t(x.argument_size(),r.sweeper());
     ValidatedTaylorModel s(x.argument_size(),r.sweeper());
-    for(ValidatedTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    for(ValidatedTaylorModel::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         set_rounding_upward();
         Float te=0.0;
-        for(ValidatedTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+        for(ValidatedTaylorModel::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
             const Float& xv=xiter->data().raw();
             const Float& yv=yiter->data().raw();
             VOLATILE Float u=xv*yv;
@@ -998,7 +998,7 @@ void _mul2(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const Validat
         }
         t.error().raw()=te/2;
         set_rounding_to_nearest();
-        for(ValidatedTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+        for(ValidatedTaylorModel::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
             t.expansion().raw().append(xiter->key(),yiter->key(),xiter->data().raw()*yiter->data().raw());
         }
         _add2(s,r,t);
@@ -1012,12 +1012,12 @@ void _mul2(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const Validat
 
     set_rounding_upward();
     Float xs=0;
-    for(ValidatedTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    for(ValidatedTaylorModel::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         xs+=abs(xiter->data().raw());
     }
 
     Float ys=0;
-    for(ValidatedTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+    for(ValidatedTaylorModel::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
         ys+=abs(yiter->data().raw());
     }
 
@@ -1039,11 +1039,11 @@ void _mul2(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const Validat
 inline void _mul3(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
 {
     ValidatedTaylorModel t(x.argument_size(),r.sweeper());
-    for(ValidatedTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    for(ValidatedTaylorModel::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         VOLATILE Float pxv=xiter->data().raw();
         VOLATILE Float nxv=-pxv;
         VOLATILE Float te=0.0;
-        for(ValidatedTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+        for(ValidatedTaylorModel::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
             set_rounding_upward();
             const Float& yv=yiter->data().raw();
             te+=(pxv*yv)+(nxv*yv);
@@ -1058,12 +1058,12 @@ inline void _mul3(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const 
 
     set_rounding_upward();
     Float xs=0;
-    for(ValidatedTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    for(ValidatedTaylorModel::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         xs+=abs(xiter->data().raw());
     }
 
     Float ys=0;
-    for(ValidatedTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+    for(ValidatedTaylorModel::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
         ys+=abs(yiter->data().raw());
     }
 
@@ -1079,7 +1079,7 @@ inline void _mul3(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const 
 }
 
 inline void _add(MultiIndex& r, const MultiIndex& a1, const MultiIndex& a2) {
-    for(MultiIndex::size_type j=0; j!=r.word_size(); ++j) {
+    for(MultiIndex::SizeType j=0; j!=r.word_size(); ++j) {
         r.word_at(j)=a1.word_at(j)+a2.word_at(j);
     }
 }
@@ -1098,14 +1098,14 @@ void _mul4(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const Validat
     Float tv;
     VOLATILE Float u;
     VOLATILE Float ml;
-    for(ValidatedTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    for(ValidatedTaylorModel::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         Float tte=0.0; // trucation error
         Float tre=0.0; // roundoff error
         const MultiIndex& xa=xiter->key();
         VOLATILE Float& xv=const_cast<Float&>(static_cast<const Float&>(xiter->data().raw()));
         VOLATILE Float mxv=-xv;
         VOLATILE Float axv=abs(xv);
-        for(ValidatedTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+        for(ValidatedTaylorModel::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
             const MultiIndex& ya=yiter->key();
             VOLATILE Float& yv=const_cast<Float&>(static_cast<const Float&>(yiter->data().raw()));
             set_rounding_to_nearest();
@@ -1134,12 +1134,12 @@ void _mul4(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const Validat
 
     set_rounding_upward();
     Float xs=0;
-    for(ValidatedTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    for(ValidatedTaylorModel::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         xs+=abs(xiter->data().raw());
     }
 
     Float ys=0;
-    for(ValidatedTaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+    for(ValidatedTaylorModel::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
         ys+=abs(yiter->data().raw());
     }
 
@@ -1220,9 +1220,9 @@ ValidatedTaylorModel::unique_sort()
 {
     this->_expansion.reverse_lexicographic_sort();
 
-    ValidatedTaylorModel::const_iterator advanced =this->begin();
-    ValidatedTaylorModel::const_iterator end =this->end();
-    ValidatedTaylorModel::iterator current=this->begin();
+    ValidatedTaylorModel::ConstIterator advanced =this->begin();
+    ValidatedTaylorModel::ConstIterator end =this->end();
+    ValidatedTaylorModel::Iterator current=this->begin();
     Float te=0.0;
     while(advanced!=end) {
         current->key()=advanced->key();
@@ -1345,7 +1345,7 @@ ValidatedTaylorModel abs(const ValidatedTaylorModel& x) {
 
 ValidatedTaylorModel neg(const ValidatedTaylorModel& x) {
     ValidatedTaylorModel r(x.argument_size(),x.sweeper());
-    for(ValidatedTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    for(ValidatedTaylorModel::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         r.expansion().raw().append(xiter->key(),-xiter->data().raw());
     }
     r.error().raw()=x.error().raw();
@@ -1383,7 +1383,7 @@ UpperInterval _range1(const ValidatedTaylorModel& tm) {
     set_rounding_mode(upward);
     VOLATILE Float t=tm.error().raw();
     VOLATILE Float v=0.0;
-    for(ValidatedTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()==0) {
             v=iter->data().raw();
         } else {
@@ -1397,7 +1397,7 @@ UpperInterval _range1(const ValidatedTaylorModel& tm) {
 
 UpperInterval _range2(const ValidatedTaylorModel& tm) {
     UpperInterval r(-tm.error().raw(),+tm.error().raw());
-    for(ValidatedTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()==0) {
             r+=iter->data().raw();
         } else {
@@ -1414,7 +1414,7 @@ UpperInterval _range3(const ValidatedTaylorModel& tm) {
     Array<Float> linear_terms(as,0.0);
     Array<Float> quadratic_terms(as,0.0);
     UpperInterval r(-tm.error().raw(),+tm.error().raw());
-    for(ValidatedTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()==0) {
             r+=iter->data().raw();
         } else if(iter->key().degree()==1) {
@@ -1929,7 +1929,7 @@ ValidatedTaylorModel preaffine(const ValidatedTaylorModel& tm, uint k, const Val
 
     // Create a temporary TaylorModels containing just terms x[k]^i
     Array<ValidatedTaylorModel> atm(d+1,ValidatedTaylorModel(as,swp));
-    for(ValidatedTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         MultiIndex a=iter->key();
         const Float& c=iter->data().raw();
         uint ak=a[k];
@@ -1998,7 +1998,7 @@ ValidatedTaylorModel recondition(const ValidatedTaylorModel& tm, Array<uint>& di
     }
 
     set_rounding_upward();
-    for(ValidatedTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         bool keep=true;
         for(uint k=0; k!=number_of_discarded_variables; ++k) {
             if(iter->key()[discarded_variables[k]]!=0) {
@@ -2057,7 +2057,7 @@ ValidatedTaylorModel& ValidatedTaylorModel::restrict(const Vector<ExactInterval>
     }
 
     // TODO: separate into roundoff computation and value computation
-    for(iterator iter=x.begin(); iter!=x.end(); ++iter) {
+    for(Iterator iter=x.begin(); iter!=x.end(); ++iter) {
         for(uint j=0; j!=as; ++j) {
             Float& c=iter->data().raw();
             UpperInterval ci=UpperInterval(c);
@@ -2085,7 +2085,7 @@ void _antidifferentiate1(ValidatedTaylorModel& x, uint k)
     //std::cerr<<"xe="<<xe<<"\n";
     set_rounding_mode(upward);
     VOLATILE Float tre=0; // Twice the maximum accumulated roundoff error
-    for(ValidatedTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    for(ValidatedTaylorModel::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         const uint c=xiter->key()[k]+1;
         Float xv=xiter->data().raw();
         Float mxv=-xv;
@@ -2109,7 +2109,7 @@ void _antidifferentiate1(ValidatedTaylorModel& x, uint k)
     //std::cerr<<"xe="<<xe<<"\n";
 
     set_rounding_to_nearest();
-    for(ValidatedTaylorModel::iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    for(ValidatedTaylorModel::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         MultiIndex& a=xiter->key();
         Float& v=xiter->data().raw();
 
@@ -2133,7 +2133,7 @@ void _antidifferentiate2(ValidatedTaylorModel& x, uint k)
     VOLATILE Float tre=0; // Twice the maximum accumulated roundoff error
     VOLATILE Float u,ml;
     uint c;
-    for(ValidatedTaylorModel::iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    for(ValidatedTaylorModel::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         MultiIndex& xa=xiter->key();
         Float& xv=xiter->data().raw();
         Float mxv=-xv;
@@ -2180,7 +2180,7 @@ ValidatedTaylorModel derivative(const ValidatedTaylorModel& x, uint k)
     VOLATILE Float u,ml,mxv;
     MultiIndex a(x.argument_size());
     uint c;
-    for(ValidatedTaylorModel::iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    for(ValidatedTaylorModel::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         c=xiter->key().at(k);
         if(c!=0) {
             a=xiter->key();
@@ -2288,9 +2288,9 @@ partial_evaluate(const ValidatedTaylorModel& x, uint k, ValidatedNumber c)
     ValidatedTaylorModel r(x.argument_size()-1,x.sweeper());
     MultiIndex ra(r.argument_size());
     if(c==ValidatedNumber(0)) {
-        for(ValidatedTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        for(ValidatedTaylorModel::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
-            MultiIndex::index_type xak=xa[k];
+            MultiIndex::IndexType xak=xa[k];
             if(xak==0) {
                 const Float& xv=xiter->data().raw();
                 for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
@@ -2303,10 +2303,10 @@ partial_evaluate(const ValidatedTaylorModel& x, uint k, ValidatedNumber c)
         ValidatedTaylorModel s(x.argument_size()-1,x.sweeper());
         Array<ValidatedTaylorModel> p(x.degree()+1,ValidatedTaylorModel(x.argument_size()-1,x.sweeper()));
 
-        for(ValidatedTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        for(ValidatedTaylorModel::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
             const Float& xv=xiter->data().raw();
-            MultiIndex::index_type xak=xa[k];
+            MultiIndex::IndexType xak=xa[k];
             for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
             for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
             assert(ra.degree()+xak==xa.degree());
@@ -2326,10 +2326,10 @@ partial_evaluate(const ValidatedTaylorModel& x, uint k, ValidatedNumber c)
 
         Powers<ValidatedNumber> cpowers(c);
 
-        for(ValidatedTaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        for(ValidatedTaylorModel::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
             const Float& xv=xiter->data().raw();
-            MultiIndex::index_type xak=xa[k];
+            MultiIndex::IndexType xak=xa[k];
             for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
             for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
             assert(ra.degree()+xak==xa.degree());
@@ -2403,7 +2403,7 @@ _split1(const ValidatedTaylorModel& tm, uint k, Tribool b)
 
     // Divide all coefficients by 2^a[k]
     // This can be done exactly
-    for(ValidatedTaylorModel::iterator iter=r.begin(); iter!=r.end(); ++iter) {
+    for(ValidatedTaylorModel::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
         const uchar ak=iter->key()[k];
         Float& c=iter->data().raw();
         c/=(1<<ak);
@@ -2417,7 +2417,7 @@ _split1(const ValidatedTaylorModel& tm, uint k, Tribool b)
 
     // Split variables by degree in x[k]
     Array<ValidatedTaylorModel> ary(deg+1,ValidatedTaylorModel(as,swp));
-    for(ValidatedTaylorModel::const_iterator iter=r.begin(); iter!=r.end(); ++iter) {
+    for(ValidatedTaylorModel::ConstIterator iter=r.begin(); iter!=r.end(); ++iter) {
         MultiIndex a=iter->key();
         const Float& c=iter->data().raw();
         uchar ak=a[k];
@@ -2434,7 +2434,7 @@ _split1(const ValidatedTaylorModel& tm, uint k, Tribool b)
             int sf=bin(j,i);
             if(tr==-1 && (j-i)%2==1) { sf=-sf; }
             r+=ary[j]*sf;
-            for(ValidatedTaylorModel::iterator iter=ary[j].begin(); iter!=ary[j].end(); ++iter) {
+            for(ValidatedTaylorModel::Iterator iter=ary[j].begin(); iter!=ary[j].end(); ++iter) {
                 ++iter->key()[k];
             }
          }
@@ -2510,7 +2510,7 @@ rescale(const ValidatedTaylorModel& tv, const ExactInterval& ivl)
 ErrorFloat ValidatedTaylorModel::radius() const {
     set_rounding_mode(upward);
     Float r=this->error().raw();
-    for(ValidatedTaylorModel::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+    for(ValidatedTaylorModel::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         if(iter->key().degree()!=0) {
             r+=abs(iter->data().raw());
         }
@@ -2522,7 +2522,7 @@ ErrorFloat ValidatedTaylorModel::radius() const {
 NormType ValidatedTaylorModel::norm() const {
     set_rounding_mode(upward);
     Float r=this->error().raw();
-    for(ValidatedTaylorModel::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+    for(ValidatedTaylorModel::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         r+=abs(iter->data().raw());
     }
     set_rounding_mode(to_nearest);
@@ -2576,12 +2576,12 @@ ValidatedTaylorModel embed(uint as, const ValidatedTaylorModel& x)
 
 // Input/output operators
 
-std::ostream&
-operator<<(std::ostream& os, const ValidatedTaylorModel& tm) {
+OutputStream&
+operator<<(OutputStream& os, const ValidatedTaylorModel& tm) {
     // Set the variable names to be 'parameter' s0,s1,..
-    Array<std::string> variable_names(tm.argument_size());
+    Array<StringType> variable_names(tm.argument_size());
     for(uint j=0; j!=tm.argument_size(); ++j) {
-        std::stringstream sstr;
+        StringStream sstr;
         sstr << 's' << j;
         variable_names[j]=sstr.str();
     }
@@ -2824,8 +2824,8 @@ ValidatedTaylorModel intersection(const ValidatedTaylorModel& x, const Validated
     //const MultiIndex* aptr;
     MultiIndex a;
 
-    ValidatedTaylorModel::const_iterator xiter=x.begin();
-    ValidatedTaylorModel::const_iterator yiter=y.begin();
+    ValidatedTaylorModel::ConstIterator xiter=x.begin();
+    ValidatedTaylorModel::ConstIterator yiter=y.begin();
     while(xiter!=x.end() || yiter!=y.end()) {
         // Can't use const MultiIndex& here since references change as the iterators change
         // We would need to use a smart reference
@@ -2947,7 +2947,7 @@ jacobian(const Vector<ValidatedTaylorModel>& f, const Vector<ValidatedNumber>& d
     uint as=f.zero_element().argument_size();
     Matrix<ValidatedNumber> J(rs,as);
     for(uint i=0; i!=rs; ++i) {
-        for(ValidatedTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+        for(ValidatedTaylorModel::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             const MultiIndex& a=iter->key();
             const Float& x=iter->data().raw();
             for(uint k=0; k!=as; ++k) {
@@ -3016,7 +3016,7 @@ jacobian_range(const Vector<ValidatedTaylorModel>& f)
     uint as=f.zero_element().argument_size();
     Matrix<UpperInterval> J(rs,as);
     for(uint i=0; i!=rs; ++i) {
-        for(ValidatedTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+        for(ValidatedTaylorModel::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             for(uint k=0; k!=as; ++k) {
                 const uint c=iter->key()[k];
                 if(c>0) {
@@ -3040,7 +3040,7 @@ jacobian2_range(const Vector<ValidatedTaylorModel>& f)
     uint has=fas-rs;
     Matrix<UpperInterval> J(rs,rs);
     for(uint i=0; i!=rs; ++i) {
-        for(ValidatedTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+        for(ValidatedTaylorModel::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             for(uint k=0; k!=rs; ++k) {
                 const uint c=iter->key()[has+k];
                 if(c>0) {
@@ -3099,7 +3099,7 @@ _compose1(const Vector<ValidatedTaylorModel>& x,
     ValidatedTaylorModel t(as,swp);
     for(uint i=0; i!=x.size(); ++i) {
         r[i].set_error(x[i].error().raw());
-        for(ValidatedTaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
+        for(ValidatedTaylorModel::ConstIterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
             t=static_cast<ExactNumber>(iter->data().raw());
             for(uint j=0; j!=iter->key().size(); ++j) {
                 ValidatedTaylorModel p=pow(ys[j],iter->key()[j]);
@@ -3128,7 +3128,7 @@ _compose2(const Vector<ValidatedTaylorModel>& x,
     for(uint j=0; j!=ys.size(); ++j) { max_power[j]=1; }
 
     for(uint i=0; i!=x.size(); ++i) {
-        for(ValidatedTaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
+        for(ValidatedTaylorModel::ConstIterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
             assert(xas==iter->key().size());
             for(uint j=0; j!=iter->key().size(); ++j) {
                 max_power[j]=max(max_power[j],iter->key()[j]);
@@ -3156,7 +3156,7 @@ _compose2(const Vector<ValidatedTaylorModel>& x,
     Float c;
     for(uint i=0; i!=x.size(); ++i) {
         r[i].set_error(x[i].error().raw());
-        for(ValidatedTaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
+        for(ValidatedTaylorModel::ConstIterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
             a=iter->key();
             c=iter->data().raw();
             t=static_cast<ExactNumber>(c);
@@ -3284,7 +3284,7 @@ void ApproximateTaylorModel::imul(const ApproximateFloat& c)
     // Compute self*=c
     if(c==0) { this->clear(); return; }
     if(c==1) { return; }
-    for(ExpansionType::iterator iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
+    for(ExpansionType::Iterator iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
         iter->data() *= c;
     }
 }
@@ -3297,8 +3297,8 @@ void ApproximateTaylorModel::isma(const ApproximateFloat& c, const ApproximateTa
     ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<", y="<<y);
     ApproximateTaylorModel r(x.argument_size());
 
-    const_iterator xiter=x._expansion.begin();
-    const_iterator yiter=y._expansion.begin();
+    ConstIterator xiter=x._expansion.begin();
+    ConstIterator yiter=y._expansion.begin();
     while(xiter!=x._expansion.end() && yiter!=y._expansion.end()) {
         if(xiter->key()<yiter->key()) {
             r._expansion.append(xiter->key(),xiter->data());
@@ -3331,9 +3331,9 @@ void ApproximateTaylorModel::ifma(const ApproximateTaylorModel& x, const Approxi
 
     ApproximateTaylorModel t(x.argument_size());
     MultiIndex sa;
-    for(ExpansionType::const_iterator xiter=x._expansion.begin(); xiter!=x._expansion.end(); ++xiter) {
-        ExpansionType::const_iterator yiter=y._expansion.begin();
-        ExpansionType::const_iterator riter=r._expansion.begin();
+    for(ExpansionType::ConstIterator xiter=x._expansion.begin(); xiter!=x._expansion.end(); ++xiter) {
+        ExpansionType::ConstIterator yiter=y._expansion.begin();
+        ExpansionType::ConstIterator riter=r._expansion.begin();
         while(riter!=r._expansion.end() && yiter!=y._expansion.end()) {
             const MultiIndex& ra=riter->key();
             sa=xiter->key()+yiter->key();
@@ -3376,7 +3376,7 @@ CoefficientType ApproximateTaylorModel::average() const {
 
 ErrorType ApproximateTaylorModel::radius() const {
     ApproximateFloat r=0.0;
-    for(Expansion<ApproximateFloat>::const_iterator iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
+    for(Expansion<ApproximateFloat>::ConstIterator iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
         if(iter->key().degree()!=0) {
             r+=abs(iter->data());
         }
@@ -3393,7 +3393,7 @@ Float ApproximateTaylorModel::tolerance() const {
 }
 
 
-std::ostream& ApproximateTaylorModel::write(std::ostream& os) const {
+OutputStream& ApproximateTaylorModel::write(OutputStream& os) const {
     return os << "TM["<<this->argument_size()<<"](" << this->_expansion << ")";
 }
 
@@ -3410,7 +3410,7 @@ template TaylorModel<ApproximateNumber> cos(const TaylorModel<ApproximateNumber>
 template TaylorModel<ApproximateNumber> tan(const TaylorModel<ApproximateNumber>&);
 
 
-std::ostream& ApproximateTaylorModel::str(std::ostream& os) const {
+OutputStream& ApproximateTaylorModel::str(OutputStream& os) const {
     return os << this->_expansion;
 }
 } //namespace Ariadne

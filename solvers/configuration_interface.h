@@ -109,9 +109,9 @@ class ConfigurationInterface {
 
   public:
     //! \brief Write to an output stream.
-    virtual std::ostream& write(std::ostream& os) const = 0;
+    virtual OutputStream& write(OutputStream& os) const = 0;
 
-    friend std::ostream& operator<<(std::ostream& os, const ConfigurationInterface& conf) { return conf.write(os); }
+    friend OutputStream& operator<<(OutputStream& os, const ConfigurationInterface& conf) { return conf.write(os); }
 };
 
 

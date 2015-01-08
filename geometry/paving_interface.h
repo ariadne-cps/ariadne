@@ -40,8 +40,8 @@ typedef bool Bool;
 typedef Tribool Tribool;
 typedef uint Nat;
 typedef int Int;
-typedef size_t SizeType;
-typedef std::ostream OutputStream;
+typedef SizeType SizeType;
+typedef OutputStream OutputStream;
 
 class ExactInterval;
 template<class X> class Box;
@@ -50,7 +50,7 @@ typedef Box<ExactInterval> ExactBox;
 class Grid;
 class GridCell;
 
-#define ARIADNE_ABSTRACT_METHOD { throw std::runtime_error(std::string("ERROR: Unimplemented abstract method ")+__PRETTY_FUNCTION__); }
+#define ARIADNE_ABSTRACT_METHOD { throw std::runtime_error(StringType("ERROR: Unimplemented abstract method ")+__PRETTY_FUNCTION__); }
 
 // A continuous predicate taking values in a three-valued logic.
 // NOTE: Corresponds to your SetCheckerInterface; I think that this name is better.
@@ -75,8 +75,8 @@ template<class T> class ForwardConstantIteratorInterface
     friend OutputStream& operator<<(OutputStream& os, const ForwardConstantIteratorInterface<T>& self) { self.write(os); return os; }
 };
 
-//! \brief A generic forward iterator through constant data.
-//! \details Since the iterator is through constant data, the data may be safely be returned by value rather than by reference,
+//! \brief A generic forward Iterator through constant data.
+//! \details Since the Iterator is through constant data, the data may be safely be returned by value rather than by reference,
 //! though this is not strictly standards-conforming, and means that operator->() cannot be provided.
 template<class T> class ForwardConstantIteratorHandle
 {
@@ -101,7 +101,7 @@ template<class T> class ForwardConstantIteratorHandle
 
 
 //! \brief A prototype interface for sets
-//! \details Since the iterator is through constant data, the data may be safely be returned by value rather than by reference,
+//! \details Since the Iterator is through constant data, the data may be safely be returned by value rather than by reference,
 //! though this is not strictly standards-conforming, and means that operator->() cannot be provided.
 template<class BS> class DenotableSetInterface
 {
@@ -141,9 +141,9 @@ class SubPavingInterface
     friend class SubPavingHandle;
     friend class PavingHandle;
   public:
-    typedef ForwardConstantIteratorHandle<GridCell> const_iterator;
+    typedef ForwardConstantIteratorHandle<GridCell> ConstIterator;
   public:
-    //! \brief A constant iterator through the cells of the paving.
+    //! \brief A constant Iterator through the cells of the paving.
     inline ForwardConstantIteratorHandle<GridCell> begin() const { return this->_begin(); }
     inline ForwardConstantIteratorHandle<GridCell> end() const { return this->_end(); }
     //! \brief A sub-paving obtained by considering one of the immediate subcells of the root cell.
@@ -195,14 +195,14 @@ inline Bool subset(const SubPavingInterface& p1, const SubPavingInterface& p2) {
 inline Bool intersect(const SubPavingInterface& p1, const SubPavingInterface& p2) { return p1.intersects(p2); }
 
 //! \ingroup StorageModule
-//! \brief A generic forward iterator through constant data.
-//! \details Since the iterator is through constant data, the data may be safely be returned by value rather than by reference,
+//! \brief A generic forward Iterator through constant data.
+//! \details Since the Iterator is through constant data, the data may be safely be returned by value rather than by reference,
 //! though this is not strictly standards-conforming, and means that operator->() cannot be provided.
 class SubPavingHandle
 {
     SubPavingInterface* _ptr;
   public:
-    typedef ForwardConstantIteratorHandle<GridCell> const_iterator;
+    typedef ForwardConstantIteratorHandle<GridCell> ConstIterator;
   public:
     ~SubPavingHandle() { delete _ptr; }
     SubPavingHandle(SubPavingInterface* p) : _ptr(p) { }
@@ -261,7 +261,7 @@ class PavingHandle
 {
     PavingInterface* _ptr;
   public:
-    typedef ForwardConstantIteratorHandle<GridCell> const_iterator;
+    typedef ForwardConstantIteratorHandle<GridCell> ConstIterator;
   public:
     ~PavingHandle() { delete _ptr; }
     PavingHandle(PavingInterface* p) : _ptr(p) { }

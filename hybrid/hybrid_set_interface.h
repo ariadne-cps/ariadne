@@ -63,8 +63,8 @@ class HybridSetInterfaceBase
     virtual HybridSetInterfaceBase* clone() const = 0;
     virtual Set<RealVariable> variables(DiscreteLocation) const = 0;
     inline SetBase euclidean_set(DiscreteLocation loc, RealSpace spc) const { return this->_euclidean_set(loc,spc); }
-    virtual std::ostream& write(std::ostream& os) const = 0;
-    friend std::ostream& operator<<(std::ostream& os, const HybridSetInterfaceBase& hs);
+    virtual OutputStream& write(OutputStream& os) const = 0;
+    friend OutputStream& operator<<(OutputStream& os, const HybridSetInterfaceBase& hs);
   protected:
     virtual SetInterfaceBase* _euclidean_set(DiscreteLocation,RealSpace) const = 0;
 };
@@ -165,7 +165,7 @@ class HybridSetInterface
 };
 
 
-inline std::ostream& operator<<(std::ostream& os, const HybridSetInterfaceBase& s) {
+inline OutputStream& operator<<(OutputStream& os, const HybridSetInterfaceBase& s) {
     return s.write(os);
 }
 

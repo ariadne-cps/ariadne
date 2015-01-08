@@ -103,7 +103,7 @@ inline ExactFloat neg(const ExactFloat& x) { return ExactFloat(neg_exact(x.value
 inline ExactFloat abs(const ExactFloat& x) { return ExactFloat(abs_exact(x.value())); }
 inline ExactFloat mag(const ExactFloat& x) { return ExactFloat(abs_exact(x.value())); }
 
-inline std::ostream& operator<<(std::ostream& os, const ExactFloat& x) {
+inline OutputStream& operator<<(OutputStream& os, const ExactFloat& x) {
     return os << std::showpoint << std::setprecision(ExactFloat::output_precision) << x.value(); }
 
 inline bool operator==(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()==x2.value(); }

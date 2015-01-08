@@ -439,7 +439,7 @@ C1TaylorFunction& operator*=(C1TaylorFunction& f, Float ec) {
         fde[j]*=ac;
     }
 
-    for(Expansion<Float>::iterator iter=f._expansion.begin();
+    for(Expansion<Float>::Iterator iter=f._expansion.begin();
         iter!=f._expansion.end(); ++iter)
     {
         const MultiIndex& a=iter->key();
@@ -455,7 +455,7 @@ C1TaylorFunction& operator*=(C1TaylorFunction& f, Float ec) {
     }
 
     set_rounding_to_nearest();
-    for(Expansion<Float>::iterator iter=f._expansion.begin();
+    for(Expansion<Float>::Iterator iter=f._expansion.begin();
         iter!=f._expansion.end(); ++iter)
     {
         Float& fv=iter->data();
@@ -475,8 +475,8 @@ C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2) {
     f0._expansion.clear();
     f0._expansion.reserve(f1._expansion.number_of_nonzeros()+f2._expansion.number_of_nonzeros());
 
-    Expansion<Float>::const_iterator i1=f1._expansion.begin();
-    Expansion<Float>::const_iterator i2=f2._expansion.begin();
+    Expansion<Float>::ConstIterator i1=f1._expansion.begin();
+    Expansion<Float>::ConstIterator i2=f2._expansion.begin();
     while(i1!=f1._expansion.end() && i2!=f2._expansion.end()) {
         if(i1->key()==i2->key()) {
             const MultiIndex& a = i1->key();
@@ -531,8 +531,8 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
     MultiIndex a(n);
     f0.clear();
 
-    Expansion<Float>::const_iterator i1=f1._expansion.begin();
-    Expansion<Float>::const_iterator i2=f2._expansion.begin();
+    Expansion<Float>::ConstIterator i1=f1._expansion.begin();
+    Expansion<Float>::ConstIterator i2=f2._expansion.begin();
     while(i1!=f1._expansion.end() && i2!=f2._expansion.end()) {
         if(i1->key()==i2->key()+a3) {
             const MultiIndex& a = i1->key();
@@ -610,7 +610,7 @@ C1TaylorFunction operator*(C1TaylorFunction f1, C1TaylorFunction f2) {
     f0b.clear();
     C1TaylorFunction* ftp=&f0a;
     C1TaylorFunction* frp=&f0b;
-    for(Expansion<Float>::const_iterator i2=f2._expansion.begin();
+    for(Expansion<Float>::ConstIterator i2=f2._expansion.begin();
         i2!=f2._expansion.end(); ++i2)
     {
         fma(*frp,*ftp,f1,i2->data(),i2->key());
@@ -663,7 +663,7 @@ template<class T> ListForm<T> list_form(const T& t) { return ListForm<T>(t); }
 OutputStream& operator<<(OutputStream& os, const ListForm<Expansion<Float>>& lfe) {
     const Expansion<Float>& e=lfe.value;
     os << "{ ";
-    for(Expansion<Float>::const_iterator iter=e.begin();
+    for(Expansion<Float>::ConstIterator iter=e.begin();
         iter!=e.end(); ++iter)
     {
         if(iter!=e.begin()) { os << ", "; }
@@ -684,7 +684,7 @@ OutputStream& operator<<(OutputStream& os, const C1TaylorFunction& f) {
        << ")";
     return os;
 
-    for(Expansion<Float>::iterator iter=f._expansion.begin();
+    for(Expansion<Float>::Iterator iter=f._expansion.begin();
         iter!=f._expansion.end(); ++iter)
     {
         os << *iter;

@@ -50,6 +50,7 @@ using InputStream = std::istream;
 using StringStream = std::stringstream;
 
 class String; // Define as a class for consistency with other value types
+using StringType = std::string;
 
 using Void = void;
 using Byte = std::int8_t;

@@ -36,7 +36,7 @@
 
 namespace Ariadne {
 
-template<class T> using InitializerList = std::initializer_list<T>;
+template<class T> using InitializerList = InitializerList<T>;
 
 /************ Matrix *********************************************************/
 

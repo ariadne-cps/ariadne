@@ -96,7 +96,7 @@ class LowerFloat {
     friend UpperFloat rec(LowerFloat);
     friend LowerFloat max(LowerFloat, LowerFloat);
     friend LowerFloat min(LowerFloat, LowerFloat);
-    friend std::ostream& operator<<(std::ostream& os, LowerFloat);
+    friend OutputStream& operator<<(OutputStream& os, LowerFloat);
   private:
     Float l;
 };
@@ -146,7 +146,7 @@ class UpperFloat {
     friend UpperFloat abs(UpperFloat);
     friend UpperFloat max(UpperFloat, UpperFloat);
     friend UpperFloat min(UpperFloat, UpperFloat);
-    friend std::ostream& operator<<(std::ostream& os, UpperFloat);
+    friend OutputStream& operator<<(OutputStream& os, UpperFloat);
   private:
     Float u;
 };
@@ -274,7 +274,7 @@ class ValidatedFloat {
     Float l, u;
 };
 
-std::ostream& operator<<(std::ostream& os, const ValidatedFloat& ivl);
+OutputStream& operator<<(OutputStream& os, const ValidatedFloat& ivl);
 
 extern const ValidatedFloat pi_val;
 
@@ -775,8 +775,8 @@ inline Tribool operator<=(ValidatedFloat i1, ValidatedFloat i2) {
     a & ivl.lower_raw() & ivl.upper_raw(); }
 #endif
 
-std::ostream& operator<<(std::ostream&, const ValidatedFloat&);
-std::istream& operator>>(std::istream&, ValidatedFloat&);
+OutputStream& operator<<(OutputStream&, const ValidatedFloat&);
+InputStream& operator>>(InputStream&, ValidatedFloat&);
 
 
 } // namespace Ariadne

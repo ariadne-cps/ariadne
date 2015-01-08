@@ -170,7 +170,7 @@ int main(int argc, const char* argv[])
     std::cout << "Discretising orbit" << std::flush;
     HybridGrid grid(watertank_system.state_space());
     HybridGridTreeSet hgts(grid);
-    for (ListSet<EnclosureType>::const_iterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
+    for (ListSet<EnclosureType>::ConstIterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
     {
         std::cout<<"."<<std::flush;
         it->adjoin_outer_approximation_to(hgts,4);

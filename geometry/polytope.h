@@ -64,7 +64,7 @@ class Polytope
     , public DrawableInterface
 {
   public:
-    typedef std::vector<ExactPoint>::const_iterator const_iterator;
+    typedef std::vector<ExactPoint>::const_iterator ConstIterator;
 
     //! \brief Default constructor constructs an empty polytope in zero dimensions.
     Polytope() { }
@@ -78,15 +78,15 @@ class Polytope
         ARIADNE_ASSERT(this->_vertices.size()==0 || v.dimension()==this->_vertices.front().dimension());
         this->_vertices.push_back(v); }
     //! \brief The number of points defining the polytope. Note that an interior point is counted by this method.
-    size_t number_of_vertices() const { return this->_vertices.size(); }
+    SizeType number_of_vertices() const { return this->_vertices.size(); }
     //! \brief The \a i<sup>th</sup> vertex.
-    const ExactPoint& vertex(size_t i) const { return this->_vertices[i]; }
+    const ExactPoint& vertex(SizeType i) const { return this->_vertices[i]; }
     const std::vector<ExactPoint>& vertices() const { return this->_vertices; }
     std::vector<ExactPoint>& vertices() { return this->_vertices; }
-    //! \brief A constant iterator pointing to the first vertex.
-    const_iterator vertices_begin() const { return this->_vertices.begin(); }
-    //! \brief A constant iterator pointing to the past-the-end vertex.
-    const_iterator vertices_end() const { return this->_vertices.end(); }
+    //! \brief A constant Iterator pointing to the first vertex.
+    ConstIterator vertices_begin() const { return this->_vertices.begin(); }
+    //! \brief A constant Iterator pointing to the past-the-end vertex.
+    ConstIterator vertices_end() const { return this->_vertices.end(); }
     //! \brief Reduce the description of the polytope by removing all non-extreme points from the list of vertices. (Not currently implemented)
     void reduce() { ARIADNE_NOT_IMPLEMENTED; }
 
@@ -97,7 +97,7 @@ class Polytope
     virtual Tribool inside(const ExactBox& bx) const;
     virtual UpperBox bounding_box() const;
     virtual void draw(CanvasInterface& c, const Projection2d& p) const;
-    virtual std::ostream& write(std::ostream& os) const;
+    virtual OutputStream& write(OutputStream& os) const;
 
     //! \brief The convex hull of two polytopes.
     friend Polytope convex_hull(const Polytope& p1, const Polytope& p2);
@@ -106,7 +106,7 @@ class Polytope
   private:
     std::vector<ExactPoint> _vertices;
 };
-inline std::ostream& operator<<(std::ostream& os, const Polytope& p) { return p.write(os); }
+inline OutputStream& operator<<(OutputStream& os, const Polytope& p) { return p.write(os); }
 
 
 

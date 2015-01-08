@@ -47,9 +47,12 @@
 
 namespace Ariadne {
 
+using OutputStream = std::ostream;
+using InputStream = std::istream;
+
 template<class InputIterator>
-std::ostream&
-write_sequence(std::ostream& os, InputIterator first, InputIterator last,
+OutputStream&
+write_sequence(OutputStream& os, InputIterator first, InputIterator last,
                char opening='[', char closing=']', char separator=',')
 {
     os << opening;
@@ -66,8 +69,8 @@ write_sequence(std::ostream& os, InputIterator first, InputIterator last,
 
 
 template<class InputIterator>
-std::ostream&
-write_pointer_sequence(std::ostream& os, InputIterator first, InputIterator last,
+OutputStream&
+write_pointer_sequence(OutputStream& os, InputIterator first, InputIterator last,
                        char opening='[', char closing=']', char separator=',')
 {
     os << opening;
@@ -84,8 +87,8 @@ write_pointer_sequence(std::ostream& os, InputIterator first, InputIterator last
 
 
 template<class InputIterator>
-std::ostream&
-write_map_sequence(std::ostream& os, InputIterator first, InputIterator last,
+OutputStream&
+write_map_sequence(OutputStream& os, InputIterator first, InputIterator last,
                    char opening='{', char closing='}', char separator=',', char descriptor=':')
 {
     os << opening;
@@ -101,8 +104,8 @@ write_map_sequence(std::ostream& os, InputIterator first, InputIterator last,
 }
 
 template<class InputIterator>
-std::ostream&
-write_map_pointer_sequence(std::ostream& os, InputIterator first, InputIterator last,
+OutputStream&
+write_map_pointer_sequence(OutputStream& os, InputIterator first, InputIterator last,
                            char opening='{', char closing='}', char separator=',', char descriptor=':')
 {
     os << opening;
@@ -118,8 +121,8 @@ write_map_pointer_sequence(std::ostream& os, InputIterator first, InputIterator 
 }
 
 template<class InputIterator>
-std::ostream&
-write_ariadne_map_sequence(std::ostream& os, InputIterator first, InputIterator last,
+OutputStream&
+write_ariadne_map_sequence(OutputStream& os, InputIterator first, InputIterator last,
                            char opening='{', char closing='}', char separator=',', char descriptor=':')
 {
     os << opening;
@@ -136,8 +139,8 @@ write_ariadne_map_sequence(std::ostream& os, InputIterator first, InputIterator 
 
 
 template<class Container>
-std::istream&
-read_sequence(std::istream& is, Container& v,
+InputStream&
+read_sequence(InputStream& is, Container& v,
               char opening='[', char closing=']', char separator=',')
 {
     typedef typename Container::value_type T;
@@ -187,32 +190,32 @@ read_sequence(std::istream& is, Container& v,
 
 template<class T1>
 inline
-std::ostream&
-operator<<(std::ostream &os, const Tuple<T1>& t)
+OutputStream&
+operator<<(OutputStream &os, const Tuple<T1>& t)
 {
     return os << '(' << t.first << ',' << ')';
 }
 
 template<class T1, class T2>
 inline
-std::ostream&
-operator<<(std::ostream &os, const Tuple<T1,T2>& t)
+OutputStream&
+operator<<(OutputStream &os, const Tuple<T1,T2>& t)
 {
     return os << '(' << t.first << ',' << t.second << ')';
 }
 
 template<class T1, class T2, class T3>
 inline
-std::ostream&
-operator<<(std::ostream &os, const Tuple<T1,T2,T3>& t)
+OutputStream&
+operator<<(OutputStream &os, const Tuple<T1,T2,T3>& t)
 {
     return os << '(' << t.first << ',' << t.second << ',' << t.third << ')';
 }
 
 template<class T1, class T2, class T3, class T4>
 inline
-std::ostream&
-operator<<(std::ostream &os, const Tuple<T1,T2,T3,T4>& t)
+OutputStream&
+operator<<(OutputStream &os, const Tuple<T1,T2,T3,T4>& t)
 {
     return os << '(' << t.first << ',' << t.second << ',' << t.third << ',' << t.fourth << ')';
 }
@@ -311,7 +314,7 @@ operator<<(std::ostream &os, const std::map<K,std::shared_ptr<T>,C>& m)
 
 template<class T>
 inline
-istream&
+std::istream&
 operator>> (std::istream &is, std::vector<T>& v) {
     return Ariadne::read_sequence(is,v);
 }

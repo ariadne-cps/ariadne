@@ -29,6 +29,7 @@
 
 #include "utility/stdlib.h"
 #include "utility/macros.h"
+#include "utility/typedefs.h"
 
 #include "rational.h"
 #include "logical.h"
@@ -45,7 +46,7 @@ namespace Ariadne {
 
 class InvalidRationalLiteralException {
   public:
-    InvalidRationalLiteralException(std::string what) { }
+    InvalidRationalLiteralException(StringType what) { }
 };
 
 // Shortened version of raw float classes sufficient for comparison operator
@@ -357,7 +358,7 @@ InputStream& operator>>(InputStream& is, Rational& q1) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-//   mpq_get_str (char *str, mpq_eq1p_t *eq1pptr, int b, size_t n, mpq_t op, mpq_rnd_t rnd)
+//   mpq_get_str (char *str, mpq_eq1p_t *eq1pptr, int b, SizeType n, mpq_t op, mpq_rnd_t rnd)
 // If str is not a null pointer, it should point to a block of storage large enough for the significand,
 // i.e., at least maq1(n + 2, 7). The eq1tra two bytes are for a possible minus sign,
 // and for the terminating null character, and the value 7 accounts for -@Inf@ plus the terminating null character.

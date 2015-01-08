@@ -42,8 +42,8 @@
 
 namespace Ariadne {
 
-template<class T> inline std::string str(const T& t) {
-    std::stringstream ss; ss << t; return ss.str(); }
+template<class T> inline StringType str(const T& t) {
+    StringStream ss; ss << t; return ss.str(); }
 
 typedef uint Nat;
 typedef int Int;
@@ -125,14 +125,14 @@ struct VectorOfScalarFunction
     NonResizableScalarFunction<X>& operator[](uint i) {
         return static_cast<NonResizableScalarFunction<X>&>(this->_vec[i]); }
 
-    virtual std::ostream& write(std::ostream& os) const {
+    virtual OutputStream& write(OutputStream& os) const {
         os << "[";
         for(uint i=0; i!=this->_vec.size(); ++i) {
             if(i!=0) { os << ","; }
             this->_vec[i].raw_pointer()->write(os); }
         return os << "]"; }
 
-    virtual std::ostream& repr(std::ostream& os) const {
+    virtual OutputStream& repr(OutputStream& os) const {
         //os << "VoSF[R" << this->argument_size() << "->R" << this->result_size() << "]";
         os << "[";
         for(uint i=0; i!=this->_vec.size(); ++i) {
@@ -159,7 +159,7 @@ struct FunctionElement
         : _f(f), _i(i) { ARIADNE_ASSERT(i<f.result_size()); }
 
     virtual Nat argument_size() const { return _f.argument_size(); }
-    virtual std::ostream& write(std::ostream& os) const { return os<<_f<<"["<<_i<<"]"; }
+    virtual OutputStream& write(OutputStream& os) const { return os<<_f<<"["<<_i<<"]"; }
     virtual ScalarFunctionInterface<X>* _derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
 
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
@@ -441,7 +441,7 @@ template<class P> VectorFunction<P>::VectorFunction(Nat rs, Nat as)
 {
 }
 
-template<class P> VectorFunction<P>::VectorFunction(std::initializer_list< ScalarFunction<P> > lsf)
+template<class P> VectorFunction<P>::VectorFunction(InitializerList< ScalarFunction<P> > lsf)
 {
     ARIADNE_ASSERT(lsf.size()>0);
     Nat as=lsf.begin()->argument_size();

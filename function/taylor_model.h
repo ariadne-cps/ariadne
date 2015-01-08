@@ -67,7 +67,7 @@ template<> struct Arithmetic< TaylorModel<ValidatedNumber>,TaylorModel<Validated
 class IntersectionException;
 
 struct IntersectionException : public std::runtime_error {
-    IntersectionException(const std::string& what) : std::runtime_error(what) { }
+    IntersectionException(const StringType& what) : std::runtime_error(what) { }
 };
 
 
@@ -106,10 +106,10 @@ class TaylorModel<ValidatedNumber>
     //! \brief The type used for the coefficients.
     typedef CoefficientType ValueType;
 
-    //! \brief An iterator through the (index,coefficient) pairs of the expansion.
-    typedef ExpansionType::iterator iterator;
-    //! \brief A constant iterator through the (index,coefficient) pairs of the expansion.
-    typedef ExpansionType::const_iterator const_iterator;
+    //! \brief An Iterator through the (index,coefficient) pairs of the expansion.
+    typedef ExpansionType::Iterator Iterator;
+    //! \brief A constant Iterator through the (index,coefficient) pairs of the expansion.
+    typedef ExpansionType::ConstIterator ConstIterator;
 
     //@{
     /*! \name Constructors and destructors. */
@@ -252,14 +252,14 @@ class TaylorModel<ValidatedNumber>
     //! \brief A read/write reference to the coefficient of the term in $x^a$.
     CoefficientType& operator[](const MultiIndex& a) { return this->_expansion.at(a,ReverseLexicographicKeyLess()); }
 
-    //! \brief An iterator to the first term in the expansion.
-    iterator begin() { return this->_expansion.begin(); }
-    //! \brief A constant iterator to the first term in the expansion.
-    const_iterator begin() const { return this->_expansion.begin(); }
-    //! \brief An iterator to the end of the expansion.
-    iterator end() { return this->_expansion.end(); }
-    //! \brief A constant iterator to the end of the expansion.
-    const_iterator end() const { return this->_expansion.end(); }
+    //! \brief An Iterator to the first term in the expansion.
+    Iterator begin() { return this->_expansion.begin(); }
+    //! \brief A constant Iterator to the first term in the expansion.
+    ConstIterator begin() const { return this->_expansion.begin(); }
+    //! \brief An Iterator to the end of the expansion.
+    Iterator end() { return this->_expansion.end(); }
+    //! \brief A constant Iterator to the end of the expansion.
+    ConstIterator end() const { return this->_expansion.end(); }
 
     //! \brief The number of variables in the argument of the quantity.
     uint argument_size() const { return this->_expansion.argument_size(); }
@@ -350,12 +350,12 @@ class TaylorModel<ValidatedNumber>
     //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const TaylorModel<ValidatedNumber>& x);
+    friend OutputStream& operator<<(OutputStream& os, const TaylorModel<ValidatedNumber>& x);
     //@}
 
   public:
-    std::ostream& str(const std::ostream&) const;
-    std::ostream& repr(const std::ostream&) const;
+    OutputStream& str(const OutputStream&) const;
+    OutputStream& repr(const OutputStream&) const;
 
 };
 
@@ -496,10 +496,10 @@ class TaylorModel<ApproximateNumber>
     //! \brief The type used for the coefficients.
     typedef ApproximateCoefficientType ValueType;
 
-    //! \brief An iterator through the (index,coefficient) pairs of the expansion.
-    typedef ExpansionType::iterator iterator;
-    //! \brief A constant iterator through the (index,coefficient) pairs of the expansion.
-    typedef ExpansionType::const_iterator const_iterator;
+    //! \brief An Iterator through the (index,coefficient) pairs of the expansion.
+    typedef ExpansionType::Iterator Iterator;
+    //! \brief A constant Iterator through the (index,coefficient) pairs of the expansion.
+    typedef ExpansionType::ConstIterator ConstIterator;
 
   public:
     //@{
@@ -604,7 +604,7 @@ class TaylorModel<ApproximateNumber>
     //! \brief The radius of the ball containing the functions.
     virtual ErrorType radius() const;
     //! \brief Write to an output stream.
-    virtual std::ostream& write(std::ostream&) const;
+    virtual OutputStream& write(OutputStream&) const;
     //! \brief Inplace addition of a scalar constant.
     virtual void iadd(const ApproximateNumber& c);
     //! \brief Inplace multiplication of a scalar constant.
@@ -618,16 +618,16 @@ class TaylorModel<ApproximateNumber>
     //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const TaylorModel<ApproximateNumber>& x);
+    friend OutputStream& operator<<(OutputStream& os, const TaylorModel<ApproximateNumber>& x);
     //@}
 
   public:
-    std::ostream& str(std::ostream&) const;
-    std::ostream& repr(std::ostream&) const;
+    OutputStream& str(OutputStream&) const;
+    OutputStream& repr(OutputStream&) const;
 };
 
 
-inline std::ostream& operator<<(std::ostream& os, const TaylorModel<ApproximateNumber>& x) {
+inline OutputStream& operator<<(OutputStream& os, const TaylorModel<ApproximateNumber>& x) {
     x.str(os); return os; }
 
 inline Vector<ExactInterval> codomain(const Vector< TaylorModel<ApproximateNumber> >& t) {

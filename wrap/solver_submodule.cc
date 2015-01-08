@@ -68,7 +68,7 @@ class SolverWrapper
         return this->get_override("continuation")(); }
     Set< ValidatedPointType > solve_all(const ValidatedVectorFunction& f, const ExactBox& bx) const {
         return this->get_override("solve_all")(); }
-    void write(std::ostream&) const { this->get_override("write")(); }
+    void write(OutputStream&) const { this->get_override("write")(); }
 };
 
 
@@ -96,7 +96,7 @@ class IntegratorWrapper
         return this->get_override("flow")(); }
     List<ValidatedVectorFunctionModel> flow(const ValidatedVectorFunction&,const ExactBox&,const Real&) const {
         return this->get_override("flow")(); }
-    void write(std::ostream&) const {
+    void write(OutputStream&) const {
         this->get_override("write")(); }
 };
 

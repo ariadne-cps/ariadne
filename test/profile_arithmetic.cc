@@ -199,22 +199,22 @@ inline void acc_opp(double& r, double x, double y) {
 
 
 
-void dot_lu_rat(double& l, double& u, size_t n, const double* x, const double* y);
-void dot_md_rat(mpq_class& m, size_t n, const double* x, const double* y);
-void dot_lu_std(double& l, double& u, size_t n, const double* x, const double* y);
-void dot_lu_opp(double& l, double& u, size_t n, const double* x, const double* y);
-void dot_lu_ivl(double& l, double& u, size_t n, const double* x, const double* y);
-void dot_lu_ord(double& l, double& u, size_t n, const double* x, const double* y);
-void dot_mr_std(double& m, double& r, size_t n, const double* x, const double* y);
-void dot_mr_mid(double& m, double& r, size_t n, const double* x, const double* y);
-void dot_mr_csy(double& m, double& r, size_t n, const double* x, const double* y);
+void dot_lu_rat(double& l, double& u, SizeType n, const double* x, const double* y);
+void dot_md_rat(mpq_class& m, SizeType n, const double* x, const double* y);
+void dot_lu_std(double& l, double& u, SizeType n, const double* x, const double* y);
+void dot_lu_opp(double& l, double& u, SizeType n, const double* x, const double* y);
+void dot_lu_ivl(double& l, double& u, SizeType n, const double* x, const double* y);
+void dot_lu_ord(double& l, double& u, SizeType n, const double* x, const double* y);
+void dot_mr_std(double& m, double& r, SizeType n, const double* x, const double* y);
+void dot_mr_mid(double& m, double& r, SizeType n, const double* x, const double* y);
+void dot_mr_csy(double& m, double& r, SizeType n, const double* x, const double* y);
 
-void add_mr_std(double& e, size_t n, double* r, const double* x, const double* y);
-void add_mr_buf(double& e, size_t n, double* r, const double* x, const double* y);
-void add_mr_csy(double& e, size_t n, double* r, const double* x, const double* y);
+void add_mr_std(double& e, SizeType n, double* r, const double* x, const double* y);
+void add_mr_buf(double& e, SizeType n, double* r, const double* x, const double* y);
+void add_mr_csy(double& e, SizeType n, double* r, const double* x, const double* y);
 
-void scal_mr_std(double& e, size_t n, double* r, const double* x, const double& c);
-void scal_mr_csy(double& e, size_t n, double* r, const double* x, const double& c);
+void scal_mr_std(double& e, SizeType n, double* r, const double* x, const double& c);
+void scal_mr_csy(double& e, SizeType n, double* r, const double* x, const double& c);
 
 
 void profile_dot(int n, int nn) {
@@ -487,11 +487,11 @@ int main(int argc, const char* argv[]) {
 
 
 
-void dot_lu_rat(double& l, double& u, size_t n, const double* x, const double* y) {
+void dot_lu_rat(double& l, double& u, SizeType n, const double* x, const double* y) {
     set_rounding_mode(round_nearest);
     assert(l==u);
     mpq_class r=l;
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         r+=mpq_class(x[i])*mpq_class(y[i]);
     }
     //mpf_class::set_precision(128);
@@ -520,15 +520,15 @@ void dot_lu_rat(double& l, double& u, size_t n, const double* x, const double* y
 }
 
 
-void dot_md_rat(mpq_class& m, size_t n, const double* x, const double* y) {
+void dot_md_rat(mpq_class& m, SizeType n, const double* x, const double* y) {
     set_round_nearest();
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         m+=mpq_class(x[i])*mpq_class(y[i]);
     }
 }
 
-void dot_lu_ivl(double& l, double& u, size_t n, const double* x, const double* y) {
-    for(size_t i=0; i!=n; ++i) {
+void dot_lu_ivl(double& l, double& u, SizeType n, const double* x, const double* y) {
+    for(SizeType i=0; i!=n; ++i) {
         set_round_up();
         u+=x[i]*y[i];
         set_round_down();
@@ -537,26 +537,26 @@ void dot_lu_ivl(double& l, double& u, size_t n, const double* x, const double* y
     set_round_nearest();
 }
 
-void dot_lu_std(double& l, double& u, size_t n, const double* x, const double* y) {
+void dot_lu_std(double& l, double& u, SizeType n, const double* x, const double* y) {
     set_round_up();
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         u+=x[i]*y[i];
         //std::cerr<<" i="<<i<<" u="<<u<<"\n";
     }
     set_round_down();
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         l+=x[i]*y[i];
         //std::cerr<<" i="<<i<<" l="<<l<<"\n";
     }
     set_round_nearest();
 }
 
-void dot_lu_opp(double& l, double& u, size_t n, const double* x, const double* y) {
+void dot_lu_opp(double& l, double& u, SizeType n, const double* x, const double* y) {
     set_round_up();
     register volatile double uu=u;
     register volatile double ll=-l;
     register volatile double t;
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         uu+=x[i]*y[i];
         t=-x[i];
         t=t*y[i];
@@ -569,10 +569,10 @@ void dot_lu_opp(double& l, double& u, size_t n, const double* x, const double* y
     set_round_nearest();
 }
 
-void dot_lu_opp2(double& l, double& u, size_t n, const double* x, const double* y) {
+void dot_lu_opp2(double& l, double& u, SizeType n, const double* x, const double* y) {
     set_round_up();
     register volatile double t;
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         u+=x[i]*y[i];
         t=(-x[i]);
         t=t*y[i];
@@ -583,19 +583,19 @@ void dot_lu_opp2(double& l, double& u, size_t n, const double* x, const double* 
     set_round_nearest();
 }
 
-void dot_lu_ord(double& l, double& u, size_t n, const double* x, const double* y) {
+void dot_lu_ord(double& l, double& u, SizeType n, const double* x, const double* y) {
 
 }
 
-void dot_mr_std(double& m, double& r, size_t n, const double* x, const double* y) {
+void dot_mr_std(double& m, double& r, SizeType n, const double* x, const double* y) {
     set_round_down();
     volatile double l=m-r;
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         l+=x[i]*y[i];
     }
     set_round_up();
     volatile double u=m+r;
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         u+=x[i]*y[i];
     }
     set_round_nearest();
@@ -605,19 +605,19 @@ void dot_mr_std(double& m, double& r, size_t n, const double* x, const double* y
     set_round_nearest();
 }
 
-void dot_mr_mid(double& m, double& r, size_t n, const double* x, const double* y) {
+void dot_mr_mid(double& m, double& r, SizeType n, const double* x, const double* y) {
     volatile double a=m;
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         a+=x[i]*y[i];
     }
     set_round_down();
     volatile double l=m-r;
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         l+=x[i]*y[i];
     }
     set_round_up();
     volatile double u=m+r;
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         u+=x[i]*y[i];
     }
     m=a;
@@ -625,9 +625,9 @@ void dot_mr_mid(double& m, double& r, size_t n, const double* x, const double* y
     set_round_nearest();
 }
 
-void dot_mr_csy(double& m, double& r, size_t n, const double* x, const double* y) {
+void dot_mr_csy(double& m, double& r, SizeType n, const double* x, const double* y) {
     double e=0;
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         double p=x[i]*y[i];
         m+=p;
         e+=abs(p)*(eps/2);
@@ -639,9 +639,9 @@ void dot_mr_csy(double& m, double& r, size_t n, const double* x, const double* y
 
 
 
-void add_mr_std(double& e, size_t n, double* r, const double* x, const double* y)
+void add_mr_std(double& e, SizeType n, double* r, const double* x, const double* y)
 {
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         volatile double a=x[i]+y[i];
         set_round_down();
         volatile double l=x[i]+y[i];
@@ -653,14 +653,14 @@ void add_mr_std(double& e, size_t n, double* r, const double* x, const double* y
     }
 }
 
-void add_mr_buf(double& e, size_t n, double* r, const double* x, const double* y)
+void add_mr_buf(double& e, SizeType n, double* r, const double* x, const double* y)
 {
     double* z=new double[n];
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         z[i]=x[i]+y[i];
     }
     set_round_up();
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         volatile double u=x[i]+y[i];
         volatile double t=-x[i];
         volatile double ml=t-y[i];
@@ -670,10 +670,10 @@ void add_mr_buf(double& e, size_t n, double* r, const double* x, const double* y
     delete[] z;
 }
 
-void add_mr_csy(double& e, size_t n, double* r, const double* x, const double* y)
+void add_mr_csy(double& e, SizeType n, double* r, const double* x, const double* y)
 {
     double d=0;
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         r[i]=x[i]+y[i];
         d+=abs(r[i]);
     }
@@ -683,9 +683,9 @@ void add_mr_csy(double& e, size_t n, double* r, const double* x, const double* y
 }
 
 
-void scal_mr_std(double& e, size_t n, double* r, const double* x, const double& c)
+void scal_mr_std(double& e, SizeType n, double* r, const double* x, const double& c)
 {
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         volatile double a=x[i]*c;
         set_round_down();
         volatile double l=x[i]*c;
@@ -697,10 +697,10 @@ void scal_mr_std(double& e, size_t n, double* r, const double* x, const double& 
     }
 }
 
-void scal_mr_csy(double& e, size_t n, double* r, const double* x, const double& c)
+void scal_mr_csy(double& e, SizeType n, double* r, const double* x, const double& c)
 {
     double d=0;
-    for(size_t i=0; i!=n; ++i) {
+    for(SizeType i=0; i!=n; ++i) {
         r[i]=x[i]*c;
         d+=abs(r[i]);
     }

@@ -114,7 +114,7 @@ class Zonotope
     /*! \brief Construct a zonotope of dimension \a d with \a m generators from raw data.
      *  The data format is (c0,G00,G01,...,G0m,e0,c1,G10,...,G1m,e1,...).
      */
-    explicit Zonotope(std::initializer_list< std::tuple<Float,std::initializer_list<Float>,Float> > lst);
+    explicit Zonotope(InitializerList< std::tuple<Float,InitializerList<Float>,Float> > lst);
 
 
     /*! \brief Convert from a box. */
@@ -209,7 +209,7 @@ class Zonotope
     //@{
     //! \name Input/output.
     /*! \brief Write to an output stream. */
-    std::ostream& write(std::ostream& os) const;
+    OutputStream& write(OutputStream& os) const;
     /*! \brief Draw on a canvas. */
     void draw(CanvasInterface& c, const Projection2d& p) const;
     //@}
@@ -242,8 +242,8 @@ Zonotope orthogonal_approximation(const Zonotope& z);
 Zonotope apply(const Affine<ExactInterval>& af, const Zonotope& z);
 Zonotope apply(const VectorFunction<ValidatedTag>& f, const Zonotope& z);
 
-std::ostream& operator<<(std::ostream& os, const Zonotope& z);
-std::istream& operator>>(std::istream& is, Zonotope& z);
+OutputStream& operator<<(OutputStream& os, const Zonotope& z);
+InputStream& operator>>(InputStream& is, Zonotope& z);
 
 
 template<class X> inline

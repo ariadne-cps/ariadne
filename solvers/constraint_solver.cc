@@ -63,7 +63,7 @@ Sign sign(const ExactInterval& ivl) {
 }
 
 
-std::ostream& operator<<(std::ostream& os, const EffectiveConstraint& c) {
+OutputStream& operator<<(OutputStream& os, const EffectiveConstraint& c) {
     static const Float inf = Ariadne::inf;
     if(c.bounds().lower()==c.bounds().upper()) { return os << c.function() << "==" << c.bounds().upper(); }
     if(c.bounds().upper()==infty) { return os << c.bounds().lower() << "<=" << c.function(); }

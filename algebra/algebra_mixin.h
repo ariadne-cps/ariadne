@@ -64,7 +64,7 @@ template<class A, class X> class AlgebraMixin
         static_cast<A*>(this)->A::isma(c,dynamic_cast<const A&>(x)); }
     virtual void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2)  {
         static_cast<A*>(this)->A::ifma(dynamic_cast<const A&>(x1),dynamic_cast<const A&>(x2)); }
-    virtual std::ostream& write(std::ostream& os) const { os << static_cast<const A&>(*this); return os; }
+    virtual OutputStream& write(OutputStream& os) const { os << static_cast<const A&>(*this); return os; }
 };
 
 template<class A, class X> class NormedAlgebraMixin

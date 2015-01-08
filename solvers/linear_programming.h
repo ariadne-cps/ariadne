@@ -45,21 +45,21 @@ enum LinearProgramStatus { INDETERMINATE_FEASIBILITY=0, PRIMAL_FEASIBLE=1, DUAL_
 class DegenerateFeasibilityProblemException : public std::runtime_error {
   public:
     DegenerateFeasibilityProblemException() : std::runtime_error("") { }
-    DegenerateFeasibilityProblemException(const std::string& what) : std::runtime_error(what) { }
+    DegenerateFeasibilityProblemException(const StringType& what) : std::runtime_error(what) { }
 };
 
 struct SingularLinearProgram : std::runtime_error {
-    SingularLinearProgram(const std::string& what)
+    SingularLinearProgram(const StringType& what)
         : std::runtime_error(what) { };
 };
 
 struct UnboundedLinearProgram : std::runtime_error {
-    UnboundedLinearProgram(const std::string& what)
+    UnboundedLinearProgram(const StringType& what)
         : std::runtime_error(what) { }
 };
 
 struct InfeasibleLinearProgram : std::runtime_error {
-    InfeasibleLinearProgram(const std::string& what)
+    InfeasibleLinearProgram(const StringType& what)
         : std::runtime_error(what) { }
 };
 
@@ -116,7 +116,7 @@ class InteriorPointSolver
 
 //! \relates SimplexSolver \brief The type of variable; lower bounded, upper bounded, basic, or fixed (upper and lower bounded).
 enum Slackness { LOWER=-1, BASIS=0, UPPER=+1, FIXED=+2 };
-std::ostream& operator<<(std::ostream& os, Slackness t);
+OutputStream& operator<<(OutputStream& os, Slackness t);
 
 //! \ingroup OptimisationModule
 //! Solver for linear programming problems using the simplex algorithm.
@@ -146,7 +146,7 @@ class SimplexSolver
     //! Uses starting variable types vt, permutation p and inverse basic matrix B.
     Vector<X>
     hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                        Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B) const;
+                        Array<Slackness>& vt, Array<SizeType>& p, Matrix<X>& B) const;
 
     //! \ingroup LinearProgrammingModule
     //! Test if there exists a point \f$x\f$ with \f$0 \leq x\f$ and \f$Ax=b\f$.
@@ -177,7 +177,7 @@ class SimplexSolver
     //! The values of \a x and \a y are output parameters, giving access to the final primal and dual variables.
     Tribool
     hotstarted_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                        Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y) const;
+                        Array<Slackness>& vt, Array<SizeType>& p, Matrix<X>& B, Vector<X>& x, Vector<X>& y) const;
 
 
 
@@ -202,7 +202,7 @@ class SimplexSolver
 
     //! \ingroup LinearProgrammingModule
     //! Compute a permutation \f$p\f$ such that \f$p_{0},\ldots,p_{m-1}\f$ are the basis variables of \f$A\f$, and the inverse matrix \f$A_B^{-1}\f$.
-    Pair< Array<size_t>, Matrix<X> >
+    Pair< Array<SizeType>, Matrix<X> >
     compute_basis(const Matrix<X>& A) const;
 
     //! \ingroup LinearProgrammingModule
@@ -213,7 +213,7 @@ class SimplexSolver
     //! \ingroup LinearProgrammingModule
     //! Perform a single step of the standard linear programming problem, updating the variable type Array \a vt, the ordered variable Array \a p, the inverse basis matrix \a B and the variables \a x.
     bool lpstep(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B, Vector<X>& x) const;
+                Array<Slackness>& vt, Array<SizeType>& p, Matrix<X>& B, Vector<X>& x) const;
 
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm, choosing basic variable \a s to exit the basis.
@@ -222,8 +222,8 @@ class SimplexSolver
     //! The variable which left the basis is the new p[s]
     //! Returns \a r where x[p[r]] was the variable entering the basis.
     //!  If r=m, then no step performed
-    size_t lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                  Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B, Vector<X>& x, size_t s) const;
+    SizeType lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+                  Array<Slackness>& vt, Array<SizeType>& p, Matrix<X>& B, Vector<X>& x, SizeType s) const;
 
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm for a feasibility computation using validated (interval) arithmetic.
@@ -232,7 +232,7 @@ class SimplexSolver
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm for a feasibility computation using validated (interval) arithmetic.
     bool validated_feasibility_step(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                                    Array<Slackness>& vt, Array<size_t>& p) const;
+                                    Array<Slackness>& vt, Array<SizeType>& p) const;
 
   public:
     //! \brief Check that the feasibility problem data is consistent.
@@ -243,18 +243,18 @@ class SimplexSolver
     //!   - x[j]=l[j] if j==LOWER and x[j]=u[j] if j==UPPER
     //!   - Ax=b
     void consistency_check(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                           const Array<Slackness>& vt, const Array<size_t>& p, const Matrix<X>& B, const Vector<X>& x) const;
+                           const Array<Slackness>& vt, const Array<SizeType>& p, const Matrix<X>& B, const Vector<X>& x) const;
 
     //! \brief Check that B is the inverse of the matrix with columns A[p[0],...,A[p[m-1]].
-    void consistency_check(const Matrix<X>& A, const Array<size_t>& p, const Matrix<X>& B) const;
+    void consistency_check(const Matrix<X>& A, const Array<SizeType>& p, const Matrix<X>& B) const;
     //! \brief Check that Ax=b
     void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& x) const;
     //! \brief Check that the basic variable Array p is consistent with the variable type Array vt.
     //! Returns the number of basic variables.
-    size_t consistency_check(const Array<Slackness>& vt, const Array<size_t>& p) const;
+    SizeType consistency_check(const Array<Slackness>& vt, const Array<SizeType>& p) const;
   private:
     Tribool _feasible(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
-                      Array<Slackness>& vt, Array<size_t>& p, Matrix<X>& B, Vector<X>& x) const;
+                      Array<Slackness>& vt, Array<SizeType>& p, Matrix<X>& B, Vector<X>& x) const;
 
 
 };

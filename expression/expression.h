@@ -264,17 +264,17 @@ template<class T> inline OutputStream& operator<<(OutputStream& os, const Expres
 //! \name Input / output operations.
 //! \related Expression
 
-template<class T> OutputStream& operator<<(std::ostream& os, const Expression<T>& f);
-template<class T> inline std::ostream& _write_comparison(std::ostream& os, const Expression<T>& f) {
+template<class T> OutputStream& operator<<(OutputStream& os, const Expression<T>& f);
+template<class T> inline OutputStream& _write_comparison(OutputStream& os, const Expression<T>& f) {
     ARIADNE_FAIL_MSG("Comparison must return a logical type."); }
-template<> inline std::ostream& _write_comparison(std::ostream& os, const Expression<Tribool>& f) {
+template<> inline OutputStream& _write_comparison(OutputStream& os, const Expression<Tribool>& f) {
     Real* real_ptr=0; return os << "(" << f.cmp1(real_ptr) << symbol(f.op()) << f.cmp2(real_ptr) << ")"; }
-template<> inline std::ostream& _write_comparison(std::ostream& os, const Expression<Boolean>& f) {
+template<> inline OutputStream& _write_comparison(OutputStream& os, const Expression<Boolean>& f) {
     String* string_ptr=0; return os << "(" << f.cmp1(string_ptr) << symbol(f.op()) << f.cmp2(string_ptr) << ")"; }
 //FIXME: Distinguish String and Integer comparisons
 
 //! \brief Write to an output stream
-template<class T> OutputStream& operator<<(std::ostream& os, const Expression<T>& f) {
+template<class T> OutputStream& operator<<(OutputStream& os, const Expression<T>& f) {
     switch(f.op()) {
         //case CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
         case CNST:

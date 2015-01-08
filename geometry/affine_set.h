@@ -130,7 +130,7 @@ class ValidatedAffineConstrainedImageSet
     List<Point2d> boundary(uint xc, uint yc) const;
 
     virtual void draw(CanvasInterface&, const Projection2d& p) const;
-    virtual std::ostream& write(std::ostream& os) const;
+    virtual OutputStream& write(OutputStream& os) const;
 
   private:
     void construct(const ExactBox& D, const Matrix<ExactFloat>& G, const Vector<ExactFloat>& c);
@@ -139,7 +139,7 @@ class ValidatedAffineConstrainedImageSet
     static void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth);
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ValidatedAffineConstrainedImageSet& as) {
+inline OutputStream& operator<<(OutputStream& os, const ValidatedAffineConstrainedImageSet& as) {
     return as.write(os); }
 
 

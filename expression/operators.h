@@ -48,7 +48,7 @@ typedef bool Bool;
 typedef unsigned int Nat;
 typedef int Int;
 
-typedef std::ostream OutputStream;
+typedef OutputStream OutputStream;
 
 class String;
 class Boolean;
@@ -424,40 +424,40 @@ struct Sgn {
 };
 
 
-inline std::ostream& operator<<(std::ostream& os, const Less& v) { return os << "<"; }
-inline std::ostream& operator<<(std::ostream& os, const Gtr& v) { return os << ">"; }
-inline std::ostream& operator<<(std::ostream& os, const Leq& v) { return os << "<="; }
-inline std::ostream& operator<<(std::ostream& os, const Geq& v) { return os << ">="; }
-inline std::ostream& operator<<(std::ostream& os, const Equal& v) { return os << "=="; }
-inline std::ostream& operator<<(std::ostream& os, const Unequal& v) { return os << "!="; }
+inline OutputStream& operator<<(OutputStream& os, const Less& v) { return os << "<"; }
+inline OutputStream& operator<<(OutputStream& os, const Gtr& v) { return os << ">"; }
+inline OutputStream& operator<<(OutputStream& os, const Leq& v) { return os << "<="; }
+inline OutputStream& operator<<(OutputStream& os, const Geq& v) { return os << ">="; }
+inline OutputStream& operator<<(OutputStream& os, const Equal& v) { return os << "=="; }
+inline OutputStream& operator<<(OutputStream& os, const Unequal& v) { return os << "!="; }
 
-inline std::ostream& operator<<(std::ostream& os, const AndOp& v) { return os << "&&"; }
-inline std::ostream& operator<<(std::ostream& os, const OrOp& v) { return os << "||"; }
-inline std::ostream& operator<<(std::ostream& os, const NotOp& v) { return os << "!"; }
+inline OutputStream& operator<<(OutputStream& os, const AndOp& v) { return os << "&&"; }
+inline OutputStream& operator<<(OutputStream& os, const OrOp& v) { return os << "||"; }
+inline OutputStream& operator<<(OutputStream& os, const NotOp& v) { return os << "!"; }
 
-inline std::ostream& operator<<(std::ostream& os, const Add& v) { return os << "+"; }
-inline std::ostream& operator<<(std::ostream& os, const Sub& v) { return os << "-"; }
-inline std::ostream& operator<<(std::ostream& os, const Mul& v) { return os << "*"; }
-inline std::ostream& operator<<(std::ostream& os, const Div& v) { return os << "/"; }
+inline OutputStream& operator<<(OutputStream& os, const Add& v) { return os << "+"; }
+inline OutputStream& operator<<(OutputStream& os, const Sub& v) { return os << "-"; }
+inline OutputStream& operator<<(OutputStream& os, const Mul& v) { return os << "*"; }
+inline OutputStream& operator<<(OutputStream& os, const Div& v) { return os << "/"; }
 
-inline std::ostream& operator<<(std::ostream& os, const Pos& op) { return os << "pos"; }
-inline std::ostream& operator<<(std::ostream& os, const Neg& op) { return os << "neg"; }
-inline std::ostream& operator<<(std::ostream& os, const Rec& op) { return os << "rec"; }
-inline std::ostream& operator<<(std::ostream& os, const Pow& op) { return os << "pow"; }
-inline std::ostream& operator<<(std::ostream& os, const Sqr& op) { return os << "sqr"; }
-inline std::ostream& operator<<(std::ostream& os, const Sqrt& op) { return os << "sqrt"; }
+inline OutputStream& operator<<(OutputStream& os, const Pos& op) { return os << "pos"; }
+inline OutputStream& operator<<(OutputStream& os, const Neg& op) { return os << "neg"; }
+inline OutputStream& operator<<(OutputStream& os, const Rec& op) { return os << "rec"; }
+inline OutputStream& operator<<(OutputStream& os, const Pow& op) { return os << "pow"; }
+inline OutputStream& operator<<(OutputStream& os, const Sqr& op) { return os << "sqr"; }
+inline OutputStream& operator<<(OutputStream& os, const Sqrt& op) { return os << "sqrt"; }
 
-inline std::ostream& operator<<(std::ostream& os, const Exp& op) { return os << "exp"; }
-inline std::ostream& operator<<(std::ostream& os, const Log& op) { return os << "log"; }
-inline std::ostream& operator<<(std::ostream& os, const Sin& op) { return os << "sin"; }
-inline std::ostream& operator<<(std::ostream& os, const Cos& op) { return os << "cos"; }
-inline std::ostream& operator<<(std::ostream& os, const Tan& op) { return os << "tan"; }
+inline OutputStream& operator<<(OutputStream& os, const Exp& op) { return os << "exp"; }
+inline OutputStream& operator<<(OutputStream& os, const Log& op) { return os << "log"; }
+inline OutputStream& operator<<(OutputStream& os, const Sin& op) { return os << "sin"; }
+inline OutputStream& operator<<(OutputStream& os, const Cos& op) { return os << "cos"; }
+inline OutputStream& operator<<(OutputStream& os, const Tan& op) { return os << "tan"; }
 
-inline std::ostream& operator<<(std::ostream& os, const Max& op) { return os << "max"; }
-inline std::ostream& operator<<(std::ostream& os, const Min& op) { return os << "min"; }
-inline std::ostream& operator<<(std::ostream& os, const Abs& op) { return os << "abs"; }
+inline OutputStream& operator<<(OutputStream& os, const Max& op) { return os << "max"; }
+inline OutputStream& operator<<(OutputStream& os, const Min& op) { return os << "min"; }
+inline OutputStream& operator<<(OutputStream& os, const Abs& op) { return os << "abs"; }
 
-inline std::ostream& operator<<(std::ostream& os, const Sgn& op) { return os << "sgn"; }
+inline OutputStream& operator<<(OutputStream& os, const Sgn& op) { return os << "sgn"; }
 
 
 } // namespace Ariadne

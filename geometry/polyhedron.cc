@@ -145,7 +145,7 @@ Polyhedron::bounded() const
 
 
 Polyhedron
-Polyhedron::halfspace(size_t i) const
+Polyhedron::halfspace(SizeType i) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -171,8 +171,8 @@ intersection(const Polyhedron& plhd1, const Polyhedron& plhd2)
 {
     ARIADNE_ASSERT(plhd1.dimension()==plhd2.dimension());
     uint d=plhd1.dimension();
-    size_t nc1=plhd1.number_of_constraints();
-    size_t nc2=plhd2.number_of_constraints();
+    SizeType nc1=plhd1.number_of_constraints();
+    SizeType nc2=plhd2.number_of_constraints();
     Matrix<Float> A(nc1+nc2,d);
     project(A,range(0,nc1),range(0,d)) = plhd1.A();
     project(A,range(nc1,nc1+nc2),range(0,d)) = plhd1.A();
@@ -210,18 +210,18 @@ polytope(const Polyhedron& pltp)
 
 
 
-std::ostream&
-Polyhedron::write(std::ostream& os) const
+OutputStream&
+Polyhedron::write(OutputStream& os) const
 {
     //return os << "Polyhedron( A=" << this->A() << ", b=" << this->b() << " )";
     const Matrix<Float> A=this->A();
     const Vector<Float> b=this->b();
     os << "Polyhedron( constraints=";
     uint d=this->dimension();
-    size_t nc=this->number_of_constraints();
-    for(size_t i=0; i!=nc; ++i) {
+    SizeType nc=this->number_of_constraints();
+    for(SizeType i=0; i!=nc; ++i) {
         os << ( i==0 ? "[" : "," );
-        for(size_t j=0; j!=d; ++j) {
+        for(SizeType j=0; j!=d; ++j) {
             os << ( j==0 ? "(" : ",");
             os << A[i][j];
         }
@@ -231,8 +231,8 @@ Polyhedron::write(std::ostream& os) const
     return os;
 }
 
-std::istream&
-operator>>(std::istream& is, Polyhedron& p)
+InputStream&
+operator>>(InputStream& is, Polyhedron& p)
 {
     std::vector< std::vector<Float> > Alst;
     std::vector< Float > Blst;
@@ -255,12 +255,12 @@ operator>>(std::istream& is, Polyhedron& p)
         Blst.push_back(b);
     }
 
-    size_t m=Alst.size();
-    size_t n=Alst[0].size();
+    SizeType m=Alst.size();
+    SizeType n=Alst[0].size();
     Matrix<Float> A(m,n);
     Vector<Float> B(m);
     for(uint i=0; i!=m; ++i) {
-        for(size_t j=0; j!=n; ++j) {
+        for(SizeType j=0; j!=n; ++j) {
             A[i][j]=Alst[i][j];
         }
         B[i]=Blst[i];

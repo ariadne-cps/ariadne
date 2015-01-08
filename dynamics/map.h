@@ -57,7 +57,7 @@ class IteratedMap
     EffectiveVectorFunction _function;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const IteratedMap& vf) {
+inline OutputStream& operator<<(OutputStream& os, const IteratedMap& vf) {
     return os << "IteratedMap( " << vf.function() << " )";
 }
 

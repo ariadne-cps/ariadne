@@ -92,7 +92,7 @@ class DiscreteMode {
     uint dimension() const;
 
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream& os) const;
+    OutputStream& write(OutputStream& os) const;
 
   private:
     // Construct discrete mode.
@@ -106,7 +106,7 @@ class DiscreteMode {
 };
 
 
-std::ostream& operator<<(std::ostream& os, const DiscreteMode& dm);
+OutputStream& operator<<(OutputStream& os, const DiscreteMode& dm);
 
 */
 
@@ -173,7 +173,7 @@ class MonolithicHybridAutomaton
         Map< DiscreteEvent, Transition >  _transitions;
         uint dimension() const { return _dynamic.result_size(); }
     };
-    friend std::ostream& operator<<(std::ostream&, const MonolithicHybridAutomaton&);
+    friend OutputStream& operator<<(OutputStream&, const MonolithicHybridAutomaton&);
   public:
     //! \brief The type used to represent time.
     typedef HybridTime TimeType;
@@ -321,11 +321,11 @@ class MonolithicHybridAutomaton
     //@}
 
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream&) const;
+    OutputStream& write(OutputStream&) const;
 
 };
 
-inline std::ostream& operator<<(std::ostream& os, const MonolithicHybridAutomaton& ha) {
+inline OutputStream& operator<<(OutputStream& os, const MonolithicHybridAutomaton& ha) {
     return ha.write(os);
 }
 

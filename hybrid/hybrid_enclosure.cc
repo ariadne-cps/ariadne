@@ -50,7 +50,7 @@
 namespace Ariadne {
 
 
-std::ostream& operator<<(std::ostream& os, const EnclosureVariableType& evt) {
+OutputStream& operator<<(OutputStream& os, const EnclosureVariableType& evt) {
     switch (evt) {
         case INITIAL: return os << "x";
         case TEMPORAL: return os << "t";
@@ -64,7 +64,7 @@ std::ostream& operator<<(std::ostream& os, const EnclosureVariableType& evt) {
     }
 }
 
-template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; return ss.str(); }
+template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
 List<String> variable_names(const List<EnclosureVariableType>& vt) {
     std::map<EnclosureVariableType,uint> counts;
@@ -465,7 +465,7 @@ void HybridEnclosure::draw(CanvasInterface& canvas, const Set<DiscreteLocation>&
     this->continuous_set().draw(canvas,proj);
 }
 
-std::ostream& HybridEnclosure::write(std::ostream& os) const
+OutputStream& HybridEnclosure::write(OutputStream& os) const
 {
     return os << "HybridEnclosure"
               << "( variables = " << variable_names(this->_variables)
@@ -482,7 +482,7 @@ std::ostream& HybridEnclosure::write(std::ostream& os) const
               << ")";
 }
 
-std::ostream& HybridEnclosure::print(std::ostream& os) const
+OutputStream& HybridEnclosure::print(OutputStream& os) const
 {
     return os << "HybridEnclosure"
               << "( events=" << this->_events
@@ -495,7 +495,7 @@ std::ostream& HybridEnclosure::print(std::ostream& os) const
               << ", time_range="<<this->time_range() << ")";
 }
 
-std::ostream& HybridEnclosure::repr(std::ostream& os) const
+OutputStream& HybridEnclosure::repr(OutputStream& os) const
 {
     return os << "HybridEnclosure"
               << "( " << this->_location
@@ -515,7 +515,7 @@ void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreeSet& hgts, int
 
 HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, int depth) {
     HybridGridTreeSet result(g);
-    for(ListSet<HybridEnclosure>::const_iterator iter=hls.begin(); iter!=hls.end(); ++iter) {
+    for(ListSet<HybridEnclosure>::ConstIterator iter=hls.begin(); iter!=hls.end(); ++iter) {
         result[iter->location()].adjoin_outer_approximation(iter->continuous_set(),depth);
     }
     return result;
@@ -523,7 +523,7 @@ HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const
 
 void
 draw(FigureInterface& figure, const ListSet<HybridEnclosure>& hels) {
-    for(ListSet<HybridEnclosure>::const_iterator iter=hels.begin(); iter!=hels.end(); ++iter) {
+    for(ListSet<HybridEnclosure>::ConstIterator iter=hels.begin(); iter!=hels.end(); ++iter) {
         draw(figure,iter->continuous_set());
     }
 }
@@ -532,7 +532,7 @@ ListSet<HybridEnclosure::ContinuousStateSetType>
 ListSet<HybridEnclosure>::operator[](const DiscreteLocation& loc) const
 {
     ListSet<HybridEnclosure::ContinuousStateSetType> result;
-    for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+    for(ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         if(iter->location()==loc) {
             result.adjoin(iter->continuous_set());
         }

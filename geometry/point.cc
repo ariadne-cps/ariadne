@@ -38,12 +38,12 @@ namespace Ariadne {
 inline ExactInterval make_interval(ApproximateNumber x) { return ExactInterval(x.raw()); }
 inline ExactInterval make_interval(ExactNumber x) { return ExactInterval(x.raw()); }
 
-template<class X> Point<X>::Point(std::initializer_list<double> lst)
+template<class X> Point<X>::Point(InitializerList<double> lst)
     : Vector<X>(Vector<Float>(Vector<double>(lst)))
 {
 }
 
-template<class X> Point<X>::Point(const std::string& str)
+template<class X> Point<X>::Point(const StringType& str)
 {
     *this=make_point(str);
 }
@@ -71,10 +71,10 @@ template class Point<ExactNumber>;
 template class Point<ApproximateNumber>;
 
 
-ExactPoint make_point(const std::string& str)
+ExactPoint make_point(const StringType& str)
 {
     std::vector<Float> lst;
-    std::stringstream ss(str);
+    StringStream ss(str);
     read_sequence(ss,lst,'(',')',',');
     Vector<Float> vec(lst);
 

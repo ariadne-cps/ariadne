@@ -65,7 +65,7 @@ class ScalarFunctionMixin<F,ApproximateTag>
     virtual ApproximateTaylorModel evaluate(const Vector<ApproximateTaylorModel>& x) const;
     virtual ApproximateAlgebra evaluate(const Vector<ApproximateAlgebra>& x) const;
 
-    virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
+    virtual OutputStream& repr(OutputStream& os) const { return this->write(os); }
     virtual ScalarFunctionInterface<ApproximateTag>* _clone() const;
 };
 
@@ -91,7 +91,7 @@ class ScalarFunctionMixin<F,ValidatedTag>
     virtual ValidatedTaylorModel evaluate(const Vector<ValidatedTaylorModel>& x) const;
     virtual ValidatedAlgebra evaluate(const Vector<ValidatedAlgebra>& x) const;
 
-    virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
+    virtual OutputStream& repr(OutputStream& os) const { return this->write(os); }
     virtual ScalarFunctionInterface<ValidatedTag>* _clone() const;
 };
 
@@ -120,7 +120,7 @@ class ScalarFunctionMixin<F,EffectiveTag>
     virtual ValidatedAlgebra evaluate(const Vector<ValidatedAlgebra>& x) const;
     virtual EffectiveAlgebra evaluate(const Vector<EffectiveAlgebra>& x) const;
 
-    virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
+    virtual OutputStream& repr(OutputStream& os) const { return this->write(os); }
     virtual ScalarFunctionInterface<EffectiveTag>* _clone() const;
 
     Vector<ApproximateNumber> gradient(const Vector<ApproximateNumber>& v) const;
@@ -145,7 +145,7 @@ class VectorFunctionMixin<F,ApproximateTag>
     virtual Vector<ApproximateAlgebra> evaluate(const Vector<ApproximateAlgebra>& x) const;
     virtual VectorFunctionInterface<ApproximateTag>* _clone() const;
 
-    virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
+    virtual OutputStream& repr(OutputStream& os) const { return this->write(os); }
 };
 
 template<class F>
@@ -170,7 +170,7 @@ class VectorFunctionMixin<F,ValidatedTag>
     virtual Vector<ValidatedAlgebra> evaluate(const Vector<ValidatedAlgebra>& x) const;
     virtual VectorFunctionInterface<ValidatedTag>* _clone() const;
 
-    virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
+    virtual OutputStream& repr(OutputStream& os) const { return this->write(os); }
 };
 
 // A wrapper for classes with non-static _compute methods
@@ -199,7 +199,7 @@ class VectorFunctionMixin<F,EffectiveTag>
     virtual Vector<EffectiveAlgebra> evaluate(const Vector<EffectiveAlgebra>& x) const;
     virtual VectorFunctionInterface<EffectiveTag>* _clone() const;
 
-    virtual std::ostream& repr(std::ostream& os) const { return this->write(os); }
+    virtual OutputStream& repr(OutputStream& os) const { return this->write(os); }
 
 };
 

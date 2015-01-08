@@ -46,7 +46,7 @@ template<class T> class Space;
 typedef Space<Real> RealSpace;
 
 enum EventKind { INVARIANT, PROGRESS, PERMISSIVE, URGENT, IMPACT };
-inline std::ostream& operator<<(std::ostream&, const EventKind& evk);
+inline OutputStream& operator<<(OutputStream&, const EventKind& evk);
 
 static const EventKind invariant = INVARIANT;
 static const EventKind progress = PROGRESS;
@@ -56,72 +56,72 @@ static const EventKind impact = IMPACT;
 
 class SystemSpecificationError : public std::runtime_error {
   public:
-    SystemSpecificationError(const std::string& what) : std::runtime_error(what) { }
+    SystemSpecificationError(const StringType& what) : std::runtime_error(what) { }
 };
 
 class NonExistentModeError : public SystemSpecificationError {
   public:
-    NonExistentModeError(const std::string& what) : SystemSpecificationError(what) { }
+    NonExistentModeError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
 class IndistinguishableModeError : public SystemSpecificationError {
   public:
-    IndistinguishableModeError(const std::string& what) : SystemSpecificationError(what) { }
+    IndistinguishableModeError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
 class DuplicateEventError : public SystemSpecificationError {
   public:
-    DuplicateEventError(const std::string& what) : SystemSpecificationError(what) { }
+    DuplicateEventError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
 class MultipleGuardError : public SystemSpecificationError {
   public:
-    MultipleGuardError(const std::string& what) : SystemSpecificationError(what) { }
+    MultipleGuardError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
 class MultipleTransitionError : public SystemSpecificationError {
   public:
-    MultipleTransitionError(const std::string& what) : SystemSpecificationError(what) { }
+    MultipleTransitionError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
 class AlgebraicLoopError : public SystemSpecificationError {
   public:
-    AlgebraicLoopError(const std::string& what) : SystemSpecificationError(what) { }
+    AlgebraicLoopError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
 class OverspecifiedSystemError : public SystemSpecificationError {
   public:
-    OverspecifiedSystemError(const std::string& what) : SystemSpecificationError(what) { }
+    OverspecifiedSystemError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
 class OverspecifiedDynamicError : public OverspecifiedSystemError {
   public:
-    OverspecifiedDynamicError(const std::string& what) : OverspecifiedSystemError(what) { }
+    OverspecifiedDynamicError(const StringType& what) : OverspecifiedSystemError(what) { }
 };
 
 class OverspecifiedResetError : public OverspecifiedSystemError {
   public:
-    OverspecifiedResetError(const std::string& what) : OverspecifiedSystemError(what) { }
+    OverspecifiedResetError(const StringType& what) : OverspecifiedSystemError(what) { }
 };
 
 class UnderspecifiedSystemError : public SystemSpecificationError {
   public:
-    UnderspecifiedSystemError(const std::string& what) : SystemSpecificationError(what) { }
+    UnderspecifiedSystemError(const StringType& what) : SystemSpecificationError(what) { }
 };
 
 class UnderspecifiedDynamicError : public UnderspecifiedSystemError {
   public:
-    UnderspecifiedDynamicError(const std::string& what) : UnderspecifiedSystemError(what) { }
+    UnderspecifiedDynamicError(const StringType& what) : UnderspecifiedSystemError(what) { }
 };
 
 class UnderspecifiedConstraintError : public UnderspecifiedSystemError {
   public:
-    UnderspecifiedConstraintError(const std::string& what) : UnderspecifiedSystemError(what) { }
+    UnderspecifiedConstraintError(const StringType& what) : UnderspecifiedSystemError(what) { }
 };
 
 class UnderspecifiedResetError : public UnderspecifiedSystemError {
   public:
-    UnderspecifiedResetError(const std::string& what) : UnderspecifiedSystemError(what) { }
+    UnderspecifiedResetError(const StringType& what) : UnderspecifiedSystemError(what) { }
 };
 
 
@@ -205,17 +205,17 @@ class HybridAutomatonInterface {
     //! \name Input/output methods
 
     //! \brief Write to an output stream.
-    virtual std::ostream& write(std::ostream& os) const = 0;
+    virtual OutputStream& write(OutputStream& os) const = 0;
     //@}
 
 };
 
-inline std::ostream& operator<<(std::ostream& os, const HybridAutomatonInterface& ha) {
+inline OutputStream& operator<<(OutputStream& os, const HybridAutomatonInterface& ha) {
     ha.write(os);
     return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const EventKind& evk) {
+inline OutputStream& operator<<(OutputStream& os, const EventKind& evk) {
     switch(evk) {
         case INVARIANT: os<<"invariant"; break;
         case PROGRESS: os<<"progress"; break;

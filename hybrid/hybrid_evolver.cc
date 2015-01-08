@@ -62,13 +62,13 @@ static const DiscreteEvent step_event("_h_");
 typedef Vector<ExactFloat> ExactFloatVector;
 typedef Vector<ExactInterval> ExactIntervalVector;
 
-std::ostream& operator<<(std::ostream& os, const HybridTerminationCriterion& termination) {
+OutputStream& operator<<(OutputStream& os, const HybridTerminationCriterion& termination) {
     return os << "HybridTerminationCriterion( maximum_time=" << termination.maximum_time()
               << ", maximum_steps="<<termination.maximum_steps()
               << ", terminating_events="<<termination.terminating_events() << " )";
 }
 
-std::ostream& operator<<(std::ostream& os, const CrossingKind& crk) {
+OutputStream& operator<<(OutputStream& os, const CrossingKind& crk) {
     switch(crk) {
         case CrossingKind::DEGENERATE: os<<"DEGENERATE"; break;
         case CrossingKind::POSITIVE: os<<"POSITIVE"; break;
@@ -83,7 +83,7 @@ std::ostream& operator<<(std::ostream& os, const CrossingKind& crk) {
     } return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const DirectionKind& dir) {
+OutputStream& operator<<(OutputStream& os, const DirectionKind& dir) {
     switch(dir) {
         case DirectionKind::POSITIVE: os<<"POSITIVE"; break;
         case DirectionKind::NEGATIVE: os<<"NEGATIVE"; break;
@@ -96,7 +96,7 @@ std::ostream& operator<<(std::ostream& os, const DirectionKind& dir) {
     } return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const StepKind& stpk) {
+OutputStream& operator<<(OutputStream& os, const StepKind& stpk) {
     switch(stpk) {
         case StepKind::CONSTANT_EVOLUTION_TIME: os<<"CONSTANT_EVOLUTION_TIME"; break;
         case StepKind::SPACETIME_DEPENDENT_EVOLUTION_TIME: os<<"SPACETIME_DEPENDENT_EVOLUTION_TIME"; break;
@@ -108,7 +108,7 @@ std::ostream& operator<<(std::ostream& os, const StepKind& stpk) {
     } return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const FinishingKind& fnshk) {
+OutputStream& operator<<(OutputStream& os, const FinishingKind& fnshk) {
     switch(fnshk) {
         case FinishingKind::BEFORE_FINAL_TIME: os<<"BEFORE_FINAL_TIME"; break;
         case FinishingKind::AT_FINAL_TIME: os<<"AT_FINAL_TIME"; break;
@@ -118,12 +118,12 @@ std::ostream& operator<<(std::ostream& os, const FinishingKind& fnshk) {
     } return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const TransitionData& transition) {
+OutputStream& operator<<(OutputStream& os, const TransitionData& transition) {
     return os << "kind="<<transition.event_kind<<", guard="<<transition.guard_function<<", "
                  "target="<<transition.target<<", reset="<<transition.reset_function;
 }
 
-std::ostream& operator<<(std::ostream& os, const TimingData& timing) {
+OutputStream& operator<<(OutputStream& os, const TimingData& timing) {
     os << "step_kind="<<timing.step_kind<<", finishing_kind="<<timing.finishing_kind<<", step_size="<<timing.step_size<<", "
        << "final_time="<<timing.final_time;
     if(timing.step_kind==StepKind::SPACETIME_DEPENDENT_EVOLUTION_TIME) {
@@ -135,7 +135,7 @@ std::ostream& operator<<(std::ostream& os, const TimingData& timing) {
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const CrossingData& crossing_data) {
+OutputStream& operator<<(OutputStream& os, const CrossingData& crossing_data) {
     os << "{kind="<<crossing_data.crossing_kind;
     if(crossing_data.crossing_kind==CrossingKind::TRANSVERSE) {
         os << ", crossing_time="<<crossing_data.crossing_time;
@@ -174,7 +174,7 @@ bool is_activating(EventKind evk) {
 // Extract the blocking events.
 Set<DiscreteEvent> blocking_events(const Map<DiscreteEvent,TransitionData>& transitions) {
     Set<DiscreteEvent> events;
-    for(Map<DiscreteEvent,TransitionData>::const_iterator transition_iter=transitions.begin();
+    for(Map<DiscreteEvent,TransitionData>::ConstIterator transition_iter=transitions.begin();
         transition_iter!=transitions.end(); ++transition_iter)
     {
         if(is_blocking(transition_iter->second.event_kind)) {
@@ -187,7 +187,7 @@ Set<DiscreteEvent> blocking_events(const Map<DiscreteEvent,TransitionData>& tran
 // Extract the activating events.
 Set<DiscreteEvent> activating_events(const Map<DiscreteEvent,TransitionData>& transitions) {
     Set<DiscreteEvent> events;
-    for(Map<DiscreteEvent,TransitionData>::const_iterator transition_iter=transitions.begin();
+    for(Map<DiscreteEvent,TransitionData>::ConstIterator transition_iter=transitions.begin();
         transition_iter!=transitions.end(); ++transition_iter)
     {
         if(is_activating(transition_iter->second.event_kind)) {
@@ -405,7 +405,7 @@ _extract_transitions(DiscreteLocation const& location) const
 
     Map<DiscreteEvent,TransitionData> transitions;
     Set<DiscreteEvent> events = _sys_ptr->events(location);
-    for(Set<DiscreteEvent>::const_iterator event_iter=events.begin();
+    for(Set<DiscreteEvent>::ConstIterator event_iter=events.begin();
         event_iter!=events.end(); ++event_iter)
     {
         DiscreteEvent event=*event_iter;
@@ -441,7 +441,7 @@ _apply_invariants(HybridEnclosure& initial_set,
     HybridEnclosure& invariant_set=initial_set;
 
     // Apply restrictions due to invariants
-    for(Map<DiscreteEvent,TransitionData>::const_iterator transition_iter=transitions.begin();
+    for(Map<DiscreteEvent,TransitionData>::ConstIterator transition_iter=transitions.begin();
         transition_iter!=transitions.end(); ++transition_iter)
     {
         DiscreteEvent event=transition_iter->first;
@@ -472,7 +472,7 @@ _process_starting_events(EvolutionData& evolution_data,
 
     // Compute possibly initially active events
     Set<DiscreteEvent> events=transitions.keys();
-    for(Map<DiscreteEvent,TransitionData>::const_iterator transition_iter=transitions.begin();
+    for(Map<DiscreteEvent,TransitionData>::ConstIterator transition_iter=transitions.begin();
         transition_iter!=transitions.end(); ++transition_iter)
     {
         DiscreteEvent event=transition_iter->first;
@@ -557,7 +557,7 @@ _compute_active_events(EffectiveVectorFunction const& dynamic,
     ARIADNE_LOG(8,"flow_bounds="<<flow_bounds<<"\n");
     reach_set.apply_full_reach_step(flow);
     ARIADNE_LOG(8,"reach_set="<<reach_set<<"\n");
-    for(Set<DiscreteEvent>::iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
+    for(Set<DiscreteEvent>::Iterator event_iter=events.begin(); event_iter!=events.end(); ++event_iter) {
         const DiscreteEvent event=*event_iter;
         const EffectiveScalarFunction& guard_function=guards[event];
         ARIADNE_LOG(8,"event="<<event<<", guard="<<guard_function<<", flow_derivative="<<lie_derivative(guard_function,dynamic)<<"\n");
@@ -605,7 +605,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
     ExactIntervalVector flow_spacial_domain=project(flow.domain(),range(0,flow.argument_size()-1u));
     ExactInterval flow_time_domain=flow.domain()[flow.argument_size()-1u];
     UpperBox flow_bounds=flow.range();
-    for(Set<DiscreteEvent>::const_iterator event_iter=active_events.begin();
+    for(Set<DiscreteEvent>::ConstIterator event_iter=active_events.begin();
         event_iter!=active_events.end(); ++event_iter)
     {
         const DiscreteEvent event=*event_iter;
@@ -726,7 +726,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
     }
     if(!crossings.empty()) {
         Map<DiscreteEvent,Tuple<CrossingKind,UpperInterval,ErrorFloat> > crossing_log_data;
-        for (Map<DiscreteEvent,CrossingData>::const_iterator crossing_iter=crossings.begin(); crossing_iter!=crossings.end(); ++crossing_iter) {
+        for (Map<DiscreteEvent,CrossingData>::ConstIterator crossing_iter=crossings.begin(); crossing_iter!=crossings.end(); ++crossing_iter) {
             DiscreteEvent event=crossing_iter->first;
             CrossingKind crossing_kind=crossing_iter->second.crossing_kind;
             UpperInterval crossing_time_range(-infty,+infty);
@@ -890,8 +890,8 @@ _apply_guard(List<HybridEnclosure>& sets,
     }
     ARIADNE_ASSERT(starting_state.domain()==elapsed_time.domain());
 
-    List<HybridEnclosure>::iterator end=sets.end();
-    for(List<HybridEnclosure>::iterator iter=sets.begin(); iter!=end; ++iter) {
+    List<HybridEnclosure>::Iterator end=sets.end();
+    for(List<HybridEnclosure>::Iterator iter=sets.begin(); iter!=end; ++iter) {
         HybridEnclosure& set=*iter;
 
         switch(crossing_data.crossing_kind) {
@@ -1003,8 +1003,8 @@ _evolution_in_mode(EvolutionData& evolution_data,
     // and means that initially active events are tested for only once.
     ARIADNE_LOG(3,"HybridEvolverBase::_evolution_in_mode\n");
 
-    typedef Map<DiscreteEvent,ValidatedScalarFunction>::const_iterator constraint_iterator;
-    typedef Set<DiscreteEvent>::const_iterator event_iterator;
+    typedef Map<DiscreteEvent,ValidatedScalarFunction>::ConstIterator constraint_iterator;
+    typedef Set<DiscreteEvent>::ConstIterator event_iterator;
 
     const Real final_time=termination_criterion.maximum_time();
     const Natural maximum_steps=termination_criterion.maximum_steps();
@@ -1121,7 +1121,7 @@ _evolution_step(EvolutionData& evolution_data,
     }
 
     Map<DiscreteEvent,EffectiveScalarFunction> guard_functions;
-    for(Map<DiscreteEvent,TransitionData>::const_iterator transition_iter=transitions.begin();
+    for(Map<DiscreteEvent,TransitionData>::ConstIterator transition_iter=transitions.begin();
         transition_iter!=transitions.end(); ++transition_iter)
     {
         guard_functions.insert(transition_iter->first,transition_iter->second.guard_function);
@@ -1137,7 +1137,7 @@ _evolution_step(EvolutionData& evolution_data,
         this->_compute_active_events(dynamic,guard_functions,flow_model,starting_set);
     if(!active_events.empty()) {
         Map<DiscreteEvent,EventKind> active_events_log_data;
-        for(Set<DiscreteEvent>::const_iterator event_iter=active_events.begin(); event_iter!=active_events.end(); ++event_iter) {
+        for(Set<DiscreteEvent>::ConstIterator event_iter=active_events.begin(); event_iter!=active_events.end(); ++event_iter) {
             active_events_log_data.insert(*event_iter,transitions[*event_iter].event_kind);
         }
         ARIADNE_LOG(2,"active_events: "<<active_events_log_data<<"\n");
@@ -1212,7 +1212,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
     ARIADNE_LOG(8,"flow_evolve_set="<<evolve_sets.front()<<"\n")
 
     // Apply constraints on reach and evolve sets due to invariants and urgent guards
-    for(Set<DiscreteEvent>::const_iterator event_iter=blocking_events.begin();
+    for(Set<DiscreteEvent>::ConstIterator event_iter=blocking_events.begin();
         event_iter!=blocking_events.end(); ++event_iter)
     {
         const TransitionData& transition_data=transitions[*event_iter];
@@ -1236,7 +1236,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
     // Make copy of evolve sets without transverse and increasing crossings which can be used for future evolution
     List<HybridEnclosure> next_working_sets = evolve_sets;
 
-    for(Set<DiscreteEvent>::const_iterator event_iter=blocking_events.begin();
+    for(Set<DiscreteEvent>::ConstIterator event_iter=blocking_events.begin();
         event_iter!=blocking_events.end(); ++event_iter)
     {
         const TransitionData& transition_data=transitions[*event_iter];
@@ -1254,7 +1254,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
     // Compute final set depending on whether the finishing kind is exactly AT_FINAL_TIME.
     // Insert sets into evolution_data as appropriate
     if(timing_data.finishing_kind==FinishingKind::AT_FINAL_TIME) {
-        for(List<HybridEnclosure>::const_iterator evolve_set_iter=evolve_sets.begin();
+        for(List<HybridEnclosure>::ConstIterator evolve_set_iter=evolve_sets.begin();
             evolve_set_iter!=evolve_sets.end(); ++evolve_set_iter)
         {
             HybridEnclosure const& evolve_set=*evolve_set_iter;
@@ -1264,15 +1264,15 @@ _apply_evolution_step(EvolutionData& evolution_data,
                 _step_data.finishing = true;
             }
         }
-        for(List<HybridEnclosure>::const_iterator reach_set_iter=reach_sets.begin();
+        for(List<HybridEnclosure>::ConstIterator reach_set_iter=reach_sets.begin();
             reach_set_iter!=reach_sets.end(); ++reach_set_iter)
         {
             HybridEnclosure const& reach_set=*reach_set_iter;
             evolution_data.reach_sets.append(reach_set);
         }
     } else { // (timing_data.finishing_kind!=AT_FINAL_TIME)
-        List<HybridEnclosure>::iterator next_working_set_iter=next_working_sets.begin();
-        for(List<HybridEnclosure>::iterator evolve_set_iter=evolve_sets.begin();
+        List<HybridEnclosure>::Iterator next_working_set_iter=next_working_sets.begin();
+        for(List<HybridEnclosure>::Iterator evolve_set_iter=evolve_sets.begin();
             evolve_set_iter!=evolve_sets.end(); ++evolve_set_iter, ++next_working_set_iter )
         {
             HybridEnclosure& evolve_set=*evolve_set_iter;
@@ -1306,7 +1306,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
                 }
             }
         }
-        for(List<HybridEnclosure>::iterator reach_set_iter=reach_sets.begin();
+        for(List<HybridEnclosure>::Iterator reach_set_iter=reach_sets.begin();
             reach_set_iter!=reach_sets.end(); ++reach_set_iter)
         {
             HybridEnclosure& reach_set=*reach_set_iter;
@@ -1330,7 +1330,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
 
 
     // Compute jump sets
-    for(Set<DiscreteEvent>::const_iterator event_iter=activating_events.begin();
+    for(Set<DiscreteEvent>::ConstIterator event_iter=activating_events.begin();
         event_iter!=activating_events.end(); ++event_iter)
     {
         DiscreteEvent event=*event_iter;
@@ -1360,7 +1360,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
         }
 
         // Apply maximum time bound, as this will be applied after the next flow step
-        for(List<HybridEnclosure>::iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
+        for(List<HybridEnclosure>::Iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
             if(jump_set.time_range().upper()>timing_data.final_time) {
                 jump_set.bound_time(timing_data.final_time);
                 if(definitely(not jump_set.empty())) { ARIADNE_WARN("Explicitly bounding time in jump set\n"); }
@@ -1368,7 +1368,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
         }
 
         // Apply blocking conditions for other active events
-        for(Set<DiscreteEvent>::const_iterator other_event_iter=blocking_events.begin();
+        for(Set<DiscreteEvent>::ConstIterator other_event_iter=blocking_events.begin();
             other_event_iter!=blocking_events.end(); ++other_event_iter)
         {
             DiscreteEvent other_event=*other_event_iter;
@@ -1382,7 +1382,7 @@ _apply_evolution_step(EvolutionData& evolution_data,
 
         ARIADNE_LOG(3, "  "<<event<<": "<<transitions[event].event_kind<<", "<<crossings[event].crossing_kind<<"\n");
         // Apply reset
-        for(List<HybridEnclosure>::iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
+        for(List<HybridEnclosure>::Iterator jump_set_iter=jump_sets.begin(); jump_set_iter!=jump_sets.end(); ++jump_set_iter) {
             HybridEnclosure& jump_set=*jump_set_iter;
             if(!definitely(jump_set.empty())) {
                 jump_set.apply_reset(event,transitions[event].target,transitions[event].target_space,transitions[event].reset_function);
@@ -1447,8 +1447,8 @@ HybridEvolverBaseConfiguration::set_flow_accuracy(const RealType value)
 }
 
 
-std::ostream&
-HybridEvolverBaseConfiguration::write(std::ostream& os) const
+OutputStream&
+HybridEvolverBaseConfiguration::write(OutputStream& os) const
 {
     os << "HybridEvolverBaseConfiguration"
        << ",\n  flow_accuracy=" << flow_accuracy()
@@ -1599,7 +1599,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         HybridEnclosure evolve_set=initial_set;
         evolve_set.apply_fixed_evolve_step(flow,flow.step_size());
 
-        for(Map<DiscreteEvent,CrossingData>::iterator crossing_iter=crossings.begin();
+        for(Map<DiscreteEvent,CrossingData>::Iterator crossing_iter=crossings.begin();
             crossing_iter!=crossings.end(); ++crossing_iter)
         {
             DiscreteEvent event=crossing_iter->first;
@@ -1661,7 +1661,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         // Compute reduced evolution time; note that for every remaining increasing crossing, we have
         // crossing_time_range.lower()>zero and crossing_time_range.upper()>step_size.
 
-        for(Map<DiscreteEvent,CrossingData>::const_iterator crossing_iter=crossings.begin();
+        for(Map<DiscreteEvent,CrossingData>::ConstIterator crossing_iter=crossings.begin();
             crossing_iter!=crossings.end(); ++crossing_iter)
         {
             if(crossing_iter->second.crossing_kind==CrossingKind::TRANSVERSE) {
@@ -1684,7 +1684,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
             }
         }
         // Erase increasing transverse crossings since these cannot occur
-        for(Map<DiscreteEvent,CrossingData>::iterator crossing_iter=crossings.begin();
+        for(Map<DiscreteEvent,CrossingData>::Iterator crossing_iter=crossings.begin();
             crossing_iter!=crossings.end(); )
         {
             if(crossing_iter->second.crossing_kind==CrossingKind::TRANSVERSE) {
@@ -1724,7 +1724,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         static const ExactFloat CREEP_MAXIMUM=ExactFloat(15.0/16);
         spacial_evolution_time=this->function_factory().create_constant(flow.space_domain(),flow.step_size()*CREEP_MAXIMUM);
 
-        for(Map<DiscreteEvent,CrossingData>::iterator crossing_iter=crossings.begin();
+        for(Map<DiscreteEvent,CrossingData>::Iterator crossing_iter=crossings.begin();
             crossing_iter!=crossings.end(); )
         {
             DiscreteEvent event=crossing_iter->first;

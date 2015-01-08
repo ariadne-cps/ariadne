@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 
+#include "utility/typedefs.h"
 #include "output/colour.h"
 #include "output/graphics_interface.h"
 

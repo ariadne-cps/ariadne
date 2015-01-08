@@ -460,8 +460,8 @@ ExactInterval& ExactInterval::operator=(const Rational& q) {
 #endif // HAVE_GMPXX_H
 
 
-std::ostream&
-operator<<(std::ostream& os, const ExactInterval& ivl)
+OutputStream&
+operator<<(OutputStream& os, const ExactInterval& ivl)
 {
     //if(ivl.lower()==ivl.upper().value()) { return os << "{" << std::setprecision(ExactInterval::output_precision) << ivl.lower().value().get_d() << ; }
     rounding_mode_t rnd=get_rounding_mode();
@@ -478,26 +478,26 @@ operator<<(std::ostream& os, const ExactInterval& ivl)
 }
 
 /*
-std::ostream&
-operator<<(std::ostream& os, const ExactInterval& ivl)
+OutputStream&
+operator<<(OutputStream& os, const ExactInterval& ivl)
 {
     return os << '[' << ivl.l << ':' << ivl.u << ']';
 }
 */
 
 /*
-std::ostream&
-operator<<(std::ostream& os, const ExactInterval& ivl)
+OutputStream&
+operator<<(OutputStream& os, const ExactInterval& ivl)
 {
     if(ivl.lower().value()==ivl.upper().value()) {
         return os << std::setprecision(18) << ivl.lower().value();
     }
 
-    std::stringstream iss,uss;
+    StringStream iss,uss;
     iss << std::setprecision(18) << ivl.lower().value();
     uss << std::setprecision(18) << ivl.upper().value();
 
-    std::string lstr,ustr;
+    StringType lstr,ustr;
     iss >> lstr; uss >> ustr;
 
     // Test if one endpoint is an integer and the other is not
@@ -535,8 +535,8 @@ operator<<(std::ostream& os, const ExactInterval& ivl)
 
 }
 */
-std::istream&
-operator>>(std::istream& is, ExactInterval& ivl)
+InputStream&
+operator>>(InputStream& is, ExactInterval& ivl)
 {
     Float l,u;
     char cl,cm,cr;

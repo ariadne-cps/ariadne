@@ -264,8 +264,8 @@ VectorFieldEvolverConfiguration::VectorFieldEvolverConfiguration()
 }
 
 
-std::ostream&
-VectorFieldEvolverConfiguration::write(std::ostream& os) const
+OutputStream&
+VectorFieldEvolverConfiguration::write(OutputStream& os) const
 {
     os << "VectorFieldEvolverSettings"
        << ",\n  maximum_step_size=" << maximum_step_size()

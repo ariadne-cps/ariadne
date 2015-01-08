@@ -43,7 +43,7 @@ namespace Ariadne {
 
 
 template<class T> class Space;
-template<class T> std::ostream& operator<<(std::ostream& os, const Space<T>& spc);
+template<class T> OutputStream& operator<<(OutputStream& os, const Space<T>& spc);
 
 class Real;
 typedef Space<Real> RealSpace;
@@ -62,7 +62,7 @@ template<class T> struct Space
     Space(const Set<Identifier>& vs) : _variables(vs.begin(),vs.end()) { }
     Space(const List<Identifier>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(VariableType(vl[i])); } }
     Space(const List<VariableType>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(vl[i]); } }
-    Space(const std::initializer_list<VariableType>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(vl.begin()[i]); } }
+    Space(const InitializerList<VariableType>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(vl.begin()[i]); } }
 
     explicit Space(const List<String>& vnl) { for(uint i=0; i!=vnl.size(); ++i) { this->append(VariableType(vnl[i])); } }
     explicit Space(const String& vn) { this->append(VariableType(vn)); }
@@ -135,7 +135,7 @@ template<class T> struct Space
     List<Identifier> _variables;
 };
 
-template<class T> inline std::ostream& operator<<(std::ostream& os, const Space<T>& spc) { return os << spc.variables(); }
+template<class T> inline OutputStream& operator<<(OutputStream& os, const Space<T>& spc) { return os << spc.variables(); }
 
 template<class T> inline Space<T> operator,(const Identifier& v1, const Identifier& v2) {
     Space<T> r; r,Variable<T>(v1),Variable<T>(v2); return r; }

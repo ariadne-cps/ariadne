@@ -213,8 +213,8 @@ MapEvolverConfiguration::MapEvolverConfiguration()
 }
 
 
-std::ostream&
-MapEvolverConfiguration::write(std::ostream& os) const
+OutputStream&
+MapEvolverConfiguration::write(OutputStream& os) const
 {
     os << "MapEvolverSettings"
        << ",\n  maximum_enclosure_radius=" << maximum_enclosure_radius()

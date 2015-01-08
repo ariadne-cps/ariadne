@@ -58,7 +58,7 @@ bounding_boxes(const HybridSpaceInterface& space, ExactInterval bound)
 {
     HybridBoxes result;
     Set<DiscreteLocation> locations = dynamic_cast<const MonolithicHybridSpace&>(space).locations();
-    for(Set<DiscreteLocation>::const_iterator loc_iter=locations.begin();
+    for(Set<DiscreteLocation>::ConstIterator loc_iter=locations.begin();
         loc_iter!=locations.end(); ++loc_iter)
         {
             DiscreteLocation const& loc=*loc_iter;

@@ -27,11 +27,11 @@
 using namespace Ariadne;
 
 Figure& operator<<(Figure& fig, const ListSet<HybridEnclosure>& set) {
-    for(ListSet<HybridEnclosure>::const_iterator set_iter=set.begin(); set_iter!=set.end(); ++set_iter) {
+    for(ListSet<HybridEnclosure>::ConstIterator set_iter=set.begin(); set_iter!=set.end(); ++set_iter) {
         fig << set_iter->continuous_set(); } return fig; }
 
 Figure& operator<<(Figure& fig, const HybridGridTreeSet& set) {
-    for(Map<DiscreteLocation,GridTreeSet>::const_iterator loc_iter=set.locations_begin(); loc_iter!=set.locations_end(); ++loc_iter) {
+    for(Map<DiscreteLocation,GridTreeSet>::ConstIterator loc_iter=set.locations_begin(); loc_iter!=set.locations_end(); ++loc_iter) {
         fig << loc_iter->second; } return fig; }
 
 /// Function for plotting the orbit and reachability set
@@ -237,7 +237,7 @@ int main()
     HybridScaling scaling( (height|1.0, aperture|0.125) );
     HybridGrid grid(watertank_system.state_space(),scaling);
     HybridGridTreeSet hgts(grid);
-    for (ListSet<HybridEnclosure>::const_iterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
+    for (ListSet<HybridEnclosure>::ConstIterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
     {
         std::cout<<"."<<std::flush;
         it->adjoin_outer_approximation_to(hgts,depth);

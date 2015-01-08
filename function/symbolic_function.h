@@ -62,8 +62,8 @@ struct ScalarFormulaFunction
 
     virtual Nat argument_size() const { return _argument_size; }
     virtual ScalarFunctionInterface<P>* _derivative(uint j) const { return new ScalarFormulaFunction<X>(_argument_size,Ariadne::derivative(_formula,j)); }
-    virtual std::ostream& write(std::ostream& os) const { return os << this->_formula; }
-    virtual std::ostream& repr(std::ostream& os) const { return os << "FormulaFunction("<<this->_argument_size<<","<<this->_formula<<")"; }
+    virtual OutputStream& write(OutputStream& os) const { return os << this->_formula; }
+    virtual OutputStream& repr(OutputStream& os) const { return os << "FormulaFunction("<<this->_argument_size<<","<<this->_formula<<")"; }
     template<class Y> void _compute(Y& r, const Vector<Y>& x) const { r=Ariadne::evaluate(_formula,x); }
 };
 
@@ -85,8 +85,8 @@ struct VectorFormulaFunction
     virtual Nat result_size() const { return this->_formulae.size(); }
     virtual Nat argument_size() const { return this->_argument_size; }
     virtual ScalarFormulaFunction<X>* _get(uint i) const { return new ScalarFormulaFunction<X>(this->_argument_size,this->_formulae[i]); }
-    virtual std::ostream& write(std::ostream& os) const { return os << this->_formulae; }
-    virtual std::ostream& repr(std::ostream& os) const { return os << "VectorFormulaFunction("<<this->result_size()<<","<<this->argument_size()<<","<<this->_formulae<<")"; }
+    virtual OutputStream& write(OutputStream& os) const { return os << this->_formulae; }
+    virtual OutputStream& repr(OutputStream& os) const { return os << "VectorFormulaFunction("<<this->result_size()<<","<<this->argument_size()<<","<<this->_formulae<<")"; }
     template<class Y> void _compute(Vector<Y>& r, const Vector<Y>& x) const { r=Ariadne::cached_evaluate(this->_formulae,x); }
 };
 
@@ -110,8 +110,8 @@ struct ConstantFunction
 
     virtual Nat argument_size() const { return _argument_size; }
     virtual ScalarFunctionInterface<P>* _derivative(uint j) const { return new ConstantFunction<P>(_argument_size,P(0)); }
-    virtual std::ostream& repr(std::ostream& os) const { return os << this->_value; }
-    virtual std::ostream& write(std::ostream& os) const { return os << "CF[R"<<this->_argument_size<<"]("<<_value<<")"; }
+    virtual OutputStream& repr(OutputStream& os) const { return os << this->_value; }
+    virtual OutputStream& write(OutputStream& os) const { return os << "CF[R"<<this->_argument_size<<"]("<<_value<<")"; }
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
         r=x.zero_element()+_value; }
 };
@@ -133,8 +133,8 @@ struct CoordinateFunction
     virtual ScalarFunctionInterface<P>* _derivative(uint j) const {
         if(j==_index) { return new ConstantFunction<X>(_argument_size,X(1)); }
         else { return new ConstantFunction<X>(_argument_size,X(0)); } }
-    virtual std::ostream& repr(std::ostream& os) const { return os << "x"<<this->_index; }
-    virtual std::ostream& write(std::ostream& os) const { return os << "IF[R"<<this->_argument_size<<"](x"<<this->_index<<")"; }
+    virtual OutputStream& repr(OutputStream& os) const { return os << "x"<<this->_index; }
+    virtual OutputStream& write(OutputStream& os) const { return os << "IF[R"<<this->_argument_size<<"](x"<<this->_index<<")"; }
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
         r=x[_index]; }
 };
@@ -172,9 +172,9 @@ struct UnaryFunction
         }
     }
 
-    virtual std::ostream& repr(std::ostream& os) const {
+    virtual OutputStream& repr(OutputStream& os) const {
         return os << "UF[R" << this->argument_size() << "](" << *this << ")"; }
-    virtual std::ostream& write(std::ostream& os) const {
+    virtual OutputStream& write(OutputStream& os) const {
         return os << _op << '(' << _arg << ')'; }
 
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
@@ -228,9 +228,9 @@ struct BinaryFunction
         }
     }
 
-    virtual std::ostream& repr(std::ostream& os) const {
+    virtual OutputStream& repr(OutputStream& os) const {
         return os << "BF[R" << this->argument_size() << "](" << *this << ")"; }
-    virtual std::ostream& write(std::ostream& os) const {
+    virtual OutputStream& write(OutputStream& os) const {
         if(_op==ADD || _op==SUB) { return os << '(' << _arg1 << symbol(_op) << _arg2 << ')'; }
         else { return os << _arg1 << symbol(_op) << _arg2; } }
 
@@ -267,9 +267,9 @@ class PowerFunction
         return _arg2*_arg1.derivative(j)*pow(_arg1,_arg2-1);
     }
 
-    virtual std::ostream& repr(std::ostream& os) const {
+    virtual OutputStream& repr(OutputStream& os) const {
         return os << "PF["<<this->argument_size()<<"]("<< *this <<")"; }
-    virtual std::ostream& write(std::ostream& os) const {
+    virtual OutputStream& write(OutputStream& os) const {
         return os << "pow(" << _arg1 << "," << _arg2 << ")"; }
 
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
@@ -298,7 +298,7 @@ struct ScalarEmbeddedFunction
         : _as1(as1), _f2(f2), _as3(as3) { }
     virtual Nat argument_size() const { return _as1+_f2.argument_size()+_as3; }
     virtual ScalarFunctionInterface<P>* _derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
-    virtual std::ostream& write(std::ostream& os) const { return os << "ScalarEmbeddedFunction( as1="<<_as1<<", f2="<<_f2<<", as3="<<_as3<<" )"; }
+    virtual OutputStream& write(OutputStream& os) const { return os << "ScalarEmbeddedFunction( as1="<<_as1<<", f2="<<_f2<<", as3="<<_as3<<" )"; }
 
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
         Vector<XX> px=project(x,Range(_as1,_as1+_f2.argument_size())); r=_f2.evaluate(px); }
@@ -318,7 +318,7 @@ struct VectorEmbeddedFunction
     virtual Nat result_size() const { return _f2.result_size(); }
     virtual Nat argument_size() const { return _as1+_f2.argument_size()+_as3; }
     virtual ScalarFunctionInterface<P>* _get(uint j) const { return new ScalarEmbeddedFunction<P>(_as1,_f2.get(j),_as3); }
-    virtual std::ostream& write(std::ostream& os) const { return os << "VectorEmbeddedFunction( as1="<<_as1<<", f2="<<_f2<<", as3="<<_as3<<" )"; }
+    virtual OutputStream& write(OutputStream& os) const { return os << "VectorEmbeddedFunction( as1="<<_as1<<", f2="<<_f2<<", as3="<<_as3<<" )"; }
 
     template<class XX> inline void _compute(Vector<XX>& r, const Vector<XX>& x) const {
         Vector<XX> px=project(x,Range(_as1,_as1+_f2.argument_size())); r=_f2.evaluate(px); }
@@ -337,7 +337,7 @@ struct ScalarComposedFunction
         : _f(f), _g(g) { ARIADNE_ASSERT(f.argument_size()==g.result_size()); }
     virtual Nat argument_size() const { return _g.argument_size(); }
     virtual ScalarFunctionInterface<P>* _derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
-    virtual std::ostream& write(std::ostream& os) const { return os << "ScalarComposedFunction( f="<<_f<<", g="<<_g<<" )"; }
+    virtual OutputStream& write(OutputStream& os) const { return os << "ScalarComposedFunction( f="<<_f<<", g="<<_g<<" )"; }
 
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
         r=_f.evaluate(_g.evaluate(x)); }
@@ -356,7 +356,7 @@ struct VectorComposedFunction
     virtual Nat result_size() const { return _f.result_size(); }
     virtual Nat argument_size() const { return _g.argument_size(); }
     virtual ScalarFunctionInterface<P>* _get(uint i) const { return new ScalarComposedFunction<P>(_f[i],_g); }
-    virtual std::ostream& write(std::ostream& os) const { return os << "ComposedFunction( f="<<_f<<", g="<<_g<<" )"; }
+    virtual OutputStream& write(OutputStream& os) const { return os << "ComposedFunction( f="<<_f<<", g="<<_g<<" )"; }
 
     template<class XX> inline void _compute(Vector<XX>& r, const Vector<XX>& x) const {
         r=_f.evaluate(_g.evaluate(x)); }
@@ -374,7 +374,7 @@ struct JoinedFunction
         : _f1(f1), _f2(f2) { ARIADNE_ASSERT(f1.argument_size()==f2.argument_size()); }
     virtual Nat result_size() const { return _f1.result_size()+_f2.result_size(); }
     virtual Nat argument_size() const { return _f1.argument_size(); }
-    virtual std::ostream& write(std::ostream& os) const { return os << "JoinedFunction( f1="<<_f1<<", f2="<<_f2<<" )"; }
+    virtual OutputStream& write(OutputStream& os) const { return os << "JoinedFunction( f1="<<_f1<<", f2="<<_f2<<" )"; }
     virtual ScalarFunctionInterface<P>* _get(uint i) const { return (i<_f1.result_size()) ? _f1.raw_pointer()->_get(i) : _f2.raw_pointer()->_get(i-_f1.result_size()); }
     template<class XX> inline void _compute(Vector<XX>& r, const Vector<XX>& x) const {
         r=join(_f1.evaluate(x),_f2.evaluate(x)); }
@@ -392,7 +392,7 @@ class CombinedFunction
         : _f1(f1), _f2(f2) { }
     virtual Nat result_size() const { return _f1.result_size()+_f2.result_size(); }
     virtual Nat argument_size() const { return _f1.argument_size()+_f2.argument_size(); }
-    virtual std::ostream& write(std::ostream& os) const { return os << "CombinedFunction( f1="<<_f1<<", f2="<<_f2<<" )"; }
+    virtual OutputStream& write(OutputStream& os) const { return os << "CombinedFunction( f1="<<_f1<<", f2="<<_f2<<" )"; }
 
     template<class XX> inline void _compute(Vector<XX>& r, const Vector<XX>& x) const {
         return r=combine(_f1.evaluate(project(x,range(0,_f1.argument_size()))),
@@ -415,7 +415,7 @@ struct LieDerivativeFunction
         _g=g; for(uint j=0; j!=g.argument_size(); ++j) { _dg[j]=g.derivative(j); } _f=f; }
     Nat argument_size() const { return _g.argument_size(); }
     virtual ScalarFunctionInterface<P>* _derivative(uint j) const { ARIADNE_NOT_IMPLEMENTED; }
-    std::ostream& write(std::ostream& os) const { return os << "LieDerivative( g="<<_g<<", f="<<_f<<" )"; }
+    OutputStream& write(OutputStream& os) const { return os << "LieDerivative( g="<<_g<<", f="<<_f<<" )"; }
 
     template<class XX> inline void _compute(XX& r, const Vector<XX>& x) const {
         //const Vector<R> fx=_f.evaluate(x); r=0; for(uint i=0; i!=_dg.size(); ++i) { r+=fx[i]+_dg[i].evaluate(x); } }

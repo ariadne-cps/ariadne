@@ -90,7 +90,7 @@ class Polyhedron
     //! \name Data access
 
     //! \brief The number of constraints.
-    size_t number_of_constraints() const { return this->b().size(); }
+    SizeType number_of_constraints() const { return this->b().size(); }
     //! \brief The matrix \f$A\f$ in the inequalities \f$Ax\leq b\f$.
     Matrix<Float> A() const;
     //! \brief The vector \f$b\f$ in the inequalities \f$Ax\leq b\f$.
@@ -120,7 +120,7 @@ class Polyhedron
     virtual Tribool separated(const ExactBox& bx) const;
 
     //! \brief The \a i<sup>th</sup> defining halfspace.
-    Polyhedron halfspace(size_t i) const;
+    Polyhedron halfspace(SizeType i) const;
 
     //! \brief Convert to a polytope.
     operator Polytope () const ;
@@ -143,7 +143,7 @@ class Polyhedron
     //! \name Input/output.
 
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream& os) const;
+    OutputStream& write(OutputStream& os) const;
     //@}
   private:
     Matrix<Float> _A;
@@ -151,7 +151,7 @@ class Polyhedron
 };
 
 
-inline std::ostream& operator<<(std::ostream& os, const Polyhedron& p) {
+inline OutputStream& operator<<(OutputStream& os, const Polyhedron& p) {
     return p.write(os);
 }
 

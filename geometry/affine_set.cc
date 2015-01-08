@@ -56,7 +56,7 @@ struct LinearProgram {
     Vector<X> l;
     Vector<X> u;
     Array<Slackness> vt;
-    Array<size_t> p;
+    Array<SizeType> p;
     Matrix<X> B;
     Vector<X> x;
     Vector<X> y;
@@ -607,10 +607,10 @@ ValidatedAffineConstrainedImageSet::boundary(uint xind, uint yind) const
     static const double ERROR_TOLERANCE = std::numeric_limits<float>::epsilon();
     static const Float inf = Ariadne::inf;
 
-    const size_t nx=_domain.size();
-    const size_t ne=2u;
-    const size_t nc=_constraint_models.size();
-    const size_t np=nx+ne+nc;
+    const SizeType nx=_domain.size();
+    const SizeType ne=2u;
+    const SizeType nc=_constraint_models.size();
+    const SizeType np=nx+ne+nc;
 
     // Set up matrix of function values
     AffineModel<ValidatedNumber> const& xa=this->_space_models[xind];
@@ -668,7 +668,7 @@ ValidatedAffineConstrainedImageSet::boundary(uint xind, uint yind) const
     List<Point2d> vertices;
 
     // Set up simplex algorithm working variables
-    Array<Slackness> vt(0); Array<size_t> p(nc); Matrix<Float> B(nc,nc);
+    Array<Slackness> vt(0); Array<SizeType> p(nc); Matrix<Float> B(nc,nc);
     Vector<Float> x(np); Vector<Float> y(nc);
 
     // Find an initial feasible point
@@ -812,7 +812,7 @@ void ValidatedAffineConstrainedImageSet::draw(CanvasInterface& canvas, const Pro
 }
 
 
-std::ostream& ValidatedAffineConstrainedImageSet::write(std::ostream& os) const {
+OutputStream& ValidatedAffineConstrainedImageSet::write(OutputStream& os) const {
     return os << "ValidatedAffineConstrainedImageSet( domain=" << this->_domain << ", function=" << this->_space_models << ", constraints=" << this->_constraint_models <<" )";
 }
 

@@ -66,7 +66,7 @@ class HybridPoint;
 class HybridBox;
 typedef HybridBasicSet<InterpolatedCurve> HybridInterpolatedCurve;
 
-template<class ES> std::ostream& operator<<(std::ostream&, const Orbit<ES>&);
+template<class ES> OutputStream& operator<<(OutputStream&, const Orbit<ES>&);
 
 template<>
 class Orbit<HybridPoint>
@@ -84,8 +84,8 @@ class Orbit<HybridPoint>
 };
 
 template<>
-std::ostream&
-operator<<(std::ostream& os, const Orbit< HybridPoint >& orb);
+OutputStream&
+operator<<(OutputStream& os, const Orbit< HybridPoint >& orb);
 
 template<>
 class Orbit<HybridGridCell>
@@ -140,8 +140,8 @@ class Orbit<HybridEnclosure>
 };
 
 template<>
-std::ostream&
-operator<<(std::ostream& os, const Orbit< HybridEnclosure >& orb);
+OutputStream&
+operator<<(OutputStream& os, const Orbit< HybridEnclosure >& orb);
 
 
 } // namespace Ariadne

@@ -101,7 +101,7 @@ TestHybridSet::test_hybrid_list_set()
 
     ARIADNE_TEST_PRINT(hls);
 
-    HybridListSet<ExactBox>::const_iterator iter=hls.begin();
+    HybridListSet<ExactBox>::ConstIterator iter=hls.begin();
     ARIADNE_TEST_EQUAL(*iter,HybridBox(loc2,spc2,bx3));
     ++iter;
     ARIADNE_TEST_EQUAL(*iter,HybridBox(loc2,spc2,bx4));
@@ -117,7 +117,7 @@ TestHybridSet::test_hybrid_list_set()
     ListSet<ExactBox> ls1; ls1.adjoin(bx1); ls1.adjoin(bx2);
     ListSet<ExactBox> ls2; ls2.adjoin(bx3); ls2.adjoin(bx4); ls2.adjoin(bx5);
 
-    HybridListSet<ExactBox>::locations_const_iterator loc_iter=hls.locations_begin();
+    HybridListSet<ExactBox>::LocationsConstIterator loc_iter=hls.locations_begin();
     ARIADNE_TEST_EQUAL(loc_iter->first,loc2);
     ARIADNE_TEST_EQUAL(loc_iter->second.second,ls2);
     ++loc_iter;

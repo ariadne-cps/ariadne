@@ -126,7 +126,7 @@ void TestHybridEvolution::test_bouncing_ball() const {
 
     Decimal exl(0.12), exu(+0.13), evl(-0.04), evu(+0.04); // Expected bounds
     HybridBox expected_orbit_final_bounding_box=HybridBox(q,{x.in(exl,exu),v.in(evl,evu)});
-    for(ListSet<HybridEnclosure>::const_iterator iter=orbit_final.begin(); iter!=orbit_final.end(); ++iter) {
+    for(ListSet<HybridEnclosure>::ConstIterator iter=orbit_final.begin(); iter!=orbit_final.end(); ++iter) {
         const HybridEnclosure& orbit_final_set=*iter;
         ARIADNE_TEST_PRINT(orbit_final_set.bounding_box());
         ARIADNE_TEST_BINARY_PREDICATE(inside,orbit_final_set,expected_orbit_final_bounding_box);

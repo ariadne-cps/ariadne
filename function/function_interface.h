@@ -47,9 +47,9 @@ class ScalarFunctionInterface<Void>
     virtual SizeType argument_size() const = 0;
 
     //! \brief Write a full version to an output stream.
-    virtual std::ostream& repr(std::ostream& os) const = 0;
+    virtual OutputStream& repr(OutputStream& os) const = 0;
     //! \brief Write to an output stream.
-    virtual std::ostream& write(std::ostream& os) const = 0;
+    virtual OutputStream& write(OutputStream& os) const = 0;
   public:
     virtual ScalarFunctionInterface<Void>* _clone() const = 0;
 };
@@ -158,8 +158,8 @@ class ScalarFunctionInterface<EffectiveTag>
 };
 
 //! \relates ScalarFunctionInterface
-//! \brief Write to an output stream. Calls the write(std::ostream&) method to perform dynamic dispatching.
-inline std::ostream& operator<<(std::ostream& os, const ScalarFunctionInterface<Void>& f) {
+//! \brief Write to an output stream. Calls the write(OutputStream&) method to perform dynamic dispatching.
+inline OutputStream& operator<<(OutputStream& os, const ScalarFunctionInterface<Void>& f) {
     return f.write(os);
 }
 
@@ -183,9 +183,9 @@ class VectorFunctionInterface<Void>
     virtual SizeType result_size() const = 0;
 
     //! \brief Write a full version to an output stream.
-    virtual std::ostream& repr(std::ostream& os) const = 0;
+    virtual OutputStream& repr(OutputStream& os) const = 0;
     //! \brief Write to an output stream.
-    virtual std::ostream& write(std::ostream& os) const = 0;
+    virtual OutputStream& write(OutputStream& os) const = 0;
   public:
     virtual VectorFunctionInterface<Void>* _clone() const = 0;
 };
@@ -281,8 +281,8 @@ class VectorFunctionInterface<EffectiveTag>
 };
 
 //! \relates VectorFunctionInterface
-//! \brief Write to an output stream. Calls the write(std::ostream&) method to perform dynamic dispatching.
-inline std::ostream& operator<<(std::ostream& os, const VectorFunctionInterface<Void>& f) {
+//! \brief Write to an output stream. Calls the write(OutputStream&) method to perform dynamic dispatching.
+inline OutputStream& operator<<(OutputStream& os, const VectorFunctionInterface<Void>& f) {
     return f.write(os);
 }
 

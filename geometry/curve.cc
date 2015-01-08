@@ -99,8 +99,8 @@ Curve::tangent(const ParameterType& s) const
 
 
 
-std::ostream&
-Curve::write(std::ostream& os) const
+OutputStream&
+Curve::write(OutputStream& os) const
 {
     return os << "Curve( function=" << this->_function << " )";
 }
@@ -130,7 +130,7 @@ InterpolatedCurve::bounding_box() const
 {
     ExactPoint pt=make_exact(this->_points.begin()->second);
     ExactBox bx(pt);
-    for(const_iterator iter=this->_points.begin(); iter!=this->_points.end(); ++iter) {
+    for(ConstIterator iter=this->_points.begin(); iter!=this->_points.end(); ++iter) {
         pt=make_exact(iter->second);
         bx=hull(bx,pt);
     }
@@ -141,7 +141,7 @@ void
 InterpolatedCurve::draw(CanvasInterface& c, const Projection2d& p) const
 {
     uint xi=p.x_coordinate(); uint yi=p.y_coordinate();
-    const_iterator iter=this->begin();
+    ConstIterator iter=this->begin();
     ApproximatePoint pt=join(iter->second,iter->first);
     c.move_to(pt[xi],pt[yi]);
     while(iter!=this->end()) {
@@ -156,8 +156,8 @@ InterpolatedCurve::draw(CanvasInterface& c, const Projection2d& p) const
     }
 }
 
-std::ostream&
-InterpolatedCurve::write(std::ostream& os) const
+OutputStream&
+InterpolatedCurve::write(OutputStream& os) const
 {
     return os << (*this);
 }

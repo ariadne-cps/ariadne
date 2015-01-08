@@ -43,7 +43,7 @@ using std::make_pair;
 
 using SizeType=std::size_t;
 
-template<class T> std::ostream& operator<<(std::ostream& os, const Array<T>& a) {
+template<class T> OutputStream& operator<<(OutputStream& os, const Array<T>& a) {
     bool first=true;
     for(auto x : a) {
         os << (first ? "[" : ",") << x;
@@ -53,7 +53,7 @@ template<class T> std::ostream& operator<<(std::ostream& os, const Array<T>& a) 
     return os << "]";
 }
 
-template<class T> std::ostream& operator<<(std::ostream& os, const SharedArray<T>& a) {
+template<class T> OutputStream& operator<<(OutputStream& os, const SharedArray<T>& a) {
     bool first=true;
     for(auto x : a) {
         os << (first ? "[" : ",") << x;
@@ -83,7 +83,7 @@ template<class T> class List : public std::vector<T> {
 };
 template<class T> inline List<T> catenate(const List<T>& l1, const List<T>& l2) {
     List<T> r(l1);
-    for(typename List<T>::const_iterator iter=l2.begin(); iter!=l2.end(); ++iter) {
+    for(auto iter=l2.begin(); iter!=l2.end(); ++iter) {
         r.append(*iter);
     }
     return r;
@@ -97,7 +97,7 @@ template<class T> inline List<T> operator,(const T& t1, const T& t2) {
     List<T> v; v.push_back(t1); v.push_back(t2); return v; }
 template<class T> inline List<T> operator,(const std::vector<T>& v, const T& t) {
     List<T> r(v); r.push_back(t); return r; }
-template<class T> std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
+template<class T> OutputStream& operator<<(OutputStream& os, const std::vector<T>& v) {
     bool first=true;
     for(auto x : v) {
         os << (first ? "[" : ",") << x;
@@ -111,6 +111,8 @@ template<class T> class LinkedList
     : public std::list<T>
 {
   public:
+    typedef typename std::list<T>::iterator Iterator;
+    typedef typename std::list<T>::const_iterator ConstIterator;
     LinkedList() : std::list<T>() { }
     LinkedList(unsigned int n) : std::list<T>(n) { }
     LinkedList(unsigned int n, const T& t) : std::vector<T>(n,t) { }
@@ -123,18 +125,20 @@ template<class T> class LinkedList
     void append(const LinkedList<T>& t) { for(unsigned int i=0; i!=t.size(); ++i) { this->push_back(t[i]); } }
     void concatenate(const LinkedList<T>& t) { for(unsigned int i=0; i!=t.size(); ++i) { this->push_back(t[i]); } }
 };
-template<class T> inline std::ostream&
-operator<< (std::ostream &os, const std::list<T>& l) {
+template<class T> inline OutputStream&
+operator<< (OutputStream &os, const std::list<T>& l) {
     return Ariadne::write_sequence(os,l.begin(),l.end());
 }
 
 
 template<class T> class Set : public std::set<T> {
   public:
+    typedef typename std::set<T>::iterator Iterator;
+    typedef typename std::set<T>::const_iterator ConstIterator;
     using std::set<T>::set;
     Set() : std::set<T>() { }
     template<class TT, EnableIf<IsConvertible<TT,T>> =dummy>
-        Set(const std::initializer_list<TT>& s) : std::set<T>(s.begin(),s.end()) { }
+        Set(const InitializerList<TT>& s) : std::set<T>(s.begin(),s.end()) { }
     template<class TT, EnableIf<IsConvertible<TT,T>> =dummy>
         Set(const std::vector<TT>& s) : std::set<T>(s.begin(),s.end()) { }
     template<class TT, EnableIf<IsConvertible<TT,T>> =dummy>
@@ -145,30 +149,30 @@ template<class T> class Set : public std::set<T> {
     bool contains(const T& t) const {
         return this->find(t)!=this->end(); }
     bool subset(const std::set<T>& s) const {
-        for(typename std::set<T>::iterator iter=s.begin(); iter!=s.end(); ++iter) {
+        for(auto iter=s.begin(); iter!=s.end(); ++iter) {
             if(!this->contains(*iter)) { return false; } } return true; }
     bool disjoint(const std::set<T>& s) const {
-        for(typename std::set<T>::const_iterator iter=s.begin(); iter!=s.end(); ++iter) {
+        for(auto iter=s.begin(); iter!=s.end(); ++iter) {
             if(this->contains(*iter)) { return false; } } return true; }
     bool disjoint(const std::vector<T>& lst) const {
-        for(typename std::vector<T>::const_iterator iter=lst.begin(); iter!=lst.end(); ++iter) {
+        for(auto iter=lst.begin(); iter!=lst.end(); ++iter) {
             if(this->contains(*iter)) { return false; } } return true; }
     Set<T>& adjoin(const std::set<T>& s) {
-        for(typename std::set<T>::const_iterator iter=s.begin(); iter!=s.end(); ++iter) { this->insert(*iter); } return *this; }
+        for(auto iter=s.begin(); iter!=s.end(); ++iter) { this->insert(*iter); } return *this; }
     Set<T>& remove(const T& t) {
-        typename std::set<T>::iterator iter=this->find(t);
+        auto iter=this->find(t);
         if(iter!=this->end()) { this->erase(iter); }
         return *this; }
     Set<T>& remove(const std::set<T>& s) {
-        typename std::set<T>::iterator iter=this->begin();
+        auto iter=this->begin();
         while(iter!=this->end()) { if(s.find(*iter)!=s.end()) { this->erase(iter++); } else { ++iter; } }
         return *this; }
     Set<T>& restrict(const std::set<T>& s) {
-        typename std::set<T>::iterator iter=this->begin();
+        auto iter=this->begin();
         while(iter!=this->end()) { if(s.find(*iter)!=s.end()) { this->erase(iter++); } else { ++iter; } }
         return *this; }
     template<class TT> Set<T>& remove(const std::vector<TT>& l) {
-        for(typename std::vector<TT>::const_iterator iter=l.begin(); iter!=l.end(); ++iter) {
+        for(auto iter=l.begin(); iter!=l.end(); ++iter) {
             this->std::set<T>::erase(static_cast<const T&>(*iter)); }
         return *this; }
 };
@@ -177,31 +181,31 @@ template<class T> inline Set<T> join(Set<T> s1, Set<T> const& s2) {
 template<class T> inline bool contains(const std::set<T>& s, const T& t) {
     return s.find(t)!=s.end(); }
 template<class T> inline bool subset(const std::set<T>& s1, const std::set<T>& s2) {
-    for(typename std::set<T>::iterator iter=s1.begin(); iter!=s1.end(); ++iter) {
+    for(auto iter=s1.begin(); iter!=s1.end(); ++iter) {
         if(!contains(s2,*iter)) { return false; } } return true; }
 template<class T> inline bool disjoint(const std::set<T>& s1, const std::set<T>& s2) {
-    for(typename std::set<T>::iterator iter=s1.begin(); iter!=s1.end(); ++iter) {
+    for(auto iter=s1.begin(); iter!=s1.end(); ++iter) {
         if(contains(s2,*iter)) { return false; } } return true; }
 template<class T> inline bool disjoint(const std::set<T>& s1, const std::vector<T>& l2) {
-    for(typename std::vector<T>::const_iterator iter=l2.begin(); iter!=l2.end(); ++iter) {
+    for(auto iter=l2.begin(); iter!=l2.end(); ++iter) {
         if(contains(s1,*iter)) { return false; } } return true; }
 template<class T> inline Set<T> intersection(const std::set<T>& s1, const std::set<T>& s2) {
     Set<T> r(s1); restrict(r,s2); return r; }
 template<class T> inline Set<T> intersection(const std::set<T>& s1, const std::vector<T>& l2) {
-    Set<T> r; for(typename std::vector<T>::const_iterator iter=l2.begin(); iter!=l2.end(); ++iter) {
+    Set<T> r; for(auto iter=l2.begin(); iter!=l2.end(); ++iter) {
         if(contains(s1,*iter)) { r.insert(*iter); } } return r; }
 template<class T> inline Set<T> difference(const std::set<T>& s1, const std::set<T>& s2) {
     Set<T> r(s1); remove(r,s2); return r; }
 template<class T> inline std::set<T>& remove(std::set<T>& r, const std::set<T>& s) {
-    typename std::set<T>::iterator iter=r.begin();
+    auto iter=r.begin();
     while(iter!=r.end()) { if(contains(s,*iter)) { r.erase(iter++); } else { ++iter; } }
     return r; }
 template<class T> inline std::set<T>& restrict(std::set<T>& r, const std::set<T>& s) {
-    typename std::set<T>::iterator iter=r.begin();
+    auto iter=r.begin();
     while(iter!=r.end()) { if(!contains(s,*iter)) { r.erase(iter++); } else { ++iter; } }
     return r; }
 
-template<class T> std::ostream& operator<<(std::ostream& os, const std::set<T>& v) {
+template<class T> OutputStream& operator<<(OutputStream& os, const std::set<T>& v) {
     bool first=true;
     for(auto x : v) {
         os << (first ? "{" : ",") << x;
@@ -214,42 +218,44 @@ template<class T> std::ostream& operator<<(std::ostream& os, const std::set<T>& 
 
 template<class K, class T> class Map : public std::map<K,T> {
   public:
+    typedef typename std::map<K,T>::iterator Iterator;
+    typedef typename std::map<K,T>::const_iterator ConstIterator;
     using std::map<K,T>::map;
     using std::map<K,T>::insert;
     T& operator[](K k) { return this->std::map<K,T>::operator[](k); }
     const T& operator[](K k) const { auto iter=this->find(k); assert(iter!=this->end()); return iter->second; }
-    const T& get(const K& k) const { typename std::map<K,T>::const_iterator p=this->find(k);
-        assert(p!=this->end()); return p->second; }
+    const T& get(const K& k) const { auto i=this->find(k);
+        assert(i!=this->end()); return i->second; }
     bool has_key(const K& k) const {
         return this->find(k)!=this->end(); }
     T& value(const K& k) {
-        typename std::map<K,T>::iterator iter=this->find(k);
+        auto iter=this->find(k);
         assert(iter!=this->end()); return iter->second; }
     const T& value(const K& k) const {
-        typename std::map<K,T>::const_iterator iter=this->find(k);
+        auto iter=this->find(k);
         assert(iter!=this->end()); return iter->second; }
     void insert(const std::pair<K,T>& kv) {
         this->std::map<K,T>::insert(kv); }
     void insert(const K& k, const T& v) {
         this->std::map<K,T>::insert(std::make_pair(k,v)); }
     void adjoin(const std::map<K,T>& m) {
-        for(typename std::map<K,T>::const_iterator i=m.begin(); i!=m.end(); ++i) { this->insert(*i); } }
+        for(auto i=m.begin(); i!=m.end(); ++i) { this->insert(*i); } }
     void remove_keys(const Set<K>& s) {
-        for(typename Set<K>::const_iterator iter=s.begin(); iter!=s.end(); ++iter) { this->erase(*iter); } }
+        for(auto iter=s.begin(); iter!=s.end(); ++iter) { this->erase(*iter); } }
     Set<K> keys() const {
-        Set<K> res; for(typename std::map<K,T>::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+        Set<K> res; for(auto iter=this->begin(); iter!=this->end(); ++iter) {
             res.insert(iter->first); } return res; }
     List<T> values() const {
-        List<T> res; for(typename std::map<K,T>::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+        List<T> res; for(auto iter=this->begin(); iter!=this->end(); ++iter) {
             res.append(iter->second); } return res; }
 };
 template<class I, class X, class J> inline X& insert(Map<I,X>& m, const J& k, const X& v) {
     return m.std::template map<I,X>::insert(std::make_pair(k,v)).first->second; }
 template<class K, class T> Map<K,T> restrict_keys(const std::map<K,T>& m, const std::set<K>& k) {
     Map<K,T> result; const Set<K>& keys=static_cast<const Set<K>&>(k);
-    for(typename std::map<K,T>::const_iterator item_iter=m.begin(); item_iter!=m.end(); ++item_iter) {
+    for(auto item_iter=m.begin(); item_iter!=m.end(); ++item_iter) {
         if(keys.contains(item_iter->first)) { result.insert(*item_iter); } } return std::move(result); }
-template<class K, class T> std::ostream& operator<<(std::ostream& os, const std::map<K,T>& m) {
+template<class K, class T> OutputStream& operator<<(OutputStream& os, const std::map<K,T>& m) {
     bool first=true;
     for(auto x : m) {
         os << (first ? "{ " : ", ") << x.first << ":" << x.second;
@@ -262,14 +268,14 @@ template<class K, class T> std::ostream& operator<<(std::ostream& os, const std:
 
 template<class T> bool unique_elements(const std::vector<T>& lst) {
     Set<T> found;
-    for(typename std::vector<T>::const_iterator iter=lst.begin(); iter!=lst.end(); ++iter) {
+    for(auto iter=lst.begin(); iter!=lst.end(); ++iter) {
         if(found.contains(*iter)) { return false; } else { found.insert(*iter); } }
     return true;
 }
 
 template<class T> Set<T> duplicate_elements(const std::vector<T>& lst) {
     Set<T> result; Set<T> found;
-    for(typename std::vector<T>::const_iterator iter=lst.begin(); iter!=lst.end(); ++iter) {
+    for(auto iter=lst.begin(); iter!=lst.end(); ++iter) {
         if(found.contains(*iter)) { result.insert(*iter); } else { found.insert(*iter); } }
     return result;
 }

@@ -41,7 +41,7 @@ namespace Ariadne {
 
 class LocationException : public std::runtime_error {
   public:
-    LocationException(const std::string& what) : std::runtime_error(what) { }
+    LocationException(const StringType& what) : std::runtime_error(what) { }
 };
 
 class HybridGridTreeSet;
@@ -53,10 +53,10 @@ class HybridSpaceInterface
     virtual RealSpace operator[](const DiscreteLocation& q) const = 0;
   public:
     virtual HybridSpaceInterface* clone() const = 0;
-    virtual std::ostream& write(std::ostream& os) const = 0;
+    virtual OutputStream& write(OutputStream& os) const = 0;
     virtual Tribool operator==(const HybridSpaceInterface& other) const = 0;
   public:
-    friend std::ostream& operator<<(std::ostream& os, const HybridSpaceInterface& hsp) { return hsp.write(os); }
+    friend OutputStream& operator<<(OutputStream& os, const HybridSpaceInterface& hsp) { return hsp.write(os); }
 };
 
 //! \ingroup HybridModule
@@ -91,7 +91,7 @@ class HybridSpace
 
     operator const HybridSpaceInterface& () const { return *_ptr; }
 
-    friend std::ostream& operator<<(std::ostream& os, const HybridSpace& hsp) { return os << *hsp._ptr; }
+    friend OutputStream& operator<<(OutputStream& os, const HybridSpace& hsp) { return os << *hsp._ptr; }
   private:
     std::shared_ptr<const HybridSpaceInterface> _ptr;
 };
@@ -103,7 +103,7 @@ class MonolithicHybridSpace
     : public HybridSpaceInterface
 {
   public:
-    typedef Map<DiscreteLocation, RealSpace >::const_iterator const_iterator;
+    typedef Map<DiscreteLocation, RealSpace >::ConstIterator ConstIterator;
 
     MonolithicHybridSpace() : _locations() { }
 
@@ -116,7 +116,7 @@ class MonolithicHybridSpace
     bool has_location(const DiscreteLocation& q) const { return _locations.has_key(q); }
 
     Tribool operator==(const HybridSpaceInterface& other) const {
-        for (const_iterator iter=this->_locations.begin(); iter!=this->_locations.end(); ++iter) {
+        for (ConstIterator iter=this->_locations.begin(); iter!=this->_locations.end(); ++iter) {
             if (!other.has_location(iter->first)) return false;
             if (other[iter->first] != iter->second) return false;
         }
@@ -124,16 +124,16 @@ class MonolithicHybridSpace
     }
 
     RealSpace operator[](const DiscreteLocation& q) const {
-        const_iterator iter = this->_locations.find(q);
+        ConstIterator iter = this->_locations.find(q);
         if(iter==this->_locations.end()) {
             ARIADNE_THROW(LocationException,"HybridSpace[DiscreteLocation q]","Space has no location "<<q); }
         return iter->second; }
 
     Set<DiscreteLocation> locations() const { return this->_locations.keys(); }
-    const_iterator begin() const { return this->_locations.begin(); }
-    const_iterator end() const { return this->_locations.end(); }
+    ConstIterator begin() const { return this->_locations.begin(); }
+    ConstIterator end() const { return this->_locations.end(); }
 
-    std::ostream& write(std::ostream& os) const { return os << "HybridSpace( " << this->_locations << " )"; }
+    OutputStream& write(OutputStream& os) const { return os << "HybridSpace( " << this->_locations << " )"; }
   private:
     Map< DiscreteLocation, RealSpace > _locations;
 };

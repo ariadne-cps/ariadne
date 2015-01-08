@@ -94,8 +94,8 @@ void Orbit<HybridPoint>::draw(CanvasInterface& canvas, const Set<DiscreteLocatio
 }
 
 template<>
-std::ostream&
-operator<<(std::ostream& os, const Orbit< HybridPoint >& orb)
+OutputStream&
+operator<<(OutputStream& os, const Orbit< HybridPoint >& orb)
 {
     return os << orb.curves();
 }
@@ -166,8 +166,8 @@ void Orbit<HybridEnclosure>::draw(CanvasInterface& c, const Set<DiscreteLocation
 }
 
 template<>
-std::ostream&
-operator<<(std::ostream& os, const Orbit< HybridEnclosure >& orb)
+OutputStream&
+operator<<(OutputStream& os, const Orbit< HybridEnclosure >& orb)
 {
     os << "Orbit(\n  initial=" << orb.initial()
        << "\n  intermediate=" << orb.intermediate()
@@ -194,7 +194,7 @@ HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& 
     : HybridBasicSet<ExactPoint>(q,make_list(x.keys()),ExactPoint(x.size()))
 {
     uint i=0;
-    for(Map<Identifier,Real>::const_iterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
+    for(Map<Identifier,Real>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
         this->point()[i]=numeric_cast<ExactFloat>(iter->second);
     }
 }
@@ -203,7 +203,7 @@ HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,ExactFl
     : HybridBasicSet<ExactPoint>(q,make_list(x.keys()),ExactPoint(x.size()))
 {
     uint i=0;
-    for(Map<Identifier,ExactFloat>::const_iterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
+    for(Map<Identifier,ExactFloat>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
         this->point()[i]=iter->second;
     }
 }
@@ -212,7 +212,7 @@ HybridPoint::HybridPoint(const DiscreteLocation& q, const List<RealConstantAssig
     : HybridBasicSet<ExactPoint>(q,left_hand_sides(x),ExactPoint(x.size()))
 {
     uint i=0;
-    for(List<RealConstantAssignment>::const_iterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
+    for(List<RealConstantAssignment>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
         this->point()[i]=numeric_cast<ExactFloat>(iter->right_hand_side());
     }
 }
@@ -243,7 +243,7 @@ void HybridBox::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const V
 }
 
 void HybridGridTreeSet::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axis_variables) const {
-    for(locations_const_iterator loc_iter=this->locations_begin(); loc_iter!=this->locations_end(); ++loc_iter) {
+    for(LocationsConstIterator loc_iter=this->locations_begin(); loc_iter!=this->locations_end(); ++loc_iter) {
         if(locations.empty() || locations.contains(loc_iter->first)) {
             RealSpace const& space=this->space(loc_iter->first);
             Projection2d projection(space.dimension(),space.index(axis_variables.x_variable()),space.index(axis_variables.y_variable()));
@@ -308,7 +308,7 @@ Tribool HybridConstraintSet::separated(const HybridBox& bx) const {
     }
 }
 
-std::ostream& HybridConstraintSet::write(std::ostream& os) const {
+OutputStream& HybridConstraintSet::write(OutputStream& os) const {
     return os << "HybridConstraintSet( "<< this->_sets << " )";
 }
 
@@ -386,7 +386,7 @@ Tribool HybridBoundedConstraintSet::separated(const HybridBox& bx) const {
 
 Tribool HybridBoundedConstraintSet::inside(const HybridBoxes& bxs) const {
     Tribool result=true;
-    for(Map<DiscreteLocation,RealExpressionBoundedConstraintSet>::const_iterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
+    for(Map<DiscreteLocation,RealExpressionBoundedConstraintSet>::ConstIterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
         DiscreteLocation const& loc=iter->first;
         RealExpressionBoundedConstraintSet const& set = iter->second;
         Set<RealVariable> vars=set.variables();
@@ -408,13 +408,13 @@ Set<DiscreteLocation> HybridBoundedConstraintSet::locations() const {
 
 HybridBoxes HybridBoundedConstraintSet::bounding_box() const {
     HybridBoxes result;
-    for(Map<DiscreteLocation,RealExpressionBoundedConstraintSet>::const_iterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
+    for(Map<DiscreteLocation,RealExpressionBoundedConstraintSet>::ConstIterator iter=this->_sets.begin(); iter!=this->_sets.end(); ++iter) {
         result.insert(iter->first,over_approximation(RealVariablesBox(iter->second.bounds())));
     }
     return result;
 }
 
-std::ostream& HybridBoundedConstraintSet::write(std::ostream& os) const {
+OutputStream& HybridBoundedConstraintSet::write(OutputStream& os) const {
     return os << "HybridBoundedConstraintSet( "<< this->_sets << " )";
 }
 

@@ -46,7 +46,7 @@ class TestSolver
 {
   private:
     std::unique_ptr<SolverInterface> solver;
-    std::string solver_class_name;
+    StringType solver_class_name;
   public:
     TestSolver(const SolverInterface& s,const char* n)
         : solver(s.clone()), solver_class_name(n) { }

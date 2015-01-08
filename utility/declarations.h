@@ -41,7 +41,7 @@
 namespace Ariadne {
 
 //! Internal name for output stream.
-typedef std::ostream OutputStream;
+typedef OutputStream OutputStream;
 
 //! Internal name for void type.
 typedef void Void;

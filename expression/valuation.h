@@ -52,7 +52,7 @@ namespace Ariadne {
 template<class X> inline Map<Identifier,X> operator|(const Variable<X>& v, const X& c) { Map<Identifier,X> r; r.insert(v.name(),c); return r; }
 template<class X> inline Map<Identifier,X> operator|(const Variable<X>& v, const Constant<X>& c) { Map<Identifier,X> r; r.insert(v.name(),c); return r; }
 template<class K, class V> inline  Map<K,V> operator,(const Map<K,V>& m1, const Map<K,V>& m2) {
-    Map<K,V> r=m1; for(typename Map<K,V>::const_iterator iter=m2.begin(); iter!=m2.end(); ++iter) { r.insert(*iter); } return r; }
+    Map<K,V> r=m1; for(typename Map<K,V>::ConstIterator iter=m2.begin(); iter!=m2.end(); ++iter) { r.insert(*iter); } return r; }
 Map<Identifier,String> inline operator|(const Variable<String>& v, const char* c) { return v|String(c); }
 
 template<class T, class X> class Valuation;
@@ -68,7 +68,7 @@ template<class T, class X>
 class Valuation
 {
   public:
-    typedef typename Map<Identifier,X>::const_iterator const_iterator;
+    typedef typename Map<Identifier,X>::ConstIterator ConstIterator;
     //! \brief The abstract mathematical type represented by variables.
     typedef T Type;
     //! \brief The concrete class of the values of the variables.
@@ -93,8 +93,8 @@ class Valuation
     const Map<Identifier,ValueType>& values() const { return _values; }
     Map<Identifier,ValueType>& values() { return _values; }
     Set<Identifier> defined() const { return _values.keys(); }
-    const_iterator begin() const { return _values.begin(); }
-    const_iterator end() const { return _values.end(); }
+    ConstIterator begin() const { return _values.begin(); }
+    ConstIterator end() const { return _values.end(); }
   public:
     Map<Identifier,ValueType> _values;
 };
@@ -103,8 +103,8 @@ template<class V, class X> bool operator==(const Valuation<V,X>& v1, const Valua
     bool identical = true;
     const Map<Identifier,X>& v1sm=v1.values();
     const Map<Identifier,X>& v2sm=v2.values();
-    typename Map<Identifier,X>::const_iterator v1iter=v1sm.begin();
-    typename Map<Identifier,X>::const_iterator v2iter=v2sm.begin();
+    typename Map<Identifier,X>::ConstIterator v1iter=v1sm.begin();
+    typename Map<Identifier,X>::ConstIterator v2iter=v2sm.begin();
 
     while(v1iter!=v1sm.end() && v2iter!=v2sm.end()) {
         if(v1iter->first==v2iter->first) {
@@ -184,26 +184,26 @@ template<class X> class HybridValuation
     Map<Identifier,X>& real_values() { return this->ContinuousValuation<X>::values(); }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const DiscreteValuation& val) {
+inline OutputStream& operator<<(OutputStream& os, const DiscreteValuation& val) {
     const char open='('; const char mid='|'; char const close=')';
     //const char open='{'; const char mid=':'; char const close='}';
     char sep=open;
-    for(Map<Identifier,DiscreteValuation::StringType>::const_iterator iter=val.string_values().begin(); iter!=val.string_values().end(); ++iter) {
+    for(Map<Identifier,DiscreteValuation::StringType>::ConstIterator iter=val.string_values().begin(); iter!=val.string_values().end(); ++iter) {
         os << sep << iter->first << mid << iter->second; sep=','; }
-    for(Map<Identifier,DiscreteValuation::IntegerType>::const_iterator iter=val.integer_values().begin(); iter!=val.integer_values().end(); ++iter) {
+    for(Map<Identifier,DiscreteValuation::IntegerType>::ConstIterator iter=val.integer_values().begin(); iter!=val.integer_values().end(); ++iter) {
         os << sep << iter->first << mid << iter->second; }
     return os << close;
 }
 
-template<class X> inline std::ostream& operator<<(std::ostream& os, const ContinuousValuation<X>& val) {
+template<class X> inline OutputStream& operator<<(OutputStream& os, const ContinuousValuation<X>& val) {
     return os << val.real_values();
 }
 
-template<class X> inline std::ostream& operator<<(std::ostream& os, const Valuation<X>& val) {
+template<class X> inline OutputStream& operator<<(OutputStream& os, const Valuation<X>& val) {
     const char open='('; const char mid ='|'; const char close=')'; const char sep=',';
     //const char open='{'; const char mid=':'; char const close='}'; char const sep=",";
     os << open;
-    for(typename Map<Identifier,X>::const_iterator iter=val.values().begin(); iter!=val.values().end(); ++iter) {
+    for(typename Map<Identifier,X>::ConstIterator iter=val.values().begin(); iter!=val.values().end(); ++iter) {
         if(iter!=val.values().begin()) { os << sep; }
         os << iter->first << mid << iter->second;
     }

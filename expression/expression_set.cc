@@ -45,7 +45,7 @@ template<> struct KeyValue<RealVariableInterval> {
 template<class T> bool unique_keys(const List<T>& lst) {
     typedef typename KeyValue<T>::KeyType K;
     Set<K> keys;
-    for(typename List<T>::const_iterator lst_iter=lst.begin(); lst_iter!=lst.end(); ++lst_iter) {
+    for(typename List<T>::ConstIterator lst_iter=lst.begin(); lst_iter!=lst.end(); ++lst_iter) {
         const K& k=KeyValue<T>().key(*lst_iter);
         if(keys.contains(k)) {
             return false;
@@ -60,7 +60,7 @@ make_key_value_map(const List<T>& lst) {
     typedef typename KeyValue<T>::KeyType K;
     typedef typename KeyValue<T>::ValueType V;
     Map<K,V> map;
-    for(typename List<T>::const_iterator lst_iter=lst.begin(); lst_iter!=lst.end(); ++lst_iter) {
+    for(typename List<T>::ConstIterator lst_iter=lst.begin(); lst_iter!=lst.end(); ++lst_iter) {
         map.insert(KeyValue<T>().key(*lst_iter),KeyValue<T>().value(*lst_iter));
     }
     return map;
@@ -136,7 +136,7 @@ OutputStream& operator<<(OutputStream& os, const RealVariablesBox& ebx) {
 
 VariablesBox over_approximation(const RealVariablesBox& ebx) {
     Map<RealVariable,ExactInterval> result;
-    for(Map<RealVariable,IntervalSet>::const_iterator iter=ebx.bounds().begin();
+    for(Map<RealVariable,IntervalSet>::ConstIterator iter=ebx.bounds().begin();
         iter!=ebx.bounds().end(); ++iter)
     {
         result[iter->first]=over_approximation(iter->second);
@@ -146,7 +146,7 @@ VariablesBox over_approximation(const RealVariablesBox& ebx) {
 
 VariablesBox approximation(const RealVariablesBox& ebx) {
     Map<RealVariable,ExactInterval> result;
-    for(Map<RealVariable,IntervalSet>::const_iterator iter=ebx.bounds().begin();
+    for(Map<RealVariable,IntervalSet>::ConstIterator iter=ebx.bounds().begin();
         iter!=ebx.bounds().end(); ++iter)
     {
         result[iter->first]=approximation(iter->second);
@@ -156,7 +156,7 @@ VariablesBox approximation(const RealVariablesBox& ebx) {
 
 VariablesBox under_approximation(const RealVariablesBox& ebx) {
     Map<RealVariable,ExactInterval> result;
-    for(Map<RealVariable,IntervalSet>::const_iterator iter=ebx.bounds().begin();
+    for(Map<RealVariable,IntervalSet>::ConstIterator iter=ebx.bounds().begin();
         iter!=ebx.bounds().end(); ++iter)
     {
         result[iter->first]=under_approximation(iter->second);
@@ -184,7 +184,7 @@ ConstraintSet RealExpressionConstraintSet::euclidean_set(const RealSpace& space)
 
 OutputStream& operator<<(OutputStream& os, const RealExpressionConstraintSet& eset) {
     os << "[";
-    for(List<ContinuousPredicate>::const_iterator iter=eset._constraints.begin(); iter!=eset._constraints.end(); ++iter) {
+    for(List<ContinuousPredicate>::ConstIterator iter=eset._constraints.begin(); iter!=eset._constraints.end(); ++iter) {
         os << (iter==eset._constraints.begin()?"":",") << *iter; }
     return os << "]";
 }
@@ -217,10 +217,10 @@ BoundedConstraintSet RealExpressionBoundedConstraintSet::euclidean_set(const Rea
 
 OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraintSet& eset) {
     os << "[";
-    for(Map<RealVariable,IntervalSet>::const_iterator iter=eset._bounds.begin(); iter!=eset._bounds.end(); ++iter) {
+    for(Map<RealVariable,IntervalSet>::ConstIterator iter=eset._bounds.begin(); iter!=eset._bounds.end(); ++iter) {
         os << (iter==eset._bounds.begin()?"":",") << *iter; }
     os << ";";
-    for(List<ContinuousPredicate>::const_iterator iter=eset._constraints.begin(); iter!=eset._constraints.end(); ++iter) {
+    for(List<ContinuousPredicate>::ConstIterator iter=eset._constraints.begin(); iter!=eset._constraints.end(); ++iter) {
         os << (iter==eset._constraints.begin()?"":",") << *iter; }
     return os << "]";
     return os << eset._bounds << eset._constraints;

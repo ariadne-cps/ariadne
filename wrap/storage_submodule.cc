@@ -37,9 +37,9 @@ using namespace Ariadne;
 
 
 
-// For some reason, Boost::Python doesn't like returning a const GridCell& from an iterator dereference. We therefore
+// For some reason, Boost::Python doesn't like returning a const GridCell& from an Iterator dereference. We therefore
 // wrap the usual GridTreeConstIterator in a class which returns a value upon dereferenceing, and use the range
-// iterator functionality.
+// Iterator functionality.
 // I have tried several approaches to the return value, and none of them seem to work.
 class PyGridTreeSetConstIterator : public GridTreeConstIterator {
   public:
@@ -62,17 +62,17 @@ class PyGridTreeSetBoxConstIterator {
   public:
     typedef boost::forward_traversal_tag iterator_category;
     typedef ExactBox value_type;
-    typedef size_t difference_type;
+    typedef SizeType difference_type;
     typedef const ExactBox reference;
     typedef const ExactBox* pointer;
 
-    PyGridTreeSetBoxConstIterator(GridTreeSet::const_iterator iter) : _iter(iter) { }
+    PyGridTreeSetBoxConstIterator(GridTreeSet::ConstIterator iter) : _iter(iter) { }
     const ExactBox operator*() const { return this->_iter->box(); }
     PyGridTreeSetBoxConstIterator& operator++() { ++this->_iter; return *this; }
     PyGridTreeSetBoxConstIterator operator++(int) { PyGridTreeSetBoxConstIterator ret(*this); ++this->_iter; return ret; }
     bool operator==(const PyGridTreeSetBoxConstIterator& other) { return this->_iter==other._iter; }
   private:
-    GridTreeSet::const_iterator _iter;
+    GridTreeSet::ConstIterator _iter;
 };
 
 PyGridTreeSetBoxConstIterator py_boxes_begin(const GridTreeSubset& gts) {
@@ -143,7 +143,7 @@ void export_grid_tree_set() {
     grid_tree_set_class.def("adjoin_outer_approximation", (void(GridTreeSet::*)(const CompactSetInterface&,const uint)) &GridTreeSet::adjoin_outer_approximation);
     grid_tree_set_class.def("adjoin_inner_approximation", (void(GridTreeSet::*)(const OpenSetInterface&,const uint,const uint)) &GridTreeSet::adjoin_inner_approximation);
     grid_tree_set_class.def("__len__", &GridTreeSet::size);
-    //grid_tree_set_class.def("__iter__", boost::python::iterator<const GridTreeSet>());
+    //grid_tree_set_class.def("__iter__", boost::python::Iterator<const GridTreeSet>());
     grid_tree_set_class.def("__iter__", range(&py_cells_begin,&py_cells_end));
     grid_tree_set_class.def("cells", range(&py_cells_begin,&py_cells_end));
     grid_tree_set_class.def("boxes", range(&py_boxes_begin,&py_boxes_end));

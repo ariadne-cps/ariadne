@@ -242,7 +242,7 @@ class TestConstrainedImageSet
         //ARIADNE_TEST_PRINT(set.affine_approximation());
     }
 
-    void test_draw(const std::string& str, const EffectiveConstrainedImageSet& set, uint acc) {
+    void test_draw(const StringType& str, const EffectiveConstrainedImageSet& set, uint acc) {
         figure.clear();
         figure.set_bounding_box(ExactBox({{-2.75,+2.75},{-1.5,+2.0}}));
         GridTreeSet paving(set.dimension());
@@ -264,11 +264,11 @@ class TestConstrainedImageSet
         figure.draw(s5); figure.draw(s6); figure.draw(s7); figure.draw(s8);
         figure.draw(s9); figure.draw(s10); figure.draw(s11); figure.draw(s12);
         figure.draw(s13); figure.draw(s14); figure.draw(s15); figure.draw(s16);
-        figure.write((std::string("test_function_set-draw-")+str).c_str());
+        figure.write((StringType("test_function_set-draw-")+str).c_str());
         figure.clear();
     }
 
-    void test_draw2(const std::string& str, const EffectiveConstrainedImageSet& set, uint acc) {
+    void test_draw2(const StringType& str, const EffectiveConstrainedImageSet& set, uint acc) {
         figure.clear();
         figure.set_bounding_box(ExactBox{{-1.75,+1.75},{-1.5,+2.0}});
         GridTreeSet paving(set.dimension());
@@ -290,7 +290,7 @@ class TestConstrainedImageSet
         figure.draw(s5); figure.draw(s6); figure.draw(s7); figure.draw(s8);
         figure.draw(s9); figure.draw(s10); figure.draw(s11); figure.draw(s12);
         figure.draw(s13); figure.draw(s14); figure.draw(s15); figure.draw(s16);
-        figure.write((std::string("test_function_set-draw-")+str).c_str());
+        figure.write((StringType("test_function_set-draw-")+str).c_str());
         figure.clear();
     }
 

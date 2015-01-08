@@ -48,7 +48,7 @@ class SolverException : public std::runtime_error
 {
   public:
     SolverException(const char* what) : std::runtime_error(what) { }
-    SolverException(const std::string& what) : std::runtime_error(what) { }
+    SolverException(const StringType& what) : std::runtime_error(what) { }
 };
 
 //! \relates SolverInterface \brief It cannot be shown that there is no solution to a (parameterised) algebraic equation,
@@ -57,7 +57,7 @@ class UnknownSolutionException : public SolverException
 {
   public:
     UnknownSolutionException(const char* what) : SolverException(what) { }
-    UnknownSolutionException(const std::string& what) : SolverException(what) { }
+    UnknownSolutionException(const StringType& what) : SolverException(what) { }
 };
 
 //! \relates SolverInterface \brief There are no solutions to a (parameterised) algebraic equation in the domain.
@@ -65,7 +65,7 @@ class NoSolutionException : public SolverException
 {
   public:
     NoSolutionException(const char* what) : SolverException(what) { }
-    NoSolutionException(const std::string& what) : SolverException(what) { }
+    NoSolutionException(const StringType& what) : SolverException(what) { }
 };
 
 //! \relates SolverInterface \brief The solutions to a (parameterised) algebraic equation are degenerate due to the Jacobian being singular.
@@ -73,7 +73,7 @@ class SingularJacobianException : public SolverException
 {
   public:
     SingularJacobianException(const char* what) : SolverException(what) { }
-    SingularJacobianException(const std::string& what) : SolverException(what) { }
+    SingularJacobianException(const StringType& what) : SolverException(what) { }
 };
 
 
@@ -89,7 +89,7 @@ class SolverInterface
     //! \brief Make a dynamically-allocated copy.
     virtual SolverInterface* clone() const = 0;
     //! \brief Write to an output stream.
-    virtual void write(std::ostream& os) const = 0;
+    virtual void write(OutputStream& os) const = 0;
 
 
     //! \brief The maximum permissible error of the solution.
@@ -129,7 +129,7 @@ class SolverInterface
     virtual Set< Vector<ValidatedNumber> > solve_all(const ValidatedVectorFunction& f,const ExactBox& bx) const = 0;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const SolverInterface& solver) {
+inline OutputStream& operator<<(OutputStream& os, const SolverInterface& solver) {
     solver.write(os); return os;
 }
 

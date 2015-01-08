@@ -42,7 +42,7 @@ inline Vector2d operator-(const Vector2d& v) { return Vector2d(-v.x,-v.y); }
 inline Vector2d operator+(const Vector2d& v1, const Vector2d& v2) { return Vector2d(v1.x+v2.x,v1.y+v2.y); }
 inline Vector2d operator-(const Vector2d& v1, const Vector2d& v2) { return Vector2d(v1.x-v2.x,v1.y-v2.y); }
 inline Vector2d operator*(const double& s1, const Vector2d& v2) { return Vector2d(s1*v2.x,s1*v2.y); }
-inline std::ostream& operator<<(std::ostream& os, const Vector2d& v) {
+inline OutputStream& operator<<(OutputStream& os, const Vector2d& v) {
     return os << "["<<v.x<<","<<v.y<<"]"; }
 
 struct Point2d {
@@ -52,14 +52,14 @@ struct Point2d {
 inline bool operator==(Point2d& pt1, const Point2d& pt2) { return pt1.x==pt2.x && pt1.y==pt2.y; }
 inline Point2d& operator+=(Point2d& pt, const Vector2d& v) { pt.x+=v.x; pt.y+=v.y; return pt; }
 inline Point2d& operator-=(Point2d& pt, const Vector2d& v) { pt.x-=v.x; pt.y-=v.y; return pt; }
-inline std::ostream& operator<<(std::ostream& os, const Point2d& pt) {
+inline OutputStream& operator<<(OutputStream& os, const Point2d& pt) {
     return os << "("<<pt.x<<","<<pt.y<<")"; }
 
 struct Box2d {
     double xl,xu,yl,yu; Box2d() { }
     Box2d(double xl_, double xu_, double yl_, double yu_) : xl(xl_), xu(xu_), yl(yl_), yu(yu_) { }
 };
-inline std::ostream& operator<<(std::ostream& os, const Box2d& bx) {
+inline OutputStream& operator<<(OutputStream& os, const Box2d& bx) {
     return os << "["<<bx.xl<<","<<bx.xu<<"]x["<<bx.yl<<","<<bx.yu<<"]"; }
 
 

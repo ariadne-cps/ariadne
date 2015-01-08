@@ -35,7 +35,7 @@
 #include <iostream>
 #include <vector>
 
-#include <boost/iterator/iterator_facade.hpp>
+#include <boost/Iterator/iterator_facade.hpp>
 
 #include "utility/macros.h"
 #include "utility/array.h"
@@ -67,47 +67,47 @@ class MultiIndexReference {
     friend class MultiIndexListIterator;
     friend class MultiIndexListConstIterator;
   public:
-    typedef unsigned int size_type;
-    typedef unsigned char byte_type;
-    typedef unsigned int word_type;
+    typedef unsigned int SizeType;
+    typedef unsigned char ByteType;
+    typedef unsigned int WordType;
     typedef char raw_data_type;
 
-    typedef byte_type index_type;
+    typedef ByteType IndexType;
     typedef MultiIndexValueReference reference;
-    typedef const index_type& const_reference;
-    //typedef unsigned int word_type;
-    //typedef unsigned long long int word_type;
+    typedef const IndexType& const_reference;
+    //typedef unsigned int WordType;
+    //typedef unsigned long long int WordType;
   protected:
   public:
     //! \brief Constructors.
-    MultiIndexReference(size_type n, index_type* p);
+    MultiIndexReference(SizeType n, IndexType* p);
   public:
     //! \brief Assign values.
     MultiIndexReference& operator=(const MultiIndexReference& a);
     //! \brief Resize to hold n variables.
-    void resize(size_type n);
+    void resize(SizeType n);
     //! \brief Assigns values from another index. Precondition: the size of \a a must equal the current size.
     void assign(const MultiIndexReference& a);
     //! \brief Set all values to zero.
     void clear();
     //! \brief The number of variables.
-    size_type size() const;
+    SizeType size() const;
     //! \brief The degree of the multi-index, equal to the sum of the number of occurrences of the variables.
-    index_type degree() const;
+    IndexType degree() const;
      //! \brief The number of variables.
-    size_type number_of_variables() const;
+    SizeType number_of_variables() const;
     //! \brief The number of occurrences of the \a i th variable.
-    index_type get(size_type i) const;
+    IndexType get(SizeType i) const;
     //! \brief Set the number of occurrences of the \a i th variable to \a n.
-    void set(size_type i, index_type n);
+    void set(SizeType i, IndexType n);
     //! \brief The number of occurrences of the \a i th variable.
-    const_reference operator[](size_type i) const;
+    const_reference operator[](SizeType i) const;
     //! \brief The number of occurrences of the \a i th variable.
-    reference operator[](size_type i);
+    reference operator[](SizeType i);
     //! \brief Increment the value of the \a ith element
-    void increment(size_type i);
+    void increment(SizeType i);
     //! \brief Decrement the value of the \a ith element
-    void decrement(size_type i);
+    void decrement(SizeType i);
 
     //! \brief Equality operator.
     friend bool operator==(const MultiIndexReference& a1, const MultiIndexReference& a2); // inline
@@ -125,15 +125,15 @@ class MultiIndexReference {
     //! \brief Inplace difference.
     MultiIndexReference& operator-=(const MultiIndexReference& a); // inline
     //! \brief Inplace scalar product.
-    MultiIndexReference& operator*=(const index_type& a); // inline
+    MultiIndexReference& operator*=(const IndexType& a); // inline
     //! \brief Sum.
     friend MultiIndexReference operator+(const MultiIndexReference& a1, const MultiIndexReference& a2); // inline
     //! \brief Difference.
     friend MultiIndexReference operator-(const MultiIndexReference& a1, const MultiIndexReference& a2); // inline
     //! \brief Scalar product.
-    friend MultiIndexReference operator*(const MultiIndexReference& a, index_type s); // inline
+    friend MultiIndexReference operator*(const MultiIndexReference& a, IndexType s); // inline
     //! \brief Scalar product.
-    friend MultiIndexReference operator*(index_type s, const MultiIndexReference& a); // inline
+    friend MultiIndexReference operator*(IndexType s, const MultiIndexReference& a); // inline
 
     //! \brief The position of the element in the Array of tensor values.
     unsigned int position() const;
@@ -143,23 +143,23 @@ class MultiIndexReference {
     unsigned int number() const;
 
     //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream&, const MultiIndexReference&);
+    friend OutputStream& operator<<(OutputStream&, const MultiIndexReference&);
   public:
-    //index_type& at(size_type i) { return _p[i]; }
-    const index_type& at(size_type i) const { return _p[i]; }
-    index_type& at(size_type i) { return _p[i]; }
-    index_type* begin() { return _p; }
-    const index_type* begin() const { return _p; }
-    index_type* end() { return _p+(_n+1u); }
-    const index_type* end() const { return _p+(_n+1u); }
+    //IndexType& at(SizeType i) { return _p[i]; }
+    const IndexType& at(SizeType i) const { return _p[i]; }
+    IndexType& at(SizeType i) { return _p[i]; }
+    IndexType* begin() { return _p; }
+    const IndexType* begin() const { return _p; }
+    IndexType* end() { return _p+(_n+1u); }
+    const IndexType* end() const { return _p+(_n+1u); }
   public:
-    //size_type memory_size() { return sizeof(word_type)*(1+_n/sizeof(word_type)); }
-    size_type memory_size() { return _n+1; }
-    void allocate() { _p=new index_type[memory_size()]; }
+    //SizeType memory_size() { return sizeof(WordType)*(1+_n/sizeof(WordType)); }
+    SizeType memory_size() { return _n+1; }
+    void allocate() { _p=new IndexType[memory_size()]; }
     void deallocate() { delete[] _p; }
   private:
-    size_type _n;
-    index_type* _p;
+    SizeType _n;
+    IndexType* _p;
 };
 
 
@@ -170,11 +170,11 @@ class MultiIndex : public MultiIndexReference {
     //! \brief Construct a multi index with no coefficients.
     explicit MultiIndex();
     //! \brief Construct a multi index of degree \a 0 with \a nv variables.
-    explicit MultiIndex(size_type nv);
+    explicit MultiIndex(SizeType nv);
     //! \brief Construct a multi index with \a nv variables from the Array \a ary.
-    explicit MultiIndex(size_type nv, const int* ary);
+    explicit MultiIndex(SizeType nv, const int* ary);
     //! \brief Construct a multi index with \a nv variables from variable arguments.
-    explicit MultiIndex(size_type nv, int a1, ...);
+    explicit MultiIndex(SizeType nv, int a1, ...);
 
     //! \brief Copy constructor.
     MultiIndex(const MultiIndex& a);
@@ -184,24 +184,24 @@ class MultiIndex : public MultiIndexReference {
     MultiIndex& operator=(const MultiIndexReference& a);
 
     //! \brief Construct the zero multi index with \a nv variables.
-    static MultiIndex zero(size_type nv);
+    static MultiIndex zero(SizeType nv);
     //! \brief Construct the unit multi index in variable \a j with \a nv variables.
-    static MultiIndex unit(size_type nv, size_type j);
+    static MultiIndex unit(SizeType nv, SizeType j);
     //! \brief Construct the first multi index of degree \a d with \a nv variables.
-    static MultiIndex first(size_type nv, index_type d);
+    static MultiIndex first(SizeType nv, IndexType d);
 };
 
 
 class MultiIndexValueReference {
-    typedef MultiIndexReference::size_type size_type;
-    typedef MultiIndexReference::index_type index_type;
-    typedef MultiIndexReference::word_type word_type;
+    typedef MultiIndexReference::SizeType SizeType;
+    typedef MultiIndexReference::IndexType IndexType;
+    typedef MultiIndexReference::WordType WordType;
   private:
-    size_type _n; index_type* _p; size_type _i;
+    SizeType _n; IndexType* _p; SizeType _i;
   public:
-    MultiIndexValueReference(size_type n, index_type* p, size_type i) : _n(n), _p(p), _i(i) { }
-    operator const index_type& () { return _p[_i]; }
-    MultiIndexValueReference& operator=(const index_type& d) { _p[_n]+=(d-_p[_i]); _p[_i]=d; return *this; }
+    MultiIndexValueReference(SizeType n, IndexType* p, SizeType i) : _n(n), _p(p), _i(i) { }
+    operator const IndexType& () { return _p[_i]; }
+    MultiIndexValueReference& operator=(const IndexType& d) { _p[_n]+=(d-_p[_i]); _p[_i]=d; return *this; }
     MultiIndexValueReference& operator++() { ++_p[_n]; ++_p[_i]; return *this; }
     MultiIndexValueReference& operator--();
     MultiIndexValueReference& operator+=(int k) { _p[_n]+=k; _p[_i]+=k; return *this; }
@@ -227,30 +227,30 @@ inline MultiIndex::MultiIndex()
     std::fill(begin(),end(),0);
 }
 
-inline MultiIndex::MultiIndex(size_type n)
+inline MultiIndex::MultiIndex(SizeType n)
     : MultiIndexReference(n,0)
 {
     allocate();
     std::fill(this->begin(),this->end(),0);
 }
 
-inline MultiIndex::MultiIndex(size_type n, const int* ary)
+inline MultiIndex::MultiIndex(SizeType n, const int* ary)
     : MultiIndexReference(n,0)
 {
     allocate();
-    index_type* p=begin();
-    p[n]=0; for(size_type i=0; i!=n; ++i) { p[i]=ary[i]; p[n]+=ary[i]; }
+    IndexType* p=begin();
+    p[n]=0; for(SizeType i=0; i!=n; ++i) { p[i]=ary[i]; p[n]+=ary[i]; }
 }
 
-inline MultiIndex::MultiIndex(size_type n, int a0, ...)
+inline MultiIndex::MultiIndex(SizeType n, int a0, ...)
     : MultiIndexReference(n,0)
 {
     ARIADNE_ASSERT(n>0);
     allocate();
-    index_type* p=begin();
+    IndexType* p=begin();
     p[0]=a0; p[n]=a0;
     va_list args; va_start(args,a0);
-    for(size_type i=1; i!=n; ++i) {
+    for(SizeType i=1; i!=n; ++i) {
         p[i]=va_arg(args,int);
         p[n]+=p[i];
     }
@@ -276,19 +276,19 @@ inline MultiIndex& MultiIndex::operator=(const MultiIndexReference& a) {
     return *this;
 }
 
-inline MultiIndex MultiIndex::zero(size_type n)
+inline MultiIndex MultiIndex::zero(SizeType n)
 {
     return MultiIndex(n);
 }
 
-inline MultiIndex MultiIndex::unit(size_type n, size_type i)
+inline MultiIndex MultiIndex::unit(SizeType n, SizeType i)
 {
     MultiIndex result(n);
     ++result[i];
     return result;
 }
 
-inline MultiIndex MultiIndex::first(size_type n, index_type d)
+inline MultiIndex MultiIndex::first(SizeType n, IndexType d)
 {
     MultiIndex result(n);
     result[0]=d;
@@ -296,7 +296,7 @@ inline MultiIndex MultiIndex::first(size_type n, index_type d)
 }
 
 
-inline MultiIndexReference::MultiIndexReference(size_type n, index_type* p)
+inline MultiIndexReference::MultiIndexReference(SizeType n, IndexType* p)
     : _n(n), _p(p) { }
 
 inline MultiIndexReference& MultiIndexReference::operator=(const MultiIndexReference& a) {
@@ -313,46 +313,46 @@ inline void MultiIndexReference::clear()
     //std::fill(this->begin(),this->end(),0);
 }
 
-inline void MultiIndexReference::resize(size_type n) {
+inline void MultiIndexReference::resize(SizeType n) {
     if(this->_n!=n) { deallocate(); this->_n=n; allocate(); }
 }
 
-inline MultiIndexReference::size_type MultiIndexReference::size() const {
+inline MultiIndexReference::SizeType MultiIndexReference::size() const {
     return this->_n;
 }
 
-inline MultiIndexReference::index_type MultiIndexReference::degree() const {
+inline MultiIndexReference::IndexType MultiIndexReference::degree() const {
     return this->_p[this->_n];
 }
 
-inline MultiIndexReference::size_type MultiIndexReference::number_of_variables() const {
+inline MultiIndexReference::SizeType MultiIndexReference::number_of_variables() const {
     return this->_n;
 }
 
-inline MultiIndexReference::index_type MultiIndexReference::get(size_type i) const {
+inline MultiIndexReference::IndexType MultiIndexReference::get(SizeType i) const {
     assert(i<this->size()); return this->_p[i];
 }
 
-inline void MultiIndexReference::set(size_type i, index_type k) {
+inline void MultiIndexReference::set(SizeType i, IndexType k) {
     assert(i<this->size());
-    index_type& ai=this->_p[i];
-    index_type& d=this->_p[this->_n];
+    IndexType& ai=this->_p[i];
+    IndexType& d=this->_p[this->_n];
     d+=k; d-=ai; ai=k;
 }
 
-inline MultiIndexReference::index_type const& MultiIndexReference::operator[](size_type i) const {
+inline MultiIndexReference::IndexType const& MultiIndexReference::operator[](SizeType i) const {
     assert(i<this->size()); return this->_p[i];
 }
 
-inline MultiIndexValueReference MultiIndexReference::operator[](size_type i) {
+inline MultiIndexValueReference MultiIndexReference::operator[](SizeType i) {
     return MultiIndexValueReference(this->_n,this->_p,i);
 }
 
-inline void MultiIndexReference::increment(size_type i) {
+inline void MultiIndexReference::increment(SizeType i) {
     ++this->_p[i]; ++this->_p[this->_n];
 }
 
-inline void MultiIndexReference::decrement(size_type i) {
+inline void MultiIndexReference::decrement(SizeType i) {
     ARIADNE_ASSERT(this->_p[i]>0u);
     --this->_p[i]; --this->_p[this->_n];
 }
@@ -361,10 +361,10 @@ inline void MultiIndexReference::decrement(size_type i) {
 inline bool operator==(const MultiIndexReference& a1, const MultiIndexReference& a2) {
     if(a1.size()!=a2.size()) { return false; }
     //return memcmp(a1.begin(),a2.begin(),a1.size());
-    for(MultiIndexReference::size_type i=0; i!=a1.size(); ++i) {
+    for(MultiIndexReference::SizeType i=0; i!=a1.size(); ++i) {
         if(a1.at(i)!=a2.at(i)) { return false; } }
     return true;
-    //for(MultiIndexReference::size_type j=0; j!=a1.word_size(); ++j) {
+    //for(MultiIndexReference::SizeType j=0; j!=a1.word_size(); ++j) {
     //    if(a1.word_at(j)!=a2.word_at(j)) { return false; } }
     //return true;
 }
@@ -381,7 +381,7 @@ inline bool operator<(const MultiIndexReference& a1, const MultiIndexReference& 
     if(a1.degree()!=a2.degree()) {
         return a1.degree()<a2.degree();
     } else {
-        for(MultiIndexReference::size_type i=0; i!=a1.size(); ++i) {
+        for(MultiIndexReference::SizeType i=0; i!=a1.size(); ++i) {
             if(a1[i]!=a2[i]) {
                 return a1[i]>a2[i];
             }
@@ -432,8 +432,8 @@ MultiIndexReference& MultiIndexReference::operator++()
     //std::cerr<<"MultiIndexReference::operator++() with *this="<<*this<<" "<<std::flush;
     assert(_n>0);
 
-    size_type const n=this->_n;
-    index_type* const p=this->_p;
+    SizeType const n=this->_n;
+    IndexType* const p=this->_p;
 
     if(n==1) {
         ++p[0];
@@ -445,9 +445,9 @@ MultiIndexReference& MultiIndexReference::operator++()
         ++p[n-1];
         return *this;
     } else {
-        index_type li=p[n-1];
+        IndexType li=p[n-1];
         p[n-1]=0;
-        for(size_type k=n-1; k!=0; --k) {
+        for(SizeType k=n-1; k!=0; --k) {
             if(p[k-1]!=0) {
                 --p[k-1];
                 p[k]=li+1;
@@ -463,11 +463,11 @@ MultiIndexReference& MultiIndexReference::operator++()
 
 inline
 MultiIndexReference& MultiIndexReference::operator+=(const MultiIndexReference& a) {
-    //for(size_type j=0; j!=this->word_size(); ++j) {
+    //for(SizeType j=0; j!=this->word_size(); ++j) {
     //    this->word_at(j)+=a.word_at(j);
     //}
     //return *this;
-    for(size_type i=0; i!=this->size()+1; ++i) {
+    for(SizeType i=0; i!=this->size()+1; ++i) {
         this->_p[i]+=a._p[i];
     }
     return *this;
@@ -475,7 +475,7 @@ MultiIndexReference& MultiIndexReference::operator+=(const MultiIndexReference& 
 
 inline
 MultiIndexReference& MultiIndexReference::operator-=(const MultiIndexReference& a) {
-    for(size_type i=0; i!=this->size()+1; ++i) {
+    for(SizeType i=0; i!=this->size()+1; ++i) {
         ARIADNE_ASSERT(this->_p[i]>=a._p[i]);
         this->_p[i]-=a._p[i];
     }
@@ -483,12 +483,12 @@ MultiIndexReference& MultiIndexReference::operator-=(const MultiIndexReference& 
 }
 
 inline
-MultiIndexReference& MultiIndexReference::operator*=(const index_type& s) {
-    //for(size_type j=0; j!=this->word_size(); ++j) {
+MultiIndexReference& MultiIndexReference::operator*=(const IndexType& s) {
+    //for(SizeType j=0; j!=this->word_size(); ++j) {
     //    this->word_at(j)*=s;
     //}
     //return *this;
-    for(size_type i=0; i!=this->size()+1; ++i) {
+    for(SizeType i=0; i!=this->size()+1; ++i) {
         this->_p[i]*=s;
     }
     return *this;
@@ -496,7 +496,7 @@ MultiIndexReference& MultiIndexReference::operator*=(const index_type& s) {
 
 inline
 void iadd(MultiIndexReference& r, const MultiIndexReference& a1, const MultiIndexReference& a2) {
-    for(MultiIndexReference::size_type j=0; j!=r.size(); ++j) {
+    for(MultiIndexReference::SizeType j=0; j!=r.size(); ++j) {
         r.at(j)=a1.at(j)+a2.at(j);
     }
 }
@@ -512,12 +512,12 @@ MultiIndexReference operator-(const MultiIndexReference& a1, const MultiIndexRef
 }
 
 inline
-MultiIndexReference operator*(const MultiIndexReference& a, MultiIndexReference::index_type s) {
+MultiIndexReference operator*(const MultiIndexReference& a, MultiIndexReference::IndexType s) {
     MultiIndexReference r(a); r*=s; return r;
 }
 
 inline
-MultiIndexReference operator*(MultiIndexReference::index_type s, const MultiIndexReference& a) {
+MultiIndexReference operator*(MultiIndexReference::IndexType s, const MultiIndexReference& a) {
     MultiIndexReference r(a); r*=s; return r;
 }
 
@@ -557,10 +557,10 @@ bin(const MultiIndexReference& n, const MultiIndexReference& k)
 }
 
 inline
-std::ostream& operator<<(std::ostream& os, const MultiIndexReference& a) {
+OutputStream& operator<<(OutputStream& os, const MultiIndexReference& a) {
     //os<<"<"<<static_cast<const void*>(a.begin())<<">";
     if(a.size()==0) { os << '('; }
-    for(MultiIndex::size_type i=0; i!=a.size(); ++i) { os << (i==0?'(':',') << int(a[i]); }
+    for(MultiIndex::SizeType i=0; i!=a.size(); ++i) { os << (i==0?'(':',') << int(a[i]); }
     //os<<";"<<int(a.degree());
     return os << ')';
 }
@@ -575,21 +575,21 @@ std::ostream& operator<<(std::ostream& os, const MultiIndexReference& a) {
 
 class MultiIndexBound {
   public:
-    typedef MultiIndexReference::size_type size_type;
-    MultiIndexBound(size_type as, size_type d);
+    typedef MultiIndexReference::SizeType SizeType;
+    MultiIndexBound(SizeType as, SizeType d);
     MultiIndexBound(const MultiIndexReference& a);
-    MultiIndexBound(size_type as, size_type ng, size_type g1s, size_type g1d, ...);
-    size_type size() const { return _groups.size(); }
+    MultiIndexBound(SizeType as, SizeType ng, SizeType g1s, SizeType g1d, ...);
+    SizeType size() const { return _groups.size(); }
     friend bool operator<=(const MultiIndexReference& a, const MultiIndexBound& b);
   private:
-    Array<size_type> _groups;
-    Array<size_type> _max_degrees;
+    Array<SizeType> _groups;
+    Array<SizeType> _max_degrees;
 };
 
-inline MultiIndexBound::MultiIndexBound(size_type as, size_type d)
+inline MultiIndexBound::MultiIndexBound(SizeType as, SizeType d)
     : _groups(as), _max_degrees(1u)
 {
-    for(size_type i=0; i!=as; ++i) {
+    for(SizeType i=0; i!=as; ++i) {
         _groups[i]=0u;
     }
     _max_degrees[0]=d;
@@ -599,24 +599,24 @@ inline MultiIndexBound::MultiIndexBound(size_type as, size_type d)
 inline MultiIndexBound::MultiIndexBound(const MultiIndexReference& a)
     : _groups(a.size()), _max_degrees(a.size())
 {
-    for(size_type i=0; i!=a.size(); ++i) {
+    for(SizeType i=0; i!=a.size(); ++i) {
         _groups[i]=i;
         _max_degrees[i]=a[i];
     }
 }
 
 
-inline MultiIndexBound::MultiIndexBound(size_type as, size_type ng, size_type g1s, size_type g1d, ...)
+inline MultiIndexBound::MultiIndexBound(SizeType as, SizeType ng, SizeType g1s, SizeType g1d, ...)
     : _groups(as), _max_degrees(ng)
 {
     va_list args; va_start(args,g1d);
-    size_type k=0;
+    SizeType k=0;
     for( ; k!=g1s; ++k) {
         _groups[k]=0;
     }
     _max_degrees[0]=g1d;
-    for(size_type i=1; i!=ng; ++i) {
-        size_type nk=k+va_arg(args,int);
+    for(SizeType i=1; i!=ng; ++i) {
+        SizeType nk=k+va_arg(args,int);
         for( ; k!=nk; ++k) {
             _groups[k]=i;
         }
@@ -627,12 +627,12 @@ inline MultiIndexBound::MultiIndexBound(size_type as, size_type ng, size_type g1
 }
 
 inline bool operator<=(const MultiIndexReference& a, const MultiIndexBound& b) {
-    typedef MultiIndexReference::size_type size_type;
-    Array<size_type> degrees(b._max_degrees.size());
-    for(size_type j=0; j!=a.size(); ++j) {
+    typedef MultiIndexReference::SizeType SizeType;
+    Array<SizeType> degrees(b._max_degrees.size());
+    for(SizeType j=0; j!=a.size(); ++j) {
         degrees[b._groups[j]]+=a[j];
     }
-    for(size_type k=0; k!=degrees.size(); ++k) {
+    for(SizeType k=0; k!=degrees.size(); ++k) {
         if(degrees[k]>b._max_degrees[k]) {
             return false;
         }
@@ -647,11 +647,11 @@ class MultiIndexListIterator
 {
     MultiIndexReference _ref;
   public:
-    typedef MultiIndex::size_type size_type;
-    typedef MultiIndex::index_type index_type;
+    typedef MultiIndex::SizeType SizeType;
+    typedef MultiIndex::IndexType IndexType;
 
     MultiIndexListIterator() : _ref(0u,0) { }
-    MultiIndexListIterator(size_type as, index_type* p) : _ref(as,p) { }
+    MultiIndexListIterator(SizeType as, IndexType* p) : _ref(as,p) { }
     MultiIndexListIterator(const MultiIndexListIterator& iter) : _ref(iter._ref) { }
     MultiIndexListIterator& operator=(const MultiIndexListIterator& iter) { _ref._n=iter._ref._n; _ref._p=iter._ref._p; return *this; }
 
@@ -661,7 +661,7 @@ class MultiIndexListIterator
     void decrement() { advance(-1); }
     void advance(int m) { _ref._p+=m*(_ref._n+1); }
 
-    friend std::ostream& operator<<(std::ostream& os, const MultiIndexListIterator& iter) {
+    friend OutputStream& operator<<(OutputStream& os, const MultiIndexListIterator& iter) {
         return os << "<" << &iter._ref[0] << ">" << iter._ref << "\n";
     }
 };
@@ -671,11 +671,11 @@ class MultiIndexListConstIterator
 {
     MultiIndexReference _ref;
   public:
-    typedef MultiIndex::size_type size_type;
-    typedef MultiIndex::index_type index_type;
+    typedef MultiIndex::SizeType SizeType;
+    typedef MultiIndex::IndexType IndexType;
 
     MultiIndexListConstIterator() : _ref(0u,0) { }
-    MultiIndexListConstIterator(size_type as, const index_type* p) : _ref(as,const_cast<index_type*>(p)) { }
+    MultiIndexListConstIterator(SizeType as, const IndexType* p) : _ref(as,const_cast<IndexType*>(p)) { }
     MultiIndexListConstIterator(MultiIndexListIterator iter) : _ref(*iter) { }
     MultiIndexListConstIterator(const MultiIndexListConstIterator& iter) : _ref(iter._ref) { }
     MultiIndexListConstIterator& operator=(const MultiIndexListConstIterator& iter) { _ref._n=iter._ref._n; _ref._p=iter._ref._p; return *this; }
@@ -685,7 +685,7 @@ class MultiIndexListConstIterator
     void decrement() { advance(-1); }
     void advance(int m) { _ref._p+=m*(_ref._n+1); }
 
-    friend std::ostream& operator<<(std::ostream& os, const MultiIndexListConstIterator& iter) {
+    friend OutputStream& operator<<(OutputStream& os, const MultiIndexListConstIterator& iter) {
         return os << "<" << &iter._ref[0] << ">" << iter._ref << "\n";
     }
 };
@@ -694,52 +694,52 @@ class MultiIndexListConstIterator
 class MultiIndexList
 {
   public:
-    typedef MultiIndex::size_type size_type;
-    typedef MultiIndex::index_type index_type;
+    typedef MultiIndex::SizeType SizeType;
+    typedef MultiIndex::IndexType IndexType;
 
     typedef MultiIndex value_type;
     typedef MultiIndexReference reference;
     typedef const MultiIndexReference const_reference;
-    typedef MultiIndexListIterator iterator;
-    typedef MultiIndexListConstIterator const_iterator;
+    typedef MultiIndexListIterator Iterator;
+    typedef MultiIndexListConstIterator ConstIterator;
 
     MultiIndexList() : _as(0u), _d() { }
-    MultiIndexList(size_type as) : _as(as), _d() { }
+    MultiIndexList(SizeType as) : _as(as), _d() { }
     bool operator==(const MultiIndexList& other) const { return this==&other || (this->_as==other._as && this->_d==other._d); }
     bool operator!=(const MultiIndexList& other) const { return !(*this==other); }
-    size_type element_size() const { return _as; }
-    size_type size() const { return _d.size()/(_as+1); }
-    size_type capacity() const { return _d.capacity()/(_as+1); }
+    SizeType element_size() const { return _as; }
+    SizeType size() const { return _d.size()/(_as+1); }
+    SizeType capacity() const { return _d.capacity()/(_as+1); }
     void clear() { _d.clear(); }
-    void resize(size_type n) { _d.resize(n*(_as+1)); }
-    void reserve(size_type c) { _d.reserve(c*(_as+1)); };
+    void resize(SizeType n) { _d.resize(n*(_as+1)); }
+    void reserve(SizeType c) { _d.reserve(c*(_as+1)); };
     void append(const MultiIndexReference& a) { this->resize(this->size()+1); (*this)[this->size()-1]=a; }
 
-    reference operator[](size_type i) { return MultiIndexReference(_as,_begin_pointer()+i*(_as+1)); }
-    const_reference operator[](size_type i) const { return MultiIndexReference(_as,const_cast<index_type*>(_begin_pointer())+i*(_as+1)); }
+    reference operator[](SizeType i) { return MultiIndexReference(_as,_begin_pointer()+i*(_as+1)); }
+    const_reference operator[](SizeType i) const { return MultiIndexReference(_as,const_cast<IndexType*>(_begin_pointer())+i*(_as+1)); }
     reference front() { return (*this)[0]; }
     const_reference front() const { return (*this)[0]; }
     reference back() { return (*this)[this->size()-1]; }
     const_reference back() const { return (*this)[this->size()-1]; }
 
-    iterator begin() { return iterator(_as,_begin_pointer()); }
-    iterator end() { return iterator(_as,_begin_pointer()+size()*(_as+1u)); }
-    const_iterator begin() const { return const_iterator(_as,_begin_pointer()); }
-    const_iterator end() const { return const_iterator(_as,_begin_pointer()+size()*(_as+1u)); }
+    Iterator begin() { return Iterator(_as,_begin_pointer()); }
+    Iterator end() { return Iterator(_as,_begin_pointer()+size()*(_as+1u)); }
+    ConstIterator begin() const { return ConstIterator(_as,_begin_pointer()); }
+    ConstIterator end() const { return ConstIterator(_as,_begin_pointer()+size()*(_as+1u)); }
   private:
   public:
-    size_type _data_size() const { return _d.size(); }
-    index_type* _begin_pointer() { return &_d[0]; }
-    const index_type* _begin_pointer() const { return &_d[0]; }
-    const std::vector<index_type>& _data() const { return _d; }
+    SizeType _data_size() const { return _d.size(); }
+    IndexType* _begin_pointer() { return &_d[0]; }
+    const IndexType* _begin_pointer() const { return &_d[0]; }
+    const std::vector<IndexType>& _data() const { return _d; }
   private:
-    size_type _as; std::vector<index_type> _d;
+    SizeType _as; std::vector<IndexType> _d;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const MultiIndexList& lst) {
+inline OutputStream& operator<<(OutputStream& os, const MultiIndexList& lst) {
     os << "MultiIndexList";
     os << "<" << lst.size() << "," << lst.capacity() <<  "," << lst.element_size() << "," << lst._data_size() << ">";
-    for(MultiIndexList::size_type i=0; i!=lst.size(); ++i) { os << (i==0?"[":",") << lst[i]; }
+    for(MultiIndexList::SizeType i=0; i!=lst.size(); ++i) { os << (i==0?"[":",") << lst[i]; }
     return os << "]";
 }
 

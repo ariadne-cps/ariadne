@@ -164,7 +164,7 @@ void subdivision_adjoin_outer_approximation_recursion(PavingInterface& paving, c
     // How small an over-approximating box needs to be relative to the cell size
     static const double RELATIVE_SMALLNESS=0.5;
 
-    for(List<ValidatedConstraint>::const_iterator iter=constraints.begin();
+    for(List<ValidatedConstraint>::ConstIterator iter=constraints.begin();
         iter!=constraints.end(); ++iter)
     {
         UpperInterval constraint_range=apply(iter->function(),subdomain);

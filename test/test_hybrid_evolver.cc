@@ -68,8 +68,8 @@ Colour final_set_colour(0.75,0.75,1.00);
 Colour initial_set_colour(0.75,0.75,1.00);
 Colour guard_set_colour(0.75,0.75,0.75);
 
-inline std::string operator+(const char* cstr, const std::string& str) { return std::string(cstr)+str; }
-inline const char* cstr(const std::string& str) { return str.c_str(); }
+inline StringType operator+(const char* cstr, const StringType& str) { return StringType(cstr)+str; }
+inline const char* cstr(const StringType& str) { return str.c_str(); }
 
 class TestHybridEvolver
 {

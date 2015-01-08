@@ -70,7 +70,7 @@ class SetInterfaceBase
     //! \brief The dimension of the set.
     virtual uint dimension() const = 0;
     //! \brief Write to an output stream.
-    virtual std::ostream& write(std::ostream& os) const = 0;
+    virtual OutputStream& write(OutputStream& os) const = 0;
 };
 
 //! \ingroup GeometryModule SetInterfaceSubModule
@@ -199,7 +199,7 @@ class SetInterface
 };
 
 
-inline std::ostream& operator<<(std::ostream& os, const SetInterfaceBase& s) {
+inline OutputStream& operator<<(OutputStream& os, const SetInterfaceBase& s) {
     return s.write(os);
 }
 
@@ -225,10 +225,10 @@ class EuclideanSpace
     //! \brief The type of approximations to sets in the space.
     typedef GridTreeSet SetApproximationType;
   public:
-    EuclideanSpace(const size_t& d) : _dimension(d) { }
-    const size_t& dimension() const { return this->_dimension; }
+    EuclideanSpace(const SizeType& d) : _dimension(d) { }
+    const SizeType& dimension() const { return this->_dimension; }
   private:
-    size_t _dimension;
+    SizeType _dimension;
 };
 
 

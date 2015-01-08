@@ -42,12 +42,12 @@ struct Colour {
     Colour(double rd, double gr, double bl, bool tr);
     Colour(const char* nm, double rd, double gr, double bl, double op=1.0);
     Colour(const char* nm, double rd, double gr, double bl, bool tr);
-    std::string name;
+    StringType name;
     double red, green, blue;
     double opacity;
 };
 
-std::ostream& operator<<(std::ostream& os, const Colour& c);
+OutputStream& operator<<(OutputStream& os, const Colour& c);
 
 extern const Colour transparant;
 

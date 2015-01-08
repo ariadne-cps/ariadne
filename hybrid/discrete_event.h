@@ -35,27 +35,27 @@ namespace Ariadne {
 class DiscreteEvent {
   public:
     DiscreteEvent() : _id("e?") { }
-    DiscreteEvent(int n) : _id(std::string("e"+to_str(n))) { if(n<0) { _id=std::string("i"+to_str(-n)); } }
-    DiscreteEvent(const std::string& s) : _id(s) { }
-    std::string name() const { return this->_id; }
+    DiscreteEvent(int n) : _id(StringType("e"+to_str(n))) { if(n<0) { _id=StringType("i"+to_str(-n)); } }
+    DiscreteEvent(const StringType& s) : _id(s) { }
+    StringType name() const { return this->_id; }
     bool operator==(const DiscreteEvent& e) const { return this->_id==e._id; }
     bool operator!=(const DiscreteEvent& e) const { return this->_id!=e._id; }
     bool operator<=(const DiscreteEvent& e) const { return this->_id<=e._id; }
     bool operator>=(const DiscreteEvent& e) const { return this->_id>=e._id; }
     bool operator< (const DiscreteEvent& e) const { return this->_id< e._id; }
     bool operator> (const DiscreteEvent& e) const { return this->_id> e._id; }
-    friend std::ostream& operator<<(std::ostream& os, const DiscreteEvent& e);
+    friend OutputStream& operator<<(OutputStream& os, const DiscreteEvent& e);
   private:
-    std::string _id;
+    StringType _id;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const DiscreteEvent& e) {
+inline OutputStream& operator<<(OutputStream& os, const DiscreteEvent& e) {
     return os << e._id;
 }
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
   template<class A> inline void serialize(A& archive, DiscreteEvent& event, const uint version) {
-      std::string& id=reinterpret_cast<std::string&>(event);
+      StringType& id=reinterpret_cast<StringType&>(event);
       archive & id;
   }
 #endif /* ARIADNE_ENABLE_SERIALIZATION */

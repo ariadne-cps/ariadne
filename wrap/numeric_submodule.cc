@@ -94,7 +94,7 @@ struct interval_from_python_str {
     interval_from_python_str() { converter::registry::push_back(&convertible,&construct,type_id<ValidatedFloat>()); }
     static void* convertible(PyObject* obj_ptr) { if (!PyString_Check(obj_ptr)) { return 0; } return obj_ptr; }
     static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        std::string str = boost::python::extract<std::string>(obj_ptr);
+        StringType str = boost::python::extract<StringType>(obj_ptr);
         void* storage = ((converter::rvalue_from_python_storage<ValidatedFloat>*)data)->storage.bytes;
         storage = new ValidatedFloat(str);
         data->convertible = storage;
@@ -103,19 +103,19 @@ struct interval_from_python_str {
 */
 
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Float>& x) {
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Float>& x) {
     return os << std::showpoint << std::setprecision(18) << x.reference().get_d();
 }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ApproximateFloat>& x) {
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ApproximateFloat>& x) {
     return os << std::showpoint << std::setprecision(18) << x.reference().get_d();
 }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<UpperFloat>& x) {
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<UpperFloat>& x) {
     return os << std::showpoint << std::setprecision(18) << x.reference().get_d();
 }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ValidatedFloat>& x) {
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ValidatedFloat>& x) {
     rounding_mode_t rnd=get_rounding_mode();
     os << '{';
     set_rounding_downward();
@@ -129,33 +129,33 @@ std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ValidatedF
 
 }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ExactFloat>& x) {
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactFloat>& x) {
     return os << std::showpoint << std::setprecision(18) << x.reference().get_d();
 }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Integer>& x) {
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Integer>& x) {
     return os << x.reference();
 }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Rational>& x) {
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& x) {
     return os << "Rational(" << x.reference().get_num() << "," << x.reference().get_den() << ")";
 }
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Real>& x) {
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& x) {
     return os << "Real(" << x.reference() << ")";
 }
 
 } // namespace Ariadne
 
 
-std::string __str__(Tribool tb) {
+StringType __str__(Tribool tb) {
   if(is_indeterminate(tb)) { return "Indeterminate"; }
   if(definitely(tb)) { return "True"; }
   else if(not possibly(tb)) { return "False"; }
   else { return "Indeterminate"; }
 }
 
-std::string __repr__(Tribool tb) {
+StringType __repr__(Tribool tb) {
   if(definitely(tb)) { return "Tribool(True)"; }
   else if(not possibly(tb)) { return "Tribool(False)"; }
   else { return "Tribool(Indeterminate)"; }
@@ -188,8 +188,8 @@ void export_tribool() {
     //tribool_class.def("__and__", (Logical<Validated>(*)(Logical<Validated>,bool))(&operator!=));
     //tribool_class.def("__or__", (Logical<Validated>(*)(Logical<Validated>,bool))(&operator!=));
 
-    tribool_class.def("__str__", (std::string(*)(Tribool))&__str__);
-    tribool_class.def("__repr__", (std::string(*)(Tribool))&__repr__);
+    tribool_class.def("__str__", (StringType(*)(Tribool))&__str__);
+    tribool_class.def("__repr__", (StringType(*)(Tribool))&__repr__);
 
     implicitly_convertible<bool,Tribool>();
 
@@ -236,7 +236,7 @@ void export_rational()
     rational_class.def(init<Integer,Integer>());
     rational_class.def(init<int>());
     rational_class.def(init<double>());
-    rational_class.def(init<std::string>());
+    rational_class.def(init<StringType>());
     rational_class.def(init<Rational>());
     rational_class.def(boost::python::self_ns::str(self));
     rational_class.def("__repr__", &__repr__<Rational>);
@@ -277,7 +277,7 @@ void export_decimal()
 {
     class_< Decimal > decimal_class("Decimal");
     decimal_class.def(init<double>());
-    decimal_class.def(init<std::string>());
+    decimal_class.def(init<StringType>());
     decimal_class.def(boost::python::self_ns::str(self));
 }
 

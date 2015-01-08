@@ -54,13 +54,13 @@ class Point
     //! The origin in \a n dimensions.
     explicit Point(uint n) : Vector<RealType>(n) { }
     //! Construct from a string literal of the form "(x1,x2,...,xd)".
-    explicit Point(const std::string& str);
+    explicit Point(const StringType& str);
     Point(const Vector<RealType>& v) : Vector<RealType>(v) { }
     template<class T, EnableIf<IsConvertible<T,X>> =dummy> Point(const Point<T>& pt) : Vector<RealType>(pt.vector()) { }
     //! Construct from an initializer list of floating-point values.
     template<class N, class T> Point(const N& n, const T& t) : Vector<RealType>(n,RealType(t)) { }
     //! Construct from an initializer list of floating-point values.
-    explicit Point(std::initializer_list<double> lst);
+    explicit Point(InitializerList<double> lst);
     //! The origin in \a n dimensions.
     static Point origin(uint n) { return Point(n,RealType(0)); }
     //! A dynamically-allocated copy.
@@ -73,14 +73,14 @@ class Point
     Vector<RealType> centre() const { return *this; }
 
     //! Write to an output stream.
-    virtual std::ostream& write(std::ostream& os) const {
+    virtual OutputStream& write(OutputStream& os) const {
         return os << static_cast<const Vector<RealType>&>(*this); }
 
     virtual void draw(CanvasInterface& c, const Projection2d& p) const;
     virtual ExactBox bounding_box() const;
 };
 
-ExactPoint make_point(const std::string&);
+ExactPoint make_point(const StringType&);
 
 } // namespace Ariadne
 

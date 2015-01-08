@@ -36,13 +36,13 @@
 namespace Ariadne {
 
 struct FlowBoundsException : public std::runtime_error {
-    FlowBoundsException(const std::string& what) : std::runtime_error(what) { }
+    FlowBoundsException(const StringType& what) : std::runtime_error(what) { }
 };
 
 //! \ingroup SolverModule EvaluationModule
 //! \brief A solution to a differential equation could not be computed within the requested tolerances.
 struct FlowTimeStepException : public std::runtime_error {
-    FlowTimeStepException(const std::string& what) : std::runtime_error(what) { }
+    FlowTimeStepException(const StringType& what) : std::runtime_error(what) { }
 };
 
 //! \ingroup SolverModule EvaluationModule

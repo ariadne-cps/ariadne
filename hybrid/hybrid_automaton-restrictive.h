@@ -99,7 +99,7 @@ template<class T> FinitarySet<T> intersection(const FinitarySet<T>& s1,const Fin
         else { return FinitarySet<T>(true,join(s1._underlying_set(),s2._underlying_set())); }
     }
 }
-template<class T> std::ostream& operator<<(std::ostream& os, const FinitarySet<T>& s) {
+template<class T> OutputStream& operator<<(OutputStream& os, const FinitarySet<T>& s) {
     if(s.is_infinite()) { os << "~"; }
     return os << s._underlying_set();
 }
@@ -128,7 +128,7 @@ class RestrictiveDiscreteMode {
     Map<DiscreteEvent, RealPredicate> invariants;
     Map<DiscreteEvent, Tuple< RealPredicate,DiscreteLocation,List<PrimedRealAssignment> > > transitions;
 };
-std::ostream& operator<<(std::ostream& os, const RestrictiveDiscreteMode& mode);
+OutputStream& operator<<(OutputStream& os, const RestrictiveDiscreteMode& mode);
 
 Set<Identifier> names(const Set<RealVariable>& v);
 
@@ -351,7 +351,7 @@ class HybridSystem
     //@}
 
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream&) const;
+    OutputStream& write(OutputStream&) const;
 
   private:
     DiscreteLocation _compute_target(DiscreteLocation source, DiscreteEvent target) const;
@@ -359,7 +359,7 @@ class HybridSystem
     static List<RealAssignment> _order_algebraic_assignments(const List<RealAssignment>&);
 };
 
-inline std::ostream& operator<<(std::ostream& os, const HybridSystem& hs) {
+inline OutputStream& operator<<(OutputStream& os, const HybridSystem& hs) {
     return hs.write(os);
 }
 

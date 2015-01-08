@@ -29,6 +29,7 @@
 #define ARIADNE_DECIMAL_H
 
 #include <string>
+#include "utility/typedefs.h"
 
 namespace Ariadne {
 
@@ -38,19 +39,19 @@ class Rational;
 //! \related Rational, Real
 //! \brief A decimal number.
 class Decimal {
-    std::string _str;
+    StringType _str;
   public:
     //! \brief Default constructor creates the number 0 (zero).
     Decimal() : _str("0.0") { }
     //! \brief Construct from a double-precision floating-point number representation.
     explicit Decimal(double d);
     //! \brief Construct from a string representation.
-    explicit Decimal(std::string);
+    explicit Decimal(StringType);
 #ifdef HAVE_GMPXX_H
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
 #endif // HAVE_GMPXX_H
-    friend std::ostream& operator<<(std::ostream& os, Decimal const& d);
+    friend OutputStream& operator<<(OutputStream& os, Decimal const& d);
     friend Decimal operator"" _dec (long double dbl);
 };
 Decimal operator"" _dec (long double dbl);

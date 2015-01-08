@@ -58,8 +58,8 @@ class ListSet
     std::vector<BS> _data;
 
   public:
-    typedef typename std::vector<BS>::const_iterator const_iterator;
-    typedef typename std::vector<BS>::iterator iterator;
+    typedef typename std::vector<BS>::const_iterator ConstIterator;
+    typedef typename std::vector<BS>::iterator Iterator;
     typedef BS value_type;
 
     virtual ~ListSet() { }
@@ -85,25 +85,25 @@ class ListSet
     bool empty() const { return this->_data.empty(); }
 
     /*! \brief Returns the number of basic sets forming this object. */
-    size_t size() const { return this->_data.size(); }
+    SizeType size() const { return this->_data.size(); }
 
     /*! \brief Accesses the i-th BasicSet. */
-    const BS& operator[](size_t i) const { return this->_data[i]; };
+    const BS& operator[](SizeType i) const { return this->_data[i]; };
 
     /*! \brief Make the set empty. */
     void clear() { this->_data.clear(); }
 
-    /*! \brief A constant iterator to the beginning of the list of basic sets. */
-    const_iterator begin() const { return this->_data.begin(); }
+    /*! \brief A constant Iterator to the beginning of the list of basic sets. */
+    ConstIterator begin() const { return this->_data.begin(); }
 
-    /*! \brief A constant iterator to the end of the list of basic sets. */
-    const_iterator end() const { return this->_data.end(); };
+    /*! \brief A constant Iterator to the end of the list of basic sets. */
+    ConstIterator end() const { return this->_data.end(); };
 
-    /*! \brief A iterator to the beginning of the list of basic sets. */
-    iterator begin() { return this->_data.begin(); }
+    /*! \brief A Iterator to the beginning of the list of basic sets. */
+    Iterator begin() { return this->_data.begin(); }
 
-    /*! \brief A iterator to the end of the list of basic sets. */
-    iterator end() { return this->_data.end(); };
+    /*! \brief A Iterator to the end of the list of basic sets. */
+    Iterator end() { return this->_data.end(); };
 
     /*! \brief Returns the denotable set's space dimension. */
     uint dimension() const { if(this->empty()) { return 0; } else { return this->_data.back().dimension(); } }
@@ -111,8 +111,8 @@ class ListSet
     /*! \brief Removes a set from the list and return it. */
     BS pop() { BS result=this->_data.back(); this->_data.pop_back(); return result; }
 
-    /*! \brief Removes a set given identified by an iterator from the list. */
-    iterator erase(iterator iter) { return this->_data.erase(iter); }
+    /*! \brief Removes a set given identified by an Iterator from the list. */
+    Iterator erase(Iterator iter) { return this->_data.erase(iter); }
 
     /*! \brief Pushes a basic set to the end of the list. */
     void push_back(const BS& bs) { this->_data.push_back(bs); }
@@ -156,7 +156,7 @@ class ListSet
     }
 
     /*! \brief Write to an output stream. */
-    std::ostream& write(std::ostream& os) const {
+    OutputStream& write(OutputStream& os) const {
         return os << *this;
     }
 
@@ -165,12 +165,12 @@ class ListSet
 
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ListSetSummary& lss) {
+inline OutputStream& operator<<(OutputStream& os, const ListSetSummary& lss) {
     return os << "ListSet( s="<<lss.size<<", d="<<lss.dimension<<")"; }
 
 template<class BS>
-std::ostream&
-operator<<(std::ostream& os, const ListSet<BS>& ls)
+OutputStream&
+operator<<(OutputStream& os, const ListSet<BS>& ls)
 {
     os << "ListSet(";
     if(!ls.empty()) { for(uint i=0; i!=ls.size(); ++i) { os << (i==0?" ":", ") << ls[i]; } }

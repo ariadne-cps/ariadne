@@ -53,7 +53,7 @@ template<class R, class Op=OperatorCode, class A1=R, class A2=A1> class BinaryEx
     virtual OperatorCode type() const { return static_cast<OperatorCode>(_op); }
     virtual BinaryExpression<R,Op,A1,A2>* clone() const { return new BinaryExpression<R,Op,A1,A2>(_op,_arg1._ptr,_arg2._ptr); }
     virtual Set<String> arguments() const { return join(this->_arg1.arguments(),this->_arg2.arguments()); }
-    virtual std::ostream& write(std::ostream& os) const {
+    virtual OutputStream& write(OutputStream& os) const {
         return os << "(" << _arg1 << symbol(_op) << _arg2 << ")"; }
   protected:
     virtual ExpressionInterface<R>* simplify() const { return this->clone(); }
@@ -66,7 +66,7 @@ template<class R, class Op=OperatorCode, class A1=R, class A2=A1> class BinaryEx
 
 using std::make_pair;
 
-std::vector<std::string> Event::_names=std::vector<std::string>();
+std::vector<StringType> Event::_names=std::vector<StringType>();
 
 
 HybridSystem::~HybridSystem()
@@ -178,7 +178,7 @@ flatten(Map< T, Set<T> >& dag)
         }
         result.push_back(t);
         dag.erase(t);
-        for(typename Map<T,Set<T> >::iterator iter=dag.begin(); iter!=dag.end(); ++iter) {
+        for(typename Map<T,Set<T> >::Iterator iter=dag.begin(); iter!=dag.end(); ++iter) {
             iter->second.erase(t);
         }
     }
@@ -201,7 +201,7 @@ DiscreteValuation HybridSystem::target(const Event& event, const DiscreteValuati
 
 bool HybridSystem::check_dynamic(const DiscreteValuation& location) const
 {
-    typedef Map<UntypedVariable,Set<UntypedVariable> >::iterator dependencies_iterator;
+    typedef Map<UntypedVariable,Set<UntypedVariable> >::Iterator dependencies_iterator;
 
     Set<UntypedVariable> independent_variables;
     Set<UntypedVariable> differential_variables;
@@ -356,7 +356,7 @@ HybridSystem::reset(const Event& event, const DiscreteValuation& source) const
     RealSpace target_space=this->state_variables(source);
 
     Map<RealVariable,RealExpression> assignments;
-    for(List<RealUpdate>::const_iterator update_iter=update_equations.begin(); update_iter!=update_equations.end(); ++update_iter) {
+    for(List<RealUpdate>::ConstIterator update_iter=update_equations.begin(); update_iter!=update_equations.end(); ++update_iter) {
         assignments.insert(update_iter->lhs.base(),update_iter->rhs);
     }
 
@@ -410,7 +410,7 @@ HybridSystem::unordered_equations(const DiscreteValuation& state) const
 List<RealAssignment>
 HybridSystem::equations(const DiscreteValuation& state) const
 {
-    typedef Map<Identifier,Set<Identifier> >::iterator dependencies_iterator;
+    typedef Map<Identifier,Set<Identifier> >::Iterator dependencies_iterator;
 
     Set<Identifier> variables;
     Map<RealVariable,RealExpression> formulae;
@@ -423,16 +423,16 @@ HybridSystem::equations(const DiscreteValuation& state) const
     }
 
     Map<Identifier,Set<Identifier> > dependencies;
-    for(Map<RealVariable,RealExpression>::const_iterator iter=formulae.begin(); iter!=formulae.end(); ++iter) {
+    for(Map<RealVariable,RealExpression>::ConstIterator iter=formulae.begin(); iter!=formulae.end(); ++iter) {
         dependencies.insert(iter->first.name(),iter->second.arguments().restrict(variables));
     }
 
     List<Identifier> ordering=flatten(dependencies);
 
     List<RealAssignment> equations;
-    for(List<Identifier>::const_iterator iter=ordering.begin(); iter!=ordering.end(); ++iter)
+    for(List<Identifier>::ConstIterator iter=ordering.begin(); iter!=ordering.end(); ++iter)
     {
-        for(Map<RealVariable,RealExpression>::iterator fiter=formulae.begin(); fiter!=formulae.end(); ++fiter) {
+        for(Map<RealVariable,RealExpression>::Iterator fiter=formulae.begin(); fiter!=formulae.end(); ++fiter) {
             if(fiter->first.name()==*iter) { equations.push_back(fiter->first=fiter->second); }
         }
     }
@@ -547,7 +547,7 @@ HybridSystem parallel_composition(const HybridSystem& sys1, const HybridSystem& 
 }
 
 
-std::ostream& operator<<(std::ostream& os, const HybridSystem& sys) {
+OutputStream& operator<<(OutputStream& os, const HybridSystem& sys) {
     os << std::boolalpha << "HybridSystem(\n"
        << "  algebraic_equations=" << sys._algebraic_equations << ",\n"
        << "  differential_equations=" << sys._differential_equations << ",\n"
@@ -558,32 +558,32 @@ std::ostream& operator<<(std::ostream& os, const HybridSystem& sys) {
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const HybridSystem::DifferentialEquation& de) {
+OutputStream& operator<<(OutputStream& os, const HybridSystem::DifferentialEquation& de) {
     os << de.loc << " -> dot("<<de.lhs.name()<<")="<<de.rhs;
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const HybridSystem::AlgebraicEquation& ae) {
+OutputStream& operator<<(OutputStream& os, const HybridSystem::AlgebraicEquation& ae) {
     os << ae.loc << " -> "<<ae.lhs<<"="<<ae.rhs;
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const HybridSystem::DiscreteUpdate& da) {
+OutputStream& operator<<(OutputStream& os, const HybridSystem::DiscreteUpdate& da) {
     os << da.evnts << ": " << da.loc << " -> next("<<da.lhs.name()<<")="<<da.rhs;
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const HybridSystem::ContinuousUpdate& da) {
+OutputStream& operator<<(OutputStream& os, const HybridSystem::ContinuousUpdate& da) {
     os << da.evnts << ": " << da.loc << " -> next("<<da.lhs.name()<<")="<<da.rhs;
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const HybridSystem::GuardPredicate& g) {
+OutputStream& operator<<(OutputStream& os, const HybridSystem::GuardPredicate& g) {
     os << g.evnts << ": " << g.loc << " -> "<<g.pred;
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const HybridSystem::InvariantPredicate& inv) {
+OutputStream& operator<<(OutputStream& os, const HybridSystem::InvariantPredicate& inv) {
     os << inv.loc << " -> "<<inv.pred;
     return os;
 }

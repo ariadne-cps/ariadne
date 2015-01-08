@@ -278,11 +278,11 @@ class HybridEnclosure
     //! \brief Draws onto a canvas.
     virtual void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream&) const;
+    OutputStream& write(OutputStream&) const;
     //! \brief Write an abbreviated representation to an output stream.
-    std::ostream& print(std::ostream&) const;
+    OutputStream& print(OutputStream&) const;
     //! \brief Write a full representation to an output stream which can be used in a constructor.
-    std::ostream& repr(std::ostream&) const;
+    OutputStream& repr(OutputStream&) const;
   private:
   public:
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] .
@@ -300,8 +300,8 @@ class HybridEnclosure
 inline Tribool inside(const HybridEnclosure& he, const HybridBox& hbx) { return he.inside(hbx); }
 inline Tribool separated(const HybridEnclosure& he, const HybridBox& hbx) { return he.separated(hbx); }
 
-inline std::ostream& operator<<(std::ostream& os, const HybridEnclosure& s) { return s.write(os); }
-inline std::ostream& operator<<(std::ostream& os, const Representation<HybridEnclosure>& s) { return s.pointer->repr(os); }
+inline OutputStream& operator<<(OutputStream& os, const HybridEnclosure& s) { return s.write(os); }
+inline OutputStream& operator<<(OutputStream& os, const Representation<HybridEnclosure>& s) { return s.pointer->repr(os); }
 
 
 class HybridGrid;
@@ -312,33 +312,33 @@ class ListSet<HybridEnclosure>
     : public HybridDrawableInterface
 {
   public:
-    typedef List<HybridEnclosure>::iterator iterator;
-    typedef List<HybridEnclosure>::const_iterator const_iterator;
+    typedef List<HybridEnclosure>::Iterator Iterator;
+    typedef List<HybridEnclosure>::ConstIterator ConstIterator;
   public:
     ListSet() { }
     ListSet(const HybridEnclosure& hes) { this->adjoin(hes); }
     ListSet(const List<HybridEnclosure>& hel) : _list(hel) { }
     void adjoin(const HybridEnclosure& hes) { this->_list.append(hes); }
     void adjoin(const ListSet<HybridEnclosure>& hels) {
-        for(List<HybridEnclosure>::const_iterator iter=hels.begin(); iter!=hels.end(); ++iter) {
+        for(List<HybridEnclosure>::ConstIterator iter=hels.begin(); iter!=hels.end(); ++iter) {
             this->adjoin(*iter); } }
     void append(const HybridEnclosure& hes) { this->_list.append(hes); }
-    size_t size() const { return _list.size(); }
+    SizeType size() const { return _list.size(); }
     const HybridEnclosure& operator[](uint i) const { return _list[i]; }
     ListSet<HybridEnclosure::ContinuousStateSetType> operator[](const DiscreteLocation& loc) const;
-    iterator begin() { return _list.begin(); }
-    iterator end() { return _list.end(); }
-    const_iterator begin() const { return _list.begin(); }
-    const_iterator end() const { return _list.end(); }
+    Iterator begin() { return _list.begin(); }
+    Iterator end() { return _list.end(); }
+    ConstIterator begin() const { return _list.begin(); }
+    ConstIterator end() const { return _list.end(); }
     void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
         for(uint i=0; i!=_list.size(); ++i) { _list[i].draw(c,l,v); } }
 
-    friend std::ostream& operator<<(std::ostream& os, const ListSet<HybridEnclosure>& hls);
+    friend OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>& hls);
   private:
     List<HybridEnclosure> _list;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ListSet<HybridEnclosure>& hls) {
+inline OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>& hls) {
     return os << hls._list;
 }
 

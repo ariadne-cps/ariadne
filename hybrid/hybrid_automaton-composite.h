@@ -101,7 +101,7 @@ class DiscreteTransition
     DiscreteLocation target() const { return this->_target; };
 
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream& os) const;
+    OutputStream& write(OutputStream& os) const;
   private:
     DiscreteTransition(DiscreteLocation source,
                        DiscreteEvent event,
@@ -111,7 +111,7 @@ class DiscreteTransition
                        EventKind kind);
 };
 
-inline std::ostream& operator<<(std::ostream& os, const DiscreteTransition& dt) {
+inline OutputStream& operator<<(OutputStream& os, const DiscreteTransition& dt) {
     return dt.write(os); }
 
 inline bool operator<(const DiscreteTransition& transition1, const DiscreteTransition& transition2) {
@@ -165,11 +165,11 @@ class DiscreteMode {
     DiscreteLocation location() const { return this->_location; }
 
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream& os) const;
+    OutputStream& write(OutputStream& os) const;
 };
 
 
-inline std::ostream& operator<<(std::ostream& os, const DiscreteMode& dm) {
+inline OutputStream& operator<<(OutputStream& os, const DiscreteMode& dm) {
     return dm.write(os); }
 
 inline bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
@@ -566,11 +566,11 @@ class HybridAutomaton
     //@}
 
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream&) const;
+    OutputStream& write(OutputStream&) const;
 
 };
 
-inline std::ostream& operator<<(std::ostream& os, const HybridAutomaton& ha) {
+inline OutputStream& operator<<(OutputStream& os, const HybridAutomaton& ha) {
     return ha.write(os);
 }
 
@@ -728,7 +728,7 @@ class CompositeHybridAutomaton
     //@}
 
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream&) const;
+    OutputStream& write(OutputStream&) const;
   protected:
     Identifier _name;
   private:
@@ -737,7 +737,7 @@ class CompositeHybridAutomaton
 
 CompositeHybridAutomaton parallel_composition(const List<HybridAutomaton>& components);
 
-inline std::ostream& operator<<(std::ostream& os, const CompositeHybridAutomaton& ha) {
+inline OutputStream& operator<<(OutputStream& os, const CompositeHybridAutomaton& ha) {
     return ha.write(os); }
 
 } // namespace Ariadne

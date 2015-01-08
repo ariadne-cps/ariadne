@@ -83,23 +83,23 @@ namespace Ariadne {
  */
 class BinaryWord : public std::vector<bool> {
   private:
-    typedef unsigned char byte_type;
+    typedef unsigned char ByteType;
     // The number of bits per byte
-    static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
+    static const SizeType _bits_per_byte=std::numeric_limits<ByteType>::digits;
   public:
-    typedef std::vector<bool>::const_iterator const_iterator;
+    typedef std::vector<bool>::const_iterator ConstIterator;
 
     //! \brief Default constructor makes an empty word.
     BinaryWord() : std::vector<bool>() { }
 
     //! \brief Construct from a string literal consisting of zeros and ones.
-    explicit BinaryWord(const std::string& str);
+    explicit BinaryWord(const StringType& str);
 
     //! Comparison operator.
     bool operator<(const BinaryWord& w) const;
 
     //! \brief The number of machine bytes the word takes up.
-    size_type bytes() const { return (size()+_bits_per_byte-1)/_bits_per_byte; }
+    SizeType bytes() const { return (size()+_bits_per_byte-1)/_bits_per_byte; }
 
     //! \brief Sets the last bit to \a x.
     void set_back (bool x) { (*this)[this->size()-1]=x; }
@@ -128,7 +128,7 @@ inline void BinaryWord::erase_prefix(const int prefix_size) {
 }
 
 inline bool  BinaryWord::operator<(const BinaryWord& w) const {
-    for( size_type i = 0; i != std::min( this->size(),w.size() ); ++i ) {
+    for( SizeType i = 0; i != std::min( this->size(),w.size() ); ++i ) {
         if( (*this)[i] != w[i] ) {
             return (*this)[i] < w[i];
         }
@@ -140,7 +140,7 @@ inline bool BinaryWord::is_prefix( const BinaryWord& b ) const {
     if( this->size() > b.size() ) {
         return false;
     }
-    for( size_type i=0; i != this->size(); ++i ) {
+    for( SizeType i=0; i != this->size(); ++i ) {
         if( (*this)[i] != b[i] ) {
             return false;
         }
@@ -152,8 +152,8 @@ inline bool BinaryWord::is_subword(const BinaryWord& b) const {
     if( this->size() > b.size() ) {
         return false;
     }
-    for( size_type i = 0; i != ( b.size() - this->size() + 1 ); ++i ) {
-        size_type j=0;
+    for( SizeType i = 0; i != ( b.size() - this->size() + 1 ); ++i ) {
+        SizeType j=0;
         while( j != this->size() && (*this)[j] == b[i+j] ) {
             ++j;
         }
@@ -169,7 +169,7 @@ inline void BinaryWord::append( const bool& binarySymbol ) {
 }
 
 inline void BinaryWord::append( const BinaryWord& binaryWord ) {
-    for( size_t i = 0; i < binaryWord.size() ; i++ ){
+    for( SizeType i = 0; i < binaryWord.size() ; i++ ){
         this->push_back( binaryWord[i] );
     }
 }
@@ -177,7 +177,7 @@ inline void BinaryWord::append( const BinaryWord& binaryWord ) {
 /*! \brief Provides a method to fill a BinaryWord with a new data form the stream
  *  The data format is either "[0,1,0,1,1]" or equivalently "01011".
  */
-inline std::istream& operator>>(std::istream& input_stream, BinaryWord& binary_word) {
+inline InputStream& operator>>(InputStream& input_stream, BinaryWord& binary_word) {
     //Clear the binary word, as we assume that we input
     //new data and the old one is not needed.
     binary_word.clear();
@@ -204,25 +204,25 @@ inline std::istream& operator>>(std::istream& input_stream, BinaryWord& binary_w
 /*! \brief allocates a new binary word created from a string.
  *  The data format is either "[0,1,0,1,1]" or equivalently "01011".
  */
-inline BinaryWord make_binary_word(const std::string& string_data) {
+inline BinaryWord make_binary_word(const StringType& string_data) {
     BinaryWord binary_word;
-    std::stringstream string_input_stream( string_data );
+    StringStream string_input_stream( string_data );
     string_input_stream >> binary_word;
     return binary_word;
 }
 
-inline BinaryWord::BinaryWord(const std::string& str) {
+inline BinaryWord::BinaryWord(const StringType& str) {
     *this=make_binary_word(str); }
 
 /*! \brief Serializes data into a stream.
  * The data format is "01011" or "e" for an empty word.
  */
-inline std::ostream& operator<<(std::ostream& os, const BinaryWord& bw) {
+inline OutputStream& operator<<(OutputStream& os, const BinaryWord& bw) {
     if( bw.empty() ) {
         return os << 'e';
     }
     os << std::noboolalpha;
-    for(size_t i=0; i!=bw.size(); ++i) {
+    for(SizeType i=0; i!=bw.size(); ++i) {
         os << bw[i];
     }
     os << std::boolalpha;

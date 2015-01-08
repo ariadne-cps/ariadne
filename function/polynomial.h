@@ -34,8 +34,6 @@
 #include <vector>
 #include <map>
 #include <algorithm>
-#include <boost/iterator.hpp>
-#include <boost/iterator_adaptors.hpp>
 
 #include "algebra/multi_index.h"
 #include "algebra/expansion.h"
@@ -63,13 +61,13 @@ class Polynomial
 {
     template<class XX> friend class Polynomial;
   public:
-    typedef typename Expansion<X>::size_type size_type;
-    typedef typename Expansion<X>::smoothness_type smoothness_type;
-    typedef typename Expansion<X>::value_type value_type;
-    typedef typename Expansion<X>::reference reference;
-    typedef typename Expansion<X>::const_reference const_reference;
-    typedef typename Expansion<X>::iterator iterator;
-    typedef typename Expansion<X>::const_iterator const_iterator;
+    typedef typename Expansion<X>::SizeType SizeType;
+    typedef typename Expansion<X>::SmoothnessType SmoothnessType;
+    typedef typename Expansion<X>::ValueType ValueType;
+    typedef typename Expansion<X>::Reference Reference;
+    typedef typename Expansion<X>::ConstReference ConstReference;
+    typedef typename Expansion<X>::Iterator Iterator;
+    typedef typename Expansion<X>::ConstIterator ConstIterator;
 
     typedef typename X::NumericType NumericType;
   public:
@@ -83,9 +81,9 @@ class Polynomial
     //! \brief Copy/conversion constructor.
     template<class XX> explicit Polynomial(const Expansion<XX>& e) : _expansion(e) { }
     //! \brief A dense polynomial with coefficients given by an initializer list of doubles.
-    explicit Polynomial(unsigned int as, unsigned int deg, std::initializer_list<X> lst);
+    explicit Polynomial(unsigned int as, unsigned int deg, InitializerList<X> lst);
     //! \brief A sparse polynomial with coefficients given by an initializer list of indices and coefficients.
-    Polynomial(std::initializer_list< std::pair<std::initializer_list<int>,X> > lst);
+    Polynomial(InitializerList< std::pair<InitializerList<int>,X> > lst);
     //@}
 
     //! \brief Create the null polynomial in the same number of variables.
@@ -122,11 +120,11 @@ class Polynomial
     //! \name Data access
 
     //! \brief The number of variables in the argument of the polynomial.
-    size_type argument_size() const { return this->_expansion.argument_size(); }
+    SizeType argument_size() const { return this->_expansion.argument_size(); }
     //! \brief The number of structural nonzero terms.
-    size_type number_of_nonzeros() const { return this->_expansion.number_of_nonzeros(); }
+    SizeType number_of_nonzeros() const { return this->_expansion.number_of_nonzeros(); }
     //! \brief The order of the highest term.
-    size_type degree() const { return this->_expansion.degree(); }
+    SizeType degree() const { return this->_expansion.degree(); }
     //! \brief The value of the polynomial at zero.
     const X& value() const { return this->_expansion[MultiIndex::zero(this->argument_size())]; }
     //! \brief A reference to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.
@@ -142,18 +140,18 @@ class Polynomial
     //@{
     //! \name Iterators
 
-    //! \brief An iterator to the beginning of the list of terms.
-    iterator begin() { return this->_expansion.begin(); }
-    //! \brief An iterator to the end of the list of terms..
-    iterator end() { return this->_expansion.end(); }
-    //! \brief An iterator to the term in \f$x^a\f$. Returns \c end() if there is no term in \a a.
-    iterator find(const MultiIndex& a) { return this->_expansion.find(a); }
-    //! \brief A constant iterator to the beginning of the list of terms.
-    const_iterator begin() const { return this->_expansion.begin(); }
-    //! \brief A constant iterator to the end of the list of terms.
-    const_iterator end() const { return this->_expansion.end(); }
-    //! \brief An iterator to the term in \f$x^a\f$. Returns \c end() if there is no term in \a a.
-    const_iterator find(const MultiIndex& a) const { return this->_expansion.find(a); }
+    //! \brief An Iterator to the beginning of the list of terms.
+    Iterator begin() { return this->_expansion.begin(); }
+    //! \brief An Iterator to the end of the list of terms..
+    Iterator end() { return this->_expansion.end(); }
+    //! \brief An Iterator to the term in \f$x^a\f$. Returns \c end() if there is no term in \a a.
+    Iterator find(const MultiIndex& a) { return this->_expansion.find(a); }
+    //! \brief A constant Iterator to the beginning of the list of terms.
+    ConstIterator begin() const { return this->_expansion.begin(); }
+    //! \brief A constant Iterator to the end of the list of terms.
+    ConstIterator end() const { return this->_expansion.end(); }
+    //! \brief An Iterator to the term in \f$x^a\f$. Returns \c end() if there is no term in \a a.
+    ConstIterator find(const MultiIndex& a) const { return this->_expansion.find(a); }
     //@}
 
 
@@ -167,9 +165,9 @@ class Polynomial
     //! \brief Insert the term \f$c x^{a_1}\f$ into a sorted list of terms.
     void insert(const MultiIndex& a, const X& c) { this->_expansion.insert(a,c,ReverseLexicographicKeyLess()); }
     //! \brief Reserve space for a total of \a n terms.
-    void reserve(size_type n) { this->_expansion.reserve(n); }
+    void reserve(SizeType n) { this->_expansion.reserve(n); }
     //! \brief Remove the term pointed to by \a iter. May be expensive if the term is near the beginning of the list of terms.
-    void erase(iterator iter) { this->_expansion.erase(iter); }
+    void erase(Iterator iter) { this->_expansion.erase(iter); }
     //! \brief Set the polynomial to zero.
     void clear() { this->_expansion.clear(); }
     //! \brief Remove all zero terms from the expansion, and order the expansion reverse lexicographically by term.
@@ -180,11 +178,11 @@ class Polynomial
     //! \name Modifying operators
 
     //! \brief Truncate to degree \a d.
-    Polynomial<X>& truncate(smoothness_type d);
+    Polynomial<X>& truncate(SmoothnessType d);
     //! \brief Differentiate with respect to the \a j<sup>th</sup> variable.
-    Polynomial<X>& differentiate(size_type j);
+    Polynomial<X>& differentiate(SizeType j);
     //! \brief Antidifferentiate (integrate) with respect to the \a j<sup>th</sup> variable.
-    Polynomial<X>& antidifferentiate(size_type j);
+    Polynomial<X>& antidifferentiate(SizeType j);
     //@}
 
     void check() const;
@@ -201,14 +199,14 @@ template<class X1, class X2> struct Arithmetic< Polynomial<X1>,Polynomial<X2> > 
 
 
 template<class X>
-Polynomial<X>::Polynomial(std::initializer_list< std::pair<std::initializer_list<int>,X> > lst)
+Polynomial<X>::Polynomial(InitializerList< std::pair<InitializerList<int>,X> > lst)
     : _expansion(lst)
 {
     this->cleanup();
 }
 
 template<class X>
-Polynomial<X>::Polynomial(unsigned int as, unsigned int deg, std::initializer_list<X> lst)
+Polynomial<X>::Polynomial(unsigned int as, unsigned int deg, InitializerList<X> lst)
     : _expansion(as,deg,lst)
 {
     this->cleanup();
@@ -216,8 +214,8 @@ Polynomial<X>::Polynomial(unsigned int as, unsigned int deg, std::initializer_li
 
 template<class X>
 Polynomial<X>&
-Polynomial<X>::differentiate(size_type j) {
-    for(typename Polynomial<X>::iterator iter=this->begin(); iter!=this->end(); ++iter) {
+Polynomial<X>::differentiate(SizeType j) {
+    for(typename Polynomial<X>::Iterator iter=this->begin(); iter!=this->end(); ++iter) {
         MultiIndex& a=iter->key();
         X& c=iter->data();
         c*=a[j];
@@ -228,8 +226,8 @@ Polynomial<X>::differentiate(size_type j) {
 
 template<class X>
 Polynomial<X>&
-Polynomial<X>::antidifferentiate(size_type j) {
-    for(typename Polynomial<X>::iterator iter=this->begin(); iter!=this->end(); ++iter) {
+Polynomial<X>::antidifferentiate(SizeType j) {
+    for(typename Polynomial<X>::Iterator iter=this->begin(); iter!=this->end(); ++iter) {
         MultiIndex& a=iter->key();
         X& c=iter->data();
         ++a[j];
@@ -239,9 +237,9 @@ Polynomial<X>::antidifferentiate(size_type j) {
 }
 
 template<class X>
-Polynomial<X>& Polynomial<X>::truncate(smoothness_type d) {
+Polynomial<X>& Polynomial<X>::truncate(SmoothnessType d) {
     Polynomial<X> r(this->argument_size());
-    for(typename Polynomial<X>::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+    for(typename Polynomial<X>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         if(iter->key().degree()<=d && iter->data()!=0) {
             r.append(iter->key(),iter->data());
         }
@@ -255,7 +253,7 @@ void Polynomial<X>::cleanup()
 {
     Polynomial<X>* self=const_cast<Polynomial<X>*>(this);
     self->_expansion.reverse_lexicographic_sort();
-    iterator new_end=unique_key(self->_expansion.begin(), self->_expansion.end(), std::plus<X>());
+    Iterator new_end=unique_key(self->_expansion.begin(), self->_expansion.end(), std::plus<X>());
     self->_expansion.resize(new_end-self->_expansion.begin());
 }
 
@@ -270,7 +268,7 @@ template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p) {
     return p; }
 //! \relates Polynomial \brief Negation.
 template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p) {
-    Polynomial<X> r(p.argument_size());  typedef typename Polynomial<X>::const_iterator Iter;
+    Polynomial<X> r(p.argument_size());  typedef typename Polynomial<X>::ConstIterator Iter;
     for(Iter iter=p.begin(); iter!=p.end(); ++iter) { r[iter->key()]-=iter->data(); } return r; }
 
 //! \relates Polynomial \brief Addition of a scalar.
@@ -282,11 +280,11 @@ template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p, const X
 //! \relates Polynomial \brief Multiplication by a scalar.
 template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p, const X& c) {
     if(c==0) { return Polynomial<X>(p.argument_size()); }
-    Polynomial<X> r(p); typedef typename Polynomial<X>::iterator Iter;
+    Polynomial<X> r(p); typedef typename Polynomial<X>::Iterator Iter;
     for(Iter iter=r.begin(); iter!=r.end(); ++iter) { iter->data()*=c; } return r; }
 //! \relates Polynomial \brief Division by a scalar.
 template<class X> inline Polynomial<X> operator/(const Polynomial<X>& p, const X& c) {
-    Polynomial<X> r(p); typedef typename Polynomial<X>::iterator Iter;
+    Polynomial<X> r(p); typedef typename Polynomial<X>::Iterator Iter;
     for(Iter iter=r.begin(); iter!=r.end(); ++iter) { iter->data()/=c; } return r; }
 
 //! \relates Polynomial \brief Addition of a scalar.
@@ -302,18 +300,18 @@ template<class X> inline Polynomial<X> operator*(const X& c, const Polynomial<X>
 //! \relates Polynomial \brief Addition.
 template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    Polynomial<X> r(p1);  typedef typename Polynomial<X>::const_iterator Iter;
+    Polynomial<X> r(p1);  typedef typename Polynomial<X>::ConstIterator Iter;
     for(Iter iter=p2.begin(); iter!=p2.end(); ++iter) { r[iter->key()]+=iter->data(); } return r; }
 //! \relates Polynomial \brief Subtraction.
 template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    Polynomial<X> r(p1);  typedef typename Polynomial<X>::const_iterator Iter;
+    Polynomial<X> r(p1);  typedef typename Polynomial<X>::ConstIterator Iter;
     for(Iter iter=p2.begin(); iter!=p2.end(); ++iter) { r[iter->key()]-=iter->data(); } return r; }
 //! \relates Polynomial \brief Multiplication.
 template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
     Polynomial<X> r(p1.argument_size());
-    typedef typename Polynomial<X>::const_iterator Iter;
+    typedef typename Polynomial<X>::ConstIterator Iter;
     for(Iter iter1=p1.begin(); iter1!=p1.end(); ++iter1) {
         for(Iter iter2=p2.begin(); iter2!=p2.end(); ++iter2) {
             MultiIndex a=iter1->key()+iter2->key();
@@ -331,12 +329,12 @@ template<class X> inline Polynomial<X> pow(const Polynomial<X>& p, unsigned int 
 //! \relates Polynomial \brief Inplace addition.
 template<class X, class XX> inline Polynomial<X>& operator+=(Polynomial<X>& p, const Polynomial<XX>& q) {
     ARIADNE_ASSERT(p.argument_size()==q.argument_size());
-    typedef typename Polynomial<X>::const_iterator Iter;
+    typedef typename Polynomial<X>::ConstIterator Iter;
     for(Iter iter=q.begin(); iter!=q.end(); ++iter) { p[iter->key()]+=iter->data(); } return p; }
 //! \relates Polynomial \brief Inplace subtraction.
 template<class X, class XX> inline Polynomial<X>& operator-=(Polynomial<X>& p, const Polynomial<XX>& q) {
     ARIADNE_ASSERT(p.argument_size()==q.argument_size());
-    typedef typename Polynomial<X>::const_iterator Iter;
+    typedef typename Polynomial<X>::ConstIterator Iter;
     for(Iter iter=q.begin(); iter!=q.end(); ++iter) { p[iter->key()]-=iter->data(); } return p; }
 
 //! \relates Polynomial \brief Inplace addition of a scalar.
@@ -347,17 +345,17 @@ template<class X> inline Polynomial<X>& operator-=(Polynomial<X>& p, const X& c)
     p[MultiIndex(p.argument_size())]-=c; return p; }
 //! \relates Polynomial \brief Inplace multiplication by a scaler.
 template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const X& c) {
-    typedef typename Polynomial<X>::iterator Iter;
+    typedef typename Polynomial<X>::Iterator Iter;
     if(c==0) { p.clear(); }
     for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->data()*=c; } return p; }
 //! \relates Polynomial \brief Inplace division by a scalar.
 template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, const X& c) {
-    typedef typename Polynomial<X>::iterator Iter;
+    typedef typename Polynomial<X>::Iterator Iter;
     for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->data()/=c; } return p; }
 
 //! \relates Polynomial \brief Inplace multiplication by a monomial.
 template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const Monomial<X>& m) {
-    typedef typename Polynomial<X>::iterator Iter;
+    typedef typename Polynomial<X>::Iterator Iter;
     if(m.data()==0) { p.clear(); }
     for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->key()+=m.key(); iter->data()*=m.data(); } return p; }
 
@@ -375,7 +373,7 @@ template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, double c) {
 
 template<class X> inline Polynomial<MidpointType<X>> midpoint(const Polynomial<X>& p) {
     Polynomial<MidpointType<X>> r(p.argument_size());
-    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+    for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
         r.append(iter->key(),static_cast<MidpointType<X>>(midpoint(iter->data()))); }
     return r;
 }
@@ -415,9 +413,9 @@ partial_evaluate(const Polynomial<X>& x, uint k, const X& c)
     Polynomial<X> r(x.argument_size()-1);
     MultiIndex ra(r.argument_size());
     if(c==0) {
-        for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
-            MultiIndex::index_type xak=xa[k];
+            MultiIndex::IndexType xak=xa[k];
             if(xak==0) {
                 const X& xv=xiter->data();
                 for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
@@ -429,10 +427,10 @@ partial_evaluate(const Polynomial<X>& x, uint k, const X& c)
         Polynomial<X> s(x.argument_size()-1);
         Array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
 
-        for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
             const X& xv=xiter->data();
-            MultiIndex::index_type xak=xa[k];
+            MultiIndex::IndexType xak=xa[k];
             for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
             for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
             assert(ra.degree()+xak==xa.degree());
@@ -454,10 +452,10 @@ partial_evaluate(const Polynomial<X>& x, uint k, const X& c)
             cpowers[j]=cpowers[j-2]*cpowers[2];
         }
 
-        for(typename Polynomial<X>::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
             const X& xv=xiter->data();
-            MultiIndex::index_type xak=xa[k];
+            MultiIndex::IndexType xak=xa[k];
             for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
             for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
             assert(ra.degree()+xak==xa.degree());
@@ -501,7 +499,7 @@ Polynomial<X>
 derivative(const Polynomial<X>& p, uint j) {
     Polynomial<X> r(p.argument_size());
     MultiIndex ar(p.argument_size());
-    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+    for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
         const MultiIndex& ap=iter->key();
         if(ap[j]>0) {
             const X& val=iter->data();
@@ -538,7 +536,7 @@ Polynomial<X>
 antiderivative(const Polynomial<X>& p, uint j) {
     Polynomial<X> r(p.argument_size());
     MultiIndex ar(p.argument_size());
-    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+    for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
         const MultiIndex& ap=iter->key();
         const X& val=iter->data();
         ar=ap;
@@ -562,7 +560,7 @@ template<class X>
 Polynomial<X>
 truncate(const Polynomial<X>& p, unsigned short d) {
     Polynomial<X> r(p.argument_size());
-    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+    for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
         if(iter->key().degree()<=d && iter->data()!=0) {
             r.append(iter->key(),iter->data());
         }
@@ -614,12 +612,12 @@ template<class X, class Y> Vector< Polynomial<X> > operator*(const Polynomial<X>
 
 /*
 template<class X>
-std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
+OutputStream& operator<<(OutputStream& os, const Polynomial<X>& p) {
     if(p.begin()==p.end()) {
         return os << "{"<<MultiIndex::zero(p.argument_size())<<":0.0}"; }
 
     os << "{";
-    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+    for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
         os << (iter==p.begin() ? "" : ",");
         for(unsigned int i=0; i!=iter->key().size(); ++i) {
             os << (i==0?" ":",") << int(iter->key()[i]); }
@@ -635,14 +633,14 @@ template<class F> NamedArgumentRepresentation<F> named_argument_repr(const F& fu
     NamedArgumentRepresentation<F> r={function,argument_names}; return r; }
 
 template<class X>
-std::ostream& operator<<(std::ostream& os, const Polynomial<X>& q) {
+OutputStream& operator<<(OutputStream& os, const Polynomial<X>& q) {
     bool first_term=true;
     bool identically_zero=true;
 
     //os <<"[P"<<q.argument_size()<<"]";
     Polynomial<X> p=q;
     p.expansion().graded_sort();
-    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+    for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
         MultiIndex a=iter->key();
         X v=iter->data();
         if(decide(v!=0)) {
@@ -666,12 +664,12 @@ std::ostream& operator<<(std::ostream& os, const Polynomial<X>& q) {
 }
 
 template<class X>
-std::ostream& operator<<(std::ostream& os, const NamedArgumentRepresentation< Polynomial<X> >& repr) {
+OutputStream& operator<<(OutputStream& os, const NamedArgumentRepresentation< Polynomial<X> >& repr) {
     const Polynomial<X>& p=repr.function;
     const std::vector<String>& n=repr.argument_names;
     bool first_term=true;
     bool identically_zero=true;
-    for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+    for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
         MultiIndex a=iter->key();
         X v=iter->data();
         if(v!=0) {

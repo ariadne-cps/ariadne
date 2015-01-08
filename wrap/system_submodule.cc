@@ -88,7 +88,7 @@ template<> uint __hash__<DiscreteLocation>(const DiscreteLocation& q) {
     return reinterpret_cast<const ushort&>(to_string(q).c_str()[0]); }
 
 
-RealExpression var(const std::string& s) { return RealExpression(RealVariable(s)); }
+RealExpression var(const StringType& s) { return RealExpression(RealVariable(s)); }
 RealExpression operator+(const RealVariable& v) { return +RealExpression(v); }
 RealExpression operator-(const RealVariable& v) { return -RealExpression(v); }
 RealExpression operator+(const RealVariable& v, const RealExpression& e) { return RealExpression(v)+e; }
@@ -103,7 +103,7 @@ RealExpression operator/(const RealExpression& e, const RealVariable& v) { retur
 } // namespace Ariadne
 
 
-namespace Ariadne { int length(const Array<std::string>& a) { return a.size(); } }
+namespace Ariadne { int length(const Array<StringType>& a) { return a.size(); } }
 
 void export_formula()
 {
@@ -124,7 +124,7 @@ void export_formula()
 /*
     implicitly_convertible<Event,EventSet>();
 
-    class_<Event> event_class("Event", init<std::string>());
+    class_<Event> event_class("Event", init<StringType>());
     event_class.def(self_ns::str(self));
 
     class_<EventSet> event_set_class("EventSet", init<EventSet>());
@@ -139,9 +139,9 @@ void export_formula()
     //implicitly_convertible<double,RealExpression>();
     //implicitly_convertible<ExactInterval,RealExpression>();
 
-    class_<StringVariable> string_variable_class("StringVariable", init<std::string>());
-    string_variable_class.def("__eq__", &__eq__<Expression<Boolean>,StringVariable,std::string>);
-    string_variable_class.def("__ne__", &__ne__<Expression<Boolean>,StringVariable,std::string>);
+    class_<StringVariable> string_variable_class("StringVariable", init<StringType>());
+    string_variable_class.def("__eq__", &__eq__<Expression<Boolean>,StringVariable,StringType>);
+    string_variable_class.def("__ne__", &__ne__<Expression<Boolean>,StringVariable,StringType>);
     string_variable_class.def(self_ns::str(self));
 
     class_<StringExpression> string_expression_class("StringExpression", init<StringExpression>());
@@ -154,7 +154,7 @@ void export_formula()
     def("next", (PrimedStringVariable(*)(const StringVariable&)) &next);
 
 
-    class_<IntegerVariable> integer_variable_class("IntegerVariable", init<std::string>());
+    class_<IntegerVariable> integer_variable_class("IntegerVariable", init<StringType>());
     integer_variable_class.def("__lshift__", (IntegerAssignment(IntegerVariable::*)(const IntegerExpression&)const) &IntegerVariable::operator=);
     integer_variable_class.def("__pos__", &__pos__<IntegerExpression,IntegerVariable>);
     integer_variable_class.def("__neg__", &__neg__<IntegerExpression,IntegerVariable>);
@@ -196,7 +196,7 @@ void export_formula()
     integer_expression_class.def(self_ns::str(self));
 
 
-    class_<RealVariable> real_variable_class("RealVariable", init<std::string>());
+    class_<RealVariable> real_variable_class("RealVariable", init<StringType>());
     real_variable_class.def("__pos__", &__pos__<RealExpression,RealVariable>);
     real_variable_class.def("__neg__", &__neg__<RealExpression,RealVariable>);
     real_variable_class.def("__add__", &__add__<RealExpression,RealVariable,RealExpression>);
@@ -298,7 +298,7 @@ void export_formula()
     continuous_predicate_class.def("__invert__", &__not__<ContinuousPredicate,ContinuousPredicate>);
     continuous_predicate_class.def(self_ns::str(self));
 
-    class_<TriboolVariable> tribool_variable_class("TriboolVariable", init<std::string>());
+    class_<TriboolVariable> tribool_variable_class("TriboolVariable", init<StringType>());
     tribool_variable_class.def(self_ns::str(self));
 
     /*
@@ -320,7 +320,7 @@ void export_formula()
 
 
 
-    //class_<RealVariable> real_variable_class("RealVariable", init<std::string>());
+    //class_<RealVariable> real_variable_class("RealVariable", init<StringType>());
 
 }
 
@@ -338,7 +338,7 @@ void export_hybrid_automaton()
     discrete_state_class.def("__hash__", &__hash__<DiscreteLocation>);
     discrete_state_class.def(self_ns::str(self));
     implicitly_convertible<int,DiscreteLocation>();
-    implicitly_convertible<std::string,DiscreteLocation>();
+    implicitly_convertible<StringType,DiscreteLocation>();
 
     class_<DiscreteEvent> discrete_event_class("DiscreteEvent",init<DiscreteEvent>());
     discrete_event_class.def("__eq__", &__eq__<bool,DiscreteEvent,DiscreteEvent>);
@@ -346,7 +346,7 @@ void export_hybrid_automaton()
     discrete_event_class.def("__hash__", &__hash__<DiscreteEvent>);
     discrete_event_class.def(self_ns::str(self));
     implicitly_convertible<int,DiscreteEvent>();
-    implicitly_convertible<std::string,DiscreteEvent>();
+    implicitly_convertible<StringType,DiscreteEvent>();
 
 
     class_<HybridTime> hybrid_time_class("HybridTime",init<double,int>());

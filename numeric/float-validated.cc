@@ -31,6 +31,7 @@
 
 
 #include "config.h"
+#include "utility/typedefs.h"
 #include "utility/macros.h"
 #include "utility/exceptions.h"
 #include "numeric/integer.h"
@@ -132,7 +133,7 @@ UpperFloat operator-(UpperFloat x1, LowerFloat x2)
     return UpperFloat(ru);
 }
 
-std::ostream& operator<<(std::ostream& os, LowerFloat x) {
+OutputStream& operator<<(OutputStream& os, LowerFloat x) {
     rounding_mode_t rnd=get_rounding_mode();
     set_rounding_downward();
     os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << x.value();
@@ -140,7 +141,7 @@ std::ostream& operator<<(std::ostream& os, LowerFloat x) {
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, UpperFloat x) {
+OutputStream& operator<<(OutputStream& os, UpperFloat x) {
     rounding_mode_t rnd=get_rounding_mode();
     set_rounding_upward();
     os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << x.value();
@@ -613,8 +614,8 @@ ValidatedFloat& ValidatedFloat::operator=(const Rational& q) {
 #endif // HAVE_GMPXX_H
 
 
-std::ostream&
-operator<<(std::ostream& os, const ValidatedFloat& ivl)
+OutputStream&
+operator<<(OutputStream& os, const ValidatedFloat& ivl)
 {
     //if(ivl.lower_value()==ivl.upper_value()) { return os << "{" << std::setprecision(ValidatedFloat::output_precision) << ivl.lower_value().get_d() << ; }
     rounding_mode_t rnd=get_rounding_mode();
@@ -631,26 +632,26 @@ operator<<(std::ostream& os, const ValidatedFloat& ivl)
 }
 
 /*
-std::ostream&
-operator<<(std::ostream& os, const ValidatedFloat& ivl)
+OutputStream&
+operator<<(OutputStream& os, const ValidatedFloat& ivl)
 {
     return os << '[' << ivl.l << ':' << ivl.u << ']';
 }
 */
 
 /*
-std::ostream&
-operator<<(std::ostream& os, const ValidatedFloat& ivl)
+OutputStream&
+operator<<(OutputStream& os, const ValidatedFloat& ivl)
 {
     if(ivl.lower_value()==ivl.upper_value()) {
         return os << std::setprecision(18) << ivl.lower_value();
     }
 
-    std::stringstream iss,uss;
+    StringStream iss,uss;
     iss << std::setprecision(18) << ivl.lower_value();
     uss << std::setprecision(18) << ivl.upper_value();
 
-    std::string lstr,ustr;
+    StringType lstr,ustr;
     iss >> lstr; uss >> ustr;
 
     // Test if one endpoint is an integer and the other is not
@@ -688,8 +689,8 @@ operator<<(std::ostream& os, const ValidatedFloat& ivl)
 
 }
 */
-std::istream&
-operator>>(std::istream& is, ValidatedFloat& ivl)
+InputStream&
+operator>>(InputStream& is, ValidatedFloat& ivl)
 {
     double l,u;
     char cl,cm,cr;

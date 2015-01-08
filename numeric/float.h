@@ -107,8 +107,8 @@ template<class R, class A> inline R integer_cast(const A& a);
 template<> inline int integer_cast(const Float& a) { return static_cast<int>(a.dbl); }
 template<> inline uint integer_cast(const Float& a) { return static_cast<uint>(a.dbl); }
 
-inline std::ostream& operator<<(std::ostream& os, const Float& x) { return os << x.dbl; }
-inline std::istream& operator>>(std::istream& is, Float& x) { double dbl; is >> dbl; x=Float(dbl); return is; }
+inline OutputStream& operator<<(OutputStream& os, const Float& x) { return os << x.dbl; }
+inline InputStream& operator>>(InputStream& is, Float& x) { double dbl; is >> dbl; x=Float(dbl); return is; }
 
 // Exact raw data operations
 inline Float operator+(Float x) { return +x.dbl; }

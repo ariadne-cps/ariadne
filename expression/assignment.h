@@ -123,7 +123,7 @@ template<class LHS, class RHS> bool operator<(const Assignment<LHS,RHS>& a1, con
     return a1.lhs < a2.lhs;
 }
 
-template<class LHS, class RHS> inline std::ostream& operator<<(std::ostream& os, const Assignment<LHS,RHS>& a) {
+template<class LHS, class RHS> inline OutputStream& operator<<(OutputStream& os, const Assignment<LHS,RHS>& a) {
     return os<<a.lhs<<"="<<a.rhs;
 }
 
@@ -262,7 +262,7 @@ template<class T> inline List< Assignment<PrimedVariable<T>, Expression<T> > > P
 template<class LHS, class RHS> List<typename LHS::BaseType> left_hand_sides(const List<Assignment<LHS,RHS> >& assignments) {
     List<typename LHS::BaseType> result;
     result.reserve(assignments.size());
-    for(typename List< Assignment<LHS,RHS> >::const_iterator assignment_iter=assignments.begin();
+    for(typename List< Assignment<LHS,RHS> >::ConstIterator assignment_iter=assignments.begin();
         assignment_iter!=assignments.end(); ++assignment_iter)
     {
         result.append(assignment_iter->lhs.base());

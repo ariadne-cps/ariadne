@@ -97,7 +97,7 @@ inline Tribool operator<(const HybridTime& ht1, const HybridTime& ht2) {
         Boolean(ht1._discrete_time<=ht2._discrete_time);
 }
 
-inline std::ostream& operator<<(std::ostream& os, const HybridTime& ht) {
+inline OutputStream& operator<<(OutputStream& os, const HybridTime& ht) {
     return os << "("<<ht._continuous_time<<","<<ht._discrete_time<<")";
 }
 

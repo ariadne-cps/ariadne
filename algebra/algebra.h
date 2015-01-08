@@ -56,7 +56,7 @@ template<class X> class Algebra
     operator const AlgebraInterface<X>& () const { return *_ptr; }
     Algebra<X> create() const { return Algebra<X>(_ptr->_create()); }
     Algebra<X> clone() const { return Algebra<X>(_ptr->_clone()); }
-    std::ostream& write(std::ostream& os) const { return _ptr->write(os); }
+    OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
   public:
     void iadd(const X& c) { _ptr->_iadd(c); }
     void imul(const X& c) { _ptr->_imul(c); }
@@ -99,7 +99,7 @@ template<class X> class NormedAlgebra
     void imul(const X& c) { _ptr->_imul(c); }
     void isma(const X& c, const NormedAlgebra<X>& x) { _ptr->_isma(c,*x._ptr); }
     void ifma(const NormedAlgebra<X>& x1, const NormedAlgebra<X>& x2) { _ptr->_ifma(*x1._ptr,*x2._ptr); }
-    std::ostream& write(std::ostream& os) const { return _ptr->write(os); }
+    OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
 };
 
 //! \brief Generic class for elements of unital algebras.
@@ -126,7 +126,7 @@ template<class X> class GradedAlgebra
     uint degree() const { return _ptr->degree(); }
     //! \brief The value in the null grade.
     const X& value() const { return _ptr->value(); }
-    std::ostream& write(std::ostream& os) const { return _ptr->write(os); }
+    OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
   public:
     void iadd(const X& c) { _ptr->_iadd(c); }
     void imul(const X& c) { _ptr->_imul(c); }
@@ -156,7 +156,7 @@ template<class X> class SymbolicAlgebra
     operator const SymbolicAlgebraInterface<X>& () const { return *_ptr; }
     SymbolicAlgebra<X> create() const { return SymbolicAlgebra<X>(_ptr->_create()); }
     SymbolicAlgebra<X> clone() const { return SymbolicAlgebra<X>(_ptr->_clone()); }
-    std::ostream& write(std::ostream& os) const { return _ptr->write(os); }
+    OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
   public:
     void iadd(const X& c) { _ptr->_iadd(c); }
     void imul(const X& c) { _ptr->_imul(c); }
@@ -169,8 +169,8 @@ template<class X> inline Algebra<X> AlgebraInterface<X>::clone() const { return 
 template<class X> inline NormedAlgebra<X> NormedAlgebraInterface<X>::create() const { return this->_create(); }
 template<class X> inline NormedAlgebra<X> NormedAlgebraInterface<X>::clone() const { return this->_clone(); }
 
-template<class X> std::ostream& operator<<(std::ostream& os, const Algebra<X>& x) { return x.write(os); }
-template<class X> std::ostream& operator<<(std::ostream& os, const NormedAlgebra<X>& x) { return x.write(os); }
+template<class X> OutputStream& operator<<(OutputStream& os, const Algebra<X>& x) { return x.write(os); }
+template<class X> OutputStream& operator<<(OutputStream& os, const NormedAlgebra<X>& x) { return x.write(os); }
 
 template<class X> Algebra<X> create(const Algebra<X>& a) { return a.create(); }
 template<class X> Algebra<X> copy(const Algebra<X>& a) { return a.clone(); }

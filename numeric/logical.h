@@ -28,13 +28,12 @@
 #define ARIADNE_LOGICAL_H
 
 #include "utility/stdlib.h"
+#include "utility/typedefs.h"
 #include "numeric/paradigm.h"
 
 #include "logical.decl.h"
 
 namespace Ariadne {
-
-using OutputStream = std::ostream;
 
 template<class P> class Logical;
 

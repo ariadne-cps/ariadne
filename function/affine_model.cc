@@ -147,7 +147,7 @@ ValidatedAffineModel affine_model(const ValidatedTaylorModel& taylor_model) {
 
     rounding_mode_t rnd=get_rounding_mode();
     set_rounding_upward();
-    for(ValidatedTaylorModel::const_iterator iter=taylor_model.begin(); iter!=taylor_model.end(); ++iter) {
+    for(ValidatedTaylorModel::ConstIterator iter=taylor_model.begin(); iter!=taylor_model.end(); ++iter) {
         if(iter->key().degree()>=2) {
             affine_model.set_error(abs(iter->data()+affine_model.error()));
         } else if(iter->key().degree()==1) {
@@ -184,7 +184,7 @@ Vector< ValidatedAffineModel > affine_models(const ExactBox& domain, const Valid
     return affine_models(VectorTaylorFunction(domain,function,AffineSweeper()).models());
 }
 
-std::ostream& operator<<(std::ostream& os, const ValidatedAffineModel& f)
+OutputStream& operator<<(OutputStream& os, const ValidatedAffineModel& f)
 {
     os << f.value().raw();
     for(uint j=0; j!=f.argument_size(); ++j) {

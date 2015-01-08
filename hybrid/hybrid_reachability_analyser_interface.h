@@ -43,7 +43,7 @@ class HybridGridTreeSet;
 //! \brief Policy to handle overspill in respect to restrictions provided for chain reach computation.
 enum ChainOverspillPolicy { OVERSPILL_IGNORE, OVERSPILL_WARNING, OVERSPILL_ERROR };
 
-std::ostream& operator<<(std::ostream& os, const ChainOverspillPolicy& policy);
+OutputStream& operator<<(OutputStream& os, const ChainOverspillPolicy& policy);
 
 /*! \brief A class for performing reachability analysis on a hybrid system.
  */

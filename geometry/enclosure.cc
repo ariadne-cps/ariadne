@@ -76,7 +76,7 @@ namespace Ariadne {
 
 static const uint verbosity = 0u;
 
-template<class T> std::string str(const T& t) { std::stringstream ss; ss<<t; return ss.str(); }
+template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
 typedef Vector<Float> RawFloatVector;
 typedef Vector<ExactInterval> ExactIntervalVector;
@@ -157,7 +157,7 @@ void Enclosure::_check() const {
     ARIADNE_ASSERT_MSG(this->_space_function.argument_size()==this->domain().size(),*this);
     ARIADNE_ASSERT_MSG(this->_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_time_function<<"\n\n");
     ARIADNE_ASSERT_MSG(this->_dwell_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_dwell_time_function<<"\n\n");
-    for(List<ValidatedConstraintModel>::const_iterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
+    for(List<ValidatedConstraintModel>::ConstIterator iter=this->_constraints.begin(); iter!=this->_constraints.end(); ++iter) {
         ARIADNE_ASSERT_MSG(iter->function().argument_size()==this->domain().size(),*this);
     }
 }
@@ -171,7 +171,7 @@ Enclosure::function_factory() const {
 // FIXME: What if solving for constraint leaves domain?
 void Enclosure::_solve_zero_constraints() {
     this->_check();
-    for(List<ValidatedScalarFunctionModel>::iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ) {
+    for(List<ValidatedScalarFunctionModel>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ) {
         const ExactBox& domain=this->domain();
         const ValidatedTaylorModel& model=iter->model();
         const uint k=model.argument_size()-1u;
@@ -181,7 +181,7 @@ void Enclosure::_solve_zero_constraints() {
         bool is_first_order=true;
         MultiIndex r(k);
         // Try linear approach in last coefficient
-        for(ValidatedTaylorModel::const_iterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
+        for(ValidatedTaylorModel::ConstIterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
             if(tmiter->key()[k]==0) {
                 assign_all_but_last(r,tmiter->key());
                 zeroth_order.expansion().append(r,tmiter->data());
@@ -197,17 +197,17 @@ void Enclosure::_solve_zero_constraints() {
             const ExactBox new_domain=project(domain,range(0,k));
             ValidatedTaylorModel substitution_model=-zeroth_order/first_order;
             this->_space_function=this->function_factory().create(new_domain,Ariadne::substitute(this->_space_function.models(),k,substitution_model));
-            for(List<ValidatedScalarFunctionModel>::iterator constraint_iter=this->_negative_constraints.begin();
+            for(List<ValidatedScalarFunctionModel>::Iterator constraint_iter=this->_negative_constraints.begin();
                     constraint_iter!=this->_negative_constraints.end(); ++constraint_iter) {
                 ValidatedScalarFunctionModel& constraint=*constraint_iter;
                 constraint=this->function_factory().create(new_domain,Ariadne::substitute(constraint.model(),k,substitution_model));
             }
-            for(List<ValidatedScalarFunctionModel>::iterator constraint_iter=this->_zero_constraints.begin();
+            for(List<ValidatedScalarFunctionModel>::Iterator constraint_iter=this->_zero_constraints.begin();
                     constraint_iter!=this->_zero_constraints.end(); ++constraint_iter) {
                 ValidatedScalarFunctionModel& constraint=*constraint_iter;
                 constraint=this->function_factory().create(new_domain,Ariadne::substitute(constraint.model(),k,substitution_model));
             }
-            // Since we are using an std::vector, assign iterator to next element
+            // Since we are using an std::vector, assign Iterator to next element
             iter=this->_zero_constraints.erase(iter);
             this->_check();
         } else {
@@ -372,10 +372,10 @@ void Enclosure::substitute(uint j, ValidatedScalarFunctionModel v)
     ARIADNE_ASSERT_MSG(v.argument_size()+1u==this->number_of_parameters(),
                        "number_of_parameters="<<this->number_of_parameters()<<", variable="<<v);
                        this->_space_function = Ariadne::substitute(this->_space_function,j,v);
-                       for(List<ValidatedScalarFunctionModel>::iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
+                       for(List<ValidatedScalarFunctionModel>::Iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
                            *iter = Ariadne::substitute(*iter,j,v);
                        }
-                       for(List<ValidatedScalarFunctionModel>::iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ++iter) {
+                       for(List<ValidatedScalarFunctionModel>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ++iter) {
                            *iter = Ariadne::substitute(*iter,j,v);
                        }
 
@@ -385,10 +385,10 @@ void Enclosure::substitute(uint j, ValidatedScalarFunctionModel v)
 void Enclosure::substitute(uint j, Float c)
 {
     this->_space_function = Ariadne::partial_evaluate(this->_space_function,j,c);
-    for(List<ValidatedScalarFunctionModel>::iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
+    for(List<ValidatedScalarFunctionModel>::Iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
         *iter = Ariadne::partial_evaluate(*iter,j,c);
     }
-    for(List<ValidatedScalarFunctionModel>::iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ++iter) {
+    for(List<ValidatedScalarFunctionModel>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ++iter) {
         *iter = Ariadne::partial_evaluate(*iter,j,c);
     }
     this->_check();
@@ -437,10 +437,10 @@ void Enclosure::apply_flow(ValidatedVectorFunction flow, ExactInterval time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     this->_space_function=compose(flow,combine(this->_space_function,this->function_factory().create_identity(ExactBox(1u,time))));
-    for(List<ValidatedScalarFunctionModel>::iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
+    for(List<ValidatedScalarFunctionModel>::Iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
         *iter=embed(*iter,time);
     }
-    for(List<ValidatedScalarFunctionModel>::iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ++iter) {
+    for(List<ValidatedScalarFunctionModel>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ++iter) {
         *iter=embed(*iter,time);
     }
     this->_check();
@@ -881,7 +881,7 @@ Enclosure::split(uint d) const
     Enclosure& result2=result.second;
 
     ValidatedScalarFunctionModel constraint_function1,constraint_function2;
-    for(List<ValidatedConstraintModel>::const_iterator iter=this->_constraints.begin();
+    for(List<ValidatedConstraintModel>::ConstIterator iter=this->_constraints.begin();
         iter!=this->_constraints.end(); ++iter)
     {
         const ValidatedConstraintModel& constraint=*iter;
@@ -1079,7 +1079,7 @@ Enclosure::kuhn_recondition()
     const Vector<ValidatedTaylorModel>& models = function.models();
     Matrix<Float> dependencies(this->dimension(),this->number_of_parameters());
     for(uint i=0; i!=dependencies.row_size(); ++i) {
-        for(ValidatedTaylorModel::const_iterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
+        for(ValidatedTaylorModel::ConstIterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
             for(uint j=0; j!=dependencies.column_size(); ++j) {
                 if(iter->key()[j]!=0) {
                     dependencies[i][j]+=abs(iter->data()).raw();
@@ -1153,7 +1153,7 @@ void Enclosure::restrict(const ExactBox& subdomain)
     result._time_function=Ariadne::restrict(result._time_function,subdomain);
     result._dwell_time_function=Ariadne::restrict(result._dwell_time_function,subdomain);
     ValidatedScalarFunctionModel new_constraint;
-    for(List<ValidatedConstraintModel>::iterator iter=result._constraints.begin();
+    for(List<ValidatedConstraintModel>::Iterator iter=result._constraints.begin();
         iter!=result._constraints.end(); ++iter)
     {
         ValidatedScalarFunctionModel& constraint_function=iter->function();
@@ -1274,20 +1274,20 @@ void Enclosure::grid_draw(CanvasInterface& canvas, const Projection2d& projectio
 
 template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
     Map<K,V> r;
-    for(typename Set<K>::const_iterator iter=s.begin(); iter!=s.end(); ++iter) {
+    for(typename Set<K>::ConstIterator iter=s.begin(); iter!=s.end(); ++iter) {
         r.insert(*m.find(*iter));
     }
     return r;
 }
 
-template<class T> std::ostream& operator<<(std::ostream& os, const Representation< List<T> >& repr) {
+template<class T> OutputStream& operator<<(OutputStream& os, const Representation< List<T> >& repr) {
     const List<T>& lst=*repr.pointer; os << "["; for(uint i=0; i!=lst.size(); ++i) { if(i!=0) { os << ","; } lst[i].repr(os); } os << "]"; return os; }
 
 const ValidatedScalarFunctionModel& repr(const ValidatedScalarFunctionModel& f) { return f; }
 const ValidatedVectorFunctionModel& repr(const ValidatedVectorFunctionModel& f) { return f; }
 const List<ValidatedScalarFunctionModel>& repr(const List<ValidatedScalarFunctionModel>& f) { return f; }
 
-std::ostream& Enclosure::write(std::ostream& os) const {
+OutputStream& Enclosure::write(OutputStream& os) const {
     const bool LONG_FORMAT=false;
 
     if(LONG_FORMAT) {
@@ -1319,7 +1319,7 @@ ValidatedAffineConstrainedImageSet
 Enclosure::affine_approximation() const
 {
     this->_check();
-    typedef List<ValidatedScalarFunctionModel>::const_iterator const_iterator;
+    typedef List<ValidatedScalarFunctionModel>::ConstIterator ConstIterator;
 
     const uint nx=this->dimension();
     const uint np=this->number_of_parameters();
@@ -1343,7 +1343,7 @@ Enclosure::affine_approximation() const
     Vector<Float> a(np);
     Float b;
 
-    for(const_iterator iter=set._negative_constraints.begin();
+    for(ConstIterator iter=set._negative_constraints.begin();
             iter!=set._negative_constraints.end(); ++iter) {
         const ValidatedScalarFunctionModel& constraint=*iter;
         b=-constraint.model().value();
@@ -1351,7 +1351,7 @@ Enclosure::affine_approximation() const
         result.new_inequality_constraint(a,b);
     }
 
-    for(const_iterator iter=set._zero_constraints.begin();
+    for(ConstIterator iter=set._zero_constraints.begin();
             iter!=set._zero_constraints.end(); ++iter) {
         const ValidatedScalarFunctionModel& constraint=*iter;
         b=-constraint.model().value();
@@ -1371,7 +1371,7 @@ struct ValidatedAffineModel {
 ValidatedAffineModel _affine_model(const ValidatedTaylorModel& tm) {
     ValidatedAffineModel result(0.0,Vector<Float>(tm.argument_size(),0.0),tm.error());
     set_rounding_upward();
-    for(ValidatedTaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()>=2) { result._e+=abs(iter->data()); }
         else if(iter->key().degree()==0) {result. _c=iter->data(); }
         else {
@@ -1390,7 +1390,7 @@ ValidatedAffineConstrainedImageSet
 Enclosure::affine_over_approximation() const
 {
     this->_check();
-    typedef List<ScalarTaylorFunction>::const_iterator const_iterator;
+    typedef List<ScalarTaylorFunction>::ConstIterator ConstIterator;
 
     const uint nx=this->dimension();
     const uint nc=this->number_of_constraints();
@@ -1425,12 +1425,12 @@ Enclosure::affine_over_approximation() const
 
 
 Enclosure product(const Enclosure& set, const ExactInterval& ivl) {
-    typedef List<ValidatedConstraintModel>::const_iterator const_iterator;
+    typedef List<ValidatedConstraintModel>::ConstIterator ConstIterator;
 
     ValidatedVectorFunctionModel new_function=combine(set.function(),set.function_factory().create_identity(ivl));
 
     Enclosure result(new_function.domain(),new_function,set.function_factory());
-    for(const_iterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
+    for(ConstIterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
         result._constraints.append(ValidatedConstraintModel(iter->lower_bound(),embed(iter->function(),ivl),iter->upper_bound()));
     }
     result._time_function=embed(set._time_function,ivl);
@@ -1440,12 +1440,12 @@ Enclosure product(const Enclosure& set, const ExactInterval& ivl) {
 }
 
 Enclosure product(const Enclosure& set, const ExactBox& bx) {
-    typedef List<ValidatedConstraintModel>::const_iterator const_iterator;
+    typedef List<ValidatedConstraintModel>::ConstIterator ConstIterator;
 
     ValidatedVectorFunctionModel new_function=combine(set.function(),set.function_factory().create_identity(bx));
 
     Enclosure result(new_function.domain(),new_function,set.function_factory());
-    for(const_iterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
+    for(ConstIterator iter=set._constraints.begin(); iter!=set._constraints.end(); ++iter) {
         result._constraints.append(ValidatedConstraintModel(iter->lower_bound(),embed(iter->function(),bx),iter->upper_bound()));
     }
     result._time_function=embed(set._time_function,bx);
@@ -1458,15 +1458,15 @@ Enclosure product(const Enclosure& set1, const Enclosure& set2) {
     ARIADNE_ASSERT(set1.time_function().range() == set2.time_function().range());
     ARIADNE_ASSERT(set1.dwell_time_function().range() == set2.dwell_time_function().range());
 
-    typedef List<ValidatedConstraintModel>::const_iterator const_iterator;
+    typedef List<ValidatedConstraintModel>::ConstIterator ConstIterator;
 
     ValidatedVectorFunctionModel new_function=combine(set1.function(),set2.function());
 
     Enclosure result(new_function.domain(),new_function,set1.function_factory());
-    for(const_iterator iter=set1._constraints.begin(); iter!=set1._constraints.end(); ++iter) {
+    for(ConstIterator iter=set1._constraints.begin(); iter!=set1._constraints.end(); ++iter) {
         result._constraints.append(ValidatedConstraintModel(iter->lower_bound(),embed(iter->function(),set2.domain()),iter->upper_bound()));
     }
-    for(const_iterator iter=set2._constraints.begin(); iter!=set2._constraints.end(); ++iter) {
+    for(ConstIterator iter=set2._constraints.begin(); iter!=set2._constraints.end(); ++iter) {
         result._constraints.append(ValidatedConstraintModel(iter->lower_bound(),embed(set1.domain(),iter->function()),iter->upper_bound()));
     }
     result._time_function=embed(set1.time_function(),set2.time_function().domain());

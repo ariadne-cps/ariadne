@@ -140,19 +140,19 @@ struct from_python< Matrix<X> >
     }
 };
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ApproximateFloat>& repr);
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ValidatedFloat>& repr);
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ExactFloat>& repr);
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<RawFloat>& repr);
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Rational>& repr);
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<Real>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ApproximateFloat>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ValidatedFloat>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactFloat>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<RawFloat>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Rational>& repr);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& repr);
 
-template<class X> std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Vector<X> >& repr) {
+template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Vector<X> >& repr) {
     Vector<X> const& v=repr.reference();
     os << "["; for(uint i=0; i!=v.size(); ++i) { if(i!=0) { os << ","; } os << python_representation(v[i]); } os << "]"; return os;
 }
 
-template<class X> std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Matrix<X> >& repr) {
+template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Matrix<X> >& repr) {
     Matrix<X> const& A=repr.reference();
     os << "["; for(uint i=0; i!=A.row_size(); ++i) { if(i!=0) { os << ","; } os << "["; for(uint j=0; j!=A.column_size(); ++j) {
         if(j!=0) { os << ","; } os << python_representation(A[i][j]); } os << "]"; } os << "]"; return os;
@@ -282,7 +282,7 @@ void export_matrix_class(class_<Matrix<X> >& matrix_class)
     matrix_class.def("__str__",&__cstr__< Matrix<X> >);
     matrix_class.def("__repr__",&__repr__<Matrix<X> >);
 
-    matrix_class.def("identity",(Matrix<X>(*)(size_t)) &Matrix<X>::identity);
+    matrix_class.def("identity",(Matrix<X>(*)(SizeType)) &Matrix<X>::identity);
     matrix_class.staticmethod("identity");
 
     from_python< Matrix<X> >();

@@ -82,8 +82,8 @@ TaylorSeries::TaylorSeries(uint d, ValidatedSeriesFunctionPointer fn,
 }
 
 inline
-std::ostream&
-operator<<(std::ostream& os, const TaylorSeries& ts) {
+OutputStream&
+operator<<(OutputStream& os, const TaylorSeries& ts) {
     return os<<"TS("<<ts.expansion<<","<<ts.error<<")";
 }
 

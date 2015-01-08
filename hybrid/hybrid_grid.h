@@ -38,7 +38,7 @@
 
 namespace Ariadne {
 
-typedef std::ostream OutputStream;
+typedef OutputStream OutputStream;
 typedef bool Bool;
 typedef Vector<ExactFloat> ExactFloatVector;
 class HybridGridTreeSet;

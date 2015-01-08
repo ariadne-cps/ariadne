@@ -292,7 +292,7 @@ template<class X> Vector< Differential<X> > second_derivative(const ValidatedVec
 template<class Vec, class Diff> void set_gradient(Vec& g, const Diff& D) {
     typedef typename Diff::ValueType X;
     uint i=0;
-    typename Diff::const_iterator iter=D.begin();
+    typename Diff::ConstIterator iter=D.begin();
     if(iter!=D.end() && iter->key().degree()==0) { ++iter; }
     while(iter!=D.end() && iter->key().degree()<=2) {
         while(iter->key()[i]==0) { ++i; }
@@ -312,7 +312,7 @@ template<class Mx, class Diff> void set_jacobian_transpose(Mx& A, const Vector<D
 template<class Mx, class Diff> void set_hessian(Mx& H, const Diff& D) {
     typedef typename Diff::ValueType X;
     uint i=0; uint j=1;
-    typename Diff::const_iterator iter=D.begin();
+    typename Diff::ConstIterator iter=D.begin();
     while(iter!=D.end() && iter->key().degree()<=1) { ++iter; }
     while(iter!=D.end() && iter->key().degree()<=2) {
         const MultiIndex& a=iter->key();
@@ -326,7 +326,7 @@ template<class Mx, class Diff> void set_hessian(Mx& H, const Diff& D) {
 
 template<class Mx, class S, class Diff> void add_hessian(Mx& H, const S& s, const Diff& D) {
     typedef typename Diff::ValueType X;
-    typename Diff::const_iterator iter=D.begin();
+    typename Diff::ConstIterator iter=D.begin();
     while(iter!=D.end() && iter->key().degree()<=1) { ++iter; }
     while(iter!=D.end() && iter->key().degree()==2) {
         const MultiIndex& a=iter->key();
@@ -2439,7 +2439,7 @@ struct KuhnTuckerFunctionBody : VectorFunctionMixin<KuhnTuckerFunctionBody,Exact
     uint result_size() const { return g.size()*2+f.argument_size(); }
     uint argument_size() const { return g.size()*2+f.argument_size(); }
     ValidatedScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
-    std::ostream& write(std::ostream&) const { ARIADNE_NOT_IMPLEMENTED; }
+    OutputStream& write(OutputStream&) const { ARIADNE_NOT_IMPLEMENTED; }
 
     template<class X> void _compute(Vector<X>& res, const Vector<X>& arg) const {
         const uint m=f.argument_size();
@@ -2472,7 +2472,7 @@ struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTu
     uint result_size() const { return g.size()*2+g[0].argument_size()+1; }
     uint argument_size() const { return g.size()*2+g[0].argument_size()+1; }
     ValidatedScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
-    std::ostream& write(std::ostream&) const { ARIADNE_NOT_IMPLEMENTED; }
+    OutputStream& write(OutputStream&) const { ARIADNE_NOT_IMPLEMENTED; }
 
     template<class X> void _compute(Vector<X>& res, const Vector<X>& arg) const {
         const uint m=g[0].argument_size();
@@ -2515,7 +2515,7 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<Feasib
     uint result_size() const { return 5*m+4*n+1u; }
     uint argument_size() const { return 5*m+4*n+1u; }
     ValidatedScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
-    std::ostream& write(std::ostream& os) const { return os << "KuhnTuckerFunctionBody"; }
+    OutputStream& write(OutputStream& os) const { return os << "KuhnTuckerFunctionBody"; }
 
     template<class X> void _compute(Vector<X>& res, const Vector<X>& arg) const {
         const X zero=arg[0].zero_element();

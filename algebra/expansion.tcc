@@ -77,7 +77,7 @@ template<class X> void Expansion<X>::swap(Expansion<X>& other) {
 template<class X> bool Expansion<X>::operator==(const Expansion<X>& other) const {
     if(this->argument_size()!=other.argument_size()) { return false; }
     if(this->number_of_nonzeros()!=other.number_of_nonzeros()) { return false; }
-    const_iterator self_iter=this->begin(); const_iterator other_iter=other.begin();
+    ConstIterator self_iter=this->begin(); ConstIterator other_iter=other.begin();
     while(self_iter!=this->end()) {
         if(self_iter->key()!=other_iter->key() || self_iter->data()!=other_iter->data()) { return false; }
         ++self_iter; ++other_iter; }
@@ -91,7 +91,7 @@ template<class X> SizeType Expansion<X>::argument_size() const { return this->_a
 template<class X> SizeType Expansion<X>::number_of_nonzeros() const { return _coefficients.size()/_element_size(); }
 
 template<class X> DegreeType Expansion<X>::degree() const {
-   DegreeType deg=0u; for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+   DegreeType deg=0u; for(ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         deg=std::max(deg,iter->key().degree());
     }
     return deg;
@@ -101,8 +101,8 @@ template<class X> const std::vector<WordType>& Expansion<X>::coefficients() cons
 
 template<class X> bool Expansion<X>::empty() const { return this->_coefficients.empty(); }
 template<class X> unsigned int Expansion<X>::size() const { return this->_coefficients.size()/_element_size(); }
-template<class X> void Expansion<X>::reserve(size_type nnz) { this->_coefficients.reserve(nnz*_element_size()); }
-template<class X> void Expansion<X>::resize(size_type nnz) { this->_coefficients.resize(nnz*_element_size()); }
+template<class X> void Expansion<X>::reserve(SizeType nnz) { this->_coefficients.reserve(nnz*_element_size()); }
+template<class X> void Expansion<X>::resize(SizeType nnz) { this->_coefficients.resize(nnz*_element_size()); }
 
 
 
@@ -117,20 +117,20 @@ template<class X> void Expansion<X>::append(const MultiIndex& a1, const MultiInd
 }
 
 template<class X> const X& Expansion<X>::operator[](const MultiIndex& a) const {
-    const_iterator iter=this->find(a);
+    ConstIterator iter=this->find(a);
     if(iter==this->end()) { return _zero; }
     else { return iter->data(); }
 }
 
-template<class X> typename Expansion<X>::iterator Expansion<X>::begin() { return iterator(_argument_size,_index_size(),_begin_ptr()); }
-template<class X> typename Expansion<X>::iterator Expansion<X>::end() { return iterator(_argument_size,_index_size(),_end_ptr()); }
-template<class X> typename Expansion<X>::iterator Expansion<X>::find(const MultiIndex& a) {
-    iterator iter=this->end(); while(iter!=this->begin()) { --iter; if(iter->key()==a) { return iter; } } return this->end(); }
+template<class X> typename Expansion<X>::Iterator Expansion<X>::begin() { return Iterator(_argument_size,_index_size(),_begin_ptr()); }
+template<class X> typename Expansion<X>::Iterator Expansion<X>::end() { return Iterator(_argument_size,_index_size(),_end_ptr()); }
+template<class X> typename Expansion<X>::Iterator Expansion<X>::find(const MultiIndex& a) {
+    Iterator iter=this->end(); while(iter!=this->begin()) { --iter; if(iter->key()==a) { return iter; } } return this->end(); }
 
-template<class X> typename Expansion<X>::const_iterator Expansion<X>::begin() const { return const_iterator(_argument_size,_index_size(),const_cast<word_type*>(_begin_ptr())); }
-template<class X> typename Expansion<X>::const_iterator Expansion<X>::end() const { return const_iterator(_argument_size,_index_size(),const_cast<word_type*>(_end_ptr())); }
-template<class X> typename Expansion<X>::const_iterator Expansion<X>::find(const MultiIndex& a) const {
-    const_iterator iter=this->end(); while(iter!=this->begin()) { --iter; if(iter->key()==a) { return iter; } } return this->end();
+template<class X> typename Expansion<X>::ConstIterator Expansion<X>::begin() const { return ConstIterator(_argument_size,_index_size(),const_cast<WordType*>(_begin_ptr())); }
+template<class X> typename Expansion<X>::ConstIterator Expansion<X>::end() const { return ConstIterator(_argument_size,_index_size(),const_cast<WordType*>(_end_ptr())); }
+template<class X> typename Expansion<X>::ConstIterator Expansion<X>::find(const MultiIndex& a) const {
+    ConstIterator iter=this->end(); while(iter!=this->begin()) { --iter; if(iter->key()==a) { return iter; } } return this->end();
 }
 
 template<class X> typename Expansion<X>::reference Expansion<X>::front() { return *(this->begin()); }
@@ -138,14 +138,14 @@ template<class X> typename Expansion<X>::reference Expansion<X>::back() { return
 template<class X> typename Expansion<X>::const_reference Expansion<X>::front() const { return *(this->begin()); }
 template<class X> typename Expansion<X>::const_reference Expansion<X>::back() const { return *(--this->end()); }
 
-template<class X> void Expansion<X>::erase(iterator iter) { iter->data()=static_cast<X>(0u); }
+template<class X> void Expansion<X>::erase(Iterator iter) { iter->data()=static_cast<X>(0u); }
 template<class X> void Expansion<X>::clear() { _coefficients.clear(); }
 
 template<class X> void Expansion<X>::remove_zeros() {
     this->resize(std::remove_if(this->begin(),this->end(),DataIsZero())-this->begin()); }
 
 template<class X> void Expansion<X>::combine_terms() {
-    iterator curr=this->begin(); const_iterator adv=this->begin(); const_iterator end=this->end();
+    Iterator curr=this->begin(); ConstIterator adv=this->begin(); ConstIterator end=this->end();
     while(adv!=end) { curr->key()=adv->key(); curr->data()=adv->data(); ++adv;
         while(adv!=end && curr->key()==adv->key()) { curr->data()+=adv->data(); ++adv; } ++curr; }
     this->resize(curr-this->begin()); }
@@ -171,23 +171,23 @@ template<class X> void Expansion<X>::reverse_lexicographic_sort() {
 
 template<class X> void Expansion<X>::check() const { }
 
-template<class X> typename Expansion<X>::size_type Expansion<X>::_vector_size() const {
+template<class X> typename Expansion<X>::SizeType Expansion<X>::_vector_size() const {
     return _coefficients.size(); }
-template<class X> typename Expansion<X>::size_type Expansion<X>::_index_size() const {
+template<class X> typename Expansion<X>::SizeType Expansion<X>::_index_size() const {
     return (_argument_size+sizeof_word)/sizeof_word; }
 
-template<class X> typename Expansion<X>::size_type Expansion<X>::_element_size() const {
+template<class X> typename Expansion<X>::SizeType Expansion<X>::_element_size() const {
     return (_argument_size+sizeof_word)/sizeof_word+sizeof_data/sizeof_word; }
 
-template<class X> const typename Expansion<X>::word_type* Expansion<X>::_begin_ptr() const { return _coefficients.begin().operator->(); }
-template<class X> const typename Expansion<X>::word_type* Expansion<X>::_end_ptr() const { return _coefficients.end().operator->(); }
-template<class X> typename Expansion<X>::word_type* Expansion<X>::_begin_ptr() { return _coefficients.begin().operator->(); }
-template<class X> typename Expansion<X>::word_type* Expansion<X>::_end_ptr() { return _coefficients.end().operator->(); }
+template<class X> const typename Expansion<X>::WordType* Expansion<X>::_begin_ptr() const { return _coefficients.begin().operator->(); }
+template<class X> const typename Expansion<X>::WordType* Expansion<X>::_end_ptr() const { return _coefficients.end().operator->(); }
+template<class X> typename Expansion<X>::WordType* Expansion<X>::_begin_ptr() { return _coefficients.begin().operator->(); }
+template<class X> typename Expansion<X>::WordType* Expansion<X>::_end_ptr() { return _coefficients.end().operator->(); }
 
-template<class X> typename Expansion<X>::iterator Expansion<X>::_insert(iterator p, const MultiIndex& a, const RealType& x) {
+template<class X> typename Expansion<X>::Iterator Expansion<X>::_insert(Iterator p, const MultiIndex& a, const RealType& x) {
         //std::cerr<<"_insert "<<*this<<" "<<p._ptr()<<" "<<a<<" "<<x<<std::endl;
         if(_coefficients.size()+_element_size()>_coefficients.capacity()) {
-            difference_type i=p-begin();
+            DifferenceType i=p-begin();
             _coefficients.resize(_coefficients.size()+_element_size());
             p=begin()+i;
         } else {
@@ -196,9 +196,9 @@ template<class X> typename Expansion<X>::iterator Expansion<X>::_insert(iterator
         return _allocated_insert(p,a,x);
 }
 
-template<class X> typename Expansion<X>::iterator Expansion<X>::_allocated_insert(iterator p, const MultiIndex& a, const RealType& x) {
+template<class X> typename Expansion<X>::Iterator Expansion<X>::_allocated_insert(Iterator p, const MultiIndex& a, const RealType& x) {
         //std::cerr<<"_allocated_insert "<<*this<<" "<<p<<" "<<p-begin()<<" "<<a<<" "<<x<<std::endl;
-        iterator curr=this->end()-1; iterator prev=curr;
+        Iterator curr=this->end()-1; Iterator prev=curr;
         while(curr!=p) { --prev; *curr=*prev; curr=prev; }
         curr->key()=a; curr->data()=x; return p; }
 
@@ -209,27 +209,27 @@ template<class X> void Expansion<X>::_prepend(const MultiIndex& a, const RealTyp
 template<class X> void Expansion<X>::_append(const MultiIndex& a, const RealType& x) {
         //std::cerr<<"_append "<<*this<<" "<<a<<" "<<x<<"... "<<std::flush;
         _coefficients.resize(_coefficients.size()+_element_size());
-        word_type* vp=_end_ptr()-_element_size(); const word_type* ap=a.word_begin();
+        WordType* vp=_end_ptr()-_element_size(); const WordType* ap=a.word_begin();
         for(unsigned int j=0; j!=_index_size(); ++j) { vp[j]=ap[j]; }
-        data_type* xp=reinterpret_cast<data_type*>(this->_end_ptr())-1; *xp=x;
+        DataType* xp=reinterpret_cast<DataType*>(this->_end_ptr())-1; *xp=x;
         //std::cerr<<"done"<<std::endl;
     }
 template<class X> void Expansion<X>::_append(const MultiIndex&  a1, const MultiIndex&  a2, const RealType& x) {
         //std::cerr<<"_append "<<*this<<" "<<a1<<" "<<a2<<" "<<x<<std::endl;
         _coefficients.resize(_coefficients.size()+_element_size());
-        word_type* vp=_end_ptr()-_element_size();
-        const word_type* ap1=a1.word_begin(); const word_type* ap2=a2.word_begin();
+        WordType* vp=_end_ptr()-_element_size();
+        const WordType* ap1=a1.word_begin(); const WordType* ap2=a2.word_begin();
         for(unsigned int j=0; j!=_index_size(); ++j) { vp[j]=ap1[j]+ap2[j]; }
-        data_type* xp=reinterpret_cast<data_type*>(this->_end_ptr())-1; *xp=x; }
+        DataType* xp=reinterpret_cast<DataType*>(this->_end_ptr())-1; *xp=x; }
 
 template<class X> X Expansion<X>::_zero = static_cast<X>(0);
 
 template<class X>
-Expansion<X>::Expansion(unsigned int as, unsigned int deg, std::initializer_list<X> lst)
+Expansion<X>::Expansion(unsigned int as, unsigned int deg, InitializerList<X> lst)
     : _argument_size(as)
 {
     MultiIndex a(as); X x;
-    typename std::initializer_list<X>::const_iterator iter = lst.begin();
+    auto iter = lst.begin();
     while(a.degree()<=deg) {
         x=*iter;
         if(x!=X(0)) { this->append(a,x); }
@@ -239,12 +239,12 @@ Expansion<X>::Expansion(unsigned int as, unsigned int deg, std::initializer_list
 }
 
 template<class X>
-Expansion<X>::Expansion(unsigned int as, std::initializer_list< std::pair<std::initializer_list<int>,X> > lst)
+Expansion<X>::Expansion(unsigned int as, InitializerList< std::pair<InitializerList<int>,X> > lst)
     : _argument_size(as)
 {
     MultiIndex a;
     X x;
-    for(typename std::initializer_list< std::pair<std::initializer_list<int>,X> >::const_iterator iter=lst.begin();
+    for(auto iter=lst.begin();
         iter!=lst.end(); ++iter)
     {
         a=MultiIndex(iter->first);
@@ -254,12 +254,12 @@ Expansion<X>::Expansion(unsigned int as, std::initializer_list< std::pair<std::i
 }
 
 template<class X>
-Expansion<X>::Expansion(std::initializer_list< std::pair<std::initializer_list<int>,X> > lst)
+Expansion<X>::Expansion(InitializerList< std::pair<InitializerList<int>,X> > lst)
     : _argument_size(lst.size()==0?0u:lst.begin()->first.size())
 {
     MultiIndex a;
     X x;
-    for(typename std::initializer_list< std::pair<std::initializer_list<int>,X> >::const_iterator iter=lst.begin();
+    for(auto iter=lst.begin();
         iter!=lst.end(); ++iter)
     {
         a=iter->first;
@@ -273,7 +273,7 @@ Expansion<X>::Expansion(const std::map<MultiIndex,XX>& m)
 {
     ARIADNE_ASSERT(!m.empty());
     this->_argument_size=m.begin()->first.size();
-    for(typename std::map<MultiIndex,XX>::const_iterator iter=m.begin(); iter!=m.end(); ++iter) {
+    for(auto iter=m.begin(); iter!=m.end(); ++iter) {
         this->append(iter->first,X(iter->second));
     }
 }
@@ -303,7 +303,7 @@ Expansion<X> Expansion<X>::_embed(unsigned int before_size, unsigned int after_s
     Expansion<X> r(new_size);
     MultiIndex old_index(old_size);
     MultiIndex new_index(new_size);
-    for(typename Expansion<X>::const_iterator iter=x.begin(); iter!=x.end(); ++iter) {
+    for(typename Expansion<X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
         old_index=iter->key();
         for(uint j=0; j!=old_size; ++j) {
             uint aj=old_index[j];
@@ -317,14 +317,14 @@ Expansion<X> Expansion<X>::_embed(unsigned int before_size, unsigned int after_s
 
 template<class T> Expansion<MidpointType<T>> midpoint(const Expansion<T>& pse) {
     Expansion<MidpointType<T>> r(pse.argument_size());
-    for(typename Expansion<T>::const_iterator iter=pse.begin(); iter!=pse.end(); ++iter) {
+    for(typename Expansion<T>::ConstIterator iter=pse.begin(); iter!=pse.end(); ++iter) {
         r.append(iter->key(),midpoint(iter->data())); }
     return r;
 }
 
 
 template<class X>
-std::ostream& Expansion<X>::write(std::ostream& os, const Array<std::string>& variable_names) const
+OutputStream& Expansion<X>::write(OutputStream& os, const Array<std::string>& variable_names) const
 {
     ARIADNE_ASSERT(this->argument_size()==variable_names.size());
     const Expansion<X>& p=*this;
@@ -332,7 +332,7 @@ std::ostream& Expansion<X>::write(std::ostream& os, const Array<std::string>& va
         os << "0";
     } else {
         bool first_term=true;
-        for(const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+        for(ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
             MultiIndex a=iter->key();
             X v=iter->data();
             if(decide(v>=X(0)) && !first_term) { os<<"+"; }
@@ -353,11 +353,11 @@ std::ostream& Expansion<X>::write(std::ostream& os, const Array<std::string>& va
 
 
 template<class X>
-std::ostream& Expansion<X>::write(std::ostream& os) const {
+OutputStream& Expansion<X>::write(OutputStream& os) const {
     const Expansion<X>& p=*this;
     Array<std::string> variable_names(p.argument_size());
     for(uint j=0; j!=p.argument_size(); ++j) {
-        std::stringstream sstr;
+        StringStream sstr;
         sstr << 'x' << j;
         variable_names[j]=sstr.str();
     }

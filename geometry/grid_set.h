@@ -83,12 +83,12 @@ class GridTreeConstIterator;
 /*Declarations of classes in other files*/
 template<class BS> class ListSet;
 
-std::ostream& operator<<(std::ostream& output_stream, const BinaryTreeNode & binary_tree );
-std::ostream& operator<<(std::ostream& os, const GridCell& theGridCell);
-std::ostream& operator<<(std::ostream& os, const GridOpenCell& theGridOpenCell );
-std::ostream& operator<<(std::ostream& os, const GridTreeCursor& theGridTreeCursor);
-std::ostream& operator<<(std::ostream& os, const GridTreeSubset& theGridTreeSubset);
-std::ostream& operator<<(std::ostream& os, const GridTreeSet& theGridTreeSet);
+OutputStream& operator<<(OutputStream& output_stream, const BinaryTreeNode & binary_tree );
+OutputStream& operator<<(OutputStream& os, const GridCell& theGridCell);
+OutputStream& operator<<(OutputStream& os, const GridOpenCell& theGridOpenCell );
+OutputStream& operator<<(OutputStream& os, const GridTreeCursor& theGridTreeCursor);
+OutputStream& operator<<(OutputStream& os, const GridTreeSubset& theGridTreeSubset);
+OutputStream& operator<<(OutputStream& os, const GridTreeSet& theGridTreeSet);
 
 bool subset(const GridCell& theCell, const GridTreeSubset& theSet);
 bool intersect(const GridCell& theCell, const GridTreeSubset& theSet);
@@ -113,19 +113,19 @@ GridTreeSet inner_approximation(const OpenSetInterface& theSet, const Grid& theG
 /*! \brief The binary-tree node operation is not allowed on a non-leaf node. */
 class NotALeafNodeException : public std::logic_error {
   public:
-    NotALeafNodeException(const std::string& str) : std::logic_error(str) { }
+    NotALeafNodeException(const StringType& str) : std::logic_error(str) { }
 };
 
 /*! \brief The binary-tree node operation is not allowed on a leaf node. */
 class IsALeafNodeException : public std::logic_error {
   public:
-    IsALeafNodeException(const std::string& str) : std::logic_error(str) { }
+    IsALeafNodeException(const StringType& str) : std::logic_error(str) { }
 };
 
 /*! \brief The GridTreeCursor throws this exception if we try to go beyond the binary tree. */
 class NotAllowedMoveException : public std::logic_error {
   public:
-    NotAllowedMoveException(const std::string& str) : std::logic_error(str) { }
+    NotAllowedMoveException(const StringType& str) : std::logic_error(str) { }
 };
 
 
@@ -339,7 +339,7 @@ class BinaryTreeNode {
      *  the number of enabled leaf nodes in the subtree
      *  rooted at pNode.
      */
-    static size_t count_enabled_leaf_nodes( const BinaryTreeNode* pNode );
+    static SizeType count_enabled_leaf_nodes( const BinaryTreeNode* pNode );
 
     /*! \brief Starting in the \a pRootTreeNode node as at the root, this method finds(creates)
      *  the leaf node defined by the \a path and marks it as enabled. If some prefix of the \a path
@@ -467,8 +467,8 @@ class GridTreeSubset
 
   public:
 
-    /*! \brief A short name for the constant iterator */
-    typedef GridTreeConstIterator const_iterator;
+    /*! \brief A short name for the constant Iterator */
+    typedef GridTreeConstIterator ConstIterator;
 
     //@{
     //! \name Constructors
@@ -502,7 +502,7 @@ class GridTreeSubset
     bool empty() const;
 
     /*! \brief The number of activated cells in the set. */
-    size_t size() const;
+    SizeType size() const;
 
     /*! \brief The dimension of the set. */
     uint dimension() const;
@@ -640,11 +640,11 @@ class GridTreeSubset
     //@{
     //! \name Iterators
 
-    /*! \brief A constant iterator through the enabled leaf nodes of the subpaving. */
-    const_iterator begin() const;
+    /*! \brief A constant Iterator through the enabled leaf nodes of the subpaving. */
+    ConstIterator begin() const;
 
-    /*! \brief A constant iterator to the end of the enabled leaf nodes of the subpaving. */
-    const_iterator end() const;
+    /*! \brief A constant Iterator to the end of the enabled leaf nodes of the subpaving. */
+    ConstIterator end() const;
 
     //@}
 
@@ -666,7 +666,7 @@ class GridTreeSubset
     void draw(CanvasInterface& canvas, const Projection2d& projection) const;
 
     /*! \brief Write to an output stream. */
-    std::ostream& write(std::ostream& os) const;
+    OutputStream& write(OutputStream& os) const;
     //@}
 
   private:
@@ -989,7 +989,7 @@ class GridTreeSet
 
 };
 
-/*! \brief This class represents a cursor/iterator that can be used to traverse a subtree. */
+/*! \brief This class represents a cursor/Iterator that can be used to traverse a subtree. */
 class GridTreeCursor {
   private:
     //The size with which the stack size will be incremented
@@ -1023,7 +1023,7 @@ class GridTreeCursor {
      */
     void updateTheCurrentGridCell( Tribool left_or_right );
 
-    friend std::ostream& operator<<(std::ostream& os, const GridTreeCursor& theGridTreeCursor);
+    friend OutputStream& operator<<(OutputStream& os, const GridTreeCursor& theGridTreeCursor);
 
   public:
     /*! \brief Default constructor constructs an invalid cursor. */
@@ -1112,14 +1112,14 @@ class GridTreeCursor {
 };
 
 /*! \brief This class allows to iterate through the enabled leaf nodes of GridTreeSubset.
- * The return objects for this iterator are constant GridCells.
+ * The return objects for this Iterator are constant GridCells.
  */
 class GridTreeConstIterator
     : public boost::iterator_facade< GridTreeConstIterator, GridCell const, boost::forward_traversal_tag >
     , public virtual ForwardConstantIteratorInterface<GridCell>
 {
   private:
-    /*! \brief When set to true indicates that this is the "end iterator" */
+    /*! \brief When set to true indicates that this is the "end Iterator" */
     bool _is_in_end_state;
 
     /*! \brief the cursor object that is created based on the given sub paving*/
@@ -1133,8 +1133,8 @@ class GridTreeConstIterator
     void increment();
 
     /*! \brief Returns true if:
-     * both iterators are in the "end iterator" state
-     * both iterators are NOT in the "end iterator" state
+     * both iterators are in the "end Iterator" state
+     * both iterators are NOT in the "end Iterator" state
      * and they point to the same node of the same sub paving
      */
     bool equal( GridTreeConstIterator const & theOtherIterator) const;
@@ -1164,15 +1164,15 @@ class GridTreeConstIterator
     //@{
     //! \name Constructors
 
-    /*! \brief Default constructor constructs an invalid iterator.
+    /*! \brief Default constructor constructs an invalid Iterator.
      *  \internal Note that a default constructor is required for compliance with the
      *  STL Trivial Iterator concept. */
     GridTreeConstIterator();
 
     /*! \brief The constructor that accepts the subpacing \a pSubPaving to iterate on
-     * The paramerter \a firstLastNone indicatges whether we want to position the iterator
+     * The paramerter \a firstLastNone indicatges whether we want to position the Iterator
      * on the first enabled leaf node (firstLastNone == true) or the last one (firstLastNone == false)
-     * or we are constructing the "end iterator" that does not point anywhere.
+     * or we are constructing the "end Iterator" that does not point anywhere.
      */
     explicit GridTreeConstIterator( const GridTreeSubset * pSubPaving, const Tribool firstLastNone );
 
@@ -1195,7 +1195,7 @@ class GridTreeConstIterator
     ~GridTreeConstIterator();
 
     //@{
-    //! \name Get the cursor of the iterator
+    //! \name Get the cursor of the Iterator
 
     //This cursor is only needed to get access to enable/disable node functionality
     GridTreeCursor const& cursor() const;
@@ -1206,7 +1206,7 @@ class GridTreeConstIterator
     virtual bool equals( ForwardConstantIteratorInterface<GridCell> const & theOtherIterator) const {
         GridTreeConstIterator const* theOtherIteratorPointer = dynamic_cast<GridTreeConstIterator const*>(&theOtherIterator);
         return theOtherIteratorPointer && (this->equal(*theOtherIteratorPointer)); }
-    virtual void write(std::ostream& os) const { os << "GridTreeConstIterator(" << this->cursor() << ")"; }
+    virtual void write(OutputStream& os) const { os << "GridTreeConstIterator(" << this->cursor() << ")"; }
 
 };
 
@@ -1576,12 +1576,12 @@ inline GridTreeConstIterator::GridTreeConstIterator( const GridTreeSubset * pSub
     _pGridTreeCursor(pSubPaving) {
     if( is_determinate( firstLastNone ) ){
         //If the first/last enabled node is not found, it means that there are no elements
-        //to iterate on, then we switch to the "end iterator" state
+        //to iterate on, then we switch to the "end Iterator" state
         _is_in_end_state = ! navigate_to( definitely( firstLastNone ) );
     } else {
-        //In this case if we do nothing, the cursor in the iterator will point to the root node
+        //In this case if we do nothing, the cursor in the Iterator will point to the root node
         //Since this can be the only node in the tre we should add a marker that indicates that
-        //the iterator is at the end state.
+        //the Iterator is at the end state.
         _is_in_end_state = true;
     }
 }
@@ -1601,7 +1601,7 @@ inline GridTreeConstIterator::~GridTreeConstIterator() {
 }
 
 inline bool GridTreeConstIterator::equal( GridTreeConstIterator const & theOtherIterator) const {
-    //Check if both iterators are in the "end iterator" state
+    //Check if both iterators are in the "end Iterator" state
     bool result = theOtherIterator._is_in_end_state && this->_is_in_end_state;
 
     //If not then check if the cursors are equal (i.e. if they point to the same binary-tree node of the same (subpaving)
@@ -1672,7 +1672,7 @@ inline bool GridTreeSubset::empty() const {
     return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() ) == 0;
 }
 
-inline size_t GridTreeSubset::size() const {
+inline SizeType GridTreeSubset::size() const {
     return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() );
 }
 
@@ -1696,7 +1696,7 @@ inline void GridTreeSubset::set_root_cell(bool enabled_or_disabled)  {
 inline UpperBox GridTreeSubset::bounding_box() const {
     if(this->empty()) return ExactBox(this->dimension());
 
-    GridTreeSet::const_iterator iter=this->begin();
+    GridTreeSet::ConstIterator iter=this->begin();
     UpperBox bbox = iter->box();
 
     for( ; iter!=this->end(); ++iter) {
@@ -1747,12 +1747,12 @@ inline bool GridTreeSubset::operator==(const GridTreeSubset& anotherGridTreeSubs
         ( ( * this->_pRootTreeNode ) == ( * anotherGridTreeSubset._pRootTreeNode ) );
 }
 
-inline GridTreeSubset::const_iterator GridTreeSubset::begin() const {
-    return GridTreeSubset::const_iterator(this, true);
+inline GridTreeSubset::ConstIterator GridTreeSubset::begin() const {
+    return GridTreeSubset::ConstIterator(this, true);
 }
 
-inline GridTreeSubset::const_iterator GridTreeSubset::end() const {
-    return GridTreeSubset::const_iterator(this, indeterminate);
+inline GridTreeSubset::ConstIterator GridTreeSubset::end() const {
+    return GridTreeSubset::ConstIterator(this, indeterminate);
 }
 
 inline const BinaryTreeNode * GridTreeSubset::binary_tree() const {
@@ -1832,7 +1832,7 @@ inline void GridTreeSet::adjoin( const GridTreeSubset& theOtherSubPaving ) {
 /*! \brief Stream insertion operator, prints out two binary arrays, one is the tree structure
  *  and the other is the true/false (enabled/disabled) values for the leaf nodes
  */
-inline std::ostream& operator<<(std::ostream& output_stream, const BinaryTreeNode & binary_tree ) {
+inline OutputStream& operator<<(OutputStream& output_stream, const BinaryTreeNode & binary_tree ) {
     BinaryWord tree, leaves;
     binary_tree.tree_to_binary_words( tree, leaves );
     return output_stream << "BinaryTreeNode( Tree: " << tree << ", Leaves: " << leaves << ")";
@@ -1840,7 +1840,7 @@ inline std::ostream& operator<<(std::ostream& output_stream, const BinaryTreeNod
 
 /****************************************FRIENDS OF GridOpenCell*******************************************/
 
-inline std::ostream& operator<<(std::ostream& os, const GridOpenCell& theGridOpenCell ) {
+inline OutputStream& operator<<(OutputStream& os, const GridOpenCell& theGridOpenCell ) {
     //Write the grid data to the string stream
     return os << "GridOpenCell( " << theGridOpenCell.grid() <<
         ", Primary cell height: " << theGridOpenCell.height() <<
@@ -1851,7 +1851,7 @@ inline std::ostream& operator<<(std::ostream& os, const GridOpenCell& theGridOpe
 /****************************************FRIENDS OF GridCell*******************************************/
 
 /*! \brief Stream insertion operator for the GridCell. */
-inline std::ostream& operator<<(std::ostream& os, const GridCell& gridPavingCell){
+inline OutputStream& operator<<(OutputStream& os, const GridCell& gridPavingCell){
     //Write the grid data to the string stream
     return os << "GridCell( " << gridPavingCell.grid() <<
         ", Primary cell height: " << gridPavingCell.height() <<
@@ -1862,7 +1862,7 @@ inline std::ostream& operator<<(std::ostream& os, const GridCell& gridPavingCell
 
 /*************************************FRIENDS OF GridTreeCursor*****************************************/
 
-inline std::ostream& operator<<(std::ostream& os, const GridTreeCursor& theGridTreeCursor){
+inline OutputStream& operator<<(OutputStream& os, const GridTreeCursor& theGridTreeCursor){
     const int curr_stack_idx = theGridTreeCursor._currentStackIndex;
     os << "GridTreeCursor( " << theGridTreeCursor._pSubPaving <<
         ", Curr. stack index: " << curr_stack_idx  <<
@@ -1875,13 +1875,13 @@ inline std::ostream& operator<<(std::ostream& os, const GridTreeCursor& theGridT
 
 /*************************************FRIENDS OF GridTreeSubset*****************************************/
 
-inline std::ostream& operator<<(std::ostream& os, const GridTreeSubset& theGridTreeSubset) {
+inline OutputStream& operator<<(OutputStream& os, const GridTreeSubset& theGridTreeSubset) {
     return os << "GridTreeSubset( Primary cell: " << theGridTreeSubset.cell() << ", " << (*theGridTreeSubset.binary_tree()) <<" )";
 }
 
 /***************************************FRIENDS OF GridTreeSet******************************************/
 
-inline std::ostream& operator<<(std::ostream& os, const GridTreeSet& theGridTreeSet) {
+inline OutputStream& operator<<(OutputStream& os, const GridTreeSet& theGridTreeSet) {
     const GridTreeSubset& theGridTreeSubset = theGridTreeSet;
     return os << "GridTreeSet( " << theGridTreeSubset << " )";
 }
@@ -1908,7 +1908,7 @@ template<class BS>
 GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, const uint numSubdivInDim) {
     ARIADNE_ASSERT_MSG( theSet.dimension()==theGrid.dimension(),"theSet="<<theSet<<", theGrid="<<theGrid );
     GridTreeSet result( theGrid );
-    for(typename ListSet<BS>::const_iterator iter=theSet.begin(); iter!=theSet.end(); ++iter) {
+    for(typename ListSet<BS>::ConstIterator iter=theSet.begin(); iter!=theSet.end(); ++iter) {
         result.adjoin_outer_approximation( *iter, numSubdivInDim );
     }
     result.recombine();

@@ -38,7 +38,7 @@ outer_approximation(const EnclosureListType& hls,
                     const int accuracy)
 {
     HybridGridTreeSet result(hgr);
-    for(EnclosureListType::const_iterator
+    for(EnclosureListType::ConstIterator
             iter=hls.begin(); iter!=hls.end(); ++iter)
         {
             DiscreteLocation loc=iter->location();
@@ -260,10 +260,10 @@ int main(int argc,char *argv[])
 
     OrbitType orbit = evolver.timed_evolution(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS,true);
     EnclosureListType final = orbit.final();
-    typedef EnclosureListType::const_iterator const_iterator;
+    typedef EnclosureListType::ConstIterator ConstIterator;
     double xmin=100.0;
     double xmax=-100.0;
-    for(const_iterator iter=final.begin(); iter != final.end(); ++iter) {
+    for(ConstIterator iter=final.begin(); iter != final.end(); ++iter) {
         ExactInterval x = iter->second.bounding_box()[0];
         if(x.lower() < xmin) xmin = x.lower();
         if(x.upper() > xmax) xmax = x.upper();
@@ -290,7 +290,7 @@ int main(int argc,char *argv[])
     for(double t = time_step; t <= total_time; t = t + time_step) {
         std::cout << "t = " << skip_time + t << flush;
         EnclosureListType reach;
-        for(const_iterator iter=final.begin(); iter != final.end(); ++iter) {
+        for(ConstIterator iter=final.begin(); iter != final.end(); ++iter) {
         orbit = evolver.orbit(watertank_system,*iter,evolution_time,UPPER_SEMANTICS);
         reach.adjoin(orbit.final());
         std::cout << "." << flush;
@@ -299,9 +299,9 @@ int main(int argc,char *argv[])
         final.clear();
         // Remove redundant elements from final set
         int i = 0;
-        for(const_iterator iter1=reach.begin(); iter1 != reach.end(); ++iter1) {
+        for(ConstIterator iter1=reach.begin(); iter1 != reach.end(); ++iter1) {
             bool flag = 0;
-            for(const_iterator iter2=iter1; iter2 != reach.end() && flag == 0; ++iter2) {
+            for(ConstIterator iter2=iter1; iter2 != reach.end() && flag == 0; ++iter2) {
                 if( iter1!= iter2 && iter1->first == iter2->first ) {
                     ExactBox b1 = iter1->second.bounding_box();
                     ExactBox b2 = iter2->second.bounding_box();
@@ -322,7 +322,7 @@ int main(int argc,char *argv[])
         // std::cout << "final set[zero_saturated][0] = " << final[zero_saturated][0].bounding_box() << endl  << endl;
         xmin=100.0;
         xmax=-100.0;
-        for(const_iterator iter=final.begin(); iter != final.end(); ++iter) {
+        for(ConstIterator iter=final.begin(); iter != final.end(); ++iter) {
             ExactInterval x = iter->second.bounding_box()[0];
             if(x.lower() < xmin) xmin = x.lower();
             if(x.upper() > xmax) xmax = x.upper();

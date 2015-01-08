@@ -40,7 +40,7 @@
 
 namespace Ariadne {
 
-typedef size_t size_type;
+typedef SizeType SizeType;
 
 
 /****************************************Grid**********************************************/
@@ -183,7 +183,7 @@ bool Grid::operator!=(const Grid& g) const
 Array<double> Grid::index(const ExactPoint& pt) const
 {
     Array<double> res(pt.size());
-    for(size_t i=0; i!=res.size(); ++i) {
+    for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=subdivision_index(i,pt[i]);
     }
     return res;
@@ -191,7 +191,7 @@ Array<double> Grid::index(const ExactPoint& pt) const
 
 Array<double> Grid::lower_index(const ExactBox& bx) const {
     Array<double> res(bx.size());
-    for(size_t i=0; i!=res.size(); ++i) {
+    for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=subdivision_lower_index(i,bx[i].lower());
     }
     return res;
@@ -199,7 +199,7 @@ Array<double> Grid::lower_index(const ExactBox& bx) const {
 
 Array<double> Grid::upper_index(const ExactBox& bx) const {
     Array<double> res(bx.size());
-    for(size_type i=0; i!=res.size(); ++i) {
+    for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=subdivision_upper_index(i,bx[i].upper());
     }
     return res;
@@ -208,7 +208,7 @@ Array<double> Grid::upper_index(const ExactBox& bx) const {
 ExactPoint Grid::point(const Array<IntegerType>& a) const
 {
     Vector<ExactFloat> res(a.size());
-    for(size_type i=0; i!=res.size(); ++i) {
+    for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=ExactFloat(this->_data->_origin[i]+this->_data->_lengths[i]*a[i]);
     }
     return res;
@@ -217,7 +217,7 @@ ExactPoint Grid::point(const Array<IntegerType>& a) const
 ExactPoint Grid::point(const Array<DyadicType>& a) const
 {
     Vector<ExactFloat> res(a.size());
-    for(size_type i=0; i!=res.size(); ++i) {
+    for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=ExactFloat(this->_data->_origin[i]+this->_data->_lengths[i]*a[i]);
     }
     return res;
@@ -226,14 +226,14 @@ ExactPoint Grid::point(const Array<DyadicType>& a) const
 ExactBox Grid::box(const Array<DyadicType>& lower, const Array<DyadicType>& upper) const
 {
     Vector<ExactInterval> res(lower.size());
-    for(size_type i=0; i!=res.size(); ++i) {
+    for(SizeType i=0; i!=res.size(); ++i) {
         res[i]=ExactInterval(this->subdivision_coordinate(i,lower[i]),
                         this->subdivision_coordinate(i,upper[i]));
     }
     return res;
 }
 
-std::ostream& operator<<(std::ostream& os, const Grid& gr)
+OutputStream& operator<<(OutputStream& os, const Grid& gr)
 {
     os << "Grid( ";
     os << "origin=" << gr.origin() << ", ";
@@ -473,7 +473,7 @@ uint BinaryTreeNode::depth() const {
     return result;
 }
 
-size_t BinaryTreeNode::count_enabled_leaf_nodes( const BinaryTreeNode* pNode ) {
+SizeType BinaryTreeNode::count_enabled_leaf_nodes( const BinaryTreeNode* pNode ) {
     if(pNode->is_leaf()) {
         return pNode->is_enabled() ? 1u : 0u;
     } else {
@@ -1245,7 +1245,7 @@ std::vector<GridOpenCell> GridOpenCell::intersection( const GridOpenCell & theLe
                 //04 Iterate through all the cells in the intersection and first add their interiors to the resulting set, second
                 //check if the two cells have common border and/or vertex and if they do then add extra open cells, lying withing
                 //the intersection and covering the common border and/or vertex.
-                for ( GridTreeSubset::const_iterator it = intersectionSet.begin(), end = intersectionSet.end(); it != end; it++) {
+                for ( GridTreeSubset::ConstIterator it = intersectionSet.begin(), end = intersectionSet.end(); it != end; it++) {
                     //Cover the interior of the cell and the borders with the cells bordered with
                     //the given one in each  positive direction in each dimension. The borders
                     //are covered only if the neighboring cell is also in the intersection set.
@@ -1336,7 +1336,7 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
 
 double GridTreeSubset::measure() const {
     Float result=0.0;
-    for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+    for(ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         result+=iter->box().measure().raw();
     }
     return approx_cast<double>(result);
@@ -1351,7 +1351,7 @@ GridTreeSubset::operator ListSet<ExactBox>() const {
     //NOTE: Push back the boxes, note that BoxListSet uses a vector, that
     //in its turn uses std:vector to store boxes in it (via push_back method),
     //the latter stores the copies of the boxes, not the references to them.
-    for (GridTreeSubset::const_iterator it = this->begin(), end = this->end(); it != end; it++ ) {
+    for (GridTreeSubset::ConstIterator it = this->begin(), end = this->end(); it != end; it++ ) {
         result.push_back((*it).box());
     }
 
@@ -1747,13 +1747,13 @@ Tribool GridTreeSubset::intersects( const BinaryTreeNode* pCurrentNode, const Gr
 }
 
 void GridTreeSubset::draw(CanvasInterface& theGraphic, const Projection2d& theProjection) const {
-    for(GridTreeSubset::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+    for(GridTreeSubset::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         iter->box().draw(theGraphic,theProjection);
     }
 }
 
-std::ostream&
-GridTreeSubset::write(std::ostream& os) const
+OutputStream&
+GridTreeSubset::write(OutputStream& os) const
 {
     return os << (*this);
 }
@@ -2007,7 +2007,7 @@ void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeN
 
 void GridTreeSet::adjoin_over_approximation( const ExactBox& theBox, const uint numSubdivInDim ) {
     // FIXME: This adjoins an outer approximation; change to ensure only overlapping cells are adjoined
-    for(size_t i=0; i!=theBox.dimension(); ++i) {
+    for(SizeType i=0; i!=theBox.dimension(); ++i) {
         if(theBox[i].lower()>=theBox[i].upper()) {
             ARIADNE_THROW(std::runtime_error,"GridTreeSet::adjoin_over_approximation(ExactBox,uint)","ExactBox "<<theBox<<" has empty interior.");
         }
@@ -2928,7 +2928,7 @@ void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const 
 }
 
 void draw(CanvasInterface& theGraphic, const Projection2d& theProjection, const GridTreeSet& theGridTreeSet) {
-    for(GridTreeSet::const_iterator iter=theGridTreeSet.begin(); iter!=theGridTreeSet.end(); ++iter) {
+    for(GridTreeSet::ConstIterator iter=theGridTreeSet.begin(); iter!=theGridTreeSet.end(); ++iter) {
         iter->box().draw(theGraphic,theProjection);
     }
 }

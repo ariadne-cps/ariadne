@@ -57,7 +57,7 @@ struct PlanarProjectionMap {
     uint x_coordinate() const { return i; }
     uint y_coordinate() const { return j; }
 };
-inline std::ostream& operator<<(std::ostream& os, const PlanarProjectionMap& p) {
+inline OutputStream& operator<<(OutputStream& os, const PlanarProjectionMap& p) {
     return os << "P<R"<<p.n<<";R2>[x"<<p.i<<",x"<<p.j<<"]"; }
 typedef PlanarProjectionMap Projection2d;
 
@@ -97,7 +97,7 @@ class CanvasInterface {
     //! \brief Destructor
     virtual ~CanvasInterface() { };
 
-    virtual void initialise(std::string x, std::string y, double lx, double ux, double ly, double uy) = 0;
+    virtual void initialise(StringType x, StringType y, double lx, double ux, double ly, double uy) = 0;
     virtual void finalise() = 0;
 
     //! \brief Move the current initial point for a line to the point \a (x,y).
@@ -145,7 +145,7 @@ class DrawableInterface {
     //! brief The dimension of the object in Euclidean space
     virtual uint dimension() const = 0;
     //! brief Write to an output stream.
-    virtual std::ostream& write(std::ostream& os) const { return os << "Drawable"; }
+    virtual OutputStream& write(OutputStream& os) const { return os << "Drawable"; }
 };
 
 

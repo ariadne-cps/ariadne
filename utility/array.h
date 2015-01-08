@@ -155,13 +155,13 @@ class Array {
     /*! \brief A constant reference  to the last element of the Array. */
     const ValueType& back() const { return _ptr[_size-1]; }
 
-    /*! \brief An iterator pointing to the beginning of the Array. */
+    /*! \brief An Iterator pointing to the beginning of the Array. */
     Iterator begin() { return _ptr; }
-    /*! \brief A constant iterator pointing to the beginning of the Array. */
+    /*! \brief A constant Iterator pointing to the beginning of the Array. */
     ConstIterator begin() const { return _ptr; }
-    /*! \brief An iterator pointing to the end of the Array. */
+    /*! \brief An Iterator pointing to the end of the Array. */
     Iterator end() { return _ptr+_size; }
-    /*! \brief A constant iterator pointing to the end of the Array. */
+    /*! \brief A constant Iterator pointing to the end of the Array. */
     ConstIterator end() const { return _ptr+_size; }
 
     /*! \brief Tests two arrays for equality */

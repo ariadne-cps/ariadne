@@ -54,13 +54,13 @@ static const int TOP_MARGIN = 10;
 static const int RIGHT_MARGIN = 10;
 
 
-std::string str(Float x) {
-    std::stringstream ss;
+StringType str(Float x) {
+    StringStream ss;
     ss << x;
     return ss.str();
 }
 
-std::ostream& operator<<(std::ostream& os, const DrawableInterface& drawable) {
+OutputStream& operator<<(OutputStream& os, const DrawableInterface& drawable) {
     return drawable.write(os);
 }
 
@@ -231,7 +231,7 @@ class CairoCanvas
     ~CairoCanvas();
     CairoCanvas(const ImageSize2d& size, const Box2d& bounds);
     CairoCanvas(cairo_t *c);
-    void initialise(std::string x, std::string y, double xl, double xu, double yl, double yu);
+    void initialise(StringType x, StringType y, double xl, double xu, double yl, double yu);
     void finalise();
     void move_to(double x, double y) { cairo_move_to (cr, x, y); }
     void line_to(double x, double y) { cairo_line_to (cr, x, y); }
@@ -318,7 +318,7 @@ void CairoCanvas::stroke()
 
 // TODO: Use generic canvas routines; move cairo-specific functionality
 // into CairoCanvas class.
-void CairoCanvas::initialise(std::string text_x, std::string text_y, double xl, double xu, double yl, double yu)
+void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, double xu, double yl, double yu)
 {
 
 
@@ -349,10 +349,10 @@ void CairoCanvas::initialise(std::string text_x, std::string text_y, double xl, 
     cairo_set_source_rgb (cr, 0., 0., 0.);
 
     // Get axis label text
-    std::string text_xl=str(xl);
-    std::string text_xu=str(xu);
-    std::string text_yl=str(yl);
-    std::string text_yu=str(yu);
+    StringType text_xl=str(xl);
+    StringType text_xu=str(xu);
+    StringType text_yl=str(yl);
+    StringType text_yu=str(yu);
 
     // Write axis labels
     cairo_text_extents_t te;
@@ -444,7 +444,7 @@ void set_properties(CanvasInterface& canvas, const GraphicsProperties& propertie
     canvas.set_line_colour(line_colour.red, line_colour.green, line_colour.blue);
 }
 
-inline std::ostream& operator<<(std::ostream& os, const ExactBox& bx) { return os << static_cast<const ExactIntervalVector&>(bx); }
+inline OutputStream& operator<<(OutputStream& os, const ExactBox& bx) { return os << static_cast<const ExactIntervalVector&>(bx); }
 
 void Figure::_paint_all(CanvasInterface& canvas) const
 {
@@ -472,8 +472,8 @@ void Figure::_paint_all(CanvasInterface& canvas) const
     double yl=numeric_cast<double>(bounding_box[projection.y_coordinate()].lower());
     double yu=numeric_cast<double>(bounding_box[projection.y_coordinate()].upper());
 
-    std::string tx=std::string("x")+str(projection.x_coordinate());
-    std::string ty=std::string("x")+str(projection.y_coordinate());
+    StringType tx=StringType("x")+str(projection.x_coordinate());
+    StringType ty=StringType("x")+str(projection.y_coordinate());
     canvas.initialise(tx,ty,xl,xu,yl,yu);
 
     // Draw shapes
@@ -513,8 +513,8 @@ Figure::write(const char* cfilename, uint drawing_width, uint drawing_height) co
 
     this->_paint_all(canvas);
 
-    std::string filename(cfilename);
-    if(filename.rfind(".") != std::string::npos) {
+    StringType filename(cfilename);
+    if(filename.rfind(".") != StringType::npos) {
     } else {
         filename=filename+".png";
     }
@@ -622,7 +622,7 @@ Colour::Colour(const char* nm, double rd, double gr, double bl, bool tr)
     : Colour("",rd,gr,bl,tr?0.0:1.0) { }
 Colour::Colour(const char* nm, double rd, double gr, double bl, double op)
     : name(nm), red(rd), green(gr), blue(bl), opacity(op) { }
-std::ostream& operator<<(std::ostream& os, const Colour& c) {
+OutputStream& operator<<(OutputStream& os, const Colour& c) {
     return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << ", op=" << c.opacity << " )"; }
 
 

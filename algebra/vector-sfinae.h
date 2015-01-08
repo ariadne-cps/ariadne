@@ -51,7 +51,7 @@ template<class X> struct Vector {
     Vector(SizeType n) : _zero(), _ary(n) { }
     Vector(SizeType n, const X& x) : _zero(x*0), _ary(n,x) { }
     Vector(Array<X> ary) : _zero(*ary.begin()*0), _ary(std::move(ary)) { }
-    Vector(std::initializer_list<X> lst) : _zero(*lst.begin()*0), _ary(lst.begin(),lst.end()) { }
+    Vector(InitializerList<X> lst) : _zero(*lst.begin()*0), _ary(lst.begin(),lst.end()) { }
     SizeType size() const { return _ary.size(); }
     const X& operator[](SizeType i) const { return _ary.at(i); }
     X& operator[](SizeType i) { return _ary.at(i); }

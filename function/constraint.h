@@ -164,7 +164,7 @@ inline ValidatedConstraint operator<=(const ValidatedConstraint& nc, const Valid
 }
 
 
-template<class X, class R> std::ostream& operator<<(std::ostream& os, const Constraint<X,R>& c) {
+template<class X, class R> OutputStream& operator<<(OutputStream& os, const Constraint<X,R>& c) {
     return os << c.lower_bound() << "<=" << c.function() << "<=" << c.upper_bound();
 }
 

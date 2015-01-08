@@ -93,7 +93,7 @@ class Grid {
     const Vector<RawFloat>& lengths() const;
 
     //! Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const Grid& g);
+    friend OutputStream& operator<<(OutputStream& os, const Grid& g);
 
     ExactNumber coordinate(uint d, DyadicType x) const;
     ExactNumber subdivision_coordinate(uint d, DyadicType x) const;

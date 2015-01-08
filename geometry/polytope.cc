@@ -64,8 +64,8 @@ Polytope::bounding_box() const
 }
 
 
-std::ostream&
-Polytope::write(std::ostream& os) const
+OutputStream&
+Polytope::write(OutputStream& os) const
 {
     return os << "Polytope( vertices=" << this->vertices() << " )";
 }
@@ -94,11 +94,11 @@ Polytope polytope(const Zonotope& z)
 {
     //std::cerr<<ARIADNE_PRETTY_FUNCTION<<std::endl;
     Polytope res;
-    size_t ng=z.generators().column_size();
-    size_t nv=1<<ng;
-    for(size_t i=0; i!=nv; ++i) {
+    SizeType ng=z.generators().column_size();
+    SizeType nv=1<<ng;
+    for(SizeType i=0; i!=nv; ++i) {
         ExactPoint pt=z.centre();
-        for(size_t j=0; j!=ng; ++j) {
+        for(SizeType j=0; j!=ng; ++j) {
             if(i & 1<<j) {
                 pt+=column(z.generators(),j);
             } else {
@@ -137,8 +137,8 @@ Polytope& reduce2d(Polytope& p)
     std::vector<ExactPoint> new_vertices;
 
     // Sweep lower boundary from bottom-left to top right
-    size_t min_size=1;
-    for(std::vector<ExactPoint>::const_iterator vertex_iter=old_vertices.begin();
+    SizeType min_size=1;
+    for(std::vector<ExactPoint>::ConstIterator vertex_iter=old_vertices.begin();
         vertex_iter!=old_vertices.end(); ++vertex_iter)
         {
             const ExactPoint& vertex=*vertex_iter;
@@ -194,12 +194,12 @@ baricentre(const Polytope& p)
     const std::vector<ExactPoint>& vertices=p.vertices();
     ExactPoint baricentre(p.dimension());
 
-    for (size_t j=0; j!=vertices.size(); ++j) {
-        for (size_t i=0; i<2; i++) {
+    for (SizeType j=0; j!=vertices.size(); ++j) {
+        for (SizeType i=0; i<2; i++) {
             baricentre[i]=baricentre[i]+vertices[j][i];
         }
     }
-    for (size_t i=0; i!=2; ++i) {
+    for (SizeType i=0; i!=2; ++i) {
         baricentre[i]/=vertices.size();
     }
     return baricentre;

@@ -224,7 +224,7 @@ class VectorFunction
 
     VectorFunction(const List< ScalarFunction<P> >& lsf);
     VectorFunction(const Vector< ScalarFunction<P> >& lsf);
-    VectorFunction(std::initializer_list< ScalarFunction<P> > lsf);
+    VectorFunction(InitializerList< ScalarFunction<P> > lsf);
     template<class PP> VectorFunction(const List< ScalarFunction<PP> >& lsf, EnableIf< IsStronger<PP,P>, Void >* = 0) {
         *this=VectorFunction<P>(List< ScalarFunction<P> >(lsf)); }
     template<class PP> VectorFunction(const VectorFunction<PP>& vf, EnableIf< IsStronger<PP,P>, Void >* = 0)

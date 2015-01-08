@@ -55,7 +55,7 @@ struct to_python_dict< Ariadne::Expansion<X>  > {
         for(uint i=0; i!=n; ++i) { lst.append(0); }
         Ariadne::MultiIndex a;
         X c;
-        for(typename Expansion<X>::const_iterator iter=e.begin(); iter!=e.end(); ++iter) {
+        for(typename Expansion<X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
             a=iter->key();
             c=iter->data();
             for(uint i=0; i!=a.size(); ++i) { int ai=a[i]; lst[i]=ai; }
@@ -80,7 +80,7 @@ struct to_python_list< Ariadne::Expansion<X>  > {
         boost::python::list pr; pr.append(0); pr.append(0);
         Ariadne::MultiIndex a;
         X c;
-        for(typename Expansion<X>::const_iterator iter=e.begin(); iter!=e.end(); ++iter) {
+        for(typename Expansion<X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
             a=iter->key();
             c=iter->data();
             for(uint i=0; i!=n; ++i) { int ai=a[i]; alst[i]=ai; }
@@ -104,7 +104,7 @@ struct to_python_list< Ariadne::Expansion<X>  > {
         return boost::python::incref(boost::python::tuple(result).ptr());
     static PyObject* convert(const std::map<K,V>& map) {
         boost::python::dict result;
-        for(typename std::map<K,V>::const_iterator iter=map.begin(); iter!=map.end(); ++iter) {
+        for(typename std::map<K,V>::ConstIterator iter=map.begin(); iter!=map.end(); ++iter) {
             result[boost::python::object(iter->first)]=boost::python::object(iter->second);
         }
         return boost::python::incref(boost::python::dict(result).ptr());
@@ -183,9 +183,9 @@ void matrix_set_item(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
 
 namespace Ariadne {
 
-template<class X> std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Expansion<X> >& repr);
+template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Expansion<X> >& repr);
 
-template<class X> std::ostream& operator<<(std::ostream& os, const PythonRepresentation< Differential<X> >& repr) {
+template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Differential<X> >& repr) {
     const Differential<X>& diff=repr.reference();
     os << python_name<X>("Differential") << "(" << python_representation(diff.expansion()) << "," << diff.degree() << ")";
     //os << python_name<X>("Differential") << "(" << diff.argument_size() << "," << diff.degree() << "," << python_representation(diff.expansion()) << ")";
@@ -234,7 +234,7 @@ void export_differential(const char* name)
     differential_class.def(self*=X());
     differential_class.def(self/=X());
     differential_class.def(self_ns::str(self));
-    //differential_class.def("__repr__", (std::string(*)(const D&)) &__repr__);
+    //differential_class.def("__repr__", (StringType(*)(const D&)) &__repr__);
     differential_class.def("__repr__", &__repr__<D>);
 
     differential_class.def("value",&D::value,return_value_policy<copy_const_reference>());

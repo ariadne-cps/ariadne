@@ -73,7 +73,7 @@ class AffineModel<ApproximateNumber>
     explicit AffineModel() : _c(), _g() { }
     explicit AffineModel(uint n) : _c(0.0), _g(n,0.0) { }
     explicit AffineModel(const ApproximateNumber& c, const Vector<ApproximateNumber>& g) : _c(c), _g(g) { }
-    explicit AffineModel(ApproximateNumber c, std::initializer_list<ApproximateNumber> g) : _c(c), _g(g) { }
+    explicit AffineModel(ApproximateNumber c, InitializerList<ApproximateNumber> g) : _c(c), _g(g) { }
 
     AffineModel<ApproximateNumber>& operator=(const ApproximateNumber& c) {
         this->_c=c; for(uint i=0; i!=this->_g.size(); ++i) { this->_g[i]=0.0; } return *this; }
@@ -120,7 +120,7 @@ AffineModel<ApproximateNumber>& operator*=(AffineModel<ApproximateNumber>& f1, c
 
 //! \relates AffineModel
 //! \brief Write to an output stream.
-std::ostream& operator<<(std::ostream& os, const AffineModel<ApproximateNumber>& f);
+OutputStream& operator<<(OutputStream& os, const AffineModel<ApproximateNumber>& f);
 
 
 //! An affine expression \f$f:[-1,+1]^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b \pm e\f$.
@@ -131,7 +131,7 @@ class AffineModel<ValidatedNumber>
     explicit AffineModel() : _c(), _g() { }
     explicit AffineModel(uint n) : _c(0.0), _g(n,ExactFloat(0.0)), _e(0.0) { }
     explicit AffineModel(const ExactFloat& c, const Vector<ExactFloat>& g, const ErrorFloat& e) : _c(c), _g(g), _e(e) { }
-    explicit AffineModel(ExactFloat c, std::initializer_list<ExactFloat> g) : _c(c), _g(g), _e(0.0) { }
+    explicit AffineModel(ExactFloat c, InitializerList<ExactFloat> g) : _c(c), _g(g), _e(0.0) { }
 
     AffineModel<ValidatedNumber>& operator=(const ExactFloat& c) {
         this->_c=c; for(uint i=0; i!=this->_g.size(); ++i) { this->_g[i]=0; } this->_e=0; return *this; }
@@ -204,7 +204,7 @@ AffineModel<ValidatedNumber> operator*(const ValidatedNumber& c1, const AffineMo
 
 //! \relates AffineModel
 //! \brief Write to an output stream.
-std::ostream& operator<<(std::ostream& os, const AffineModel<ValidatedNumber>& f);
+OutputStream& operator<<(OutputStream& os, const AffineModel<ValidatedNumber>& f);
 
 //! \relates AffineModel
 //! \brief Create from a Taylor model.

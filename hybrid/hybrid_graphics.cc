@@ -99,7 +99,7 @@ HybridFigure::HybridFigure()
 }
 
 void HybridFigure::set_bounds(const Map<RealVariable,IntervalSet>& b) {
-    for(Map<RealVariable,IntervalSet>::const_iterator iter=b.begin(); iter!=b.end(); ++iter) {
+    for(Map<RealVariable,IntervalSet>::ConstIterator iter=b.begin(); iter!=b.end(); ++iter) {
         bounds.insert(iter->first,approximation(iter->second));
     }
 }
@@ -119,7 +119,7 @@ class CairoCanvas
     ~CairoCanvas();
     CairoCanvas(const ImageSize2d& size, const Box2d& bounds);
     CairoCanvas(cairo_t *c);
-    void initialise(std::string x, std::string y, double xl, double xu, double yl, double yu);
+    void initialise(StringType x, StringType y, double xl, double xu, double yl, double yu);
     void finalise();
     void move_to(double x, double y) { cairo_move_to (cr, x, y); }
     void line_to(double x, double y) { cairo_line_to (cr, x, y); }
@@ -163,8 +163,8 @@ HybridFigure::write(const char* cfilename, uint drawing_width, uint drawing_heig
 
     this->_paint_all(canvas);
 
-    std::string filename(cfilename);
-    if(filename.rfind(".") != std::string::npos) {
+    StringType filename(cfilename);
+    if(filename.rfind(".") != StringType::npos) {
     } else {
         filename=filename+".png";
     }

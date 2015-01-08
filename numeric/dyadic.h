@@ -78,7 +78,7 @@ inline Dyadic operator+(const Dyadic& x1,  const Dyadic& x2);
 inline Dyadic operator-(const Dyadic& x1,  const Dyadic& x2);
 inline Dyadic operator*(const Dyadic& x1,  const Dyadic& x2);
 inline Rational operator/(const Dyadic& x1,  const Dyadic& x2);
-inline std::ostream& operator<<(std::ostream& os, const Dyadic& x) { return os << std::showpoint << std::setprecision(18) << x.value(); }
+inline OutputStream& operator<<(OutputStream& os, const Dyadic& x) { return os << std::showpoint << std::setprecision(18) << x.value(); }
 
 inline bool operator==(const Dyadic& x1, const Dyadic& x2) { return x1.value()==x2.value(); }
 inline bool operator!=(const Dyadic& x1, const Dyadic& x2) { return x1.value()!=x2.value(); }

@@ -308,7 +308,7 @@ class Enclosure
     void grid_draw(CanvasInterface&, const Projection2d& p, uint=1u) const;
 
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream&) const;
+    OutputStream& write(OutputStream&) const;
   private:
     void _check() const;
     void _solve_zero_constraints();
@@ -320,7 +320,7 @@ class Enclosure
 };
 
 //! \related Enclosure \brief Stream output operator.
-inline std::ostream& operator<<(std::ostream& os, const Enclosure& s) { return s.write(os); }
+inline OutputStream& operator<<(OutputStream& os, const Enclosure& s) { return s.write(os); }
 
 //! \related Enclosure \brief The Cartesian product of a constrained image set with an interval in one dimension.
 Enclosure product(const Enclosure& set, const ExactInterval& ivl);

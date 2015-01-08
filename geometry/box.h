@@ -41,7 +41,7 @@
 
 namespace Ariadne {
 
-typedef std::ostream OutputStream;
+typedef OutputStream OutputStream;
 typedef uint Nat;
 
 class IntervalSet;
@@ -160,7 +160,7 @@ template<> class Box<ExactInterval>
     explicit Box<ExactInterval>(uint d) : Vector<ExactInterval>(d) { }
     //! Construct from an initializer list of pairs of floating-point values
     //! giving lower and upper bounds.
-    Box<ExactInterval>(std::initializer_list<ExactInterval> lst);
+    Box<ExactInterval>(InitializerList<ExactInterval> lst);
 
     explicit Box<ExactInterval>(uint d, ExactInterval ivl) : Vector<ExactInterval>(d,ivl) { }
     Box<ExactInterval>(const Vector<ExactFloat>& pvec) : Vector<ExactInterval>(pvec) { }
@@ -168,7 +168,7 @@ template<> class Box<ExactInterval>
     Box<ExactInterval>(const List<ExactInterval>& ilst) : Vector<ExactInterval>(ilst) { }
 
     //! Construct from a string literal of the form "[a1,b1]x[a2,b2]x...x[ad,bd]".
-    explicit Box<ExactInterval>(const std::string& str);
+    explicit Box<ExactInterval>(const StringType& str);
 
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static ExactBox unit_box(uint n) {
@@ -321,7 +321,7 @@ template<> class Box<ExactInterval>
     virtual void draw(CanvasInterface& c, const Projection2d& p) const;
 
     //! \brief Write to an output stream.
-    virtual std::ostream& write(std::ostream& os) const {
+    virtual OutputStream& write(OutputStream& os) const {
         return os << *static_cast<const Vector<ExactInterval>*>(this);
     }
 
@@ -345,7 +345,7 @@ ExactBox widen(const ExactBox& bx);
 //! \relates ExactBox \brief A box which is narrower than the input, and has single-precision values.
 ExactBox narrow(const ExactBox& bx);
 
-ExactBox make_box(const std::string& str);
+ExactBox make_box(const StringType& str);
 
 
 //! \ingroup BasicSetSubModule GeometryModule
@@ -361,7 +361,7 @@ template<> class Box<UpperInterval>
     explicit Box<UpperInterval>(uint d, UpperInterval ivl) : Vector<UpperInterval>(d,ivl) { }
     //! Construct from an initializer list of pairs of floating-point values
     //! giving lower and upper bounds.
-    Box<UpperInterval>(std::initializer_list<UpperInterval> lst);
+    Box<UpperInterval>(InitializerList<UpperInterval> lst);
 
     Box<UpperInterval>(Vector<ExactInterval>const& vec) : Vector<UpperInterval>(vec) { }
     Box<UpperInterval>(Vector<UpperInterval>const& vec) : Vector<UpperInterval>(vec) { }
@@ -494,7 +494,7 @@ template<> class Box<UpperInterval>
     Pair<UpperBox,UpperBox> split(uint i) const;
 
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream& os) const {
+    OutputStream& write(OutputStream& os) const {
         return os << *static_cast<const Vector<UpperInterval>*>(this);
     }
 

@@ -153,7 +153,7 @@ TestHybridSystem::test_build_hybrid_system()
 
     Set<DiscreteLocation> reachable = valve_component.reachable_locations((valve|open));
     std::cerr << reachable;
-    for(Set<DiscreteLocation>::const_iterator iter=reachable.begin(); iter!=reachable.end(); ++iter) {
+    for(Set<DiscreteLocation>::ConstIterator iter=reachable.begin(); iter!=reachable.end(); ++iter) {
         std::cerr<<valve_component.mode(*iter)<<"\n";
         valve_component.check_mode(*iter);
     }

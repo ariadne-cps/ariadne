@@ -52,25 +52,25 @@ class Real;
 
 template<class X> inline const char* python_name(const char* name);
 template<> inline const char* python_name<Float>(const char* name) {
-    return (std::string("Float")+name).c_str(); }
+    return (StringType("Float")+name).c_str(); }
 template<> inline const char* python_name<Integer>(const char* name) {
-    return (std::string("Integer")+name).c_str(); }
+    return (StringType("Integer")+name).c_str(); }
 template<> inline const char* python_name<Rational>(const char* name) {
-    return (std::string("Rational")+name).c_str(); }
+    return (StringType("Rational")+name).c_str(); }
 template<> inline const char* python_name<Real>(const char* name) {
-    return (std::string("Real")+name).c_str(); }
+    return (StringType("Real")+name).c_str(); }
 
 template<> inline const char* python_name<ExactFloat>(const char* name) {
-    return (std::string("ExactFloat")+name).c_str(); }
+    return (StringType("ExactFloat")+name).c_str(); }
 template<> inline const char* python_name<ValidatedFloat>(const char* name) {
-    return (std::string("ValidatedFloat")+name).c_str(); }
+    return (StringType("ValidatedFloat")+name).c_str(); }
 template<> inline const char* python_name<UpperFloat>(const char* name) {
-    return (std::string("UpperFloat")+name).c_str(); }
+    return (StringType("UpperFloat")+name).c_str(); }
 template<> inline const char* python_name<ApproximateFloat>(const char* name) {
-    return (std::string("ApproximateFloat")+name).c_str(); }
+    return (StringType("ApproximateFloat")+name).c_str(); }
 
 template<> inline const char* python_name<ExactInterval>(const char* name) {
-    return (std::string("ExactInterval")+name).c_str(); }
+    return (StringType("ExactInterval")+name).c_str(); }
 
 template<class T> struct to_python;
 template<class T> struct to_python_list;
@@ -110,7 +110,7 @@ struct to_python< std::vector<T> > {
 
     static PyObject* convert(const std::vector<T>& vec) {
         boost::python::list result;
-        for(typename std::vector<T>::const_iterator iter=vec.begin(); iter!=vec.end(); ++iter) {
+        for(typename std::vector<T>::ConstIterator iter=vec.begin(); iter!=vec.end(); ++iter) {
             result.append(boost::python::object(*iter));
         }
         return boost::python::incref(boost::python::list(result).ptr());
@@ -124,7 +124,7 @@ struct to_python<std::set<T> > {
     to_python() { boost::python::to_python_converter< std::set<T>, to_python< std::set<T> > >(); }
     static PyObject* convert(const std::set<T>& set) {
         boost::python::list values;
-        for(typename std::set<T>::const_iterator iter=set.begin(); iter!=set.end(); ++iter) {
+        for(typename std::set<T>::ConstIterator iter=set.begin(); iter!=set.end(); ++iter) {
             values.append(boost::python::object(*iter));
         }
         PyObject* result=PySet_New(values.ptr());
@@ -138,7 +138,7 @@ struct to_python_list<std::set<T> > {
     to_python_list() { boost::python::to_python_converter< std::set<T>, to_python_list< std::set<T> > >(); }
     static PyObject* convert(const std::set<T>& set) {
         boost::python::list result;
-        for(typename std::set<T>::const_iterator iter=set.begin(); iter!=set.end(); ++iter) {
+        for(typename std::set<T>::ConstIterator iter=set.begin(); iter!=set.end(); ++iter) {
             result.append(boost::python::object(*iter));
         }
         return boost::python::incref(boost::python::list(result).ptr());
@@ -151,7 +151,7 @@ struct to_python<std::map<K,V> > {
     to_python() { boost::python::to_python_converter< std::map<K,V>, to_python< std::map<K,V> > >(); }
     static PyObject* convert(const std::map<K,V>& map) {
         boost::python::dict result;
-        for(typename std::map<K,V>::const_iterator iter=map.begin(); iter!=map.end(); ++iter) {
+        for(typename std::map<K,V>::ConstIterator iter=map.begin(); iter!=map.end(); ++iter) {
             result[boost::python::object(iter->first)]=boost::python::object(iter->second);
         }
         return boost::python::incref(boost::python::dict(result).ptr());
@@ -220,7 +220,7 @@ struct to_python< Ariadne::Array<T> > {
     to_python() { boost::python::to_python_converter< Ariadne::Array<T>, to_python< Ariadne::Array<T> > >(); }
     static PyObject* convert(const Ariadne::Array<T>& ary) {
         boost::python::list result;
-        for(typename Ariadne::Array<T>::const_iterator iter=ary.begin(); iter!=ary.end(); ++iter) {
+        for(typename Ariadne::Array<T>::ConstIterator iter=ary.begin(); iter!=ary.end(); ++iter) {
             result.append(boost::python::object(*iter));
         }
         return boost::python::incref(boost::python::list(result).ptr());
@@ -233,7 +233,7 @@ struct to_python< Ariadne::List<T> > {
     to_python() { boost::python::to_python_converter< Ariadne::List<T>, to_python< Ariadne::List<T> > >(); }
     static PyObject* convert(const Ariadne::List<T>& lst) {
         boost::python::list result;
-        for(typename List<T>::const_iterator iter=lst.begin(); iter!=lst.end(); ++iter) {
+        for(typename List<T>::ConstIterator iter=lst.begin(); iter!=lst.end(); ++iter) {
             result.append(boost::python::object(*iter));
         }
         return boost::python::incref(boost::python::list(result).ptr());
@@ -246,7 +246,7 @@ struct to_python< Ariadne::Set<T> > {
     to_python() { boost::python::to_python_converter< Ariadne::Set<T>, to_python< Ariadne::Set<T> > >(); }
     static PyObject* convert(const Ariadne::Set<T>& set) {
         boost::python::list values;
-        for(typename Ariadne::Set<T>::const_iterator iter=set.begin(); iter!=set.end(); ++iter) {
+        for(typename Ariadne::Set<T>::ConstIterator iter=set.begin(); iter!=set.end(); ++iter) {
             values.append(boost::python::object(*iter));
         }
         PyObject* result=PySet_New(values.ptr());
@@ -260,7 +260,7 @@ struct to_python_list< Ariadne::Set<T> > {
     to_python_list() { boost::python::to_python_converter< Ariadne::Set<T>, to_python_list< Ariadne::Set<T> > >(); }
     static PyObject* convert(const Set<T>& set) {
         boost::python::list result;
-        for(typename Set<T>::const_iterator iter=set.begin(); iter!=set.end(); ++iter) {
+        for(typename Set<T>::ConstIterator iter=set.begin(); iter!=set.end(); ++iter) {
             result.append(boost::python::object(*iter));
         }
         return boost::python::incref(boost::python::list(result).ptr());
@@ -273,7 +273,7 @@ struct to_python<Ariadne::Map<K,V> > {
     to_python() { boost::python::to_python_converter< Ariadne::Map<K,V>, to_python< Ariadne::Map<K,V> > >(); }
     static PyObject* convert(const Ariadne::Map<K,V>& map) {
         boost::python::dict result;
-        for(typename Ariadne::Map<K,V>::const_iterator iter=map.begin(); iter!=map.end(); ++iter) {
+        for(typename Ariadne::Map<K,V>::ConstIterator iter=map.begin(); iter!=map.end(); ++iter) {
             result[boost::python::object(iter->first)]=boost::python::object(iter->second);
         }
         return boost::python::incref(boost::python::dict(result).ptr());
@@ -435,11 +435,11 @@ template<class R, class A1, class A2>
 R __le__(const A1& a1, const A2& a2) { return static_cast<R>(a1<=a2); }
 
 
-template<class T> std::string __cstr__(const T& t) {
-    std::stringstream ss; ss << t; return ss.str(); }
+template<class T> StringType __cstr__(const T& t) {
+    StringStream ss; ss << t; return ss.str(); }
 
-template<class T> std::string __crepr__(const T& t) {
-    std::stringstream ss; ss << representation(t); return ss.str(); }
+template<class T> StringType __crepr__(const T& t) {
+    StringStream ss; ss << representation(t); return ss.str(); }
 
 
 template<class T> struct PythonRepresentation {
@@ -452,8 +452,8 @@ template<class T> PythonRepresentation<T>
 python_representation(const T& t) {
     return PythonRepresentation<T>(t); }
 
-template<class T> std::string __repr__(const T& t) {
-    std::stringstream ss;
+template<class T> StringType __repr__(const T& t) {
+    StringStream ss;
     ss << PythonRepresentation<T>(t);
     return ss.str();
 }

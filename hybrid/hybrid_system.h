@@ -93,9 +93,9 @@ class HybridSystem
 
 
 /*
-    typedef std::map< Event, std::shared_ptr<const VectorFunction> >::const_iterator invariant_const_iterator;
-    typedef std::set< DiscreteTransition >::const_iterator discrete_transition_const_iterator;
-    typedef std::set< DiscreteMode >::const_iterator discrete_mode_const_iterator;
+    typedef std::map< Event, std::shared_ptr<const VectorFunction> >::ConstIterator invariant_const_iterator;
+    typedef std::set< DiscreteTransition >::ConstIterator discrete_transition_const_iterator;
+    typedef std::set< DiscreteMode >::ConstIterator discrete_mode_const_iterator;
 */
   private:
   public:
@@ -121,13 +121,13 @@ class HybridSystem
     List<InvariantPredicate> _invariant_predicates;
     List<DisabledEvents> _disabled_events;
 
-    typedef List<DifferentialEquation>::const_iterator dynamic_const_iterator;
-    typedef List<AlgebraicEquation>::const_iterator relation_const_iterator;
-    typedef List<DiscreteUpdate>::const_iterator switch_const_iterator;
-    typedef List<ContinuousUpdate>::const_iterator jump_const_iterator;
-    typedef List<InvariantPredicate>::const_iterator invariant_const_iterator;
-    typedef List<GuardPredicate>::const_iterator guard_const_iterator;
-    typedef List<DisabledEvents>::const_iterator disabled_const_iterator;
+    typedef List<DifferentialEquation>::ConstIterator dynamic_const_iterator;
+    typedef List<AlgebraicEquation>::ConstIterator relation_const_iterator;
+    typedef List<DiscreteUpdate>::ConstIterator switch_const_iterator;
+    typedef List<ContinuousUpdate>::ConstIterator jump_const_iterator;
+    typedef List<InvariantPredicate>::ConstIterator invariant_const_iterator;
+    typedef List<GuardPredicate>::ConstIterator guard_const_iterator;
+    typedef List<DisabledEvents>::ConstIterator disabled_const_iterator;
   public:
     //@{
     //! \name Constructors and destructors
@@ -297,13 +297,13 @@ class HybridSystem
     //@}
 };
 
-std::ostream& operator<<(std::ostream& os, const HybridSystem& hs);
-std::ostream& operator<<(std::ostream& os, const HybridSystem::AlgebraicEquation& ae);
-std::ostream& operator<<(std::ostream& os, const HybridSystem::DifferentialEquation& de);
-std::ostream& operator<<(std::ostream& os, const HybridSystem::DiscreteUpdate& da);
-std::ostream& operator<<(std::ostream& os, const HybridSystem::ContinuousUpdate& re);
-std::ostream& operator<<(std::ostream& os, const HybridSystem::GuardPredicate& g);
-std::ostream& operator<<(std::ostream& os, const HybridSystem::InvariantPredicate& inv);
+OutputStream& operator<<(OutputStream& os, const HybridSystem& hs);
+OutputStream& operator<<(OutputStream& os, const HybridSystem::AlgebraicEquation& ae);
+OutputStream& operator<<(OutputStream& os, const HybridSystem::DifferentialEquation& de);
+OutputStream& operator<<(OutputStream& os, const HybridSystem::DiscreteUpdate& da);
+OutputStream& operator<<(OutputStream& os, const HybridSystem::ContinuousUpdate& re);
+OutputStream& operator<<(OutputStream& os, const HybridSystem::GuardPredicate& g);
+OutputStream& operator<<(OutputStream& os, const HybridSystem::InvariantPredicate& inv);
 
 
 

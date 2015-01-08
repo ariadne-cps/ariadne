@@ -198,7 +198,7 @@ class ExactInterval {
     Float l, u;
 };
 
-std::ostream& operator<<(std::ostream& os, const ExactInterval& ivl);
+OutputStream& operator<<(OutputStream& os, const ExactInterval& ivl);
 
 inline ValidatedFloat midpoint(ExactInterval i) {
     return i.midpoint();
@@ -362,7 +362,7 @@ class UpperInterval {
         return UpperInterval(max(ivl1.l,ivl2.l),min(ivl1.u,ivl2.u)); }
     friend UpperInterval widen(UpperInterval x) {
         return UpperInterval(widen(ValidatedFloat(x.lower_raw(),x.upper_raw()))); }
-    friend std::ostream& operator<<(std::ostream& os, UpperInterval const& ivl) {
+    friend OutputStream& operator<<(OutputStream& os, UpperInterval const& ivl) {
         return os << ExactInterval(ivl.lower_raw(),ivl.upper_raw()); }
   private:
     Float l, u;
@@ -859,8 +859,8 @@ inline Tribool operator<=(UpperInterval i1, UpperInterval i2) {
     a & ivl.lower_raw() & ivl.upper_raw(); }
 #endif
 
-std::ostream& operator<<(std::ostream&, const ExactInterval&);
-std::istream& operator>>(std::istream&, ExactInterval&);
+OutputStream& operator<<(OutputStream&, const ExactInterval&);
+InputStream& operator>>(InputStream&, ExactInterval&);
 
 inline ValidatedFloat make_singleton(ExactFloatInterval const& ivl) {
     return ValidatedFloat(ivl.lower_raw(),ivl.upper_raw());
@@ -889,7 +889,7 @@ class ApproximateInterval {
     ApproximateFloat width() const { return ApproximateFloat(u-l); }
     friend Bool contains(ApproximateInterval const& ivl, ApproximateFloat const& x) {
         return ivl.lower_raw()<=x.raw() && x.raw()<=ivl.upper_raw(); }
-    friend std::ostream& operator<<(std::ostream& os, const ApproximateInterval& ivl) {
+    friend OutputStream& operator<<(OutputStream& os, const ApproximateInterval& ivl) {
         return os << ExactInterval(ivl.lower_raw(),ivl.upper_raw()); }
   private:
     Float l, u;

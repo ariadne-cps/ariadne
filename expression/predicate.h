@@ -46,9 +46,9 @@ namespace Ariadne {
 
 class PredicateInterface {
   public:
-    typedef unsigned int size_type;
+    typedef unsigned int SizeType;
 
-    virtual size_type argument_size() const = 0;
+    virtual SizeType argument_size() const = 0;
     virtual Tribool evaluate(const Vector<Float>& x) const = 0;
     virtual Tribool evaluate(const Vector<ValidatedNumber>& x) const = 0;
 };
@@ -71,7 +71,7 @@ class ExpressionPredicate
         return ep1._expression.pointer()==ep2._expression.pointer() && ep1._sign!=ep2._sign; }
     bool operator<(const ExpressionPredicate& p) const {
         return (_expression.pointer()) < (const void*)(p._expression.pointer()); }
-    size_type argument_size() const { return _expression.argument_size(); }
+    SizeType argument_size() const { return _expression.argument_size(); }
     Tribool evaluate(const Vector<Float>& x) const {
         Float value=_expression.evaluate(x)*_sign;
         if(value<0) { return true; }
@@ -93,8 +93,8 @@ class DisjunctivePredicate
     : public PredicateInterface
 {
   public:
-    size_type size() const { return _predicates.size(); }
-    const ExpressionPredicate& operator[](size_type i) const { return _predicates[i]; }
+    SizeType size() const { return _predicates.size(); }
+    const ExpressionPredicate& operator[](SizeType i) const { return _predicates[i]; }
 
     bool vacuous() const { return _predicates.empty(); }
     bool tautologous() const { return _tautology; }
@@ -112,7 +112,7 @@ class DisjunctivePredicate
     DisjunctivePredicate& operator|=(const DisjunctivePredicate& p) {
         for(uint i=0; i!=p.size(); ++i) { (*this) |= p[i]; } return *this; }
 
-    virtual size_type argument_size() const;
+    virtual SizeType argument_size() const;
     virtual Tribool evaluate(const Vector<Float>& x) const;
     virtual Tribool evaluate(const Vector<ValidatedNumber>& x) const;
 
@@ -137,7 +137,7 @@ class ConjunctiveNormalFormPredicate
     ConjunctiveNormalFormPredicate& operator|=(DisjunctivePredicate p) {
         for(uint i=0; i!=_cnf.size(); ++i) { _cnf[i] |= p; } return *this; }
 
-    virtual size_type argument_size() const;
+    virtual SizeType argument_size() const;
     virtual Tribool evaluate(const Vector<Float>& x) const;
     virtual Tribool evaluate(const Vector<ValidatedNumber>& x) const;
   private:

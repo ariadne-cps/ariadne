@@ -123,7 +123,7 @@ struct to_python< ListSet<ES> > {
 
     static PyObject* convert(const ListSet<ES>& ls) {
         boost::python::list result;
-        for(typename ListSet<ES>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
+        for(typename ListSet<ES>::ConstIterator iter=ls.begin(); iter!=ls.end(); ++iter) {
             result.append(boost::python::object(*iter));
         }
         return boost::python::incref(boost::python::list(result).ptr());
@@ -138,7 +138,7 @@ struct to_python< ListSet< HybridBasicSet<ES> > > {
 
     static PyObject* convert(const SetType& hls) {
         boost::python::dict result;
-        for(typename SetType::locations_const_iterator iter=hls.locations_begin(); iter!=hls.locations_end(); ++iter) {
+        for(typename SetType::LocationsConstIterator iter=hls.locations_begin(); iter!=hls.locations_end(); ++iter) {
             result[iter->first]=iter->second;
         }
         return boost::python::incref(boost::python::dict(result).ptr());
@@ -146,8 +146,8 @@ struct to_python< ListSet< HybridBasicSet<ES> > > {
     static const PyTypeObject* get_pytype() { return &PyDict_Type; }
 };
 
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ValidatedFloat>& x);
-std::ostream& operator<<(std::ostream& os, const PythonRepresentation<ExactInterval>& x) {
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ValidatedFloat>& x);
+OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ExactInterval>& x) {
     return os << PythonRepresentation<ValidatedFloat>(ValidatedFloat(x.reference()));
 }
 
@@ -161,7 +161,7 @@ class OpenSetWrapper
     uint dimension() const { return this->get_override("dimension")(); }
     Tribool covers(const ExactBox& r) const { return this->get_override("covers")(); }
     Tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
-    std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
+    OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
 class ClosedSetWrapper
@@ -171,7 +171,7 @@ class ClosedSetWrapper
     ClosedSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
     Tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
-    std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
+    OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
 
@@ -182,7 +182,7 @@ class OvertSetWrapper
     OvertSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
     Tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
-    std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
+    OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
 
@@ -196,7 +196,7 @@ class CompactSetWrapper
     Tribool inside(const ExactBox& r) const { return this->get_override("inside")(); }
     Tribool bounded() const { return this->get_override("bounded")(); }
     UpperBox bounding_box() const { return this->get_override("bounding_box")(); }
-    std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
+    OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
 class RegularSetWrapper
@@ -208,7 +208,7 @@ class RegularSetWrapper
     Tribool overlaps(const ExactBox& r) const { return this->get_override("overlaps")(); }
     Tribool covers(const ExactBox& r) const { return this->get_override("covers")(); }
     Tribool separated(const ExactBox& r) const { return this->get_override("separated")(); }
-    std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
+    OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
 class LocatedSetWrapper
@@ -222,7 +222,7 @@ class LocatedSetWrapper
     Tribool inside(const ExactBox& r) const { return this->get_override("inside")(); }
     Tribool bounded() const { return this->get_override("bounded")(); }
     UpperBox bounding_box() const { return this->get_override("bounding_box")(); }
-    std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
+    OutputStream& write(OutputStream&) const { return this->get_override("write")(); }
 };
 
 }

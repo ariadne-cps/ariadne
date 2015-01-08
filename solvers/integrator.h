@@ -174,7 +174,7 @@ class TaylorPicardIntegrator
     void set_step_maximum_error(double e) { _step_maximum_error = e; }
 
     virtual TaylorPicardIntegrator* clone() const { return new TaylorPicardIntegrator(*this); }
-    virtual void write(std::ostream& os) const;
+    virtual void write(OutputStream& os) const;
 
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,
@@ -232,7 +232,7 @@ class TaylorSeriesIntegrator
     void set_step_maximum_error(double e) { _step_maximum_error = e; }
 
     virtual TaylorSeriesIntegrator* clone() const { return new TaylorSeriesIntegrator(*this); }
-    virtual void write(std::ostream& os) const;
+    virtual void write(OutputStream& os) const;
 
     virtual Pair<ExactFloat,UpperBox>
     flow_bounds(const ValidatedVectorFunction& vector_field,
@@ -267,7 +267,7 @@ class AffineIntegrator
     //! \brief The order of the method in time.
     uint temporal_order() const { return this->_temporal_order; }
     virtual AffineIntegrator* clone() const { return new AffineIntegrator(*this); }
-    virtual void write(std::ostream& os) const;
+    virtual void write(OutputStream& os) const;
 
     virtual ValidatedVectorFunctionModel
     flow_step(const ValidatedVectorFunction& vector_field,

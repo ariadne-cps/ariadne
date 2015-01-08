@@ -75,8 +75,8 @@ class GridOpenCell;
 
 typedef Vector<ExactInterval> LatticeBoxType;
 
-std::ostream& operator<<(std::ostream& os, const GridCell& theGridCell);
-std::ostream& operator<<(std::ostream& os, const GridOpenCell& theGridOpenCell );
+OutputStream& operator<<(OutputStream& os, const GridCell& theGridCell);
+OutputStream& operator<<(OutputStream& os, const GridOpenCell& theGridOpenCell );
 
 bool subset( const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne = NULL,
              BinaryWord * pPathPrefixTwo = NULL, uint * pPrimaryCellHeight = NULL );

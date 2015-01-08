@@ -57,7 +57,7 @@ class VectorField
     EffectiveVectorFunction _function;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const VectorField& vf) {
+inline OutputStream& operator<<(OutputStream& os, const VectorField& vf) {
     return os << "VectorField( " << vf.function() << " )";
 }
 

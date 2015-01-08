@@ -554,7 +554,7 @@ operator<=(const FirstDifferential<X>& x, const R& c)
 
 
 template<class X>
-std::ostream& operator<<(std::ostream& os, const FirstDifferential<X>& x)
+OutputStream& operator<<(OutputStream& os, const FirstDifferential<X>& x)
 {
     os << "D<R"<<x.argument_size()<<","<<x.degree()<<">{ ";
     os << x._value;
@@ -1008,7 +1008,7 @@ SecondDifferential<X> tan(const SecondDifferential<X>& x)
 
 
 template<class X>
-std::ostream& operator<<(std::ostream& os, const SecondDifferential<X>& x)
+OutputStream& operator<<(OutputStream& os, const SecondDifferential<X>& x)
 {
     Expansion<X> e=x.expansion();
     //e.graded_sort();

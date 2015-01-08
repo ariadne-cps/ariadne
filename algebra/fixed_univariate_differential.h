@@ -494,7 +494,7 @@ operator< (const R& c, const UnivariateFirstDifferential<X>& x)
 
 
 template<class X>
-std::ostream& operator<<(std::ostream& os, const UnivariateFirstDifferential<X>& x)
+OutputStream& operator<<(OutputStream& os, const UnivariateFirstDifferential<X>& x)
 {
     os << "D<R"<<x.argument_size()<<","<<x.degree()<<">{ ";
     os << x._value << "; " << x._gradient;
@@ -938,7 +938,7 @@ operator< (const R& c, const UnivariateSecondDifferential<X>& x)
 
 
 template<class X>
-std::ostream& operator<<(std::ostream& os, const UnivariateSecondDifferential<X>& x)
+OutputStream& operator<<(OutputStream& os, const UnivariateSecondDifferential<X>& x)
 {
      //e.graded_sort();
     os << "D<R"<<x.argument_size()<<","<<x.degree()<<">{";

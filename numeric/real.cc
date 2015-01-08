@@ -25,8 +25,6 @@
  *  \brief
  */
 
-
-
 #include "utility/module.h"
 #include "expression/operators.h"
 #include "expression/templates.h"

@@ -197,7 +197,7 @@ antiderivative(const UnivariateDifferential<X>& x, const X& c)
 
 
 template<class X>
-std::ostream& operator<<(std::ostream& os, const UnivariateDifferential<X>& x)
+OutputStream& operator<<(OutputStream& os, const UnivariateDifferential<X>& x)
 {
     os << "D<"<<x.degree()<<">";
     for(uint i=0; i<=x.degree(); ++i) {

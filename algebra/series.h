@@ -264,7 +264,7 @@ operator*(const Series<X>& x, const Series<X>& y)
 
 
 template<class X>
-std::ostream& operator<<(std::ostream& os, const Series<X>& x)
+OutputStream& operator<<(OutputStream& os, const Series<X>& x)
 {
     os << "S";
     for(uint i=0; i<=x.degree(); ++i) {

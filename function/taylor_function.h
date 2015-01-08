@@ -191,10 +191,10 @@ class ScalarTaylorFunction
     DomainType _domain;
     ModelType _model;
   public:
-    //! \brief An iterator through the (index,coefficient) pairs of the expansion expansion.
-    typedef ExpansionType::iterator iterator;
-    //! \brief A constant iterator through the (index,coefficient) pairs of the expansion expansion.
-    typedef ExpansionType::const_iterator const_iterator;
+    //! \brief An Iterator through the (index,coefficient) pairs of the expansion expansion.
+    typedef ExpansionType::Iterator Iterator;
+    //! \brief A constant Iterator through the (index,coefficient) pairs of the expansion expansion.
+    typedef ExpansionType::ConstIterator ConstIterator;
 
     //@{
     /*! \name Constructors and destructors. */
@@ -301,14 +301,14 @@ class ScalarTaylorFunction
     //! \brief A read/write reference to the coefficient of the term in $x^a$.
     CoefficientType& operator[](const MultiIndex& a) { return this->_model[a]; }
 
-    //! \brief An iterator to the first term in the expansion expansion.
-    iterator begin() { return this->_model.begin(); }
-    //! \brief A constant iterator to the first term in the expansion expansion.
-    const_iterator begin() const { return this->_model.begin(); }
-    //! \brief An iterator to the end of the expansion expansion.
-    iterator end() { return this->_model.end(); }
-    //! \brief A constant iterator to the end of the expansion expansion.
-    const_iterator end() const { return this->_model.end(); }
+    //! \brief An Iterator to the first term in the expansion expansion.
+    Iterator begin() { return this->_model.begin(); }
+    //! \brief A constant Iterator to the first term in the expansion expansion.
+    ConstIterator begin() const { return this->_model.begin(); }
+    //! \brief An Iterator to the end of the expansion expansion.
+    Iterator end() { return this->_model.end(); }
+    //! \brief A constant Iterator to the end of the expansion expansion.
+    ConstIterator end() const { return this->_model.end(); }
 
     //! \brief The number of variables in the argument of the quantity.
     uint argument_size() const { return this->_model.argument_size(); }
@@ -448,11 +448,11 @@ class ScalarTaylorFunction
     //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
-    std::ostream& write(std::ostream& os) const;
+    OutputStream& write(OutputStream& os) const;
     /*! \brief Write a full representation to an output stream. */
-    std::ostream& repr(std::ostream& os) const;
+    OutputStream& repr(OutputStream& os) const;
     //! \brief Write to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const ScalarTaylorFunction& x);
+    friend OutputStream& operator<<(OutputStream& os, const ScalarTaylorFunction& x);
     //@}
 
   public:
@@ -685,7 +685,7 @@ class VectorTaylorFunction
     explicit VectorTaylorFunction(const List<ScalarTaylorFunction>& components);
 
     /*! \brief Construct from an initializer list of scalar Taylor functions. */
-    VectorTaylorFunction(std::initializer_list<ScalarTaylorFunction> components);
+    VectorTaylorFunction(InitializerList<ScalarTaylorFunction> components);
 
     /*! \brief Construct from a vector expression. */
     template<class E> explicit VectorTaylorFunction(const VectorExpression<E>& ve);
@@ -781,10 +781,10 @@ class VectorTaylorFunction
     Void adjoin(const ScalarTaylorFunction& sf);
 
     /*! \brief Write to an output stream. */
-    std::ostream& write(std::ostream& os) const;
+    OutputStream& write(OutputStream& os) const;
 
     /*! \brief Write a full representation to an output stream. */
-    std::ostream& repr(std::ostream& os) const;
+    OutputStream& repr(OutputStream& os) const;
 
     /*! \brief Inplace addition. */
     friend VectorTaylorFunction& operator+=(VectorTaylorFunction& f, const VectorTaylorFunction& g);
@@ -907,7 +907,7 @@ VectorTaylorFunction combine(const ScalarTaylorFunction& f, const ScalarTaylorFu
 
 NormType norm(const VectorTaylorFunction& f);
 
-std::ostream& operator<<(std::ostream&, const VectorTaylorFunction&);
+OutputStream& operator<<(OutputStream&, const VectorTaylorFunction&);
 
 // Conversion operatations
 Polynomial<ValidatedNumber> polynomial(const ScalarTaylorFunction& tfn);
@@ -915,19 +915,19 @@ Vector< Polynomial<ValidatedNumber> > polynomial(const VectorTaylorFunction& tfn
 List< Polynomial<ValidatedNumber> > polynomials(const List<ScalarTaylorFunction>& tfns);
 
 // Sanitised output
-std::ostream& operator<<(std::ostream&, const Representation<ScalarTaylorFunction>&);
-std::ostream& operator<<(std::ostream&, const Representation<VectorTaylorFunction>&);
+OutputStream& operator<<(OutputStream&, const Representation<ScalarTaylorFunction>&);
+OutputStream& operator<<(OutputStream&, const Representation<VectorTaylorFunction>&);
 template<class F> struct ModelsRepresentation { const F* pointer; double threshold; };
 template<class F> ModelsRepresentation<F> model_repr(const F& f, double swpt) { ModelsRepresentation<F> r={&f,swpt}; return r; }
-std::ostream& operator<<(std::ostream&,const ModelsRepresentation<ScalarTaylorFunction>&);
-std::ostream& operator<<(std::ostream&,const ModelsRepresentation< List<ScalarTaylorFunction> >&);
-std::ostream& operator<<(std::ostream&,const ModelsRepresentation<VectorTaylorFunction>&);
+OutputStream& operator<<(OutputStream&,const ModelsRepresentation<ScalarTaylorFunction>&);
+OutputStream& operator<<(OutputStream&,const ModelsRepresentation< List<ScalarTaylorFunction> >&);
+OutputStream& operator<<(OutputStream&,const ModelsRepresentation<VectorTaylorFunction>&);
 template<class F> struct PolynomialRepresentation { const F* pointer; double threshold; List<String> names; };
 template<class F> PolynomialRepresentation<F> polynomial_repr(const F& f, double swpt) { PolynomialRepresentation<F> r={&f,swpt}; return r; }
 template<class F> PolynomialRepresentation<F> polynomial_repr(const F& f, double swpt, const List<String>& names) { PolynomialRepresentation<F> r={&f,swpt,names}; return r; }
-std::ostream& operator<<(std::ostream&,const PolynomialRepresentation<ScalarTaylorFunction>&);
-std::ostream& operator<<(std::ostream&,const PolynomialRepresentation< List<ScalarTaylorFunction> >&);
-std::ostream& operator<<(std::ostream&,const PolynomialRepresentation<VectorTaylorFunction>&);
+OutputStream& operator<<(OutputStream&,const PolynomialRepresentation<ScalarTaylorFunction>&);
+OutputStream& operator<<(OutputStream&,const PolynomialRepresentation< List<ScalarTaylorFunction> >&);
+OutputStream& operator<<(OutputStream&,const PolynomialRepresentation<VectorTaylorFunction>&);
 
 
 template<class E> VectorTaylorFunction::VectorTaylorFunction(const VectorExpression<E>& ve) : _domain(), _models(ve().size())
@@ -951,7 +951,7 @@ class VectorTaylorFunctionElementReference
     void sweep() { this->_c->_models[this->_i].sweep(); }
     template<class X> X evaluate(const Vector<X>& x) const { return this->_c->get(this->_i).evaluate(x); }
     template<class X> X operator()(const Vector<X>& x) const { return this->_c->get(this->_i).operator()(x); }
-    friend std::ostream& operator<<(std::ostream& os, const VectorTaylorFunctionElementReference& t) { return os<<ScalarTaylorFunction(t); }
+    friend OutputStream& operator<<(OutputStream& os, const VectorTaylorFunctionElementReference& t) { return os<<ScalarTaylorFunction(t); }
   private:
     VectorTaylorFunction* _c; uint _i;
 };

@@ -307,7 +307,7 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactB
 
 }
 
-void TaylorPicardIntegrator::write(std::ostream& os) const {
+void TaylorPicardIntegrator::write(OutputStream& os) const {
     os << "TaylorPicardIntegrator"
        << "(maximum_error = " << this->maximum_error()
        << ", function_factory = " << this->function_factory()
@@ -447,18 +447,18 @@ Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferenti
     Vector<GradedValidatedDifferential> gdphi(nx,GradedValidatedDifferential(List<ValidatedDifferential>(to+1u,ValidatedDifferential(nx,so))));
     for(uint i=0; i!=nx; ++i) {
         for(uint j=0; j!=to; ++j) {
-            for(ValidatedDifferential::const_iterator iter=dphic[i][j].begin(); iter!=dphic[i][j].end(); ++iter) {
+            for(ValidatedDifferential::ConstIterator iter=dphic[i][j].begin(); iter!=dphic[i][j].end(); ++iter) {
                 if(iter->key().degree()<so) { gdphi[i][j].expansion().append(iter->key(),iter->data()); }
             }
-            for(ValidatedDifferential::const_iterator iter=dphid[i][j].begin(); iter!=dphid[i][j].end(); ++iter) {
+            for(ValidatedDifferential::ConstIterator iter=dphid[i][j].begin(); iter!=dphid[i][j].end(); ++iter) {
                 if(iter->key().degree()==so) { gdphi[i][j].expansion().append(iter->key(),iter->data()); }
             }
         }
         uint j=to;
-        for(ValidatedDifferential::const_iterator iter=dphia[i][j].begin(); iter!=dphia[i][j].end(); ++iter) {
+        for(ValidatedDifferential::ConstIterator iter=dphia[i][j].begin(); iter!=dphia[i][j].end(); ++iter) {
             if(iter->key().degree()<so) { gdphi[i][j].expansion().append(iter->key(),iter->data()); }
         }
-        for(ValidatedDifferential::const_iterator iter=dphib[i][j].begin(); iter!=dphib[i][j].end(); ++iter) {
+        for(ValidatedDifferential::ConstIterator iter=dphib[i][j].begin(); iter!=dphib[i][j].end(); ++iter) {
             if(iter->key().degree()==so) { gdphi[i][j].expansion().append(iter->key(),iter->data()); }
         }
     }
@@ -469,7 +469,7 @@ Vector<ValidatedDifferential> flow_differential(Vector<GradedValidatedDifferenti
         Expansion<ValidatedFloat>& component=dphi[i].expansion();
         for(uint j=0; j<=to; ++j) {
             const Expansion<ValidatedFloat>& expansion=gdphi[i][j].expansion();
-            for(Expansion<ValidatedFloat>::const_iterator iter=expansion.begin(); iter!=expansion.end(); ++iter) {
+            for(Expansion<ValidatedFloat>::ConstIterator iter=expansion.begin(); iter!=expansion.end(); ++iter) {
                 append_join(component,iter->key(),j,iter->data());
             }
         }
@@ -491,7 +491,7 @@ VectorTaylorFunction flow_function(const Vector<ValidatedDifferential>& dphi, co
         error=0u;
         expansion.reserve(dphi[i].expansion().number_of_nonzeros());
 
-        Differential<ValidatedFloat>::const_iterator iter=dphi[i].begin();
+        Differential<ValidatedFloat>::ConstIterator iter=dphi[i].begin();
         while(iter!=dphi[i].end()) {
             MultiIndex const a=iter->key();
             ValidatedFloat coef=iter->data();
@@ -535,8 +535,8 @@ differential_flow_step(const ValidatedVectorFunction& f, const ExactBox& dx, con
         error=0u;
         expansion.reserve(dphic[i].expansion().number_of_nonzeros());
 
-        ValidatedDifferential::const_iterator citer=dphic[i].begin();
-        ValidatedDifferential::const_iterator biter=dphib[i].begin();
+        ValidatedDifferential::ConstIterator citer=dphic[i].begin();
+        ValidatedDifferential::ConstIterator biter=dphib[i].begin();
         while(citer!=dphic[i].end() && biter!=dphib[i].end()) {
             assert(citer->key()==biter->key());
             MultiIndex const a=citer->key();
@@ -587,8 +587,8 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactB
         error=0;
         expansion.reserve(dphic[i].expansion().number_of_nonzeros());
 
-        ValidatedDifferential::const_iterator citer=dphic[i].begin();
-        ValidatedDifferential::const_iterator biter=dphib[i].begin();
+        ValidatedDifferential::ConstIterator citer=dphic[i].begin();
+        ValidatedDifferential::ConstIterator biter=dphib[i].begin();
         while(citer!=dphic[i].end() && biter!=dphib[i].end()) {
             assert(citer->key()==biter->key());
             MultiIndex const a=citer->key();
@@ -834,7 +834,7 @@ TaylorSeriesIntegrator::flow_bounds(const ValidatedVectorFunction& vf, const Exa
     return std::make_pair(ExactFloat(h),bx);
 }
 
-void TaylorSeriesIntegrator::write(std::ostream& os) const {
+void TaylorSeriesIntegrator::write(OutputStream& os) const {
     os << "TaylorSeriesIntegrator"
        << "( function_factory = " << this->function_factory()
        << ", maximum_error = " << this->maximum_error()
@@ -852,8 +852,8 @@ void TaylorSeriesIntegrator::write(std::ostream& os) const {
 
 template<class X> void truncate(Differential<X>& x, uint spacial_order, uint temporal_order) {
     uint n=x.argument_size()-1;
-    typename Differential<X>::iterator write_iter=x.begin();
-    typename Differential<X>::const_iterator read_iter=x.begin();
+    typename Differential<X>::Iterator write_iter=x.begin();
+    typename Differential<X>::ConstIterator read_iter=x.begin();
     while(read_iter!=x.end()) {
         const MultiIndex& index = read_iter->key();
         if(index[n]>temporal_order || index[n]+spacial_order<index.degree()) {
@@ -909,7 +909,7 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBox& do
     rad[n] = h;
 
     for(uint i=0; i!=n; ++i) {
-        for(Expansion<ValidatedNumber>::const_iterator iter=bdphi[i].begin(); iter!=bdphi[i].end(); ++iter) {
+        for(Expansion<ValidatedNumber>::ConstIterator iter=bdphi[i].begin(); iter!=bdphi[i].end(); ++iter) {
             const MultiIndex& a=iter->key();
             if(a[n]==this->_temporal_order && a[n]+this->_spacial_order==a.degree()) {
                 const ValidatedNumber& rng = iter->data();
@@ -937,7 +937,7 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBox& do
     return res;
 }
 
-void AffineIntegrator::write(std::ostream& os) const {
+void AffineIntegrator::write(OutputStream& os) const {
     os << "AffineIntegrator"
        << "( function_factory = " << this->function_factory()
        << ", maximum_error = " << this->maximum_error()

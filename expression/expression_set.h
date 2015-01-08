@@ -201,7 +201,7 @@ class RealExpressionConstraintSet
     Set<RealVariable> variables() const { return Set<RealVariable>(arguments(this->_constraints)); }
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; }
     ConstraintSet euclidean_set(const RealSpace& space) const;
-    friend std::ostream& operator<<(std::ostream& os, const RealExpressionConstraintSet& eset);
+    friend OutputStream& operator<<(OutputStream& os, const RealExpressionConstraintSet& eset);
 };
 
 //! \ingroup ExpressionSetSubModule
@@ -219,7 +219,7 @@ class RealExpressionBoundedConstraintSet
     Map<RealVariable,IntervalSet> bounds() const { return this->_bounds; }
     List<ContinuousPredicate> const& constraints() const { return this->_constraints; }
     BoundedConstraintSet euclidean_set(const RealSpace& space) const;
-    friend std::ostream& operator<<(std::ostream& os, const RealExpressionBoundedConstraintSet& eset);
+    friend OutputStream& operator<<(OutputStream& os, const RealExpressionBoundedConstraintSet& eset);
 };
 
 

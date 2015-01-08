@@ -106,7 +106,7 @@ void TestPolynomial::test_concept()
 void TestPolynomial::test_cleanup()
 {
     typedef Expansion<Float>::value_type ValueType;
-    typedef Expansion<Float>::word_type WordType;
+    typedef Expansion<Float>::WordType WordType;
 /*
     {
         MultiIndex a(3);
@@ -136,9 +136,9 @@ void TestPolynomial::test_cleanup()
             value=reinterpret_cast<double&>(v[3*i+1]);
         }
 
-        typedef Expansion<Float>::iterator iterator;
-        iterator iter1(3,&*v.begin());
-        iterator iter2(3,&*v.end());
+        typedef Expansion<Float>::Iterator Iterator;
+        Iterator iter1(3,&*v.begin());
+        Iterator iter2(3,&*v.end());
         std::sort(iter1,iter2);
 
         for(uint i=0; i!=v.size()/3; ++i) {
@@ -219,7 +219,7 @@ void TestPolynomial::test_indexing()
     ARIADNE_TEST_PRINT(p);
     ARIADNE_TEST_EQUAL(p.number_of_nonzeros(),4);
     p.expansion().graded_sort();
-    Polynomial<Float>::const_iterator iter=p.begin();
+    Polynomial<Float>::ConstIterator iter=p.begin();
     ARIADNE_TEST_EQUAL(iter->key(),MultiIndex({0,0,0}));
     ARIADNE_TEST_EQUAL(iter->data(),7.0);
     ++iter;

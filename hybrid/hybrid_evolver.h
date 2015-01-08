@@ -542,7 +542,7 @@ enum class CrossingKind {
     GRAZING //!< The time at which the guard function reaches a maximum along flow lines is a smooth function \f$\mu(x_0)\f$ of the initial state \f$x_0\f$.
         //! Implies by concavity along flow lines, which is equivalent to \f$L_{f}^{2} g < 0\f$ within the reached set.
 };
-std::ostream& operator<<(std::ostream& os, const CrossingKind& crk);
+OutputStream& operator<<(OutputStream& os, const CrossingKind& crk);
 
 //! \brief A data type used to store information about the way flow lines cross a guard \f$g(x)=0\f$.
 //! \relates HybridEvolverInterface
@@ -566,7 +566,7 @@ struct CrossingData
     //! i.e. \f$L_{f}g(\phi(x,\mu(x))) = 0\f$.
     ValidatedScalarFunctionModel critical_time;
 };
-std::ostream& operator<<(std::ostream& os, const CrossingData& crk);
+OutputStream& operator<<(OutputStream& os, const CrossingData& crk);
 
 //! \brief The kind of step taken in the evolution. Determines how the evolution time is specified.
 //! \details Assumes that the starting set and time is given as a subset of \f$\{ \xi(s); \tau(s) \mid s\in D\}\f$
@@ -592,7 +592,7 @@ enum class StepKind {
     CONSTANT_FINISHING_TIME, //!< The step is taken up to the specified evolution time \f$t_{\max}\f$. The actual step length depends on the parameterisation.
       //! After the step, we have \f$\xi'(s) = \phi(\xi(s),t_{\max}-\tau(s))\f$ and \f$\tau'(s)=t_{\max}\f$.
 };
-std::ostream& operator<<(std::ostream& os, const StepKind& crk);
+OutputStream& operator<<(OutputStream& os, const StepKind& crk);
 
 //! \brief The way in which the step interacts with the final evolution time.
 //! \details Used to control whether final time constraints need to be added,
@@ -607,7 +607,7 @@ enum class FinishingKind {
     STRADDLE_FINAL_TIME, //!< At the end of the step, some points may have passed the final time, and some may not reached it.
         //!< Usable as a default value.
 };
-std::ostream& operator<<(std::ostream& os, const FinishingKind& crk);
+OutputStream& operator<<(OutputStream& os, const FinishingKind& crk);
 
 //! \brief A data type used to store information about the kind of time step taken during hybrid evolution.
 //! \relates HybridEvolverInterface
@@ -726,7 +726,7 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
 
   public:
 
-    virtual std::ostream& write(std::ostream& os) const;
+    virtual OutputStream& write(OutputStream& os) const;
 };
 
 

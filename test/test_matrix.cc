@@ -106,8 +106,8 @@ TestMatrix::test_misc()
     Matrix<ApproximateFloat> A3({{-1.0,3.0,1.0}, {-1.0,1.0,2.0}, {2.0,1.0,1.0}});
     ARIADNE_TEST_PRINT(A3);
 
-    for(size_t i=0; i!=A2.row_size(); ++i) {
-        for(size_t j=0; j!=A2.column_size(); ++j) {
+    for(SizeType i=0; i!=A2.row_size(); ++i) {
+        for(SizeType j=0; j!=A2.column_size(); ++j) {
             ARIADNE_TEST_EQUAL(A2[i][j],A2.get(i,j));
             ARIADNE_TEST_EQUALS(A2[i][j],Aptr[i*A2.column_size()+j]);
         }

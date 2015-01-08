@@ -28,8 +28,6 @@
 #include <vector>
 #include <map>
 #include <algorithm>
-#include <boost/iterator.hpp>
-#include <boost/iterator_adaptors.hpp>
 
 #include "algebra/vector.h"
 #include "algebra/multi_index.h"
@@ -41,14 +39,14 @@ namespace Ariadne {
 
 template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector<Y>& x)
 {
-    typedef typename Expansion<X>::const_iterator const_iterator;
+    typedef typename Expansion<X>::ConstIterator ConstIterator;
     const uint n=e.argument_size();
     const Y z=x.zero_element(); // The zero element of the ring Y
     if(e.number_of_nonzeros()==0) { return z; }
 
     Array< Y > r(e.argument_size(),z); // An Array of "registers" containing working p(x[0],...,x[k])
-    const_iterator iter=e.begin();
-    const_iterator end=e.end();
+    ConstIterator iter=e.begin();
+    ConstIterator end=e.end();
     uint k=n;   // The current working register
     const uchar* na=iter->key().begin(); // The values of the next multi-index
     uint j=k;   // The lowest register containing a non-zero value
@@ -117,7 +115,7 @@ Y power_evaluate(const Expansion<X>& e, const Vector<Y>& y)
 
     Y r=zero;
     Y t=zero;
-    for(typename Expansion<X>::const_iterator iter=e.begin();
+    for(typename Expansion<X>::ConstIterator iter=e.begin();
         iter!=e.end(); ++iter)
     {
         const MultiIndex& j=iter->key();

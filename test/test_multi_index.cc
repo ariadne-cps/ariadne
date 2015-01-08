@@ -103,7 +103,7 @@ class TestMultiIndex
         while(a.degree()<=5) {
             MultiIndex b=a; ++a; ++n;
             ARIADNE_TEST_BINARY_PREDICATE(graded_less,b,a);
-            MultiIndex::index_type d=0; for(MultiIndex::size_type i=0; i!=a.size(); ++i) { d+=a[i]; }
+            MultiIndex::IndexType d=0; for(MultiIndex::SizeType i=0; i!=a.size(); ++i) { d+=a[i]; }
             ARIADNE_TEST_EQUAL(a.degree(),d);
         }
         ARIADNE_ASSERT_EQUAL(n,126);

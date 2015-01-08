@@ -92,7 +92,7 @@ jacobian2_range(const Vector<ValidatedTaylorModel>& f)
     uint has=fas-rs;
     Matrix<ValidatedNumber> J(rs,rs);
     for(uint i=0; i!=rs; ++i) {
-        for(ValidatedTaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+        for(ValidatedTaylorModel::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             for(uint k=0; k!=rs; ++k) {
                 const uint c=iter->key()[has+k];
                 if(c>0) {
@@ -201,7 +201,7 @@ template<class X1, class X2>
 bool operator<(const Vector<X1>& v1, const Vector<X2>& v2)
 {
     if(v1.size()!=v2.size()) { return v1.size()<v2.size(); }
-    for(size_t i=0; i!=v1.size(); ++i) {
+    for(SizeType i=0; i!=v1.size(); ++i) {
         if(decide(v1[i]<v2[i])) { return true; }
         else if(decide(v1[i]>v2[i])) { return false; }
     }
@@ -243,7 +243,7 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
         try {
             Vector<ValidatedNumber> y=this->zero(f,bx);
             bool is_new=true;
-            for(Set<Vector<ValidatedNumber> >::const_iterator iter=r.begin(); iter!=r.end(); ++iter) {
+            for(Set<Vector<ValidatedNumber> >::ConstIterator iter=r.begin(); iter!=r.end(); ++iter) {
                 if(consistent(y,*iter)) {
                     is_new=false;
                     break;
@@ -725,7 +725,7 @@ IntervalNewtonSolver::implicit(const ValidatedScalarFunction& f,
 */
 
 
-void IntervalNewtonSolver::write(std::ostream& os) const
+void IntervalNewtonSolver::write(OutputStream& os) const
 {
     os << "IntervalNewtonSolver"
        << "( maximum_error=" << this->maximum_error()
@@ -733,7 +733,7 @@ void IntervalNewtonSolver::write(std::ostream& os) const
        << " )";
 }
 
-void KrawczykSolver::write(std::ostream& os) const
+void KrawczykSolver::write(OutputStream& os) const
 {
     os << "KrawczykSolver"
        << "( maximum_error=" << this->maximum_error()
@@ -741,7 +741,7 @@ void KrawczykSolver::write(std::ostream& os) const
        << " )";
 }
 
-void FactoredKrawczykSolver::write(std::ostream& os) const
+void FactoredKrawczykSolver::write(OutputStream& os) const
 {
     os << "FactoredKrawczykSolver"
        << "( maximum_error=" << this->maximum_error()

@@ -27,7 +27,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <string>
-using std::string;
+using StringType;
 
 #include <boost/timer.hpp>
 #include <boost/progress.hpp>

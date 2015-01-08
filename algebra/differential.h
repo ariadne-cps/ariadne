@@ -1148,21 +1148,24 @@ compose(const Vector< Differential<X> >& x,
     return r;
 }
 
+
 template<class X>
 Vector< Differential<X> >
 lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg)
 {
     Vector< Differential<X> > r(df.result_size(),df.argument_size(),df.degree()-1);
     Differential<X> t(df.argument_size(), df.degree()-1);
+    MultiIndex a; X c;
     for(Nat i=0; i!=df.result_size(); ++i) {
         Expansion<X> const& dfi_expansion = df[i].expansion();
         Expansion<X>& t_expansion = t.expansion();
         for(Nat j=0; j!=df.argument_size(); ++j) {
             for(typename Expansion<X>::ConstIterator iter=dfi_expansion.begin(); iter!=dfi_expansion.end(); ++iter) {
                 if(iter->key()[j]!=0) {
-                    t_expansion.append(iter->key(),iter->data());
-                    t_expansion.back().data()*=t_expansion.back().key()[j];
-                    t_expansion.back().key()[j]-=1;
+                    a=iter->key();
+                    c=iter->data()*Nat(a[j]);
+                    a[j]-=1;
+                    t_expansion.append(a,c);
                 }
             }
             r[i]+=t*dg[j];

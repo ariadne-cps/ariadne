@@ -358,7 +358,7 @@ C1TaylorFunction::C1TaylorFunction(Nat as)
         ind[i]=0;
     }
     _expansion.append(ind,0);
-    _expansion.sort(ReverseLexicographicKeyLess());
+    _expansion.reverse_lexicographic_sort();
 }
 
 C1TaylorFunction C1TaylorFunction::constant(Nat as, Float c) {

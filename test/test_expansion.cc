@@ -114,7 +114,7 @@ Void TestExpansion::test_concept()
     //e.insert(a,x);
     e.prepend(a,x);
     e.append(a,x);
-    e.append(a,a,x);
+    e.append_sum(a,a,x);
     e.clear();
 
     e.graded_sort();

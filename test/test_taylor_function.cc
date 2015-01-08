@@ -41,12 +41,13 @@ using namespace std;
 using namespace Ariadne;
 
 Vector<ExactFloat> e(Nat n, Nat i) { return Vector<ExactFloat>::unit(n,i); }
-Expansion<RawFloat> v(Nat n, Nat j) { return Expansion<RawFloat>::variable(n,j); }
 Polynomial<Float> p(Nat n, Nat j) { return Polynomial<Float>::variable(n,j); }
 ScalarTaylorFunction t(ExactBox d, Nat j,Sweeper swp) { return ScalarTaylorFunction::variable(d,j,swp); }
 
-namespace Ariadne {
-std::pair<Float, Vector<ExactInterval> > flow_bounds(EffectiveVectorFunction const&,Vector<ExactInterval> const&,Float const&);
+template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const Vector<Float> v) {
+    Vector< Expansion<X> > r(v.size(),Expansion<X>(e.argument_size()));
+    for(Nat i=0; i!=r.size(); ++i) { ARIADNE_ASSERT(v[i]==0.0 || v[i]==1.0); if(v[i]==1.0) { r[i]=e; } }
+    return r;
 }
 
 

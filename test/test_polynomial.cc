@@ -85,7 +85,6 @@ Void TestPolynomial::test_concept()
     p.reserve(2u);
     p.insert(a,x);
     p.append(a,x);
-    p.append(a,a,x);
 
     x=cp[a];
     p[a]=1.0;

@@ -60,18 +60,53 @@ FwdIter unique_key(FwdIter first, FwdIter last, Op op) {
 }
 
 
+
+template<class X> X Expansion<X>::_zero = static_cast<X>(0);
+
+template<class X> Expansion<X>::~Expansion() { }
+
 template<class X> Expansion<X>::Expansion() : Expansion(0u) { }
 
 template<class X> Expansion<X>::Expansion(SizeType as) : _argument_size(as) { }
 
-template<class X> Expansion<RawFloat>& Expansion<X>::raw() { return reinterpret_cast<Expansion<RawFloat>&>(*this); }
+template<class X> Expansion<X>::Expansion(SizeType as, DegreeType deg, InitializerList<X> lst)
+    : _argument_size(as)
+{
+    MultiIndex a(as); X x;
+    auto iter = lst.begin();
+    while(a.degree()<=deg) {
+        x=*iter;
+        if(x!=X(0)) { this->append(a,x); }
+        ++a;
+        ++iter;
+    }
+}
 
-template<class X> Expansion<RawFloat>const& Expansion<X>::raw() const { return reinterpret_cast<Expansion<RawFloat>const&>(*this); }
+
+template<class X> Expansion<X>::Expansion(SizeType as, InitializerList<PairType<InitializerList<Int>,X>> lst)
+    : _argument_size(as)
+{
+    MultiIndex a;
+    X x;
+    for(auto iter=lst.begin();
+        iter!=lst.end(); ++iter)
+    {
+        a=iter->first;
+        x=iter->second;
+        if(x!=X(0)) { this->append(a,x); }
+    }
+}
+
+template<class X> Expansion<X>::Expansion(InitializerList<PairType<InitializerList<Int>,X>> lst)
+    : Expansion(lst.size()==0?0u:lst.begin()->first.size(),lst)
+{ }
+
 
 template<class X> Void Expansion<X>::swap(Expansion<X>& other) {
     std::swap(this->_argument_size,other._argument_size);
     std::swap(this->_coefficients,other._coefficients);
 }
+
 
 template<class X> Bool Expansion<X>::operator==(const Expansion<X>& other) const {
     if(this->argument_size()!=other.argument_size()) { return false; }
@@ -96,8 +131,6 @@ template<class X> DegreeType Expansion<X>::degree() const {
     return deg;
 }
 
-template<class X> const std::vector<WordType>& Expansion<X>::coefficients() const { return this->_coefficients; }
-
 template<class X> Bool Expansion<X>::empty() const { return this->_coefficients.empty(); }
 template<class X> SizeType Expansion<X>::size() const { return this->_coefficients.size()/_element_size(); }
 template<class X> Void Expansion<X>::reserve(SizeType nnz) { this->_coefficients.reserve(nnz*_element_size()); }
@@ -111,7 +144,7 @@ template<class X> Void Expansion<X>::append(const MultiIndex& a, const RealType&
 template<class X> Void Expansion<X>::prepend(const MultiIndex& a, const RealType& c) {
     this->_prepend(a,c);
 }
-template<class X> Void Expansion<X>::append(const MultiIndex& a1, const MultiIndex& a2, const RealType& c) {
+template<class X> Void Expansion<X>::append_sum(const MultiIndex& a1, const MultiIndex& a2, const RealType& c) {
     this->_append(a1,a2,c);
 }
 
@@ -132,11 +165,6 @@ template<class X> typename Expansion<X>::ConstIterator Expansion<X>::find(const 
     ConstIterator iter=this->end(); while(iter!=this->begin()) { --iter; if(iter->key()==a) { return iter; } } return this->end();
 }
 
-template<class X> typename Expansion<X>::reference Expansion<X>::front() { return *(this->begin()); }
-template<class X> typename Expansion<X>::reference Expansion<X>::back() { return *(--this->end()); }
-template<class X> typename Expansion<X>::const_reference Expansion<X>::front() const { return *(this->begin()); }
-template<class X> typename Expansion<X>::const_reference Expansion<X>::back() const { return *(--this->end()); }
-
 template<class X> Void Expansion<X>::erase(Iterator iter) { iter->data()=static_cast<X>(0u); }
 template<class X> Void Expansion<X>::clear() { _coefficients.clear(); }
 
@@ -152,20 +180,16 @@ template<class X> Void Expansion<X>::combine_terms() {
 template<> Void Expansion<ExactFloat>::combine_terms() { ARIADNE_NOT_IMPLEMENTED; }
 template<> Void Expansion<ExactInterval>::combine_terms() { ARIADNE_NOT_IMPLEMENTED; }
 
-template<class X> template<class CMP> Void Expansion<X>::sort(const CMP& cmp) {
-    std::sort(this->begin(),this->end(),cmp);
-}
-
 template<class X> Void Expansion<X>::graded_sort() {
-    std::sort(this->begin(),this->end(),GradedKeyLess());
+    this->_sort(GradedKeyLess());
 }
 
 template<class X> Void Expansion<X>::lexicographic_sort() {
-    std::sort(this->begin(),this->end(),LexicographicKeyLess());
+    this->_sort(LexicographicKeyLess());
 }
 
 template<class X> Void Expansion<X>::reverse_lexicographic_sort() {
-    std::sort(this->begin(),this->end(),ReverseLexicographicKeyLess());
+    this->_sort(ReverseLexicographicKeyLess());
 }
 
 template<class X> Void Expansion<X>::check() const { }
@@ -184,110 +208,46 @@ template<class X> typename Expansion<X>::WordType* Expansion<X>::_begin_ptr() { 
 template<class X> typename Expansion<X>::WordType* Expansion<X>::_end_ptr() { return _coefficients.end().operator->(); }
 
 template<class X> typename Expansion<X>::Iterator Expansion<X>::_insert(Iterator p, const MultiIndex& a, const RealType& x) {
-        //std::cerr<<"_insert "<<*this<<" "<<p._ptr()<<" "<<a<<" "<<x<<std::endl;
-        if(_coefficients.size()+_element_size()>_coefficients.capacity()) {
-            DifferenceType i=p-begin();
-            _coefficients.resize(_coefficients.size()+_element_size());
-            p=begin()+i;
-        } else {
-            _coefficients.resize(_coefficients.size()+_element_size());
-        }
-        return _allocated_insert(p,a,x);
+    //std::cerr<<"_insert "<<*this<<" "<<p._ptr()<<" "<<a<<" "<<x<<std::endl;
+    if(_coefficients.size()+_element_size()>_coefficients.capacity()) {
+        DifferenceType i=p-begin();
+        _coefficients.resize(_coefficients.size()+_element_size());
+        p=begin()+i;
+    } else {
+        _coefficients.resize(_coefficients.size()+_element_size());
+    }
+    return _allocated_insert(p,a,x);
 }
 
 template<class X> typename Expansion<X>::Iterator Expansion<X>::_allocated_insert(Iterator p, const MultiIndex& a, const RealType& x) {
-        //std::cerr<<"_allocated_insert "<<*this<<" "<<p<<" "<<p-begin()<<" "<<a<<" "<<x<<std::endl;
-        Iterator curr=this->end()-1; Iterator prev=curr;
-        while(curr!=p) { --prev; *curr=*prev; curr=prev; }
-        curr->key()=a; curr->data()=x; return p; }
+    //std::cerr<<"_allocated_insert "<<*this<<" "<<p<<" "<<p-begin()<<" "<<a<<" "<<x<<std::endl;
+    Iterator curr=this->end()-1; Iterator prev=curr;
+    while(curr!=p) { --prev; *curr=*prev; curr=prev; }
+    curr->key()=a; curr->data()=x; return p;
+}
 
 template<class X> Void Expansion<X>::_prepend(const MultiIndex& a, const RealType& x) {
-        //std::cerr<<"_prepend "<<*this<<" "<<a<<" "<<x<<std::endl;
-        _coefficients.resize(_coefficients.size()+_element_size());
-        _allocated_insert(begin(),a,x); }
+    //std::cerr<<"_prepend "<<*this<<" "<<a<<" "<<x<<std::endl;
+    _coefficients.resize(_coefficients.size()+_element_size());
+    _allocated_insert(begin(),a,x);
+}
+
 template<class X> Void Expansion<X>::_append(const MultiIndex& a, const RealType& x) {
-        //std::cerr<<"_append "<<*this<<" "<<a<<" "<<x<<"... "<<std::flush;
-        _coefficients.resize(_coefficients.size()+_element_size());
-        WordType* vp=_end_ptr()-_element_size(); const WordType* ap=a.word_begin();
-        for(SizeType j=0; j!=_index_size(); ++j) { vp[j]=ap[j]; }
-        DataType* xp=reinterpret_cast<DataType*>(this->_end_ptr())-1; *xp=x;
-        //std::cerr<<"done"<<std::endl;
-    }
+    //std::cerr<<"_append "<<*this<<" "<<a<<" "<<x<<"... "<<std::flush;
+    _coefficients.resize(_coefficients.size()+_element_size());
+    WordType* vp=_end_ptr()-_element_size(); const WordType* ap=a.word_begin();
+    for(SizeType j=0; j!=_index_size(); ++j) { vp[j]=ap[j]; }
+    DataType* xp=reinterpret_cast<DataType*>(this->_end_ptr())-1; *xp=x;
+    //std::cerr<<"done"<<std::endl;
+}
+
 template<class X> Void Expansion<X>::_append(const MultiIndex&  a1, const MultiIndex&  a2, const RealType& x) {
-        //std::cerr<<"_append "<<*this<<" "<<a1<<" "<<a2<<" "<<x<<std::endl;
-        _coefficients.resize(_coefficients.size()+_element_size());
-        WordType* vp=_end_ptr()-_element_size();
-        const WordType* ap1=a1.word_begin(); const WordType* ap2=a2.word_begin();
-        for(SizeType j=0; j!=_index_size(); ++j) { vp[j]=ap1[j]+ap2[j]; }
-        DataType* xp=reinterpret_cast<DataType*>(this->_end_ptr())-1; *xp=x; }
-
-template<class X> X Expansion<X>::_zero = static_cast<X>(0);
-
-template<class X>
-Expansion<X>::Expansion(SizeType as, DegreeType deg, InitializerList<X> lst)
-    : _argument_size(as)
-{
-    MultiIndex a(as); X x;
-    auto iter = lst.begin();
-    while(a.degree()<=deg) {
-        x=*iter;
-        if(x!=X(0)) { this->append(a,x); }
-        ++a;
-        ++iter;
-    }
-}
-
-template<class X>
-Expansion<X>::Expansion(SizeType as, InitializerList< PairType<InitializerList<Int>,X> > lst)
-    : _argument_size(as)
-{
-    MultiIndex a;
-    X x;
-    for(auto iter=lst.begin();
-        iter!=lst.end(); ++iter)
-    {
-        a=MultiIndex(iter->first);
-        x=iter->second;
-        if(x!=X(0)) { this->append(a,x); }
-    }
-}
-
-template<class X>
-Expansion<X>::Expansion(InitializerList< PairType<InitializerList<Int>,X> > lst)
-    : _argument_size(lst.size()==0?0u:lst.begin()->first.size())
-{
-    MultiIndex a;
-    X x;
-    for(auto iter=lst.begin();
-        iter!=lst.end(); ++iter)
-    {
-        a=iter->first;
-        x=iter->second;
-        if(x!=X(0)) { this->append(a,x); }
-    }
-}
-
-template<class X> template<class XX>
-Expansion<X>::Expansion(const std::map<MultiIndex,XX>& m)
-{
-    ARIADNE_ASSERT(!m.empty());
-    this->_argument_size=m.begin()->first.size();
-    for(auto iter=m.begin(); iter!=m.end(); ++iter) {
-        this->append(iter->first,X(iter->second));
-    }
-}
-
-
-
-template<class X> Expansion<X>& Expansion<X>::operator=(const X& c) {
-    this->clear();
-    this->append(MultiIndex::zero(this->argument_size()),c);
-    return *this;
-}
-
-template<class X> Expansion<X> Expansion<X>::variable(SizeType n, SizeType i) {
-    Expansion<X> p(n); p.append(MultiIndex::unit(n,i),X(1));
-    return p;
+    //std::cerr<<"_append "<<*this<<" "<<a1<<" "<<a2<<" "<<x<<std::endl;
+    _coefficients.resize(_coefficients.size()+_element_size());
+    WordType* vp=_end_ptr()-_element_size();
+    const WordType* ap1=a1.word_begin(); const WordType* ap2=a2.word_begin();
+    for(SizeType j=0; j!=_index_size(); ++j) { vp[j]=ap1[j]+ap2[j]; }
+    DataType* xp=reinterpret_cast<DataType*>(this->_end_ptr())-1; *xp=x;
 }
 
 
@@ -313,13 +273,9 @@ Expansion<X> Expansion<X>::_embed(SizeType before_size, SizeType after_size) con
     return r;
 }
 
+template<class X> Expansion<RawFloat>& Expansion<X>::raw() { return reinterpret_cast<Expansion<RawFloat>&>(*this); }
 
-template<class T> Expansion<MidpointType<T>> midpoint(const Expansion<T>& pse) {
-    Expansion<MidpointType<T>> r(pse.argument_size());
-    for(typename Expansion<T>::ConstIterator iter=pse.begin(); iter!=pse.end(); ++iter) {
-        r.append(iter->key(),midpoint(iter->data())); }
-    return r;
-}
+template<class X> Expansion<RawFloat>const& Expansion<X>::raw() const { return reinterpret_cast<Expansion<RawFloat>const&>(*this); }
 
 
 template<class X>
@@ -382,15 +338,6 @@ OutputStream& Expansion<X>::write(OutputStream& os) const {
 
 
 
-template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const Vector<Float> v) {
-    Vector< Expansion<X> > r(v.size(),Expansion<X>(e.argument_size()));
-    for(Nat i=0; i!=r.size(); ++i) {
-        ARIADNE_ASSERT(v[i]==0.0 || v[i]==1.0);
-        if(v[i]==1.0) { r[i]=e; }
-    }
-    return r;
-}
-
 
 template<class T>
 inline Vector< Expansion<MidpointType<T>> > midpoint(const Vector< Expansion<T> >& pse) {
@@ -403,19 +350,57 @@ inline Vector< Expansion<MidpointType<T>> > midpoint(const Vector< Expansion<T> 
 
 
 
+template<class X> template<class CMP> Void Expansion<X>::_sort(const CMP& cmp) {
+    std::sort(this->begin(),this->end(),cmp);
+}
+
+template<class X> template<class CMP> typename Expansion<X>::CoefficientType& Expansion<X>::_at(const MultiIndex& a,const CMP& cmp) {
+    Iterator p=std::lower_bound(this->begin(),this->end(),a,cmp);
+    if(p!=this->end() && p->key()==a) { return p->data(); }
+    else { p=this->_insert(p,a,X(0)); return p->data(); }
+}
+
+template<class X> template<class CMP> typename Expansion<X>::Iterator Expansion<X>::_insert(const MultiIndex& a, const CoefficientType& x,const CMP& cmp) {
+    //std::cerr<<"_insert "<<*this<<" "<<a<<" "<<x<<std::endl;
+    _coefficients.resize(_coefficients.size()+_element_size());
+    Iterator p=std::lower_bound(this->begin(),this->end()-1,a,cmp);
+    return _allocated_insert(p,a,x);
+}
+
+
+
 template<class X, class CMP> SortedExpansion<X,CMP>::SortedExpansion(Expansion<X> e)
     : Expansion<X>(std::move(e))
 {
     this->sort();
 }
 
-template<class X, class CMP> Void SortedExpansion<X,CMP>::insert(const MultiIndex& a, const CoefficientType& c) { this->Expansion<X>::insert(a,c,CMP()); }
-template<class X, class CMP> Void SortedExpansion<X,CMP>::set(const MultiIndex& a, const CoefficientType& c) { this->Expansion<X>::set(a,c,CMP()); }
-template<class X, class CMP> typename SortedExpansion<X,CMP>::CoefficientType& SortedExpansion<X,CMP>::at(const MultiIndex& a) { return this->Expansion<X>::at(a,CMP()); }
-template<class X, class CMP> typename SortedExpansion<X,CMP>::CoefficientType const& SortedExpansion<X,CMP>::get(const MultiIndex& a) const { return this->Expansion<X>::get(a,CMP()); }
-template<class X, class CMP> typename Expansion<X>::Iterator SortedExpansion<X,CMP>::find(const MultiIndex& a) { return this->Expansion<X>::find(a,CMP()); }
-template<class X, class CMP> typename Expansion<X>::ConstIterator SortedExpansion<X,CMP>::find(const MultiIndex& a) const { return this->Expansion<X>::find(a,CMP()); }
-template<class X, class CMP> Void SortedExpansion<X,CMP>::sort() { this->Expansion<X>::sort(CMP()); }
+template<class X, class CMP> Void SortedExpansion<X,CMP>::insert(const MultiIndex& a, const CoefficientType& c) {
+    this->Expansion<X>::_insert(a,c,CMP());
+}
+
+template<class X, class CMP> typename SortedExpansion<X,CMP>::CoefficientType& SortedExpansion<X,CMP>::at(const MultiIndex& a) {
+    return this->Expansion<X>::_at(a,CMP());
+}
+
+template<class X, class CMP> Void SortedExpansion<X,CMP>::set(const MultiIndex& a, const CoefficientType& c) {
+    this->at(a)=c;
+}
+
+template<class X, class CMP> typename SortedExpansion<X,CMP>::CoefficientType const& SortedExpansion<X,CMP>::get(const MultiIndex& a) const {
+    return const_cast<SortedExpansion<X,CMP>*>(this)->at(a);
+}
+
+template<class X, class CMP> typename Expansion<X>::Iterator SortedExpansion<X,CMP>::find(const MultiIndex& a) {
+    Iterator iter=std::lower_bound(this->begin(),this->end(),a,CMP()); if(iter!=this->end() && iter->key()!=a) { iter=this->end(); } return iter;
+}
+
+template<class X, class CMP> typename Expansion<X>::ConstIterator SortedExpansion<X,CMP>::find(const MultiIndex& a) const {
+    Iterator iter=std::lower_bound(this->begin(),this->end(),a,CMP()); if(iter!=this->end() && iter->key()!=a) { iter=this->end(); } return iter;
+}
+
+template<class X, class CMP> Void SortedExpansion<X,CMP>::sort() {
+    this->Expansion<X>::_sort(CMP()); }
 
 
 

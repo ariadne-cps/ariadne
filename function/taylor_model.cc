@@ -999,7 +999,7 @@ Void _mul2(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const Validat
         t.error().raw()=te/2;
         set_rounding_to_nearest();
         for(ValidatedTaylorModel::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-            t.expansion().raw().append(xiter->key(),yiter->key(),xiter->data().raw()*yiter->data().raw());
+            t.expansion().raw().append_sum(xiter->key(),yiter->key(),xiter->data().raw()*yiter->data().raw());
         }
         _add2(s,r,t);
         r.expansion().swap(s.expansion());
@@ -1048,7 +1048,7 @@ inline Void _mul3(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const 
             const Float& yv=yiter->data().raw();
             te+=(pxv*yv)+(nxv*yv);
             set_rounding_to_nearest();
-            t.expansion().raw().append(xiter->key(),yiter->key(),xiter->data().raw()*yiter->data().raw());
+            t.expansion().raw().append_sum(xiter->key(),yiter->key(),xiter->data().raw()*yiter->data().raw());
         }
         t.error().raw()=te/2;
         r+=t;
@@ -3353,7 +3353,7 @@ Void ApproximateTaylorModel::ifma(const ApproximateTaylorModel& x, const Approxi
             ++riter;
         }
         while(yiter!=y._expansion.end()) {
-            t._expansion.append(xiter->key(),yiter->key(),xiter->data()*yiter->data());
+            t._expansion.append_sum(xiter->key(),yiter->key(),xiter->data()*yiter->data());
             ++yiter;
 
         }

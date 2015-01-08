@@ -90,8 +90,8 @@ class TaylorModel<ValidatedNumber>
 {
     friend class ScalarTaylorFunction;
     friend class VectorTaylorFunction;
-    typedef Expansion<CoefficientType> ExpansionType;
     typedef ReverseLexicographicKeyLess ComparisonType;
+    typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
   public:
     typedef ValidatedNumber NumericType;
   private:
@@ -242,15 +242,15 @@ class TaylorModel<ValidatedNumber>
     template<class E, EnableIf<IsSame<E,double>> =dummy> Void set_error(const E& ne) { set_error(ErrorType(ne)); }
     //! \brief Set the constant term in the expansion.
     Void set_value(const CoefficientType& c) {
-        this->_expansion.set(MultiIndex::zero(this->argument_size()),c,ReverseLexicographicKeyLess()); }
+        this->_expansion.set(MultiIndex::zero(this->argument_size()),c); }
     //! \brief Set the coefficient of the term \f$df/dx_j\f$.
     Void set_gradient(Nat j, const CoefficientType& c) {
-        this->_expansion.set(MultiIndex::unit(this->argument_size(),j),c,ReverseLexicographicKeyLess()); }
+        this->_expansion.set(MultiIndex::unit(this->argument_size(),j),c); }
 
     //! \brief The coefficient of the term in $x^a$.
     const CoefficientType& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
     //! \brief A read/write reference to the coefficient of the term in $x^a$.
-    CoefficientType& operator[](const MultiIndex& a) { return this->_expansion.at(a,ReverseLexicographicKeyLess()); }
+    CoefficientType& operator[](const MultiIndex& a) { return this->_expansion.at(a); }
 
     //! \brief An Iterator to the first term in the expansion.
     Iterator begin() { return this->_expansion.begin(); }

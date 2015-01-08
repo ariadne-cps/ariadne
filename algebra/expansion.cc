@@ -40,6 +40,14 @@ namespace Ariadne {
     typedef typename Expansion<Float>::Iterator FloatExpansionIterator;
     template FloatExpansionIterator unique_key(FloatExpansionIterator,FloatExpansionIterator,std::plus<Float>);
 
+    template class SortedExpansion<Float,GradedKeyLess>;
+    template class SortedExpansion<ApproximateFloat,GradedKeyLess>;
+    template class SortedExpansion<ValidatedFloat,GradedKeyLess>;
+
+    template class SortedExpansion<Float,ReverseLexicographicKeyLess>;
+    template class SortedExpansion<ExactFloat,ReverseLexicographicKeyLess>;
+    template class SortedExpansion<ValidatedFloat,ReverseLexicographicKeyLess>;
+    template class SortedExpansion<ExactInterval,ReverseLexicographicKeyLess>;
 }
 
 #include "algebra/differential.h"

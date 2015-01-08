@@ -39,6 +39,7 @@ typedef unsigned int uint;
 namespace std {
 template<class T> class initializer_list;
 template<class T> class shared_ptr;
+template<class T1, class T2> class pair;
 template<class... Args> class tuple;
 template<class T1, class T2> struct pair;
 }
@@ -70,6 +71,7 @@ using DegreeType = std::uint8_t;
 
 template<class T> using SharedPointer = std::shared_ptr<T>;
 template<class T> using InitializerList = std::initializer_list<T>;
+template<class T1, class T2> using PairType = std::pair<T1,T2>;
 
 template<class T1,class T2> class Pair;
 template<class... Args> class Tuple;

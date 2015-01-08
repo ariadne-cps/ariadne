@@ -128,9 +128,9 @@ class Polynomial
     //! \brief The value of the polynomial at zero.
     const X& value() const { return this->_expansion[MultiIndex::zero(this->argument_size())]; }
     //! \brief A reference to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.
-    X& operator[](const MultiIndex& a) { return this->_expansion.at(a,ReverseLexicographicKeyLess()); }
+    X& operator[](const MultiIndex& a) { return this->_expansion.at(a); }
     //! \brief A constant referent to the coefficient of the term in \f$x^{a_1}\cdots x^{a_n}\f$.
-    const X& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
+    const X& operator[](const MultiIndex& a) const { return this->_expansion.get(a); }
     //! \brief A constant reference to the raw data expansion.
     const Expansion<X>& expansion() const { return this->_expansion; }
     //! \brief A reference to the raw data expansion.
@@ -163,7 +163,7 @@ class Polynomial
     //! \brief Append the term \f$c x^{a_1}\f$ to the list of terms.
     Void append(const MultiIndex& a, const X& c) { this->_expansion.append(a,c); }
     //! \brief Insert the term \f$c x^{a_1}\f$ into a sorted list of terms.
-    Void insert(const MultiIndex& a, const X& c) { this->_expansion.insert(a,c,ReverseLexicographicKeyLess()); }
+    Void insert(const MultiIndex& a, const X& c) { this->_expansion.insert(a,c); }
     //! \brief Reserve space for a total of \a n terms.
     Void reserve(SizeType n) { this->_expansion.reserve(n); }
     //! \brief Remove the term pointed to by \a iter. May be expensive if the term is near the beginning of the list of terms.
@@ -187,7 +187,7 @@ class Polynomial
 
     Void check() const;
   private:
-    Expansion<X> _expansion;
+    SortedExpansion<X,ReverseLexicographicKeyLess> _expansion;
 };
 
 template<class X1, class X2> struct Arithmetic< X1,Polynomial<X2> > {

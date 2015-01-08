@@ -112,30 +112,32 @@ class Differential
     static const X _one;
   public:
     //! \brief The type of used to represent numbers in the coefficient.
+    typedef SortedExpansion<X,GradedKeyLess> ExpansionType;
+    //! \brief The type of used to represent numbers in the coefficient.
     typedef typename X::NumericType NumericType;
     //! \brief The type of used to represent the coefficients.
     typedef X ValueType;
     //! \brief The type of an Iterator through (index,coefficient) pairs..
-    typedef typename Expansion<X>::Iterator Iterator;
+    typedef typename ExpansionType::Iterator Iterator;
     //! \brief The type of a constant Iterator through (index,coefficient) pairs..
-    typedef typename Expansion<X>::ConstIterator ConstIterator;
+    typedef typename ExpansionType::ConstIterator ConstIterator;
 
     //! \brief Default constructor constructs a differential with degree zero in no variables.
     explicit Differential() : _expansion(0), _degree(0) { }
     //! \brief Constructs a differential with degree \a deg in \a as variables.
-    explicit Differential(SizeType as, Nat deg) : _expansion(as),_degree(deg) { }
+    explicit Differential(SizeType as, DegreeType deg) : _expansion(as),_degree(deg) { }
     //! \brief Construct a differential from a mapping giving a coefficient for a finite number of multi-indices.
-    explicit Differential(const std::map<MultiIndex,X>& map, Nat deg) : _expansion(map), _degree(deg) { this->cleanup(); }
+    explicit Differential(const Map<MultiIndex,X>& map, DegreeType deg) : _expansion(map), _degree(deg) { this->cleanup(); }
     //! \brief Construct a differential of degree \a deg from the power-series expansion \a e.
     //! Terms in \a e of degree higher than \a deg are truncated
-    explicit Differential(const Expansion<X>& e, Nat deg) : _expansion(e.argument_size()),_degree(deg) {
+    explicit Differential(const Expansion<X>& e, DegreeType deg) : _expansion(e.argument_size()),_degree(deg) {
         for(typename Expansion<X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
             if(iter->key().degree()<=deg) { this->_expansion.append(iter->key(),iter->data()); } } this->cleanup(); }
     //! \brief Construct a differential of degree \a deg from an initializer list list of (index,coefficient) pairs.
-    explicit Differential(SizeType as, DegreeType deg, InitializerList< std::pair<InitializerList<Int>,X> > lst);
+    explicit Differential(SizeType as, DegreeType deg, InitializerList< PairType<InitializerList<Int>,X> > lst);
 
     //! \brief Construct a dense differential of degree \a deg in \a as variables from a list of coefficients beginning at \a ptr.
-    template<class XX> Differential(SizeType as, Nat deg, const XX* ptr) : _expansion(as), _degree(deg) {
+    template<class XX> Differential(SizeType as, DegreeType deg, const XX* ptr) : _expansion(as), _degree(deg) {
         for(MultiIndex j(as); j.degree()<=deg; ++j) { XX const& x=*ptr; if(!decide(x==0)) { _expansion.append(j,*ptr); } ++ptr; } this->cleanup(); }
     //! \brief Conversion constructor from a different numerical type.
     template<class XX> Differential(const Differential<XX>& x)
@@ -217,7 +219,7 @@ class Differential
     //! \brief The coefficient of \f$x^a\f$ i.e. \f$\prod x_j^{a_j}\f$.
     X& operator[](const MultiIndex& a) {
         ARIADNE_ASSERT_MSG(a.number_of_variables()==this->argument_size()," d="<<*this<<", a="<<a);
-        return this->_expansion._at(a,GradedKeyLess()); }
+        return this->_expansion.at(a); }
     //! \brief A reference to the coefficient of \f$x^a\f$.
     const X& operator[](const MultiIndex& a) const {
         ARIADNE_ASSERT_MSG(a.number_of_variables()==this->argument_size()," d="<<*this<<", a="<<a);
@@ -310,7 +312,7 @@ class Differential
     friend Differential<X> antiderivative<>(const Differential<X>& x, Nat i);
 #endif
   private:
-    Expansion<X> _expansion;
+    ExpansionType _expansion;
     Nat _degree;
   private:
     //BOOST_CONCEPT_ASSERT((DifferentialConcept< Differential<X> >));
@@ -331,8 +333,8 @@ const X Differential<X>::_one=X(1);
 
 template<class X>
 Differential<X>::Differential(SizeType as, DegreeType deg,
-                              InitializerList< std::pair<InitializerList<Int>,X> > lst)
-    : _expansion(as,lst), _degree(deg)
+                              InitializerList< PairType<InitializerList<Int>,X> > lst)
+    : _expansion(Expansion<X>(as,lst)), _degree(deg)
 {
     this->cleanup();
 }

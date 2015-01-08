@@ -266,10 +266,12 @@ inline OutputStream& operator<<(OutputStream& os, const ExpansionIterator<X,Ref,
 template<class X>
 class Expansion
 {
+    static const Ariadne::SizeType DEFAULT_CAPACITY=16;
   public:
     static X _zero;
   public:
     typedef X RealType;
+    typedef X CoefficientType;
     typedef unsigned short int SmoothnessType;
     typedef MultiIndex::SizeType SizeType;
     typedef MultiIndex::ByteType ByteType;
@@ -289,14 +291,14 @@ class Expansion
     typedef ExpansionValue<X>const* const_pointer;
     typedef ExpansionIterator<X,ExpansionValue<X>&, ExpansionValue<X>* > iterator;
     typedef ExpansionIterator<X,ExpansionValue<X>const&, ExpansionValue<X>const* > const_iterator;
-
+  public:
     typedef ExpansionValue<X> ValueType;
     typedef ExpansionValue<X>& Reference;
     typedef ExpansionValue<X>const& ConstReference;
     typedef ExpansionIterator<X,ExpansionValue<X>&, ExpansionValue<X>* > Iterator;
     typedef ExpansionIterator<X,ExpansionValue<X>const&, ExpansionValue<X>const* > ConstIterator;
   public:
-    explicit Expansion();
+    explicit Expansion(); // DEPRECTATED
     explicit Expansion(SizeType as);
     Expansion(SizeType as, DegreeType deg, std::initializer_list<X> lst);
     Expansion(std::initializer_list< std::pair<std::initializer_list<Int>,X> > lst);
@@ -329,12 +331,6 @@ class Expansion
     Void reserve(SizeType nnz);
     Void resize(SizeType nnz);
 
-    template<class CMP> Void insert(const MultiIndex& a, const RealType& c, const CMP& cmp);
-    template<class CMP> Void set(const MultiIndex& a, const RealType& c, const CMP& cmp);
-    template<class CMP> RealType& at(const MultiIndex& a, const CMP& cmp);
-    template<class CMP> Iterator find(const MultiIndex& a, const CMP& cmp);
-    template<class CMP> ConstIterator find(const MultiIndex& a, const CMP& cmp) const;
-
     Void append(const MultiIndex& a, const RealType& c);
     Void prepend(const MultiIndex& a, const RealType& c);
     Void append(const MultiIndex& a1, const MultiIndex& a2, const RealType& c);
@@ -359,7 +355,14 @@ class Expansion
 
     Void remove_zeros();
     Void combine_terms();
-
+  protected:
+    template<class CMP> Void insert(const MultiIndex& a, const RealType& c, const CMP& cmp);
+    template<class CMP> Void set(const MultiIndex& a, const RealType& c, const CMP& cmp);
+    template<class CMP> RealType& at(const MultiIndex& a, const CMP& cmp);
+    template<class CMP> RealType const& get(const MultiIndex& a, const CMP& cmp) const;
+    template<class CMP> Iterator find(const MultiIndex& a, const CMP& cmp);
+    template<class CMP> ConstIterator find(const MultiIndex& a, const CMP& cmp) const;
+  public:
     template<class CMP> Void sort(const CMP& cmp);
 
     Void graded_sort();
@@ -387,6 +390,8 @@ class Expansion
     Expansion<X> _embed(unsigned int before_size, unsigned int after_size) const;
   public:
     OutputStream& write(OutputStream& os, const Array<StringType>& variables) const;
+    OutputStream& write_polynomial(OutputStream& os) const;
+    OutputStream& write_map(OutputStream& os) const;
     OutputStream& write(OutputStream& os) const;
   private:
     SizeType _argument_size;
@@ -397,15 +402,20 @@ template<class X, class CMP> class SortedExpansion
     : public Expansion<X>
 {
   public:
-    typedef typename Expansion<X>::RealType RealType;
+    typedef X CoefficientType;
+    typedef typename Expansion<X>::Iterator Iterator;
+    typedef typename Expansion<X>::ConstIterator ConstIterator;
+  public:
     using Expansion<X>::Expansion;
+    SortedExpansion(Expansion<X> e);
+    Void sort();
 
-    Void insert(const MultiIndex& a, const RealType& c) { this->insert(a,c,CMP()); }
-    Void set(const MultiIndex& a, const RealType& c) { this->set(a,c,CMP()); }
-    RealType& at(const MultiIndex& a) { return this->at(a,CMP()); }
-    typename Expansion<X>::Iterator find(const MultiIndex& a) { return this->find(a,CMP()); }
-    typename Expansion<X>::ConstIterator find(const MultiIndex& a) const { return this->find(a,CMP()); }
-    Void sort() { this->sort(CMP()); }
+    Void insert(const MultiIndex& a, const CoefficientType& c);
+    Void set(const MultiIndex& a, const CoefficientType& c);
+    CoefficientType& at(const MultiIndex& a);
+    CoefficientType const& get(const MultiIndex& a) const;
+    Iterator find(const MultiIndex& a);
+    ConstIterator find(const MultiIndex& a) const;
 };
 
 // Disable construction of Expansion<Rational> since above implementation only
@@ -500,6 +510,9 @@ template<class X> template<class CMP> Void Expansion<X>::set(const MultiIndex& a
 }
 template<class X> template<class CMP> X& Expansion<X>::at(const MultiIndex& a, const CMP& cmp) {
     return this->_at(a,cmp);
+}
+template<class X> template<class CMP> X const& Expansion<X>::get(const MultiIndex& a, const CMP& cmp) const {
+    return const_cast<Expansion<X>*>(this)->_at(a,cmp);
 }
 template<class X> template<class CMP> typename Expansion<X>::Iterator Expansion<X>::find(const MultiIndex& a, const CMP& cmp) {
     Iterator iter=std::lower_bound(this->begin(),this->end(),a,cmp); if(iter!=this->end() && iter->key()!=a) { iter=this->end(); } return iter;

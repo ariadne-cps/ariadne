@@ -365,7 +365,7 @@ C1TaylorFunction C1TaylorFunction::constant(Nat as, Float c) {
     C1TaylorFunction result(as);
     MultiIndex ind=MultiIndex::zero(as);
     //result._expansion[ind]=Float(c);
-    result._expansion.set(ind,c,ReverseLexicographicKeyLess());
+    result._expansion.append(ind,c);
     return result;
 }
 
@@ -373,7 +373,7 @@ C1TaylorFunction C1TaylorFunction::coordinate(Nat as, Nat i) {
     C1TaylorFunction result(as);
     MultiIndex ind=MultiIndex::unit(as,i);
     //result._expansion[ind]=1;
-    result._expansion.set(ind,1.0,ReverseLexicographicKeyLess());
+    result._expansion.append(ind,1.0);
     return result;
 }
 

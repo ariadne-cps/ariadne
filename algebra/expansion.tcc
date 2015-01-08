@@ -60,8 +60,7 @@ FwdIter unique_key(FwdIter first, FwdIter last, Op op) {
 }
 
 
-
-template<class X> Expansion<X>::Expansion() : _argument_size() { }
+template<class X> Expansion<X>::Expansion() : Expansion(0u) { }
 
 template<class X> Expansion<X>::Expansion(SizeType as) : _argument_size(as) { }
 
@@ -351,9 +350,8 @@ OutputStream& Expansion<X>::write(OutputStream& os, const Array<std::string>& va
     return os;
 }
 
-
 template<class X>
-OutputStream& Expansion<X>::write(OutputStream& os) const {
+OutputStream& Expansion<X>::write_polynomial(OutputStream& os) const {
     const Expansion<X>& p=*this;
     Array<std::string> variable_names(p.argument_size());
     for(Nat j=0; j!=p.argument_size(); ++j) {
@@ -364,6 +362,22 @@ OutputStream& Expansion<X>::write(OutputStream& os) const {
     return p.write(os,variable_names);
 }
 
+template<class X>
+OutputStream& Expansion<X>::write_map(OutputStream& os) const {
+    os << "E[" << this->argument_size() << ";" << this->number_of_nonzeros() << "]";
+    os << "{";
+    for(auto iter=this->begin(); iter!=this->end(); ++iter) {
+        if(iter!=this->begin()) { os << ", "; }
+        os << iter->key() << ":" << iter->data();
+    }
+    os << "}";
+    return os;
+}
+
+template<class X>
+OutputStream& Expansion<X>::write(OutputStream& os) const {
+    return this->write_map(os);
+}
 
 
 
@@ -389,6 +403,19 @@ inline Vector< Expansion<MidpointType<T>> > midpoint(const Vector< Expansion<T> 
 
 
 
+template<class X, class CMP> SortedExpansion<X,CMP>::SortedExpansion(Expansion<X> e)
+    : Expansion<X>(std::move(e))
+{
+    this->sort();
+}
+
+template<class X, class CMP> Void SortedExpansion<X,CMP>::insert(const MultiIndex& a, const CoefficientType& c) { this->Expansion<X>::insert(a,c,CMP()); }
+template<class X, class CMP> Void SortedExpansion<X,CMP>::set(const MultiIndex& a, const CoefficientType& c) { this->Expansion<X>::set(a,c,CMP()); }
+template<class X, class CMP> typename SortedExpansion<X,CMP>::CoefficientType& SortedExpansion<X,CMP>::at(const MultiIndex& a) { return this->Expansion<X>::at(a,CMP()); }
+template<class X, class CMP> typename SortedExpansion<X,CMP>::CoefficientType const& SortedExpansion<X,CMP>::get(const MultiIndex& a) const { return this->Expansion<X>::get(a,CMP()); }
+template<class X, class CMP> typename Expansion<X>::Iterator SortedExpansion<X,CMP>::find(const MultiIndex& a) { return this->Expansion<X>::find(a,CMP()); }
+template<class X, class CMP> typename Expansion<X>::ConstIterator SortedExpansion<X,CMP>::find(const MultiIndex& a) const { return this->Expansion<X>::find(a,CMP()); }
+template<class X, class CMP> Void SortedExpansion<X,CMP>::sort() { this->Expansion<X>::sort(CMP()); }
 
 
 

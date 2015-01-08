@@ -278,6 +278,8 @@ Void export_sweeper()
 
 }
 
+Expansion<ExactFloat>const& get_expansion(ValidatedTaylorModel const& tm) { return tm.expansion(); }
+
 Void export_taylor_model()
 {
     typedef Nat Nat;
@@ -291,7 +293,7 @@ Void export_taylor_model()
     taylor_model_class.def("value", (const ExactFloat&(ValidatedTaylorModel::*)()const) &ValidatedTaylorModel::value, return_value_policy<copy_const_reference>());
     taylor_model_class.def("gradient", (const ExactFloat&(ValidatedTaylorModel::*)(Nat)const) &ValidatedTaylorModel::gradient, return_value_policy<copy_const_reference>());
     taylor_model_class.def("error", (const ErrorFloat&(ValidatedTaylorModel::*)()const) &ValidatedTaylorModel::error, return_value_policy<copy_const_reference>());
-    taylor_model_class.def("expansion", (const Expansion<ExactFloat>&(ValidatedTaylorModel::*)()const) &ValidatedTaylorModel::expansion, return_value_policy<copy_const_reference>());
+    taylor_model_class.def("expansion", (const Expansion<ExactFloat>&(*)(ValidatedTaylorModel const&)) &get_expansion, return_value_policy<copy_const_reference>());
     taylor_model_class.def("set_error", (Void(ValidatedTaylorModel::*)(const ErrorFloat&)) &ValidatedTaylorModel::set_error);
     taylor_model_class.def("argument_size", &ValidatedTaylorModel::argument_size);
     taylor_model_class.def("domain", &ValidatedTaylorModel::domain);

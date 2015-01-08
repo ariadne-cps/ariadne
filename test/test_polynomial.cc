@@ -198,42 +198,43 @@ Void TestPolynomial::test_indexing()
     Polynomial<Float> q(3);
     q[MultiIndex({0,0,0})]=2.0;
     q[MultiIndex({0,1,0})]=3.0;
-    ARIADNE_TEST_EQUAL(q.number_of_nonzeros(),2);
-    ARIADNE_TEST_EQUAL(q[MultiIndex({0,0,0})],2.0);
-    ARIADNE_TEST_EQUAL(q[MultiIndex({0,1,0})],3.0);
+    ARIADNE_TEST_EQUALS(q.number_of_nonzeros(),2);
+    ARIADNE_TEST_EQUALS(q[MultiIndex({0,0,0})],2.0);
+    ARIADNE_TEST_EQUALS(q[MultiIndex({0,1,0})],3.0);
     q[MultiIndex({1,0,0})]=5.0;
-    ARIADNE_TEST_EQUAL(q[MultiIndex({1,0,0})],5.0);
-    ARIADNE_TEST_EQUAL(q[MultiIndex({0,1,0})],3.0);
+    ARIADNE_TEST_EQUALS(q[MultiIndex({1,0,0})],5.0);
+    ARIADNE_TEST_EQUALS(q[MultiIndex({0,1,0})],3.0);
     q[MultiIndex({0,0,1})]=7.0;
-    ARIADNE_TEST_EQUAL(q[MultiIndex({0,0,1})],7.0);
+    ARIADNE_TEST_EQUALS(q[MultiIndex({0,0,1})],7.0);
 
     // Test insert at beginning
     p.clear();
+    ARIADNE_TEST_PRINT(p.expansion());
     p[MultiIndex({0,1,0})]=2.0;
     p[MultiIndex({0,0,1})]=3.0;
     p[MultiIndex({2,1,0})]=5.0;
-    ARIADNE_TEST_EQUAL(pc[MultiIndex({0,0,0})],0.0);
-    ARIADNE_TEST_EQUAL(p.number_of_nonzeros(),3);
-    ARIADNE_TEST_PRINT(p);
+    ARIADNE_TEST_PRINT(p.expansion());
+    ARIADNE_TEST_EQUALS(pc[MultiIndex({0,0,0})],0.0);
+    ARIADNE_TEST_EQUALS(p.number_of_nonzeros(),3);
+    ARIADNE_TEST_PRINT(p.expansion());
     ARIADNE_TEST_EXECUTE(p[MultiIndex({0,0,0})]=7);
-    ARIADNE_TEST_PRINT(p);
-    ARIADNE_TEST_EQUAL(p.number_of_nonzeros(),4);
+    ARIADNE_TEST_PRINT(p.expansion());
+    ARIADNE_TEST_EQUALS(p.number_of_nonzeros(),4);
     p.expansion().graded_sort();
+    ARIADNE_TEST_PRINT(p.expansion());
+
     Polynomial<Float>::ConstIterator iter=p.begin();
-    ARIADNE_TEST_EQUAL(iter->key(),MultiIndex({0,0,0}));
-    ARIADNE_TEST_EQUAL(iter->data(),7.0);
+    ARIADNE_TEST_EQUALS(iter->key(),MultiIndex({0,0,0}));
+    ARIADNE_TEST_EQUALS(iter->data(),7.0);
     ++iter;
-    ARIADNE_TEST_EQUAL(iter->key(),MultiIndex({0,1,0}));
-    ARIADNE_TEST_EQUAL(iter->data(),2.0);
+    ARIADNE_TEST_EQUALS(iter->key(),MultiIndex({0,1,0}));
+    ARIADNE_TEST_EQUALS(iter->data(),2.0);
     ++iter;
-    ARIADNE_TEST_EQUAL(iter->key(),MultiIndex({0,0,1}));
-    ARIADNE_TEST_EQUAL(iter->data(),3.0);
+    ARIADNE_TEST_EQUALS(iter->key(),MultiIndex({0,0,1}));
+    ARIADNE_TEST_EQUALS(iter->data(),3.0);
     ++iter;
-    ARIADNE_TEST_EQUAL(iter->key(),MultiIndex({2,1,0}));
-    ARIADNE_TEST_EQUAL(iter->data(),5.0);
-
-
-
+    ARIADNE_TEST_EQUALS(iter->key(),MultiIndex({2,1,0}));
+    ARIADNE_TEST_EQUALS(iter->data(),5.0);
 }
 
 Void TestPolynomial::test_arithmetic()

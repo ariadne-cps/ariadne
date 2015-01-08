@@ -276,8 +276,8 @@ class TestDifferentialVector {
     }
 
     void test_evaluate() {
-        ApproximateFloat ac[2]={1,2}; ApproximateFloat adv[10]={1,2,3,4,5,6,7,8,9,10};
-        Vector<X> c(2u,ac);
+        Array<ApproximateFloat> ac={1,2}; ApproximateFloat adv[10]={1,2,3,4,5,6,7,8,9,10};
+        Vector<X> c(ac);
         DifferentialVectorType dv(1u,2u,3u,adv);
         std::cout << "c=" << c << std::endl;
         std::cout << "dv="<< dv << std::endl;

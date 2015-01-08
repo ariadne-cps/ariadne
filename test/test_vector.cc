@@ -54,6 +54,7 @@ TestVector::test()
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_comparisons());
     ARIADNE_TEST_CALL(test_arithmetic());
+    ARIADNE_TEST_CALL(test_misc());
 }
 
 void
@@ -135,7 +136,9 @@ TestVector::test_misc()
     Vector<ApproximateFloat> v0;
     cout << "v0.size()=" << v0.size() << endl;
     cout << "v0=" << flush; cout << v0 << endl;
-    Vector<ApproximateFloat> v1(n,vptr);
+    ARIADNE_TEST_NOTIFY("Constructor Vector<X>(SizeType, const X*) is unsafe and has been removed.");
+    Array<ApproximateFloat> a1(vptr,vptr+3);
+    Vector<ApproximateFloat> v1(a1);
     cout << "v1=" << v1 << endl;
     Vector<ApproximateFloat> v2=Vector<ApproximateFloat>({2.375,4.25,-1.25});
     cout << "v2=" << v2 << endl;

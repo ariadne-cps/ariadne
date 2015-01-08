@@ -106,8 +106,6 @@ class Vector
     explicit Vector(SizeType n) : _ary(n,X()) { static_assert(IsDefaultConstructible<X>::value,""); }
     //! \brief Construct a vector of size \a n, with elements initialised to \a t.
     explicit Vector(SizeType n, const X& t) : _ary(n,t) {  }
-    //! \brief Construct a vector of size \a n, with elements initialised to the array beginning at \a p.
-    explicit Vector(SizeType n, const X* p) : _ary(p,p+n) {  }
     //! \brief Construct from an array of the same type.
     explicit Vector(const Array<X>& ary) : _ary(ary) { }
     //! \brief Construct from a list of the same type.

@@ -85,7 +85,7 @@ Grid::Grid(uint d, Float l)
 Grid::Grid(const Vector<Float>& lengths)
     : _data(new Data())
 {
-    Vector<Float> origin(lengths.size(),0);
+    Vector<Float> origin(lengths.size(),Float(0));
     this->_create(origin,lengths);
 }
 

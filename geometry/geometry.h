@@ -71,9 +71,9 @@ ExactBox split(const ExactBox& bx, Nat i, Piece lr) {
 }
 
 inline
-std::pair<ExactBox,ExactBox> split(const ExactBox& bx, Nat i)
+Pair<ExactBox,ExactBox> split(const ExactBox& bx, Nat i)
 {
-    std::pair<ExactBox,ExactBox> result(bx,bx);
+    Pair<ExactBox,ExactBox> result(bx,bx);
     ExactFloat c=mid(bx[i].lower(),bx[i].upper());
     result.first[i].set_upper(c);
     result.second[i].set_lower(c);
@@ -88,7 +88,7 @@ ExactBox split(const ExactBox& bx, Piece lr)
 }
 
 inline
-std::pair<ExactBox,ExactBox> split(const ExactBox& bx) {
+Pair<ExactBox,ExactBox> split(const ExactBox& bx) {
     return split(bx,irmax(bx));
 }
 

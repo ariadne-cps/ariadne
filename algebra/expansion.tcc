@@ -238,7 +238,7 @@ Expansion<X>::Expansion(SizeType as, DegreeType deg, InitializerList<X> lst)
 }
 
 template<class X>
-Expansion<X>::Expansion(SizeType as, InitializerList< std::pair<InitializerList<Int>,X> > lst)
+Expansion<X>::Expansion(SizeType as, InitializerList< PairType<InitializerList<Int>,X> > lst)
     : _argument_size(as)
 {
     MultiIndex a;
@@ -253,7 +253,7 @@ Expansion<X>::Expansion(SizeType as, InitializerList< std::pair<InitializerList<
 }
 
 template<class X>
-Expansion<X>::Expansion(InitializerList< std::pair<InitializerList<Int>,X> > lst)
+Expansion<X>::Expansion(InitializerList< PairType<InitializerList<Int>,X> > lst)
     : _argument_size(lst.size()==0?0u:lst.begin()->first.size())
 {
     MultiIndex a;

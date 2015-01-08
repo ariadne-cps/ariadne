@@ -31,8 +31,6 @@
 
 namespace Ariadne {
 
-using std::pair;
-
 
 template<class ES> class ListSet;
 template<class ES> class Orbit;

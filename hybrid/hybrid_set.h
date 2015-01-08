@@ -569,7 +569,7 @@ class HybridGridTreeSet
     //!
     Void insert(DiscreteLocation q, const GridTreeSet& gts) {
         this->_map.insert(q,gts); }
-    Void insert(std::pair<DiscreteLocation,GridTreeSet>& qgts) {
+    Void insert(Pair<DiscreteLocation,GridTreeSet>& qgts) {
         this->_map.insert(qgts); }
 
     //!

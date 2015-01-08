@@ -83,7 +83,7 @@ class Polynomial
     //! \brief A dense polynomial with coefficients given by an initializer list of doubles.
     explicit Polynomial(SizeType as, DegreeType deg, InitializerList<X> lst);
     //! \brief A sparse polynomial with coefficients given by an initializer list of indices and coefficients.
-    Polynomial(InitializerList< std::pair<InitializerList<Int>,X> > lst);
+    Polynomial(InitializerList< PairType<InitializerList<Int>,X> > lst);
     //@}
 
     //! \brief Create the null polynomial in the same number of variables.
@@ -199,7 +199,7 @@ template<class X1, class X2> struct Arithmetic< Polynomial<X1>,Polynomial<X2> > 
 
 
 template<class X>
-Polynomial<X>::Polynomial(InitializerList< std::pair<InitializerList<Int>,X> > lst)
+Polynomial<X>::Polynomial(InitializerList< PairType<InitializerList<Int>,X> > lst)
     : _expansion(lst)
 {
     this->cleanup();

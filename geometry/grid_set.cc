@@ -870,7 +870,7 @@ GridCell GridCell::split(Bool isRight) const {
     return GridCell( _theGrid, _theHeight, theWord);
 }
 
-std::pair<GridCell,GridCell> GridCell::split() const {
+Pair<GridCell,GridCell> GridCell::split() const {
     BinaryWord theLeftWord = _theWord;
     theLeftWord.push_back( false );
     BinaryWord theRightWord = _theWord;

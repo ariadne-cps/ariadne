@@ -128,7 +128,7 @@ HybridReachabilityAnalyser::_reach_evolve_resume(const ListSet<HybridEnclosure>&
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::_reach_evolve_resume(...)\n");
     const HybridGrid& grid=this->_configuration->grid();
-    std::pair<HybridGridTreeSet,HybridGridTreeSet> result=make_pair(HybridGridTreeSet(grid),HybridGridTreeSet(grid));
+    Pair<HybridGridTreeSet,HybridGridTreeSet> result=make_pair(HybridGridTreeSet(grid),HybridGridTreeSet(grid));
     HybridGridTreeSet& reach_cells=result.first; HybridGridTreeSet& evolve_cells=result.second;
 
     for(ListSet<HybridEnclosure>::ConstIterator encl_iter=initial_enclosures.begin(); encl_iter!=initial_enclosures.end(); ++encl_iter) {

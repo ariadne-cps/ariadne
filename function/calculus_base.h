@@ -39,9 +39,6 @@
 /* \brief Top-level namespace. */
 namespace Ariadne {
 
-using std::pair;
-
-
 template<class T> class Array;
 
 class ExactInterval;
@@ -196,7 +193,7 @@ class CalculusBase
     //! \brief Computed a pair \f$(h,B)\f$ such that the flow of the vector_field \a vf starting in
     //! domain \a d remains in \a B for times up to \a h. The maximum allowable \a h and maximum
     //! allowable diameter of \a B are given.
-    virtual pair<TimeType,BoxType>
+    virtual Pair<TimeType,BoxType>
     flow_bounds(const VectorFunctionType& vf,
                 const BoxType& d,
                 const RealType& maximum_step_size,
@@ -204,7 +201,7 @@ class CalculusBase
 
     //! \brief Computed a pair \f$(h,B)\f$ such that the flow of the vector_field \a vf starting in
     //! domain \a d remains in \a B for times up to \a h. The maximum allowable \a h is given.
-    virtual pair<TimeType,BoxType>
+    virtual Pair<TimeType,BoxType>
     flow_bounds(const VectorFunctionType& vf,
                 const BoxType& d,
                 const RealType& maximum_step_size) const

@@ -61,7 +61,7 @@ template<class Sys, class BS> class Evolver;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
 class TaylorConstrainedImageSet;
-typedef std::pair<DiscreteLocation,TaylorConstrainedImageSet> HybridTaylorConstrainedImageSet;
+typedef Pair<DiscreteLocation,TaylorConstrainedImageSet> HybridTaylorConstrainedImageSet;
 class MonolithicHybridAutomaton;
 template<class ES> class Orbit;
 
@@ -97,10 +97,10 @@ class PythonHybridEvolver
     typedef MonolithicHybridAutomaton::TimeType TimeType;
     typedef Int IntegerType;
     typedef Float RealType;
-    typedef std::vector<DiscreteEvent> EventListType;
+    typedef List<DiscreteEvent> EventListType;
     typedef MonolithicHybridAutomaton SystemType;
     typedef TaylorConstrainedImageSet ContinuousEnclosureType;
-    typedef pair<DiscreteLocation,TaylorConstrainedImageSet> HybridEnclosureType;
+    typedef Pair<DiscreteLocation,TaylorConstrainedImageSet> HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
@@ -180,17 +180,17 @@ orbit(const SystemType& system,
 enum Bool { False, True };
 
 template<class SET>
-ListSet< std::pair<DiscreteLocation,SET> >*
+ListSet< Pair<DiscreteLocation,SET> >*
 make_hybrid_list_set(const boost::python::list& pylst)
 //make_hybrid_list_set(const boost::python::object& pyobj)
 {
-    ListSet< std::pair<DiscreteLocation,SET> >* result=new ListSet< std::pair<DiscreteLocation,SET> >();
+    ListSet< Pair<DiscreteLocation,SET> >* result=new ListSet< Pair<DiscreteLocation,SET> >();
     //boost::python::list pylst=boost::python::extract<boost::python::list>(pyobj);
     for(Int i=0; i!=len(pylst); ++i) {
         boost::python::Tuple pytup=boost::python::extract<boost::python::Tuple>(pylst[i]);
         Ariadne::DiscreteLocation q(boost::python::extract<Int>(pytup[0]));
         SET s(boost::python::extract<SET>(pytup[1]));
-        //std::pair<Ariadne::DiscreteLocation,SET> pr=std::make_pair(q,s);
+        //Pair<Ariadne::DiscreteLocation,SET> pr=std::make_pair(q,s);
         //result->adjoin(std::make_pair(q,s));
     }
     return result;
@@ -208,7 +208,7 @@ PythonHybridEvolver::initialise_python()
         boost::python::object evolution_namespace = evolution_module.attr("__dict__");
         main_namespace["hybrid_evolver"]=evolution_module;
 
-        boost::python::class_< ListSet< std::pair<DiscreteLocation,TaylorConstrainedImageSet> > >
+        boost::python::class_< ListSet< Pair<DiscreteLocation,TaylorConstrainedImageSet> > >
             enclosure_list_class("HybridTaylorConstrainedImageSetList",boost::python::no_init);
         enclosure_list_class.def("__init__",boost::python::make_constructor(&make_hybrid_list_set<TaylorConstrainedImageSet>));
 

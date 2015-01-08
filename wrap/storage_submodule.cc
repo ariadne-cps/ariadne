@@ -108,7 +108,7 @@ Void export_grid_cell()
     class_<GridCell> grid_cell_class("GridCell",no_init);
     grid_cell_class.def("dimension", &GridCell::dimension);
     grid_cell_class.def("depth", &GridCell::depth);
-    grid_cell_class.def("split", (std::pair<GridCell,GridCell>(GridCell::*)()const) &GridCell::split);
+    grid_cell_class.def("split", (Pair<GridCell,GridCell>(GridCell::*)()const) &GridCell::split);
     grid_cell_class.def("split", (GridCell(GridCell::*)(Bool)const) &GridCell::split);
     grid_cell_class.def("box", &GridCell::box, return_value_policy<copy_const_reference>());
     grid_cell_class.def(self_ns::str(self));

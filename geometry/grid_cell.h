@@ -256,7 +256,7 @@ class GridCell : public GridAbstractCell {
     GridCell split(Bool isRight) const;
 
     /*! \brief Splits the given cell into two sub-cells, returning both. */
-    std::pair<GridCell,GridCell> split() const;
+    Pair<GridCell,GridCell> split() const;
 
     /*! \brief The equality operator. */
     Bool operator==(const GridCell& otherCell) const;

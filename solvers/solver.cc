@@ -281,7 +281,7 @@ SolverBase::solve_all(const ValidatedVectorFunction& f,
         }
 
         //std::cerr<<"  Splitting "<<bx<<"\n";
-        std::pair< Vector<ExactInterval>, Vector<ExactInterval> > splt=split(bx);
+        Pair< Vector<ExactInterval>, Vector<ExactInterval> > splt=split(bx);
         r.adjoin(this->solve_all(f,splt.first));
         r.adjoin(this->solve_all(f,splt.second));
     }

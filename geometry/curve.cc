@@ -116,7 +116,7 @@ InterpolatedCurve::clone() const
 Void
 InterpolatedCurve::insert(const ParameterType& s, const PointType& pt) {
     if(!this->_points.empty()) { ARIADNE_ASSERT(pt.size()==this->dimension()); }
-    this->_points.insert(std::pair< ParameterType, PointType >(s,pt));
+    this->_points.insert(Pair< ParameterType, PointType >(s,pt));
 }
 
 Void

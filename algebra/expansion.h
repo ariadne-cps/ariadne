@@ -300,9 +300,9 @@ class Expansion
   public:
     explicit Expansion(); // DEPRECTATED
     explicit Expansion(SizeType as);
-    Expansion(SizeType as, DegreeType deg, std::initializer_list<X> lst);
-    Expansion(std::initializer_list< std::pair<std::initializer_list<Int>,X> > lst);
-    Expansion(SizeType as, std::initializer_list< std::pair<std::initializer_list<Int>,X> > lst);
+    Expansion(SizeType as, DegreeType deg, InitializerList<X> lst);
+    Expansion(InitializerList< PairType<InitializerList<Int>,X> > lst);
+    Expansion(SizeType as, InitializerList< PairType<InitializerList<Int>,X> > lst);
     template<class XX> Expansion(const std::map<MultiIndex,XX>& m);
     template<class XX, typename std::enable_if<std::is_convertible<XX,X>::value,Int>::type=0>
         Expansion(const Expansion<XX>& p);

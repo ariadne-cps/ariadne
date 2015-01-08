@@ -358,35 +358,6 @@ template<class X, class CMP> class SortedExpansion
 template<> class Expansion<Rational>;
 #endif
 
-
-
-//! \ingroup FunctionModule
-//! \brief Convert a power-series expansion into a formula using a version of Horner's rule.
-//!
-//! For a polynomial in \f$n\f$ variables, Horner's rule is a recursive formula
-//! \f[ p(x) = \bigl( \bigl(  x^{d_k-d_{k-1}} q_k(\hat{x})x^{d_0} + \cdots + q_1(\hat{x}) \bigr) x^{d_1-d_0} + q_0(\hat{x}) \bigr) x^{d_0} \f]
-//! where \f$\hat{x}=(x_1,\ldots,x_{n-1})\f$ and \f$q_i\f$ is the polynomial of terms in \f$x_n^{d_i}\f$.
-//! To evaluate a polynomial using Horner's rule without using recursive function calls, we maintain registers \f$r_k\f$ containing
-//! the current evaluation of a polynomial in \f$(x_1,\ldots,x_k)\f$.
-//!
-//! We list the terms in reverse lexicographic order, defined as \f$\alpha \prec \beta\f$ if \f$\alpha_j>\beta_j\f$,
-//! where \f$j=\max\{i\mid \alpha_i\neq\beta_i\}\f$.
-//! For a given term \f$c_\alpha x^\alpha\f$, let \f$k=\max\{j\mid \alpha_j\neq\beta_j\}\f$, where \f$\beta\f$ is the next multi-index.
-//! We update register \f$r_k\f$ by \f[r'_k=(((c_\alpha + r_1) x^{\alpha_1} + r_2 )x^{\alpha_2}+\cdots r_k)x^{\alpha_k-\beta_k}.\f]
-//! The result is obtained by updating a fictional register \f$r_{n+1}\f$ at the last step.
-//! See J. M. Pena and T. Sauer, "On the multivariate Horner scheme", SIAM J. Numer. Anal. 37(4) 1186-1197, 2000.
-template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector<Y>& x);
-
-template<class X, class Y> Y power_evaluate(const Expansion<X>& e, const Vector<Y>& y);
-
-template<class X, class Y> Y evaluate(const Expansion<X>& e, const Vector<Y>& y);
-
-template<class X, class Y> Y simple_evaluate(const Expansion<X>& e, const Vector<Y>& y);
-
-template<class X, class Y> Vector<Y> evaluate(const Vector< Expansion<X> >& x, const Vector<Y>& y);
-
-
-
 template<class X> inline Expansion<X> embed(SizeType before_size, Expansion<X> const& x, SizeType after_size) {
     return x._embed(before_size,after_size);
 }

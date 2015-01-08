@@ -655,6 +655,10 @@ series_flow_step(const ValidatedVectorFunction& f, const ExactBox& bdx, const Ex
         Ariadne::flow_iterate(p,h,fdphic,tdphic,dphic);
         Ariadne::flow_iterate(p,h,fdphid,tdphid,dphid);
     }
+    ARIADNE_LOG(7,"dphia="<<dphia<<"\n");
+    ARIADNE_LOG(7,"dphib="<<dphib<<"\n");
+    ARIADNE_LOG(7,"dphic="<<dphic<<"\n");
+    ARIADNE_LOG(7,"dphid="<<dphid<<"\n");
 
     Vector<ValidatedDifferential> dphi=flow_differential(dphia,dphib,dphic,dphid,so,to,verbosity);
     ARIADNE_LOG(5,"dphi="<<dphi<<"\n");
@@ -732,6 +736,7 @@ series_flow_step(const ValidatedVectorFunction& f, const ExactBox& bdx, const Ex
 ValidatedVectorFunctionModel
 TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBox& dx, const ExactFloat& h, const UpperBox& bx) const
 {
+    ARIADNE_LOG(3,"TaylorSeriesIntegrator::flow_step(ValidatedVectorFunction f, ExactBox dx, ExactFloat h, const UpperBox& bx)\n");
     ValidatedVectorFunctionModel tphi=Ariadne::series_flow_step(f,dx,h,bx,
         this->step_maximum_error(),this->step_sweep_threshold(),
         this->minimum_spacial_order(),this->minimum_temporal_order(),
@@ -869,6 +874,7 @@ template<class X> void truncate(Vector< Differential<X> >& x, uint spacial_order
 Vector<ValidatedDifferential>
 AffineIntegrator::flow_derivative(const ValidatedVectorFunction& f, const Vector<ValidatedNumber>& dom) const
 {
+    ARIADNE_LOG(5,"AffineIntegrator::flow_derivative(ValidatedVectorFunction f, ValidatedBox dom)\n");
     Vector<ValidatedDifferential> dx=
         ValidatedDifferential::variables(this->_spacial_order+this->_temporal_order,
                                          join(dom,zero));
@@ -884,6 +890,7 @@ AffineIntegrator::flow_derivative(const ValidatedVectorFunction& f, const Vector
 ValidatedVectorFunctionModel
 AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBox& dom, const ExactFloat& h, const UpperBox& bbox) const
 {
+    ARIADNE_LOG(3,"AffineIntegrator::flow_step(ValidatedVectorFunction f, ExactBox dom, Float h, UpperBox bbox)\n");
     Vector<ValidatedNumber> mid = Vector<ValidatedNumber>(midpoint(dom));
 
     Vector<ValidatedDifferential> mdphi = this->flow_derivative(f,mid);

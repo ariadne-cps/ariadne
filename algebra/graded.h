@@ -91,21 +91,24 @@ template<class A> struct Graded : public List<A>
     template<class Op> Void operator=(const ClosureExpression<Op,SelfType>& expr);
     Void operator=(const ClosureExpression<AntiDiff,SelfType>& ad);
     Graded<A>& operator=(const Graded<A>& a) { this->List<A>::operator=(a); return *this; }
-    Graded<A> create_zero() const { return Ariadne::create_zero((*this)[0]); }
+    Graded<A> create_zero() const { return Graded<A>(List<A>(this->degree()+1, Ariadne::create_zero((*this)[0]))); }
     Nat degree() const { return this->size()-1u; }
     Void extend(const A& a) { this->List<A>::append(a); }
 };
 template<class A> std::ostream& operator<<(std::ostream& os, const Graded<A>& g) {
-    if(g.size()==0) { return os << "0"; }
+    if(g.size()==0) { return os << "G[-]{}"; }
+    os << "G[" << g.degree() << "]{";
     os << "(" << g[0] << ")";
     for(uint i=1; i<=g.degree(); ++i) {
         os << " + (" << g[i] << ")*t";
         if(i>1) { os << "^"<<i; }
     }
+    os << "}";
     return os;
 }
 template<> std::ostream& operator<<(std::ostream& os, const Graded<Float>& g) {
-    if(g.size()==0) { return os << "0"; }
+    if(g.size()==0) { return os << "G[-]{}"; }
+    os << "G[" << g.degree() << "]{";
     bool nonzero=false;
     if(g[0]!=0) { os << g[0]; nonzero=true; }
     for(uint i=1; i<=g.degree(); ++i) {
@@ -121,6 +124,7 @@ template<> std::ostream& operator<<(std::ostream& os, const Graded<Float>& g) {
          }
     }
     if(!nonzero) { os << "0"; }
+    os << "}";
     return os;
 }
 template<> std::ostream& operator<<(std::ostream& os, const Graded<ExactInterval>& g) {

@@ -68,9 +68,9 @@ make_expression(Op op, const A1& a1, const A2& a2, const A3& a3) {
 
 
 
-bool compatible(const Float& x1, const Float& x2) { return true; }
-template<class X> bool compatible(const Polynomial<X>& x1, const Polynomial<X>& x2) { return x1.argument_size()==x2.argument_size(); }
-template<class X> bool compatible(const Differential<X>& x1, const Differential<X>& x2) { return x1.argument_size()==x2.argument_size(); }
+Bool compatible(const Float& x1, const Float& x2) { return true; }
+template<class X> Bool compatible(const Polynomial<X>& x1, const Polynomial<X>& x2) { return x1.argument_size()==x2.argument_size(); }
+template<class X> Bool compatible(const Differential<X>& x1, const Differential<X>& x2) { return x1.argument_size()==x2.argument_size(); }
 
 Float create(const Float& x) { return Float(0); }
 ExactInterval create(const ExactInterval& x) { return ExactInterval(0); }
@@ -99,7 +99,7 @@ template<class A> OutputStream& operator<<(OutputStream& os, const Graded<A>& g)
     if(g.size()==0) { return os << "G[-]{}"; }
     os << "G[" << g.degree() << "]{";
     os << "(" << g[0] << ")";
-    for(uint i=1; i<=g.degree(); ++i) {
+    for(Nat i=1; i<=g.degree(); ++i) {
         os << " + (" << g[i] << ")*t";
         if(i>1) { os << "^"<<i; }
     }
@@ -109,9 +109,9 @@ template<class A> OutputStream& operator<<(OutputStream& os, const Graded<A>& g)
 template<> OutputStream& operator<<(OutputStream& os, const Graded<Float>& g) {
     if(g.size()==0) { return os << "G[-]{}"; }
     os << "G[" << g.degree() << "]{";
-    bool nonzero=false;
+    Bool nonzero=false;
     if(g[0]!=0) { os << g[0]; nonzero=true; }
-    for(uint i=1; i<=g.degree(); ++i) {
+    for(Nat i=1; i<=g.degree(); ++i) {
         if(g[i]>0) {
             if(nonzero) { os << "+"; }
             if(g[i]==1) { os << "t"; } else { os << g[i]<<"*t"; }
@@ -130,7 +130,7 @@ template<> OutputStream& operator<<(OutputStream& os, const Graded<Float>& g) {
 template<> OutputStream& operator<<(OutputStream& os, const Graded<ExactInterval>& g) {
     if(g.size()==0) { return os << "0"; }
     os << g[0];
-    for(uint i=1; i<=g.degree(); ++i) {
+    for(Nat i=1; i<=g.degree(); ++i) {
         os << "+"<<g[i]<<"*t";
         if(i>1) { os << "^"<<i; }
     }
@@ -159,8 +159,8 @@ template<class A, class B> Graded<A> operator+(const Graded<A>& a, const B& c) {
     Graded<A> r(a); r[0]+=c; return r;  }
 template<class A, class B> Graded<A> operator*(const Graded<A>& a, const B& c) {
     Graded<A> r(a); r*=c; return r;  }
-template<class A> Graded<A> operator*(const Graded<A>& a, int c) {
-    Graded<A> r(a); if(c==0) { for(uint i=0; i!=r.size(); ++i) { r[i]*=c; } } else { r*=c; } return r;  }
+template<class A> Graded<A> operator*(const Graded<A>& a, Int c) {
+    Graded<A> r(a); if(c==0) { for(Nat i=0; i!=r.size(); ++i) { r[i]*=c; } } else { r*=c; } return r;  }
 
 template<class A> ClosureExpression<Neg,Graded<A> > operator-(const Graded<A>& a) {
     return make_expression(Neg(),a); }
@@ -191,7 +191,7 @@ template<class A> ClosureExpression<Cos,Graded<A> > cos(const Graded<A>& a) {
 
 template<class A> Graded<A> pos(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> abs(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
-template<class A> Graded<A> pow(const Graded<A>& a, int n) { ARIADNE_NOT_IMPLEMENTED; }
+template<class A> Graded<A> pow(const Graded<A>& a, Int n) { ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> tan(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 template<class A> Graded<A> atan(const Graded<A>& a) { ARIADNE_NOT_IMPLEMENTED; }
 
@@ -329,7 +329,7 @@ template<class A> Void sincos(Graded<A>& s, Graded<A>& c, const Graded<A>& f) {
     Nat d = f.degree();
     A z=create(f[0]);
     ARIADNE_ASSERT(s.size()==0 && c.size()==0);
-    for(uint i=0; i<=d; ++i) { s.append(z); c.append(z); }
+    for(Nat i=0; i<=d; ++i) { s.append(z); c.append(z); }
     s[0]=sin(f[0]);
     c[0]=cos(f[0]);
     for(Nat i=1; i<=d; ++i) {
@@ -382,7 +382,7 @@ template<class A> ClosureExpression<AntiDiff,Graded<A> > antidifferential(const 
 Pair<List<Float>,Float> midpoint_error(const Graded<ExactInterval>& x) {
     List<Float> m(x.degree()+1);
     Float e;
-    for(uint i=0; i<=x.degree(); ++i) {
+    for(Nat i=0; i<=x.degree(); ++i) {
         m[i]=static_cast<Float>(midpoint(x[i]));
         e=add_up(e,max(sub_up(m[i],x[i].lower_raw()),sub_up(x[i].upper_raw(),m[i])));
     }
@@ -402,9 +402,9 @@ struct Function {
 };
 
 
-template<class X, class A> void compute(const Vector< Procedure<X> >& p, Vector< Graded<A> >& r, List< Graded<A> >& t, const Vector< Graded<A> >& a) {
+template<class X, class A> Void compute(const Vector< Procedure<X> >& p, Vector< Graded<A> >& r, List< Graded<A> >& t, const Vector< Graded<A> >& a) {
     _compute(t,p._instructions,p._constants,a);
-    for(uint i=0; i!=p._results.size(); ++i) { r[i]=t[p._results[i]]; }
+    for(Nat i=0; i!=p._results.size(); ++i) { r[i]=t[p._results[i]]; }
 }
 
 } // namespace Ariadne

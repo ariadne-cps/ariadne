@@ -49,9 +49,9 @@ enum class LogicalValue : char {
     TRUE=+2 //!< Definitely true.
 };
 
-inline bool definitely(const LogicalValue& l) { return l==LogicalValue::TRUE; }
-inline bool possibly(const LogicalValue& l) { return l!=LogicalValue::FALSE; }
-inline bool decide(const LogicalValue& l) { return l==LogicalValue::TRUE || l==LogicalValue::LIKELY; };
+inline Bool definitely(const LogicalValue& l) { return l==LogicalValue::TRUE; }
+inline Bool possibly(const LogicalValue& l) { return l!=LogicalValue::FALSE; }
+inline Bool decide(const LogicalValue& l) { return l==LogicalValue::TRUE || l==LogicalValue::LIKELY; };
 
 LogicalValue equal(LogicalValue l1, LogicalValue l2);
 inline LogicalValue disjunction(LogicalValue l1, LogicalValue l2) { return (l1<l2 ? l1 : l2); }
@@ -76,12 +76,12 @@ template<class P> class Logical
     constexpr Logical() : Logical(LogicalValue::FALSE) { }
     template<class PP, EnableIf<IsWeaker<P,PP>> =dummy> constexpr Logical(Logical<PP> l) : Logical(l._v) { }
     //! \brief Convert from a builtin boolean value.
-    constexpr Logical(bool b) : Logical(b?LogicalValue::TRUE:LogicalValue::FALSE) { }
+    constexpr Logical(Bool b) : Logical(b?LogicalValue::TRUE:LogicalValue::FALSE) { }
 
     //! \brief Convert to a builtin boolean value. Calls the decide() function.
     // TODO: This should be explicit (except for Boolean)
 
-    // explicit operator bool () const { return decide(this->_v); }
+    // explicit operator Bool () const { return decide(this->_v); }
 
     //! \brief Equality of two logical values.
     friend inline Logical<P> operator==(Logical<P> l1, Logical<P> l2) { return Logical<P>(equal(l1._v,l2._v)); }
@@ -96,19 +96,19 @@ template<class P> class Logical
     friend inline Logical<Negated<P>> operator!(Logical<P> l) { return Logical<Negated<P>>(negation(l._v)); }
     //! \brief Returns \c true only if \a l represents the result of a logical predicate which is definitely true.
     //! Returns \c false for values other than LogicalValue::TRUE.
-    friend inline bool definitely(Logical<P> l) { return l._v == LogicalValue::TRUE; }
+    friend inline Bool definitely(Logical<P> l) { return l._v == LogicalValue::TRUE; }
     //! \brief Returns \c true only if \a l represents the result of a logical predicate which may be true.
     //!  Returns \c false  only for the value LogicalValue::FALSE.
-    friend inline bool possibly(Logical<P> l) { return l._v != LogicalValue::FALSE; }
+    friend inline Bool possibly(Logical<P> l) { return l._v != LogicalValue::FALSE; }
     //! \brief Converts the logical value into a true/false boolean context.
     //! Returns \c true for LogicalValue::TRUE or LogicalValue::LIKELY.
     //! Note that decide(indeterminate) is false.
-    friend inline bool decide(Logical<P> l) { return l._v >= LogicalValue::LIKELY; }
+    friend inline Bool decide(Logical<P> l) { return l._v >= LogicalValue::LIKELY; }
     //! \brief Returns \c true if the value is definitely TRUE or FALSE.
-    friend inline bool is_determinate(Logical<P> l) { return l._v == LogicalValue::TRUE || l._v == LogicalValue::FALSE; }
-    friend inline bool is_indeterminate(Logical<P> l) { return l._v != LogicalValue::TRUE && l._v != LogicalValue::FALSE; }
+    friend inline Bool is_determinate(Logical<P> l) { return l._v == LogicalValue::TRUE || l._v == LogicalValue::FALSE; }
+    friend inline Bool is_indeterminate(Logical<P> l) { return l._v != LogicalValue::TRUE && l._v != LogicalValue::FALSE; }
     //! \brief Returns \c true if the values have the same code; does not mean they represent equal results.
-    friend inline bool same(Logical<P> l1, Logical<P> l2) { return l1._v == l2._v; }
+    friend inline Bool same(Logical<P> l1, Logical<P> l2) { return l1._v == l2._v; }
     //! \brief Write to an output stream.
     friend inline OutputStream& operator<<(OutputStream& os, Logical<P> l) { return os << l._v; }
   private:
@@ -140,24 +140,24 @@ static const Logical<Approximate> likely = Logical<Approximate>(LogicalValue::LI
 //! \brief The logical constant representing an value which is deemed unlikely to be true, but for which truth has not been ruled out.
 static const Logical<Approximate> unlikely = Logical<Approximate>(LogicalValue::UNLIKELY);
 
-inline bool definitely(bool b) { return b; }
-inline bool possibly(bool b) { return b; }
-inline bool decide(bool b) { return b; }
+inline Bool definitely(Bool b) { return b; }
+inline Bool possibly(Bool b) { return b; }
+inline Bool decide(Bool b) { return b; }
 
 //! \ingroup LogicalTypes
 //! \brief A logical variable representing the result of a decidable proposition.
 class Boolean : public Logical<Exact> {
   public:
-    Boolean(bool b=false) : Logical<Exact>(b) { }
+    Boolean(Bool b=false) : Logical<Exact>(b) { }
     Boolean(Logical<Exact> l) : Logical<Exact>(l) { }
     friend Boolean operator&&(Boolean l1, Boolean l2) { return Logical<Exact>(l1) && Logical<Exact>(l2); }
-    friend Boolean operator&&(Boolean l1, bool l2) { return l1 && Boolean(l2); }
-    friend Boolean operator&&(bool l1, Boolean l2) { return Boolean(l1) && l2; }
+    friend Boolean operator&&(Boolean l1, Bool l2) { return l1 && Boolean(l2); }
+    friend Boolean operator&&(Bool l1, Boolean l2) { return Boolean(l1) && l2; }
     friend Boolean operator||(Boolean l1, Boolean l2) { return Logical<Exact>(l1) || Logical<Exact>(l2); }
-    friend Boolean operator||(Boolean l1, bool l2) { return l1 || Boolean(l2); }
-    friend Boolean operator||(bool l1, Boolean l2) { return Boolean(l1) || l2; }
+    friend Boolean operator||(Boolean l1, Bool l2) { return l1 || Boolean(l2); }
+    friend Boolean operator||(Bool l1, Boolean l2) { return Boolean(l1) || l2; }
     friend Boolean operator!(Boolean l) { return !Logical<Exact>(l); }
-    operator bool () const { return decide(*this); }
+    operator Bool () const { return decide(*this); }
 };
 
 //! \ingroup LogicalTypes

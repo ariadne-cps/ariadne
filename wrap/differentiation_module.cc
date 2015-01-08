@@ -31,8 +31,8 @@ template<class X> class SparseDifferential;
 template<class DIFF> class DifferentialVector;
 }
 
-template<class DIFF> void export_differential();
-template<class DIFF> void export_differential_vector();
+template<class DIFF> Void export_differential();
+template<class DIFF> Void export_differential_vector();
 
 using namespace Ariadne;
 

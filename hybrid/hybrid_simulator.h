@@ -51,7 +51,7 @@ class HybridSimulator
 
     //! \brief Default constructor.
     HybridSimulator();
-    void set_step_size(double h);
+    Void set_step_size(double h);
 
     //@{
     //! \name Evolution using abstract sets.

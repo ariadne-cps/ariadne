@@ -40,11 +40,11 @@ using namespace Ariadne;
 
 class TestConstraintSolver
 {
-    uint verbosity;
+    Nat verbosity;
   public:
-    TestConstraintSolver(uint v) : verbosity(v) { }
+    TestConstraintSolver(Nat v) : verbosity(v) { }
 
-    void test() {
+    Void test() {
         ARIADNE_TEST_CALL(test_empty_reduce_inequality());
         ARIADNE_TEST_CALL(test_empty_reduce_equality());
         ARIADNE_TEST_CALL(test_empty_reduce_mixed());
@@ -56,7 +56,7 @@ class TestConstraintSolver
         ARIADNE_TEST_CALL(test_split());
     }
 
-    void test_empty_reduce_inequality() {
+    Void test_empty_reduce_inequality() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         ExactBox D = ExactBox{{0.0,1.0},{0.0,1.0}};
         List<EffectiveConstraint> c = {4<=2*x[0]+x[1]};
@@ -69,7 +69,7 @@ class TestConstraintSolver
         ARIADNE_TEST_ASSERT(D.empty());
     }
 
-    void test_empty_reduce_equality() {
+    Void test_empty_reduce_equality() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         ExactBox D = ExactBox{{0.0,1.0},{0.0,1.0}};
         List<EffectiveConstraint> c = {2*x[0]+x[1]==4};
@@ -82,7 +82,7 @@ class TestConstraintSolver
         ARIADNE_TEST_ASSERT(D.empty());
     }
 
-    void test_empty_reduce_mixed() {
+    Void test_empty_reduce_mixed() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         ExactBox D = ExactBox{{0.0,0.25},{0.0, 2.0}};
         List<EffectiveConstraint> c = {x[1]<=1,x[0]+x[1]==2};
@@ -95,7 +95,7 @@ class TestConstraintSolver
         ARIADNE_TEST_ASSERT(D.empty());
     }
 
-    void test_empty_hull_reduce() {
+    Void test_empty_hull_reduce() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         ExactBox D = ExactBox{{0.0,0.25},{0.0,2.0}};
         List<EffectiveConstraint> c = {x[1]<=1, x[0]+x[1]==2};
@@ -109,7 +109,7 @@ class TestConstraintSolver
         ARIADNE_TEST_ASSERT(D.empty());
     }
 
-    void test_empty_box_reduce() {
+    Void test_empty_box_reduce() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         ExactBox D = ExactBox{{0.0,0.25},{0.0, 2.0}};
         List<EffectiveConstraint> c = {x[1]<=1,x[0]+x[1]==2};
@@ -127,7 +127,7 @@ class TestConstraintSolver
         ARIADNE_TEST_ASSERT(D.empty());
     }
 
-    void test_hull_reduce() {
+    Void test_hull_reduce() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         ExactBox D = ExactBox{{0.0,2.0},{0.0,2.0}};
         List<EffectiveConstraint> c = {-2<=2*x[0]+x[1]<=1};
@@ -139,7 +139,7 @@ class TestConstraintSolver
         ARIADNE_TEST_EQUAL(D,ExactBox({{0.0,0.5},{0.0,1.0}}));
     }
 
-    void test_box_reduce() {
+    Void test_box_reduce() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         ExactBox D = ExactBox{{0.0,2.0},{0.0,2.0}};
         EffectiveConstraint c = (-2<=2*x[0]+x[1]<=1);
@@ -154,7 +154,7 @@ class TestConstraintSolver
     }
 
 
-    void test_monotone_reduce() {
+    Void test_monotone_reduce() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         ExactBox D = ExactBox{{0.0,2.0},{0.0,2.0}};
         EffectiveConstraint c = (-2<=2*x[0]+x[1]<=1);
@@ -168,12 +168,12 @@ class TestConstraintSolver
         ARIADNE_TEST_EQUAL(D,ExactBox({{0.0,0.75},{0.0,1.25}}));
     }
 
-    void test_split() {
+    Void test_split() {
         ARIADNE_TEST_WARN("test_split: Not implemented");
     }
 };
 
-int main(int argc, const char* argv[]) {
+Int main(Int argc, const char* argv[]) {
     TestConstraintSolver(get_verbosity(argc,argv)).test();
     return ARIADNE_TEST_FAILURES;
 }

@@ -68,13 +68,13 @@ template<class X> class AlgebraInterface
     virtual AlgebraInterface<X>* _create() const = 0;
 
     //! \brief Add a constant numerical scalar \c r+=c .
-    virtual void _iadd(const X& c) = 0;
+    virtual Void _iadd(const X& c) = 0;
     //! \brief Multiply by a numerical scalar \c r*=c .
-    virtual void _imul(const X& c) = 0;
+    virtual Void _imul(const X& c) = 0;
     //! \brief Scalar multiply and add \c r+=c*x .
-    virtual void _isma(const X& c, const AlgebraInterface<X>& x) = 0;
+    virtual Void _isma(const X& c, const AlgebraInterface<X>& x) = 0;
     //! \brief Fused multiply and add \c r+=x1*x2 .
-    virtual void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2) = 0;
+    virtual Void _ifma(const AlgebraInterface<X>& x1, const AlgebraInterface<X>& x2) = 0;
 };
 
 //! \brief Interface for a normed unital algebra over a field \a X.
@@ -114,7 +114,7 @@ template<class X> class GradedAlgebraInterface
     virtual GradedAlgebraInterface<X>* _clone() const = 0;
     virtual GradedAlgebraInterface<X>* _create() const = 0;
 
-    virtual uint degree() const = 0;
+    virtual Nat degree() const = 0;
     virtual const X& value() const = 0;
 };
 
@@ -138,10 +138,10 @@ template<class X> class VectorAlgebraInterface
     : public virtual WritableInterface
 {
   public:
-    virtual AlgebraInterface<X>* get_ptr(uint i) const = 0;
-    virtual void set_ptr(uint i, AlgebraInterface<X>*) = 0;
+    virtual AlgebraInterface<X>* get_ptr(Nat i) const = 0;
+    virtual Void set_ptr(Nat i, AlgebraInterface<X>*) = 0;
 
-    Algebra<X> operator[](uint i) const;
+    Algebra<X> operator[](Nat i) const;
 };
 
 

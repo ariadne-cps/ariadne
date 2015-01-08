@@ -53,11 +53,11 @@
 namespace Ariadne {
 
 
-extern int global_verbosity;
-int verbosity=global_verbosity;
+extern Int global_verbosity;
+Int verbosity=global_verbosity;
 
 
-void ddconv(std::vector< Vector<Float> >&, const std::vector< Vector<Float> >&);
+Void ddconv(std::vector< Vector<Float> >&, const std::vector< Vector<Float> >&);
 
 Polyhedron polyhedron(const ExactBox& bx);
 Polyhedron polyhedron(const Polytope& p);
@@ -71,7 +71,7 @@ Polyhedron::Polyhedron()
 }
 
 
-Polyhedron::Polyhedron(uint d)
+Polyhedron::Polyhedron(Nat d)
     : _A(0,d), _b(0)
 {
 }
@@ -89,8 +89,8 @@ Polyhedron::Polyhedron(const Matrix<Float>& A, const Vector<Float>& b)
 Polyhedron::Polyhedron(const ExactBox& bx)
     : _A(bx.dimension()*2,bx.dimension()), _b(bx.dimension()*2)
 {
-    const uint n=bx.dimension();
-    for(uint i=0; i!=n; ++i) {
+    const Nat n=bx.dimension();
+    for(Nat i=0; i!=n; ++i) {
         _A[i][i]=-1;
         _b[i]=-bx[i].lower();
         _A[i+n][i]=+1;
@@ -124,7 +124,7 @@ Polyhedron::b() const
 
 
 
-uint
+Nat
 Polyhedron::dimension() const
 {
     return this->_A.column_size();
@@ -170,7 +170,7 @@ Polyhedron
 intersection(const Polyhedron& plhd1, const Polyhedron& plhd2)
 {
     ARIADNE_ASSERT(plhd1.dimension()==plhd2.dimension());
-    uint d=plhd1.dimension();
+    Nat d=plhd1.dimension();
     SizeType nc1=plhd1.number_of_constraints();
     SizeType nc2=plhd2.number_of_constraints();
     Matrix<Float> A(nc1+nc2,d);
@@ -217,7 +217,7 @@ Polyhedron::write(OutputStream& os) const
     const Matrix<Float> A=this->A();
     const Vector<Float> b=this->b();
     os << "Polyhedron( constraints=";
-    uint d=this->dimension();
+    Nat d=this->dimension();
     SizeType nc=this->number_of_constraints();
     for(SizeType i=0; i!=nc; ++i) {
         os << ( i==0 ? "[" : "," );
@@ -259,7 +259,7 @@ operator>>(InputStream& is, Polyhedron& p)
     SizeType n=Alst[0].size();
     Matrix<Float> A(m,n);
     Vector<Float> B(m);
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         for(SizeType j=0; j!=n; ++j) {
             A[i][j]=Alst[i][j];
         }

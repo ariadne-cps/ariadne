@@ -46,9 +46,9 @@ struct Polytope2d
 {
     List<Point2d> points;
   public:
-    Polytope2d(uint n, ...) {
+    Polytope2d(Nat n, ...) {
         assert(n>=1); va_list args; va_start(args,n);
-        for(uint i=0; i!=n; ++i) {
+        for(Nat i=0; i!=n; ++i) {
             // NOTE: Need to store values first since order of evaluating function arguments is undefined
             double x=va_arg(args,double); double y=va_arg(args,double);
             this->points.push_back(Point2d(x,y));
@@ -56,12 +56,12 @@ struct Polytope2d
     }
 
     virtual Polytope2d* clone() const { return new Polytope2d(*this); }
-    virtual uint dimension() const { return 2u; }
+    virtual Nat dimension() const { return 2u; }
 
-    virtual void draw(CanvasInterface& canvas, const Projection2d& p) const {
+    virtual Void draw(CanvasInterface& canvas, const Projection2d& p) const {
         if(points.size()==1) { canvas.dot(points[0].x,points[0].y); return; }
         canvas.move_to(points[0].x,points[0].y);
-        for(uint i=1; i!=points.size(); ++i) {
+        for(Nat i=1; i!=points.size(); ++i) {
             canvas.line_to(points[i].x,points[i].y);
         }
         canvas.line_to(points[0].x,points[0].y);
@@ -69,7 +69,7 @@ struct Polytope2d
     }
 
     Polytope2d operator+(const Vector2d& v) {
-        Polytope2d r(*this); for(uint i=0; i!=r.points.size(); ++i) { r.points[i]+=v; } return r;
+        Polytope2d r(*this); for(Nat i=0; i!=r.points.size(); ++i) { r.points[i]+=v; } return r;
     }
 };
 
@@ -78,7 +78,7 @@ static const Colour expected_colour(1.0,0.25,0.25);
 
 namespace Ariadne {
 ExactFloat operator"" _ex (long double x) { return ExactFloat((double)x); }
-ValidatedFloat operator/(int n1, ExactFloat x2) { return ExactFloat(n1)/x2; }
+ValidatedFloat operator/(Int n1, ExactFloat x2) { return ExactFloat(n1)/x2; }
 }
 
 class TestAffineSet
@@ -91,7 +91,7 @@ class TestAffineSet
   public:
     TestAffineSet() : set(Matrix<ExactFloat>(2,2),Vector<ExactFloat>(2)) { }
 
-    void test_pure_constraint() {
+    Void test_pure_constraint() {
         figure.clear();
 
         D = ExactBox::unit_box(2);
@@ -112,7 +112,7 @@ class TestAffineSet
         figure.draw(set);
     }
 
-    void test_constrained_image() {
+    Void test_constrained_image() {
         D = ExactBox::unit_box(3);
         x = Affine<ValidatedNumber>::variables(3);
 
@@ -131,7 +131,7 @@ class TestAffineSet
     }
 
 
-    void test_separated() {
+    Void test_separated() {
         D=ExactBox::unit_box(3);
         x=Affine<ValidatedNumber>::variables(3);
         ValidatedAffineConstrainedImageSet affine_set(D, {-0.9375_ex+0.0625_ex*x[0]+0.5_ex*x[1],0.87890625_ex-0.1171875_ex*x[0]+x[1]+0.00390625_ex*x[2]});
@@ -165,7 +165,7 @@ class TestAffineSet
 
     }
 
-    void test_outer_approximation() {
+    Void test_outer_approximation() {
 
         {
             D=ExactBox::unit_box(2);
@@ -258,7 +258,7 @@ class TestAffineSet
     }
 
 
-    void test_empty() {
+    Void test_empty() {
         D = ExactBox::unit_box(2);
         x = Affine<ValidatedNumber>::variables(2);
 
@@ -273,7 +273,7 @@ class TestAffineSet
         figure.write("test_affine_set-empty");
     }
 
-    void test_uniform_error() {
+    Void test_uniform_error() {
         double e=0.25;
         ExactInterval I = ExactInterval(-1,+1);
         ValidatedNumber E = ValidatedNumber(-e,+e);
@@ -309,7 +309,7 @@ class TestAffineSet
     }
 
 
-    void test_draw() {
+    Void test_draw() {
         ExactFloatVector2d offsets{0.0,0.0}; // Offsets
         ExactFloatVector& o=offsets;
         double& ox=(double&)offsets[0]; double& oy=(double&)offsets[1];
@@ -455,7 +455,7 @@ class TestAffineSet
         figure.write("test_affine_set-draw");
     }
 
-    void test() {
+    Void test() {
         figure.set_bounding_box(ExactBox{{-4.0_ex,+4.0_ex},{-4.0_ex,+4.0_ex}});
         ARIADNE_TEST_CALL(test_empty());
         ARIADNE_TEST_CALL(test_pure_constraint());
@@ -470,7 +470,7 @@ class TestAffineSet
 
 
 
-int main(int argc, const char* argv[])
+Int main(Int argc, const char* argv[])
 {
     TestAffineSet().test();
     std::cerr<<"INCOMPLETE ";

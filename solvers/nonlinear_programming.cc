@@ -97,82 +97,82 @@ DiagonalMatrix<X> diagonal_matrix(const Vector<X>& v) {
 }
 
 template<class X> inline
-bool epos(const Vector<X>& x) {
-    for(uint i=0; i!=x.size(); ++i) { if(x[i]<=0) { return false; } } return true;
+Bool epos(const Vector<X>& x) {
+    for(Nat i=0; i!=x.size(); ++i) { if(x[i]<=0) { return false; } } return true;
 }
 
 template<class X> inline
-bool eneg(const Vector<X>& x) {
-    for(uint i=0; i!=x.size(); ++i) { if(x[i]>=0) { return false; } } return true;
+Bool eneg(const Vector<X>& x) {
+    for(Nat i=0; i!=x.size(); ++i) { if(x[i]>=0) { return false; } } return true;
 }
 
 template<class X, class XX> inline
-bool egtr(const Vector<X>& x, const XX& s) {
-    for(uint i=0; i!=x.size(); ++i) { if(x[i]<=s) { return false; } } return true;
+Bool egtr(const Vector<X>& x, const XX& s) {
+    for(Nat i=0; i!=x.size(); ++i) { if(x[i]<=s) { return false; } } return true;
 }
 
 template<class X, class XX> inline
-bool elss(const Vector<X>& x, const XX& s) {
-    for(uint i=0; i!=x.size(); ++i) { if(x[i]>=s) { return false; } } return true;
+Bool elss(const Vector<X>& x, const XX& s) {
+    for(Nat i=0; i!=x.size(); ++i) { if(x[i]>=s) { return false; } } return true;
 }
 
 template<class X> inline
 Vector<X> eadd(const Vector<X>& x, const Vector<X>& y) {
-    Vector<X> r(x.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=x[i]+y[i]; } return r;
+    Vector<X> r(x.size()); for(Nat i=0; i!=r.size(); ++i) { r[i]=x[i]+y[i]; } return r;
 }
 
 template<class X> inline
 Vector<X> esub(const Vector<X>& x, const X& s) {
-    Vector<X> r(x.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=x[i]-s; } return r;
+    Vector<X> r(x.size()); for(Nat i=0; i!=r.size(); ++i) { r[i]=x[i]-s; } return r;
 }
 
 template<class X> inline
 Vector<X> esub(const Vector<X>& x, const Vector<X>& y) {
-    Vector<X> r(x.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=x[i]-y[i]; } return r;
+    Vector<X> r(x.size()); for(Nat i=0; i!=r.size(); ++i) { r[i]=x[i]-y[i]; } return r;
 }
 
 template<class X> inline
 Vector<X> emul(const Vector<X>& x, const Vector<X>& z) {
-    Vector<X> r(x.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=x[i]*z[i]; } return r;
+    Vector<X> r(x.size()); for(Nat i=0; i!=r.size(); ++i) { r[i]=x[i]*z[i]; } return r;
 }
 
 inline
 Vector<UpperInterval> emul(const Vector<UpperInterval>& x, const Vector<Float>& z) {
-    Vector<UpperInterval> r(x.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=x[i]*z[i]; } return r;
+    Vector<UpperInterval> r(x.size()); for(Nat i=0; i!=r.size(); ++i) { r[i]=x[i]*z[i]; } return r;
 }
 
 inline
 Vector<UpperInterval> emul(const Vector<Float>& x, const Vector<UpperInterval>& z) {
-    Vector<UpperInterval> r(x.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=x[i]*z[i]; } return r;
+    Vector<UpperInterval> r(x.size()); for(Nat i=0; i!=r.size(); ++i) { r[i]=x[i]*z[i]; } return r;
 }
 
 template<class X, class XX> inline
 Vector<X> ediv(const Vector<X>& x, const Vector<XX>& z) {
-    Vector<X> r(x.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=x[i]/z[i]; } return r;
+    Vector<X> r(x.size()); for(Nat i=0; i!=r.size(); ++i) { r[i]=x[i]/z[i]; } return r;
 }
 
 template<class X> inline
 Vector<X> ediv(const X& s, const Vector<X>& z) {
-    Vector<X> r(z.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=s/z[i]; } return r;
+    Vector<X> r(z.size()); for(Nat i=0; i!=r.size(); ++i) { r[i]=s/z[i]; } return r;
 }
 
 template<class X> inline
 Vector<X> erec(const Vector<X>& z) {
-    Vector<X> r(z.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=rec(z[i]); } return r;
+    Vector<X> r(z.size()); for(Nat i=0; i!=r.size(); ++i) { r[i]=rec(z[i]); } return r;
 }
 
 template<class X> inline
 Vector<X> esqr(const Vector<X>& z) {
-    Vector<X> r(z.size()); for(uint i=0; i!=r.size(); ++i) { r[i]=sqr(z[i]); } return r;
+    Vector<X> r(z.size()); for(Nat i=0; i!=r.size(); ++i) { r[i]=sqr(z[i]); } return r;
 }
 
 inline
 ExactInterval eivl(const RawFloatVector& x) {
-    ARIADNE_ASSERT(x.size()>0); ExactInterval r(x[0]); for(uint i=0; i!=x.size(); ++i) { r=hull(r,ExactFloat(x[i])); } return r;
+    ARIADNE_ASSERT(x.size()>0); ExactInterval r(x[0]); for(Nat i=0; i!=x.size(); ++i) { r=hull(r,ExactFloat(x[i])); } return r;
 }
 
 Matrix<ApproximateNumber> join(Matrix<ApproximateNumber> const& A1, Matrix<ApproximateNumber> const& A2, Matrix<ApproximateNumber> const& A3) {
-    uint m=A1.row_size(); uint n1=A1.column_size(); uint n2=A2.column_size(); uint n3=A3.column_size();
+    Nat m=A1.row_size(); Nat n1=A1.column_size(); Nat n2=A2.column_size(); Nat n3=A3.column_size();
     Matrix<ApproximateNumber> A123(m,n1+n2+n3);
     project(A123,range(0,m),range(0,n1))=A1;
     project(A123,range(0,m),range(n1,n1+n2))=A2;
@@ -181,7 +181,7 @@ Matrix<ApproximateNumber> join(Matrix<ApproximateNumber> const& A1, Matrix<Appro
 }
 
 template<class X> Matrix<X> cojoin(Matrix<X> const& A1, Matrix<X> const& A2, Matrix<X> const& A3) {
-    uint n=A1.column_size(); uint m1=A1.row_size(); uint m2=A2.row_size(); uint m3=A3.row_size();
+    Nat n=A1.column_size(); Nat m1=A1.row_size(); Nat m2=A2.row_size(); Nat m3=A3.row_size();
     Matrix<X> A123(m1+m2+m3,n);
     project(A123,range(0,m1),range(0,n))=A1;
     project(A123,range(m1,m1+m2),range(0,n))=A2;
@@ -192,20 +192,20 @@ template<class X> Matrix<X> cojoin(Matrix<X> const& A1, Matrix<X> const& A2, Mat
 
 // Compute S+=ADA^T, where D is diagonal and S is symmetric.
 template<class X>
-void adat(Matrix<X>& S, const Matrix<X>& A, const Vector<X>& D)
+Void adat(Matrix<X>& S, const Matrix<X>& A, const Vector<X>& D)
 {
-    const uint m=A.row_size();
-    const uint n=A.column_size();
-    for(uint i1=0; i1!=m; ++i1) {
-        for(uint j=0; j!=n; ++j) {
+    const Nat m=A.row_size();
+    const Nat n=A.column_size();
+    for(Nat i1=0; i1!=m; ++i1) {
+        for(Nat j=0; j!=n; ++j) {
             X ADij=A[i1][j]*D[j];
-            for(uint i2=i1; i2!=m; ++i2) {
+            for(Nat i2=i1; i2!=m; ++i2) {
                 S[i1][i2]+=ADij*A[i2][j];
             }
         }
     }
-    for(uint i1=1; i1!=m; ++i1) {
-        for(uint i2=0; i2!=i1; ++i2) {
+    for(Nat i1=1; i1!=m; ++i1) {
+        for(Nat i2=0; i2!=i1; ++i2) {
             S[i1][i2]=S[i2][i1];
         }
     }
@@ -213,24 +213,24 @@ void adat(Matrix<X>& S, const Matrix<X>& A, const Vector<X>& D)
 
 // Compute S+=A^TDA, where D is diagonal and S is symmetric.
 template<class X>
-void atda(Matrix<X>& S, const Matrix<X>& A, const Vector<X>& D)
+Void atda(Matrix<X>& S, const Matrix<X>& A, const Vector<X>& D)
 {
     assert(S.row_size()==S.column_size());
     assert(S.column_size()==A.column_size());
     assert(D.size()==A.row_size());
 
-    const uint m=A.column_size();
-    const uint n=A.row_size();
-    for(uint i1=0; i1!=m; ++i1) {
-        for(uint j=0; j!=n; ++j) {
+    const Nat m=A.column_size();
+    const Nat n=A.row_size();
+    for(Nat i1=0; i1!=m; ++i1) {
+        for(Nat j=0; j!=n; ++j) {
             X ATDij=A[j][i1]*D[j];
-            for(uint i2=i1; i2!=m; ++i2) {
+            for(Nat i2=i1; i2!=m; ++i2) {
                 S[i1][i2]+=ATDij*A[j][i2];
             }
         }
     }
-    for(uint i1=1; i1!=m; ++i1) {
-        for(uint i2=0; i2!=i1; ++i2) {
+    for(Nat i1=1; i1!=m; ++i1) {
+        for(Nat i2=0; i2!=i1; ++i2) {
             S[i1][i2]=S[i2][i1];
         }
     }
@@ -238,7 +238,7 @@ void atda(Matrix<X>& S, const Matrix<X>& A, const Vector<X>& D)
 
 // Compute S+=A^TDA, where D is diagonal and S is symmetric.
 template<class X>
-void atda(Matrix<X>& S, const Matrix<X>& A, const DiagonalMatrix<X>& D)
+Void atda(Matrix<X>& S, const Matrix<X>& A, const DiagonalMatrix<X>& D)
 {
     atda(S,A,D.diagonal());
 }
@@ -247,7 +247,7 @@ void atda(Matrix<X>& S, const Matrix<X>& A, const DiagonalMatrix<X>& D)
 template<class X>
 Matrix<X> adat(const Matrix<X>& A, const Vector<X>& D)
 {
-    const uint m=A.row_size();
+    const Nat m=A.row_size();
     Matrix<X> S=Matrix<X>::zero(m,m);
     adat(S,A,D);
     return S;
@@ -257,26 +257,26 @@ Matrix<X> adat(const Matrix<X>& A, const Vector<X>& D)
 template<class X>
 Matrix<X> amulat(const Matrix<X>& A)
 {
-    const uint m=A.row_size();
-    const uint n=A.column_size();
+    const Nat m=A.row_size();
+    const Nat n=A.column_size();
     Matrix<X> S(m,m);
-    for(uint i1=0; i1!=m; ++i1) {
-        for(uint j=0; j!=n; ++j) {
-            for(uint i2=i1; i2!=m; ++i2) {
+    for(Nat i1=0; i1!=m; ++i1) {
+        for(Nat j=0; j!=n; ++j) {
+            for(Nat i2=i1; i2!=m; ++i2) {
                 S[i1][i2]+=A[i1][j]*A[i2][j];
             }
         }
     }
-    for(uint i1=1; i1!=m; ++i1) {
-        for(uint i2=0; i2!=i1; ++i2) {
+    for(Nat i1=1; i1!=m; ++i1) {
+        for(Nat i2=0; i2!=i1; ++i2) {
             S[i1][i2]=S[i2][i1];
         }
     }
     return S;
 }
 
-template<class X> inline bool all_greater(const Vector<X>& x, const X& e) {
-    for(uint i=0; i!=x.size(); ++i) { if(x[i]<=e) { return false; } } return true;
+template<class X> inline Bool all_greater(const Vector<X>& x, const X& e) {
+    for(Nat i=0; i!=x.size(); ++i) { if(x[i]<=e) { return false; } } return true;
 }
 
 
@@ -289,9 +289,9 @@ template<class X> Vector< Differential<X> > second_derivative(const ValidatedVec
     return f.evaluate(d);
 }
 
-template<class Vec, class Diff> void set_gradient(Vec& g, const Diff& D) {
+template<class Vec, class Diff> Void set_gradient(Vec& g, const Diff& D) {
     typedef typename Diff::ValueType X;
-    uint i=0;
+    Nat i=0;
     typename Diff::ConstIterator iter=D.begin();
     if(iter!=D.end() && iter->key().degree()==0) { ++iter; }
     while(iter!=D.end() && iter->key().degree()<=2) {
@@ -301,17 +301,17 @@ template<class Vec, class Diff> void set_gradient(Vec& g, const Diff& D) {
     }
 }
 
-template<class Mx, class Diff> void set_jacobian_transpose(Mx& A, const Vector<Diff>& D) {
-    for(uint j=0; j!=A.column_size(); ++j) {
-        for(uint i=0; i!=A.row_size(); ++i) {
+template<class Mx, class Diff> Void set_jacobian_transpose(Mx& A, const Vector<Diff>& D) {
+    for(Nat j=0; j!=A.column_size(); ++j) {
+        for(Nat i=0; i!=A.row_size(); ++i) {
             A[i][j]=D[j][i];
         }
     }
 }
 
-template<class Mx, class Diff> void set_hessian(Mx& H, const Diff& D) {
+template<class Mx, class Diff> Void set_hessian(Mx& H, const Diff& D) {
     typedef typename Diff::ValueType X;
-    uint i=0; uint j=1;
+    Nat i=0; Nat j=1;
     typename Diff::ConstIterator iter=D.begin();
     while(iter!=D.end() && iter->key().degree()<=1) { ++iter; }
     while(iter!=D.end() && iter->key().degree()<=2) {
@@ -324,17 +324,17 @@ template<class Mx, class Diff> void set_hessian(Mx& H, const Diff& D) {
     }
 }
 
-template<class Mx, class S, class Diff> void add_hessian(Mx& H, const S& s, const Diff& D) {
+template<class Mx, class S, class Diff> Void add_hessian(Mx& H, const S& s, const Diff& D) {
     typedef typename Diff::ValueType X;
     typename Diff::ConstIterator iter=D.begin();
     while(iter!=D.end() && iter->key().degree()<=1) { ++iter; }
     while(iter!=D.end() && iter->key().degree()==2) {
         const MultiIndex& a=iter->key();
         const X& c=iter->data();
-        uint i=0;
+        Nat i=0;
         while(a[i]==0) { ++i; }
         if(a[i]==2) { H[i][i]+=s*c; }
-        else { uint j=i+1; while(a[j]==0) { ++j; } H[i][j]+=s*c; H[j][i]+=s*c; }
+        else { Nat j=i+1; while(a[j]==0) { ++j; } H[i][j]+=s*c; H[j][i]+=s*c; }
         ++iter;
     }
 }
@@ -342,17 +342,17 @@ template<class Mx, class S, class Diff> void add_hessian(Mx& H, const S& s, cons
 // Compute the product (A -A I -I ; 1 1 1 1) v
 template<class X, class XX> Vector<X> feasibility_mul(const Matrix<XX>& A, const Vector<X>& v)
 {
-    const uint m=A.row_size();
-    const uint n=A.column_size();
+    const Nat m=A.row_size();
+    const Nat n=A.column_size();
     ARIADNE_ASSERT(v.size()==2*(m+n));
     Vector<X> r(m+1u);
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         r[i]=v[2*n+i]-v[2*n+m+i];
-        for(uint j=0; j!=n; ++j) {
+        for(Nat j=0; j!=n; ++j) {
             r[i]+=A[i][j]*(v[j]-v[n+j]);
         }
     }
-    for(uint k=0; k!=2*(m+n); ++k) {
+    for(Nat k=0; k!=2*(m+n); ++k) {
         r[m]+=v[k];
     }
     return r;
@@ -361,20 +361,20 @@ template<class X, class XX> Vector<X> feasibility_mul(const Matrix<XX>& A, const
 // Compute the product (AT 1 \\ -AT 1 \\ I 1 \\ -I 1) I -I ; 1 1 1 1) v
 template<class X, class XX> Vector<X> feasibility_trmul(const Matrix<XX>& A, const Vector<X>& w)
 {
-    const uint m=A.row_size();
-    const uint n=A.column_size();
+    const Nat m=A.row_size();
+    const Nat n=A.column_size();
     ARIADNE_ASSERT(w.size()==m+1);
     Vector<X> r(2*(m+n));
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         r[j]=0;
-        for(uint i=0; i!=m; ++i) {
+        for(Nat i=0; i!=m; ++i) {
             r[j]+=A[i][j]*w[i];
         }
         r[n+j]=-r[j];
         r[j]+=w[m];
         r[n+j]+=w[m];
     }
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         r[2*n+i]=w[i]+w[m];
         r[2*n+m+i]=-w[i]+w[m];
     }
@@ -385,35 +385,35 @@ template<class X, class XX> Vector<X> feasibility_trmul(const Matrix<XX>& A, con
 // Compute the product \f$\hat{A}^T \hat{D} \hat{A} + \hat{H}\f$ where \f$\hat{A}=\left(\begin{matrix}A&-A&I&-I\\1&1&1&1\end{matrix}\right)\f$ and \f$\hat{D}=D\f$ is diagonal.
 template<class X> Matrix<X> feasibility_adat(const Matrix<X>& H, const Matrix<X>& A, const Vector<X>& D)
 {
-    const uint m=A.row_size();
-    const uint n=A.column_size();
+    const Nat m=A.row_size();
+    const Nat n=A.column_size();
     ARIADNE_ASSERT(H.row_size()==m);
     ARIADNE_ASSERT(H.column_size()==m);
     ARIADNE_ASSERT(D.size()==2*(m+n));
     Matrix<X> S(m+1,m+1);
 
-    for(uint i=0; i!=m; ++i) { for(uint j=0; j!=m; ++j) { S[i][j] = H[i][j]; } }
-    for(uint i=0; i!=m; ++i) { S[i][m]=0; S[m][i]=0; } S[m][m]=0;
+    for(Nat i=0; i!=m; ++i) { for(Nat j=0; j!=m; ++j) { S[i][j] = H[i][j]; } }
+    for(Nat i=0; i!=m; ++i) { S[i][m]=0; S[m][i]=0; } S[m][m]=0;
 
-    for(uint i1=0; i1!=m; ++i1) {
-        for(uint j=0; j!=n; ++j) {
+    for(Nat i1=0; i1!=m; ++i1) {
+        for(Nat j=0; j!=n; ++j) {
             X ADij=A[i1][j]*(D[j]+D[n+j]);
-            for(uint i2=0; i2!=m; ++i2) {
+            for(Nat i2=0; i2!=m; ++i2) {
                 S[i1][i2]+=ADij*A[i2][j];
             }
         }
     }
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         S[i][i]+=(D[2*n+i]+D[2*n+m+i]);
     }
-    for(uint i=0; i!=m; ++i) {
-        for(uint j=0; j!=n; ++j) {
+    for(Nat i=0; i!=m; ++i) {
+        for(Nat j=0; j!=n; ++j) {
             S[i][m]+=A[i][j]*(D[j]-D[n+j]);
         }
         S[i][m]+=(D[2*n+i]-D[2*n+m+i]);
         S[m][i]=S[i][m];
     }
-    for(uint k=0; k!=2*(m+n); ++k) {
+    for(Nat k=0; k!=2*(m+n); ++k) {
         S[m][m]+=D[k];
     }
 
@@ -471,7 +471,7 @@ inline ConstraintKind constraint_kind(ExactInterval C) {
 
 
 ExactBox widen(ExactBox bx, RawFloat e) {
-    for(uint i=0; i!=bx.size(); ++i) {
+    for(Nat i=0; i!=bx.size(); ++i) {
         bx[i]=ExactInterval(bx[i].lower().raw()-e,bx[i].upper().raw()+e);
     }
     return bx;
@@ -512,7 +512,7 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     Tribool result = true;
     Vector<ValidatedFloat> gx=g(X);
     ARIADNE_LOG(7,"g(X)="<<gx<<"\n");
-    for(uint i=0; i!=C.size(); ++i) {
+    for(Nat i=0; i!=C.size(); ++i) {
         if(definitely(disjoint(UpperInterval(gx[i]),C[i]))) {
             return false;
         }
@@ -525,9 +525,9 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     if(!definitely(result)) { return result; }
 
     // Extract the equality constraints
-    List<uint> equality_constraints;
+    List<Nat> equality_constraints;
     equality_constraints.reserve(C.size());
-    for(uint i=0; i!=C.size(); ++i) {
+    for(Nat i=0; i!=C.size(); ++i) {
         if(C[i].singleton()) { equality_constraints.append(i); }
     }
 
@@ -535,7 +535,7 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     ARIADNE_ASSERT(g.result_size()>0);
     ValidatedVectorFunction ge(equality_constraints.size(),g.argument_size());
     ExactIntervalVector ce(equality_constraints.size());
-    for(uint i=0; i!=ge.result_size(); ++i) {
+    for(Nat i=0; i!=ge.result_size(); ++i) {
         ge[i]=g[equality_constraints[i]];
         ce[i]=C[equality_constraints[i]];
     }
@@ -546,7 +546,7 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     UpperIntervalMatrix ivlA=ge.jacobian(X);
     ARIADNE_LOG(7,"ivlA="<<ivlA<<"\n");
     ApproximateFloatVector fltD(X.size());
-    for(uint i=0; i!=X.size(); ++i) { fltD[i]=rec(sqr(X[i].error())); }
+    for(Nat i=0; i!=X.size(); ++i) { fltD[i]=rec(sqr(X[i].error())); }
     ApproximateFloatMatrix fltA=midpoint(ivlA);
     ARIADNE_LOG(7,"A="<<fltA<<"\n");
     ARIADNE_LOG(7,"D="<<fltD<<"\n");
@@ -626,7 +626,7 @@ validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     Nat n=D.size();
     ValidatedVectorFunction h(equalities.size(),g.argument_size());
     ExactFloatVector c(equalities.size());
-    for(uint i=0; i!=equalities.size(); ++i) {
+    for(Nat i=0; i!=equalities.size(); ++i) {
         h[i] = g[equalities[i]];
         c[i] = C[equalities[i]].lower();
     }
@@ -638,13 +638,13 @@ validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     ARIADNE_LOG(5,"A="<<transpose(AT)<<"\n");
     Vector<ValidatedFloat> w0(k,ValidatedFloat(0));
 
-    bool found_solution=false;
-    bool validated_solution=false;
+    Bool found_solution=false;
+    Bool validated_solution=false;
 
     Vector<ValidatedFloat> w(k), mw(k), nw(k);
     Vector<ValidatedFloat> mx(n);
 
-    for(uint ii=0; ii!=12; ++ii) {
+    for(Nat ii=0; ii!=12; ++ii) {
         mw=midpoint(w);
         x=x0+AT*w;
         mx=make_exact(x0)+AT*mw;
@@ -683,7 +683,7 @@ validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     ARIADNE_DEBUG_ASSERT(models(h(x)-make_exact(c),ExactFloatVector(k)));
 
     // Check inequality constraints once more
-    for(uint i=0; i!=C.size(); ++i) {
+    for(Nat i=0; i!=C.size(); ++i) {
         if(C[i].lower()==C[i].upper()) {
             ARIADNE_DEBUG_ASSERT(models(gx[i],C[i].centre()));
         } else {
@@ -715,7 +715,7 @@ validate_infeasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     // Compute Taylor estimate of y g(X)
     VectorTaylorFunction tg(D,g,default_sweeper());
     ScalarTaylorFunction tyg(D,default_sweeper());
-    for(uint j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
+    for(Nat j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
     UpperInterval tygD = apply(tyg,D);
 
     UpperIntervalMatrix dgD = jacobian(g,D);
@@ -724,7 +724,7 @@ validate_infeasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     UpperInterval ygx = dot(UpperIntervalVector(y),apply(g,UpperIntervalVector(x)));
 
     UpperInterval ygD = ygx;
-    for(uint i=0; i!=x.size(); ++i) {
+    for(Nat i=0; i!=x.size(); ++i) {
         ygD += ydgD[i] * (D[i]-x[i]);
     }
 
@@ -744,16 +744,16 @@ is_infeasibility_certificate(ExactBox D, ValidatedVectorFunction g, ExactBox C, 
     if(y.size()==0) { return D.empty(); }
 
     // Try to prove lambda.(g(y)-c) != 0
-    const uint n=C.size();
+    const Nat n=C.size();
 
     ScalarTaylorFunction tyg(D,default_sweeper());
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         tyg+=y[i]*ScalarTaylorFunction(D,g[i],default_sweeper());
     }
     ValidatedNumber iygx = tyg(make_singleton(D));
 
     UpperInterval iyC = 0;
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         iyC+=y[i]*C[i];
     }
 
@@ -775,7 +775,7 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Valid
     ARIADNE_LOG(2,"OptimiserBase::minimise(f,D,g,h)\n");
     ValidatedVectorFunction gh=join(g,h);
     ExactBox C(gh.result_size(),ExactInterval(0.0));
-    for(uint i=0; i!=g.result_size(); ++i) { C[i]=ExactInterval(-inf,0.0); }
+    for(Nat i=0; i!=g.result_size(); ++i) { C[i]=ExactInterval(-inf,0.0); }
     return this->minimise(f,D,gh,C);
 }
 
@@ -787,7 +787,7 @@ feasible(ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const
     ARIADNE_LOG(2,"OptimiserBase::feasible(D,g,h)\n");
     ValidatedVectorFunction gh=join(g,h);
     ExactBox C(gh.result_size(),ExactInterval(0.0));
-    for(uint i=0; i!=g.result_size(); ++i) { C[i]=ExactInterval(-inf,0.0); }
+    for(Nat i=0; i!=g.result_size(); ++i) { C[i]=ExactInterval(-inf,0.0); }
     return this->feasible(D,gh,C);
 }
 
@@ -810,7 +810,7 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Exact
 
     static const double VALUE_TOLERANCE=1e-8;
     static const double STATE_TOLERANCE=1e-8;
-    static const uint MAXIMUM_STEPS=24;
+    static const Nat MAXIMUM_STEPS=24;
 
     ARIADNE_ASSERT(f.argument_size()==D.size());
     ARIADNE_ASSERT(g.argument_size()==D.size());
@@ -825,7 +825,7 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Exact
     static const float MU_MIN = 1e-12;
 
     // FIXME: Allow more steps
-    for(uint i=0; i!=MAXIMUM_STEPS; ++i) {
+    for(Nat i=0; i!=MAXIMUM_STEPS; ++i) {
         ARIADNE_LOG(4,"  f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
         oldx=x;
         ApproximateFloat oldfx=f(oldx);
@@ -874,7 +874,7 @@ feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const
     static const float MU_MIN = 1e-12;
 
     // FIXME: Allow more steps
-    for(uint i=0; i!=12; ++i) {
+    for(Nat i=0; i!=12; ++i) {
         ARIADNE_LOG(5,"f(x)="<<f(x)<<", x="<<x<<", y="<<y<<", g(x)="<<g(x)<<"\n");
         this->step(f,D,g,R,v);
         if(this->validate_feasibility(D,g,C,make_exact(x))) {
@@ -944,8 +944,8 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     static const double sigma=1.0/8;
     static const double scale=0.75;
 
-    const uint n=d.size();
-    const uint m=c.size();
+    const Nat n=d.size();
+    const Nat m=c.size();
 
     ARIADNE_ASSERT_MSG(f.argument_size()==d.size(),"f="<<f<<", D="<<d<<", g="<<g<<", C="<<c);
     ARIADNE_ASSERT_MSG(g.argument_size()==d.size(),"f="<<f<<", D="<<d<<", g="<<g<<", C="<<c);
@@ -973,7 +973,7 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
 
     // H is the Hessian matrix H of the Lagrangian $L(x,\lambda) = f(x) + \sum_k g_k(x) $
     Matrix<Float> YH = ddfx.hessian();
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         YH+=y[i]*ddgx[i].hessian();
     }
     ARIADNE_LOG(7,"D2f(x)="<<ddfx.hessian()<<"\n");
@@ -1009,8 +1009,8 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     atda(S,A,D);
     S+=E;
 
-    //FloatMatrix EE(n,n); for(uint j=0; j!=n; ++j) { EE[j][j]=E[j]; }
-    //FloatMatrix DD(m,m); for(uint i=0; i!=m; ++i) { DD[i][i]=E[i]; }
+    //FloatMatrix EE(n,n); for(Nat j=0; j!=n; ++j) { EE[j][j]=E[j]; }
+    //FloatMatrix DD(m,m); for(Nat i=0; i!=m; ++i) { DD[i][i]=E[i]; }
 
     ARIADNE_LOG(9,"S="<<S<<"\n");
     ARIADNE_DEBUG_ASSERT(norm(FloatMatrix(S-(YH+E+transpose(A)*(D*A))))/norm(S)<1e-8);
@@ -1106,8 +1106,8 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     // Pick an update value which minimises the objective function
     Float fxmin=make_raw(f(make_approximate(nx)));
     Float alphamin=1.0;
-    static const uint REDUCTION_STEPS=4;
-    for(uint i=0; i!=REDUCTION_STEPS; ++i) {
+    static const Nat REDUCTION_STEPS=4;
+    for(Nat i=0; i!=REDUCTION_STEPS; ++i) {
         alpha*=scale;
         nx = x-alpha*dx;
         Float fnx=make_raw(f(make_approximate(nx)));
@@ -1122,7 +1122,7 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     // Since we need to keep the point feasible, but the updates are linear
     // we need to validate feasibility directly.
     static const double MINIMUM_ALPHA=1e-16;
-    bool allfeasible=false;
+    Bool allfeasible=false;
     while(alpha>MINIMUM_ALPHA && !allfeasible) {
         nwl=wl-alpha*dwl;
         nwu=wu-alpha*dwu;
@@ -1154,10 +1154,10 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     vl=nvl; vu=nvu; zl=nzl; zu=nzu;
 
     Float nmu = 0.0;
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         nmu = nmu + wl[i]*vl[i] + wu[i]*vu[i];
     }
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         nmu = nmu + xl[j]*zl[j] + xu[j]*zu[j];
     }
     nmu /= (2*(m+n));
@@ -1191,7 +1191,7 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Exact
     ApproximateFloat mu = 1.0;
 
 
-    for(uint i=0; i!=12; ++i) {
+    for(Nat i=0; i!=12; ++i) {
         this->minimisation_step(f,D,g,C,h, x,w, kappa,lambda, mu);
         if(i%3==0 && i<=10) { mu *= 0.25; }
     }
@@ -1213,9 +1213,9 @@ minimisation_step(const ApproximateScalarFunction& f, const ExactBox& d, const A
                   ApproximateFloatVector& x, ApproximateFloatVector& w,
                   ApproximateFloatVector& kappa, ApproximateFloatVector& lambda, const ApproximateFloat& mu) const
 {
-    const uint n=x.size();
-    const uint m=kappa.size();
-    const uint l=lambda.size();
+    const Nat n=x.size();
+    const Nat m=kappa.size();
+    const Nat l=lambda.size();
 
     ARIADNE_DEBUG_PRECONDITION(w.size()==kappa.size());
     ARIADNE_DEBUG_PRECONDITION(f.argument_size()==n);
@@ -1266,8 +1266,8 @@ minimisation_step(const ApproximateScalarFunction& f, const ExactBox& d, const A
 
     // H is the Hessian matrix H[i1,i2] = df/dx[i1]dx[i2] + Sum_[j]kappa[j]*dg[j]/dx[i1]dx[i2] + Sum[k]lambda[k]*dh[k]/dx[i1]dx[i2]
     ApproximateFloatMatrix H = ddfx.hessian();
-    for(uint j=0; j!=m; ++j) { H += kappa[j] * ddgx[j].hessian(); }
-    for(uint k=0; k!=l; ++k) { H += lambda[k] * ddhx[k].hessian(); }
+    for(Nat j=0; j!=m; ++j) { H += kappa[j] * ddgx[j].hessian(); }
+    for(Nat k=0; k!=l; ++k) { H += lambda[k] * ddhx[k].hessian(); }
     ARIADNE_LOG(9,"H="<<H<<"\n");
 
     // Determines the weighting to give to the relaxation parameter mu
@@ -1278,7 +1278,7 @@ minimisation_step(const ApproximateScalarFunction& f, const ExactBox& d, const A
     //   rx = df/dx[i] + Sum[j] dg[j]/dx[i] * kappa[j] + Sum[k] dh[k]/dx[i] * lambda[j] + mu *( 1/(xu[i]-x[i]) - 1/(x[i]-xl[i]) )
     ApproximateFloatVector rx = df + transpose(A) * kappa + transpose(B)* lambda;
     ApproximateFloatDiagonalMatrix D(n);
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         ApproximateFloat nuu = rec(d[i].upper()-x[i]);
         ApproximateFloat nul = rec(x[i]-d[i].lower());
         rx[i] += mu * ( nuu - nul );
@@ -1288,7 +1288,7 @@ minimisation_step(const ApproximateScalarFunction& f, const ExactBox& d, const A
     //   rw = - kappa[j] + mu *( 1/(wu[i]-w[i]) - 1/(w[i]-wl[i]) )
     ApproximateFloatVector rw = -kappa;
     ApproximateFloatDiagonalMatrix C(m);
-    for(uint j=0; j!=m; ++j) {
+    for(Nat j=0; j!=m; ++j) {
         ApproximateFloat nuu = rec(c[j].upper()-w[j]);
         ApproximateFloat nul = rec(w[j]-c[j].lower());
         rw[j] += (mu*EQUALITY_RELAXATION_MULTIPLIER) * ( nuu - nul );
@@ -1345,7 +1345,7 @@ minimisation_step(const ApproximateScalarFunction& f, const ExactBox& d, const A
     ApproximateFloatVector newx(n);
     ApproximateFloatVector neww(m);
     ApproximateFloat alpha = 1.0;
-    bool success = false;
+    Bool success = false;
     do {
         newx = x - alpha * dx;
         neww = w - alpha * dw;
@@ -1384,7 +1384,7 @@ feasible(ExactBox d, ValidatedVectorFunction g, ExactBox c) const
     this->setup_feasibility(d,g,c,x,y);
 
     // FIXME: Allow more steps
-    for(uint i=0; i!=12; ++i) {
+    for(Nat i=0; i!=12; ++i) {
         ARIADNE_LOG(4,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", x="<<x<<", z="<<z<<"\n");
         this->feasibility_step(d,g,c,x,y);
         if(t>0) {
@@ -1402,7 +1402,7 @@ feasible(ExactBox d, ValidatedVectorFunction g, ExactBox c) const
 }
 
 
-void
+Void
 NonlinearInteriorPointOptimiser::feasibility_step(
     const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& c,
     ApproximateFloatVector& x, ApproximateFloatVector& y) const
@@ -1411,7 +1411,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 }
 
 
-void
+Void
 NonlinearInteriorPointOptimiser::feasibility_step(
     const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& c,
     ApproximateFloatVector& x, ApproximateFloatVector& y, ApproximateFloat& t) const
@@ -1422,8 +1422,8 @@ NonlinearInteriorPointOptimiser::feasibility_step(
     static const ApproximateFloat sigma=1.0/8;
     static const ApproximateFloat scale=0.75;
 
-    const uint m=d.size();
-    const uint n=c.size();
+    const Nat m=d.size();
+    const Nat n=c.size();
 
     ApproximateFloatVector z(n);
 
@@ -1442,7 +1442,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 
     // H is the Hessian matrix H of the Lagrangian $L(x,\lambda) = f(x) + \sum_k g_k(x) \lambda_k$
     Matrix<ApproximateFloat> H(m,m);
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         H+=y[i]*ddgx[i].hessian();
     }
     ARIADNE_LOG(7," H="<<H<<" ");
@@ -1451,12 +1451,12 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 
 
     // Add correction for bounded domain to diagonal elements of Hessian
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
     }
 
     // Compute diagonal entries of KKT Hessian
     Vector<ApproximateFloat> D(n);
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         if(c[j].lower()==c[j].upper()) {
         } else if(c[j].upper()==+inf) {
         } else if(c[j].lower()==-inf) {
@@ -1483,15 +1483,15 @@ NonlinearInteriorPointOptimiser::feasibility_step(
 
     // Construct the extended valuation GY=(gy-cu+te,cl-gy+te,y-bu+te,bl-y+te)
     ApproximateFloatVector gye(2*(m+n));
-    //for(uint j=0; j!=n; ++j) { gxe[j]=gy[j]-c[j].upper()+t; gye[n+j]=c[j].lower()-gy[j]+t; }
-    //for(uint i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper()+t; gye[2*n+m+i]=d[i].lower()-y[i]+t; }
+    //for(Nat j=0; j!=n; ++j) { gxe[j]=gy[j]-c[j].upper()+t; gye[n+j]=c[j].lower()-gy[j]+t; }
+    //for(Nat i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper()+t; gye[2*n+m+i]=d[i].lower()-y[i]+t; }
     ARIADNE_LOG(9,"  GE="<<gye<<"\n");
 
     // Construct the extended matrix AE=(A -A I -I \\ e e 0 0)
     ApproximateFloatMatrix AE(m+1,2*(m+n));
-    //for(uint i=0; i!=m; ++i) { for(uint j=0; j!=n; ++j) { AE[i][j]=A[i][j]; AE[i][n+j]=-A[i][j]; } }
-    //for(uint i=0; i!=m; ++i) { AE[i][2*n+i]=1; AE[i][2*n+m+i]=-1; }
-    //for(uint k=0; k!=o; ++k) { AE[m][k]=1; }
+    //for(Nat i=0; i!=m; ++i) { for(Nat j=0; j!=n; ++j) { AE[i][j]=A[i][j]; AE[i][n+j]=-A[i][j]; } }
+    //for(Nat i=0; i!=m; ++i) { AE[i][2*n+i]=1; AE[i][2*n+m+i]=-1; }
+    //for(Nat k=0; k!=o; ++k) { AE[m][k]=1; }
     ApproximateFloatMatrix AET=transpose(AE);
 
     // Construct the symmetric matrix and its inverse
@@ -1529,7 +1529,7 @@ NonlinearInteriorPointOptimiser::feasibility_step(
     // Since we need to keep the point feasible, but the updates are linear
     // we need to validate feasibility directly rather than assuming the
     // linear update of y and z are good enough.
-    bool allpositive=false;
+    Bool allpositive=false;
     ApproximateFloat alpha=1/scale;
     if(!egtr(emul(x,z) , gamma*mu/16)) {
         ARIADNE_LOG(1,"WARNING: x="<<x<<", z="<<z<< ", x.z="<<emul(x,z)<<"<"<<gamma*mu / 16);
@@ -1559,9 +1559,9 @@ Void NonlinearInteriorPointOptimiser::linearised_feasibility_step(
     static const double sigma=1.0/8;
     static const double scale=0.75;
 
-    const uint m=d.size();
-    const uint n=c.size();
-    const uint o=2*(m+n);
+    const Nat m=d.size();
+    const Nat n=c.size();
+    const Nat o=2*(m+n);
 
     ARIADNE_ASSERT_MSG(g.argument_size()==m,"d="<<d<<" g="<<g);
     ARIADNE_ASSERT_MSG(g.result_size()==n,"d="<<d<<" g="<<g<<" c="<<c);
@@ -1580,13 +1580,13 @@ Void NonlinearInteriorPointOptimiser::linearised_feasibility_step(
     ARIADNE_LOG(9,"  dg="<<dg<<"\n");
 
     // gy is the vector of values of g(y)
-    RawFloatVector gy(n); for(uint j=0; j!=n; ++j) { gy[j]=dg[j].value(); }
+    RawFloatVector gy(n); for(Nat j=0; j!=n; ++j) { gy[j]=dg[j].value(); }
     ARIADNE_LOG(9,"  g(y)="<<gy<<" ");
 
     // A is the transpose derivative matrix aij=dgj/dyi, extended with a column of ones
     FloatMatrix A(m,n);
-    for(uint i=0; i!=m; ++i) {
-        for(uint j=0; j!=n; ++j) {
+    for(Nat i=0; i!=m; ++i) {
+        for(Nat j=0; j!=n; ++j) {
             A[i][j]=dg[j][i];
         }
     }
@@ -1602,16 +1602,16 @@ Void NonlinearInteriorPointOptimiser::linearised_feasibility_step(
 
     // Construct the extended valuation GY=(gy-cu+te,cl-gy+te,y-bu+te,bl-y+te)
     RawFloatVector gye(o);
-    for(uint j=0; j!=n; ++j) { gye[j]=gy[j]-c[j].upper()+t; gye[n+j]=c[j].lower()-gy[j]+t; }
-    for(uint i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper()+t; gye[2*n+m+i]=d[i].lower()-y[i]+t; }
+    for(Nat j=0; j!=n; ++j) { gye[j]=gy[j]-c[j].upper()+t; gye[n+j]=c[j].lower()-gy[j]+t; }
+    for(Nat i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper()+t; gye[2*n+m+i]=d[i].lower()-y[i]+t; }
     ARIADNE_LOG(9,"  GE="<<gye<<"\n");
 
     // Construct the extended matrix AE=(A -A I -I \\ e e 0 0)
     FloatMatrix AE(m+1,o);
-    for(uint i=0; i!=m; ++i) { for(uint j=0; j!=n; ++j) { AE[i][j]=A[i][j]; AE[i][n+j]=-A[i][j]; } }
-    for(uint i=0; i!=m; ++i) { AE[i][2*n+i]=1; AE[i][2*n+m+i]=-1; }
-    for(uint k=0; k!=o; ++k) { AE[m][k]=1; }
-    for(uint k=0; k!=2*(m+n); ++k) { AE[m][k]=1; }
+    for(Nat i=0; i!=m; ++i) { for(Nat j=0; j!=n; ++j) { AE[i][j]=A[i][j]; AE[i][n+j]=-A[i][j]; } }
+    for(Nat i=0; i!=m; ++i) { AE[i][2*n+i]=1; AE[i][2*n+m+i]=-1; }
+    for(Nat k=0; k!=o; ++k) { AE[m][k]=1; }
+    for(Nat k=0; k!=2*(m+n); ++k) { AE[m][k]=1; }
     FloatMatrix AET=transpose(AE);
 
     // Construct the symmetric matrix and its inverse
@@ -1649,7 +1649,7 @@ Void NonlinearInteriorPointOptimiser::linearised_feasibility_step(
     // Since we need to keep the point feasible, but the updates are linear
     // we need to validate feasibility directly rather than assuming the
     // linear update of y and z are good enough.
-    bool allpositive=false;
+    Bool allpositive=false;
     Float alpha=1/scale;
     ARIADNE_ASSERT_MSG(egtr(emul(x,z),gamma*mu),emul(x,z)<<"<"<<gamma*mu);
     while(!allpositive) {
@@ -1679,7 +1679,7 @@ compute_mu(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox
     ApproximateFloat mu = 0.0;
     ApproximateFloatVector gx = g(x);
 
-    for(uint i=0; i!=C.size(); ++i) {
+    for(Nat i=0; i!=C.size(); ++i) {
         if(C[i].lower()==C[i].upper()) { }
         else if(C[i].lower()==-infty) { mu += lambda[i] * (gx[i] - C[i].upper()); }
         else if(C[i].upper()==+infty) { mu += lambda[i] * (gx[i] - C[i].lower()); }
@@ -1693,11 +1693,11 @@ compute_mu(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox
 }
 
 
-void NonlinearInteriorPointOptimiser::
+Void NonlinearInteriorPointOptimiser::
 setup_feasibility(const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& c,
                   ApproximateFloatVector& x, ApproximateFloatVector& y) const
 {
-    const uint l=2*(d.size()+c.size());
+    const Nat l=2*(d.size()+c.size());
     y=midpoint(d);
     x=ApproximateFloatVector(l,1.0/l);
     //compute_tz(d,g,c,y,t,z);
@@ -1731,7 +1731,7 @@ feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const
     ApproximateFloatVector x=midpoint(D);
 
     ApproximateFloatVector w=midpoint(C);
-    for(uint i=0; i!=C.size(); ++i) {
+    for(Nat i=0; i!=C.size(); ++i) {
         if(C[i].upper()==+infty) { w[i]=C[i].lower()+one; }
         else if(C[i].lower()==-infty) { w[i]=C[i].upper()-one; }
     }
@@ -1740,7 +1740,7 @@ feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const
 
     ARIADNE_LOG(5,"x="<<x<<" w="<<w<<" y="<<y<<"\n");
 
-    for(uint i=0; i!=10; ++i) {
+    for(Nat i=0; i!=10; ++i) {
         this->feasibility_step(D,g,C,x,y,w);
     }
     return this->check_feasibility(D,g,C,make_exact(x),make_exact(y));
@@ -1751,9 +1751,9 @@ feasibility_step(const ExactBox& X, const ApproximateVectorFunction& g, const Ex
                  ApproximateFloatVector& x, ApproximateFloatVector& w, ApproximateFloat& mu) const
 {
     ApproximateVectorFunction h(0u,X.size());
-    const uint n=X.size();
-    const uint m=W.size();
-    const uint l=h.result_size();
+    const Nat n=X.size();
+    const Nat m=W.size();
+    const Nat l=h.result_size();
 
     ARIADNE_LOG(4,"PenaltyFunctionOptimiser::feasibility_step(...)\n");
     ARIADNE_LOG(5,"x="<<x<<"\n");
@@ -1781,14 +1781,14 @@ feasibility_step(const ExactBox& X, const ApproximateVectorFunction& g, const Ex
 
     // H is the Hessian matrix H[i1,i2] = df/dx[i1]dx[i2] + Sum_[j] lambda[j]*dg[j]/dx[i1]dx[i2]
     ApproximateFloatMatrix H(n,n);
-    for(uint j=0; j!=m; ++j) { H += (gx[j]-w[j]) * ddgx[j].hessian(); }
-    for(uint k=0; k!=l; ++k) { H += (hx[k]) * ddhx[k].hessian(); }
+    for(Nat j=0; j!=m; ++j) { H += (gx[j]-w[j]) * ddgx[j].hessian(); }
+    for(Nat k=0; k!=l; ++k) { H += (hx[k]) * ddhx[k].hessian(); }
     ARIADNE_LOG(9,"H="<<H<<"\n");
 
     ApproximateFloatDiagonalMatrix D(n);
     ApproximateFloatDiagonalMatrix E(m);
-    for(uint i=0; i!=n; ++i) { D[i] = rec(sqr(x[i]-X[i].lower())) + rec(sqr(X[i].upper()-x[i])); }
-    for(uint j=0; j!=m; ++j) { E[j] = rec(sqr(w[j]-W[j].lower())) + rec(sqr(W[j].upper()-w[j])); }
+    for(Nat i=0; i!=n; ++i) { D[i] = rec(sqr(x[i]-X[i].lower())) + rec(sqr(X[i].upper()-x[i])); }
+    for(Nat j=0; j!=m; ++j) { E[j] = rec(sqr(w[j]-W[j].lower())) + rec(sqr(W[j].upper()-w[j])); }
     ARIADNE_LOG(9,"D="<<D<<"\n");
     ARIADNE_LOG(9,"E="<<E<<"\n");
 
@@ -1837,7 +1837,7 @@ feasibility_step(const ExactBox& X, const ApproximateVectorFunction& g, const Ex
 }
 
 
-void PenaltyFunctionOptimiser::
+Void PenaltyFunctionOptimiser::
 feasibility_step(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
                  ValidatedFloatVector& x, ValidatedFloatVector& w) const
 {
@@ -1847,7 +1847,7 @@ feasibility_step(const ExactBox& D, const ValidatedVectorFunction& g, const Exac
 
 // Use a penalty approach without multipliers on the constraint functions
 // Solve g(x)=w, x in D, w in C; Lagrangian y.(g(x)-w)
-void PenaltyFunctionOptimiser::
+Void PenaltyFunctionOptimiser::
 feasibility_step(ExactBox const& D, ApproximateVectorFunction const& g, ExactBox const& C,
                  ApproximateFloatVector& x, ApproximateFloatVector& y, ApproximateFloatVector& w) const
 {
@@ -1903,7 +1903,7 @@ feasibility_step(ExactBox const& D, ApproximateVectorFunction const& g, ExactBox
 
     // H is the Hessian matrix H of the Lagrangian $L(x,\lambda) = f(x) + \sum_k g_k(x) $
     Matrix<ApproximateNumber> YH(x.size(),x.size());
-    for(uint i=0; i!=y.size(); ++i) {
+    for(Nat i=0; i!=y.size(); ++i) {
         YH+=y[i]*ddgx[i].hessian();
     }
     ARIADNE_LOG(7,"Y.D2g(x)="<<YH<<"\n");
@@ -1914,11 +1914,11 @@ feasibility_step(ExactBox const& D, ApproximateVectorFunction const& g, ExactBox
     Vector<ApproximateNumber> recxl=x-dl; recxl=erec(recxl);
 
     Vector<ApproximateNumber> diagDw=esqr(recwu)+esqr(recwl);
-    Matrix<ApproximateNumber> Dw(m,m); for(uint i=0; i!=m; ++i) { Dw[i][i]=diagDw[i]; }
+    Matrix<ApproximateNumber> Dw(m,m); for(Nat i=0; i!=m; ++i) { Dw[i][i]=diagDw[i]; }
     DiagonalMatrix<ApproximateNumber> Dx(esqr(recxu)+esqr(recxl));
 
 
-    for(uint i=0; i!=n; ++i) { YH[i][i]-=Dx[i]; }
+    for(Nat i=0; i!=n; ++i) { YH[i][i]-=Dx[i]; }
 
     Matrix<ApproximateNumber> AT=transpose(A);
     Matrix<ApproximateNumber> Znm(n,m);
@@ -1930,7 +1930,7 @@ feasibility_step(ExactBox const& D, ApproximateVectorFunction const& g, ExactBox
     Matrix<ApproximateNumber> S=cojoin(join(Dw,Zmn,Im),join(Znm,-YH,-AT),join(Im,-A,Zmm));
     Vector<ApproximateNumber> r=join(recwu-recwl+y,recxu-recxl-yA,w-gx);
 
-    for(uint j=0; j!=m; ++j) {
+    for(Nat j=0; j!=m; ++j) {
         if(C[j].lower()==C[j].upper()) {
             S[j][j]=1;
             S[j][m+n+j]=0;
@@ -1964,23 +1964,23 @@ feasibility_step(ExactBox const& D, ApproximateVectorFunction const& g, ExactBox
 }
 
 /*
-void NonlinearInteriorPointOptimiser::
+Void NonlinearInteriorPointOptimiser::
 compute_tz(const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& b,
            const RawFloatVector& y, Float& t, RawFloatVector& z) const
 {
     static const double ZMIN=0.5;
 
-    const uint m=g.argument_size();
-    const uint n=g.result_size();
+    const Nat m=g.argument_size();
+    const Nat n=g.result_size();
 
     RawFloatVector gy=g(y);
 
     t=+inf;
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         t=min(t,b[j].upper()-gy[j]);
         t=min(t,gy[j]-b[j].lower());
     }
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         t=min(t,d[i].upper()-y[i]);
         t=min(t,y[i]-d[i].lower());
     }
@@ -1991,30 +1991,30 @@ compute_tz(const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox
     else { t-=ZMIN; }
 
     z.resize(2*(m+n));
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         z[j]=b[j].upper()-gy[j]-t;
         z[n+j]=gy[j]-b[j].lower()-t;
     }
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         z[2*n+i]=d[i].upper()-y[i]-t;
         z[2*n+m+i]=y[i]-d[i].lower()-t;
     }
 }
 
-void NonlinearInteriorPointOptimiser::compute_z(const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& b,
+Void NonlinearInteriorPointOptimiser::compute_z(const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& b,
                                                 const RawFloatVector& y, const Float& t, RawFloatVector& z) const
 {
-    const uint m=g.argument_size();
-    const uint n=g.result_size();
+    const Nat m=g.argument_size();
+    const Nat n=g.result_size();
 
     RawFloatVector gy=g(y);
 
     z.resize(2*(m+n));
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         z[j]=b[j].upper()-gy[j]-t;
         z[n+j]=gy[j]-b[j].lower()-t;
     }
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         z[2*n+i]=d[i].upper()-y[i]-t;
         z[2*n+m+i]=y[i]-d[i].lower()-t;
     }
@@ -2034,7 +2034,7 @@ feasible(ExactBox D, ValidatedVectorFunction h) const
     ApproximateFloatVector x=midpoint(D);
     ApproximateFloatVector y(h.result_size(),0.0);
 
-    for(uint i=0; i!=8; ++i) {
+    for(Nat i=0; i!=8; ++i) {
         this->feasibility_step(D,h,x,y);
     }
 
@@ -2052,22 +2052,22 @@ feasibility_step(const ExactBox& D, const ApproximateVectorFunction& h,
     ARIADNE_LOG(4,"ApproximateOptimiser::feasibility_step(D,h,x,y)\n");
     ARIADNE_LOG(5,"x="<<x<<" y="<<y<<"\n");
     static const double SCALE_FACTOR = 0.75;
-    const uint n=x.size();
-    const uint m=y.size();
+    const Nat n=x.size();
+    const Nat m=y.size();
     // Solve equations y Dh(x) - 1/(x-xl) + 1/(xu-x) = 0; h(x) = 0
     Vector<ApproximateFloatDifferential> ddhx=h.evaluate(ApproximateFloatDifferential::variables(2,x));
     ApproximateFloatMatrix A = ddhx.jacobian();
     ARIADNE_LOG(6,"A="<<A<<" b="<<ddhx.value()<<"\n");
 
     ApproximateFloatMatrix H(n,n);
-    for(uint i=0; i!=m; ++i) { H += y[i] * ddhx[i].hessian(); }
-    for(uint j=0; j!=n; ++j) {
+    for(Nat i=0; i!=m; ++i) { H += y[i] * ddhx[i].hessian(); }
+    for(Nat j=0; j!=n; ++j) {
         H[j][j] += rec(sqr(x[j]-D[j].lower()));
         H[j][j] += rec(sqr(D[j].upper()-x[j]));
     }
 
     ApproximateFloatVector rx = transpose(A) * y;
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         rx[j] -= rec(x[j]-D[j].lower());
         rx[j] += rec(D[j].upper()-x[j]);
     }
@@ -2119,8 +2119,8 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
 
     Tribool result = true;
 
-    List<uint> equalities;
-    for(uint j=0; j!=C.size(); ++j) {
+    List<Nat> equalities;
+    for(Nat j=0; j!=C.size(); ++j) {
         if(gx[j].upper()<C[j].lower() || gx[j].lower()>C[j].upper()) {
             return false;
         }
@@ -2136,7 +2136,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
 
         ValidatedVectorFunction h(equalities.size(),g.argument_size());
         ValidatedFloatVector c(equalities.size());
-        for(uint i=0; i!=equalities.size(); ++i) {
+        for(Nat i=0; i!=equalities.size(); ++i) {
             h[i] = g[equalities[i]];
             c[i] = C[equalities[i]].lower();
         }
@@ -2168,7 +2168,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     // Compute Taylor estimate of y g(X)
     VectorTaylorFunction tg(D,g,default_sweeper());
     ScalarTaylorFunction tyg(D,default_sweeper());
-    for(uint j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
+    for(Nat j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
     UpperInterval tygD = UpperInterval(tyg(make_singleton(D)));
 
     UpperIntervalMatrix dgD = jacobian(g,D);
@@ -2177,7 +2177,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     ValidatedFloat ygx = dot(y,gx);
 
     UpperInterval ygD = UpperInterval(ygx);
-    for(uint i=0; i!=x.size(); ++i) {
+    for(Nat i=0; i!=x.size(); ++i) {
         ygD += ydgD[i] * (D[i]-UpperInterval(x[i]));
     }
 
@@ -2240,8 +2240,8 @@ feasibility_step(const ExactBox& D, const ApproximateVectorFunction& g, const Ex
     RawFloatVector xl=lower_bounds(D); RawFloatVector xu=upper_bounds(D);
     RawFloatVector zl=lower_bounds(C); RawFloatVector zu=upper_bounds(C);
 
-    const uint n=x.size();
-    const uint m=y.size();
+    const Nat n=x.size();
+    const Nat m=y.size();
 
     ARIADNE_LOG(4,"x="<<x<<" y="<<y<<" z="<<z<<"\n");
     Vector<FloatDifferential> ddx = FloatDifferential::variables(2,x);
@@ -2253,10 +2253,10 @@ feasibility_step(const ExactBox& D, const ApproximateVectorFunction& g, const Ex
 
     RawFloatVector r(n+2*m,n+2*m);
     project(r,range(0,n)) = y * A;
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         r[i] += ( rec(x[i]-xl[i]) - rec(xu[i]-x[i]) );
     }
-    for(uint j=0; j!=m; ++j) {
+    for(Nat j=0; j!=m; ++j) {
         if(zl[j]==zu[j]) { assert(zu[j]==zl[j]); r[n+j] = z[j]-zl[j]; }
         else { r[n+j] = ( rec(z[j]-zl[j]) - rec(zu[j]-z[j]) - y[j] ); }
     }
@@ -2265,38 +2265,38 @@ feasibility_step(const ExactBox& D, const ApproximateVectorFunction& g, const Ex
     ARIADNE_LOG(5,"r="<<r<<"\n");
 
     FloatMatrix S(n+2*m+1,n+2*m+1);
-    for(uint j=0; j!=m; ++j) {
+    for(Nat j=0; j!=m; ++j) {
         FloatMatrix H=ddgx[j].hessian();
-        for(uint i1=0; i1!=n; ++i1) {
-            for(uint i2=0; i2!=n; ++i2) {
+        for(Nat i1=0; i1!=n; ++i1) {
+            for(Nat i2=0; i2!=n; ++i2) {
                 S[i1][i2]+=y[j]*H[i1][i2];
             }
         }
     }
-    for(uint j=0; j!=m; ++j) {
-        for(uint i=0; i!=n; ++i) {
+    for(Nat j=0; j!=m; ++j) {
+        for(Nat i=0; i!=n; ++i) {
             S[i][j+m+n]=A[j][i];
             S[j+m+n][i]=A[j][i];
         }
     }
-    for(uint j=0; j!=m; ++j) {
+    for(Nat j=0; j!=m; ++j) {
         S[n+j][n+m+j] = -1.0;
         S[n+m+j][n+j] = -1.0;
         //if(zl[j]==zu[j]) { S[n+j][n+j] = -1.0; S[n+j][n+m+j] = 0.0; }
         if(zl[j]==zu[j]) { S[n+j][n+j] = +inf; }
         else { S[n+j][n+j] = - rec(sqr(z[j]-zl[j])) - rec(sqr(zu[j]-z[j])); }
     }
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         S[i][i]-= rec(sqr(xu[i]-x[i]));
         S[i][i]-= rec(sqr(x[i]-xl[i]));
     }
 
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         S[i][n+2*m] -= rec(xu[i]-x[i]);
         S[i][n+2*m] += rec(x[i]-xl[i]);
     }
 
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         //S[n+m+j][n+m+j] = -1.0/1024;
     }
 
@@ -2334,7 +2334,7 @@ feasible(ExactBox D, ValidatedVectorFunction h) const
     ARIADNE_LOG(2,"IntervalOptimiser::feasible(D,h)\n");
     ARIADNE_LOG(3,"D="<<D<<", h="<<h<<"\n");
 
-    const uint n=D.size();
+    const Nat n=D.size();
 
     ValidatedFloatVector zl(n), zu(n);
     ExactFloatVector xl = Ariadne::lower_bounds(D);
@@ -2344,7 +2344,7 @@ feasible(ExactBox D, ValidatedVectorFunction h) const
     ValidatedFloatVector y(h.result_size(),ValidatedFloat(-1,+1));
     ValidatedFloat mu(0,1);
 
-    for(uint i=0; i!=8; ++i) {
+    for(Nat i=0; i!=8; ++i) {
         this->feasibility_step(xl,xu,h,x,y,zl,zu,mu);
     }
 
@@ -2358,8 +2358,8 @@ feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const V
     ARIADNE_LOG(4,"IntervalOptimiser::feasibility_step(D,h,X,Lambda)\n");
     ARIADNE_LOG(5,"[x]="<<x<<" [lambda]="<<y<<", [zl]="<<zl<<", [zu]="<<zu<<" [mu]="<<mu<<"\n");
 
-    const uint n=x.size();
-    const uint m=y.size();
+    const Nat n=x.size();
+    const Nat m=y.size();
 
     ValidatedFloatVector mx=midpoint(x);
     ValidatedFloatVector my=midpoint(y);
@@ -2376,7 +2376,7 @@ feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const V
     ARIADNE_LOG(6,"A="<<A<<" b="<<ddhx.value()<<"\n");
 
     ValidatedFloatVector rx = transpose(mA) * my;
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         rx[j] -= mmu*rec(mx[j]-xl[j]);
         rx[j] += mmu*rec(xu[j]-mx[j]);
     }
@@ -2386,8 +2386,8 @@ feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const V
     ARIADNE_LOG(5,"rx="<<rx<<" ry="<<ry<<" rzl="<<rzl<<" rzu="<<rzu<<"\n");
 
     ValidatedFloatMatrix H(n,n);
-    for(uint i=0; i!=m; ++i) { H += y[i] * ddhx[i].hessian(); }
-    for(uint j=0; j!=n; ++j) {
+    for(Nat i=0; i!=m; ++i) { H += y[i] * ddhx[i].hessian(); }
+    for(Nat j=0; j!=n; ++j) {
         H[j][j] += mu*rec(sqr(x[j]-xl[j]));
         H[j][j] += mu*rec(sqr(xu[j]-x[j]));
     }
@@ -2412,7 +2412,7 @@ feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const V
 
     x = refinement(x,nx); y=refinement(y,ny);
     ValidatedFloat nmu = 0;
-    for(uint i=0; i!=m; ++i) { nmu += sqr(y[i]); }
+    for(Nat i=0; i!=m; ++i) { nmu += sqr(y[i]); }
     mu=refinement(mu,nmu);
 }
 
@@ -2427,30 +2427,30 @@ struct KuhnTuckerFunctionBody : VectorFunctionMixin<KuhnTuckerFunctionBody,Exact
 
     KuhnTuckerFunctionBody(ValidatedScalarFunction _f, ValidatedVectorFunction _g) {
         ARIADNE_ASSERT(_f.argument_size()==_g.argument_size());
-        const uint m=_g.argument_size();
-        const uint n=_g.result_size();
-        g.resize(n); df.resize(m); dg.resize(n); for(uint j=0; j!=n; ++j) { dg[j].resize(m); }
+        const Nat m=_g.argument_size();
+        const Nat n=_g.result_size();
+        g.resize(n); df.resize(m); dg.resize(n); for(Nat j=0; j!=n; ++j) { dg[j].resize(m); }
         f=_f;
-        for(uint j=0; j!=n; ++j) { g[j]=_g[j]; }
-        for(uint i=0; i!=m; ++i) { df[i]=f.derivative(i); }
-        for(uint j=0; j!=n; ++j) { for(uint i=0; i!=m; ++i) { dg[j][i]=g[j].derivative(i); } }
+        for(Nat j=0; j!=n; ++j) { g[j]=_g[j]; }
+        for(Nat i=0; i!=m; ++i) { df[i]=f.derivative(i); }
+        for(Nat j=0; j!=n; ++j) { for(Nat i=0; i!=m; ++i) { dg[j][i]=g[j].derivative(i); } }
     }
 
-    uint result_size() const { return g.size()*2+f.argument_size(); }
-    uint argument_size() const { return g.size()*2+f.argument_size(); }
-    ValidatedScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
+    Nat result_size() const { return g.size()*2+f.argument_size(); }
+    Nat argument_size() const { return g.size()*2+f.argument_size(); }
+    ValidatedScalarFunction operator[](Nat) const { ARIADNE_NOT_IMPLEMENTED; }
     OutputStream& write(OutputStream&) const { ARIADNE_NOT_IMPLEMENTED; }
 
-    template<class X> void _compute(Vector<X>& res, const Vector<X>& arg) const {
-        const uint m=f.argument_size();
-        const uint n=g.size();
+    template<class X> Void _compute(Vector<X>& res, const Vector<X>& arg) const {
+        const Nat m=f.argument_size();
+        const Nat n=g.size();
         Vector<X> x(project(arg,range(0,n)));
         Vector<X> y(project(arg,range(n,n+m)));
         Vector<X> z(project(arg,range(n+m,n+m+n)));
         Vector<X> rx(m), rz(n), rs(n);
-        for(uint i=0; i!=m; ++i) { rx[i]=df[i].evaluate(y); for(uint j=0; j!=n; ++j) { rx[i]=rx[i]-x[j]*dg[j][i].evaluate(y); } }
-        for(uint j=0; j!=n; ++j) { rz[j]=g[j].evaluate(y) + z[j]; }
-        for(uint j=0; j!=n; ++j) { rs[j]=x[j]*z[j]; }
+        for(Nat i=0; i!=m; ++i) { rx[i]=df[i].evaluate(y); for(Nat j=0; j!=n; ++j) { rx[i]=rx[i]-x[j]*dg[j][i].evaluate(y); } }
+        for(Nat j=0; j!=n; ++j) { rz[j]=g[j].evaluate(y) + z[j]; }
+        for(Nat j=0; j!=n; ++j) { rs[j]=x[j]*z[j]; }
         project(res,range(0,n))=rz;
         project(res,range(n,n+m))=rx;
         project(res,range(n+m,n+m+n))=rs;
@@ -2463,29 +2463,29 @@ struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTu
     Array<Array<ValidatedScalarFunction> > dg;
 
     FeasibilityKuhnTuckerFunctionBody(ValidatedVectorFunction _g) {
-        const uint m=_g.argument_size();
-        const uint n=_g.result_size();
-        g.resize(n); dg.resize(n); for(uint j=0; j!=n; ++j) { dg[j].resize(m); }
-        for(uint j=0; j!=n; ++j) { g[j]=_g[j]; for(uint i=0; i!=m; ++i) { dg[j][i]=g[j].derivative(i); } }
+        const Nat m=_g.argument_size();
+        const Nat n=_g.result_size();
+        g.resize(n); dg.resize(n); for(Nat j=0; j!=n; ++j) { dg[j].resize(m); }
+        for(Nat j=0; j!=n; ++j) { g[j]=_g[j]; for(Nat i=0; i!=m; ++i) { dg[j][i]=g[j].derivative(i); } }
     }
 
-    uint result_size() const { return g.size()*2+g[0].argument_size()+1; }
-    uint argument_size() const { return g.size()*2+g[0].argument_size()+1; }
-    ValidatedScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
+    Nat result_size() const { return g.size()*2+g[0].argument_size()+1; }
+    Nat argument_size() const { return g.size()*2+g[0].argument_size()+1; }
+    ValidatedScalarFunction operator[](Nat) const { ARIADNE_NOT_IMPLEMENTED; }
     OutputStream& write(OutputStream&) const { ARIADNE_NOT_IMPLEMENTED; }
 
-    template<class X> void _compute(Vector<X>& res, const Vector<X>& arg) const {
-        const uint m=g[0].argument_size();
-        const uint n=g.size();
+    template<class X> Void _compute(Vector<X>& res, const Vector<X>& arg) const {
+        const Nat m=g[0].argument_size();
+        const Nat n=g.size();
         Vector<X> x(project(arg,range(0,n)));
         Vector<X> y(project(arg,range(n,n+m)));
         Vector<X> z(project(arg,range(n+m,n+m+n)));
         X t(arg[n+m+n]);
         Vector<X> rx(m), rz(n), rs(n); X rt;
-        for(uint i=0; i!=m; ++i) { rx[i]=x[0]*dg[0][i].evaluate(y); for(uint j=1; j!=n; ++j) { rx[i]=rx[i]+x[j]*dg[j][i].evaluate(y); } }
-        for(uint j=0; j!=n; ++j) { rz[j]=g[j].evaluate(y) + t + z[j]; }
-        for(uint j=0; j!=n; ++j) { rs[j]=x[j]*z[j]; }
-        rt=1-x[0]; for(uint j=1; j!=n; ++j) { rt=rt-x[j]; }
+        for(Nat i=0; i!=m; ++i) { rx[i]=x[0]*dg[0][i].evaluate(y); for(Nat j=1; j!=n; ++j) { rx[i]=rx[i]+x[j]*dg[j][i].evaluate(y); } }
+        for(Nat j=0; j!=n; ++j) { rz[j]=g[j].evaluate(y) + t + z[j]; }
+        for(Nat j=0; j!=n; ++j) { rs[j]=x[j]*z[j]; }
+        rt=1-x[0]; for(Nat j=1; j!=n; ++j) { rt=rt-x[j]; }
         project(res,range(0,n))=rz;
         project(res,range(n,n+m))=rx;
         project(res,range(n+m,n+m+n))=rs;
@@ -2497,8 +2497,8 @@ struct FeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTu
 
 struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<FeasibilityKuhnTuckerFunctionBody,ExactInterval>
 {
-    uint m;
-    uint n;
+    Nat m;
+    Nat n;
     ExactIntervalVector d;
     Array<ValidatedScalarFunction> g;
     ExactIntervalVector c;
@@ -2508,18 +2508,18 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<Feasib
         m=_g.argument_size();
         n=_g.result_size();
         d=D; c=C;
-        g.resize(n); dg.resize(n); for(uint j=0; j!=n; ++j) { dg[j].resize(m); }
-        for(uint j=0; j!=n; ++j) { g[j]=_g[j]; for(uint i=0; i!=m; ++i) { dg[j][i]=g[j].derivative(i); } }
+        g.resize(n); dg.resize(n); for(Nat j=0; j!=n; ++j) { dg[j].resize(m); }
+        for(Nat j=0; j!=n; ++j) { g[j]=_g[j]; for(Nat i=0; i!=m; ++i) { dg[j][i]=g[j].derivative(i); } }
     }
 
-    uint result_size() const { return 5*m+4*n+1u; }
-    uint argument_size() const { return 5*m+4*n+1u; }
-    ValidatedScalarFunction operator[](uint) const { ARIADNE_NOT_IMPLEMENTED; }
+    Nat result_size() const { return 5*m+4*n+1u; }
+    Nat argument_size() const { return 5*m+4*n+1u; }
+    ValidatedScalarFunction operator[](Nat) const { ARIADNE_NOT_IMPLEMENTED; }
     OutputStream& write(OutputStream& os) const { return os << "KuhnTuckerFunctionBody"; }
 
-    template<class X> void _compute(Vector<X>& res, const Vector<X>& arg) const {
+    template<class X> Void _compute(Vector<X>& res, const Vector<X>& arg) const {
         const X zero=arg[0].zero_element();
-        const uint l=2*(m+n);
+        const Nat l=2*(m+n);
         assert(arg.size()==l+m+l+1);
         Vector<X> x(project(arg,range(0u,l)));
         Vector<X> y(project(arg,range(l,l+m)));
@@ -2527,18 +2527,18 @@ struct ConstrainedFeasibilityKuhnTuckerFunctionBody : VectorFunctionMixin<Feasib
         X t(arg[l+m+l]);
         Vector<X> rx(m,zero), rz(l,zero), rs(l,zero); X rt(zero);
         Vector<X> gy(n);
-        for(uint j=0; j!=n; ++j) { gy[j]=g[j].evaluate(y); }
+        for(Nat j=0; j!=n; ++j) { gy[j]=g[j].evaluate(y); }
         Matrix<X> dgy(n,m);
-        for(uint i=0; i!=m; ++i) { for(uint j=0; j!=n; ++j) { dgy[j][i]=dg[j][i].evaluate(y); } }
+        for(Nat i=0; i!=m; ++i) { for(Nat j=0; j!=n; ++j) { dgy[j][i]=dg[j][i].evaluate(y); } }
 
-        for(uint i=0; i!=m; ++i) {
-            for(uint j=0; j!=n; ++j) { rx[i]+=x[j]*(dgy[j][i]-c[j].upper()); rx[i]+=x[n+j]*(c[j].lower()-dgy[j][i]); }
+        for(Nat i=0; i!=m; ++i) {
+            for(Nat j=0; j!=n; ++j) { rx[i]+=x[j]*(dgy[j][i]-c[j].upper()); rx[i]+=x[n+j]*(c[j].lower()-dgy[j][i]); }
             rx[i]+=x[2*n+i]*(y[i]-d[i].upper())-x[2*n+m+i]*(d[i].lower()-y[i]);
         }
-        for(uint j=0; j!=n; ++j) { rz[j]=gy[j] + t + z[j]; rz[n+j]=t+z[n+j]-gy[j]; }
-        for(uint i=0; i!=m; ++i) { rz[2*n+i]=y[i]+t+z[2*n+i]; rz[2*n+m+i]=y[i]+t+z[2*n+m+i]; }
-        for(uint k=0; k!=l; ++k) { rs[k]=x[k]*z[k]; }
-        rt+=1.0; for(uint j=0; j!=2*n; ++j) { rt=rt-x[j]; }
+        for(Nat j=0; j!=n; ++j) { rz[j]=gy[j] + t + z[j]; rz[n+j]=t+z[n+j]-gy[j]; }
+        for(Nat i=0; i!=m; ++i) { rz[2*n+i]=y[i]+t+z[2*n+i]; rz[2*n+m+i]=y[i]+t+z[2*n+m+i]; }
+        for(Nat k=0; k!=l; ++k) { rs[k]=x[k]*z[k]; }
+        rt+=1.0; for(Nat j=0; j!=2*n; ++j) { rt=rt-x[j]; }
         project(res,range(0,l))=rz;
         project(res,range(l,l+m))=rx;
         project(res,range(l+m,l+m+l))=rs;
@@ -2569,7 +2569,7 @@ feasible(ExactBox d, ValidatedVectorFunction g, ExactBox c) const
 
 
     // FIXME: Allow more steps
-    for(uint i=0; i!=12; ++i) {
+    for(Nat i=0; i!=12; ++i) {
         ARIADNE_LOG(4,"  t="<<t<<", y="<<y<<", g(y)="<<g(y)<<", x="<<x<<", z="<<z<<"\n");
         try {
             this->feasibility_step(d,g,c,x,y,z,t);
@@ -2601,12 +2601,12 @@ feasible(ExactBox d, ValidatedVectorFunction g, ExactBox c) const
 
 
 
-void KrawczykOptimiser::setup_feasibility(const ExactBox& d, const ValidatedVectorFunction& g, const ExactBox& c,
+Void KrawczykOptimiser::setup_feasibility(const ExactBox& d, const ValidatedVectorFunction& g, const ExactBox& c,
                                           ExactIntervalVector& x, ExactIntervalVector& y, ExactIntervalVector& z, ExactInterval& t) const
 {
-    const uint m=g.argument_size();
-    const uint n=g.result_size();
-    const uint l=2*(m+n);
+    const Nat m=g.argument_size();
+    const Nat n=g.result_size();
+    const Nat l=2*(m+n);
     x=ExactIntervalVector(l, ExactInterval(0,1)/l);
     y=d;
     z.resize(2*(m+n));
@@ -2614,15 +2614,15 @@ void KrawczykOptimiser::setup_feasibility(const ExactBox& d, const ValidatedVect
 }
 
 
-void KrawczykOptimiser::compute_tz(const ExactBox& d, const ValidatedVectorFunction& g, const ExactBox& c,
+Void KrawczykOptimiser::compute_tz(const ExactBox& d, const ValidatedVectorFunction& g, const ExactBox& c,
                                    const ExactIntervalVector& y, ExactInterval& t, ExactIntervalVector& z) const
 {
     ARIADNE_ASSERT(d.size()>0u);
     //static const double EPS=1.0/8;
     static const float min_float=std::numeric_limits<float>::min();
 
-    const uint m=g.argument_size();
-    const uint n=g.result_size();
+    const Nat m=g.argument_size();
+    const Nat n=g.result_size();
 
     // Compute the image of y under the constraint function
     ExactIntervalVector gy=g(y);
@@ -2633,11 +2633,11 @@ void KrawczykOptimiser::compute_tz(const ExactBox& d, const ValidatedVectorFunct
     // Find the range of possible values of the optimal t
     // This range is too pessimistic
     t=ExactInterval(+inf,+inf);
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         t=min(t,c[j]-gy[j]);
         t=min(t,gy[j]-c[j]);
     }
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         t=min(t,d[i]-y[i]);
         t=min(t,y[i]-d[i]);
     }
@@ -2645,13 +2645,13 @@ void KrawczykOptimiser::compute_tz(const ExactBox& d, const ValidatedVectorFunct
     // Find the range of possible values of the optimal t
     Float tmin=+inf;
     Float tmax=+inf;
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         tmax=min(tmax,sub_up(c[j].upper(),gy[j].lower()));
         tmax=min(tmax,sub_up(gy[j].upper(),c[j].lower()));
         tmin=min(tmin,sub_down(c[j].upper(),mgy[j].upper()));
         tmin=min(tmin,sub_down(mgy[j].lower(),c[j].lower()));
     }
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         tmin=min(tmin,sub_up(d[i].upper(),y[i].lower()));
         tmax=min(tmax,sub_up(y[i].upper(),d[i].lower()));
         tmin=min(tmin,sub_down(d[i].upper(),my[i].upper()));
@@ -2663,22 +2663,22 @@ void KrawczykOptimiser::compute_tz(const ExactBox& d, const ValidatedVectorFunct
 
     // Find the range of possible values of the optimal z
     // This range is too pessimistic
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         z[j]=max(c[j].upper()-gy[j]-t,0.0);
         z[n+j]=max(gy[j]-c[j].lower()-t,0.0);
     }
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         z[2*n+i]=max(d[i].upper()-y[i]-t,0.0);
         z[2*n+m+i]=max(y[i]-d[i].lower()-t,0.0);
     }
 
     // Find the range of possible values of the optimal z
     // This range is too pessimistic
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         z[j]=ExactInterval(0.0,c[j].upper()-mgy[j].lower()-tmin);
         z[n+j]=ExactInterval(0.0,mgy[j].upper()-c[j].lower()-tmin);
     }
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         z[2*n+i]=ExactInterval(0.0,d[i].upper()-my[i].lower()-tmin);
         z[2*n+m+i]=ExactInterval(0.0,my[i].upper()-d[i].lower()-tmin);
     }
@@ -2688,19 +2688,19 @@ void KrawczykOptimiser::compute_tz(const ExactBox& d, const ValidatedVectorFunct
 }
 
 
-void KrawczykOptimiser::
+Void KrawczykOptimiser::
 minimisation_step(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g,
                   ExactIntervalVector& x, ExactIntervalVector& y, ExactIntervalVector& z) const
 {
-    const uint m=f.argument_size();
-    const uint n=g.result_size();
+    const Nat m=f.argument_size();
+    const Nat n=g.result_size();
 
     Differential<ExactInterval> ddf=f.evaluate(Differential<ExactInterval>::variables(2,y));
     Vector< Differential<ExactInterval> > ddg=g.evaluate(Differential<ExactInterval>::variables(2,y));
 
     ExactIntervalMatrix H(m,m);
     set_hessian(H,ddf);
-    for(uint j=0; j!=n; ++j) { add_hessian(H,-x[j],ddg[j]); }
+    for(Nat j=0; j!=n; ++j) { add_hessian(H,-x[j],ddg[j]); }
 
     ExactIntervalMatrix A(m,n);
     set_jacobian_transpose(A,ddg);
@@ -2714,19 +2714,19 @@ minimisation_step(const ValidatedScalarFunction& f, const ValidatedVectorFunctio
 
 
 
-void KrawczykOptimiser::feasibility_step(const ValidatedVectorFunction& g,
+Void KrawczykOptimiser::feasibility_step(const ValidatedVectorFunction& g,
                                          ExactIntervalVector& x, ExactIntervalVector& y, ExactIntervalVector& z, ExactInterval& t) const
 {
     ARIADNE_NOT_IMPLEMENTED;
-    const uint m=y.size();
-    const uint n=x.size();
+    const Nat m=y.size();
+    const Nat n=x.size();
 
     Vector< Differential<ExactInterval> > ddg=g.evaluate(Differential<ExactInterval>::variables(2,y));
 
     // A is the transpose derivative matrix aij=dgj/dyi
     ExactIntervalMatrix A(m,n);
-    for(uint i=0; i!=m; ++i) {
-        for(uint j=0; j!=n; ++j) {
+    for(Nat i=0; i!=m; ++i) {
+        for(Nat j=0; j!=n; ++j) {
             A[i][j]=ddg[j][i];
         }
     }
@@ -2734,7 +2734,7 @@ void KrawczykOptimiser::feasibility_step(const ValidatedVectorFunction& g,
 
     // H is the Hessian matrix Hik = xj*dgj/dyidyk
     ExactIntervalMatrix H(m,m);
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         add_hessian(H,x[j],ddg[j]);
     }
     ARIADNE_LOG(9," H="<<H<<"\n");
@@ -2745,7 +2745,7 @@ void KrawczykOptimiser::feasibility_step(const ValidatedVectorFunction& g,
     ARIADNE_LOG(9," mH="<<mH<<"\n");
 
     RawFloatVector mD(n);
-    for(uint j=0; j!=n; ++j) { mD[j]=midpoint(x[j])/midpoint(z[j]); }
+    for(Nat j=0; j!=n; ++j) { mD[j]=midpoint(x[j])/midpoint(z[j]); }
     ARIADNE_LOG(9," mD="<<mD<<"\n");
 
     FloatMatrix& mS=mH;
@@ -2758,58 +2758,58 @@ void KrawczykOptimiser::feasibility_step(const ValidatedVectorFunction& g,
 // Feasibility step for dual (inequality constrained) problem without using slack variables
 // FIXME: Do we need a slackness parameter mu? Probably not; hopefully the infinities are kept in check...
 // This method has the advantage of not needing to update the primal variables
-void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVectorFunction& g, const ExactBox& c,
+Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVectorFunction& g, const ExactBox& c,
                                          ExactIntervalVector& y, ExactInterval& t) const
 {
-    const uint m=d.size();
-    const uint n=c.size();
+    const Nat m=d.size();
+    const Nat n=c.size();
 
     // Compute function values
     Vector< Differential<ExactInterval> > ddg=g.evaluate(Differential<ExactInterval>::variables(2,y));
 
     // gy is the vector of values of g(y)
     ExactIntervalVector gy(n);
-    for(uint j=0; j!=n; ++j) { gy[j]=ddg[j].value(); }
+    for(Nat j=0; j!=n; ++j) { gy[j]=ddg[j].value(); }
 
     // z is the vector of slack variables z[k]=cu[k]-gy[k]-t or z[k]=gy[k]-cl[k]-t
     ExactIntervalVector z(2*(m+n));
-    for(uint j=0; j!=n; ++j) { z[j]=d[j].upper()-gy[j]-t; z[n+j]=gy[j]-d[j].lower()-t; }
-    for(uint i=0; i!=m; ++i) { z[i]=c[2*n+i].upper()-y[i]-t; z[2*n+m+i]=y[i]-c[i].lower()-t; }
+    for(Nat j=0; j!=n; ++j) { z[j]=d[j].upper()-gy[j]-t; z[n+j]=gy[j]-d[j].lower()-t; }
+    for(Nat i=0; i!=m; ++i) { z[i]=c[2*n+i].upper()-y[i]-t; z[2*n+m+i]=y[i]-c[i].lower()-t; }
 
     ExactIntervalVector zr(2*(m+n));
-    for(uint k=0; k!=2*(m+n); ++k) { zr[k]=1.0/z[k]; }
+    for(Nat k=0; k!=2*(m+n); ++k) { zr[k]=1.0/z[k]; }
 
     ExactIntervalVector D(2*(m+n));
-    for(uint k=0; k!=2*(m+n); ++k) { D[k]=zr[k]*zr[k]; }
+    for(Nat k=0; k!=2*(m+n); ++k) { D[k]=zr[k]*zr[k]; }
 
     // A is the transpose derivative matrix aij=dgj/dyi
     ExactIntervalMatrix A(m,n);
-    for(uint i=0; i!=m; ++i) { for(uint j=0; j!=n; ++j) { A[i][j]=ddg[j][i]; } }
+    for(Nat i=0; i!=m; ++i) { for(Nat j=0; j!=n; ++j) { A[i][j]=ddg[j][i]; } }
 
     // A is the sum of scaled Hessian matrices hi1i2=zj*ddgj/dyi1yi2
     ExactIntervalMatrix H(m,m);
 
     ExactIntervalMatrix SE(m+1,m+1);
     // SE[0:m][0:m] is the matrix H+/-A(D1+D2)AT+(D3+D4) where D=z.z
-    for(uint i1=0; i1!=m; ++i1) { for(uint i2=0; i2!=m; ++i2) { SE[i1][i2]=H[i1][i2];
-        for(uint j=0; j!=n; ++j) { SE[i1][i2]+=A[i1][j]*(D[j]+D[n+j])*A[i2][j]; }
+    for(Nat i1=0; i1!=m; ++i1) { for(Nat i2=0; i2!=m; ++i2) { SE[i1][i2]=H[i1][i2];
+        for(Nat j=0; j!=n; ++j) { SE[i1][i2]+=A[i1][j]*(D[j]+D[n+j])*A[i2][j]; }
     } }
-    for(uint i=0; i!=m; ++i) { SE[i][i]+=(D[2*n+i]+D[2*n+m+i]); }
+    for(Nat i=0; i!=m; ++i) { SE[i][i]+=(D[2*n+i]+D[2*n+m+i]); }
     // SE[m][0:m]=SE[0:m][m] is the vector A(D1-D2)e+(D3-D4)e
-    for(uint i=0; i!=m; ++i) { SE[i][m]=D[2*n+i]-D[2*n+m+i];
-        for(uint j=0; j!=n; ++j) { SE[i][m]+=A[i][j]*(D[j]-D[n+j]); }
+    for(Nat i=0; i!=m; ++i) { SE[i][m]=D[2*n+i]-D[2*n+m+i];
+        for(Nat j=0; j!=n; ++j) { SE[i][m]+=A[i][j]*(D[j]-D[n+j]); }
         SE[m][i]=SE[i][m];
     }
     // SE[m][m] is the scalar eT(D1+D2)e+eT(D3+D4)e
-    for(uint k=0; k!=2*(m+n); ++k) { SE[m][m]+=D[k]; }
+    for(Nat k=0; k!=2*(m+n); ++k) { SE[m][m]+=D[k]; }
 
     // Vector of residuals
     ExactIntervalVector re(m+1);
-    for(uint i=0; i!=m; ++i) { re[i]+=(zr[2*n+i]-zr[2*n+m+i]);
-        for(uint j=0; j!=n; ++j) { re[i]+=A[i][j]*(zr[j]-zr[n+j]); }
+    for(Nat i=0; i!=m; ++i) { re[i]+=(zr[2*n+i]-zr[2*n+m+i]);
+        for(Nat j=0; j!=n; ++j) { re[i]+=A[i][j]*(zr[j]-zr[n+j]); }
     }
-    for(uint j=0; j!=n; ++j) { re[m]+=(zr[j]+zr[n+n]); }
-    for(uint i=0; i!=m; ++i) { re[m]+=(zr[2*n+i]+zr[2*n+m+i]); }
+    for(Nat j=0; j!=n; ++j) { re[m]+=(zr[j]+zr[n+n]); }
+    for(Nat i=0; i!=m; ++i) { re[m]+=(zr[2*n+i]+zr[2*n+m+i]); }
 
     // Compute inverse Jacobian matrix
     ExactIntervalMatrix JE;
@@ -2837,12 +2837,12 @@ void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVecto
 
 
 
-void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVectorFunction& g, const ExactBox& c,
+Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVectorFunction& g, const ExactBox& c,
                                          ExactIntervalVector& x, ExactIntervalVector& y, ExactIntervalVector& z, ExactInterval& t) const
 {
-    const uint m=d.size();
-    const uint n=c.size();
-    const uint o=2*(m+n);
+    const Nat m=d.size();
+    const Nat n=c.size();
+    const Nat o=2*(m+n);
 
     ARIADNE_ASSERT_MSG(g.argument_size()==m,"d="<<d<<" g="<<g);
     ARIADNE_ASSERT_MSG(g.result_size()==n,"d="<<d<<" g="<<g<<" c="<<c);
@@ -2858,13 +2858,13 @@ void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVecto
     ARIADNE_LOG(9,"  ddg="<<ddg<<"\n");
 
     // gy is the vector of values of g(y)
-    ExactIntervalVector gy(n); for(uint j=0; j!=n; ++j) { gy[j]=ddg[j].value(); }
+    ExactIntervalVector gy(n); for(Nat j=0; j!=n; ++j) { gy[j]=ddg[j].value(); }
     ARIADNE_LOG(9,"  g(y)="<<gy<<" ");
 
     // A is the transpose derivative matrix aij=dgj/dyi, extended with a column of ones
     ExactIntervalMatrix A(m,n);
-    for(uint i=0; i!=m; ++i) {
-        for(uint j=0; j!=n; ++j) {
+    for(Nat i=0; i!=m; ++i) {
+        for(Nat j=0; j!=n; ++j) {
             A[i][j]=ddg[j][i];
         }
     }
@@ -2872,22 +2872,22 @@ void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVecto
 
     // H is the Hessian matrix Hik = (xcuj-xclj)*dgj/dyidyk
     ExactIntervalMatrix H(m,m);
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         add_hessian(H,x[j]-x[n+j],ddg[j]);
     }
     ARIADNE_LOG(9," H="<<H);
 
     // Construct the extended valuation GY=(gy-cu+te,cl-gy+te,y-bu+te,bl-y+te)
     ExactIntervalVector gye(o);
-    for(uint j=0; j!=n; ++j) { gye[j]=gy[j]-c[j].upper()+t; gye[n+j]=c[j].lower()-gy[j]+t; }
-    for(uint i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper()+t; gye[2*n+m+i]=d[i].lower()-y[i]+t; }
+    for(Nat j=0; j!=n; ++j) { gye[j]=gy[j]-c[j].upper()+t; gye[n+j]=c[j].lower()-gy[j]+t; }
+    for(Nat i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper()+t; gye[2*n+m+i]=d[i].lower()-y[i]+t; }
     ARIADNE_LOG(9,"  GE="<<gye<<"\n");
 
     // Construct the extended matrix AE=(A -A I -I \\ e e 0 0)
     ExactIntervalMatrix AE(m+1,o);
-    for(uint i=0; i!=m; ++i) { for(uint j=0; j!=n; ++j) { AE[i][j]=A[i][j]; AE[i][n+j]=-A[i][j]; } }
-    for(uint i=0; i!=m; ++i) { AE[i][2*n+i]=1; AE[i][2*n+m+i]=-1; }
-    for(uint k=0; k!=o; ++k) { AE[m][k]=1; }
+    for(Nat i=0; i!=m; ++i) { for(Nat j=0; j!=n; ++j) { AE[i][j]=A[i][j]; AE[i][n+j]=-A[i][j]; } }
+    for(Nat i=0; i!=m; ++i) { AE[i][2*n+i]=1; AE[i][2*n+m+i]=-1; }
+    for(Nat k=0; k!=o; ++k) { AE[m][k]=1; }
     ExactIntervalMatrix AET=transpose(AE);
 
     FloatMatrix mA=midpoint(A);

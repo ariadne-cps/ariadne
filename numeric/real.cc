@@ -139,8 +139,8 @@ UpperFloat::UpperFloat(Real const& x) : UpperFloat(x.upper()) { }
 LowerFloat::LowerFloat(Real const& x) : LowerFloat(x.lower()) { }
 ApproximateFloat::ApproximateFloat(Real const& x) : ApproximateFloat(x.approx()) { }
 
-Real::Real(std::uint64_t m, void*) : Real(new RealConstant<Integer>(m)) { }
-Real::Real(std::int64_t n, void*) : Real(new RealConstant<Integer>(n)) { }
+Real::Real(std::uint64_t m, Void*) : Real(new RealConstant<Integer>(m)) { }
+Real::Real(std::int64_t n, Void*) : Real(new RealConstant<Integer>(n)) { }
 
 Real::Real() : Real(new RealConstant<Integer>(0)) { }
 Real::Real(Integer const& x) : Real(new RealConstant<Integer>(x)) { }
@@ -213,8 +213,8 @@ BoundFloatMP Real::operator() (PrecisionMP pr) const {
 }
 
 BoundFloatMP Real::evaluate(Accuracy accuracy) const {
-    uint effort=1;
-    uint acc=accuracy.bits();
+    Nat effort=1;
+    Nat acc=accuracy.bits();
     PrecisionMP precision=effort*64;
     ErrorFloatMP error_bound(two_exp(-acc).get_d(),precision);
         std::cerr << "  acc="<<acc<<" max_err=="<<error_bound<<"\n";

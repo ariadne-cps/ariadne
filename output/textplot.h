@@ -37,7 +37,7 @@
 #include "output/graphics_interface.h"
 #include "output/colour.h"
 
-typedef unsigned int uint;
+typedef unsigned int Nat;
 
 namespace Ariadne {
 
@@ -68,43 +68,43 @@ class TextPlot
     virtual Void set_bounding_box(const GraphicsBoundingBoxType& bx) override { };
     virtual Void set_dot_radius(double) override { };
 
-    void set_projection(uint, uint, uint) { };
+    Void set_projection(Nat, Nat, Nat) { };
 
-    void set_line_style(bool) { };
-    void set_line_width(double) { };
-    void set_line_colour(Colour) { };
-    void set_fill_style(bool) { };
-    void set_fill_opacity(double) { };
-    void set_fill_colour(Colour) { };
+    Void set_line_style(Bool) { };
+    Void set_line_width(double) { };
+    Void set_line_colour(Colour) { };
+    Void set_fill_style(Bool) { };
+    Void set_fill_opacity(double) { };
+    Void set_fill_colour(Colour) { };
 
-    void set_line_colour(double, double, double) { };
-    void set_fill_colour(double, double, double) { };
+    Void set_line_colour(double, double, double) { };
+    Void set_fill_colour(double, double, double) { };
 
-    bool get_line_style() const { return true; }
+    Bool get_line_style() const { return true; }
     double get_line_width() const { return 1.0; }
     Colour get_line_colour() const { return black; }
-    bool get_fill_style() const { return false; };
+    Bool get_fill_style() const { return false; };
     double get_fill_opacity() const { return 0.0; };
     Colour get_fill_colour() const { return white; };
 
-    void open(const char* filename);
-    void open(const char* filename, ios::openmode mode);
-    void draw(const ExactPoint&);
-    void draw(const ExactBox&);
-//    void draw(const Polytope&);
-    void draw(const InterpolatedCurve&);
-    void draw(const GridTreeSubset&);
-    void draw(const DrawableInterface&);
-    void close();
+    Void open(const char* filename);
+    Void open(const char* filename, ios::openmode mode);
+    Void draw(const ExactPoint&);
+    Void draw(const ExactBox&);
+//    Void draw(const Polytope&);
+    Void draw(const InterpolatedCurve&);
+    Void draw(const GridTreeSubset&);
+    Void draw(const DrawableInterface&);
+    Void close();
   private:
-    void _draw(const std::vector<ExactPoint>&);
+    Void _draw(const std::vector<ExactPoint>&);
   private:
     std::ofstream _fstream;
 };
 
 template<class SET> TextPlot& operator<<(TextPlot& g, const SET& set) { draw(g, set); return g; }
 
-template<class SET> void textplot(const char* filename, const SET& set) {
+template<class SET> Void textplot(const char* filename, const SET& set) {
     TextPlot g(filename); draw(g, set); g.close(); }
 
 } // namespace Ariadne

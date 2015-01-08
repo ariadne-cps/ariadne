@@ -199,7 +199,7 @@ DiscreteValuation HybridSystem::target(const Event& event, const DiscreteValuati
 }
 
 
-bool HybridSystem::check_dynamic(const DiscreteValuation& location) const
+Bool HybridSystem::check_dynamic(const DiscreteValuation& location) const
 {
     typedef Map<UntypedVariable,Set<UntypedVariable> >::Iterator dependencies_iterator;
 
@@ -214,7 +214,7 @@ bool HybridSystem::check_dynamic(const DiscreteValuation& location) const
     Map<UntypedVariable,Set<UntypedVariable> > algebraic_dependencies;
 
     for(dynamic_const_iterator iter=this->_differential_equations.begin(); iter!=this->_differential_equations.end(); ++iter) {
-        bool active;
+        Bool active;
         try {
             active=evaluate(iter->loc,location);
         } catch(...) {
@@ -256,7 +256,7 @@ bool HybridSystem::check_dynamic(const DiscreteValuation& location) const
     return true;
 }
 
-bool HybridSystem::check_reset(const Event& event, const DiscreteValuation& source, const DiscreteValuation& target) const
+Bool HybridSystem::check_reset(const Event& event, const DiscreteValuation& source, const DiscreteValuation& target) const
 {
     Set<Identifier> source_variables=join(this->state_variables(source),this->auxiliary_variables(source));
     Set<Identifier> target_state_variables=this->state_variables(source);
@@ -280,7 +280,7 @@ bool HybridSystem::check_reset(const Event& event, const DiscreteValuation& sour
 }
 
 
-bool HybridSystem::check_guards(const DiscreteValuation& location) const
+Bool HybridSystem::check_guards(const DiscreteValuation& location) const
 {
     Set<Identifier> variables=join(this->state_variables(location),this->auxiliary_variables(location));
 
@@ -335,7 +335,7 @@ HybridSystem::dynamic(const DiscreteValuation& location) const
     RealSpace space=this->state_variables(location);
 
     List<RealExpression> expressions;
-    for(uint i=0; i!=differential_equations.size(); ++i) {
+    for(Nat i=0; i!=differential_equations.size(); ++i) {
         const RealExpression& rhs=differential_equations[i].rhs;
         expressions.push_back(rhs);
         //expressions.push_back(differential_equations[i].rhs());

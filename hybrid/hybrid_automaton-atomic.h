@@ -100,48 +100,48 @@ class AtomicHybridAutomaton
     //! \name Methods for building the automaton.
 
     //! \brief Adds a discrete mode to the automaton.
-    void new_mode(StringConstant location,
+    Void new_mode(StringConstant location,
                   List<RealAssignment> const& auxiliary,
                   List<DottedRealAssignment> const& dynamic) {
         this->HybridAutomaton::new_mode(this->_variable|location,auxiliary,dynamic);
     }
 
     //! \brief Adds a discrete mode to the automaton.
-    void new_mode(StringConstant location,
+    Void new_mode(StringConstant location,
                   List<DottedRealAssignment> const& dynamic) {
         this->HybridAutomaton::new_mode(this->_variable|location,dynamic);
     }
 
     //! \brief Adds a discrete mode to the automaton.
-    void new_mode(StringConstant location,
+    Void new_mode(StringConstant location,
                   List<RealAssignment> const& auxiliary) {
         this->HybridAutomaton::new_mode(this->_variable|location,auxiliary);
     }
 
 
     //! \brief Adds a discrete mode to the automaton.
-    void new_invariant(StringConstant location,
+    Void new_invariant(StringConstant location,
                        ContinuousPredicate const& invariant,
                        DiscreteEvent event) {
         this->HybridAutomaton::new_invariant(this->_variable|location,invariant,event);
     }
 
     //! \brief Adds an urgent guard to the automaton.
-    void new_urgent_guard(StringConstant location,
+    Void new_urgent_guard(StringConstant location,
                           DiscreteEvent event,
                           ContinuousPredicate const& guard) {
         this->HybridAutomaton::new_guard(this->_variable|location,event,guard,urgent);
     }
 
     //! \brief Adds a permissive guard to the automaton.
-    void new_permissive_guard(StringConstant location,
+    Void new_permissive_guard(StringConstant location,
                               DiscreteEvent event,
                               ContinuousPredicate const& guard) {
         this->HybridAutomaton::new_guard(this->_variable|location,event,guard,permissive);
     }
 
     //! \brief Adds a reset to the automaton. (Same as new_transition.)
-    void new_reset(StringConstant source,
+    Void new_reset(StringConstant source,
                    DiscreteEvent event,
                    StringConstant target,
                    List<PrimedRealAssignment> const& reset) {
@@ -150,7 +150,7 @@ class AtomicHybridAutomaton
 
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
-    void new_transition(StringConstant source,
+    Void new_transition(StringConstant source,
                         DiscreteEvent event,
                         ContinuousPredicate const& guard,
                         StringConstant target,
@@ -160,7 +160,7 @@ class AtomicHybridAutomaton
     }
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
-    void new_transition(StringConstant source,
+    Void new_transition(StringConstant source,
                         DiscreteEvent event,
                         StringConstant target,
                         List<PrimedRealAssignment> const& reset,
@@ -171,7 +171,7 @@ class AtomicHybridAutomaton
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //! The reset is trivial. This form is for the case that there are no continuous state variables in the new location.
-    void new_transition(StringConstant source,
+    Void new_transition(StringConstant source,
                         DiscreteEvent event,
                         StringConstant target,
                         ContinuousPredicate const& guard,
@@ -181,7 +181,7 @@ class AtomicHybridAutomaton
 
     //! \brief Adds an unguarded transition to the automaton.
     //! The guard is the constant "True" i.e. the event is an input event.
-    void new_transition(StringConstant source,
+    Void new_transition(StringConstant source,
                         DiscreteEvent event,
                         StringConstant target,
                         List<PrimedRealAssignment> const& reset) {
@@ -190,7 +190,7 @@ class AtomicHybridAutomaton
 
     //! \brief Adds an unguarded transition to the automaton.
     //! The guard is the constant "True" i.e. the event is an input event.
-    void new_transition(StringConstant source,
+    Void new_transition(StringConstant source,
                         DiscreteEvent event,
                         StringConstant target) {
         this->HybridAutomaton::new_transition(this->_variable|source,event,this->_variable|target);

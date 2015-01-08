@@ -69,12 +69,12 @@ class Polytope
     //! \brief Default constructor constructs an empty polytope in zero dimensions.
     Polytope() { }
     //! \brief Construct an empty polytope in \a d dimensions.
-    Polytope(uint d) { }
+    Polytope(Nat d) { }
     //! \brief Construct polytope with vertices in \a v.
     Polytope(const std::vector<ExactPoint>& v) : _vertices(v) { }
 
     //! \brief Add a new vertex \a v to the current vertices.
-    void new_vertex(const ExactPoint& v) {
+    Void new_vertex(const ExactPoint& v) {
         ARIADNE_ASSERT(this->_vertices.size()==0 || v.dimension()==this->_vertices.front().dimension());
         this->_vertices.push_back(v); }
     //! \brief The number of points defining the polytope. Note that an interior point is counted by this method.
@@ -88,15 +88,15 @@ class Polytope
     //! \brief A constant Iterator pointing to the past-the-end vertex.
     ConstIterator vertices_end() const { return this->_vertices.end(); }
     //! \brief Reduce the description of the polytope by removing all non-extreme points from the list of vertices. (Not currently implemented)
-    void reduce() { ARIADNE_NOT_IMPLEMENTED; }
+    Void reduce() { ARIADNE_NOT_IMPLEMENTED; }
 
     virtual Polytope* clone() const { return new Polytope(*this); }
-    virtual uint dimension() const { if(this->_vertices.size()==0) { return 0; } return this->_vertices.front().dimension(); }
+    virtual Nat dimension() const { if(this->_vertices.size()==0) { return 0; } return this->_vertices.front().dimension(); }
     virtual Tribool separated(const ExactBox& bx) const;
     virtual Tribool overlaps(const ExactBox& bx) const;
     virtual Tribool inside(const ExactBox& bx) const;
     virtual UpperBox bounding_box() const;
-    virtual void draw(CanvasInterface& c, const Projection2d& p) const;
+    virtual Void draw(CanvasInterface& c, const Projection2d& p) const;
     virtual OutputStream& write(OutputStream& os) const;
 
     //! \brief The convex hull of two polytopes.

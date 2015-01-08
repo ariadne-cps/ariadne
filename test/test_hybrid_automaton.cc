@@ -41,15 +41,15 @@ Set<DiscreteEvent> operator,(const Set<DiscreteEvent> s, const DiscreteEvent e) 
 
 class TestHybridSystem {
   public:
-    void test();
+    Void test();
   private:
-    void test_build_hybrid_system();
-    void test_static_analysis();
+    Void test_build_hybrid_system();
+    Void test_static_analysis();
   private:
     HybridSystem _system;
 };
 
-void
+Void
 TestHybridSystem::test()
 {
     std::clog<<std::boolalpha;
@@ -59,7 +59,7 @@ TestHybridSystem::test()
 }
 
 
-void
+Void
 TestHybridSystem::test_build_hybrid_system()
 {
     // Declare some constants. Note that system parameters should be given as variables.
@@ -164,7 +164,7 @@ TestHybridSystem::test_build_hybrid_system()
 
 
 
-void TestHybridSystem::test_static_analysis()
+Void TestHybridSystem::test_static_analysis()
 {
     DiscreteLocation valve_opening(StringVariable("valve")|"opening");
     ARIADNE_TEST_EXECUTE(this->_system.check_mode(valve_opening));
@@ -180,29 +180,29 @@ void TestHybridSystem::test_static_analysis()
 
 class TestHybridAutomaton {
   public:
-    void test();
+    Void test();
 
-    void test_distinct_modes();
-    void test_overspecified_dynamic();
-    void test_algebraic_loops();
-    void test_nonexistent_mode();
-    void test_multiple_guard();
-    void test_multiple_transition();
-    void test_overspecified_reset();
+    Void test_distinct_modes();
+    Void test_overspecified_dynamic();
+    Void test_algebraic_loops();
+    Void test_nonexistent_mode();
+    Void test_multiple_guard();
+    Void test_multiple_transition();
+    Void test_overspecified_reset();
 
-    void test_underspecified_mode();
-    void test_underspecified_reset();
+    Void test_underspecified_mode();
+    Void test_underspecified_reset();
 
 
-    void test_build_hybrid_system();
-    void test_build_atomic_hybrid_automaton();
-    void test_build_intensional_hybrid_automaton();
-    void test_static_analysis();
+    Void test_build_hybrid_system();
+    Void test_build_atomic_hybrid_automaton();
+    Void test_build_intensional_hybrid_automaton();
+    Void test_static_analysis();
   private:
     CompositeHybridAutomaton _system;
 };
 
-void
+Void
 TestHybridAutomaton::test()
 {
     std::clog<<std::boolalpha;
@@ -224,7 +224,7 @@ TestHybridAutomaton::test()
 }
 
 
-void
+Void
 TestHybridAutomaton::test_distinct_modes()
 {
     HybridAutomaton system;
@@ -235,7 +235,7 @@ TestHybridAutomaton::test_distinct_modes()
     ARIADNE_TEST_THROWS(system.new_mode(q2|"s3"),IndistinguishableModeError);
 }
 
-void
+Void
 TestHybridAutomaton::test_overspecified_dynamic()
 {
     HybridAutomaton system;
@@ -247,7 +247,7 @@ TestHybridAutomaton::test_overspecified_dynamic()
     ARIADNE_TEST_THROWS( system.new_mode( (x=1),(dot(x)=0) ),SystemSpecificationError);
 }
 
-void
+Void
 TestHybridAutomaton::test_algebraic_loops()
 {
     HybridAutomaton system;
@@ -260,7 +260,7 @@ TestHybridAutomaton::test_algebraic_loops()
     ARIADNE_TEST_EXECUTE( HybridAutomaton().new_mode( (x=y,y=z),(dot(z)=x+y+z) ) );
 }
 
-void
+Void
 TestHybridAutomaton::test_nonexistent_mode()
 {
     HybridAutomaton system;
@@ -279,7 +279,7 @@ TestHybridAutomaton::test_nonexistent_mode()
     ARIADNE_TEST_EXECUTE( system.new_transition( (q|"1"), e, (q|"2",r|"1") ) );
 }
 
-void
+Void
 TestHybridAutomaton::test_multiple_guard()
 {
     HybridAutomaton system;
@@ -299,7 +299,7 @@ TestHybridAutomaton::test_multiple_guard()
     ARIADNE_TEST_THROWS( system.new_action( q1, x+y<=c, e1, x+y>=0 ), MultipleGuardError );
 }
 
-void
+Void
 TestHybridAutomaton::test_multiple_transition()
 {
     HybridAutomaton system;
@@ -317,7 +317,7 @@ TestHybridAutomaton::test_multiple_transition()
     ARIADNE_TEST_THROWS( system.new_transition( q1, e1, q2, (prime(x)=x) ), MultipleTransitionError );
 }
 
-void
+Void
 TestHybridAutomaton::test_overspecified_reset()
 {
     HybridAutomaton system;
@@ -339,7 +339,7 @@ TestHybridAutomaton::test_overspecified_reset()
     ARIADNE_TEST_THROWS( system.new_transition( q1, e5, q1, (prime(y)=2*x+4,prime(y)=2*(x+2)) ), OverspecifiedResetError );
 }
 
-void
+Void
 TestHybridAutomaton::test_underspecified_mode()
 {
     HybridAutomaton system;
@@ -377,7 +377,7 @@ TestHybridAutomaton::test_underspecified_mode()
     ARIADNE_TEST_THROWS( system.check_mode( q5 ), UnderspecifiedResetError );
 }
 
-void
+Void
 TestHybridAutomaton::test_underspecified_reset()
 {
     HybridAutomaton system;
@@ -405,7 +405,7 @@ TestHybridAutomaton::test_underspecified_reset()
 
 
 
-void
+Void
 TestHybridAutomaton::test_build_hybrid_system()
 {
     // Declare some constants. Note that system parameters should be given as variables.
@@ -493,7 +493,7 @@ TestHybridAutomaton::test_build_hybrid_system()
 
 
 
-void
+Void
 TestHybridAutomaton::test_static_analysis()
 {
     StringVariable valve("valve");
@@ -518,7 +518,7 @@ TestHybridAutomaton::test_static_analysis()
     ARIADNE_TEST_EXECUTE(_system.discrete_reachability(valve_opening));
 }
 
-void
+Void
 TestHybridAutomaton::test_build_atomic_hybrid_automaton()
 {
     // Declare some constants. Note that system parameters should be given as variables.
@@ -586,7 +586,7 @@ TestHybridAutomaton::test_build_atomic_hybrid_automaton()
 }
 
 
-void
+Void
 TestHybridAutomaton::test_build_intensional_hybrid_automaton()
 {
     // Declare some constants. Note that system parameters should be given as variables.
@@ -656,7 +656,7 @@ TestHybridAutomaton::test_build_intensional_hybrid_automaton()
 
 
 
-int main() {
+Int main() {
     //ARIADNE_TEST_CALL(TestHybridAutomaton().test_build_atomic_hybrid_automaton());
     ARIADNE_TEST_CALL(TestHybridAutomaton().test());
 

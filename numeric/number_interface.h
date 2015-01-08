@@ -60,7 +60,7 @@ class NumberInterface
     virtual NumberInterface* _neg() const = 0;
     virtual NumberInterface* _sqr() const = 0;
     virtual NumberInterface* _rec() const = 0;
-    virtual NumberInterface* _pow(int n) const = 0;
+    virtual NumberInterface* _pow(Int n) const = 0;
     virtual NumberInterface* _add(NumberInterface const& y) const = 0;
     virtual NumberInterface* _sub(NumberInterface const& y) const = 0;
     virtual NumberInterface* _mul(NumberInterface const& y) const = 0;

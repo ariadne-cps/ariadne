@@ -60,9 +60,9 @@ using namespace Ariadne;
 namespace Ariadne {
 
 /*Some type definitions*/
-typedef std::vector<bool> BooleanArray;
-typedef Array<int> IndexArray;
-typedef Array<unsigned int> SizeArray;
+typedef std::vector<Bool> BooleanArray;
+typedef Array<Int> IndexArray;
+typedef Array<SizeType> SizeArray;
 
 typedef unsigned short dimension_type;
 
@@ -78,8 +78,8 @@ typedef Vector<ExactInterval> LatticeBoxType;
 OutputStream& operator<<(OutputStream& os, const GridCell& theGridCell);
 OutputStream& operator<<(OutputStream& os, const GridOpenCell& theGridOpenCell );
 
-bool subset( const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne = NULL,
-             BinaryWord * pPathPrefixTwo = NULL, uint * pPrimaryCellHeight = NULL );
+Bool subset( const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne = NULL,
+             BinaryWord * pPathPrefixTwo = NULL, Nat * pPrimaryCellHeight = NULL );
 
 
 /*! \brief An abstract cell of a grid paving. This class is the base of the GridCell - a regular cell on the Grid
@@ -96,7 +96,7 @@ class GridAbstractCell {
     Grid _theGrid;
 
     /*! \brief The level of the primary root cell relative to the zero level. */
-    uint _theHeight;
+    Nat _theHeight;
 
     /*! \brief The word describing the path in a binary tree. This path defines the cell in the Grid. */
     BinaryWord _theWord;
@@ -107,7 +107,7 @@ class GridAbstractCell {
     /*! \brief The box is given as an explicit parameter. This should only be used
      *  by friend classes which have already computed the box.
      */
-    GridAbstractCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord, const ExactBox& theBox);
+    GridAbstractCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, const ExactBox& theBox);
 
     /*! \brief The copy constructor for the \a GridAbstractCell */
     GridAbstractCell(const GridAbstractCell& theGridCell);
@@ -118,7 +118,7 @@ class GridAbstractCell {
      * defining the primary cell corners for \a theHeight-1, we recompute \a leftBottomCorner and \a rightTopCorner
      * for the current level \a theHeight.
      */
-    static inline void primary_cell_at_height( const uint theHeight, int & leftBottomCorner, int & rightTopCorner );
+    static inline Void primary_cell_at_height( const Nat theHeight, Int & leftBottomCorner, Int & rightTopCorner );
 
     /*! \brief This function allows to compare to cells it is used by the operator== and operator< methods of this class
      *  The value of \a comparator should be either \a COMPARE_EQUAL or \a COMPARE_LESS
@@ -129,28 +129,28 @@ class GridAbstractCell {
      *  NOTE: Since the function is only based on comparison of the Grids, the words definings the cells and the
      *  primary cell heights we can use it in sub-classes for comparing cells of the same types
      */
-    static bool compare_abstract_grid_cells(const GridAbstractCell * pCellLeft, const GridAbstractCell &cellRight, const uint comparator );
+    static Bool compare_abstract_grid_cells(const GridAbstractCell * pCellLeft, const GridAbstractCell &cellRight, const Nat comparator );
 
   public:
 
     /*! \brief The constant for the grid cells comparison */
-    static const uint COMPARE_EQUAL = 0;
-    static const uint COMPARE_LESS = 1;
+    static const Nat COMPARE_EQUAL = 0;
+    static const Nat COMPARE_LESS = 1;
 
     /*! \brief The underlying grid. */
     const Grid& grid() const;
 
     /*! \brief The height of the primary cell to which this cell is rooted. */
-    uint height() const;
+    Nat height() const;
 
     /*! \brief The depth in the grid at which the cell lies. */
-    int depth() const;
+    Int depth() const;
 
     /*! \brief The height in the tree of the primary cell to which this cell is rooted. */
-    int tree_height() const;
+    Int tree_height() const;
 
     /*! \brief The depth in the tree at which the cell lies. */
-    int tree_depth() const;
+    Int tree_depth() const;
 
     /*! \brief The word describing the path in a binary tree from the primary cell of height (this.height()) to this cell. */
     const BinaryWord& word() const;
@@ -193,24 +193,24 @@ class GridAbstractCell {
      * \a theHeight defines the height of the primary cell above the zero level and
      * \a dimensions is the number of dimension in the considered space
      */
-    static LatticeBoxType primary_cell_lattice_box( const uint theHeight, const dimension_type dimensions );
+    static LatticeBoxType primary_cell_lattice_box( const Nat theHeight, const dimension_type dimensions );
 
     /*! \brief Takes the lattice box \a theLatticeBox related to some (unknown) grid and computes the
      *   smallest primary cell on that grid that will contain this box.
      *   The method returns the hight of that primary cell.
      */
-    static uint smallest_enclosing_primary_cell_height( const LatticeBoxType& theLatticeBox );
+    static Nat smallest_enclosing_primary_cell_height( const LatticeBoxType& theLatticeBox );
 
     /*! /brief Computes the height of the primary cell that encloses
      *  (may be exactly) the given box on the given grid.
      */
-    static uint smallest_enclosing_primary_cell_height( const UpperBox & theBox, const Grid& theGrid );
+    static Nat smallest_enclosing_primary_cell_height( const UpperBox & theBox, const Grid& theGrid );
 
     /*! \brief This method returns the path from the \a topPCellHeight to the \a bottomPCellHeight
      *  in the \a dimensions dimensional space. We assume that \a topPCellHeight >= \a bottomPCellHeight
      *  if not, then we return an empty binary word.
      */
-    static BinaryWord primary_cell_path( const uint dimensions, const uint topPCellHeight, const uint bottomPCellHeight);
+    static BinaryWord primary_cell_path( const Nat dimensions, const Nat topPCellHeight, const Nat bottomPCellHeight);
 
     /*! \brief Apply grid data \a theGrid to \a theLatticeBox in order to compute
      * the box dimensions in the original space
@@ -237,8 +237,8 @@ class GridCell : public GridAbstractCell {
      *  aligned to some common primary cell, which height will be referenced by
      *  \a pPrimaryCellHeight, are returned as \a pathPrefixOne and \a pathPrefixTwo
      */
-    friend bool subset( const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne,
-                            BinaryWord * pPathPrefixTwo, uint * pPrimaryCellHeight );
+    friend Bool subset( const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne,
+                            BinaryWord * pPathPrefixTwo, Nat * pPrimaryCellHeight );
 
   public:
     /*! \brief Default constructor. Needed for some containers and iterators. */
@@ -249,39 +249,39 @@ class GridCell : public GridAbstractCell {
      * via the path \a _theWord. Note that, \a theHeight is the height relative to the Grid,
      * but not to the original space!
      */
-    GridCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord);
+    GridCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord);
 
     /*! \brief Allows to split the given cell into two sub-cells. When isRight == true
      * then we return the right sub-cell, otherwise the left one */
-    GridCell split(bool isRight) const;
+    GridCell split(Bool isRight) const;
 
     /*! \brief Splits the given cell into two sub-cells, returning both. */
     std::pair<GridCell,GridCell> split() const;
 
     /*! \brief The equality operator. */
-    bool operator==(const GridCell& otherCell) const;
+    Bool operator==(const GridCell& otherCell) const;
 
     /*! \brief Allows to assign one GridCell to another */
     GridCell& operator=( const GridCell & otherCell );
 
     /*! \brief A total order on cells on the same grid, by height and word prefix. */
-    bool operator<(const GridCell& otherCell) const;
+    Bool operator<(const GridCell& otherCell) const;
 
     /*! \brief The dimension of the cell. */
-    uint dimension() const;
+    Nat dimension() const;
 
     /*! \brief Allows to convert the given GridCell into an open grid cell (GridOpenCell)*/
     GridOpenCell interior() const;
 
     /*! \brief this method computes the box corresponding to this cell in the grid lattice.*/
-    static LatticeBoxType compute_lattice_box( const uint dimensions, const uint theHeight, const BinaryWord& theWord );
+    static LatticeBoxType compute_lattice_box( const Nat dimensions, const Nat theHeight, const BinaryWord& theWord );
 
     /*! \brief this method computes the box in the original space based on the \a theGrid,
      *  and a cell which is obtained by traversing the path given by \a _theWord from the
      * primary cell located at the heigth \a theHeight above the zero level cells
      * (relative to the grid).
      */
-    static ExactBox compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord);
+    static ExactBox compute_box(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord);
 
     /*! /brief Creates an over approximation for the \a theBox on \a theGrid. \a theBox
      * is in the original space coordinates. We compute the over approximation as the
@@ -297,12 +297,12 @@ class GridCell : public GridAbstractCell {
      *  the corresponding prefix. When the words are alligned, wi simply use the == and < operators of
      *  the \a BinaryWord class.
      */
-    static bool compare_grid_cells(const GridCell * pCellLeft, const GridCell &cellRight, const uint comparator );
+    static Bool compare_grid_cells(const GridCell * pCellLeft, const GridCell &cellRight, const Nat comparator );
 
     /*! \brief Computes the neighboring cell to the given cell (defined by \a theGrid, \a theHeight, \a theWord)
      *  in the given dimension \a dim. The resulting cell will the of the same size as the given one.
      */
-    static GridCell neighboringCell( const Grid& theGrid, const uint theHeight, const BinaryWord& theWord, const uint dim );
+    static GridCell neighboringCell( const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, const Nat dim );
 };
 
 /*! \brief An open cell of a grid paving. This cell is open and the path from the primary cell
@@ -322,7 +322,7 @@ class GridOpenCell: public GridAbstractCell {
     /*! \brief The box is given as an explicit parameter. This should only be used
      *  by friend classes which have already computed the box.
      */
-    GridOpenCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord, const ExactBox& theBox);
+    GridOpenCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, const ExactBox& theBox);
 
     /*! \brief This method allows to enumerate the GridCells that are located in the positive
      *  axis direction from the base cell. The base cell is defined by \a theHeight and
@@ -331,7 +331,7 @@ class GridOpenCell: public GridAbstractCell {
      *  to which all the neighboring cell will be added, i.e. it is a return parameter.
      *  NOTE: The cell defined by \a theHeight, \a theBaseCellWord will also be in \a theResultSet.
      */
-    void neighboring_cells( const uint theHeight, const BinaryWord& theBaseCellWord,
+    Void neighboring_cells( const Nat theHeight, const BinaryWord& theBaseCellWord,
                             BinaryWord& cellPosition, GridTreeSet& theResultSet ) const;
 
     /*! \brief This method allows to compute the neighboring (to the right) cell of
@@ -340,7 +340,7 @@ class GridOpenCell: public GridAbstractCell {
      *  theGrid.dimensions() dimensional space. Note that if \a cellPosition consists
      *  of theGrid.dimensions() zeroes then we adjoin the base cell itself.
      */
-    static GridCell neighboring_cell( const Grid& theGrid, const uint theHeight,
+    static GridCell neighboring_cell( const Grid& theGrid, const Nat theHeight,
                                       const BinaryWord& theBaseCellWord, BinaryWord& cellPosition );
 
     /*! \brief This method allows to find the smallest open cell that contains \a theBox.
@@ -357,7 +357,7 @@ class GridOpenCell: public GridAbstractCell {
      *  is a technical parameter that has to be set to an empty word. Also, this method add the interior
      *  of theCell to the vector \a result.
      */
-    static void cover_cell_and_borders( const GridCell& theCell, const GridTreeSet& theSet,
+    static Void cover_cell_and_borders( const GridCell& theCell, const GridTreeSet& theSet,
                                         BinaryWord& cellPosition, std::vector<GridOpenCell>& result );
 
   public:
@@ -369,20 +369,20 @@ class GridOpenCell: public GridAbstractCell {
      * via the path \a _theWord. Note that, \a theHeight is the height relative to the Grid,
      * but not to the original space!
      */
-    GridOpenCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord);
+    GridOpenCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord);
 
     /*! \brief Allows to split the given cell into two sub-cells. When isRight == true
      * then we return the right sub-cell, if false then the left one, otherwise the middle one */
     GridOpenCell split(Tribool isRight) const;
 
     /*! \brief The equality operator. */
-    bool operator==(const GridOpenCell& otherCell) const;
+    Bool operator==(const GridOpenCell& otherCell) const;
 
     /*! \brief Allows to assign one GridCell to another */
     GridOpenCell& operator=( const GridOpenCell & otherCell );
 
     /*! \brief A total order on cells on the same grid, by height and word prefix. */
-    bool operator<(const GridOpenCell& otherCell) const;
+    Bool operator<(const GridOpenCell& otherCell) const;
 
     /*! \brief Computes all the cells that constitute the GridOpenCell in the form of the GridTreeSet.*/
     GridTreeSet closure() const;
@@ -398,13 +398,13 @@ class GridOpenCell: public GridAbstractCell {
     static std::vector<GridOpenCell> intersection( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell );
 
     /*! \brief Tests if the two open cells intersect */
-    static bool intersect( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell );
+    static Bool intersect( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell );
 
     /*! \brief this method computes the box in the original space based on the \a theGrid.
      * This box should be treated as an open set. I.e. the borders of the box must be excluded.
      * Note tha, \a theHeight and \a theWord define the left bottom cell (base cell) of the open cell.
      */
-    static ExactBox compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord);
+    static ExactBox compute_box(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord);
 
     /*! \brief This function allows to compare to cells it is used by the operator== and operator< methods of this class
      *  The value of \a comparator should be either \a COMPARE_EQUAL or \a COMPARE_LESS
@@ -413,7 +413,7 @@ class GridOpenCell: public GridAbstractCell {
      *  the corresponding prefix. When the words are alligned, wi simply use the == and < operators of
      *  the \a BinaryWord class.
      */
-    static bool compare_grid_cells(const GridOpenCell * pCellLeft, const GridOpenCell &cellRight, const uint comparator );
+    static Bool compare_grid_cells(const GridOpenCell * pCellLeft, const GridOpenCell &cellRight, const Nat comparator );
 
     /*! \brief This method computes the smallest open cell that contains the given box \a theBox
      *  (in the original space), taking into account the given grid \a theGrid.
@@ -433,13 +433,13 @@ inline GridAbstractCell::GridAbstractCell(const GridAbstractCell& theGridCell):
     _theWord(theGridCell._theWord), _theBox(theGridCell._theBox) {
 }
 
-inline GridAbstractCell::GridAbstractCell(const Grid& theGrid, const uint theHeight,
+inline GridAbstractCell::GridAbstractCell(const Grid& theGrid, const Nat theHeight,
                                             const BinaryWord& theWord, const ExactBox& theBox):
     _theGrid(theGrid), _theHeight(theHeight),
     _theWord(theWord), _theBox(theBox) {
 }
 
-inline void GridAbstractCell::primary_cell_at_height( const uint theHeight, int & leftBottomCorner, int & rightTopCorner ) {
+inline Void GridAbstractCell::primary_cell_at_height( const Nat theHeight, Int & leftBottomCorner, Int & rightTopCorner ) {
     if ( theHeight % 2 == 1 ) {
         leftBottomCorner = 2*leftBottomCorner - rightTopCorner;
     } else {
@@ -451,19 +451,19 @@ inline const Grid& GridAbstractCell::grid() const {
     return _theGrid;
 }
 
-inline uint GridAbstractCell::height() const {
+inline Nat GridAbstractCell::height() const {
     return _theHeight;
 }
 
-inline int GridAbstractCell::depth() const {
+inline Int GridAbstractCell::depth() const {
     return _theWord.size() - _theHeight;
 }
 
-inline int GridAbstractCell::tree_height() const {
+inline Int GridAbstractCell::tree_height() const {
     return _theHeight * _theGrid.dimension();
 }
 
-inline int GridAbstractCell::tree_depth() const {
+inline Int GridAbstractCell::tree_depth() const {
     return _theWord.size() - _theHeight * _theGrid.dimension();
 }
 
@@ -498,7 +498,7 @@ inline GridAbstractCell& GridAbstractCell::operator=(const GridAbstractCell & ot
 inline GridCell::GridCell() : GridAbstractCell( Grid(), 0, BinaryWord(), ExactBox() ) {
 }
 
-inline GridCell::GridCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) :
+inline GridCell::GridCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord) :
                     GridAbstractCell( theGrid, theHeight, theWord, compute_box(theGrid, theHeight, theWord) ) {
 }
 
@@ -507,34 +507,34 @@ inline GridCell& GridCell::operator=(const GridCell & otherCell ) {
     return *this;
 }
 
-inline bool GridCell::operator==( const GridCell& other ) const {
+inline Bool GridCell::operator==( const GridCell& other ) const {
     return compare_grid_cells( this, other, COMPARE_EQUAL );
 }
 
-inline bool GridCell::operator<(const GridCell& other) const {
+inline Bool GridCell::operator<(const GridCell& other) const {
     return compare_grid_cells( this, other, COMPARE_LESS );
 }
 
-inline bool GridCell::compare_grid_cells(const GridCell * pCellLeft, const GridCell &cellRight, const uint comparator ) {
+inline Bool GridCell::compare_grid_cells(const GridCell * pCellLeft, const GridCell &cellRight, const Nat comparator ) {
     return GridAbstractCell::compare_abstract_grid_cells( pCellLeft, cellRight, comparator );
 }
 
 //The box is not related to the Grid, i.e. it is in the original space, whereas the binary tree is related to the Lattice of the grid:
-inline ExactBox GridCell::compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) {
+inline ExactBox GridCell::compute_box(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord) {
     //Compute the lattice box and then map it to the original space using the grid data
     return lattice_box_to_space( GridCell::compute_lattice_box( theGrid.dimension(), theHeight, theWord ), theGrid );
 }
 
 /*********************************************GridOpenCell***********************************************/
 
-inline GridOpenCell::GridOpenCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord, const ExactBox& theBox) :
+inline GridOpenCell::GridOpenCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord, const ExactBox& theBox) :
                             GridAbstractCell(theGrid, theHeight, theWord, theBox) {
 }
 
 inline GridOpenCell::GridOpenCell() : GridAbstractCell( Grid(), 0, BinaryWord(), compute_box(Grid(), 0, BinaryWord()) ) {
 }
 
-inline GridOpenCell::GridOpenCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) :
+inline GridOpenCell::GridOpenCell(const Grid& theGrid, const Nat theHeight, const BinaryWord& theWord) :
                     GridAbstractCell( theGrid, theHeight, theWord, compute_box(theGrid, theHeight, theWord) ) {
 }
 
@@ -543,19 +543,19 @@ inline GridOpenCell& GridOpenCell::operator=(const GridOpenCell & otherCell ) {
     return *this;
 }
 
-inline bool GridOpenCell::operator==( const GridOpenCell& other ) const {
+inline Bool GridOpenCell::operator==( const GridOpenCell& other ) const {
     return compare_grid_cells( this, other, COMPARE_EQUAL );
 }
 
-inline bool GridOpenCell::operator<(const GridOpenCell& other) const {
+inline Bool GridOpenCell::operator<(const GridOpenCell& other) const {
     return compare_grid_cells( this, other, COMPARE_LESS );
 }
 
-inline bool GridOpenCell::compare_grid_cells(const GridOpenCell * pCellLeft, const GridOpenCell &cellRight, const uint comparator ) {
+inline Bool GridOpenCell::compare_grid_cells(const GridOpenCell * pCellLeft, const GridOpenCell &cellRight, const Nat comparator ) {
     return GridAbstractCell::compare_abstract_grid_cells( pCellLeft, cellRight, comparator );
 }
 
-inline bool GridOpenCell::intersect( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell ) {
+inline Bool GridOpenCell::intersect( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell ) {
     return definitely( theLeftOpenCell.box().overlaps(  theRightOpenCell.box() ) );
 }
 

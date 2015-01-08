@@ -65,7 +65,7 @@ class CIFAtomicInterchangeAutomaton
     //!    \param progress_predicates are the time-can-progress (tcp) predicates e.g. \f$g(x_1,\ldots,x_n)\leq c\f$ valid in the mode.
     //!
     //! Currently no invariant predicates are supported.
-    void new_mode(AtomicDiscreteLocation location,
+    Void new_mode(AtomicDiscreteLocation location,
                   const List<RealAlgebraicAssignment>& algebraic_equations,
                   const List<RealDifferentialAssignment>& differential_equations,
                   const List<ContinuousPredicate>& progress_predicates);
@@ -79,7 +79,7 @@ class CIFAtomicInterchangeAutomaton
     //!    \param reset is the transition's reset.
     //!    \param guard is the transition's activation region.
     //!    \param urgency is a flag giving whether the transition is urgent.
-    void new_transition(AtomicDiscreteLocation source,
+    Void new_transition(AtomicDiscreteLocation source,
                         DiscreteEvent event,
                         AtomicDiscreteLocation target,
                         const List<RealUpdateAssignment>& reset,
@@ -96,7 +96,7 @@ CIFAtomicInterchangeAutomaton::CIFAtomicInterchangeAutomaton(const String& name)
 }
 
 inline
-void
+Void
 CIFAtomicInterchangeAutomaton::new_mode(
     AtomicDiscreteLocation location,
     const List<RealAlgebraicAssignment>& algebraic_equations,
@@ -104,14 +104,14 @@ CIFAtomicInterchangeAutomaton::new_mode(
     const List<ContinuousPredicate>& progress_predicates)
 {
     this->AtomicHybridAutomaton::new_mode(location,algebraic_equations,differential_equations);
-    for(uint i=0; i!=progress_predicates.size(); ++i) {
+    for(Nat i=0; i!=progress_predicates.size(); ++i) {
         String name=String(location.name())+".tcp"+to_string(i);
         this->AtomicHybridAutomaton::new_invariant(location,DiscreteEvent(name),progress_predicates[i]);
     }
 }
 
 inline
-void
+Void
 CIFAtomicInterchangeAutomaton::new_transition(
     AtomicDiscreteLocation source,
     DiscreteEvent event,

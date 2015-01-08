@@ -35,8 +35,8 @@
 #include <fenv.h>
 #include <gmpxx.h>
 
-// Needed for MAC OS X, where uint is not defined
-typedef unsigned int uint;
+// Needed for MAC OS X, where Nat is not defined
+typedef unsigned Int Nat;
 
 // Machine epsilon, approximately 2.2e-16;
 const double eps=1./(1<<26)/(1<<26);
@@ -56,7 +56,7 @@ const double eps=1./(1<<26)/(1<<26);
 #endif
 
 
-typedef int rounding_mode_t;
+typedef Int rounding_mode_t;
 static const rounding_mode_t round_nearest = FE_TONEAREST;
 static const rounding_mode_t round_down = FE_DOWNWARD;
 static const rounding_mode_t round_up = FE_UPWARD;
@@ -114,28 +114,28 @@ inline rounding_mode_t get_control_word() { rounding_mode_t grnd; asm volatile (
 
 #if defined ARIADNE_C99_ROUNDING
 
-inline void set_round_up() { fesetround(FE_UPWARD);  }
-inline void set_round_down() { fesetround(FE_DOWNWARD);  }
-inline void set_round_nearest() { fesetround(FE_TONEAREST);  }
+inline Void set_round_up() { fesetround(FE_UPWARD);  }
+inline Void set_round_down() { fesetround(FE_DOWNWARD);  }
+inline Void set_round_nearest() { fesetround(FE_TONEAREST);  }
 
-inline void set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
+inline Void set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
 inline rounding_mode_t get_rounding_mode() { return fegetround(); }
 
-inline void c_set_round_nearest() { fesetround(FE_TONEAREST); }
+inline Void c_set_round_nearest() { fesetround(FE_TONEAREST); }
 
 #elif defined ARIADNE_GCC_ROUNDING
 
-inline void set_round_up() { asm volatile ("fldcw ROUND_UP"); }
-inline void set_round_down() { asm volatile ("fldcw ROUND_DOWN"); }
-inline void set_round_nearest() { asm volatile ("fldcw ROUND_NEAREST"); }
+inline Void set_round_up() { asm volatile ("fldcw ROUND_UP"); }
+inline Void set_round_down() { asm volatile ("fldcw ROUND_DOWN"); }
+inline Void set_round_nearest() { asm volatile ("fldcw ROUND_NEAREST"); }
 
-inline void c_set_round_nearest() { fesetround(FE_TONEAREST); }
+inline Void c_set_round_nearest() { fesetround(FE_TONEAREST); }
 
-//inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw (%0)" : : "r" (rnd) ); }
+//inline Void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw (%0)" : : "r" (rnd) ); }
 //inline rounding_mode_t get_rounding_mode() { rounding_mode_t rnd asm volatile ("fldcw (%0)" : : "r" (rnd) ); return rnd; }
 
 inline rounding_mode_t get_rounding_mode() { rounding_mode_t grnd; asm volatile ("fstcw %0" : "=m" (grnd) ); return grnd; }
-inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw %0" : : "m" (rnd) ); }
+inline Void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw %0" : : "m" (rnd) ); }
 
 #elif defined ARIADNE_GCC_MACRO_ROUNDING
 
@@ -143,18 +143,18 @@ inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw %0" : 
 #define set_round_down()         asm("fldcw ROUND_DOWN")
 #define set_round_nearest()      asm("fldcw ROUND_NEAREST")
 
-inline void set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
+inline Void set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
 inline rounding_mode_t get_rounding_mode() { return fegetround(); }
 
-inline void c_set_round_nearest() { fesetround(FE_TONEAREST); }
+inline Void c_set_round_nearest() { fesetround(FE_TONEAREST); }
 
 #endif
 
 double rndm() {
     double w=double(1<<16)*(1<<15);
-    int r1=int(2*uint(std::rand()))/2;
-    unsigned int r2=std::rand();
-    unsigned int r3=std::rand();
+    Int r1=Int(2*Nat(std::rand()))/2;
+    unsigned Int r2=std::rand();
+    unsigned Int r3=std::rand();
     double r=((double(r3)/w+double(r2))/w+double(r1))/(1<<28);
     //std::cerr<<"r="<<r<<" r1,2,3="<<r1<<","<<r2<<","<<r3<<"\n";
     return r;
@@ -176,14 +176,14 @@ inline double mul_opp(double x, double y) {
     return -t;
 }
 
-inline void acc_rnd(double& r, double x, double y) {
+inline Void acc_rnd(double& r, double x, double y) {
     double m=x*y;
     std::cerr<<"  acc_rnd: r="<<r<<" m="<<m;
     r+=x*y;
     std::cerr<<" r="<<r<<"\n";
 }
 
-inline void acc_opp(double& r, double x, double y) {
+inline Void acc_opp(double& r, double x, double y) {
     volatile double t=-x;
     t=t*y;
     std::cerr<<"  acc_opp: r="<<r<<" m="<<-t;
@@ -199,29 +199,29 @@ inline void acc_opp(double& r, double x, double y) {
 
 
 
-void dot_lu_rat(double& l, double& u, SizeType n, const double* x, const double* y);
-void dot_md_rat(mpq_class& m, SizeType n, const double* x, const double* y);
-void dot_lu_std(double& l, double& u, SizeType n, const double* x, const double* y);
-void dot_lu_opp(double& l, double& u, SizeType n, const double* x, const double* y);
-void dot_lu_ivl(double& l, double& u, SizeType n, const double* x, const double* y);
-void dot_lu_ord(double& l, double& u, SizeType n, const double* x, const double* y);
-void dot_mr_std(double& m, double& r, SizeType n, const double* x, const double* y);
-void dot_mr_mid(double& m, double& r, SizeType n, const double* x, const double* y);
-void dot_mr_csy(double& m, double& r, SizeType n, const double* x, const double* y);
+Void dot_lu_rat(double& l, double& u, SizeType n, const double* x, const double* y);
+Void dot_md_rat(mpq_class& m, SizeType n, const double* x, const double* y);
+Void dot_lu_std(double& l, double& u, SizeType n, const double* x, const double* y);
+Void dot_lu_opp(double& l, double& u, SizeType n, const double* x, const double* y);
+Void dot_lu_ivl(double& l, double& u, SizeType n, const double* x, const double* y);
+Void dot_lu_ord(double& l, double& u, SizeType n, const double* x, const double* y);
+Void dot_mr_std(double& m, double& r, SizeType n, const double* x, const double* y);
+Void dot_mr_mid(double& m, double& r, SizeType n, const double* x, const double* y);
+Void dot_mr_csy(double& m, double& r, SizeType n, const double* x, const double* y);
 
-void add_mr_std(double& e, SizeType n, double* r, const double* x, const double* y);
-void add_mr_buf(double& e, SizeType n, double* r, const double* x, const double* y);
-void add_mr_csy(double& e, SizeType n, double* r, const double* x, const double* y);
+Void add_mr_std(double& e, SizeType n, double* r, const double* x, const double* y);
+Void add_mr_buf(double& e, SizeType n, double* r, const double* x, const double* y);
+Void add_mr_csy(double& e, SizeType n, double* r, const double* x, const double* y);
 
-void scal_mr_std(double& e, SizeType n, double* r, const double* x, const double& c);
-void scal_mr_csy(double& e, SizeType n, double* r, const double* x, const double& c);
+Void scal_mr_std(double& e, SizeType n, double* r, const double* x, const double& c);
+Void scal_mr_csy(double& e, SizeType n, double* r, const double* x, const double& c);
 
 
-void profile_dot(int n, int nn) {
+Void profile_dot(Int n, Int nn) {
     double* x=new double[n];
     double* y=new double[n];
 
-    for(int i=0; i!=n; ++i) {
+    for(Int i=0; i!=n; ++i) {
         x[i]=rndm();
         y[i]=rndm();
     }
@@ -239,7 +239,7 @@ void profile_dot(int n, int nn) {
     dot_md_rat(qm,n,x,y);
 
     tm.restart();
-    for(int i=0; i!=nn; ++i) {
+    for(Int i=0; i!=nn; ++i) {
         l=0; u=0;
         dot_lu_std(l,u,n,x,y);
     }
@@ -249,7 +249,7 @@ void profile_dot(int n, int nn) {
     assert(l<=ql && qu<=u);
 
     tm.restart();
-    for(int i=0; i!=nn; ++i) {
+    for(Int i=0; i!=nn; ++i) {
         l=0; u=0;
         dot_lu_opp(l,u,n,x,y);
     }
@@ -259,7 +259,7 @@ void profile_dot(int n, int nn) {
     assert(l<=ql && qu<=u);
 
     tm.restart();
-    for(int i=0; i!=nn; ++i) {
+    for(Int i=0; i!=nn; ++i) {
         l=0; u=0;
         dot_lu_ivl(l,u,n,x,y);
     }
@@ -271,7 +271,7 @@ void profile_dot(int n, int nn) {
 
 
     tm.restart();
-    for(int i=0; i!=nn; ++i) {
+    for(Int i=0; i!=nn; ++i) {
         m=0; r=0;
         dot_mr_std(m,r,n,x,y);
     }
@@ -281,7 +281,7 @@ void profile_dot(int n, int nn) {
     assert(abs(mpq_class(m)-qm)<=r);
 
     tm.restart();
-    for(int i=0; i!=nn; ++i) {
+    for(Int i=0; i!=nn; ++i) {
         m=0; r=0;
         dot_mr_mid(m,r,n,x,y);
     }
@@ -291,7 +291,7 @@ void profile_dot(int n, int nn) {
     assert(abs(mpq_class(m)-qm)<=r);
 
     tm.restart();
-    for(int i=0; i!=nn; ++i) {
+    for(Int i=0; i!=nn; ++i) {
         m=0; r=0;
         dot_mr_csy(m,r,n,x,y);
     }
@@ -306,12 +306,12 @@ void profile_dot(int n, int nn) {
 }
 
 
-void profile_add(int n, int nn) {
+Void profile_add(Int n, Int nn) {
     double* x=new double[n];
     double* y=new double[n];
     double* z=new double[n];
 
-    for(int i=0; i!=n; ++i) {
+    for(Int i=0; i!=n; ++i) {
         x[i]=rndm();
         y[i]=rndm();
     }
@@ -321,7 +321,7 @@ void profile_add(int n, int nn) {
     boost::timer tm; double t=0;
 
     tm.restart();
-    for(int i=0; i!=nn; ++i) {
+    for(Int i=0; i!=nn; ++i) {
         r=0;
         add_mr_std(r,n,z,x,y);
     }
@@ -330,7 +330,7 @@ void profile_add(int n, int nn) {
              <<" r="<<r<<std::endl;
 
     tm.restart();
-    for(int i=0; i!=nn; ++i) {
+    for(Int i=0; i!=nn; ++i) {
         r=0;
         add_mr_buf(r,n,z,x,y);
     }
@@ -339,7 +339,7 @@ void profile_add(int n, int nn) {
              <<" r="<<r<<std::endl;
 
     tm.restart();
-    for(int i=0; i!=nn; ++i) {
+    for(Int i=0; i!=nn; ++i) {
         r=0;
         add_mr_csy(r,n,z,x,y);
     }
@@ -349,12 +349,12 @@ void profile_add(int n, int nn) {
 }
 
 
- void profile_scal(int n, int nn) {
+ Void profile_scal(Int n, Int nn) {
     double* x=new double[n];
     double* z=new double[n];
 
     double c=rndm();
-    for(int i=0; i!=n; ++i) {
+    for(Int i=0; i!=n; ++i) {
         x[i]=rndm();
     }
 
@@ -364,7 +364,7 @@ void profile_add(int n, int nn) {
     boost::timer tm; double t=0;
 
     tm.restart();
-    for(int i=0; i!=nn; ++i) {
+    for(Int i=0; i!=nn; ++i) {
         r=0;
         scal_mr_std(r,n,z,x,c);
     }
@@ -373,7 +373,7 @@ void profile_add(int n, int nn) {
              <<" r="<<r<<std::endl;
 
     tm.restart();
-    for(int i=0; i!=nn; ++i) {
+    for(Int i=0; i!=nn; ++i) {
         r=0;
         scal_mr_csy(r,n,z,x,c);
     }
@@ -383,7 +383,7 @@ void profile_add(int n, int nn) {
 }
 
 
-void test_rounding(volatile double p, volatile double q)
+Void test_rounding(volatile double p, volatile double q)
 {
     std::cout<<"Testing correct rounding\n";
     rounding_mode_t fcw=get_control_word();
@@ -412,13 +412,13 @@ void test_rounding(volatile double p, volatile double q)
     std::cout<<"Restored rounding mode="<<get_rounding_mode()<<"\n";
 }
 
-int main(int argc, const char* argv[]) {
+Int main(Int argc, const char* argv[]) {
     std::cout<<std::setprecision(20);
     std::cerr<<std::setprecision(20);
     //srand((unsigned)time(0));
 
-    int n=(1<<10);
-    int nn=(1<<12);
+    Int n=(1<<10);
+    Int nn=(1<<12);
     if(argc>1) {
         n=(1<<atoi(argv[1]));
     }
@@ -436,7 +436,7 @@ int main(int argc, const char* argv[]) {
     double* y=new double[n];
     double* z=new double[n];
 
-    for(int i=0; i!=n; ++i) {
+    for(Int i=0; i!=n; ++i) {
         x[i]=rndm();
         y[i]=rndm();
         z[i]=rndm();
@@ -444,13 +444,13 @@ int main(int argc, const char* argv[]) {
 
     double* w=new double[n];
     double* v=new double[n];
-    for(int i=0; i!=n; ++i) {
+    for(Int i=0; i!=n; ++i) {
         v[i]=z[i];
         w[i]=z[i];
     }
 
-    int nnn=std::min(n,4);
-    for(int i=0; i!=nnn; ++i) {
+    Int nnn=std::min(n,4);
+    for(Int i=0; i!=nnn; ++i) {
         set_rounding_mode(round_down);
         double r=add_rnd(x[i],y[i]);
         std::cerr<<"add_rnd_down: x="<<x[i]<<" y="<<y[i]<<" r="<<r<<"\n";
@@ -461,7 +461,7 @@ int main(int argc, const char* argv[]) {
     }
     set_rounding_mode(round_nearest);
 
-    for(int i=0; i!=nnn; ++i) {
+    for(Int i=0; i!=nnn; ++i) {
         std::cerr<<"x="<<x[i]<<" y="<<y[i]<<" z="<<z[i]<<"\n";
         set_rounding_mode(round_down);
         acc_rnd(z[i],x[i],y[i]);
@@ -487,7 +487,7 @@ int main(int argc, const char* argv[]) {
 
 
 
-void dot_lu_rat(double& l, double& u, SizeType n, const double* x, const double* y) {
+Void dot_lu_rat(double& l, double& u, SizeType n, const double* x, const double* y) {
     set_rounding_mode(round_nearest);
     assert(l==u);
     mpq_class r=l;
@@ -503,7 +503,7 @@ void dot_lu_rat(double& l, double& u, SizeType n, const double* x, const double*
     double e=abs(d)*(eps/16);
     assert(e>0);
     l=d;
-    int m=0;
+    Int m=0;
     while(l<r) {
         ++m;
         l=d+m*e;
@@ -520,14 +520,14 @@ void dot_lu_rat(double& l, double& u, SizeType n, const double* x, const double*
 }
 
 
-void dot_md_rat(mpq_class& m, SizeType n, const double* x, const double* y) {
+Void dot_md_rat(mpq_class& m, SizeType n, const double* x, const double* y) {
     set_round_nearest();
     for(SizeType i=0; i!=n; ++i) {
         m+=mpq_class(x[i])*mpq_class(y[i]);
     }
 }
 
-void dot_lu_ivl(double& l, double& u, SizeType n, const double* x, const double* y) {
+Void dot_lu_ivl(double& l, double& u, SizeType n, const double* x, const double* y) {
     for(SizeType i=0; i!=n; ++i) {
         set_round_up();
         u+=x[i]*y[i];
@@ -537,7 +537,7 @@ void dot_lu_ivl(double& l, double& u, SizeType n, const double* x, const double*
     set_round_nearest();
 }
 
-void dot_lu_std(double& l, double& u, SizeType n, const double* x, const double* y) {
+Void dot_lu_std(double& l, double& u, SizeType n, const double* x, const double* y) {
     set_round_up();
     for(SizeType i=0; i!=n; ++i) {
         u+=x[i]*y[i];
@@ -551,7 +551,7 @@ void dot_lu_std(double& l, double& u, SizeType n, const double* x, const double*
     set_round_nearest();
 }
 
-void dot_lu_opp(double& l, double& u, SizeType n, const double* x, const double* y) {
+Void dot_lu_opp(double& l, double& u, SizeType n, const double* x, const double* y) {
     set_round_up();
     register volatile double uu=u;
     register volatile double ll=-l;
@@ -569,7 +569,7 @@ void dot_lu_opp(double& l, double& u, SizeType n, const double* x, const double*
     set_round_nearest();
 }
 
-void dot_lu_opp2(double& l, double& u, SizeType n, const double* x, const double* y) {
+Void dot_lu_opp2(double& l, double& u, SizeType n, const double* x, const double* y) {
     set_round_up();
     register volatile double t;
     for(SizeType i=0; i!=n; ++i) {
@@ -583,11 +583,11 @@ void dot_lu_opp2(double& l, double& u, SizeType n, const double* x, const double
     set_round_nearest();
 }
 
-void dot_lu_ord(double& l, double& u, SizeType n, const double* x, const double* y) {
+Void dot_lu_ord(double& l, double& u, SizeType n, const double* x, const double* y) {
 
 }
 
-void dot_mr_std(double& m, double& r, SizeType n, const double* x, const double* y) {
+Void dot_mr_std(double& m, double& r, SizeType n, const double* x, const double* y) {
     set_round_down();
     volatile double l=m-r;
     for(SizeType i=0; i!=n; ++i) {
@@ -605,7 +605,7 @@ void dot_mr_std(double& m, double& r, SizeType n, const double* x, const double*
     set_round_nearest();
 }
 
-void dot_mr_mid(double& m, double& r, SizeType n, const double* x, const double* y) {
+Void dot_mr_mid(double& m, double& r, SizeType n, const double* x, const double* y) {
     volatile double a=m;
     for(SizeType i=0; i!=n; ++i) {
         a+=x[i]*y[i];
@@ -625,7 +625,7 @@ void dot_mr_mid(double& m, double& r, SizeType n, const double* x, const double*
     set_round_nearest();
 }
 
-void dot_mr_csy(double& m, double& r, SizeType n, const double* x, const double* y) {
+Void dot_mr_csy(double& m, double& r, SizeType n, const double* x, const double* y) {
     double e=0;
     for(SizeType i=0; i!=n; ++i) {
         double p=x[i]*y[i];
@@ -639,7 +639,7 @@ void dot_mr_csy(double& m, double& r, SizeType n, const double* x, const double*
 
 
 
-void add_mr_std(double& e, SizeType n, double* r, const double* x, const double* y)
+Void add_mr_std(double& e, SizeType n, double* r, const double* x, const double* y)
 {
     for(SizeType i=0; i!=n; ++i) {
         volatile double a=x[i]+y[i];
@@ -653,7 +653,7 @@ void add_mr_std(double& e, SizeType n, double* r, const double* x, const double*
     }
 }
 
-void add_mr_buf(double& e, SizeType n, double* r, const double* x, const double* y)
+Void add_mr_buf(double& e, SizeType n, double* r, const double* x, const double* y)
 {
     double* z=new double[n];
     for(SizeType i=0; i!=n; ++i) {
@@ -670,7 +670,7 @@ void add_mr_buf(double& e, SizeType n, double* r, const double* x, const double*
     delete[] z;
 }
 
-void add_mr_csy(double& e, SizeType n, double* r, const double* x, const double* y)
+Void add_mr_csy(double& e, SizeType n, double* r, const double* x, const double* y)
 {
     double d=0;
     for(SizeType i=0; i!=n; ++i) {
@@ -683,7 +683,7 @@ void add_mr_csy(double& e, SizeType n, double* r, const double* x, const double*
 }
 
 
-void scal_mr_std(double& e, SizeType n, double* r, const double* x, const double& c)
+Void scal_mr_std(double& e, SizeType n, double* r, const double* x, const double& c)
 {
     for(SizeType i=0; i!=n; ++i) {
         volatile double a=x[i]*c;
@@ -697,7 +697,7 @@ void scal_mr_std(double& e, SizeType n, double* r, const double* x, const double
     }
 }
 
-void scal_mr_csy(double& e, SizeType n, double* r, const double* x, const double& c)
+Void scal_mr_csy(double& e, SizeType n, double* r, const double* x, const double& c)
 {
     double d=0;
     for(SizeType i=0; i!=n; ++i) {
@@ -711,7 +711,7 @@ void scal_mr_csy(double& e, SizeType n, double* r, const double* x, const double
 
 #else // No fenv.h or no gmpxx.h
 
-int main() {
+Int main() {
     std::cout << "SKIPPED " << std::endl;
 }
 

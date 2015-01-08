@@ -74,7 +74,7 @@ TextPlot::TextPlot(const char* cfilename, ios_base::openmode mode)
 }
 
 
-void TextPlot::open(const char* cfilename)
+Void TextPlot::open(const char* cfilename)
 {
     StringType filename(cfilename);
     if(filename.rfind(".") != StringType::npos) {
@@ -85,7 +85,7 @@ void TextPlot::open(const char* cfilename)
 }
 
 
-void TextPlot::open(const char* cfilename, ios_base::openmode mode)
+Void TextPlot::open(const char* cfilename, ios_base::openmode mode)
 {
     StringType filename(cfilename);
     if(filename.rfind(".") != StringType::npos) {
@@ -98,7 +98,7 @@ void TextPlot::open(const char* cfilename, ios_base::openmode mode)
 
 inline OutputStream& operator<<(OutputStream& os, const DrawableInterface& sh) { return sh.write(os); }
 
-void TextPlot::draw(const DrawableInterface& shape) {
+Void TextPlot::draw(const DrawableInterface& shape) {
     if(dynamic_cast<const ExactPoint*>(&shape)) {
         this->draw(dynamic_cast<const ExactPoint&>(shape));
     } else if(dynamic_cast<const ExactBox*>(&shape)) {
@@ -114,44 +114,44 @@ void TextPlot::draw(const DrawableInterface& shape) {
     }
 }
 
-void TextPlot::_draw(const std::vector<ExactPoint>& pts) {
+Void TextPlot::_draw(const std::vector<ExactPoint>& pts) {
     for(std::vector<ExactPoint>::const_iterator iter = pts.begin() ; iter != pts.end() ; iter++) {
         this->draw(*iter);
     }
     this->_fstream << std::endl;
 }
 
-void TextPlot::draw(const ExactPoint& pt) {
-    for(uint i = 0; i < pt.dimension(); i++) {
+Void TextPlot::draw(const ExactPoint& pt) {
+    for(Nat i = 0; i < pt.dimension(); i++) {
         this->_fstream << approx_cast<double>(pt[i]) << " ";
     }
     this->_fstream << std::endl;
 }
 
 
-void TextPlot::draw(const ExactBox& bx) {
+Void TextPlot::draw(const ExactBox& bx) {
     this->_draw(bx.vertices());
 }
 
-//void TextPlot::draw(const Polytope& p) {
+//Void TextPlot::draw(const Polytope& p) {
 //    this->_draw(p.vertices());
 //}
 
-void TextPlot::draw(const InterpolatedCurve& c) {
+Void TextPlot::draw(const InterpolatedCurve& c) {
     for(InterpolatedCurve::ConstIterator iter = c.begin() ; iter != c.end() ; ++iter) {
         this->draw(ApproximatePoint(iter->second));
     }
     this->_fstream << std::endl;
 }
 
-void TextPlot::draw(const GridTreeSubset& gts) {
+Void TextPlot::draw(const GridTreeSubset& gts) {
     for(GridTreeSubset::ConstIterator iter = gts.begin() ; iter != gts.end() ; ++iter) {
         this->draw(iter->box());
     }
     this->_fstream << std::endl;
 }
 
-void TextPlot::close() {
+Void TextPlot::close() {
     this->_fstream.close();
 }
 

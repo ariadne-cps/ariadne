@@ -41,9 +41,6 @@
 #include "numeric/float-validated.h"
 #include "numeric/float-approximate.h"
 
-// Simplifying typedefs for unsigned types
-typedef unsigned int uint;
-
 namespace Ariadne {
 
 class Tribool;
@@ -102,8 +99,8 @@ class ExactInterval {
   public:
     //! \brief Default constructor yields the singleton zero interval \a [0,0].
     ExactInterval() : l(0.0), u(0.0) { }
-    ExactInterval(uint m) : l(m), u(m) { }
-    ExactInterval(int n) : l(n), u(n) { }
+    ExactInterval(Nat m) : l(m), u(m) { }
+    ExactInterval(Int n) : l(n), u(n) { }
     //! \brief Convert from a builtin double-precision floating-point value. Yields the singleton interval \a [x,x].
     ExactInterval(double x) : l(x), u(x) { }
     //! \brief Create from a floating-point value. Yields the singleton interval \a [x,x].
@@ -140,8 +137,8 @@ class ExactInterval {
     ExactInterval(const Rational& lower, const Rational& upper);
 #endif // HAVE_GMPXX_H
 
-    ExactInterval& operator=(uint m) { l=m; u=m; return *this; }
-    ExactInterval& operator=(int n) { l=n; u=n; return *this; }
+    ExactInterval& operator=(Nat m) { l=m; u=m; return *this; }
+    ExactInterval& operator=(Int n) { l=n; u=n; return *this; }
     ExactInterval& operator=(double c) { l=c; u=c; return *this; }
     ExactInterval& operator=(const Float& x) { l=x; u=x; return *this; }
     ExactInterval& operator=(const Real& x);
@@ -176,24 +173,24 @@ class ExactInterval {
     Bool singleton() const { return l==u; }
 
     //! \brief Sets the interval to a "canonical" empty interval \a [1,0].
-    void set_empty() { l=+std::numeric_limits< double >::infinity(); u=-std::numeric_limits< double >::infinity(); }
-    void set_lower(const ExactFloat& lower) { l=lower.raw(); }
+    Void set_empty() { l=+std::numeric_limits< double >::infinity(); u=-std::numeric_limits< double >::infinity(); }
+    Void set_lower(const ExactFloat& lower) { l=lower.raw(); }
         // ARIADNE_ASSERT(lower<=this->u);
-    void set_upper(const ExactFloat& upper) { u=upper.raw(); }
+    Void set_upper(const ExactFloat& upper) { u=upper.raw(); }
         // ARIADNE_ASSERT(this->l<=upper);
-    void set(const ExactFloat& lower, const ExactFloat& upper) { l=lower.raw(); u=upper.raw(); }
+    Void set(const ExactFloat& lower, const ExactFloat& upper) { l=lower.raw(); u=upper.raw(); }
         // ARIADNE_ASSERT(lower<=upper);
-    void set_lower(const Float& lower) { l=lower; }
+    Void set_lower(const Float& lower) { l=lower; }
         // ARIADNE_ASSERT(lower<=this->u);
-    void set_upper(const Float& upper) { u=upper; }
+    Void set_upper(const Float& upper) { u=upper; }
         // ARIADNE_ASSERT(this->l<=upper);
-    void set(const Float& lower, const Float& upper) { l=lower; u=upper; }
+    Void set(const Float& lower, const Float& upper) { l=lower; u=upper; }
         // ARIADNE_ASSERT(lower<=upper);
   public:
     //! \brief Extract a double-precision point approximation to the value represented by the interval.
     double get_d() const { return (this->l.get_d()+this->u.get_d())/2; }
-    static uint output_precision;
-    static void set_output_precision(uint p) { output_precision=p; }
+    static Nat output_precision;
+    static Void set_output_precision(Nat p) { output_precision=p; }
   private:
     Float l, u;
 };
@@ -294,7 +291,7 @@ class UpperInterval {
     // FIXME: Should make explicit, but this interferes with role as a numeric type
     UpperInterval(Float point) : l(point), u(point) { }
     // FIXME: Should make explicit, but this interferes with role as a numeric type
-    UpperInterval(unsigned int  point) : l(point), u(point) { }
+    UpperInterval(unsigned int point) : l(point), u(point) { }
     UpperInterval(int  point) : l(point), u(point) { }
     UpperInterval(double  point) : l(point), u(point) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
@@ -311,9 +308,9 @@ class UpperInterval {
     UpperInterval(ValidatedFloat point) : l(point.lower_raw()), u(point.upper_raw()) { }
 
     //! \brief Set the lower bound of the interval.
-    void set_lower(LowerFloat lower) { l=lower.raw(); }
+    Void set_lower(LowerFloat lower) { l=lower.raw(); }
     //! \brief Set the upper bound of the interval.
-    void set_upper(UpperFloat upper) { u=upper.raw(); }
+    Void set_upper(UpperFloat upper) { u=upper.raw(); }
 
     //! \brief The lower bound of the interval.
     const Float& lower_raw() const { return l; }
@@ -393,7 +390,7 @@ ExactInterval narrow(ExactInterval i);
 // Over-approximate by an interval with float coefficients
 //! \related ExactInterval \brief Over-approximate the interval by one using builtin single-precision floating-point values as endpoints.
 ExactInterval trunc(ExactInterval);
-ExactInterval trunc(ExactInterval, uint eps);
+ExactInterval trunc(ExactInterval, Nat eps);
 
 //! \related ExactInterval \brief The nearest representable number to the midpoint of the interval.
 inline Float med(ExactInterval i) { return half_exact(add_near(i.lower_raw(),i.upper_raw())); }
@@ -448,9 +445,9 @@ inline UpperInterval mul_ivl(Float, Float);
 inline UpperInterval div_ivl(Float, Float);
 
 //! \related UpperInterval \brief Positive integer power function. Yields an over-approximation to \f$\{ x^m \mid x\in I\}\f$.
-UpperInterval pow(UpperInterval i, uint m);
+UpperInterval pow(UpperInterval i, Nat m);
 //! \related UpperInterval \brief %Integer power function. Yields an over-approximation to \f$\{ x^n \mid x\in I\}\f$.
-UpperInterval pow(UpperInterval i, int n);
+UpperInterval pow(UpperInterval i, Int n);
 
 //! \related UpperInterval \brief Square-root function. Yields an over-approximation to \f$\{ \sqrt{x} \mid x\in I\}\f$.
 //! Requires \c I.lower()>=0 .
@@ -673,7 +670,7 @@ inline UpperInterval div_ivl(Float x1, Float x2)
     return UpperInterval(rl,ru);
 }
 
-inline UpperInterval pow_ivl(Float x1, int n2)
+inline UpperInterval pow_ivl(Float x1, Int n2)
 {
     return pow(UpperInterval(x1),n2);
 }
@@ -761,7 +758,7 @@ inline UpperInterval& operator-=(UpperInterval& i1, double x2) { i1=sub(i1,stati
 inline UpperInterval& operator*=(UpperInterval& i1, double x2) { i1=mul(i1,static_cast<Float>(x2)); return i1; }
 inline UpperInterval& operator/=(UpperInterval& i1, double x2) { i1=div(i1,static_cast<Float>(x2)); return i1; }
 
-//inline UpperInterval operator/(const UpperInterval& i1, int n2) { return div(i1,Float(n2)); }
+//inline UpperInterval operator/(const UpperInterval& i1, Int n2) { return div(i1,Float(n2)); }
 //inline UpperInterval operator/(const UpperInterval& i1, double x2) { return div(i1,Float(x2)); }
 
 // Standard equality operators
@@ -855,7 +852,7 @@ inline Tribool operator<=(UpperInterval i1, UpperInterval i2) {
 }
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
-  template<class A> void serialize(A& a, ExactInterval& ivl, const uint version) {
+  template<class A> Void serialize(A& a, ExactInterval& ivl, const Nat version) {
     a & ivl.lower_raw() & ivl.upper_raw(); }
 #endif
 

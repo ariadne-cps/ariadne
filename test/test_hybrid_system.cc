@@ -39,15 +39,15 @@ using namespace Ariadne;
 
 class TestHybridSystem {
   public:
-    void test();
+    Void test();
   private:
-    void test_build_hybrid_system();
-    void test_static_analysis();
+    Void test_build_hybrid_system();
+    Void test_static_analysis();
   private:
     HybridSystem _system;
 };
 
-void
+Void
 TestHybridSystem::test()
 {
     ARIADNE_TEST_CALL(test_build_hybrid_system());
@@ -55,7 +55,7 @@ TestHybridSystem::test()
 }
 
 
-void
+Void
 TestHybridSystem::test_build_hybrid_system()
 {
     // Declare the hyrbid system object
@@ -164,7 +164,7 @@ TestHybridSystem::test_build_hybrid_system()
 
 
 
-void
+Void
 TestHybridSystem::test_static_analysis()
 {
     ARIADNE_TEST_PRINT(_system.events());
@@ -174,7 +174,7 @@ TestHybridSystem::test_static_analysis()
 }
 
 
-int main() {
+Int main() {
     TestHybridSystem().test();
     return ARIADNE_TEST_FAILURES;
 }

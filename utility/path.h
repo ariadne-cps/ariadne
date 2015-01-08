@@ -184,7 +184,7 @@ template<class T> T Path<T>::get_back() const {
     return this->_word.back();
 }
 
-template<class T> Void Path<T>::set_back(T t) {
+template<class T> void Path<T>::set_back(T t) {
     this->_word.back()=t;
 }
 
@@ -192,7 +192,7 @@ template<class T> T Path<T>::pop() {
     T back=this->_word.back(); this->_word.pop_back(); return back;
 }
 
-template<class T> Void Path<T>::push( const T& s ) {
+template<class T> void Path<T>::push( const T& s ) {
     this->_word.push_back( s );
 }
 
@@ -200,15 +200,15 @@ template<class T> T Path<T>::pop_back( ) {
     T back=this->_word.back(); this->_word.pop_back(); return back;
 }
 
-template<class T> Void Path<T>::push_back( const T& s ) {
+template<class T> void Path<T>::push_back( const T& s ) {
     this->_word.push_back( s );
 }
 
-template<class T> Void Path<T>::append( const T& s ) {
+template<class T> void Path<T>::append( const T& s ) {
     this->_word.push_back( s );
 }
 
-template<class T> Void Path<T>::append( const List<T>& w ) {
+template<class T> void Path<T>::append( const List<T>& w ) {
     for( SizeType i = 0; i < w.size() ; i++ ){
         this->_word.push_back( w[i] );
     }

@@ -41,7 +41,7 @@ class TestConstrainedImageSet
   private:
     Figure figure;
   public:
-    void test() {
+    Void test() {
         figure.set_bounding_box(ExactBox{{-4.0,+4.0},{-4.0,+4.0}});
         ARIADNE_TEST_CALL(test_constructor());
         ARIADNE_TEST_CALL(test_geometry());
@@ -51,7 +51,7 @@ class TestConstrainedImageSet
         ARIADNE_TEST_CALL(test_draw());
     }
 
-    void test_constructor() {
+    Void test_constructor() {
         List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(3);
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
 
@@ -62,7 +62,7 @@ class TestConstrainedImageSet
         set.apply((x[0]+x[1],x[0]-x[1]*x[1]));
     }
 
-    void test_geometry() {
+    Void test_geometry() {
         List<EffectiveScalarFunction> p=EffectiveScalarFunction::coordinates(1);
         List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(3);
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
@@ -132,7 +132,7 @@ class TestConstrainedImageSet
         plot("test_function_sets-geometry-idisc",widen(idisc.bounding_box(),0.5),set_colour,idisc,box_colour,box1,box_colour,box2,box_colour,box3);
     }
 
-    void test_separated() {
+    Void test_separated() {
         List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(3);
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
 
@@ -170,7 +170,7 @@ class TestConstrainedImageSet
         figure.clear();
     }
 
-    void test_approximation() {
+    Void test_approximation() {
         List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(3);
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
 
@@ -180,14 +180,14 @@ class TestConstrainedImageSet
         set.new_space_constraint(x[0]+x[1]<=2.0);
         ARIADNE_TEST_PRINT(set);
         GridTreeSet paving(2);
-        uint depth=2;
+        Nat depth=2;
         paving.adjoin_outer_approximation(set,depth);
         set.adjoin_outer_approximation_to(paving,depth);
         figure.draw(paving);
     }
 
 
-    void test_split() {
+    Void test_split() {
         EffectiveScalarFunction o=EffectiveScalarFunction::constant(3,1);
         EffectiveScalarFunction s0=EffectiveScalarFunction::coordinate(3,0);
         EffectiveScalarFunction s1=EffectiveScalarFunction::coordinate(3,1);
@@ -230,7 +230,7 @@ class TestConstrainedImageSet
         figure.write("test_function_set-split");
     }
 
-    void test_affine_approximation() {
+    Void test_affine_approximation() {
         // Test conversionn is exact for the affine set -2<x<1; 0<y<2 3x+y<1
         List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(2);
         BoxSet d( (IntervalSet(-2,1),IntervalSet(0,2)) );
@@ -242,7 +242,7 @@ class TestConstrainedImageSet
         //ARIADNE_TEST_PRINT(set.affine_approximation());
     }
 
-    void test_draw(const StringType& str, const EffectiveConstrainedImageSet& set, uint acc) {
+    Void test_draw(const StringType& str, const EffectiveConstrainedImageSet& set, Nat acc) {
         figure.clear();
         figure.set_bounding_box(ExactBox({{-2.75,+2.75},{-1.5,+2.0}}));
         GridTreeSet paving(set.dimension());
@@ -268,7 +268,7 @@ class TestConstrainedImageSet
         figure.clear();
     }
 
-    void test_draw2(const StringType& str, const EffectiveConstrainedImageSet& set, uint acc) {
+    Void test_draw2(const StringType& str, const EffectiveConstrainedImageSet& set, Nat acc) {
         figure.clear();
         figure.set_bounding_box(ExactBox{{-1.75,+1.75},{-1.5,+2.0}});
         GridTreeSet paving(set.dimension());
@@ -294,12 +294,12 @@ class TestConstrainedImageSet
         figure.clear();
     }
 
-    void test_draw() {
+    Void test_draw() {
         EffectiveScalarFunction s=EffectiveScalarFunction::coordinate(2,0);
         EffectiveScalarFunction t=EffectiveScalarFunction::coordinate(2,1);
         EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
         EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
-        uint acc = 2u;
+        Nat acc = 2u;
 
         test_draw("ellipse",EffectiveConstrainedImageSet(BoxSet(2,IntervalSet(-1,1)),(2*s+t,s+t),(s*s+t*t<=0.75)),acc+1u);
         //test_draw("concave",EffectiveConstrainedImageSet(ExactBox(2,-1.01,1.01,-1.01,1.01),(s,1.0*s*s+t),(2*s+0.25*s*s+t-2.0<=0)),acc);
@@ -309,7 +309,7 @@ class TestConstrainedImageSet
 
 
 
-int main(int argc, const char* argv[])
+Int main(Int argc, const char* argv[])
 {
     TestConstrainedImageSet().test();
     std::cerr<<"INCOMPLETE ";

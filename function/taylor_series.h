@@ -35,7 +35,7 @@
 
 namespace Ariadne {
 
-typedef Series<ValidatedNumber>(*ValidatedSeriesFunctionPointer)(uint,const ValidatedNumber&);
+typedef Series<ValidatedNumber>(*ValidatedSeriesFunctionPointer)(Nat,const ValidatedNumber&);
 
 // A deprecated class for computing power series expansions
 // The difference between this and the Series class is that a TaylorSeries
@@ -43,24 +43,24 @@ typedef Series<ValidatedNumber>(*ValidatedSeriesFunctionPointer)(uint,const Vali
 // valid on a subdomain, while a Series class uses arbitrary coefficients
 // and is valid within the entire radius of convergence
 class TaylorSeries {
-    typedef Series<ValidatedNumber>(*ValidatedSeriesFunctionPointer)(uint,const ValidatedNumber&);
+    typedef Series<ValidatedNumber>(*ValidatedSeriesFunctionPointer)(Nat,const ValidatedNumber&);
   public:
-    TaylorSeries(uint d) : expansion(d+1), error(0) { }
-    TaylorSeries(uint degree, ValidatedSeriesFunctionPointer function,
+    TaylorSeries(Nat d) : expansion(d+1), error(0) { }
+    TaylorSeries(Nat degree, ValidatedSeriesFunctionPointer function,
                  const ExactFloat& centre, const ValidatedNumber& domain);
-    uint degree() const { return expansion.size()-1; }
-    ExactFloat& operator[](uint i) { return expansion[i]; }
+    Nat degree() const { return expansion.size()-1; }
+    ExactFloat& operator[](Nat i) { return expansion[i]; }
     Array<ExactFloat> expansion;
     ValidatedNumber error;
-    void sweep(ExactFloat e) {
-        for(uint i=0; i<=degree(); ++i) {
+    Void sweep(ExactFloat e) {
+        for(Nat i=0; i<=degree(); ++i) {
             if(abs(expansion[i])<=e) {
                 error+=expansion[i]*ValidatedNumber(-1,1);
                 expansion[i]=0; } } }
 };
 
 inline
-TaylorSeries::TaylorSeries(uint d, ValidatedSeriesFunctionPointer fn,
+TaylorSeries::TaylorSeries(Nat d, ValidatedSeriesFunctionPointer fn,
                            const ExactFloat& c, const ValidatedNumber& r)
     : expansion(d+1), error(0)
 {
@@ -70,7 +70,7 @@ TaylorSeries::TaylorSeries(uint d, ValidatedSeriesFunctionPointer fn,
     ValidatedNumber e=r-c;
     //std::cerr<<"\nc="<<c<<" r="<<r<<" e="<<e<<"\n";
     //std::cerr<<"centre_series="<<centre_series<<"\nrange_series="<<range_series<<"\n";
-    for(uint i=0; i!=d; ++i) {
+    for(Nat i=0; i!=d; ++i) {
         this->expansion[i]=centre_series[i].midpoint();
         this->error+=(centre_series[i]-this->expansion[i])*p;
         p*=e;

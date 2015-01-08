@@ -45,14 +45,14 @@ class TestExpression {
         : o("1.0",1.0), x("x"), y("y"), z("z") {
     }
 
-    void test_variables() {
+    Void test_variables() {
         ARIADNE_TEST_CONSTRUCT(RealVariable,a,("a"));
         ARIADNE_TEST_ASSERT(a==RealVariable("a"));
         ARIADNE_TEST_ASSERT(a==RealVariable(a));
         ARIADNE_TEST_ASSERT(a!=RealVariable("b"));
     }
 
-    void test_assignment() {
+    Void test_assignment() {
         RealVariable x("x"), y("y");
         Real z(0), o(1);
         Assignment<Variable<Real>,Real> ac = (x=o);
@@ -70,7 +70,7 @@ class TestExpression {
         v = lac;
     }
 
-    void test_evaluate() {
+    Void test_evaluate() {
         ARIADNE_TEST_CONSTRUCT(RealExpression,g,(x+3*y*z*z));
 
         Map<RealVariable,Real> v;
@@ -80,7 +80,7 @@ class TestExpression {
         //ARIADNE_TEST_EQUAL(evaluate(g,v),Real(227));
     }
 
-    void test_parameters() {
+    Void test_parameters() {
         RealVariable x("x");
 
         RealExpression expr = x;//+u;
@@ -98,7 +98,7 @@ class TestExpression {
         ARIADNE_TEST_EQUALS(result1,uncertain_value);
     }
 
-    void test_function()
+    Void test_function()
     {
         // Test to ensure that constants are handled correctly.
         Real tc=Dyadic(5.0);
@@ -140,7 +140,7 @@ class TestExpression {
         //ARIADNE_TEST_EQUAL(EffectiveVectorFunction((x+y,y+z*z),(x,y,z))[0],EffectiveScalarFunction(x+y,(x,y,z)));
     }
 
-    void test() {
+    Void test() {
         test_variables();
         test_assignment();
         test_parameters();
@@ -149,7 +149,7 @@ class TestExpression {
 };
 
 
-int main() {
+Int main() {
     TestExpression().test();
     return ARIADNE_TEST_FAILURES;
 };

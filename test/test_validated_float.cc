@@ -41,24 +41,24 @@ using namespace std;
 class TestValidatedFloat
 {
   public:
-    void test();
+    Void test();
   private:
-    void test_concept();
-    void test_constructors();
-    void test_input();
-    void test_class();
-    void test_comparison();
-    void test_correct_rounded_arithmetic();
-    void test_accurate_rounded_arithmetic();
-    void test_exact_rounded_arithmetic();
-    void test_aliasing();
-    void test_monotone_functions();
-    void test_trigonometric_functions();
-    void regression_tests();
+    Void test_concept();
+    Void test_constructors();
+    Void test_input();
+    Void test_class();
+    Void test_comparison();
+    Void test_correct_rounded_arithmetic();
+    Void test_accurate_rounded_arithmetic();
+    Void test_exact_rounded_arithmetic();
+    Void test_aliasing();
+    Void test_monotone_functions();
+    Void test_trigonometric_functions();
+    Void regression_tests();
 };
 
 
-void
+Void
 TestValidatedFloat::test()
 {
     ARIADNE_TEST_CALL(test_concept());
@@ -74,13 +74,13 @@ TestValidatedFloat::test()
     ARIADNE_TEST_CALL(regression_tests());
 }
 
-void
+Void
 TestValidatedFloat::test_concept()
 {
     ValidatedFloat::set_output_precision(17);
 
-    int n=1;
-    uint m=1;
+    Int n=1;
+    Nat m=1;
     double d=1;
     ExactFloat x=1;
     Float a,b;
@@ -130,7 +130,7 @@ TestValidatedFloat::test_concept()
 
 // Test that interval arithmetic is rounded correctly,
 // without paying attention to accuracy issues.
-void
+Void
 TestValidatedFloat::test_correct_rounded_arithmetic()
 {
     ValidatedFloat onethird=ValidatedFloat(1)/ValidatedFloat(3);
@@ -142,7 +142,7 @@ TestValidatedFloat::test_correct_rounded_arithmetic()
 
 
 // Test that interval arithmetic gives the most accurate rounded values
-void
+Void
 TestValidatedFloat::test_accurate_rounded_arithmetic()
 {
     const double min=std::numeric_limits<double>::min();
@@ -173,7 +173,7 @@ TestValidatedFloat::test_accurate_rounded_arithmetic()
 
 
 // Test that interval arithmetic gives exact values if possible
-void
+Void
 TestValidatedFloat::test_exact_rounded_arithmetic()
 {
     ARIADNE_TEST_EQUAL(ValidatedFloat(5,7)+ValidatedFloat(2,4),ValidatedFloat(7,11));
@@ -258,7 +258,7 @@ TestValidatedFloat::test_exact_rounded_arithmetic()
 
 
 
-void
+Void
 TestValidatedFloat::test_constructors()
 {
     Float zero=0;
@@ -272,7 +272,7 @@ TestValidatedFloat::test_constructors()
     if(ivld2.lower_value()>ivld2.upper_value()) {
         ARIADNE_TEST_WARN("ValidatedFloat default constructor returns an empty set.");
     } else {
-        ARIADNE_TEST_ASSERT((bool)(ivld2==ValidatedFloat(zero,zero)));
+        ARIADNE_TEST_ASSERT((Bool)(ivld2==ValidatedFloat(zero,zero)));
     }
 
     // Constructor with approximations
@@ -310,7 +310,7 @@ TestValidatedFloat::test_constructors()
     ARIADNE_TEST_ASSERT(ivld7.lower_value()==+inf); ARIADNE_TEST_ASSERT(ivld7.upper_value()==-inf);
 }
 
-void TestValidatedFloat::test_class()
+Void TestValidatedFloat::test_class()
 {
     // Test lower, upper, midpoint, radius, width
 
@@ -336,7 +336,7 @@ void TestValidatedFloat::test_class()
     ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).width().raw(),1.000000000000000222);
 }
 
-void TestValidatedFloat::test_input()
+Void TestValidatedFloat::test_input()
 {
     ValidatedFloat ivl1,ivl2;
     string input("[1.125,2.25] [0.4,0.6]");
@@ -357,7 +357,7 @@ void TestValidatedFloat::test_input()
     }
 }
 
-void TestValidatedFloat::test_comparison() {
+Void TestValidatedFloat::test_comparison() {
     // FIXME: If using Boost style interval tests, uncomment the line below
     // and comment out the line after
     //ARIADNE_TEST_ASSERT(indeterminate(ivld1==ivld2));
@@ -371,7 +371,7 @@ void TestValidatedFloat::test_comparison() {
     ARIADNE_TEST_ASSERT(ivl1ref.lower_value()==Float(5.25));
 }
 
-void TestValidatedFloat::test_aliasing() {
+Void TestValidatedFloat::test_aliasing() {
 
     ExactFloat x2(1.5);
     ExactFloat x3(2.25);
@@ -391,7 +391,7 @@ void TestValidatedFloat::test_aliasing() {
     ivl1=ivl3; ivl1=x2/ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,ValidatedFloat(x2/ivl3));
 }
 
-void TestValidatedFloat::test_monotone_functions()
+Void TestValidatedFloat::test_monotone_functions()
 {
 
     ValidatedFloat two(2.0);
@@ -420,7 +420,7 @@ void TestValidatedFloat::test_monotone_functions()
     ARIADNE_TEST_COMPARE(loge.upper_value(),<,1.000000000002);
 }
 
-void TestValidatedFloat::test_trigonometric_functions()
+Void TestValidatedFloat::test_trigonometric_functions()
 {
     try {
         ValidatedFloat x(6.283185307179586,6.283185307179587);
@@ -446,7 +446,7 @@ void TestValidatedFloat::test_trigonometric_functions()
 
 }
 
-void TestValidatedFloat::regression_tests() {
+Void TestValidatedFloat::regression_tests() {
 
     // Regression test; fails dramatically on certain types of rounding
     {
@@ -462,7 +462,7 @@ void TestValidatedFloat::regression_tests() {
 
 }
 
-int main() {
+Int main() {
     std::cout<<std::setprecision(20);
     std::cerr<<std::setprecision(20);
 

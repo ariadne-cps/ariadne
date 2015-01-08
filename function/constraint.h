@@ -54,7 +54,7 @@ class Constraint {
     Constraint(const Constraint<FF,RR>& c)
         : _function(static_cast<F>(c.function())), _lower_bound(c.lower_bound()), _upper_bound(c.upper_bound()) { }
 
-    void set_function(const FunctionType& f) { this->_function = f; }
+    Void set_function(const FunctionType& f) { this->_function = f; }
     FunctionType& function() { return this->_function; }
     FunctionType const& function() const { return this->_function; }
     Nat argument_size() const { return this->_function.argument_size(); }

@@ -43,7 +43,7 @@ template<class F> struct FltMPObject : NumberObject<F> { };
 /************ FltMP ********************************************************/
 
 //enum class RoundingModeMP : mpfr_rnd_t { NEAREST=MPFR_RNDN, UPWARD=MPFR_RNDU, DOWNWARD=MPFR_RNDD };
-enum class RoundingModeMP : uint { NEAREST=MPFR_RNDN, UPWARD=MPFR_RNDU, DOWNWARD=MPFR_RNDD };
+enum class RoundingModeMP : Nat { NEAREST=MPFR_RNDN, UPWARD=MPFR_RNDU, DOWNWARD=MPFR_RNDD };
 
 template<class F> struct FltMPExpression { };
 
@@ -169,7 +169,7 @@ template<> class FloatMPTemplate<Error>
     FltMP _e;
   public:
     typedef Error Paradigm;
-    FloatMPTemplate<Error>(uint);
+    FloatMPTemplate<Error>(Nat);
     explicit FloatMPTemplate<Error>(double);
     explicit FloatMPTemplate<Error>(double,PrecisionMP);
     explicit FloatMPTemplate<Error>(FltMP);
@@ -263,7 +263,7 @@ template<> class FloatMPTemplate<Metrc> : public NumberObject<MetrcFloatMP>
     friend MetrcFloatMP abs(MetrcFloatMP x);
     friend MetrcFloatMP max(MetrcFloatMP x1, MetrcFloatMP x2);
     friend MetrcFloatMP min(MetrcFloatMP x1, MetrcFloatMP x2);
-    friend bool operator==(MetrcFloatMP,int);
+    friend Bool operator==(MetrcFloatMP,Int);
     friend OutputStream& operator<<(OutputStream& os, MetrcFloatMP const&);
  private:
     friend ApprxFloatMP operator+(ApprxFloatMP,ApprxFloatMP);
@@ -320,7 +320,7 @@ template<> class FloatMPTemplate<Bound>
     friend BoundFloatMP min(BoundFloatMP,BoundFloatMP);
     friend BoundFloatMP max(BoundFloatMP,BoundFloatMP);
     double get_d() const;
-    friend bool operator==(BoundFloatMP,int);
+    friend Bool operator==(BoundFloatMP,Int);
     friend OutputStream& operator<<(OutputStream& os, BoundFloatMP const&);
  private:
     friend ApprxFloatMP operator+(ApprxFloatMP,ApprxFloatMP);

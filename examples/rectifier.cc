@@ -8,7 +8,7 @@
 using namespace Ariadne;
 
 /// Function for plotting the orbit and reachability set
-template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const ExactBox& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
+template<class SET> Void plot(const char* filename, const Int& xaxis, const Int& yaxis, const Int& numVariables, const ExactBox& bbox, const Colour& fc, const SET& set, const Int& MAX_GRID_DEPTH) {
     // Assigns local variables
     Figure fig;
 
@@ -24,7 +24,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         fig << fill_colour(Colour(1.0,1.0,1.0));
 
         // Gets the number of times each variable interval would be divided by 2
-        int numDivisions = MAX_GRID_DEPTH / numVariables;
+        Int numDivisions = MAX_GRID_DEPTH / numVariables;
         // Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
         Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
         // Initiates the x position to the bounding box left bound
@@ -56,9 +56,9 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
     fig.write(filename);
 }
 
-int main(int argc, const char* argv[])
+Int main(Int argc, const char* argv[])
 {
-    uint evolver_verbosity = 0;
+    Nat evolver_verbosity = 0;
     if(argc>1) { evolver_verbosity=atoi(argv[1]); }
 
     Real amplitude(4.0);
@@ -80,14 +80,14 @@ int main(int argc, const char* argv[])
     /// Introduces the global parameters
     Real TIME_LIMIT = 1/frequency;
     //float TIME_LIMIT = 0.0042;
-    int TRAN_LIMIT = 1;
+    Int TRAN_LIMIT = 1;
     double MAX_ENCL_RADIUS = 1.0;
     double MAX_STEP_SIZE = 1e-2/frequency.get_d();
     //float LOCK_TOGRID_TIME = 2.0/frequency;
     //double LOCK_TOGRID_TIME = 0.25/frequency;
-    //int MAX_GRID_DEPTH = 7;
-    //int VERBOSITY=3;
-    bool ENABLE_SUBDIV=false;
+    //Int MAX_GRID_DEPTH = 7;
+    //Int VERBOSITY=3;
+    Bool ENABLE_SUBDIV=false;
 
     /// Build the Hybrid System
 

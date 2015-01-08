@@ -43,7 +43,7 @@ Orbit<ExactPoint>::Orbit(const ExactPoint& pt)
     : _curve(new InterpolatedCurve(0,pt))
 { }
 
-void
+Void
 Orbit<ExactPoint>::insert(ExactFloat t, const ExactPoint& pt)
 {
     this->_curve->insert(t,pt);

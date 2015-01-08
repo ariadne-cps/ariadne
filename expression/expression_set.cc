@@ -42,7 +42,7 @@ template<> struct KeyValue<RealVariableInterval> {
     ValueType value(const RealVariableInterval& ivl) { return ivl.interval(); }
 };
 
-template<class T> bool unique_keys(const List<T>& lst) {
+template<class T> Bool unique_keys(const List<T>& lst) {
     typedef typename KeyValue<T>::KeyType K;
     Set<K> keys;
     for(typename List<T>::ConstIterator lst_iter=lst.begin(); lst_iter!=lst.end(); ++lst_iter) {
@@ -69,7 +69,7 @@ make_key_value_map(const List<T>& lst) {
 template<class K, class V> List<V> order(const Map<K,V>& map, const List<K>& ordering) {
     List<V> result;
     result.reserve(ordering.size());
-    for(uint i=0; i!=ordering.size(); ++i) {
+    for(Nat i=0; i!=ordering.size(); ++i) {
         result.append(map[ordering[i]]);
     }
     return result;
@@ -77,13 +77,13 @@ template<class K, class V> List<V> order(const Map<K,V>& map, const List<K>& ord
 
 Set<Identifier> variables(const List<RealVariableInterval>& b) {
     Set<Identifier> r;
-    for(uint i=0; i!=b.size(); ++i) { r.insert(b[i].variable().name()); }
+    for(Nat i=0; i!=b.size(); ++i) { r.insert(b[i].variable().name()); }
     return r;
 }
 
 Set<Identifier> arguments(const List<ContinuousPredicate>& c) {
     Set<Identifier> r;
-    for(uint i=0; i!=c.size(); ++i) { r.adjoin(arguments(c[i])); }
+    for(Nat i=0; i!=c.size(); ++i) { r.adjoin(arguments(c[i])); }
     return r;
 }
 
@@ -103,7 +103,7 @@ OutputStream& operator<<(OutputStream& os, const RealVariableInterval& eivl) {
 
 RealVariablesBox::RealVariablesBox(const List<RealVariableInterval>& lst)
 {
-    for(uint i=0; i!=lst.size(); ++i) {
+    for(Nat i=0; i!=lst.size(); ++i) {
         _bounds.insert(lst[i].variable(),lst[i].interval());
     }
 }
@@ -111,14 +111,14 @@ RealVariablesBox::RealVariablesBox(const List<RealVariableInterval>& lst)
 RealVariablesBox::RealVariablesBox(const RealSpace& spc, const BoxSet& bx)
 {
     ARIADNE_ASSERT(spc.size()==bx.size());
-    for(uint i=0; i!=spc.size(); ++i) {
+    for(Nat i=0; i!=spc.size(); ++i) {
         _bounds.insert(spc[i],bx[i]);
     }
 }
 
 BoxSet RealVariablesBox::euclidean_set(const RealSpace& spc) const {
     BoxSet bx(spc.size());
-    for(uint i=0; i!=spc.size(); ++i) {
+    for(Nat i=0; i!=spc.size(); ++i) {
         bx[i]=(*this)[spc[i]];
     }
     return bx;
@@ -174,7 +174,7 @@ RealExpressionConstraintSet::RealExpressionConstraintSet(const List<ContinuousPr
 ConstraintSet RealExpressionConstraintSet::euclidean_set(const RealSpace& space) const {
     const RealExpressionConstraintSet& set = *this;
     List<RealConstraint> constraints;
-    for(uint i=0; i!=set.constraints().size(); ++i) {
+    for(Nat i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
         EffectiveScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
         constraints.append( constraint_function <= Real(0) );
@@ -208,7 +208,7 @@ BoundedConstraintSet RealExpressionBoundedConstraintSet::euclidean_set(const Rea
     const RealExpressionBoundedConstraintSet& set = *this;
     BoxSet domain=RealVariablesBox(set.bounds()).euclidean_set(space);
     List<RealConstraint> constraints;
-    for(uint i=0; i!=set.constraints().size(); ++i) {
+    for(Nat i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
         EffectiveScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
         constraints.append( constraint_function <= Real(0) );
@@ -232,7 +232,7 @@ ValidatedConstrainedImageSet approximate_euclidean_set(const RealExpressionBound
 
     ValidatedConstrainedImageSet result(domain,identity);
     //List<ValidatedConstraint> constraints;
-    for(uint i=0; i!=set.constraints().size(); ++i) {
+    for(Nat i=0; i!=set.constraints().size(); ++i) {
         RealExpression constraint_expression=indicator(set.constraints()[i],NEGATIVE);
         ValidatedScalarFunction constraint_function( Ariadne::make_function(constraint_expression,space) );
         result.new_parameter_constraint(constraint_function <= ExactNumber(0) );

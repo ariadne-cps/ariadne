@@ -73,8 +73,8 @@ class ExactFloat {
     double get_d() const { return _v.get_d(); }
 
   public:
-    static uint output_precision;
-    static void set_output_precision(uint p) { output_precision=p; }
+    static Nat output_precision;
+    static Void set_output_precision(Nat p) { output_precision=p; }
 };
 
 class ValidatedFloat;
@@ -97,7 +97,7 @@ inline ValidatedFloat operator+(const ExactFloat& x1,  const ValidatedFloat& x2)
 inline ValidatedFloat operator-(const ExactFloat& x1,  const ValidatedFloat& x2);
 inline ValidatedFloat operator*(const ExactFloat& x1,  const ValidatedFloat& x2);
 inline ValidatedFloat operator/(const ExactFloat& x1,  const ValidatedFloat& x2);
-inline ValidatedFloat pow(const ExactFloat& x, int n);
+inline ValidatedFloat pow(const ExactFloat& x, Int n);
 
 inline ExactFloat neg(const ExactFloat& x) { return ExactFloat(neg_exact(x.value())); }
 inline ExactFloat abs(const ExactFloat& x) { return ExactFloat(abs_exact(x.value())); }
@@ -106,19 +106,19 @@ inline ExactFloat mag(const ExactFloat& x) { return ExactFloat(abs_exact(x.value
 inline OutputStream& operator<<(OutputStream& os, const ExactFloat& x) {
     return os << std::showpoint << std::setprecision(ExactFloat::output_precision) << x.value(); }
 
-inline bool operator==(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()==x2.value(); }
-inline bool operator!=(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()!=x2.value(); }
-inline bool operator<=(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()<=x2.value(); }
-inline bool operator>=(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()>=x2.value(); }
-inline bool operator< (const ExactFloat& x1, const ExactFloat& x2) { return x1.value()< x2.value(); }
-inline bool operator> (const ExactFloat& x1, const ExactFloat& x2) { return x1.value()> x2.value(); }
+inline Bool operator==(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()==x2.value(); }
+inline Bool operator!=(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()!=x2.value(); }
+inline Bool operator<=(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()<=x2.value(); }
+inline Bool operator>=(const ExactFloat& x1, const ExactFloat& x2) { return x1.value()>=x2.value(); }
+inline Bool operator< (const ExactFloat& x1, const ExactFloat& x2) { return x1.value()< x2.value(); }
+inline Bool operator> (const ExactFloat& x1, const ExactFloat& x2) { return x1.value()> x2.value(); }
 
-inline bool operator==(const ExactFloat& x1, double x2) { return x1.value()==x2; }
-inline bool operator!=(const ExactFloat& x1, double x2) { return x1.value()!=x2; }
-inline bool operator<=(const ExactFloat& x1, double x2) { return x1.value()<=x2; }
-inline bool operator>=(const ExactFloat& x1, double x2) { return x1.value()>=x2; }
-inline bool operator< (const ExactFloat& x1, double x2) { return x1.value()< x2; }
-inline bool operator> (const ExactFloat& x1, double x2) { return x1.value()> x2; }
+inline Bool operator==(const ExactFloat& x1, double x2) { return x1.value()==x2; }
+inline Bool operator!=(const ExactFloat& x1, double x2) { return x1.value()!=x2; }
+inline Bool operator<=(const ExactFloat& x1, double x2) { return x1.value()<=x2; }
+inline Bool operator>=(const ExactFloat& x1, double x2) { return x1.value()>=x2; }
+inline Bool operator< (const ExactFloat& x1, double x2) { return x1.value()< x2; }
+inline Bool operator> (const ExactFloat& x1, double x2) { return x1.value()> x2; }
 
 class ApproximateFloat;
 inline const ExactFloat& make_exact(const Float& x) { return reinterpret_cast<const ExactFloat&>(x); }
@@ -139,26 +139,26 @@ inline ValidatedFloat add(ExactFloat x, ExactFloat y);
 inline ValidatedFloat sub(ExactFloat x, ExactFloat y);
 inline ValidatedFloat mul(ExactFloat x, ExactFloat y);
 inline ValidatedFloat div(ExactFloat x, ExactFloat y);
-inline ValidatedFloat pow(ExactFloat x, int n);
+inline ValidatedFloat pow(ExactFloat x, Int n);
 
 inline ValidatedFloat rad(ExactFloat x, ExactFloat y);
 inline ValidatedFloat med(ExactFloat x, ExactFloat y);
 
 
 #ifdef HAVE_GMPXX_H
-inline bool operator==(const ExactFloat& x, const Rational& q) { return Rational(x)==q; }
-inline bool operator!=(const ExactFloat& x, const Rational& q) { return Rational(x)!=q; }
-inline bool operator<=(const ExactFloat& x, const Rational& q) { return Rational(x)<=q; }
-inline bool operator>=(const ExactFloat& x, const Rational& q) { return Rational(x)>=q; }
-inline bool operator< (const ExactFloat& x, const Rational& q) { return Rational(x)< q; }
-inline bool operator> (const ExactFloat& x, const Rational& q) { return Rational(x)> q; }
+inline Bool operator==(const ExactFloat& x, const Rational& q) { return Rational(x)==q; }
+inline Bool operator!=(const ExactFloat& x, const Rational& q) { return Rational(x)!=q; }
+inline Bool operator<=(const ExactFloat& x, const Rational& q) { return Rational(x)<=q; }
+inline Bool operator>=(const ExactFloat& x, const Rational& q) { return Rational(x)>=q; }
+inline Bool operator< (const ExactFloat& x, const Rational& q) { return Rational(x)< q; }
+inline Bool operator> (const ExactFloat& x, const Rational& q) { return Rational(x)> q; }
 
-inline bool operator==(const Rational& q, const ExactFloat& x) { return q==Rational(x); }
-inline bool operator!=(const Rational& q, const ExactFloat& x) { return q!=Rational(x); }
-inline bool operator<=(const Rational& q, const ExactFloat& x) { return q<=Rational(x); }
-inline bool operator>=(const Rational& q, const ExactFloat& x) { return q>=Rational(x); }
-inline bool operator< (const Rational& q, const ExactFloat& x) { return q< Rational(x); }
-inline bool operator> (const Rational& q, const ExactFloat& x) { return q> Rational(x); }
+inline Bool operator==(const Rational& q, const ExactFloat& x) { return q==Rational(x); }
+inline Bool operator!=(const Rational& q, const ExactFloat& x) { return q!=Rational(x); }
+inline Bool operator<=(const Rational& q, const ExactFloat& x) { return q<=Rational(x); }
+inline Bool operator>=(const Rational& q, const ExactFloat& x) { return q>=Rational(x); }
+inline Bool operator< (const Rational& q, const ExactFloat& x) { return q< Rational(x); }
+inline Bool operator> (const Rational& q, const ExactFloat& x) { return q> Rational(x); }
 #endif // HAVE_GMPXX_H
 
 

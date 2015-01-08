@@ -62,7 +62,7 @@ template<class M> struct IsMatrixExpression : IsMatrix<M> { };
 template<class X> struct IsNumber;
 template<class A> struct IsAlgebra;
 
-template<class X> struct IsScalar { static const bool value = !IsVector<X>::value && !IsCovector<X>::value && !IsMatrix<X>::value; };
+template<class X> struct IsScalar { static const Bool value = !IsVector<X>::value && !IsCovector<X>::value && !IsMatrix<X>::value; };
 
 template<class V> using ScalarType=typename V::ScalarType;
 
@@ -144,7 +144,7 @@ class Vector
         ARIADNE_ASSERT(i<n); Vector<X> result(n,static_cast<X>(0)); result[i]=static_cast<X>(1); return result; }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
     static Array< Vector<X> > basis(SizeType n) {
-        Array< Vector<X> > result(n); for(uint i=0; i!=n; ++i) { result[i]=unit(n,i); } return result; }
+        Array< Vector<X> > result(n); for(Nat i=0; i!=n; ++i) { result[i]=unit(n,i); } return result; }
     //@}
 
     //@{

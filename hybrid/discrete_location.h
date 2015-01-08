@@ -47,20 +47,20 @@ class DiscreteLocation
     //! \brief Construct a location for which the string variable named \a var is given value \a val.
     explicit DiscreteLocation(const Identifier& var, const String& val) : StringValuation() { this->insert(StringVariable(var),val); }
     explicit DiscreteLocation(const StringType& var, const StringType& val) : StringValuation() { this->insert(StringVariable(var),val); }
-    explicit DiscreteLocation(const int& num) : StringValuation() { this->insert(StringVariable("q"),to_str(num)); }
+    explicit DiscreteLocation(const Int& num) : StringValuation() { this->insert(StringVariable("q"),to_str(num)); }
     DiscreteLocation(const DiscreteLocation&) = default;
     DiscreteLocation(const Map<Identifier,String>& sm) : StringValuation(sm) { }
-    void adjoin(const DiscreteLocation& loc) { this->_values.adjoin(loc._values); }
+    Void adjoin(const DiscreteLocation& loc) { this->_values.adjoin(loc._values); }
 };
 
 //! \relates DiscreteLocation \brief Combine the values of variables of two locations.
 DiscreteLocation operator,(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
-bool operator==(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
-bool operator!=(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
-bool operator<(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
+Bool operator==(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
+Bool operator!=(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
+Bool operator<(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
 
 //! \relates DiscreteLocation \brief Test if two locations are distinguishable i.e. specify a common variable which takes different values.
-inline bool are_distinguishable(const DiscreteLocation& location1, const DiscreteLocation& location2) {
+inline Bool are_distinguishable(const DiscreteLocation& location1, const DiscreteLocation& location2) {
     for(Map<Identifier,String>::ConstIterator iter1=location1._values.begin(); iter1!=location1._values.end(); ++iter1) {
         if(location2._values.has_key(iter1->first) && location2._values[iter1->first] != iter1->second) {
             return true;
@@ -70,7 +70,7 @@ inline bool are_distinguishable(const DiscreteLocation& location1, const Discret
 }
 
 //! \relates DiscreteLocation \brief Test if \a partial_location is defined by a restricted set of variables of \a full_location.
-inline bool is_restriction(const DiscreteLocation& partial_location, const DiscreteLocation& full_location) {
+inline Bool is_restriction(const DiscreteLocation& partial_location, const DiscreteLocation& full_location) {
     for(Map<Identifier,String>::ConstIterator value_iter=partial_location._values.begin(); value_iter!=partial_location._values.end(); ++value_iter) {
         if(!full_location._values.has_key(value_iter->first) || full_location[StringVariable(value_iter->first)]!=value_iter->second) {
             return false;

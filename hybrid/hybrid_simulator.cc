@@ -56,7 +56,7 @@ HybridSimulator::HybridSimulator()
 {
 }
 
-void HybridSimulator::set_step_size(double h)
+Void HybridSimulator::set_step_size(double h)
 {
     this->_step_size=h;
 }
@@ -66,7 +66,7 @@ ExactPoint make_point(const HybridPoint& hpt, const RealSpace& spc) {
     if(hpt.space()==spc) { return hpt.point(); }
     Map<RealVariable,ExactFloat> values=hpt.values();
     ExactPoint pt(spc.dimension());
-    for(uint i=0; i!=pt.size(); ++i) {
+    for(Nat i=0; i!=pt.size(); ++i) {
         pt[i]=values[spc.variable(i)];
     }
     return pt;
@@ -102,7 +102,7 @@ HybridSimulator::orbit(const HybridAutomatonInterface& system, const HybridPoint
 
     while(possibly(t<tmax)) {
 
-        bool enabled=false;
+        Bool enabled=false;
         DiscreteEvent event;
         for(Map<DiscreteEvent,EffectiveScalarFunction>::ConstIterator guard_iter=guards.begin(); guard_iter!=guards.end(); ++guard_iter) {
             if(evaluate(guard_iter->second,point)>0) {

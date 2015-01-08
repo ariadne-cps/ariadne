@@ -50,7 +50,7 @@ namespace Ariadne {
 
 namespace {
 
-bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
+Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     return reverse_lexicographic_less(a1,a2); }
 
 } // namespace
@@ -64,7 +64,7 @@ const double ec=em/2;
 typedef Float ErrorFloat;
 typedef Float ApproxFloat;
 
-void axpy(Float& te, ApproxFloat& r, const Float& a, const Float& x, const Float& y) {
+Void axpy(Float& te, ApproxFloat& r, const Float& a, const Float& x, const Float& y) {
     VOLATILE Float& xv=const_cast<VOLATILE Float&>(x);
     VOLATILE Float mxv=-x;
     set_rounding_upward();
@@ -75,7 +75,7 @@ void axpy(Float& te, ApproxFloat& r, const Float& a, const Float& x, const Float
     r=a*xv+y;
 }
 
-void add_op(Float& te, ApproxFloat& r, const Float& x, const Float& y) {
+Void add_op(Float& te, ApproxFloat& r, const Float& x, const Float& y) {
     VOLATILE Float& xv=const_cast<VOLATILE Float&>(x);
     VOLATILE Float mxv=-x;
     set_rounding_upward();
@@ -86,7 +86,7 @@ void add_op(Float& te, ApproxFloat& r, const Float& x, const Float& y) {
     r=xv+y;
 }
 
-void sub_op(Float& te, ApproxFloat& r, const Float& x, const Float& y) {
+Void sub_op(Float& te, ApproxFloat& r, const Float& x, const Float& y) {
     VOLATILE Float& xv=const_cast<VOLATILE Float&>(x);
     VOLATILE Float mxv=-x;
     set_rounding_upward();
@@ -97,7 +97,7 @@ void sub_op(Float& te, ApproxFloat& r, const Float& x, const Float& y) {
     r=xv-y;
 }
 
-void mul_op(Float& te, ApproxFloat& r, const Float& s, const Float& x) {
+Void mul_op(Float& te, ApproxFloat& r, const Float& s, const Float& x) {
     VOLATILE Float& xv=const_cast<VOLATILE Float&>(x);
     VOLATILE Float mxv=-x;
     set_rounding_upward();
@@ -108,7 +108,7 @@ void mul_op(Float& te, ApproxFloat& r, const Float& s, const Float& x) {
     r=xv*s;
 }
 
-void mul_op(Float& te, ApproxFloat& r, const Float& sl, const Float& sm, const Float& su, const Float& x) {
+Void mul_op(Float& te, ApproxFloat& r, const Float& sl, const Float& sm, const Float& su, const Float& x) {
     VOLATILE Float& xv=const_cast<VOLATILE Float&>(x);
     VOLATILE Float mxv=-x;
     set_rounding_upward();
@@ -131,7 +131,7 @@ void mul_op(Float& te, ApproxFloat& r, const Float& sl, const Float& sm, const F
 
 Vector<ValidatedNumber> unscale(const Vector<ValidatedNumber>& x, const Vector<ExactInterval>& d) {
     Vector<ValidatedNumber> r(x);
-    for(uint i=0; i!=r.size(); ++i) {
+    for(Nat i=0; i!=r.size(); ++i) {
         if(d[i].lower().raw()==d[i].upper().raw()) {
             if(x[i]==d[i].midpoint()) {
                 r[i]=ValidatedNumber(0.0,0.0);
@@ -155,7 +155,7 @@ ValidatedTaylorModel::TaylorModel()
 { }
 
 
-ValidatedTaylorModel::TaylorModel(uint as, Sweeper swp)
+ValidatedTaylorModel::TaylorModel(Nat as, Sweeper swp)
     : _expansion(as), _error(0), _sweeper(swp)
 {
 }
@@ -194,7 +194,7 @@ ValidatedTaylorModel::create_ball(ErrorType e) const
     return r;
 }
 
-void
+Void
 ValidatedTaylorModel::swap(ValidatedTaylorModel& tm)
 {
     this->_expansion.swap(tm._expansion);
@@ -202,14 +202,14 @@ ValidatedTaylorModel::swap(ValidatedTaylorModel& tm)
     std::swap(this->_sweeper,tm._sweeper);
 }
 
-void
+Void
 ValidatedTaylorModel::clear()
 {
     this->_expansion.clear();
     this->_error=0u;
 }
 
-uint
+Nat
 ValidatedTaylorModel::degree() const
 {
     uchar deg=0u;
@@ -236,14 +236,14 @@ ValidatedTaylorModel::operator=(const ValidatedNumber& c)
 namespace { // Internal code for arithmetic
 
 // Inplace negation
-void _neg(ValidatedTaylorModel& r)
+Void _neg(ValidatedTaylorModel& r)
 {
     for(ValidatedTaylorModel::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
         iter->data().raw()=-iter->data().raw();
     }
 }
 
-inline void _scal_exact(ValidatedTaylorModel& r, const Float& c)
+inline Void _scal_exact(ValidatedTaylorModel& r, const Float& c)
 {
     // Operation can be performed exactly
     RawFloat pc=static_cast<RawFloat>(c);
@@ -257,7 +257,7 @@ inline void _scal_exact(ValidatedTaylorModel& r, const Float& c)
 
 
 
-inline void _scal_approx(ValidatedTaylorModel& r, const Float& c)
+inline Void _scal_approx(ValidatedTaylorModel& r, const Float& c)
 {
     // General case with error analysis
     Float& re=r.error().raw();
@@ -285,7 +285,7 @@ inline void _scal_approx(ValidatedTaylorModel& r, const Float& c)
 
 
 
-inline void _scal_approx4(ValidatedTaylorModel& r, const Float& c)
+inline Void _scal_approx4(ValidatedTaylorModel& r, const Float& c)
 {
     // General case with error analysis
     Float& re=r.error().raw();
@@ -313,7 +313,7 @@ inline void _scal_approx4(ValidatedTaylorModel& r, const Float& c)
     return;
 }
 
-inline void _scal_approx3(ValidatedTaylorModel& r, const Float& c)
+inline Void _scal_approx3(ValidatedTaylorModel& r, const Float& c)
 {
     // General case with error analysis
     double& re=internal_cast<double&>(r.error().raw());
@@ -341,7 +341,7 @@ inline void _scal_approx3(ValidatedTaylorModel& r, const Float& c)
 
 
 // Version using only Float class directly
-inline void _scal_approx2(ValidatedTaylorModel& r, const Float& c)
+inline Void _scal_approx2(ValidatedTaylorModel& r, const Float& c)
 {
     // General case with error analysis
     Float& re=r.error().raw();
@@ -368,7 +368,7 @@ inline void _scal_approx2(ValidatedTaylorModel& r, const Float& c)
 }
 
 // Modified version to try to obtain optimal performance
-inline void _scal_approx1(ValidatedTaylorModel& rr, const Float& cc)
+inline Void _scal_approx1(ValidatedTaylorModel& rr, const Float& cc)
 {
     // General case with error analysis
     Expansion<double>& r=reinterpret_cast<Expansion<double>&>(rr.expansion());
@@ -399,7 +399,7 @@ inline void _scal_approx1(ValidatedTaylorModel& rr, const Float& cc)
 
 
 // Original version except with double
-inline void _scal_approx0(ValidatedTaylorModel& rr, const Float& cc)
+inline Void _scal_approx0(ValidatedTaylorModel& rr, const Float& cc)
 {
     Expansion<double>& r=reinterpret_cast<Expansion<double>&>(rr.expansion());
     volatile double& re=reinterpret_cast<volatile double&>(rr.error());
@@ -428,7 +428,7 @@ inline void _scal_approx0(ValidatedTaylorModel& rr, const Float& cc)
     return;
 }
 
-void _scal(ValidatedTaylorModel& r, const Float& c)
+Void _scal(ValidatedTaylorModel& r, const Float& c)
 {
     // No measurable speedup in general case by avoiding checks
     _scal_approx4(r,c); return;
@@ -439,7 +439,7 @@ void _scal(ValidatedTaylorModel& r, const Float& c)
 }
 
 
-void _scal(ValidatedTaylorModel& r, const ValidatedNumber& c)
+Void _scal(ValidatedTaylorModel& r, const ValidatedNumber& c)
 {
     ARIADNE_ASSERT_MSG(c.lower().raw()<=c.upper().raw(),c);
     ARIADNE_ASSERT_MSG(r.error().raw()>=0,"r="<<r);
@@ -478,7 +478,7 @@ void _scal(ValidatedTaylorModel& r, const ValidatedNumber& c)
     return;
 }
 
-void _scal2(ValidatedTaylorModel& r, const ValidatedNumber& c)
+Void _scal2(ValidatedTaylorModel& r, const ValidatedNumber& c)
 {
     //std::cerr<<"ValidatedTaylorModel::scal(ValidatedNumber c) c="<<c<<std::endl;
     Float& re=r.error().raw();
@@ -513,17 +513,17 @@ void _scal2(ValidatedTaylorModel& r, const ValidatedNumber& c)
 }
 
 
-struct UnitMultiIndex { uint argument_size; uint unit_index; };
+struct UnitMultiIndex { Nat argument_size; Nat unit_index; };
 
 
-inline void _incr(ValidatedTaylorModel& r, const MultiIndex& a)
+inline Void _incr(ValidatedTaylorModel& r, const MultiIndex& a)
 {
     for(ValidatedTaylorModel::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
         static_cast<MultiIndex&>(iter->key())+=a;
     }
 }
 
-inline void _incr(ValidatedTaylorModel& r, uint j)
+inline Void _incr(ValidatedTaylorModel& r, Nat j)
 {
     for(ValidatedTaylorModel::Iterator iter=r.begin(); iter!=r.end(); ++iter) {
         ++static_cast<MultiIndex&>(iter->key())[j];
@@ -532,7 +532,7 @@ inline void _incr(ValidatedTaylorModel& r, uint j)
 
 
 inline
-void _acc(ValidatedTaylorModel& r, const ExactFloat& c)
+Void _acc(ValidatedTaylorModel& r, const ExactFloat& c)
 {
     // Compute self+=c
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
@@ -560,7 +560,7 @@ void _acc(ValidatedTaylorModel& r, const ExactFloat& c)
 
 
 inline
-void _acc(ValidatedTaylorModel& r, const ValidatedNumber& c)
+Void _acc(ValidatedTaylorModel& r, const ValidatedNumber& c)
 {
     // Compute self+=c
     ARIADNE_ASSERT_MSG(r.error().raw()>=0,r);
@@ -600,7 +600,7 @@ void _acc(ValidatedTaylorModel& r, const ValidatedNumber& c)
 // Compute r=x+y, assuming r is empty
 // First compute the errors and then at the end compute the expansion
 // This saves rounding mode changes, but requires an extra loop
-inline void _add1(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
+inline Void _add1(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
 {
     // Compute r=x+y, assuming r is empty
     set_rounding_upward();
@@ -659,7 +659,7 @@ inline void _add1(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const 
 //   than using two loops
 // Use opposite rounding to compute difference of upward and downward roundings,
 //   as this seems to be marginally faster than changing the rounding mode
-inline void _add2(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
+inline Void _add2(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
 {
     set_rounding_upward();
     Float te=0.0;
@@ -705,19 +705,19 @@ inline void _add2(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const 
 
 }
 
-inline void _add(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
+inline Void _add(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
 {
     _add2(r,x,y);
     ARIADNE_ASSERT(r.error().raw()>=0);
 }
 
-inline void _acc(ValidatedTaylorModel& r, const ValidatedTaylorModel& x)
+inline Void _acc(ValidatedTaylorModel& r, const ValidatedTaylorModel& x)
 {
     ValidatedTaylorModel s(r.argument_size(),r.sweeper()); _add(s,r,x); s.swap(r);
     ARIADNE_ASSERT(r.error().raw()>=0);
 }
 
-inline void _sub(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
+inline Void _sub(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
 {
     // Compute r=x+y, assuming r is empty
     set_rounding_upward();
@@ -763,7 +763,7 @@ inline void _sub(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const V
     ARIADNE_ASSERT(r.error().raw()>=0);
 }
 
-inline void _sma(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const Float& c, const ValidatedTaylorModel& y)
+inline Void _sma(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const Float& c, const ValidatedTaylorModel& y)
 {
     if(c==1.0) { _add(r,x,y); return; }
     if(c==-1.0) { _sub(r,x,y); return; }
@@ -826,7 +826,7 @@ inline void _sma(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const F
     ARIADNE_ASSERT(r.error().raw()>=0);
 }
 
-inline void _sma(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedNumber& c, const ValidatedTaylorModel& y)
+inline Void _sma(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedNumber& c, const ValidatedTaylorModel& y)
 {
     if(c.lower().raw()==c.upper().raw()) {
         _sma(r,x,c.lower().raw(),y); return;
@@ -919,7 +919,7 @@ inline void _sma(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const V
 struct Ivl { Float u; Float ml; };
 
 /*
-inline void _mul1(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
+inline Void _mul1(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
 {
     // Compute r+=x*y
     typedef ValidatedTaylorModel::ConstIterator ConstIterator;
@@ -982,7 +982,7 @@ inline void _mul1(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const 
 // Compute monomial-by-monomial in y
 // Avoid changing rounding mode
 inline
-void _mul2(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
+Void _mul2(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
 {
     ValidatedTaylorModel t(x.argument_size(),r.sweeper());
     ValidatedTaylorModel s(x.argument_size(),r.sweeper());
@@ -1036,7 +1036,7 @@ void _mul2(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const Validat
 // Compute r+=x*y
 // Compute monomial-by-monomial in y
 // Change the rounding mode to avoid iterating using opposite rounding
-inline void _mul3(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
+inline Void _mul3(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
 {
     ValidatedTaylorModel t(x.argument_size(),r.sweeper());
     for(ValidatedTaylorModel::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
@@ -1078,7 +1078,7 @@ inline void _mul3(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const 
     return;
 }
 
-inline void _add(MultiIndex& r, const MultiIndex& a1, const MultiIndex& a2) {
+inline Void _add(MultiIndex& r, const MultiIndex& a1, const MultiIndex& a2) {
     for(MultiIndex::SizeType j=0; j!=r.word_size(); ++j) {
         r.word_at(j)=a1.word_at(j)+a2.word_at(j);
     }
@@ -1089,9 +1089,9 @@ inline void _add(MultiIndex& r, const MultiIndex& a1, const MultiIndex& a2) {
 // Compute monomial-by-monomial in y
 // Avoid changing rounding mode
 inline
-void _mul4(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y, const Sweeper& accuracy)
+Void _mul4(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y, const Sweeper& accuracy)
 {
-    const uint as=r.argument_size();
+    const Nat as=r.argument_size();
     ValidatedTaylorModel t(as,r.sweeper());
     ValidatedTaylorModel s(as,r.sweeper());
     MultiIndex ta(as);
@@ -1152,7 +1152,7 @@ void _mul4(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const Validat
     return;
 }
 
-inline void _mul(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y) {
+inline Void _mul(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y) {
     //_mul2(r,x,y);
     _mul4(r,x,y,r.sweeper());
     ARIADNE_ASSERT(r.error().raw()>=0);
@@ -1162,12 +1162,12 @@ inline void _mul(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const V
 
 } // namespace
 
-void _mul_full(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
+Void _mul_full(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
 {
     _mul2(r,x,y);
 }
 
-void _mul_clear(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
+Void _mul_clear(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y)
 {
     _mul4(r,x,y,r.sweeper());
 }
@@ -1177,21 +1177,21 @@ void _mul_clear(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const Va
 
 // Inplace arithmetical operations for Algebra concept
 
-void ValidatedTaylorModel::iadd(const ValidatedNumber& c)
+Void ValidatedTaylorModel::iadd(const ValidatedNumber& c)
 {
     _acc(*this,c);
     this->sweep();
     ARIADNE_ASSERT_MSG(this->error().raw()>=0,*this);
 }
 
-void ValidatedTaylorModel::imul(const ValidatedNumber& c)
+Void ValidatedTaylorModel::imul(const ValidatedNumber& c)
 {
     _scal(*this,c);
     this->sweep();
     ARIADNE_ASSERT_MSG(this->error().raw()>=0,*this);
 }
 
-void ValidatedTaylorModel::isma(const ValidatedNumber& c, const ValidatedTaylorModel& y)
+Void ValidatedTaylorModel::isma(const ValidatedNumber& c, const ValidatedTaylorModel& y)
 {
     ValidatedTaylorModel& x=*this;
     ValidatedTaylorModel r=this->create();
@@ -1201,7 +1201,7 @@ void ValidatedTaylorModel::isma(const ValidatedNumber& c, const ValidatedTaylorM
     ARIADNE_ASSERT_MSG(this->error().raw()>=0,*this);
 }
 
-void ValidatedTaylorModel::ifma(const ValidatedTaylorModel& x1, const ValidatedTaylorModel& x2)
+Void ValidatedTaylorModel::ifma(const ValidatedTaylorModel& x1, const ValidatedTaylorModel& x2)
 {
     _mul(*this,x1,x2);
     this->sweep();
@@ -1326,7 +1326,7 @@ ValidatedTaylorModel abs(const ValidatedTaylorModel& x) {
         // Use power series expansion $abs(x)=\sum_{i=0}^{7} p_i x^{2i} \pm e$ for $x\in[-1,+1]$ with
         // p=[0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667] and e=0.035
         // TODO: Find more accurate and stable formula
-        static const uint n=7u;
+        static const Nat n=7u;
         static const double p[n]={0.0112167620474, 5.6963263292747541, -31.744583789655049, 100.43002481377681, -162.01366698662306, 127.45243493284417, -38.829743345344667};
         static const double err=0.035;
         ValidatedTaylorModel r(x.argument_size(),x.sweeper());
@@ -1334,8 +1334,8 @@ ValidatedTaylorModel abs(const ValidatedTaylorModel& x) {
         ValidatedTaylorModel s=x/xmag;
         s=sqr(s);
         r=static_cast<ExactNumber>(p[n-1]);
-        for(uint i=0; i!=(n-1); ++i) {
-            uint j=(n-2)-i;
+        for(Nat i=0; i!=(n-1); ++i) {
+            Nat j=(n-2)-i;
             r=s*r+p[j];
         }
         r+=ValidatedFloat(-err,+err);
@@ -1361,7 +1361,7 @@ ValidatedTaylorModel sqr(const ValidatedTaylorModel& x) {
     return r;
 }
 
-ValidatedTaylorModel pow(const ValidatedTaylorModel& x, int n) {
+ValidatedTaylorModel pow(const ValidatedTaylorModel& x, Int n) {
     ValidatedTaylorModel r(x.argument_size(),x.sweeper()); r+=1;
     ValidatedTaylorModel p(x);
     while(n) {
@@ -1410,7 +1410,7 @@ UpperInterval _range2(const ValidatedTaylorModel& tm) {
 // Compute the range by grouping all quadratic terms x[i]^2 with linear terms x[i]
 // The range of ax^2+bx+c is a([-1,1]+b/2a)^2+(c-b^2/4a)
 UpperInterval _range3(const ValidatedTaylorModel& tm) {
-    const uint as=tm.argument_size();
+    const Nat as=tm.argument_size();
     Array<Float> linear_terms(as,0.0);
     Array<Float> quadratic_terms(as,0.0);
     UpperInterval r(-tm.error().raw(),+tm.error().raw());
@@ -1418,11 +1418,11 @@ UpperInterval _range3(const ValidatedTaylorModel& tm) {
         if(iter->key().degree()==0) {
             r+=iter->data().raw();
         } else if(iter->key().degree()==1) {
-            for(uint j=0; j!=tm.argument_size(); ++j) {
+            for(Nat j=0; j!=tm.argument_size(); ++j) {
                 if(iter->key()[j]==1) { linear_terms[j]=iter->data().raw(); break; }
             }
         } else if(iter->key().degree()==2) {
-            for(uint j=0; j!=tm.argument_size(); ++j) {
+            for(Nat j=0; j!=tm.argument_size(); ++j) {
                 if(iter->key()[j]==2) { quadratic_terms[j]=iter->data().raw(); break; }
                 if(iter->key()[j]==1) { r+=abs(iter->data().raw())*UpperInterval(-1,1); break; }
             }
@@ -1432,7 +1432,7 @@ UpperInterval _range3(const ValidatedTaylorModel& tm) {
     }
     // If the ratio b/a is very large, then roundoff error can cause a significant
     // additional error. We compute both |a|+|b| and a([-1,+1]+b/2a)-b^2/4a and take best bound
-    for(uint j=0; j!=as; ++j) {
+    for(Nat j=0; j!=as; ++j) {
         const Float& a=quadratic_terms[j];
         const Float& b=linear_terms[j];
         UpperInterval ql=abs(a)*UpperInterval(-1,1) + abs(b)*UpperInterval(-1,+1);
@@ -1483,7 +1483,7 @@ _compose(const TaylorSeries& ts, const ValidatedTaylorModel& tv, double eps)
     vref=0.0;
     ValidatedTaylorModel r(tv.argument_size(),tv.sweeper());
     r+=ts.expansion[ts.expansion.size()-1];
-    for(uint i=1; i!=ts.expansion.size(); ++i) {
+    for(Nat i=1; i!=ts.expansion.size(); ++i) {
         //std::cerr<<"    r="<<r<<std::endl;
         r=r*tv;
         r+=ts.expansion[ts.expansion.size()-i-1];
@@ -1510,9 +1510,9 @@ ValidatedTaylorModel
 _compose1(const ValidatedSeriesFunctionPointer& fn, const ValidatedTaylorModel& tm, double eps)
 {
     Sweeper threshold_sweeper(new ThresholdSweeper(eps));
-    static const uint DEGREE=18;
+    static const Nat DEGREE=18;
     static const double TRUNCATION_ERROR=1e-8;
-    uint d=DEGREE;
+    Nat d=DEGREE;
     ExactFloat c=tm.value();
     UpperInterval r=tm.range();
     Series<ValidatedFloat> centre_series=fn(d,c);
@@ -1527,7 +1527,7 @@ _compose1(const ValidatedSeriesFunctionPointer& fn, const ValidatedTaylorModel& 
     ValidatedTaylorModel x=tm-c;
     ValidatedTaylorModel res(tm.argument_size(),tm.sweeper());
     res+=range_series[d];
-    for(uint i=0; i!=d; ++i) {
+    for(Nat i=0; i!=d; ++i) {
         //std::cerr<<"i="<<i<<" r="<<res<<"\n";
         res=centre_series[d-i-1]+x*res;
         res.sweep(threshold_sweeper);
@@ -1544,9 +1544,9 @@ ValidatedTaylorModel
 _compose2(const ValidatedSeriesFunctionPointer& fn, const ValidatedTaylorModel& tm, double eps)
 {
     Sweeper threshold_sweeper(new ThresholdSweeper(eps));
-    static const uint DEGREE=20;
+    static const Nat DEGREE=20;
     static const Float TRUNCATION_ERROR=1e-8;
-    uint d=DEGREE;
+    Nat d=DEGREE;
     ExactFloat c=tm.value();
     UpperInterval r=tm.range();
     Series<ValidatedFloat> centre_series=fn(d,c);
@@ -1565,7 +1565,7 @@ _compose2(const ValidatedSeriesFunctionPointer& fn, const ValidatedTaylorModel& 
     ValidatedTaylorModel x=tm-c;
     ValidatedTaylorModel res(tm.argument_size(),tm.sweeper());
     res+=centre_series[d];
-    for(uint i=0; i!=d; ++i) {
+    for(Nat i=0; i!=d; ++i) {
         res=centre_series[d-i-1]+x*res;
         res.sweep(threshold_sweeper);
     }
@@ -1581,9 +1581,9 @@ _compose2(const ValidatedSeriesFunctionPointer& fn, const ValidatedTaylorModel& 
 ValidatedTaylorModel
 _compose3(const ValidatedSeriesFunctionPointer& fn, const ValidatedTaylorModel& tm, Float eps)
 {
-    static const uint DEGREE=20;
+    static const Nat DEGREE=20;
     static const Float TRUNCATION_ERROR=1e-8;
-    uint d=DEGREE;
+    Nat d=DEGREE;
     ExactFloat c=tm.value();
     UpperInterval r=tm.range();
     Series<ValidatedFloat> centre_series=fn(d,c);
@@ -1608,7 +1608,7 @@ _compose3(const ValidatedSeriesFunctionPointer& fn, const ValidatedTaylorModel& 
     ValidatedTaylorModel x=tm;
     ValidatedTaylorModel res(tm.argument_size(),tm.sweeper());
     res+=centre_series[d];
-    for(uint i=0; i!=d; ++i) {
+    for(Nat i=0; i!=d; ++i) {
         res=centre_series[d-i-1]+x*res;
         //res.sweep(eps);
     }
@@ -1649,7 +1649,7 @@ ValidatedTaylorModel sqrt(const ValidatedTaylorModel& x) {
     Float eps=(r.upper().raw()-r.lower().raw())/(r.upper().raw()+r.lower().raw());
     set_rounding_to_nearest();
     assert(eps<1);
-    uint d=integer_cast<int>((log((1-eps)*x.tolerance())/log(eps)+1));
+    Nat d=integer_cast<Int>((log((1-eps)*x.tolerance())/log(eps)+1));
     //std::cerr<<"x="<<x<<std::endl;
     //std::cerr<<"x/a="<<x/a<<" a="<<a<<std::endl;
     ValidatedTaylorModel y=(x/a)-1.0;
@@ -1659,7 +1659,7 @@ ValidatedTaylorModel sqrt(const ValidatedTaylorModel& x) {
     //std::cerr<<"sqrt_series="<<sqrt_series<<std::endl;
     //std::cerr<<"y="<<y<<std::endl;
     z+=sqrt_series[d-1];
-    for(uint i=0; i!=d; ++i) {
+    for(Nat i=0; i!=d; ++i) {
         z=sqrt_series[d-i-1] + z * y;
         z.sweep();
         //std::cerr<<"z="<<z<<std::endl;
@@ -1689,14 +1689,14 @@ ValidatedTaylorModel rec(const ValidatedTaylorModel& x) {
     set_rounding_to_nearest();
     assert(eps<1);
 
-    uint d=integer_cast<uint>((log((1-eps)*x.tolerance())/log(eps))+1);
+    Nat d=integer_cast<Nat>((log((1-eps)*x.tolerance())/log(eps))+1);
 
     ValidatedTaylorModel y=1-(x/a);
     ValidatedTaylorModel z(x.argument_size(),x.sweeper());
     z+=Float(d%2?-1:+1);
     //std::cerr<<"  y="<<y<<"\n";
     //std::cerr<<"  z="<<z<<"\n";
-    for(uint i=0; i!=d; ++i) {
+    for(Nat i=0; i!=d; ++i) {
         z=1.0 + z * y;
         //std::cerr<<"  z="<<z<<"\n";
     }
@@ -1727,11 +1727,11 @@ ValidatedTaylorModel log(const ValidatedTaylorModel& x) {
     Float eps=(r.upper().raw()-r.lower().raw())/(r.upper().raw()+r.lower().raw());
     set_rounding_to_nearest();
     assert(eps<1);
-    uint d=integer_cast<uint>((log((1-eps)*x.tolerance())/log(eps)+1));
+    Nat d=integer_cast<Nat>((log((1-eps)*x.tolerance())/log(eps)+1));
     ValidatedTaylorModel y=x/a-1;
     ValidatedTaylorModel z(x.argument_size(),x.sweeper());
     z+=Float(d%2?-1:+1)/d;
-    for(uint i=1; i!=d; ++i) {
+    for(Nat i=1; i!=d; ++i) {
         z=Float((d-i)%2?+1:-1)/(d-i) + z * y;
         z.sweep();
     }
@@ -1741,7 +1741,7 @@ ValidatedTaylorModel log(const ValidatedTaylorModel& x) {
     return z+log(ValidatedFloat(a))+ValidatedFloat(-trunc_err,+trunc_err);
 }
 
-static const uint MAXIMUM_DEGREE = 18;
+static const Nat MAXIMUM_DEGREE = 18;
 
 // Use special code to utilise exp(ax+b)=exp(x)^a*exp(b)
 ValidatedTaylorModel exp(const ValidatedTaylorModel& x) {
@@ -1752,25 +1752,25 @@ ValidatedTaylorModel exp(const ValidatedTaylorModel& x) {
     Float xval=x.value().raw();
     y-=xval;
     Float xrad=mag(y.range()).raw();
-    uint sfp=0; // A number such that 2^sfp>rad(x.range())
+    Nat sfp=0; // A number such that 2^sfp>rad(x.range())
     while(Float(1<<sfp)<xrad) { ++sfp; }
     Float sf=1.0/(1<<sfp);
     _scal_exact(y,sf);
     Float yrad=xrad*sf;
 
-    uint degree=MAXIMUM_DEGREE;
+    Nat degree=MAXIMUM_DEGREE;
 
     // Since x is in unit domain, truncation error is no worse than maximum omitted term, i.e. xr/fac(d+1)
     ValidatedTaylorModel res(x.argument_size(),x.sweeper());
     res.set_error(pow_up(yrad,degree+1));
-    for(uint i=0; i!=degree; ++i) {
+    for(Nat i=0; i!=degree; ++i) {
         res/=(degree-i);
         res=y*res+1.0;
     }
 
     // Square r a total of sfp times
     ValidatedTaylorModel square(x.argument_size(),x.sweeper());
-    for(uint i=0; i!=sfp; ++i) {
+    for(Nat i=0; i!=sfp; ++i) {
         _mul(square,res,res);
         res.swap(square);
         square.clear();
@@ -1795,7 +1795,7 @@ ValidatedTaylorModel sin(const ValidatedTaylorModel& x) {
     ExactNumber one(1.0);
 
     Float two_pi_approx=2*pi_approx;
-    int n=integer_cast<int>(floor(x.value().raw()/two_pi_approx + 0.5));
+    Int n=integer_cast<Int>(floor(x.value().raw()/two_pi_approx + 0.5));
     y=x-(n*2*pi_val);
 
     if(y.error().raw()>two_pi_approx/2) {
@@ -1803,13 +1803,13 @@ ValidatedTaylorModel sin(const ValidatedTaylorModel& x) {
     } else {
         _mul(s,y,y);
 
-        int d=(MAXIMUM_DEGREE+3)/2;
+        Int d=(MAXIMUM_DEGREE+3)/2;
         Float srad=mag(s.range()).raw();
         Float truncation_error=pow_up(srad,d+1)*rec_fac_up((d+1)*2);
 
         // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
         r=one;
-        for(int i=0; i!=d; ++i) {
+        for(Int i=0; i!=d; ++i) {
             r/=Float(-2*(d-i)*(2*(d-i)+1));
             _mul(t,s,r); r.swap(t); t.clear();
             r+=one;
@@ -1832,7 +1832,7 @@ ValidatedTaylorModel cos(const ValidatedTaylorModel& x) {
     ValidatedTaylorModel t(x.argument_size(),x.sweeper());
 
     Float two_pi=2*pi_approx;
-    int n=integer_cast<int>(floor(x.value().raw()/two_pi + 0.5));
+    Int n=integer_cast<Int>(floor(x.value().raw()/two_pi + 0.5));
 
     y=x-2*n*pi_val;
     ExactNumber one(1.0);
@@ -1842,13 +1842,13 @@ ValidatedTaylorModel cos(const ValidatedTaylorModel& x) {
     } else {
         _mul(s,y,y);
 
-        int d=(MAXIMUM_DEGREE+3)/2;
+        Int d=(MAXIMUM_DEGREE+3)/2;
         Float srad=mag(s.range()).raw();
         Float truncation_error=pow_up(srad,d+1)*rec_fac_up((d+1)*2);
 
         // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
         r=one;
-        for(int i=0; i!=d; ++i) {
+        for(Int i=0; i!=d; ++i) {
             r/=double(-2*(d-i)*(2*(d-i)-1));
             _mul(t,s,r); r.swap(t); t.clear();
             r+=one;
@@ -1865,19 +1865,19 @@ ValidatedTaylorModel tan(const ValidatedTaylorModel& x) {
 }
 
 ValidatedTaylorModel asin(const ValidatedTaylorModel& x) {
-    static const uint DEG=18;
+    static const Nat DEG=18;
     return compose(TaylorSeries(DEG,&Series<ValidatedNumber>::asin,
                                 x.value(),static_cast<ValidatedNumber>(x.range())),x);
 }
 
 ValidatedTaylorModel acos(const ValidatedTaylorModel& x) {
-    static const uint DEG=18;
+    static const Nat DEG=18;
     return compose(TaylorSeries(DEG,&Series<ValidatedNumber>::acos,
                                 x.value(),static_cast<ValidatedNumber>(x.range())),x);
 }
 
 ValidatedTaylorModel atan(const ValidatedTaylorModel& x) {
-    static const uint DEG=18;
+    static const Nat DEG=18;
     return compose(TaylorSeries(DEG,&Series<ValidatedNumber>::atan,
                                 x.value(),static_cast<ValidatedNumber>(x.range())),x);
 }
@@ -1919,9 +1919,9 @@ ValidatedTaylorModel& ValidatedTaylorModel::rescale(const ExactInterval& ocd, co
 
 
 // Replace the kth variable x[k] by a*x[k]+b.
-ValidatedTaylorModel preaffine(const ValidatedTaylorModel& tm, uint k, const ValidatedNumber& a, const ValidatedNumber& b) {
-    uint d=tm.degree();
-    uint as=tm.argument_size();
+ValidatedTaylorModel preaffine(const ValidatedTaylorModel& tm, Nat k, const ValidatedNumber& a, const ValidatedNumber& b) {
+    Nat d=tm.degree();
+    Nat as=tm.argument_size();
     Sweeper swp=tm.sweeper();
 
     ValidatedTaylorModel r(as,swp);
@@ -1932,15 +1932,15 @@ ValidatedTaylorModel preaffine(const ValidatedTaylorModel& tm, uint k, const Val
     for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         MultiIndex a=iter->key();
         const Float& c=iter->data().raw();
-        uint ak=a[k];
+        Nat ak=a[k];
         a[k]=0;
         atm[ak].expansion().raw().append(a,c);
     }
 
     ValidatedTaylorModel xk=ValidatedTaylorModel::variable(as,k,swp);
 
-    for(uint i=0; i<=d; ++i) {
-        for(uint j=i; j<=d; ++j) {
+    for(Nat i=0; i<=d; ++i) {
+        for(Nat j=i; j<=d; ++j) {
             ValidatedNumber c=(Ariadne::bin(j,i)*Ariadne::pow(a,i)*Ariadne::pow(b,j-i));
             r+=c*atm[j];
             atm[j]*=xk;
@@ -1950,29 +1950,29 @@ ValidatedTaylorModel preaffine(const ValidatedTaylorModel& tm, uint k, const Val
 }
 
 
-ValidatedTaylorModel discard(const ValidatedTaylorModel& tm, Array<uint>& discarded_variables) {
+ValidatedTaylorModel discard(const ValidatedTaylorModel& tm, Array<Nat>& discarded_variables) {
     return recondition(tm,discarded_variables,0u,0u);
 }
 
-ValidatedTaylorModel recondition(const ValidatedTaylorModel& tm, Array<uint>& discarded_variables, uint number_of_error_variables) {
+ValidatedTaylorModel recondition(const ValidatedTaylorModel& tm, Array<Nat>& discarded_variables, Nat number_of_error_variables) {
     return recondition(tm,discarded_variables,number_of_error_variables,number_of_error_variables);
 }
 
-ValidatedTaylorModel recondition(const ValidatedTaylorModel& tm, Array<uint>& discarded_variables, uint number_of_error_variables, uint index_of_error)
+ValidatedTaylorModel recondition(const ValidatedTaylorModel& tm, Array<Nat>& discarded_variables, Nat number_of_error_variables, Nat index_of_error)
 {
-    for(uint i=0; i!=discarded_variables.size()-1; ++i) {
+    for(Nat i=0; i!=discarded_variables.size()-1; ++i) {
         ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1]);
     }
     ARIADNE_PRECONDITION(discarded_variables[discarded_variables.size()-1]<tm.argument_size());
     ARIADNE_PRECONDITION(index_of_error<=number_of_error_variables);
 
-    const uint number_of_discarded_variables = discarded_variables.size();
-    const uint number_of_kept_variables = tm.argument_size() - discarded_variables.size();
+    const Nat number_of_discarded_variables = discarded_variables.size();
+    const Nat number_of_kept_variables = tm.argument_size() - discarded_variables.size();
 
     // Make an Array of the variables to be kept
-    Array<uint> kept_variables(number_of_kept_variables);
-    uint kd=0; uint kk=0;
-    for(uint j=0; j!=tm.argument_size(); ++j) {
+    Array<Nat> kept_variables(number_of_kept_variables);
+    Nat kd=0; Nat kk=0;
+    for(Nat j=0; j!=tm.argument_size(); ++j) {
         if(kd==number_of_discarded_variables || j!=discarded_variables[kd]) {
             kept_variables[kk]=j; ++kk;
         } else {
@@ -1999,8 +1999,8 @@ ValidatedTaylorModel recondition(const ValidatedTaylorModel& tm, Array<uint>& di
 
     set_rounding_upward();
     for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-        bool keep=true;
-        for(uint k=0; k!=number_of_discarded_variables; ++k) {
+        Bool keep=true;
+        for(Nat k=0; k!=number_of_discarded_variables; ++k) {
             if(iter->key()[discarded_variables[k]]!=0) {
                 *error_ptr = add_rnd(*error_ptr,abs(iter->data().raw()));
                 keep=false;
@@ -2008,7 +2008,7 @@ ValidatedTaylorModel recondition(const ValidatedTaylorModel& tm, Array<uint>& di
             }
         }
         if(keep) {
-            for(uint k=0; k!=number_of_kept_variables; ++k) {
+            for(Nat k=0; k!=number_of_kept_variables; ++k) {
                 a[k]=iter->key()[kept_variables[k]];
             }
             r.expansion().raw().append(a,iter->data().raw());
@@ -2020,7 +2020,7 @@ ValidatedTaylorModel recondition(const ValidatedTaylorModel& tm, Array<uint>& di
 }
 
 
-ValidatedTaylorModel restrict(const ValidatedTaylorModel& tm, uint k, const ExactInterval& nd) {
+ValidatedTaylorModel restrict(const ValidatedTaylorModel& tm, Nat k, const ExactInterval& nd) {
     ARIADNE_ASSERT(k<tm.argument_size());
     ARIADNE_ASSERT(nd.lower().raw()>=-1 && nd.upper().raw()<=+1);
     if(nd.lower().raw()==-1 && nd.upper().raw()==1) {
@@ -2043,25 +2043,25 @@ ValidatedTaylorModel& ValidatedTaylorModel::restrict(const Vector<ExactInterval>
 {
     ValidatedTaylorModel& x=*this;
     ARIADNE_ASSERT(x.argument_size()==nd.size());
-    const uint as=x.argument_size();
-    const uint d=x.expansion().degree();
+    const Nat as=x.argument_size();
+    const Nat d=x.expansion().degree();
     if(d==0) { return x; }
 
     Array< Array<ValidatedNumber> > sf(as,Array<ValidatedNumber>(d+1u));
-    for(uint j=0; j!=as; ++j) {
+    for(Nat j=0; j!=as; ++j) {
         sf[j][0]=1.0;
         sf[j][1]=(nd[j].upper()-nd[j].lower())/2;
-        for(uint k=2; k<=d; ++k) {
+        for(Nat k=2; k<=d; ++k) {
             sf[j][k]=sf[j][k-1]*sf[j][1];
         }
     }
 
     // TODO: separate into roundoff computation and value computation
     for(Iterator iter=x.begin(); iter!=x.end(); ++iter) {
-        for(uint j=0; j!=as; ++j) {
+        for(Nat j=0; j!=as; ++j) {
             Float& c=iter->data().raw();
             UpperInterval ci=UpperInterval(c);
-            for(uint j=0; j!=as; ++j) {
+            for(Nat j=0; j!=as; ++j) {
                 ci*=sf[j][iter->key()[j]];
             }
             iter->data().raw()=ci.centre().raw();
@@ -2078,7 +2078,7 @@ inline double div_rnd(double x, int n) { return (volatile double&)x/(volatile in
 // Compute antiderivative by first computing the error and then the individual terms
 // Seems to have problems with setting the rounding mode; with certain compiler flags
 // sometimes the truncation error is not set
-void _antidifferentiate1(ValidatedTaylorModel& x, uint k)
+Void _antidifferentiate1(ValidatedTaylorModel& x, Nat k)
 {
     ARIADNE_ASSERT(k<x.argument_size());
 
@@ -2086,7 +2086,7 @@ void _antidifferentiate1(ValidatedTaylorModel& x, uint k)
     set_rounding_mode(upward);
     VOLATILE Float tre=0; // Twice the maximum accumulated roundoff error
     for(ValidatedTaylorModel::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        const uint c=xiter->key()[k]+1;
+        const Nat c=xiter->key()[k]+1;
         Float xv=xiter->data().raw();
         Float mxv=-xv;
         assert(c>0);
@@ -2116,7 +2116,7 @@ void _antidifferentiate1(ValidatedTaylorModel& x, uint k)
         // Use the following code as opposed to ++a[k]; c=a[k];
         // as this seems to be safer against compiler optimisations through MultiIndexElementReference
         a.increment(k);
-        const int& c=a.at(k);
+        const Int& c=a.at(k);
         assert(c>0);
         v/=c;
     }
@@ -2124,7 +2124,7 @@ void _antidifferentiate1(ValidatedTaylorModel& x, uint k)
 
 // Compute antiderivative by computing term-by-term, switching the rounding mode
 // May be slow if no assembly rounding mode switching is available.
-void _antidifferentiate2(ValidatedTaylorModel& x, uint k)
+Void _antidifferentiate2(ValidatedTaylorModel& x, Nat k)
 {
     ARIADNE_ASSERT(k<x.argument_size());
 
@@ -2132,7 +2132,7 @@ void _antidifferentiate2(ValidatedTaylorModel& x, uint k)
     set_rounding_mode(upward);
     VOLATILE Float tre=0; // Twice the maximum accumulated roundoff error
     VOLATILE Float u,ml;
-    uint c;
+    Nat c;
     for(ValidatedTaylorModel::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         MultiIndex& xa=xiter->key();
         Float& xv=xiter->data().raw();
@@ -2160,7 +2160,7 @@ void _antidifferentiate2(ValidatedTaylorModel& x, uint k)
 }
 
 
-ValidatedTaylorModel& ValidatedTaylorModel::antidifferentiate(uint k)
+ValidatedTaylorModel& ValidatedTaylorModel::antidifferentiate(Nat k)
 {
     _antidifferentiate2(*this,k); return *this;
 }
@@ -2169,7 +2169,7 @@ ValidatedTaylorModel& ValidatedTaylorModel::antidifferentiate(uint k)
 // May be slow if no assembly rounding mode switching is available.
 
 
-ValidatedTaylorModel derivative(const ValidatedTaylorModel& x, uint k)
+ValidatedTaylorModel derivative(const ValidatedTaylorModel& x, Nat k)
 {
     ARIADNE_ASSERT(k<x.argument_size());
     ValidatedTaylorModel r(x.argument_size(),x.sweeper());
@@ -2179,7 +2179,7 @@ ValidatedTaylorModel derivative(const ValidatedTaylorModel& x, uint k)
     Float xv;
     VOLATILE Float u,ml,mxv;
     MultiIndex a(x.argument_size());
-    uint c;
+    Nat c;
     for(ValidatedTaylorModel::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         c=xiter->key().at(k);
         if(c!=0) {
@@ -2221,7 +2221,7 @@ Vector<ValidatedNumber>
 evaluate(const Vector<ValidatedTaylorModel>& tv, const Vector<ValidatedNumber>& x)
 {
     Vector<ValidatedNumber> r(tv.size());
-    for(uint i=0; i!=r.size(); ++i) {
+    for(Nat i=0; i!=r.size(); ++i) {
         r[i]=evaluate(tv[i],x);
     }
     return r;
@@ -2232,7 +2232,7 @@ template<class T> class Powers {
   public:
     explicit Powers(const T& t) { _values.push_back(t*0+1); _values.push_back(t); }
     explicit Powers(const T& z, const T& t) { _values.push_back(z); _values.push_back(t); }
-    const T& operator[](uint i) const { while(_values.size()<=i) { _values.push_back(_values[1]*_values.back()); } return _values[i]; }
+    const T& operator[](Nat i) const { while(_values.size()<=i) { _values.push_back(_values[1]*_values.back()); } return _values[i]; }
   private:
     mutable std::vector<T> _values;
 };
@@ -2241,7 +2241,7 @@ template<> class Powers<ValidatedNumber> {
   public:
     explicit Powers(const ValidatedNumber& t) { _values.push_back(ValidatedNumber(1)); _values.push_back(t); }
     explicit Powers(const ValidatedNumber& z, const ValidatedNumber& t) { _values.push_back(z); _values.push_back(t); }
-    const ValidatedNumber& operator[](uint i) const {
+    const ValidatedNumber& operator[](Nat i) const {
         while(_values.size()<=i) {
             if(_values.size()%2==0) { _values.push_back(sqr(_values[_values.size()/2])); }
             else { _values.push_back(_values[1]*_values.back()); } }
@@ -2251,23 +2251,23 @@ template<> class Powers<ValidatedNumber> {
 };
 
 
-ValidatedTaylorModel substitute(const ValidatedTaylorModel& x, uint k, const ValidatedTaylorModel& s) {
+ValidatedTaylorModel substitute(const ValidatedTaylorModel& x, Nat k, const ValidatedTaylorModel& s) {
     ARIADNE_ASSERT(x.argument_size()==s.argument_size()+1u);
-    const uint n=s.argument_size();
+    const Nat n=s.argument_size();
     Sweeper swp=s.sweeper();
     Vector<ValidatedTaylorModel> y(n+1,ValidatedTaylorModel::zero(n,swp));
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         y[i]=ValidatedTaylorModel::variable(n,i,swp);
     }
     y[n]=s;
     return compose(x,y);
 }
 
-Vector<ValidatedTaylorModel> substitute(const Vector<ValidatedTaylorModel>& x, uint k, const ValidatedTaylorModel& s) {
-    const uint n=s.argument_size();
+Vector<ValidatedTaylorModel> substitute(const Vector<ValidatedTaylorModel>& x, Nat k, const ValidatedTaylorModel& s) {
+    const Nat n=s.argument_size();
     Sweeper swp=s.sweeper();
     Vector<ValidatedTaylorModel> y(n+1,ValidatedTaylorModel::zero(n,swp));
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         y[i]=ValidatedTaylorModel::variable(n,i,swp);
     }
     y[n]=s;
@@ -2276,14 +2276,14 @@ Vector<ValidatedTaylorModel> substitute(const Vector<ValidatedTaylorModel>& x, u
 
 
 ValidatedTaylorModel
-partial_evaluate(const ValidatedTaylorModel& x, uint k, ExactNumber c)
+partial_evaluate(const ValidatedTaylorModel& x, Nat k, ExactNumber c)
 {
     return partial_evaluate(x,k,ValidatedNumber(c));
 }
 
 
 ValidatedTaylorModel
-partial_evaluate(const ValidatedTaylorModel& x, uint k, ValidatedNumber c)
+partial_evaluate(const ValidatedTaylorModel& x, Nat k, ValidatedNumber c)
 {
     ValidatedTaylorModel r(x.argument_size()-1,x.sweeper());
     MultiIndex ra(r.argument_size());
@@ -2293,8 +2293,8 @@ partial_evaluate(const ValidatedTaylorModel& x, uint k, ValidatedNumber c)
             MultiIndex::IndexType xak=xa[k];
             if(xak==0) {
                 const Float& xv=xiter->data().raw();
-                for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
-                for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+                for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
+                for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
                 r.expansion().raw().append(ra,xv);
             }
         }
@@ -2307,15 +2307,15 @@ partial_evaluate(const ValidatedTaylorModel& x, uint k, ValidatedNumber c)
             const MultiIndex& xa=xiter->key();
             const Float& xv=xiter->data().raw();
             MultiIndex::IndexType xak=xa[k];
-            for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
-            for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+            for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
+            for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
             assert(ra.degree()+xak==xa.degree());
             p[xak].expansion().raw().append(ra,xv);
         }
 
         r=p[0];
         r.set_error(x.error().raw());
-        for(uint i=1; i!=p.size(); ++i) {
+        for(Nat i=1; i!=p.size(); ++i) {
             _add(s,r,p[i]);
             r.swap(s);
             s.clear();
@@ -2330,18 +2330,18 @@ partial_evaluate(const ValidatedTaylorModel& x, uint k, ValidatedNumber c)
             const MultiIndex& xa=xiter->key();
             const Float& xv=xiter->data().raw();
             MultiIndex::IndexType xak=xa[k];
-            for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
-            for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+            for(Nat i=0; i!=k; ++i) { ra[i]=xa[i]; }
+            for(Nat i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
             assert(ra.degree()+xak==xa.degree());
             p[xak].expansion().raw().append(ra,xv);
         }
-        for(uint i=1; i!=p.size(); ++i) {
+        for(Nat i=1; i!=p.size(); ++i) {
             p[i]*=cpowers[i];
         }
 
         r=p[0];
         r.set_error(x.error().raw());
-        for(uint i=1; i!=p.size(); ++i) {
+        for(Nat i=1; i!=p.size(); ++i) {
             _add(s,r,p[i]);
             r.swap(s);
             s.clear();
@@ -2352,21 +2352,21 @@ partial_evaluate(const ValidatedTaylorModel& x, uint k, ValidatedNumber c)
 }
 
 Vector<ValidatedTaylorModel>
-partial_evaluate(const Vector<ValidatedTaylorModel>& tv, uint k, ExactNumber c)
+partial_evaluate(const Vector<ValidatedTaylorModel>& tv, Nat k, ExactNumber c)
 {
     // FIXME: Fails if tv.size()==0
     Vector<ValidatedTaylorModel> r(tv.size(),ValidatedTaylorModel::zero(tv.zero_element().argument_size(),tv.zero_element().sweeper()));
-    for(uint i=0; i!=r.size(); ++i) {
+    for(Nat i=0; i!=r.size(); ++i) {
         r[i]=partial_evaluate(tv[i],k,c);
     }
     return r;
 }
 
 Vector<ValidatedTaylorModel>
-partial_evaluate(const Vector<ValidatedTaylorModel>& tv, uint k, ValidatedNumber c)
+partial_evaluate(const Vector<ValidatedTaylorModel>& tv, Nat k, ValidatedNumber c)
 {
     Vector<ValidatedTaylorModel> r(tv.size(),ValidatedTaylorModel::zero(tv.zero_element().argument_size(),tv.zero_element().sweeper()));
-    for(uint i=0; i!=r.size(); ++i) {
+    for(Nat i=0; i!=r.size(); ++i) {
         r[i]=partial_evaluate(tv[i],k,c);
     }
     return r;
@@ -2374,10 +2374,10 @@ partial_evaluate(const Vector<ValidatedTaylorModel>& tv, uint k, ValidatedNumber
 
 
 Pair<ValidatedTaylorModel,ValidatedTaylorModel>
-split(const ValidatedTaylorModel& tv, uint j)
+split(const ValidatedTaylorModel& tv, Nat j)
 {
     // TODO: improve efficiency of implementation
-    uint as=tv.argument_size();
+    Nat as=tv.argument_size();
     Sweeper swp=tv.sweeper();
     Vector<ValidatedTaylorModel> s=ValidatedTaylorModel::variables(as,swp);
     s[j]=ValidatedTaylorModel::scaling(as,j,ExactInterval(-1,0),swp);
@@ -2393,10 +2393,10 @@ split(const ValidatedTaylorModel& tv, uint j)
 
 
 ValidatedTaylorModel
-_split1(const ValidatedTaylorModel& tm, uint k, Tribool b)
+_split1(const ValidatedTaylorModel& tm, Nat k, Tribool b)
 {
-    const uint deg=tm.degree();
-    const uint as=tm.argument_size();
+    const Nat deg=tm.degree();
+    const Nat as=tm.argument_size();
     Sweeper swp=tm.sweeper();
 
     ValidatedTaylorModel r(tm);
@@ -2409,7 +2409,7 @@ _split1(const ValidatedTaylorModel& tm, uint k, Tribool b)
         c/=(1<<ak);
     }
 
-    int tr=( definitely(b) ? +1 : possibly(b) ? 0 : -1 );
+    Int tr=( definitely(b) ? +1 : possibly(b) ? 0 : -1 );
 
     if(tr==0) { return r; }
 
@@ -2429,9 +2429,9 @@ _split1(const ValidatedTaylorModel& tm, uint k, Tribool b)
     r.clear();
     r.set_error(re);
 
-    for(uint i=0; i<=deg; ++i) {
-        for(uint j=i; j<=deg; ++j) {
-            int sf=bin(j,i);
+    for(Nat i=0; i<=deg; ++i) {
+        for(Nat j=i; j<=deg; ++j) {
+            Int sf=bin(j,i);
             if(tr==-1 && (j-i)%2==1) { sf=-sf; }
             r+=ary[j]*sf;
             for(ValidatedTaylorModel::Iterator iter=ary[j].begin(); iter!=ary[j].end(); ++iter) {
@@ -2445,7 +2445,7 @@ _split1(const ValidatedTaylorModel& tm, uint k, Tribool b)
 
 
 ValidatedTaylorModel
-split(const ValidatedTaylorModel& tm, uint j, Tribool b)
+split(const ValidatedTaylorModel& tm, Nat j, Tribool b)
 {
     return _split1(tm,j,b);
 }
@@ -2533,7 +2533,7 @@ NormType norm(const ValidatedTaylorModel& tv) {
     return tv.norm();
 }
 
-bool
+Bool
 refines(const ValidatedTaylorModel& tv1, const ValidatedTaylorModel& tv2)
 {
     ARIADNE_ASSERT(tv1.argument_size()==tv2.argument_size());
@@ -2544,7 +2544,7 @@ refines(const ValidatedTaylorModel& tv1, const ValidatedTaylorModel& tv2)
 }
 
 
-bool
+Bool
 disjoint(const ValidatedTaylorModel& tv1, const ValidatedTaylorModel& tv2)
 {
     ARIADNE_ASSERT(tv1.argument_size()==tv2.argument_size());
@@ -2561,12 +2561,12 @@ disjoint(const ValidatedTaylorModel& tv1, const ValidatedTaylorModel& tv2)
 }
 
 
-ValidatedTaylorModel embed(const ValidatedTaylorModel& x, uint as)
+ValidatedTaylorModel embed(const ValidatedTaylorModel& x, Nat as)
 {
     return ValidatedTaylorModel(embed(0u,x.expansion(),as),x.error(),x.sweeper());
 }
 
-ValidatedTaylorModel embed(uint as, const ValidatedTaylorModel& x)
+ValidatedTaylorModel embed(Nat as, const ValidatedTaylorModel& x)
 {
     return ValidatedTaylorModel(embed(as,x.expansion(),0u),x.error(),x.sweeper());
 }
@@ -2580,7 +2580,7 @@ OutputStream&
 operator<<(OutputStream& os, const ValidatedTaylorModel& tm) {
     // Set the variable names to be 'parameter' s0,s1,..
     Array<StringType> variable_names(tm.argument_size());
-    for(uint j=0; j!=tm.argument_size(); ++j) {
+    for(Nat j=0; j!=tm.argument_size(); ++j) {
         StringStream sstr;
         sstr << 's' << j;
         variable_names[j]=sstr.str();
@@ -2600,41 +2600,41 @@ operator<<(OutputStream& os, const ValidatedTaylorModel& tm) {
 // Vector-valued named constructors
 
 
-Vector<ValidatedTaylorModel> ValidatedTaylorModel::zeros(uint rs, uint as, Sweeper swp)
+Vector<ValidatedTaylorModel> ValidatedTaylorModel::zeros(Nat rs, Nat as, Sweeper swp)
 {
     Vector<ValidatedTaylorModel> result(rs,ValidatedTaylorModel::zero(as,swp));
     return result;
 }
 
-Vector<ValidatedTaylorModel> ValidatedTaylorModel::constants(uint as, const Vector<ExactNumber>& c, Sweeper swp)
+Vector<ValidatedTaylorModel> ValidatedTaylorModel::constants(Nat as, const Vector<ExactNumber>& c, Sweeper swp)
 {
     Vector<ValidatedTaylorModel> result(c.size(),ValidatedTaylorModel::zero(as,swp));
-    for(uint i=0; i!=c.size(); ++i) {
+    for(Nat i=0; i!=c.size(); ++i) {
         result[i]=ValidatedTaylorModel::constant(as,c[i],swp);
     }
     return result;
 }
 
-Vector<ValidatedTaylorModel> ValidatedTaylorModel::constants(uint as, const Vector<ValidatedNumber>& c, Sweeper swp)
+Vector<ValidatedTaylorModel> ValidatedTaylorModel::constants(Nat as, const Vector<ValidatedNumber>& c, Sweeper swp)
 {
     Vector<ValidatedTaylorModel> result(c.size(),ValidatedTaylorModel::zero(as,swp));
-    for(uint i=0; i!=c.size(); ++i) {
+    for(Nat i=0; i!=c.size(); ++i) {
         result[i]=ValidatedTaylorModel::constant(as,c[i],swp);
     }
     return result;
 }
 
-Vector<ValidatedTaylorModel> ValidatedTaylorModel::variables(uint as, Sweeper swp)
+Vector<ValidatedTaylorModel> ValidatedTaylorModel::variables(Nat as, Sweeper swp)
 {
     Vector<ValidatedTaylorModel> result(as,ValidatedTaylorModel::zero(as,swp));
-    for(uint i=0; i!=as; ++i) { result[i]=ValidatedTaylorModel::variable(as,i,swp); }
+    for(Nat i=0; i!=as; ++i) { result[i]=ValidatedTaylorModel::variable(as,i,swp); }
     return result;
 }
 
 Vector<ValidatedTaylorModel> ValidatedTaylorModel::scalings(const Vector<ExactInterval>& d, Sweeper swp)
 {
     Vector<ValidatedTaylorModel> result(d.size(),ValidatedTaylorModel::zero(d.size(),swp));
-    for(uint i=0; i!=d.size(); ++i) {
+    for(Nat i=0; i!=d.size(); ++i) {
         result[i]=ValidatedTaylorModel::scaling(d.size(),i,d[i],swp);
     }
     return result;
@@ -2643,7 +2643,7 @@ Vector<ValidatedTaylorModel> ValidatedTaylorModel::scalings(const Vector<ExactIn
 Vector<ValidatedTaylorModel> ValidatedTaylorModel::unscalings(const Vector<ExactInterval>& cd, Sweeper swp)
 {
     Vector<ValidatedTaylorModel> result(cd.size(),ValidatedTaylorModel::zero(cd.size(),swp));
-    for(uint i=0; i!=cd.size(); ++i) {
+    for(Nat i=0; i!=cd.size(); ++i) {
         result[i]=ValidatedTaylorModel::unscaling(cd.size(),i,cd[i],swp);
     }
     return result;
@@ -2658,19 +2658,19 @@ Vector<ValidatedTaylorModel> ValidatedTaylorModel::unscalings(const Vector<Exact
 
 
 
-Vector<ValidatedTaylorModel> embed(const Vector<ValidatedTaylorModel>& x, uint as)
+Vector<ValidatedTaylorModel> embed(const Vector<ValidatedTaylorModel>& x, Nat as)
 {
     Vector<ValidatedTaylorModel> r(x.size());
-    for(uint i=0; i!=x.size(); ++i) {
+    for(Nat i=0; i!=x.size(); ++i) {
         r[i]=embed(x[i],as);
     }
     return r;
 }
 
-Vector<ValidatedTaylorModel> embed(uint as, const Vector<ValidatedTaylorModel>& x)
+Vector<ValidatedTaylorModel> embed(Nat as, const Vector<ValidatedTaylorModel>& x)
 {
     Vector<ValidatedTaylorModel> r(x.size());
-    for(uint i=0; i!=x.size(); ++i) {
+    for(Nat i=0; i!=x.size(); ++i) {
         r[i]=embed(as,x[i]);
     }
     return r;
@@ -2692,42 +2692,42 @@ Vector<ValidatedTaylorModel> combine(const ValidatedTaylorModel& x1, const Valid
     return join(embed(x1,x2.argument_size()),embed(x1.argument_size(),x2));
 }
 
-bool
+Bool
 refines(const Vector<ValidatedTaylorModel>& tv1, const Vector<ValidatedTaylorModel>& tv2)
 {
     ARIADNE_ASSERT(tv1.size()==tv2.size());
-    for(uint i=0; i!=tv1.size(); ++i) {
+    for(Nat i=0; i!=tv1.size(); ++i) {
         if(!refines(tv1[i],tv2[i])) { return false; }
     }
     return true;
 }
 
-bool
+Bool
 disjoint(const Vector<ValidatedTaylorModel>& tv1, const Vector<ValidatedTaylorModel>& tv2)
 {
     ARIADNE_ASSERT(tv1.size()==tv2.size());
-    for(uint i=0; i!=tv1.size(); ++i) {
+    for(Nat i=0; i!=tv1.size(); ++i) {
         if(disjoint(tv1[i],tv2[i])) { return true; }
     }
     return false;
 }
 
 Pair< Vector<ValidatedTaylorModel>, Vector<ValidatedTaylorModel> >
-split(const Vector<ValidatedTaylorModel>& tv, uint j)
+split(const Vector<ValidatedTaylorModel>& tv, Nat j)
 {
     Vector<ValidatedTaylorModel> r1(tv.size());
     Vector<ValidatedTaylorModel> r2(tv.size());
-    for(uint i=0; i!=tv.size(); ++i) {
+    for(Nat i=0; i!=tv.size(); ++i) {
         make_lpair(r1[i],r2[i])=split(tv[i],j);
     }
     return make_pair(r1,r2);
 }
 
 Vector<ValidatedTaylorModel>
-split(const Vector<ValidatedTaylorModel>& tv, uint j, bool h)
+split(const Vector<ValidatedTaylorModel>& tv, Nat j, Bool h)
 {
     Vector<ValidatedTaylorModel> r(tv.size());
-    for(uint i=0; i!=tv.size(); ++i) {
+    for(Nat i=0; i!=tv.size(); ++i) {
         r[i]=split(tv[i],j,h);
     }
     return r;
@@ -2737,7 +2737,7 @@ Vector<ValidatedTaylorModel>
 unscale(const Vector<ValidatedTaylorModel>& tvs, const Vector<ExactInterval>& ivls)
 {
     Vector<ValidatedTaylorModel> r(tvs.size());
-    for(uint i=0; i!=r.size(); ++i) {
+    for(Nat i=0; i!=r.size(); ++i) {
         r[i]=unscale(tvs[i],ivls[i]);
     }
     return r;
@@ -2759,7 +2759,7 @@ Vector<ValidatedTaylorModel>
 rescale(const Vector<ValidatedTaylorModel>& tvs, const Vector<ExactInterval>& old_codom, const Vector<ExactInterval>& new_codom)
 {
     Vector<ValidatedTaylorModel> r(tvs.size());
-    for(uint i=0; i!=r.size(); ++i) {
+    for(Nat i=0; i!=r.size(); ++i) {
         r[i]=rescale(tvs[i],old_codom[i],new_codom[i]);
     }
     return r;
@@ -2768,7 +2768,7 @@ rescale(const Vector<ValidatedTaylorModel>& tvs, const Vector<ExactInterval>& ol
 Vector<ValidatedTaylorModel>&
 rescale(Vector<ValidatedTaylorModel>& tvs, const Vector<ExactInterval>& old_codom, const Vector<ExactInterval>& new_codom)
 {
-    for(uint i=0; i!=tvs.size(); ++i) {
+    for(Nat i=0; i!=tvs.size(); ++i) {
         rescale(tvs[i],old_codom[i],new_codom[i]);
     }
     return tvs;
@@ -2778,27 +2778,27 @@ Vector<ValidatedTaylorModel>
 scale(const Vector<ValidatedTaylorModel>& tvs, const Vector<ExactInterval>& new_codom)
 {
     Vector<ValidatedTaylorModel> r(tvs);
-    for(uint i=0; i!=tvs.size(); ++i) {
+    for(Nat i=0; i!=tvs.size(); ++i) {
         r[i].rescale(ExactInterval(-1,+1),new_codom[i]);
     }
     return r;
 }
 
-ValidatedTaylorModel antiderivative(const ValidatedTaylorModel& x, uint k) {
+ValidatedTaylorModel antiderivative(const ValidatedTaylorModel& x, Nat k) {
     ValidatedTaylorModel r(x);
     r.antidifferentiate(k);
     return r;
 }
 
-Vector<ValidatedTaylorModel> antiderivative(const Vector<ValidatedTaylorModel>& x, uint k) {
+Vector<ValidatedTaylorModel> antiderivative(const Vector<ValidatedTaylorModel>& x, Nat k) {
     Vector<ValidatedTaylorModel> r(x);
-    for(uint i=0; i!=x.size(); ++i) {
+    for(Nat i=0; i!=x.size(); ++i) {
         r[i].antidifferentiate(k);
     }
     return r;
 }
 
-ValidatedTaylorModel antiderivative(const ValidatedTaylorModel& x, const ExactInterval& dk, uint k) {
+ValidatedTaylorModel antiderivative(const ValidatedTaylorModel& x, const ExactInterval& dk, Nat k) {
     ValidatedNumber dkr=static_cast<ValidatedNumber>(rad_ivl(dk.lower().raw(),dk.upper().raw()));
     ValidatedTaylorModel r(x);
     r.antidifferentiate(k);
@@ -2806,9 +2806,9 @@ ValidatedTaylorModel antiderivative(const ValidatedTaylorModel& x, const ExactIn
     return r;
 }
 
-Vector<ValidatedTaylorModel> antiderivative(const Vector<ValidatedTaylorModel>& x, const ExactInterval& dk, uint k) {
+Vector<ValidatedTaylorModel> antiderivative(const Vector<ValidatedTaylorModel>& x, const ExactInterval& dk, Nat k) {
     Vector<ValidatedTaylorModel> r(x.size());
-    for(uint i=0; i!=x.size(); ++i) {
+    for(Nat i=0; i!=x.size(); ++i) {
         r[i]=antiderivative(x[i],dk,k);
     }
     return r;
@@ -2888,17 +2888,17 @@ ValidatedTaylorModel intersection(const ValidatedTaylorModel& x, const Validated
 }
 
 Vector<UpperInterval> ranges(const Vector<ValidatedTaylorModel>& f) {
-    Vector<UpperInterval> r(f.size()); for(uint i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
+    Vector<UpperInterval> r(f.size()); for(Nat i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
 }
 
 inline Vector<ValidatedTaylorModel>& clobber(Vector<ValidatedTaylorModel>& h) {
-    for(uint i=0; i!=h.size(); ++i) { h[i].set_error(0u); } return h; }
+    for(Nat i=0; i!=h.size(); ++i) { h[i].set_error(0u); } return h; }
 
 inline Vector<ErrorFloat> errors(const Vector<ValidatedTaylorModel>& h) {
-    Vector<ErrorFloat> e(h.size()); for(uint i=0; i!=h.size(); ++i) { e[i]=h[i].error(); } return e; }
+    Vector<ErrorFloat> e(h.size()); for(Nat i=0; i!=h.size(); ++i) { e[i]=h[i].error(); } return e; }
 
 inline Vector<ErrorFloat> norms(const Vector<ValidatedTaylorModel>& h) {
-    Vector<ErrorFloat> r(h.size()); for(uint i=0; i!=h.size(); ++i) { r[i]=norm(h[i]); } return r; }
+    Vector<ErrorFloat> r(h.size()); for(Nat i=0; i!=h.size(); ++i) { r[i]=norm(h[i]); } return r; }
 
 ErrorFloat norm(const Vector<ValidatedTaylorModel>& h) {
     return norm(norms(h));
@@ -2914,7 +2914,7 @@ jacobian(const Vector<ValidatedTaylorModel>& f, const Vector<ValidatedNumber>& x
 {
     Vector< Differential<ValidatedNumber> > dx=Differential<ValidatedNumber>::variables(1u,x);
     Vector< Differential<ValidatedNumber> > df(f.size(),x.size(),1u);
-    for(uint i=0; i!=f.size(); ++i) {
+    for(Nat i=0; i!=f.size(); ++i) {
         df[i]=evaluate(f[i].expansion(),dx);
     }
     return jacobian(df);
@@ -2925,13 +2925,13 @@ Matrix<ValidatedNumber>
 jacobian2(const Vector<ValidatedTaylorModel>& f, const Vector<ValidatedNumber>& x)
 {
     Vector< Differential<ValidatedNumber> > dx(x.size());
-    for(uint i=0; i!=x.size()-f.size(); ++i) {
+    for(Nat i=0; i!=x.size()-f.size(); ++i) {
         dx[i]=Differential<ValidatedNumber>::constant(f.size(),1u,x[i]); }
-    for(uint i=0; i!=f.size(); ++i) {
-        uint j=i+(x.size()-f.size());
+    for(Nat i=0; i!=f.size(); ++i) {
+        Nat j=i+(x.size()-f.size());
         dx[j]=Differential<ValidatedNumber>::variable(f.size(),1u,x[j],i); }
     Vector< Differential<ValidatedNumber> > df(f.size());
-    for(uint i=0; i!=f.size(); ++i) {
+    for(Nat i=0; i!=f.size(); ++i) {
         df[i]=evaluate(f[i].expansion(),dx);
     }
     Matrix<ValidatedNumber> J=jacobian(df);
@@ -2943,15 +2943,15 @@ jacobian2(const Vector<ValidatedTaylorModel>& f, const Vector<ValidatedNumber>& 
 Matrix<ValidatedNumber>
 jacobian(const Vector<ValidatedTaylorModel>& f, const Vector<ValidatedNumber>& d)
 {
-    uint rs=f.size();
-    uint as=f.zero_element().argument_size();
+    Nat rs=f.size();
+    Nat as=f.zero_element().argument_size();
     Matrix<ValidatedNumber> J(rs,as);
-    for(uint i=0; i!=rs; ++i) {
+    for(Nat i=0; i!=rs; ++i) {
         for(ValidatedTaylorModel::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             const MultiIndex& a=iter->key();
             const Float& x=iter->data().raw();
-            for(uint k=0; k!=as; ++k) {
-                const uint c=a[k];
+            for(Nat k=0; k!=as; ++k) {
+                const Nat c=a[k];
                 if(c>0) {
                     if(iter->key().degree()==1) {
                         J[i][k]+=x;
@@ -2959,7 +2959,7 @@ jacobian(const Vector<ValidatedTaylorModel>& f, const Vector<ValidatedNumber>& d
                     else {
                         ValidatedNumber p(-x,+x);
                         p*=Float(c);
-                        for(uint l=0; l!=as; ++l) {
+                        for(Nat l=0; l!=as; ++l) {
                             if(l==k) { if(a[l]>1) { p*=pow(d[l],a[l]-1); } }
                             else { if(a[k]>0) { p*=pow(d[k],a[k]); } }
                         }
@@ -2977,12 +2977,12 @@ jacobian(const Vector<ValidatedTaylorModel>& f, const Vector<ValidatedNumber>& d
 Matrix<Float>
 jacobian_value(const Vector<ValidatedTaylorModel>& f)
 {
-    uint rs=f.size();
-    uint as=f.zero_element().argument_size();
+    Nat rs=f.size();
+    Nat as=f.zero_element().argument_size();
     Matrix<Float> J(rs,as);
     MultiIndex a(as);
-    for(uint i=0; i!=rs; ++i) {
-        for(uint j=0; j!=as; ++j) {
+    for(Nat i=0; i!=rs; ++i) {
+        for(Nat j=0; j!=as; ++j) {
             a[j]=1; const Float x=f[i][a].raw(); J[i][j]=x; a[j]=0;
         }
     }
@@ -2993,13 +2993,13 @@ jacobian_value(const Vector<ValidatedTaylorModel>& f)
 Matrix<Float>
 jacobian2_value(const Vector<ValidatedTaylorModel>& f)
 {
-    const uint rs=f.size();
-    const uint fas=f.zero_element().argument_size();
-    const uint has=fas-rs;
+    const Nat rs=f.size();
+    const Nat fas=f.zero_element().argument_size();
+    const Nat has=fas-rs;
     Matrix<Float> J(rs,rs);
     MultiIndex a(fas);
-    for(uint i=0; i!=rs; ++i) {
-        for(uint j=0; j!=rs; ++j) {
+    for(Nat i=0; i!=rs; ++i) {
+        for(Nat j=0; j!=rs; ++j) {
             a[has+j]=1; const Float x=f[i][a].raw(); J[i][j]=x; a[has+j]=0;
         }
     }
@@ -3012,13 +3012,13 @@ jacobian2_value(const Vector<ValidatedTaylorModel>& f)
 Matrix<UpperInterval>
 jacobian_range(const Vector<ValidatedTaylorModel>& f)
 {
-    uint rs=f.size();
-    uint as=f.zero_element().argument_size();
+    Nat rs=f.size();
+    Nat as=f.zero_element().argument_size();
     Matrix<UpperInterval> J(rs,as);
-    for(uint i=0; i!=rs; ++i) {
+    for(Nat i=0; i!=rs; ++i) {
         for(ValidatedTaylorModel::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
-            for(uint k=0; k!=as; ++k) {
-                const uint c=iter->key()[k];
+            for(Nat k=0; k!=as; ++k) {
+                const Nat c=iter->key()[k];
                 if(c>0) {
                     const Float& x=iter->data().raw();
                     if(iter->key().degree()==1) { J[i][k]+=x; }
@@ -3035,14 +3035,14 @@ jacobian_range(const Vector<ValidatedTaylorModel>& f)
 Matrix<UpperInterval>
 jacobian2_range(const Vector<ValidatedTaylorModel>& f)
 {
-    uint rs=f.size();
-    uint fas=f.zero_element().argument_size();
-    uint has=fas-rs;
+    Nat rs=f.size();
+    Nat fas=f.zero_element().argument_size();
+    Nat has=fas-rs;
     Matrix<UpperInterval> J(rs,rs);
-    for(uint i=0; i!=rs; ++i) {
+    for(Nat i=0; i!=rs; ++i) {
         for(ValidatedTaylorModel::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
-            for(uint k=0; k!=rs; ++k) {
-                const uint c=iter->key()[has+k];
+            for(Nat k=0; k!=rs; ++k) {
+                const Nat c=iter->key()[has+k];
                 if(c>0) {
                     const Float& x=iter->data().raw();
                     if(iter->key().degree()==1) { J[i][k]+=x; }
@@ -3089,19 +3089,19 @@ _compose1(const Vector<ValidatedTaylorModel>& x,
     //std::cerr<<"compose1"<<std::endl;
     ARIADNE_ASSERT(x.size()>0);
     ARIADNE_ASSERT(ys.size()==x.zero_element().argument_size());
-    for(uint i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x.zero_element().argument_size()); }
-    for(uint i=0; i!=ys.size(); ++i) { ARIADNE_ASSERT_MSG(ys[i].argument_size()==ys.zero_element().argument_size(),"ys="<<ys); }
+    for(Nat i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x.zero_element().argument_size()); }
+    for(Nat i=0; i!=ys.size(); ++i) { ARIADNE_ASSERT_MSG(ys[i].argument_size()==ys.zero_element().argument_size(),"ys="<<ys); }
 
-    uint as=ys.zero_element().argument_size();
+    Nat as=ys.zero_element().argument_size();
     Sweeper swp=ys.zero_element().sweeper();
 
     Vector<ValidatedTaylorModel> r(x.size(),ValidatedTaylorModel(as,swp));
     ValidatedTaylorModel t(as,swp);
-    for(uint i=0; i!=x.size(); ++i) {
+    for(Nat i=0; i!=x.size(); ++i) {
         r[i].set_error(x[i].error().raw());
         for(ValidatedTaylorModel::ConstIterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
             t=static_cast<ExactNumber>(iter->data().raw());
-            for(uint j=0; j!=iter->key().size(); ++j) {
+            for(Nat j=0; j!=iter->key().size(); ++j) {
                 ValidatedTaylorModel p=pow(ys[j],iter->key()[j]);
                 t=t*p;
             }
@@ -3119,33 +3119,33 @@ _compose2(const Vector<ValidatedTaylorModel>& x,
           const Vector<ValidatedTaylorModel>& ys)
 {
     //std::cerr<<"compose2"<<std::endl;
-    uint yrs=ys.size();
-    uint xas=ys.size();
-    uint as=ys.zero_element().argument_size();
+    Nat yrs=ys.size();
+    Nat xas=ys.size();
+    Nat as=ys.zero_element().argument_size();
     Sweeper sweeper=ys.zero_element().sweeper();
 
     Array<uchar> max_power(ys.size());
-    for(uint j=0; j!=ys.size(); ++j) { max_power[j]=1; }
+    for(Nat j=0; j!=ys.size(); ++j) { max_power[j]=1; }
 
-    for(uint i=0; i!=x.size(); ++i) {
+    for(Nat i=0; i!=x.size(); ++i) {
         for(ValidatedTaylorModel::ConstIterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
             assert(xas==iter->key().size());
-            for(uint j=0; j!=iter->key().size(); ++j) {
+            for(Nat j=0; j!=iter->key().size(); ++j) {
                 max_power[j]=max(max_power[j],iter->key()[j]);
             }
         }
     }
 
     uchar max_max_power = 1;
-    for(uint j=0; j!=ys.size(); ++j) {
+    for(Nat j=0; j!=ys.size(); ++j) {
         max_max_power = max(max_max_power,max_power[j]);
     }
 
     Array< Array< ValidatedTaylorModel > > powers(yrs, Array<ValidatedTaylorModel>(max_max_power+1,ValidatedTaylorModel::zero(as,sweeper)));
-    for(uint j=0; j!=yrs; ++j) {
+    for(Nat j=0; j!=yrs; ++j) {
         powers[j][0]=ys[j]*0;
         powers[j][1]=ys[j];
-        for(uint k=2; k!=powers[j].size(); ++k) {
+        for(Nat k=2; k!=powers[j].size(); ++k) {
             powers[j][k]=powers[j][k/2]*powers[j][(k+1)/2];
         }
     }
@@ -3154,13 +3154,13 @@ _compose2(const Vector<ValidatedTaylorModel>& x,
     ValidatedTaylorModel t(as,sweeper);
     MultiIndex a;
     Float c;
-    for(uint i=0; i!=x.size(); ++i) {
+    for(Nat i=0; i!=x.size(); ++i) {
         r[i].set_error(x[i].error().raw());
         for(ValidatedTaylorModel::ConstIterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
             a=iter->key();
             c=iter->data().raw();
             t=static_cast<ExactNumber>(c);
-            for(uint j=0; j!=a.size(); ++j) {
+            for(Nat j=0; j!=a.size(); ++j) {
                 if(a[j]>0) {
                     t=t*powers[j][a[j]];
                 }
@@ -3178,8 +3178,8 @@ _compose(const Vector<ValidatedTaylorModel>& x,
 {
     ARIADNE_ASSERT_MSG(x.size()>0,"x="<<x<<", ys="<<ys);
     ARIADNE_ASSERT_MSG(ys.size()==x[0].argument_size(),"x="<<x<<", ys="<<ys);
-    for(uint i=1; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
-    for(uint i=1; i!=ys.size(); ++i) { ARIADNE_ASSERT_MSG(ys[i].argument_size()==ys[0].argument_size(),"ys="<<ys); }
+    for(Nat i=1; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
+    for(Nat i=1; i!=ys.size(); ++i) { ARIADNE_ASSERT_MSG(ys[i].argument_size()==ys[0].argument_size(),"ys="<<ys); }
 
     return _compose2(x,ys);
 }
@@ -3254,17 +3254,17 @@ template TaylorModel<ValidatedNumber> tan(const TaylorModel<ValidatedNumber>&);
 
 
 
-ApproximateTaylorModel::TaylorModel(uint as)
+ApproximateTaylorModel::TaylorModel(Nat as)
     : _expansion(as), _sweeper()
 {
 }
 
-ApproximateTaylorModel::TaylorModel(uint as, Sweeper swp)
+ApproximateTaylorModel::TaylorModel(Nat as, Sweeper swp)
     : _expansion(as), _sweeper(swp)
 {
 }
 
-void ApproximateTaylorModel::iadd(const ApproximateFloat& c)
+Void ApproximateTaylorModel::iadd(const ApproximateFloat& c)
 {
     // Compute self+=c
     ApproximateTaylorModel& x=*this;
@@ -3279,7 +3279,7 @@ void ApproximateTaylorModel::iadd(const ApproximateFloat& c)
     }
 }
 
-void ApproximateTaylorModel::imul(const ApproximateFloat& c)
+Void ApproximateTaylorModel::imul(const ApproximateFloat& c)
 {
     // Compute self*=c
     if(c==0) { this->clear(); return; }
@@ -3291,7 +3291,7 @@ void ApproximateTaylorModel::imul(const ApproximateFloat& c)
 
 
 
-void ApproximateTaylorModel::isma(const ApproximateFloat& c, const ApproximateTaylorModel& y)
+Void ApproximateTaylorModel::isma(const ApproximateFloat& c, const ApproximateTaylorModel& y)
 {
     const ApproximateTaylorModel& x=*this;
     ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<", y="<<y);
@@ -3324,7 +3324,7 @@ void ApproximateTaylorModel::isma(const ApproximateFloat& c, const ApproximateTa
 }
 
 
-void ApproximateTaylorModel::ifma(const ApproximateTaylorModel& x, const ApproximateTaylorModel& y)
+Void ApproximateTaylorModel::ifma(const ApproximateTaylorModel& x, const ApproximateTaylorModel& y)
 {
     ApproximateTaylorModel& r(*this);
     ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<",y="<<y);
@@ -3401,7 +3401,7 @@ OutputStream& ApproximateTaylorModel::write(OutputStream& os) const {
 template TaylorModel<ApproximateNumber> neg(const TaylorModel<ApproximateNumber>&);
 template TaylorModel<ApproximateNumber> rec(const TaylorModel<ApproximateNumber>&);
 template TaylorModel<ApproximateNumber> sqr(const TaylorModel<ApproximateNumber>&);
-template TaylorModel<ApproximateNumber> pow(const TaylorModel<ApproximateNumber>&, int);
+template TaylorModel<ApproximateNumber> pow(const TaylorModel<ApproximateNumber>&, Int);
 template TaylorModel<ApproximateNumber> sqrt(const TaylorModel<ApproximateNumber>&);
 template TaylorModel<ApproximateNumber> exp(const TaylorModel<ApproximateNumber>&);
 template TaylorModel<ApproximateNumber> log(const TaylorModel<ApproximateNumber>&);

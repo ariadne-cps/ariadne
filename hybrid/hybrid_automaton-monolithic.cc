@@ -35,7 +35,7 @@
 
 namespace Ariadne {
 
-typedef uint DimensionType;
+typedef Nat DimensionType;
 
 
 MonolithicHybridAutomaton::Mode::Mode(DiscreteLocation q, RealSpace s, EffectiveVectorFunction f)
@@ -60,12 +60,12 @@ MonolithicHybridAutomaton::~MonolithicHybridAutomaton()
 }
 
 
-void
+Void
 MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
                                     EffectiveVectorFunction dynamic)
 {
     List<Identifier> names;
-    for(uint i=0; i!=dynamic.result_size(); ++i) {
+    for(Nat i=0; i!=dynamic.result_size(); ++i) {
         StringStream ss;
         ss << "x" << i;
         names.append(ss.str());
@@ -74,7 +74,7 @@ MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
 }
 
 
-void
+Void
 MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
                                     RealSpace space,
                                     EffectiveVectorFunction dynamic)
@@ -96,7 +96,7 @@ MonolithicHybridAutomaton::new_mode(DiscreteLocation location,
 }
 
 
-void
+Void
 MonolithicHybridAutomaton::new_invariant(DiscreteLocation location,
                                          DiscreteEvent event,
                                          EffectiveScalarFunction invariant,
@@ -121,7 +121,7 @@ MonolithicHybridAutomaton::new_invariant(DiscreteLocation location,
 
 
 
-void
+Void
 MonolithicHybridAutomaton::new_transition(DiscreteLocation source,
                                           DiscreteEvent event,
                                           DiscreteLocation target,
@@ -151,14 +151,14 @@ MonolithicHybridAutomaton::new_transition(DiscreteLocation source,
 
 
 
-bool
+Bool
 MonolithicHybridAutomaton::has_mode(DiscreteLocation location) const
 {
     return this->_modes.has_key(location);
 }
 
 
-bool
+Bool
 MonolithicHybridAutomaton::has_guard(DiscreteLocation source, DiscreteEvent event) const
 {
     if(!this->has_mode(source)) { return false; }
@@ -166,7 +166,7 @@ MonolithicHybridAutomaton::has_guard(DiscreteLocation source, DiscreteEvent even
     return mode._transitions.has_key(event);
 }
 
-bool
+Bool
 MonolithicHybridAutomaton::has_invariant(DiscreteLocation source, DiscreteEvent event) const
 {
     if(!this->has_mode(source)) { return false; }
@@ -174,7 +174,7 @@ MonolithicHybridAutomaton::has_invariant(DiscreteLocation source, DiscreteEvent 
     return mode._invariants.has_key(event);
 }
 
-bool
+Bool
 MonolithicHybridAutomaton::has_transition(DiscreteLocation source, DiscreteEvent event) const
 {
     if(!this->has_mode(source)) { return false; }
@@ -205,7 +205,7 @@ MonolithicHybridAutomaton::transition(DiscreteLocation source, DiscreteEvent eve
 }
 
 
-uint
+Nat
 MonolithicHybridAutomaton::dimension(DiscreteLocation location) const
 {
     return this->mode(location).dimension();

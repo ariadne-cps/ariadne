@@ -39,21 +39,21 @@ using namespace std;
 
 class TestPaving
 {
-    int verbosity;
+    Int verbosity;
   public:
-    TestPaving(const int verb);
+    TestPaving(const Int verb);
   public:
-    void test() const;
-    void test_constructors() const;
-    void test_iterator() const;
-    void test_branch() const;
-    void test_geometry() const;
-    void test_approximation() const;
+    Void test() const;
+    Void test_constructors() const;
+    Void test_iterator() const;
+    Void test_branch() const;
+    Void test_geometry() const;
+    Void test_approximation() const;
 };
 
-TestPaving::TestPaving(const int verb) : verbosity(verb) { }
+TestPaving::TestPaving(const Int verb) : verbosity(verb) { }
 
-void TestPaving::test() const {
+Void TestPaving::test() const {
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_iterator());
     ARIADNE_TEST_CALL(test_branch());
@@ -61,7 +61,7 @@ void TestPaving::test() const {
     ARIADNE_TEST_CALL(test_approximation());
 };
 
-void TestPaving::test_constructors() const {
+Void TestPaving::test_constructors() const {
     Grid grid(2);
     GridTreeSet grid_set(grid);
     PavingInterface& paving = grid_set;
@@ -89,7 +89,7 @@ void TestPaving::test_constructors() const {
 
 }
 
-void TestPaving::test_iterator() const {
+Void TestPaving::test_iterator() const {
     Grid grid(2);
     GridTreeSet grid_set(grid);
     PavingInterface& paving = grid_set;
@@ -108,7 +108,7 @@ void TestPaving::test_iterator() const {
     ARIADNE_TEST_EQUALS(iter,paving.end());
 }
 
-void TestPaving::test_branch() const {
+Void TestPaving::test_branch() const {
     Grid grid(2);
     GridTreeSet grid_set(grid);
     PavingInterface& paving = grid_set;
@@ -147,7 +147,7 @@ void TestPaving::test_branch() const {
     ARIADNE_TEST_ASSERT((++branch1.begin())->word()==word4);
 }
 
-void TestPaving::test_geometry() const {
+Void TestPaving::test_geometry() const {
     Grid grid(2);
     GridTreeSet grid_tree_set(grid);
     Nat height(0);
@@ -212,7 +212,7 @@ void TestPaving::test_geometry() const {
 
 }
 
-void TestPaving::test_approximation() const {
+Void TestPaving::test_approximation() const {
     Grid grid(2);
     GridTreeSet grid_set(grid);
     PavingInterface& paving = grid_set;
@@ -258,9 +258,9 @@ void TestPaving::test_approximation() const {
 }
 
 
-int main(int argc, const char* argv[])
+Int main(Int argc, const char* argv[])
 {
-    int verbosity=get_verbosity(argc,argv);
+    Int verbosity=get_verbosity(argc,argv);
 
     TestPaving(verbosity).test();
     return ARIADNE_TEST_FAILURES;

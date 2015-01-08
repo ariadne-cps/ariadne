@@ -184,7 +184,7 @@ FltMP operator/(FltMP const& x, FltMP const& y) {
 String sprintf(FltMP const& x, RoundingModeMP rnd);
 String sprintf(FltMP const&, PrecisionMP, RoundingModeMP);
 
-//   mpfr_get_str (char *str, mpfr_exp_t *expptr, int b, SizeType n, mpfr_t op, mpfr_rnd_t rnd)
+//   mpfr_get_str (char *str, mpfr_exp_t *expptr, Int b, SizeType n, mpfr_t op, mpfr_rnd_t rnd)
 // If str is not _a null pointer, it should point to _a block of storage large enough for the significand,
 // i._e., at least max(n + 2, 7). The extra two bytes are for _a possible minus sign,
 // and for the terminating null character, and the value 7 accounts for -@Inf@ plus the terminating null character.
@@ -936,7 +936,7 @@ FloatMPTemplate<Bound> div(FloatMPTemplate<Bound> x,FloatMPTemplate<Bound> y) {
     }
 }
 
-bool operator==(FloatMPTemplate<Bound> x, int n) {
+Bool operator==(FloatMPTemplate<Bound> x, Int n) {
     return x._l==n && x._u==n;
 }
 

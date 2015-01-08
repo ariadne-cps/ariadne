@@ -78,7 +78,7 @@ inline Real operator-(Real const& r1, Rational const& q2) {
 
 inline ValidatedFloat operator*(Integer n1,  const ExactFloat& x2) {
     ARIADNE_ASSERT(n1==n1.get_si());
-    ExactFloat x1((int)n1.get_si());
+    ExactFloat x1((Int)n1.get_si());
     return x1*x2;
 }
 
@@ -91,7 +91,7 @@ template<> inline ExactFloat numeric_cast<ExactFloat>(Real const& x) {
 }
 
 inline DiscreteTimeType div_floor(Real const& t, ExactNumber h) {
-    return integer_cast<uint>(numeric_cast<ApproximateFloat>(t)/h);
+    return integer_cast<Nat>(numeric_cast<ApproximateFloat>(t)/h);
 }
 
 template<> inline Nat integer_cast<Nat>(ValidatedFloat const& x) {
@@ -121,7 +121,7 @@ clone() const
 Pair<HybridGridTreeSet,HybridGridTreeSet>
 HybridReachabilityAnalyser::_reach_evolve_resume(const ListSet<HybridEnclosure>& initial_enclosures,
                                                 const HybridTime& time,
-                                                const int accuracy,
+                                                const Int accuracy,
                                                 ListSet<HybridEnclosure>& evolve_enclosures,
                                                 Semantics semantics,
                                                 const HybridEvolverInterface& evolver) const
@@ -161,7 +161,7 @@ HybridReachabilityAnalyser::_reach_evolve_resume(const ListSet<HybridEnclosure>&
 HybridGridTreeSet
 HybridReachabilityAnalyser::_upper_reach(const HybridGridTreeSet& set,
                                          const HybridTime& time,
-                                         const int accuracy,
+                                         const Int accuracy,
                                          const HybridEvolverInterface& evolver) const
 {
     HybridGrid grid=set.grid();
@@ -182,7 +182,7 @@ HybridReachabilityAnalyser::_upper_reach(const HybridGridTreeSet& set,
 HybridGridTreeSet
 HybridReachabilityAnalyser::_upper_evolve(const HybridGridTreeSet& set,
                                           const HybridTime& time,
-                                          const int accuracy,
+                                          const Int accuracy,
                                           const HybridEvolverInterface& evolver) const
 {
     HybridGrid grid=set.grid();
@@ -205,7 +205,7 @@ HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(HybridGridTreeSet& reach_
                                                        HybridGridTreeSet& evolve_cells,
                                                        const HybridGridTreeSet& set,
                                                        const HybridTerminationCriterion& termination,
-                                                       const int accuracy,
+                                                       const Int accuracy,
                                                        const HybridEvolverInterface& evolver) const
 {
     ARIADNE_LOG(4,"HybridReachabilityAnalyser::_adjoin_upper_reach_evolve(...)\n");
@@ -244,8 +244,8 @@ lower_evolve(const OvertSetInterfaceType& initial_set,
              const TimeType& time) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_evolve(...)\n");
-    int grid_depth = this->_configuration->maximum_grid_depth();
-    int grid_height = this->_configuration->maximum_grid_height();
+    Int grid_depth = this->_configuration->maximum_grid_depth();
+    Int grid_height = this->_configuration->maximum_grid_height();
     HybridGrid grid=this->_configuration->grid();
     HybridGridTreeSet initial_cells(grid); HybridGridTreeSet final_cells(grid);
 
@@ -274,8 +274,8 @@ lower_reach(const OvertSetInterfaceType& initial_set,
             const TimeType& time) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_reach(set,time)\n");
-    int grid_depth = this->_configuration->maximum_grid_depth();
-    int grid_height = this->_configuration->maximum_grid_height();
+    Int grid_depth = this->_configuration->maximum_grid_depth();
+    Int grid_height = this->_configuration->maximum_grid_height();
     const HybridGrid& grid=this->_configuration->grid();
     HybridGridTreeSet initial_cells(grid); HybridGridTreeSet reach_cells(grid);
 
@@ -304,8 +304,8 @@ lower_reach_evolve(const OvertSetInterfaceType& initial_set,
                    const TimeType& time) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_reach_evolve(...)\n");
-    int grid_depth = this->_configuration->maximum_grid_depth();
-    int grid_height = this->_configuration->maximum_grid_height();
+    Int grid_depth = this->_configuration->maximum_grid_depth();
+    Int grid_height = this->_configuration->maximum_grid_height();
 
     const HybridGrid& grid=this->_configuration->grid();
 
@@ -341,20 +341,20 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::lower_reach(set)\n");
     ExactNumber transient_time = this->_configuration->transient_time();
-    int transient_steps = this->_configuration->transient_steps();
+    Int transient_steps = this->_configuration->transient_steps();
     HybridTime hybrid_transient_time(transient_time, transient_steps);
     ExactNumber lock_to_grid_time=this->_configuration->lock_to_grid_time();
-    int lock_to_grid_steps=this->_configuration->lock_to_grid_steps();
+    Int lock_to_grid_steps=this->_configuration->lock_to_grid_steps();
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,lock_to_grid_steps);
-    int maximum_grid_depth = this->_configuration->maximum_grid_depth();
-    int maximum_grid_height = this->_configuration->maximum_grid_height();
+    Int maximum_grid_depth = this->_configuration->maximum_grid_depth();
+    Int maximum_grid_height = this->_configuration->maximum_grid_height();
     ARIADNE_LOG(3,"transient_time=("<<transient_time<<","<<transient_steps<<")\n");
     ARIADNE_LOG(3,"lock_to_grid_time=("<<lock_to_grid_time<<","<<lock_to_grid_steps<<")\n");
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
 
     const HybridGrid& grid=this->_configuration->grid();
 
-    bool has_bounding_domain = static_cast<bool>(this->_configuration->bounding_domain_ptr());
+    Bool has_bounding_domain = static_cast<Bool>(this->_configuration->bounding_domain_ptr());
 
     HybridGridTreeSet bounding(grid);
     if (has_bounding_domain)
@@ -427,20 +427,20 @@ upper_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_evolve(...)\n");
     const HybridGrid& grid=this->_configuration->grid();
     HybridGridTreeSet evolve_cells(grid);
-    int grid_depth = this->_configuration->maximum_grid_depth();
+    Int grid_depth = this->_configuration->maximum_grid_depth();
     evolve_cells.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial_evolve.size()="<<evolve_cells.size()<<"\n");
     Real real_time=time.continuous_time();
     DiscreteTimeType discrete_steps=time.discrete_time();
     ExactNumber lock_to_grid_time=this->_configuration->lock_to_grid_time();
-    DiscreteTimeType time_steps=integer_cast<uint>(numeric_cast<ExactFloat>(real_time)/lock_to_grid_time);
+    DiscreteTimeType time_steps=integer_cast<Nat>(numeric_cast<ExactFloat>(real_time)/lock_to_grid_time);
     Real remainder_time=real_time-Real(time_steps*Rational(lock_to_grid_time));
     HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
     HybridTime hybrid_remainder_time(remainder_time,discrete_steps);
     ARIADNE_LOG(3,"real_time="<<real_time<<"\n");
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
 
-    for(uint i=0; i!=time_steps; ++i) {
+    for(Nat i=0; i!=time_steps; ++i) {
         ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
         evolve_cells=this->_upper_evolve(evolve_cells,hybrid_lock_to_grid_time,grid_depth,*_evolver);
     }
@@ -465,7 +465,7 @@ upper_reach(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
     const HybridGrid& grid=this->_configuration->grid();
     HybridGridTreeSet evolve_cells(grid);
-    int grid_depth = this->_configuration->maximum_grid_depth();
+    Int grid_depth = this->_configuration->maximum_grid_depth();
     ARIADNE_LOG(4,"grid_depth="<<grid_depth<<"\n");
     evolve_cells.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial size = "<<evolve_cells.size()<<"\n");
@@ -483,7 +483,7 @@ upper_reach(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
     ARIADNE_LOG(3,"discrete_steps="<<discrete_steps<<"\n");
     HybridGridTreeSet found_cells(grid), accumulated_evolve_cells(grid);
-    for(uint i=0; i!=time_steps; ++i) {
+    for(Nat i=0; i!=time_steps; ++i) {
         accumulated_evolve_cells.adjoin(found_cells);
         ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,evolve_cells,hybrid_lock_to_grid_time,grid_depth,*_evolver);
@@ -520,7 +520,7 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
     const HybridGrid& grid=this->_configuration->grid();
     HybridGridTreeSet evolve_cells(grid);
-    int grid_depth = this->_configuration->maximum_grid_depth();
+    Int grid_depth = this->_configuration->maximum_grid_depth();
     ARIADNE_LOG(4,"grid_depth="<<grid_depth<<"\n");
     evolve_cells.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial_evolve"<<evolve_cells<<"\n");
@@ -537,7 +537,7 @@ upper_reach_evolve(const CompactSetInterfaceType& initial_set,
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
 
     HybridGridTreeSet found_cells(grid);
-    for(uint i=0; i!=time_steps; ++i) {
+    for(Nat i=0; i!=time_steps; ++i) {
         ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");
         this->_adjoin_upper_reach_evolve(found_cells,evolve_cells,evolve_cells,hybrid_lock_to_grid_time,grid_depth,*_evolver);
         ARIADNE_LOG(5,"found.size()="<<found_cells.size()<<"\n");
@@ -572,15 +572,15 @@ outer_chain_reach(
     ExactNumber lock_to_grid_time=this->_configuration->lock_to_grid_time();
     DiscreteTimeType lock_to_grid_steps=this->_configuration->lock_to_grid_steps();
     HybridTerminationCriterion recurrent_termination(ExactFloat(lock_to_grid_time),lock_to_grid_steps,lock_to_grid_events);
-    int maximum_grid_depth = this->_configuration->maximum_grid_depth();
-    int maximum_grid_height = this->_configuration->maximum_grid_height();
+    Int maximum_grid_depth = this->_configuration->maximum_grid_depth();
+    Int maximum_grid_height = this->_configuration->maximum_grid_height();
     ARIADNE_LOG(3,"transient_time=("<<transient_time<<","<<transient_steps<<")\n");
     ARIADNE_LOG(3,"lock_to_grid_time=("<<lock_to_grid_time<<","<<lock_to_grid_steps<<")\n");
     ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
 
     const HybridGrid& grid=this->_configuration->grid();
 
-    bool has_bounding_domain = static_cast<bool>(this->_configuration->bounding_domain_ptr());
+    Bool has_bounding_domain = static_cast<Bool>(this->_configuration->bounding_domain_ptr());
 
     HybridGridTreeSet bounding(grid);
     if (has_bounding_domain)
@@ -635,7 +635,7 @@ outer_chain_reach(
 }
 
 
-void HybridReachabilityAnalyser::_checked_restriction(HybridGridTreeSet& set, const HybridGridTreeSet& bounding) const
+Void HybridReachabilityAnalyser::_checked_restriction(HybridGridTreeSet& set, const HybridGridTreeSet& bounding) const
 {
     ChainOverspillPolicy policy = this->_configuration->outer_overspill_policy();
     HybridGridTreeSet set_copy(set.grid());
@@ -693,7 +693,7 @@ HybridReachabilityAnalyserConfiguration::write(OutputStream& os) const
 }
 
 
-void
+Void
 HybridReachabilityAnalyserConfiguration::set_bounding_domain_ptr(const std::shared_ptr<HybridBoxes> value)
 {
  //   ARIADNE_ASSERT_MSG(possibly(value_ptr->space() == _analyser.system().state_space()),
@@ -703,7 +703,7 @@ HybridReachabilityAnalyserConfiguration::set_bounding_domain_ptr(const std::shar
 }
 
 
-void
+Void
 HybridReachabilityAnalyserConfiguration::set_grid(const std::shared_ptr<HybridGrid> value_ptr)
 {
     ARIADNE_ASSERT_MSG(possibly(value_ptr->space() == _analyser.system().state_space()),

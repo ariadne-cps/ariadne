@@ -37,10 +37,10 @@
 using std::cout; using std::cerr; using std::endl;
 using namespace Ariadne;
 
-Vector<ExactFloat> v(uint n, uint i) { return Vector<ExactFloat>::unit(n,i); }
-ValidatedTaylorModel ctm(uint m, double c, Sweeper swp) { return ValidatedTaylorModel::constant(m,c,swp); }
-ValidatedTaylorModel ctm(uint m, Sweeper swp) { return ValidatedTaylorModel::constant(m,1.0,swp); }
-//ValidatedTaylorModel tm(uint m, uint i, Sweeper swp) { return ValidatedTaylorModel::variable(m,i,swp); }
+Vector<ExactFloat> v(Nat n, Nat i) { return Vector<ExactFloat>::unit(n,i); }
+ValidatedTaylorModel ctm(Nat m, double c, Sweeper swp) { return ValidatedTaylorModel::constant(m,c,swp); }
+ValidatedTaylorModel ctm(Nat m, Sweeper swp) { return ValidatedTaylorModel::constant(m,1.0,swp); }
+//ValidatedTaylorModel tm(Nat m, Nat i, Sweeper swp) { return ValidatedTaylorModel::variable(m,i,swp); }
 
 
 class TestTaylorModel
@@ -53,23 +53,23 @@ class TestTaylorModel
     Sweeper swp;
   public:
     TestTaylorModel(Sweeper swp);
-    void test();
+    Void test();
   private:
-    void test_concept();
-    void test_constructors();
-    void test_predicates();
-    void test_approximation();
-    void test_unscale();
-    void test_evaluate();
-    void test_arithmetic();
-    void test_range();
-    void test_functions();
-    void test_rescale();
-    void test_restrict();
-    void test_intersection();
-    void test_split();
-    void test_antiderivative();
-    void test_compose();
+    Void test_concept();
+    Void test_constructors();
+    Void test_predicates();
+    Void test_approximation();
+    Void test_unscale();
+    Void test_evaluate();
+    Void test_arithmetic();
+    Void test_range();
+    Void test_functions();
+    Void test_rescale();
+    Void test_restrict();
+    Void test_intersection();
+    Void test_split();
+    Void test_antiderivative();
+    Void test_compose();
 };
 
 
@@ -78,7 +78,7 @@ TestTaylorModel::TestTaylorModel(Sweeper sweeper)
 {
 }
 
-void TestTaylorModel::test()
+Void TestTaylorModel::test()
 {
     std::cerr<<std::setprecision(17);
     std::cout<<std::setprecision(17);
@@ -100,7 +100,7 @@ void TestTaylorModel::test()
 }
 
 
-void TestTaylorModel::test_concept()
+Void TestTaylorModel::test_concept()
 {
     const ExactFloat f=0;
     const ValidatedFloat i;
@@ -130,7 +130,7 @@ void TestTaylorModel::test_concept()
 
 }
 
-void TestTaylorModel::test_constructors()
+Void TestTaylorModel::test_constructors()
 {
     ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv1,(E(2,3, {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0}), 0.25, swp));
     ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv2,(E({ {{0,0},1.0}, {{1,0},2.0}, {{0,1},3.0}, {{2,0},4.0}, {{1,1},5.0}, {{0,2},6.0}, {{3,0},7.0}, {{2,1},8.0}, {{1,2},9.0}, {{0,3},10.0} }), 0.25, swp));
@@ -142,7 +142,7 @@ void TestTaylorModel::test_constructors()
     ARIADNE_ASSERT_EQUAL(tv2,tv1);
 }
 
-void TestTaylorModel::test_predicates()
+Void TestTaylorModel::test_predicates()
 {
     ValidatedTaylorModel tv1({{{0},1.00},{{1},2.00},{{2},3.00}}, 0.75, swp);
     ValidatedTaylorModel tv2({{{0},1.00},{{1},1.75},{{2},3.25}}, 0.25, swp);
@@ -155,26 +155,26 @@ void TestTaylorModel::test_predicates()
     ARIADNE_TEST_BINARY_PREDICATE(refines,tv4,tv1);
 }
 
-void TestTaylorModel::test_approximation()
+Void TestTaylorModel::test_approximation()
 {
     ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv2,(E(1,2, {1.0,2.0,3.0}),0.25, swp));
 }
 
-void TestTaylorModel::test_unscale()
+Void TestTaylorModel::test_unscale()
 {
     if(unscale(ValidatedTaylorModel({{{0},3.0}},0.0,swp),ExactInterval(1.0)).codomain()!=ExactInterval(1.0)) {
         ARIADNE_TEST_WARN("Unscaling over singleton domain does not yield constant");
     }
 }
 
-void TestTaylorModel::test_evaluate()
+Void TestTaylorModel::test_evaluate()
 {
     Vector<ValidatedFloat> iv={{0.25,0.5},{-0.75,-0.5}};
     ValidatedTaylorModel tv({{{0,0},1.0},{{1,0},2.0},{{0,1},3.0},{{2,0},4.0},{{1,1},5.0},{{0,2},6.0}},0.25,swp);
     ARIADNE_TEST_EQUAL(evaluate(tv,iv),ValidatedFloat(-1,1));
 }
 
-void TestTaylorModel::test_arithmetic()
+Void TestTaylorModel::test_arithmetic()
 {
     //Operations which can be performed exactly with floating-point arithmetic.
     ARIADNE_TEST_EQUAL(ValidatedTaylorModel(E(1,2, {1.0,-2.0,3.0}), 0.75,swp)+(-3), ValidatedTaylorModel(E(1,2, {-2.0,-2.0,3.0}), 0.75,swp));
@@ -202,7 +202,7 @@ void TestTaylorModel::test_arithmetic()
     }
 }
 
-void TestTaylorModel::test_range()
+Void TestTaylorModel::test_range()
 {
     ValidatedTaylorModel x0 = ValidatedTaylorModel::variable(2,0,swp);
     ValidatedTaylorModel x1 = ValidatedTaylorModel::variable(2,1,swp);
@@ -219,7 +219,7 @@ void TestTaylorModel::test_range()
         ARIADNE_TEST_WARN("ValidatedTaylorModel::range() not exact for quadratic functions."); }
 }
 
-void TestTaylorModel::test_functions()
+Void TestTaylorModel::test_functions()
 {
     ValidatedTaylorModel x(E(1,1, {0.0, 1.0}), 0.0, swp);
     ValidatedTaylorModel xz(E(1,1, {0.0, 0.5}), 0.0, swp);
@@ -250,15 +250,15 @@ void TestTaylorModel::test_functions()
 }
 
 
-void TestTaylorModel::test_rescale()
+Void TestTaylorModel::test_rescale()
 {
 }
 
-void TestTaylorModel::test_restrict()
+Void TestTaylorModel::test_restrict()
 {
 }
 
-void TestTaylorModel::test_intersection()
+Void TestTaylorModel::test_intersection()
 {
     ValidatedTaylorModel x=ValidatedTaylorModel::variable(2,0,swp);
     ValidatedTaylorModel y=ValidatedTaylorModel::variable(2,1,swp);
@@ -273,7 +273,7 @@ void TestTaylorModel::test_intersection()
         T(E(1,0, {1.0583333333333331}),0.10833333333333339,swp));
 }
 
-void TestTaylorModel::test_split()
+Void TestTaylorModel::test_split()
 {
     ValidatedTaylorModel x=ValidatedTaylorModel::variable(2,0,swp);
     ValidatedTaylorModel y=ValidatedTaylorModel::variable(2,1,swp);
@@ -296,7 +296,7 @@ void TestTaylorModel::test_split()
 }
 
 
-void TestTaylorModel::test_antiderivative()
+Void TestTaylorModel::test_antiderivative()
 {
     ValidatedFloat unit_interval(-1,+1);
     ValidatedTaylorModel tm=ValidatedTaylorModel::constant(2,1.0,swp);
@@ -324,7 +324,7 @@ void TestTaylorModel::test_antiderivative()
 }
 
 
-void TestTaylorModel::test_compose()
+Void TestTaylorModel::test_compose()
 {
 
 }
@@ -333,10 +333,10 @@ void TestTaylorModel::test_compose()
 
 namespace Ariadne {
 Vector<UpperInterval> range(const Vector<ValidatedTaylorModel>& tm) {
-    Vector<UpperInterval> r(tm.size()); for(uint i=0; i!=tm.size(); ++i) { r[i]=tm[i].range(); } return r; }
+    Vector<UpperInterval> r(tm.size()); for(Nat i=0; i!=tm.size(); ++i) { r[i]=tm[i].range(); } return r; }
 }
 
-int main() {
+Int main() {
     ThresholdSweeper sweeper(1e-8);
     TestTaylorModel(sweeper).test();
 

@@ -69,7 +69,7 @@ template<> String class_name<Upper>() { return "Upper"; }
 template<> String class_name<Lower>() { return "Lower"; }
 template<> String class_name<Approximate>() { return "Approximate"; }
 
-template<> String class_name<bool>() { return "bool"; }
+template<> String class_name<Bool>() { return "Bool"; }
 template<> String class_name<Boolean>() { return "Boolean"; }
 template<> String class_name<Tribool>() { return "Tribool"; }
 template<> String class_name<Sierpinski>() { return "Sierpinski"; }

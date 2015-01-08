@@ -31,7 +31,7 @@
 #include <iosfwd>
 #include <string>
 
-typedef unsigned int uint;
+typedef unsigned int Nat;
 
 namespace Ariadne {
 
@@ -39,9 +39,9 @@ namespace Ariadne {
 struct Colour {
     Colour();
     Colour(double rd, double gr, double bl, double op=1.0);
-    Colour(double rd, double gr, double bl, bool tr);
+    Colour(double rd, double gr, double bl, Bool tr);
     Colour(const char* nm, double rd, double gr, double bl, double op=1.0);
-    Colour(const char* nm, double rd, double gr, double bl, bool tr);
+    Colour(const char* nm, double rd, double gr, double bl, Bool tr);
     StringType name;
     double red, green, blue;
     double opacity;

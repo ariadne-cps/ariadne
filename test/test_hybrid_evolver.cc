@@ -50,7 +50,7 @@
 using namespace Ariadne;
 using namespace std;
 
-int evolver_verbosity=0;
+Int evolver_verbosity=0;
 
 
 RealVariable v0=RealVariable("x0");
@@ -75,47 +75,47 @@ class TestHybridEvolver
 {
   private:
     string evolver_name;
-    int evolver_verbosity;
+    Int evolver_verbosity;
     boost::shared_ptr<TaylorSeriesIntegrator> evolver_integrator;
     mutable boost::shared_ptr<HybridEvolverBase> evolver_ptr;
   private:
-    void _set_evolver(const HybridAutomatonInterface& system) const;
+    Void _set_evolver(const HybridAutomatonInterface& system) const;
   public:
     TestHybridEvolver(
             const string evolver_name,
-            const int evolver_verbosity,
+            const Int evolver_verbosity,
             const TaylorSeriesIntegrator& evolver_integrator);
-    void test_all() const;
-    void test_flow() const;
-    void test_affine_flow() const;
-    void test_exact_final_time() const;
-    void test_maximum_steps() const;
-    void test_urgent_event() const;
-    void test_empty_interior() const;
-    void test_partial_event() const;
-    void test_step_size_event() const;
-    void test_initially_active_event() const;
-    void test_initially_active_attracting_event() const;
-    void test_initially_active_repelling_event() const;
-    void test_impact() const;
-    void test_tangency() const;
-    void test_simultaneous_events() const;
-    void test_creep() const;
-    void test_unwind() const;
-    void test_permissive() const;
+    Void test_all() const;
+    Void test_flow() const;
+    Void test_affine_flow() const;
+    Void test_exact_final_time() const;
+    Void test_maximum_steps() const;
+    Void test_urgent_event() const;
+    Void test_empty_interior() const;
+    Void test_partial_event() const;
+    Void test_step_size_event() const;
+    Void test_initially_active_event() const;
+    Void test_initially_active_attracting_event() const;
+    Void test_initially_active_repelling_event() const;
+    Void test_impact() const;
+    Void test_tangency() const;
+    Void test_simultaneous_events() const;
+    Void test_creep() const;
+    Void test_unwind() const;
+    Void test_permissive() const;
 
-    void test_splitting_on_urgent_event() const;
-    void test_affine_hysteresis() const;
-    void test_transverse_linear_crossing() const;
-    void test_transverse_cubic_crossing() const;
-    void test_transverse_cube_root_crossing() const;
-    void test_constant_derivative_system() const;
+    Void test_splitting_on_urgent_event() const;
+    Void test_affine_hysteresis() const;
+    Void test_transverse_linear_crossing() const;
+    Void test_transverse_cubic_crossing() const;
+    Void test_transverse_cube_root_crossing() const;
+    Void test_constant_derivative_system() const;
 
 };
 
 TestHybridEvolver::TestHybridEvolver(
         const string ev_name,
-        const int ev_verbosity,
+        const Int ev_verbosity,
         const TaylorSeriesIntegrator& ev_integrator)
     : evolver_name(ev_name)
     , evolver_verbosity(ev_verbosity)
@@ -125,14 +125,14 @@ TestHybridEvolver::TestHybridEvolver(
     DRAWING_ACCURACY = 1;
 }
 
-void TestHybridEvolver::_set_evolver(const HybridAutomatonInterface& system) const
+Void TestHybridEvolver::_set_evolver(const HybridAutomatonInterface& system) const
 {
     evolver_ptr.reset(new GeneralHybridEvolver(system));
     evolver_ptr->verbosity = evolver_verbosity;
     evolver_ptr->set_integrator(*evolver_integrator);
 }
 
-void TestHybridEvolver::test_all() const {
+Void TestHybridEvolver::test_all() const {
     ARIADNE_TEST_CALL(test_flow());
     ARIADNE_TEST_CALL(test_affine_flow());
     ARIADNE_TEST_CALL(test_exact_final_time());
@@ -159,7 +159,7 @@ void TestHybridEvolver::test_all() const {
     ARIADNE_TEST_CALL(test_constant_derivative_system());
 }
 
-void TestHybridEvolver::test_flow() const {
+Void TestHybridEvolver::test_flow() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
     RealSpace space=automaton.continuous_state_space(q);
@@ -184,7 +184,7 @@ void TestHybridEvolver::test_flow() const {
 }
 
 
-void TestHybridEvolver::test_exact_final_time() const {
+Void TestHybridEvolver::test_exact_final_time() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
     RealSpace space=automaton.continuous_state_space(q);
@@ -209,7 +209,7 @@ void TestHybridEvolver::test_exact_final_time() const {
 
 
 //! A simple test for the maximum number of steps
-void TestHybridEvolver::test_maximum_steps() const {
+Void TestHybridEvolver::test_maximum_steps() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
     const Dyadic c1(1.5); const Dyadic c2(1.0/16); const Dyadic c3(0.5);
@@ -240,7 +240,7 @@ void TestHybridEvolver::test_maximum_steps() const {
 }
 
 //! A simple test for an urgent event
-void TestHybridEvolver::test_urgent_event() const {
+Void TestHybridEvolver::test_urgent_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
     const Dyadic c1(1.5); const Dyadic c2(1.0/16); const Dyadic c3(0.5);
@@ -272,7 +272,7 @@ void TestHybridEvolver::test_urgent_event() const {
 
 
 // A test to ensure that an event which is active at the final time does actually occur
-void TestHybridEvolver::test_empty_interior() const {
+Void TestHybridEvolver::test_empty_interior() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
     automaton.new_transition(q,e,q,{x0-2,x1},x0-1,urgent);
@@ -298,7 +298,7 @@ void TestHybridEvolver::test_empty_interior() const {
 }
 
 // A test to ensure that an event which is active at the final time does actually occur
-void TestHybridEvolver::test_partial_event() const {
+Void TestHybridEvolver::test_partial_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
     automaton.new_transition(q,e,q,(x0-2,x1),x0-x1/16-2,urgent);
@@ -330,7 +330,7 @@ void TestHybridEvolver::test_partial_event() const {
 // A test to ensure that an event which would be active after a time step
 // but is avoided because the evolution is completed before the event would occur,
 // does not occur
-void TestHybridEvolver::test_step_size_event() const {
+Void TestHybridEvolver::test_step_size_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
     automaton.new_transition(q,e,q,(x0-2,x1),x0-2,urgent);
@@ -356,7 +356,7 @@ void TestHybridEvolver::test_step_size_event() const {
 }
 
 
-void TestHybridEvolver::test_initially_active_event() const {
+Void TestHybridEvolver::test_initially_active_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c));
     automaton.new_transition(q,e,q,(x0+1,x1),-x0,urgent);
@@ -384,7 +384,7 @@ void TestHybridEvolver::test_initially_active_event() const {
 
 }
 
-void TestHybridEvolver::test_initially_active_attracting_event() const {
+Void TestHybridEvolver::test_initially_active_attracting_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(-c/2,c));
     automaton.new_transition(q,e,q,(x0+1,x1),-x0-x1/256,urgent);
@@ -408,7 +408,7 @@ void TestHybridEvolver::test_initially_active_attracting_event() const {
 
 }
 
-void TestHybridEvolver::test_initially_active_repelling_event() const {
+Void TestHybridEvolver::test_initially_active_repelling_event() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(+c/2,c));
     automaton.new_transition(q,e,q,(x0+1,x1),-x0,urgent);
@@ -431,7 +431,7 @@ void TestHybridEvolver::test_initially_active_repelling_event() const {
 
 
 
-void TestHybridEvolver::test_impact() const {
+Void TestHybridEvolver::test_impact() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(x1,Real(0)*c));
     automaton.new_transition(q,e,q,(x0,x1-2),x0-1,impact);
@@ -455,7 +455,7 @@ void TestHybridEvolver::test_impact() const {
          initial_set_colour,orbit.initial());
 }
 
-void TestHybridEvolver::test_tangency() const {
+Void TestHybridEvolver::test_tangency() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,z));
     automaton.new_transition(q,e,q,(x0,x1-1),x1-sqr(x0),urgent);
@@ -484,7 +484,7 @@ void TestHybridEvolver::test_tangency() const {
 #include "geometry/affine_set.h"
 #include "hybrid/hybrid_set.h"
 
-void TestHybridEvolver::test_simultaneous_events() const {
+Void TestHybridEvolver::test_simultaneous_events() const {
     MonolithicHybridAutomaton automaton;
     DiscreteEvent e1("e1");
     DiscreteEvent e2("e2");
@@ -512,7 +512,7 @@ void TestHybridEvolver::test_simultaneous_events() const {
 }
 
 
-void TestHybridEvolver::test_creep() const {
+Void TestHybridEvolver::test_creep() const {
     MonolithicHybridAutomaton automaton;
     DiscreteEvent e("e");
     automaton.new_mode(q,(c,c));
@@ -541,7 +541,7 @@ void TestHybridEvolver::test_creep() const {
          initial_set_colour,orbit.initial());
 }
 
-void TestHybridEvolver::test_unwind() const {
+Void TestHybridEvolver::test_unwind() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c));
     //automaton.new_transition(q,e,q,(x0-3,x1-1),x0-1,urgent);
@@ -566,7 +566,7 @@ void TestHybridEvolver::test_unwind() const {
          initial_set_colour,orbit.initial());
 }
 
-void TestHybridEvolver::test_permissive() const {
+Void TestHybridEvolver::test_permissive() const {
     MonolithicHybridAutomaton automaton;
     automaton.new_mode(q,(c,c/2));
     DiscreteEvent i("i");
@@ -603,7 +603,7 @@ void TestHybridEvolver::test_permissive() const {
 
 
 
-void
+Void
 TestHybridEvolver::test_affine_flow() const
 {
     RealVariable x0("x");
@@ -635,7 +635,7 @@ TestHybridEvolver::test_affine_flow() const
 }
 
 
-void
+Void
 TestHybridEvolver::test_splitting_on_urgent_event() const
 {
     RealVariable x("x");
@@ -677,7 +677,7 @@ TestHybridEvolver::test_splitting_on_urgent_event() const
 }
 
 
-void
+Void
 TestHybridEvolver::test_affine_hysteresis() const
 {
     // A hybrid automaton with a single component and two locations,
@@ -780,7 +780,7 @@ TestHybridEvolver::test_affine_hysteresis() const
 
 
 
-void TestHybridEvolver::test_constant_derivative_system() const
+Void TestHybridEvolver::test_constant_derivative_system() const
 {
     // Test the system (d(x),d(y))=(1,0) with reset (x',y')=(x-2,y) when x+y>0
     // Starting in a small box near the origin, the system should return to
@@ -821,7 +821,7 @@ void TestHybridEvolver::test_constant_derivative_system() const
 
 
 
-void TestHybridEvolver::test_transverse_linear_crossing() const
+Void TestHybridEvolver::test_transverse_linear_crossing() const
 {
     DiscreteLocation q1("q1"), q2("q2");
     RealVariable x("x"), y("y");
@@ -860,7 +860,7 @@ void TestHybridEvolver::test_transverse_linear_crossing() const
          final_set_colour,orbit.final(), initial_set_colour,orbit.initial());
 }
 
-void TestHybridEvolver::test_transverse_cubic_crossing() const
+Void TestHybridEvolver::test_transverse_cubic_crossing() const
 {
     DiscreteLocation q1("q1"), q2("q2");
     RealVariable x("x"), y("y");
@@ -886,7 +886,7 @@ void TestHybridEvolver::test_transverse_cubic_crossing() const
          final_set_colour,orbit.final(), initial_set_colour,orbit.initial());
 }
 
-void TestHybridEvolver::test_transverse_cube_root_crossing() const
+Void TestHybridEvolver::test_transverse_cube_root_crossing() const
 {
     DiscreteLocation q1("q1"), q2("q2");
     RealVariable x("x"), y("y");
@@ -918,9 +918,9 @@ void TestHybridEvolver::test_transverse_cube_root_crossing() const
 
 
 
-int main(int argc, const char* argv[])
+Int main(Int argc, const char* argv[])
 {
-    int evolver_verbosity=get_verbosity(argc,argv);
+    Int evolver_verbosity=get_verbosity(argc,argv);
 
     DRAWING_METHOD = AFFINE_DRAW; DRAWING_ACCURACY = 2u;
 

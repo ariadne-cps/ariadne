@@ -32,8 +32,8 @@
 
 namespace Ariadne {
 
-typedef uint Nat;
-typedef int Int;
+typedef Nat Nat;
+typedef Int Int;
 
 template<class A, class X=Void> class Operators;
 

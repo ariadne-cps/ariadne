@@ -42,16 +42,16 @@ using namespace Ariadne;
 class TestFunction
 {
   public:
-    void test();
+    Void test();
   private:
-    void test_concept();
-    void test_scalar_function();
-    void test_vector_function();
-    void test_conversions();
-    void test_differentiation();
+    Void test_concept();
+    Void test_scalar_function();
+    Void test_vector_function();
+    Void test_conversions();
+    Void test_differentiation();
 };
 
-void TestFunction::test()
+Void TestFunction::test()
 {
     ARIADNE_TEST_CALL(test_scalar_function());
     ARIADNE_TEST_CALL(test_vector_function());
@@ -59,7 +59,7 @@ void TestFunction::test()
     ARIADNE_TEST_CALL(test_differentiation());
 }
 
-void TestFunction::test_concept()
+Void TestFunction::test_concept()
 {
 
     EffectiveScalarFunction sf1(3);
@@ -83,7 +83,7 @@ void TestFunction::test_concept()
 
 }
 
-void TestFunction::test_scalar_function()
+Void TestFunction::test_scalar_function()
 {
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,o,constant(3,1));
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveScalarFunction,x,coordinate(3,0));
@@ -100,7 +100,7 @@ void TestFunction::test_scalar_function()
     ARIADNE_TEST_EQUAL(df(p),2.0);
 }
 
-void TestFunction::test_vector_function()
+Void TestFunction::test_vector_function()
 {
     ARIADNE_TEST_NAMED_CONSTRUCT(EffectiveVectorFunction,id,identity(3));
 
@@ -131,12 +131,12 @@ void TestFunction::test_vector_function()
 
 
 
-void TestFunction::test_conversions()
+Void TestFunction::test_conversions()
 {
 
 }
 
-void TestFunction::test_differentiation()
+Void TestFunction::test_differentiation()
 {
     EffectiveScalarFunction z=EffectiveScalarFunction::constant(2,0);
     EffectiveScalarFunction o=EffectiveScalarFunction::constant(2,1);
@@ -154,7 +154,7 @@ void TestFunction::test_differentiation()
 }
 
 
-int main() {
+Int main() {
     TestFunction().test();
 
     return ARIADNE_TEST_FAILURES;

@@ -40,16 +40,16 @@ namespace Ariadne {
 template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector<Y>& x)
 {
     typedef typename Expansion<X>::ConstIterator ConstIterator;
-    const uint n=e.argument_size();
+    const Nat n=e.argument_size();
     const Y z=x.zero_element(); // The zero element of the ring Y
     if(e.number_of_nonzeros()==0) { return z; }
 
     Array< Y > r(e.argument_size(),z); // An Array of "registers" containing working p(x[0],...,x[k])
     ConstIterator iter=e.begin();
     ConstIterator end=e.end();
-    uint k=n;   // The current working register
+    Nat k=n;   // The current working register
     const uchar* na=iter->key().begin(); // The values of the next multi-index
-    uint j=k;   // The lowest register containing a non-zero value
+    Nat j=k;   // The lowest register containing a non-zero value
     X c=iter->data();
     Y t=z;
     const uchar* a=na;
@@ -64,14 +64,14 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
         // Set r[k]=(((c+r[0])*x[0]^a[0]+r[1])*x[1]^a[1]+...+r[k])*x[k]^(a[k]-na[k])
         // Omit zero terms where possible
         t=numeric_cast<typename Y::NumericType>(c);
-        for(uint i=0; i!=min(j,k); ++i) {
-            for(uint ii=0; ii!=a[i]; ++ii) {
+        for(Nat i=0; i!=min(j,k); ++i) {
+            for(Nat ii=0; ii!=a[i]; ++ii) {
                 t=t*x[i];
             }
         }
-        for(uint i=min(j,k); i!=k; ++i) {
+        for(Nat i=min(j,k); i!=k; ++i) {
             t=t+r[i];
-            for(uint ii=0; ii!=a[i]; ++ii) {
+            for(Nat ii=0; ii!=a[i]; ++ii) {
                 t=t*x[i];
             }
             r[i]=z;
@@ -79,7 +79,7 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
         if(j<=k) {
             t=t+r[k];
         }
-        for(uint ii=na[k]; ii!=a[k]; ++ii) {
+        for(Nat ii=na[k]; ii!=a[k]; ++ii) {
             t=t*x[k];
         }
         r[k]=t;
@@ -91,14 +91,14 @@ template<class X, class Y> Y horner_evaluate(const Expansion<X>& e, const Vector
     }
     // Set r=(((c+r[0])*x[0]^a[0]+r[1])*x[1]^a[1]+...+r[n-1])*x[n-1]^(a[n-1])
     t=numeric_cast<typename Y::NumericType>(c);
-    for(uint i=0; i!=j; ++i) {
-        for(uint ii=0; ii!=a[i]; ++ii) {
+    for(Nat i=0; i!=j; ++i) {
+        for(Nat ii=0; ii!=a[i]; ++ii) {
             t=t*x[i];
         }
     }
-    for(uint i=j; i!=n; ++i) {
+    for(Nat i=j; i!=n; ++i) {
         t=t+r[i];
-        for(uint ii=0; ii!=a[i]; ++ii) {
+        for(Nat ii=0; ii!=a[i]; ++ii) {
             t=t*x[i];
         }
     }
@@ -121,8 +121,8 @@ Y power_evaluate(const Expansion<X>& e, const Vector<Y>& y)
         const MultiIndex& j=iter->key();
         const X& c=iter->data();
         t=one;
-        for(uint k=0; k!=e.argument_size(); ++k) {
-            for(uint l=0; l!=j[k]; ++l) {
+        for(Nat k=0; k!=e.argument_size(); ++k) {
+            for(Nat l=0; l!=j[k]; ++l) {
                 t=t*y[k];
             }
         }
@@ -150,7 +150,7 @@ template<class X, class Y>
 Vector<Y> evaluate(const Vector< Expansion<X> >& x, const Vector<Y>& y)
 {
     Vector<Y> r(x.size(),y.zero_element());
-    for(unsigned int i=0; i!=x.size(); ++i) {
+    for(SizeType i=0; i!=x.size(); ++i) {
         r[i]=evaluate(x[i],y);
     }
     return r;

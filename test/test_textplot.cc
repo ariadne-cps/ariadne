@@ -40,14 +40,14 @@ using namespace Ariadne;
 
 struct RadiusSquare : EffectiveVectorFunctionData<1,2,1> {
     template<class R, class A, class P>
-    static void compute(R& r, const A& x, const P& p) {
+    static Void compute(R& r, const A& x, const P& p) {
         r[0]=sqr(x[0])+sqr(x[1])-sqr(p[0]);
     }
 };
 
 
 
-int main(int argc, char **argv)
+Int main(Int argc, char **argv)
 {
 
     ExactBox bx1(2); bx1[0]=ExactInterval(-0.2,0.2); bx1[1]=ExactInterval(-0.1,0.10);
@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 
     std::cout << "Testing interpolated curves.." << std::endl;
     InterpolatedCurve cv(ExactPoint(2,0.0));
-    for(int i=1; i<=10; ++i) {
+    for(Int i=1; i<=10; ++i) {
         ExactPoint pt(2); pt[0]=i/10.; pt[1]=sqr(pt[0]);
         cv.insert(i,pt);
     }

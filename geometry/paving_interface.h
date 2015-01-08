@@ -35,11 +35,11 @@
 
 namespace Ariadne {
 
-typedef void Void;
-typedef bool Bool;
+typedef Void Void;
+typedef Bool Bool;
 typedef Tribool Tribool;
-typedef uint Nat;
-typedef int Int;
+typedef Nat Nat;
+typedef Int Int;
 typedef SizeType SizeType;
 typedef OutputStream OutputStream;
 

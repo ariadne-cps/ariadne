@@ -38,28 +38,28 @@ using namespace Ariadne;
 typedef GeneralHybridEvolver HybridEvolverType;
 
 
-void press_enter_to_continue() {
+Void press_enter_to_continue() {
     std::cout << "Press ENTER to continue... " << flush;
     std::cin.ignore( std::numeric_limits <std::streamsize> ::max(), '\n' );
 }
 
 template<class SET1,class SET2,class SET3,class SET4>
-void nolines_plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
+Void nolines_plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
           const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4) {
     HybridFigure g;  g.set_axes(axes); g.set_line_style(false); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
     g.set_fill_colour(fc3); draw(g,set3); g.set_fill_colour(fc4); draw(g,set4); g.write(filename); }
 
 
 template<class SET1,class SET2,class SET3,class SET4,class SET5>
-void nolines_plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
+Void nolines_plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
           const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4, const Colour& fc5, const SET5& set5) {
     HybridFigure g;  g.set_axes(axes); g.set_line_style(false); g.set_line_width(0.0); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
     g.set_fill_colour(fc3); draw(g,set3); g.set_fill_colour(fc4); draw(g,set4);
     g.set_fill_colour(fc5); draw(g,set5); g.write(filename); }
 
-int main(int argc, const char* argv[])
+Int main(Int argc, const char* argv[])
 {
-    uint evolver_verbosity = 0;
+    Nat evolver_verbosity = 0;
     if(argc>1) { evolver_verbosity=atoi(argv[1]); }
 
     // Create the system

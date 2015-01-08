@@ -4,7 +4,7 @@
 
 using namespace Ariadne;
 
-int test_taylor_series() {
+Int test_taylor_series() {
     C1TaylorSeries f1=C1TaylorSeries::constant(2.0);
     f1._coefficients={2,3,5,7};
     f1._uniform_error=0.1;
@@ -35,7 +35,7 @@ int test_taylor_series() {
    
 }
 
-int test_taylor_function() {
+Int test_taylor_function() {
     C1TaylorFunction f1=C1TaylorFunction(2);
     f1._expansion={{{1,1},7},{{1,0},5},{{0,1},3},{{0,0},2}};
     f1._uniform_error=0.0;
@@ -77,7 +77,7 @@ int test_taylor_function() {
 }
 
 
-int main() {
+Int main() {
     test_taylor_series();
     test_taylor_function();
     std::cout << "Done\n";

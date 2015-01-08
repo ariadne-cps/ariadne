@@ -39,40 +39,40 @@ class TestMultiIndex
   public:
     TestMultiIndex() { }
 
-    void test() {
+    Void test() {
         ARIADNE_TEST_CALL(test_constructor());
         ARIADNE_TEST_CALL(test_comparison());
         ARIADNE_TEST_CALL(test_addition());
         ARIADNE_TEST_CALL(test_increment());
     }
 
-    void test_constructor() {
-        int a1[3]={2,0,3};
+    Void test_constructor() {
+        Int a1[3]={2,0,3};
         MultiIndex i1(3u,a1);
-        ARIADNE_TEST_EQUAL((int)i1.number_of_variables(),3);
-        ARIADNE_TEST_EQUAL((int)i1.degree(),5);
-        ARIADNE_TEST_EQUAL((int)i1[0],2);
-        ARIADNE_TEST_EQUAL((int)i1[1],0);
-        ARIADNE_TEST_EQUAL((int)i1[2],3);
+        ARIADNE_TEST_EQUAL((Int)i1.number_of_variables(),3);
+        ARIADNE_TEST_EQUAL((Int)i1.degree(),5);
+        ARIADNE_TEST_EQUAL((Int)i1[0],2);
+        ARIADNE_TEST_EQUAL((Int)i1[1],0);
+        ARIADNE_TEST_EQUAL((Int)i1[2],3);
 
-        int a2[5]={2,0,3,0,5};
+        Int a2[5]={2,0,3,0,5};
         MultiIndex i2(5,a2);
-        ARIADNE_TEST_EQUAL((int)i2.number_of_variables(),5);
-        ARIADNE_TEST_EQUAL((int)i2.degree(),10);
-        ARIADNE_TEST_EQUAL((int)i2[3],0);
-        ARIADNE_TEST_EQUAL((int)i2[4],5);
+        ARIADNE_TEST_EQUAL((Int)i2.number_of_variables(),5);
+        ARIADNE_TEST_EQUAL((Int)i2.degree(),10);
+        ARIADNE_TEST_EQUAL((Int)i2[3],0);
+        ARIADNE_TEST_EQUAL((Int)i2[4],5);
 
         MultiIndex i3=MultiIndex::unit(9u,2u);
-        ARIADNE_TEST_EQUAL((int)i3.number_of_variables(),9);
-        ARIADNE_TEST_EQUAL((int)i3.degree(),1);
-        ARIADNE_TEST_EQUAL((int)i3[2],1);
-        ARIADNE_TEST_EQUAL((int)i3[8],0);
+        ARIADNE_TEST_EQUAL((Int)i3.number_of_variables(),9);
+        ARIADNE_TEST_EQUAL((Int)i3.degree(),1);
+        ARIADNE_TEST_EQUAL((Int)i3[2],1);
+        ARIADNE_TEST_EQUAL((Int)i3[8],0);
     }
 
-    void test_comparison() {
-        int a1[3]={2,0,3};
-        int a2[3]={1,0,4};
-        int a3[3]={3,0,1};
+    Void test_comparison() {
+        Int a1[3]={2,0,3};
+        Int a2[3]={1,0,4};
+        Int a3[3]={3,0,1};
         ARIADNE_TEST_CONSTRUCT(MultiIndex,i1,(3,a1));
         ARIADNE_TEST_CONSTRUCT(MultiIndex,i2,(3,a2));
         ARIADNE_TEST_CONSTRUCT(MultiIndex,i3,(3,a3));
@@ -92,14 +92,14 @@ class TestMultiIndex
 
     }
 
-    void test_addition() {
-        int a1[3]={2,0,3}, a2[3]={1,1,0}, a3[3]={3,1,3};
+    Void test_addition() {
+        Int a1[3]={2,0,3}, a2[3]={1,1,0}, a3[3]={3,1,3};
         ARIADNE_TEST_EQUAL(MultiIndex(3,a1)+MultiIndex(3,a2),MultiIndex(3,a3));
     }
 
-    void test_increment() {
+    Void test_increment() {
         MultiIndex a(4);
-        int n=0;
+        Int n=0;
         while(a.degree()<=5) {
             MultiIndex b=a; ++a; ++n;
             ARIADNE_TEST_BINARY_PREDICATE(graded_less,b,a);
@@ -111,7 +111,7 @@ class TestMultiIndex
 
 };
 
-int main() {
+Int main() {
   TestMultiIndex().test();
   return ARIADNE_TEST_FAILURES;
 }

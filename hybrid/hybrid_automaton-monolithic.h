@@ -89,7 +89,7 @@ class DiscreteMode {
         return this->_invariants.find(event)->second; }
 
     //! \brief The dimension of the discrete mode.
-    uint dimension() const;
+    Nat dimension() const;
 
     //! \brief Write to an output stream.
     OutputStream& write(OutputStream& os) const;
@@ -171,7 +171,7 @@ class MonolithicHybridAutomaton
         EffectiveVectorFunction _dynamic;
         Map< DiscreteEvent, Invariant >  _invariants;
         Map< DiscreteEvent, Transition >  _transitions;
-        uint dimension() const { return _dynamic.result_size(); }
+        Nat dimension() const { return _dynamic.result_size(); }
     };
     friend OutputStream& operator<<(OutputStream&, const MonolithicHybridAutomaton&);
   public:
@@ -213,7 +213,7 @@ class MonolithicHybridAutomaton
     //!   \param dynamic is the mode's vector field.
     //!
     //! The variables are given default names x0, x1 etc.
-    void new_mode(DiscreteLocation state,
+    Void new_mode(DiscreteLocation state,
                   EffectiveVectorFunction dynamic);
 
     //! \brief Adds a discrete mode to the automaton.
@@ -221,7 +221,7 @@ class MonolithicHybridAutomaton
     //!   \param state is the mode's discrete state.
     //!   \param space is a list of state variables.
     //!   \param dynamic is the mode's vector field.
-    void new_mode(DiscreteLocation state,
+    Void new_mode(DiscreteLocation state,
                   RealSpace space,
                   EffectiveVectorFunction dynamic);
 
@@ -233,7 +233,7 @@ class MonolithicHybridAutomaton
     //!   \param invariant is the new invariant condition, in the form \f$g(x)<0\f$.
     //!   \param kind determines whether the constraint is a true invariant, or a progress predicate.
 
-    void new_invariant(DiscreteLocation state,
+    Void new_invariant(DiscreteLocation state,
                        DiscreteEvent label,
                        EffectiveScalarFunction invariant,
                        EventKind kind=PROGRESS
@@ -248,7 +248,7 @@ class MonolithicHybridAutomaton
     //!    \param reset is the transition's reset.
     //!    \param guard is the transition's guard function. The transition may occur when \f$g(x)\geq0\f$.
     //!    \param kind determines whether the transision is an impact, urgent or permissive.
-    void new_transition(DiscreteLocation source,
+    Void new_transition(DiscreteLocation source,
                         DiscreteEvent event,
                         DiscreteLocation target,
                         EffectiveVectorFunction reset,
@@ -264,19 +264,19 @@ class MonolithicHybridAutomaton
     const Identifier& name() const { return _name; }
 
     //! \brief Test if the hybrid automaton has a discrete mode \a location.
-    bool has_mode(DiscreteLocation location) const;
+    Bool has_mode(DiscreteLocation location) const;
 
     //! \brief Test if the hybrid automaton has an action (corresponding to an invariant or guard) in \a location labelled by \a event.
-    bool has_guard(DiscreteLocation location, DiscreteEvent event) const;
+    Bool has_guard(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief Test if the hybrid automaton has an invariant in \a location labelled by \a event.
-    bool has_invariant(DiscreteLocation location, DiscreteEvent event) const;
+    Bool has_invariant(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id.
-    bool has_transition(DiscreteLocation source, DiscreteEvent event) const;
+    Bool has_transition(DiscreteLocation source, DiscreteEvent event) const;
 
     //! \brief The dimension of the state space of in the mode \a location.
-    uint dimension(DiscreteLocation location) const;
+    Nat dimension(DiscreteLocation location) const;
 
     //! \brief The dynamic valid in the mode \a location.
     virtual EffectiveVectorFunction dynamic_function(DiscreteLocation location) const;

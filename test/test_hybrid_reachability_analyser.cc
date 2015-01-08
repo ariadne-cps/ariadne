@@ -116,7 +116,7 @@ class TestHybridReachabilityAnalyser
         return analyser;
     }
 
-    TestHybridReachabilityAnalyser(uint analyser_verbosity = 0u)
+    TestHybridReachabilityAnalyser(Nat analyser_verbosity = 0u)
         : system(build_system()),
           analyser(build_analyser(system)),
           grid(2),
@@ -142,7 +142,7 @@ class TestHybridReachabilityAnalyser
 
     }
 
-    void test_lower_reach_lower_evolve() {
+    Void test_lower_reach_lower_evolve() {
         DiscreteLocation loc(1);
         ExactBox bounding_box(2,bound);
         cout << "Computing timed reachable set" << endl;
@@ -164,7 +164,7 @@ class TestHybridReachabilityAnalyser
              reach_set_colour,hybrid_lower_reach,evolve_set_colour,hybrid_lower_evolve);
     }
 
-    void test_lower_reach_evolve() {
+    Void test_lower_reach_evolve() {
         DiscreteLocation loc(1);
         ExactBox bounding_box(2,bound);
 
@@ -182,7 +182,7 @@ class TestHybridReachabilityAnalyser
              reach_set_colour,reach_evolve_set.first,evolve_set_colour,reach_evolve_set.second);
     }
 
-    void test_upper_reach_upper_evolve() {
+    Void test_upper_reach_upper_evolve() {
         DiscreteLocation loc(1);
         ExactBox bounding_box(2,bound);
         cout << "Computing timed reachable set" << endl;
@@ -201,7 +201,7 @@ class TestHybridReachabilityAnalyser
              reach_set_colour,upper_reach_set,evolve_set_colour,upper_evolve_set);
     }
 
-    void test_upper_reach_evolve() {
+    Void test_upper_reach_evolve() {
         cout << "Computing timed reach-evolve set" << endl;
         DiscreteLocation loc(1);
         ExactBox bounding_box(2,bound);
@@ -214,7 +214,7 @@ class TestHybridReachabilityAnalyser
              reach_set_colour,reach_evolve_set.first,final_set_colour,reach_evolve_set.second);
     }
 
-    void test_infinite_time_lower_reach() {
+    Void test_infinite_time_lower_reach() {
 
         DiscreteLocation loc(1);
         HybridBoxes bounding_boxes
@@ -234,7 +234,7 @@ class TestHybridReachabilityAnalyser
              reach_set_colour,lower_reach_set);
     }
 
-    void test_outer_chain_reach() {
+    Void test_outer_chain_reach() {
         cout << "Computing outer chain reachable set" << endl;
         DiscreteLocation loc(1);
         HybridBoxes bounding_boxes
@@ -260,7 +260,7 @@ class TestHybridReachabilityAnalyser
 
     }
 
-    void test() {
+    Void test() {
         //ValidatedTaylorModel::set_default_sweep_threshold(1e-6);
         //ValidatedTaylorModel::set_default_maximum_degree(6u);
 
@@ -276,9 +276,9 @@ class TestHybridReachabilityAnalyser
 };
 
 
-int main(int argc, const char* argv[])
+Int main(Int argc, const char* argv[])
 {
-    int analyser_verbosity=get_verbosity(argc,argv);
+    Int analyser_verbosity=get_verbosity(argc,argv);
 
     TestHybridReachabilityAnalyser(analyser_verbosity).test();
     return ARIADNE_TEST_FAILURES;

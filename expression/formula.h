@@ -113,7 +113,7 @@ template<class X> OutputStream& operator<<(OutputStream& os, const Formula<X>& f
 
 template<class X>
 struct FormulaNode {
-    mutable uint count;
+    mutable Nat count;
     Operator op;
     virtual ~FormulaNode();
     explicit FormulaNode(const Operator& o) : count(0u), op(o) { }
@@ -187,7 +187,7 @@ template<class X> inline Formula<X> Formula<X>::binary(const Operator& op, Formu
 template<class X> inline Formula<X> Formula<X>::scalar(const Operator& op, Formula<X> const& a1, Int n2) {
     return Formula<X>(new ScalarFormulaNode<X>(op,a1,n2)); }
 template<class X> inline Vector< Formula<X> > Formula<X>::identity(Nat n) {
-    Vector< Formula<X> > r(n); for(uint i=0; i!=n; ++i) { r[i]=Formula<X>::coordinate(i); } return r; }
+    Vector< Formula<X> > r(n); for(Nat i=0; i!=n; ++i) { r[i]=Formula<X>::coordinate(i); } return r; }
 
 template<class X, class R> inline Formula<X> make_formula(const R& c) {
     return Formula<X>::constant(c); }
@@ -215,7 +215,7 @@ template<class X> inline Formula<X> operator/(const Formula<X>& f1, const Formul
 template<class X> inline Formula<X> neg(const Formula<X>& f) { return make_formula(Neg(),f); }
 template<class X> inline Formula<X> rec(const Formula<X>& f) { return make_formula(Rec(),f); }
 template<class X> inline Formula<X> sqr(const Formula<X>& f) { return make_formula(Sqr(),f); }
-template<class X> inline Formula<X> pow(const Formula<X>& f, int n) { return make_formula(Pow(),f,n); }
+template<class X> inline Formula<X> pow(const Formula<X>& f, Int n) { return make_formula(Pow(),f,n); }
 template<class X> inline Formula<X> sqrt(const Formula<X>& f) { return make_formula(Sqrt(),f); }
 template<class X> inline Formula<X> exp(const Formula<X>& f) { return make_formula(Exp(),f); }
 template<class X> inline Formula<X> log(const Formula<X>& f) { return make_formula(Log(),f); }
@@ -264,7 +264,7 @@ template<class X, class T> T evaluate(const Formula<X>& f, const Vector<T>& x) {
 
 
 //! \brief Convert the expression with index type \c I to one with variables indexed by \a J.
-template<class X, class T> const T& cached_evaluate(const Formula<X>& f, const Vector<T>& x, Map<const void*,T>& cache) {
+template<class X, class T> const T& cached_evaluate(const Formula<X>& f, const Vector<T>& x, Map<const Void*,T>& cache) {
     const FormulaNode<X>* fptr=f.node_ptr();
     if(cache.has_key(fptr)) { return cache.get(fptr); }
     switch(f.kind()) {
@@ -278,21 +278,21 @@ template<class X, class T> const T& cached_evaluate(const Formula<X>& f, const V
 }
 
 template<class X, class T> inline T cached_evaluate(const Formula<X>& f, const Vector<T>& v) {
-    Map<const void*,T> cache;
+    Map<const Void*,T> cache;
     return cached_evaluate(f.handle(),v,cache);
 }
 
 template<class X, class T> Vector<T> cached_evaluate(const Vector< Formula<X> >& f, const Vector<T>& v) {
     assert(v.size()!=0);
     Vector<T> r(f.size());
-    Map<const void*,T> cache;
-    for(uint i=0; i!=r.size(); ++i) {
+    Map<const Void*,T> cache;
+    for(Nat i=0; i!=r.size(); ++i) {
         r[i]=cached_evaluate(f[i],v,cache);
     }
     return r;
 }
 
-template<class X> Formula<X> derivative(const Formula<X>& f, uint j)
+template<class X> Formula<X> derivative(const Formula<X>& f, Nat j)
 {
     switch(f.op()) {
         case CNST:
@@ -379,12 +379,12 @@ Formula<Real> formula(const Expression<Real>& e, const Space<Real>& spc);
 template<class X> Formula<X> formula(const Expansion<X>& e)
 {
     Vector< Formula<X> > identity(e.argument_size());
-    for(uint i=0; i!=identity.size(); ++i) { identity[i]=Formula<X>::coordinate(i); }
+    for(Nat i=0; i!=identity.size(); ++i) { identity[i]=Formula<X>::coordinate(i); }
     return horner_evaluate(e,identity);
 }
 
 // Class for which an object x produces coordinate \f$x_j\f$ when calling \c x[j].
-struct Coordinate { Formula<Real> operator[](uint j) { return Formula<Real>::coordinate(j); } };
+struct Coordinate { Formula<Real> operator[](Nat j) { return Formula<Real>::coordinate(j); } };
 
 } // namespace Ariadne
 

@@ -72,27 +72,27 @@ class UnivariateFirstDifferential
         UnivariateFirstDifferential<X> r; r._value=v; r._gradient=1; return r; }
 
     //! \brief Equality operator.
-    bool operator==(const UnivariateFirstDifferential<X>& other) const {
+    Bool operator==(const UnivariateFirstDifferential<X>& other) const {
         return this->_value==other._value && this->_gradient==other._gradient; }
 
     //! \brief Inequality operator.
-    bool operator!=(const UnivariateFirstDifferential<X>& other) const {
+    Bool operator!=(const UnivariateFirstDifferential<X>& other) const {
         return !(*this==other); }
 
     //! \brief The number of independent variables.
-    uint argument_size() const { return 1u; }
+    Nat argument_size() const { return 1u; }
     //! \brief The maximum degree of the stored terms.
-    uint degree() const { return 1u; }
+    Nat degree() const { return 1u; }
     //! \brief The value of the differential i.e. the coefficient of \f$1\f$.
     const X& value() const { return this->_value; }
     //! \brief The first derivative.
     const X& gradient() const { return this->_gradient; }
 
     //! \brief Set the coefficient of the constant term to \a c.
-    void set_value(const X& c) { this->_value=c; }
+    Void set_value(const X& c) { this->_value=c; }
 
     //! \brief Set all coefficients to zero.
-    void clear() { *this=_zero; }
+    Void clear() { *this=_zero; }
 
 };
 
@@ -172,7 +172,7 @@ operator*(const UnivariateFirstDifferential<X>& x, const R& c)
 
 template<class X>
 UnivariateFirstDifferential<X>
-operator*(const UnivariateFirstDifferential<X>& x, const int& c)
+operator*(const UnivariateFirstDifferential<X>& x, const Int& c)
 {
     UnivariateFirstDifferential<X> r(x); r*=X(0); return r;
 }
@@ -340,7 +340,7 @@ UnivariateFirstDifferential<X> sqr(const UnivariateFirstDifferential<X>& x)
 }
 
 template<class X>
-UnivariateFirstDifferential<X> pow(const UnivariateFirstDifferential<X>& x, int n)
+UnivariateFirstDifferential<X> pow(const UnivariateFirstDifferential<X>& x, Int n)
 {
     return UnivariateFirstDifferential<X>( pow(x._value,n), (n*pow(x._value,n-1))*x._gradient );
 }
@@ -417,7 +417,7 @@ UnivariateFirstDifferential<X> atan(const UnivariateFirstDifferential<X>& x)
 
 
 template<class X>
-bool
+Bool
 operator>=(const UnivariateFirstDifferential<X>& x, const UnivariateFirstDifferential<X>& y)
 {
     return x._value>=y._value;
@@ -425,7 +425,7 @@ operator>=(const UnivariateFirstDifferential<X>& x, const UnivariateFirstDiffere
 
 
 template<class X>
-bool
+Bool
 operator<=(const UnivariateFirstDifferential<X>& x, const UnivariateFirstDifferential<X>& y)
 {
     return x._value<=y._value;
@@ -433,7 +433,7 @@ operator<=(const UnivariateFirstDifferential<X>& x, const UnivariateFirstDiffere
 
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator>=(const UnivariateFirstDifferential<X>& x, const R& c)
 {
     return x._value>=static_cast<X>(c);
@@ -441,28 +441,28 @@ operator>=(const UnivariateFirstDifferential<X>& x, const R& c)
 
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator<=(const UnivariateFirstDifferential<X>& x, const R& c)
 {
     return x._value<=static_cast<X>(c);
 }
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator> (const UnivariateFirstDifferential<X>& x, const R& c)
 {
     return x._value> static_cast<X>(c);
 }
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator< (const UnivariateFirstDifferential<X>& x, const R& c)
 {
     return x._value< static_cast<X>(c);
 }
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator>=(const R& c, const UnivariateFirstDifferential<X>& x)
 {
     return static_cast<X>(c)>=x._value;
@@ -470,21 +470,21 @@ operator>=(const R& c, const UnivariateFirstDifferential<X>& x)
 
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator<=(const R& c, const UnivariateFirstDifferential<X>& x)
 {
     return static_cast<X>(c)<=x._value;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator> (const R& c, const UnivariateFirstDifferential<X>& x)
 {
     return static_cast<X>(c)> x._value;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator< (const R& c, const UnivariateFirstDifferential<X>& x)
 {
     return static_cast<X>(c)< x._value;
@@ -547,17 +547,17 @@ class UnivariateSecondDifferential
         UnivariateSecondDifferential<X> r; r._value=v; r._gradient=1; return r; }
 
     //! \brief Equality operator.
-    bool operator==(const UnivariateSecondDifferential<X>& other) const {
+    Bool operator==(const UnivariateSecondDifferential<X>& other) const {
         return this->_value==other._value && this->_gradient==other._gradient  && this->_hessian==other._hessian; }
 
     //! \brief Inequality operator.
-    bool operator!=(const UnivariateSecondDifferential<X>& other) const {
+    Bool operator!=(const UnivariateSecondDifferential<X>& other) const {
         return !(*this==other); }
 
     //! \brief The number of independent variables.
-    uint argument_size() const { return 1u; }
+    Nat argument_size() const { return 1u; }
     //! \brief The maximum degree of the stored terms.
-    uint degree() const { return 2u; }
+    Nat degree() const { return 2u; }
     //! \brief The value of the differential i.e. the coefficient of \f$1\f$.
     const X& value() const { return this->_value; }
     //! \brief The first derivative.
@@ -567,10 +567,10 @@ class UnivariateSecondDifferential
 
 
     //! \brief Set the coefficient of the constant term to \a c.
-    void set_value(const X& c) { this->_value=c; }
+    Void set_value(const X& c) { this->_value=c; }
 
     //! \brief Set all coefficients to zero.
-    void clear() { *this=_zero; }
+    Void clear() { *this=_zero; }
 
 };
 
@@ -817,7 +817,7 @@ UnivariateSecondDifferential<X> sqr(const UnivariateSecondDifferential<X>& x)
 }
 
 template<class X>
-UnivariateSecondDifferential<X> pow(const UnivariateSecondDifferential<X>& x, int n)
+UnivariateSecondDifferential<X> pow(const UnivariateSecondDifferential<X>& x, Int n)
 {
     return UnivariateSecondDifferential<X>( pow(x._value,n), (n*pow(x._value,n-1))*x._gradient, n*(n-1)*pow(x._value,n-2)*x._hessian );
 }
@@ -877,7 +877,7 @@ UnivariateSecondDifferential<X> tan(const UnivariateSecondDifferential<X>& x)
 }
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator>=(const UnivariateSecondDifferential<X>& x, const R& c)
 {
     return x._value>=static_cast<X>(c);
@@ -885,28 +885,28 @@ operator>=(const UnivariateSecondDifferential<X>& x, const R& c)
 
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator<=(const UnivariateSecondDifferential<X>& x, const R& c)
 {
     return x._value<=static_cast<X>(c);
 }
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator> (const UnivariateSecondDifferential<X>& x, const R& c)
 {
     return x._value> static_cast<X>(c);
 }
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator< (const UnivariateSecondDifferential<X>& x, const R& c)
 {
     return x._value< static_cast<X>(c);
 }
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator>=(const R& c, const UnivariateSecondDifferential<X>& x)
 {
     return static_cast<X>(c)>=x._value;
@@ -914,21 +914,21 @@ operator>=(const R& c, const UnivariateSecondDifferential<X>& x)
 
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator<=(const R& c, const UnivariateSecondDifferential<X>& x)
 {
     return static_cast<X>(c)<=x._value;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator> (const R& c, const UnivariateSecondDifferential<X>& x)
 {
     return static_cast<X>(c)> x._value;
 }
 
 template<class X, class R>
-EnableIfNumeric<R,bool>
+EnableIfNumeric<R,Bool>
 operator< (const R& c, const UnivariateSecondDifferential<X>& x)
 {
     return static_cast<X>(c)< x._value;

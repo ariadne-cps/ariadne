@@ -293,26 +293,26 @@ class KrawczykOptimiser
                      const ValidatedFloat& t0, const ValidatedFloatVector& x0, const ValidatedFloatVector& y0, const ValidatedFloatVector& z0) const;
 
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.
-    void minimisation_step(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
+    Void minimisation_step(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
                            ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z, ValidatedFloat& t) const;
     //! \brief A primal-dual feasibility step for the problem \f$g(y)\in C;\ y\in D\f$.
-    void feasibility_step(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
+    Void feasibility_step(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
                           ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z, ValidatedFloat& t) const;
 
     //! \brief A primal feasibility step for the problem \f$g(y)\in C;\ y\in D\f$. \deprecated
-    void feasibility_step(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
+    Void feasibility_step(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
                           ValidatedFloatVector& y, ValidatedFloat& t) const;
     //! \brief A feasibility step for the problem \f$g(y)\leq 0\f$. \deprecated
-    void feasibility_step(const ValidatedVectorFunction& g,
+    Void feasibility_step(const ValidatedVectorFunction& g,
                           ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z, ValidatedFloat& t) const;
     //! \brief An optimization step for the problem \f$\max f(y) \text{ s.t. } g(y)\leq 0\f$. \deprecated
-    void minimisation_step(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g,
+    Void minimisation_step(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g,
                            ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z) const;
   protected:
-    void setup_feasibility(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
+    Void setup_feasibility(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C,
                            ValidatedFloatVector& x, ValidatedFloatVector& y, ValidatedFloatVector& z, ValidatedFloat& t) const;
     protected:
-    void compute_tz(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C, const ValidatedFloatVector& y, ValidatedFloat& t, ValidatedFloatVector& z) const;
+    Void compute_tz(const ExactBox& D, const ValidatedVectorFunction& g, const ExactBox& C, const ValidatedFloatVector& y, ValidatedFloat& t, ValidatedFloatVector& z) const;
 };
 
 */

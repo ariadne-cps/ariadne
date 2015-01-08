@@ -34,31 +34,31 @@
 using namespace boost::python;
 using namespace Ariadne;
 
-template<class X> void read_array(Array<X>&, const boost::python::object& obj) { }
-inline uint compute_polynomial_data_size(uint rs, uint as, uint d) { return rs*Ariadne::bin(d+as,as); }
+template<class X> Void read_array(Array<X>&, const boost::python::object& obj) { }
+inline Nat compute_polynomial_data_size(Nat rs, Nat as, Nat d) { return rs*Ariadne::bin(d+as,as); }
 
 namespace Ariadne {
 
 // FIXME: Ensure all valid arithmetic and comparisons are defined!
-inline auto operator==(ValidatedFloat x, int n) -> decltype(x==ExactFloat(n)) { return x==ExactFloat(n); }
-inline auto operator!=(ValidatedFloat x, int n) -> decltype(x!=ExactFloat(n)) { return x!=ExactFloat(n); }
-inline auto operator> (ValidatedFloat x, int n) -> decltype(x> ExactFloat(n)) { return x> ExactFloat(n); }
-inline auto operator*=(ApproximateFloat x, int n) -> decltype(x*=ApproximateFloat(n)) { return x*=ApproximateFloat(n); }
+inline auto operator==(ValidatedFloat x, Int n) -> decltype(x==ExactFloat(n)) { return x==ExactFloat(n); }
+inline auto operator!=(ValidatedFloat x, Int n) -> decltype(x!=ExactFloat(n)) { return x!=ExactFloat(n); }
+inline auto operator> (ValidatedFloat x, Int n) -> decltype(x> ExactFloat(n)) { return x> ExactFloat(n); }
+inline auto operator*=(ApproximateFloat x, Int n) -> decltype(x*=ApproximateFloat(n)) { return x*=ApproximateFloat(n); }
 
 template<class X>
 struct to_python_dict< Ariadne::Expansion<X>  > {
     to_python_dict() { boost::python::to_python_converter< Ariadne::Expansion<X>, to_python_dict< Ariadne::Expansion<X> > >(); }
     static PyObject* convert(const Ariadne::Expansion<X>& e) {
-        uint n=e.argument_size();
+        Nat n=e.argument_size();
         boost::python::dict res;
         boost::python::list lst;
-        for(uint i=0; i!=n; ++i) { lst.append(0); }
+        for(Nat i=0; i!=n; ++i) { lst.append(0); }
         Ariadne::MultiIndex a;
         X c;
         for(typename Expansion<X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
             a=iter->key();
             c=iter->data();
-            for(uint i=0; i!=a.size(); ++i) { int ai=a[i]; lst[i]=ai; }
+            for(Nat i=0; i!=a.size(); ++i) { Int ai=a[i]; lst[i]=ai; }
             boost::python::tuple tup(lst);
             //res[tup]=boost::python::object(c);
             res[boost::python::object(a)]=boost::python::object(c);
@@ -72,10 +72,10 @@ template<class X>
 struct to_python_list< Ariadne::Expansion<X>  > {
     to_python_list() { boost::python::to_python_converter< Ariadne::Expansion<X>, to_python_list< Ariadne::Expansion<X> > >(); }
     static PyObject* convert(const Ariadne::Expansion<X>& e) {
-        uint n=e.argument_size();
+        Nat n=e.argument_size();
         boost::python::list res;
         boost::python::list alst;
-        for(uint i=0; i!=n; ++i) { alst.append(0); }
+        for(Nat i=0; i!=n; ++i) { alst.append(0); }
         std::cerr<<"Here\n";
         boost::python::list pr; pr.append(0); pr.append(0);
         Ariadne::MultiIndex a;
@@ -83,7 +83,7 @@ struct to_python_list< Ariadne::Expansion<X>  > {
         for(typename Expansion<X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
             a=iter->key();
             c=iter->data();
-            for(uint i=0; i!=n; ++i) { int ai=a[i]; alst[i]=ai; }
+            for(Nat i=0; i!=n; ++i) { Int ai=a[i]; alst[i]=ai; }
             pr[0]=boost::python::tuple(alst);
             pr[1]=boost::python::object(c);
             res.append(boost::python::tuple(pr));
@@ -114,7 +114,7 @@ struct to_python_list< Ariadne::Expansion<X>  > {
 
 template<class DIFF>
 DIFF*
-make_differential(const uint& as, const uint& d, const boost::python::object& obj)
+make_differential(const Nat& as, const Nat& d, const boost::python::object& obj)
 {
     typedef typename DIFF::ValueType X;
     DIFF* result=new DIFF(as,d);
@@ -134,7 +134,7 @@ make_differential(const uint& as, const uint& d, const boost::python::object& ob
 
 template<class DIFF>
 DIFF*
-make_sparse_differential(const boost::python::object& obj,const uint& d)
+make_sparse_differential(const boost::python::object& obj,const Nat& d)
 {
     typedef typename DIFF::ValueType X;
     Expansion<X> expansion = boost::python::extract< Expansion<X> >(obj);
@@ -145,10 +145,10 @@ make_sparse_differential(const boost::python::object& obj,const uint& d)
 
 template<class DIFF>
 boost::python::list
-make_differential_variables(const uint& d, const Vector<typename DIFF::NumericType>& x)
+make_differential_variables(const Nat& d, const Vector<typename DIFF::NumericType>& x)
 {
     boost::python::list result;
-    for(uint i=0; i!=x.size(); ++i) {
+    for(Nat i=0; i!=x.size(); ++i) {
         result.append(DIFF::variable(x.size(),d,numeric_cast<typename DIFF::NumericType>(x[i]),i));
     }
     return result;
@@ -157,7 +157,7 @@ make_differential_variables(const uint& d, const Vector<typename DIFF::NumericTy
 
 template<class DIFF>
 Vector<DIFF>*
-make_differential_vector(const uint& rs, const uint& as, const uint& d, const boost::python::object& obj)
+make_differential_vector(const Nat& rs, const Nat& as, const Nat& d, const boost::python::object& obj)
 {
     typedef typename DIFF::ValueType X;
     Array<X> data;
@@ -175,10 +175,10 @@ template<class C, class I, class J, class X> inline
 X matrix_get_item(const C& c, const I& i, const J& j) { return c[i][j]; }
 
 template<class C, class I, class X> inline
-void set_item(C& c, const I& i, const X& x) { c[i]=x; }
+Void set_item(C& c, const I& i, const X& x) { c[i]=x; }
 
 template<class C, class I, class J, class X> inline
-void matrix_set_item(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
+Void matrix_set_item(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
 
 
 namespace Ariadne {
@@ -197,7 +197,7 @@ template<class X> OutputStream& operator<<(OutputStream& os, const PythonReprese
 
 
 template<class DIFF>
-void export_differential(const char* name)
+Void export_differential(const char* name)
 {
     typedef typename DIFF::ValueType X;
     typedef Vector<X> V;
@@ -210,8 +210,8 @@ void export_differential(const char* name)
     //differential_class.def("__init__", make_constructor(&make_differential<D>) );
     differential_class.def("__init__", make_constructor(&make_sparse_differential<D>) );
     differential_class.def( init< D >());
-    differential_class.def( init< uint, uint >());
-    differential_class.def( init< Expansion<X>, uint >());
+    differential_class.def( init< Nat, Nat >());
+    differential_class.def( init< Expansion<X>, Nat >());
     differential_class.def("__getitem__", &get_item<D,MultiIndex,X>);
     differential_class.def("__setitem__",&set_item<D,MultiIndex,X>);
     differential_class.def(-self);
@@ -242,9 +242,9 @@ void export_differential(const char* name)
     differential_class.def("hessian", (Matrix<X>(D::*)()const)&D::hessian);
     differential_class.def("expansion", (Expansion<X>const&(D::*)()const)&D::expansion,return_value_policy<copy_const_reference>());
 
-    differential_class.def("constant",(D(*)(uint, uint, const X&))&D::constant);
-    differential_class.def("variable",(D(*)(uint, uint, const X&, uint))&D::variable);
-    differential_class.def("variables",(Vector<D>(*)(uint, const Vector<X>&))&D::variables);
+    differential_class.def("constant",(D(*)(Nat, Nat, const X&))&D::constant);
+    differential_class.def("variable",(D(*)(Nat, Nat, const X&, Nat))&D::variable);
+    differential_class.def("variables",(Vector<D>(*)(Nat, const Vector<X>&))&D::variables);
 
     differential_class.staticmethod("constant");
     differential_class.staticmethod("variable");
@@ -254,7 +254,7 @@ void export_differential(const char* name)
     def("pos",(D(*)(const D&))&pos<X>);
     def("neg",(D(*)(const D&))&neg<X>);
     def("rec",(D(*)(const D&))&rec<X>);
-    def("pow",(D(*)(const D&, int))&pow<X>);
+    def("pow",(D(*)(const D&, Int))&pow<X>);
 
     def("sqrt", (D(*)(const D&))&sqrt<X>);
     def("exp", (D(*)(const D&))&exp<X>);
@@ -270,7 +270,7 @@ void export_differential(const char* name)
 }
 
 template<class DIFF>
-void
+Void
 export_differential_vector(const char* name)
 {
     typedef typename DIFF::ValueType X;
@@ -281,11 +281,11 @@ export_differential_vector(const char* name)
 
     class_<DV> differential_vector_class(name);
     differential_vector_class.def("__init__", make_constructor(&make_differential_vector<D>) );
-    differential_vector_class.def( init< uint, uint, uint >());
-    differential_vector_class.def("__getitem__", &matrix_get_item<DV,int,MultiIndex,X>);
-    differential_vector_class.def("__getitem__", &get_item<DV,int,D>);
-    differential_vector_class.def("__setitem__",&set_item<DV,int,X>);
-    differential_vector_class.def("__setitem__",&set_item<DV,int,D>);
+    differential_vector_class.def( init< Nat, Nat, Nat >());
+    differential_vector_class.def("__getitem__", &matrix_get_item<DV,Int,MultiIndex,X>);
+    differential_vector_class.def("__getitem__", &get_item<DV,Int,D>);
+    differential_vector_class.def("__setitem__",&set_item<DV,Int,X>);
+    differential_vector_class.def("__setitem__",&set_item<DV,Int,D>);
     differential_vector_class.def("__neg__",&__neg__<DV,DV>);
     differential_vector_class.def("__add__",&__add__<DV,DV,DV>);
     differential_vector_class.def("__sub__",&__sub__<DV,DV,DV>);
@@ -306,15 +306,15 @@ export_differential_vector(const char* name)
     def("lie_derivative", (DV(*)(const DV&,const DV&))&lie_derivative);
 }
 
-template void export_differential< Differential<ApproximateFloat> >(const char*);
-template void export_differential< Differential<ValidatedFloat> >(const char*);
-//template void export_differential< Differential<ValidatedTaylorModel> >(const char*);
+template Void export_differential< Differential<ApproximateFloat> >(const char*);
+template Void export_differential< Differential<ValidatedFloat> >(const char*);
+//template Void export_differential< Differential<ValidatedTaylorModel> >(const char*);
 
-template void export_differential_vector< Differential<ApproximateFloat> >(const char*);
-template void export_differential_vector< Differential<ValidatedFloat> >(const char*);
-//template void export_differential_vector< Differential<ValidatedTaylorModel> >(const char*);
+template Void export_differential_vector< Differential<ApproximateFloat> >(const char*);
+template Void export_differential_vector< Differential<ValidatedFloat> >(const char*);
+//template Void export_differential_vector< Differential<ValidatedTaylorModel> >(const char*);
 
-void differentiation_submodule()
+Void differentiation_submodule()
 {
     to_python_dict < Expansion<ApproximateFloat> >();
     to_python_dict < Expansion<ValidatedFloat> >();

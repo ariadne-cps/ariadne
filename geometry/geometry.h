@@ -37,10 +37,10 @@ namespace Ariadne {
 enum Piece { left=0, right=1, middle=2 };
 
 inline
-uint irmax(const ExactBox& bx) {
+Nat irmax(const ExactBox& bx) {
     Float dmax=0.0;
-    uint imax=0;
-    for(uint i=0; i!=bx.size(); ++i) {
+    Nat imax=0;
+    for(Nat i=0; i!=bx.size(); ++i) {
         Float d=bx[i].width().raw();
         if(d>dmax) {
             imax=i;
@@ -55,7 +55,7 @@ inline ExactFloat mid(ExactFloat l, ExactFloat u) {
 }
 
 inline
-ExactBox split(const ExactBox& bx, uint i, Piece lr) {
+ExactBox split(const ExactBox& bx, Nat i, Piece lr) {
     ExactBox result(bx);
     ExactInterval& ivl=result[i];
     const ExactFloat& l=ivl.lower();
@@ -71,7 +71,7 @@ ExactBox split(const ExactBox& bx, uint i, Piece lr) {
 }
 
 inline
-std::pair<ExactBox,ExactBox> split(const ExactBox& bx, uint i)
+std::pair<ExactBox,ExactBox> split(const ExactBox& bx, Nat i)
 {
     std::pair<ExactBox,ExactBox> result(bx,bx);
     ExactFloat c=mid(bx[i].lower(),bx[i].upper());
@@ -83,7 +83,7 @@ std::pair<ExactBox,ExactBox> split(const ExactBox& bx, uint i)
 inline
 ExactBox split(const ExactBox& bx, Piece lr)
 {
-    uint i=irmax(bx);
+    Nat i=irmax(bx);
     return split(bx,i,lr);
 }
 
@@ -112,7 +112,7 @@ separated(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat& eps)
     	//cout << "radius limit reached\n";
         return indeterminate;
     } else {
-        uint i=irmax(d);
+        Nat i=irmax(d);
         //cout << "splitting\n";
         return separated(split(d,i,left),f,b,eps) && separated(split(d,i,right),f,b,eps);
     }
@@ -138,7 +138,7 @@ inside(const ExactBox& d, const F& f, const ExactBox& b, const RawFloat& eps)
     	//cout << "radius limit reached\n";
         return indeterminate;
     } else {
-        uint i=irmax(d);
+        Nat i=irmax(d);
         //cout << "splitting\n";
         return inside(split(d,i,left),f,b,eps) && inside(split(d,i,right),f,b,eps);
     }
@@ -148,8 +148,8 @@ template<class DS>
 DS remove_subsets(const DS& ls)
 {
     DS result;
-    for(uint i=0; i!=ls.size(); ++i) {
-        for(uint j=0; j!=ls.size(); ++j) {
+    for(Nat i=0; i!=ls.size(); ++i) {
+        for(Nat j=0; j!=ls.size(); ++j) {
             if(inside(ls[i],ls[j])) {
                 break;
             }
@@ -162,8 +162,8 @@ template<class DS>
 DS remove_supersets(const DS& ls)
 {
     DS result;
-    for(uint i=0; i!=ls.size(); ++i) {
-        for(uint j=0; j!=ls.size(); ++j) {
+    for(Nat i=0; i!=ls.size(); ++i) {
+        for(Nat j=0; j!=ls.size(); ++j) {
             if(inside(ls[j],ls[i])) {
                 break;
             }

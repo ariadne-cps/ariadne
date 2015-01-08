@@ -40,41 +40,41 @@ class Series
 {
   public:
     explicit Series() : _data(1) { }
-    explicit Series(uint d) : _data(d+1) { }
-    explicit Series(uint d, const X& z) : _data(d+1,z) { }
-    template<class XX> Series(uint d, const XX* ptr) : _data(ptr,ptr+(d+1)) { }
-    uint degree() const { return this->_data.size()-1; }
-    X& operator[](uint i) { return this->_data[i]; }
-    const X& operator[](uint i) const { return this->_data[i]; }
+    explicit Series(Nat d) : _data(d+1) { }
+    explicit Series(Nat d, const X& z) : _data(d+1,z) { }
+    template<class XX> Series(Nat d, const XX* ptr) : _data(ptr,ptr+(d+1)) { }
+    Nat degree() const { return this->_data.size()-1; }
+    X& operator[](Nat i) { return this->_data[i]; }
+    const X& operator[](Nat i) const { return this->_data[i]; }
 
     template<class R> Series<X>& operator+=(const Series<R>& y) { _data+=y._data; return *this; }
     template<class R> Series<X>& operator*=(const Series<R>& y) { *this=(*this)*y; return *this; }
     template<class R> Series<X>& operator+=(const R& c) { _data[0]+=c; return *this; }
     template<class R> Series<X>& operator*=(const R& c) { _data*=c; return *this; }
 
-    static Series<X> rec(uint d, const X& x);
-    static Series<X> pow(uint d, const X& x, int n);
-    static Series<X> sqrt(uint d, const X& x);
-    static Series<X> exp(uint d, const X& x);
-    static Series<X> log(uint d, const X& x);
+    static Series<X> rec(Nat d, const X& x);
+    static Series<X> pow(Nat d, const X& x, Int n);
+    static Series<X> sqrt(Nat d, const X& x);
+    static Series<X> exp(Nat d, const X& x);
+    static Series<X> log(Nat d, const X& x);
 
-    static Series<X> sin(uint d, const X& x);
-    static Series<X> cos(uint d, const X& x);
-    static Series<X> tan(uint d, const X& x);
-    static Series<X> asin(uint d, const X& x);
-    static Series<X> acos(uint d, const X& x);
-    static Series<X> atan(uint d, const X& x);
+    static Series<X> sin(Nat d, const X& x);
+    static Series<X> cos(Nat d, const X& x);
+    static Series<X> tan(Nat d, const X& x);
+    static Series<X> asin(Nat d, const X& x);
+    static Series<X> acos(Nat d, const X& x);
+    static Series<X> atan(Nat d, const X& x);
   private:
     Array<X> _data;
 };
 
-template<class X> inline Series<X> make_series(Rec, uint d, const X& x) { return Series<X>::rec(d,x); }
-template<class X> inline Series<X> make_series(Sqrt, uint d, const X& x) { return Series<X>::sqrt(d,x); }
-template<class X> inline Series<X> make_series(Exp, uint d, const X& x) { return Series<X>::exp(d,x); }
-template<class X> inline Series<X> make_series(Log, uint d, const X& x) { return Series<X>::log(d,x); }
-template<class X> inline Series<X> make_series(Sin, uint d, const X& x) { return Series<X>::sin(d,x); }
-template<class X> inline Series<X> make_series(Cos, uint d, const X& x) { return Series<X>::cos(d,x); }
-template<class X> inline Series<X> make_series(Tan, uint d, const X& x) { return Series<X>::tan(d,x); }
+template<class X> inline Series<X> make_series(Rec, Nat d, const X& x) { return Series<X>::rec(d,x); }
+template<class X> inline Series<X> make_series(Sqrt, Nat d, const X& x) { return Series<X>::sqrt(d,x); }
+template<class X> inline Series<X> make_series(Exp, Nat d, const X& x) { return Series<X>::exp(d,x); }
+template<class X> inline Series<X> make_series(Log, Nat d, const X& x) { return Series<X>::log(d,x); }
+template<class X> inline Series<X> make_series(Sin, Nat d, const X& x) { return Series<X>::sin(d,x); }
+template<class X> inline Series<X> make_series(Cos, Nat d, const X& x) { return Series<X>::cos(d,x); }
+template<class X> inline Series<X> make_series(Tan, Nat d, const X& x) { return Series<X>::tan(d,x); }
 
 template<class X> Series<X> operator+(X c, const Series<X>& x) {
     Series<X> r(x); r+=c; return r; }
@@ -97,11 +97,11 @@ template<class X> Series<X> sqrt(const Series<X>& x) {
 
 template<class X>
 Series<X>
-Series<X>::rec(uint d, const X& c)
+Series<X>::rec(Nat d, const X& c)
 {
     Series<X> y(d,c*0);
     X mr = (-1)/c;
-    for(uint i=0; i<=y.degree(); ++i) {
+    for(Nat i=0; i<=y.degree(); ++i) {
         y[i]=-Ariadne::pow(mr,i+1u);
     }
     return y;
@@ -109,13 +109,13 @@ Series<X>::rec(uint d, const X& c)
 
 template<class X>
 Series<X>
-Series<X>::pow(uint d, const X& c, int k)
+Series<X>::pow(Nat d, const X& c, Int k)
 {
 
-    uint n=k;
+    Nat n=k;
     Series<X> y(d,c*0);
-    for(uint i=0; i<=std::min(uint(d),n); ++i) {
-        uint j=n-i;
+    for(Nat i=0; i<=std::min(Nat(d),n); ++i) {
+        Nat j=n-i;
         y[i]=X(bin(n,j))*Ariadne::pow(c,j);
     }
     return y;
@@ -123,25 +123,25 @@ Series<X>::pow(uint d, const X& c, int k)
 
 template<class X>
 Series<X>
-Series<X>::sqrt(uint d, const X& c)
+Series<X>::sqrt(Nat d, const X& c)
 {
     Series<X> y(d,c*X(0));
     y[0]=Ariadne::sqrt(c);
     X mhr=(-1/c)/2;
-    for(uint i=1; i<=y.degree(); ++i) {
-        // Need to convert uint to int to prevent wraparound for 2*1u-3
-        y[i]=((2*int(i)-3)*mhr)/i*y[i-1];
+    for(Nat i=1; i<=y.degree(); ++i) {
+        // Need to convert Nat to Int to prevent wraparound for 2*1u-3
+        y[i]=((2*Int(i)-3)*mhr)/i*y[i-1];
     }
     return y;
 }
 
 template<class X>
 Series<X>
-Series<X>::exp(uint d, const X& c)
+Series<X>::exp(Nat d, const X& c)
 {
     Series<X> y(d,c*0);
     y[0]=Ariadne::exp(c);
-    for(uint i=1; i<=y.degree(); ++i) {
+    for(Nat i=1; i<=y.degree(); ++i) {
         y[i]=y[i-1]/i;
     }
     return y;
@@ -149,12 +149,12 @@ Series<X>::exp(uint d, const X& c)
 
 template<class X>
 Series<X>
-Series<X>::log(uint d, const X& c)
+Series<X>::log(Nat d, const X& c)
 {
     Series<X> y(d,c*0);
     y[0]=Ariadne::log(c);
     X mr=(-1)/c;
-    for(uint i=1; i<=y.degree();++i) {
+    for(Nat i=1; i<=y.degree();++i) {
         y[i]=-Ariadne::pow(mr,i)/i;
     }
     return y;
@@ -162,13 +162,13 @@ Series<X>::log(uint d, const X& c)
 
 template<class X>
 Series<X>
-Series<X>::sin(uint d, const X& c)
+Series<X>::sin(Nat d, const X& c)
 {
     Series<X> y(d,c*0);
     y[0]=Ariadne::sin(c);
     if(d>=1) {
         y[1]=Ariadne::cos(c);
-        for(uint i=2; i<=d; ++i) {
+        for(Nat i=2; i<=d; ++i) {
             y[i]=-y[i-2]/(i*(i-1));
         }
     }
@@ -178,13 +178,13 @@ Series<X>::sin(uint d, const X& c)
 
 template<class X>
 Series<X>
-Series<X>::cos(uint d, const X& c)
+Series<X>::cos(Nat d, const X& c)
 {
     Series<X> y(d,c*0);
     y[0]=Ariadne::cos(c);
     if(d>=1) {
         y[1]=-Ariadne::sin(c);
-        for(uint i=2; i<=d; ++i) {
+        for(Nat i=2; i<=d; ++i) {
             y[i]=-y[i-2]/(i*(i-1));
         }
     }
@@ -193,14 +193,14 @@ Series<X>::cos(uint d, const X& c)
 
 template<class X>
 Series<X>
-Series<X>::tan(uint d, const X& c)
+Series<X>::tan(Nat d, const X& c)
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 template<class X>
 Series<X>
-Series<X>::asin(uint d, const X& c)
+Series<X>::asin(Nat d, const X& c)
 {
     if(d==0) { Series<X> y(d,c*0); y[0]=Ariadne::asin(c); return y; }
     Series<X> y(d-1,c*0); y[0]=c; y[1]=X(1);
@@ -210,7 +210,7 @@ Series<X>::asin(uint d, const X& c)
 
 template<class X>
 Series<X>
-Series<X>::acos(uint d, const X& c)
+Series<X>::acos(Nat d, const X& c)
 {
     if(d==0) { Series<X> y(d,c*0); y[0]=Ariadne::acos(c); return y; }
     Series<X> y(d-1,c*0); y[0]=c; y[1]=X(1);
@@ -220,7 +220,7 @@ Series<X>::acos(uint d, const X& c)
 
 template<class X>
 Series<X>
-Series<X>::atan(uint d, const X& c)
+Series<X>::atan(Nat d, const X& c)
 {
     if(d==0) { Series<X> y(d,c*0); y[0]=Ariadne::atan(c); return y; }
     Series<X> y(d-1,c*0); y[0]=c; y[1]=X(1);
@@ -234,10 +234,10 @@ template<class X>
 Series<X>
 antiderivative(const Series<X>& x, const X& c)
 {
-    uint n=x.degree();
+    Nat n=x.degree();
     Series<X> r(n+1,x[0]*0);
     r[0]=c;
-    for(uint i=0; i<=n; ++i) {
+    for(Nat i=0; i<=n; ++i) {
         r[i+1]=x[i]/(i+1);
     }
     return r;
@@ -251,11 +251,11 @@ operator*(const Series<X>& x, const Series<X>& y)
     //const Series<X>& x=*this;
     X zero=x[0]*y[0]*0.0;
     Series<X> r(std::min(x.degree(),y.degree()));
-    for(uint k=0; k<=r.degree(); ++k) {
+    for(Nat k=0; k<=r.degree(); ++k) {
         r[k]=zero;
     }
-    for(uint i=0; i<=r.degree(); ++i) {
-        for(uint j=0; j<=r.degree()-i; ++j) {
+    for(Nat i=0; i<=r.degree(); ++i) {
+        for(Nat j=0; j<=r.degree()-i; ++j) {
             r[i+j]+=bin(i+j,i)*x[i]*y[j];
         }
     }
@@ -267,7 +267,7 @@ template<class X>
 OutputStream& operator<<(OutputStream& os, const Series<X>& x)
 {
     os << "S";
-    for(uint i=0; i<=x.degree(); ++i) {
+    for(Nat i=0; i<=x.degree(); ++i) {
         os << (i==0 ? '[' : ',') << x[i];
     }
     return os << "]";

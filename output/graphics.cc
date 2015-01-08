@@ -45,13 +45,13 @@
 
 namespace Ariadne {
 
-static const int DEFAULT_WIDTH = 800;
-static const int DEFAULT_HEIGHT = 800;
+static const Int DEFAULT_WIDTH = 800;
+static const Int DEFAULT_HEIGHT = 800;
 
-static const int LEFT_MARGIN = 160;
-static const int BOTTOM_MARGIN = 40;
-static const int TOP_MARGIN = 10;
-static const int RIGHT_MARGIN = 10;
+static const Int LEFT_MARGIN = 160;
+static const Int BOTTOM_MARGIN = 40;
+static const Int TOP_MARGIN = 10;
+static const Int RIGHT_MARGIN = 10;
 
 
 StringType str(Float x) {
@@ -97,23 +97,23 @@ Figure::Figure()
     this->_data->projection=PlanarProjectionMap(2,0,1);
 }
 
-void Figure::draw(const DrawableInterface& shape)
+Void Figure::draw(const DrawableInterface& shape)
 {
     this->_data->objects.push_back(GraphicsObject(this->_data->properties,shape));
 }
 
 
-void Figure::set_projection(uint as, uint ix, uint iy)
+Void Figure::set_projection(Nat as, Nat ix, Nat iy)
 {
     this->_data->projection=PlanarProjectionMap(as,ix,iy);
 }
 
-void Figure::set_projection_map(const PlanarProjectionMap& p)
+Void Figure::set_projection_map(const PlanarProjectionMap& p)
 {
     this->_data->projection=p;
 }
 
-void Figure::set_bounding_box(const ApproximateBox& bx)
+Void Figure::set_bounding_box(const ApproximateBox& bx)
 {
     this->_data->bounding_box=bx;
 }
@@ -128,52 +128,52 @@ ApproximateBox Figure::get_bounding_box() const
     return this->_data->bounding_box;
 }
 
-void Figure::set_dot_radius(double dr)
+Void Figure::set_dot_radius(double dr)
 {
     this->_data->properties.dot_radius=dr;
 }
 
-void Figure::set_line_style(bool ls)
+Void Figure::set_line_style(Bool ls)
 {
     this->_data->properties.line_style=ls;
 }
 
-void Figure::set_line_width(double lw)
+Void Figure::set_line_width(double lw)
 {
     this->_data->properties.line_width=lw;
 }
 
-void Figure::set_line_colour(Colour lc)
+Void Figure::set_line_colour(Colour lc)
 {
     this->_data->properties.line_colour=lc;
 }
 
-void Figure::set_line_colour(double r, double g, double b)
+Void Figure::set_line_colour(double r, double g, double b)
 {
     this->set_line_colour(Colour(r,g,b));
 }
 
-void Figure::set_fill_style(bool fs)
+Void Figure::set_fill_style(Bool fs)
 {
     this->_data->properties.fill_style=fs;
 }
 
-void Figure::set_fill_opacity(double fo)
+Void Figure::set_fill_opacity(double fo)
 {
     this->_data->properties.fill_colour.opacity=fo;
 }
 
-void Figure::set_fill_colour(Colour fc)
+Void Figure::set_fill_colour(Colour fc)
 {
     this->_data->properties.fill_colour=fc;
 }
 
-void Figure::set_fill_colour(double r, double g, double b)
+Void Figure::set_fill_colour(double r, double g, double b)
 {
     this->set_fill_colour(Colour(r,g,b,this->_data->properties.fill_colour.opacity));
 }
 
-bool Figure::get_line_style() const
+Bool Figure::get_line_style() const
 {
     return this->_data->properties.line_style;
 }
@@ -189,7 +189,7 @@ Colour Figure::get_line_colour() const
 }
 
 
-bool Figure::get_fill_style() const
+Bool Figure::get_fill_style() const
 {
     return this->_data->properties.fill_style;
 }
@@ -206,13 +206,13 @@ Colour Figure::get_fill_colour() const
 
 
 
-void Figure::clear() {
+Void Figure::clear() {
     this->_data->objects.clear();
 }
 
 struct ImageSize2d {
-    uint nx,ny;
-    ImageSize2d(uint _nx,uint _ny) : nx(_nx), ny(_ny) { }
+    Nat nx,ny;
+    ImageSize2d(Nat _nx,Nat _ny) : nx(_nx), ny(_ny) { }
 };
 
 
@@ -231,19 +231,19 @@ class CairoCanvas
     ~CairoCanvas();
     CairoCanvas(const ImageSize2d& size, const Box2d& bounds);
     CairoCanvas(cairo_t *c);
-    void initialise(StringType x, StringType y, double xl, double xu, double yl, double yu);
-    void finalise();
-    void move_to(double x, double y) { cairo_move_to (cr, x, y); }
-    void line_to(double x, double y) { cairo_line_to (cr, x, y); }
-    void circle(double x, double y, double r) { cairo_arc (cr, x, y, r, 0, 2*M_PI); }
-    void dot(double x, double y) { cairo_arc (cr, x, y, dr/1000, 0, 2*M_PI); }
-    void stroke();
-    void fill() { cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fc.opacity); cairo_fill_preserve (cr); this->stroke(); }
-    void set_dot_radius(double dr) { this->dr=dr; }
-    void set_line_width(double lw) { this->lw=lw; }
-    void set_line_colour(double r, double g, double b) { lc.red=r; lc.green=g; lc.blue=b; }
-    void set_fill_opacity(double o) { fc.opacity=o; }
-    void set_fill_colour(double r, double g, double b) { fc.red=r; fc.green=g; fc.blue=b; }
+    Void initialise(StringType x, StringType y, double xl, double xu, double yl, double yu);
+    Void finalise();
+    Void move_to(double x, double y) { cairo_move_to (cr, x, y); }
+    Void line_to(double x, double y) { cairo_line_to (cr, x, y); }
+    Void circle(double x, double y, double r) { cairo_arc (cr, x, y, r, 0, 2*M_PI); }
+    Void dot(double x, double y) { cairo_arc (cr, x, y, dr/1000, 0, 2*M_PI); }
+    Void stroke();
+    Void fill() { cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fc.opacity); cairo_fill_preserve (cr); this->stroke(); }
+    Void set_dot_radius(double dr) { this->dr=dr; }
+    Void set_line_width(double lw) { this->lw=lw; }
+    Void set_line_colour(double r, double g, double b) { lc.red=r; lc.green=g; lc.blue=b; }
+    Void set_fill_opacity(double o) { fc.opacity=o; }
+    Void set_fill_colour(double r, double g, double b) { fc.red=r; fc.green=g; fc.blue=b; }
 
     Vector2d scaling() const;
     Box2d bounds() const;
@@ -272,8 +272,8 @@ CairoCanvas::CairoCanvas(const ImageSize2d& size, const Box2d& bounds)
     //std::cerr<<"Figure::write(filename="<<cfilename<<")\n";
     cairo_surface_t *surface;
 
-    const int canvas_width = size.nx+LEFT_MARGIN+RIGHT_MARGIN;
-    const int canvas_height = size.ny+BOTTOM_MARGIN+TOP_MARGIN;;
+    const Int canvas_width = size.nx+LEFT_MARGIN+RIGHT_MARGIN;
+    const Int canvas_height = size.ny+BOTTOM_MARGIN+TOP_MARGIN;;
 
     surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
     cr = cairo_create (surface);
@@ -297,7 +297,7 @@ Box2d CairoCanvas::bounds() const
     return Box2d(xl,xu,yl,yu);
 }
 
-void CairoCanvas::stroke()
+Void CairoCanvas::stroke()
 {
     cairo_save(cr);
 
@@ -318,7 +318,7 @@ void CairoCanvas::stroke()
 
 // TODO: Use generic canvas routines; move cairo-specific functionality
 // into CairoCanvas class.
-void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, double xu, double yl, double yu)
+Void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, double xu, double yl, double yu)
 {
 
 
@@ -326,16 +326,16 @@ void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, do
     cairo_t *cr=cairo_canvas.cr;
 
     const ImageSize2d drawing_size = cairo_canvas.size_in_pixels();
-    const int drawing_width = drawing_size.nx;
-    const int drawing_height = drawing_size.ny;
+    const Int drawing_width = drawing_size.nx;
+    const Int drawing_height = drawing_size.ny;
 
-    //const int canvas_width = cairo_image_surface_get_width(cairo_get_target(cr));
-    //const int canvas_height = cairo_image_surface_get_height(cairo_get_target(cr));
+    //const Int canvas_width = cairo_image_surface_get_width(cairo_get_target(cr));
+    //const Int canvas_height = cairo_image_surface_get_height(cairo_get_target(cr));
 
-    const int left_margin = LEFT_MARGIN;
-    //const int right_margin = RIGHT_MARGIN;
-    //const int bottom_margin = BOTTOM_MARGIN;
-    const int top_margin = TOP_MARGIN;
+    const Int left_margin = LEFT_MARGIN;
+    //const Int right_margin = RIGHT_MARGIN;
+    //const Int bottom_margin = BOTTOM_MARGIN;
+    const Int top_margin = TOP_MARGIN;
 
     // clear background
     cairo_set_source_rgb (cr, 1,1,1);
@@ -411,7 +411,7 @@ void CairoCanvas::initialise(StringType text_x, StringType text_y, double xl, do
     cairo_translate(cr, utr0, utr1);
 }
 
-void CairoCanvas::finalise()
+Void CairoCanvas::finalise()
 {
     cairo_t *cr=this->cr;
 
@@ -419,11 +419,11 @@ void CairoCanvas::finalise()
     cairo_restore (cr);
 
     const ImageSize2d drawing_size = this->size_in_pixels();
-    const int drawing_width = drawing_size.nx;
-    const int drawing_height = drawing_size.ny;
+    const Int drawing_width = drawing_size.nx;
+    const Int drawing_height = drawing_size.ny;
 
-    const int left_margin = LEFT_MARGIN;
-    const int top_margin = TOP_MARGIN;
+    const Int left_margin = LEFT_MARGIN;
+    const Int top_margin = TOP_MARGIN;
 
     cairo_set_line_width (cr, 2.0);
     cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
@@ -436,7 +436,7 @@ void CairoCanvas::finalise()
 }
 
 
-void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties) {
+Void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties) {
     const Colour& line_colour=properties.line_colour;
     const Colour& fill_colour=properties.fill_colour;
     canvas.set_fill_opacity(properties.fill_colour.opacity);
@@ -446,13 +446,13 @@ void set_properties(CanvasInterface& canvas, const GraphicsProperties& propertie
 
 inline OutputStream& operator<<(OutputStream& os, const ExactBox& bx) { return os << static_cast<const ExactIntervalVector&>(bx); }
 
-void Figure::_paint_all(CanvasInterface& canvas) const
+Void Figure::_paint_all(CanvasInterface& canvas) const
 {
     ApproximateBox bounding_box=this->_data->bounding_box;
     const PlanarProjectionMap projection=this->_data->projection;
     const std::vector<GraphicsObject>& objects=this->_data->objects;
 
-    uint dimension=projection.argument_size();
+    Nat dimension=projection.argument_size();
 
     // Don't attempt to compute a bounding box, as this relies on
     // a drawable object having one. Instead, the bounding box must be
@@ -477,7 +477,7 @@ void Figure::_paint_all(CanvasInterface& canvas) const
     canvas.initialise(tx,ty,xl,xu,yl,yu);
 
     // Draw shapes
-    for(uint i=0; i!=objects.size(); ++i) {
+    for(Nat i=0; i!=objects.size(); ++i) {
         const DrawableInterface& shape=objects[i].shape_ptr.operator*();
         if(shape.dimension()==0) { break; } // The dimension may be equal to two for certain empty sets.
         ARIADNE_ASSERT_MSG(dimension==shape.dimension(),
@@ -490,22 +490,22 @@ void Figure::_paint_all(CanvasInterface& canvas) const
 }
 
 
-void
+Void
 Figure::write(const char* cfilename) const
 {
     this->write(cfilename, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 }
 
 
-void
-Figure::write(const char* cfilename, uint drawing_width, uint drawing_height) const
+Void
+Figure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) const
 {
     //std::cerr<<"Figure::write(filename="<<cfilename<<")\n";
     cairo_surface_t *surface;
     cairo_t *cr;
 
-    const int canvas_width = drawing_width+LEFT_MARGIN+RIGHT_MARGIN;
-    const int canvas_height = drawing_height+BOTTOM_MARGIN+TOP_MARGIN;;
+    const Int canvas_width = drawing_width+LEFT_MARGIN+RIGHT_MARGIN;
+    const Int canvas_height = drawing_height+BOTTOM_MARGIN+TOP_MARGIN;;
 
     surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
     cr = cairo_create (surface);
@@ -526,7 +526,7 @@ Figure::write(const char* cfilename, uint drawing_width, uint drawing_height) co
 
 #ifdef HAVE_GTK_H
 
-void
+Void
 paint (GtkWidget      *widget,
        GdkEventExpose *eev,
        gpointer        gdata)
@@ -546,13 +546,13 @@ paint (GtkWidget      *widget,
     figure->_paint_all(canvas);
 }
 
-void Figure::display() const
+Void Figure::display() const
 {
 
     GtkWidget *window;
     GtkWidget *canvas;
 
-    int argc=0;
+    Int argc=0;
     char **argv;
 
     // initialize gtk
@@ -588,7 +588,7 @@ void Figure::display() const
 
 #else // NO GTK_H
 
-void Figure::display() const
+Void Figure::display() const
 {
     throw std::runtime_error("No facilities for displaying graphics are available.");
 }
@@ -597,13 +597,13 @@ void Figure::display() const
 
 #else // NO CAIRO_H
 
-void
+Void
 Figure::write(const char* filename) const
 {
     throw std::runtime_error("No facilities for drawing graphics are available.");
 }
 
-void Figure::display() const
+Void Figure::display() const
 {
     throw std::runtime_error("No facilities for displaying graphics are available.");
 }
@@ -614,11 +614,11 @@ void Figure::display() const
 
 Colour::Colour()
     : Colour("transparant", 1.0, 1.0, 1.0, 0.0) { }
-Colour::Colour(double rd, double gr, double bl, bool tr)
+Colour::Colour(double rd, double gr, double bl, Bool tr)
     : Colour("",rd,gr,bl,tr?0.0:1.0) { }
 Colour::Colour(double rd, double gr, double bl, double op)
     : Colour("",rd,gr,bl,op) { }
-Colour::Colour(const char* nm, double rd, double gr, double bl, bool tr)
+Colour::Colour(const char* nm, double rd, double gr, double bl, Bool tr)
     : Colour("",rd,gr,bl,tr?0.0:1.0) { }
 Colour::Colour(const char* nm, double rd, double gr, double bl, double op)
     : name(nm), red(rd), green(gr), blue(bl), opacity(op) { }

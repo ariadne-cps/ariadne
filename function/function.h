@@ -319,7 +319,7 @@ template<class P>
 struct VectorFunctionElementReference {
     VectorFunction<P>& _vf; Nat _i;
     VectorFunctionElementReference<P>(VectorFunction<P>& vf, Nat i) : _vf(vf), _i(i) { }
-    void operator=(const ScalarFunction<P>& sf);
+    Void operator=(const ScalarFunction<P>& sf);
     VectorFunctionElementReference<P>& operator=(const VectorFunctionElementReference<P>& sfr);
     template<class XX> XX evaluate(const Vector<XX> & x) const;
     template<class XX> XX operator()(const Vector<XX> & x) const;
@@ -329,7 +329,7 @@ template<class P> inline VectorFunctionElementReference<P> VectorFunction<P>::op
 template<class P> inline OutputStream& operator<<(OutputStream& os, const VectorFunctionElementReference<P>& vfe) {
     return  os << static_cast< ScalarFunction<P> >(vfe); }
 
-template<class P> inline void VectorFunctionElementReference<P>::operator=(const ScalarFunction<P>& sf) { _vf.set(_i,sf); }
+template<class P> inline Void VectorFunctionElementReference<P>::operator=(const ScalarFunction<P>& sf) { _vf.set(_i,sf); }
 template<class P> inline VectorFunctionElementReference<P>& VectorFunctionElementReference<P>::operator=(const VectorFunctionElementReference<P>& sfr) {
     _vf.set(_i,static_cast< ScalarFunction<P> >(sfr)); return *this; }
 template<class P> template<class XX> inline XX VectorFunctionElementReference<P>::evaluate(const Vector<XX> & x) const {

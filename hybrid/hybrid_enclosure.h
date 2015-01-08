@@ -160,9 +160,9 @@ class HybridEnclosure
     //! \brief The list of previous events.
     const List<DiscreteEvent>& previous_events() const;
     //! \brief The number of independent parameters.
-    uint number_of_parameters() const;
+    Nat number_of_parameters() const;
     //! \brief The number of constraints.
-    uint number_of_constraints() const;
+    Nat number_of_constraints() const;
     //! \brief The continuous state set.
     const ExactBox parameter_domain() const;
     //! \brief The function related to space.
@@ -173,7 +173,7 @@ class HybridEnclosure
     const ValidatedScalarFunctionModel& dwell_time_function() const;
 
     //! \brief Set the evolution time function to \a omega.
-    void set_time_function(const ValidatedScalarFunctionModel& omega);
+    Void set_time_function(const ValidatedScalarFunctionModel& omega);
 
     //! \brief A bounding box for the space.
     UpperBox space_bounding_box() const;
@@ -187,65 +187,65 @@ class HybridEnclosure
 
     //! \brief Apply the reset map \a r corresponding to event \a e with target location \a q.
     //! Corresponds to replacing \f$\xi\f$ by \f$r\circ \xi\f$.
-    void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorFunction& r);
+    Void apply_reset(DiscreteEvent e, DiscreteLocation q, RealSpace s, const ValidatedVectorFunction& r);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps) and tau'(s)=tau(s)+eps
-    void apply_fixed_evolve_step(const ValidatedVectorFunctionModel& phi, const ExactFloat& eps);
+    Void apply_fixed_evolve_step(const ValidatedVectorFunctionModel& phi, const ExactFloat& eps);
     //! \brief Apply the evolve step \xi'(s) = phi(xi(s),eps(xi(s),tau(s))) and tau'(s)=tau(s)+eps(xi(s),tau(s))
-    void apply_spacetime_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
+    Void apply_spacetime_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
     //! \brief Apply the reach step \xi'(s) = phi(xi(s),t-tau(s)) and tau'(s)=tau(s)+t for 0<=t<=eps(xi(s),tau(s))
-    void apply_spacetime_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
+    Void apply_spacetime_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
-    void apply_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
+    Void apply_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
     // Compute the evolve step \xi'(s) = phi(xi(s),\omega(s)-tau(s)) and tau'(s)=omega(s)
-    void apply_finishing_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& omega);
+    Void apply_finishing_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& omega);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(s) , assuming eps(s)<= h throughout.
-    void apply_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
+    Void apply_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& eps);
     //! \brief Compute the reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h].
-    void apply_full_reach_step(const ValidatedVectorFunctionModel& phi);
+    Void apply_full_reach_step(const ValidatedVectorFunctionModel& phi);
 
 
     //! \brief Set the time of evolution to \a \f$t_{\max}\f$.
     //! Corresponds to introducting the constraint \f$\tau(s) = t_{\max}\f$.
-    void set_time(Real tmax);
+    Void set_time(Real tmax);
     //! \brief Set the time of evolution to \a omega.
     //! Corresponds to introducting the constraint \f$\tau(s) = \omega(s)\f$.
-    void set_time(ValidatedScalarFunction omega);
+    Void set_time(ValidatedScalarFunction omega);
     //! \brief Introduces the constraint \f$\tau(s)\leq \omega(s)\f$.
-    void bound_time(ValidatedScalarFunction omega);
+    Void bound_time(ValidatedScalarFunction omega);
     //! \brief Introduces the constraint \f$\tau(s)\leq t_{\max}\f$.
-    void bound_time(Real tmax);
+    Void bound_time(Real tmax);
 
     //! \brief Set the maximum time of evolution to \a \f$t_{\max}\f$. \deprecated
     //! Corresponds to introducting the constraint \f$\tau(s)\leq t_{\max}\f$.
-    void set_maximum_time(DiscreteEvent event, RawFloat tmax);
+    Void set_maximum_time(DiscreteEvent event, RawFloat tmax);
     //! \brief Set the current time-step to \f$h\f$. \deprecated
-    void set_step_time(ExactFloat h);
+    Void set_step_time(ExactFloat h);
     //! \brief \deprecated
-    void new_time_step_bound(DiscreteEvent e, ValidatedScalarFunction tau);
+    Void new_time_step_bound(DiscreteEvent e, ValidatedScalarFunction tau);
 
     //! \brief Introduces a new parameter with domain \a ivl.
-    void new_parameter(ExactInterval ivl, EnclosureVariableType);
+    Void new_parameter(ExactInterval ivl, EnclosureVariableType);
     //! \brief Introduce a new independent variable with domain \a ivl.
-    void new_variable(ExactInterval ivl, EnclosureVariableType);
+    Void new_variable(ExactInterval ivl, EnclosureVariableType);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$. \deprecated
-    void new_constraint(DiscreteEvent e, ValidatedConstraint c);
+    Void new_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces a new state constraint \f$C\f$ on \f$x\f$.
-    void new_state_constraint(DiscreteEvent e, ValidatedConstraint c);
+    Void new_state_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces a new constraint \f$C\f$ on \f$s\f$.
-    void new_parameter_constraint(DiscreteEvent e, ValidatedConstraint c);
+    Void new_parameter_constraint(DiscreteEvent e, ValidatedConstraint c);
     //! \brief Introduces the new invariant (progress predicate) \f$c(x)\leq0\f$.
-    void new_invariant(DiscreteEvent e, ValidatedScalarFunction c);
+    Void new_invariant(DiscreteEvent e, ValidatedScalarFunction c);
     //! \brief Introduces the new activation condition \f$g(x)\geq0\f$ for the event \a e.
-    void new_activation(DiscreteEvent e,ValidatedScalarFunction g);
+    Void new_activation(DiscreteEvent e,ValidatedScalarFunction g);
     //! \brief Introduces the new guard condition \f$g(x)=0\f$ for the event \a e.
     //! More precisely, the continuous dynamics is restricted to \f$c(x)\leq0\f$, and the event happens when \f$c(x)\geq0\f$.
-    void new_guard(DiscreteEvent e, ValidatedScalarFunction g);
+    Void new_guard(DiscreteEvent e, ValidatedScalarFunction g);
     //! \brief Introduces the new guard condition \f$g(x)=0\f$ for the event \a e, with computed crossing time \f$\tau(s)\f$.
-    void new_guard(DiscreteEvent e, ValidatedScalarFunction g, ValidatedScalarFunction ct);
+    Void new_guard(DiscreteEvent e, ValidatedScalarFunction g, ValidatedScalarFunction ct);
 
 
     //! \brief The dimension of the set.
-    uint dimension() const;
+    Nat dimension() const;
     //! \brief Tests whether the set is empty.
     Tribool empty() const;
     //! \brief Tests whether the set satisfies the constraint \a c.
@@ -258,25 +258,25 @@ class HybridEnclosure
     //! \brief Tests whether the set is a subset of the interior of the box \a hbx.
     Tribool inside(const HybridBox& hbx) const;
     //! \brief Restricts to a subdomain of the \em parameter domain.
-    void restrict(const ExactBox& subdomain);
+    Void restrict(const ExactBox& subdomain);
     //! \brief Adjoins an outer approximation of the set to the grid-based set \a paving, with accuracy given by
     //! \a depth subdivisions in each component.
-    void adjoin_outer_approximation_to(HybridGridTreeSet& paving, int depth) const;
+    Void adjoin_outer_approximation_to(HybridGridTreeSet& paving, Int depth) const;
 
     //! \brief Splits into two smaller subsets along parameter direction \a dim.
-    Pair<HybridEnclosure,HybridEnclosure> split(uint dim) const;
+    Pair<HybridEnclosure,HybridEnclosure> split(Nat dim) const;
     //! \brief Splits into smaller subsets.
     List<HybridEnclosure> split() const;
 
     //! \brief Simplifies the representation.
-    void recondition();
+    Void recondition();
     //! \brief Simplifies the representation by changing all uniform errors into independent variables.
-    void uniform_error_recondition();
+    Void uniform_error_recondition();
     //! \brief Simplifies the representation by choosing most significant independent variables to keep, and merging the rest into a single error for each component.
-    void kuhn_recondition();
+    Void kuhn_recondition();
 
     //! \brief Draws onto a canvas.
-    virtual void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
+    virtual Void draw(CanvasInterface&, const Set<DiscreteLocation>&, const Variables2d&) const;
     //! \brief Write to an output stream.
     OutputStream& write(OutputStream&) const;
     //! \brief Write an abbreviated representation to an output stream.
@@ -286,12 +286,12 @@ class HybridEnclosure
   private:
   public:
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] .
-    void _apply_flow(ValidatedVectorFunction phi, ExactFloat step);
+    Void _apply_flow(ValidatedVectorFunction phi, ExactFloat step);
     // Compute the flow reach step xi'(s,t) = phi(xi(s),t) and tau'(s,t)=tau(s)+t for t in [0,h] and t <= eps(xi(s)) .
-    void _apply_flow(ValidatedVectorFunction phi, ExactFloat step, ValidatedScalarFunction elps);
+    Void _apply_flow(ValidatedVectorFunction phi, ExactFloat step, ValidatedScalarFunction elps);
     // Compute the flow evolve step \xi'(s) = phi(xi(s),eps(s)) and tau'(s)=tau(s)+eps(s)
-    void _apply_flow_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
-    void _check() const; // Check that set is well-formed.
+    Void _apply_flow_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
+    Void _check() const; // Check that set is well-formed.
     // Compute constraints of the set
     List<ValidatedConstraint> constraints() const;
 
@@ -318,20 +318,20 @@ class ListSet<HybridEnclosure>
     ListSet() { }
     ListSet(const HybridEnclosure& hes) { this->adjoin(hes); }
     ListSet(const List<HybridEnclosure>& hel) : _list(hel) { }
-    void adjoin(const HybridEnclosure& hes) { this->_list.append(hes); }
-    void adjoin(const ListSet<HybridEnclosure>& hels) {
+    Void adjoin(const HybridEnclosure& hes) { this->_list.append(hes); }
+    Void adjoin(const ListSet<HybridEnclosure>& hels) {
         for(List<HybridEnclosure>::ConstIterator iter=hels.begin(); iter!=hels.end(); ++iter) {
             this->adjoin(*iter); } }
-    void append(const HybridEnclosure& hes) { this->_list.append(hes); }
+    Void append(const HybridEnclosure& hes) { this->_list.append(hes); }
     SizeType size() const { return _list.size(); }
-    const HybridEnclosure& operator[](uint i) const { return _list[i]; }
+    const HybridEnclosure& operator[](Nat i) const { return _list[i]; }
     ListSet<HybridEnclosure::ContinuousStateSetType> operator[](const DiscreteLocation& loc) const;
     Iterator begin() { return _list.begin(); }
     Iterator end() { return _list.end(); }
     ConstIterator begin() const { return _list.begin(); }
     ConstIterator end() const { return _list.end(); }
-    void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
-        for(uint i=0; i!=_list.size(); ++i) { _list[i].draw(c,l,v); } }
+    Void draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
+        for(Nat i=0; i!=_list.size(); ++i) { _list[i].draw(c,l,v); } }
 
     friend OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>& hls);
   private:
@@ -342,7 +342,7 @@ inline OutputStream& operator<<(OutputStream& os, const ListSet<HybridEnclosure>
     return os << hls._list;
 }
 
-HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, int d);
+HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Int d);
 
 
 } // namespace Ariadne

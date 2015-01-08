@@ -71,29 +71,29 @@ class AffineModel<ApproximateNumber>
 {
   public:
     explicit AffineModel() : _c(), _g() { }
-    explicit AffineModel(uint n) : _c(0.0), _g(n,0.0) { }
+    explicit AffineModel(Nat n) : _c(0.0), _g(n,0.0) { }
     explicit AffineModel(const ApproximateNumber& c, const Vector<ApproximateNumber>& g) : _c(c), _g(g) { }
     explicit AffineModel(ApproximateNumber c, InitializerList<ApproximateNumber> g) : _c(c), _g(g) { }
 
     AffineModel<ApproximateNumber>& operator=(const ApproximateNumber& c) {
-        this->_c=c; for(uint i=0; i!=this->_g.size(); ++i) { this->_g[i]=0.0; } return *this; }
-    ApproximateNumber& operator[](uint i) { return this->_g[i]; }
-    const ApproximateNumber& operator[](uint i) const { return this->_g[i]; }
-    static AffineModel<ApproximateNumber> constant(uint n, const ApproximateNumber& c) {
+        this->_c=c; for(Nat i=0; i!=this->_g.size(); ++i) { this->_g[i]=0.0; } return *this; }
+    ApproximateNumber& operator[](Nat i) { return this->_g[i]; }
+    const ApproximateNumber& operator[](Nat i) const { return this->_g[i]; }
+    static AffineModel<ApproximateNumber> constant(Nat n, const ApproximateNumber& c) {
         return AffineModel<ApproximateNumber>(c,Vector<ApproximateNumber>(n,0.0)); }
-    static AffineModel<ApproximateNumber> variable(uint n, uint j) {
+    static AffineModel<ApproximateNumber> variable(Nat n, Nat j) {
         return AffineModel<ApproximateNumber>(0.0,Vector<ApproximateNumber>::unit(n,j)); }
 
     const Vector<ApproximateNumber>& a() const { return this->_g; }
     const ApproximateNumber& b() const { return this->_c; }
 
     const Vector<ApproximateNumber>& gradient() const { return this->_g; }
-    const ApproximateNumber& gradient(uint i) const { return this->_g[i]; }
+    const ApproximateNumber& gradient(Nat i) const { return this->_g[i]; }
     const ApproximateNumber& value() const { return this->_c; }
 
-    void resize(uint n) { this->_g.resize(n); }
+    Void resize(Nat n) { this->_g.resize(n); }
 
-    uint argument_size() const { return this->_g.size(); }
+    Nat argument_size() const { return this->_g.size(); }
   private:
     ApproximateNumber _c;
     Vector<ApproximateNumber> _g;
@@ -129,15 +129,15 @@ class AffineModel<ValidatedNumber>
 {
   public:
     explicit AffineModel() : _c(), _g() { }
-    explicit AffineModel(uint n) : _c(0.0), _g(n,ExactFloat(0.0)), _e(0.0) { }
+    explicit AffineModel(Nat n) : _c(0.0), _g(n,ExactFloat(0.0)), _e(0.0) { }
     explicit AffineModel(const ExactFloat& c, const Vector<ExactFloat>& g, const ErrorFloat& e) : _c(c), _g(g), _e(e) { }
     explicit AffineModel(ExactFloat c, InitializerList<ExactFloat> g) : _c(c), _g(g), _e(0.0) { }
 
     AffineModel<ValidatedNumber>& operator=(const ExactFloat& c) {
-        this->_c=c; for(uint i=0; i!=this->_g.size(); ++i) { this->_g[i]=0; } this->_e=0; return *this; }
-    static AffineModel<ValidatedNumber> constant(uint n, const ExactFloat& c) {
+        this->_c=c; for(Nat i=0; i!=this->_g.size(); ++i) { this->_g[i]=0; } this->_e=0; return *this; }
+    static AffineModel<ValidatedNumber> constant(Nat n, const ExactFloat& c) {
         return AffineModel<ValidatedNumber>(c,Vector<ExactFloat>(n,0),ErrorFloat(0)); }
-    static AffineModel<ValidatedNumber> variable(uint n, uint j) {
+    static AffineModel<ValidatedNumber> variable(Nat n, Nat j) {
         return AffineModel<ValidatedNumber>(0,Vector<ExactFloat>::unit(n,j),0); }
 
 
@@ -145,23 +145,23 @@ class AffineModel<ValidatedNumber>
     const ExactFloat& b() const { return this->_c; }
     const ErrorFloat& e() const { return this->_e; }
 
-    ExactFloat& operator[](uint i) { return this->_g[i]; }
-    const ExactFloat& operator[](uint i) const { return this->_g[i]; }
+    ExactFloat& operator[](Nat i) { return this->_g[i]; }
+    const ExactFloat& operator[](Nat i) const { return this->_g[i]; }
     const Vector<ExactFloat>& gradient() const { return this->_g; }
-    const ExactFloat& gradient(uint i) const { return this->_g[i]; }
+    const ExactFloat& gradient(Nat i) const { return this->_g[i]; }
     const ExactFloat& value() const { return this->_c; }
     const ErrorFloat& error() const { return this->_e; }
 
-    void set_value(const ExactFloat& c) { _c=c; }
-    void set_gradient(uint j, const ExactFloat& g) { _g[j]=g; }
-    void set_error(const ErrorFloat& e) { _e=e; }
+    Void set_value(const ExactFloat& c) { _c=c; }
+    Void set_gradient(Nat j, const ExactFloat& g) { _g[j]=g; }
+    Void set_error(const ErrorFloat& e) { _e=e; }
 
-    void resize(uint n) { this->_g.resize(n); }
+    Void resize(Nat n) { this->_g.resize(n); }
 
-    uint argument_size() const { return this->_g.size(); }
+    Nat argument_size() const { return this->_g.size(); }
     template<class X> X evaluate(const Vector<X>& v) const {
         X r=v.zero_element()+static_cast<X>(this->_c);
-        for(uint i=0; i!=this->_g.size(); ++i) {
+        for(Nat i=0; i!=this->_g.size(); ++i) {
             r+=X(this->_g[i])*v[i]; }
         r+=ValidatedNumber(-_e,+_e);
         return r;

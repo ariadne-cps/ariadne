@@ -49,7 +49,7 @@ using namespace std;
 
 /// This function diverges heavily
 struct FailOne : VectorFunctionData<2,2,1> {
-    template<class R, class A, class P> static void
+    template<class R, class A, class P> static Void
     compute(R& r, const A& x, const P& p) {
           r[0] = 1;
           r[1] = -p[0] * x[1] + p[0];
@@ -58,7 +58,7 @@ struct FailOne : VectorFunctionData<2,2,1> {
 
 /// This function diverges heavily
 struct FailTwo : VectorFunctionData<3,3,1> {
-    template<class R, class A, class P> static void
+    template<class R, class A, class P> static Void
     compute(R& r, const A& x, const P& p) {
           r[0] = 1;
           r[1] = x[1] * x[2] / p[0];
@@ -70,11 +70,11 @@ struct FailTwo : VectorFunctionData<3,3,1> {
 class TestContinuousEvolution
 {
   public:
-    void test() const;
-    void failure_test() const;
+    Void test() const;
+    Void failure_test() const;
 };
 
-int main()
+Int main()
 {
     //std::cerr<<"SKIPPED "; return 1;
     ARIADNE_TEST_CALL(TestContinuousEvolution().test());
@@ -84,7 +84,7 @@ int main()
 
 
 
-void TestContinuousEvolution::test() const
+Void TestContinuousEvolution::test() const
 {
     // cout << __PRETTY_FUNCTION__ << endl;
 
@@ -152,7 +152,7 @@ void TestContinuousEvolution::test() const
 
 }
 
-void TestContinuousEvolution::failure_test() const
+Void TestContinuousEvolution::failure_test() const
 {
     // The systems in this test are stiff and are expected to fail.
 

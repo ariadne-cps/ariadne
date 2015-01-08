@@ -50,9 +50,9 @@ static const ExactFloat zero=0;
 
 ScalarTaylorFunction unchecked_compose(const ValidatedScalarFunctionModel& f, const VectorTaylorFunction& g);
 
-inline auto operator+(int n, ValidatedFloat x) -> decltype(ExactFloat(n)+x) { return ExactFloat(n)+x; }
-inline auto operator-(int n, ValidatedFloat x) -> decltype(ExactFloat(n)-x) { return ExactFloat(n)-x; }
-inline auto operator/(ExactFloat x, uint n) -> decltype(x/ExactFloat(n)) { return x/ExactFloat(n); }
+inline auto operator+(Int n, ValidatedFloat x) -> decltype(ExactFloat(n)+x) { return ExactFloat(n)+x; }
+inline auto operator-(Int n, ValidatedFloat x) -> decltype(ExactFloat(n)-x) { return ExactFloat(n)-x; }
+inline auto operator/(ExactFloat x, Nat n) -> decltype(x/ExactFloat(n)) { return x/ExactFloat(n); }
 
 typedef Integer Natural;
 
@@ -148,7 +148,7 @@ OutputStream& operator<<(OutputStream& os, const CrossingData& crossing_data) {
 }
 
 // Test if an event 'blocks' continuous evolution.
-bool is_blocking(EventKind evk) {
+Bool is_blocking(EventKind evk) {
     switch(evk) {
         case INVARIANT: case PROGRESS: case URGENT: case IMPACT:
             return true;
@@ -160,7 +160,7 @@ bool is_blocking(EventKind evk) {
 }
 
 // Test if an event 'activates' a discrete transition.
-bool is_activating(EventKind evk) {
+Bool is_activating(EventKind evk) {
     switch(evk) {
         case PERMISSIVE: case URGENT: case IMPACT:
             return true;
@@ -265,7 +265,7 @@ HybridEvolverBase::HybridEvolverBase(const SystemType& system,
     this->_create(system,factory.clone());
 }
 
-void
+Void
 HybridEvolverBase::_create(
         const SystemType& system,
         FunctionFactoryType* factory)
@@ -297,7 +297,7 @@ HybridEvolverBase::configuration() const
     return *this->_configuration_ptr;
 }
 
-void
+Void
 HybridEvolverBase::set_function_factory(const FunctionFactoryType& factory)
 {
     this->_function_factory_ptr=std::shared_ptr<FunctionFactoryType>(factory.clone());
@@ -309,13 +309,13 @@ HybridEvolverBase::function_factory() const
     return*this->_function_factory_ptr;
 }
 
-void
+Void
 HybridEvolverBase::set_integrator(const IntegratorInterface& integrator)
 {
     this->_integrator_ptr=std::shared_ptr<IntegratorInterface>(integrator.clone());
 }
 
-void
+Void
 HybridEvolverBase::set_solver(const SolverInterface& solver)
 {
     this->_solver_ptr=std::shared_ptr<SolverInterface>(solver.clone());
@@ -335,7 +335,7 @@ HybridEvolverBase::enclosure(const HybridSet& initial_set) const
 }
 
 
-void
+Void
 HybridEvolverBase::
 _evolution(ListSet<HybridEnclosure>& final,
            ListSet<HybridEnclosure>& reachable,
@@ -343,7 +343,7 @@ _evolution(ListSet<HybridEnclosure>& final,
            HybridEnclosure const& initial_set,
            HybridTerminationCriterion const& termination_criterion,
            Semantics semantics,
-           bool reach) const
+           Bool reach) const
 {
     EvolutionData evolution_data;
     evolution_data.semantics=semantics;
@@ -360,19 +360,19 @@ _evolution(ListSet<HybridEnclosure>& final,
 
 struct EvolutionStepData {
     EvolutionStepData() : progress(false), finishing(false), events() { }
-    bool progress;
-    bool finishing;
+    Bool progress;
+    Bool finishing;
     Set<DiscreteEvent> events;
 };
 
-void
+Void
 HybridEvolverBase::
 _log_summary(const EvolutionData& evolution_data, HybridEnclosure const& starting_set) const
 {
     UpperBox starting_bounding_box=starting_set.space_bounding_box();
     UpperInterval starting_time_range=starting_set.time_range();
     UpperInterval starting_dwell_time_range=starting_set.dwell_time_range();
-    int old_precision = std::clog.precision();
+    Int old_precision = std::clog.precision();
     if(verbosity>=1) { std::clog<<"\n"; }
     ARIADNE_LOG(1,(verbosity==1?"\r":"")
             <<"#w="<<std::setw(4)<<std::left<<evolution_data.initial_sets.size()+1u
@@ -432,7 +432,7 @@ _extract_transitions(DiscreteLocation const& location) const
     return transitions;
 }
 
-void
+Void
 HybridEvolverBase::
 _apply_invariants(HybridEnclosure& initial_set,
                   Map<DiscreteEvent,TransitionData> const& transitions) const
@@ -454,7 +454,7 @@ _apply_invariants(HybridEnclosure& initial_set,
     }
 }
 
-void
+Void
 HybridEvolverBase::
 _process_starting_events(EvolutionData& evolution_data,
                         HybridEnclosure const& initial_set,
@@ -747,7 +747,7 @@ _compute_crossings(Set<DiscreteEvent> const& active_events,
 
 
 
-void
+Void
 HybridEvolverBase::
 _recondition(HybridEnclosure& set) const
 {
@@ -756,7 +756,7 @@ _recondition(HybridEnclosure& set) const
 
 
 
-void
+Void
 HybridEvolverBase::
 _apply_reach_step(HybridEnclosure& set,
                   ValidatedVectorFunctionModel const& flow,
@@ -765,7 +765,7 @@ _apply_reach_step(HybridEnclosure& set,
     set.apply_reach_step(flow,timing_data.parameter_dependent_evolution_time);
 }
 
-void
+Void
 HybridEvolverBase::
 _apply_evolve_step(HybridEnclosure& set,
                   ValidatedVectorFunctionModel const& flow,
@@ -790,7 +790,7 @@ _apply_evolve_step(HybridEnclosure& set,
     }
 }
 
-void
+Void
 HybridEvolverBase::
 _apply_guard_step(HybridEnclosure& set,
                   EffectiveVectorFunction const& dynamic,
@@ -870,7 +870,7 @@ _apply_guard_step(HybridEnclosure& set,
 // In the case of concave crossings, splits the set into two, one part
 // corresponding to points which actually hit the set (and stop on first crossing)
 // the other part corresponding to points which miss the set.
-void HybridEvolverBase::
+Void HybridEvolverBase::
 _apply_guard(List<HybridEnclosure>& sets,
              const HybridEnclosure& starting_set,
              const ValidatedVectorFunctionModel& flow,
@@ -880,7 +880,7 @@ _apply_guard(List<HybridEnclosure>& sets,
              const Semantics semantics) const
 {
     ARIADNE_LOG(3,"HybridEvolverBase::_apply_guard(...)\n");
-    static const uint SUBDIVISIONS_FOR_DEGENERATE_CROSSING = 2;
+    static const Nat SUBDIVISIONS_FOR_DEGENERATE_CROSSING = 2;
     const DiscreteEvent event=transition_data.event;
     const ValidatedScalarFunction& guard_function=transition_data.guard_function;
     //const ValidatedScalarFunction& guard_flow_derivative_function=transition_data.guard_flow_derivative_function;
@@ -955,10 +955,10 @@ _apply_guard(List<HybridEnclosure>& sets,
             case CrossingKind::DEGENERATE: case CrossingKind::CONCAVE: {
                 // The crossing with the guard set is not one of the kinds handled above.
                 // We obtain an over-approximation by testing at finitely many time points
-                const uint n=SUBDIVISIONS_FOR_DEGENERATE_CROSSING;
+                const Nat n=SUBDIVISIONS_FOR_DEGENERATE_CROSSING;
                 switch(semantics) {
                     case UPPER_SEMANTICS:
-                        for(uint i=0; i!=n; ++i) {
+                        for(Nat i=0; i!=n; ++i) {
                             ValidatedFloat alpha=ExactFloat(i+1)/n;
                             ValidatedScalarFunctionModel intermediate_guard
                                 = compose( guard_function, unchecked_compose( flow, join(starting_state, alpha*elapsed_time) ) );
@@ -990,7 +990,7 @@ _apply_guard(List<HybridEnclosure>& sets,
 
 
 
-void
+Void
 HybridEvolverBase::
 _evolution_in_mode(EvolutionData& evolution_data,
                    HybridTerminationCriterion const& termination_criterion) const
@@ -1066,7 +1066,7 @@ _evolution_in_mode(EvolutionData& evolution_data,
     }
 }
 
-void
+Void
 HybridEvolverBase::
 _evolution_step(EvolutionData& evolution_data,
                 EffectiveVectorFunction const& dynamic,
@@ -1113,7 +1113,7 @@ _evolution_step(EvolutionData& evolution_data,
         } else if (this->_configuration_ptr->enable_subdivisions()) {
             ARIADNE_LOG(1,"\r  too large, splitting\n");
             List<HybridEnclosure> split_sets = starting_set.split();
-            for(uint i=0; i!=split_sets.size(); ++i) {
+            for(Nat i=0; i!=split_sets.size(); ++i) {
                 if(!definitely(split_sets[i].empty())) { evolution_data.working_sets.append(split_sets[i]); }
             }
             return;
@@ -1158,7 +1158,7 @@ _evolution_step(EvolutionData& evolution_data,
 }
 
 
-void HybridEvolverBase::
+Void HybridEvolverBase::
 _apply_evolution_step(EvolutionData& evolution_data,
                       HybridEnclosure const& starting_set,
                       ValidatedVectorFunctionModel const& flow,
@@ -1439,7 +1439,7 @@ HybridEvolverBaseConfiguration::HybridEvolverBaseConfiguration(HybridEvolverBase
     set_enable_subdivisions(true);
 }
 
-void
+Void
 HybridEvolverBaseConfiguration::set_flow_accuracy(const RealType value)
 {
     _evolver._integrator_ptr=std::shared_ptr<TaylorSeriesIntegrator>(new TaylorSeriesIntegrator(MaximumError(value)));
@@ -1489,7 +1489,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     // Compute the evolution time for the given step.
     ARIADNE_LOG(7,"GeneralHybridEvolver::_estimate_timing(...)\n");
 
-    const uint n = flow.result_size();
+    const Nat n = flow.result_size();
     const ExactFloat step_size=flow.domain()[flow.domain().size()-1].upper();
 
     TimingData result;
@@ -1581,10 +1581,10 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
     ValidatedScalarFunctionModel spacial_evolution_time=this->function_factory().create_constant(space_domain,ExactFloat(step_size));
 
     // Select one of GUARD_CREEP or TIME_CREEP
-    static const bool GUARD_CREEP=true;
-    static const bool TIME_CREEP=false;
+    static const Bool GUARD_CREEP=true;
+    static const Bool TIME_CREEP=false;
 
-    bool creep=false;
+    Bool creep=false;
 
     // Test for creep step
     if(ALLOW_CREEP && !crossings.empty() && (result.finishing_kind == FinishingKind::BEFORE_FINAL_TIME || result.finishing_kind == FinishingKind::STRADDLE_FINAL_TIME) ) {
@@ -1718,7 +1718,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
         ValidatedScalarFunctionModel zero_function=flow[0].create_zero();
         ValidatedVectorFunctionModel identity_function=flow.create_identity();
         ValidatedVectorFunctionModel space_projection=flow*zero;
-        for(uint i=0; i!=n; ++i) { space_projection[i]=space_projection[i]+identity_function[i]; }
+        for(Nat i=0; i!=n; ++i) { space_projection[i]=space_projection[i]+identity_function[i]; }
 
         //static const ExactFloat CREEP_MAXIMUM=ExactFloat(1.0);
         static const ExactFloat CREEP_MAXIMUM=ExactFloat(15.0/16);
@@ -1744,7 +1744,7 @@ _estimate_timing(Set<DiscreteEvent>& active_events,
                 ARIADNE_LOG(6,"  step_size: "<<flow.step_size()<<", guard_range: "<<guard_range<<", guard_derivative_range: "<<guard_derivative_range<<", alpha: "<<alpha<<"\n");
                 if(alpha>0 && alpha<=1) {
                     ValidatedScalarFunctionModel guard_creep_time;
-                    bool sucessfully_computed_guard_creep_time=false;
+                    Bool sucessfully_computed_guard_creep_time=false;
                     try {
                         guard_creep_time=solver.implicit(compose(guard_function,flow)-alpha*compose(guard_function,space_projection),
                                                         flow_spacial_domain,flow_time_domain);

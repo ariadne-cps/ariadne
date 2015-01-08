@@ -74,8 +74,8 @@ template<class SYS, class ES, class TRM> class EvolverBase
 
   protected:
     //! \brief Main routine for computing the evolution.
-    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, const EnclosureType& initial,
-                            const TerminationType& termination, Semantics semantics, bool reach) const = 0;
+    virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, const EnclosureType& initial,
+                            const TerminationType& termination, Semantics semantics, Bool reach) const = 0;
 };
 
 

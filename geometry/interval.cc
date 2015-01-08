@@ -62,7 +62,7 @@ inline Float cos_up(Float x) { set_rounding_upward(); Float y=cos_rnd(x); return
 
 const UpperInterval pi_ivl=ExactInterval(pi_down,pi_up);
 
-uint ExactInterval::output_precision = 6;
+Nat ExactInterval::output_precision = 6;
 
 ExactInterval widen(ExactInterval x)
 {
@@ -111,9 +111,9 @@ ExactInterval trunc(ExactInterval x)
     return ExactInterval(double(tl),double(tu));
 }
 
-ExactInterval trunc(ExactInterval x, uint n)
+ExactInterval trunc(ExactInterval x, Nat n)
 {
-    ExactInterval e=ExactInterval(std::pow(2.0,52-(int)n));
+    ExactInterval e=ExactInterval(std::pow(2.0,52-(Int)n));
     UpperInterval y=x+e;
     UpperInterval r=y-e;
     return ExactInterval(r.lower_raw(),r.upper_raw());
@@ -310,13 +310,13 @@ UpperInterval sqr(UpperInterval i)
 
 
 
-UpperInterval pow(UpperInterval i, int n)
+UpperInterval pow(UpperInterval i, Int n)
 {
-    if(n<0) { return pow(rec(i),uint(-n)); }
-    else return pow(i,uint(n));
+    if(n<0) { return pow(rec(i),Nat(-n)); }
+    else return pow(i,Nat(n));
 }
 
-UpperInterval pow(UpperInterval i, uint m)
+UpperInterval pow(UpperInterval i, Nat m)
 {
     rounding_mode_t rnd = get_rounding_mode();
     const UpperInterval& nvi=i;
@@ -511,7 +511,7 @@ operator<<(OutputStream& os, const ExactInterval& ivl)
     }
 
     // Write common head
-    uint i;
+    Nat i;
     for(i=0; (i<std::min(lstr.size(),ustr.size()) && lstr[i]==ustr[i]); ++i) {
         os << lstr[i];
     }
@@ -520,14 +520,14 @@ operator<<(OutputStream& os, const ExactInterval& ivl)
     if(i==lstr.size()) {
         os << "0";
     }
-    for(uint li=i; li != lstr.size(); ++li) {
+    for(Nat li=i; li != lstr.size(); ++li) {
         os << lstr[li];
     }
     os << ":";
     if(i==ustr.size()) {
         os << "0";
     }
-    for(uint ui=i; ui != ustr.size(); ++ui) {
+    for(Nat ui=i; ui != ustr.size(); ++ui) {
         os << ustr[ui];
     }
     os << "]";

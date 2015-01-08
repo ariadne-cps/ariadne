@@ -73,7 +73,7 @@ C1TaylorSeries::C1TaylorSeries()
 {
 }
 
-C1TaylorSeries::C1TaylorSeries(uint d)
+C1TaylorSeries::C1TaylorSeries(Nat d)
     : _coefficients(d+1,Float(0))
     , _zero_error(0)
     , _uniform_error(0)
@@ -97,7 +97,7 @@ ExactInterval C1TaylorSeries::domain() const {
     return ExactInterval(-1,+1);
 }
 
-uint C1TaylorSeries::degree() const {
+Nat C1TaylorSeries::degree() const {
     return this->_coefficients.size()-1;
 }
 
@@ -159,7 +159,7 @@ C1TaylorSeries& operator*=(C1TaylorSeries& f, ValidatedNumber ic) {
         fue+=e;
     }
 
-    for(uint i=1; i!=f._coefficients.size(); ++i) {
+    for(Nat i=1; i!=f._coefficients.size(); ++i) {
         set_rounding_upward();
         Float& fv=f._coefficients[i];
         VOLATILE Float fvu=fv*c;
@@ -170,7 +170,7 @@ C1TaylorSeries& operator*=(C1TaylorSeries& f, ValidatedNumber ic) {
     };
 
     set_rounding_to_nearest();
-    for(uint i=0; i!=f._coefficients.size(); ++i) {
+    for(Nat i=0; i!=f._coefficients.size(); ++i) {
         f._coefficients[i]*=c;
     }
 
@@ -191,7 +191,7 @@ C1TaylorSeries operator+(C1TaylorSeries f1, C1TaylorSeries f2) {
     VOLATILE Float mvl=(-f1a[0])-f2a[0];
     r._zero_error=(vu+mvl)/2;
     r._uniform_error=(vu+mvl)/2;
-    for(uint i=1; i!=min(f1a.size(),f2a.size()); ++i) {
+    for(Nat i=1; i!=min(f1a.size(),f2a.size()); ++i) {
         vu=f1a[i]+f2a[i];
         mvl=(-f1a[i])-f2a[i];
         r._uniform_error+=(vu+mvl)/2;
@@ -202,13 +202,13 @@ C1TaylorSeries operator+(C1TaylorSeries f1, C1TaylorSeries f2) {
     r._derivative_error+=f1._derivative_error+f2._derivative_error;
 
     set_rounding_to_nearest();
-    for(uint i=0; i!=min(f1a.size(),f2a.size()); ++i) {
+    for(Nat i=0; i!=min(f1a.size(),f2a.size()); ++i) {
         f0a[i]=f1a[i]+f2a[i];
     }
-    for(uint i=min(f1a.size(),f2a.size()); i!=f1a.size(); ++i) {
+    for(Nat i=min(f1a.size(),f2a.size()); i!=f1a.size(); ++i) {
         f0a[i]=f1a[i];
     }
-    for(uint i=min(f1a.size(),f2a.size()); i!=f2a.size(); ++i) {
+    for(Nat i=min(f1a.size(),f2a.size()); i!=f2a.size(); ++i) {
         f0a[i]=f2a[i];
     }
     return r;
@@ -216,7 +216,7 @@ C1TaylorSeries operator+(C1TaylorSeries f1, C1TaylorSeries f2) {
 
 inline Float abssum(std::vector<Float> const& a) {
     Float s=0;
-    for(uint i=0; i!=a.size(); ++i) {
+    for(Nat i=0; i!=a.size(); ++i) {
         s+=abs(a[i]);
     }
     return s;
@@ -225,7 +225,7 @@ inline Float abssum(std::vector<Float> const& a) {
 inline Float indabssum(std::vector<Float> const& a) {
     ARIADNE_DEBUG_ASSERT(a.size()>=1);
     Float s=0;
-    for(uint i=1; i!=a.size(); ++i) {
+    for(Nat i=1; i!=a.size(); ++i) {
         s+=i*abs(a[i]);
     }
     return s;
@@ -264,11 +264,11 @@ C1TaylorSeries operator*(C1TaylorSeries f1, C1TaylorSeries f2) {
     frze0=(vu+mvl)/2;
     fre0=(vu+mvl)/2;
     // std::cerr<<"ir="<<0<<", i1="<<0<<", i2="<<0<<"\n";
-    for(uint ir=1; ir!=f1a.size()+f2a.size()-1; ++ir) {
+    for(Nat ir=1; ir!=f1a.size()+f2a.size()-1; ++ir) {
         vu=0.0;
         mvl=0.0;
-        for(uint i1=max(0,int(ir)-int(f2a.size()-1)); i1!=min(int(ir+1),int(f1a.size())); ++i1) {
-            uint i2=ir-i1;
+        for(Nat i1=max(0,Int(ir)-Int(f2a.size()-1)); i1!=min(Int(ir+1),Int(f1a.size())); ++i1) {
+            Nat i2=ir-i1;
             // std::cerr<<"ir="<<ir<<", i1="<<i1<<", i2="<<i2<<"\n";
             ARIADNE_DEBUG_ASSERT(i2<f2a.size());
             vu+=f1a[i1]*f2a[i2];
@@ -286,9 +286,9 @@ C1TaylorSeries operator*(C1TaylorSeries f1, C1TaylorSeries f2) {
              + (f1e0*f2sa1 + f1sa0*f2e1 + f1e0*f2e1) );
 
     set_rounding_to_nearest();
-    for(uint i1=0; i1!=f1a.size(); ++i1) {
-        for(uint i2=0; i2!=f2a.size(); ++i2) {
-            uint i0=i1+i2;
+    for(Nat i1=0; i1!=f1a.size(); ++i1) {
+        for(Nat i2=0; i2!=f2a.size(); ++i2) {
+            Nat i0=i1+i2;
             fra[i0]+=f1a[i1]*f2a[i2];
         }
     }
@@ -668,7 +668,7 @@ OutputStream& operator<<(OutputStream& os, const ListForm<Expansion<Float>>& lfe
     {
         if(iter!=e.begin()) { os << ", "; }
         for(Nat i=0; i!=iter->key().size(); ++i) {
-            os << uint(iter->key()[i]);
+            os << Nat(iter->key()[i]);
             if(i+1!=iter->key().size()) { os << ","; }
         }
         os << ":" << iter->data();

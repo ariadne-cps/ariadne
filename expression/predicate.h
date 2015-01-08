@@ -46,7 +46,7 @@ namespace Ariadne {
 
 class PredicateInterface {
   public:
-    typedef unsigned int SizeType;
+    typedef std::size_t SizeType;
 
     virtual SizeType argument_size() const = 0;
     virtual Tribool evaluate(const Vector<Float>& x) const = 0;
@@ -61,16 +61,16 @@ class ExpressionPredicate
     ExpressionPredicate(const EffectiveScalarFunction& expression)
         : _expression(expression), _sign(+1) { }
     const EffectiveScalarFunction& expression() const { return _expression; }
-    int sign() const { return _sign; }
+    Int sign() const { return _sign; }
 
-    bool same(const ExpressionPredicate& ep2) const {
+    Bool same(const ExpressionPredicate& ep2) const {
         const ExpressionPredicate& ep1=*this;
         return ep1._expression.pointer()==ep2._expression.pointer() && ep1._sign==ep2._sign; }
-    bool opposite(const ExpressionPredicate& ep2) const {
+    Bool opposite(const ExpressionPredicate& ep2) const {
         const ExpressionPredicate& ep1=*this;
         return ep1._expression.pointer()==ep2._expression.pointer() && ep1._sign!=ep2._sign; }
-    bool operator<(const ExpressionPredicate& p) const {
-        return (_expression.pointer()) < (const void*)(p._expression.pointer()); }
+    Bool operator<(const ExpressionPredicate& p) const {
+        return (_expression.pointer()) < (const Void*)(p._expression.pointer()); }
     SizeType argument_size() const { return _expression.argument_size(); }
     Tribool evaluate(const Vector<Float>& x) const {
         Float value=_expression.evaluate(x)*_sign;
@@ -84,7 +84,7 @@ class ExpressionPredicate
         else { return indeterminate; } }
   private:
     EffectiveScalarFunction _expression;
-    int _sign;
+    Int _sign;
 };
 
 //! \brief A predicate which is a disjunction of simple predicates.
@@ -96,12 +96,12 @@ class DisjunctivePredicate
     SizeType size() const { return _predicates.size(); }
     const ExpressionPredicate& operator[](SizeType i) const { return _predicates[i]; }
 
-    bool vacuous() const { return _predicates.empty(); }
-    bool tautologous() const { return _tautology; }
+    Bool vacuous() const { return _predicates.empty(); }
+    Bool tautologous() const { return _tautology; }
 
     DisjunctivePredicate& operator|=(ExpressionPredicate p) {
         if(_tautology) { return *this; }
-        for(uint i=0; i!=_predicates.size(); ++i) {
+        for(Nat i=0; i!=_predicates.size(); ++i) {
             if(p.same(_predicates[i])) { return *this; }
             if(p.opposite(_predicates[i])) { _predicates.clear(); _tautology=true; return *this; }
         }
@@ -110,7 +110,7 @@ class DisjunctivePredicate
     }
 
     DisjunctivePredicate& operator|=(const DisjunctivePredicate& p) {
-        for(uint i=0; i!=p.size(); ++i) { (*this) |= p[i]; } return *this; }
+        for(Nat i=0; i!=p.size(); ++i) { (*this) |= p[i]; } return *this; }
 
     virtual SizeType argument_size() const;
     virtual Tribool evaluate(const Vector<Float>& x) const;
@@ -118,7 +118,7 @@ class DisjunctivePredicate
 
   private:
     std::vector<ExpressionPredicate> _predicates;
-    bool _tautology;
+    Bool _tautology;
 };
 
 //! \brief A predicate in <em>conjunctive normal form</em>.
@@ -135,7 +135,7 @@ class ConjunctiveNormalFormPredicate
     ConjunctiveNormalFormPredicate& operator&=(DisjunctivePredicate p) {
         _cnf.push_back(p); return *this; }
     ConjunctiveNormalFormPredicate& operator|=(DisjunctivePredicate p) {
-        for(uint i=0; i!=_cnf.size(); ++i) { _cnf[i] |= p; } return *this; }
+        for(Nat i=0; i!=_cnf.size(); ++i) { _cnf[i] |= p; } return *this; }
 
     virtual SizeType argument_size() const;
     virtual Tribool evaluate(const Vector<Float>& x) const;

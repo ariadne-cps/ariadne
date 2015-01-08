@@ -38,9 +38,6 @@
 #include "numeric/rational.h"
 
 
-// Simplifying typedef for unsigned integer type
-typedef unsigned int uint;
-
 namespace Ariadne {
 
 class Float;
@@ -104,8 +101,8 @@ template<> inline double& internal_cast(Float& x) { return const_cast<double&>(x
 template<> inline volatile double& internal_cast(Float& x) { return const_cast<volatile double&>(x.dbl); }
 
 template<class R, class A> inline R integer_cast(const A& a);
-template<> inline int integer_cast(const Float& a) { return static_cast<int>(a.dbl); }
-template<> inline uint integer_cast(const Float& a) { return static_cast<uint>(a.dbl); }
+template<> inline Int integer_cast(const Float& a) { return static_cast<Int>(a.dbl); }
+template<> inline Nat integer_cast(const Float& a) { return static_cast<Nat>(a.dbl); }
 
 inline OutputStream& operator<<(OutputStream& os, const Float& x) { return os << x.dbl; }
 inline InputStream& operator>>(InputStream& is, Float& x) { double dbl; is >> dbl; x=Float(dbl); return is; }
@@ -122,19 +119,19 @@ inline Float max(Float x1, Float x2) { return std::max(x1,x2); }
 inline Float min(Float x1, Float x2) { return std::min(x1,x2); }
 
 // Raw data comparisons
-inline bool operator==(Float const& x1, Float const& x2) { return x1.dbl == x2.dbl; }
-inline bool operator!=(Float const& x1, Float const& x2) { return x1.dbl != x2.dbl; }
-inline bool operator<=(Float const& x1, Float const& x2) { return x1.dbl <= x2.dbl; }
-inline bool operator>=(Float const& x1, Float const& x2) { return x1.dbl >= x2.dbl; }
-inline bool operator< (Float const& x1, Float const& x2) { return x1.dbl <  x2.dbl; }
-inline bool operator> (Float const& x1, Float const& x2) { return x1.dbl >  x2.dbl; }
+inline Bool operator==(Float const& x1, Float const& x2) { return x1.dbl == x2.dbl; }
+inline Bool operator!=(Float const& x1, Float const& x2) { return x1.dbl != x2.dbl; }
+inline Bool operator<=(Float const& x1, Float const& x2) { return x1.dbl <= x2.dbl; }
+inline Bool operator>=(Float const& x1, Float const& x2) { return x1.dbl >= x2.dbl; }
+inline Bool operator< (Float const& x1, Float const& x2) { return x1.dbl <  x2.dbl; }
+inline Bool operator> (Float const& x1, Float const& x2) { return x1.dbl >  x2.dbl; }
 
 // Constants related to numerical limits
 inline Float mx() { return std::numeric_limits<double>::max(); }
 inline Float eps() { return std::numeric_limits<double>::epsilon(); }
 
 // Checking whether a Float is not-a-number
-inline bool isnan(const Float& x) { return std::isnan(x.dbl); }
+inline Bool isnan(const Float& x) { return std::isnan(x.dbl); }
 
 // Operations for finding nearest representable values
 inline Float down(Float x) { return x.dbl>0 ? x.dbl*(1-2e-16) : x.dbl*(1+2e-16); } // Deprecated
@@ -167,7 +164,7 @@ inline Float sub_rnd(Float x, Float y) { volatile double xv = x.dbl; volatile do
 inline Float mul_rnd(Float x, Float y) { volatile double xv = x.dbl; volatile double yv=y.dbl; volatile double r=xv*yv; return r; }
 inline Float div_rnd(Float x, Float y) { volatile double xv = x.dbl; volatile double yv=y.dbl; volatile double r=xv/yv; return r; }
 
-Float pow_rnd(Float x, int n);
+Float pow_rnd(Float x, Int n);
 
 // Opposite rounded arithmetic
 inline Float pos_opp(const Float& x) { volatile double t=-x.dbl; return -t; }
@@ -178,7 +175,7 @@ inline Float add_opp(Float x, Float y) { volatile double t=-x.dbl; t=t-y.dbl; re
 inline Float sub_opp(Float x, Float y) { volatile double t=-x.dbl; t=t+y.dbl; return -t; }
 inline Float mul_opp(Float x, Float y) { volatile double t=-x.dbl; t=t*y.dbl; return -t; }
 inline Float div_opp(Float x, Float y) { volatile double t=x.dbl; t=t/y.dbl; return -t; }
-Float pow_opp(Float x, int n);
+Float pow_opp(Float x, Int n);
 
 // Correctly rounded algebraic and transcendental functions
 Float sqrt_rnd(Float x);
@@ -227,7 +224,7 @@ inline Float mul_approx(Float x, Float y) {
 inline Float div_approx(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
     Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float pow_approx(Float x, int n) {
+inline Float pow_approx(Float x, Int n) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
     Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
 
@@ -243,7 +240,7 @@ inline Float mul_up(Float x, Float y) {
 inline Float div_up(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
     Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float pow_up(Float x, int n) {
+inline Float pow_up(Float x, Int n) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
     Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
 
@@ -259,7 +256,7 @@ inline Float mul_down(Float x, Float y) {
 inline Float div_down(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
     Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float pow_down(Float x, int n) {
+inline Float pow_down(Float x, Int n) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
     Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
 
@@ -298,8 +295,8 @@ inline Float add(Float x1, Float x2) { return x1.dbl+x2.dbl; }
 inline Float sub(Float x1, Float x2) { return x1.dbl-x2.dbl; }
 inline Float mul(Float x1, Float x2) { return x1.dbl*x2.dbl; }
 inline Float div(Float x1, Float x2) { return x1.dbl/x2.dbl; }
-inline Float pow(Float x, uint n) { return std::pow(x.dbl,double(n)); }
-inline Float pow(Float x, int n) { return std::pow(x.dbl,double(n)); }
+inline Float pow(Float x, Nat n) { return std::pow(x.dbl,double(n)); }
+inline Float pow(Float x, Int n) { return std::pow(x.dbl,double(n)); }
 inline Float sqr(Float x) { return x.dbl * x.dbl; }
 inline Float rec(Float x) { return 1.0/x.dbl; }
 inline Float sqrt(Float x) { return std::sqrt(x.dbl); }
@@ -327,18 +324,18 @@ inline Float& operator*=(Float& x1, double x2) { x1.dbl*=x2; return x1; }
 inline Float& operator/=(Float& x1, double x2) { x1.dbl/=x2; return x1; }
 
 // Deprecated mixed comparisons
-inline bool operator==(Float x1, double x2) { return x1.dbl==x2; }
-inline bool operator!=(Float x1, double x2) { return x1.dbl!=x2; }
-inline bool operator<=(Float x1, double x2) { return x1.dbl<=x2; }
-inline bool operator>=(Float x1, double x2) { return x1.dbl>=x2; }
-inline bool operator< (Float x1, double x2) { return x1.dbl< x2; }
-inline bool operator> (Float x1, double x2) { return x1.dbl> x2; }
-inline bool operator==(double x1, Float x2) { return x1==x2.dbl; }
-inline bool operator!=(double x1, Float x2) { return x1!=x2.dbl; }
-inline bool operator<=(double x1, Float x2) { return x1<=x2.dbl; }
-inline bool operator>=(double x1, Float x2) { return x1>=x2.dbl; }
-inline bool operator< (double x1, Float x2) { return x1< x2.dbl; }
-inline bool operator> (double x1, Float x2) { return x1> x2.dbl; }
+inline Bool operator==(Float x1, double x2) { return x1.dbl==x2; }
+inline Bool operator!=(Float x1, double x2) { return x1.dbl!=x2; }
+inline Bool operator<=(Float x1, double x2) { return x1.dbl<=x2; }
+inline Bool operator>=(Float x1, double x2) { return x1.dbl>=x2; }
+inline Bool operator< (Float x1, double x2) { return x1.dbl< x2; }
+inline Bool operator> (Float x1, double x2) { return x1.dbl> x2; }
+inline Bool operator==(double x1, Float x2) { return x1==x2.dbl; }
+inline Bool operator!=(double x1, Float x2) { return x1!=x2.dbl; }
+inline Bool operator<=(double x1, Float x2) { return x1<=x2.dbl; }
+inline Bool operator>=(double x1, Float x2) { return x1>=x2.dbl; }
+inline Bool operator< (double x1, Float x2) { return x1< x2.dbl; }
+inline Bool operator> (double x1, Float x2) { return x1> x2.dbl; }
 
 } // namespace Ariadne
 

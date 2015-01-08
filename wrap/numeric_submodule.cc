@@ -41,7 +41,7 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-void set_output_precision(uint p) { std::cout << std::setprecision(p); }
+Void set_output_precision(Nat p) { std::cout << std::setprecision(p); }
 
 Dyadic operator+(Dyadic const& x1, Dyadic const& x2) {
     Dyadic r(x1.value()+x2.value()); ARIADNE_ASSERT(Rational(r)==Rational(x1)+Rational(x2)); return r; }
@@ -62,13 +62,13 @@ class PythonRational : public Rational {
 template<>
 struct from_python_dict<ValidatedFloat> {
     from_python_dict() { converter::registry::push_back(&convertible,&construct,type_id<ValidatedFloat>()); }
-    static void* convertible(PyObject* obj_ptr) {
+    static Void* convertible(PyObject* obj_ptr) {
         if (!PyDict_Check(obj_ptr) || len(extract<dict>(obj_ptr))!=1) { return 0; } return obj_ptr; }
-    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         boost::python::dict dct = boost::python::extract<boost::python::dict>(obj_ptr);
         boost::python::list lst=dct.items();
         assert(boost::python::len(lst)==1);
-        void* storage = ((converter::rvalue_from_python_storage<ValidatedFloat>*)data)->storage.bytes;
+        Void* storage = ((converter::rvalue_from_python_storage<ValidatedFloat>*)data)->storage.bytes;
         new (storage) ValidatedFloat(boost::python::extract<Float>(lst[0][0]),boost::python::extract<Float>(lst[0][1]));
         data->convertible = storage;
     }
@@ -78,12 +78,12 @@ struct from_python_dict<ValidatedFloat> {
 template<>
 struct from_python_list<ValidatedFloat> {
     from_python_list() { converter::registry::push_back(&convertible,&construct,type_id<ValidatedFloat>()); }
-    static void* convertible(PyObject* obj_ptr) {
+    static Void* convertible(PyObject* obj_ptr) {
         if (!PyList_Check(obj_ptr) || len(extract<list>(obj_ptr))!=2) { return 0; } return obj_ptr; }
-    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         boost::python::list lst = boost::python::extract<boost::python::list>(obj_ptr);
         assert(boost::python::len(lst)==2);
-        void* storage = ((converter::rvalue_from_python_storage<ValidatedFloat>*)data)->storage.bytes;
+        Void* storage = ((converter::rvalue_from_python_storage<ValidatedFloat>*)data)->storage.bytes;
         new (storage) ValidatedFloat(boost::python::extract<Float>(lst[0]),boost::python::extract<Float>(lst[1]));
         data->convertible = storage;
     }
@@ -92,10 +92,10 @@ struct from_python_list<ValidatedFloat> {
 /*
 struct interval_from_python_str {
     interval_from_python_str() { converter::registry::push_back(&convertible,&construct,type_id<ValidatedFloat>()); }
-    static void* convertible(PyObject* obj_ptr) { if (!PyString_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+    static Void* convertible(PyObject* obj_ptr) { if (!PyString_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         StringType str = boost::python::extract<StringType>(obj_ptr);
-        void* storage = ((converter::rvalue_from_python_storage<ValidatedFloat>*)data)->storage.bytes;
+        Void* storage = ((converter::rvalue_from_python_storage<ValidatedFloat>*)data)->storage.bytes;
         storage = new ValidatedFloat(str);
         data->convertible = storage;
     }
@@ -161,19 +161,19 @@ StringType __repr__(Tribool tb) {
   else { return "Tribool(Indeterminate)"; }
 }
 
-bool __nonzero__(Tribool tb) { return definitely(tb); }
+Bool __nonzero__(Tribool tb) { return definitely(tb); }
 Tribool indeterminate_const() { return indeterminate; }
 
 namespace Ariadne {
-bool possibly(Logical<Validated>);
-bool definitely(Logical<Validated>);
-bool is_determinate(Logical<Validated>);
+Bool possibly(Logical<Validated>);
+Bool definitely(Logical<Validated>);
+Bool is_determinate(Logical<Validated>);
 }
 
-void export_tribool() {
+Void export_tribool() {
 
-    class_<Tribool> tribool_class("Tribool",init<bool>());
-    tribool_class.def(init<int>());
+    class_<Tribool> tribool_class("Tribool",init<Bool>());
+    tribool_class.def(init<Int>());
     tribool_class.def(init<Tribool>());
     tribool_class.def("__eq__", &__eq__<Tribool,Tribool,Tribool>);
     tribool_class.def("__ne__", &__ne__<Tribool,Tribool,Tribool>);
@@ -181,22 +181,22 @@ void export_tribool() {
     tribool_class.def("__or__", &__or__<Tribool,Tribool,Tribool>);
     // WARNING: __not__ is not a special method!
     tribool_class.def("__not__", &__not__<Tribool,Tribool>);
-    tribool_class.def("__nonzero__", (bool(*)(Tribool))&__nonzero__);
+    tribool_class.def("__nonzero__", (Bool(*)(Tribool))&__nonzero__);
 
-    //tribool_class.def("__eq__", (Logical<Validated>(*)(Logical<Validated>,bool))(&operator==));
-    //tribool_class.def("__neq__", (Logical<Validated>(*)(Logical<Validated>,bool))(&operator!=));
-    //tribool_class.def("__and__", (Logical<Validated>(*)(Logical<Validated>,bool))(&operator!=));
-    //tribool_class.def("__or__", (Logical<Validated>(*)(Logical<Validated>,bool))(&operator!=));
+    //tribool_class.def("__eq__", (Logical<Validated>(*)(Logical<Validated>,Bool))(&operator==));
+    //tribool_class.def("__neq__", (Logical<Validated>(*)(Logical<Validated>,Bool))(&operator!=));
+    //tribool_class.def("__and__", (Logical<Validated>(*)(Logical<Validated>,Bool))(&operator!=));
+    //tribool_class.def("__or__", (Logical<Validated>(*)(Logical<Validated>,Bool))(&operator!=));
 
     tribool_class.def("__str__", (StringType(*)(Tribool))&__str__);
     tribool_class.def("__repr__", (StringType(*)(Tribool))&__repr__);
 
-    implicitly_convertible<bool,Tribool>();
+    implicitly_convertible<Bool,Tribool>();
 
-    def("indeterminate",(Tribool(*)(void))&indeterminate_const);
-    def("possibly",(bool(*)(Logical<Validated>))&possibly);
-    def("definitely",(bool(*)(Logical<Validated>))&definitely);
-    def("is_determinate",(bool(*)(Logical<Validated>))&is_determinate);
+    def("indeterminate",(Tribool(*)())&indeterminate_const);
+    def("possibly",(Bool(*)(Logical<Validated>))&possibly);
+    def("definitely",(Bool(*)(Logical<Validated>))&definitely);
+    def("is_determinate",(Bool(*)(Logical<Validated>))&is_determinate);
     // no facility for wrapping C++ constants
     // def("Indeterminate",tribool_indeterminate_constant);
 
@@ -205,14 +205,14 @@ void export_tribool() {
 
 #ifdef HAVE_GMPXX_H
 
-void export_integer()
+Void export_integer()
 {
     class_<Integer> integer_class("Integer");
-    integer_class.def(init<int>());
+    integer_class.def(init<Int>());
     integer_class.def(init<Integer>());
     integer_class.def(boost::python::self_ns::str(self));
     integer_class.def("__repr__", &__repr__<Integer>);
-    integer_class.def("__lt__",&__lt__<bool,Integer,Integer>);
+    integer_class.def("__lt__",&__lt__<Bool,Integer,Integer>);
 
     integer_class.def("__pos__", &__pos__<Integer,Integer>);
     integer_class.def("__neg__", &__neg__<Integer,Integer>);
@@ -220,7 +220,7 @@ void export_integer()
     integer_class.def("__sub__", &__sub__<Integer,Integer,Integer>);
     integer_class.def("__mul__", &__mul__<Integer,Integer,Integer>);
 
-    implicitly_convertible<int,Integer>();
+    implicitly_convertible<Int,Integer>();
 }
 #endif
 
@@ -230,17 +230,17 @@ namespace Ariadne {
 Rational sqr(Rational const&);
 }
 
-void export_rational()
+Void export_rational()
 {
     class_<Rational> rational_class("Rational");
     rational_class.def(init<Integer,Integer>());
-    rational_class.def(init<int>());
+    rational_class.def(init<Int>());
     rational_class.def(init<double>());
     rational_class.def(init<StringType>());
     rational_class.def(init<Rational>());
     rational_class.def(boost::python::self_ns::str(self));
     rational_class.def("__repr__", &__repr__<Rational>);
-    rational_class.def("__lt__",&__lt__<bool,Rational,Rational>);
+    rational_class.def("__lt__",&__lt__<Bool,Rational,Rational>);
 
     rational_class.def("__pos__", &__pos__<Rational,Rational>);
     rational_class.def("__neg__", &__neg__<Rational,Rational>);
@@ -256,11 +256,11 @@ void export_rational()
 }
 #endif
 
-void export_dyadic()
+Void export_dyadic()
 {
     class_< Dyadic > dyadic_class("Dyadic",init<Dyadic>());
     dyadic_class.def(init<>());
-    dyadic_class.def(init<int>());
+    dyadic_class.def(init<Int>());
     dyadic_class.def(init<double>());
     dyadic_class.def(+self);
     dyadic_class.def(-self);
@@ -273,7 +273,7 @@ void export_dyadic()
     dyadic_class.def("__repr__", &__cstr__<Dyadic>);
 }
 
-void export_decimal()
+Void export_decimal()
 {
     class_< Decimal > decimal_class("Decimal");
     decimal_class.def(init<double>());
@@ -296,10 +296,10 @@ Real tan(Real);
 Real atan(Real);
 }
 
-void export_real()
+Void export_real()
 {
     class_<Real> real_class("Real",init<Real>());
-    real_class.def(init<int>());
+    real_class.def(init<Int>());
 #ifdef HAVE_GMPXX_H
     real_class.def(init<Integer>());
     real_class.def(init<Rational>());
@@ -318,10 +318,10 @@ void export_real()
     real_class.def(self * self);
     real_class.def(self / self);
 
-    real_class.def(int() + self);
-    real_class.def(int() - self);
-    real_class.def(int() * self);
-    real_class.def(int() / self);
+    real_class.def(Int() + self);
+    real_class.def(Int() - self);
+    real_class.def(Int() * self);
+    real_class.def(Int() / self);
 
     real_class.def(self == self);
     real_class.def(self != self);
@@ -332,7 +332,7 @@ void export_real()
 
     def("pi", (Real(*)()) &pi_function);
 
-    def("pow",  (Real(*)(Real, int)) &pow);
+    def("pow",  (Real(*)(Real, Int)) &pow);
     def("sqr", (Real(*)(Real)) &sqr);
     def("rec", (Real(*)(Real)) &rec);
     def("sqrt", (Real(*)(Real)) &sqrt);
@@ -344,7 +344,7 @@ void export_real()
     def("tan", (Real(*)(Real)) &tan);
     def("atan", (Real(*)(Real)) &atan);
 
-    implicitly_convertible<int,Real>();
+    implicitly_convertible<Int,Real>();
 #ifdef HAVE_GMPXX_H
     implicitly_convertible<Integer,Real>();
     implicitly_convertible<Rational,Real>();
@@ -356,7 +356,7 @@ void export_real()
 
 
 
-void export_exact_float()
+Void export_exact_float()
 {
     class_< ExactFloat > exact_float_class("ExactFloat",init<ExactFloat>());
     exact_float_class.def(init<>());
@@ -374,7 +374,7 @@ void export_exact_float()
     exact_float_class.def("__repr__", &__cstr__<ExactFloat>);
 }
 
-void export_validated_float()
+Void export_validated_float()
 {
     using boost::python::class_;
     using boost::python::init;
@@ -441,9 +441,9 @@ void export_validated_float()
     def("max", (ValidatedFloat(*)(ValidatedFloat,ValidatedFloat)) &max);
     def("min", (ValidatedFloat(*)(ValidatedFloat,ValidatedFloat)) &min);
 
-    def("trunc", (ValidatedFloat(*)(ValidatedFloat,uint)) &trunc, "truncate to n binary digits");
+    def("trunc", (ValidatedFloat(*)(ValidatedFloat,Nat)) &trunc, "truncate to n binary digits");
     def("abs", (ValidatedFloat(*)(ValidatedFloat)) &abs, "validated_float absolute value function");
-    def("pow",  (ValidatedFloat(*)(ValidatedFloat,int)) &pow, "validated_float power function");
+    def("pow",  (ValidatedFloat(*)(ValidatedFloat,Int)) &pow, "validated_float power function");
     def("sqr", (ValidatedFloat(*)(ValidatedFloat)) &sqr, "validated_float square function");
     def("rec", (ValidatedFloat(*)(ValidatedFloat)) &rec);
     def("sqrt", (ValidatedFloat(*)(ValidatedFloat)) &sqrt);
@@ -458,7 +458,7 @@ void export_validated_float()
     def("atan", (ValidatedFloat(*)(ValidatedFloat)) &atan);
 }
 
-void export_upper_float()
+Void export_upper_float()
 {
     class_< UpperFloat > upper_float_class("UpperFloat");
     upper_float_class.def(init<double>());
@@ -473,7 +473,7 @@ void export_upper_float()
     implicitly_convertible<ValidatedFloat,UpperFloat>();
 }
 
-void export_lower_float()
+Void export_lower_float()
 {
     class_< LowerFloat > lower_float_class("LowerFloat");
     lower_float_class.def(init<double>());
@@ -489,7 +489,7 @@ void export_lower_float()
     implicitly_convertible<ValidatedFloat,LowerFloat>();
 }
 
-void export_approximate_float()
+Void export_approximate_float()
 {
     using boost::python::class_;
     using boost::python::init;
@@ -545,7 +545,7 @@ void export_approximate_float()
     def("min", (ApproximateFloat(*)(ApproximateFloat,ApproximateFloat)) &min);
 
     def("abs", (ApproximateFloat(*)(ApproximateFloat)) &abs);
-    def("pow",  (ApproximateFloat(*)(ApproximateFloat,int)) &pow);
+    def("pow",  (ApproximateFloat(*)(ApproximateFloat,Int)) &pow);
     def("sqr", (ApproximateFloat(*)(ApproximateFloat)) &sqr);
     def("rec", (ApproximateFloat(*)(ApproximateFloat)) &rec);
     def("sqrt", (ApproximateFloat(*)(ApproximateFloat)) &sqrt);
@@ -560,7 +560,7 @@ void export_approximate_float()
     def("atan", (ApproximateFloat(*)(ApproximateFloat)) &atan);
 }
 
-void export_float()
+Void export_float()
 {
     class_< Float > float_class("Float");
     float_class.def(init<double>());
@@ -593,7 +593,7 @@ void export_float()
     def("max",(Float(*)(Float,Float)) &Ariadne::max);
     def("abs", (Float(*)(Float)) &Ariadne::abs);
 
-    def("pow",(Float(*)(Float,int)) &Ariadne::pow);
+    def("pow",(Float(*)(Float,Int)) &Ariadne::pow);
 
     def("rec",(Float(*)(Float)) &Ariadne::rec);
     def("sqr",(Float(*)(Float)) &Ariadne::sqr);
@@ -612,7 +612,7 @@ void export_float()
 }
 
 
-void
+Void
 numeric_submodule()
 {
     export_tribool();

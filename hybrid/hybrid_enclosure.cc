@@ -67,9 +67,9 @@ OutputStream& operator<<(OutputStream& os, const EnclosureVariableType& evt) {
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
 List<String> variable_names(const List<EnclosureVariableType>& vt) {
-    std::map<EnclosureVariableType,uint> counts;
+    std::map<EnclosureVariableType,Nat> counts;
     List<String> result;
-    for(uint i=0; i!=vt.size(); ++i) {
+    for(Nat i=0; i!=vt.size(); ++i) {
         result.append( str(vt[i]) + str(counts[vt[i]]++) );
     }
     return result;
@@ -165,7 +165,7 @@ HybridEnclosure::dwell_time_function() const
     return this->_set.dwell_time_function();
 }
 
-void HybridEnclosure::set_time_function(const ValidatedScalarFunctionModel& time_function)
+Void HybridEnclosure::set_time_function(const ValidatedScalarFunctionModel& time_function)
 {
     ARIADNE_NOT_IMPLEMENTED;
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->parameter_domain(),time_function.domain()),
@@ -199,13 +199,13 @@ HybridEnclosure::dwell_time_range() const
     return apply(this->dwell_time_function(),this->_set.reduced_domain());
 }
 
-uint
+Nat
 HybridEnclosure::number_of_constraints() const
 {
     return this->_set.number_of_constraints();
 }
 
-uint
+Nat
 HybridEnclosure::number_of_parameters() const
 {
     return this->_set.number_of_parameters();
@@ -224,46 +224,46 @@ HybridEnclosure::bounding_box() const
 }
 
 
-void HybridEnclosure::new_parameter(ExactInterval ivl, EnclosureVariableType vt)
+Void HybridEnclosure::new_parameter(ExactInterval ivl, EnclosureVariableType vt)
 {
     this->_set.new_parameter(ivl);
     this->_variables.append(vt);
 }
 
-void HybridEnclosure::new_variable(ExactInterval ivl, EnclosureVariableType vt)
+Void HybridEnclosure::new_variable(ExactInterval ivl, EnclosureVariableType vt)
 {
     this->_set.new_variable(ivl);
     this->_variables.append(vt);
 }
 
-void HybridEnclosure::new_invariant(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
+Void HybridEnclosure::new_invariant(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
     this->_set.new_negative_state_constraint(constraint_function);
 }
 
 
-void HybridEnclosure::new_activation(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
+Void HybridEnclosure::new_activation(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
     this->_set.new_positive_state_constraint(constraint_function);
 }
 
-void HybridEnclosure::new_guard(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
+Void HybridEnclosure::new_guard(DiscreteEvent event, ValidatedScalarFunction constraint_function) {
     this->_set.new_zero_state_constraint(constraint_function);
 }
 
-void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
+Void HybridEnclosure::new_parameter_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
     this->_set.new_parameter_constraint(constraint);
 }
 
-void HybridEnclosure::new_state_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
+Void HybridEnclosure::new_state_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
     this->_set.new_state_constraint(constraint);
 }
 
 
-void HybridEnclosure::new_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
+Void HybridEnclosure::new_constraint(DiscreteEvent event, ValidatedConstraint constraint) {
     this->new_state_constraint(event,constraint);
 }
 
 
-void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealSpace space, const ValidatedVectorFunction& map)
+Void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, RealSpace space, const ValidatedVectorFunction& map)
 {
     ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"*this="<<*this<<", event="<<event<<", space="<<space<<", target="<<target<<", map="<<map);
     this->_events.append(event);
@@ -272,76 +272,76 @@ void HybridEnclosure::apply_reset(DiscreteEvent event, DiscreteLocation target, 
     this->_set.apply_map(map);
 }
 
-void HybridEnclosure::apply_fixed_evolve_step(const ValidatedVectorFunctionModel& phi, const ExactFloat& elps)
+Void HybridEnclosure::apply_fixed_evolve_step(const ValidatedVectorFunctionModel& phi, const ExactFloat& elps)
 {
     this->_set.apply_fixed_evolve_step(phi,elps);
 }
 
-void HybridEnclosure::apply_spacetime_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
+Void HybridEnclosure::apply_spacetime_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
 {
     this->_set.apply_spacetime_evolve_step(phi,elps);
 }
 
-void HybridEnclosure::apply_spacetime_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
+Void HybridEnclosure::apply_spacetime_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
 {
     this->_set.apply_spacetime_reach_step(phi,elps);
 }
 
 
-void HybridEnclosure::apply_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
+Void HybridEnclosure::apply_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
 {
     this->_set.apply_parameter_evolve_step(phi,elps);
 }
 
-void HybridEnclosure::apply_finishing_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& omega)
+Void HybridEnclosure::apply_finishing_evolve_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& omega)
 {
     this->_set.apply_finishing_parameter_evolve_step(phi,omega);
 }
 
 
-void HybridEnclosure::apply_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
+Void HybridEnclosure::apply_reach_step(const ValidatedVectorFunctionModel& phi, const ValidatedScalarFunctionModel& elps)
 {
     this->_set.apply_parameter_reach_step(phi,elps);
 }
 
-void HybridEnclosure::apply_full_reach_step(const ValidatedVectorFunctionModel& phi)
+Void HybridEnclosure::apply_full_reach_step(const ValidatedVectorFunctionModel& phi)
 {
     this->_set.apply_full_reach_step(phi);
 }
 
 
 
-void HybridEnclosure::bound_time(Real tmax) {
+Void HybridEnclosure::bound_time(Real tmax) {
     if(this->time_range().upper()>ValidatedNumber(tmax).lower()) {
         this->_set.new_negative_parameter_constraint(this->time_function()-ValidatedNumber(tmax));
     }
 }
 
-void HybridEnclosure::bound_time(ValidatedScalarFunction tmax) {
+Void HybridEnclosure::bound_time(ValidatedScalarFunction tmax) {
     this->_set.new_negative_parameter_constraint(this->time_function()-this->_set.function_factory().create(this->_set.domain(),tmax));
 }
 
-void HybridEnclosure::set_time(Real time)
+Void HybridEnclosure::set_time(Real time)
 {
     this->_set.new_zero_parameter_constraint(this->time_function()-ValidatedNumber(time));
 }
 
-void HybridEnclosure::set_time(ValidatedScalarFunction time)
+Void HybridEnclosure::set_time(ValidatedScalarFunction time)
 {
     this->_set.new_zero_parameter_constraint(this->time_function()-this->function_factory().create(this->_set.domain(),time));
 }
 
 
-void HybridEnclosure::set_maximum_time(DiscreteEvent event, Float final_time)
+Void HybridEnclosure::set_maximum_time(DiscreteEvent event, Float final_time)
 {
     this->_set.new_negative_parameter_constraint(this->time_function()-ValidatedNumber(final_time)); // Deprecated
 }
 
-void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ValidatedScalarFunction constraint) {
+Void HybridEnclosure::new_time_step_bound(DiscreteEvent event, ValidatedScalarFunction constraint) {
     ARIADNE_NOT_IMPLEMENTED; // Deprecated
 }
 
-void HybridEnclosure::set_step_time(ExactFloat time)
+Void HybridEnclosure::set_step_time(ExactFloat time)
 {
     ARIADNE_NOT_IMPLEMENTED; // Deprecated
 }
@@ -365,7 +365,7 @@ HybridEnclosure::continuous_set() const {
 }
 
 
-uint HybridEnclosure::dimension() const {
+Nat HybridEnclosure::dimension() const {
     return this->space_function().result_size();
 }
 
@@ -393,23 +393,23 @@ List<ValidatedConstraint> HybridEnclosure::constraints() const {
     return this->continuous_set().constraints();
 }
 
-void
+Void
 HybridEnclosure::restrict(const ExactBox& subdomain)
 {
     this->_set.restrict(subdomain);
 }
 
-void
+Void
 HybridEnclosure::recondition()
 {
     this->uniform_error_recondition();
     this->kuhn_recondition();
 }
 
-void
+Void
 HybridEnclosure::uniform_error_recondition()
 {
-    uint old_number_of_parameters = this->number_of_parameters();
+    Nat old_number_of_parameters = this->number_of_parameters();
     this->_set.uniform_error_recondition();
     ExactIntervalVector new_variables = project(this->parameter_domain(),range(old_number_of_parameters,this->number_of_parameters()));
     this->_variables.concatenate(List<EnclosureVariableType>(new_variables.size(),ERROR));
@@ -417,7 +417,7 @@ HybridEnclosure::uniform_error_recondition()
 }
 
 
-void
+Void
 HybridEnclosure::kuhn_recondition()
 {
     this->_set.kuhn_recondition();
@@ -430,14 +430,14 @@ HybridEnclosure::split() const
 {
     List<ExactIntervalVector> subdomains = this->continuous_set().splitting_subdomains_zeroth_order();
     List<HybridEnclosure> result(subdomains.size(),*this);
-    for(uint i=0; i!=result.size(); ++i) {
+    for(Nat i=0; i!=result.size(); ++i) {
         result[i].restrict(subdomains[i]);
     }
     return result;
 }
 
 
-void check_subset(const ExactIntervalVector& dom1, const ExactIntervalVector& dom2, const char* msg)
+Void check_subset(const ExactIntervalVector& dom1, const ExactIntervalVector& dom2, const char* msg)
 {
     if(dom1.size()!=dom2.size()) {
         ARIADNE_FAIL_MSG(msg<<" size("<<dom1<<")!=size("<<dom2<<")");
@@ -446,20 +446,20 @@ void check_subset(const ExactIntervalVector& dom1, const ExactIntervalVector& do
     }
 }
 
-void
+Void
 HybridEnclosure::_check() const
 {
     //this->_set.check();
     const ExactIntervalVector& reduced_domain = this->_set.reduced_domain();
     check_subset(reduced_domain,this->_set.domain(),"domain");
     check_subset(reduced_domain,this->space_function().domain(),"function domain");
-    for(uint i=0; i!=this->_set.constraints().size(); ++i) {
+    for(Nat i=0; i!=this->_set.constraints().size(); ++i) {
         check_subset(reduced_domain,this->_set.constraint(i).function().domain(),"constraint");
     }
     check_subset(reduced_domain,this->time_function().domain(),"time");
 }
 
-void HybridEnclosure::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const
+Void HybridEnclosure::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const
 {
     Projection2d proj=Ariadne::projection(this->space(),axes);
     this->continuous_set().draw(canvas,proj);
@@ -507,13 +507,13 @@ OutputStream& HybridEnclosure::repr(OutputStream& os) const
 }
 
 
-void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreeSet& hgts, int depth) const {
+Void HybridEnclosure::adjoin_outer_approximation_to(HybridGridTreeSet& hgts, Int depth) const {
     const Enclosure& set = this->continuous_set();
     GridTreeSet& paving = hgts[this->location()];
     set.adjoin_outer_approximation_to(paving,depth);
 }
 
-HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, int depth) {
+HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const HybridGrid& g, Int depth) {
     HybridGridTreeSet result(g);
     for(ListSet<HybridEnclosure>::ConstIterator iter=hls.begin(); iter!=hls.end(); ++iter) {
         result[iter->location()].adjoin_outer_approximation(iter->continuous_set(),depth);
@@ -521,7 +521,7 @@ HybridGridTreeSet outer_approximation(const ListSet<HybridEnclosure>& hls, const
     return result;
 }
 
-void
+Void
 draw(FigureInterface& figure, const ListSet<HybridEnclosure>& hels) {
     for(ListSet<HybridEnclosure>::ConstIterator iter=hels.begin(); iter!=hels.end(); ++iter) {
         draw(figure,iter->continuous_set());

@@ -63,7 +63,7 @@ namespace Ariadne {
  *  Public methods are available to read (get) and write (set) the property "property_name", with the following signatures:
  *
  *  const PropertyType& property_name() const;
- *  void set_property_name(const PropertyType value);
+ *  Void set_property_name(const PropertyType value);
  *
  *  Please note that the argument to the write method must be passed by value for clear responsibility and simplicity of
  *  manually setting the property. If efficiency demands not to perform any copy, then the PropertyType must be a std::shared_ptr

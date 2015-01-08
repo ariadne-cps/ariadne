@@ -49,16 +49,16 @@ using namespace std;
 class TestMapEvolver
 {
   public:
-    void test() const;
+    Void test() const;
 };
 
-int main()
+Int main()
 {
     TestMapEvolver().test();
     return ARIADNE_TEST_FAILURES;
 }
 
-void TestMapEvolver::test() const
+Void TestMapEvolver::test() const
 {
     cout << __PRETTY_FUNCTION__ << endl;
 

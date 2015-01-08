@@ -25,9 +25,9 @@
 
 namespace Ariadne { class ExactInterval; }
 
-void export_interval();
-template<class X> void export_vector();
-template<class X> void export_matrix();
+Void export_interval();
+template<class X> Void export_vector();
+template<class X> Void export_matrix();
 
 using namespace Ariadne;
 

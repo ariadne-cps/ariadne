@@ -35,15 +35,15 @@ namespace Ariadne {
 class DiscreteEvent {
   public:
     DiscreteEvent() : _id("e?") { }
-    DiscreteEvent(int n) : _id(StringType("e"+to_str(n))) { if(n<0) { _id=StringType("i"+to_str(-n)); } }
+    DiscreteEvent(Int n) : _id(StringType("e"+to_str(n))) { if(n<0) { _id=StringType("i"+to_str(-n)); } }
     DiscreteEvent(const StringType& s) : _id(s) { }
     StringType name() const { return this->_id; }
-    bool operator==(const DiscreteEvent& e) const { return this->_id==e._id; }
-    bool operator!=(const DiscreteEvent& e) const { return this->_id!=e._id; }
-    bool operator<=(const DiscreteEvent& e) const { return this->_id<=e._id; }
-    bool operator>=(const DiscreteEvent& e) const { return this->_id>=e._id; }
-    bool operator< (const DiscreteEvent& e) const { return this->_id< e._id; }
-    bool operator> (const DiscreteEvent& e) const { return this->_id> e._id; }
+    Bool operator==(const DiscreteEvent& e) const { return this->_id==e._id; }
+    Bool operator!=(const DiscreteEvent& e) const { return this->_id!=e._id; }
+    Bool operator<=(const DiscreteEvent& e) const { return this->_id<=e._id; }
+    Bool operator>=(const DiscreteEvent& e) const { return this->_id>=e._id; }
+    Bool operator< (const DiscreteEvent& e) const { return this->_id< e._id; }
+    Bool operator> (const DiscreteEvent& e) const { return this->_id> e._id; }
     friend OutputStream& operator<<(OutputStream& os, const DiscreteEvent& e);
   private:
     StringType _id;
@@ -54,7 +54,7 @@ inline OutputStream& operator<<(OutputStream& os, const DiscreteEvent& e) {
 }
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
-  template<class A> inline void serialize(A& archive, DiscreteEvent& event, const uint version) {
+  template<class A> inline Void serialize(A& archive, DiscreteEvent& event, const Nat version) {
       StringType& id=reinterpret_cast<StringType&>(event);
       archive & id;
   }

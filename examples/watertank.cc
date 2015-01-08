@@ -29,9 +29,9 @@
 
 using namespace Ariadne;
 
-int main(int argc, const char* argv[])
+Int main(Int argc, const char* argv[])
 {
-    uint evolver_verbosity = 0;
+    Nat evolver_verbosity = 0;
     if(argc>1) { evolver_verbosity=atoi(argv[1]); }
 
     typedef GeneralHybridEvolver GeneralHybridEvolverType;

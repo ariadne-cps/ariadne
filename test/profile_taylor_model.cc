@@ -94,8 +94,8 @@ bind(const F& f,const A1& a1,const A2& a2) {
 
 
 namespace Ariadne {
-void _mul_clear(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y);
-void _mul_full(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y);
+Void _mul_clear(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y);
+Void _mul_full(ValidatedTaylorModel& r, const ValidatedTaylorModel& x, const ValidatedTaylorModel& y);
 }
 
 
@@ -153,7 +153,7 @@ typedef ValidatedTaylorModel(*TaylorFunctionPtr)(const Vector<ValidatedTaylorMod
 
 
 template<class T>
-void profile(uint ntries, const char* name, const T& run)
+Void profile(Nat ntries, const char* name, const T& run)
 {
     typename T::result_type res=run();
     //std::cerr<< "\n" << name << "(" << args << ")=\n  " << res << "\n\n";
@@ -161,14 +161,14 @@ void profile(uint ntries, const char* name, const T& run)
     boost::timer tm;
 
     tm.restart();
-    for(uint i=0; i!=ntries; ++i) {
+    for(Nat i=0; i!=ntries; ++i) {
         res=run();
     }
 
     double total_time = tm.elapsed();
     double average_time_in_microseconds = 1000000*(total_time/ntries);
     Float error = res.error();
-    unsigned int size = res.number_of_nonzeros();
+    unsigned Int size = res.number_of_nonzeros();
 
     std::cout << std::setw(20) << std::left << name << std::right
               << std::setw(10) << std::fixed << std::setprecision(2) << average_time_in_microseconds << " "
@@ -177,12 +177,12 @@ void profile(uint ntries, const char* name, const T& run)
               << std::endl;
 }
 
-int main(int argc, const char* argv[]) {
-    uint ntries=20;
+Int main(Int argc, const char* argv[]) {
+    Nat ntries=20;
     if(argc>1) { ntries=atoi(argv[1]); }
 
     Vector<Float> c={1.0,2.0};
-    int i;
+    Int i;
 
     TrivialSweeper trivial_sweeper;
     Vector<ValidatedTaylorModel> v(2,ValidatedTaylorModel(2,trivial_sweeper));

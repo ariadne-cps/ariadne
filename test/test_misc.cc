@@ -29,5 +29,5 @@ namespace Ariadne { }
 
 using namespace Ariadne;
 
-int main() {
+Int main() {
 }

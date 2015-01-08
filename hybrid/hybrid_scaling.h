@@ -36,7 +36,7 @@
 
 #include "expression/variables.h"
 
-typedef void Void;
+typedef Void Void;
 typedef OutputStream OutputStream;
 
 namespace Ariadne {

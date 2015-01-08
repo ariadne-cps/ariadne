@@ -46,7 +46,7 @@ typedef Matrix<UpperInterval> UpperIntervalMatrix;
 // Return r[i]=x[i]-c for i=1,...,n
 Vector<Float> esub(const Vector<Float>& x, const Float& c) {
     Vector<Float> r(x.size());
-    for(uint i=0; i!=r.size(); ++i) {
+    for(Nat i=0; i!=r.size(); ++i) {
         r[i]=x[i]-c;
     }
     return r;
@@ -55,7 +55,7 @@ Vector<Float> esub(const Vector<Float>& x, const Float& c) {
 // Return r[i]=x[i]*y[i] for i=1,...,n
 Vector<Float> emul(const Vector<Float>& x, const Vector<Float>& y) {
     Vector<Float> r(x.size());
-    for(uint i=0; i!=r.size(); ++i) {
+    for(Nat i=0; i!=r.size(); ++i) {
         r[i]=x[i]*y[i];
     }
     return r;
@@ -64,7 +64,7 @@ Vector<Float> emul(const Vector<Float>& x, const Vector<Float>& y) {
 // Return r[i]=x[i]*y[i] for i=1,...,n
 Vector<Float> ediv(const Vector<Float>& x, const Vector<Float>& z) {
     Vector<Float> r(x.size());
-    for(uint i=0; i!=r.size(); ++i) {
+    for(Nat i=0; i!=r.size(); ++i) {
         r[i]=x[i]/z[i];
     }
     return r;
@@ -73,7 +73,7 @@ Vector<Float> ediv(const Vector<Float>& x, const Vector<Float>& z) {
 // Return r[i]=x[i]*y[i]+z for i=1,...,n
 Vector<Float> efma(const Vector<Float>& x, const Vector<Float>& y, const Float& z) {
     Vector<Float> r(x.size());
-    for(uint i=0; i!=r.size(); ++i) {
+    for(Nat i=0; i!=r.size(); ++i) {
         r[i]=x[i]*y[i]+z;
     }
     return r;
@@ -82,18 +82,18 @@ Vector<Float> efma(const Vector<Float>& x, const Vector<Float>& y, const Float& 
 // Return r[i]=1/y[i] for i=1,...,n
 Vector<Float> erec(const Vector<Float>& v) {
     Vector<Float> r(v.size());
-    for(uint i=0; i!=r.size(); ++i) {
+    for(Nat i=0; i!=r.size(); ++i) {
         r[i]=1.0/v[i];
     }
     return r;
 }
 
-bool is_nan(Float const& x) {
+Bool is_nan(Float const& x) {
     return std::isnan(x.get_d());
 }
 
-bool is_nan(Vector<Float> const& v) {
-    for(uint i=0; i!=v.size(); ++i) {
+Bool is_nan(Vector<Float> const& v) {
+    for(Nat i=0; i!=v.size(); ++i) {
         if(is_nan(v[i])) { return true; }
     }
     return false;
@@ -105,10 +105,10 @@ Matrix<Float> adat(const Matrix<Float>& A, const Vector<Float>& D)
 {
     Matrix<Float> R(A.row_size(),A.row_size());
     ARIADNE_ASSERT(D.size()==A.column_size());
-    for(uint i=0; i!=A.row_size(); ++i) {
-        for(uint k=0; k!=A.column_size(); ++k) {
+    for(Nat i=0; i!=A.row_size(); ++i) {
+        for(Nat k=0; k!=A.column_size(); ++k) {
             Float ADik=A[i][k]*D[k];
-            for(uint j=0; j!=A.row_size(); ++j) {
+            for(Nat j=0; j!=A.row_size(); ++j) {
                 R[i][j]+=ADik*A[j][k];
             }
         }
@@ -116,22 +116,22 @@ Matrix<Float> adat(const Matrix<Float>& A, const Vector<Float>& D)
     return R;
 }
 
-bool all_greater(const Vector<Float>& x, const Float& e) {
-    for(uint i=0; i!=x.size(); ++i) {
+Bool all_greater(const Vector<Float>& x, const Float& e) {
+    for(Nat i=0; i!=x.size(); ++i) {
         if(x[i]<=e) { return false; }
     }
     return true;
 }
 
-bool all_less(const Vector<Float>& x, const Float& e) {
-    for(uint i=0; i!=x.size(); ++i) {
+Bool all_less(const Vector<Float>& x, const Float& e) {
+    for(Nat i=0; i!=x.size(); ++i) {
         if(x[i]>=e) { return false; }
     }
     return true;
 }
 
-bool all_greater(const Vector<Float>& x1, const Vector<Float>& x2) {
-    for(uint i=0; i!=x1.size(); ++i) {
+Bool all_greater(const Vector<Float>& x1, const Vector<Float>& x2) {
+    for(Nat i=0; i!=x1.size(); ++i) {
         if(x1[i]<=x2[i]) { return false; }
     }
     return true;
@@ -141,9 +141,9 @@ bool all_greater(const Vector<Float>& x1, const Vector<Float>& x2) {
 Float compute_mu(const Vector<Float>& xl, const Vector<Float>& xu,
                  const Vector<Float>& x, const Vector<Float>& zl, const Vector<Float>& zu)
 {
-    const uint n=x.size();
+    const Nat n=x.size();
     Float mu = 0.0;
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         if(xl[i]!=-inf) { mu += ((x[i]-xl[i])*zl[i]); }
         if(xu[i]!=+inf) { mu += ((xu[i]-x[i])*zu[i]); }
     }
@@ -163,8 +163,8 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
                      const Matrix<Float>& A, const Vector<Float>& b,
                      const Vector<Float>& x, const Vector<Float>& y) const
 {
-    const uint m=A.row_size();
-    const uint n=A.column_size();
+    const Nat m=A.row_size();
+    const Nat n=A.column_size();
 
     // x should be an approximate solution to Ax=b
     // Use the fact that for any x, x'=(x + A^T (AA^T)^{-1}(b-Ax)) satisfies Ax'=0
@@ -172,15 +172,15 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
     Vector<ValidatedNumber> ivle = make_exact(b)-make_exact(A)*ivlx;
 
     Matrix<ValidatedNumber> ivlS(m,m);
-    for(uint i1=0; i1!=m; ++i1) {
-        for(uint i2=i1; i2!=m; ++i2) {
-            for(uint j=0; j!=n; ++j) {
+    for(Nat i1=0; i1!=m; ++i1) {
+        for(Nat i2=i1; i2!=m; ++i2) {
+            for(Nat j=0; j!=n; ++j) {
                 ivlS[i1][i2] += mul_val(A[i1][j],A[i2][j]);
             }
         }
     }
-    for(uint i1=0; i1!=m; ++i1) {
-        for(uint i2=0; i2!=i1; ++i2) {
+    for(Nat i1=0; i1!=m; ++i1) {
+        for(Nat i2=0; i2!=i1; ++i2) {
             ivlS[i1][i2]=ivlS[i2][i1];
         }
     }
@@ -191,7 +191,7 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
 
     ARIADNE_LOG(2,"[x] = "<<ivlx);
     Tribool result=true;
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         if(ivlx[i].lower().raw()<=xl[i] || ivlx[i].upper().raw()>=xu[i]) {
             result = indeterminate; break;
         }
@@ -204,10 +204,10 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
     Vector<ValidatedNumber> z=transpose(make_exact(A)) * make_exact(y);
     Float mx = 0.0;
     set_rounding_downward();
-    for(uint i=0; i!=y.size(); ++i) {
+    for(Nat i=0; i!=y.size(); ++i) {
         mx += (b[i]*y[i]).raw();
     }
-    for(uint i=0; i!=x.size(); ++i) {
+    for(Nat i=0; i!=x.size(); ++i) {
         Float neg_xui = -xu[i];
         if(z[i].upper()>0.0) { mx += z[i].upper().raw() * neg_xui; }
         if(z[i].lower()<0.0) { mx += z[i].lower().raw() * xl[i]; }
@@ -228,13 +228,13 @@ InteriorPointSolver::minimise(const Vector<Float>& c,
     ARIADNE_LOG(2,"A="<<A<<", b="<<b<<", c="<<c<<"\n");
     ARIADNE_LOG(2,"xl="<<xl<<", xu="<<xu<<"\n");
 
-    const uint m = b.size();
-    const uint n = c.size();
+    const Nat m = b.size();
+    const Nat n = c.size();
     Vector<Float> y(m, 0.0);
     Vector<Float> x(n);
     Vector<Float> zl(n);
     Vector<Float> zu(n);
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         if(xl[i]==-inf) {
             if(xu[i]==+inf) { x[i]=0.0; } else { x[i] = xu[i]-1.0; }
         } else {
@@ -244,7 +244,7 @@ InteriorPointSolver::minimise(const Vector<Float>& c,
         if(xu[i]==+inf) { zu[i] = 0.0; } else { zu[i] = 1.0; }
     }
 
-    bool done;
+    Bool done;
     do {
         done = this->_minimisation_step(c,xl,xu,A,b, x,y,zl,zu);
     } while(!done);
@@ -276,7 +276,7 @@ hotstarted_minimise(const Vector<Float>& c,
     ARIADNE_ASSERT(A.column_size()==zu.size());
 
     const double maxerror=1e-3;
-    const uint maxsteps=10;
+    const Nat maxsteps=10;
 
     Float cx,yb;
     cx=dot(c,x);
@@ -286,7 +286,7 @@ hotstarted_minimise(const Vector<Float>& c,
     ARIADNE_LOG(2,"xl="<<xl<<" xu="<<xu<<" A="<<A<<" b="<<b<<" c="<<c<<"\n");
     ARIADNE_LOG(2,"x="<<x<<" y="<<y<<" z="<<zl<<" zu="<<zu<<"\n");
 
-    uint steps=0;
+    Nat steps=0;
     while(steps<maxsteps && (cx-yb)>maxerror) {
         this->_minimisation_step(c,xl,xu,A,b, x,y,zl,zu);
         ++steps;
@@ -306,14 +306,14 @@ feasible(const Vector<Float>& xl, const Vector<Float>& xu,
     ARIADNE_LOG(3,"A="<<A<<", b="<<b<<"\n");
     ARIADNE_LOG(3,"xl="<<xl<<", xu="<<xu<<"\n");
 
-    const uint m = A.row_size();
-    const uint n = A.column_size();
+    const Nat m = A.row_size();
+    const Nat n = A.column_size();
     Vector<Float> c(n, 0.0);
     Vector<Float> y(m, 0.0);
     Vector<Float> x(n);
     Vector<Float> zl(n);
     Vector<Float> zu(n);
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         if(xl[i]==-inf) {
             if(xu[i]==+inf) { x[i]=0.0; } else { x[i] = xu[i]-1.0; }
         } else {
@@ -325,7 +325,7 @@ feasible(const Vector<Float>& xl, const Vector<Float>& xu,
     Vector<UpperInterval> X=hull(Vector<ExactFloat>(xl),Vector<ExactFloat>(xu));
 
     const double THRESHOLD = 1e-8;
-    uint step=0;
+    Nat step=0;
     while(step++<24) {
         LinearProgramStatus result=this->_feasibility_step(xl,xu,A,b, x,y,zl,zu);
         if(result==PRIMAL_DUAL_FEASIBLE || result==PRIMAL_FEASIBLE) {
@@ -365,8 +365,8 @@ _minimisation_step(const Vector<Float>& c, const Vector<Float>& xl, const Vector
     static const double scale=0.75;
 
 
-    const uint m=A.row_size();
-    const uint n=A.column_size();
+    const Nat m=A.row_size();
+    const Nat n=A.column_size();
 
     Vector<Float> dx(n),dy(m),dzl(n),dzu(n);
     Vector<Float> nx,ny,nzl,nzu;
@@ -381,7 +381,7 @@ _minimisation_step(const Vector<Float>& c, const Vector<Float>& xl, const Vector
     // rx = Ax-b; ry=yA+zl-zu-c; rzl=(x-xl).zl-mu; rzu=(xu-x).zu-mu.
     rx=A*x-b;
     ry=transpose(A)*y+(zl-zu)-c;
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         if(xl[i]!=-inf) { rzl[i] = (x[i]-xl[i])*zl[i] - mu; } else { rzl[i]=0.0; }
         if(xu[i]!=+inf) { rzu[i] = (xu[i]-x[i])*zu[i] - mu; } else { rzu[i]=0.0; }
     }

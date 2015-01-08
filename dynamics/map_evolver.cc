@@ -56,11 +56,11 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 namespace Ariadne {
 
 // Allow subdivisions in upper evolution
-const bool ENABLE_SUBDIVISIONS = false;
+const Bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
-const bool ENABLE_PREMATURE_TERMINATION = false;
+const Bool ENABLE_PREMATURE_TERMINATION = false;
 
-static const int BLOCKING_EVENT = -2;
+static const Int BLOCKING_EVENT = -2;
 using std::shared_ptr;
 
 class DegenerateCrossingException { };
@@ -99,7 +99,7 @@ enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
 
 
 
-void
+Void
 MapEvolver::
 _evolution(EnclosureListType& final_sets,
            EnclosureListType& reach_sets,
@@ -107,7 +107,7 @@ _evolution(EnclosureListType& final_sets,
            const EnclosureType& initial_set,
            const TerminationType& maximum_time,
            Semantics semantics,
-           bool reach) const
+           Bool reach) const
 {
     verbosity=0;
 
@@ -140,7 +140,7 @@ _evolution(EnclosureListType& final_sets,
                   && (initial_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List<EnclosureType> subdivisions=subdivide(initial_enclosure);
-            for(uint i=0; i!=subdivisions.size(); ++i) {
+            for(Nat i=0; i!=subdivisions.size(); ++i) {
                 EnclosureType const& subdivided_enclosure=subdivisions[i];
                 working_sets.push_back(make_pair(initial_time,subdivided_enclosure));
             }
@@ -162,7 +162,7 @@ _evolution(EnclosureListType& final_sets,
 
 
 
-void
+Void
 MapEvolver::
 _evolution_step(List< TimedEnclosureType >& working_sets,
                 EnclosureListType& final_sets,
@@ -171,7 +171,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 const TimedEnclosureType& current_set,
                 const TimeType& maximum_time,
                 Semantics semantics,
-                bool reach) const
+                Bool reach) const
 {
     EnclosureType initial_enclosure;
     TimeType initial_time;
@@ -184,8 +184,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
     ARIADNE_LOG(2,"box = "<<initial_enclosure.bounding_box()<<" ");
     ARIADNE_LOG(2,"radius = "<<radius(initial_enclosure.bounding_box())<<"\n\n");
-    //const uint nd=initial_enclosure.result_size();
-    //const uint ng=initial_enclosure.argument_size();
+    //const Nat nd=initial_enclosure.result_size();
+    //const Nat ng=initial_enclosure.argument_size();
 
 
     /////////////// Main Evolution ////////////////////////////////

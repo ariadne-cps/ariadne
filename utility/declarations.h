@@ -40,6 +40,8 @@
 
 namespace Ariadne {
 
+typedef unsigned int uint;
+
 //! Internal name for output stream.
 typedef OutputStream OutputStream;
 
@@ -48,10 +50,10 @@ typedef void Void;
 
 //! Internal name for builtin boolean type.
 typedef bool Bool;
-//! Internal name for builtin unsigned integers.
-typedef unsigned int Nat;
 //! Internal name for builtin integers.
 typedef int Int;
+//! Internal name for builtin unsigned integers.
+typedef uint Nat;
 
 // Define as a class for consistency with other value types
 class String;

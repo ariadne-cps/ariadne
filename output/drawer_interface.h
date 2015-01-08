@@ -32,7 +32,7 @@
 
 namespace Ariadne {
 
-typedef void Void;
+typedef Void Void;
 class CanvasInterface;
 class PlanarProjectionMap;
 typedef PlanarProjectionMap Projection2d;

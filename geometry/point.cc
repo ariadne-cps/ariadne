@@ -57,12 +57,12 @@ UpperInterval operator+(ApproximateNumber x, UpperInterval y) { return UpperInte
 template<class X> ExactBox Point<X>::bounding_box() const {
     ExactBox r(this->dimension());
     Float e=eps();
-    for(uint i=0; i!=this->dimension(); ++i) {
+    for(Nat i=0; i!=this->dimension(); ++i) {
         r[i]=make_exact_interval((*this)[i]+UpperInterval(-e,+e)); }
     return r;
 }
 
-template<class X> void Point<X>::draw(CanvasInterface& canv, const Projection2d& proj) const {
+template<class X> Void Point<X>::draw(CanvasInterface& canv, const Projection2d& proj) const {
     canv.dot(numeric_cast<double>((*this)[proj.x_coordinate()]),numeric_cast<double>((*this)[proj.y_coordinate()]));
     canv.stroke();
 }

@@ -51,7 +51,7 @@ enum DrawingMethod { CURVE_DRAW, BOX_DRAW, AFFINE_DRAW, GRID_DRAW };
 extern DrawingMethod DRAWING_METHOD;
 //! \related Enclosure \brief The accuracy used to draw a set.
 //! HACK: May be replaced by more advanced functionality in the future.
-extern unsigned int DRAWING_ACCURACY;
+extern uint DRAWING_ACCURACY;
 
 //! \related Enclosure \brief The possible types of method used to discretise a nonlinear set.
 enum DiscretisationMethod { SUBDIVISION_DISCRETISE, AFFINE_DISCRETISE, CONSTRAINT_DISCRETISE };
@@ -94,7 +94,7 @@ class Enclosure
     List<ValidatedConstraintModel> _constraints;
     ValidatedFunctionModelFactoryInterface* _function_factory_ptr;
     mutable ExactBox _reduced_domain;
-    mutable bool _is_fully_reduced;
+    mutable Bool _is_fully_reduced;
   public:
     //! \brief Construct a set with \f$D=\emptyset\f$ in \f$\mathbb{R}^0\f$.
     explicit Enclosure();
@@ -133,65 +133,65 @@ class Enclosure
     ExactBox const constraint_bounds() const;
 
     //! \brief Introduces a new parameter with values in the interval \a ivl. The set itself does not change.
-    void new_parameter(ExactInterval ivl);
+    Void new_parameter(ExactInterval ivl);
     //! \brief Introduces a new independent variable with values in the interval \a ivl.
     //! Equivalent to constructing the set \f$S\times I\f$.
-    void new_variable(ExactInterval ivl);
+    Void new_variable(ExactInterval ivl);
     //! \brief Substitutes the expression \f$x_j=v(x_1,\ldots,x_{j-1},x_{j+1}\ldots,x_n)\f$ into the function and constraints.
     //! Requires that \f$v(D_1,\ldots,D_{j-1},D_{j+1}\ldots,D_n) \subset D_j\f$ where \f$D\f$ is the domain.
-    void substitute(uint j, ValidatedScalarFunctionModel v);
+    Void substitute(Nat j, ValidatedScalarFunctionModel v);
     //! \brief Substitutes the expression \f$x_j=c\f$ into the function and constraints.
-    void substitute(uint j, Float c);
+    Void substitute(Nat j, Float c);
 
     //! \brief Apply the map \f$r\f$ to the map \f$f\f$.
-    void apply_map(ValidatedVectorFunction r);
+    Void apply_map(ValidatedVectorFunction r);
     //! \brief Apply the flow \f$\phi(x,h)\f$ to the map \f$f\f$.
-    void apply_fixed_evolve_step(ValidatedVectorFunction phi, ExactFloat h);
+    Void apply_fixed_evolve_step(ValidatedVectorFunction phi, ExactFloat h);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s))\f$.
-    void apply_space_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
+    Void apply_space_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     //! \brief Apply the flow \f$xi'(s)=\phi(\xi(s),\epsilon(\xi(s),\tau(s)))\f$, \f$\tau'(s)=\tau(s)+\epsilon(\xi(s),\tau(s))\f$.
-    void apply_spacetime_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
+    Void apply_spacetime_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     //! \brief Set \f$\xi'(s)=\phi(\xi(s),\epsilon(s))\f$ and \f$\tau'(s)=\tau(s)+\epsilon(s)\f$.
-    void apply_parameter_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
+    Void apply_parameter_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
     //! \brief Set \f$\xi'(s)=\phi(\xi(s),\omega(s)-\tau(s))\f$ and \f$\tau'(s)=\omega(s)\f$.
-    void apply_finishing_parameter_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction omega);
+    Void apply_finishing_parameter_evolve_step(ValidatedVectorFunction phi, ValidatedScalarFunction omega);
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $r\leq h.
-    void apply_full_reach_step(ValidatedVectorFunctionModel phi);
+    Void apply_full_reach_step(ValidatedVectorFunctionModel phi);
     //! \brief Apply the flow \f$xi'(s,r)=\phi(\xi(s),r)\f$, \f$\tau'(s,r)=\tau(s)+r\f$, \f$r\leq\epsilon(s)\f$
-    void apply_spacetime_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps);
+    Void apply_spacetime_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps);
     //! \brief Set \f$\xi'(s,r)=\phi(\xi(s),r)\f$ and \f$\tau'(s,r)=\tau(s)+r\f$ for $r-\epsilon(s)\leq 0$.
-    void apply_parameter_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps);
+    Void apply_parameter_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps);
 /*
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,h]\f$
-    void apply_reach_step(ValidatedVectorFunction phi, Float h);
+    Void apply_reach_step(ValidatedVectorFunction phi, Float h);
     //! \brief Apply the flow \f$\phi(x,t)\f$ for \f$t\in[0,\max(h,\epsilon(x))]\f$
-    void apply_reach_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
+    Void apply_reach_step(ValidatedVectorFunction phi, ValidatedScalarFunction elps);
 */
 
     //! \brief Introduces the constraint \f$c\f$ applied to the state \f$x=f(s)\f$.
-    void new_state_constraint(ValidatedConstraint c);
+    Void new_state_constraint(ValidatedConstraint c);
     //! \brief Introduces the constraint \f$c\f$ applied to the parameter \f$s\f$.
-    void new_parameter_constraint(ValidatedConstraint c);
+    Void new_parameter_constraint(ValidatedConstraint c);
 
     //! \brief Introduces the constraint \f$-g(\xi(s)) \leq 0\f$.
-    void new_positive_state_constraint(ValidatedScalarFunction g);
+    Void new_positive_state_constraint(ValidatedScalarFunction g);
     //! \brief Introduces the constraint \f$g(\xi(s)) \leq 0\f$.
-    void new_negative_state_constraint(ValidatedScalarFunction g);
+    Void new_negative_state_constraint(ValidatedScalarFunction g);
     //! \brief Introduces the constraint \f$h(\xi(s)) = 0\f$.
-    void new_zero_state_constraint(ValidatedScalarFunction h);
+    Void new_zero_state_constraint(ValidatedScalarFunction h);
     //! \brief Introduces the constraint \f$g(s) \leq 0\f$.
-    void new_negative_parameter_constraint(ValidatedScalarFunction g);
+    Void new_negative_parameter_constraint(ValidatedScalarFunction g);
     //! \brief Introduces the constraint \f$h(s) = 0\f$.
-    void new_zero_parameter_constraint(ValidatedScalarFunction h);
+    Void new_zero_parameter_constraint(ValidatedScalarFunction h);
 
     //! \brief The number of negative constraints.
-    uint number_of_constraints() const;
+    Nat number_of_constraints() const;
     //! \brief All equality and inequality constraints.
     List<ValidatedConstraintModel> const& constraint_models() const;
     //! \brief All equality and inequality constraints.
     List<ValidatedConstraint> const constraints() const;
     //! \brief The \a i<sup>th</sup> constraint.
-    ValidatedConstraintModel const& constraint(uint i) const;
+    ValidatedConstraintModel const& constraint(Nat i) const;
 
     //! \brief  Returns true if \f$g(x)>0\f$ over the whole set,
     //! false \f$g(x)<0\f$ over the whole set,
@@ -202,9 +202,9 @@ class Enclosure
     virtual Tribool satisfies(ValidatedConstraint c) const;
 
     //! \brief The dimension of the set.
-    uint dimension() const;
+    Nat dimension() const;
     //! \brief The number of parameters i.e. the dimension of the parameter domain.
-    uint number_of_parameters() const;
+    Nat number_of_parameters() const;
     //! \brief A bounding box for the set.
     UpperBox bounding_box() const;
     //! \brief A point in the image of the <em>unconstrained</em> parameter domain.
@@ -225,42 +225,42 @@ class Enclosure
 
     //! \brief Reduces the size of the effective parameter domain
     //! by pruning away infeasible points. Does not affect the set as a mathematical entity.
-    void reduce() const;
+    Void reduce() const;
     //! \brief Reconditions the set to give an over-approximation with a simpler representation.
-    void recondition();
+    Void recondition();
     //! \brief Simplifies the representation by changing all uniform errors into independent variables.
-    void uniform_error_recondition();
+    Void uniform_error_recondition();
     //! \brief Simplifies the representation by choosing most significant independent variables to keep, and merging the rest into a single error for each component.
-    void kuhn_recondition();
+    Void kuhn_recondition();
     //! \brief Restrict the parameter domain to \a subdomain.
     //! \details May also restrict the domain of the defining function models,
     //! resulting in more accurate computations.
-    void restrict(const ExactBox& subdomain);
+    Void restrict(const ExactBox& subdomain);
     //! \brief The set obtained by restricting to the \a subdomain.
     Enclosure restriction(const ExactBox& subdomain) const;
 
     //! \brief Compute an outer approximation on the \a grid to the given \a depth.
-    GridTreeSet outer_approximation(const Grid& grid, int depth) const;
+    GridTreeSet outer_approximation(const Grid& grid, Int depth) const;
 
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving.
-    void adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
     //! by subdividing the parameter domain. Does not require constraint propagation,
     //! but may be inefficient.
-    void subdivision_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
+    Void subdivision_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
     //! by first computing affine over-approximations of the set.
-    void affine_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
+    Void affine_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
     //! by using constraint propagation.
-    void constraint_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
+    Void constraint_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
     //! \brief Adjoin an outer approximation to the given \a depth to the \a paving
     //! by using an interior point method to try to find good barrier functions
     //! and using constraint propagation to prove disjointness with cells.
     //! \details Potentially very efficient, but may be unreliable due to the
     //! use of nonlinear programming to find good Lyapounov multipliers for
     //! the constraints.
-    void optimal_constraint_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
+    Void optimal_constraint_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
     //! \brief An approximation as an affine set.
     //! \details Most easily computed by dropping all nonlinear terms in the
@@ -281,7 +281,7 @@ class Enclosure
     List<Enclosure> split(const List<ExactBox>& subdomains);
 
     //! \brief The direction along which the set should be split to reduce the bounding box.
-    uint splitting_index_zeroth_order() const;
+    Nat splitting_index_zeroth_order() const;
     //! \brief Split into two by splitting the parameter domain along
     //! the direction which reduces the size of the bounding box.
     Pair<Enclosure,Enclosure> split_zeroth_order() const;
@@ -293,25 +293,25 @@ class Enclosure
     Pair<Enclosure,Enclosure> split() const;
     //! \brief Split into two by splitting the parameter domain along
     //! the \a k<sup>th</sup> direction.
-    Pair<Enclosure,Enclosure> split(uint k) const;
+    Pair<Enclosure,Enclosure> split(Nat k) const;
 
 
     //! \brief Draw to a canvas.
-    void draw(CanvasInterface& c, const Projection2d& p) const;
+    Void draw(CanvasInterface& c, const Projection2d& p) const;
     //! \brief Draw the bounding box to a canvas. Useful to obtain a quick and rough
     //! image or when all else fails.
-    void box_draw(CanvasInterface&, const Projection2d& p) const;
+    Void box_draw(CanvasInterface&, const Projection2d& p) const;
     //! \brief Draw the to a canvas by splitting into small enough pieces that
     //! affine over-approximations yield a good image.
-    void affine_draw(CanvasInterface&, const Projection2d& p, uint=1u) const;
+    Void affine_draw(CanvasInterface&, const Projection2d& p, Nat=1u) const;
     //! \brief Draw the to a canvas by over-approximating on a grid.
-    void grid_draw(CanvasInterface&, const Projection2d& p, uint=1u) const;
+    Void grid_draw(CanvasInterface&, const Projection2d& p, Nat=1u) const;
 
     //! \brief Write to an output stream.
     OutputStream& write(OutputStream&) const;
   private:
-    void _check() const;
-    void _solve_zero_constraints();
+    Void _check() const;
+    Void _solve_zero_constraints();
     EffectiveVectorFunction real_function() const;
   private:
     friend Enclosure product(const Enclosure&, const ExactInterval&);

@@ -42,14 +42,14 @@ class TestInteriorPointSolver
   public:
     TestInteriorPointSolver(InteriorPointSolver& o) : optimiser(&o) { }
 
-    void test() {
+    Void test() {
         ARIADNE_TEST_CALL(test_validate_feasibility());
         //ARIADNE_TEST_CALL(test_optimization());
         //ARIADNE_TEST_CALL(test_feasibility());
         ARIADNE_TEST_CALL(test_constrained_feasibility());
     }
 
-    void test_validate_feasibility() {
+    Void test_validate_feasibility() {
         // A feasible instance
         RawFloatVector xl={0.0,0.0,0.0};
         RawFloatVector xu={inf,inf,inf};
@@ -65,7 +65,7 @@ class TestInteriorPointSolver
     }
 
 
-    void test_feasibility() {
+    Void test_feasibility() {
         // A feasible instance
         RawFloatVector xl={0.0,0.0,0.0};
         RawFloatVector xu={inf,inf,inf};
@@ -78,7 +78,7 @@ class TestInteriorPointSolver
     }
 
 
-    void test_constrained_feasibility() {
+    Void test_constrained_feasibility() {
         FloatMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
         RawFloatVector b={1.0,1.0};
         RawFloatVector xl={0.0,0.0,0.0};
@@ -93,7 +93,7 @@ class TestInteriorPointSolver
     }
 
 
-    void test_optimization() {
+    Void test_optimization() {
         FloatMatrix A={{1.0,0.0,1.0},{0.0,1.0,2.0}};
         RawFloatVector b={1.0,1.0};
         RawFloatVector c={1.0,0.5,-0.75};
@@ -106,9 +106,9 @@ class TestInteriorPointSolver
 };
 
 
-int main(int argc, const char* argv[])
+Int main(Int argc, const char* argv[])
 {
-    uint optimiser_verbosity = 0;
+    Nat optimiser_verbosity = 0;
     if(argc>1) { optimiser_verbosity=atoi(argv[1]); }
 
     InteriorPointSolver interior_point_optimiser;

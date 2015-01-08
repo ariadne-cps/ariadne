@@ -32,7 +32,7 @@
 #include "hybrid/hybrid_simulator.h"
 #include "hybrid/hybrid_graphics.h"
 
-template<class T> void write(const char* filename, const T& t) {
+template<class T> Void write(const char* filename, const T& t) {
     std::ofstream ofs(filename); ofs << t; ofs.close();
 }
 
@@ -140,7 +140,7 @@ HybridEvolverType create_evolver(const CompositeHybridAutomaton& heating_system)
     return evolver;
 }
 
-void compute_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
+Void compute_evolution(const CompositeHybridAutomaton& heating_system,const GeneralHybridEvolver& evolver)
 {
 
     // Redefine the two discrete states
@@ -224,7 +224,7 @@ void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
 }
 
 
-void compute_reachable_sets(const GeneralHybridEvolver& evolver)
+Void compute_reachable_sets(const GeneralHybridEvolver& evolver)
 {
 /*
     // Create a ReachabilityAnalyser object
@@ -286,7 +286,7 @@ void compute_reachable_sets(const GeneralHybridEvolver& evolver)
 
 
 
-void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& heating_system, const HybridReachabilityAnalyser& analyser)
+Void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& heating_system, const HybridReachabilityAnalyser& analyser)
 {
 /*
     // Define the initial set
@@ -327,7 +327,7 @@ void compute_reachable_sets_with_serialisation(const CompositeHybridAutomaton& h
 
 
 
-int main(int argc, const char* argv[])
+Int main(Int argc, const char* argv[])
 {
     // Create the system
     CompositeHybridAutomaton heating_system=create_heating_system();

@@ -39,7 +39,7 @@ using namespace Ariadne;
 
 
 template<class Orb>
-void export_orbit(const char* name)
+Void export_orbit(const char* name)
 {
     class_<Orb> orbit_class(name,no_init);
     orbit_class.def("reach", &Orb::reach,return_value_policy<copy_const_reference>());
@@ -50,7 +50,7 @@ void export_orbit(const char* name)
 
 
 template<class Ev, class Init>
-void export_evolver(const char* name)
+Void export_evolver(const char* name)
 {
     typedef typename Ev::SystemType Sys;
     typedef typename Ev::EnclosureType ES;
@@ -62,7 +62,7 @@ void export_evolver(const char* name)
     evolver_class.def(self_ns::str(self));
 }
 
-void evolution_submodule()
+Void evolution_submodule()
 {
     export_orbit< Orbit<HybridEnclosure> >("HybridOrbit");
     //export_evolver<VectorFieldEvolver, init<ContinuousEvolutionParameters> >("VectorFieldEvolver");

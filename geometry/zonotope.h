@@ -92,9 +92,9 @@ class Zonotope
     /*! \brief Default constructor yields a zonotope with dimension zero and no generators. */
     explicit Zonotope();
     /*! \brief Construct a zonotope of dimension \a d with no generators. */
-    explicit Zonotope(uint d);
+    explicit Zonotope(Nat d);
     /*! \brief Construct a zonotope of dimension \a n with centre at the origin and \a m generators. */
-    explicit Zonotope(uint d, uint m);
+    explicit Zonotope(Nat d, Nat m);
 
     /*! \brief Construct from centre, generators, and a uniform error term. */
     explicit Zonotope(const Vector<Float>& c, const Matrix<Float>& G, const Vector<Float>& e);
@@ -109,7 +109,7 @@ class Zonotope
 
 
     /*! \brief Construct a zonotope of dimension \a d with centre at the origin and \a m generators from the data beginning at \a ptr. */
-    template<class XX> explicit Zonotope(uint d, uint m, const XX* ptr);
+    template<class XX> explicit Zonotope(Nat d, Nat m, const XX* ptr);
 
     /*! \brief Construct a zonotope of dimension \a d with \a m generators from raw data.
      *  The data format is (c0,G00,G01,...,G0m,e0,c1,G10,...,G1m,e1,...).
@@ -131,16 +131,16 @@ class Zonotope
     //@{
     //! \name Logical predicates
     /*! \brief Test for equality of representation. */
-    friend bool operator==(const Zonotope& z1, const Zonotope& z2);
+    friend Bool operator==(const Zonotope& z1, const Zonotope& z2);
     //@}
 
     //@{
     //! \name Data access
     /*! \brief The dimension of the zonotope. */
-    uint dimension() const;
+    Nat dimension() const;
 
     /*! \brief The number of generators of the zonotope. */
-    uint number_of_generators() const;
+    Nat number_of_generators() const;
 
     /*! \brief The domain. */
     Vector<ExactInterval> domain() const;
@@ -196,7 +196,7 @@ class Zonotope
     /*! \brief Compute an over-approximation of a zonotope \a z with nonsingular generator matrix. */
     friend Zonotope nonsingular_over_approximation(const Zonotope&);
     /*! \brief Compute a cascade-over-approximation of the zonotope \a z with \a b blocks of \a d generators. */
-    friend Zonotope cascade_over_approximation(const Zonotope& z, uint b);
+    friend Zonotope cascade_over_approximation(const Zonotope& z, Nat b);
     //@}
 
     //@{
@@ -211,7 +211,7 @@ class Zonotope
     /*! \brief Write to an output stream. */
     OutputStream& write(OutputStream& os) const;
     /*! \brief Draw on a canvas. */
-    void draw(CanvasInterface& c, const Projection2d& p) const;
+    Void draw(CanvasInterface& c, const Projection2d& p) const;
     //@}
 };
 
@@ -236,7 +236,7 @@ Zonotope over_approximation(const Zonotope& z);
 Zonotope error_free_over_approximation(const Zonotope&);
 Zonotope orthogonal_over_approximation(const Zonotope&);
 Zonotope nonsingular_over_approximation(const Zonotope&);
-Zonotope cascade_over_approximation(const Zonotope& z, uint b);
+Zonotope cascade_over_approximation(const Zonotope& z, Nat b);
 Zonotope orthogonal_approximation(const Zonotope& z);
 
 Zonotope apply(const Affine<ExactInterval>& af, const Zonotope& z);
@@ -247,7 +247,7 @@ InputStream& operator>>(InputStream& is, Zonotope& z);
 
 
 template<class X> inline
-Zonotope::Zonotope(uint d, uint m, const X* ptr)
+Zonotope::Zonotope(Nat d, Nat m, const X* ptr)
     : _centre(d,ptr), _generators(d,m,ptr+d), _error(d)
 {
 }

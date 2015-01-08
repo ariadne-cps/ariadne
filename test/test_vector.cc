@@ -38,16 +38,16 @@ using namespace Ariadne;
 
 class TestVector {
   public:
-    void test();
+    Void test();
   private:
-    void test_concept();
-    void test_constructors();
-    void test_comparisons();
-    void test_arithmetic();
-    void test_misc();
+    Void test_concept();
+    Void test_constructors();
+    Void test_comparisons();
+    Void test_arithmetic();
+    Void test_misc();
 };
 
-void
+Void
 TestVector::test()
 {
     ARIADNE_TEST_CALL(test_concept());
@@ -57,7 +57,7 @@ TestVector::test()
     ARIADNE_TEST_CALL(test_misc());
 }
 
-void
+Void
 TestVector::test_concept()
 {
     ApproximateFloat ax(1);
@@ -82,7 +82,7 @@ TestVector::test_concept()
 }
 
 
-void
+Void
 TestVector::test_constructors()
 {
     ARIADNE_TEST_CONSTRUCT( RawFloatVector, v0, (3) );
@@ -100,7 +100,7 @@ TestVector::test_constructors()
 }
 
 
-void
+Void
 TestVector::test_comparisons()
 {
     RawFloatVector v(2); v[0]=1.25; v[1]=-1.375;
@@ -110,7 +110,7 @@ TestVector::test_comparisons()
 }
 
 
-void
+Void
 TestVector::test_arithmetic()
 {
     ARIADNE_TEST_EQUAL( + RawFloatVector({2.0,-3.0,5.0}) , RawFloatVector({2.0,-3.0,5.0}) );
@@ -125,11 +125,11 @@ TestVector::test_arithmetic()
 }
 
 
-void
+Void
 TestVector::test_misc()
 {
 
-    int n=3;
+    Int n=3;
     ApproximateFloat vptr[3]={-4.0,3.0,1.0};
     ApproximateFloat x=1.5;
 
@@ -270,7 +270,7 @@ TestVector::test_misc()
 }
 
 
-int main() {
+Int main() {
     TestVector().test();
 
     return ARIADNE_TEST_FAILURES;

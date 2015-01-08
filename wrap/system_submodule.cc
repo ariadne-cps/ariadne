@@ -50,12 +50,12 @@ namespace Ariadne {
 template<class T>
 struct from_python< Space<T> > {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id< Space<T> >()); }
-    static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        void* storage = ((converter::rvalue_from_python_storage<ExactInterval>*)data)->storage.bytes;
+    static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        Void* storage = ((converter::rvalue_from_python_storage<ExactInterval>*)data)->storage.bytes;
         boost::python::list elements=extract<boost::python::list>(obj_ptr);
         Space<T>* spc_ptr = new (storage) Space<T>();
-        for(int i=0; i!=len(elements); ++i) {
+        for(Int i=0; i!=len(elements); ++i) {
             extract<String> xs(elements[i]);
             if(xs.check()) { spc_ptr->append(Variable<T>(xs())); }
             else { Variable<T> v=extract< Variable<T> >(elements[i]); spc_ptr->append(v); }
@@ -67,12 +67,12 @@ struct from_python< Space<T> > {
 template<>
 struct from_python< Set<DiscreteEvent> > {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id< Set<DiscreteEvent> >()); }
-    static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
-        void* storage = ((converter::rvalue_from_python_storage< Set<DiscreteEvent> >*)data)->storage.bytes;
+    static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+        Void* storage = ((converter::rvalue_from_python_storage< Set<DiscreteEvent> >*)data)->storage.bytes;
         boost::python::list elements=extract<boost::python::list>(obj_ptr);
         Set<DiscreteEvent>* evnts_ptr = new (storage) Set<DiscreteEvent>();
-        for(int i=0; i!=len(elements); ++i) {
+        for(Int i=0; i!=len(elements); ++i) {
             extract<String> xs(elements[i]);
             if(xs.check()) { evnts_ptr->insert(DiscreteEvent(xs())); }
             else { DiscreteEvent e=extract< DiscreteEvent >(elements[i]); evnts_ptr->insert(e); }
@@ -81,10 +81,10 @@ struct from_python< Set<DiscreteEvent> > {
     }
 };
 
-template<class T> uint __hash__(const T&);
-template<> uint __hash__<DiscreteEvent>(const DiscreteEvent& e) {
+template<class T> Nat __hash__(const T&);
+template<> Nat __hash__<DiscreteEvent>(const DiscreteEvent& e) {
     return reinterpret_cast<const ushort&>(e.name().c_str()[0]); }
-template<> uint __hash__<DiscreteLocation>(const DiscreteLocation& q) {
+template<> Nat __hash__<DiscreteLocation>(const DiscreteLocation& q) {
     return reinterpret_cast<const ushort&>(to_string(q).c_str()[0]); }
 
 
@@ -103,14 +103,14 @@ RealExpression operator/(const RealExpression& e, const RealVariable& v) { retur
 } // namespace Ariadne
 
 
-namespace Ariadne { int length(const Array<StringType>& a) { return a.size(); } }
+namespace Ariadne { Int length(const Array<StringType>& a) { return a.size(); } }
 
-void export_formula()
+Void export_formula()
 {
     implicitly_convertible<String,StringExpression>();
     implicitly_convertible<StringVariable,StringExpression>();
 
-    implicitly_convertible<int,IntegerExpression>();
+    implicitly_convertible<Int,IntegerExpression>();
     implicitly_convertible<Integer,IntegerExpression>();
     implicitly_convertible<IntegerVariable,IntegerExpression>();
 
@@ -258,7 +258,7 @@ void export_formula()
     def("neg", (RealExpression(*)(RealExpression)) &neg);
     def("rec", (RealExpression(*)(RealExpression)) &rec);
     def("sqr", (RealExpression(*)(RealExpression)) &sqr);
-    //def("pow", (RealExpression(*)(RealExpression,int)) &pow);
+    //def("pow", (RealExpression(*)(RealExpression,Int)) &pow);
     def("sqrt", (RealExpression(*)(RealExpression)) &sqrt);
     def("exp", (RealExpression(*)(RealExpression)) &exp);
     def("log", (RealExpression(*)(RealExpression)) &log);
@@ -285,7 +285,7 @@ void export_formula()
     to_python< List<TriboolExpression> >();
 
     class_<DiscretePredicate> discrete_predicate_class("DiscretePredicate", init<DiscretePredicate>());
-    discrete_predicate_class.def(init<bool>());
+    discrete_predicate_class.def(init<Bool>());
     discrete_predicate_class.def("__and__", &__and__<DiscretePredicate,DiscretePredicate,DiscretePredicate>);
     discrete_predicate_class.def("__or__", &__or__<DiscretePredicate,DiscretePredicate,DiscretePredicate>);
     discrete_predicate_class.def("__invert__", &__not__<DiscretePredicate,DiscretePredicate>);
@@ -325,7 +325,7 @@ void export_formula()
 }
 
 
-void export_hybrid_automaton()
+Void export_hybrid_automaton()
 {
     // Don't use return_value_policy<copy_const_reference> since reference lifetime should not exceed automaton lifetime
 
@@ -333,23 +333,23 @@ void export_hybrid_automaton()
     to_python< Set<DiscreteLocation> >();
 
     class_<DiscreteLocation> discrete_state_class("DiscreteLocation",init<DiscreteLocation>());
-    discrete_state_class.def("__eq__", &__eq__<bool,DiscreteLocation,DiscreteLocation>);
-    discrete_state_class.def("__ne__", &__ne__<bool,DiscreteLocation,DiscreteLocation>);
+    discrete_state_class.def("__eq__", &__eq__<Bool,DiscreteLocation,DiscreteLocation>);
+    discrete_state_class.def("__ne__", &__ne__<Bool,DiscreteLocation,DiscreteLocation>);
     discrete_state_class.def("__hash__", &__hash__<DiscreteLocation>);
     discrete_state_class.def(self_ns::str(self));
-    implicitly_convertible<int,DiscreteLocation>();
+    implicitly_convertible<Int,DiscreteLocation>();
     implicitly_convertible<StringType,DiscreteLocation>();
 
     class_<DiscreteEvent> discrete_event_class("DiscreteEvent",init<DiscreteEvent>());
-    discrete_event_class.def("__eq__", &__eq__<bool,DiscreteEvent,DiscreteEvent>);
-    discrete_event_class.def("__ne__", &__ne__<bool,DiscreteEvent,DiscreteEvent>);
+    discrete_event_class.def("__eq__", &__eq__<Bool,DiscreteEvent,DiscreteEvent>);
+    discrete_event_class.def("__ne__", &__ne__<Bool,DiscreteEvent,DiscreteEvent>);
     discrete_event_class.def("__hash__", &__hash__<DiscreteEvent>);
     discrete_event_class.def(self_ns::str(self));
-    implicitly_convertible<int,DiscreteEvent>();
+    implicitly_convertible<Int,DiscreteEvent>();
     implicitly_convertible<StringType,DiscreteEvent>();
 
 
-    class_<HybridTime> hybrid_time_class("HybridTime",init<double,int>());
+    class_<HybridTime> hybrid_time_class("HybridTime",init<double,Int>());
     hybrid_time_class.def("continuous_time",&HybridTime::continuous_time,return_value_policy<copy_const_reference>());
     hybrid_time_class.def("discrete_time",&HybridTime::discrete_time,return_value_policy<copy_const_reference>());
 
@@ -360,16 +360,16 @@ void export_hybrid_automaton()
     hybrid_automaton_class.def("dynamic_function", &MonolithicHybridAutomaton::dynamic_function);
     hybrid_automaton_class.def("guard_function", &MonolithicHybridAutomaton::guard_function);
     hybrid_automaton_class.def("reset_function", &MonolithicHybridAutomaton::reset_function);
-    hybrid_automaton_class.def("new_mode",(void(MonolithicHybridAutomaton::*)(DiscreteLocation,EffectiveVectorFunction)) &MonolithicHybridAutomaton::new_mode, return_value_policy<reference_existing_object>());
-    hybrid_automaton_class.def("new_invariant",(void(MonolithicHybridAutomaton::*)(DiscreteLocation,EffectiveScalarFunction,DiscreteEvent)) &MonolithicHybridAutomaton::new_invariant);
-    hybrid_automaton_class.def("new_transition",(void(MonolithicHybridAutomaton::*)(DiscreteLocation,DiscreteEvent,DiscreteLocation,EffectiveVectorFunction,EffectiveScalarFunction,EventKind)) &MonolithicHybridAutomaton::new_transition);
+    hybrid_automaton_class.def("new_mode",(Void(MonolithicHybridAutomaton::*)(DiscreteLocation,EffectiveVectorFunction)) &MonolithicHybridAutomaton::new_mode, return_value_policy<reference_existing_object>());
+    hybrid_automaton_class.def("new_invariant",(Void(MonolithicHybridAutomaton::*)(DiscreteLocation,EffectiveScalarFunction,DiscreteEvent)) &MonolithicHybridAutomaton::new_invariant);
+    hybrid_automaton_class.def("new_transition",(Void(MonolithicHybridAutomaton::*)(DiscreteLocation,DiscreteEvent,DiscreteLocation,EffectiveVectorFunction,EffectiveScalarFunction,EventKind)) &MonolithicHybridAutomaton::new_transition);
     hybrid_automaton_class.def(self_ns::str(self));
 
 }
 
 
 
-void system_submodule() {
+Void system_submodule() {
     export_formula();
     export_hybrid_automaton();
 }

@@ -68,19 +68,19 @@ EffectiveScalarFunction constraint_function(Space<Real>& space, const List<RealA
 
 template<class T> class FinitarySet
 {
-    bool _is_infinite;
+    Bool _is_infinite;
     Set<T> _set_or_complement;
   public:
     FinitarySet() : _is_infinite(false), _set_or_complement() { }
     FinitarySet(const T& t) : _is_infinite(false), _set_or_complement() { _set_or_complement.insert(t); }
     FinitarySet(const Set<T>& s) : _is_infinite(false), _set_or_complement(s) { }
-    FinitarySet(bool c, const Set<T>& s) : _is_infinite(c), _set_or_complement(s) { }
-    bool is_finite() const { return !this->_is_infinite; }
-    bool is_infinite() const { return this->_is_infinite; }
-    bool contains(const T& t) const { return this->_set_or_complement.contains(t) xor _is_infinite; }
+    FinitarySet(Bool c, const Set<T>& s) : _is_infinite(c), _set_or_complement(s) { }
+    Bool is_finite() const { return !this->_is_infinite; }
+    Bool is_infinite() const { return this->_is_infinite; }
+    Bool contains(const T& t) const { return this->_set_or_complement.contains(t) xor _is_infinite; }
     const Set<T>& _underlying_set() const { return this->_set_or_complement; }
-    void adjoin(const FinitarySet<T>& set) { *this=join(*this,set); }
-    void restrict(const FinitarySet<T>& set) { *this=intersection(*this,set); }
+    Void adjoin(const FinitarySet<T>& set) { *this=join(*this,set); }
+    Void restrict(const FinitarySet<T>& set) { *this=intersection(*this,set); }
 };
 template<class T> FinitarySet<T> complement(const Set<T>& s) {
     return FinitarySet<T>(true,s); }
@@ -108,7 +108,7 @@ typedef FinitarySet<DiscreteEvent> EventSet;
 
 class EventPredicate {
    public:
-     bool operator() (const DiscreteEvent& e);
+     Bool operator() (const DiscreteEvent& e);
 };
 
 typedef ContinuousPredicate RealPredicate;
@@ -178,31 +178,31 @@ class HybridSystem
     //@{
     //! \name Methods for building the automaton.
 
-    void disable_events(DiscretePredicate q, EventSet e);
-    void nonjumping_variables(DiscretePredicate q, EventSet e, Set<StringVariable> v);
-    void nonjumping_variables(DiscretePredicate q, EventSet e, Set<RealVariable> v);
+    Void disable_events(DiscretePredicate q, EventSet e);
+    Void nonjumping_variables(DiscretePredicate q, EventSet e, Set<StringVariable> v);
+    Void nonjumping_variables(DiscretePredicate q, EventSet e, Set<RealVariable> v);
 
-    void new_update(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u);
-    void new_reset(DiscretePredicate q, DiscreteEvent e, List<PrimedRealAssignment> r);
-    void new_dynamic(DiscretePredicate q, List<RealAssignment> a, List<DottedRealAssignment> d);
-    void new_dynamic(DiscretePredicate q, List<DottedRealAssignment> d);
-    void new_dynamic(List<DottedRealAssignment> d);
-    void new_auxiliary(DiscretePredicate q, List<RealAssignment> a);
-    void new_auxiliary(List<RealAssignment> a);
-    void new_dynamic(DiscretePredicate q ,List<RealAssignment> a, List<DottedRealAssignment>& d);
-    void new_dynamic(List<RealAssignment> a);
-    void new_invariant(DiscretePredicate q, DiscreteEvent e, RealPredicate i);
-    void new_invariant(DiscretePredicate q, RealPredicate i);
-    void new_guard(DiscretePredicate q, DiscreteEvent e, RealPredicate g);
+    Void new_update(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u);
+    Void new_reset(DiscretePredicate q, DiscreteEvent e, List<PrimedRealAssignment> r);
+    Void new_dynamic(DiscretePredicate q, List<RealAssignment> a, List<DottedRealAssignment> d);
+    Void new_dynamic(DiscretePredicate q, List<DottedRealAssignment> d);
+    Void new_dynamic(List<DottedRealAssignment> d);
+    Void new_auxiliary(DiscretePredicate q, List<RealAssignment> a);
+    Void new_auxiliary(List<RealAssignment> a);
+    Void new_dynamic(DiscretePredicate q ,List<RealAssignment> a, List<DottedRealAssignment>& d);
+    Void new_dynamic(List<RealAssignment> a);
+    Void new_invariant(DiscretePredicate q, DiscreteEvent e, RealPredicate i);
+    Void new_invariant(DiscretePredicate q, RealPredicate i);
+    Void new_guard(DiscretePredicate q, DiscreteEvent e, RealPredicate g);
 
-    void new_transition(DiscretePredicate q, DiscreteEvent e, PrimedStringAssignment u, RealPredicate g);
-    void new_transition(DiscretePredicate q, DiscreteEvent e, PrimedStringAssignment u, List<PrimedRealAssignment> r, RealPredicate g);
-    void new_transition(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u, List<PrimedRealAssignment> r, RealPredicate g);
+    Void new_transition(DiscretePredicate q, DiscreteEvent e, PrimedStringAssignment u, RealPredicate g);
+    Void new_transition(DiscretePredicate q, DiscreteEvent e, PrimedStringAssignment u, List<PrimedRealAssignment> r, RealPredicate g);
+    Void new_transition(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u, List<PrimedRealAssignment> r, RealPredicate g);
 
-    void new_mode(DiscreteLocation, List<RealAssignment>, List<DottedRealAssignment>);
-    void new_transition(DiscreteLocation q, DiscreteEvent e, DiscreteLocation t, List<PrimedRealAssignment> r, RealPredicate g);
-    void new_transition(DiscreteLocation q, DiscreteEvent e, DiscreteLocation t, PrimedRealAssignment r, RealPredicate g);
-    void new_transition(DiscreteLocation q, DiscreteEvent e, DiscreteLocation t, RealPredicate g);
+    Void new_mode(DiscreteLocation, List<RealAssignment>, List<DottedRealAssignment>);
+    Void new_transition(DiscreteLocation q, DiscreteEvent e, DiscreteLocation t, List<PrimedRealAssignment> r, RealPredicate g);
+    Void new_transition(DiscreteLocation q, DiscreteEvent e, DiscreteLocation t, PrimedRealAssignment r, RealPredicate g);
+    Void new_transition(DiscreteLocation q, DiscreteEvent e, DiscreteLocation t, RealPredicate g);
 
     //@}
 
@@ -217,10 +217,10 @@ class HybridSystem
 
 
     //! \brief Test if the hybrid automaton has an invariant (either explicit or from an urgent transition) with the given \a event label in \a location.
-    bool has_invariant(DiscreteLocation location, DiscreteEvent event) const;
+    Bool has_invariant(DiscreteLocation location, DiscreteEvent event) const;
 
     //! \brief Tests if the automaton has a guard predicate corresponding to the given location and event.
-    bool has_guard(DiscreteLocation, DiscreteEvent) const;
+    Bool has_guard(DiscreteLocation, DiscreteEvent) const;
 
 
     //! \brief The discrete events corresponding to an invariant in \a source.
@@ -242,7 +242,7 @@ class HybridSystem
 
 
     HybridSpace state_space() const;
-    uint dimension(DiscreteLocation) const;
+    Nat dimension(DiscreteLocation) const;
     RealSpace continuous_state_space(DiscreteLocation) const;
     EffectiveVectorFunction output_function(DiscreteLocation) const;
     EffectiveVectorFunction dynamic_function(DiscreteLocation) const;
@@ -258,10 +258,10 @@ class HybridSystem
     //! \name Methods for extracting the discrete dynamics of the automaton.
 
     //! \brief Test if the hybrid automaton has a valid discrete mode with the given \a location.
-    bool has_mode(DiscreteLocation location) const;
+    Bool has_mode(DiscreteLocation location) const;
 
     //! \brief Test if the hybrid automaton has a discrete transition starting from the given location with the given event.
-    bool has_transition(DiscreteLocation source, DiscreteEvent event) const;
+    Bool has_transition(DiscreteLocation source, DiscreteEvent event) const;
 
     //! \brief The discrete events corresponding to a discrete transition in \a source.
     Set<DiscreteEvent> transition_events(DiscreteLocation source) const;
@@ -306,7 +306,7 @@ class HybridSystem
     //! \name Methods for extracting the continuous dynamics of the automaton for conformance with HybridAutomatonInterface.
 
     //! \brief The dimension of the state spacec in the given \a location.
-    virtual uint dimension(DiscreteLocation location) const;
+    virtual Nat dimension(DiscreteLocation location) const;
     //! \brief The output function on Euclidean state space. Used for outputting auxiliary variables.
     virtual EffectiveVectorFunction output_function(DiscreteLocation location) const;
     //! \brief The function defining the differential equation \f$\dot{x}=f(x)\f$ valid in the \a location.
@@ -335,11 +335,11 @@ class HybridSystem
     //!
     //! Includes a check for algebraic dependencies, over-defined variables, under-defined variables, and
     //! variables which should be defined in a reset but are not.
-    void check_mode(DiscreteLocation) const;
-    void check_overspecification(DiscreteLocation) const;
+    Void check_mode(DiscreteLocation) const;
+    Void check_overspecification(DiscreteLocation) const;
     //! \brief Runs check_mode() in any mode reachable under the discrete dynamics from the given initial location(s).
-    void check_reachable_modes(const Set<DiscreteLocation>&) const;
-    void check_reachable_modes(DiscreteLocation) const;
+    Void check_reachable_modes(const Set<DiscreteLocation>&) const;
+    Void check_reachable_modes(DiscreteLocation) const;
     //@}
 
     //@{

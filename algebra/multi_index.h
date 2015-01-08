@@ -80,11 +80,11 @@ class MultiIndex {
     //! \brief Construct a multi index of degree \a 0 with \a nv variables.
     explicit MultiIndex(SizeType nv);
     //! \brief Construct a multi index with \a nv variables from the Array \a ary.
-    explicit MultiIndex(SizeType nv, const int* ary);
+    explicit MultiIndex(SizeType nv, const Int* ary);
     //! \brief Construct a multi index with \a nv variables from the Array \a ary.
     explicit MultiIndex(SizeType nv, const unsigned char* ary);
     //! \brief Construct a multi index with from an initializer list.
-    MultiIndex(InitializerList<int> lst);
+    MultiIndex(InitializerList<Int> lst);
 
     //! \brief Copy constructor.
     MultiIndex(const MultiIndex& a);
@@ -99,11 +99,11 @@ class MultiIndex {
     static MultiIndex first(SizeType nv, IndexType d);
 
     //! \brief Resize to hold n variables.
-    void resize(SizeType n);
+    Void resize(SizeType n);
     //! \brief Assigns values from another index. Precondition: the size of \a a must equal the current size.
-    void assign(const MultiIndex& a);
+    Void assign(const MultiIndex& a);
     //! \brief Set all values to zero.
-    void clear();
+    Void clear();
     //! \brief The number of variables.
     SizeType size() const;
     //! \brief The degree of the multi-index, equal to the sum of the number of occurrences of the variables.
@@ -113,25 +113,25 @@ class MultiIndex {
     //! \brief The number of occurrences of the \a i th variable.
     IndexType get(SizeType i) const;
     //! \brief Set the number of occurrences of the \a i th variable to \a n.
-    void set(SizeType i, IndexType n);
+    Void set(SizeType i, IndexType n);
     //! \brief The number of occurrences of the \a i th variable.
     const IndexType& operator[](SizeType i) const;
     //! \brief The number of occurrences of the \a i th variable.
     MultiIndexValueReference operator[](SizeType i);
     //! \brief Increment the value of the \a ith element
-    void increment(SizeType i);
+    Void increment(SizeType i);
     //! \brief Decrement the value of the \a ith element
-    void decrement(SizeType i);
+    Void decrement(SizeType i);
 
     //! \brief Equality operator.
-    friend bool operator==(const MultiIndex& a1, const MultiIndex& a2); // inline
+    friend Bool operator==(const MultiIndex& a1, const MultiIndex& a2); // inline
     //! \brief Inequality operator.
-    friend bool operator!=(const MultiIndex& a1, const MultiIndex& a2); // inline
+    friend Bool operator!=(const MultiIndex& a1, const MultiIndex& a2); // inline
 
     //! \brief Increment. No post-increment operator as we sometimes pass MultiIndex by reference.
     MultiIndex& operator++(); // inline
     // No post-increment operator as we sometimes pass MultiIndex by reference.Post increment.
-    // MultiIndex operator++(int);
+    // MultiIndex operator++(Int);
     //! \brief Inplace sum.
     MultiIndex& operator+=(const MultiIndex& a); // inline
     //! \brief Inplace difference.
@@ -176,7 +176,7 @@ class MultiIndex {
         return ((n*sizeof(ByteType))/sizeof(WordType)+1); }
     static WordType* _allocate_words(SizeType nw) {
         WordType* p=new WordType[nw]; return p; }
-    static void _deallocate_words(WordType* p) {
+    static Void _deallocate_words(WordType* p) {
         delete[] p; }
   private:
     SizeType _n;
@@ -197,8 +197,8 @@ class MultiIndexValueReference {
     MultiIndexValueReference& operator=(const IndexType& d) { _p[_n]+=(d-_p[_i]); _p[_i]=d; return *this; }
     MultiIndexValueReference& operator++() { ++_p[_n]; ++_p[_i]; return *this; }
     MultiIndexValueReference& operator--();
-    MultiIndexValueReference& operator+=(int k) { _p[_n]+=k; _p[_i]+=k; return *this; }
-    MultiIndexValueReference& operator-=(int k) { _p[_n]-=k; _p[_i]-=k; return *this; }
+    MultiIndexValueReference& operator+=(Int k) { _p[_n]+=k; _p[_i]+=k; return *this; }
+    MultiIndexValueReference& operator-=(Int k) { _p[_n]-=k; _p[_i]-=k; return *this; }
 };
 
 inline MultiIndexValueReference& MultiIndexValueReference::operator--() {
@@ -233,7 +233,7 @@ inline MultiIndex::MultiIndex(SizeType n, const unsigned char* ary)
     p[n]=0; for(SizeType i=0; i!=n; ++i) { p[i]=ary[i]; p[n]+=ary[i]; }
 }
 
-inline MultiIndex::MultiIndex(SizeType n, const int* ary)
+inline MultiIndex::MultiIndex(SizeType n, const Int* ary)
     : _n(n), _nw(_word_size(_n)), _p(_allocate_words(_nw))
 {
     for(SizeType j=0; j!=word_size(); ++j) { word_at(j)=0; }
@@ -241,11 +241,11 @@ inline MultiIndex::MultiIndex(SizeType n, const int* ary)
     p[n]=0; for(SizeType i=0; i!=n; ++i) { p[i]=ary[i]; p[n]+=ary[i]; }
 }
 
-inline MultiIndex::MultiIndex(InitializerList<int> lst)
+inline MultiIndex::MultiIndex(InitializerList<Int> lst)
     : _n(lst.size()), _nw(_word_size(_n)), _p(_allocate_words(_nw))
 {
     IndexType* ptr=reinterpret_cast<IndexType*>(_p);
-    InitializerList<int>::const_iterator iter=lst.begin();
+    InitializerList<Int>::const_iterator iter=lst.begin();
     IndexType* deg_ptr=ptr+_n;
     *deg_ptr=0;
     while(iter!=lst.end()) {
@@ -266,7 +266,7 @@ inline MultiIndex& MultiIndex::operator=(const MultiIndex& a) {
     return *this;
 }
 
-inline void MultiIndex::assign(const MultiIndex& a) {
+inline Void MultiIndex::assign(const MultiIndex& a) {
     for(SizeType j=0; j!=this->word_size(); ++j) { this->word_at(j)=a.word_at(j); }
     //std::copy(a.word_begin(),a.word_end(),this->word_begin());
 }
@@ -292,12 +292,12 @@ inline MultiIndex MultiIndex::first(SizeType n, IndexType d)
     return result;
 }
 
-inline void MultiIndex::clear()
+inline Void MultiIndex::clear()
 {
     std::fill(this->word_begin(),this->word_end(),0);
 }
 
-inline void MultiIndex::resize(SizeType n) {
+inline Void MultiIndex::resize(SizeType n) {
     if(this->_n!=n) { _deallocate_words(this->_p); this->_n=n; this->_nw=_word_size(_n); this->_p=_allocate_words(this->_nw); }
 }
 
@@ -317,7 +317,7 @@ inline MultiIndex::IndexType MultiIndex::get(SizeType i) const {
     assert(i<this->size()); return reinterpret_cast<const IndexType*>(this->_p)[i];
 }
 
-inline void MultiIndex::set(SizeType i, IndexType k) {
+inline Void MultiIndex::set(SizeType i, IndexType k) {
     assert(i<this->size());
     IndexType& ai=reinterpret_cast<IndexType*>(this->_p)[i];
     IndexType& d=reinterpret_cast<IndexType*>(this->_p)[this->_n];
@@ -332,17 +332,17 @@ inline MultiIndexValueReference MultiIndex::operator[](SizeType i) {
     return MultiIndexValueReference(this->_n,reinterpret_cast<IndexType*>(this->_p),i);
 }
 
-inline void MultiIndex::increment(SizeType i) {
+inline Void MultiIndex::increment(SizeType i) {
     ++reinterpret_cast<IndexType*>(this->_p)[i]; ++reinterpret_cast<IndexType*>(this->_p)[this->_n];
 }
 
-inline void MultiIndex::decrement(SizeType i) {
+inline Void MultiIndex::decrement(SizeType i) {
     ARIADNE_ASSERT(reinterpret_cast<IndexType*>(this->_p)[i]>0u);
     --reinterpret_cast<IndexType*>(this->_p)[i]; --reinterpret_cast<IndexType*>(this->_p)[this->_n];
 }
 
 
-inline bool operator==(const MultiIndex& a1, const MultiIndex& a2) {
+inline Bool operator==(const MultiIndex& a1, const MultiIndex& a2) {
     if(a1.size()!=a2.size()) { return false; }
     for(MultiIndex::SizeType i=0; i!=a1.size(); ++i) {
         if(a1.at(i)!=a2.at(i)) { return false; } }
@@ -352,11 +352,11 @@ inline bool operator==(const MultiIndex& a1, const MultiIndex& a2) {
     return true;
 }
 
-inline bool operator!=(const MultiIndex& a1, const MultiIndex& a2) {
+inline Bool operator!=(const MultiIndex& a1, const MultiIndex& a2) {
     return !(a1==a2);
 }
 
-inline bool graded_less(const MultiIndex& a1, const MultiIndex& a2) {
+inline Bool graded_less(const MultiIndex& a1, const MultiIndex& a2) {
     if(a1.size()!=a2.size()) {
         throw std::runtime_error("graded_less(MultiIndex,MultiIndex): number of variables must match");
     }
@@ -371,7 +371,7 @@ inline bool graded_less(const MultiIndex& a1, const MultiIndex& a2) {
         }
         return false;
         //for(SizeType j=0; j!=a1.word_size(); ++j) {
-        for(int j=a1.word_size()-1; j!=-1; --j) {
+        for(Int j=a1.word_size()-1; j!=-1; --j) {
             if(a1.word_at(j)!=a2.word_at(j)) {
                 return a1.word_at(j)<a2.word_at(j);
             }
@@ -380,7 +380,7 @@ inline bool graded_less(const MultiIndex& a1, const MultiIndex& a2) {
     }
 }
 
-inline bool lexicographic_less(const MultiIndex& a1, const MultiIndex& a2) {
+inline Bool lexicographic_less(const MultiIndex& a1, const MultiIndex& a2) {
     if(a1.size()!=a2.size()) {
         throw std::runtime_error("lexicographic_less(MultiIndex,MultiIndex): number of variables must match");
     }
@@ -393,7 +393,7 @@ inline bool lexicographic_less(const MultiIndex& a1, const MultiIndex& a2) {
     return false;
 }
 
-inline bool reverse_lexicographic_less(const MultiIndex& a1, const MultiIndex& a2) {
+inline Bool reverse_lexicographic_less(const MultiIndex& a1, const MultiIndex& a2) {
     if(a1.size()!=a2.size()) {
         throw std::runtime_error("reverse_lexicographic_less(MultiIndex,MultiIndex): number of variables must match");
     }
@@ -510,7 +510,7 @@ MultiIndex& MultiIndex::operator*=(const IndexType& s) {
 }
 
 inline
-void iadd(MultiIndex& r, const MultiIndex& a1, const MultiIndex& a2) {
+Void iadd(MultiIndex& r, const MultiIndex& a1, const MultiIndex& a2) {
     for(MultiIndex::SizeType j=0; j!=r.word_size(); ++j) {
         r.word_at(j)=a1.word_at(j)+a2.word_at(j);
     }
@@ -573,11 +573,11 @@ bin(const MultiIndex& n, const MultiIndex& k)
 
 inline
 OutputStream& operator<<(OutputStream& os, const MultiIndex& a) {
-    //os << "("<<int(a.degree());
-    //for(MultiIndex::SizeType i=0; i!=a.size(); ++i) { os << (i==0?';':',') << int(a[i]); }
+    //os << "("<<Int(a.degree());
+    //for(MultiIndex::SizeType i=0; i!=a.size(); ++i) { os << (i==0?';':',') << Int(a[i]); }
     if(a.size()==0) { os << '('; }
-    for(MultiIndex::SizeType i=0; i!=a.size(); ++i) { os << (i==0?'(':',') << int(a[i]); }
-    os<<";"<<int(a.degree());
+    for(MultiIndex::SizeType i=0; i!=a.size(); ++i) { os << (i==0?'(':',') << Int(a[i]); }
+    os<<";"<<Int(a.degree());
     return os << ')';
 }
 
@@ -595,7 +595,7 @@ class MultiIndexBound {
     MultiIndexBound(SizeType as, SizeType d);
     MultiIndexBound(const MultiIndex& a);
     SizeType size() const { return _groups.size(); }
-    friend bool operator<=(const MultiIndex& a, const MultiIndexBound& b);
+    friend Bool operator<=(const MultiIndex& a, const MultiIndexBound& b);
   private:
     Array<SizeType> _groups;
     Array<SizeType> _max_degrees;
@@ -621,7 +621,7 @@ inline MultiIndexBound::MultiIndexBound(const MultiIndex& a)
 }
 
 
-inline bool operator<=(const MultiIndex& a, const MultiIndexBound& b) {
+inline Bool operator<=(const MultiIndex& a, const MultiIndexBound& b) {
     typedef MultiIndex::SizeType SizeType;
     Array<SizeType> degrees(b._max_degrees.size());
     for(SizeType j=0; j!=a.size(); ++j) {

@@ -52,7 +52,7 @@ class Point
     //! Default constructor contructs the singleton point in zero dimensions.
     Point() : Vector<RealType>() { }
     //! The origin in \a n dimensions.
-    explicit Point(uint n) : Vector<RealType>(n) { }
+    explicit Point(Nat n) : Vector<RealType>(n) { }
     //! Construct from a string literal of the form "(x1,x2,...,xd)".
     explicit Point(const StringType& str);
     Point(const Vector<RealType>& v) : Vector<RealType>(v) { }
@@ -62,11 +62,11 @@ class Point
     //! Construct from an initializer list of floating-point values.
     explicit Point(InitializerList<double> lst);
     //! The origin in \a n dimensions.
-    static Point origin(uint n) { return Point(n,RealType(0)); }
+    static Point origin(Nat n) { return Point(n,RealType(0)); }
     //! A dynamically-allocated copy.
     virtual Point<X>* clone() const;
     //! The dimension of the point.
-    uint dimension() const { return this->size(); }
+    Nat dimension() const { return this->size(); }
     //! An explicit cast to a float vector. Useful to prevent ambiguous function overloads.
     const Vector<RealType>& vector() const { return *this; }
 
@@ -76,7 +76,7 @@ class Point
     virtual OutputStream& write(OutputStream& os) const {
         return os << static_cast<const Vector<RealType>&>(*this); }
 
-    virtual void draw(CanvasInterface& c, const Projection2d& p) const;
+    virtual Void draw(CanvasInterface& c, const Projection2d& p) const;
     virtual ExactBox bounding_box() const;
 };
 

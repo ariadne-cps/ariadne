@@ -54,22 +54,22 @@ class SolverBase
 {
   public:
     /*! \brief Constructor. */
-    SolverBase(double max_error, uint max_steps);
+    SolverBase(double max_error, Nat max_steps);
 
     /*! \brief The maximum permissible error of the solution. */
     double maximum_error() const { return this->_max_error; }
     /*! \brief Set the maximum error. */
-    void set_maximum_error(double max_error) { this->_max_error=max_error; };
+    Void set_maximum_error(double max_error) { this->_max_error=max_error; };
 
     /*! \brief The maximum number of steps allowed before the method must quit. */
-    uint maximum_number_of_steps() const { return this->_max_steps; }
+    Nat maximum_number_of_steps() const { return this->_max_steps; }
     /*! \brief Set the maximum number of steps. */
-    void set_maximum_number_of_steps(uint max_steps) { this->_max_steps=max_steps; };
+    Void set_maximum_number_of_steps(Nat max_steps) { this->_max_steps=max_steps; };
 
     /*! \brief The class which constructs functions for the implicit function solver. */
     const FunctionModelFactoryInterface<ValidatedTag>& function_factory() const;
     /*! \brief Set the class which constructs functions for the implicit function solver. */
-    void set_function_factory(const FunctionModelFactoryInterface<ValidatedTag>& factory);
+    Void set_function_factory(const FunctionModelFactoryInterface<ValidatedTag>& factory);
 
     /*! \brief Solve \f$f(x)=0\f$, starting in the box \a bx. */
     virtual Vector<ValidatedNumber> zero(const ValidatedVectorFunction& f,const ExactBox& bx) const;
@@ -96,7 +96,7 @@ class SolverBase
     virtual ValidatedVectorFunctionModel implicit_step(const ValidatedVectorFunction& f,const ValidatedVectorFunctionModel& p,const ValidatedVectorFunctionModel& x) const = 0;
   private:
     double _max_error;
-    uint _max_steps;
+    Nat _max_steps;
     std::shared_ptr< FunctionModelFactoryInterface<ValidatedTag> > _function_factory_ptr;
 };
 
@@ -109,12 +109,12 @@ class IntervalNewtonSolver
 {
   public:
     /*! \brief Constructor. */
-    IntervalNewtonSolver(double max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
+    IntervalNewtonSolver(double max_error, Nat max_steps) : SolverBase(max_error,max_steps) { }
     IntervalNewtonSolver(MaximumError max_error, MaximumNumberOfSteps max_steps) : SolverBase(max_error,max_steps) { }
     /*! \brief Cloning operator. */
     virtual IntervalNewtonSolver* clone() const { return new IntervalNewtonSolver(*this); }
     /*! \brief Write to an output stream. */
-    virtual void write(OutputStream& os) const;
+    virtual Void write(OutputStream& os) const;
 
     using SolverBase::implicit;
   public:
@@ -133,12 +133,12 @@ class KrawczykSolver
 {
   public:
     /*! \brief Constructor. */
-    KrawczykSolver(double max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
+    KrawczykSolver(double max_error, Nat max_steps) : SolverBase(max_error,max_steps) { }
     KrawczykSolver(MaximumError max_error, MaximumNumberOfSteps max_steps) : SolverBase(max_error,max_steps) { }
     /*! \brief Cloning operator. */
     virtual KrawczykSolver* clone() const { return new KrawczykSolver(*this); }
     /*! \brief Write to an output stream. */
-    virtual void write(OutputStream& os) const;
+    virtual Void write(OutputStream& os) const;
 
     /*! \brief Solve \f$f(a,x)=0\f$ for a in \a par, looking for solutions with x in \a ix. */
     virtual ValidatedVectorFunctionModel implicit_step(const ValidatedVectorFunction& f, const ValidatedVectorFunctionModel& p, const ValidatedVectorFunctionModel& x) const;
@@ -160,12 +160,12 @@ class FactoredKrawczykSolver
 {
   public:
     /*! \brief Constructor. */
-    FactoredKrawczykSolver(double max_error, uint max_steps) : KrawczykSolver(max_error,max_steps) { }
+    FactoredKrawczykSolver(double max_error, Nat max_steps) : KrawczykSolver(max_error,max_steps) { }
     FactoredKrawczykSolver(MaximumError max_error, MaximumNumberOfSteps max_steps) : KrawczykSolver(max_error,max_steps) { }
     /*! \brief Cloning operator. */
     virtual FactoredKrawczykSolver* clone() const { return new FactoredKrawczykSolver(*this); }
     /*! \brief Write to an output stream. */
-    virtual void write(OutputStream& os) const;
+    virtual Void write(OutputStream& os) const;
   public:
     /*! \brief A single step of the modified Krawczyk contractor. */
     virtual Vector<ValidatedNumber>

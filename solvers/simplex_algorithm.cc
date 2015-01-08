@@ -59,20 +59,20 @@ OutputStream& operator<<(OutputStream& os, Slackness t) {
 }
 
 // Add functions to remove dependencies
-inline bool operator==(Rational q, int n) { return q==Rational(n); }
-inline bool operator!=(Rational q, int n) { return q!=Rational(n); }
-inline bool operator<=(Rational q, int n) { return q<=Rational(n); }
-inline bool operator>=(Rational q, int n) { return q>=Rational(n); }
-inline bool operator> (Rational q, int n) { return q> Rational(n); }
-inline bool operator< (Rational q, int n) { return q< Rational(n); }
+inline Bool operator==(Rational q, Int n) { return q==Rational(n); }
+inline Bool operator!=(Rational q, Int n) { return q!=Rational(n); }
+inline Bool operator<=(Rational q, Int n) { return q<=Rational(n); }
+inline Bool operator>=(Rational q, Int n) { return q>=Rational(n); }
+inline Bool operator> (Rational q, Int n) { return q> Rational(n); }
+inline Bool operator< (Rational q, Int n) { return q< Rational(n); }
 
-inline bool operator==(Rational q, double n) { return q==Rational(n); }
+inline Bool operator==(Rational q, double n) { return q==Rational(n); }
 Rational midpoint(Rational const& q) { return q; }
 
-inline auto operator<=(ValidatedFloat x1, int x2) -> decltype(x1<=ValidatedFloat(x2)) { return x1<=ValidatedFloat(x2); }
-inline auto operator>=(ValidatedFloat x1, int x2) -> decltype(x1>=ValidatedFloat(x2)) { return x1>=ValidatedFloat(x2); }
-inline auto operator< (ValidatedFloat x1, int x2) -> decltype(x1< ValidatedFloat(x2)) { return x1< ValidatedFloat(x2); }
-inline auto operator> (ValidatedFloat x1, int x2) -> decltype(x1> ValidatedFloat(x2)) { return x1> ValidatedFloat(x2); }
+inline auto operator<=(ValidatedFloat x1, Int x2) -> decltype(x1<=ValidatedFloat(x2)) { return x1<=ValidatedFloat(x2); }
+inline auto operator>=(ValidatedFloat x1, Int x2) -> decltype(x1>=ValidatedFloat(x2)) { return x1>=ValidatedFloat(x2); }
+inline auto operator< (ValidatedFloat x1, Int x2) -> decltype(x1< ValidatedFloat(x2)) { return x1< ValidatedFloat(x2); }
+inline auto operator> (ValidatedFloat x1, Int x2) -> decltype(x1> ValidatedFloat(x2)) { return x1> ValidatedFloat(x2); }
 
 template<class X> struct RigorousNumericsTraits { typedef X Type; };
 template<> struct RigorousNumericsTraits<Float> { typedef UpperInterval Type; };
@@ -151,7 +151,7 @@ SimplexSolver<X>::consistency_check(const Array<Slackness>& vt, const Array<Size
 
 // Check that the matrix B is the inverse of the matrix A_B with columns p[0],...,p[m-1] of A.
 template<class X>
-void
+Void
 SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Array<SizeType>& p, const Matrix<X>& B) const
 {
     static const X MAXIMUM_ERROR=X(1e-8);
@@ -175,7 +175,7 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Array<SizeType>& p
 
 // Check that Ax=b.
 template<class X>
-void
+Void
 SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b,const Vector<X>& x) const
 {
     static const X MAXIMUM_ERROR=X(1e-8);
@@ -187,7 +187,7 @@ SimplexSolver<X>::consistency_check(const Matrix<X>& A, const Vector<X>& b,const
 // Check that the matrix B is the inverse of the matrix A_B with columns p[0],...,p[m-1] of A, and that
 // the vector x is given by x_L=l_L, x_U=x_U and x_B=B^{-1} A_N x_N.
 template<class X>
-void
+Void
 SimplexSolver<X>::consistency_check(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                                     const Array<Slackness>& vt, const Array<SizeType>& p, const Matrix<X>& B, const Vector<X>& x) const
 {
@@ -301,12 +301,12 @@ SimplexSolver<X>::compute_basis(const Matrix<X>& A) const
         // Find a good pivot column j and swap entries of jth and kth columns
 
         // Look for a column which is the unit vector ek below k
-        bool found_unit=false;
+        Bool found_unit=false;
         SizeType j;
         for(j=k; j!=n; ++j) {
             if(U[k][j]==+1) {
                 found_unit=true;
-                for(uint i=k+1; i!=m; ++i) {
+                for(Nat i=k+1; i!=m; ++i) {
                     if(U[i][j]!=0) { found_unit=false; break; }
                 }
             }
@@ -772,16 +772,16 @@ compute_rt(const Vector<Float>& xl, const Vector<Float>& xu, const Array<Slackne
 
 
 template<class X>
-void
+Void
 update_B(Matrix<X>& B, const Vector<X>& d, const SizeType r)
 {
     const SizeType m=d.size();
     X dr=d[r];
     X drr=1/dr;
     Vector<X> e(m); e[r]=1;
-    Vector<X> Br(m); for(uint j=0; j!=m; ++j) { Br[j]=B[r][j]; }
-    for(uint i=0; i!=m; ++i) {
-        for(uint j=0; j!=m; ++j) {
+    Vector<X> Br(m); for(Nat j=0; j!=m; ++j) { Br[j]=B[r][j]; }
+    for(Nat i=0; i!=m; ++i) {
+        for(Nat j=0; j!=m; ++j) {
             B[i][j]-=(d[i]+e[i])*Br[j]*drr;
         }
     }
@@ -790,7 +790,7 @@ update_B(Matrix<X>& B, const Vector<X>& d, const SizeType r)
 
 
 template<class X>
-void
+Void
 update_x(const Array<SizeType>& p, Vector<X>& x, const SizeType s, const Vector<X>& d, const SizeType r, const X& t)
 {
     const SizeType m=d.size();
@@ -804,7 +804,7 @@ update_x(const Array<SizeType>& p, Vector<X>& x, const SizeType s, const Vector<
 
 
 template<class X>
-void
+Void
 update_x(const Vector<X>& xl, const Vector<X>& xu, const Array<SizeType>& p, Vector<X>& x, const SizeType s, const Vector<X>& d, const SizeType r, const X& t)
 {
     // Update x when variable p[s] becomes basic and variable p[r] becomes non-basic
@@ -825,7 +825,7 @@ update_x(const Vector<X>& xl, const Vector<X>& xu, const Array<SizeType>& p, Vec
 }
 
 template<class X>
-void
+Void
 update_x(const Vector<X>& xl, const Vector<X>& xu, const Array<SizeType>& p, Vector<X>& x, const SizeType s, const Vector<X>& d, const X& t)
 {
     // Update basis when a variable changes between lower and upper
@@ -843,7 +843,7 @@ update_x(const Vector<X>& xl, const Vector<X>& xu, const Array<SizeType>& p, Vec
 
 
 template<class X>
-void
+Void
 update_y(const Vector<X>& xl, const Vector<X>& xu, const Array<SizeType>& p, Vector<X>& y, const SizeType s, const Vector<X>& d, const X& t)
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -880,7 +880,7 @@ SimplexSolver<X>::validated_feasible(const Vector<X>& xl, const Vector<X>& xu, c
     make_lpair(p,B)=this->compute_basis(A);
     vt=compute_vt(xl,xu,p,A.row_size());
 
-    bool done = false;
+    Bool done = false;
     while(!done) {
         done=this->validated_feasibility_step(xl,xu,A,b,vt,p);
     }
@@ -888,7 +888,7 @@ SimplexSolver<X>::validated_feasible(const Vector<X>& xl, const Vector<X>& xu, c
 }
 
 template<class X>
-bool
+Bool
 SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                                              Array<Slackness>& vt, Array<SizeType>& p) const
 {
@@ -909,7 +909,7 @@ SimplexSolver<X>::validated_feasibility_step(const Vector<X>& xl, const Vector<X
     Vector<X> c(n);
     Vector<X> relaxed_xl(xl);
     Vector<X> relaxed_xu(xu);
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         SizeType j=p[i];
         if(possibly(x[p[i]]<=xl[p[i]])) { c[j]=-1; relaxed_xl[j]=-inf; feasible=indeterminate; }
         if(possibly(x[p[i]]>=xu[p[i]])) { c[j]=+1; relaxed_xu[j]=+inf; feasible=indeterminate; }
@@ -1047,8 +1047,8 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
     const double ERROR_TOLERANCE = std::numeric_limits<float>::epsilon();
 
     // Recompute B and x if it appears that there are problems with numerical degeneracy
-    bool possible_degeneracy=false;
-    for(uint i=0; i!=m; ++i) {
+    Bool possible_degeneracy=false;
+    for(Nat i=0; i!=m; ++i) {
         if(xl[p[i]]>x[p[i]] || x[p[i]]>xu[p[i]]) {
             possible_degeneracy=true;
             break;
@@ -1056,7 +1056,7 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
     }
     B=compute_B<X>(A,p);
     x=Ariadne::compute_x<X>(xl,xu,A,b, vt,p,B);
-    for(uint i=0; i!=m; ++i) {
+    for(Nat i=0; i!=m; ++i) {
         if(x[p[i]]<xl[p[i]]) {
             ARIADNE_ASSERT(x[p[i]]>xl[p[i]]-X(ERROR_TOLERANCE));
             x[p[i]]=xl[p[i]];
@@ -1075,7 +1075,7 @@ SimplexSolver<X>::lpstep(const Vector<X>& xl, const Vector<X>& xu, const Matrix<
 }
 
 template<class X>
-bool
+Bool
 SimplexSolver<X>::lpstep(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                          Array<Slackness>& vt, Array<SizeType>& p, Matrix<X>& B, Vector<X>& x) const
 {
@@ -1095,7 +1095,7 @@ Vector<X>
 SimplexSolver<X>::compute_x(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                             const Array<Slackness>& vt) const
 {
-    Array<uint> p=compute_p(vt);
+    Array<Nat> p=compute_p(vt);
     Matrix<X> B = Ariadne::compute_B<X>(A,p);
     return Ariadne::compute_x(xl,xu,A,b, vt,p,B);
 }
@@ -1119,7 +1119,7 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
     // It seems that using this threshold does not work...
     static const X ROBUST_FEASIBILITY_THRESHOLD = X(std::numeric_limits<double>::epsilon()) * 0;
 
-    bool infeasible=false;
+    Bool infeasible=false;
     for(SizeType j=0; j!=n; ++j) {
         // If x[j] is (almost) infeasible by way of being to low, relax constraint x[j]>=xl[j] to x[j]>=-inf.
         if(x[j]<xl[j]) { cc[j]=-1; ll[j]=-inf; infeasible=true; }
@@ -1128,11 +1128,11 @@ SimplexSolver<X>::_feasible(const Vector<X>& xl, const Vector<X>& xu, const Matr
     }
     ARIADNE_LOG(9,"    vt="<<vt<<" x="<<x<<" cc="<<cc<<"\n");
 
-    static const int MAX_STEPS=1024;
-    int steps=0;
+    static const Int MAX_STEPS=1024;
+    Int steps=0;
     while(infeasible) {
 
-        bool done=lpstep(cc,ll,uu,A,b, vt,p,B,x);
+        Bool done=lpstep(cc,ll,uu,A,b, vt,p,B,x);
         ARIADNE_LOG(9,"  Done changing basis\n");
         ARIADNE_LOG(9,"    p="<<p<<" B="<<B<<"\n");
         ARIADNE_LOG(9,"    vt="<<vt<<" x="<<x<<"\n");
@@ -1458,9 +1458,9 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
     this->_feasible(xl,xu,A,b, vt,p,B,x);
     ARIADNE_LOG(3,"Feasible A="<<A<<" b="<<b<<" xl="<<xl<<" xu="<<xu<<" vt="<<vt<<" p="<<p<<" x="<<x<<" Ax="<<A*x<<"\n");
 
-    bool done=false;
-    const int MAX_STEPS=1024;
-    int steps=0;
+    Bool done=false;
+    const Int MAX_STEPS=1024;
+    Int steps=0;
     while(not done) {
         done=lpstep(c,xl,xu,A,b, vt,p,B,x);
         ++steps;

@@ -38,9 +38,6 @@
 #include "numeric/float.h"
 #include "numeric/float-exact.h"
 
-// Simplifying typedefs for unsigned types
-typedef unsigned int uint;
-
 namespace Ariadne {
 
 // Forward declarations
@@ -141,7 +138,7 @@ class UpperFloat {
     friend UpperFloat& operator+=(UpperFloat&, UpperFloat);
     friend UpperFloat& operator*=(UpperFloat&, UpperFloat);
     friend LowerFloat rec(UpperFloat);
-    friend UpperFloat pow(UpperFloat, uint);
+    friend UpperFloat pow(UpperFloat, Nat);
     friend UpperFloat half(UpperFloat);
     friend UpperFloat abs(UpperFloat);
     friend UpperFloat max(UpperFloat, UpperFloat);
@@ -225,8 +222,8 @@ class ValidatedFloat {
     ValidatedFloat(const Rational& lower, const Rational& upper);
 #endif // HAVE_GMPXX_H
 
-    ValidatedFloat& operator=(uint m) { l=m; u=m; return *this; }
-    ValidatedFloat& operator=(int n) { l=n; u=n; return *this; }
+    ValidatedFloat& operator=(Nat m) { l=m; u=m; return *this; }
+    ValidatedFloat& operator=(Int n) { l=n; u=n; return *this; }
     ValidatedFloat& operator=(double c) { l=c; u=c; return *this; }
     ValidatedFloat& operator=(const Float& x) { l=x; u=x; return *this; }
     ValidatedFloat& operator=(const Real& x);
@@ -253,23 +250,23 @@ class ValidatedFloat {
     const UpperFloat width() const { return UpperFloat(sub_up(u,l)); }
 
     //! \brief Tests if the interval is empty.
-    bool empty() const { return l>u; }
+    Bool empty() const { return l>u; }
     //! \brief Tests if the interval is a singleton.
-    bool singleton() const { return l==u; }
+    Bool singleton() const { return l==u; }
 
     //! \brief Sets the interval to a "canonical" empty interval \a [1,0].
-    void set_empty() { l=+std::numeric_limits< double >::infinity(); u=-std::numeric_limits< double >::infinity(); }
-    void set_lower(const Float& lower) { l=lower; }
+    Void set_empty() { l=+std::numeric_limits< double >::infinity(); u=-std::numeric_limits< double >::infinity(); }
+    Void set_lower(const Float& lower) { l=lower; }
         // ARIADNE_ASSERT(lower<=this->u);
-    void set_upper(const Float& upper) { u=upper; }
+    Void set_upper(const Float& upper) { u=upper; }
         // ARIADNE_ASSERT(this->l<=upper);
-    void set(const Float& lower, const Float& upper) { l=lower; u=upper; }
+    Void set(const Float& lower, const Float& upper) { l=lower; u=upper; }
         // ARIADNE_ASSERT(lower<=upper);
   public:
     //! \brief Extract a double-precision point approximation to the value represented by the interval.
     double get_d() const { return (this->l.get_d()+this->u.get_d())/2; }
-    static uint output_precision;
-    static void set_output_precision(uint p) { output_precision=p; }
+    static Nat output_precision;
+    static Void set_output_precision(Nat p) { output_precision=p; }
   private:
     Float l, u;
 };
@@ -305,7 +302,7 @@ inline PositiveUpperFloat width(ValidatedFloat i) {
 }
 
 //! \related ValidatedFloat \brief Test if the intervals are equal (as sets).
-inline bool equal(ValidatedFloat i1, ValidatedFloat i2) {
+inline Bool equal(ValidatedFloat i1, ValidatedFloat i2) {
     //std::cerr<<"equal(i1,i2) with i1="<<i1<<"; i2="<<i2<<std::endl;
     return i1.lower_raw()==i2.lower_raw() && i1.upper_raw()==i2.upper_raw();
 }
@@ -319,7 +316,7 @@ ValidatedFloat narrow(ValidatedFloat i);
 // Over-approximate by an interval with float coefficients
 //! \related ValidatedFloat \brief Over-approximate the interval by one using builtin single-precision floating-point values as endpoints.
 ValidatedFloat trunc(ValidatedFloat);
-ValidatedFloat trunc(ValidatedFloat, uint eps);
+ValidatedFloat trunc(ValidatedFloat, Nat eps);
 
 //! \related ValidatedFloat \brief The interval of possible maximum values. Yields the interval between \c i1.upper() and \c i2.upper().
 inline ValidatedFloat max(ValidatedFloat i1,ValidatedFloat i2);
@@ -364,9 +361,9 @@ inline ValidatedFloat mul(ExactFloat, ExactFloat);
 inline ValidatedFloat div(ExactFloat, ExactFloat);
 
 //! \related ValidatedFloat \brief Positive integer power function. Yields an over-approximation to \f$\{ x^m \mid x\in I\}\f$.
-ValidatedFloat pow(ValidatedFloat i, uint m);
+ValidatedFloat pow(ValidatedFloat i, Nat m);
 //! \related ValidatedFloat \brief %Integer power function. Yields an over-approximation to \f$\{ x^n \mid x\in I\}\f$.
-ValidatedFloat pow(ValidatedFloat i, int n);
+ValidatedFloat pow(ValidatedFloat i, Int n);
 
 //! \related ValidatedFloat \brief Square-root function. Yields an over-approximation to \f$\{ \sqrt{x} \mid x\in I\}\f$.
 //! Requires \c I.lower()>=0 .
@@ -588,7 +585,7 @@ inline ValidatedFloat div(ExactFloat x1, ExactFloat x2)
     return ValidatedFloat(rl,ru);
 }
 
-inline ValidatedFloat pow(ExactFloat x1, int n2)
+inline ValidatedFloat pow(ExactFloat x1, Int n2)
 {
     return pow(ValidatedFloat(x1),n2);
 }
@@ -642,11 +639,11 @@ inline ValidatedFloat operator+(const ExactFloat& x1, const ExactFloat& x2) { re
 inline ValidatedFloat operator-(const ExactFloat& x1, const ExactFloat& x2) { return sub(x1,x2); }
 inline ValidatedFloat operator*(const ExactFloat& x1, const ExactFloat& x2) { return mul(x1,x2); }
 inline ValidatedFloat operator/(const ExactFloat& x1, const ExactFloat& x2) { return div(x1,x2); }
-inline ValidatedFloat pow(const ExactFloat& x, int n) { return pow(ValidatedFloat(x),n); }
+inline ValidatedFloat pow(const ExactFloat& x, Int n) { return pow(ValidatedFloat(x),n); }
 
 // Standard equality operators
 //! \related ValidatedFloat \brief Tests if \a i1 provides tighter bounds than \a i2.
-inline bool refines(const ValidatedFloat& i1, const ValidatedFloat& i2) {
+inline Bool refines(const ValidatedFloat& i1, const ValidatedFloat& i2) {
     return i1.lower_raw()>=i2.lower_raw() && i1.upper_raw()<=i2.upper_raw(); }
 
 //! \related ValidatedFloat \brief The common refinement of \a i1 and \a i2.
@@ -654,15 +651,15 @@ inline ValidatedFloat refinement(const ValidatedFloat& i1, const ValidatedFloat&
     return ValidatedFloat(max(i1.lower_raw(),i2.lower_raw()),min(i1.upper_raw(),i2.upper_raw())); }
 
 //! \related ValidatedFloat \brief Tests if \a i1 and \a i2 are consistent with representing the same number.
-inline bool consistent(const ValidatedFloat& i1, const ValidatedFloat& i2) {
+inline Bool consistent(const ValidatedFloat& i1, const ValidatedFloat& i2) {
     return i1.lower_raw()<=i2.upper_raw() && i1.upper_raw()>=i2.lower_raw(); }
 
 //! \related ValidatedFloat \brief  Tests if \a i1 and \a i2 are inconsistent with representing the same number.
-inline bool inconsistent(const ValidatedFloat& i1, const ValidatedFloat& i2) {
+inline Bool inconsistent(const ValidatedFloat& i1, const ValidatedFloat& i2) {
     return not consistent(i1,i2); }
 
 //! \related ValidatedFloat \brief  Tests if \a i1 is a model for the exact value \a x2. number.
-inline bool models(const ValidatedFloat& i1, const ExactFloat& x2) {
+inline Bool models(const ValidatedFloat& i1, const ExactFloat& x2) {
     return i1.lower_raw()<=x2.raw() && i1.upper_raw()>=x2.raw(); }
 
 //inline ValidatedFloat& operator+=(ValidatedFloat& i1, const ExactFloat& x2) { i1=add(i1,x2); return i1; }
@@ -681,10 +678,10 @@ template<class F, class N, EnableIf<IsSame<F,ValidatedFloat>> =dummy, EnableIf<I
 
 // Standard equality operators
 //! \related ValidatedFloat \brief Equality operator. Tests equality of intervals as geometric objects, so \c [0,1]==[0,1] returns \c true.
-inline bool operator==(const ValidatedFloat& i1, const ValidatedFloat& i2) { return i1.lower_raw()==i2.lower_raw() && i1.upper_raw()==i2.upper_raw(); }
+inline Bool operator==(const ValidatedFloat& i1, const ValidatedFloat& i2) { return i1.lower_raw()==i2.lower_raw() && i1.upper_raw()==i2.upper_raw(); }
 //! \related ValidatedFloat \brief Inequality operator. Tests equality of intervals as geometric objects, so \c [0,2]!=[1,3] returns \c true,
 //! even though the intervals possibly represent the same exact real value.
-inline bool operator!=(const ValidatedFloat& i1, const ValidatedFloat& i2) { return i1.lower_raw()!=i2.lower_raw() || i1.upper_raw()!=i2.upper_raw(); }
+inline Bool operator!=(const ValidatedFloat& i1, const ValidatedFloat& i2) { return i1.lower_raw()!=i2.lower_raw() || i1.upper_raw()!=i2.upper_raw(); }
 
 // Boost-style Tribool (in)equality operators
 //inline Tribool operator==(const ValidatedFloat& i1, const ValidatedFloat& i2) {
@@ -771,7 +768,7 @@ inline Tribool operator<=(ValidatedFloat i1, ValidatedFloat i2) {
 }
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
-  template<class A> void serialize(A& a, ValidatedFloat& ivl, const uint version) {
+  template<class A> Void serialize(A& a, ValidatedFloat& ivl, const Nat version) {
     a & ivl.lower_raw() & ivl.upper_raw(); }
 #endif
 

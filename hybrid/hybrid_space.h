@@ -49,7 +49,7 @@ class HybridGridTreeSet;
 class HybridSpaceInterface
 {
   public:
-    virtual bool has_location(const DiscreteLocation& q) const  = 0;
+    virtual Bool has_location(const DiscreteLocation& q) const  = 0;
     virtual RealSpace operator[](const DiscreteLocation& q) const = 0;
   public:
     virtual HybridSpaceInterface* clone() const = 0;
@@ -84,7 +84,7 @@ class HybridSpace
     HybridSpace(const HybridSpaceInterface& hspc) : _ptr(hspc.clone()) { }
     HybridSpace(const HybridSpaceInterface* hspc_ptr) : _ptr(hspc_ptr) { }
 
-    bool has_location(const DiscreteLocation& q) const { return this->_ptr->has_location(q); }
+    Bool has_location(const DiscreteLocation& q) const { return this->_ptr->has_location(q); }
     RealSpace operator[](const DiscreteLocation& q) const { return this->_ptr->operator[](q); }
 
     Tribool operator==(const HybridSpace& other) const { return this->_ptr->operator==(other); }
@@ -111,9 +111,9 @@ class MonolithicHybridSpace
 
     MonolithicHybridSpace* clone() const { return new MonolithicHybridSpace(*this); }
 
-    void new_location(const DiscreteLocation& q, const RealSpace& spc) { this->_locations.insert(q,spc); }
+    Void new_location(const DiscreteLocation& q, const RealSpace& spc) { this->_locations.insert(q,spc); }
 
-    bool has_location(const DiscreteLocation& q) const { return _locations.has_key(q); }
+    Bool has_location(const DiscreteLocation& q) const { return _locations.has_key(q); }
 
     Tribool operator==(const HybridSpaceInterface& other) const {
         for (ConstIterator iter=this->_locations.begin(); iter!=this->_locations.end(); ++iter) {

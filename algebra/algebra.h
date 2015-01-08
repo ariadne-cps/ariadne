@@ -50,7 +50,7 @@ template<class X> class Algebra
     Algebra(AlgebraInterface<X>* p) : _ptr(p) { }
     Algebra(const AlgebraInterface<X>& a) : _ptr(a._clone()) { }
     Algebra(const Algebra<X>& a) : _ptr(a._ptr->_clone()) { }
-    Algebra<X>& operator=(int c) { *this = this->create(); this->iadd(c); return *this; }
+    Algebra<X>& operator=(Int c) { *this = this->create(); this->iadd(c); return *this; }
     Algebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
     Algebra<X>& operator=(const Algebra<X>& a) { this->_ptr=std::shared_ptr< AlgebraInterface<X> >(a._ptr->_clone()); return *this; }
     operator const AlgebraInterface<X>& () const { return *_ptr; }
@@ -58,10 +58,10 @@ template<class X> class Algebra
     Algebra<X> clone() const { return Algebra<X>(_ptr->_clone()); }
     OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
   public:
-    void iadd(const X& c) { _ptr->_iadd(c); }
-    void imul(const X& c) { _ptr->_imul(c); }
-    void isma(const X& c, const Algebra<X>& x) { _ptr->_isma(c,*x._ptr); }
-    void ifma(const Algebra<X>& x1, const Algebra<X>& x2) { _ptr->_ifma(*x1._ptr,*x2._ptr); }
+    Void iadd(const X& c) { _ptr->_iadd(c); }
+    Void imul(const X& c) { _ptr->_imul(c); }
+    Void isma(const X& c, const Algebra<X>& x) { _ptr->_isma(c,*x._ptr); }
+    Void ifma(const Algebra<X>& x1, const Algebra<X>& x2) { _ptr->_ifma(*x1._ptr,*x2._ptr); }
 };
 
 template<class X> class NormedAlgebra
@@ -77,7 +77,7 @@ template<class X> class NormedAlgebra
     NormedAlgebra(const NormedAlgebraInterface<X>& a) : _ptr(a.clone()) { }
     operator Algebra<X> () const { return _ptr->_clone(); }
     operator const NormedAlgebraInterface<X>& () const { return *_ptr; }
-    NormedAlgebra<X>& operator=(int c) { *this = this->create(); this->iadd(c); return *this; }
+    NormedAlgebra<X>& operator=(Int c) { *this = this->create(); this->iadd(c); return *this; }
     NormedAlgebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
     NormedAlgebra<X>& operator=(const NormedAlgebra<X>& a) { this->_ptr=std::shared_ptr< NormedAlgebraInterface<X> >(a._ptr->_clone()); return *this; }
     //! \brief The norm of the element.
@@ -94,11 +94,11 @@ template<class X> class NormedAlgebra
         return create_ball(ErrorFloat(RawFloat(r))); }
     NormedAlgebra<X> create() const { return NormedAlgebra<X>(_ptr->_create()); }
     NormedAlgebra<X> clone() const { return NormedAlgebra<X>(_ptr->_clone()); }
-    void clear() { this->imul(0); }
-    void iadd(const X& c) { _ptr->_iadd(c); }
-    void imul(const X& c) { _ptr->_imul(c); }
-    void isma(const X& c, const NormedAlgebra<X>& x) { _ptr->_isma(c,*x._ptr); }
-    void ifma(const NormedAlgebra<X>& x1, const NormedAlgebra<X>& x2) { _ptr->_ifma(*x1._ptr,*x2._ptr); }
+    Void clear() { this->imul(0); }
+    Void iadd(const X& c) { _ptr->_iadd(c); }
+    Void imul(const X& c) { _ptr->_imul(c); }
+    Void isma(const X& c, const NormedAlgebra<X>& x) { _ptr->_isma(c,*x._ptr); }
+    Void ifma(const NormedAlgebra<X>& x1, const NormedAlgebra<X>& x2) { _ptr->_ifma(*x1._ptr,*x2._ptr); }
     OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
 };
 
@@ -115,7 +115,7 @@ template<class X> class GradedAlgebra
     GradedAlgebra(GradedAlgebraInterface<X>* p) : _ptr(p) { }
     GradedAlgebra(const GradedAlgebraInterface<X>& a) : _ptr(a._clone()) { }
     GradedAlgebra(const GradedAlgebra<X>& a) : _ptr(a._ptr->_clone()) { }
-    GradedAlgebra<X>& operator=(int c) { *this = this->create(); this->iadd(c); return *this; }
+    GradedAlgebra<X>& operator=(Int c) { *this = this->create(); this->iadd(c); return *this; }
     GradedAlgebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
     GradedAlgebra<X>& operator=(const Algebra<X>& a) { this->_ptr=std::shared_ptr< AlgebraInterface<X> >(a._ptr->_clone()); return *this; }
     operator Algebra<X> () const { return _ptr->_clone(); }
@@ -123,15 +123,15 @@ template<class X> class GradedAlgebra
     GradedAlgebra<X> create() const { return GradedAlgebra<X>(_ptr->_create()); }
     GradedAlgebra<X> clone() const { return GradedAlgebra<X>(_ptr->_clone()); }
     //! \brief The degree of the algebra.
-    uint degree() const { return _ptr->degree(); }
+    Nat degree() const { return _ptr->degree(); }
     //! \brief The value in the null grade.
     const X& value() const { return _ptr->value(); }
     OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
   public:
-    void iadd(const X& c) { _ptr->_iadd(c); }
-    void imul(const X& c) { _ptr->_imul(c); }
-    void isma(const X& c, const GradedAlgebra<X>& x) { _ptr->_isma(c,*x._ptr); }
-    void ifma(const GradedAlgebra<X>& x1, const GradedAlgebra<X>& x2) { _ptr->_ifma(*x1._ptr,*x2._ptr); }
+    Void iadd(const X& c) { _ptr->_iadd(c); }
+    Void imul(const X& c) { _ptr->_imul(c); }
+    Void isma(const X& c, const GradedAlgebra<X>& x) { _ptr->_isma(c,*x._ptr); }
+    Void ifma(const GradedAlgebra<X>& x1, const GradedAlgebra<X>& x2) { _ptr->_ifma(*x1._ptr,*x2._ptr); }
 };
 
 //! \brief Generic class for elements of unital algebras.
@@ -149,7 +149,7 @@ template<class X> class SymbolicAlgebra
     SymbolicAlgebra(const SymbolicAlgebra<X>& a) : _ptr(a._ptr->_clone()) { }
     //! \brief Create the representation of the operator \a op applied to \a a.
     SymbolicAlgebra(OperatorCode op, const SymbolicAlgebra<X>& a) : _ptr(a._ptr->_apply(op)) { }
-    SymbolicAlgebra<X>& operator=(int c) { *this = this->create(); this->iadd(c); return *this; }
+    SymbolicAlgebra<X>& operator=(Int c) { *this = this->create(); this->iadd(c); return *this; }
     SymbolicAlgebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
     SymbolicAlgebra<X>& operator=(const Algebra<X>& a) { this->_ptr=std::shared_ptr< AlgebraInterface<X> >(a._ptr->_clone()); return *this; }
     operator Algebra<X> () const { return _ptr->_clone(); }
@@ -158,10 +158,10 @@ template<class X> class SymbolicAlgebra
     SymbolicAlgebra<X> clone() const { return SymbolicAlgebra<X>(_ptr->_clone()); }
     OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
   public:
-    void iadd(const X& c) { _ptr->_iadd(c); }
-    void imul(const X& c) { _ptr->_imul(c); }
-    void isma(const X& c, const SymbolicAlgebra<X>& x) { _ptr->_isma(c,*x._ptr); }
-    void ifma(const SymbolicAlgebra<X>& x1, const SymbolicAlgebra<X>& x2) { _ptr->_ifma(*x1._ptr,*x2._ptr); }
+    Void iadd(const X& c) { _ptr->_iadd(c); }
+    Void imul(const X& c) { _ptr->_imul(c); }
+    Void isma(const X& c, const SymbolicAlgebra<X>& x) { _ptr->_isma(c,*x._ptr); }
+    Void ifma(const SymbolicAlgebra<X>& x1, const SymbolicAlgebra<X>& x2) { _ptr->_ifma(*x1._ptr,*x2._ptr); }
 };
 
 template<class X> inline Algebra<X> AlgebraInterface<X>::create() const { return this->_create(); }

@@ -48,9 +48,9 @@ class SolverWrapper
 {
   public:
     SolverInterface* clone() const { return this->get_override("clone")(); }
-    void set_maximum_error(double) { this->get_override("set_maximum_error")(); }
+    Void set_maximum_error(double) { this->get_override("set_maximum_error")(); }
     double maximum_error() const { return this->get_override("maximum_error")(); }
-    void set_maximum_number_of_steps(uint) { this->get_override("set_maximum_number_of_steps")(); }
+    Void set_maximum_number_of_steps(uint) { this->get_override("set_maximum_number_of_steps")(); }
     uint maximum_number_of_steps() const { return this->get_override("maximum_number_of_steps")(); }
     ValidatedPointType zero(const ValidatedVectorFunction& f, const ExactBox& bx) const {
         return this->get_override("zero")(); }
@@ -68,7 +68,7 @@ class SolverWrapper
         return this->get_override("continuation")(); }
     Set< ValidatedPointType > solve_all(const ValidatedVectorFunction& f, const ExactBox& bx) const {
         return this->get_override("solve_all")(); }
-    void write(OutputStream&) const { this->get_override("write")(); }
+    Void write(OutputStream&) const { this->get_override("write")(); }
 };
 
 
@@ -78,9 +78,9 @@ class IntegratorWrapper
   public:
     IntegratorInterface* clone() const {
         return this->get_override("clone")(); }
-    void set_temporal_order(uint) {
+    Void set_temporal_order(uint) {
         this->get_override("set_temporal_order")(); }
-    void set_maximum_error(double) {
+    Void set_maximum_error(double) {
         this->get_override("set_maximum_error")(); }
     double maximum_error() const {
         return this->get_override("maximum_error")(); }
@@ -96,7 +96,7 @@ class IntegratorWrapper
         return this->get_override("flow")(); }
     List<ValidatedVectorFunctionModel> flow(const ValidatedVectorFunction&,const ExactBox&,const Real&) const {
         return this->get_override("flow")(); }
-    void write(OutputStream&) const {
+    Void write(OutputStream&) const {
         this->get_override("write")(); }
 };
 
@@ -104,7 +104,7 @@ class IntegratorWrapper
 } // namespace Ariadne
 
 
-void export_solver()
+Void export_solver()
 {
     class_<SolverWrapper, boost::noncopyable> solver_wrapper_class("SolverInterface");
     solver_wrapper_class.def("solve",pure_virtual((Vector<ValidatedNumber>(SolverInterface::*)(const ValidatedVectorFunction&,const ExactBox&)const) &SolverInterface::solve));
@@ -119,7 +119,7 @@ void export_solver()
 
 
 
-void export_integrator()
+Void export_integrator()
 {
     class_<IntegratorWrapper, boost::noncopyable> integrator_wrapper_class("IntegratorInterface");
     integrator_wrapper_class.def("flow_bounds",(Pair<ExactFloat,UpperBox>(IntegratorInterface::*)(const ValidatedVectorFunction&, const ExactBox&, const RawFloat&)const)&IntegratorInterface::flow_bounds);
@@ -157,7 +157,7 @@ void export_integrator()
 }
 
 
-void solver_submodule()
+Void solver_submodule()
 {
     to_python_list< Set< ExactBox > >();
     to_python< List< ExactBox > >();

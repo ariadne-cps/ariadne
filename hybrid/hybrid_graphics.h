@@ -40,8 +40,6 @@
 #include "expression/expression_set.h"
 #include "hybrid/discrete_location.h"
 
-typedef unsigned int uint;
-
 namespace Ariadne {
 
 class IntervalSet;
@@ -110,37 +108,37 @@ class HybridFigure
     ~HybridFigure();
     HybridFigure();
 
-    void set_locations(const List<DiscreteLocation>& l) { locations=Set<DiscreteLocation>(l); }
-    void set_axes(const Axes2d& axes) { bounds=axes.bounds; variables=axes.variables; }
-    void set_bounds(const RealVariable& x, const RawFloat& l, const RawFloat& u) { bounds.insert(x,ExactInterval(l,u)); }
-    void set_bounds(const RealVariable& x, const ExactInterval& ivl) { bounds.insert(x,ivl); }
-    void set_bounds(const Map<RealVariable,ExactInterval>& b) { bounds=b; };
-    void set_bounds(const Map<RealVariable,IntervalSet>& b);
-    void set_variables(const RealVariable& x, const RealVariable& y) { variables=Variables2d(x,y); }
+    Void set_locations(const List<DiscreteLocation>& l) { locations=Set<DiscreteLocation>(l); }
+    Void set_axes(const Axes2d& axes) { bounds=axes.bounds; variables=axes.variables; }
+    Void set_bounds(const RealVariable& x, const RawFloat& l, const RawFloat& u) { bounds.insert(x,ExactInterval(l,u)); }
+    Void set_bounds(const RealVariable& x, const ExactInterval& ivl) { bounds.insert(x,ivl); }
+    Void set_bounds(const Map<RealVariable,ExactInterval>& b) { bounds=b; };
+    Void set_bounds(const Map<RealVariable,IntervalSet>& b);
+    Void set_variables(const RealVariable& x, const RealVariable& y) { variables=Variables2d(x,y); }
 
-    void set_line_style(bool ls) { properties.line_style=ls; }
-    void set_line_width(double lw) { properties.line_width=lw; }
-    void set_line_colour(Colour lc) { properties.line_colour=lc; }
-    void set_fill_style(bool fs) { properties.fill_style=fs; }
-    void set_fill_colour(Colour fc) { properties.fill_colour=fc; }
+    Void set_line_style(Bool ls) { properties.line_style=ls; }
+    Void set_line_width(double lw) { properties.line_width=lw; }
+    Void set_line_colour(Colour lc) { properties.line_colour=lc; }
+    Void set_fill_style(Bool fs) { properties.fill_style=fs; }
+    Void set_fill_colour(Colour fc) { properties.fill_colour=fc; }
 
-    void set_fill_opacity(double fo) { properties.fill_colour.opacity=fo; }
-    void set_line_colour(double r, double g, double b) { properties.line_colour=Colour(r,g,b); }
-    void set_fill_colour(double r, double g, double b) { properties.fill_colour=Colour(r,g,b,properties.fill_colour.opacity); }
+    Void set_fill_opacity(double fo) { properties.fill_colour.opacity=fo; }
+    Void set_line_colour(double r, double g, double b) { properties.line_colour=Colour(r,g,b); }
+    Void set_fill_colour(double r, double g, double b) { properties.fill_colour=Colour(r,g,b,properties.fill_colour.opacity); }
 
-    bool get_line_style() const { return properties.line_style; }
+    Bool get_line_style() const { return properties.line_style; }
     double get_line_width() const { return properties.line_width; }
     Colour get_line_colour() const { return properties.line_colour; }
-    bool get_fill_style() const { return properties.fill_style; }
+    Bool get_fill_style() const { return properties.fill_style; }
     Colour get_fill_colour() const { return properties.fill_colour; }
 
-    void draw(const HybridDrawableInterface& shape) { objects.append(HybridGraphicsObject(this->properties,shape)); }
-    void clear() { objects.clear(); }
+    Void draw(const HybridDrawableInterface& shape) { objects.append(HybridGraphicsObject(this->properties,shape)); }
+    Void clear() { objects.clear(); }
 
-    void write(const char* filename, uint nx, uint ny) const;
-    void write(const char* filename) const;
+    Void write(const char* filename, Nat nx, Nat ny) const;
+    Void write(const char* filename) const;
   public:
-    void _paint_all(CanvasInterface& canvas) const; // Writes all shapes to the canvas
+    Void _paint_all(CanvasInterface& canvas) const; // Writes all shapes to the canvas
   private:
   public:
     Map<RealVariable,ExactInterval> bounds;
@@ -157,40 +155,40 @@ inline HybridFigure& operator<<(HybridFigure& g, const FillStyle& fs) { g.set_fi
 inline HybridFigure& operator<<(HybridFigure& g, const FillOpacity& fo) { g.set_fill_opacity(fo); return g; }
 inline HybridFigure& operator<<(HybridFigure& g, const FillColour& fc) { g.set_fill_colour(fc); return g; }
 
-inline void draw(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); }
+inline Void draw(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); }
 inline HybridFigure& operator<<(HybridFigure& fig, const HybridDrawableInterface& shape) { fig.draw(shape); return fig; }
 
 ExactInterval approximation(const IntervalSet& rivl);
 
 template<class SET1>
-void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1) {
+Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1) {
     HybridFigure g; g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.write(filename); }
 
 template<class SET1,class SET2>
-void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2) {
+Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2) {
     HybridFigure g; g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2); g.write(filename); }
 
 template<class SET1,class SET2,class SET3>
-void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
+Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
           const Colour& fc3, const SET3& set3) {
     HybridFigure g; g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
     g.set_fill_colour(fc3); draw(g,set3); g.write(filename); }
 
 template<class SET1,class SET2,class SET3,class SET4>
-void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
+Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
           const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4) {
     HybridFigure g;  g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
     g.set_fill_colour(fc3); draw(g,set3); g.set_fill_colour(fc4); draw(g,set4); g.write(filename); }
 
 template<class SET1,class SET2,class SET3,class SET4,class SET5>
-void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
+Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
           const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4, const Colour& fc5, const SET5& set5) {
     HybridFigure g;  g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);
     g.set_fill_colour(fc3); draw(g,set3); g.set_fill_colour(fc4); draw(g,set4);
     g.set_fill_colour(fc5); draw(g,set5); g.write(filename); }
 
 template<class SET1,class SET2,class SET3,class SET4,class SET5,class SET6>
-void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
+Void plot(const char* filename, const Axes2d& axes, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2,
           const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4,
           const Colour& fc5, const SET5& set5, const Colour& fc6, const SET6& set6) {
     HybridFigure g;  g.set_axes(axes); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2);

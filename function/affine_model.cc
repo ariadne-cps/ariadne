@@ -40,14 +40,14 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAf
     Nat n=a1.argument_size();
     ValidatedAffineModel r(n);
     r=CoefficientType( a1.value().raw()+a2.value().raw() );
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         r[i]=CoefficientType(a1[i].raw()+a2[i].raw());
     }
 
     set_rounding_upward();
 
     RawFloat te=0.0;
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         RawFloat mrjl = (-a1.gradient(j).raw())-a2.gradient(j).raw();
         RawFloat  rju = ( a1.gradient(j).raw())+a2.gradient(j).raw();
         te+=(rju+mrjl);
@@ -91,14 +91,14 @@ ValidatedAffineModel operator*(const ValidatedNumber& c, const ValidatedAffineMo
     RawFloat cm=c.midpoint().raw();
     ValidatedAffineModel r(n);
     r=CoefficientType(a.value().raw()*cm);
-    for(uint i=0; i!=n; ++i) {
+    for(Nat i=0; i!=n; ++i) {
         r[i].raw()=a[i].raw()*cm;
     }
 
     set_rounding_upward();
 
     RawFloat te=0.0;
-    for(uint j=0; j!=n; ++j) {
+    for(Nat j=0; j!=n; ++j) {
         RawFloat mca=(-cm)*a.gradient(j).raw();
         RawFloat ca= cm*a.gradient(j).raw();
         te+=(ca+mca);
@@ -109,7 +109,7 @@ ValidatedAffineModel operator*(const ValidatedNumber& c, const ValidatedAffineMo
     RawFloat re=0.0;
     if(c.lower()!=c.upper()) {
         RawFloat ce=max(c.upper().raw()-cm,cm-c.lower().raw());
-        for(uint j=0; j!=n; ++j) {
+        for(Nat j=0; j!=n; ++j) {
             re+=abs(a.gradient(j).raw()*ce);
         }
     }
@@ -128,12 +128,12 @@ ValidatedAffineModel operator*(const ValidatedAffineModel& a, const ValidatedNum
 ValidatedAffineModel affine_model(const ValidatedAffine& a) {
     ValidatedAffineModel am(a.argument_size());
     am = CoefficientType( midpoint(a.value()).raw() );
-    for(uint j=0; j!=a.argument_size(); ++j) {
+    for(Nat j=0; j!=a.argument_size(); ++j) {
         am[j] = midpoint(a[j]);
     }
     set_rounding_upward();
     RawFloat e = 0.0;
-    for(uint j=0; j!=a.argument_size(); ++j) {
+    for(Nat j=0; j!=a.argument_size(); ++j) {
         e += max(a.gradient(j).upper().raw()-am.gradient(j).raw(),am.gradient(j).raw()-a.gradient(j).lower().raw());
     }
     e += max(a.value().upper().raw()-am.value().raw(),am.value().raw()-a.value().lower().raw());
@@ -151,7 +151,7 @@ ValidatedAffineModel affine_model(const ValidatedTaylorModel& taylor_model) {
         if(iter->key().degree()>=2) {
             affine_model.set_error(abs(iter->data()+affine_model.error()));
         } else if(iter->key().degree()==1) {
-            for(uint i=0; i!=taylor_model.argument_size(); ++i) {
+            for(Nat i=0; i!=taylor_model.argument_size(); ++i) {
                 if(iter->key()[i]==1) {
                     affine_model.set_gradient(i,iter->data());
                     break;
@@ -170,7 +170,7 @@ ValidatedAffineModel affine_model(const ValidatedTaylorModel& taylor_model) {
 Vector< ValidatedAffineModel > affine_models(const Vector< ValidatedTaylorModel >& models)
 {
     Vector< ValidatedAffineModel > result(models.size(),ValidatedAffineModel(models.size()==0?0u:models[0].argument_size()));
-    for(uint i=0; i!=result.size(); ++i) { result[i]=affine_model(models[i]); }
+    for(Nat i=0; i!=result.size(); ++i) { result[i]=affine_model(models[i]); }
     return result;
 }
 
@@ -187,7 +187,7 @@ Vector< ValidatedAffineModel > affine_models(const ExactBox& domain, const Valid
 OutputStream& operator<<(OutputStream& os, const ValidatedAffineModel& f)
 {
     os << f.value().raw();
-    for(uint j=0; j!=f.argument_size(); ++j) {
+    for(Nat j=0; j!=f.argument_size(); ++j) {
         if(f.gradient(j)>0.0) { os << "+"; }
         if(f.gradient(j)!=0.0) { os << f.gradient(j) << "*x" << j; }
     }

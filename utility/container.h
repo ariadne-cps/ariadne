@@ -75,10 +75,10 @@ template<class T> class List : public std::vector<T> {
         List(const std::vector<TT>& l) : std::vector<T>(l.begin(),l.end()) { }
     template<class TT, EnableIf<IsConstructible<T,TT>> =dummy, DisableIf<IsConvertible<TT,T>> =dummy>
         explicit List(const std::vector<TT>& l) : std::vector<T>(l.begin(),l.end()) { }
-    Void append(const T& t) { this->push_back(t); }
-    Void append(const std::vector<T>& t) {
+    void append(const T& t) { this->push_back(t); }
+    void append(const std::vector<T>& t) {
         for(unsigned int i=0; i!=t.size(); ++i) { this->push_back(t[i]); } }
-    Void concatenate(const std::vector<T>& t) {
+    void concatenate(const std::vector<T>& t) {
         for(unsigned int i=0; i!=t.size(); ++i) { this->push_back(t[i]); } }
 };
 template<class T> inline List<T> catenate(const List<T>& l1, const List<T>& l2) {

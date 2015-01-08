@@ -38,14 +38,12 @@
 
 #include "geometry/box.h"
 
-typedef unsigned int uint;
-
 namespace Ariadne {
 
 template<class ES> class ListSet;
 class DiscreteLocation;
 
-struct ListSetSummary { uint size, dimension; };
+struct ListSetSummary { Nat size, dimension; };
 
 /*! \ingroup ListSetSubModule
  *  \brief A set described as the union of sets in a list of basic sets.
@@ -65,7 +63,7 @@ class ListSet
     virtual ~ListSet() { }
 
     ListSet() { };
-    explicit ListSet(uint d) { };
+    explicit ListSet(Nat d) { };
     explicit ListSet(const BS& bs) { this->adjoin(bs); }
     template<class BST> ListSet(const ListSet<BST>& ls) {
         this->_data.insert(this->end(),ls.begin(),ls.end()); }
@@ -78,11 +76,11 @@ class ListSet
 
     /*! \brief Tests if the sets are equal. Tests equality of sequences,
      *  including ordering. */
-    bool operator==(const ListSet<BS>& other) const { return this->_data==other._data; }
+    Bool operator==(const ListSet<BS>& other) const { return this->_data==other._data; }
 
 
     /*! \brief Returns true if the list is empty. */
-    bool empty() const { return this->_data.empty(); }
+    Bool empty() const { return this->_data.empty(); }
 
     /*! \brief Returns the number of basic sets forming this object. */
     SizeType size() const { return this->_data.size(); }
@@ -91,7 +89,7 @@ class ListSet
     const BS& operator[](SizeType i) const { return this->_data[i]; };
 
     /*! \brief Make the set empty. */
-    void clear() { this->_data.clear(); }
+    Void clear() { this->_data.clear(); }
 
     /*! \brief A constant Iterator to the beginning of the list of basic sets. */
     ConstIterator begin() const { return this->_data.begin(); }
@@ -106,7 +104,7 @@ class ListSet
     Iterator end() { return this->_data.end(); };
 
     /*! \brief Returns the denotable set's space dimension. */
-    uint dimension() const { if(this->empty()) { return 0; } else { return this->_data.back().dimension(); } }
+    Nat dimension() const { if(this->empty()) { return 0; } else { return this->_data.back().dimension(); } }
 
     /*! \brief Removes a set from the list and return it. */
     BS pop() { BS result=this->_data.back(); this->_data.pop_back(); return result; }
@@ -115,22 +113,22 @@ class ListSet
     Iterator erase(Iterator iter) { return this->_data.erase(iter); }
 
     /*! \brief Pushes a basic set to the end of the list. */
-    void push_back(const BS& bs) { this->_data.push_back(bs); }
+    Void push_back(const BS& bs) { this->_data.push_back(bs); }
 
     /*! \brief Adjoins (makes union with) a basic set. */
-    void adjoin(const BS& bs) {
+    Void adjoin(const BS& bs) {
         ARIADNE_ASSERT(this->empty() || this->_data.back().dimension()==bs.dimension());
         this->_data.push_back(bs); }
 
     /*! \brief Adjoins (makes union with) another list set. */
-    void adjoin(const ListSet<BS>& ls) {
+    Void adjoin(const ListSet<BS>& ls) {
         ARIADNE_ASSERT(this->empty() || ls.empty() || this->_data.back().dimension()==ls._data.back().dimension());
         this->_data.insert(this->_data.end(),ls.begin(),ls.end()); }
 
     /*! \brief compute a list of the bounding boxes of the set elements. */
     ListSet<UpperBox> bounding_boxes() const {
         ListSet<UpperBox> result(this->dimension());
-        for(uint i=0; i!=this->size(); ++i) {
+        for(Nat i=0; i!=this->size(); ++i) {
             result.adjoin((*this)[i].bounding_box());
         }
         return result;
@@ -140,7 +138,7 @@ class ListSet
     UpperBox bounding_box() const {
         if(this->size()==0) { return UpperBox(this->dimension()); }
         UpperBox result((*this)[0].bounding_box());
-        for(uint i=1; i!=this->size(); ++i) {
+        for(Nat i=1; i!=this->size(); ++i) {
             result=hull(result,(*this)[i].bounding_box()); }
         return result;
     }
@@ -149,8 +147,8 @@ class ListSet
      *
      *  The ListSet template does not implement the DrawableInterface to avoid a dependency on the box.h header file.
      */
-    void draw(CanvasInterface& c, const Projection2d& p) const {
-        for(uint i=0; i!=this->size(); ++i) {
+    Void draw(CanvasInterface& c, const Projection2d& p) const {
+        for(Nat i=0; i!=this->size(); ++i) {
             (*this)[i].draw(c,p);
         }
     }
@@ -173,7 +171,7 @@ OutputStream&
 operator<<(OutputStream& os, const ListSet<BS>& ls)
 {
     os << "ListSet(";
-    if(!ls.empty()) { for(uint i=0; i!=ls.size(); ++i) { os << (i==0?" ":", ") << ls[i]; } }
+    if(!ls.empty()) { for(Nat i=0; i!=ls.size(); ++i) { os << (i==0?" ":", ") << ls[i]; } }
     return os << " )";
 }
 

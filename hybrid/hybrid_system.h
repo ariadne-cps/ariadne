@@ -147,71 +147,71 @@ class HybridSystem
 
     // Methods for rules valid in certain modes
     //! \brief Adds a algebraic equation to the system.
-    void new_equation(DiscretePredicate q, RealAssignment a) {
+    Void new_equation(DiscretePredicate q, RealAssignment a) {
         AlgebraicEquation eqn={q,a.lhs,a.rhs}; _algebraic_equations.push_back(eqn); };
     //! \brief Adds a differential equation to the system.
-    void new_dynamic(DiscretePredicate q, RealDynamic d) {
+    Void new_dynamic(DiscretePredicate q, RealDynamic d) {
         DifferentialEquation eqn={q,d.lhs.base(),d.rhs}; _differential_equations.push_back(eqn); };
     //! \brief Adds a discrete reset to the system.
-    void new_transition(EventSet e, DiscretePredicate q, StringUpdate a) {
+    Void new_transition(EventSet e, DiscretePredicate q, StringUpdate a) {
         DiscreteUpdate eqn={e,q,a.lhs.base(),a.rhs}; _discrete_updates.push_back(eqn); }
-    void new_transition(DiscretePredicate q, EventSet e, StringUpdate a) {
+    Void new_transition(DiscretePredicate q, EventSet e, StringUpdate a) {
         DiscreteUpdate eqn={e,q,a.lhs.base(),a.rhs}; _discrete_updates.push_back(eqn); }
     //! \brief Adds a reset equation to the system.
-    void new_reset(EventSet e, DiscretePredicate q, RealUpdate a) {
+    Void new_reset(EventSet e, DiscretePredicate q, RealUpdate a) {
         ContinuousUpdate eqn={e,q,a.lhs.base(),a.rhs}; _continuous_updates.push_back(eqn); }
-    void new_reset(DiscretePredicate q, EventSet e, RealUpdate a) {
+    Void new_reset(DiscretePredicate q, EventSet e, RealUpdate a) {
         ContinuousUpdate eqn={e,q,a.lhs.base(),a.rhs}; _continuous_updates.push_back(eqn); }
     //! \brief Adds a guard predicate to the system.
-    void new_guard(EventSet e, DiscretePredicate q, ContinuousPredicate p) {
+    Void new_guard(EventSet e, DiscretePredicate q, ContinuousPredicate p) {
         GuardPredicate eqn={e,q,p}; _guard_predicates.push_back(eqn); }
-    void new_guard(DiscretePredicate q, EventSet e, ContinuousPredicate p) {
+    Void new_guard(DiscretePredicate q, EventSet e, ContinuousPredicate p) {
         GuardPredicate eqn={e,q,p}; _guard_predicates.push_back(eqn); }
     //! \brief Adds a guard predicate and invariant to the system.
-    void new_guard(EventSet e, DiscretePredicate q,  ContinuousPredicate a, ContinuousPredicate i) {
+    Void new_guard(EventSet e, DiscretePredicate q,  ContinuousPredicate a, ContinuousPredicate i) {
         GuardPredicate aeqn={e,q,a}; _guard_predicates.push_back(aeqn);
         InvariantPredicate ieqn={q,i}; _invariant_predicates.push_back(ieqn); }
-    void new_guard(DiscretePredicate q, EventSet e, ContinuousPredicate a, ContinuousPredicate i) {
+    Void new_guard(DiscretePredicate q, EventSet e, ContinuousPredicate a, ContinuousPredicate i) {
         GuardPredicate aeqn={e,q,a}; _guard_predicates.push_back(aeqn);
         InvariantPredicate ieqn={q,i}; _invariant_predicates.push_back(ieqn); }
     //! \brief Adds a guard predicate to the system.
-    void new_guard(EventSet e, DiscretePredicate q, bool p) {
+    Void new_guard(EventSet e, DiscretePredicate q, Bool p) {
         GuardPredicate eqn={e,q,ContinuousPredicate(Tribool(p))}; _guard_predicates.push_back(eqn); }
-    void new_guard(DiscretePredicate q, EventSet e, bool p) {
+    Void new_guard(DiscretePredicate q, EventSet e, Bool p) {
         GuardPredicate eqn={e,q,ContinuousPredicate(Tribool(p))}; _guard_predicates.push_back(eqn); }
     //! \brief Adds an invariant to the system.
-    void new_invariant(DiscretePredicate q, ContinuousPredicate p) {
+    Void new_invariant(DiscretePredicate q, ContinuousPredicate p) {
         InvariantPredicate eqn={q,p}; _invariant_predicates.push_back(eqn); }
     //! \brief Disables events in a given set of locations.
-    void new_disabled_events(EventSet e, DiscretePredicate q) {
+    Void new_disabled_events(EventSet e, DiscretePredicate q) {
         DisabledEvents dis={e,q}; _disabled_events.push_back(dis); }
-    void new_disabled_events(DiscretePredicate q, EventSet e) {
+    Void new_disabled_events(DiscretePredicate q, EventSet e) {
         DisabledEvents dis={e,q}; _disabled_events.push_back(dis); }
 
     // Methods for rules valid in all modes.
     //! \brief Adds a algebraic equation to the system, valid in all modes.
-    void new_equation(RealAssignment a) { this->new_equation(DiscretePredicate(true),a); }
+    Void new_equation(RealAssignment a) { this->new_equation(DiscretePredicate(true),a); }
     //! \brief Adds a differential equation to the system.
-    void new_dynamic(RealDynamic d) { this->new_dynamic(DiscretePredicate(true),d); }
+    Void new_dynamic(RealDynamic d) { this->new_dynamic(DiscretePredicate(true),d); }
     //! \brief Adds a discrete reset to the system, valid in all modes.
-    void new_transition(EventSet e, StringUpdate du) { this->new_transition(e,DiscretePredicate(true),du); }
+    Void new_transition(EventSet e, StringUpdate du) { this->new_transition(e,DiscretePredicate(true),du); }
     //! \brief Adds a reset equation to the system, valid in all modes.
-    void new_reset(EventSet e, RealUpdate u) { this->new_reset(e,DiscretePredicate(true),u); }
+    Void new_reset(EventSet e, RealUpdate u) { this->new_reset(e,DiscretePredicate(true),u); }
     //! \brief Adds a guard predicate to the system, valid in all modes.
-    void new_guard(EventSet e, ContinuousPredicate p) { this->new_guard(e,DiscretePredicate(true),p); }
+    Void new_guard(EventSet e, ContinuousPredicate p) { this->new_guard(e,DiscretePredicate(true),p); }
     //! \brief Adds a guard predicate to the system, valid in all modes.
-    void new_guard(EventSet e, bool p) { this->new_guard(e,DiscretePredicate(true),ContinuousPredicate(Tribool(p))); }
+    Void new_guard(EventSet e, Bool p) { this->new_guard(e,DiscretePredicate(true),ContinuousPredicate(Tribool(p))); }
     //! \brief Adds an invariant to the system, valid in all modes.
-    void new_invariant(ContinuousPredicate p) { this->new_invariant(DiscretePredicate(true),p); }
+    Void new_invariant(ContinuousPredicate p) { this->new_invariant(DiscretePredicate(true),p); }
     //! \brief Disables events in all locations.
-    void new_disabled_events(EventSet e) {
+    Void new_disabled_events(EventSet e) {
     DisabledEvents dis={e,DiscretePredicate(true)}; _disabled_events.push_back(dis); }
 
     // Methods for rules valid for all events.
     //! \brief Adds a discrete reset to the system, valid in all modes and for all events.
-    void new_transition(StringUpdate du) { this->new_transition(EventSet::all(),DiscretePredicate(true),du); }
+    Void new_transition(StringUpdate du) { this->new_transition(EventSet::all(),DiscretePredicate(true),du); }
     //! \brief Adds a reset equation to the system, valid in all modes and for all events.
-    void new_reset(RealUpdate u) { this->new_reset(EventSet::all(),DiscretePredicate(true),u); }
+    Void new_reset(RealUpdate u) { this->new_reset(EventSet::all(),DiscretePredicate(true),u); }
 
     //@}
 
@@ -243,15 +243,15 @@ class HybridSystem
 
     //! \brief Check that the continuous dynamics in \a location is valid, which
     //!   means that every continuous variable has exactly one defining equation.
-    bool check_dynamic(const DiscreteValuation& location) const;
+    Bool check_dynamic(const DiscreteValuation& location) const;
     //! \brief Check that the guards in \a location are well-defined, which means
     //!   that they only use continuous variables defined in the given \a location.
-    bool check_guards(const DiscreteValuation& location) const;
+    Bool check_guards(const DiscreteValuation& location) const;
     //! \brief Check that the reset map for the transition
     //!   from the \a source location to the \a target location when the \a event occurs
     //!   only uses variables defined in the source location,
     //!   and specifies exactly the state variables in the target location.
-    bool check_reset(const Event& event, const DiscreteValuation& source, const DiscreteValuation& target) const;
+    Bool check_reset(const Event& event, const DiscreteValuation& source, const DiscreteValuation& target) const;
 
 
     //! \brief The set of all events which can occur in the discrete \a location.

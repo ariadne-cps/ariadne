@@ -54,22 +54,22 @@ typedef Space<Real> RealSpace;
 //!  \details \sa Variable
 template<class T> struct Space
 {
-    typedef unsigned int SizeType;
+    typedef std::size_t SizeType;
     typedef Variable<T> VariableType;
   public:
     //! \brief The trivial space \f$\R^0\f$.
     Space() : _variables() { }
     Space(const Set<Identifier>& vs) : _variables(vs.begin(),vs.end()) { }
-    Space(const List<Identifier>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(VariableType(vl[i])); } }
-    Space(const List<VariableType>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(vl[i]); } }
-    Space(const InitializerList<VariableType>& vl) { for(uint i=0; i!=vl.size(); ++i) { this->append(vl.begin()[i]); } }
+    Space(const List<Identifier>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(VariableType(vl[i])); } }
+    Space(const List<VariableType>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(vl[i]); } }
+    Space(const InitializerList<VariableType>& vl) { for(Nat i=0; i!=vl.size(); ++i) { this->append(vl.begin()[i]); } }
 
-    explicit Space(const List<String>& vnl) { for(uint i=0; i!=vnl.size(); ++i) { this->append(VariableType(vnl[i])); } }
+    explicit Space(const List<String>& vnl) { for(Nat i=0; i!=vnl.size(); ++i) { this->append(VariableType(vnl[i])); } }
     explicit Space(const String& vn) { this->append(VariableType(vn)); }
 
 
-    bool operator==(const Space<T>& other) const { return this->_variables==other._variables; }
-    bool operator!=(const Space<T>& other) const { return !(*this == other); }
+    Bool operator==(const Space<T>& other) const { return this->_variables==other._variables; }
+    Bool operator!=(const Space<T>& other) const { return !(*this == other); }
 
     SizeType size() const { return _variables.size(); }
     //! \brief The dimension of the space.
@@ -85,7 +85,7 @@ template<class T> struct Space
     //! \brief A map giving the index of a given variable.
     Map<Identifier,SizeType> indices_from_names() const {
         Map<Identifier,SizeType> indices;
-        for(uint i=0; i!=this->_variables.size(); ++i) {
+        for(Nat i=0; i!=this->_variables.size(); ++i) {
             ARIADNE_ASSERT_MSG(!indices.has_key(_variables[i]),"Repeated variable "<<_variables[i]<<" in space "<<_variables)
             indices.insert(this->_variables[i].name(),i);
         }
@@ -93,39 +93,39 @@ template<class T> struct Space
     //! \brief A map giving the index of a given variable.
     Map<VariableType,SizeType> indices() const {
         Map<VariableType,SizeType> indices;
-        for(uint i=0; i!=this->_variables.size(); ++i) {
+        for(Nat i=0; i!=this->_variables.size(); ++i) {
             ARIADNE_ASSERT_MSG(!indices.has_key(_variables[i]),"Repeated variable "<<_variables[i]<<" in space "<<_variables)
             indices.insert(this->_variables[i],i);
         }
         return indices; }
 
     //! \brief Tests if the variable \a v is in the space.
-    bool contains(const VariableType& v) const {
-        for(uint i=0; i!=_variables.size(); ++i) {
+    Bool contains(const VariableType& v) const {
+        for(Nat i=0; i!=_variables.size(); ++i) {
             if(v.name()==_variables[i]) { return true; } }
         return false; }
     //! \brief The index of the named variable \a v.
     SizeType index(const VariableType& v) const {
-        for(uint i=0; i!=_variables.size(); ++i) {
+        for(Nat i=0; i!=_variables.size(); ++i) {
             if(v.name()==_variables[i]) { return i; } }
         ARIADNE_ASSERT_MSG(false,"Variable "<<v<<" is not in the Space "<<*this);
         return _variables.size(); }
     SizeType index(const String& n) const {
-        for(uint i=0; i!=_variables.size(); ++i) {
+        for(Nat i=0; i!=_variables.size(); ++i) {
             if(n==_variables[i]) { return i; } }
         ARIADNE_ASSERT_MSG(false,"Variable named "<<n<<" is not in the Space "<<*this);
         return _variables.size(); }
     //! \brief Append the named variable \a v to the variables defining the space; ignores if the variable is already in the space.
     Space<T>& insert(const VariableType& v) {
-        for(uint i=0; i!=_variables.size(); ++i) {
+        for(Nat i=0; i!=_variables.size(); ++i) {
             if(_variables[i]==v) { return *this; } }
         _variables.push_back(v); return *this; }
     //! \brief Adjoins the variables in \a spc.
     Space<T>& adjoin(const Space<T>& spc) {
-        for(uint i=0; i!=spc._variables.size(); ++i) { this->insert(spc._variables[i]); } return *this; }
+        for(Nat i=0; i!=spc._variables.size(); ++i) { this->insert(spc._variables[i]); } return *this; }
     //! \brief Append the named variable \a v to the variables defining the space.
     Space<T>& append(const VariableType& v) {
-        for(uint i=0; i!=_variables.size(); ++i) {
+        for(Nat i=0; i!=_variables.size(); ++i) {
             ARIADNE_ASSERT_MSG(_variables[i]!=v.name(),"Variable "<<v<<" is already a variable of the StateSpace "<<*this);
         }
         _variables.push_back(v.name()); return *this; }
@@ -145,7 +145,7 @@ template<class T> inline Space<T> join(const Space<T>& spc1, const Space<T>& spc
 
 
 // Compiled conversion operators to allow conversion between expression and function.
-uint dimension(const Space<Real>& spc);
+Nat dimension(const Space<Real>& spc);
 Space<Real> space(const List< Variable<Real> >& vars);
 
 template<class T> Variable<T> variable(const String& s) { return Variable<T>(s); }

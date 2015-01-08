@@ -68,7 +68,7 @@ class SetInterfaceBase
     //! \brief Construct a dynamically-allocated copy.
     virtual SetInterfaceBase* clone() const = 0;
     //! \brief The dimension of the set.
-    virtual uint dimension() const = 0;
+    virtual Nat dimension() const = 0;
     //! \brief Write to an output stream.
     virtual OutputStream& write(OutputStream& os) const = 0;
 };

@@ -35,7 +35,7 @@ typedef EnclosureType::ContinuousStateSetType ContinuousEnclosureType;
 HybridGridTreeSet
 outer_approximation(const EnclosureListType& hls,
                     const HybridGrid& hgr,
-                    const int accuracy)
+                    const Int accuracy)
 {
     HybridGridTreeSet result(hgr);
     for(EnclosureListType::ConstIterator
@@ -51,7 +51,7 @@ outer_approximation(const EnclosureListType& hls,
 }
 
 
-int main(int argc,char *argv[])
+Int main(Int argc,char *argv[])
 {
     if(argc != 3) {
       std::cerr << "Usage: watertank-proportional bmin bmax" <<std::endl;
@@ -62,7 +62,7 @@ int main(int argc,char *argv[])
     Real a(0.02_dec);
     Real r(1.25_dec);
     Real Rif = 5.67_dec;
-    int Kp = 15;
+    Int Kp = 15;
 
     double bmin = atoi(argv[1])*0.0001;
     double bmax = atoi(argv[2])*0.0001;
@@ -187,8 +187,8 @@ int main(int argc,char *argv[])
     HybridScaling scaling( (water|0.25, aperture|1.0, pressure|1.0, error|1.0, time|1.0) );
     HybridGrid hg(watertank_system.state_space(),scaling);
     HybridGridTreeSet hgts(hg);
-    //uint grid_depth = 9;
-    //uint grid_height = 8;
+    //Nat grid_depth = 9;
+    //Nat grid_height = 8;
 
     std::cout << "Computing timed evolution starting from location one_saturated, x = 0.0, y = 1.0 for " << skip_time << " seconds" << std::endl;
     for(double b=bmin ; b < bmax+bstep ; b += bstep) {
@@ -202,7 +202,7 @@ int main(int argc,char *argv[])
             hgts.adjoin(outer_approximation(result.reach(),hgts.grid(),grid_depth));
             cout<<"done:"<<hgts.size()<<" total cells."<<std::endl;
             char filename[30];
-            sprintf(filename,"wt-best-%d-%d",int(b*10000),int(d*10000));
+            sprintf(filename,"wt-best-%d-%d",Int(b*10000),Int(d*10000));
             cout<<"Saving result to "<<filename<<"..."<<std::flush;
             Figure g2;
             g2.set_bounding_box(graphic_box);
@@ -239,7 +239,7 @@ int main(int argc,char *argv[])
 //    ExactBox graphic_box(2, 18.0,32.0 , 5.0,6.0);
     ExactBox graphic_box(2, skip_time,total_time , 5.0,7.0);
     Figure g1;
-    Array<uint> tx(2,4,0);
+    Array<Nat> tx(2,4,0);
     g1.set_bounding_box(graphic_box);
     g1.set_projection_map(ProjectionFunction(tx,5));
     g1 << ExactBox(2, 18,32, hmax - Delta, hmax + Delta);
@@ -298,9 +298,9 @@ int main(int argc,char *argv[])
 //        std::cout << endl << "final set before clearing = " << reach  << endl;
         final.clear();
         // Remove redundant elements from final set
-        int i = 0;
+        Int i = 0;
         for(ConstIterator iter1=reach.begin(); iter1 != reach.end(); ++iter1) {
-            bool flag = 0;
+            Bool flag = 0;
             for(ConstIterator iter2=iter1; iter2 != reach.end() && flag == 0; ++iter2) {
                 if( iter1!= iter2 && iter1->first == iter2->first ) {
                     ExactBox b1 = iter1->second.bounding_box();
@@ -339,7 +339,7 @@ int main(int argc,char *argv[])
     ExactBox bounding_box(2, -0.1,9.1, -0.1,1.1);
     Figure g;
     g.set_bounding_box(bounding_box);
-    Array<uint> p(2,0,1);
+    Array<Nat> p(2,0,1);
     g.set_projection_map(ProjectionFunction(p,4));
 
     g << fill_colour(Colour(0.0,0.5,1.0));

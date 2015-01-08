@@ -39,7 +39,7 @@ using namespace boost::python;
 
 
 namespace Ariadne {
-    template<class S> void draw(FigureInterface& fig, const S& sh) { fig.draw(sh); }
+    template<class S> Void draw(FigureInterface& fig, const S& sh) { fig.draw(sh); }
 }
 
 
@@ -47,31 +47,31 @@ using namespace Ariadne;
 
 
 
-void export_figure()
+Void export_figure()
 {
     class_<FigureInterface,boost::noncopyable>("FigureInterface",no_init);
     class_<Figure, bases<FigureInterface> > figure_class("Figure",init<>());
 
     //class_<Figure, bases<FigureInterface> > figure_class("Figure",init<>());
-    figure_class.def("set_projection_map",(void(Figure::*)(const PlanarProjectionMap&)) &Figure::set_projection_map);
-    figure_class.def("set_projection",(void(Figure::*)(uint,uint,uint)) &Figure::set_projection);
+    figure_class.def("set_projection_map",(Void(Figure::*)(const PlanarProjectionMap&)) &Figure::set_projection_map);
+    figure_class.def("set_projection",(Void(Figure::*)(Nat,Nat,Nat)) &Figure::set_projection);
     figure_class.def("set_bounding_box",&Figure::set_bounding_box);
-    figure_class.def("set_dot_radius", (void(Figure::*)(double)) &Figure::set_dot_radius);
-    figure_class.def("set_line_style", (void(Figure::*)(bool)) &Figure::set_line_style);
-    figure_class.def("set_line_width", (void(Figure::*)(double)) &Figure::set_line_width);
-    figure_class.def("set_line_colour", (void(Figure::*)(double,double,double)) &Figure::set_line_colour);
-    figure_class.def("set_fill_style", (void(Figure::*)(bool)) &Figure::set_fill_style);
-    figure_class.def("set_fill_colour", (void(Figure::*)(double,double,double)) &Figure::set_fill_colour);
-    figure_class.def("set_fill_opacity", (void(Figure::*)(double)) &Figure::set_fill_opacity);
-    figure_class.def("draw",(void(FigureInterface::*)(const DrawableInterface&))&FigureInterface::draw);
+    figure_class.def("set_dot_radius", (Void(Figure::*)(double)) &Figure::set_dot_radius);
+    figure_class.def("set_line_style", (Void(Figure::*)(Bool)) &Figure::set_line_style);
+    figure_class.def("set_line_width", (Void(Figure::*)(double)) &Figure::set_line_width);
+    figure_class.def("set_line_colour", (Void(Figure::*)(double,double,double)) &Figure::set_line_colour);
+    figure_class.def("set_fill_style", (Void(Figure::*)(Bool)) &Figure::set_fill_style);
+    figure_class.def("set_fill_colour", (Void(Figure::*)(double,double,double)) &Figure::set_fill_colour);
+    figure_class.def("set_fill_opacity", (Void(Figure::*)(double)) &Figure::set_fill_opacity);
+    figure_class.def("draw",(Void(FigureInterface::*)(const DrawableInterface&))&FigureInterface::draw);
     figure_class.def("clear",&Figure::clear);
     figure_class.def("display",&Figure::display);
-    figure_class.def("write",(void(Figure::*)(const char*)const)&Figure::write);
-    figure_class.def("write",(void(Figure::*)(const char*,uint,uint)const)&Figure::write);
+    figure_class.def("write",(Void(Figure::*)(const char*)const)&Figure::write);
+    figure_class.def("write",(Void(Figure::*)(const char*,Nat,Nat)const)&Figure::write);
 }
 
 
-void graphics_submodule() {
+Void graphics_submodule() {
     export_figure();
 }
 

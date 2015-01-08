@@ -65,7 +65,7 @@ Curve::clone() const
 }
 
 
-uint
+Nat
 Curve::dimension() const
 {
     return this->_function.result_size();
@@ -113,13 +113,13 @@ InterpolatedCurve::clone() const
     return new InterpolatedCurve(*this);
 }
 
-void
+Void
 InterpolatedCurve::insert(const ParameterType& s, const PointType& pt) {
     if(!this->_points.empty()) { ARIADNE_ASSERT(pt.size()==this->dimension()); }
     this->_points.insert(std::pair< ParameterType, PointType >(s,pt));
 }
 
-void
+Void
 InterpolatedCurve::insert(const RawFloat& s, const Vector<RawFloat>& pt) {
     if(!this->_points.empty()) { ARIADNE_ASSERT(pt.size()==this->dimension()); }
     this->insert(ParameterType(s),PointType(reinterpret_cast<Vector<ExactFloat>const&>(pt)));
@@ -137,10 +137,10 @@ InterpolatedCurve::bounding_box() const
     return bx;
 }
 
-void
+Void
 InterpolatedCurve::draw(CanvasInterface& c, const Projection2d& p) const
 {
-    uint xi=p.x_coordinate(); uint yi=p.y_coordinate();
+    Nat xi=p.x_coordinate(); Nat yi=p.y_coordinate();
     ConstIterator iter=this->begin();
     ApproximatePoint pt=join(iter->second,iter->first);
     c.move_to(pt[xi],pt[yi]);

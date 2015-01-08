@@ -42,7 +42,7 @@
 
 namespace Ariadne {
 
-typedef uint Nat;
+typedef Nat Nat;
 template<class X> class Formula;
 template<class X> class Graded;
 
@@ -54,10 +54,10 @@ struct ProcedureInstruction
 {
     explicit ProcedureInstruction(OperatorCode o, SizeType a) : op(o), arg(a) { }
     explicit ProcedureInstruction(OperatorCode o, SizeType a1, SizeType a2) : op(o), arg1(a1), arg2(a2) { }
-    explicit ProcedureInstruction(OperatorCode o, SizeType a, int n) : op(o), arg(a), np(n) { }
+    explicit ProcedureInstruction(OperatorCode o, SizeType a, Int n) : op(o), arg(a), np(n) { }
     OperatorCode op;
     union {
-        struct { SizeType arg; int np; };
+        struct { SizeType arg; Int np; };
         struct { SizeType arg1; SizeType arg2; };
     };
 };
@@ -78,9 +78,9 @@ class Procedure {
     List<X> _constants;
     List<ProcedureInstruction> _instructions;
   public:
-    void new_unary_instruction(OperatorCode o, SizeType a) { _instructions.append(ProcedureInstruction(o,a)); }
-    void new_binary_instruction(OperatorCode o, SizeType a1, SizeType a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
-    void new_power_instruction(OperatorCode o, SizeType a, int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
+    Void new_unary_instruction(OperatorCode o, SizeType a) { _instructions.append(ProcedureInstruction(o,a)); }
+    Void new_binary_instruction(OperatorCode o, SizeType a1, SizeType a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
+    Void new_power_instruction(OperatorCode o, SizeType a, Int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
   public:
 };
 
@@ -102,14 +102,14 @@ class Vector< Procedure<X> > {
   public:
     Nat result_size() const { return _results.size(); }
     Nat temporaries_size() const { return _instructions.size(); }
-    void new_instruction(OperatorCode o, SizeType a) { _instructions.append(ProcedureInstruction(o,a)); }
-    void new_instruction(OperatorCode o, SizeType a, int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
-    void new_instruction(OperatorCode o, SizeType a1, SizeType a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
-    void set_return(SizeType i, SizeType a) { _results[i]=a; }
+    Void new_instruction(OperatorCode o, SizeType a) { _instructions.append(ProcedureInstruction(o,a)); }
+    Void new_instruction(OperatorCode o, SizeType a, Int n) { _instructions.append(ProcedureInstruction(o,a,n)); }
+    Void new_instruction(OperatorCode o, SizeType a1, SizeType a2) { _instructions.append(ProcedureInstruction(o,a1,a2)); }
+    Void set_return(SizeType i, SizeType a) { _results[i]=a; }
 };
 
 // \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
-template<class X, class T> void _execute(List<T>& v, const List<ProcedureInstruction>& p, const List<X>& c, const Vector<T>& x)
+template<class X, class T> Void _execute(List<T>& v, const List<ProcedureInstruction>& p, const List<X>& c, const Vector<T>& x)
 {
     T z=x.zero_element();
     for(SizeType i=0; i!=p.size(); ++i) {
@@ -140,7 +140,7 @@ template<class X, class T> void _execute(List<T>& v, const List<ProcedureInstruc
 }
 
 // \related Procedure \brief Evaluate a function \a f defined by an algorithmic procedure.
-template<class X, class T> void _compute(List<T>& v, const List<ProcedureInstruction>& p, const List<X>& c, const Vector<T>& x)
+template<class X, class T> Void _compute(List<T>& v, const List<ProcedureInstruction>& p, const List<X>& c, const Vector<T>& x)
 {
     T z=x.zero_element();
     ARIADNE_ASSERT(v.size()==p.size());
@@ -171,7 +171,7 @@ template<class X, class T> void _compute(List<T>& v, const List<ProcedureInstruc
     }
 }
 
-template<class T> void _propagate(Vector<T>& x, List<T>& v, const List<ProcedureInstruction>& p)
+template<class T> Void _propagate(Vector<T>& x, List<T>& v, const List<ProcedureInstruction>& p)
 {
     ExactFloat infty(inf);
 
@@ -227,7 +227,7 @@ template<class X> SizeType _convert(List<ProcedureInstruction>& p, List<X>& c, c
 }
 
 template<class X>
-void _write(OutputStream& os, const List<ProcedureInstruction>& p, const List<X>& c)
+Void _write(OutputStream& os, const List<ProcedureInstruction>& p, const List<X>& c)
 {
     for(SizeType i=0; i!=p.size(); ++i) {
         const ProcedureInstruction& instruction=p[i];
@@ -351,13 +351,13 @@ namespace Ariadne {
 // NOTE: Ordering of r and x is important, since nan elements of r are preserved,
 // but nan elements of x do not affect r
 inline
-void restrict(UpperInterval& r, const UpperInterval& x) {
+Void restrict(UpperInterval& r, const UpperInterval& x) {
     r.set_lower(max(r.lower(),x.lower()));
     r.set_upper(min(r.upper(),x.upper()));
 };
 
 template<class X>
-void simple_hull_reduce(UpperBox& dom, const Procedure<X>& f, ExactInterval codom)
+Void simple_hull_reduce(UpperBox& dom, const Procedure<X>& f, ExactInterval codom)
 {
     const List<ProcedureInstruction>& p=f._instructions;
     const List<X>& c=f._constants;
@@ -369,7 +369,7 @@ void simple_hull_reduce(UpperBox& dom, const Procedure<X>& f, ExactInterval codo
 }
 
 template<class X>
-void simple_hull_reduce(UpperBox& dom, const Vector< Procedure<X> >& f, ExactBox codom)
+Void simple_hull_reduce(UpperBox& dom, const Vector< Procedure<X> >& f, ExactBox codom)
 {
     const List<ProcedureInstruction>& p=f._instructions;
     const List<X>& c=f._constants;

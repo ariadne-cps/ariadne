@@ -32,7 +32,7 @@
 
 namespace Ariadne {
 
-static const int SMOOTH=255;
+static const Int SMOOTH=255;
 
 template<>
 class ScalarFunctionInterface<Void>

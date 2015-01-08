@@ -61,10 +61,10 @@ LowerFloat64 operator"" _l(long double);
 UpperFloat64 operator"" _u(long double);
 ApprxFloat64 operator"" _a(long double);
 
-void set_rounding_to_nearest();
-void set_rounding_downward();
-void set_rounding_upward();
-void set_rounding_toward_zero();
+Void set_rounding_to_nearest();
+Void set_rounding_downward();
+Void set_rounding_upward();
+Void set_rounding_toward_zero();
 
 template<class N> inline N& operator+=(NumberObject<N>& n1, const NumberObject<N>& n2) {
     n1.upcast()=n1.upcast()+n2.upcast(); return n1.upcast(); }
@@ -89,7 +89,7 @@ class Float64 : public ScalarObject<Float64> {
     friend Float64 operator-(Float64 x1, Float64 x2);
     friend Float64 operator*(Float64 x1, Float64 x2);
     friend Float64 operator/(Float64 x1, Float64 x2);
-    friend Float64 operator/(Float64 x1, int n2);
+    friend Float64 operator/(Float64 x1, Int n2);
     friend Float64& operator+=(Float64& x1, Float64 x2);
     friend Float64& operator-=(Float64& x1, Float64 x2);
     friend Float64& operator*=(Float64& x1, Float64 x2);
@@ -111,7 +111,7 @@ inline Float64 operator+(Float64 x1, Float64 x2) { return Float64{x1.d+x2.d}; }
 inline Float64 operator-(Float64 x1, Float64 x2) { return Float64{x1.d-x2.d}; }
 inline Float64 operator*(Float64 x1, Float64 x2) { return Float64{x1.d*x2.d}; }
 inline Float64 operator/(Float64 x1, Float64 x2) { return Float64{x1.d/x2.d}; }
-inline Float64 operator/(Float64 x1, int n2) { return Float64{x1.d/n2}; }
+inline Float64 operator/(Float64 x1, Int n2) { return Float64{x1.d/n2}; }
 inline Float64& operator+=(Float64& x1, Float64 x2) { x1.d+=x2.d; return x1; }
 inline Float64& operator-=(Float64& x1, Float64 x2) { x1.d-=x2.d; return x1; }
 inline Float64& operator*=(Float64& x1, Float64 x2) { x1.d*=x2.d; return x1; }
@@ -142,15 +142,15 @@ class ExactFloat64
     friend class BoundFloat64;
     friend class ApprxFloat64;
     volatile double v;
-    static int output_precision;
+    static Int output_precision;
   public:
-    static void set_output_precision(int);
+    static Void set_output_precision(Int);
   public:
     typedef Exact Paradigm;
     ExactFloat64();
     template<class N, typename std::enable_if<std::is_integral<N>::value>::type> ExactFloat64(N);
-    ExactFloat64(uint);
-    ExactFloat64(int);
+    ExactFloat64(Nat);
+    ExactFloat64(Int);
     explicit ExactFloat64(double);
     explicit ExactFloat64(Float64);
     operator BoundFloat64 () const;
@@ -181,12 +181,12 @@ ExactFloat64 max(ExactFloat64 x1, ExactFloat64 x2);
 
 class ErrorFloat64 : public NumberObject<UpperFloat64> {
     volatile double e;
-    static int output_precision;
+    static Int output_precision;
   public:
-    static void set_output_precision(int);
+    static Void set_output_precision(Int);
   public:
     ErrorFloat64();
-    template<class M, EnableIf<IsSame<M,uint>> = dummy> ErrorFloat64(M m);
+    template<class M, EnableIf<IsSame<M,Nat>> = dummy> ErrorFloat64(M m);
     template<class X, EnableIf<IsSame<X,double>> = dummy> explicit ErrorFloat64(X x);
     explicit ErrorFloat64(double);
     explicit ErrorFloat64(Float64);
@@ -206,7 +206,7 @@ class ErrorFloat64 : public NumberObject<UpperFloat64> {
 
 ErrorFloat64 max(ErrorFloat64 x1, ErrorFloat64 x2);
 
-template<class M, typename std::enable_if<std::is_unsigned<M>::value,int>::type=0> inline ErrorFloat64 operator/(ErrorFloat64 x1, M m2) {
+template<class M, typename std::enable_if<std::is_unsigned<M>::value,Int>::type=0> inline ErrorFloat64 operator/(ErrorFloat64 x1, M m2) {
     return ErrorFloat64(x1.get_d()/m2); }
 
 class ValidFloat64 : public NumberObject<ValidFloat64> {
@@ -216,7 +216,7 @@ class ValidFloat64 : public NumberObject<ValidFloat64> {
   public:
     typedef Validated Paradigm;
     ValidFloat64();
-    template<class N, typename std::enable_if<std::is_integral<N>::value,int>::type = 0>
+    template<class N, typename std::enable_if<std::is_integral<N>::value,Int>::type = 0>
         ValidFloat64(N n);
     explicit ValidFloat64(double);
     explicit ValidFloat64(double,double);
@@ -234,7 +234,7 @@ class ValidFloat64 : public NumberObject<ValidFloat64> {
     friend ValidFloat64 operator/(ValidFloat64,ValidFloat64);
     friend ValidFloat64 sqr(ValidFloat64);
     friend ValidFloat64 rec(ValidFloat64 x);
-    friend bool operator==(ValidFloat64,int);
+    friend Bool operator==(ValidFloat64,Int);
     friend OutputStream& operator<<(OutputStream& os, ValidFloat64 const&);
 };
 ValidFloat64 min(ValidFloat64 x1, ValidFloat64 x2);
@@ -243,20 +243,20 @@ ValidFloat64 max(ValidFloat64 x1, ValidFloat64 x2);
 
 Bool same(ValidFloat64 x1, ValidFloat64 x2);
 
-template<class N, typename std::enable_if<std::is_integral<N>::value,int>::type> inline
+template<class N, typename std::enable_if<std::is_integral<N>::value,Int>::type> inline
 ValidFloat64::ValidFloat64(N n) : ValidFloat64(double(n),ExactTag())
 { }
 
 class BoundFloat64 : public NumberObject<BoundFloat64> {
     friend class ApprxFloat64; friend class ValidFloat64;
     volatile double l; volatile double u;
-    static int output_precision;
+    static Int output_precision;
   public:
-    static void set_output_precision(int);
+    static Void set_output_precision(Int);
   public:
     typedef Validated Paradigm;
     BoundFloat64();
-    BoundFloat64(int);
+    BoundFloat64(Int);
     BoundFloat64(const Rational&);
     explicit BoundFloat64(double);
     explicit BoundFloat64(double,double);
@@ -274,7 +274,7 @@ class BoundFloat64 : public NumberObject<BoundFloat64> {
     friend BoundFloat64 sqr(BoundFloat64);
     friend BoundFloat64 max(BoundFloat64,BoundFloat64);
     friend BoundFloat64 min(BoundFloat64,BoundFloat64);
-    friend bool operator==(BoundFloat64,int);
+    friend Bool operator==(BoundFloat64,Int);
     friend Tribool operator> (BoundFloat64,BoundFloat64);
     friend OutputStream& operator<<(OutputStream& os, BoundFloat64 const&);
 
@@ -303,7 +303,7 @@ class LowerFloat64 : public NumberObject<LowerFloat64> {
     volatile double l;
   public:
     LowerFloat64();
-    LowerFloat64(int);
+    LowerFloat64(Int);
     explicit LowerFloat64(double);
     operator ApprxFloat64 () const;
     Float64 get_flt() const;
@@ -326,7 +326,7 @@ class UpperFloat64 : public NumberObject<UpperFloat64> {
     volatile double u;
   public:
     UpperFloat64();
-    UpperFloat64(int);
+    UpperFloat64(Int);
     explicit UpperFloat64(double);
     operator ApprxFloat64 () const;
     Float64 get_flt() const;

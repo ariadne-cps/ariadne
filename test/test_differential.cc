@@ -41,7 +41,7 @@ using namespace Ariadne;
 using namespace std;
 
 template<class R, class A, class P>
-void henon(R& r, const A& x, const P& p)
+Void henon(R& r, const A& x, const P& p)
 {
     r[0]=p[0]-x[0]*x[0]-p[1]*x[1];
     r[1]=x[0];
@@ -92,16 +92,16 @@ class TestDifferential {
         ARIADNE_TEST_CALL(test_hessian());
     }
 
-    void test_degree() {
+    Void test_degree() {
         ARIADNE_TEST_ASSERT(x1.degree()==4);
     }
 
-    void test_neg() {
+    Void test_neg() {
         DifferentialType nx1(2,4, { {{0,0},-2.0}, {{1,0},-1.0}, {{2,0},-0.5} });
         ARIADNE_TEST_EQUALS(-x1,nx1);
     }
 
-    void test_add() {
+    Void test_add() {
         DifferentialType x1px2(2,4, { {{0,0},5.0}, {{1,0},2.0}, {{2,0},0.75} });
         ARIADNE_TEST_EQUALS(x1+x2,x1px2);
         ARIADNE_TEST_EVALUATE(x1+c1);
@@ -109,7 +109,7 @@ class TestDifferential {
         //assert((x1+x2)==DifferentialType("[3,2,0,0]"));
     }
 
-    void test_sub() {
+    Void test_sub() {
         DifferentialType x1mx2(2,4, { {{0,0},-1.0}, {{1,0},0.0}, {{2,0},0.25} });
         ARIADNE_TEST_EQUALS(x1-x2,x1mx2);
         ARIADNE_TEST_EVALUATE(x1-c1);
@@ -117,7 +117,7 @@ class TestDifferential {
         //assert((x1-x2)==DifferentialType("[-1,0,0,0]"));
     }
 
-    void test_mul() {
+    Void test_mul() {
         double a1[6]={ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
         double a2[6]={ 2.0, 3.0, 5.0, 7.0, 11.0, 13.0 };
         double a1m2[6]={ 2.0, 7.0, 11.0, 21.0, 40.0, 40.0 };
@@ -132,7 +132,7 @@ class TestDifferential {
         ARIADNE_TEST_EQUAL(x2*c,cmx2);
     }
 
-    void test_div() {
+    Void test_div() {
         ARIADNE_TEST_EVALUATE(x1/x2);
         ARIADNE_TEST_EVALUATE(x1/c1);
         ARIADNE_TEST_EVALUATE(c1/x1);
@@ -150,18 +150,18 @@ class TestDifferential {
         */
     }
 
-    void test_rec() {
+    Void test_rec() {
         double a1[6]={ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
         ARIADNE_TEST_CONSTRUCT(DifferentialType,x1,(2,2,a1));
         ARIADNE_TEST_EQUAL(rec(rec(x1)),x1);
     }
 
-    void test_pow() {
+    Void test_pow() {
         cout << x2 << "^5 = " << pow(x2,5) << std::endl;
         //    assert(pow(x2,5)==DifferentialType("[32,80,160,240]"));
     }
 
-    void test_compose() {
+    Void test_compose() {
         //double ax[10] = { 3.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
         double ax[10] = { 3.0,  1.0, 2.0,  1.0, 0.5, 2.0,  0.0, 0.0, 0.0, 0.0 };
         double ay[4] = { 1.0, 2.0, -3.0, 5.0 };
@@ -174,7 +174,7 @@ class TestDifferential {
         ARIADNE_TEST_EQUAL(compose(id,x),x);
     }
 
-    void test_gradient() {
+    Void test_gradient() {
         // Regression test based on errors in Henon evaluation.
         Vector<ApproximateFloat> x={0.875,-0.125};
         Vector< Differential<ApproximateFloat> > dx=Differential<ApproximateFloat>::variables(1u,x);
@@ -186,7 +186,7 @@ class TestDifferential {
         ARIADNE_TEST_EQUALS(g[1],-0.25);
     }
 
-    void test_hessian() {
+    Void test_hessian() {
         // Test Hessian matrix of
         ApproximateFloat a00=1.5; ApproximateFloat a01=2.5; ApproximateFloat a11=3.5;
         double x0=0.875; double x1=-1.25;
@@ -238,7 +238,7 @@ class TestDifferentialVector {
         ARIADNE_TEST_CALL(test_mapping());
     }
 
-    void test_degree() {
+    Void test_degree() {
         ARIADNE_TEST_EQUAL(x1.degree(),4);
 
         // Regression test to check setting of degree for null vector
@@ -253,29 +253,29 @@ class TestDifferentialVector {
 
     }
 
-    void test_add() {
+    Void test_add() {
         cout << x1 << "+" << x2 << " = " << x1+x2 << std::endl;
         //assert((x1+x2)==DifferentialVectorType("[3,2,0,0]"));
     }
 
-    void test_sub() {
+    Void test_sub() {
         cout << x1 << "-" << x2 << " = " << x1-x2 << std::endl;
         //assert((x1-x2)==DifferentialVectorType("[-1,0,0,0]"));
     }
 
-    void test_mul() {
+    Void test_mul() {
         X c=2;
         cout << x1 << "*" << c << " = " << x1*c << std::endl;
         cout << c << "*" << x1 << " = " << c*x1 << std::endl;
         //assert((x1*x2)==DifferentialVectorType("[2,3,2,0]"));
     }
 
-    void test_div() {
+    Void test_div() {
         X c=2;
         cout << x1 << "/" << c << " = " << x1/c << std::endl;
     }
 
-    void test_evaluate() {
+    Void test_evaluate() {
         Array<ApproximateFloat> ac={1,2}; ApproximateFloat adv[10]={1,2,3,4,5,6,7,8,9,10};
         Vector<X> c(ac);
         DifferentialVectorType dv(1u,2u,3u,adv);
@@ -285,14 +285,14 @@ class TestDifferentialVector {
         std::cout << std::endl;
     }
 
-    void test_jacobian() {
+    Void test_jacobian() {
         DifferentialVectorType dv(0u,2u,3u);
         Matrix<ApproximateFloat> J=dv.jacobian();
         ARIADNE_TEST_EQUALS(J.row_size(),dv.result_size());
         ARIADNE_TEST_EQUALS(J.column_size(),dv.argument_size());
     }
 
-    void test_differentiate() {
+    Void test_differentiate() {
         double ax[]={ 2,12,7,33,24,13 };
         DifferentialType x(2,2,ax);
         double ay[]={ 1,2,3,6,7,9,11,12,13,14 };
@@ -304,7 +304,7 @@ class TestDifferentialVector {
         ARIADNE_TEST_EQUAL(derivative(antiderivative(y,0),0),y);
     }
 
-    void test_compose() {
+    Void test_compose() {
         //double ax[10] = { 3.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
         double ax[10] = { 3.0, 1.0, 0.0, 0.0, 0.125, 0.25, 0.0, 0.0, 0.0, 0.0 };
         double ay[4] = { 1.0, -1.0, 0.5, -0.25 };
@@ -321,7 +321,7 @@ class TestDifferentialVector {
         ARIADNE_TEST_EQUAL(compose(id,x),x);
     }
 
-    void test_mapping() {
+    Void test_mapping() {
         DifferentialVectorType x(2,2,2);
         x[0][MultiIndex::unit(2,0)]=1; x[1][MultiIndex::unit(2,1)]=1;
         cout << "x=" << x << endl;
@@ -332,7 +332,7 @@ class TestDifferentialVector {
     }
 };
 
-int main() {
+Int main() {
     TestDifferential< Differential<ApproximateFloat> > tf;
     TestDifferentialVector< Differential<ApproximateFloat> > tfv;
 //#if defined HAVE_GMPXX_H and not defined ARIADNE_USE_ARRAY_EXPANSION

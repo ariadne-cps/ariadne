@@ -35,7 +35,7 @@ Figure& operator<<(Figure& fig, const HybridGridTreeSet& set) {
         fig << loc_iter->second; } return fig; }
 
 /// Function for plotting the orbit and reachability set
-template<class SET> void plot(const char* filename, const int& xaxis, const int& yaxis, const int& numVariables, const ExactBox& bbox, const Colour& fc, const SET& set, const int& MAX_GRID_DEPTH) {
+template<class SET> Void plot(const char* filename, const Int& xaxis, const Int& yaxis, const Int& numVariables, const ExactBox& bbox, const Colour& fc, const SET& set, const Int& MAX_GRID_DEPTH) {
     // Assigns local variables
     Figure fig;
 
@@ -51,7 +51,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
         fig << fill_colour(Colour(1.0,1.0,1.0));
 
         // Gets the number of times each variable interval would be divided by 2
-        int numDivisions = MAX_GRID_DEPTH / numVariables;
+        Int numDivisions = MAX_GRID_DEPTH / numVariables;
         // Gets the step in the x direction, by 1/2^(numDivisions+h), where h is 1 if the step is to be further divided by 2, 0 otherwise
         Float step_x = 1.0/(1 << (numDivisions + ((MAX_GRID_DEPTH - numDivisions*numVariables > xaxis) ? 1 : 0)));
         // Initiates the x position to the bounding box left bound
@@ -84,7 +84,7 @@ template<class SET> void plot(const char* filename, const int& xaxis, const int&
 }
 
 
-int main()
+Int main()
 {
 
     /// Set the system parameters
@@ -99,7 +99,7 @@ int main()
     Real one = 1;
 
     double tmax = 80.0;
-    int jmax = 6;
+    Int jmax = 6;
 
 
     /// Build the Hybrid System

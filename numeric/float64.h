@@ -296,9 +296,9 @@ template<> class Float64Template<Exact>
     friend class Float64Template<Bounded>;
     friend class Float64Template<Approximate>;
     volatile double _v;
-    static int output_precision;
+    static Int output_precision;
   public:
-    static void set_output_precision(int);
+    static Void set_output_precision(Int);
   public:
     typedef Exact Paradigm;
 
@@ -407,13 +407,13 @@ Float64Template<Exact>::Float64Template(N n) : Float64Template<Exact>(Int64(n)) 
 //! \brief Positive floating-point numbers representing an over-approximation to the error of some quantity.
 template<> class Float64Template<Error> {
     volatile double _e;
-    static int output_precision;
+    static Int output_precision;
   public:
-    static void set_output_precision(int);
+    static Void set_output_precision(Int);
   public:
     typedef Upper Paradigm;
     Float64Template<Error>();
-    template<class M, EnableIf<IsSame<M,uint>> = dummy> Float64Template<Error>(M m);
+    template<class M, EnableIf<IsSame<M,Nat>> = dummy> Float64Template<Error>(M m);
     template<class X, EnableIf<IsSame<X,double>> = dummy> explicit Float64Template<Error>(X x);
     explicit Float64Template<Error>(double);
     explicit Float64Template<Error>(Flt64);
@@ -459,7 +459,7 @@ template<> class Float64Template<Error> {
     friend OutputStream& operator<<(OutputStream& os, ErrorFloat64 const&);
 };
 
-template<class M, EnableIf<IsSame<M,uint>>> inline
+template<class M, EnableIf<IsSame<M,Nat>>> inline
 Float64Template<Error>::Float64Template(M m) : Float64Template<Error>(static_cast<double>(m)) { }
 
 template<class M, EnableIf<IsUnsigned<M>> =dummy> inline
@@ -476,9 +476,9 @@ template<> class Float64Template<Metric>
     : DispatchFloat64Arithmetic
 {
     volatile double _v; volatile double _e;
-    static int output_precision;
+    static Int output_precision;
   public:
-    static void set_output_precision(int);
+    static Void set_output_precision(Int);
   private:
     Float64Template<Metric>(double d, IsExactTag);
   public:
@@ -590,14 +590,14 @@ template<> class Float64Template<Bounded>
     : DispatchFloat64Arithmetic
     , public ProvideConvertedOperations<BoundedFloat64,ExactFloat64,Return<BoundedFloat64>>
     , public ProvideConvertedOperations<BoundedFloat64,MetricFloat64,Return<BoundedFloat64>>
-    , public ProvideConvertedOperations<BoundedFloat64,int,Return<BoundedFloat64>>
+    , public ProvideConvertedOperations<BoundedFloat64,Int,Return<BoundedFloat64>>
 {
     friend class Float64Template<Approximate>; friend class Float64Template<Metric>;
     volatile double _l; volatile double _u;
-    static int output_precision;
+    static Int output_precision;
   public:
-    static void set_output_precision(int);
-    static int get_output_precision();
+    static Void set_output_precision(Int);
+    static Int get_output_precision();
   public:
     typedef Validated Paradigm;
     typedef BoundedFloat64 NumericType;
@@ -971,10 +971,10 @@ ApproximateFloat64 atan(ApproximateFloat64);
 template<> class Float64Template<Approximate>
     : DispatchFloat64Arithmetic
 {
-    static int output_precision;
+    static Int output_precision;
     volatile double _a;
   public:
-    static void set_output_precision(int);
+    static Void set_output_precision(Int);
   public:
     typedef Approximate Paradigm;
     typedef ApproximateFloat64 NumericType;

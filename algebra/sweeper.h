@@ -43,15 +43,15 @@ template<class SWP> class SweeperBase;
 class SweeperInterface {
     friend class Sweeper;
   public:
-    inline bool discard(const MultiIndex& a, const Float& x) const { return this->_discard(a,x); }
-    inline void sweep(Expansion<Float>& p, Float& e) const { this->_sweep(p,e); }
-    inline void sweep(Expansion<Float>& p) const { this->_sweep(p); }
+    inline Bool discard(const MultiIndex& a, const Float& x) const { return this->_discard(a,x); }
+    inline Void sweep(Expansion<Float>& p, Float& e) const { this->_sweep(p,e); }
+    inline Void sweep(Expansion<Float>& p) const { this->_sweep(p); }
   private:
     virtual SweeperInterface* _clone() const = 0;
-    virtual void _sweep(Expansion<Float>& p, Float& e) const = 0;
-    virtual void _sweep(Expansion<Float>& p) const = 0;
-    virtual bool _discard(const MultiIndex& a, const Float& x) const = 0;
-    virtual void _write(OutputStream& os) const = 0;
+    virtual Void _sweep(Expansion<Float>& p, Float& e) const = 0;
+    virtual Void _sweep(Expansion<Float>& p) const = 0;
+    virtual Bool _discard(const MultiIndex& a, const Float& x) const = 0;
+    virtual Void _write(OutputStream& os) const = 0;
     friend OutputStream& operator<<(OutputStream& os, const SweeperInterface& swp) { swp._write(os); return os; }
 };
 
@@ -71,11 +71,11 @@ class Sweeper {
     inline std::shared_ptr<const SweeperInterface> operator& () { return _ptr; }
   public:
     //! \brief Returns \a true if the term with index \a a and coefficient \a x should be discarded.
-    inline bool discard(const MultiIndex& a, const Float& x) const { return this->_ptr->_discard(a,x); }
+    inline Bool discard(const MultiIndex& a, const Float& x) const { return this->_ptr->_discard(a,x); }
     //! \brief Discard terms in the expansion, adding the absolute value of the coefficient to the uniform error.
-    inline void sweep(Expansion<Float>& p, Float& e) const { this->_ptr->_sweep(p,e); }
+    inline Void sweep(Expansion<Float>& p, Float& e) const { this->_ptr->_sweep(p,e); }
     //! \brief Discard terms in the expansion, without keeping track of discarded terms.
-    inline void sweep(Expansion<Float>& p) const { this->_ptr->_sweep(p); }
+    inline Void sweep(Expansion<Float>& p) const { this->_ptr->_sweep(p); }
     friend OutputStream& operator<<(OutputStream& os, const Sweeper& swp) { return os << *swp._ptr; }
   private:
     std::shared_ptr<const SweeperInterface> _ptr;
@@ -85,9 +85,9 @@ template<class SWP> class SweeperBase
     : public virtual SweeperInterface
 {
     virtual SweeperInterface* _clone() const;
-    virtual bool _discard(const MultiIndex& a, const Float& x) const;
-    virtual void _sweep(Expansion<Float>& p, Float& e) const;
-    virtual void _sweep(Expansion<Float>& p) const;
+    virtual Bool _discard(const MultiIndex& a, const Float& x) const;
+    virtual Void _sweep(Expansion<Float>& p, Float& e) const;
+    virtual Void _sweep(Expansion<Float>& p) const;
 };
 
 
@@ -98,13 +98,13 @@ SweeperInterface* SweeperBase<SWP>::_clone() const
 }
 
 template<class SWP>
-bool SweeperBase<SWP>::_discard(const MultiIndex& a, const Float& x) const
+Bool SweeperBase<SWP>::_discard(const MultiIndex& a, const Float& x) const
 {
     return static_cast<const SWP*>(this)->SWP::discard(a,x);
 }
 
 template<class SWP>
-void SweeperBase<SWP>::_sweep(Expansion<Float>& p, Float& e) const
+Void SweeperBase<SWP>::_sweep(Expansion<Float>& p, Float& e) const
 {
     Expansion<Float>::ConstIterator end=p.end();
     Expansion<Float>::ConstIterator adv=p.begin();
@@ -126,7 +126,7 @@ void SweeperBase<SWP>::_sweep(Expansion<Float>& p, Float& e) const
 }
 
 template<class SWP>
-void SweeperBase<SWP>::_sweep(Expansion<Float>& p) const
+Void SweeperBase<SWP>::_sweep(Expansion<Float>& p) const
 {
     Expansion<Float>::ConstIterator end=p.end();
     Expansion<Float>::ConstIterator adv=p.begin();
@@ -148,46 +148,46 @@ class ThresholdSweeper : public SweeperBase<ThresholdSweeper> {
   public:
     ThresholdSweeper(double sweep_threshold) : _sweep_threshold(sweep_threshold) { ARIADNE_ASSERT(sweep_threshold>=0.0); }
     Float sweep_threshold() const { return _sweep_threshold; }
-    inline bool discard(const MultiIndex& a, const Float& x) const { return abs(x) < this->_sweep_threshold; }
+    inline Bool discard(const MultiIndex& a, const Float& x) const { return abs(x) < this->_sweep_threshold; }
   private:
-    virtual void _write(OutputStream& os) const { os << "ThresholdSweeper( sweep_threshold="<<this->_sweep_threshold<<" )"; };
+    virtual Void _write(OutputStream& os) const { os << "ThresholdSweeper( sweep_threshold="<<this->_sweep_threshold<<" )"; };
 };
 
 //! \brief A sweeper class which does not discard any terms at all.
 class TrivialSweeper : public SweeperBase<TrivialSweeper> {
   public:
-    inline bool discard(const MultiIndex& a, const Float& x) const { return false; }
+    inline Bool discard(const MultiIndex& a, const Float& x) const { return false; }
   private:
-    virtual void _sweep(Expansion<Float>& p, Float& e) const { }
-    virtual void _write(OutputStream& os) const { os << "TrivialSweeper"; }
+    virtual Void _sweep(Expansion<Float>& p, Float& e) const { }
+    virtual Void _write(OutputStream& os) const { os << "TrivialSweeper"; }
 };
 
 //! \brief A sweeper class which only discards the zero term.
 class NullSweeper : public SweeperBase<NullSweeper> {
   public:
-    inline bool discard(const MultiIndex& a, const Float& x) const { return x==0.0; }
+    inline Bool discard(const MultiIndex& a, const Float& x) const { return x==0.0; }
   private:
-    virtual void _write(OutputStream& os) const { os << "NullSweeper"; }
+    virtual Void _write(OutputStream& os) const { os << "NullSweeper"; }
 };
 
 //! \brief A sweeper class which discards non-affine terms.
 class AffineSweeper : public SweeperBase<AffineSweeper> {
   public:
-    inline bool discard(const MultiIndex& a, const Float& x) const { return a.degree()>1; }
+    inline Bool discard(const MultiIndex& a, const Float& x) const { return a.degree()>1; }
   private:
-    virtual void _write(OutputStream& os) const { os << "AffineSweeper"; }
+    virtual Void _write(OutputStream& os) const { os << "AffineSweeper"; }
 };
 
 //! \brief A sweeper class which discards terms whose total degree is above some threshold.
 class GradedSweeper : public SweeperBase<GradedSweeper> {
   public:
-    GradedSweeper(uint degree) : _degree(degree) { }
-    uint degree() const { return this->_degree; }
-    inline bool discard(const MultiIndex& a, const Float& x) const { return a.degree()>this->_degree; }
+    GradedSweeper(Nat degree) : _degree(degree) { }
+    Nat degree() const { return this->_degree; }
+    inline Bool discard(const MultiIndex& a, const Float& x) const { return a.degree()>this->_degree; }
   private:
-    virtual void _write(OutputStream& os) const { os << "GradedSweeper( degree="<<this->_degree<<" )"; }
+    virtual Void _write(OutputStream& os) const { os << "GradedSweeper( degree="<<this->_degree<<" )"; }
   private:
-    uint _degree;
+    Nat _degree;
 };
 
 inline Sweeper::Sweeper() : _ptr(new ThresholdSweeper(std::numeric_limits<float>::epsilon())) { }

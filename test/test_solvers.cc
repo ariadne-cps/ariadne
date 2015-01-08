@@ -51,7 +51,7 @@ class TestSolver
     TestSolver(const SolverInterface& s,const char* n)
         : solver(s.clone()), solver_class_name(n) { }
 
-    int test() {
+    Int test() {
         ARIADNE_TEST_PRINT(*solver);
         ARIADNE_TEST_CALL(test_solve());
         ARIADNE_TEST_CALL(test_implicit());
@@ -59,7 +59,7 @@ class TestSolver
         return 0;
     }
 
-    void test_solve() {
+    Void test_solve() {
         EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(1,0);
         ExactIntervalVector d({ExactInterval(0.0,1.0)});
         EffectiveVectorFunction f({(x*x+1)*x-1});
@@ -67,7 +67,7 @@ class TestSolver
         ARIADNE_TEST_BINARY_PREDICATE(contains,ExactInterval(0.6823,0.6824),p[0]);
     }
 
-    void test_implicit() {
+    Void test_implicit() {
         //TaylorModelAccuracy::set_default_sweep_threshold(1e-12);
 
         EffectiveScalarFunction aa=EffectiveScalarFunction::coordinate(1,0);
@@ -134,7 +134,7 @@ class TestSolver
 
     }
 
-    void test_scalar_implicit() {
+    Void test_scalar_implicit() {
         //TaylorModelAccuracy::set_default_sweep_threshold(1e-12);
 
         EffectiveScalarFunction aa=EffectiveScalarFunction::coordinate(1,0);
@@ -185,7 +185,7 @@ class TestSolver
 
 #include "algebra/differential.h"
 
-int main(int argc, const char **argv) {
+Int main(Int argc, const char **argv) {
 /*
     ExactIntervalVector D={{-1,+1},{-1,+1}};
     VectorTaylorFunction x=VectorTaylorFunction::identity(D,ThresholdSweeper(1e-10));
@@ -204,7 +204,7 @@ int main(int argc, const char **argv) {
     std::cerr<<"f(dx)="<<f.evaluate(dx)<<"\n";
     return 0;
 */
-    int verbosity=get_verbosity(argc,argv);
+    Int verbosity=get_verbosity(argc,argv);
 
     IntervalNewtonSolver interval_newton_solver(maximum_error=1e-5,maximum_number_of_steps=12);
     interval_newton_solver.verbosity=verbosity;

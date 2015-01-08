@@ -60,11 +60,11 @@ template<class ES> List<ES> subdivide(const ES& enclosure) {
 namespace Ariadne {
 
 // Allow subdivisions in upper evolution
-const bool ENABLE_SUBDIVISIONS = false;
+const Bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
-const bool ENABLE_PREMATURE_TERMINATION = false;
+const Bool ENABLE_PREMATURE_TERMINATION = false;
 
-static const int BLOCKING_EVENT = -2;
+static const Int BLOCKING_EVENT = -2;
 using std::shared_ptr;
 
 class DegenerateCrossingException { };
@@ -106,7 +106,7 @@ enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
 
 
 
-void
+Void
 VectorFieldEvolver::
 _evolution(EnclosureListType& final_sets,
            EnclosureListType& reach_sets,
@@ -114,7 +114,7 @@ _evolution(EnclosureListType& final_sets,
            const EnclosureType& initial_set,
            const TimeType& maximum_time,
            Semantics semantics,
-           bool reach) const
+           Bool reach) const
 {
     typedef EffectiveVectorFunction FunctionType;
     typedef Vector<ExactInterval> BoxType;
@@ -148,7 +148,7 @@ _evolution(EnclosureListType& final_sets,
                   && (current_set_radius>this->_configuration->maximum_enclosure_radius())) {
             // Subdivide
             List< EnclosureType > subdivisions=subdivide(current_set_model);
-            for(uint i=0; i!=subdivisions.size(); ++i) {
+            for(Nat i=0; i!=subdivisions.size(); ++i) {
                 EnclosureType const& subdivided_set_model=subdivisions[i];
                 working_sets.push_back(make_pair(current_time,subdivided_set_model));
             }
@@ -181,7 +181,7 @@ _evolution(EnclosureListType& final_sets,
 
 
 
-void
+Void
 VectorFieldEvolver::
 _evolution_step(List< TimedEnclosureType >& working_sets,
                 EnclosureListType& final_sets,
@@ -190,7 +190,7 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
                 const TimedEnclosureType& working_timed_set_model,
                 const TimeType& maximum_time,
                 Semantics semantics,
-                bool reach) const
+                Bool reach) const
 {
     typedef EffectiveVectorFunction FunctionType;
     typedef Vector<ExactInterval> BoxType;
@@ -208,8 +208,8 @@ _evolution_step(List< TimedEnclosureType >& working_sets,
 
     ARIADNE_LOG(2,"box = "<<current_set_model.bounding_box()<<" ");
     ARIADNE_LOG(2,"radius = "<<radius(current_set_model.bounding_box())<<"\n\n");
-    //const uint nd=initial_set_model.result_size();
-    //const uint ng=initial_set_model.argument_size();
+    //const Nat nd=initial_set_model.result_size();
+    //const Nat ng=initial_set_model.argument_size();
 
 
     /////////////// Main Evolution ////////////////////////////////

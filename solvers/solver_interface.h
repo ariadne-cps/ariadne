@@ -35,8 +35,6 @@
 #include "utility/declarations.h"
 #include "utility/logging.h"
 
-typedef unsigned int uint;
-
 namespace Ariadne {
 template<class T> class Set;
 template<class T> class List;
@@ -89,18 +87,18 @@ class SolverInterface
     //! \brief Make a dynamically-allocated copy.
     virtual SolverInterface* clone() const = 0;
     //! \brief Write to an output stream.
-    virtual void write(OutputStream& os) const = 0;
+    virtual Void write(OutputStream& os) const = 0;
 
 
     //! \brief The maximum permissible error of the solution.
     virtual double maximum_error() const = 0;
     //! \brief Set the maximum error.
-    virtual void set_maximum_error(double max_error) = 0;
+    virtual Void set_maximum_error(double max_error) = 0;
 
     //! \brief The maximum number of steps allowed before the method must quit.
-    virtual uint maximum_number_of_steps() const = 0;
+    virtual Nat maximum_number_of_steps() const = 0;
     //! \brief Set the maximum number of steps.
-    virtual void set_maximum_number_of_steps(uint max_steps) = 0;
+    virtual Void set_maximum_number_of_steps(Nat max_steps) = 0;
 
     //! \brief Solve \f$f(x)=0\f$, starting in the box \a bx.
     virtual Vector<ValidatedNumber> zero(const ValidatedVectorFunction& f,const ExactBox& pt) const = 0;

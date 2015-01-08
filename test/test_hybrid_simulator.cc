@@ -40,17 +40,17 @@
 using namespace Ariadne;
 using namespace std;
 
-int verbosity=0;
+Int verbosity=0;
 
 class TestHybridSimulator
 {
   private:
     static HybridAutomaton system();
   public:
-    void test() const;
+    Void test() const;
 };
 
-int main()
+Int main()
 {
     TestHybridSimulator().test();
     std::cerr<<"INOMPLETE ";
@@ -80,7 +80,7 @@ TestHybridSimulator::system()
     return automaton;
 }
 
-void TestHybridSimulator::test() const
+Void TestHybridSimulator::test() const
 {
     cout << __PRETTY_FUNCTION__ << endl;
 

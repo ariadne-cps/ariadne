@@ -159,7 +159,7 @@ UpperFloat operator/(UpperFloat x1, LowerFloat x2) {
     return UpperFloat(x1.raw()/x2.raw());
 }
 
-UpperFloat pow(UpperFloat x, uint n) {
+UpperFloat pow(UpperFloat x, Nat n) {
     assert(x.raw()>=0.0);
     return UpperFloat(pow_up(x.raw(),n));
 }
@@ -219,7 +219,7 @@ LowerFloat max(LowerFloat x1, LowerFloat x2) {
 
 const ValidatedFloat pi_val=ValidatedFloat(pi_down,pi_up);
 
-uint ValidatedFloat::output_precision = 6;
+Nat ValidatedFloat::output_precision = 6;
 
 ValidatedFloat widen(ValidatedFloat x)
 {
@@ -268,9 +268,9 @@ ValidatedFloat trunc(ValidatedFloat x)
     return ValidatedFloat(double(tl),double(tu));
 }
 
-ValidatedFloat trunc(ValidatedFloat x, uint n)
+ValidatedFloat trunc(ValidatedFloat x, Nat n)
 {
-    ValidatedFloat e=ValidatedFloat(std::pow(2.0,52-(int)n));
+    ValidatedFloat e=ValidatedFloat(std::pow(2.0,52-(Int)n));
     ValidatedFloat y=x+e;
     return y-e;
 }
@@ -466,13 +466,13 @@ ValidatedFloat sqr(ValidatedFloat i)
 
 
 
-ValidatedFloat pow(ValidatedFloat i, int n)
+ValidatedFloat pow(ValidatedFloat i, Int n)
 {
-    if(n<0) { return pow(rec(i),uint(-n)); }
-    else return pow(i,uint(n));
+    if(n<0) { return pow(rec(i),Nat(-n)); }
+    else return pow(i,Nat(n));
 }
 
-ValidatedFloat pow(ValidatedFloat i, uint m)
+ValidatedFloat pow(ValidatedFloat i, Nat m)
 {
     rounding_mode_t rnd = get_rounding_mode();
     const ValidatedFloat& nvi=i;
@@ -665,7 +665,7 @@ operator<<(OutputStream& os, const ValidatedFloat& ivl)
     }
 
     // Write common head
-    uint i;
+    Nat i;
     for(i=0; (i<std::min(lstr.size(),ustr.size()) && lstr[i]==ustr[i]); ++i) {
         os << lstr[i];
     }
@@ -674,14 +674,14 @@ operator<<(OutputStream& os, const ValidatedFloat& ivl)
     if(i==lstr.size()) {
         os << "0";
     }
-    for(uint li=i; li != lstr.size(); ++li) {
+    for(Nat li=i; li != lstr.size(); ++li) {
         os << lstr[li];
     }
     os << ":";
     if(i==ustr.size()) {
         os << "0";
     }
-    for(uint ui=i; ui != ustr.size(); ++ui) {
+    for(Nat ui=i; ui != ustr.size(); ++ui) {
         os << ustr[ui];
     }
     os << "]";

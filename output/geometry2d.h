@@ -28,7 +28,7 @@
 #ifndef ARIADNE_GEOMETRY2D_H
 #define ARIADNE_GEOMETRY2D_H
 
-typedef unsigned int uint;
+typedef unsigned int Nat;
 
 namespace Ariadne {
 
@@ -49,7 +49,7 @@ struct Point2d {
     double x,y; Point2d(double x_, double y_) : x(x_), y(y_) { }
     template<class X, class Y> Point2d(const X& x_, const Y& y_) : x(numeric_cast<double>(x_)), y(numeric_cast<double>(y_)) { }
 };
-inline bool operator==(Point2d& pt1, const Point2d& pt2) { return pt1.x==pt2.x && pt1.y==pt2.y; }
+inline Bool operator==(Point2d& pt1, const Point2d& pt2) { return pt1.x==pt2.x && pt1.y==pt2.y; }
 inline Point2d& operator+=(Point2d& pt, const Vector2d& v) { pt.x+=v.x; pt.y+=v.y; return pt; }
 inline Point2d& operator-=(Point2d& pt, const Vector2d& v) { pt.x-=v.x; pt.y-=v.y; return pt; }
 inline OutputStream& operator<<(OutputStream& os, const Point2d& pt) {

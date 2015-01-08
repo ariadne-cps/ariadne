@@ -96,7 +96,7 @@ struct ExpansionValue {
     MultiIndex& key() { return *reinterpret_cast<MultiIndex*>(this); }
     X& data() { return *reinterpret_cast<X*>(_p+_nw); }
   private:
-    void _resize(SizeType n, SizeType nw) {
+    Void _resize(SizeType n, SizeType nw) {
         //std::cerr<<"resize"<<*this<<" "<<n<<" "<<nw<<"..."<<std::flush;
         if(_nw!=nw) {
             //std::cerr<<" reallocating..."<<std::flush;
@@ -105,12 +105,12 @@ struct ExpansionValue {
         _n=n;
         //std::cerr<<" done"<<std::endl;
     }
-    void _assign(const WordType* p) {
-        //std::cerr<<"assign"<<*this<<" "<<(void*)_p<<"..."<<std::flush;
+    Void _assign(const WordType* p) {
+        //std::cerr<<"assign"<<*this<<" "<<(Void*)_p<<"..."<<std::flush;
         for(SizeType j=0; j!=_nw+_ds; ++j) { _p[j]=p[j]; }
         //std::cerr<<" done"<<std::endl;
     }
-    //void _assign(const WordType* p) { std::memcpy(_p,p,(_nw+_ds)*sizeof(WordType)); }
+    //Void _assign(const WordType* p) { std::memcpy(_p,p,(_nw+_ds)*sizeof(WordType)); }
   public:
     SizeType _n; SizeType _nw; WordType* _p;
     static const SizeType _ds=sizeof(X)/sizeof(WordType);
@@ -134,9 +134,9 @@ struct ExpansionValue {
     MultiIndex& key() { return *reinterpret_cast<MultiIndex*>(this); }
     X& data() { return *reinterpret_cast<X*>(_p+_nw); }
   private:
-    void _resize(SizeType n, SizeType nw) {
+    Void _resize(SizeType n, SizeType nw) {
         if(_nw!=nw) { delete[] _p; _nw=nw; _p=new WordType[_nw+_ds]; }_n=n; }
-    void _assign(const WordType* p) {
+    Void _assign(const WordType* p) {
         for(SizeType j=0; j!=_nw+_ds; ++j) { _p[j]=p[j]; } }
   public:
     SizeType _n; SizeType _nw; WordType* _p;
@@ -145,44 +145,44 @@ struct ExpansionValue {
 
 
 struct DataLess {
-    template<class X> bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) { return v1.data()<v2.data(); }
-    template<class X> bool operator()(const ExpansionValue<X>& v1, const X& d2) { return v1.data()<d2; }
+    template<class X> Bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) { return v1.data()<v2.data(); }
+    template<class X> Bool operator()(const ExpansionValue<X>& v1, const X& d2) { return v1.data()<d2; }
 };
 
 struct DataIsZero {
-    template<class X> bool operator()(const ExpansionValue<X>& v) { return v.data()==static_cast<X>(0); }
+    template<class X> Bool operator()(const ExpansionValue<X>& v) { return v.data()==static_cast<X>(0); }
 };
 
 struct KeyEquals {
-    template<class X> bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) { return v1.key()==v2.key(); }
-    template<class X> bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) { return v1.key()==k2; }
-    bool operator()(const MultiIndex& k1, const MultiIndex& k2) { return k2==k2; }
+    template<class X> Bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) { return v1.key()==v2.key(); }
+    template<class X> Bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) { return v1.key()==k2; }
+    Bool operator()(const MultiIndex& k1, const MultiIndex& k2) { return k2==k2; }
 };
 
 struct GradedKeyLess {
-    template<class X> bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) {
+    template<class X> Bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) {
         return graded_less(v1.key(),v2.key()); }
-    template<class X> bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) {
+    template<class X> Bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) {
         return graded_less(v1.key(),k2); }
-    bool operator()(const MultiIndex& k1, const MultiIndex& k2) {
+    Bool operator()(const MultiIndex& k1, const MultiIndex& k2) {
         return graded_less(k1,k2); }
 };
 
 struct LexicographicKeyLess {
-    template<class X> bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) {
+    template<class X> Bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) {
         return lexicographic_less(v1.key(),v2.key()); }
-    template<class X> bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) {
+    template<class X> Bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) {
         return lexicographic_less(v1.key(),k2);; }
-    bool operator()(const MultiIndex& k1, const MultiIndex& k2) {
+    Bool operator()(const MultiIndex& k1, const MultiIndex& k2) {
         return lexicographic_less(k1,k2); }
 };
 
 struct ReverseLexicographicKeyLess {
-    template<class X> bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) {
+    template<class X> Bool operator()(const ExpansionValue<X>& v1, const ExpansionValue<X>& v2) {
         return reverse_lexicographic_less(v1.key(),v2.key()); }
-    template<class X> bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) {
+    template<class X> Bool operator()(const ExpansionValue<X>& v1, const MultiIndex& k2) {
         return reverse_lexicographic_less(v1.key(),k2);; }
-    bool operator()(const MultiIndex& k1, const MultiIndex& k2) {
+    Bool operator()(const MultiIndex& k1, const MultiIndex& k2) {
         return reverse_lexicographic_less(k1,k2); }
 };
 
@@ -190,7 +190,7 @@ struct ReverseLexicographicKeyLess {
 
 template<class X>
 inline OutputStream& operator<<(OutputStream& os, const ExpansionValue<X>& dv) {
-    return os << "["<<dv._n<<","<<dv._nw<<","<<(void*)dv._p<<"]"<<dv.key()<<":"<<dv.data();
+    return os << "["<<dv._n<<","<<dv._nw<<","<<(Void*)dv._p<<"]"<<dv.key()<<":"<<dv.data();
     //return os << dv.key() << ":" << dv.data();
 }
 
@@ -228,7 +228,7 @@ class ExpansionIterator
         : _n(n), _nw(nw), _p(p) { }
     template<class Ref2,class Ptr2> ExpansionIterator(const ExpansionIterator<X,Ref2,Ptr2>& i)
         : _n(i._n), _nw(i._nw), _p(i._p) { }
-    template<class Ref2,class Ptr2> bool equal(const ExpansionIterator<X,Ref2,Ptr2>& i) const {
+    template<class Ref2,class Ptr2> Bool equal(const ExpansionIterator<X,Ref2,Ptr2>& i) const {
         return _p==i._p; }
     template<class Ref2,class Ptr2> difference_type distance_to(const ExpansionIterator<X,Ref2,Ptr2>& i) const {
         return (i._p-_p)/difference_type(_nw+_ds); }
@@ -244,12 +244,12 @@ class ExpansionIterator
         _p+=m*difference_type(_nw+_ds);
         return *this; }
     const WordType* _word_ptr() { return this->_p; }
-    const void* _ptr() { return this->_p; }
+    const Void* _ptr() { return this->_p; }
   private:
     SizeType _n;
     SizeType _nw;
     WordType* _p;
-    static const int _ds=sizeof(DataType)/sizeof(WordType);
+    static const SizeType _ds=sizeof(DataType)/sizeof(WordType);
 };
 
 
@@ -257,8 +257,8 @@ template<class X, class Ref, class Ptr>
 inline OutputStream& operator<<(OutputStream& os, const ExpansionIterator<X,Ref,Ptr>& piter) {
     const MultiIndex::ByteType* ap=reinterpret_cast<const MultiIndex::ByteType*>(piter._p);
     const X* xp=reinterpret_cast<const X*>(piter._p+piter._nw);
-    os << "(n="<<piter._n<<", nw="<<piter._nw<<", p="<<(void*)piter._p<<", a=";
-    for(MultiIndex::SizeType i=0; i!=piter._n; ++i) { os<<(i==0?"(":",")<<int(ap[i]); }
+    os << "(n="<<piter._n<<", nw="<<piter._nw<<", p="<<(Void*)piter._p<<", a=";
+    for(MultiIndex::SizeType i=0; i!=piter._n; ++i) { os<<(i==0?"(":",")<<Int(ap[i]); }
     os << "), x="<<*xp<<")";
     return os;
 }
@@ -274,7 +274,7 @@ class Expansion
     typedef MultiIndex::SizeType SizeType;
     typedef MultiIndex::ByteType ByteType;
     typedef MultiIndex::WordType WordType;
-    typedef int DifferenceType;
+    typedef Int DifferenceType;
     typedef MultiIndex KeyType;
     typedef X DataType;
 
@@ -297,14 +297,14 @@ class Expansion
     typedef ExpansionIterator<X,ExpansionValue<X>const&, ExpansionValue<X>const* > ConstIterator;
   public:
     explicit Expansion();
-    explicit Expansion(unsigned int as);
-    Expansion(unsigned int as, unsigned int deg, InitializerList<X> lst);
-    Expansion(InitializerList< std::pair<InitializerList<int>,X> > lst);
-    Expansion(unsigned int as, InitializerList< std::pair<InitializerList<int>,X> > lst);
+    explicit Expansion(SizeType as);
+    Expansion(SizeType as, DegreeType deg, std::initializer_list<X> lst);
+    Expansion(std::initializer_list< std::pair<std::initializer_list<Int>,X> > lst);
+    Expansion(SizeType as, std::initializer_list< std::pair<std::initializer_list<Int>,X> > lst);
     template<class XX> Expansion(const std::map<MultiIndex,XX>& m);
-    template<class XX, typename std::enable_if<std::is_convertible<XX,X>::value,int>::type=0>
+    template<class XX, typename std::enable_if<std::is_convertible<XX,X>::value,Int>::type=0>
         Expansion(const Expansion<XX>& p);
-    template<class XX, typename std::enable_if<std::is_constructible<X,XX>::value and not std::is_convertible<XX,X>::value,int>::type=0>
+    template<class XX, typename std::enable_if<std::is_constructible<X,XX>::value and not std::is_convertible<XX,X>::value,Int>::type=0>
         explicit Expansion(const Expansion<XX>& p);
 
     Expansion<RawFloat>& raw();
@@ -314,30 +314,30 @@ class Expansion
 
     static Expansion<X> variable(unsigned int as, unsigned int i);
 
-    void swap(Expansion<X>& other);
+    Void swap(Expansion<X>& other);
 
-    bool operator==(const Expansion<X>& other) const;
-    bool operator!=(const Expansion<X>& other) const;
+    Bool operator==(const Expansion<X>& other) const;
+    Bool operator!=(const Expansion<X>& other) const;
 
     unsigned int argument_size() const;
     unsigned int number_of_nonzeros() const;
     DegreeType degree() const;
     const std::vector<WordType>& coefficients() const;
 
-    bool empty() const;
+    Bool empty() const;
     unsigned int size() const;
-    void reserve(SizeType nnz);
-    void resize(SizeType nnz);
+    Void reserve(SizeType nnz);
+    Void resize(SizeType nnz);
 
-    template<class CMP> void insert(const MultiIndex& a, const RealType& c, const CMP& cmp);
-    template<class CMP> void set(const MultiIndex& a, const RealType& c, const CMP& cmp);
+    template<class CMP> Void insert(const MultiIndex& a, const RealType& c, const CMP& cmp);
+    template<class CMP> Void set(const MultiIndex& a, const RealType& c, const CMP& cmp);
     template<class CMP> RealType& at(const MultiIndex& a, const CMP& cmp);
     template<class CMP> Iterator find(const MultiIndex& a, const CMP& cmp);
     template<class CMP> ConstIterator find(const MultiIndex& a, const CMP& cmp) const;
 
-    void append(const MultiIndex& a, const RealType& c);
-    void prepend(const MultiIndex& a, const RealType& c);
-    void append(const MultiIndex& a1, const MultiIndex& a2, const RealType& c);
+    Void append(const MultiIndex& a, const RealType& c);
+    Void prepend(const MultiIndex& a, const RealType& c);
+    Void append(const MultiIndex& a1, const MultiIndex& a2, const RealType& c);
 
     const RealType& operator[](const MultiIndex& a) const;
 
@@ -354,19 +354,19 @@ class Expansion
     const_reference front() const;
     const_reference back() const;
 
-    void erase(Iterator iter);
-    void clear();
+    Void erase(Iterator iter);
+    Void clear();
 
-    void remove_zeros();
-    void combine_terms();
+    Void remove_zeros();
+    Void combine_terms();
 
-    template<class CMP> void sort(const CMP& cmp);
+    template<class CMP> Void sort(const CMP& cmp);
 
-    void graded_sort();
-    void lexicographic_sort();
-    void reverse_lexicographic_sort();
+    Void graded_sort();
+    Void lexicographic_sort();
+    Void reverse_lexicographic_sort();
 
-    void check() const;
+    Void check() const;
 
   public:
     SizeType _vector_size() const;
@@ -381,9 +381,9 @@ class Expansion
     template<class CMP> Iterator _insert(const MultiIndex& a, const RealType& x,const CMP& cmp);
     Iterator _insert(Iterator p, const MultiIndex& a, const RealType& x);
     Iterator _allocated_insert(Iterator p, const MultiIndex& a, const RealType& x);
-    void _prepend(const MultiIndex& a, const RealType& x);
-    void _append(const MultiIndex& a, const RealType& x);
-    void _append(const MultiIndex&  a1, const MultiIndex&  a2, const RealType& x);
+    Void _prepend(const MultiIndex& a, const RealType& x);
+    Void _append(const MultiIndex& a, const RealType& x);
+    Void _append(const MultiIndex&  a1, const MultiIndex&  a2, const RealType& x);
     Expansion<X> _embed(unsigned int before_size, unsigned int after_size) const;
   public:
     OutputStream& write(OutputStream& os, const Array<StringType>& variables) const;
@@ -400,12 +400,12 @@ template<class X, class CMP> class SortedExpansion
     typedef typename Expansion<X>::RealType RealType;
     using Expansion<X>::Expansion;
 
-    void insert(const MultiIndex& a, const RealType& c) { this->insert(a,c,CMP()); }
-    void set(const MultiIndex& a, const RealType& c) { this->set(a,c,CMP()); }
+    Void insert(const MultiIndex& a, const RealType& c) { this->insert(a,c,CMP()); }
+    Void set(const MultiIndex& a, const RealType& c) { this->set(a,c,CMP()); }
     RealType& at(const MultiIndex& a) { return this->at(a,CMP()); }
     typename Expansion<X>::Iterator find(const MultiIndex& a) { return this->find(a,CMP()); }
     typename Expansion<X>::ConstIterator find(const MultiIndex& a) const { return this->find(a,CMP()); }
-    void sort() { this->sort(CMP()); }
+    Void sort() { this->sort(CMP()); }
 };
 
 // Disable construction of Expansion<Rational> since above implementation only
@@ -459,7 +459,7 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, const Expans
 
 
 
-template<class X> template<class XX, typename std::enable_if<std::is_convertible<XX,X>::value,int>::type> inline
+template<class X> template<class XX, typename std::enable_if<std::is_convertible<XX,X>::value,Int>::type> inline
 Expansion<X>::Expansion(const Expansion<XX>& p)
     : _argument_size(p.argument_size())
 {
@@ -468,7 +468,7 @@ Expansion<X>::Expansion(const Expansion<XX>& p)
 }
 
 template<class X>
-template<class XX, typename std::enable_if<std::is_constructible<X,XX>::value and not std::is_convertible<XX,X>::value,int>::type>
+template<class XX, typename std::enable_if<std::is_constructible<X,XX>::value and not std::is_convertible<XX,X>::value,Int>::type>
 inline
 Expansion<X>::Expansion(const Expansion<XX>& p)
     : _argument_size(p.argument_size())
@@ -492,10 +492,10 @@ template<class X> template<class CMP> typename Expansion<X>::Iterator Expansion<
     return _allocated_insert(p,a,x);
 }
 
-template<class X> template<class CMP> void Expansion<X>::insert(const MultiIndex& a, const RealType& c, const CMP& cmp) {
+template<class X> template<class CMP> Void Expansion<X>::insert(const MultiIndex& a, const RealType& c, const CMP& cmp) {
     this->_insert(a,c,cmp);
 }
-template<class X> template<class CMP> void Expansion<X>::set(const MultiIndex& a, const RealType& c, const CMP& cmp) {
+template<class X> template<class CMP> Void Expansion<X>::set(const MultiIndex& a, const RealType& c, const CMP& cmp) {
     this->_at(a,cmp)=c;
 }
 template<class X> template<class CMP> X& Expansion<X>::at(const MultiIndex& a, const CMP& cmp) {

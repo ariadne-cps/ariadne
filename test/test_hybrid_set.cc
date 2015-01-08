@@ -41,13 +41,13 @@ using namespace Ariadne;
 
 class TestHybridSet {
   public:
-    void test();
+    Void test();
   private:
-    void test_hybrid_list_set();
-    void test_hybrid_grid_set();
+    Void test_hybrid_list_set();
+    Void test_hybrid_grid_set();
 };
 
-void
+Void
 TestHybridSet::test()
 {
     ARIADNE_TEST_CALL(test_hybrid_list_set());
@@ -55,7 +55,7 @@ TestHybridSet::test()
 }
 
 
-void
+Void
 TestHybridSet::test_hybrid_grid_set()
 {
     // Test compilation without correctness
@@ -76,7 +76,7 @@ TestHybridSet::test_hybrid_grid_set()
 }
 
 
-void
+Void
 TestHybridSet::test_hybrid_list_set()
 {
     HybridListSet<ExactBox> hls;
@@ -129,7 +129,7 @@ TestHybridSet::test_hybrid_list_set()
 }
 
 
-int main() {
+Int main() {
     TestHybridSet().test();
     return ARIADNE_TEST_FAILURES;
 }

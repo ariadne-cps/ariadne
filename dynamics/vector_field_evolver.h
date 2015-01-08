@@ -118,14 +118,14 @@ class VectorFieldEvolver
         return reachable; }
 
   protected:
-    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+    virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const EnclosureType& initial, const TimeType& time,
-                            Semantics semantics, bool reach) const;
+                            Semantics semantics, Bool reach) const;
 
-    virtual void _evolution_step(List< TimedEnclosureType >& working_sets,
+    virtual Void _evolution_step(List< TimedEnclosureType >& working_sets,
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                  const TimedEnclosureType& current_set, const TimeType& time,
-                                 Semantics semantics, bool reach) const;
+                                 Semantics semantics, Bool reach) const;
 
   private:
     std::shared_ptr< SystemType > _sys_ptr;
@@ -157,10 +157,10 @@ class VectorFieldEvolverConfiguration : public ConfigurationInterface
   public:
 
     const RealType& maximum_step_size() const { return _maximum_step_size; }
-    void maximum_step_size(const RealType value) { _maximum_step_size = value; }
+    Void maximum_step_size(const RealType value) { _maximum_step_size = value; }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    void maximum_enclosure_radius(const RealType value) { _maximum_enclosure_radius = value; }
+    Void maximum_enclosure_radius(const RealType value) { _maximum_enclosure_radius = value; }
 
   public:
 

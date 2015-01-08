@@ -39,7 +39,7 @@
 namespace Ariadne {
 
 typedef OutputStream OutputStream;
-typedef bool Bool;
+typedef Bool Bool;
 typedef Vector<ExactFloat> ExactFloatVector;
 class HybridGridTreeSet;
 
@@ -81,7 +81,7 @@ inline Grid HybridGrid::operator[](const DiscreteLocation& loc) const
 {
     RealSpace continuous_space = this->_space[loc];
     Vector<RawFloat> lengths(continuous_space.size());
-    for(uint i=0; i!=continuous_space.size(); ++i) {
+    for(Nat i=0; i!=continuous_space.size(); ++i) {
         lengths[i] = static_cast<RawFloat>(this->_scaling.scaling(loc,continuous_space.variable(i)));
     }
     return Grid(lengths);

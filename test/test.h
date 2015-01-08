@@ -199,7 +199,7 @@ int test_case_counter = 0;
 #define ARIADNE_TEST_CHECK_WARN(expression,expected)                         \
     {                                                                   \
         std::cout << #expression << ": " << std::flush; \
-        bool ok = ariadne_check(std::cout,expression,expected);         \
+        Bool ok = ariadne_check(std::cout,expression,expected);         \
         if(ok) {                                                        \
             std::cout << "\n" << std::endl;                             \
         } else {                                                        \
@@ -213,7 +213,7 @@ int test_case_counter = 0;
 #define ARIADNE_TEST_CHECK(expression,expected)                         \
     {                                                                   \
         std::cout << #expression << ": " << std::flush; \
-        bool ok = ariadne_check(std::cout,expression,expected);         \
+        Bool ok = ariadne_check(std::cout,expression,expected);         \
         if(ok) {                                                        \
             std::cout << "\n" << std::endl;                             \
         } else {                                                        \
@@ -228,7 +228,7 @@ int test_case_counter = 0;
 #define ARIADNE_TEST_EQUAL(expression1,expression2)                         \
     {                                                                   \
         std::cout << #expression1 << " == " << #expression2 << ": " << std::flush; \
-        bool ok = decide((expression1) == (expression2));                       \
+        Bool ok = decide((expression1) == (expression2));                       \
         if(ok) {                                                        \
             std::cout << "true\n" << std::endl;                         \
         } else {                                                        \
@@ -244,7 +244,7 @@ int test_case_counter = 0;
 #define ARIADNE_TEST_EQUALS(expression,expected)                         \
     {                                                                   \
         std::cout << #expression << " == " << #expected << ": " << std::flush; \
-        bool ok = decide((expression) == (expected));                       \
+        Bool ok = decide((expression) == (expected));                       \
         if(ok) {                                                        \
             std::cout << "true\n" << std::endl;                         \
         } else {                                                        \
@@ -259,7 +259,7 @@ int test_case_counter = 0;
 #define ARIADNE_TEST_LESS(expression,expected)                         \
     {                                                                   \
         std::cout << #expression << " < " << #expected << ": " << std::flush; \
-        bool ok = decide((expression) < (expected));                       \
+        Bool ok = decide((expression) < (expected));                       \
         if(ok) {                                                        \
             std::cout << "true\n" << std::endl;                         \
         } else {                                                        \
@@ -274,7 +274,7 @@ int test_case_counter = 0;
 #define ARIADNE_TEST_UNARY_PREDICATE(predicate,argument)    \
     {                                                                   \
         std::cout << #predicate << "(" << #argument << ") with " << #argument << "=" << (argument) << ": " << std::flush; \
-        bool ok = decide(predicate((argument)));                  \
+        Bool ok = decide(predicate((argument)));                  \
         if(ok) {                                                        \
             std::cout << "true\n" << std::endl;                         \
         } else {                                                        \
@@ -289,7 +289,7 @@ int test_case_counter = 0;
 #define ARIADNE_TEST_BINARY_PREDICATE(predicate,argument1,argument2)    \
     {                                                                   \
         std::cout << #predicate << "(" << (#argument1) << "," << (#argument2) << ") with " << #argument1 << "=" << (argument1) << ", " << #argument2 << "=" << (argument2) << ": " << std::flush; \
-        bool ok = decide(predicate((argument1),(argument2)));                  \
+        Bool ok = decide(predicate((argument1),(argument2)));                  \
         if(ok) {                                                        \
             std::cout << "true\n" << std::endl;                         \
         } else {                                                        \
@@ -304,7 +304,7 @@ int test_case_counter = 0;
 #define ARIADNE_TEST_COMPARE(expression,comparison,expected)           \
     {                                                                   \
         std::cout << #expression << ": " << (expression) << std::flush; \
-        bool ok = decide((expression) comparison (expected));               \
+        Bool ok = decide((expression) comparison (expected));               \
         if(ok) {                                                        \
             std::cout << " " << #comparison << " " << (expected) << ": true\n" << std::endl; \
         } else {                                                        \
@@ -320,7 +320,7 @@ int test_case_counter = 0;
     {                                                                   \
         Type result=(expression);                                       \
         std::cout << #expression << ": " << result << std::flush; \
-        bool ok = result comparison (expected);               \
+        Bool ok = result comparison (expected);               \
         if(ok) {                                                        \
             std::cout << " " << #comparison << " " << (expected) << "\n" << std::endl; \
         } else {                                                        \
@@ -440,7 +440,7 @@ int test_case_counter = 0;
 /*! \brief clean std::vector, i.e. delete memory of it's non NULL elements and set them to NULL in the vector */
 #define ARIADNE_CLEAN_TEST_VECTOR( vector ) \
     { \
-        for(uint i = 0; i < vector.size(); i++ ) { \
+        for(SizeType i = 0; i < vector.size(); i++ ) { \
             if( vector[i] != NULL ) { \
                 delete vector[i]; vector[i] = NULL; \
             } \

@@ -40,7 +40,7 @@ EffectiveScalarFunction operator*(double c, EffectiveScalarFunction f) { return 
 //struct UnsafeReal : Real { UnsafeReal(double d) : Real(d) { } };
 
 
-int main(int argc, char **argv)
+Int main(Int argc, char **argv)
 {
 
     ExactBox bx1(2); bx1[0]=ExactInterval(-0.2,0.2); bx1[1]=ExactInterval(-0.1,0.10);
@@ -111,7 +111,7 @@ int main(int argc, char **argv)
     g.clear();
 
     InterpolatedCurve cv(0,ExactPoint(2,0.0));
-    for(int i=1; i<=10; ++i) {
+    for(Int i=1; i<=10; ++i) {
         ExactPoint pt(2); pt[0]=ExactFloat(i/10.); pt[1]=ExactFloat(i*i/100.);
         cv.insert(i,pt);
     }

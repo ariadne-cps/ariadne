@@ -152,7 +152,7 @@ class HybridAutomatonInterface {
     //! \name Methods for testing and extracting the discrete dynamics.
 
     //! \brief Test if the hybrid automaton has a valid discrete mode \a location.
-    virtual bool has_mode(DiscreteLocation location) const = 0;
+    virtual Bool has_mode(DiscreteLocation location) const = 0;
 
     //! \brief The set of all events possible in the given \a location.
     virtual Set<DiscreteEvent> events(DiscreteLocation location) const = 0;
@@ -161,13 +161,13 @@ class HybridAutomatonInterface {
     virtual EventKind event_kind(DiscreteLocation location, DiscreteEvent event) const = 0;
 
     //! \brief Test if the hybrid automaton has an invariant or urgent guard constraint in the \a location labelled by \a event.
-    virtual bool has_invariant(DiscreteLocation location, DiscreteEvent event) const = 0;
+    virtual Bool has_invariant(DiscreteLocation location, DiscreteEvent event) const = 0;
 
     //! \brief Test if the hybrid automaton has a guard constraint in the \a location labelled by \a event.
-    virtual bool has_guard(DiscreteLocation location, DiscreteEvent event) const = 0;
+    virtual Bool has_guard(DiscreteLocation location, DiscreteEvent event) const = 0;
 
     //! \brief Test if the hybrid automaton has a discrete transition in \a source due to \a event.
-    virtual bool has_transition(DiscreteLocation source, DiscreteEvent event) const = 0;
+    virtual Bool has_transition(DiscreteLocation source, DiscreteEvent event) const = 0;
 
     //! \brief The target location of \a event starting in the \a source location.
     virtual DiscreteLocation target(DiscreteLocation source, DiscreteEvent event) const = 0;
@@ -178,7 +178,7 @@ class HybridAutomatonInterface {
     //! \name Methods for extracting the continuous dynamics.
 
     //! \brief The dimension of the state space in the given \a location.
-    virtual uint dimension(DiscreteLocation location) const = 0;
+    virtual Nat dimension(DiscreteLocation location) const = 0;
 
     //! \brief The dynamic valid in the mode \a location.
     virtual EffectiveVectorFunction dynamic_function(DiscreteLocation location) const = 0;

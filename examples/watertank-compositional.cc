@@ -28,7 +28,7 @@
 using namespace Ariadne;
 using std::cout; using std::endl;
 
-int main()
+Int main()
 {
     // Declare some constants. Note that system parameters should be given as variables.
     RealConstant T("T",4.0);

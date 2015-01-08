@@ -119,7 +119,7 @@ struct Assignment< Variable<T>, T>
     Variable<T> lhs; T rhs;
 };
 
-template<class LHS, class RHS> bool operator<(const Assignment<LHS,RHS>& a1, const Assignment<LHS,RHS>& a2) {
+template<class LHS, class RHS> Bool operator<(const Assignment<LHS,RHS>& a1, const Assignment<LHS,RHS>& a2) {
     return a1.lhs < a2.lhs;
 }
 
@@ -214,7 +214,7 @@ template<class T> inline Let<T> let(const List<Variable<T> >& lhs) { return Let<
 template<class T> inline List< Assignment<Variable<T>, Expression<T> > > Let<T>::operator=(const List<Expression<T> >& rhs) {
     assert(this->_lhs.size()==rhs.size());
     List< Assignment<Variable<T>,Expression<T> > > result;
-    for(uint i=0; i!=rhs.size(); ++i) { result.append(let(this->_lhs[i])=rhs[i]); }
+    for(Nat i=0; i!=rhs.size(); ++i) { result.append(let(this->_lhs[i])=rhs[i]); }
     return result;
 }
 
@@ -227,19 +227,19 @@ template<class T> inline Dot<T> dot(const List<Variable<T> >& lhs) { return Dot<
 template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > Dot<T>::operator=(const List<Expression<T> >& rhs) {
     assert(this->_lhs.size()==rhs.size());
     List< Assignment<DottedVariable<T>,Expression<T> > > result;
-    for(uint i=0; i!=rhs.size(); ++i) { result.append(dot(this->_lhs[i])=rhs[i]); }
+    for(Nat i=0; i!=rhs.size(); ++i) { result.append(dot(this->_lhs[i])=rhs[i]); }
     return result;
 }
 
-template<> struct Dot<void> {
+template<> struct Dot<Void> {
     const List<Identifier>& _lhs;
     Dot(const List<Identifier>& lhs) : _lhs(lhs) { }
     template<class T> List< Assignment<DottedVariable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
 };
-inline Dot<void> dot(const List<String>& lhs) { return Dot<void>(lhs); }
-template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > Dot<void>::operator=(const List<Expression<T> >& rhs) {
+inline Dot<Void> dot(const List<String>& lhs) { return Dot<Void>(lhs); }
+template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > Dot<Void>::operator=(const List<Expression<T> >& rhs) {
     List< Assignment<DottedVariable<T>,Expression<T> > > result;
-    for(uint i=0; i!=rhs.size(); ++i) { result.append(DottedVariable<T>(this->_lhs[i])=rhs[i]); }
+    for(Nat i=0; i!=rhs.size(); ++i) { result.append(DottedVariable<T>(this->_lhs[i])=rhs[i]); }
     return result;
 }
 
@@ -253,7 +253,7 @@ template<class T> inline Primed<T> next(const List<Variable<T> >& lhs) { return 
 template<class T> inline List< Assignment<PrimedVariable<T>, Expression<T> > > Primed<T>::operator=(const List<Expression<T> >& rhs) {
     assert(this->_lhs.size()==rhs.size());
     List< Assignment<PrimedVariable<T>,Expression<T> > > result;
-    for(uint i=0; i!=rhs.size(); ++i) { result.append(next(this->_lhs[i])=rhs[i]); }
+    for(Nat i=0; i!=rhs.size(); ++i) { result.append(next(this->_lhs[i])=rhs[i]); }
     return result;
 }
 template<class T> inline List< Assignment<PrimedVariable<T>, Expression<T> > > Primed<T>::operator=(const List<Variable<T> >& rhs) {

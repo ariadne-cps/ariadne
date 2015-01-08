@@ -48,41 +48,41 @@
 
 namespace Ariadne {
 
-static const int DEFAULT_WIDTH = 800;
-static const int DEFAULT_HEIGHT = 800;
+static const Int DEFAULT_WIDTH = 800;
+static const Int DEFAULT_HEIGHT = 800;
 
-static const int LEFT_MARGIN = 160;
-static const int BOTTOM_MARGIN = 40;
-static const int TOP_MARGIN = 10;
-static const int RIGHT_MARGIN = 10;
+static const Int LEFT_MARGIN = 160;
+static const Int BOTTOM_MARGIN = 40;
+static const Int TOP_MARGIN = 10;
+static const Int RIGHT_MARGIN = 10;
 
 
 struct ImageSize2d {
-    uint nx,ny;
-    ImageSize2d(uint _nx,uint _ny) : nx(_nx), ny(_ny) { }
+    Nat nx,ny;
+    ImageSize2d(Nat _nx,Nat _ny) : nx(_nx), ny(_ny) { }
 };
 
-bool valid_axis_variables(const RealSpace& space, const Variables2d& variables) {
+Bool valid_axis_variables(const RealSpace& space, const Variables2d& variables) {
     return ( (variables.x_variable().name()==TimeVariable().name()) || space.contains(variables.x_variable()) ) && space.contains(variables.y_variable());
 }
 
 Projection2d projection(const RealSpace& space, const Variables2d& variables) {
     ARIADNE_ASSERT(valid_axis_variables(space,variables));
-    uint x_index = (variables.x_variable()==TimeVariable() && !space.contains(variables.x_variable())) ? space.dimension() : space.index(variables.x_variable());
-    uint y_index = space.index(variables.y_variable());
+    Nat x_index = (variables.x_variable()==TimeVariable() && !space.contains(variables.x_variable())) ? space.dimension() : space.index(variables.x_variable());
+    Nat y_index = space.index(variables.y_variable());
     return Projection2d(space.dimension(),x_index,y_index);
 }
 
 
 
-void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties);
+Void set_properties(CanvasInterface& canvas, const GraphicsProperties& properties);
 
-void draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const HybridDrawableInterface& shape) {
+Void draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const HybridDrawableInterface& shape) {
     shape.draw(canvas,locations,variables);
 }
 
-void paint(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const List<HybridGraphicsObject>& objects) {
-    for(uint i=0; i!=objects.size(); ++i) {
+Void paint(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& variables, const List<HybridGraphicsObject>& objects) {
+    for(Nat i=0; i!=objects.size(); ++i) {
         const HybridDrawableInterface& shape=*objects[i].shape_ptr;
         set_properties(canvas, objects[i].properties);
         shape.draw(canvas,locations,variables);
@@ -98,7 +98,7 @@ HybridFigure::HybridFigure()
 {
 }
 
-void HybridFigure::set_bounds(const Map<RealVariable,IntervalSet>& b) {
+Void HybridFigure::set_bounds(const Map<RealVariable,IntervalSet>& b) {
     for(Map<RealVariable,IntervalSet>::ConstIterator iter=b.begin(); iter!=b.end(); ++iter) {
         bounds.insert(iter->first,approximation(iter->second));
     }
@@ -119,18 +119,18 @@ class CairoCanvas
     ~CairoCanvas();
     CairoCanvas(const ImageSize2d& size, const Box2d& bounds);
     CairoCanvas(cairo_t *c);
-    void initialise(StringType x, StringType y, double xl, double xu, double yl, double yu);
-    void finalise();
-    void move_to(double x, double y) { cairo_move_to (cr, x, y); }
-    void line_to(double x, double y) { cairo_line_to (cr, x, y); }
-    void circle(double x, double y, double r) { cairo_arc (cr, x, y, r, 0, 2*M_PI); }
-    void dot(double x, double y) { static const double RADIUS=0.01; cairo_arc (cr, x, y, RADIUS, 0, 2*M_PI); }
-    void stroke();
-    void fill() { cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fc.opacity); cairo_fill_preserve (cr); this->stroke(); }
-    void set_line_width(double lw) { this->lw=lw; }
-    void set_line_colour(double r, double g, double b) { lc=Colour(r,g,b); }
-    void set_fill_opacity(double o) { fc.opacity=o; }
-    void set_fill_colour(double r, double g, double b) { fc=Colour(r,g,b,fc.opacity); }
+    Void initialise(StringType x, StringType y, double xl, double xu, double yl, double yu);
+    Void finalise();
+    Void move_to(double x, double y) { cairo_move_to (cr, x, y); }
+    Void line_to(double x, double y) { cairo_line_to (cr, x, y); }
+    Void circle(double x, double y, double r) { cairo_arc (cr, x, y, r, 0, 2*M_PI); }
+    Void dot(double x, double y) { static const double RADIUS=0.01; cairo_arc (cr, x, y, RADIUS, 0, 2*M_PI); }
+    Void stroke();
+    Void fill() { cairo_set_source_rgba(cr,fc.red,fc.green,fc.blue,fc.opacity); cairo_fill_preserve (cr); this->stroke(); }
+    Void set_line_width(double lw) { this->lw=lw; }
+    Void set_line_colour(double r, double g, double b) { lc=Colour(r,g,b); }
+    Void set_fill_opacity(double o) { fc.opacity=o; }
+    Void set_fill_colour(double r, double g, double b) { fc=Colour(r,g,b,fc.opacity); }
 
     Vector2d scaling() const;
     Box2d bounds() const;
@@ -141,21 +141,21 @@ class CairoCanvas
 };
 
 
-void
+Void
 HybridFigure::write(const char* cfilename) const
 {
     this->write(cfilename, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 }
 
 
-void
-HybridFigure::write(const char* cfilename, uint drawing_width, uint drawing_height) const
+Void
+HybridFigure::write(const char* cfilename, Nat drawing_width, Nat drawing_height) const
 {
     cairo_surface_t *surface;
     cairo_t *cr;
 
-    const int canvas_width = drawing_width+LEFT_MARGIN+RIGHT_MARGIN;
-    const int canvas_height = drawing_height+BOTTOM_MARGIN+TOP_MARGIN;;
+    const Int canvas_width = drawing_width+LEFT_MARGIN+RIGHT_MARGIN;
+    const Int canvas_height = drawing_height+BOTTOM_MARGIN+TOP_MARGIN;;
 
     surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
     cr = cairo_create (surface);
@@ -173,7 +173,7 @@ HybridFigure::write(const char* cfilename, uint drawing_width, uint drawing_heig
     //cairo_surface_destroy (surface);
 }
 
-void HybridFigure::_paint_all(CanvasInterface& canvas) const
+Void HybridFigure::_paint_all(CanvasInterface& canvas) const
 {
     // Project the bounding box onto the canvas
     double xl=numeric_cast<double>(bounds[variables.x_variable()].lower());
@@ -184,7 +184,7 @@ void HybridFigure::_paint_all(CanvasInterface& canvas) const
     canvas.initialise(variables.x_variable().name(),variables.y_variable().name(),xl,xu,yl,yu);
 
     // Draw shapes
-    for(uint i=0; i!=objects.size(); ++i) {
+    for(Nat i=0; i!=objects.size(); ++i) {
         const HybridDrawableInterface& shape=*objects[i].shape_ptr;
         set_properties(canvas, objects[i].properties);
         shape.draw(canvas,this->locations,this->variables);

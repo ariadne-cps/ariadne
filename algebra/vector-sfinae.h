@@ -41,7 +41,7 @@ template<class V> struct IsVector : False { };
 template<class V> struct IsCovector : False { };
 template<class M> struct IsMatrix : False { };
 
-template<class S> struct IsScalar { static const bool value=not (IsVector<S>::value or IsCovector<S>::value or IsMatrix<S>::value); };
+template<class S> struct IsScalar { static const Bool value=not (IsVector<S>::value or IsCovector<S>::value or IsMatrix<S>::value); };
 
 template<class X> struct Vector {
     X _zero;

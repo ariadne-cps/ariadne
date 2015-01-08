@@ -51,7 +51,7 @@ class GridCell;
  */
 class Grid {
     typedef double DyadicType;
-    typedef int IntegerType;
+    typedef Int IntegerType;
   private:
     // Structure containing actual data values
     struct Data;
@@ -63,10 +63,10 @@ class Grid {
     explicit Grid();
 
     //! Construct from a dimension and a spacing in each direction.
-    explicit Grid(uint d);
+    explicit Grid(Nat d);
 
     //! Construct from a dimension and a spacing in each direction.
-    explicit Grid(uint d, RawFloat l);
+    explicit Grid(Nat d, RawFloat l);
 
     //! Construct from a vector of offsets.
     explicit Grid(const Vector<RawFloat>& lengths);
@@ -78,13 +78,13 @@ class Grid {
     Grid(const Grid& g);
 
     //! The underlying dimension of the grid.
-    uint dimension() const;
+    Nat dimension() const;
 
     //! Tests equality of two grids. Tests equality of references first.
-    bool operator==(const Grid& g) const;
+    Bool operator==(const Grid& g) const;
 
     //! Tests inequality of two grids.
-    bool operator!=(const Grid& g) const;
+    Bool operator!=(const Grid& g) const;
 
     //! The origin of the grid.
     const Vector<RawFloat>& origin() const;
@@ -95,13 +95,13 @@ class Grid {
     //! Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, const Grid& g);
 
-    ExactNumber coordinate(uint d, DyadicType x) const;
-    ExactNumber subdivision_coordinate(uint d, DyadicType x) const;
-    ExactNumber subdivision_coordinate(uint d, IntegerType n) const;
+    ExactNumber coordinate(Nat d, DyadicType x) const;
+    ExactNumber subdivision_coordinate(Nat d, DyadicType x) const;
+    ExactNumber subdivision_coordinate(Nat d, IntegerType n) const;
 
-    int subdivision_index(uint d, const ExactNumber& x) const;
-    int subdivision_lower_index(uint d, const LowerNumber& x) const;
-    int subdivision_upper_index(uint d, const UpperNumber& x) const;
+    Int subdivision_index(Nat d, const ExactNumber& x) const;
+    Int subdivision_lower_index(Nat d, const LowerNumber& x) const;
+    Int subdivision_upper_index(Nat d, const UpperNumber& x) const;
 
     Array<DyadicType> index(const ExactPoint& pt) const;
     Array<DyadicType> lower_index(const ExactBox& bx) const;
@@ -113,7 +113,7 @@ class Grid {
     ExactBox box(const GridCell& cell) const;
   private:
     // Create new data
-    void _create(const Vector<RawFloat>& o, const Vector<RawFloat>& l);
+    Void _create(const Vector<RawFloat>& o, const Vector<RawFloat>& l);
   private:
     // Pointer to data. We can test grids for equality using reference semantics since data is a constant.
     std::shared_ptr<Data> _data;

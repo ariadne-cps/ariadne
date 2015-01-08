@@ -99,13 +99,13 @@ template<class I> class Handle {
     const SharedPointer<I> managed_pointer() const { return _ptr; }
     SharedPointer<I> managed_pointer() { make_unique(); return _ptr; }
   protected:
-    Void make_unique() { if(!_ptr.unique()) { _ptr=SharedPointer<I>(_ptr->_copy()); } }
+    void make_unique() { if(!_ptr.unique()) { _ptr=SharedPointer<I>(_ptr->_copy()); } }
   private:
     template<class T, class II> friend T& dynamic_handle_cast(Handle<II>& h);
     template<class T, class II> friend const T& dynamic_handle_cast(const Handle<II>& h);
 };
 
-Void write_error(OutputStream& os, const WritableInterface* w, const char* i, const char* c, const char* t);
+void write_error(OutputStream& os, const WritableInterface* w, const char* i, const char* c, const char* t);
 
 template<class T, class I> const T& dynamic_handle_cast(const Handle<I>& h) {
     const I* i=h.raw_const_pointer();

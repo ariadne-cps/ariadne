@@ -74,7 +74,7 @@
 
 namespace Ariadne {
 
-static const uint verbosity = 0u;
+static const Nat verbosity = 0u;
 
 template<class T> StringType str(const T& t) { StringStream ss; ss<<t; return ss.str(); }
 
@@ -114,7 +114,7 @@ ValidatedVectorFunctionModel make_identity(const BoxSet& bx, const ValidatedFunc
     ExactIntervalVector dom(bx.dimension());
     RawFloatVector errs(bx.dimension());
 
-    for(uint i=0; i!=bx.dimension(); ++i) {
+    for(Nat i=0; i!=bx.dimension(); ++i) {
         ExactInterval dom_lower_ivl=make_exact_interval(bx[i].lower());
         ExactInterval dom_upper_ivl=make_exact_interval(bx[i].upper());
         // Convert to single-precision values
@@ -129,7 +129,7 @@ ValidatedVectorFunctionModel make_identity(const BoxSet& bx, const ValidatedFunc
     }
 
     ValidatedVectorFunctionModel res=fac.create_identity(dom);
-    for(uint i=0; i!=bx.dimension(); ++i) {
+    for(Nat i=0; i!=bx.dimension(); ++i) {
         res[i]=res[i]+ValidatedNumber(-errs[i],+errs[i]);
     }
 
@@ -137,8 +137,8 @@ ValidatedVectorFunctionModel make_identity(const BoxSet& bx, const ValidatedFunc
 };
 
 // TODO: Make more efficient
-inline void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
-    for(uint i=0; i!=r.size(); ++i) { r[i]=a[i]; }
+inline Void assign_all_but_last(MultiIndex& r, const MultiIndex& a) {
+    for(Nat i=0; i!=r.size(); ++i) { r[i]=a[i]; }
 }
 } // namespace
 
@@ -153,7 +153,7 @@ Pair<ValidatedVectorFunctionModel,ValidatedVectorFunctionModel> split(const Vali
 }
 
 
-void Enclosure::_check() const {
+Void Enclosure::_check() const {
     ARIADNE_ASSERT_MSG(this->_space_function.argument_size()==this->domain().size(),*this);
     ARIADNE_ASSERT_MSG(this->_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_time_function<<"\n\n");
     ARIADNE_ASSERT_MSG(this->_dwell_time_function.argument_size()==this->domain().size(),*this<<"\n\n"<<this->_domain<<"\n"<<this->_dwell_time_function<<"\n\n");
@@ -169,16 +169,16 @@ Enclosure::function_factory() const {
 
 /*
 // FIXME: What if solving for constraint leaves domain?
-void Enclosure::_solve_zero_constraints() {
+Void Enclosure::_solve_zero_constraints() {
     this->_check();
     for(List<ValidatedScalarFunctionModel>::Iterator iter=this->_zero_constraints.begin(); iter!=this->_zero_constraints.end(); ) {
         const ExactBox& domain=this->domain();
         const ValidatedTaylorModel& model=iter->model();
-        const uint k=model.argument_size()-1u;
+        const Nat k=model.argument_size()-1u;
         ValidatedTaylorModel zeroth_order(k,this->sweeper());
         ValidatedTaylorModel first_order(k,this->sweeper());
-        bool is_zeroth_order=true;
-        bool is_first_order=true;
+        Bool is_zeroth_order=true;
+        Bool is_first_order=true;
         MultiIndex r(k);
         // Try linear approach in last coefficient
         for(ValidatedTaylorModel::ConstIterator tmiter=model.begin(); tmiter!=model.end(); ++tmiter) {
@@ -235,7 +235,7 @@ Enclosure::Enclosure(const BoundedConstraintSet& set, const ValidatedFunctionMod
     this->_domain=this->_space_function.domain();
     this->_time_function=this->function_factory().create_zero(this->domain());
     this->_dwell_time_function=this->function_factory().create_zero(this->domain());
-    for(uint i=0; i!=set.number_of_constraints(); ++i) {
+    for(Nat i=0; i!=set.number_of_constraints(); ++i) {
         this->new_state_constraint(set.constraint(i));
     }
     this->_reduced_domain=this->_domain;
@@ -248,15 +248,15 @@ Enclosure::Enclosure(const ExactBox& box, const ValidatedFunctionModelFactoryInt
 {
     // Ensure domain elements have nonempty radius
     const float min_float=std::numeric_limits<float>::min();
-    List<uint> proper_coordinates;
+    List<Nat> proper_coordinates;
     proper_coordinates.reserve(box.dimension());
-    for(uint i=0; i!=box.dimension(); ++i) {
+    for(Nat i=0; i!=box.dimension(); ++i) {
         if(box[i].width()>=min_float) {
             proper_coordinates.append(i);
         }
     }
     this->_domain=ExactBox(proper_coordinates.size());
-    for(uint j=0; j!=this->_domain.size(); ++j) {
+    for(Nat j=0; j!=this->_domain.size(); ++j) {
         this->_domain[j]=box[proper_coordinates[j]];
     }
 
@@ -269,9 +269,9 @@ Enclosure::Enclosure(const ExactBox& box, const ValidatedFunctionModelFactoryInt
     this->_space_function=this->function_factory().create_zeros(box.dimension(),this->_domain);
     this->_time_function=this->function_factory().create_zero(this->_domain);
     this->_dwell_time_function=this->function_factory().create_zero(this->domain());
-    uint j=0;
+    Nat j=0;
     proper_coordinates.append(box.dimension());
-    for(uint i=0; i!=box.dimension(); ++i) {
+    for(Nat i=0; i!=box.dimension(); ++i) {
         if(proper_coordinates[j]==i) {
             this->_space_function[i]=this->function_factory().create_coordinate(this->_domain,j);
             ++j;
@@ -303,7 +303,7 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& func
     ARIADNE_ASSERT_MSG(domain.size()==function.argument_size(),"domain="<<domain<<", function="<<function);
     const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
-    for(uint i=0; i!=this->_domain.size(); ++i) {
+    for(Nat i=0; i!=this->_domain.size(); ++i) {
         if(this->_domain[i].width()==0) {
             this->_domain[i]=widen(this->_domain[i]);
         }
@@ -313,7 +313,7 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& func
     this->_time_function=this->function_factory().create_zero(this->_domain);
     this->_dwell_time_function=this->function_factory().create_zero(this->domain());
 
-    for(uint i=0; i!=constraints.size(); ++i) {
+    for(Nat i=0; i!=constraints.size(); ++i) {
         ARIADNE_ASSERT_MSG(domain.size()==constraints[i].function().argument_size(),"domain="<<domain<<", constraint="<<constraints[i]);
         this->new_parameter_constraint(constraints[i]);
     }
@@ -331,7 +331,7 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& spac
     ARIADNE_ASSERT_MSG(domain.size()==time_function.argument_size(),"domain="<<domain<<", time_function="<<time_function);
     const double min=std::numeric_limits<double>::min();
     this->_domain=domain;
-    for(uint i=0; i!=this->_domain.size(); ++i) {
+    for(Nat i=0; i!=this->_domain.size(); ++i) {
         if(this->_domain[i].width()==0) {
             this->_domain[i]=widen(this->_domain[i]);
         }
@@ -341,7 +341,7 @@ Enclosure::Enclosure(const ExactBox& domain, const ValidatedVectorFunction& spac
     this->_time_function=this->function_factory().create(this->_domain,time_function);
     this->_dwell_time_function=this->function_factory().create_zero(this->domain());
 
-    for(uint i=0; i!=constraints.size(); ++i) {
+    for(Nat i=0; i!=constraints.size(); ++i) {
         ARIADNE_ASSERT_MSG(domain.size()==constraints[i].function().argument_size(),"domain="<<domain<<", constraint="<<constraints[i]);
         this->new_parameter_constraint(constraints[i]);
     }
@@ -367,7 +367,7 @@ Tribool Enclosure::satisfies(ValidatedScalarFunction constraint) const
 
 
 /*
-void Enclosure::substitute(uint j, ValidatedScalarFunctionModel v)
+Void Enclosure::substitute(Nat j, ValidatedScalarFunctionModel v)
 {
     ARIADNE_ASSERT_MSG(v.argument_size()+1u==this->number_of_parameters(),
                        "number_of_parameters="<<this->number_of_parameters()<<", variable="<<v);
@@ -382,7 +382,7 @@ void Enclosure::substitute(uint j, ValidatedScalarFunctionModel v)
                        this->_check();
 }
 
-void Enclosure::substitute(uint j, Float c)
+Void Enclosure::substitute(Nat j, Float c)
 {
     this->_space_function = Ariadne::partial_evaluate(this->_space_function,j,c);
     for(List<ValidatedScalarFunctionModel>::Iterator iter=this->_negative_constraints.begin(); iter!=this->_negative_constraints.end(); ++iter) {
@@ -395,21 +395,21 @@ void Enclosure::substitute(uint j, Float c)
 }
 */
 
-void Enclosure::new_parameter(ExactInterval ivl)
+Void Enclosure::new_parameter(ExactInterval ivl)
 {
     this->_domain=product(this->_domain,ivl);
     this->_reduced_domain=product(this->_reduced_domain,ivl);
     this->_space_function=embed(this->_space_function,ivl);
     this->_time_function=embed(this->_time_function,ivl);
     this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
-    for(uint i=0; i!=this->_constraints.size(); ++i) {
+    for(Nat i=0; i!=this->_constraints.size(); ++i) {
         ValidatedConstraintModel& constraint=this->_constraints[i];
         constraint.set_function(embed(constraint.function(),ivl));
     }
     this->_check();
 }
 
-void Enclosure::new_variable(ExactInterval ivl)
+Void Enclosure::new_variable(ExactInterval ivl)
 {
     ValidatedScalarFunctionModel variable_function = this->function_factory().create_identity(ivl);
     this->_domain=product(this->_domain,ivl);
@@ -417,14 +417,14 @@ void Enclosure::new_variable(ExactInterval ivl)
     this->_space_function=combine(this->_space_function,variable_function);
     this->_time_function=embed(this->_time_function,ivl);
     this->_dwell_time_function=embed(this->_dwell_time_function,ivl);
-    for(uint i=0; i!=this->_constraints.size(); ++i) {
+    for(Nat i=0; i!=this->_constraints.size(); ++i) {
         ValidatedConstraintModel& constraint=this->_constraints[i];
         constraint.set_function(embed(constraint.function(),ivl));
     }
     this->_check();
 }
 
-void Enclosure::apply_map(ValidatedVectorFunction map)
+Void Enclosure::apply_map(ValidatedVectorFunction map)
 {
     ARIADNE_ASSERT_MSG(map.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", map="<<map);
     this->_space_function=compose(map,this->_space_function);
@@ -433,7 +433,7 @@ void Enclosure::apply_map(ValidatedVectorFunction map)
 }
 
 /*
-void Enclosure::apply_flow(ValidatedVectorFunction flow, ExactInterval time)
+Void Enclosure::apply_flow(ValidatedVectorFunction flow, ExactInterval time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     this->_space_function=compose(flow,combine(this->_space_function,this->function_factory().create_identity(ExactBox(1u,time))));
@@ -447,7 +447,7 @@ void Enclosure::apply_flow(ValidatedVectorFunction flow, ExactInterval time)
 }
 */
 
-void Enclosure::apply_fixed_evolve_step(ValidatedVectorFunction flow, ExactFloat time)
+Void Enclosure::apply_fixed_evolve_step(ValidatedVectorFunction flow, ExactFloat time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     ValidatedScalarFunctionModel evolve_time_function=this->function_factory().create_constant(this->domain(),ExactFloat(time));
@@ -457,7 +457,7 @@ void Enclosure::apply_fixed_evolve_step(ValidatedVectorFunction flow, ExactFloat
     this->_check();
 }
 
-void Enclosure::apply_space_evolve_step(ValidatedVectorFunction flow, ValidatedScalarFunction time)
+Void Enclosure::apply_space_evolve_step(ValidatedVectorFunction flow, ValidatedScalarFunction time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     ARIADNE_ASSERT_MSG(time.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", time="<<time);
@@ -467,7 +467,7 @@ void Enclosure::apply_space_evolve_step(ValidatedVectorFunction flow, ValidatedS
     this->_dwell_time_function=this->_dwell_time_function + evolve_time_function;
     this->_check();
 }
-void Enclosure::apply_spacetime_evolve_step(ValidatedVectorFunction flow, ValidatedScalarFunction time)
+Void Enclosure::apply_spacetime_evolve_step(ValidatedVectorFunction flow, ValidatedScalarFunction time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     ARIADNE_ASSERT_MSG(time.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", time="<<time);
@@ -478,7 +478,7 @@ void Enclosure::apply_spacetime_evolve_step(ValidatedVectorFunction flow, Valida
     this->_check();
 }
 
-void Enclosure::apply_parameter_evolve_step(ValidatedVectorFunction flow, ValidatedScalarFunction time)
+Void Enclosure::apply_parameter_evolve_step(ValidatedVectorFunction flow, ValidatedScalarFunction time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     ARIADNE_ASSERT_MSG(time.argument_size()==this->number_of_parameters(),"number_of_parameters="<<this->number_of_parameters()<<", time="<<time);
@@ -488,7 +488,7 @@ void Enclosure::apply_parameter_evolve_step(ValidatedVectorFunction flow, Valida
     this->_check();
 }
 
-void Enclosure::apply_finishing_parameter_evolve_step(ValidatedVectorFunction flow, ValidatedScalarFunction finishing_time)
+Void Enclosure::apply_finishing_parameter_evolve_step(ValidatedVectorFunction flow, ValidatedScalarFunction finishing_time)
 {
     ARIADNE_ASSERT_MSG(flow.argument_size()==this->dimension()+1u,"dimension="<<this->dimension()<<", flow="<<flow);
     ARIADNE_ASSERT_MSG(finishing_time.argument_size()==this->number_of_parameters(),"number_of_parameters="<<this->number_of_parameters()<<", finishing_time="<<finishing_time);
@@ -499,7 +499,7 @@ void Enclosure::apply_finishing_parameter_evolve_step(ValidatedVectorFunction fl
     this->_check();
 }
 
-void Enclosure::apply_full_reach_step(ValidatedVectorFunctionModel phi)
+Void Enclosure::apply_full_reach_step(ValidatedVectorFunctionModel phi)
 {
     // xi'(s,t) = phi(xi(s),t) for t in [0,h] with constraint t<=eps(s) where range(eps) in [0,h]
     // tau'(s) = tau(s)+t
@@ -510,7 +510,7 @@ void Enclosure::apply_full_reach_step(ValidatedVectorFunctionModel phi)
     this->apply_parameter_reach_step(phi,elps);
 }
 
-void Enclosure::apply_spacetime_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps)
+Void Enclosure::apply_spacetime_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps)
 {
     ARIADNE_ASSERT(phi.result_size()==this->dimension());
     ARIADNE_ASSERT(phi.argument_size()==this->dimension()+1);
@@ -518,7 +518,7 @@ void Enclosure::apply_spacetime_reach_step(ValidatedVectorFunctionModel phi, Val
     this->apply_parameter_reach_step(phi,compose(elps,join(this->space_function(),this->time_function())));
 }
 
-void Enclosure::apply_parameter_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps)
+Void Enclosure::apply_parameter_reach_step(ValidatedVectorFunctionModel phi, ValidatedScalarFunction elps)
 {
     // xi'(s,t) = phi(xi(s),t) for t in [0,h] with constraint t<=eps(s) where range(eps) in [0,h]
     // tau'(s) = tau(s)+t
@@ -542,14 +542,14 @@ void Enclosure::apply_parameter_reach_step(ValidatedVectorFunctionModel phi, Val
     this->_check();
 }
 
-void Enclosure::new_state_constraint(ValidatedConstraint constraint) {
+Void Enclosure::new_state_constraint(ValidatedConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->dimension());
     this->_is_fully_reduced=false;
     ValidatedScalarFunctionModel composed_function_model=compose(constraint.function(),this->_space_function);
     this->_constraints.append(ValidatedConstraintModel(constraint.lower_bound(),composed_function_model,constraint.upper_bound()));
 }
 
-void Enclosure::new_parameter_constraint(ValidatedConstraint constraint) {
+Void Enclosure::new_parameter_constraint(ValidatedConstraint constraint) {
     ARIADNE_ASSERT(constraint.function().argument_size()==this->number_of_parameters());
     this->_is_fully_reduced=false;
     ValidatedScalarFunctionModel function_model=this->function_factory().create(this->domain(),constraint.function());
@@ -557,31 +557,31 @@ void Enclosure::new_parameter_constraint(ValidatedConstraint constraint) {
 }
 
 
-void Enclosure::new_positive_state_constraint(ValidatedScalarFunction constraint_function) {
+Void Enclosure::new_positive_state_constraint(ValidatedScalarFunction constraint_function) {
     ARIADNE_ASSERT_MSG(constraint_function.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", constraint_function="<<constraint_function);
     this->_is_fully_reduced=false;
     this->_constraints.append(compose(constraint_function,this->space_function())>=0);
 }
 
-void Enclosure::new_negative_state_constraint(ValidatedScalarFunction constraint_function) {
+Void Enclosure::new_negative_state_constraint(ValidatedScalarFunction constraint_function) {
     ARIADNE_ASSERT_MSG(constraint_function.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", constraint_function="<<constraint_function);
     this->_is_fully_reduced=false;
     this->_constraints.append(compose(constraint_function,this->space_function())<=0);
 }
 
-void Enclosure::new_zero_state_constraint(ValidatedScalarFunction constraint_function) {
+Void Enclosure::new_zero_state_constraint(ValidatedScalarFunction constraint_function) {
     ARIADNE_ASSERT_MSG(constraint_function.argument_size()==this->dimension(),"dimension="<<this->dimension()<<", constraint_function="<<constraint_function);
     this->_is_fully_reduced=false;
     this->_constraints.append(compose(constraint_function,this->space_function())==0);
 }
 
-void Enclosure::new_negative_parameter_constraint(ValidatedScalarFunction constraint_function) {
+Void Enclosure::new_negative_parameter_constraint(ValidatedScalarFunction constraint_function) {
     ARIADNE_ASSERT_MSG(constraint_function.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint_function="<<constraint_function);
     this->_is_fully_reduced=false;
     this->_constraints.append(this->function_factory().create(this->domain(),constraint_function)<=0);
 }
 
-void Enclosure::new_zero_parameter_constraint(ValidatedScalarFunction constraint_function) {
+Void Enclosure::new_zero_parameter_constraint(ValidatedScalarFunction constraint_function) {
     ARIADNE_ASSERT_MSG(constraint_function.argument_size()==this->domain().size(),"domain="<<this->domain()<<", constraint_function="<<constraint_function);
     this->_is_fully_reduced=false;
     this->_constraints.append(this->function_factory().create(this->domain(),constraint_function)==0);
@@ -623,7 +623,7 @@ ValidatedScalarFunctionModel const& Enclosure::dwell_time_function() const {
     return this->_dwell_time_function;
 }
 
-uint Enclosure::number_of_constraints() const {
+Nat Enclosure::number_of_constraints() const {
     return this->_constraints.size();
 }
 
@@ -633,19 +633,19 @@ List<ValidatedConstraintModel> const& Enclosure::constraint_models() const {
 
 List<ValidatedConstraint> const Enclosure::constraints() const {
     List<ValidatedConstraint> result;
-    for(uint i=0; i!=this->_constraints.size(); ++i) {
+    for(Nat i=0; i!=this->_constraints.size(); ++i) {
         result.append(ValidatedConstraint(this->_constraints[i].lower_bound(),this->_constraints[i].function(),this->_constraints[i].upper_bound()));
     }
     return result;
 }
 
-ValidatedConstraintModel const& Enclosure::constraint(uint i) const {
+ValidatedConstraintModel const& Enclosure::constraint(Nat i) const {
     return this->_constraints[i];
 }
 
 ValidatedVectorFunctionModel const Enclosure::constraint_function() const {
     ValidatedVectorFunctionModel g=this->function_factory().create_zeros(this->number_of_constraints(),this->domain());
-    for(uint i=0; i!=this->number_of_constraints(); ++i) {
+    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         g.set(i,this->constraint(i).function());
     }
     return g;
@@ -653,17 +653,17 @@ ValidatedVectorFunctionModel const Enclosure::constraint_function() const {
 
 ExactBox const Enclosure::constraint_bounds() const {
     ExactBox c(this->number_of_constraints());
-    for(uint i=0; i!=this->number_of_constraints(); ++i) {
+    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         c[i]=this->constraint(i).bounds();
     }
     return c;
 }
 
-uint Enclosure::dimension() const {
+Nat Enclosure::dimension() const {
     return this->_space_function.result_size();
 }
 
-uint Enclosure::number_of_parameters() const {
+Nat Enclosure::number_of_parameters() const {
     return this->_space_function.argument_size();
 }
 
@@ -700,7 +700,7 @@ Tribool Enclosure::empty() const
     if(this->_constraints.empty()) { return Ariadne::empty(this->domain()); }
     if(!this->_is_fully_reduced) { this->reduce(); this->reduce(); this->reduce(); }
 
-    for(uint i=0; i!=this->_constraints.size(); ++i) {
+    for(Nat i=0; i!=this->_constraints.size(); ++i) {
         UpperInterval constraint_range = Ariadne::apply(this->_constraints[i].function(),this->_reduced_domain);
         if( definitely(disjoint(constraint_range,this->_constraints[i].bounds())) ) {
             if(this->_reduced_domain.size()>0) { this->_reduced_domain[0] = ExactInterval(1,-1); }
@@ -734,20 +734,20 @@ Tribool Enclosure::separated(const ExactBox& bx) const
     if(_reduced_domain.empty()) { return true; }
 
     const ExactBox test_domain=this->_reduced_domain;
-    for(uint i=0; i!=bx.dimension(); ++i) {
+    for(Nat i=0; i!=bx.dimension(); ++i) {
         constraints.append(ValidatedScalarFunctionModel(this->_space_function[i]) >= bx[i].lower());
         constraints.append(ValidatedScalarFunctionModel(this->_space_function[i]) <= bx[i].upper());
     }
     return !contractor.feasible(test_domain,constraints).first;
 }
 
-void Enclosure::reduce() const
+Void Enclosure::reduce() const
 {
     List<ValidatedConstraint> constraints=this->constraints();
     ConstraintSolver contractor=ConstraintSolver();
     contractor.reduce(this->_reduced_domain,constraints);
 
-    for(uint i=0; i!=this->number_of_parameters(); ++i) {
+    for(Nat i=0; i!=this->number_of_parameters(); ++i) {
         double l=this->_reduced_domain[i].lower().get_d();
         double u=this->_reduced_domain[i].upper().get_d();
         if(isnan(l) || isnan(u)) {
@@ -758,9 +758,9 @@ void Enclosure::reduce() const
 
 /*
     // Remove redundant constraints
-    uint j=0;
+    Nat j=0;
     List<ValidatedScalarFunctionModel>& mutable_constraints=const_cast<List<ValidatedScalarFunctionModel>&>(this->_negative_constraints);
-    for(uint i=0; i!=mutable_constraints.size(); ++i) {
+    for(Nat i=0; i!=mutable_constraints.size(); ++i) {
         if(mutable_constraints[i](this->_reduced_domain).upper()<0.0) { redundant_constraints.append(i); }
         else { if(i>j) { mutable_constraints[j]=mutable_constraints[j]; } ++j; }
     }
@@ -773,8 +773,8 @@ void Enclosure::reduce() const
 
 
 Matrix<Float> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, const ExactBox& dom);
-Pair<uint,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBox& domain);
-Pair<uint,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBox& domain);
+Pair<Nat,double> nonlinearity_index_and_error(const ValidatedVectorFunction& function, const ExactBox& domain);
+Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBox& domain);
 
 Pair<Enclosure,Enclosure>
 Enclosure::split_zeroth_order() const
@@ -787,7 +787,7 @@ List<ExactBox>
 Enclosure::splitting_subdomains_zeroth_order() const
 {
     List<ExactBox> result;
-    uint k=this->splitting_index_zeroth_order();
+    Nat k=this->splitting_index_zeroth_order();
     if(k==this->number_of_parameters()) {
         result.append(this->_reduced_domain);
     } else {
@@ -799,18 +799,18 @@ Enclosure::splitting_subdomains_zeroth_order() const
 }
 
 
-uint
+Nat
 Enclosure::splitting_index_zeroth_order() const
 {
     Matrix<UpperInterval> jacobian=Ariadne::jacobian(this->function(),this->reduced_domain());
 
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
-    uint jmax=this->number_of_parameters();
+    Nat jmax=this->number_of_parameters();
     Float max_column_norm=0.0;
-    for(uint j=0; j!=this->number_of_parameters(); ++j) {
+    for(Nat j=0; j!=this->number_of_parameters(); ++j) {
         Float column_norm=0.0;
-        for(uint i=0; i!=this->dimension(); ++i) {
+        for(Nat i=0; i!=this->dimension(); ++i) {
             column_norm+=mag(jacobian[i][j]).raw();
         }
         column_norm *= this->reduced_domain()[j].error().raw();
@@ -831,14 +831,14 @@ Enclosure::split_first_order() const
 
     // Compute the row of the nonlinearities Array which has the highest norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
-    uint imax=nonlinearities.row_size();
-    uint jmax_in_row_imax=nonlinearities.column_size();
+    Nat imax=nonlinearities.row_size();
+    Nat jmax_in_row_imax=nonlinearities.column_size();
     Float max_row_sum=0.0;
-    for(uint i=0; i!=nonlinearities.row_size(); ++i) {
-        uint jmax=nonlinearities.column_size();
+    for(Nat i=0; i!=nonlinearities.row_size(); ++i) {
+        Nat jmax=nonlinearities.column_size();
         Float row_sum=0.0;
         Float max_mag_j_in_i=0.0;
-        for(uint j=0; j!=nonlinearities.column_size(); ++j) {
+        for(Nat j=0; j!=nonlinearities.column_size(); ++j) {
             row_sum+=mag(nonlinearities[i][j]);
             if(mag(nonlinearities[i][j])>max_mag_j_in_i) {
                 jmax=j;
@@ -865,7 +865,7 @@ Enclosure::split() const
 }
 
 Pair<Enclosure,Enclosure>
-Enclosure::split(uint d) const
+Enclosure::split(Nat d) const
 {
     ARIADNE_PRECONDITION(d<this->number_of_parameters());
     ExactBox subdomain1,subdomain2;
@@ -913,9 +913,9 @@ Enclosure::split(uint d) const
 
 
 
-void adjoin_outer_approximation(PavingInterface&, const ExactBox& domain, const ValidatedVectorFunction& function, const ValidatedVectorFunction& negative_constraints, const ValidatedVectorFunction& equality_constraints, int depth);
+Void adjoin_outer_approximation(PavingInterface&, const ExactBox& domain, const ValidatedVectorFunction& function, const ValidatedVectorFunction& negative_constraints, const ValidatedVectorFunction& equality_constraints, Int depth);
 
-void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
+Void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
 {
     PavingInterface& p=paving;
     const ExactBox& d=this->domain();
@@ -941,7 +941,7 @@ void Enclosure::adjoin_outer_approximation_to(PavingInterface& paving, int depth
 }
 
 
-GridTreeSet Enclosure::outer_approximation(const Grid& grid, int depth) const
+GridTreeSet Enclosure::outer_approximation(const Grid& grid, Int depth) const
 {
     GridTreeSet paving(grid);
     this->adjoin_outer_approximation_to(paving,depth);
@@ -950,13 +950,13 @@ GridTreeSet Enclosure::outer_approximation(const Grid& grid, int depth) const
 
 
 
-void Enclosure::affine_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const
+Void Enclosure::affine_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const
 {
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->_reduced_domain,this->_domain),*this);
 
     // Bound the maximum number of splittings allowed to draw a particular set.
     // Note that this gives rise to possibly 2^MAX_DEPTH split sets!!
-    static const int MAXIMUM_DEPTH = 16;
+    static const Int MAXIMUM_DEPTH = 16;
 
     // The basic approximation error when plotting with accuracy=0
     static const double BASIC_ERROR = 0.0625;
@@ -970,10 +970,10 @@ void Enclosure::affine_adjoin_outer_approximation_to(PavingInterface& paving, in
     List<ExactBox> splitdomains;
     unsplitdomains.append(this->_reduced_domain);
     ExactBox splitdomain1,splitdomain2;
-    for(int i=0; i!=MAXIMUM_DEPTH; ++i) {
+    for(Int i=0; i!=MAXIMUM_DEPTH; ++i) {
         //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
-        for(uint n=0; n!=unsplitdomains.size(); ++n) {
-            uint k; double err;
+        for(Nat n=0; n!=unsplitdomains.size(); ++n) {
+            Nat k; double err;
             make_lpair(k,err)=nonlinearity_index_and_error(fg,unsplitdomains[n]);
             //std::cerr<<"  domain="<<unsplitdomains[n]<<" k="<<k<<" err="<<err<<" max_err="<<max_error<<"\n";
             if(k==this->number_of_parameters() || err < max_error) {
@@ -993,7 +993,7 @@ void Enclosure::affine_adjoin_outer_approximation_to(PavingInterface& paving, in
         ARIADNE_WARN("Cannot obtain desired accuracy in outer approximation "<<*this<<" without excessive splitting.");
     }
 
-    for(uint n=0; n!=subdomains.size(); ++n) {
+    for(Nat n=0; n!=subdomains.size(); ++n) {
         this->restriction(subdomains[n]).affine_over_approximation().adjoin_outer_approximation_to(paving,depth);
     }
 }
@@ -1002,7 +1002,7 @@ void Enclosure::affine_adjoin_outer_approximation_to(PavingInterface& paving, in
 
 
 
-void
+Void
 Enclosure::recondition()
 {
     this->uniform_error_recondition();
@@ -1010,15 +1010,15 @@ Enclosure::recondition()
 }
 
 
-void Enclosure::
+Void Enclosure::
 uniform_error_recondition()
 {
     const double MAXIMUM_ERROR = std::numeric_limits<double>::epsilon() * 1024;
-    uint old_number_of_parameters = this->number_of_parameters();
+    Nat old_number_of_parameters = this->number_of_parameters();
 
-    List<uint> large_error_indices;
+    List<Nat> large_error_indices;
 
-    for(uint i=0; i!=this->_space_function.result_size(); ++i) {
+    for(Nat i=0; i!=this->_space_function.result_size(); ++i) {
         Float error=this->_space_function.get(i).error().raw();
         if(error > MAXIMUM_ERROR) {
             large_error_indices.append(i);
@@ -1026,21 +1026,21 @@ uniform_error_recondition()
     }
 
     ExactBox error_domains(large_error_indices.size());
-    for(uint i=0; i!=large_error_indices.size(); ++i) {
+    for(Nat i=0; i!=large_error_indices.size(); ++i) {
         Float error=this->_space_function.get(large_error_indices[i]).error().raw();
         error_domains[i]=ExactInterval(-error,+error);
     }
     error_domains=ExactBox(large_error_indices.size(),ExactInterval(-1,+1));
-    uint k=this->number_of_parameters();
+    Nat k=this->number_of_parameters();
 
     this->_domain=product(this->_domain,error_domains);
     this->_reduced_domain=product(this->_reduced_domain,error_domains);
     this->_space_function=embed(this->_space_function,error_domains);
-    for(uint i=0; i!=this->_constraints.size(); ++i) {
+    for(Nat i=0; i!=this->_constraints.size(); ++i) {
         this->_constraints[i].function()=embed(this->_constraints[i].function(),error_domains);
     }
 
-    for(uint i=0; i!=large_error_indices.size(); ++i) {
+    for(Nat i=0; i!=large_error_indices.size(); ++i) {
         Float error=this->_space_function.get(large_error_indices[i]).error().raw();
         if(error > MAXIMUM_ERROR) {
             this->_space_function[i].set_error(0u);
@@ -1057,14 +1057,14 @@ uniform_error_recondition()
 
 
 
-void
+Void
 Enclosure::kuhn_recondition()
 {
     if(!dynamic_cast<const VectorTaylorFunction*>(&this->space_function().reference())) {
         ARIADNE_WARN("Cannot Kuhn reduce an Enclosure which is not given by TaylorFunctions.");
     }
 
-    static const uint NUMBER_OF_BLOCKS = 2;
+    static const Nat NUMBER_OF_BLOCKS = 2;
 
     const Nat number_of_kept_parameters = (NUMBER_OF_BLOCKS-1)*this->dimension();
     const Nat number_of_discarded_parameters=this->number_of_parameters()-number_of_kept_parameters;
@@ -1078,9 +1078,9 @@ Enclosure::kuhn_recondition()
     const VectorTaylorFunction& function=dynamic_cast<const VectorTaylorFunction&>(this->space_function().reference());
     const Vector<ValidatedTaylorModel>& models = function.models();
     Matrix<Float> dependencies(this->dimension(),this->number_of_parameters());
-    for(uint i=0; i!=dependencies.row_size(); ++i) {
+    for(Nat i=0; i!=dependencies.row_size(); ++i) {
         for(ValidatedTaylorModel::ConstIterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
-            for(uint j=0; j!=dependencies.column_size(); ++j) {
+            for(Nat j=0; j!=dependencies.column_size(); ++j) {
                 if(iter->key()[j]!=0) {
                     dependencies[i][j]+=abs(iter->data()).raw();
                 }
@@ -1088,9 +1088,9 @@ Enclosure::kuhn_recondition()
         }
     }
     Array< Pair<Float,Nat> > column_max_dependencies(this->number_of_parameters());
-    for(uint j=0; j!=dependencies.column_size(); ++j) {
+    for(Nat j=0; j!=dependencies.column_size(); ++j) {
         column_max_dependencies[j] = make_pair(Float(0.0),Nat(j));
-        for(uint i=0; i!=dependencies.row_size(); ++i) {
+        for(Nat i=0; i!=dependencies.row_size(); ++i) {
             column_max_dependencies[j].first=std::max(column_max_dependencies[j].first,dependencies[i][j]);
         }
     }
@@ -1098,13 +1098,13 @@ Enclosure::kuhn_recondition()
 
     Array<Nat> kept_parameters(number_of_kept_parameters);
     Array<Nat> discarded_parameters(number_of_discarded_parameters);
-    for(uint j=0; j!=number_of_kept_parameters; ++j) { kept_parameters[j]=column_max_dependencies[j].second; }
-    for(uint j=0; j!=number_of_discarded_parameters; ++j) { discarded_parameters[j]=column_max_dependencies[number_of_kept_parameters+j].second; }
+    for(Nat j=0; j!=number_of_kept_parameters; ++j) { kept_parameters[j]=column_max_dependencies[j].second; }
+    for(Nat j=0; j!=number_of_discarded_parameters; ++j) { discarded_parameters[j]=column_max_dependencies[number_of_kept_parameters+j].second; }
     std::sort(kept_parameters.begin(),kept_parameters.end());
     std::sort(discarded_parameters.begin(),discarded_parameters.end());
 
     Vector<ValidatedTaylorModel> new_models(models.size(),ValidatedTaylorModel(number_of_kept_parameters+number_of_error_parameters,function.sweeper()));
-    for(uint i=0; i!=this->dimension(); ++i) {
+    for(Nat i=0; i!=this->dimension(); ++i) {
         new_models[i] = Ariadne::recondition(models[i],discarded_parameters,number_of_error_parameters,i);
     }
 
@@ -1122,7 +1122,7 @@ Enclosure::kuhn_recondition()
     this->_reduced_domain = new_reduced_domain;
 
     Enclosure new_set(new_domain,VectorTaylorFunction(new_domain,new_models),this->function_factory());
-    for(uint i=0; i!=this->_constraints.size(); ++i) {
+    for(Nat i=0; i!=this->_constraints.size(); ++i) {
         const ValidatedConstraintModel& constraint=this->_constraints[i];
         ScalarTaylorFunction const& constraint_function=dynamic_cast<const ScalarTaylorFunction&>(constraint.function().reference());
         ValidatedScalarFunctionModel new_constraint_function=ScalarTaylorFunction(new_domain,Ariadne::recondition(constraint_function.model(),discarded_parameters,number_of_error_parameters));
@@ -1142,7 +1142,7 @@ Enclosure::kuhn_recondition()
 
 
 
-void Enclosure::restrict(const ExactBox& subdomain)
+Void Enclosure::restrict(const ExactBox& subdomain)
 {
     ARIADNE_ASSERT_MSG(subdomain.size()==this->number_of_parameters(),"set="<<*this<<", subdomain="<<subdomain);
     ARIADNE_ASSERT_MSG(Ariadne::subset(subdomain,this->domain()),"set.domain()="<<this->domain()<<", subdomain="<<subdomain);
@@ -1170,7 +1170,7 @@ Enclosure Enclosure::restriction(const ExactBox& subdomain) const
 }
 
 
-void Enclosure::draw(CanvasInterface& canvas, const Projection2d& projection) const {
+Void Enclosure::draw(CanvasInterface& canvas, const Projection2d& projection) const {
     switch(DRAWING_METHOD) {
         case BOX_DRAW:
             this->box_draw(canvas,projection);
@@ -1187,7 +1187,7 @@ void Enclosure::draw(CanvasInterface& canvas, const Projection2d& projection) co
     }
 }
 
-void Enclosure::box_draw(CanvasInterface& canvas, const Projection2d& projection) const {
+Void Enclosure::box_draw(CanvasInterface& canvas, const Projection2d& projection) const {
     this->reduce();
     make_exact_box(product(Ariadne::apply(this->_space_function,this->_reduced_domain),Ariadne::apply(this->_time_function,this->_reduced_domain))).draw(canvas,projection);
 }
@@ -1196,7 +1196,7 @@ ValidatedVectorFunctionModel join(const ValidatedVectorFunctionModel& f1, const 
     return join(join(f1,f2),f3);
 }
 
-void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& projection, uint accuracy) const {
+Void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& projection, Nat accuracy) const {
     ARIADNE_ASSERT_MSG(Ariadne::subset(this->_reduced_domain,this->_domain),*this);
 
     ValidatedVectorFunctionModel cached_space_function=this->_space_function;
@@ -1204,7 +1204,7 @@ void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& project
 
     // Bound the maximum number of splittings allowed to draw a particular set.
     // Note that this gives rise to possibly 2^MAX_DEPTH split sets!!
-    static const int MAXIMUM_DEPTH = 16;
+    static const Int MAXIMUM_DEPTH = 16;
 
     // The basic approximation error when plotting with accuracy=0
     static const double BASIC_ERROR = 0.0625;
@@ -1217,9 +1217,9 @@ void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& project
     }
 
     ValidatedVectorFunctionModel fg=this->function_factory().create_zeros(this->dimension()+1u+this->number_of_constraints(),this->domain());
-    for(uint i=0; i!=this->dimension(); ++i) { fg[i]=this->_space_function[i]; }
-    for(uint i=0; i!=1; ++i) { fg[i+this->dimension()]=this->_time_function; }
-    for(uint i=0; i!=this->_constraints.size(); ++i) { fg[i+this->dimension()+1]=this->_constraints[i].function(); }
+    for(Nat i=0; i!=this->dimension(); ++i) { fg[i]=this->_space_function[i]; }
+    for(Nat i=0; i!=1; ++i) { fg[i+this->dimension()]=this->_time_function; }
+    for(Nat i=0; i!=this->_constraints.size(); ++i) { fg[i+this->dimension()+1]=this->_constraints[i].function(); }
 
 //    ValidatedVectorFunctionModel fg=join(this->space_function(),this->time_function(),this->constraint_function());
 
@@ -1228,10 +1228,10 @@ void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& project
     List<ExactBox> splitdomains;
     unsplitdomains.append(this->_reduced_domain);
     ExactBox splitdomain1,splitdomain2;
-    for(int i=0; i!=MAXIMUM_DEPTH; ++i) {
+    for(Int i=0; i!=MAXIMUM_DEPTH; ++i) {
         //std::cerr<<"i="<<i<<"\nsubdomains="<<subdomains<<"\nunsplitdomains="<<unsplitdomains<<"\n\n";
-        for(uint n=0; n!=unsplitdomains.size(); ++n) {
-            uint k; double err;
+        for(Nat n=0; n!=unsplitdomains.size(); ++n) {
+            Nat k; double err;
             make_lpair(k,err)=nonlinearity_index_and_error(fg,unsplitdomains[n]);
             //std::cerr<<"  domain="<<unsplitdomains[n]<<" k="<<k<<" err="<<err<<" max_err="<<max_error<<"\n";
             if(k==this->number_of_parameters() || err < max_error) {
@@ -1251,7 +1251,7 @@ void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& project
         ARIADNE_WARN("Cannot obtain desired accuracy in drawing "<<*this<<" without excessive splitting.");
     }
 
-    for(uint n=0; n!=subdomains.size(); ++n) {
+    for(Nat n=0; n!=subdomains.size(); ++n) {
         try {
             this->restriction(subdomains[n]).affine_over_approximation().draw(canvas,projection);
         } catch(std::runtime_error& e) {
@@ -1264,7 +1264,7 @@ void Enclosure::affine_draw(CanvasInterface& canvas, const Projection2d& project
 };
 
 
-void Enclosure::grid_draw(CanvasInterface& canvas, const Projection2d& projection, uint accuracy) const {
+Void Enclosure::grid_draw(CanvasInterface& canvas, const Projection2d& projection, Nat accuracy) const {
     // TODO: Project to grid first
     this->outer_approximation(Grid(this->dimension()),accuracy).draw(canvas,projection);
 }
@@ -1281,14 +1281,14 @@ template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
 }
 
 template<class T> OutputStream& operator<<(OutputStream& os, const Representation< List<T> >& repr) {
-    const List<T>& lst=*repr.pointer; os << "["; for(uint i=0; i!=lst.size(); ++i) { if(i!=0) { os << ","; } lst[i].repr(os); } os << "]"; return os; }
+    const List<T>& lst=*repr.pointer; os << "["; for(Nat i=0; i!=lst.size(); ++i) { if(i!=0) { os << ","; } lst[i].repr(os); } os << "]"; return os; }
 
 const ValidatedScalarFunctionModel& repr(const ValidatedScalarFunctionModel& f) { return f; }
 const ValidatedVectorFunctionModel& repr(const ValidatedVectorFunctionModel& f) { return f; }
 const List<ValidatedScalarFunctionModel>& repr(const List<ValidatedScalarFunctionModel>& f) { return f; }
 
 OutputStream& Enclosure::write(OutputStream& os) const {
-    const bool LONG_FORMAT=false;
+    const Bool LONG_FORMAT=false;
 
     if(LONG_FORMAT) {
         os << "Enclosure"
@@ -1321,8 +1321,8 @@ Enclosure::affine_approximation() const
     this->_check();
     typedef List<ValidatedScalarFunctionModel>::ConstIterator ConstIterator;
 
-    const uint nx=this->dimension();
-    const uint np=this->number_of_parameters();
+    const Nat nx=this->dimension();
+    const Nat np=this->number_of_parameters();
 
     Enclosure set(*this);
 
@@ -1331,10 +1331,10 @@ Enclosure::affine_approximation() const
 
     Vector<Float> h(nx);
     Matrix<Float> G(nx,np);
-    for(uint i=0; i!=nx; ++i) {
+    for(Nat i=0; i!=nx; ++i) {
         ValidatedScalarFunctionModel component=set._space_function[i];
         h[i]=component.model().value();
-        for(uint j=0; j!=np; ++j) {
+        for(Nat j=0; j!=np; ++j) {
             G[i][j]=component.model().gradient(j);
         }
     }
@@ -1347,7 +1347,7 @@ Enclosure::affine_approximation() const
             iter!=set._negative_constraints.end(); ++iter) {
         const ValidatedScalarFunctionModel& constraint=*iter;
         b=-constraint.model().value();
-        for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
+        for(Nat j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
         result.new_inequality_constraint(a,b);
     }
 
@@ -1355,7 +1355,7 @@ Enclosure::affine_approximation() const
             iter!=set._zero_constraints.end(); ++iter) {
         const ValidatedScalarFunctionModel& constraint=*iter;
         b=-constraint.model().value();
-        for(uint j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
+        for(Nat j=0; j!=np; ++j) { a[j]=constraint.model().gradient(j); }
         result.new_equality_constraint(a,b);
     }
     return result;
@@ -1375,7 +1375,7 @@ ValidatedAffineModel _affine_model(const ValidatedTaylorModel& tm) {
         if(iter->key().degree()>=2) { result._e+=abs(iter->data()); }
         else if(iter->key().degree()==0) {result. _c=iter->data(); }
         else {
-            for(uint j=0; j!=tm.argument_size(); ++j) {
+            for(Nat j=0; j!=tm.argument_size(); ++j) {
                 if(iter->key()[j]!=0) { result._g[j]=iter->data(); break; }
             }
         }
@@ -1392,26 +1392,26 @@ Enclosure::affine_over_approximation() const
     this->_check();
     typedef List<ScalarTaylorFunction>::ConstIterator ConstIterator;
 
-    const uint nx=this->dimension();
-    const uint nc=this->number_of_constraints();
-    const uint np=this->number_of_parameters();
+    const Nat nx=this->dimension();
+    const Nat nc=this->number_of_constraints();
+    const Nat np=this->number_of_parameters();
 
     AffineSweeper affine_sweeper;
     VectorTaylorFunction space_function=dynamic_cast<const VectorTaylorFunction&>(this->_space_function.reference());
     ScalarTaylorFunction time_function=dynamic_cast<const ScalarTaylorFunction&>(this->_time_function.reference());
     List<ScalarTaylorFunction> constraint_functions;
-    for(uint i=0; i!=nc; ++i) { constraint_functions.append(dynamic_cast<const ScalarTaylorFunction&>(this->_constraints[i].function().reference())); }
+    for(Nat i=0; i!=nc; ++i) { constraint_functions.append(dynamic_cast<const ScalarTaylorFunction&>(this->_constraints[i].function().reference())); }
 
     //std::cerr<<"\n"<<space_function<<"\n"<<time_function<<"\n"<<constraint_functions<<"\n\n";
 
     Vector< ValidatedAffineModel > affine_function_models(space_function.result_size());
-    for(uint i=0; i!=space_function.result_size(); ++i) { affine_function_models[i]=affine_model(space_function.models()[i]); }
+    for(Nat i=0; i!=space_function.result_size(); ++i) { affine_function_models[i]=affine_model(space_function.models()[i]); }
     //affine_function_models[space_function.result_size()]=affine_model(time_function.model());
 
     ValidatedAffineConstrainedImageSet result(affine_function_models);
     //std::cerr<<"\n"<<*this<<"\n"<<result<<"\n\n";
 
-    for(uint i=0; i!=this->number_of_constraints(); ++i) {
+    for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         ValidatedTaylorModel const& constraint_model=constraint_functions[i].model();
         ValidatedAffineModel affine_constraint_model=affine_model(constraint_model);
         ExactInterval constraint_bound=this->constraint(i).bounds();

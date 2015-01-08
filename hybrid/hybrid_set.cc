@@ -54,19 +54,19 @@ Orbit<HybridPoint>::Orbit(const HybridPoint& hpt)
     : _curves_ptr(new std::vector<HybridInterpolatedCurve>(1u,HybridInterpolatedCurve(hpt.location(),hpt.space(),InterpolatedCurve(0,hpt.point()))))
 { }
 
-uint
+Nat
 Orbit<HybridPoint>::size() const
 {
     return this->_curves_ptr->size();
 }
 
 const InterpolatedCurve&
-Orbit<HybridPoint>::curve(uint m) const
+Orbit<HybridPoint>::curve(Nat m) const
 {
     return (*this->_curves_ptr)[m].continuous_set();
 }
 
-void
+Void
 Orbit<HybridPoint>::insert(HybridTime ht, const HybridPoint& hpt)
 {
     ARIADNE_ASSERT(ht.discrete_time()<=this->size());
@@ -80,9 +80,9 @@ Orbit<HybridPoint>::insert(HybridTime ht, const HybridPoint& hpt)
     }
 }
 
-void Orbit<HybridPoint>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
+Void Orbit<HybridPoint>::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axes) const {
     const Orbit<HybridPoint>& orbit=*this;
-    for(uint i=0; i!=orbit._curves_ptr->size(); ++i) {
+    for(Nat i=0; i!=orbit._curves_ptr->size(); ++i) {
         HybridInterpolatedCurve const& hcurve=this->_curves_ptr->at(i);
         if(locations.empty() || locations.contains(hcurve.location())) {
             RealSpace const& space=hcurve.space();
@@ -161,7 +161,7 @@ final() const
 
 
 
-void Orbit<HybridEnclosure>::draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
+Void Orbit<HybridEnclosure>::draw(CanvasInterface& c, const Set<DiscreteLocation>& l, const Variables2d& v) const {
     this->reach().draw(c,l,v);
 }
 
@@ -184,7 +184,7 @@ operator<<(OutputStream& os, const Orbit< HybridEnclosure >& orb)
 
 Map<RealVariable,IntervalSet> make_map(const List<RealVariableInterval>& b) {
     Map<RealVariable,IntervalSet> res;
-    for(uint i=0; i!=b.size(); ++i) {
+    for(Nat i=0; i!=b.size(); ++i) {
         res.insert(b[i].variable(),IntervalSet(b[i].lower(),b[i].upper()));
     }
     return res;
@@ -193,7 +193,7 @@ Map<RealVariable,IntervalSet> make_map(const List<RealVariableInterval>& b) {
 HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& x)
     : HybridBasicSet<ExactPoint>(q,make_list(x.keys()),ExactPoint(x.size()))
 {
-    uint i=0;
+    Nat i=0;
     for(Map<Identifier,Real>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
         this->point()[i]=numeric_cast<ExactFloat>(iter->second);
     }
@@ -202,7 +202,7 @@ HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& 
 HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,ExactFloat>& x)
     : HybridBasicSet<ExactPoint>(q,make_list(x.keys()),ExactPoint(x.size()))
 {
-    uint i=0;
+    Nat i=0;
     for(Map<Identifier,ExactFloat>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
         this->point()[i]=iter->second;
     }
@@ -211,7 +211,7 @@ HybridPoint::HybridPoint(const DiscreteLocation& q, const Map<Identifier,ExactFl
 HybridPoint::HybridPoint(const DiscreteLocation& q, const List<RealConstantAssignment>& x)
     : HybridBasicSet<ExactPoint>(q,left_hand_sides(x),ExactPoint(x.size()))
 {
-    uint i=0;
+    Nat i=0;
     for(List<RealConstantAssignment>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter, ++i) {
         this->point()[i]=numeric_cast<ExactFloat>(iter->right_hand_side());
     }
@@ -219,7 +219,7 @@ HybridPoint::HybridPoint(const DiscreteLocation& q, const List<RealConstantAssig
 
 Map<RealVariable,ExactFloat> HybridPoint::values() const {
     Map<RealVariable,ExactFloat> r;
-    for(uint i=0; i!=this->space().dimension(); ++i) {
+    for(Nat i=0; i!=this->space().dimension(); ++i) {
         r.insert(this->space()[i],this->point()[i]);
     }
     return r;
@@ -228,7 +228,7 @@ Map<RealVariable,ExactFloat> HybridPoint::values() const {
 
 
 
-template<class BS> void draw(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
+template<class BS> Void draw(CanvasInterface& canvas, const DiscreteLocation& location, const Variables2d& axes, const HybridBasicSet<BS>& set)
 {
     if(set.location()==location) {
         Projection2d projection(set.continuous_set().dimension(),set.space().index(axes.x_variable()),set.space().index(axes.y_variable()));
@@ -236,13 +236,13 @@ template<class BS> void draw(CanvasInterface& canvas, const DiscreteLocation& lo
     }
 }
 
-void HybridBox::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {
+Void HybridBox::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {
     if(q.empty() || q.contains(this->location())) {
         this->continuous_set().draw(c,projection(this->space(),p));
     }
 }
 
-void HybridGridTreeSet::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axis_variables) const {
+Void HybridGridTreeSet::draw(CanvasInterface& canvas, const Set<DiscreteLocation>& locations, const Variables2d& axis_variables) const {
     for(LocationsConstIterator loc_iter=this->locations_begin(); loc_iter!=this->locations_end(); ++loc_iter) {
         if(locations.empty() || locations.contains(loc_iter->first)) {
             RealSpace const& space=this->space(loc_iter->first);
@@ -418,7 +418,7 @@ OutputStream& HybridBoundedConstraintSet::write(OutputStream& os) const {
     return os << "HybridBoundedConstraintSet( "<< this->_sets << " )";
 }
 
-void HybridBoundedConstraintSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {
+Void HybridBoundedConstraintSet::draw(CanvasInterface& c, const Set<DiscreteLocation>& q, const Variables2d& p) const {
     if(q.empty() || q.contains(this->location())) {
         Set<RealVariable> variables=this->variables(this->location());
         RealSpace space(List<RealVariable>(variables.begin(),variables.end()));

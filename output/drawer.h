@@ -33,7 +33,7 @@
 
 namespace Ariadne {
 
-typedef int Int;
+typedef Int Int;
 
 struct Depth { Int _d; explicit Depth(Int d) : _d(d) { } operator Int() const { return _d; } };
 

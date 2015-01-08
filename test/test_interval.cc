@@ -46,25 +46,25 @@ class TestInterval
     typedef ExactInterval I;
     typedef Float R;
   public:
-    void test();
+    Void test();
   private:
-    void test_concept();
-    void test_constructors();
-    void test_input();
-    void test_class();
-    void test_comparison();
-    void test_correct_rounded_arithmetic();
-    void test_accurate_rounded_arithmetic();
-    void test_exact_rounded_arithmetic();
-    void test_aliasing();
-    void test_monotone_functions();
-    void test_trigonometric_functions();
-    void test_geometric_predicates();
-    void regression_tests();
+    Void test_concept();
+    Void test_constructors();
+    Void test_input();
+    Void test_class();
+    Void test_comparison();
+    Void test_correct_rounded_arithmetic();
+    Void test_accurate_rounded_arithmetic();
+    Void test_exact_rounded_arithmetic();
+    Void test_aliasing();
+    Void test_monotone_functions();
+    Void test_trigonometric_functions();
+    Void test_geometric_predicates();
+    Void regression_tests();
 };
 
 
-void
+Void
 TestInterval::test()
 {
     ARIADNE_TEST_CALL(test_concept());
@@ -81,11 +81,11 @@ TestInterval::test()
     ARIADNE_TEST_CALL(regression_tests());
 }
 
-void
+Void
 TestInterval::test_concept()
 {
-    int n=1;
-    uint m=1;
+    Int n=1;
+    Nat m=1;
     double d=1;
     ExactFloat x=1;
     Float a,b;
@@ -136,7 +136,7 @@ TestInterval::test_concept()
 
 // Test that interval arithmetic is rounded correctly,
 // without paying attention to accuracy issues.
-void
+Void
 TestInterval::test_correct_rounded_arithmetic()
 {
     UpperInterval onethird=UpperInterval(1)/UpperInterval(3);
@@ -148,7 +148,7 @@ TestInterval::test_correct_rounded_arithmetic()
 
 
 // Test that interval arithmetic gives the most accurate rounded values
-void
+Void
 TestInterval::test_accurate_rounded_arithmetic()
 {
     const double min=std::numeric_limits<double>::min();
@@ -179,7 +179,7 @@ TestInterval::test_accurate_rounded_arithmetic()
 
 
 // Test that interval arithmetic gives exact values if possible
-void
+Void
 TestInterval::test_exact_rounded_arithmetic()
 {
     ARIADNE_TEST_EQUAL(UpperInterval(5,7)+UpperInterval(2,4),UpperInterval(7,11));
@@ -264,7 +264,7 @@ TestInterval::test_exact_rounded_arithmetic()
 
 
 
-void
+Void
 TestInterval::test_constructors()
 {
     typedef ExactInterval I;
@@ -281,7 +281,7 @@ TestInterval::test_constructors()
     if(ivld2.lower()>ivld2.upper()) {
         ARIADNE_TEST_WARN("ExactInterval default constructor returns an empty set.");
     } else {
-        ARIADNE_TEST_ASSERT((bool)(ivld2==ExactInterval(zero,zero)));
+        ARIADNE_TEST_ASSERT((Bool)(ivld2==ExactInterval(zero,zero)));
     }
 
     // Constructor with approximations
@@ -319,7 +319,7 @@ TestInterval::test_constructors()
     ARIADNE_TEST_ASSERT(ivld7.lower()==+inf); ARIADNE_TEST_ASSERT(ivld7.upper()==-inf);
 }
 
-void TestInterval::test_class()
+Void TestInterval::test_class()
 {
     // Test lower, upper, midpoint, radius, width
 
@@ -345,7 +345,7 @@ void TestInterval::test_class()
     ARIADNE_TEST_EQUAL(ExactInterval(div_down(-1,3),div_up(2,3)).width().raw(),1.000000000000000222);
 }
 
-void TestInterval::test_input()
+Void TestInterval::test_input()
 {
     ExactInterval ivl1,ivl2;
     string input("[1.125,2.25] [0.4,0.6]");
@@ -366,7 +366,7 @@ void TestInterval::test_input()
     }
 }
 
-void TestInterval::test_comparison() {
+Void TestInterval::test_comparison() {
     // FIXME: If using Boost style interval tests, uncomment the line below
     // and comment out the line after
     //ARIADNE_TEST_ASSERT(indeterminate(ivld1==ivld2));
@@ -380,7 +380,7 @@ void TestInterval::test_comparison() {
     ARIADNE_TEST_ASSERT(ivl1ref.lower().raw()==Float(5.25));
 }
 
-void TestInterval::test_aliasing() {
+Void TestInterval::test_aliasing() {
 
     Float x2=1.5;
     Float x3=2.25;
@@ -400,7 +400,7 @@ void TestInterval::test_aliasing() {
     ivl1=ivl3; ivl1=x2/ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,UpperInterval(x2/ivl3));
 }
 
-void TestInterval::test_monotone_functions()
+Void TestInterval::test_monotone_functions()
 {
 
     UpperInterval two(2.0);
@@ -429,7 +429,7 @@ void TestInterval::test_monotone_functions()
     ARIADNE_TEST_COMPARE(loge.upper(),<,1.000000000002);
 }
 
-void TestInterval::test_trigonometric_functions()
+Void TestInterval::test_trigonometric_functions()
 {
     try {
         UpperInterval x(6.283185307179586,6.283185307179587);
@@ -455,7 +455,7 @@ void TestInterval::test_trigonometric_functions()
 
 }
 
-void TestInterval::test_geometric_predicates()
+Void TestInterval::test_geometric_predicates()
 {
     ExactInterval empty_interval; empty_interval.set_empty();
 
@@ -512,7 +512,7 @@ void TestInterval::test_geometric_predicates()
     ARIADNE_TEST_BINARY_PREDICATE(inside,empty_interval,ExactInterval(0.25,0.75));
 }
 
-void TestInterval::regression_tests() {
+Void TestInterval::regression_tests() {
 
     // Regression test; fails dramatically on certain types of rounding
     {
@@ -529,7 +529,7 @@ void TestInterval::regression_tests() {
 }
 
 
-int main() {
+Int main() {
     std::cout<<std::setprecision(20);
     std::cerr<<std::setprecision(20);
 

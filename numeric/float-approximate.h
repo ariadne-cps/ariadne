@@ -37,9 +37,6 @@
 #include "numeric/rounding.h"
 #include "numeric/float.h"
 
-// Simplifying typedef for unsigned integer type
-typedef unsigned int uint;
-
 namespace Ariadne {
 
 class Real;
@@ -76,7 +73,7 @@ class ExactFloat;
 //! \sa ExactInterval, Real, ExactFloat
 class ApproximateFloat {
   public:
-    static uint output_precision;
+    static Nat output_precision;
     Float a;
   public:
     typedef ApproximateFloat NumericType;
@@ -114,7 +111,7 @@ class ApproximateFloat {
     Float& raw() { return this->a; }
     //! \brief An approximation by a built-in double-precision floating-point number.
     double get_d() const { return this->a.get_d(); }
-    static void set_output_precision(uint p) { output_precision=p; }
+    static Void set_output_precision(Nat p) { output_precision=p; }
 };
 
 
@@ -124,8 +121,8 @@ inline InputStream& operator>>(InputStream& is, ApproximateFloat& x) {
     Float a; is >> a; x=ApproximateFloat(a); return is; }
 
 template<class R, class A> inline R integer_cast(const A& a);
-template<> inline int integer_cast(const ApproximateFloat& x) { return static_cast<int>(x.a.dbl); }
-template<> inline uint integer_cast(const ApproximateFloat& x) { return static_cast<uint>(x.a.dbl); }
+template<> inline Int integer_cast(const ApproximateFloat& x) { return static_cast<Int>(x.a.dbl); }
+template<> inline Nat integer_cast(const ApproximateFloat& x) { return static_cast<Nat>(x.a.dbl); }
 
 // Discontinuous integer-valued functions
 //! \related ApproximateFloat \brief The next lowest integer, represented as a floating-point type.
@@ -165,10 +162,10 @@ inline ApproximateFloat div(ApproximateFloat x, ApproximateFloat y) { return App
 
 //! \related ApproximateFloat \brief The positive integer power operator \c x^m.
 //! Note that there is no power operator in C++, so the named version must be used. In Python, the power operator is \c x**m.
-inline ApproximateFloat pow(ApproximateFloat x, uint m) { return ApproximateFloat(pow_approx(x.a,m)); }
+inline ApproximateFloat pow(ApproximateFloat x, Nat m) { return ApproximateFloat(pow_approx(x.a,m)); }
 //! \related ApproximateFloat \brief The integer power operator \c x^n.
 //! Note that there is no power operator in C++, so the named version must be used. In Python, the power operator is \c x**n.
-inline ApproximateFloat pow(ApproximateFloat x, int n) { return ApproximateFloat(pow_approx(x.a,n)); }
+inline ApproximateFloat pow(ApproximateFloat x, Int n) { return ApproximateFloat(pow_approx(x.a,n)); }
 
 // Standard algebraic and transcendental functions
 //! \related ApproximateFloat \brief The square-root function. Not guaranteed to be correctly rounded.
@@ -207,9 +204,9 @@ inline ApproximateFloat operator*(const ApproximateFloat& x1, const ApproximateF
 //! \related ApproximateFloat \brief The division operator. Guaranteed to respect the current rounding mode.
 inline ApproximateFloat operator/(const ApproximateFloat& x1, const ApproximateFloat& x2) { return div(x1,x2); }
 
-//template<class N, typename std::enable_if<std::is_integral<N>::value,int>::type=0>
+//template<class N, typename std::enable_if<std::is_integral<N>::value,Int>::type=0>
 //    inline ApproximateFloat operator/(N n1, const ApproximateFloat& x2) { return div(ApproximateFloat(n1),x2); };
-//template<class N, typename std::enable_if<std::is_integral<N>::value,int>::type=0>
+//template<class N, typename std::enable_if<std::is_integral<N>::value,Int>::type=0>
 //    inline ApproximateFloat operator/(const ApproximateFloat& x1, N n2) { return div(x1,ApproximateFloat(n2)); };
 
 //! \related ApproximateFloat \brief The in-place addition operator. Guaranteed to respect the current rounding mode.
@@ -223,17 +220,17 @@ inline ApproximateFloat& operator/=(ApproximateFloat& x, const ApproximateFloat&
 
 // Comparison operators
 //! \related ApproximateFloat \brief The equality operator.
-inline bool operator==(const ApproximateFloat& x1, const ApproximateFloat& x2) { return x1.a==x2.a; }
+inline Bool operator==(const ApproximateFloat& x1, const ApproximateFloat& x2) { return x1.a==x2.a; }
 //! \related ApproximateFloat \brief The inequality operator.
-inline bool operator!=(const ApproximateFloat& x1, const ApproximateFloat& x2) { return x1.a!=x2.a; }
+inline Bool operator!=(const ApproximateFloat& x1, const ApproximateFloat& x2) { return x1.a!=x2.a; }
 //! \related ApproximateFloat \brief The less-than-or-equal-to comparison operator.
-inline bool operator<=(const ApproximateFloat& x1, const ApproximateFloat& x2) { return x1.a<=x2.a; }
+inline Bool operator<=(const ApproximateFloat& x1, const ApproximateFloat& x2) { return x1.a<=x2.a; }
 //! \related ApproximateFloat \brief The greater-than-or-equal-to comparison operator.
-inline bool operator>=(const ApproximateFloat& x1, const ApproximateFloat& x2) { return x1.a>=x2.a; }
+inline Bool operator>=(const ApproximateFloat& x1, const ApproximateFloat& x2) { return x1.a>=x2.a; }
 //! \related ApproximateFloat \brief The less-than comparison operator.
-inline bool operator< (const ApproximateFloat& x1, const ApproximateFloat& x2) { return x1.a< x2.a; }
+inline Bool operator< (const ApproximateFloat& x1, const ApproximateFloat& x2) { return x1.a< x2.a; }
 //! \related ApproximateFloat \brief The greater-than comparison operator.
-inline bool operator> (const ApproximateFloat& x1, const ApproximateFloat& x2) { return x1.a> x2.a; }
+inline Bool operator> (const ApproximateFloat& x1, const ApproximateFloat& x2) { return x1.a> x2.a; }
 
 
 } // namespace Ariadne

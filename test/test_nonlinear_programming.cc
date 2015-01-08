@@ -46,7 +46,7 @@ class TestOptimiser
     TestOptimiser(const OptimiserInterface& opt)
         : optimiser(opt.clone()) { }
 
-    void test() {
+    Void test() {
         ARIADNE_TEST_CALL(test_feasibility_check());
         ARIADNE_TEST_CALL(test_unconstrained_optimisation());
         ARIADNE_TEST_CALL(test_constrained_optimisation());
@@ -56,7 +56,7 @@ class TestOptimiser
         ARIADNE_TEST_CALL(test_nonlinear_equality_feasibility());
     }
 
-    void test_unconstrained_optimisation() {
+    Void test_unconstrained_optimisation() {
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         EffectiveScalarFunction x0s = sqr(x[0]);
@@ -75,7 +75,7 @@ class TestOptimiser
         //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
     }
 
-    void test_equality_constrained_optimisation() {
+    Void test_equality_constrained_optimisation() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         EffectiveScalarFunction f=(sqr(x[0])+sqr(x[1]));
         ARIADNE_TEST_PRINT(f);
@@ -92,7 +92,7 @@ class TestOptimiser
         ARIADNE_TEST_LESS(norm(g(x_optimal)),required_accuracy);
     }
 
-    void test_constrained_optimisation() {
+    Void test_constrained_optimisation() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(3);
         EffectiveScalarFunction x0s = sqr(x[0]);
         EffectiveScalarFunction f = x0s*(12+x0s*(Decimal(6.3)+x0s))+6*x[1]*(x[1]-x[0])+x[2];
@@ -112,7 +112,7 @@ class TestOptimiser
         //ARIADNE_TEST_LESS(norm(x_optimal),required_accuracy);
     }
 
-    void test_mixed_constrained_optimisation() {
+    Void test_mixed_constrained_optimisation() {
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(3);
         EffectiveScalarFunction f(+(sqr(x[0])+sqr(x[1])+x[1]*x[2]));
         ARIADNE_TEST_PRINT(f);
@@ -130,7 +130,7 @@ class TestOptimiser
         ARIADNE_TEST_LESS(norm(h(x_optimal)),required_accuracy);
     }
 
-    void test_linear_feasibility() {
+    Void test_linear_feasibility() {
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         EffectiveVectorFunction g=EffectiveVectorFunction(1u, 2*x[0]+x[1]);
@@ -145,7 +145,7 @@ class TestOptimiser
         ARIADNE_TEST_ASSERT(!optimiser->feasible(D,g,C));
     }
 
-    void test_nonlinear_feasibility() {
+    Void test_nonlinear_feasibility() {
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         EffectiveVectorFunction g = {2*x[0]+x[1]+x[0]*x[1]/8};
@@ -160,7 +160,7 @@ class TestOptimiser
         ARIADNE_TEST_ASSERT(!optimiser->feasible(D,g,C));
     }
 
-    void test_nonlinear_equality_feasibility() {
+    Void test_nonlinear_equality_feasibility() {
         // Test the feasibility of x0>0, x1>0, 2x1+x2<1 using box [0,2]x[0,2]
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         EffectiveVectorFunction h = { 2*x[0]-x[1]+x[0]*x[1]/8 };
@@ -171,7 +171,7 @@ class TestOptimiser
         ARIADNE_TEST_ASSERT(optimiser->feasible(D,h,C));
     }
 
-    void test_feasibility_check() {
+    Void test_feasibility_check() {
         EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
         ARIADNE_TEST_CONSTRUCT( EffectiveVectorFunction, g, ({sqr(x[0])+2*sqr(x[1])-1}) );
         ARIADNE_TEST_CONSTRUCT( ExactIntervalVector, D, ({{-1.0, 1.0},{-1.0,1.0}}) );
@@ -194,8 +194,8 @@ class TestOptimiser
 
 };
 
-int main(int argc, const char* argv[]) {
-    uint optimiser_verbosity = get_verbosity(argc,argv);
+Int main(Int argc, const char* argv[]) {
+    Nat optimiser_verbosity = get_verbosity(argc,argv);
 
     NonlinearInfeasibleInteriorPointOptimiser nlio;
     nlio.verbosity=optimiser_verbosity;

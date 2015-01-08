@@ -31,14 +31,14 @@ using namespace Ariadne;
 // Declare the type to be used for the system evolution
 typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
 
-int main(int argc, char** argv)
+Int main(Int argc, char** argv)
 {
-    uint verbosity = 0;
+    Nat verbosity = 0;
     if(argc>1) { verbosity=atoi(argv[1]); }
 
     // Set up the evolution parameters and grid
     double time(5.0);
-    int steps = 3;
+    Int steps = 3;
     Real step_size(1e-1);
 
 

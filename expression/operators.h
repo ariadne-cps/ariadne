@@ -48,7 +48,7 @@ typedef bool Bool;
 typedef unsigned int Nat;
 typedef int Int;
 
-typedef OutputStream OutputStream;
+typedef std::ostream OutputStream;
 
 class String;
 class Boolean;

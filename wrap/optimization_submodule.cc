@@ -57,10 +57,10 @@ python_compute_basis(const Matrix<X>& A) {
 }
 
 template<class T> T get(const Array<T>& ary, SizeType i) { return ary[i]; }
-template<class T> void set(Array<T>& ary, SizeType i, const T& t) { ary[i]=t; }
+template<class T> Void set(Array<T>& ary, SizeType i, const T& t) { ary[i]=t; }
 
 template<class T>
-void export_internal_array(const char* name)
+Void export_internal_array(const char* name)
 {
     class_< Array<T> > array_class(name,no_init);
     array_class.def("__len__", &Array<T>::size);
@@ -69,7 +69,7 @@ void export_internal_array(const char* name)
 }
 
 
-void export_variable_type()
+Void export_variable_type()
 {
     typedef Array<Slackness> SlacknessArray;
 
@@ -79,7 +79,7 @@ void export_variable_type()
     variable_enum.value("UPPER", UPPER);
 }
 
-void export_constraint()
+Void export_constraint()
 {
     class_<EffectiveConstraint> effective_nonlinear_constraint_class("EffectiveConstraint",init<Real,EffectiveScalarFunction,EffectiveNumber>());
     effective_nonlinear_constraint_class.def(self_ns::str(self));
@@ -93,7 +93,7 @@ void export_constraint()
     validated_nonlinear_constraint_class.def(self_ns::str(self));
 }
 
-void export_interior_point_solver()
+Void export_interior_point_solver()
 {
     to_python< Ariadne::Tuple< Vector<Float>, Vector<Float>, Vector<Float> > >();
 
@@ -104,27 +104,27 @@ void export_interior_point_solver()
 }
 
 
-void export_constraint_solver()
+Void export_constraint_solver()
 {
     class_<ConstraintSolver> constraint_solver_class("ConstraintSolver", init<>());
-    constraint_solver_class.def("hull_reduce", (bool(ConstraintSolver::*)(UpperBox&,const ValidatedScalarFunctionInterface&,const ExactInterval&)const) &ConstraintSolver::hull_reduce);
-    constraint_solver_class.def("box_reduce", (bool(ConstraintSolver::*)(UpperBox&,const ValidatedScalarFunctionInterface&,const ExactInterval&,uint)const) &ConstraintSolver::box_reduce);
-    constraint_solver_class.def("monotone_reduce", (bool(ConstraintSolver::*)(UpperBox&,const ValidatedScalarFunctionInterface&,const ExactInterval&,uint)const) &ConstraintSolver::monotone_reduce);
-    constraint_solver_class.def("reduce", (bool(ConstraintSolver::*)(UpperBox&,const List<ValidatedConstraint>&)const) &ConstraintSolver::reduce);
-    constraint_solver_class.def("reduce", (bool(ConstraintSolver::*)(UpperBox&,const ValidatedVectorFunction&,const ExactBox&)const) &ConstraintSolver::reduce);
+    constraint_solver_class.def("hull_reduce", (Bool(ConstraintSolver::*)(UpperBox&,const ValidatedScalarFunctionInterface&,const ExactInterval&)const) &ConstraintSolver::hull_reduce);
+    constraint_solver_class.def("box_reduce", (Bool(ConstraintSolver::*)(UpperBox&,const ValidatedScalarFunctionInterface&,const ExactInterval&,Nat)const) &ConstraintSolver::box_reduce);
+    constraint_solver_class.def("monotone_reduce", (Bool(ConstraintSolver::*)(UpperBox&,const ValidatedScalarFunctionInterface&,const ExactInterval&,Nat)const) &ConstraintSolver::monotone_reduce);
+    constraint_solver_class.def("reduce", (Bool(ConstraintSolver::*)(UpperBox&,const List<ValidatedConstraint>&)const) &ConstraintSolver::reduce);
+    constraint_solver_class.def("reduce", (Bool(ConstraintSolver::*)(UpperBox&,const ValidatedVectorFunction&,const ExactBox&)const) &ConstraintSolver::reduce);
 }
 
 
 
 template<class X>
-void export_simplex_solver()
+Void export_simplex_solver()
 {
     typedef Array<SizeType> SizeArray;
 
     to_python< std::pair< Array<SizeType>, Matrix<X> > >();
 
     class_< SimplexSolver<X> > simplex_solver_class("SimplexSolver", init<>());
-    simplex_solver_class.def("lpstep",(bool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,Array<Slackness>& ,SizeArray&,Matrix<X>&,Vector<X>&)const) &SimplexSolver<X>::lpstep);
+    simplex_solver_class.def("lpstep",(Bool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&,Array<Slackness>& ,SizeArray&,Matrix<X>&,Vector<X>&)const) &SimplexSolver<X>::lpstep);
 
 
     simplex_solver_class.def("feasible",(Tribool(SimplexSolver<X>::*)(const Vector<X>&,const Vector<X>&,const Matrix<X>&,const Vector<X>&)const) &SimplexSolver<X>::feasible);
@@ -136,7 +136,7 @@ void export_simplex_solver()
 }
 
 
-void optimization_submodule() {
+Void optimization_submodule() {
     export_variable_type();
     export_constraint();
     export_array<SizeType>("SizeArray");

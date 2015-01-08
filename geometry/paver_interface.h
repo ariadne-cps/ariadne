@@ -30,8 +30,8 @@
 
 namespace Ariadne {
 
-typedef void Void;
-typedef int Int;
+typedef Void Void;
+typedef Int Int;
 class ExactInterval;
 template<class X> class Vector;
 template<class X> class VectorFunctionInterface;

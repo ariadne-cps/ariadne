@@ -149,7 +149,7 @@ template<class X> class NumberWrapper
         return _heap_move_number(neg(_cast(*this))); }
     virtual NumberInterface* _rec() const {
         return _heap_move_number(rec(_cast(*this))); }
-    virtual NumberInterface* _pow(int n) const {
+    virtual NumberInterface* _pow(Int n) const {
         return _heap_move_number(pow(_cast(*this),n)); }
     virtual NumberInterface* _add(NumberInterface const& y) const {
         const NumberWrapper<X>* p=dynamic_cast<const NumberWrapper<X>*>(&y);
@@ -224,13 +224,13 @@ template<class X> class NumberWrapper
     virtual NumberInterface* _apply(const UnaryOperatorInterface& o) const { return o._compute(static_cast<const X&>(*this)); }
 
   private:
-    template<class R, typename std::enable_if<std::is_constructible<R,X>::value,int>::type = 0>
+    template<class R, typename std::enable_if<std::is_constructible<R,X>::value,Int>::type = 0>
         inline R _get_as() const { return static_cast<R>(static_cast<const X&>(*this)); }
-    template<class R, typename std::enable_if<!std::is_constructible<R,X>::value,int>::type = 0>
+    template<class R, typename std::enable_if<!std::is_constructible<R,X>::value,Int>::type = 0>
         inline R _get_as() const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << "\n"; throw ParadigmError(); }
-    template<class R, typename std::enable_if<std::is_constructible<R,X,PrecisionMP>::value,int>::type = 0>
+    template<class R, typename std::enable_if<std::is_constructible<R,X,PrecisionMP>::value,Int>::type = 0>
         inline R _get_as(PrecisionMP pr) const { return R(static_cast<const X&>(*this),pr); }
-    template<class R, typename std::enable_if<!std::is_constructible<R,X,PrecisionMP>::value,int>::type = 0>
+    template<class R, typename std::enable_if<!std::is_constructible<R,X,PrecisionMP>::value,Int>::type = 0>
         inline R _get_as(PrecisionMP) const { std::cerr<<"Warning: Cannot convert " << _cast(*this) << " of type " << this->_class_name() << " to " << class_name<R>() << " with given precision\n"; throw ParadigmError(); }
 };
 

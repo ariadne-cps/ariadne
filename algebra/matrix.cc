@@ -475,7 +475,7 @@ triangular_factor(const Matrix<ApproximateFloat>& A)
     const SizeType n=A.column_size();
 
     Matrix<X> R=A;
-    PivotMatrix P(n); for(uint i=0; i!=n; ++i) { P[i]=i; }
+    PivotMatrix P(n); for(Nat i=0; i!=n; ++i) { P[i]=i; }
 
     // Array of column norm squares
     Array<X> cns(n);
@@ -485,7 +485,7 @@ triangular_factor(const Matrix<ApproximateFloat>& A)
     for(SizeType k=0; k!=min(m,n); ++k) {
         //std::cerr<<"k="<<k<<" R="<<R<<std::endl;
 
-        bool pivoting=true;
+        Bool pivoting=true;
         if(pivoting) {
             // Compute column norms
             for(SizeType j=k; j!=n; ++j) {
@@ -622,7 +622,7 @@ triangular_multiplier(const Matrix<ApproximateFloat>& A)
 template<class X> Matrix<X> pivot_matrix(const Array<SizeType>& pv)
 {
     const SizeType n=pv.size();
-    Array<SizeType> perm(n); for(uint i=0; i!=n; ++i) { perm[i]=i; }
+    Array<SizeType> perm(n); for(Nat i=0; i!=n; ++i) { perm[i]=i; }
     for(SizeType i=0; i!=n; ++i) {
         std::swap(perm[i],perm[pv[i]]);
     }
@@ -646,7 +646,7 @@ OutputStream& operator<<(OutputStream& os, const PivotMatrix& pv) {
 // transformations H=I-vv' with |v|=1. Note that inv(H)=H'=H. The vector v is
 // chosen to be a multiple of the first working column of A.
 template<class X> Tuple< Matrix<X>, Matrix<X>, PivotMatrix >
-orthogonal_decomposition(const Matrix<X>& A, bool allow_pivoting)
+orthogonal_decomposition(const Matrix<X>& A, Bool allow_pivoting)
 {
     X zero=A.zero_element();
     X one=zero+1;
@@ -868,7 +868,7 @@ template Vector<ApproximateFloat> solve(const Matrix<ApproximateFloat>&, const V
 //template Matrix<ApproximateFloat> lu_solve(const Matrix<ApproximateFloat>&, const Matrix<ApproximateFloat>&);
 //template Matrix<ApproximateFloat> lu_inverse(const Matrix<ApproximateFloat>&, const Matrix<ApproximateFloat>&);
 template Tuple<PivotMatrix,Matrix<ApproximateFloat>,Matrix<ApproximateFloat>> triangular_decomposition(Matrix<ApproximateFloat> const&);
-template Tuple<Matrix<ApproximateFloat>,Matrix<ApproximateFloat>,PivotMatrix> orthogonal_decomposition(Matrix<ApproximateFloat> const&, bool);
+template Tuple<Matrix<ApproximateFloat>,Matrix<ApproximateFloat>,PivotMatrix> orthogonal_decomposition(Matrix<ApproximateFloat> const&, Bool);
 template Tuple<Matrix<ApproximateFloat>,Matrix<ApproximateFloat>> orthogonal_decomposition(Matrix<ApproximateFloat> const&);
 
 template Vector<ApproximateFloat> row_norms(Matrix<ApproximateFloat> const&);

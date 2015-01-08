@@ -47,7 +47,7 @@ template<> struct And<> : True { };
 template<class... PS> struct ValueAnd<false, PS...> : False { };
 template<class... PS> struct ValueAnd<true, PS...> : And<PS...> { };
 
-template<class P1, class P2, class P3=Void> struct Or { static const bool value = P1::value || P2::value || P3::value; };
+template<class P1, class P2, class P3=void> struct Or { static const bool value = P1::value || P2::value || P3::value; };
 template<class P1, class P2> struct Or<P1,P2> { static const bool value = P1::value || P2::value; };
 template<class P> struct Not { static const bool value = !P::value; };
 
@@ -78,8 +78,8 @@ template<class T> using ResultOf = typename std::result_of<T>::type;
 template<class T1, class T2, class T3> using AreSame = And<IsSame<T1,T2>,IsSame<T2,T3>>;
 
 template<class T> struct IsDefined : True { };
-template<class T=Void> struct IsSomething : True { };
-template<> struct IsSomething<Void> : False { };
+template<class T=void> struct IsSomething : True { };
+template<> struct IsSomething<void> : False { };
 
 template<class T> struct Self { typedef T Type; };
 template<class T> using SelfType = typename Self<T>::Type;

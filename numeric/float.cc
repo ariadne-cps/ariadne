@@ -69,16 +69,16 @@ namespace Ariadne {
 typedef unsigned short rounding_mode_t;
 
 //! \ingroup NumericModule \brief Set the active rounding mode.
-void set_rounding_mode(RoundingModeType rnd) { _set_rounding_mode(rnd); }
+Void set_rounding_mode(RoundingModeType rnd) { _set_rounding_mode(rnd); }
 //! \ingroup NumericModule \brief Get the active rounding mode.
 RoundingModeType get_rounding_mode() { return _get_rounding_mode(); }
 
-void set_rounding_to_nearest() { _set_rounding_to_nearest(); }
-void set_rounding_downward() { _set_rounding_downward(); }
-void set_rounding_upward() { _set_rounding_upward(); }
-void set_rounding_toward_zero() { _set_rounding_toward_zero(); }
+Void set_rounding_to_nearest() { _set_rounding_to_nearest(); }
+Void set_rounding_downward() { _set_rounding_downward(); }
+Void set_rounding_upward() { _set_rounding_upward(); }
+Void set_rounding_toward_zero() { _set_rounding_toward_zero(); }
 
-void set_default_rounding() { _set_rounding_upward(); }
+Void set_default_rounding() { _set_rounding_upward(); }
 
 
 static const double _quarter_pi_up=0.78539816339744839;
@@ -113,26 +113,26 @@ static inline char rounding_mode_char()
     return '?';
 }
 
-static inline double horner_rnd(int n, double x, const long long int* c)
+static inline double horner_rnd(Int n, double x, const long long int* c)
 {
     volatile double y=1./c[n];
-    for(int i=n-1; i>=0; --i) {
+    for(Int i=n-1; i>=0; --i) {
         y=1.0/c[i]+x*y;
     }
     return y;
 }
 
-static inline double horner_opp(int n, double x, const long long int* c)
+static inline double horner_opp(Int n, double x, const long long int* c)
 {
     volatile double y=-1./c[n];
-    for(int i=n-1; i>=0; --i) {
+    for(Int i=n-1; i>=0; --i) {
         y=-1.0/c[i]+x*y;
     }
     return -y;
 }
 
 // Rounded power
-double pow_rnd(double x, uint m)
+double pow_rnd(double x, Nat m)
 {
     if(m==0) { return 1.0; }
     if(x==0) { return 0.0; }
@@ -143,12 +143,12 @@ double pow_rnd(double x, uint m)
 }
 
 // Rounded power
-double pow_rnd(double x, int n)
+double pow_rnd(double x, Int n)
 {
-    if(n>=0) { return pow_rnd(x,uint(n)); }
+    if(n>=0) { return pow_rnd(x,Nat(n)); }
     ARIADNE_ASSERT(x!=0.0);
-    if(x>0.0 || (n%2==-1)) { volatile double r=1.0/x; return pow_rnd(r,uint(-n)); }
-    else { volatile double r=-1.0/x; return pow_rnd(r,uint(-n)); }
+    if(x>0.0 || (n%2==-1)) { volatile double r=1.0/x; return pow_rnd(r,Nat(-n)); }
+    else { volatile double r=-1.0/x; return pow_rnd(r,Nat(-n)); }
 }
 
 double sqrt_rnd(double x)
@@ -157,7 +157,7 @@ double sqrt_rnd(double x)
     ARIADNE_ASSERT_MSG(x>=0, " x = "<<x<<"\n");
 
     if(x==0.0) { return 0.0; }
-    int n; volatile double y,a,b;
+    Int n; volatile double y,a,b;
     y=frexp(x,&n);
     if(n%2) { y*=2; n-=1; }
     assert(y>=0.5 && y<=2.0);
@@ -181,7 +181,7 @@ double tan_rnd_series(double x);
 
 double texp(double x) {
     double r=1.0; double t=1.0;
-    for(uint i=1; i!=20; ++i) {
+    for(Nat i=1; i!=20; ++i) {
         t*=x; t/=i; r+=t;
     }
     return r;
@@ -231,7 +231,7 @@ double exp_rnd(double x)
 
 
     long int m=static_cast<long int>(n);
-    int e;
+    Int e;
     volatile double z=frexp(y,&e);
     z=ldexp(z,m+e);
     return z;
@@ -257,7 +257,7 @@ double log_rnd(double x) {
 
     if(x==1.0) { return 0.0; }
 
-    int n;
+    Int n;
     volatile double y,z,s,t,w,ly;
 
     y=frexp(x,&n);
@@ -309,14 +309,14 @@ double sin_rnd(double x) {
     volatile double half_pi_rnd=two_pi_rnd/4;
     volatile double half_pi_opp=two_pi_opp/4;
 
-    int q = (long int)(std::floor(x/_quarter_pi_approx)) % 8;
+    Int q = (long int)(std::floor(x/_quarter_pi_approx)) % 8;
     if(q<-4) { q+=8; } if(q>=4) { q-=8; }
     volatile double n=-std::floor(x/_two_pi_approx+0.5);
 
     volatile double y,w,s;
 
     // Set to true if sin is decreasing so we want opposite rounding
-    bool want_opposite=(q<-2||q>=2);
+    Bool want_opposite=(q<-2||q>=2);
     // if n is negative then we need to switch rounding of two_pi
     volatile double two_pi_corr=((n>=0.0) ^ want_opposite) ? two_pi_rnd : two_pi_opp;
 
@@ -395,7 +395,7 @@ double cos_rnd(double x) {
         y=sub_opp(mul_opp(n_rnd+1,pi_opp),x);
     }
 
-    int q = (long int)(std::floor(y/_quarter_pi_approx)) % 8;
+    Int q = (long int)(std::floor(y/_quarter_pi_approx)) % 8;
     assert(q<=4);
 
     volatile double w,c;
@@ -555,7 +555,7 @@ double tan_rnd_series(double x) {
     if(x>=0) {
         s=x*x;
         w=double(cn[12])/cd[12];
-        for(int i=11; i>=0; --i) {
+        for(Int i=11; i>=0; --i) {
             c=double(cn[i])/cd[i];
             w=c+s*w;
         }
@@ -563,7 +563,7 @@ double tan_rnd_series(double x) {
     } else {
         s=(-x)*x; s=-s;
         w=double(-cn[12])/cd[12];
-        for(int i=12; i>=0; --i) {
+        for(Int i=12; i>=0; --i) {
             c=double(-cn[i])/cd[i];
             w=c+s*w;
         }
@@ -572,7 +572,7 @@ double tan_rnd_series(double x) {
     return r;
 }
 
-Float pow_rnd(Float x, int n)
+Float pow_rnd(Float x, Int n)
 {
     return pow_rnd(x.dbl,n);
 }
@@ -616,12 +616,12 @@ Float tan_rnd(Float x)
 
 namespace Ariadne {
 
-void serialize(boost::archive::text_oarchive& a, Float& flt, const unsigned int v) {
+Void serialize(boost::archive::text_oarchive& a, Float& flt, const unsigned int v) {
     const double x=flt.get_d();
     a << x;
 };
 
-void serialize(boost::archive::text_iarchive& a, Float& flt, const unsigned int v) {
+Void serialize(boost::archive::text_iarchive& a, Float& flt, const unsigned int v) {
     flt=std::numeric_limits<double>::quiet_NaN();
     double x;
     a >> x;

@@ -71,12 +71,12 @@ Rational::Rational() {
 }
 
 /*
-Rational::Rational(uint m) {
+Rational::Rational(Nat m) {
     mpq_init(_mpq);
     mpq_set_ui(_mpq,m,1u);
 }
 
-Rational::Rational(int n) {
+Rational::Rational(Int n) {
     mpq_init(_mpq);
     mpq_set_si(_mpq,n,1);
 }
@@ -116,7 +116,7 @@ Rational::Rational(ExactFloat64 const& x) : Rational(reinterpret_cast<Float64 co
 }
 
 Rational::Rational(const String& s) {
-    int base=10;
+    Int base=10;
     mpq_init(_mpq);
     mpq_set_str(_mpq,s.c_str(),base);
     mpq_canonicalize(_mpq);
@@ -312,7 +312,7 @@ Rational operator"" _q(long double x) {
     // Stop if a coefficient is larger than max_cf_coef, since then the result
     //   is accurate to within 2^{-32}
     long double t=x;
-    int s=1;
+    Int s=1;
     if(x<0) { s=-1; t=-x; }
     long double cf[N+1];
     cf[N]=0;
@@ -358,7 +358,7 @@ InputStream& operator>>(InputStream& is, Rational& q1) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-//   mpq_get_str (char *str, mpq_eq1p_t *eq1pptr, int b, SizeType n, mpq_t op, mpq_rnd_t rnd)
+//   mpq_get_str (char *str, mpq_eq1p_t *eq1pptr, Int b, SizeType n, mpq_t op, mpq_rnd_t rnd)
 // If str is not a null pointer, it should point to a block of storage large enough for the significand,
 // i.e., at least maq1(n + 2, 7). The eq1tra two bytes are for a possible minus sign,
 // and for the terminating null character, and the value 7 accounts for -@Inf@ plus the terminating null character.

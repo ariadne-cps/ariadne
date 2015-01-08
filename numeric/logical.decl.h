@@ -34,7 +34,7 @@
 
 namespace Ariadne {
 
-typedef void Void;
+typedef Void Void;
 
 enum class LogicalValue : char;
 template<class P=Void> class Logical;

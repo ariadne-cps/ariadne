@@ -42,8 +42,8 @@ using namespace std;
 inline Vector<ExactInterval> operator,(const ExactInterval& ivl1, const ExactInterval& ivl2) {
     Vector<ExactInterval> r(2); r[0]=ivl1; r[1]=ivl2; return r; }
 
-inline EffectiveScalarFunction operator^(EffectiveScalarFunction f, int m) { return pow(f,m); }
-//inline double operator^(double f, uint m) { return pow(f,m); }
+inline EffectiveScalarFunction operator^(EffectiveScalarFunction f, Int m) { return pow(f,m); }
+//inline double operator^(double f, Nat m) { return pow(f,m); }
 
 EffectiveScalarFunction operator*(double c, EffectiveScalarFunction f) { return Real(c)*f; }
 struct UnsafeReal : Real { UnsafeReal(double d) : Real(d) { } };
@@ -66,7 +66,7 @@ class TestIntegrator
         t=EffectiveScalarFunction::coordinate(3,2);
     }
 
-    int test() {
+    Int test() {
         ARIADNE_TEST_PRINT(*integrator_ptr);
         ARIADNE_TEST_CALL(test_constant_derivative());
         ARIADNE_TEST_CALL(test_quadratic_flow());
@@ -76,7 +76,7 @@ class TestIntegrator
         return 0;
     }
 
-    int test_affine() {
+    Int test_affine() {
         ARIADNE_TEST_CALL(test_constant_derivative());
         ARIADNE_TEST_CALL(test_quadratic_flow());
         ARIADNE_TEST_CALL(test_linear());
@@ -84,7 +84,7 @@ class TestIntegrator
         return 0;
     }
 
-    void test_constant_derivative() {
+    Void test_constant_derivative() {
         EffectiveVectorFunction f=(o*2,o*3);
         ARIADNE_TEST_PRINT(f);
         ExactIntervalVector d=(ExactInterval(0.0,1.0),ExactInterval(-0.5,1.5));
@@ -97,7 +97,7 @@ class TestIntegrator
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-8);
     }
 
-    void test_quadratic_flow() {
+    Void test_quadratic_flow() {
         EffectiveVectorFunction f=(o,x);
         ExactIntervalVector d=(ExactInterval(0.0,1.0),ExactInterval(-0.5,1.5));
         Float h=0.25;
@@ -110,7 +110,7 @@ class TestIntegrator
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-8);
     }
 
-    void test_linear() {
+    Void test_linear() {
         EffectiveVectorFunction f=(x,-y);
         ExactIntervalVector d=(ExactInterval(-0.25,0.25),ExactInterval(-0.25,0.25));
         Float h=0.25;
@@ -123,7 +123,7 @@ class TestIntegrator
         ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow-expected_flow),1e-4);
     };
 
-    void test_spiral() {
+    Void test_spiral() {
         ExactFloat half(0.5);
         EffectiveVectorFunction f=(-half*x-y,x-half*y);
         ExactIntervalVector d=(ExactInterval(0.75,1.25),ExactInterval(-0.25,0.25));
@@ -139,7 +139,7 @@ class TestIntegrator
 
     };
 
-    void test_logistic() {
+    Void test_logistic() {
         o=EffectiveScalarFunction::constant(1,1);
         x=EffectiveScalarFunction::coordinate(1,0);
         x0=EffectiveScalarFunction::coordinate(2,0);
@@ -183,8 +183,8 @@ class TestIntegrator
     };
 };
 
-int main(int argc, const char **argv) {
-    int verbosity=get_verbosity(argc,argv);
+Int main(Int argc, const char **argv) {
+    Int verbosity=get_verbosity(argc,argv);
 
     ARIADNE_TEST_PRINT("Testing TaylorSeriesIntegrator");
     TaylorSeriesIntegrator taylor_series_integrator(

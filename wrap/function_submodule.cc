@@ -59,12 +59,12 @@ template<>
 struct from_python< MultiIndex >
 {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id<MultiIndex>()); }
-    static void* convertible(PyObject* obj_ptr) { if (!PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+    static Void* convertible(PyObject* obj_ptr) { if (!PyTuple_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         boost::python::tuple tup=extract<boost::python::tuple>(obj_ptr);
-        void* storage = ((converter::rvalue_from_python_storage<MultiIndex>*)   data)->storage.bytes;
+        Void* storage = ((converter::rvalue_from_python_storage<MultiIndex>*)   data)->storage.bytes;
         MultiIndex res(len(tup));
-        for(uint i=0; i!=res.size(); ++i) { res.set(i,extract<uint>(tup[i])); }
+        for(Nat i=0; i!=res.size(); ++i) { res.set(i,extract<Nat>(tup[i])); }
         new (storage) MultiIndex(res);
         data->convertible = storage;
     }
@@ -77,12 +77,12 @@ template<>
 struct from_python<EffectiveVectorFunction>
 {
     from_python() { converter::registry::push_back(&convertible,&construct,type_id<EffectiveVectorFunction>()); }
-    static void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
-    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
+    static Void* convertible(PyObject* obj_ptr) { if (!PyList_Check(obj_ptr)) { return 0; } return obj_ptr; }
+    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data) {
         list lst=extract<list>(obj_ptr);
-        void* storage = ((converter::rvalue_from_python_storage< EffectiveVectorFunction >*)   data)->storage.bytes;
+        Void* storage = ((converter::rvalue_from_python_storage< EffectiveVectorFunction >*)   data)->storage.bytes;
         EffectiveVectorFunction res(len(lst),0);
-        for(uint i=0; i!=res.result_size(); ++i) { res.set(i,extract<EffectiveScalarFunction>(lst[i])); }
+        for(Nat i=0; i!=res.result_size(); ++i) { res.set(i,extract<EffectiveScalarFunction>(lst[i])); }
         new (storage) EffectiveVectorFunction(res);
         data->convertible = storage;
     }
@@ -93,10 +93,10 @@ struct from_python<EffectiveVectorFunction>
 
 template<class X, class D>
 inline Matrix<X> get_jacobian(const Vector<D>& d) {
-    const uint rs=d.size(); const uint as=d[0].argument_size();
+    const Nat rs=d.size(); const Nat as=d[0].argument_size();
     Matrix<X> J(rs,as);
-    for(uint i=0; i!=rs; ++i) {
-        for(uint j=0; j!=as; ++j) {
+    for(Nat i=0; i!=rs; ++i) {
+        for(Nat j=0; j!=as; ++j) {
             J[i][j]=d[i][j];
         }
     }
@@ -115,25 +115,25 @@ class ScalarPythonFunction
     : public ScalarFunctionMixin<ScalarPythonFunction,EffectiveTag>
 {
     friend class ScalarFunctionMixin<ScalarPythonFunction,EffectiveTag>;
-    template<class T> void _compute(T& r, const Vector<T>& a) const {
+    template<class T> Void _compute(T& r, const Vector<T>& a) const {
         r=boost::python::extract<T>(this->_pyf(a)); }
   public:
-    ScalarPythonFunction(StringType& nm, uint as, const object& pyf) : _name(nm), _argument_size(as), _pyf(pyf) { }
-    ScalarPythonFunction(uint as, const object& pyf) : _name(),  _argument_size(as), _pyf(pyf) { }
+    ScalarPythonFunction(StringType& nm, Nat as, const object& pyf) : _name(nm), _argument_size(as), _pyf(pyf) { }
+    ScalarPythonFunction(Nat as, const object& pyf) : _name(),  _argument_size(as), _pyf(pyf) { }
     ScalarPythonFunction(const object& pyf)
         : _name(),
-          _argument_size(extract<int>(pyf.attr("argument_size"))),
+          _argument_size(extract<Int>(pyf.attr("argument_size"))),
           _pyf(pyf) { }
 
     ScalarPythonFunction* clone() const { return new ScalarPythonFunction(*this); }
-    virtual uint argument_size() const { return this->_argument_size; }
+    virtual Nat argument_size() const { return this->_argument_size; }
 
     virtual Vector<ApproximateFloat> gradient(const Vector<ApproximateFloat>& x) const {
         return this->evaluate(Differential<ApproximateFloat>::variables(1u,x)).gradient(); }
     virtual Vector<ValidatedFloat> gradient(const Vector<ValidatedFloat>& x) const {
         return this->evaluate(Differential<ValidatedFloat>::variables(1u,x)).gradient(); }
 
-    virtual EffectiveScalarFunctionInterface* _derivative (uint j) const {
+    virtual EffectiveScalarFunctionInterface* _derivative (Nat j) const {
         ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
     virtual OutputStream& repr(OutputStream& os) const { return os; }
     virtual OutputStream& write(OutputStream& os) const {
@@ -141,10 +141,10 @@ class ScalarPythonFunction
         if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }
         os << "argument_size="<<this->_argument_size;
         return os << " )"; }
-    EffectiveScalarFunction derivative(uint j) const { return EffectiveScalarFunction(this->_derivative(j)); }
+    EffectiveScalarFunction derivative(Nat j) const { return EffectiveScalarFunction(this->_derivative(j)); }
   private:
     StringType _name;
-    uint _argument_size;
+    Nat _argument_size;
     boost::python::object _pyf;
 };
 
@@ -153,29 +153,29 @@ class VectorPythonFunction
     : public VectorFunctionMixin<VectorPythonFunction,EffectiveTag>
 {
     friend class VectorFunctionMixin<VectorPythonFunction,EffectiveTag>;
-    template<class T> void _compute(Vector<T>& r, const Vector<T>& a) const {
+    template<class T> Void _compute(Vector<T>& r, const Vector<T>& a) const {
         r=boost::python::extract< Vector<T> >(this->_pyf(a)); }
   public:
-    VectorPythonFunction(StringType& nm, uint rs, uint as, const object& pyf) : _name(nm), _result_size(rs), _argument_size(as), _pyf(pyf) { }
-    VectorPythonFunction(uint rs, uint as, const object& pyf) : _name(), _result_size(rs), _argument_size(as), _pyf(pyf) { }
+    VectorPythonFunction(StringType& nm, Nat rs, Nat as, const object& pyf) : _name(nm), _result_size(rs), _argument_size(as), _pyf(pyf) { }
+    VectorPythonFunction(Nat rs, Nat as, const object& pyf) : _name(), _result_size(rs), _argument_size(as), _pyf(pyf) { }
     VectorPythonFunction(const object& pyf)
         : _name(),
-          _result_size(extract<int>(pyf.attr("result_size"))),
-          _argument_size(extract<int>(pyf.attr("argument_size"))),
+          _result_size(extract<Int>(pyf.attr("result_size"))),
+          _argument_size(extract<Int>(pyf.attr("argument_size"))),
           _pyf(pyf) { }
 
     VectorPythonFunction* clone() const { return new VectorPythonFunction(*this); }
-    virtual uint result_size() const { return this->_result_size; }
-    virtual uint argument_size() const { return this->_argument_size; }
+    virtual Nat result_size() const { return this->_result_size; }
+    virtual Nat argument_size() const { return this->_argument_size; }
 
     virtual Matrix<ApproximateFloat> jacobian (const Vector<ApproximateFloat>& x) const {
         return this->evaluate(Differential<ApproximateFloat>::variables(1u,x)).jacobian(); }
     virtual Matrix<ValidatedFloat> jacobian (const Vector<ValidatedFloat>& x) const {
         return this->evaluate(Differential<ValidatedFloat>::variables(1u,x)).jacobian(); }
 
-    virtual EffectiveScalarFunctionInterface* _get(uint i) const {
+    virtual EffectiveScalarFunctionInterface* _get(Nat i) const {
         ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
-    virtual EffectiveScalarFunction operator[](uint i) const {
+    virtual EffectiveScalarFunction operator[](Nat i) const {
         ARIADNE_FAIL_MSG("Cannot get a component of a Python function"); }
 
     virtual OutputStream& write(OutputStream& os) const {
@@ -186,8 +186,8 @@ class VectorPythonFunction
         return os << " )"; }
   private:
     StringType _name;
-    uint _result_size;
-    uint _argument_size;
+    Nat _result_size;
+    Nat _argument_size;
     boost::python::object _pyf;
 };
 
@@ -215,9 +215,9 @@ template<class X> using Monomial = ExpansionValue<X>;
 
 
 
-void export_multi_index()
+Void export_multi_index()
 {
-    class_< MultiIndex > multi_index_class("MultiIndex", init<uint>());
+    class_< MultiIndex > multi_index_class("MultiIndex", init<Nat>());
     multi_index_class.def(init<MultiIndex>());
     multi_index_class.def("__getitem__",&MultiIndex::get);
     multi_index_class.def("__setitem__",&MultiIndex::set);
@@ -230,7 +230,7 @@ void export_multi_index()
 }
 
 template<class X>
-void export_monomial()
+Void export_monomial()
 {
     class_< ExpansionValue<X> > monomial_class(python_name<X>("Monomial"), init<MultiIndex,X>());
     monomial_class.def("key",(const MultiIndex&(ExpansionValue<X>::*)()const)&ExpansionValue<X>::key,return_value_policy<copy_const_reference>());
@@ -239,19 +239,19 @@ void export_monomial()
 }
 
 template<class X>
-void export_polynomial()
+Void export_polynomial()
 {
     X real;
 
     class_< Polynomial<X> > polynomial_class(python_name<X>("Polynomial"), init< Polynomial<X> >());
-    polynomial_class.def(init<uint>());
-    polynomial_class.def("constant", (Polynomial<X>(*)(uint,double)) &Polynomial<X>::constant);
+    polynomial_class.def(init<Nat>());
+    polynomial_class.def("constant", (Polynomial<X>(*)(Nat,double)) &Polynomial<X>::constant);
     polynomial_class.staticmethod("constant");
-    polynomial_class.def("variable", (Polynomial<X>(*)(uint,uint)) &Polynomial<X>::variable);
+    polynomial_class.def("variable", (Polynomial<X>(*)(Nat,Nat)) &Polynomial<X>::variable);
     polynomial_class.staticmethod("variable");
-    polynomial_class.def("coordinate", (Polynomial<X>(*)(uint,uint)) &Polynomial<X>::variable);
+    polynomial_class.def("coordinate", (Polynomial<X>(*)(Nat,Nat)) &Polynomial<X>::variable);
     polynomial_class.staticmethod("coordinate");
-    polynomial_class.def("variables", (Vector< Polynomial<X> >(*)(uint)) &Polynomial<X>::variables);
+    polynomial_class.def("variables", (Vector< Polynomial<X> >(*)(Nat)) &Polynomial<X>::variables);
     polynomial_class.staticmethod("variables");
 
     polynomial_class.def("argument_size", &Polynomial<X>::argument_size);
@@ -274,11 +274,11 @@ void export_polynomial()
     to_python< Vector< Polynomial<X> > >();
 }
 
-void export_scalar_function()
+Void export_scalar_function()
 {
     class_<EffectiveScalarFunction>
         scalar_function_class("EffectiveScalarFunction", init<EffectiveScalarFunction>());
-    scalar_function_class.def(init<uint>());
+    scalar_function_class.def(init<Nat>());
     scalar_function_class.def("argument_size", &EffectiveScalarFunction::argument_size);
     scalar_function_class.def("derivative", &EffectiveScalarFunction::derivative);
     scalar_function_class.def("__call__", (ValidatedFloat(EffectiveScalarFunction::*)(const Vector<ValidatedFloat>&)const)&EffectiveScalarFunction::operator() );
@@ -309,17 +309,17 @@ void export_scalar_function()
     scalar_function_class.def("__str__", &__cstr__<EffectiveScalarFunction>);
     scalar_function_class.def("__repr__", &__crepr__<EffectiveScalarFunction>);
 
-    scalar_function_class.def("constant", (EffectiveScalarFunction(*)(uint,Real)) &EffectiveScalarFunction::constant);
-    scalar_function_class.def("coordinate", (EffectiveScalarFunction(*)(uint,uint)) &EffectiveScalarFunction::coordinate);
+    scalar_function_class.def("constant", (EffectiveScalarFunction(*)(Nat,Real)) &EffectiveScalarFunction::constant);
+    scalar_function_class.def("coordinate", (EffectiveScalarFunction(*)(Nat,Nat)) &EffectiveScalarFunction::coordinate);
     scalar_function_class.staticmethod("constant");
     scalar_function_class.staticmethod("coordinate");
 
     def("evaluate", (ApproximateFloat(*)(const EffectiveScalarFunction&,const Vector<ApproximateFloat>&)) &evaluate);
     def("evaluate", (ValidatedFloat(*)(const EffectiveScalarFunction&,const Vector<ValidatedFloat>&)) &evaluate);
 
-    def("derivative", (EffectiveScalarFunction(EffectiveScalarFunction::*)(uint)const) &EffectiveScalarFunction::derivative);
+    def("derivative", (EffectiveScalarFunction(EffectiveScalarFunction::*)(Nat)const) &EffectiveScalarFunction::derivative);
 
-    def("pow", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&,int)) &pow);
+    def("pow", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&,Int)) &pow);
     def("rec", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&)) &rec);
     def("sqr", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&)) &sqr);
     def("sqrt", (EffectiveScalarFunction(*)(const EffectiveScalarFunction&)) &sqrt);
@@ -333,7 +333,7 @@ void export_scalar_function()
 
     class_<ValidatedScalarFunction> interval_scalar_function_class("ValidatedScalarFunction", init<ValidatedScalarFunction>());
     interval_scalar_function_class.def(init<EffectiveScalarFunction>());
-    interval_scalar_function_class.def(init<uint>());
+    interval_scalar_function_class.def(init<Nat>());
     interval_scalar_function_class.def("argument_size", &ValidatedScalarFunction::argument_size);
     interval_scalar_function_class.def("__str__", &__cstr__<ValidatedScalarFunction>);
     interval_scalar_function_class.def("__repr__", &__crepr__<ValidatedScalarFunction>);
@@ -342,12 +342,12 @@ void export_scalar_function()
 }
 
 
-void export_vector_function()
+Void export_vector_function()
 {
 
     class_<EffectiveVectorFunction>
         vector_function_class("EffectiveVectorFunction", init<EffectiveVectorFunction>());
-    vector_function_class.def(init<uint,uint>());
+    vector_function_class.def(init<Nat,Nat>());
 
     vector_function_class.def("result_size", &EffectiveVectorFunction::result_size);
     vector_function_class.def("argument_size", &EffectiveVectorFunction::argument_size);
@@ -364,7 +364,7 @@ void export_vector_function()
     vector_function_class.def("__str__", &__cstr__<EffectiveVectorFunction>);
     vector_function_class.def("__repr__", &__crepr__<EffectiveVectorFunction>);
 
-    vector_function_class.def("identity", (EffectiveVectorFunction(*)(uint)) &EffectiveVectorFunction::identity);
+    vector_function_class.def("identity", (EffectiveVectorFunction(*)(Nat)) &EffectiveVectorFunction::identity);
     vector_function_class.staticmethod("identity");
 
     def("evaluate", (Vector<ApproximateFloat>(*)(const EffectiveVectorFunction&,const Vector<ApproximateFloat>&)) &evaluate);
@@ -382,7 +382,7 @@ void export_vector_function()
 
     class_<ValidatedVectorFunction> interval_vector_function_class("ValidatedVectorFunction", init<ValidatedVectorFunction>());
     interval_vector_function_class.def(init<EffectiveVectorFunction>());
-    interval_vector_function_class.def(init<uint,uint>());
+    interval_vector_function_class.def(init<Nat,Nat>());
     interval_vector_function_class.def("result_size", &ValidatedVectorFunction::result_size);
     interval_vector_function_class.def("argument_size", &ValidatedVectorFunction::argument_size);
     interval_vector_function_class.def("__getitem__", &ValidatedVectorFunction::get);
@@ -394,20 +394,20 @@ void export_vector_function()
 }
 
 
-void export_scalar_python_function()
+Void export_scalar_python_function()
 {
     class_<ScalarPythonFunction, bases< EffectiveScalarFunctionInterface > > scalar_python_function_class("ScalarUserFunction", init<object>());
-    scalar_python_function_class.def(init<uint,object>());
+    scalar_python_function_class.def(init<Nat,object>());
 }
 
-void export_vector_python_function()
+Void export_vector_python_function()
 {
     class_<VectorPythonFunction, bases< EffectiveVectorFunctionInterface > > vector_python_function_class("VectorUserFunction", init<object>());
-    vector_python_function_class.def(init<uint,uint,object>());
+    vector_python_function_class.def(init<Nat,Nat,object>());
 }
 
 
-void function_submodule() {
+Void function_submodule() {
     to_python< Array<StringType> >();
     from_python< Array<StringType> >();
 

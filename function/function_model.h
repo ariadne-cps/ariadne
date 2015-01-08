@@ -358,7 +358,7 @@ template<> class VectorFunctionModel<ValidatedTag>
   public:
     inline VectorFunctionModel() : _ptr() { }
     inline VectorFunctionModel(Nat n, const ScalarFunctionModelInterface<ValidatedTag>& sf)
-        : _ptr(sf._create_vector(n)) { for(uint i=0; i!=n; ++i) { (*this)[i]=sf; } }
+        : _ptr(sf._create_vector(n)) { for(Nat i=0; i!=n; ++i) { (*this)[i]=sf; } }
     inline VectorFunctionModel(VectorFunctionModelInterface<ValidatedTag>* p) : _ptr(p) { }
     inline VectorFunctionModel(const VectorFunctionModelInterface<ValidatedTag>& f) : _ptr(f._clone()) { }
     inline VectorFunctionModel(const VectorFunctionModel<ValidatedTag>& f) : _ptr(f._ptr) { }
@@ -405,21 +405,21 @@ inline VectorFunctionModel<ValidatedTag> restrict(const VectorFunctionModel<Vali
 inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f) {
     return f._ptr->_clone(); }
 inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f) {
-    VectorFunctionModel<ValidatedTag> r=f; for(uint i=0; i!=r.size(); ++i) { r[i]=-f[i]; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f; for(Nat i=0; i!=r.size(); ++i) { r[i]=-f[i]; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(uint i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f1; for(Nat i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(uint i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f1; for(Nat i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f1, const Vector<ValidatedNumber>& c2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(uint i=0; i!=r.size(); ++i) { r[i]=f1[i]+c2[i]; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f1; for(Nat i=0; i!=r.size(); ++i) { r[i]=f1[i]+c2[i]; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f1, const Vector<ValidatedNumber>& c2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(uint i=0; i!=r.size(); ++i) { r[i]=f1[i]-c2[i]; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f1; for(Nat i=0; i!=r.size(); ++i) { r[i]=f1[i]-c2[i]; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator+(const Vector<ValidatedNumber>& c1, const VectorFunctionModel<ValidatedTag>& f2);
 inline VectorFunctionModel<ValidatedTag> operator-(const Vector<ValidatedNumber>& c1, const VectorFunctionModel<ValidatedTag>& f2);
 inline VectorFunctionModel<ValidatedTag> operator*(const VectorFunctionModel<ValidatedTag>& f1, const ValidatedNumber& c2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(uint i=0; i!=r.size(); ++i) { r[i]=f1[i]*c2; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f1; for(Nat i=0; i!=r.size(); ++i) { r[i]=f1[i]*c2; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator*(const ValidatedNumber& c1, const VectorFunctionModel<ValidatedTag>& f2) {
-    VectorFunctionModel<ValidatedTag> r=f2; for(uint i=0; i!=r.size(); ++i) { r[i]=c1*f2[i]; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f2; for(Nat i=0; i!=r.size(); ++i) { r[i]=c1*f2[i]; } return r; }
 
 inline ValidatedNumber evaluate(const ScalarFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumber>& x) { return f._ptr->evaluate(x); }
 inline Vector<ValidatedNumber> evaluate(const VectorFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumber>& x) { return f._ptr->evaluate(x); }
@@ -477,11 +477,11 @@ inline VectorFunctionModel<ValidatedTag> combine(const VectorFunctionModel<Valid
 
 inline VectorFunctionModel<ValidatedTag> intersection(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
     ARIADNE_ASSERT_MSG(f1.size()==f2.size(),"intersection(f1,f2): f1="<<f1<<", f2="<<f2<<")");
-    VectorFunctionModel<ValidatedTag> r=+f1; for(uint i=0; i!=r.size(); ++i) { r[i]=intersection(f1[i],f2[i]); } return r; }
+    VectorFunctionModel<ValidatedTag> r=+f1; for(Nat i=0; i!=r.size(); ++i) { r[i]=intersection(f1[i],f2[i]); } return r; }
 
 inline VectorFunctionModel<ValidatedTag> antiderivative(const VectorFunctionModel<ValidatedTag>& f, Nat j) {
     VectorFunctionModel<ValidatedTag> r(f);
-    for(uint i=0; i!=r.size(); ++i) { r[i]=antiderivative(f[i],j); }
+    for(Nat i=0; i!=r.size(); ++i) { r[i]=antiderivative(f[i],j); }
     return r;
 }
 

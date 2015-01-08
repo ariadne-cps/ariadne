@@ -40,10 +40,10 @@
 using namespace std;
 using namespace Ariadne;
 
-Vector<ExactFloat> e(uint n, uint i) { return Vector<ExactFloat>::unit(n,i); }
-Expansion<RawFloat> v(uint n, uint j) { return Expansion<RawFloat>::variable(n,j); }
-Polynomial<Float> p(uint n, uint j) { return Polynomial<Float>::variable(n,j); }
-ScalarTaylorFunction t(ExactBox d, uint j,Sweeper swp) { return ScalarTaylorFunction::variable(d,j,swp); }
+Vector<ExactFloat> e(Nat n, Nat i) { return Vector<ExactFloat>::unit(n,i); }
+Expansion<RawFloat> v(Nat n, Nat j) { return Expansion<RawFloat>::variable(n,j); }
+Polynomial<Float> p(Nat n, Nat j) { return Polynomial<Float>::variable(n,j); }
+ScalarTaylorFunction t(ExactBox d, Nat j,Sweeper swp) { return ScalarTaylorFunction::variable(d,j,swp); }
 
 namespace Ariadne {
 std::pair<Float, Vector<ExactInterval> > flow_bounds(EffectiveVectorFunction const&,Vector<ExactInterval> const&,Float const&);
@@ -56,21 +56,21 @@ class TestScalarTaylorFunction
     Sweeper swp;
   public:
     TestScalarTaylorFunction(Sweeper sweeper);
-    void test();
+    Void test();
   private:
-    void test_concept();
-    void test_constructors();
-    void test_predicates();
-    void test_approximation();
-    void test_evaluate();
-    void test_arithmetic();
-    void test_functions();
-    void test_compose();
-    void test_antiderivative();
-    void test_substitute();
-    void test_conversion();
+    Void test_concept();
+    Void test_constructors();
+    Void test_predicates();
+    Void test_approximation();
+    Void test_evaluate();
+    Void test_arithmetic();
+    Void test_functions();
+    Void test_compose();
+    Void test_antiderivative();
+    Void test_substitute();
+    Void test_conversion();
   private:
-    ExactBox d(unsigned int n) { return Vector<ExactInterval>(n,ExactInterval(-1,+1)); }
+    ExactBox d(SizeType n) { return Vector<ExactInterval>(n,ExactInterval(-1,+1)); }
     typedef Expansion<RawFloat> e;
     typedef TaylorModel<ValidatedTag> TM;
 };
@@ -82,7 +82,7 @@ TestScalarTaylorFunction::TestScalarTaylorFunction(Sweeper sweeper)
 }
 
 
-void TestScalarTaylorFunction::test()
+Void TestScalarTaylorFunction::test()
 {
     std::clog<<std::setprecision(17);
     std::cerr<<std::setprecision(17);
@@ -98,7 +98,7 @@ void TestScalarTaylorFunction::test()
 }
 
 
-void TestScalarTaylorFunction::test_concept()
+Void TestScalarTaylorFunction::test_concept()
 {
     const ExactFloat f=0;
     const ValidatedFloat i;
@@ -128,7 +128,7 @@ void TestScalarTaylorFunction::test_concept()
 
 }
 
-void TestScalarTaylorFunction::test_constructors()
+Void TestScalarTaylorFunction::test_constructors()
 {
     ARIADNE_TEST_CONSTRUCT(ScalarTaylorFunction,tv1,({{-1,+1},{-1,+1}},{{{0,0},1.},{{1,0},2.},{{0,1},3.},{{2,0},4.},{{1,1},5.},{{0,2},6.},{{3,0},7.},{{2,1},8.},{{1,2},9.},{{0,3},10.}},0.25,swp));
 
@@ -139,7 +139,7 @@ void TestScalarTaylorFunction::test_constructors()
     ARIADNE_ASSERT_EQUAL(tv1.error(),0.25);
 }
 
-void TestScalarTaylorFunction::test_predicates()
+Void TestScalarTaylorFunction::test_predicates()
 {
     ScalarTaylorFunction tv1(d(1),e(1,2, {1.00,2.00,3.00}), 0.75, swp);
     ScalarTaylorFunction tv2(d(1),e(1,2, {1.00,1.75,3.25}), 0.25, swp);
@@ -152,20 +152,20 @@ void TestScalarTaylorFunction::test_predicates()
     ARIADNE_TEST_BINARY_PREDICATE(refines,tv4,tv1);
 }
 
-void TestScalarTaylorFunction::test_approximation()
+Void TestScalarTaylorFunction::test_approximation()
 {
     ARIADNE_TEST_CONSTRUCT(ScalarTaylorFunction,tv1,(d(2),e(2,3,{1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0}),0.25,swp));
     ARIADNE_TEST_CONSTRUCT(ScalarTaylorFunction,tv2,(d(1),e(1,2,{1.0,2.0,3.0}),0.25,swp));
 }
 
-void TestScalarTaylorFunction::test_evaluate()
+Void TestScalarTaylorFunction::test_evaluate()
 {
     Vector<ValidatedFloat> iv({{0.25,0.5},{-0.75,-0.5}});
     ScalarTaylorFunction tv(d(2),e(2,2,{1.0,2.0,3.0,4.0,5.0,6.0}),0.25,swp);
     ARIADNE_TEST_EQUAL(evaluate(tv,iv),ValidatedFloat(-1,1));
 }
 
-void TestScalarTaylorFunction::test_arithmetic()
+Void TestScalarTaylorFunction::test_arithmetic()
 {
     ARIADNE_TEST_EQUAL(d(1),d(1));
     //Operations which can be performed exactly with floating-point arithmetic.
@@ -188,7 +188,7 @@ void TestScalarTaylorFunction::test_arithmetic()
 
 }
 
-void TestScalarTaylorFunction::test_functions()
+Void TestScalarTaylorFunction::test_functions()
 {
     ScalarTaylorFunction xz(d(1),e(1,1, {0.0, 0.5}), 0.0, swp);
     ScalarTaylorFunction xo(d(1),e(1,1, {1.0, 0.5}), 0.0, swp);
@@ -205,12 +205,12 @@ void TestScalarTaylorFunction::test_functions()
 }
 
 
-void TestScalarTaylorFunction::test_compose()
+Void TestScalarTaylorFunction::test_compose()
 {
 }
 
 
-void TestScalarTaylorFunction::test_antiderivative()
+Void TestScalarTaylorFunction::test_antiderivative()
 {
     ScalarTaylorFunction tm=ScalarTaylorFunction::constant(d(2),1.0,swp);
     ScalarTaylorFunction atm=antiderivative(tm,1u);
@@ -234,7 +234,7 @@ void TestScalarTaylorFunction::test_antiderivative()
 
 }
 
-void TestScalarTaylorFunction::test_substitute()
+Void TestScalarTaylorFunction::test_substitute()
 {
     ExactBox d1={{-0.75,+0.75}};
     ScalarTaylorFunction tu=ScalarTaylorFunction::coordinate(d1,0,swp);
@@ -251,7 +251,7 @@ void TestScalarTaylorFunction::test_substitute()
     ARIADNE_TEST_EQUAL(tg,tr);
 }
 
-void TestScalarTaylorFunction::test_conversion() {
+Void TestScalarTaylorFunction::test_conversion() {
     // Test conversion between ordinary functions and Taylor functions.
     ExactBox D={{-0.5,0.5},{-1.0,2.0}};
     Vector<ExactFloat> pt={-0.25_exact,0.25_exact};
@@ -282,17 +282,17 @@ class TestVectorTaylorFunction
     Sweeper swp;
   public:
     TestVectorTaylorFunction(Sweeper sweeper);
-    void test();
+    Void test();
   private:
-    void test_constructors();
-    void test_restrict();
-    void test_jacobian();
-    void test_compose();
-    void test_antiderivative();
-    void test_join();
-    void test_combine();
-    void test_conversion();
-    void test_domain();
+    Void test_constructors();
+    Void test_restrict();
+    Void test_jacobian();
+    Void test_compose();
+    Void test_antiderivative();
+    Void test_join();
+    Void test_combine();
+    Void test_conversion();
+    Void test_domain();
 };
 
 
@@ -304,7 +304,7 @@ TestVectorTaylorFunction::TestVectorTaylorFunction(Sweeper sweeper)
 }
 
 
-void
+Void
 TestVectorTaylorFunction::test()
 {
     ARIADNE_TEST_CALL(test_combine());
@@ -318,11 +318,11 @@ TestVectorTaylorFunction::test()
     ARIADNE_TEST_CALL(test_domain());
 }
 
-bool operator==(Expansion<ExactFloat> const& e1, Expansion<RawFloat> const& e2) {
+Bool operator==(Expansion<ExactFloat> const& e1, Expansion<RawFloat> const& e2) {
     return reinterpret_cast<Expansion<RawFloat>const&>(e1)==e2;
 }
 
-void TestVectorTaylorFunction::test_constructors()
+Void TestVectorTaylorFunction::test_constructors()
 {
     Vector< Expansion<RawFloat> > expansion(2);
     expansion[0]=Expansion<RawFloat>({ {{0,0},1.125}, {{1,0},-0.75}, {{0,1},0.0625}, {{2,0},-0.25} });
@@ -348,7 +348,7 @@ void TestVectorTaylorFunction::test_constructors()
 
 }
 
-void TestVectorTaylorFunction::test_restrict()
+Void TestVectorTaylorFunction::test_restrict()
 {
     Vector<RawFloat> unit0={1};
 
@@ -373,7 +373,7 @@ void TestVectorTaylorFunction::test_restrict()
     ARIADNE_TEST_EQUAL(restrict(function2,subdomain2),restricted_function2);
 }
 
-void TestVectorTaylorFunction::test_jacobian()
+Void TestVectorTaylorFunction::test_jacobian()
 {
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
     ExactFloat a(1.5); ExactFloat b(0.25);
@@ -395,7 +395,7 @@ void TestVectorTaylorFunction::test_jacobian()
     ARIADNE_TEST_EQUAL(VectorTaylorFunction(domain3,henon,swp).jacobian(point2),henon.jacobian(point2));
 }
 
-void TestVectorTaylorFunction::test_compose()
+Void TestVectorTaylorFunction::test_compose()
 {
     Real a=ExactFloat(1.5); Real b=ExactFloat(0.25);
     EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
@@ -419,10 +419,10 @@ void TestVectorTaylorFunction::test_compose()
 }
 
 
-void TestVectorTaylorFunction::test_antiderivative()
+Void TestVectorTaylorFunction::test_antiderivative()
 {
-    unsigned int index0=0;
-    unsigned int index1=1;
+    SizeType index0=0;
+    SizeType index1=1;
 
     Vector<RawFloat> unit0={1};
     ExactBox domain1={{-1,+1},{-1,+1}};
@@ -452,7 +452,7 @@ void TestVectorTaylorFunction::test_antiderivative()
 
 }
 
-void TestVectorTaylorFunction::test_join()
+Void TestVectorTaylorFunction::test_join()
 {
     ExactBox domain={{-0.25,+0.25},{-0.5,+0.5}};
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
@@ -467,7 +467,7 @@ void TestVectorTaylorFunction::test_join()
 
 }
 
-void TestVectorTaylorFunction::test_combine()
+Void TestVectorTaylorFunction::test_combine()
 {
     // This test contains a regression test to check correct behaviour for a zero component.
     ExactBox domain1={{-0.25,+0.25},{-0.5,+0.5}};
@@ -488,7 +488,7 @@ void TestVectorTaylorFunction::test_combine()
 
 }
 
-void TestVectorTaylorFunction::test_conversion()
+Void TestVectorTaylorFunction::test_conversion()
 {
     // Test conversion between ordinary functions and Taylor functions.
     ExactBox D={{-0.5,0.5},{-1.0,2.0}};
@@ -512,7 +512,7 @@ void TestVectorTaylorFunction::test_conversion()
 }
 
 // Regression test for domain with empty interior
-void TestVectorTaylorFunction::test_domain()
+Void TestVectorTaylorFunction::test_domain()
 {
     EffectiveScalarFunction z=EffectiveScalarFunction::constant(2,0);
     EffectiveScalarFunction o=EffectiveScalarFunction::constant(2,1);
@@ -562,21 +562,21 @@ class TestTaylorFunctionFactory
 {
   public:
     TestTaylorFunctionFactory();
-    void test();
+    Void test();
   private:
-    void test_create();
+    Void test_create();
 };
 
 TestTaylorFunctionFactory::TestTaylorFunctionFactory()
 {
 }
 
-void TestTaylorFunctionFactory::test()
+Void TestTaylorFunctionFactory::test()
 {
     ARIADNE_TEST_CALL(test_create());
 }
 
-void TestTaylorFunctionFactory::test_create()
+Void TestTaylorFunctionFactory::test_create()
 {
     Sweeper sweeper(new ThresholdSweeper(1e-4));
     TaylorFunctionFactory factory(sweeper);
@@ -602,7 +602,7 @@ void TestTaylorFunctionFactory::test_create()
 
 
 
-int main() {
+Int main() {
     ThresholdSweeper sweeper(std::numeric_limits<float>::epsilon());
     TestScalarTaylorFunction(sweeper).test();
     TestVectorTaylorFunction(sweeper).test();

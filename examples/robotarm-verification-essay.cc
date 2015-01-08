@@ -32,7 +32,7 @@ using namespace Ariadne;
 typedef GeneralHybridEvolver::EnclosureType HybridEnclosureType;
 
 // Auxiliary function for plotting
-void plot_results(const Orbit<HybridEnclosure>& orbit,
+Void plot_results(const Orbit<HybridEnclosure>& orbit,
   double delta, double time, const RealVariable& t,
   const RealVariable& x, const RealVariable& vx,
   const RealVariable& z, const RealVariable& vz,
@@ -113,9 +113,9 @@ void plot_results(const Orbit<HybridEnclosure>& orbit,
     std::cout << " done." << endl;
 }
 
-int main(int argc, char** argv)
+Int main(Int argc, char** argv)
 {
-    uint verbosity = 0;
+    Nat verbosity = 0;
     if(argc>1) { verbosity=atoi(argv[1]); }
 
     // Redirect std::cerr to file
@@ -127,7 +127,7 @@ int main(int argc, char** argv)
 
     // Set up the evolution parameters and grid
     double time(5.0);
-    int steps = 3;
+    Int steps = 3;
     Real step_size(1e-1);
 
     // Definition of the reference trajectory
@@ -260,7 +260,7 @@ int main(int argc, char** argv)
     Rational deltamax ( 0.1_dec );
     // accuracy
     ExactFloat eps = 1e-2_exact;
-    int iter=0; // iteration count
+    Int iter=0; // iteration count
 
     Orbit<HybridEnclosure> orbit;
     while(deltamax - deltamin >= eps) {

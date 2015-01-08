@@ -32,18 +32,18 @@
 namespace Ariadne {
 
 namespace {
-inline ApproximateFloat operator+(ApproximateFloat x1, int n2) { return x1+ApproximateFloat(n2); }
+inline ApproximateFloat operator+(ApproximateFloat x1, Int n2) { return x1+ApproximateFloat(n2); }
 } // namespace
 
 template<class A> EnableIfGradedAlgebra<A>
 compose(const Series<typename A::NumericType>& x, const A& y)
 {
-    uint d=y.degree();
+    Nat d=y.degree();
 
     A w=y - y.value();
     A r=y.create();
     r+=x[d];
-    for(uint n=1; n<=d; ++n) {
+    for(Nat n=1; n<=d; ++n) {
         r=r*w;
         r+=x[d-n];
     }
@@ -63,7 +63,7 @@ _compose(const TaylorSeries& ts, const A& tv, double eps)
     vref=0;
     A r(tv.argument_size());
     r+=ts.expansion[ts.expansion.size()-1];
-    for(uint i=1; i!=ts.expansion.size(); ++i) {
+    for(Nat i=1; i!=ts.expansion.size(); ++i) {
         //std::cerr<<"    r="<<r<<std::endl;
         r=r*tv;
         r+=ts.expansion[ts.expansion.size()-i-1];
@@ -89,9 +89,9 @@ compose(const TaylorSeries& ts, const A& tm)
 template<class A> EnableIfNormedAlgebra<A>
 _compose1(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
 {
-    static const uint DEGREE=18;
+    static const Nat DEGREE=18;
     static const double TRUNCATION_ERROR=1e-8;
-    uint d=DEGREE;
+    Nat d=DEGREE;
     ExactFloat c=tm.value();
     ValidatedFloat r=tm.range();
     Series<ValidatedFloat> centre_series=fn(d,ValidatedFloat(c));
@@ -106,7 +106,7 @@ _compose1(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
     A x=tm-c;
     A res(tm.argument_size(),tm.accuracy_ptr());
     res+=range_series[d];
-    for(uint i=0; i!=d; ++i) {
+    for(Nat i=0; i!=d; ++i) {
         //std::cerr<<"i="<<i<<" r="<<res<<"\n";
         res=centre_series[d-i-1]+x*res;
         res.sweep(eps);
@@ -122,9 +122,9 @@ _compose1(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
 template<class A> EnableIfNormedAlgebra<A>
 _compose2(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
 {
-    static const uint DEGREE=20;
+    static const Nat DEGREE=20;
     static const Float TRUNCATION_ERROR=1e-8;
-    uint d=DEGREE;
+    Nat d=DEGREE;
     ExactFloat c=tm.value();
     ValidatedFloat r=tm.range();
     Series<ValidatedFloat> centre_series=fn(d,ValidatedFloat(c));
@@ -143,7 +143,7 @@ _compose2(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
     A x=tm-c;
     A res(tm.argument_size(),tm.accuracy_ptr());
     res+=centre_series[d];
-    for(uint i=0; i!=d; ++i) {
+    for(Nat i=0; i!=d; ++i) {
         res=centre_series[d-i-1]+x*res;
         res.sweep(eps);
     }
@@ -159,9 +159,9 @@ _compose2(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
 template<class A> EnableIfNormedAlgebra<A>
 _compose3(const ValidatedSeriesFunctionPointer& fn, const A& tm, Float eps)
 {
-    static const uint DEGREE=20;
+    static const Nat DEGREE=20;
     static const Float TRUNCATION_ERROR=1e-8;
-    uint d=DEGREE;
+    Nat d=DEGREE;
     ExactFloat c=tm.value();
     ValidatedFloat r=tm.range();
     Series<ValidatedFloat> centre_series=fn(d,ValidatedFloat(c));
@@ -186,7 +186,7 @@ _compose3(const ValidatedSeriesFunctionPointer& fn, const A& tm, Float eps)
     A x=tm;
     A res(tm.argument_size(),tm.accuracy_ptr());
     res+=centre_series[d];
-    for(uint i=0; i!=d; ++i) {
+    for(Nat i=0; i!=d; ++i) {
         res=centre_series[d-i-1]+x*res;
         //res.sweep(eps);
     }
@@ -210,9 +210,9 @@ _compose(const ValidatedSeriesFunctionPointer& fn, const A& tm, Float eps)
 //   unbounded domain (exp,sin,cos)
 
 namespace {
-inline int pow2(uint k) { return 1<<k; }
-inline int powm1(uint k) { return (k%2) ? -1 : +1; }
-double rec_fac_up(uint n) { set_rounding_upward(); double r=1.0; for(uint i=1; i<=n; ++i) { r/=i; } return r; }
+inline Int pow2(Nat k) { return 1<<k; }
+inline Int powm1(Nat k) { return (k%2) ? -1 : +1; }
+double rec_fac_up(Nat n) { set_rounding_upward(); double r=1.0; for(Nat i=1; i<=n; ++i) { r/=i; } return r; }
 }
 
 template<class A> EnableIfNormedAlgebra<A>
@@ -235,7 +235,7 @@ sqrt(const A& x)
     UpperFloat eps=rng.radius()/rng.midpoint();
     set_rounding_to_nearest();
     assert(eps<1);
-    uint d=integer_cast<int>((log((1-eps)*ExactFloat(x.tolerance()))/log(eps)+1));
+    Nat d=integer_cast<Int>((log((1-eps)*ExactFloat(x.tolerance()))/log(eps)+1));
     //std::cerr<<"x="<<x<<std::endl;
     //std::cerr<<"x/a="<<x/a<<" a="<<a<<std::endl;
     A y=(x/avg)-X(1.0);
@@ -245,7 +245,7 @@ sqrt(const A& x)
     //std::cerr<<"sqrt_series="<<sqrt_series<<std::endl;
     //std::cerr<<"y="<<y<<std::endl;
     z+=sqrt_series[d-1];
-    for(uint i=0; i!=d; ++i) {
+    for(Nat i=0; i!=d; ++i) {
         z=sqrt_series[d-i-1] + z * y;
         //std::cerr<<"z="<<z<<std::endl;
     }
@@ -278,14 +278,14 @@ rec(const A& x)
     set_rounding_to_nearest();
     assert(eps<1);
 
-    uint d=integer_cast<uint>((log((1-eps)*ExactFloat(x.tolerance()))/log(eps))+1);
+    Nat d=integer_cast<Nat>((log((1-eps)*ExactFloat(x.tolerance()))/log(eps))+1);
 
     A y=1-(x/numeric_cast<X>(avg));
     A z=x.create();
     z+=Float(d%2?-1:+1);
     //std::cerr<<"  y="<<y<<"\n";
     //std::cerr<<"  z="<<z<<"\n";
-    for(uint i=0; i!=d; ++i) {
+    for(Nat i=0; i!=d; ++i) {
         z=1.0 + z * y;
         //std::cerr<<"  z="<<z<<"\n";
     }
@@ -315,11 +315,11 @@ log(const A& x)
     ErrorFloat eps=rng.radius()/avg;
     set_rounding_to_nearest();
     assert(eps<1);
-    uint d=integer_cast<uint>((log((1-eps)*ExactFloat(x.tolerance()))/log(eps)+1));
+    Nat d=integer_cast<Nat>((log((1-eps)*ExactFloat(x.tolerance()))/log(eps)+1));
     A y=x/avg-X(1);
     A z=x.create();
     z+=Float(d%2?-1:+1)/d;
-    for(uint i=1; i!=d; ++i) {
+    for(Nat i=1; i!=d; ++i) {
         z=Float((d-i)%2?+1:-1)/(d-i) + z * y;
     }
     z=z*y;
@@ -340,24 +340,24 @@ template<class A> EnableIfNormedAlgebra<A> exp(const A& x)
     ErrorFloat xrad=x.radius();
     RawFloat xtol = x.tolerance();
 
-    uint sfp=0; // A number such that 2^sfp>rad(x.range())
+    Nat sfp=0; // A number such that 2^sfp>rad(x.range())
     while(Float(1<<sfp)<xrad.raw()) { ++sfp; }
     ExactFloat sf=ExactFloat(RawFloat(1)/(1<<sfp));
     y*=sf;
     ErrorFloat yrad=xrad*sf;
 
-    static const uint degree = 7;
+    static const Nat degree = 7;
     A res=x.create();
     ErrorFloat truncation_error = (pow(yrad,degree+1));
     res += numeric_cast<X>(ValidatedFloat(-truncation_error,+truncation_error));
-    for(uint i=0; i!=degree; ++i) {
-        res/=(degree-i);
+    for(Nat i=0; i!=degree; ++i) {
+        res/=Int(degree-i);
         res=y*res+1.0;
     }
 
     // Square r a total of sfp times
     A square=x.create();
-    for(uint i=0; i!=sfp; ++i) {
+    for(Nat i=0; i!=sfp; ++i) {
         res=res*res;
         square.clear();
     }
@@ -383,7 +383,7 @@ sin(const A& x)
 
     Float two_pi_approx=2*pi_approx;
     Float xavg=x.average().raw();
-    int n=integer_cast<int>(floor(RawFloat(xavg/two_pi_approx + 0.5)));
+    Int n=integer_cast<Int>(floor(RawFloat(xavg/two_pi_approx + 0.5)));
 
     Real const& pi=Ariadne::pi;
     auto two_pi=2*pi;
@@ -391,13 +391,13 @@ sin(const A& x)
 
     s=sqr(y);
 
-    int d=8; // TODO: Change number of terms to be dependent on tolerance
+    Int d=8; // TODO: Change number of terms to be dependent on tolerance
     ErrorFloat srad=s.radius();
     ErrorFloat truncation_error=ErrorFloat(pow_up(srad.raw(),d+1)*rec_fac_up((d+1)*2));
 
     // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
     r=1;
-    for(int i=0; i!=d; ++i) {
+    for(Int i=0; i!=d; ++i) {
         r/=X(-2*(d-i)*(2*(d-i)+1));
         r*=s;
         r+=X(1.0);
@@ -423,7 +423,7 @@ cos(const A& x)
     A r=z;
 
     Float two_pi_approx=2*pi_approx;
-    int n=integer_cast<int>(floor(Float(x.average())/two_pi_approx + 0.5));
+    Int n=integer_cast<Int>(floor(Float(x.average())/two_pi_approx + 0.5));
 
     auto two_pi=2*pi;
     y=x-n*two_pi;
@@ -434,13 +434,13 @@ cos(const A& x)
     {
         s=sqr(y);
 
-        int d=8; // TODO: Change number of terms to be dependent on tolerance
+        Int d=8; // TODO: Change number of terms to be dependent on tolerance
         ErrorFloat srad=s.radius();
         ErrorFloat truncation_error=ErrorFloat(pow_up(srad.raw(),d+1)*rec_fac_up((d+1)*2));
 
         // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
         r=1.0;
-        for(int i=0; i!=d; ++i) {
+        for(Int i=0; i!=d; ++i) {
             r/=X(-2*(d-i)*(2*(d-i)-1));
             r*=s;
             r+=1.0;
@@ -463,7 +463,7 @@ asin(const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*
-    static const uint DEG=18;
+    static const Nat DEG=18;
     typedef typename A::NumericType X;
     Float xavg = x.average();
     Float xrad = x.radius();
@@ -477,7 +477,7 @@ acos(const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*
-    static const uint DEG=18;
+    static const Nat DEG=18;
     typedef typename A::NumericType X;
     Float xavg = x.average();
     Float xrad = x.radius();
@@ -491,7 +491,7 @@ atan(const A& x)
 {
     ARIADNE_NOT_IMPLEMENTED;
 /*
-    static const uint DEG=18;
+    static const Nat DEG=18;
     typedef typename A::NumericType X;
     Float xavg = x.average();
     Float xrad = x.radius();

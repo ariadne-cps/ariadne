@@ -114,7 +114,7 @@ class DiscreteTransition
 inline OutputStream& operator<<(OutputStream& os, const DiscreteTransition& dt) {
     return dt.write(os); }
 
-inline bool operator<(const DiscreteTransition& transition1, const DiscreteTransition& transition2) {
+inline Bool operator<(const DiscreteTransition& transition1, const DiscreteTransition& transition2) {
     return transition1.event() < transition2.event()
         || (transition1.event() == transition2.event()
             && transition1.source() < transition2.source());
@@ -172,7 +172,7 @@ class DiscreteMode {
 inline OutputStream& operator<<(OutputStream& os, const DiscreteMode& dm) {
     return dm.write(os); }
 
-inline bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
+inline Bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
     return mode1.location() < mode2.location(); }
 
 
@@ -235,26 +235,26 @@ class HybridAutomaton
     Map< DiscreteLocation, DiscreteMode > _modes;
 
   protected:
-    void _new_mode(DiscreteLocation location,
+    Void _new_mode(DiscreteLocation location,
                    List<RealAssignment> const& auxilary,
                    List<DottedRealAssignment> const& dynamic);
 
-    void _new_invariant_(DiscreteLocation location,
+    Void _new_invariant_(DiscreteLocation location,
                          ContinuousPredicate invariant,
                          DiscreteEvent event);
 
-    void _new_guard_(DiscreteLocation location,
+    Void _new_guard_(DiscreteLocation location,
                      DiscreteEvent event,
                      ContinuousPredicate guard,
                      EventKind kind);
 
-    void _new_action(DiscreteLocation location,
+    Void _new_action(DiscreteLocation location,
                      ContinuousPredicate invariant,
                      DiscreteEvent event,
                      ContinuousPredicate guard,
                      EventKind kind);
 
-    void _new_update(DiscreteLocation location,
+    Void _new_update(DiscreteLocation location,
                      DiscreteEvent event,
                      DiscreteLocation target,
                      List<PrimedRealAssignment> const& reset);
@@ -285,46 +285,46 @@ class HybridAutomaton
     //! \name Methods for building the automaton.
 
     //! \brief Adds a discrete mode to the automaton.
-    void new_mode(DiscreteLocation location,
+    Void new_mode(DiscreteLocation location,
                   List<RealAssignment> const& auxiliary,
                   List<DottedRealAssignment> const& dynamic) {
         this->_new_mode(location,auxiliary,dynamic);
     }
 
     //! \brief Adds a discrete mode to the automaton.
-    void new_mode(DiscreteLocation location,
+    Void new_mode(DiscreteLocation location,
                   List<DottedRealAssignment> const& dynamic) {
         this->_new_mode(location,List<RealAssignment>(),dynamic);
     }
 
     //! \brief Adds a discrete mode to the automaton.
-    void new_mode(DiscreteLocation location,
+    Void new_mode(DiscreteLocation location,
                   List<RealAssignment> const& auxiliary) {
         this->_new_mode(location,auxiliary,List<DottedRealAssignment>());
     }
 
     //! \brief Adds a discrete mode to the automaton without any dynamics.
-    void new_mode(DiscreteLocation location) {
+    Void new_mode(DiscreteLocation location) {
         this->_new_mode(location,List<RealAssignment>(),List<DottedRealAssignment>());
     }
 
     //! \brief Adds a discrete mode to the automaton.
-    void new_mode(List<RealAssignment> const& auxiliary, List<DottedRealAssignment> const& dynamic) {
+    Void new_mode(List<RealAssignment> const& auxiliary, List<DottedRealAssignment> const& dynamic) {
         this->_new_mode(DiscreteLocation(),auxiliary,dynamic);
     }
 
     //! \brief Adds a discrete mode to the automaton.
-    void new_mode(List<DottedRealAssignment> const& dynamic) {
+    Void new_mode(List<DottedRealAssignment> const& dynamic) {
         this->_new_mode(DiscreteLocation(),List<RealAssignment>(),dynamic);
     }
 
     //! \brief Adds a discrete mode to the automaton.
-    void new_mode(List<RealAssignment> const& auxiliary) {
+    Void new_mode(List<RealAssignment> const& auxiliary) {
         this->_new_mode(DiscreteLocation(),auxiliary,List<DottedRealAssignment>());
     }
 
     //! \brief Adds a new internal/output event with a given enabling \a guard condition and triggering \a invariant.
-    void new_action(DiscreteLocation location,
+    Void new_action(DiscreteLocation location,
                     ContinuousPredicate invariant,
                     DiscreteEvent event,
                     ContinuousPredicate guard,
@@ -333,7 +333,7 @@ class HybridAutomaton
     }
 
     //! \brief Adds a new internal/output event with a given enabling \a guard condition and triggering \a invariant.
-    void new_action(DiscreteLocation location,
+    Void new_action(DiscreteLocation location,
                     DiscreteEvent event,
                     ContinuousPredicate guard,
                     EventKind kind=URGENT) {
@@ -342,14 +342,14 @@ class HybridAutomaton
     }
 
     //! \brief Adds an invariant to the automaton.
-    void new_invariant(DiscreteLocation location,
+    Void new_invariant(DiscreteLocation location,
                        ContinuousPredicate const& invariant,
                        DiscreteEvent event) {
         //this->_new_action(location,event,invariant,ContinuousPredicate(Tribool(false)),INVARIANT);
         this->_new_invariant_(location,invariant,event);
     }
 
-    void set_invariant(DiscreteLocation location,
+    Void set_invariant(DiscreteLocation location,
                        ContinuousPredicate const& invariant, 
                        DiscreteEvent event) {
         DiscreteMode& mode=this->_modes.value(location);
@@ -358,7 +358,7 @@ class HybridAutomaton
     }
 
     //! \brief Adds a guard to the automaton.
-    void new_guard(DiscreteLocation location,
+    Void new_guard(DiscreteLocation location,
                    DiscreteEvent event,
                    ContinuousPredicate const& guard,
                    EventKind kind) {
@@ -366,7 +366,7 @@ class HybridAutomaton
         this->_new_guard_(location,event,guard,kind);
     }
 
-    void set_guard(DiscreteLocation location, 
+    Void set_guard(DiscreteLocation location, 
                    DiscreteEvent event, 
                    ContinuousPredicate const& guard, 
                    EventKind kind) {
@@ -377,7 +377,7 @@ class HybridAutomaton
 
 
     //! \brief Adds an update/reset to the automaton.
-    void new_update(DiscreteLocation source,
+    Void new_update(DiscreteLocation source,
                     DiscreteEvent event,
                     DiscreteLocation target,
                     List<PrimedRealAssignment> const& reset) {
@@ -385,20 +385,20 @@ class HybridAutomaton
     }
 
     //! \brief Adds a discrete update to the automaton to a mode with no continuous state variables.
-    void new_update(DiscreteLocation source,
+    Void new_update(DiscreteLocation source,
                     DiscreteEvent event,
                     DiscreteLocation target) {
         this->_new_update(source,event,target,List<PrimedRealAssignment>());
     }
 
     //! \brief Adds a reset to an automaton with a single mode.
-    void new_update(DiscreteEvent event,
+    Void new_update(DiscreteEvent event,
                     List<PrimedRealAssignment> const& reset) {
         this->_new_update(DiscreteLocation(),event,DiscreteLocation(),List<PrimedRealAssignment>());
     }
 
     //! \brief Adds a reset to the automaton. (Same as new_update.)
-    void new_reset(DiscreteLocation source,
+    Void new_reset(DiscreteLocation source,
                    DiscreteEvent event,
                    DiscreteLocation target,
                    List<PrimedRealAssignment> const& reset) {
@@ -406,7 +406,7 @@ class HybridAutomaton
     }
 
     //! \brief Adds a reset to an automaton with a single mode.
-    void new_reset(DiscreteEvent event,
+    Void new_reset(DiscreteEvent event,
                     List<PrimedRealAssignment> const& reset) {
         this->_new_update(DiscreteLocation(),event,DiscreteLocation(),List<PrimedRealAssignment>());
     }
@@ -419,7 +419,7 @@ class HybridAutomaton
     //!    \param reset is the transition's reset.
     //!    \param guard is the transition's activation region.
     //!    \param urgency is a flag indicating whether the transition is urgent i.e. occurs as soon as it is activated.
-    void new_transition(DiscreteLocation source,
+    Void new_transition(DiscreteLocation source,
                         DiscreteEvent event,
                         DiscreteLocation target,
                         const List<PrimedRealAssignment>& reset,
@@ -433,7 +433,7 @@ class HybridAutomaton
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //! The reset is trivial. This form is for the case that there are no continuous state variables in the new location.
-    void new_transition(DiscreteLocation source,
+    Void new_transition(DiscreteLocation source,
                         DiscreteEvent event,
                         DiscreteLocation target,
                         ContinuousPredicate const& guard,
@@ -443,7 +443,7 @@ class HybridAutomaton
 
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
     //! The reset is trivial. This form is for the case that there are no continuous state variables in the new location.
-    void new_transition(DiscreteLocation source,
+    Void new_transition(DiscreteLocation source,
                         DiscreteEvent event,
                         ContinuousPredicate const& guard,
                         DiscreteLocation target,
@@ -453,7 +453,7 @@ class HybridAutomaton
 
     //! \brief Adds an unguarded transition to the automaton.
     //! The guard is the constant "True" i.e. the event is an input event.
-    void new_transition(DiscreteLocation source,
+    Void new_transition(DiscreteLocation source,
                         DiscreteEvent event,
                         DiscreteLocation target,
                         List<PrimedRealAssignment> const & reset) {
@@ -462,14 +462,14 @@ class HybridAutomaton
 
     //! \brief Adds an unguarded transition to the automaton.
     //! The guard is the constant "True" i.e. the event is an input event.
-    void new_transition(DiscreteLocation source,
+    Void new_transition(DiscreteLocation source,
                         DiscreteEvent event,
                         DiscreteLocation target) {
         this->_new_update(source,event,target,List<PrimedRealAssignment>());
     }
 
     //! \brief Adds a discrete transition for an automaton with a single mode.
-    void new_transition(DiscreteEvent event,
+    Void new_transition(DiscreteEvent event,
                         List<PrimedRealAssignment> const & reset,
                         ContinuousPredicate const& guard,
                         EventKind kind=urgent) {
@@ -491,7 +491,7 @@ class HybridAutomaton
     Set<DiscreteLocation> locations() const;
 
     //! \brief Test if the hybrid automaton has a discrete mode with the given exact \a location.
-    bool has_location(DiscreteLocation location) const;
+    Bool has_location(DiscreteLocation location) const;
 
 
     //! \brief The discrete mode with given discrete state.
@@ -500,7 +500,7 @@ class HybridAutomaton
 
     //! \brief Checks validity of the mode for the given \a location.
     //! Only checks for underspecified dynamics; overspecification is determined at build-time.
-    void check_mode(DiscreteLocation location) const;
+    Void check_mode(DiscreteLocation location) const;
     //@}
 
     //@{
@@ -533,16 +533,16 @@ class HybridAutomaton
     //! \brief The continuous state space in the given location.
     virtual RealSpace continuous_state_space(DiscreteLocation) const;
     //! \brief The dimension of the continuous state space in the given location.
-    virtual uint dimension(DiscreteLocation) const;
+    virtual Nat dimension(DiscreteLocation) const;
 
     //! \brief Test if the hybrid automaton has a discrete mode corresponding to the given location.
-    virtual bool has_mode(DiscreteLocation location) const;
+    virtual Bool has_mode(DiscreteLocation location) const;
     //! \brief Test if the hybrid automaton has an invariant (either explicit or from an urgent transition) with the given \a event label in \a location.
-    virtual bool has_invariant(DiscreteLocation location, DiscreteEvent event) const;
+    virtual Bool has_invariant(DiscreteLocation location, DiscreteEvent event) const;
     //! \brief Tests if the automaton has an invariant or transition corresponding to the given location and event.
-    virtual bool has_guard(DiscreteLocation, DiscreteEvent) const;
+    virtual Bool has_guard(DiscreteLocation, DiscreteEvent) const;
     //! \brief Test if the hybrid automaton has a discrete transition starting from the given location with the given event.
-    virtual bool has_transition(DiscreteLocation source, DiscreteEvent event) const;
+    virtual Bool has_transition(DiscreteLocation source, DiscreteEvent event) const;
     //! \brief The events which are active in the given location.
     virtual Set<DiscreteEvent> events(DiscreteLocation) const;
 
@@ -585,7 +585,7 @@ class CompositeHybridAutomaton
     , public Loggable
 {
     mutable DiscreteMode _cached_mode;
-    void _cache_mode(DiscreteLocation) const;
+    Void _cache_mode(DiscreteLocation) const;
   public:
     typedef HybridTime TimeType;
   public:
@@ -620,9 +620,9 @@ class CompositeHybridAutomaton
     const Identifier& name() const { return _name; }
 
     //! \brief The number of component automata.
-    uint number_of_components() const;
+    Nat number_of_components() const;
     //! \brief The \a i<sup>th</sup> component automaton.
-    const HybridAutomaton& component(uint i) const;
+    const HybridAutomaton& component(Nat i) const;
     //@}
 
     //@{
@@ -631,13 +631,13 @@ class CompositeHybridAutomaton
     //! The mode corresponding to the given location.
     DiscreteMode const& mode(DiscreteLocation) const;
     //! \brief Tests if the automaton has a mode corresponding to the given location.
-    bool has_mode(DiscreteLocation) const;
+    Bool has_mode(DiscreteLocation) const;
     //! \brief Tests if the automaton has an invariant corresponding to the given location and event.
-    bool has_invariant(DiscreteLocation, DiscreteEvent) const;
+    Bool has_invariant(DiscreteLocation, DiscreteEvent) const;
     //! \brief Tests if the automaton has an invariant or transition corresponding to the given location and event.
-    bool has_guard(DiscreteLocation, DiscreteEvent) const;
+    Bool has_guard(DiscreteLocation, DiscreteEvent) const;
     //! \brief Tests if the automaton has a transition corresponding to the given location and event.
-    bool has_transition(DiscreteLocation, DiscreteEvent) const;
+    Bool has_transition(DiscreteLocation, DiscreteEvent) const;
 
     //@}
 
@@ -681,7 +681,7 @@ class CompositeHybridAutomaton
     //! \brief The continuous state space in the given location.
     RealSpace continuous_state_space(DiscreteLocation) const;
     //! \brief The dimension of the continuous state space in the given location.
-    uint dimension(DiscreteLocation) const;
+    Nat dimension(DiscreteLocation) const;
 
     //! \brief The events which are active in the given location.
     Set<DiscreteEvent> events(DiscreteLocation) const;
@@ -711,11 +711,11 @@ class CompositeHybridAutomaton
     //!
     //! Includes a check for algebraic dependencies, over-defined variables, under-defined variables, and
     //! variables which should be defined in a reset but are not.
-    void check_mode(DiscreteLocation) const;
+    Void check_mode(DiscreteLocation) const;
     //! \brief Runs check_mode() in any mode reachable under the discrete dynamics from the given initial location.
-    void check_reachable_modes(DiscreteLocation) const;
+    Void check_reachable_modes(DiscreteLocation) const;
     //! \brief Runs check_mode() in any mode reachable under the discrete dynamics from the given initial locations.
-    void check_reachable_modes(const Set<DiscreteLocation>&) const;
+    Void check_reachable_modes(const Set<DiscreteLocation>&) const;
     //@}
 
     //@{

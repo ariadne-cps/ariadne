@@ -65,14 +65,14 @@ struct HybridTime
       : _continuous_time(ExactFloat(t)), _discrete_time(n) { }
     HybridTime(ExactFloat t, Integer n)
       : _continuous_time(t), _discrete_time(n) { }
-    HybridTime(double t, int n)
+    HybridTime(double t, Int n)
       : _continuous_time(t), _discrete_time(n) { }
-    HybridTime(int n, double t)
+    HybridTime(Int n, double t)
       : _continuous_time(t), _discrete_time(n) {
-          ARIADNE_FAIL_MSG("HybridTime(int,double) is incorrect; use HybridTime(Real,Integer) instead."); }
+          ARIADNE_FAIL_MSG("HybridTime(Int,double) is incorrect; use HybridTime(Real,Integer) instead."); }
 };
 
-inline bool same(const HybridTime& ht1, const HybridTime& ht2) {
+inline Bool same(const HybridTime& ht1, const HybridTime& ht2) {
     return same(ht1._continuous_time,ht2._continuous_time) &&
         ht1._discrete_time==ht2._discrete_time;
 }

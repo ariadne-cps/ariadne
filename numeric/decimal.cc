@@ -41,13 +41,13 @@ Decimal operator"" _dec(long double x)
 Decimal::Decimal(double x)
 {
     StringStream ss;
-    int s=+1;
+    Int s=+1;
     if(x<0) { s=-1; ss<<'-'; }
     double y=s*x;
-    static const uint sf=9;
+    static const Nat sf=9;
     static const double acc=1e-9;
     static const double tol=1e-15;
-    int exp=0; double pow=1;
+    Int exp=0; double pow=1;
     while(y<1.0) { y*=10; exp-=1; pow/=10; }
     while(y>=1.0) { y/=10; exp+=1; pow*=10; }
     long int n=std::floor(y/acc+0.5);
@@ -55,9 +55,9 @@ Decimal::Decimal(double x)
     if(std::fabs(re)>=tol) {
         ARIADNE_THROW(std::runtime_error,"Decimal(double)","double-precision floating-point number must have a relative error of "<<tol<<" with respect to its approximation to "<<sf<<" significant figures; number "<<std::setprecision(17)<<x<<" has a relative error of "<<re<<"");
     }
-    long int m=1e9; int c=0;
+    long int m=1e9; Int c=0;
     if(exp<=0) { ss << '0'; }
-    if(exp<0) { ss << '.'; for(int i=0; i!=-exp; ++i) { ss << "0"; } }
+    if(exp<0) { ss << '.'; for(Int i=0; i!=-exp; ++i) { ss << "0"; } }
     while(n!=0) {
         if(exp==0) { ss << "."; }
         m/=10;
@@ -75,7 +75,7 @@ Decimal::Decimal(StringType str)
     : _str(str)
 {
     // Parse string to ensure correctness
-    bool found_decimal_point=false;
+    Bool found_decimal_point=false;
     const char* c_ptr=str.c_str();
     const char& c=*c_ptr;
     if(c=='-' || c=='+') {
@@ -108,9 +108,9 @@ OutputStream& operator<<(OutputStream& os, Decimal const& d) {
 
 Decimal::operator Rational() const {
     Rational q;
-    bool decimal_point=false;
-    uint decimal_places=0;
-    int sign=1;
+    Bool decimal_point=false;
+    Nat decimal_places=0;
+    Int sign=1;
     const char* c_ptr=this->_str.c_str();
     const char& c=*c_ptr;
     if(c=='-') {
@@ -138,7 +138,7 @@ Decimal::operator Rational() const {
         }
         ++c_ptr;
     }
-    for(uint i=0; i!=decimal_places; ++i) {
+    for(Nat i=0; i!=decimal_places; ++i) {
         q=q/10;
     }
     return sign*q;

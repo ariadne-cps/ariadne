@@ -154,7 +154,7 @@ class Expression {
 
 template<class T>
 struct ExpressionNode {
-    mutable uint count;
+    mutable Nat count;
     Operator op;
     virtual ~ExpressionNode();
     explicit ExpressionNode(const Operator& o) : count(0u), op(o) { }
@@ -252,7 +252,7 @@ Expression<R> make_expression(Op op, const Expression<A1>& e1, Expression<A2> e2
 
 
 template<class T> inline OutputStream& operator<<(OutputStream& os, const ExpressionNode<T>* e) {
-    return os << (void*)(e);
+    return os << (Void*)(e);
 }
 
 

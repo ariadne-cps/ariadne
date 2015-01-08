@@ -64,7 +64,7 @@ class CurveInterface
     /*! \brief Return a new dynamically-allocated copy of the curve. */
     virtual CurveInterface* clone() const = 0;
     /*! \brief The dimension of the space the curve lies in. */
-    virtual uint dimension() const = 0;
+    virtual Nat dimension() const = 0;
     /*! \brief The smoothness of the curve. */
     virtual ushort smoothness() const = 0;
 
@@ -101,7 +101,7 @@ class Curve
     /*! \brief Return a new dynamically-allocated copy of the constraint. */
     virtual Curve* clone() const;
     /*! \brief The dimension of the set. */
-    virtual uint dimension() const;
+    virtual Nat dimension() const;
     /*! \brief The smoothness of the curve. */
     virtual ushort smoothness() const;
 
@@ -143,13 +143,13 @@ class InterpolatedCurve
     InterpolatedCurve(const PointType& pt0, const PointType& pt1)
         : _points() { this->insert(0,pt0); this->insert(1,pt1); }
     /*! \brief Insert a point with parameter value \a s and spacial value \a pt. */
-    void insert(const ParameterType& s, const PointType& pt);
-    void insert(const RawFloat& s, const Vector<RawFloat>& pt);
+    Void insert(const ParameterType& s, const PointType& pt);
+    Void insert(const RawFloat& s, const Vector<RawFloat>& pt);
 
     /*! \brief The number of segments in the curve. */
     SizeType size() const { return this->_points.size(); }
     /*! \brief The dimension of the Euclidean space the line segment lies in. */
-    uint dimension() const { return this->_points.begin()->second.size(); }
+    Nat dimension() const { return this->_points.begin()->second.size(); }
     /*! \brief An Iterator to the first point in the curve. */
     ConstIterator begin() const { return this->_points.begin(); }
     /*! \brief An Iterator to the end point in the curve, NOT the one-past-the-end! */
@@ -158,7 +158,7 @@ class InterpolatedCurve
     /*! \brief A dynamically-allocated copy. */
     virtual InterpolatedCurve* clone() const;
     /*! \brief Draw on a two-dimensional canvas. */
-    virtual void draw(CanvasInterface& c, const Projection2d& p) const;
+    virtual Void draw(CanvasInterface& c, const Projection2d& p) const;
     /*! \brief A bounding box for the curve. */
     virtual UpperBox bounding_box() const;
 

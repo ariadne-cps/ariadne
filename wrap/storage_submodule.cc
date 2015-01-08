@@ -69,8 +69,8 @@ class PyGridTreeSetBoxConstIterator {
     PyGridTreeSetBoxConstIterator(GridTreeSet::ConstIterator iter) : _iter(iter) { }
     const ExactBox operator*() const { return this->_iter->box(); }
     PyGridTreeSetBoxConstIterator& operator++() { ++this->_iter; return *this; }
-    PyGridTreeSetBoxConstIterator operator++(int) { PyGridTreeSetBoxConstIterator ret(*this); ++this->_iter; return ret; }
-    bool operator==(const PyGridTreeSetBoxConstIterator& other) { return this->_iter==other._iter; }
+    PyGridTreeSetBoxConstIterator operator++(Int) { PyGridTreeSetBoxConstIterator ret(*this); ++this->_iter; return ret; }
+    Bool operator==(const PyGridTreeSetBoxConstIterator& other) { return this->_iter==other._iter; }
   private:
     GridTreeSet::ConstIterator _iter;
 };
@@ -86,14 +86,14 @@ PyGridTreeSetBoxConstIterator py_boxes_end(const GridTreeSubset& gts) {
 
 
 
-void export_grid()
+Void export_grid()
 {
     typedef Vector<Float> RVector;
     typedef Vector<ExactInterval> IVector;
 
     class_< Grid > grid_class("Grid",no_init);
-    grid_class.def(init<uint>());
-    grid_class.def(init<uint,Float>());
+    grid_class.def(init<Nat>());
+    grid_class.def(init<Nat,Float>());
     grid_class.def(init< Vector<Float>, Vector<Float> >());
     grid_class.def("dimension", &Grid::dimension);
     grid_class.def("origin", &Grid::origin, return_value_policy<copy_const_reference>());
@@ -102,14 +102,14 @@ void export_grid()
 }
 
 
-void export_grid_cell()
+Void export_grid_cell()
 {
 
     class_<GridCell> grid_cell_class("GridCell",no_init);
     grid_cell_class.def("dimension", &GridCell::dimension);
     grid_cell_class.def("depth", &GridCell::depth);
     grid_cell_class.def("split", (std::pair<GridCell,GridCell>(GridCell::*)()const) &GridCell::split);
-    grid_cell_class.def("split", (GridCell(GridCell::*)(bool)const) &GridCell::split);
+    grid_cell_class.def("split", (GridCell(GridCell::*)(Bool)const) &GridCell::split);
     grid_cell_class.def("box", &GridCell::box, return_value_policy<copy_const_reference>());
     grid_cell_class.def(self_ns::str(self));
 
@@ -119,12 +119,12 @@ void export_grid_cell()
 }
 
 
-void export_grid_tree_set() {
+Void export_grid_tree_set() {
 
     class_<GridTreeSubset> grid_tree_subset_class("GridTreeSubset",no_init);
 
     class_<GridTreeSet, bases<GridTreeSubset,DrawableInterface> > grid_tree_set_class("GridTreeSet",init<GridTreeSet>());
-    grid_tree_set_class.def(init<uint>());
+    grid_tree_set_class.def(init<Nat>());
     grid_tree_set_class.def(init<Grid>());
     grid_tree_set_class.def("bounding_box", &GridTreeSet::bounding_box);
     grid_tree_set_class.def("empty", &GridTreeSet::empty);
@@ -135,13 +135,13 @@ void export_grid_tree_set() {
     grid_tree_set_class.def("recombine", &GridTreeSet::recombine);
     grid_tree_set_class.def("grid", &GridTreeSet::grid,return_value_policy<copy_const_reference>());
     grid_tree_set_class.def("measure", &GridTreeSet::measure);
-    grid_tree_set_class.def("adjoin", (void(GridTreeSet::*)(const GridCell&))(&GridTreeSet::adjoin));
-    grid_tree_set_class.def("adjoin", (void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::adjoin));
-    grid_tree_set_class.def("restrict", (void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::restrict));
-    grid_tree_set_class.def("remove", (void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::remove));
-    grid_tree_set_class.def("adjoin_over_approximation", (void(GridTreeSet::*)(const ExactBox&,const uint)) &GridTreeSet::adjoin_over_approximation);
-    grid_tree_set_class.def("adjoin_outer_approximation", (void(GridTreeSet::*)(const CompactSetInterface&,const uint)) &GridTreeSet::adjoin_outer_approximation);
-    grid_tree_set_class.def("adjoin_inner_approximation", (void(GridTreeSet::*)(const OpenSetInterface&,const uint,const uint)) &GridTreeSet::adjoin_inner_approximation);
+    grid_tree_set_class.def("adjoin", (Void(GridTreeSet::*)(const GridCell&))(&GridTreeSet::adjoin));
+    grid_tree_set_class.def("adjoin", (Void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::adjoin));
+    grid_tree_set_class.def("restrict", (Void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::restrict));
+    grid_tree_set_class.def("remove", (Void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::remove));
+    grid_tree_set_class.def("adjoin_over_approximation", (Void(GridTreeSet::*)(const ExactBox&,const Nat)) &GridTreeSet::adjoin_over_approximation);
+    grid_tree_set_class.def("adjoin_outer_approximation", (Void(GridTreeSet::*)(const CompactSetInterface&,const Nat)) &GridTreeSet::adjoin_outer_approximation);
+    grid_tree_set_class.def("adjoin_inner_approximation", (Void(GridTreeSet::*)(const OpenSetInterface&,const Nat,const Nat)) &GridTreeSet::adjoin_inner_approximation);
     grid_tree_set_class.def("__len__", &GridTreeSet::size);
     //grid_tree_set_class.def("__iter__", boost::python::Iterator<const GridTreeSet>());
     grid_tree_set_class.def("__iter__", range(&py_cells_begin,&py_cells_end));
@@ -152,18 +152,18 @@ void export_grid_tree_set() {
     def("union",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&join));
     def("difference",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&difference));
     def("intersection",(GridTreeSet(*)(const GridTreeSubset&,const GridTreeSubset&))(&intersection));
-    def("intersect",(bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&intersect));
-    def("subset",(bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&subset));
-    def("intersect",(bool(*)(const GridCell&,const GridTreeSubset&))(&intersect));
-    def("subset",(bool(*)(const GridCell&,const GridTreeSubset&))(&subset));
+    def("intersect",(Bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&intersect));
+    def("subset",(Bool(*)(const GridTreeSubset&,const GridTreeSubset&))(&subset));
+    def("intersect",(Bool(*)(const GridCell&,const GridTreeSubset&))(&intersect));
+    def("subset",(Bool(*)(const GridCell&,const GridTreeSubset&))(&subset));
 
-    def("outer_approximation",(GridTreeSet(*)(const CompactSetInterface&,const Grid&,const uint)) &outer_approximation);
-    def("inner_approximation",(GridTreeSet(*)(const OpenSetInterface&,const Grid&,const uint,const uint)) &inner_approximation);
+    def("outer_approximation",(GridTreeSet(*)(const CompactSetInterface&,const Grid&,const Nat)) &outer_approximation);
+    def("inner_approximation",(GridTreeSet(*)(const OpenSetInterface&,const Grid&,const Nat,const Nat)) &inner_approximation);
 
 }
 
 
-void storage_submodule()
+Void storage_submodule()
 {
     export_grid();
     export_grid_cell();

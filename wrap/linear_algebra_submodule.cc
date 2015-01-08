@@ -43,29 +43,29 @@ namespace Ariadne {
 
 
 template<class X>
-X __vgetitem__(const Vector<X>& v, int i)
+X __vgetitem__(const Vector<X>& v, Int i)
 {
     if(i<0) { i+=v.size(); }
-    ARIADNE_ASSERT_MSG(0<=i && uint(i)<v.size(),"v="<<v<<" i="<<i);
+    ARIADNE_ASSERT_MSG(0<=i && Nat(i)<v.size(),"v="<<v<<" i="<<i);
     return v[i];
 }
 
 
 template<class X>
-Vector<X> __vgetslice__(const Vector<X>& v, int start, int stop)
+Vector<X> __vgetslice__(const Vector<X>& v, Int start, Int stop)
 {
     if(start<0) { start+=v.size(); }
     if(stop<0) { stop+=v.size(); }
-    ARIADNE_ASSERT(0<=start && start<=stop && uint(stop)<=v.size());
+    ARIADNE_ASSERT(0<=start && start<=stop && Nat(stop)<=v.size());
     return project(v,range(start,stop));
 }
 
 
 template<class X>
-void __vsetitem__(Vector<X>& v, int i, const X& x)
+Void __vsetitem__(Vector<X>& v, Int i, const X& x)
 {
     if(i<0) { i+=v.size(); }
-    ARIADNE_ASSERT(0<=i && uint(i)<v.size());
+    ARIADNE_ASSERT(0<=i && Nat(i)<v.size());
     v[i]=x;
 }
 
@@ -73,16 +73,16 @@ void __vsetitem__(Vector<X>& v, int i, const X& x)
 template<class X>
 X __mgetitem__(const Matrix<X>& A, const boost::python::tuple& tup)
 {
-    uint i=boost::python::extract<uint>(tup[0]);
-    uint j=boost::python::extract<uint>(tup[1]);
+    Nat i=boost::python::extract<Nat>(tup[0]);
+    Nat j=boost::python::extract<Nat>(tup[1]);
     return A[i][j];
 }
 
 template<class X>
-void __msetitem__(Matrix<X>& A, const boost::python::tuple& tup, const X& x)
+Void __msetitem__(Matrix<X>& A, const boost::python::tuple& tup, const X& x)
 {
-    uint i=boost::python::extract<uint>(tup[0]);
-    uint j=boost::python::extract<uint>(tup[1]);
+    Nat i=boost::python::extract<Nat>(tup[0]);
+    Nat j=boost::python::extract<Nat>(tup[1]);
     A[i][j]=x;
 }
 
@@ -96,17 +96,17 @@ struct from_python< Vector<X> >
         converter::registry::push_back(&convertible,&construct,type_id< Vector<X> >());
     }
 
-    static void* convertible(PyObject* obj_ptr) {
+    static Void* convertible(PyObject* obj_ptr) {
         if (!PyList_Check(obj_ptr)) { return 0; }
         return obj_ptr;
     }
 
-    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data)
+    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data)
     {
         list lst=extract<list>(obj_ptr);
-        void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*)   data)->storage.bytes;
+        Void* storage = ((converter::rvalue_from_python_storage< Vector<X> >*)   data)->storage.bytes;
         Vector<X> res(len(lst));
-        for(uint i=0; i!=res.size(); ++i) { res[i]=extract<X>(lst[i]); }
+        for(Nat i=0; i!=res.size(); ++i) { res[i]=extract<X>(lst[i]); }
         new (storage) Vector<X>(res);
         data->convertible = storage;
     }
@@ -120,21 +120,21 @@ struct from_python< Matrix<X> >
         converter::registry::push_back(&convertible,&construct,type_id< Matrix<X> >());
     }
 
-    static void* convertible(PyObject* obj_ptr) {
+    static Void* convertible(PyObject* obj_ptr) {
         if (!PyList_Check(obj_ptr)) { return 0; }
         return obj_ptr;
     }
 
-    static void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data)
+    static Void construct(PyObject* obj_ptr,converter::rvalue_from_python_stage1_data* data)
     {
         list rows=extract<list>(obj_ptr);
         Matrix<X> res(len(rows),len(extract<list>(rows[0])));
-        for(uint i=0; i!=res.row_size(); ++i) {
+        for(Nat i=0; i!=res.row_size(); ++i) {
             list elmnts=extract<list>(rows[i]);
-            ARIADNE_ASSERT(uint(len(elmnts))==res.column_size());
-            for(uint j=0; j!=res.column_size(); ++j) {
+            ARIADNE_ASSERT(Nat(len(elmnts))==res.column_size());
+            for(Nat j=0; j!=res.column_size(); ++j) {
                 res[i][j]=extract<X>(elmnts[j]); } }
-        void* storage = ((converter::rvalue_from_python_storage< Matrix<X> >*)   data)->storage.bytes;
+        Void* storage = ((converter::rvalue_from_python_storage< Matrix<X> >*)   data)->storage.bytes;
         new (storage) Matrix<X>(res);
         data->convertible = storage;
     }
@@ -149,12 +149,12 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<Real>& rep
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Vector<X> >& repr) {
     Vector<X> const& v=repr.reference();
-    os << "["; for(uint i=0; i!=v.size(); ++i) { if(i!=0) { os << ","; } os << python_representation(v[i]); } os << "]"; return os;
+    os << "["; for(Nat i=0; i!=v.size(); ++i) { if(i!=0) { os << ","; } os << python_representation(v[i]); } os << "]"; return os;
 }
 
 template<class X> OutputStream& operator<<(OutputStream& os, const PythonRepresentation< Matrix<X> >& repr) {
     Matrix<X> const& A=repr.reference();
-    os << "["; for(uint i=0; i!=A.row_size(); ++i) { if(i!=0) { os << ","; } os << "["; for(uint j=0; j!=A.column_size(); ++j) {
+    os << "["; for(Nat i=0; i!=A.row_size(); ++i) { if(i!=0) { os << ","; } os << "["; for(Nat j=0; j!=A.column_size(); ++j) {
         if(j!=0) { os << ","; } os << python_representation(A[i][j]); } os << "]"; } os << "]"; return os;
 }
 
@@ -169,18 +169,18 @@ template<class X> Vector<X> __join__(const X& s1, const X& s2) { return join(s1,
 
 
 template<class X>
-void export_vector_class(class_<Vector<X> >& vector_class)
+Void export_vector_class(class_<Vector<X> >& vector_class)
 {
-    vector_class.def(init<int>());
-    vector_class.def(init<int,X>());
+    vector_class.def(init<Int>());
+    vector_class.def(init<Int,X>());
     vector_class.def("size", &Vector<X>::size);
     vector_class.def("__len__", &Vector<X>::size);
     vector_class.def("__setitem__", &__vsetitem__<X>);
     vector_class.def("__setitem__", &__vsetitem__<X>);
     vector_class.def("__getitem__", &__vgetitem__<X>);
     vector_class.def("__getslice__", &__vgetslice__<X>);
-    vector_class.def("__eq__", &__eq__<bool,Vector<X>,Vector<X> >);
-    vector_class.def("__ne__", &__ne__<bool,Vector<X>,Vector<X> >);
+    vector_class.def("__eq__", &__eq__<Bool,Vector<X>,Vector<X> >);
+    vector_class.def("__ne__", &__ne__<Bool,Vector<X>,Vector<X> >);
     vector_class.def("__pos__", &__pos__< Vector<X>, Vector<X> >);
     vector_class.def("__neg__", &__neg__< Vector<X>, Vector<X> >);
     vector_class.def("__str__",&__cstr__< Vector<X> >);
@@ -202,14 +202,14 @@ void export_vector_class(class_<Vector<X> >& vector_class)
 }
 
 template<class X, class Y>
-void export_vector_conversion(class_<Vector<X> >& vector_class)
+Void export_vector_conversion(class_<Vector<X> >& vector_class)
 {
-    //vector_class.def(init<int,Y>());
+    //vector_class.def(init<Int,Y>());
     vector_class.def(init< Vector<Y> >());
 }
 
 template<class R, class X, class Y>
-void export_vector_arithmetic(class_<Vector<X> >& vector_class)
+Void export_vector_arithmetic(class_<Vector<X> >& vector_class)
 {
     vector_class.def("__add__",__add__< Vector<R>, Vector<X>, Vector<Y> >);
     vector_class.def("__sub__",__sub__< Vector<R>, Vector<X>, Vector<Y> >);
@@ -223,7 +223,7 @@ void export_vector_arithmetic(class_<Vector<X> >& vector_class)
 }
 
 
-template<class X> void export_vector()
+template<class X> Void export_vector()
 {
     class_< Vector<X> > vector_class(python_name<X>("Vector"),init< Vector<X> >());
     export_vector_class<X>(vector_class);
@@ -232,13 +232,13 @@ template<class X> void export_vector()
 }
 
 
-template<> void export_vector<ExactFloat>()
+template<> Void export_vector<ExactFloat>()
 {
     class_< Vector<ExactFloat> > exact_vector_class("ExactFloatVector",init< Vector<ExactFloat> >());
     export_vector_class<ExactFloat>(exact_vector_class);
 }
 
-template<> void export_vector<ValidatedFloat>()
+template<> Void export_vector<ValidatedFloat>()
 {
     class_< Vector<ValidatedFloat> > validated_vector_class("ValidatedFloatVector",init< Vector<ValidatedFloat> >());
     export_vector_class<ValidatedFloat>(validated_vector_class);
@@ -250,7 +250,7 @@ template<> void export_vector<ValidatedFloat>()
     implicitly_convertible< Vector<ExactFloat>, Vector<ValidatedFloat> >();
 }
 
-template<> void export_vector<ApproximateFloat>()
+template<> Void export_vector<ApproximateFloat>()
 {
     class_< Vector<ApproximateFloat> > approximate_vector_class("RawFloatVector",init< Vector<ApproximateFloat> >());
     export_vector_class<ApproximateFloat>(approximate_vector_class);
@@ -266,11 +266,11 @@ template<> void export_vector<ApproximateFloat>()
 
 
 template<class X>
-void export_matrix_class(class_<Matrix<X> >& matrix_class)
+Void export_matrix_class(class_<Matrix<X> >& matrix_class)
 {
-    typedef uint SizeType;
+    typedef Nat SizeType;
 
-    matrix_class.def(init<int,int>());
+    matrix_class.def(init<Int,Int>());
     matrix_class.def("rows", &Matrix<X>::row_size);
     matrix_class.def("columns", &Matrix<X>::column_size);
     matrix_class.def("row_size", &Matrix<X>::row_size);
@@ -290,13 +290,13 @@ void export_matrix_class(class_<Matrix<X> >& matrix_class)
 
 
 template<class X, class Y>
-void export_matrix_conversion(class_<Matrix<X> >& matrix_class)
+Void export_matrix_conversion(class_<Matrix<X> >& matrix_class)
 {
     matrix_class.def(init< Matrix<Y> >());
 }
 
 template<class R, class X, class Y>
-void export_matrix_arithmetic(class_<Matrix<X> >& matrix_class)
+Void export_matrix_arithmetic(class_<Matrix<X> >& matrix_class)
 {
     matrix_class.def("__add__", &__add__< Matrix<R>, Matrix<X>, Matrix<Y> >);
     matrix_class.def("__sub__", &__sub__< Matrix<R>, Matrix<X>, Matrix<Y> >);
@@ -309,7 +309,7 @@ void export_matrix_arithmetic(class_<Matrix<X> >& matrix_class)
 }
 
 template<class X>
-void export_matrix_operations(class_<Matrix<X> >& matrix_class)
+Void export_matrix_operations(class_<Matrix<X> >& matrix_class)
 {
     def("norm",(X(*)(const Matrix<X>&)) &norm);
     def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);
@@ -320,7 +320,7 @@ void export_matrix_operations(class_<Matrix<X> >& matrix_class)
 }
 
 
-template<class X> void export_matrix()
+template<class X> Void export_matrix()
 {
     class_< Matrix<X> > matrix_class(python_name<X>("Matrix"),init< Matrix<X> >());
     export_matrix_class<X>(matrix_class);
@@ -331,14 +331,14 @@ template<class X> void export_matrix()
 
 }
 
-template<> void export_matrix<ExactFloat>()
+template<> Void export_matrix<ExactFloat>()
 {
     class_< Matrix<ExactFloat> > matrix_class(python_name<ExactFloat>("Matrix"),no_init);
     matrix_class.def(init<PivotMatrix>());
     export_matrix_class<ExactFloat>(matrix_class);
 }
 
-template<> void export_matrix<ValidatedFloat>()
+template<> Void export_matrix<ValidatedFloat>()
 {
     class_< Matrix<ValidatedFloat> > matrix_class(python_name<ValidatedFloat>("Matrix"),no_init);
     export_matrix_class<ValidatedFloat>(matrix_class);
@@ -357,7 +357,7 @@ template<> void export_matrix<ValidatedFloat>()
     //implicitly_convertible< Matrix<ApproximateFloat>, Matrix<ValidatedFloat> >();
 }
 
-template<> void export_matrix<ApproximateFloat>()
+template<> Void export_matrix<ApproximateFloat>()
 {
     class_< Matrix<ApproximateFloat> > matrix_class(python_name<ApproximateFloat>("Matrix"),no_init);
     export_matrix_class<ApproximateFloat>(matrix_class);
@@ -377,10 +377,10 @@ template<> void export_matrix<ApproximateFloat>()
 }
 
 
-template<class X> void export_diagonal_matrix()
+template<class X> Void export_diagonal_matrix()
 {
     class_< DiagonalMatrix<X> > diagonal_matrix_class(python_name<X>("DiagonalMatrix"),no_init);
-    diagonal_matrix_class.def(init< uint >());
+    diagonal_matrix_class.def(init< Nat >());
     diagonal_matrix_class.def(init< Vector<X> >());
     diagonal_matrix_class.def("__setitem__", &DiagonalMatrix<X>::set);
     diagonal_matrix_class.def("__getitem__", &DiagonalMatrix<X>::get, return_value_policy<copy_const_reference>());
@@ -400,7 +400,7 @@ template<class X> void export_diagonal_matrix()
     //def("inverse", (DiagonalMatrix<X>(*)(const DiagonalMatrix<X>&)) &inverse<X>);
 }
 
-void export_pivot_matrix()
+Void export_pivot_matrix()
 {
 
     implicitly_convertible< PivotMatrix, Matrix<ExactFloat> >();
@@ -411,20 +411,20 @@ void export_pivot_matrix()
 }
 
 
-template void export_vector<ApproximateFloat>();
-template void export_vector<ValidatedFloat>();
-template void export_matrix<ApproximateFloat>();
-template void export_matrix<ValidatedFloat>();
+template Void export_vector<ApproximateFloat>();
+template Void export_vector<ValidatedFloat>();
+template Void export_matrix<ApproximateFloat>();
+template Void export_matrix<ValidatedFloat>();
 
-template void export_diagonal_matrix<ApproximateFloat>();
+template Void export_diagonal_matrix<ApproximateFloat>();
 
 #ifdef HAVE_GMPXX_H
-template void export_vector<Rational>();
-template void export_matrix<Rational>();
+template Void export_vector<Rational>();
+template Void export_matrix<Rational>();
 #endif
 
 
-void linear_algebra_submodule() {
+Void linear_algebra_submodule() {
     export_vector<ApproximateFloat>();
     export_vector<ValidatedFloat>();
 

@@ -43,21 +43,21 @@ using namespace Ariadne;
 class TestFloat
 {
   public:
-    void test();
+    Void test();
   private:
-    void test_concept();
-    void test_class();
-    void test_conversion();
-    void test_stream();
-    void test_comparison();
-    void test_rounding();
-    void test_arithmetic();
-    void test_cosine();
-    void test_function();
+    Void test_concept();
+    Void test_class();
+    Void test_conversion();
+    Void test_stream();
+    Void test_comparison();
+    Void test_rounding();
+    Void test_arithmetic();
+    Void test_cosine();
+    Void test_function();
 };
 
 
-int main() {
+Int main() {
     std::cout<<std::setprecision(20);
     std::cerr<<std::setprecision(20);
 
@@ -67,7 +67,7 @@ int main() {
 }
 
 
-void
+Void
 TestFloat::test()
 {
     //ARIADNE_TEST_CALL(test_concept());
@@ -86,12 +86,12 @@ TestFloat::test()
 
 // Test that the type implements all operations of
 // the Float concept without testing correctness
-void
+Void
 TestFloat::test_concept()
 {
-    bool b=true;
-    int n=1;
-    uint m=1;
+    Bool b=true;
+    Int n=1;
+    Nat m=1;
     double d=1;
     Float x=1;
 
@@ -121,7 +121,7 @@ TestFloat::test_concept()
 
     x=med_approx(x,x); x=rad_up(x,x);
 
-    // Mixed Float/int arithmetic
+    // Mixed Float/Int arithmetic
     x=mul_approx(n,x); x=mul_down(n,x); x=mul_up(n,x); // x=mul_chop(n,x);
     x=mul_approx(m,x); x=mul_down(m,x); x=mul_up(m,x); // x=mul_chop(m,x);
     x=mul_approx(x,n); x=mul_down(x,n); x=mul_up(x,n); // x=mul_chop(x,n);
@@ -160,11 +160,11 @@ TestFloat::test_concept()
 }
 
 
-void
+Void
 TestFloat::test_class()
 {
     cout << __PRETTY_FUNCTION__ << endl;
-    // Construct from an int
+    // Construct from an Int
     Float f1(2);
     ARIADNE_TEST_ASSERT(f1==2);
     // Construct from a double
@@ -174,7 +174,7 @@ TestFloat::test_class()
     Float f3(f2);
     ARIADNE_TEST_ASSERT(f3==f2);
 
-    // Assign from an int
+    // Assign from an Int
     f1=3;
     ARIADNE_TEST_ASSERT(f1==3);
     // Assign from a double
@@ -187,18 +187,18 @@ TestFloat::test_class()
 }
 
 
-void
+Void
 TestFloat::test_conversion()
 {
     cout << __PRETTY_FUNCTION__ << endl;
 
     // Convert from integers
-    int n;
-    n=std::numeric_limits<int>::min();
+    Int n;
+    n=std::numeric_limits<Int>::min();
     ARIADNE_TEST_ASSERT(Float(n)==n);
-    n=std::numeric_limits<int>::max();
+    n=std::numeric_limits<Int>::max();
     ARIADNE_TEST_ASSERT(Float(n)==n);
-    n=std::numeric_limits<unsigned int>::max();
+    n=std::numeric_limits<Nat>::max();
     ARIADNE_TEST_ASSERT(Float(n)==n);
 
     // Conversion from long integers cannot be performed exactly, so is banned
@@ -230,7 +230,7 @@ TestFloat::test_conversion()
 };
 
 
-void
+Void
 TestFloat::test_stream()
 {
     cout << __PRETTY_FUNCTION__ << endl;
@@ -271,7 +271,7 @@ TestFloat::test_stream()
 }
 
 
-void
+Void
 TestFloat::test_comparison()
 {
     cout << __PRETTY_FUNCTION__ << endl;
@@ -295,12 +295,12 @@ TestFloat::test_comparison()
     ARIADNE_TEST_ASSERT(f2>=f3); ARIADNE_TEST_ASSERT(!(f2< f3));
 
     // Test comparison with in integer
-    int i2=1;
+    Int i2=1;
     ARIADNE_TEST_ASSERT(!(f1==i2)); ARIADNE_TEST_ASSERT(f1!=i2);
     ARIADNE_TEST_ASSERT(!(f1<=i2)); ARIADNE_TEST_ASSERT(f1> i2);
     ARIADNE_TEST_ASSERT(f1>=i2); ARIADNE_TEST_ASSERT(!(f1< i2));
 
-    int i1=1;
+    Int i1=1;
     ARIADNE_TEST_ASSERT(!(i1==f2)); ARIADNE_TEST_ASSERT(i1!=f2);
     ARIADNE_TEST_ASSERT(!(i1<=f2)); ARIADNE_TEST_ASSERT(i1> f2);
     ARIADNE_TEST_ASSERT(i1>=f2); ARIADNE_TEST_ASSERT(!(i1< f2));
@@ -329,7 +329,7 @@ TestFloat::test_comparison()
 
 }
 
-void
+Void
 TestFloat::test_rounding()
 {
     volatile double one   = 1;
@@ -372,7 +372,7 @@ TestFloat::test_rounding()
     ARIADNE_TEST_EQUAL(twofifthsroundnearest, twofifthsnearest);
 }
 
-void
+Void
 TestFloat::test_arithmetic()
 {
     cout << __PRETTY_FUNCTION__ << endl;
@@ -498,13 +498,13 @@ TestFloat::test_arithmetic()
     ARIADNE_TEST_ASSERT(floor(f3)==-2); ARIADNE_TEST_ASSERT(ceil(f3)==-2);
 
     // Conversion to integer types
-    int i3,i4;
-    i3=numeric_cast<int>(floor(f1));
-    i4=numeric_cast<int>(ceil(f1));
+    Int i3,i4;
+    i3=numeric_cast<Int>(floor(f1));
+    i4=numeric_cast<Int>(ceil(f1));
     cout << i3 << " < " << f1 << " < " << i4 << endl;
     ARIADNE_TEST_ASSERT(i3==1); ARIADNE_TEST_ASSERT(i4==2);
-    i3=numeric_cast<int>(floor(f2));
-    i4=numeric_cast<int>(ceil(f2));
+    i3=numeric_cast<Int>(floor(f2));
+    i4=numeric_cast<Int>(ceil(f2));
     cout << i3 << " < " << f2 << " < " << i4 << endl;
     ARIADNE_TEST_ASSERT(i3==-4); ARIADNE_TEST_ASSERT(i4==-3);
 
@@ -529,7 +529,7 @@ TestFloat::test_arithmetic()
 }
 
 
-void
+Void
 TestFloat::test_function()
 {
     cout << __PRETTY_FUNCTION__ << endl;
@@ -561,7 +561,7 @@ TestFloat::test_function()
     //test_inverse_pair("tanh",&tanh_down,&tanh_up,&atanh_down,&atanh_up);
 }
 
-void
+Void
 TestFloat::test_cosine()
 
 {

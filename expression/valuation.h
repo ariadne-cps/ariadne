@@ -80,9 +80,9 @@ class Valuation
     Valuation(const Map<Identifier,ValueType>& m) : _values(m) { }
     Valuation(const Assignment<Variable<T>,X>& a);
     Valuation(const List<Assignment<Variable<T>,X> >& la);
-    void insert(const Variable<Type>& v, const ValueType& s) { this->_values.insert(v.name(),s); }
+    Void insert(const Variable<Type>& v, const ValueType& s) { this->_values.insert(v.name(),s); }
     //! \brief Set the value associated with variable \a v to \a s.
-    void set(const Variable<Type>& v, const ValueType& s) { this->_values[v.name()]=s; }
+    Void set(const Variable<Type>& v, const ValueType& s) { this->_values[v.name()]=s; }
     //! \brief Get the value associated with variable \a v.
     const ValueType& get(const Variable<Type>& v) const { return _values[v.name()]; }
     const ValueType& operator[](const Identifier& nm) const { return _values[nm]; }
@@ -99,8 +99,8 @@ class Valuation
     Map<Identifier,ValueType> _values;
 };
 
-template<class V, class X> bool operator==(const Valuation<V,X>& v1, const Valuation<V,X>& v2) {
-    bool identical = true;
+template<class V, class X> Bool operator==(const Valuation<V,X>& v1, const Valuation<V,X>& v2) {
+    Bool identical = true;
     const Map<Identifier,X>& v1sm=v1.values();
     const Map<Identifier,X>& v2sm=v2.values();
     typename Map<Identifier,X>::ConstIterator v1iter=v1sm.begin();
@@ -149,7 +149,7 @@ class DiscreteValuation
     const Map<Identifier,IntegerType>& integer_values() const { return Valuation<Integer>::values(); }
 };
 
-inline bool operator==(const DiscreteValuation& v1, const DiscreteValuation& v2) {
+inline Bool operator==(const DiscreteValuation& v1, const DiscreteValuation& v2) {
     return static_cast<const StringValuation&>(v1)==static_cast<const StringValuation&>(v2)
         && static_cast<const IntegerValuation&>(v1)==static_cast<const IntegerValuation&>(v2); }
 
@@ -212,7 +212,7 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, const Valuat
 
 template<class V, class X> Valuation<V,X>::Valuation(const Assignment<Variable<V>,X>& a) { this->insert(a.lhs,a.rhs); }
 template<class V, class X> Valuation<V,X>::Valuation(const List<Assignment<Variable<V>,X> >& la) {
-    for(uint i=0; i!=la.size(); ++i) { this->insert(la[i].lhs,la[i].rhs); } }
+    for(Nat i=0; i!=la.size(); ++i) { this->insert(la[i].lhs,la[i].rhs); } }
 Boolean evaluate(const Expression<Boolean>&, const StringValuation&);
 String evaluate(const Expression<String>&, const StringValuation&);
 Integer evaluate(const Expression<Integer>&, const IntegerValuation&);

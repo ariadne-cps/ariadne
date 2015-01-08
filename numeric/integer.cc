@@ -174,7 +174,7 @@ Integer::Integer(Int32 n) {
 
 Integer::Integer(Nat64 m) {
     mpz_init(_mpz);
-    static const unsigned int max=std::numeric_limits<int>::max();
+    static const unsigned int max=std::numeric_limits<Int>::max();
     static const unsigned long long int lmax=max;
     static const Integer zmax=Integer(Int32(max));
     unsigned long long int larg = m.get_ui();
@@ -369,7 +369,7 @@ Boolean operator> (Integer const& z1, Integer const& z2) {
     return cmp(z1,z2)==Comparison::GREATER;
 }
 
-//   mpz_get_str (char *str, mpz_exp_t *expptr, int b, SizeType n, mpz_t op, mpz_rnd_t rnd)
+//   mpz_get_str (char *str, mpz_exp_t *expptr, Int b, SizeType n, mpz_t op, mpz_rnd_t rnd)
 // If str is not a null pointer, it should point to a block of storage large enough for the significand,
 // i.e., at least maq1(n + 2, 7). The extra two bytes are for a possible minus sign,
 // and for the terminating null character, and the value 7 accounts for -@Inf@ plus the terminating null character.
@@ -382,7 +382,7 @@ OutputStream& operator<<(OutputStream& os, Integer const& z) {
 }
 
 Integer make_integer(unsigned long long int n) {
-    static const unsigned int max=std::numeric_limits<int>::max();
+    static const unsigned int max=std::numeric_limits<Int>::max();
     static const unsigned long long int m=max;
     unsigned long long int q = n / m;
     unsigned long long int r = n % m;

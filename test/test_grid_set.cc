@@ -44,13 +44,13 @@
 using namespace Ariadne;
 using namespace std;
 
-static const uint heightZero = 0;
-static const uint heightOne = 1;
-static const uint heightTwo = 2;
-static const uint heightThree = 3;
-static const uint heightFour = 4;
+static const Nat heightZero = 0;
+static const Nat heightOne = 1;
+static const Nat heightTwo = 2;
+static const Nat heightThree = 3;
+static const Nat heightFour = 4;
 
-void test_binary_tree() {
+Void test_binary_tree() {
     const BinaryTreeNode * BINARY_TREE_NODE_NULL_POINTER = NULL;
 
     // !!!
@@ -222,13 +222,13 @@ void test_binary_tree() {
     ARIADNE_TEST_COMPARE( expected_binary_tree2, ==, theNewBinaryTreeRoot );
 }
 
-void test_grid_paving_cursor(){
+Void test_grid_paving_cursor(){
 
     //Allocate the Grid
     Grid theGrid( Vector<Float>({-0.25, 0.25, 1.5}), Vector<Float>({0.25, 0.25, 0.25}) );
 
     //Define the higth of the primary root cell.
-    const uint theHeight = 2;
+    const Nat theHeight = 2;
 
     //Create the binary tree;
     BinaryTreeNode * pRootTreeNode = new BinaryTreeNode(true);
@@ -354,14 +354,14 @@ void test_grid_paving_cursor(){
     ARIADNE_TEST_THROWS( theGPCursor.set_disabled(), NotALeafNodeException);
 }
 
-void test_grid_paving_const_iterator(){
+Void test_grid_paving_const_iterator(){
     std::vector< GridCell *> expected_result( 8 );
 
     //Allocate the Grid
     Grid theGrid( Vector<Float>({-0.25, 0.25}), Vector<Float>({0.25, 0.25}) );
 
     //Define the higth of the primary root cell.
-    const uint theHeight = 2;
+    const Nat theHeight = 2;
 
     //Create the binary tree;
     BinaryTreeNode * pRootTreeNode = new BinaryTreeNode(true);
@@ -502,7 +502,7 @@ void test_grid_paving_const_iterator(){
     ARIADNE_TEST_EQUAL(theGPCursor.is_enabled(), true);
 }
 
-void test_grid_sub_paving_one(){
+Void test_grid_sub_paving_one(){
 
     //Allocate the Grid, one Dimension
     Vector<Float> originOne(1); originOne.set(0, 0.0);
@@ -510,7 +510,7 @@ void test_grid_sub_paving_one(){
     const Grid theOneDimGrid( originOne, lengthsOne );
 
     //Define the higth of the primary root cell.
-    const uint theHeight = 2;
+    const Nat theHeight = 2;
 
     //Create the binary tree;
     BinaryTreeNode * pRootTreeNode = new BinaryTreeNode(true);
@@ -623,12 +623,12 @@ void test_grid_sub_paving_one(){
     ARIADNE_TEST_EQUAL( theGridSPTwoDim.depth(), 4u );
 }
 
-void test_grid_sub_paving_two() {
+Void test_grid_sub_paving_two() {
     //Allocate a trivial Grid two dimensional grid
     Grid theTwoDimGrid(2, 1.0);
 
     //Define the higth of the primary root cell.
-    const uint theHeight = 2;
+    const Nat theHeight = 2;
 
     //Create the binary tree;
     BinaryTreeNode * pRootTreeNode = new BinaryTreeNode(true);
@@ -674,12 +674,12 @@ void test_grid_sub_paving_two() {
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-void test_grid_sub_paving_three() {
+Void test_grid_sub_paving_three() {
     //Allocate a trivial Grid two dimensional grid
     Grid theTwoDimGrid(2, 1.0);
 
     //Define the higth of the primary root cell.
-    const uint theHeight = 1;
+    const Nat theHeight = 1;
 
     //Create the binary tree;
     BinaryTreeNode * pRootTreeNode = new BinaryTreeNode(true);
@@ -714,7 +714,7 @@ void test_grid_sub_paving_three() {
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-void test_grid_paving(){
+Void test_grid_paving(){
     //Create a trivial 4-dimensional Grid
     Grid trivialFourDimGrid( Vector<Float>({0.0,0.0,0.0,0.0}), Vector<Float>({1.0,1.0,1.0,1.0}) );
 
@@ -775,7 +775,7 @@ void test_grid_paving(){
     // !!!
     //Create a trivial 2-dimensional Grid
     Grid trivialTwoDimGrid( Vector<Float>({0.0,0.0}), Vector<Float>({1.0,1.0}) );
-    ARIADNE_PRINT_TEST_CASE_TITLE("Test GridTreeSet::restrict_to_height( const uint theHeight )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test GridTreeSet::restrict_to_height( const Nat theHeight )");
     GridTreeSet initialTreeSetOne( trivialTwoDimGrid, 2, make_binary_word("1111001000100"), make_binary_word("10010001") );
     GridTreeSet initialTreeSetOneCopyOne( initialTreeSetOne );
     GridTreeSet initialTreeSetOneCopyTwo( initialTreeSetOne );
@@ -801,7 +801,7 @@ void test_grid_paving(){
     ARIADNE_TEST_EQUAL( expectedTreeSetThree, initialTreeSetTwo );
 }
 
-void test_grid_cell(){
+Void test_grid_cell(){
     BinaryWord expected_result;
 
     // !!!
@@ -897,7 +897,7 @@ void test_grid_cell(){
     ARIADNE_TEST_EQUAL( expected_cell_box, pThirdCell_To_Split->interior().box() );
 }
 
-void test_grid_open_cell_two(){
+Void test_grid_open_cell_two(){
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
@@ -934,7 +934,7 @@ void test_grid_open_cell_two(){
     ARIADNE_TEST_EQUAL( expected_right_open_cell_box01, openCell01.split( true ).box() );
 }
 
-void test_grid_open_cell_three(){
+Void test_grid_open_cell_three(){
     //Allocate a trivial Grid two dimensional grid
     Grid theGrid(2, 1.0);
 
@@ -943,7 +943,7 @@ void test_grid_open_cell_three(){
     ExactBox theBox = make_box("[0.0,1.0]x[0.0,1.0]");
     ExactBox expectedOpenCellBox = make_box("[-1.0,3.0]x[-1.0,3.0]");
     BinaryWord expectedOpenCellWord = make_binary_word("00");
-    uint expectedOpenCellHeight = 2;
+    Nat expectedOpenCellHeight = 2;
     GridOpenCell actualOpenCell = GridOpenCell::outer_approximation( theBox, theGrid );
     ARIADNE_TEST_EQUAL( expectedOpenCellBox, actualOpenCell.box() );
     ARIADNE_TEST_EQUAL( expectedOpenCellWord, actualOpenCell.word() );
@@ -1027,7 +1027,7 @@ void test_grid_open_cell_three(){
     ARIADNE_TEST_EQUAL( expectedOpenCellHeight, actualOpenCell.height() );
 }
 
-void test_grid_open_cell_four(){
+Void test_grid_open_cell_four(){
     //Allocate a trivial Grid two dimensional grid
     Grid theGrid(2, 1.0);
 
@@ -1062,7 +1062,7 @@ void test_grid_open_cell_four(){
     ARIADNE_TEST_EQUAL( GridOpenCell::intersect( leftOpenCell, rightOpenCell ), false );
 }
 
-void test_grid_open_cell_five() {
+Void test_grid_open_cell_five() {
     //The vector for storing the results
     std::vector< GridCell* > expected_result_arr(4);
 
@@ -1073,7 +1073,7 @@ void test_grid_open_cell_five() {
     ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 00 height=0, dimension: 2");
     GridOpenCell openCell = GridOpenCell( theTrivialGrid, 0, BinaryWord() );
 
-    uint theHeight = 2;
+    Nat theHeight = 2;
     expected_result_arr[0] = new GridCell( theTrivialGrid, theHeight, make_binary_word("0011") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, theHeight, make_binary_word("0110") );
     expected_result_arr[2] = new GridCell( theTrivialGrid, theHeight, make_binary_word("1001") );
@@ -1296,10 +1296,10 @@ void test_grid_open_cell_five() {
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-void test_grid_open_cell_six() {
+Void test_grid_open_cell_six() {
     std::vector<GridOpenCell> expectedResult;
     std::vector<GridOpenCell> actualResult;
-    uint theHeight;
+    Nat theHeight;
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
@@ -1392,7 +1392,7 @@ void test_grid_open_cell_six() {
     expectedResult.erase( expectedResult.begin(), expectedResult.end() );
 }
 
-void test_grid_open_cell_one(){
+Void test_grid_open_cell_one(){
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
@@ -1544,14 +1544,14 @@ void test_grid_open_cell_one(){
     ARIADNE_TEST_EQUAL( expected_open_cell_box20, openCell20.box() );
 }
 
-void test_adjoin_operation_one(){
+Void test_adjoin_operation_one(){
     //Allocate a trivial Grid
     Grid theGrid(2, 1.0);
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test adjoining a GridCell to the GridTreeSet");
     //Define the GridCell that is rooted to a high primary cell
-    const int theHigherCellHeight = 2;
+    const Int theHigherCellHeight = 2;
     BinaryWord theHigherCellPath;
     theHigherCellPath.push_back(true);
     theHigherCellPath.push_back(false);
@@ -1577,7 +1577,7 @@ void test_adjoin_operation_one(){
     ARIADNE_TEST_EQUAL( expected_two_cell_paving, theOneCellPaving );
 }
 
-void test_adjoin_operation_two(){
+Void test_adjoin_operation_two(){
 
     //Allocate a trivial Grid
     Grid theGrid(2, 1.0);
@@ -1585,7 +1585,7 @@ void test_adjoin_operation_two(){
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test adjoining a GridCell to the GridTreeSet");
     //Define the GridCell that is rooted to the lower primary cell
-    const int theLowerCellHeight = 1;
+    const Int theLowerCellHeight = 1;
     BinaryWord theLowerCellPath;
     theLowerCellPath.push_back(true);
     theLowerCellPath.push_back(true);
@@ -1597,7 +1597,7 @@ void test_adjoin_operation_two(){
     ARIADNE_TEST_EQUAL( expected_box, theLowerLevelCell.box() );
 
     //Define the higth of the primary root cell.
-    const uint theHeight = 2;
+    const Nat theHeight = 2;
     //Create the binary tree;
     BinaryTreeNode * pRootTreeNode = new BinaryTreeNode(false);
     pRootTreeNode->split();
@@ -1618,7 +1618,7 @@ void test_adjoin_operation_two(){
     ARIADNE_TEST_EQUAL( expected_tree_set_result, theOneCellPaving );
 }
 
-void test_adjoin_operation_three(){
+Void test_adjoin_operation_three(){
     string expected_result;
 
     //Allocate a trivial Grid
@@ -1627,7 +1627,7 @@ void test_adjoin_operation_three(){
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test adjoining a GridCell to the GridTreeSet");
     //Define the GridCell that is rooted to the same primary cell
-    const int theLowerCellHeight = 2;
+    const Int theLowerCellHeight = 2;
     BinaryWord theLowerCellPath;
     theLowerCellPath.push_back(false);
     theLowerCellPath.push_back(false);
@@ -1641,7 +1641,7 @@ void test_adjoin_operation_three(){
     ARIADNE_TEST_EQUAL( expected_box, theLowerLevelCell.box() );
 
     //Define the higth of the primary root cell.
-    const uint theHeight = 2;
+    const Nat theHeight = 2;
     //Create the binary tree;
     BinaryTreeNode * pRootTreeNode = new BinaryTreeNode(false);
     pRootTreeNode->split();
@@ -1662,7 +1662,7 @@ void test_adjoin_operation_three(){
     ARIADNE_TEST_EQUAL( expected_tree_set_result, theOneCellPaving );
 }
 
-void test_adjoin_outer_approximation_operation(){
+Void test_adjoin_outer_approximation_operation(){
     //Allocate a trivial Grid
     Grid theTrivialGrid(2, 1.0);
 
@@ -1671,7 +1671,7 @@ void test_adjoin_outer_approximation_operation(){
     ExactBox initialRectangle( make_box("[-0.5,1.5]x[-0.3,1.0]") );
 
     //Define the higth of the primary root cell.
-    const uint theHeight = 2;
+    const Nat theHeight = 2;
     //Create the binary tree;
     BinaryTreeNode * pRootTreeNode = new BinaryTreeNode(false);
     pRootTreeNode->split();
@@ -1737,7 +1737,7 @@ void test_adjoin_outer_approximation_operation(){
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-void test_adjoin_inner_approximation_operation_one(){
+Void test_adjoin_inner_approximation_operation_one(){
     //Allocate a trivial Grid
     Grid theTrivialGrid(2, 1.0);
 
@@ -1779,7 +1779,7 @@ void test_adjoin_inner_approximation_operation_one(){
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-void test_adjoin_inner_approximation_operation_two(){
+Void test_adjoin_inner_approximation_operation_two(){
     //Allocate a trivial Grid
     Grid theTrivialGrid(2, 1.0);
 
@@ -1823,7 +1823,7 @@ void test_adjoin_inner_approximation_operation_two(){
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-void test_adjoin_inner_approximation_operation_three(){
+Void test_adjoin_inner_approximation_operation_three(){
     //Allocate a trivial Grid
     Grid theTrivialGrid(2, 1.0);
 
@@ -1862,7 +1862,7 @@ void test_adjoin_inner_approximation_operation_three(){
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-void test_restrict() {
+Void test_restrict() {
     std::vector< GridCell* > expected_result_arr(3);
 
     //Allocate a trivial Grid
@@ -1948,7 +1948,7 @@ void test_restrict() {
     //    The GridTreeSubset is at level 1 and it's primary cell is at level 2
 }
 
-void test_remove_one() {
+Void test_remove_one() {
     std::vector< GridCell* > expected_result_arr(3);
 
     //Allocate a trivial Grid
@@ -2036,7 +2036,7 @@ void test_remove_one() {
     //    The GridTreeSubset is at level 1 and it's primary cell is at level 2
 }
 
-void test_remove_two() {
+Void test_remove_two() {
     std::vector< GridCell* > expected_result_arr(4);
 
     //Allocate a trivial Grid
@@ -2100,14 +2100,14 @@ void test_remove_two() {
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-void test_cell_subset_subset() {
+Void test_cell_subset_subset() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
-    const uint smallHeight = 0;
-    const uint mediumHeight = 1;
-    const uint bigHeight = 2;
+    const Nat smallHeight = 0;
+    const Nat mediumHeight = 1;
+    const Nat bigHeight = 2;
 
     //Create the cell, will be rooted to the primary cell mediumHeight
     GridCell theCell( theTrivialGrid, mediumHeight, make_binary_word("110") );
@@ -2285,13 +2285,13 @@ void test_cell_subset_subset() {
     ARIADNE_TEST_EQUAL( subset( theCell, theBigPaving), true );
 }
 
-void test_subsets_join() {
+Void test_subsets_join() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
-    const uint smallHeight = 1;
-    const uint bigHeight = 2;
+    const Nat smallHeight = 1;
+    const Nat bigHeight = 2;
 
     //Make set one
     BinaryWord tree = make_binary_word("1100100");
@@ -2317,13 +2317,13 @@ void test_subsets_join() {
     ARIADNE_TEST_EQUAL( expectedResultSet, resultSet);
 }
 
-void test_subsets_intersection() {
+Void test_subsets_intersection() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
-    const uint smallHeight = 1;
-    const uint bigHeight = 2;
+    const Nat smallHeight = 1;
+    const Nat bigHeight = 2;
 
     //Make set one
     BinaryWord tree = make_binary_word("1100100");
@@ -2348,13 +2348,13 @@ void test_subsets_intersection() {
     ARIADNE_TEST_EQUAL( expectedResultSet, resultSet);
 }
 
-void test_subsets_difference() {
+Void test_subsets_difference() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
-    const uint smallHeight = 1;
-    const uint bigHeight = 2;
+    const Nat smallHeight = 1;
+    const Nat bigHeight = 2;
 
     //Make set one
     BinaryWord tree = make_binary_word("1100100");
@@ -2379,14 +2379,14 @@ void test_subsets_difference() {
     ARIADNE_TEST_EQUAL( expectedResultSet, resultSet);
 }
 
-void test_cell_intersect_subset() {
+Void test_cell_intersect_subset() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
-    const uint heightZero = 0;
-    const uint heightOne = 1;
-    const uint heightTwo = 2;
+    const Nat heightZero = 0;
+    const Nat heightOne = 1;
+    const Nat heightTwo = 2;
 
     BinaryWord tree = make_binary_word("1111001000100");
     BinaryWord leaves = make_binary_word("1001001");
@@ -2404,7 +2404,7 @@ void test_cell_intersect_subset() {
     GridCell theHighCellThree( theTrivialGrid, heightTwo, make_binary_word("00") );        // does intersect with the set and the subset
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridCell& , const GridTreeSubset& )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridCell& , const GridTreeSubset& )");
     ARIADNE_PRINT_TEST_COMMENT("theSet");
     cout << theSet << endl;
     ARIADNE_PRINT_TEST_COMMENT("theLowCell");
@@ -2412,7 +2412,7 @@ void test_cell_intersect_subset() {
     ARIADNE_TEST_EQUAL( intersect( theLowCell, theSet ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridCell& , const GridTreeSubset& )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridCell& , const GridTreeSubset& )");
     ARIADNE_PRINT_TEST_COMMENT("theSet");
     cout << theSet << endl;
     ARIADNE_PRINT_TEST_COMMENT("theMediumCellOne");
@@ -2420,7 +2420,7 @@ void test_cell_intersect_subset() {
     ARIADNE_TEST_EQUAL( intersect( theMediumCellOne, theSet ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridCell& , const GridTreeSubset& )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridCell& , const GridTreeSubset& )");
     ARIADNE_PRINT_TEST_COMMENT("theSet");
     cout << theSet << endl;
     ARIADNE_PRINT_TEST_COMMENT("theMediumCellTwo");
@@ -2428,7 +2428,7 @@ void test_cell_intersect_subset() {
     ARIADNE_TEST_EQUAL( intersect( theMediumCellTwo, theSet ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridCell& , const GridTreeSubset& )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridCell& , const GridTreeSubset& )");
     ARIADNE_PRINT_TEST_COMMENT("theSet");
     cout << theSet << endl;
     ARIADNE_PRINT_TEST_COMMENT("theHighCellOne");
@@ -2436,7 +2436,7 @@ void test_cell_intersect_subset() {
     ARIADNE_TEST_EQUAL( intersect( theHighCellOne, theSet ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridCell& , const GridTreeSubset& )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridCell& , const GridTreeSubset& )");
     ARIADNE_PRINT_TEST_COMMENT("theSet");
     cout << theSet << endl;
     ARIADNE_PRINT_TEST_COMMENT("");
@@ -2444,7 +2444,7 @@ void test_cell_intersect_subset() {
     ARIADNE_TEST_EQUAL( intersect( theHighCellTwo, theSet ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridCell& , const GridTreeSubset& )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridCell& , const GridTreeSubset& )");
     ARIADNE_PRINT_TEST_COMMENT("theSet");
     cout << theSet << endl;
     ARIADNE_PRINT_TEST_COMMENT("theHighCellThree");
@@ -2452,7 +2452,7 @@ void test_cell_intersect_subset() {
     ARIADNE_TEST_EQUAL( intersect( theHighCellThree, theSet ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridCell& , const GridTreeSet& )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridCell& , const GridTreeSet& )");
     ARIADNE_PRINT_TEST_COMMENT("theSubset");
     cout << theSubset << endl;
     ARIADNE_PRINT_TEST_COMMENT("theLowCell");
@@ -2460,7 +2460,7 @@ void test_cell_intersect_subset() {
     ARIADNE_TEST_EQUAL( intersect( theLowCell, theSubset ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridCell& , const GridTreeSet& )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridCell& , const GridTreeSet& )");
     ARIADNE_PRINT_TEST_COMMENT("theSubset");
     cout << theSubset << endl;
     ARIADNE_PRINT_TEST_COMMENT("theMediumCellOne");
@@ -2468,7 +2468,7 @@ void test_cell_intersect_subset() {
     ARIADNE_TEST_EQUAL( intersect( theMediumCellOne, theSubset ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridCell& , const GridTreeSet& )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridCell& , const GridTreeSet& )");
     ARIADNE_PRINT_TEST_COMMENT("theSubset");
     cout << theSubset << endl;
     ARIADNE_PRINT_TEST_COMMENT("theMediumCellTwo");
@@ -2476,7 +2476,7 @@ void test_cell_intersect_subset() {
     ARIADNE_TEST_EQUAL( intersect( theMediumCellTwo, theSubset ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridCell& , const GridTreeSet& )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridCell& , const GridTreeSet& )");
     ARIADNE_PRINT_TEST_COMMENT("theSubset");
     cout << theSubset << endl;
     ARIADNE_PRINT_TEST_COMMENT("theHighCellOne");
@@ -2484,7 +2484,7 @@ void test_cell_intersect_subset() {
     ARIADNE_TEST_EQUAL( intersect( theHighCellOne, theSubset ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridCell& , const GridTreeSet& )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridCell& , const GridTreeSet& )");
     ARIADNE_PRINT_TEST_COMMENT("theSubset");
     cout << theSubset << endl;
     ARIADNE_PRINT_TEST_COMMENT("theHighCellTwo");
@@ -2492,7 +2492,7 @@ void test_cell_intersect_subset() {
     ARIADNE_TEST_EQUAL( intersect( theHighCellTwo, theSubset ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridCell& , const GridTreeSet& )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridCell& , const GridTreeSet& )");
     ARIADNE_PRINT_TEST_COMMENT("theSubset");
     cout << theSubset << endl;
     ARIADNE_PRINT_TEST_COMMENT("theHighCellThree");
@@ -2502,15 +2502,15 @@ void test_cell_intersect_subset() {
 }
 
 
-void test_subset_intersect_subset() {
+Void test_subset_intersect_subset() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
-    const uint heightZero = 0;
-    const uint heightOne = 1;
-    const uint heightTwo = 2;
-    const uint heightThree = 3;
+    const Nat heightZero = 0;
+    const Nat heightOne = 1;
+    const Nat heightTwo = 2;
+    const Nat heightThree = 3;
 
     BinaryWord tree = make_binary_word("1111001000100");
     BinaryWord leaves = make_binary_word("1001001");
@@ -2521,7 +2521,7 @@ void test_subset_intersect_subset() {
     GridTreeSubset theSubset( theTrivialGrid, heightOne, path, theSet.binary_tree()->left_node()->left_node()->right_node()->right_node() );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridTreeSubset& theSet, const GridTreeSubset& theSubset )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridTreeSubset& theSet, const GridTreeSubset& theSubset )");
     ARIADNE_PRINT_TEST_COMMENT("theSet");
     cout << theSet << endl;
     ARIADNE_PRINT_TEST_COMMENT("theSubset");
@@ -2529,7 +2529,7 @@ void test_subset_intersect_subset() {
     ARIADNE_TEST_EQUAL( intersect( theSet, theSubset ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridTreeSubset& theSubset, const GridTreeSubset& theSet )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridTreeSubset& theSubset, const GridTreeSubset& theSet )");
     ARIADNE_PRINT_TEST_COMMENT("theSet");
     cout << theSet << endl;
     ARIADNE_PRINT_TEST_COMMENT("theSubset");
@@ -2544,7 +2544,7 @@ void test_subset_intersect_subset() {
     GridTreeSubset theSubSetOne( theTrivialGrid, heightThree, make_binary_word("11"), &binaryTreeRootOne );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridTreeSubset& theSet, const GridTreeSubset& theSubSetOne )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridTreeSubset& theSet, const GridTreeSubset& theSubSetOne )");
     ARIADNE_PRINT_TEST_COMMENT("theSet");
     cout << theSet << endl;
     ARIADNE_PRINT_TEST_COMMENT("theSubSetOne");
@@ -2552,7 +2552,7 @@ void test_subset_intersect_subset() {
     ARIADNE_TEST_EQUAL( intersect( theSet, theSubSetOne ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridTreeSubset& theSubset, const GridTreeSubset& theSubSetOne )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridTreeSubset& theSubset, const GridTreeSubset& theSubSetOne )");
     ARIADNE_PRINT_TEST_COMMENT("theSubset");
     cout << theSubset << endl;
     ARIADNE_PRINT_TEST_COMMENT("theSubSetOne");
@@ -2564,7 +2564,7 @@ void test_subset_intersect_subset() {
     GridTreeSubset theSubSetTwo( theTrivialGrid, heightThree, make_binary_word("10"), &binaryTreeRootOne );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridTreeSubset& theSubSetOne, const GridTreeSubset& theSubSetTwo )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridTreeSubset& theSubSetOne, const GridTreeSubset& theSubSetTwo )");
     ARIADNE_PRINT_TEST_COMMENT("theSubSetOne");
     cout << theSubSetOne << endl;
     ARIADNE_PRINT_TEST_COMMENT("theSubSetTwo");
@@ -2576,7 +2576,7 @@ void test_subset_intersect_subset() {
     GridTreeSet theSetOne( theTrivialGrid, heightZero, new BinaryTreeNode( binaryTreeRootOne ) );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridTreeSubset& theSet, const GridTreeSubset& theSetOne )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridTreeSubset& theSet, const GridTreeSubset& theSetOne )");
     ARIADNE_PRINT_TEST_COMMENT("theSet");
     cout << theSet << endl;
     ARIADNE_PRINT_TEST_COMMENT("theSetOne");
@@ -2587,14 +2587,14 @@ void test_subset_intersect_subset() {
     ARIADNE_TEST_EQUAL( intersect( theSet, theSetOne ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool intersect( const GridTreeSubset& theSetOne, const GridTreeSubset& theSet )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool intersect( const GridTreeSubset& theSetOne, const GridTreeSubset& theSet )");
     ARIADNE_PRINT_TEST_COMMENT("Mince theSet to depth 20, just to make things more complex");
     theSet.mince_to_tree_depth(20);
     ARIADNE_TEST_EQUAL( intersect( theSetOne, theSet ), true );
 
 }
 
-void test_subset_subset_subset() {
+Void test_subset_subset_subset() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
@@ -2606,7 +2606,7 @@ void test_subset_subset_subset() {
     GridTreeSubset theSubsetOne( theTrivialGrid, heightTwo, make_binary_word("0"), theSetOne.binary_tree()->left_node() );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSetOne, const GridTreeSubset& theSubsetOne )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool subset( const GridTreeSubset& theSetOne, const GridTreeSubset& theSubsetOne )");
     ARIADNE_PRINT_TEST_COMMENT("theSetOne");
     cout << theSetOne << endl;
     ARIADNE_PRINT_TEST_COMMENT("theSubsetOne");
@@ -2614,7 +2614,7 @@ void test_subset_subset_subset() {
     ARIADNE_TEST_EQUAL( subset( theSetOne, theSubsetOne ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSubsetOne, const GridTreeSubset& theSetOne )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool subset( const GridTreeSubset& theSubsetOne, const GridTreeSubset& theSetOne )");
     ARIADNE_TEST_EQUAL( subset( theSubsetOne, theSetOne ), true );
 
     //Make two subsets such that the tree of the first one is a super tree of the second one,
@@ -2627,7 +2627,7 @@ void test_subset_subset_subset() {
     GridTreeSubset theSubSetThree( theTrivialGrid, heightThree, make_binary_word("110"), &binaryTreeRootThree );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSubSetTwo, const GridTreeSubset& theSubSetThree )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool subset( const GridTreeSubset& theSubSetTwo, const GridTreeSubset& theSubSetThree )");
     ARIADNE_PRINT_TEST_COMMENT("theSubSetTwo");
     cout << theSubSetTwo << endl;
     ARIADNE_PRINT_TEST_COMMENT("theSubSetThree");
@@ -2635,11 +2635,11 @@ void test_subset_subset_subset() {
     ARIADNE_TEST_EQUAL( subset( theSubSetTwo, theSubSetThree ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSubSetThree, const GridTreeSubset& theSubSetTwo )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool subset( const GridTreeSubset& theSubSetThree, const GridTreeSubset& theSubSetTwo )");
     ARIADNE_TEST_EQUAL( subset( theSubSetThree, theSubSetTwo ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSubSetTwo, const GridTreeSubset& theSubSetThree )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool subset( const GridTreeSubset& theSubSetTwo, const GridTreeSubset& theSubSetThree )");
     ARIADNE_PRINT_TEST_COMMENT("Mince theSubSetThree to depth 10, just to make things more complex");
     theSubSetThree.mince_to_tree_depth(10);
     ARIADNE_TEST_EQUAL( subset( theSubSetTwo, theSubSetThree ), true );
@@ -2653,23 +2653,23 @@ void test_subset_subset_subset() {
     GridTreeSubset theSubSetFour( theTrivialGrid, heightThree, make_binary_word("110"), &binaryTreeRootFour );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSubSetFour, const GridTreeSubset& theSubSetThree )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool subset( const GridTreeSubset& theSubSetFour, const GridTreeSubset& theSubSetThree )");
     ARIADNE_PRINT_TEST_COMMENT("theSubSetFour");
     cout << theSubSetFour << endl;
     ARIADNE_TEST_EQUAL( subset( theSubSetFour, theSubSetThree ), true );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSubSetTwo, const GridTreeSubset& theSubSetFour )");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing Bool subset( const GridTreeSubset& theSubSetTwo, const GridTreeSubset& theSubSetFour )");
     ARIADNE_TEST_EQUAL( subset( theSubSetTwo, theSubSetFour ), false );
 
 }
 
-void test_subset_intersects_box() {
+Void test_subset_intersects_box() {
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
-    const uint heightTwo = 2;
+    const Nat heightTwo = 2;
 
     //Create the set and the subset of this set, they are both rooted to the same primary node of heightTwo
     //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,3]x[1,3]
@@ -2736,12 +2736,12 @@ void test_subset_intersects_box() {
     //Somehow I need two boxes for which we can not determine if they intersect or not.
 }
 
-void test_subset_subset_box(){
+Void test_subset_subset_box(){
 
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
-    const uint heightTwo = 2;
+    const Nat heightTwo = 2;
 
     //Create the set rooted to the primary node of heightTwo
     //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,3]x[1,3]
@@ -2854,11 +2854,11 @@ void test_subset_subset_box(){
 
 }
 
-void test_subset_superset_box(){
+Void test_subset_superset_box(){
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
 
-    const uint heightTwo = 2;
+    const Nat heightTwo = 2;
 
     //Create the set and the subset of this set, they are both rooted to the same primary node of heightTwo
     //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,2]x[1,2] U [1,2]x[2,3] U [2,3]x[1,2] U [2,3]x[2,3]
@@ -2941,7 +2941,7 @@ void test_subset_superset_box(){
 
 }
 
-int main() {
+Int main() {
 
     test_binary_tree();
 

@@ -45,22 +45,22 @@ class TestExpansion
     typedef MultiIndex MI;
     typedef Expansion<Float> E;
   public:
-    void test();
+    Void test();
   private:
-    void test_working();
-    void test_concept();
-    void test_iterator_concept();
-    void test_data_access();
-    void test_equality();
-    void test_cleanup();
-    void test_constructors();
-    //void test_indexing();
-    void test_find();
-    void test_embed();
+    Void test_working();
+    Void test_concept();
+    Void test_iterator_concept();
+    Void test_data_access();
+    Void test_equality();
+    Void test_cleanup();
+    Void test_constructors();
+    //Void test_indexing();
+    Void test_find();
+    Void test_embed();
 };
 
 
-void TestExpansion::test()
+Void TestExpansion::test()
 {
     ARIADNE_TEST_CALL(test_working());
     ARIADNE_TEST_CALL(test_data_access());
@@ -73,7 +73,7 @@ void TestExpansion::test()
 }
 
 
-void TestExpansion::test_working()
+Void TestExpansion::test_working()
 {
     Expansion<Float> e(3);
     ARIADNE_TEST_PRINT(e);
@@ -89,7 +89,7 @@ void TestExpansion::test_working()
 }
 
 
-void TestExpansion::test_concept()
+Void TestExpansion::test_concept()
 {
     Float x=0;
     MI a(3);
@@ -130,7 +130,7 @@ void TestExpansion::test_concept()
     ce.check();
 }
 
-void TestExpansion::test_iterator_concept()
+Void TestExpansion::test_iterator_concept()
 {
     MI a(3);
     Expansion<Float> e(3);
@@ -153,7 +153,7 @@ void TestExpansion::test_iterator_concept()
     Expansion<Float>::const_reference cref=*citer;
     Expansion<Float>::const_pointer cptr=citer.operator->();
 
-    bool res;
+    Bool res;
 
     ++iter; --iter;
     ++citer; --citer;
@@ -165,7 +165,7 @@ void TestExpansion::test_iterator_concept()
 }
 
 // Test dereferencing of iterators
-void TestExpansion::test_data_access()
+Void TestExpansion::test_data_access()
 {
     // Test index and element size values for a large expansion
     Expansion<Float> e5(5);
@@ -239,7 +239,7 @@ void TestExpansion::test_data_access()
 
 }
 
-void TestExpansion::test_equality()
+Void TestExpansion::test_equality()
 {
     MI a(2);
     MI b(2); ++b;
@@ -261,7 +261,7 @@ void TestExpansion::test_equality()
 }
 
 
-void TestExpansion::test_cleanup()
+Void TestExpansion::test_cleanup()
 {
     // Test to see if the cleanup/sort operations work.
     // Since these are used in the constructors, we can't use the main constructors to test this
@@ -272,7 +272,7 @@ void TestExpansion::test_cleanup()
 
     Expansion<Float> e(3);
     ARIADNE_TEST_PRINT(e);
-    for(uint i=0; i!=2; ++i) {
+    for(Nat i=0; i!=2; ++i) {
         if(i%2) { e.append(a,1/(1.+i)); ++b; ++b; a=b; ++b; } else { e.append(b,1/(1.+i));}
         ARIADNE_TEST_PRINT(e);
     }
@@ -285,7 +285,7 @@ void TestExpansion::test_cleanup()
 
 }
 
-void TestExpansion::test_constructors()
+Void TestExpansion::test_constructors()
 {
     // Empty expansion
     ARIADNE_TEST_CONSTRUCT(Expansion<Float>,e1,(3));
@@ -322,7 +322,7 @@ void TestExpansion::test_constructors()
 
 
 /* Not needed since we cannot look up by index without order
-void TestExpansion::test_indexing()
+Void TestExpansion::test_indexing()
 {
     Expansion<Float> e(3,4, 0,0,0,2.0,  1,0,0,3.0, 1,0,1,5.0, 2,1,0,7.0);
     const Expansion<Float>& pc=e;
@@ -374,7 +374,7 @@ void TestExpansion::test_indexing()
 */
 
 
-void TestExpansion::test_find()
+Void TestExpansion::test_find()
 {
     Expansion<Float> e({ {{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0} });
     MI a(2);
@@ -389,7 +389,7 @@ void TestExpansion::test_find()
 
 }
 
-void TestExpansion::test_embed()
+Void TestExpansion::test_embed()
 {
     ARIADNE_TEST_CONSTRUCT(Expansion<Float>,e,({ {{1,2},5.0}, {{0,0},2.0}, {{1,0},3.0}, {{3,0},7.0}, {{0,1},11.0} }));
     ARIADNE_TEST_EQUAL(embed(0,e,2),Expansion<Float>({ {{1,2,0,0},5.0}, {{0,0,0,0},2.0}, {{1,0,0,0},3.0}, {{3,0,0,0},7.0}, {{0,1,0,0},11.0} }));
@@ -398,7 +398,7 @@ void TestExpansion::test_embed()
 
 }
 
-int main() {
+Int main() {
     TestExpansion().test();
     return ARIADNE_TEST_FAILURES;
 }

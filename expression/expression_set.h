@@ -141,7 +141,7 @@ inline RealVariableInterval operator==(const RealVariable& v, const Real& x) {
 inline RealVariableInterval operator==(const Real& x, const RealVariable& v) {
     return RealVariableInterval(x,v,x); }
 
-inline RealVariableLowerInterval operator<=(int l, RealVariable const& v) {
+inline RealVariableLowerInterval operator<=(Int l, RealVariable const& v) {
     return RealVariableLowerInterval(l,v); }
 
 //! \ingroup ExpressionSetSubModule
@@ -172,9 +172,9 @@ class VariablesBox {
   public:
     VariablesBox() : _spc(), _bx(0) { }
     VariablesBox(const Map<RealVariable,ExactInterval>& bnds) : _spc(List<RealVariable>(bnds.keys())), _bx(_spc.dimension()) {
-        for(uint i=0; i!=this->_bx.dimension(); ++i) { this->_bx[i] = bnds[this->_spc[i]]; } }
+        for(Nat i=0; i!=this->_bx.dimension(); ++i) { this->_bx[i] = bnds[this->_spc[i]]; } }
     VariablesBox(const List<RealVariableInterval>& bnds) : _spc(), _bx(bnds.size()) {
-        for(uint i=0; i!=bnds.size(); ++i) { this->_spc.append(bnds[i].variable()); this->_bx[i]=bnds[i].approximate_interval(); } }
+        for(Nat i=0; i!=bnds.size(); ++i) { this->_spc.append(bnds[i].variable()); this->_bx[i]=bnds[i].approximate_interval(); } }
     VariablesBox(const RealSpace& spc, const ExactBox& bx) : _spc(spc), _bx(bx) { ARIADNE_ASSERT(spc.dimension()==bx.dimension()); }
     Set<RealVariable> variables() const { return Set<RealVariable>(_spc.variables()); }
     RealSpace const& space() const { return this->_spc; }
@@ -182,7 +182,7 @@ class VariablesBox {
     ExactBox const& box() const { return this->_bx; }
     const ExactInterval& operator[](const RealVariable& v) const { return this->_bx[this->_spc.index(v)]; }
     ExactBox euclidean_set(const RealSpace& spc) const {
-        ExactBox res(spc.dimension()); for(uint i=0; i!=res.dimension(); ++i) { res[i]=this->_bx[this->_spc.index(spc[i])]; } return res; }
+        ExactBox res(spc.dimension()); for(Nat i=0; i!=res.dimension(); ++i) { res[i]=this->_bx[this->_spc.index(spc[i])]; } return res; }
     friend OutputStream& operator<<(OutputStream& os, const VariablesBox& ebx) {
         return os << "VariablesBox( space=" << ebx.space() << ", box=" << ebx.box() << " )"; }
 };

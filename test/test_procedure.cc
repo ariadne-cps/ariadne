@@ -48,13 +48,13 @@ class TestProcedure
     //static ApproximateFormula y;
   public:
     TestProcedure();
-    void test();
+    Void test();
   private:
-    void test_formula();
-    void test_construct_from_formula();
-    void test_construct_from_expansion();
-    void test_evaluate();
-    void test_propagate();
+    Void test_formula();
+    Void test_construct_from_formula();
+    Void test_construct_from_expansion();
+    Void test_evaluate();
+    Void test_propagate();
 };
 
 //ApproximateFormula TestProcedure::o(ApproximateFormula::constant(1.0));
@@ -66,7 +66,7 @@ TestProcedure::TestProcedure()
 {
 }
 
-void TestProcedure::test()
+Void TestProcedure::test()
 {
     ARIADNE_TEST_CALL(test_formula());
     ARIADNE_TEST_CALL(test_construct_from_formula());
@@ -75,7 +75,7 @@ void TestProcedure::test()
     ARIADNE_TEST_CALL(test_propagate());
 }
 
-void TestProcedure::test_formula()
+Void TestProcedure::test_formula()
 {
     ApproximateFormula o(ApproximateFormula::constant(1.0));
     ApproximateFormula x(ApproximateFormula::coordinate(0));
@@ -87,7 +87,7 @@ void TestProcedure::test_formula()
     //Vector< ApproximateFormula > f((sqrt(pow(x,2)+pow(y,2)), atan(y/x)));
 }
 
-void TestProcedure::test_construct_from_formula()
+Void TestProcedure::test_construct_from_formula()
 {
     ApproximateFormula o(ApproximateFormula::constant(1.0));
     ApproximateFormula x(ApproximateFormula::coordinate(0));
@@ -108,7 +108,7 @@ void TestProcedure::test_construct_from_formula()
     ARIADNE_TEST_PRINT(p0);
 }
 
-void TestProcedure::test_construct_from_expansion()
+Void TestProcedure::test_construct_from_expansion()
 {
     {
         Expansion<ApproximateFloat> e({ {{0,0},1.0}, {{1,0},2.0}, {{0,2},3.0}, {{1,4},4.0} });
@@ -130,7 +130,7 @@ void TestProcedure::test_construct_from_expansion()
 }
 
 
-void TestProcedure::test_evaluate()
+Void TestProcedure::test_evaluate()
 {
     ApproximateProcedure p;
     p.new_unary_instruction(IND,0u);
@@ -147,7 +147,7 @@ void TestProcedure::test_evaluate()
     ARIADNE_TEST_EQUALS(evaluate(p,x),5.0);
 }
 
-void TestProcedure::test_propagate()
+Void TestProcedure::test_propagate()
 {
     {
         ValidatedProcedure p;
@@ -186,7 +186,7 @@ void TestProcedure::test_propagate()
 
 
 
-int main() {
+Int main() {
     TestProcedure().test();
     return ARIADNE_TEST_FAILURES;
 }

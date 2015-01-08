@@ -43,24 +43,24 @@
 namespace Ariadne {
 
 
-bool is_blocking(EventKind);
-bool is_activating(EventKind);
+Bool is_blocking(EventKind);
+Bool is_activating(EventKind);
 
 namespace {
 
 // Shorthand for testing whether a location satisfies a predicate. For internal use only.
-bool operator==(const DiscretePredicate& predicate, const DiscreteLocation& location) {
+Bool operator==(const DiscretePredicate& predicate, const DiscreteLocation& location) {
     return evaluate(predicate,location);
 }
 
-bool operator==(const EventSet& set, const DiscreteEvent& event) {
+Bool operator==(const EventSet& set, const DiscreteEvent& event) {
     return set.contains(event);
 }
 
 template<class T>
 List<T> filter(const List<Tuple<DiscretePredicate,List<T> > >& rules, const DiscreteLocation& q) {
     List<T> result;
-    for(uint i=0; i!=rules.size(); ++i) {
+    for(Nat i=0; i!=rules.size(); ++i) {
         if(rules[i].first==q) { result.append(rules[i].second); }
     }
     return result;
@@ -69,7 +69,7 @@ List<T> filter(const List<Tuple<DiscretePredicate,List<T> > >& rules, const Disc
 template<class T1, class T2>
 List< Tuple<T1,T2> > filter(const List<Tuple<DiscretePredicate,T1,T2> >& rules, const DiscreteLocation& q) {
     List< Tuple<T1,T2> > result;
-    for(uint i=0; i!=rules.size(); ++i) {
+    for(Nat i=0; i!=rules.size(); ++i) {
         if(rules[i].first==q) { result.append(make_tuple(rules[i].second,rules[i].third)); }
     }
     return result;
@@ -78,7 +78,7 @@ List< Tuple<T1,T2> > filter(const List<Tuple<DiscretePredicate,T1,T2> >& rules, 
 template<class T>
 List<T> filter(const List<Tuple<DiscretePredicate,EventSet,List<T> > >& rules, const DiscreteLocation& q, const DiscreteEvent& e) {
     List<T> result;
-    for(uint i=0; i!=rules.size(); ++i) {
+    for(Nat i=0; i!=rules.size(); ++i) {
         if(rules[i].first==q && rules[i].second.contains(e)) { result.append(rules[i].third); }
     }
     return result;
@@ -87,9 +87,9 @@ List<T> filter(const List<Tuple<DiscretePredicate,EventSet,List<T> > >& rules, c
 template<class T>
 T select(const List<Tuple<DiscretePredicate,EventSet,T> >& rules, const DiscreteLocation& q, const DiscreteEvent& e) {
     ARIADNE_ASSERT(rules.size()>0);
-    bool found=false;
+    Bool found=false;
     T result=rules[0].third;
-    for(uint i=0; i!=rules.size(); ++i) {
+    for(Nat i=0; i!=rules.size(); ++i) {
         if(rules[i].first==q && rules[i].second.contains(e)) {
             if(found) { ARIADNE_FAIL_MSG("More than one rule matching ("<<q<<","<<e<<") in "<<rules); }
             found=true; result=rules[i].third;
@@ -102,9 +102,9 @@ T select(const List<Tuple<DiscretePredicate,EventSet,T> >& rules, const Discrete
 template<class T>
 T select(const List<Tuple<DiscretePredicate,DiscreteEvent,T> >& rules, const DiscreteLocation& q, const DiscreteEvent& e) {
     ARIADNE_ASSERT(rules.size()>0);
-    bool found=false;
+    Bool found=false;
     T result=rules[0].third;
-    for(uint i=0; i!=rules.size(); ++i) {
+    for(Nat i=0; i!=rules.size(); ++i) {
         if(rules[i].first==q && rules[i].second==e) {
             if(found) { ARIADNE_FAIL_MSG("More than one rule matching ("<<q<<","<<e<<") in "<<rules); }
             found=true; result=rules[i].third;
@@ -116,7 +116,7 @@ T select(const List<Tuple<DiscretePredicate,DiscreteEvent,T> >& rules, const Dis
 
 EventSet filter_join(const List< Tuple<DiscretePredicate,EventSet> >& events, const DiscreteLocation& q) {
     EventSet result;
-    for(uint i=0; i!=events.size(); ++i) {
+    for(Nat i=0; i!=events.size(); ++i) {
         if(events[i].first==q) { result=join(result,events[i].second); }
     }
     return result;
@@ -124,7 +124,7 @@ EventSet filter_join(const List< Tuple<DiscretePredicate,EventSet> >& events, co
 
 template<class Assignment> List<RealVariable> left_hand_sides(const List<Assignment>& assignments) {
     List<RealVariable> variables;
-    for(uint i=0; i!=assignments.size(); ++i) {
+    for(Nat i=0; i!=assignments.size(); ++i) {
         variables.append(assignments[i].variable().base());
     }
     return variables;
@@ -132,7 +132,7 @@ template<class Assignment> List<RealVariable> left_hand_sides(const List<Assignm
 
 template<class Assignment> List<RealExpression> right_hand_sides(const List<Assignment>& assignments) {
     List<RealExpression> expressions;
-    for(uint i=0; i!=assignments.size(); ++i) {
+    for(Nat i=0; i!=assignments.size(); ++i) {
         expressions.append(assignments[i].expression());
     }
     return expressions;
@@ -141,7 +141,7 @@ template<class Assignment> List<RealExpression> right_hand_sides(const List<Assi
 template<class X>
 List<Identifier> names(const List<Variable<X> >& variables) {
     List<Identifier> result;
-    for(uint i=0; i!=variables.size(); ++i) {
+    for(Nat i=0; i!=variables.size(); ++i) {
         result.append(variables[i].name());
     }
     return result;
@@ -150,7 +150,7 @@ List<Identifier> names(const List<Variable<X> >& variables) {
 template<class Tp, template<class> class Dec>
 List< Variable<Tp> > base(const List< Dec<Tp> >& variables) {
     List< Variable<Tp> > result;
-    for(uint i=0; i!=variables.size(); ++i) {
+    for(Nat i=0; i!=variables.size(); ++i) {
         result.append(variables[i].base());
     }
     return result;
@@ -162,9 +162,9 @@ Set<T> make_set(const List<T>& list) {
 }
 
 template<class Var>
-bool unique(const List<Var>& variables) {
+Bool unique(const List<Var>& variables) {
     Set<Var> found;
-    for(uint i=0; i!=variables.size(); ++i) {
+    for(Nat i=0; i!=variables.size(); ++i) {
         if(found.contains(variables[i])) {
             return false;
         } else {
@@ -178,7 +178,7 @@ template<class Var>
 Set<Var> duplicates(const List<Var>& variables) {
     Set<Var> result;
     Set<Var> found;
-    for(uint i=0; i!=variables.size(); ++i) {
+    for(Nat i=0; i!=variables.size(); ++i) {
         if(found.contains(variables[i])) {
             result.insert(variables[i]);
         } else {
@@ -198,8 +198,8 @@ DiscreteLocation operator,(const DiscreteLocation& loc1, const DiscreteLocation&
     return DiscreteLocation((loc1.values(),loc2.values()));
 }
 
-bool operator==(const DiscreteLocation& q1, const DiscreteLocation& q2) {
-    bool identical=true;
+Bool operator==(const DiscreteLocation& q1, const DiscreteLocation& q2) {
+    Bool identical=true;
     const Map<Identifier,String>& q1sm=q1.values();
     const Map<Identifier,String>& q2sm=q2.values();
     Map<Identifier,String>::ConstIterator q1iter=q1sm.begin();
@@ -221,11 +221,11 @@ bool operator==(const DiscreteLocation& q1, const DiscreteLocation& q2) {
     return true;
 }
 
-bool operator!=(const DiscreteLocation& q1, const DiscreteLocation& q2) {
+Bool operator!=(const DiscreteLocation& q1, const DiscreteLocation& q2) {
     return !(q1==q2);
 }
 
-bool operator<(const DiscreteLocation& q1, const DiscreteLocation& q2) {
+Bool operator<(const DiscreteLocation& q1, const DiscreteLocation& q2) {
     const Map<Identifier,String>& q1sm=q1.values();
     const Map<Identifier,String>& q2sm=q2.values();
     Map<Identifier,String>::ConstIterator q1iter=q1sm.begin();
@@ -257,7 +257,7 @@ EventSet ignorable(const List< Tuple<EventSet,Set<Identifier> > >& rules, const 
     EventSet result;
     for(Set<Identifier>::ConstIterator var_iter=vars.begin(); var_iter!=vars.end(); ++var_iter) {
         EventSet variable_does_not_jump;
-        for(uint i=0; i!=rules.size(); ++i) {
+        for(Nat i=0; i!=rules.size(); ++i) {
             if(rules[i].second.contains(*var_iter)) {
                 variable_does_not_jump.adjoin(rules[i].first);
             }
@@ -293,35 +293,35 @@ HybridSystem::~HybridSystem()
 {
 }
 
-void HybridSystem::disable_events(DiscretePredicate q, EventSet e) {
+Void HybridSystem::disable_events(DiscretePredicate q, EventSet e) {
     this->_disabled_events.append(make_tuple(q,e)); }
-void HybridSystem::nonjumping_variables(DiscretePredicate q, EventSet e, Set<RealVariable> v) {
+Void HybridSystem::nonjumping_variables(DiscretePredicate q, EventSet e, Set<RealVariable> v) {
     this->_nonjumping_continuous_state_variables.append(make_tuple(q,e,names(v))); }
-void HybridSystem::new_update(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u) {
+Void HybridSystem::new_update(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u) {
     this->_discrete_updates.append(make_tuple(q,e,u)); }
-void HybridSystem::new_reset(DiscretePredicate q, DiscreteEvent e, List<PrimedRealAssignment> r) {
+Void HybridSystem::new_reset(DiscretePredicate q, DiscreteEvent e, List<PrimedRealAssignment> r) {
     this->_primed_assignments.append(make_tuple(q,e,r)); }
-void HybridSystem::new_dynamic(DiscretePredicate q, List<DottedRealAssignment> d) {
+Void HybridSystem::new_dynamic(DiscretePredicate q, List<DottedRealAssignment> d) {
     this->_dotted_assignments.append(make_tuple(q,d)); }
-void HybridSystem::new_dynamic(List<DottedRealAssignment> d) {
+Void HybridSystem::new_dynamic(List<DottedRealAssignment> d) {
     this->_dotted_assignments.append(make_tuple(DiscretePredicate(true),d)); }
-void HybridSystem::new_auxiliary(DiscretePredicate q, List<RealAssignment> a) {
+Void HybridSystem::new_auxiliary(DiscretePredicate q, List<RealAssignment> a) {
     this->_assignments.append(make_tuple(q,a)); }
-void HybridSystem::new_auxiliary(List<RealAssignment> a) {
+Void HybridSystem::new_auxiliary(List<RealAssignment> a) {
     this->_assignments.append(make_tuple(DiscretePredicate(true),a)); }
-void HybridSystem::new_invariant(DiscretePredicate q, DiscreteEvent e, RealPredicate i) {
+Void HybridSystem::new_invariant(DiscretePredicate q, DiscreteEvent e, RealPredicate i) {
     this->_invariant_predicates.append(make_tuple(q,e,i)); }
-void HybridSystem::new_invariant(DiscretePredicate q, RealPredicate i) {
+Void HybridSystem::new_invariant(DiscretePredicate q, RealPredicate i) {
     this->_invariant_predicates.append(make_tuple(q,DiscreteEvent(),i)); }
-void HybridSystem::new_guard(DiscretePredicate q, DiscreteEvent e, RealPredicate g) {
+Void HybridSystem::new_guard(DiscretePredicate q, DiscreteEvent e, RealPredicate g) {
     this->_guard_predicates.append(make_tuple(q,e,g)); }
 /*
-void HybridSystem::new_transition(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u,
+Void HybridSystem::new_transition(DiscretePredicate q, DiscreteEvent e, List<PrimedStringAssignment> u,
                                                 List<PrimedRealAssignment> r, RealPredicate g) {
     this->new_update(q,e,u); this->new_reset(q,e,r); this->new_guard(q,e,g); }
-void HybridSystem::new_transition(DiscretePredicate q, DiscreteEvent e, PrimedStringAssignment u, PrimedRealAssignment r, RealPredicate g) {
+Void HybridSystem::new_transition(DiscretePredicate q, DiscreteEvent e, PrimedStringAssignment u, PrimedRealAssignment r, RealPredicate g) {
     this->new_reset(q,e,make_list(r)); this->new_guard(q,e,g); }
-void HybridSystem::new_transition(DiscretePredicate q, DiscreteEvent e, PrimedStringAssignment u, RealPredicate g) {
+Void HybridSystem::new_transition(DiscretePredicate q, DiscreteEvent e, PrimedStringAssignment u, RealPredicate g) {
     this->new_update(q,e,make_list(u)); this->new_guard(q,e,g); }
 */
 
@@ -358,7 +358,7 @@ RestrictiveDiscreteMode HybridSystem::compute_mode(const DiscreteLocation& locat
 
         // Compute the targets
         DiscreteLocation target;
-        for(uint i=0; i!=this->_nonjumping_discrete_variables.size(); ++i) {
+        for(Nat i=0; i!=this->_nonjumping_discrete_variables.size(); ++i) {
             if(this->_nonjumping_discrete_variables[i].first==location && this->_nonjumping_discrete_variables[i].second==event) {
                 Set<Identifier> const& nonjumping_variables=this->_nonjumping_discrete_variables[i].third;
                 for(Set<Identifier>::ConstIterator var_iter=nonjumping_variables.begin(); var_iter!=nonjumping_variables.end(); ++var_iter) {
@@ -366,7 +366,7 @@ RestrictiveDiscreteMode HybridSystem::compute_mode(const DiscreteLocation& locat
                 }
             }
         }
-        for(uint i=0; i!=this->_discrete_updates.size(); ++i) {
+        for(Nat i=0; i!=this->_discrete_updates.size(); ++i) {
             if(this->_discrete_updates[i].first==location && this->_discrete_updates[i].second==event) {
                 List<PrimedStringAssignment> const& updates=this->_discrete_updates[i].third;
                 for(List<PrimedStringAssignment>::ConstIterator asn_iter=updates.begin(); asn_iter!=updates.end(); ++asn_iter) {
@@ -378,12 +378,12 @@ RestrictiveDiscreteMode HybridSystem::compute_mode(const DiscreteLocation& locat
 
         // Compute the resets
         List<PrimedRealAssignment> reset;
-        for(uint i=0; i!=this->_nonjumping_continuous_state_variables.size(); ++i) {
+        for(Nat i=0; i!=this->_nonjumping_continuous_state_variables.size(); ++i) {
             if(this->_nonjumping_continuous_state_variables[i].first==location && this->_nonjumping_continuous_state_variables[i].second==event) {
                 reset.append(primed_real_assignments(this->_nonjumping_continuous_state_variables[i].third));
             }
         }
-        for(uint i=0; i!=this->_primed_assignments.size(); ++i) {
+        for(Nat i=0; i!=this->_primed_assignments.size(); ++i) {
             if(this->_primed_assignments[i].first==location && this->_primed_assignments[i].second==event) {
                 reset.append(this->_primed_assignments[i].third);
             }
@@ -409,7 +409,7 @@ Set<DiscreteLocation> HybridSystem::reachable_locations(DiscreteLocation const& 
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-void HybridSystem::check_mode(DiscreteLocation) const {
+Void HybridSystem::check_mode(DiscreteLocation) const {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
@@ -470,11 +470,11 @@ List<PrimedStringAssignment> make_update(const DiscreteLocation& q) {
 
 
 
-void HybridSystem::new_transition(DiscretePredicate s, DiscreteEvent e, PrimedStringAssignment u, RealPredicate g) {
+Void HybridSystem::new_transition(DiscretePredicate s, DiscreteEvent e, PrimedStringAssignment u, RealPredicate g) {
     this->new_transition(s,e,make_list(u),List<PrimedRealAssignment>(),g); }
-void HybridSystem::new_transition(DiscretePredicate s, DiscreteEvent e, PrimedStringAssignment u, List<PrimedRealAssignment> r, RealPredicate g) {
+Void HybridSystem::new_transition(DiscretePredicate s, DiscreteEvent e, PrimedStringAssignment u, List<PrimedRealAssignment> r, RealPredicate g) {
     this->new_transition(s,e,make_list(u),r,g); }
-void HybridSystem::new_transition(DiscretePredicate s, DiscreteEvent e, List<PrimedStringAssignment> u,
+Void HybridSystem::new_transition(DiscretePredicate s, DiscreteEvent e, List<PrimedStringAssignment> u,
                                                 List<PrimedRealAssignment> r, RealPredicate g) {
     this->new_guard(s,e,g);
     this->new_update(s,e,u);
@@ -482,17 +482,17 @@ void HybridSystem::new_transition(DiscretePredicate s, DiscreteEvent e, List<Pri
 }
 
 
-void HybridSystem::new_mode(DiscreteLocation q, List<RealAssignment> a, List<DottedRealAssignment> d) {
+Void HybridSystem::new_mode(DiscreteLocation q, List<RealAssignment> a, List<DottedRealAssignment> d) {
     DiscretePredicate p=make_predicate(q);
     this->new_auxiliary(p,a);
     this->new_dynamic(p,d);
 }
 
-void HybridSystem::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, List<PrimedRealAssignment> r, RealPredicate g) {
+Void HybridSystem::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, List<PrimedRealAssignment> r, RealPredicate g) {
     this->new_transition(make_predicate(s),e,make_update(t),r,g); }
-void HybridSystem::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, PrimedRealAssignment r, RealPredicate g) {
+Void HybridSystem::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, PrimedRealAssignment r, RealPredicate g) {
     this->new_transition(s,e,t,make_list(r),g); }
-void HybridSystem::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, RealPredicate g) {
+Void HybridSystem::new_transition(DiscreteLocation s, DiscreteEvent e, DiscreteLocation t, RealPredicate g) {
     this->new_transition(s,e,t,List<PrimedRealAssignment>(),g); }
 
 
@@ -503,7 +503,7 @@ dynamic_function(Space<Real>& space, const List<RealAssignment>& algebraic, cons
 {
     RealExpression default_expression;
     List<RealExpression> results(differential.size(),default_expression);
-    for(uint i=0; i!=differential.size(); ++i) {
+    for(Nat i=0; i!=differential.size(); ++i) {
         results[space.index(differential[i].lhs.base())]=substitute(differential[i].rhs,algebraic);
     }
 
@@ -533,7 +533,7 @@ dynamic_function(Space<Real>& space, const List<RealAssignment>& algebraic, cons
 
 DiscreteLocation evaluate(const DiscreteUpdate& update, const DiscreteLocation& location) {
     DiscreteLocation result;
-    for(uint i=0; i!=update.size(); ++i) {
+    for(Nat i=0; i!=update.size(); ++i) {
         result.insert(update[i].variable().base(),evaluate(update[i].expression(),location));
     }
     return result;
@@ -551,25 +551,25 @@ Map<DiscreteEvent,DiscreteLocation> evaluate(const Map<DiscreteEvent,DiscreteUpd
 
 List<DottedRealVariable> dot(const List<RealVariable>& v) {
     List<DottedRealVariable> result;
-    for(uint i=0; i!=v.size(); ++i) { result.append(dot(v[i])); }
+    for(Nat i=0; i!=v.size(); ++i) { result.append(dot(v[i])); }
     return result;
 }
 
 List<PrimedRealVariable> next(const List<RealVariable>& v) {
     List<PrimedRealVariable> result;
-    for(uint i=0; i!=v.size(); ++i) { result.append(next(v[i])); }
+    for(Nat i=0; i!=v.size(); ++i) { result.append(next(v[i])); }
     return result;
 }
 
 List<RealVariable> base(const List<PrimedRealVariable>& v) {
     List<RealVariable> result;
-    for(uint i=0; i!=v.size(); ++i) { result.append(v[i].base()); }
+    for(Nat i=0; i!=v.size(); ++i) { result.append(v[i].base()); }
     return result;
 }
 
 List<RealVariable> base(const List<DottedRealVariable>& v) {
     List<RealVariable> result;
-    for(uint i=0; i!=v.size(); ++i) { result.append(v[i].base()); }
+    for(Nat i=0; i!=v.size(); ++i) { result.append(v[i].base()); }
     return result;
 }
 
@@ -612,7 +612,7 @@ operator<<(OutputStream& os, const DiscreteMode& mode)
     return os << " )";
 }
 
-bool
+Bool
 operator<(const DiscreteMode& mode1, const DiscreteMode& mode2)
 {
     return mode1.location() < mode2.location();
@@ -685,7 +685,7 @@ CompositionalHybridAutomaton::mode(DiscreteLocation location) const
 }
 
 
-bool
+Bool
 CompositionalHybridAutomaton::has_mode(DiscreteLocation location) const
 {
     try {
@@ -697,19 +697,19 @@ CompositionalHybridAutomaton::has_mode(DiscreteLocation location) const
     }
 }
 
-bool
+Bool
 CompositionalHybridAutomaton::has_invariant(DiscreteLocation q, DiscreteEvent e) const
 {
     return this->mode(q)._invariant_predicates.has_key(e);
 }
 
-bool
+Bool
 CompositionalHybridAutomaton::has_guard(DiscreteLocation q, DiscreteEvent e) const
 {
     return this->mode(q)._guard_predicates.has_key(e);
 }
 
-bool
+Bool
 CompositionalHybridAutomaton::has_transition(DiscreteLocation q, DiscreteEvent e) const
 {
     return this->mode(q)._targets.has_key(e) || this->mode(q)._primed_assignments.has_key(e);
@@ -719,7 +719,7 @@ Set<DiscreteEvent>
 CompositionalHybridAutomaton::guard_events(DiscreteLocation q) const
 {
     Set<DiscreteEvent> result;
-    for(uint i=0; i!=this->_guard_predicates.size(); ++i) {
+    for(Nat i=0; i!=this->_guard_predicates.size(); ++i) {
         if(this->_guard_predicates[i].first == q) {
             result.insert(this->_guard_predicates[i].second);
         }
@@ -731,7 +731,7 @@ Set<DiscreteEvent>
 CompositionalHybridAutomaton::invariant_events(DiscreteLocation q) const
 {
     Set<DiscreteEvent> result;
-    for(uint i=0; i!=this->_invariant_predicates.size(); ++i) {
+    for(Nat i=0; i!=this->_invariant_predicates.size(); ++i) {
         if(this->_invariant_predicates[i].first == q) {
             result.insert(this->_invariant_predicates[i].second);
         }
@@ -820,7 +820,7 @@ class CompositeHybridSpace
     ~CompositeHybridSpace() { _system_ptr = 0; }
     CompositeHybridSpace(const CompositeHybridAutomaton& ha) : _system_ptr(&ha) { }
     virtual CompositeHybridSpace* clone() const { return new CompositeHybridSpace(*this); }
-    virtual bool has_location(const DiscreteLocation& q) const { return this->_system_ptr->has_mode(q); }
+    virtual Bool has_location(const DiscreteLocation& q) const { return this->_system_ptr->has_mode(q); }
     virtual RealSpace operator[](const DiscreteLocation& q) const { return this->_system_ptr->continuous_state_space(q); }
     virtual OutputStream& write(OutputStream& os) const { return os << "CompositeHybridSpace( " << *this->_system_ptr << " )"; }
   private:
@@ -847,10 +847,10 @@ CompositionalHybridAutomaton::events(DiscreteLocation location) const
 DiscreteLocation
 CompositionalHybridAutomaton::_compute_target(DiscreteLocation source, DiscreteEvent event) const {
     DiscreteLocation result;
-    for(uint i=0; i!=this->_discrete_updates.size(); ++i) {
+    for(Nat i=0; i!=this->_discrete_updates.size(); ++i) {
         if(this->_discrete_updates[i].second == event && this->_discrete_updates[i].first == source) {
             DiscreteUpdate const& update = _discrete_updates[i].third;
-            for(uint j=0; j!=update.size(); ++j) {
+            for(Nat j=0; j!=update.size(); ++j) {
                 result.insert(update[j].variable().base(), evaluate(update[j].expression(),source));
             }
         }
@@ -862,12 +862,12 @@ CompositionalHybridAutomaton::_compute_target(DiscreteLocation source, DiscreteE
 Map<DiscreteEvent, DiscreteLocation>
 CompositionalHybridAutomaton::_compute_targets(DiscreteLocation source) const {
     Map<DiscreteEvent,DiscreteLocation> result;
-    for(uint i=0; i!=this->_discrete_updates.size(); ++i) {
+    for(Nat i=0; i!=this->_discrete_updates.size(); ++i) {
         if(this->_discrete_updates[i].first == source) {
             DiscreteEvent const& event = _discrete_updates[i].second;
             DiscreteUpdate const& update = _discrete_updates[i].third;
             DiscreteLocation& target = result[event];
-            for(uint j=0; j!=update.size(); ++j) {
+            for(Nat j=0; j!=update.size(); ++j) {
                 target.insert(update[j].variable().base(), evaluate(update[j].expression(),source));
             }
         }
@@ -876,7 +876,7 @@ CompositionalHybridAutomaton::_compute_targets(DiscreteLocation source) const {
 }
 
 
-uint
+Nat
 CompositeHybridAutomaton::dimension(DiscreteLocation location) const {
     return this->state_variables(location).size();
 }
@@ -899,7 +899,7 @@ CompositeHybridAutomaton::variables(DiscreteLocation location) const {
 List<RealVariable>
 CompositeHybridAutomaton::state_variables(DiscreteLocation location) const {
     List<RealVariable> result;
-    for(uint i=0; i!=this->_components.size(); ++i) {
+    for(Nat i=0; i!=this->_components.size(); ++i) {
         ARIADNE_ASSERT(this->_components[i].has_mode(location[i]));
         // Append state space in mode i; note that this automatically checks whether a variable is already present
         result.append(this->_components[i].state_variables(location[i]));
@@ -934,7 +934,7 @@ CompositionalHybridAutomaton::event_kind(DiscreteLocation location, DiscreteEven
 
 
 
-uint
+Nat
 CompositionalHybridAutomaton::dimension(DiscreteLocation location) const {
     return this->state_variables(location).size();
 }
@@ -945,7 +945,7 @@ CompositionalHybridAutomaton::output_function(DiscreteLocation location) const {
     Space<Real> space=this->state_variables(location);
     List<RealAssignment> algebraic=this->algebraic_assignments(location);
     List<RealExpression> results(algebraic.size(),RealExpression(0.0));
-    for(uint i=0; i!=algebraic.size(); ++i) { results[i]=algebraic[i].variable(); }
+    for(Nat i=0; i!=algebraic.size(); ++i) { results[i]=algebraic[i].variable(); }
     return EffectiveVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
 }
 
@@ -955,7 +955,7 @@ CompositionalHybridAutomaton::dynamic_function(DiscreteLocation location) const 
     List<RealAssignment> algebraic=this->algebraic_assignments(location);
     List<DottedRealAssignment> differential=this->differential_assignments(location);
     List<RealExpression> results(differential.size(),RealExpression(0.0));
-    for(uint i=0; i!=differential.size(); ++i) { results[space.index(differential[i].variable().base())]=substitute(differential[i].expression(),algebraic); }
+    for(Nat i=0; i!=differential.size(); ++i) { results[space.index(differential[i].variable().base())]=substitute(differential[i].expression(),algebraic); }
     return EffectiveVectorFunction(Ariadne::dimension(space),Ariadne::formula(results,algebraic,space));
 }
 
@@ -967,7 +967,7 @@ CompositionalHybridAutomaton::reset_function(DiscreteLocation source, DiscreteEv
     List<RealAssignment> algebraic=this->algebraic_assignments(source);
     List<PrimedRealAssignment> update=this->update_assignments(source,event);
     List<RealExpression> results(update.size(),RealExpression(0.0));
-    for(uint i=0; i!=update.size(); ++i) { results[target_space.index(update[i].variable().base())]=update[i].expression(); }
+    for(Nat i=0; i!=update.size(); ++i) { results[target_space.index(update[i].variable().base())]=update[i].expression(); }
     return EffectiveVectorFunction(Ariadne::dimension(source_space),Ariadne::formula(results,algebraic,source_space));
 }
 
@@ -994,7 +994,7 @@ CompositionalHybridAutomaton::grid(DiscreteLocation location) const
 {
     List<RealVariable> variables=this->state_variables(location);
     Vector<Float> lengths(variables.size());
-    for(uint i=0; i!=variables.size(); ++i) {
+    for(Nat i=0; i!=variables.size(); ++i) {
         lengths[i]=variables[i].resolution();
     }
     return Grid(lengths);
@@ -1011,7 +1011,7 @@ CompositeHybridAutomaton::urgent_events(DiscreteLocation location) const
 {
     Set<DiscreteEvent> result;
     Set<DiscreteEvent> duplicates;
-    for(uint i=0; i!=this->_components.size(); ++i) {
+    for(Nat i=0; i!=this->_components.size(); ++i) {
         Set<DiscreteEvent> found=this->_components[i].urgent_events(location[i]);
         duplicates.adjoin(intersection(result,found));
         result.adjoin(found);
@@ -1028,7 +1028,7 @@ Set<DiscreteEvent>
 CompositeHybridAutomaton::permissive_events(DiscreteLocation location) const
 {
     Set<DiscreteEvent> result;
-    for(uint i=0; i!=this->_components.size(); ++i) {
+    for(Nat i=0; i!=this->_components.size(); ++i) {
         result.adjoin(this->_components[i].permissive_events(location[i]));
     }
     return result;
@@ -1050,20 +1050,20 @@ CompositionalHybridAutomaton::_order_algebraic_assignments(const List<RealAssign
 
     Set< RealVariable > result_variables;
     Map< RealVariable, Set<RealVariable> > unresolved_dependencies;
-    Map< RealVariable, uint > assignment_table;
+    Map< RealVariable, Nat > assignment_table;
 
-    for(uint i=0; i!=assignments.size(); ++i) {
+    for(Nat i=0; i!=assignments.size(); ++i) {
         result_variables.insert(assignments[i].variable());
         assignment_table.insert(assignments[i].variable(),i);
     }
 
-    for(uint i=0; i!=assignments.size(); ++i) {
+    for(Nat i=0; i!=assignments.size(); ++i) {
         unresolved_dependencies.insert(assignments[i].variable(),intersection(real_arguments(assignments[i].expression()),result_variables));
     }
 
     while(!unresolved_dependencies.empty()) {
         // Check for an which has been resolved and add to list of ok equations
-        bool found=false;
+        Bool found=false;
         for(Map< RealVariable, Set<RealVariable> >::Iterator iter=unresolved_dependencies.begin();
             iter!=unresolved_dependencies.end(); ++iter)
         {
@@ -1092,7 +1092,7 @@ CompositionalHybridAutomaton::_order_algebraic_assignments(const List<RealAssign
 
 
 
-void
+Void
 CompositionalHybridAutomaton::check_overspecification(DiscreteLocation location) const
 {
     // Check for overspecification of state and auxiliary variables
@@ -1149,7 +1149,7 @@ CompositionalHybridAutomaton::check_overspecification(DiscreteLocation location)
 }
 
 
-void
+Void
 CompositionalHybridAutomaton::check_mode(DiscreteLocation location) const {
     this->check_overspecification(location);
 
@@ -1235,7 +1235,7 @@ CompositionalHybridAutomaton::check_mode(DiscreteLocation location) const {
 }
 
 
-void
+Void
 CompositionalHybridAutomaton::check_reachable_modes(DiscreteLocation initial_location) const
 {
     Set<DiscreteLocation> initial_locations;
@@ -1244,7 +1244,7 @@ CompositionalHybridAutomaton::check_reachable_modes(DiscreteLocation initial_loc
 }
 
 
-void
+Void
 CompositionalHybridAutomaton::check_reachable_modes(const Set<DiscreteLocation>& initial_locations) const
 {
     Set<DiscreteLocation> reachable_locations=this->reachable_locations(initial_locations);
@@ -1263,7 +1263,7 @@ Set<DiscreteLocation>
 CompositionalHybridAutomaton::reachable_locations(const Set<DiscreteLocation>& initial_locations) const
 {
     const CompositionalHybridAutomaton& automaton=*this;
-    typedef uint Nat;
+    typedef Nat Nat;
 
     Set<DiscreteLocation> reached=initial_locations;
     Set<DiscreteLocation> working=initial_locations;
@@ -1303,7 +1303,7 @@ CompositionalHybridAutomaton::reachable_locations(const Set<DiscreteLocation>& i
 CompositionalHybridAutomaton compose(const List<CompositionalHybridAutomaton>& components)
 {
     CompositionalHybridAutomaton result;
-    for(uint i=0; i!=components.size(); ++i) {
+    for(Nat i=0; i!=components.size(); ++i) {
         const CompositionalHybridAutomaton& component = components[i];
         result._discrete_events.adjoin(component._discrete_events);
         result._discrete_variables.adjoin(component._discrete_variables);
@@ -1319,14 +1319,14 @@ CompositionalHybridAutomaton compose(const List<CompositionalHybridAutomaton>& c
     }
 
     // Introduce nonjumping constraints for discrete variables
-    for(uint i=0; i!=components.size(); ++i) {
-        for(uint j=0; j!=component[i]._dotted_assignments.size(); ++j) {
+    for(Nat i=0; i!=components.size(); ++i) {
+        for(Nat j=0; j!=component[i]._dotted_assignments.size(); ++j) {
             Tuple<DiscretePredicate,DottedRealAssignment> dynamic = _components[i]._dotted_assignments[j];
             this->_nonjumping[i]._append(dynamic.first,dynamic.second.left_hand_side());
         }
     }
 
-    List<Pair<int,double> > lst;
+    List<Pair<Int,double> > lst;
     make_map(lst);
     return result;
 
@@ -1346,27 +1346,27 @@ ComponentHybridAutomaton(const List<StringVariable>& discrete_variables, const L
 }
 
 
-void
+Void
 ComponentHybridAutomaton::
 new_equation(const DiscretePredicate& locations,
              const List<RealAssignment>& equations)
 {
-    for(uint i=0; i!=equations.size(); ++i) {
+    for(Nat i=0; i!=equations.size(); ++i) {
         this->_assignments.append(make_tuple(locations,equations[i]));
     }
 }
 
-void
+Void
 ComponentHybridAutomaton::
 new_dynamic(const DiscretePredicate& locations,
             const List<DottedRealAssignment>& dynamic)
 {
-    for(uint i=0; i!=dynamic.size(); ++i) {
+    for(Nat i=0; i!=dynamic.size(); ++i) {
         this->_dotted_assignments.append(make_tuple(locations,dynamic[i]));
     }
 }
 
-void
+Void
 ComponentHybridAutomaton::
 new_invariant(const DiscretePredicate& locations,
               DiscreteEvent event,
@@ -1377,7 +1377,7 @@ new_invariant(const DiscretePredicate& locations,
 }
 
 
-void
+Void
 ComponentHybridAutomaton::
 new_guard(const DiscretePredicate& locations,
           DiscreteEvent event,
@@ -1388,7 +1388,7 @@ new_guard(const DiscretePredicate& locations,
 }
 
 
-void
+Void
 ComponentHybridAutomaton::
 new_reset(const DiscretePredicate& sources,
           DiscreteEvent event,
@@ -1396,14 +1396,14 @@ new_reset(const DiscretePredicate& sources,
           const List<PrimedRealAssignment>& reset)
 {
     this->_discrete_updates.append(make_tuple(sources,event,update));
-    for(uint i=0; i!=reset.size(); ++i) {
+    for(Nat i=0; i!=reset.size(); ++i) {
         this->_primed_assignments.append(make_tuple(sources,event,reset[i]));
     }
 }
 
 
 
-void
+Void
 ComponentHybridAutomaton::
 new_transition(const DiscretePredicate& sources,
                DiscreteEvent event,
@@ -1414,7 +1414,7 @@ new_transition(const DiscretePredicate& sources,
 {
     this->_guard_predicates.append(make_tuple(sources,event,guard));
     this->_discrete_updates.append(make_tuple(sources,event,update));
-    for(uint i=0; i!=reset.size(); ++i) {
+    for(Nat i=0; i!=reset.size(); ++i) {
         this->_primed_assignments.append(make_tuple(sources,event,reset[i]));
     }
 }

@@ -108,13 +108,13 @@ class ValidatedAffineConstrainedImageSet
     ValidatedAffineConstrainedImageSet(const ExactBox& D, const Vector<ValidatedAffineModel>& f, const List<ValidatedAffineModelConstraint>& c);
 
     ValidatedAffineConstrainedImageSet* clone() const;
-    void new_parameter_constraint(const EffectiveAffineConstraint& c);
-    void new_parameter_constraint(const ValidatedAffineConstraint& c);
-    void new_constraint(const ValidatedAffineModelConstraint& c);
+    Void new_parameter_constraint(const EffectiveAffineConstraint& c);
+    Void new_parameter_constraint(const ValidatedAffineConstraint& c);
+    Void new_constraint(const ValidatedAffineModelConstraint& c);
 
-    uint dimension() const;
-    uint number_of_parameters() const;
-    uint number_of_constraints() const;
+    Nat dimension() const;
+    Nat number_of_parameters() const;
+    Nat number_of_constraints() const;
     ExactBox domain() const;
 
     Tribool bounded() const;
@@ -123,20 +123,20 @@ class ValidatedAffineConstrainedImageSet
     Tribool inside(const ExactBox& bx) const;
     Tribool empty() const;
 
-    void adjoin_outer_approximation_to(PavingInterface& g, int depth) const;
-    GridTreeSet outer_approximation(const Grid& g, int depth) const;
-    void robust_adjoin_outer_approximation_to(PavingInterface& paving, int depth) const;
+    Void adjoin_outer_approximation_to(PavingInterface& g, Int depth) const;
+    GridTreeSet outer_approximation(const Grid& g, Int depth) const;
+    Void robust_adjoin_outer_approximation_to(PavingInterface& paving, Int depth) const;
 
-    List<Point2d> boundary(uint xc, uint yc) const;
+    List<Point2d> boundary(Nat xc, Nat yc) const;
 
-    virtual void draw(CanvasInterface&, const Projection2d& p) const;
+    virtual Void draw(CanvasInterface&, const Projection2d& p) const;
     virtual OutputStream& write(OutputStream& os) const;
 
   private:
-    void construct(const ExactBox& D, const Matrix<ExactFloat>& G, const Vector<ExactFloat>& c);
-    void construct_linear_program(LinearProgram<Float>& lp) const;
-    static void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth);
-    static void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, int depth);
+    Void construct(const ExactBox& D, const Matrix<ExactFloat>& G, const Vector<ExactFloat>& c);
+    Void construct_linear_program(LinearProgram<Float>& lp) const;
+    static Void _robust_adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, Int depth);
+    static Void _adjoin_outer_approximation_to(PavingInterface& paving, LinearProgram<Float>& lp, const Vector<Float>& errors, GridCell& cell, Int depth);
 };
 
 inline OutputStream& operator<<(OutputStream& os, const ValidatedAffineConstrainedImageSet& as) {

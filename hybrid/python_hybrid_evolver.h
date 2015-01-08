@@ -95,7 +95,7 @@ class PythonHybridEvolver
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
     typedef MonolithicHybridAutomaton::TimeType TimeType;
-    typedef int IntegerType;
+    typedef Int IntegerType;
     typedef Float RealType;
     typedef std::vector<DiscreteEvent> EventListType;
     typedef MonolithicHybridAutomaton SystemType;
@@ -147,11 +147,11 @@ class PythonHybridEvolver
     typedef Tuple<DiscreteLocation, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
 
     // This is the only method which is called in Python
-    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+    virtual Void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                             const SystemType& system, const EnclosureType& initial, const TimeType& time,
-                            Semantics semantics, bool reach) const;
+                            Semantics semantics, Bool reach) const;
 
-    void initialise_python();
+    Void initialise_python();
 
   private:
     EvolutionParametersType _parameters;
@@ -186,9 +186,9 @@ make_hybrid_list_set(const boost::python::list& pylst)
 {
     ListSet< std::pair<DiscreteLocation,SET> >* result=new ListSet< std::pair<DiscreteLocation,SET> >();
     //boost::python::list pylst=boost::python::extract<boost::python::list>(pyobj);
-    for(int i=0; i!=len(pylst); ++i) {
+    for(Int i=0; i!=len(pylst); ++i) {
         boost::python::Tuple pytup=boost::python::extract<boost::python::Tuple>(pylst[i]);
-        Ariadne::DiscreteLocation q(boost::python::extract<int>(pytup[0]));
+        Ariadne::DiscreteLocation q(boost::python::extract<Int>(pytup[0]));
         SET s(boost::python::extract<SET>(pytup[1]));
         //std::pair<Ariadne::DiscreteLocation,SET> pr=std::make_pair(q,s);
         //result->adjoin(std::make_pair(q,s));
@@ -196,7 +196,7 @@ make_hybrid_list_set(const boost::python::list& pylst)
     return result;
 }
 
-void
+Void
 PythonHybridEvolver::initialise_python()
 {
         Py_Initialize();
@@ -223,10 +223,10 @@ PythonHybridEvolver::initialise_python()
 }
 
 
-void
+Void
 PythonHybridEvolver::_evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
                                 const SystemType& system, const EnclosureType& initial, const TimeType& time,
-                                Semantics semantics, bool reach) const
+                                Semantics semantics, Bool reach) const
 {
     try {
         boost::python::object main_module(boost::python::handle<>(PyImport_ImportModule("__main__")));
@@ -235,7 +235,7 @@ PythonHybridEvolver::_evolution(EnclosureListType& final, EnclosureListType& rea
         main_namespace["system"]=system;
         main_namespace["initial"]=initial;
         main_namespace["time"]=time;
-        main_namespace["semantics"]=int(semantics);
+        main_namespace["semantics"]=Int(semantics);
 
         //PyRun_SimpleString("print\nprint \"Starting Python evaluate\"\nprint dir()\nprint\nprint dir(hybrid_evolver)\nprint\n");
         PyRun_SimpleString("evolver=hybrid_evolver.HybridEvolverPrototype()");

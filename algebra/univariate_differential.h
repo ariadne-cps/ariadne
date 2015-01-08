@@ -46,22 +46,22 @@ class UnivariateDifferential
     template<class T, class Y> friend UnivariateDifferential<Y> compose(const Series<T>&,const UnivariateDifferential<Y>&);
   public:
     explicit UnivariateDifferential() : _data(1) { }
-    explicit UnivariateDifferential(uint d) : _data(d+1) { }
-    explicit UnivariateDifferential(uint d, const X& x) : _data(d+1,x) { }
-    template<class XX> UnivariateDifferential(uint d, const XX* ptr) : _data(ptr,ptr+(d+1)) { }
+    explicit UnivariateDifferential(Nat d) : _data(d+1) { }
+    explicit UnivariateDifferential(Nat d, const X& x) : _data(d+1,x) { }
+    template<class XX> UnivariateDifferential(Nat d, const XX* ptr) : _data(ptr,ptr+(d+1)) { }
 
-    static UnivariateDifferential<X> constant(uint d, const X& c) {
+    static UnivariateDifferential<X> constant(Nat d, const X& c) {
         UnivariateDifferential<X> result(d,create_zero(c)); result._data[0]=c; return result; }
-    static UnivariateDifferential<X> variable(uint d, const X& x) {
+    static UnivariateDifferential<X> variable(Nat d, const X& x) {
         UnivariateDifferential<X> result(d,create_zero(x)); result._data[0]=x; result._data[1]=1; return result; }
 
     UnivariateDifferential<X>& operator=(const X& c) {
-        X z=create_zero(_data[0]); _data[0]=c; for(uint i=1; i!=_data.size(); ++i) { _data[i]=z; } return *this; }
-    uint degree() const { return this->_data.size()-1; }
+        X z=create_zero(_data[0]); _data[0]=c; for(Nat i=1; i!=_data.size(); ++i) { _data[i]=z; } return *this; }
+    Nat degree() const { return this->_data.size()-1; }
     const X& value() const { return this->_data[0]; }
     const X& gradient() const { return this->_data[1]; }
-    const X& operator[](uint i) const { return this->_data[i]; }
-    X& operator[](uint i) { return this->_data[i]; }
+    const X& operator[](Nat i) const { return this->_data[i]; }
+    X& operator[](Nat i) { return this->_data[i]; }
   private:
     Array<X> _data;
 };
@@ -70,9 +70,9 @@ template<class X> UnivariateDifferential<X> create_zero(const UnivariateDifferen
     return UnivariateDifferential<X>(c.degree(),create_zero(c[0])); }
 
 template<class X> UnivariateDifferential<X>& operator+=(UnivariateDifferential<X>& x, const UnivariateDifferential<X>& y) {
-    for(uint i=0; i<=x.degree(); ++i) { x[i]+=y[i]; } return x; }
+    for(Nat i=0; i<=x.degree(); ++i) { x[i]+=y[i]; } return x; }
 template<class X> UnivariateDifferential<X>& operator-=(UnivariateDifferential<X>& x, const UnivariateDifferential<X>& y) {
-    for(uint i=0; i<=x.degree(); ++i) { x[i]-=y[i]; } return x; }
+    for(Nat i=0; i<=x.degree(); ++i) { x[i]-=y[i]; } return x; }
 template<class X> UnivariateDifferential<X>& operator*=(UnivariateDifferential<X>& x, const UnivariateDifferential<X>& y) {
     x=x*y; return x; }
 
@@ -83,7 +83,7 @@ operator+=(UnivariateDifferential<X>& x, const Y& c) {
 template<class X, class Y>
 EnableIfNumeric<Y,UnivariateDifferential<X>&>
 operator*=(UnivariateDifferential<X>& x, const Y& c) {
-    for(uint i=0; i<=x.degree(); ++i) { x[i]*=c; } return x; }
+    for(Nat i=0; i<=x.degree(); ++i) { x[i]*=c; } return x; }
 
 template<class X> UnivariateDifferential<X> operator+(X c, const UnivariateDifferential<X>& x) {
     Series<X> r(x); r+=c; return r; }
@@ -99,8 +99,8 @@ template<class X> UnivariateDifferential<X> operator-(const UnivariateDifferenti
 
 template<class X> UnivariateDifferential<X> operator*(const UnivariateDifferential<X>& x1, const UnivariateDifferential<X>& x2) {
     UnivariateDifferential<X> r(min(x1.degree(),x2.degree()),create_zero(x1[0]*x2[0]));
-    for(uint i1=0; i1<=r.degree(); ++i1) {
-        for(uint i2=0; i2<=r.degree()-i1; ++i2) {
+    for(Nat i1=0; i1<=r.degree(); ++i1) {
+        for(Nat i2=0; i2<=r.degree()-i1; ++i2) {
             r[i1+i2]+=x1[i1]*x2[i2];
         }
     }
@@ -119,7 +119,7 @@ template<class X> UnivariateDifferential<X> sqr(const UnivariateDifferential<X>&
 template<class X> UnivariateDifferential<X> sqrt(const UnivariateDifferential<X>& dx) {
     return compose(Series<X>::sqrt(dx.degree(),dx[0]),dx); }
 
-template<class X> UnivariateDifferential<X> pow(const UnivariateDifferential<X>& dx, int n) {
+template<class X> UnivariateDifferential<X> pow(const UnivariateDifferential<X>& dx, Int n) {
     return compose(Series<X>::pow(dx.degree(),dx[0],n),dx); }
 
 template<class X> UnivariateDifferential<X> exp(const UnivariateDifferential<X>& dx) {
@@ -141,14 +141,14 @@ template<class X> UnivariateDifferential<X> tan(const UnivariateDifferential<X>&
 template<class X, class Y>
 UnivariateDifferential<Y> compose(const Series<X>& x, const UnivariateDifferential<Y>& y)
 {
-    uint d=std::min(x.degree(),y.degree());
+    Nat d=std::min(x.degree(),y.degree());
 
     Y y0 = y[0];
     Y z = create_zero(y0);
     const_cast<Y&>(y[0]) = z;
     UnivariateDifferential<Y> r(d, z);
     r[0]=x[d];
-    for(uint n=1; n<=d; ++n) {
+    for(Nat n=1; n<=d; ++n) {
         r=r*y;
         r[0]+=x[d-n];
     }
@@ -160,10 +160,10 @@ template<class X>
 UnivariateDifferential<X>
 derivative(const UnivariateDifferential<X>& x)
 {
-    uint n=x.degree();
+    Nat n=x.degree();
     UnivariateDifferential<X> r(min(n,1u)-1u);
     if(n==0) { r[0]=x[0]*0; }
-    for(uint i=0; i<n; ++i) {
+    for(Nat i=0; i<n; ++i) {
         r[i]=(i+1)*x[i+1];
     }
     return r;
@@ -173,9 +173,9 @@ template<class X>
 UnivariateDifferential<X>
 antiderivative(const UnivariateDifferential<X>& x)
 {
-    uint n=x.degree();
+    Nat n=x.degree();
     UnivariateDifferential<X> r(n+1,create_zero(x[0]));
-    for(uint i=0; i<=n; ++i) {
+    for(Nat i=0; i<=n; ++i) {
         r[i+1]=x[i]/(i+1);
     }
     return r;
@@ -185,10 +185,10 @@ template<class X>
 UnivariateDifferential<X>
 antiderivative(const UnivariateDifferential<X>& x, const X& c)
 {
-    uint n=x.degree();
+    Nat n=x.degree();
     UnivariateDifferential<X> r(n+1,create_zero(x[0]));
     r[0]=c;
-    for(uint i=0; i<=n; ++i) {
+    for(Nat i=0; i<=n; ++i) {
         r[i+1]=x[i]/(i+1);
     }
     return r;
@@ -200,7 +200,7 @@ template<class X>
 OutputStream& operator<<(OutputStream& os, const UnivariateDifferential<X>& x)
 {
     os << "D<"<<x.degree()<<">";
-    for(uint i=0; i<=x.degree(); ++i) {
+    for(Nat i=0; i<=x.degree(); ++i) {
         os << (i==0 ? '[' : ',') << x[i];
     }
     return os << "]";

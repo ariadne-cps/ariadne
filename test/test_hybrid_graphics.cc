@@ -34,7 +34,7 @@
 using namespace Ariadne;
 
 
-int main(int argc, char **argv) {
+Int main(Int argc, char **argv) {
     StringVariable q("q");
     RealVariable x("x"),y("y"),z("z");
     DiscreteLocation location((q|"1"));

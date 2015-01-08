@@ -46,8 +46,8 @@
 namespace Ariadne {
 
 
-uint ApproximateFloat::output_precision = 6;
-uint ExactFloat::output_precision = 18;
+Nat ApproximateFloat::output_precision = 6;
+Nat ExactFloat::output_precision = 18;
 
 const ExactFloat infty = ExactFloat(inf);
 

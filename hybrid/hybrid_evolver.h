@@ -135,20 +135,20 @@ class HybridEvolverBase
     const ConfigurationType& configuration() const;
 
     //! \brief Change the configuration from a \a domain and \a lengths (NOT IMPLEMENTED).
-    virtual void reconfigure(const HybridBoxes& domain, const HybridExactFloatVector& lengths) { }
+    virtual Void reconfigure(const HybridBoxes& domain, const HybridExactFloatVector& lengths) { }
 
     //! \brief The class which constructs functions for the enclosures.
     const FunctionFactoryType& function_factory() const;
     //! \brief Set the class which constructs functions for the enclosures.
-    void set_function_factory(const FunctionFactoryType& factory);
+    Void set_function_factory(const FunctionFactoryType& factory);
 
     //! \brief Set the class which integrates the continuous dynamics.
-    void set_integrator(const IntegratorInterface& integrator);
+    Void set_integrator(const IntegratorInterface& integrator);
     //! \brief Set the class which integrates the continuous dynamics.
-    void set_solver(const SolverInterface& solver);
+    Void set_solver(const SolverInterface& solver);
 
-    bool ALLOW_CREEP; //!< If true, a less-than-full evolution step may be taken to avoid splitting due to partially crossing a guard.
-    bool ALLOW_UNWIND; //!< If true, a less-than-full evolution step may be taken to try to restore all time values over the parameter domain to the same value.
+    Bool ALLOW_CREEP; //!< If true, a less-than-full evolution step may be taken to avoid splitting due to partially crossing a guard.
+    Bool ALLOW_UNWIND; //!< If true, a less-than-full evolution step may be taken to try to restore all time values over the parameter domain to the same value.
     //@}
 
     //@{
@@ -206,9 +206,9 @@ class HybridEvolverBase
     //!   are taken.
     //! \param reach A flag indicating whether the reachable sets should
     //!   be computed.
-    virtual void _evolution(ListSet<HybridEnclosure>& final, ListSet<HybridEnclosure>& reachable, ListSet<HybridEnclosure>& intermediate,
+    virtual Void _evolution(ListSet<HybridEnclosure>& final, ListSet<HybridEnclosure>& reachable, ListSet<HybridEnclosure>& intermediate,
                             const EnclosureType& initial, const TerminationType& termination,
-                            Semantics semantics, bool reach) const;
+                            Semantics semantics, Bool reach) const;
 
     //! \brief Compute the evolution within a single discrete mode.
     //!
@@ -218,14 +218,14 @@ class HybridEvolverBase
     //! either the maximum continuous time is reached, or no furter continuous
     //! evolution is possible.
     virtual
-    void
+    Void
     _evolution_in_mode(EvolutionData& evolution_data,
                        TerminationType const& maximum_time) const;
 
     //! \brief Performs an evolution step on one of the sets listed in \a
     //! evolution_data.initial_sets.
     virtual
-    void
+    Void
     _evolution_step(EvolutionData& evolution_data,
                     EffectiveVectorFunction const& dynamic,
                     Map<DiscreteEvent,TransitionData> const& transitions,
@@ -320,7 +320,7 @@ class HybridEvolverBase
     //! \brief Simplify the description of a set or allow for reconditioning
     //! of numerical error.
     virtual
-    void
+    Void
     _recondition(HybridEnclosure& set) const;
 
     //! \brief Process the \a starting_set to find any
@@ -338,7 +338,7 @@ class HybridEvolverBase
     //! to give the flowable set
     //! \f$P=\{ x\in I \mid \forall e\in E_{\mathrm{tcp}},\ p_e(x)\leq0\}\f$.
     virtual
-    void
+    Void
     _process_starting_events(EvolutionData& evolution_data,
                             HybridEnclosure const& starting_set,
                             Map<DiscreteEvent,TransitionData> const& transitions) const;
@@ -346,7 +346,7 @@ class HybridEvolverBase
     //! \brief Apply the \a flow to the \a set up to the time specified by \a timing_data
     //! to obtain the single-step unconstrained reachable set.
     virtual
-    void
+    Void
     _apply_reach_step(HybridEnclosure& set,
                       ValidatedVectorFunctionModel const& flow,
                       TimingData const& timing_data) const;
@@ -354,7 +354,7 @@ class HybridEvolverBase
     //! \brief Apply the \a flow to the \a set for the time specified by \a timing_data
     //! to obtain the single-step unconstrained evolved set.
     virtual
-    void
+    Void
     _apply_evolve_step(HybridEnclosure& set,
                        ValidatedVectorFunctionModel const& flow,
                        TimingData const& timing_data) const;
@@ -366,7 +366,7 @@ class HybridEvolverBase
     //! NOTE: The \a dynamic is used to compute the Lie derivative of
     //! the flow to ensure positive crossing in the degenerate case. It should not really be necessary.
     virtual
-    void
+    Void
     _apply_guard_step(HybridEnclosure& set,
                       EffectiveVectorFunction const& dynamic,
                       ValidatedVectorFunctionModel const& flow,
@@ -378,7 +378,7 @@ class HybridEvolverBase
     //! \brief Apply the invariants in \a transition_data to the set \a set.
     //! \callgraph
     virtual
-    void
+    Void
     _apply_invariants(HybridEnclosure& set,
                       const Map<DiscreteEvent,TransitionData>& transition_data) const;
 
@@ -390,7 +390,7 @@ class HybridEvolverBase
     //! The extra sets are adjoined to the end of the list of sets to be constrained.
     //! NOTE: The \a evolve_time should probably be in crossing_data, and should not really be necessary.
     virtual
-    void
+    Void
     _apply_guard(List<HybridEnclosure>& sets,
                  const HybridEnclosure& starting_set,
                  const ValidatedVectorFunctionModel& flow,
@@ -439,7 +439,7 @@ class HybridEvolverBase
     //!
     //! TODO: This method might be better split into even simpler events.
     virtual
-    void
+    Void
     _apply_evolution_step(EvolutionData& evolution_data,
                           HybridEnclosure const& starting_set,
                           ValidatedVectorFunctionModel const& flow,
@@ -450,11 +450,11 @@ class HybridEvolverBase
 
     //! \brief Output a one-line summary of the current evolution state to the logging stream.
     virtual
-    void
+    Void
     _log_summary(EvolutionData const& evolution_data, HybridEnclosure const& starting_set) const;
 
   protected:
-    void _create(const SystemType& system, FunctionFactoryType* factory);
+    Void _create(const SystemType& system, FunctionFactoryType* factory);
     std::shared_ptr< IntegratorInterface > _integrator_ptr;
   private:
     std::shared_ptr< FunctionFactoryType > _function_factory_ptr;
@@ -467,8 +467,8 @@ class HybridEvolverBase
 };
 
 
-bool is_blocking(EventKind evk);
-bool is_activating(EventKind evk);
+Bool is_blocking(EventKind evk);
+Bool is_activating(EventKind evk);
 
 //! \brief A data type used to store information about a transition of a hybrid system.
 //! \relates HybridEvolverInterface
@@ -667,7 +667,7 @@ struct EvolutionData
 class HybridEvolverBaseConfiguration : public ConfigurationInterface
 {
   public:
-    typedef uint UnsignedIntType;
+    typedef Nat UnsignedIntType;
     typedef double RealType;
 
   protected:
@@ -698,31 +698,31 @@ class HybridEvolverBaseConfiguration : public ConfigurationInterface
     RealType _maximum_spacial_error;
 
     //! \brief Enable reconditioning of basic sets (false by default).
-    bool _enable_reconditioning;
+    Bool _enable_reconditioning;
 
     //! \brief Enable subdivision of basic sets (false by default), only for upper semantics.
-    bool _enable_subdivisions;
+    Bool _enable_subdivisions;
 
   public:
 
     const RealType& flow_accuracy() const { return _flow_accuracy; }
     //! \brief Construct the _integrator of the evolver, then set the _flow_accuracy.
-    void set_flow_accuracy(const RealType value);
+    Void set_flow_accuracy(const RealType value);
 
     const RealType& maximum_step_size() const { return _maximum_step_size; }
-    void set_maximum_step_size(const RealType value) { _maximum_step_size = value; }
+    Void set_maximum_step_size(const RealType value) { _maximum_step_size = value; }
 
     const RealType& maximum_enclosure_radius() const { return _maximum_enclosure_radius; }
-    void set_maximum_enclosure_radius(const RealType value) { _maximum_enclosure_radius = value; }
+    Void set_maximum_enclosure_radius(const RealType value) { _maximum_enclosure_radius = value; }
 
     const RealType& maximum_spacial_error() const { return _maximum_spacial_error; }
-    void set_maximum_spacial_error(const RealType value) { _maximum_spacial_error = value; }
+    Void set_maximum_spacial_error(const RealType value) { _maximum_spacial_error = value; }
 
-    const bool& enable_reconditioning() const { return _enable_reconditioning; }
-    void set_enable_reconditioning(const bool value) { _enable_reconditioning = value; }
+    const Bool& enable_reconditioning() const { return _enable_reconditioning; }
+    Void set_enable_reconditioning(const Bool value) { _enable_reconditioning = value; }
 
-    const bool& enable_subdivisions() const { return _enable_subdivisions; }
-    void set_enable_subdivisions(const bool value) { _enable_subdivisions = value; }
+    const Bool& enable_subdivisions() const { return _enable_subdivisions; }
+    Void set_enable_subdivisions(const Bool value) { _enable_subdivisions = value; }
 
   public:
 

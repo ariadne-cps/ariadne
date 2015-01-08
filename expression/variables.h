@@ -45,9 +45,6 @@ class Identifier;
 
 template<class T> class Set;
 
-typedef unsigned int Nat;
-typedef int Int;
-
 class Boolean;
 class Tribool;
 
@@ -103,7 +100,7 @@ template<class T> class Constant
     //    : _name_ptr(new String(str)), _value_ptr(new T(value)) { }
     const Identifier& name() const { return *_name_ptr; }
     const T& value() const { return *_value_ptr; }
-    bool operator==(const Constant<T>& other) const {
+    Bool operator==(const Constant<T>& other) const {
         if(this->name()==other.name()) { assert(this->value()==other.value()); return true; } else { return false; } }
   private:
     std::shared_ptr<Identifier> _name_ptr;
@@ -117,7 +114,7 @@ template<> class Constant<String>
     const Identifier& name() const { return static_cast<const Identifier&>(_value); }
     const String& value() const { return _value; }
     operator const String& () const { return _value; }
-    bool operator==(const Constant<String>& other) const {
+    Bool operator==(const Constant<String>& other) const {
         return (this->value()==other.value()); }
   private:
     String _value;
@@ -132,10 +129,10 @@ class UntypedVariable {
     //! \brief The name of the variable.
     const Identifier& name() const { return *_name_ptr; }
     const VariableType& type() const { return this->_type; }
-    bool operator==(const UntypedVariable& other) const {
+    Bool operator==(const UntypedVariable& other) const {
         return (this->name()==other.name()) && (this->_category==other._category); }
-    bool operator!=(const UntypedVariable& other) const { return !(*this==other); }
-    bool operator<(const UntypedVariable& other) const {
+    Bool operator!=(const UntypedVariable& other) const { return !(*this==other); }
+    Bool operator<(const UntypedVariable& other) const {
         return this->name()<other.name() || (this->name()==other.name() && this->_type < other._type); }
     virtual OutputStream& write(OutputStream&) const;
   public:

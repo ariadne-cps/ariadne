@@ -43,7 +43,7 @@ namespace Ariadne {
 class Real;
 template<> struct IsNumber<Real> : True { };
 
-struct Accuracy { uint _bits; Nat bits() { return _bits; } TwoExp error() const; };
+struct Accuracy { Nat _bits; Nat bits() { return _bits; } TwoExp error() const; };
 
 extern const Real pi;
 extern const Real infinity;
@@ -141,8 +141,8 @@ class Real
 
     friend OutputStream& operator<<(OutputStream&, Real const&);
   private:
-    Real(std::int64_t n, void*);
-    Real(std::uint64_t m, void*);
+    Real(std::int64_t n, Void*);
+    Real(std::uint64_t m, Void*);
 };
 
 template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>>> inline Real::Real(M m) : Real(std::uint64_t(m),nullptr) { };

@@ -44,20 +44,20 @@ using namespace Ariadne;
 
 class TestMatrix {
   public:
-    void test();
+    Void test();
   private:
-    void test_concept();
-    void test_misc();
+    Void test_concept();
+    Void test_misc();
 };
 
-void
+Void
 TestMatrix::test()
 {
     ARIADNE_TEST_CALL(test_concept());
     ARIADNE_TEST_CALL(test_misc());
 }
 
-void
+Void
 TestMatrix::test_concept()
 {
     ApproximateFloat fx(1);
@@ -89,7 +89,7 @@ TestMatrix::test_concept()
 }
 
 
-void
+Void
 TestMatrix::test_misc()
 {
     ApproximateFloat x=2.25;
@@ -142,7 +142,7 @@ TestMatrix::test_misc()
     ARIADNE_TEST_EQUALS(transpose(ApproximateFloatMatrix({{1.,2.,3.},{4.,5.,6.}}))*ApproximateFloatVector({5.,7.}),ApproximateFloatMatrix({{1.,4.},{2.,5.},{3.,6.}})*ApproximateFloatVector({5.,7.}));
 }
 
-int main() {
+Int main() {
     TestMatrix().test();
     return ARIADNE_TEST_FAILURES;
 }

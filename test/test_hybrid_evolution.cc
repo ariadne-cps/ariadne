@@ -48,7 +48,7 @@
 using namespace Ariadne;
 using namespace std;
 
-int evolver_verbosity=0;
+Int evolver_verbosity=0;
 
 
 EffectiveScalarFunction c=EffectiveScalarFunction::constant(2,1);
@@ -66,21 +66,21 @@ Colour guard_set_colour(0.75,0.75,0.75);
 // Test evolution of realistic hybrid systems
 class TestHybridEvolution
 {
-    int verbosity;
+    Int verbosity;
     mutable shared_ptr<HybridEvolverBase> evolver;
   public:
-    TestHybridEvolution(const int verb);
+    TestHybridEvolution(const Int verb);
   private:
-    void _set_evolver(const HybridAutomatonInterface& system) const;
+    Void _set_evolver(const HybridAutomatonInterface& system) const;
   public:
-    void test() const;
-    void test_bouncing_ball() const;
-    void test_water_tank() const;
+    Void test() const;
+    Void test_bouncing_ball() const;
+    Void test_water_tank() const;
 };
 
-TestHybridEvolution::TestHybridEvolution(const int verb) : verbosity(verb) { }
+TestHybridEvolution::TestHybridEvolution(const Int verb) : verbosity(verb) { }
 
-void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) const
+Void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) const
 {
     evolver.reset(new GeneralHybridEvolver(system));
     //evolver->set_integrator(TaylorSeriesIntegrator(1e-5));
@@ -91,12 +91,12 @@ void TestHybridEvolution::_set_evolver(const HybridAutomatonInterface& system) c
     evolver->configuration().set_maximum_enclosure_radius(1./2);
 }
 
-void TestHybridEvolution::test() const {
+Void TestHybridEvolution::test() const {
     ARIADNE_TEST_CALL(test_bouncing_ball());
     ARIADNE_TEST_CALL(test_water_tank());
 };
 
-void TestHybridEvolution::test_bouncing_ball() const {
+Void TestHybridEvolution::test_bouncing_ball() const {
     HybridAutomaton bouncing_ball;
     Real one(1);
     RealVariable x("x");
@@ -144,7 +144,7 @@ void TestHybridEvolution::test_bouncing_ball() const {
 }
 
 
-void TestHybridEvolution::test_water_tank() const {
+Void TestHybridEvolution::test_water_tank() const {
     // Declare some constants
     Real T(Rational(4));
     Real hmin(Rational(11,2));
@@ -215,9 +215,9 @@ void TestHybridEvolution::test_water_tank() const {
 }
 
 
-int main(int argc, const char* argv[])
+Int main(Int argc, const char* argv[])
 {
-    int evolver_verbosity=get_verbosity(argc,argv);
+    Int evolver_verbosity=get_verbosity(argc,argv);
 
     DRAWING_METHOD = AFFINE_DRAW; DRAWING_ACCURACY = 1u;
 

@@ -166,17 +166,17 @@ class HybridReachabilityAnalyser
   private:
     // Helper functions for operators on lists of sets.
     Pair<HybridGridTreeSet,HybridGridTreeSet> _reach_evolve_resume(const ListSet<HybridEnclosure>& initial_enclosures,
-            const HybridTime& time, const int accuracy, ListSet<HybridEnclosure>& evolve_enclosures,
+            const HybridTime& time, const Int accuracy, ListSet<HybridEnclosure>& evolve_enclosures,
             Semantics semantics, const HybridEvolverInterface& evolver) const;
     HybridGridTreeSet _upper_reach(const HybridGridTreeSet& set, const HybridTime& time,
-            const int accuracy, const HybridEvolverInterface& evolver) const;
+            const Int accuracy, const HybridEvolverInterface& evolver) const;
     HybridGridTreeSet _upper_evolve(const HybridGridTreeSet& set, const HybridTime& time,
-            const int accuracy, const HybridEvolverInterface& evolver) const;
-    void _adjoin_upper_reach_evolve(HybridGridTreeSet& reach_set, HybridGridTreeSet& final_set,
+            const Int accuracy, const HybridEvolverInterface& evolver) const;
+    Void _adjoin_upper_reach_evolve(HybridGridTreeSet& reach_set, HybridGridTreeSet& final_set,
                                     const HybridGridTreeSet& set, const HybridTerminationCriterion& termination,
-                                    const int accuracy, const HybridEvolverInterface& evolver) const;
+                                    const Int accuracy, const HybridEvolverInterface& evolver) const;
     //! \brief Perform restriction on \a set, using the overspill policy
-    void _checked_restriction(HybridGridTreeSet& set, const HybridGridTreeSet& bounding) const;
+    Void _checked_restriction(HybridGridTreeSet& set, const HybridGridTreeSet& bounding) const;
 };
 
 
@@ -186,9 +186,9 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
 
   public:
     //! \brief The integer type.
-    typedef int IntType;
+    typedef Int IntType;
     //! \brief The unsigned integer type.
-    typedef uint UnsignedIntType;
+    typedef Nat UnsignedIntType;
     //! \brief The real type.
     typedef ExactNumber RealType;
 
@@ -298,40 +298,40 @@ class HybridReachabilityAnalyserConfiguration : public ConfigurationInterface {
   public:
 
     const RealType& transient_time() const { return _transient_time; }
-    void set_transient_time(const RawFloat value) { _transient_time = RealType(value); }
+    Void set_transient_time(const RawFloat value) { _transient_time = RealType(value); }
 
     const UnsignedIntType& transient_steps() const { return _transient_steps; }
-    void set_transient_steps(const UnsignedIntType value) { _transient_steps = value; }
+    Void set_transient_steps(const UnsignedIntType value) { _transient_steps = value; }
 
     const RealType& lock_to_grid_time() const { return _lock_to_grid_time; }
-    void set_lock_to_grid_time(const RawFloat value) { _lock_to_grid_time = RealType(value); }
+    Void set_lock_to_grid_time(const RawFloat value) { _lock_to_grid_time = RealType(value); }
 
     const UnsignedIntType& lock_to_grid_steps() const { return _lock_to_grid_steps; }
-    void set_lock_to_grid_steps(const UnsignedIntType value) { _lock_to_grid_steps = value; }
+    Void set_lock_to_grid_steps(const UnsignedIntType value) { _lock_to_grid_steps = value; }
 
     const Set<DiscreteEvent>& lock_to_grid_events() const { return _lock_to_grid_events; }
-    void set_lock_to_grid_events(const Set<DiscreteEvent> value) { _lock_to_grid_events = value; }
+    Void set_lock_to_grid_events(const Set<DiscreteEvent> value) { _lock_to_grid_events = value; }
 
     const IntType& maximum_grid_depth() const { return _maximum_grid_depth; }
-    void set_maximum_grid_depth(const IntType value) { _maximum_grid_depth = value; }
+    Void set_maximum_grid_depth(const IntType value) { _maximum_grid_depth = value; }
 
     const IntType& maximum_grid_height() const { return _maximum_grid_height; }
-    void set_maximum_grid_height(const IntType value) { _maximum_grid_height = value; }
+    Void set_maximum_grid_height(const IntType value) { _maximum_grid_height = value; }
 
     const std::shared_ptr<HybridBoxes>& bounding_domain_ptr() const { return _bounding_domain_ptr; }
     //! \brief Check the consistency in respect to the system space, then set the bounding domain.
-    void set_bounding_domain_ptr(const std::shared_ptr<HybridBoxes> value);
+    Void set_bounding_domain_ptr(const std::shared_ptr<HybridBoxes> value);
 
     const HybridGrid& grid() const { return *_grid_ptr; }
     HybridGrid& grid() { return *_grid_ptr; }
     //! \brief Check the consistency in respect to the system space, then set the grid.
-    void set_grid(const std::shared_ptr<HybridGrid> value_ptr);
+    Void set_grid(const std::shared_ptr<HybridGrid> value_ptr);
 
-    void set_scaling(const RealVariable& v, RawFloat s) {
+    Void set_scaling(const RealVariable& v, RawFloat s) {
         dynamic_cast<SimpleHybridScaling&>(this->grid().scalings()).set_scaling(v,ExactFloat(s)); }
 
     const ChainOverspillPolicy& outer_overspill_policy() const { return _outer_overspill_policy; }
-    void set_outer_overspill_policy(const ChainOverspillPolicy value) { _outer_overspill_policy = value; }
+    Void set_outer_overspill_policy(const ChainOverspillPolicy value) { _outer_overspill_policy = value; }
 
   public:
 

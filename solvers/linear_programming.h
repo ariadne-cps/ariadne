@@ -212,7 +212,7 @@ class SimplexSolver
 
     //! \ingroup LinearProgrammingModule
     //! Perform a single step of the standard linear programming problem, updating the variable type Array \a vt, the ordered variable Array \a p, the inverse basis matrix \a B and the variables \a x.
-    bool lpstep(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+    Bool lpstep(const Vector<X>& c, const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                 Array<Slackness>& vt, Array<SizeType>& p, Matrix<X>& B, Vector<X>& x) const;
 
     //! \ingroup LinearProgrammingModule
@@ -231,7 +231,7 @@ class SimplexSolver
 
     //! \ingroup LinearProgrammingModule
     //! Perform a step of the simplex algorithm for a feasibility computation using validated (interval) arithmetic.
-    bool validated_feasibility_step(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+    Bool validated_feasibility_step(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                                     Array<Slackness>& vt, Array<SizeType>& p) const;
 
   public:
@@ -242,13 +242,13 @@ class SimplexSolver
     //!   - B = inverse(A_B), where A_B is the mxm submatrix of A formed by columns for which vt[j]==BASIC
     //!   - x[j]=l[j] if j==LOWER and x[j]=u[j] if j==UPPER
     //!   - Ax=b
-    void consistency_check(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
+    Void consistency_check(const Vector<X>& xl, const Vector<X>& xu, const Matrix<X>& A, const Vector<X>& b,
                            const Array<Slackness>& vt, const Array<SizeType>& p, const Matrix<X>& B, const Vector<X>& x) const;
 
     //! \brief Check that B is the inverse of the matrix with columns A[p[0],...,A[p[m-1]].
-    void consistency_check(const Matrix<X>& A, const Array<SizeType>& p, const Matrix<X>& B) const;
+    Void consistency_check(const Matrix<X>& A, const Array<SizeType>& p, const Matrix<X>& B) const;
     //! \brief Check that Ax=b
-    void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& x) const;
+    Void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& x) const;
     //! \brief Check that the basic variable Array p is consistent with the variable type Array vt.
     //! Returns the number of basic variables.
     SizeType consistency_check(const Array<Slackness>& vt, const Array<SizeType>& p) const;

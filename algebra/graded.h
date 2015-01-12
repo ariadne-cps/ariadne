@@ -337,8 +337,8 @@ template<class A> Void sincos(Graded<A>& s, Graded<A>& c, const Graded<A>& f) {
             s[i] += j*f[j]*c[i-j];
             c[i] += j*f[j]*s[i-j];
         }
-        s[i]/=(+Float(i));
-        c[i]/=(-Float(i));
+        s[i]/=(+i);
+        c[i]/=(-i);
     }
 }
 

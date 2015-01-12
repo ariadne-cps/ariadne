@@ -1,7 +1,7 @@
 /***************************************************************************
  *            differential.cc
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2008-15  Pieter Collins
  *
  ****************************************************************************/
 
@@ -28,6 +28,15 @@
 
 #include "algebra_mixin.tcc"
 
+#include "differential.tcc"
+
 namespace Ariadne {
+
+//template class Differential<RawFloat64>;
+
+//template class Differential<Rational>;
+
+//template class Differential<ValidatedFloat64>;
+template class Differential<ApproximateFloat>;
 
 }

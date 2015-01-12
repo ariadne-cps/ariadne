@@ -1,7 +1,7 @@
 /***************************************************************************
  *            differential.h
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2008-15  Pieter Collins
  *
  ****************************************************************************/
 
@@ -50,7 +50,6 @@ template<class X> class Series;
 
 template<class X> class Expansion;
 template<class X> class Differential;
-template<class X> class Vector<Differential<X>>;
 
 typedef Differential<Float> FloatDifferential;
 typedef Differential<ExactInterval> ExactIntervalDifferential;
@@ -62,10 +61,19 @@ typedef Vector< Differential<UpperInterval> > UpperIntervalDifferentialVector;
 template<class X> Differential<X>& operator+=(Differential<X>& x, const Differential<X>& y);
 template<class X> Differential<X>& operator-=(Differential<X>& x, const Differential<X>& y);
 
-template<class X, class R> Differential<X>& operator+=(Differential<X>& x, const R& c);
-template<class X, class R> Differential<X>& operator-=(Differential<X>& x, const R& c);
-template<class X, class R> Differential<X>& operator*=(Differential<X>& x, const R& c);
-template<class X, class R> Differential<X>& operator/=(Differential<X>& x, const R& c);
+template<class X> Differential<X>& operator+=(Differential<X>& x, const typename Differential<X>::NumericType& c);
+template<class X> Differential<X>& operator-=(Differential<X>& x, const typename Differential<X>::NumericType& c);
+template<class X> Differential<X>& operator*=(Differential<X>& x, const typename Differential<X>::NumericType& c);
+template<class X> Differential<X>& operator/=(Differential<X>& x, const typename Differential<X>::NumericType& c);
+
+template<class X> Differential<X> operator+(Differential<X> const& x, const typename Differential<X>::NumericType& c);
+template<class X> Differential<X> operator-(Differential<X> const& x, const typename Differential<X>::NumericType& c);
+template<class X> Differential<X> operator*(Differential<X> const& x, const typename Differential<X>::NumericType& c);
+template<class X> Differential<X> operator/(Differential<X> const& x, const typename Differential<X>::NumericType& c);
+template<class X> Differential<X> operator+(const typename Differential<X>::NumericType& c, Differential<X> const& x);
+template<class X> Differential<X> operator-(const typename Differential<X>::NumericType& c, Differential<X> const& x);
+template<class X> Differential<X> operator*(const typename Differential<X>::NumericType& c, Differential<X> const& x);
+template<class X> Differential<X> operator/(const typename Differential<X>::NumericType& c, Differential<X> const& x);
 
 template<class X> Differential<X> operator+(const Differential<X>& x);
 template<class X> Differential<X> operator-(const Differential<X>& x);
@@ -87,13 +95,16 @@ template<class X> Differential<X> tan(const Differential<X>& x);
 
 template<class X, class Y> Y evaluate(const Differential<X>& y, const Vector<Y>& z);
 template<class X> Differential<X> compose(const Series<X>& x, const Differential<X>& y);
-template<class X> Differential<X> derivative(const Differential<X>& x, Nat i);
-template<class X> Differential<X> antiderivative(const Differential<X>& x, Nat i);
+template<class X> Differential<X> derivative(const Differential<X>& x, SizeType i);
+template<class X> Differential<X> antiderivative(const Differential<X>& x, SizeType i);
 
 template<class X> Differential<X> compose(const Differential<X>&, const Vector< Differential<X> >&);
 template<class X> Vector< Differential<X> > compose(const Vector< Differential<X> >&, const Vector< Differential<X> >&);
 
+template<class X> OutputStream& operator<<(OutputStream&, Differential<X> const& dx);
 
+template<class X> using EqualityType = decltype(declval<X>()==declval<X>());
+template<class X> using InequalityType = decltype(declval<X>()!=declval<X>());
 
 //! \ingroup DifferentiationModule
 //! \brief A class representing the partial derivatives of a scalar quantity
@@ -110,7 +121,12 @@ class Differential
     static const Nat MAX_DEGREE=65535;
     static const X _zero;
     static const X _one;
+
+    DegreeType _degree;
+    SortedExpansion<X,GradedKeyLess> _expansion;
   public:
+    //! \brief The comparison used to sort the coefficients.
+    typedef GradedKeyLess ComparisonType;
     //! \brief The type of used to represent numbers in the coefficient.
     typedef SortedExpansion<X,GradedKeyLess> ExpansionType;
     //! \brief The type of used to represent numbers in the coefficient.
@@ -123,149 +139,124 @@ class Differential
     typedef typename ExpansionType::ConstIterator ConstIterator;
 
     //! \brief Default constructor constructs a differential with degree zero in no variables.
-    explicit Differential() : _expansion(0), _degree(0) { }
+    explicit Differential();
     //! \brief Constructs a differential with degree \a deg in \a as variables.
-    explicit Differential(SizeType as, DegreeType deg) : _expansion(as),_degree(deg) { }
+    explicit Differential(SizeType as, DegreeType deg);
     //! \brief Construct a differential from a mapping giving a coefficient for a finite number of multi-indices.
-    explicit Differential(const Map<MultiIndex,X>& map, DegreeType deg) : _expansion(map), _degree(deg) { this->cleanup(); }
+    explicit Differential(const Map<MultiIndex,X>& map, DegreeType deg);
     //! \brief Construct a differential of degree \a deg from the power-series expansion \a e.
     //! Terms in \a e of degree higher than \a deg are truncated
-    explicit Differential(const Expansion<X>& e, DegreeType deg) : _expansion(e.argument_size()),_degree(deg) {
-        for(typename Expansion<X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
-            if(iter->key().degree()<=deg) { this->_expansion.append(iter->key(),iter->data()); } } this->cleanup(); }
+    explicit Differential(const Expansion<X>& e, DegreeType deg);
     //! \brief Construct a differential of degree \a deg from an initializer list list of (index,coefficient) pairs.
     explicit Differential(SizeType as, DegreeType deg, InitializerList< PairType<InitializerList<Int>,X> > lst);
 
     //! \brief Construct a dense differential of degree \a deg in \a as variables from a list of coefficients beginning at \a ptr.
-    template<class XX> Differential(SizeType as, DegreeType deg, const XX* ptr) : _expansion(as), _degree(deg) {
-        for(MultiIndex j(as); j.degree()<=deg; ++j) { XX const& x=*ptr; if(!decide(x==0)) { _expansion.append(j,*ptr); } ++ptr; } this->cleanup(); }
+    template<class XX> Differential(SizeType as, DegreeType deg, const XX* ptr);
     //! \brief Conversion constructor from a different numerical type.
-    template<class XX> Differential(const Differential<XX>& x)
-        : _expansion(x.expansion()), _degree(x.degree()) { }
+    template<class XX> Differential(const Differential<XX>& x);
+
 
     //! \brief Set the differential equal to a constant, without changing the degree or number of arguments.
-    Differential<X>& operator=(const X& c) {
-        this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),c); return *this; }
+    Differential<X>& operator=(const X& c);
 
     //! \brief A constant differential of degree \a deg in \a as arguments with value \a c.
-    static Differential<X> constant(SizeType as, Nat deg, const X& c) {
-        Differential<X> r(as,deg); r._expansion.append(MultiIndex(as),c); return r; }
+    static Differential<X> constant(SizeType as, DegreeType deg, const X& c);
     //! \brief A differential of degree \a deg in \a as arguments representing the quantity \f$v+x_j\f$.
-    static Differential<X> variable(SizeType as, Nat deg, const X& v, Nat j) {
-        Differential<X> r(as,deg);
-        MultiIndex a(as);
-        r._expansion.append(a,v);
-        a[j]=1; r._expansion.append(a,_one); return r; }
-
+    static Differential<X> variable(SizeType as, DegreeType deg, const X& v, SizeType j);
     //! \brief A vector of \a rs constant differentials of degree \a deg in \a as arguments with values \a c[j].
-    static Vector< Differential<X> > constants(Nat rs, SizeType as, Nat deg, const Vector<X>& c) {
-        ARIADNE_ASSERT(c.size()==rs);
-        Vector< Differential<X> > result(rs,Differential(as,deg));
-        for(Nat i=0; i!=rs; ++i) { result[i]=c[i]; }
-        return result;
-    }
+    static Vector< Differential<X> > constants(SizeType rs, SizeType as, DegreeType deg, const Vector<X>& c);
     //! \brief A vector of \a rs differentials of degree \a deg in \a as arguments with values \f$v_i+x_i\f$.
     //! \pre \a rs == \a as == c.size().
-    static Vector< Differential<X> > variables(Nat rs, SizeType as, Nat deg, const Vector<X>& x) {
-        ARIADNE_ASSERT(x.size()==rs);  ARIADNE_ASSERT(as==x.size());
-        return variables(deg,x);
-    }
+    static Vector< Differential<X> > variables(SizeType rs, SizeType as, DegreeType deg, const Vector<X>& x);
 
     //! \brief \brief A vector of differentials of degree \a deg in \a as arguments with values \f$c_i+x_i\f$.
-    static Vector< Differential<X> > variables(Nat deg, const Vector<X>& x) {
-        Vector< Differential<X> > result(x.size(),Differential<X>(x.size(),deg));
-        MultiIndex a(x.size());
-        for(Nat i=0; i!=x.size(); ++i) {
-            result[i]._expansion.append(a,x[i]);
-            a[i]=1; result[i]._expansion.append(a,_one); a[i]=0;
-        }
-        return result;
-    }
+    static Vector< Differential<X> > variables(DegreeType deg, const Vector<X>& x);
 
     //! \brief Equality operator. Tests equality of representation, so comparing two differentials which are mathematically equal may return false if the structural zeros are different.
-    Bool operator==(const Differential<X>& other) const;
-
+    EqualityType<X> operator==(const Differential<X>& other) const;
     //! \brief Inequality operator.
-    Bool operator!=(const Differential<X>& other) const {
-        return !(*this==other); }
+    InequalityType<X> operator!=(const Differential<X>& other) const;
+
 
     //! \brief The number of independent variables.
-    Nat argument_size() const { return this->_expansion.argument_size(); }
+    SizeType argument_size() const;
     //! \brief The maximum degree of the stored terms.
-    Nat degree() const { return this->_degree; }
+    DegreeType degree() const;
     //! \brief The internal representation of the polynomial expansion.
-    const Expansion<X>& expansion() const { return this->_expansion; }
+    const Expansion<X>& expansion() const;
     //! \brief A reference to the internal representation of the polynomial expansion.
-    Expansion<X>& expansion() { return this->_expansion; }
+    Expansion<X>& expansion();
     //! \brief The value of the differential i.e. the coefficient of \f$1\f$.
-    const X& value() const { return this->operator[](MultiIndex(this->argument_size())); }
+    const X& value() const;
     //! \brief The coefficient of \f$x_j\f$.
-    const X& gradient(Nat j) const { return this->operator[](MultiIndex::unit(this->argument_size(),j)); }
+    const X& gradient(SizeType j) const;
     //! \brief The vector of coefficients of \f$x_j\f$.
-    Vector<X> gradient() const { Vector<X> g(this->argument_size());
-        for(Nat j=0; j!=g.size(); ++j) { g[j]=this->gradient(j); } return g; }
+    Vector<X> gradient() const;
     //! \brief The Hessian matrix.
     //! \note Note the the components of the Hessian matrix are \em half those of the values indexed by the differential.
     //! This is because the differential stores the coefficients of the Taylor expansion, rather than the derivatives themselves.
     Matrix<X> hessian() const;
 
-
     //! \brief A reference to the coefficient of \f$x_j\f$.
-    X& operator[](const Nat& j) {
-        return this->operator[](MultiIndex::unit(this->argument_size(),j)); }
+    X& operator[](const SizeType& j);
     //! \brief The coefficient of \f$x_j\f$.
-    const X& operator[](const Nat& j) const {
-        return this->operator[](MultiIndex::unit(this->argument_size(),j)); }
+    const X& operator[](const SizeType& j) const;
     //! \brief The coefficient of \f$x^a\f$ i.e. \f$\prod x_j^{a_j}\f$.
-    X& operator[](const MultiIndex& a) {
-        ARIADNE_ASSERT_MSG(a.number_of_variables()==this->argument_size()," d="<<*this<<", a="<<a);
-        return this->_expansion.at(a); }
+    X& operator[](const MultiIndex& a);
     //! \brief A reference to the coefficient of \f$x^a\f$.
-    const X& operator[](const MultiIndex& a) const {
-        ARIADNE_ASSERT_MSG(a.number_of_variables()==this->argument_size()," d="<<*this<<", a="<<a);
-        ConstIterator iter=this->_expansion.find(a);
-        if(iter==this->_expansion.end()) { return _zero; } else { return iter->data(); } }
+    const X& operator[](const MultiIndex& a) const;
 
     //! \brief Set the degree to be equal to \a d.
-    Void set_degree(Nat d) { this->_degree = d; }
+    Void set_degree(DegreeType d);
     //! \brief Set the coefficient of the constant term to \a c.
-    Void set_value(const X& c) { this->operator[](MultiIndex(this->argument_size()))=c; }
+    Void set_value(const X& c);
     //! \brief Set the coefficient of the term in \f$x_j\f$ to \a d.
-    Void set_gradient(Nat j, const X& d) { this->operator[](MultiIndex::unit(this->argument_size(),j))=d; }
+    Void set_gradient(SizeType j, const X& d);
 
     //! \brief An Iterator to the first structural nonzero.
-    Iterator begin() { return this->_expansion.begin(); }
+    Iterator begin();
     //! \brief An Iterator to past-the-end structural nonzero.
-    Iterator end() { return this->_expansion.end(); }
+    Iterator end();
     //! \brief A constant Iterator to the first structural nonzero.
-    ConstIterator begin() const { return this->_expansion.begin(); }
+    ConstIterator begin() const;
     //! \brief A constant Iterator to past-the-end structural nonzero.
-    ConstIterator end() const { return this->_expansion.end(); }
+    ConstIterator end() const;
 
     //! \brief The zero element of the differential algebra.
-    Differential<X> create() const { return Differential<X>(this->argument_size(),this->degree()); }
-    Differential<X> create_zero() const { return Differential<X>(this->argument_size(),this->degree()); }
+    Differential<X> create() const;
+    Differential<X> create_zero() const;
     //! \brief Set all coefficients to zero.
-    Void clear() { this->_expansion.clear(); }
+    Void clear();
     //! \brief Remove all terms with coefficient \f$0\f$.
-    Void cleanup() { this->_expansion.graded_sort(); this->_expansion.combine_terms(); this->_expansion.remove_zeros(); }
+    Void cleanup();
     //! \brief Check that differential is sorted and all terms have degree less than maximum degree.
     Void check() const;
 
+    //! \brief Inplace addition of a constant.
+    template<class XX> friend Differential<XX>& operator+=(Differential<XX>& x, const typename Differential<XX>::NumericType& c);
+    //! \brief Inplace subtraction of a constant.
+    template<class XX> friend Differential<XX>& operator-=(Differential<XX>& x, const typename Differential<XX>::NumericType& c);
+    //! \brief Inplace multiplication by constant.
+    template<class XX> friend Differential<XX>& operator*=(Differential<XX>& x, const typename Differential<XX>::NumericType& c);
+    //! \brief Inplace division by a constant.
+    template<class XX> friend Differential<XX>& operator/=(Differential<XX>& x, const typename Differential<XX>::NumericType& c);
 
     //! \brief Inplace addition.
     template<class XX> friend Differential<XX>& operator+=(Differential<XX>& x, const Differential<XX>& y);
     //! \brief Inplace subtraction.
     template<class XX> friend Differential<XX>& operator-=(Differential<XX>& x, const Differential<XX>& y);
 
-    //! \brief Inplace addition of a constant.
-    template<class XX, class RR> friend Differential<XX>& operator+=(Differential<XX>& x, const RR& c);
-    //! \brief Inplace subtraction of a constant.
-    template<class XX, class RR> friend Differential<XX>& operator-=(Differential<XX>& x, const RR& c);
-    //! \brief Inplace multiplication by constant.
-    template<class XX, class RR> friend Differential<XX>& operator*=(Differential<XX>& x, const RR& c);
-    //! \brief Inplace division by a constant.
-    template<class XX, class RR> friend Differential<XX>& operator/=(Differential<XX>& x, const RR& c);
+    //! \brief Addition of a constant.
+    friend Differential<X> operator+<>(const Differential<X>& x, const X& c);
+    friend Differential<X> operator+<>(const X& c, const Differential<X>& x);
+    //! \brief Subtraction of a constant.
+    friend Differential<X> operator-<>(const Differential<X>& x, const X& y);
+    friend Differential<X> operator-<>(const X& c, const Differential<X>& x);
+    //! \brief Multiplication by a constant.
+    friend Differential<X> operator*<>(const Differential<X>& x, const X& y);
+    friend Differential<X> operator*<>(const X& c, const Differential<X>& x);
+    //! \brief Division by a constant.
+    friend Differential<X> operator/<>(const Differential<X>& x, const X& y);
 
     //! \brief Unary plus.
     friend Differential<X> operator+<>(const Differential<X>& x);
@@ -307,649 +298,27 @@ class Differential
     //! \brief Compose differentials at a point.
     friend Differential<X> compose<>(const Differential<X>& x, const Vector< Differential<X> >& y);
     //! \brief Compute the differential of the derivative.
-    friend Differential<X> derivative<>(const Differential<X>& x, Nat i);
+    friend Differential<X> derivative<>(const Differential<X>& x, SizeType i);
     //! \brief Compute an antiderivative with respect to the variable \a i.
-    friend Differential<X> antiderivative<>(const Differential<X>& x, Nat i);
+    friend Differential<X> antiderivative<>(const Differential<X>& x, SizeType i);
 #endif
-  private:
-    ExpansionType _expansion;
-    Nat _degree;
-  private:
-    //BOOST_CONCEPT_ASSERT((DifferentialConcept< Differential<X> >));
 };
 
-template<class X1, class X2> struct Arithmetic< X1,Differential<X2> > {
-    typedef Differential<typename Arithmetic<X1,X2>::ResultType> ResultType; };
-template<class X1, class X2> struct Arithmetic< Differential<X1>,X2 > {
-    typedef Differential<typename Arithmetic<X1,X2>::ResultType> ResultType; };
-template<class X1, class X2> struct Arithmetic< Differential<X1>,Differential<X2> > {
-    typedef Differential<typename Arithmetic<X1,X2>::ResultType> ResultType; };
-
-template<class X>
-const X Differential<X>::_zero=X(0);
-
-template<class X>
-const X Differential<X>::_one=X(1);
-
-template<class X>
-Differential<X>::Differential(SizeType as, DegreeType deg,
-                              InitializerList< PairType<InitializerList<Int>,X> > lst)
-    : _expansion(Expansion<X>(as,lst)), _degree(deg)
-{
+template<class X> template<class XX> Differential<X>::Differential(SizeType as, DegreeType deg, const XX* ptr) : _expansion(as), _degree(deg) {
+    for(MultiIndex j(as); j.degree()<=deg; ++j) {
+        XX const& x=*ptr;
+        if(!decide(x==0)) {
+            _expansion.append(j,*ptr);
+        }
+        ++ptr;
+    }
     this->cleanup();
 }
 
-template<class X>
-Void
-Differential<X>::check() const
+template<class X> template<class XX> Differential<X>::Differential(const Differential<XX>& x)
+    : _expansion(x.expansion()), _degree(x.degree())
 {
-    for(typename Differential<X>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
-        ARIADNE_ASSERT_MSG(iter->key().degree()<=this->degree(), *this);
-        typename Differential<X>::ConstIterator next = iter; ++next;
-        ARIADNE_ASSERT_MSG(graded_less(iter->key(),next->key()),"Error in ordering Differential "<<this->expansion());
-    }
 }
-
-/*
-template<class X>
-Differential<X>& Differential<X>::operator+=(const Differential<X>& x)
-{
-    for(ConstIterator iter=x._expansion.begin(); iter!=x._expansion.end(); ++iter) {
-        this->_expansion[iter->key()]+=static_cast<const X&>(iter->data());
-    }
-    return *this;
-}
-
-template<class X>
-Differential<X>& Differential<X>::operator-=(const Differential<X>& x)
-{
-    for(ConstIterator iter=x._expansion.begin(); iter!=x._expansion.end(); ++iter) {
-        this->_expansion[iter->key()]-=static_cast<const X&>(iter->data());
-    }
-    return *this;
-}
-
-template<class X> template<class R>
-Differential<X>& Differential<X>::operator+=(const R& c)
-{
-    this->_expansion[MultiIndex(this->argument_size())]+=c; return *this;
-}
-
-template<class X> template<class R>
-Differential<X>& Differential<X>::operator-=(const R& c)
-{
-    this->_expansion[MultiIndex(this->argument_size())]-=c; return *this;
-}
-
-template<class X> template<class R>
-Differential<X>& Differential<X>::operator*=(const R& c)
-{
-    if(c==0) {
-        X zero=this->_expansion.begin()->data(); zero*=0;
-        this->_expansion.clear();
-        this->_expansion[MultiIndex(this->argument_size())]=zero;
-    } else {
-        for(Iterator iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
-            static_cast<X&>(iter->data())*=c;
-        }
-    }
-    return *this;
-}
-
-
-template<class X> template<class R>
-Differential<X>& Differential<X>::operator/=(const R& c)
-{
-    for(Iterator iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
-        static_cast<X&>(iter->data())/=c;
-    }
-    return *this;
-}
-*/
-
-
-template<class X> Matrix<X> Differential<X>::hessian() const {
-    ARIADNE_PRECONDITION(this->degree()>=2);
-    Matrix<X> H(this->argument_size(),this->argument_size());
-    ConstIterator iter=this->begin();
-    while(iter!=this->end() && iter->key().degree()<=1) { ++iter; }
-    Nat i=0; Nat j=1;
-    while(iter!=this->end() && iter->key().degree()<=2) {
-        const MultiIndex& a=iter->key(); const X& c=iter->data();
-        while(a[i]==0) { ++i; j=i+1; }
-        if(a[i]==2) { H[i][i]=c*2; }
-        else { while(a[j]==0) { ++j; } H[i][j]=c*2; H[j][i]=c*2; }
-        ++iter;
-    }
-    return H;
-}
-
-template<class X> Bool Differential<X>::operator==(const Differential<X>& other) const {
-    Differential<X> const& self=*this;
-    if(self.argument_size()!=other.argument_size()) { return false; }
-    ConstIterator self_iter=self.begin(); ConstIterator other_iter=other.begin();
-    while(self_iter!=self.end() && other_iter!=other.end()) {
-        if(self_iter->data()==0) {
-            ++self_iter;
-        } else if(other_iter->data()==0) {
-            ++other_iter;
-        } else {
-            if(self_iter->key()!=other_iter->key() || self_iter->data()!=other_iter->data()) { return false; }
-            ++self_iter; ++other_iter;
-        }
-    }
-    while(self_iter!=self.end()) {
-        if(self_iter->data()!=0) { return false; } ++self_iter;
-    }
-    while(other_iter!=other.end()) {
-        if(other_iter->data()!=0) { return false; } ++other_iter;
-    }
-    return true;
-}
-
-
-
-template<class X> Differential<X> operator+(const Differential<X>& x, const Differential<X>& y);
-template<class X> Differential<X> operator-(const Differential<X>& x, const Differential<X>& y);
-
-
-
-template<class X>
-Differential<X>& operator+=(Differential<X>& x, const Differential<X>& y)
-{
-    x=x+y;
-    return x;
-}
-
-template<class X>
-Differential<X>& operator-=(Differential<X>& x, const Differential<X>& y)
-{
-    x=x-y;
-    return x;
-}
-
-template<class X, class R>
-Differential<X>& operator+=(Differential<X>& x, const R& c)
-{
-    MultiIndex a(x.argument_size());
-    if(x.expansion().empty()) {
-        x.expansion().append(a,c);
-    } else if(x.begin()->key()!=a) {
-        x.expansion().prepend(a,c);
-    } else {
-        x.begin()->data()+=c;
-    }
-    return x;
-}
-
-template<class X, class R>
-Differential<X>& operator-=(Differential<X>& x, const R& c)
-{
-    MultiIndex a(x.argument_size());
-    if(x.expansion().empty()) {
-        x.expansion().append(a,-c);
-    } else if(x.begin()->key()!=a) {
-        x.expansion().prepend(a,-c);
-    } else {
-        x.begin()->data()-=c;
-    }
-    return x;
-}
-
-template<class X, class R>
-Differential<X>& operator*=(Differential<X>& x, const R& c)
-{
-    typedef typename Differential<X>::Iterator Iterator;
-    if(c==static_cast<X>(0)) {
-        x.clear();
-    } else {
-        for(Iterator iter=x.begin(); iter!=x.end(); ++iter) {
-            static_cast<X&>(iter->data())*=c;
-        }
-    }
-    return x;
-}
-
-
-template<class X, class R>
-Differential<X>& operator/=(Differential<X>& x, const R& c)
-{
-    typedef typename Differential<X>::Iterator Iterator;
-    for(Iterator iter=x.begin(); iter!=x.end(); ++iter) {
-        static_cast<X&>(iter->data())/=static_cast<X>(c);
-    }
-    return x;
-}
-
-
-template<class X>
-Differential<X> operator+(const Differential<X>& x)
-{
-    Differential<X> r(x.argument_size(),x.degree());
-    r.expansion().reserve(x.expansion().number_of_nonzeros());
-    for(typename Differential<X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
-        r.expansion().append(iter->key(), +iter->data());
-    }
-    return r;
-}
-
-template<class X>
-Differential<X> operator-(const Differential<X>& x)
-{
-    Differential<X> r(x.argument_size(),x.degree());
-    r.expansion().reserve(x.expansion().number_of_nonzeros());
-    for(typename Differential<X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
-        r.expansion().append(iter->key(), -iter->data());
-    }
-    return r;
-}
-
-
-template<class X, class R>
-EnableIfNumeric<R,Differential<X> >
-operator+(const Differential<X>& x, const R& c)
-{
-    Differential<X> r(x); r+=X(c); return r;
-}
-
-
-template<class X, class R>
-EnableIfNumeric<R,Differential<X> >
-operator+(const R& c, const Differential<X>& x)
-{
-    Differential<X> r(x); r+=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumeric<R,Differential<X> >
-operator-(const Differential<X>& x, const R& c)
-{
-    Differential<X> r(x); r-=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumeric<R,Differential<X> >
-operator-(const R& c, const Differential<X>& x)
-{
-    Differential<X> r(-x); r+=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumeric<R,Differential<X> >
-operator*(const Differential<X>& x, const R& c)
-{
-    Differential<X> r(x); r*=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumeric<R,Differential<X> >
-operator*(const R& c, const Differential<X>& x)
-{
-    Differential<X> r(x); r*=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumeric<R,Differential<X> >
-operator/(const Differential<X>& x, const R& c)
-{
-    Differential<X> r(x); r/=X(c); return r;
-}
-
-template<class X, class R>
-EnableIfNumeric<R,Differential<X> >
-operator/(const R& c, const Differential<X>& x)
-{
-    Differential<X> r(rec(x)); r*=X(c); return r;
-}
-
-
-
-
-
-
-
-
-template<class X>
-Differential<X> operator+(const Differential<X>& x, const Differential<X>& y)
-{
-    ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<" y="<<y);
-    Differential<X> r(x.argument_size(),std::min(x.degree(),y.degree()));
-    typename Differential<X>::ConstIterator xiter=x.begin();
-    typename Differential<X>::ConstIterator yiter=y.begin();
-    // No need to check if maximum degree has been reached below,
-    // since if one Iterator is above the maximum degree, the other is at the end.
-    while(xiter!=x.end() && yiter!=y.end()) {
-        if(xiter->key()==yiter->key()) {
-            r.expansion().append(xiter->key(),xiter->data()+yiter->data());
-            ++xiter; ++yiter;
-        } else if(graded_less(xiter->key(),yiter->key())) {
-            r.expansion().append(xiter->key(),xiter->data());
-            ++xiter;
-        } else {
-            r.expansion().append(yiter->key(),yiter->data());
-            ++yiter;
-        }
-    }
-    while(xiter!=x.end() && xiter->key().degree()<=r.degree()) {
-        r.expansion().append(xiter->key(),xiter->data());
-        ++xiter;
-    }
-    while(yiter!=y.end() && yiter->key().degree()<=r.degree()) {
-        r.expansion().append(yiter->key(),yiter->data());
-        ++yiter;
-    }
-    //std::cerr<<"x="<<x<<" y="<<y<<" x+y="<<r<<"\n";
-    return r;
-}
-
-template<class X>
-Differential<X> operator-(const Differential<X>& x, const Differential<X>& y)
-{
-    ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<" y="<<y);
-    Differential<X> r(x.argument_size(),std::min(x.degree(),y.degree()));
-    typename Differential<X>::ConstIterator xiter=x.begin();
-    typename Differential<X>::ConstIterator yiter=y.begin();
-    // No need to check if maximum degree has been reached below,
-    // since if one Iterator is above the maximum degree, the other is at the end.
-    while(xiter!=x.end() && yiter!=y.end()) {
-        if(xiter->key()==yiter->key()) {
-            r.expansion().append(xiter->key(),xiter->data()-yiter->data());
-            ++xiter; ++yiter;
-        } else if(graded_less(xiter->key(),yiter->key())) {
-            r.expansion().append(xiter->key(),xiter->data());
-            ++xiter;
-        } else {
-            r.expansion().append(yiter->key(),-yiter->data());
-            ++yiter;
-        }
-    }
-    while(xiter!=x.end() && xiter->key().degree()<=r.degree()) {
-        r.expansion().append(xiter->key(),xiter->data());
-        ++xiter;
-    }
-    while(yiter!=y.end() && yiter->key().degree()<=r.degree()) {
-        r.expansion().append(yiter->key(),-yiter->data());
-        ++yiter;
-    }
-    //std::cerr<<"x="<<x<<" y="<<y<<" x-y="<<r<<"\n";
-    return r;
-}
-
-template<class X>
-Differential<X> operator*(const Differential<X>& x, const Differential<X>& y)
-{
-    typedef typename Differential<X>::ConstIterator ConstIterator;
-    ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<" y="<<y);
-    Differential<X> r(x.argument_size(),std::min(x._degree,y._degree));
-    MultiIndex a(x.argument_size());
-    X c(0);
-    for(ConstIterator xiter=x._expansion.begin(); xiter!=x._expansion.end(); ++xiter) {
-        if(xiter->key().degree()>r.degree()) { break; }
-        for(ConstIterator yiter=y._expansion.begin(); yiter!=y._expansion.end(); ++yiter) {
-            if(xiter->key().degree()+yiter->key().degree()>r.degree()) { break; }
-            a=xiter->key()+yiter->key();
-            c=static_cast<const X&>(xiter->data())*static_cast<const X&>(yiter->data());
-            r._expansion.append(a,c);
-        }
-    }
-    r.cleanup();
-    //std::cerr<<"x="<<x<<" y="<<y<<" x*y="<<r<<"\n";
-    return r;
-}
-
-template<class X>
-Differential<X> operator/(const Differential<X>& x, const Differential<X>& y)
-{
-    ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x="<<x<<" y="<<y);
-    return x*rec(y);
-}
-
-template<class X>
-Differential<X>
-min(const Differential<X>& x1, const Differential<X>& x2)
-{
-    ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
-    if(x1.value()==x2.value()) {
-        ARIADNE_THROW(std::runtime_error,"min(Differential<X> x1, Differential<X> x2)","x1[0]==x2[0]");
-    }
-    return x1.value()<x2.value() ? x1 : x2;
-}
-
-
-template<class X>
-Differential<X>
-max(const Differential<X>& x1,const Differential<X>& x2)
-{
-    ARIADNE_ASSERT_MSG(x1.argument_size()==x2.argument_size(),"x1="<<x1<<" x2="<<x2);
-    if(x1.value()==x2.value()) {
-        ARIADNE_THROW(std::runtime_error,"max(Differential<X> x1, Differential<X> x2)","x1[0]==x2[0]");
-    }
-    return x1.value()>x2.value() ? x1 : x2;
-}
-
-template<class X>
-Differential<X>
-abs(const Differential<X>& x)
-{
-    // FIXME: Maybe need different code for validated and approximate paradigms
-    if(decide(x.value()==0)) {
-        ARIADNE_THROW(std::runtime_error,"abs(Differential<X> x)","x[0]==0");
-    }
-    return decide(x.value()>0) ? pos(x) : neg(x);
-}
-
-
-template<class X>
-Differential<X>
-pos(const Differential<X>& x)
-{
-    return x;
-}
-
-template<class X>
-Differential<X>
-neg(const Differential<X>& x)
-{
-    return -x;
-}
-
-template<class X>
-Differential<X> rec(const Differential<X>& x)
-{
-    return compose(Series<X>::rec(x.degree(),x.value()),x);
-}
-
-template<class X>
-Differential<X> sqr(const Differential<X>& x)
-{
-    return pow(x,2);
-}
-
-template<class X>
-Differential<X> pow(const Differential<X>& x, Int n)
-{
-    return compose(Series<X>::pow(x.degree(),x.value(),n),x);
-}
-
-template<class X>
-Differential<X> sqrt(const Differential<X>& x)
-{
-    return compose(Series<X>::sqrt(x.degree(),x.value()),x);
-}
-
-template<class X>
-Differential<X> exp(const Differential<X>& x)
-{
-    return compose(Series<X>::exp(x.degree(),x.value()),x);
-}
-
-template<class X>
-Differential<X> log(const Differential<X>& x)
-{
-    return compose(Series<X>::log(x.degree(),x.value()),x);
-}
-
-template<class X>
-Differential<X> sin(const Differential<X>& x)
-{
-    return compose(Series<X>::sin(x.degree(),x.value()),x);
-}
-
-template<class X>
-Differential<X> cos(const Differential<X>& x)
-{
-    return compose(Series<X>::cos(x.degree(),x.value()),x);
-}
-
-template<class X>
-Differential<X> tan(const Differential<X>& x)
-{
-    return compose(Series<X>::tan(x.degree(),x.value()),x);
-}
-
-
-
-template<class X, class Y>
-Y
-evaluate(const Differential<X>& y, const Vector<Y>& x)
-{
-    //std::cerr<<ARIADNE_PRETTY_FUNCTION<<std::endl;
-    ARIADNE_ASSERT_MSG(y.argument_size()==x.size(), "y="<<y<<" x="<<x);
-    //std::cerr << "y=" << y << std::endl;
-    //std::cerr << "x=" << x << std::endl;
-    Nat d=y.degree();
-    Nat ms=x.size();
-    ARIADNE_ASSERT(d>=1);
-
-    Y zero = x.zero_element();
-    Y one = zero; one+=1;
-
-    // Use inefficient brute-force approach with lots of storage...
-    Array< Array< Y > > val(ms, Array< Y >(d+1));
-    for(Nat j=0; j!=ms; ++j) {
-        val[j][0]=one;
-        val[j][1]=x[j];
-        for(Nat k=2; k<=d; ++k) {
-            val[j][k]=val[j][k-1]*x[j];
-        }
-    }
-
-    Y r(zero);
-    for(typename Differential<X>::ConstIterator iter=y.begin();
-        iter!=y.end(); ++iter)
-        {
-            const MultiIndex& j=iter->key();
-            const X& c=iter->data();
-            Y t=one;
-            for(Nat k=0; k!=ms; ++k) {
-                t=t*val[k][j[k]];
-            }
-            t*=c;
-            r+=t;
-            //std::cerr<<" j="<<j<<" c="<<c<<" r="<<r<<std::endl;
-        }
-    return r;
-}
-
-
-template<class X>
-Differential<X> compose(const Series<X>& x, const Differential<X>& y)
-{
-    SizeType as=y.argument_size();
-    Nat d=std::min(x.degree(),y.degree());
-
-    Differential<X> w=y;
-    if(w.begin()->key().degree()==0) { w.begin()->data()=0; }
-    Differential<X> r(as,d);
-    r[MultiIndex(as)]=x[d];
-    for(Nat n=1; n<=d; ++n) {
-        r=r*w;
-        r+=x[d-n];
-    }
-    return r;
-}
-
-
-template<class X>
-Vector<X>
-gradient(const Differential<X>& x)
-{
-    Vector<X> r(x.argument_size());
-    for(Nat j=0; j!=x.argument_size(); ++j) {
-        r[j]=x.gradient(j);
-    }
-    return r;
-}
-
-
-template<class X>
-Differential<X> derivative(const Differential<X>& x, Nat i)
-{
-    if(x.degree()==0) { return Differential<X>(x.argument_size(),0u); }
-    Differential<X> r(x.argument_size(), x.degree()-1);
-    MultiIndex a(x.argument_size());
-    for(typename Differential<X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
-        a=iter->key();
-        Nat n=a[i];
-        if(n!=0) {
-            const X& xc=x[a];
-            --a[i];
-            X& rc=r[a];
-            rc=xc*n;
-        }
-    }
-    return r;
-}
-
-template<class X>
-Differential<X> antiderivative(const Differential<X>& x, Nat i)
-{
-    Differential<X> r(x.argument_size(), x.degree()+1);
-    MultiIndex a(x.argument_size());
-    MultiIndex ra=MultiIndex(x.argument_size());
-    MultiIndex ai=MultiIndex::unit(x.argument_size(),i);
-    for(typename Differential<X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
-        a=iter->key();
-        const X& xc=x[a];
-        ++a[i];
-        Nat n=a[i];
-        X& rc=r[a];
-        rc=xc/n;
-    }
-    return r;
-}
-
-
-template<class X>
-OutputStream& operator<<(OutputStream& os, const Differential<X>& x)
-{
-    Expansion<X> e=x.expansion();
-    //e.graded_sort();
-    os << "SD("<<x.argument_size()<<","<<x.degree()<<"){";
-    for(typename Expansion<X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
-        if(iter!=e.begin()) { os << ","; } os << " ";
-        for(Nat i=0; i!=e.argument_size(); ++i) {
-            if(i!=0) { os << ","; }
-            os << Nat(iter->key()[i]);
-        }
-        os << ":" << X(iter->data());
-    }
-    return os << " }";
-}
-
-
-//! Embed the arguments in a space of dimension \a size, starting at position \a start.
-template<class X>
-Differential<X>
-embed(Nat before_size, const Differential<X>& x,
-      Nat after_size)
-{
-    return Differential<X>(x.degree(),x.expansion().embed(before_size,after_size));
-}
-
-
-
-
 
 template<class X>
 struct NonAssignableDifferential
@@ -968,16 +337,16 @@ struct NonAssignableDifferential
 };
 
 class DifferentialCharacteristics {
-    Nat _argument_size; Nat _degree;
+    uint _argument_size; uint _degree;
   public:
     DifferentialCharacteristics() : _argument_size(0u), _degree(0u) { };
-    DifferentialCharacteristics(SizeType as, Nat d) : _argument_size(as), _degree(d) { };
+    DifferentialCharacteristics(uint as, uint d) : _argument_size(as), _degree(d) { };
     template<class X> DifferentialCharacteristics(const Differential<X>& d) : _argument_size(d.argument_size()), _degree(d.degree()) { };
-    Nat argument_size() const { return this->_argument_size; }
-    Nat degree() const { return this->_degree; }
+    uint argument_size() const { return this->_argument_size; }
+    uint degree() const { return this->_degree; }
 };
 
-/*! \brief A class representing the derivatives of a vector quantity depending on multiple arguments. */
+//! \brief A class representing the derivatives of a vector quantity depending on multiple arguments.
 template<class X>
 class Vector< Differential<X> >
     : public VectorExpression< Vector< Differential<X> > >
@@ -990,7 +359,7 @@ class Vector< Differential<X> >
     // The type of the class
     typedef Vector< Differential<X> > SelfType;
     // The type used for accessing elements
-    typedef Nat IndexType;
+    typedef SizeType IndexType;
     // The value stored in the vector.
     typedef Differential<X> ValueType;
     // The type used for scalars.
@@ -999,21 +368,21 @@ class Vector< Differential<X> >
     typedef X NumericType;
 
     Vector() : _chars(), _ary(0) { }
-    Vector(Nat rs) : _chars(), _ary(rs) { }
-    Vector(Nat rs, SizeType as, Nat d) : _chars(as,d), _ary(rs) {
-        for(Nat i=0; i!=rs; ++i) { this->_ary[i]=Differential<X>(as,d); } }
-    Vector(Nat rs, const Differential<X>& sd) : _chars(sd), _ary(rs) {
-        for(Nat i=0; i!=rs; ++i) { this->_ary[i]=sd; } }
-    Vector(Nat rs, const Differential<X>* p) : _chars(), _ary(rs) {
-        ARIADNE_ASSERT(rs>0); _chars=DifferentialCharacteristics(p[0]); for(Nat i=0; i!=rs; ++i) { this->_ary[i]=p[i]; } }
+    Vector(SizeType rs) : _chars(), _ary(rs) { }
+    Vector(SizeType rs, SizeType as, DegreeType d) : _chars(as,d), _ary(rs) {
+        for(SizeType i=0; i!=rs; ++i) { this->_ary[i]=Differential<X>(as,d); } }
+    Vector(SizeType rs, const Differential<X>& sd) : _chars(sd), _ary(rs) {
+        for(SizeType i=0; i!=rs; ++i) { this->_ary[i]=sd; } }
+    Vector(SizeType rs, const Differential<X>* p) : _chars(), _ary(rs) {
+        ARIADNE_ASSERT(rs>0); _chars=DifferentialCharacteristics(p[0]); for(SizeType i=0; i!=rs; ++i) { this->_ary[i]=p[i]; } }
     template<class XX> Vector(const Vector< Differential<XX> > dv) : _chars(dv._chars), _ary(dv._ary) { }
-    template<class XX> Vector(Nat rs, SizeType as, Nat d, const XX* ptr);
-    Vector(Nat rs, SizeType as, Nat d,const Vector<X>& v, const Matrix<X>& A);
+    template<class XX> Vector(SizeType rs, SizeType as, DegreeType d, const XX* ptr);
+    Vector(SizeType rs, SizeType as, DegreeType d,const Vector<X>& v, const Matrix<X>& A);
     template<class E> Vector(const VectorExpression<E>& ve) : _ary(ve().size()) {
-        for(Nat i=0; i!=_ary.size(); ++i) { static_cast<Differential<X>&>(_ary[i])=ve()[i]; }
+        for(SizeType i=0; i!=_ary.size(); ++i) { static_cast<Differential<X>&>(_ary[i])=ve()[i]; }
         ARIADNE_ASSERT(_ary.size()!=0); _chars=DifferentialCharacteristics(_ary[0]); }
     template<class E> Vector< Differential<X> >& operator=(const VectorExpression<E>& ve) {
-        _ary.resize(ve().size()); for(Nat i=0; i!=_ary.size(); ++i) { static_cast<Differential<X>&>(_ary[i])=ve()[i]; }
+        _ary.resize(ve().size()); for(SizeType i=0; i!=_ary.size(); ++i) { static_cast<Differential<X>&>(_ary[i])=ve()[i]; }
         ARIADNE_ASSERT(_ary.size()!=0); _chars=DifferentialCharacteristics(_ary[0]); return *this; }
 
 
@@ -1030,43 +399,43 @@ class Vector< Differential<X> >
         this->_ary[i]=x;
     }
 
-    Nat size() const { return this->_ary.size(); }
-    Nat result_size() const { return this->size(); }
-    Nat argument_size() const { return this->_chars.argument_size(); }
-    Nat degree() const { return this->_chars.degree(); }
+    SizeType size() const { return this->_ary.size(); }
+    SizeType result_size() const { return this->size(); }
+    SizeType argument_size() const { return this->_chars.argument_size(); }
+    DegreeType degree() const { return this->_chars.degree(); }
 
     Vector<X> value() const {
         Vector<X> r(this->result_size());
-        for(Nat i=0; i!=r.size(); ++i) { r[i]=(*this)[i].value(); } return r; }
+        for(SizeType i=0; i!=r.size(); ++i) { r[i]=(*this)[i].value(); } return r; }
     Matrix<X> jacobian() const { Matrix<X> r(this->result_size(),this->argument_size());
-        for(Nat i=0; i!=r.row_size(); ++i) { for(Nat j=0; j!=r.column_size(); ++j) { r[i][j]=(*this)[i].gradient(j); } } return r; }
+        for(SizeType i=0; i!=r.row_size(); ++i) { for(SizeType j=0; j!=r.column_size(); ++j) { r[i][j]=(*this)[i].gradient(j); } } return r; }
 
     Void set_value(const Vector<X>& c) {
         ARIADNE_ASSERT(this->result_size()==c.size());
-        for(Nat i=0; i!=c.size(); ++i) { (*this)[i].set_value(c[i]); } }
+        for(SizeType i=0; i!=c.size(); ++i) { (*this)[i].set_value(c[i]); } }
 
-    static Vector< Differential<X> > constant(Nat rs, SizeType as, Nat d, const Vector<X>& c) {
+    Vector<Differential<X>> constant(SizeType rs, SizeType as, DegreeType d, const Vector<X>& c) {
         ARIADNE_ASSERT(c.size()==rs);
         Vector< Differential<X> > result(rs,as,d);
-        for(Nat i=0; i!=rs; ++i) { result[i]=c[i]; }
+        for(SizeType i=0; i!=rs; ++i) { result[i]=c[i]; }
         return result;
     }
 
-    static Vector< Differential<X> > variable(Nat rs, SizeType as, Nat d, const Vector<X>& x) {
+    Vector<Differential<X>> variable(SizeType rs, SizeType as, DegreeType d, const Vector<X>& x) {
         ARIADNE_ASSERT(x.size()==rs);
         Vector< Differential<X> > result(rs,as,d);
-        for(Nat i=0; i!=rs; ++i) { result[i]=x[i]; result[i][i]=X(1.0); }
+        for(SizeType i=0; i!=rs; ++i) { result[i]=x[i]; result[i][i]=X(1.0); }
         return result;
     }
 
-    static Vector< Differential<X> > affine(Nat rs, SizeType as, Nat d, const Vector<X>& b, const Matrix<X>& A) {
+    Vector<Differential<X>> affine(SizeType rs, SizeType as, DegreeType d, const Vector<X>& b, const Matrix<X>& A) {
         ARIADNE_ASSERT(b.size()==rs);
         ARIADNE_ASSERT(A.row_size()==rs);
         ARIADNE_ASSERT(A.column_size()==as);
         Vector< Differential<X> > result(rs,as,d);
-        for(Nat i=0; i!=rs; ++i) {
+        for(SizeType i=0; i!=rs; ++i) {
             result[i]=b[i];
-            for(Nat j=0; j!=as; ++j) {
+            for(SizeType j=0; j!=as; ++j) {
                 result[i][j]=A[i][j];
             }
         }
@@ -1075,146 +444,12 @@ class Vector< Differential<X> >
 
 };
 
+template<class X> Vector<Differential<X>> derivative(Vector<Differential<X>> const&, SizeType k);
+template<class X> Vector<Differential<X>> antiderivative(Vector<Differential<X>> const&, SizeType k);
+template<class X> Matrix<X> jacobian(Vector<Differential<X>> const&);
 
-template<class X> template<class XX>
-Vector< Differential<X> >::Vector(Nat rs, SizeType as, Nat d, const XX* ptr)
-    : _chars(as,d), _ary(rs,Differential<X>(as,d))
-{
-    for(Nat i=0; i!=rs; ++i) {
-        for(MultiIndex j(as); j.degree()<=d; ++j) {
-            if(*ptr!=0) { (*this)[i][j]=*ptr; } ++ptr; } }
-}
-
-template<class X>
-Vector< Differential<X> >::Vector(Nat rs, SizeType as, Nat d,
-                                  const Vector<X>& v, const Matrix<X>& A)
-    :  _chars(as,d), _ary(rs,Differential<X>(as,d))
-{
-    ARIADNE_ASSERT(rs==v.size());
-    ARIADNE_ASSERT(rs==A.row_size());
-    ARIADNE_ASSERT(as==A.column_size());
-    for(Nat i=0; i!=this->result_size(); ++i) {
-        (*this)[i]=v[i];
-        for(Nat j=0; j!=this->argument_size(); ++j) {
-            const X& x=A[i][j];
-            if(x!=0) { (*this)[i][j]=x; }
-        }
-    }
-}
-
-
-/*! \brief Compose the series of \a x and the series of \a y, assuming that \a x is centred at the value of \a y. The value of \a y is therefore unused by this method. */
-template<class X, class Y>
-Vector<Y>
-evaluate(const Vector< Differential<X> >& x,
-         const Vector<Y>& y)
-{
-    Vector<Y> r(x.result_size());
-    for(Nat i=0; i!=r.size(); ++i) {
-        r[i]=evaluate(x[i],y);
-    }
-    return r;
-}
-
-/*! \brief Compose the series of \a x and the series of \a y, assuming that \a x is centred at the value of \a y. The value of \a y is therefore unused by this method. */
-template<class X>
-Differential<X>
-compose(const Differential<X>& x,
-        const Vector< Differential<X> >& y)
-{
-    Vector< Differential<X> >& ync=const_cast< Vector< Differential<X> >&>(y);
-    Vector<X> yv(y.size());
-    for(Nat i=0; i!=ync.result_size(); ++i) { yv[i]=ync[i].value(); ync[i].set_value(0); }
-    Differential<X> r=evaluate(x,ync);
-    for(Nat i=0; i!=ync.result_size(); ++i) { ync[i].set_value(yv[i]); }
-    return r;
-}
-
-
-/*! \brief Compose the series of \a x and the series of \a y, assuming that \a x is centred at the value of \a y. The value of \a y is therefore unused by this method. */
-template<class X>
-Vector< Differential<X> >
-compose(const Vector< Differential<X> >& x,
-        const Vector< Differential<X> >& y)
-{
-    ARIADNE_ASSERT(x.degree()==y.degree());
-    //std::cerr<<"compose(DV x, DV y)\n x="<<x<<"\n y="<<y<<std::endl;
-    Vector< Differential<X> >& ync=const_cast< Vector< Differential<X> >&>(y);
-    Vector<X> yv(y.size());
-    for(Nat i=0; i!=ync.result_size(); ++i) { yv[i]=ync[i].value(); ync[i].set_value(0); }
-    Vector< Differential<X> > r(x.size(),y.argument_size(),y.degree());
-    for(Nat i=0; i!=x.result_size(); ++i) { r[i]=evaluate(x[i],y); }
-    for(Nat i=0; i!=ync.result_size(); ++i) { ync[i].set_value(yv[i]); }
-    return r;
-}
-
-
-template<class X>
-Vector< Differential<X> >
-lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg)
-{
-    Vector< Differential<X> > r(df.result_size(),df.argument_size(),df.degree()-1);
-    Differential<X> t(df.argument_size(), df.degree()-1);
-    MultiIndex a; X c;
-    for(Nat i=0; i!=df.result_size(); ++i) {
-        Expansion<X> const& dfi_expansion = df[i].expansion();
-        Expansion<X>& t_expansion = t.expansion();
-        for(Nat j=0; j!=df.argument_size(); ++j) {
-            for(typename Expansion<X>::ConstIterator iter=dfi_expansion.begin(); iter!=dfi_expansion.end(); ++iter) {
-                if(iter->key()[j]!=0) {
-                    a=iter->key();
-                    c=iter->data()*Nat(a[j]);
-                    a[j]-=1;
-                    t_expansion.append(a,c);
-                }
-            }
-            r[i]+=t*dg[j];
-            t.clear();
-        }
-    }
-    return r;
-}
-
-template<class X>
-Vector< Differential<X> >
-antiderivative(const Vector< Differential<X> >& x, Nat k) {
-    Vector< Differential<X> > r(x.size(), Differential<X>(x.argument_size(),x.degree()+1));
-    for(Nat i=0; i!=r.size(); ++i) { r[i]=antiderivative(x[i],k); }
-    return r;
-}
-
-template<class X>
-Vector<X>
-value(const Vector< Differential<X> >& x)
-{
-    Vector<X> r(x.size());
-    for(Nat i=0; i!=x.size(); ++i) {
-        r[i]=x[i].value();
-    }
-    return r;
-}
-
-template<class X>
-Matrix<X>
-jacobian(const Vector< Differential<X> >& x)
-{
-    if(x.size()==0) { return Matrix<X>(); }
-    for(Nat i=1; i!=x.size(); ++i) {
-        ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size());
-    }
-
-    Matrix<X> r(x.size(),x[0].argument_size());
-    for(Nat i=0; i!=x.size(); ++i) {
-        for(Nat j=0; j!=x[0].argument_size(); ++j) {
-            r[i][j]=x[i].gradient(j);
-
-        }
-    }
-    return r;
-}
-
-
-
+template<class X, class Y> Vector<Y> evaluate(const Vector< Differential<X> >& x, const Vector<Y>& y);
+template<class X> Differential<X> compose(const Differential<X>& x, const Vector< Differential<X> >& y);
 
 } //namespace Ariadne
 

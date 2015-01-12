@@ -28,6 +28,8 @@
 
 namespace Ariadne {
 
+    template class Polynomial<Float>;
+    
 } //namespace Ariadne
 
 

@@ -21,47 +21,58 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "algebra/evaluate.h"
+
 namespace Ariadne {
 
-template<class X> Polynomial<X>::Polynomial(SizeType as) : _expansion(as) { }
+template<class X> Polynomial<X>::Polynomial(SizeType as)
+    : _expansion(as)
+{
+}
 
-template<class X> template<class XX> Polynomial<X>::Polynomial(const Polynomial<XX>& p) : _expansion(p._expansion) { }
+template<class X>
+Polynomial<X>::Polynomial(InitializerList<PairType<InitializerList<Int>,X>> lst)
+    : _expansion(lst)
+{
+    this->cleanup();
+}
 
-template<class X> template<class XX> Polynomial<X>::Polynomial(const Expansion<XX>& e) : _expansion(e) { }
-
-
+template<class X>
+Polynomial<X>::Polynomial(SizeType as, DegreeType deg, InitializerList<X> lst)
+    : _expansion(as,deg,lst)
+{
+    this->cleanup();
+}
 
 
 template<class X> Polynomial<X> Polynomial<X>::create_zero() const {
-    return Polynomial<X>(this->argument_size()); }
+    return Polynomial<X>(this->argument_size());
+}
 
 
 template<class X> Polynomial<X> Polynomial<X>::constant(SizeType as, const X& c) {
-    Polynomial<X> r(as); r[MultiIndex::zero(as)]=c; return r; }
+    Polynomial<X> r(as); r[MultiIndex::zero(as)]=c; return r;
+}
 
 template<class X> Polynomial<X> Polynomial<X>::variable(SizeType as, SizeType j) {
-    ARIADNE_ASSERT(j<as); Polynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r; }
+    ARIADNE_ASSERT(j<as); Polynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r;
+}
+
 template<class X> Polynomial<X> Polynomial<X>::coordinate(SizeType as, SizeType j) {
-    ARIADNE_ASSERT(j<as); Polynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r; }
+    ARIADNE_ASSERT(j<as); Polynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r;
+}
 
 
 template<class X> Vector<Polynomial<X>> Polynomial<X>::variables(SizeType as) {
-    Vector<Polynomial<X>> r(as); for(SizeType i=0; i!=as; ++i) { r[i]=variable(as,i); } return r; }
-template<class X> Polynomial<X>& Polynomial<X>::operator=(const X& x) { this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),x); return *this; }
+    Vector<Polynomial<X>> r(as); for(SizeType i=0; i!=as; ++i) { r[i]=variable(as,i); } return r;
+}
 
 
-
-
-
-template<class X> template<class XX> Bool Polynomial<X>::operator==(const Polynomial<XX>& p) const {
-    const_cast<Polynomial<X>*>(this)->cleanup(); const_cast<Polynomial<XX>&>(p).cleanup();
-    return this->_expansion==p._expansion; }
-
-template<class X> template<class XX> Bool Polynomial<X>::operator!=(const Polynomial<XX>& p) const {
-    return !(*this==p); }
-
-
-
+template<class X> Polynomial<X>& Polynomial<X>::operator=(const X& x) {
+    this->_expansion.clear();
+    this->_expansion.append(MultiIndex(this->argument_size()),x);
+    return *this;
+}
 
 
 
@@ -83,9 +94,6 @@ template<class X> Expansion<X>& Polynomial<X>::expansion() { return this->_expan
 
 
 
-
-
-
 template<class X> typename Polynomial<X>::Iterator Polynomial<X>::begin() { return this->_expansion.begin(); }
 
 template<class X> typename Polynomial<X>::Iterator Polynomial<X>::end() { return this->_expansion.end(); }
@@ -100,10 +108,6 @@ template<class X> typename Polynomial<X>::ConstIterator Polynomial<X>::find(cons
 
 
 
-
-
-
-
 template<class X> Void Polynomial<X>::append(const MultiIndex& a, const X& c) { this->_expansion.append(a,c); }
 
 template<class X> Void Polynomial<X>::insert(const MultiIndex& a, const X& c) { this->_expansion.insert(a,c); }
@@ -115,24 +119,6 @@ template<class X> Void Polynomial<X>::erase(Iterator iter) { this->_expansion.er
 template<class X> Void Polynomial<X>::clear() { this->_expansion.clear(); }
 
 
-
-
-
-
-
-template<class X>
-Polynomial<X>::Polynomial(InitializerList< PairType<InitializerList<Int>,X> > lst)
-    : _expansion(lst)
-{
-    this->cleanup();
-}
-
-template<class X>
-Polynomial<X>::Polynomial(SizeType as, DegreeType deg, InitializerList<X> lst)
-    : _expansion(as,deg,lst)
-{
-    this->cleanup();
-}
 
 template<class X>
 Polynomial<X>&
@@ -166,8 +152,28 @@ Polynomial<X>& Polynomial<X>::truncate(DegreeType d) {
             r.append(iter->key(),iter->data());
         }
     }
-    this->swap(r);
+    this->_expansion.swap(r._expansion);
     return *this;
+}
+
+template<class FwdIter, class Op>
+FwdIter unique_key(FwdIter first, FwdIter last, Op op) {
+    FwdIter curr=first;
+    FwdIter next=curr;
+    while(next!=last) {
+        if(curr!=next) { *curr=*next; }
+        ++next;
+        while(next!=last && curr->key()==next->key()) {
+            if(curr->key()==next->key()) {
+                curr->data()=op(curr->data(),next->data());
+                ++next;
+            }
+        }
+        // Removes zero entries; the code below is preferred to the case "curr->data()!=0" for Tribool results
+        if(curr->data()==0) { }
+        else { ++curr; }
+    }
+    return curr;
 }
 
 template<class X>
@@ -179,158 +185,132 @@ Void Polynomial<X>::cleanup()
     self->_expansion.resize(new_end-self->_expansion.begin());
 }
 
-template<class X> inline
+template<class X>
 Void Polynomial<X>::check() const
 {
     this->_expansion.check();
 }
 
 
-template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p) {
-    return p; }
-
-template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p) {
-    Polynomial<X> r(p.argument_size());  typedef typename Polynomial<X>::ConstIterator Iter;
-    for(Iter iter=p.begin(); iter!=p.end(); ++iter) { r[iter->key()]-=iter->data(); } return r; }
 
 
-template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p, const X& c) {
-    Polynomial<X> r(p); r[MultiIndex(p.argument_size())]+=c; return r; }
-
-template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p, const X& c) {
-    Polynomial<X> r(p); r[MultiIndex(p.argument_size())]-=c; return r; }
-
-template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p, const X& c) {
-    if(c==0) { return Polynomial<X>(p.argument_size()); }
-    Polynomial<X> r(p); typedef typename Polynomial<X>::Iterator Iter;
-    for(Iter iter=r.begin(); iter!=r.end(); ++iter) { iter->data()*=c; } return r; }
-
-template<class X> inline Polynomial<X> operator/(const Polynomial<X>& p, const X& c) {
-    Polynomial<X> r(p); typedef typename Polynomial<X>::Iterator Iter;
-    for(Iter iter=r.begin(); iter!=r.end(); ++iter) { iter->data()/=c; } return r; }
-
-
-template<class X> inline Polynomial<X> operator+(const X& c, const Polynomial<X>& p) {
-    return p+c; }
-
-template<class X> inline Polynomial<X> operator-(const X& c, const Polynomial<X>& p) {
-    return (-p)+c; }
-
-template<class X> inline Polynomial<X> operator*(const X& c, const Polynomial<X>& p) {
-    return p*c; }
-
-
-template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p1, const Polynomial<X>& p2) {
-    ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    Polynomial<X> r(p1);  typedef typename Polynomial<X>::ConstIterator Iter;
-    for(Iter iter=p2.begin(); iter!=p2.end(); ++iter) { r[iter->key()]+=iter->data(); } return r; }
-
-template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p1, const Polynomial<X>& p2) {
-    ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    Polynomial<X> r(p1);  typedef typename Polynomial<X>::ConstIterator Iter;
-    for(Iter iter=p2.begin(); iter!=p2.end(); ++iter) { r[iter->key()]-=iter->data(); } return r; }
-
-template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p1, const Polynomial<X>& p2) {
-    ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    Polynomial<X> r(p1.argument_size());
-    typedef typename Polynomial<X>::ConstIterator Iter;
-    for(Iter iter1=p1.begin(); iter1!=p1.end(); ++iter1) {
-        for(Iter iter2=p2.begin(); iter2!=p2.end(); ++iter2) {
-            MultiIndex a=iter1->key()+iter2->key();
-            r[a]+=iter1->data()*iter2->data(); } } return r; }
-
-
-template<class X> inline Polynomial<X> sqr(const Polynomial<X>& p) {
-    return p*p; }
-
-
-template<class X> inline Polynomial<X> pow(const Polynomial<X>& p, Nat m) {
-    Polynomial<X> r=Polynomial<X>::constant(p.argument_size(),1.0); Polynomial<X> q(p);
-    while(m) { if(m%2) { r=r*q; } q=q*q; m/=2; } return r; }
-
-
-template<class X, class XX> inline Polynomial<X>& operator+=(Polynomial<X>& p, const Polynomial<XX>& q) {
-    ARIADNE_ASSERT(p.argument_size()==q.argument_size());
-    typedef typename Polynomial<X>::ConstIterator Iter;
-    for(Iter iter=q.begin(); iter!=q.end(); ++iter) { p[iter->key()]+=iter->data(); } return p; }
-
-template<class X, class XX> inline Polynomial<X>& operator-=(Polynomial<X>& p, const Polynomial<XX>& q) {
-    ARIADNE_ASSERT(p.argument_size()==q.argument_size());
-    typedef typename Polynomial<X>::ConstIterator Iter;
-    for(Iter iter=q.begin(); iter!=q.end(); ++iter) { p[iter->key()]-=iter->data(); } return p; }
-
-
-template<class X> inline Polynomial<X>& operator+=(Polynomial<X>& p, const X& c) {
-    p[MultiIndex(p.argument_size())]+=c; return p; }
-
-template<class X> inline Polynomial<X>& operator-=(Polynomial<X>& p, const X& c) {
-    p[MultiIndex(p.argument_size())]-=c; return p; }
-
-template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const X& c) {
-    typedef typename Polynomial<X>::Iterator Iter;
-    if(c==0) { p.clear(); }
-    for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->data()*=c; } return p; }
-
-template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, const X& c) {
-    typedef typename Polynomial<X>::Iterator Iter;
-    for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->data()/=c; } return p; }
-
-
-template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const Monomial<X>& m) {
-    typedef typename Polynomial<X>::Iterator Iter;
-    if(m.data()==0) { p.clear(); }
-    for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->key()+=m.key(); iter->data()*=m.data(); } return p; }
-
-template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p, double c) { return p+X(c); }
-template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p, double c) { return p-X(c); }
-template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p, double c) { return p*X(c); }
-template<class X> inline Polynomial<X> operator/(const Polynomial<X>& p, double c) { return p/X(c); }
-template<class X> inline Polynomial<X> operator+(double c, const Polynomial<X>& p) { return X(c)+p; }
-template<class X> inline Polynomial<X> operator-(double c, const Polynomial<X>& p) { return X(c)-p; }
-template<class X> inline Polynomial<X> operator*(double c, const Polynomial<X>& p) { return X(c)*p; }
-template<class X> inline Polynomial<X>& operator+=(Polynomial<X>& p, double c) { return p+=X(c); }
-template<class X> inline Polynomial<X>& operator-=(Polynomial<X>& p, double c) { return p-=X(c); }
-template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, double c) { return p*=X(c); }
-template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, double c) { return p/=X(c); }
-
-template<class X> inline Polynomial<MidpointType<X>> midpoint(const Polynomial<X>& p) {
-    Polynomial<MidpointType<X>> r(p.argument_size());
-    for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
-        r.append(iter->key(),static_cast<MidpointType<X>>(midpoint(iter->data()))); }
-    return r;
-}
-
-template<class X> inline Vector< Polynomial<MidpointType<X>> > midpoint(const Vector<Polynomial<X>>& p) {
-    Vector< Polynomial<MidpointType<X>> > r(p.size());
-    for(Nat i=0; i!=p.size(); ++i) {
-        r[i]=midpoint(p[i]); }
-    return r;
-}
-
-
-template<class X, class Y> inline
-Y evaluate(const Polynomial<X>& p, const Vector<Y>& x)
-{
-    return evaluate(p.expansion(),x);
-}
-
-
-template<class X, class Y> inline
-Vector<Y> evaluate(const Vector<Polynomial<X>>& p, const Vector<Y>& x)
-{
-    ARIADNE_ASSERT(p.size()>0 && p.zero_element().argument_size()==x.size());
-    Y zero = x.zero_element(); zero*=0;
-    Vector<Y> r(p.size(),zero);
-    for(Nat i=0; i!=p.size(); ++i) {
-        r[i]=evaluate(p[i],x);
+template<class X> Polynomial<X> Polynomial<X>::_neg(const Polynomial<X>& p) {
+    Polynomial<X> r(p.argument_size());
+    for(auto iter=p.begin(); iter!=p.end(); ++iter) {
+        r[iter->key()]-=iter->data();
     }
     return r;
 }
 
 
+template<class X> Polynomial<X> Polynomial<X>::_add(const Polynomial<X>& p, const X& c) {
+    Polynomial<X> r(p);
+    r[MultiIndex(p.argument_size())]+=c;
+    return r;
+}
+
+template<class X> Polynomial<X> Polynomial<X>::_mul(const Polynomial<X>& p, const X& c) {
+    if(c==0) { return Polynomial<X>(p.argument_size()); }
+    Polynomial<X> r(p);
+    for(auto iter=r.begin(); iter!=r.end(); ++iter) {
+        iter->data()*=c;
+    }
+    return r;
+}
+
+template<class X> Polynomial<X> Polynomial<X>::_add(const Polynomial<X>& p1, const Polynomial<X>& p2) {
+    ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
+    ComparisonType less;
+    Polynomial<X> r(p1.argument_size());
+    auto iter1=p1.begin(); auto iter2=p2.begin();
+    while (iter1!=p1.end() && iter2!=p2.end()) {
+        if (iter1->key()==iter2->key()) {
+            r._expansion.append(iter1->key(),iter1->data()+iter2->data());
+           ++iter1; ++iter2;
+         } else if (less(iter1->key(),iter2->key())) {
+            r._expansion.append(iter1->key(),iter1->data());
+            ++iter1;
+        } else { //  (greater(iter1->key(),iter2->key()))
+            r._expansion.append(iter2->key(),iter2->data());
+            ++iter2;
+        }
+    }
+    while (iter1!=p1.end()) {
+        r._expansion.append(iter1->key(),iter1->data());
+        ++iter1;
+    }
+    while (iter2!=p2.end()) {
+            r._expansion.append(iter2->key(),iter2->data());
+            ++iter2;
+    }
+    return std::move(r);
+}
+
+template<class X> Polynomial<X> Polynomial<X>::_sub(const Polynomial<X>& p1, const Polynomial<X>& p2) {
+    ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
+    ComparisonType less;
+    Polynomial<X> r(p1.argument_size());
+    auto iter1=p1.begin(); auto iter2=p2.begin();
+    while (iter1!=p1.end() && iter2!=p2.end()) {
+        if (iter1->key()==iter2->key()) {
+            r._expansion.append(iter1->key(),iter1->data()-iter2->data());
+           ++iter1; ++iter2;
+         } else if (less(iter1->key(),iter2->key())) {
+            r._expansion.append(iter1->key(),iter1->data());
+            ++iter1;
+        } else { //  (greater(iter1->key(),iter2->key()))
+            r._expansion.append(iter2->key(),-iter2->data());
+            ++iter2;
+        }
+    }
+    while (iter1!=p1.end()) {
+        r._expansion.append(iter1->key(),iter1->data());
+        ++iter1;
+    }
+    while (iter2!=p2.end()) {
+            r._expansion.append(iter2->key(),-iter2->data());
+            ++iter2;
+    }
+    return std::move(r);
+}
+
+template<class X> Polynomial<X> Polynomial<X>::_mul(const Polynomial<X>& p1, const Polynomial<X>& p2) {
+    ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
+    Polynomial<X> r(p1.argument_size());
+    for(auto iter1=p1.begin(); iter1!=p1.end(); ++iter1) {
+        for(auto iter2=p2.begin(); iter2!=p2.end(); ++iter2) {
+            MultiIndex a=iter1->key()+iter2->key();
+            r[a]+=iter1->data()*iter2->data();
+        }
+    }
+    return r;
+}
+
+template<class X> Polynomial<X>& Polynomial<X>::_imul(Polynomial<X>& p, const Monomial<X>& m) {
+    if(m.data()==0) { p.clear(); }
+    for(auto iter=p.begin(); iter!=p.end(); ++iter) {
+        iter->key()+=m.key();
+        iter->data()*=m.data();
+    }
+    return p;
+}
+
+
+
+template<class X> X Polynomial<X>::_evaluate(const Polynomial<X>& p, const Vector<X>& x) {
+    return horner_evaluate(p._expansion,x);
+}
+
+template<class X> Polynomial<X> Polynomial<X>::_compose(const Polynomial<X>& p, const Vector<Polynomial<X>>& q) {
+    return evaluate(p,q);
+}
+
+
+
+
 template<class X>
 Polynomial<X>
-partial_evaluate(const Polynomial<X>& x, Nat k, const X& c)
+Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
 {
     Polynomial<X> r(x.argument_size()-1);
     MultiIndex ra(r.argument_size());
@@ -397,140 +377,6 @@ partial_evaluate(const Polynomial<X>& x, Nat k, const X& c)
 }
 
 
-template<class X> inline
-Polynomial<X> compose(const Polynomial<X>& p, const Vector<Polynomial<X>>& q)
-{
-    return evaluate(p,q);
-}
-
-template<class X> inline
-Vector<Polynomial<X>> compose(const Vector<Polynomial<X>>& p, const Vector<Polynomial<X>>& q)
-{
-    return evaluate(p,q);
-}
-
-
-template<class X> inline
-Polynomial<X> embed(SizeType before_size, const Polynomial<X>& x, SizeType after_size)
-{
-    return Polynomial<X>(embed(before_size,x.expansion(),after_size));
-}
-
-template<class X>
-Polynomial<X>
-derivative(const Polynomial<X>& p, Nat j) {
-    Polynomial<X> r(p.argument_size());
-    MultiIndex ar(p.argument_size());
-    for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
-        const MultiIndex& ap=iter->key();
-        if(ap[j]>0) {
-            const X& val=iter->data();
-            ar=ap;
-            ar[j]-=1;
-            r.append(ar,val*static_cast<X>(ap[j]));
-        }
-    }
-    return r;
-}
-
-template<class X>
-Vector<Polynomial<X>>
-derivative(const Polynomial<X>& p) {
-    Vector<Polynomial<X>> r(p.argument_size(), Polynomial<X>(p.argument_size()) );
-    for(Nat j=0; j!=r.size(); ++j) {
-        r[j]=derivative(p,j);
-    }
-    return r;
-}
-
-template<class X>
-Vector<Polynomial<X>>
-derivative(const Vector<Polynomial<X>>& p, Nat j) {
-    Vector<Polynomial<X>> r(p.size());
-    for(Nat i=0; i!=p.size(); ++i) {
-        r[i]=derivative(p[i],j);
-    }
-    return r;
-}
-
-template<class X>
-Polynomial<X>
-antiderivative(const Polynomial<X>& p, Nat j) {
-    Polynomial<X> r(p.argument_size());
-    MultiIndex ar(p.argument_size());
-    for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
-        const MultiIndex& ap=iter->key();
-        const X& val=iter->data();
-        ar=ap;
-        ++ar[j];
-        r.append(ar,val/ar[j]);
-    }
-    return r;
-}
-
-template<class X>
-Vector<Polynomial<X>>
-antiderivative(const Vector<Polynomial<X>>& p, Nat j) {
-    Vector<Polynomial<X>> r(p.size());
-    for(Nat i=0; i!=p.size(); ++i) {
-        r[i]=antiderivative(p[i],j);
-    }
-    return r;
-}
-
-template<class X>
-Polynomial<X>
-truncate(const Polynomial<X>& p, unsigned short d) {
-    Polynomial<X> r(p.argument_size());
-    for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
-        if(iter->key().degree()<=d && iter->data()!=0) {
-            r.append(iter->key(),iter->data());
-        }
-    }
-    return r;
-}
-
-template<class X>
-Vector<Polynomial<X>>
-truncate(const Vector<Polynomial<X>>& p, Nat d) {
-    Vector<Polynomial<X>> r(p.size());
-    for(Nat i=0; i!=p.size(); ++i) {
-        r[i]=truncate(p[i],d);
-    }
-    return r;
-}
-
-
-
-template<class X>
-Vector<Polynomial<X>> flow(const Vector<Polynomial<X>>& p, Nat order)
-{
-    Nat n=p.size();
-    Vector<Polynomial<X>> p0(n,Polynomial<X>(n+1));
-    for(Nat i=0; i!=n; ++i) { p0[i][MultiIndex::unit(n+1,i)]=1.0; }
-
-    Vector<Polynomial<X>> r=p0;
-    for(Nat k=0; k!=order; ++k) {
-        r=compose(p,r);
-        for(Nat i=0; i!=n; ++i) {
-            r[i].cleanup();
-            r[i]=truncate(r[i],k+1);
-            r[i]=antiderivative(r[i],n);
-            r[i]+=p0[i];
-        }
-    }
-
-    return r;
-}
-
-
-template<class X, class Y> Vector<Polynomial<X>> operator*(const Polynomial<X>& p, const Vector<Y> e) {
-    Vector<Polynomial<X>> r(e.size(),Polynomial<X>(p.argument_size()));
-    for(Nat i=0; i!=r.size(); ++i) { r[i]=p; r[i]*=X(e[i]); }
-    return r;
-}
-
-
 
 /*
 template<class X>
@@ -548,14 +394,9 @@ OutputStream& operator<<(OutputStream& os, const Polynomial<X>& p) {
 }
 */
 
-template<class F> struct NamedArgumentRepresentation {
-    const F& function; const std::vector<String>& argument_names;
-};
-template<class F> NamedArgumentRepresentation<F> named_argument_repr(const F& function, const std::vector<String>& argument_names) {
-    NamedArgumentRepresentation<F> r={function,argument_names}; return r; }
-
 template<class X>
-OutputStream& operator<<(OutputStream& os, const Polynomial<X>& q) {
+OutputStream& Polynomial<X>::_write(OutputStream& os) const {
+    Polynomial<X> const& q=*this;
     Bool first_term=true;
     Bool identically_zero=true;
 
@@ -586,9 +427,9 @@ OutputStream& operator<<(OutputStream& os, const Polynomial<X>& q) {
 }
 
 template<class X>
-OutputStream& operator<<(OutputStream& os, const NamedArgumentRepresentation< Polynomial<X> >& repr) {
-    const Polynomial<X>& p=repr.function;
-    const std::vector<String>& n=repr.argument_names;
+OutputStream& Polynomial<X>::_write(OutputStream& os, List<String> const& argument_names) const {
+    const Polynomial<X>& p=*this;
+    const std::vector<String>& n=argument_names;
     Bool first_term=true;
     Bool identically_zero=true;
     for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {

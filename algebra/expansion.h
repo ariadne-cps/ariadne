@@ -52,8 +52,6 @@ template<class X> class Expansion;
 typedef Expansion<Float> FloatExpansion;
 
 
-template<class FwdIter, class Op> FwdIter unique_key(FwdIter first, FwdIter last, Op op);
-
 
 template<class X>
 struct ExpansionValue {

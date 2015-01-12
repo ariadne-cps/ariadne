@@ -39,28 +39,6 @@
 
 namespace Ariadne {
 
-template<class FwdIter, class Op>
-FwdIter unique_key(FwdIter first, FwdIter last, Op op) {
-    FwdIter curr=first;
-    FwdIter next=curr;
-    while(next!=last) {
-        if(curr!=next) { *curr=*next; }
-        ++next;
-        while(next!=last && curr->key()==next->key()) {
-            if(curr->key()==next->key()) {
-                curr->data()=op(curr->data(),next->data());
-                ++next;
-            }
-        }
-        // Removes zero entries; the code below is preferred to the case "curr->data()!=0" for Tribool results
-        if(curr->data()==0) { }
-        else { ++curr; }
-    }
-    return curr;
-}
-
-
-
 template<class X> X Expansion<X>::_zero = static_cast<X>(0);
 
 template<class X> Expansion<X>::~Expansion() { }

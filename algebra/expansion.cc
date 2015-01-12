@@ -35,9 +35,6 @@ namespace Ariadne {
     template class Expansion<UpperInterval>;
     template class Expansion<ExactInterval>;
 
-    typedef typename Expansion<Float>::Iterator FloatExpansionIterator;
-    template FloatExpansionIterator unique_key(FloatExpansionIterator,FloatExpansionIterator,std::plus<Float>);
-
     template class SortedExpansion<Float,GradedKeyLess>;
     template class SortedExpansion<ApproximateFloat,GradedKeyLess>;
     template class SortedExpansion<ValidatedFloat,GradedKeyLess>;

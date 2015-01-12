@@ -77,9 +77,6 @@ ExactInterval create(const ExactInterval& x) { return ExactInterval(0); }
 template<class X> Polynomial<X> create(const Polynomial<X>& x) { return Polynomial<X>(x.argument_size()); }
 template<class X> Differential<X> create(const Differential<X>& x) { return Differential<X>(x.argument_size(),x.degree()); }
 
-OutputStream& operator<<(OutputStream& os, const Differential<ExactInterval>& d) {
-    return os << Polynomial<ExactInterval>(d.expansion());
-}
 
 template<class A> struct Graded : public List<A>
 {

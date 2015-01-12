@@ -22,7 +22,7 @@
  */
 
 #include "numeric/numeric.h"
-#include "config.h"
+#include "geometry/interval.h"
 
 #include "algebra/differential.h"
 
@@ -32,11 +32,14 @@
 
 namespace Ariadne {
 
-//template class Differential<RawFloat64>;
+template class UnivariateDifferential<Float>;
+template class UnivariateDifferential<ApproximateFloat>;
+template class UnivariateDifferential<ValidatedFloat>;
+template class UnivariateDifferential<UpperInterval>;
 
-//template class Differential<Rational>;
-
-//template class Differential<ValidatedFloat64>;
+template class Differential<Float>;
+template class Differential<ValidatedFloat>;
 template class Differential<ApproximateFloat>;
+template class Differential<UpperInterval>;
 
 }

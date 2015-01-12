@@ -395,6 +395,6 @@ template<class X> Expansion<MidpointType<X>> midpoint(const Expansion<X>& e) {
 
 } // namespace Ariadne
 
-#include "evaluate.tcc"
+#include "evaluate.h"
 
 #endif /* ARIADNE_EXPANSION_H */

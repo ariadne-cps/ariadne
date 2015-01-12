@@ -242,27 +242,35 @@ Void export_differential(const char* name)
     differential_class.def("hessian", (Matrix<X>(D::*)()const)&D::hessian);
     differential_class.def("expansion", (Expansion<X>const&(D::*)()const)&D::expansion,return_value_policy<copy_const_reference>());
 
-    differential_class.def("constant",(D(*)(Nat, Nat, const X&))&D::constant);
-    differential_class.def("variable",(D(*)(Nat, Nat, const X&, Nat))&D::variable);
-    differential_class.def("variables",(Vector<D>(*)(Nat, const Vector<X>&))&D::variables);
+    differential_class.def("constant",(D(*)(SizeType, DegreeType, const X&))&D::constant);
+    differential_class.def("variable",(D(*)(SizeType, DegreeType, const X&, SizeType))&D::variable);
+    differential_class.def("variables",(Vector<D>(*)(DegreeType, const Vector<X>&))&D::variables);
 
     differential_class.staticmethod("constant");
     differential_class.staticmethod("variable");
     differential_class.staticmethod("variables");
 
-    def("abs",(D(*)(const D&))&abs<X>);
-    def("pos",(D(*)(const D&))&pos<X>);
-    def("neg",(D(*)(const D&))&neg<X>);
-    def("rec",(D(*)(const D&))&rec<X>);
-    def("pow",(D(*)(const D&, Int))&pow<X>);
-
-    def("sqrt", (D(*)(const D&))&sqrt<X>);
-    def("exp", (D(*)(const D&))&exp<X>);
-    def("log", (D(*)(const D&))&log<X>);
-/*
+    def("derivative", (D(*)(const D&, SizeType))&derivative<X>);
+    def("antiderivative", (D(*)(const D&, SizeType))&antiderivative<X>);
     def("sin", (D(*)(const D&))&sin<X>);
-    def("cos", (D(*)(const D&))&cos<X>);
-    def("tan", (D(*)(const D&))&tan<X>);
+
+/*
+    // Declare non-template friends
+    D abs(D const&); D pos(D const&); D neg(D const&); D rec(D const&); D pow(D const&, Int);
+    D sqrt(D const&); D exp(D const&); D log(D const&); D sin(D const&); D cos(D const&); D tan(D const&);
+
+    def("abs",(D(*)(const D&))&abs);
+    def("pos",(D(*)(const D&))&pos);
+    def("neg",(D(*)(const D&))&neg);
+    def("rec",(D(*)(const D&))&rec);
+    def("pow",(D(*)(const D&, Int))&pow);
+
+    def("sqrt", (D(*)(const D&))&sqrt);
+    def("exp", (D(*)(const D&))&exp);
+    def("log", (D(*)(const D&))&log);
+    def("sin", (D(*)(const D&))&sin);
+    def("cos", (D(*)(const D&))&cos);
+    def("tan", (D(*)(const D&))&tan);
     def("asin", (D(*)(const D&))&asin<X>);
     def("acos", (D(*)(const D&))&acos<X>);
     def("atan", (D(*)(const D&))&atan<X>);

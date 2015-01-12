@@ -51,7 +51,6 @@ template<class X> class Procedure;
 template<class X> class Polynomial;
 typedef Differential<ValidatedNumber> ValidatedDifferential;
 typedef Vector< Procedure<ValidatedNumber> > ValidatedVectorProcedure;
-typedef Vector< Differential<ExactInterval> > ExactIntervalDifferentialVector;
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> ValidatedFunctionModelFactoryInterface;
 typedef std::shared_ptr<const ValidatedFunctionModelFactoryInterface> FunctionFactoryPointer;

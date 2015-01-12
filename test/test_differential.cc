@@ -60,7 +60,7 @@ template<class DF>
 class TestDifferential {
     typedef typename DF::ValueType X;
     typedef X ScalarType;
-    typedef Series<X> SeriesType;
+    typedef typename DF::SeriesType SeriesType;
     typedef DF DifferentialType;
     typedef Vector<DF> DifferentialVectorType;
   private:
@@ -232,7 +232,6 @@ class TestDifferentialVector {
         ARIADNE_TEST_CALL(test_mul());
         ARIADNE_TEST_CALL(test_div());
         ARIADNE_TEST_CALL(test_jacobian());
-        ARIADNE_TEST_CALL(test_evaluate());
         ARIADNE_TEST_CALL(test_differentiate());
         ARIADNE_TEST_CALL(test_compose());
         ARIADNE_TEST_CALL(test_mapping());
@@ -273,16 +272,6 @@ class TestDifferentialVector {
     Void test_div() {
         X c=2;
         cout << x1 << "/" << c << " = " << x1/c << std::endl;
-    }
-
-    Void test_evaluate() {
-        Array<ApproximateFloat> ac={1,2}; ApproximateFloat adv[10]={1,2,3,4,5,6,7,8,9,10};
-        Vector<X> c(ac);
-        DifferentialVectorType dv(1u,2u,3u,adv);
-        std::cout << "c=" << c << std::endl;
-        std::cout << "dv="<< dv << std::endl;
-        std::cout << "v(c)" << evaluate(dv,c) << std::endl;
-        std::cout << std::endl;
     }
 
     Void test_jacobian() {

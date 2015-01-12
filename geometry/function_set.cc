@@ -136,7 +136,7 @@ Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface
     //std::cerr<<"dom="<<dom<<"\n";
     const Nat m=f.result_size();
     const Nat n=f.argument_size();
-    Vector<UpperIntervalDifferential> ivl_dx=ExactIntervalDifferential::constants(m,n, 2, dom);
+    Vector<UpperIntervalDifferential> ivl_dx=UpperIntervalDifferential::constants(m,n, 2, dom);
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
         Float sf=dom[i].error().raw();
@@ -660,7 +660,7 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
     //std::cerr<<"dom="<<dom<<"\n";
     const Nat m=f.result_size();
     const Nat n=f.argument_size();
-    Vector<ExactIntervalDifferential> ivl_dx=ExactIntervalDifferential::constants(m,n, 1, dom);
+    Vector<UpperIntervalDifferential> ivl_dx=UpperIntervalDifferential::constants(m,n, 1, dom);
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
         Float sf=dom[i].radius();
@@ -669,13 +669,13 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
-    Vector<ExactIntervalDifferential> df=f.evaluate(ivl_dx);
+    Vector<UpperIntervalDifferential> df=f.evaluate(ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
     for(Nat i=0; i!=m; ++i) {
-        const ExactIntervalDifferential& d=df[i];
-        for(ExactIntervalDifferential::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
+        const UpperIntervalDifferential& d=df[i];
+        for(UpperIntervalDifferential::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->key();
             if(a.degree()==1) {
                 for(Nat j=0; j!=n; ++j) {
@@ -695,7 +695,7 @@ Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface
     //std::cerr<<"dom="<<dom<<"\n";
     const Nat m=f.result_size();
     const Nat n=f.argument_size();
-    Vector<ExactIntervalDifferential> ivl_dx=ExactIntervalDifferential::constants(m,n, 2, dom);
+    Vector<UpperIntervalDifferential> ivl_dx=UpperIntervalDifferential::constants(m,n, 2, dom);
     MultiIndex a(n);
     for(Nat i=0; i!=n; ++i) {
         Float sf=dom[i].radius();
@@ -704,13 +704,13 @@ Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
-    Vector<ExactIntervalDifferential> df=f.evaluate(ivl_dx);
+    Vector<UpperIntervalDifferential> df=f.evaluate(ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
     for(Nat i=0; i!=m; ++i) {
-        const ExactIntervalDifferential& d=df[i];
-        for(ExactIntervalDifferential::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
+        const UpperIntervalDifferential& d=df[i];
+        for(UpperIntervalDifferential::ConstIterator iter=d.begin(); iter!=d.end(); ++iter) {
             a=iter->key();
             if(a.degree()==2) {
                 for(Nat j=0; j!=n; ++j) {

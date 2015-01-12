@@ -2695,8 +2695,8 @@ minimisation_step(const ValidatedScalarFunction& f, const ValidatedVectorFunctio
     const Nat m=f.argument_size();
     const Nat n=g.result_size();
 
-    Differential<ExactInterval> ddf=f.evaluate(Differential<ExactInterval>::variables(2,y));
-    Vector< Differential<ExactInterval> > ddg=g.evaluate(Differential<ExactInterval>::variables(2,y));
+    Differential<UpperInterval> ddf=f.evaluate(Differential<UpperInterval>::variables(2,y));
+    Vector< Differential<UpperInterval> > ddg=g.evaluate(Differential<UpperInterval>::variables(2,y));
 
     ExactIntervalMatrix H(m,m);
     set_hessian(H,ddf);
@@ -2721,7 +2721,7 @@ Void KrawczykOptimiser::feasibility_step(const ValidatedVectorFunction& g,
     const Nat m=y.size();
     const Nat n=x.size();
 
-    Vector< Differential<ExactInterval> > ddg=g.evaluate(Differential<ExactInterval>::variables(2,y));
+    Vector< Differential<UpperInterval> > ddg=g.evaluate(Differential<UpperInterval>::variables(2,y));
 
     // A is the transpose derivative matrix aij=dgj/dyi
     ExactIntervalMatrix A(m,n);
@@ -2765,7 +2765,7 @@ Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVecto
     const Nat n=c.size();
 
     // Compute function values
-    Vector< Differential<ExactInterval> > ddg=g.evaluate(Differential<ExactInterval>::variables(2,y));
+    Vector< Differential<UpperInterval> > ddg=g.evaluate(Differential<UpperInterval>::variables(2,y));
 
     // gy is the vector of values of g(y)
     ExactIntervalVector gy(n);
@@ -2854,15 +2854,15 @@ Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVecto
     ARIADNE_LOG(9,"m="<<m<<" n="<<n<<"\n");
     ARIADNE_LOG(9,"x="<<x<<" yt="<<yt<<" z="<<z<<"\n");
 
-    Vector< Differential<ExactInterval> > ddg=g.evaluate(Differential<ExactInterval>::variables(2,y));
+    Vector< Differential<UpperInterval> > ddg=g.evaluate(Differential<UpperInterval>::variables(2,y));
     ARIADNE_LOG(9,"  ddg="<<ddg<<"\n");
 
     // gy is the vector of values of g(y)
-    ExactIntervalVector gy(n); for(Nat j=0; j!=n; ++j) { gy[j]=ddg[j].value(); }
+    UpperIntervalVector gy(n); for(Nat j=0; j!=n; ++j) { gy[j]=ddg[j].value(); }
     ARIADNE_LOG(9,"  g(y)="<<gy<<" ");
 
     // A is the transpose derivative matrix aij=dgj/dyi, extended with a column of ones
-    ExactIntervalMatrix A(m,n);
+    UpperIntervalMatrix A(m,n);
     for(Nat i=0; i!=m; ++i) {
         for(Nat j=0; j!=n; ++j) {
             A[i][j]=ddg[j][i];
@@ -2871,24 +2871,24 @@ Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVecto
     ARIADNE_LOG(9," A="<<A<<" ");
 
     // H is the Hessian matrix Hik = (xcuj-xclj)*dgj/dyidyk
-    ExactIntervalMatrix H(m,m);
+    UpperIntervalMatrix H(m,m);
     for(Nat j=0; j!=n; ++j) {
         add_hessian(H,x[j]-x[n+j],ddg[j]);
     }
     ARIADNE_LOG(9," H="<<H);
 
     // Construct the extended valuation GY=(gy-cu+te,cl-gy+te,y-bu+te,bl-y+te)
-    ExactIntervalVector gye(o);
+    UpperIntervalVector gye(o);
     for(Nat j=0; j!=n; ++j) { gye[j]=gy[j]-c[j].upper()+t; gye[n+j]=c[j].lower()-gy[j]+t; }
     for(Nat i=0; i!=m; ++i) { gye[2*n+i]=y[i]-d[i].upper()+t; gye[2*n+m+i]=d[i].lower()-y[i]+t; }
     ARIADNE_LOG(9,"  GE="<<gye<<"\n");
 
     // Construct the extended matrix AE=(A -A I -I \\ e e 0 0)
-    ExactIntervalMatrix AE(m+1,o);
+    UpperIntervalMatrix AE(m+1,o);
     for(Nat i=0; i!=m; ++i) { for(Nat j=0; j!=n; ++j) { AE[i][j]=A[i][j]; AE[i][n+j]=-A[i][j]; } }
     for(Nat i=0; i!=m; ++i) { AE[i][2*n+i]=1; AE[i][2*n+m+i]=-1; }
     for(Nat k=0; k!=o; ++k) { AE[m][k]=1; }
-    ExactIntervalMatrix AET=transpose(AE);
+    UpperIntervalMatrix AET=transpose(AE);
 
     FloatMatrix mA=midpoint(A);
     FloatMatrix mAE=midpoint(AE);
@@ -2913,55 +2913,55 @@ Void KrawczykOptimiser::feasibility_step(const ExactBox& d, const ValidatedVecto
     // FIXME: What if S is not invertible?
 
     // Construct the residuals
-    ExactIntervalVector rx=emul(mx,mz);
+    UpperIntervalVector rx=emul(mx,mz);
     //RawFloatVector ryt=-prod(AE,x); ryt[m]+=1; // FIXME: Need hessian
-    ExactIntervalVector ryt=-feasibility_mul(mA,mx); ryt[m]+=1; // FIXME: Need hessian
-    ExactIntervalVector rz=midpoint(gye)+mz;
+    UpperIntervalVector ryt=-feasibility_mul(mA,mx); ryt[m]+=1; // FIXME: Need hessian
+    UpperIntervalVector rz=midpoint(gye)+mz;
     ARIADNE_LOG(9,"rx="<<rx<<" ryt="<<ryt<<" rz="<<rz<<"\n");
 
     // Construct the errors on the residuals ([M]-M)([x]-x)
-    ExactIntervalVector ex=x-mx;
-    ExactIntervalVector eyt=yt-myt;
-    ExactIntervalVector ez=z-mz;
-    ExactIntervalMatrix eA=A-mA;
-    ExactIntervalMatrix eH=H-mH;
+    UpperIntervalVector ex=x-mx;
+    UpperIntervalVector eyt=yt-myt;
+    UpperIntervalVector ez=z-mz;
+    UpperIntervalMatrix eA=A-mA;
+    UpperIntervalMatrix eH=H-mH;
 
-    ExactIntervalVector erx=2.0*emul(ex,ez);
-    ExactIntervalVector eryt=ExactIntervalMatrix(AE-mAE)*ex;
-    ExactIntervalVector erz=ExactIntervalMatrix(AET-mAET)*eyt;
+    UpperIntervalVector erx=2.0*emul(ex,ez);
+    UpperIntervalVector eryt=UpperIntervalMatrix(AE-mAE)*ex;
+    UpperIntervalVector erz=UpperIntervalMatrix(AET-mAET)*eyt;
     ARIADNE_LOG(9,"erx="<<erx<<" eryt="<<eryt<<" erz="<<erz<<"\n");
 
     rx+=2.0*emul(ex,ez);
-    ryt+=ExactIntervalMatrix(AE-mAE)*ex;
-    rz+=ExactIntervalMatrix(AET-mAET)*eyt;
+    ryt+=UpperIntervalMatrix(AE-mAE)*ex;
+    rz+=UpperIntervalMatrix(AET-mAET)*eyt;
     ARIADNE_LOG(9,"rx="<<rx<<" ryt="<<ryt<<" rz="<<rz<<"\n");
 
     //RawFloatVector rr=prod(AE,ediv(RawFloatVector(rx-emul(x,rz)),z))-ryt;
 
     // Compute the error differences
-    ExactIntervalVector erxdz=ediv(erx,mz);
-    ExactIntervalVector edyt=(mSinv*mAE)*erxdz + mSinv*eyt - (mSinv*(mAE*DiagonalMatrix<Float>(mDE))) * ez;
-    ExactIntervalVector edz=-erz-feasibility_trmul(mA,edyt);
-    ExactIntervalVector edx=-ediv(ExactIntervalVector(erx+emul(mx,edz)),mz);
+    UpperIntervalVector erxdz=ediv(erx,mz);
+    UpperIntervalVector edyt=(mSinv*mAE)*erxdz + mSinv*eyt - (mSinv*(mAE*DiagonalMatrix<Float>(mDE))) * ez;
+    UpperIntervalVector edz=-erz-feasibility_trmul(mA,edyt);
+    UpperIntervalVector edx=-ediv(UpperIntervalVector(erx+emul(mx,edz)),mz);
     ARIADNE_LOG(9,"edx="<<edx<<" edyt="<<edyt<<" edz="<<edz<<"\n");
 
     // Compute the error differences
-    ExactIntervalVector eerr=prod(mAE,ediv(esub(erx,emul(mx,erz)),mz))-eryt;
+    UpperIntervalVector eerr=prod(mAE,ediv(esub(erx,emul(mx,erz)),mz))-eryt;
     ARIADNE_LOG(9,"  eerr="<<eerr<<"\n");
-    ExactIntervalVector eedyt=prod(mSinv,eerr);
-    ExactIntervalVector eedz=-erz-feasibility_trmul(mA,eedyt);
-    ExactIntervalVector eedx=-ediv(ExactIntervalVector(erx+emul(mx,eedz)),mz);
+    UpperIntervalVector eedyt=prod(mSinv,eerr);
+    UpperIntervalVector eedz=-erz-feasibility_trmul(mA,eedyt);
+    UpperIntervalVector eedx=-ediv(UpperIntervalVector(erx+emul(mx,eedz)),mz);
     ARIADNE_LOG(9,"eedx="<<eedx<<" eedyt="<<eedyt<<" eedz="<<eedz<<"\n");
 
 
     // Compute the differences
-    ExactIntervalVector rr=prod(mAE,ediv(esub(rx,emul(mx,rz)),mz))-ryt;
-    ExactIntervalVector dyt=prod(mSinv,rr);
-    ExactIntervalVector dz=-rz-feasibility_trmul(mA,dyt);
-    ExactIntervalVector dx=-ediv(ExactIntervalVector(rx+emul(mx,dz)),mz);
+    UpperIntervalVector rr=prod(mAE,ediv(esub(rx,emul(mx,rz)),mz))-ryt;
+    UpperIntervalVector dyt=prod(mSinv,rr);
+    UpperIntervalVector dz=-rz-feasibility_trmul(mA,dyt);
+    UpperIntervalVector dx=-ediv(UpperIntervalVector(rx+emul(mx,dz)),mz);
     ARIADNE_LOG(9,"dx="<<dx<<" dyt="<<dyt<<" dz="<<dz<<"\n\n");
 
-    ExactIntervalVector nx,ny,nyt,nz; Float nt;
+    UpperIntervalVector nx,ny,nyt,nz; Float nt;
     nx=mx+dx;
     nyt=myt+dyt;
     nz=mz+dz;

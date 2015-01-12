@@ -26,16 +26,18 @@
  */
 
 #ifndef ARIADNE_EVALUATE_H
-#define ARIADNE_EVALUATE
+#define ARIADNE_EVALUATE_H
+
 namespace Ariadne {
 
 template<class X> class Expansion;
 template<class A> class Vector;
 class ReverseGradedLexicographicLess;
+class ReverseLexicographicKeyLess;
 
 //! \ingroup FunctionModule
 //! \brief Evaluate a power series on an algebra using Horner's rule.
-template<class X, class A> A horner_evaluate(const SortedExpansion<X>& e, const Vector<A>& y);
+template<class X, class A> A horner_evaluate(const Expansion<X>& e, const Vector<A>& y);
 
 //! \ingroup FunctionModule
 //! \brief Evaluate a power series on an algebra using termwise expansion (slow).

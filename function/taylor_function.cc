@@ -40,6 +40,7 @@
 #include "function/function.h"
 #include "function/taylor_function.h"
 
+#include "algebra/evaluate.h"
 #include "function_mixin.tcc"
 #include "function/taylor_function.h"
 

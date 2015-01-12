@@ -42,8 +42,6 @@
 
 namespace Ariadne {
 
-class ExactInterval;
-
 template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Series;
@@ -52,59 +50,76 @@ template<class X> class Expansion;
 template<class X> class Differential;
 
 typedef Differential<Float> FloatDifferential;
-typedef Differential<ExactInterval> ExactIntervalDifferential;
+typedef Differential<ApproximateFloat> ApproximateFloatDifferential;
+typedef Differential<ValidatedFloat> ValidatedFloatDifferential;
 typedef Differential<UpperInterval> UpperIntervalDifferential;
-typedef Vector< Differential<Float> > FloatDifferentialVector;
-typedef Vector< Differential<ExactInterval> > ExactIntervalDifferentialVector;
-typedef Vector< Differential<UpperInterval> > UpperIntervalDifferentialVector;
 
-template<class X> Differential<X>& operator+=(Differential<X>& x, const Differential<X>& y);
-template<class X> Differential<X>& operator-=(Differential<X>& x, const Differential<X>& y);
-
-template<class X> Differential<X>& operator+=(Differential<X>& x, const typename Differential<X>::NumericType& c);
-template<class X> Differential<X>& operator-=(Differential<X>& x, const typename Differential<X>::NumericType& c);
-template<class X> Differential<X>& operator*=(Differential<X>& x, const typename Differential<X>::NumericType& c);
-template<class X> Differential<X>& operator/=(Differential<X>& x, const typename Differential<X>::NumericType& c);
-
-template<class X> Differential<X> operator+(Differential<X> const& x, const typename Differential<X>::NumericType& c);
-template<class X> Differential<X> operator-(Differential<X> const& x, const typename Differential<X>::NumericType& c);
-template<class X> Differential<X> operator*(Differential<X> const& x, const typename Differential<X>::NumericType& c);
-template<class X> Differential<X> operator/(Differential<X> const& x, const typename Differential<X>::NumericType& c);
-template<class X> Differential<X> operator+(const typename Differential<X>::NumericType& c, Differential<X> const& x);
-template<class X> Differential<X> operator-(const typename Differential<X>::NumericType& c, Differential<X> const& x);
-template<class X> Differential<X> operator*(const typename Differential<X>::NumericType& c, Differential<X> const& x);
-template<class X> Differential<X> operator/(const typename Differential<X>::NumericType& c, Differential<X> const& x);
-
-template<class X> Differential<X> operator+(const Differential<X>& x);
-template<class X> Differential<X> operator-(const Differential<X>& x);
-template<class X> Differential<X> operator+(const Differential<X>& x, const Differential<X>& y);
-template<class X> Differential<X> operator-(const Differential<X>& x, const Differential<X>& y);
-template<class X> Differential<X> operator*(const Differential<X>& x, const Differential<X>& y);
-template<class X> Differential<X> operator/(const Differential<X>& x, const Differential<X>& y);
-
-template<class X> Differential<X> neg(const Differential<X>& x);
-template<class X> Differential<X> rec(const Differential<X>& x);
-template<class X> Differential<X> pow(const Differential<X>& x, Int n);
-template<class X> Differential<X> sqr(const Differential<X>& x);
-template<class X> Differential<X> sqrt(const Differential<X>& x);
-template<class X> Differential<X> exp(const Differential<X>& x);
-template<class X> Differential<X> log(const Differential<X>& x);
-template<class X> Differential<X> sin(const Differential<X>& x);
-template<class X> Differential<X> cos(const Differential<X>& x);
-template<class X> Differential<X> tan(const Differential<X>& x);
-
-template<class X, class Y> Y evaluate(const Differential<X>& y, const Vector<Y>& z);
-template<class X> Differential<X> compose(const Series<X>& x, const Differential<X>& y);
-template<class X> Differential<X> derivative(const Differential<X>& x, SizeType i);
-template<class X> Differential<X> antiderivative(const Differential<X>& x, SizeType i);
-
-template<class X> Differential<X> compose(const Differential<X>&, const Vector< Differential<X> >&);
-template<class X> Vector< Differential<X> > compose(const Vector< Differential<X> >&, const Vector< Differential<X> >&);
-
-template<class X> OutputStream& operator<<(OutputStream&, Differential<X> const& dx);
 
 template<class X> using EqualityType = decltype(declval<X>()==declval<X>());
 template<class X> using InequalityType = decltype(declval<X>()!=declval<X>());
+
+
+
+
+//! \ingroup DifferentiationModule
+//! \brief Arbitrary-order derivatives with respect to a single argument.
+template<class X> class UnivariateDifferential
+{
+    Array<X> _ary;
+  public:
+    typedef X NumericType;
+    typedef UnivariateDifferential<X> SelfType;
+    typedef typename Array<X>::Iterator Iterator;
+    typedef typename Array<X>::ConstIterator ConstIterator;
+
+    UnivariateDifferential();
+    UnivariateDifferential(DegreeType d);
+    UnivariateDifferential(DegreeType d, InitializerList<X> e);
+    template<class XX> UnivariateDifferential(DegreeType d, XX const* p);
+    UnivariateDifferential(Series<X> const& s); // explicit
+
+    static SelfType constant(DegreeType d, const NumericType& c);
+    static SelfType variable(DegreeType d, const NumericType& c);
+
+    SelfType create_zero() const;
+    SelfType create_constant(const NumericType& c) const;
+    SelfType create_variable(const NumericType& c) const;
+
+    SizeType argument_size() const;
+    DegreeType degree() const;
+    const Array<X>& array() const;
+    Expansion<X>& array();
+    const X& operator[](SizeType k) const;
+    X& operator[](SizeType k);
+
+    SelfType& operator=(const NumericType& c);
+
+    SelfType& operator+=(const SelfType& x);
+    SelfType& operator-=(const SelfType& x);
+    SelfType& operator*=(const SelfType& x);
+    SelfType& operator+=(const NumericType& c);
+    SelfType& operator*=(const NumericType& c);
+
+    SelfType apply(Rec) const;
+
+    X value() const;
+    X gradient() const;
+    X hessian() const;
+
+    Void clear();
+    OutputStream& write(OutputStream& os) const;
+
+    friend OutputStream& operator<<(OutputStream& os, UnivariateDifferential<X> const& dx) {
+        return dx.write(os); }
+};
+
+template<class X> template<class XX> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, XX const* ptr)
+    : _ary(d+1,X(0))
+{
+    std::copy(ptr,ptr+d+1,_ary.begin());
+}
+
+
 
 //! \ingroup DifferentiationModule
 //! \brief A class representing the partial derivatives of a scalar quantity
@@ -118,13 +133,17 @@ template<class X> using InequalityType = decltype(declval<X>()!=declval<X>());
 template<class X>
 class Differential
 {
-    static const Nat MAX_DEGREE=65535;
+    typedef Differential<X> SelfType;
+
+    static const DegreeType MAX_DEGREE=65535;
     static const X _zero;
     static const X _one;
 
     DegreeType _degree;
     SortedExpansion<X,GradedKeyLess> _expansion;
   public:
+    //! \brief The type used for a power series.
+    typedef UnivariateDifferential<X> SeriesType;
     //! \brief The comparison used to sort the coefficients.
     typedef GradedKeyLess ComparisonType;
     //! \brief The type of used to represent numbers in the coefficient.
@@ -232,76 +251,132 @@ class Differential
     //! \brief Check that differential is sorted and all terms have degree less than maximum degree.
     Void check() const;
 
+  public:
+    //! \brief The derivatives of the composition of functions.
+    template<class XX> friend Differential<XX> compose(UnivariateDifferential<XX> const& dx, Differential<XX> const& dy);
+    //! \brief The derivatives of the composition of functions.
+    template<class XX> friend Differential<XX> compose(Differential<XX> const& dx, Vector<Differential<XX>> const& dy);
+    //! \brief The derivatives of the composition of functions.
+    template<class XX> friend Vector<Differential<X>> compose(Vector<Differential<X>> const& dx, Vector<Differential<X>> const& dy);
+    //! \brief Compute the differential of the derivative.
+    template<class XX> friend Differential<XX> derivative(Differential<XX> const& dx, SizeType k);
+    //! \brief Compute an antiderivative with respect to the variable \a i.
+    template<class XX> friend Differential<XX> antiderivative(Differential<XX> const& dx, SizeType k);
+
+    friend X value(const Differential<X>& x) { return x.value(); }
+    friend Vector<X> gradient(const Differential<X>& x) { return x.gradient(); }
+    friend Matrix<X> hessian(const Differential<X>& x) { return x.hessian(); }
+
+    friend OutputStream& operator<<(OutputStream& os, Differential<X> const& dx) { return dx._write(os); }
+  public:
     //! \brief Inplace addition of a constant.
-    template<class XX> friend Differential<XX>& operator+=(Differential<XX>& x, const typename Differential<XX>::NumericType& c);
+    Differential<X>& operator+=(const NumericType& c) { return *this=Differential<X>::_add(*this,c); }
     //! \brief Inplace subtraction of a constant.
-    template<class XX> friend Differential<XX>& operator-=(Differential<XX>& x, const typename Differential<XX>::NumericType& c);
-    //! \brief Inplace multiplication by constant.
-    template<class XX> friend Differential<XX>& operator*=(Differential<XX>& x, const typename Differential<XX>::NumericType& c);
+    Differential<X>& operator-=(const NumericType& c) { return this->operator+=(neg(c)); }
+    //! \brief Inplace multiplication by a constant.
+    Differential<X>& operator*=(const NumericType& c) { return *this=Differential<X>::_mul(*this,c); }
     //! \brief Inplace division by a constant.
-    template<class XX> friend Differential<XX>& operator/=(Differential<XX>& x, const typename Differential<XX>::NumericType& c);
+    Differential<X>& operator/=(const NumericType& c) { return this->operator*=(rec(c)); }
 
-    //! \brief Inplace addition.
-    template<class XX> friend Differential<XX>& operator+=(Differential<XX>& x, const Differential<XX>& y);
-    //! \brief Inplace subtraction.
-    template<class XX> friend Differential<XX>& operator-=(Differential<XX>& x, const Differential<XX>& y);
+    //! \brief Inplace addition of another differential.
+    Differential<X>& operator+=(const SelfType& dx) { return *this=Differential<X>::_add(*this,dx); }
+    //! \brief Inplace subtraction of another differential.
+    Differential<X>& operator-=(const SelfType& dx) { return *this=Differential<X>::_sub(*this,dx); }
+    //! \brief Inplace multiplication by another differential.
+    Differential<X>& operator*=(const SelfType& dx) { return *this=Differential<X>::_mul(*this,dx); }
+    //! \brief Inplace division by another differential.
+    Differential<X>& operator/=(const SelfType& dx) { return *this=Differential<X>::_div(*this,dx); }
 
-    //! \brief Addition of a constant.
-    friend Differential<X> operator+<>(const Differential<X>& x, const X& c);
-    friend Differential<X> operator+<>(const X& c, const Differential<X>& x);
-    //! \brief Subtraction of a constant.
-    friend Differential<X> operator-<>(const Differential<X>& x, const X& y);
-    friend Differential<X> operator-<>(const X& c, const Differential<X>& x);
-    //! \brief Multiplication by a constant.
-    friend Differential<X> operator*<>(const Differential<X>& x, const X& y);
-    friend Differential<X> operator*<>(const X& c, const Differential<X>& x);
-    //! \brief Division by a constant.
-    friend Differential<X> operator/<>(const Differential<X>& x, const X& y);
 
     //! \brief Unary plus.
-    friend Differential<X> operator+<>(const Differential<X>& x);
-    //! \brief Unary minus.
-    friend Differential<X> operator-<>(const Differential<X>& x);
-    //! \brief Addition.
-    friend Differential<X> operator+<>(const Differential<X>& x, const Differential<X>& y);
-    //! \brief Subtraction.
-    friend Differential<X> operator-<>(const Differential<X>& x, const Differential<X>& y);
-    //! \brief Multiplication.
-    friend Differential<X> operator*<>(const Differential<X>& x, const Differential<X>& y);
-    //! \brief Division.
-    friend Differential<X> operator/<>(const Differential<X>& x, const Differential<X>& y);
-
+    friend Differential<X> operator+(Differential<X> x) { return Differential<X>::_pos(x); }
     //! \brief Negation.
-    friend Differential<X> neg<>(const Differential<X>& x);
-    //! \brief Reciprocal.
-    friend Differential<X> rec<>(const Differential<X>& x);
-    //! \brief Integer power.
-    friend Differential<X> pow<>(const Differential<X>& x, Int n);
-    //! \brief Square.
-    friend Differential<X> sqr<>(const Differential<X>& x);
-    //! \brief Square root.
-    friend Differential<X> sqrt<>(const Differential<X>& x);
-    //! \brief Exponential function.
-    friend Differential<X> exp<>(const Differential<X>& x);
-    //! \brief Natural logarithm.
-    friend Differential<X> log<>(const Differential<X>& x);
-    //! \brief Sine function.
-    friend Differential<X> sin<>(const Differential<X>& x);
-    //! \brief Cosine function.
-    friend Differential<X> cos<>(const Differential<X>& x);
-    //! \brief Tangent function.
-    friend Differential<X> tan<>(const Differential<X>& x);
+    friend Differential<X> operator-(Differential<X> x) { return Differential<X>::_neg(x); }
 
-#ifdef DOXYGEN
-    //! \brief Compose by a power series in one variable.
-    friend Differential<X> compose<>(const Series<X>& x, const Differential<X>& y);
-    //! \brief Compose differentials at a point.
-    friend Differential<X> compose<>(const Differential<X>& x, const Vector< Differential<X> >& y);
-    //! \brief Compute the differential of the derivative.
-    friend Differential<X> derivative<>(const Differential<X>& x, SizeType i);
-    //! \brief Compute an antiderivative with respect to the variable \a i.
-    friend Differential<X> antiderivative<>(const Differential<X>& x, SizeType i);
-#endif
+    //! \brief Addition.
+    friend Differential<X> operator+(const Differential<X>& x1, const Differential<X>& x2) {
+        return Differential<X>::_add(x1,x2); }
+    //! \brief Subtraction.
+    friend Differential<X> operator-(const Differential<X>& x1, const Differential<X>& x2) {
+        return Differential<X>::_sub(x1,x2); }
+    //! \brief Multiplication.
+    friend Differential<X> operator*(const Differential<X>& x1, const Differential<X>& x2) {
+        return Differential<X>::_mul(x1,x2); }
+    //! \brief Division.
+    friend Differential<X> operator/(const Differential<X>& x1, const Differential<X>& x2) {
+        return Differential<X>::_div(x1,x2); }
+
+    //! \brief Addition of a constant.
+    friend Differential<X> operator+(const Differential<X>& x, const NumericType& c) {
+        return Differential<X>::_add(x,c); }
+    friend Differential<X> operator+(const NumericType& c, const Differential<X>& x) {
+        return Differential<X>::_add(x,c); }
+    //! \brief Subtraction of a constant.
+    friend Differential<X> operator-(const Differential<X>& x, const NumericType& c) {
+        return Differential<X>::_add(x,neg(c)); }
+    friend Differential<X> operator-(const NumericType& c, const Differential<X>& x) {
+        return Differential<X>::_add(neg(x),c); }
+    //! \brief Multiplication by a constant.
+    friend Differential<X> operator*(const Differential<X>& x, const NumericType& c) {
+        return Differential<X>::_mul(x,c); }
+    friend Differential<X> operator*(const NumericType& c, const Differential<X>& x) {
+        return Differential<X>::_mul(x,c); }
+    //! \brief Division by a constant.
+    friend Differential<X> operator/(const Differential<X>& x, const NumericType& c) {
+        return Differential<X>::_mul(x,rec(c)); }
+    friend Differential<X> operator/(const NumericType& c, const Differential<X>& x) {
+        return Differential<X>::_mul(rec(x),c); }
+
+    friend Differential<X> min(const Differential<X>& x1, const Differential<X>& x2) {
+        return Differential<X>::_min(x1,x2); }
+    friend Differential<X> max(const Differential<X>& x1, const Differential<X>& x2) {
+        return Differential<X>::_max(x1,x2); }
+    friend Differential<X> abs(const Differential<X>& x) {
+        return Differential<X>::_abs(x); }
+
+    //! \brief Copy.
+    template<class XX> friend Differential<XX> pos(const Differential<XX>& x);
+    //! \brief Negation.
+    template<class XX> friend Differential<XX> neg(const Differential<XX>& x);
+    //! \brief Reciprocal.
+    template<class XX> friend Differential<XX> rec(const Differential<XX>& x);
+    //! \brief Integer power.
+    template<class XX> friend Differential<XX> pow(const Differential<XX>& x, Int n);
+    //! \brief Square.
+    template<class XX> friend Differential<XX> sqr(const Differential<XX>& x);
+    //! \brief Square root.
+    template<class XX> friend Differential<XX> sqrt(const Differential<XX>& x);
+    //! \brief Exponential function.
+    template<class XX> friend Differential<XX> exp(const Differential<XX>& x);
+    //! \brief Natural logarithm.
+    template<class XX> friend Differential<XX> log(const Differential<XX>& x);
+    //! \brief Sine function.
+    template<class XX> friend Differential<XX> sin(const Differential<XX>& x);
+    //! \brief Cosine function.
+    template<class XX> friend Differential<XX> cos(const Differential<XX>& x);
+    //! \brief Tangent function.
+    template<class XX> friend Differential<XX> tan(const Differential<XX>& x);
+
+  private:
+    static Differential<X> _pos(Differential<X> dx);
+    static Differential<X> _neg(Differential<X> dx);
+    static Differential<X> _add(Differential<X> dx, X const& c);
+    static Differential<X> _mul(Differential<X> dx, X const& c);
+    static Differential<X> _add(Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> _sub(Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> _mul(Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> _div(Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> _min(Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> _max(Differential<X> const& dx1, Differential<X> const& dx2);
+    static Differential<X> _abs(Differential<X> const& dx);
+    static Differential<X> _derivative(Differential<X> const& dx, SizeType k);
+    static Differential<X> _antiderivative(Differential<X> const& dx, SizeType k);
+    static Differential<X> _compose(UnivariateDifferential<X> const&, Differential<X> const&);
+    static Differential<X> _compose(Differential<X> const&, Vector<Differential<X>> const&);
+    static Vector<Differential<X>> _compose(Vector<Differential<X>> const&, Vector<Differential<X>> const&);
+
+    static Matrix<X> _jacobian(Vector<Differential<X>> const&);
+    OutputStream& _write(OutputStream& os) const;
 };
 
 template<class X> template<class XX> Differential<X>::Differential(SizeType as, DegreeType deg, const XX* ptr) : _expansion(as), _degree(deg) {
@@ -319,6 +394,42 @@ template<class X> template<class XX> Differential<X>::Differential(const Differe
     : _expansion(x.expansion()), _degree(x.degree())
 {
 }
+
+template<class X> Differential<X> compose(UnivariateDifferential<X> const& x, Differential<X> const& y) { return Differential<X>::_compose(x,y); }
+template<class X> Differential<X> compose(Differential<X> const& x, Vector<Differential<X>> const& y) { return Differential<X>::_compose(x,y); }
+template<class X> Differential<X> derivative(Differential<X> const& x, SizeType k) { return Differential<X>::_derivative(x,k); }
+template<class X> Differential<X> antiderivative(Differential<X> const& x, SizeType k) { return Differential<X>::_antiderivative(x,k); }
+
+template<class X> inline Differential<X> compose(Series<X> const& x, Differential<X> const& y) {
+    return compose(UnivariateDifferential<X>(x),y); }
+
+template<class X> Differential<X> pos(Differential<X> const& x) { return +x; }
+template<class X> Differential<X> neg(Differential<X> const& x) { return -x; }
+template<class X> Differential<X> sqr(Differential<X> const& x) { return x*x; }
+template<class X> Differential<X> pow(Differential<X> const& x, Int n) { return compose(Series<X>::pow(x.degree(),x.value(),n),x); }
+
+template<class X> Differential<X> rec(Differential<X> const& x) { return compose(Series<X>::rec(x.degree(),x.value()),x); }
+template<class X> Differential<X> sqrt(Differential<X> const& x) { return compose(Series<X>::sqrt(x.degree(),x.value()),x); }
+template<class X> Differential<X> exp(Differential<X> const& x) { return compose(Series<X>::exp(x.degree(),x.value()),x); }
+template<class X> Differential<X> log(Differential<X> const& x) { return compose(Series<X>::log(x.degree(),x.value()),x); }
+template<class X> Differential<X> sin(Differential<X> const& x) { return compose(Series<X>::sin(x.degree(),x.value()),x); }
+template<class X> Differential<X> cos(Differential<X> const& x) { return compose(Series<X>::cos(x.degree(),x.value()),x); }
+template<class X> Differential<X> tan(Differential<X> const& x) { return compose(Series<X>::tan(x.degree(),x.value()),x); }
+
+
+
+
+template<class X> Vector<Differential<X>> compose(Vector<Differential<X>> const&, Vector<Differential<X>> const&);
+template<class X> Vector<Differential<X>> derivative(Vector<Differential<X>> const&, SizeType k);
+template<class X> Vector<Differential<X>> antiderivative(Vector<Differential<X>> const&, SizeType k);
+template<class X> Vector<X> value(const Vector<Differential<X>>& x);
+template<class X> Matrix<X> jacobian(Vector<Differential<X>> const&);
+
+template<class X> Vector<Differential<X>> lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg);
+
+
+
+
 
 template<class X>
 struct NonAssignableDifferential
@@ -444,12 +555,117 @@ class Vector< Differential<X> >
 
 };
 
-template<class X> Vector<Differential<X>> derivative(Vector<Differential<X>> const&, SizeType k);
-template<class X> Vector<Differential<X>> antiderivative(Vector<Differential<X>> const&, SizeType k);
-template<class X> Matrix<X> jacobian(Vector<Differential<X>> const&);
 
-template<class X, class Y> Vector<Y> evaluate(const Vector< Differential<X> >& x, const Vector<Y>& y);
-template<class X> Differential<X> compose(const Differential<X>& x, const Vector< Differential<X> >& y);
+template<class X> template<class XX>
+Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d, const XX* ptr)
+    : _chars(as,d), _ary(rs,Differential<X>(as,d))
+{
+    for(SizeType i=0; i!=rs; ++i) {
+        for(MultiIndex j(as); j.degree()<=d; ++j) {
+            if(*ptr!=0) { (*this)[i][j]=*ptr; } ++ptr; } }
+}
+
+template<class X>
+Vector<Differential<X>>::Vector(SizeType rs, SizeType as, DegreeType d,
+                                  const Vector<X>& v, const Matrix<X>& A)
+    :  _chars(as,d), _ary(rs,Differential<X>(as,d))
+{
+    ARIADNE_ASSERT(rs==v.size());
+    ARIADNE_ASSERT(rs==A.row_size());
+    ARIADNE_ASSERT(as==A.column_size());
+    for(SizeType i=0; i!=this->result_size(); ++i) {
+        (*this)[i]=v[i];
+        for(SizeType j=0; j!=this->argument_size(); ++j) {
+            const X& x=A[i][j];
+            if(x!=0) { (*this)[i][j]=x; }
+        }
+    }
+}
+
+template<class X>
+Vector<X>
+value(const Vector<Differential<X>>& x)
+{
+    Vector<X> r(x.size());
+    for(SizeType i=0; i!=x.size(); ++i) {
+        r[i]=x[i].value();
+    }
+    return r;
+}
+
+template<class X>
+Matrix<X>
+jacobian(const Vector<Differential<X>>& x)
+{
+    if(x.size()==0) { return Matrix<X>(); }
+    for(SizeType i=1; i!=x.size(); ++i) {
+        ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size());
+    }
+
+    Matrix<X> r(x.size(),x[0].argument_size());
+    for(SizeType i=0; i!=x.size(); ++i) {
+        for(SizeType j=0; j!=x[0].argument_size(); ++j) {
+            r[i][j]=x[i].gradient(j);
+
+        }
+    }
+    return r;
+}
+
+
+template<class X> Vector<Differential<X>> compose(Vector<Differential<X>> const& x, Vector<Differential<X>> const& y) {
+    Vector<Differential<X>> r(x.size(),y.zero_element());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=compose(x[i],y); }
+    return r;
+}
+
+template<class X>
+Vector<Differential<X>>
+derivative(const Vector<Differential<X>>& x, SizeType k) {
+    Vector<Differential<X>> r(x.size(), Differential<X>(x.argument_size(),min(x.degree(),1u)-1u));
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=derivative(x[i],k); }
+    return r;
+}
+
+template<class X>
+Vector<Differential<X>>
+antiderivative(const Vector<Differential<X>>& x, SizeType k) {
+    Vector<Differential<X>> r(x.size(), Differential<X>(x.argument_size(),x.degree()+1));
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=antiderivative(x[i],k); }
+    return r;
+}
+
+
+
+
+template<class X>
+Vector<Differential<X>>
+lie_derivative(const Vector<Differential<X> >& df, const Vector<Differential<X> >& dg)
+{
+    Vector<Differential<X>> r(df.result_size(),df.argument_size(),df.degree()-1);
+    Differential<X> t(df.argument_size(), df.degree()-1);
+    MultiIndex a; X c;
+    for(SizeType i=0; i!=df.result_size(); ++i) {
+        Expansion<X> const& dfi_expansion = df[i].expansion();
+        Expansion<X>& t_expansion = t.expansion();
+        for(SizeType j=0; j!=df.argument_size(); ++j) {
+            for(typename Expansion<X>::ConstIterator iter=dfi_expansion.begin(); iter!=dfi_expansion.end(); ++iter) {
+                if(iter->key()[j]!=0) {
+                    a=iter->key();
+                    c=iter->data()*SizeType(a[j]);
+                    a[j]-=1;
+                    t_expansion.append(a,c);
+                }
+            }
+            r[i]+=t*dg[j];
+            t.clear();
+        }
+    }
+    return r;
+}
+
+
+
 
 } //namespace Ariadne
 

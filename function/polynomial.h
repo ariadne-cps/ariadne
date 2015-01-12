@@ -39,6 +39,7 @@
 #include "algebra/expansion.h"
 #include "function/taylor_model.h"
 #include "algebra/differential.h"
+#include "algebra/evaluate.h"
 
 
 namespace Ariadne {

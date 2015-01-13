@@ -45,6 +45,7 @@
 namespace Ariadne {
 
 template<class T> class Array;
+template<class X> class Algebra;
 
 //! \brief A monomial with coefficients of some type \a X.
 template<class X>
@@ -203,8 +204,9 @@ class Polynomial
     static Polynomial<X> _mul(const Polynomial<X>& p, const X& c);
     static Polynomial<X>& _imul(Polynomial<X>& p, const Monomial<X>& m);
     static Polynomial<X> _compose(const Polynomial<X>& p, const Vector<Polynomial<X>>& q);
-    static X _evaluate(const Polynomial<X>& x, const Vector<X>& c);
-    static Polynomial<X> _partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c);
+    static X _evaluate(const Polynomial<X>& p, const Vector<X>& vx);
+    static Algebra<X> _evaluate(const Polynomial<X>& p, const Vector<Algebra<X>>& va);
+    static Polynomial<X> _partial_evaluate(const Polynomial<X>& p, SizeType k, const X& c);
     OutputStream& _write(OutputStream& os) const;
     OutputStream& _write(OutputStream& os, List<String> const& names) const;
   private:
@@ -367,7 +369,5 @@ template<class X> Vector<Polynomial<MidpointType<X>>> midpoint(const Vector<Poly
 
 
 } // namespace Ariadne
-
-#include "polynomial.tcc"
 
 #endif /* ARIADNE_POLYNOMIAL_H */

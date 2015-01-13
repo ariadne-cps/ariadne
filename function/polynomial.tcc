@@ -25,6 +25,15 @@
 
 namespace Ariadne {
 
+template<class X> inline auto operator==(X const& x1, Int n2) -> decltype(x1==X(n2)) { return x1==X(n2); }
+template<class X> inline auto operator!=(X const& x1, Int n2) -> decltype(x1!=X(n2)) { return x1!=X(n2); }
+template<class X> inline auto operator> (X const& x1, Int n2) -> decltype(x1> X(n2)) { return x1> X(n2); }
+
+template<class X> inline bool is_null(X const& x) { return decide(x==0); }
+template<class X> inline bool is_unit(X const& x) { return decide(x==1); }
+template<class X> inline bool is_positive(X const& x) { return decide(x>=0); }
+
+
 template<class X> Polynomial<X>::Polynomial(SizeType as)
     : _expansion(as)
 {
@@ -126,7 +135,7 @@ Polynomial<X>::differentiate(SizeType j) {
     for(typename Polynomial<X>::Iterator iter=this->begin(); iter!=this->end(); ++iter) {
         MultiIndex& a=iter->key();
         X& c=iter->data();
-        c*=a[j];
+        c*=static_cast<Nat>(a[j]);
         if(a[j]!=0u) { ++a[j]; }
     }
     return *this;
@@ -139,7 +148,7 @@ Polynomial<X>::antidifferentiate(SizeType j) {
         MultiIndex& a=iter->key();
         X& c=iter->data();
         ++a[j];
-        c/=a[j];
+        c/=static_cast<Nat>(a[j]);
     }
     return *this;
 }
@@ -148,7 +157,7 @@ template<class X>
 Polynomial<X>& Polynomial<X>::truncate(DegreeType d) {
     Polynomial<X> r(this->argument_size());
     for(typename Polynomial<X>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
-        if(iter->key().degree()<=d && iter->data()!=0) {
+        if(iter->key().degree()<=d && iter->data()!=X(0)) {
             r.append(iter->key(),iter->data());
         }
     }
@@ -210,7 +219,7 @@ template<class X> Polynomial<X> Polynomial<X>::_add(const Polynomial<X>& p, cons
 }
 
 template<class X> Polynomial<X> Polynomial<X>::_mul(const Polynomial<X>& p, const X& c) {
-    if(c==0) { return Polynomial<X>(p.argument_size()); }
+    if(is_null(c)) { return Polynomial<X>(p.argument_size()); }
     Polynomial<X> r(p);
     for(auto iter=r.begin(); iter!=r.end(); ++iter) {
         iter->data()*=c;
@@ -287,7 +296,7 @@ template<class X> Polynomial<X> Polynomial<X>::_mul(const Polynomial<X>& p1, con
 }
 
 template<class X> Polynomial<X>& Polynomial<X>::_imul(Polynomial<X>& p, const Monomial<X>& m) {
-    if(m.data()==0) { p.clear(); }
+    if(is_null(m.data())) { p.clear(); }
     for(auto iter=p.begin(); iter!=p.end(); ++iter) {
         iter->key()+=m.key();
         iter->data()*=m.data();
@@ -314,7 +323,7 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
 {
     Polynomial<X> r(x.argument_size()-1);
     MultiIndex ra(r.argument_size());
-    if(c==0) {
+    if(is_null(c)) {
         for(typename Polynomial<X>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xa=xiter->key();
             MultiIndex::IndexType xak=xa[k];
@@ -325,7 +334,7 @@ Polynomial<X>::_partial_evaluate(const Polynomial<X>& x, SizeType k, const X& c)
                 r.expansion().append(ra,xv);
             }
         }
-    } else if(c==1) {
+    } else if(is_unit(c)) {
         Polynomial<X> s(x.argument_size()-1);
         Array< Polynomial<X> > p(x.degree()+1,Polynomial<X>(x.argument_size()-1));
 
@@ -409,10 +418,10 @@ OutputStream& Polynomial<X>::_write(OutputStream& os) const {
         if(decide(v!=0)) {
             identically_zero=false;
             Bool first_factor=true;
-            if(decide(v>0) && !first_term) { os << "+"; }
+            if(decide(v>X(0)) && !first_term) { os << "+"; }
             first_term=false;
-            if(decide(v==1)) { }
-            else if (decide(v==-1)) { os << '-'; }
+            if(decide(v==X(1))) { }
+            else if (decide(v==X(-1))) { os << '-'; }
             else { os << v; first_factor=false; }
             for(Nat j=0; j!=a.size(); ++j) {
                 if(a[j]!=0) {
@@ -435,10 +444,10 @@ OutputStream& Polynomial<X>::_write(OutputStream& os, List<String> const& argume
     for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
         MultiIndex a=iter->key();
         X v=iter->data();
-        if(v!=0) {
+        if(decide(v!=0)) {
             identically_zero=false;
             Bool first_factor=true;
-            if(v>0 && !first_term) { os << "+"; }
+            if(decide(v>0) && !first_term) { os << "+"; }
             first_term=false;
             if(v==1) { } else if (v==-1) { os << '-'; }
             else { os << 'v'; first_factor=false; }

@@ -24,12 +24,22 @@
 #include "numeric/numeric.h"
 #include "config.h"
 
+#include "geometry/interval.h"
 #include "function/polynomial.h"
+#include "function/polynomial.tcc"
 
 namespace Ariadne {
 
-    template class Polynomial<Float>;
-    
+template class Polynomial<Float>;
+template class Polynomial<ApproximateFloat>;
+template class Polynomial<ValidatedFloat>;
+template class Polynomial<UpperInterval>;
+
+template Polynomial<ExactFloat>::Polynomial(SizeType);
+template Void Polynomial<ExactFloat>::append(MultiIndex const&, ExactFloat const&);
+template OutputStream& Polynomial<ExactFloat>::_write(OutputStream&) const;
+template OutputStream& Polynomial<ExactFloat>::_write(OutputStream&, List<String> const&) const;
+
 } //namespace Ariadne
 
 

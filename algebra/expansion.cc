@@ -43,6 +43,8 @@ namespace Ariadne {
     template class SortedExpansion<Float,ReverseLexicographicKeyLess>;
     template class SortedExpansion<ExactFloat,ReverseLexicographicKeyLess>;
     template class SortedExpansion<ValidatedFloat,ReverseLexicographicKeyLess>;
+    template class SortedExpansion<ApproximateFloat,ReverseLexicographicKeyLess>;
+    template class SortedExpansion<UpperInterval,ReverseLexicographicKeyLess>;
     template class SortedExpansion<ExactInterval,ReverseLexicographicKeyLess>;
 }
 

@@ -38,8 +38,8 @@ using std::cout; using std::cerr; using std::endl;
 using namespace Ariadne;
 
 Vector<ExactFloat> v(Nat n, Nat i) { return Vector<ExactFloat>::unit(n,i); }
-ValidatedTaylorModel ctm(Nat m, double c, Sweeper swp) { return ValidatedTaylorModel::constant(m,c,swp); }
-ValidatedTaylorModel ctm(Nat m, Sweeper swp) { return ValidatedTaylorModel::constant(m,1.0,swp); }
+ValidatedTaylorModel ctm(Nat m, double c, Sweeper swp) { return ValidatedTaylorModel::constant(m,ExactFloat(c),swp); }
+ValidatedTaylorModel ctm(Nat m, Sweeper swp) { return ValidatedTaylorModel::constant(m,ExactFloat(1.0),swp); }
 //ValidatedTaylorModel tm(Nat m, Nat i, Sweeper swp) { return ValidatedTaylorModel::variable(m,i,swp); }
 
 
@@ -299,7 +299,7 @@ Void TestTaylorModel::test_split()
 Void TestTaylorModel::test_antiderivative()
 {
     ValidatedFloat unit_interval(-1,+1);
-    ValidatedTaylorModel tm=ValidatedTaylorModel::constant(2,1.0,swp);
+    ValidatedTaylorModel tm=ValidatedTaylorModel::constant(2,1,swp);
     ValidatedTaylorModel atm=antiderivative(tm,1);
 
     ARIADNE_TEST_EQUAL(antiderivative(T(E({ {{0,0},2.0} }),0.,swp),0),T(E({ {{1,0},2.0} }),0.,swp));

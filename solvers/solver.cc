@@ -46,7 +46,7 @@ Vector<UpperInterval> ranges(const Vector<ValidatedTaylorModel>& f) {
 }
 
 Vector<ValidatedTaylorModel>& clobber(Vector<ValidatedTaylorModel>& h) {
-    for(Nat i=0; i!=h.size(); ++i) { h[i].set_error(0.0); } return h; }
+    for(Nat i=0; i!=h.size(); ++i) { h[i].set_error(0); } return h; }
 
 // Compute the Jacobian over an arbitrary domain
 Matrix<ValidatedNumber>

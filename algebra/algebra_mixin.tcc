@@ -212,7 +212,7 @@ _compose(const ValidatedSeriesFunctionPointer& fn, const A& tm, Float eps)
 namespace {
 inline Int pow2(Nat k) { return 1<<k; }
 inline Int powm1(Nat k) { return (k%2) ? -1 : +1; }
-double rec_fac_up(Nat n) { set_rounding_upward(); double r=1.0; for(Nat i=1; i<=n; ++i) { r/=i; } return r; }
+double rec_fac_up(Nat n) { set_rounding_upward(); double r=1; for(Nat i=1; i<=n; ++i) { r/=i; } return r; }
 }
 
 template<class A> EnableIfNormedAlgebra<A>
@@ -238,7 +238,7 @@ sqrt(const A& x)
     Nat d=integer_cast<Int>((log((1-eps)*ExactFloat(x.tolerance()))/log(eps)+1));
     //std::cerr<<"x="<<x<<std::endl;
     //std::cerr<<"x/a="<<x/a<<" a="<<a<<std::endl;
-    A y=(x/avg)-X(1.0);
+    A y=(x/avg)-X(1);
     //std::cerr<<"y="<<y<<std::endl;
     A z=x.create();
     Series<X> sqrt_series=Series<X>::sqrt(d,X(1));
@@ -286,7 +286,7 @@ rec(const A& x)
     //std::cerr<<"  y="<<y<<"\n";
     //std::cerr<<"  z="<<z<<"\n";
     for(Nat i=0; i!=d; ++i) {
-        z=1.0 + z * y;
+        z=1 + z * y;
         //std::cerr<<"  z="<<z<<"\n";
     }
 
@@ -352,7 +352,7 @@ template<class A> EnableIfNormedAlgebra<A> exp(const A& x)
     res += numeric_cast<X>(ValidatedFloat(-truncation_error,+truncation_error));
     for(Nat i=0; i!=degree; ++i) {
         res/=Int(degree-i);
-        res=y*res+1.0;
+        res=y*res+1;
     }
 
     // Square r a total of sfp times
@@ -400,7 +400,7 @@ sin(const A& x)
     for(Int i=0; i!=d; ++i) {
         r/=X(-2*(d-i)*(2*(d-i)+1));
         r*=s;
-        r+=X(1.0);
+        r+=X(1);
     }
     r=y*r;
 
@@ -429,7 +429,7 @@ cos(const A& x)
     y=x-n*two_pi;
 
     //if(y.error()>two_pi/2) {
-    //    r.error()=1.0;
+    //    r.error()=1;
     //} else
     {
         s=sqr(y);
@@ -439,11 +439,11 @@ cos(const A& x)
         ErrorFloat truncation_error=ErrorFloat(pow_up(srad.raw(),d+1)*rec_fac_up((d+1)*2));
 
         // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
-        r=1.0;
+        r=1;
         for(Int i=0; i!=d; ++i) {
             r/=X(-2*(d-i)*(2*(d-i)-1));
             r*=s;
-            r+=1.0;
+            r+=1;
         }
 
         r+=r.create_ball(truncation_error);

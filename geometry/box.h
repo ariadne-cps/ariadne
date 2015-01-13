@@ -571,6 +571,15 @@ inline ApproximateBox widen(const UpperBox& bx, ApproximateFloat eps) {
     return r;
 }
 
+//! \ingroup BasicSetSubModule GeometryModule
+//! \brief A unit box in Euclidean space.
+template<> class Box<UnitInterval> : public Box<ExactInterval> {
+  public:
+    Box<UnitInterval>(SizeType n) : Box<ExactInterval>(n,UnitInterval()) { }
+    Box<UnitInterval>(SizeType n, UnitInterval ivl) : Box<ExactInterval>(n,ivl) { }
+    UnitInterval operator[] (SizeType i) const { return UnitInterval(); }
+};
+
 } // namespace Ariadne
 
 #endif /* ARIADNE_BOX_H */

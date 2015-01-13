@@ -323,9 +323,6 @@ Void export_taylor_model()
     taylor_model_class.def(self/=ValidatedNumber());
     taylor_model_class.def(self+=self);
     taylor_model_class.def(self-=self);
-    taylor_model_class.def(self>double());
-    taylor_model_class.def(self>self);
-    taylor_model_class.def(self<self);
     taylor_model_class.def(self_ns::str(self));
 
     taylor_model_class.def("constant",(ValidatedTaylorModel(*)(Nat, const ValidatedNumber&,Sweeper))&ValidatedTaylorModel::constant);
@@ -334,10 +331,6 @@ Void export_taylor_model()
     taylor_model_class.staticmethod("constant");
     taylor_model_class.staticmethod("variable");
     //taylor_model_class.staticmethod("variables");
-
-    taylor_model_class.def("restrict", (ValidatedTaylorModel&(ValidatedTaylorModel::*)(const ExactBox&))&ValidatedTaylorModel::restrict, return_value_policy<reference_existing_object>());
-    taylor_model_class.def("restrict", (ValidatedTaylorModel(*)(const ValidatedTaylorModel&,Nat,const ExactInterval&))&restrict);
-    taylor_model_class.def("preaffine", (ValidatedTaylorModel(*)(const ValidatedTaylorModel&,Nat,const ExactInterval&,const ExactInterval&))&preaffine);
 
     taylor_model_class.def("evaluate", (ValidatedNumber(*)(const ValidatedTaylorModel&, const Vector<ValidatedNumber>&))&evaluate);
     taylor_model_class.def("set",(ValidatedTaylorModel(*)(const ValidatedTaylorModel&,Nat,ValidatedNumber))&partial_evaluate);

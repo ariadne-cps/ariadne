@@ -48,21 +48,12 @@ class UnitInterval;
 template<class T1, class T2> struct Product;
 
 template<class X> class TaylorModel;
-typedef TaylorModel<ApproximateNumber> ApproximateTaylorModel;
-typedef TaylorModel<ValidatedNumber> ValidatedTaylorModel;
+typedef TaylorModel<ApproximateFloat> ApproximateTaylorModel;
+typedef TaylorModel<ValidatedFloat> ValidatedTaylorModel;
 
 template<class X> struct IsScalar< TaylorModel<X> > { static const Bool value = true; };
 template<class X> struct IsAlgebra< TaylorModel<X> > { static const Bool value = true; };
 template<class X> struct IsNormedAlgebra< TaylorModel<X> > { static const Bool value = true; };
-
-template<> struct Arithmetic< TaylorModel<ApproximateNumber>,ApproximateNumber > { typedef TaylorModel<ApproximateNumber> ResultType; };
-template<> struct Arithmetic< ApproximateNumber,TaylorModel<ApproximateNumber> > { typedef TaylorModel<ApproximateNumber> ResultType; };
-template<> struct Arithmetic< TaylorModel<ApproximateNumber>,TaylorModel<ApproximateNumber> > { typedef TaylorModel<ApproximateNumber> ResultType; };
-template<> struct Arithmetic< ExactNumber,TaylorModel<ValidatedNumber> > { typedef TaylorModel<ValidatedNumber> ResultType; };
-template<> struct Arithmetic< TaylorModel<ValidatedNumber>,ExactNumber > { typedef TaylorModel<ValidatedNumber> ResultType; };
-template<> struct Arithmetic< TaylorModel<ValidatedNumber>,ValidatedNumber > { typedef TaylorModel<ValidatedNumber> ResultType; };
-template<> struct Arithmetic< ValidatedNumber,TaylorModel<ValidatedNumber> > { typedef TaylorModel<ValidatedNumber> ResultType; };
-template<> struct Arithmetic< TaylorModel<ValidatedNumber>,TaylorModel<ValidatedNumber> > { typedef TaylorModel<ValidatedNumber> ResultType; };
 
 class IntersectionException;
 
@@ -71,13 +62,6 @@ struct IntersectionException : public std::runtime_error {
 };
 
 
-ValidatedTaylorModel sqrt(const ValidatedTaylorModel& x);
-ValidatedTaylorModel rec(const ValidatedTaylorModel& x);
-ValidatedTaylorModel exp(const ValidatedTaylorModel& x);
-ValidatedTaylorModel log(const ValidatedTaylorModel& x);
-ValidatedTaylorModel sin(const ValidatedTaylorModel& x);
-ValidatedTaylorModel cos(const ValidatedTaylorModel& x);
-ValidatedTaylorModel tan(const ValidatedTaylorModel& x);
 
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
@@ -85,8 +69,8 @@ ValidatedTaylorModel tan(const ValidatedTaylorModel& x);
  * See also Expansion, ScalarTaylorFunction, VectorTaylorFunction, TaylorConstrainedImageSet.
  */
 template<>
-class TaylorModel<ValidatedNumber>
-    : public NormedAlgebraMixin<TaylorModel<ValidatedNumber>,ValidatedNumber>
+class TaylorModel<ValidatedFloat>
+    : public NormedAlgebraMixin<TaylorModel<ValidatedFloat>,ValidatedNumber>
 {
     friend class ScalarTaylorFunction;
     friend class VectorTaylorFunction;
@@ -114,89 +98,89 @@ class TaylorModel<ValidatedNumber>
     //@{
     /*! \name Constructors and destructors. */
     //! \brief Default constructor.
-    TaylorModel<ValidatedNumber>();
-    //! \brief Construct a TaylorModel<ValidatedNumber> in \a as arguments with the given accuracy control.
-    TaylorModel<ValidatedNumber>(Nat as, Sweeper swp);
+    TaylorModel<ValidatedFloat>();
+    //! \brief Construct a TaylorModel<ValidatedFloat> in \a as arguments with the given accuracy control.
+    TaylorModel<ValidatedFloat>(Nat as, Sweeper swp);
     //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
-    TaylorModel<ValidatedNumber>(const Expansion<CoefficientType>& f, const ErrorType& e, Sweeper swp);
-    TaylorModel<ValidatedNumber>(const Expansion<RawFloat>& f, const RawFloat& e, Sweeper swp);
+    TaylorModel<ValidatedFloat>(const Expansion<CoefficientType>& f, const ErrorType& e, Sweeper swp);
+    TaylorModel<ValidatedFloat>(const Expansion<RawFloat>& f, const RawFloat& e, Sweeper swp);
     //! \brief Fast swap with another Taylor model.
-    Void swap(TaylorModel<ValidatedNumber>& tm);
+    Void swap(TaylorModel<ValidatedFloat>& tm);
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
-    TaylorModel<ValidatedNumber> create() const;
+    TaylorModel<ValidatedFloat> create() const;
     //! \brief The zero element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
-    TaylorModel<ValidatedNumber> create_zero() const;
+    TaylorModel<ValidatedFloat> create_zero() const;
     //! \brief The \a j<sup>th</sup> coordinate element of the algebra of Taylor models, with the same number of arguments and accuracy parameters.
-    TaylorModel<ValidatedNumber> create_coordinate(Nat j) const;
+    TaylorModel<ValidatedFloat> create_coordinate(Nat j) const;
     //! \brief Set to zero.
-    TaylorModel<ValidatedNumber> create_ball(ErrorType e) const;
+    TaylorModel<ValidatedFloat> create_ball(ErrorType e) const;
     //! \brief Set to zero.
     Void clear();
 
     //@{
     /*! \name Assignment to constant values. */
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorModel<ValidatedNumber>& operator=(const ValidatedNumber& c);
+    TaylorModel<ValidatedFloat>& operator=(const ValidatedNumber& c);
     template<class X, typename std::enable_if<std::is_same<X,RawFloat>::value,Int>::type=0>
-        TaylorModel<ValidatedNumber>& operator=(const X& c) { return (*this)=static_cast<ValidatedNumber>(c); }
+        TaylorModel<ValidatedFloat>& operator=(const X& c) { return (*this)=static_cast<ValidatedNumber>(c); }
     template<class X, typename std::enable_if<std::is_same<X,double>::value,Int>::type=0>
-        TaylorModel<ValidatedNumber>& operator=(const X& c) { return (*this)=static_cast<ValidatedNumber>(c); }
+        TaylorModel<ValidatedFloat>& operator=(const X& c) { return (*this)=static_cast<ValidatedNumber>(c); }
     //@}
 
     //@{
     /*! \name Named constructors. */
     //! \brief Construct the zero quantity in \a as independent variables.
-    static TaylorModel<ValidatedNumber> zero(Nat as, Sweeper swp) {
-        TaylorModel<ValidatedNumber> r(as,swp); return r; }
+    static TaylorModel<ValidatedFloat> zero(Nat as, Sweeper swp) {
+        TaylorModel<ValidatedFloat> r(as,swp); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<ValidatedNumber> constant(Nat as, double c, Sweeper swp) {
-        return TaylorModel<ValidatedNumber>::constant(as,CoefficientType(c),swp); }
+    static TaylorModel<ValidatedFloat> constant(Nat as, double c, Sweeper swp) {
+        return TaylorModel<ValidatedFloat>::constant(as,CoefficientType(c),swp); }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<ValidatedNumber> constant(Nat as, const CoefficientType& c, Sweeper swp) {
-        TaylorModel<ValidatedNumber> r(as,swp); r.set_value(c); return r; }
+    static TaylorModel<ValidatedFloat> constant(Nat as, const CoefficientType& c, Sweeper swp) {
+        TaylorModel<ValidatedFloat> r(as,swp); r.set_value(c); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel<ValidatedNumber> constant(Nat as, const ValidatedNumber& c, Sweeper swp) {
-        TaylorModel<ValidatedNumber> r(as,swp); r.set_value(1); r*=c; return r; }
+    static TaylorModel<ValidatedFloat> constant(Nat as, const ValidatedNumber& c, Sweeper swp) {
+        TaylorModel<ValidatedFloat> r(as,swp); r.set_value(1); r*=c; return r; }
     //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
-    static TaylorModel<ValidatedNumber> variable(Nat as, Nat j, Sweeper swp) {
-        TaylorModel<ValidatedNumber> r(as,swp); r.set_gradient(j,1); return r; }
+    static TaylorModel<ValidatedFloat> variable(Nat as, Nat j, Sweeper swp) {
+        TaylorModel<ValidatedFloat> r(as,swp); r.set_gradient(j,1); return r; }
     //! \brief Construct the quantity which scales the unit interval into the domain \a dom.
-    static TaylorModel<ValidatedNumber> scaling(Nat as, Nat j, const ExactInterval& dom, Sweeper swp) {
-        TaylorModel<ValidatedNumber> r(as,swp); r.set_gradient(j,1); r.rescale(ExactInterval(-1,1),dom); return r; }
+    static TaylorModel<ValidatedFloat> scaling(Nat as, Nat j, const ExactInterval& dom, Sweeper swp) {
+        TaylorModel<ValidatedFloat> r(as,swp); r.set_gradient(j,1); r.rescale(ExactInterval(-1,1),dom); return r; }
     //! \brief Construct the quantity which scales the codomain \a codom into the unit interval.
-    static TaylorModel<ValidatedNumber> unscaling(Nat as, Nat j, const ExactInterval& codom, Sweeper swp) {
-        TaylorModel<ValidatedNumber> r(as,swp); r.set_gradient(j,1); r.rescale(codom,ExactInterval(-1,+1)); return r; }
+    static TaylorModel<ValidatedFloat> unscaling(Nat as, Nat j, const ExactInterval& codom, Sweeper swp) {
+        TaylorModel<ValidatedFloat> r(as,swp); r.set_gradient(j,1); r.rescale(codom,ExactInterval(-1,+1)); return r; }
     //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a e
-    static TaylorModel<ValidatedNumber> error(Nat as, ErrorType e, Sweeper swp) {
-        TaylorModel<ValidatedNumber> r(as,swp); r.set_error(e); return r; }
+    static TaylorModel<ValidatedFloat> error(Nat as, ErrorType e, Sweeper swp) {
+        TaylorModel<ValidatedFloat> r(as,swp); r.set_error(e); return r; }
 
     //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
-    static Vector< TaylorModel<ValidatedNumber> > zeros(Nat rs, Nat as, Sweeper swp);
+    static Vector<TaylorModel<ValidatedFloat>> zeros(Nat rs, Nat as, Sweeper swp);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector< TaylorModel<ValidatedNumber> > constants(Nat as, const Vector<ExactNumber>& c, Sweeper swp);
+    static Vector<TaylorModel<ValidatedFloat>> constants(Nat as, const Vector<ExactNumber>& c, Sweeper swp);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector< TaylorModel<ValidatedNumber> > constants(Nat as, const Vector<ValidatedNumber>& c, Sweeper swp);
+    static Vector<TaylorModel<ValidatedFloat>> constants(Nat as, const Vector<ValidatedNumber>& c, Sweeper swp);
     //! \brief Return the vector of variables on the unit domain.
-    static Vector< TaylorModel<ValidatedNumber> > variables(Nat as, Sweeper swp);
+    static Vector<TaylorModel<ValidatedFloat>> variables(Nat as, Sweeper swp);
     //! \brief Return the vector scaling the unit interval onto the domain \a d.
-    static Vector< TaylorModel<ValidatedNumber> > scalings(const Vector<ExactInterval>& dom, Sweeper swp);
+    static Vector<TaylorModel<ValidatedFloat>> scalings(const Vector<ExactInterval>& dom, Sweeper swp);
     //! \brief Return the vector scaling the unit interval onto the codomain \a cd.
-    static Vector< TaylorModel<ValidatedNumber> > unscalings(const Vector<ExactInterval>& dom, Sweeper swp);
+    static Vector<TaylorModel<ValidatedFloat>> unscalings(const Vector<ExactInterval>& dom, Sweeper swp);
     //@}
 
     //@{
     /*! \name Comparison operators. */
     //! \brief Equality operator. Tests equality of representation, including error term.
-    Bool operator==(const TaylorModel<ValidatedNumber>& sd) const {
+    Bool operator==(const TaylorModel<ValidatedFloat>& sd) const {
         return this->_expansion==sd._expansion && this->_error == sd._error; }
     //! \brief Inequality operator.
-    Bool operator!=(const TaylorModel<ValidatedNumber>& sd) const {
+    Bool operator!=(const TaylorModel<ValidatedFloat>& sd) const {
         return !(*this==sd); }
     //! \brief Comparison with another Taylor model.
-    Tribool operator<(const TaylorModel<ValidatedNumber>& sd) const {
+    Tribool operator<(const TaylorModel<ValidatedFloat>& sd) const {
         return (sd-*this)>0; }
     //! \brief Comparison with another Taylor model.
-    Tribool operator>(const TaylorModel<ValidatedNumber>& sd) const {
+    Tribool operator>(const TaylorModel<ValidatedFloat>& sd) const {
         return (*this-sd)>0; }
 
     //! \brief Comparison with a scalar.
@@ -281,50 +265,50 @@ class TaylorModel<ValidatedNumber>
     ExactInterval gradient_range(Nat j) const;
 
     //! \brief Evaluate the quantity over the interval of points \a x.
-    friend ValidatedNumber evaluate(const TaylorModel<ValidatedNumber>&, const Vector<ValidatedNumber>& x);
+    friend ValidatedNumber evaluate(const TaylorModel<ValidatedFloat>&, const Vector<ValidatedNumber>& x);
     //! \brief Evaluate the quantity over the interval of points \a x.
-    friend TaylorModel<ValidatedNumber> compose(const TaylorModel<ValidatedNumber>&, const Vector< TaylorModel<ValidatedNumber> >& x);
+    friend TaylorModel<ValidatedFloat> compose(const TaylorModel<ValidatedFloat>&, const Vector<TaylorModel<ValidatedFloat>>& x);
     //! \brief Compose two models, where the second is scaled so that the codomain is a unit box.
-    friend Vector<ValidatedNumber> evaluate(const Vector< TaylorModel<ValidatedNumber> >& f, const Vector<ValidatedNumber>& x);
+    friend Vector<ValidatedNumber> evaluate(const Vector<TaylorModel<ValidatedFloat>>& f, const Vector<ValidatedNumber>& x);
     //! \brief Compose two models, where the second is scaled so that the codomain is a unit box.
-    friend Vector< TaylorModel<ValidatedNumber> > compose(const Vector< TaylorModel<ValidatedNumber> >& f, const Vector< TaylorModel<ValidatedNumber> >& g);
+    friend Vector<TaylorModel<ValidatedFloat>> compose(const Vector<TaylorModel<ValidatedFloat>>& f, const Vector<TaylorModel<ValidatedFloat>>& g);
     //@}
 
     //@{
     /*! \name Inplace modifications. */
     // TODO: Change these to return Void
     //! \brief Scale so that the old codomain maps into the new codomain.
-    TaylorModel<ValidatedNumber>& rescale(const ExactInterval& old_codomain, const ExactInterval& new_codomain);
+    TaylorModel<ValidatedFloat>& rescale(const ExactInterval& old_codomain, const ExactInterval& new_codomain);
     //! \brief Restrict to a subdomain.
-    TaylorModel<ValidatedNumber>& restrict(const Vector<ExactInterval>& new_domain);
+    TaylorModel<ValidatedFloat>& restrict(const Vector<ExactInterval>& new_domain);
     //! \brief Compute the antiderivative (in place).
-    TaylorModel<ValidatedNumber>& antidifferentiate(Nat k);
+    TaylorModel<ValidatedFloat>& antidifferentiate(Nat k);
     //@}
 
     //@{
     /*! \name Set-based operations. */
     //! \brief Test if one model refines (is a subset of) another.
-    friend Bool refines(const TaylorModel<ValidatedNumber>& tm1, const TaylorModel<ValidatedNumber>& tm2);
+    friend Bool refines(const TaylorModel<ValidatedFloat>& tm1, const TaylorModel<ValidatedFloat>& tm2);
     //! \brief Test if one model is disjoint from (is incompatible with) another.
-    friend Bool disjoint(const TaylorModel<ValidatedNumber>& tm1, const TaylorModel<ValidatedNumber>& tm2);
+    friend Bool disjoint(const TaylorModel<ValidatedFloat>& tm1, const TaylorModel<ValidatedFloat>& tm2);
     //! \brief An over-approximation of the intersection of the sets of functions
     //! allowed by the two models. It is guaranteed that any function represented
     //! by both models is also represented by the result.
-    friend TaylorModel<ValidatedNumber> intersection(const TaylorModel<ValidatedNumber>& tm1, const TaylorModel<ValidatedNumber>& tm2);
+    friend TaylorModel<ValidatedFloat> intersection(const TaylorModel<ValidatedFloat>& tm1, const TaylorModel<ValidatedFloat>& tm2);
     //@}
 
     //@{
     /*! \name Simplification operations. */
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
-    TaylorModel<ValidatedNumber>& sweep();
+    TaylorModel<ValidatedFloat>& sweep();
     //! \brief Remove all terms whose coefficient has magnitude less than \a eps.
-    TaylorModel<ValidatedNumber>& sweep(const SweeperInterface& accuracy);
+    TaylorModel<ValidatedFloat>& sweep(const SweeperInterface& accuracy);
     //! \brief Set the error to zero.
     //! WARNING: This method does not preserve rigour of the model approximation.
-    TaylorModel<ValidatedNumber>& clobber();
+    TaylorModel<ValidatedFloat>& clobber();
     //! \brief Sort the terms in index order and combine terms with the same index.
-    TaylorModel<ValidatedNumber>& unique_sort();
+    TaylorModel<ValidatedFloat>& unique_sort();
     //@}
 
     //@{
@@ -342,15 +326,15 @@ class TaylorModel<ValidatedNumber>
     //! \brief Multiply by a numerical scalar \c r*=c .
     Void imul(const ValidatedNumber& c);
     //! \brief Scalar multiply and add \c r+=c*x .
-    Void isma(const ValidatedNumber& c, const TaylorModel<ValidatedNumber>& x);
+    Void isma(const ValidatedNumber& c, const TaylorModel<ValidatedFloat>& x);
     //! \brief Fused multiply and add \c r+=x1*x2 .
-    Void ifma(const TaylorModel<ValidatedNumber>& x1, const TaylorModel<ValidatedNumber>& x2);
+    Void ifma(const TaylorModel<ValidatedFloat>& x1, const TaylorModel<ValidatedFloat>& x2);
     //@}
 
     //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
-    friend OutputStream& operator<<(OutputStream& os, const TaylorModel<ValidatedNumber>& x);
+    friend OutputStream& operator<<(OutputStream& os, const TaylorModel<ValidatedFloat>& x);
     //@}
 
   public:
@@ -362,124 +346,131 @@ class TaylorModel<ValidatedNumber>
 // Rescale the vector \a x from the domain \a dom to the unit domain.
 Vector<ValidatedNumber> unscale(const Vector<ValidatedNumber>& x, const Vector<ExactInterval>& dom);
 
-//! \relates TaylorModel<ValidatedNumber> \brief The magnitude of the variable
-ErrorType mag(const TaylorModel<ValidatedNumber>& tm);
-//! \relates TaylorModel<ValidatedNumber> \brief Split the variable over two domains, subdividing along the independent variable j.
-Pair< TaylorModel<ValidatedNumber>, TaylorModel<ValidatedNumber> > split(const TaylorModel<ValidatedNumber>& x, Nat j);
-//! \relates TaylorModel<ValidatedNumber>
+//! \relates TaylorModel<ValidatedFloat> \brief The magnitude of the variable
+ErrorType mag(const TaylorModel<ValidatedFloat>& tm);
+//! \relates TaylorModel<ValidatedFloat> \brief Split the variable over two domains, subdividing along the independent variable j.
+Pair< TaylorModel<ValidatedFloat>, TaylorModel<ValidatedFloat> > split(const TaylorModel<ValidatedFloat>& x, Nat j);
+//! \relates TaylorModel<ValidatedFloat>
 //!\brief Split the variable, subdividing along the independent variable j
 //! and taking the lower/middle/upper half depending on whether half is false, indeterminate or true.
-TaylorModel<ValidatedNumber> split(const TaylorModel<ValidatedNumber>& x, Nat j, Tribool half);
+TaylorModel<ValidatedFloat> split(const TaylorModel<ValidatedFloat>& x, Nat j, Tribool half);
 
-//! \relates TaylorModel<ValidatedNumber> \brief Scale the variable by post-composing with an affine map taking the unit interval to ivl.
-TaylorModel<ValidatedNumber> scale(const TaylorModel<ValidatedNumber>& x, const ExactInterval& ivl);
-//! \relates TaylorModel<ValidatedNumber> \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
-TaylorModel<ValidatedNumber> unscale(const TaylorModel<ValidatedNumber>& x, const ExactInterval& ivl);
-//! \relates TaylorModel<ValidatedNumber> \brief Scale the variable by post-composing with an affine map taking the interval ivl1 to interval \a ivl2
-TaylorModel<ValidatedNumber> rescale(const TaylorModel<ValidatedNumber>& x, const ExactInterval& ivl1, const ExactInterval& ivl2);
+//! \relates TaylorModel<ValidatedFloat> \brief Scale the variable by post-composing with an affine map taking the unit interval to ivl.
+TaylorModel<ValidatedFloat> scale(const TaylorModel<ValidatedFloat>& x, const ExactInterval& ivl);
+//! \relates TaylorModel<ValidatedFloat> \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
+TaylorModel<ValidatedFloat> unscale(const TaylorModel<ValidatedFloat>& x, const ExactInterval& ivl);
+//! \relates TaylorModel<ValidatedFloat> \brief Scale the variable by post-composing with an affine map taking the interval ivl1 to interval \a ivl2
+TaylorModel<ValidatedFloat> rescale(const TaylorModel<ValidatedFloat>& x, const ExactInterval& ivl1, const ExactInterval& ivl2);
 
-//! \relates TaylorModel<ValidatedNumber> \brief Evaluate an array of Taylor variables on a vector.
-ValidatedNumber evaluate(const TaylorModel<ValidatedNumber>& x, const Vector<ValidatedNumber>& sy);
-//! \relates TaylorModel<ValidatedNumber> \brief Substite \a c for the \a k th variable.
-TaylorModel<ValidatedNumber> partial_evaluate(const TaylorModel<ValidatedNumber>& x, Nat k, ValidatedNumber c);
-//! \relates TaylorModel<ValidatedNumber>
-//! Substitute the TaylorModel<ValidatedNumber> y in the  kth variable of \a x.
+//! \relates TaylorModel<ValidatedFloat> \brief Evaluate an array of Taylor variables on a vector.
+ValidatedNumber evaluate(const TaylorModel<ValidatedFloat>& x, const Vector<ValidatedNumber>& sy);
+//! \relates TaylorModel<ValidatedFloat> \brief Substite \a c for the \a k th variable.
+TaylorModel<ValidatedFloat> partial_evaluate(const TaylorModel<ValidatedFloat>& x, Nat k, ValidatedNumber c);
+//! \relates TaylorModel<ValidatedFloat>
+//! Substitute the TaylorModel<ValidatedFloat> y in the  kth variable of \a x.
 //! Precondition: x.argument_size()==y.argument_size()+1
-TaylorModel<ValidatedNumber> substitute(const TaylorModel<ValidatedNumber>& x, Nat k, const TaylorModel<ValidatedNumber>& y);
+TaylorModel<ValidatedFloat> substitute(const TaylorModel<ValidatedFloat>& x, Nat k, const TaylorModel<ValidatedFloat>& y);
 
-//! \relates TaylorModel<ValidatedNumber> \brief Embed the model in a space of higher dimension
-TaylorModel<ValidatedNumber> embed(const TaylorModel<ValidatedNumber>& tm, Nat d);
-//! \relates TaylorModel<ValidatedNumber> \brief Embed the model in a space of higher dimension, placing the error in variable i.
-TaylorModel<ValidatedNumber> embed_error(const TaylorModel<ValidatedNumber>& tm, Nat d, Nat i);
-//! \relates TaylorModel<ValidatedNumber> \brief Embed the model in a space of higher dimension
-TaylorModel<ValidatedNumber> embed(Nat as, const TaylorModel<ValidatedNumber>& tv);
+//! \relates TaylorModel<ValidatedFloat> \brief Embed the model in a space of higher dimension
+TaylorModel<ValidatedFloat> embed(const TaylorModel<ValidatedFloat>& tm, Nat d);
+//! \relates TaylorModel<ValidatedFloat> \brief Embed the model in a space of higher dimension, placing the error in variable i.
+TaylorModel<ValidatedFloat> embed_error(const TaylorModel<ValidatedFloat>& tm, Nat d, Nat i);
+//! \relates TaylorModel<ValidatedFloat> \brief Embed the model in a space of higher dimension
+TaylorModel<ValidatedFloat> embed(Nat as, const TaylorModel<ValidatedFloat>& tv);
 
-//! \relates TaylorModel<ValidatedNumber> \brief Test if a model refines another
-Bool refines(const TaylorModel<ValidatedNumber>& tv1, const TaylorModel<ValidatedNumber>& tv2);
-//! \relates TaylorModel<ValidatedNumber> \brief Test if a model is disjoint from
-Bool disjoint(const TaylorModel<ValidatedNumber>& tv1, const TaylorModel<ValidatedNumber>& tv2);
+//! \relates TaylorModel<ValidatedFloat> \brief Test if a model refines another
+Bool refines(const TaylorModel<ValidatedFloat>& tv1, const TaylorModel<ValidatedFloat>& tv2);
+//! \relates TaylorModel<ValidatedFloat> \brief Test if a model is disjoint from
+Bool disjoint(const TaylorModel<ValidatedFloat>& tv1, const TaylorModel<ValidatedFloat>& tv2);
 
-//! \relates TaylorModel<ValidatedNumber> \brief Antidifferentiation operator
-TaylorModel<ValidatedNumber> antiderivative(const TaylorModel<ValidatedNumber>& x, Nat k);
+//! \relates TaylorModel<ValidatedFloat> \brief Antidifferentiation operator
+TaylorModel<ValidatedFloat> antiderivative(const TaylorModel<ValidatedFloat>& x, Nat k);
 
-//! \relates TaylorModel<ValidatedNumber> \brief Differentiation operator; discards error term
-TaylorModel<ValidatedNumber> derivative(const TaylorModel<ValidatedNumber>& x, Nat k);
+//! \relates TaylorModel<ValidatedFloat> \brief Differentiation operator; discards error term
+TaylorModel<ValidatedFloat> derivative(const TaylorModel<ValidatedFloat>& x, Nat k);
 
-//! \relates TaylorModel<ValidatedNumber> \brief Replace the variale x[k] with a*x[k]+b
-TaylorModel<ValidatedNumber> preaffine(const TaylorModel<ValidatedNumber>&, Nat k, const ValidatedNumber& a, const ValidatedNumber& b);
-//! \relates TaylorModel<ValidatedNumber> \brief Restricts the range of the variable x[k] to the interval d.
+//! \relates TaylorModel<ValidatedFloat> \brief Replace the variale x[k] with a*x[k]+b
+TaylorModel<ValidatedFloat> preaffine(const TaylorModel<ValidatedFloat>&, Nat k, const ValidatedNumber& a, const ValidatedNumber& b);
+//! \relates TaylorModel<ValidatedFloat> \brief Restricts the range of the variable x[k] to the interval d.
 //! \pre -1 <= d.lower() <= d.upper() <= 1 .
-TaylorModel<ValidatedNumber> restrict(const TaylorModel<ValidatedNumber>&, Nat k, const ExactInterval& d);
+TaylorModel<ValidatedFloat> restrict(const TaylorModel<ValidatedFloat>&, Nat k, const ExactInterval& d);
 
 //! \brief Abstract away the given variables.
 //! For example, the model tm(x0,x1,x2,x3) becomes tm'(x0,x1)=tm(x0,[-1,+1],x1,[-1,+1]) on discarding x1 and x3.
-TaylorModel<ValidatedNumber>  discard(const TaylorModel<ValidatedNumber>&, const Array<Nat>& variables);
+TaylorModel<ValidatedFloat>  discard(const TaylorModel<ValidatedFloat>&, const Array<Nat>& variables);
 
-TaylorModel<ValidatedNumber> recondition(const TaylorModel<ValidatedNumber>& tm, Array<Nat>& discarded_variables,
+TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, Array<Nat>& discarded_variables,
                                   Nat number_of_error_variables);
 
-TaylorModel<ValidatedNumber> recondition(const TaylorModel<ValidatedNumber>& tm, Array<Nat>& discarded_variables,
+TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, Array<Nat>& discarded_variables,
                                   Nat number_of_error_variables, Nat index_of_error);
 
-//! \relates TaylorModel<ValidatedNumber>
+//! \relates TaylorModel<ValidatedFloat>
 //! An over-approximation to the intersection of two Taylor models.
 //! Since the intersection cannot be represented exactly in the class of
 //! TaylorModels, truncation errors as well as roundoff errors may be present.
 //! In the absence of roundoff errors, the result is a subset of both arguments,
 //! and is guaranteed to contain any function contained in both arguments.
-TaylorModel<ValidatedNumber> intersection(const TaylorModel<ValidatedNumber>& x1, const TaylorModel<ValidatedNumber>& x2);
+TaylorModel<ValidatedFloat> intersection(const TaylorModel<ValidatedFloat>& x1, const TaylorModel<ValidatedFloat>& x2);
 
 // Compose an Array of Taylor variables with another, assuming that y has been scaled to have unit codomain
-TaylorModel<ValidatedNumber> compose(const TaylorModel<ValidatedNumber>& x, const Vector< TaylorModel<ValidatedNumber> >& y);
+TaylorModel<ValidatedFloat> compose(const TaylorModel<ValidatedFloat>& x, const Vector<TaylorModel<ValidatedFloat>>& y);
 
 // Compose an Array of Taylor variables with another, after scaling by the interval vectors
-TaylorModel<ValidatedNumber> compose(const TaylorModel<ValidatedNumber>& x, const Vector<ExactInterval>& bx, const Vector< TaylorModel<ValidatedNumber> >& y);
+TaylorModel<ValidatedFloat> compose(const TaylorModel<ValidatedFloat>& x, const Vector<ExactInterval>& bx, const Vector<TaylorModel<ValidatedFloat>>& y);
 
-ErrorType norm(const TaylorModel<ValidatedNumber>& tm);
-ErrorType norm(const Vector< TaylorModel<ValidatedNumber> >& tv);
+ErrorType norm(const TaylorModel<ValidatedFloat>& tm);
+ErrorType norm(const Vector<TaylorModel<ValidatedFloat>>& tv);
 
-TaylorModel<ValidatedNumber> max(const TaylorModel<ValidatedNumber>& x, const TaylorModel<ValidatedNumber>& y);
-TaylorModel<ValidatedNumber> min(const TaylorModel<ValidatedNumber>& x, const TaylorModel<ValidatedNumber>& y);
-TaylorModel<ValidatedNumber> abs(const TaylorModel<ValidatedNumber>& x);
+TaylorModel<ValidatedFloat> max(const TaylorModel<ValidatedFloat>& x, const TaylorModel<ValidatedFloat>& y);
+TaylorModel<ValidatedFloat> min(const TaylorModel<ValidatedFloat>& x, const TaylorModel<ValidatedFloat>& y);
+TaylorModel<ValidatedFloat> abs(const TaylorModel<ValidatedFloat>& x);
 
+TaylorModel<ValidatedFloat> sqrt(const TaylorModel<ValidatedFloat>& x);
+TaylorModel<ValidatedFloat> rec(const TaylorModel<ValidatedFloat>& x);
+TaylorModel<ValidatedFloat> exp(const TaylorModel<ValidatedFloat>& x);
+TaylorModel<ValidatedFloat> log(const TaylorModel<ValidatedFloat>& x);
+TaylorModel<ValidatedFloat> sin(const TaylorModel<ValidatedFloat>& x);
+TaylorModel<ValidatedFloat> cos(const TaylorModel<ValidatedFloat>& x);
+TaylorModel<ValidatedFloat> tan(const TaylorModel<ValidatedFloat>& x);
 
 
 // Vector operations which can be evaluated componentwise
-Bool refines(const Vector< TaylorModel<ValidatedNumber> >&,const Vector< TaylorModel<ValidatedNumber> >&);
-Bool disjoint(const Vector< TaylorModel<ValidatedNumber> >&,const Vector< TaylorModel<ValidatedNumber> >&);
-Pair< Vector< TaylorModel<ValidatedNumber> >, Vector< TaylorModel<ValidatedNumber> > > split(const Vector< TaylorModel<ValidatedNumber> >& x, Nat j);
-Vector< TaylorModel<ValidatedNumber> > split(const Vector< TaylorModel<ValidatedNumber> >& x, Nat j, Bool half);
-Vector< TaylorModel<ValidatedNumber> > unscale(const Vector< TaylorModel<ValidatedNumber> >& x, const Vector<ExactInterval>& bx);
-Vector< TaylorModel<ValidatedNumber> > scale(const Vector< TaylorModel<ValidatedNumber> >& x, const Vector<ExactInterval>& bx);
-Vector<ValidatedNumber> evaluate(const Vector< TaylorModel<ValidatedNumber> >& x, const Vector<ValidatedNumber>& sy);
-Vector< TaylorModel<ValidatedNumber> > partial_evaluate(const Vector< TaylorModel<ValidatedNumber> >& x, Nat k, ValidatedNumber sy);
-Vector< TaylorModel<ValidatedNumber> > substitute(const Vector< TaylorModel<ValidatedNumber> >& x, Nat k, const TaylorModel<ValidatedNumber>& y);
-Vector< TaylorModel<ValidatedNumber> > antiderivative(const Vector< TaylorModel<ValidatedNumber> >& x, Nat k);
-Vector< TaylorModel<ValidatedNumber> > embed(const Vector< TaylorModel<ValidatedNumber> >& x, Nat as);
-Vector< TaylorModel<ValidatedNumber> > embed(Nat as, const Vector< TaylorModel<ValidatedNumber> >& x);
-Matrix<ValidatedNumber> jacobian(const Vector< TaylorModel<ValidatedNumber> >& x, const Vector<ValidatedNumber>& y);
-//Matrix<ExactInterval> jacobian(const Vector< TaylorModel<ValidatedNumber> >& x);
-Bool refines(const Vector< TaylorModel<ValidatedNumber> >& x1, const Vector< TaylorModel<ValidatedNumber> >& x2);
-Vector< TaylorModel<ValidatedNumber> > combine(const Vector< TaylorModel<ValidatedNumber> >& x1, const Vector< TaylorModel<ValidatedNumber> >& x2);
-Vector< TaylorModel<ValidatedNumber> > combine(const Vector< TaylorModel<ValidatedNumber> >& x1, const TaylorModel<ValidatedNumber>& x2);
-Vector< TaylorModel<ValidatedNumber> > combine(const TaylorModel<ValidatedNumber>& x1, const Vector< TaylorModel<ValidatedNumber> >& x2);
-Vector< TaylorModel<ValidatedNumber> > combine(const TaylorModel<ValidatedNumber>& x1, const TaylorModel<ValidatedNumber>& x2);
-Vector< TaylorModel<ValidatedNumber> > compose(const Vector< TaylorModel<ValidatedNumber> >& f, const Vector< TaylorModel<ValidatedNumber> >& g);
-Vector< TaylorModel<ValidatedNumber> > compose(const Vector< TaylorModel<ValidatedNumber> >& f, const Vector<ExactInterval>& dom, const Vector< TaylorModel<ValidatedNumber> >& g);
+Bool refines(const Vector<TaylorModel<ValidatedFloat>>&,const Vector<TaylorModel<ValidatedFloat>>&);
+Bool disjoint(const Vector<TaylorModel<ValidatedFloat>>&,const Vector<TaylorModel<ValidatedFloat>>&);
+Pair< Vector<TaylorModel<ValidatedFloat>>, Vector<TaylorModel<ValidatedFloat>> > split(const Vector<TaylorModel<ValidatedFloat>>& x, Nat j);
+Vector<TaylorModel<ValidatedFloat>> split(const Vector<TaylorModel<ValidatedFloat>>& x, Nat j, Bool half);
+Vector<TaylorModel<ValidatedFloat>> unscale(const Vector<TaylorModel<ValidatedFloat>>& x, const Vector<ExactInterval>& bx);
+Vector<TaylorModel<ValidatedFloat>> scale(const Vector<TaylorModel<ValidatedFloat>>& x, const Vector<ExactInterval>& bx);
+Vector<ValidatedNumber> evaluate(const Vector<TaylorModel<ValidatedFloat>>& x, const Vector<ValidatedNumber>& sy);
+Vector<TaylorModel<ValidatedFloat>> partial_evaluate(const Vector<TaylorModel<ValidatedFloat>>& x, Nat k, ValidatedNumber sy);
+Vector<TaylorModel<ValidatedFloat>> substitute(const Vector<TaylorModel<ValidatedFloat>>& x, Nat k, const TaylorModel<ValidatedFloat>& y);
+Vector<TaylorModel<ValidatedFloat>> antiderivative(const Vector<TaylorModel<ValidatedFloat>>& x, Nat k);
+Vector<TaylorModel<ValidatedFloat>> embed(const Vector<TaylorModel<ValidatedFloat>>& x, Nat as);
+Vector<TaylorModel<ValidatedFloat>> embed(Nat as, const Vector<TaylorModel<ValidatedFloat>>& x);
+Matrix<ValidatedNumber> jacobian(const Vector<TaylorModel<ValidatedFloat>>& x, const Vector<ValidatedNumber>& y);
+//Matrix<ExactInterval> jacobian(const Vector<TaylorModel<ValidatedFloat>>& x);
+Bool refines(const Vector<TaylorModel<ValidatedFloat>>& x1, const Vector<TaylorModel<ValidatedFloat>>& x2);
+Vector<TaylorModel<ValidatedFloat>> combine(const Vector<TaylorModel<ValidatedFloat>>& x1, const Vector<TaylorModel<ValidatedFloat>>& x2);
+Vector<TaylorModel<ValidatedFloat>> combine(const Vector<TaylorModel<ValidatedFloat>>& x1, const TaylorModel<ValidatedFloat>& x2);
+Vector<TaylorModel<ValidatedFloat>> combine(const TaylorModel<ValidatedFloat>& x1, const Vector<TaylorModel<ValidatedFloat>>& x2);
+Vector<TaylorModel<ValidatedFloat>> combine(const TaylorModel<ValidatedFloat>& x1, const TaylorModel<ValidatedFloat>& x2);
+Vector<TaylorModel<ValidatedFloat>> compose(const Vector<TaylorModel<ValidatedFloat>>& f, const Vector<TaylorModel<ValidatedFloat>>& g);
+Vector<TaylorModel<ValidatedFloat>> compose(const Vector<TaylorModel<ValidatedFloat>>& f, const Vector<ExactInterval>& dom, const Vector<TaylorModel<ValidatedFloat>>& g);
 
-TaylorModel<ValidatedNumber> unchecked_compose(const TaylorModel<ValidatedNumber>& x, const Vector< TaylorModel<ValidatedNumber> >& y);
-Vector< TaylorModel<ValidatedNumber> > unchecked_compose(const Vector< TaylorModel<ValidatedNumber> >& x, const Vector< TaylorModel<ValidatedNumber> >& y);
-Vector< TaylorModel<ValidatedNumber> > unchecked_compose(const Vector< TaylorModel<ValidatedNumber> >& x, const Vector<ExactInterval>& dom, const Vector< TaylorModel<ValidatedNumber> >& y);
+TaylorModel<ValidatedFloat> unchecked_compose(const TaylorModel<ValidatedFloat>& x, const Vector<TaylorModel<ValidatedFloat>>& y);
+Vector<TaylorModel<ValidatedFloat>> unchecked_compose(const Vector<TaylorModel<ValidatedFloat>>& x, const Vector<TaylorModel<ValidatedFloat>>& y);
+Vector<TaylorModel<ValidatedFloat>> unchecked_compose(const Vector<TaylorModel<ValidatedFloat>>& x, const Vector<ExactInterval>& dom, const Vector<TaylorModel<ValidatedFloat>>& y);
 
 
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, Polynomila, TaylorModel<ValidatedNumber><ExactInterval>.
+ * See also Expansion, Polynomila, TaylorModel<ValidatedFloat><ExactInterval>.
  */
 template<>
-class TaylorModel<ApproximateNumber>
-    : public NormedAlgebraMixin<TaylorModel<ApproximateNumber>,ApproximateNumber>
+class TaylorModel<ApproximateFloat>
+    : public NormedAlgebraMixin<TaylorModel<ApproximateFloat>,ApproximateNumber>
 {
     typedef Expansion<ApproximateCoefficientType> ExpansionType;
   private:
@@ -504,42 +495,42 @@ class TaylorModel<ApproximateNumber>
   public:
     //@{
     /*! \name Constructors and destructors. */
-    //! \brief Construct a ValidatedTaylorModel in \a as arguments.
-    TaylorModel<ApproximateNumber>(Nat as = 0u);
-    TaylorModel<ApproximateNumber>(Nat as, Sweeper swp);
+    //! \brief Construct a TaylorModel<ValidatedFloat> in \a as arguments.
+    TaylorModel<ApproximateFloat>(Nat as = 0u);
+    TaylorModel<ApproximateFloat>(Nat as, Sweeper swp);
 
-    TaylorModel<ApproximateNumber> create() const { return TaylorModel<ApproximateNumber>(this->argument_size(),this->_sweeper); }
-    TaylorModel<ApproximateNumber> create_zero() const { return TaylorModel<ApproximateNumber>(this->argument_size(),this->_sweeper); }
-    TaylorModel<ApproximateNumber> create_ball(ApproximateErrorType r) const { return TaylorModel<ApproximateNumber>(this->argument_size(),this->_sweeper); }
+    TaylorModel<ApproximateFloat> create() const { return TaylorModel<ApproximateFloat>(this->argument_size(),this->_sweeper); }
+    TaylorModel<ApproximateFloat> create_zero() const { return TaylorModel<ApproximateFloat>(this->argument_size(),this->_sweeper); }
+    TaylorModel<ApproximateFloat> create_ball(ApproximateErrorType r) const { return TaylorModel<ApproximateFloat>(this->argument_size(),this->_sweeper); }
     //! \brief Fast swap with another Taylor model.
-    Void swap(TaylorModel<ApproximateNumber>& other) { this->_expansion.swap(other._expansion); }
+    Void swap(TaylorModel<ApproximateFloat>& other) { this->_expansion.swap(other._expansion); }
     //! \brief Set to zero.
     Void clear() { this->_expansion.clear(); }
     //! \brief A zero element with the same parameters.
-    TaylorModel<ApproximateNumber> null() const { return TaylorModel<ApproximateNumber>(this->argument_size()); }
+    TaylorModel<ApproximateFloat> null() const { return TaylorModel<ApproximateFloat>(this->argument_size()); }
     //@}
 
     //@{
     /*! \name Assignment to constant values. */
     //! \brief Set equal to a built-in, keeping the same number of arguments.
-    TaylorModel<ApproximateNumber>& operator=(double c) {
+    TaylorModel<ApproximateFloat>& operator=(double c) {
         this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),ApproximateCoefficientType(c)); return *this; }
     //! \brief Set equal to a constant, keeping the same number of arguments.
-    TaylorModel<ApproximateNumber>& operator=(const ApproximateNumber& c) {
+    TaylorModel<ApproximateFloat>& operator=(const ApproximateNumber& c) {
         this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),c); return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorModel<ApproximateNumber>& operator=(const ValidatedNumber& c) { return (*this)=ApproximateNumber(c); }
+    TaylorModel<ApproximateFloat>& operator=(const ValidatedNumber& c) { return (*this)=ApproximateNumber(c); }
     //! \brief Set equal to a real constant, keeping the same number of arguments.
-    TaylorModel<ApproximateNumber>& operator=(const EffectiveNumber& c) { return (*this)=ApproximateNumber(c); }
+    TaylorModel<ApproximateFloat>& operator=(const EffectiveNumber& c) { return (*this)=ApproximateNumber(c); }
     //@}
 
     //@{
     /*! \name Comparison operators. */
     //! \brief Equality operator. Tests equality of representation, including error term.
-    Bool operator==(const TaylorModel<ApproximateNumber>& other) const {
+    Bool operator==(const TaylorModel<ApproximateFloat>& other) const {
         return this->_expansion==other._expansion; }
     //! \brief Inequality operator.
-    Bool operator!=(const TaylorModel<ApproximateNumber>& other) const {
+    Bool operator!=(const TaylorModel<ApproximateFloat>& other) const {
         return !(*this==other); }
     //@}
 
@@ -587,9 +578,9 @@ class TaylorModel<ApproximateNumber>
     /*! \name Simplification operations. */
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
-    TaylorModel<ApproximateNumber>& sweep();
+    TaylorModel<ApproximateFloat>& sweep();
     //! \brief Sort the terms in index order and combine terms with the same index.
-    TaylorModel<ApproximateNumber>& unique_sort();
+    TaylorModel<ApproximateFloat>& unique_sort();
     //@}
 
   public:
@@ -610,15 +601,15 @@ class TaylorModel<ApproximateNumber>
     //! \brief Inplace multiplication of a scalar constant.
     virtual Void imul(const ApproximateNumber& c);
     //! \brief Inplace addition of a scalar multiple of a Taylor model.
-    virtual Void isma(const ApproximateNumber& c, const TaylorModel<ApproximateNumber>& x);
+    virtual Void isma(const ApproximateNumber& c, const TaylorModel<ApproximateFloat>& x);
     //! \brief Inplace addition of a product of Taylor models.
-    virtual Void ifma(const TaylorModel<ApproximateNumber>& x1, const TaylorModel<ApproximateNumber>& x2);
+    virtual Void ifma(const TaylorModel<ApproximateFloat>& x1, const TaylorModel<ApproximateFloat>& x2);
 
 
     //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
-    friend OutputStream& operator<<(OutputStream& os, const TaylorModel<ApproximateNumber>& x);
+    friend OutputStream& operator<<(OutputStream& os, const TaylorModel<ApproximateFloat>& x);
     //@}
 
   public:
@@ -627,10 +618,10 @@ class TaylorModel<ApproximateNumber>
 };
 
 
-inline OutputStream& operator<<(OutputStream& os, const TaylorModel<ApproximateNumber>& x) {
+inline OutputStream& operator<<(OutputStream& os, const TaylorModel<ApproximateFloat>& x) {
     x.str(os); return os; }
 
-inline Vector<ExactInterval> codomain(const Vector< TaylorModel<ApproximateNumber> >& t) {
+inline Vector<ExactInterval> codomain(const Vector< TaylorModel<ApproximateFloat> >& t) {
     Vector<ExactInterval> r(t.size()); for(Nat i=0; i!=t.size(); ++i) { r[i]=t[i].codomain(); } return r; }
 
 

@@ -35,8 +35,10 @@ template class Polynomial<ApproximateFloat>;
 template class Polynomial<ValidatedFloat>;
 template class Polynomial<UpperInterval>;
 
+template<> Void Polynomial<ExactFloat>::cleanup() { }
+
 template Polynomial<ExactFloat>::Polynomial(SizeType);
-template Void Polynomial<ExactFloat>::append(MultiIndex const&, ExactFloat const&);
+template Expansion<ExactFloat>& Polynomial<ExactFloat>::expansion();
 template OutputStream& Polynomial<ExactFloat>::_write(OutputStream&) const;
 template OutputStream& Polynomial<ExactFloat>::_write(OutputStream&, List<String> const&) const;
 

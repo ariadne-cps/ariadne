@@ -117,7 +117,7 @@ template<class X> typename Polynomial<X>::ConstIterator Polynomial<X>::find(cons
 
 
 
-template<class X> Void Polynomial<X>::append(const MultiIndex& a, const X& c) { this->_expansion.append(a,c); }
+template<class X> Void Polynomial<X>::_append(const MultiIndex& a, const X& c) { this->_expansion.append(a,c); }
 
 template<class X> Void Polynomial<X>::insert(const MultiIndex& a, const X& c) { this->_expansion.insert(a,c); }
 
@@ -158,7 +158,7 @@ Polynomial<X>& Polynomial<X>::truncate(DegreeType d) {
     Polynomial<X> r(this->argument_size());
     for(typename Polynomial<X>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         if(iter->key().degree()<=d && iter->data()!=X(0)) {
-            r.append(iter->key(),iter->data());
+            r._append(iter->key(),iter->data());
         }
     }
     this->_expansion.swap(r._expansion);
@@ -405,34 +405,13 @@ OutputStream& operator<<(OutputStream& os, const Polynomial<X>& p) {
 
 template<class X>
 OutputStream& Polynomial<X>::_write(OutputStream& os) const {
-    Polynomial<X> const& q=*this;
-    Bool first_term=true;
-    Bool identically_zero=true;
-
-    //os <<"[P"<<q.argument_size()<<"]";
-    Polynomial<X> p=q;
-    p.expansion().graded_sort();
-    for(typename Polynomial<X>::ConstIterator iter=p.begin(); iter!=p.end(); ++iter) {
-        MultiIndex a=iter->key();
-        X v=iter->data();
-        if(decide(v!=0)) {
-            identically_zero=false;
-            Bool first_factor=true;
-            if(decide(v>X(0)) && !first_term) { os << "+"; }
-            first_term=false;
-            if(decide(v==X(1))) { }
-            else if (decide(v==X(-1))) { os << '-'; }
-            else { os << v; first_factor=false; }
-            for(Nat j=0; j!=a.size(); ++j) {
-                if(a[j]!=0) {
-                    if(first_factor) { first_factor=false; } else { os <<"*"; }
-                    os<<"x"<<j; if(a[j]!=1) { os<<"^"<<Int(a[j]); } }
-            }
-            if(first_factor) { os << '1'; }
-        }
+    List<String> argument_names;
+    for(SizeType i=0; i!=this->argument_size(); ++i) {
+        StringStream ss;
+        ss << "x" << i;
+        argument_names.append(ss.str());
     }
-    if(identically_zero) { os << "0"; }
-    return os;
+    return this->_write(os,argument_names);
 }
 
 template<class X>
@@ -450,7 +429,7 @@ OutputStream& Polynomial<X>::_write(OutputStream& os, List<String> const& argume
             if(decide(v>0) && !first_term) { os << "+"; }
             first_term=false;
             if(v==1) { } else if (v==-1) { os << '-'; }
-            else { os << 'v'; first_factor=false; }
+            else { os << v; first_factor=false; }
             for(Nat j=0; j!=a.size(); ++j) {
                 if(a[j]!=0) {
                     if(first_factor) { first_factor=false; } else { os <<"*"; }

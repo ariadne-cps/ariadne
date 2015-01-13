@@ -84,7 +84,6 @@ Void TestPolynomial::test_concept()
 
     p.reserve(2u);
     p.insert(a,x);
-    p.append(a,x);
 
     x=cp[a];
     p[a]=1.0;
@@ -155,7 +154,7 @@ Void TestPolynomial::test_cleanup()
     MultiIndex b(3); ++b;
     Polynomial<Float> p(3);
     for(Nat i=0; i!=2; ++i) {
-        if(i%2) { p.append(a,1/(1.+i)); ++b; ++b; a=b; ++b; } else { p.append(b,1/(1.+i));}
+        if(i%2) { p.expansion().append(a,1/(1.+i)); ++b; ++b; a=b; ++b; } else { p.expansion().append(b,1/(1.+i));}
     }
     ARIADNE_TEST_PRINT(p);
     ARIADNE_TEST_EXECUTE(p.cleanup());

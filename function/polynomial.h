@@ -153,8 +153,6 @@ class Polynomial
     //@{
     //! \name Modifying operations
 
-    //! \brief Append the term \f$c x^{a_1}\f$ to the list of terms.
-    Void append(const MultiIndex& a, const X& c);
     //! \brief Insert the term \f$c x^{a_1}\f$ into a sorted list of terms.
     Void insert(const MultiIndex& a, const X& c);
     //! \brief Reserve space for a total of \a n terms.
@@ -210,6 +208,7 @@ class Polynomial
     OutputStream& _write(OutputStream& os) const;
     OutputStream& _write(OutputStream& os, List<String> const& names) const;
   private:
+    Void _append(const MultiIndex& a, const X& c);
     Iterator _unique_key();
   private:
     SortedExpansion<X,ReverseLexicographicKeyLess> _expansion;
@@ -258,7 +257,7 @@ template<class X> inline Polynomial<X> antiderivative(Polynomial<X> p, SizeType 
 template<class X> inline Polynomial<X> truncate(Polynomial<X> p, DegreeType deg) {
     p.truncate(deg); return std::move(p); }
 
-template<class X> OutputStream& operator<<(OutputStream& os, const Polynomial<X>& p) {
+template<class X> inline OutputStream& operator<<(OutputStream& os, const Polynomial<X>& p) {
     return p._write(os); }
 
 
@@ -266,10 +265,10 @@ template<class F> struct NamedArgumentRepresentation {
     const F& function; const List<String>& argument_names;
 };
 
-template<class F> NamedArgumentRepresentation<F> named_argument_repr(const F& function, const List<String>& argument_names) {
+template<class F> inline NamedArgumentRepresentation<F> named_argument_repr(const F& function, const List<String>& argument_names) {
     NamedArgumentRepresentation<F> r={function,argument_names}; return r; }
 
-template<class X> OutputStream& operator<<(OutputStream& os, const NamedArgumentRepresentation<Polynomial<X>>& repr) {
+template<class X> inline OutputStream& operator<<(OutputStream& os, const NamedArgumentRepresentation<Polynomial<X>>& repr) {
     return repr.function._write(os,repr.argument_names); }
 
 
@@ -328,12 +327,8 @@ template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const Monom
 
 
 
-template<class X> Polynomial<MidpointType<X>> midpoint(const Polynomial<X>& p) {
-    Polynomial<MidpointType<X>> r(p.argument_size());
-    for(auto iter=p.begin(); iter!=p.end(); ++iter) {
-        r.append(iter->key(),static_cast<MidpointType<X>>(midpoint(iter->data()))); }
-    return r;
-}
+template<class X> inline Polynomial<MidpointType<X>> midpoint(const Polynomial<X>& p) {
+    return Polynomial<MidpointType<X>>(midpoint(p.expansion())); }
 
 
 // Vectorised operations

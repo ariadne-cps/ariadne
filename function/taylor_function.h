@@ -184,6 +184,7 @@ class ScalarTaylorFunction
     typedef ExactInterval RangeType;
     typedef ValidatedNumber NumericType;
     typedef TaylorModel<ValidatedNumber> ModelType;
+    typedef ValidatedTaylorModel::CoefficientType CoefficientType;
     typedef Expansion<CoefficientType> ExpansionType;
     typedef Ariadne::ErrorType ErrorType;
   private:
@@ -633,6 +634,8 @@ class VectorTaylorFunction
     : public VectorFunctionModelMixin<VectorTaylorFunction,ValidatedTag>
 {
     friend class VectorTaylorFunctionElementReference;
+    typedef ValidatedTaylorModel::CoefficientType CoefficientType;
+
   public:
     typedef ExactBox DomainType;
 

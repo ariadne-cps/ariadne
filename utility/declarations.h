@@ -69,13 +69,13 @@ struct Lower;
 struct Approximate;
 template<class PS, class PW> struct IsStronger;
 
-typedef ErrorFloat NormType;
-typedef ErrorFloat ErrorType;
-typedef ExactFloat CoefficientType;
+typedef ErrorFloat ValidatedNormType;
+typedef ApproximateFloat ApproximateNormType;
 
-typedef ApproximateNumber ApproximateNormType;
-typedef ApproximateNumber ApproximateErrorType;
-typedef ApproximateNumber ApproximateCoefficientType;
+typedef ErrorFloat NormType; // FIXME: Remove this typedef
+typedef ErrorFloat ErrorType; // FIXME: Remove this typedef
+typedef ApproximateFloat ApproximateErrorType; // FIXME: Remove this typedef
+
 template<class I> struct CanonicalNumberTypedef;
 template<> struct CanonicalNumberTypedef<ExactTag> { typedef ExactNumber Type; };
 template<> struct CanonicalNumberTypedef<EffectiveTag> { typedef EffectiveNumber Type; };

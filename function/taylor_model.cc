@@ -2507,7 +2507,7 @@ rescale(const TaylorModel<ValidatedFloat>& tv, const ExactInterval& ivl)
 
 
 
-ErrorFloat TaylorModel<ValidatedFloat>::radius() const {
+TaylorModel<ValidatedFloat>::NormType TaylorModel<ValidatedFloat>::radius() const {
     set_rounding_mode(upward);
     Float r=this->error().raw();
     for(TaylorModel<ValidatedFloat>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
@@ -2519,7 +2519,7 @@ ErrorFloat TaylorModel<ValidatedFloat>::radius() const {
     return ErrorFloat(r);
 }
 
-NormType TaylorModel<ValidatedFloat>::norm() const {
+TaylorModel<ValidatedFloat>::NormType TaylorModel<ValidatedFloat>::norm() const {
     set_rounding_mode(upward);
     Float r=this->error().raw();
     for(TaylorModel<ValidatedFloat>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
@@ -3366,15 +3366,15 @@ Void TaylorModel<ApproximateFloat>::ifma(const TaylorModel<ApproximateFloat>& x,
 
 
 
-ErrorType TaylorModel<ApproximateFloat>::norm() const {
+TaylorModel<ApproximateFloat>::NormType TaylorModel<ApproximateFloat>::norm() const {
     return ExactFloat(((*this)[MultiIndex(this->argument_size())]).raw());
 }
 
-CoefficientType TaylorModel<ApproximateFloat>::average() const {
+TaylorModel<ApproximateFloat>::CoefficientType TaylorModel<ApproximateFloat>::average() const {
     return ExactFloat(((*this)[MultiIndex(this->argument_size())]).raw());
 }
 
-ErrorType TaylorModel<ApproximateFloat>::radius() const {
+TaylorModel<ApproximateFloat>::NormType TaylorModel<ApproximateFloat>::radius() const {
     ApproximateFloat r=0.0;
     for(Expansion<ApproximateFloat>::ConstIterator iter=this->_expansion.begin(); iter!=this->_expansion.end(); ++iter) {
         if(iter->key().degree()!=0) {
@@ -3384,8 +3384,10 @@ ErrorType TaylorModel<ApproximateFloat>::radius() const {
     return ErrorType(r.raw());
 }
 
-UpperInterval TaylorModel<ApproximateFloat>::range() const {
-    ErrorType rad=this->radius(); return this->average()+UpperInterval(-rad.raw(),+rad.raw());
+ApproximateInterval TaylorModel<ApproximateFloat>::range() const {
+    ApproximateFloat av=this->average();
+    ApproximateFloat rad=this->radius();
+    return ApproximateInterval(av-rad,av+rad);
 }
 
 Float TaylorModel<ApproximateFloat>::tolerance() const {

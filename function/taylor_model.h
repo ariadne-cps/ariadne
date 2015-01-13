@@ -74,6 +74,9 @@ class TaylorModel<ValidatedFloat>
 {
     friend class ScalarTaylorFunction;
     friend class VectorTaylorFunction;
+    typedef ExactFloat CoefficientType;
+    typedef ErrorFloat ErrorType;
+    typedef ErrorFloat NormType;
     typedef ReverseLexicographicKeyLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
   public:
@@ -212,8 +215,8 @@ class TaylorModel<ValidatedFloat>
 
     //! \brief The constant term in the expansion.
     CoefficientType average() const { return (*this)[MultiIndex::zero(this->argument_size())]; }
-    //! \brief The radius of the smallest ball containing the model.
-    ErrorType radius() const;
+    //! \brief The radius of the smallest ball about a constant function containing the model.
+    NormType radius() const;
     //! \brief An over-approximation to the supremum norm.
     NormType norm() const;
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e. Equal to the sweep threshold.
@@ -472,12 +475,15 @@ template<>
 class TaylorModel<ApproximateFloat>
     : public NormedAlgebraMixin<TaylorModel<ApproximateFloat>,ApproximateNumber>
 {
-    typedef Expansion<ApproximateCoefficientType> ExpansionType;
+    typedef ApproximateFloat CoefficientType;
+    typedef ApproximateFloat NormType;
+    typedef ReverseLexicographicKeyLess ComparisonType;
+    typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
   private:
     ExpansionType _expansion;
     mutable Sweeper _sweeper;
   private:
-    static const ApproximateCoefficientType _zero;
+    static const CoefficientType _zero;
 
   public:
     //! \brief The type used for the coefficients.
@@ -485,7 +491,7 @@ class TaylorModel<ApproximateFloat>
     //! \brief The type used to index the coefficients.
     typedef MultiIndex IndexType;
     //! \brief The type used for the coefficients.
-    typedef ApproximateCoefficientType ValueType;
+    typedef CoefficientType ValueType;
 
     //! \brief An Iterator through the (index,coefficient) pairs of the expansion.
     typedef ExpansionType::Iterator Iterator;
@@ -514,7 +520,7 @@ class TaylorModel<ApproximateFloat>
     /*! \name Assignment to constant values. */
     //! \brief Set equal to a built-in, keeping the same number of arguments.
     TaylorModel<ApproximateFloat>& operator=(double c) {
-        this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),ApproximateCoefficientType(c)); return *this; }
+        this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),ApproximateFloat(c)); return *this; }
     //! \brief Set equal to a constant, keeping the same number of arguments.
     TaylorModel<ApproximateFloat>& operator=(const ApproximateNumber& c) {
         this->_expansion.clear(); this->_expansion.append(MultiIndex(this->argument_size()),c); return *this; }
@@ -539,9 +545,9 @@ class TaylorModel<ApproximateFloat>
     //! \brief The number of variables in the argument of the quantity.
     Nat argument_size() const { return this->_expansion.argument_size(); }
     //! \brief The coefficient of the term in $x^a$.
-    const ApproximateCoefficientType& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
+    const CoefficientType& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
     //! \brief The error of the expansion over the domain.
-    const ApproximateErrorType& error() const { return _zero; }
+    Void error() const { }
     //@}
 
     //@{
@@ -551,9 +557,9 @@ class TaylorModel<ApproximateFloat>
     //! \brief A coarse over-approximation to the range of the quantity.
     ExactInterval codomain() const;
     //! \brief An over-approximation to the range of the quantity.
-    UpperInterval range() const;
+    ApproximateInterval range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
-    UpperInterval gradient_range(Nat j) const;
+    ApproximateInterval gradient_range(Nat j) const;
     //@}
 
     //@{
@@ -587,13 +593,13 @@ class TaylorModel<ApproximateFloat>
     //@{
     /*! \name Standard algebra interface. */
     //! \brief An approximation to the norm of the function.
-    virtual ErrorType norm() const;
+    virtual NormType norm() const;
     //! \brief An approximation to the average value of the function.
     virtual CoefficientType average() const;
     //! \brief The tolerance to which analytic functions should be computed.
     virtual RawFloat tolerance() const;
     //! \brief The radius of the ball containing the functions.
-    virtual ErrorType radius() const;
+    virtual NormType radius() const;
     //! \brief Write to an output stream.
     virtual OutputStream& write(OutputStream&) const;
     //! \brief Inplace addition of a scalar constant.

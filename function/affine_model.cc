@@ -39,9 +39,9 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAf
     ARIADNE_ASSERT_MSG(a1.argument_size()==a2.argument_size(),"a1="<<a1<<" a2="<<a2);
     Nat n=a1.argument_size();
     ValidatedAffineModel r(n);
-    r=CoefficientType( a1.value().raw()+a2.value().raw() );
+    r=ValidatedAffineModel::CoefficientType( a1.value().raw()+a2.value().raw() );
     for(Nat i=0; i!=n; ++i) {
-        r[i]=CoefficientType(a1[i].raw()+a2[i].raw());
+        r[i]=ValidatedAffineModel::CoefficientType(a1[i].raw()+a2[i].raw());
     }
 
     set_rounding_upward();
@@ -67,7 +67,7 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAf
 ValidatedAffineModel operator+(const ValidatedNumber& c, const ValidatedAffineModel& a) {
     ValidatedAffineModel r=a;
     RawFloat cm=c.midpoint().raw();
-    r.set_value( static_cast<CoefficientType>( cm + a.value().raw() ) );
+    r.set_value( static_cast<ValidatedAffineModel::CoefficientType>( cm + a.value().raw() ) );
 
     set_rounding_upward();
 
@@ -75,7 +75,7 @@ ValidatedAffineModel operator+(const ValidatedNumber& c, const ValidatedAffineMo
     RawFloat  ru = ( a.value().raw())+cm;
     RawFloat te = (ru+mrl)/2;
 
-    r.set_error( ErrorType( a.error().raw() + max(c.upper().raw()-cm,cm-c.lower().raw()) + te) );
+    r.set_error( ValidatedAffineModel::ErrorType( a.error().raw() + max(c.upper().raw()-cm,cm-c.lower().raw()) + te) );
 
     set_rounding_to_nearest();
 
@@ -90,7 +90,7 @@ ValidatedAffineModel operator*(const ValidatedNumber& c, const ValidatedAffineMo
     Nat n=a.argument_size();
     RawFloat cm=c.midpoint().raw();
     ValidatedAffineModel r(n);
-    r=CoefficientType(a.value().raw()*cm);
+    r=ValidatedAffineModel::CoefficientType(a.value().raw()*cm);
     for(Nat i=0; i!=n; ++i) {
         r[i].raw()=a[i].raw()*cm;
     }
@@ -114,7 +114,7 @@ ValidatedAffineModel operator*(const ValidatedNumber& c, const ValidatedAffineMo
         }
     }
 
-    r.set_error(ErrorType(abs(cm)*a.error().raw() + ((ca+mca) + te)/2 + re));
+    r.set_error(ValidatedAffineModel::ErrorType(abs(cm)*a.error().raw() + ((ca+mca) + te)/2 + re));
 
     set_rounding_to_nearest();
 
@@ -127,7 +127,7 @@ ValidatedAffineModel operator*(const ValidatedAffineModel& a, const ValidatedNum
 
 ValidatedAffineModel affine_model(const ValidatedAffine& a) {
     ValidatedAffineModel am(a.argument_size());
-    am = CoefficientType( midpoint(a.value()).raw() );
+    am = ValidatedAffineModel::CoefficientType( midpoint(a.value()).raw() );
     for(Nat j=0; j!=a.argument_size(); ++j) {
         am[j] = midpoint(a[j]);
     }
@@ -137,7 +137,7 @@ ValidatedAffineModel affine_model(const ValidatedAffine& a) {
         e += max(a.gradient(j).upper().raw()-am.gradient(j).raw(),am.gradient(j).raw()-a.gradient(j).lower().raw());
     }
     e += max(a.value().upper().raw()-am.value().raw(),am.value().raw()-a.value().lower().raw());
-    am.set_error(ErrorType(e));
+    am.set_error(ValidatedAffineModel::ErrorType(e));
     set_rounding_to_nearest();
     return am;
 }

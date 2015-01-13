@@ -64,9 +64,15 @@ typedef FunctionModelFactory<ValidatedTag> ValidatedFunctionModelFactory;
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
 
+typedef ExactFloat ValidatedCoefficientType;
+typedef ErrorFloat ValidatedErrorType;
+
 template<> class ScalarFunctionModelInterface<ValidatedTag>
     : public virtual ScalarFunctionInterface<ValidatedTag>
 {
+  public:
+    typedef Ariadne::ValidatedCoefficientType CoefficientType;
+    typedef Ariadne::ValidatedErrorType ErrorType;
   public:
     virtual ExactBox const& domain() const = 0;
     virtual ExactInterval const codomain() const = 0;
@@ -144,6 +150,8 @@ template<class F> class ScalarFunctionModelMixin<F,ValidatedTag>
 //! \brief Generic scalar functions on bounded domains.
 template<> class ScalarFunctionModel<ValidatedTag>
 {
+    typedef Ariadne::ValidatedCoefficientType CoefficientType;
+    typedef Ariadne::ValidatedErrorType ErrorType;
   public:
     clone_on_copy_ptr< ScalarFunctionModelInterface<ValidatedTag> > _ptr;
   public:

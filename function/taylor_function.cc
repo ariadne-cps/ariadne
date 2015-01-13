@@ -852,10 +852,10 @@ error(const Vector<ScalarTaylorFunction>& x)
     return r;
 }
 
-Vector<CoefficientType>
+Vector<ExactFloat>
 value(const Vector<ScalarTaylorFunction>& x)
 {
-    Vector<CoefficientType> r(x.size());
+    Vector<ExactFloat> r(x.size());
     for(Nat i=0; i!=x.size(); ++i) {
         r[i]=x[i].value();
     }

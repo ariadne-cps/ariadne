@@ -223,8 +223,8 @@ sqrt(const A& x)
     //std::cerr<<"rec(A)\n";
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
-    auto avg=x.average();
-    auto rad=x.radius();
+    auto avg=make_exact(x.average());
+    auto rad=make_exact(x.radius());
     ValidatedFloat rng=avg+ValidatedFloat(-rad,+rad);
 
     if(rng.lower()<=0) {
@@ -267,8 +267,8 @@ rec(const A& x)
     //std::cerr<<"rec(A)\n";
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
-    ExactFloat avg=x.average();
-    ErrorFloat rad=x.radius();
+    ExactFloat avg=make_exact(x.average());
+    ErrorFloat rad=make_exact(x.radius());
     ValidatedFloat rng=avg+ValidatedFloat(-rad,+rad);
     if(rng.upper()>=0 && rng.lower()<=0) {
         ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<", x.range()="<<rng);
@@ -305,8 +305,8 @@ log(const A& x)
     typedef typename A::NumericType X;
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
-    auto avg=x.average();
-    auto rad=x.radius();
+    auto avg=make_exact(x.average());
+    auto rad=make_exact(x.radius());
     ValidatedFloat rng=avg+ValidatedFloat(-rad,+rad);
     if(rng.lower()<=0) {
         ARIADNE_THROW(DomainException,"sqrt",rng);
@@ -334,10 +334,10 @@ template<class A> EnableIfNormedAlgebra<A> exp(const A& x)
     // FIXME: Truncation error may be incorrect
 
     // Scale to unit interval
-    ExactFloat xavg=x.average();
+    ExactFloat xavg=make_exact(x.average());
     A y = x-xavg;
 
-    ErrorFloat xrad=x.radius();
+    ErrorFloat xrad=make_exact(x.radius());
     RawFloat xtol = x.tolerance();
 
     Nat sfp=0; // A number such that 2^sfp>rad(x.range())
@@ -392,7 +392,7 @@ sin(const A& x)
     s=sqr(y);
 
     Int d=8; // TODO: Change number of terms to be dependent on tolerance
-    ErrorFloat srad=s.radius();
+    ErrorFloat srad=make_exact(s.radius());
     ErrorFloat truncation_error=ErrorFloat(pow_up(srad.raw(),d+1)*rec_fac_up((d+1)*2));
 
     // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
@@ -435,7 +435,7 @@ cos(const A& x)
         s=sqr(y);
 
         Int d=8; // TODO: Change number of terms to be dependent on tolerance
-        ErrorFloat srad=s.radius();
+        ErrorFloat srad=make_exact(s.radius());
         ErrorFloat truncation_error=ErrorFloat(pow_up(srad.raw(),d+1)*rec_fac_up((d+1)*2));
 
         // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)

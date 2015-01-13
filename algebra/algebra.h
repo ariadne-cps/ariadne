@@ -81,13 +81,13 @@ template<class X> class NormedAlgebra
     NormedAlgebra<X>& operator=(const X& c) { *this = this->create(); this->iadd(c); return *this; }
     NormedAlgebra<X>& operator=(const NormedAlgebra<X>& a) { this->_ptr=std::shared_ptr< NormedAlgebraInterface<X> >(a._ptr->_clone()); return *this; }
     //! \brief The norm of the element.
-    ErrorFloat norm() const { return _ptr->norm(); }
+    typename AlgebraTraits<X>::NormType norm() const { return _ptr->norm(); }
     //! \brief A value \a c minimising |a-c|.
-    ExactFloat average() const { return _ptr->average(); }
+    typename AlgebraTraits<X>::ValueType average() const { return _ptr->average(); }
     //! \brief The tolerance used to determine the truncation error when applying an analytic function.
     Float tolerance() const { return _ptr->tolerance(); }
     //! \brief A value \c r such that \c |a-c1|<=r.
-    ErrorFloat radius() const { return _ptr->radius(); }
+    typename AlgebraTraits<X>::NormType radius() const { return _ptr->radius(); }
     NormedAlgebra<X> create_zero() const { return NormedAlgebra<X>(_ptr->_create()); }
     NormedAlgebra<X> create_ball(ErrorFloat r) const { return NormedAlgebra<X>(_ptr->_create_ball(r)); }
     NormedAlgebra<X> create_ball(ApproximateFloat r) const {

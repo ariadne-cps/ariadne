@@ -70,6 +70,8 @@ template<>
 class AffineModel<ApproximateNumber>
 {
   public:
+    typedef ApproximateFloat CoefficientType;
+
     explicit AffineModel() : _c(), _g() { }
     explicit AffineModel(Nat n) : _c(0.0), _g(n,0.0) { }
     explicit AffineModel(const ApproximateNumber& c, const Vector<ApproximateNumber>& g) : _c(c), _g(g) { }
@@ -128,6 +130,9 @@ template<>
 class AffineModel<ValidatedNumber>
 {
   public:
+    typedef ExactFloat CoefficientType;
+    typedef ErrorFloat ErrorType;
+
     explicit AffineModel() : _c(), _g() { }
     explicit AffineModel(Nat n) : _c(0.0), _g(n,ExactFloat(0.0)), _e(0.0) { }
     explicit AffineModel(const ExactFloat& c, const Vector<ExactFloat>& g, const ErrorFloat& e) : _c(c), _g(g), _e(e) { }

@@ -44,6 +44,30 @@ template<class X> class NormedAlgebra;
 template<class X> class GradedAlgebra;
 template<class X> class SymbolicAlgebra;
 
+template<class X> struct AlgebraTraits;
+
+template<> struct AlgebraTraits<ApproximateFloat> {
+    typedef ApproximateFloat ValueType;
+    typedef ApproximateInterval RangeType;
+    typedef ApproximateFloat NormType;
+    typedef ApproximateNumber NumericType;
+};
+
+template<> struct AlgebraTraits<ValidatedFloat> {
+    typedef ExactFloat ValueType;
+    typedef UpperInterval RangeType;
+    typedef ErrorFloat NormType;
+    typedef ValidatedNumber NumericType;
+};
+
+template<> struct AlgebraTraits<Real> {
+    typedef ExactFloat ValueType;
+    typedef UpperInterval RangeType;
+    typedef ErrorFloat NormType;
+    typedef Real NumericType;
+};
+
+
 struct Ball {
     explicit Ball(ErrorType r) : _radius(r) { }
     ErrorType _radius;
@@ -82,6 +106,10 @@ template<class X> class NormedAlgebraInterface
     : public virtual AlgebraInterface<X>
 {
   public:
+    typedef typename AlgebraTraits<X>::ValueType ValueType;
+    typedef typename AlgebraTraits<X>::NormType NormType;
+    typedef typename AlgebraTraits<X>::RangeType RangeType;
+  public:
     NormedAlgebra<X> create() const;
     NormedAlgebra<X> clone() const;
   public:
@@ -93,13 +121,13 @@ template<class X> class NormedAlgebraInterface
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e.
     virtual RawFloat tolerance() const = 0;
     //! \brief A value \c c such that \c |a-c1| is approximately minimised.
-    virtual ExactFloat average() const = 0;
+    virtual ValueType average() const = 0;
     //! \brief A value \c c such that \c |a-c1| is approximately minimised.
-    virtual ErrorType radius() const = 0;
+    virtual NormType radius() const = 0;
     //! \brief The interval \c [c-r,c+r] where \c |a-c1|<=r.
-    virtual UpperInterval range() const = 0;
+    virtual RangeType range() const = 0;
     //! \brief An over-approximation to the norm.
-    virtual ErrorType norm() const = 0;
+    virtual NormType norm() const = 0;
 };
 
 //! \brief Interface for a unital algebra over a field with support for composition with a power series.

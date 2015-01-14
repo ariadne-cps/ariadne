@@ -246,7 +246,7 @@ ScalarTaylorFunction extension(const ScalarTaylorFunction& tv, const ExactBox& d
 
 
 
-Polynomial<ValidatedNumber> polynomial(const ValidatedTaylorModel& tm);
+Polynomial<ValidatedFloat> polynomial(const ValidatedTaylorModel& tm);
 
 inline Bool operator==(ExactFloat x1, Int n2) { return x1.raw()==Float(n2); }
 inline Bool operator==(ValidatedFloat x1, Int n2) { return x1.upper_raw()==Float(n2) && x1.lower_raw()==Float(n2); }
@@ -260,22 +260,22 @@ inline Bool operator> (ExactFloat x1, Int n2) { return x1.raw()> Float(n2); }
 inline Bool operator> (ValidatedFloat x1, Int n2) { return x1.lower_raw()> Float(n2); }
 inline Bool operator> (ApproximateFloat x1, Int n2) { return x1.raw()> Float(n2); }
 
-Polynomial<ValidatedNumber>
+Polynomial<ValidatedFloat>
 ScalarTaylorFunction::polynomial() const
 {
-    Polynomial<ValidatedNumber> z(this->argument_size());
+    Polynomial<ValidatedFloat> z(this->argument_size());
 
-    Polynomial<ValidatedNumber> p=Ariadne::polynomial(this->model());
+    Polynomial<ValidatedFloat> p=Ariadne::polynomial(this->model());
 
-    Vector<Polynomial<ValidatedNumber> > s(this->argument_size(),z);
+    Vector<Polynomial<ValidatedFloat> > s(this->argument_size(),z);
     for(SizeType j=0; j!=this->argument_size(); ++j) {
         ExactInterval const& domj=this->domain()[j];
         if(domj.width()<=0) {
             ARIADNE_ASSERT(this->domain()[j].width()==0);
-            s[j]=Polynomial<ValidatedNumber>::constant(this->argument_size(),0);
+            s[j]=Polynomial<ValidatedFloat>::constant(this->argument_size(),0);
         } else {
             //s[j]=Ariadne::polynomial(ValidatedTaylorModel::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper()));
-            s[j]=(Polynomial<ValidatedNumber>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
+            s[j]=(Polynomial<ValidatedFloat>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
         }
     }
 
@@ -1062,12 +1062,6 @@ Void VectorTaylorFunction::adjoin(const ScalarTaylorFunction& sf)
 
 
 VectorTaylorFunction
-VectorTaylorFunction::constant(const ExactBox& d, const Vector<ExactNumber>& c, Sweeper swp)
-{
-    return VectorTaylorFunction(d,ValidatedTaylorModel::constants(d.size(),c,swp));
-}
-
-VectorTaylorFunction
 VectorTaylorFunction::constant(const ExactBox& d, const Vector<ValidatedNumber>& c, Sweeper swp)
 {
     return VectorTaylorFunction(d,ValidatedTaylorModel::constants(d.size(),c,swp));
@@ -1086,24 +1080,24 @@ VectorTaylorFunction::projection(const ExactBox& d, SizeType imin, SizeType imax
 }
 
 
-Polynomial<ValidatedNumber> polynomial(const ValidatedTaylorModel& tm) {
-    return Polynomial<ValidatedNumber>(tm.expansion())+ValidatedNumber(-tm.error(),+tm.error());
+Polynomial<ValidatedFloat> polynomial(const ValidatedTaylorModel& tm) {
+    return Polynomial<ValidatedFloat>(tm.expansion())+ValidatedNumber(-tm.error(),+tm.error());
 }
 
-Vector< Polynomial<ValidatedNumber> >
+Vector< Polynomial<ValidatedFloat> >
 VectorTaylorFunction::polynomials() const
 {
-    Vector<Polynomial<ValidatedNumber> > p(this->result_size(),Polynomial<ValidatedNumber>(this->argument_size()));
+    Vector<Polynomial<ValidatedFloat> > p(this->result_size(),Polynomial<ValidatedFloat>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
         p[i]=static_cast<ScalarTaylorFunction>((*this)[i]).polynomial();
     }
     return p;
 }
 
-Vector< Expansion<ExactFloat> > const
+Vector<Expansion<ExactFloat>> const
 VectorTaylorFunction::expansions() const
 {
-    Vector< Expansion<ExactFloat> > e(this->result_size(),Expansion<ExactFloat>(this->argument_size()));
+    Vector<Expansion<ExactFloat>> e(this->result_size(),Expansion<ExactFloat>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
         e[i]=this->models()[i].expansion();
     }
@@ -1871,21 +1865,14 @@ operator<<(OutputStream& os, const VectorTaylorFunction& p)
     return p.write(os);
 }
 
-Polynomial<ValidatedNumber> polynomial(const ScalarTaylorFunction& tfn) {
-    return Polynomial<ValidatedNumber>(tfn.polynomial());
+Polynomial<ValidatedFloat> polynomial(const ScalarTaylorFunction& tfn) {
+    return Polynomial<ValidatedFloat>(tfn.polynomial());
 }
 
-Vector< Polynomial<ValidatedNumber> > polynomial(const VectorTaylorFunction& tfn) {
+Vector< Polynomial<ValidatedFloat> > polynomials(const VectorTaylorFunction& tfn) {
     return tfn.polynomials();
 }
 
-List< Polynomial<ValidatedNumber> > polynomials(const List<ScalarTaylorFunction>& tfns) {
-    List< Polynomial<ValidatedNumber> > result;
-    for(SizeType i=0; i!=tfns.size(); ++i) {
-        result.append(polynomial(tfns[i]));
-    }
-    return result;
-}
 
 
 ScalarTaylorFunction

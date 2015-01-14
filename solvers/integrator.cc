@@ -284,7 +284,7 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactB
 
     ARIADNE_LOG(5,"phi="<<phi<<"\n");
     for(Nat k=0; k!=this->_maximum_temporal_order; ++k) {
-        Bool last_step=(phi.error()<this->maximum_error());
+        Bool last_step=(phi.error().raw()<this->maximum_error());
         ValidatedVectorFunctionModel fphi=compose(f,phi);
         ARIADNE_LOG(5,"fphi="<<fphi<<"\n");
         for(Nat i=0; i!=nx; ++i) {
@@ -294,7 +294,7 @@ TaylorPicardIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactB
         if(last_step) { break; }
     }
 
-    if(phi.error()>this->step_maximum_error()) {
+    if(phi.error().raw()>this->step_maximum_error()) {
         ARIADNE_THROW(FlowTimeStepException,"TaylorPicardIntegrator::flow_step","Integration of "<<f<<" starting in "<<dx<<" for time "<<h<<" has error "<<phi.error()<<" after "<<this->_maximum_temporal_order<<" iterations, which exceeds maximum error "<<this->maximum_error()<<"\n");
     }
 
@@ -672,7 +672,7 @@ series_flow_step(const ValidatedVectorFunction& f, const ExactBox& bdx, const Ex
         Nat nnz=0; for(Nat i=0; i!=tphi.size(); ++i) { nnz+=tphi.model(i).number_of_nonzeros(); }
         ARIADNE_LOG(3,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<tphi.error()<<"\n");
 
-        if( (so<max_so) && (tphi.error()*ErrorFloat(TRY_SPACIAL_ORDER_INCREASE_FACTOR) > old_error) ) {
+        if( (so<max_so) && ((tphi.error()*ErrorFloat(TRY_SPACIAL_ORDER_INCREASE_FACTOR)).raw() > old_error.raw()) ) {
             // try increasing spacial degree
             if(nto==0) {
                 // Initialise higher spacial order
@@ -745,7 +745,7 @@ TaylorSeriesIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactB
 //    ValidatedVectorFunctionModel tphi=Ariadne::differential_space_time_flow_step(f,dx,h,bx,
 //        this->step_sweep_threshold(),6,4,this->verbosity);
 
-    if(tphi.error()>this->step_maximum_error()) {
+    if(tphi.error().raw()>this->step_maximum_error()) {
         ARIADNE_THROW(FlowTimeStepException,"TaylorSeriesIntegrator::flow_step",
                       "Integration of "<<f<<" over "<<dx<<" for time "<<h<<" has error "<<tphi.errors()<<
                       " using spacial order "<<this->maximum_spacial_order()<<" and temporal order "<<this->maximum_temporal_order()<<

@@ -278,11 +278,6 @@ class ScalarTaylorFunction
     ValidatedNumber operator()(const Vector<ExactNumber>& x) const;
     ApproximateNumber operator()(const Vector<ApproximateNumber>& x) const;
 
-    //! \brief Evaluate the function at the point \a x.
-    friend ApproximateNumber evaluate(const ScalarTaylorFunction& f, const Vector<ApproximateNumber>& x);
-    //! \brief Evaluate the function over the interval of points \a x.
-    friend ValidatedNumber evaluate(const ScalarTaylorFunction& f, const Vector<ValidatedNumber>& x);
-
     /*! \brief Compute an approximation to gradient derivative of the function at the point \a x. */
     Vector<NumericType> gradient(const Vector<NumericType>& x) const;
     //@}
@@ -629,9 +624,6 @@ class VectorTaylorFunction
     Vector<ValidatedNumber> operator()(const Vector<ValidatedNumber>& x) const;
     Vector<ApproximateNumber> operator()(const Vector<ApproximateNumber>& x) const;
     Vector<ValidatedNumber> operator()(const Vector<ExactNumber>& x) const;
-    /*! \brief Evaluate the Taylor model at the point \a x. */
-    friend Vector<ValidatedNumber> evaluate(const VectorTaylorFunction& f, const Vector<ValidatedNumber>& x);
-    friend Vector<ApproximateNumber> evaluate(const VectorTaylorFunction& f, const Vector<ApproximateNumber>& x);
     /*! \brief Compute an approximation to Jacobian derivative of the Taylor model sat the point \a x. */
     Matrix<NumericType> jacobian(const Vector<NumericType>& x) const;
 
@@ -844,7 +836,6 @@ class VectorTaylorFunctionElementReference
     ErrorType error() const { return this->_c->_models[this->_i].error(); }
     Void set_error(const ErrorType& e) { this->_c->_models[this->_i].set_error(e); }
     Void sweep() { this->_c->_models[this->_i].sweep(); }
-    template<class X> X evaluate(const Vector<X>& x) const { return this->_c->get(this->_i).evaluate(x); }
     template<class X> X operator()(const Vector<X>& x) const { return this->_c->get(this->_i).operator()(x); }
     friend OutputStream& operator<<(OutputStream& os, const VectorTaylorFunctionElementReference& t) { return os<<ScalarTaylorFunction(t); }
   private:

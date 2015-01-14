@@ -595,7 +595,7 @@ ErrorFloat distance(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& 
     return norm(f1-f2);
 }
 
-ErrorFloat distance(const ScalarTaylorFunction& f1, const EffectiveScalarFunction& f2) {
+ErrorFloat distance(const ScalarTaylorFunction& f1, const ValidatedScalarFunction& f2) {
     return distance(f1,ScalarTaylorFunction(f1.domain(),f2,f1.sweeper()));
 }
 
@@ -996,21 +996,6 @@ VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
     this->_models=f.evaluate(x);
     this->sweep();
 }
-
-/*
-VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
-                                           const EffectiveVectorFunction& f,
-                                           const Sweeper& swp)
-    : _domain(d), _models(f.result_size())
-{
-    ARIADNE_ASSERT(f.result_size()>0);
-    ARIADNE_ASSERT(d.size()==f.argument_size());
-    Vector<ValidatedTaylorModel> x=ValidatedTaylorModel::scalings(d,swp);
-    for(SizeType i=0; i!=x.size(); ++i) { x[i].set_sweeper(swp); }
-    this->_models=f.evaluate(x);
-    this->sweep();
-}
-*/
 
 VectorTaylorFunction::VectorTaylorFunction(const Vector<ScalarTaylorFunction>& v)
     : _domain(), _models(v.size())
@@ -1599,6 +1584,18 @@ operator-(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
 }
 
 VectorTaylorFunction
+operator*(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2)
+{
+    ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
+    if(f1.domain()==f2.domain()) {
+        return VectorTaylorFunction(f1.domain(),Vector<ValidatedTaylorModel>(f1.model()*f2.models()));
+    } else {
+        ExactBox new_domain=intersection(f1.domain(),f2.domain());
+        return operator*(restriction(f1,new_domain),restriction(f2,new_domain));
+    }
+}
+
+VectorTaylorFunction
 operator*(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2)
 {
     ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
@@ -1611,15 +1608,9 @@ operator*(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2)
 }
 
 VectorTaylorFunction
-operator*(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2)
+operator/(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2)
 {
-    ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
-    if(f1.domain()==f2.domain()) {
-        return VectorTaylorFunction(f1.domain(),Vector<ValidatedTaylorModel>(f1.model()*f2.models()));
-    } else {
-        ExactBox new_domain=intersection(f1.domain(),f2.domain());
-        return operator*(restriction(f1,new_domain),restriction(f2,new_domain));
-    }
+    return f1 * rec(f2);
 }
 
 
@@ -1686,11 +1677,6 @@ operator*(const Matrix<ValidatedNumber>& A, const VectorTaylorFunction& f)
     return VectorTaylorFunction(f.domain(),models);
 }
 
-
-VectorTaylorFunction
-operator-(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2) {
-    return f1 - VectorTaylorFunction(f1.domain(),f2,f1.sweeper());
-}
 
 
 
@@ -1824,7 +1810,7 @@ ErrorFloat distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& 
     return norm(f1-f2);
 }
 
-ErrorFloat distance(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2) {
+ErrorFloat distance(const VectorTaylorFunction& f1, const ValidatedVectorFunction& f2) {
     return distance(f1,VectorTaylorFunction(f1.domain(),f2,f1.sweeper()));
 }
 

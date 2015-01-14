@@ -46,11 +46,9 @@ template<class X> class Matrix;
 template<class X> class Polynomial;
 
 template<class X> class ScalarFunction;
-typedef EffectiveScalarFunction EffectiveScalarFunction;
-typedef ValidatedScalarFunction ValidatedScalarFunction;
+typedef ScalarFunction<Validated> ValidatedScalarFunction;
 template<class X> class VectorFunction;
-typedef EffectiveVectorFunction EffectiveVectorFunction;
-typedef ValidatedVectorFunction ValidatedVectorFunction;
+typedef VectorFunction<Validated> ValidatedVectorFunction;
 
 class MultiIndex;
 template<class X> class TaylorModel;
@@ -470,21 +468,21 @@ ScalarTaylorFunction operator-(const ValidatedNumber& c, const ScalarTaylorFunct
 ScalarTaylorFunction operator*(const ValidatedNumber& c, const ScalarTaylorFunction& f);
 ScalarTaylorFunction operator/(const ValidatedNumber& c, const ScalarTaylorFunction& f);
 
-inline ScalarTaylorFunction operator+(const EffectiveScalarFunction& f1, const ScalarTaylorFunction& tf2) {
+inline ScalarTaylorFunction operator+(const ValidatedScalarFunction& f1, const ScalarTaylorFunction& tf2) {
     return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())+tf2; }
-inline ScalarTaylorFunction operator-(const EffectiveScalarFunction& f1, const ScalarTaylorFunction& tf2) {
+inline ScalarTaylorFunction operator-(const ValidatedScalarFunction& f1, const ScalarTaylorFunction& tf2) {
     return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())-tf2; }
-inline ScalarTaylorFunction operator*(const EffectiveScalarFunction& f1, const ScalarTaylorFunction& tf2) {
+inline ScalarTaylorFunction operator*(const ValidatedScalarFunction& f1, const ScalarTaylorFunction& tf2) {
     return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())*tf2; }
-inline ScalarTaylorFunction operator/(const EffectiveScalarFunction& f1, const ScalarTaylorFunction& tf2) {
+inline ScalarTaylorFunction operator/(const ValidatedScalarFunction& f1, const ScalarTaylorFunction& tf2) {
     return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())/tf2; }
-inline ScalarTaylorFunction operator+(const ScalarTaylorFunction& tf1, const EffectiveScalarFunction& f2) {
+inline ScalarTaylorFunction operator+(const ScalarTaylorFunction& tf1, const ValidatedScalarFunction& f2) {
     return tf1+ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-inline ScalarTaylorFunction operator-(const ScalarTaylorFunction& tf1, const EffectiveScalarFunction& f2) {
+inline ScalarTaylorFunction operator-(const ScalarTaylorFunction& tf1, const ValidatedScalarFunction& f2) {
     return tf1-ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-inline ScalarTaylorFunction operator*(const ScalarTaylorFunction& tf1, const EffectiveScalarFunction& f2) {
+inline ScalarTaylorFunction operator*(const ScalarTaylorFunction& tf1, const ValidatedScalarFunction& f2) {
     return tf1*ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-inline ScalarTaylorFunction operator/(const ScalarTaylorFunction& tf1, const EffectiveScalarFunction& f2) {
+inline ScalarTaylorFunction operator/(const ScalarTaylorFunction& tf1, const ValidatedScalarFunction& f2) {
     return tf1/ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
 
 inline ScalarTaylorFunction abs(const ScalarTaylorFunction& x) {
@@ -709,9 +707,11 @@ class VectorTaylorFunction
     /*! \brief Subtraction. */
     friend VectorTaylorFunction operator-(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
     /*! \brief Multiplication. */
-    friend VectorTaylorFunction operator*(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2);
-    /*! \brief Multiplication. */
     friend VectorTaylorFunction operator*(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2);
+    /*! \brief Multiplication. */
+    friend VectorTaylorFunction operator*(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2);
+    /*! \brief Division. */
+    friend VectorTaylorFunction operator/(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2);
 
     /*! \brief Addition of a constant. */
     friend VectorTaylorFunction operator+(const VectorTaylorFunction& f, const Vector<ValidatedNumber>& c);
@@ -746,7 +746,7 @@ class VectorTaylorFunction
 
     friend NormType norm(const VectorTaylorFunction& f);
     friend NormType distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
-    friend NormType distance(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2);
+    friend NormType distance(const VectorTaylorFunction& f1, const ValidatedVectorFunction& f2);
 
     //! \brief Restrict the function \a f to a subdomain \a d.
     friend VectorTaylorFunction restriction(const VectorTaylorFunction& f, const ExactBox& d);
@@ -803,13 +803,31 @@ class VectorTaylorFunction
     Vector< TaylorModel<ValidatedNumber> > _models;
 };
 
-VectorTaylorFunction operator-(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2);
-
-
 // Conversion operatations
 Polynomial<ValidatedNumber> polynomial(const ScalarTaylorFunction& tfn);
 Vector< Polynomial<ValidatedNumber> > polynomial(const VectorTaylorFunction& tfn);
 List< Polynomial<ValidatedNumber> > polynomials(const List<ScalarTaylorFunction>& tfns);
+
+inline VectorTaylorFunction operator+(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2) {
+    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())+tf2; }
+inline VectorTaylorFunction operator-(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2) {
+    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())-tf2; }
+inline VectorTaylorFunction operator*(const ValidatedScalarFunction& f1, const VectorTaylorFunction& tf2) {
+    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())*tf2; }
+inline VectorTaylorFunction operator*(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2) {
+    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())*tf2; }
+inline VectorTaylorFunction operator/(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2) {
+    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())/tf2; }
+inline VectorTaylorFunction operator+(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2) {
+    return tf1+VectorTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+inline VectorTaylorFunction operator-(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2) {
+    return tf1-VectorTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+inline VectorTaylorFunction operator*(const ScalarTaylorFunction& tf1, const ValidatedVectorFunction& f2) {
+    return tf1*VectorTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+inline VectorTaylorFunction operator*(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2) {
+    return tf1*ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+inline VectorTaylorFunction operator/(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2) {
+    return tf1/ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
 
 
 // Sanitised output

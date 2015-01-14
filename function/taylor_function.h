@@ -135,12 +135,13 @@ class ScalarTaylorFunction
 {
   public:
     typedef ExactBox DomainType;
-    typedef ExactInterval RangeType;
-    typedef ValidatedNumber NumericType;
-    typedef TaylorModel<ValidatedNumber> ModelType;
-    typedef ValidatedTaylorModel::CoefficientType CoefficientType;
-    typedef Expansion<CoefficientType> ExpansionType;
-    typedef Ariadne::ErrorType ErrorType;
+    typedef ValidatedTaylorModel ModelType;
+    typedef ModelType::CodomainType CodomainType;
+    typedef ModelType::RangeType RangeType;
+    typedef ModelType::ExpansionType ExpansionType;
+    typedef ModelType::CoefficientType CoefficientType;
+    typedef ModelType::ErrorType ErrorType;
+    typedef ModelType::NumericType NumericType;
   private:
     static const CoefficientType _zero;
     DomainType _domain;
@@ -535,6 +536,10 @@ class VectorTaylorFunction
 
   public:
     typedef ExactBox DomainType;
+    typedef ValidatedTaylorModel ModelType;
+    typedef Box<ModelType::CodomainType> CodomainType;
+    typedef Box<ModelType::RangeType> RangeType;
+    typedef ModelType::NumericType NumericType;
 
     /*! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables. */
     VectorTaylorFunction();

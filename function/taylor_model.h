@@ -74,20 +74,18 @@ class TaylorModel<ValidatedFloat>
 {
     friend class ScalarTaylorFunction;
     friend class VectorTaylorFunction;
+  public:
     typedef ExactFloat CoefficientType;
     typedef ErrorFloat ErrorType;
     typedef ErrorFloat NormType;
     typedef ReverseLexicographicKeyLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
-  public:
-    typedef ValidatedNumber NumericType;
-  private:
-    ExpansionType _expansion;
-    ErrorType _error;
-    mutable Sweeper _sweeper;
-  public:
+
+    typedef ExactInterval CodomainType;
+    typedef ApproximateInterval RangeType;
+
     //! \brief The type used for the coefficients.
-    typedef CoefficientType ScalarType;
+    typedef ValidatedNumber NumericType;
     //! \brief The type used to index the coefficients.
     typedef MultiIndex IndexType;
     //! \brief The type used for the coefficients.
@@ -97,7 +95,11 @@ class TaylorModel<ValidatedFloat>
     typedef ExpansionType::Iterator Iterator;
     //! \brief A constant Iterator through the (index,coefficient) pairs of the expansion.
     typedef ExpansionType::ConstIterator ConstIterator;
-
+  private:
+    ExpansionType _expansion;
+    ErrorType _error;
+    mutable Sweeper _sweeper;
+  public:
     //@{
     /*! \name Constructors and destructors. */
     //! \brief Default constructor.
@@ -476,17 +478,14 @@ template<>
 class TaylorModel<ApproximateFloat>
     : public NormedAlgebraMixin<TaylorModel<ApproximateFloat>,ApproximateNumber>
 {
+  public:
     typedef ApproximateFloat CoefficientType;
-    typedef ApproximateFloat NormType;
     typedef ReverseLexicographicKeyLess ComparisonType;
     typedef SortedExpansion<CoefficientType,ComparisonType> ExpansionType;
-  private:
-    ExpansionType _expansion;
-    mutable Sweeper _sweeper;
-  private:
-    static const CoefficientType _zero;
 
-  public:
+    typedef ExactInterval CodomainType;
+    typedef ApproximateInterval RangeType;
+
     //! \brief The type used for the coefficients.
     typedef ApproximateNumber NumericType;
     //! \brief The type used to index the coefficients.
@@ -498,6 +497,11 @@ class TaylorModel<ApproximateFloat>
     typedef ExpansionType::Iterator Iterator;
     //! \brief A constant Iterator through the (index,coefficient) pairs of the expansion.
     typedef ExpansionType::ConstIterator ConstIterator;
+  private:
+    ExpansionType _expansion;
+    mutable Sweeper _sweeper;
+  private:
+    static const CoefficientType _zero;
 
   public:
     //@{

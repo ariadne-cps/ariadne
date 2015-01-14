@@ -85,7 +85,7 @@ ScalarTaylorFunction::ScalarTaylorFunction(const ExactBox& d, Sweeper swp)
 {
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const ExactBox& d, const Expansion<Float>& p, const double& e, const Sweeper& swp)
+ScalarTaylorFunction::ScalarTaylorFunction(const ExactBox& d, const Expansion<Float>& p, const Float& e, const Sweeper& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
@@ -131,21 +131,8 @@ ScalarTaylorFunction ScalarTaylorFunction::constant(const ExactBox& d, const Val
     return ScalarTaylorFunction(d,ValidatedTaylorModel::constant(d.size(),c,swp));
 }
 
-ScalarTaylorFunction ScalarTaylorFunction::identity(const ExactInterval& ivl, Sweeper swp)
-{
-    Vector<ExactInterval> d(1,ivl);
-    return ScalarTaylorFunction(d,ValidatedTaylorModel::scaling(d.size(),0u,d[0u],swp));
-}
-
 ScalarTaylorFunction ScalarTaylorFunction::coordinate(const ExactBox& d, Nat j, Sweeper swp)
 {
-    ARIADNE_ASSERT(j<d.size());
-    return ScalarTaylorFunction(d,ValidatedTaylorModel::scaling(d.size(),j,d[j],swp));
-}
-
-ScalarTaylorFunction ScalarTaylorFunction::variable(const ExactBox& d, Nat j, Sweeper swp)
-{
-    ARIADNE_DEPRECATED("ScalarTaylorFunction::variable","Use ScalarTaylorFunction::coordinate instead");
     ARIADNE_ASSERT(j<d.size());
     return ScalarTaylorFunction(d,ValidatedTaylorModel::scaling(d.size(),j,d[j],swp));
 }
@@ -161,21 +148,25 @@ Vector<ScalarTaylorFunction> ScalarTaylorFunction::constants(const ExactBox& d, 
     return x;
 }
 
-Vector<ScalarTaylorFunction> ScalarTaylorFunction::variables(const ExactBox& d, Sweeper swp)
+Vector<ScalarTaylorFunction> ScalarTaylorFunction::coordinates(const ExactBox& d, Sweeper swp)
 {
-    ARIADNE_DEPRECATED("ScalarTaylorFunction::variables","Use VectorTaylorFunction::identity instead");
-    return variables(d,0u,d.size(),swp);
+    ARIADNE_DEPRECATED("ScalarTaylorFunction::coordinates","Use VectorTaylorFunction::identity instead");
+    Vector<ScalarTaylorFunction> x(d.dimension(),ScalarTaylorFunction(d,swp));
+    for(Nat i=0; i!=x.size(); ++i) {
+        x[i]=ScalarTaylorFunction::coordinate(d,i,swp);
+    }
+    return x;
 }
 
-Vector<ScalarTaylorFunction> ScalarTaylorFunction::variables(const ExactBox& d, Nat imin, Nat imax, Sweeper swp)
+Vector<ScalarTaylorFunction> ScalarTaylorFunction::coordinates(const ExactBox& d, Nat imin, Nat imax, Sweeper swp)
 {
-    ARIADNE_DEPRECATED("ScalarTaylorFunction::variables","Use VectorTaylorFunction::projection instead");
+    ARIADNE_DEPRECATED("ScalarTaylorFunction::coordinates","Use VectorTaylorFunction::projection instead");
     ARIADNE_ASSERT(imin<=imax);
     ARIADNE_ASSERT(imax<=d.size());
 
     Vector<ScalarTaylorFunction> x(imax-imin);
     for(Nat i=imin; i!=imax; ++i) {
-        x[i-imin]=ScalarTaylorFunction::variable(d,i,swp);
+        x[i-imin]=ScalarTaylorFunction::coordinate(d,i,swp);
     }
     return x;
 }
@@ -210,11 +201,49 @@ VectorFunctionModelInterface<ValidatedTag>* ScalarTaylorFunction::_create_vector
 }
 
 
-
-Sweeper ScalarTaylorFunction::sweeper() const
-{
-    return this->_model.sweeper();
+// To scale from a model on [a,b] to a model on [c,d], use scale factor s=(d-c)/(b-a)
+// and translation t=((c+d)-(a+b))/(b-a)
+// Because we are scaling the model on [-1,+1], this is not the same as
+// the mapping taking [a,b] to [c,d]
+ScalarTaylorFunction partial_restriction(const ScalarTaylorFunction& tv, Nat k, const ExactInterval& new_ivl) {
+    ARIADNE_ASSERT(k<tv.argument_size())
+    const ExactInterval& old_ivl=tv.domain()[k];
+    ARIADNE_ASSERT(subset(new_ivl,old_ivl));
+    if(new_ivl==old_ivl) { return tv; }
+    Float a=old_ivl.lower().raw(); Float b=old_ivl.upper().raw();
+    Float c=new_ivl.lower().raw(); Float d=new_ivl.upper().raw();
+    if(a==b) { ARIADNE_ASSERT( a<b || (a==b && c==d) ); return tv; }
+    ValidatedNumber s=static_cast<ValidatedNumber>(sub_ivl(d,c)/sub_ivl(b,a));
+    // ValidatedNumber t=(mul_ivl(b,c)-mul_ivl(a,d))/sub_ivl(b,a);  // WRONG!!
+    ValidatedNumber t=static_cast<ValidatedNumber>((add_ivl(c,d)-add_ivl(a,b))/sub_ivl(b,a));
+    ExactBox new_dom=tv.domain();
+    new_dom[k]=new_ivl;
+    return ScalarTaylorFunction(new_dom,preaffine(tv.model(),k,s,t));
 }
+
+ScalarTaylorFunction restriction(const ScalarTaylorFunction& tv, const ExactBox& d) {
+    ARIADNE_ASSERT(subset(d,tv.domain()));
+    const ExactBox& od=tv.domain();
+    ScalarTaylorFunction r=tv;
+    for(Nat j=0; j!=d.size(); ++j) {
+        if(od[j]!=d[j]) { r=partial_restriction(r,j,d[j]); }
+    }
+    return r;
+}
+
+Void ScalarTaylorFunction::restrict(const ExactBox& d) {
+    (*this)=restriction(*this,d);
+}
+
+ScalarTaylorFunction extension(const ScalarTaylorFunction& tv, const ExactBox& d) {
+    const ExactBox& domain=tv.domain();
+    ARIADNE_ASSERT(subset(domain,d));
+    for(Nat i=0; i!=d.size(); ++i) {
+        ARIADNE_ASSERT(domain[i]==d[i] || domain[i].lower()==domain[i].upper());
+    }
+    return ScalarTaylorFunction(d,tv._model);
+}
+
 
 
 Polynomial<ValidatedNumber> polynomial(const ValidatedTaylorModel& tm);
@@ -269,101 +298,145 @@ Bool ScalarTaylorFunction::operator==(const ScalarTaylorFunction& tv) const
 
 ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const ScalarTaylorFunction& y) {
     ARIADNE_ASSERT(subset(x.domain(),y.domain()));
-    if(x.domain()==y.domain()) { x._model+=y._model; }
-    else { x._model+=restrict(y,x.domain())._model; }
+    if(x.domain()==y.domain()) { x.model()+=y.model(); }
+    else { x.model()+=restriction(y,x.domain()).model(); }
     return x;
 }
 
 ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const ScalarTaylorFunction& y) {
     ARIADNE_ASSERT(subset(x.domain(),y.domain()));
-    if(x.domain()==y.domain()) { x._model-=y._model; }
-    else { x._model-=restrict(y,x.domain())._model; }
+    if(x.domain()==y.domain()) { x.model()-=y.model(); }
+    else { x.model()-=restriction(y,x.domain()).model(); }
     return x;
 }
 
 
 ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f, const ValidatedNumber& c) {
-    f._model+=c;
+    f.model()+=c;
     return f;
 }
 
 ScalarTaylorFunction& operator-=(ScalarTaylorFunction& f, const ValidatedNumber& c) {
-    f._model-=c;
+    f.model()-=c;
     return f;
 }
 
 ScalarTaylorFunction& operator*=(ScalarTaylorFunction& f, const ValidatedNumber& c) {
-    f._model*=c;
+    f.model()*=c;
     return f;
 }
 
 ScalarTaylorFunction& operator/=(ScalarTaylorFunction& f, const ValidatedNumber& c) {
-    f._model/=c;
+    f.model()/=c;
     return f;
 }
 
 ScalarTaylorFunction operator+(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x._domain,x._model);
+    return ScalarTaylorFunction(x.domain(),x.model());
 }
 
 ScalarTaylorFunction operator-(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x._domain,-x._model);
+    return ScalarTaylorFunction(x.domain(),-x.model());
 }
 
 
 ScalarTaylorFunction operator+(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
-    if(x1._domain==x2._domain) {
-        return ScalarTaylorFunction(x1._domain,x1._model+x2._model); }
+    if(x1.domain()==x2.domain()) {
+        return ScalarTaylorFunction(x1.domain(),x1.model()+x2.model()); }
     else {
-        ExactBox domain=intersection(x1._domain,x2._domain);
-        return ScalarTaylorFunction(domain,restrict(x1,domain)._model+restrict(x2,domain)._model);}
+        ExactBox domain=intersection(x1.domain(),x2.domain());
+        return ScalarTaylorFunction(domain,restriction(x1,domain).model()+restriction(x2,domain).model());}
 }
 
 ScalarTaylorFunction operator-(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
-    if(x1._domain==x2._domain) {
-        return ScalarTaylorFunction(x1._domain,x1._model-x2._model); }
+    if(x1.domain()==x2.domain()) {
+        return ScalarTaylorFunction(x1.domain(),x1.model()-x2.model()); }
     else {
-        ExactBox domain=intersection(x1._domain,x2._domain);
-        return ScalarTaylorFunction(domain,restrict(x1,domain)._model-restrict(x2,domain)._model);}
+        ExactBox domain=intersection(x1.domain(),x2.domain());
+        return ScalarTaylorFunction(domain,restriction(x1,domain).model()-restriction(x2,domain).model());}
 }
 
 ScalarTaylorFunction operator*(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
-    if(x1._domain==x2._domain) {
-        return ScalarTaylorFunction(x1._domain,x1._model*x2._model); }
+    if(x1.domain()==x2.domain()) {
+        return ScalarTaylorFunction(x1.domain(),x1.model()*x2.model()); }
     else {
-        ExactBox domain=intersection(x1._domain,x2._domain);
-        return ScalarTaylorFunction(domain,restrict(x1,domain)._model*restrict(x2,domain)._model);}
+        ExactBox domain=intersection(x1.domain(),x2.domain());
+        return ScalarTaylorFunction(domain,restriction(x1,domain).model()*restriction(x2,domain).model());}
 }
 
 ScalarTaylorFunction operator/(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
-    if(x1._domain==x2._domain) {
-        return ScalarTaylorFunction(x1._domain,x1._model/x2._model); }
+    if(x1.domain()==x2.domain()) {
+        return ScalarTaylorFunction(x1.domain(),x1.model()/x2.model()); }
     else {
-        ExactBox domain=intersection(x1._domain,x2._domain);
-        return ScalarTaylorFunction(domain,restrict(x1,domain)._model/restrict(x2,domain)._model);}
+        ExactBox domain=intersection(x1.domain(),x2.domain());
+        return ScalarTaylorFunction(domain,restriction(x1,domain).model()/restriction(x2,domain).model());}
 }
+
+ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, const ValidatedNumber& c) {
+    ScalarTaylorFunction r(x); r+=c; return r;
+}
+
+ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, const ValidatedNumber& c) {
+    ScalarTaylorFunction r(x); r+=neg(c); return r;
+}
+
+ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const ValidatedNumber& c) {
+    ScalarTaylorFunction r(x); r*=c; return r;
+}
+
+ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const ValidatedNumber& c) {
+    ScalarTaylorFunction r(x); r*=rec(c); return r;
+}
+
+ScalarTaylorFunction operator+(const ValidatedNumber& c, const ScalarTaylorFunction& x) {
+    ScalarTaylorFunction r(x); r+=c; return r;
+}
+
+ScalarTaylorFunction operator-(const ValidatedNumber& c, const ScalarTaylorFunction& x) {
+    ScalarTaylorFunction r(neg(x)); r+=c; return r;
+}
+
+ScalarTaylorFunction operator*(const ValidatedNumber& c, const ScalarTaylorFunction& x) {
+    ScalarTaylorFunction r(x); r*=c; return r;
+}
+
+ScalarTaylorFunction operator/(const ValidatedNumber& c, const ScalarTaylorFunction& x) {
+    ScalarTaylorFunction r(rec(x)); r*=c; return r;
+}
+
 
 
 
 
 
 ScalarTaylorFunction max(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
-    if(x1._domain==x2._domain) {
-        return ScalarTaylorFunction(x1._domain,max(x1._model,x2._model)); }
+    if(x1.domain()==x2.domain()) {
+        return ScalarTaylorFunction(x1.domain(),max(x1.model(),x2.model())); }
     else {
-        ExactBox domain=intersection(x1._domain,x2._domain);
-        return ScalarTaylorFunction(domain,max(restrict(x1,domain)._model,restrict(x2,domain)._model));}
+        ExactBox domain=intersection(x1.domain(),x2.domain());
+        return ScalarTaylorFunction(domain,max(restriction(x1,domain).model(),restriction(x2,domain).model()));}
 }
 
 ScalarTaylorFunction min(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
-    if(x1._domain==x2._domain) {
-        return ScalarTaylorFunction(x1._domain,min(x1._model,x2._model)); }
+    if(x1.domain()==x2.domain()) {
+        return ScalarTaylorFunction(x1.domain(),min(x1.model(),x2.model())); }
     else {
-        ExactBox domain=intersection(x1._domain,x2._domain);
-        return ScalarTaylorFunction(domain,min(restrict(x1,domain)._model,restrict(x2,domain)._model));}
+        ExactBox domain=intersection(x1.domain(),x2.domain());
+        return ScalarTaylorFunction(domain,min(restriction(x1,domain).model(),restriction(x2,domain).model()));}
 }
 
 
+
+ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, Nat k) {
+    ValidatedNumber sf=rad_val(x.domain()[k]);
+    return ScalarTaylorFunction(x.domain(),antiderivative(x.model(),k)*sf); }
+
+ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, Nat k) {
+    ValidatedNumber sf=rec(rad_val(x.domain()[k]));
+    return ScalarTaylorFunction(x.domain(),derivative(x.model(),k)*sf); }
+
+ScalarTaylorFunction embed(const ExactBox& dom1, const ScalarTaylorFunction& tv2,const ExactBox& dom3) {
+    return ScalarTaylorFunction(product(product(dom1,tv2.domain()),dom3),embed(embed(dom1.size(),tv2.model()),dom3.size())); }
 
 ScalarTaylorFunction* ScalarTaylorFunction::_derivative(Nat j) const
 {
@@ -372,7 +445,7 @@ ScalarTaylorFunction* ScalarTaylorFunction::_derivative(Nat j) const
 
 
 ApproximateNumber
-ScalarTaylorFunction::evaluate(const Vector<ApproximateNumber>& x) const
+ScalarTaylorFunction::operator() (const Vector<ApproximateNumber>& x) const
 {
     const ScalarTaylorFunction& f=*this;
     if(!contains(f.domain(),make_exact(x))) {
@@ -383,44 +456,29 @@ ScalarTaylorFunction::evaluate(const Vector<ApproximateNumber>& x) const
 }
 
 ValidatedNumber
-ScalarTaylorFunction::evaluate(const Vector<ValidatedNumber>& x) const
-{
-    return Ariadne::evaluate(*this,x);
-}
-
-ValidatedNumber
 ScalarTaylorFunction::operator()(const Vector<ValidatedNumber>& x) const
 {
     return Ariadne::evaluate(*this,x);
 }
 
-
-Void ScalarTaylorFunction::restrict(const ExactBox& d) {
-    ARIADNE_ASSERT(subset(d,this->domain()));
-    const ExactBox& od=this->domain();
-    for(Nat j=0; j!=d.size(); ++j) {
-        if(od[j]!=d[j]) { *this=Ariadne::restrict(*this,j,d[j]); }
-    }
+ValidatedNumber
+ScalarTaylorFunction::operator()(const Vector<ExactNumber>& x) const
+{
+    return Ariadne::evaluate(*this,Vector<ValidatedNumber>(x));
 }
 
-ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, const ExactBox& d) {
-    ARIADNE_ASSERT(subset(d,tv.domain()));
-    const ExactBox& od=tv.domain();
-    ScalarTaylorFunction r=tv;
-    for(Nat j=0; j!=d.size(); ++j) {
-        if(od[j]!=d[j]) { r=restrict(r,j,d[j]); }
+Vector<ValidatedNumber>
+ScalarTaylorFunction::gradient(const Vector<ValidatedNumber>& x) const
+{
+    Vector<ValidatedNumber> g=Ariadne::gradient(this->_model,unscale(x,this->_domain));
+    for(Nat j=0; j!=g.size(); ++j) {
+        ValidatedNumber rad=rad_val(this->_domain[j]);
+        g[j]/=rad;
     }
-    return r;
+    return g;
 }
 
-ScalarTaylorFunction extend(const ScalarTaylorFunction& tv, const ExactBox& d) {
-    const ExactBox& domain=tv.domain();
-    ARIADNE_ASSERT(subset(domain,d));
-    for(Nat i=0; i!=d.size(); ++i) {
-        ARIADNE_ASSERT(domain[i]==d[i] || domain[i].lower()==domain[i].upper());
-    }
-    return ScalarTaylorFunction(d,tv._model);
-}
+
 
 ValidatedNumber
 evaluate(const ScalarTaylorFunction& f, const Vector<ValidatedNumber>& x) {
@@ -437,19 +495,7 @@ unchecked_evaluate(const ScalarTaylorFunction& f, const Vector<ValidatedNumber>&
 
 
 ScalarTaylorFunction
-compose(const EffectiveScalarFunction& g, const VectorTaylorFunction& f)
-{
-    return ScalarTaylorFunction(f.domain(),g.evaluate(f.models()));
-}
-
-ScalarTaylorFunction
 compose(const ValidatedScalarFunction& g, const VectorTaylorFunction& f)
-{
-    return ScalarTaylorFunction(f.domain(),g.evaluate(f.models()));
-}
-
-ScalarTaylorFunction
-compose(const ValidatedScalarFunctionInterface& g, const VectorTaylorFunction& f)
 {
     return ScalarTaylorFunction(f.domain(),g.evaluate(f.models()));
 }
@@ -472,12 +518,6 @@ unchecked_compose(const ScalarTaylorFunction& g, const VectorTaylorFunction& f)
 
 
 ScalarTaylorFunction
-partial_evaluate(const ScalarTaylorFunction& tf, Nat k, const ExactNumber& c)
-{
-    return partial_evaluate(tf,k,ValidatedNumber(c));
-}
-
-ScalarTaylorFunction
 partial_evaluate(const ScalarTaylorFunction& te, Nat k, const ValidatedNumber& c)
 {
     // Scale c to domain
@@ -497,30 +537,6 @@ partial_evaluate(const ScalarTaylorFunction& te, Nat k, const ValidatedNumber& c
 }
 
 
-// To scale from a model on [a,b] to a model on [c,d], use scale factor s=(d-c)/(b-a)
-// and translation t=((c+d)-(a+b))/(b-a)
-// Because we are scaling the model on [-1,+1], this is not the same as
-// the mapping taking [a,b] to [c,d]
-ScalarTaylorFunction partial_restrict(const ScalarTaylorFunction& tv, Nat k, const ExactInterval& new_ivl) {
-    ARIADNE_ASSERT(k<tv.argument_size())
-    const ExactInterval& old_ivl=tv.domain()[k];
-    ARIADNE_ASSERT(subset(new_ivl,old_ivl));
-    if(new_ivl==old_ivl) { return tv; }
-    Float a=old_ivl.lower().raw(); Float b=old_ivl.upper().raw();
-    Float c=new_ivl.lower().raw(); Float d=new_ivl.upper().raw();
-    if(a==b) { ARIADNE_ASSERT( a<b || (a==b && c==d) ); return tv; }
-    ValidatedNumber s=static_cast<ValidatedNumber>(sub_ivl(d,c)/sub_ivl(b,a));
-    // ValidatedNumber t=(mul_ivl(b,c)-mul_ivl(a,d))/sub_ivl(b,a);  // WRONG!!
-    ValidatedNumber t=static_cast<ValidatedNumber>((add_ivl(c,d)-add_ivl(a,b))/sub_ivl(b,a));
-    ExactBox new_dom=tv.domain();
-    new_dom[k]=new_ivl;
-    return ScalarTaylorFunction(new_dom,preaffine(tv.model(),k,s,t));
-}
-
-
-ScalarTaylorFunction restrict(const ScalarTaylorFunction& tv, Nat k, const ExactInterval& new_ivl) {
-    return partial_restrict(tv,k,new_ivl);
-}
 
 ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& f, Nat k, ExactFloat c)
 {
@@ -551,7 +567,7 @@ split(const ScalarTaylorFunction& tv, Nat j)
 Bool refines(const ScalarTaylorFunction& tv1, const ScalarTaylorFunction& tv2)
 {
     if(tv1.domain()==tv2.domain()) { return refines(tv1.model(),tv2.model()); }
-    if(subset(tv2.domain(),tv1.domain())) { return refines(restrict(tv1,tv2.domain()).model(),tv2.model()); }
+    if(subset(tv2.domain(),tv1.domain())) { return refines(restriction(tv1,tv2.domain()).model(),tv2.model()); }
     else { return false; }
 }
 
@@ -561,7 +577,7 @@ Bool disjoint(const ScalarTaylorFunction& tv1, const ScalarTaylorFunction& tv2)
         return disjoint(tv1.model(),tv2.model());
     } else {
         ExactBox domain=intersection(tv1.domain(),tv2.domain());
-        return disjoint(restrict(tv1,domain).model(),restrict(tv2,domain).model());
+        return disjoint(restriction(tv1,domain).model(),restriction(tv2,domain).model());
     }
 }
 
@@ -583,10 +599,6 @@ ErrorFloat distance(const ScalarTaylorFunction& f1, const EffectiveScalarFunctio
     return distance(f1,ScalarTaylorFunction(f1.domain(),f2,f1.sweeper()));
 }
 
-Vector<ScalarTaylorFunction> compose(const Vector<ScalarTaylorFunction>& x, const Vector<ScalarTaylorFunction>& y) {
-    ARIADNE_NOT_IMPLEMENTED; }
-ScalarTaylorFunction compose(const ScalarTaylorFunction& x, const Vector<ScalarTaylorFunction>& y) {
-    ARIADNE_NOT_IMPLEMENTED; }
 
 Vector<ScalarTaylorFunction>
 prod(const Matrix<ValidatedNumber>& A,
@@ -617,21 +629,6 @@ midpoint(const ScalarTaylorFunction& f)
     return ScalarTaylorFunction(f.domain(),tm);
 }
 
-
-ScalarTaylorFunction
-compose(const EffectiveScalarFunction& f, const Vector<ScalarTaylorFunction>& g)
-{
-    ARIADNE_ASSERT(f.argument_size()==g.size());
-    for(Nat i=0; i!=g.size(); ++i) {
-        ARIADNE_ASSERT(g.zero_element().domain()==g[i].domain());
-    }
-
-    ExactBox gdomain=g.zero_element().domain();
-    Vector<ValidatedTaylorModel> gmodels(g.size());
-    for(Nat i=0; i!=g.size(); ++i) { gmodels[i]=g[i].model(); }
-
-    return ScalarTaylorFunction(gdomain,f.evaluate(gmodels));
-}
 
 OutputStream& operator<<(OutputStream& os, const Representation<Float>& flt_repr)
 {
@@ -779,7 +776,7 @@ OutputStream& operator<<(OutputStream& os, const Representation<ScalarTaylorFunc
 }
 */
 /*
-OutputStream& operator<<(OutputStream& os, const ModelsRepresentation<ScalarTaylorFunction>& frepr)
+OutputStream& operator<<(OutputStream& os, const ModelRepresentation<ScalarTaylorFunction>& frepr)
 {
     ScalarTaylorFunction const& f=*frepr.pointer;
     Float truncatation_error = 0.0;
@@ -793,7 +790,7 @@ OutputStream& operator<<(OutputStream& os, const ModelsRepresentation<ScalarTayl
 }
 */
 
-OutputStream& operator<<(OutputStream& os, const ModelsRepresentation<ScalarTaylorFunction>& frepr)
+OutputStream& operator<<(OutputStream& os, const ModelRepresentation<ScalarTaylorFunction>& frepr)
 {
     ScalarTaylorFunction const& f=*frepr.pointer;
     ScalarTaylorFunction tf=f;
@@ -939,18 +936,6 @@ VectorTaylorFunction& VectorTaylorFunction::operator=(const ValidatedVectorFunct
 }
 
 
-VectorTaylorFunction substitute(const VectorTaylorFunction& f, Nat k, const ScalarTaylorFunction& h) {
-    ARIADNE_ASSERT_MSG(f.argument_size()==h.argument_size()+1u,"f="<<f<<", k="<<k<<", h="<<h);
-    const ExactInterval& dk=f.domain()[k];
-    ValidatedTaylorModel unscaled_model=unscale(h.model(),dk);
-    return VectorTaylorFunction(h.domain(),substitute(f.models(),k,unscaled_model));
-}
-
-ScalarTaylorFunction substitute(const ScalarTaylorFunction& f, Nat k, const ScalarTaylorFunction& h) {
-    const ExactInterval& dk=f.domain()[k];
-    ValidatedTaylorModel unscaled_model=unscale(h.model(),dk);
-    return ScalarTaylorFunction(h.domain(),substitute(f.model(),k,unscaled_model));
-}
 
 
 VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
@@ -1112,7 +1097,7 @@ VectorTaylorFunction::identity(const ExactBox& d, Sweeper swp)
 VectorTaylorFunction
 VectorTaylorFunction::projection(const ExactBox& d, Nat imin, Nat imax, Sweeper swp)
 {
-    return VectorTaylorFunction(ScalarTaylorFunction::variables(d,imin,imax,swp));
+    return VectorTaylorFunction(ScalarTaylorFunction::coordinates(d,imin,imax,swp));
 }
 
 
@@ -1360,8 +1345,10 @@ VectorTaylorFunction::clobber()
 
 
 
+
+
 Vector<ApproximateNumber>
-VectorTaylorFunction::evaluate(const Vector<ApproximateNumber>& x) const
+VectorTaylorFunction::operator()(const Vector<ApproximateNumber>& x) const
 {
     const VectorTaylorFunction& f=*this;
     if(!decide(contains(f.domain(),x))) {
@@ -1375,9 +1362,8 @@ VectorTaylorFunction::evaluate(const Vector<ApproximateNumber>& x) const
     return r;
 }
 
-
 Vector<ValidatedNumber>
-VectorTaylorFunction::evaluate(const Vector<ValidatedNumber>& x) const
+VectorTaylorFunction::operator()(const Vector<ValidatedNumber>& x) const
 {
     const VectorTaylorFunction& f=*this;
     if(!contains(f.domain(),x)) {
@@ -1385,18 +1371,6 @@ VectorTaylorFunction::evaluate(const Vector<ValidatedNumber>& x) const
     }
     Vector<ValidatedNumber> sx=Ariadne::unscale(x,f._domain);
     return Ariadne::evaluate(f._models,sx);
-}
-
-Vector<ApproximateNumber>
-VectorTaylorFunction::operator()(const Vector<ApproximateNumber>& x) const
-{
-    return this->evaluate(x);
-}
-
-Vector<ValidatedNumber>
-VectorTaylorFunction::operator()(const Vector<ValidatedNumber>& x) const
-{
-    return this->evaluate(x);
 }
 
 Matrix<ValidatedNumber>
@@ -1415,7 +1389,7 @@ VectorTaylorFunction::jacobian(const Vector<ValidatedNumber>& x) const
 Void
 VectorTaylorFunction::restrict(const ExactBox& x)
 {
-    *this=Ariadne::restrict(*this,x);
+    *this=restriction(*this,x);
 }
 
 
@@ -1497,13 +1471,13 @@ embed(const ExactBox& d1, const VectorTaylorFunction& f, const ExactBox& d2)
 }
 
 VectorTaylorFunction
-restrict(const VectorTaylorFunction& f, const ExactBox& d)
+restriction(const VectorTaylorFunction& f, const ExactBox& d)
 {
-    ARIADNE_ASSERT_MSG(subset(d,f.domain()),"Cannot restrict "<<f<<" to non-sub-domain "<<d);
+    ARIADNE_ASSERT_MSG(subset(d,f.domain()),"Cannot restriction "<<f<<" to non-sub-domain "<<d);
     if(d==f.domain()) { return f; }
     VectorTaylorFunction r(f.result_size(),d,f.sweeper());
     for(Nat i=0; i!=r.result_size(); ++i) {
-        r.set(i,restrict(f[i],d));
+        r.set(i,restriction(f[i],d));
     }
     return r;
 }
@@ -1607,7 +1581,7 @@ operator+(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
         return VectorTaylorFunction(f1.domain(),Vector<ValidatedTaylorModel>(f1.models()+f2.models()));
     } else {
         ExactBox new_domain=intersection(f1.domain(),f2.domain());
-        return operator+(restrict(f1,new_domain),restrict(f2,new_domain));
+        return operator+(restriction(f1,new_domain),restriction(f2,new_domain));
     }
 }
 
@@ -1620,7 +1594,7 @@ operator-(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
         return VectorTaylorFunction(f1.domain(),Vector<ValidatedTaylorModel>(f1.models()-f2.models()));
     } else {
         ExactBox new_domain=intersection(f1.domain(),f2.domain());
-        return operator-(restrict(f1,new_domain),restrict(f2,new_domain));
+        return operator-(restriction(f1,new_domain),restriction(f2,new_domain));
     }
 }
 
@@ -1632,7 +1606,7 @@ operator*(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2)
         return VectorTaylorFunction(f1.domain(),Vector<ValidatedTaylorModel>(f1.models()*f2.model()));
     } else {
         ExactBox new_domain=intersection(f1.domain(),f2.domain());
-        return operator*(restrict(f1,new_domain),restrict(f2,new_domain));
+        return operator*(restriction(f1,new_domain),restriction(f2,new_domain));
     }
 }
 
@@ -1644,7 +1618,7 @@ operator*(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2)
         return VectorTaylorFunction(f1.domain(),Vector<ValidatedTaylorModel>(f1.model()*f2.models()));
     } else {
         ExactBox new_domain=intersection(f1.domain(),f2.domain());
-        return operator*(restrict(f1,new_domain),restrict(f2,new_domain));
+        return operator*(restriction(f1,new_domain),restriction(f2,new_domain));
     }
 }
 
@@ -1723,12 +1697,6 @@ operator-(const VectorTaylorFunction& f1, const EffectiveVectorFunction& f2) {
 
 
 VectorTaylorFunction
-partial_evaluate(const VectorTaylorFunction& tf, Nat k, const ExactNumber& c)
-{
-    return partial_evaluate(tf,k,ValidatedNumber(c));
-}
-
-VectorTaylorFunction
 partial_evaluate(const VectorTaylorFunction& tf, Nat k, const ValidatedNumber& c)
 {
     // Scale c to domain
@@ -1749,19 +1717,19 @@ partial_evaluate(const VectorTaylorFunction& tf, Nat k, const ValidatedNumber& c
 
 
 VectorTaylorFunction
-partial_restrict(const VectorTaylorFunction& tf, Nat k, const ExactInterval& d)
+partial_restriction(const VectorTaylorFunction& tf, Nat k, const ExactInterval& d)
 {
     VectorTaylorFunction r(tf.result_size(),tf.domain(),tf.sweeper());
     for(Nat i=0; i!=tf.result_size(); ++i) {
-        r[i]=partial_restrict(tf[i],k,d);
+        r[i]=partial_restriction(tf[i],k,d);
     }
     return r;
 }
 
 VectorTaylorFunction
-restrict(const VectorTaylorFunction& tf, Nat k, const ExactInterval& d)
+restriction(const VectorTaylorFunction& tf, Nat k, const ExactInterval& d)
 {
-    return partial_restrict(tf,k,d);
+    return partial_restriction(tf,k,d);
 }
 
 
@@ -1776,12 +1744,6 @@ evaluate(const VectorTaylorFunction& f, const Vector<ValidatedNumber>& x) {
 Vector<ValidatedNumber>
 unchecked_evaluate(const VectorTaylorFunction& f, const Vector<ValidatedNumber>& x) {
     return evaluate(f.models(),unscale(x,f.domain()));
-}
-
-VectorTaylorFunction
-compose(const EffectiveVectorFunction& g, const VectorTaylorFunction& f)
-{
-    return VectorTaylorFunction(f.domain(),g.evaluate(f.models()));
 }
 
 VectorTaylorFunction
@@ -1899,7 +1861,7 @@ OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<Vector
     os << "[";
     for(Nat i=0; i!=function.result_size(); ++i) {
         if(i!=0) { os << ","; }
-        os << polynomial_repr(function[i],repr.threshold,repr.names);
+        os << polynomial_representation(function[i],repr.threshold,repr.names);
     }
     return os << "]";
 }
@@ -1910,7 +1872,7 @@ OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation< List<
     os << "[";
     for(Nat i=0; i!=functions.size(); ++i) {
         if(i!=0) { os << ","; }
-        os << polynomial_repr(functions[i],repr.threshold);
+        os << polynomial_representation(functions[i],repr.threshold);
     }
     return os << "]";
 }
@@ -1982,11 +1944,6 @@ TaylorFunctionFactory::create_coordinate(const ExactBox& domain, Nat k) const
     return ScalarTaylorFunction::coordinate(domain,k,this->_sweeper);
 }
 
-ScalarTaylorFunction
-TaylorFunctionFactory::create_identity(const ExactInterval& domain) const
-{
-    return ScalarTaylorFunction::identity(domain,this->_sweeper);
-}
 
 VectorTaylorFunction
 TaylorFunctionFactory::create_identity(const ExactBox& domain) const

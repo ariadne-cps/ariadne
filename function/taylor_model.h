@@ -451,6 +451,7 @@ Vector<TaylorModel<ValidatedFloat>> substitute(const Vector<TaylorModel<Validate
 Vector<TaylorModel<ValidatedFloat>> antiderivative(const Vector<TaylorModel<ValidatedFloat>>& x, Nat k);
 Vector<TaylorModel<ValidatedFloat>> embed(const Vector<TaylorModel<ValidatedFloat>>& x, Nat as);
 Vector<TaylorModel<ValidatedFloat>> embed(Nat as, const Vector<TaylorModel<ValidatedFloat>>& x);
+Vector<ValidatedNumber> gradient(const TaylorModel<ValidatedFloat>& x, const Vector<ValidatedNumber>& y);
 Matrix<ValidatedNumber> jacobian(const Vector<TaylorModel<ValidatedFloat>>& x, const Vector<ValidatedNumber>& y);
 //Matrix<ExactInterval> jacobian(const Vector<TaylorModel<ValidatedFloat>>& x);
 Bool refines(const Vector<TaylorModel<ValidatedFloat>>& x1, const Vector<TaylorModel<ValidatedFloat>>& x2);

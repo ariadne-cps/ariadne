@@ -194,6 +194,8 @@ template<> class ScalarFunctionModel<ValidatedTag>
 inline NormType norm(const ScalarFunctionModel<ValidatedTag>& f) { return f._ptr->_norm(); }
 inline ScalarFunctionModel<ValidatedTag> derivative(const ScalarFunctionModel<ValidatedTag>& f, Nat j) { return f._ptr->_derivative(j); }
 inline ScalarFunctionModel<ValidatedTag> antiderivative(const ScalarFunctionModel<ValidatedTag>& f, Nat j) { return f._ptr->_antiderivative(j); }
+inline ScalarFunctionModel<ValidatedTag> restriction(const ScalarFunctionModel<ValidatedTag>& f, const ExactBox& d) {
+    ScalarFunctionModel<ValidatedTag> r(f); r.restrict(d); return r; }
 
 inline ScalarFunctionModel<ValidatedTag> embed(const ExactBox& d1, const ScalarFunctionModel<ValidatedTag>& f, const ExactBox& d2) {
     return f._ptr->_embed(d1,d2); }

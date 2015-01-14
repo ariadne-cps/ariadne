@@ -76,7 +76,7 @@ Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const E
 {
     const Nat m=f.result_size();
     const Nat n=f.argument_size();
-    VectorTaylorFunction g=restrict(f,dom);
+    VectorTaylorFunction g=restriction(f,dom);
 
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
     MultiIndex a;

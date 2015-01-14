@@ -2908,6 +2908,15 @@ ErrorFloat norm(const Vector<TaylorModel<ValidatedFloat>>& h) {
 
 // Jacobian matrices
 
+Vector<ValidatedNumber>
+gradient(const TaylorModel<ValidatedFloat>& f, const Vector<ValidatedNumber>& x)
+{
+    Vector< Differential<ValidatedNumber> > dx=Differential<ValidatedNumber>::variables(1u,x);
+    Differential<ValidatedNumber> df=evaluate(f.expansion(),dx);
+    return gradient(df);
+}
+
+
 // Compute the Jacobian over an arbitrary domain
 Matrix<ValidatedNumber>
 jacobian(const Vector<TaylorModel<ValidatedFloat>>& f, const Vector<ValidatedNumber>& x)

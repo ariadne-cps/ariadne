@@ -38,7 +38,7 @@
 #include "function/polynomial.h"
 #include "function/function.h"
 #include "function/function_model.h"
-#include "function/taylor_function.h"
+//#include "function/taylor_function.h"
 #include "function/symbolic_function.h"
 
 #endif

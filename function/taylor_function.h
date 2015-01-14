@@ -174,7 +174,7 @@ template<class M> class FunctionPatch
     FunctionPatch& operator=(const ScalarFunctionModel<ValidatedTag>& f);
 
     //! \brief Construct a FunctionPatch over the domain \a d from the function \a f.
-    explicit FunctionPatch(const DomainType& d, const ValidatedScalarFunction& f, Sweeper swp);
+    explicit FunctionPatch(const DomainType& d, const ScalarFunctionType<M>& f, Sweeper swp);
     //@}
 
     //@{
@@ -244,7 +244,7 @@ template<class M> class FunctionPatch
     //! \brief A polynomial representation.
     Polynomial<ValidatedFloat> polynomial() const;
     //! \brief A multivalued function equal to the model on the domain.
-    ValidatedScalarFunction function() const;
+    ScalarFunctionType<M> function() const;
 
     //! \brief Set the error of the expansion.
     Void set_error(const ErrorType& ne) { this->_model.set_error(ne); }
@@ -446,16 +446,17 @@ template<class M> class VectorFunctionPatch
     : public VectorFunctionModelMixin<VectorFunctionPatch<M>,typename M::Paradigm>
 {
     friend class VectorFunctionPatchElementReference<M>;
-
+    typedef typename M::Paradigm P;
   public:
     typedef ExactBox DomainType;
-    typedef ValidatedTaylorModel ModelType;
-    typedef Box<ModelType::CodomainType> CodomainType;
-    typedef Box<ModelType::RangeType> RangeType;
-    typedef ModelType::ExpansionType ExpansionType;
-    typedef ModelType::CoefficientType CoefficientType;
-    typedef ModelType::ErrorType ErrorType;
-    typedef ModelType::NumericType NumericType;
+    typedef M ModelType;
+    typedef Box<typename ModelType::CodomainType> CodomainType;
+    typedef Box<typename ModelType::RangeType> RangeType;
+    typedef typename ModelType::ExpansionType ExpansionType;
+    typedef typename ModelType::CoefficientType CoefficientType;
+    typedef typename ModelType::ErrorType ErrorType;
+    typedef typename ModelType::NumericType NumericType;
+    typedef P Paradigm;
 
     /*! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables. */
     VectorFunctionPatch<M>();
@@ -471,24 +472,24 @@ template<class M> class VectorFunctionPatch
 
     /*! \brief Construct from a domain and the expansion. */
     VectorFunctionPatch<M>(const ExactBox& domain,
-                         const Vector< Expansion<CoefficientType> >& expansion,
+                         const Vector<Expansion<ExactFloat>>& expansion,
                          Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
     VectorFunctionPatch<M>(const ExactBox& domain,
-                         const Vector< Expansion<CoefficientType> >& expansion,
-                         const Vector<ErrorType>& error,
+                         const Vector<Expansion<ExactFloat>>& expansion,
+                         const Vector<ErrorFloat>& error,
                          Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
     VectorFunctionPatch<M>(const ExactBox& domain,
-                         const Vector< Expansion<RawFloat> >& expansion,
+                         const Vector<Expansion<RawFloat>>& expansion,
                          const Vector<RawFloat>& error,
                          Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
     VectorFunctionPatch<M>(const ExactBox& domain,
-                         const Vector< Expansion<RawFloat> >& expansion,
+                         const Vector<Expansion<RawFloat>>& expansion,
                          Sweeper swp);
 
     /*! \brief Construct from a domain and the models. */
@@ -496,7 +497,7 @@ template<class M> class VectorFunctionPatch
 
     /*! \brief Construct from a domain, a function, and a sweeper determining the accuracy. */
     VectorFunctionPatch<M>(const ExactBox& domain,
-                         const ValidatedVectorFunction& function,
+                         const VectorFunctionType<M>& function,
                          const Sweeper& sweeper);
 
     /*! \brief Construct from a vector of scalar Taylor functions. */
@@ -589,7 +590,7 @@ template<class M> class VectorFunctionPatch
     /*! \brief The maximum roundoff/truncation error of the components. */
     ErrorType const error() const;
     //! \brief A multivalued function equal to the model on the domain.
-    ValidatedVectorFunction function() const;
+    VectorFunctionType<M> function() const;
 
     /*! \brief Truncate terms higher than \a bd. */
     VectorFunctionPatch<M>& truncate(const MultiIndexBound& bd);
@@ -605,7 +606,6 @@ template<class M> class VectorFunctionPatch
     OutputStream& repr(OutputStream& os) const;
 
   private:
-    Array< Array<ValidatedNumber> > _powers(const Vector<ValidatedNumber>&) const;
     Void _compute_jacobian() const;
     Void _set_argument_size(SizeType n);
     SizeType _compute_maximum_component_size() const;
@@ -667,16 +667,16 @@ template<class M> VectorFunctionPatch<M> operator*(const Matrix<ExactNumber>& A,
 /*! \brief Multiplication by a matrix. */
 template<class M> VectorFunctionPatch<M> operator*(const Matrix<NumericType<M>>& A, const VectorFunctionPatch<M>& f);
 
-template<class M> VectorFunctionPatch<M> operator+(const ValidatedVectorFunction& f1, const VectorFunctionPatch<M>& tf2);
-template<class M> VectorFunctionPatch<M> operator-(const ValidatedVectorFunction& f1, const VectorFunctionPatch<M>& tf2);
-template<class M> VectorFunctionPatch<M> operator*(const ValidatedScalarFunction& f1, const VectorFunctionPatch<M>& tf2);
-template<class M> VectorFunctionPatch<M> operator*(const ValidatedVectorFunction& f1, const FunctionPatch<M>& tf2);
-template<class M> VectorFunctionPatch<M> operator/(const ValidatedVectorFunction& f1, const FunctionPatch<M>& tf2);
-template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& tf1, const ValidatedVectorFunction& f2);
-template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& tf1, const ValidatedVectorFunction& f2);
-template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& tf1, const ValidatedVectorFunction& f2);
-template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& tf1, const ValidatedScalarFunction& f2);
-template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& tf1, const ValidatedScalarFunction& f2);
+template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionType<M>& f1, const VectorFunctionPatch<M>& tf2);
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionType<M>& f1, const VectorFunctionPatch<M>& tf2);
+template<class M> VectorFunctionPatch<M> operator*(const ScalarFunctionType<M>& f1, const VectorFunctionPatch<M>& tf2);
+template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionType<M>& f1, const FunctionPatch<M>& tf2);
+template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionType<M>& f1, const FunctionPatch<M>& tf2);
+template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& tf1, const VectorFunctionType<M>& f2);
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& tf1, const VectorFunctionType<M>& f2);
+template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& tf1, const VectorFunctionType<M>& f2);
+template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& tf1, const ScalarFunctionType<M>& f2);
+template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& tf1, const ScalarFunctionType<M>& f2);
 
 //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
 template<class M> FunctionPatch<M> compose(const FunctionType<M>& f, const VectorFunctionPatch<M>& g);
@@ -696,7 +696,7 @@ template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatc
 
 template<class M> NormType norm(const VectorFunctionPatch<M>& f);
 template<class M> NormType distance(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2);
-template<class M> NormType distance(const VectorFunctionPatch<M>& f1, const ValidatedVectorFunction& f2);
+template<class M> NormType distance(const VectorFunctionPatch<M>& f1, const VectorFunctionType<M>& f2);
 
 //! \brief Restrict the function \a f to a subdomain \a d.
 template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& f, const ExactBox& d);

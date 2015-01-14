@@ -101,7 +101,7 @@ template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const Model
 {
 }
 
-template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const ValidatedScalarFunction& f, Sweeper swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const ScalarFunctionType<M>& f, Sweeper swp)
     : _domain(d), _model(f.argument_size(),swp)
 {
     ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
@@ -277,7 +277,7 @@ template<class M> Polynomial<ValidatedFloat> FunctionPatch<M>::polynomial() cons
     return compose(p,s);
 }
 
-template<class M> ValidatedScalarFunction FunctionPatch<M>::function() const
+template<class M> ScalarFunctionType<M> FunctionPatch<M>::function() const
 {
     return ValidatedScalarFunction(new FunctionPatch<M>(*this));
 }
@@ -621,25 +621,6 @@ template<class M> ErrorFloat distance(const FunctionPatch<M>& f1, const Validate
 }
 
 
-template<class M> Vector<FunctionPatch<M>> prod(const Matrix<ValidatedNumber>& A,
-     const Vector<FunctionPatch<M>>& x)
-{
-    ARIADNE_ASSERT(x.size()>0);
-    ARIADNE_ASSERT(A.column_size()==x.size());
-    for(SizeType i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x.zero_element().argument_size()); }
-
-    Vector<FunctionPatch<M>> r(A.row_size(),x.zero_element());
-    for(SizeType i=0; i!=A.row_size(); ++i) {
-        for(SizeType j=0; j!=A.column_size(); ++j) {
-            //r[i]+=A[i][j]*x[j];
-            const ValidatedNumber& Aij=A[i][j]; const FunctionPatch<M>& xj=x[j]; FunctionPatch<M>& ri=r[i]; ri+=Aij*xj;
-        }
-    }
-    return r;
-}
-
-template<class M> Matrix<ExactInterval> jacobian(const Vector<FunctionPatch<M>>& tv, const ExactBox& x);
-
 template<class M> FunctionPatch<M> midpoint(const FunctionPatch<M>& f)
 {
     M tm=f.model();
@@ -880,30 +861,6 @@ template<class M> Vector<UpperInterval> ranges(const Vector<FunctionPatch<M>>& x
 }
 
 
-template<class M> Vector<ValidatedNumber> evaluate(const Vector<FunctionPatch<M>>& tv, const Vector<ValidatedNumber>& x)
-{
-    Vector<ValidatedNumber> r(tv.size());
-    for(SizeType i=0; i!=tv.size(); ++i) {
-        r[i]=evaluate(tv[i],x);
-    }
-    return r;
-}
-
-template<class M> Matrix<ValidatedNumber> jacobian(const Vector<FunctionPatch<M>>& tv, const Vector<ValidatedNumber>& x)
-{
-    ARIADNE_ASSERT(check(tv));
-    const Vector<ExactInterval> dom=tv.zero_element().domain();
-    const SizeType n=dom.size();
-    Vector< Differential<ValidatedNumber> > s(n,n,1u);
-    for(SizeType j=0; j!=n; ++j) {
-        ExactInterval dj=dom[j];
-        s[j].set_value((x[j]-med_val(dj))/rad_val(dj));
-        s[j].set_gradient(j,rec(rad_val(dj)));
-    }
-    Vector< Expansion<ExactFloat> > p=expansion(tv);
-    Vector< Differential<ValidatedNumber> > d=evaluate(p,s);
-    return d.jacobian();
-}
 
 
 
@@ -956,7 +913,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
-                                           const Vector< Expansion<ExactFloat> >& f,
+                                           const Vector<Expansion<ExactFloat>>& f,
                                            const Vector<ErrorFloat>& e,
                                            Sweeper swp)
     : _domain(d), _models(f.size(),ModelType(d.size(),swp))
@@ -969,15 +926,15 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
-                                           const Vector< Expansion<ExactFloat> >& f,
+                                           const Vector<Expansion<ExactFloat>>& f,
                                            Sweeper swp)
     : VectorFunctionPatch<M>(d,f,Vector<ErrorFloat>(f.size()),swp)
 {
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
-                                           const Vector< Expansion<Float> >& f,
-                                           const Vector<Float>& e,
+                                           const Vector<Expansion<RawFloat>>& f,
+                                           const Vector<RawFloat>& e,
                                            Sweeper swp)
     : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<ExactFloat>>const&>(f),
                            reinterpret_cast<Vector<ErrorFloat>const&>(e),swp)
@@ -985,7 +942,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
 }
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
-                                           const Vector< Expansion<Float> >& f,
+                                           const Vector<Expansion<RawFloat>>& f,
                                            Sweeper swp)
     : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<ExactFloat>>const&>(f),Vector<ErrorFloat>(f.size()),swp)
 {
@@ -994,7 +951,7 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
 
 
 template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
-                                           const ValidatedVectorFunction& f,
+                                           const VectorFunctionType<M>& f,
                                            const Sweeper& swp)
     : _domain(d), _models(f.result_size())
 {
@@ -1069,7 +1026,7 @@ template<class M> Void VectorFunctionPatch<M>::adjoin(const FunctionPatch<M>& sf
 
 
 
-template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::constant(const ExactBox& d, const Vector<ValidatedNumber>& c, Sweeper swp)
+template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::constant(const ExactBox& d, const Vector<NumericType>& c, Sweeper swp)
 {
     return VectorFunctionPatch<M>(d,ModelType::constants(d.size(),c,swp));
 }
@@ -1107,7 +1064,7 @@ template<class M> Vector<Expansion<ExactFloat>> const VectorFunctionPatch<M>::ex
     return e;
 }
 
-template<class M> Vector<ErrorFloat> const VectorFunctionPatch<M>::errors() const
+template<class M> Vector<typename VectorFunctionPatch<M>::ErrorType> const VectorFunctionPatch<M>::errors() const
 {
     Vector<ErrorFloat> e(this->result_size());
     for(SizeType i=0; i!=this->result_size(); ++i) {
@@ -1116,7 +1073,7 @@ template<class M> Vector<ErrorFloat> const VectorFunctionPatch<M>::errors() cons
     return e;
 }
 
-template<class M> ErrorFloat const VectorFunctionPatch<M>::error() const
+template<class M> typename VectorFunctionPatch<M>::ErrorType const VectorFunctionPatch<M>::error() const
 {
     ErrorFloat e=0;
     for(SizeType i=0; i!=this->result_size(); ++i) {
@@ -1125,7 +1082,7 @@ template<class M> ErrorFloat const VectorFunctionPatch<M>::error() const
     return e;
 }
 
-template<class M> ValidatedVectorFunction VectorFunctionPatch<M>::function() const
+template<class M> VectorFunctionType<M> VectorFunctionPatch<M>::function() const
 {
     return ValidatedVectorFunction(new VectorFunctionPatch<M>(*this));
 }
@@ -1182,7 +1139,7 @@ template<class M> const UpperBox VectorFunctionPatch<M>::range() const
 }
 
 
-template<class M> const Vector<ExactFloat> VectorFunctionPatch<M>::centre() const
+template<class M> const Vector<typename VectorFunctionPatch<M>::CoefficientType> VectorFunctionPatch<M>::centre() const
 {
     Vector<ExactFloat> result(this->result_size());
     for(SizeType i=0; i!=result.size(); ++i) {
@@ -1333,11 +1290,11 @@ template<class M> Vector<ValidatedNumber> VectorFunctionPatch<M>::operator()(con
     return Ariadne::evaluate(f._models,sx);
 }
 
-template<class M> Matrix<ValidatedNumber> VectorFunctionPatch<M>::jacobian(const Vector<ValidatedNumber>& x) const
+template<class M> Matrix<typename VectorFunctionPatch<M>::NumericType> VectorFunctionPatch<M>::jacobian(const Vector<NumericType>& x) const
 {
-    Matrix<ValidatedNumber> J=Ariadne::jacobian(this->_models,unscale(x,this->_domain));
+    Matrix<NumericType> J=Ariadne::jacobian(this->_models,unscale(x,this->_domain));
     for(SizeType j=0; j!=J.column_size(); ++j) {
-        ValidatedNumber rad=rad_val(this->_domain[j]);
+        NumericType rad=rad_val(this->_domain[j]);
         for(SizeType i=0; i!=J.row_size(); ++i) {
             J[i][j]/=rad;
         }
@@ -1480,27 +1437,27 @@ template<class M> VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, 
     return f;
 }
 
-template<class M> VectorFunctionPatch<M>& operator+=(VectorFunctionPatch<M>& f, const Vector<ValidatedNumber>& c)
+template<class M> VectorFunctionPatch<M>& operator+=(VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c)
 {
     ARIADNE_ASSERT(f.result_size()==c.size());
     f.models()+=c;
     return f;
 }
 
-template<class M> VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, const Vector<ValidatedNumber>& c)
+template<class M> VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c)
 {
     ARIADNE_ASSERT(f.result_size()==c.size());
     f.models()-=c;
     return f;
 }
 
-template<class M> VectorFunctionPatch<M>& operator*=(VectorFunctionPatch<M>& f, const ValidatedNumber& c)
+template<class M> VectorFunctionPatch<M>& operator*=(VectorFunctionPatch<M>& f, const NumericType<M>& c)
 {
     f.models()*=c;
     return f;
 }
 
-template<class M> VectorFunctionPatch<M>& operator/=(VectorFunctionPatch<M>& f, const ValidatedNumber& c)
+template<class M> VectorFunctionPatch<M>& operator/=(VectorFunctionPatch<M>& f, const NumericType<M>& c)
 {
     f.models()/=c;
     return f;
@@ -1570,27 +1527,27 @@ template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>&
     return VectorFunctionPatch<M>(f.domain(),Vector<M>(-f.models()));
 }
 
-template<class M> VectorFunctionPatch<M> operator*(const ValidatedNumber& c, const VectorFunctionPatch<M>& f)
+template<class M> VectorFunctionPatch<M> operator*(const NumericType<M>& c, const VectorFunctionPatch<M>& f)
 {
     return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()*c));
 }
 
-template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f, const ValidatedNumber& c)
+template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f, const NumericType<M>& c)
 {
     return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()*c));
 }
 
-template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f, const ValidatedNumber& c)
+template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f, const NumericType<M>& c)
 {
     return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()/c));
 }
 
-template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f, const Vector<ValidatedNumber>& c)
+template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c)
 {
     return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()+c));
 }
 
-template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f, const Vector<ValidatedNumber>& c)
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c)
 {
     return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()-c));
 }
@@ -1607,7 +1564,7 @@ template<class M> VectorFunctionPatch<M> operator*(const Matrix<Float>& A, const
     return VectorFunctionPatch<M>(f.domain(),models);
 }
 
-template<class M> VectorFunctionPatch<M> operator*(const Matrix<ValidatedNumber>& A, const VectorFunctionPatch<M>& f)
+template<class M> VectorFunctionPatch<M> operator*(const Matrix<NumericType<M>>& A, const VectorFunctionPatch<M>& f)
 {
     ARIADNE_PRECONDITION(A.column_size()==f.size());
     Vector<M> models(A.row_size(),M(f.argument_size(),f.sweeper()));
@@ -1874,43 +1831,6 @@ FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory() {
 FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory(double sweep_threshold) {
     return new TaylorFunctionFactory(ThresholdSweeper(sweep_threshold));
 }
-
-/*
-template<class M> latexstream& operator<<(Output::latexstream& texs, const VectorFunctionPatch<M>& p)
-{
-    using namespace Function;
-    texs << "%VectorFunctionPatch<M>\n";
-    texs << "\\ensuremath{\n";
-    texs << "\\left( \\begin{Array}{c}\n";
-    char var='x';
-    for(SizeType i=0; i!=p.result_size(); ++i) {
-        Bool first = true;
-        if(i!=0) { texs << "\\\\"; }
-        for(MultiIndex j(p.argument_size()); j.degree()<=p.order(); ++j) {
-            const ValidatedNumber& a=p.centre_derivatives()[i][j];
-            if(a!=0) {
-                if(first) { first=false; }
-                else { if(a>0) { texs << '+'; } }
-                if(a==1) { if(j.degree()==0) { texs << a; } }
-                else if(a==-1) { if(j.degree()==0) { texs << a; } else { texs << '-'; } }
-                else { texs << a << ' '; }
-                for(SizeType k=0; k!=p.argument_size(); ++k) {
-                    if(j[k]!=0) {
-                        texs << var << "_{ " << k+1 << "}";
-                        if(j[k]!=1) {
-                            texs << "^{" << j[k] << "}";
-                        }
-                    }
-                    texs << " ";
-                }
-            }
-        }
-        texs << "\n";
-    }
-    texs << "\\end{Array}\\right)\n}\n";
-    return texs;
-}
-*/
 
 
 } // namespace Ariadne

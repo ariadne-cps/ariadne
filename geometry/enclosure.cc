@@ -1280,8 +1280,6 @@ template<class K, class V> Map<K,V> filter(const Map<K,V>& m, const Set<K>& s) {
     return r;
 }
 
-template<class T> OutputStream& operator<<(OutputStream& os, const Representation< List<T> >& repr) {
-    const List<T>& lst=*repr.pointer; os << "["; for(Nat i=0; i!=lst.size(); ++i) { if(i!=0) { os << ","; } lst[i].repr(os); } os << "]"; return os; }
 
 const ValidatedScalarFunctionModel& repr(const ValidatedScalarFunctionModel& f) { return f; }
 const ValidatedVectorFunctionModel& repr(const ValidatedVectorFunctionModel& f) { return f; }

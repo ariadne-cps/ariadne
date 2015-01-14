@@ -47,6 +47,7 @@ class ExactFloat {
   private:
     Float _v;
   public:
+    typedef Exact Paradigm;
     typedef ExactFloat NumericType;
 
     //! \brief Default constructor creates the number 0 (zero).

@@ -76,6 +76,7 @@ class ApproximateFloat {
     static Nat output_precision;
     Float a;
   public:
+    typedef Approximate Paradigm;
     typedef ApproximateFloat NumericType;
   public:
     //! \brief Default constructor creates an uninitialised number.

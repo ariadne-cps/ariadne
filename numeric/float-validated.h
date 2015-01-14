@@ -61,6 +61,7 @@ using PositiveUpperFloat = UpperFloat;
 //! \brief Floating-point lower bounds for real numbers.
 class LowerFloat {
   public:
+    typedef Lower Paradigm;
     typedef LowerFloat NumericType;
   public:
     //! \brief Default constructor yields a lower bound of \a 0.
@@ -102,6 +103,7 @@ class LowerFloat {
 //! \brief Floating-point upper bounds for real numbers.
 class UpperFloat {
   public:
+    typedef Upper Paradigm;
     typedef UpperFloat NumericType;
   public:
     //! \brief Default constructor yields an upper bound of \a 0.
@@ -182,6 +184,7 @@ class UpperFloat {
 //! \endcode
 class ValidatedFloat {
   public:
+    typedef Validated Paradigm;
     typedef ValidatedFloat NumericType;
   public:
     //! \brief Default constructor yields the singleton zero interval \a [0,0].

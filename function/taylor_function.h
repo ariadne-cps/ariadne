@@ -303,45 +303,8 @@ class ScalarTaylorFunction
     //! \brief Restrict to a subdomain.
     Void restrict(const DomainType& d);
 
-    //! \brief Restrict to a subdomain.
-    friend ScalarTaylorFunction restriction(const ScalarTaylorFunction& x, const DomainType& d);
-    //! \brief Extend over a larger domain. Only possible if the larger domain is only larger where the smaller domain is a singleton.
-    //! The extension is performed keeping \a x constant over the new coordinates. // DEPRECATED
-    friend ScalarTaylorFunction extension(const ScalarTaylorFunction& x, const DomainType& d);
-
-    //! \brief Test if the quantity is a better approximation than \a t throughout the domain.
-    friend Bool refines(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
-    //! \brief Test if the function models are inconsistent with representing the same exact function.
-    friend Bool inconsistent(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
-    //! \brief Compute an over-approximation to the common refinement of \a x1 and \a x2.
-    friend ScalarTaylorFunction refinement(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
 
     //@}
-
-
-    // Normed algebra
-    friend NormType norm(const ScalarTaylorFunction& f);
-
-    // Differential algebra
-    friend ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, SizeType k, ExactFloat c);
-    friend ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, SizeType k);
-    friend ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, SizeType k);
-
-    // Function algebra
-    friend ScalarTaylorFunction embed(const ExactBox& dom1, const ScalarTaylorFunction& tv2,const ExactBox& dom3);
-    // Set the value of the \a kth variable to c
-    friend ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, SizeType k, const NumericType& c);
-    // Evaluate a scalar Taylor function on a vector.
-    friend NumericType unchecked_evaluate(const ScalarTaylorFunction&, const Vector<NumericType>&);
-
-    // Compose with an function.
-    friend ScalarTaylorFunction compose(const ValidatedScalarFunction& x, const VectorTaylorFunction& y);
-    friend ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
-
-    // Split the variable over two domains, subdividing along the independent variable j.
-    friend Pair<ScalarTaylorFunction,ScalarTaylorFunction> split(const ScalarTaylorFunction& x, SizeType j);
-
-
 
     /*! \name Arithmetic operations. */
 
@@ -443,6 +406,43 @@ class ScalarTaylorFunction
     VectorFunctionModelInterface<ValidatedTag>* _create_identity() const;
     VectorFunctionModelInterface<ValidatedTag>* _create_vector(SizeType i) const;
 };
+
+//! \brief Restrict to a subdomain.
+ScalarTaylorFunction restriction(const ScalarTaylorFunction& x, const ExactBox& d);
+//! \brief Extend over a larger domain. Only possible if the larger domain is only larger where the smaller domain is a singleton.
+//! The extension is performed keeping \a x constant over the new coordinates. // DEPRECATED
+ScalarTaylorFunction extension(const ScalarTaylorFunction& x, const ExactBox& d);
+
+//! \brief Test if the quantity is a better approximation than \a t throughout the domain.
+Bool refines(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
+//! \brief Test if the function models are inconsistent with representing the same exact function.
+Bool inconsistent(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
+//! \brief Compute an over-approximation to the common refinement of \a x1 and \a x2.
+ScalarTaylorFunction refinement(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
+
+
+// Normed algebra
+NormType norm(const ScalarTaylorFunction& f);
+
+// Differential algebra
+ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, SizeType k, ExactFloat c);
+ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, SizeType k);
+ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, SizeType k);
+
+// Function algebra
+ScalarTaylorFunction embed(const ExactBox& dom1, const ScalarTaylorFunction& tv2,const ExactBox& dom3);
+// Set the value of the \a kth variable to c
+ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, SizeType k, const ScalarTaylorFunction::NumericType& c);
+// Evaluate a scalar Taylor function on a vector.
+ScalarTaylorFunction::NumericType unchecked_evaluate(const ScalarTaylorFunction&, const Vector<ScalarTaylorFunction::NumericType>&);
+
+// Compose with an function.
+ScalarTaylorFunction compose(const ValidatedScalarFunction& x, const VectorTaylorFunction& y);
+ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
+
+// Split the variable over two domains, subdividing along the independent variable j.
+Pair<ScalarTaylorFunction,ScalarTaylorFunction> split(const ScalarTaylorFunction& x, SizeType j);
+
 
 ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f, const ScalarTaylorFunction::NumericType& c);
 ScalarTaylorFunction& operator-=(ScalarTaylorFunction& f, const ScalarTaylorFunction::NumericType& c);
@@ -595,6 +595,7 @@ class VectorTaylorFunction
     const UpperBox range() const;
     /*! \brief The data used to define the Taylor models. */
     const Vector<ModelType>& models() const;
+    Vector<ModelType>& models();
     /*! \brief The data used to define the centre of the Taylor models. */
     const Vector<Expansion<ExactFloat>> expansions() const;
 
@@ -664,112 +665,6 @@ class VectorTaylorFunction
     /*! \brief Write a full representation to an output stream. */
     OutputStream& repr(OutputStream& os) const;
 
-    /*! \brief Inplace addition. */
-    friend VectorTaylorFunction& operator+=(VectorTaylorFunction& f, const VectorTaylorFunction& g);
-    /*! \brief Inplace subtraction. */
-    friend VectorTaylorFunction& operator-=(VectorTaylorFunction& f, const VectorTaylorFunction& g);
-    /*! \brief Inplace addition. */
-    friend VectorTaylorFunction& operator+=(VectorTaylorFunction& f, const Vector<NumericType>& c);
-    /*! \brief Inplace subtraction. */
-    friend VectorTaylorFunction& operator-=(VectorTaylorFunction& f, const Vector<NumericType>& c);
-    /*! \brief Inplace scalar multiplication. */
-    friend VectorTaylorFunction& operator*=(VectorTaylorFunction& f, const NumericType& c);
-    /*! \brief Inplace scalar division. */
-    friend VectorTaylorFunction& operator/=(VectorTaylorFunction& f, const NumericType& c);
-
-    /*! \brief Negation. */
-    friend VectorTaylorFunction operator-(const VectorTaylorFunction& f);
-    /*! \brief Addition. */
-    friend VectorTaylorFunction operator+(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
-    /*! \brief Subtraction. */
-    friend VectorTaylorFunction operator-(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
-    /*! \brief Multiplication. */
-    friend VectorTaylorFunction operator*(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2);
-    /*! \brief Multiplication. */
-    friend VectorTaylorFunction operator*(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2);
-    /*! \brief Division. */
-    friend VectorTaylorFunction operator/(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2);
-
-    /*! \brief Addition of a constant. */
-    friend VectorTaylorFunction operator+(const VectorTaylorFunction& f, const Vector<NumericType>& c);
-    /*! \brief Subtraction of a constant. */
-    friend VectorTaylorFunction operator-(const VectorTaylorFunction& f, const Vector<NumericType>& c);
-    /*! \brief Multiplication by a scalar. */
-    friend VectorTaylorFunction operator*(const NumericType& c, const VectorTaylorFunction& f);
-    /*! \brief Multiplication by a scalar. */
-    friend VectorTaylorFunction operator*(const VectorTaylorFunction& f, const NumericType& c);
-    /*! \brief Division by a scalar. */
-    friend VectorTaylorFunction operator/(const VectorTaylorFunction& f, const NumericType& c);
-    /*! \brief Multiplication by a matrix. */
-    friend VectorTaylorFunction operator*(const Matrix<ExactNumber>& A, const VectorTaylorFunction& f);
-    /*! \brief Multiplication by a matrix. */
-    friend VectorTaylorFunction operator*(const Matrix<NumericType>& A, const VectorTaylorFunction& f);
-
-    friend VectorTaylorFunction operator+(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2);
-    friend VectorTaylorFunction operator-(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2);
-    friend VectorTaylorFunction operator*(const ValidatedScalarFunction& f1, const VectorTaylorFunction& tf2);
-    friend VectorTaylorFunction operator*(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2);
-    friend VectorTaylorFunction operator/(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2);
-    friend VectorTaylorFunction operator+(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2);
-    friend VectorTaylorFunction operator-(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2);
-    friend VectorTaylorFunction operator*(const ScalarTaylorFunction& tf1, const ValidatedVectorFunction& f2);
-    friend VectorTaylorFunction operator*(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2);
-    friend VectorTaylorFunction operator/(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2);
-
-    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    friend ScalarTaylorFunction compose(const ValidatedScalarFunction& f, const VectorTaylorFunction& g);
-    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    friend VectorTaylorFunction compose(const ValidatedVectorFunction& f, const VectorTaylorFunction& g);
-    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    friend ScalarTaylorFunction compose(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
-    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    friend VectorTaylorFunction compose(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
-
-    //! \brief Weak derivative of \a f with respect to variable \a k.
-    friend VectorTaylorFunction derivative(const VectorTaylorFunction& f, SizeType k);
-    //! \brief Antiderivative of \a f with respect to variable \a k.
-    friend VectorTaylorFunction antiderivative(const VectorTaylorFunction& f, SizeType k);
-    //! \brief Antiderivative of \a f with respect to variable \a k, taking value \c 0 when \a x[k]=c.
-    friend VectorTaylorFunction antiderivative(const VectorTaylorFunction& f, SizeType k, ExactFloat c);
-
-    friend NormType norm(const VectorTaylorFunction& f);
-    friend NormType distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
-    friend NormType distance(const VectorTaylorFunction& f1, const ValidatedVectorFunction& f2);
-
-    //! \brief Restrict the function \a f to a subdomain \a d.
-    friend VectorTaylorFunction restriction(const VectorTaylorFunction& f, const ExactBox& d);
-    //! \brief Restrict the function \a f to a larger domain \a d.
-    friend VectorTaylorFunction extension(const VectorTaylorFunction& f, const ExactBox& d);
-
-    friend VectorTaylorFunction embed(const ExactBox& d1, const VectorTaylorFunction& tv2,const ExactBox& d3);
-
-    //! \brief Tests if a function \a f refines another function \a g.
-    //! To be a refinement, the domain of \a f must contain the domain of \a g.
-    friend Bool refines(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
-    friend Bool inconsistent(const VectorTaylorFunction&, const VectorTaylorFunction&);
-    friend VectorTaylorFunction refinement(const VectorTaylorFunction&, const VectorTaylorFunction&);
-
-    //! \brief Compute the function \f$(f \oplus g)(x)=(f(x),g(x))\f$.
-    friend VectorTaylorFunction join(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
-    friend VectorTaylorFunction join(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
-    friend VectorTaylorFunction join(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
-    friend VectorTaylorFunction join(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
-    //! \brief Compute the function \f$(f\otimes g)(x,y)=(f(x),g(y))\f$.
-    friend VectorTaylorFunction combine(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
-    friend VectorTaylorFunction combine(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
-    friend VectorTaylorFunction combine(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
-    friend VectorTaylorFunction combine(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
-
-    friend VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, SizeType k, const NumericType& c);
-
-    friend Vector<NumericType> unchecked_evaluate(const VectorTaylorFunction&, const Vector<NumericType>&);
-    friend ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
-    friend VectorTaylorFunction unchecked_compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
-
-    // Split the domain into halves along the \a j<sup>th</sup> coordinate.
-    friend Pair<VectorTaylorFunction,VectorTaylorFunction> split(const VectorTaylorFunction& x, SizeType j);
-
-    friend OutputStream& operator<<(OutputStream&, const VectorTaylorFunction&);
   private:
     Array< Array<ValidatedNumber> > _powers(const Vector<ValidatedNumber>&) const;
     Void _compute_jacobian() const;
@@ -790,6 +685,117 @@ class VectorTaylorFunction
     ExactBox _domain;
     Vector< ModelType > _models;
 };
+
+
+    /*! \brief Inplace addition. */
+    VectorTaylorFunction& operator+=(VectorTaylorFunction& f, const VectorTaylorFunction& g);
+    /*! \brief Inplace subtraction. */
+    VectorTaylorFunction& operator-=(VectorTaylorFunction& f, const VectorTaylorFunction& g);
+    /*! \brief Inplace addition. */
+    VectorTaylorFunction& operator+=(VectorTaylorFunction& f, const Vector<VectorTaylorFunction::NumericType>& c);
+    /*! \brief Inplace subtraction. */
+    VectorTaylorFunction& operator-=(VectorTaylorFunction& f, const Vector<VectorTaylorFunction::NumericType>& c);
+    /*! \brief Inplace scalar multiplication. */
+    VectorTaylorFunction& operator*=(VectorTaylorFunction& f, const VectorTaylorFunction::NumericType& c);
+    /*! \brief Inplace scalar division. */
+    VectorTaylorFunction& operator/=(VectorTaylorFunction& f, const VectorTaylorFunction::NumericType& c);
+
+    /*! \brief Negation. */
+    VectorTaylorFunction operator-(const VectorTaylorFunction& f);
+    /*! \brief Addition. */
+    VectorTaylorFunction operator+(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
+    /*! \brief Subtraction. */
+    VectorTaylorFunction operator-(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
+    /*! \brief Multiplication. */
+    VectorTaylorFunction operator*(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2);
+    /*! \brief Multiplication. */
+    VectorTaylorFunction operator*(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2);
+    /*! \brief Division. */
+    VectorTaylorFunction operator/(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2);
+
+    /*! \brief Addition of a constant. */
+    VectorTaylorFunction operator+(const VectorTaylorFunction& f, const Vector<VectorTaylorFunction::NumericType>& c);
+    /*! \brief Subtraction of a constant. */
+    VectorTaylorFunction operator-(const VectorTaylorFunction& f, const Vector<VectorTaylorFunction::NumericType>& c);
+    /*! \brief Multiplication by a scalar. */
+    VectorTaylorFunction operator*(const VectorTaylorFunction::NumericType& c, const VectorTaylorFunction& f);
+    /*! \brief Multiplication by a scalar. */
+    VectorTaylorFunction operator*(const VectorTaylorFunction& f, const VectorTaylorFunction::NumericType& c);
+    /*! \brief Division by a scalar. */
+    VectorTaylorFunction operator/(const VectorTaylorFunction& f, const VectorTaylorFunction::NumericType& c);
+    /*! \brief Multiplication by a matrix. */
+    VectorTaylorFunction operator*(const Matrix<ExactNumber>& A, const VectorTaylorFunction& f);
+    /*! \brief Multiplication by a matrix. */
+    VectorTaylorFunction operator*(const Matrix<VectorTaylorFunction::NumericType>& A, const VectorTaylorFunction& f);
+
+    VectorTaylorFunction operator+(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2);
+    VectorTaylorFunction operator-(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2);
+    VectorTaylorFunction operator*(const ValidatedScalarFunction& f1, const VectorTaylorFunction& tf2);
+    VectorTaylorFunction operator*(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2);
+    VectorTaylorFunction operator/(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2);
+    VectorTaylorFunction operator+(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2);
+    VectorTaylorFunction operator-(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2);
+    VectorTaylorFunction operator*(const ScalarTaylorFunction& tf1, const ValidatedVectorFunction& f2);
+    VectorTaylorFunction operator*(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2);
+    VectorTaylorFunction operator/(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2);
+
+    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
+    ScalarTaylorFunction compose(const ValidatedScalarFunction& f, const VectorTaylorFunction& g);
+    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
+    VectorTaylorFunction compose(const ValidatedVectorFunction& f, const VectorTaylorFunction& g);
+    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
+    ScalarTaylorFunction compose(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
+    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
+    VectorTaylorFunction compose(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
+
+    //! \brief Weak derivative of \a f with respect to variable \a k.
+    VectorTaylorFunction derivative(const VectorTaylorFunction& f, SizeType k);
+    //! \brief Antiderivative of \a f with respect to variable \a k.
+    VectorTaylorFunction antiderivative(const VectorTaylorFunction& f, SizeType k);
+    //! \brief Antiderivative of \a f with respect to variable \a k, taking value \c 0 when \a x[k]=c.
+    VectorTaylorFunction antiderivative(const VectorTaylorFunction& f, SizeType k, ExactFloat c);
+
+    NormType norm(const VectorTaylorFunction& f);
+    NormType distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
+    NormType distance(const VectorTaylorFunction& f1, const ValidatedVectorFunction& f2);
+
+    //! \brief Restrict the function \a f to a subdomain \a d.
+    VectorTaylorFunction restriction(const VectorTaylorFunction& f, const ExactBox& d);
+    //! \brief Restrict the function \a f to a larger domain \a d.
+    VectorTaylorFunction extension(const VectorTaylorFunction& f, const ExactBox& d);
+
+    VectorTaylorFunction embed(const ExactBox& d1, const VectorTaylorFunction& tv2,const ExactBox& d3);
+
+    //! \brief Tests if a function \a f refines another function \a g.
+    //! To be a refinement, the domain of \a f must contain the domain of \a g.
+    Bool refines(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
+    Bool inconsistent(const VectorTaylorFunction&, const VectorTaylorFunction&);
+    VectorTaylorFunction refinement(const VectorTaylorFunction&, const VectorTaylorFunction&);
+
+    //! \brief Compute the function \f$(f \oplus g)(x)=(f(x),g(x))\f$.
+    VectorTaylorFunction join(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
+    VectorTaylorFunction join(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
+    VectorTaylorFunction join(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
+    VectorTaylorFunction join(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
+    //! \brief Compute the function \f$(f\otimes g)(x,y)=(f(x),g(y))\f$.
+    VectorTaylorFunction combine(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
+    VectorTaylorFunction combine(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
+    VectorTaylorFunction combine(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
+    VectorTaylorFunction combine(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
+
+    VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, SizeType k, const VectorTaylorFunction::NumericType& c);
+
+    Vector<VectorTaylorFunction::NumericType> unchecked_evaluate(const VectorTaylorFunction&, const Vector<VectorTaylorFunction::NumericType>&);
+    ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
+    VectorTaylorFunction unchecked_compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
+
+    // Split the domain into halves along the \a j<sup>th</sup> coordinate.
+    Pair<VectorTaylorFunction,VectorTaylorFunction> split(const VectorTaylorFunction& x, SizeType j);
+
+    OutputStream& operator<<(OutputStream&, const VectorTaylorFunction&);
+
+
+
 
 // Conversion operatations
 Polynomial<ValidatedFloat> polynomial(const ScalarTaylorFunction& tfn);

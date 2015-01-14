@@ -241,7 +241,7 @@ ScalarTaylorFunction extension(const ScalarTaylorFunction& tv, const ExactBox& d
     for(SizeType i=0; i!=d.size(); ++i) {
         ARIADNE_ASSERT(domain[i]==d[i] || domain[i].lower()==domain[i].upper());
     }
-    return ScalarTaylorFunction(d,tv._model);
+    return ScalarTaylorFunction(d,tv.model());
 }
 
 
@@ -1251,6 +1251,12 @@ VectorTaylorFunction::models() const
     return this->_models;
 }
 
+Vector<ValidatedTaylorModel>&
+VectorTaylorFunction::models()
+{
+    return this->_models;
+}
+
 const ValidatedTaylorModel&
 VectorTaylorFunction::model(SizeType i) const
 {
@@ -1550,7 +1556,7 @@ operator+=(VectorTaylorFunction& f, const VectorTaylorFunction& g)
     ARIADNE_ASSERT(f.result_size()==g.result_size());
     ARIADNE_ASSERT(subset(f.domain(),g.domain()));
     ARIADNE_ASSERT(f.domain()==g.domain());
-    f._models+=g._models;
+    f.models()+=g.models();
     return f;
 }
 
@@ -1560,7 +1566,7 @@ operator-=(VectorTaylorFunction& f, const VectorTaylorFunction& g)
     ARIADNE_ASSERT(f.result_size()==g.result_size());
     ARIADNE_ASSERT(subset(f.domain(),g.domain()));
     ARIADNE_ASSERT(f.domain()==g.domain());
-    f._models+=g._models;
+    f.models()+=g.models();
     return f;
 }
 
@@ -1568,7 +1574,7 @@ VectorTaylorFunction&
 operator+=(VectorTaylorFunction& f, const Vector<ValidatedNumber>& c)
 {
     ARIADNE_ASSERT(f.result_size()==c.size());
-    f._models+=c;
+    f.models()+=c;
     return f;
 }
 
@@ -1576,21 +1582,21 @@ VectorTaylorFunction&
 operator-=(VectorTaylorFunction& f, const Vector<ValidatedNumber>& c)
 {
     ARIADNE_ASSERT(f.result_size()==c.size());
-    f._models-=c;
+    f.models()-=c;
     return f;
 }
 
 VectorTaylorFunction&
 operator*=(VectorTaylorFunction& f, const ValidatedNumber& c)
 {
-    f._models*=c;
+    f.models()*=c;
     return f;
 }
 
 VectorTaylorFunction&
 operator/=(VectorTaylorFunction& f, const ValidatedNumber& c)
 {
-    f._models/=c;
+    f.models()/=c;
     return f;
 }
 
@@ -1835,8 +1841,8 @@ antiderivative(const VectorTaylorFunction& f, SizeType k)
     ValidatedNumber fdomkrad=rad_val(f.domain()[k]);
     VectorTaylorFunction g=f;
     for(SizeType i=0; i!=g.size(); ++i) {
-        g._models[i].antidifferentiate(k);
-        g._models[i]*=fdomkrad;
+        g.models()[i].antidifferentiate(k);
+        g.models()[i]*=fdomkrad;
     }
     return g;
 }

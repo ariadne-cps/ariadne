@@ -471,51 +471,29 @@ ScalarTaylorFunction operator-(const ScalarTaylorFunction::NumericType& c, const
 ScalarTaylorFunction operator*(const ScalarTaylorFunction::NumericType& c, const ScalarTaylorFunction& f);
 ScalarTaylorFunction operator/(const ScalarTaylorFunction::NumericType& c, const ScalarTaylorFunction& f);
 
-inline ScalarTaylorFunction operator+(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2) {
-    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())+tf2; }
-inline ScalarTaylorFunction operator-(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2) {
-    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())-tf2; }
-inline ScalarTaylorFunction operator*(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2) {
-    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())*tf2; }
-inline ScalarTaylorFunction operator/(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2) {
-    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())/tf2; }
-inline ScalarTaylorFunction operator+(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2) {
-    return tf1+ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-inline ScalarTaylorFunction operator-(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2) {
-    return tf1-ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-inline ScalarTaylorFunction operator*(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2) {
-    return tf1*ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-inline ScalarTaylorFunction operator/(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2) {
-    return tf1/ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+ScalarTaylorFunction operator+(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2);
+ScalarTaylorFunction operator-(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2);
+ScalarTaylorFunction operator*(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2);
+ScalarTaylorFunction operator/(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2);
+ScalarTaylorFunction operator+(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2);
+ScalarTaylorFunction operator-(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2);
+ScalarTaylorFunction operator*(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2);
+ScalarTaylorFunction operator/(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2);
 
-inline ScalarTaylorFunction abs(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),abs(x.model())); }
-inline ScalarTaylorFunction neg(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),-x.model()); }
-inline ScalarTaylorFunction rec(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),rec(x.model())); }
-inline ScalarTaylorFunction sqr(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),sqr(x.model())); }
-inline ScalarTaylorFunction pow(const ScalarTaylorFunction& x, Int n) {
-    return ScalarTaylorFunction(x.domain(),pow(x.model(),n)); }
-inline ScalarTaylorFunction sqrt(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),sqrt(x.model())); }
-inline ScalarTaylorFunction exp(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),exp(x.model())); }
-inline ScalarTaylorFunction log(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),log(x.model())); }
-inline ScalarTaylorFunction sin(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),sin(x.model())); }
-inline ScalarTaylorFunction cos(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),cos(x.model())); }
-inline ScalarTaylorFunction tan(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),tan(x.model())); }
-inline ScalarTaylorFunction asin(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),asin(x.model())); }
-inline ScalarTaylorFunction acos(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),acos(x.model())); }
-inline ScalarTaylorFunction atan(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),atan(x.model())); }
+ScalarTaylorFunction abs(const ScalarTaylorFunction& x);
+ScalarTaylorFunction neg(const ScalarTaylorFunction& x);
+ScalarTaylorFunction rec(const ScalarTaylorFunction& x);
+ScalarTaylorFunction sqr(const ScalarTaylorFunction& x);
+ScalarTaylorFunction pow(const ScalarTaylorFunction& x, Int n);
+ScalarTaylorFunction sqrt(const ScalarTaylorFunction& x);
+ScalarTaylorFunction exp(const ScalarTaylorFunction& x);
+ScalarTaylorFunction log(const ScalarTaylorFunction& x);
+ScalarTaylorFunction sin(const ScalarTaylorFunction& x);
+ScalarTaylorFunction cos(const ScalarTaylorFunction& x);
+ScalarTaylorFunction tan(const ScalarTaylorFunction& x);
+ScalarTaylorFunction asin(const ScalarTaylorFunction& x);
+ScalarTaylorFunction acos(const ScalarTaylorFunction& x);
+ScalarTaylorFunction atan(const ScalarTaylorFunction& x);
 
 // Remove the error term
 ScalarTaylorFunction midpoint(const ScalarTaylorFunction& x);
@@ -735,6 +713,17 @@ class VectorTaylorFunction
     /*! \brief Multiplication by a matrix. */
     friend VectorTaylorFunction operator*(const Matrix<NumericType>& A, const VectorTaylorFunction& f);
 
+    friend VectorTaylorFunction operator+(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2);
+    friend VectorTaylorFunction operator-(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2);
+    friend VectorTaylorFunction operator*(const ValidatedScalarFunction& f1, const VectorTaylorFunction& tf2);
+    friend VectorTaylorFunction operator*(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2);
+    friend VectorTaylorFunction operator/(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2);
+    friend VectorTaylorFunction operator+(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2);
+    friend VectorTaylorFunction operator-(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2);
+    friend VectorTaylorFunction operator*(const ScalarTaylorFunction& tf1, const ValidatedVectorFunction& f2);
+    friend VectorTaylorFunction operator*(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2);
+    friend VectorTaylorFunction operator/(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2);
+
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
     friend ScalarTaylorFunction compose(const ValidatedScalarFunction& f, const VectorTaylorFunction& g);
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
@@ -814,27 +803,6 @@ class VectorTaylorFunction
 Polynomial<ValidatedFloat> polynomial(const ScalarTaylorFunction& tfn);
 Vector< Polynomial<ValidatedFloat> > polynomials(const VectorTaylorFunction& tfn);
 
-inline VectorTaylorFunction operator+(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2) {
-    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())+tf2; }
-inline VectorTaylorFunction operator-(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2) {
-    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())-tf2; }
-inline VectorTaylorFunction operator*(const ValidatedScalarFunction& f1, const VectorTaylorFunction& tf2) {
-    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())*tf2; }
-inline VectorTaylorFunction operator*(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2) {
-    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())*tf2; }
-inline VectorTaylorFunction operator/(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2) {
-    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())/tf2; }
-inline VectorTaylorFunction operator+(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2) {
-    return tf1+VectorTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-inline VectorTaylorFunction operator-(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2) {
-    return tf1-VectorTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-inline VectorTaylorFunction operator*(const ScalarTaylorFunction& tf1, const ValidatedVectorFunction& f2) {
-    return tf1*VectorTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-inline VectorTaylorFunction operator*(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2) {
-    return tf1*ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-inline VectorTaylorFunction operator/(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2) {
-    return tf1/ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-
 
 // Sanitised output
 OutputStream& operator<<(OutputStream&, const Representation<ScalarTaylorFunction>&);
@@ -853,7 +821,8 @@ OutputStream& operator<<(OutputStream&,const PolynomialRepresentation<ScalarTayl
 OutputStream& operator<<(OutputStream&,const PolynomialRepresentation<VectorTaylorFunction>&);
 
 
-template<class E> VectorTaylorFunction::VectorTaylorFunction(const VectorExpression<E>& ve) : _domain(), _models(ve().size())
+template<class E> VectorTaylorFunction::VectorTaylorFunction(const VectorExpression<E>& ve)
+    : _domain(), _models(ve().size(),ve().zero_element().model())
 {
     if(ve().size()!=0) { this->_domain=ve().zero_element().domain(); }
     for(SizeType i=0; i!=ve().size(); ++i) { this->set(i,ve()[i]); }

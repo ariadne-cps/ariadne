@@ -404,6 +404,23 @@ ScalarTaylorFunction operator/(const ValidatedNumber& c, const ScalarTaylorFunct
     ScalarTaylorFunction r(rec(x)); r*=c; return r;
 }
 
+ScalarTaylorFunction operator+(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2) {
+    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())+tf2; }
+ScalarTaylorFunction operator-(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2) {
+    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())-tf2; }
+ScalarTaylorFunction operator*(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2) {
+    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())*tf2; }
+ScalarTaylorFunction operator/(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2) {
+    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())/tf2; }
+ScalarTaylorFunction operator+(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2) {
+    return tf1+ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+ScalarTaylorFunction operator-(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2) {
+    return tf1-ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+ScalarTaylorFunction operator*(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2) {
+    return tf1*ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+ScalarTaylorFunction operator/(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2) {
+    return tf1/ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+
 
 
 
@@ -425,6 +442,34 @@ ScalarTaylorFunction min(const ScalarTaylorFunction& x1, const ScalarTaylorFunct
         return ScalarTaylorFunction(domain,min(restriction(x1,domain).model(),restriction(x2,domain).model()));}
 }
 
+ScalarTaylorFunction abs(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x.domain(),abs(x.model())); }
+ScalarTaylorFunction neg(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x.domain(),-x.model()); }
+ScalarTaylorFunction rec(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x.domain(),rec(x.model())); }
+ScalarTaylorFunction sqr(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x.domain(),sqr(x.model())); }
+ScalarTaylorFunction pow(const ScalarTaylorFunction& x, Int n) {
+    return ScalarTaylorFunction(x.domain(),pow(x.model(),n)); }
+ScalarTaylorFunction sqrt(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x.domain(),sqrt(x.model())); }
+ScalarTaylorFunction exp(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x.domain(),exp(x.model())); }
+ScalarTaylorFunction log(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x.domain(),log(x.model())); }
+ScalarTaylorFunction sin(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x.domain(),sin(x.model())); }
+ScalarTaylorFunction cos(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x.domain(),cos(x.model())); }
+ScalarTaylorFunction tan(const ScalarTaylorFunction& x) {
+    return ScalarTaylorFunction(x.domain(),tan(x.model())); }
+ScalarTaylorFunction asin(const ScalarTaylorFunction& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
+ScalarTaylorFunction acos(const ScalarTaylorFunction& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
+ScalarTaylorFunction atan(const ScalarTaylorFunction& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
 
 
 ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, SizeType k) {
@@ -1670,6 +1715,27 @@ operator*(const Matrix<ValidatedNumber>& A, const VectorTaylorFunction& f)
     }
     return VectorTaylorFunction(f.domain(),models);
 }
+
+VectorTaylorFunction operator+(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2) {
+    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())+tf2; }
+VectorTaylorFunction operator-(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2) {
+    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())-tf2; }
+VectorTaylorFunction operator*(const ValidatedScalarFunction& f1, const VectorTaylorFunction& tf2) {
+    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())*tf2; }
+VectorTaylorFunction operator*(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2) {
+    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())*tf2; }
+VectorTaylorFunction operator/(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2) {
+    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())/tf2; }
+VectorTaylorFunction operator+(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2) {
+    return tf1+VectorTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+VectorTaylorFunction operator-(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2) {
+    return tf1-VectorTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+VectorTaylorFunction operator*(const ScalarTaylorFunction& tf1, const ValidatedVectorFunction& f2) {
+    return tf1*VectorTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+VectorTaylorFunction operator*(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2) {
+    return tf1*ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+VectorTaylorFunction operator/(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2) {
+    return tf1/ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
 
 
 

@@ -51,10 +51,6 @@ template<class X> class VectorFunction;
 typedef VectorFunction<Validated> ValidatedVectorFunction;
 
 class MultiIndex;
-template<class X> class TaylorModel;
-class ScalarTaylorFunction;
-class VectorTaylorFunction;
-class TaylorFunctionFactory;
 
 inline ApproximateNumber med_apprx(ExactInterval const& ivl) {
     return ApproximateNumber(half_exact(add_approx(ivl.lower_raw(),ivl.upper_raw())));
@@ -372,7 +368,7 @@ template<class M> NumericType<M> unchecked_evaluate(const FunctionPatch<M>&, con
 
 // Compose with an function.
 template<class M> FunctionPatch<M> compose(const FunctionType<M>& x, const VectorFunctionPatch<M>& y);
-template<class M> FunctionPatch<M> unchecked_compose(const FunctionPatch<M>&, const VectorTaylorFunction&);
+template<class M> FunctionPatch<M> unchecked_compose(const FunctionPatch<M>&, const VectorFunctionPatch<M>&);
 
 // Split the variable over two domains, subdividing along the independent variable j.
 template<class M> Pair<FunctionPatch<M>,FunctionPatch<M>> split(const FunctionPatch<M>& x, SizeType j);

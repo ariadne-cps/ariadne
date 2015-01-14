@@ -43,11 +43,12 @@
 namespace Ariadne {
 
 template<class X> class TaylorModel;
-class ScalarTaylorFunction;
-class VectorTaylorFunction;
 class TaylorFunctionFactory;
 
+typedef ScalarFunctionPatch<ValidatedTaylorModel> ScalarTaylorFunction;
+typedef VectorFunctionPatch<ValidatedTaylorModel> VectorTaylorFunction;
 
+/*
 class ScalarTaylorFunction : public FunctionPatch<ValidatedTaylorModel> {
   public:
     using FunctionPatch<ValidatedTaylorModel>::FunctionPatch;
@@ -61,6 +62,7 @@ class VectorTaylorFunction : public VectorFunctionPatch<ValidatedTaylorModel> {
     VectorTaylorFunction() : VectorFunctionPatch<ValidatedTaylorModel>() { }
     VectorTaylorFunction(VectorFunctionPatch<ValidatedTaylorModel> const& f) : VectorFunctionPatch<ValidatedTaylorModel>(f) { }
 };
+*/
 
 class TaylorFunctionFactory
     : public FunctionModelFactoryInterface<ValidatedTag>

@@ -672,7 +672,7 @@ series_flow_step(const ValidatedVectorFunction& f, const ExactBox& bdx, const Ex
         Nat nnz=0; for(Nat i=0; i!=tphi.size(); ++i) { nnz+=tphi.model(i).number_of_nonzeros(); }
         ARIADNE_LOG(3,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<tphi.error()<<"\n");
 
-        if( (so<max_so) && ( (tphi.error()*ErrorFloat(TRY_SPACIAL_ORDER_INCREASE_FACTOR)).raw() > old_error.raw()) ) {
+        if( (so<max_so) && (tphi.error()*ErrorFloat(TRY_SPACIAL_ORDER_INCREASE_FACTOR) > old_error) ) {
             // try increasing spacial degree
             if(nto==0) {
                 // Initialise higher spacial order

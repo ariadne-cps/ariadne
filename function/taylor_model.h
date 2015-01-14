@@ -72,8 +72,6 @@ template<>
 class TaylorModel<ValidatedFloat>
     : public NormedAlgebraMixin<TaylorModel<ValidatedFloat>,ValidatedNumber>
 {
-    friend class ScalarTaylorFunction;
-    friend class VectorTaylorFunction;
   public:
     typedef ExactFloat CoefficientType;
     typedef ErrorFloat ErrorType;

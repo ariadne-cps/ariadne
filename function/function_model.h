@@ -61,11 +61,12 @@ typedef VectorFunctionModel<ValidatedTag> ValidatedVectorFunctionModel;
 template<class X> class FunctionModelFactory;
 typedef FunctionModelFactory<ValidatedTag> ValidatedFunctionModelFactory;
 
-class ScalarTaylorFunction;
-class VectorTaylorFunction;
-
 typedef ExactFloat ValidatedCoefficientType;
 typedef ErrorFloat ValidatedErrorType;
+
+template<class X> class TaylorModel;
+template<class M> class FunctionPatch;
+typedef FunctionPatch<TaylorModel<ValidatedFloat>> ScalarTaylorFunction;
 
 template<> class ScalarFunctionModelInterface<ValidatedTag>
     : public virtual ScalarFunctionInterface<ValidatedTag>
@@ -307,13 +308,11 @@ template<> class VectorFunctionModelInterface<ValidatedTag>
 
 template<class V> struct Element;
 
-class ScalarTaylorFunction;
-class VectorTaylorFunction;
-template<> struct Element<VectorTaylorFunction> { typedef ScalarTaylorFunction Type; };
-
 template<class M> class FunctionPatch;
 template<class M> class VectorFunctionPatch;
 template<class M> struct Element<VectorFunctionPatch<M>> { typedef FunctionPatch<M> Type; };
+
+typedef FunctionPatch<ValidatedTaylorModel> ScalarTaylorFunction;
 
 template<class F> class VectorFunctionModelMixin<F,ValidatedTag>
     : public virtual VectorFunctionModelInterface<ValidatedTag>

@@ -67,7 +67,9 @@ typedef VectorFunctionInterface<ValidatedTag> ValidatedVectorFunctionInterface;
 template<class X> class VectorFunction;
 typedef ValidatedVectorFunction ValidatedVectorFunction;
 
-class VectorTaylorFunction;
+template<class X> class TaylorModel;
+template<class M> class VectorFunctionPatch;
+typedef VectorFunctionPatch<TaylorModel<ValidatedFloat>> VectorTaylorFunction;
 
 template<class X> struct FeasibilityState {
     X t;

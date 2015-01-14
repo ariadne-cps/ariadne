@@ -48,8 +48,6 @@ namespace Ariadne {
 
 static const ExactFloat zero=0;
 
-ScalarTaylorFunction unchecked_compose(const ValidatedScalarFunctionModel& f, const VectorTaylorFunction& g);
-
 inline auto operator+(Int n, ValidatedFloat x) -> decltype(ExactFloat(n)+x) { return ExactFloat(n)+x; }
 inline auto operator-(Int n, ValidatedFloat x) -> decltype(ExactFloat(n)-x) { return ExactFloat(n)-x; }
 inline auto operator/(ExactFloat x, Nat n) -> decltype(x/ExactFloat(n)) { return x/ExactFloat(n); }

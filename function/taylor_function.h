@@ -101,7 +101,7 @@ inline ValidatedNumber unscale(const ValidatedNumber& x, const ExactInterval& d)
 
 template<class X> Vector<X> unscale(const Vector<X>& x, const ExactBox& d) {
     Vector<X> r(x);
-    for(Nat i=0; i!=r.size(); ++i) {
+    for(SizeType i=0; i!=r.size(); ++i) {
         r[i]=unscale(x[i],d[i]);
     }
     return r;
@@ -198,7 +198,7 @@ class ScalarTaylorFunction
     //! \brief Return the vector of variables with values \a x over domain \a d.
     static Vector<ScalarTaylorFunction> coordinates(const DomainType& d, Sweeper swp);
     //! \brief Return the vector of variables in the range \a imin to \a imax with values \a x over domain \a d.
-    static Vector<ScalarTaylorFunction> coordinates(const DomainType& d, Nat imin, Nat imax, Sweeper swp);
+    static Vector<ScalarTaylorFunction> coordinates(const DomainType& d, SizeType imin, SizeType imax, Sweeper swp);
     //@}
 
     //@{
@@ -235,7 +235,7 @@ class ScalarTaylorFunction
     //! \brief The constant term in the expansion.
     const CoefficientType& value() const { return this->_model.value(); }
     //! \brief The gradient at the centre of the domain.
-    const CoefficientType gradient_value(Nat i) const { return make_exact(this->_model.gradient(i)/this->_domain[i].radius()); }
+    const CoefficientType gradient_value(SizeType i) const { return make_exact(this->_model.gradient(i)/this->_domain[i].radius()); }
 
     //! \brief A polynomial representation.
     Polynomial<ValidatedNumber> polynomial() const;
@@ -253,11 +253,11 @@ class ScalarTaylorFunction
     CoefficientType& operator[](const MultiIndex& a) { return this->_model[a]; }
 
     //! \brief The number of variables in the argument of the quantity.
-    Nat argument_size() const { return this->_model.argument_size(); }
+    SizeType argument_size() const { return this->_model.argument_size(); }
     //! \brief The maximum degree of terms in the expansion expansion.
-    Nat degree() const { return this->_model.degree(); }
+    DegreeType degree() const { return this->_model.degree(); }
     //! \brief The number of nonzero terms in the expansion expansion.
-    Nat number_of_nonzeros() const { return this->_model.number_of_nonzeros(); }
+    SizeType number_of_nonzeros() const { return this->_model.number_of_nonzeros(); }
     //@}
 
     //@{
@@ -327,14 +327,14 @@ class ScalarTaylorFunction
     friend NormType norm(const ScalarTaylorFunction& f);
 
     // Differential algebra
-    friend ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, Nat k, ExactFloat c);
-    friend ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, Nat k);
-    friend ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, Nat k);
+    friend ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, SizeType k, ExactFloat c);
+    friend ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, SizeType k);
+    friend ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, SizeType k);
 
     // Function algebra
     friend ScalarTaylorFunction embed(const ExactBox& dom1, const ScalarTaylorFunction& tv2,const ExactBox& dom3);
     // Set the value of the \a kth variable to c
-    friend ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, Nat k, const ValidatedNumber& c);
+    friend ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, SizeType k, const ValidatedNumber& c);
     // Evaluate a scalar Taylor function on a vector.
     friend ValidatedNumber unchecked_evaluate(const ScalarTaylorFunction&, const Vector<ValidatedNumber>&);
 
@@ -343,7 +343,7 @@ class ScalarTaylorFunction
     friend ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
 
     // Split the variable over two domains, subdividing along the independent variable j.
-    friend Pair<ScalarTaylorFunction,ScalarTaylorFunction> split(const ScalarTaylorFunction& x, Nat j);
+    friend Pair<ScalarTaylorFunction,ScalarTaylorFunction> split(const ScalarTaylorFunction& x, SizeType j);
 
 
 
@@ -401,9 +401,9 @@ class ScalarTaylorFunction
     friend ScalarTaylorFunction pow(const ScalarTaylorFunction& x, Int n);
     //! \brief Square root.
     friend ScalarTaylorFunction sqrt(const ScalarTaylorFunction& x);
-    //! \brief Natural exponent.
+    //! \brief SizeTypeural exponent.
     friend ScalarTaylorFunction exp(const ScalarTaylorFunction& x);
-    //! \brief Natural logarithm.
+    //! \brief SizeTypeural logarithm.
     friend ScalarTaylorFunction log(const ScalarTaylorFunction& x);
     //! \brief Sine.
     friend ScalarTaylorFunction sin(const ScalarTaylorFunction& x);
@@ -441,11 +441,11 @@ class ScalarTaylorFunction
         r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
             + convert_error<R>(this->_model.error());
     }
-    ScalarTaylorFunction* _derivative(Nat j) const;
+    ScalarTaylorFunction* _derivative(SizeType j) const;
     ScalarTaylorFunction* _clone() const;
     ScalarTaylorFunction* _create() const;
     VectorFunctionModelInterface<ValidatedTag>* _create_identity() const;
-    VectorFunctionModelInterface<ValidatedTag>* _create_vector(Nat i) const;
+    VectorFunctionModelInterface<ValidatedTag>* _create_vector(SizeType i) const;
 };
 
 ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f, const ValidatedNumber& c);
@@ -619,25 +619,25 @@ class VectorTaylorFunction
     const Vector< Expansion<CoefficientType> > expansions() const;
 
     /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
-    const TaylorModel<ValidatedNumber>& model(Nat i) const;
+    const TaylorModel<ValidatedNumber>& model(SizeType i) const;
     /*! \brief The \a i<sup>th</sup> Taylor model used to define the function. */
-    TaylorModel<ValidatedNumber>& model(Nat i);
+    TaylorModel<ValidatedNumber>& model(SizeType i);
 
     /*! \brief The size of the argument. */
-    Nat argument_size() const;
+    SizeType argument_size() const;
     /*! \brief The size of the result. */
-    Nat result_size() const;
+    SizeType result_size() const;
 
     // For compatibility wit Vector.
-    Nat size() const { return this->result_size(); }
+    SizeType size() const { return this->result_size(); }
     /*! \brief Get the \a ith Taylor variable */
-    ScalarTaylorFunction get(Nat i) const;
+    ScalarTaylorFunction get(SizeType i) const;
     /*! \brief Set the \a ith Taylor variable */
-    Void set(Nat i, const ScalarTaylorFunction& te);
+    Void set(SizeType i, const ScalarTaylorFunction& te);
     /*! \brief The \a ith Taylor variable */
-    ScalarTaylorFunction operator[](Nat i) const;
+    ScalarTaylorFunction operator[](SizeType i) const;
     /*! \brief The \a ith Taylor variable */
-    VectorTaylorFunctionElementReference operator[](Nat i);
+    VectorTaylorFunctionElementReference operator[](SizeType i);
 
 
     /*! \brief Evaluate the Taylor model at the point \a x. */
@@ -665,7 +665,7 @@ class VectorTaylorFunction
     /*! \brief The identity Taylor model on domain \a d. */
     static VectorTaylorFunction identity(const ExactBox& d, Sweeper swp);
     //! \brief Return the vector of variables in the range with values \a x over domain \a d.
-    static VectorTaylorFunction projection(const ExactBox& d, Nat imin, Nat imax, Sweeper swp);
+    static VectorTaylorFunction projection(const ExactBox& d, SizeType imin, SizeType imax, Sweeper swp);
 
     /*! \brief Convert to an interval polynomial. */
     Vector< Polynomial<ValidatedNumber> > polynomials() const;
@@ -738,11 +738,11 @@ class VectorTaylorFunction
     friend VectorTaylorFunction compose(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
 
     //! \brief Weak derivative of \a f with respect to variable \a k.
-    friend VectorTaylorFunction derivative(const VectorTaylorFunction& f, Nat k);
+    friend VectorTaylorFunction derivative(const VectorTaylorFunction& f, SizeType k);
     //! \brief Antiderivative of \a f with respect to variable \a k.
-    friend VectorTaylorFunction antiderivative(const VectorTaylorFunction& f, Nat k);
+    friend VectorTaylorFunction antiderivative(const VectorTaylorFunction& f, SizeType k);
     //! \brief Antiderivative of \a f with respect to variable \a k, taking value \c 0 when \a x[k]=c.
-    friend VectorTaylorFunction antiderivative(const VectorTaylorFunction& f, Nat k, ExactFloat c);
+    friend VectorTaylorFunction antiderivative(const VectorTaylorFunction& f, SizeType k, ExactFloat c);
 
     friend NormType norm(const VectorTaylorFunction& f);
     friend NormType distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
@@ -772,23 +772,23 @@ class VectorTaylorFunction
     friend VectorTaylorFunction combine(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
     friend VectorTaylorFunction combine(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
 
-    friend VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, Nat k, const ValidatedNumber& c);
+    friend VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, SizeType k, const ValidatedNumber& c);
 
     friend Vector<ValidatedNumber> unchecked_evaluate(const VectorTaylorFunction&, const Vector<ValidatedNumber>&);
     friend ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
     friend VectorTaylorFunction unchecked_compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
 
     // Split the domain into halves along the \a j<sup>th</sup> coordinate.
-    friend Pair<VectorTaylorFunction,VectorTaylorFunction> split(const VectorTaylorFunction& x, Nat j);
+    friend Pair<VectorTaylorFunction,VectorTaylorFunction> split(const VectorTaylorFunction& x, SizeType j);
 
     friend OutputStream& operator<<(OutputStream&, const VectorTaylorFunction&);
   private:
     Array< Array<ValidatedNumber> > _powers(const Vector<ValidatedNumber>&) const;
     Void _compute_jacobian() const;
-    Void _set_argument_size(Nat n);
-    Nat _compute_maximum_component_size() const;
-    Void _resize(Nat rs, Nat as, ushort d, ushort s);
-    virtual ScalarTaylorFunction* _get(Nat i) const { return new ScalarTaylorFunction(this->_domain,this->_models[i]); }
+    Void _set_argument_size(SizeType n);
+    SizeType _compute_maximum_component_size() const;
+    Void _resize(SizeType rs, SizeType as, ushort d, ushort s);
+    virtual ScalarTaylorFunction* _get(SizeType i) const { return new ScalarTaylorFunction(this->_domain,this->_models[i]); }
     virtual VectorTaylorFunction* _clone() const;
     virtual VectorTaylorFunction* _create() const;
     virtual VectorTaylorFunction* _create_identity() const;
@@ -832,7 +832,7 @@ OutputStream& operator<<(OutputStream&,const PolynomialRepresentation<VectorTayl
 template<class E> VectorTaylorFunction::VectorTaylorFunction(const VectorExpression<E>& ve) : _domain(), _models(ve().size())
 {
     if(ve().size()!=0) { this->_domain=ve().zero_element().domain(); }
-    for(Nat i=0; i!=ve().size(); ++i) { this->set(i,ve()[i]); }
+    for(SizeType i=0; i!=ve().size(); ++i) { this->set(i,ve()[i]); }
 }
 
 class VectorTaylorFunctionElementReference
@@ -840,7 +840,7 @@ class VectorTaylorFunctionElementReference
     friend class ScalarTaylorFunction;
     friend class VectorTaylorFunction;
  public:
-    VectorTaylorFunctionElementReference(VectorTaylorFunction& c, Nat i) : _c(&c), _i(i) { }
+    VectorTaylorFunctionElementReference(VectorTaylorFunction& c, SizeType i) : _c(&c), _i(i) { }
     operator ScalarTaylorFunction () const { return this->_c->get(this->_i); }
     Void operator=(const VectorTaylorFunctionElementReference& x) { this->_c->set(this->_i,x._c->get(x._i)); }
     Void operator=(const ScalarTaylorFunction& x) { this->_c->set(this->_i,x); }
@@ -854,7 +854,7 @@ class VectorTaylorFunctionElementReference
     template<class X> X operator()(const Vector<X>& x) const { return this->_c->get(this->_i).operator()(x); }
     friend OutputStream& operator<<(OutputStream& os, const VectorTaylorFunctionElementReference& t) { return os<<ScalarTaylorFunction(t); }
   private:
-    VectorTaylorFunction* _c; Nat _i;
+    VectorTaylorFunction* _c; SizeType _i;
 };
 
 
@@ -871,8 +871,8 @@ class TaylorFunctionFactory
     VectorTaylorFunction create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const;
     ScalarTaylorFunction create_zero(const ExactBox& domain) const;
     ScalarTaylorFunction create_constant(const ExactBox& domain, ValidatedNumber c) const;
-    ScalarTaylorFunction create_coordinate(const ExactBox& domain, Nat k) const;
-    VectorTaylorFunction create_zero(Nat i, const ExactBox& domain) const;
+    ScalarTaylorFunction create_coordinate(const ExactBox& domain, SizeType k) const;
+    VectorTaylorFunction create_zero(SizeType i, const ExactBox& domain) const;
     ScalarTaylorFunction create_identity(const ExactInterval& domain) const;
     VectorTaylorFunction create_identity(const ExactBox& domain) const;
   private:

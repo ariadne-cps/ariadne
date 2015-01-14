@@ -668,11 +668,11 @@ series_flow_step(const ValidatedVectorFunction& f, const ExactBox& bdx, const Ex
 
     ErrorFloat old_error=tphi.error()*ErrorFloat(TRY_SPACIAL_ORDER_INCREASE_FACTOR*2);
 
-    while(tphi.error()>max_err && (so<max_so || to<max_to) ) {
+    while(tphi.error().raw()>max_err && (so<max_so || to<max_to) ) {
         Nat nnz=0; for(Nat i=0; i!=tphi.size(); ++i) { nnz+=tphi.model(i).number_of_nonzeros(); }
         ARIADNE_LOG(3,"so="<<so<<" to="<<to<<" nnz="<<nnz<<" err="<<tphi.error()<<"\n");
 
-        if( (so<max_so) && (tphi.error()*ErrorFloat(TRY_SPACIAL_ORDER_INCREASE_FACTOR) > old_error) ) {
+        if( (so<max_so) && ( (tphi.error()*ErrorFloat(TRY_SPACIAL_ORDER_INCREASE_FACTOR)).raw() > old_error.raw()) ) {
             // try increasing spacial degree
             if(nto==0) {
                 // Initialise higher spacial order
@@ -704,7 +704,7 @@ series_flow_step(const ValidatedVectorFunction& f, const ExactBox& bdx, const Ex
             Nat nnnz=0; for(Nat i=0; i!=tphi.size(); ++i) { nnnz+=tphi.model(i).number_of_nonzeros(); }
             ARIADNE_LOG(3,"nso="<<nso<<" nto="<<nto<<" nnnz="<<nnnz<<" nerr="<<ntphi.error()<<"\n");
 
-            if( to==max_to || ntphi.error()<tphi.error()) {
+            if( to==max_to || ntphi.error().raw()<tphi.error().raw()) {
                 dphia=ndphia; dphib=ndphib; dphic=ndphic; dphid=ndphid;
                 fdphia=nfdphia; fdphib=nfdphib; fdphic=nfdphic; fdphid=nfdphid;
                 tdphia=ntdphia; tdphib=ntdphib; tdphic=ntdphic; tdphid=ntdphid;

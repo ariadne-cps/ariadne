@@ -207,8 +207,8 @@ class Vector
     friend template<class X> Vector<X> join(const Vector<X>& v1, const X& s2);
     //! \brief Join a scalar and a vector.
     friend template<class X> Vector<X> join(const X& s1, const Vector<X>& v2);
-    //! \brief Join two scalars.
-    friend template<class X> Vector<X> join(const X& s1, const X& s2);
+    //! \brief Join two scalars. // FIXME: Removed due to poor detection of scalar types
+    // friend template<class X, EnableIf<IsScalar<X>> =dummy> Vector<X> join(const X& s1, const X& s2);
 
     //! \brief Write to an output stream.
     friend template<class X> OutputStream& operator<<(OutputStream& os, const Vector<X>& v);
@@ -540,14 +540,14 @@ Vector<X> join(const Vector<X>& v1, const typename Vector<X>::ScalarType& x2)
     return std::move(r);
 }
 
-template<class X, EnableIf<IsScalar<X>> =dummy>
-Vector<X> join(const X& x1, const X& x2)
-{
-    Vector<X> r(2u);
-    r[0u]=x1;
-    r[1u]=x2;
-    return std::move(r);
-}
+//template<class X, EnableIf<IsScalar<X>> =dummy>
+//Vector<X> join(const X& x1, const X& x2)
+//{
+//    Vector<X> r(2u);
+//    r[0u]=x1;
+//    r[1u]=x2;
+//    return std::move(r);
+//}
 
 template<class X>
 Vector<X> join(const Vector<X>& v1, const Vector<X>& v2, const typename Vector<X>::ScalarType& x3)

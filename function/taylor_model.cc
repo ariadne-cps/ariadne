@@ -2689,7 +2689,7 @@ Vector<TaylorModel<ValidatedFloat>> combine(const TaylorModel<ValidatedFloat>& x
 }
 
 Vector<TaylorModel<ValidatedFloat>> combine(const TaylorModel<ValidatedFloat>& x1, const TaylorModel<ValidatedFloat>& x2) {
-    return join(embed(x1,x2.argument_size()),embed(x1.argument_size(),x2));
+    return {embed(x1,x2.argument_size()),embed(x1.argument_size(),x2)};
 }
 
 Bool

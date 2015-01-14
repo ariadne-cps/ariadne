@@ -50,8 +50,6 @@ template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const 
     return r;
 }
 
-
-
 class TestScalarTaylorFunction
 {
     Sweeper swp;
@@ -137,8 +135,8 @@ Void TestScalarTaylorFunction::test_constructors()
     ARIADNE_ASSERT_EQUAL(tv1.domain(),Vector<ExactInterval>({{-1,+1},{-1,+1}}));
     ARIADNE_ASSERT_EQUAL(tv1.argument_size(),2);
     ARIADNE_ASSERT_EQUAL(tv1.number_of_nonzeros(),10);
-    ARIADNE_ASSERT_EQUAL(tv1.value(),1.0);
-    ARIADNE_ASSERT_EQUAL(tv1.error(),0.25);
+    ARIADNE_ASSERT_EQUAL(tv1.value().raw(),1.0);
+    ARIADNE_ASSERT_EQUAL(tv1.error().raw(),0.25);
 }
 
 Void TestScalarTaylorFunction::test_predicates()
@@ -547,6 +545,7 @@ Void TestVectorTaylorFunction::test_domain()
 
     // Ensure evaluation and composition throw errors when expected
     Vector<ValidatedFloat> xe={{0.875,1.125},{0.5,1.5}};
+    ARIADNE_TEST_THROWS(t2(xe),DomainException);
     ARIADNE_TEST_THROWS(evaluate(t2,xe),DomainException);
 
     VectorTaylorFunction te1=t1; te1[0]=te1[0]+ValidatedFloat(-0.125,+0.125);

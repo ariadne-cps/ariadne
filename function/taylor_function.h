@@ -105,9 +105,15 @@ template<class X> Vector<X> unscale(const Vector<X>& x, const ExactBox& d) {
     return r;
 }
 
+template<class T> using NumericType = typename T::NumericType;
+template<class T> using FunctionType = typename T::FunctionType;
+template<class T> using ScalarFunctionType = typename T::ScalarFunctionType;
+template<class T> using VectorFunctionType = typename T::VectorFunctionType;
 
-
-class VectorTaylorFunctionElementReference;
+template<class M> class FunctionPatch;
+template<class M> using ScalarFunctionPatch = FunctionPatch<M>;
+template<class M> class VectorFunctionPatch;
+template<class M> class VectorFunctionPatchElementReference;
 
 /*! \ingroup FunctionModelSubModule
  *  \brief A ScalarTaylorFunction is a type of FunctionModel in which a the restriction of a scalar function \f$f:\R^n\rightarrow\R\f$ on a domain \f$D\f$ is approximated by polynomial \f$p\f$ with uniform error \f$e\f$.
@@ -130,83 +136,80 @@ class VectorTaylorFunctionElementReference;
  *
  * \sa Expansion, TaylorModel, VectorTaylorFunction, TaylorConstrainedImageSet.
  */
-class ScalarTaylorFunction
-    : public ScalarFunctionModelMixin<ScalarTaylorFunction, ValidatedTag>
+template<class M> class FunctionPatch
+    : public ScalarFunctionModelMixin<FunctionPatch<M>, typename M::Paradigm>
 {
+    typedef typename M::Paradigm P;
   public:
     typedef ExactBox DomainType;
-    typedef ValidatedTaylorModel ModelType;
-    typedef ModelType::CodomainType CodomainType;
-    typedef ModelType::RangeType RangeType;
-    typedef ModelType::ExpansionType ExpansionType;
-    typedef ModelType::CoefficientType CoefficientType;
-    typedef ModelType::ErrorType ErrorType;
-    typedef ModelType::NumericType NumericType;
-    typedef ModelType::NumericType::Paradigm Paradigm;
+    typedef M ModelType;
+    typedef typename ModelType::CodomainType CodomainType;
+    typedef typename ModelType::RangeType RangeType;
+    typedef typename ModelType::ExpansionType ExpansionType;
+    typedef typename ModelType::CoefficientType CoefficientType;
+    typedef typename ModelType::ErrorType ErrorType;
+    typedef typename ModelType::NumericType NumericType;
+    typedef typename ModelType::Paradigm Paradigm;
     typedef ScalarFunction<Paradigm> FunctionType;
   private:
     static const CoefficientType _zero;
     DomainType _domain;
     ModelType _model;
   public:
-    //! \brief An Iterator through the (index,coefficient) pairs of the expansion expansion.
-    typedef ExpansionType::Iterator Iterator;
-    //! \brief A constant Iterator through the (index,coefficient) pairs of the expansion expansion.
-    typedef ExpansionType::ConstIterator ConstIterator;
 
     //@{
     /*! \name Constructors and destructors. */
     //! \brief Default constructor.
-    explicit ScalarTaylorFunction();
-    //! \brief Construct a ScalarTaylorFunction over the domain \a d.
-    //explicit ScalarTaylorFunction(const DomainType& d);
-    explicit ScalarTaylorFunction(const DomainType& d, Sweeper swp);
-    //! \brief Construct a ScalarTaylorFunction over the domain \a d, based on the scaled model \a m.
-    explicit ScalarTaylorFunction(const DomainType& d, const ModelType& m);
+    explicit FunctionPatch();
+    //! \brief Construct a FunctionPatch<M> over the domain \a d.
+    //explicit FunctionPatch(const DomainType& d);
+    explicit FunctionPatch(const DomainType& d, Sweeper swp);
+    //! \brief Construct a FunctionPatch<M> over the domain \a d, based on the scaled model \a m.
+    explicit FunctionPatch(const DomainType& d, const ModelType& m);
 
-    explicit ScalarTaylorFunction(const DomainType& d, const Expansion<CoefficientType>& p, const ErrorType& e, const Sweeper& swp);
-    explicit ScalarTaylorFunction(const DomainType& d, const Expansion<RawFloat>& p, const RawFloat& e, const Sweeper& swp);
+    explicit FunctionPatch(const ExactBox& d, const Expansion<ExactFloat>& p, const ErrorFloat& e, const Sweeper& swp);
+    explicit FunctionPatch(const ExactBox& d, const Expansion<RawFloat>& p, const RawFloat& e, const Sweeper& swp);
 
-    explicit ScalarTaylorFunction(const ScalarFunctionModel<ValidatedTag>& f);
-    ScalarTaylorFunction& operator=(const ScalarFunctionModel<ValidatedTag>& f);
+    explicit FunctionPatch(const ScalarFunctionModel<ValidatedTag>& f);
+    FunctionPatch& operator=(const ScalarFunctionModel<ValidatedTag>& f);
 
-    //! \brief Construct a ScalarTaylorFunction over the domain \a d from the function \a f.
-    explicit ScalarTaylorFunction(const DomainType& d, const ValidatedScalarFunction& f, Sweeper swp);
+    //! \brief Construct a FunctionPatch over the domain \a d from the function \a f.
+    explicit FunctionPatch(const DomainType& d, const ValidatedScalarFunction& f, Sweeper swp);
     //@}
 
     //@{
     /*! \name Assignment to constant values. */
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    ScalarTaylorFunction& operator=(const NumericType& c) { this->_model=c; return *this; }
+    FunctionPatch<M>& operator=(const NumericType& c) { this->_model=c; return *this; }
     //@}
 
     //@{
     /*! \name Named constructors. */
     //! \brief Construct a zero function over domain \a d.
-    static ScalarTaylorFunction zero(const DomainType& d, Sweeper swp);
+    static FunctionPatch<M> zero(const DomainType& d, Sweeper swp);
     //! \brief Construct a constant quantity in \a as independent variables.
-    static ScalarTaylorFunction constant(const DomainType& d, const NumericType& c, Sweeper swp);
+    static FunctionPatch<M> constant(const DomainType& d, const NumericType& c, Sweeper swp);
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
-    static ScalarTaylorFunction coordinate(const DomainType& d, SizeType j, Sweeper swp);
+    static FunctionPatch<M> coordinate(const DomainType& d, SizeType j, Sweeper swp);
 
     //! \brief Construct the quantity \f$c+\sum g_jx_j\f$ over the domain \a d. // DEPRECATED
-    static ScalarTaylorFunction affine(const DomainType& d, const CoefficientType& c, const Vector<CoefficientType>& g, Sweeper swp);
+    static FunctionPatch<M> affine(const DomainType& d, const CoefficientType& c, const Vector<CoefficientType>& g, Sweeper swp);
     //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$ over domain \a d. // DEPRECATED
-    static ScalarTaylorFunction affine(const DomainType& d, const CoefficientType& x, const Vector<CoefficientType>& g, const ErrorType& e, Sweeper swp) ;
+    static FunctionPatch<M> affine(const DomainType& d, const CoefficientType& x, const Vector<CoefficientType>& g, const ErrorType& e, Sweeper swp) ;
 
     //! \brief Return the vector of constants with interval values \a c over domain \a d.
-    static Vector<ScalarTaylorFunction> constants(const DomainType& d, const Vector<NumericType>& c, Sweeper swp);
+    static Vector<FunctionPatch<M>> constants(const DomainType& d, const Vector<NumericType>& c, Sweeper swp);
     //! \brief Return the vector of variables with values \a x over domain \a d.
-    static Vector<ScalarTaylorFunction> coordinates(const DomainType& d, Sweeper swp);
+    static Vector<FunctionPatch<M>> coordinates(const DomainType& d, Sweeper swp);
     //! \brief Return the vector of variables in the range \a imin to \a imax with values \a x over domain \a d.
-    static Vector<ScalarTaylorFunction> coordinates(const DomainType& d, SizeType imin, SizeType imax, Sweeper swp);
+    static Vector<FunctionPatch<M>> coordinates(const DomainType& d, SizeType imin, SizeType imax, Sweeper swp);
     //@}
 
     //@{
     /*! \name Prototype constructors. */
-    ScalarTaylorFunction create_zero() const;
-    ScalarTaylorFunction create_constant(NumericType const& c) const;
-    ScalarTaylorFunction create_coordinate(SizeType j) const;
+    FunctionPatch<M> create_zero() const;
+    FunctionPatch<M> create_constant(NumericType const& c) const;
+    FunctionPatch<M> create_coordinate(SizeType j) const;
     //@}
 
     //@{
@@ -264,9 +267,9 @@ class ScalarTaylorFunction
     //@{
     /*! \name Comparison operators. */
     //! \brief Equality operator. Tests equality of representation, including error term.
-    Bool operator==(const ScalarTaylorFunction& tv) const;
+    Bool operator==(const FunctionPatch<M>& tv) const;
     //! \brief Inequality operator.
-    Bool operator!=(const ScalarTaylorFunction& tv) const { return !(*this==tv); }
+    Bool operator!=(const FunctionPatch<M>& tv) const { return !(*this==tv); }
     //@}
 
     //@{
@@ -286,10 +289,10 @@ class ScalarTaylorFunction
     /*! \name Simplification operations. */
    //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
-    ScalarTaylorFunction& sweep() { this->_model.sweep(); return *this; }
+    FunctionPatch<M>& sweep() { this->_model.sweep(); return *this; }
     //! \brief Remove all terms whose degree is higher than \a deg or
     //! whose coefficient has magnitude less than \a eps.
-    ScalarTaylorFunction& sweep(const SweeperInterface& swp) { this->_model.sweep(swp); return *this; }
+    FunctionPatch<M>& sweep(const SweeperInterface& swp) { this->_model.sweep(swp); return *this; }
     //@}
 
     //@{
@@ -307,76 +310,6 @@ class ScalarTaylorFunction
     //@}
 
     /*! \name Arithmetic operations. */
-
-/*
-    //! \brief Inplace addition of another variable.
-    friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
-    //! \brief Inplace subtraction of another variable.
-    friend ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
-    //! \brief Inplace addition of a product of two variables.
-    friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const Product<ScalarTaylorFunction,ScalarTaylorFunction>& y);
-    //! \brief Inplace addition of an interval constant.
-    friend ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const NumericType& c);
-    //! \brief Inplace subtraction of an interval constant.
-    friend ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const NumericType& c);
-    //! \brief Inplace multiplication by an approximate scalar.
-    friend ScalarTaylorFunction& operator*=(ScalarTaylorFunction& x, const NumericType& c);
-    //! \brief Inplace division by an approximate scalar.
-    friend ScalarTaylorFunction& operator/=(ScalarTaylorFunction& x, const NumericType& c);
-
-    //! \brief Unary plus.
-    friend ScalarTaylorFunction operator+(const ScalarTaylorFunction& x);
-    //! \brief Unary minus.
-    friend ScalarTaylorFunction operator-(const ScalarTaylorFunction& x);
-    //! \brief Addition.
-    friend ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
-    //! \brief Subtraction.
-    friend ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
-    //! \brief Multiplication.
-    friend ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
-    //! \brief Division.
-    friend ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
-
-    //! \brief Maximum. Throws an error if one variable is not greater than the other
-    //! over the entire domain.
-    friend ScalarTaylorFunction max(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
-    //! \brief Minimum. Throws an error if one variable is not greater than the other
-    //! over the entire domain.
-    friend ScalarTaylorFunction min(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
-    //! \brief Addition.
-    friend ScalarTaylorFunction add(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
-    //! \brief Multiplication.
-    friend ScalarTaylorFunction mul(const ScalarTaylorFunction& x, const ScalarTaylorFunction& y);
-    //! \brief Absolute value. Throws an error if one variable is neither greater than
-    //! zero over the entire domain, nor less than zero over the entire domain.
-    friend ScalarTaylorFunction abs(const ScalarTaylorFunction& x);
-    //! \brief Negation.
-    friend ScalarTaylorFunction neg(const ScalarTaylorFunction& x);
-    //! \brief Reciprocal.
-    friend ScalarTaylorFunction rec(const ScalarTaylorFunction& x);
-    //! \brief Square.
-    friend ScalarTaylorFunction sqr(const ScalarTaylorFunction& x);
-    //! \brief Power.
-    friend ScalarTaylorFunction pow(const ScalarTaylorFunction& x, Int n);
-    //! \brief Square root.
-    friend ScalarTaylorFunction sqrt(const ScalarTaylorFunction& x);
-    //! \brief SizeTypeural exponent.
-    friend ScalarTaylorFunction exp(const ScalarTaylorFunction& x);
-    //! \brief SizeTypeural logarithm.
-    friend ScalarTaylorFunction log(const ScalarTaylorFunction& x);
-    //! \brief Sine.
-    friend ScalarTaylorFunction sin(const ScalarTaylorFunction& x);
-    //! \brief Cosine.
-    friend ScalarTaylorFunction cos(const ScalarTaylorFunction& x);
-    //! \brief Tangent.
-    friend ScalarTaylorFunction tan(const ScalarTaylorFunction& x);
-    //! \brief Inverse sine.
-    friend ScalarTaylorFunction asin(const ScalarTaylorFunction& x);
-    //! \brief Inverse cosine.
-    friend ScalarTaylorFunction acos(const ScalarTaylorFunction& x);
-    //! \brief Inverse tangent.
-    friend ScalarTaylorFunction atan(const ScalarTaylorFunction& x);
-*/
     //@}
 
     //@{
@@ -386,113 +319,119 @@ class ScalarTaylorFunction
     /*! \brief Write a full representation to an output stream. */
     OutputStream& repr(OutputStream& os) const;
     //! \brief Write to an output stream.
-    friend OutputStream& operator<<(OutputStream& os, const ScalarTaylorFunction& x);
+    friend OutputStream& operator<<(OutputStream& os, const FunctionPatch<M>& x) {
+        return x.write(os); }
     //@}
 
   public:
     Void clobber() { this->_model.clobber(); }
   private:
     friend class TaylorFunctionFactory;
-    friend class ScalarFunctionMixin<ScalarTaylorFunction, ValidatedTag>;
-    friend class ScalarFunctionModelMixin<ScalarTaylorFunction, ValidatedTag>;
+    friend class ScalarFunctionMixin<FunctionPatch<M>, ValidatedTag>;
+    friend class ScalarFunctionModelMixin<FunctionPatch<M>, ValidatedTag>;
     template<class T> Void _compute(T& r, const Vector<T>& a) const {
         typedef typename T::NumericType R;
         r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
             + convert_error<R>(this->_model.error());
     }
-    ScalarTaylorFunction* _derivative(SizeType j) const;
-    ScalarTaylorFunction* _clone() const;
-    ScalarTaylorFunction* _create() const;
-    VectorFunctionModelInterface<ValidatedTag>* _create_identity() const;
-    VectorFunctionModelInterface<ValidatedTag>* _create_vector(SizeType i) const;
+    FunctionPatch<M>* _derivative(SizeType j) const;
+    FunctionPatch<M>* _clone() const;
+    FunctionPatch<M>* _create() const;
+    VectorFunctionModelInterface<Paradigm>* _create_identity() const;
+    VectorFunctionModelInterface<Paradigm>* _create_vector(SizeType i) const;
 };
 
 //! \brief Restrict to a subdomain.
-ScalarTaylorFunction restriction(const ScalarTaylorFunction& x, const ExactBox& d);
+template<class M> FunctionPatch<M> restriction(const FunctionPatch<M>& x, const ExactBox& d);
 //! \brief Extend over a larger domain. Only possible if the larger domain is only larger where the smaller domain is a singleton.
 //! The extension is performed keeping \a x constant over the new coordinates. // DEPRECATED
-ScalarTaylorFunction extension(const ScalarTaylorFunction& x, const ExactBox& d);
+template<class M> FunctionPatch<M> extension(const FunctionPatch<M>& x, const ExactBox& d);
 
 //! \brief Test if the quantity is a better approximation than \a t throughout the domain.
-Bool refines(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
+template<class M> Bool refines(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2);
 //! \brief Test if the function models are inconsistent with representing the same exact function.
-Bool inconsistent(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
+template<class M> Bool inconsistent(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2);
 //! \brief Compute an over-approximation to the common refinement of \a x1 and \a x2.
-ScalarTaylorFunction refinement(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2);
+template<class M> FunctionPatch<M> refinement(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2);
 
 
 // Normed algebra
-NormType norm(const ScalarTaylorFunction& f);
+template<class M> NormType norm(const FunctionPatch<M>& f);
 
 // Differential algebra
-ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, SizeType k, ExactFloat c);
-ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, SizeType k);
-ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, SizeType k);
+template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, SizeType k, ExactFloat c);
+template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, SizeType k);
+template<class M> FunctionPatch<M> derivative(const FunctionPatch<M>& x, SizeType k);
 
 // Function algebra
-ScalarTaylorFunction embed(const ExactBox& dom1, const ScalarTaylorFunction& tv2,const ExactBox& dom3);
+template<class M> FunctionPatch<M> embed(const ExactBox& dom1, const FunctionPatch<M>& tv2,const ExactBox& dom3);
 // Set the value of the \a kth variable to c
-ScalarTaylorFunction partial_evaluate(const ScalarTaylorFunction& f, SizeType k, const ScalarTaylorFunction::NumericType& c);
+template<class M> FunctionPatch<M> partial_evaluate(const FunctionPatch<M>& f, SizeType k, const NumericType<M>& c);
 // Evaluate a scalar Taylor function on a vector.
-ScalarTaylorFunction::NumericType unchecked_evaluate(const ScalarTaylorFunction&, const Vector<ScalarTaylorFunction::NumericType>&);
+template<class M> NumericType<M> unchecked_evaluate(const FunctionPatch<M>&, const Vector<NumericType<M>>&);
 
 // Compose with an function.
-ScalarTaylorFunction compose(const ValidatedScalarFunction& x, const VectorTaylorFunction& y);
-ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
+template<class M> FunctionPatch<M> compose(const FunctionType<M>& x, const VectorFunctionPatch<M>& y);
+template<class M> FunctionPatch<M> unchecked_compose(const FunctionPatch<M>&, const VectorTaylorFunction&);
 
 // Split the variable over two domains, subdividing along the independent variable j.
-Pair<ScalarTaylorFunction,ScalarTaylorFunction> split(const ScalarTaylorFunction& x, SizeType j);
+template<class M> Pair<FunctionPatch<M>,FunctionPatch<M>> split(const FunctionPatch<M>& x, SizeType j);
 
 
-ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f, const ScalarTaylorFunction::NumericType& c);
-ScalarTaylorFunction& operator-=(ScalarTaylorFunction& f, const ScalarTaylorFunction::NumericType& c);
-ScalarTaylorFunction& operator*=(ScalarTaylorFunction& f, const ScalarTaylorFunction::NumericType& c);
-ScalarTaylorFunction& operator/=(ScalarTaylorFunction& f, const ScalarTaylorFunction::NumericType& c);
-ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2);
-ScalarTaylorFunction& operator-=(ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2);
+template<class M> FunctionPatch<M>& operator+=(FunctionPatch<M>& f, const NumericType<M>& c);
+template<class M> FunctionPatch<M>& operator-=(FunctionPatch<M>& f, const NumericType<M>& c);
+template<class M> FunctionPatch<M>& operator*=(FunctionPatch<M>& f, const NumericType<M>& c);
+template<class M> FunctionPatch<M>& operator/=(FunctionPatch<M>& f, const NumericType<M>& c);
+template<class M> FunctionPatch<M>& operator+=(FunctionPatch<M>& f1, const FunctionPatch<M>& f2);
+template<class M> FunctionPatch<M>& operator-=(FunctionPatch<M>& f1, const FunctionPatch<M>& f2);
 
-ScalarTaylorFunction operator+(const ScalarTaylorFunction& f);
-ScalarTaylorFunction operator-(const ScalarTaylorFunction& f);
-ScalarTaylorFunction operator+(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2);
-ScalarTaylorFunction operator-(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2);
-ScalarTaylorFunction operator*(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2);
-ScalarTaylorFunction operator/(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2);
-ScalarTaylorFunction operator+(const ScalarTaylorFunction& f, const ScalarTaylorFunction::NumericType& c);
-ScalarTaylorFunction operator-(const ScalarTaylorFunction& f, const ScalarTaylorFunction::NumericType& c);
-ScalarTaylorFunction operator*(const ScalarTaylorFunction& f, const ScalarTaylorFunction::NumericType& c);
-ScalarTaylorFunction operator/(const ScalarTaylorFunction& f, const ScalarTaylorFunction::NumericType& c);
-ScalarTaylorFunction operator+(const ScalarTaylorFunction::NumericType& c, const ScalarTaylorFunction& f);
-ScalarTaylorFunction operator-(const ScalarTaylorFunction::NumericType& c, const ScalarTaylorFunction& f);
-ScalarTaylorFunction operator*(const ScalarTaylorFunction::NumericType& c, const ScalarTaylorFunction& f);
-ScalarTaylorFunction operator/(const ScalarTaylorFunction::NumericType& c, const ScalarTaylorFunction& f);
+template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& f);
+template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& f);
+template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2);
+template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2);
+template<class M> FunctionPatch<M> operator*(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2);
+template<class M> FunctionPatch<M> operator/(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2);
+template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& f, const NumericType<M>& c);
+template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& f, const NumericType<M>& c);
+template<class M> FunctionPatch<M> operator*(const FunctionPatch<M>& f, const NumericType<M>& c);
+template<class M> FunctionPatch<M> operator/(const FunctionPatch<M>& f, const NumericType<M>& c);
+template<class M> FunctionPatch<M> operator+(const NumericType<M>& c, const FunctionPatch<M>& f);
+template<class M> FunctionPatch<M> operator-(const NumericType<M>& c, const FunctionPatch<M>& f);
+template<class M> FunctionPatch<M> operator*(const NumericType<M>& c, const FunctionPatch<M>& f);
+template<class M> FunctionPatch<M> operator/(const NumericType<M>& c, const FunctionPatch<M>& f);
 
-ScalarTaylorFunction operator+(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2);
-ScalarTaylorFunction operator-(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2);
-ScalarTaylorFunction operator*(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2);
-ScalarTaylorFunction operator/(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2);
-ScalarTaylorFunction operator+(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2);
-ScalarTaylorFunction operator-(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2);
-ScalarTaylorFunction operator*(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2);
-ScalarTaylorFunction operator/(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2);
+template<class M> FunctionPatch<M> operator+(const typename FunctionPatch<M>::FunctionType& f1, const FunctionPatch<M>& tf2);
+template<class M> FunctionPatch<M> operator-(const typename FunctionPatch<M>::FunctionType& f1, const FunctionPatch<M>& tf2);
+template<class M> FunctionPatch<M> operator*(const typename FunctionPatch<M>::FunctionType& f1, const FunctionPatch<M>& tf2);
+template<class M> FunctionPatch<M> operator/(const typename FunctionPatch<M>::FunctionType& f1, const FunctionPatch<M>& tf2);
+template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& tf1, const typename FunctionPatch<M>::FunctionType& f2);
+template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& tf1, const typename FunctionPatch<M>::FunctionType& f2);
+template<class M> FunctionPatch<M> operator*(const FunctionPatch<M>& tf1, const typename FunctionPatch<M>::FunctionType& f2);
+template<class M> FunctionPatch<M> operator/(const FunctionPatch<M>& tf1, const typename FunctionPatch<M>::FunctionType& f2);
 
-ScalarTaylorFunction abs(const ScalarTaylorFunction& x);
-ScalarTaylorFunction neg(const ScalarTaylorFunction& x);
-ScalarTaylorFunction rec(const ScalarTaylorFunction& x);
-ScalarTaylorFunction sqr(const ScalarTaylorFunction& x);
-ScalarTaylorFunction pow(const ScalarTaylorFunction& x, Int n);
-ScalarTaylorFunction sqrt(const ScalarTaylorFunction& x);
-ScalarTaylorFunction exp(const ScalarTaylorFunction& x);
-ScalarTaylorFunction log(const ScalarTaylorFunction& x);
-ScalarTaylorFunction sin(const ScalarTaylorFunction& x);
-ScalarTaylorFunction cos(const ScalarTaylorFunction& x);
-ScalarTaylorFunction tan(const ScalarTaylorFunction& x);
-ScalarTaylorFunction asin(const ScalarTaylorFunction& x);
-ScalarTaylorFunction acos(const ScalarTaylorFunction& x);
-ScalarTaylorFunction atan(const ScalarTaylorFunction& x);
+template<class M> FunctionPatch<M> abs(const FunctionPatch<M>& x);
+template<class M> FunctionPatch<M> neg(const FunctionPatch<M>& x);
+template<class M> FunctionPatch<M> rec(const FunctionPatch<M>& x);
+template<class M> FunctionPatch<M> sqr(const FunctionPatch<M>& x);
+template<class M> FunctionPatch<M> pow(const FunctionPatch<M>& x, Int n);
+template<class M> FunctionPatch<M> sqrt(const FunctionPatch<M>& x);
+template<class M> FunctionPatch<M> exp(const FunctionPatch<M>& x);
+template<class M> FunctionPatch<M> log(const FunctionPatch<M>& x);
+template<class M> FunctionPatch<M> sin(const FunctionPatch<M>& x);
+template<class M> FunctionPatch<M> cos(const FunctionPatch<M>& x);
+template<class M> FunctionPatch<M> tan(const FunctionPatch<M>& x);
+template<class M> FunctionPatch<M> asin(const FunctionPatch<M>& x);
+template<class M> FunctionPatch<M> acos(const FunctionPatch<M>& x);
+template<class M> FunctionPatch<M> atan(const FunctionPatch<M>& x);
 
 // Remove the error term
-ScalarTaylorFunction midpoint(const ScalarTaylorFunction& x);
+template<class M> FunctionPatch<M> midpoint(const FunctionPatch<M>& x);
 
+// Code
+template<class M> FunctionPatch<M>::FunctionPatch(const ScalarFunctionModel<ValidatedTag>& f) {
+     ARIADNE_ASSERT_MSG(dynamic_cast<const FunctionPatch<M>*>(f._ptr.operator->())," f="<<f);
+     *this=dynamic_cast<const FunctionPatch<M>&>(*f._ptr);
+}
 
 
 
@@ -501,12 +440,12 @@ ScalarTaylorFunction midpoint(const ScalarTaylorFunction& x);
 /*! \ingroup FunctionModelSubModule
  *  \brief A Taylor function model with multivalued codomain built from the TaylorModel class.
  *
- *  See also TaylorModel, ScalarTaylorFunction, VectorTaylorFunction.
+ *  See also TaylorModel, FunctionPatch<M>, VectorTaylorFunction.
  */
-class VectorTaylorFunction
-    : public VectorFunctionModelMixin<VectorTaylorFunction,ValidatedTag>
+template<class M> class VectorFunctionPatch
+    : public VectorFunctionModelMixin<VectorFunctionPatch<M>,typename M::Paradigm>
 {
-    friend class VectorTaylorFunctionElementReference;
+    friend class VectorFunctionPatchElementReference<M>;
 
   public:
     typedef ExactBox DomainType;
@@ -519,66 +458,66 @@ class VectorTaylorFunction
     typedef ModelType::NumericType NumericType;
 
     /*! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables. */
-    VectorTaylorFunction();
+    VectorFunctionPatch<M>();
 
     /*! \brief Construct the zero vector function over an unspecified domain. */
-    explicit VectorTaylorFunction(SizeType result_size);
+    explicit VectorFunctionPatch<M>(SizeType result_size);
 
     /*! \brief Construct from a result size and a domain. */
-    VectorTaylorFunction(SizeType result_size, const ExactBox& domain, Sweeper swp);
+    VectorFunctionPatch<M>(SizeType result_size, const ExactBox& domain, Sweeper swp);
 
     /*! \brief Construct a vector function all of whose components are the same. */
-    VectorTaylorFunction(SizeType result_size, const ScalarTaylorFunction& scalar_function);
+    VectorFunctionPatch<M>(SizeType result_size, const FunctionPatch<M>& scalar_function);
 
     /*! \brief Construct from a domain and the expansion. */
-    VectorTaylorFunction(const ExactBox& domain,
+    VectorFunctionPatch<M>(const ExactBox& domain,
                          const Vector< Expansion<CoefficientType> >& expansion,
                          Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
-    VectorTaylorFunction(const ExactBox& domain,
+    VectorFunctionPatch<M>(const ExactBox& domain,
                          const Vector< Expansion<CoefficientType> >& expansion,
                          const Vector<ErrorType>& error,
                          Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
-    VectorTaylorFunction(const ExactBox& domain,
+    VectorFunctionPatch<M>(const ExactBox& domain,
                          const Vector< Expansion<RawFloat> >& expansion,
                          const Vector<RawFloat>& error,
                          Sweeper swp);
 
     /*! \brief Construct from a domain, and expansion and errors. */
-    VectorTaylorFunction(const ExactBox& domain,
+    VectorFunctionPatch<M>(const ExactBox& domain,
                          const Vector< Expansion<RawFloat> >& expansion,
                          Sweeper swp);
 
     /*! \brief Construct from a domain and the models. */
-    explicit VectorTaylorFunction(const ExactBox& domain, const Vector< ModelType >& variables);
+    explicit VectorFunctionPatch<M>(const ExactBox& domain, const Vector< ModelType >& variables);
 
     /*! \brief Construct from a domain, a function, and a sweeper determining the accuracy. */
-    VectorTaylorFunction(const ExactBox& domain,
+    VectorFunctionPatch<M>(const ExactBox& domain,
                          const ValidatedVectorFunction& function,
                          const Sweeper& sweeper);
 
     /*! \brief Construct from a vector of scalar Taylor functions. */
-    explicit VectorTaylorFunction(const Vector<ScalarTaylorFunction>& components);
+    explicit VectorFunctionPatch<M>(const Vector<FunctionPatch<M>>& components);
 
     /*! \brief Construct from a list of scalar Taylor functions. */
-    explicit VectorTaylorFunction(const List<ScalarTaylorFunction>& components);
+    explicit VectorFunctionPatch<M>(const List<FunctionPatch<M>>& components);
 
     /*! \brief Construct from an initializer list of scalar Taylor functions. */
-    VectorTaylorFunction(InitializerList<ScalarTaylorFunction> components);
+    VectorFunctionPatch<M>(InitializerList<FunctionPatch<M>> components);
 
     /*! \brief Construct from a vector expression. */
-    template<class E> explicit VectorTaylorFunction(const VectorExpression<E>& ve);
+    template<class E> explicit VectorFunctionPatch<M>(const VectorExpression<E>& ve);
 
-    explicit VectorTaylorFunction (const VectorFunctionModel<ValidatedTag>& f);
-    VectorTaylorFunction& operator=(const VectorFunctionModel<ValidatedTag>& f);
+    explicit VectorFunctionPatch<M> (const VectorFunctionModel<ValidatedTag>& f);
+    VectorFunctionPatch<M>& operator=(const VectorFunctionModel<ValidatedTag>& f);
 
     /*! \brief Equality operator. */
-    Bool operator==(const VectorTaylorFunction& p) const;
+    Bool operator==(const VectorFunctionPatch<M>& p) const;
     /*! \brief Inequality operator. */
-    Bool operator!=(const VectorTaylorFunction& p) const;
+    Bool operator!=(const VectorFunctionPatch<M>& p) const;
 
     // Data access
     /*! \brief The sweeper used to control approximation of the Taylor function. */
@@ -612,13 +551,13 @@ class VectorTaylorFunction
     // For compatibility wit Vector.
     SizeType size() const { return this->result_size(); }
     /*! \brief Get the \a ith Taylor variable */
-    ScalarTaylorFunction get(SizeType i) const;
+    FunctionPatch<M> get(SizeType i) const;
     /*! \brief Set the \a ith Taylor variable */
-    Void set(SizeType i, const ScalarTaylorFunction& te);
+    Void set(SizeType i, const FunctionPatch<M>& te);
     /*! \brief The \a ith Taylor variable */
-    ScalarTaylorFunction operator[](SizeType i) const;
+    FunctionPatch<M> operator[](SizeType i) const;
     /*! \brief The \a ith Taylor variable */
-    VectorTaylorFunctionElementReference operator[](SizeType i);
+    VectorFunctionPatchElementReference<M> operator[](SizeType i);
 
 
     /*! \brief Evaluate the Taylor model at the point \a x. */
@@ -630,18 +569,18 @@ class VectorTaylorFunction
 
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
-    VectorTaylorFunction& sweep();
+    VectorFunctionPatch<M>& sweep();
     //! \brief Remove all terms as specified by \a sweeper.
-    VectorTaylorFunction& sweep(const SweeperInterface& sweeper);
+    VectorFunctionPatch<M>& sweep(const SweeperInterface& sweeper);
     /*! \brief Set the error to zero. */
     Void clobber();
 
     /*! \brief The constant Taylor model with range \a r and argument domain \a d. */
-    static VectorTaylorFunction constant(const ExactBox& d, const Vector<NumericType>& r, Sweeper swp);
+    static VectorFunctionPatch<M> constant(const ExactBox& d, const Vector<NumericType>& r, Sweeper swp);
     /*! \brief The identity Taylor model on domain \a d. */
-    static VectorTaylorFunction identity(const ExactBox& d, Sweeper swp);
+    static VectorFunctionPatch<M> identity(const ExactBox& d, Sweeper swp);
     //! \brief Return the vector of variables in the range with values \a x over domain \a d.
-    static VectorTaylorFunction projection(const ExactBox& d, SizeType imin, SizeType imax, Sweeper swp);
+    static VectorFunctionPatch<M> projection(const ExactBox& d, SizeType imin, SizeType imax, Sweeper swp);
 
     /*! \brief Convert to an interval polynomial. */
     Vector<Polynomial<ValidatedFloat>> polynomials() const;
@@ -653,11 +592,11 @@ class VectorTaylorFunction
     ValidatedVectorFunction function() const;
 
     /*! \brief Truncate terms higher than \a bd. */
-    VectorTaylorFunction& truncate(const MultiIndexBound& bd);
+    VectorFunctionPatch<M>& truncate(const MultiIndexBound& bd);
     /*! \brief Restrict to a subdomain. */
     Void restrict(const ExactBox& d);
     //! \brief Adjoin a scalar function.
-    Void adjoin(const ScalarTaylorFunction& sf);
+    Void adjoin(const FunctionPatch<M>& sf);
 
     /*! \brief Write to an output stream. */
     OutputStream& write(OutputStream& os) const;
@@ -671,13 +610,13 @@ class VectorTaylorFunction
     Void _set_argument_size(SizeType n);
     SizeType _compute_maximum_component_size() const;
     Void _resize(SizeType rs, SizeType as, ushort d, ushort s);
-    virtual ScalarTaylorFunction* _get(SizeType i) const { return new ScalarTaylorFunction(this->_domain,this->_models[i]); }
-    virtual VectorTaylorFunction* _clone() const;
-    virtual VectorTaylorFunction* _create() const;
-    virtual VectorTaylorFunction* _create_identity() const;
-    virtual ScalarTaylorFunction* _create_zero() const;
+    virtual ScalarFunctionPatch<M>* _get(SizeType i) const { return new FunctionPatch<M>(this->_domain,this->_models[i]); }
+    virtual VectorFunctionPatch<M>* _clone() const;
+    virtual VectorFunctionPatch<M>* _create() const;
+    virtual VectorFunctionPatch<M>* _create_identity() const;
+    virtual ScalarFunctionPatch<M>* _create_zero() const;
   private:
-    friend class VectorFunctionMixin<VectorTaylorFunction,ValidatedTag>;
+    friend class VectorFunctionMixin<VectorFunctionPatch<M>,ValidatedTag>;
     friend class TaylorFunctionFactory;
     template<class X> Void _compute(Vector<X>& r, const Vector<X>& a) const;
   private:
@@ -687,167 +626,202 @@ class VectorTaylorFunction
 };
 
 
-    /*! \brief Inplace addition. */
-    VectorTaylorFunction& operator+=(VectorTaylorFunction& f, const VectorTaylorFunction& g);
-    /*! \brief Inplace subtraction. */
-    VectorTaylorFunction& operator-=(VectorTaylorFunction& f, const VectorTaylorFunction& g);
-    /*! \brief Inplace addition. */
-    VectorTaylorFunction& operator+=(VectorTaylorFunction& f, const Vector<VectorTaylorFunction::NumericType>& c);
-    /*! \brief Inplace subtraction. */
-    VectorTaylorFunction& operator-=(VectorTaylorFunction& f, const Vector<VectorTaylorFunction::NumericType>& c);
-    /*! \brief Inplace scalar multiplication. */
-    VectorTaylorFunction& operator*=(VectorTaylorFunction& f, const VectorTaylorFunction::NumericType& c);
-    /*! \brief Inplace scalar division. */
-    VectorTaylorFunction& operator/=(VectorTaylorFunction& f, const VectorTaylorFunction::NumericType& c);
+/*! \brief Inplace addition. */
+template<class M> VectorFunctionPatch<M>& operator+=(VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
+/*! \brief Inplace subtraction. */
+template<class M> VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
+/*! \brief Inplace addition. */
+template<class M> VectorFunctionPatch<M>& operator+=(VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c);
+/*! \brief Inplace subtraction. */
+template<class M> VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c);
+/*! \brief Inplace scalar multiplication. */
+template<class M> VectorFunctionPatch<M>& operator*=(VectorFunctionPatch<M>& f, const NumericType<M>& c);
+/*! \brief Inplace scalar division. */
+template<class M> VectorFunctionPatch<M>& operator/=(VectorFunctionPatch<M>& f, const NumericType<M>& c);
 
-    /*! \brief Negation. */
-    VectorTaylorFunction operator-(const VectorTaylorFunction& f);
-    /*! \brief Addition. */
-    VectorTaylorFunction operator+(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
-    /*! \brief Subtraction. */
-    VectorTaylorFunction operator-(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
-    /*! \brief Multiplication. */
-    VectorTaylorFunction operator*(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2);
-    /*! \brief Multiplication. */
-    VectorTaylorFunction operator*(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2);
-    /*! \brief Division. */
-    VectorTaylorFunction operator/(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2);
+/*! \brief Negation. */
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f);
+/*! \brief Addition. */
+template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2);
+/*! \brief Subtraction. */
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2);
+/*! \brief Multiplication. */
+template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2);
+/*! \brief Multiplication. */
+template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2);
+/*! \brief Division. */
+template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2);
 
-    /*! \brief Addition of a constant. */
-    VectorTaylorFunction operator+(const VectorTaylorFunction& f, const Vector<VectorTaylorFunction::NumericType>& c);
-    /*! \brief Subtraction of a constant. */
-    VectorTaylorFunction operator-(const VectorTaylorFunction& f, const Vector<VectorTaylorFunction::NumericType>& c);
-    /*! \brief Multiplication by a scalar. */
-    VectorTaylorFunction operator*(const VectorTaylorFunction::NumericType& c, const VectorTaylorFunction& f);
-    /*! \brief Multiplication by a scalar. */
-    VectorTaylorFunction operator*(const VectorTaylorFunction& f, const VectorTaylorFunction::NumericType& c);
-    /*! \brief Division by a scalar. */
-    VectorTaylorFunction operator/(const VectorTaylorFunction& f, const VectorTaylorFunction::NumericType& c);
-    /*! \brief Multiplication by a matrix. */
-    VectorTaylorFunction operator*(const Matrix<ExactNumber>& A, const VectorTaylorFunction& f);
-    /*! \brief Multiplication by a matrix. */
-    VectorTaylorFunction operator*(const Matrix<VectorTaylorFunction::NumericType>& A, const VectorTaylorFunction& f);
+/*! \brief Addition of a constant. */
+template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c);
+/*! \brief Subtraction of a constant. */
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c);
+/*! \brief Multiplication by a scalar. */
+template<class M> VectorFunctionPatch<M> operator*(const NumericType<M>& c, const VectorFunctionPatch<M>& f);
+/*! \brief Multiplication by a scalar. */
+template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f, const NumericType<M>& c);
+/*! \brief Division by a scalar. */
+template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f, const NumericType<M>& c);
+/*! \brief Multiplication by a matrix. */
+template<class M> VectorFunctionPatch<M> operator*(const Matrix<ExactNumber>& A, const VectorFunctionPatch<M>& f);
+/*! \brief Multiplication by a matrix. */
+template<class M> VectorFunctionPatch<M> operator*(const Matrix<NumericType<M>>& A, const VectorFunctionPatch<M>& f);
 
-    VectorTaylorFunction operator+(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2);
-    VectorTaylorFunction operator-(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2);
-    VectorTaylorFunction operator*(const ValidatedScalarFunction& f1, const VectorTaylorFunction& tf2);
-    VectorTaylorFunction operator*(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2);
-    VectorTaylorFunction operator/(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2);
-    VectorTaylorFunction operator+(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2);
-    VectorTaylorFunction operator-(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2);
-    VectorTaylorFunction operator*(const ScalarTaylorFunction& tf1, const ValidatedVectorFunction& f2);
-    VectorTaylorFunction operator*(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2);
-    VectorTaylorFunction operator/(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2);
+template<class M> VectorFunctionPatch<M> operator+(const ValidatedVectorFunction& f1, const VectorFunctionPatch<M>& tf2);
+template<class M> VectorFunctionPatch<M> operator-(const ValidatedVectorFunction& f1, const VectorFunctionPatch<M>& tf2);
+template<class M> VectorFunctionPatch<M> operator*(const ValidatedScalarFunction& f1, const VectorFunctionPatch<M>& tf2);
+template<class M> VectorFunctionPatch<M> operator*(const ValidatedVectorFunction& f1, const FunctionPatch<M>& tf2);
+template<class M> VectorFunctionPatch<M> operator/(const ValidatedVectorFunction& f1, const FunctionPatch<M>& tf2);
+template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& tf1, const ValidatedVectorFunction& f2);
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& tf1, const ValidatedVectorFunction& f2);
+template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& tf1, const ValidatedVectorFunction& f2);
+template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& tf1, const ValidatedScalarFunction& f2);
+template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& tf1, const ValidatedScalarFunction& f2);
 
-    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    ScalarTaylorFunction compose(const ValidatedScalarFunction& f, const VectorTaylorFunction& g);
-    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    VectorTaylorFunction compose(const ValidatedVectorFunction& f, const VectorTaylorFunction& g);
-    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    ScalarTaylorFunction compose(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
-    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    VectorTaylorFunction compose(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
+//! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
+template<class M> FunctionPatch<M> compose(const FunctionType<M>& f, const VectorFunctionPatch<M>& g);
+//! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
+template<class M> VectorFunctionPatch<M> compose(const VectorFunctionType<M>& f, const VectorFunctionPatch<M>& g);
+//! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
+template<class M> FunctionPatch<M> compose(const FunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
+//! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
+template<class M> VectorFunctionPatch<M> compose(const VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
 
-    //! \brief Weak derivative of \a f with respect to variable \a k.
-    VectorTaylorFunction derivative(const VectorTaylorFunction& f, SizeType k);
-    //! \brief Antiderivative of \a f with respect to variable \a k.
-    VectorTaylorFunction antiderivative(const VectorTaylorFunction& f, SizeType k);
-    //! \brief Antiderivative of \a f with respect to variable \a k, taking value \c 0 when \a x[k]=c.
-    VectorTaylorFunction antiderivative(const VectorTaylorFunction& f, SizeType k, ExactFloat c);
+//! \brief Weak derivative of \a f with respect to variable \a k.
+template<class M> VectorFunctionPatch<M> derivative(const VectorFunctionPatch<M>& f, SizeType k);
+//! \brief Antiderivative of \a f with respect to variable \a k.
+template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k);
+//! \brief Antiderivative of \a f with respect to variable \a k, taking value \c 0 when \a x[k]=c.
+template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k, ExactFloat c);
 
-    NormType norm(const VectorTaylorFunction& f);
-    NormType distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2);
-    NormType distance(const VectorTaylorFunction& f1, const ValidatedVectorFunction& f2);
+template<class M> NormType norm(const VectorFunctionPatch<M>& f);
+template<class M> NormType distance(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2);
+template<class M> NormType distance(const VectorFunctionPatch<M>& f1, const ValidatedVectorFunction& f2);
 
-    //! \brief Restrict the function \a f to a subdomain \a d.
-    VectorTaylorFunction restriction(const VectorTaylorFunction& f, const ExactBox& d);
-    //! \brief Restrict the function \a f to a larger domain \a d.
-    VectorTaylorFunction extension(const VectorTaylorFunction& f, const ExactBox& d);
+//! \brief Restrict the function \a f to a subdomain \a d.
+template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& f, const ExactBox& d);
+//! \brief Restrict the function \a f to a larger domain \a d.
+template<class M> VectorFunctionPatch<M> extension(const VectorFunctionPatch<M>& f, const ExactBox& d);
 
-    VectorTaylorFunction embed(const ExactBox& d1, const VectorTaylorFunction& tv2,const ExactBox& d3);
+template<class M> VectorFunctionPatch<M> embed(const ExactBox& d1, const VectorFunctionPatch<M>& tv2,const ExactBox& d3);
 
-    //! \brief Tests if a function \a f refines another function \a g.
-    //! To be a refinement, the domain of \a f must contain the domain of \a g.
-    Bool refines(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
-    Bool inconsistent(const VectorTaylorFunction&, const VectorTaylorFunction&);
-    VectorTaylorFunction refinement(const VectorTaylorFunction&, const VectorTaylorFunction&);
+//! \brief Tests if a function \a f refines another function \a g.
+//! To be a refinement, the domain of \a f must contain the domain of \a g.
+template<class M> Bool refines(const VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
+template<class M> Bool inconsistent(const VectorFunctionPatch<M>&, const VectorFunctionPatch<M>&);
+template<class M> VectorFunctionPatch<M> refinement(const VectorFunctionPatch<M>&, const VectorFunctionPatch<M>&);
 
-    //! \brief Compute the function \f$(f \oplus g)(x)=(f(x),g(x))\f$.
-    VectorTaylorFunction join(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
-    VectorTaylorFunction join(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
-    VectorTaylorFunction join(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
-    VectorTaylorFunction join(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
-    //! \brief Compute the function \f$(f\otimes g)(x,y)=(f(x),g(y))\f$.
-    VectorTaylorFunction combine(const VectorTaylorFunction& f, const VectorTaylorFunction& g);
-    VectorTaylorFunction combine(const VectorTaylorFunction& f, const ScalarTaylorFunction& g);
-    VectorTaylorFunction combine(const ScalarTaylorFunction& f, const VectorTaylorFunction& g);
-    VectorTaylorFunction combine(const ScalarTaylorFunction& f, const ScalarTaylorFunction& g);
+//! \brief Compute the function \f$(f \oplus g)(x)=(f(x),g(x))\f$.
+template<class M> VectorFunctionPatch<M> join(const VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
+template<class M> VectorFunctionPatch<M> join(const VectorFunctionPatch<M>& f, const FunctionPatch<M>& g);
+template<class M> VectorFunctionPatch<M> join(const FunctionPatch<M>& f, const FunctionPatch<M>& g);
+template<class M> VectorFunctionPatch<M> join(const FunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
+//! \brief Compute the function \f$(f\otimes g)(x,y)=(f(x),g(y))\f$.
+template<class M> VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
+template<class M> VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f, const FunctionPatch<M>& g);
+template<class M> VectorFunctionPatch<M> combine(const FunctionPatch<M>& f, const VectorFunctionPatch<M>& g);
+template<class M> VectorFunctionPatch<M> combine(const FunctionPatch<M>& f, const FunctionPatch<M>& g);
 
-    VectorTaylorFunction partial_evaluate(const VectorTaylorFunction& f, SizeType k, const VectorTaylorFunction::NumericType& c);
+template<class M> VectorFunctionPatch<M> partial_evaluate(const VectorFunctionPatch<M>& f, SizeType k, const NumericType<M>& c);
 
-    Vector<VectorTaylorFunction::NumericType> unchecked_evaluate(const VectorTaylorFunction&, const Vector<VectorTaylorFunction::NumericType>&);
-    ScalarTaylorFunction unchecked_compose(const ScalarTaylorFunction&, const VectorTaylorFunction&);
-    VectorTaylorFunction unchecked_compose(const VectorTaylorFunction&, const VectorTaylorFunction&);
+template<class M> Vector<NumericType<M>> unchecked_evaluate(const VectorFunctionPatch<M>&, const Vector<NumericType<M>>&);
+template<class M> FunctionPatch<M> unchecked_compose(const FunctionPatch<M>&, const VectorFunctionPatch<M>&);
+template<class M> VectorFunctionPatch<M> unchecked_compose(const VectorFunctionPatch<M>&, const VectorFunctionPatch<M>&);
 
-    // Split the domain into halves along the \a j<sup>th</sup> coordinate.
-    Pair<VectorTaylorFunction,VectorTaylorFunction> split(const VectorTaylorFunction& x, SizeType j);
+// Split the domain into halves along the \a j<sup>th</sup> coordinate.
+template<class M> Pair<VectorFunctionPatch<M>,VectorFunctionPatch<M>> split(const VectorFunctionPatch<M>& x, SizeType j);
 
-    OutputStream& operator<<(OutputStream&, const VectorTaylorFunction&);
-
-
-
+template<class M> OutputStream& operator<<(OutputStream&, const VectorFunctionPatch<M>&);
 
 // Conversion operatations
-Polynomial<ValidatedFloat> polynomial(const ScalarTaylorFunction& tfn);
-Vector< Polynomial<ValidatedFloat> > polynomials(const VectorTaylorFunction& tfn);
+template<class M> Polynomial<ValidatedFloat> polynomial(const FunctionPatch<M>& tfn);
+template<class M> Vector< Polynomial<ValidatedFloat> > polynomials(const VectorFunctionPatch<M>& tfn);
 
 
 // Sanitised output
-OutputStream& operator<<(OutputStream&, const Representation<ScalarTaylorFunction>&);
-OutputStream& operator<<(OutputStream&, const Representation<VectorTaylorFunction>&);
+template<class M> OutputStream& operator<<(OutputStream&, const Representation<FunctionPatch<M>>&);
+template<class M> OutputStream& operator<<(OutputStream&, const Representation<VectorFunctionPatch<M>>&);
 template<class F> struct ModelRepresentation { const F* pointer; double threshold; };
 template<class F> ModelRepresentation<F> model_representation(const F& f, double swpt) {
     ModelRepresentation<F> r={&f,swpt}; return r; }
-OutputStream& operator<<(OutputStream&,const ModelRepresentation<ScalarTaylorFunction>&);
-OutputStream& operator<<(OutputStream&,const ModelRepresentation<VectorTaylorFunction>&);
+template<class M> OutputStream& operator<<(OutputStream&,const ModelRepresentation<FunctionPatch<M>>&);
+template<class M> OutputStream& operator<<(OutputStream&,const ModelRepresentation<VectorFunctionPatch<M>>&);
 template<class F> struct PolynomialRepresentation { const F* pointer; double threshold; List<String> names; };
 template<class F> PolynomialRepresentation<F> polynomial_representation(const F& f, double swpt) {
     PolynomialRepresentation<F> r={&f,swpt}; return r; }
 template<class F> PolynomialRepresentation<F> polynomial_representation(const F& f, double swpt, const List<String>& names) {
     PolynomialRepresentation<F> r={&f,swpt,names}; return r; }
-OutputStream& operator<<(OutputStream&,const PolynomialRepresentation<ScalarTaylorFunction>&);
-OutputStream& operator<<(OutputStream&,const PolynomialRepresentation<VectorTaylorFunction>&);
+template<class M> OutputStream& operator<<(OutputStream&,const PolynomialRepresentation<FunctionPatch<M>>&);
+template<class M> OutputStream& operator<<(OutputStream&,const PolynomialRepresentation<VectorFunctionPatch<M>>&);
 
 
-template<class E> VectorTaylorFunction::VectorTaylorFunction(const VectorExpression<E>& ve)
+template<class M> template<class E> VectorFunctionPatch<M>::VectorFunctionPatch(const VectorExpression<E>& ve)
     : _domain(), _models(ve().size(),ve().zero_element().model())
 {
     if(ve().size()!=0) { this->_domain=ve().zero_element().domain(); }
     for(SizeType i=0; i!=ve().size(); ++i) { this->set(i,ve()[i]); }
 }
 
-class VectorTaylorFunctionElementReference
+template<class M> class VectorFunctionPatchElementReference
 {
-    friend class ScalarTaylorFunction;
-    friend class VectorTaylorFunction;
-    typedef ValidatedTaylorModel ModelType;
+    typedef M ModelType;
+    typedef typename M::NumericType NumericType;
+    typedef VectorFunctionPatchElementReference<M> SelfType;
+    typedef FunctionPatch<M> FunctionType;
  public:
-    VectorTaylorFunctionElementReference(VectorTaylorFunction& c, SizeType i) : _c(&c), _i(i) { }
-    operator ScalarTaylorFunction () const { return this->_c->get(this->_i); }
-    Void operator=(const VectorTaylorFunctionElementReference& x) { this->_c->set(this->_i,x._c->get(x._i)); }
-    Void operator=(const ScalarTaylorFunction& x) { this->_c->set(this->_i,x); }
-    ScalarTaylorFunction element() const { return this->_c->get(this->_i); }
+    VectorFunctionPatchElementReference(VectorFunctionPatch<M>& c, SizeType i) : _c(&c), _i(i) { }
+    operator ScalarFunctionPatch<M> () const { return this->_c->get(this->_i); }
+    Void operator=(const VectorFunctionPatchElementReference<M>& x) { this->_c->set(this->_i,x._c->get(x._i)); }
+    Void operator=(const ScalarFunctionPatch<M>& x) { this->_c->set(this->_i,x); }
+    ScalarFunctionPatch<M> element() const { return this->_c->get(this->_i); }
     ExactBox const& domain() const { return this->_c->domain(); }
     const ModelType& model() const { return this->_c->_models[this->_i]; }
     ErrorType error() const { return this->_c->_models[this->_i].error(); }
     Void set_error(const ErrorType& e) { this->_c->_models[this->_i].set_error(e); }
     Void sweep() { this->_c->_models[this->_i].sweep(); }
     template<class X> X operator()(const Vector<X>& x) const { return this->_c->get(this->_i).operator()(x); }
-    friend OutputStream& operator<<(OutputStream& os, const VectorTaylorFunctionElementReference& t) { return os<<ScalarTaylorFunction(t); }
+    friend OutputStream& operator<<(OutputStream& os, const VectorFunctionPatchElementReference<M>& f) { return os<<f.element(); }
+  public:
+    friend FunctionType operator+(SelfType e1, SelfType e2) { return e1.element()+e2.element(); }
+    friend FunctionType operator+(NumericType c, SelfType e) { return c+e.element(); }
+    friend FunctionType operator+(SelfType e, NumericType c) { return e.element()+c; }
+    friend FunctionType operator+(FunctionType f, SelfType e) { return f+e.element(); }
+    friend FunctionType operator+(SelfType e, FunctionType f) { return e.element()+f; }
+    friend FunctionType operator*(SelfType e1, SelfType e2) { return e1.element()*e2.element(); }
+    friend FunctionType operator*(NumericType c, SelfType e) { return c*e.element(); }
+    friend FunctionType operator*(SelfType e, NumericType c) { return e.element()*c; }
+    friend FunctionType operator*(FunctionType f, SelfType e) { return f*e.element(); }
+    friend FunctionType operator*(SelfType e, FunctionType f) { return e.element()*f; }
   private:
-    VectorTaylorFunction* _c; SizeType _i;
+    VectorFunctionPatch<M>* _c; SizeType _i;
 };
 
+
+
+template<class M> FunctionPatch<M> compose(const FunctionType<M>& g, const VectorFunctionPatch<M>& f) {
+    return FunctionPatch<M>(f.domain(),g.evaluate(f.models()));
+}
+
+template<class M> VectorFunctionPatch<M> compose(const VectorFunctionType<M>& g, const VectorFunctionPatch<M>& f) {
+    return VectorFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
+}
+
+
+
+
+class ScalarTaylorFunction : public FunctionPatch<ValidatedTaylorModel> {
+  public:
+    using FunctionPatch<ValidatedTaylorModel>::FunctionPatch;
+    ScalarTaylorFunction() : FunctionPatch<ValidatedTaylorModel>() { }
+    ScalarTaylorFunction(FunctionPatch<ValidatedTaylorModel> const& f) : FunctionPatch<ValidatedTaylorModel>(f) { }
+};
+
+class VectorTaylorFunction : public VectorFunctionPatch<ValidatedTaylorModel> {
+  public:
+    using VectorFunctionPatch<ValidatedTaylorModel>::VectorFunctionPatch;
+    VectorTaylorFunction() : VectorFunctionPatch<ValidatedTaylorModel>() { }
+    VectorTaylorFunction(VectorFunctionPatch<ValidatedTaylorModel> const& f) : VectorFunctionPatch<ValidatedTaylorModel>(f) { }
+};
 
 class TaylorFunctionFactory
     : public FunctionModelFactoryInterface<ValidatedTag>

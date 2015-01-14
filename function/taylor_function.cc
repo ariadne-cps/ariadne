@@ -50,7 +50,7 @@ namespace Ariadne {
 
 static double TAYLOR_FUNCTION_WRITING_ACCURACY = 1e-8;
 
-Void _set_scaling(ScalarTaylorFunction& x, const ExactInterval& ivl, SizeType j)
+template<class M> Void _set_scaling(FunctionPatch<M>& x, const ExactInterval& ivl, SizeType j)
 {
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(upward);
@@ -76,128 +76,124 @@ ScalarFunctionModel<ValidatedTag>& ScalarFunctionModel<ValidatedTag>::operator=(
 }
 
 
-ScalarTaylorFunction::ScalarTaylorFunction()
+
+template<class M> FunctionPatch<M>::FunctionPatch()
     : _domain(), _model()
 { }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const ExactBox& d, Sweeper swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, Sweeper swp)
     : _domain(d), _model(d.size(),swp)
 {
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const ExactBox& d, const Expansion<Float>& p, const Float& e, const Sweeper& swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const Expansion<RawFloat>& p, const RawFloat& e, const Sweeper& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const ExactBox& d, const Expansion<ExactFloat>& p, const ErrorFloat& e, const Sweeper& swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const Expansion<ExactFloat>& p, const ErrorFloat& e, const Sweeper& swp)
     : _domain(d), _model(p,e,swp)
 {
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const ExactBox& d, const ValidatedTaylorModel& m)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const ModelType& m)
     : _domain(d), _model(m)
 {
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const ExactBox& d, const ValidatedScalarFunction& f, Sweeper swp)
+template<class M> FunctionPatch<M>::FunctionPatch(const ExactBox& d, const ValidatedScalarFunction& f, Sweeper swp)
     : _domain(d), _model(f.argument_size(),swp)
 {
     ARIADNE_ASSERT_MSG(d.size()==f.argument_size(),"d="<<d<<" f="<<f);
-    Vector<ValidatedTaylorModel> x=ValidatedTaylorModel::scalings(d,swp);
+    Vector<ModelType> x=ModelType::scalings(d,swp);
     this->_model=f.evaluate(x);
     this->_model.sweep();
 }
 
-ScalarTaylorFunction::ScalarTaylorFunction(const ValidatedScalarFunctionModel& f) {
-     ARIADNE_ASSERT_MSG(dynamic_cast<const ScalarTaylorFunction*>(f._ptr.operator->())," f="<<f);
-     *this=dynamic_cast<const ScalarTaylorFunction&>(*f._ptr);
-}
-
-ScalarTaylorFunction& ScalarTaylorFunction::operator=(const ValidatedScalarFunctionModel& f)
+template<class M> FunctionPatch<M>& FunctionPatch<M>::operator=(const ValidatedScalarFunctionModel& f)
 {
-    return (*this)=ScalarTaylorFunction(this->domain(),f,this->sweeper());
+    return (*this)=FunctionPatch<M>(this->domain(),f,this->sweeper());
 }
 
 
 
-ScalarTaylorFunction ScalarTaylorFunction::zero(const ExactBox& d, Sweeper swp)
+template<class M> FunctionPatch<M> FunctionPatch<M>::zero(const ExactBox& d, Sweeper swp)
 {
-    return ScalarTaylorFunction(d,ValidatedTaylorModel::zero(d.size(),swp));
+    return FunctionPatch<M>(d,ModelType::zero(d.size(),swp));
 }
 
-ScalarTaylorFunction ScalarTaylorFunction::constant(const ExactBox& d, const ValidatedNumber& c, Sweeper swp)
+template<class M> FunctionPatch<M> FunctionPatch<M>::constant(const ExactBox& d, const NumericType& c, Sweeper swp)
 {
-    return ScalarTaylorFunction(d,ValidatedTaylorModel::constant(d.size(),c,swp));
+    return FunctionPatch<M>(d,ModelType::constant(d.size(),c,swp));
 }
 
-ScalarTaylorFunction ScalarTaylorFunction::coordinate(const ExactBox& d, SizeType j, Sweeper swp)
+template<class M> FunctionPatch<M> FunctionPatch<M>::coordinate(const ExactBox& d, SizeType j, Sweeper swp)
 {
     ARIADNE_ASSERT(j<d.size());
-    return ScalarTaylorFunction(d,ValidatedTaylorModel::scaling(d.size(),j,d[j],swp));
+    return FunctionPatch<M>(d,ModelType::scaling(d.size(),j,d[j],swp));
 }
 
 
-Vector<ScalarTaylorFunction> ScalarTaylorFunction::constants(const ExactBox& d, const Vector<ValidatedNumber>& c, Sweeper swp)
+template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::constants(const ExactBox& d, const Vector<NumericType>& c, Sweeper swp)
 {
-    ARIADNE_DEPRECATED("ScalarTaylorFunction::constants","Use VectorTaylorFunction::constant instead");
-    Vector<ScalarTaylorFunction> x(c.size(),ScalarTaylorFunction(d,swp));
+    ARIADNE_DEPRECATED("FunctionPatch<M>::constants","Use VectorFunctionPatch<M>::constant instead");
+    Vector<FunctionPatch<M>> x(c.size(),FunctionPatch<M>(d,swp));
     for(SizeType i=0; i!=c.size(); ++i) {
         x[i]=c[i];
     }
     return x;
 }
 
-Vector<ScalarTaylorFunction> ScalarTaylorFunction::coordinates(const ExactBox& d, Sweeper swp)
+template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::coordinates(const ExactBox& d, Sweeper swp)
 {
-    ARIADNE_DEPRECATED("ScalarTaylorFunction::coordinates","Use VectorTaylorFunction::identity instead");
-    Vector<ScalarTaylorFunction> x(d.dimension(),ScalarTaylorFunction(d,swp));
+    ARIADNE_DEPRECATED("FunctionPatch<M>::coordinates","Use VectorFunctionPatch<M>::identity instead");
+    Vector<FunctionPatch<M>> x(d.dimension(),FunctionPatch<M>(d,swp));
     for(SizeType i=0; i!=x.size(); ++i) {
-        x[i]=ScalarTaylorFunction::coordinate(d,i,swp);
+        x[i]=FunctionPatch<M>::coordinate(d,i,swp);
     }
     return x;
 }
 
-Vector<ScalarTaylorFunction> ScalarTaylorFunction::coordinates(const ExactBox& d, SizeType imin, SizeType imax, Sweeper swp)
+template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::coordinates(const ExactBox& d, SizeType imin, SizeType imax, Sweeper swp)
 {
-    ARIADNE_DEPRECATED("ScalarTaylorFunction::coordinates","Use VectorTaylorFunction::projection instead");
+    ARIADNE_DEPRECATED("FunctionPatch<M>::coordinates","Use VectorFunctionPatch<M>::projection instead");
     ARIADNE_ASSERT(imin<=imax);
     ARIADNE_ASSERT(imax<=d.size());
 
-    Vector<ScalarTaylorFunction> x(imax-imin);
+    Vector<FunctionPatch<M>> x(imax-imin);
     for(SizeType i=imin; i!=imax; ++i) {
-        x[i-imin]=ScalarTaylorFunction::coordinate(d,i,swp);
+        x[i-imin]=FunctionPatch<M>::coordinate(d,i,swp);
     }
     return x;
 }
 
 
-ScalarTaylorFunction ScalarTaylorFunction::create_zero() const
+template<class M> FunctionPatch<M> FunctionPatch<M>::create_zero() const
 {
-    return ScalarTaylorFunction(this->domain(),this->_model.sweeper());
+    return FunctionPatch<M>(this->domain(),this->_model.sweeper());
 }
 
-ScalarTaylorFunction* ScalarTaylorFunction::_clone() const
+template<class M> FunctionPatch<M>* FunctionPatch<M>::_clone() const
 {
-    return new ScalarTaylorFunction(*this);
+    return new FunctionPatch<M>(*this);
 }
 
-ScalarTaylorFunction* ScalarTaylorFunction::_create() const
+template<class M> FunctionPatch<M>* FunctionPatch<M>::_create() const
 {
-    return new ScalarTaylorFunction(this->domain(),this->_model.sweeper());
+    return new FunctionPatch<M>(this->domain(),this->_model.sweeper());
 }
 
-VectorFunctionModelInterface<ValidatedTag>* ScalarTaylorFunction::_create_identity() const
+template<class M> VectorFunctionModelInterface<typename M::Paradigm>* FunctionPatch<M>::_create_identity() const
 {
     Sweeper sweeper=this->sweeper();
-    VectorTaylorFunction* result = new VectorTaylorFunction(this->domain().size(), ScalarTaylorFunction(this->domain(),sweeper));
-    for(SizeType i=0; i!=result->size(); ++i) { (*result)[i]=ScalarTaylorFunction::coordinate(this->domain(),i,sweeper); }
+    VectorFunctionPatch<M>* result = new VectorFunctionPatch<M>(this->domain().size(), FunctionPatch<M>(this->domain(),sweeper));
+    for(SizeType i=0; i!=result->size(); ++i) { (*result)[i]=FunctionPatch<M>::coordinate(this->domain(),i,sweeper); }
     return result;
 }
 
-VectorFunctionModelInterface<ValidatedTag>* ScalarTaylorFunction::_create_vector(SizeType i) const
+template<class M> VectorFunctionModelInterface<typename M::Paradigm>* FunctionPatch<M>::_create_vector(SizeType i) const
 {
-    return new VectorTaylorFunction(i,this->domain(),this->_model.sweeper());
+    return new VectorFunctionPatch<M>(i,this->domain(),this->_model.sweeper());
 }
 
 
@@ -205,7 +201,7 @@ VectorFunctionModelInterface<ValidatedTag>* ScalarTaylorFunction::_create_vector
 // and translation t=((c+d)-(a+b))/(b-a)
 // Because we are scaling the model on [-1,+1], this is not the same as
 // the mapping taking [a,b] to [c,d]
-ScalarTaylorFunction partial_restriction(const ScalarTaylorFunction& tv, SizeType k, const ExactInterval& new_ivl) {
+template<class M> FunctionPatch<M> partial_restriction(const FunctionPatch<M>& tv, SizeType k, const ExactInterval& new_ivl) {
     ARIADNE_ASSERT(k<tv.argument_size())
     const ExactInterval& old_ivl=tv.domain()[k];
     ARIADNE_ASSERT(subset(new_ivl,old_ivl));
@@ -218,35 +214,35 @@ ScalarTaylorFunction partial_restriction(const ScalarTaylorFunction& tv, SizeTyp
     ValidatedNumber t=static_cast<ValidatedNumber>((add_ivl(c,d)-add_ivl(a,b))/sub_ivl(b,a));
     ExactBox new_dom=tv.domain();
     new_dom[k]=new_ivl;
-    return ScalarTaylorFunction(new_dom,preaffine(tv.model(),k,s,t));
+    return FunctionPatch<M>(new_dom,preaffine(tv.model(),k,s,t));
 }
 
-ScalarTaylorFunction restriction(const ScalarTaylorFunction& tv, const ExactBox& d) {
+template<class M> FunctionPatch<M> restriction(const FunctionPatch<M>& tv, const ExactBox& d) {
     ARIADNE_ASSERT(subset(d,tv.domain()));
     const ExactBox& od=tv.domain();
-    ScalarTaylorFunction r=tv;
+    FunctionPatch<M> r=tv;
     for(SizeType j=0; j!=d.size(); ++j) {
         if(od[j]!=d[j]) { r=partial_restriction(r,j,d[j]); }
     }
     return r;
 }
 
-Void ScalarTaylorFunction::restrict(const ExactBox& d) {
+template<class M> Void FunctionPatch<M>::restrict(const ExactBox& d) {
     (*this)=restriction(*this,d);
 }
 
-ScalarTaylorFunction extension(const ScalarTaylorFunction& tv, const ExactBox& d) {
+template<class M> FunctionPatch<M> extension(const FunctionPatch<M>& tv, const ExactBox& d) {
     const ExactBox& domain=tv.domain();
     ARIADNE_ASSERT(subset(domain,d));
     for(SizeType i=0; i!=d.size(); ++i) {
         ARIADNE_ASSERT(domain[i]==d[i] || domain[i].lower()==domain[i].upper());
     }
-    return ScalarTaylorFunction(d,tv.model());
+    return FunctionPatch<M>(d,tv.model());
 }
 
 
 
-Polynomial<ValidatedFloat> polynomial(const ValidatedTaylorModel& tm);
+template<class M> Polynomial<ValidatedFloat> polynomial(const M& tm);
 
 inline Bool operator==(ExactFloat x1, Int n2) { return x1.raw()==Float(n2); }
 inline Bool operator==(ValidatedFloat x1, Int n2) { return x1.upper_raw()==Float(n2) && x1.lower_raw()==Float(n2); }
@@ -260,8 +256,7 @@ inline Bool operator> (ExactFloat x1, Int n2) { return x1.raw()> Float(n2); }
 inline Bool operator> (ValidatedFloat x1, Int n2) { return x1.lower_raw()> Float(n2); }
 inline Bool operator> (ApproximateFloat x1, Int n2) { return x1.raw()> Float(n2); }
 
-Polynomial<ValidatedFloat>
-ScalarTaylorFunction::polynomial() const
+template<class M> Polynomial<ValidatedFloat> FunctionPatch<M>::polynomial() const
 {
     Polynomial<ValidatedFloat> z(this->argument_size());
 
@@ -274,7 +269,7 @@ ScalarTaylorFunction::polynomial() const
             ARIADNE_ASSERT(this->domain()[j].width()==0);
             s[j]=Polynomial<ValidatedFloat>::constant(this->argument_size(),0);
         } else {
-            //s[j]=Ariadne::polynomial(ValidatedTaylorModel::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper()));
+            //s[j]=Ariadne::polynomial(ModelType::unscaling(this->argument_size(),j,this->domain()[j],this->sweeper()));
             s[j]=(Polynomial<ValidatedFloat>::coordinate(this->argument_size(),j)-domj.midpoint())/domj.radius();
         }
     }
@@ -282,28 +277,27 @@ ScalarTaylorFunction::polynomial() const
     return compose(p,s);
 }
 
-ValidatedScalarFunction
-ScalarTaylorFunction::function() const
+template<class M> ValidatedScalarFunction FunctionPatch<M>::function() const
 {
-    return ValidatedScalarFunction(new ScalarTaylorFunction(*this));
+    return ValidatedScalarFunction(new FunctionPatch<M>(*this));
 }
 
 
-Bool ScalarTaylorFunction::operator==(const ScalarTaylorFunction& tv) const
+template<class M> Bool FunctionPatch<M>::operator==(const FunctionPatch<M>& tv) const
 {
     return this->_domain==tv._domain && this->_model==tv._model;
 }
 
 
 
-ScalarTaylorFunction& operator+=(ScalarTaylorFunction& x, const ScalarTaylorFunction& y) {
+template<class M> FunctionPatch<M>& operator+=(FunctionPatch<M>& x, const FunctionPatch<M>& y) {
     ARIADNE_ASSERT(subset(x.domain(),y.domain()));
     if(x.domain()==y.domain()) { x.model()+=y.model(); }
     else { x.model()+=restriction(y,x.domain()).model(); }
     return x;
 }
 
-ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const ScalarTaylorFunction& y) {
+template<class M> FunctionPatch<M>& operator-=(FunctionPatch<M>& x, const FunctionPatch<M>& y) {
     ARIADNE_ASSERT(subset(x.domain(),y.domain()));
     if(x.domain()==y.domain()) { x.model()-=y.model(); }
     else { x.model()-=restriction(y,x.domain()).model(); }
@@ -311,188 +305,187 @@ ScalarTaylorFunction& operator-=(ScalarTaylorFunction& x, const ScalarTaylorFunc
 }
 
 
-ScalarTaylorFunction& operator+=(ScalarTaylorFunction& f, const ValidatedNumber& c) {
+template<class M> FunctionPatch<M>& operator+=(FunctionPatch<M>& f, const NumericType<M>& c) {
     f.model()+=c;
     return f;
 }
 
-ScalarTaylorFunction& operator-=(ScalarTaylorFunction& f, const ValidatedNumber& c) {
+template<class M> FunctionPatch<M>& operator-=(FunctionPatch<M>& f, const NumericType<M>& c) {
     f.model()-=c;
     return f;
 }
 
-ScalarTaylorFunction& operator*=(ScalarTaylorFunction& f, const ValidatedNumber& c) {
+template<class M> FunctionPatch<M>& operator*=(FunctionPatch<M>& f, const NumericType<M>& c) {
     f.model()*=c;
     return f;
 }
 
-ScalarTaylorFunction& operator/=(ScalarTaylorFunction& f, const ValidatedNumber& c) {
+template<class M> FunctionPatch<M>& operator/=(FunctionPatch<M>& f, const NumericType<M>& c) {
     f.model()/=c;
     return f;
 }
 
-ScalarTaylorFunction operator+(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),x.model());
+template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),x.model());
 }
 
-ScalarTaylorFunction operator-(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),-x.model());
+template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),-x.model());
 }
 
 
-ScalarTaylorFunction operator+(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
+template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2) {
     if(x1.domain()==x2.domain()) {
-        return ScalarTaylorFunction(x1.domain(),x1.model()+x2.model()); }
+        return FunctionPatch<M>(x1.domain(),x1.model()+x2.model()); }
     else {
         ExactBox domain=intersection(x1.domain(),x2.domain());
-        return ScalarTaylorFunction(domain,restriction(x1,domain).model()+restriction(x2,domain).model());}
+        return FunctionPatch<M>(domain,restriction(x1,domain).model()+restriction(x2,domain).model());}
 }
 
-ScalarTaylorFunction operator-(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
+template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2) {
     if(x1.domain()==x2.domain()) {
-        return ScalarTaylorFunction(x1.domain(),x1.model()-x2.model()); }
+        return FunctionPatch<M>(x1.domain(),x1.model()-x2.model()); }
     else {
         ExactBox domain=intersection(x1.domain(),x2.domain());
-        return ScalarTaylorFunction(domain,restriction(x1,domain).model()-restriction(x2,domain).model());}
+        return FunctionPatch<M>(domain,restriction(x1,domain).model()-restriction(x2,domain).model());}
 }
 
-ScalarTaylorFunction operator*(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
+template<class M> FunctionPatch<M> operator*(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2) {
     if(x1.domain()==x2.domain()) {
-        return ScalarTaylorFunction(x1.domain(),x1.model()*x2.model()); }
+        return FunctionPatch<M>(x1.domain(),x1.model()*x2.model()); }
     else {
         ExactBox domain=intersection(x1.domain(),x2.domain());
-        return ScalarTaylorFunction(domain,restriction(x1,domain).model()*restriction(x2,domain).model());}
+        return FunctionPatch<M>(domain,restriction(x1,domain).model()*restriction(x2,domain).model());}
 }
 
-ScalarTaylorFunction operator/(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
+template<class M> FunctionPatch<M> operator/(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2) {
     if(x1.domain()==x2.domain()) {
-        return ScalarTaylorFunction(x1.domain(),x1.model()/x2.model()); }
+        return FunctionPatch<M>(x1.domain(),x1.model()/x2.model()); }
     else {
         ExactBox domain=intersection(x1.domain(),x2.domain());
-        return ScalarTaylorFunction(domain,restriction(x1,domain).model()/restriction(x2,domain).model());}
+        return FunctionPatch<M>(domain,restriction(x1,domain).model()/restriction(x2,domain).model());}
 }
 
-ScalarTaylorFunction operator+(const ScalarTaylorFunction& x, const ValidatedNumber& c) {
-    ScalarTaylorFunction r(x); r+=c; return r;
+template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& x, const NumericType<M>& c) {
+    FunctionPatch<M> r(x); r+=c; return r;
 }
 
-ScalarTaylorFunction operator-(const ScalarTaylorFunction& x, const ValidatedNumber& c) {
-    ScalarTaylorFunction r(x); r+=neg(c); return r;
+template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& x, const NumericType<M>& c) {
+    FunctionPatch<M> r(x); r+=neg(c); return r;
 }
 
-ScalarTaylorFunction operator*(const ScalarTaylorFunction& x, const ValidatedNumber& c) {
-    ScalarTaylorFunction r(x); r*=c; return r;
+template<class M> FunctionPatch<M> operator*(const FunctionPatch<M>& x, const NumericType<M>& c) {
+    FunctionPatch<M> r(x); r*=c; return r;
 }
 
-ScalarTaylorFunction operator/(const ScalarTaylorFunction& x, const ValidatedNumber& c) {
-    ScalarTaylorFunction r(x); r*=rec(c); return r;
+template<class M> FunctionPatch<M> operator/(const FunctionPatch<M>& x, const NumericType<M>& c) {
+    FunctionPatch<M> r(x); r*=rec(c); return r;
 }
 
-ScalarTaylorFunction operator+(const ValidatedNumber& c, const ScalarTaylorFunction& x) {
-    ScalarTaylorFunction r(x); r+=c; return r;
+template<class M> FunctionPatch<M> operator+(const NumericType<M>& c, const FunctionPatch<M>& x) {
+    FunctionPatch<M> r(x); r+=c; return r;
 }
 
-ScalarTaylorFunction operator-(const ValidatedNumber& c, const ScalarTaylorFunction& x) {
-    ScalarTaylorFunction r(neg(x)); r+=c; return r;
+template<class M> FunctionPatch<M> operator-(const NumericType<M>& c, const FunctionPatch<M>& x) {
+    FunctionPatch<M> r(neg(x)); r+=c; return r;
 }
 
-ScalarTaylorFunction operator*(const ValidatedNumber& c, const ScalarTaylorFunction& x) {
-    ScalarTaylorFunction r(x); r*=c; return r;
+template<class M> FunctionPatch<M> operator*(const NumericType<M>& c, const FunctionPatch<M>& x) {
+    FunctionPatch<M> r(x); r*=c; return r;
 }
 
-ScalarTaylorFunction operator/(const ValidatedNumber& c, const ScalarTaylorFunction& x) {
-    ScalarTaylorFunction r(rec(x)); r*=c; return r;
+template<class M> FunctionPatch<M> operator/(const NumericType<M>& c, const FunctionPatch<M>& x) {
+    FunctionPatch<M> r(rec(x)); r*=c; return r;
 }
 
-ScalarTaylorFunction operator+(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2) {
-    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())+tf2; }
-ScalarTaylorFunction operator-(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2) {
-    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())-tf2; }
-ScalarTaylorFunction operator*(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2) {
-    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())*tf2; }
-ScalarTaylorFunction operator/(const ScalarTaylorFunction::FunctionType& f1, const ScalarTaylorFunction& tf2) {
-    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())/tf2; }
-ScalarTaylorFunction operator+(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2) {
-    return tf1+ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-ScalarTaylorFunction operator-(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2) {
-    return tf1-ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-ScalarTaylorFunction operator*(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2) {
-    return tf1*ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-ScalarTaylorFunction operator/(const ScalarTaylorFunction& tf1, const ScalarTaylorFunction::FunctionType& f2) {
-    return tf1/ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> FunctionPatch<M> operator+(const FunctionType<M>& f1, const FunctionPatch<M>& tf2) {
+    return FunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())+tf2; }
+template<class M> FunctionPatch<M> operator-(const FunctionType<M>& f1, const FunctionPatch<M>& tf2) {
+    return FunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())-tf2; }
+template<class M> FunctionPatch<M> operator*(const FunctionType<M>& f1, const FunctionPatch<M>& tf2) {
+    return FunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())*tf2; }
+template<class M> FunctionPatch<M> operator/(const FunctionType<M>& f1, const FunctionPatch<M>& tf2) {
+    return FunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())/tf2; }
+template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& tf1, const FunctionType<M>& f2) {
+    return tf1+FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& tf1, const FunctionType<M>& f2) {
+    return tf1-FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> FunctionPatch<M> operator*(const FunctionPatch<M>& tf1, const FunctionType<M>& f2) {
+    return tf1*FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> FunctionPatch<M> operator/(const FunctionPatch<M>& tf1, const FunctionType<M>& f2) {
+    return tf1/FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
 
 
 
 
 
 
-ScalarTaylorFunction max(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
+template<class M> FunctionPatch<M> max(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2) {
     if(x1.domain()==x2.domain()) {
-        return ScalarTaylorFunction(x1.domain(),max(x1.model(),x2.model())); }
+        return FunctionPatch<M>(x1.domain(),max(x1.model(),x2.model())); }
     else {
         ExactBox domain=intersection(x1.domain(),x2.domain());
-        return ScalarTaylorFunction(domain,max(restriction(x1,domain).model(),restriction(x2,domain).model()));}
+        return FunctionPatch<M>(domain,max(restriction(x1,domain).model(),restriction(x2,domain).model()));}
 }
 
-ScalarTaylorFunction min(const ScalarTaylorFunction& x1, const ScalarTaylorFunction& x2) {
+template<class M> FunctionPatch<M> min(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2) {
     if(x1.domain()==x2.domain()) {
-        return ScalarTaylorFunction(x1.domain(),min(x1.model(),x2.model())); }
+        return FunctionPatch<M>(x1.domain(),min(x1.model(),x2.model())); }
     else {
         ExactBox domain=intersection(x1.domain(),x2.domain());
-        return ScalarTaylorFunction(domain,min(restriction(x1,domain).model(),restriction(x2,domain).model()));}
+        return FunctionPatch<M>(domain,min(restriction(x1,domain).model(),restriction(x2,domain).model()));}
 }
 
-ScalarTaylorFunction abs(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),abs(x.model())); }
-ScalarTaylorFunction neg(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),-x.model()); }
-ScalarTaylorFunction rec(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),rec(x.model())); }
-ScalarTaylorFunction sqr(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),sqr(x.model())); }
-ScalarTaylorFunction pow(const ScalarTaylorFunction& x, Int n) {
-    return ScalarTaylorFunction(x.domain(),pow(x.model(),n)); }
-ScalarTaylorFunction sqrt(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),sqrt(x.model())); }
-ScalarTaylorFunction exp(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),exp(x.model())); }
-ScalarTaylorFunction log(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),log(x.model())); }
-ScalarTaylorFunction sin(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),sin(x.model())); }
-ScalarTaylorFunction cos(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),cos(x.model())); }
-ScalarTaylorFunction tan(const ScalarTaylorFunction& x) {
-    return ScalarTaylorFunction(x.domain(),tan(x.model())); }
-ScalarTaylorFunction asin(const ScalarTaylorFunction& x) {
+template<class M> FunctionPatch<M> abs(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),abs(x.model())); }
+template<class M> FunctionPatch<M> neg(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),-x.model()); }
+template<class M> FunctionPatch<M> rec(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),rec(x.model())); }
+template<class M> FunctionPatch<M> sqr(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),sqr(x.model())); }
+template<class M> FunctionPatch<M> pow(const FunctionPatch<M>& x, Int n) {
+    return FunctionPatch<M>(x.domain(),pow(x.model(),n)); }
+template<class M> FunctionPatch<M> sqrt(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),sqrt(x.model())); }
+template<class M> FunctionPatch<M> exp(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),exp(x.model())); }
+template<class M> FunctionPatch<M> log(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),log(x.model())); }
+template<class M> FunctionPatch<M> sin(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),sin(x.model())); }
+template<class M> FunctionPatch<M> cos(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),cos(x.model())); }
+template<class M> FunctionPatch<M> tan(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),tan(x.model())); }
+template<class M> FunctionPatch<M> asin(const FunctionPatch<M>& x) {
     ARIADNE_NOT_IMPLEMENTED; }
-ScalarTaylorFunction acos(const ScalarTaylorFunction& x) {
+template<class M> FunctionPatch<M> acos(const FunctionPatch<M>& x) {
     ARIADNE_NOT_IMPLEMENTED; }
-ScalarTaylorFunction atan(const ScalarTaylorFunction& x) {
+template<class M> FunctionPatch<M> atan(const FunctionPatch<M>& x) {
     ARIADNE_NOT_IMPLEMENTED; }
 
 
-ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& x, SizeType k) {
+template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, SizeType k) {
     ValidatedNumber sf=rad_val(x.domain()[k]);
-    return ScalarTaylorFunction(x.domain(),antiderivative(x.model(),k)*sf); }
+    return FunctionPatch<M>(x.domain(),antiderivative(x.model(),k)*sf); }
 
-ScalarTaylorFunction derivative(const ScalarTaylorFunction& x, SizeType k) {
+template<class M> FunctionPatch<M> derivative(const FunctionPatch<M>& x, SizeType k) {
     ValidatedNumber sf=rec(rad_val(x.domain()[k]));
-    return ScalarTaylorFunction(x.domain(),derivative(x.model(),k)*sf); }
+    return FunctionPatch<M>(x.domain(),derivative(x.model(),k)*sf); }
 
-ScalarTaylorFunction embed(const ExactBox& dom1, const ScalarTaylorFunction& tv2,const ExactBox& dom3) {
-    return ScalarTaylorFunction(product(product(dom1,tv2.domain()),dom3),embed(embed(dom1.size(),tv2.model()),dom3.size())); }
+template<class M> FunctionPatch<M> embed(const ExactBox& dom1, const FunctionPatch<M>& tv2,const ExactBox& dom3) {
+    return FunctionPatch<M>(product(product(dom1,tv2.domain()),dom3),embed(embed(dom1.size(),tv2.model()),dom3.size())); }
 
-ScalarTaylorFunction* ScalarTaylorFunction::_derivative(SizeType j) const
+template<class M> FunctionPatch<M>* FunctionPatch<M>::_derivative(SizeType j) const
 {
-    return new ScalarTaylorFunction(Ariadne::derivative(*this,j));
+    return new FunctionPatch<M>(Ariadne::derivative(*this,j));
 }
 
 
-ApproximateNumber
-ScalarTaylorFunction::operator() (const Vector<ApproximateNumber>& x) const
+template<class M> ApproximateNumber FunctionPatch<M>::operator() (const Vector<ApproximateNumber>& x) const
 {
-    const ScalarTaylorFunction& f=*this;
+    const FunctionPatch<M>& f=*this;
     if(!contains(f.domain(),make_exact(x))) {
         ARIADNE_THROW(DomainException,"tf.evaluate(ax) with tf="<<f<<", ax="<<x," ax is not an element of tf.domain()="<<f.domain());
     }
@@ -500,24 +493,25 @@ ScalarTaylorFunction::operator() (const Vector<ApproximateNumber>& x) const
     return Ariadne::evaluate(this->_model.expansion(),sx);
 }
 
-ValidatedNumber
-ScalarTaylorFunction::operator()(const Vector<ValidatedNumber>& x) const
+template<class M> ValidatedNumber FunctionPatch<M>::operator()(const Vector<ValidatedNumber>& x) const
 {
-    return Ariadne::evaluate(*this,x);
+    const FunctionPatch<M>& f=*this;
+    if(!contains(f.domain(),x)) {
+        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
+    }
+    return unchecked_evaluate(f,x);
 }
 
-ValidatedNumber
-ScalarTaylorFunction::operator()(const Vector<ExactNumber>& x) const
+template<class M> ValidatedNumber FunctionPatch<M>::operator()(const Vector<ExactNumber>& x) const
 {
     return Ariadne::evaluate(*this,Vector<ValidatedNumber>(x));
 }
 
-Vector<ValidatedNumber>
-ScalarTaylorFunction::gradient(const Vector<ValidatedNumber>& x) const
+template<class M> Vector<NumericType<M>> FunctionPatch<M>::gradient(const Vector<NumericType>& x) const
 {
-    Vector<ValidatedNumber> g=Ariadne::gradient(this->_model,unscale(x,this->_domain));
+    Vector<NumericType> g=Ariadne::gradient(this->_model,unscale(x,this->_domain));
     for(SizeType j=0; j!=g.size(); ++j) {
-        ValidatedNumber rad=rad_val(this->_domain[j]);
+        NumericType rad=rad_val(this->_domain[j]);
         g[j]/=rad;
     }
     return g;
@@ -525,28 +519,12 @@ ScalarTaylorFunction::gradient(const Vector<ValidatedNumber>& x) const
 
 
 
-ValidatedNumber
-evaluate(const ScalarTaylorFunction& f, const Vector<ValidatedNumber>& x) {
-    if(!contains(f.domain(),x)) {
-        ARIADNE_THROW(DomainException,std::setprecision(17)<<"evaluate(tf,vx) with tf="<<f<<", vx="<<x," vx is not a subset of tf.domain()="<<f.domain());
-    }
-    return unchecked_evaluate(f,x);
-}
-
-ValidatedNumber
-unchecked_evaluate(const ScalarTaylorFunction& f, const Vector<ValidatedNumber>& x) {
+template<class M> NumericType<M> unchecked_evaluate(const FunctionPatch<M>& f, const Vector<NumericType<M>>& x) {
     return evaluate(f.model(),unscale(x,f.domain()));
 }
 
 
-ScalarTaylorFunction
-compose(const ValidatedScalarFunction& g, const VectorTaylorFunction& f)
-{
-    return ScalarTaylorFunction(f.domain(),g.evaluate(f.models()));
-}
-
-ScalarTaylorFunction
-compose(const ScalarTaylorFunction& g, const VectorTaylorFunction& f)
+template<class M> FunctionPatch<M> compose(const FunctionPatch<M>& g, const VectorFunctionPatch<M>& f)
 {
     if(!subset(f.codomain(),g.domain())) {
         ARIADNE_THROW(DomainException,"compose(g,f) with g="<<g<<", f="<<f,"f.codomain()="<<f.codomain()<<" is not a subset of g.domain()="<<g.domain());
@@ -554,16 +532,14 @@ compose(const ScalarTaylorFunction& g, const VectorTaylorFunction& f)
     return unchecked_compose(g,f);
 }
 
-ScalarTaylorFunction
-unchecked_compose(const ScalarTaylorFunction& g, const VectorTaylorFunction& f)
+template<class M> FunctionPatch<M> unchecked_compose(const FunctionPatch<M>& g, const VectorFunctionPatch<M>& f)
 {
-    return ScalarTaylorFunction(f.domain(),compose(g.model(),unscale(f.models(),g.domain())));
+    return FunctionPatch<M>(f.domain(),compose(g.model(),unscale(f.models(),g.domain())));
 }
 
 
 
-ScalarTaylorFunction
-partial_evaluate(const ScalarTaylorFunction& te, SizeType k, const ValidatedNumber& c)
+template<class M> FunctionPatch<M> partial_evaluate(const FunctionPatch<M>& te, SizeType k, const NumericType<M>& c)
 {
     // Scale c to domain
     const SizeType as=te.argument_size();
@@ -576,21 +552,21 @@ partial_evaluate(const ScalarTaylorFunction& te, SizeType k, const ValidatedNumb
     for(SizeType i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
     for(SizeType i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
 
-    ValidatedTaylorModel new_model=partial_evaluate(te.model(),k,sc);
+    M new_model=partial_evaluate(te.model(),k,sc);
 
-    return ScalarTaylorFunction(new_domain,new_model);
+    return FunctionPatch<M>(new_domain,new_model);
 }
 
 
 
-ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& f, SizeType k, ExactFloat c)
+template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, SizeType k, ExactFloat c)
 {
     ARIADNE_ASSERT(k<f.argument_size());
     ARIADNE_ASSERT(contains(f.domain()[k],c));
 
-    ScalarTaylorFunction g = antiderivative(f,k);
-    VectorTaylorFunction h = VectorTaylorFunction::identity(g.domain(),g.sweeper());
-    h[k] = ScalarTaylorFunction::constant(g.domain(),c,g.sweeper());
+    FunctionPatch<M> g = antiderivative(f,k);
+    VectorFunctionPatch<M> h = VectorFunctionPatch<M>::identity(g.domain(),g.sweeper());
+    h[k] = FunctionPatch<M>::constant(g.domain(),c,g.sweeper());
 
     return g-compose(g,h);
 }
@@ -599,24 +575,24 @@ ScalarTaylorFunction antiderivative(const ScalarTaylorFunction& f, SizeType k, E
 
 
 
-Pair<ScalarTaylorFunction,ScalarTaylorFunction>
-split(const ScalarTaylorFunction& tv, SizeType j)
+template<class M> Pair<FunctionPatch<M>,FunctionPatch<M>> split(const FunctionPatch<M>& tv, SizeType j)
 {
-    Pair<ValidatedTaylorModel,ValidatedTaylorModel> models=split(tv.model(),j);
+    typedef M ModelType;
+    Pair<ModelType,ModelType> models=split(tv.model(),j);
     Pair<ExactBox,ExactBox> subdomains=split(tv.domain(),j);
-    return make_pair(ScalarTaylorFunction(subdomains.first,models.first),
-                     ScalarTaylorFunction(subdomains.second,models.second));
+    return make_pair(FunctionPatch<M>(subdomains.first,models.first),
+                     FunctionPatch<M>(subdomains.second,models.second));
 
 }
 
-Bool refines(const ScalarTaylorFunction& tv1, const ScalarTaylorFunction& tv2)
+template<class M> Bool refines(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2)
 {
     if(tv1.domain()==tv2.domain()) { return refines(tv1.model(),tv2.model()); }
     if(subset(tv2.domain(),tv1.domain())) { return refines(restriction(tv1,tv2.domain()).model(),tv2.model()); }
     else { return false; }
 }
 
-Bool disjoint(const ScalarTaylorFunction& tv1, const ScalarTaylorFunction& tv2)
+template<class M> Bool disjoint(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2)
 {
     if(tv1.domain()==tv2.domain()) {
         return disjoint(tv1.model(),tv2.model());
@@ -626,52 +602,49 @@ Bool disjoint(const ScalarTaylorFunction& tv1, const ScalarTaylorFunction& tv2)
     }
 }
 
-ScalarTaylorFunction intersection(const ScalarTaylorFunction& tv1, const ScalarTaylorFunction& tv2)
+template<class M> FunctionPatch<M> intersection(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2)
 {
     ARIADNE_ASSERT(tv1.domain()==tv2.domain());
-    return ScalarTaylorFunction(tv1.domain(),intersection(tv1.model(),tv2.model()));
+    return FunctionPatch<M>(tv1.domain(),intersection(tv1.model(),tv2.model()));
 }
 
-ErrorFloat norm(const ScalarTaylorFunction& f) {
+template<class M> ErrorFloat norm(const FunctionPatch<M>& f) {
     return norm(f.model());
 }
 
-ErrorFloat distance(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2) {
+template<class M> ErrorFloat distance(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
     return norm(f1-f2);
 }
 
-ErrorFloat distance(const ScalarTaylorFunction& f1, const ValidatedScalarFunction& f2) {
-    return distance(f1,ScalarTaylorFunction(f1.domain(),f2,f1.sweeper()));
+template<class M> ErrorFloat distance(const FunctionPatch<M>& f1, const ValidatedScalarFunction& f2) {
+    return distance(f1,FunctionPatch<M>(f1.domain(),f2,f1.sweeper()));
 }
 
 
-Vector<ScalarTaylorFunction>
-prod(const Matrix<ValidatedNumber>& A,
-     const Vector<ScalarTaylorFunction>& x)
+template<class M> Vector<FunctionPatch<M>> prod(const Matrix<ValidatedNumber>& A,
+     const Vector<FunctionPatch<M>>& x)
 {
     ARIADNE_ASSERT(x.size()>0);
     ARIADNE_ASSERT(A.column_size()==x.size());
     for(SizeType i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x.zero_element().argument_size()); }
 
-    Vector<ScalarTaylorFunction> r(A.row_size(),x.zero_element());
+    Vector<FunctionPatch<M>> r(A.row_size(),x.zero_element());
     for(SizeType i=0; i!=A.row_size(); ++i) {
         for(SizeType j=0; j!=A.column_size(); ++j) {
             //r[i]+=A[i][j]*x[j];
-            const ValidatedNumber& Aij=A[i][j]; const ScalarTaylorFunction& xj=x[j]; ScalarTaylorFunction& ri=r[i]; ri+=Aij*xj;
+            const ValidatedNumber& Aij=A[i][j]; const FunctionPatch<M>& xj=x[j]; FunctionPatch<M>& ri=r[i]; ri+=Aij*xj;
         }
     }
     return r;
 }
 
-Matrix<ExactInterval>
-jacobian(const Vector<ScalarTaylorFunction>& tv, const ExactBox& x);
+template<class M> Matrix<ExactInterval> jacobian(const Vector<FunctionPatch<M>>& tv, const ExactBox& x);
 
-ScalarTaylorFunction
-midpoint(const ScalarTaylorFunction& f)
+template<class M> FunctionPatch<M> midpoint(const FunctionPatch<M>& f)
 {
-    ValidatedTaylorModel tm=f.model();
+    M tm=f.model();
     tm.set_error(0u);
-    return ScalarTaylorFunction(f.domain(),tm);
+    return FunctionPatch<M>(f.domain(),tm);
 }
 
 
@@ -777,8 +750,7 @@ template<class T> OutputStream& operator<<(OutputStream& os, const Representatio
 }
 
 
-OutputStream&
-ScalarTaylorFunction::write(OutputStream& os) const
+template<class M> OutputStream& FunctionPatch<M>::write(OutputStream& os) const
 {
     Polynomial<ValidatedFloat> p=this->polynomial();
     Polynomial<ApproximateFloat> ap=p;
@@ -787,29 +759,27 @@ ScalarTaylorFunction::write(OutputStream& os) const
     return os;
 }
 
-OutputStream&
-ScalarTaylorFunction::repr(OutputStream& os) const
+template<class M> OutputStream& FunctionPatch<M>::repr(OutputStream& os) const
 {
-    return os << "ScalarTaylorFunction(" << representation(this->domain()) << ", " << representation(this->model().expansion().raw())
+    return os << "FunctionPatch<M>(" << representation(this->domain()) << ", " << representation(this->model().expansion().raw())
               << "," << representation(this->error().raw())<<","<<this->sweeper()<<")";
 }
 
-OutputStream&
-operator<<(OutputStream& os, const ScalarTaylorFunction& tf)
+template<class M> OutputStream& operator<<(OutputStream& os, const FunctionPatch<M>& tf)
 {
     return tf.write(os);
 }
 
-OutputStream& operator<<(OutputStream& os, const Representation<ScalarTaylorFunction>& tf)
+template<class M> OutputStream& operator<<(OutputStream& os, const Representation<FunctionPatch<M>>& tf)
 {
     return tf.pointer->repr(os);
 }
 
 /*
-OutputStream& operator<<(OutputStream& os, const Representation<ScalarTaylorFunction>& frepr)
+template<class M> OutputStream& operator<<(OutputStream& os, const Representation<FunctionPatch<M>>& frepr)
 {
-    ScalarTaylorFunction const& function=*frepr.pointer;
-    ScalarTaylorFunction truncated_function=function;
+    FunctionPatch<M> const& function=*frepr.pointer;
+    FunctionPatch<M> truncated_function=function;
     truncated_function.set_error(0.0);
     truncated_function.sweep(ThresholdSweeper(TAYLOR_FUNCTION_WRITING_ACCURACY));
 
@@ -821,12 +791,12 @@ OutputStream& operator<<(OutputStream& os, const Representation<ScalarTaylorFunc
 }
 */
 /*
-OutputStream& operator<<(OutputStream& os, const ModelRepresentation<ScalarTaylorFunction>& frepr)
+template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresentation<FunctionPatch<M>>& frepr)
 {
-    ScalarTaylorFunction const& f=*frepr.pointer;
+    FunctionPatch<M> const& f=*frepr.pointer;
     Float truncatation_error = 0.0;
     os << "<"<<f.domain()<<"\n";
-    for(ValidatedTaylorModel::ConstIterator iter=f.begin(); iter!=f.end(); ++iter) {
+    for(ModelType::ConstIterator iter=f.begin(); iter!=f.end(); ++iter) {
         if(abs(iter->data())>frepr.threshold) { truncatation_error+=abs(iter->data()); }
         else { os << iter->key() << ":" << iter->data() << ","; }
     }
@@ -835,20 +805,20 @@ OutputStream& operator<<(OutputStream& os, const ModelRepresentation<ScalarTaylo
 }
 */
 
-OutputStream& operator<<(OutputStream& os, const ModelRepresentation<ScalarTaylorFunction>& frepr)
+template<class M> OutputStream& operator<<(OutputStream& os, const ModelRepresentation<FunctionPatch<M>>& frepr)
 {
-    ScalarTaylorFunction const& f=*frepr.pointer;
-    ScalarTaylorFunction tf=f;
+    FunctionPatch<M> const& f=*frepr.pointer;
+    FunctionPatch<M> tf=f;
     tf.clobber();
     tf.sweep(ThresholdSweeper(frepr.threshold));
     os << "("<<tf.model()<<"+/-"<<f.error();
     return os;
 }
 
-OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<ScalarTaylorFunction>& frepr)
+template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<FunctionPatch<M>>& frepr)
 {
-    ScalarTaylorFunction const& function=*frepr.pointer;
-    ScalarTaylorFunction truncated_function = function;
+    FunctionPatch<M> const& function=*frepr.pointer;
+    FunctionPatch<M> truncated_function = function;
     truncated_function.clobber();
     truncated_function.sweep(ThresholdSweeper(frepr.threshold));
     ErrorFloat truncatation_error = truncated_function.error();
@@ -865,8 +835,7 @@ OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<Scalar
 
 
 
-Bool
-check(const Vector<ScalarTaylorFunction>& tv)
+template<class M> Bool check(const Vector<FunctionPatch<M>>& tv)
 {
     for(SizeType i=0; i!=tv.size(); ++i) {
         if(tv.zero_element().domain()!=tv[i].domain()) { return false; }
@@ -874,8 +843,7 @@ check(const Vector<ScalarTaylorFunction>& tv)
     return true;
 }
 
-Vector< Expansion<ExactFloat> >
-expansion(const Vector<ScalarTaylorFunction>& x)
+template<class M> Vector<Expansion<ExactFloat>> expansion(const Vector<FunctionPatch<M>>& x)
 {
     Vector< Expansion<ExactFloat> > r(x.size());
     for(SizeType i=0; i!=x.size(); ++i) {
@@ -884,8 +852,7 @@ expansion(const Vector<ScalarTaylorFunction>& x)
     return r;
 }
 
-Vector<ErrorFloat>
-error(const Vector<ScalarTaylorFunction>& x)
+template<class M> Vector<ErrorFloat> error(const Vector<FunctionPatch<M>>& x)
 {
     Vector<ErrorFloat> r(x.size());
     for(SizeType i=0; i!=x.size(); ++i) {
@@ -894,8 +861,7 @@ error(const Vector<ScalarTaylorFunction>& x)
     return r;
 }
 
-Vector<ExactFloat>
-value(const Vector<ScalarTaylorFunction>& x)
+template<class M> Vector<ExactFloat> value(const Vector<FunctionPatch<M>>& x)
 {
     Vector<ExactFloat> r(x.size());
     for(SizeType i=0; i!=x.size(); ++i) {
@@ -904,8 +870,7 @@ value(const Vector<ScalarTaylorFunction>& x)
     return r;
 }
 
-Vector<UpperInterval>
-ranges(const Vector<ScalarTaylorFunction>& x)
+template<class M> Vector<UpperInterval> ranges(const Vector<FunctionPatch<M>>& x)
 {
     Vector<UpperInterval> r(x.size());
     for(SizeType i=0; i!=x.size(); ++i) {
@@ -915,8 +880,7 @@ ranges(const Vector<ScalarTaylorFunction>& x)
 }
 
 
-Vector<ValidatedNumber>
-evaluate(const Vector<ScalarTaylorFunction>& tv, const Vector<ValidatedNumber>& x)
+template<class M> Vector<ValidatedNumber> evaluate(const Vector<FunctionPatch<M>>& tv, const Vector<ValidatedNumber>& x)
 {
     Vector<ValidatedNumber> r(tv.size());
     for(SizeType i=0; i!=tv.size(); ++i) {
@@ -925,8 +889,7 @@ evaluate(const Vector<ScalarTaylorFunction>& tv, const Vector<ValidatedNumber>& 
     return r;
 }
 
-Matrix<ValidatedNumber>
-jacobian(const Vector<ScalarTaylorFunction>& tv, const Vector<ValidatedNumber>& x)
+template<class M> Matrix<ValidatedNumber> jacobian(const Vector<FunctionPatch<M>>& tv, const Vector<ValidatedNumber>& x)
 {
     ARIADNE_ASSERT(check(tv));
     const Vector<ExactInterval> dom=tv.zero_element().domain();
@@ -946,45 +909,45 @@ jacobian(const Vector<ScalarTaylorFunction>& tv, const Vector<ValidatedNumber>& 
 
 
 
-VectorTaylorFunction::VectorTaylorFunction()
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch()
     : _domain(), _models()
 {
 }
 
-VectorTaylorFunction::VectorTaylorFunction(SizeType k)
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(SizeType k)
     : _domain(), _models(k)
 {
 }
 
-VectorTaylorFunction::VectorTaylorFunction(SizeType m, const ExactBox& d, Sweeper swp)
-    : _domain(d), _models(m,ValidatedTaylorModel(d.size(),swp))
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(SizeType m, const ExactBox& d, Sweeper swp)
+    : _domain(d), _models(m,ModelType(d.size(),swp))
 {
 }
 
-VectorTaylorFunction::VectorTaylorFunction(SizeType k, const ScalarTaylorFunction& f)
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(SizeType k, const FunctionPatch<M>& f)
     : _domain(f.domain()), _models(k,f.model())
 {
 }
 
-VectorTaylorFunction::VectorTaylorFunction(const ValidatedVectorFunctionModel& f)
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ValidatedVectorFunctionModel& f)
     : _domain(), _models()
 {
-    ARIADNE_ASSERT(dynamic_cast<const VectorTaylorFunction*>(&f.reference()));
-    *this = dynamic_cast<const VectorTaylorFunction&>(f.reference());
+    ARIADNE_ASSERT(dynamic_cast<const VectorFunctionPatch<M>*>(&f.reference()));
+    *this = dynamic_cast<const VectorFunctionPatch<M>&>(f.reference());
 }
 
-VectorTaylorFunction& VectorTaylorFunction::operator=(const ValidatedVectorFunctionModel& f)
+template<class M> VectorFunctionPatch<M>& VectorFunctionPatch<M>::operator=(const ValidatedVectorFunctionModel& f)
 {
-    ARIADNE_ASSERT(dynamic_cast<const VectorTaylorFunction*>(&f.reference()));
-    *this = dynamic_cast<const VectorTaylorFunction&>(f.reference());
+    ARIADNE_ASSERT(dynamic_cast<const VectorFunctionPatch<M>*>(&f.reference()));
+    *this = dynamic_cast<const VectorFunctionPatch<M>&>(f.reference());
     return *this;
 }
 
 
 
 
-VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
-                                           const Vector<ValidatedTaylorModel>& f)
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
+                                           const Vector<ModelType>& f)
     : _domain(d), _models(f)
 {
     for(SizeType i=0; i!=f.size(); ++i) {
@@ -992,57 +955,57 @@ VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
     }
 }
 
-VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
                                            const Vector< Expansion<ExactFloat> >& f,
                                            const Vector<ErrorFloat>& e,
                                            Sweeper swp)
-    : _domain(d), _models(f.size(),ValidatedTaylorModel(d.size(),swp))
+    : _domain(d), _models(f.size(),ModelType(d.size(),swp))
 {
     ARIADNE_ASSERT(f.size()==e.size());
     for(SizeType i=0; i!=f.size(); ++i) {
         ARIADNE_ASSERT(d.size()==f[i].argument_size());
-        _models[i]=ValidatedTaylorModel(f[i],e[i],swp);
+        _models[i]=ModelType(f[i],e[i],swp);
     }
 }
 
-VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
                                            const Vector< Expansion<ExactFloat> >& f,
                                            Sweeper swp)
-    : VectorTaylorFunction(d,f,Vector<ErrorFloat>(f.size()),swp)
+    : VectorFunctionPatch<M>(d,f,Vector<ErrorFloat>(f.size()),swp)
 {
 }
 
-VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
                                            const Vector< Expansion<Float> >& f,
                                            const Vector<Float>& e,
                                            Sweeper swp)
-    : VectorTaylorFunction(d,reinterpret_cast<Vector<Expansion<ExactFloat>>const&>(f),
+    : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<ExactFloat>>const&>(f),
                            reinterpret_cast<Vector<ErrorFloat>const&>(e),swp)
 {
 }
 
-VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
                                            const Vector< Expansion<Float> >& f,
                                            Sweeper swp)
-    : VectorTaylorFunction(d,reinterpret_cast<Vector<Expansion<ExactFloat>>const&>(f),Vector<ErrorFloat>(f.size()),swp)
+    : VectorFunctionPatch<M>(d,reinterpret_cast<Vector<Expansion<ExactFloat>>const&>(f),Vector<ErrorFloat>(f.size()),swp)
 {
 }
 
 
 
-VectorTaylorFunction::VectorTaylorFunction(const ExactBox& d,
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
                                            const ValidatedVectorFunction& f,
                                            const Sweeper& swp)
     : _domain(d), _models(f.result_size())
 {
     //ARIADNE_ASSERT_MSG(f.result_size()>0, "d="<<d<<", f="<<f<<", swp="<<swp);
     ARIADNE_ASSERT(d.size()==f.argument_size());
-    Vector<ValidatedTaylorModel> x=ValidatedTaylorModel::scalings(d,swp);
+    Vector<ModelType> x=ModelType::scalings(d,swp);
     this->_models=f.evaluate(x);
     this->sweep();
 }
 
-VectorTaylorFunction::VectorTaylorFunction(const Vector<ScalarTaylorFunction>& v)
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const Vector<FunctionPatch<M>>& v)
     : _domain(), _models(v.size())
 {
     ARIADNE_ASSERT(v.size()>0);
@@ -1053,7 +1016,7 @@ VectorTaylorFunction::VectorTaylorFunction(const Vector<ScalarTaylorFunction>& v
     }
 }
 
-VectorTaylorFunction::VectorTaylorFunction(const List<ScalarTaylorFunction>& v)
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const List<FunctionPatch<M>>& v)
     : _domain(), _models(v.size())
 {
     ARIADNE_ASSERT(v.size()>0);
@@ -1064,37 +1027,37 @@ VectorTaylorFunction::VectorTaylorFunction(const List<ScalarTaylorFunction>& v)
     }
 }
 
-VectorTaylorFunction::VectorTaylorFunction(InitializerList<ScalarTaylorFunction> lst)
+template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(InitializerList<FunctionPatch<M>> lst)
     : _domain(), _models(lst.size())
 {
-    *this=VectorTaylorFunction(List<ScalarTaylorFunction>(lst));
+    *this=VectorFunctionPatch<M>(List<FunctionPatch<M>>(lst));
 }
 
 
-VectorTaylorFunction* VectorTaylorFunction::_clone() const
+template<class M> VectorFunctionPatch<M>* VectorFunctionPatch<M>::_clone() const
 {
-    return new VectorTaylorFunction(*this);
+    return new VectorFunctionPatch<M>(*this);
 }
 
-VectorTaylorFunction* VectorTaylorFunction::_create() const
+template<class M> VectorFunctionPatch<M>* VectorFunctionPatch<M>::_create() const
 {
-    return new VectorTaylorFunction(this->result_size(), ScalarTaylorFunction(this->domain(),this->sweeper()));
+    return new VectorFunctionPatch<M>(this->result_size(), FunctionPatch<M>(this->domain(),this->sweeper()));
 }
 
-ScalarTaylorFunction* VectorTaylorFunction::_create_zero() const
+template<class M> FunctionPatch<M>* VectorFunctionPatch<M>::_create_zero() const
 {
-    return new ScalarTaylorFunction(this->domain(),this->sweeper());
+    return new FunctionPatch<M>(this->domain(),this->sweeper());
 }
 
-VectorTaylorFunction* VectorTaylorFunction::_create_identity() const
+template<class M> VectorFunctionPatch<M>* VectorFunctionPatch<M>::_create_identity() const
 {
     Sweeper sweeper=this->sweeper();
-    VectorTaylorFunction* result = new VectorTaylorFunction(this->domain().size(), ScalarTaylorFunction(this->domain(),sweeper));
-    for(SizeType i=0; i!=result->size(); ++i) { (*result)[i]=ScalarTaylorFunction::coordinate(this->domain(),i,sweeper); }
+    VectorFunctionPatch<M>* result = new VectorFunctionPatch<M>(this->domain().size(), FunctionPatch<M>(this->domain(),sweeper));
+    for(SizeType i=0; i!=result->size(); ++i) { (*result)[i]=FunctionPatch<M>::coordinate(this->domain(),i,sweeper); }
     return result;
 }
 
-Void VectorTaylorFunction::adjoin(const ScalarTaylorFunction& sf)
+template<class M> Void VectorFunctionPatch<M>::adjoin(const FunctionPatch<M>& sf)
 {
     ARIADNE_ASSERT_MSG(sf.domain()==this->domain(),"sf="<<sf);
     this->_models=join(this->_models,sf.model());
@@ -1106,41 +1069,36 @@ Void VectorTaylorFunction::adjoin(const ScalarTaylorFunction& sf)
 
 
 
-VectorTaylorFunction
-VectorTaylorFunction::constant(const ExactBox& d, const Vector<ValidatedNumber>& c, Sweeper swp)
+template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::constant(const ExactBox& d, const Vector<ValidatedNumber>& c, Sweeper swp)
 {
-    return VectorTaylorFunction(d,ValidatedTaylorModel::constants(d.size(),c,swp));
+    return VectorFunctionPatch<M>(d,ModelType::constants(d.size(),c,swp));
 }
 
-VectorTaylorFunction
-VectorTaylorFunction::identity(const ExactBox& d, Sweeper swp)
+template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::identity(const ExactBox& d, Sweeper swp)
 {
-    return VectorTaylorFunction(d,ValidatedTaylorModel::scalings(d,swp));
+    return VectorFunctionPatch<M>(d,ModelType::scalings(d,swp));
 }
 
-VectorTaylorFunction
-VectorTaylorFunction::projection(const ExactBox& d, SizeType imin, SizeType imax, Sweeper swp)
+template<class M> VectorFunctionPatch<M> VectorFunctionPatch<M>::projection(const ExactBox& d, SizeType imin, SizeType imax, Sweeper swp)
 {
-    return VectorTaylorFunction(ScalarTaylorFunction::coordinates(d,imin,imax,swp));
+    return VectorFunctionPatch<M>(FunctionPatch<M>::coordinates(d,imin,imax,swp));
 }
 
 
-Polynomial<ValidatedFloat> polynomial(const ValidatedTaylorModel& tm) {
+template<class M> Polynomial<ValidatedFloat> polynomial(const M& tm) {
     return Polynomial<ValidatedFloat>(tm.expansion())+ValidatedNumber(-tm.error(),+tm.error());
 }
 
-Vector< Polynomial<ValidatedFloat> >
-VectorTaylorFunction::polynomials() const
+template<class M> Vector<Polynomial<ValidatedFloat>> VectorFunctionPatch<M>::polynomials() const
 {
     Vector<Polynomial<ValidatedFloat> > p(this->result_size(),Polynomial<ValidatedFloat>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
-        p[i]=static_cast<ScalarTaylorFunction>((*this)[i]).polynomial();
+        p[i]=static_cast<FunctionPatch<M>>((*this)[i]).polynomial();
     }
     return p;
 }
 
-Vector<Expansion<ExactFloat>> const
-VectorTaylorFunction::expansions() const
+template<class M> Vector<Expansion<ExactFloat>> const VectorFunctionPatch<M>::expansions() const
 {
     Vector<Expansion<ExactFloat>> e(this->result_size(),Expansion<ExactFloat>(this->argument_size()));
     for(SizeType i=0; i!=this->result_size(); ++i) {
@@ -1149,8 +1107,7 @@ VectorTaylorFunction::expansions() const
     return e;
 }
 
-Vector<ErrorFloat> const
-VectorTaylorFunction::errors() const
+template<class M> Vector<ErrorFloat> const VectorFunctionPatch<M>::errors() const
 {
     Vector<ErrorFloat> e(this->result_size());
     for(SizeType i=0; i!=this->result_size(); ++i) {
@@ -1159,8 +1116,7 @@ VectorTaylorFunction::errors() const
     return e;
 }
 
-ErrorFloat const
-VectorTaylorFunction::error() const
+template<class M> ErrorFloat const VectorFunctionPatch<M>::error() const
 {
     ErrorFloat e=0;
     for(SizeType i=0; i!=this->result_size(); ++i) {
@@ -1169,51 +1125,44 @@ VectorTaylorFunction::error() const
     return e;
 }
 
-ValidatedVectorFunction
-VectorTaylorFunction::function() const
+template<class M> ValidatedVectorFunction VectorFunctionPatch<M>::function() const
 {
-    return ValidatedVectorFunction(new VectorTaylorFunction(*this));
+    return ValidatedVectorFunction(new VectorFunctionPatch<M>(*this));
 }
 
-Bool
-VectorTaylorFunction::operator==(const VectorTaylorFunction& tm) const
+template<class M> Bool VectorFunctionPatch<M>::operator==(const VectorFunctionPatch<M>& tm) const
 {
     return this->_models==tm._models;
 }
 
 
 
-Bool
-VectorTaylorFunction::operator!=(const VectorTaylorFunction& p2) const
+template<class M> Bool VectorFunctionPatch<M>::operator!=(const VectorFunctionPatch<M>& p2) const
 {
     return !(*this==p2);
 }
 
 
 
-Sweeper
-VectorTaylorFunction::sweeper() const
+template<class M> Sweeper VectorFunctionPatch<M>::sweeper() const
 {
     ARIADNE_ASSERT(this->size()>0); return this->_models[0].sweeper();
 }
 
 
-Void
-VectorTaylorFunction::set_sweeper(Sweeper swp)
+template<class M> Void VectorFunctionPatch<M>::set_sweeper(Sweeper swp)
 {
     for(SizeType i=0; i!=this->result_size(); ++i) {
         this->_models[i].set_sweeper(swp);
     }
 }
 
-const ExactBox&
-VectorTaylorFunction::domain() const
+template<class M> const ExactBox& VectorFunctionPatch<M>::domain() const
 {
     return this->_domain;
 }
 
-const ExactBox
-VectorTaylorFunction::codomain() const
+template<class M> const ExactBox VectorFunctionPatch<M>::codomain() const
 {
     ExactBox result(this->result_size());
     for(SizeType i=0; i!=result.size(); ++i) {
@@ -1223,8 +1172,7 @@ VectorTaylorFunction::codomain() const
 }
 
 
-const UpperBox
-VectorTaylorFunction::range() const
+template<class M> const UpperBox VectorFunctionPatch<M>::range() const
 {
     Vector<UpperInterval> result(this->result_size());
     for(SizeType i=0; i!=result.size(); ++i) {
@@ -1234,8 +1182,7 @@ VectorTaylorFunction::range() const
 }
 
 
-const Vector<ExactFloat>
-VectorTaylorFunction::centre() const
+template<class M> const Vector<ExactFloat> VectorFunctionPatch<M>::centre() const
 {
     Vector<ExactFloat> result(this->result_size());
     for(SizeType i=0; i!=result.size(); ++i) {
@@ -1245,26 +1192,22 @@ VectorTaylorFunction::centre() const
 }
 
 
-const Vector<ValidatedTaylorModel>&
-VectorTaylorFunction::models() const
+template<class M> const Vector<typename VectorFunctionPatch<M>::ModelType>& VectorFunctionPatch<M>::models() const
 {
     return this->_models;
 }
 
-Vector<ValidatedTaylorModel>&
-VectorTaylorFunction::models()
+template<class M> Vector<typename VectorFunctionPatch<M>::ModelType>& VectorFunctionPatch<M>::models()
 {
     return this->_models;
 }
 
-const ValidatedTaylorModel&
-VectorTaylorFunction::model(SizeType i) const
+template<class M> const typename VectorFunctionPatch<M>::ModelType& VectorFunctionPatch<M>::model(SizeType i) const
 {
     return this->_models[i];
 }
 
-ValidatedTaylorModel&
-VectorTaylorFunction::model(SizeType i)
+template<class M> typename VectorFunctionPatch<M>::ModelType& VectorFunctionPatch<M>::model(SizeType i)
 {
     return this->_models[i];
 }
@@ -1272,42 +1215,36 @@ VectorTaylorFunction::model(SizeType i)
 
 
 
-SizeType
-VectorTaylorFunction::argument_size() const
+template<class M> SizeType VectorFunctionPatch<M>::argument_size() const
 {
     return this->_domain.size();
 }
 
 
-SizeType
-VectorTaylorFunction::result_size() const
+template<class M> SizeType VectorFunctionPatch<M>::result_size() const
 {
     return this->_models.size();
 }
 
 
-ScalarTaylorFunction
-VectorTaylorFunction::operator[](SizeType i) const
+template<class M> FunctionPatch<M> VectorFunctionPatch<M>::operator[](SizeType i) const
 {
     return this->get(i);
 }
 
-VectorTaylorFunctionElementReference
-VectorTaylorFunction::operator[](SizeType i)
+template<class M> VectorFunctionPatchElementReference<M> VectorFunctionPatch<M>::operator[](SizeType i)
 {
-    return VectorTaylorFunctionElementReference(*this,i);
+    return VectorFunctionPatchElementReference<M>(*this,i);
 }
 
-ScalarTaylorFunction
-VectorTaylorFunction::get(SizeType i) const
+template<class M> FunctionPatch<M> VectorFunctionPatch<M>::get(SizeType i) const
 {
-    return ScalarTaylorFunction(this->_domain,this->_models[i]);
+    return FunctionPatch<M>(this->_domain,this->_models[i]);
 }
 
-Void
-VectorTaylorFunction::set(SizeType i, const ScalarTaylorFunction& e)
+template<class M> Void VectorFunctionPatch<M>::set(SizeType i, const FunctionPatch<M>& e)
 {
-    ARIADNE_ASSERT_MSG(this->size()>i,"Cannot set "<<i<<"th element of VectorTaylorFunction "<<(*this));
+    ARIADNE_ASSERT_MSG(this->size()>i,"Cannot set "<<i<<"th element of VectorFunctionPatch<M> "<<(*this));
     if(this->domain().size()!=0) {
         ARIADNE_ASSERT_MSG(e.domain()==this->domain(),"Domain of "<<e<<" conflicts with existing domain "<<this->domain());
     } else {
@@ -1329,12 +1266,10 @@ VectorTaylorFunction::set(SizeType i, const ScalarTaylorFunction& e)
 
 
 
-template<class T>
-Void
-VectorTaylorFunction::_compute(Vector<T>& r, const Vector<T>& a) const
+template<class M> template<class T> Void VectorFunctionPatch<M>::_compute(Vector<T>& r, const Vector<T>& a) const
 {
     typedef typename T::NumericType X;
-    const VectorTaylorFunction& f=*this;
+    const VectorFunctionPatch<M>& f=*this;
     Vector<T> sx=Ariadne::unscale(a,f._domain);
     for(SizeType i=0; i!=r.size(); ++i) {
         T ri=Ariadne::evaluate(this->_models[i].expansion(),sx);
@@ -1346,8 +1281,7 @@ VectorTaylorFunction::_compute(Vector<T>& r, const Vector<T>& a) const
 
 
 
-VectorTaylorFunction&
-VectorTaylorFunction::sweep()
+template<class M> VectorFunctionPatch<M>& VectorFunctionPatch<M>::sweep()
 {
     for(SizeType i=0; i!=this->size(); ++i) {
         this->_models[i].sweep();
@@ -1355,8 +1289,7 @@ VectorTaylorFunction::sweep()
     return *this;
 }
 
-VectorTaylorFunction&
-VectorTaylorFunction::sweep(const SweeperInterface& sweeper)
+template<class M> VectorFunctionPatch<M>& VectorFunctionPatch<M>::sweep(const SweeperInterface& sweeper)
 {
     for(SizeType i=0; i!=this->size(); ++i) {
         this->_models[i].sweep(sweeper);
@@ -1365,8 +1298,7 @@ VectorTaylorFunction::sweep(const SweeperInterface& sweeper)
 }
 
 
-Void
-VectorTaylorFunction::clobber()
+template<class M> Void VectorFunctionPatch<M>::clobber()
 {
     for(SizeType i=0; i!=this->size(); ++i) {
         this->_models[i].clobber();
@@ -1377,10 +1309,9 @@ VectorTaylorFunction::clobber()
 
 
 
-Vector<ApproximateNumber>
-VectorTaylorFunction::operator()(const Vector<ApproximateNumber>& x) const
+template<class M> Vector<ApproximateNumber> VectorFunctionPatch<M>::operator()(const Vector<ApproximateNumber>& x) const
 {
-    const VectorTaylorFunction& f=*this;
+    const VectorFunctionPatch<M>& f=*this;
     if(!decide(contains(f.domain(),x))) {
         ARIADNE_THROW(DomainException,"tf.evaluate(ax) with tf="<<f<<", ax="<<x,"ax is not an element of tf.domain()="<<f.domain());
     }
@@ -1392,10 +1323,9 @@ VectorTaylorFunction::operator()(const Vector<ApproximateNumber>& x) const
     return r;
 }
 
-Vector<ValidatedNumber>
-VectorTaylorFunction::operator()(const Vector<ValidatedNumber>& x) const
+template<class M> Vector<ValidatedNumber> VectorFunctionPatch<M>::operator()(const Vector<ValidatedNumber>& x) const
 {
-    const VectorTaylorFunction& f=*this;
+    const VectorFunctionPatch<M>& f=*this;
     if(!contains(f.domain(),x)) {
         ARIADNE_THROW(DomainException,"tf.evaluate(vx) with tf="<<f<<", x="<<x,"vx is not a subset of tf.domain()="<<f.domain());
     }
@@ -1403,8 +1333,7 @@ VectorTaylorFunction::operator()(const Vector<ValidatedNumber>& x) const
     return Ariadne::evaluate(f._models,sx);
 }
 
-Matrix<ValidatedNumber>
-VectorTaylorFunction::jacobian(const Vector<ValidatedNumber>& x) const
+template<class M> Matrix<ValidatedNumber> VectorFunctionPatch<M>::jacobian(const Vector<ValidatedNumber>& x) const
 {
     Matrix<ValidatedNumber> J=Ariadne::jacobian(this->_models,unscale(x,this->_domain));
     for(SizeType j=0; j!=J.column_size(); ++j) {
@@ -1416,114 +1345,99 @@ VectorTaylorFunction::jacobian(const Vector<ValidatedNumber>& x) const
     return J;
 }
 
-Void
-VectorTaylorFunction::restrict(const ExactBox& x)
+template<class M> Void VectorFunctionPatch<M>::restrict(const ExactBox& x)
 {
     *this=restriction(*this,x);
 }
 
 
-VectorTaylorFunction
-join(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2)
+template<class M> VectorFunctionPatch<M> join(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2)
 {
     ARIADNE_ASSERT_MSG(f1.domain()==f2.domain(),"f1="<<f1<<", f2="<<f2);
-    return VectorTaylorFunction(f1.domain(),join(f1.models(),f2.model()));
+    return VectorFunctionPatch<M>(f1.domain(),join(f1.models(),f2.model()));
 }
 
-VectorTaylorFunction
-join(const VectorTaylorFunction& f, const VectorTaylorFunction& g)
+template<class M> VectorFunctionPatch<M> join(const VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g)
 {
     ARIADNE_ASSERT(f.domain()==g.domain());
-    return VectorTaylorFunction(f.domain(),join(f.models(),g.models()));
+    return VectorFunctionPatch<M>(f.domain(),join(f.models(),g.models()));
 }
 
-VectorTaylorFunction
-join(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2)
+template<class M> VectorFunctionPatch<M> join(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2)
 {
     ARIADNE_ASSERT(f1.domain()==f2.domain());
-    return VectorTaylorFunction(f1.domain(),join(f1.model(),f2.model()));
+    return VectorFunctionPatch<M>(f1.domain(),join(f1.model(),f2.model()));
 }
 
-VectorTaylorFunction
-join(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2)
+template<class M> VectorFunctionPatch<M> join(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
 {
     ARIADNE_ASSERT(f1.domain()==f2.domain());
-    return VectorTaylorFunction(f1.domain(),join(f1.model(),f2.models()));
+    return VectorFunctionPatch<M>(f1.domain(),join(f1.model(),f2.models()));
 }
 
-VectorTaylorFunction
-combine(const ScalarTaylorFunction& f1, const ScalarTaylorFunction& f2)
+template<class M> VectorFunctionPatch<M> combine(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2)
 {
-    return VectorTaylorFunction(product(f1.domain(),f2.domain()),combine(f1.model(),f2.model()));
+    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(f1.model(),f2.model()));
 }
 
-VectorTaylorFunction
-combine(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2)
+template<class M> VectorFunctionPatch<M> combine(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
 {
-    return VectorTaylorFunction(product(f1.domain(),f2.domain()),combine(f1.model(),f2.models()));
+    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(f1.model(),f2.models()));
 }
 
-VectorTaylorFunction
-combine(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2)
+template<class M> VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2)
 {
-    return VectorTaylorFunction(product(f1.domain(),f2.domain()),combine(f1.models(),f2.model()));
+    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(f1.models(),f2.model()));
 }
 
-VectorTaylorFunction
-combine(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
+template<class M> VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
 {
-    return VectorTaylorFunction(product(f1.domain(),f2.domain()),combine(f1.models(),f2.models()));
+    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(f1.models(),f2.models()));
 }
 
 
-VectorTaylorFunction
-embed(const VectorTaylorFunction& f, const ExactInterval& d)
+template<class M> VectorFunctionPatch<M> embed(const VectorFunctionPatch<M>& f, const ExactInterval& d)
 {
     return embed(ExactBox(),f,ExactBox(1u,d));
 }
 
-VectorTaylorFunction
-embed(const VectorTaylorFunction& f, const ExactBox& d)
+template<class M> VectorFunctionPatch<M> embed(const VectorFunctionPatch<M>& f, const ExactBox& d)
 {
     return embed(ExactBox(),f,d);
 }
 
-VectorTaylorFunction
-embed(const ExactBox& d, const VectorTaylorFunction& f)
+template<class M> VectorFunctionPatch<M> embed(const ExactBox& d, const VectorFunctionPatch<M>& f)
 {
     return embed(d,f,ExactBox());
 }
 
-VectorTaylorFunction
-embed(const ExactBox& d1, const VectorTaylorFunction& f, const ExactBox& d2)
+template<class M> VectorFunctionPatch<M> embed(const ExactBox& d1, const VectorFunctionPatch<M>& f, const ExactBox& d2)
 {
-    return VectorTaylorFunction(join(d1,f.domain(),d2),embed(embed(d1.size(),f.models()),d2.size()));
+    return VectorFunctionPatch<M>(join(d1,f.domain(),d2),embed(embed(d1.size(),f.models()),d2.size()));
 }
 
-VectorTaylorFunction
-restriction(const VectorTaylorFunction& f, const ExactBox& d)
+template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& f, const ExactBox& d)
 {
     ARIADNE_ASSERT_MSG(subset(d,f.domain()),"Cannot restriction "<<f<<" to non-sub-domain "<<d);
     if(d==f.domain()) { return f; }
-    VectorTaylorFunction r(f.result_size(),d,f.sweeper());
+    VectorFunctionPatch<M> r(f.result_size(),d,f.sweeper());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r.set(i,restriction(f[i],d));
     }
     return r;
 }
 
-Pair<VectorTaylorFunction,VectorTaylorFunction>
-split(const VectorTaylorFunction& tf, SizeType j)
+template<class M> Pair<VectorFunctionPatch<M>,VectorFunctionPatch<M>> split(const VectorFunctionPatch<M>& tf, SizeType j)
 {
-    Pair< Vector<ValidatedTaylorModel>,Vector<ValidatedTaylorModel> > models=split(tf.models(),j);
+    typedef M ModelType;
+    Pair< Vector<ModelType>,Vector<ModelType> > models=split(tf.models(),j);
     Pair<ExactBox,ExactBox> subdomains=split(tf.domain(),j);
-    return make_pair(VectorTaylorFunction(subdomains.first,models.first),
-                     VectorTaylorFunction(subdomains.second,models.second));
+    return make_pair(VectorFunctionPatch<M>(subdomains.first,models.first),
+                     VectorFunctionPatch<M>(subdomains.second,models.second));
 
 }
 
-Bool
-refines(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
+template<class M> Bool refines(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
     for(SizeType i=0; i!=f1.result_size(); ++i) {
         if(!refines(f1[i],f2[i])) { return false; }
@@ -1531,8 +1445,7 @@ refines(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
     return true;
 }
 
-Bool
-disjoint(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
+template<class M> Bool disjoint(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
     for(SizeType i=0; i!=f1.result_size(); ++i) {
         if(disjoint(f1[i],f2[i])) { return true; }
@@ -1540,18 +1453,16 @@ disjoint(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
     return false;
 }
 
-VectorTaylorFunction
-intersection(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
+template<class M> VectorFunctionPatch<M> intersection(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
-    VectorTaylorFunction r(f1.result_size());
+    VectorFunctionPatch<M> r(f1.result_size());
     for(SizeType i=0; i!=r.result_size(); ++i) {
         r[i]=intersection(f1[i],f2[i]);
     }
     return r;
 }
 
-VectorTaylorFunction&
-operator+=(VectorTaylorFunction& f, const VectorTaylorFunction& g)
+template<class M> VectorFunctionPatch<M>& operator+=(VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g)
 {
     ARIADNE_ASSERT(f.result_size()==g.result_size());
     ARIADNE_ASSERT(subset(f.domain(),g.domain()));
@@ -1560,8 +1471,7 @@ operator+=(VectorTaylorFunction& f, const VectorTaylorFunction& g)
     return f;
 }
 
-VectorTaylorFunction&
-operator-=(VectorTaylorFunction& f, const VectorTaylorFunction& g)
+template<class M> VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g)
 {
     ARIADNE_ASSERT(f.result_size()==g.result_size());
     ARIADNE_ASSERT(subset(f.domain(),g.domain()));
@@ -1570,45 +1480,41 @@ operator-=(VectorTaylorFunction& f, const VectorTaylorFunction& g)
     return f;
 }
 
-VectorTaylorFunction&
-operator+=(VectorTaylorFunction& f, const Vector<ValidatedNumber>& c)
+template<class M> VectorFunctionPatch<M>& operator+=(VectorFunctionPatch<M>& f, const Vector<ValidatedNumber>& c)
 {
     ARIADNE_ASSERT(f.result_size()==c.size());
     f.models()+=c;
     return f;
 }
 
-VectorTaylorFunction&
-operator-=(VectorTaylorFunction& f, const Vector<ValidatedNumber>& c)
+template<class M> VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, const Vector<ValidatedNumber>& c)
 {
     ARIADNE_ASSERT(f.result_size()==c.size());
     f.models()-=c;
     return f;
 }
 
-VectorTaylorFunction&
-operator*=(VectorTaylorFunction& f, const ValidatedNumber& c)
+template<class M> VectorFunctionPatch<M>& operator*=(VectorFunctionPatch<M>& f, const ValidatedNumber& c)
 {
     f.models()*=c;
     return f;
 }
 
-VectorTaylorFunction&
-operator/=(VectorTaylorFunction& f, const ValidatedNumber& c)
+template<class M> VectorFunctionPatch<M>& operator/=(VectorFunctionPatch<M>& f, const ValidatedNumber& c)
 {
     f.models()/=c;
     return f;
 }
 
 
-VectorTaylorFunction
-operator+(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
+template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
 {
+    typedef M ModelType;
     ARIADNE_ASSERT_MSG(!empty(intersection(f1.domain(),f2.domain())),
-                       "operator+(VectorTaylorFunction f1, VectorTaylorFunction f2) with f1="<<f1<<" f2="<<f2<<
+                       "operator+(VectorFunctionPatch<M> f1, VectorFunctionPatch<M> f2) with f1="<<f1<<" f2="<<f2<<
                        ": domains are disjoint");
     if(f1.domain()==f2.domain()) {
-        return VectorTaylorFunction(f1.domain(),Vector<ValidatedTaylorModel>(f1.models()+f2.models()));
+        return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.models()+f2.models()));
     } else {
         ExactBox new_domain=intersection(f1.domain(),f2.domain());
         return operator+(restriction(f1,new_domain),restriction(f2,new_domain));
@@ -1616,196 +1522,175 @@ operator+(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
 }
 
 
-VectorTaylorFunction
-operator-(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2)
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
 {
+    typedef M ModelType;
     ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
     if(f1.domain()==f2.domain()) {
-        return VectorTaylorFunction(f1.domain(),Vector<ValidatedTaylorModel>(f1.models()-f2.models()));
+        return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.models()-f2.models()));
     } else {
         ExactBox new_domain=intersection(f1.domain(),f2.domain());
         return operator-(restriction(f1,new_domain),restriction(f2,new_domain));
     }
 }
 
-VectorTaylorFunction
-operator*(const ScalarTaylorFunction& f1, const VectorTaylorFunction& f2)
+template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
 {
+    typedef M ModelType;
     ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
     if(f1.domain()==f2.domain()) {
-        return VectorTaylorFunction(f1.domain(),Vector<ValidatedTaylorModel>(f1.model()*f2.models()));
+        return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.model()*f2.models()));
     } else {
         ExactBox new_domain=intersection(f1.domain(),f2.domain());
         return operator*(restriction(f1,new_domain),restriction(f2,new_domain));
     }
 }
 
-VectorTaylorFunction
-operator*(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2)
+template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2)
 {
+    typedef M ModelType;
     ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
     if(f1.domain()==f2.domain()) {
-        return VectorTaylorFunction(f1.domain(),Vector<ValidatedTaylorModel>(f1.models()*f2.model()));
+        return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.models()*f2.model()));
     } else {
         ExactBox new_domain=intersection(f1.domain(),f2.domain());
         return operator*(restriction(f1,new_domain),restriction(f2,new_domain));
     }
 }
 
-VectorTaylorFunction
-operator/(const VectorTaylorFunction& f1, const ScalarTaylorFunction& f2)
+template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2)
 {
     return f1 * rec(f2);
 }
 
 
 
-VectorTaylorFunction
-operator-(const VectorTaylorFunction& f)
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f)
 {
-    return VectorTaylorFunction(f.domain(),Vector<ValidatedTaylorModel>(-f.models()));
+    return VectorFunctionPatch<M>(f.domain(),Vector<M>(-f.models()));
 }
 
-VectorTaylorFunction
-operator*(const ValidatedNumber& c, const VectorTaylorFunction& f)
+template<class M> VectorFunctionPatch<M> operator*(const ValidatedNumber& c, const VectorFunctionPatch<M>& f)
 {
-    return VectorTaylorFunction(f.domain(),Vector<ValidatedTaylorModel>(f.models()*c));
+    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()*c));
 }
 
-VectorTaylorFunction
-operator*(const VectorTaylorFunction& f, const ValidatedNumber& c)
+template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f, const ValidatedNumber& c)
 {
-    return VectorTaylorFunction(f.domain(),Vector<ValidatedTaylorModel>(f.models()*c));
+    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()*c));
 }
 
-VectorTaylorFunction
-operator/(const VectorTaylorFunction& f, const ValidatedNumber& c)
+template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f, const ValidatedNumber& c)
 {
-    return VectorTaylorFunction(f.domain(),Vector<ValidatedTaylorModel>(f.models()/c));
+    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()/c));
 }
 
-VectorTaylorFunction
-operator+(const VectorTaylorFunction& f, const Vector<ValidatedNumber>& c)
+template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f, const Vector<ValidatedNumber>& c)
 {
-    return VectorTaylorFunction(f.domain(),Vector<ValidatedTaylorModel>(f.models()+c));
+    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()+c));
 }
 
-VectorTaylorFunction
-operator-(const VectorTaylorFunction& f, const Vector<ValidatedNumber>& c)
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f, const Vector<ValidatedNumber>& c)
 {
-    return VectorTaylorFunction(f.domain(),Vector<ValidatedTaylorModel>(f.models()-c));
+    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()-c));
 }
 
-VectorTaylorFunction
-operator*(const Matrix<Float>& A, const VectorTaylorFunction& f)
+template<class M> VectorFunctionPatch<M> operator*(const Matrix<Float>& A, const VectorFunctionPatch<M>& f)
 {
     ARIADNE_PRECONDITION(A.column_size()==f.size());
-    Vector<ValidatedTaylorModel> models(A.row_size(),ValidatedTaylorModel(f.argument_size(),f.sweeper()));
+    Vector<M> models(A.row_size(),M(f.argument_size(),f.sweeper()));
     for(SizeType i=0; i!=A.row_size(); ++i) {
         for(SizeType j=0; j!=A.column_size(); ++j) {
             models[i] += A.get(i,j) * f.model(j);
         }
     }
-    return VectorTaylorFunction(f.domain(),models);
+    return VectorFunctionPatch<M>(f.domain(),models);
 }
 
-VectorTaylorFunction
-operator*(const Matrix<ValidatedNumber>& A, const VectorTaylorFunction& f)
+template<class M> VectorFunctionPatch<M> operator*(const Matrix<ValidatedNumber>& A, const VectorFunctionPatch<M>& f)
 {
     ARIADNE_PRECONDITION(A.column_size()==f.size());
-    Vector<ValidatedTaylorModel> models(A.row_size(),ValidatedTaylorModel(f.argument_size(),f.sweeper()));
+    Vector<M> models(A.row_size(),M(f.argument_size(),f.sweeper()));
     for(SizeType i=0; i!=A.row_size(); ++i) {
         for(SizeType j=0; j!=A.column_size(); ++j) {
             models[i] += A.get(i,j) * f.model(j);
         }
     }
-    return VectorTaylorFunction(f.domain(),models);
+    return VectorFunctionPatch<M>(f.domain(),models);
 }
 
-VectorTaylorFunction operator+(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2) {
-    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())+tf2; }
-VectorTaylorFunction operator-(const ValidatedVectorFunction& f1, const VectorTaylorFunction& tf2) {
-    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())-tf2; }
-VectorTaylorFunction operator*(const ValidatedScalarFunction& f1, const VectorTaylorFunction& tf2) {
-    return ScalarTaylorFunction(tf2.domain(),f1,tf2.sweeper())*tf2; }
-VectorTaylorFunction operator*(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2) {
-    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())*tf2; }
-VectorTaylorFunction operator/(const ValidatedVectorFunction& f1, const ScalarTaylorFunction& tf2) {
-    return VectorTaylorFunction(tf2.domain(),f1,tf2.sweeper())/tf2; }
-VectorTaylorFunction operator+(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2) {
-    return tf1+VectorTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-VectorTaylorFunction operator-(const VectorTaylorFunction& tf1, const ValidatedVectorFunction& f2) {
-    return tf1-VectorTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-VectorTaylorFunction operator*(const ScalarTaylorFunction& tf1, const ValidatedVectorFunction& f2) {
-    return tf1*VectorTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-VectorTaylorFunction operator*(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2) {
-    return tf1*ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
-VectorTaylorFunction operator/(const VectorTaylorFunction& tf1, const ValidatedScalarFunction& f2) {
-    return tf1/ScalarTaylorFunction(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> VectorFunctionPatch<M> operator+(const ValidatedVectorFunction& f1, const VectorFunctionPatch<M>& tf2) {
+    return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())+tf2; }
+template<class M> VectorFunctionPatch<M> operator-(const ValidatedVectorFunction& f1, const VectorFunctionPatch<M>& tf2) {
+    return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())-tf2; }
+template<class M> VectorFunctionPatch<M> operator*(const ValidatedScalarFunction& f1, const VectorFunctionPatch<M>& tf2) {
+    return FunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())*tf2; }
+template<class M> VectorFunctionPatch<M> operator*(const ValidatedVectorFunction& f1, const FunctionPatch<M>& tf2) {
+    return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())*tf2; }
+template<class M> VectorFunctionPatch<M> operator/(const ValidatedVectorFunction& f1, const FunctionPatch<M>& tf2) {
+    return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())/tf2; }
+template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& tf1, const ValidatedVectorFunction& f2) {
+    return tf1+VectorFunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& tf1, const ValidatedVectorFunction& f2) {
+    return tf1-VectorFunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& tf1, const ValidatedVectorFunction& f2) {
+    return tf1*VectorFunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& tf1, const ValidatedScalarFunction& f2) {
+    return tf1*FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& tf1, const ValidatedScalarFunction& f2) {
+    return tf1/FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
 
 
 
 
 
 
-VectorTaylorFunction
-partial_evaluate(const VectorTaylorFunction& tf, SizeType k, const ValidatedNumber& c)
+template<class M> VectorFunctionPatch<M> partial_evaluate(const VectorFunctionPatch<M>& tf, SizeType k, const NumericType<M>& c)
 {
     // Scale c to domain
     const SizeType as=tf.argument_size();
     ARIADNE_ASSERT(k<as);
     const Vector<ExactInterval>& domain=tf.domain();
     const ExactInterval& dk=domain[k];
-    ValidatedNumber sc=(c-med_val(dk))/rad_val(dk);
+    NumericType<M> sc=(c-med_val(dk))/rad_val(dk);
 
     Vector<ExactInterval> new_domain(as-1);
     for(SizeType i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
     for(SizeType i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
 
-    Vector<ValidatedTaylorModel> new_models=partial_evaluate(tf.models(),k,sc);
+    Vector<M> new_models=partial_evaluate(tf.models(),k,sc);
 
-    return VectorTaylorFunction(new_domain,new_models);
+    return VectorFunctionPatch<M>(new_domain,new_models);
 }
 
 
-VectorTaylorFunction
-partial_restriction(const VectorTaylorFunction& tf, SizeType k, const ExactInterval& d)
+template<class M> VectorFunctionPatch<M> partial_restriction(const VectorFunctionPatch<M>& tf, SizeType k, const ExactInterval& d)
 {
-    VectorTaylorFunction r(tf.result_size(),tf.domain(),tf.sweeper());
+    VectorFunctionPatch<M> r(tf.result_size(),tf.domain(),tf.sweeper());
     for(SizeType i=0; i!=tf.result_size(); ++i) {
         r[i]=partial_restriction(tf[i],k,d);
     }
     return r;
 }
 
-VectorTaylorFunction
-restriction(const VectorTaylorFunction& tf, SizeType k, const ExactInterval& d)
+template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& tf, SizeType k, const ExactInterval& d)
 {
     return partial_restriction(tf,k,d);
 }
 
 
-Vector<ValidatedNumber>
-evaluate(const VectorTaylorFunction& f, const Vector<ValidatedNumber>& x) {
+template<class M> Vector<ValidatedNumber> evaluate(const VectorFunctionPatch<M>& f, const Vector<ValidatedNumber>& x) {
     if(!contains(f.domain(),x)) {
         ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
     }
     return unchecked_evaluate(f,x);
 }
 
-Vector<ValidatedNumber>
-unchecked_evaluate(const VectorTaylorFunction& f, const Vector<ValidatedNumber>& x) {
+template<class M> Vector<NumericType<M>> unchecked_evaluate(const VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& x) {
     return evaluate(f.models(),unscale(x,f.domain()));
 }
 
-VectorTaylorFunction
-compose(const ValidatedVectorFunction& g, const VectorTaylorFunction& f)
-{
-    return VectorTaylorFunction(f.domain(),g.evaluate(f.models()));
-}
-
-VectorTaylorFunction
-compose(const VectorTaylorFunction& g, const VectorTaylorFunction& f)
+template<class M> VectorFunctionPatch<M> compose(const VectorFunctionPatch<M>& g, const VectorFunctionPatch<M>& f)
 {
     if(!subset(f.codomain(),g.domain())) {
         ARIADNE_THROW(DomainException,"compose(g,f) with g="<<g<<", f="<<f,"f.codomain()="<<f.codomain()<<" is not a subset of g.domain()="<<g.domain());
@@ -1814,32 +1699,29 @@ compose(const VectorTaylorFunction& g, const VectorTaylorFunction& f)
 }
 
 
-VectorTaylorFunction
-unchecked_compose(const VectorTaylorFunction& g, const VectorTaylorFunction& f)
+template<class M> VectorFunctionPatch<M> unchecked_compose(const VectorFunctionPatch<M>& g, const VectorFunctionPatch<M>& f)
 {
-    return VectorTaylorFunction(f.domain(),compose(g.models(),unscale(f.models(),g.domain())));
+    return VectorFunctionPatch<M>(f.domain(),compose(g.models(),unscale(f.models(),g.domain())));
 }
 
 
 
-VectorTaylorFunction
-derivative(const VectorTaylorFunction& f, SizeType k)
+template<class M> VectorFunctionPatch<M> derivative(const VectorFunctionPatch<M>& f, SizeType k)
 {
     ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
     ValidatedNumber fdomkrad=rad_val(f.domain()[k]);
-    VectorTaylorFunction g=f;
+    VectorFunctionPatch<M> g=f;
     for(SizeType i=0; i!=g.size(); ++i) {
         g[i]=derivative(f[i],k);
     }
     return g;
 }
 
-VectorTaylorFunction
-antiderivative(const VectorTaylorFunction& f, SizeType k)
+template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k)
 {
     ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
     ValidatedNumber fdomkrad=rad_val(f.domain()[k]);
-    VectorTaylorFunction g=f;
+    VectorFunctionPatch<M> g=f;
     for(SizeType i=0; i!=g.size(); ++i) {
         g.models()[i].antidifferentiate(k);
         g.models()[i]*=fdomkrad;
@@ -1847,12 +1729,11 @@ antiderivative(const VectorTaylorFunction& f, SizeType k)
     return g;
 }
 
-VectorTaylorFunction
-antiderivative(const VectorTaylorFunction& f, SizeType k, ExactNumber c)
+template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k, ExactNumber c)
 {
     ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
     ValidatedNumber fdomkrad=rad_val(f.domain()[k]);
-    VectorTaylorFunction g=f;
+    VectorFunctionPatch<M> g=f;
     for(SizeType i=0; i!=g.size(); ++i) {
         g[i]=antiderivative(f[i],k,c);
     }
@@ -1864,7 +1745,7 @@ antiderivative(const VectorTaylorFunction& f, SizeType k, ExactNumber c)
 
 
 
-ErrorFloat norm(const VectorTaylorFunction& f) {
+template<class M> ErrorFloat norm(const VectorFunctionPatch<M>& f) {
     ErrorFloat res=0u;
     for(SizeType i=0; i!=f.result_size(); ++i) {
         res=max(res,norm(f[i]));
@@ -1872,44 +1753,42 @@ ErrorFloat norm(const VectorTaylorFunction& f) {
     return res;
 }
 
-ErrorFloat distance(const VectorTaylorFunction& f1, const VectorTaylorFunction& f2) {
+template<class M> ErrorFloat distance(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
     return norm(f1-f2);
 }
 
-ErrorFloat distance(const VectorTaylorFunction& f1, const ValidatedVectorFunction& f2) {
-    return distance(f1,VectorTaylorFunction(f1.domain(),f2,f1.sweeper()));
+template<class M> ErrorFloat distance(const VectorFunctionPatch<M>& f1, const ValidatedVectorFunction& f2) {
+    return distance(f1,VectorFunctionPatch<M>(f1.domain(),f2,f1.sweeper()));
 }
 
 
-OutputStream&
-VectorTaylorFunction::write(OutputStream& os) const
+template<class M> OutputStream& VectorFunctionPatch<M>::write(OutputStream& os) const
 {
     os << "[";
     for(SizeType i=0; i!=this->result_size(); ++i) {
         if(i!=0) { os << ", "; }
-        ScalarTaylorFunction tfi=(*this)[i];
+        FunctionPatch<M> tfi=(*this)[i];
         os << tfi;
     }
     os << "]";
     return os;
 }
 
-OutputStream&
-VectorTaylorFunction::repr(OutputStream& os) const
+template<class M> OutputStream& VectorFunctionPatch<M>::repr(OutputStream& os) const
 {
-    return os << "VectorTaylorFunction("
+    return os << "VectorFunctionPatch<M>("
               << representation(this->domain()) << ", " << representation(this->expansions()) << ", "
               << representation(this->errors()) << ", " << representation(this->sweeper()) << ")";
 }
 
-OutputStream& operator<<(OutputStream& os, const Representation<VectorTaylorFunction>& repr)
+template<class M> OutputStream& operator<<(OutputStream& os, const Representation<VectorFunctionPatch<M>>& repr)
 {
     return repr.pointer->repr(os);
 }
 
-OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<VectorTaylorFunction>& repr)
+template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<VectorFunctionPatch<M>>& repr)
 {
-    const VectorTaylorFunction& function = *repr.pointer;
+    const VectorFunctionPatch<M>& function = *repr.pointer;
     os << "[";
     for(SizeType i=0; i!=function.result_size(); ++i) {
         if(i!=0) { os << ","; }
@@ -1918,9 +1797,9 @@ OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<Vector
     return os << "]";
 }
 
-OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation< List<ScalarTaylorFunction> >& repr)
+template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation< List<FunctionPatch<M>> >& repr)
 {
-    const List<ScalarTaylorFunction>& functions = *repr.pointer;
+    const List<FunctionPatch<M>>& functions = *repr.pointer;
     os << "[";
     for(SizeType i=0; i!=functions.size(); ++i) {
         if(i!=0) { os << ","; }
@@ -1931,67 +1810,58 @@ OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation< List<
 
 
 
-OutputStream&
-operator<<(OutputStream& os, const VectorTaylorFunction& p)
+template<class M> OutputStream& operator<<(OutputStream& os, const VectorFunctionPatch<M>& p)
 {
     return p.write(os);
 }
 
-Polynomial<ValidatedFloat> polynomial(const ScalarTaylorFunction& tfn) {
+template<class M> Polynomial<ValidatedFloat> polynomial(const FunctionPatch<M>& tfn) {
     return Polynomial<ValidatedFloat>(tfn.polynomial());
 }
 
-Vector< Polynomial<ValidatedFloat> > polynomials(const VectorTaylorFunction& tfn) {
+template<class M> Vector< Polynomial<ValidatedFloat> > polynomials(const VectorFunctionPatch<M>& tfn) {
     return tfn.polynomials();
 }
 
 
 
-ScalarTaylorFunction
-TaylorFunctionFactory::create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const
+ScalarTaylorFunction TaylorFunctionFactory::create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const
 {
     return ScalarTaylorFunction(domain,function,this->_sweeper);
 }
 
-ScalarTaylorFunction*
-TaylorFunctionFactory::_create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const
+ScalarTaylorFunction* TaylorFunctionFactory::_create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const
 {
     return new ScalarTaylorFunction(domain,function,this->_sweeper);
 }
 
-VectorTaylorFunction
-TaylorFunctionFactory::create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const
+VectorTaylorFunction TaylorFunctionFactory::create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const
 {
     return VectorTaylorFunction(domain,function,this->_sweeper);
 }
 
-VectorTaylorFunction*
-TaylorFunctionFactory::_create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const
+VectorTaylorFunction* TaylorFunctionFactory::_create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const
 {
     return new VectorTaylorFunction(domain,function,this->_sweeper);
 }
 
-ScalarTaylorFunction
-TaylorFunctionFactory::create_zero(const ExactBox& domain) const
+ScalarTaylorFunction TaylorFunctionFactory::create_zero(const ExactBox& domain) const
 {
     return ScalarTaylorFunction::zero(domain,this->_sweeper);
 }
 
-ScalarTaylorFunction
-TaylorFunctionFactory::create_constant(const ExactBox& domain, ValidatedNumber value) const
+ScalarTaylorFunction TaylorFunctionFactory::create_constant(const ExactBox& domain, ValidatedNumber value) const
 {
     return ScalarTaylorFunction::constant(domain,value,this->_sweeper);
 }
 
-ScalarTaylorFunction
-TaylorFunctionFactory::create_coordinate(const ExactBox& domain, SizeType k) const
+ScalarTaylorFunction TaylorFunctionFactory::create_coordinate(const ExactBox& domain, SizeType k) const
 {
     return ScalarTaylorFunction::coordinate(domain,k,this->_sweeper);
 }
 
 
-VectorTaylorFunction
-TaylorFunctionFactory::create_identity(const ExactBox& domain) const
+VectorTaylorFunction TaylorFunctionFactory::create_identity(const ExactBox& domain) const
 {
     return VectorTaylorFunction::identity(domain,this->_sweeper);
 }
@@ -2006,11 +1876,10 @@ FunctionModelFactoryInterface<ValidatedTag>* make_taylor_function_factory(double
 }
 
 /*
-latexstream&
-operator<<(Output::latexstream& texs, const VectorTaylorFunction& p)
+template<class M> latexstream& operator<<(Output::latexstream& texs, const VectorFunctionPatch<M>& p)
 {
     using namespace Function;
-    texs << "%VectorTaylorFunction\n";
+    texs << "%VectorFunctionPatch<M>\n";
     texs << "\\ensuremath{\n";
     texs << "\\left( \\begin{Array}{c}\n";
     char var='x';

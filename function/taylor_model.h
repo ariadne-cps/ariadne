@@ -84,8 +84,16 @@ class TaylorModel<ValidatedFloat>
     typedef ExactInterval CodomainType;
     typedef ApproximateInterval RangeType;
 
+    //! \brief The computational paradigm.
+    typedef Validated Paradigm;
+
     //! \brief The type used for the coefficients.
     typedef ValidatedNumber NumericType;
+
+    typedef ValidatedScalarFunction FunctionType;
+    typedef ValidatedScalarFunction ScalarFunctionType;
+    typedef ValidatedVectorFunction VectorFunctionType;
+
     //! \brief The type used to index the coefficients.
     typedef MultiIndex IndexType;
     //! \brief The type used for the coefficients.

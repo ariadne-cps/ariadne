@@ -305,10 +305,15 @@ template<> class VectorFunctionModelInterface<ValidatedTag>
     virtual Void restrict(const ExactBox& d) = 0;
 };
 
+template<class V> struct Element;
+
 class ScalarTaylorFunction;
 class VectorTaylorFunction;
-template<class V> struct Element;
 template<> struct Element<VectorTaylorFunction> { typedef ScalarTaylorFunction Type; };
+
+template<class M> class FunctionPatch;
+template<class M> class VectorFunctionPatch;
+template<class M> struct Element<VectorFunctionPatch<M>> { typedef FunctionPatch<M> Type; };
 
 template<class F> class VectorFunctionModelMixin<F,ValidatedTag>
     : public virtual VectorFunctionModelInterface<ValidatedTag>

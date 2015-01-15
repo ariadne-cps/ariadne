@@ -80,6 +80,7 @@ template<class X> class SeriesGenerator<Atan,X> : public SeriesGeneratorInterfac
 
 
 
+//! \brief A power series, centred on a value, with unlimited many coefficients.
 template<class X>
 class PowerSeries
 {
@@ -131,6 +132,24 @@ template<class X> inline Void PowerSeries<X>::_compute(DegreeType n) const {
 template<class X> OutputStream& PowerSeries<X>::_write(OutputStream& os) const {
     this->_compute(2); return os << "Series( centre=" << this->_centre << ", terms=" << this->_data << " )"; }
 
+template<class X> class Series : public PowerSeries<X> {
+  public:
+    using PowerSeries<X>::PowerSeries;
+    Series(PowerSeries<X> ps) : PowerSeries<X>(std::move(ps)) { }
+};
+
+template<class OP, class X> inline Series<X> make_series(OP op, DegreeType d, const X& x) { return Series<X>(op,x); }
+template<class OP, class X> inline Series<X> make_series(OP op, const X& x) { return Series<X>(op,x); }
+
+
+class AnalyticFunction {
+  public:
+    PowerSeries<ApproximateNumber> series(ApproximateNumber c) const { ARIADNE_NOT_IMPLEMENTED; }
+    PowerSeries<ValidatedNumber> series(ValidatedNumber c) const { ARIADNE_NOT_IMPLEMENTED; }
+    PowerSeries<ValidatedNumber> series(ExactNumber c) const { ARIADNE_NOT_IMPLEMENTED; }
+};
+
+/*
 template<class X>
 class Series
 {
@@ -368,6 +387,8 @@ OutputStream& operator<<(OutputStream& os, const Series<X>& x)
     }
     return os << "]";
 }
+*/
+
 
 } // namespace Ariadne
 

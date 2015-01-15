@@ -32,6 +32,7 @@
 
 #include "utility/macros.h"
 #include "utility/array.h"
+#include "numeric/number.decl.h"
 #include "numeric/float.decl.h"
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
@@ -76,7 +77,7 @@ template<class X> class UnivariateDifferential
     UnivariateDifferential(DegreeType d);
     UnivariateDifferential(DegreeType d, InitializerList<X> e);
     template<class XX> UnivariateDifferential(DegreeType d, XX const* p);
-    UnivariateDifferential(Series<X> const& s); // explicit
+    UnivariateDifferential(DegreeType d, PowerSeries<X> const& s); // explicit
 
     static SelfType constant(DegreeType d, const NumericType& c);
     static SelfType variable(DegreeType d, const NumericType& c);
@@ -244,6 +245,7 @@ class Differential
     //! \brief The zero element of the differential algebra.
     Differential<X> create() const;
     Differential<X> create_zero() const;
+    Differential<X> create_constant(const NumericType& c) const;
     //! \brief Set all coefficients to zero.
     Void clear();
     //! \brief Remove all terms with coefficient \f$0\f$.
@@ -400,21 +402,21 @@ template<class X> Differential<X> compose(Differential<X> const& x, Vector<Diffe
 template<class X> Differential<X> derivative(Differential<X> const& x, SizeType k) { return Differential<X>::_derivative(x,k); }
 template<class X> Differential<X> antiderivative(Differential<X> const& x, SizeType k) { return Differential<X>::_antiderivative(x,k); }
 
-template<class X> inline Differential<X> compose(Series<X> const& x, Differential<X> const& y) {
-    return compose(UnivariateDifferential<X>(x),y); }
+template<class X> inline Differential<X> compose(PowerSeries<X> const& x, Differential<X> const& y) {
+    return compose(UnivariateDifferential<X>(y.degree(),x),y); }
 
 template<class X> Differential<X> pos(Differential<X> const& x) { return +x; }
 template<class X> Differential<X> neg(Differential<X> const& x) { return -x; }
 template<class X> Differential<X> sqr(Differential<X> const& x) { return x*x; }
-template<class X> Differential<X> pow(Differential<X> const& x, Int n) { return compose(Series<X>::pow(x.degree(),x.value(),n),x); }
+template<class X> Differential<X> pow(Differential<X> const& x, Int n) { return generic_pow(x,n); }
 
-template<class X> Differential<X> rec(Differential<X> const& x) { return compose(Series<X>::rec(x.degree(),x.value()),x); }
-template<class X> Differential<X> sqrt(Differential<X> const& x) { return compose(Series<X>::sqrt(x.degree(),x.value()),x); }
-template<class X> Differential<X> exp(Differential<X> const& x) { return compose(Series<X>::exp(x.degree(),x.value()),x); }
-template<class X> Differential<X> log(Differential<X> const& x) { return compose(Series<X>::log(x.degree(),x.value()),x); }
-template<class X> Differential<X> sin(Differential<X> const& x) { return compose(Series<X>::sin(x.degree(),x.value()),x); }
-template<class X> Differential<X> cos(Differential<X> const& x) { return compose(Series<X>::cos(x.degree(),x.value()),x); }
-template<class X> Differential<X> tan(Differential<X> const& x) { return compose(Series<X>::tan(x.degree(),x.value()),x); }
+template<class X> Differential<X> rec(Differential<X> const& x) { return compose(Series<X>::rec(x.value()),x); }
+template<class X> Differential<X> sqrt(Differential<X> const& x) { return compose(Series<X>::sqrt(x.value()),x); }
+template<class X> Differential<X> exp(Differential<X> const& x) { return compose(Series<X>::exp(x.value()),x); }
+template<class X> Differential<X> log(Differential<X> const& x) { return compose(Series<X>::log(x.value()),x); }
+template<class X> Differential<X> sin(Differential<X> const& x) { return compose(Series<X>::sin(x.value()),x); }
+template<class X> Differential<X> cos(Differential<X> const& x) { return compose(Series<X>::cos(x.value()),x); }
+template<class X> Differential<X> tan(Differential<X> const& x) { return compose(Series<X>::tan(x.value()),x); }
 
 
 

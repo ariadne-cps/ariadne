@@ -31,63 +31,71 @@
 
 #include "numeric/numeric.h"
 #include "algebra/series.h"
+#include "geometry/interval.h"
 #include "utility/container.h"
 
 namespace Ariadne {
 
-typedef Series<ValidatedNumber>(*ValidatedSeriesFunctionPointer)(Nat,const ValidatedNumber&);
-typedef Series<ValidatedNumber>(*ValidatedPowerSeries)(Nat,const ValidatedNumber&);
+class AnalyticFunction;
 
-// A deprecated class for computing power series expansions
-// The difference between this and the Series class is that a TaylorSeries
+// A univariate Taylor function for computing power series expansions
+// The difference between this and the PowerSeries class is that a TaylorSeries
 // uses floating-point coefficients and an interval remainder, and is only
 // valid on a subdomain, while a Series class uses arbitrary coefficients
 // and is valid within the entire radius of convergence
 template<class X> class TaylorSeries;
 
 template<> class TaylorSeries<ValidatedFloat> {
-    typedef Series<ValidatedNumber>(*ValidatedSeriesFunctionPointer)(Nat,const ValidatedNumber&);
+    ExactInterval _domain;
+    Array<ExactFloat> _expansion;
+    ErrorFloat _error;
   public:
-    TaylorSeries(Nat d) : expansion(d+1), error(0) { }
-    TaylorSeries(Nat degree, ValidatedSeriesFunctionPointer function,
-                 const ExactFloat& centre, const ValidatedNumber& domain);
-    Nat degree() const { return expansion.size()-1; }
-    ExactFloat& operator[](Nat i) { return expansion[i]; }
-    Array<ExactFloat> expansion;
-    ValidatedNumber error;
-    Void sweep(ExactFloat e) {
-        for(Nat i=0; i<=degree(); ++i) {
-            if(abs(expansion[i])<=e) {
-                error+=expansion[i]*ValidatedNumber(-1,1);
-                expansion[i]=0; } } }
+    TaylorSeries(const ExactInterval& dom, DegreeType deg) : _domain(dom), _expansion(deg+1), _error(0) { }
+
+    TaylorSeries(const ExactInterval& domain, const ExactFloat& centre, DegreeType degree,
+                 AnalyticFunction const& function);
+
+    template<class OP> TaylorSeries(OP unary_operator, const ExactInterval& domain, const ExactFloat& centre, DegreeType degree);
+
+    DegreeType degree() const { return _expansion.size()-1; }
+    ExactFloat const& operator[](DegreeType i) const { return _expansion[i]; }
+    Array<ExactFloat> expansion() const { return _expansion; }
+    ErrorFloat error() const { return _error; }
+    Void sweep(ExactFloat threshold);
+
+    friend OutputStream& operator<<(OutputStream&, TaylorSeries<ValidatedFloat> const&);
 };
 
-inline
-TaylorSeries<ValidatedFloat>::TaylorSeries(Nat d, ValidatedSeriesFunctionPointer fn,
-                           const ExactFloat& c, const ValidatedNumber& r)
-    : expansion(d+1), error(0)
+
+template<class OP> inline
+TaylorSeries<ValidatedFloat>::TaylorSeries(OP unary_operator, const ExactInterval& domain, const ExactFloat& centre, DegreeType degree)
+    : _domain(domain), _expansion(degree+1), _error(0u)
 {
-    Series<ValidatedNumber> centre_series=fn(d,ValidatedNumber(c));
-    Series<ValidatedNumber> range_series=fn(d,r);
-    ValidatedNumber p=1;
-    ValidatedNumber e=r-c;
-    //std::cerr<<"\nc="<<c<<" r="<<r<<" e="<<e<<"\n";
-    //std::cerr<<"centre_series="<<centre_series<<"\nrange_series="<<range_series<<"\n";
-    for(Nat i=0; i!=d; ++i) {
-        this->expansion[i]=centre_series[i].midpoint();
-        this->error+=(centre_series[i]-this->expansion[i])*p;
-        p*=e;
+    PowerSeries<ValidatedNumber> centre_series=PowerSeries<ValidatedFloat>(unary_operator,ValidatedNumber(centre));
+    PowerSeries<ValidatedNumber> range_series=PowerSeries<ValidatedFloat>(unary_operator,ValidatedNumber(domain));
+    for(DegreeType i=0; i!=degree; ++i) {
+        this->_expansion[i]=centre_series[i].midpoint();
+        this->_error+=mag(centre_series[i]-this->_expansion[i]);
     }
-    //this->expansion[d]=midpoint(centre_series[d]);
-    this->expansion[d]=range_series[d].midpoint();
-    this->error+=(range_series[d]-this->expansion[d])*p;
-    //std::cerr<<"expansion="<<this->expansion<<"\nerror="<<this->error<<"\n";
+    DegreeType d=degree;
+    this->_expansion[d]=range_series[d].midpoint();
+    this->_error+=mag(range_series[d]-this->_expansion[d]);
+}
+
+
+inline
+Void TaylorSeries<ValidatedFloat>::sweep(ExactFloat threshold) {
+    for(DegreeType i=0; i<=degree(); ++i) {
+        if(mag(_expansion[i])<=threshold) {
+            _error+=mag(_expansion[i]);
+            _expansion[i]=0;
+        }
+    }
 }
 
 inline
-OutputStream&
-operator<<(OutputStream& os, const TaylorSeries<ValidatedFloat>& ts) {
-    return os<<"TS("<<ts.expansion<<","<<ts.error<<")";
+OutputStream& operator<<(OutputStream& os, const TaylorSeries<ValidatedFloat>& ts) {
+    return os<<"TS("<<ts._expansion<<"+/-"<<ts._error<<")";
 }
 
 

@@ -23,7 +23,7 @@
 
 #include "numeric/numeric.h"
 #include "algebra/series.h"
-#include "algebra/vector.h"
+#include "function/taylor_series.h"
 
 #include "test.h"
 
@@ -40,6 +40,8 @@ class TestSeries
         ARIADNE_TEST_CALL(test_log());
         ARIADNE_TEST_CALL(test_sin());
         ARIADNE_TEST_CALL(test_cos());
+
+        ARIADNE_TEST_CALL(test_taylor_series());
     }
   private:
     void test_class() {
@@ -97,6 +99,12 @@ class TestSeries
                              (List<Float>{1.0,0.0,-1.0/2,0.0,1.0/24,0.0}) );
         ARIADNE_TEST_EQUAL ( PowerSeries<Float>(Cos(),1.0).coefficients(4),
                              (List<Float>{cos1,-sin1,-cos1/2,sin1/6,cos1/24}) );
+    }
+
+    void test_taylor_series() {
+        TaylorSeries<ValidatedFloat> exp_series(Exp(),ExactInterval(-1,+1),ExactFloat(0),8u);
+        ARIADNE_TEST_PRINT(PowerSeries<ValidatedNumber>(Exp(),ValidatedNumber(-1,+1)).coefficients(8u));
+        ARIADNE_TEST_PRINT(exp_series);
     }
 
 };

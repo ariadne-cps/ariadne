@@ -62,11 +62,11 @@ _compose(const TaylorSeries<ValidatedFloat>& ts, const A& tv, double eps)
     ExactFloat vtmp=vref;
     vref=0;
     A r(tv.argument_size());
-    r+=ts.expansion[ts.expansion.size()-1];
-    for(Nat i=1; i!=ts.expansion.size(); ++i) {
+    r+=ts[ts.degree()];
+    for(Nat i=1; i<=ts.degree(); ++i) {
         //std::cerr<<"    r="<<r<<std::endl;
         r=r*tv;
-        r+=ts.expansion[ts.expansion.size()-i-1];
+        r+=ts[ts.degree()-i];
         r.sweep(eps);
     }
     //std::cerr<<"    r="<<r<<std::endl;
@@ -87,15 +87,15 @@ compose(const TaylorSeries<ValidatedFloat>& ts, const A& tm)
 // over the range of the series. This method tends to suffer from blow-up of the
 // truncation error
 template<class A> EnableIfNormedAlgebra<A>
-_compose1(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
+_compose1(const AnalyticFunction& fn, const A& tm, double eps)
 {
     static const Nat DEGREE=18;
     static const double TRUNCATION_ERROR=1e-8;
     Nat d=DEGREE;
     ExactFloat c=tm.value();
     ValidatedFloat r=tm.range();
-    Series<ValidatedFloat> centre_series=fn(d,ValidatedFloat(c));
-    Series<ValidatedFloat> range_series=fn(d,r);
+    PowerSeries<ValidatedFloat> centre_series=fn.series(ValidatedFloat(c));
+    PowerSeries<ValidatedFloat> range_series=fn.series(r);
 
     Float truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
     if(truncation_error_estimate>TRUNCATION_ERROR) {
@@ -120,15 +120,15 @@ _compose1(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
 // error. The radius of convergence of this method is still quite low,
 // typically only half of the radius of convergence of the power series itself
 template<class A> EnableIfNormedAlgebra<A>
-_compose2(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
+_compose2(const AnalyticFunction& fn, const A& tm, double eps)
 {
     static const Nat DEGREE=20;
     static const Float TRUNCATION_ERROR=1e-8;
     Nat d=DEGREE;
     ExactFloat c=tm.value();
     ValidatedFloat r=tm.range();
-    Series<ValidatedFloat> centre_series=fn(d,ValidatedFloat(c));
-    Series<ValidatedFloat> range_series=fn(d,r);
+    PowerSeries<ValidatedFloat> centre_series=fn.series(ValidatedFloat(c));
+    PowerSeries<ValidatedFloat> range_series=fn.series(r);
 
     //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
     //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
@@ -157,15 +157,15 @@ _compose2(const ValidatedSeriesFunctionPointer& fn, const A& tm, double eps)
 // error. This method is better than _compose2 since the truncation error is
 // assumed at the ends of the intervals
 template<class A> EnableIfNormedAlgebra<A>
-_compose3(const ValidatedSeriesFunctionPointer& fn, const A& tm, Float eps)
+_compose3(const AnalyticFunction& fn, const A& tm, Float eps)
 {
     static const Nat DEGREE=20;
     static const Float TRUNCATION_ERROR=1e-8;
     Nat d=DEGREE;
     ExactFloat c=tm.value();
     ValidatedFloat r=tm.range();
-    Series<ValidatedFloat> centre_series=fn(d,ValidatedFloat(c));
-    Series<ValidatedFloat> range_series=fn(d,r);
+    Series<ValidatedFloat> centre_series=fn.series(ValidatedFloat(c));
+    Series<ValidatedFloat> range_series=fn.series(r);
 
     //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
     //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
@@ -196,7 +196,7 @@ _compose3(const ValidatedSeriesFunctionPointer& fn, const A& tm, Float eps)
 
 
 template<class A> EnableIfNormedAlgebra<A>
-_compose(const ValidatedSeriesFunctionPointer& fn, const A& tm, Float eps)
+_compose(const AnalyticFunction& fn, const A& tm, Float eps)
 {
     return _compose3(fn,tm,eps);
 }
@@ -241,7 +241,7 @@ sqrt(const A& x)
     A y=(x/avg)-X(1);
     //std::cerr<<"y="<<y<<std::endl;
     A z=x.create();
-    Series<X> sqrt_series=Series<X>::sqrt(d,X(1));
+    Series<X> sqrt_series=Series<X>::sqrt(X(1));
     //std::cerr<<"sqrt_series="<<sqrt_series<<std::endl;
     //std::cerr<<"y="<<y<<std::endl;
     z+=sqrt_series[d-1];

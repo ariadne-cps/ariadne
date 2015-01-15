@@ -47,6 +47,11 @@
 
 namespace Ariadne {
 
+template<class X> inline X generic_pow(X p, Nat m) {
+    X r=p.create_constant(1); while(m!=0) { if(m%2==1) { r=r*p; } p=sqr(p); m=m/2; } return r; }
+
+template<class X> inline X generic_pow(X p, Int n) {
+    return n>=0 ? generic_pow(p,Nat(n)) : rec(generic_pow(p,Nat(-n))); }
 
 //! \ingroup NumericModule
 //! \brief Cast one %Ariadne numerical type or builtin numerical type to another.

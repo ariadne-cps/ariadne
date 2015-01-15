@@ -1274,15 +1274,15 @@ _compose(const TaylorSeries<ValidatedFloat>& ts, const TaylorModel<ValidatedFloa
     Float vtmp=vref;
     vref=0.0;
     TaylorModel<ValidatedFloat> r(tv.argument_size(),tv.sweeper());
-    r+=ts.expansion[ts.expansion.size()-1];
-    for(SizeType i=1; i!=ts.expansion.size(); ++i) {
+    r+=ts[ts.degree()];
+    for(SizeType i=1; i<=ts.degree(); ++i) {
         //std::cerr<<"    r="<<r<<std::endl;
         r=r*tv;
-        r+=ts.expansion[ts.expansion.size()-i-1];
+        r+=ts[ts.degree()-i];
         r.sweep(threshold_sweeper);
     }
     //std::cerr<<"    r="<<r<<std::endl;
-    r+=ts.error;
+    r.error()+=ts.error();
     //std::cerr<<"    r="<<r<<std::endl;
     vref=vtmp;
     return r;
@@ -1299,7 +1299,7 @@ compose(const TaylorSeries<ValidatedFloat>& ts, const TaylorModel<ValidatedFloat
 // over the range of the series. This method tends to suffer from blow-up of the
 // truncation error
 TaylorModel<ValidatedFloat>
-_compose1(const ValidatedPowerSeries& fn, const TaylorModel<ValidatedFloat>& tm, double eps)
+_compose1(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm, double eps)
 {
     Sweeper threshold_sweeper(new ThresholdSweeper(eps));
     static const DegreeType DEGREE=18;
@@ -1307,8 +1307,8 @@ _compose1(const ValidatedPowerSeries& fn, const TaylorModel<ValidatedFloat>& tm,
     Nat d=DEGREE;
     ExactFloat c=tm.value();
     UpperInterval r=tm.range();
-    Series<ValidatedFloat> centre_series=fn(d,c);
-    Series<ValidatedFloat> range_series=fn(d,static_cast<ValidatedFloat>(r));
+    Series<ValidatedFloat> centre_series=fn.series(c);
+    Series<ValidatedFloat> range_series=fn.series(static_cast<ValidatedFloat>(r));
 
     Float truncation_error_estimate=(mag(range_series[d])*pow(mag(r-c),d)).raw();
     if(truncation_error_estimate>TRUNCATION_ERROR) {
@@ -1333,7 +1333,7 @@ _compose1(const ValidatedPowerSeries& fn, const TaylorModel<ValidatedFloat>& tm,
 // error. The radius of convergence of this method is still quite low,
 // typically only half of the radius of convergence of the power series itself
 TaylorModel<ValidatedFloat>
-_compose2(const ValidatedPowerSeries& fn, const TaylorModel<ValidatedFloat>& tm, double eps)
+_compose2(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm, double eps)
 {
     Sweeper threshold_sweeper(new ThresholdSweeper(eps));
     static const DegreeType DEGREE=20;
@@ -1341,8 +1341,8 @@ _compose2(const ValidatedPowerSeries& fn, const TaylorModel<ValidatedFloat>& tm,
     Nat d=DEGREE;
     ExactFloat c=tm.value();
     UpperInterval r=tm.range();
-    Series<ValidatedFloat> centre_series=fn(d,c);
-    Series<ValidatedFloat> range_series=fn(d,static_cast<ValidatedFloat>(r));
+    Series<ValidatedFloat> centre_series=fn.series(c);
+    Series<ValidatedFloat> range_series=fn.series(static_cast<ValidatedFloat>(r));
 
     //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
     //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
@@ -1371,15 +1371,15 @@ _compose2(const ValidatedPowerSeries& fn, const TaylorModel<ValidatedFloat>& tm,
 // error. This method is better than _compose2 since the truncation error is
 // assumed at the ends of the intervals
 TaylorModel<ValidatedFloat>
-_compose3(const ValidatedPowerSeries& fn, const TaylorModel<ValidatedFloat>& tm, Float eps)
+_compose3(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm, Float eps)
 {
     static const DegreeType DEGREE=20;
     static const Float TRUNCATION_ERROR=1e-8;
     Nat d=DEGREE;
     ExactFloat c=tm.value();
     UpperInterval r=tm.range();
-    Series<ValidatedFloat> centre_series=fn(d,c);
-    Series<ValidatedFloat> range_series=fn(d,static_cast<ValidatedFloat>(r));
+    Series<ValidatedFloat> centre_series=fn.series(c);
+    Series<ValidatedFloat> range_series=fn.series(static_cast<ValidatedFloat>(r));
 
     //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
     //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
@@ -1410,7 +1410,7 @@ _compose3(const ValidatedPowerSeries& fn, const TaylorModel<ValidatedFloat>& tm,
 
 
 TaylorModel<ValidatedFloat>
-_compose(const ValidatedSeriesFunctionPointer& fn, const TaylorModel<ValidatedFloat>& tm, Float eps) {
+_compose(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm, Float eps) {
     //std::cerr<<"_compose(SeriesFunction,TaylorModel<ValidatedFloat>,Error)\n";
     return _compose3(fn,tm,eps);
 }
@@ -1449,7 +1449,7 @@ TaylorModel<ValidatedFloat> sqrt(const TaylorModel<ValidatedFloat>& x) {
     TaylorModel<ValidatedFloat> y=(x/a)-1.0;
     //std::cerr<<"y="<<y<<std::endl;
     TaylorModel<ValidatedFloat> z(x.argument_size(),x.sweeper());
-    Series<ValidatedFloat> sqrt_series=Series<ValidatedFloat>::sqrt(d,ValidatedFloat(1));
+    Series<ValidatedFloat> sqrt_series=Series<ValidatedFloat>::sqrt(ValidatedFloat(1));
     //std::cerr<<"sqrt_series="<<sqrt_series<<std::endl;
     //std::cerr<<"y="<<y<<std::endl;
     z+=sqrt_series[d-1];
@@ -1656,23 +1656,12 @@ TaylorModel<ValidatedFloat> tan(const TaylorModel<ValidatedFloat>& x) {
     return sin(x)*rec(cos(x));
 }
 
-TaylorModel<ValidatedFloat> asin(const TaylorModel<ValidatedFloat>& x) {
-    static const DegreeType DEG=MAXIMUM_DEGREE;
-    return compose(TaylorSeries<ValidatedFloat>(DEG,&Series<ValidatedNumber>::asin,
-                                x.value(),static_cast<ValidatedNumber>(x.range())),x);
-}
-
-TaylorModel<ValidatedFloat> acos(const TaylorModel<ValidatedFloat>& x) {
-    static const DegreeType DEG=MAXIMUM_DEGREE;
-    return compose(TaylorSeries<ValidatedFloat>(DEG,&Series<ValidatedNumber>::acos,
-                                x.value(),static_cast<ValidatedNumber>(x.range())),x);
-}
-
 TaylorModel<ValidatedFloat> atan(const TaylorModel<ValidatedFloat>& x) {
-    static const DegreeType DEG=MAXIMUM_DEGREE;
-    return compose(TaylorSeries<ValidatedFloat>(DEG,&Series<ValidatedNumber>::atan,
-                                x.value(),static_cast<ValidatedNumber>(x.range())),x);
+    static const DegreeType degree=MAXIMUM_DEGREE;
+    TaylorSeries<ValidatedFloat> series(Atan(),x.codomain(),x.value(),degree);
+    return compose(series,x);
 }
+
 
 
 

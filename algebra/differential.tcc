@@ -58,8 +58,8 @@ template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d
     std::copy(lst.begin(),lst.end(),_ary.begin());
 }
 
-template<class X> UnivariateDifferential<X>::UnivariateDifferential(Series<X> const& s)
-    : _ary(s.degree()+1u) { for(SizeType i=0; i<=s.degree(); ++i) { this->_ary[i]=s[i]; }
+template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, PowerSeries<X> const& s)
+    : _ary(d+1u) { for(SizeType i=0; i<=d; ++i) { this->_ary[i]=s[i]; }
 }
 
 template<class X> UnivariateDifferential<X> UnivariateDifferential<X>::constant(DegreeType d, X const& c) {
@@ -330,6 +330,10 @@ template<class X> Differential<X> Differential<X>::create() const {
 
 template<class X> Differential<X> Differential<X>::create_zero() const {
     return Differential<X>(this->argument_size(),this->degree());
+}
+
+template<class X> Differential<X> Differential<X>::create_constant(NumericType const& c) const {
+    return Differential<X>::constant(this->argument_size(),this->degree(),c);
 }
 
 

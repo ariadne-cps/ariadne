@@ -4,6 +4,7 @@ set(UNIT_TESTS
     test_interval
     test_vector
     test_matrix
+    test_series
     test_multi_index
     test_expansion
     test_polynomial

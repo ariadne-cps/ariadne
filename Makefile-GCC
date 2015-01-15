@@ -21,10 +21,10 @@ TEST_NUMERIC_SRC = \
 
 
 LIB_ALGEBRA_SRC = \
-	vector.cc matrix.cc multi_index.cc expansion.cc differential.cc algebra.cc \
+	vector.cc matrix.cc series.cc multi_index.cc expansion.cc differential.cc algebra.cc \
 
 TEST_ALGEBRA_SRC = \
-	test_vector.cc test_matrix.cc test_multi_index.cc test_expansion.cc test_differential.cc \
+	test_vector.cc test_matrix.cc test_series.cc test_multi_index.cc test_expansion.cc test_differential.cc \
 
 LIB_FUNCTION_SRC = \
 	affine.cc polynomial.cc affine_model.cc taylor_model.cc  \

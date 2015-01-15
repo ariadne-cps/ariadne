@@ -29,31 +29,107 @@
 #define ARIADNE_SERIES_H
 
 #include "utility/array.h"
-#include "numeric/integer.h"
+#include "utility/container.h"
 #include "expression/operators.h"
 
 namespace Ariadne {
 
+template<class X> class PowerSeries;
+
+//! \brief Algorithm for computing a power series.
+template<class X> class SeriesGeneratorInterface {
+  public:
+    virtual ~SeriesGeneratorInterface() = default;
+    //! \brief Compute the \a d-th term of a power series, given centering at \a x and previous terms \a s.
+    virtual X _next(SizeType d, X const& x, List<X>& s) const = 0;
+};
+
+template<class OP, class X> class SeriesGenerator;
+
+template<class X> class SeriesGenerator<Rec,X> : public SeriesGeneratorInterface<X> {
+    virtual X _next(SizeType d, X const& c, List<X>& y) const final { return (d==0) ? (1/c) : y[d-1]*(-y[0]); }
+};
+
+template<class X> class SeriesGenerator<Sqrt,X> : public SeriesGeneratorInterface<X> {
+    virtual X _next(SizeType d, X const& c, List<X>& y) const final { return (d==0) ? sqrt(c) : ((2*Int(d)-3)*(-1/c)/2)/d*y[d-1]; }
+};
+
+template<class X> class SeriesGenerator<Exp,X> : public SeriesGeneratorInterface<X> {
+    virtual X _next(SizeType d, X const& c, List<X>& y) const final { return (d==0) ? exp(c) : y[d-1]/d; }
+};
+
+template<class X> class SeriesGenerator<Log,X> : public SeriesGeneratorInterface<X> {
+    virtual X _next(SizeType d, X const& c, List<X>& y) const final { return (d==0) ? log(c) : (d==1) ? 1/c : -y[d-1]*y[1]*(d-1)/d; }
+};
+
+template<class X> class SeriesGenerator<Sin,X> : public SeriesGeneratorInterface<X> {
+    virtual X _next(SizeType d, X const& c, List<X>& y) const final { return (d==0) ? sin(c) : (d==1) ? cos(c) : -y[d-2]/(d*(d-1)); }
+};
+
+template<class X> class SeriesGenerator<Cos,X> : public SeriesGeneratorInterface<X> {
+    virtual X _next(SizeType d, X const& c, List<X>& y) const final { return (d==0) ? cos(c) : (d==1) ? -sin(c) : -y[d-2]/(d*(d-1)); }
+};
+
+template<class X> class SeriesGenerator<Tan,X> : public SeriesGeneratorInterface<X> {
+    virtual X _next(SizeType d, X const& c, List<X>& y) const final { if (d==0) { return tan(c); } ARIADNE_NOT_IMPLEMENTED; }
+};
+
+template<class X> class SeriesGenerator<Atan,X> : public SeriesGeneratorInterface<X> {
+    virtual X _next(SizeType d, X const& c, List<X>& y) const final { if (d==0) { return atan(c); } ARIADNE_NOT_IMPLEMENTED; }
+};
+
+
+
 template<class X>
 class PowerSeries
 {
-
+    std::shared_ptr<SeriesGeneratorInterface<X>> _ptr;
+    X _centre;
+    mutable List<X> _data;
+  private:
+    PowerSeries<X>(SeriesGeneratorInterface<X>* p, X const& c, std::nullptr_t dummy);
+    Void _compute(DegreeType n) const;
+    OutputStream& _write(OutputStream& os) const;
   public:
-    const X& operator[](DegreeType d) const;
+    template<class OP> PowerSeries(OP op, X const& x);
+    const X& operator[](DegreeType n) const;
+    const List<X>& coefficients(DegreeType n) const;
+    friend OutputStream& operator<<(OutputStream& os, PowerSeries<X> const& s) { return s._write(os); }
 
-    static PowerSeries<X> rec(const X& x);
-    static PowerSeries<X> pow(const X& x, Int n);
-    static PowerSeries<X> sqrt(const X& x);
-    static PowerSeries<X> exp(const X& x);
-    static PowerSeries<X> log(const X& x);
+    static PowerSeries<X> rec(const X& x) { return PowerSeries<X>(Rec(),x); }
+    static PowerSeries<X> sqrt(const X& x) { return PowerSeries<X>(Sqrt(),x); }
+    static PowerSeries<X> exp(const X& x) { return PowerSeries<X>(Exp(),x); }
+    static PowerSeries<X> log(const X& x) { return PowerSeries<X>(Log(),x); }
 
-    static PowerSeries<X> sin(const X& x);
-    static PowerSeries<X> cos(const X& x);
-    static PowerSeries<X> tan(const X& x);
-    static PowerSeries<X> asin(const X& x);
-    static PowerSeries<X> acos(const X& x);
-    static PowerSeries<X> atan(const X& x);
+    static PowerSeries<X> sin(const X& x) { return PowerSeries<X>(Sin(),x); }
+    static PowerSeries<X> cos(const X& x) { return PowerSeries<X>(Cos(),x); }
+    static PowerSeries<X> tan(const X& x) { return PowerSeries<X>(Tan(),x); }
+    static PowerSeries<X> atan(const X& x) { return PowerSeries<X>(Atan(),x); }
 };
+
+
+template<class X> template<class OP> PowerSeries<X>::PowerSeries(OP op, X const& x)
+    : PowerSeries(new SeriesGenerator<OP,X>(),x, nullptr) {
+}
+
+template<class X> inline List<X> const& PowerSeries<X>::coefficients(DegreeType n) const {
+    this->_compute(n); return this->_data;
+}
+
+template<class X> inline X const& PowerSeries<X>::operator[] (DegreeType n) const {
+    this->_compute(n); return this->_data[n];
+}
+
+template<class X> inline PowerSeries<X>::PowerSeries(SeriesGeneratorInterface<X>* p, X const& c, std::nullptr_t)
+    : _ptr(p), _centre(c), _data() {
+}
+
+template<class X> inline Void PowerSeries<X>::_compute(DegreeType n) const {
+    while(_data.size()<=n) { _data.append(_ptr->_next(_data.size(),_centre,_data)); }
+}
+
+template<class X> OutputStream& PowerSeries<X>::_write(OutputStream& os) const {
+    this->_compute(2); return os << "Series( centre=" << this->_centre << ", terms=" << this->_data << " )"; }
 
 template<class X>
 class Series
@@ -288,7 +364,7 @@ OutputStream& operator<<(OutputStream& os, const Series<X>& x)
 {
     os << "S";
     for(Nat i=0; i<=x.degree(); ++i) {
-        os << (i==0 ? '[' : ',') << x[i];
+        os << (i==0 ? '[' : ',') << std::setprecision(18) << x[i];
     }
     return os << "]";
 }

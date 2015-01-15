@@ -30,6 +30,9 @@
 #ifndef ARIADNE_ARRAY_H
 #define ARIADNE_ARRAY_H
 
+#include <initializer_list>
+#include <iterator>
+#include <stdexcept>
 #include "metaprogramming.h"
 
 namespace Ariadne {

@@ -48,6 +48,8 @@
 
 namespace Ariadne {
 
+template class Series<ValidatedFloat>;
+
 namespace {
 
 Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {

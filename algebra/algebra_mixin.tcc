@@ -51,10 +51,10 @@ compose(const Series<typename A::NumericType>& x, const A& y)
 }
 
 
-class TaylorSeries;
+template<class X> class TaylorSeries;
 
 template<class A> EnableIfNormedAlgebra<A>
-_compose(const TaylorSeries& ts, const A& tv, double eps)
+_compose(const TaylorSeries<ValidatedFloat>& ts, const A& tv, double eps)
 {
     //std::cerr<<"_compose(TaylorSeries,A,Error)\n";
     //std::cerr<<"\n  ts="<<ts<<"\n  tv="<<tv<<"\n";
@@ -77,7 +77,7 @@ _compose(const TaylorSeries& ts, const A& tv, double eps)
 }
 
 template<class A> EnableIfNormedAlgebra<A>
-compose(const TaylorSeries& ts, const A& tm)
+compose(const TaylorSeries<ValidatedFloat>& ts, const A& tm)
 {
     return _compose(ts,tm,tm.tolerance());
 }

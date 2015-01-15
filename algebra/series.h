@@ -34,6 +34,26 @@
 
 namespace Ariadne {
 
+template<class X>
+class PowerSeries
+{
+
+  public:
+    const X& operator[](DegreeType d) const;
+
+    static PowerSeries<X> rec(const X& x);
+    static PowerSeries<X> pow(const X& x, Int n);
+    static PowerSeries<X> sqrt(const X& x);
+    static PowerSeries<X> exp(const X& x);
+    static PowerSeries<X> log(const X& x);
+
+    static PowerSeries<X> sin(const X& x);
+    static PowerSeries<X> cos(const X& x);
+    static PowerSeries<X> tan(const X& x);
+    static PowerSeries<X> asin(const X& x);
+    static PowerSeries<X> acos(const X& x);
+    static PowerSeries<X> atan(const X& x);
+};
 
 template<class X>
 class Series

@@ -58,6 +58,7 @@ using Byte = std::int8_t;
 using Bool = bool;
 using Nat = uint;
 using Int = int;
+using Dbl = double;
 using Nat32Type = std::uint32_t;
 using Int32Type = std::int32_t;
 using Nat64Type = std::uint64_t;

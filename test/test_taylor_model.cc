@@ -40,7 +40,7 @@ using namespace Ariadne;
 Vector<ExactFloat> v(Nat n, Nat i) { return Vector<ExactFloat>::unit(n,i); }
 ValidatedTaylorModel ctm(Nat m, double c, Sweeper swp) { return ValidatedTaylorModel::constant(m,ExactFloat(c),swp); }
 ValidatedTaylorModel ctm(Nat m, Sweeper swp) { return ValidatedTaylorModel::constant(m,ExactFloat(1.0),swp); }
-//ValidatedTaylorModel tm(Nat m, Nat i, Sweeper swp) { return ValidatedTaylorModel::variable(m,i,swp); }
+//ValidatedTaylorModel tm(Nat m, Nat i, Sweeper swp) { return ValidatedTaylorModel::coordinate(m,i,swp); }
 
 
 class TestTaylorModel
@@ -66,7 +66,7 @@ class TestTaylorModel
     Void test_functions();
     Void test_rescale();
     Void test_restrict();
-    Void test_intersection();
+    Void test_refinement();
     Void test_split();
     Void test_antiderivative();
     Void test_compose();
@@ -93,7 +93,7 @@ Void TestTaylorModel::test()
     ARIADNE_TEST_CALL(test_functions());
     ARIADNE_TEST_CALL(test_rescale());
     ARIADNE_TEST_CALL(test_restrict());
-    ARIADNE_TEST_CALL(test_intersection());
+    ARIADNE_TEST_CALL(test_refinement());
     ARIADNE_TEST_CALL(test_split());
     ARIADNE_TEST_CALL(test_antiderivative());
     ARIADNE_TEST_CALL(test_compose());
@@ -160,8 +160,10 @@ Void TestTaylorModel::test_approximation()
     ARIADNE_TEST_CONSTRUCT(ValidatedTaylorModel,tv2,(E(1,2, {1.0,2.0,3.0}),0.25, swp));
 }
 
+
 Void TestTaylorModel::test_unscale()
 {
+
     if(unscale(ValidatedTaylorModel({{{0},3.0}},0.0,swp),ExactInterval(1.0)).codomain()!=ExactInterval(1.0)) {
         ARIADNE_TEST_WARN("Unscaling over singleton domain does not yield constant");
     }
@@ -204,8 +206,8 @@ Void TestTaylorModel::test_arithmetic()
 
 Void TestTaylorModel::test_range()
 {
-    ValidatedTaylorModel x0 = ValidatedTaylorModel::variable(2,0,swp);
-    ValidatedTaylorModel x1 = ValidatedTaylorModel::variable(2,1,swp);
+    ValidatedTaylorModel x0 = ValidatedTaylorModel::coordinate(2,0,swp);
+    ValidatedTaylorModel x1 = ValidatedTaylorModel::coordinate(2,1,swp);
 
     // Test range of cubic, which should be exact
     ValidatedTaylorModel t1 = x0*x0*x0+x0;
@@ -258,41 +260,35 @@ Void TestTaylorModel::test_restrict()
 {
 }
 
-Void TestTaylorModel::test_intersection()
+Void TestTaylorModel::test_refinement()
 {
-    ValidatedTaylorModel x=ValidatedTaylorModel::variable(2,0,swp);
-    ValidatedTaylorModel y=ValidatedTaylorModel::variable(2,1,swp);
+    ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(2,0,swp);
+    ValidatedTaylorModel y=ValidatedTaylorModel::coordinate(2,1,swp);
     ValidatedTaylorModel e=ValidatedTaylorModel::error(2,1u,swp);
 
-    // Test intersection with no roundoff errors
-    ARIADNE_TEST_EQUAL(intersection(T(E(1,4, {1.0,-0.75,0.0,3.0,3.25}),0.5,swp),T(E(1,4, {1.0,0.0,0.25,2.0,3.0}),1.0,swp)),
+    // Test refinement with no roundoff errors
+    ARIADNE_TEST_EQUAL(refinement(T(E(1,4, {1.0,-0.75,0.0,3.0,3.25}),0.5,swp),T(E(1,4, {1.0,0.0,0.25,2.0,3.0}),1.0,swp)),
         T(E(1,4, {1.0,-0.625,0.0,2.75,3.25}),0.50,swp));
 
-    // Test intersection with roundoff errors
-    ARIADNE_TEST_EQUAL(intersection(T(E(1,0, {2./3}),0.5,swp),T(E(1,0, {6./5}),0.25,swp)),
+    // Test refinement with roundoff errors
+    ARIADNE_TEST_EQUAL(refinement(T(E(1,0, {2./3}),0.5,swp),T(E(1,0, {6./5}),0.25,swp)),
         T(E(1,0, {1.0583333333333331}),0.10833333333333339,swp));
 }
 
 Void TestTaylorModel::test_split()
 {
-    ValidatedTaylorModel x=ValidatedTaylorModel::variable(2,0,swp);
-    ValidatedTaylorModel y=ValidatedTaylorModel::variable(2,1,swp);
+    ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(2,0,swp);
+    ValidatedTaylorModel y=ValidatedTaylorModel::coordinate(2,1,swp);
     ValidatedTaylorModel z=ValidatedTaylorModel::zero(2,swp);
     ValidatedTaylorModel t=1+3*x+2*y-5*x*x-7*x*y+11*y*y;
     ValidatedTaylorModel es1=-1.75+4*x+5.5*y-1.25*x*x-3.5*x*y+11*y*y;
-    ValidatedTaylorModel es2=1.25-1*x-1.5*y-1.25*x*x-3.5*x*y+11*y*y;
-    ValidatedTaylorModel es3=1+1.5*x+2*y-1.25*x*x-3.5*x*y+11*y*y;
+    ValidatedTaylorModel es2=1+1.5*x+2*y-1.25*x*x-3.5*x*y+11*y*y;
+    ValidatedTaylorModel es3=1.25-1*x-1.5*y-1.25*x*x-3.5*x*y+11*y*y;
 
     ARIADNE_TEST_PRINT(t);
-    ARIADNE_TEST_EQUAL(split(t,0).first,es1);
-    ARIADNE_TEST_EQUAL(split(t,0).second,es2);
-    ARIADNE_TEST_EQUAL(split(t,0,false),es1);
-    ARIADNE_TEST_EQUAL(split(t,0,true),es2);
-    ARIADNE_TEST_EQUAL(split(t,0,indeterminate),es3);
-
-    // Test to make sure split(tm,k) and split(tm,k,lr) use same code
-    ARIADNE_TEST_EQUAL(split(t,0).first,split(t,0,false));
-    ARIADNE_TEST_EQUAL(split(t,0).second,split(t,0,true));
+    ARIADNE_TEST_EQUAL(split(t,0,SplitPart::LOWER),es1);
+    ARIADNE_TEST_EQUAL(split(t,0,SplitPart::MIDDLE),es2);
+    ARIADNE_TEST_EQUAL(split(t,0,SplitPart::UPPER),es3);
 }
 
 
@@ -310,7 +306,7 @@ Void TestTaylorModel::test_antiderivative()
     ARIADNE_TEST_EQUAL(antiderivative(T(E({ {{2,4},7.5} }),0.,swp),1),T(E({ {{2,5},1.5} }),0.,swp));
 
     // Test error control
-    ValidatedTaylorModel x=ValidatedTaylorModel::variable(1,0,swp);
+    ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(1,0,swp);
     ValidatedTaylorModel e=ValidatedTaylorModel::zero(1,swp)+ValidatedFloat(-1,+1);
     ARIADNE_TEST_EQUAL(antiderivative(2.0*x*x,0),0.66666666666666663*x*x*x+5.5511151231257827021e-17*e);
     ARIADNE_TEST_EQUAL(antiderivative(2.0*x*x+e,0),0.66666666666666663*x*x*x+1.0000000000000002*e);

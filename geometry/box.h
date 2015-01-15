@@ -334,6 +334,7 @@ template<> class Box<ExactInterval>
 ExactBox product(const ExactBox& bx1, const ExactBox& bx2);
 ExactBox product(const ExactBox& bx1, const ExactInterval& ivl2);
 ExactBox product(const ExactInterval& ivl1, const ExactBox& bx2);
+ExactBox product(const ExactBox& bx1, const ExactBox& bx2, const ExactBox& bx3);
 //! \relates ExactBox \brief The smallest box containing the two boxes.
 ExactBox hull(const ExactBox& bx1, const ExactBox& bx2);
 ExactBox hull(const ExactBox& bx1, const ExactPoint& pt2);

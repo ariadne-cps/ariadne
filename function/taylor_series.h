@@ -36,13 +36,16 @@
 namespace Ariadne {
 
 typedef Series<ValidatedNumber>(*ValidatedSeriesFunctionPointer)(Nat,const ValidatedNumber&);
+typedef Series<ValidatedNumber>(*ValidatedPowerSeries)(Nat,const ValidatedNumber&);
 
 // A deprecated class for computing power series expansions
 // The difference between this and the Series class is that a TaylorSeries
 // uses floating-point coefficients and an interval remainder, and is only
 // valid on a subdomain, while a Series class uses arbitrary coefficients
 // and is valid within the entire radius of convergence
-class TaylorSeries {
+template<class X> class TaylorSeries;
+
+template<> class TaylorSeries<ValidatedFloat> {
     typedef Series<ValidatedNumber>(*ValidatedSeriesFunctionPointer)(Nat,const ValidatedNumber&);
   public:
     TaylorSeries(Nat d) : expansion(d+1), error(0) { }
@@ -60,7 +63,7 @@ class TaylorSeries {
 };
 
 inline
-TaylorSeries::TaylorSeries(Nat d, ValidatedSeriesFunctionPointer fn,
+TaylorSeries<ValidatedFloat>::TaylorSeries(Nat d, ValidatedSeriesFunctionPointer fn,
                            const ExactFloat& c, const ValidatedNumber& r)
     : expansion(d+1), error(0)
 {
@@ -83,7 +86,7 @@ TaylorSeries::TaylorSeries(Nat d, ValidatedSeriesFunctionPointer fn,
 
 inline
 OutputStream&
-operator<<(OutputStream& os, const TaylorSeries& ts) {
+operator<<(OutputStream& os, const TaylorSeries<ValidatedFloat>& ts) {
     return os<<"TS("<<ts.expansion<<","<<ts.error<<")";
 }
 

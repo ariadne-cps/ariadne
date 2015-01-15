@@ -412,6 +412,22 @@ ExactBox product(const ExactBox& bx1, const ExactInterval& ivl2) {
     return product(bx1,ExactBox(1u,ivl2));
 }
 
+ExactBox product(const ExactBox& bx1, const ExactBox& bx2, const ExactBox& bx3) {
+    SizeType n1=bx1.dimension();
+    SizeType n2=bx2.dimension();
+    SizeType n3=bx3.dimension();
+    ExactBox r(n1+n2+n3);
+    for(SizeType i=0; i!=n1; ++i) {
+        r[i]=bx1[i];
+    }
+    for(SizeType i=0; i!=n2; ++i) {
+        r[n1+i]=bx2[i];
+    }
+    for(SizeType i=0; i!=n3; ++i) {
+        r[n1+n2+i]=bx3[i];
+    }
+    return r;
+}
 
 ExactBox hull(const ExactBox& bx1, const ExactBox& bx2) {
     ARIADNE_ASSERT(bx1.dimension()==bx2.dimension());

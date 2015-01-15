@@ -500,8 +500,7 @@ VectorTaylorFunction flow_function(const Vector<ValidatedDifferential>& dphi, co
             expansion.append(a,x);
             ++iter;
         }
-        model.unique_sort();
-        model.sweep();
+        model.cleanup();
     }
     return tphi;
 }
@@ -553,8 +552,7 @@ differential_flow_step(const ValidatedVectorFunction& f, const ExactBox& dx, con
             ++citer;
             ++biter;
         }
-        model.unique_sort();
-        model.sweep();
+        model.cleanup();
     }
     return tphi;
 }
@@ -607,8 +605,7 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactB
             ++citer;
             ++biter;
         }
-        model.unique_sort();
-        model.sweep();
+        model.cleanup();
     }
     return tphi;
 }

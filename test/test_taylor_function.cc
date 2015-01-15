@@ -243,7 +243,8 @@ Void TestScalarTaylorFunction::test_antiderivative()
 
     ARIADNE_TEST_PRINT(f);
     ARIADNE_TEST_CONSTRUCT(ScalarTaylorFunction, g, (antiderivative(f,0,2.0_exact)) );
-    ARIADNE_ASSERT(norm(derivative(g,0)-f)<1e-8);
+    ARIADNE_TEST_CONSTRUCT(ScalarTaylorFunction, dg, (derivative(g,0)) );
+    ARIADNE_TEST_LESS(norm(dg-f),1e-8);
 
     // We should have f(c,s)=0 for all x1
     ScalarTaylorFunction s = ScalarTaylorFunction::coordinate({dom[1]},0u,swp);

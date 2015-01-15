@@ -108,6 +108,7 @@ class Vector
     explicit Vector(SizeType n, const X& t) : _ary(n,t) {  }
     //! \brief Construct from an array of the same type.
     explicit Vector(const Array<X>& ary) : _ary(ary) { }
+    explicit Vector(Array<X>&& ary) : _ary(ary) { }
     //! \brief Construct from a list of the same type.
     explicit Vector(const List<X>& lst) : _ary(lst.begin(),lst.end()) { }
     //! \brief Convert from an initializer list of the same type.

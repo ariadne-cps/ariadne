@@ -230,12 +230,10 @@ template<class M> class FunctionPatch
     //! \brief A reference to the error of the expansion over the domain.
     ErrorType& error() { return this->_model.error(); }
 
-    //! \brief A reference to the constant term in the expansion.
-    CoefficientType& value() { return this->_model.value(); }
     //! \brief The constant term in the expansion.
     const CoefficientType& value() const { return this->_model.value(); }
     //! \brief The gradient at the centre of the domain.
-    const CoefficientType gradient_value(SizeType i) const { return make_exact(this->_model.gradient(i)/this->_domain[i].radius()); }
+    const CoefficientType gradient_value(SizeType i) const { return make_exact(this->_model.gradient_value(i)/this->_domain[i].radius()); }
 
     //! \brief A polynomial representation.
     Polynomial<ValidatedFloat> polynomial() const;

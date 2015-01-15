@@ -47,6 +47,7 @@ class VectorScaling {
     Box<ExactInterval> _codom;
   public:
     VectorScaling(Box<ExactInterval> codom) : _codom(codom) { }
+    SizeType size() const { return _codom.dimension(); }
     Scaling operator[] (SizeType i) const { return Scaling(_codom[i]); }
     Box<ExactInterval> const& codomain() const { return _codom; }
     template<class X> Vector<X> operator() (Vector<X> const&) const;
@@ -65,10 +66,21 @@ class VectorUnscaling {
     Box<ExactInterval> _dom;
   public:
     VectorUnscaling(Box<ExactInterval> dom) : _dom(dom) { }
+    SizeType size() const { return _dom.dimension(); }
     Unscaling operator[] (SizeType i) const { return Unscaling(_dom[i]); }
     Box<ExactInterval> const& domain() const { return _dom; }
     template<class X> Vector<X> operator() (Vector<X> const&) const;
 };
+
+template<class X> X Scaling::operator() (X const& x) const {
+    auto r=_codom.radius(); auto c=_codom.midpoint();
+    return x*r+c;
+}
+
+template<class X> X Unscaling::operator() (X const& x) const {
+    auto r=_dom.radius(); auto c=_dom.midpoint();
+    return (x-c)/r;
+}
 
 } // namespace Ariadne
 

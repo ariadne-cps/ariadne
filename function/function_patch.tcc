@@ -381,18 +381,18 @@ template<class M> Bool FunctionPatch<M>::operator==(const FunctionPatch<M>& tv) 
 
 
 
-template<class M> FunctionPatch<M>& operator+=(FunctionPatch<M>& x, const FunctionPatch<M>& y) {
-    ARIADNE_ASSERT(subset(x.domain(),y.domain()));
-    if(x.domain()==y.domain()) { x.model()+=y.model(); }
-    else { x.model()+=restriction(y,x.domain()).model(); }
-    return x;
+template<class M> FunctionPatch<M>& operator+=(FunctionPatch<M>& f, const FunctionPatch<M>& g) {
+    ARIADNE_ASSERT_MSG(subset(f.domain(),g.domain()),"f="<<f<<", g="<<g);
+    if(f.domain()==g.domain()) { f.model()+=g.model(); }
+    else { f.model()+=restriction(g,f.domain()).model(); }
+    return f;
 }
 
-template<class M> FunctionPatch<M>& operator-=(FunctionPatch<M>& x, const FunctionPatch<M>& y) {
-    ARIADNE_ASSERT(subset(x.domain(),y.domain()));
-    if(x.domain()==y.domain()) { x.model()-=y.model(); }
-    else { x.model()-=restriction(y,x.domain()).model(); }
-    return x;
+template<class M> FunctionPatch<M>& operator-=(FunctionPatch<M>& f, const FunctionPatch<M>& g) {
+    ARIADNE_ASSERT_MSG(subset(f.domain(),g.domain()),"f="<<f<<", g="<<g);
+    if(f.domain()==g.domain()) { f.model()-=g.model(); }
+    else { f.model()-=restriction(g,f.domain()).model(); }
+    return f;
 }
 
 
@@ -566,7 +566,7 @@ template<class M> FunctionPatch<M> derivative(const FunctionPatch<M>& x, SizeTyp
     return FunctionPatch<M>(x.domain(),derivative(x.model(),k)*sf); }
 
 template<class M> FunctionPatch<M> embed(const ExactBox& dom1, const FunctionPatch<M>& tv2,const ExactBox& dom3) {
-    return FunctionPatch<M>(product(product(dom1,tv2.domain()),dom3),embed(embed(dom1.size(),tv2.model()),dom3.size())); }
+    return FunctionPatch<M>(product(dom1,tv2.domain(),dom3),embed(dom1.size(),tv2.model(),dom3.size())); }
 
 template<class M> FunctionPatch<M>* FunctionPatch<M>::_derivative(SizeType j) const
 {
@@ -687,17 +687,17 @@ template<class M> Bool refines(const FunctionPatch<M>& tv1, const FunctionPatch<
     else { return false; }
 }
 
-template<class M> Bool disjoint(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2)
+template<class M> Bool inconsistent(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2)
 {
     if(tv1.domain()==tv2.domain()) {
-        return disjoint(tv1.model(),tv2.model());
+        return inconsistent(tv1.model(),tv2.model());
     } else {
         ExactBox domain=intersection(tv1.domain(),tv2.domain());
-        return disjoint(restriction(tv1,domain).model(),restriction(tv2,domain).model());
+        return inconsistent(restriction(tv1,domain).model(),restriction(tv2,domain).model());
     }
 }
 
-template<class M> FunctionPatch<M> intersection(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2)
+template<class M> FunctionPatch<M> refinement(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2)
 {
     ARIADNE_ASSERT(tv1.domain()==tv2.domain());
     return FunctionPatch<M>(tv1.domain(),intersection(tv1.model(),tv2.model()));
@@ -729,8 +729,11 @@ template<class M> OutputStream& FunctionPatch<M>::write(OutputStream& os) const
 {
     Polynomial<ValidatedFloat> p=this->polynomial();
     Polynomial<ApproximateFloat> ap=p;
+    os << "FP" << this->domain();
+    os << "(";
     os << ap;
     if(this->error()>0.0) { os << "+/-" << this->error(); }
+    os << ")";
     return os;
 }
 
@@ -1364,7 +1367,7 @@ template<class M> VectorFunctionPatch<M> embed(const ExactBox& d, const VectorFu
 
 template<class M> VectorFunctionPatch<M> embed(const ExactBox& d1, const VectorFunctionPatch<M>& f, const ExactBox& d2)
 {
-    return VectorFunctionPatch<M>(join(d1,f.domain(),d2),embed(embed(d1.size(),f.models()),d2.size()));
+    return VectorFunctionPatch<M>(product(d1,f.domain(),d2),embed(d1.size(),f.models(),d2.size()));
 }
 
 template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& f, const ExactBox& d)

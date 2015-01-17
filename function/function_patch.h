@@ -187,6 +187,8 @@ template<class M> class FunctionPatch
     static FunctionPatch<M> constant(const DomainType& d, const NumericType& c, Sweeper swp);
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
     static FunctionPatch<M> coordinate(const DomainType& d, SizeType j, Sweeper swp);
+    //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
+    static VectorFunctionPatch<M> identity(const DomainType& d, Sweeper swp);
 
     //! \brief Construct the quantity \f$c+\sum g_jx_j\f$ over the domain \a d. // DEPRECATED
     static FunctionPatch<M> affine(const DomainType& d, const CoefficientType& c, const Vector<CoefficientType>& g, Sweeper swp);

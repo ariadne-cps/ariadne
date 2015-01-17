@@ -144,9 +144,9 @@ Void SweeperBase<SWP>::_sweep(Expansion<Float>& p) const
 
 //! \brief A sweeper class which discards terms whose absolute value is smaller than a threshold.
 class ThresholdSweeper : public SweeperBase<ThresholdSweeper> {
-    double _sweep_threshold;
+    Float _sweep_threshold;
   public:
-    ThresholdSweeper(double sweep_threshold) : _sweep_threshold(sweep_threshold) { ARIADNE_ASSERT(sweep_threshold>=0.0); }
+    ThresholdSweeper(Float sweep_threshold) : _sweep_threshold(sweep_threshold) { ARIADNE_ASSERT(sweep_threshold>=0.0); }
     Float sweep_threshold() const { return _sweep_threshold; }
     inline Bool discard(const MultiIndex& a, const Float& x) const { return abs(x) < this->_sweep_threshold; }
   private:

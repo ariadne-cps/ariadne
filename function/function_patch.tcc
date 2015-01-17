@@ -224,6 +224,11 @@ template<class M> FunctionPatch<M> FunctionPatch<M>::coordinate(const ExactBox& 
     return FunctionPatch<M>(d,ModelType::scaling(d.size(),j,d[j],swp));
 }
 
+template<class M> VectorFunctionPatch<M> FunctionPatch<M>::identity(const ExactBox& d, Sweeper swp)
+{
+    return VectorFunctionPatch<M>(d,ModelType::scalings(d,swp));
+}
+
 
 template<class M> Vector<FunctionPatch<M>> FunctionPatch<M>::constants(const ExactBox& d, const Vector<NumericType>& c, Sweeper swp)
 {

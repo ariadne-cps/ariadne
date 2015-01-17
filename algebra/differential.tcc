@@ -59,7 +59,7 @@ template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d
     std::copy(lst.begin(),lst.end(),_ary.begin());
 }
 
-template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, PowerSeries<X> const& s)
+template<class X> UnivariateDifferential<X>::UnivariateDifferential(DegreeType d, Series<X> const& s)
     : _ary(d+1u) { for(SizeType i=0; i<=d; ++i) { this->_ary[i]=s[i]; }
 }
 

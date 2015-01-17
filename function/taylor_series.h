@@ -39,7 +39,7 @@ namespace Ariadne {
 class AnalyticFunction;
 
 // A univariate Taylor function for computing power series expansions
-// The difference between this and the PowerSeries class is that a TaylorSeries
+// The difference between this and the Series class is that a TaylorSeries
 // uses floating-point coefficients and an interval remainder, and is only
 // valid on a subdomain, while a Series class uses arbitrary coefficients
 // and is valid within the entire radius of convergence
@@ -71,8 +71,8 @@ template<class OP> inline
 TaylorSeries<ValidatedFloat>::TaylorSeries(OP unary_operator, const ExactInterval& domain, const ExactFloat& centre, DegreeType degree)
     : _domain(domain), _expansion(degree+1), _error(0u)
 {
-    PowerSeries<ValidatedNumber> centre_series=PowerSeries<ValidatedFloat>(unary_operator,ValidatedNumber(centre));
-    PowerSeries<ValidatedNumber> range_series=PowerSeries<ValidatedFloat>(unary_operator,ValidatedNumber(domain));
+    Series<ValidatedNumber> centre_series=Series<ValidatedFloat>(unary_operator,ValidatedNumber(centre));
+    Series<ValidatedNumber> range_series=Series<ValidatedFloat>(unary_operator,ValidatedNumber(domain));
     for(DegreeType i=0; i!=degree; ++i) {
         this->_expansion[i]=centre_series[i].midpoint();
         this->_error+=mag(centre_series[i]-this->_expansion[i]);

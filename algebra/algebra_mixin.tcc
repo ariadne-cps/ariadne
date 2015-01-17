@@ -94,8 +94,8 @@ _compose1(const AnalyticFunction& fn, const A& tm, double eps)
     Nat d=DEGREE;
     ExactFloat c=tm.value();
     ValidatedFloat r=tm.range();
-    PowerSeries<ValidatedFloat> centre_series=fn.series(ValidatedFloat(c));
-    PowerSeries<ValidatedFloat> range_series=fn.series(r);
+    Series<ValidatedFloat> centre_series=fn.series(ValidatedFloat(c));
+    Series<ValidatedFloat> range_series=fn.series(r);
 
     Float truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
     if(truncation_error_estimate>TRUNCATION_ERROR) {
@@ -127,8 +127,8 @@ _compose2(const AnalyticFunction& fn, const A& tm, double eps)
     Nat d=DEGREE;
     ExactFloat c=tm.value();
     ValidatedFloat r=tm.range();
-    PowerSeries<ValidatedFloat> centre_series=fn.series(ValidatedFloat(c));
-    PowerSeries<ValidatedFloat> range_series=fn.series(r);
+    Series<ValidatedFloat> centre_series=fn.series(ValidatedFloat(c));
+    Series<ValidatedFloat> range_series=fn.series(r);
 
     //std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
     //std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";

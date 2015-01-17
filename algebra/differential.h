@@ -77,7 +77,7 @@ template<class X> class UnivariateDifferential
     UnivariateDifferential(DegreeType d);
     UnivariateDifferential(DegreeType d, InitializerList<X> e);
     template<class XX> UnivariateDifferential(DegreeType d, XX const* p);
-    UnivariateDifferential(DegreeType d, PowerSeries<X> const& s); // explicit
+    UnivariateDifferential(DegreeType d, Series<X> const& s); // explicit
 
     static SelfType constant(DegreeType d, const NumericType& c);
     static SelfType variable(DegreeType d, const NumericType& c);
@@ -402,7 +402,7 @@ template<class X> Differential<X> compose(Differential<X> const& x, Vector<Diffe
 template<class X> Differential<X> derivative(Differential<X> const& x, SizeType k) { return Differential<X>::_derivative(x,k); }
 template<class X> Differential<X> antiderivative(Differential<X> const& x, SizeType k) { return Differential<X>::_antiderivative(x,k); }
 
-template<class X> inline Differential<X> compose(PowerSeries<X> const& x, Differential<X> const& y) {
+template<class X> inline Differential<X> compose(Series<X> const& x, Differential<X> const& y) {
     return compose(UnivariateDifferential<X>(y.degree(),x),y); }
 
 template<class X> Differential<X> pos(Differential<X> const& x) { return +x; }

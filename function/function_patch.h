@@ -276,7 +276,7 @@ template<class M> class FunctionPatch
     ApproximateNumber operator()(const Vector<ApproximateNumber>& x) const;
 
     /*! \brief Compute an approximation to gradient derivative of the function at the point \a x. */
-    Vector<NumericType> gradient(const Vector<NumericType>& x) const;
+    Covector<NumericType> gradient(const Vector<NumericType>& x) const;
     //@}
 
     //@{

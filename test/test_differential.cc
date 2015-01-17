@@ -32,6 +32,7 @@
 
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
+#include "algebra/covector.h"
 #include "algebra/differential.h"
 
 #include "test.h"
@@ -180,7 +181,7 @@ class TestDifferential {
         Vector< Differential<ApproximateFloat> > dx=Differential<ApproximateFloat>::variables(1u,x);
         Differential<ApproximateFloat> dfx=1.5-dx[0]*dx[0]-0.25*dx[1];
         ARIADNE_TEST_PRINT(dfx);
-        Vector<ApproximateFloat> g = dfx.gradient();
+        Covector<ApproximateFloat> g = dfx.gradient();
         ARIADNE_TEST_PRINT(g);
         ARIADNE_TEST_EQUALS(g[0],-1.75);
         ARIADNE_TEST_EQUALS(g[1],-0.25);

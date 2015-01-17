@@ -66,9 +66,9 @@ template<class F> ValidatedAlgebra ScalarFunctionMixin<F,EffectiveTag>::evaluate
 template<class F> EffectiveAlgebra ScalarFunctionMixin<F,EffectiveTag>::evaluate(const Vector<EffectiveAlgebra>& x) const { return this->_base_evaluate(x); }
 template<class F> EffectiveScalarFunctionInterface* ScalarFunctionMixin<F,EffectiveTag>::_clone() const { return new F(static_cast<const F&>(*this)); }
 
-template<class F> Vector<ApproximateNumber> ScalarFunctionMixin<F,EffectiveTag>::gradient(const Vector<ApproximateNumber>& x) const {
+template<class F> Covector<ApproximateNumber> ScalarFunctionMixin<F,EffectiveTag>::gradient(const Vector<ApproximateNumber>& x) const {
     return this->_base_evaluate(ApproximateDifferential::variables(1u,x)).gradient(); }
-template<class F> Vector<ValidatedNumber> ScalarFunctionMixin<F,EffectiveTag>::gradient(const Vector<ValidatedNumber>& x) const {
+template<class F> Covector<ValidatedNumber> ScalarFunctionMixin<F,EffectiveTag>::gradient(const Vector<ValidatedNumber>& x) const {
     return this->_base_evaluate(ValidatedDifferential::variables(1u,x)).gradient(); }
 
 template<class F> Vector<ApproximateNumber> VectorFunctionMixin<F,ApproximateTag>::evaluate(const Vector<ApproximateNumber>& x) const { return this->_base_evaluate(x); }

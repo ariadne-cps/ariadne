@@ -128,9 +128,9 @@ class ScalarPythonFunction
     ScalarPythonFunction* clone() const { return new ScalarPythonFunction(*this); }
     virtual Nat argument_size() const { return this->_argument_size; }
 
-    virtual Vector<ApproximateFloat> gradient(const Vector<ApproximateFloat>& x) const {
+    virtual Covector<ApproximateFloat> gradient(const Vector<ApproximateFloat>& x) const {
         return this->evaluate(Differential<ApproximateFloat>::variables(1u,x)).gradient(); }
-    virtual Vector<ValidatedFloat> gradient(const Vector<ValidatedFloat>& x) const {
+    virtual Covector<ValidatedFloat> gradient(const Vector<ValidatedFloat>& x) const {
         return this->evaluate(Differential<ValidatedFloat>::variables(1u,x)).gradient(); }
 
     virtual EffectiveScalarFunctionInterface* _derivative (Nat j) const {
@@ -285,8 +285,8 @@ Void export_scalar_function()
     scalar_function_class.def("__call__", (ApproximateFloat(EffectiveScalarFunction::*)(const Vector<ApproximateFloat>&)const)&EffectiveScalarFunction::operator() );
     scalar_function_class.def("__call__", (Differential<ValidatedFloat>(EffectiveScalarFunction::*)(const Vector<Differential<ValidatedFloat>>&)const)&EffectiveScalarFunction::evaluate );
     scalar_function_class.def("__call__", (Differential<ApproximateFloat>(EffectiveScalarFunction::*)(const Vector<Differential<ApproximateFloat>>&)const)&EffectiveScalarFunction::evaluate );
-    scalar_function_class.def("gradient", (Vector<ValidatedFloat>(EffectiveScalarFunction::*)(const Vector<ValidatedFloat>&)const)&EffectiveScalarFunction::gradient );
-    scalar_function_class.def("gradient", (Vector<ValidatedFloat>(EffectiveScalarFunction::*)(const Vector<ValidatedFloat>&)const)&EffectiveScalarFunction::gradient );
+    scalar_function_class.def("gradient", (Covector<ValidatedFloat>(EffectiveScalarFunction::*)(const Vector<ValidatedFloat>&)const)&EffectiveScalarFunction::gradient );
+    scalar_function_class.def("gradient", (Covector<ValidatedFloat>(EffectiveScalarFunction::*)(const Vector<ValidatedFloat>&)const)&EffectiveScalarFunction::gradient );
     scalar_function_class.def("differential", (Differential<ValidatedFloat>(EffectiveScalarFunction::*)(const Vector<ValidatedFloat>&,Nat)const) &EffectiveScalarFunction::differential);
     scalar_function_class.def("differential", (Differential<ApproximateFloat>(EffectiveScalarFunction::*)(const Vector<ApproximateFloat>&,Nat)const) &EffectiveScalarFunction::differential);
     scalar_function_class.def("__pos__", &__pos__<EffectiveScalarFunction,EffectiveScalarFunction>);

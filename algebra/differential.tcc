@@ -27,6 +27,7 @@
 #include "utility/array.h"
 #include "numeric/float.decl.h"
 #include "algebra/vector.h"
+#include "algebra/covector.h"
 #include "algebra/matrix.h"
 #include "algebra/multi_index.h"
 #include "algebra/series.h"
@@ -250,8 +251,8 @@ template<class X> const X& Differential<X>::gradient(SizeType j) const {
     return this->operator[](MultiIndex::unit(this->argument_size(),j));
 }
 
-template<class X> Vector<X> Differential<X>::gradient() const {
-    Vector<X> g(this->argument_size());
+template<class X> Covector<X> Differential<X>::gradient() const {
+    Covector<X> g(this->argument_size());
     for(SizeType j=0; j!=g.size(); ++j) { g[j]=this->gradient(j); }
     return g;
 }

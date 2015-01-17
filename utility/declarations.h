@@ -92,6 +92,7 @@ template<class X> using InformationTag = typename InformationTypedef<X>::Type;
 
 // Concrete class declarations
 template<class X> class Vector;
+template<class X> class Covector;
 template<class X> class Matrix;
 template<class X> class Differential;
 template<class X> class Vector;

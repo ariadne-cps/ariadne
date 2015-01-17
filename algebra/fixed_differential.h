@@ -123,7 +123,7 @@ class FirstDifferential
 {
   public:
     X _value;
-    Vector<X> _gradient;
+    Covector<X> _gradient;
     static const X _zero;
   public:
     //! \brief The type of used to represent numbers in the coefficient.
@@ -138,7 +138,7 @@ class FirstDifferential
     explicit FirstDifferential(Nat as, const X& z) : _value(z), _gradient(as,z) { }
 
     //! \brief Constructs a differential with degree zero in \a as variables. (Deprecated)
-    explicit FirstDifferential(const X& v, const Vector<X>& g) : _value(v), _gradient(g) { }
+    explicit FirstDifferential(const X& v, const Covector<X>& g) : _value(v), _gradient(g) { }
 
     //! \brief Conversion constructor from a different numerical type.
     template<class XX> FirstDifferential(const FirstDifferential<XX>& x)
@@ -174,7 +174,7 @@ class FirstDifferential
     //! \brief The value of the differential i.e. the coefficient of \f$1\f$.
     const X& value() const { return this->_value; }
     //! \brief The vector of coefficients of \f$x_j\f$.
-    const Vector<X>& gradient() const { return this->_gradient; }
+    const Covector<X>& gradient() const { return this->_gradient; }
     //! \brief The vector of coefficients of \f$x_j\f$.
     const X& gradient(Nat j) const { return this->_gradient[j]; }
 
@@ -631,7 +631,7 @@ class SecondDifferential
 {
   public:
     X _value;
-    Vector<X> _gradient;
+    Covector<X> _gradient;
     Matrix<X> _hessian;
     static const X _zero;
   public:
@@ -644,7 +644,7 @@ class SecondDifferential
     explicit SecondDifferential(Nat as) : _value(_zero), _gradient(as), _hessian(as,as) { }
 
     //! \brief Constructs a differential with degree zero in \a as variables. (Deprecated)
-    explicit SecondDifferential(const X& v, const Vector<X>& g, const Matrix<X>& h) : _value(v), _gradient(g), _hessian(h) {
+    explicit SecondDifferential(const X& v, const Covector<X>& g, const Matrix<X>& h) : _value(v), _gradient(g), _hessian(h) {
         ARIADNE_ASSERT_MSG(h.row_size()==g.size() && h.column_size()==g.size(), "SecondDifferential(v,g,h): v="<<v<<", g="<<g<<", h="<<h<<"\n"); }
 
     //! \brief Conversion constructor from a different numerical type.
@@ -683,7 +683,7 @@ class SecondDifferential
     //! \brief The value of the differential i.e. the coefficient of \f$1\f$.
     const X& value() const { return this->_value; }
     //! \brief The vector of coefficients of \f$x_j\f$.
-    const Vector<X>& gradient() const { return this->_gradient; }
+    const Covector<X>& gradient() const { return this->_gradient; }
     //! \brief The Hessian matrix.
     //! \note Note the the components of the Hessian matrix are \em half those of the values indexed by the differential.
     //! This is because the differential stores the coefficients of the Taylor expansion, rather than the derivatives themselves.

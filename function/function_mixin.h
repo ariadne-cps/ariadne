@@ -123,8 +123,8 @@ class ScalarFunctionMixin<F,EffectiveTag>
     virtual OutputStream& repr(OutputStream& os) const { return this->write(os); }
     virtual ScalarFunctionInterface<EffectiveTag>* _clone() const;
 
-    Vector<ApproximateNumber> gradient(const Vector<ApproximateNumber>& v) const;
-    Vector<ValidatedNumber> gradient(const Vector<ValidatedNumber>& v) const;
+    Covector<ApproximateNumber> gradient(const Vector<ApproximateNumber>& v) const;
+    Covector<ValidatedNumber> gradient(const Vector<ValidatedNumber>& v) const;
 };
 
 

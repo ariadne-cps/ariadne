@@ -28,7 +28,8 @@
 
 #include "utility/array.h"
 #include "numeric/numeric.h"
-#include "function/taylor_model.h"
+#include "algebra/vector.h"
+#include "algebra/covector.h"
 #include "algebra/differential.h"
 
 using namespace boost::python;
@@ -238,7 +239,7 @@ Void export_differential(const char* name)
     differential_class.def("__repr__", &__repr__<D>);
 
     differential_class.def("value",&D::value,return_value_policy<copy_const_reference>());
-    differential_class.def("gradient",(Vector<X>(D::*)()const)&D::gradient);
+    differential_class.def("gradient",(Covector<X>(D::*)()const)&D::gradient);
     differential_class.def("hessian", (Matrix<X>(D::*)()const)&D::hessian);
     differential_class.def("expansion", (Expansion<X>const&(D::*)()const)&D::expansion,return_value_policy<copy_const_reference>());
 
@@ -316,11 +317,9 @@ export_differential_vector(const char* name)
 
 template Void export_differential< Differential<ApproximateFloat> >(const char*);
 template Void export_differential< Differential<ValidatedFloat> >(const char*);
-//template Void export_differential< Differential<ValidatedTaylorModel> >(const char*);
 
 template Void export_differential_vector< Differential<ApproximateFloat> >(const char*);
 template Void export_differential_vector< Differential<ValidatedFloat> >(const char*);
-//template Void export_differential_vector< Differential<ValidatedTaylorModel> >(const char*);
 
 Void differentiation_submodule()
 {
@@ -329,10 +328,8 @@ Void differentiation_submodule()
 
     export_differential< Differential<ApproximateFloat> >("ApproximateDifferential");
     export_differential< Differential<ValidatedFloat> >("ValidatedDifferential");
-    //export_differential< Differential<ValidatedTaylorModel> >("TaylorModelDifferential");
 
     export_differential_vector< Differential<ApproximateFloat> >("ApproximateDifferentialVector");
     export_differential_vector< Differential<ValidatedFloat> >("ValidatedDifferentialVector");
-    //export_differential_vector< Differential<ValidatedTaylorModel> >("TaylorModelDifferentialVector");
 }
 

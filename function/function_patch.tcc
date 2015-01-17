@@ -598,9 +598,9 @@ template<class M> ValidatedNumber FunctionPatch<M>::operator()(const Vector<Exac
     return Ariadne::evaluate(*this,Vector<ValidatedNumber>(x));
 }
 
-template<class M> Vector<NumericType<M>> FunctionPatch<M>::gradient(const Vector<NumericType>& x) const
+template<class M> Covector<NumericType<M>> FunctionPatch<M>::gradient(const Vector<NumericType>& x) const
 {
-    Vector<NumericType> g=Ariadne::gradient(this->_model,unscale(x,this->_domain));
+    Covector<NumericType> g=Ariadne::gradient(this->_model,unscale(x,this->_domain));
     for(SizeType j=0; j!=g.size(); ++j) {
         NumericType rad=rad_val(this->_domain[j]);
         g[j]/=rad;

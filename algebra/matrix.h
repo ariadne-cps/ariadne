@@ -213,6 +213,7 @@ template<class M> class MatrixRow {
     SizeType size() const { return _A.column_size(); }
     auto zero_element() const -> decltype(_A.zero_element()) { return _A.zero_element(); }
     auto operator[](SizeType j) -> decltype(_A.at(_i,j)) { return _A.at(_i,j); }
+    MatrixRow<M>& operator=(Covector<ScalarType> const& u) { for(SizeType j=0; j!=u.size(); ++j) { _A.set(_i,j,u[j]); } }
 };
 template<class M> struct IsCovectorExpression<MatrixRow<M>> : True { };
 

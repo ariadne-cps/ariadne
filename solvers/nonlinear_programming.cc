@@ -965,7 +965,7 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
     Vector<Float> gx = ddgx.value();
     ARIADNE_LOG(7,"f(x)="<<fx<<"\n");
     ARIADNE_LOG(7,"g(x)="<<gx<<"\n");
-    Vector<Float> Jfx = ddfx.gradient();
+    Vector<Float> Jfx = transpose(ddfx.gradient());
     Matrix<Float> A = ddgx.jacobian();
     Matrix<Float>& Jgx = A;
     ARIADNE_LOG(7,"Df(x)="<<Jfx<<"\n");
@@ -1253,7 +1253,7 @@ minimisation_step(const ApproximateScalarFunction& f, const ExactBox& d, const A
 
     // A, B are the derivative matrices aij=dgi/dxj
     // HACK: Need to explicitly set size of Jacobian if g or h have result_size of zero
-    ApproximateFloatVector df = ddfx.gradient();
+    ApproximateFloatVector df = transpose(ddfx.gradient());
     ARIADNE_LOG(9,"df(x)="<<df<<"\n");
     ApproximateFloatMatrix A = ddgx.jacobian();
     if(m==0) { A=ApproximateFloatMatrix(m,n); }

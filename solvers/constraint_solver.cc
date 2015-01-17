@@ -375,7 +375,7 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBox& domain, const VectorTaylorFunct
         g += make_exact(multipliers[i]) * function[i];
         C += make_exact(multipliers[i]) * bounds[i];
     }
-    UpperIntervalVector dg = gradient(g,domain);
+    Covector<UpperInterval> dg = gradient(g,domain);
     C -= g(centre);
 
     UpperBox new_domain(domain);
@@ -465,7 +465,7 @@ Void compute_monotonicity(UpperBox& domain, const EffectiveConstraint& constrain
 
     // Compute monotone formulae
     boost::Array<Sign,0> monotonicity(n);
-    Vector<ExactInterval> grad=constraint.function().gradient(domain);
+    Covector<ExactInterval> grad=constraint.function().gradient(domain);
     for(Nat j=0; j!=n; ++j) {
         monotonicity[j]=sign(grad[j]);
     }

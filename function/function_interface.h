@@ -76,7 +76,7 @@ class ScalarFunctionInterface<ApproximateTag>
     //! \brief Evaluate the function over a vector of elements of an algebra.
     virtual Algebra<ApproximateNumber> evaluate(const Vector< Algebra<ApproximateNumber> >& x) const = 0;
 
-    Vector<ApproximateNumber> gradient(const Vector<ApproximateNumber>& x) const;
+    Covector<ApproximateNumber> gradient(const Vector<ApproximateNumber>& x) const;
     Differential<ApproximateNumber> differential(const Vector<ApproximateNumber>& x, Nat d) const;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
@@ -115,7 +115,7 @@ class ScalarFunctionInterface<ValidatedTag>
     virtual Algebra<ValidatedNumber> evaluate(const Vector< Algebra<ValidatedNumber> >& x) const = 0;
 
     using ScalarFunctionInterface<ApproximateTag>::gradient;
-    Vector<ValidatedNumber> gradient(const Vector<ValidatedNumber>& x) const;
+    Covector<ValidatedNumber> gradient(const Vector<ValidatedNumber>& x) const;
     using ScalarFunctionInterface<ApproximateTag>::differential;
     Differential<ValidatedNumber> differential(const Vector<ValidatedNumber>& x, Nat d) const;
 

@@ -90,7 +90,7 @@ class Affine
     const Vector<X>& a() const { return this->_g; }
     const X& b() const { return this->_c; }
 
-    const Vector<X>& gradient() const { return this->_g; }
+    const Covector<X>& gradient() const { return this->_g; }
     const X& gradient(Nat i) const { return this->_g[i]; }
     const X& value() const { return this->_c; }
 

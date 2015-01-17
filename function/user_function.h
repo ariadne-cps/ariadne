@@ -94,9 +94,9 @@ template<class F> class ScalarUserFunction
 
         virtual EffectiveScalarFunction derivative(Nat j) const { ARIADNE_NOT_IMPLEMENTED; }
 
-        virtual Vector<ApproximateNumber> gradient(const Vector<ApproximateNumber>& x) const {
+        virtual Covector<ApproximateNumber> gradient(const Vector<ApproximateNumber>& x) const {
             return this->evaluate(Differential<ApproximateNumber>::variables(1u,x)).gradient(); }
-        virtual Vector<ValidatedNumber> gradient(const Vector<ValidatedNumber>& x) const {
+        virtual Covector<ValidatedNumber> gradient(const Vector<ValidatedNumber>& x) const {
             return this->evaluate(Differential<ValidatedNumber>::variables(1u,x)).gradient(); }
 
          virtual OutputStream& repr(OutputStream& os) const  {

@@ -211,7 +211,7 @@ class Differential
     //! \brief The coefficient of \f$x_j\f$.
     const X& gradient(SizeType j) const;
     //! \brief The vector of coefficients of \f$x_j\f$.
-    Vector<X> gradient() const;
+    Covector<X> gradient() const;
     //! \brief The Hessian matrix.
     //! \note Note the the components of the Hessian matrix are \em half those of the values indexed by the differential.
     //! This is because the differential stores the coefficients of the Taylor expansion, rather than the derivatives themselves.
@@ -266,7 +266,7 @@ class Differential
     template<class XX> friend Differential<XX> antiderivative(Differential<XX> const& dx, SizeType k);
 
     friend X value(const Differential<X>& x) { return x.value(); }
-    friend Vector<X> gradient(const Differential<X>& x) { return x.gradient(); }
+    friend Covector<X> gradient(const Differential<X>& x) { return x.gradient(); }
     friend Matrix<X> hessian(const Differential<X>& x) { return x.hessian(); }
 
     friend OutputStream& operator<<(OutputStream& os, Differential<X> const& dx) { return dx._write(os); }

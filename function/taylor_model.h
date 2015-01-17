@@ -260,7 +260,7 @@ class TaylorModel<ValidatedFloat>
     //! \brief Evaluate the quantity over the interval of points \a x.
     friend ValidatedNumber evaluate(const TaylorModel<ValidatedFloat>&, const Vector<ValidatedNumber>& x);
     //! \brief Evaluate the gradient over the interval of points \a x.
-    friend Vector<ValidatedNumber> gradient(const TaylorModel<ValidatedFloat>&, const Vector<ValidatedNumber>& x);
+    friend Covector<ValidatedNumber> gradient(const TaylorModel<ValidatedFloat>&, const Vector<ValidatedNumber>& x);
     //! \brief Evaluate the quantity over the interval of points \a x.
     friend TaylorModel<ValidatedFloat> compose(const TaylorModel<ValidatedFloat>&, const Vector<TaylorModel<ValidatedFloat>>& x);
     //! \brief Compose two models, where the second is scaled so that the codomain is a unit box.
@@ -381,7 +381,7 @@ TaylorModel<ValidatedFloat> antiderivative(const TaylorModel<ValidatedFloat>& x,
 //! \relates TaylorModel<ValidatedFloat> \brief Differentiation operator; discards error term
 TaylorModel<ValidatedFloat> weak_derivative(const TaylorModel<ValidatedFloat>& x, SizeType k);
 TaylorModel<ValidatedFloat> derivative(const TaylorModel<ValidatedFloat>& x, SizeType k);
-Vector<ValidatedNumber> gradient(const TaylorModel<ValidatedFloat>& x, const Vector<ValidatedNumber>& y);
+Covector<ValidatedNumber> gradient(const TaylorModel<ValidatedFloat>& x, const Vector<ValidatedNumber>& y);
 
 TaylorModel<ValidatedFloat> unscale(const TaylorModel<ValidatedFloat>& tv, const ExactInterval& ivl);
 //! \relates TaylorModel<ValidatedFloat Compose a vector of Taylor models with another.

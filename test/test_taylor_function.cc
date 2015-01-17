@@ -26,6 +26,7 @@
 #include "config.h"
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
+#include "algebra/covector.h"
 #include "algebra/matrix.h"
 #include "algebra/multi_index.h"
 #include "algebra/expansion.h"

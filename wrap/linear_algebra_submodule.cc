@@ -163,7 +163,7 @@ template<class X> auto __dot__(const Vector<X>& v1, const Vector<X>& v2) -> decl
 template<class X> Vector<X> __join__(const Vector<X>& v1, const Vector<X>& v2) { return join(v1,v2); }
 template<class X> Vector<X> __join__(const Vector<X>& v1, const X& s2) { return join(v1,s2); }
 template<class X> Vector<X> __join__(const X& s1, const Vector<X>& v2) { return join(s1,v2); }
-template<class X> Vector<X> __join__(const X& s1, const X& s2) { return join(s1,s2); }
+template<class X> Vector<X> __join__(const X& s1, const X& s2) { return Vector<X>{s1,s2}; }
 
 } // namespace Ariadne
 

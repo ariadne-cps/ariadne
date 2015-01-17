@@ -65,9 +65,9 @@ EffectiveScalarFunction make_function(const Expression<Real>& expr, const List< 
 
 //------------------------ FunctionInterface forwarded functions  -----------------------------------//
 
-Vector<ApproximateNumber> ScalarFunctionInterface<ApproximateTag>::gradient(const Vector<ApproximateNumber>& x) const {
+Covector<ApproximateNumber> ScalarFunctionInterface<ApproximateTag>::gradient(const Vector<ApproximateNumber>& x) const {
     return this->evaluate(Differential<ApproximateNumber>::variables(1u,x)).gradient(); }
-Vector<ValidatedNumber> ScalarFunctionInterface<ValidatedTag>::gradient(const Vector<ValidatedNumber>& x) const {
+Covector<ValidatedNumber> ScalarFunctionInterface<ValidatedTag>::gradient(const Vector<ValidatedNumber>& x) const {
     return this->evaluate(Differential<ValidatedNumber>::variables(1u,x)).gradient(); }
 Differential<ApproximateNumber> ScalarFunctionInterface<ApproximateTag>::differential(const Vector<ApproximateNumber>& x, Nat d) const {
     return this->evaluate(Differential<ApproximateNumber>::variables(d,x)); }

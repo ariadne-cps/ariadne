@@ -1889,7 +1889,7 @@ ApproximateNumber evaluate(const TaylorModel<ValidatedFloat>& tm, const Vector<A
 }
 
 
-Vector<ValidatedNumber> gradient(const TaylorModel<ValidatedFloat>& f, const Vector<ValidatedNumber>& x)
+Covector<ValidatedNumber> gradient(const TaylorModel<ValidatedFloat>& f, const Vector<ValidatedNumber>& x)
 {
     Vector< Differential<ValidatedNumber> > dx=Differential<ValidatedNumber>::variables(1u,x);
     Differential<ValidatedNumber> df=horner_evaluate(f.expansion(),dx);

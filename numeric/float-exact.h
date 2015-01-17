@@ -72,7 +72,6 @@ class ExactFloat {
     Float& raw() { return _v; }
     //! \brief The double-precision value.
     double get_d() const { return _v.get_d(); }
-
   public:
     static Nat output_precision;
     static Void set_output_precision(Nat p) { output_precision=p; }

@@ -510,7 +510,7 @@ Void export_scalar_taylor_function()
     scalar_taylor_function_class.def("__call__", (ValidatedFloat(ScalarTaylorFunction::*)(const Vector<ValidatedFloat>&)const) &ScalarTaylorFunction::evaluate);
     scalar_taylor_function_class.def("evaluate", (ApproximateFloat(ScalarTaylorFunction::*)(const Vector<ApproximateFloat>&)const) &ScalarTaylorFunction::evaluate);
     scalar_taylor_function_class.def("evaluate", (ValidatedFloat(ScalarTaylorFunction::*)(const Vector<ValidatedFloat>&)const) &ScalarTaylorFunction::evaluate);
-    //scalar_taylor_function_class.def("gradient", (Vector<ValidatedFloat>(ScalarTaylorFunction::*)(const Vector<ValidatedFloat>&)const) &ScalarTaylorFunction::gradient);
+    //scalar_taylor_function_class.def("gradient", (Covector<ValidatedFloat>(ScalarTaylorFunction::*)(const Vector<ValidatedFloat>&)const) &ScalarTaylorFunction::gradient);
     scalar_taylor_function_class.def("function", (EffectiveScalarFunction(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::function);
     scalar_taylor_function_class.def("polynomial", (Polynomial<ValidatedFloat>(ScalarTaylorFunction::*)()const) &ScalarTaylorFunction::polynomial);
     scalar_taylor_function_class.def("set", (ScalarTaylorFunction(*)(const ScalarTaylorFunction&,Nat j, const ValidatedFloat&)) &partial_evaluate);
@@ -625,7 +625,7 @@ Void export_vector_taylor_function()
     vector_taylor_function_class.def("__call__", (Vector<ValidatedFloat>(VectorTaylorFunction::*)(const Vector<ValidatedFloat>&)const) &VectorTaylorFunction::evaluate);
     vector_taylor_function_class.def("evaluate", (Vector<ApproximateFloat>(VectorTaylorFunction::*)(const Vector<ApproximateFloat>&)const) &VectorTaylorFunction::evaluate);
     vector_taylor_function_class.def("evaluate", (Vector<ValidatedFloat>(VectorTaylorFunction::*)(const Vector<ValidatedFloat>&)const) &VectorTaylorFunction::evaluate);
-    //vector_taylor_function_class.def("jacobian", (Vector<ValidatedFloat>(ScalarTaylorFunction::*)(const Vector<ValidatedFloat>&)const) &ScalarTaylorFunction::gradient);
+    //vector_taylor_function_class.def("jacobian", (Vector<ValidatedFloat>(VectorTaylorFunction::*)(const Vector<ValidatedFloat>&)const) &VectorTaylorFunction::jacobian);
     vector_taylor_function_class.def("polynomials", (Vector< Polynomial<ValidatedFloat> >(VectorTaylorFunction::*)()const) &VectorTaylorFunction::polynomials);
     vector_taylor_function_class.def("function", (EffectiveVectorFunction(VectorTaylorFunction::*)()const) &VectorTaylorFunction::function);
 

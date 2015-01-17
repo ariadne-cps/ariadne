@@ -41,6 +41,7 @@
 
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
+#include "algebra/covector.h"
 #include "algebra/differential.h"
 
 #include "geometry/interval.h"
@@ -94,7 +95,7 @@ class ScalarFunction
 
     ScalarFunction<P> derivative(Nat j) const { return this->reference().derivative(j); }
 
-    template<class XX> Vector<XX> gradient(const Vector<XX>& x) const { return this->reference().gradient(x); }
+    template<class XX> Covector<XX> gradient(const Vector<XX>& x) const { return this->reference().gradient(x); }
     template<class XX> Differential<XX> differential(const Vector<XX>& x, Nat d) const { return this->_ptr->differential(x,d); }
 
     OutputStream& write(OutputStream& os) const { return this->_ptr->write(os); }
@@ -109,7 +110,7 @@ ScalarFunction<P>::ScalarFunction(const VectorFunctionElementReference<PP>& vfe,
 
 template<class P> inline OutputStream& operator<<(OutputStream& os, const ScalarFunction<P>& f) { return f.write(os); }
 template<class P, class XX> inline XX evaluate(const ScalarFunction<P>& f, const Vector<XX>& x) { return f(x); }
-template<class P, class XX> inline Vector<XX> gradient(const ScalarFunction<P>& f, const Vector<XX>& x) { return f.gradient(x); }
+template<class P, class XX> inline Covector<XX> gradient(const ScalarFunction<P>& f, const Vector<XX>& x) { return f.gradient(x); }
 
 ApproximateScalarFunction ScalarFunctionInterface<ApproximateTag>::clone() const { return ApproximateScalarFunction(this->_clone()); }
 ValidatedScalarFunction ScalarFunctionInterface<ValidatedTag>::clone() const { return ValidatedScalarFunction(this->_clone()); }
@@ -361,12 +362,12 @@ inline Differential<UpperInterval> evaluate(ScalarFunction<ValidatedTag>const& f
     return static_cast<Differential<UpperInterval>>(f.evaluate(reinterpret_cast<Vector<Differential<ValidatedFloat>>const&>(x))); }
 inline Differential<UpperInterval> differential(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x, Nat d) {
     return static_cast<Differential<UpperInterval>>(f.differential(reinterpret_cast<Vector<ValidatedFloat>const&>(x),d)); }
-inline Vector<UpperInterval> gradient(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
-inline Vector<UpperInterval> gradient(ScalarFunction<ValidatedTag>const& f, const Vector<ExactInterval>& x) {
-    return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
-inline Vector<UpperInterval> gradient_range(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
+inline Covector<UpperInterval> gradient(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
+    return static_cast<Covector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
+inline Covector<UpperInterval> gradient(ScalarFunction<ValidatedTag>const& f, const Vector<ExactInterval>& x) {
+    return static_cast<Covector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
+inline Covector<UpperInterval> gradient_range(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
+    return static_cast<Covector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
 
 inline Vector<UpperInterval> apply(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Vector<UpperInterval>>(f.evaluate(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
@@ -384,9 +385,9 @@ inline Matrix<UpperInterval> jacobian_range(VectorFunction<ValidatedTag>const& f
     return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
 
 // FIXME: Needed to override templated gradient and jacobian
-inline Vector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Vector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
-inline Vector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
+inline Covector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
+    return static_cast<Covector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
+inline Covector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
     return gradient(f,static_cast<Vector<UpperInterval>>(x)); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }

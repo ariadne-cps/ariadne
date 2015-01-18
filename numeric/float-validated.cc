@@ -71,7 +71,7 @@ LowerFloat operator+(LowerFloat x)
 UpperFloat operator+(UpperFloat x)
 {
     volatile double xu=internal_cast<volatile double&>(x.value());
-    volatile double ru=-xu;
+    volatile double ru=+xu;
     return UpperFloat(ru);
 }
 

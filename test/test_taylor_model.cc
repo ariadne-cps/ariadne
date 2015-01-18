@@ -70,6 +70,7 @@ class TestTaylorModel
     Void test_split();
     Void test_antiderivative();
     Void test_compose();
+    Void test_recondition();
 };
 
 
@@ -97,6 +98,7 @@ Void TestTaylorModel::test()
     ARIADNE_TEST_CALL(test_split());
     ARIADNE_TEST_CALL(test_antiderivative());
     ARIADNE_TEST_CALL(test_compose());
+    ARIADNE_TEST_CALL(test_recondition());
 }
 
 
@@ -323,6 +325,15 @@ Void TestTaylorModel::test_antiderivative()
 Void TestTaylorModel::test_compose()
 {
 
+}
+
+Void TestTaylorModel::test_recondition()
+{
+    Sweeper swp;
+    ARIADNE_TEST_CONSTRUCT( ValidatedTaylorModel, tm1, ({ {{0,0},2.0}, {{1,0},3.0}, {{0,1},5.0} }, 0.5, swp) );
+    ARIADNE_TEST_CONSTRUCT( ValidatedTaylorModel, tm2, ({ {{0,0,1},0.5}, {{0,0,0},2.0}, {{1,0,0},3.0}, {{0,1,0},5.0} }, 0.0, swp) );
+    ARIADNE_TEST_EQUAL(embed_error(tm1),tm2);
+    ARIADNE_TEST_EQUAL(discard_variables(tm2,{2}),tm1);
 }
 
 

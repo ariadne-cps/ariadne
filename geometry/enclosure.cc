@@ -1055,6 +1055,68 @@ uniform_error_recondition()
 
 }
 
+// In TaylorModel code file
+Array<SizeType> complement(SizeType nmax, Array<SizeType> vars);
+
+TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables) {
+    return recondition(tm,discarded_variables,number_of_error_variables,number_of_error_variables);
+}
+
+TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)
+{
+    for(SizeType i=0; i!=discarded_variables.size()-1; ++i) {
+        ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1]);
+    }
+    ARIADNE_PRECONDITION(discarded_variables[discarded_variables.size()-1]<tm.argument_size());
+    ARIADNE_PRECONDITION(index_of_error<=number_of_error_variables);
+
+    const SizeType number_of_variables = tm.argument_size();
+    const SizeType number_of_discarded_variables = discarded_variables.size();
+    const SizeType number_of_kept_variables = number_of_variables - number_of_discarded_variables;
+
+    // Make an Array of the variables to be kept
+    Array<SizeType> kept_variables=complement(number_of_variables,discarded_variables);
+
+    // Construct result and reserve memory
+    TaylorModel<ValidatedFloat> r(number_of_kept_variables+number_of_error_variables,tm.sweeper());
+    r.expansion().reserve(tm.number_of_nonzeros()+1u);
+    MultiIndex ra(number_of_kept_variables+number_of_error_variables);
+
+    // Set the uniform error of the original model
+    // If index_of_error == number_of_error_variables, then the error is kept as a uniform error bound
+    ErrorFloat* error_ptr;
+    if(number_of_error_variables==index_of_error) {
+        error_ptr = &r.error();
+    } else {
+        ra[number_of_kept_variables+index_of_error]=1;
+        r.expansion().append(ra,make_exact(tm.error()));
+        ra[number_of_kept_variables+index_of_error]=0;
+        error_ptr = reinterpret_cast<ErrorFloat*>(&r.begin()->data());
+    }
+    ErrorFloat& error=*error_ptr;
+
+    for(TaylorModel<ValidatedFloat>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+        MultiIndex const& xa=iter->key();
+        ExactFloat const& xv=iter->data();
+        Bool keep=true;
+        for(SizeType k=0; k!=number_of_discarded_variables; ++k) {
+            if(xa[discarded_variables[k]]!=0) {
+                error *= mag(xv);
+                keep=false;
+                break;
+            }
+        }
+        if(keep) {
+            for(SizeType k=0; k!=number_of_kept_variables; ++k) {
+                ra[k]=xa[kept_variables[k]];
+            }
+            r.expansion().append(ra,xv);
+        }
+    }
+    set_rounding_to_nearest();
+
+    return r;
+}
 
 
 Void

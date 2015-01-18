@@ -426,9 +426,9 @@ inline Void _acc(TaylorModel<ValidatedFloat>& r, const ValidatedFloat& c)
     }
 
     if(r.expansion().empty()) { // Append a constant term zero
-        r.expansion().append(MultiIndex(r.argument_size()),0);
+        r._append(MultiIndex(r.argument_size()),0);
     } else if((r.end()-1)->key().degree()>0) { // Append a constant term zero
-        r.expansion().append(MultiIndex(r.argument_size()),0);
+        r._append(MultiIndex(r.argument_size()),0);
     }
 
     ExactFloat& rv=(r.end()-1)->data();
@@ -453,24 +453,24 @@ inline Void _add(TaylorModel<ValidatedFloat>& r, const TaylorModel<ValidatedFloa
     TaylorModel<ValidatedFloat>::ConstIterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
         if(xiter->key()<yiter->key()) {
-            r.expansion().append(xiter->key(),xiter->data());
+            r._append(xiter->key(),xiter->data());
             ++xiter;
         } else if(yiter->key()<xiter->key()) {
-            r.expansion().append(yiter->key(),yiter->data());
+            r._append(yiter->key(),yiter->data());
             ++yiter;
         } else {
             ARIADNE_DEBUG_ASSERT(xiter->key()==yiter->key());
-            r.expansion().append(xiter->key(),add_err(xiter->data(),yiter->data(),e));
+            r._append(xiter->key(),add_err(xiter->data(),yiter->data(),e));
             ++xiter; ++yiter;
         }
     }
 
     while(xiter!=x.end()) {
-        r.expansion().append(xiter->key(),xiter->data());
+        r._append(xiter->key(),xiter->data());
         ++xiter;
     }
     while(yiter!=y.end()) {
-        r.expansion().append(yiter->key(),yiter->data());
+        r._append(yiter->key(),yiter->data());
         ++yiter;
     }
 
@@ -556,24 +556,24 @@ inline Void _sub(TaylorModel<ValidatedFloat>& r, const TaylorModel<ValidatedFloa
     TaylorModel<ValidatedFloat>::ConstIterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
         if(xiter->key()<yiter->key()) {
-            r.expansion().append(xiter->key(),xiter->data());
+            r._append(xiter->key(),xiter->data());
             ++xiter;
         } else if(yiter->key()<xiter->key()) {
-            r.expansion().append(yiter->key(),-yiter->data());
+            r._append(yiter->key(),-yiter->data());
             ++yiter;
         } else {
             ARIADNE_DEBUG_ASSERT(xiter->key()==yiter->key());
-            r.expansion().append(xiter->key(),sub_err(xiter->data(),yiter->data(),e));
+            r._append(xiter->key(),sub_err(xiter->data(),yiter->data(),e));
             ++xiter; ++yiter;
         }
     }
 
     while(xiter!=x.end()) {
-        r.expansion().append(xiter->key(),xiter->data());
+        r._append(xiter->key(),xiter->data());
         ++xiter;
     }
     while(yiter!=y.end()) {
-        r.expansion().append(yiter->key(),-yiter->data());
+        r._append(yiter->key(),-yiter->data());
         ++yiter;
     }
 
@@ -699,7 +699,7 @@ Void _mul(TaylorModel<ValidatedFloat>& r, const TaylorModel<ValidatedFloat>& x, 
             if(r.sweeper().discard(ta,tv.raw())) {
                 te+=mag_xv*mag(yv);
             } else {
-                t.expansion().append(ta,tv);
+                t._append(ta,tv);
                 re+=(xv*yv).error();
             }
         }
@@ -1054,7 +1054,7 @@ TaylorModel<ValidatedFloat> abs(const TaylorModel<ValidatedFloat>& x) {
 TaylorModel<ValidatedFloat> neg(const TaylorModel<ValidatedFloat>& x) {
     TaylorModel<ValidatedFloat> r(x.argument_size(),x.sweeper());
     for(TaylorModel<ValidatedFloat>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        r.expansion().append(xiter->key(),-xiter->data());
+        r._append(xiter->key(),-xiter->data());
     }
     r.error()=x.error();
     return r;
@@ -1508,75 +1508,86 @@ TaylorModel<ValidatedFloat> preaffine(const TaylorModel<ValidatedFloat>& tm, Siz
     return r;
 }
 
-
-TaylorModel<ValidatedFloat> discard(const TaylorModel<ValidatedFloat>& tm, Array<SizeType>& discarded_variables) {
-    return recondition(tm,discarded_variables,0u,0u);
+// Given an array of ordered indices below some maximum, make an array of the indices not in the array
+Array<SizeType> complement(SizeType nmax, Array<SizeType> vars) {
+    Array<SizeType> cmpl(nmax-vars.size());
+    SizeType kr=0; SizeType kv=0;
+    for(SizeType j=0; j!=nmax; ++j) {
+        if(kv==vars.size() || j!=vars[kv]) {
+            cmpl[kr]=j; ++kr;
+        } else {
+            ++kv;
+        }
+    }
+    return std::move(cmpl);
 }
 
-TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables) {
-    return recondition(tm,discarded_variables,number_of_error_variables,number_of_error_variables);
+
+TaylorModel<ValidatedFloat> embed_error(const TaylorModel<ValidatedFloat>& tm) {
+    const SizeType as=tm.argument_size();
+    TaylorModel<ValidatedFloat> rtm(as+1u,tm.sweeper());
+    MultiIndex ra(as+1u);
+
+    // The new error term is first in reverse lexicographic order.
+    ExactFloat err_coef=make_exact(tm.error());
+    ra[as]=1;
+    rtm._append(ra,err_coef);
+    ra[as]=0;
+
+    // Copy new terms
+    for(TaylorModel<ValidatedFloat>::ConstIterator iter=tm.expansion().begin(); iter!=tm.expansion().end(); ++iter) {
+        MultiIndex const& xa=iter->key();
+        ExactFloat const& xv=iter->data();
+        for(SizeType j=0; j!=as; ++j) { ra[j]=xa[j]; }
+        rtm._append(ra,xv);
+    }
+    return std::move(rtm);
 }
 
-TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)
-{
+TaylorModel<ValidatedFloat> discard_variables(const TaylorModel<ValidatedFloat>& tm, Array<SizeType> const& discarded_variables) {
     for(SizeType i=0; i!=discarded_variables.size()-1; ++i) {
         ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1]);
     }
     ARIADNE_PRECONDITION(discarded_variables[discarded_variables.size()-1]<tm.argument_size());
-    ARIADNE_PRECONDITION(index_of_error<=number_of_error_variables);
 
+    const SizeType number_of_variables = tm.argument_size();
     const SizeType number_of_discarded_variables = discarded_variables.size();
-    const SizeType number_of_kept_variables = tm.argument_size() - discarded_variables.size();
+    const SizeType number_of_kept_variables = number_of_variables - number_of_discarded_variables;
 
     // Make an Array of the variables to be kept
-    Array<SizeType> kept_variables(number_of_kept_variables);
-    SizeType kd=0; SizeType kk=0;
-    for(SizeType j=0; j!=tm.argument_size(); ++j) {
-        if(kd==number_of_discarded_variables || j!=discarded_variables[kd]) {
-            kept_variables[kk]=j; ++kk;
-        } else {
-            ++kd;
-        }
-    }
+    Array<SizeType> kept_variables=complement(number_of_variables,discarded_variables);
 
     // Construct result and reserve memory
-    TaylorModel<ValidatedFloat> r(number_of_kept_variables+number_of_error_variables,tm.sweeper());
-    r.expansion().reserve(tm.number_of_nonzeros()+1u);
-    MultiIndex a(number_of_kept_variables+number_of_error_variables);
+    TaylorModel<ValidatedFloat> rtm(number_of_kept_variables,tm.sweeper());
+    rtm.expansion().reserve(tm.number_of_nonzeros()+1u);
 
     // Set the uniform error of the original model
     // If index_of_error == number_of_error_variables, then the error is kept as a uniform error bound
-    Float* error_ptr;
-    if(number_of_error_variables==index_of_error) {
-        error_ptr = &r.error().raw();
-    } else {
-        a[number_of_kept_variables+index_of_error]=1;
-        r.expansion().raw().append(a,tm.error().raw());
-        a[number_of_kept_variables+index_of_error]=0;
-        error_ptr = &r.begin()->data().raw();
-    }
-
-    set_rounding_upward();
+    MultiIndex ra(number_of_kept_variables);
+    ErrorFloat derr=0u; // Magnitude of discarded terms
     for(TaylorModel<ValidatedFloat>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+        MultiIndex const& xa=iter->key();
+        ExactFloat const& xv=iter->data();
         Bool keep=true;
         for(SizeType k=0; k!=number_of_discarded_variables; ++k) {
-            if(iter->key()[discarded_variables[k]]!=0) {
-                *error_ptr = add_rnd(*error_ptr,abs(iter->data().raw()));
+            if(xa[discarded_variables[k]]!=0) {
+                derr += mag(iter->data());
                 keep=false;
                 break;
             }
         }
         if(keep) {
             for(SizeType k=0; k!=number_of_kept_variables; ++k) {
-                a[k]=iter->key()[kept_variables[k]];
+                ra[k]=xa[kept_variables[k]];
             }
-            r.expansion().raw().append(a,iter->data().raw());
+            rtm._append(ra,xv);
         }
     }
-    set_rounding_to_nearest();
+    rtm.error()+=derr;
 
-    return r;
+    return rtm;
 }
+
 
 
 TaylorModel<ValidatedFloat> restrict(const TaylorModel<ValidatedFloat>& tm, SizeType k, const ExactInterval& nd) {
@@ -1670,7 +1681,7 @@ TaylorModel<ValidatedFloat> derivative(const TaylorModel<ValidatedFloat>& x, Siz
             ra=xa;
             ra[k]-=1;
             rv=mul_err(xv,c,re);
-            r.expansion().append(ra,rv);
+            r._append(ra,rv);
         }
     }
 

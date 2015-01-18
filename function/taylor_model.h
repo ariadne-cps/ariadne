@@ -341,9 +341,9 @@ class TaylorModel<ValidatedFloat>
   public:
     OutputStream& str(const OutputStream&) const;
     OutputStream& repr(const OutputStream&) const;
-  public:
+  public: // FIXME: Should be private
     Void _set_error(const RawFloat& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ErrorType(ne); }
-
+    Void _append(MultiIndex const& a, CoefficientType const& v) { this->_expansion.append(a,v); }
 };
 
 //! \relates Rescale the vector \a x from the domain \a dom to the unit domain.
@@ -398,12 +398,12 @@ Vector<TaylorModel<ValidatedFloat>> compose(VectorUnscaling const& u, const Vect
 //! \relates TaylorModel<ValidatedFloat> \brief Replace the variale x[k] with a*x[k]+b. // DEPRECATED
 TaylorModel<ValidatedFloat> preaffine(const TaylorModel<ValidatedFloat>&, SizeType k, const ValidatedNumber& a, const ValidatedNumber& b);
 
-//! \relates TaylorModel<ValidatedFloat> \brief Embed the model in a space of higher dimension, placing the error in variable \a j.
-TaylorModel<ValidatedFloat> embed_error(const TaylorModel<ValidatedFloat>& tm, SizeType j);
+//! \relates TaylorModel<ValidatedFloat> \brief Embed the model in a space of higher dimension, placing the error in the final variable.
+TaylorModel<ValidatedFloat> embed_error(const TaylorModel<ValidatedFloat>& tm);
 
 //! \relates TaylorModel<ValidatedFloat> \brief Abstract away the given variables.
 //! For example, the model tm(x0,x1,x2,x3) becomes tm'(x0,x1)=tm(x0,[-1,+1],x1,[-1,+1]) on discarding x1 and x3.
-TaylorModel<ValidatedFloat>  discard(const TaylorModel<ValidatedFloat>&, const Array<SizeType>& variables);
+TaylorModel<ValidatedFloat>  discard_variables(const TaylorModel<ValidatedFloat>&, const Array<SizeType>& variables);
 
 TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, Array<SizeType>& discarded_variables,
                                         SizeType number_of_error_variables);

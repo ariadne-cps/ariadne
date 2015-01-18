@@ -215,11 +215,12 @@ Void TestTaylorModel::test_range()
     ValidatedTaylorModel t1 = x0*x0*x0+x0;
     ARIADNE_TEST_ASSERT(t1.range()==ExactInterval(-2,+2));
 
+    //x^2+x = (x+1/2)^2-1/4; Range [-0.25,+2.0]
     // Test range of quadratic, which could be exact, but need not be
     ValidatedTaylorModel t2 = x0*x0+x0;
     ARIADNE_TEST_BINARY_PREDICATE(refines,t2.range(),ExactInterval(-2,+2));
     ARIADNE_TEST_BINARY_PREDICATE(refines,ExactInterval(-0.25,+2),t2.range());
-    if(make_exact_interval(t2.range())!=ExactInterval(-0.2578125,2.0)) {
+    if(make_exact_interval(t2.range())!=ExactInterval(-0.25,2.0)) {
         ARIADNE_TEST_WARN("ValidatedTaylorModel::range() not exact for quadratic functions."); }
 }
 
@@ -274,7 +275,14 @@ Void TestTaylorModel::test_refinement()
 
     // Test refinement with roundoff errors
     ARIADNE_TEST_EQUAL(refinement(T(E(1,0, {2./3}),0.5,swp),T(E(1,0, {6./5}),0.25,swp)),
-        T(E(1,0, {1.0583333333333331}),0.10833333333333339,swp));
+        T(E(1,0, {1.05833333333333335}),0.108333333333333393,swp));
+
+    // Code below computes expected values for second test
+    // Float xv=2./3; Float xe=1./2; Float yv=6./5; Float ye=1./4;
+    // Float rl=sub_down(yv,ye); Float ru=add_up(xv,xe); Float rv=add_near(rl,ru)/2; Float re=sub_up(ru,rl)/2;
+    // std::cerr << std::setprecision(18) << "xv="<<xv<<" yv="<<yv<<" rl="<<rl<<" ru="<<ru<<" rv="<<rv<<" re="<<re<<"\n";
+
+
 }
 
 Void TestTaylorModel::test_split()

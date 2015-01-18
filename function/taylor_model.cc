@@ -52,7 +52,7 @@ template class Series<ValidatedFloat>;
 
 namespace {
 
-static const double HALF_MACHINE_EPSILON = 2.2204460492503131e-16/2;
+static const double MACHINE_EPSILON = 2.2204460492503131e-16;
 
 Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     return reverse_lexicographic_less(a1,a2); }
@@ -168,6 +168,17 @@ TaylorModel<ValidatedFloat>& TaylorModel<ValidatedFloat>::operator=(const Valida
 
 namespace { // Internal code for arithmetic
 
+struct ValidatedApproximateFloat {
+    ValidatedFloat _v; ApproximateFloat _a;
+    ValidatedApproximateFloat(ValidatedFloat x) : _v(x), _a(x) { }
+    LowerFloat lower() const { return _v.lower(); }
+    ApproximateFloat middle() const { return _a; }
+    UpperFloat upper() const { return _v.upper(); }
+    Float const& lower_raw() const { return _v.lower_raw(); }
+    Float const& middle_raw() const { return _a.raw(); }
+    Float const& upper_raw() const { return _v.upper_raw(); }
+};
+
 ExactFloat add_err(ExactFloat const& x1, ExactFloat const& x2, ErrorFloat& e) {
     ExactFloat mx1=-x1;
     set_rounding_to_nearest();
@@ -179,15 +190,15 @@ ExactFloat add_err(ExactFloat const& x1, ExactFloat const& x2, ErrorFloat& e) {
     return r;
 }
 
-ExactFloat add_err(ExactFloat const& x, ValidatedFloat const& c, ErrorFloat& e) {
+ExactFloat add_err(ExactFloat const& x, ValidatedApproximateFloat const& c, ErrorFloat& e) {
     Float const& xv=x.raw();
-    Float const cl=c.lower().raw();
-    Float const cu=c.upper().raw();
+    Float const& cl=c.lower_raw();
+    Float const& cm=c.middle_raw();
+    Float const& cu=c.upper_raw();
     Float& re=e.raw();
     set_rounding_to_nearest();
-    Float cm=(cl+cu)/2;
     Float rv=xv+cm;
-     set_rounding_upward();
+    set_rounding_upward();
     Float u=xv+cu;
     Float ml=(-xv)-cl;
     re += (u+ml)/2;
@@ -223,13 +234,14 @@ ExactFloat mul_err(ExactFloat const& x1, ExactFloat const& x2, ErrorFloat& e) {
     return r;
 }
 
-ExactFloat mul_err(ExactFloat const& x, ValidatedFloat const& vc, ApproximateFloat ca, ErrorFloat& e) {
+ExactFloat mul_err(ExactFloat const& x, ValidatedApproximateFloat const& c, ErrorFloat& e) {
     Float const& xv=x.raw();
-    Float const cu=vc.upper().raw();
-    Float const cl=vc.lower().raw();
+    Float const& cu=c.upper_raw();
+    Float const& cm=c.middle_raw();
+    Float const& cl=c.lower_raw();
     Float& re=e.raw();
     set_rounding_to_nearest();
-    Float rv=xv*ca.raw();
+    Float rv=xv*cm;
     set_rounding_upward();
     Float u,ml;
     if(xv>=0) {
@@ -240,6 +252,30 @@ ExactFloat mul_err(ExactFloat const& x, ValidatedFloat const& vc, ApproximateFlo
         Float mcu=-cu;
         u=xv*cl;
         ml=xv*mcu;
+    }
+    re+=(u+ml)/2;
+    return ExactFloat(rv);
+}
+
+ExactFloat fma_err(ExactFloat const& x, ValidatedApproximateFloat const& c, ExactFloat y, ErrorFloat& e) {
+    Float const& xv=x.raw();
+    Float const& cu=c.upper_raw();
+    Float const& cm=c.middle_raw();
+    Float const& cl=c.lower_raw();
+    Float const& yv=y.raw();
+    Float& re=e.raw();
+    set_rounding_to_nearest();
+    Float rv=xv+cm*yv;
+    set_rounding_upward();
+    Float u,ml;
+    if(yv>=0) {
+        Float mcl=-cl;
+        u=cu*yv+xv;
+        ml=mcl*yv-xv;
+    } else {
+        Float mcu=-cu;
+        u=cl*yv+xv;
+        ml=mcu*yv-xv;
     }
     re+=(u+ml)/2;
     return ExactFloat(rv);
@@ -296,10 +332,10 @@ Void _scal(TaylorModel<ValidatedFloat>& r, const ValidatedFloat& c)
     }
 
     ErrorFloat e=0u;
-    ApproximateFloat ca=c.value();
+    ValidatedApproximateFloat clmu=c;
     for(TaylorModel<ValidatedFloat>::Iterator riter=r.begin(); riter!=r.end(); ++riter) {
         ExactFloat& rv=riter->data();
-        rv=mul_err(rv,c,ca,e);
+        rv=mul_err(rv,clmu,e);
     }
     r.error()*=mag(c);
     r.error()+=e;
@@ -372,7 +408,6 @@ inline Void _acc(TaylorModel<ValidatedFloat>& r, const ValidatedFloat& c)
 }
 
 
-#ifndef ARIADNE_AVOID_ROUNDING_MODE_CHANGES
 // Compute r=x+y, assuming r is empty.
 // Use a rounding mode change every iteration, as this appears to be faster
 //   than using two loops
@@ -414,66 +449,6 @@ inline Void _add(TaylorModel<ValidatedFloat>& r, const TaylorModel<ValidatedFloa
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 }
 
-#else // ARIADNE_AVOID_ROUNDING_MODE_CHANGES
-
-// Compute r=x+y, assuming r is empty
-// First compute the errors and then at the end compute the expansion
-// This saves rounding mode changes, but requires an extra loop
-inline Void _add(TaylorModel<ValidatedFloat>& r, const TaylorModel<ValidatedFloat>& x, const TaylorModel<ValidatedFloat>& y)
-{
-    // Compute r=x+y, assuming r is empty
-    set_rounding_upward();
-    Float te=0.0;
-    TaylorModel<ValidatedFloat>::ConstIterator xiter=x.begin();
-    TaylorModel<ValidatedFloat>::ConstIterator yiter=y.begin();
-    while(xiter!=x.end() && yiter!=y.end()) {
-        if(xiter->key()<yiter->key()) {
-            ++xiter;
-        } else if(yiter->key()<xiter->key()) {
-            ++yiter;
-        } else {
-            const Float& xv=xiter->data().raw();
-            const Float& yv=yiter->data().raw();
-            VOLATILE Float u=xv+yv;
-            VOLATILE Float t=-xv;
-            VOLATILE Float ml=t-yv;
-            te+=(u+ml);
-            ++xiter; ++yiter;
-        }
-    }
-    r.error().raw()=x.error().raw();
-    r.error().raw()+=y.error().raw();
-    r.error().raw()+=(te/2);
-
-    set_rounding_to_nearest();
-    xiter=x.begin();
-    yiter=y.begin();
-    while(xiter!=x.end() && yiter!=y.end()) {
-        if(xiter->key()<yiter->key()) {
-            r.expansion().raw().append(xiter->key(),xiter->data().raw());
-            ++xiter;
-        } else if(yiter->key()<xiter->key()) {
-            r.expansion().raw().append(yiter->key(),yiter->data().raw());
-            ++yiter;
-        } else {
-            RawFloat c=xiter->data().raw()+yiter->data().raw();
-            if(c!=0) { r.expansion().raw().append(xiter->key(),c); }
-            ++xiter; ++yiter;
-        }
-    }
-    while(xiter!=x.end()) {
-        r.expansion().raw().append(xiter->key(),xiter->data().raw());
-        ++xiter;
-    }
-    while(yiter!=y.end()) {
-        r.expansion().raw().append(yiter->key(),yiter->data().raw());
-        ++yiter;
-    }
-    ARIADNE_DEBUG_ASSERT_MSG(r.error()>=0,r);
-
-}
-
-#endif // ARIADNE_AVOID_ROUNDING_MODE_CHANGES
 
 inline Void _acc(TaylorModel<ValidatedFloat>& r, const TaylorModel<ValidatedFloat>& x)
 {
@@ -524,13 +499,10 @@ inline Void _sma(TaylorModel<ValidatedFloat>& r, const TaylorModel<ValidatedFloa
     ARIADNE_ASSERT_MSG(x.error().raw()>=0,"x="<<x);
     ARIADNE_ASSERT_MSG(y.error().raw()>=0,"y="<<y);
 
-    //std::cerr<<"TaylorModel<ValidatedFloat>::scal(ValidatedNumber c) c="<<c<<std::endl;
-    set_rounding_upward();
     VOLATILE Float u,ml,myv;
-    Float te=0; // Twice the maximum accumulated error
-    Float cu=c.upper().raw();
-    Float mcl=-c.lower().raw();
-    Float cm=c.midpoint().raw();
+    ErrorFloat te=0; // Twice the maximum accumulated error
+    ErrorFloat err=0u; // Twice the maximum accumulated error
+    ValidatedApproximateFloat clmu=c;
 
     // Compute r=x+y, assuming r is empty
     set_rounding_upward();
@@ -538,75 +510,39 @@ inline Void _sma(TaylorModel<ValidatedFloat>& r, const TaylorModel<ValidatedFloa
     TaylorModel<ValidatedFloat>::ConstIterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
         if(xiter->key()<yiter->key()) {
-            r.expansion().raw().append(xiter->key(),xiter->data().raw());
+            const ExactFloat& xv=xiter->data();
+            r.expansion().append(xiter->key(),xv);
             ++xiter;
         } else if(yiter->key()<xiter->key()) {
-            set_rounding_upward();
-            const Float& yv=yiter->data().raw();
-            if(yv>=0.0) {
-                u=cu*yv;
-                ml=mcl*yv;
-            } else {
-                myv = -yv;
-                u = mcl*myv;
-                ml = cu*myv;
-            }
-            te+=(u+ml);
-            set_rounding_to_nearest();
-            r.expansion().raw().append(yiter->key(),cm*yiter->data().raw());
+            const ExactFloat& yv=yiter->data();
+            r.expansion().append(yiter->key(),mul_err(yv,c,err));
             ++yiter;
         } else {
-            set_rounding_upward();
-            const Float& xv=xiter->data().raw();
-            const Float& yv=yiter->data().raw();
-            if(yv>0.0) {
-                u=cu*yv+xv;
-                ml=mcl*yv-xv;
-            } else {
-                myv=-yv;
-                u=mcl*myv+xv;
-                ml=cu*myv-xv;
-            }
-            te+=(u+ml);
-            set_rounding_to_nearest();
-            r.expansion().raw().append(xiter->key(),xiter->data().raw()+cm*yiter->data().raw());
+            const ExactFloat& xv=xiter->data();
+            const ExactFloat& yv=yiter->data();
+            r.expansion().append(xiter->key(),fma_err(xv,clmu,yv,err));
             ++xiter; ++yiter;
         }
     }
 
     while(xiter!=x.end()) {
-        r.expansion().raw().append(xiter->key(),xiter->data().raw());
+        const ExactFloat& xv=xiter->data();
+        r.expansion().append(xiter->key(),xv);
         ++xiter;
     }
     while(yiter!=y.end()) {
-        set_rounding_upward();
-        const Float& yv=yiter->data().raw();
-        if(yv>0.0) {
-            u=cu*yv;
-            ml=mcl*yv;
-        } else {
-            myv = -yv;
-            u=mcl*myv;
-            ml=cu*myv;
-        }
-        te+=(u+ml);
-        set_rounding_to_nearest();
-        r.expansion().raw().append(yiter->key(),cm*yiter->data().raw());
+        const ExactFloat& yv=yiter->data();
+        r.expansion().append(yiter->key(),mul_err(yv,clmu,err));
         ++yiter;
     }
 
-    set_rounding_upward();
-    r.error().raw()=x.error().raw();
-    r.error().raw()+=y.error().raw();
-    r.error().raw()+=(te/2);
-    set_rounding_to_nearest();
+    r.error()=x.error()+y.error();
+    r.error()+=err;
 
     ARIADNE_DEBUG_ASSERT_MSG(r.error()>=0,r);
 }
 
 
-
-#ifndef ARIADNE_AVOID_ROUNDING_MODE_CHANGES
 
 // Compute r+=x*y
 // Compute monomial-by-monomial in y
@@ -665,63 +601,6 @@ Void _mul(TaylorModel<ValidatedFloat>& r, const TaylorModel<ValidatedFloat>& x, 
     return;
 }
 
-#else // ARIADNE_AVOID_ROUNDING_MODE_CHANGES
-
-// Compute r+=x*y
-// Compute monomial-by-monomial in y
-// Avoid changing rounding mode
-inline
-Void _mul(TaylorModel<ValidatedFloat>& r, const TaylorModel<ValidatedFloat>& x, const TaylorModel<ValidatedFloat>& y)
-{
-    TaylorModel<ValidatedFloat> t(x.argument_size(),r.sweeper());
-    TaylorModel<ValidatedFloat> s(x.argument_size(),r.sweeper());
-    for(TaylorModel<ValidatedFloat>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        set_rounding_upward();
-        Float te=0.0;
-        for(TaylorModel<ValidatedFloat>::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-            const Float& xv=xiter->data().raw();
-            const Float& yv=yiter->data().raw();
-            VOLATILE Float u=xv*yv;
-            VOLATILE Float ml=-xv; ml=ml*yv;
-            te+=(u+ml);
-        }
-        t.error().raw()=te/2;
-        set_rounding_to_nearest();
-        for(TaylorModel<ValidatedFloat>::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-            t.expansion().raw().append_sum(xiter->key(),yiter->key(),xiter->data().raw()*yiter->data().raw());
-        }
-        _add(s,r,t);
-        r.expansion().swap(s.expansion());
-        r.error().raw()=s.error().raw();
-        s.expansion().clear();
-        s.error().raw()=0.0;
-        t.expansion().clear();
-        t.error().raw()=0.0;
-    }
-
-    set_rounding_upward();
-    Float xs=0;
-    for(TaylorModel<ValidatedFloat>::ConstIterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        xs+=abs(xiter->data().raw());
-    }
-
-    Float ys=0;
-    for(TaylorModel<ValidatedFloat>::ConstIterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-        ys+=abs(yiter->data().raw());
-    }
-
-    Float& re=r.error().raw();
-    const Float& xe=x.error().raw();
-    const Float& ye=y.error().raw();
-    re+=xs*ye+ys*xe+xe*ye;
-
-    r.sweep();
-
-    set_rounding_to_nearest();
-    return;
-}
-
-#endif
 
 } // namespace
 
@@ -850,65 +729,46 @@ TaylorModel<ValidatedFloat>::codomain() const
     return make_exact_interval(this->range());
 }
 
-
-UpperInterval _range1(const TaylorModel<ValidatedFloat>& tm) {
-    set_rounding_mode(upward);
-    ExactFloat v=0;
-    ErrorFloat e=0u;
-    for(auto iter=tm.begin(); iter!=tm.end(); ++iter) {
-        if(iter->key().degree()==0) {
-            v=iter->data();
-        } else {
-            e+=abs(iter->data());
-        }
-    }
-    UpperInterval r(v-e,v+e);
-    set_rounding_mode(to_nearest);
-    return r;
-}
-
-
 // Compute the range by grouping all quadratic terms x[i]^2 with linear terms x[i]
 // The range of ax^2+bx+c is a([-1,1]+b/2a)^2+(c-b^2/4a)
-UpperInterval _range2(const TaylorModel<ValidatedFloat>& tm) {
+UpperInterval TaylorModel<ValidatedFloat>::range() const {
+    const TaylorModel<ValidatedFloat>& tm=*this;
     const SizeType as=tm.argument_size();
-    Array<Float> linear_terms(as,0.0);
-    Array<Float> quadratic_terms(as,0.0);
-    UpperInterval r(-tm.error().raw(),+tm.error().raw());
+    ExactFloat constant_term=0;
+    Array<ExactFloat> linear_terms(as,0);
+    Array<ExactFloat> quadratic_terms(as,0);
+    ErrorFloat err=0u;
     for(auto iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()==0) {
-            r+=iter->data().raw();
+            constant_term=iter->data();
         } else if(iter->key().degree()==1) {
             for(SizeType j=0; j!=tm.argument_size(); ++j) {
-                if(iter->key()[j]==1) { linear_terms[j]=iter->data().raw(); break; }
+                if(iter->key()[j]==1) { linear_terms[j]=iter->data(); break; }
             }
         } else if(iter->key().degree()==2) {
             for(SizeType j=0; j!=tm.argument_size(); ++j) {
-                if(iter->key()[j]==2) { quadratic_terms[j]=iter->data().raw(); break; }
-                if(iter->key()[j]==1) { r+=abs(iter->data().raw())*UpperInterval(-1,1); break; }
+                if(iter->key()[j]==2) { quadratic_terms[j]=iter->data(); break; }
+                if(iter->key()[j]==1) { err+=mag(iter->data()); break; }
             }
         } else {
-            r+=abs(iter->data().raw())*UpperInterval(-1,1);
+            err+=mag(iter->data());
         }
     }
+    err=err+tm.error();
+    ValidatedFloat r(constant_term-err,constant_term+err);
+    const ValidatedFloat unit_ivl(-1,+1);
     // If the ratio b/a is very large, then roundoff error can cause a significant
     // additional error. We compute both |a|+|b| and a([-1,+1]+b/2a)-b^2/4a and take best bound
     for(SizeType j=0; j!=as; ++j) {
-        const Float& a=quadratic_terms[j];
-        const Float& b=linear_terms[j];
-        UpperInterval ql=abs(a)*UpperInterval(-1,1) + abs(b)*UpperInterval(-1,+1);
-        UpperInterval qf=a*(sqr(UpperInterval(-1,+1)+UpperInterval(b)/(2*a)))-sqr(UpperInterval(b))/(4*a);
-        r += intersection(ql,qf); // NOTE: ql must be the first term in case of NaN in qf
+        const ExactFloat& a=quadratic_terms[j];
+        const ExactFloat& b=linear_terms[j];
+        ValidatedFloat ql=abs(a)*unit_ivl + abs(b)*unit_ivl;
+        ValidatedFloat qf=a*(sqr(unit_ivl+b/a/2))-sqr(b)/a/4;
+        r += refinement(ql,qf); // NOTE: ql must be the first term in case of NaN in qf
     }
     return r;
 }
 
-
-
-UpperInterval
-TaylorModel<ValidatedFloat>::range() const {
-    return Ariadne::_range2(*this);
-}
 
 UpperInterval TaylorModel<ValidatedFloat>::gradient_range(SizeType j) const {
     SizeType as=this->argument_size();
@@ -1021,7 +881,7 @@ template<class X> class TaylorSeries;
 TaylorModel<ValidatedFloat>
 compose(const TaylorSeries<ValidatedFloat>& ts, const TaylorModel<ValidatedFloat>& tv)
 {
-    Sweeper threshold_sweeper(new ThresholdSweeper(HALF_MACHINE_EPSILON));
+    Sweeper threshold_sweeper(new ThresholdSweeper(MACHINE_EPSILON));
     ExactFloat& vref=const_cast<ExactFloat&>(tv.value());
     ExactFloat vtmp=vref;
     vref=0;
@@ -1039,69 +899,6 @@ compose(const TaylorSeries<ValidatedFloat>& ts, const TaylorModel<ValidatedFloat
 }
 
 
-// Compose using the Taylor formula directly. The final term is the Taylor series computed
-// over the range of the series. This method tends to suffer from blow-up of the
-// truncation error
-TaylorModel<ValidatedFloat>
-_compose1(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm, RawFloat eps)
-{
-    Sweeper threshold_sweeper(new ThresholdSweeper(eps));
-    static const DegreeType DEGREE=18;
-    static const RawFloat TRUNCATION_ERROR=1e-8;
-    Nat d=DEGREE;
-    ExactFloat c=tm.value();
-    UpperInterval r=tm.range();
-    Series<ValidatedFloat> centre_series=fn.series(c);
-    Series<ValidatedFloat> range_series=fn.series(static_cast<ValidatedFloat>(r));
-
-    ErrorFloat truncation_error_estimate=(mag(range_series[d])*pow(mag(r-c),d));
-    if(truncation_error_estimate.raw()>TRUNCATION_ERROR) {
-        ARIADNE_WARN("Truncation error estimate "<<truncation_error_estimate
-                     <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
-    }
-
-    TaylorModel<ValidatedFloat> x=tm-c;
-    TaylorModel<ValidatedFloat> res(tm.argument_size(),tm.sweeper());
-    res+=range_series[d];
-    for(DegreeType i=0; i!=d; ++i) {
-        res=centre_series[d-i-1]+x*res;
-        res.sweep(threshold_sweeper);
-    }
-    return res;
-}
-
-// Compose using the Taylor formula with a constant truncation error. This method
-// is usually better than _compose1 since there is no blow-up of the trunction
-// error. The radius of convergence of this method is still quite low,
-// typically only half of the radius of convergence of the power series itself
-TaylorModel<ValidatedFloat>
-_compose2(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm, RawFloat eps)
-{
-    Sweeper threshold_sweeper(new ThresholdSweeper(eps));
-    static const DegreeType DEGREE=20;
-    static const RawFloat TRUNCATION_ERROR=1e-8;
-    Nat d=DEGREE;
-    ExactFloat c=tm.value();
-    UpperInterval r=tm.range();
-    Series<ValidatedFloat> centre_series=fn.series(c);
-    Series<ValidatedFloat> range_series=fn.series(static_cast<ValidatedFloat>(r));
-
-    ErrorFloat truncation_error=mag(range_series[d]-centre_series[d])*pow(mag(r-c),d);
-    if(truncation_error.raw()>TRUNCATION_ERROR) {
-        ARIADNE_WARN("Truncation error estimate "<<truncation_error
-                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
-    }
-
-    TaylorModel<ValidatedFloat> x=tm-c;
-    TaylorModel<ValidatedFloat> res(tm.argument_size(),tm.sweeper());
-    res+=centre_series[d];
-    for(Nat i=0; i!=d; ++i) {
-        res=centre_series[d-i-1]+x*res;
-        res.sweep(threshold_sweeper);
-    }
-    res+=ValidatedFloat(-truncation_error,+truncation_error);
-    return res;
-}
 
 
 // Compose using the Taylor formula with a constant truncation error. This method
@@ -1109,25 +906,34 @@ _compose2(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm, Raw
 // error. This method is better than _compose2 since the truncation error is
 // assumed at the ends of the intervals
 TaylorModel<ValidatedFloat>
-_compose3(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm, RawFloat eps)
-{
-    static const DegreeType DEGREE=20;
-    static const Float TRUNCATION_ERROR=1e-8;
-    Nat d=DEGREE;
-    ExactFloat c=tm.value();
-    UpperInterval r=tm.range();
-    Series<ValidatedFloat> centre_series=fn.series(c);
-    Series<ValidatedFloat> range_series=fn.series(static_cast<ValidatedFloat>(r));
+compose(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm) {
+    static const DegreeType MAX_DEGREE=20;
+    static const Float MAX_TRUNCATION_ERROR=MACHINE_EPSILON;
+    SweeperInterface const& sweeper=tm.sweeper();
 
-    ValidatedFloat se=range_series[d]-centre_series[d];
-    ValidatedFloat e=static_cast<ValidatedFloat>(r)-c;
-    ValidatedFloat p=pow(e,d-1);
-    p=ValidatedFloat(-p.lower().raw()*e.lower().raw(),p.upper().raw()*e.upper().raw());
+    Float max_truncation_error=MAX_TRUNCATION_ERROR;
+    ThresholdSweeper const* threshold_sweeper_ptr = dynamic_cast<ThresholdSweeper const*>(&sweeper);
+    if(threshold_sweeper_ptr) { max_truncation_error=threshold_sweeper_ptr->sweep_threshold(); }
+
+    DegreeType max_degree=MAX_DEGREE;
+    GradedSweeper const* graded_sweeper_ptr = dynamic_cast<GradedSweeper const*>(&sweeper);
+    if(graded_sweeper_ptr) { max_degree=graded_sweeper_ptr->degree(); }
+
+
+    Nat d=max_degree;
+    ExactFloat c=tm.value();
+    ValidatedFloat r=make_singleton(tm.range());
+    Series<ValidatedFloat> centre_series=fn.series(c);
+    Series<ValidatedFloat> range_series=fn.series(r);
+
+    ErrorFloat se=mag(range_series[d]-centre_series[d]);
+    ErrorFloat e=mag(r-c);
+    ErrorFloat p=pow(e,d);
     // FIXME: Here we assume the dth derivative of f is monotone increasing
-    Float truncation_error=max(se.lower().raw()*p.lower().raw(),se.upper().raw()*p.upper().raw());
-    if(truncation_error>TRUNCATION_ERROR) {
+    ErrorFloat truncation_error=se*p;
+    if(truncation_error.raw()>max_truncation_error) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
-                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n");
+                 <<" is greater than maximum allowable truncation error "<<max_truncation_error<<"\n");
     }
 
     TaylorModel<ValidatedFloat> x=tm;
@@ -1140,18 +946,6 @@ _compose3(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm, Raw
     res+=ValidatedFloat(-truncation_error,+truncation_error);
     return res;
 }
-
-
-TaylorModel<ValidatedFloat>
-compose(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm, RawFloat eps) {
-    return _compose3(fn,tm,eps);
-}
-
-TaylorModel<ValidatedFloat>
-compose(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm) {
-    return compose(fn,tm,HALF_MACHINE_EPSILON);
-}
-
 
 
 
@@ -1785,12 +1579,13 @@ Bool inconsistent(const TaylorModel<ValidatedFloat>& tm1, const TaylorModel<Vali
 
 TaylorModel<ValidatedFloat> refinement(const TaylorModel<ValidatedFloat>& x, const TaylorModel<ValidatedFloat>& y) {
     TaylorModel<ValidatedFloat> r(x.argument_size(),x.sweeper());
-    Float twice_max_error=0.0;
 
-    const Float& xe=x.error().raw();
-    const Float& ye=y.error().raw();
-    VOLATILE Float rv,xv,yv,xu,yu,mxl,myl,u,ml;
-    //const MultiIndex* aptr;
+    ErrorFloat max_error=0u;
+
+    const ErrorFloat& xe=x.error();
+    const ErrorFloat& ye=y.error();
+    ExactFloat rv,xv,yv;
+    Float xu,yu,mxl,myl,u,ml;
     MultiIndex a;
 
     TaylorModel<ValidatedFloat>::ConstIterator xiter=x.begin();
@@ -1802,56 +1597,42 @@ TaylorModel<ValidatedFloat> refinement(const TaylorModel<ValidatedFloat>& x, con
         //const MultiIndex& ya=yiter->key();
         if(xiter==x.end()) {
             a=yiter->key();
-            yv=yiter->data().raw();
-            xv=0.0;
+            yv=yiter->data();
+            xv=0;
             ++yiter;
         } else if(yiter==y.end()) {
             a=xiter->key();
-            xv=xiter->data().raw();
-            yv=0.0;
+            xv=xiter->data();
+            yv=0;
             ++xiter;
         } else if(xiter->key()==yiter->key()) {
             a=xiter->key();
-            xv=xiter->data().raw();
-            yv=yiter->data().raw();
+            xv=xiter->data();
+            yv=yiter->data();
             ++xiter;
             ++yiter;
         } else if(xiter->key()<yiter->key()) {
             a=xiter->key();
-            xv=xiter->data().raw();
-            yv=0.0;
+            xv=xiter->data();
+            yv=0;
             ++xiter;
         } else { // xa>ya
             a=yiter->key();
-            yv=yiter->data().raw();
-            xv=0.0;
+            yv=yiter->data();
+            xv=0;
             ++yiter;
         }
 
-        set_rounding_upward();
-        xu=xv+xe;
-        yu=yv+ye;
-        mxl=xe-xv;
-        myl=ye-yv;
-        u=min(xu,yu);
-        ml=min(mxl,myl);
-        if(u+ml<0) {
-            ARIADNE_THROW(IntersectionException,"intersection(TaylorModel<ValidatedFloat>,TaylorModel<ValidatedFloat>)",x<<" and "<<y<<" are disjoint.");
+        ValidatedFloat rve=refinement( xv.pm(xe), yv.pm(ye) );
+        if(rve.error().raw()<0.0) {
+            ARIADNE_THROW(IntersectionException,"refinement(TaylorModel<ValidatedFloat>,TaylorModel<ValidatedFloat>)",x<<" and "<<y<<" are inconsistent.");
         }
-        twice_max_error=max(twice_max_error,(u+ml));
 
-        set_rounding_to_nearest();
-        xu=xv+xe;
-        yu=yv+ye;
-        mxl=xe-xv;
-        myl=ye-yv;
-        u=min(xu,yu);
-        ml=min(mxl,myl);
-        rv=(u-ml)/2;
-        if(rv!=0.0) { r.expansion().raw().append(a,(u-ml)/2); }
+        if(rve.value()!=0) { r.expansion().append(a,rve.value()); }
+        max_error=max(max_error,rve.error());
     }
 
-    r.error().raw()=twice_max_error/2;
+    r.error()=max_error;
 
     return r;
 }

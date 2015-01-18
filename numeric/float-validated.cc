@@ -613,6 +613,9 @@ ValidatedFloat& ValidatedFloat::operator=(const Rational& q) {
 
 #endif // HAVE_GMPXX_H
 
+ValidatedFloat ExactFloat::pm(ErrorFloat e) const {
+    ExactFloat const& v=*this; return ValidatedFloat(v-e,v+e);
+}
 
 OutputStream&
 operator<<(OutputStream& os, const ValidatedFloat& ivl)

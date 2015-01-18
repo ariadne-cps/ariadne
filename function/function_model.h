@@ -64,9 +64,9 @@ typedef FunctionModelFactory<ValidatedTag> ValidatedFunctionModelFactory;
 typedef ExactFloat ValidatedCoefficientType;
 typedef ErrorFloat ValidatedErrorType;
 
-template<class X> class TaylorModel;
+template<class P, class F> class TaylorModel;
 template<class M> class FunctionPatch;
-typedef FunctionPatch<TaylorModel<ValidatedFloat>> ScalarTaylorFunction;
+typedef FunctionPatch<TaylorModel<Validated,Float>> ScalarTaylorFunction;
 
 template<> class ScalarFunctionModelInterface<ValidatedTag>
     : public virtual ScalarFunctionInterface<ValidatedTag>

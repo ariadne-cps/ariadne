@@ -54,16 +54,16 @@ typedef AffineModel<ApproximateNumber> ApproximateAffineModel;
 typedef AffineModel<ValidatedNumber> ValidatedAffineModel;
 
 template<class X> class ScalarFunction;
-template<class X> class TaylorModel;
-typedef TaylorModel<ApproximateNumber> ApproximateTaylorModel;
-typedef TaylorModel<ValidatedNumber> ValidatedTaylorModel;
+template<class P, class F> class TaylorModel;
+typedef TaylorModel<Approximate,Float> ApproximateTaylorModel;
+typedef TaylorModel<Validated,Float> ValidatedTaylorModel;
 
 
 AffineModel<ValidatedNumber> affine_model(const Affine<ValidatedNumber>& affine);
 AffineModel<ValidatedNumber> affine_model(const Affine<EffectiveNumber>& affine);
-AffineModel<ValidatedNumber> affine_model(const TaylorModel<ValidatedNumber>& taylor_model);
+AffineModel<ValidatedNumber> affine_model(const TaylorModel<Validated,Float>& taylor_model);
 AffineModel<ValidatedNumber> affine_model(const ExactBox& domain, const ValidatedScalarFunction& function);
-Vector< AffineModel<ValidatedNumber> > affine_models(const Vector< TaylorModel<ValidatedNumber> >& taylor_models);
+Vector< AffineModel<ValidatedNumber> > affine_models(const Vector< TaylorModel<Validated,Float> >& taylor_models);
 Vector< AffineModel<ValidatedNumber> > affine_models(const ExactBox& domain, const ValidatedVectorFunction& function);
 
 //! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x) \approx \sum_{i=0}^{n-1} a_i x_i + b\f$.
@@ -214,7 +214,7 @@ OutputStream& operator<<(OutputStream& os, const AffineModel<ValidatedNumber>& f
 
 //! \relates AffineModel
 //! \brief Create from a Taylor model.
-AffineModel<ValidatedNumber> affine_model(const TaylorModel<ValidatedNumber>& tm);
+AffineModel<ValidatedNumber> affine_model(const TaylorModel<Validated,Float>& tm);
 
 
 

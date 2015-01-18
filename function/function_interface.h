@@ -70,7 +70,7 @@ class ScalarFunctionInterface<ApproximateTag>
     //! \brief Evaluate the function over a vector of differentials.
     virtual Differential<ApproximateNumber> evaluate(const Vector< Differential<ApproximateNumber> >& x) const = 0;
     //! \brief Evaluate the function over a vector of approximate Taylor models.
-    virtual TaylorModel<ApproximateNumber> evaluate(const Vector< TaylorModel<ApproximateNumber> >& x) const = 0;
+    virtual TaylorModel<Approximate,Float> evaluate(const Vector< TaylorModel<Approximate,Float> >& x) const = 0;
     //! \brief Evaluate the function over a vector of formulae to create the composed function.
     virtual Formula<ApproximateNumber> evaluate(const Vector< Formula<ApproximateNumber> >& x) const = 0;
     //! \brief Evaluate the function over a vector of elements of an algebra.
@@ -107,7 +107,7 @@ class ScalarFunctionInterface<ValidatedTag>
     //! \brief Evaluate the function over a vector of interval differentials.
     virtual Differential<ValidatedNumber> evaluate(const Vector< Differential<ValidatedNumber> >& x) const = 0;
     //! \brief Evaluate the function over a vector of Taylor models with interval error.
-    virtual TaylorModel<ValidatedNumber> evaluate(const Vector< TaylorModel<ValidatedNumber> >& x) const = 0;
+    virtual TaylorModel<Validated,Float> evaluate(const Vector< TaylorModel<Validated,Float> >& x) const = 0;
 
     //! \brief Apply the function to a formula. Can be used to obtain a tree structure from the function.
     virtual Formula<ValidatedNumber> evaluate(const Vector< Formula<ValidatedNumber> >& x) const = 0;
@@ -203,7 +203,7 @@ class VectorFunctionInterface<ApproximateTag>
     //! \brief Evaluate the function over a vector of differentials.
     virtual Vector< Differential<ApproximateNumber> > evaluate(const Vector< Differential<ApproximateNumber> >& x) const = 0;
     //! \brief Evaluate the function over a vector of approximate Taylor models.
-    virtual Vector< TaylorModel<ApproximateNumber> > evaluate(const Vector< TaylorModel<ApproximateNumber> >& x) const = 0;
+    virtual Vector< TaylorModel<Approximate,Float> > evaluate(const Vector< TaylorModel<Approximate,Float> >& x) const = 0;
     //! \brief Evaluate the function over a vector of formulae to create the composed function.
     virtual Vector< Formula<ApproximateNumber> > evaluate(const Vector< Formula<ApproximateNumber> >& x) const = 0;
     //! \brief Apply the function to an algebra.
@@ -235,7 +235,7 @@ class VectorFunctionInterface<ValidatedTag>
     //! \brief Evaluate the function over a vector of interval differentials.
     virtual Vector< Differential<ValidatedNumber> > evaluate(const Vector< Differential<ValidatedNumber> >& x) const = 0;
     //! \brief Evaluate the function over a vector of Taylor models with interval error.
-    virtual Vector< TaylorModel<ValidatedNumber> > evaluate(const Vector< TaylorModel<ValidatedNumber> >& x) const = 0;
+    virtual Vector< TaylorModel<Validated,Float> > evaluate(const Vector< TaylorModel<Validated,Float> >& x) const = 0;
 
     //! \brief Evaluate the function over a vector of formulae.
     virtual Vector< Formula<ValidatedNumber> > evaluate(const Vector< Formula<ValidatedNumber> >& x) const = 0;

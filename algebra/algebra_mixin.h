@@ -34,7 +34,7 @@
 namespace Ariadne {
 
 template<class X> class Differential;
-template<class X> class TaylorModel;
+template<class P, class F> class TaylorModel;
 
 template<class X> class Algebra;
 template<class X> class NormedAlgebra;

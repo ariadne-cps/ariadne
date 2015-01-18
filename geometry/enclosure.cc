@@ -1058,7 +1058,7 @@ uniform_error_recondition()
 // In TaylorModel code file
 Array<SizeType> complement(SizeType nmax, Array<SizeType> vars);
 
-TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)
+TaylorModel<Validated,Float> recondition(const TaylorModel<Validated,Float>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)
 {
     for(SizeType i=0; i!=discarded_variables.size()-1; ++i) {
         ARIADNE_PRECONDITION(discarded_variables[i]<discarded_variables[i+1]);
@@ -1074,7 +1074,7 @@ TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, A
     Array<SizeType> kept_variables=complement(number_of_variables,discarded_variables);
 
     // Construct result and reserve memory
-    TaylorModel<ValidatedFloat> r(number_of_kept_variables+number_of_error_variables,tm.sweeper());
+    TaylorModel<Validated,Float> r(number_of_kept_variables+number_of_error_variables,tm.sweeper());
     r.expansion().reserve(tm.number_of_nonzeros()+1u);
     MultiIndex ra(number_of_kept_variables+number_of_error_variables);
 
@@ -1091,7 +1091,7 @@ TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, A
     }
     ErrorFloat& error=*error_ptr;
 
-    for(TaylorModel<ValidatedFloat>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
+    for(TaylorModel<Validated,Float>::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         MultiIndex const& xa=iter->key();
         ExactFloat const& xv=iter->data();
         Bool keep=true;
@@ -1114,7 +1114,7 @@ TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, A
     return r;
 }
 
-TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables) {
+TaylorModel<Validated,Float> recondition(const TaylorModel<Validated,Float>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables) {
     return recondition(tm,discarded_variables,number_of_error_variables,number_of_error_variables);
 }
 

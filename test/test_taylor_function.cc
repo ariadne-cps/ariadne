@@ -72,7 +72,7 @@ class TestScalarTaylorFunction
   private:
     ExactBox d(SizeType n) { return Vector<ExactInterval>(n,ExactInterval(-1,+1)); }
     typedef Expansion<RawFloat> e;
-    typedef TaylorModel<ValidatedTag> TM;
+    typedef TaylorModel<Validated,Float> TM;
 };
 
 

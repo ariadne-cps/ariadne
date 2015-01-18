@@ -64,7 +64,6 @@ class MapEvolver
     : public EvolverBase< IteratedMap, Enclosure, Integer>
     , public Loggable
 {
-    typedef TaylorModel<ValidatedNumber> VariableType;
   public:
     typedef MapEvolverConfiguration ConfigurationType;
     typedef IteratedMap SystemType;

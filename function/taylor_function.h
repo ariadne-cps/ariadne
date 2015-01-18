@@ -42,7 +42,7 @@
 
 namespace Ariadne {
 
-template<class X> class TaylorModel;
+template<class P, class F> class TaylorModel;
 class TaylorFunctionFactory;
 
 typedef ScalarFunctionPatch<ValidatedTaylorModel> ScalarTaylorFunction;

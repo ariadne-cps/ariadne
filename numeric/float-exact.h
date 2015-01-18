@@ -38,6 +38,8 @@
 #include "numeric/rational.h"
 #include "numeric/float.h"
 
+#include "numeric/twoexp.h"
+
 namespace Ariadne {
 
 //! \ingroup NumericModule
@@ -85,6 +87,13 @@ inline ExactFloat operator"" _exact(long double lx) { double x=lx; assert(x==lx)
 
 inline ExactFloat operator+(const ExactFloat& x) { return ExactFloat(pos_exact(x.value())); }
 inline ExactFloat operator-(const ExactFloat& x) { return ExactFloat(neg_exact(x.value())); }
+
+inline TwoExp::operator ExactFloat () const { return ExactFloat(this->get_d()); }
+inline ExactFloat operator*(const ExactFloat& x, TwoExp y) { ExactFloat yv=y; return ExactFloat(x.raw()*yv.raw()); }
+inline ExactFloat operator/(const ExactFloat& x, TwoExp y) { ExactFloat yv=y; return ExactFloat(x.raw()/yv.raw()); }
+inline ExactFloat& operator*=(ExactFloat& x, TwoExp y) { ExactFloat yv=y; return x=ExactFloat(x.raw()*yv.raw()); }
+inline ExactFloat& operator/=(ExactFloat& x, TwoExp y) { ExactFloat yv=y; return x=ExactFloat(x.raw()/yv.raw()); }
+
 inline ValidatedFloat operator+(const ExactFloat& x1,  const ExactFloat& x2);
 inline ValidatedFloat operator-(const ExactFloat& x1,  const ExactFloat& x2);
 inline ValidatedFloat operator*(const ExactFloat& x1,  const ExactFloat& x2);

@@ -378,6 +378,13 @@ Void TestVectorTaylorFunction::test_restrict()
     VectorTaylorFunction function2(domain2,expansion2*unit0,error2,swp);
     VectorTaylorFunction restricted_function2(subdomain2,subexpansion2*unit0,suberror2,swp);
     ARIADNE_TEST_EQUAL(restriction(function2,subdomain2),restricted_function2);
+
+    {
+        ScalarTaylorFunction function2(domain2,expansion2,error2[0],swp);
+        ScalarTaylorFunction restricted_function2(subdomain2,subexpansion2,suberror2[0],swp);
+        ARIADNE_TEST_EQUAL(restriction(function2,subdomain2),restricted_function2);
+    }
+
 }
 
 Void TestVectorTaylorFunction::test_jacobian()

@@ -1045,23 +1045,6 @@ template<> class Float64Template<Approximate>
 };
 
 
-/************ TwoExp ***************************************************/
-
-//! \ingroup NumericModule
-//! \brief A class representing a number of the form  \c 2<sup>\it n</sup> for some \it n.
-//! Useful since floating-point numbers can be exactly multiplied and divided by powers of \c 2.
-class TwoExp {
-    Int _n;
-  public:
-    explicit TwoExp(Int n) : _n(n) { }
-    double get_d() const { if(_n>=0) { return std::pow(2.0,_n); } else { return std::pow(0.5,-_n); } }
-    operator ExactFloat64 () const { return Float64Template<Exact>(this->get_d()); }
-    operator ErrorFloat64 () const { return Float64Template<Error>(this->get_d()); }
-    operator MetricFloat64 () const { return Float64Template<Metric>(this->get_d()); }
-    operator BoundedFloat64 () const { return Float64Template<Bounded>(this->get_d()); }
-};
-inline TwoExp two_exp(Int n) { return TwoExp(n); }
-
 
 /************ Casting ***************************************************/
 

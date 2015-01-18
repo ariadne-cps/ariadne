@@ -297,43 +297,22 @@ template<class M> VectorFunctionModelInterface<typename M::Paradigm>* FunctionPa
 // and translation t=((c+d)-(a+b))/(b-a)
 // Because we are scaling the model on [-1,+1], this is not the same as
 // the mapping taking [a,b] to [c,d]
-template<class M> FunctionPatch<M> partial_restriction(const FunctionPatch<M>& tv, SizeType k, const ExactInterval& new_ivl) {
-    ARIADNE_ASSERT(k<tv.argument_size())
-    const ExactInterval& old_ivl=tv.domain()[k];
-    ARIADNE_ASSERT(subset(new_ivl,old_ivl));
-    if(new_ivl==old_ivl) { return tv; }
-    Float a=old_ivl.lower().raw(); Float b=old_ivl.upper().raw();
-    Float c=new_ivl.lower().raw(); Float d=new_ivl.upper().raw();
-    if(a==b) { ARIADNE_ASSERT( a<b || (a==b && c==d) ); return tv; }
-    ValidatedNumber s=static_cast<ValidatedNumber>(sub_ivl(d,c)/sub_ivl(b,a));
-    // ValidatedNumber t=(mul_ivl(b,c)-mul_ivl(a,d))/sub_ivl(b,a);  // WRONG!!
-    ValidatedNumber t=static_cast<ValidatedNumber>((add_ivl(c,d)-add_ivl(a,b))/sub_ivl(b,a));
-    ExactBox new_dom=tv.domain();
-    new_dom[k]=new_ivl;
-    return FunctionPatch<M>(new_dom,preaffine(tv.model(),k,s,t));
+template<class M> FunctionPatch<M> partial_restriction(const FunctionPatch<M>& fp, SizeType k, const ExactInterval& ivl) {
+    ExactBox dom=fp.domain();
+    dom[k]=ivl;
+    return restriction(fp,dom);
 }
 
-template<class M> FunctionPatch<M> restriction(const FunctionPatch<M>& tv, const ExactBox& d) {
-    ARIADNE_ASSERT(subset(d,tv.domain()));
-    const ExactBox& od=tv.domain();
-    FunctionPatch<M> r=tv;
-    for(SizeType j=0; j!=d.size(); ++j) {
-        if(od[j]!=d[j]) { r=partial_restriction(r,j,d[j]); }
-    }
-    return r;
+template<class M> FunctionPatch<M> restriction(const FunctionPatch<M>& fp, const ExactBox& dom) {
+    return unchecked_compose(fp,FunctionPatch<M>::identity(dom,fp.sweeper()));
 }
 
-template<class M> Void FunctionPatch<M>::restrict(const ExactBox& d) {
-    (*this)=restriction(*this,d);
+template<class M> Void FunctionPatch<M>::restrict(const ExactBox& dom) {
+    (*this)=restriction(*this,dom);
 }
 
-template<class M> FunctionPatch<M> extension(const FunctionPatch<M>& tv, const ExactBox& d) {
-    const ExactBox& domain=tv.domain();
-    ARIADNE_ASSERT(subset(domain,d));
-    for(SizeType i=0; i!=d.size(); ++i) {
-        ARIADNE_ASSERT(domain[i]==d[i] || domain[i].lower()==domain[i].upper());
-    }
-    return FunctionPatch<M>(d,tv.model());
+template<class M> FunctionPatch<M> extension(const FunctionPatch<M>& fp, const ExactBox& dom) {
+    return unchecked_compose(fp,FunctionPatch<M>::identity(dom,fp.sweeper()));
 }
 
 

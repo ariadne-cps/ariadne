@@ -395,9 +395,6 @@ TaylorModel<ValidatedFloat> compose(const TaylorModel<ValidatedFloat>& tf, const
 TaylorModel<ValidatedFloat> compose(const TaylorModel<ValidatedFloat>& tf, const VectorUnscaling& u);
 Vector<TaylorModel<ValidatedFloat>> compose(VectorUnscaling const& u, const Vector<TaylorModel<ValidatedFloat>>& tf);
 
-//! \relates TaylorModel<ValidatedFloat> \brief Replace the variale x[k] with a*x[k]+b. // DEPRECATED
-TaylorModel<ValidatedFloat> preaffine(const TaylorModel<ValidatedFloat>&, SizeType k, const ValidatedNumber& a, const ValidatedNumber& b);
-
 //! \relates TaylorModel<ValidatedFloat> \brief Embed the model in a space of higher dimension, placing the error in the final variable.
 TaylorModel<ValidatedFloat> embed_error(const TaylorModel<ValidatedFloat>& tm);
 

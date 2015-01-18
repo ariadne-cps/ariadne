@@ -22,22 +22,37 @@
  */
 
 /*! \file numeric/twoexp.h
- *  \brief 
+ *  \brief
  */
-
-
 
 #ifndef ARIADNE_TWOEXP_H
 #define ARIADNE_TWOEXP_H
 
+#include <cmath>
+
 namespace Ariadne {
 
+/************ TwoExp ***************************************************/
+
+//! \ingroup NumericModule
+//! \brief A class representing a number of the form  \c 2<sup>\it n</sup> for some \it n.
+//! Useful since floating-point numbers can be exactly multiplied and divided by powers of \c 2.
 class TwoExp {
-    Int _exp;
+    Int _n;
   public:
-    TwoExp(Int exp) : _exp(n);
-    Int exponent() const { return this->_exp; }
+    explicit TwoExp(Int n) : _n(n) { }
+    Int exponent() const { return this->_n; }
+    // NOTE: Use std::pow(2.0,_n) not (1<<_n) since latter does not handle very large exponents
+    Float raw() const { return Float(this->get_d()); }
+    double get_d() const { return std::pow(2.0,this->_n); }
+    operator ExactFloat () const;
+    operator ExactFloat64 () const;
+    operator ErrorFloat64 () const;
+    operator MetricFloat64 () const;
+    operator BoundedFloat64 () const;
 };
+inline TwoExp two_exp(Int n) { return TwoExp(n); }
+
 
 } // namespace Ariadne
 

@@ -113,6 +113,7 @@ class ApproximateFloat {
     //! \brief An approximation by a built-in double-precision floating-point number.
     double get_d() const { return this->a.get_d(); }
     static Void set_output_precision(Nat p) { output_precision=p; }
+    ApproximateFloat pm(ApproximateFloat e) { return *this; }
 };
 
 

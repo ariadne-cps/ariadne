@@ -142,7 +142,7 @@ class AnalyticFunction {
     std::shared_ptr<const SeriesGeneratorInterface<ApproximateNumber>> _asg_ptr;
     std::shared_ptr<const SeriesGeneratorInterface<ValidatedNumber>> _vsg_ptr;
   public:
-    template<class OP> AnalyticFunction(OP op)
+    template<class OP> explicit AnalyticFunction(OP op)
         : _op_code(op.code()), _asg_ptr(new SeriesGenerator<OP,ApproximateNumber>()), _vsg_ptr(new SeriesGenerator<OP,ValidatedNumber>()) { }
     Series<ApproximateNumber> series(ApproximateNumber c) const {
         return Series<ApproximateNumber>(_asg_ptr,c,nullptr); }

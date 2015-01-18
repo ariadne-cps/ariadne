@@ -108,6 +108,7 @@ inline ValidatedFloat operator+(const ExactFloat& x1,  const ValidatedFloat& x2)
 inline ValidatedFloat operator-(const ExactFloat& x1,  const ValidatedFloat& x2);
 inline ValidatedFloat operator*(const ExactFloat& x1,  const ValidatedFloat& x2);
 inline ValidatedFloat operator/(const ExactFloat& x1,  const ValidatedFloat& x2);
+inline ValidatedFloat operator/(const ExactFloat& x, Int n);
 inline ValidatedFloat pow(const ExactFloat& x, Int n);
 
 inline ExactFloat neg(const ExactFloat& x) { return ExactFloat(neg_exact(x.value())); }
@@ -155,6 +156,9 @@ inline ValidatedFloat pow(ExactFloat x, Int n);
 inline ValidatedFloat rad(ExactFloat x, ExactFloat y);
 inline ValidatedFloat med(ExactFloat x, ExactFloat y);
 
+inline ValidatedFloat sqrt(ExactFloat x);
+inline ValidatedFloat exp(ExactFloat x);
+inline ValidatedFloat log(ExactFloat x);
 
 #ifdef HAVE_GMPXX_H
 inline Bool operator==(const ExactFloat& x, const Rational& q) { return Rational(x)==q; }

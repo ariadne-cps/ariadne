@@ -224,29 +224,49 @@ Void TestTaylorModel::test_range()
         ARIADNE_TEST_WARN("ValidatedTaylorModel::range() not exact for quadratic functions."); }
 }
 
+ValidatedTaylorModel operator^(ValidatedTaylorModel tm, Nat m) { return pow(tm,m); }
+ValidatedTaylorModel clobber(ValidatedTaylorModel tm) { tm.clobber(); return std::move(tm); }
+
 Void TestTaylorModel::test_functions()
 {
-    ValidatedTaylorModel x(E(1,1, {0.0, 1.0}), 0.0, swp);
-    ValidatedTaylorModel xz(E(1,1, {0.0, 0.5}), 0.0, swp);
-    ValidatedTaylorModel xo(E(1,1, {1.0, 0.5}), 0.0, swp);
+    ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(1,0,swp);
+    ValidatedTaylorModel xz=x/2;
+    ValidatedTaylorModel xo=1+x/2;
+    ValidatedTaylorModel hx=x/2;
+    ValidatedFloat e(-1,+1);
 
     ARIADNE_TEST_PRINT(exp(x));
     ARIADNE_TEST_PRINT(sin(x));
     ARIADNE_TEST_PRINT(cos(x));
 
-    //Functions based on their natural defining points with variable dependence 0.5
-    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(T(E(1,1,{0.0,1.0}),0.0,swp)),T(E(1,6, {1.0,1.00,0.500,0.1667,0.0417,0.0083,0.0014}),0.0004,swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(x),T(E(1,6, {0.0,1.0000,0.0,-0.1667,0.0,0.0083,0.0}),0.0003,swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(x),T(E(1,6, {1.0000,0.0,-0.5000,0.0,0.0417,0.0,-0.0014}),0.0003,swp));
+    // Expected tolerance based on sweeper characteristics
+    static const ValidatedFloat tol=ExactFloat(x.tolerance())*ValidatedFloat(-1,+1);
+
+    // exp, sin and cos have error bound e^N/N!*(1+1/N), where e is bound for |x| N is the first term omitted
+    // Error bound for rec is e^(N-1); log is e^(N-1)/N; sqrt is ???, where e is bound for |x-1|
+
+    //Functions based on their natural defining points with variable dependence 1.0
+    ValidatedTaylorModel expected_exp_x = 1+x+(x^2)/2+(x^3)/6+(x^4)/24+(x^5)/120+(x^6)/720+e/4410+tol;
+    ValidatedTaylorModel expected_sin_x = x-(x^3)/6+(x^5)/120+e/4410+tol;
+    ValidatedTaylorModel expected_cos_x = 1-(x^2)/2+(x^4)/24-(x^6)/720+e/35840+tol;
+    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(x),expected_exp_x);
+    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(x),expected_sin_x);
+    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(x),expected_cos_x);
 
     //Functions based on their natural defining points with variable dependence 0.5
-    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(xz),ValidatedTaylorModel(E(1,6, {1.00000,0.50000,0.12500,0.02083,0.00260,0.00026,0.00002}), 0.00003, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(xz),ValidatedTaylorModel(E(1,6, {0.00000,0.50000,0.0000,-0.02083,0.00000,0.00026,0.00000}), 0.00003, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(xz),ValidatedTaylorModel(E(1,6, {1.00000,0.0000,-0.12500,0.00000,0.00260,0.0000,-0.00002}), 0.00003, swp));
+    ValidatedTaylorModel expected_exp_xz = 1+hx+(hx^2)/2+(hx^3)/6+(hx^4)/24+(hx^5)/120+(hx^6)/720+e/128/4410+tol;
+    ValidatedTaylorModel expected_sin_xz = hx-(hx^3)/6+(hx^5)/120+e/128/4410+tol;
+    ValidatedTaylorModel expected_cos_xz = 1-(hx^2)/2+(hx^4)/24-(hx^6)/720+e/128/35840+tol;
+    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(xz),expected_exp_xz);
+    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(xz),expected_sin_xz);
+    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(xz),expected_cos_xz);
 
-    ARIADNE_TEST_BINARY_PREDICATE(refines,rec(xo),ValidatedTaylorModel(E(1,6,  {1.000000,-0.500000, 0.250000,-0.125000, 0.062500,-0.031250, 0.015625}), 0.018, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(xo),ValidatedTaylorModel(E(1,6, {1.000000, 0.250000,-0.031250, 0.007813,-0.002441, 0.000854,-0.000320}), 0.0003, swp));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,log(xo),ValidatedTaylorModel(E(1,6,  {0.000000, 0.500000,-0.125000, 0.041667,-0.015625, 0.006250,-0.002604}), 0.003, swp));
+    ValidatedTaylorModel expected_rec_xo = 1-hx+(hx^2)-(hx^3)+(hx^4)-(hx^5)+(hx^6)+e/64+tol;
+    ValidatedTaylorModel expected_sqrt_xo = 1+hx/2-(hx^2)/8+(hx^3)/16-(hx^4)*5/128+(hx^5)*7/256-(hx^6)*21/1024+e/64+tol;
+    ValidatedTaylorModel expected_log_xo = hx-(hx^2)/2+(hx^3)/3-(hx^4)/4+(hx^5)/5-(hx^6)/6+e/64/7+tol;
+    ARIADNE_TEST_BINARY_PREDICATE(refines,rec(xo),expected_rec_xo);
+    ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(xo),expected_sqrt_xo);
+    ARIADNE_TEST_BINARY_PREDICATE(refines,log(xo),expected_log_xo);
 
     // Test exponential based at log2
     ARIADNE_TEST_BINARY_PREDICATE(refines,exp(T(E(1,1,{0.693147,0.5}),0.0,swp)),

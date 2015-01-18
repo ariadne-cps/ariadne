@@ -139,6 +139,7 @@ class UpperFloat {
     friend UpperFloat operator/(UpperFloat, LowerFloat);
     friend UpperFloat& operator+=(UpperFloat&, UpperFloat);
     friend UpperFloat& operator*=(UpperFloat&, UpperFloat);
+    friend UpperFloat& operator/=(UpperFloat&, Nat);
     friend LowerFloat rec(UpperFloat);
     friend UpperFloat pow(UpperFloat, Nat);
     friend UpperFloat half(UpperFloat);
@@ -603,6 +604,20 @@ inline ValidatedFloat rad(ExactFloat x1, ExactFloat x2)
     return sub(half(x2),half(x1));
 }
 
+inline ValidatedFloat sqrt(ExactFloat x) {
+    return sqrt(ValidatedFloat(x));
+}
+
+inline ValidatedFloat exp(ExactFloat x) {
+    return exp(ValidatedFloat(x));
+}
+
+inline ValidatedFloat log(ExactFloat x) {
+    return log(ValidatedFloat(x));
+}
+
+
+
 inline ValidatedFloat med(ValidatedFloat x);
 
 inline ValidatedFloat rad(ValidatedFloat i);
@@ -642,6 +657,7 @@ inline ValidatedFloat operator+(const ExactFloat& x1, const ExactFloat& x2) { re
 inline ValidatedFloat operator-(const ExactFloat& x1, const ExactFloat& x2) { return sub(x1,x2); }
 inline ValidatedFloat operator*(const ExactFloat& x1, const ExactFloat& x2) { return mul(x1,x2); }
 inline ValidatedFloat operator/(const ExactFloat& x1, const ExactFloat& x2) { return div(x1,x2); }
+inline ValidatedFloat operator/(const ExactFloat& x1, Int n2) { return div(x1,ExactFloat(n2)); }
 inline ValidatedFloat pow(const ExactFloat& x, Int n) { return pow(ValidatedFloat(x),n); }
 
 // Standard equality operators

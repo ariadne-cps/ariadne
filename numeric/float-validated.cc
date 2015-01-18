@@ -180,6 +180,10 @@ UpperFloat& operator*=(UpperFloat& x1, UpperFloat x2) {
      return x1=x1*x2;
 }
 
+UpperFloat& operator/=(UpperFloat& x1, Nat n2) {
+     return x1=x1/n2;
+}
+
 UpperFloat rec(LowerFloat x)
 {
     rounding_mode_t rnd=get_rounding_mode();

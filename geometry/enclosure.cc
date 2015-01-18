@@ -1058,10 +1058,6 @@ uniform_error_recondition()
 // In TaylorModel code file
 Array<SizeType> complement(SizeType nmax, Array<SizeType> vars);
 
-TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables) {
-    return recondition(tm,discarded_variables,number_of_error_variables,number_of_error_variables);
-}
-
 TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables, SizeType index_of_error)
 {
     for(SizeType i=0; i!=discarded_variables.size()-1; ++i) {
@@ -1116,6 +1112,10 @@ TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, A
     set_rounding_to_nearest();
 
     return r;
+}
+
+TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, Array<SizeType>& discarded_variables, SizeType number_of_error_variables) {
+    return recondition(tm,discarded_variables,number_of_error_variables,number_of_error_variables);
 }
 
 

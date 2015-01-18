@@ -152,6 +152,9 @@ class TaylorModel<ValidatedFloat>
     //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a e
     static TaylorModel<ValidatedFloat> error(SizeType as, ErrorType e, Sweeper swp) {
         TaylorModel<ValidatedFloat> r(as,swp); r.set_error(e); return r; }
+    //! \brief Construct a constant quantity in \a as independent variables with value zero and uniform error \a e
+    static TaylorModel<ValidatedFloat> ball(SizeType as, ErrorType e, Sweeper swp) {
+        TaylorModel<ValidatedFloat> r(as,swp); r.set_error(e); return r; }
 
     //! \brief Construct the quantity which scales the interval \a codom onto the unit interval.
     static TaylorModel<ValidatedFloat> scaling(SizeType as, SizeType j, const ExactInterval& codom, Sweeper swp);
@@ -346,23 +349,6 @@ class TaylorModel<ValidatedFloat>
     Void _append(MultiIndex const& a, CoefficientType const& v) { this->_expansion.append(a,v); }
 };
 
-//! \relates Rescale the vector \a x from the domain \a dom to the unit domain.
-Vector<ValidatedNumber> unscale(const Vector<ValidatedNumber>& x, const Vector<ExactInterval>& dom);
-
-//! \relates TaylorModel<ValidatedFloat> \brief The magnitude of the model.
-ErrorType mag(const TaylorModel<ValidatedFloat>& tm);
-
-//! \relates TaylorModel<ValidatedFloat>
-//!\brief Split the variable, subdividing along the independent variable j, taking the lower/middle/upper half.
-TaylorModel<ValidatedFloat> split(const TaylorModel<ValidatedFloat>& x, SizeType j, SplitPart part);
-
-//! \relates TaylorModel<ValidatedFloat> \brief Evaluate an array of Taylor variables on a vector.
-ValidatedNumber evaluate(const TaylorModel<ValidatedFloat>& x, const Vector<ValidatedNumber>& sy);
-//! \relates TaylorModel<ValidatedFloat> \brief Substite \a c for the \a k th variable.
-TaylorModel<ValidatedFloat> partial_evaluate(const TaylorModel<ValidatedFloat>& x, SizeType k, ValidatedNumber c);
-
-//! \relates TaylorModel<ValidatedFloat> \brief Embed the model in a space of higher dimension
-TaylorModel<ValidatedFloat> embed(SizeType as1, const TaylorModel<ValidatedFloat>& tm2, SizeType as3);
 
 //! \relates TaylorModel<ValidatedFloat> \brief Test if a model refines another
 Bool refines(const TaylorModel<ValidatedFloat>& tv1, const TaylorModel<ValidatedFloat>& tv2);
@@ -383,45 +369,41 @@ TaylorModel<ValidatedFloat> weak_derivative(const TaylorModel<ValidatedFloat>& x
 TaylorModel<ValidatedFloat> derivative(const TaylorModel<ValidatedFloat>& x, SizeType k);
 Covector<ValidatedNumber> gradient(const TaylorModel<ValidatedFloat>& x, const Vector<ValidatedNumber>& y);
 
+//! \relates TaylorModel<ValidatedFloat> \brief Evaluate an array of Taylor variables on a vector.
+ValidatedNumber evaluate(const TaylorModel<ValidatedFloat>& x, const Vector<ValidatedNumber>& sy);
+//! \relates TaylorModel<ValidatedFloat> \brief Substite \a c for the \a k th variable.
+TaylorModel<ValidatedFloat> partial_evaluate(const TaylorModel<ValidatedFloat>& x, SizeType k, ValidatedNumber c);
+
+//! \relates Rescale the vector \a x from the domain \a dom to the unit domain.
 TaylorModel<ValidatedFloat> unscale(const TaylorModel<ValidatedFloat>& tv, const ExactInterval& ivl);
 //! \relates TaylorModel<ValidatedFloat Compose a vector of Taylor models with another.
 TaylorModel<ValidatedFloat> compose(const Unscaling& u, const TaylorModel<ValidatedFloat>& tg);
-
 //! \relates TaylorModel<ValidatedFloat Compose a vector of Taylor models with another.
 TaylorModel<ValidatedFloat> compose(const TaylorModel<ValidatedFloat>& tf, const Vector<TaylorModel<ValidatedFloat>>& tg);
-
-
 //! \relates TaylorModel<ValidatedFloat> \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
 TaylorModel<ValidatedFloat> compose(const TaylorModel<ValidatedFloat>& tf, const VectorUnscaling& u);
 Vector<TaylorModel<ValidatedFloat>> compose(VectorUnscaling const& u, const Vector<TaylorModel<ValidatedFloat>>& tf);
 
+//! \relates TaylorModel<ValidatedFloat>
+//!\brief Split the variable, subdividing along the independent variable j, taking the lower/middle/upper half.
+TaylorModel<ValidatedFloat> split(const TaylorModel<ValidatedFloat>& x, SizeType j, SplitPart part);
+//! \relates TaylorModel<ValidatedFloat> \brief Embed the model in a space of higher dimension
+TaylorModel<ValidatedFloat> embed(SizeType as1, const TaylorModel<ValidatedFloat>& tm2, SizeType as3);
+
 //! \relates TaylorModel<ValidatedFloat> \brief Embed the model in a space of higher dimension, placing the error in the final variable.
 TaylorModel<ValidatedFloat> embed_error(const TaylorModel<ValidatedFloat>& tm);
-
 //! \relates TaylorModel<ValidatedFloat> \brief Abstract away the given variables.
 //! For example, the model tm(x0,x1,x2,x3) becomes tm'(x0,x1)=tm(x0,[-1,+1],x1,[-1,+1]) on discarding x1 and x3.
 TaylorModel<ValidatedFloat>  discard_variables(const TaylorModel<ValidatedFloat>&, const Array<SizeType>& variables);
 
-TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, Array<SizeType>& discarded_variables,
-                                        SizeType number_of_error_variables);
-
-TaylorModel<ValidatedFloat> recondition(const TaylorModel<ValidatedFloat>& tm, Array<SizeType>& discarded_variables,
-                                        SizeType number_of_error_variables, SizeType index_of_error);
-
+//! \relates TaylorModel<ValidatedFloat> \brief The magnitude of the model. Returns an over-approximation to the supremum norm.
+ErrorType mag(const TaylorModel<ValidatedFloat>& tm);
 //! \relates TaylorModel<ValidatedFloat> \brief An over-approximation to the supremum norm.
 ErrorType norm(const TaylorModel<ValidatedFloat>& tm);
 
 TaylorModel<ValidatedFloat> max(const TaylorModel<ValidatedFloat>& x, const TaylorModel<ValidatedFloat>& y);
 TaylorModel<ValidatedFloat> min(const TaylorModel<ValidatedFloat>& x, const TaylorModel<ValidatedFloat>& y);
 TaylorModel<ValidatedFloat> abs(const TaylorModel<ValidatedFloat>& x);
-
-TaylorModel<ValidatedFloat> sqrt(const TaylorModel<ValidatedFloat>& x);
-TaylorModel<ValidatedFloat> rec(const TaylorModel<ValidatedFloat>& x);
-TaylorModel<ValidatedFloat> exp(const TaylorModel<ValidatedFloat>& x);
-TaylorModel<ValidatedFloat> log(const TaylorModel<ValidatedFloat>& x);
-TaylorModel<ValidatedFloat> sin(const TaylorModel<ValidatedFloat>& x);
-TaylorModel<ValidatedFloat> cos(const TaylorModel<ValidatedFloat>& x);
-TaylorModel<ValidatedFloat> tan(const TaylorModel<ValidatedFloat>& x);
 
 
 

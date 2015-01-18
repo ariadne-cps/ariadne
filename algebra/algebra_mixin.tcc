@@ -35,6 +35,12 @@ namespace {
 inline ApproximateFloat operator+(ApproximateFloat x1, Int n2) { return x1+ApproximateFloat(n2); }
 } // namespace
 
+struct Factorial {
+    Nat _n;
+    Factorial(Nat n) : _n(n) { }
+    operator ValidatedFloat() { ValidatedFloat r=1; for(Nat i=1; i<=_n; ++i) { r*=i; } return r; }
+};
+
 template<class A> EnableIfGradedAlgebra<A>
 compose(const Series<typename A::NumericType>& x, const A& y)
 {
@@ -223,79 +229,62 @@ sqrt(const A& x)
     //std::cerr<<"rec(A)\n";
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
+    auto tol=make_exact(x.tolerance());
     auto avg=make_exact(x.average());
     auto rad=make_exact(x.radius());
-    ValidatedFloat rng=avg+ValidatedFloat(-rad,+rad);
 
-    if(rng.lower()<=0) {
-        ARIADNE_THROW(DomainException,"sqrt",x);
+    if(avg<=rad) {
+        ARIADNE_THROW(DomainException,"log(A x)","x="<<x<<"\n");
     }
 
-    set_rounding_upward();
-    UpperFloat eps=rng.radius()/rng.midpoint();
-    set_rounding_to_nearest();
-    assert(eps<1);
-    Nat d=integer_cast<Int>((log((1-eps)*ExactFloat(x.tolerance()))/log(eps)+1));
-    //std::cerr<<"x="<<x<<std::endl;
-    //std::cerr<<"x/a="<<x/a<<" a="<<a<<std::endl;
-    A y=(x/avg)-X(1);
-    //std::cerr<<"y="<<y<<std::endl;
-    A z=x.create();
+    ErrorFloat eps=rad/avg;
+    ARIADNE_DEBUG_ASSERT(eps<1);
+
     Series<X> sqrt_series=Series<X>::sqrt(X(1));
-    //std::cerr<<"sqrt_series="<<sqrt_series<<std::endl;
-    //std::cerr<<"y="<<y<<std::endl;
+    Nat d=integer_cast<Int>((log((1-eps)*tol)/log(eps)+1));
+    ErrorFloat trunc_err=pow(eps,d)/(1-eps)*mag(make_exact(sqrt_series[d]));
+
+    A y=x/avg-1;
+    A z=x.create();
     z+=sqrt_series[d-1];
     for(Nat i=0; i!=d; ++i) {
         z=sqrt_series[d-i-1] + z * y;
-        //std::cerr<<"z="<<z<<std::endl;
     }
-    auto trunc_err=pow(eps,d)/(1-eps)*mag(sqrt_series[d]);
-    //std::cerr<<"te="<<trunc_err<<" te*[-1,+1]="<<trunc_err*ValidatedFloat(-1,1)<<std::endl;
     z+=z.create_ball(trunc_err);
-    //std::cerr<<"z="<<z<<std::endl;
-    X sqrta=sqrt(numeric_cast<X>(avg));
-    //std::cerr<<"sqrt(a)="<<sqrta<<std::endl;
-    z*=sqrt(numeric_cast<X>(avg));
-    //std::cerr<<"z="<<z<<std::endl;
+    z*=sqrt(avg);
     return z;
 }
-struct Foo { };
+
 template<class A> EnableIfNormedAlgebra<A>
 rec(const A& x)
 {
     typedef typename A::NumericType X;
-    //std::cerr<<"rec(A)\n";
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
-    ExactFloat avg=make_exact(x.average());
-    ErrorFloat rad=make_exact(x.radius());
-    ValidatedFloat rng=avg+ValidatedFloat(-rad,+rad);
-    if(rng.upper()>=0 && rng.lower()<=0) {
-        ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<", x.range()="<<rng);
+    auto tol=make_exact(x.tolerance());
+    auto avg=make_exact(x.average());
+    auto rad=make_exact(x.radius());
+
+    if(abs(avg)<=rad) {
+        ARIADNE_THROW(DivideByZeroException,"rec(A x)","x="<<x<<"\n");
     }
-    set_rounding_upward();
-    ErrorFloat eps=rng.radius()/abs(rng.midpoint());
-    set_rounding_to_nearest();
-    assert(eps<1);
 
-    Nat d=integer_cast<Nat>((log((1-eps)*ExactFloat(x.tolerance()))/log(eps))+1);
+    ErrorFloat eps=rad/abs(avg);
+    ARIADNE_DEBUG_ASSERT(eps<1);
 
-    A y=1-(x/numeric_cast<X>(avg));
+    // Compute the degree and truncation error
+    Nat d=integer_cast<Nat>((log((1-eps)*tol)/log(eps))+1);
+    ErrorFloat te=pow(eps,d)/(1-eps);
+
+    A y=1-x/avg;
     A z=x.create();
-    z+=Float(d%2?-1:+1);
-    //std::cerr<<"  y="<<y<<"\n";
-    //std::cerr<<"  z="<<z<<"\n";
+    z+=(d%2?-1:+1);
     for(Nat i=0; i!=d; ++i) {
         z=1 + z * y;
-        //std::cerr<<"  z="<<z<<"\n";
     }
 
-    // Compute the truncation error
-    ErrorFloat te=pow(eps,d)/(1-eps);
     z+=z.create_ball(te);
-    //std::cerr<<"  z="<<z<<"\n";
     z/=avg;
-    //std::cerr<<"  z="<<z<<"\n";
     return z;
 }
 
@@ -305,17 +294,21 @@ log(const A& x)
     typedef typename A::NumericType X;
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
+    auto tol=make_exact(x.tolerance());
     auto avg=make_exact(x.average());
     auto rad=make_exact(x.radius());
-    ValidatedFloat rng=avg+ValidatedFloat(-rad,+rad);
-    if(rng.lower()<=0) {
-        ARIADNE_THROW(DomainException,"sqrt",rng);
+    auto rng=avg.pm(rad);
+
+    if(avg<=rad) {
+        ARIADNE_THROW(DomainException,"log(A x)","x="<<x<<"\n");
     }
-    set_rounding_upward();
-    ErrorFloat eps=rng.radius()/avg;
-    set_rounding_to_nearest();
-    assert(eps<1);
-    Nat d=integer_cast<Nat>((log((1-eps)*ExactFloat(x.tolerance()))/log(eps)+1));
+
+    ErrorFloat eps=rad/avg;
+    ARIADNE_DEBUG_ASSERT(eps<1);
+
+    Nat d=integer_cast<Nat>((log((1-eps)*tol)/log(eps)+1));
+    ErrorFloat trunc_err=pow(eps,d)/(1-eps)/d;
+
     A y=x/avg-X(1);
     A z=x.create();
     z+=Float(d%2?-1:+1)/d;
@@ -323,50 +316,52 @@ log(const A& x)
         z=Float((d-i)%2?+1:-1)/(d-i) + z * y;
     }
     z=z*y;
-    ErrorFloat trunc_err=pow(eps,d)/(1-eps)/d;
-    return z+log(numeric_cast<X>(avg))+ValidatedFloat(-trunc_err,+trunc_err);
+
+    z+=z.create_ball(trunc_err);
+    z+=log(numeric_cast<X>(avg));
+    return z;
 }
 
 // Use special code to utilise exp(ax+b)=exp(x)^a*exp(b)
 template<class A> EnableIfNormedAlgebra<A> exp(const A& x)
 {
     typedef typename A::NumericType X;
-    // FIXME: Truncation error may be incorrect
+
+    auto avg=x.average();
+    auto rad=x.radius();
+    auto tol = make_exact(x.tolerance());
 
     // Scale to unit interval
-    ExactFloat xavg=make_exact(x.average());
-    A y = x-xavg;
-
-    ErrorFloat xrad=make_exact(x.radius());
-    RawFloat xtol = x.tolerance();
-
     Nat sfp=0; // A number such that 2^sfp>rad(x.range())
-    while(Float(1<<sfp)<xrad.raw()) { ++sfp; }
-    ExactFloat sf=ExactFloat(RawFloat(1)/(1<<sfp));
-    y*=sf;
-    ErrorFloat yrad=xrad*sf;
+    while(ExactFloat(two_exp(sfp))<rad) { ++sfp; }
+    ExactFloat sf=two_exp(sfp);
+    A y = (x-avg)*sf;
+    auto yrad=rad*sf;
 
-    static const Nat degree = 7;
-    A res=x.create();
-    ErrorFloat truncation_error = (pow(yrad,degree+1));
-    res += numeric_cast<X>(ValidatedFloat(-truncation_error,+truncation_error));
-    for(Nat i=0; i!=degree; ++i) {
-        res/=Int(degree-i);
-        res=y*res+1;
+    // Find the required degree
+    Nat deg = 0;
+    auto trunc_err=pow(yrad,0u)*2;
+    do {
+        ++deg;
+        trunc_err=pow(yrad,deg)*(rec(Factorial(deg))*(deg+1)/deg);
+    } while(trunc_err>tol);
+
+    A z=x.create_constant(1);
+    for(Nat i=0; i!=deg; ++i) {
+        z/=(deg-i);
+        z=y*z+1;
     }
+    z+=z.create_ball(trunc_err);
 
     // Square r a total of sfp times
-    A square=x.create();
     for(Nat i=0; i!=sfp; ++i) {
-        res=res*res;
-        square.clear();
+        z=z*z;
     }
 
     // Multiply by exp(xv)
-    res*=Ariadne::exp(ValidatedFloat(xavg));
+    z*=exp(avg);
 
-    return res;
-    //return _compose(&Series<ValidatedFloat>::exp,x,x.sweep_threshold());
+    return z;
 }
 
 // Use special code to utilise sin(x+2pi)=sin(x)
@@ -375,38 +370,39 @@ template<class A> EnableIfNormedAlgebra<A>
 sin(const A& x)
 {
     typedef typename A::NumericType X;
-    // FIXME: Truncation error may be incorrect
-    A z=x.create();
-    A y=z;
-    A s=z;
-    A r=z;
-
-    Float two_pi_approx=2*pi_approx;
-    Float xavg=x.average().raw();
-    Int n=integer_cast<Int>(floor(RawFloat(xavg/two_pi_approx + 0.5)));
-
     Real const& pi=Ariadne::pi;
-    auto two_pi=2*pi;
-    y=x-n*two_pi;
+    // FIXME: Truncation error may be incorrect
 
-    s=sqr(y);
+    auto tol = make_exact(x.tolerance());
+    auto avg=x.average();
+    auto rad=x.radius();
+    auto rng=avg.pm(rad);
+    Int n=integer_cast<Int>(floor( (avg/ApproximateFloat(pi)+1)/2 ));
 
-    Int d=8; // TODO: Change number of terms to be dependent on tolerance
-    ErrorFloat srad=make_exact(s.radius());
-    ErrorFloat truncation_error=ErrorFloat(pow_up(srad.raw(),d+1)*rec_fac_up((d+1)*2));
+    A y=x-(2*n)*pi;
+
+    A s=sqr(y);
+
+    // Find the required degree
+    Nat deg = 0;
+    auto trunc_err=pow(rad,0u)*2;
+    do {
+        ++deg;
+        trunc_err=pow(rad,deg)*(rec(Factorial(deg))*(deg+1)/deg);
+    } while(trunc_err>tol);
 
     // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
-    r=1;
-    for(Int i=0; i!=d; ++i) {
-        r/=X(-2*(d-i)*(2*(d-i)+1));
-        r*=s;
-        r+=X(1);
+    A z=x.create_constant(1);
+    for(Int i=0; i!=deg; ++i) {
+        z/=X(-Int(2*(deg-i)*(2*(deg-i)+1)));
+        z*=s;
+        z+=1;
     }
-    r=y*r;
+    z=y*z;
 
-    r+=r.create_ball(truncation_error);
+    z+=z.create_ball(trunc_err);
 
-    return r;
+    return z;
 }
 
 // Use special code to utilise sin(x+2pi)=sin(x)
@@ -416,40 +412,36 @@ cos(const A& x)
 {
     typedef typename A::NumericType X;
 
-    // FIXME: Truncation error may be incorrect
-    A z=x.create();
-    A y=z;
-    A s=z;
-    A r=z;
+    auto tol = make_exact(x.tolerance());
+    auto avg=x.average();
+    auto rad=x.radius();
 
     Float two_pi_approx=2*pi_approx;
-    Int n=integer_cast<Int>(floor(Float(x.average())/two_pi_approx + 0.5));
+    Int n=integer_cast<Int>(floor( (avg/ApproximateFloat(pi)+1)/2 ));
 
-    auto two_pi=2*pi;
-    y=x-n*two_pi;
+    A y=x-(2*n)*pi;
 
-    //if(y.error()>two_pi/2) {
-    //    r.error()=1;
-    //} else
-    {
-        s=sqr(y);
+    A s=sqr(y);
 
-        Int d=8; // TODO: Change number of terms to be dependent on tolerance
-        ErrorFloat srad=make_exact(s.radius());
-        ErrorFloat truncation_error=ErrorFloat(pow_up(srad.raw(),d+1)*rec_fac_up((d+1)*2));
+    // Find the required degree
+    Nat deg = 0;
+    auto trunc_err=pow(rad,0u)*2;
+    do {
+        ++deg;
+        trunc_err=pow(rad,deg)*(rec(Factorial(deg))*(deg+1)/deg);
+    } while(trunc_err>tol);
 
-        // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
-        r=1;
-        for(Int i=0; i!=d; ++i) {
-            r/=X(-2*(d-i)*(2*(d-i)-1));
-            r*=s;
-            r+=1;
-        }
-
-        r+=r.create_ball(truncation_error);
+    // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
+    A z=x.create_constant(1);
+    for(Int i=0; i!=deg; ++i) {
+        z/=X(-Int(2*(deg-i)*(2*(deg-i)-1)));
+        z*=s;
+        z+=1;
     }
 
-    return r;
+    z+=z.create_ball(trunc_err);
+
+    return z;
 }
 
 template<class A> EnableIfNormedAlgebra<A>

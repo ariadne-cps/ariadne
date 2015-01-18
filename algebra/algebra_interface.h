@@ -116,6 +116,7 @@ template<class X> class NormedAlgebraInterface
     // Overrides for AlgebraInterface operations
     virtual NormedAlgebraInterface<X>* _clone() const = 0;
     virtual NormedAlgebraInterface<X>* _create() const = 0;
+    virtual NormedAlgebraInterface<X>* _create_constant(X c) const = 0;
     virtual NormedAlgebraInterface<X>* _create_ball(ErrorType r) const = 0;
 
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e.

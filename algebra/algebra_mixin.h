@@ -72,6 +72,7 @@ template<class A, class X> class NormedAlgebraMixin
     , public AlgebraMixin<A,X>
 {
     virtual NormedAlgebraInterface<X>* _create_ball(ErrorType r) const { return new A(static_cast<const A&>(*this).A::create_ball(r)); }
+    virtual NormedAlgebraInterface<X>* _create_constant(X c) const { return new A(static_cast<const A&>(*this).A::create_constant(c)); }
     virtual NormedAlgebraInterface<X>* _create() const { return new A(static_cast<const A&>(*this).A::create()); }
     virtual NormedAlgebraInterface<X>* _clone() const { return new A(static_cast<const A&>(*this)); }
 };

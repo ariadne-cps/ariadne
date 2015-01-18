@@ -903,10 +903,11 @@ compose(const TaylorSeries<ValidatedFloat>& ts, const TaylorModel<ValidatedFloat
 
 // Compose using the Taylor formula with a constant truncation error. This method
 // is usually better than _compose1 since there is no blow-up of the trunction
-// error. This method is better than _compose2 since the truncation error is
-// assumed at the ends of the intervals
+// error.
 TaylorModel<ValidatedFloat>
 compose(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm) {
+    std::cerr<<"\n\nfn="<<fn<<"\ntm="<<tm<<"\n";
+
     static const DegreeType MAX_DEGREE=20;
     static const Float MAX_TRUNCATION_ERROR=MACHINE_EPSILON;
     SweeperInterface const& sweeper=tm.sweeper();
@@ -919,24 +920,30 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm) {
     GradedSweeper const* graded_sweeper_ptr = dynamic_cast<GradedSweeper const*>(&sweeper);
     if(graded_sweeper_ptr) { max_degree=graded_sweeper_ptr->degree(); }
 
+    std::cerr<<"max_truncation_error="<<max_truncation_error<<"\nmax_degree="<<(uint)max_degree<<"\n";
 
     Nat d=max_degree;
     ExactFloat c=tm.value();
     ValidatedFloat r=make_singleton(tm.range());
     Series<ValidatedFloat> centre_series=fn.series(c);
     Series<ValidatedFloat> range_series=fn.series(r);
+    std::cerr<<"c="<<c<<"\nr="<<r<<"\n";
+    std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
+
 
     ErrorFloat se=mag(range_series[d]-centre_series[d]);
     ErrorFloat e=mag(r-c);
     ErrorFloat p=pow(e,d);
+    std::cerr<<"se="<<se<<"\ne="<<e<<"\np="<<p<<"\n";
     // FIXME: Here we assume the dth derivative of f is monotone increasing
     ErrorFloat truncation_error=se*p;
+    std::cerr<<"truncation_error="<<truncation_error<<"\n\n";
     if(truncation_error.raw()>max_truncation_error) {
         ARIADNE_WARN("Truncation error estimate "<<truncation_error
                  <<" is greater than maximum allowable truncation error "<<max_truncation_error<<"\n");
     }
 
-    TaylorModel<ValidatedFloat> x=tm;
+    TaylorModel<ValidatedFloat> x=tm-c;
     TaylorModel<ValidatedFloat> res(tm.argument_size(),tm.sweeper());
     res+=centre_series[d];
     for(Nat i=0; i!=d; ++i) {
@@ -951,250 +958,7 @@ compose(const AnalyticFunction& fn, const TaylorModel<ValidatedFloat>& tm) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Algebraic and trancendental functions
-//   bounded domain (rec,sqrt,log,tan)
-//   unbounded domain (exp,sin,cos)
-
-static const DegreeType MAXIMUM_DEGREE = 18;
-
-
-TaylorModel<ValidatedFloat> sqrt(const TaylorModel<ValidatedFloat>& x) {
-    //std::cerr<<"rec(TaylorModel<ValidatedFloat>)\n";
-    // Use a special routine to minimise errors
-    // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
-    UpperInterval r=x.range();
-
-    if(r.lower().raw()<=0) {
-        ARIADNE_THROW(DomainException,"sqrt",x.range());
-    }
-
-    assert(r.lower().raw()>0);
-    Float a=(r.lower().raw()+r.upper().raw())/2;
-    set_rounding_upward();
-    Float eps=(r.upper().raw()-r.lower().raw())/(r.upper().raw()+r.lower().raw());
-    set_rounding_to_nearest();
-    assert(eps<1);
-    Nat d=integer_cast<Int>((log((1-eps)*x.tolerance())/log(eps)+1));
-    //std::cerr<<"x="<<x<<std::endl;
-    //std::cerr<<"x/a="<<x/a<<" a="<<a<<std::endl;
-    TaylorModel<ValidatedFloat> y=(x/a)-1.0;
-    //std::cerr<<"y="<<y<<std::endl;
-    TaylorModel<ValidatedFloat> z(x.argument_size(),x.sweeper());
-    Series<ValidatedFloat> sqrt_series=Series<ValidatedFloat>::sqrt(ValidatedFloat(1));
-    //std::cerr<<"sqrt_series="<<sqrt_series<<std::endl;
-    //std::cerr<<"y="<<y<<std::endl;
-    z+=sqrt_series[d-1];
-    for(Nat i=0; i!=d; ++i) {
-        z=sqrt_series[d-i-1] + z * y;
-        z.sweep();
-        //std::cerr<<"z="<<z<<std::endl;
-    }
-    Float trunc_err=(pow(eps,d)/(1-eps))*mag(sqrt_series[d]).raw();
-    //std::cerr<<"te="<<trunc_err<<" te*[-1,+1]="<<trunc_err*ValidatedFloat(-1,1)<<std::endl;
-    z.error().raw()+=trunc_err;
-    //std::cerr<<"z="<<z<<std::endl;
-    ValidatedFloat sqrta=sqrt(ValidatedFloat(a));
-    //std::cerr<<"sqrt(a)="<<sqrta<<std::endl;
-    z*=sqrt(ValidatedFloat(a));
-    //std::cerr<<"z="<<z<<std::endl;
-    return z;
-}
-
-TaylorModel<ValidatedFloat> rec(const TaylorModel<ValidatedFloat>& x) {
-    //std::cerr<<"rec(TaylorModel<ValidatedFloat>)\n";
-    // Use a special routine to minimise errors
-    // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
-    ValidatedFloat r=static_cast<ValidatedFloat>(x.range());
-    if(r.upper().raw()>=0 && r.lower().raw()<=0) {
-        ARIADNE_THROW(DivideByZeroException,"rec(TaylorModel<ValidatedFloat> x)","x="<<x<<", x.range()="<<x.range());
-    }
-    Float a=(r.lower().raw()+r.upper().raw())/2;
-    set_rounding_upward();
-    Float eps=abs((r.upper().raw()-r.lower().raw())/(r.upper().raw()+r.lower().raw()));
-    set_rounding_to_nearest();
-    assert(eps<1);
-
-    Nat d=integer_cast<Nat>((log((1-eps)*x.tolerance())/log(eps))+1);
-
-    TaylorModel<ValidatedFloat> y=1-(x/a);
-    TaylorModel<ValidatedFloat> z(x.argument_size(),x.sweeper());
-    z+=Float(d%2?-1:+1);
-    //std::cerr<<"  y="<<y<<"\n";
-    //std::cerr<<"  z="<<z<<"\n";
-    for(Nat i=0; i!=d; ++i) {
-        z=1.0 + z * y;
-        //std::cerr<<"  z="<<z<<"\n";
-    }
-
-    // Compute the truncation error
-    Float te=pow(eps,d)/(1-eps);
-    //std::cerr<<"  te="<<te<<"\n";
-    set_rounding_upward();
-    Float nze=te+z.error().raw();
-    //std::cerr<<"  nze="<<nze<<"\n";
-    set_rounding_to_nearest();
-    z._set_error(nze);
-    //std::cerr<<"  z="<<z<<"\n";
-    z/=a;
-    //std::cerr<<"  z="<<z<<"\n";
-    return z;
-}
-
-TaylorModel<ValidatedFloat> log(const TaylorModel<ValidatedFloat>& x) {
-    // Use a special routine to minimise errors
-    // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
-    UpperInterval r=x.range();
-    if(r.lower().raw()<=0) {
-        ARIADNE_THROW(DomainException,"sqrt",x.range());
-    }
-    Float a=(r.lower().raw()+r.upper().raw())/2;
-    set_rounding_upward();
-    Float eps=(r.upper().raw()-r.lower().raw())/(r.upper().raw()+r.lower().raw());
-    set_rounding_to_nearest();
-    assert(eps<1);
-    Nat d=integer_cast<Nat>((log((1-eps)*x.tolerance())/log(eps)+1));
-    TaylorModel<ValidatedFloat> y=x/a-1;
-    TaylorModel<ValidatedFloat> z(x.argument_size(),x.sweeper());
-    z+=Float(d%2?-1:+1)/d;
-    for(Nat i=1; i!=d; ++i) {
-        z=Float((d-i)%2?+1:-1)/(d-i) + z * y;
-        z.sweep();
-    }
-    z=z*y;
-    z.sweep();
-    Float trunc_err=pow(eps,d)/(1-eps)/d;
-    return z+log(ValidatedFloat(a))+ValidatedFloat(-trunc_err,+trunc_err);
-}
-
-// Use special code to utilise exp(ax+b)=exp(x)^a*exp(b)
-TaylorModel<ValidatedFloat> exp(const TaylorModel<ValidatedFloat>& x) {
-    // FIXME: Truncation error may be incorrect
-
-    // Scale to unit interval
-    TaylorModel<ValidatedFloat> y=x;
-    Float xval=x.value().raw();
-    y-=xval;
-    Float xrad=mag(y.range()).raw();
-    Nat sfp=0; // A number such that 2^sfp>rad(x.range())
-    while(Float(1<<sfp)<xrad) { ++sfp; }
-    TwoExp sf=two_exp(-sfp);
-    _scal(y,sf);
-    Float yrad=xrad*sf.raw();
-
-    const DegreeType degree=MAXIMUM_DEGREE;
-
-    // Since x is in unit domain, truncation error is no worse than maximum omitted term, i.e. xr/fac(d+1)
-    TaylorModel<ValidatedFloat> res(x.argument_size(),x.sweeper());
-    res._set_error(pow_up(yrad,degree+1));
-    for(Nat i=0; i!=degree; ++i) {
-        res/=(degree-i);
-        res=y*res+1.0;
-    }
-
-    // Square r a total of sfp times
-    TaylorModel<ValidatedFloat> square(x.argument_size(),x.sweeper());
-    for(Nat i=0; i!=sfp; ++i) {
-        _mul(square,res,res);
-        res.swap(square);
-        square.clear();
-    }
-
-    // Multiply by exp(xv)
-    res*=Ariadne::exp(ValidatedFloat(xval));
-
-    return res;
-    //return _compose(&Series<ValidatedFloat>::exp,x,x.tolerance());
-}
-
-// Use special code to utilise sin(x+2pi)=sin(x)
-// and that the power series is of the form x*f(x^2)
-TaylorModel<ValidatedFloat> sin(const TaylorModel<ValidatedFloat>& x) {
-    // FIXME: Truncation error may be incorrect
-    TaylorModel<ValidatedFloat> y(x.argument_size(),x.sweeper());
-    TaylorModel<ValidatedFloat> s(x.argument_size(),x.sweeper());
-    TaylorModel<ValidatedFloat> r(x.argument_size(),x.sweeper());
-    TaylorModel<ValidatedFloat> t(x.argument_size(),x.sweeper());
-
-    ExactNumber one(1.0);
-
-    Float two_pi_approx=2*pi_approx;
-    Int n=integer_cast<Int>(floor(x.value().raw()/two_pi_approx + 0.5));
-    y=x-(n*2*pi_val);
-
-    if(y.error().raw()>two_pi_approx/2) {
-        r.error().raw()=one.raw();
-    } else {
-        _mul(s,y,y);
-
-        Int d=(MAXIMUM_DEGREE+3)/2;
-        Float srad=mag(s.range()).raw();
-        Float truncation_error=pow_up(srad,d+1)*rec_fac_up((d+1)*2);
-
-        // Compute x(1-y/6+y^2/120-y^3/5040+... = x(1-y/6*(1-y/20*(1-y/42*...)
-        r=one;
-        for(Int i=0; i!=d; ++i) {
-            r/=Float(-2*(d-i)*(2*(d-i)+1));
-            _mul(t,s,r); r.swap(t); t.clear();
-            r+=one;
-        }
-        _mul(t,y,r); r.swap(t);
-
-        r.error().raw()+=truncation_error;
-    }
-
-    return r;
-}
-
-// Use special code to utilise sin(x+2pi)=sin(x)
-// and that the power series is of the form f(x^2)
-TaylorModel<ValidatedFloat> cos(const TaylorModel<ValidatedFloat>& x) {
-    // FIXME: Truncation error may be incorrect
-    TaylorModel<ValidatedFloat> y(x.argument_size(),x.sweeper());
-    TaylorModel<ValidatedFloat> s(x.argument_size(),x.sweeper());
-    TaylorModel<ValidatedFloat> r(x.argument_size(),x.sweeper());
-    TaylorModel<ValidatedFloat> t(x.argument_size(),x.sweeper());
-
-    Float two_pi=2*pi_approx;
-    Int n=integer_cast<Int>(floor(x.value().raw()/two_pi + 0.5));
-
-    y=x-2*n*pi_val;
-    ExactNumber one(1.0);
-
-    if(y.error().raw()>two_pi/2) {
-        r.error().raw()=one.raw();
-    } else {
-        _mul(s,y,y);
-
-        Int d=(MAXIMUM_DEGREE+3)/2;
-        Float srad=mag(s.range()).raw();
-        Float truncation_error=pow_up(srad,d+1)*rec_fac_up((d+1)*2);
-
-        // Compute 1-y/2+y^2/24-y^3/720+... = (1-y/2*(1-y/12*(1-y/30*...)
-        r=one;
-        for(Int i=0; i!=d; ++i) {
-            r/=double(-2*(d-i)*(2*(d-i)-1));
-            _mul(t,s,r); r.swap(t); t.clear();
-            r+=one;
-        }
-
-        r.error().raw()+=truncation_error;
-    }
-
-    return r;
-}
-
-TaylorModel<ValidatedFloat> tan(const TaylorModel<ValidatedFloat>& x) {
-    return sin(x)*rec(cos(x));
-}
-
-TaylorModel<ValidatedFloat> atan(const TaylorModel<ValidatedFloat>& x) {
-    static const DegreeType degree=MAXIMUM_DEGREE;
-    TaylorSeries<ValidatedFloat> series(Atan(),x.codomain(),x.value(),degree);
-    return compose(series,x);
-}
-
-
-
+// Algebraic and trancendental functions are implemented using generic Algebra code
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1286,7 +1050,7 @@ TaylorModel<ValidatedFloat> discard_variables(const TaylorModel<ValidatedFloat>&
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Inplace function operators
+// Differentiation operators
 
 
 Void TaylorModel<ValidatedFloat>::antidifferentiate(SizeType k) {

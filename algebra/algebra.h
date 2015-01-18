@@ -89,6 +89,7 @@ template<class X> class NormedAlgebra
     //! \brief A value \c r such that \c |a-c1|<=r.
     typename AlgebraTraits<X>::NormType radius() const { return _ptr->radius(); }
     NormedAlgebra<X> create_zero() const { return NormedAlgebra<X>(_ptr->_create()); }
+    NormedAlgebra<X> create_constant(X c) const { return NormedAlgebra<X>(_ptr->_create_constant(c)); }
     NormedAlgebra<X> create_ball(ErrorFloat r) const { return NormedAlgebra<X>(_ptr->_create_ball(r)); }
     NormedAlgebra<X> create_ball(ApproximateFloat r) const {
         return create_ball(ErrorFloat(RawFloat(r))); }

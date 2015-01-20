@@ -64,13 +64,13 @@ class ScalarFunction
     typedef P InformationTag;
     typedef X NumericType;
 
-    static ScalarFunction<P> zero(Nat m);
-    static ScalarFunction<P> constant(Nat m, NumericType c);
-    static ScalarFunction<P> coordinate(Nat m, Nat j);
-    static List< ScalarFunction<P> > coordinates(Nat n);
+    static ScalarFunction<P> zero(SizeType m);
+    static ScalarFunction<P> constant(SizeType m, NumericType c);
+    static ScalarFunction<P> coordinate(SizeType m, SizeType j);
+    static List< ScalarFunction<P> > coordinates(SizeType n);
 
-    explicit ScalarFunction(Nat as);
-    explicit ScalarFunction(Nat as, Formula<NumericType> f);
+    explicit ScalarFunction(SizeType as);
+    explicit ScalarFunction(SizeType as, Formula<NumericType> f);
 
     ScalarFunction();
     explicit ScalarFunction(ScalarFunctionInterface<P>* p) : _ptr(p) { }
@@ -89,14 +89,14 @@ class ScalarFunction
     const ScalarFunctionInterface<P>& reference() const  { return _ptr.operator*(); }
     operator const ScalarFunctionInterface<P>& () const { return _ptr.operator*(); }
 
-    Nat argument_size() const { return this->reference().argument_size(); }
+    SizeType argument_size() const { return this->reference().argument_size(); }
     template<class XX> XX evaluate(const Vector<XX>& x) const { return this->reference().evaluate(x); }
     template<class XX> XX operator() (const Vector<XX>& x) const { return this->reference().evaluate(x); }
 
-    ScalarFunction<P> derivative(Nat j) const { return this->reference().derivative(j); }
+    ScalarFunction<P> derivative(SizeType j) const { return this->reference().derivative(j); }
 
     template<class XX> Covector<XX> gradient(const Vector<XX>& x) const { return this->reference().gradient(x); }
-    template<class XX> Differential<XX> differential(const Vector<XX>& x, Nat d) const { return this->_ptr->differential(x,d); }
+    template<class XX> Differential<XX> differential(const Vector<XX>& x, SizeType d) const { return this->_ptr->differential(x,d); }
 
     OutputStream& write(OutputStream& os) const { return this->_ptr->write(os); }
 };
@@ -123,11 +123,11 @@ inline ValidatedNumber ScalarFunctionInterface<ValidatedTag>::operator() (const 
     return this->evaluate(x); }
 inline EffectiveNumber ScalarFunctionInterface<EffectiveTag>::operator() (const Vector<EffectiveNumber>& x) const {
     return this->evaluate(x); }
-inline ApproximateScalarFunction ScalarFunctionInterface<ApproximateTag>::derivative(Nat j) const {
+inline ApproximateScalarFunction ScalarFunctionInterface<ApproximateTag>::derivative(SizeType j) const {
     return ApproximateScalarFunction(this->_derivative(j)); }
-inline ValidatedScalarFunction ScalarFunctionInterface<ValidatedTag>::derivative(Nat j) const {
+inline ValidatedScalarFunction ScalarFunctionInterface<ValidatedTag>::derivative(SizeType j) const {
     return ValidatedScalarFunction(this->_derivative(j)); }
-inline EffectiveScalarFunction ScalarFunctionInterface<EffectiveTag>::derivative(Nat j) const {
+inline EffectiveScalarFunction ScalarFunctionInterface<EffectiveTag>::derivative(SizeType j) const {
     return EffectiveScalarFunction(this->_derivative(j)); }
 
 /*
@@ -207,13 +207,13 @@ class VectorFunction
   public:
     typedef X NumericType;
 
-    static VectorFunction<P> zeros(Nat rs, Nat as);
-    static VectorFunction<P> identity(Nat n);
+    static VectorFunction<P> zeros(SizeType rs, SizeType as);
+    static VectorFunction<P> identity(SizeType n);
 
     VectorFunction();
-    VectorFunction(Nat rs, Nat as);
-    VectorFunction(Nat as, const List< Formula<X> >& flst);
-    VectorFunction(Nat rs, ScalarFunction<P> sf);
+    VectorFunction(SizeType rs, SizeType as);
+    VectorFunction(SizeType as, const List< Formula<X> >& flst);
+    VectorFunction(SizeType rs, ScalarFunction<P> sf);
 
     explicit VectorFunction(VectorFunctionInterface<P>* fptr) : _ptr(fptr) { }
     VectorFunction(std::shared_ptr< VectorFunctionInterface<P> > fptr) : _ptr(fptr) { }
@@ -231,22 +231,22 @@ class VectorFunction
     template<class PP> VectorFunction(const VectorFunction<PP>& vf, EnableIf< IsStronger<PP,P>, Void >* = 0)
         : _ptr(std::dynamic_pointer_cast< const VectorFunctionInterface<P> >(vf.managed_pointer())) { }
 
-    ScalarFunction<P> get(Nat i) const { return ScalarFunction<P>(this->_ptr->_get(i)); }
-    //Void set(Nat i, ScalarFunction<P> f) { this->_ptr->_set(i,f); };
-    Void set(Nat i, ScalarFunction<P> f);
+    ScalarFunction<P> get(SizeType i) const { return ScalarFunction<P>(this->_ptr->_get(i)); }
+    //Void set(SizeType i, ScalarFunction<P> f) { this->_ptr->_set(i,f); };
+    Void set(SizeType i, ScalarFunction<P> f);
 
-    ScalarFunction<P> operator[](Nat i) const { return this->get(i); }
-    VectorFunctionElementReference<P> operator[](Nat i);
+    ScalarFunction<P> operator[](SizeType i) const { return this->get(i); }
+    VectorFunctionElementReference<P> operator[](SizeType i);
 
-    Nat result_size() const { return this->_ptr->result_size(); }
-    Nat argument_size() const { return this->_ptr->argument_size(); }
+    SizeType result_size() const { return this->_ptr->result_size(); }
+    SizeType argument_size() const { return this->_ptr->argument_size(); }
 
     template<class XX> auto evaluate(const Vector<XX>& x) const -> decltype(this->_ptr->evaluate(x)) { return this->_ptr->evaluate(x); }
     template<class XX> auto operator() (const Vector<XX>& x) const -> decltype(this->_ptr->evaluate(x)) { return this->_ptr->evaluate(x); }
 
     template<class XX> auto jacobian(const Vector<XX>& x) const -> decltype(this->_ptr->jacobian(x)) {
         return this->_ptr->jacobian(x); }
-    template<class XX> auto differentials(const Vector<XX>& x, Nat d) const -> decltype(this->_ptr->differentials(x,d)) {
+    template<class XX> auto differentials(const Vector<XX>& x, SizeType d) const -> decltype(this->_ptr->differentials(x,d)) {
         return this->_ptr->differentials(x,d); }
 
     OutputStream& write(OutputStream& os) const { return this->_ptr->write(os); }
@@ -267,8 +267,8 @@ template<class X> VectorFunction<X> operator-(const VectorFunction<X>& f1, const
 template<class X> VectorFunction<X> operator*(const VectorFunction<X>& vf, const ScalarFunction<X>& sf);
 template<class X> VectorFunction<X> operator*(const ScalarFunction<X>& sf, const VectorFunction<X>& vf);
 
-template<class X> ScalarFunction<X> embed(Nat as1, const ScalarFunction<X>& f2, Nat as3);
-template<class X> VectorFunction<X> embed(Nat as1, const VectorFunction<X>& f2, Nat as3);
+template<class X> ScalarFunction<X> embed(SizeType as1, const ScalarFunction<X>& f2, SizeType as3);
+template<class X> VectorFunction<X> embed(SizeType as1, const VectorFunction<X>& f2, SizeType as3);
 
 template<class X> VectorFunction<X> join(const ScalarFunction<X>& f1, const ScalarFunction<X>& f2);
 template<class X> VectorFunction<X> join(const ScalarFunction<X>& f1, const VectorFunction<X>& f2);
@@ -288,8 +288,8 @@ EffectiveVectorFunction operator*(const EffectiveVectorFunction& vf, const Effec
 EffectiveVectorFunction operator*(const EffectiveScalarFunction& sf, const EffectiveVectorFunction& vf);
 EffectiveVectorFunction operator*(const EffectiveNumber& c, const EffectiveVectorFunction& vf);
 
-EffectiveScalarFunction embed(Nat as1, const EffectiveScalarFunction& f2, Nat as3);
-EffectiveVectorFunction embed(Nat as1, const EffectiveVectorFunction& f2, Nat as3);
+EffectiveScalarFunction embed(SizeType as1, const EffectiveScalarFunction& f2, SizeType as3);
+EffectiveVectorFunction embed(SizeType as1, const EffectiveVectorFunction& f2, SizeType as3);
 
 EffectiveVectorFunction join(const EffectiveScalarFunction& f1, const EffectiveScalarFunction& f2);
 EffectiveVectorFunction join(const EffectiveScalarFunction& f1, const EffectiveVectorFunction& f2);
@@ -318,15 +318,15 @@ ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const Validate
 
 template<class P>
 struct VectorFunctionElementReference {
-    VectorFunction<P>& _vf; Nat _i;
-    VectorFunctionElementReference<P>(VectorFunction<P>& vf, Nat i) : _vf(vf), _i(i) { }
+    VectorFunction<P>& _vf; SizeType _i;
+    VectorFunctionElementReference<P>(VectorFunction<P>& vf, SizeType i) : _vf(vf), _i(i) { }
     Void operator=(const ScalarFunction<P>& sf);
     VectorFunctionElementReference<P>& operator=(const VectorFunctionElementReference<P>& sfr);
     template<class XX> XX evaluate(const Vector<XX> & x) const;
     template<class XX> XX operator()(const Vector<XX> & x) const;
 };
 
-template<class P> inline VectorFunctionElementReference<P> VectorFunction<P>::operator[](Nat i) { return VectorFunctionElementReference<P>(*this,i); }
+template<class P> inline VectorFunctionElementReference<P> VectorFunction<P>::operator[](SizeType i) { return VectorFunctionElementReference<P>(*this,i); }
 template<class P> inline OutputStream& operator<<(OutputStream& os, const VectorFunctionElementReference<P>& vfe) {
     return  os << static_cast< ScalarFunction<P> >(vfe); }
 
@@ -338,11 +338,11 @@ template<class P> template<class XX> inline XX VectorFunctionElementReference<P>
 template<class P> template<class XX> inline XX VectorFunctionElementReference<P>::operator()(const Vector<XX> & x) const {
     return static_cast< ScalarFunction<P> >(*this).evaluate(x); }
 
-inline ApproximateScalarFunction VectorFunctionInterface<ApproximateTag>::operator[](Nat i) const {
+inline ApproximateScalarFunction VectorFunctionInterface<ApproximateTag>::operator[](SizeType i) const {
     return ApproximateScalarFunction(this->_get(i)); }
-inline ValidatedScalarFunction VectorFunctionInterface<ValidatedTag>::operator[](Nat i) const {
+inline ValidatedScalarFunction VectorFunctionInterface<ValidatedTag>::operator[](SizeType i) const {
     return ValidatedScalarFunction(this->_get(i)); }
-inline EffectiveScalarFunction VectorFunctionInterface<EffectiveTag>::operator[](Nat i) const {
+inline EffectiveScalarFunction VectorFunctionInterface<EffectiveTag>::operator[](SizeType i) const {
     return EffectiveScalarFunction(this->_get(i)); }
 
 
@@ -360,7 +360,7 @@ inline UpperInterval evaluate(ScalarFunction<ValidatedTag>const& f, const Vector
     return static_cast<UpperInterval>(f.evaluate(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
 inline Differential<UpperInterval> evaluate(ScalarFunction<ValidatedTag>const& f, const Vector<Differential<UpperInterval>>& x) {
     return static_cast<Differential<UpperInterval>>(f.evaluate(reinterpret_cast<Vector<Differential<ValidatedFloat>>const&>(x))); }
-inline Differential<UpperInterval> differential(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x, Nat d) {
+inline Differential<UpperInterval> differential(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x, SizeType d) {
     return static_cast<Differential<UpperInterval>>(f.differential(reinterpret_cast<Vector<ValidatedFloat>const&>(x),d)); }
 inline Covector<UpperInterval> gradient(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Covector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
@@ -375,7 +375,7 @@ inline Vector<UpperInterval> evaluate(VectorFunction<ValidatedTag>const& f, cons
     return static_cast<Vector<UpperInterval>>(f.evaluate(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
 inline Vector<Differential<UpperInterval>> evaluate(VectorFunction<ValidatedTag>const& f, const Vector<Differential<UpperInterval>>& x) {
     return static_cast<Vector<Differential<UpperInterval>>>(f.evaluate(reinterpret_cast<Vector<Differential<ValidatedFloat>>const&>(x))); }
-inline Vector<Differential<UpperInterval>> differentials(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x, Nat d) {
+inline Vector<Differential<UpperInterval>> differentials(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x, SizeType d) {
     return static_cast<Vector<Differential<UpperInterval>>>(f.differentials(reinterpret_cast<Vector<ValidatedFloat>const&>(x),d)); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }

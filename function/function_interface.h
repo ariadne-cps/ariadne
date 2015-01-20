@@ -39,7 +39,7 @@ class ScalarFunctionInterface<Void>
 {
   public:
     //! \brief The type used to describe the number of argument variables.
-    typedef Nat SizeType;
+    typedef Ariadne::SizeType SizeType;
 
     //! \brief Virtual destructor.
     virtual ~ScalarFunctionInterface() { };
@@ -77,12 +77,12 @@ class ScalarFunctionInterface<ApproximateTag>
     virtual Algebra<ApproximateNumber> evaluate(const Vector< Algebra<ApproximateNumber> >& x) const = 0;
 
     Covector<ApproximateNumber> gradient(const Vector<ApproximateNumber>& x) const;
-    Differential<ApproximateNumber> differential(const Vector<ApproximateNumber>& x, Nat d) const;
+    Differential<ApproximateNumber> differential(const Vector<ApproximateNumber>& x, SizeType d) const;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<ApproximateTag> derivative(Nat i) const;
+    inline ScalarFunction<ApproximateTag> derivative(SizeType i) const;
   private:
-    virtual ScalarFunctionInterface<ApproximateTag>* _derivative(Nat i) const = 0;
+    virtual ScalarFunctionInterface<ApproximateTag>* _derivative(SizeType i) const = 0;
   public:
     virtual ScalarFunctionInterface<ApproximateTag>* _clone() const = 0;
 };
@@ -117,13 +117,13 @@ class ScalarFunctionInterface<ValidatedTag>
     using ScalarFunctionInterface<ApproximateTag>::gradient;
     Covector<ValidatedNumber> gradient(const Vector<ValidatedNumber>& x) const;
     using ScalarFunctionInterface<ApproximateTag>::differential;
-    Differential<ValidatedNumber> differential(const Vector<ValidatedNumber>& x, Nat d) const;
+    Differential<ValidatedNumber> differential(const Vector<ValidatedNumber>& x, SizeType d) const;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<ValidatedTag> derivative(Nat i) const;
+    inline ScalarFunction<ValidatedTag> derivative(SizeType i) const;
   private:
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    virtual ScalarFunctionInterface<ValidatedTag>* _derivative(Nat i) const = 0;
+    virtual ScalarFunctionInterface<ValidatedTag>* _derivative(SizeType i) const = 0;
   public:
     virtual ScalarFunctionInterface<ValidatedTag>* _clone() const = 0;
 };
@@ -149,10 +149,10 @@ class ScalarFunctionInterface<EffectiveTag>
     virtual Algebra<EffectiveNumber> evaluate(const Vector< Algebra<EffectiveNumber> >& x) const = 0;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<EffectiveTag> derivative(Nat i) const;
+    inline ScalarFunction<EffectiveTag> derivative(SizeType i) const;
   private:
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    virtual ScalarFunctionInterface<EffectiveTag>* _derivative(Nat i) const = 0;
+    virtual ScalarFunctionInterface<EffectiveTag>* _derivative(SizeType i) const = 0;
   public:
     virtual ScalarFunctionInterface<EffectiveTag>* _clone() const = 0;
 };
@@ -172,7 +172,7 @@ class VectorFunctionInterface<Void>
 {
   public:
     //! \brief The type used to describe the number of argument variables.
-    typedef Nat SizeType;
+    typedef Ariadne::SizeType SizeType;
 
     //! \brief Virtual destructor.
     virtual ~VectorFunctionInterface() { };
@@ -210,12 +210,12 @@ class VectorFunctionInterface<ApproximateTag>
     virtual Vector< Algebra<ApproximateNumber> > evaluate(const Vector< Algebra<ApproximateNumber> >& x) const = 0;
 
     Matrix<ApproximateNumber> jacobian(const Vector<ApproximateNumber>& x) const;
-    Vector< Differential<ApproximateNumber> > differentials(const Vector<ApproximateNumber>& x, Nat d) const;
+    Vector< Differential<ApproximateNumber> > differentials(const Vector<ApproximateNumber>& x, SizeType d) const;
 
     //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<ApproximateTag> operator[](Nat i) const;
+    inline ScalarFunction<ApproximateTag> operator[](SizeType i) const;
   public:
-    virtual ScalarFunctionInterface<ApproximateTag>* _get(Nat i) const = 0;
+    virtual ScalarFunctionInterface<ApproximateTag>* _get(SizeType i) const = 0;
     virtual VectorFunctionInterface<ApproximateTag>* _clone() const = 0;
 };
 
@@ -246,12 +246,12 @@ class VectorFunctionInterface<ValidatedTag>
     Matrix<ValidatedNumber> jacobian(const Vector<ValidatedNumber>& x) const;
     Matrix<ValidatedNumber> jacobian(const Vector<ExactNumber>& x) const;
     using VectorFunctionInterface<ApproximateTag>::differentials;
-    Vector< Differential<ValidatedNumber> > differentials(const Vector<ValidatedNumber>& x, Nat d) const;
+    Vector< Differential<ValidatedNumber> > differentials(const Vector<ValidatedNumber>& x, SizeType d) const;
 
     //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<ValidatedTag> operator[](Nat i) const;
+    inline ScalarFunction<ValidatedTag> operator[](SizeType i) const;
   public:
-    virtual ScalarFunctionInterface<ValidatedTag>* _get(Nat i) const = 0;
+    virtual ScalarFunctionInterface<ValidatedTag>* _get(SizeType i) const = 0;
     virtual VectorFunctionInterface<ValidatedTag>* _clone() const = 0;
 
 };
@@ -274,9 +274,9 @@ class VectorFunctionInterface<EffectiveTag>
     virtual Vector< Algebra<EffectiveNumber> > evaluate(const Vector< Algebra<EffectiveNumber> >& x) const = 0;
 
     //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<EffectiveTag> operator[](Nat i) const;
+    inline ScalarFunction<EffectiveTag> operator[](SizeType i) const;
   public:
-    virtual ScalarFunctionInterface<EffectiveTag>* _get(Nat i) const = 0;
+    virtual ScalarFunctionInterface<EffectiveTag>* _get(SizeType i) const = 0;
     virtual VectorFunctionInterface<EffectiveTag>* _clone() const = 0;
 };
 

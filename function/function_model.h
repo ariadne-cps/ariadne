@@ -80,7 +80,7 @@ template<> class ScalarFunctionModelInterface<ValidatedTag>
     virtual UpperInterval range() const = 0;
 
     virtual CoefficientType const& value() const = 0;
-    virtual CoefficientType const gradient_value(Nat i) const = 0;
+    virtual CoefficientType const gradient_value(SizeType i) const = 0;
     virtual ErrorType const& error() const = 0;
 
     virtual Void set_error(const ErrorType& e) = 0;
@@ -93,13 +93,13 @@ template<> class ScalarFunctionModelInterface<ValidatedTag>
 
     virtual ScalarFunctionModelInterface<ValidatedTag>* _clone() const = 0;
     virtual ScalarFunctionModelInterface<ValidatedTag>* _create() const = 0;
-    virtual VectorFunctionModelInterface<ValidatedTag>* _create_vector(Nat i) const = 0;
+    virtual VectorFunctionModelInterface<ValidatedTag>* _create_vector(SizeType i) const = 0;
     virtual ScalarFunctionModelInterface<ValidatedTag>* _embed(const ExactBox& d1, const ExactBox& d2) const = 0;
     virtual VectorFunctionModelInterface<ValidatedTag>* _create_identity() const = 0;
     virtual Void restrict(const ExactBox& d) = 0;
 
-    virtual ScalarFunctionModelInterface<ValidatedTag>* _derivative(Nat j) const = 0;
-    virtual ScalarFunctionModelInterface<ValidatedTag>* _antiderivative(Nat j) const = 0;
+    virtual ScalarFunctionModelInterface<ValidatedTag>* _derivative(SizeType j) const = 0;
+    virtual ScalarFunctionModelInterface<ValidatedTag>* _antiderivative(SizeType j) const = 0;
 
     virtual Boolean _refines(const ScalarFunctionModelInterface<ValidatedTag>& f) const = 0;
     virtual Boolean _disjoint(const ScalarFunctionModelInterface<ValidatedTag>& f) const = 0;
@@ -123,7 +123,7 @@ template<class F> class ScalarFunctionModelMixin<F,ValidatedTag>
         return new F(static_cast<const F&>(*this)); }
     NormType const _norm() const {
         return norm(static_cast<const F&>(*this)); }
-    ScalarFunctionModelInterface<ValidatedTag>* _antiderivative(Nat j) const {
+    ScalarFunctionModelInterface<ValidatedTag>* _antiderivative(SizeType j) const {
         return new F(antiderivative(static_cast<const F&>(*this),j)); }
     ScalarFunctionModelInterface<ValidatedTag>* _apply(OperatorCode op) const {
         return new F(this->apply(op)); }
@@ -172,7 +172,7 @@ template<> class ScalarFunctionModel<ValidatedTag>
     ScalarFunctionModel<ValidatedTag>& operator=(const ValidatedNumber& c);
     ScalarFunctionModel<ValidatedTag>& operator=(const ValidatedScalarFunction& f);
     ScalarFunctionModel<ValidatedTag>& operator=(const ScalarTaylorFunction& f);
-    inline Nat argument_size() const { return this->_ptr->argument_size(); }
+    inline SizeType argument_size() const { return this->_ptr->argument_size(); }
     template<class XX> inline XX operator()(const Vector<XX>& v) const { return this->_ptr->evaluate(v); }
     template<class XX> inline XX evaluate(const Vector<XX>& v) const { return this->_ptr->evaluate(v); }
     inline ExactBox const domain() const { return this->_ptr->domain(); }
@@ -180,7 +180,7 @@ template<> class ScalarFunctionModel<ValidatedTag>
     inline UpperInterval const range() const { return this->_ptr->range(); }
 
     inline CoefficientType value() const { return this->_ptr->value(); }
-    inline CoefficientType gradient_value(Nat j) const { return this->_ptr->gradient_value(j); }
+    inline CoefficientType gradient_value(SizeType j) const { return this->_ptr->gradient_value(j); }
     inline ErrorType error() const { return this->_ptr->error(); }
 
     inline Void set_error(const ErrorType& e) { return this->_ptr->set_error(e); }
@@ -193,8 +193,8 @@ template<> class ScalarFunctionModel<ValidatedTag>
 // inline ScalarFunctionModel<ValidatedTag>& ScalarFunctionModel<ValidatedTag>::operator=(const ValidatedScalarFunction& f) { (*this)=this->_ptr->_create()+f; return *this; }
 
 inline NormType norm(const ScalarFunctionModel<ValidatedTag>& f) { return f._ptr->_norm(); }
-inline ScalarFunctionModel<ValidatedTag> derivative(const ScalarFunctionModel<ValidatedTag>& f, Nat j) { return f._ptr->_derivative(j); }
-inline ScalarFunctionModel<ValidatedTag> antiderivative(const ScalarFunctionModel<ValidatedTag>& f, Nat j) { return f._ptr->_antiderivative(j); }
+inline ScalarFunctionModel<ValidatedTag> derivative(const ScalarFunctionModel<ValidatedTag>& f, SizeType j) { return f._ptr->_derivative(j); }
+inline ScalarFunctionModel<ValidatedTag> antiderivative(const ScalarFunctionModel<ValidatedTag>& f, SizeType j) { return f._ptr->_antiderivative(j); }
 inline ScalarFunctionModel<ValidatedTag> restriction(const ScalarFunctionModel<ValidatedTag>& f, const ExactBox& d) {
     ScalarFunctionModel<ValidatedTag> r(f); r.restrict(d); return r; }
 
@@ -291,8 +291,8 @@ template<> class VectorFunctionModelInterface<ValidatedTag>
     virtual VectorFunctionModelInterface<ValidatedTag>* _clone() const = 0;
     virtual ScalarFunctionModelInterface<ValidatedTag>* _create_zero() const = 0;
     virtual VectorFunctionModelInterface<ValidatedTag>* _create_identity() const = 0;
-    virtual Void _set(Nat, ScalarFunctionModelInterface<ValidatedTag> const&) = 0;
-    virtual ScalarFunctionModelInterface<ValidatedTag>* _get(Nat) const = 0;
+    virtual Void _set(SizeType, ScalarFunctionModelInterface<ValidatedTag> const&) = 0;
+    virtual ScalarFunctionModelInterface<ValidatedTag>* _get(SizeType) const = 0;
     virtual VectorFunctionModelInterface<ValidatedTag>* _embed(const ExactBox& d1, const ExactBox& d2) const = 0;
     virtual VectorFunctionModelInterface<ValidatedTag>* _join(const VectorFunctionModelInterface<ValidatedTag>& f2) const = 0;
     virtual VectorFunctionModelInterface<ValidatedTag>* _combine(const VectorFunctionModelInterface<ValidatedTag>& f2) const = 0;
@@ -302,7 +302,7 @@ template<> class VectorFunctionModelInterface<ValidatedTag>
     virtual VectorFunctionModelInterface<ValidatedTag>* _compose(const VectorFunctionInterface<ValidatedTag>& f) const = 0;
     virtual ScalarFunctionModelInterface<ValidatedTag>* _unchecked_compose(const ScalarFunctionInterface<ValidatedTag>& f) const = 0;
     virtual VectorFunctionModelInterface<ValidatedTag>* _unchecked_compose(const VectorFunctionInterface<ValidatedTag>& f) const = 0;
-    virtual VectorFunctionModelInterface<ValidatedTag>* _partial_evaluate(Nat j, const ValidatedNumber& c) const = 0;
+    virtual VectorFunctionModelInterface<ValidatedTag>* _partial_evaluate(SizeType j, const ValidatedNumber& c) const = 0;
     virtual Void restrict(const ExactBox& d) = 0;
 };
 
@@ -321,7 +321,7 @@ template<class F> class VectorFunctionModelMixin<F,ValidatedTag>
     typedef typename Element<F>::Type ScalarFunctionType;
   public:
     virtual VectorFunctionModelInterface<ValidatedTag>* _clone() const { return new F(static_cast<const F&>(*this)); }
-    virtual Void _set(Nat i, const ScalarFunctionModelInterface<ValidatedTag>& sf) {
+    virtual Void _set(SizeType i, const ScalarFunctionModelInterface<ValidatedTag>& sf) {
         if(!dynamic_cast<const typename F::ScalarFunctionType*>(&sf)) {
             ARIADNE_FAIL_MSG("Cannot set element of VectorFunctionModel "<<*this<<" to "<<sf<<"\n"); }
         static_cast<F&>(*this).F::set(i,dynamic_cast<const ScalarFunctionType&>(sf)); }
@@ -345,15 +345,15 @@ template<class F> class VectorFunctionModelMixin<F,ValidatedTag>
         return heap_copy(unchecked_compose(dynamic_cast<const ScalarFunctionType&>(f),static_cast<const F&>(*this))); }
     VectorFunctionModelInterface<ValidatedTag>* _unchecked_compose(const VectorFunctionInterface<ValidatedTag>& f) const {
         return heap_copy(unchecked_compose(dynamic_cast<const F&>(f),static_cast<const F&>(*this))); }
-    VectorFunctionModelInterface<ValidatedTag>* _partial_evaluate(Nat j, const ValidatedNumber& c) const {
+    VectorFunctionModelInterface<ValidatedTag>* _partial_evaluate(SizeType j, const ValidatedNumber& c) const {
         return heap_copy(partial_evaluate(static_cast<const F&>(*this),j,c)); }
 };
 
 template<class X> class VectorFunctionModelElement {
-    VectorFunctionModel<X>* _p; Nat _i;
+    VectorFunctionModel<X>* _p; SizeType _i;
   public:
     operator const ScalarFunctionModel<X> () const;
-    VectorFunctionModelElement(VectorFunctionModel<X>* p, Nat i) : _p(p), _i(i) { }
+    VectorFunctionModelElement(VectorFunctionModel<X>* p, SizeType i) : _p(p), _i(i) { }
     VectorFunctionModelElement<X>& operator=(const ScalarFunctionModel<X>& sf) { _p->set(_i,sf); return *this; }
     VectorFunctionModelElement<X>& operator=(const VectorFunctionModelElement<X>& sf) { return this->operator=(static_cast<ScalarFunctionModel<X>const>(sf)); }
     Void clobber() { ScalarFunctionModel<ValidatedTag> sf=_p->get(_i); sf.clobber(); _p->set(_i,sf); }
@@ -371,8 +371,8 @@ template<> class VectorFunctionModel<ValidatedTag>
     clone_on_copy_ptr< VectorFunctionModelInterface<ValidatedTag> > _ptr;
   public:
     inline VectorFunctionModel() : _ptr() { }
-    inline VectorFunctionModel(Nat n, const ScalarFunctionModelInterface<ValidatedTag>& sf)
-        : _ptr(sf._create_vector(n)) { for(Nat i=0; i!=n; ++i) { (*this)[i]=sf; } }
+    inline VectorFunctionModel(SizeType n, const ScalarFunctionModelInterface<ValidatedTag>& sf)
+        : _ptr(sf._create_vector(n)) { for(SizeType i=0; i!=n; ++i) { (*this)[i]=sf; } }
     inline VectorFunctionModel(VectorFunctionModelInterface<ValidatedTag>* p) : _ptr(p) { }
     inline VectorFunctionModel(const VectorFunctionModelInterface<ValidatedTag>& f) : _ptr(f._clone()) { }
     inline VectorFunctionModel(const VectorFunctionModel<ValidatedTag>& f) : _ptr(f._ptr) { }
@@ -383,15 +383,15 @@ template<> class VectorFunctionModel<ValidatedTag>
     inline VectorFunctionModelInterface<ValidatedTag>& reference() { return *_ptr; }
     inline ScalarFunctionModel<ValidatedTag> create_zero() const { return this->_ptr->_create_zero(); }
     inline VectorFunctionModel<ValidatedTag> create_identity() const { return this->_ptr->_create_identity(); }
-    inline Nat result_size() const { return this->_ptr->result_size(); }
-    inline Nat argument_size() const { return this->_ptr->argument_size(); }
-    inline Nat size() const { return this->_ptr->result_size(); }
+    inline SizeType result_size() const { return this->_ptr->result_size(); }
+    inline SizeType argument_size() const { return this->_ptr->argument_size(); }
+    inline SizeType size() const { return this->_ptr->result_size(); }
     template<class XX> inline Vector<XX> operator()(const Vector<XX>& v) const { return this->_ptr->evaluate(v); }
     template<class XX> inline Vector<XX> evaluate(const Vector<XX>& v) const { return this->_ptr->evaluate(v); }
-    inline ScalarFunctionModel<ValidatedTag> const get(Nat i) const { return this->_ptr->_get(i); }
-    inline Void set(Nat i, ScalarFunctionModel<ValidatedTag> const& sf) { this->_ptr->_set(i,sf); }
-    inline ScalarFunctionModel<ValidatedTag> const operator[](Nat i) const { return this->get(i); }
-    inline VectorFunctionModelElement<ValidatedTag> operator[](Nat i) { return VectorFunctionModelElement<ValidatedTag>(this,i); }
+    inline ScalarFunctionModel<ValidatedTag> const get(SizeType i) const { return this->_ptr->_get(i); }
+    inline Void set(SizeType i, ScalarFunctionModel<ValidatedTag> const& sf) { this->_ptr->_set(i,sf); }
+    inline ScalarFunctionModel<ValidatedTag> const operator[](SizeType i) const { return this->get(i); }
+    inline VectorFunctionModelElement<ValidatedTag> operator[](SizeType i) { return VectorFunctionModelElement<ValidatedTag>(this,i); }
     inline ExactBox const domain() const { return this->_ptr->domain(); }
     inline ExactBox const codomain() const { return this->_ptr->codomain(); }
     inline UpperBox const range() const { return this->_ptr->range(); }
@@ -419,21 +419,21 @@ inline VectorFunctionModel<ValidatedTag> restrict(const VectorFunctionModel<Vali
 inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f) {
     return f._ptr->_clone(); }
 inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f) {
-    VectorFunctionModel<ValidatedTag> r=f; for(Nat i=0; i!=r.size(); ++i) { r[i]=-f[i]; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f; for(SizeType i=0; i!=r.size(); ++i) { r[i]=-f[i]; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(Nat i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(Nat i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f1, const Vector<ValidatedNumber>& c2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(Nat i=0; i!=r.size(); ++i) { r[i]=f1[i]+c2[i]; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]+c2[i]; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f1, const Vector<ValidatedNumber>& c2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(Nat i=0; i!=r.size(); ++i) { r[i]=f1[i]-c2[i]; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-c2[i]; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator+(const Vector<ValidatedNumber>& c1, const VectorFunctionModel<ValidatedTag>& f2);
 inline VectorFunctionModel<ValidatedTag> operator-(const Vector<ValidatedNumber>& c1, const VectorFunctionModel<ValidatedTag>& f2);
 inline VectorFunctionModel<ValidatedTag> operator*(const VectorFunctionModel<ValidatedTag>& f1, const ValidatedNumber& c2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(Nat i=0; i!=r.size(); ++i) { r[i]=f1[i]*c2; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]*c2; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator*(const ValidatedNumber& c1, const VectorFunctionModel<ValidatedTag>& f2) {
-    VectorFunctionModel<ValidatedTag> r=f2; for(Nat i=0; i!=r.size(); ++i) { r[i]=c1*f2[i]; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f2; for(SizeType i=0; i!=r.size(); ++i) { r[i]=c1*f2[i]; } return r; }
 
 inline ValidatedNumber evaluate(const ScalarFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumber>& x) { return f._ptr->evaluate(x); }
 inline Vector<ValidatedNumber> evaluate(const VectorFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumber>& x) { return f._ptr->evaluate(x); }
@@ -491,15 +491,15 @@ inline VectorFunctionModel<ValidatedTag> combine(const VectorFunctionModel<Valid
 
 inline VectorFunctionModel<ValidatedTag> intersection(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
     ARIADNE_ASSERT_MSG(f1.size()==f2.size(),"intersection(f1,f2): f1="<<f1<<", f2="<<f2<<")");
-    VectorFunctionModel<ValidatedTag> r=+f1; for(Nat i=0; i!=r.size(); ++i) { r[i]=intersection(f1[i],f2[i]); } return r; }
+    VectorFunctionModel<ValidatedTag> r=+f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=intersection(f1[i],f2[i]); } return r; }
 
-inline VectorFunctionModel<ValidatedTag> antiderivative(const VectorFunctionModel<ValidatedTag>& f, Nat j) {
+inline VectorFunctionModel<ValidatedTag> antiderivative(const VectorFunctionModel<ValidatedTag>& f, SizeType j) {
     VectorFunctionModel<ValidatedTag> r(f);
-    for(Nat i=0; i!=r.size(); ++i) { r[i]=antiderivative(f[i],j); }
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=antiderivative(f[i],j); }
     return r;
 }
 
-inline VectorFunctionModel<ValidatedTag> partial_evaluate(const VectorFunctionModel<ValidatedTag>& f, Nat j, const ValidatedNumber& c) {
+inline VectorFunctionModel<ValidatedTag> partial_evaluate(const VectorFunctionModel<ValidatedTag>& f, SizeType j, const ValidatedNumber& c) {
     return f._ptr->_partial_evaluate(j,c); }
 
 
@@ -532,10 +532,10 @@ template<> class FunctionModelFactoryInterface<ValidatedTag>
     inline ScalarFunctionModel<ValidatedTag> create(const ExactBox& domain, const ScalarFunctionInterface<ValidatedTag>& function) const;
     inline VectorFunctionModel<ValidatedTag> create(const ExactBox& domain, const VectorFunctionInterface<ValidatedTag>& function) const;
     inline ScalarFunctionModel<ValidatedTag> create_zero(const ExactBox& domain) const;
-    inline VectorFunctionModel<ValidatedTag> create_zeros(Nat result_size, const ExactBox& domain) const;
+    inline VectorFunctionModel<ValidatedTag> create_zeros(SizeType result_size, const ExactBox& domain) const;
     inline ScalarFunctionModel<ValidatedTag> create_constant(const ExactBox& domain, const ValidatedNumber& value) const;
     inline VectorFunctionModel<ValidatedTag> create_constants(const ExactBox& domain, const Vector<ValidatedNumber>& values) const;
-    inline ScalarFunctionModel<ValidatedTag> create_coordinate(const ExactBox& domain, Nat index) const;
+    inline ScalarFunctionModel<ValidatedTag> create_coordinate(const ExactBox& domain, SizeType index) const;
     inline ScalarFunctionModel<ValidatedTag> create_identity(const ExactInterval& domain) const;
     inline VectorFunctionModel<ValidatedTag> create_identity(const ExactBox& domain) const;
   private:
@@ -570,13 +570,13 @@ namespace Ariadne {
 
 ScalarFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::create_zero(const ExactBox& domain) const {
     return this->_create(domain,EffectiveScalarFunction::zero(domain.size())); }
-VectorFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::create_zeros(Nat result_size, const ExactBox& domain) const {
+VectorFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::create_zeros(SizeType result_size, const ExactBox& domain) const {
     return this->_create(domain,EffectiveVectorFunction::zeros(result_size,domain.size())); }
 ScalarFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::create_constant(const ExactBox& domain, const ValidatedNumber& value) const {
     return ScalarFunctionModel<ValidatedTag>(this->_create(domain,EffectiveScalarFunction::zero(domain.size())))+value; };
 VectorFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::create_constants(const ExactBox& domain, const Vector<ValidatedNumber>& values) const {
     return VectorFunctionModel<ValidatedTag>(this->_create(domain,EffectiveVectorFunction::zeros(values.size(),domain.size())))+values; };
-ScalarFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::create_coordinate(const ExactBox& domain, Nat index) const {
+ScalarFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::create_coordinate(const ExactBox& domain, SizeType index) const {
     return ScalarFunctionModel<ValidatedTag>(this->_create(domain,EffectiveScalarFunction::coordinate(domain.size(),index))); };
 ScalarFunctionModel<ValidatedTag> FunctionModelFactoryInterface<ValidatedTag>::create_identity(const ExactInterval& domain) const {
     return this->_create(ExactBox(1,domain),EffectiveScalarFunction::coordinate(1,0)); };

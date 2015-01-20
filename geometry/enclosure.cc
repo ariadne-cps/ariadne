@@ -1126,11 +1126,11 @@ Enclosure::kuhn_recondition()
         ARIADNE_WARN("Cannot Kuhn reduce an Enclosure which is not given by TaylorFunctions.");
     }
 
-    static const Nat NUMBER_OF_BLOCKS = 2;
+    static const SizeType NUMBER_OF_BLOCKS = 2;
 
-    const Nat number_of_kept_parameters = (NUMBER_OF_BLOCKS-1)*this->dimension();
-    const Nat number_of_discarded_parameters=this->number_of_parameters()-number_of_kept_parameters;
-    const Nat number_of_error_parameters = this->dimension();
+    const SizeType number_of_kept_parameters = (NUMBER_OF_BLOCKS-1)*this->dimension();
+    const SizeType number_of_discarded_parameters=this->number_of_parameters()-number_of_kept_parameters;
+    const SizeType number_of_error_parameters = this->dimension();
 
     if(this->number_of_parameters()<=number_of_kept_parameters) {
         this->uniform_error_recondition();
@@ -1140,43 +1140,43 @@ Enclosure::kuhn_recondition()
     const VectorTaylorFunction& function=dynamic_cast<const VectorTaylorFunction&>(this->space_function().reference());
     const Vector<ValidatedTaylorModel>& models = function.models();
     Matrix<Float> dependencies(this->dimension(),this->number_of_parameters());
-    for(Nat i=0; i!=dependencies.row_size(); ++i) {
+    for(SizeType i=0; i!=dependencies.row_size(); ++i) {
         for(ValidatedTaylorModel::ConstIterator iter=models[i].begin(); iter!=models[i].end(); ++iter) {
-            for(Nat j=0; j!=dependencies.column_size(); ++j) {
+            for(SizeType j=0; j!=dependencies.column_size(); ++j) {
                 if(iter->key()[j]!=0) {
                     dependencies[i][j]+=abs(iter->data()).raw();
                 }
             }
         }
     }
-    Array< Pair<Float,Nat> > column_max_dependencies(this->number_of_parameters());
-    for(Nat j=0; j!=dependencies.column_size(); ++j) {
-        column_max_dependencies[j] = make_pair(Float(0.0),Nat(j));
-        for(Nat i=0; i!=dependencies.row_size(); ++i) {
+    Array< Pair<Float,SizeType> > column_max_dependencies(this->number_of_parameters());
+    for(SizeType j=0; j!=dependencies.column_size(); ++j) {
+        column_max_dependencies[j] = make_pair(Float(0.0),SizeType(j));
+        for(SizeType i=0; i!=dependencies.row_size(); ++i) {
             column_max_dependencies[j].first=std::max(column_max_dependencies[j].first,dependencies[i][j]);
         }
     }
-    std::sort(column_max_dependencies.begin(),column_max_dependencies.end(),std::greater< Pair<Float,Nat> >());
+    std::sort(column_max_dependencies.begin(),column_max_dependencies.end(),std::greater< Pair<Float,SizeType> >());
 
-    Array<Nat> kept_parameters(number_of_kept_parameters);
-    Array<Nat> discarded_parameters(number_of_discarded_parameters);
-    for(Nat j=0; j!=number_of_kept_parameters; ++j) { kept_parameters[j]=column_max_dependencies[j].second; }
-    for(Nat j=0; j!=number_of_discarded_parameters; ++j) { discarded_parameters[j]=column_max_dependencies[number_of_kept_parameters+j].second; }
+    Array<SizeType> kept_parameters(number_of_kept_parameters);
+    Array<SizeType> discarded_parameters(number_of_discarded_parameters);
+    for(SizeType j=0; j!=number_of_kept_parameters; ++j) { kept_parameters[j]=column_max_dependencies[j].second; }
+    for(SizeType j=0; j!=number_of_discarded_parameters; ++j) { discarded_parameters[j]=column_max_dependencies[number_of_kept_parameters+j].second; }
     std::sort(kept_parameters.begin(),kept_parameters.end());
     std::sort(discarded_parameters.begin(),discarded_parameters.end());
 
     Vector<ValidatedTaylorModel> new_models(models.size(),ValidatedTaylorModel(number_of_kept_parameters+number_of_error_parameters,function.sweeper()));
-    for(Nat i=0; i!=this->dimension(); ++i) {
+    for(SizeType i=0; i!=this->dimension(); ++i) {
         new_models[i] = Ariadne::recondition(models[i],discarded_parameters,number_of_error_parameters,i);
     }
 
     ExactBox new_domain(number_of_kept_parameters+number_of_error_parameters);
     ExactBox new_reduced_domain(number_of_kept_parameters+number_of_error_parameters);
-    for(Nat j=0; j!=number_of_kept_parameters; ++j) {
+    for(SizeType j=0; j!=number_of_kept_parameters; ++j) {
         new_domain[j]=this->parameter_domain()[kept_parameters[j]];
         new_reduced_domain[j]=this->reduced_domain()[kept_parameters[j]];
     }
-    for(Nat j=number_of_kept_parameters; j!=number_of_kept_parameters+number_of_error_parameters; ++j) {
+    for(SizeType j=number_of_kept_parameters; j!=number_of_kept_parameters+number_of_error_parameters; ++j) {
         new_domain[j]=ExactInterval(-1,+1);
         new_reduced_domain[j]=ExactInterval(-1,+1);
     }
@@ -1184,7 +1184,7 @@ Enclosure::kuhn_recondition()
     this->_reduced_domain = new_reduced_domain;
 
     Enclosure new_set(new_domain,VectorTaylorFunction(new_domain,new_models),this->function_factory());
-    for(Nat i=0; i!=this->_constraints.size(); ++i) {
+    for(SizeType i=0; i!=this->_constraints.size(); ++i) {
         const ValidatedConstraintModel& constraint=this->_constraints[i];
         ScalarTaylorFunction const& constraint_function=dynamic_cast<const ScalarTaylorFunction&>(constraint.function().reference());
         ValidatedScalarFunctionModel new_constraint_function=ScalarTaylorFunction(new_domain,Ariadne::recondition(constraint_function.model(),discarded_parameters,number_of_error_parameters));

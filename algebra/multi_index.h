@@ -63,7 +63,7 @@ template<> class Reference<const MultiIndex>;
 //! \b Rationale: The reason why tuples are used for multi-index literals is that they can be used as keys in Python \c dict objects.
 class MultiIndex {
   public:
-    typedef unsigned int SizeType;
+    typedef Ariadne::SizeType SizeType;
     typedef unsigned char ByteType;
     typedef unsigned int WordType;
 

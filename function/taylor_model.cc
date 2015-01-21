@@ -63,24 +63,6 @@ Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
 
 
 
-/*
-Vector<ValidatedNumber> unscale(const Vector<ValidatedNumber>& x, const Vector<ExactInterval>& d) {
-    Vector<ValidatedNumber> r(x);
-    for(SizeType i=0; i!=r.size(); ++i) {
-        if(d[i].lower()==d[i].upper()) {
-            if(x[i]==d[i].midpoint()) {
-                r[i]=ValidatedNumber(0.0,0.0);
-            } else {
-                r[i]=ValidatedNumber(-inf,+inf);
-            }
-        } else {
-            r[i]=(2*r[i]-(d[i].lower()+d[i].upper()))/(d[i].upper()-d[i].lower());
-        }
-    }
-    return r;
-}
-*/
-
 
 template<class F> TaylorModel<Validated,F>::TaylorModel()
     : _expansion(0), _error(0), _sweeper()
@@ -785,6 +767,25 @@ template<class F> UpperInterval TaylorModel<Validated,F>::gradient_range(SizeTyp
     return g;
 }
 
+template<class F> Covector<UpperInterval> TaylorModel<Validated,F>::gradient_range() const {
+    SizeType as=this->argument_size();
+    Covector<UpperInterval> g(this->argument_size(),UpperInterval(0,0));
+    for(typename TaylorModel<Validated,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
+        MultiIndex const& a=iter->key();
+        const ExactFloat& x=iter->data();
+        for(SizeType j=0; j!=this->argument_size(); ++j) {
+            const Nat c=a[j];
+            if(c>0) {
+                if(a.degree()==1) { g[j]+=UpperInterval(x); }
+                else { g[j]+=UpperInterval(-1,1)*x*c; }
+            }
+        }
+    }
+    return g;
+}
+
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1146,8 +1147,7 @@ template<class F> ApproximateNumber TaylorModel<Validated,F>::_evaluate(const Ta
 }
 
 
-template<class F> Covector<ValidatedNumber> TaylorModel<Validated,F>::_gradient(const TaylorModel<Validated,F>& tm, const Vector<ValidatedNumber>& x)
-{
+template<class F> Covector<ValidatedNumber> TaylorModel<Validated,F>::_gradient(const TaylorModel<Validated,F>& tm, const Vector<ValidatedNumber>& x) {
     Vector< Differential<ValidatedNumber> > dx=Differential<ValidatedNumber>::variables(1u,x);
     Differential<ValidatedNumber> df=horner_evaluate(tm.expansion(),dx)+ValidatedNumber(-tm.error(),+tm.error());
     return gradient(df);
@@ -1155,8 +1155,46 @@ template<class F> Covector<ValidatedNumber> TaylorModel<Validated,F>::_gradient(
 
 
 
-template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::_compose(TaylorModel<Validated,F> const& x, Vector<TaylorModel<Validated,F>> const& y) {
+template<class F> TaylorModel<Validated,F>
+TaylorModel<Validated,F>::_compose(TaylorModel<Validated,F> const& x, Vector<TaylorModel<Validated,F>> const& y) {
     return horner_evaluate(x.expansion(),y)+ValidatedFloat(-x.error(),+x.error());
+}
+
+template<class F> Void TaylorModel<Validated,F>::unscale(ExactInterval const& ivl) {
+    // Scale tv so that the interval ivl maps into [-1,1]
+    // The result is given by  (tv-c)*s where c is the centre
+    // and s the reciprocal of the radius of ivl
+
+    // If the radius of ivl is less than a constant, then
+    // there are three possible policies. We can either map to zero or to
+    // everything, or map a constant to zero and other models to everything.
+    // The motivation for mapping to zero is that the domain is
+    // restricted to the point and this is
+    // The motivation for mapping to everything is that any function on the
+    // resulting interval should be independent of the unneeded component
+
+    TaylorModel<Validated,F>& tm=*this;
+    ARIADNE_ASSERT_MSG(ivl.lower()<=ivl.upper(),"Cannot unscale TaylorModel<Validated,F> "<<tm<<" from empty interval "<<ivl);
+
+    if(ivl.lower()==ivl.upper()) {
+        tm=ivl.midpoint();
+        // Uncomment out line below to make unscaling to a singleton interval undefined
+        //tm.clear(); tm.set_error(+inf);
+    } else {
+        ValidatedNumber c=ivl.centre();
+        ValidatedNumber s=rec(ivl.radius());
+        tm-=c;
+        tm*=s;
+    }
+}
+
+template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::_compose(const Unscaling& u, const TaylorModel<Validated,F>& y) {
+    TaylorModel<Validated,F> r=y; r.unscale(u.domain()); return std::move(r);
+}
+
+template<class F> TaylorModel<Validated,F>
+TaylorModel<Validated,F>::_compose(const TaylorModel<Validated,F>& x, const VectorUnscaling& u, const Vector<TaylorModel<Validated,F>>& y) {
+    return compose(x,compose(u,y));
 }
 
 
@@ -1250,39 +1288,6 @@ template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::_split(cons
 
     return r;
 }
-
-template<class F> Void TaylorModel<Validated,F>::unscale(ExactInterval const& ivl) {
-    // Scale tv so that the interval ivl maps into [-1,1]
-    // The result is given by  (tv-c)*s where c is the centre
-    // and s the reciprocal of the radius of ivl
-
-    // If the radius of ivl is less than a constant, then
-    // there are three possible policies. We can either map to zero or to
-    // everything, or map a constant to zero and other models to everything.
-    // The motivation for mapping to zero is that the domain is
-    // restricted to the point and this is
-    // The motivation for mapping to everything is that any function on the
-    // resulting interval should be independent of the unneeded component
-
-    TaylorModel<Validated,F>& tm=*this;
-    ARIADNE_ASSERT_MSG(ivl.lower()<=ivl.upper(),"Cannot unscale TaylorModel<Validated,F> "<<tm<<" from empty interval "<<ivl);
-
-    if(ivl.lower()==ivl.upper()) {
-        tm=ivl.midpoint();
-        // Uncomment out line below to make unscaling to a singleton interval undefined
-        //tm.clear(); tm.set_error(+inf);
-    } else {
-        ValidatedNumber c=ivl.centre();
-        ValidatedNumber s=rec(ivl.radius());
-        tm-=c;
-        tm*=s;
-    }
-}
-
-template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::_compose(const Unscaling& u, const TaylorModel<Validated,F>& y) {
-    TaylorModel<Validated,F> r=y; r.unscale(u.domain()); return std::move(r);
-}
-
 
 
 
@@ -1460,75 +1465,6 @@ template<class F> Vector<TaylorModel<Validated,F>> TaylorModel<Validated,F>::sca
 
 
 
-
-///////////////////////////////////////////////////////////////////////////////
-
-// Vector-valued versions of scalar operators
-
-
-template<class F> Vector<TaylorModel<Validated,F>> combine(const Vector<TaylorModel<Validated,F>>& x1, const TaylorModel<Validated,F>& x2) {
-    return join(embed(0u,x1,x2.argument_size()),embed(x1.zero_element().argument_size(),x2,0u));
-}
-
-template<class F> Vector<TaylorModel<Validated,F>> combine(const TaylorModel<Validated,F>& x1, const Vector<TaylorModel<Validated,F>>& x2) {
-    return join(embed(0u,x1,x2.zero_element().argument_size()),embed(x1.argument_size(),x2,0u));
-}
-
-template<class F> Vector<TaylorModel<Validated,F>> combine(const TaylorModel<Validated,F>& x1, const TaylorModel<Validated,F>& x2) {
-    return {embed(0u,x1,x2.argument_size()),embed(x1.argument_size(),x2,0u)};
-}
-
-template<class F> Bool refines(const Vector<TaylorModel<Validated,F>>& tv1, const Vector<TaylorModel<Validated,F>>& tv2) {
-    ARIADNE_ASSERT(tv1.size()==tv2.size());
-    for(SizeType i=0; i!=tv1.size(); ++i) { if(not refines(tv1[i],tv2[i])) { return false; } }
-    return true;
-}
-
-template<class F> Bool inconsistent(const Vector<TaylorModel<Validated,F>>& tv1, const Vector<TaylorModel<Validated,F>>& tv2) {
-    ARIADNE_ASSERT(tv1.size()==tv2.size());
-    for(SizeType i=0; i!=tv1.size(); ++i) { if(decide(inconsistent(tv1[i],tv2[i]))) { return true; } }
-    return false;
-}
-
-template<class F> Vector<TaylorModel<Validated,F>> split(const Vector<TaylorModel<Validated,F>>& tv, SizeType j, SplitPart h) {
-    Vector<TaylorModel<Validated,F>> r(tv.size());
-    for(SizeType i=0; i!=tv.size(); ++i) { r[i]=split(tv[i],j,h); }
-    return r;
-}
-
-template<class F> Vector<TaylorModel<Validated,F>> unscale(const Vector<TaylorModel<Validated,F>>& tvs, const Vector<ExactInterval>& ivls) {
-    Vector<TaylorModel<Validated,F>> r(tvs.size());
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=unscale(tvs[i],ivls[i]); }
-    return r;
-}
-
-
-template<class F> Vector<TaylorModel<Validated,F>> antiderivative(const Vector<TaylorModel<Validated,F>>& x, SizeType k) {
-    Vector<TaylorModel<Validated,F>> r(x.size());
-    for(SizeType i=0; i!=x.size(); ++i) { r[i]=antiderivative(x[i],k); }
-    return r;
-}
-
-template<class F> Vector<TaylorModel<Validated,F>> derivative(const Vector<TaylorModel<Validated,F>>& x, SizeType k) {
-    Vector<TaylorModel<Validated,F>> r(x.size());
-    for(SizeType i=0; i!=x.size(); ++i) { r[i]=derivative(x[i],k); }
-    return r;
-}
-
-template<class F> Vector<UpperInterval> ranges(const Vector<TaylorModel<Validated,F>>& f) {
-    Vector<UpperInterval> r(f.size()); for(SizeType i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
-}
-
-template<class F> Vector<ErrorFloat> errors(const Vector<TaylorModel<Validated,F>>& h) {
-    Vector<ErrorFloat> e(h.size()); for(SizeType i=0; i!=h.size(); ++i) { e[i]=h[i].error(); } return e; }
-
-template<class F> Vector<ErrorFloat> norms(const Vector<TaylorModel<Validated,F>>& h) {
-    Vector<ErrorFloat> r(h.size()); for(SizeType i=0; i!=h.size(); ++i) { r[i]=norm(h[i]); } return r; }
-
-template<class F> ErrorFloat norm(const Vector<TaylorModel<Validated,F>>& h) {
-    ErrorFloat r=0u; for(SizeType i=0; i!=h.size(); ++i) { r=max(r,norm(h[i])); } return r;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 // Jacobian matrices
@@ -1642,53 +1578,6 @@ jacobian_range(const Vector<TaylorModel<Validated,F>>& f, const Array<SizeType>&
 }
 
 
-template<class F> ValidatedNumber gradient(const TaylorModel<Validated,F>& f, const Vector<ValidatedNumber>& x, SizeType k) {
-    return jacobian({f},x,{k})[0][0];
-}
-
-template<class F> ExactFloat gradient_value(const TaylorModel<Validated,F>& f, SizeType k) {
-    return jacobian_value({f},{k})[0][0];
-}
-
-template<class F> UpperInterval gradient_range(const TaylorModel<Validated,F>& f, SizeType k) {
-    return jacobian_range({f},{k})[0][0];
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-
-// Vector operators (evaluate, compose)
-
-
-template<class F> Vector<TaylorModel<Validated,F>>
-compose(const VectorUnscaling& u,
-        const Vector<TaylorModel<Validated,F>>& y)
-{
-    ARIADNE_ASSERT_MSG(u.size()==y.size(),"u="<<u.domain()<<", y="<<y);
-    Vector<TaylorModel<Validated,F>> r(u.size());
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=compose(u[i],y[i]); }
-    return std::move(r);
-}
-
-
-
-
-
-template<class F> TaylorModel<Validated,F>
-compose(const TaylorModel<Validated,F>& x,
-        const VectorUnscaling& u,
-        const Vector<TaylorModel<Validated,F>>& y)
-{
-    return compose(x,compose(u,y));
-}
-
-template<class F> Vector<TaylorModel<Validated,F>>
-compose(const Vector<TaylorModel<Validated,F>>& x,
-        const VectorUnscaling& u,
-        const Vector<TaylorModel<Validated,F>>& y)
-{
-    return compose(x,compose(u,y));
-}
 
 
 
@@ -1700,7 +1589,6 @@ template TaylorModel<Validated,Float> log(const TaylorModel<Validated,Float>&);
 template TaylorModel<Validated,Float> sin(const TaylorModel<Validated,Float>&);
 template TaylorModel<Validated,Float> cos(const TaylorModel<Validated,Float>&);
 template TaylorModel<Validated,Float> tan(const TaylorModel<Validated,Float>&);
-template Matrix<ValidatedNumber> jacobian(const Vector<TaylorModel<Validated,Float>>&, const Vector<ValidatedNumber>&);
 
 
 

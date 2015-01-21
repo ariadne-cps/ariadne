@@ -209,6 +209,8 @@ class TaylorModel<Validated,F>
     const CoefficientType& value() const { return (*this)[MultiIndex::zero(this->argument_size())]; }
     //! \brief The coefficient of the gradient term \f$df/dx_j\f$.
     const CoefficientType& gradient_value(SizeType j) const { return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
+    Covector<CoefficientType> gradient_value() const { Covector<CoefficientType> r(this->argument_size());
+        for(SizeType j=0; j!=this->argument_size(); ++j) { r[j]=(*this)[MultiIndex::unit(this->argument_size(),j)]; } return r; }
 
     //! \brief The constant term in the expansion.
     CoefficientType average() const;
@@ -216,8 +218,14 @@ class TaylorModel<Validated,F>
     NormType radius() const;
     //! \brief An over-approximation to the supremum norm.
     NormType norm() const;
+    //! \brief An over-approximation to the supremum norm.
+    friend typename TaylorModel<Validated,F>::NormType norm(const TaylorModel<Validated,F>& tm) { return tm.norm(); }
+    friend typename TaylorModel<Validated,F>::NormType mag(const TaylorModel<Validated,F>& tm) { return tm.norm(); }
+
+
     //! \brief A value \c e such that analytic functions are evaluated to a tolerance of \c e. Equal to the sweep threshold.
     RawFloat tolerance() const;
+
 
     //! \brief Set the error of the expansion.
     Void set_error(const ErrorType& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ne; }
@@ -260,6 +268,7 @@ class TaylorModel<Validated,F>
     UpperInterval range() const;
     //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
     UpperInterval gradient_range(SizeType j) const;
+    Covector<UpperInterval> gradient_range() const;
 
     //! \brief Evaluate the quantity over the interval of points \a x.
     friend ApproximateNumber evaluate(const TaylorModel<Validated,F>& f, const Vector<ApproximateNumber>& x) {
@@ -269,6 +278,9 @@ class TaylorModel<Validated,F>
     //! \brief Evaluate the gradient over the interval of points \a x.
     friend Covector<ValidatedNumber> gradient(const TaylorModel<Validated,F>& f, const Vector<ValidatedNumber>& x) {
         return TaylorModel<Validated,F>::_gradient(f,x); }
+    //! \brief Substite \a c for the \a k th variable.
+    friend TaylorModel<Validated,F> partial_evaluate(const TaylorModel<Validated,F>& x, SizeType k, ValidatedNumber c) {
+        return TaylorModel<Validated,F>::_partial_evaluate(x,k,c); }
     //! \relates TaylorModel<Validated,F Compose a vector of Taylor models with another.
     friend TaylorModel<Validated,F> compose(const Unscaling& uf, const TaylorModel<Validated,F>& tg) {
         return TaylorModel<Validated,F>::_compose(uf,tg); }
@@ -374,6 +386,16 @@ class TaylorModel<Validated,F>
     //@}
 
     //@{
+    /*! \name Order operators. */
+    //! \brief The pointwise maximum.
+    friend TaylorModel<Validated,F> max(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y);
+    //! \brief The pointwise minimum.
+    friend TaylorModel<Validated,F> min(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y);
+    //! \brief The pointwise absolute value.
+    //! \details If the range of \a x definitely does not include 0, returns +x or -x. Otherwise, uses a uniform polynomial approximation to abs.
+    friend TaylorModel<Validated,F> abs(const TaylorModel<Validated,F>& x);
+    //@}
+    //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
     friend OutputStream& operator<<(OutputStream& os, const TaylorModel<Validated,F>& x) { return x.str(os); }
@@ -396,26 +418,11 @@ class TaylorModel<Validated,F>
     static TaylorModel<Validated,F> _embed(SizeType as1, const TaylorModel<Validated,F>& tm2, SizeType as3);
     static TaylorModel<Validated,F> _compose(TaylorModel<Validated,F> const& tf, const Vector<TaylorModel<Validated,F>>& tg);
     static TaylorModel<Validated,F> _compose(Unscaling const& uf, TaylorModel<Validated,F> const& tg);
+    static TaylorModel<Validated,F> _compose(TaylorModel<Validated,F> const& tf, VectorUnscaling const& u, const Vector<TaylorModel<Validated,F>>& tg);
     static TaylorModel<Validated,F> _partial_evaluate(const TaylorModel<Validated,F>& x, SizeType k, ValidatedNumber c);
     static Covector<ValidatedNumber> _gradient(const TaylorModel<Validated,F>& x, Vector<ValidatedNumber> const& v);
     static ValidatedNumber _evaluate(const TaylorModel<Validated,F>& x, Vector<ValidatedNumber> const& v);
     static ApproximateNumber _evaluate(const TaylorModel<Validated,F>& x, Vector<ApproximateNumber> const& v);
-  public:
-    //! \brief Substite \a c for the \a k th variable.
-    friend TaylorModel<Validated,F> partial_evaluate(const TaylorModel<Validated,F>& x, SizeType k, ValidatedNumber c) {
-        return TaylorModel<Validated,F>::_partial_evaluate(x,k,c); }
-
-    //! \brief The magnitude of the model. Returns an over-approximation to the supremum norm.
-    friend ErrorType mag(const TaylorModel<Validated,F>& tm) {
-        return tm.norm(); }
-    //! \brief An over-approximation to the supremum norm.
-    friend typename TaylorModel<Validated,F>::NormType norm(const TaylorModel<Validated,F>& tm) {
-        return tm.norm(); }
-
-    friend TaylorModel<Validated,F> max(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y);
-    friend TaylorModel<Validated,F> min(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y);
-    friend TaylorModel<Validated,F> abs(const TaylorModel<Validated,F>& x);
-
 };
 
 Covector<ValidatedNumber> gradient(const TaylorModel<Validated,Float>& x, const Vector<ValidatedNumber>& v);
@@ -594,31 +601,107 @@ class TaylorModel<Approximate,F>
 
 
 
+template<class F> Bool inconsistent(const Vector<TaylorModel<Validated,F>>& tm1, const Vector<TaylorModel<Validated,F>>& tm2) {
+    ARIADNE_ASSERT(tm1.size()==tm2.size());
+    for(SizeType i=0; i!=tm1.size(); ++i) { if(inconsistent(tm1[i],tm2[i])) { return true; } }
+    return false;
+}
+
+template<class F> Bool refines(const Vector<TaylorModel<Validated,F>>& tm1, const Vector<TaylorModel<Validated,F>>& tm2) {
+    ARIADNE_ASSERT(tm1.size()==tm2.size());
+    for(SizeType i=0; i!=tm1.size(); ++i) { if(not refines(tm1[i],tm2[i])) { return false; } }
+    return true;
+}
+
+template<class F> Vector<TaylorModel<Validated,F>> refinement(const Vector<TaylorModel<Validated,F>>& tm1, const Vector<TaylorModel<Validated,F>>& tm2) {
+    ARIADNE_ASSERT(tm1.size()==tm2.size());
+    Vector<TaylorModel<Validated,F>> r(tm1.size());
+    for(SizeType i=0; i!=tm1.size(); ++i) { r[i]=refinement(tm1[i],tm2[i]); }
+    return std::move(r);
+}
 
 
-template<class F> inline Box<ExactInterval> codomain(const Vector<TaylorModel<Validated,F> >& vtm) {
-    Box<ExactInterval> r(vtm.size()); for(SizeType i=0; i!=vtm.size(); ++i) { r[i]=vtm[i].codomain(); } return r; }
-
-template<class F> inline Box<ExactInterval> codomain(const Vector<TaylorModel<Approximate,F> >& vtm) {
-    Box<ExactInterval> r(vtm.size()); for(SizeType i=0; i!=vtm.size(); ++i) { r[i]=vtm[i].codomain(); } return r; }
 
 
-// Vector operations which can be evaluated componentwise
-template<class F> Bool refines(const Vector<TaylorModel<Validated,F>>&, const Vector<TaylorModel<Validated,F>>&);
-template<class F> Bool inconsistent(const Vector<TaylorModel<Validated,F>>&, const Vector<TaylorModel<Validated,F>>&);
-template<class F> Vector<TaylorModel<Validated,F>> refinement(const Vector<TaylorModel<Validated,F>>&, const Vector<TaylorModel<Validated,F>>&);
 
-template<class F> Vector<TaylorModel<Validated,F>> split(const Vector<TaylorModel<Validated,F>>& x, SizeType k, SplitPart part);
+template<class F> Vector<TaylorModel<Validated,F>> partial_evaluate(const Vector<TaylorModel<Validated,F>>& tf, SizeType k, const ValidatedNumber& c) {
+    Vector<TaylorModel<Validated,F>> r(tf.size(),ValidatedTaylorModel::zero(tf.zero_element().argument_size()-1,tf.zero_element().sweeper()));
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=partial_evaluate(tf[i],k,c); }
+    return std::move(r);
+}
 
-template<class F> Vector<ValidatedNumber> evaluate(const Vector<TaylorModel<Validated,F>>& x, const Vector<ValidatedNumber>& sy);
-template<class F> Vector<TaylorModel<Validated,F>> partial_evaluate(const Vector<TaylorModel<Validated,F>>& x, SizeType k, ValidatedNumber const& sy);
-template<class F> Vector<TaylorModel<Validated,F>> compose(const VectorUnscaling& u, const Vector<TaylorModel<Validated,F>>& x);
-template<class F> Vector<TaylorModel<Validated,F>> compose(const VectorScaling& u, const Vector<TaylorModel<Validated,F>>& x);
-template<class F> Vector<TaylorModel<Validated,F>> compose(const Vector<TaylorModel<Validated,F>>& f, const Vector<TaylorModel<Validated,F>>& g);
-template<class F> Vector<TaylorModel<Validated,F>> compose(const Vector<TaylorModel<Validated,F>>& f, const Vector<ExactInterval>& dom, const Vector<TaylorModel<Validated,F>>& g);
+template<class F> Vector<ValidatedNumber> evaluate(const Vector<TaylorModel<Validated,F>>& tf, const Vector<ValidatedNumber>& x) {
+    Vector<ValidatedNumber> r(tf.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=evaluate(tf[i],x); }
+    return std::move(r);
+}
 
-template<class F> Vector<TaylorModel<Validated,F>> antiderivative(const Vector<TaylorModel<Validated,F>>& x, SizeType k);
-template<class F> Vector<TaylorModel<Validated,F>> weak_derivative(const Vector<TaylorModel<Validated,F>>& x, SizeType k);
+template<class F> Vector<TaylorModel<Validated,F>> compose(const Vector<TaylorModel<Validated,F>>& tf, const Vector<TaylorModel<Validated,F>>& tg) {
+    Vector<TaylorModel<Validated,F>> r(tf.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=compose(tf[i],tg); }
+    return std::move(r);
+}
+
+template<class P, class F> Vector<TaylorModel<P,F>> unscale(const Vector<TaylorModel<P,F>>& x, const Vector<ExactInterval>& dom) {
+    Vector<TaylorModel<P,F>> r(x.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=unscale(x[i],dom[i]); }
+    return std::move(r);
+}
+
+template<class P, class F> Vector<TaylorModel<P,F>> compose(const VectorUnscaling& u, const Vector<TaylorModel<P,F>>& g) {
+    ARIADNE_ASSERT_MSG(u.size()==g.size(),"u="<<u.domain()<<", g="<<g);
+    Vector<TaylorModel<P,F>> r(u.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=compose(u[i],g[i]); }
+    return std::move(r);
+}
+
+template<class P, class F> Vector<TaylorModel<P,F>> compose(const Vector<TaylorModel<P,F>>& x,
+                                                            const VectorUnscaling& u,
+                                                            const Vector<TaylorModel<P,F>>& y) {
+    return compose(x,compose(u,y));
+}
+
+template<class P, class F> Vector<TaylorModel<P,F>> antiderivative(const Vector<TaylorModel<P,F>>& x, SizeType k) {
+    Vector<TaylorModel<P,F>> r(x.size());
+    for(SizeType i=0; i!=x.size(); ++i) { r[i]=antiderivative(x[i],k); }
+    return std::move(r);
+}
+
+template<class P, class F> Vector<TaylorModel<P,F>> derivative(const Vector<TaylorModel<P,F>>& x, SizeType k) {
+    Vector<TaylorModel<P,F>> r(x.size());
+    for(SizeType i=0; i!=x.size(); ++i) { r[i]=derivative(x[i],k); }
+    return std::move(r);
+}
+
+template<class P, class F> Vector<TaylorModel<P,F>> combine(const Vector<TaylorModel<P,F>>& x1, const Vector<TaylorModel<P,F>>& x2) {
+    return join(embed(0u,x1,x2.zero_element().argument_size()),embed(x1.zero_element().argument_size(),x2,0u));
+}
+
+template<class F> Vector<TaylorModel<Validated,F>> embed(SizeType as1, const Vector<TaylorModel<Validated,F>>& x2, SizeType as3) {
+    Vector<TaylorModel<Validated,F>> r(x2.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=embed(as1,x2[i],as3); }
+    return std::move(r);
+}
+
+template<class P, class F> Vector<TaylorModel<P,F>> split(const Vector<TaylorModel<P,F>>& x, SizeType j, SplitPart h) {
+    Vector<TaylorModel<P,F>> r(x.size());
+    for(SizeType i=0; i!=x.size(); ++i) { r[i]=split(x[i],j,h); }
+    return std::move(r);
+}
+
+template<class P, class F> typename TaylorModel<P,F>::RangeType ranges(const Vector<TaylorModel<P,F>>& f) {
+    Vector<typename TaylorModel<P,F>::RangeType> r(f.size()); for(SizeType i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return std::move(r);
+}
+
+template<class P, class F> Vector<typename TaylorModel<P,F>::ErrorType> errors(const Vector<TaylorModel<P,F>>& h) {
+    Vector<typename TaylorModel<P,F>::ErrorType> e(h.size()); for(SizeType i=0; i!=h.size(); ++i) { e[i]=h[i].error(); } return e; }
+
+template<class P, class F> Vector<typename TaylorModel<P,F>::NormType> norms(const Vector<TaylorModel<P,F>>& h) {
+    Vector<NormType> r(h.size()); for(SizeType i=0; i!=h.size(); ++i) { r[i]=norm(h[i]); } return std::move(r); }
+
+template<class P, class F> typename TaylorModel<P,F>::NormType norm(const Vector<TaylorModel<P,F>>& h) {
+    typename TaylorModel<P,F>::NormType r=0u; for(SizeType i=0; i!=h.size(); ++i) { r=max(r,norm(h[i])); } return std::move(r);
+}
 
 template<class F> Matrix<ValidatedNumber> jacobian(const Vector<TaylorModel<Validated,F>>& x, const Vector<ValidatedNumber>& y);
 template<class F> Matrix<ValidatedNumber> jacobian(const Vector<TaylorModel<Validated,F>>& x, const Vector<ValidatedNumber>& y, Array<SizeType>& p);
@@ -628,41 +711,6 @@ template<class F> Matrix<UpperInterval> jacobian_range(const Vector<TaylorModel<
 template<class F> Matrix<UpperInterval> jacobian_range(const Vector<TaylorModel<Validated,F>>& x, const Array<SizeType>& p);
 
 
-template<class F> Vector<TaylorModel<Validated,F>> embed(SizeType as1, const Vector<TaylorModel<Validated,F>>& tm2, SizeType as3);
-template<class F> Vector<TaylorModel<Validated,F>> combine(const Vector<TaylorModel<Validated,F>>& x1, const Vector<TaylorModel<Validated,F>>& x2);
-template<class F> Vector<TaylorModel<Validated,F>> combine(const Vector<TaylorModel<Validated,F>>& x1, const TaylorModel<Validated,F>& x2);
-template<class F> Vector<TaylorModel<Validated,F>> combine(const TaylorModel<Validated,F>& x1, const Vector<TaylorModel<Validated,F>>& x2);
-template<class F> Vector<TaylorModel<Validated,F>> combine(const TaylorModel<Validated,F>& x1, const TaylorModel<Validated,F>& x2);
-
-
-
-template<class F> Vector<TaylorModel<Validated,F>> partial_evaluate(const Vector<TaylorModel<Validated,F>>& tf, SizeType k, const ValidatedNumber& c) {
-    Vector<TaylorModel<Validated,F>> r(tf.size(),ValidatedTaylorModel::zero(tf.zero_element().argument_size()-1,tf.zero_element().sweeper()));
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=partial_evaluate(tf[i],k,c); }
-    return r;
-}
-
-template<class F> Vector<ValidatedNumber> evaluate(const Vector<TaylorModel<Validated,F>>& tf, const Vector<ValidatedNumber>& x) {
-    Vector<ValidatedNumber> r(tf.size());
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=evaluate(tf[i],x); }
-    return r;
-}
-
-template<class F> Vector<TaylorModel<Validated,F>> compose(const Vector<TaylorModel<Validated,F>>& tf, const Vector<TaylorModel<Validated,F>>& tg) {
-    Vector<TaylorModel<Validated,F>> r(tf.size());
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=compose(tf[i],tg); }
-    return r;
-}
-
-template<class F> Vector<TaylorModel<Validated,F>> embed(SizeType as1, const Vector<TaylorModel<Validated,F>>& x2, SizeType as3) {
-    Vector<TaylorModel<Validated,F>> r(x2.size());
-    for(SizeType i=0; i!=r.size(); ++i) { r[i]=embed(as1,x2[i],as3); }
-    return r;
-}
-
-template<class F> Vector<TaylorModel<Validated,F>> combine(const Vector<TaylorModel<Validated,F>>& x1, const Vector<TaylorModel<Validated,F>>& x2) {
-    return join(embed(0u,x1,x2.zero_element().argument_size()),embed(x1.zero_element().argument_size(),x2,0u));
-}
 
 
 } // namespace Ariadne

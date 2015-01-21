@@ -1273,7 +1273,11 @@ template<class M> Vector<ValidatedNumber> VectorFunctionPatch<M>::operator()(con
 
 template<class M> Matrix<typename VectorFunctionPatch<M>::NumericType> VectorFunctionPatch<M>::jacobian(const Vector<NumericType>& x) const
 {
-    Matrix<NumericType> J=Ariadne::jacobian(this->_models,unscale(x,this->_domain));
+    Vector<NumericType> y=unscale(x,this->_domain);
+    Matrix<NumericType> J(this->size(),x.size());
+    for(SizeType i=0; i!=J.row_size(); ++i) {
+        J[i]=gradient(this->_models[i],y);
+    }
     for(SizeType j=0; j!=J.column_size(); ++j) {
         NumericType rad=rad_val(this->_domain[j]);
         for(SizeType i=0; i!=J.row_size(); ++i) {

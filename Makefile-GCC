@@ -1,7 +1,7 @@
 all: lib tests wrap examples
 
 VPATH = utility numeric expression algebra function geometry solvers dynamics hybrid output \
-	tests wrap examples
+	test wrap examples
 
 HDR = \
 	standard.h numeric.h functional.h
@@ -134,11 +134,15 @@ DEP_DIR = dep
 OBJ_DIR = obj
 BIN_DIR = bin
 CHECK_DIR = check
-LIB_OBJ_DIR = $(OBJ_DIR)/lib
-TESTS_OBJ_DIR = $(OBJ_DIR)/test
+#LIB_OBJ_DIR = $(OBJ_DIR)/lib
+#TESTS_OBJ_DIR = $(OBJ_DIR)/test
+#WRAP_OBJ_DIR = $(OBJ_DIR)/wrap
+#EXAMPLES_OBJ_DIR = $(OBJ_DIR)/examples
+LIB_OBJ_DIR = $(OBJ_DIR)
+TESTS_OBJ_DIR = $(OBJ_DIR)
+WRAP_OBJ_DIR = $(OBJ_DIR)
+EXAMPLES_OBJ_DIR = $(OBJ_DIR)
 TESTS_BIN_DIR = $(BIN_DIR)
-WRAP_OBJ_DIR = $(OBJ_DIR)/wrap
-EXAMPLES_OBJ_DIR = $(OBJ_DIR)/examples
 EXAMPLES_BIN_DIR = $(BIN_DIR)
 
 ARIADNE_LIB = libariadne.so
@@ -146,7 +150,7 @@ ARIADNE_NUMERIC_LIB = libariadne-numeric.so
 ARIADNE_ALGEBRA_LIB = libariadne-algebra.so
 ARIADNE_FUNCTION_LIB = libariadne-function.so
 
-DEPS = $(patsubst %.cc,$(DEP_DIR)/%.d,$(LIB_SRC) $(LIB_EXTRAS_SRC) $(TEST_SRC) $(EXAMPLES_SRC))
+DEPS = $(patsubst %.cc,$(DEP_DIR)/%.d,$(LIB_SRC) $(LIB_EXTRAS_SRC) $(TESTS_SRC) $(EXAMPLES_SRC))
 
 PCH = $(patsubst %.h,%.h.gch,$(HDR))
 LIB_OBJ = $(patsubst %.cc,$(LIB_OBJ_DIR)/%.o,$(LIB_SRC))
@@ -177,8 +181,8 @@ PYTHON_LIBRARY=python$(PYTHON_VERSION)
 PYTHON_LINK_LIBS=-lboost_python -l$(PYTHON_LIBRARY)
 
 # Pull in dependency information
-include $(PCH:.gch=.d)
 include $(DEPS)
+# include $(PCH:.gch=.d)
 
 phony: all help dirs deps lib tests wrap examples check clean shiny
 
@@ -230,18 +234,18 @@ shiny: clean
 	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > $*.h.d
 	@sed -i 's|.*.o:|$*.h.gch:|' $*.h.d
 
-$(DEP_DIR)/numeric.d: include/numeric.h | dirs
-	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > $(DEP_DIR)/numeric.d
+$(DEP_DIR)/numeric.d: numeric/numeric.h | dirs
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null > $@
 	sed -i 's|.*.o:|obj/$*.o:|' $(DEP_DIR)/$*.d
 
-$(DEP_DIR)/functional.d: include/functional.h | dirs
-	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< > $(DEP_DIR)/$*.d
+$(DEP_DIR)/functional.d: function/functional.h | dirs
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -MM $< 2>/dev/null > $@
 	sed -i 's|.*.o:|obj/$*.o:|' $(DEP_DIR)/$*.d
 
 $(DEP_DIR)/%.d: %.cc | dirs
 	@echo "Making dependencies for "$<
 	@$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -MM $< > $(DEP_DIR)/$*.d
-	@sed -i 's|.*.o:|obj/$*.o:|' $(DEP_DIR)/$*.d
+	@sed -i 's|.*.o:|$(OBJ_DIR)/$*.o:|' $(DEP_DIR)/$*.d
 
 
 libariadne.so: $(PCH) $(LIB_OBJ)
@@ -268,42 +272,43 @@ wrap/boost_python.h.gch: wrap/boost_python.h
 numeric/float.o: numeric/float.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
-obj/lib/%.o: %.cc
+obj/%.o: %.cc
+	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS)  -I$(PYTHON_INCLUDE_PATH) -c -o $@ $<
+
+obj/test_%.o: test/test_%.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
-obj/test/%.o: test/%.cc
-	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
-
-obj/wrap/%.o: wrap/%.cc | wrap/boost_python.h.gch
+#FIXME: Make Python wrapper use its own compile rule
+obj/%module.o: wrap/%module.cc wrap/boost_python.h.gch
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -I$(PYTHON_INCLUDE_PATH) -c -o $@ $<
 
-obj/examples/%.o: examples/%.cc
+obj/%.o: examples/%.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATHS) -c -o $@ $<
 
-bin/%: obj/test/%.o | libariadne.so
+bin/test_%: $(TESTS_OBJ_DIR)/test_%.o  libariadne.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
 
 
-bin/test_float: obj/test/test_float.o | libariadne-numeric.so
+bin/test_float: $(TESTS_OBJ_DIR)/test_float.o  libariadne-numeric.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
 
-bin/test_validated_float: obj/test/test_validated_float.o | libariadne-numeric.so
+bin/test_validated_float: $(TESTS_OBJ_DIR)/test_validated_float.o  libariadne-numeric.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
 
 
-bin/test_vector: obj/test/test_vector.o  libariadne-algebra.so
+bin/test_vector: $(TESTS_OBJ_DIR)/test_vector.o  libariadne-algebra.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
 
-bin/test_matrix: obj/test/test_matrix.o  libariadne-algebra.so
+bin/test_matrix: $(TESTS_OBJ_DIR)/test_matrix.o  libariadne-algebra.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
 
-bin/test_multi_index: obj/test/test_multi_index.o  libariadne-algebra.so
+bin/test_multi_index: $(TESTS_OBJ_DIR)/test_multi_index.o  libariadne-algebra.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
 
-bin/test_expansion: obj/test/test_expansion.o  libariadne-algebra.so
+bin/test_expansion: $(TESTS_OBJ_DIR)/test_expansion.o  libariadne-algebra.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
 
-bin/test_differential: obj/test/test_differential.o  libariadne-algebra.so
+bin/test_differential: $(TESTS_OBJ_DIR)/test_differential.o  libariadne-algebra.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(LINK_LIBS) -o $@
 
 
@@ -325,8 +330,11 @@ bin/test_function: $(TESTS_OBJ_DIR)/test_function.o  libariadne-function.so $(TE
 bin/test_taylor_function: $(TESTS_OBJ_DIR)/test_taylor_function.o  libariadne-function.so $(TEST_FUNCTION_EXTRA_OBJ)
 	$(CXX) $< $(LINK_FLAGS) $(TEST_FUNCTION_EXTRA_OBJ) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
+bin/test_%: $(TESTS_OBJ_DIR)/test_%.o  libariadne.so
+	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
 
-bin/%: obj/examples/%.o libariadne.so
+
+bin/%: $(EXAMPLES_OBJ_DIR)/%.o libariadne.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
 
 #wrap/boost_python.h.gch: boost_python.h

@@ -69,6 +69,8 @@ class ScalarFunction
     static ScalarFunction<P> coordinate(SizeType m, SizeType j);
     static List< ScalarFunction<P> > coordinates(SizeType n);
 
+    ScalarFunction<P> create_zero() const { return ScalarFunction<P>::zero(this->argument_size()); }
+
     explicit ScalarFunction(SizeType as);
     explicit ScalarFunction(SizeType as, Formula<NumericType> f);
 

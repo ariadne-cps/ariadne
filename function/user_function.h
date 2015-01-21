@@ -51,12 +51,12 @@ namespace Ariadne {
 
 //! \related ScalarUserFunction
 //! \brief Template structure containing scalar function meta-information.
-template<Nat AS, Nat PS=0u, Nat SM=255u>
+template<SizeType AS, SizeType PS=0u, DegreeType SM=255u>
 struct ScalarFunctionData
 {
-    static const Nat argument_size() { return AS; }
-    static const Nat parameter_size() { return PS; }
-    static const Nat smoothness() { return SM; }
+    static const SizeType argument_size() { return AS; }
+    static const SizeType parameter_size() { return PS; }
+    static const DegreeType smoothness() { return SM; }
 };
 
 //! \brief A wrapper for converting templated C++ functions to %Ariadne functions.
@@ -81,7 +81,6 @@ template<class F> class ScalarUserFunction
       private:
         Vector<EffectiveNumber> _p;
       public:
-        typedef Nat SizeType;
         Representation(const Vector<EffectiveNumber>& p) : _p(p) { }
 
         template<class R, class A> inline Void _compute(R& r, const A& a) const { F::compute(r,a,_p); }
@@ -92,7 +91,7 @@ template<class F> class ScalarUserFunction
         virtual SizeType parameter_size() const { return F::parameter_size(); }
 
 
-        virtual EffectiveScalarFunction derivative(Nat j) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual EffectiveScalarFunction derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
 
         virtual Covector<ApproximateNumber> gradient(const Vector<ApproximateNumber>& x) const {
             return this->evaluate(Differential<ApproximateNumber>::variables(1u,x)).gradient(); }
@@ -109,7 +108,7 @@ template<class F> class ScalarUserFunction
     ScalarUserFunction(const Vector<ExactNumber>& p) : EffectiveScalarFunction(new Representation(Vector<EffectiveNumber>(p))) { }
     ScalarUserFunction(const Vector<EffectiveNumber>& p) : EffectiveScalarFunction(new Representation(p)) { }
 
-    Nat parameter_size() const { return F().parameter_size(); }
+    SizeType parameter_size() const { return F().parameter_size(); }
     //const Vector<ValidatedNumber> parameters() const { return _p; }
 };
 
@@ -117,18 +116,18 @@ template<class F> class ScalarUserFunction
 
 
 //! \brief A convenience class defining the meta-data of an %Ariadne function.
-template<Nat RS, Nat AS, Nat PS=0u, Nat SM=255u>
+template<SizeType RS, SizeType AS, SizeType PS=0u, DegreeType SM=255u>
 class VectorFunctionData
 {
   public:
     //!
-    static const Nat result_size() { return RS; }
+    static const SizeType result_size() { return RS; }
     //!
-    static const Nat argument_size() { return AS; }
+    static const SizeType argument_size() { return AS; }
     //!
-    static const Nat parameter_size() { return PS; }
+    static const SizeType parameter_size() { return PS; }
     //!
-    static const Nat smoothness() { return SM; }
+    static const DegreeType smoothness() { return SM; }
 };
 
 
@@ -154,7 +153,6 @@ template<class F> class VectorUserFunction
         : public VectorFunctionMixin< Representation, EffectiveTag >
     {
       public:
-        typedef Nat SizeType;
         Representation(const Vector<EffectiveNumber>& p) : _p(p) { }
 
         virtual Representation* clone() const { return new Representation(*this); }
@@ -170,8 +168,8 @@ template<class F> class VectorUserFunction
         virtual Matrix<ValidatedNumber> jacobian(const Vector<ValidatedNumber>& x) const {
             return Ariadne::jacobian(this->evaluate(Differential<ValidatedNumber>::variables(1u,x))); }
 
-        virtual EffectiveScalarFunctionInterface* _get(Nat i) const { ARIADNE_NOT_IMPLEMENTED; }
-        virtual EffectiveScalarFunction operator[](Nat i) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual EffectiveScalarFunctionInterface* _get(SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
+        virtual EffectiveScalarFunction operator[](SizeType i) const { ARIADNE_NOT_IMPLEMENTED; }
 
         // TODO: Find a better way for writing functions which can handle transformations which may not have a
         // write() method or operator<<.

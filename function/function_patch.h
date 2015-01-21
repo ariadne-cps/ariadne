@@ -365,6 +365,7 @@ template<class M> FunctionPatch<M> embed(const ExactBox& dom1, const FunctionPat
 template<class M> FunctionPatch<M> partial_evaluate(const FunctionPatch<M>& f, SizeType k, const NumericType<M>& c);
 // Evaluate a scalar Taylor function on a vector.
 template<class M> NumericType<M> unchecked_evaluate(const FunctionPatch<M>&, const Vector<NumericType<M>>&);
+template<class M> NumericType<M> evaluate(const FunctionPatch<M>&, const Vector<NumericType<M>>&);
 
 // Compose with an function.
 template<class M> FunctionPatch<M> compose(const FunctionType<M>& x, const VectorFunctionPatch<M>& y);

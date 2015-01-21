@@ -557,8 +557,14 @@ Void TestVectorTaylorFunction::test_domain()
     ARIADNE_TEST_THROWS(t2(xe),DomainException);
     ARIADNE_TEST_THROWS(evaluate(t2,xe),DomainException);
 
+    // Ensure evaluation and composition throw errors when expected
+    VectorTaylorFunction vt2={t2};
+    ARIADNE_TEST_THROWS(vt2(xe),DomainException);
+    ARIADNE_TEST_THROWS(evaluate(vt2,xe),DomainException);
+
     VectorTaylorFunction te1=t1; te1[0]=te1[0]+ValidatedFloat(-0.125,+0.125);
     ARIADNE_TEST_THROWS(compose(t2,te1),DomainException);
+    ARIADNE_TEST_THROWS(compose(vt2,te1),DomainException);
 
     ARIADNE_TEST_EQUAL(unchecked_evaluate(t2,xe),ValidatedFloat(2.25,4.25));
 

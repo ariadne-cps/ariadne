@@ -594,6 +594,13 @@ template<class M> Covector<NumericType<M>> FunctionPatch<M>::gradient(const Vect
 
 
 
+template<class M> NumericType<M> evaluate(const FunctionPatch<M>& f, const Vector<NumericType<M>>& x) {
+    if(!contains(f.domain(),x)) {
+        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
+    }
+    return unchecked_evaluate(f,x);
+}
+
 template<class M> NumericType<M> unchecked_evaluate(const FunctionPatch<M>& f, const Vector<NumericType<M>>& x) {
     return evaluate(f.model(),unscale(x,f.domain()));
 }

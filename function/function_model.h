@@ -436,7 +436,8 @@ inline VectorFunctionModel<ValidatedTag> operator*(const ValidatedNumber& c1, co
     VectorFunctionModel<ValidatedTag> r=f2; for(SizeType i=0; i!=r.size(); ++i) { r[i]=c1*f2[i]; } return r; }
 
 inline ValidatedNumber evaluate(const ScalarFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumber>& x) { return f._ptr->evaluate(x); }
-inline Vector<ValidatedNumber> evaluate(const VectorFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumber>& x) { return f._ptr->evaluate(x); }
+//inline Vector<ValidatedNumber> evaluate(const VectorFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumber>& x) {
+//    std::cerr<<"evaluate(const VectorFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumber>& x)\n"; return f._ptr->evaluate(x); }
 
 inline ValidatedNumber unchecked_evaluate(const ScalarFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumber>& x) { return f._ptr->_unchecked_evaluate(x); }
 inline Vector<ValidatedNumber> unchecked_evaluate(const VectorFunctionModel<ValidatedTag>& f, const Vector<ValidatedNumber>& x) { return f._ptr->_unchecked_evaluate(x); }

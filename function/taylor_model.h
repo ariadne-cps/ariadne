@@ -35,6 +35,7 @@
 #include "utility/array.h"
 #include "utility/pointer.h"
 #include "algebra/vector.h"
+#include "algebra/covector.h"
 #include "algebra/multi_index.h"
 #include "algebra/expansion.h"
 #include "algebra/sweeper.h"
@@ -261,41 +262,78 @@ class TaylorModel<Validated,F>
     UpperInterval gradient_range(SizeType j) const;
 
     //! \brief Evaluate the quantity over the interval of points \a x.
-    friend ValidatedNumber evaluate(const TaylorModel<Validated,F>&, const Vector<ValidatedNumber>& x);
+    friend ApproximateNumber evaluate(const TaylorModel<Validated,F>& f, const Vector<ApproximateNumber>& x) {
+        return TaylorModel<Validated,F>::_evaluate(f,x); }
+    friend ValidatedNumber evaluate(const TaylorModel<Validated,F>& f, const Vector<ValidatedNumber>& x) {
+        return TaylorModel<Validated,F>::_evaluate(f,x); }
     //! \brief Evaluate the gradient over the interval of points \a x.
-    friend Covector<ValidatedNumber> gradient(const TaylorModel<Validated,F>&, const Vector<ValidatedNumber>& x);
+    friend Covector<ValidatedNumber> gradient(const TaylorModel<Validated,F>& f, const Vector<ValidatedNumber>& x) {
+        return TaylorModel<Validated,F>::_gradient(f,x); }
+    //! \relates TaylorModel<Validated,F Compose a vector of Taylor models with another.
+    friend TaylorModel<Validated,F> compose(const Unscaling& uf, const TaylorModel<Validated,F>& tg) {
+        return TaylorModel<Validated,F>::_compose(uf,tg); }
     //! \brief Evaluate the quantity over the interval of points \a x.
-    friend TaylorModel<Validated,F> compose(const TaylorModel<Validated,F>&, const Vector<TaylorModel<Validated,F>>& x);
-    //! \brief Compose two models, where the second is scaled so that the codomain is a unit box.
-    friend Vector<ValidatedNumber> evaluate(const Vector<TaylorModel<Validated,F>>& f, const Vector<ValidatedNumber>& x);
-    //! \brief Compose two models, where the second is scaled so that the codomain is a unit box.
-    friend Vector<TaylorModel<Validated,F>> compose(const Vector<TaylorModel<Validated,F>>& f, const Vector<TaylorModel<Validated,F>>& g);
+    friend TaylorModel<Validated,F> compose(const TaylorModel<Validated,F>& f, const Vector<TaylorModel<Validated,F>>& g) {
+        return TaylorModel<Validated,F>::_compose(f,g); }
+    //! \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
+    friend TaylorModel<Validated,F> compose(const TaylorModel<Validated,F>& tf, const VectorUnscaling& u);
+
     //@}
 
     //@{
     /*! \name Inplace modifications. */
     //! \brief Scales the model by a function mapping \a dom into the unit interval.
-    Void unscale(ExactInterval dom);
+    Void unscale(ExactInterval const& dom);
     //! \brief Compute the antiderivative (in place).
     Void antidifferentiate(SizeType k);
     //! \brief Compute the weak derivative (in place).
     Void differentiate(SizeType k);
+
+    friend TaylorModel<Validated,F> unscale(TaylorModel<Validated,F> tm, ExactInterval const& dom) {
+        tm.unscale(dom); return std::move(tm); }
+    friend TaylorModel<Validated,F> antiderivative(TaylorModel<Validated,F> tm, SizeType k) {
+        tm.antidifferentiate(k); return std::move(tm); }
+    friend TaylorModel<Validated,F> derivative(TaylorModel<Validated,F> tm, SizeType k) {
+        tm.differentiate(k); return std::move(tm); }
+    //@}
+
+    //@{
+    /*! \name Operations on the domain. */
+    //!\brief Split the Taylor model \a tm, subdividing along the independent variable \a k, taking the lower/middle/upper \a part.
+    friend TaylorModel<Validated,F> split(const TaylorModel<Validated,F>& tm, SizeType k, SplitPart part) {
+        return TaylorModel<Validated,F>::_split(tm,k,part); }
+    //! \relates TaylorModel<Validated,F> \brief Embed the model in a space of higher dimension
+    friend TaylorModel<Validated,F> embed(SizeType as1, const TaylorModel<Validated,F>& tm2, SizeType as3) {
+        return TaylorModel<Validated,F>::_embed(as1,tm2,as3); }
     //@}
 
     //@{
     /*! \name Validated paradigm-based operations. */
-    //! \brief Test if one model refines (is a subset of) another.
-    friend Bool refines(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
     //! \brief Test if one model is disjoint from (is incompatible with) another.
-    friend Bool inconsistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
-    //! \brief An over-approximation of the intersection of the sets of functions
-    //! allowed by the two models. It is guaranteed that any function represented
-    //! by both models is also represented by the result.
-    friend TaylorModel<Validated,F> refinement(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
+    friend Bool inconsistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2) {
+        return TaylorModel<Validated,F>::_inconsistent(tm1,tm2); }
+    //! \brief Test if one model refines (is a subset of) another.
+    friend Bool refines(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2) {
+        return TaylorModel<Validated,F>::_refines(tm1,tm2); }
+    //! \brief An over-approximation to the common refinement of two Taylor models.
+    //! Since the intersection of represented sets of functions cannot be represented
+    //! exactly in the class of TaylorModels, truncation errors as well as roundoff errors
+    //! may be present. In the absence of roundoff errors, the result is a subset of both
+    //! arguments, and is guaranteed to contain any function contained in both arguments.
+    friend TaylorModel<Validated,F> refinement(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2) {
+        return TaylorModel<Validated,F>::_refinement(tm1,tm2); }
     //@}
 
     //@{
     /*! \name Simplification operations. */
+    //! \relates TaylorModel<Validated,F> \brief Embed the model in a space of higher dimension, placing the error in the final variable.
+    friend TaylorModel<Validated,F> embed_error(const TaylorModel<Validated,F>& tm) {
+        return TaylorModel<Validated,F>::_embed_error(tm); }
+    //! \relates TaylorModel<Validated,F> \brief Abstract away the given variables.
+    //! For example, the model tm(x0,x1,x2,x3) becomes tm'(x0,x1)=tm(x0,[-1,+1],x1,[-1,+1]) on discarding x1 and x3.
+    friend TaylorModel<Validated,F>  discard_variables(const TaylorModel<Validated,F>& tm, const Array<SizeType>& variables) {
+        return TaylorModel<Validated,F>::_discard_variables(tm,variables); }
+
     //! \brief Remove all terms based on the \a swp conditions.
     TaylorModel<Validated,F>& sweep(const Sweeper& swp);
 
@@ -338,73 +376,49 @@ class TaylorModel<Validated,F>
     //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
-    friend OutputStream& operator<<(OutputStream& os, const TaylorModel<Validated,F>& x);
+    friend OutputStream& operator<<(OutputStream& os, const TaylorModel<Validated,F>& x) { return x.str(os); }
     //@}
 
   public:
-    OutputStream& str(const OutputStream&) const;
-    OutputStream& repr(const OutputStream&) const;
+    OutputStream& str(OutputStream&) const;
+    OutputStream& repr(OutputStream&) const;
   public: // FIXME: Should be private
     Void _set_error(const RawFloat& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ErrorType(ne); }
     Void _append(MultiIndex const& a, CoefficientType const& v) { this->_expansion.append(a,v); }
+    static Bool _inconsistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
+    static Bool _refines(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
+    static TaylorModel<Validated,F> _refinement(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
+    static TaylorModel<Validated,F> _antiderivative(const TaylorModel<Validated,F>& tm, SizeType k);
+    static TaylorModel<Validated,F> _weak_derivative(const TaylorModel<Validated,F>& tm, SizeType k);
+    static TaylorModel<Validated,F> _embed_error(const TaylorModel<Validated,F>& tm);
+    static TaylorModel<Validated,F>  _discard_variables(const TaylorModel<Validated,F>&, const Array<SizeType>& variables);
+    static TaylorModel<Validated,F> _split(const TaylorModel<Validated,F>& tm, SizeType k, SplitPart part);
+    static TaylorModel<Validated,F> _embed(SizeType as1, const TaylorModel<Validated,F>& tm2, SizeType as3);
+    static TaylorModel<Validated,F> _compose(TaylorModel<Validated,F> const& tf, const Vector<TaylorModel<Validated,F>>& tg);
+    static TaylorModel<Validated,F> _compose(Unscaling const& uf, TaylorModel<Validated,F> const& tg);
+    static TaylorModel<Validated,F> _partial_evaluate(const TaylorModel<Validated,F>& x, SizeType k, ValidatedNumber c);
+    static Covector<ValidatedNumber> _gradient(const TaylorModel<Validated,F>& x, Vector<ValidatedNumber> const& v);
+    static ValidatedNumber _evaluate(const TaylorModel<Validated,F>& x, Vector<ValidatedNumber> const& v);
+    static ApproximateNumber _evaluate(const TaylorModel<Validated,F>& x, Vector<ApproximateNumber> const& v);
+  public:
+    //! \brief Substite \a c for the \a k th variable.
+    friend TaylorModel<Validated,F> partial_evaluate(const TaylorModel<Validated,F>& x, SizeType k, ValidatedNumber c) {
+        return TaylorModel<Validated,F>::_partial_evaluate(x,k,c); }
+
+    //! \brief The magnitude of the model. Returns an over-approximation to the supremum norm.
+    friend ErrorType mag(const TaylorModel<Validated,F>& tm) {
+        return tm.norm(); }
+    //! \brief An over-approximation to the supremum norm.
+    friend typename TaylorModel<Validated,F>::NormType norm(const TaylorModel<Validated,F>& tm) {
+        return tm.norm(); }
+
+    friend TaylorModel<Validated,F> max(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y);
+    friend TaylorModel<Validated,F> min(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y);
+    friend TaylorModel<Validated,F> abs(const TaylorModel<Validated,F>& x);
+
 };
 
-
-//! \relates TaylorModel<Validated,F> \brief Test if a model refines another
-template<class F> Bool refines(const TaylorModel<Validated,F>& tv1, const TaylorModel<Validated,F>& tv2);
-//! \relates TaylorModel<Validated,F> \brief Test if two models are possible inconstent. If \a true, then models may still be consistent.
-template<class F> Bool inconsistent(const TaylorModel<Validated,F>& tv1, const TaylorModel<Validated,F>& tv2);
-//! \relates TaylorModel<Validated,F>
-//! An over-approximation to the common refinement of two Taylor models.
-//! Since the intersection of represented sets of functions cannot be represented
-//! exactly in the class of TaylorModels, truncation errors as well as roundoff errors
-//! may be present. In the absence of roundoff errors, the result is a subset of both
-//! arguments, and is guaranteed to contain any function contained in both arguments.
-template<class F> TaylorModel<Validated,F> refinement(const TaylorModel<Validated,F>& x1, const TaylorModel<Validated,F>& x2);
-
-//! \relates TaylorModel<Validated,F> \brief Antidifferentiation operator
-template<class F> TaylorModel<Validated,F> antiderivative(const TaylorModel<Validated,F>& x, SizeType k);
-//! \relates TaylorModel<Validated,F> \brief Differentiation operator; discards error term
-template<class F> TaylorModel<Validated,F> weak_derivative(const TaylorModel<Validated,F>& x, SizeType k);
-template<class F> TaylorModel<Validated,F> derivative(const TaylorModel<Validated,F>& x, SizeType k);
-template<class F> Covector<ValidatedNumber> gradient(const TaylorModel<Validated,F>& x, const Vector<ValidatedNumber>& y);
-
-//! \relates TaylorModel<Validated,F> \brief Evaluate an array of Taylor variables on a vector.
-template<class F> ValidatedNumber evaluate(const TaylorModel<Validated,F>& x, const Vector<ValidatedNumber>& sy);
-//! \relates TaylorModel<Validated,F> \brief Substite \a c for the \a k th variable.
-template<class F> TaylorModel<Validated,F> partial_evaluate(const TaylorModel<Validated,F>& x, SizeType k, ValidatedNumber c);
-
-//! \relates Rescale the vector \a x from the domain \a dom to the unit domain.
-template<class F> TaylorModel<Validated,F> unscale(const TaylorModel<Validated,F>& tv, const ExactInterval& ivl);
-//! \relates TaylorModel<Validated,F Compose a vector of Taylor models with another.
-template<class F> TaylorModel<Validated,F> compose(const Unscaling& u, const TaylorModel<Validated,F>& tg);
-//! \relates TaylorModel<Validated,F Compose a vector of Taylor models with another.
-template<class F> TaylorModel<Validated,F> compose(const TaylorModel<Validated,F>& tf, const Vector<TaylorModel<Validated,F>>& tg);
-//! \relates TaylorModel<Validated,F> \brief Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
-template<class F> TaylorModel<Validated,F> compose(const TaylorModel<Validated,F>& tf, const VectorUnscaling& u);
-template<class F> Vector<TaylorModel<Validated,F>> compose(VectorUnscaling const& u, const Vector<TaylorModel<Validated,F>>& tf);
-
-//! \relates TaylorModel<Validated,F>
-//!\brief Split the variable, subdividing along the independent variable j, taking the lower/middle/upper half.
-template<class F> TaylorModel<Validated,F> split(const TaylorModel<Validated,F>& x, SizeType j, SplitPart part);
-//! \relates TaylorModel<Validated,F> \brief Embed the model in a space of higher dimension
-template<class F> TaylorModel<Validated,F> embed(SizeType as1, const TaylorModel<Validated,F>& tm2, SizeType as3);
-
-//! \relates TaylorModel<Validated,F> \brief Embed the model in a space of higher dimension, placing the error in the final variable.
-template<class F> TaylorModel<Validated,F> embed_error(const TaylorModel<Validated,F>& tm);
-//! \relates TaylorModel<Validated,F> \brief Abstract away the given variables.
-//! For example, the model tm(x0,x1,x2,x3) becomes tm'(x0,x1)=tm(x0,[-1,+1],x1,[-1,+1]) on discarding x1 and x3.
-template<class F> TaylorModel<Validated,F>  discard_variables(const TaylorModel<Validated,F>&, const Array<SizeType>& variables);
-
-//! \relates TaylorModel<Validated,F> \brief The magnitude of the model. Returns an over-approximation to the supremum norm.
-template<class F> ErrorType mag(const TaylorModel<Validated,F>& tm);
-//! \relates TaylorModel<Validated,F> \brief An over-approximation to the supremum norm.
-template<class F> ErrorType norm(const TaylorModel<Validated,F>& tm);
-
-template<class F> TaylorModel<Validated,F> max(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y);
-template<class F> TaylorModel<Validated,F> min(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y);
-template<class F> TaylorModel<Validated,F> abs(const TaylorModel<Validated,F>& x);
-
+Covector<ValidatedNumber> gradient(const TaylorModel<Validated,Float>& x, const Vector<ValidatedNumber>& v);
 
 
 
@@ -513,11 +527,15 @@ class TaylorModel<Approximate,F>
     //@{
     /*! \name Inplace modifications. */
     //! \brief Scale so that the old codomain maps into the unit interval.
-    Void unscale(const ExactInterval& codomain);
+    Void unscale(const ExactInterval& dom);
     //! \brief Compute the antiderivative (in place).
     Void antidifferentiate(SizeType k);
     //! \brief Compute the derivative (in place).
     Void differentiate(SizeType k);
+
+    friend TaylorModel<Approximate,F> unscale(TaylorModel<Approximate,F> tm, const ExactInterval& dom) {
+        tm.unscale(dom); return std::move(tm); }
+
     //@}
 
     //@{
@@ -565,7 +583,8 @@ class TaylorModel<Approximate,F>
     //@{
     /*! \name Stream input/output operators. */
     //! \brief Write to an output stream.
-    friend OutputStream& operator<<(OutputStream& os, const TaylorModel<Approximate,F>& x);
+    friend OutputStream& operator<<(OutputStream& os, const TaylorModel<Approximate,F>& x) {
+        return x.str(os); }
     //@}
 
   public:
@@ -574,15 +593,14 @@ class TaylorModel<Approximate,F>
 };
 
 
-template<class F> inline OutputStream& operator<<(OutputStream& os, const TaylorModel<Approximate,F>& x) {
-    x.str(os); return os; }
 
-template<class P, class F> inline Box<ExactInterval> codomain(const Vector<TaylorModel<P,F> >& vtm) {
+
+
+template<class F> inline Box<ExactInterval> codomain(const Vector<TaylorModel<Validated,F> >& vtm) {
     Box<ExactInterval> r(vtm.size()); for(SizeType i=0; i!=vtm.size(); ++i) { r[i]=vtm[i].codomain(); } return r; }
 
-template<class F> TaylorModel<Approximate,F> unscale(const TaylorModel<Approximate,F>& tv, const ExactInterval& ivl);
-
-
+template<class F> inline Box<ExactInterval> codomain(const Vector<TaylorModel<Approximate,F> >& vtm) {
+    Box<ExactInterval> r(vtm.size()); for(SizeType i=0; i!=vtm.size(); ++i) { r[i]=vtm[i].codomain(); } return r; }
 
 
 // Vector operations which can be evaluated componentwise
@@ -615,6 +633,37 @@ template<class F> Vector<TaylorModel<Validated,F>> combine(const Vector<TaylorMo
 template<class F> Vector<TaylorModel<Validated,F>> combine(const Vector<TaylorModel<Validated,F>>& x1, const TaylorModel<Validated,F>& x2);
 template<class F> Vector<TaylorModel<Validated,F>> combine(const TaylorModel<Validated,F>& x1, const Vector<TaylorModel<Validated,F>>& x2);
 template<class F> Vector<TaylorModel<Validated,F>> combine(const TaylorModel<Validated,F>& x1, const TaylorModel<Validated,F>& x2);
+
+
+
+template<class F> Vector<TaylorModel<Validated,F>> partial_evaluate(const Vector<TaylorModel<Validated,F>>& tf, SizeType k, const ValidatedNumber& c) {
+    Vector<TaylorModel<Validated,F>> r(tf.size(),ValidatedTaylorModel::zero(tf.zero_element().argument_size()-1,tf.zero_element().sweeper()));
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=partial_evaluate(tf[i],k,c); }
+    return r;
+}
+
+template<class F> Vector<ValidatedNumber> evaluate(const Vector<TaylorModel<Validated,F>>& tf, const Vector<ValidatedNumber>& x) {
+    Vector<ValidatedNumber> r(tf.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=evaluate(tf[i],x); }
+    return r;
+}
+
+template<class F> Vector<TaylorModel<Validated,F>> compose(const Vector<TaylorModel<Validated,F>>& tf, const Vector<TaylorModel<Validated,F>>& tg) {
+    Vector<TaylorModel<Validated,F>> r(tf.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=compose(tf[i],tg); }
+    return r;
+}
+
+template<class F> Vector<TaylorModel<Validated,F>> embed(SizeType as1, const Vector<TaylorModel<Validated,F>>& x2, SizeType as3) {
+    Vector<TaylorModel<Validated,F>> r(x2.size());
+    for(SizeType i=0; i!=r.size(); ++i) { r[i]=embed(as1,x2[i],as3); }
+    return r;
+}
+
+template<class F> Vector<TaylorModel<Validated,F>> combine(const Vector<TaylorModel<Validated,F>>& x1, const Vector<TaylorModel<Validated,F>>& x2) {
+    return join(embed(0u,x1,x2.zero_element().argument_size()),embed(x1.zero_element().argument_size(),x2,0u));
+}
+
 
 } // namespace Ariadne
 

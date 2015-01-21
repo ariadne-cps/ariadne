@@ -366,7 +366,9 @@ template<class X, class CMP> Void SortedExpansion<X,CMP>::set(const MultiIndex& 
 }
 
 template<class X, class CMP> typename SortedExpansion<X,CMP>::CoefficientType const& SortedExpansion<X,CMP>::get(const MultiIndex& a) const {
-    return const_cast<SortedExpansion<X,CMP>*>(this)->at(a);
+    ConstIterator iter=this->find(a);
+    if(iter==this->end()) { return  Expansion<X>::_zero; }
+    else { return iter->data(); }
 }
 
 template<class X, class CMP> typename Expansion<X>::Iterator SortedExpansion<X,CMP>::find(const MultiIndex& a) {

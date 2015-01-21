@@ -329,6 +329,7 @@ template<class X> Expansion<MidpointType<X>> midpoint(const Expansion<X>& pse);
 template<class X> Expansion<X> embed(SizeType, Expansion<X> const&, SizeType);
 template<class X> OutputStream& operator<<(OutputStream& os, const Expansion<X>& p);
 
+template<class X, class CMP> class SortedExpansionValueReference;
 
 template<class X, class CMP> class SortedExpansion
     : public Expansion<X>
@@ -342,6 +343,9 @@ template<class X, class CMP> class SortedExpansion
     SortedExpansion(Expansion<X> e);
     Void sort();
 
+    X const& operator[](const MultiIndex& a) const;
+    SortedExpansionValueReference<X,CMP> operator[](const MultiIndex& a);
+
     Void insert(const MultiIndex& a, const CoefficientType& c);
     Void set(const MultiIndex& a, const CoefficientType& c);
     CoefficientType& at(const MultiIndex& a);
@@ -349,6 +353,25 @@ template<class X, class CMP> class SortedExpansion
     Iterator find(const MultiIndex& a);
     ConstIterator find(const MultiIndex& a) const;
 };
+
+template<class X, class CMP> class SortedExpansionValueReference {
+    SortedExpansion<X,CMP>& _e; MultiIndex const& _a;
+  public:
+    SortedExpansionValueReference(SortedExpansion<X,CMP>& e, const MultiIndex& a) : _e(e), _a(a) { }
+    operator const X& () const { return _e.get(_a); }
+    //operator X& () { return _e.at(_a); }
+    SortedExpansionValueReference<X,CMP>& operator=(const X& x) { _e.set(_a,x); return *this; }
+    SortedExpansionValueReference<X,CMP>& operator+=(X const& c) { _e.at(_a)+=c; return *this; }
+    SortedExpansionValueReference<X,CMP>& operator-=(X const& c) { _e.at(_a)-=c; return *this; }
+    SortedExpansionValueReference<X,CMP>& operator*=(X const& c) { _e.at(_a)*=c; return *this; }
+    SortedExpansionValueReference<X,CMP>& operator/=(X const& c) { _e.at(_a)/=c; return *this; }
+};
+
+template<class X, class CMP> inline const X& SortedExpansion<X,CMP>::operator[](const MultiIndex& a) const {
+    return const_cast<SortedExpansion<X,CMP>&>(*this).at(a); }
+
+template<class X, class CMP> inline SortedExpansionValueReference<X,CMP> SortedExpansion<X,CMP>::operator[](const MultiIndex& a) {
+    return SortedExpansionValueReference<X,CMP>(*this,a); }
 
 // Disable construction of Expansion<Rational> since above implementation only
 // works for "plain old data" types

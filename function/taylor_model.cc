@@ -1582,6 +1582,9 @@ jacobian_range(const Vector<TaylorModel<Validated,F>>& f, const Array<SizeType>&
 
 
 template class TaylorModel<Validated,Float>;
+template TaylorModel<Validated,Float> max(const TaylorModel<Validated,Float>&,const TaylorModel<Validated,Float>&);
+template TaylorModel<Validated,Float> min(const TaylorModel<Validated,Float>&,const TaylorModel<Validated,Float>&);
+template TaylorModel<Validated,Float> abs(const TaylorModel<Validated,Float>&);
 template TaylorModel<Validated,Float> rec(const TaylorModel<Validated,Float>&);
 template TaylorModel<Validated,Float> sqrt(const TaylorModel<Validated,Float>&);
 template TaylorModel<Validated,Float> exp(const TaylorModel<Validated,Float>&);

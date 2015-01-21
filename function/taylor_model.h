@@ -388,12 +388,12 @@ class TaylorModel<Validated,F>
     //@{
     /*! \name Order operators. */
     //! \brief The pointwise maximum.
-    friend TaylorModel<Validated,F> max(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y);
+    template<class FF> friend TaylorModel<Validated,FF> max(const TaylorModel<Validated,FF>& x, const TaylorModel<Validated,FF>& y);
     //! \brief The pointwise minimum.
-    friend TaylorModel<Validated,F> min(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y);
+    template<class FF> friend TaylorModel<Validated,FF> min(const TaylorModel<Validated,FF>& x, const TaylorModel<Validated,FF>& y);
     //! \brief The pointwise absolute value.
     //! \details If the range of \a x definitely does not include 0, returns +x or -x. Otherwise, uses a uniform polynomial approximation to abs.
-    friend TaylorModel<Validated,F> abs(const TaylorModel<Validated,F>& x);
+    template<class FF> friend TaylorModel<Validated,FF> abs(const TaylorModel<Validated,FF>& x);
     //@}
     //@{
     /*! \name Stream input/output operators. */

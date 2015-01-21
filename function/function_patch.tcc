@@ -664,7 +664,7 @@ template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, Siz
 template<class M> Pair<FunctionPatch<M>,FunctionPatch<M>> split(const FunctionPatch<M>& tv, SizeType j)
 {
     typedef M ModelType;
-    Pair<ModelType,ModelType> models=split(tv.model(),j);
+    Pair<ModelType,ModelType> models={split(tv.model(),j,SplitPart::LOWER),split(tv.model(),j,SplitPart::LOWER)};
     Pair<ExactBox,ExactBox> subdomains=split(tv.domain(),j);
     return make_pair(FunctionPatch<M>(subdomains.first,models.first),
                      FunctionPatch<M>(subdomains.second,models.second));
@@ -691,7 +691,7 @@ template<class M> Bool inconsistent(const FunctionPatch<M>& tv1, const FunctionP
 template<class M> FunctionPatch<M> refinement(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2)
 {
     ARIADNE_ASSERT(tv1.domain()==tv2.domain());
-    return FunctionPatch<M>(tv1.domain(),intersection(tv1.model(),tv2.model()));
+    return FunctionPatch<M>(tv1.domain(),refinement(tv1.model(),tv2.model()));
 }
 
 template<class M> ErrorFloat norm(const FunctionPatch<M>& f) {
@@ -1315,7 +1315,7 @@ template<class M> VectorFunctionPatch<M> join(const VectorFunctionPatch<M>& f, c
 template<class M> VectorFunctionPatch<M> join(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2)
 {
     ARIADNE_ASSERT(f1.domain()==f2.domain());
-    return VectorFunctionPatch<M>(f1.domain(),join(f1.model(),f2.model()));
+    return VectorFunctionPatch<M>(f1.domain(),{f1.model(),f2.model()});
 }
 
 template<class M> VectorFunctionPatch<M> join(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
@@ -1326,17 +1326,17 @@ template<class M> VectorFunctionPatch<M> join(const FunctionPatch<M>& f1, const 
 
 template<class M> VectorFunctionPatch<M> combine(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2)
 {
-    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(f1.model(),f2.model()));
+    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(Vector<M>(1u,f1.model()),{f2.model()}));
 }
 
 template<class M> VectorFunctionPatch<M> combine(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
 {
-    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(f1.model(),f2.models()));
+    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine({f1.model()},f2.models()));
 }
 
 template<class M> VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2)
 {
-    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(f1.models(),f2.model()));
+    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(f1.models(),{f2.model()}));
 }
 
 template<class M> VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
@@ -1394,19 +1394,19 @@ template<class M> Bool refines(const VectorFunctionPatch<M>& f1, const VectorFun
     return true;
 }
 
-template<class M> Bool disjoint(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+template<class M> Bool inconsistent(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
     for(SizeType i=0; i!=f1.result_size(); ++i) {
-        if(disjoint(f1[i],f2[i])) { return true; }
+        if(inconsistent(f1[i],f2[i])) { return true; }
     }
     return false;
 }
 
-template<class M> VectorFunctionPatch<M> intersection(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+template<class M> VectorFunctionPatch<M> refinement(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
     ARIADNE_ASSERT(f1.result_size()==f2.result_size());
     VectorFunctionPatch<M> r(f1.result_size());
     for(SizeType i=0; i!=r.result_size(); ++i) {
-        r[i]=intersection(f1[i],f2[i]);
+        r[i]=refinement(f1[i],f2[i]);
     }
     return r;
 }

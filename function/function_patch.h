@@ -397,14 +397,14 @@ template<class M> FunctionPatch<M> operator-(const NumericType<M>& c, const Func
 template<class M> FunctionPatch<M> operator*(const NumericType<M>& c, const FunctionPatch<M>& f);
 template<class M> FunctionPatch<M> operator/(const NumericType<M>& c, const FunctionPatch<M>& f);
 
-template<class M> FunctionPatch<M> operator+(const typename FunctionPatch<M>::FunctionType& f1, const FunctionPatch<M>& tf2);
-template<class M> FunctionPatch<M> operator-(const typename FunctionPatch<M>::FunctionType& f1, const FunctionPatch<M>& tf2);
-template<class M> FunctionPatch<M> operator*(const typename FunctionPatch<M>::FunctionType& f1, const FunctionPatch<M>& tf2);
-template<class M> FunctionPatch<M> operator/(const typename FunctionPatch<M>::FunctionType& f1, const FunctionPatch<M>& tf2);
-template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& tf1, const typename FunctionPatch<M>::FunctionType& f2);
-template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& tf1, const typename FunctionPatch<M>::FunctionType& f2);
-template<class M> FunctionPatch<M> operator*(const FunctionPatch<M>& tf1, const typename FunctionPatch<M>::FunctionType& f2);
-template<class M> FunctionPatch<M> operator/(const FunctionPatch<M>& tf1, const typename FunctionPatch<M>::FunctionType& f2);
+template<class M> FunctionPatch<M> operator+(const FunctionType<M>& f1, const FunctionPatch<M>& tf2);
+template<class M> FunctionPatch<M> operator-(const FunctionType<M>& f1, const FunctionPatch<M>& tf2);
+template<class M> FunctionPatch<M> operator*(const FunctionType<M>& f1, const FunctionPatch<M>& tf2);
+template<class M> FunctionPatch<M> operator/(const FunctionType<M>& f1, const FunctionPatch<M>& tf2);
+template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& tf1, const FunctionType<M>& f2);
+template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& tf1, const FunctionType<M>& f2);
+template<class M> FunctionPatch<M> operator*(const FunctionPatch<M>& tf1, const FunctionType<M>& f2);
+template<class M> FunctionPatch<M> operator/(const FunctionPatch<M>& tf1, const FunctionType<M>& f2);
 
 template<class M> FunctionPatch<M> abs(const FunctionPatch<M>& x);
 template<class M> FunctionPatch<M> neg(const FunctionPatch<M>& x);

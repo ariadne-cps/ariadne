@@ -67,17 +67,17 @@ Covector<ApproximateNumber> ScalarFunctionInterface<ApproximateTag>::gradient(co
     return this->evaluate(Differential<ApproximateNumber>::variables(1u,x)).gradient(); }
 Covector<ValidatedNumber> ScalarFunctionInterface<ValidatedTag>::gradient(const Vector<ValidatedNumber>& x) const {
     return this->evaluate(Differential<ValidatedNumber>::variables(1u,x)).gradient(); }
-Differential<ApproximateNumber> ScalarFunctionInterface<ApproximateTag>::differential(const Vector<ApproximateNumber>& x, SizeType d) const {
+Differential<ApproximateNumber> ScalarFunctionInterface<ApproximateTag>::differential(const Vector<ApproximateNumber>& x, DegreeType d) const {
     return this->evaluate(Differential<ApproximateNumber>::variables(d,x)); }
-Differential<ValidatedNumber> ScalarFunctionInterface<ValidatedTag>::differential(const Vector<ValidatedNumber>& x, SizeType d) const {
+Differential<ValidatedNumber> ScalarFunctionInterface<ValidatedTag>::differential(const Vector<ValidatedNumber>& x, DegreeType d) const {
     return this->evaluate(Differential<ValidatedNumber>::variables(d,x)); }
 Matrix<ApproximateNumber> VectorFunctionInterface<ApproximateTag>::jacobian(const Vector<ApproximateNumber>& x) const {
     return this->evaluate(Differential<ApproximateNumber>::variables(1u,x)).jacobian(); }
 Matrix<ValidatedNumber> VectorFunctionInterface<ValidatedTag>::jacobian(const Vector<ValidatedNumber>& x) const {
     return this->evaluate(Differential<ValidatedNumber>::variables(1u,x)).jacobian(); }
-Vector< Differential<ApproximateNumber> > VectorFunctionInterface<ApproximateTag>::differentials(const Vector<ApproximateNumber>& x, SizeType d) const {
+Vector< Differential<ApproximateNumber> > VectorFunctionInterface<ApproximateTag>::differentials(const Vector<ApproximateNumber>& x, DegreeType d) const {
     return this->evaluate(Differential<ApproximateNumber>::variables(d,x)); }
-Vector< Differential<ValidatedNumber> > VectorFunctionInterface<ValidatedTag>::differentials(const Vector<ValidatedNumber>& x, SizeType d) const {
+Vector< Differential<ValidatedNumber> > VectorFunctionInterface<ValidatedTag>::differentials(const Vector<ValidatedNumber>& x, DegreeType d) const {
     return this->evaluate(Differential<ValidatedNumber>::variables(d,x)); }
 
 //------------------------ Vector of Scalar functions  -----------------------------------//

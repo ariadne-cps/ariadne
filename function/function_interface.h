@@ -77,7 +77,7 @@ class ScalarFunctionInterface<ApproximateTag>
     virtual Algebra<ApproximateNumber> evaluate(const Vector< Algebra<ApproximateNumber> >& x) const = 0;
 
     Covector<ApproximateNumber> gradient(const Vector<ApproximateNumber>& x) const;
-    Differential<ApproximateNumber> differential(const Vector<ApproximateNumber>& x, SizeType d) const;
+    Differential<ApproximateNumber> differential(const Vector<ApproximateNumber>& x, DegreeType d) const;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
     inline ScalarFunction<ApproximateTag> derivative(SizeType i) const;
@@ -117,7 +117,7 @@ class ScalarFunctionInterface<ValidatedTag>
     using ScalarFunctionInterface<ApproximateTag>::gradient;
     Covector<ValidatedNumber> gradient(const Vector<ValidatedNumber>& x) const;
     using ScalarFunctionInterface<ApproximateTag>::differential;
-    Differential<ValidatedNumber> differential(const Vector<ValidatedNumber>& x, SizeType d) const;
+    Differential<ValidatedNumber> differential(const Vector<ValidatedNumber>& x, DegreeType d) const;
 
     //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
     inline ScalarFunction<ValidatedTag> derivative(SizeType i) const;
@@ -210,7 +210,7 @@ class VectorFunctionInterface<ApproximateTag>
     virtual Vector< Algebra<ApproximateNumber> > evaluate(const Vector< Algebra<ApproximateNumber> >& x) const = 0;
 
     Matrix<ApproximateNumber> jacobian(const Vector<ApproximateNumber>& x) const;
-    Vector< Differential<ApproximateNumber> > differentials(const Vector<ApproximateNumber>& x, SizeType d) const;
+    Vector< Differential<ApproximateNumber> > differentials(const Vector<ApproximateNumber>& x, DegreeType d) const;
 
     //! \brief Get the \a i<sup>th</sup> component function.
     inline ScalarFunction<ApproximateTag> operator[](SizeType i) const;
@@ -246,7 +246,7 @@ class VectorFunctionInterface<ValidatedTag>
     Matrix<ValidatedNumber> jacobian(const Vector<ValidatedNumber>& x) const;
     Matrix<ValidatedNumber> jacobian(const Vector<ExactNumber>& x) const;
     using VectorFunctionInterface<ApproximateTag>::differentials;
-    Vector< Differential<ValidatedNumber> > differentials(const Vector<ValidatedNumber>& x, SizeType d) const;
+    Vector< Differential<ValidatedNumber> > differentials(const Vector<ValidatedNumber>& x, DegreeType d) const;
 
     //! \brief Get the \a i<sup>th</sup> component function.
     inline ScalarFunction<ValidatedTag> operator[](SizeType i) const;

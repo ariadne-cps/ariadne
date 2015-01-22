@@ -91,6 +91,8 @@ class ScalarFunction
     template<class PP> inline ScalarFunction(const VectorFunctionElementReference<PP>& vfe,
                                              EnableIf<IsStronger<PP,P>,Void>* = 0);
 
+    ScalarFunction<P>& operator=(NumericType const& c) { return *this=this->create_constant(c); }
+
     std::shared_ptr< const ScalarFunctionInterface<P> > managed_pointer() const  { return _ptr; }
     const ScalarFunctionInterface<P>* raw_pointer() const  { return _ptr.operator->(); }
     const ScalarFunctionInterface<P>& reference() const  { return _ptr.operator*(); }
@@ -102,10 +104,11 @@ class ScalarFunction
     template<class XX> XX evaluate(const Vector<XX>& x) const { return this->reference().evaluate(x); }
     template<class XX> XX operator() (const Vector<XX>& x) const { return this->reference().evaluate(x); }
 
-    ScalarFunction<P> derivative(SizeType j) const { return this->reference().derivative(j); }
+    ScalarFunction<P> derivative(SizeType k) const { return this->reference().derivative(k); }
+    friend ScalarFunction<P> derivative(ScalarFunction<P> const& f, SizeType k) { return f.reference().derivative(k); }
 
     template<class XX> Covector<XX> gradient(const Vector<XX>& x) const { return this->reference().gradient(x); }
-    template<class XX> Differential<XX> differential(const Vector<XX>& x, SizeType d) const { return this->_ptr->differential(x,d); }
+    template<class XX> Differential<XX> differential(const Vector<XX>& x, DegreeType d) const { return this->_ptr->differential(x,d); }
 
     OutputStream& write(OutputStream& os) const { return this->_ptr->write(os); }
 };
@@ -120,6 +123,7 @@ ScalarFunction<P>::ScalarFunction(const VectorFunctionElementReference<PP>& vfe,
 template<class P> inline OutputStream& operator<<(OutputStream& os, const ScalarFunction<P>& f) { return f.write(os); }
 template<class P, class XX> inline XX evaluate(const ScalarFunction<P>& f, const Vector<XX>& x) { return f(x); }
 template<class P, class XX> inline Covector<XX> gradient(const ScalarFunction<P>& f, const Vector<XX>& x) { return f.gradient(x); }
+template<class P, class XX> inline Differential<XX> differential(const ScalarFunction<P>& f, const Vector<XX>& x, DegreeType d) { return f.differential(x,d); }
 
 ApproximateScalarFunction ScalarFunctionInterface<ApproximateTag>::clone() const { return ApproximateScalarFunction(this->_clone()); }
 ValidatedScalarFunction ScalarFunctionInterface<ValidatedTag>::clone() const { return ValidatedScalarFunction(this->_clone()); }
@@ -255,7 +259,7 @@ class VectorFunction
 
     template<class XX> auto jacobian(const Vector<XX>& x) const -> decltype(this->_ptr->jacobian(x)) {
         return this->_ptr->jacobian(x); }
-    template<class XX> auto differentials(const Vector<XX>& x, SizeType d) const -> decltype(this->_ptr->differentials(x,d)) {
+    template<class XX> auto differentials(const Vector<XX>& x, DegreeType d) const -> decltype(this->_ptr->differentials(x,d)) {
         return this->_ptr->differentials(x,d); }
 
     OutputStream& write(OutputStream& os) const { return this->_ptr->write(os); }

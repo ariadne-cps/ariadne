@@ -55,6 +55,9 @@ henon(const Vector<DF>& x, const Vector<typename DF::NumericType>& p)
     Vector<DF> r(2,2,x.degree()); henon(r,x,p); return r;
 }
 
+// FIXME: Operators needed to prevent bad overloads
+template<class X> Differential<X> operator*(const typename Differential<X>::NumericType& c,const NonAssignableDifferential<X>& dx) {
+    return c * static_cast<Differential<X>const&>(dx); }
 
 
 template<class DF>

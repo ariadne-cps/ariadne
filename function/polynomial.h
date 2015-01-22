@@ -200,8 +200,8 @@ class Polynomial
     static Polynomial<X> _add(const Polynomial<X>& p1, const Polynomial<X>& p2);
     static Polynomial<X> _sub(const Polynomial<X>& p1, const Polynomial<X>& p2);
     static Polynomial<X> _mul(const Polynomial<X>& p1, const Polynomial<X>& p2);
-    static Polynomial<X> _add(const Polynomial<X>& p, const X& c);
-    static Polynomial<X> _mul(const Polynomial<X>& p, const X& c);
+    static Polynomial<X>& _iadd(Polynomial<X>& p, const X& c);
+    static Polynomial<X>& _imul(Polynomial<X>& p, const X& c);
     static Polynomial<X>& _imul(Polynomial<X>& p, const Monomial<X>& m);
     static Polynomial<X> _compose(const Polynomial<X>& p, const Vector<Polynomial<X>>& q);
     static X _evaluate(const Polynomial<X>& p, const Vector<X>& vx);
@@ -273,61 +273,24 @@ template<class F> inline NamedArgumentRepresentation<F> named_argument_repr(cons
 template<class X> inline OutputStream& operator<<(OutputStream& os, const NamedArgumentRepresentation<Polynomial<X>>& repr) {
     return repr.function._write(os,repr.argument_names); }
 
-
+template<class X> struct IsAlgebra<Polynomial<X>> : True { };
 
 template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p) {
     return Polynomial<X>::_pos(p); }
 template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p) {
     return Polynomial<X>::_neg(p); }
-template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p, const typename Polynomial<X>::NumericType& c) {
-    return Polynomial<X>::_add(p,c); }
-template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p, const typename Polynomial<X>::NumericType& c) {
-    return Polynomial<X>::_add(p,neg(c)); }
-template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p, const typename Polynomial<X>::NumericType& c) {
-    return Polynomial<X>::_mul(p,c); }
-template<class X> inline Polynomial<X> operator/(const Polynomial<X>& p, const typename Polynomial<X>::NumericType& c) {
-    return Polynomial<X>::_mul(p,rec(c)); }
-template<class X> inline Polynomial<X> operator+(const typename Polynomial<X>::NumericType& c, const Polynomial<X>& p) {
-    return Polynomial<X>::_add(p,c); }
-template<class X> inline Polynomial<X> operator-(const typename Polynomial<X>::NumericType& c, const Polynomial<X>& p) {
-    return Polynomial<X>::_add(neg(p),c); }
-template<class X> inline Polynomial<X> operator*(const typename Polynomial<X>::NumericType& c, const Polynomial<X>& p) {
-    return Polynomial<X>::_mul(p,c); }
-
-template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p1, const Polynomial<X>& p2)
-{ return Polynomial<X>::_add(p1,p2); }
+template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p1, const Polynomial<X>& p2) {
+    return Polynomial<X>::_add(p1,p2); }
 template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p1, const Polynomial<X>& p2) {
     return Polynomial<X>::_sub(p1,p2); }
 template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p1, const Polynomial<X>& p2) {
     return Polynomial<X>::_mul(p1,p2); }
-
-template<class X> inline Polynomial<X> sqr(const Polynomial<X>& p) {
-    return p*p; }
-
-template<class X> inline Polynomial<X> pow(const Polynomial<X>& p, Nat m) {
-    Polynomial<X> r=Polynomial<X>::constant(p.argument_size(),1.0); Polynomial<X> q(p);
-    while(m) { if(m%2) { r=r*q; } q=q*q; m/=2; } return r;
-}
-
-
-template<class X> inline Polynomial<X>& operator+=(Polynomial<X>& p, const typename Polynomial<X>::SelfType& q) {
-    return p=p+q; }
-template<class X> inline Polynomial<X>& operator-=(Polynomial<X>& p, const typename Polynomial<X>::SelfType& q) {
-    return p=p-q; }
-
-template<class X> inline Polynomial<X>& operator+=(Polynomial<X>& p, const typename Polynomial<X>::NumericType& c) {
-    return p=p+c; }
-template<class X> inline Polynomial<X>& operator-=(Polynomial<X>& p, const typename Polynomial<X>::NumericType& c) {
-    return p=p-c; }
-template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const typename Polynomial<X>::NumericType& c) {
-    return p=p*c; }
-template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, const typename Polynomial<X>::NumericType& c) {
-    return p=p/c; }
-
+template<class X> inline Polynomial<X>& operator+=(Polynomial<X>& p, const NumericType<Polynomial<X>>& c) {
+    return Polynomial<X>::_iadd(p,c); }
+template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const NumericType<Polynomial<X>>& c) {
+    return Polynomial<X>::_imul(p,c); }
 template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const Monomial<X>& m) {
     return Polynomial<X>::_imul(p,m); }
-
-
 
 template<class X> inline Polynomial<MidpointType<X>> midpoint(const Polynomial<X>& p) {
     return Polynomial<MidpointType<X>>(midpoint(p.expansion())); }
@@ -340,19 +303,19 @@ template<class X, class A> Vector<A> evaluate(const Vector<Polynomial<X>>& p, co
     return r;
 }
 
-template<class X> Vector<Polynomial<X>> derivative(const Vector<Polynomial<X>>& p, Nat j) {
+template<class X> Vector<Polynomial<X>> derivative(const Vector<Polynomial<X>>& p, SizeType j) {
     Vector<Polynomial<X>> r(p.size());
     for(Nat i=0; i!=p.size(); ++i) { r[i]=derivative(p[i],j); }
     return r;
 }
 
-template<class X> Vector<Polynomial<X>> antiderivative(const Vector<Polynomial<X>>& p, Nat j) {
+template<class X> Vector<Polynomial<X>> antiderivative(const Vector<Polynomial<X>>& p, SizeType j) {
     Vector<Polynomial<X>> r(p.size());
     for(Nat i=0; i!=p.size(); ++i) { r[i]=antiderivative(p[i],j); }
     return r;
 }
 
-template<class X> Vector<Polynomial<X>> truncate(const Vector<Polynomial<X>>& p, Nat d) {
+template<class X> Vector<Polynomial<X>> truncate(const Vector<Polynomial<X>>& p, DegreeType d) {
     Vector<Polynomial<X>> r(p.size());
     for(Nat i=0; i!=p.size(); ++i) { r[i]=truncate(p[i],d); }
     return r;

@@ -40,7 +40,7 @@
 #include "function/function.h"
 #include "utility/exceptions.h"
 
-#include "algebra/algebra_mixin.tcc"
+#include "algebra/algebra_operations.tcc"
 
 #define VOLATILE ;
 #include "algebra/multi_index-noaliasing.h"
@@ -838,7 +838,7 @@ template<class F> TaylorModel<Validated,F> abs(const TaylorModel<Validated,F>& x
         r=static_cast<ExactFloat>(p[n-1]);
         for(Nat i=0; i!=(n-1); ++i) {
             Nat j=(n-2)-i;
-            r=s*r+p[j];
+            r=s*r+static_cast<ExactFloat>(p[j]);
         }
         r+=ValidatedFloat(-err,+err);
         return r*xmag;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            algebra.h
  *
- *  Copyright 2010  Pieter Collins
+ *  Copyright 2010-15  Pieter Collins
  *
  ****************************************************************************/
 
@@ -33,7 +33,6 @@
 #include "utility/pointer.h"
 #include "expression/operators.h"
 #include "algebra/algebra_interface.h"
-#include "algebra/algebra_mixin.h"
 
 namespace Ariadne {
 
@@ -57,6 +56,7 @@ template<class X> class Algebra
     operator const AlgebraInterface<X>& () const { return *_ptr; }
     Algebra<X> create() const { return Algebra<X>(_ptr->_create()); }
     Algebra<X> clone() const { return Algebra<X>(_ptr->_clone()); }
+    Algebra<X> create_zero() const { return Algebra<X>(_ptr->_create()); }
     OutputStream& write(OutputStream& os) const { return _ptr->write(os); }
   public:
     Void iadd(const X& c) { _ptr->_iadd(c); }
@@ -67,6 +67,7 @@ template<class X> class Algebra
 
 template<class X> class NormedAlgebra
 {
+    static_assert(not IsSame<X,Real>::value,"");
   private:
     std::shared_ptr< NormedAlgebraInterface<X> > _ptr;
   public:
@@ -187,17 +188,6 @@ template<class X> Algebra<X> tan(const Algebra<X>& a) { return apply(Tan(),a); }
 
 // FIXME: Eliminate use of clone with std::dynamic_pointer_cast
 template<class X, class OP> Algebra<X> apply(OP op, const Algebra<X>& a) {
-    const AlgebraInterface<X>* aptr = &static_cast<const AlgebraInterface<X>&>(a);
-    if(dynamic_cast<const NormedAlgebraInterface<X>*>(aptr)) {
-        NormedAlgebra<X> na(dynamic_cast<const NormedAlgebraInterface<X>&>(*aptr)._clone());
-        return op(na);
-    } else if(dynamic_cast<const GradedAlgebraInterface<X>*>(aptr)) {
-        GradedAlgebra<X> ga(dynamic_cast<const GradedAlgebraInterface<X>&>(*aptr)._clone());
-        return compose(make_series(op,ga.degree(),ga.value()),ga);
-    } else if(dynamic_cast<const SymbolicAlgebraInterface<X>*>(aptr)) {
-        SymbolicAlgebra<X> sa(dynamic_cast<const SymbolicAlgebraInterface<X>&>(*aptr)._clone());
-        return SymbolicAlgebra<X>(op.code(),sa);
-    }
     ARIADNE_FAIL_MSG("Cannot apply operator "<<op<<" to "<<a<<"\n");
 }
 

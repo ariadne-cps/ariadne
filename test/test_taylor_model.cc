@@ -42,6 +42,12 @@ ValidatedTaylorModel ctm(Nat m, double c, Sweeper swp) { return ValidatedTaylorM
 ValidatedTaylorModel ctm(Nat m, Sweeper swp) { return ValidatedTaylorModel::constant(m,ExactFloat(1.0),swp); }
 //ValidatedTaylorModel tm(Nat m, Nat i, Sweeper swp) { return ValidatedTaylorModel::coordinate(m,i,swp); }
 
+// Allow addition and multiplication by double
+template<class D, EnableIf<IsSame<D,double>> =dummy> ValidatedTaylorModel operator+(D d, ValidatedTaylorModel tm) { return ExactFloat(d)+tm; }
+template<class D, EnableIf<IsSame<D,double>> =dummy> ValidatedTaylorModel operator-(D d, ValidatedTaylorModel tm) { return ExactFloat(d)-tm; }
+template<class D, EnableIf<IsSame<D,double>> =dummy> ValidatedTaylorModel operator*(D d, ValidatedTaylorModel tm) { return ExactFloat(d)*tm; }
+
+// Allow carat for power
 ValidatedTaylorModel operator^(ValidatedTaylorModel tm, Nat m) { return pow(tm,m); }
 ValidatedTaylorModel clobber(ValidatedTaylorModel tm) { tm.clobber(); return std::move(tm); }
 
@@ -180,7 +186,6 @@ Void TestTaylorModel::test_predicates()
     ARIADNE_TEST_BINARY_PREDICATE(consistent,1+2*x+3*y+e*3/4,1+2*x+3*y+e*3/4);
     ARIADNE_TEST_BINARY_PREDICATE(consistent,1+e*3/4,2+e/4);
     ARIADNE_TEST_BINARY_PREDICATE(not consistent,x-(x^3)*2/3+e/(3.0_exact+pow(h,20)),z);
-
     ARIADNE_TEST_BINARY_PREDICATE(inconsistent,1-2*(x^2),e*7/8);
     ARIADNE_TEST_BINARY_PREDICATE(not inconsistent,1+2*x+3*y+e*3/4,1+2*x+3*y+e*3/4);
     ARIADNE_TEST_BINARY_PREDICATE(not inconsistent,1+e*3/4,2+e/4);
@@ -262,11 +267,12 @@ Void TestTaylorModel::test_arithmetic()
     ARIADNE_TEST_EQUAL(pow(t,3),t*t*t);
 
     ValidatedTaylorModel tm_inf(Expansion<Float>(2),+inf,swp);
-    if(isnan(numeric_cast<double>(numeric_cast<Float>((tm_inf * 0.0).error())))) {
+    ValidatedTaylorModel tm_zero_times_inf=0*tm_inf;
+    if(isnan(tm_zero_times_inf.error().get_d())) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-NaN");
-    } else if((tm_inf * 0).error()==+infty) {
+    } else if(tm_zero_times_inf.error()==+infty) {
         ARIADNE_TEST_WARN("Multiplying 0+/-inf by 0 yields 0+/-inf");
-    } else if((tm_inf * 0).error()==0) {
+    } else if(tm_zero_times_inf.error()==0) {
         ARIADNE_TEST_PRINT("Multiplying 0+/-inf by 0 yields 0+/-0");
     }
 }
@@ -339,7 +345,7 @@ Void TestTaylorModel::test_functions()
 
     ARIADNE_TEST_BINARY_PREDICATE(refines,rec(3*ophx),expected_rec_ophx/3);
     ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(9*ophx),expected_sqrt_ophx*3);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,log(3*ophx),expected_log_ophx+log(3));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,log(3*ophx),expected_log_ophx+log(ExactFloat(3)));
 
     Nat rn=3; ExactFloat c(2); ExactFloat r(rn);
     ARIADNE_TEST_PRINT(c);

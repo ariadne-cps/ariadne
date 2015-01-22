@@ -40,6 +40,7 @@
 #include "algebra/expansion.h"
 #include "algebra/sweeper.h"
 #include "algebra/algebra_mixin.h"
+#include "algebra/algebra_operations.h"
 #include "function/scaling.h"
 #include "geometry/interval.h"
 
@@ -136,7 +137,7 @@ class TaylorModel<Validated,F>
     //@{
     /*! \name Assignment to constant values. */
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorModel<Validated,F>& operator=(const ValidatedNumber& c);
+    TaylorModel<Validated,F>& operator =(const ValidatedNumber& c);
     //@}
 
     //@{
@@ -386,6 +387,16 @@ class TaylorModel<Validated,F>
     Void isma(const ValidatedNumber& c, const TaylorModel<Validated,F>& x);
     //! \brief Fused multiply and add \c r+=x1*x2 .
     Void ifma(const TaylorModel<Validated,F>& x1, const TaylorModel<Validated,F>& x2);
+
+    friend TaylorModel<Validated,F> operator-(TaylorModel<Validated,F> x) { x.imul(-1); return std::move(x); }
+    friend TaylorModel<Validated,F>& operator+=(TaylorModel<Validated,F>& x, NumericType const& c) { x.iadd(c); return x; }
+    friend TaylorModel<Validated,F>& operator*=(TaylorModel<Validated,F>& x, NumericType const& c) { x.imul(c); return x; }
+    friend TaylorModel<Validated,F> operator+(TaylorModel<Validated,F> const& x1, TaylorModel<Validated,F> const& x2) {
+        TaylorModel<Validated,F> r=x1; r.isma(+1,x2); return std::move(r); }
+    friend TaylorModel<Validated,F> operator-(TaylorModel<Validated,F> const& x1, TaylorModel<Validated,F> const& x2) {
+        TaylorModel<Validated,F> r=x1; r.isma(-1,x2); return std::move(r); }
+    friend TaylorModel<Validated,F> operator*(TaylorModel<Validated,F> const& x1, TaylorModel<Validated,F> const& x2) {
+        TaylorModel<Validated,F> r(x1.argument_size(),x1.sweeper()); r.ifma(x1,x2); return std::move(r); }
     //@}
 
     //@{

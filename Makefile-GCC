@@ -319,7 +319,7 @@ bin/test_polynomial: $(TESTS_OBJ_DIR)/test_polynomial.o  libariadne-function.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@
 
 bin/test_taylor_model: $(TESTS_OBJ_DIR)/test_taylor_model.o $(LIB_OBJ_DIR)/taylor_model.o libariadne-function.so
-	$(CXX) $< $(LIB_OBJ_DIR)/taylor_model.o $(LINK_FLAGS) $(ARIADNE_ALGEBRA_LIB) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@
+	$(CXX) $< $(LIB_OBJ_DIR)/taylor_model.o $(LINK_FLAGS) libariadne-function.so $(LINK_LIBS) -o $@
 
 bin/test_procedure: $(TESTS_OBJ_DIR)/test_procedure.o  libariadne-function.so $(TEST_FUNCTION_EXTRA_OBJ)
 	$(CXX) $< $(LINK_FLAGS) $(TEST_FUNCTION_EXTRA_OBJ) $(ARIADNE_FUNCTION_LIB) $(LINK_LIBS) -o $@

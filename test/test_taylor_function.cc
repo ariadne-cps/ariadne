@@ -101,6 +101,8 @@ Void TestScalarTaylorFunction::test()
 
 Void TestScalarTaylorFunction::test_concept()
 {
+    static_assert(IsAlgebra<ScalarTaylorFunction>::value,"");
+    
     const ExactFloat f=0;
     const ValidatedFloat i;
     const Vector<ExactFloat> vf;
@@ -118,9 +120,12 @@ Void TestScalarTaylorFunction::test_concept()
     tr+=i; tr-=i; tr*=i; tr/=i;
     tr+=t; tr-=t;
 
+    tr=pos(tr); tr=neg(tr); tr=sqr(tr);
+    tr=rec(tr); tr=pow(tr,1u); tr=pow(tr,-1);
     tr=exp(t); tr=log(t); tr=sqrt(t);
     tr=sin(t); tr=cos(t); tr=tan(t);
     //tr=asin(t); tr=acos(t); tr=atan(t);
+    tr=max(tr,tr); tr=min(tr,tr); tr=abs(tr);
 
     tr.sweep(); tr.clobber();
 

@@ -26,7 +26,7 @@
 
 #include "algebra/differential.h"
 
-#include "algebra_mixin.tcc"
+#include "algebra_operations.h"
 
 #include "differential.tcc"
 

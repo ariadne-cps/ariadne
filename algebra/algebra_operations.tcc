@@ -1,7 +1,7 @@
 /***************************************************************************
- *            algebra_mixin.tcc
+ *            algebra_operations.tcc
  *
- *  Copyright 2011  Pieter Collins
+ *  Copyright 2011-15  Pieter Collins
  *
  ****************************************************************************/
 
@@ -22,9 +22,7 @@
  */
 
 #include "utility/exceptions.h"
-#include "algebra/algebra_interface.h"
-#include "algebra/algebra_mixin.h"
-#include "algebra/algebra.h"
+#include "algebra/algebra_operations.h"
 
 #include "algebra/series.h"
 #include "function/taylor_series.h"
@@ -311,9 +309,9 @@ log(const A& x)
 
     A y=x/avg-X(1);
     A z=x.create();
-    z+=Float(d%2?-1:+1)/d;
+    z+=X(d%2?-1:+1)/d;
     for(Nat i=1; i!=d; ++i) {
-        z=Float((d-i)%2?+1:-1)/(d-i) + z * y;
+        z=X((d-i)%2?+1:-1)/(d-i) + z * y;
     }
     z=z*y;
 

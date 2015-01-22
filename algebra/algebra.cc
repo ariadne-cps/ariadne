@@ -1,7 +1,7 @@
 /***************************************************************************
  *            algebra.cc
  *
- *  Copyright 2011  Pieter Collins
+ *  Copyright 2011-15  Pieter Collins
  *
  ****************************************************************************/
 
@@ -24,7 +24,9 @@
 #include "numeric/numeric.h"
 #include "config.h"
 
-#include "algebra_mixin.tcc"
+#include "algebra.h"
+#include "algebra_mixin.h"
+#include "algebra_operations.tcc"
 
 namespace Ariadne {
 
@@ -34,31 +36,24 @@ template GradedAlgebra<EffectiveNumber> compose(const Series<EffectiveNumber>&, 
 
 template NormedAlgebra<ApproximateNumber> rec(const NormedAlgebra<ApproximateNumber>&);
 template NormedAlgebra<ValidatedNumber> rec(const NormedAlgebra<ValidatedNumber>&);
-template NormedAlgebra<EffectiveNumber> rec(const NormedAlgebra<EffectiveNumber>&);
 
 template NormedAlgebra<ApproximateNumber> sqrt(const NormedAlgebra<ApproximateNumber>&);
 template NormedAlgebra<ValidatedNumber> sqrt(const NormedAlgebra<ValidatedNumber>&);
-template NormedAlgebra<EffectiveNumber> sqrt(const NormedAlgebra<EffectiveNumber>&);
 
 template NormedAlgebra<ApproximateNumber> exp(const NormedAlgebra<ApproximateNumber>&);
 template NormedAlgebra<ValidatedNumber> exp(const NormedAlgebra<ValidatedNumber>&);
-template NormedAlgebra<EffectiveNumber> exp(const NormedAlgebra<EffectiveNumber>&);
 
 template NormedAlgebra<ApproximateNumber> log(const NormedAlgebra<ApproximateNumber>&);
 template NormedAlgebra<ValidatedNumber> log(const NormedAlgebra<ValidatedNumber>&);
-template NormedAlgebra<EffectiveNumber> log(const NormedAlgebra<EffectiveNumber>&);
 
 template NormedAlgebra<ApproximateNumber> sin(const NormedAlgebra<ApproximateNumber>&);
 template NormedAlgebra<ValidatedNumber> sin(const NormedAlgebra<ValidatedNumber>&);
-template NormedAlgebra<EffectiveNumber> sin(const NormedAlgebra<EffectiveNumber>&);
 
 template NormedAlgebra<ApproximateNumber> cos(const NormedAlgebra<ApproximateNumber>&);
 template NormedAlgebra<ValidatedNumber> cos(const NormedAlgebra<ValidatedNumber>&);
-template NormedAlgebra<EffectiveNumber> cos(const NormedAlgebra<EffectiveNumber>&);
 
 template NormedAlgebra<ApproximateNumber> tan(const NormedAlgebra<ApproximateNumber>&);
 template NormedAlgebra<ValidatedNumber> tan(const NormedAlgebra<ValidatedNumber>&);
-template NormedAlgebra<EffectiveNumber> tan(const NormedAlgebra<EffectiveNumber>&);
 
 /*
 template NormedAlgebra<ApproximateNumber> asin(const NormedAlgebra<ApproximateNumber>&);

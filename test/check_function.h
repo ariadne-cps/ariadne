@@ -42,31 +42,31 @@ typedef ExactBox BoxDomain;
 template<class P> using Function = ScalarFunction<P>;
 typedef Function<Effective> EffectiveFunction;
 
-template<class F, class R=DontCare, class = Fallback> struct HasCodomainMethod : False { };
+template<class F, class R=Return<DontCare>, class = Fallback> struct HasCodomainMethod : False { };
 template<class F, class R> struct HasCodomainMethod<F, R, EnableIf<IsDefined<decltype(declval<F>().codomain())>,Fallback>> : True { };
 
-template<class F, class R=DontCare, class = Fallback> struct HasDomainMethod : False { };
+template<class F, class R=Return<DontCare>, class = Fallback> struct HasDomainMethod : False { };
 template<class F, class R> struct HasDomainMethod<F, R, EnableIf<IsDefined<decltype(declval<F>().domain())>,Fallback>> : True { };
 
-template<class F, class A, class R=DontCare, class = Fallback> struct HasCallMethod : False { };
+template<class F, class A, class R=Return<DontCare>, class = Fallback> struct HasCallMethod : False { };
 template<class F, class A, class R>
-    struct HasCallMethod<F,A,R,EnableIf<IsConvertible<decltype(declval<F>()(declval<A>())),R>,Fallback>> : True { };
+    struct HasCallMethod<F,A,Return<R>,EnableIf<IsConvertible<decltype(declval<F>()(declval<A>())),R>,Fallback>> : True { };
 
-template<class F, class A, class R=DontCare, class = Fallback> struct HasGradientMethod : False { };
+template<class F, class A, class R=Return<DontCare>, class = Fallback> struct HasGradientMethod : False { };
 template<class F, class A, class R>
-    struct HasGradientMethod<F,A,R,EnableIf<IsConvertible<decltype(declval<F>().gradient(declval<A>())),R>,Fallback>> : True { };
+    struct HasGradientMethod<F,A,Return<R>,EnableIf<IsConvertible<decltype(declval<F>().gradient(declval<A>())),R>,Fallback>> : True { };
 
-template<class F, class A, class R=DontCare, class = Fallback> struct HasDifferentialMethod : False { };
+template<class F, class A, class R=Return<DontCare>, class = Fallback> struct HasDifferentialMethod : False { };
 template<class F, class A, class R>
-    struct HasDifferentialMethod<F,A,R,EnableIf<IsConvertible<decltype(declval<F>().differential(declval<DegreeType>(),declval<A>())),R>,Fallback>> : True { };
+    struct HasDifferentialMethod<F,A,Return<R>,EnableIf<IsConvertible<decltype(declval<F>().differential(declval<A>(),declval<DegreeType>())),R>,Fallback>> : True { };
 
-template<class F, class A, class R=DontCare, class = Fallback> struct HasEvaluate : False { };
+template<class F, class A, class R=Return<DontCare>, class = Fallback> struct HasEvaluate : False { };
 template<class F, class A, class R>
-    struct HasEvaluate<F,A,R,EnableIf<IsConvertible<decltype(evaluate(declval<F>(),declval<A>())),R>,Fallback>> : True { };
+    struct HasEvaluate<F,A,Return<R>,EnableIf<IsConvertible<decltype(evaluate(declval<F>(),declval<A>())),R>,Fallback>> : True { };
 
-template<class F, class G, class R=DontCare, class = Fallback> struct HasCompose : False { };
+template<class F, class G, class R=Return<DontCare>, class = Fallback> struct HasCompose : False { };
 template<class F, class G, class R>
-    struct HasCompose<F,G,R,EnableIf<IsConvertible<decltype(compose(declval<F>(),declval<G>())),R>,Fallback>> : True { };
+    struct HasCompose<F,G,Return<R>,EnableIf<IsConvertible<decltype(compose(declval<F>(),declval<G>())),R>,Fallback>> : True { };
 
 #define ARIADNE_HAS_TYPEDEF(typename_to_check) \
     template<class A, class = Fallback> struct Has##typename_to_check : False { }; \
@@ -167,7 +167,7 @@ template<class F> void CheckFunctionConcept<F>::check_differentiable_concept()
 
     this->check_differential_algebra_concept();
 
-    ARIADNE_TEST_STATIC_ASSERT(HasDerivative<F,SizeType,F>);
+    ARIADNE_TEST_STATIC_ASSERT(HasDerivative<F,SizeType,Return<F>>);
 
     if(IsWeaker<Approximate,P>::value) {
         ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Differential<ApproximateFloat>>, Return<Differential<ApproximateFloat>>>);

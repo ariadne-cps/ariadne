@@ -29,8 +29,8 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-template<typename T1, typename T2, typename = Fallback> struct HasPow : False { };
-template<typename T1, typename T2> struct HasPow<T1,T2,EnableIf<True, decltype(pow(declval<T1&>(),declval<T2&>()),Fallback())>> : True { };
+template<class X, class N, class R=Return<DontCare>, class = Fallback> struct HasPow : False { };
+template<class X, class N, class R> struct HasPow<X,N,Return<R>,EnableIf<IsConvertible<decltype(pow(declval<X&>(),declval<N&>())),R>,Fallback>> : True { };
 
 //template<typename Op, typename T, typename = Fallback> struct HasUnaryOperator : False { };
 //template<typename Op, typename T> struct HasUnaryOperator<Op,T,EnableIf<True,decltype(Op()(declval<T&>()),Fallback())>> : True { };

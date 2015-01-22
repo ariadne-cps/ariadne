@@ -32,30 +32,30 @@ template<class X> String vector_class_name() { return String("Vector<") + class_
 using namespace Ariadne;
 
 
-template<class V, class R=DontCare, class = Fallback> struct HasZeroElementMethod : False { };
-template<class V, class R> struct HasZeroElementMethod<V, R, EnableIf<IsConvertible<decltype(declval<V>().zero_element()),R>,Fallback>> : True { };
+template<class V, class R=Return<DontCare>, class = Fallback> struct HasZeroElementMethod : False { };
+template<class V, class R> struct HasZeroElementMethod<V, Return<R>, EnableIf<IsConvertible<decltype(declval<V>().zero_element()),R>,Fallback>> : True { };
 
-template<class V, class R=DontCare, class = Fallback> struct HasSizeMethod : False { };
-template<class V, class R> struct HasSizeMethod<V, R, EnableIf<IsConvertible<decltype(declval<V>().size()),R>,Fallback>> : True { };
+template<class V, class R=Return<DontCare>, class = Fallback> struct HasSizeMethod : False { };
+template<class V, class R> struct HasSizeMethod<V, Return<R>, EnableIf<IsConvertible<decltype(declval<V>().size()),R>,Fallback>> : True { };
 
 template<class V, class I, class R=DontCare, class = Fallback> struct HasSubscriptingMethod : False { };
-template<class V, class I, class R> struct HasSubscriptingMethod<V, I, R, EnableIf<IsConvertible<decltype(declval<V>()[declval<I>()]),R>,Fallback>> : True { };
+template<class V, class I, class R> struct HasSubscriptingMethod<V, I, Return<R>, EnableIf<IsConvertible<decltype(declval<V>()[declval<I>()]),R>,Fallback>> : True { };
 
 template<class A1, class A2, class R=Return<DontCare>, class = Fallback> struct HasJoin : False { };
 template<class A1, class A2, class R> struct HasJoin<A1, A2, Return<R>, EnableIf<IsConvertible<decltype(join(declval<A1>(),declval<A2>())),R>,Fallback>> : True { };
 
 template<class V, class R=DontCare, class = Fallback> struct HasNorm : False { };
-template<class V, class R> struct HasNorm<V, R, EnableIf<IsConvertible<decltype(norm(declval<V>())),R>,Fallback>> : True { };
+template<class V, class R> struct HasNorm<V, Return<R>, EnableIf<IsConvertible<decltype(norm(declval<V>())),R>,Fallback>> : True { };
 
 
 template<class A, class R=DontCare, class = Fallback> struct HasNormMethod : False { };
-template<class A, class R> struct HasNormMethod<A, R, EnableIf<IsConvertible<decltype(declval<A>().norm()),R>,Fallback>> : True { };
+template<class A, class R> struct HasNormMethod<A, Return<R>, EnableIf<IsConvertible<decltype(declval<A>().norm()),R>,Fallback>> : True { };
 
 template<class A, class K=SizeType, class R=DontCare, class = Fallback> struct HasDerivative : False { };
-template<class A, class K, class R> struct HasDerivative<A, K, R, EnableIf<IsConvertible<decltype(derivative(declval<A>(),declval<K>())),R>,Fallback>> : True { };
+template<class A, class K, class R> struct HasDerivative<A, K, Return<R>, EnableIf<IsConvertible<decltype(derivative(declval<A>(),declval<K>())),R>,Fallback>> : True { };
 
 template<class A, class K=SizeType, class R=DontCare, class = Fallback> struct HasAntiderivative : False { };
-template<class A, class K, class R> struct HasAntiderivative<A, K, R, EnableIf<IsConvertible<decltype(derivative(declval<A>(),declval<K>())),R>,Fallback>> : True { };
+template<class A, class K, class R> struct HasAntiderivative<A, K, Return<R>, EnableIf<IsConvertible<decltype(derivative(declval<A>(),declval<K>())),R>,Fallback>> : True { };
 
 template<class V, class = Fallback> struct HasScalarType : False { }; \
 template<class V> struct HasScalarType<V, EnableIf<IsDefined<typename V::ScalarType>,Fallback>> : True { }; \
@@ -158,13 +158,13 @@ template<class A> void CheckAlgebraConcept<A>::check_algebra_concept()
     ARIADNE_TEST_STATIC_ASSERT(HasOperator<Sqr,A,Return<A>>);
     ARIADNE_TEST_STATIC_ASSERT(HasOperator<Pow,A,Nat,Return<A>>);
 }
-
+class A { }; class B { public: B& operator=(A a) { return *this; } };
 template<class A> void CheckAlgebraConcept<A>::check_unital_algebra_concept()
 {
-
     this->check_algebra_concept();
 
     typedef typename A::NumericType X;
+
     ARIADNE_TEST_STATIC_ASSERT(IsAssignable<A,X>);
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<A>().create_constant(declval<X>())),A>);
 

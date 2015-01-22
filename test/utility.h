@@ -48,6 +48,8 @@ template<class X> auto operator>=(X const& x, double d) -> decltype(x>=ExactFloa
 struct OperatorPositive { template<class A> auto operator()(A a) const -> decltype(+a) { return +a; } };
 struct OperatorNegative { template<class A> auto operator()(A a) const -> decltype(-a) { return -a; } };
 struct OperatorNegate { template<class A> auto operator()(A a) const -> decltype(-a) { return -a; } };
+struct OperatorUnaryPlus { template<class A> auto operator()(A a) const -> decltype(+a) { return +a; } };
+struct OperatorUnaryMinus { template<class A> auto operator()(A a) const -> decltype(-a) { return -a; } };
 struct OperatorPlus { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1+a2) { return a1+a2; } };
 struct OperatorMinus { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1-a2) { return a1-a2; } };
 struct OperatorTimes { template<class A1, class A2> auto operator()(A1 a1, A2 a2) const -> decltype(a1*a2) { return a1*a2; } };

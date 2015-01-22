@@ -137,7 +137,7 @@ template<class A> bool CheckAlgebraConcept<A>::has_numeric_type()
     ARIADNE_TEST_STATIC_ASSERT(HasNumericType<A>);
     return HasNumericType<A>::value;
 }
-
+namespace Ariadne { template<> String class_name<EffectiveScalarFunction>() { return "EffectiveScalarFunction"; } }
 template<class A> void CheckAlgebraConcept<A>::check_algebra_concept()
 {
     typedef typename A::NumericType X;
@@ -145,16 +145,16 @@ template<class A> void CheckAlgebraConcept<A>::check_algebra_concept()
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<A>().create_zero()),A>);
 
     ARIADNE_TEST_STATIC_ASSERT(IsConvertible<A,A>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Pos,A>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Pos,A,Return<A>>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Neg,A,Return<A>>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Add,A,A>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Add,A,A,Return<A>>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Sub,A,A,Return<A>>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Mul,A,A,Return<A>>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Mul,A,X,Return<A>>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Mul,X,A,Return<A>>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Div,A,X,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorUnaryPlus,A>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorUnaryPlus,A,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorUnaryMinus,A,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorPlus,A,A>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorPlus,A,A,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorMinus,A,A,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorTimes,A,A,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorTimes,A,X,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorTimes,X,A,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorDivides,A,X,Return<A>>);
     ARIADNE_TEST_STATIC_ASSERT(HasOperator<Sqr,A,Return<A>>);
     ARIADNE_TEST_STATIC_ASSERT(HasOperator<Pow,A,Nat,Return<A>>);
 }
@@ -168,10 +168,10 @@ template<class A> void CheckAlgebraConcept<A>::check_unital_algebra_concept()
     ARIADNE_TEST_STATIC_ASSERT(IsAssignable<A,X>);
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<A>().create_constant(declval<X>())),A>);
 
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Add,A,X,Return<A>>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Add,X,A,Return<A>>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Sub,A,X,Return<A>>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Sub,X,A,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorPlus,A,X,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorPlus,X,A,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorMinus,A,X,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorMinus,X,A,Return<A>>);
 }
 
 template<class A> void CheckAlgebraConcept<A>::check_division_algebra_concept()
@@ -181,8 +181,8 @@ template<class A> void CheckAlgebraConcept<A>::check_division_algebra_concept()
     typedef typename A::NumericType X;
 
     ARIADNE_TEST_STATIC_ASSERT(HasOperator<Rec,A,Return<A>>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Div,A,A,Return<A>>);
-    ARIADNE_TEST_STATIC_ASSERT(HasOperator<Div,X,A,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorDivides,A,A,Return<A>>);
+    ARIADNE_TEST_STATIC_ASSERT(HasOperator<OperatorDivides,X,A,Return<A>>);
     ARIADNE_TEST_STATIC_ASSERT(HasOperator<Pow,A,Int,Return<A>>);
 }
 
@@ -211,5 +211,5 @@ template<class A> void CheckAlgebraConcept<A>::check_graded_algebra_concept()
 template<class A> void CheckAlgebraConcept<A>::check_differential_algebra_concept()
 {
 //    ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<A>().smoothness()),DegreeType>);
-    ARIADNE_TEST_STATIC_ASSERT(HasDerivative<A,SizeType,A>);
+    ARIADNE_TEST_STATIC_ASSERT(HasDerivative<A,SizeType,Return<A>>);
 }

@@ -28,6 +28,13 @@
 #include "expression/operators.h"
 #include "function/function.h"
 
+namespace Ariadne {
+template<class X> String class_name();
+template<> String class_name<Approximate>() { return "Approximate"; }
+template<> String class_name<Validated>() { return "Validated"; }
+template<> String class_name<Effective>() { return "Effective"; }
+} // namespace Ariadne
+
 using namespace Ariadne;
 
 typedef ExactInterval IntervalDomain;
@@ -88,11 +95,6 @@ template<class F> class CheckFunctionConcept : public CheckAlgebraConcept<F>
     void check_composable_concept();
 };
 
-template<class X> String clss_name();
-template<> String clss_name<Approximate>() { return "Approximate"; }
-template<> String clss_name<Validated>() { return "Validated"; }
-template<> String clss_name<Effective>() { return "Effective"; }
-
 template<class F> void CheckFunctionConcept<F>::check()
 {
     this->check_division_algebra_concept();
@@ -141,20 +143,20 @@ template<class F> void CheckFunctionConcept<F>::check_evaluable_concept()
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<F>().argument_size()),SizeType>);
 
     if(IsWeaker<Approximate,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumber>,ApproximateNumber>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateFloat>,ApproximateFloat>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumber>,ApproximateNumber>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumber>, Return<ApproximateNumber>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateFloat>, Return<ApproximateFloat>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumber>, Return<ApproximateNumber>>);
     }
 
     if(IsWeaker<Validated,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedNumber>,ValidatedNumber>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<BoundedFloat>,BoundedFloat>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedFloat>,ValidatedFloat>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedNumber>, Return<ValidatedNumber>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<BoundedFloat>, Return<BoundedFloat>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedFloat>, Return<ValidatedFloat>>);
     }
 
     if(IsWeaker<Effective,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<EffectiveNumber>,EffectiveNumber>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Real>,Real>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<EffectiveNumber>, Return<EffectiveNumber>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Real>, Return<Real>>);
     }
 
 }
@@ -168,15 +170,15 @@ template<class F> void CheckFunctionConcept<F>::check_differentiable_concept()
     ARIADNE_TEST_STATIC_ASSERT(HasDerivative<F,SizeType,F>);
 
     if(IsWeaker<Approximate,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Differential<ApproximateFloat>>,Differential<ApproximateFloat>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasGradientMethod<F,Vector<ApproximateFloat>,Covector<ApproximateFloat>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasDifferentialMethod<F,Vector<ApproximateFloat>,Differential<ApproximateFloat>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Differential<ApproximateFloat>>, Return<Differential<ApproximateFloat>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasGradientMethod<F,Vector<ApproximateFloat>, Return<Covector<ApproximateFloat>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasDifferentialMethod<F,Vector<ApproximateFloat>, Return<Differential<ApproximateFloat>>>);
     }
 
     if(IsWeaker<Validated,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Differential<BoundedFloat>>,Differential<BoundedFloat>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasGradientMethod<F,Vector<BoundedFloat>,Covector<BoundedFloat>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasDifferentialMethod<F,Vector<BoundedFloat>,Differential<BoundedFloat>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Differential<BoundedFloat>>, Return<Differential<BoundedFloat>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasGradientMethod<F,Vector<BoundedFloat>, Return<Covector<BoundedFloat>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasDifferentialMethod<F,Vector<BoundedFloat>, Return<Differential<BoundedFloat>>>);
     }
 
     if(IsWeaker<Effective,P>::value) {
@@ -186,24 +188,24 @@ template<class F> void CheckFunctionConcept<F>::check_differentiable_concept()
 
 template<class F> void CheckFunctionConcept<F>::check_integrable_concept()
 {
-    ARIADNE_TEST_STATIC_ASSERT(HasAntiderivative<F,SizeType,F>);
+    ARIADNE_TEST_STATIC_ASSERT(HasAntiderivative<F,SizeType, Return<F>>);
 }
 
 template<class F> void CheckFunctionConcept<F>::check_composable_concept()
 {
     typedef typename F::Paradigm P;
-    ARIADNE_TEST_STATIC_ASSERT(HasCompose<F,Vector<F>,F>);
+    ARIADNE_TEST_STATIC_ASSERT(HasCompose<F,Vector<F>, Return<F>>);
 
     if(IsWeaker<P,Approximate>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCompose<Function<Approximate>,Vector<F>,F>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCompose<Function<Approximate>,Vector<F>, Return<F>>);
     }
 
     if(IsWeaker<P,Validated>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCompose<Function<Validated>,Vector<F>,F>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCompose<Function<Validated>,Vector<F>, Return<F>>);
     }
 
     if(IsWeaker<P,Effective>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCompose<Function<Effective>,Vector<F>,F>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCompose<Function<Effective>,Vector<F>, Return<F>>);
     }
 }
 
@@ -246,30 +248,30 @@ template<class F> void CheckVectorFunctionConcept<F>::check_evaluable_concept()
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<F>().argument_size()),SizeType>);
 
     if(IsWeaker<Approximate,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumber>,Vector<ApproximateNumber>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateFloat>,Vector<ApproximateFloat>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateNumber>, Return<Vector<ApproximateNumber>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ApproximateFloat>, Return<Vector<ApproximateFloat>>>);
 
-        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ApproximateNumber>,Vector<ApproximateNumber>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ApproximateFloat>,Vector<ApproximateFloat>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ApproximateNumber>, Return<Vector<ApproximateNumber>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ApproximateFloat>, Return<Vector<ApproximateFloat>>>);
     }
 
     if(IsWeaker<Validated,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedNumber>,Vector<ValidatedNumber>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<BoundedFloat>,Vector<BoundedFloat>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedFloat>,Vector<ValidatedFloat>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedNumber>, Return<Vector<ValidatedNumber>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<BoundedFloat>, Return<Vector<BoundedFloat>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<ValidatedFloat>, Return<Vector<ValidatedFloat>>>);
 
-        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ValidatedNumber>,Vector<ValidatedNumber>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<BoundedFloat>,Vector<BoundedFloat>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ValidatedFloat>,Vector<ValidatedFloat>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ValidatedNumber>, Return<Vector<ValidatedNumber>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<BoundedFloat>, Return<Vector<BoundedFloat>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<ValidatedFloat>, Return<Vector<ValidatedFloat>>>);
 
     }
 
     if(IsWeaker<Effective,P>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<EffectiveNumber>,Vector<EffectiveNumber>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Real>,Vector<Real>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<EffectiveNumber>, Return<Vector<EffectiveNumber>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCallMethod<F,Vector<Real>, Return<Vector<Real>>>);
 
-        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<EffectiveNumber>,Vector<EffectiveNumber>>);
-        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<Real>,Vector<Real>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<EffectiveNumber>, Return<Vector<EffectiveNumber>>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasEvaluate<F,Vector<Real>, Return<Vector<Real>>>);
 
     }
 

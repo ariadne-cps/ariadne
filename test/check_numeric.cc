@@ -109,6 +109,7 @@ void output_check_result(Bool p, String e, String r, String op, String a1, Strin
     if(p) {
         std::cout << " OK\n";
     } else {
+        ++ARIADNE_TEST_FAILURES;
         std::cout << " Failed! Actual type is " << r << "\n";
         std::cerr << "ERROR: " << op << "(" << a1 << "," << a2 << ") -> " << r << "; expected " << e << "\n";
     }
@@ -121,38 +122,55 @@ template<class E, class OP, class A1, class A2> void chk() {
     output_check_result(p,class_name<E>(),class_name<R>(),op_name<OP>(),class_name<A1>(),class_name<A2>());
 }
 
-template<class T, class F> void check_explicitly_constructible() {
-    std::cout << "Checking " << class_name<T>() << " is constructible from " << class_name<F>() << ":";
-    if(IsConstructible<T,F>::value and not IsConvertible<F,T>::value) {
+void output_check_explicitly_constructible_result(Bool p, String t, String f, Bool c) {
+    std::cout << "Checking " << t << " is constructible from " << f << ":";
+    if(p) {
         std::cout << " OK\n";
     } else {
         std::cout << " Failed!\n";
-        if(IsConvertible<F,T>::value) {
-            std::cerr << "ERROR: " << class_name<T>() << " is convertible from  " << class_name<F>() << ", but only explict constructor allowed.\n";
+        if(c) {
+            std::cerr << "ERROR: " << t << " is convertible from  " << f << ", but only explict construction should be allowed.\n";
         } else {
-            std::cerr << "ERROR: " << class_name<T>() << " is not constructible from " << class_name<F>() << ".\n";
+            std::cerr << "ERROR: " << t << " is not constructible from " << f << ".\n";
         }
     }
 }
 
-template<class T, class F> void check_convertible() {
-    std::cout << "Checking " << class_name<T>() << " is convertible from " << class_name<F>() << ":";
-    if(IsConvertible<F,T>::value) {
+template<class T, class F> void check_explicitly_constructible() {
+    Bool c=IsConvertible<F,T>::value;
+    Bool p=IsConstructible<T,F>::value and not c;
+    output_check_explicitly_constructible_result(p,class_name<T>(),class_name<F>(),c);
+}
+
+
+void output_check_convertible_result(Bool p, String t, String f) {
+    std::cout << "Checking " << t << " is convertible from " << f << ":";
+    if(p) {
         std::cout << " OK\n";
     } else {
         std::cout << " Failed!\n";
-        std::cerr << "ERROR: " << class_name<T>() << " is not convertible from " << class_name<F>() << ".\n";
+        std::cerr << "ERROR: " << t << " is not convertible from " << f << ".\n";
+    }
+}
+
+template<class T, class F> void check_convertible() {
+    Bool p=IsConvertible<F,T>::value;
+    output_check_convertible_result(p,class_name<T>(),class_name<F>());
+}
+
+void output_check_not_constructible_result(Bool p, String t, String f) {
+    std::cout << "Checking " << t << " is not constructible from " << f << ":";
+    if(p) {
+        std::cout << " OK\n";
+    } else {
+        std::cout << " Failed!\n";
+        std::cerr << "ERROR: " << t << " is constructible from " << f << "\n";
     }
 }
 
 template<class T, class F> void check_not_constructible() {
-    std::cout << "Checking " << class_name<T>() << " is not constructible from " << class_name<F>() << ":";
-    if(not IsConstructible<T,F>::value) {
-        std::cout << " OK\n";
-    } else {
-        std::cout << " Failed!\n";
-        std::cerr << "ERROR: " << class_name<T>() << " is constructible from " << class_name<F>() << "\n";
-    }
+    Bool p=not IsConstructible<T,F>::value;
+    output_check_not_constructible_result(p,class_name<T>(),class_name<F>());
 }
 
 struct Cid { } ; struct Eid { }; struct Nid { };

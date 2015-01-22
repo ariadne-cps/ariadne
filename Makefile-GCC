@@ -17,8 +17,8 @@ LIB_NUMERIC_SRC = \
 #   float64.cc \
 
 TEST_NUMERIC_SRC = \
-	test_float.cc test_validated_float.cc \
 	check_numeric.cc \
+	test_float.cc test_validated_float.cc \
 
 LIB_ALGEBRA_SRC = \
 	vector.cc matrix.cc series.cc multi_index.cc expansion.cc differential.cc algebra.cc \
@@ -29,9 +29,9 @@ TEST_ALGEBRA_SRC = \
 LIB_FUNCTION_SRC = \
 	affine.cc polynomial.cc affine_model.cc taylor_model.cc  \
 	function.cc symbolic_function.cc taylor_function.cc  \
-	check_function.cc \
 
 TEST_FUNCTION_SRC = \
+	check_function.cc \
 	test_polynomial.cc test_procedure.cc test_function.cc test_taylor_model.cc test_taylor_function.cc \
 
 LIB_SOLVER_SRC = \
@@ -289,6 +289,12 @@ obj/%.o: examples/%.cc
 bin/test_%: $(TESTS_OBJ_DIR)/test_%.o  libariadne.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_LIB) $(LINK_LIBS) -o $@
 
+
+bin/check_numeric: $(TESTS_OBJ_DIR)/check_numeric.o
+	$(CXX) $< $(LINK_FLAGS) -o $@
+
+bin/check_function: $(TESTS_OBJ_DIR)/check_function.o
+	$(CXX) $< $(LINK_FLAGS) -o $@
 
 bin/test_float: $(TESTS_OBJ_DIR)/test_float.o  libariadne-numeric.so
 	$(CXX) $< $(LINK_FLAGS) $(ARIADNE_NUMERIC_LIB) $(LINK_LIBS) -o $@

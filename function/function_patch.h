@@ -52,55 +52,6 @@ typedef VectorFunction<Validated> ValidatedVectorFunction;
 
 class MultiIndex;
 
-inline ApproximateNumber med_apprx(ExactInterval const& ivl) {
-    return ApproximateNumber(half_exact(add_approx(ivl.lower_raw(),ivl.upper_raw())));
-}
-
-inline ApproximateNumber rad_apprx(ExactInterval const& ivl) {
-    return ApproximateNumber(half_exact(sub_approx(ivl.upper_raw(),ivl.lower_raw())));
-}
-
-inline ValidatedNumber med_val(ExactInterval const& ivl) {
-    return half(ivl.lower()+ivl.upper());
-}
-
-inline ValidatedNumber rad_val(ExactInterval const& ivl) {
-    return half(ivl.upper()-ivl.lower());
-}
-
-template<template<class> class T> inline T<ApproximateNumber> unscale(const T<ApproximateNumber>& x, const ExactInterval& d) {
-    ApproximateNumber c(med_apprx(d));
-    ApproximateNumber r(rad_apprx(d));
-    return (x-c)/r;
-}
-
-template<template<class> class T> inline T<ValidatedNumber> unscale(const T<ValidatedNumber>& x, const ExactInterval& d) {
-    ValidatedNumber c(med_val(d));
-    ValidatedNumber r(rad_val(d));
-    return (x-c)/r;
-}
-
-
-inline ApproximateNumber unscale(const ApproximateNumber& x, const ExactInterval& d) {
-    ApproximateNumber c(med_apprx(d));
-    ApproximateNumber r(rad_apprx(d));
-    return (x-c)/r;
-}
-
-inline ValidatedNumber unscale(const ValidatedNumber& x, const ExactInterval& d) {
-    ValidatedNumber c(med_val(d));
-    ValidatedNumber r(rad_val(d));
-    return (x-c)/r;
-}
-
-template<class X> Vector<X> unscale(const Vector<X>& x, const ExactBox& d) {
-    Vector<X> r(x);
-    for(SizeType i=0; i!=r.size(); ++i) {
-        r[i]=unscale(x[i],d[i]);
-    }
-    return r;
-}
-
 template<class T> using NumericType = typename T::NumericType;
 template<class T> using FunctionType = typename T::FunctionType;
 template<class T> using ScalarFunctionType = typename T::ScalarFunctionType;
@@ -424,11 +375,6 @@ template<class M> FunctionPatch<M> atan(const FunctionPatch<M>& x);
 // Remove the error term
 template<class M> FunctionPatch<M> midpoint(const FunctionPatch<M>& x);
 
-// Code
-template<class M> FunctionPatch<M>::FunctionPatch(const ScalarFunctionModel<ValidatedTag>& f) {
-     ARIADNE_ASSERT_MSG(dynamic_cast<const FunctionPatch<M>*>(f._ptr.operator->())," f="<<f);
-     *this=dynamic_cast<const FunctionPatch<M>&>(*f._ptr);
-}
 
 
 
@@ -731,8 +677,8 @@ template<class M> Pair<VectorFunctionPatch<M>,VectorFunctionPatch<M>> split(cons
 template<class M> OutputStream& operator<<(OutputStream&, const VectorFunctionPatch<M>&);
 
 // Conversion operatations
-template<class M> Polynomial<ValidatedFloat> polynomial(const FunctionPatch<M>& tfn);
-template<class M> Vector< Polynomial<ValidatedFloat> > polynomials(const VectorFunctionPatch<M>& tfn);
+template<class M> Polynomial<NumericType<M>> polynomial(const FunctionPatch<M>& tfn);
+template<class M> Vector< Polynomial<NumericType<M>> > polynomials(const VectorFunctionPatch<M>& tfn);
 
 
 // Sanitised output
@@ -793,8 +739,867 @@ template<class M> class VectorFunctionPatchElementReference
     VectorFunctionPatch<M>* _c; SizeType _i;
 };
 
-} // namespace Ariadne
 
-#include "function_patch.tcc"
+
+
+
+// Non-member template code
+template<class M> FunctionPatch<M>::FunctionPatch(const ScalarFunctionModel<ValidatedTag>& f) {
+     ARIADNE_ASSERT_MSG(dynamic_cast<const FunctionPatch<M>*>(f._ptr.operator->())," f="<<f);
+     *this=dynamic_cast<const FunctionPatch<M>&>(*f._ptr);
+}
+
+// To scale from a model on [a,b] to a model on [c,d], use scale factor s=(d-c)/(b-a)
+// and translation t=((c+d)-(a+b))/(b-a)
+// Because we are scaling the model on [-1,+1], this is not the same as
+// the mapping taking [a,b] to [c,d]
+template<class M> FunctionPatch<M> partial_restriction(const FunctionPatch<M>& fp, SizeType k, const ExactInterval& ivl) {
+    ExactBox dom=fp.domain(); dom[k]=ivl; return restriction(fp,dom);
+}
+
+template<class M> FunctionPatch<M> restriction(const FunctionPatch<M>& fp, const ExactBox& dom) {
+    if(not(subset(dom,fp.domain()))) { ARIADNE_THROW(DomainException,"restiction(FunctionPatch<M>,ExactBox)","fp="<<fp<<", dom="<<dom); }
+    return unchecked_compose(fp,FunctionPatch<M>::identity(dom,fp.sweeper()));
+}
+
+template<class M> FunctionPatch<M> extension(const FunctionPatch<M>& fp, const ExactBox& dom) {
+    return unchecked_compose(fp,FunctionPatch<M>::identity(dom,fp.sweeper()));
+}
+
+
+
+
+template<class M> FunctionPatch<M>& operator+=(FunctionPatch<M>& f, const NumericType<M>& c) {
+    f.model()+=c;
+    return f;
+}
+
+template<class M> FunctionPatch<M>& operator-=(FunctionPatch<M>& f, const NumericType<M>& c) {
+    f.model()-=c;
+    return f;
+}
+
+template<class M> FunctionPatch<M>& operator*=(FunctionPatch<M>& f, const NumericType<M>& c) {
+    f.model()*=c;
+    return f;
+}
+
+template<class M> FunctionPatch<M>& operator/=(FunctionPatch<M>& f, const NumericType<M>& c) {
+    f.model()/=c;
+    return f;
+}
+
+template<class M> FunctionPatch<M>& operator+=(FunctionPatch<M>& f, const FunctionPatch<M>& g) {
+    ARIADNE_ASSERT_MSG(subset(f.domain(),g.domain()),"f="<<f<<", g="<<g);
+    if(f.domain()==g.domain()) { f.model()+=g.model(); }
+    else { f.model()+=restriction(g,f.domain()).model(); }
+    return f;
+}
+
+template<class M> FunctionPatch<M>& operator-=(FunctionPatch<M>& f, const FunctionPatch<M>& g) {
+    ARIADNE_ASSERT_MSG(subset(f.domain(),g.domain()),"f="<<f<<", g="<<g);
+    if(f.domain()==g.domain()) { f.model()-=g.model(); }
+    else { f.model()-=restriction(g,f.domain()).model(); }
+    return f;
+}
+
+template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),x.model());
+}
+
+template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),-x.model());
+}
+
+
+template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2) {
+    if(x1.domain()==x2.domain()) {
+        return FunctionPatch<M>(x1.domain(),x1.model()+x2.model()); }
+    else {
+        ExactBox domain=intersection(x1.domain(),x2.domain());
+        return FunctionPatch<M>(domain,restriction(x1,domain).model()+restriction(x2,domain).model());}
+}
+
+template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2) {
+    if(x1.domain()==x2.domain()) {
+        return FunctionPatch<M>(x1.domain(),x1.model()-x2.model()); }
+    else {
+        ExactBox domain=intersection(x1.domain(),x2.domain());
+        return FunctionPatch<M>(domain,restriction(x1,domain).model()-restriction(x2,domain).model());}
+}
+
+template<class M> FunctionPatch<M> operator*(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2) {
+    if(x1.domain()==x2.domain()) {
+        return FunctionPatch<M>(x1.domain(),x1.model()*x2.model()); }
+    else {
+        ExactBox domain=intersection(x1.domain(),x2.domain());
+        return FunctionPatch<M>(domain,restriction(x1,domain).model()*restriction(x2,domain).model());}
+}
+
+template<class M> FunctionPatch<M> operator/(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2) {
+    if(x1.domain()==x2.domain()) {
+        return FunctionPatch<M>(x1.domain(),x1.model()/x2.model()); }
+    else {
+        ExactBox domain=intersection(x1.domain(),x2.domain());
+        return FunctionPatch<M>(domain,restriction(x1,domain).model()/restriction(x2,domain).model());}
+}
+
+template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& x, const NumericType<M>& c) {
+    FunctionPatch<M> r(x); r+=c; return r;
+}
+
+template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& x, const NumericType<M>& c) {
+    FunctionPatch<M> r(x); r+=neg(c); return r;
+}
+
+template<class M> FunctionPatch<M> operator*(const FunctionPatch<M>& x, const NumericType<M>& c) {
+    FunctionPatch<M> r(x); r*=c; return r;
+}
+
+template<class M> FunctionPatch<M> operator/(const FunctionPatch<M>& x, const NumericType<M>& c) {
+    FunctionPatch<M> r(x); r*=rec(c); return r;
+}
+
+template<class M> FunctionPatch<M> operator+(const NumericType<M>& c, const FunctionPatch<M>& x) {
+    FunctionPatch<M> r(x); r+=c; return r;
+}
+
+template<class M> FunctionPatch<M> operator-(const NumericType<M>& c, const FunctionPatch<M>& x) {
+    FunctionPatch<M> r(neg(x)); r+=c; return r;
+}
+
+template<class M> FunctionPatch<M> operator*(const NumericType<M>& c, const FunctionPatch<M>& x) {
+    FunctionPatch<M> r(x); r*=c; return r;
+}
+
+template<class M> FunctionPatch<M> operator/(const NumericType<M>& c, const FunctionPatch<M>& x) {
+    FunctionPatch<M> r(rec(x)); r*=c; return r;
+}
+
+template<class M> FunctionPatch<M> operator+(const FunctionType<M>& f1, const FunctionPatch<M>& tf2) {
+    return FunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())+tf2; }
+template<class M> FunctionPatch<M> operator-(const FunctionType<M>& f1, const FunctionPatch<M>& tf2) {
+    return FunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())-tf2; }
+template<class M> FunctionPatch<M> operator*(const FunctionType<M>& f1, const FunctionPatch<M>& tf2) {
+    return FunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())*tf2; }
+template<class M> FunctionPatch<M> operator/(const FunctionType<M>& f1, const FunctionPatch<M>& tf2) {
+    return FunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())/tf2; }
+template<class M> FunctionPatch<M> operator+(const FunctionPatch<M>& tf1, const FunctionType<M>& f2) {
+    return tf1+FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> FunctionPatch<M> operator-(const FunctionPatch<M>& tf1, const FunctionType<M>& f2) {
+    return tf1-FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> FunctionPatch<M> operator*(const FunctionPatch<M>& tf1, const FunctionType<M>& f2) {
+    return tf1*FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> FunctionPatch<M> operator/(const FunctionPatch<M>& tf1, const FunctionType<M>& f2) {
+    return tf1/FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+
+
+
+
+
+
+template<class M> FunctionPatch<M> max(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2) {
+    if(x1.domain()==x2.domain()) {
+        return FunctionPatch<M>(x1.domain(),max(x1.model(),x2.model())); }
+    else {
+        ExactBox domain=intersection(x1.domain(),x2.domain());
+        return FunctionPatch<M>(domain,max(restriction(x1,domain).model(),restriction(x2,domain).model()));}
+}
+
+template<class M> FunctionPatch<M> min(const FunctionPatch<M>& x1, const FunctionPatch<M>& x2) {
+    if(x1.domain()==x2.domain()) {
+        return FunctionPatch<M>(x1.domain(),min(x1.model(),x2.model())); }
+    else {
+        ExactBox domain=intersection(x1.domain(),x2.domain());
+        return FunctionPatch<M>(domain,min(restriction(x1,domain).model(),restriction(x2,domain).model()));}
+}
+
+template<class M> FunctionPatch<M> abs(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),abs(x.model())); }
+template<class M> FunctionPatch<M> neg(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),-x.model()); }
+template<class M> FunctionPatch<M> rec(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),rec(x.model())); }
+template<class M> FunctionPatch<M> sqr(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),sqr(x.model())); }
+template<class M> FunctionPatch<M> pow(const FunctionPatch<M>& x, Int n) {
+    return FunctionPatch<M>(x.domain(),pow(x.model(),n)); }
+template<class M> FunctionPatch<M> sqrt(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),sqrt(x.model())); }
+template<class M> FunctionPatch<M> exp(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),exp(x.model())); }
+template<class M> FunctionPatch<M> log(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),log(x.model())); }
+template<class M> FunctionPatch<M> sin(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),sin(x.model())); }
+template<class M> FunctionPatch<M> cos(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),cos(x.model())); }
+template<class M> FunctionPatch<M> tan(const FunctionPatch<M>& x) {
+    return FunctionPatch<M>(x.domain(),tan(x.model())); }
+template<class M> FunctionPatch<M> asin(const FunctionPatch<M>& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
+template<class M> FunctionPatch<M> acos(const FunctionPatch<M>& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
+template<class M> FunctionPatch<M> atan(const FunctionPatch<M>& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
+
+
+template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& x, SizeType k) {
+    ValidatedNumber sf=rad_val(x.domain()[k]);
+    return FunctionPatch<M>(x.domain(),antiderivative(x.model(),k)*sf); }
+
+template<class M> FunctionPatch<M> derivative(const FunctionPatch<M>& x, SizeType k) {
+    ValidatedNumber sf=rec(rad_val(x.domain()[k]));
+    return FunctionPatch<M>(x.domain(),derivative(x.model(),k)*sf); }
+
+template<class M> FunctionPatch<M> embed(const ExactBox& dom1, const FunctionPatch<M>& tv2,const ExactBox& dom3) {
+    return FunctionPatch<M>(product(dom1,tv2.domain(),dom3),embed(dom1.size(),tv2.model(),dom3.size())); }
+
+template<class M> NumericType<M> evaluate(const FunctionPatch<M>& f, const Vector<NumericType<M>>& x) {
+    if(!contains(f.domain(),x)) {
+        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not an element of f.domain()="<<f.domain());
+    }
+    return unchecked_evaluate(f,x);
+}
+
+template<class M> NumericType<M> unchecked_evaluate(const FunctionPatch<M>& f, const Vector<NumericType<M>>& x) {
+    return evaluate(f.model(),unscale(x,f.domain()));
+}
+
+
+template<class M> FunctionPatch<M> compose(const FunctionType<M>& g, const VectorFunctionPatch<M>& f) {
+    return FunctionPatch<M>(f.domain(),g.evaluate(f.models()));
+}
+
+template<class M> FunctionPatch<M> compose(const FunctionPatch<M>& g, const VectorFunctionPatch<M>& f)
+{
+    if(!subset(f.codomain(),g.domain())) {
+        ARIADNE_THROW(DomainException,"compose(g,f) with g="<<g<<", f="<<f,"f.codomain()="<<f.codomain()<<" is not a subset of g.domain()="<<g.domain());
+    }
+    return unchecked_compose(g,f);
+}
+
+template<class M> FunctionPatch<M> unchecked_compose(const FunctionPatch<M>& g, const VectorFunctionPatch<M>& f)
+{
+    return FunctionPatch<M>(f.domain(),compose(g.model(),unscale(f.models(),g.domain())));
+}
+
+
+
+template<class M> FunctionPatch<M> partial_evaluate(const FunctionPatch<M>& te, SizeType k, const NumericType<M>& c)
+{
+    // Scale c to domain
+    const SizeType as=te.argument_size();
+    ARIADNE_ASSERT(k<as);
+    const ExactBox& domain=te.domain();
+    const ExactInterval& dk=domain[k];
+    ValidatedNumber sc=(c-med_val(dk))/rad_val(dk);
+
+    ExactBox new_domain(as-1);
+    for(SizeType i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
+    for(SizeType i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
+
+    M new_model=partial_evaluate(te.model(),k,sc);
+
+    return FunctionPatch<M>(new_domain,new_model);
+}
+
+
+
+template<class M> FunctionPatch<M> antiderivative(const FunctionPatch<M>& f, SizeType k, ExactFloat c)
+{
+    ARIADNE_ASSERT(k<f.argument_size());
+    ARIADNE_ASSERT(contains(f.domain()[k],c));
+
+    FunctionPatch<M> g = antiderivative(f,k);
+    VectorFunctionPatch<M> h = VectorFunctionPatch<M>::identity(g.domain(),g.sweeper());
+    h[k] = FunctionPatch<M>::constant(g.domain(),c,g.sweeper());
+
+    return g-compose(g,h);
+}
+
+
+
+
+
+template<class M> Pair<FunctionPatch<M>,FunctionPatch<M>> split(const FunctionPatch<M>& tv, SizeType j)
+{
+    typedef M ModelType;
+    Pair<ModelType,ModelType> models={split(tv.model(),j,SplitPart::LOWER),split(tv.model(),j,SplitPart::LOWER)};
+    Pair<ExactBox,ExactBox> subdomains=split(tv.domain(),j);
+    return make_pair(FunctionPatch<M>(subdomains.first,models.first),
+                     FunctionPatch<M>(subdomains.second,models.second));
+
+}
+
+template<class M> Bool refines(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2)
+{
+    if(tv1.domain()==tv2.domain()) { return refines(tv1.model(),tv2.model()); }
+    if(subset(tv2.domain(),tv1.domain())) { return refines(restriction(tv1,tv2.domain()).model(),tv2.model()); }
+    else { return false; }
+}
+
+template<class M> Bool inconsistent(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2)
+{
+    if(tv1.domain()==tv2.domain()) {
+        return inconsistent(tv1.model(),tv2.model());
+    } else {
+        ExactBox domain=intersection(tv1.domain(),tv2.domain());
+        return inconsistent(restriction(tv1,domain).model(),restriction(tv2,domain).model());
+    }
+}
+
+template<class M> FunctionPatch<M> refinement(const FunctionPatch<M>& tv1, const FunctionPatch<M>& tv2)
+{
+    ARIADNE_ASSERT(tv1.domain()==tv2.domain());
+    return FunctionPatch<M>(tv1.domain(),refinement(tv1.model(),tv2.model()));
+}
+
+template<class M> ErrorFloat norm(const FunctionPatch<M>& f) {
+    return norm(f.model());
+}
+
+template<class M> ErrorFloat distance(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2) {
+    return norm(f1-f2);
+}
+
+template<class M> ErrorFloat distance(const FunctionPatch<M>& f1, const ValidatedScalarFunction& f2) {
+    return distance(f1,FunctionPatch<M>(f1.domain(),f2,f1.sweeper()));
+}
+
+
+template<class M> FunctionPatch<M> midpoint(const FunctionPatch<M>& f)
+{
+    M tm=f.model();
+    tm.set_error(0u);
+    return FunctionPatch<M>(f.domain(),tm);
+}
+
+template<class M> OutputStream& operator<<(OutputStream& os, const FunctionPatch<M>& tf)
+{
+    return tf.write(os);
+}
+
+template<class M> OutputStream& operator<<(OutputStream& os, const Representation<FunctionPatch<M>>& tf)
+{
+    return tf.pointer->repr(os);
+}
+
+
+
+
+
+
+#ifdef ARIADNE_UNDEF
+
+template<class M> Bool check(const Vector<FunctionPatch<M>>& tv)
+{
+    for(SizeType i=0; i!=tv.size(); ++i) {
+        if(tv.zero_element().domain()!=tv[i].domain()) { return false; }
+    }
+    return true;
+}
+
+template<class M> Vector<Expansion<ExactFloat>> expansion(const Vector<FunctionPatch<M>>& x)
+{
+    Vector< Expansion<ExactFloat> > r(x.size());
+    for(SizeType i=0; i!=x.size(); ++i) {
+        r[i]=x[i].expansion();
+    }
+    return r;
+}
+
+template<class M> Vector<ErrorFloat> error(const Vector<FunctionPatch<M>>& x)
+{
+    Vector<ErrorFloat> r(x.size());
+    for(SizeType i=0; i!=x.size(); ++i) {
+        r[i]=x[i].error();
+    }
+    return r;
+}
+
+template<class M> Vector<ExactFloat> value(const Vector<FunctionPatch<M>>& x)
+{
+    Vector<ExactFloat> r(x.size());
+    for(SizeType i=0; i!=x.size(); ++i) {
+        r[i]=x[i].value();
+    }
+    return r;
+}
+
+template<class M> Vector<UpperInterval> ranges(const Vector<FunctionPatch<M>>& x)
+{
+    Vector<UpperInterval> r(x.size());
+    for(SizeType i=0; i!=x.size(); ++i) {
+        r[i]=x[i].range();
+    }
+    return r;
+}
+
+#endif // ARIADNE_UNDEF
+
+
+
+
+
+template<class M> VectorFunctionPatch<M> join(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2)
+{
+    ARIADNE_ASSERT_MSG(f1.domain()==f2.domain(),"f1="<<f1<<", f2="<<f2);
+    return VectorFunctionPatch<M>(f1.domain(),join(f1.models(),f2.model()));
+}
+
+template<class M> VectorFunctionPatch<M> join(const VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g)
+{
+    ARIADNE_ASSERT(f.domain()==g.domain());
+    return VectorFunctionPatch<M>(f.domain(),join(f.models(),g.models()));
+}
+
+template<class M> VectorFunctionPatch<M> join(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2)
+{
+    ARIADNE_ASSERT(f1.domain()==f2.domain());
+    return VectorFunctionPatch<M>(f1.domain(),{f1.model(),f2.model()});
+}
+
+template<class M> VectorFunctionPatch<M> join(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
+{
+    ARIADNE_ASSERT(f1.domain()==f2.domain());
+    return VectorFunctionPatch<M>(f1.domain(),join(f1.model(),f2.models()));
+}
+
+template<class M> VectorFunctionPatch<M> combine(const FunctionPatch<M>& f1, const FunctionPatch<M>& f2)
+{
+    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(Vector<M>(1u,f1.model()),{f2.model()}));
+}
+
+template<class M> VectorFunctionPatch<M> combine(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
+{
+    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine({f1.model()},f2.models()));
+}
+
+template<class M> VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2)
+{
+    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(f1.models(),{f2.model()}));
+}
+
+template<class M> VectorFunctionPatch<M> combine(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
+{
+    return VectorFunctionPatch<M>(product(f1.domain(),f2.domain()),combine(f1.models(),f2.models()));
+}
+
+
+template<class M> VectorFunctionPatch<M> embed(const VectorFunctionPatch<M>& f, const ExactInterval& d)
+{
+    return embed(ExactBox(),f,ExactBox(1u,d));
+}
+
+template<class M> VectorFunctionPatch<M> embed(const VectorFunctionPatch<M>& f, const ExactBox& d)
+{
+    return embed(ExactBox(),f,d);
+}
+
+template<class M> VectorFunctionPatch<M> embed(const ExactBox& d, const VectorFunctionPatch<M>& f)
+{
+    return embed(d,f,ExactBox());
+}
+
+template<class M> VectorFunctionPatch<M> embed(const ExactBox& d1, const VectorFunctionPatch<M>& f, const ExactBox& d2)
+{
+    return VectorFunctionPatch<M>(product(d1,f.domain(),d2),embed(d1.size(),f.models(),d2.size()));
+}
+
+template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& f, const ExactBox& d)
+{
+    ARIADNE_ASSERT_MSG(subset(d,f.domain()),"Cannot restriction "<<f<<" to non-sub-domain "<<d);
+    if(d==f.domain()) { return f; }
+    VectorFunctionPatch<M> r(f.result_size(),d,f.sweeper());
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r.set(i,restriction(f[i],d));
+    }
+    return r;
+}
+
+template<class M> Pair<VectorFunctionPatch<M>,VectorFunctionPatch<M>> split(const VectorFunctionPatch<M>& tf, SizeType j)
+{
+    typedef M ModelType;
+    Pair< Vector<ModelType>,Vector<ModelType> > models=split(tf.models(),j);
+    Pair<ExactBox,ExactBox> subdomains=split(tf.domain(),j);
+    return make_pair(VectorFunctionPatch<M>(subdomains.first,models.first),
+                     VectorFunctionPatch<M>(subdomains.second,models.second));
+
+}
+
+template<class M> Bool refines(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+    ARIADNE_ASSERT(f1.result_size()==f2.result_size());
+    for(SizeType i=0; i!=f1.result_size(); ++i) {
+        if(!refines(f1[i],f2[i])) { return false; }
+    }
+    return true;
+}
+
+template<class M> Bool inconsistent(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+    ARIADNE_ASSERT(f1.result_size()==f2.result_size());
+    for(SizeType i=0; i!=f1.result_size(); ++i) {
+        if(inconsistent(f1[i],f2[i])) { return true; }
+    }
+    return false;
+}
+
+template<class M> VectorFunctionPatch<M> refinement(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+    ARIADNE_ASSERT(f1.result_size()==f2.result_size());
+    VectorFunctionPatch<M> r(f1.result_size());
+    for(SizeType i=0; i!=r.result_size(); ++i) {
+        r[i]=refinement(f1[i],f2[i]);
+    }
+    return r;
+}
+
+template<class M> VectorFunctionPatch<M>& operator+=(VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g)
+{
+    ARIADNE_ASSERT(f.result_size()==g.result_size());
+    ARIADNE_ASSERT(subset(f.domain(),g.domain()));
+    ARIADNE_ASSERT(f.domain()==g.domain());
+    f.models()+=g.models();
+    return f;
+}
+
+template<class M> VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, const VectorFunctionPatch<M>& g)
+{
+    ARIADNE_ASSERT(f.result_size()==g.result_size());
+    ARIADNE_ASSERT(subset(f.domain(),g.domain()));
+    ARIADNE_ASSERT(f.domain()==g.domain());
+    f.models()+=g.models();
+    return f;
+}
+
+template<class M> VectorFunctionPatch<M>& operator+=(VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c)
+{
+    ARIADNE_ASSERT(f.result_size()==c.size());
+    f.models()+=c;
+    return f;
+}
+
+template<class M> VectorFunctionPatch<M>& operator-=(VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c)
+{
+    ARIADNE_ASSERT(f.result_size()==c.size());
+    f.models()-=c;
+    return f;
+}
+
+template<class M> VectorFunctionPatch<M>& operator*=(VectorFunctionPatch<M>& f, const NumericType<M>& c)
+{
+    f.models()*=c;
+    return f;
+}
+
+template<class M> VectorFunctionPatch<M>& operator/=(VectorFunctionPatch<M>& f, const NumericType<M>& c)
+{
+    f.models()/=c;
+    return f;
+}
+
+
+template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
+{
+    typedef M ModelType;
+    ARIADNE_ASSERT_MSG(!empty(intersection(f1.domain(),f2.domain())),
+                       "operator+(VectorFunctionPatch<M> f1, VectorFunctionPatch<M> f2) with f1="<<f1<<" f2="<<f2<<
+                       ": domains are disjoint");
+    if(f1.domain()==f2.domain()) {
+        return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.models()+f2.models()));
+    } else {
+        ExactBox new_domain=intersection(f1.domain(),f2.domain());
+        return operator+(restriction(f1,new_domain),restriction(f2,new_domain));
+    }
+}
+
+
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
+{
+    typedef M ModelType;
+    ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
+    if(f1.domain()==f2.domain()) {
+        return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.models()-f2.models()));
+    } else {
+        ExactBox new_domain=intersection(f1.domain(),f2.domain());
+        return operator-(restriction(f1,new_domain),restriction(f2,new_domain));
+    }
+}
+
+template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2)
+{
+    typedef M ModelType;
+    ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
+    if(f1.domain()==f2.domain()) {
+        return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.model()*f2.models()));
+    } else {
+        ExactBox new_domain=intersection(f1.domain(),f2.domain());
+        return operator*(restriction(f1,new_domain),restriction(f2,new_domain));
+    }
+}
+
+template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2)
+{
+    typedef M ModelType;
+    ARIADNE_ASSERT(!empty(intersection(f1.domain(),f2.domain())));
+    if(f1.domain()==f2.domain()) {
+        return VectorFunctionPatch<M>(f1.domain(),Vector<ModelType>(f1.models()*f2.model()));
+    } else {
+        ExactBox new_domain=intersection(f1.domain(),f2.domain());
+        return operator*(restriction(f1,new_domain),restriction(f2,new_domain));
+    }
+}
+
+template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f1, const FunctionPatch<M>& f2)
+{
+    return f1 * rec(f2);
+}
+
+
+
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f)
+{
+    return VectorFunctionPatch<M>(f.domain(),Vector<M>(-f.models()));
+}
+
+template<class M> VectorFunctionPatch<M> operator*(const NumericType<M>& c, const VectorFunctionPatch<M>& f)
+{
+    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()*c));
+}
+
+template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& f, const NumericType<M>& c)
+{
+    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()*c));
+}
+
+template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& f, const NumericType<M>& c)
+{
+    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()/c));
+}
+
+template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c)
+{
+    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()+c));
+}
+
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& c)
+{
+    return VectorFunctionPatch<M>(f.domain(),Vector<M>(f.models()-c));
+}
+
+template<class M> VectorFunctionPatch<M> operator*(const Matrix<Float>& A, const VectorFunctionPatch<M>& f)
+{
+    ARIADNE_PRECONDITION(A.column_size()==f.size());
+    Vector<M> models(A.row_size(),M(f.argument_size(),f.sweeper()));
+    for(SizeType i=0; i!=A.row_size(); ++i) {
+        for(SizeType j=0; j!=A.column_size(); ++j) {
+            models[i] += A.get(i,j) * f.model(j);
+        }
+    }
+    return VectorFunctionPatch<M>(f.domain(),models);
+}
+
+template<class M> VectorFunctionPatch<M> operator*(const Matrix<NumericType<M>>& A, const VectorFunctionPatch<M>& f)
+{
+    ARIADNE_PRECONDITION(A.column_size()==f.size());
+    Vector<M> models(A.row_size(),M(f.argument_size(),f.sweeper()));
+    for(SizeType i=0; i!=A.row_size(); ++i) {
+        for(SizeType j=0; j!=A.column_size(); ++j) {
+            models[i] += A.get(i,j) * f.model(j);
+        }
+    }
+    return VectorFunctionPatch<M>(f.domain(),models);
+}
+
+template<class M> VectorFunctionPatch<M> operator+(const ValidatedVectorFunction& f1, const VectorFunctionPatch<M>& tf2) {
+    return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())+tf2; }
+template<class M> VectorFunctionPatch<M> operator-(const ValidatedVectorFunction& f1, const VectorFunctionPatch<M>& tf2) {
+    return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())-tf2; }
+template<class M> VectorFunctionPatch<M> operator*(const ValidatedScalarFunction& f1, const VectorFunctionPatch<M>& tf2) {
+    return FunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())*tf2; }
+template<class M> VectorFunctionPatch<M> operator*(const ValidatedVectorFunction& f1, const FunctionPatch<M>& tf2) {
+    return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())*tf2; }
+template<class M> VectorFunctionPatch<M> operator/(const ValidatedVectorFunction& f1, const FunctionPatch<M>& tf2) {
+    return VectorFunctionPatch<M>(tf2.domain(),f1,tf2.sweeper())/tf2; }
+template<class M> VectorFunctionPatch<M> operator+(const VectorFunctionPatch<M>& tf1, const ValidatedVectorFunction& f2) {
+    return tf1+VectorFunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> VectorFunctionPatch<M> operator-(const VectorFunctionPatch<M>& tf1, const ValidatedVectorFunction& f2) {
+    return tf1-VectorFunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> VectorFunctionPatch<M> operator*(const FunctionPatch<M>& tf1, const ValidatedVectorFunction& f2) {
+    return tf1*VectorFunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> VectorFunctionPatch<M> operator*(const VectorFunctionPatch<M>& tf1, const ValidatedScalarFunction& f2) {
+    return tf1*FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+template<class M> VectorFunctionPatch<M> operator/(const VectorFunctionPatch<M>& tf1, const ValidatedScalarFunction& f2) {
+    return tf1/FunctionPatch<M>(tf1.domain(),f2,tf1.sweeper()); }
+
+
+
+
+
+
+template<class M> VectorFunctionPatch<M> partial_evaluate(const VectorFunctionPatch<M>& tf, SizeType k, const NumericType<M>& c)
+{
+    // Scale c to domain
+    const SizeType as=tf.argument_size();
+    ARIADNE_ASSERT(k<as);
+    const Vector<ExactInterval>& domain=tf.domain();
+    const ExactInterval& dk=domain[k];
+    NumericType<M> sc=(c-med_val(dk))/rad_val(dk);
+
+    Vector<ExactInterval> new_domain(as-1);
+    for(SizeType i=0; i!=k; ++i) { new_domain[i]=domain[i]; }
+    for(SizeType i=k; i!=as-1; ++i) { new_domain[i]=domain[i+1]; }
+
+    Vector<M> new_models=partial_evaluate(tf.models(),k,sc);
+
+    return VectorFunctionPatch<M>(new_domain,new_models);
+}
+
+
+template<class M> VectorFunctionPatch<M> partial_restriction(const VectorFunctionPatch<M>& tf, SizeType k, const ExactInterval& d)
+{
+    VectorFunctionPatch<M> r(tf.result_size(),tf.domain(),tf.sweeper());
+    for(SizeType i=0; i!=tf.result_size(); ++i) {
+        r[i]=partial_restriction(tf[i],k,d);
+    }
+    return r;
+}
+
+template<class M> VectorFunctionPatch<M> restriction(const VectorFunctionPatch<M>& tf, SizeType k, const ExactInterval& d)
+{
+    return partial_restriction(tf,k,d);
+}
+
+
+template<class M> Vector<ValidatedNumber> evaluate(const VectorFunctionPatch<M>& f, const Vector<ValidatedNumber>& x) {
+    if(!contains(f.domain(),x)) {
+        ARIADNE_THROW(DomainException,"evaluate(f,x) with f="<<f<<", x="<<x,"x is not a subset of f.domain()="<<f.domain());
+    }
+    return unchecked_evaluate(f,x);
+}
+
+template<class M> Vector<NumericType<M>> unchecked_evaluate(const VectorFunctionPatch<M>& f, const Vector<NumericType<M>>& x) {
+    return evaluate(f.models(),unscale(x,f.domain()));
+}
+
+template<class M> VectorFunctionPatch<M> compose(const VectorFunctionType<M>& g, const VectorFunctionPatch<M>& f) {
+    return VectorFunctionPatch<M>(f.domain(),g.evaluate(f.models()));
+}
+
+template<class M> VectorFunctionPatch<M> compose(const VectorFunctionPatch<M>& g, const VectorFunctionPatch<M>& f)
+{
+    if(!subset(f.codomain(),g.domain())) {
+        ARIADNE_THROW(DomainException,"compose(g,f) with g="<<g<<", f="<<f,"f.codomain()="<<f.codomain()<<" is not a subset of g.domain()="<<g.domain());
+    }
+    return unchecked_compose(g,f);
+}
+
+
+template<class M> VectorFunctionPatch<M> unchecked_compose(const VectorFunctionPatch<M>& g, const VectorFunctionPatch<M>& f)
+{
+    return VectorFunctionPatch<M>(f.domain(),compose(g.models(),unscale(f.models(),g.domain())));
+}
+
+
+
+template<class M> VectorFunctionPatch<M> derivative(const VectorFunctionPatch<M>& f, SizeType k)
+{
+    ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
+    ValidatedNumber fdomkrad=rad_val(f.domain()[k]);
+    VectorFunctionPatch<M> g=f;
+    for(SizeType i=0; i!=g.size(); ++i) {
+        g[i]=derivative(f[i],k);
+    }
+    return g;
+}
+
+template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k)
+{
+    ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
+    ValidatedNumber fdomkrad=rad_val(f.domain()[k]);
+    VectorFunctionPatch<M> g=f;
+    for(SizeType i=0; i!=g.size(); ++i) {
+        g.models()[i].antidifferentiate(k);
+        g.models()[i]*=fdomkrad;
+    }
+    return g;
+}
+
+template<class M> VectorFunctionPatch<M> antiderivative(const VectorFunctionPatch<M>& f, SizeType k, ExactNumber c)
+{
+    ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
+    ValidatedNumber fdomkrad=rad_val(f.domain()[k]);
+    VectorFunctionPatch<M> g=f;
+    for(SizeType i=0; i!=g.size(); ++i) {
+        g[i]=antiderivative(f[i],k,c);
+    }
+    return g;
+}
+
+
+
+
+
+
+template<class M> ErrorFloat norm(const VectorFunctionPatch<M>& f) {
+    ErrorFloat res=0u;
+    for(SizeType i=0; i!=f.result_size(); ++i) {
+        res=max(res,norm(f[i]));
+    }
+    return res;
+}
+
+template<class M> ErrorFloat distance(const VectorFunctionPatch<M>& f1, const VectorFunctionPatch<M>& f2) {
+    return norm(f1-f2);
+}
+
+template<class M> ErrorFloat distance(const VectorFunctionPatch<M>& f1, const ValidatedVectorFunction& f2) {
+    return distance(f1,VectorFunctionPatch<M>(f1.domain(),f2,f1.sweeper()));
+}
+
+
+template<class M> OutputStream& operator<<(OutputStream& os, const Representation<VectorFunctionPatch<M>>& repr)
+{
+    return repr.pointer->repr(os);
+}
+
+template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation<VectorFunctionPatch<M>>& repr)
+{
+    const VectorFunctionPatch<M>& function = *repr.pointer;
+    os << "[";
+    for(SizeType i=0; i!=function.result_size(); ++i) {
+        if(i!=0) { os << ","; }
+        os << polynomial_representation(function[i],repr.threshold,repr.names);
+    }
+    return os << "]";
+}
+
+template<class M> OutputStream& operator<<(OutputStream& os, const PolynomialRepresentation< List<FunctionPatch<M>> >& repr)
+{
+    const List<FunctionPatch<M>>& functions = *repr.pointer;
+    os << "[";
+    for(SizeType i=0; i!=functions.size(); ++i) {
+        if(i!=0) { os << ","; }
+        os << polynomial_representation(functions[i],repr.threshold);
+    }
+    return os << "]";
+}
+
+
+
+template<class M> OutputStream& operator<<(OutputStream& os, const VectorFunctionPatch<M>& p)
+{
+    return p.write(os);
+}
+
+template<class M> Polynomial<NumericType<M>> polynomial(const FunctionPatch<M>& tfn) {
+    return tfn.polynomial();
+}
+
+template<class M> Vector< Polynomial<NumericType<M>> > polynomials(const VectorFunctionPatch<M>& tfn) {
+    return tfn.polynomials();
+}
+
+
+} // namespace Ariadne
 
 #endif // ARIADNE_FUNCTION_PATCH_H

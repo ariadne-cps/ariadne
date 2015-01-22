@@ -33,6 +33,45 @@
 
 namespace Ariadne {
 
+inline ApproximateNumber med_apprx(ExactInterval const& ivl) {
+    return ApproximateNumber(half_exact(add_approx(ivl.lower_raw(),ivl.upper_raw())));
+}
+
+inline ApproximateNumber rad_apprx(ExactInterval const& ivl) {
+    return ApproximateNumber(half_exact(sub_approx(ivl.upper_raw(),ivl.lower_raw())));
+}
+
+inline ValidatedNumber med_val(ExactInterval const& ivl) {
+    return half(ivl.lower()+ivl.upper());
+}
+
+inline ValidatedNumber rad_val(ExactInterval const& ivl) {
+    return half(ivl.upper()-ivl.lower());
+}
+
+
+template<class T, EnableIf<IsSame<Paradigm<T>,Approximate>> =dummy>
+inline T unscale(T x, const ExactInterval& d) {
+    ApproximateNumber c(med_apprx(d));
+    ApproximateNumber r(rad_apprx(d));
+    return (std::move(x)-c)/r;
+}
+
+template<class T, EnableIf<IsStronger<Paradigm<T>,Validated>> =dummy>
+inline T unscale(T x, const ExactInterval& d) {
+    ValidatedNumber c(med_val(d));
+    if(d.lower()==d.upper()) { return std::move(x)*0; }
+    ValidatedNumber r(rad_val(d));
+    return (std::move(x)-c)/r;
+}
+
+template<class X> Vector<X> unscale(const Vector<X>& x, const ExactBox& d) {
+    Vector<X> r(x);
+    for(SizeType i=0; i!=r.size(); ++i) {
+        r[i]=unscale(x[i],d[i]);
+    }
+    return r;
+}
 
 class Scaling {
     ExactInterval _codom;
@@ -40,7 +79,7 @@ class Scaling {
     Scaling(ExactInterval codom) : _codom(codom) { }
     UnitInterval domain() const { return UnitInterval(); }
     ExactInterval codomain() const { return _codom; }
-    template<class X> X operator() (X const&) const;
+    template<class X> X operator() (X) const;
 };
 
 class VectorScaling {
@@ -59,7 +98,7 @@ class Unscaling {
     Unscaling(ExactInterval dom) : _dom(dom) { }
     ExactInterval domain() const { return _dom; }
     UnitInterval codomain() const { return UnitInterval(); }
-    template<class X> X operator() (X const&) const;
+    template<class X> X operator() (X) const;
 };
 
 class VectorUnscaling {
@@ -72,12 +111,13 @@ class VectorUnscaling {
     template<class X> Vector<X> operator() (Vector<X> const&) const;
 };
 
-template<class X> X Scaling::operator() (X const& x) const {
+template<class X> X Scaling::operator() (X x) const {
     auto r=_codom.radius(); auto c=_codom.midpoint();
     return x*r+c;
 }
 
-template<class X> X Unscaling::operator() (X const& x) const {
+template<class X> X Unscaling::operator() (X x) const {
+    return unscale(std::move(x),this->_dom);
     auto r=_dom.radius(); auto c=_dom.midpoint();
     return (x-c)/r;
 }

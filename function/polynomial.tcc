@@ -76,6 +76,10 @@ template<class X> Vector<Polynomial<X>> Polynomial<X>::variables(SizeType as) {
     Vector<Polynomial<X>> r(as); for(SizeType i=0; i!=as; ++i) { r[i]=variable(as,i); } return r;
 }
 
+template<class X> Vector<Polynomial<X>> Polynomial<X>::coordinates(SizeType as) {
+    Vector<Polynomial<X>> r(as); for(SizeType i=0; i!=as; ++i) { r[i]=coordinate(as,i); } return r;
+}
+
 
 template<class X> Polynomial<X>& Polynomial<X>::operator=(const X& x) {
     this->_expansion.clear();

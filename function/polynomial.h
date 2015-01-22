@@ -95,10 +95,11 @@ class Polynomial
     //! \brief Create a constant polynomial in \a as variables with value \a c.
     static Polynomial<X> constant(SizeType as, const X& c);
     //! \brief Create a polynomial in \a as variables which returns the value of the \a j<sup>th</sup> variable.
-    static Polynomial<X> variable(SizeType as, SizeType j);
     static Polynomial<X> coordinate(SizeType as, SizeType j);
+    static Polynomial<X> variable(SizeType as, SizeType j);
     //! \brief Create an Array of polynomials in \a as variables,
     //! the i<sup>th</sup> of  which returns the value of the i<sup>th</sup> variable.
+    static Vector<Polynomial<X>> coordinates(SizeType as);
     static Vector<Polynomial<X>> variables(SizeType as);
 
     //! \brief Set equal to a constant.

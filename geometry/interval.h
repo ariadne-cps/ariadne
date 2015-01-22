@@ -95,6 +95,7 @@ class UnitInterval;
 //! \endcode
 class ExactInterval {
   public:
+    typedef Exact Paradigm;
     typedef ExactInterval NumericType;
   public:
     //! \brief Default constructor yields the singleton zero interval \a [0,0].
@@ -283,6 +284,7 @@ inline Bool covers(ExactInterval i1, ExactInterval i2) { return i1.lower_raw()<i
 //! \brief An over-approximation to an interval set.
 class UpperInterval {
   public:
+    typedef Upper Paradigm;
     typedef UpperInterval NumericType;
 
     //! \brief Default constructor yields the singleton zero interval \a [0,0].
@@ -870,6 +872,7 @@ inline ValidatedFloat make_singleton(UpperFloatInterval const& ivl) {
 //! \brief An over-approximation to an interval set.
 class ApproximateInterval {
   public:
+    typedef Approximate Paradigm;
     explicit ApproximateInterval() : l(0.0), u(0.0) { }
     explicit ApproximateInterval(Float point) : l(point), u(point) { }
     explicit ApproximateInterval(Float lower, Float upper) : l(lower), u(upper) { }

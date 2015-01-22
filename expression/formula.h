@@ -71,6 +71,7 @@ template<class X>
 class Formula {
     typedef Index I;
   public:
+    typedef typename X::Paradigm Paradigm;
     typedef X NumericType;
     typedef X ConstantType;
     typedef I IndexType;

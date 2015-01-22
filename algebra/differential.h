@@ -69,6 +69,7 @@ template<class X> class UnivariateDifferential
     Array<X> _ary;
   public:
     typedef X NumericType;
+    typedef typename X::Paradigm Paradigm;
     typedef UnivariateDifferential<X> SelfType;
     typedef typename Array<X>::Iterator Iterator;
     typedef typename Array<X>::ConstIterator ConstIterator;
@@ -149,6 +150,8 @@ class Differential
     typedef GradedKeyLess ComparisonType;
     //! \brief The type of used to represent numbers in the coefficient.
     typedef SortedExpansion<X,GradedKeyLess> ExpansionType;
+    //! \brief The kind of information provided by the concrete values.
+    typedef typename X::Paradigm Paradigm;
     //! \brief The type of used to represent numbers in the coefficient.
     typedef typename X::NumericType NumericType;
     //! \brief The type of used to represent the coefficients.

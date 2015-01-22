@@ -69,6 +69,7 @@ class Polynomial
     typedef typename Expansion<X>::Iterator Iterator;
     typedef typename Expansion<X>::ConstIterator ConstIterator;
 
+    typedef typename X::Paradigm Paradigm;
     typedef typename X::NumericType NumericType;
     typedef Polynomial<X> SelfType;
     typedef ReverseLexicographicKeyLess ComparisonType;

@@ -45,6 +45,7 @@ template<class X> class Algebra
     std::shared_ptr< AlgebraInterface<X> > _ptr;
   public:
     typedef X ScalarType;
+    typedef typename X::Paradigm Paradigm;
     typedef typename X::NumericType NumericType;
     Algebra() : _ptr() { }
     Algebra(AlgebraInterface<X>* p) : _ptr(p) { }

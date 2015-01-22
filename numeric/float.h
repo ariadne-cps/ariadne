@@ -73,6 +73,7 @@ class Float {
   public:
     double dbl;
   public:
+    typedef Raw Paradigm;
     typedef Float NumericType;
   public:
     //! \brief Default constructor creates an uninitialised number.

@@ -748,7 +748,7 @@ template<class F> UpperInterval TaylorModel<Validated,F>::range() const {
         ValidatedFloat qf=a*(sqr(unit_ivl+b/a/2))-sqr(b)/a/4;
         r += refinement(ql,qf); // NOTE: ql must be the first term in case of NaN in qf
     }
-    return r;
+    return UpperInterval(r);
 }
 
 
@@ -1335,10 +1335,16 @@ template<class F> Bool TaylorModel<Validated,F>::_refines(const TaylorModel<Vali
 }
 
 
+template<class F> Bool TaylorModel<Validated,F>::_consistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2)
+{
+    ARIADNE_PRECONDITION(tm1.argument_size()==tm2.argument_size());
+    return (Ariadne::norm(tm1-tm2) <= (tm1.error()+tm2.error())*2u);
+}
+
 template<class F> Bool TaylorModel<Validated,F>::_inconsistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2)
 {
     ARIADNE_PRECONDITION(tm1.argument_size()==tm2.argument_size());
-    return (Ariadne::norm(tm1-tm2) > (tm1.error()+tm2.error())*2u);
+    return (Ariadne::mag(tm1.value()-tm2.value()) > (tm1.error()+tm2.error()));
 }
 
 template<class F> TaylorModel<Validated,F> TaylorModel<Validated,F>::_refinement(const TaylorModel<Validated,F>& x, const TaylorModel<Validated,F>& y) {

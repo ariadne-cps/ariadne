@@ -322,6 +322,9 @@ class TaylorModel<Validated,F>
     //@{
     /*! \name Validated paradigm-based operations. */
     //! \brief Test if one model is disjoint from (is incompatible with) another.
+    friend Bool consistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2) {
+        return TaylorModel<Validated,F>::_consistent(tm1,tm2); }
+    //! \brief Test if one model is disjoint from (is incompatible with) another.
     friend Bool inconsistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2) {
         return TaylorModel<Validated,F>::_inconsistent(tm1,tm2); }
     //! \brief Test if one model refines (is a subset of) another.
@@ -407,6 +410,7 @@ class TaylorModel<Validated,F>
   public: // FIXME: Should be private
     Void _set_error(const RawFloat& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ErrorType(ne); }
     Void _append(MultiIndex const& a, CoefficientType const& v) { this->_expansion.append(a,v); }
+    static Bool _consistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
     static Bool _inconsistent(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
     static Bool _refines(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);
     static TaylorModel<Validated,F> _refinement(const TaylorModel<Validated,F>& tm1, const TaylorModel<Validated,F>& tm2);

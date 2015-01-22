@@ -335,7 +335,7 @@ template<class A> EnableIfNormedAlgebra<A> exp(const A& x)
     Nat sfp=0; // A number such that 2^sfp>rad(x.range())
     while(ExactFloat(two_exp(sfp))<rad) { ++sfp; }
     ExactFloat sf=two_exp(sfp);
-    A y = (x-avg)*sf;
+    A y = (x-avg)/sf;
     auto yrad=rad*sf;
 
     // Find the required degree

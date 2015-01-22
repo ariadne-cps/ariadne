@@ -616,6 +616,14 @@ inline ValidatedFloat log(ExactFloat x) {
     return log(ValidatedFloat(x));
 }
 
+inline ValidatedFloat sin(ExactFloat x) {
+    return sin(ValidatedFloat(x));
+}
+
+inline ValidatedFloat cos(ExactFloat x) {
+    return cos(ValidatedFloat(x));
+}
+
 
 
 inline ValidatedFloat med(ValidatedFloat x);
@@ -658,7 +666,6 @@ inline ValidatedFloat operator-(const ExactFloat& x1, const ExactFloat& x2) { re
 inline ValidatedFloat operator*(const ExactFloat& x1, const ExactFloat& x2) { return mul(x1,x2); }
 inline ValidatedFloat operator/(const ExactFloat& x1, const ExactFloat& x2) { return div(x1,x2); }
 inline ValidatedFloat operator/(const ExactFloat& x1, Int n2) { return div(x1,ExactFloat(n2)); }
-inline ValidatedFloat pow(const ExactFloat& x, Int n) { return pow(ValidatedFloat(x),n); }
 
 // Standard equality operators
 //! \related ValidatedFloat \brief Tests if \a i1 provides tighter bounds than \a i2.

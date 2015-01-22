@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "function/module.h"
+#include "function/functional.h"
 
 #include "function/function.h"
-#include "function/domain.h"
+#include "geometry/box.h"
 
 #include "numeric/float.decl.h"
 

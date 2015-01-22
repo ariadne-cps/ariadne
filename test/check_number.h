@@ -97,15 +97,15 @@ template<class N> class CheckNumberConcepts {
     void check_equality_comparible_concept() {
         ARIADNE_TEST_STATIC_ASSERT(IsEqualityComparible<N,N>);
         ARIADNE_TEST_STATIC_ASSERT(HasOperator<Equal,N,N>);
-        ARIADNE_TEST_STATIC_ASSERT(HasOperator<NotEqual,N,N>);
+        ARIADNE_TEST_STATIC_ASSERT(HasOperator<Unequal,N,N>);
     }
 
     void check_order_concept() {
         ARIADNE_TEST_STATIC_ASSERT(IsLessThanCompartible<N,N>);
         ARIADNE_TEST_STATIC_ASSERT(HasOperator<Less,N,N>);
-        ARIADNE_TEST_STATIC_ASSERT(HasOperator<LessEqual,N,N>);
-        ARIADNE_TEST_STATIC_ASSERT(HasOperator<Greater,N,N>);
-        ARIADNE_TEST_STATIC_ASSERT(HasOperator<GreaterEqual,N,N>);
+        ARIADNE_TEST_STATIC_ASSERT(HasOperator<Leq,N,N>);
+        ARIADNE_TEST_STATIC_ASSERT(HasOperator<Gtr,N,N>);
+        ARIADNE_TEST_STATIC_ASSERT(HasOperator<Geq,N,N>);
     }
 
     void check_comparible_concept() {

@@ -210,6 +210,6 @@ template<class A> void CheckAlgebraConcept<A>::check_graded_algebra_concept()
 
 template<class A> void CheckAlgebraConcept<A>::check_differential_algebra_concept()
 {
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<A>().smoothness()),DegreeType>);
+//    ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<A>().smoothness()),DegreeType>);
     ARIADNE_TEST_STATIC_ASSERT(HasDerivative<A,SizeType,A>);
 }

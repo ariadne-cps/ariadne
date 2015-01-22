@@ -35,6 +35,7 @@
 
 int ARIADNE_TEST_FAILURES=0;
 int ARIADNE_TEST_SKIPPED=0;
+std::string ARIADNE_CURRENT_TESTING_CLASS = "???";
 
 // This needs to be a function since we do not want to evaluate the result twice,
 // and can't store it in a variable since we don't know it's type.
@@ -415,6 +416,57 @@ int test_case_counter = 0;
         }                                                               \
         catch(...) {                                                    \
             std::cout << "caught exception as expected\n" << std::endl; \
+        }                                                               \
+    }                                                                   \
+
+
+/*! \brief Evaluates \a expression in a boolean context and checks if the result is \a true. */
+/*! Use variadic macro argument to allow template parameters */
+#define ARIADNE_TEST_STATIC_ASSERT(...)                          \
+    {                                                                   \
+        std::cout << #__VA_ARGS__ << ": " << std::flush;                 \
+        bool result = ((__VA_ARGS__::value));                                   \
+        if(result) {                                                    \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "false\n" << std::endl;                 \
+            std::cout << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": " << ARIADNE_CURRENT_TESTING_CLASS << ": Static assertion `" << #__VA_ARGS__ << "' failed." << "\n" << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": " << ARIADNE_CURRENT_TESTING_CLASS << ": Static assertion `" << #__VA_ARGS__ << "' failed." << std::endl; \
+        }                                                               \
+    }                                                                   \
+
+
+/*! \brief Evaluates \a expression in a boolean context and checks if the result is \a true. */
+/*! Use variadic macro argument to allow template parameters */
+#define ARIADNE_TEST_SAME_TYPE(...)                          \
+    {                                                                   \
+        std::cout << "IsSame<" << #__VA_ARGS__ << ">: " << std::flush;                 \
+        bool result = ((IsSame<__VA_ARGS__>::value));                                   \
+        if(result) {                                                    \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "false\n" << std::endl;                 \
+            std::cout << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": " << ARIADNE_CURRENT_TESTING_CLASS << ": Static assertion `IsSame<" << #__VA_ARGS__ << ">' failed." << " First type is " << class_name<typename First<__VA_ARGS__>::Type>() << "\n" << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": " << ARIADNE_CURRENT_TESTING_CLASS << ": Static assertion `IsSame<" << #__VA_ARGS__ << ">' failed." << " First type is " << class_name<typename First<__VA_ARGS__>::Type>() << std::endl; \
+        }                                                               \
+    }                                                                   \
+
+
+/*! \brief Tests if two types are equivalent. */
+/*! Use variadic macro argument to allow template parameters */
+#define ARIADNE_TEST_EQUIVALENT_TYPE(...)                          \
+    {                                                                   \
+        std::cout << "IsEquivalent<" << #__VA_ARGS__ << ">: " << std::flush;                 \
+        bool result = ((IsEquivalent<__VA_ARGS__>::value));                                   \
+        if(result) {                                                    \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "false\n" << std::endl;                 \
+            std::cout << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": " << ARIADNE_CURRENT_TESTING_CLASS << ": Static assertion `IsEquivalent<" << #__VA_ARGS__ << ">' failed." << " First type is " << class_name<typename First<__VA_ARGS__>::Type>() << "\n" << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": " << ARIADNE_CURRENT_TESTING_CLASS << ": Static assertion `IsEquivalent<" << #__VA_ARGS__ << ">' failed." << " First type is " << class_name<typename First<__VA_ARGS__>::Type>() << std::endl; \
         }                                                               \
     }                                                                   \
 

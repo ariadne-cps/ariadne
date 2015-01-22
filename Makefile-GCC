@@ -18,7 +18,7 @@ LIB_NUMERIC_SRC = \
 
 TEST_NUMERIC_SRC = \
 	test_float.cc test_validated_float.cc \
-
+	check_numeric.cc \
 
 LIB_ALGEBRA_SRC = \
 	vector.cc matrix.cc series.cc multi_index.cc expansion.cc differential.cc algebra.cc \
@@ -29,6 +29,7 @@ TEST_ALGEBRA_SRC = \
 LIB_FUNCTION_SRC = \
 	affine.cc polynomial.cc affine_model.cc taylor_model.cc  \
 	function.cc symbolic_function.cc taylor_function.cc  \
+	check_function.cc \
 
 TEST_FUNCTION_SRC = \
 	test_polynomial.cc test_procedure.cc test_function.cc test_taylor_model.cc test_taylor_function.cc \

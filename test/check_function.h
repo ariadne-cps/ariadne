@@ -30,6 +30,10 @@
 
 using namespace Ariadne;
 
+typedef ExactInterval IntervalDomain;
+typedef ExactBox BoxDomain;
+template<class P> using Function = ScalarFunction<P>;
+typedef Function<Effective> EffectiveFunction;
 
 template<class F, class R=DontCare, class = Fallback> struct HasCodomainMethod : False { };
 template<class F, class R> struct HasCodomainMethod<F, R, EnableIf<IsDefined<decltype(declval<F>().codomain())>,Fallback>> : True { };
@@ -107,9 +111,9 @@ template<class F> void CheckFunctionConcept<F>::check_create_concept()
     typedef typename F::DomainType D;
     typedef typename F::NumericType X;
 
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(F::zero(declval<D>())),F>);
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(F::constant(declval<D>(),declval<X>())),F>);
-    ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(F::coordinate(declval<D>(),declval<SizeType>())),F>);
+    ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(F::zero(declval<SizeType>())),F>);
+    ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(F::constant(declval<SizeType>(),declval<X>())),F>);
+    ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(F::coordinate(declval<SizeType>(),declval<SizeType>())),F>);
 
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<F>().create_zero()),F>);
     ARIADNE_TEST_STATIC_ASSERT(IsSame<decltype(declval<F>().create_constant(-3)),F>);

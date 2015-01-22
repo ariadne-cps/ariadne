@@ -62,7 +62,10 @@ class ScalarFunction
     std::shared_ptr< const ScalarFunctionInterface<P> > _ptr;
   public:
     typedef P InformationTag;
+    typedef P Paradigm;
     typedef X NumericType;
+    typedef ExactBox DomainType;
+    typedef ExactInterval CodomainType;
 
     static ScalarFunction<P> zero(SizeType m);
     static ScalarFunction<P> constant(SizeType m, NumericType c);
@@ -70,6 +73,8 @@ class ScalarFunction
     static List< ScalarFunction<P> > coordinates(SizeType n);
 
     ScalarFunction<P> create_zero() const { return ScalarFunction<P>::zero(this->argument_size()); }
+    ScalarFunction<P> create_constant(NumericType c) const { return ScalarFunction<P>::constant(this->argument_size(),c); }
+    ScalarFunction<P> create_coordinate(SizeType j) const { return ScalarFunction<P>::coordinate(this->argument_size(),j); }
 
     explicit ScalarFunction(SizeType as);
     explicit ScalarFunction(SizeType as, Formula<NumericType> f);
@@ -91,6 +96,8 @@ class ScalarFunction
     const ScalarFunctionInterface<P>& reference() const  { return _ptr.operator*(); }
     operator const ScalarFunctionInterface<P>& () const { return _ptr.operator*(); }
 
+    DomainType domain() const;
+    CodomainType codomain() const;
     SizeType argument_size() const { return this->reference().argument_size(); }
     template<class XX> XX evaluate(const Vector<XX>& x) const { return this->reference().evaluate(x); }
     template<class XX> XX operator() (const Vector<XX>& x) const { return this->reference().evaluate(x); }

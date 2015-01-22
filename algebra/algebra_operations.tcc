@@ -491,5 +491,25 @@ atan(const A& x)
 }
 
 
+template<class A> int instantiate_transcendental() {
+    auto rec_ptr  = (A(*)(A const&)) &rec;
+    auto sqrt_ptr = (A(*)(A const&)) &sqrt;
+    auto exp_ptr  = (A(*)(A const&)) &exp;
+    auto log_ptr  = (A(*)(A const&)) &log;
+    auto sin_ptr  = (A(*)(A const&)) &sin;
+    auto cos_ptr  = (A(*)(A const&)) &cos;
+    auto tan_ptr  = (A(*)(A const&)) &tan;
+    auto atan_ptr  = (A(*)(A const&)) &tan;
+
+    return (int)rec_ptr + (int)sqrt_ptr + (int)exp_ptr + (int)log_ptr
+                + (int)sin_ptr + int(cos_ptr) + int(tan_ptr) + int(atan_ptr);
+}
+
+template<class A> int instantiate_ordered() {
+    auto abs_ptr  = (A(*)(A const&)) &abs;
+    auto max_ptr = (A(*)(A const&, A const&)) &max;
+    auto min_ptr = (A(*)(A const&, A const&)) &min;
+    return (int)abs_ptr + (int)max_ptr + (int)min_ptr;
+}
 
 } // namespace Ariadne

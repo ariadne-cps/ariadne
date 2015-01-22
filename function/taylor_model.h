@@ -1,7 +1,7 @@
 /***************************************************************************
  *            taylor_model.h
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2008-15  Pieter Collins
  *
  ****************************************************************************/
 
@@ -601,6 +601,9 @@ class TaylorModel<Approximate,F>
     //! \brief Inplace addition of a product of Taylor models.
     virtual Void ifma(const TaylorModel<Approximate,F>& x1, const TaylorModel<Approximate,F>& x2);
 
+    template<class FF> friend TaylorModel<Approximate,FF> max(const TaylorModel<Approximate,FF>& x, const TaylorModel<Approximate,FF>& y);
+    template<class FF> friend TaylorModel<Approximate,FF> min(const TaylorModel<Approximate,FF>& x, const TaylorModel<Approximate,FF>& y);
+    template<class FF> friend TaylorModel<Approximate,FF> abs(const TaylorModel<Approximate,FF>& x);
 
     //@{
     /*! \name Stream input/output operators. */

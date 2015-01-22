@@ -58,9 +58,20 @@ inline int get_verbosity(int argc, const char* argv[]) {
     return 0;
 }
 
+
 //This is the variable that stores counter for the number of test cases
 //The value is used and updated in the next two macro definitions
 int test_case_counter = 0;
+
+/*! \brief Tests a class function */
+#define ARIADNE_TEST_CLASS(classname,testclassconstruct)                       \
+    { \
+        std::cout << "****************************************\n"       \
+                  << "TESTING CLASS " << #classname << "\n"                    \
+                  << "****************************************\n" << std::endl; \
+        ARIADNE_CURRENT_TESTING_CLASS=#classname; \
+        testclassconstruct.test(); \
+    } \
 
 /*! \brief Print the title for the test case */
 #define ARIADNE_PRINT_TEST_CASE_TITLE( pTitle )                         \
@@ -68,7 +79,6 @@ int test_case_counter = 0;
         cout << endl << "***" << ++test_case_counter << ": "<< pTitle << "***" << endl; \
         cout.flush();                                                   \
     }                                                                   \
-
 
 /*! \brief Print the comment for the test */
 #define ARIADNE_PRINT_TEST_COMMENT( pComment )                          \
@@ -254,6 +264,25 @@ int test_case_counter = 0;
             std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Equality `" << #expression << " == " << #expected << "' failed; " << #expression << "=" << (expression) << std::endl; \
         }                                                               \
     }                                                                   \
+
+/*! \brief Evaluates \a expression and checks if the result is within \a tolerance of \a expected. */
+#define ARIADNE_TEST_WITHIN(expression,expected,tolerance)                         \
+    {                                                                   \
+        std::cout << #expression << " ~ " << #expected << ": " << std::flush; \
+        auto error=mag(expression-expected); \
+        Bool ok = decide(error <= tolerance);                       \
+        if(ok) {                                                        \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "\nERROR: " << #expression << ":\n           " << (expression) \
+                      << "\n     : " << #expected << ":\n           " << (expected) \
+                      << "\n     : error: " << (error) \
+                      << "\n     : tolerance " << (tolerance) << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Approximate equality `" << #expression << " ~ " << #expected << "' failed; " << #expression << "=" << (expression) << "; " << #expected << "=" << (expected)<< "; error=" << (error) << "; tolerance=" << (tolerance) << std::endl; \
+        }                                                               \
+    }                                                                   \
+                                                                   \
 
 
 /*! \brief Evaluates \a expression and checks if the result is less than \a expected. */

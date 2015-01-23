@@ -22,7 +22,13 @@
  */
 
 #include "numeric/float-exact.h"
+#include "numeric/float-approximate.h"
+#include "numeric/real.h"
 
 namespace Ariadne {
+
+ExactFloat make_exact(Real const& r) {
+    ApproximateFloat a(r); return ExactFloat(a.raw());
+}
 
 } // namespace Ariadne

@@ -26,9 +26,7 @@
 
 #include "utility/macros.h"
 #include "numeric/decimal.h"
-
 #include "numeric/rational.h"
-#include "geometry/interval.h"
 #include "numeric/float.h"
 
 namespace Ariadne {

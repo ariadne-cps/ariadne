@@ -542,7 +542,8 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     }
     ARIADNE_LOG(7,"D2f="<<D2f<<"\n");
 
-    ValidatedScalarFunctionModel z=h[0]*Real(0);
+    ValidatedNumber zero(0);
+    ValidatedScalarFunctionModel z=h[0]*zero;
     ValidatedVectorFunctionModel idh=join(id,h);
 
     Matrix<ValidatedScalarFunctionModel> J(n,n,z);

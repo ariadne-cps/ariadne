@@ -175,8 +175,11 @@ Void TestContinuousEvolution::failure_test() const
     // cout << "initial_box=" << initial_box << endl;
 
     // Set up the vector field for the first test
-    Vector<Real> p = {200};
-    VectorUserFunction<FailOne> failone(p);
+    Real p = 200;
+    EffectiveScalarFunction o=EffectiveScalarFunction::constant(2,1.0_exact);
+    EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
+    EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
+    EffectiveVectorFunction failone=(o,-p*y+p);
     VectorField failone_vf(failone);
 
     VectorFieldEvolver evolverone(failone_vf,integrator);
@@ -210,8 +213,13 @@ Void TestContinuousEvolution::failure_test() const
     fig.write("test_continuous_evolution-failone");
 
     // Set up the vector field for the second test
-    p[0] = Rational(1,10);
-    VectorUserFunction<FailTwo> failtwo(p);
+    p = Rational(1,10);
+    EffectiveScalarFunction z3=EffectiveScalarFunction::zero(3);
+    EffectiveScalarFunction o3=EffectiveScalarFunction::constant(3,1.0_exact);
+    EffectiveScalarFunction x0=EffectiveScalarFunction::coordinate(3,0);
+    EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(3,1);
+    EffectiveScalarFunction x2=EffectiveScalarFunction::coordinate(3,1);
+    EffectiveVectorFunction failtwo=(o3,x1*x2/p,z3);
     VectorField failtwo_vf(failtwo);
 
     VectorFieldEvolver evolvertwo(failtwo_vf,integrator);

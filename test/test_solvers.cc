@@ -78,6 +78,7 @@ class TestSolver
         EffectiveVectorFunction f;
         ValidatedVectorFunctionModel h;
         EffectiveVectorFunction e;
+        ExactFloat tol;
 
         // Test solution of x-a=0. This should be very easy to solve.
         p=ExactIntervalVector({ExactInterval(-0.25,0.25)});
@@ -88,7 +89,7 @@ class TestSolver
         ARIADNE_TEST_PRINT(h);
         e=EffectiveVectorFunction(1u,aa);
         ARIADNE_TEST_PRINT(e);
-        ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-8);
+        ARIADNE_TEST_COMPARE(norm(h-e),<,1e-8);
 
         // Test solution of 4x^2+x-4-a=0 on [0.875,1.125]. There is a unique solution with positive derivative.
         p=ExactIntervalVector({ExactInterval(0.875,1.125)});
@@ -101,7 +102,7 @@ class TestSolver
         Decimal a0(0.682328), a1(0.0521547), a2(-0.0023232), a3(0.000147778);
         e=EffectiveVectorFunction( { a0+bb*(a1+bb*(a2+bb*a3)) } );
         ARIADNE_TEST_PRINT(e);
-        ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
+        ARIADNE_TEST_COMPARE(norm(h-e),<,1e-4);
 
         // Test solution of 4x^2+x-4-a=0 on [-0.25,0.25]. There is a unique solution with positive derivative.
         p=ExactIntervalVector({ExactInterval(-0.25,0.25)});
@@ -114,7 +115,7 @@ class TestSolver
         Decimal c0(0.828427), c1(0.0441942), c2(-0.000345267), c3(0.00000539468);
         e=EffectiveVectorFunction( { c0+bb*(c1+bb*(c2+bb*c3)) } );
         ARIADNE_TEST_PRINT(e);
-        ARIADNE_TEST_COMPARE(norm((h-e).range()),<,1e-4);
+        ARIADNE_TEST_COMPARE(norm(h-e),<,1e-4);
 
         // Test solution of x-2*a=0 on [-1,+1], taking values in [-1,+1].
         // There is at most one solution, but this lies partially outside the range.

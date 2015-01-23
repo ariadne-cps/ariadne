@@ -424,7 +424,7 @@ Void flow_init(const Vector<ValidatedProcedure>& p,
     fy=Vector< GradedValidatedDifferential >(p.result_size(),null);
     t=List< GradedValidatedDifferential >(p.temporaries_size(),null);
     for(Nat i=0; i!=y.size(); ++i) {
-        y[i]=GradedValidatedDifferential(Differential<UpperInterval>::variable(y.size(),so,UpperInterval(0.0),i)*r[i]+x[i]);
+        y[i]=GradedValidatedDifferential(Differential<UpperInterval>::variable(y.size(),so,UpperInterval(0,0),i)*r[i]+x[i]);
     }
 }
 

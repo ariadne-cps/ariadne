@@ -93,7 +93,7 @@ TestValidatedFloat::test_concept()
     j=ValidatedFloat(n,n); j=ValidatedFloat(m,m); j=ValidatedFloat(d,d); j=ValidatedFloat(a,b);
     j=ValidatedFloat(n,m); j=ValidatedFloat(m,d); j=ValidatedFloat(d,n);
     // Assignment
-    j=n; j=m; j=d; j=x; j=i;
+    j=n; j=m; j=x; j=i;
 
     // Exact operations
     j=abs(i); j=neg(i); j=rec(i);

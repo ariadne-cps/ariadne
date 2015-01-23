@@ -63,6 +63,8 @@ class ExactFloat {
     //! \brief Explicit construction from an approximate floating-point value.
     explicit ExactFloat(const Float& x) : _v(x) { }
 #ifdef HAVE_GMPXX_H
+    //! \brief Construct from an integer.
+    explicit ExactFloat(const Integer& z);
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
 #endif
@@ -132,9 +134,11 @@ template<class N, EnableIf<IsIntegral<N>> =dummy> inline Bool operator> (const E
 
 class ApproximateFloat;
 inline const ExactFloat& make_exact(const Float& x) { return reinterpret_cast<const ExactFloat&>(x); }
+inline const ExactFloat& make_exact(const ExactFloat& x) { return x; }
 inline const ExactFloat& make_exact(const ApproximateFloat& x) { return reinterpret_cast<const ExactFloat&>(x); }
 template<template<class>class T> inline const T<ExactFloat>& make_exact(const T<ApproximateFloat>& t) { return reinterpret_cast<const T<ExactFloat>&>(t); }
 template<template<class>class T> inline const T<ExactFloat>& make_exact(const T<Float>& t) { return reinterpret_cast<const T<ExactFloat>&>(t); }
+ExactFloat make_exact(const Real& x);
 
 //! \related Float \brief The constant infinity
 //extern ExactFloat inf;

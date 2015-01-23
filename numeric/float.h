@@ -338,6 +338,40 @@ inline Bool operator>=(double x1, Float x2) { return x1>=x2.dbl; }
 inline Bool operator< (double x1, Float x2) { return x1< x2.dbl; }
 inline Bool operator> (double x1, Float x2) { return x1> x2.dbl; }
 
+template<class X> struct IsGeneric : And<IsConvertible<X,Real>,Not<IsFloat<X>>> { };
+template<> struct IsFloat<double> : True { };
+
+// Mixed Float - Generic operations
+template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
+    decltype(declval<F>()+declval<ValidatedFloat>()) operator+(F const& f, X const& x) { return f+ValidatedFloat(x); }
+template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
+    decltype(declval<F>()-declval<ValidatedFloat>()) operator-(F const& f, X const& x) { return f-ValidatedFloat(x); }
+template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
+    decltype(declval<F>()*declval<ValidatedFloat>()) operator*(F const& f, X const& x) { return f*ValidatedFloat(x); }
+template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
+    decltype(declval<F>()/declval<ValidatedFloat>()) operator/(F const& f, X const& x) { return f/ValidatedFloat(x); }
+template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
+    decltype(declval<ValidatedFloat>()+declval<F>()) operator+(X const& x, F const& f) { return ValidatedFloat(x)+f; }
+template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
+    decltype(declval<ValidatedFloat>()-declval<F>()) operator-(X const& x, F const& f) { return ValidatedFloat(x)-f; }
+template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
+    decltype(declval<ValidatedFloat>()*declval<F>()) operator*(X const& x, F const& f) { return ValidatedFloat(x)*f; }
+template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
+    decltype(declval<ValidatedFloat>()/declval<F>()) operator/(X const& x, F const& f) { return ValidatedFloat(x)/f; }
+
+template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
+    decltype(declval<F>()==declval<ValidatedFloat>()) operator==(F const& f, X const& x) { return f==ValidatedFloat(x); }
+template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
+    decltype(declval<F>()!=declval<ValidatedFloat>()) operator!=(F const& f, X const& x) { return f!=ValidatedFloat(x); }
+template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
+    decltype(declval<F>()>=declval<ValidatedFloat>()) operator>=(F const& f, X const& x) { return f>=ValidatedFloat(x); }
+template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
+    decltype(declval<F>()<=declval<ValidatedFloat>()) operator<=(F const& f, X const& x) { return f<=ValidatedFloat(x); }
+template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
+    decltype(declval<F>()> declval<ValidatedFloat>()) operator> (F const& f, X const& x) { return f> ValidatedFloat(x); }
+template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
+    decltype(declval<F>()> declval<ValidatedFloat>()) operator< (F const& f, X const& x) { return f< ValidatedFloat(x); }
+
 } // namespace Ariadne
 
 #endif

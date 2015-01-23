@@ -188,10 +188,10 @@ class TaylorModel<Validated,F>
         return (*this-sd)>0; }
 
     //! \brief Comparison with a scalar.
-    Tribool operator<(double c) const {
+    Tribool operator<(Int c) const {
         return this->range()<c; }
     //! \brief Comparison with a scalar.
-    Tribool operator>(double c) const {
+    Tribool operator>(Int c) const {
         return this->range()>c; }
     //@}
 

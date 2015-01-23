@@ -125,7 +125,7 @@ void TestReal::test_arithmetic() {
 void TestReal::test_transcendental() {
     ApproximateFloat eps=std::numeric_limits<double>::epsilon();
     Real x(2.5_exact);
-    ApproximateFloat ax=x;
+    ApproximateFloat ax(x);
     ARIADNE_TEST_EQUALS(sqrt(Real(4)),2.0);
     ARIADNE_TEST_EQUALS(exp(Real(0)),1.0);
     ARIADNE_TEST_EQUALS(log(Real(1)),0.0);

@@ -552,7 +552,7 @@ template<class X,class XX,class XXX>
 Vector<XX>
 compute_z(const Matrix<X>& A, const Vector<XXX>& c, const Array<SizeType>& p, const Vector<XX>& y)
 {
-    const double CUTOFF_THRESHOLD=1e-10;
+    const ExactFloat CUTOFF_THRESHOLD(1e-10);
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
     Vector<XX> z(n);
@@ -746,11 +746,11 @@ compute_rt(const Vector<Float>& xl, const Vector<Float>& xu, const Array<Slackne
     ARIADNE_LOG(7,"   s="<<s<<" p[s]="<<p[s]<<" vt[p[s]]="<<vt[p[s]]<<" ds="<<ds<<" xl[p[s]]="<<xl[p[s]]<<" xu[p[s]]="<<xu[p[s]]<<" r="<<r<<" t[r]="<<t<<"\n");
     for(SizeType k=0; k!=m; ++k) {
         SizeType j=p[k];
-        if( definitely(d[k]*ds<0.0) && definitely(x[j]>=xl[j]) && xl[j] != -inf) {
+        if( definitely(d[k]*ds<0) && definitely(x[j]>=xl[j]) && xl[j] != -inf) {
             tk=(xl[j]-x[j])/(ds*d[k]);
             //if( r==n || tk<t || (tk==t && p[k]<p[r]) ) { t=tk; r=k; }
             if( definitely(tk<t) || definitely(tk==t && p[k]<p[r]) ) { t=tk; r=k; }
-        } else if( definitely(d[k]*ds>0.0) && definitely(x[j]<=xu[j]) && xu[j] != inf ) {
+        } else if( definitely(d[k]*ds>0) && definitely(x[j]<=xu[j]) && xu[j] != inf ) {
             tk=(xu[j]-x[j])/(ds*d[k]);
             //if( r==n || tk<t || (tk==t && p[k]<p[r])) { t=tk; r=k; }
             if( definitely(tk<t) || definitely(tk==t && p[k]<p[r])) { t=tk; r=k; }

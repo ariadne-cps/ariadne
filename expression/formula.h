@@ -249,7 +249,7 @@ template<class X, class T> inline T make_constant(const X& c, const Vector<T>& v
 
 // Make a constant of type T with value c based on a prototype vector v
 template<class X, class T> inline Formula<T> make_constant(const X& c, const Vector< Formula<T> >& v) {
-    return Formula<T>::constant(c);
+    return Formula<T>::constant(static_cast<T>(c));
 }
 
 template<class X, class T> T evaluate(const Formula<X>& f, const Vector<T>& x) {

@@ -89,13 +89,15 @@ class ApproximateFloat {
     explicit ApproximateFloat(const Dyadic& d);
     //! \brief Convert approximately from a decimal number.
     explicit ApproximateFloat(const Decimal& d);
-#ifdef HAVE_GMPXX_H
+
+    //! \brief Construct from an integer.
+    explicit ApproximateFloat(const Integer& z);
     //! \brief Construct from a rational number.
     explicit ApproximateFloat(const Rational& q);
-#endif // HAVE_GMPXX_H
     //! \brief Convert from a general real number by generating a representable approximation,
     //! not necessarily the nearest.
-    ApproximateFloat(const Real& r);
+    explicit ApproximateFloat(const Real& r);
+
     //! \brief Convert from a floating-point number with an exact representation.
     ApproximateFloat(const ExactFloat& x);
     //! \brief Convert from a floating-point bounds on a number.

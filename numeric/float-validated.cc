@@ -610,11 +610,6 @@ ValidatedFloat::ValidatedFloat(const Rational& ql, const Rational& qu) : l(ql.ge
     set_rounding_mode(rounding_mode);
 }
 
-ValidatedFloat& ValidatedFloat::operator=(const Rational& q) {
-    return *this = ValidatedFloat(q);
-}
-
-
 #endif // HAVE_GMPXX_H
 
 ValidatedFloat ExactFloat::pm(ErrorFloat e) const {

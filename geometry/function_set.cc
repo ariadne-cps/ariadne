@@ -829,7 +829,7 @@ ExactBox ValidatedConstrainedImageSet::constraint_bounds() const
 {
     ExactBox result(this->number_of_constraints());
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
-        result[i]=ExactInterval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound());
+        result[i]=make_exact_interval(UpperInterval(this->constraint(i).lower_bound(),this->constraint(i).upper_bound()));
     }
     return result;
 }

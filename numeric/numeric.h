@@ -81,10 +81,10 @@ template<> inline double approx_cast(const ExactFloat& a) { return a.get_d(); }
 //! Returns the float 0.0 (since floating-point computations do not keep track of errors)
 //! and the interval [-e,+e].
 template<class X> inline X convert_error(const Float& e);
-template<> inline Float convert_error<Float>(const Float& e) { return 0.0; }
+template<> inline Float convert_error<Float>(const Float& e) { return Float(0.0); }
 
 template<class X> inline X convert_error(const ApproximateFloat& e);
-template<> inline ApproximateFloat convert_error<ApproximateFloat>(const ApproximateFloat& e) { return 0.0; }
+template<> inline ApproximateFloat convert_error<ApproximateFloat>(const ApproximateFloat& e) { return ApproximateFloat(0.0); }
 template<> inline ValidatedFloat convert_error<ValidatedFloat>(const ApproximateFloat& e) { return ValidatedFloat(-e.raw(),+e.raw()); }
 
 // Use 'enable_if' style template to restrict allowable instances. See the Boost documentation

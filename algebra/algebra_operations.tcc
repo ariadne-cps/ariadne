@@ -377,7 +377,7 @@ sin(const A& x)
     auto rng=avg.pm(rad);
     Int n=integer_cast<Int>(floor( (avg/ApproximateFloat(pi)+1)/2 ));
 
-    A y=x-(2*n)*pi;
+    A y=x-(2*n)*X(pi);
 
     A s=sqr(y);
 
@@ -417,7 +417,7 @@ cos(const A& x)
     Float two_pi_approx=2*pi_approx;
     Int n=integer_cast<Int>(floor( (avg/ApproximateFloat(pi)+1)/2 ));
 
-    A y=x-(2*n)*pi;
+    A y=x-(2*n)*X(pi);
 
     A s=sqr(y);
 

@@ -774,8 +774,8 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Valid
 {
     ARIADNE_LOG(2,"OptimiserBase::minimise(f,D,g,h)\n");
     ValidatedVectorFunction gh=join(g,h);
-    ExactBox C(gh.result_size(),ExactInterval(0.0));
-    for(Nat i=0; i!=g.result_size(); ++i) { C[i]=ExactInterval(-inf,0.0); }
+    ExactBox C(gh.result_size(),ExactInterval(0,0));
+    for(Nat i=0; i!=g.result_size(); ++i) { C[i]=ExactInterval(-inf,0); }
     return this->minimise(f,D,gh,C);
 }
 
@@ -786,8 +786,8 @@ feasible(ExactBox D, ValidatedVectorFunction g, ValidatedVectorFunction h) const
 {
     ARIADNE_LOG(2,"OptimiserBase::feasible(D,g,h)\n");
     ValidatedVectorFunction gh=join(g,h);
-    ExactBox C(gh.result_size(),ExactInterval(0.0));
-    for(Nat i=0; i!=g.result_size(); ++i) { C[i]=ExactInterval(-inf,0.0); }
+    ExactBox C(gh.result_size(),ExactInterval(0,0));
+    for(Nat i=0; i!=g.result_size(); ++i) { C[i]=ExactInterval(-inf,0); }
     return this->feasible(D,gh,C);
 }
 

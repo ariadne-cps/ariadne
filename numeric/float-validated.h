@@ -197,14 +197,19 @@ class ValidatedFloat {
     explicit ValidatedFloat(const Float& x) : l(x), u(x) { }
     //! \brief Copy constructor.
     ValidatedFloat(const ValidatedFloat& i) : l(i.l), u(i.u) { }
-    //! \brief Convert from a general real number. Yields an interval containing the exact value.
-    ValidatedFloat(const Real& x);
     //! \brief Convert from a floating-point number with an exact representation.
     ValidatedFloat(const ExactFloat& x) : l(x.raw()), u(x.raw()) { }
     //! \brief Convert from a dyadic number.
-    ValidatedFloat(const Dyadic& x);
+    explicit ValidatedFloat(const Dyadic& x);
     //! \brief Convert from a decimal number.
-    ValidatedFloat(const Decimal& x);
+    explicit ValidatedFloat(const Decimal& x);
+    //! \brief Construct from an integer.
+    explicit ValidatedFloat(const Integer& z);
+    //! \brief Construct from a rational number.
+     explicit ValidatedFloat(const Rational& q);
+    //! \brief Convert from a general real number. Yields an interval containing the exact value.
+    //! FIXME: Should be construction
+    ValidatedFloat(const Real& x);
 
     //! \brief Convert to a floating-point approximation.
     explicit operator Float () const { return static_cast<Float>(this->midpoint()); }
@@ -217,19 +222,11 @@ class ValidatedFloat {
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     ValidatedFloat(const LowerFloat& lower, const UpperFloat& upper) : l(lower.raw()), u(upper.raw()) { }
         // ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper);
-#ifdef HAVE_GMPXX_H
-    ValidatedFloat(const Integer& z);
-    ValidatedFloat(const Rational& q);
-    ValidatedFloat& operator=(const Rational& q);
-    ValidatedFloat(const Rational& lower, const Rational& upper);
-#endif // HAVE_GMPXX_H
+     ValidatedFloat(const Rational& lower, const Rational& upper);
 
-    ValidatedFloat& operator=(Nat m) { l=m; u=m; return *this; }
-    ValidatedFloat& operator=(Int n) { l=n; u=n; return *this; }
-    ValidatedFloat& operator=(double c) { l=c; u=c; return *this; }
-    ValidatedFloat& operator=(const Float& x) { l=x; u=x; return *this; }
-    ValidatedFloat& operator=(const Real& x);
-    ValidatedFloat& operator=(const ExactFloat& x) { l=x.raw(); u=x.raw(); return *this; };
+    template<class N, EnableIf<IsIntegral<N>> = dummy> ValidatedFloat& operator=(N n) { l=n; u=n; }
+    ValidatedFloat& operator=(const Real& x) { *this=ValidatedFloat(x); }
+    ValidatedFloat& operator=(const ExactFloat& x) { l=x.raw(); u=x.raw(); return *this; }
 
     //! \brief The lower bound of the interval.
     const Float& lower_raw() const { return l; }
@@ -683,20 +680,6 @@ inline Bool inconsistent(const ValidatedFloat& i1, const ValidatedFloat& i2) {
 //! \related ValidatedFloat \brief  Tests if \a i1 is a model for the exact value \a x2. number.
 inline Bool models(const ValidatedFloat& i1, const ExactFloat& x2) {
     return i1.lower_raw()<=x2.raw() && i1.upper_raw()>=x2.raw(); }
-
-//inline ValidatedFloat& operator+=(ValidatedFloat& i1, const ExactFloat& x2) { i1=add(i1,x2); return i1; }
-//inline ValidatedFloat& operator-=(ValidatedFloat& i1, const ExactFloat& x2) { i1=sub(i1,x2); return i1; }
-//inline ValidatedFloat& operator*=(ValidatedFloat& i1, const ExactFloat& x2) { i1=mul(i1,x2); return i1; }
-//inline ValidatedFloat& operator/=(ValidatedFloat& i1, const ExactFloat& x2) { i1=div(i1,x2); return i1; }
-
-template<class F, class N, EnableIf<IsSame<F,ValidatedFloat>> =dummy, EnableIf<IsIntegral<N>> =dummy>
-    inline ValidatedFloat operator*(const F& x1, N n2) { return mul(x1,ExactFloat(n2)); };
-template<class F, class N, EnableIf<IsSame<F,ValidatedFloat>> =dummy, EnableIf<IsIntegral<N>> =dummy>
-    inline ValidatedFloat operator*(N n1,const F& x2) { return mul(ExactFloat(n1),x2); };
-template<class F, class N, EnableIf<IsSame<F,ValidatedFloat>> =dummy, EnableIf<IsIntegral<N>> =dummy>
-    inline ValidatedFloat operator/(const F& x1, N n2) { return div(x1,ExactFloat(n2)); };
-template<class F, class N, EnableIf<IsSame<F,ValidatedFloat>> =dummy, EnableIf<IsIntegral<N>> =dummy>
-    inline ValidatedFloat operator/(N n1,const F& x2) { return div(ExactFloat(n1),x2); };
 
 // Standard equality operators
 //! \related ValidatedFloat \brief Equality operator. Tests equality of intervals as geometric objects, so \c [0,1]==[0,1] returns \c true.

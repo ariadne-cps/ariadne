@@ -70,6 +70,7 @@ template<class N1, class N2, EnableIf<And<IsNumber<N1>,IsNumber<N2>>> =dummy> in
 template<class N1, class N2, EnableIf<And<IsNumber<N1>,IsNumber<N2>>> =dummy> inline N1& operator/=(N1& n1, const N2& n2) { n1=n1/n2; return n1; }
 
 
+/*
 struct DefineBuiltinFloatOperators {
     using ApN = Number<Approximate>;
 
@@ -85,7 +86,7 @@ struct DefineBuiltinFloatOperators {
     template<class X, class D, EnableIf<IsFloatingPoint<D>> =dummy> friend auto operator/(X x, D d) -> decltype(add(x,ApN(d))) { return div(x,ApN(d)); }
     template<class X, class D, EnableIf<IsFloatingPoint<D>> =dummy> friend auto operator/(D d, X x) -> decltype(add(ApN(d),x)) { return div(ApN(d),x); }
 };
-
+*/
 
 #ifdef ARIADNE_FRIEND_NUMBER
 

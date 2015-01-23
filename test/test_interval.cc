@@ -37,10 +37,6 @@
 using namespace Ariadne;
 using namespace std;
 
-namespace Ariadne {
-inline ExactFloat const& make_exact(ExactFloat const& x) { return x; }
-}
-
 class TestInterval
 {
     typedef ExactInterval I;

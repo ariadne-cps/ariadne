@@ -72,14 +72,14 @@ ValidatedProcedure make_procedure(const ValidatedScalarFunctionInterface& f) {
     return Procedure<ValidatedNumber>(e);
 }
 
-UpperInterval emulrng(const RawFloatVector& x, const RawFloatVector& z) {
-    UpperInterval r=mul_ivl(x[0],z[0]);
-    for(Nat i=0; i!=x.size(); ++i) { r=hull(mul_ivl(x[i],z[i]),r); }
+UpperInterval emulrng(const ExactFloatVector& x, const ExactFloatVector& z) {
+    UpperInterval r=mul(x[0],z[0]);
+    for(Nat i=0; i!=x.size(); ++i) { r=hull(mul(x[i],z[i]),r); }
     return r;
 }
 
-UpperInterval emulrng(const ExactFloatVector& x, const ExactFloatVector& z) {
-    return emulrng(reinterpret_cast<Vector<Float>const&>(x),reinterpret_cast<Vector<Float>const&>(z));
+UpperInterval emulrng(const RawFloatVector& x, const RawFloatVector& z) {
+    return emulrng(reinterpret_cast<ExactFloatVector const&>(x),reinterpret_cast<ExactFloatVector const&>(z));
 }
 
 UpperFloat total_widths(const UpperBox& bx) {

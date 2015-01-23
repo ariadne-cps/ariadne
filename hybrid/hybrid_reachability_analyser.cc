@@ -372,7 +372,7 @@ lower_reach(const OvertSetInterfaceType& initial_set) const
 
     HybridGridTreeSet reach_cells(grid);
 
-    if(transient_time > 0.0 || transient_steps > 0) {
+    if(transient_time > 0.0_exact || transient_steps > 0) {
         ARIADNE_LOG(3,"Computing transient evolution...\n");
 
         ListSet<HybridEnclosure> initial_enclosures;
@@ -597,7 +597,7 @@ outer_chain_reach(
 
     HybridGridTreeSet reach_cells(grid);
     HybridGridTreeSet evolve_cells(grid);
-    if(transient_time > 0.0 || transient_steps > 0) {
+    if(transient_time > 0.0_exact || transient_steps > 0) {
         ARIADNE_LOG(3,"Computing transient evolution...\n");
         this->_adjoin_upper_reach_evolve(reach_cells,evolve_cells,initial_cells,transient_termination,maximum_grid_depth,*_evolver);
         _checked_restriction(evolve_cells,bounding);

@@ -1458,10 +1458,10 @@ NonlinearInteriorPointOptimiser::feasibility_step(
     Vector<ApproximateFloat> D(n);
     for(Nat j=0; j!=n; ++j) {
         if(c[j].lower()==c[j].upper()) {
-        } else if(c[j].upper()==+inf) {
-        } else if(c[j].lower()==-inf) {
+        } else if(c[j].upper().raw()==+inf) {
+        } else if(c[j].lower().raw()==-inf) {
         } else {
-            ARIADNE_DEBUG_ASSERT(-infty<c[j].lower() && c[j].lower()<c[j].upper() && c[j].upper()<+inf);
+            ARIADNE_DEBUG_ASSERT(definitely(-infty<c[j].lower() && c[j].lower()<c[j].upper() && c[j].upper()<+infty));
         }
     }
 

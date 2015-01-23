@@ -124,12 +124,12 @@ inline Bool operator>=(const ExactFloat& x1, const ExactFloat& x2) { return x1.v
 inline Bool operator< (const ExactFloat& x1, const ExactFloat& x2) { return x1.value()< x2.value(); }
 inline Bool operator> (const ExactFloat& x1, const ExactFloat& x2) { return x1.value()> x2.value(); }
 
-inline Bool operator==(const ExactFloat& x1, double x2) { return x1.value()==x2; }
-inline Bool operator!=(const ExactFloat& x1, double x2) { return x1.value()!=x2; }
-inline Bool operator<=(const ExactFloat& x1, double x2) { return x1.value()<=x2; }
-inline Bool operator>=(const ExactFloat& x1, double x2) { return x1.value()>=x2; }
-inline Bool operator< (const ExactFloat& x1, double x2) { return x1.value()< x2; }
-inline Bool operator> (const ExactFloat& x1, double x2) { return x1.value()> x2; }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Bool operator==(const ExactFloat& x1, N n2) { return x1.value()==n2; }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Bool operator!=(const ExactFloat& x1, N n2) { return x1.value()!=n2; }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Bool operator<=(const ExactFloat& x1, N n2) { return x1.value()<=n2; }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Bool operator>=(const ExactFloat& x1, N n2) { return x1.value()>=n2; }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Bool operator< (const ExactFloat& x1, N n2) { return x1.value()< n2; }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Bool operator> (const ExactFloat& x1, N n2) { return x1.value()> n2; }
 
 class ApproximateFloat;
 inline const ExactFloat& make_exact(const Float& x) { return reinterpret_cast<const ExactFloat&>(x); }

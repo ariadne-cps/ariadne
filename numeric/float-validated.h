@@ -709,59 +709,6 @@ inline Bool operator==(const ValidatedFloat& i1, const ValidatedFloat& i2) { ret
 //! even though the intervals possibly represent the same exact real value.
 inline Bool operator!=(const ValidatedFloat& i1, const ValidatedFloat& i2) { return i1.lower_raw()!=i2.lower_raw() || i1.upper_raw()!=i2.upper_raw(); }
 
-// Boost-style Tribool (in)equality operators
-//inline Tribool operator==(const ValidatedFloat& i1, const ValidatedFloat& i2) {
-//  if(i1.lower_raw()>i2.upper_raw() || i1.upper_raw()<i2.lower_raw()) { return false; } else if(i1.lower_raw()==i2.upper_raw() && i1.upper_raw()==i2.lower_raw()) { return true; } else { return indeterminate; } }
-//inline Tribool operator!=(const ValidatedFloat& i1, const ValidatedFloat& i2) { return !(i1==i2); }
-
-//! \related ValidatedFloat \brief Equality operator. Tests equality of represented real-point value.
-//! Hence \c [0.0,2.0]==1.0 yields \c indeterminate since the interval may represent a real number other than \c 1.0 .
-inline Tribool operator==(const ValidatedFloat& i1, const ExactFloat& x2) {
-    if(i1.upper_raw()<x2.raw() || i1.lower_raw()>x2.raw() ) { return false; }
-    else if(i1.lower_raw()==x2.raw()  && i1.upper_raw()==x2.raw() ) { return true; }
-    else { return indeterminate; }
-}
-
-//! \related ValidatedFloat \brief Equality operator. Tests equality of represented real-point value.
-//! Hence \c [0.0,2.0]!=1.0 yields \c indeterminate since the interval may represent a real number equal to \c 1.0 .
-inline Tribool operator!=(const ValidatedFloat& i1, const ExactFloat& x2) {
-    if(i1.upper_raw()<x2.raw()  || i1.lower_raw()>x2.raw() ) { return true; }
-    else if(i1.lower_raw()==x2.raw()  && i1.upper_raw()==x2.raw() ) { return false; }
-    else { return indeterminate; }
-}
-
-inline Tribool operator> (const ValidatedFloat& i1, const ExactFloat& x2) {
-    if(i1.lower_raw()> x2.raw() ) { return true; }
-    else if(i1.upper_raw()<=x2.raw() ) { return false; }
-    else { return indeterminate; }
-}
-
-inline Tribool operator< (const ValidatedFloat& i1, const ExactFloat& x2) {
-    if(i1.upper_raw()< x2.raw() ) { return true; }
-    else if(i1.lower_raw()>=x2.raw() ) { return false; }
-    else { return indeterminate; }
-}
-
-inline Tribool operator>=(const ValidatedFloat& i1, const ExactFloat& x2) {
-    if(i1.lower_raw()>=x2.raw() ) { return true; }
-    else if(i1.upper_raw()< x2.raw() ) { return false; }
-    else { return indeterminate; }
-}
-
-inline Tribool operator<=(const ValidatedFloat& i1, const ExactFloat& x2) {
-    if(i1.upper_raw()<=x2.raw() ) { return true; }
-    else if(i1.lower_raw()> x2.raw() ) { return false; }
-    else { return indeterminate; }
-}
-
-/*
-inline Tribool operator==(const ValidatedFloat& i1, double x2) { return i1==static_cast<ExactFloat>(x2); }
-inline Tribool operator!=(const ValidatedFloat& i1, double x2) { return i1!=static_cast<ExactFloat>(x2); }
-inline Tribool operator<=(const ValidatedFloat& i1, double x2) { return i1<=static_cast<ExactFloat>(x2); }
-inline Tribool operator>=(const ValidatedFloat& i1, double x2) { return i1>=static_cast<ExactFloat>(x2); }
-inline Tribool operator< (const ValidatedFloat& i1, double x2) { return i1< static_cast<ExactFloat>(x2); }
-inline Tribool operator> (const ValidatedFloat& i1, double x2) { return i1> static_cast<ExactFloat>(x2); }
-*/
 
 
 //! \related ValidatedFloat \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
@@ -792,6 +739,13 @@ inline Tribool operator<=(ValidatedFloat i1, ValidatedFloat i2) {
     else if(i1.lower_raw()> i2.upper_raw()) { return false; }
     else { return indeterminate; }
 }
+
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator==(const ValidatedFloat& x1, N n2) { return x1==ValidatedFloat(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator!=(const ValidatedFloat& x1, N n2) { return x1!=ValidatedFloat(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator<=(const ValidatedFloat& x1, N n2) { return x1<=ValidatedFloat(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator>=(const ValidatedFloat& x1, N n2) { return x1>=ValidatedFloat(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator< (const ValidatedFloat& x1, N n2) { return x1< ValidatedFloat(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator> (const ValidatedFloat& x1, N n2) { return x1> ValidatedFloat(n2); }
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
   template<class A> Void serialize(A& a, ValidatedFloat& ivl, const Nat version) {

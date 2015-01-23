@@ -157,6 +157,13 @@ Real cos(Real);
 Real tan(Real);
 Real atan(Real);
 
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator==(const Real& x1, N n2) { return x1==Real(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator!=(const Real& x1, N n2) { return x1!=Real(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator<=(const Real& x1, N n2) { return x1<=Real(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator>=(const Real& x1, N n2) { return x1>=Real(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator< (const Real& x1, N n2) { return x1< Real(n2); }
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator> (const Real& x1, N n2) { return x1> Real(n2); }
+
 /*
 template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline auto
     operator==(Real r, D d) -> decltype(r==ApprxFloat64(d)) { return r==ApprxFloat64(d); }

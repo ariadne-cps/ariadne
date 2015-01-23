@@ -93,7 +93,7 @@ UpperFloat total_widths(const UpperBox& bx) {
 UpperFloat average_width(const UpperBox& bx) {
     UpperFloat res=0u;
     for(Nat i=0; i!=bx.size(); ++i) {
-        if(bx[i].lower().raw()>bx[i].upper().raw()) { return -infty; }
+        if(definitely(bx[i].lower()>bx[i].upper())) { return -infty; }
         res+=bx[i].width();
     }
     return res/bx.size();
@@ -380,7 +380,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
     ARIADNE_LOG(4,"\n  t="<<t<<"\n  y="<<y<<"\n    x="<<x<<"\n    z="<<z<<"\n");
     ARIADNE_LOG(2,"  t="<<t<<", y="<<y<<"\n");
 
-    if(!(t<=1e10)) {
+    if(!(t.raw()<inf)) {
         ARIADNE_WARN("feasibility failed\n");
         char c; cin >> c;
         at=0;
@@ -391,7 +391,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
 
     //assert(t>=-1000);
 
-    if(t<TERR) {
+    if(t.raw()<TERR) {
 
         // Probably disjoint, so try to prove this
         UpperBox nd=d;
@@ -441,7 +441,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         }
     }
 
-    if(t<=0.0 && UpperBox(apply(f,d)).radius()>b.box().radius()) {
+    if(t<=0.0_exact && UpperBox(apply(f,d)).radius()>b.box().radius()) {
         ARIADNE_LOG(2,"  Splitting domain\n");
         Pair<ExactBox,ExactBox> sd=d.split();
         ax = ApproximateFloat(1-XSIGMA)*ax + Vector<ApproximateFloat>(ax.size(),XSIGMA/x.size());
@@ -452,7 +452,7 @@ Void hotstarted_constraint_adjoin_outer_approximation_recursion(
         return;
     }
 
-    if(t>0.0) {
+    if(t>0.0_exact) {
         ARIADNE_LOG(2," Intersection point: parameter="<<y<<"\n");
     }
 
@@ -475,7 +475,7 @@ Void hotstarted_optimal_constraint_adjoin_outer_approximation_recursion(PavingIn
     // When making a new starting primal point, need to move components away from zero
     // This constant shows how far away from zero the points are
     static const double XSIGMA = 0.125;
-    static const double TERR = -1.0/((1<<e)*1024.0);
+    static const ExactFloat TERR ( -1.0/((1<<e)*1024.0) );
     static const Float inf = Ariadne::inf;
 
     const Nat m=fg.argument_size();

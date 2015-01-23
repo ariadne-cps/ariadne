@@ -24,8 +24,8 @@
 #include "utility/module.h"
 #include "config.h"
 
-#include "numeric/real.h"
 #include "numeric/logical.h"
+#include "numeric/real.h"
 
 #include "numeric/integer.h"
 #include "numeric/rational.h"

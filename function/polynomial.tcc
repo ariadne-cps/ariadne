@@ -25,10 +25,6 @@
 
 namespace Ariadne {
 
-template<class X> inline auto operator==(X const& x1, Int n2) -> decltype(x1==X(n2)) { return x1==X(n2); }
-template<class X> inline auto operator!=(X const& x1, Int n2) -> decltype(x1!=X(n2)) { return x1!=X(n2); }
-template<class X> inline auto operator> (X const& x1, Int n2) -> decltype(x1> X(n2)) { return x1> X(n2); }
-
 template<class X> inline bool is_null(X const& x) { return decide(x==0); }
 template<class X> inline bool is_unit(X const& x) { return decide(x==1); }
 template<class X> inline bool is_positive(X const& x) { return decide(x>=0); }
@@ -183,7 +179,7 @@ FwdIter unique_key(FwdIter first, FwdIter last, Op op) {
             }
         }
         // Removes zero entries; the code below is preferred to the case "curr->data()!=0" for Tribool results
-        if(curr->data()==0) { }
+        if(definitely(curr->data()==0)) { }
         else { ++curr; }
     }
     return curr;
@@ -433,7 +429,7 @@ OutputStream& Polynomial<X>::_write(OutputStream& os, List<String> const& argume
             Bool first_factor=true;
             if(decide(v>0) && !first_term) { os << "+"; }
             first_term=false;
-            if(v==1) { } else if (v==-1) { os << '-'; }
+            if(decide(v==1)) { } else if (decide(v==-1)) { os << '-'; }
             else { os << v; first_factor=false; }
             for(Nat j=0; j!=a.size(); ++j) {
                 if(a[j]!=0) {

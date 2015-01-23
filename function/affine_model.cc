@@ -188,8 +188,8 @@ OutputStream& operator<<(OutputStream& os, const ValidatedAffineModel& f)
 {
     os << f.value().raw();
     for(Nat j=0; j!=f.argument_size(); ++j) {
-        if(f.gradient(j)>0.0) { os << "+"; }
-        if(f.gradient(j)!=0.0) { os << f.gradient(j) << "*x" << j; }
+        if(decide(f.gradient(j)>0)) { os << "+"; }
+        if(definitely(f.gradient(j)!=0)) { os << f.gradient(j) << "*x" << j; }
     }
     return os << "+/-" << f.error();
 

@@ -24,6 +24,7 @@
 #include "config.h"
 #include "test.h"
 
+#include "numeric/logical.h"
 #include "numeric/real.h"
 #include "expression/variables.h"
 #include "expression/assignment.h"

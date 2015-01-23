@@ -672,7 +672,7 @@ ValidatedScalarFunction operator-(ValidatedScalarFunction const& f, ValidatedNum
     std::shared_ptr<ValidatedScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f.managed_pointer());
     if(fp) { return ValidatedScalarFunctionModel(*fp) - c; }
     std::shared_ptr<EffectiveScalarFunctionInterface const> rfp=std::dynamic_pointer_cast<EffectiveScalarFunctionInterface const>(f.managed_pointer());
-    if(rfp && c.lower().value()==c.upper().value()) { return EffectiveScalarFunction(*rfp) - ExactFloat(c.lower().value()); }
+    if(rfp && c.lower().raw()==c.upper().raw()) { return EffectiveScalarFunction(*rfp) - ExactFloat(c.lower().raw()); }
     return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(SUB,f,ValidatedScalarFunction::constant(f.argument_size(),c)));
 }
 

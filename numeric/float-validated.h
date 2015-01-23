@@ -81,7 +81,6 @@ class LowerFloat {
     //! \brief Explicitly convert to the raw floating-point value.
     explicit operator Float const& () const { return l; }
     //! \brief Get the raw value.
-    Float const& value() const { return l; }
     Float const& raw() const { return l; }
     Float& raw() { return l; }
     //! \brief Get the value to double-precision.
@@ -125,7 +124,6 @@ class UpperFloat {
     //! \brief Explicitly convert to the raw floating-point value.
     explicit operator Float const& () const { return u; }
     //! \brief Get the raw value.
-    Float const& value() const { return u; }
     Float const& raw() const { return u; }
     Float& raw() { return u; }
     //! \brief Get the value to double-precision.
@@ -234,10 +232,8 @@ class ValidatedFloat {
     ValidatedFloat& operator=(const ExactFloat& x) { l=x.raw(); u=x.raw(); return *this; };
 
     //! \brief The lower bound of the interval.
-    const Float& lower_value() const { return l; }
     const Float& lower_raw() const { return l; }
     //! \brief The upper bound of the interval.
-    const Float& upper_value() const { return u; }
     const Float& upper_raw() const { return u; }
 
     //! \brief The lower bound of the interval.

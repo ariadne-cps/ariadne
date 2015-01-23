@@ -107,7 +107,6 @@ class ApproximateFloat {
     //! \brief Explicit conversion to extract raw data.
     explicit operator Float const& () const { return this->a; }
     //! \brief An approximation by a built-in double-precision floating-point number.
-    Float const& value() const { return this->a; }
     Float const& raw() const { return this->a; }
     Float& raw() { return this->a; }
     //! \brief An approximation by a built-in double-precision floating-point number.

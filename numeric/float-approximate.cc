@@ -56,10 +56,10 @@ const ExactFloat infty = ExactFloat(inf);
 ApproximateFloat::ApproximateFloat(Dyadic const& b) : ApproximateFloat(b.operator Rational()) { }
 ApproximateFloat::ApproximateFloat(Decimal const& d) : ApproximateFloat(d.operator Rational()) { }
 
-ApproximateFloat::ApproximateFloat(ExactFloat const& x) : ApproximateFloat(x.value()) { }
-ApproximateFloat::ApproximateFloat(ValidatedFloat const& x) : ApproximateFloat(half_exact(add_near(x.lower_value(),x.upper_value()))) { }
-ApproximateFloat::ApproximateFloat(UpperFloat const& x) : ApproximateFloat(x.value()) { }
-ApproximateFloat::ApproximateFloat(LowerFloat const& x) : ApproximateFloat(x.value()) { }
+ApproximateFloat::ApproximateFloat(ExactFloat const& x) : ApproximateFloat(x.raw()) { }
+ApproximateFloat::ApproximateFloat(ValidatedFloat const& x) : ApproximateFloat(half_exact(add_near(x.lower_raw(),x.upper_raw()))) { }
+ApproximateFloat::ApproximateFloat(UpperFloat const& x) : ApproximateFloat(x.raw()) { }
+ApproximateFloat::ApproximateFloat(LowerFloat const& x) : ApproximateFloat(x.raw()) { }
 
 #ifdef HAVE_GMPXX_H
 ExactFloat::operator Rational() const {

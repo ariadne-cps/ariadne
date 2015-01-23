@@ -100,13 +100,10 @@ class ExactInterval {
   public:
     //! \brief Default constructor yields the singleton zero interval \a [0,0].
     ExactInterval() : l(0.0), u(0.0) { }
-    ExactInterval(Nat m) : l(m), u(m) { }
-    ExactInterval(Int n) : l(n), u(n) { }
-    //! \brief Convert from a builtin double-precision floating-point value. Yields the singleton interval \a [x,x].
-    ExactInterval(double x) : l(x), u(x) { }
-    //! \brief Create from a floating-point value. Yields the singleton interval \a [x,x].
-    //! Cannot be used in conversions since the \c %ExactInterval class provides stronger accuracy guarantees than the \c %Float class.
-    explicit ExactInterval(const Float& x) : l(x), u(x) { }
+    template<class N, EnableIf<IsIntegral<N>> =dummy>
+        ExactInterval(N n) : l(n), u(n) { }
+    template<class NL, class NU, EnableIf<IsIntegral<NL>> =dummy, EnableIf<IsIntegral<NU>> =dummy>
+        ExactInterval(NL nl, NU nu) : l(nl), u(nu) { }
     //! \brief Copy constructor.
     ExactInterval(const ExactInterval& i) : l(i.l), u(i.u) { }
     //! \brief Convert from a floating-point number with an exact representation.
@@ -115,6 +112,8 @@ class ExactInterval {
     explicit ExactInterval(const Dyadic& x);
     //! \brief Convert from a decimal number.
     explicit ExactInterval(const Decimal& x);
+    //! \brief Convert from a raw float number.
+    explicit ExactInterval(const Float& x);
 
     //! \brief Convert to a floating-point approximation.
     explicit operator Float () const { return half_exact(add_near(l.raw(),u.raw())); }
@@ -122,13 +121,9 @@ class ExactInterval {
     explicit operator ValidatedFloat () const { return ValidatedFloat(this->lower(),this->upper()); }
 
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
-    ExactInterval(double lower, double upper) : l(lower), u(upper) { }
-    //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     ExactInterval(const Float& lower, const Float& upper) : l(lower), u(upper) { }
     //! \brief Convert from a floating-point number with an exact representation.
     ExactInterval(const ExactFloat& lower, const ExactFloat& upper) : l(lower.raw()), u(upper.raw()) { }
-    //! \brief Construct an over-approximating interval.
-    explicit ExactInterval(const LowerFloat& lower, const UpperFloat& upper) : l(lower.raw()), u(upper.raw()) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     explicit ExactInterval(const Real& lower, const Real& upper);
 #ifdef HAVE_GMPXX_H
@@ -293,12 +288,10 @@ class UpperInterval {
     // FIXME: Should make explicit, but this interferes with role as a numeric type
     UpperInterval(Float point) : l(point), u(point) { }
     // FIXME: Should make explicit, but this interferes with role as a numeric type
-    UpperInterval(unsigned int point) : l(point), u(point) { }
-    UpperInterval(int  point) : l(point), u(point) { }
-    UpperInterval(double  point) : l(point), u(point) { }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> UpperInterval(N n) : l(n), u(n) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     explicit UpperInterval(Float lower, Float upper) : l(lower), u(upper) { }
-    explicit UpperInterval(double lower, double upper) : l(lower), u(upper) { }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> UpperInterval(N lower, N upper) : l(lower), u(upper) { }
 
     //! \brief Construct an over-approximating interval.
     UpperInterval(LowerFloat lower, UpperFloat upper) : UpperInterval(lower.raw(),upper.raw()) { }
@@ -428,23 +421,8 @@ UpperInterval mul(UpperInterval, UpperInterval);
 //! \related UpperInterval \brief Division function. Yields an over-approximation to \f$\{ x_1 \div x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
 UpperInterval div(UpperInterval, UpperInterval);
 
-inline UpperInterval add(UpperInterval, Float);
-inline UpperInterval add(Float, UpperInterval);
-inline UpperInterval sub(UpperInterval, Float);
-inline UpperInterval sub(Float, UpperInterval);
-UpperInterval mul(UpperInterval, Float);
-UpperInterval mul(Float,UpperInterval);
-UpperInterval div(UpperInterval, Float);
-UpperInterval div(Float, UpperInterval);
-
 extern const UpperInterval pi_ivl;
 
-inline UpperInterval neg_ivl(Float);
-inline UpperInterval rec_ivl(Float);
-inline UpperInterval add_ivl(Float, Float);
-inline UpperInterval sub_ivl(Float, Float);
-inline UpperInterval mul_ivl(Float, Float);
-inline UpperInterval div_ivl(Float, Float);
 
 //! \related UpperInterval \brief Positive integer power function. Yields an over-approximation to \f$\{ x^m \mid x\in I\}\f$.
 UpperInterval pow(UpperInterval i, Nat m);
@@ -470,236 +448,83 @@ UpperInterval asin(UpperInterval);
 UpperInterval acos(UpperInterval);
 UpperInterval atan(UpperInterval);
 
+inline ValidatedFloat make_singleton(UpperInterval const& ivl) { return ValidatedFloat(ivl.lower(),ivl.upper()); }
 
 //! \related UpperInterval \brief The magnitude of the interval \a I. Yields \f$ \max\{ |x|\,\mid\,x\in I \}\f$.
 inline PositiveUpperFloat mag(UpperInterval i) { return PositiveUpperFloat(max(abs(i.lower_raw()),abs(i.upper_raw()))); }
 //! \related UpperInterval \brief The mignitude of the interval \a I. Yields \f$ \min\{ |x|\,\mid\,x\in I \}\f$.
 inline LowerFloat mig(UpperInterval i) { return LowerFloat(min(Float(0),min(abs(i.lower_raw()),abs(i.upper_raw())))); }
 
-inline UpperInterval max(UpperInterval i1, UpperInterval i2)
-{
-    return UpperInterval(max(i1.lower_raw(),i2.lower_raw()),max(i1.upper_raw(),i2.upper_raw()));
-}
+inline UpperInterval max(UpperInterval i1, UpperInterval i2) {
+    return max(make_singleton(i1),make_singleton(i2)); }
 
-inline UpperInterval min(UpperInterval i1, UpperInterval i2)
-{
-    return UpperInterval(min(i1.lower_raw(),i2.lower_raw()),min(i1.upper_raw(),i2.upper_raw()));
-}
+inline UpperInterval min(UpperInterval i1, UpperInterval i2) {
+    return min(make_singleton(i1),make_singleton(i2)); }
 
-inline UpperInterval abs(UpperInterval i)
-{
-    if(i.lower_raw()>=0) {
-        return UpperInterval(i.lower_raw(),i.upper_raw());
-    } else if(i.upper_raw()<=0) {
-        return UpperInterval(-i.upper_raw(),-i.lower_raw());
-    } else {
-        return UpperInterval(static_cast<Float>(0.0),max(-i.lower_raw(),i.upper_raw()));
-    }
-}
+inline UpperInterval abs(UpperInterval i) {
+    return abs(make_singleton(i)); }
 
-inline UpperInterval pos(UpperInterval i)
-{
-    return UpperInterval(+i.lower_raw(),+i.upper_raw());
-}
+inline UpperInterval pos(UpperInterval i) {
+    return pos(make_singleton(i)); }
 
-inline UpperInterval pos_ivl(Float x)
-{
-    return UpperInterval(+x,+x);
-}
+inline UpperInterval neg(UpperInterval i) {
+    return neg(make_singleton(i)); }
 
-inline UpperInterval neg(UpperInterval i)
-{
-    return UpperInterval(-i.upper_raw(),-i.lower_raw());
-}
+inline UpperInterval sqr(UpperInterval i) {
+    return sqr(make_singleton(i)); }
 
-inline UpperInterval neg_ivl(Float x)
-{
-    return UpperInterval(-x,-x);
-}
+inline UpperInterval add(UpperInterval i1, UpperInterval i2) {
+    return add(make_singleton(i1),make_singleton(i2)); }
 
-inline UpperInterval sqr_ivl(Float x)
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double xv=internal_cast<volatile double&>(x);
-    set_rounding_mode(downward);
-    volatile double rl=xv*xv;
-    set_rounding_mode(upward);
-    volatile double ru=xv*xv;
-    set_rounding_mode(rnd);
-    return UpperInterval(rl,ru);
-}
+inline UpperInterval sub(UpperInterval i1, UpperInterval i2) {
+    return sub(make_singleton(i1),make_singleton(i2)); }
 
-inline UpperInterval rec_ivl(Float x)
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double xv=internal_cast<volatile double&>(x);
-    set_rounding_mode(downward);
-    volatile double rl=1.0/xv;
-    set_rounding_mode(upward);
-    volatile double ru=1.0/xv;
-    set_rounding_mode(rnd);
-    return UpperInterval(rl,ru);
-}
+inline UpperInterval mul(UpperInterval i1, UpperInterval i2) {
+    return mul(make_singleton(i1),make_singleton(i2)); }
 
+inline UpperInterval div(UpperInterval i1, UpperInterval i2) {
+    return div(make_singleton(i1),make_singleton(i2)); }
 
+inline UpperInterval pow(UpperInterval i, Nat m) {
+    return pow(make_singleton(i),m); }
 
-inline UpperInterval add(UpperInterval i1, UpperInterval i2)
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double i1l=internal_cast<volatile double&>(i1.lower_raw());
-    volatile double i1u=internal_cast<volatile double&>(i1.upper_raw());
-    volatile double i2l=internal_cast<volatile double&>(i2.lower_raw());
-    volatile double i2u=internal_cast<volatile double&>(i2.upper_raw());
-    set_rounding_mode(downward);
-    volatile double rl=i1l+i2l;
-    set_rounding_mode(upward);
-    volatile double ru=i1u+i2u;
-    set_rounding_mode(rnd);
-    return UpperInterval(rl,ru);
-}
+inline UpperInterval pow(UpperInterval i, Int n) {
+    return pow(make_singleton(i),n); }
 
-inline UpperInterval add(UpperInterval i1, Float x2)
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double i1l=internal_cast<volatile double&>(i1.lower_raw());
-    volatile double i1u=internal_cast<volatile double&>(i1.upper_raw());
-    volatile double x2v=internal_cast<volatile double&>(x2);
-    set_rounding_mode(downward);
-    volatile double rl=i1l+x2v;
-    set_rounding_mode(upward);
-    volatile double ru=i1u+x2v;
-    set_rounding_mode(rnd);
-    return UpperInterval(rl,ru);
-}
+inline UpperInterval rec(UpperInterval i) {
+    return rec(make_singleton(i)); }
 
-inline UpperInterval add(Float x1, UpperInterval i2)
-{
-    return add(i2,x1);
-}
+inline UpperInterval sqrt(UpperInterval i) {
+    return sqrt(make_singleton(i)); }
 
-inline UpperInterval add_ivl(Float x1, Float x2)
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double x1v=internal_cast<volatile double&>(x1);
-    volatile double x2v=internal_cast<volatile double&>(x2);
-    set_rounding_mode(downward);
-    volatile double rl=x1v+x2v;
-    set_rounding_mode(upward);
-    volatile double ru=x1v+x2v;
-    set_rounding_mode(rnd);
-    return UpperInterval(rl,ru);
-}
+inline UpperInterval exp(UpperInterval i) {
+    return exp(make_singleton(i)); }
 
-inline UpperInterval sub(UpperInterval i1, UpperInterval i2)
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double i1l=internal_cast<volatile double&>(i1.lower_raw());
-    volatile double i1u=internal_cast<volatile double&>(i1.upper_raw());
-    volatile double i2l=internal_cast<volatile double&>(i2.lower_raw());
-    volatile double i2u=internal_cast<volatile double&>(i2.upper_raw());
-    set_rounding_mode(downward);
-    volatile double rl=i1l-i2u;
-    set_rounding_mode(upward);
-    volatile double ru=i1u-i2l;
-    set_rounding_mode(rnd);
-    return UpperInterval(rl,ru);
-}
+inline UpperInterval log(UpperInterval i) {
+    return log(make_singleton(i)); }
 
-inline UpperInterval sub(UpperInterval i1, Float x2)
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double i1l=internal_cast<volatile double&>(i1.lower_raw());
-    volatile double i1u=internal_cast<volatile double&>(i1.upper_raw());
-    volatile double x2v=internal_cast<volatile double&>(x2);
-    set_rounding_mode(downward);
-    volatile double rl=i1l-x2v;
-    set_rounding_mode(upward);
-    volatile double ru=i1u-x2v;
-    set_rounding_mode(rnd);
-    return UpperInterval(rl,ru);
-}
+inline UpperInterval sin(UpperInterval i) {
+    return sin(make_singleton(i)); }
 
-inline UpperInterval sub(Float x1, UpperInterval i2)
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double x1v=internal_cast<volatile double&>(x1);
-    volatile double i2l=internal_cast<volatile double&>(i2.lower_raw());
-    volatile double i2u=internal_cast<volatile double&>(i2.upper_raw());
-    set_rounding_mode(downward);
-    volatile double rl=x1v-i2u;
-    set_rounding_mode(upward);
-    volatile double ru=x1v-i2l;
-    set_rounding_mode(rnd);
-    return UpperInterval(rl,ru);
-}
+inline UpperInterval cos(UpperInterval i) {
+    return cos(make_singleton(i)); }
 
-inline UpperInterval sub_ivl(Float x1, Float x2)
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double x1v=internal_cast<volatile double&>(x1);
-    volatile double x2v=internal_cast<volatile double&>(x2);
-    set_rounding_mode(downward);
-    volatile double rl=x1v-x2v;
-    set_rounding_mode(upward);
-    volatile double ru=x1v-x2v;
-    set_rounding_mode(rnd);
-    return UpperInterval(rl,ru);
-}
+inline UpperInterval tan(UpperInterval i) {
+    return tan(make_singleton(i)); }
 
-inline UpperInterval mul_ivl(Float x1, Float x2)
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double x1v=internal_cast<volatile double&>(x1);
-    volatile double x2v=internal_cast<volatile double&>(x2);
-    set_rounding_mode(downward);
-    volatile double rl=x1v*x2v;
-    set_rounding_mode(upward);
-    volatile double ru=x1v*x2v;
-    set_rounding_mode(rnd);
-    return UpperInterval(rl,ru);
-}
+inline UpperInterval asin(UpperInterval i) {
+    return asin(make_singleton(i)); }
 
-inline UpperInterval div_ivl(Float x1, Float x2)
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double x1v=internal_cast<volatile double&>(x1);
-    volatile double x2v=internal_cast<volatile double&>(x2);
-    set_rounding_mode(downward);
-    volatile double rl=x1v/x2v;
-    set_rounding_mode(upward);
-    volatile double ru=x1v/x2v;
-    set_rounding_mode(rnd);
-    return UpperInterval(rl,ru);
-}
+inline UpperInterval acos(UpperInterval i) {
+    return acos(make_singleton(i)); }
 
-inline UpperInterval pow_ivl(Float x1, Int n2)
-{
-    return pow(UpperInterval(x1),n2);
-}
-
-inline UpperInterval med_ivl(Float x1, Float x2)
-{
-    return add_ivl(half(x1),half(x2));
-}
-
-inline UpperInterval rad_ivl(Float x1, Float x2)
-{
-    return sub_ivl(half(x2),half(x1));
-}
-
-inline UpperInterval med_ivl(UpperInterval i) {
-    return add_ivl(half(i.lower_raw()),half(i.upper_raw()));
-}
-
-inline UpperInterval rad_ivl(UpperInterval i) {
-    return sub_ivl(half(i.upper_raw()),half(i.lower_raw()));
-}
-
+inline UpperInterval atan(UpperInterval i) {
+    return atan(make_singleton(i)); }
 
 //! \related UpperInterval \brief Unary plus operator. Should be implemented exactly and yield \f$\{ +x \mid x\in I\}\f$.
-inline UpperInterval operator+(const UpperInterval& i) { return UpperInterval(i.lower_raw(),i.upper_raw()); }
+inline UpperInterval operator+(const UpperInterval& i) { return pos(i); }
 //! \related UpperInterval \brief Unary negation operator. Should be implemented exactly and yield \f$\{ -x \mid x\in I\}\f$.
-inline UpperInterval operator-(const UpperInterval& i) { return UpperInterval(-i.upper_raw(),-i.lower_raw()); }
+inline UpperInterval operator-(const UpperInterval& i) { return neg(i); }
 //! \related UpperInterval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1+x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
 inline UpperInterval operator+(const UpperInterval& i1, const UpperInterval& i2) { return add(i1,i2); }
 //! \related UpperInterval \brief Binary addition operator. Guaranteed to yield an over approximation to \f$\{ x_1-x_2 \mid x_1\in I_1 \wedge x_2\in I_2\}\f$.
@@ -718,51 +543,6 @@ inline UpperInterval& operator*=(UpperInterval& i1, const UpperInterval& i2) { i
 //! \related UpperInterval \brief Inplace division operator.
 inline UpperInterval& operator/=(UpperInterval& i1, const UpperInterval& i2) { i1=div(i1,i2); return i1; }
 
-inline UpperInterval operator+(const UpperInterval& i1, const Float& x2) { return add(i1,x2); }
-inline UpperInterval operator-(const UpperInterval& i1, const Float& x2) { return sub(i1,x2); }
-inline UpperInterval operator*(const UpperInterval& i1, const Float& x2) { return mul(i1,x2); }
-inline UpperInterval operator/(const UpperInterval& i1, const Float& x2) { return div(i1,x2); }
-inline UpperInterval operator+(const Float& x1, const UpperInterval& i2) { return add(i2,x1); }
-inline UpperInterval operator-(const Float& x1, const UpperInterval& i2) { return sub(x1,i2); }
-inline UpperInterval operator*(const Float& x1, const UpperInterval& i2) { return mul(i2,x1); }
-inline UpperInterval operator/(const Float& x1, const UpperInterval& i2) { return div(x1,i2); }
-
-inline UpperInterval operator+(const UpperInterval& i1, const ExactFloat& x2) { return add(i1,static_cast<UpperInterval>(x2)); }
-inline UpperInterval operator-(const UpperInterval& i1, const ExactFloat& x2) { return sub(i1,static_cast<UpperInterval>(x2)); }
-inline UpperInterval operator*(const UpperInterval& i1, const ExactFloat& x2) { return mul(i1,static_cast<UpperInterval>(x2)); }
-inline UpperInterval operator/(const UpperInterval& i1, const ExactFloat& x2) { return div(i1,static_cast<UpperInterval>(x2)); }
-inline UpperInterval operator+(const ExactFloat& x1, const UpperInterval& i2) { return add(static_cast<UpperInterval>(x1),i2); }
-inline UpperInterval operator-(const ExactFloat& x1, const UpperInterval& i2) { return sub(static_cast<UpperInterval>(x1),i2); }
-inline UpperInterval operator*(const ExactFloat& x1, const UpperInterval& i2) { return mul(static_cast<UpperInterval>(x1),i2); }
-inline UpperInterval operator/(const ExactFloat& x1, const UpperInterval& i2) { return div(static_cast<UpperInterval>(x1),i2); }
-
-inline UpperInterval& operator+=(UpperInterval& i1, const ValidatedFloat& x2) { i1=add(i1,UpperInterval(x2)); return i1; }
-inline UpperInterval& operator-=(UpperInterval& i1, const ValidatedFloat& x2) { i1=sub(i1,UpperInterval(x2)); return i1; }
-inline UpperInterval& operator*=(UpperInterval& i1, const ValidatedFloat& x2) { i1=mul(i1,UpperInterval(x2)); return i1; }
-inline UpperInterval& operator/=(UpperInterval& i1, const ValidatedFloat& x2) { i1=div(i1,UpperInterval(x2)); return i1; }
-
-inline UpperInterval& operator+=(UpperInterval& i1, const Float& x2) { i1=add(i1,x2); return i1; }
-inline UpperInterval& operator-=(UpperInterval& i1, const Float& x2) { i1=sub(i1,x2); return i1; }
-inline UpperInterval& operator*=(UpperInterval& i1, const Float& x2) { i1=mul(i1,x2); return i1; }
-inline UpperInterval& operator/=(UpperInterval& i1, const Float& x2) { i1=div(i1,x2); return i1; }
-
-inline UpperInterval operator+(const UpperInterval& i1, double x2) { return add(i1,static_cast<Float>(x2)); }
-inline UpperInterval operator+(double x1, const UpperInterval& i2) { return add(i2,static_cast<Float>(x1)); }
-inline UpperInterval operator-(const UpperInterval& i1, double x2) { return sub(i1,static_cast<Float>(x2)); }
-inline UpperInterval operator-(double x1, const UpperInterval& i2) { return sub(static_cast<Float>(x1),i2); }
-inline UpperInterval operator*(const UpperInterval& i1, double x2) { return mul(i1,static_cast<Float>(x2)); }
-inline UpperInterval operator*(double x1, const UpperInterval& i2) { return mul(i2,static_cast<Float>(x1)); }
-inline UpperInterval operator/(const UpperInterval& i1, double x2) { return div(i1,static_cast<Float>(x2)); }
-inline UpperInterval operator/(double x1, const UpperInterval& i2) { return div(static_cast<Float>(x1),i2); }
-
-inline UpperInterval& operator+=(UpperInterval& i1, double x2) { i1=add(i1,static_cast<Float>(x2)); return i1; }
-inline UpperInterval& operator-=(UpperInterval& i1, double x2) { i1=sub(i1,static_cast<Float>(x2)); return i1; }
-inline UpperInterval& operator*=(UpperInterval& i1, double x2) { i1=mul(i1,static_cast<Float>(x2)); return i1; }
-inline UpperInterval& operator/=(UpperInterval& i1, double x2) { i1=div(i1,static_cast<Float>(x2)); return i1; }
-
-//inline UpperInterval operator/(const UpperInterval& i1, Int n2) { return div(i1,Float(n2)); }
-//inline UpperInterval operator/(const UpperInterval& i1, double x2) { return div(i1,Float(x2)); }
-
 // Standard equality operators
 //! \related UpperInterval \brief Equality operator. Tests equality of intervals as geometric objects, so \c [0,1]==[0,1] returns \c true.
 inline Bool operator==(const UpperInterval& i1, const UpperInterval& i2) { return i1.lower_raw()==i2.lower_raw() && i1.upper_raw()==i2.upper_raw(); }
@@ -774,55 +554,6 @@ inline Bool operator!=(const UpperInterval& i1, const UpperInterval& i2) { retur
 //inline Tribool operator==(const UpperInterval& i1, const UpperInterval& i2) {
 //  if(i1.lower_raw()>i2.upper_raw() || i1.upper_raw()<i2.lower_raw()) { return false; } else if(i1.lower_raw()==i2.upper_raw() && i1.upper_raw()==i2.lower_raw()) { return true; } else { return indeterminate; } }
 //inline Tribool operator!=(const UpperInterval& i1, const UpperInterval& i2) { return !(i1==i2); }
-
-//! \related UpperInterval \brief Equality operator. Tests equality of represented real-point value.
-//! Hence \c [0.0,2.0]==1.0 yields \c indeterminate since the interval may represent a real number other than \c 1.0 .
-inline Tribool operator==(const UpperInterval& i1, const Float& x2) {
-    if(i1.upper_raw()<x2 || i1.lower_raw()>x2) { return false; }
-    else if(i1.lower_raw()==x2 && i1.upper_raw()==x2) { return true; }
-    else { return indeterminate; }
-}
-
-//! \related UpperInterval \brief Equality operator. Tests equality of represented real-point value.
-//! Hence \c [0.0,2.0]!=1.0 yields \c indeterminate since the interval may represent a real number equal to \c 1.0 .
-inline Tribool operator!=(const UpperInterval& i1, const Float& x2) {
-    if(i1.upper_raw()<x2 || i1.lower_raw()>x2) { return true; }
-    else if(i1.lower_raw()==x2 && i1.upper_raw()==x2) { return false; }
-    else { return indeterminate; }
-}
-
-inline Tribool operator> (const UpperInterval& i1, const Float& x2) {
-    if(i1.lower_raw()> x2) { return true; }
-    else if(i1.upper_raw()<=x2) { return false; }
-    else { return indeterminate; }
-}
-
-inline Tribool operator< (const UpperInterval& i1, const Float& x2) {
-    if(i1.upper_raw()< x2) { return true; }
-    else if(i1.lower_raw()>=x2) { return false; }
-    else { return indeterminate; }
-}
-
-inline Tribool operator>=(const UpperInterval& i1, const Float& x2) {
-    if(i1.lower_raw()>=x2) { return true; }
-    else if(i1.upper_raw()< x2) { return false; }
-    else { return indeterminate; }
-}
-
-inline Tribool operator<=(const UpperInterval& i1, const Float& x2) {
-    if(i1.upper_raw()<=x2) { return true; }
-    else if(i1.lower_raw()> x2) { return false; }
-    else { return indeterminate; }
-}
-
-inline Tribool operator==(const UpperInterval& i1, double x2) { return i1==static_cast<Float>(x2); }
-inline Tribool operator!=(const UpperInterval& i1, double x2) { return i1!=static_cast<Float>(x2); }
-inline Tribool operator<=(const UpperInterval& i1, double x2) { return i1<=static_cast<Float>(x2); }
-inline Tribool operator>=(const UpperInterval& i1, double x2) { return i1>=static_cast<Float>(x2); }
-inline Tribool operator< (const UpperInterval& i1, double x2) { return i1< static_cast<Float>(x2); }
-inline Tribool operator> (const UpperInterval& i1, double x2) { return i1> static_cast<Float>(x2); }
-
-
 
 //! \related UpperInterval \brief Strict greater-than comparison operator. Tests equality of represented real-point value.
 //! Hence \c [1.0,3.0]>[0.0,2.0] yields \c indeterminate since the first interval could represent the number 1.25 and the second 1.75.
@@ -861,13 +592,6 @@ inline Tribool operator<=(UpperInterval i1, UpperInterval i2) {
 OutputStream& operator<<(OutputStream&, const ExactInterval&);
 InputStream& operator>>(InputStream&, ExactInterval&);
 
-inline ValidatedFloat make_singleton(ExactFloatInterval const& ivl) {
-    return ValidatedFloat(ivl.lower_raw(),ivl.upper_raw());
-}
-
-inline ValidatedFloat make_singleton(UpperFloatInterval const& ivl) {
-    return ValidatedFloat(ivl.lower_raw(),ivl.upper_raw());
-}
 
 //! \brief An over-approximation to an interval set.
 class ApproximateInterval {

@@ -71,7 +71,7 @@ using std::max;
 //! \sa Real, ExactFloat, ValidatedFloat, UpperFloat, LowerFloat, ApproximateFloat
 class Float {
   public:
-    double dbl;
+    volatile double dbl;
   public:
     typedef Raw Paradigm;
     typedef Float NumericType;
@@ -82,8 +82,8 @@ class Float {
     Float(double x) : dbl(x) { }
     //! \brief Copy constructor.
     Float(const Float& x) : dbl(x.dbl) { }
-    explicit operator volatile double& () { return dbl; }
-    explicit operator const double& () const { return dbl; }
+    explicit operator volatile double& () { return const_cast<volatile double&>(dbl); }
+    explicit operator const double& () const { return const_cast<const double&>(dbl); }
     Float const& raw() const { return *this; } // FIXME: Included for compatibility with user floats
     //! \brief An approximation by a built-in double-precision floating-point number.
     double get_d() const { return this->dbl; }
@@ -156,14 +156,14 @@ inline Float abs_exact(Float x) { return std::fabs(x.dbl); }
 inline Float mag_exact(Float x) { return std::fabs(x.dbl); }
 
 // Correctly rounded arithmetic
-inline Float pos_rnd(const Float& x) { volatile double xv=x.dbl; return +xv; }
-inline Float neg_rnd(const Float& x) { volatile double xv=x.dbl; return -xv; }
-inline Float sqr_rnd(const Float& x) { volatile double xv=x.dbl; return xv*xv; }
-inline Float rec_rnd(const Float& x) { volatile double xv=x.dbl; return 1.0/xv; }
-inline Float add_rnd(Float x, Float y) { volatile double xv = x.dbl; volatile double yv=y.dbl; volatile double r=xv+yv; return r; }
-inline Float sub_rnd(Float x, Float y) { volatile double xv = x.dbl; volatile double yv=y.dbl; volatile double r=xv-yv; return r; }
-inline Float mul_rnd(Float x, Float y) { volatile double xv = x.dbl; volatile double yv=y.dbl; volatile double r=xv*yv; return r; }
-inline Float div_rnd(Float x, Float y) { volatile double xv = x.dbl; volatile double yv=y.dbl; volatile double r=xv/yv; return r; }
+inline Float pos_rnd(const Float& x) { return +x.dbl; }
+inline Float neg_rnd(const Float& x) { return -x.dbl; }
+inline Float sqr_rnd(const Float& x) { return x.dbl*x.dbl; }
+inline Float rec_rnd(const Float& x) { return 1.0/x.dbl; }
+inline Float add_rnd(Float x, Float y) { return x.dbl+y.dbl; }
+inline Float sub_rnd(Float x, Float y) { return x.dbl-y.dbl; }
+inline Float mul_rnd(Float x, Float y) { return x.dbl*y.dbl; }
+inline Float div_rnd(Float x, Float y) { return x.dbl/y.dbl; }
 
 Float pow_rnd(Float x, Int n);
 
@@ -171,7 +171,7 @@ Float pow_rnd(Float x, Int n);
 inline Float pos_opp(const Float& x) { volatile double t=-x.dbl; return -t; }
 inline Float neg_opp(const Float& x) { volatile double t=x.dbl; return -t; }
 inline Float sqr_opp(const Float& x) { volatile double t=-x.dbl; t=t*x.dbl; return -t; }
-inline Float rec_opp(const Float& x) { volatile double t=-1.0/(volatile double&)x.dbl; return -t; }
+inline Float rec_opp(const Float& x) { volatile double t=-1.0/x.dbl; return -t; }
 inline Float add_opp(Float x, Float y) { volatile double t=-x.dbl; t=t-y.dbl; return -t; }
 inline Float sub_opp(Float x, Float y) { volatile double t=-x.dbl; t=t+y.dbl; return -t; }
 inline Float mul_opp(Float x, Float y) { volatile double t=-x.dbl; t=t*y.dbl; return -t; }

@@ -464,10 +464,15 @@ TestFloat::test_arithmetic()
     Float five = 5;
     Float nine = 9;
 
+    Float expected_five_ninths_up=0.55555555555555558023;
     set_rounding_downward();
-    ARIADNE_TEST_COMPARE(five/nine,<,0.55555555555555558023);
-    set_rounding_to_nearest();
+    ARIADNE_TEST_COMPARE(five/nine,<,expected_five_ninths_up);
+    ARIADNE_TEST_COMPARE(div_rnd(five,nine),<,expected_five_ninths_up);
+    Float five_divby_nine_down=five;
+    five_divby_nine_down/=nine;
+    ARIADNE_TEST_COMPARE(five_divby_nine_down,<,expected_five_ninths_up);
 
+    set_rounding_to_nearest();
     ARIADNE_TEST_COMPARE(div_down(Float(5.0),Float(9.0)),<,div_up(Float(5.0),Float(9.0)));
     ARIADNE_TEST_COMPARE(div_down(Float(5),Float(9)),<,div_up(Float(5),Float(9)));
     ARIADNE_TEST_COMPARE(div_down(five,nine),<,div_up(five,nine));

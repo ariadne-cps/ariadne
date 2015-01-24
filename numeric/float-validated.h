@@ -76,8 +76,14 @@ class LowerFloat {
     inline LowerFloat(const ValidatedFloat& x);
     //! \brief Convert from a floating-point number with an exact representation.
     LowerFloat(const ExactFloat& x) : l(x.raw()) { }
+    //! \brief Construct from a generic number.
+    explicit LowerFloat(const Number<Lower>& x);
+    //! \brief Convert to generic number type.
+    operator Number<Lower> () const;
     //! \brief Convert from a real number.
-    LowerFloat(const Real& x);
+    explicit LowerFloat(const Real& x);
+    explicit LowerFloat(const Rational& x);
+    explicit LowerFloat(const Integer& x);
     //! \brief Explicitly convert to the raw floating-point value.
     explicit operator Float const& () const { return l; }
     //! \brief Get the raw value.
@@ -111,14 +117,18 @@ class UpperFloat {
     template<class N, EnableIf<IsIntegral<N>> = dummy> UpperFloat(N n) : u(n) { }
     //! \brief Convert from a builtin floating-point value.
     template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit UpperFloat(X x) : u(x) { }
-    //! \brief Construct from a builtin double-precision floating-point value.
-    explicit UpperFloat(double x) : u(x) { }
     //! \brief Explicitly construct from a raw floating-point value.
     explicit UpperFloat(Float x) : u(x) { }
     //! \brief Convert from floating-point bounds on a number.
     inline UpperFloat(const ValidatedFloat& x);
     //! \brief Convert from a real number.
-    UpperFloat(const Real& x);
+    explicit UpperFloat(const Real& x);
+    explicit UpperFloat(const Rational& x);
+    explicit UpperFloat(const Integer& x);
+    //! \brief Construct from a generic number.
+    explicit UpperFloat(const Number<Upper>& x);
+    //! \brief Convert to generic number type.
+    operator Number<Upper> () const;
     //! \brief Convert from a floating-point number with an exact representation.
     UpperFloat(const ExactFloat& x) : u(x.raw()) { }
     //! \brief Explicitly convert to the raw floating-point value.
@@ -208,8 +218,11 @@ class ValidatedFloat {
     //! \brief Construct from a rational number.
      explicit ValidatedFloat(const Rational& q);
     //! \brief Convert from a general real number. Yields an interval containing the exact value.
-    //! FIXME: Should be construction
-    ValidatedFloat(const Real& x);
+    explicit ValidatedFloat(const Real& x);
+    //! \brief Construct from a generic number.
+    explicit ValidatedFloat(const Number<Validated>& x);
+    //! \brief Convert to generic number type.
+    operator Number<Validated> () const;
 
     //! \brief Convert to a floating-point approximation.
     explicit operator Float () const { return static_cast<Float>(this->midpoint()); }

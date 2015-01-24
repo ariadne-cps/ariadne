@@ -70,6 +70,9 @@ class ExactFloat {
 #endif
     //! \brief Explicit conversion to raw data type.
     explicit operator Float () const { return _v; }
+    //! \brief Convert to generic number type.
+    operator Number<Exact> () const;
+
     //! \brief The raw floating-point number with the same value.
     Float const& raw() const { return _v; }
     Float& raw() { return _v; }

@@ -338,39 +338,52 @@ inline Bool operator>=(double x1, Float x2) { return x1>=x2.dbl; }
 inline Bool operator< (double x1, Float x2) { return x1< x2.dbl; }
 inline Bool operator> (double x1, Float x2) { return x1> x2.dbl; }
 
-template<class X> struct IsGeneric : And<IsConvertible<X,Real>,Not<IsFloat<X>>> { };
+// Support for creating floating-point objects from builtin, concrete and generic numbers
+ApproximateFloat create_float(Number<Approximate>);
+LowerFloat create_float(Number<Lower>);
+UpperFloat create_float(Number<Upper>);
+ValidatedFloat create_float(Number<Validated>);
+ValidatedFloat create_float(Number<Effective>);
+ExactFloat create_float(Number<Exact>);
+ValidatedFloat create_float(Real);
+ValidatedFloat create_float(Rational);
+ExactFloat create_float(Integer);
+template<class N, EnableIf<IsIntegral<N>> =dummy> ExactFloat create_float(N n);
+template<class F, EnableIf<IsFloatingPoint<F>> =dummy> ApproximateFloat create_float(F f);
+
+template<class X> struct IsGeneric : And<IsNumber<X>,Not<IsFloat<X>>> { };
 template<> struct IsFloat<double> : True { };
 
 // Mixed Float - Generic operations
 template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
-    decltype(declval<F>()+declval<ValidatedFloat>()) operator+(F const& f, X const& x) { return f+ValidatedFloat(x); }
+    decltype(declval<F>()+create_float(declval<X>())) operator+(F const& f, X const& x) { return f+create_float(x); }
 template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
-    decltype(declval<F>()-declval<ValidatedFloat>()) operator-(F const& f, X const& x) { return f-ValidatedFloat(x); }
+    decltype(declval<F>()-create_float(declval<X>())) operator-(F const& f, X const& x) { return f-create_float(x); }
 template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
-    decltype(declval<F>()*declval<ValidatedFloat>()) operator*(F const& f, X const& x) { return f*ValidatedFloat(x); }
+    decltype(declval<F>()*create_float(declval<X>())) operator*(F const& f, X const& x) { return f*create_float(x); }
 template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
-    decltype(declval<F>()/declval<ValidatedFloat>()) operator/(F const& f, X const& x) { return f/ValidatedFloat(x); }
+    decltype(declval<F>()/create_float(declval<X>())) operator/(F const& f, X const& x) { return f/create_float(x); }
 template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
-    decltype(declval<ValidatedFloat>()+declval<F>()) operator+(X const& x, F const& f) { return ValidatedFloat(x)+f; }
+    decltype(create_float(declval<X>())+declval<F>()) operator+(X const& x, F const& f) { return create_float(x)+f; }
 template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
-    decltype(declval<ValidatedFloat>()-declval<F>()) operator-(X const& x, F const& f) { return ValidatedFloat(x)-f; }
+    decltype(create_float(declval<X>())-declval<F>()) operator-(X const& x, F const& f) { return create_float(x)-f; }
 template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
-    decltype(declval<ValidatedFloat>()*declval<F>()) operator*(X const& x, F const& f) { return ValidatedFloat(x)*f; }
+    decltype(create_float(declval<X>())*declval<F>()) operator*(X const& x, F const& f) { return create_float(x)*f; }
 template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
-    decltype(declval<ValidatedFloat>()/declval<F>()) operator/(X const& x, F const& f) { return ValidatedFloat(x)/f; }
+    decltype(create_float(declval<X>())/declval<F>()) operator/(X const& x, F const& f) { return create_float(x)/f; }
 
 template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
-    decltype(declval<F>()==declval<ValidatedFloat>()) operator==(F const& f, X const& x) { return f==ValidatedFloat(x); }
+    decltype(declval<F>()==create_float(declval<X>())) operator==(F const& f, X const& x) { return f==create_float(x); }
 template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
-    decltype(declval<F>()!=declval<ValidatedFloat>()) operator!=(F const& f, X const& x) { return f!=ValidatedFloat(x); }
+    decltype(declval<F>()!=create_float(declval<X>())) operator!=(F const& f, X const& x) { return f!=create_float(x); }
 template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
-    decltype(declval<F>()>=declval<ValidatedFloat>()) operator>=(F const& f, X const& x) { return f>=ValidatedFloat(x); }
+    decltype(declval<F>()>=create_float(declval<X>())) operator>=(F const& f, X const& x) { return f>=create_float(x); }
 template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
-    decltype(declval<F>()<=declval<ValidatedFloat>()) operator<=(F const& f, X const& x) { return f<=ValidatedFloat(x); }
+    decltype(declval<F>()<=create_float(declval<X>())) operator<=(F const& f, X const& x) { return f<=create_float(x); }
 template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
-    decltype(declval<F>()> declval<ValidatedFloat>()) operator> (F const& f, X const& x) { return f> ValidatedFloat(x); }
+    decltype(declval<F>()> create_float(declval<X>())) operator> (F const& f, X const& x) { return f> create_float(x); }
 template<class F, class X, EnableIf<IsFloat<F>> =dummy, EnableIf<IsGeneric<X>> =dummy>
-    decltype(declval<F>()> declval<ValidatedFloat>()) operator< (F const& f, X const& x) { return f< ValidatedFloat(x); }
+    decltype(declval<F>()> create_float(declval<X>())) operator< (F const& f, X const& x) { return f< create_float(x); }
 
 } // namespace Ariadne
 

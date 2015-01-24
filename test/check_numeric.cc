@@ -211,12 +211,12 @@ ARIADNE_CLASS_NAME(Integer);
 ARIADNE_CLASS_NAME(Rational);
 ARIADNE_CLASS_NAME(Real);
 
-//ARIADNE_CLASS_NAME(ApproximateNumber)
-//ARIADNE_CLASS_NAME(LowerNumber)
-//ARIADNE_CLASS_NAME(UpperNumber)
-//ARIADNE_CLASS_NAME(ValidatedNumber)
-//ARIADNE_CLASS_NAME(EffectiveNumber)
-//ARIADNE_CLASS_NAME(ExactNumber)
+ARIADNE_CLASS_NAME(Number<Approximate>)
+ARIADNE_CLASS_NAME(Number<Lower>)
+ARIADNE_CLASS_NAME(Number<Upper>)
+ARIADNE_CLASS_NAME(Number<Validated>)
+ARIADNE_CLASS_NAME(Number<Effective>)
+ARIADNE_CLASS_NAME(Number<Exact>)
 
 ARIADNE_CLASS_NAME(ApproximateFloat64);
 ARIADNE_CLASS_NAME(LowerFloat64);
@@ -236,8 +236,8 @@ ARIADNE_CLASS_NAME(ExactFloat);
 
 typedef int I; typedef double D;
 typedef Integer Z; typedef Rational Q; typedef Real R;
-typedef ExactNumber ExN; typedef EffectiveNumber EfN; typedef ValidatedNumber VaN;
-typedef UpperNumber UpN; typedef LowerNumber LoN; typedef ApproximateNumber ApN;
+typedef Number<Exact> ExN; typedef Number<Effective> EfN; typedef Number<Validated> VaN;
+typedef Number<Upper> UpN; typedef Number<Lower> LoN; typedef Number<Approximate> ApN;
 typedef ExactFloat ExF; typedef MetricFloat MeF; typedef BoundedFloat BoF;
 typedef UpperFloat UpF; typedef LowerFloat LoF; typedef ApproximateFloat ApF;
 
@@ -385,7 +385,7 @@ void CheckNumeric::check_addition() {
     chk<ApN,Plus,Z,D>(); chk<Z,Plus,Z,I>(); chk<Z,Plus,Z,Z>(); chk<Q,Plus,Z,Q>(); chk<R,Plus,Z,R>();
     chk<ApN,Plus,Q,D>(); chk<Q,Plus,Q,I>(); chk<Q,Plus,Q,Z>(); chk<Q,Plus,Q,Q>(); chk<R,Plus,Q,R>();
     chk<ApN,Plus,R,D>(); chk<R,Plus,R,I>(); chk<R,Plus,R,Z>(); chk<R,Plus,R,Q>(); chk<R,Plus,R,R>();
-/*
+
     // Generic numbers
     chk<ExN,Plus,ExN,ExN>(); chk<EfN,Plus,ExN,EfN>(); chk<VaN,Plus,ExN,VaN>(); chk<UpN,Plus,ExN,UpN>(); chk<LoN,Plus,ExN,LoN>(); chk<ApN,Plus,ExN,ApN>();
     chk<EfN,Plus,EfN,ExN>(); chk<EfN,Plus,EfN,EfN>(); chk<VaN,Plus,EfN,VaN>(); chk<UpN,Plus,EfN,UpN>(); chk<LoN,Plus,EfN,LoN>(); chk<ApN,Plus,EfN,ApN>();
@@ -408,7 +408,7 @@ void CheckNumeric::check_addition() {
     chk<ExN,Plus,Z,ExN>(); chk<EfN,Plus,Z,EfN>(); chk<VaN,Plus,Z,VaN>(); chk<UpN,Plus,Z,UpN>(); chk<LoN,Plus,Z,LoN>(); chk<ApN,Plus,Z,ApN>();
     chk<ExN,Plus,Q,ExN>(); chk<EfN,Plus,Q,EfN>(); chk<VaN,Plus,Q,VaN>(); chk<UpN,Plus,Q,UpN>(); chk<LoN,Plus,Q,LoN>(); chk<ApN,Plus,Q,ApN>();
     chk<EfN,Plus,R,ExN>(); chk<EfN,Plus,R,EfN>(); chk<VaN,Plus,R,VaN>(); chk<UpN,Plus,R,UpN>(); chk<LoN,Plus,R,LoN>(); chk<ApN,Plus,R,ApN>();
-*/
+
     // Float numbers
     chk<VaF,Plus,ExF,ExF>(); chk<MeF,Plus,ExF,MeF>(); chk<BoF,Plus,ExF,BoF>(); chk<UpF,Plus,ExF,UpF>(); chk<LoF,Plus,ExF,LoF>(); chk<ApF,Plus,ExF,ApF>();
     chk<MeF,Plus,MeF,ExF>(); chk<MeF,Plus,MeF,MeF>(); chk<VaF,Plus,MeF,BoF>(); chk<UpF,Plus,MeF,UpF>(); chk<LoF,Plus,MeF,LoF>(); chk<ApF,Plus,MeF,ApF>();
@@ -416,7 +416,7 @@ void CheckNumeric::check_addition() {
     chk<UpF,Plus,UpF,ExF>(); chk<UpF,Plus,UpF,MeF>(); chk<UpF,Plus,UpF,BoF>(); chk<UpF,Plus,UpF,UpF>(); chk<ApF,Plus,UpF,LoF>(); chk<ApF,Plus,UpF,ApF>();
     chk<LoF,Plus,LoF,ExF>(); chk<LoF,Plus,LoF,MeF>(); chk<LoF,Plus,LoF,BoF>(); chk<ApF,Plus,LoF,UpF>(); chk<LoF,Plus,LoF,LoF>(); chk<ApF,Plus,LoF,ApF>();
     chk<ApF,Plus,ApF,ExF>(); chk<ApF,Plus,ApF,MeF>(); chk<ApF,Plus,ApF,BoF>(); chk<ApF,Plus,ApF,UpF>(); chk<ApF,Plus,ApF,LoF>(); chk<ApF,Plus,ApF,ApF>();
-/*
+
     // Mixed Float # Generic and Generic # Float
     chk<VaF,Plus,ExF,ExN>(); chk<VaF,Plus,ExF,EfN>(); chk<VaF,Plus,ExF,VaN>(); chk<UpF,Plus,ExF,UpN>(); chk<LoF,Plus,ExF,LoN>(); chk<ApF,Plus,ExF,ApN>();
     chk<MeF,Plus,MeF,ExN>(); chk<MeF,Plus,MeF,EfN>(); chk<MeF,Plus,MeF,VaN>(); chk<UpF,Plus,MeF,UpN>(); chk<LoF,Plus,MeF,LoN>(); chk<ApF,Plus,MeF,ApN>();
@@ -431,7 +431,7 @@ void CheckNumeric::check_addition() {
     chk<UpF,Plus,UpN,ExF>(); chk<UpF,Plus,UpN,MeF>(); chk<UpF,Plus,UpN,BoF>(); chk<UpF,Plus,UpN,UpF>(); chk<ApF,Plus,UpN,LoF>(); chk<ApF,Plus,UpN,ApF>();
     chk<LoF,Plus,LoN,ExF>(); chk<LoF,Plus,LoN,MeF>(); chk<LoF,Plus,LoN,BoF>(); chk<ApF,Plus,LoN,UpF>(); chk<LoF,Plus,LoN,LoF>(); chk<ApF,Plus,LoN,ApF>();
     chk<ApF,Plus,ApN,ExF>(); chk<ApF,Plus,ApN,MeF>(); chk<ApF,Plus,ApN,BoF>(); chk<ApF,Plus,ApN,UpF>(); chk<ApF,Plus,ApN,LoF>(); chk<ApF,Plus,ApN,ApF>();
-*/
+
     // Mixed Float # Concrete and Concrete # Float
     chk<ApF,Plus,ExF,D>(); chk<VaF,Plus,ExF,I>(); chk<VaF,Plus,ExF,Z>(); chk<VaF,Plus,ExF,Q>(); chk<VaF,Plus,ExF,R>();
     chk<ApF,Plus,MeF,D>(); chk<MeF,Plus,MeF,I>(); chk<MeF,Plus,MeF,Z>(); chk<MeF,Plus,MeF,Q>(); chk<MeF,Plus,MeF,R>();

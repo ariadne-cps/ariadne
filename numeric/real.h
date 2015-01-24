@@ -75,7 +75,7 @@ class Real
     Real(Decimal const& d);
     Real(Rational const& q);
 
-    Real(ExactFloat x); // TODO: Should this be explicit or not??
+    explicit Real(ExactFloat x);
 
     operator Number<Effective>() const;
 

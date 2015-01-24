@@ -97,6 +97,10 @@ class ApproximateFloat {
     //! \brief Convert from a general real number by generating a representable approximation,
     //! not necessarily the nearest.
     explicit ApproximateFloat(const Real& r);
+    //! \brief Construct from a generic number.
+    explicit ApproximateFloat(const Number<Approximate>& x);
+    //! \brief Convert to generic number type.
+    operator Number<Approximate> () const;
 
     //! \brief Convert from a floating-point number with an exact representation.
     ApproximateFloat(const ExactFloat& x);

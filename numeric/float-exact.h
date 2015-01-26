@@ -54,7 +54,7 @@ class ExactFloat {
 
     //! \brief Default constructor creates the number 0 (zero).
     ExactFloat() : _v(0) { }
-    //! \brief Convert from a built-in integer.
+    //! \brief Construct from a built-in integer.
     template<class N, EnableIf<IsIntegral<N>> =dummy> ExactFloat(N n) : _v(n) { }
     //! \brief Explicit construction from a built-in double-precision value.
     //! \details Tests to ensure that the number is not 'accidentally' created from a rounded version of a string literal,
@@ -85,6 +85,8 @@ class ExactFloat {
     static Void set_output_precision(Nat p) { output_precision=p; }
 };
 
+template<class N, EnableIf<IsIntegral<N>> =dummy> inline ExactFloat create_float(N n) { return ExactFloat(n); }
+
 class ValidatedFloat;
 
 extern const ExactFloat infty;
@@ -112,7 +114,6 @@ inline ValidatedFloat operator+(const ExactFloat& x1,  const ValidatedFloat& x2)
 inline ValidatedFloat operator-(const ExactFloat& x1,  const ValidatedFloat& x2);
 inline ValidatedFloat operator*(const ExactFloat& x1,  const ValidatedFloat& x2);
 inline ValidatedFloat operator/(const ExactFloat& x1,  const ValidatedFloat& x2);
-inline ValidatedFloat operator/(const ExactFloat& x, Int n);
 
 inline ExactFloat neg(const ExactFloat& x) { return ExactFloat(neg_exact(x.raw())); }
 inline ExactFloat abs(const ExactFloat& x) { return ExactFloat(abs_exact(x.raw())); }

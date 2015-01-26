@@ -51,7 +51,7 @@ Int main(Int argc, char **argv)
 
     //Zonotope z1(z1c,z1g);
     //Polytope p1=polytope(z1);
-    Real p = ExactFloat(0.5);
+    Real p(0.5);
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(3);
     EffectiveVectorFunction afn1((0.05*x[0]+0.05*x[2]+0.15,0.05*x[1]+0.05*x[2]+0.6));
     ValidatedConstrainedImageSet s1(ExactBox::unit_box(3),afn1);

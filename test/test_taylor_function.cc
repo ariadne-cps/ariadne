@@ -41,7 +41,7 @@
 using namespace std;
 using namespace Ariadne;
 
-Vector<ExactFloat> e(Nat n, Nat i) { return Vector<ExactFloat>::unit(n,i); }
+Vector<Real> e(Nat n, Nat i) { return Vector<Real>::unit(n,i); }
 Polynomial<Float> p(Nat n, Nat j) { return Polynomial<Float>::variable(n,j); }
 ScalarTaylorFunction t(ExactBox d, Nat j,Sweeper swp) { return ScalarTaylorFunction::coordinate(d,j,swp); }
 
@@ -102,7 +102,7 @@ Void TestScalarTaylorFunction::test()
 Void TestScalarTaylorFunction::test_concept()
 {
     static_assert(IsAlgebra<ScalarTaylorFunction>::value,"");
-    
+
     const ExactFloat f=0;
     const ValidatedFloat i;
     const Vector<ExactFloat> vf;
@@ -174,7 +174,7 @@ Void TestScalarTaylorFunction::test_evaluate()
 Void TestScalarTaylorFunction::test_gradient()
 {
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
-    ExactFloat a(1.5); ExactFloat b(0.25);
+    Real a(1.5); Real b(0.25);
     EffectiveScalarFunction quadratic = a-x[0]*x[0]+b*x[1];
 
     ExactBox domain1={{-1.0,+1.0},{-1.0,+1.0}};
@@ -344,13 +344,13 @@ Void TestVectorTaylorFunction::test_constructors()
 
     ExactBox domain={{0.25,1.25},{0.5,1.0}};
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
-    ExactFloat a(1.5); ExactFloat b(0.25);
+    Real a(1.5); Real b(0.25);
     EffectiveVectorFunction henon_function( (a-x[0]*x[0]+b*x[1], x[0]*1) );
     ARIADNE_TEST_CONSTRUCT(VectorTaylorFunction,henon_model,(domain,henon_function,swp));
     ARIADNE_TEST_EQUAL(henon_model.models()[0].expansion(),expansion[0])
     ARIADNE_TEST_EQUAL(henon_model.models()[1].expansion(),expansion[1])
 
-    Vector<ValidatedFloat> e0=e(2,0); Vector<ValidatedFloat> e1=e(2,1);
+    Vector<ValidatedFloat> e0(e(2,0)); Vector<ValidatedFloat> e1(e(2,1));
 
     VectorTaylorFunction t=VectorTaylorFunction::identity(domain,swp);
     //VectorTaylorFunction variables_model((1.5-t[0]*t[0]+0.25*t[1])*e0+t[0]*e1);
@@ -395,7 +395,7 @@ Void TestVectorTaylorFunction::test_restrict()
 Void TestVectorTaylorFunction::test_jacobian()
 {
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
-    ExactFloat a(1.5); ExactFloat b(0.25);
+    Real a(1.5); Real b(0.25);
     EffectiveVectorFunction henon( (a-x[0]*x[0]+b*x[1], x[0]*1) );
     ExactBox domain1={{-1.0,+1.0},{-1.0,+1.0}};
     ExactBox domain2={{-0.5,+0.5},{-0.25,+0.25}};
@@ -416,7 +416,7 @@ Void TestVectorTaylorFunction::test_jacobian()
 
 Void TestVectorTaylorFunction::test_compose()
 {
-    Real a=ExactFloat(1.5); Real b=ExactFloat(0.25);
+    Real a(1.5); Real b(0.25);
     EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
     EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
     EffectiveVectorFunction henon_polynomial=(a-x*x+b*y)*e(2,0)+x*e(2,1);

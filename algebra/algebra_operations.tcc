@@ -501,15 +501,17 @@ template<class A> int instantiate_transcendental() {
     auto tan_ptr  = (A(*)(A const&)) &tan;
     auto atan_ptr  = (A(*)(A const&)) &tan;
 
-    return (int)rec_ptr + (int)sqrt_ptr + (int)exp_ptr + (int)log_ptr
-                + (int)sin_ptr + int(cos_ptr) + int(tan_ptr) + int(atan_ptr);
+    typedef std::size_t size_t;
+    return (size_t)rec_ptr + (size_t)sqrt_ptr + (size_t)exp_ptr + (size_t)log_ptr
+                + (size_t)sin_ptr + (size_t)cos_ptr + (size_t)tan_ptr + (size_t)atan_ptr;
 }
 
 template<class A> int instantiate_ordered() {
     auto abs_ptr  = (A(*)(A const&)) &abs;
     auto max_ptr = (A(*)(A const&, A const&)) &max;
     auto min_ptr = (A(*)(A const&, A const&)) &min;
-    return (int)abs_ptr + (int)max_ptr + (int)min_ptr;
+    typedef std::size_t size_t;
+    return (size_t)abs_ptr + (size_t)max_ptr + (size_t)min_ptr;
 }
 
 } // namespace Ariadne

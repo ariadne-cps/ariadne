@@ -127,8 +127,8 @@ class Rational
     mpq_t const& get_mpq() const;
   private:
     friend class Dyadic;
-  public:
-    explicit Rational(double);
+  private:
+    explicit Rational(double, std::nullptr_t dummy);
 };
 template<> struct IsNumber<Rational> : True { };
 Rational operator"" _q(long double x);

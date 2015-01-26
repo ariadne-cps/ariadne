@@ -140,6 +140,11 @@ class Real
     friend Bool same(Real,Real);
 
     friend OutputStream& operator<<(OutputStream&, Real const&);
+
+    friend Number<Effective> operator+(Number<Effective>, Number<Effective>);
+    friend Number<Effective> operator-(Number<Effective>, Number<Effective>);
+    friend Number<Effective> operator*(Number<Effective>, Number<Effective>);
+    friend Number<Effective> operator/(Number<Effective>, Number<Effective>);
   private:
     Real(std::int64_t n, Void*);
     Real(std::uint64_t m, Void*);

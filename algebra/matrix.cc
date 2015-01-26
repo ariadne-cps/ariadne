@@ -146,7 +146,7 @@ template<> Matrix<BoundFloat> dd_solve(const Matrix<BoundFloat>& A, const Matrix
     const SizeType m=B.column_size();
 
     //Compute an upper bound for 1/(|aii|-sum|aij|) using outward rounding
-    Vector<UpperFloat> c(n,0);
+    Vector<UpperFloat> c(n,UpperFloat(0u));
     for(SizeType i=0; i!=n; ++i) {
         LowerFloat rci=mig(A[i][i]);
         for(SizeType j=0; j!=n; ++j) {
@@ -417,7 +417,7 @@ triangular_decomposition(const Matrix<X>& A)
     for(SizeType k=0; k!=std::min(m,n); ++k) {
         // Choose a pivot row
         SizeType iamax=k;
-        X amax=0;
+        X amax=A.zero_element();
         for(SizeType i=k; i!=m; ++i) {
             if(decide(abs(A[i][k])>amax)) {
                 iamax=i;
@@ -470,6 +470,7 @@ Tuple< Matrix<ApproximateFloat>, PivotMatrix>
 triangular_factor(const Matrix<ApproximateFloat>& A)
 {
     typedef ApproximateFloat X;
+    X zero = A.zero_element();
 
     const SizeType m=A.row_size();
     const SizeType n=A.column_size();
@@ -489,7 +490,7 @@ triangular_factor(const Matrix<ApproximateFloat>& A)
         if(pivoting) {
             // Compute column norms
             for(SizeType j=k; j!=n; ++j) {
-                cns[j]=0.0;
+                cns[j]=zero;
                 for(SizeType i=k; i!=m; ++i) {
                     cns[j]+=sqr(R[i][j]);
                 }
@@ -515,7 +516,7 @@ triangular_factor(const Matrix<ApproximateFloat>& A)
         }
 
         // Compute |a| where a is the working column
-        X nrmas=0.0;
+        X nrmas=zero;
         for(SizeType i=k; i!=m; ++i) {
             nrmas+=R[i][k]*R[i][k];
         }
@@ -529,7 +530,7 @@ triangular_factor(const Matrix<ApproximateFloat>& A)
         else { u[k]-=nrma; }
 
         // Compute -2/u.u
-        X nrmus=0.0;
+        X nrmus=zero;
         for(SizeType i=k; i!=m; ++i) {
             nrmus+=sqr(u[i]);
         }
@@ -537,7 +538,7 @@ triangular_factor(const Matrix<ApproximateFloat>& A)
 
         // For each column b, compute b-=2u(u.b)/u.u
         for(SizeType j=k; j!=n; ++j) {
-            X udtb=0.0;
+            X udtb=zero;
             for(SizeType i=k; i!=m; ++i) {
                 udtb+=u[i]*R[i][j];
             }
@@ -550,7 +551,7 @@ triangular_factor(const Matrix<ApproximateFloat>& A)
         // For the kth column, set R[k][k]=-/+ |a|
         // and R[i][k]=0 for i>k
         for(SizeType i=k+1; i!=m; ++i) {
-            R[i][k]=0.0;
+            R[i][k]=zero;
         }
 
     } // end of loop on working column k
@@ -560,7 +561,7 @@ triangular_factor(const Matrix<ApproximateFloat>& A)
     RoundingModeType prev_rounding_mode=get_rounding_mode();
     for(SizeType i=0; i!=m; ++i) {
         set_rounding_upward();
-        X rsum=0.0;
+        X rsum=zero;
         for(SizeType j=i; j!=n; ++j) {
             rsum+=abs(R[i][j]);
         }
@@ -766,7 +767,7 @@ orthogonal_decomposition(const Matrix<X>& A)
 {
     SizeType m=A.row_size();
     SizeType n=A.column_size();
-    X z=0;
+    X z=A.zero_element();
     Matrix<X> O(m,m,z);
     Matrix<X> R(A);
 

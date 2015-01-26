@@ -145,11 +145,11 @@ Void TestFunction::test_differentiation()
 
     EffectiveScalarFunction af=3*x-2*y+1;
     EffectiveScalarFunction daf=af.derivative(1);
-    ARIADNE_TEST_EQUAL(daf.evaluate(Vector<ApproximateFloat>{2.4,1.3}),-2.0);
+    ARIADNE_TEST_EQUAL(daf.evaluate(Vector<ApproximateFloat>{2.4,1.3}),-2.0_exact);
 
-    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<ApproximateFloat>{2.4,1.3}),1.0);
-    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<ValidatedFloat>{{2.4,2.4},{1.3,1.3}}),1.0_dec);
-    ARIADNE_TEST_EQUAL(x.derivative(1).evaluate(Vector<ApproximateFloat>{2.4, 1.3}),0.0);
+    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<ApproximateFloat>{2.4,1.3}),1.0_exact);
+    ARIADNE_TEST_EQUAL(x.derivative(0).evaluate(Vector<ValidatedFloat>{{2.4,2.4},{1.3,1.3}}),1.0_exact);
+    ARIADNE_TEST_EQUAL(x.derivative(1).evaluate(Vector<ApproximateFloat>{2.4, 1.3}),0.0_exact);
 
 }
 

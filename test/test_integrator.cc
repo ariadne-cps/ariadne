@@ -124,7 +124,7 @@ class TestIntegrator
     };
 
     Void test_spiral() {
-        ExactFloat half(0.5);
+        Real half(0.5);
         EffectiveVectorFunction f=(-half*x-y,x-half*y);
         ExactIntervalVector d=(ExactInterval(0.75,1.25),ExactInterval(-0.25,0.25));
         Float h=0.25;

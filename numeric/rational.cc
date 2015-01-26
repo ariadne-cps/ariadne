@@ -97,16 +97,16 @@ Rational::Rational(Integer const& znum, Integer const& zden) {
 Rational::Rational(Int64 n) : Rational(Integer(n)) {
 }
 
-Rational::Rational(double d) {
+Rational::Rational(double d, std::nullptr_t dummy) {
     mpq_init(_mpq);
     mpq_set_d(_mpq,d);
     mpq_canonicalize(_mpq);
 }
 
-Rational::Rational(Float const& x) : Rational(x.dbl) {
+Rational::Rational(Float const& x) : Rational(x.dbl,nullptr) {
 }
 
-Rational::Rational(Float64 const& x) : Rational(x.d) {
+Rational::Rational(Float64 const& x) : Rational(x.d,nullptr) {
 }
 
 Rational::Rational(ExactFloat const& x) : Rational(reinterpret_cast<Float const&>(x)) {
@@ -306,7 +306,7 @@ Rational operator"" _q(long double x) {
     // See if the long double value is an exact single-precision value
     volatile float sx=static_cast<float>(x);
     if(static_cast<long double>(sx)==x) {
-        return Rational(static_cast<double>(sx));
+        return Rational(static_cast<double>(sx),nullptr);
     }
     // Compute the continued fraction expansion of x, storing coefficients in cf
     // Stop if a coefficient is larger than max_cf_coef, since then the result
@@ -327,14 +327,14 @@ Rational operator"" _q(long double x) {
                       "x="<<x<<" is not a sufficiently close approximation to a simple rational number.");
     }
     // Compute the result from the continued fraction coefficients
-    Rational q = Rational(static_cast<double>(cf[i]));
+    Rational q = Rational(static_cast<double>(cf[i]),nullptr);
     while(i!=0) {
         --i;
-        q=Rational(cf[i])+rec(q);
+        q=Rational(cf[i],nullptr)+rec(q);
     }
     if(s==-1) { q=-q; }
     double xd=static_cast<double>(x);
-    Rational xq=Rational(xd);
+    Rational xq=Rational(xd,nullptr);
     //volatile double qd=q.get_d();
     double ae=std::abs((q-xq).get_d());
     double re=ae/std::max(1.0,std::abs(xd));

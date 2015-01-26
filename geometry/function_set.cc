@@ -195,7 +195,7 @@ Pair<Nat,double> nonlinearity_index_and_error(const VectorTaylorFunction& functi
 
 BoxSet::BoxSet(const ExactIntervalVector& bx) : _ary(bx.size()) {
     for(Nat i=0; i!=bx.size(); ++i) {
-        this->_ary[i]=IntervalSet(ExactFloat(bx[i].lower()),ExactFloat(bx[i].upper()));
+        this->_ary[i]=IntervalSet(Real(bx[i].lower()),Real(bx[i].upper()));
     }
 }
 
@@ -595,7 +595,7 @@ ConstrainedImageSet::split() const
     Nat k=this->number_of_parameters();
     Float rmax=0.0;
     for(Nat j=0; j!=this->number_of_parameters(); ++j) {
-       UpperFloat rj=this->domain()[j].radius();
+       UpperFloat rj(this->domain()[j].radius());
        if(rj.raw()>rmax) {
             k=j;
             rmax=rj.raw();

@@ -107,7 +107,10 @@ typedef BoundedFloat BoundFloat;
 typedef ValidatedFloat ValidFloat;
 typedef ApproximateFloat ApprxFloat;
 
+template<> struct IsNumber<double> : True { };
+
 template<class X> struct IsFloat : False { };
+template<> struct IsFloat<double> : True { };
 template<> struct IsFloat<ExactFloat> : True { };
 template<> struct IsFloat<ValidatedFloat> : True { };
 template<> struct IsFloat<UpperFloat> : True { };

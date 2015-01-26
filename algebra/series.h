@@ -47,35 +47,35 @@ template<class X> class SeriesGeneratorInterface {
 template<class OP, class X> class SeriesGenerator;
 
 template<class X> class SeriesGenerator<Rec,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType d, X const& c, List<X>& y) const final { return (d==0) ? (1/c) : y[d-1]*(-y[0]); }
+    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { return (deg==0) ? (1/c) : y[deg-1]*(-y[0]); }
 };
 
 template<class X> class SeriesGenerator<Sqrt,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType d, X const& c, List<X>& y) const final { return (d==0) ? sqrt(c) : ((2*Int(d)-3)*(-1/c)/2)/d*y[d-1]; }
+    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { Int d=deg; return (deg==0) ? sqrt(c) : ((2*d-3)*(-1/c)/2)/d*y[deg-1]; }
 };
 
 template<class X> class SeriesGenerator<Exp,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType d, X const& c, List<X>& y) const final { return (d==0) ? exp(c) : y[d-1]/d; }
+    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { Int d=deg; return (deg==0) ? exp(c) : y[deg-1]/d; }
 };
 
 template<class X> class SeriesGenerator<Log,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType d, X const& c, List<X>& y) const final { return (d==0) ? log(c) : (d==1) ? 1/c : -y[d-1]*y[1]*(d-1)/d; }
+    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { Int d=deg; return (deg==0) ? log(c) : (d==1) ? 1/c : -y[deg-1]*y[1]*(d-1)/d; }
 };
 
 template<class X> class SeriesGenerator<Sin,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType d, X const& c, List<X>& y) const final { return (d==0) ? sin(c) : (d==1) ? cos(c) : -y[d-2]/(d*(d-1)); }
+    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { Int d=deg; return (deg==0) ? sin(c) : (deg==1) ? cos(c) : -y[deg-2]/(d*(d-1)); }
 };
 
 template<class X> class SeriesGenerator<Cos,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType d, X const& c, List<X>& y) const final { return (d==0) ? cos(c) : (d==1) ? -sin(c) : -y[d-2]/(d*(d-1)); }
+    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { Int d=deg; return (deg==0) ? cos(c) : (deg==1) ? -sin(c) : -y[deg-2]/(d*(d-1)); }
 };
 
 template<class X> class SeriesGenerator<Tan,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType d, X const& c, List<X>& y) const final { if (d==0) { return tan(c); } ARIADNE_NOT_IMPLEMENTED; }
+    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { if (deg==0) { return tan(c); } ARIADNE_NOT_IMPLEMENTED; }
 };
 
 template<class X> class SeriesGenerator<Atan,X> : public SeriesGeneratorInterface<X> {
-    virtual X _next(SizeType d, X const& c, List<X>& y) const final { if (d==0) { return atan(c); } ARIADNE_NOT_IMPLEMENTED; }
+    virtual X _next(SizeType deg, X const& c, List<X>& y) const final { if (deg==0) { return atan(c); } ARIADNE_NOT_IMPLEMENTED; }
 };
 
 

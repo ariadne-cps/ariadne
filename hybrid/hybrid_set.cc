@@ -45,8 +45,6 @@
 
 namespace Ariadne {
 
-ExactFloat make_exact(Real r) { return make_exact(ApproximateFloat(r)); }
-
 template<> inline ExactFloat numeric_cast<ExactFloat>(Real const& r) {
     return make_exact(ApproximateFloat(r));
 }

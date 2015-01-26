@@ -21,11 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "config.h"
+#include "utility/macros.h"
+
 #include "numeric/float-exact.h"
 #include "numeric/float-approximate.h"
 #include "numeric/real.h"
 
 namespace Ariadne {
+
+ExactFloat::ExactFloat(Integer const& z)
+    : _v(z.get_si())
+{
+    int n=z.get_si();
+    ARIADNE_PRECONDITION(z==n);
+}
 
 ExactFloat make_exact(Real const& r) {
     ApproximateFloat a(r); return ExactFloat(a.raw());

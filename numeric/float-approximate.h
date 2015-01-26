@@ -81,8 +81,10 @@ class ApproximateFloat {
   public:
     //! \brief Default constructor creates an uninitialised number.
     ApproximateFloat() : a() { }
+    //! \brief Construct from a built-in double-precision floating-point number.
+    template<class N, EnableIf<IsIntegral<N>> =dummy> ApproximateFloat(N n) : a(n) { }
     //! \brief Convert from a built-in double-precision floating-point number.
-    ApproximateFloat(double x) : a(x) { }
+    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> ApproximateFloat(D x) : a(x) { }
     //! \brief Copy constructor.
     explicit ApproximateFloat(const Float& x) : a(x) { }
     //! \brief Convert approximately from a decimal number.
@@ -99,6 +101,10 @@ class ApproximateFloat {
     explicit ApproximateFloat(const Real& r);
     //! \brief Construct from a generic number.
     explicit ApproximateFloat(const Number<Approximate>& x);
+    //! \brief Assign from a generic number
+    template<class P> ApproximateFloat& operator=(const Number<P>& x);
+    template<class N, EnableIf<IsIntegral<N>> =dummy> ApproximateFloat& operator=(const N& n) { *this=ApproximateFloat(n); }
+    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> ApproximateFloat& operator=(const D& d) { *this=ApproximateFloat(d); }
     //! \brief Convert to generic number type.
     operator Number<Approximate> () const;
 
@@ -110,6 +116,7 @@ class ApproximateFloat {
     ApproximateFloat(const UpperFloat& x);
     //! \brief Convert from a floating-point lower bound on a number.
     ApproximateFloat(const LowerFloat& x);
+
     //! \brief Explicit conversion to extract raw data.
     explicit operator Float const& () const { return this->a; }
     //! \brief An approximation by a built-in double-precision floating-point number.
@@ -121,6 +128,7 @@ class ApproximateFloat {
     ApproximateFloat pm(ApproximateFloat e) { return *this; }
 };
 
+template<class D, EnableIf<IsFloatingPoint<D>> =dummy> inline ApproximateFloat create_float(D d) { return ApproximateFloat(d); }
 
 inline OutputStream& operator<<(OutputStream& os, const ApproximateFloat& x) {
     return os << std::showpoint << std::setprecision(ApproximateFloat::output_precision) << x.a; }
@@ -199,17 +207,17 @@ inline ApproximateFloat atan(ApproximateFloat x) { return ApproximateFloat(atan_
 
 // Arithmetic operators
 //! \related ApproximateFloat \brief Unary plus (identity) operator. Guaranteed to be exact.
-inline ApproximateFloat operator+(const ApproximateFloat& x) { return pos(x); }
+inline ApproximateFloat operator+(ApproximateFloat x) { return pos(x); }
 //! \related ApproximateFloat \brief Unary negation operator. Guaranteed to be exact.
-inline ApproximateFloat operator-(const ApproximateFloat& x) { return neg(x); }
+inline ApproximateFloat operator-(ApproximateFloat x) { return neg(x); }
 //! \related ApproximateFloat \brief The addition operator. Guaranteed to respect the current rounding mode.
-inline ApproximateFloat operator+(const ApproximateFloat& x1, const ApproximateFloat& x2) { return add(x1,x2); }
+inline ApproximateFloat operator+(ApproximateFloat x1, ApproximateFloat x2) { return add(x1,x2); }
 //! \related ApproximateFloat \brief The subtraction operator. Guaranteed to respect the current rounding mode.
-inline ApproximateFloat operator-(const ApproximateFloat& x1, const ApproximateFloat& x2) { return sub(x1,x2); }
+inline ApproximateFloat operator-(ApproximateFloat x1, ApproximateFloat x2) { return sub(x1,x2); }
 //! \related ApproximateFloat \brief The multiplication operator. Guaranteed to respect the current rounding mode.
-inline ApproximateFloat operator*(const ApproximateFloat& x1, const ApproximateFloat& x2) { return mul(x1,x2); }
+inline ApproximateFloat operator*(ApproximateFloat x1, ApproximateFloat x2) { return mul(x1,x2); }
 //! \related ApproximateFloat \brief The division operator. Guaranteed to respect the current rounding mode.
-inline ApproximateFloat operator/(const ApproximateFloat& x1, const ApproximateFloat& x2) { return div(x1,x2); }
+inline ApproximateFloat operator/(ApproximateFloat x1, ApproximateFloat x2) { return div(x1,x2); }
 
 //template<class N, typename std::enable_if<std::is_integral<N>::value,Int>::type=0>
 //    inline ApproximateFloat operator/(N n1, const ApproximateFloat& x2) { return div(ApproximateFloat(n1),x2); };

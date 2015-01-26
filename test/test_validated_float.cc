@@ -82,10 +82,10 @@ TestValidatedFloat::test_concept()
     Int n=1;
     Nat m=1;
     double d=1;
-    ExactFloat x=1;
+    ExactFloat x(1);
     Float a,b;
-    ValidatedFloat i=1;
-    ValidatedFloat j=1;
+    ValidatedFloat i(1);
+    ValidatedFloat j(1);
 
 
     // Constructors

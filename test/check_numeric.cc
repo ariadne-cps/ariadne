@@ -44,12 +44,18 @@ using namespace Ariadne;
 namespace Ariadne {
 template<class T> String class_name();
 
+class Plus;
+
 namespace Detail {
 
+/*
 template<class OP, class X1, class X2, class = Fallback> struct SafeTypedef {
     typedef Fallback Type; };
 template<class OP, class X1, class X2> struct SafeTypedef<OP,X1,X2, EnableIf<IsConvertible<decltype(declval<OP>()(declval<X1>(),declval<X2>())),DontCare>,Fallback>> {
     typedef decltype(declval<OP>()(declval<X1>(),declval<X2>()) ) Type; };
+*/
+
+template<class OP, class X1, class X2> struct SafeTypedef { typedef decltype( OP()(declval<X1>(),declval<X2>()) ) Type; };
 
 template<class X, class = Fallback> struct SafeNegationTypedef { typedef Fallback Type; };
 template<class X> struct SafeNegationTypedef<X, EnableIf<IsConvertible<decltype(-declval<X>()),DontCare>,Fallback>> { typedef decltype(-declval<X>()) Type; };
@@ -243,6 +249,7 @@ typedef UpperFloat UpF; typedef LowerFloat LoF; typedef ApproximateFloat ApF;
 
 typedef decltype(declval<ExF>() + declval<ExF>()) VaF;
 typedef decltype(declval<UpF>() * declval<UpF>()) PrF;
+typedef decltype(declval<double>() + declval<Number<Approximate>>()) ApD;
 //typedef ValidatedFloat64Type VaF;
 
 } // namespace Ariadne
@@ -269,11 +276,11 @@ void CheckNumeric::check()
     ARIADNE_TEST_CALL(notifications());
     ARIADNE_TEST_CALL(check_conversions());
     ARIADNE_TEST_CALL(check_addition());
-    ARIADNE_TEST_WARN("Skipping check of sub, mul, div and cmp functions.");
-    return;
     ARIADNE_TEST_CALL(check_subtraction());
     ARIADNE_TEST_CALL(check_multiplication());
     ARIADNE_TEST_CALL(check_division());
+    ARIADNE_TEST_WARN("Skipping check of less and equal functions.");
+    return;
     ARIADNE_TEST_CALL(check_comparison());
     ARIADNE_TEST_CALL(check_equality());
 }
@@ -282,7 +289,6 @@ String to_str(bool b) { return b?"true":"false"; }
 
 void CheckNumeric::notifications()
 {
-
     // Operations on ExactFloat: display what is being used.
     ARIADNE_TEST_NOTIFY(String("Conversion double -> ApproximateNumber: ")+to_str(IsConvertible<double,ApproximateNumber>::value));
     ARIADNE_TEST_NOTIFY(String("Conversion double -> ApproximateFloat64: ")+to_str(IsConvertible<double,ApproximateFloat64>::value));
@@ -292,9 +298,10 @@ void CheckNumeric::notifications()
     ARIADNE_TEST_NOTIFY(String("Conversion int -> ExactFloat64: ")+to_str(IsConvertible<int,ExactFloat64>::value));
     ARIADNE_TEST_NOTIFY(String("Construction Integer -> ExactFloat64: ")+to_str(IsConstructible<ExactFloat64,Integer>::value));
     ARIADNE_TEST_NOTIFY((String("ExactFloat + ExactFloat -> ")+class_name<SafeSumType<ExactFloat,ExactFloat>>()));
-    ARIADNE_TEST_NOTIFY((String("ExactFloat + double -> ")+class_name<SafeSumType<ExactFloat,double>>()));
+    ARIADNE_TEST_NOTIFY((String("Integer + double -> ")+class_name<SafeSumType<Integer,double>>()));
     ARIADNE_TEST_NOTIFY((String("ExactNumber + double -> ")+class_name<SafeSumType<ExactNumber,double>>()));
     ARIADNE_TEST_NOTIFY((String("ApproximateNumber + double -> ")+class_name<SafeSumType<ApproximateNumber,double>>()));
+    ARIADNE_TEST_NOTIFY((String("ExactFloat + double -> ")+class_name<SafeSumType<ExactFloat,double>>()));
     ARIADNE_TEST_NOTIFY((String("MetricFloat + BoundedFloat -> ")+class_name<SafeSumType<MetricFloat,BoundedFloat>>()));
     ARIADNE_TEST_NOTIFY((String("UpperNumber * UpperNumber -> ")+class_name<SafeProductType<UpperNumber,UpperNumber>>()));
     ARIADNE_TEST_NOTIFY((String("UpperFloat * UpperFloat -> ")+class_name<SafeProductType<UpperFloat,UpperFloat>>()));
@@ -380,11 +387,11 @@ void CheckNumeric::check_conversions() {
 
 void CheckNumeric::check_addition() {
     // Concrete numbers
-    chk< D ,Plus,D,D>(); chk<D,Plus,D,I>(); chk<ApN,Plus,D,Z>(); chk<ApN,Plus,D,Q>(); chk<ApN,Plus,D,R>();
+    chk< D ,Plus,D,D>(); chk<D,Plus,D,I>(); chk<ApD,Plus,D,Z>(); chk<ApD,Plus,D,Q>(); chk<ApD,Plus,D,R>();
     chk< D ,Plus,I,D>(); chk<I,Plus,I,I>(); chk<Z,Plus,I,Z>(); chk<Q,Plus,I,Q>(); chk<R,Plus,I,R>();
-    chk<ApN,Plus,Z,D>(); chk<Z,Plus,Z,I>(); chk<Z,Plus,Z,Z>(); chk<Q,Plus,Z,Q>(); chk<R,Plus,Z,R>();
-    chk<ApN,Plus,Q,D>(); chk<Q,Plus,Q,I>(); chk<Q,Plus,Q,Z>(); chk<Q,Plus,Q,Q>(); chk<R,Plus,Q,R>();
-    chk<ApN,Plus,R,D>(); chk<R,Plus,R,I>(); chk<R,Plus,R,Z>(); chk<R,Plus,R,Q>(); chk<R,Plus,R,R>();
+    chk<ApD,Plus,Z,D>(); chk<Z,Plus,Z,I>(); chk<Z,Plus,Z,Z>(); chk<Q,Plus,Z,Q>(); chk<R,Plus,Z,R>();
+    chk<ApD,Plus,Q,D>(); chk<Q,Plus,Q,I>(); chk<Q,Plus,Q,Z>(); chk<Q,Plus,Q,Q>(); chk<R,Plus,Q,R>();
+    chk<ApD,Plus,R,D>(); chk<R,Plus,R,I>(); chk<R,Plus,R,Z>(); chk<R,Plus,R,Q>(); chk<R,Plus,R,R>();
 
     // Generic numbers
     chk<ExN,Plus,ExN,ExN>(); chk<EfN,Plus,ExN,EfN>(); chk<VaN,Plus,ExN,VaN>(); chk<UpN,Plus,ExN,UpN>(); chk<LoN,Plus,ExN,LoN>(); chk<ApN,Plus,ExN,ApN>();
@@ -395,15 +402,15 @@ void CheckNumeric::check_addition() {
     chk<ApN,Plus,ApN,ExN>(); chk<ApN,Plus,ApN,EfN>(); chk<ApN,Plus,ApN,VaN>(); chk<ApN,Plus,ApN,UpN>(); chk<ApN,Plus,ApN,LoN>(); chk<ApN,Plus,ApN,ApN>();
 
     // Mixed Generic # Concrete numbers
-    chk<ApN,Plus,ExN,D>(); chk<ExN,Plus,ExN,I>(); chk<ExN,Plus,ExN,Z>(); chk<ExN,Plus,ExN,Q>(); chk<EfN,Plus,ExN,R>();
-    chk<ApN,Plus,EfN,D>(); chk<EfN,Plus,EfN,I>(); chk<EfN,Plus,EfN,Z>(); chk<EfN,Plus,EfN,Q>(); chk<EfN,Plus,EfN,R>();
-    chk<ApN,Plus,VaN,D>(); chk<VaN,Plus,VaN,I>(); chk<VaN,Plus,VaN,Z>(); chk<VaN,Plus,VaN,Q>(); chk<VaN,Plus,VaN,R>();
-    chk<ApN,Plus,UpN,D>(); chk<UpN,Plus,UpN,I>(); chk<UpN,Plus,UpN,Z>(); chk<UpN,Plus,UpN,Q>(); chk<UpN,Plus,UpN,R>();
-    chk<ApN,Plus,LoN,D>(); chk<LoN,Plus,LoN,I>(); chk<LoN,Plus,LoN,Z>(); chk<LoN,Plus,LoN,Q>(); chk<LoN,Plus,LoN,R>();
-    chk<ApN,Plus,ApN,D>(); chk<ApN,Plus,ApN,I>(); chk<ApN,Plus,ApN,Z>(); chk<ApN,Plus,ApN,Q>(); chk<ApN,Plus,ApN,R>();
+    chk<ApD,Plus,ExN,D>(); chk<ExN,Plus,ExN,I>(); chk<ExN,Plus,ExN,Z>(); chk<ExN,Plus,ExN,Q>(); chk<EfN,Plus,ExN,R>();
+    chk<ApD,Plus,EfN,D>(); chk<EfN,Plus,EfN,I>(); chk<EfN,Plus,EfN,Z>(); chk<EfN,Plus,EfN,Q>(); chk<EfN,Plus,EfN,R>();
+    chk<ApD,Plus,VaN,D>(); chk<VaN,Plus,VaN,I>(); chk<VaN,Plus,VaN,Z>(); chk<VaN,Plus,VaN,Q>(); chk<VaN,Plus,VaN,R>();
+    chk<ApD,Plus,UpN,D>(); chk<UpN,Plus,UpN,I>(); chk<UpN,Plus,UpN,Z>(); chk<UpN,Plus,UpN,Q>(); chk<UpN,Plus,UpN,R>();
+    chk<ApD,Plus,LoN,D>(); chk<LoN,Plus,LoN,I>(); chk<LoN,Plus,LoN,Z>(); chk<LoN,Plus,LoN,Q>(); chk<LoN,Plus,LoN,R>();
+    chk<ApD,Plus,ApN,D>(); chk<ApN,Plus,ApN,I>(); chk<ApN,Plus,ApN,Z>(); chk<ApN,Plus,ApN,Q>(); chk<ApN,Plus,ApN,R>();
 
     // Mixed Concrete # Generic numbers
-    chk<ApN,Plus,D,ExN>(); chk<ApN,Plus,D,EfN>(); chk<ApN,Plus,D,VaN>(); chk<ApN,Plus,D,UpN>(); chk<ApN,Plus,D,LoN>(); chk<ApN,Plus,D,ApN>();
+    chk<ApD,Plus,D,ExN>(); chk<ApD,Plus,D,EfN>(); chk<ApD,Plus,D,VaN>(); chk<ApD,Plus,D,UpN>(); chk<ApD,Plus,D,LoN>(); chk<ApD,Plus,D,ApN>();
     chk<ExN,Plus,I,ExN>(); chk<EfN,Plus,I,EfN>(); chk<VaN,Plus,I,VaN>(); chk<UpN,Plus,I,UpN>(); chk<LoN,Plus,I,LoN>(); chk<ApN,Plus,I,ApN>();
     chk<ExN,Plus,Z,ExN>(); chk<EfN,Plus,Z,EfN>(); chk<VaN,Plus,Z,VaN>(); chk<UpN,Plus,Z,UpN>(); chk<LoN,Plus,Z,LoN>(); chk<ApN,Plus,Z,ApN>();
     chk<ExN,Plus,Q,ExN>(); chk<EfN,Plus,Q,EfN>(); chk<VaN,Plus,Q,VaN>(); chk<UpN,Plus,Q,UpN>(); chk<LoN,Plus,Q,LoN>(); chk<ApN,Plus,Q,ApN>();
@@ -450,212 +457,212 @@ void CheckNumeric::check_addition() {
 void CheckNumeric::check_subtraction() {
 
     // Concrete numbers
-    chk< D ,Sub,D,D>(); chk<D,Sub,D,I>(); chk<ApN,Sub,D,Z>(); chk<ApN,Sub,D,Q>(); chk<ApN,Sub,D,R>();
-    chk< D ,Sub,I,D>(); chk<I,Sub,I,I>(); chk<Z,Sub,I,Z>(); chk<Q,Sub,I,Q>(); chk<R,Sub,I,R>();
-    chk<ApN,Sub,Z,D>(); chk<Z,Sub,Z,I>(); chk<Z,Sub,Z,Z>(); chk<Q,Sub,Z,Q>(); chk<R,Sub,Z,R>();
-    chk<ApN,Sub,Q,D>(); chk<Q,Sub,Q,I>(); chk<Q,Sub,Q,Z>(); chk<Q,Sub,Q,Q>(); chk<R,Sub,Q,R>();
-    chk<ApN,Sub,R,D>(); chk<R,Sub,R,I>(); chk<R,Sub,R,Z>(); chk<R,Sub,R,Q>(); chk<R,Sub,R,R>();
+    chk< D ,Minus,D,D>(); chk<D,Minus,D,I>(); chk<ApD,Minus,D,Z>(); chk<ApD,Minus,D,Q>(); chk<ApD,Minus,D,R>();
+    chk< D ,Minus,I,D>(); chk<I,Minus,I,I>(); chk<Z,Minus,I,Z>(); chk<Q,Minus,I,Q>(); chk<R,Minus,I,R>();
+    chk<ApD,Minus,Z,D>(); chk<Z,Minus,Z,I>(); chk<Z,Minus,Z,Z>(); chk<Q,Minus,Z,Q>(); chk<R,Minus,Z,R>();
+    chk<ApD,Minus,Q,D>(); chk<Q,Minus,Q,I>(); chk<Q,Minus,Q,Z>(); chk<Q,Minus,Q,Q>(); chk<R,Minus,Q,R>();
+    chk<ApD,Minus,R,D>(); chk<R,Minus,R,I>(); chk<R,Minus,R,Z>(); chk<R,Minus,R,Q>(); chk<R,Minus,R,R>();
 
     // Generic numbers
-    chk<ExN,Sub,ExN,ExN>(); chk<EfN,Sub,ExN,EfN>(); chk<VaN,Sub,ExN,VaN>(); chk<LoN,Sub,ExN,UpN>(); chk<UpN,Sub,ExN,LoN>(); chk<ApN,Sub,ExN,ApN>();
-    chk<EfN,Sub,EfN,ExN>(); chk<EfN,Sub,EfN,EfN>(); chk<VaN,Sub,EfN,VaN>(); chk<LoN,Sub,EfN,UpN>(); chk<UpN,Sub,EfN,LoN>(); chk<ApN,Sub,EfN,ApN>();
-    chk<VaN,Sub,VaN,ExN>(); chk<VaN,Sub,VaN,EfN>(); chk<VaN,Sub,VaN,VaN>(); chk<LoN,Sub,VaN,UpN>(); chk<UpN,Sub,VaN,LoN>(); chk<ApN,Sub,VaN,ApN>();
-    chk<UpN,Sub,UpN,ExN>(); chk<UpN,Sub,UpN,EfN>(); chk<UpN,Sub,UpN,VaN>(); chk<ApN,Sub,UpN,UpN>(); chk<UpN,Sub,UpN,LoN>(); chk<ApN,Sub,UpN,ApN>();
-    chk<LoN,Sub,LoN,ExN>(); chk<LoN,Sub,LoN,EfN>(); chk<LoN,Sub,LoN,VaN>(); chk<LoN,Sub,LoN,UpN>(); chk<ApN,Sub,LoN,LoN>(); chk<ApN,Sub,LoN,ApN>();
-    chk<ApN,Sub,ApN,ExN>(); chk<ApN,Sub,ApN,EfN>(); chk<ApN,Sub,ApN,VaN>(); chk<ApN,Sub,ApN,UpN>(); chk<ApN,Sub,ApN,LoN>(); chk<ApN,Sub,ApN,ApN>();
+    chk<ExN,Minus,ExN,ExN>(); chk<EfN,Minus,ExN,EfN>(); chk<VaN,Minus,ExN,VaN>(); chk<LoN,Minus,ExN,UpN>(); chk<UpN,Minus,ExN,LoN>(); chk<ApN,Minus,ExN,ApN>();
+    chk<EfN,Minus,EfN,ExN>(); chk<EfN,Minus,EfN,EfN>(); chk<VaN,Minus,EfN,VaN>(); chk<LoN,Minus,EfN,UpN>(); chk<UpN,Minus,EfN,LoN>(); chk<ApN,Minus,EfN,ApN>();
+    chk<VaN,Minus,VaN,ExN>(); chk<VaN,Minus,VaN,EfN>(); chk<VaN,Minus,VaN,VaN>(); chk<LoN,Minus,VaN,UpN>(); chk<UpN,Minus,VaN,LoN>(); chk<ApN,Minus,VaN,ApN>();
+    chk<UpN,Minus,UpN,ExN>(); chk<UpN,Minus,UpN,EfN>(); chk<UpN,Minus,UpN,VaN>(); chk<ApN,Minus,UpN,UpN>(); chk<UpN,Minus,UpN,LoN>(); chk<ApN,Minus,UpN,ApN>();
+    chk<LoN,Minus,LoN,ExN>(); chk<LoN,Minus,LoN,EfN>(); chk<LoN,Minus,LoN,VaN>(); chk<LoN,Minus,LoN,UpN>(); chk<ApN,Minus,LoN,LoN>(); chk<ApN,Minus,LoN,ApN>();
+    chk<ApN,Minus,ApN,ExN>(); chk<ApN,Minus,ApN,EfN>(); chk<ApN,Minus,ApN,VaN>(); chk<ApN,Minus,ApN,UpN>(); chk<ApN,Minus,ApN,LoN>(); chk<ApN,Minus,ApN,ApN>();
 
     // Mixed Generic # Concrete numbers
-    chk<ApN,Sub,ExN,D>(); chk<ExN,Sub,ExN,I>(); chk<ExN,Sub,ExN,Z>(); chk<ExN,Sub,ExN,Q>(); chk<EfN,Sub,ExN,R>();
-    chk<ApN,Sub,EfN,D>(); chk<EfN,Sub,EfN,I>(); chk<EfN,Sub,EfN,Z>(); chk<EfN,Sub,EfN,Q>(); chk<EfN,Sub,EfN,R>();
-    chk<ApN,Sub,VaN,D>(); chk<VaN,Sub,VaN,I>(); chk<VaN,Sub,VaN,Z>(); chk<VaN,Sub,VaN,Q>(); chk<VaN,Sub,VaN,R>();
-    chk<ApN,Sub,UpN,D>(); chk<UpN,Sub,UpN,I>(); chk<UpN,Sub,UpN,Z>(); chk<UpN,Sub,UpN,Q>(); chk<UpN,Sub,UpN,R>();
-    chk<ApN,Sub,LoN,D>(); chk<LoN,Sub,LoN,I>(); chk<LoN,Sub,LoN,Z>(); chk<LoN,Sub,LoN,Q>(); chk<LoN,Sub,LoN,R>();
-    chk<ApN,Sub,ApN,D>(); chk<ApN,Sub,ApN,I>(); chk<ApN,Sub,ApN,Z>(); chk<ApN,Sub,ApN,Q>(); chk<ApN,Sub,ApN,R>();
+    chk<ApD,Minus,ExN,D>(); chk<ExN,Minus,ExN,I>(); chk<ExN,Minus,ExN,Z>(); chk<ExN,Minus,ExN,Q>(); chk<EfN,Minus,ExN,R>();
+    chk<ApD,Minus,EfN,D>(); chk<EfN,Minus,EfN,I>(); chk<EfN,Minus,EfN,Z>(); chk<EfN,Minus,EfN,Q>(); chk<EfN,Minus,EfN,R>();
+    chk<ApD,Minus,VaN,D>(); chk<VaN,Minus,VaN,I>(); chk<VaN,Minus,VaN,Z>(); chk<VaN,Minus,VaN,Q>(); chk<VaN,Minus,VaN,R>();
+    chk<ApD,Minus,UpN,D>(); chk<UpN,Minus,UpN,I>(); chk<UpN,Minus,UpN,Z>(); chk<UpN,Minus,UpN,Q>(); chk<UpN,Minus,UpN,R>();
+    chk<ApD,Minus,LoN,D>(); chk<LoN,Minus,LoN,I>(); chk<LoN,Minus,LoN,Z>(); chk<LoN,Minus,LoN,Q>(); chk<LoN,Minus,LoN,R>();
+    chk<ApD,Minus,ApN,D>(); chk<ApN,Minus,ApN,I>(); chk<ApN,Minus,ApN,Z>(); chk<ApN,Minus,ApN,Q>(); chk<ApN,Minus,ApN,R>();
 
     // Mixed Concrete # Generic numbers
-    chk<ApN,Sub,D,ExN>(); chk<ApN,Sub,D,EfN>(); chk<ApN,Sub,D,VaN>(); chk<ApN,Sub,D,UpN>(); chk<ApN,Sub,D,LoN>(); chk<ApN,Sub,D,ApN>();
-    chk<ExN,Sub,I,ExN>(); chk<EfN,Sub,I,EfN>(); chk<VaN,Sub,I,VaN>(); chk<LoN,Sub,I,UpN>(); chk<UpN,Sub,I,LoN>(); chk<ApN,Sub,I,ApN>();
-    chk<ExN,Sub,Z,ExN>(); chk<EfN,Sub,Z,EfN>(); chk<VaN,Sub,Z,VaN>(); chk<LoN,Sub,Z,UpN>(); chk<UpN,Sub,Z,LoN>(); chk<ApN,Sub,Z,ApN>();
-    chk<ExN,Sub,Q,ExN>(); chk<EfN,Sub,Q,EfN>(); chk<VaN,Sub,Q,VaN>(); chk<LoN,Sub,Q,UpN>(); chk<UpN,Sub,Q,LoN>(); chk<ApN,Sub,Q,ApN>();
-    chk<EfN,Sub,R,ExN>(); chk<EfN,Sub,R,EfN>(); chk<VaN,Sub,R,VaN>(); chk<LoN,Sub,R,UpN>(); chk<UpN,Sub,R,LoN>(); chk<ApN,Sub,R,ApN>();
+    chk<ApD,Minus,D,ExN>(); chk<ApD,Minus,D,EfN>(); chk<ApD,Minus,D,VaN>(); chk<ApD,Minus,D,UpN>(); chk<ApD,Minus,D,LoN>(); chk<ApD,Minus,D,ApN>();
+    chk<ExN,Minus,I,ExN>(); chk<EfN,Minus,I,EfN>(); chk<VaN,Minus,I,VaN>(); chk<LoN,Minus,I,UpN>(); chk<UpN,Minus,I,LoN>(); chk<ApN,Minus,I,ApN>();
+    chk<ExN,Minus,Z,ExN>(); chk<EfN,Minus,Z,EfN>(); chk<VaN,Minus,Z,VaN>(); chk<LoN,Minus,Z,UpN>(); chk<UpN,Minus,Z,LoN>(); chk<ApN,Minus,Z,ApN>();
+    chk<ExN,Minus,Q,ExN>(); chk<EfN,Minus,Q,EfN>(); chk<VaN,Minus,Q,VaN>(); chk<LoN,Minus,Q,UpN>(); chk<UpN,Minus,Q,LoN>(); chk<ApN,Minus,Q,ApN>();
+    chk<EfN,Minus,R,ExN>(); chk<EfN,Minus,R,EfN>(); chk<VaN,Minus,R,VaN>(); chk<LoN,Minus,R,UpN>(); chk<UpN,Minus,R,LoN>(); chk<ApN,Minus,R,ApN>();
 
     // Float numbers
-    chk<VaF,Sub,ExF,ExF>(); chk<MeF,Sub,ExF,MeF>(); chk<BoF,Sub,ExF,BoF>(); chk<LoF,Sub,ExF,UpF>(); chk<UpF,Sub,ExF,LoF>(); chk<ApF,Sub,ExF,ApF>();
-    chk<MeF,Sub,MeF,ExF>(); chk<MeF,Sub,MeF,MeF>(); chk<VaF,Sub,MeF,BoF>(); chk<LoF,Sub,MeF,UpF>(); chk<UpF,Sub,MeF,LoF>(); chk<ApF,Sub,MeF,ApF>();
-    chk<BoF,Sub,BoF,ExF>(); chk<VaF,Sub,BoF,MeF>(); chk<BoF,Sub,BoF,BoF>(); chk<LoF,Sub,BoF,UpF>(); chk<UpF,Sub,BoF,LoF>(); chk<ApF,Sub,BoF,ApF>();
-    chk<UpF,Sub,UpF,ExF>(); chk<UpF,Sub,UpF,MeF>(); chk<UpF,Sub,UpF,BoF>(); chk<ApF,Sub,UpF,UpF>(); chk<UpF,Sub,UpF,LoF>(); chk<ApF,Sub,UpF,ApF>();
-    chk<LoF,Sub,LoF,ExF>(); chk<LoF,Sub,LoF,MeF>(); chk<LoF,Sub,LoF,BoF>(); chk<LoF,Sub,LoF,UpF>(); chk<ApF,Sub,LoF,LoF>(); chk<ApF,Sub,LoF,ApF>();
-    chk<ApF,Sub,ApF,ExF>(); chk<ApF,Sub,ApF,MeF>(); chk<ApF,Sub,ApF,BoF>(); chk<ApF,Sub,ApF,UpF>(); chk<ApF,Sub,ApF,LoF>(); chk<ApF,Sub,ApF,ApF>();
+    chk<VaF,Minus,ExF,ExF>(); chk<MeF,Minus,ExF,MeF>(); chk<BoF,Minus,ExF,BoF>(); chk<LoF,Minus,ExF,UpF>(); chk<UpF,Minus,ExF,LoF>(); chk<ApF,Minus,ExF,ApF>();
+    chk<MeF,Minus,MeF,ExF>(); chk<MeF,Minus,MeF,MeF>(); chk<VaF,Minus,MeF,BoF>(); chk<LoF,Minus,MeF,UpF>(); chk<UpF,Minus,MeF,LoF>(); chk<ApF,Minus,MeF,ApF>();
+    chk<BoF,Minus,BoF,ExF>(); chk<VaF,Minus,BoF,MeF>(); chk<BoF,Minus,BoF,BoF>(); chk<LoF,Minus,BoF,UpF>(); chk<UpF,Minus,BoF,LoF>(); chk<ApF,Minus,BoF,ApF>();
+    chk<UpF,Minus,UpF,ExF>(); chk<UpF,Minus,UpF,MeF>(); chk<UpF,Minus,UpF,BoF>(); chk<ApF,Minus,UpF,UpF>(); chk<UpF,Minus,UpF,LoF>(); chk<ApF,Minus,UpF,ApF>();
+    chk<LoF,Minus,LoF,ExF>(); chk<LoF,Minus,LoF,MeF>(); chk<LoF,Minus,LoF,BoF>(); chk<LoF,Minus,LoF,UpF>(); chk<ApF,Minus,LoF,LoF>(); chk<ApF,Minus,LoF,ApF>();
+    chk<ApF,Minus,ApF,ExF>(); chk<ApF,Minus,ApF,MeF>(); chk<ApF,Minus,ApF,BoF>(); chk<ApF,Minus,ApF,UpF>(); chk<ApF,Minus,ApF,LoF>(); chk<ApF,Minus,ApF,ApF>();
 
     // Mixed Float # Generic and Generic # Float
-    chk<VaF,Sub,ExF,ExN>(); chk<VaF,Sub,ExF,EfN>(); chk<VaF,Sub,ExF,VaN>(); chk<LoF,Sub,ExF,UpN>(); chk<UpF,Sub,ExF,LoN>(); chk<ApF,Sub,ExF,ApN>();
-    chk<MeF,Sub,MeF,ExN>(); chk<MeF,Sub,MeF,EfN>(); chk<MeF,Sub,MeF,VaN>(); chk<LoF,Sub,MeF,UpN>(); chk<UpF,Sub,MeF,LoN>(); chk<ApF,Sub,MeF,ApN>();
-    chk<BoF,Sub,BoF,ExN>(); chk<BoF,Sub,BoF,EfN>(); chk<BoF,Sub,BoF,VaN>(); chk<LoF,Sub,BoF,UpN>(); chk<UpF,Sub,BoF,LoN>(); chk<ApF,Sub,BoF,ApN>();
-    chk<UpF,Sub,UpF,ExN>(); chk<UpF,Sub,UpF,EfN>(); chk<UpF,Sub,UpF,VaN>(); chk<ApF,Sub,UpF,UpN>(); chk<UpF,Sub,UpF,LoN>(); chk<ApF,Sub,UpF,ApN>();
-    chk<LoF,Sub,LoF,ExN>(); chk<LoF,Sub,LoF,EfN>(); chk<LoF,Sub,LoF,VaN>(); chk<LoF,Sub,LoF,UpN>(); chk<ApF,Sub,LoF,LoN>(); chk<ApF,Sub,LoF,ApN>();
-    chk<ApF,Sub,ApF,ExN>(); chk<ApF,Sub,ApF,EfN>(); chk<ApF,Sub,ApF,VaN>(); chk<ApF,Sub,ApF,UpN>(); chk<ApF,Sub,ApF,LoN>(); chk<ApF,Sub,ApF,ApN>();
+    chk<VaF,Minus,ExF,ExN>(); chk<VaF,Minus,ExF,EfN>(); chk<VaF,Minus,ExF,VaN>(); chk<LoF,Minus,ExF,UpN>(); chk<UpF,Minus,ExF,LoN>(); chk<ApF,Minus,ExF,ApN>();
+    chk<MeF,Minus,MeF,ExN>(); chk<MeF,Minus,MeF,EfN>(); chk<MeF,Minus,MeF,VaN>(); chk<LoF,Minus,MeF,UpN>(); chk<UpF,Minus,MeF,LoN>(); chk<ApF,Minus,MeF,ApN>();
+    chk<BoF,Minus,BoF,ExN>(); chk<BoF,Minus,BoF,EfN>(); chk<BoF,Minus,BoF,VaN>(); chk<LoF,Minus,BoF,UpN>(); chk<UpF,Minus,BoF,LoN>(); chk<ApF,Minus,BoF,ApN>();
+    chk<UpF,Minus,UpF,ExN>(); chk<UpF,Minus,UpF,EfN>(); chk<UpF,Minus,UpF,VaN>(); chk<ApF,Minus,UpF,UpN>(); chk<UpF,Minus,UpF,LoN>(); chk<ApF,Minus,UpF,ApN>();
+    chk<LoF,Minus,LoF,ExN>(); chk<LoF,Minus,LoF,EfN>(); chk<LoF,Minus,LoF,VaN>(); chk<LoF,Minus,LoF,UpN>(); chk<ApF,Minus,LoF,LoN>(); chk<ApF,Minus,LoF,ApN>();
+    chk<ApF,Minus,ApF,ExN>(); chk<ApF,Minus,ApF,EfN>(); chk<ApF,Minus,ApF,VaN>(); chk<ApF,Minus,ApF,UpN>(); chk<ApF,Minus,ApF,LoN>(); chk<ApF,Minus,ApF,ApN>();
 
-    chk<VaF,Sub,ExN,ExF>(); chk<MeF,Sub,ExN,MeF>(); chk<BoF,Sub,ExN,BoF>(); chk<LoF,Sub,ExN,UpF>(); chk<UpF,Sub,ExN,LoF>(); chk<ApF,Sub,ExN,ApF>();
-    chk<VaF,Sub,EfN,ExF>(); chk<MeF,Sub,EfN,MeF>(); chk<BoF,Sub,EfN,BoF>(); chk<LoF,Sub,EfN,UpF>(); chk<UpF,Sub,EfN,LoF>(); chk<ApF,Sub,EfN,ApF>();
-    chk<VaF,Sub,VaN,ExF>(); chk<MeF,Sub,VaN,MeF>(); chk<BoF,Sub,VaN,BoF>(); chk<LoF,Sub,VaN,UpF>(); chk<UpF,Sub,VaN,LoF>(); chk<ApF,Sub,VaN,ApF>();
-    chk<UpF,Sub,UpN,ExF>(); chk<UpF,Sub,UpN,MeF>(); chk<UpF,Sub,UpN,BoF>(); chk<ApF,Sub,UpN,UpF>(); chk<UpF,Sub,UpN,LoF>(); chk<ApF,Sub,UpN,ApF>();
-    chk<LoF,Sub,LoN,ExF>(); chk<LoF,Sub,LoN,MeF>(); chk<LoF,Sub,LoN,BoF>(); chk<LoF,Sub,LoN,UpF>(); chk<ApF,Sub,LoN,LoF>(); chk<ApF,Sub,LoN,ApF>();
-    chk<ApF,Sub,ApN,ExF>(); chk<ApF,Sub,ApN,MeF>(); chk<ApF,Sub,ApN,BoF>(); chk<ApF,Sub,ApN,UpF>(); chk<ApF,Sub,ApN,LoF>(); chk<ApF,Sub,ApN,ApF>();
+    chk<VaF,Minus,ExN,ExF>(); chk<MeF,Minus,ExN,MeF>(); chk<BoF,Minus,ExN,BoF>(); chk<LoF,Minus,ExN,UpF>(); chk<UpF,Minus,ExN,LoF>(); chk<ApF,Minus,ExN,ApF>();
+    chk<VaF,Minus,EfN,ExF>(); chk<MeF,Minus,EfN,MeF>(); chk<BoF,Minus,EfN,BoF>(); chk<LoF,Minus,EfN,UpF>(); chk<UpF,Minus,EfN,LoF>(); chk<ApF,Minus,EfN,ApF>();
+    chk<VaF,Minus,VaN,ExF>(); chk<MeF,Minus,VaN,MeF>(); chk<BoF,Minus,VaN,BoF>(); chk<LoF,Minus,VaN,UpF>(); chk<UpF,Minus,VaN,LoF>(); chk<ApF,Minus,VaN,ApF>();
+    chk<UpF,Minus,UpN,ExF>(); chk<UpF,Minus,UpN,MeF>(); chk<UpF,Minus,UpN,BoF>(); chk<ApF,Minus,UpN,UpF>(); chk<UpF,Minus,UpN,LoF>(); chk<ApF,Minus,UpN,ApF>();
+    chk<LoF,Minus,LoN,ExF>(); chk<LoF,Minus,LoN,MeF>(); chk<LoF,Minus,LoN,BoF>(); chk<LoF,Minus,LoN,UpF>(); chk<ApF,Minus,LoN,LoF>(); chk<ApF,Minus,LoN,ApF>();
+    chk<ApF,Minus,ApN,ExF>(); chk<ApF,Minus,ApN,MeF>(); chk<ApF,Minus,ApN,BoF>(); chk<ApF,Minus,ApN,UpF>(); chk<ApF,Minus,ApN,LoF>(); chk<ApF,Minus,ApN,ApF>();
 
     // Mixed Float # Concrete and Concrete # Float
-    chk<ApF,Sub,ExF,D>(); chk<VaF,Sub,ExF,I>(); chk<VaF,Sub,ExF,Z>(); chk<VaF,Sub,ExF,Q>(); chk<VaF,Sub,ExF,R>();
-    chk<ApF,Sub,MeF,D>(); chk<MeF,Sub,MeF,I>(); chk<MeF,Sub,MeF,Z>(); chk<MeF,Sub,MeF,Q>(); chk<MeF,Sub,MeF,R>();
-    chk<ApF,Sub,BoF,D>(); chk<BoF,Sub,BoF,I>(); chk<BoF,Sub,BoF,Z>(); chk<BoF,Sub,BoF,Q>(); chk<BoF,Sub,BoF,R>();
-    chk<ApF,Sub,UpF,D>(); chk<UpF,Sub,UpF,I>(); chk<UpF,Sub,UpF,Z>(); chk<UpF,Sub,UpF,Q>(); chk<UpF,Sub,UpF,R>();
-    chk<ApF,Sub,LoF,D>(); chk<LoF,Sub,LoF,I>(); chk<LoF,Sub,LoF,Z>(); chk<LoF,Sub,LoF,Q>(); chk<LoF,Sub,LoF,R>();
-    chk<ApF,Sub,ApF,D>(); chk<ApF,Sub,ApF,I>(); chk<ApF,Sub,ApF,Z>(); chk<ApF,Sub,ApF,Q>(); chk<ApF,Sub,ApF,R>();
+    chk<ApF,Minus,ExF,D>(); chk<VaF,Minus,ExF,I>(); chk<VaF,Minus,ExF,Z>(); chk<VaF,Minus,ExF,Q>(); chk<VaF,Minus,ExF,R>();
+    chk<ApF,Minus,MeF,D>(); chk<MeF,Minus,MeF,I>(); chk<MeF,Minus,MeF,Z>(); chk<MeF,Minus,MeF,Q>(); chk<MeF,Minus,MeF,R>();
+    chk<ApF,Minus,BoF,D>(); chk<BoF,Minus,BoF,I>(); chk<BoF,Minus,BoF,Z>(); chk<BoF,Minus,BoF,Q>(); chk<BoF,Minus,BoF,R>();
+    chk<ApF,Minus,UpF,D>(); chk<UpF,Minus,UpF,I>(); chk<UpF,Minus,UpF,Z>(); chk<UpF,Minus,UpF,Q>(); chk<UpF,Minus,UpF,R>();
+    chk<ApF,Minus,LoF,D>(); chk<LoF,Minus,LoF,I>(); chk<LoF,Minus,LoF,Z>(); chk<LoF,Minus,LoF,Q>(); chk<LoF,Minus,LoF,R>();
+    chk<ApF,Minus,ApF,D>(); chk<ApF,Minus,ApF,I>(); chk<ApF,Minus,ApF,Z>(); chk<ApF,Minus,ApF,Q>(); chk<ApF,Minus,ApF,R>();
 
-    chk<ApF,Sub,D,ExF>(); chk<ApF,Sub,D,MeF>(); chk<ApF,Sub,D,BoF>(); chk<ApF,Sub,D,UpF>(); chk<ApF,Sub,D,LoF>(); chk<ApF,Sub,D,ApF>();
-    chk<VaF,Sub,I,ExF>(); chk<MeF,Sub,I,MeF>(); chk<BoF,Sub,I,BoF>(); chk<LoF,Sub,I,UpF>(); chk<UpF,Sub,I,LoF>(); chk<ApF,Sub,I,ApF>();
-    chk<VaF,Sub,Z,ExF>(); chk<MeF,Sub,Z,MeF>(); chk<BoF,Sub,Z,BoF>(); chk<LoF,Sub,Z,UpF>(); chk<UpF,Sub,Z,LoF>(); chk<ApF,Sub,Z,ApF>();
-    chk<VaF,Sub,Q,ExF>(); chk<MeF,Sub,Q,MeF>(); chk<BoF,Sub,Q,BoF>(); chk<LoF,Sub,Q,UpF>(); chk<UpF,Sub,Q,LoF>(); chk<ApF,Sub,Q,ApF>();
-    chk<VaF,Sub,R,ExF>(); chk<MeF,Sub,R,MeF>(); chk<BoF,Sub,R,BoF>(); chk<LoF,Sub,R,UpF>(); chk<UpF,Sub,R,LoF>(); chk<ApF,Sub,R,ApF>();
+    chk<ApF,Minus,D,ExF>(); chk<ApF,Minus,D,MeF>(); chk<ApF,Minus,D,BoF>(); chk<ApF,Minus,D,UpF>(); chk<ApF,Minus,D,LoF>(); chk<ApF,Minus,D,ApF>();
+    chk<VaF,Minus,I,ExF>(); chk<MeF,Minus,I,MeF>(); chk<BoF,Minus,I,BoF>(); chk<LoF,Minus,I,UpF>(); chk<UpF,Minus,I,LoF>(); chk<ApF,Minus,I,ApF>();
+    chk<VaF,Minus,Z,ExF>(); chk<MeF,Minus,Z,MeF>(); chk<BoF,Minus,Z,BoF>(); chk<LoF,Minus,Z,UpF>(); chk<UpF,Minus,Z,LoF>(); chk<ApF,Minus,Z,ApF>();
+    chk<VaF,Minus,Q,ExF>(); chk<MeF,Minus,Q,MeF>(); chk<BoF,Minus,Q,BoF>(); chk<LoF,Minus,Q,UpF>(); chk<UpF,Minus,Q,LoF>(); chk<ApF,Minus,Q,ApF>();
+    chk<VaF,Minus,R,ExF>(); chk<MeF,Minus,R,MeF>(); chk<BoF,Minus,R,BoF>(); chk<LoF,Minus,R,UpF>(); chk<UpF,Minus,R,LoF>(); chk<ApF,Minus,R,ApF>();
 }
 
 void CheckNumeric::check_multiplication() {
 
     // Concrete numbers
-    chk< D ,Mul,D,D>(); chk<D,Mul,D,I>(); chk<ApN,Mul,D,Z>(); chk<ApN,Mul,D,Q>(); chk<ApN,Mul,D,R>();
-    chk< D ,Mul,I,D>(); chk<I,Mul,I,I>(); chk<Z,Mul,I,Z>(); chk<Q,Mul,I,Q>(); chk<R,Mul,I,R>();
-    chk<ApN,Mul,Z,D>(); chk<Z,Mul,Z,I>(); chk<Z,Mul,Z,Z>(); chk<Q,Mul,Z,Q>(); chk<R,Mul,Z,R>();
-    chk<ApN,Mul,Q,D>(); chk<Q,Mul,Q,I>(); chk<Q,Mul,Q,Z>(); chk<Q,Mul,Q,Q>(); chk<R,Mul,Q,R>();
-    chk<ApN,Mul,R,D>(); chk<R,Mul,R,I>(); chk<R,Mul,R,Z>(); chk<R,Mul,R,Q>(); chk<R,Mul,R,R>();
+    chk< D ,Times,D,D>(); chk<D,Times,D,I>(); chk<ApD,Times,D,Z>(); chk<ApD,Times,D,Q>(); chk<ApD,Times,D,R>();
+    chk< D ,Times,I,D>(); chk<I,Times,I,I>(); chk<Z,Times,I,Z>(); chk<Q,Times,I,Q>(); chk<R,Times,I,R>();
+    chk<ApD,Times,Z,D>(); chk<Z,Times,Z,I>(); chk<Z,Times,Z,Z>(); chk<Q,Times,Z,Q>(); chk<R,Times,Z,R>();
+    chk<ApD,Times,Q,D>(); chk<Q,Times,Q,I>(); chk<Q,Times,Q,Z>(); chk<Q,Times,Q,Q>(); chk<R,Times,Q,R>();
+    chk<ApD,Times,R,D>(); chk<R,Times,R,I>(); chk<R,Times,R,Z>(); chk<R,Times,R,Q>(); chk<R,Times,R,R>();
 
     // Generic numbers
-    chk<ExN,Mul,ExN,ExN>(); chk<EfN,Mul,ExN,EfN>(); chk<VaN,Mul,ExN,VaN>(); chk<UpN,Mul,ExN,UpN>(); chk<LoN,Mul,ExN,LoN>(); chk<ApN,Mul,ExN,ApN>();
-    chk<EfN,Mul,EfN,ExN>(); chk<EfN,Mul,EfN,EfN>(); chk<VaN,Mul,EfN,VaN>(); chk<UpN,Mul,EfN,UpN>(); chk<LoN,Mul,EfN,LoN>(); chk<ApN,Mul,EfN,ApN>();
-    chk<VaN,Mul,VaN,ExN>(); chk<VaN,Mul,VaN,EfN>(); chk<VaN,Mul,VaN,VaN>(); chk<UpN,Mul,VaN,UpN>(); chk<LoN,Mul,VaN,LoN>(); chk<ApN,Mul,VaN,ApN>();
-    chk<UpN,Mul,UpN,ExN>(); chk<UpN,Mul,UpN,EfN>(); chk<UpN,Mul,UpN,VaN>(); chk<UpN,Mul,UpN,UpN>(); chk<ApN,Mul,UpN,LoN>(); chk<ApN,Mul,UpN,ApN>();
-    chk<LoN,Mul,LoN,ExN>(); chk<LoN,Mul,LoN,EfN>(); chk<LoN,Mul,LoN,VaN>(); chk<ApN,Mul,LoN,UpN>(); chk<LoN,Mul,LoN,LoN>(); chk<ApN,Mul,LoN,ApN>();
-    chk<ApN,Mul,ApN,ExN>(); chk<ApN,Mul,ApN,EfN>(); chk<ApN,Mul,ApN,VaN>(); chk<ApN,Mul,ApN,UpN>(); chk<ApN,Mul,ApN,LoN>(); chk<ApN,Mul,ApN,ApN>();
+    chk<ExN,Times,ExN,ExN>(); chk<EfN,Times,ExN,EfN>(); chk<VaN,Times,ExN,VaN>(); chk<UpN,Times,ExN,UpN>(); chk<LoN,Times,ExN,LoN>(); chk<ApN,Times,ExN,ApN>();
+    chk<EfN,Times,EfN,ExN>(); chk<EfN,Times,EfN,EfN>(); chk<VaN,Times,EfN,VaN>(); chk<UpN,Times,EfN,UpN>(); chk<LoN,Times,EfN,LoN>(); chk<ApN,Times,EfN,ApN>();
+    chk<VaN,Times,VaN,ExN>(); chk<VaN,Times,VaN,EfN>(); chk<VaN,Times,VaN,VaN>(); chk<UpN,Times,VaN,UpN>(); chk<LoN,Times,VaN,LoN>(); chk<ApN,Times,VaN,ApN>();
+    chk<UpN,Times,UpN,ExN>(); chk<UpN,Times,UpN,EfN>(); chk<UpN,Times,UpN,VaN>(); chk<UpN,Times,UpN,UpN>(); chk<ApN,Times,UpN,LoN>(); chk<ApN,Times,UpN,ApN>();
+    chk<LoN,Times,LoN,ExN>(); chk<LoN,Times,LoN,EfN>(); chk<LoN,Times,LoN,VaN>(); chk<ApN,Times,LoN,UpN>(); chk<LoN,Times,LoN,LoN>(); chk<ApN,Times,LoN,ApN>();
+    chk<ApN,Times,ApN,ExN>(); chk<ApN,Times,ApN,EfN>(); chk<ApN,Times,ApN,VaN>(); chk<ApN,Times,ApN,UpN>(); chk<ApN,Times,ApN,LoN>(); chk<ApN,Times,ApN,ApN>();
 
     // Mixed Generic # Concrete numbers
-    chk<ApN,Mul,ExN,D>(); chk<ExN,Mul,ExN,I>(); chk<ExN,Mul,ExN,Z>(); chk<ExN,Mul,ExN,Q>(); chk<EfN,Mul,ExN,R>();
-    chk<ApN,Mul,EfN,D>(); chk<EfN,Mul,EfN,I>(); chk<EfN,Mul,EfN,Z>(); chk<EfN,Mul,EfN,Q>(); chk<EfN,Mul,EfN,R>();
-    chk<ApN,Mul,VaN,D>(); chk<VaN,Mul,VaN,I>(); chk<VaN,Mul,VaN,Z>(); chk<VaN,Mul,VaN,Q>(); chk<VaN,Mul,VaN,R>();
-    chk<ApN,Mul,UpN,D>(); chk<UpN,Mul,UpN,I>(); chk<UpN,Mul,UpN,Z>(); chk<UpN,Mul,UpN,Q>(); chk<UpN,Mul,UpN,R>();
-    chk<ApN,Mul,LoN,D>(); chk<LoN,Mul,LoN,I>(); chk<LoN,Mul,LoN,Z>(); chk<LoN,Mul,LoN,Q>(); chk<LoN,Mul,LoN,R>();
-    chk<ApN,Mul,ApN,D>(); chk<ApN,Mul,ApN,I>(); chk<ApN,Mul,ApN,Z>(); chk<ApN,Mul,ApN,Q>(); chk<ApN,Mul,ApN,R>();
+    chk<ApD,Times,ExN,D>(); chk<ExN,Times,ExN,I>(); chk<ExN,Times,ExN,Z>(); chk<ExN,Times,ExN,Q>(); chk<EfN,Times,ExN,R>();
+    chk<ApD,Times,EfN,D>(); chk<EfN,Times,EfN,I>(); chk<EfN,Times,EfN,Z>(); chk<EfN,Times,EfN,Q>(); chk<EfN,Times,EfN,R>();
+    chk<ApD,Times,VaN,D>(); chk<VaN,Times,VaN,I>(); chk<VaN,Times,VaN,Z>(); chk<VaN,Times,VaN,Q>(); chk<VaN,Times,VaN,R>();
+    chk<ApD,Times,UpN,D>(); chk<UpN,Times,UpN,I>(); chk<UpN,Times,UpN,Z>(); chk<UpN,Times,UpN,Q>(); chk<UpN,Times,UpN,R>();
+    chk<ApD,Times,LoN,D>(); chk<LoN,Times,LoN,I>(); chk<LoN,Times,LoN,Z>(); chk<LoN,Times,LoN,Q>(); chk<LoN,Times,LoN,R>();
+    chk<ApD,Times,ApN,D>(); chk<ApN,Times,ApN,I>(); chk<ApN,Times,ApN,Z>(); chk<ApN,Times,ApN,Q>(); chk<ApN,Times,ApN,R>();
 
     // Mixed Concrete # Generic numbers
-    chk<ApN,Mul,D,ExN>(); chk<ApN,Mul,D,EfN>(); chk<ApN,Mul,D,VaN>(); chk<ApN,Mul,D,UpN>(); chk<ApN,Mul,D,LoN>(); chk<ApN,Mul,D,ApN>();
-    chk<ExN,Mul,I,ExN>(); chk<EfN,Mul,I,EfN>(); chk<VaN,Mul,I,VaN>(); chk<UpN,Mul,I,UpN>(); chk<LoN,Mul,I,LoN>(); chk<ApN,Mul,I,ApN>();
-    chk<ExN,Mul,Z,ExN>(); chk<EfN,Mul,Z,EfN>(); chk<VaN,Mul,Z,VaN>(); chk<UpN,Mul,Z,UpN>(); chk<LoN,Mul,Z,LoN>(); chk<ApN,Mul,Z,ApN>();
-    chk<ExN,Mul,Q,ExN>(); chk<EfN,Mul,Q,EfN>(); chk<VaN,Mul,Q,VaN>(); chk<UpN,Mul,Q,UpN>(); chk<LoN,Mul,Q,LoN>(); chk<ApN,Mul,Q,ApN>();
-    chk<EfN,Mul,R,ExN>(); chk<EfN,Mul,R,EfN>(); chk<VaN,Mul,R,VaN>(); chk<UpN,Mul,R,UpN>(); chk<LoN,Mul,R,LoN>(); chk<ApN,Mul,R,ApN>();
+    chk<ApD,Times,D,ExN>(); chk<ApD,Times,D,EfN>(); chk<ApD,Times,D,VaN>(); chk<ApD,Times,D,UpN>(); chk<ApD,Times,D,LoN>(); chk<ApD,Times,D,ApN>();
+    chk<ExN,Times,I,ExN>(); chk<EfN,Times,I,EfN>(); chk<VaN,Times,I,VaN>(); chk<UpN,Times,I,UpN>(); chk<LoN,Times,I,LoN>(); chk<ApN,Times,I,ApN>();
+    chk<ExN,Times,Z,ExN>(); chk<EfN,Times,Z,EfN>(); chk<VaN,Times,Z,VaN>(); chk<UpN,Times,Z,UpN>(); chk<LoN,Times,Z,LoN>(); chk<ApN,Times,Z,ApN>();
+    chk<ExN,Times,Q,ExN>(); chk<EfN,Times,Q,EfN>(); chk<VaN,Times,Q,VaN>(); chk<UpN,Times,Q,UpN>(); chk<LoN,Times,Q,LoN>(); chk<ApN,Times,Q,ApN>();
+    chk<EfN,Times,R,ExN>(); chk<EfN,Times,R,EfN>(); chk<VaN,Times,R,VaN>(); chk<UpN,Times,R,UpN>(); chk<LoN,Times,R,LoN>(); chk<ApN,Times,R,ApN>();
 
     // Float numbers
-    chk<VaF,Mul,ExF,ExF>(); chk<MeF,Mul,ExF,MeF>(); chk<BoF,Mul,ExF,BoF>(); chk<UpF,Mul,ExF,UpF>(); chk<LoF,Mul,ExF,LoF>(); chk<ApF,Mul,ExF,ApF>();
-    chk<MeF,Mul,MeF,ExF>(); chk<MeF,Mul,MeF,MeF>(); chk<VaF,Mul,MeF,BoF>(); chk<UpF,Mul,MeF,UpF>(); chk<LoF,Mul,MeF,LoF>(); chk<ApF,Mul,MeF,ApF>();
-    chk<BoF,Mul,BoF,ExF>(); chk<VaF,Mul,BoF,MeF>(); chk<BoF,Mul,BoF,BoF>(); chk<UpF,Mul,BoF,UpF>(); chk<LoF,Mul,BoF,LoF>(); chk<ApF,Mul,BoF,ApF>();
-    chk<UpF,Mul,UpF,ExF>(); chk<UpF,Mul,UpF,MeF>(); chk<UpF,Mul,UpF,BoF>(); chk<UpF,Mul,UpF,UpF>(); chk<ApF,Mul,UpF,LoF>(); chk<ApF,Mul,UpF,ApF>();
-    chk<LoF,Mul,LoF,ExF>(); chk<LoF,Mul,LoF,MeF>(); chk<LoF,Mul,LoF,BoF>(); chk<ApF,Mul,LoF,UpF>(); chk<LoF,Mul,LoF,LoF>(); chk<ApF,Mul,LoF,ApF>();
-    chk<ApF,Mul,ApF,ExF>(); chk<ApF,Mul,ApF,MeF>(); chk<ApF,Mul,ApF,BoF>(); chk<ApF,Mul,ApF,UpF>(); chk<ApF,Mul,ApF,LoF>(); chk<ApF,Mul,ApF,ApF>();
+    chk<VaF,Times,ExF,ExF>(); chk<MeF,Times,ExF,MeF>(); chk<BoF,Times,ExF,BoF>(); chk<UpF,Times,ExF,UpF>(); chk<LoF,Times,ExF,LoF>(); chk<ApF,Times,ExF,ApF>();
+    chk<MeF,Times,MeF,ExF>(); chk<MeF,Times,MeF,MeF>(); chk<VaF,Times,MeF,BoF>(); chk<UpF,Times,MeF,UpF>(); chk<LoF,Times,MeF,LoF>(); chk<ApF,Times,MeF,ApF>();
+    chk<BoF,Times,BoF,ExF>(); chk<VaF,Times,BoF,MeF>(); chk<BoF,Times,BoF,BoF>(); chk<UpF,Times,BoF,UpF>(); chk<LoF,Times,BoF,LoF>(); chk<ApF,Times,BoF,ApF>();
+    chk<UpF,Times,UpF,ExF>(); chk<UpF,Times,UpF,MeF>(); chk<UpF,Times,UpF,BoF>(); chk<UpF,Times,UpF,UpF>(); chk<ApF,Times,UpF,LoF>(); chk<ApF,Times,UpF,ApF>();
+    chk<LoF,Times,LoF,ExF>(); chk<LoF,Times,LoF,MeF>(); chk<LoF,Times,LoF,BoF>(); chk<ApF,Times,LoF,UpF>(); chk<LoF,Times,LoF,LoF>(); chk<ApF,Times,LoF,ApF>();
+    chk<ApF,Times,ApF,ExF>(); chk<ApF,Times,ApF,MeF>(); chk<ApF,Times,ApF,BoF>(); chk<ApF,Times,ApF,UpF>(); chk<ApF,Times,ApF,LoF>(); chk<ApF,Times,ApF,ApF>();
 
     // Mixed Float # Generic and Generic # Float
-    chk<VaF,Mul,ExF,ExN>(); chk<VaF,Mul,ExF,EfN>(); chk<VaF,Mul,ExF,VaN>(); chk<UpF,Mul,ExF,UpN>(); chk<LoF,Mul,ExF,LoN>(); chk<ApF,Mul,ExF,ApN>();
-    chk<MeF,Mul,MeF,ExN>(); chk<MeF,Mul,MeF,EfN>(); chk<MeF,Mul,MeF,VaN>(); chk<UpF,Mul,MeF,UpN>(); chk<LoF,Mul,MeF,LoN>(); chk<ApF,Mul,MeF,ApN>();
-    chk<BoF,Mul,BoF,ExN>(); chk<BoF,Mul,BoF,EfN>(); chk<BoF,Mul,BoF,VaN>(); chk<UpF,Mul,BoF,UpN>(); chk<LoF,Mul,BoF,LoN>(); chk<ApF,Mul,BoF,ApN>();
-    chk<UpF,Mul,UpF,ExN>(); chk<UpF,Mul,UpF,EfN>(); chk<UpF,Mul,UpF,VaN>(); chk<UpF,Mul,UpF,UpN>(); chk<ApF,Mul,UpF,LoN>(); chk<ApF,Mul,UpF,ApN>();
-    chk<LoF,Mul,LoF,ExN>(); chk<LoF,Mul,LoF,EfN>(); chk<LoF,Mul,LoF,VaN>(); chk<ApF,Mul,LoF,UpN>(); chk<LoF,Mul,LoF,LoN>(); chk<ApF,Mul,LoF,ApN>();
-    chk<ApF,Mul,ApF,ExN>(); chk<ApF,Mul,ApF,EfN>(); chk<ApF,Mul,ApF,VaN>(); chk<ApF,Mul,ApF,UpN>(); chk<ApF,Mul,ApF,LoN>(); chk<ApF,Mul,ApF,ApN>();
+    chk<VaF,Times,ExF,ExN>(); chk<VaF,Times,ExF,EfN>(); chk<VaF,Times,ExF,VaN>(); chk<UpF,Times,ExF,UpN>(); chk<LoF,Times,ExF,LoN>(); chk<ApF,Times,ExF,ApN>();
+    chk<MeF,Times,MeF,ExN>(); chk<MeF,Times,MeF,EfN>(); chk<MeF,Times,MeF,VaN>(); chk<UpF,Times,MeF,UpN>(); chk<LoF,Times,MeF,LoN>(); chk<ApF,Times,MeF,ApN>();
+    chk<BoF,Times,BoF,ExN>(); chk<BoF,Times,BoF,EfN>(); chk<BoF,Times,BoF,VaN>(); chk<UpF,Times,BoF,UpN>(); chk<LoF,Times,BoF,LoN>(); chk<ApF,Times,BoF,ApN>();
+    chk<UpF,Times,UpF,ExN>(); chk<UpF,Times,UpF,EfN>(); chk<UpF,Times,UpF,VaN>(); chk<UpF,Times,UpF,UpN>(); chk<ApF,Times,UpF,LoN>(); chk<ApF,Times,UpF,ApN>();
+    chk<LoF,Times,LoF,ExN>(); chk<LoF,Times,LoF,EfN>(); chk<LoF,Times,LoF,VaN>(); chk<ApF,Times,LoF,UpN>(); chk<LoF,Times,LoF,LoN>(); chk<ApF,Times,LoF,ApN>();
+    chk<ApF,Times,ApF,ExN>(); chk<ApF,Times,ApF,EfN>(); chk<ApF,Times,ApF,VaN>(); chk<ApF,Times,ApF,UpN>(); chk<ApF,Times,ApF,LoN>(); chk<ApF,Times,ApF,ApN>();
 
-    chk<VaF,Mul,ExN,ExF>(); chk<MeF,Mul,ExN,MeF>(); chk<BoF,Mul,ExN,BoF>(); chk<UpF,Mul,ExN,UpF>(); chk<LoF,Mul,ExN,LoF>(); chk<ApF,Mul,ExN,ApF>();
-    chk<VaF,Mul,EfN,ExF>(); chk<MeF,Mul,EfN,MeF>(); chk<BoF,Mul,EfN,BoF>(); chk<UpF,Mul,EfN,UpF>(); chk<LoF,Mul,EfN,LoF>(); chk<ApF,Mul,EfN,ApF>();
-    chk<VaF,Mul,VaN,ExF>(); chk<MeF,Mul,VaN,MeF>(); chk<BoF,Mul,VaN,BoF>(); chk<UpF,Mul,VaN,UpF>(); chk<LoF,Mul,VaN,LoF>(); chk<ApF,Mul,VaN,ApF>();
-    chk<UpF,Mul,UpN,ExF>(); chk<UpF,Mul,UpN,MeF>(); chk<UpF,Mul,UpN,BoF>(); chk<UpF,Mul,UpN,UpF>(); chk<ApF,Mul,UpN,LoF>(); chk<ApF,Mul,UpN,ApF>();
-    chk<LoF,Mul,LoN,ExF>(); chk<LoF,Mul,LoN,MeF>(); chk<LoF,Mul,LoN,BoF>(); chk<ApF,Mul,LoN,UpF>(); chk<LoF,Mul,LoN,LoF>(); chk<ApF,Mul,LoN,ApF>();
-    chk<ApF,Mul,ApN,ExF>(); chk<ApF,Mul,ApN,MeF>(); chk<ApF,Mul,ApN,BoF>(); chk<ApF,Mul,ApN,UpF>(); chk<ApF,Mul,ApN,LoF>(); chk<ApF,Mul,ApN,ApF>();
+    chk<VaF,Times,ExN,ExF>(); chk<MeF,Times,ExN,MeF>(); chk<BoF,Times,ExN,BoF>(); chk<UpF,Times,ExN,UpF>(); chk<LoF,Times,ExN,LoF>(); chk<ApF,Times,ExN,ApF>();
+    chk<VaF,Times,EfN,ExF>(); chk<MeF,Times,EfN,MeF>(); chk<BoF,Times,EfN,BoF>(); chk<UpF,Times,EfN,UpF>(); chk<LoF,Times,EfN,LoF>(); chk<ApF,Times,EfN,ApF>();
+    chk<VaF,Times,VaN,ExF>(); chk<MeF,Times,VaN,MeF>(); chk<BoF,Times,VaN,BoF>(); chk<UpF,Times,VaN,UpF>(); chk<LoF,Times,VaN,LoF>(); chk<ApF,Times,VaN,ApF>();
+    chk<UpF,Times,UpN,ExF>(); chk<UpF,Times,UpN,MeF>(); chk<UpF,Times,UpN,BoF>(); chk<UpF,Times,UpN,UpF>(); chk<ApF,Times,UpN,LoF>(); chk<ApF,Times,UpN,ApF>();
+    chk<LoF,Times,LoN,ExF>(); chk<LoF,Times,LoN,MeF>(); chk<LoF,Times,LoN,BoF>(); chk<ApF,Times,LoN,UpF>(); chk<LoF,Times,LoN,LoF>(); chk<ApF,Times,LoN,ApF>();
+    chk<ApF,Times,ApN,ExF>(); chk<ApF,Times,ApN,MeF>(); chk<ApF,Times,ApN,BoF>(); chk<ApF,Times,ApN,UpF>(); chk<ApF,Times,ApN,LoF>(); chk<ApF,Times,ApN,ApF>();
 
     // Mixed Float # Concrete and Concrete # Float
-    chk<ApF,Mul,ExF,D>(); chk<VaF,Mul,ExF,I>(); chk<VaF,Mul,ExF,Z>(); chk<VaF,Mul,ExF,Q>(); chk<VaF,Mul,ExF,R>();
-    chk<ApF,Mul,MeF,D>(); chk<MeF,Mul,MeF,I>(); chk<MeF,Mul,MeF,Z>(); chk<MeF,Mul,MeF,Q>(); chk<MeF,Mul,MeF,R>();
-    chk<ApF,Mul,BoF,D>(); chk<BoF,Mul,BoF,I>(); chk<BoF,Mul,BoF,Z>(); chk<BoF,Mul,BoF,Q>(); chk<BoF,Mul,BoF,R>();
-    chk<ApF,Mul,UpF,D>(); chk<UpF,Mul,UpF,I>(); chk<UpF,Mul,UpF,Z>(); chk<UpF,Mul,UpF,Q>(); chk<UpF,Mul,UpF,R>();
-    chk<ApF,Mul,LoF,D>(); chk<LoF,Mul,LoF,I>(); chk<LoF,Mul,LoF,Z>(); chk<LoF,Mul,LoF,Q>(); chk<LoF,Mul,LoF,R>();
-    chk<ApF,Mul,ApF,D>(); chk<ApF,Mul,ApF,I>(); chk<ApF,Mul,ApF,Z>(); chk<ApF,Mul,ApF,Q>(); chk<ApF,Mul,ApF,R>();
+    chk<ApF,Times,ExF,D>(); chk<VaF,Times,ExF,I>(); chk<VaF,Times,ExF,Z>(); chk<VaF,Times,ExF,Q>(); chk<VaF,Times,ExF,R>();
+    chk<ApF,Times,MeF,D>(); chk<MeF,Times,MeF,I>(); chk<MeF,Times,MeF,Z>(); chk<MeF,Times,MeF,Q>(); chk<MeF,Times,MeF,R>();
+    chk<ApF,Times,BoF,D>(); chk<BoF,Times,BoF,I>(); chk<BoF,Times,BoF,Z>(); chk<BoF,Times,BoF,Q>(); chk<BoF,Times,BoF,R>();
+    chk<ApF,Times,UpF,D>(); chk<UpF,Times,UpF,I>(); chk<UpF,Times,UpF,Z>(); chk<UpF,Times,UpF,Q>(); chk<UpF,Times,UpF,R>();
+    chk<ApF,Times,LoF,D>(); chk<LoF,Times,LoF,I>(); chk<LoF,Times,LoF,Z>(); chk<LoF,Times,LoF,Q>(); chk<LoF,Times,LoF,R>();
+    chk<ApF,Times,ApF,D>(); chk<ApF,Times,ApF,I>(); chk<ApF,Times,ApF,Z>(); chk<ApF,Times,ApF,Q>(); chk<ApF,Times,ApF,R>();
 
-    chk<ApF,Mul,D,ExF>(); chk<ApF,Mul,D,MeF>(); chk<ApF,Mul,D,BoF>(); chk<ApF,Mul,D,UpF>(); chk<ApF,Mul,D,LoF>(); chk<ApF,Mul,D,ApF>();
-    chk<VaF,Mul,I,ExF>(); chk<MeF,Mul,I,MeF>(); chk<BoF,Mul,I,BoF>(); chk<UpF,Mul,I,UpF>(); chk<LoF,Mul,I,LoF>(); chk<ApF,Mul,I,ApF>();
-    chk<VaF,Mul,Z,ExF>(); chk<MeF,Mul,Z,MeF>(); chk<BoF,Mul,Z,BoF>(); chk<UpF,Mul,Z,UpF>(); chk<LoF,Mul,Z,LoF>(); chk<ApF,Mul,Z,ApF>();
-    chk<VaF,Mul,Q,ExF>(); chk<MeF,Mul,Q,MeF>(); chk<BoF,Mul,Q,BoF>(); chk<UpF,Mul,Q,UpF>(); chk<LoF,Mul,Q,LoF>(); chk<ApF,Mul,Q,ApF>();
-    chk<VaF,Mul,R,ExF>(); chk<MeF,Mul,R,MeF>(); chk<BoF,Mul,R,BoF>(); chk<UpF,Mul,R,UpF>(); chk<LoF,Mul,R,LoF>(); chk<ApF,Mul,R,ApF>();
+    chk<ApF,Times,D,ExF>(); chk<ApF,Times,D,MeF>(); chk<ApF,Times,D,BoF>(); chk<ApF,Times,D,UpF>(); chk<ApF,Times,D,LoF>(); chk<ApF,Times,D,ApF>();
+    chk<VaF,Times,I,ExF>(); chk<MeF,Times,I,MeF>(); chk<BoF,Times,I,BoF>(); chk<UpF,Times,I,UpF>(); chk<LoF,Times,I,LoF>(); chk<ApF,Times,I,ApF>();
+    chk<VaF,Times,Z,ExF>(); chk<MeF,Times,Z,MeF>(); chk<BoF,Times,Z,BoF>(); chk<UpF,Times,Z,UpF>(); chk<LoF,Times,Z,LoF>(); chk<ApF,Times,Z,ApF>();
+    chk<VaF,Times,Q,ExF>(); chk<MeF,Times,Q,MeF>(); chk<BoF,Times,Q,BoF>(); chk<UpF,Times,Q,UpF>(); chk<LoF,Times,Q,LoF>(); chk<ApF,Times,Q,ApF>();
+    chk<VaF,Times,R,ExF>(); chk<MeF,Times,R,MeF>(); chk<BoF,Times,R,BoF>(); chk<UpF,Times,R,UpF>(); chk<LoF,Times,R,LoF>(); chk<ApF,Times,R,ApF>();
 
 }
 
 void CheckNumeric::check_division() {
 
     // Concrete numbers
-    chk< D ,Div,D,D>(); chk<D,Div,D,I>(); chk<ApN,Div,D,Z>(); chk<ApN,Div,D,Q>(); chk<ApN,Div,D,R>();
-    chk< D ,Div,I,D>(); chk<I,Div,I,I>(); chk<Q,Div,I,Z>(); chk<Q,Div,I,Q>(); chk<R,Div,I,R>();
-    chk<ApN,Div,Z,D>(); chk<Q,Div,Z,I>(); chk<Q,Div,Z,Z>(); chk<Q,Div,Z,Q>(); chk<R,Div,Z,R>();
-    chk<ApN,Div,Q,D>(); chk<Q,Div,Q,I>(); chk<Q,Div,Q,Z>(); chk<Q,Div,Q,Q>(); chk<R,Div,Q,R>();
-    chk<ApN,Div,R,D>(); chk<R,Div,R,I>(); chk<R,Div,R,Z>(); chk<R,Div,R,Q>(); chk<R,Div,R,R>();
+    chk< D ,Divides,D,D>(); chk<D,Divides,D,I>(); chk<ApD,Divides,D,Z>(); chk<ApD,Divides,D,Q>(); chk<ApD,Divides,D,R>();
+    chk< D ,Divides,I,D>(); chk<I,Divides,I,I>(); chk<Q,Divides,I,Z>(); chk<Q,Divides,I,Q>(); chk<R,Divides,I,R>();
+    chk<ApD,Divides,Z,D>(); chk<Q,Divides,Z,I>(); chk<Q,Divides,Z,Z>(); chk<Q,Divides,Z,Q>(); chk<R,Divides,Z,R>();
+    chk<ApD,Divides,Q,D>(); chk<Q,Divides,Q,I>(); chk<Q,Divides,Q,Z>(); chk<Q,Divides,Q,Q>(); chk<R,Divides,Q,R>();
+    chk<ApD,Divides,R,D>(); chk<R,Divides,R,I>(); chk<R,Divides,R,Z>(); chk<R,Divides,R,Q>(); chk<R,Divides,R,R>();
 
     // Generic numbers
-    chk<ExN,Div,ExN,ExN>(); chk<EfN,Div,ExN,EfN>(); chk<VaN,Div,ExN,VaN>(); chk<LoN,Div,ExN,UpN>(); chk<UpN,Div,ExN,LoN>(); chk<ApN,Div,ExN,ApN>();
-    chk<EfN,Div,EfN,ExN>(); chk<EfN,Div,EfN,EfN>(); chk<VaN,Div,EfN,VaN>(); chk<LoN,Div,EfN,UpN>(); chk<UpN,Div,EfN,LoN>(); chk<ApN,Div,EfN,ApN>();
-    chk<VaN,Div,VaN,ExN>(); chk<VaN,Div,VaN,EfN>(); chk<VaN,Div,VaN,VaN>(); chk<LoN,Div,VaN,UpN>(); chk<UpN,Div,VaN,LoN>(); chk<ApN,Div,VaN,ApN>();
-    chk<UpN,Div,UpN,ExN>(); chk<UpN,Div,UpN,EfN>(); chk<UpN,Div,UpN,VaN>(); chk<ApN,Div,UpN,UpN>(); chk<UpN,Div,UpN,LoN>(); chk<ApN,Div,UpN,ApN>();
-    chk<LoN,Div,LoN,ExN>(); chk<LoN,Div,LoN,EfN>(); chk<LoN,Div,LoN,VaN>(); chk<LoN,Div,LoN,UpN>(); chk<ApN,Div,LoN,LoN>(); chk<ApN,Div,LoN,ApN>();
-    chk<ApN,Div,ApN,ExN>(); chk<ApN,Div,ApN,EfN>(); chk<ApN,Div,ApN,VaN>(); chk<ApN,Div,ApN,UpN>(); chk<ApN,Div,ApN,LoN>(); chk<ApN,Div,ApN,ApN>();
+    chk<ExN,Divides,ExN,ExN>(); chk<EfN,Divides,ExN,EfN>(); chk<VaN,Divides,ExN,VaN>(); chk<LoN,Divides,ExN,UpN>(); chk<UpN,Divides,ExN,LoN>(); chk<ApN,Divides,ExN,ApN>();
+    chk<EfN,Divides,EfN,ExN>(); chk<EfN,Divides,EfN,EfN>(); chk<VaN,Divides,EfN,VaN>(); chk<LoN,Divides,EfN,UpN>(); chk<UpN,Divides,EfN,LoN>(); chk<ApN,Divides,EfN,ApN>();
+    chk<VaN,Divides,VaN,ExN>(); chk<VaN,Divides,VaN,EfN>(); chk<VaN,Divides,VaN,VaN>(); chk<LoN,Divides,VaN,UpN>(); chk<UpN,Divides,VaN,LoN>(); chk<ApN,Divides,VaN,ApN>();
+    chk<UpN,Divides,UpN,ExN>(); chk<UpN,Divides,UpN,EfN>(); chk<UpN,Divides,UpN,VaN>(); chk<ApN,Divides,UpN,UpN>(); chk<UpN,Divides,UpN,LoN>(); chk<ApN,Divides,UpN,ApN>();
+    chk<LoN,Divides,LoN,ExN>(); chk<LoN,Divides,LoN,EfN>(); chk<LoN,Divides,LoN,VaN>(); chk<LoN,Divides,LoN,UpN>(); chk<ApN,Divides,LoN,LoN>(); chk<ApN,Divides,LoN,ApN>();
+    chk<ApN,Divides,ApN,ExN>(); chk<ApN,Divides,ApN,EfN>(); chk<ApN,Divides,ApN,VaN>(); chk<ApN,Divides,ApN,UpN>(); chk<ApN,Divides,ApN,LoN>(); chk<ApN,Divides,ApN,ApN>();
 
     // Mixed Generic # Concrete numbers
-    chk<ApN,Div,ExN,D>(); chk<ExN,Div,ExN,I>(); chk<ExN,Div,ExN,Z>(); chk<ExN,Div,ExN,Q>(); chk<EfN,Div,ExN,R>();
-    chk<ApN,Div,EfN,D>(); chk<EfN,Div,EfN,I>(); chk<EfN,Div,EfN,Z>(); chk<EfN,Div,EfN,Q>(); chk<EfN,Div,EfN,R>();
-    chk<ApN,Div,VaN,D>(); chk<VaN,Div,VaN,I>(); chk<VaN,Div,VaN,Z>(); chk<VaN,Div,VaN,Q>(); chk<VaN,Div,VaN,R>();
-    chk<ApN,Div,UpN,D>(); chk<UpN,Div,UpN,I>(); chk<UpN,Div,UpN,Z>(); chk<UpN,Div,UpN,Q>(); chk<UpN,Div,UpN,R>();
-    chk<ApN,Div,LoN,D>(); chk<LoN,Div,LoN,I>(); chk<LoN,Div,LoN,Z>(); chk<LoN,Div,LoN,Q>(); chk<LoN,Div,LoN,R>();
-    chk<ApN,Div,ApN,D>(); chk<ApN,Div,ApN,I>(); chk<ApN,Div,ApN,Z>(); chk<ApN,Div,ApN,Q>(); chk<ApN,Div,ApN,R>();
+    chk<ApD,Divides,ExN,D>(); chk<ExN,Divides,ExN,I>(); chk<ExN,Divides,ExN,Z>(); chk<ExN,Divides,ExN,Q>(); chk<EfN,Divides,ExN,R>();
+    chk<ApD,Divides,EfN,D>(); chk<EfN,Divides,EfN,I>(); chk<EfN,Divides,EfN,Z>(); chk<EfN,Divides,EfN,Q>(); chk<EfN,Divides,EfN,R>();
+    chk<ApD,Divides,VaN,D>(); chk<VaN,Divides,VaN,I>(); chk<VaN,Divides,VaN,Z>(); chk<VaN,Divides,VaN,Q>(); chk<VaN,Divides,VaN,R>();
+    chk<ApD,Divides,UpN,D>(); chk<UpN,Divides,UpN,I>(); chk<UpN,Divides,UpN,Z>(); chk<UpN,Divides,UpN,Q>(); chk<UpN,Divides,UpN,R>();
+    chk<ApD,Divides,LoN,D>(); chk<LoN,Divides,LoN,I>(); chk<LoN,Divides,LoN,Z>(); chk<LoN,Divides,LoN,Q>(); chk<LoN,Divides,LoN,R>();
+    chk<ApD,Divides,ApN,D>(); chk<ApN,Divides,ApN,I>(); chk<ApN,Divides,ApN,Z>(); chk<ApN,Divides,ApN,Q>(); chk<ApN,Divides,ApN,R>();
 
     // Mixed Concrete # Generic numbers
-    chk<ApN,Div,D,ExN>(); chk<ApN,Div,D,EfN>(); chk<ApN,Div,D,VaN>(); chk<ApN,Div,D,UpN>(); chk<ApN,Div,D,LoN>(); chk<ApN,Div,D,ApN>();
-    chk<ExN,Div,I,ExN>(); chk<EfN,Div,I,EfN>(); chk<VaN,Div,I,VaN>(); chk<LoN,Div,I,UpN>(); chk<UpN,Div,I,LoN>(); chk<ApN,Div,I,ApN>();
-    chk<ExN,Div,Z,ExN>(); chk<EfN,Div,Z,EfN>(); chk<VaN,Div,Z,VaN>(); chk<LoN,Div,Z,UpN>(); chk<UpN,Div,Z,LoN>(); chk<ApN,Div,Z,ApN>();
-    chk<ExN,Div,Q,ExN>(); chk<EfN,Div,Q,EfN>(); chk<VaN,Div,Q,VaN>(); chk<LoN,Div,Q,UpN>(); chk<UpN,Div,Q,LoN>(); chk<ApN,Div,Q,ApN>();
-    chk<EfN,Div,R,ExN>(); chk<EfN,Div,R,EfN>(); chk<VaN,Div,R,VaN>(); chk<LoN,Div,R,UpN>(); chk<UpN,Div,R,LoN>(); chk<ApN,Div,R,ApN>();
+    chk<ApD,Divides,D,ExN>(); chk<ApD,Divides,D,EfN>(); chk<ApD,Divides,D,VaN>(); chk<ApD,Divides,D,UpN>(); chk<ApD,Divides,D,LoN>(); chk<ApD,Divides,D,ApN>();
+    chk<ExN,Divides,I,ExN>(); chk<EfN,Divides,I,EfN>(); chk<VaN,Divides,I,VaN>(); chk<LoN,Divides,I,UpN>(); chk<UpN,Divides,I,LoN>(); chk<ApN,Divides,I,ApN>();
+    chk<ExN,Divides,Z,ExN>(); chk<EfN,Divides,Z,EfN>(); chk<VaN,Divides,Z,VaN>(); chk<LoN,Divides,Z,UpN>(); chk<UpN,Divides,Z,LoN>(); chk<ApN,Divides,Z,ApN>();
+    chk<ExN,Divides,Q,ExN>(); chk<EfN,Divides,Q,EfN>(); chk<VaN,Divides,Q,VaN>(); chk<LoN,Divides,Q,UpN>(); chk<UpN,Divides,Q,LoN>(); chk<ApN,Divides,Q,ApN>();
+    chk<EfN,Divides,R,ExN>(); chk<EfN,Divides,R,EfN>(); chk<VaN,Divides,R,VaN>(); chk<LoN,Divides,R,UpN>(); chk<UpN,Divides,R,LoN>(); chk<ApN,Divides,R,ApN>();
 
     // Float numbers
-    chk<VaF,Div,ExF,ExF>(); chk<MeF,Div,ExF,MeF>(); chk<BoF,Div,ExF,BoF>(); chk<LoF,Div,ExF,UpF>(); chk<UpF,Div,ExF,LoF>(); chk<ApF,Div,ExF,ApF>();
-    chk<MeF,Div,MeF,ExF>(); chk<MeF,Div,MeF,MeF>(); chk<VaF,Div,MeF,BoF>(); chk<LoF,Div,MeF,UpF>(); chk<UpF,Div,MeF,LoF>(); chk<ApF,Div,MeF,ApF>();
-    chk<BoF,Div,BoF,ExF>(); chk<VaF,Div,BoF,MeF>(); chk<BoF,Div,BoF,BoF>(); chk<LoF,Div,BoF,UpF>(); chk<UpF,Div,BoF,LoF>(); chk<ApF,Div,BoF,ApF>();
-    chk<UpF,Div,UpF,ExF>(); chk<UpF,Div,UpF,MeF>(); chk<UpF,Div,UpF,BoF>(); chk<ApF,Div,UpF,UpF>(); chk<UpF,Div,UpF,LoF>(); chk<ApF,Div,UpF,ApF>();
-    chk<LoF,Div,LoF,ExF>(); chk<LoF,Div,LoF,MeF>(); chk<LoF,Div,LoF,BoF>(); chk<LoF,Div,LoF,UpF>(); chk<ApF,Div,LoF,LoF>(); chk<ApF,Div,LoF,ApF>();
-    chk<ApF,Div,ApF,ExF>(); chk<ApF,Div,ApF,MeF>(); chk<ApF,Div,ApF,BoF>(); chk<ApF,Div,ApF,UpF>(); chk<ApF,Div,ApF,LoF>(); chk<ApF,Div,ApF,ApF>();
+    chk<VaF,Divides,ExF,ExF>(); chk<MeF,Divides,ExF,MeF>(); chk<BoF,Divides,ExF,BoF>(); chk<LoF,Divides,ExF,UpF>(); chk<UpF,Divides,ExF,LoF>(); chk<ApF,Divides,ExF,ApF>();
+    chk<MeF,Divides,MeF,ExF>(); chk<MeF,Divides,MeF,MeF>(); chk<VaF,Divides,MeF,BoF>(); chk<LoF,Divides,MeF,UpF>(); chk<UpF,Divides,MeF,LoF>(); chk<ApF,Divides,MeF,ApF>();
+    chk<BoF,Divides,BoF,ExF>(); chk<VaF,Divides,BoF,MeF>(); chk<BoF,Divides,BoF,BoF>(); chk<LoF,Divides,BoF,UpF>(); chk<UpF,Divides,BoF,LoF>(); chk<ApF,Divides,BoF,ApF>();
+    chk<UpF,Divides,UpF,ExF>(); chk<UpF,Divides,UpF,MeF>(); chk<UpF,Divides,UpF,BoF>(); chk<ApF,Divides,UpF,UpF>(); chk<UpF,Divides,UpF,LoF>(); chk<ApF,Divides,UpF,ApF>();
+    chk<LoF,Divides,LoF,ExF>(); chk<LoF,Divides,LoF,MeF>(); chk<LoF,Divides,LoF,BoF>(); chk<LoF,Divides,LoF,UpF>(); chk<ApF,Divides,LoF,LoF>(); chk<ApF,Divides,LoF,ApF>();
+    chk<ApF,Divides,ApF,ExF>(); chk<ApF,Divides,ApF,MeF>(); chk<ApF,Divides,ApF,BoF>(); chk<ApF,Divides,ApF,UpF>(); chk<ApF,Divides,ApF,LoF>(); chk<ApF,Divides,ApF,ApF>();
 
     // Mixed Float # Generic and Generic # Float
-    chk<VaF,Div,ExF,ExN>(); chk<VaF,Div,ExF,EfN>(); chk<VaF,Div,ExF,VaN>(); chk<LoF,Div,ExF,UpN>(); chk<UpF,Div,ExF,LoN>(); chk<ApF,Div,ExF,ApN>();
-    chk<MeF,Div,MeF,ExN>(); chk<MeF,Div,MeF,EfN>(); chk<MeF,Div,MeF,VaN>(); chk<LoF,Div,MeF,UpN>(); chk<UpF,Div,MeF,LoN>(); chk<ApF,Div,MeF,ApN>();
-    chk<BoF,Div,BoF,ExN>(); chk<BoF,Div,BoF,EfN>(); chk<BoF,Div,BoF,VaN>(); chk<LoF,Div,BoF,UpN>(); chk<UpF,Div,BoF,LoN>(); chk<ApF,Div,BoF,ApN>();
-    chk<UpF,Div,UpF,ExN>(); chk<UpF,Div,UpF,EfN>(); chk<UpF,Div,UpF,VaN>(); chk<ApF,Div,UpF,UpN>(); chk<UpF,Div,UpF,LoN>(); chk<ApF,Div,UpF,ApN>();
-    chk<LoF,Div,LoF,ExN>(); chk<LoF,Div,LoF,EfN>(); chk<LoF,Div,LoF,VaN>(); chk<LoF,Div,LoF,UpN>(); chk<ApF,Div,LoF,LoN>(); chk<ApF,Div,LoF,ApN>();
-    chk<ApF,Div,ApF,ExN>(); chk<ApF,Div,ApF,EfN>(); chk<ApF,Div,ApF,VaN>(); chk<ApF,Div,ApF,UpN>(); chk<ApF,Div,ApF,LoN>(); chk<ApF,Div,ApF,ApN>();
+    chk<VaF,Divides,ExF,ExN>(); chk<VaF,Divides,ExF,EfN>(); chk<VaF,Divides,ExF,VaN>(); chk<LoF,Divides,ExF,UpN>(); chk<UpF,Divides,ExF,LoN>(); chk<ApF,Divides,ExF,ApN>();
+    chk<MeF,Divides,MeF,ExN>(); chk<MeF,Divides,MeF,EfN>(); chk<MeF,Divides,MeF,VaN>(); chk<LoF,Divides,MeF,UpN>(); chk<UpF,Divides,MeF,LoN>(); chk<ApF,Divides,MeF,ApN>();
+    chk<BoF,Divides,BoF,ExN>(); chk<BoF,Divides,BoF,EfN>(); chk<BoF,Divides,BoF,VaN>(); chk<LoF,Divides,BoF,UpN>(); chk<UpF,Divides,BoF,LoN>(); chk<ApF,Divides,BoF,ApN>();
+    chk<UpF,Divides,UpF,ExN>(); chk<UpF,Divides,UpF,EfN>(); chk<UpF,Divides,UpF,VaN>(); chk<ApF,Divides,UpF,UpN>(); chk<UpF,Divides,UpF,LoN>(); chk<ApF,Divides,UpF,ApN>();
+    chk<LoF,Divides,LoF,ExN>(); chk<LoF,Divides,LoF,EfN>(); chk<LoF,Divides,LoF,VaN>(); chk<LoF,Divides,LoF,UpN>(); chk<ApF,Divides,LoF,LoN>(); chk<ApF,Divides,LoF,ApN>();
+    chk<ApF,Divides,ApF,ExN>(); chk<ApF,Divides,ApF,EfN>(); chk<ApF,Divides,ApF,VaN>(); chk<ApF,Divides,ApF,UpN>(); chk<ApF,Divides,ApF,LoN>(); chk<ApF,Divides,ApF,ApN>();
 
-    chk<VaF,Div,ExN,ExF>(); chk<MeF,Div,ExN,MeF>(); chk<BoF,Div,ExN,BoF>(); chk<LoF,Div,ExN,UpF>(); chk<UpF,Div,ExN,LoF>(); chk<ApF,Div,ExN,ApF>();
-    chk<VaF,Div,EfN,ExF>(); chk<MeF,Div,EfN,MeF>(); chk<BoF,Div,EfN,BoF>(); chk<LoF,Div,EfN,UpF>(); chk<UpF,Div,EfN,LoF>(); chk<ApF,Div,EfN,ApF>();
-    chk<VaF,Div,VaN,ExF>(); chk<MeF,Div,VaN,MeF>(); chk<BoF,Div,VaN,BoF>(); chk<LoF,Div,VaN,UpF>(); chk<UpF,Div,VaN,LoF>(); chk<ApF,Div,VaN,ApF>();
-    chk<UpF,Div,UpN,ExF>(); chk<UpF,Div,UpN,MeF>(); chk<UpF,Div,UpN,BoF>(); chk<ApF,Div,UpN,UpF>(); chk<UpF,Div,UpN,LoF>(); chk<ApF,Div,UpN,ApF>();
-    chk<LoF,Div,LoN,ExF>(); chk<LoF,Div,LoN,MeF>(); chk<LoF,Div,LoN,BoF>(); chk<LoF,Div,LoN,UpF>(); chk<ApF,Div,LoN,LoF>(); chk<ApF,Div,LoN,ApF>();
-    chk<ApF,Div,ApN,ExF>(); chk<ApF,Div,ApN,MeF>(); chk<ApF,Div,ApN,BoF>(); chk<ApF,Div,ApN,UpF>(); chk<ApF,Div,ApN,LoF>(); chk<ApF,Div,ApN,ApF>();
+    chk<VaF,Divides,ExN,ExF>(); chk<MeF,Divides,ExN,MeF>(); chk<BoF,Divides,ExN,BoF>(); chk<LoF,Divides,ExN,UpF>(); chk<UpF,Divides,ExN,LoF>(); chk<ApF,Divides,ExN,ApF>();
+    chk<VaF,Divides,EfN,ExF>(); chk<MeF,Divides,EfN,MeF>(); chk<BoF,Divides,EfN,BoF>(); chk<LoF,Divides,EfN,UpF>(); chk<UpF,Divides,EfN,LoF>(); chk<ApF,Divides,EfN,ApF>();
+    chk<VaF,Divides,VaN,ExF>(); chk<MeF,Divides,VaN,MeF>(); chk<BoF,Divides,VaN,BoF>(); chk<LoF,Divides,VaN,UpF>(); chk<UpF,Divides,VaN,LoF>(); chk<ApF,Divides,VaN,ApF>();
+    chk<UpF,Divides,UpN,ExF>(); chk<UpF,Divides,UpN,MeF>(); chk<UpF,Divides,UpN,BoF>(); chk<ApF,Divides,UpN,UpF>(); chk<UpF,Divides,UpN,LoF>(); chk<ApF,Divides,UpN,ApF>();
+    chk<LoF,Divides,LoN,ExF>(); chk<LoF,Divides,LoN,MeF>(); chk<LoF,Divides,LoN,BoF>(); chk<LoF,Divides,LoN,UpF>(); chk<ApF,Divides,LoN,LoF>(); chk<ApF,Divides,LoN,ApF>();
+    chk<ApF,Divides,ApN,ExF>(); chk<ApF,Divides,ApN,MeF>(); chk<ApF,Divides,ApN,BoF>(); chk<ApF,Divides,ApN,UpF>(); chk<ApF,Divides,ApN,LoF>(); chk<ApF,Divides,ApN,ApF>();
 
     // Mixed Float # Concrete and Concrete # Float
-    chk<ApF,Div,ExF,D>(); chk<VaF,Div,ExF,I>(); chk<VaF,Div,ExF,Z>(); chk<VaF,Div,ExF,Q>(); chk<VaF,Div,ExF,R>();
-    chk<ApF,Div,MeF,D>(); chk<MeF,Div,MeF,I>(); chk<MeF,Div,MeF,Z>(); chk<MeF,Div,MeF,Q>(); chk<MeF,Div,MeF,R>();
-    chk<ApF,Div,BoF,D>(); chk<BoF,Div,BoF,I>(); chk<BoF,Div,BoF,Z>(); chk<BoF,Div,BoF,Q>(); chk<BoF,Div,BoF,R>();
-    chk<ApF,Div,UpF,D>(); chk<UpF,Div,UpF,I>(); chk<UpF,Div,UpF,Z>(); chk<UpF,Div,UpF,Q>(); chk<UpF,Div,UpF,R>();
-    chk<ApF,Div,LoF,D>(); chk<LoF,Div,LoF,I>(); chk<LoF,Div,LoF,Z>(); chk<LoF,Div,LoF,Q>(); chk<LoF,Div,LoF,R>();
-    chk<ApF,Div,ApF,D>(); chk<ApF,Div,ApF,I>(); chk<ApF,Div,ApF,Z>(); chk<ApF,Div,ApF,Q>(); chk<ApF,Div,ApF,R>();
+    chk<ApF,Divides,ExF,D>(); chk<VaF,Divides,ExF,I>(); chk<VaF,Divides,ExF,Z>(); chk<VaF,Divides,ExF,Q>(); chk<VaF,Divides,ExF,R>();
+    chk<ApF,Divides,MeF,D>(); chk<MeF,Divides,MeF,I>(); chk<MeF,Divides,MeF,Z>(); chk<MeF,Divides,MeF,Q>(); chk<MeF,Divides,MeF,R>();
+    chk<ApF,Divides,BoF,D>(); chk<BoF,Divides,BoF,I>(); chk<BoF,Divides,BoF,Z>(); chk<BoF,Divides,BoF,Q>(); chk<BoF,Divides,BoF,R>();
+    chk<ApF,Divides,UpF,D>(); chk<UpF,Divides,UpF,I>(); chk<UpF,Divides,UpF,Z>(); chk<UpF,Divides,UpF,Q>(); chk<UpF,Divides,UpF,R>();
+    chk<ApF,Divides,LoF,D>(); chk<LoF,Divides,LoF,I>(); chk<LoF,Divides,LoF,Z>(); chk<LoF,Divides,LoF,Q>(); chk<LoF,Divides,LoF,R>();
+    chk<ApF,Divides,ApF,D>(); chk<ApF,Divides,ApF,I>(); chk<ApF,Divides,ApF,Z>(); chk<ApF,Divides,ApF,Q>(); chk<ApF,Divides,ApF,R>();
 
-    chk<ApF,Div,D,ExF>(); chk<ApF,Div,D,MeF>(); chk<ApF,Div,D,BoF>(); chk<ApF,Div,D,UpF>(); chk<ApF,Div,D,LoF>(); chk<ApF,Div,D,ApF>();
-    chk<VaF,Div,I,ExF>(); chk<MeF,Div,I,MeF>(); chk<BoF,Div,I,BoF>(); chk<LoF,Div,I,UpF>(); chk<UpF,Div,I,LoF>(); chk<ApF,Div,I,ApF>();
-    chk<VaF,Div,Z,ExF>(); chk<MeF,Div,Z,MeF>(); chk<BoF,Div,Z,BoF>(); chk<LoF,Div,Z,UpF>(); chk<UpF,Div,Z,LoF>(); chk<ApF,Div,Z,ApF>();
-    chk<VaF,Div,Q,ExF>(); chk<MeF,Div,Q,MeF>(); chk<BoF,Div,Q,BoF>(); chk<LoF,Div,Q,UpF>(); chk<UpF,Div,Q,LoF>(); chk<ApF,Div,Q,ApF>();
-    chk<VaF,Div,R,ExF>(); chk<MeF,Div,R,MeF>(); chk<BoF,Div,R,BoF>(); chk<LoF,Div,R,UpF>(); chk<UpF,Div,R,LoF>(); chk<ApF,Div,R,ApF>();
+    chk<ApF,Divides,D,ExF>(); chk<ApF,Divides,D,MeF>(); chk<ApF,Divides,D,BoF>(); chk<ApF,Divides,D,UpF>(); chk<ApF,Divides,D,LoF>(); chk<ApF,Divides,D,ApF>();
+    chk<VaF,Divides,I,ExF>(); chk<MeF,Divides,I,MeF>(); chk<BoF,Divides,I,BoF>(); chk<LoF,Divides,I,UpF>(); chk<UpF,Divides,I,LoF>(); chk<ApF,Divides,I,ApF>();
+    chk<VaF,Divides,Z,ExF>(); chk<MeF,Divides,Z,MeF>(); chk<BoF,Divides,Z,BoF>(); chk<LoF,Divides,Z,UpF>(); chk<UpF,Divides,Z,LoF>(); chk<ApF,Divides,Z,ApF>();
+    chk<VaF,Divides,Q,ExF>(); chk<MeF,Divides,Q,MeF>(); chk<BoF,Divides,Q,BoF>(); chk<LoF,Divides,Q,UpF>(); chk<UpF,Divides,Q,LoF>(); chk<ApF,Divides,Q,ApF>();
+    chk<VaF,Divides,R,ExF>(); chk<MeF,Divides,R,MeF>(); chk<BoF,Divides,R,BoF>(); chk<LoF,Divides,R,UpF>(); chk<UpF,Divides,R,LoF>(); chk<ApF,Divides,R,ApF>();
 }
 
 

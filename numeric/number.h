@@ -209,6 +209,13 @@ template<class P> class Number
     friend Number<SP> operator/(Number<SP>, Number<SP>);
 };
 
+template<class R> struct IsConcreteNumber : IsConvertible<R,Real> { };
+
+template<class R, class P, EnableIf<IsConcreteNumber<R>> =dummy> auto operator+(R const& r1, Number<P> const& y2) -> decltype(Number<Paradigm<R>>(r1)+y2) {
+    return Number<Paradigm<R>>(r1)+y2; }
+template<class R, class P, EnableIf<IsConcreteNumber<R>> =dummy> auto operator+(Number<P> const& y1, R const& r2) -> decltype(y1+Number<Paradigm<R>>(r2)) {
+    return y1+Number<Paradigm<R>>(r2); }
+
 //! \brief Get the value of the number represented by \a X with the same precision paramters as \a p.
 template<class X, class P, EnableIf<IsWeaker<ParadigmTag<X>,P>> =dummy>
 inline X extract(Number<P> y);

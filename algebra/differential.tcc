@@ -539,7 +539,7 @@ template<class X> Differential<X> _evaluate(const Differential<X>& x, const Vect
     ARIADNE_ASSERT(d>=1);
 
     Differential<X> zero = a.zero_element();
-    Differential<X> one = zero; one+=1;
+    Differential<X> one = zero.create_constant(X(1));
 
     // Use inefficient brute-force approach with lots of storage...
     Array< Array< Differential<X> > > val(ms, Array< Differential<X> >(d+1));
@@ -590,7 +590,8 @@ Differential<X> Differential<X>::_compose(const Differential<X>& x, const Vector
 {
     Vector<Differential<X>>& ync=const_cast< Vector<Differential<X>>&>(y);
     Vector<X> yv(y.size());
-    for(SizeType i=0; i!=ync.result_size(); ++i) { yv[i]=ync[i].value(); ync[i].set_value(0); }
+    X zero(0);
+    for(SizeType i=0; i!=ync.result_size(); ++i) { yv[i]=ync[i].value(); ync[i].set_value(zero); }
     Differential<X> r=_evaluate(x,ync);
     for(SizeType i=0; i!=ync.result_size(); ++i) { ync[i].set_value(yv[i]); }
     return r;
@@ -604,14 +605,13 @@ Vector<Differential<X>> Differential<X>::_compose(const Vector<Differential<X>>&
     //std::cerr<<"compose(DV x, DV y)\n x="<<x<<"\n y="<<y<<std::endl;
     Vector<Differential<X>>& ync=const_cast< Vector<Differential<X>>&>(y);
     Vector<X> yv(y.size());
-    for(SizeType i=0; i!=ync.result_size(); ++i) { yv[i]=ync[i].value(); ync[i].set_value(0); }
+    X zero(0);
+    for(SizeType i=0; i!=ync.result_size(); ++i) { yv[i]=ync[i].value(); ync[i].set_value(zero); }
     Vector<Differential<X>> r(x.size(),y.argument_size(),y.degree());
     for(SizeType i=0; i!=x.result_size(); ++i) { r[i]=_evaluate(x[i],y); }
     for(SizeType i=0; i!=ync.result_size(); ++i) { ync[i].set_value(yv[i]); }
     return r;
 }
-
-
 
 
 template<class X>
@@ -622,7 +622,7 @@ Differential<X> Differential<X>::_derivative(const Differential<X>& x, SizeType 
     MultiIndex a(x.argument_size());
     for(typename Differential<X>::ConstIterator iter=x.begin(); iter!=x.end(); ++iter) {
         a=iter->key();
-        SizeType n=a[i];
+        Nat n=a[i];
         if(n!=0) {
             const X& xc=x[a];
             --a[i];
@@ -644,7 +644,7 @@ Differential<X> Differential<X>::_antiderivative(const Differential<X>& x, SizeT
         a=iter->key();
         const X& xc=x[a];
         ++a[i];
-        SizeType n=a[i];
+        Nat n=a[i];
         X& rc=r[a];
         rc=xc/n;
     }

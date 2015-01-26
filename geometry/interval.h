@@ -36,6 +36,7 @@
 #include "utility/tribool.h"
 #include "numeric/logical.h"
 #include "numeric/rounding.h"
+#include "numeric/real.h"
 #include "numeric/float.h"
 #include "numeric/float-exact.h"
 #include "numeric/float-validated.h"
@@ -301,6 +302,7 @@ class UpperInterval {
     //! \brief Construct a singleton interval.
     UpperInterval(ExactFloat point) : l(point.raw()), u(point.raw()) { }
     UpperInterval(ValidatedFloat point) : l(point.lower_raw()), u(point.upper_raw()) { }
+    UpperInterval(Real point) : UpperInterval(ValidatedFloat(point)) { }
 
     //! \brief Set the lower bound of the interval.
     Void set_lower(LowerFloat lower) { l=lower.raw(); }

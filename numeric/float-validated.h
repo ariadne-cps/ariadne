@@ -78,6 +78,8 @@ class LowerFloat {
     LowerFloat(const ExactFloat& x) : l(x.raw()) { }
     //! \brief Construct from a generic number.
     explicit LowerFloat(const Number<Lower>& x);
+    //! \brief Assign from a generic number
+    LowerFloat& operator=(const Number<Lower>& x);
     //! \brief Convert to generic number type.
     operator Number<Lower> () const;
     //! \brief Convert from a real number.
@@ -96,10 +98,18 @@ class LowerFloat {
     friend LowerFloat operator+(LowerFloat, LowerFloat);
     friend LowerFloat operator-(LowerFloat, UpperFloat);
     friend UpperFloat operator-(UpperFloat, LowerFloat);
+    friend LowerFloat operator*(LowerFloat, LowerFloat);
+    friend LowerFloat operator/(LowerFloat, UpperFloat);
+    friend UpperFloat operator/(UpperFloat, LowerFloat);
     friend UpperFloat rec(LowerFloat);
     friend LowerFloat max(LowerFloat, LowerFloat);
     friend LowerFloat min(LowerFloat, LowerFloat);
     friend OutputStream& operator<<(OutputStream& os, LowerFloat);
+
+    friend ApproximateFloat operator+(ApproximateFloat, ApproximateFloat);
+    friend ApproximateFloat operator-(ApproximateFloat, ApproximateFloat);
+    friend ApproximateFloat operator*(ApproximateFloat, ApproximateFloat);
+    friend ApproximateFloat operator/(ApproximateFloat, ApproximateFloat);
   private:
     Float l;
 };
@@ -127,6 +137,8 @@ class UpperFloat {
     explicit UpperFloat(const Integer& x);
     //! \brief Construct from a generic number.
     explicit UpperFloat(const Number<Upper>& x);
+    //! \brief Assign from a generic number
+    UpperFloat& operator=(const Number<Upper>& x);
     //! \brief Convert to generic number type.
     operator Number<Upper> () const;
     //! \brief Convert from a floating-point number with an exact representation.
@@ -145,6 +157,7 @@ class UpperFloat {
     friend LowerFloat operator-(LowerFloat, UpperFloat);
     friend UpperFloat operator*(UpperFloat, UpperFloat);
     friend UpperFloat operator/(UpperFloat, LowerFloat);
+    friend LowerFloat operator/(LowerFloat, UpperFloat);
     friend UpperFloat& operator+=(UpperFloat&, UpperFloat);
     friend UpperFloat& operator*=(UpperFloat&, UpperFloat);
     friend UpperFloat& operator/=(UpperFloat&, Nat);
@@ -155,6 +168,11 @@ class UpperFloat {
     friend UpperFloat max(UpperFloat, UpperFloat);
     friend UpperFloat min(UpperFloat, UpperFloat);
     friend OutputStream& operator<<(OutputStream& os, UpperFloat);
+
+    friend ApproximateFloat operator+(ApproximateFloat, ApproximateFloat);
+    friend ApproximateFloat operator-(ApproximateFloat, ApproximateFloat);
+    friend ApproximateFloat operator*(ApproximateFloat, ApproximateFloat);
+    friend ApproximateFloat operator/(ApproximateFloat, ApproximateFloat);
   private:
     Float u;
 };
@@ -221,6 +239,8 @@ class ValidatedFloat {
     explicit ValidatedFloat(const Real& x);
     //! \brief Construct from a generic number.
     explicit ValidatedFloat(const Number<Validated>& x);
+    //! \brief Assign from a generic number
+    ValidatedFloat& operator=(const Number<Validated>& x);
     //! \brief Convert to generic number type.
     operator Number<Validated> () const;
 
@@ -671,7 +691,6 @@ inline ValidatedFloat operator+(const ExactFloat& x1, const ExactFloat& x2) { re
 inline ValidatedFloat operator-(const ExactFloat& x1, const ExactFloat& x2) { return sub(x1,x2); }
 inline ValidatedFloat operator*(const ExactFloat& x1, const ExactFloat& x2) { return mul(x1,x2); }
 inline ValidatedFloat operator/(const ExactFloat& x1, const ExactFloat& x2) { return div(x1,x2); }
-inline ValidatedFloat operator/(const ExactFloat& x1, Int n2) { return div(x1,ExactFloat(n2)); }
 
 // Standard equality operators
 //! \related ValidatedFloat \brief Tests if \a i1 provides tighter bounds than \a i2.

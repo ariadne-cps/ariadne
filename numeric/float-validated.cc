@@ -38,9 +38,12 @@
 #include "numeric/decimal.h"
 #include "numeric/dyadic.h"
 #include "numeric/rational.h"
+#include "numeric/real.h"
+#include "numeric/number.h"
 #include "numeric/float.h"
 #include "numeric/float-exact.h"
 #include "numeric/float-validated.h"
+#include "numeric/float-approximate.h"
 
 
 namespace Ariadne {
@@ -60,6 +63,14 @@ inline double _div_up(volatile double x, volatile double y) { set_rounding_upwar
 inline Float cos_down(Float x) { set_rounding_downward(); Float y=cos_rnd(x); return y; }
 inline Float cos_up(Float x) { set_rounding_upward(); Float y=cos_rnd(x); return y; }
 } // namespace
+
+LowerFloat::LowerFloat(Number<Lower> const& x) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+UpperFloat::UpperFloat(Number<Upper> const& x) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
 
 LowerFloat operator+(LowerFloat x)
 {
@@ -133,6 +144,18 @@ UpperFloat operator-(UpperFloat x1, LowerFloat x2)
     return UpperFloat(ru);
 }
 
+LowerFloat operator*(LowerFloat x1, LowerFloat x2)
+{
+    ARIADNE_PRECONDITION(x1.raw()>=0 && x2.raw()>=0);
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double x1l=internal_cast<volatile double&>(x1.raw());
+    volatile double x2l=internal_cast<volatile double&>(x2.raw());
+    set_rounding_mode(downward);
+    volatile double rl=x1l*x2l;
+    set_rounding_mode(rnd);
+    return LowerFloat(rl);
+}
+
 OutputStream& operator<<(OutputStream& os, LowerFloat x) {
     rounding_mode_t rnd=get_rounding_mode();
     set_rounding_downward();
@@ -180,10 +203,6 @@ UpperFloat& operator*=(UpperFloat& x1, UpperFloat x2) {
      return x1=x1*x2;
 }
 
-UpperFloat& operator/=(UpperFloat& x1, Nat n2) {
-     return x1=x1/n2;
-}
-
 UpperFloat rec(LowerFloat x)
 {
     rounding_mode_t rnd=get_rounding_mode();
@@ -222,6 +241,10 @@ LowerFloat max(LowerFloat x1, LowerFloat x2) {
 }
 
 const ValidatedFloat pi_val=ValidatedFloat(pi_down,pi_up);
+
+ValidatedFloat::ValidatedFloat(Number<Validated> const& x) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
 
 Nat ValidatedFloat::output_precision = 6;
 
@@ -540,7 +563,7 @@ ValidatedFloat cos(ValidatedFloat i)
 
     if(i.radius().raw()>2*_pi_down) { return ValidatedFloat(-1.0,+1.0); }
 
-    Float n=floor(i.lower_raw().get_d()/(2*_pi_approx)+0.5);
+    Float n=floor(i.lower_raw()/(2*_pi_approx)+0.5);
     i=i-two*ExactFloat(n)*pi_val;
 
     ARIADNE_ASSERT(i.lower_raw()<=pi_up);
@@ -706,6 +729,15 @@ operator>>(InputStream& is, ValidatedFloat& ivl)
 }
 
 
+ApproximateFloat create_float(Number<Approximate> x) { return ApproximateFloat(x); }
+LowerFloat create_float(Number<Lower> x) { return LowerFloat(x); }
+UpperFloat create_float(Number<Upper> x) { return UpperFloat(x); }
+ValidatedFloat create_float(Number<Validated> x) { return ValidatedFloat(x); }
+ValidatedFloat create_float(Number<Effective> x) { return ValidatedFloat(x); }
+ValidatedFloat create_float(Number<Exact> x) { return ValidatedFloat(x); }
+ValidatedFloat create_float(Real r) { return ValidatedFloat(r); }
+ValidatedFloat create_float(Rational q) { return ValidatedFloat(q); }
+ExactFloat create_float(Integer z) { return ExactFloat(z); }
 
 } // namespace Ariadne
 

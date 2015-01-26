@@ -202,8 +202,9 @@ template<> class Box<ExactInterval>
 
     //! An approximation to the Lesbegue measure (area, volume) of the box.
     ApproximateNumber measure() const {
-        ApproximateNumber meas=1u;
-        for(Nat i=0; i!=this->size(); ++i) {
+        ARIADNE_ASSERT(this->size()!=0);
+        ApproximateNumber meas=(*this)[0].width();
+        for(Nat i=1; i!=this->size(); ++i) {
             meas *= (*this)[i].width();
         }
         return meas;

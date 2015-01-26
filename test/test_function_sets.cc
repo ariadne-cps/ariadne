@@ -75,7 +75,7 @@ class TestConstrainedImageSet
 
         // Test the polytope
         EffectiveConstrainedImageSet polytope((IntervalSet(-2,+2),IntervalSet(-2,+2)),(x[0],x[1]));
-        polytope.new_parameter_constraint(x[0]+ExactFloat(1.5)*+x[1]<=1);
+        polytope.new_parameter_constraint(x[0]+Real(1.5)*+x[1]<=1);
         box1=ExactBox( (ExactInterval(1.0,2.0),ExactInterval(0.5,1.0)) );
         box2=ExactBox( (ExactInterval(0.0,1.0),ExactInterval(0.5,1.0)) );
         ARIADNE_TEST_ASSERT(polytope.separated(box1));
@@ -106,9 +106,9 @@ class TestConstrainedImageSet
         plot("test_function_sets-geometry-parabola",widen(parabola.bounding_box(),0.5),set_colour,parabola,box_colour,box1,box_colour,box2);
 
         // Test whether the second iterate of the Henon map intersects a box
-        ExactFloat half(0.5);
+        Real half(0.5);
         BoxSet d(2,IntervalSet(-half,+half));
-        ExactFloat a(1.5); ExactFloat b(0.375);
+        Real a(1.5); Real b(0.375);
         EffectiveVectorFunction h((a-x[0]*x[0]-b*x[1],x[0]));
         EffectiveVectorFunction f=compose(h,h);
         EffectiveConstrainedImageSet set(d,f);
@@ -196,7 +196,7 @@ class TestConstrainedImageSet
         EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(2,1);
         BoxSet d(3,IntervalSet(-1,+1));
         EffectiveConstrainedImageSet set(d,(s0,s1+s2*s2/2));
-        set.new_parameter_constraint(s0+ExactFloat(0.75)*s1+s2<=0.0);
+        set.new_parameter_constraint(s0+Real(0.75)*s1+s2<=Real(0));
 
         EffectiveConstrainedImageSet subset1,subset2;
         make_lpair(subset1,subset2)=set.split(0);
@@ -209,10 +209,10 @@ class TestConstrainedImageSet
         make_lpair(subset11,subset12)=subset1.split(0);
         make_lpair(subset21,subset22)=subset2.split(0);
         ARIADNE_TEST_PRINT(subset11);
-        subset11.apply(EffectiveVectorFunction((x0+ExactFloat(2.5),x1)));
+        subset11.apply(EffectiveVectorFunction((x0+Real(2.5),x1)));
         ARIADNE_TEST_PRINT(subset11);
 
-        set.apply(EffectiveVectorFunction((x0-ExactFloat(2.5),x1)));
+        set.apply(EffectiveVectorFunction((x0-Real(2.5),x1)));
         Figure figure;
         figure.set_bounding_box(ExactBox({{-4.0,+4.0},{-4.0,+4.0}}));
         figure.set_fill_colour(1.0,1.0,1.0);

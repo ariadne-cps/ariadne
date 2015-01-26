@@ -36,7 +36,7 @@ template<class X> Matrix<X> Matrix<X>::zero(SizeType m, SizeType n) {
 
 template<class X> Matrix<X> Matrix<X>::identity(SizeType n) {
     Matrix<X> A(n,n,X(0));
-    for(SizeType i=0; i!=n; ++i) { A.at(i,i)=1u; }
+    for(SizeType i=0; i!=n; ++i) { A.at(i,i)=1; }
     return std::move(A);
 }
 
@@ -107,9 +107,9 @@ template<class X> InputStream& Matrix<X>::read(InputStream& is) {
 template<class X> decltype(mag(declval<X>())) sup_norm(const Matrix<X>& A)
 {
     typedef decltype(mag(declval<X>())+mag(declval<X>())) R;
-    R result=0u;
+    R result=A.zero_element();
     for(SizeType i=0; i!=A.row_size(); ++i) {
-        R row_sum=0u;
+        R row_sum=A.zero_element();;
         for(SizeType j=0; j!=A.column_size(); ++j) {
             row_sum+=mag(A[i][j]);
         }

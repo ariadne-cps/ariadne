@@ -79,7 +79,7 @@ class TestOptimiser
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
         EffectiveScalarFunction f=(sqr(x[0])+sqr(x[1]));
         ARIADNE_TEST_PRINT(f);
-        ExactFloat a(1.5); ExactFloat b(0.25);
+        Real a(1.5); Real b(0.25);
         EffectiveVectorFunction g={a+x[0]+2*x[1]+b*x[0]*x[1]};
         ARIADNE_TEST_PRINT(g);
         ExactIntervalVector C={{0.0,0.0}};
@@ -100,7 +100,7 @@ class TestOptimiser
         //EffectiveVectorFunction g( (x[0]-1, x[0]+x[1]*x[1], x[1]*x[1]) );
         ExactBox D = ExactBox{{-1.0,2.0},{-3.0,5.0},{-3.0,5.0}};
         ARIADNE_TEST_PRINT(D);
-        EffectiveVectorFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-ExactFloat(0.875)};
+        EffectiveVectorFunction g = {2*x[1]+x[0], x[0]+x[1]*x[1]-Real(0.875)};
         ARIADNE_TEST_PRINT(g);
         ExactBox C = ExactBox{{0.0,inf},{0.0,inf}};
         ARIADNE_TEST_PRINT(C);
@@ -118,8 +118,8 @@ class TestOptimiser
         ARIADNE_TEST_PRINT(f);
         ExactBox D = ExactBox{{-1.0,2.0},{-3.0,5.0},{1.25,2.25}};
         ARIADNE_TEST_PRINT(D);
-        EffectiveScalarFunction g = x[0]*x[1]-x[0]*ExactFloat(1.25);
-        EffectiveVectorFunction h = {ExactFloat(1.5)+x[0]+2*x[1]+ExactFloat(0.25)*x[0]*x[1]};
+        EffectiveScalarFunction g = x[0]*x[1]-x[0]*Real(1.25);
+        EffectiveVectorFunction h = {Real(1.5)+x[0]+2*x[1]+Real(0.25)*x[0]*x[1]};
         EffectiveVectorFunction gh=join(g,h);
         ARIADNE_TEST_PRINT(gh);
         ExactBox C = ExactBox {{-1.0,-0.5},{0.0,0.0}};

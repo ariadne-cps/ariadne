@@ -50,7 +50,8 @@ class Constraint {
     Constraint(FunctionType const& f, BoundType const& x)
         : _function(f), _lower_bound(x), _upper_bound(x) { }
 
-    template< class FF, class RR, class=EnableIf<IsConvertible<FF,F>>, class=EnableIf<IsConvertible<RR,R>> >
+    // FIXME: Should require convertibility of RR to R
+    template< class FF, class RR, class=EnableIf<IsConvertible<FF,F>>, class=EnableIf<IsConstructible<R,RR>> >
     Constraint(const Constraint<FF,RR>& c)
         : _function(static_cast<F>(c.function())), _lower_bound(c.lower_bound()), _upper_bound(c.upper_bound()) { }
 

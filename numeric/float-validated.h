@@ -37,14 +37,18 @@
 #include "numeric/rounding.h"
 #include "numeric/float.h"
 #include "numeric/float-exact.h"
+#include "numeric/float-lower.h"
+#include "numeric/float-upper.h"
 
 namespace Ariadne {
 
 // Forward declarations
 class Float;
+class ApproximateFloat;
+class LowerFloat;
+class UpperFloat;
 class ValidatedFloat;
 class ExactFloat;
-
 
 class Real;
 
@@ -53,129 +57,6 @@ class Rational;
 class Dyadic;
 class Decimal;
 
-class LowerFloat;
-class UpperFloat;
-using PositiveUpperFloat = UpperFloat;
-
-//! \ingroup NumericModule
-//! \brief Floating-point lower bounds for real numbers.
-class LowerFloat {
-  public:
-    typedef Lower Paradigm;
-    typedef LowerFloat NumericType;
-  public:
-    //! \brief Default constructor yields a lower bound of \a 0.
-    LowerFloat() : l(0.0) { }
-    //! \brief Convert from a builtin integer.
-    template<class N, EnableIf<IsIntegral<N>> = dummy> LowerFloat(N n) : l(n) { }
-    //! \brief Convert from a builtin floating-point value.
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit LowerFloat(X x) : l(x) { }
-    //! \brief Explicitly construct from a raw floating-point value.
-    explicit LowerFloat(Float x) : l(x) { }
-    //! \brief Convert from floating-point bounds on a number.
-    inline LowerFloat(const ValidatedFloat& x);
-    //! \brief Convert from a floating-point number with an exact representation.
-    LowerFloat(const ExactFloat& x) : l(x.raw()) { }
-    //! \brief Construct from a generic number.
-    explicit LowerFloat(const Number<Lower>& x);
-    //! \brief Assign from a generic number
-    LowerFloat& operator=(const Number<Lower>& x);
-    //! \brief Convert to generic number type.
-    operator Number<Lower> () const;
-    //! \brief Convert from a real number.
-    explicit LowerFloat(const Real& x);
-    explicit LowerFloat(const Rational& x);
-    explicit LowerFloat(const Integer& x);
-    //! \brief Explicitly convert to the raw floating-point value.
-    explicit operator Float const& () const { return l; }
-    //! \brief Get the raw value.
-    Float const& raw() const { return l; }
-    Float& raw() { return l; }
-    //! \brief Get the value to double-precision.
-    double get_d() const { return l.get_d(); }
-    friend LowerFloat operator+(LowerFloat);
-    friend UpperFloat operator-(LowerFloat);
-    friend LowerFloat operator+(LowerFloat, LowerFloat);
-    friend LowerFloat operator-(LowerFloat, UpperFloat);
-    friend UpperFloat operator-(UpperFloat, LowerFloat);
-    friend LowerFloat operator*(LowerFloat, LowerFloat);
-    friend LowerFloat operator/(LowerFloat, UpperFloat);
-    friend UpperFloat operator/(UpperFloat, LowerFloat);
-    friend UpperFloat rec(LowerFloat);
-    friend LowerFloat max(LowerFloat, LowerFloat);
-    friend LowerFloat min(LowerFloat, LowerFloat);
-    friend OutputStream& operator<<(OutputStream& os, LowerFloat);
-
-    friend ApproximateFloat operator+(ApproximateFloat, ApproximateFloat);
-    friend ApproximateFloat operator-(ApproximateFloat, ApproximateFloat);
-    friend ApproximateFloat operator*(ApproximateFloat, ApproximateFloat);
-    friend ApproximateFloat operator/(ApproximateFloat, ApproximateFloat);
-  private:
-    Float l;
-};
-
-//! \ingroup NumericModule
-//! \brief Floating-point upper bounds for real numbers.
-class UpperFloat {
-  public:
-    typedef Upper Paradigm;
-    typedef UpperFloat NumericType;
-  public:
-    //! \brief Default constructor yields an upper bound of \a 0.
-    UpperFloat() : u(0.0) { }
-    //! \brief Convert from a builtin integer.
-    template<class N, EnableIf<IsIntegral<N>> = dummy> UpperFloat(N n) : u(n) { }
-    //! \brief Convert from a builtin floating-point value.
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit UpperFloat(X x) : u(x) { }
-    //! \brief Explicitly construct from a raw floating-point value.
-    explicit UpperFloat(Float x) : u(x) { }
-    //! \brief Convert from floating-point bounds on a number.
-    inline UpperFloat(const ValidatedFloat& x);
-    //! \brief Convert from a real number.
-    explicit UpperFloat(const Real& x);
-    explicit UpperFloat(const Rational& x);
-    explicit UpperFloat(const Integer& x);
-    //! \brief Construct from a generic number.
-    explicit UpperFloat(const Number<Upper>& x);
-    //! \brief Assign from a generic number
-    UpperFloat& operator=(const Number<Upper>& x);
-    //! \brief Convert to generic number type.
-    operator Number<Upper> () const;
-    //! \brief Convert from a floating-point number with an exact representation.
-    UpperFloat(const ExactFloat& x) : u(x.raw()) { }
-    //! \brief Explicitly convert to the raw floating-point value.
-    explicit operator Float const& () const { return u; }
-    //! \brief Get the raw value.
-    Float const& raw() const { return u; }
-    Float& raw() { return u; }
-    //! \brief Get the value to double-precision.
-    double get_d() const { return u.get_d(); }
-    friend UpperFloat operator+(UpperFloat);
-    friend LowerFloat operator-(UpperFloat);
-    friend UpperFloat operator+(UpperFloat, UpperFloat);
-    friend UpperFloat operator-(UpperFloat, LowerFloat);
-    friend LowerFloat operator-(LowerFloat, UpperFloat);
-    friend UpperFloat operator*(UpperFloat, UpperFloat);
-    friend UpperFloat operator/(UpperFloat, LowerFloat);
-    friend LowerFloat operator/(LowerFloat, UpperFloat);
-    friend UpperFloat& operator+=(UpperFloat&, UpperFloat);
-    friend UpperFloat& operator*=(UpperFloat&, UpperFloat);
-    friend UpperFloat& operator/=(UpperFloat&, Nat);
-    friend LowerFloat rec(UpperFloat);
-    friend UpperFloat pow(UpperFloat, Nat);
-    friend UpperFloat half(UpperFloat);
-    friend UpperFloat abs(UpperFloat);
-    friend UpperFloat max(UpperFloat, UpperFloat);
-    friend UpperFloat min(UpperFloat, UpperFloat);
-    friend OutputStream& operator<<(OutputStream& os, UpperFloat);
-
-    friend ApproximateFloat operator+(ApproximateFloat, ApproximateFloat);
-    friend ApproximateFloat operator-(ApproximateFloat, ApproximateFloat);
-    friend ApproximateFloat operator*(ApproximateFloat, ApproximateFloat);
-    friend ApproximateFloat operator/(ApproximateFloat, ApproximateFloat);
-  private:
-    Float u;
-};
 
 //! \ingroup NumericModule
 //! \brief Intervals with floating-point endpoints supporting outwardly-rounded arithmetic.

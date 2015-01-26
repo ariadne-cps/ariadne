@@ -63,13 +63,13 @@ Bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
 
 
 template<class F> TaylorModel<Validated,F>::TaylorModel()
-    : _expansion(0), _error(0), _sweeper()
+    : _expansion(0), _error(0u), _sweeper()
 {
 }
 
 
 template<class F> TaylorModel<Validated,F>::TaylorModel(SizeType as, Sweeper swp)
-    : _expansion(as), _error(0), _sweeper(swp)
+    : _expansion(as), _error(0u), _sweeper(swp)
 {
 }
 
@@ -368,7 +368,7 @@ template<class F> inline Void _acc(TaylorModel<Validated,F>& r, const ValidatedF
 
     if(c.lower().raw()==-inf || c.upper().raw()==+inf) {
         r.clear();
-        r.set_error(+infty);
+        r.set_error(ErrorFloat(+infty));
         return;
     }
 
@@ -483,7 +483,7 @@ template<class F> inline Void _sma(TaylorModel<Validated,F>& r, const TaylorMode
     ARIADNE_ASSERT_MSG(y.error().raw()>=0,"y="<<y);
 
     VOLATILE Float u,ml,myv;
-    ErrorFloat te=0; // Twice the maximum accumulated error
+    ErrorFloat te=0u; // Twice the maximum accumulated error
     ErrorFloat err=0u; // Twice the maximum accumulated error
     ValidatedApproximateFloat clmu=c;
 
@@ -1056,7 +1056,7 @@ template<class F> Void TaylorModel<Validated,F>::antidifferentiate(SizeType k) {
     TaylorModel<Validated,F>& x=*this;
     ARIADNE_PRECONDITION(k<x.argument_size());
 
-    ErrorFloat e=0;
+    ErrorFloat e=0u;
     for(typename TaylorModel<Validated,F>::Iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         MultiIndex& xa=xiter->key();
         ExactFloat& xv=xiter->data();

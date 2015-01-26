@@ -139,10 +139,10 @@ class ValidatedFloat {
     const ExactFloat midpoint() const { return ExactFloat(half_exact(add_approx(l,u))); }
     const ExactFloat value() const { return ExactFloat(half_exact(add_approx(l,u))); }
     //! \brief An over-approximation to the radius of the interval.
-    const UpperFloat radius() const { return UpperFloat(half_exact(sub_up(u,l))); }
-    const UpperFloat error() const { Float c=half_exact(add_approx(l,u)); Float e=max(sub_up(u,c),sub_up(c,l)); return UpperFloat(e); }
+    const PositiveUpperFloat radius() const { return PositiveUpperFloat(half_exact(sub_up(u,l))); }
+    const PositiveUpperFloat error() const { Float c=half_exact(add_approx(l,u)); Float e=max(sub_up(u,c),sub_up(c,l)); return PositiveUpperFloat(e); }
     //! \brief An over-approximation to the width of the interval.
-    const UpperFloat width() const { return UpperFloat(sub_up(u,l)); }
+    const PositiveUpperFloat width() const { return PositiveUpperFloat(sub_up(u,l)); }
 
     //! \brief Tests if the interval is empty.
     Bool empty() const { return l>u; }

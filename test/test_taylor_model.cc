@@ -232,7 +232,7 @@ Void TestTaylorModel::test_arithmetic()
 {
     {
         ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(1,0,swp);
-        ValidatedTaylorModel e=ValidatedTaylorModel::error(1,1.0_exact,swp);
+        ValidatedTaylorModel e=ValidatedTaylorModel::error(1,1.0_error,swp);
         ARIADNE_TEST_EQUALS(1-2*x+3*(x^2)+e*3/4, ValidatedTaylorModel({{{0},1.0},{{1},-2.0},{{2},3.0}}, 0.75,swp));
     }
 
@@ -255,7 +255,7 @@ Void TestTaylorModel::test_arithmetic()
     ValidatedTaylorModel o=ValidatedTaylorModel::constant(2,1.0_exact,swp);
     ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(2,0,swp);
     ValidatedTaylorModel y=ValidatedTaylorModel::coordinate(2,1,swp);
-    ValidatedTaylorModel e=ValidatedTaylorModel::ball(2,1.0_exact,swp);
+    ValidatedTaylorModel e=ValidatedTaylorModel::ball(2,1.0_error,swp);
 
     ValidatedTaylorModel t=1-2*x+3*y;
 
@@ -377,7 +377,7 @@ Void TestTaylorModel::test_refinement()
 {
     ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(2,0,swp);
     ValidatedTaylorModel y=ValidatedTaylorModel::coordinate(2,1,swp);
-    ValidatedTaylorModel e=ValidatedTaylorModel::error(2,1u,swp);
+    ValidatedTaylorModel e=ValidatedTaylorModel::error(2,1.0_error,swp);
 
     ARIADNE_TEST_BINARY_PREDICATE(refines,1+x+(x^2)/2+(x^3)/4,1+x+(x^2)/2+e/4);
     ARIADNE_TEST_BINARY_PREDICATE(not refines,1+x+(x^2)/2+(x^3)/6+e/pow(2.0_exact,31),1+x+(x^2)/2+e/6);

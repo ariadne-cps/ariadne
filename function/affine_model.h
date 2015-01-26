@@ -135,16 +135,16 @@ class AffineModel<ValidatedNumber>
     typedef ErrorFloat ErrorType;
 
     explicit AffineModel() : _c(), _g() { }
-    explicit AffineModel(Nat n) : _c(0.0), _g(n,ExactFloat(0.0)), _e(0.0) { }
+    explicit AffineModel(Nat n) : _c(0.0), _g(n,ExactFloat(0.0)), _e(0u) { }
     explicit AffineModel(const ExactFloat& c, const Covector<ExactFloat>& g, const ErrorFloat& e) : _c(c), _g(g), _e(e) { }
-    explicit AffineModel(ExactFloat c, InitializerList<ExactFloat> g) : _c(c), _g(g), _e(0.0) { }
+    explicit AffineModel(ExactFloat c, InitializerList<ExactFloat> g) : _c(c), _g(g), _e(0u) { }
 
     AffineModel<ValidatedNumber>& operator=(const ExactFloat& c) {
-        this->_c=c; for(Nat i=0; i!=this->_g.size(); ++i) { this->_g[i]=0; } this->_e=0; return *this; }
+        this->_c=c; for(Nat i=0; i!=this->_g.size(); ++i) { this->_g[i]=0; } this->_e=0u; return *this; }
     static AffineModel<ValidatedNumber> constant(Nat n, const ExactFloat& c) {
-        return AffineModel<ValidatedNumber>(c,Covector<ExactFloat>(n,0),ErrorFloat(0)); }
+        return AffineModel<ValidatedNumber>(c,Covector<ExactFloat>(n,0),ErrorFloat(0u)); }
     static AffineModel<ValidatedNumber> variable(Nat n, Nat j) {
-        return AffineModel<ValidatedNumber>(0,Covector<ExactFloat>::unit(n,j),0); }
+        return AffineModel<ValidatedNumber>(0,Covector<ExactFloat>::unit(n,j),0u); }
 
 
     const Covector<ExactFloat>& a() const { return this->_g; }

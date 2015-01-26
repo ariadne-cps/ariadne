@@ -582,7 +582,7 @@ differential_space_time_flow_step(const ValidatedVectorFunction& f, const ExactB
         ValidatedTaylorModel& model=tphi.model(i);
         Expansion<ExactFloat>& expansion=model.expansion();
         ErrorFloat& error=model.error();
-        error=0;
+        error=0u;
         expansion.reserve(dphic[i].expansion().number_of_nonzeros());
 
         ValidatedDifferential::ConstIterator citer=dphic[i].begin();
@@ -899,11 +899,11 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBox& do
     Vector<ErrorFloat> err(n);
 
     set_rounding_upward();
-    Vector<ErrorFloat> rad(n+1);
+    Vector<ErrorFloat> rad(n+1,0u);
     for(Nat i=0; i!=n; ++i) {
-        rad[i] = max(dom[i].upper()-mid[i].lower(),mid[i].upper()-dom[i].lower());
+        rad[i] = ErrorFloat(max(dom[i].upper()-mid[i].lower(),mid[i].upper()-dom[i].lower()));
     }
-    rad[n] = h;
+    rad[n] = mag(h);
 
     for(Nat i=0; i!=n; ++i) {
         for(Expansion<ValidatedNumber>::ConstIterator iter=bdphi[i].begin(); iter!=bdphi[i].end(); ++iter) {
@@ -912,7 +912,7 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBox& do
                 const ValidatedNumber& rng = iter->data();
                 const ValidatedNumber& mid = mdphi[i][a];
                 ARIADNE_ASSERT(rng.lower()<=mid.lower() && mid.upper()<=rng.upper());
-                ErrorFloat mag = max(rng.upper()-mid.lower(),mid.upper()-rng.lower());
+                ErrorFloat mag = ErrorFloat(max(rng.upper()-mid.lower(),mid.upper()-rng.lower()));
                 for(Nat j=0; j!=n+1; ++j) { mag *= pow(rad[j],Nat(a[j])); }
                 err[i] += mag;
             }

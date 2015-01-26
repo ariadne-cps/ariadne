@@ -76,7 +76,7 @@ inline OutputStream& operator<<(OutputStream& os, const Representation<Float>& f
     return os;
 }
 
-inline OutputStream& operator<<(OutputStream& os, const Representation<UpperFloat>& flt_repr)
+inline OutputStream& operator<<(OutputStream& os, const Representation<PositiveUpperFloat>& flt_repr)
 {
     return os << reinterpret_cast<Representation<Float>const&>(flt_repr);
 }
@@ -674,7 +674,7 @@ template<class M> Vector<typename VectorFunctionPatch<M>::ErrorType> const Vecto
 
 template<class M> typename VectorFunctionPatch<M>::ErrorType const VectorFunctionPatch<M>::error() const
 {
-    ErrorFloat e=0;
+    ErrorFloat e=0u;
     for(SizeType i=0; i!=this->result_size(); ++i) {
         e=max(e,this->models()[i].error());
     }

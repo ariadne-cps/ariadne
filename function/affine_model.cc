@@ -149,7 +149,7 @@ ValidatedAffineModel affine_model(const ValidatedTaylorModel& taylor_model) {
     set_rounding_upward();
     for(ValidatedTaylorModel::ConstIterator iter=taylor_model.begin(); iter!=taylor_model.end(); ++iter) {
         if(iter->key().degree()>=2) {
-            affine_model.set_error(abs(iter->data()+affine_model.error()));
+            affine_model.set_error(mag(iter->data())+affine_model.error());
         } else if(iter->key().degree()==1) {
             for(Nat i=0; i!=taylor_model.argument_size(); ++i) {
                 if(iter->key()[i]==1) {

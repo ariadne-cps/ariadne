@@ -46,7 +46,7 @@ Vector<UpperInterval> ranges(const Vector<ValidatedTaylorModel>& f) {
 }
 
 Vector<ValidatedTaylorModel>& clobber(Vector<ValidatedTaylorModel>& h) {
-    for(Nat i=0; i!=h.size(); ++i) { h[i].set_error(0); } return h; }
+    for(Nat i=0; i!=h.size(); ++i) { h[i].set_error(0u); } return h; }
 
 // Compute the Jacobian over an arbitrary domain
 Matrix<ValidatedNumber>
@@ -600,7 +600,7 @@ KrawczykSolver::implicit_step(const ValidatedVectorFunction& f,
     ARIADNE_LOG(4,"    f="<<f<<"\n");
     //ARIADNE_LOG(5,"  e="<<sup_error(x)<<"  x="<<x<<"\n");
     ValidatedVectorFunctionModel mx(x);
-    for(Nat i=0; i!=mx.size(); ++i) { mx[i].set_error(0); }
+    for(Nat i=0; i!=mx.size(); ++i) { mx[i].set_error(0u); }
     ARIADNE_LOG(5,"    mx="<<mx<<"\n");
     Vector<ErrorFloat> ex(nx);
     for(Nat i=0; i!=nx; ++i) { ex[i]=x[i].error(); }

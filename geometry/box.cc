@@ -271,9 +271,9 @@ Vector<ExactInterval> intersection(const Vector<ExactInterval>& v1, const Vector
 
 PositiveUpperNumber radius(const Vector<ExactInterval>& v)
 {
-    PositiveUpperNumber r=0;
+    PositiveUpperNumber r=0u;
     for(SizeType i=0; i!=v.size(); ++i) {
-        r=max(r,v[i].radius());
+        r=max(r,mag(v[i].radius()));
     }
     return r;
 }

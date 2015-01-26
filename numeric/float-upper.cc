@@ -145,5 +145,34 @@ UpperFloat max(UpperFloat x1, UpperFloat x2) {
     return UpperFloat(max(x1.raw(),x2.raw()));
 }
 
+
+
+
+PositiveUpperFloat operator+(PositiveUpperFloat x1, PositiveUpperFloat x2) {
+    return PositiveUpperFloat(add_up(x1.raw(),x2.raw()));
+}
+
+PositiveUpperFloat operator-(PositiveUpperFloat x1, LowerFloat x2) {
+    ARIADNE_PRECONDITION(x1.raw()>=x2.raw());
+    return PositiveUpperFloat(sub_up(x1.raw(),x2.raw()));
+}
+
+PositiveUpperFloat operator*(PositiveUpperFloat x1, PositiveUpperFloat x2) {
+    return PositiveUpperFloat(mul_up(x1.raw(),x2.raw()));
+}
+
+PositiveUpperFloat operator/(PositiveUpperFloat x1, LowerFloat x2) {
+    ARIADNE_PRECONDITION(x2.raw()>=0);
+    return PositiveUpperFloat(div_up(x1.raw(),x2.raw()));
+}
+
+PositiveUpperFloat pow(PositiveUpperFloat x, Nat m) {
+    return PositiveUpperFloat(pow_up(x.raw(),m));
+}
+
+PositiveUpperFloat half(PositiveUpperFloat x) {
+    return PositiveUpperFloat(half(x.raw()));
+}
+
 } // namespace Ariadne
 

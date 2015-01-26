@@ -50,7 +50,7 @@ template<> class TaylorSeries<ValidatedFloat> {
     Array<ExactFloat> _expansion;
     ErrorFloat _error;
   public:
-    TaylorSeries(const ExactInterval& dom, DegreeType deg) : _domain(dom), _expansion(deg+1), _error(0) { }
+    TaylorSeries(const ExactInterval& dom, DegreeType deg) : _domain(dom), _expansion(deg+1), _error(0u) { }
 
     TaylorSeries(const ExactInterval& domain, const ExactFloat& centre, DegreeType degree,
                  AnalyticFunction const& function);

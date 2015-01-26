@@ -31,7 +31,9 @@
 #include <iostream>
 #include <cassert>
 
+#include "utility/macros.h"
 #include "utility/declarations.h"
+#include "utility/metaprogramming.h"
 
 #include "utility/tribool.h"
 #include "numeric/rounding.h"
@@ -102,6 +104,29 @@ class UpperFloat {
   private:
     Float u;
 };
+
+class PositiveExactFloat;
+
+class PositiveUpperFloat : public UpperFloat {
+  public:
+    PositiveUpperFloat() : UpperFloat() { }
+    explicit PositiveUpperFloat(Float x) : UpperFloat(x) { ARIADNE_DEBUG_PRECONDITION(x>=0.0); }
+    explicit PositiveUpperFloat(UpperFloat x) : PositiveUpperFloat(x.raw()) { }
+
+    template<class M, EnableIf<And<IsIntegral<M>,IsUnsigned<M>>> =dummy>
+        PositiveUpperFloat(M m) :  UpperFloat(m) { }
+    PositiveUpperFloat(PositiveExactFloat x) :  UpperFloat(x) { }
+
+    friend PositiveUpperFloat operator+(PositiveUpperFloat x1, PositiveUpperFloat x2);
+    friend PositiveUpperFloat operator-(PositiveUpperFloat x1, LowerFloat x2);
+    friend PositiveUpperFloat operator*(PositiveUpperFloat x1, PositiveUpperFloat x2);
+    friend PositiveUpperFloat operator/(PositiveUpperFloat x1, LowerFloat x2);
+    friend PositiveUpperFloat pow(PositiveUpperFloat x, Nat m);
+    friend PositiveUpperFloat half(PositiveUpperFloat x);
+};
+
+inline ErrorFloat operator"" _error(long double lx) { double x=lx; assert(x==lx); return ErrorFloat(Float(x)); }
+
 
 
 } // namespace Ariadne

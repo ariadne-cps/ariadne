@@ -117,7 +117,6 @@ inline ValidatedFloat operator/(const ExactFloat& x1,  const ValidatedFloat& x2)
 
 inline ExactFloat neg(const ExactFloat& x) { return ExactFloat(neg_exact(x.raw())); }
 inline ExactFloat abs(const ExactFloat& x) { return ExactFloat(abs_exact(x.raw())); }
-inline ExactFloat mag(const ExactFloat& x) { return ExactFloat(abs_exact(x.raw())); }
 
 inline OutputStream& operator<<(OutputStream& os, const ExactFloat& x) {
     return os << std::showpoint << std::setprecision(ExactFloat::output_precision) << x.raw(); }
@@ -188,7 +187,11 @@ inline Bool operator> (const Rational& q, const ExactFloat& x) { return q> Ratio
 #endif // HAVE_GMPXX_H
 
 
-
+class PositiveExactFloat : public ExactFloat {
+  public:
+    PositiveExactFloat(Float x) : ExactFloat(x) { }
+};
+inline PositiveExactFloat mag(ExactFloat x) { return PositiveExactFloat(abs(x.raw())); }
 
 } // namespace Ariadne
 

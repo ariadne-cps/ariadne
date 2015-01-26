@@ -312,7 +312,7 @@ TestInterval::test_constructors()
     // Empty interval
     ExactInterval ivld7;
     ARIADNE_TEST_EXECUTE(ivld7.set_empty());
-    ARIADNE_TEST_ASSERT(ivld7.lower()==+inf); ARIADNE_TEST_ASSERT(ivld7.upper()==-inf);
+    ARIADNE_TEST_ASSERT(ivld7.lower().raw()==+inf); ARIADNE_TEST_ASSERT(ivld7.upper().raw()==-inf);
 }
 
 Void TestInterval::test_class()

@@ -29,10 +29,11 @@
 #define ARIADNE_FLOAT_RAW_H
 
 #include "float64.h"
+#include "floatmp.h"
 
 namespace Ariadne {
 
-typedef Float64 Float;
+typedef FloatMP Float;
 typedef Float RawFloat;
 
 } // namespace Ariadne

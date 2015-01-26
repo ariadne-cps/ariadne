@@ -1070,13 +1070,13 @@ Tribool ValidatedConstrainedImageSet::satisfies(const ValidatedConstraint& nc) c
     const ExactInterval& bounds = nc.bounds();
 
     Tribool result;
-    if(definitely(bounds.upper()<+inf)) {
+    if(definitely(bounds.upper()<+infty)) {
         all_constraints.append( composed_function >= bounds.upper() );
         result=solver.feasible(domain,all_constraints).first;
         all_constraints.pop_back();
         if(definitely(result)) { return false; }
     }
-    if(definitely(bounds.lower()>-inf)) {
+    if(definitely(bounds.lower()>-infty)) {
         all_constraints.append(composed_function <= bounds.lower());
         result = result || solver.feasible(domain,all_constraints).first;
     }

@@ -56,6 +56,7 @@ struct PrecisionMP {
 };
 
 struct NoInit { };
+struct RawPtr { };
 
 //! \ingroup FltMPSubModule
 //! \brief Multiple-precision floating-point numbers.
@@ -66,6 +67,8 @@ class FloatMP {
     mpfr_t _mpfr;
     typedef decltype(_mpfr[0]) MpfrReference;
   public:
+    typedef Raw Paradigm;
+    typedef FloatMP NumericType;
     typedef PrecisionMP PrecisionType;
     typedef mpfr_rnd_t RoundingModeType;
     static Void set_rounding_mode(RoundingModeMP rnd);
@@ -84,7 +87,8 @@ class FloatMP {
     explicit FloatMP(Rational const&, PrecisionMP, RoundingModeType);
     FloatMP(double);
     FloatMP(double, PrecisionMP);
-    FloatMP(const mpfr_t);
+    FloatMP(Float64);
+//    FloatMP(const mpfr_t);
     FloatMP(const FloatMP&);
     FloatMP(FloatMP&&);
     template<class N, EnableIf<IsIntegral<N>> =dummy> FloatMP& operator=(N n);
@@ -104,6 +108,10 @@ class FloatMP {
     friend FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
     friend FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
     friend FloatMP operator/(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP& operator+=(FloatMP& x1, FloatMP const& x2);
+    friend FloatMP& operator-=(FloatMP& x1, FloatMP const& x2);
+    friend FloatMP& operator*=(FloatMP& x1, FloatMP const& x2);
+    friend FloatMP& operator/=(FloatMP& x1, FloatMP const& x2);
 
     //friend Integer floor(FloatMP const& x);
     //friend Integer ceil(FloatMP const& x);
@@ -113,8 +121,22 @@ class FloatMP {
     friend FloatMP nul(FloatMP const& x);
     friend FloatMP pos(FloatMP const& x);
     friend FloatMP neg(FloatMP const& x);
+    friend FloatMP half(FloatMP const& x);
+    friend FloatMP mag(FloatMP const& x);
     friend FloatMP abs(FloatMP const& x);
-    friend FloatMP half(FloatMP&& x);
+    friend FloatMP min(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP max(FloatMP const& x1, FloatMP const& x2);
+
+    friend FloatMP sqr(FloatMP const& x);
+    friend FloatMP rec(FloatMP const& x);
+    friend FloatMP add(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP sub(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP mul(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP div(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP pow(FloatMP const& x, Int n);
+    friend FloatMP sqrt(FloatMP const& x);
+    friend FloatMP exp(FloatMP const& x);
+    friend FloatMP log(FloatMP const& x);
 
     friend FloatMP pos(FloatMP const& x, RoundingModeType);
     friend FloatMP neg(FloatMP const& x, RoundingModeType);
@@ -125,6 +147,51 @@ class FloatMP {
     friend FloatMP div(FloatMP const& x1, FloatMP const& x2, RoundingModeType);
     friend FloatMP exp(FloatMP const& x, RoundingModeType);
 
+    friend FloatMP pos_exact(FloatMP const& x);
+    friend FloatMP neg_exact(FloatMP const& x);
+    friend FloatMP abs_exact(FloatMP const& x);
+    friend FloatMP half_exact(FloatMP const& x);
+    friend FloatMP add_approx(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP add_near(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP add_down(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP add_up(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP sub_approx(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP sub_near(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP sub_down(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP sub_up(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP mul_approx(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP mul_near(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP mul_down(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP mul_up(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP div_approx(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP div_near(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP div_down(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP div_up(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP pow_approx(FloatMP const& x, Int n);
+    friend FloatMP pow_down(FloatMP const& x, Int n);
+    friend FloatMP pow_up(FloatMP const& x, Int n);
+
+    friend FloatMP sqrt_approx(FloatMP const& x);
+    friend FloatMP exp_approx(FloatMP const& x);
+    friend FloatMP log_approx(FloatMP const& x);
+    friend FloatMP sin_approx(FloatMP const& x);
+    friend FloatMP cos_approx(FloatMP const& x);
+    friend FloatMP tan_approx(FloatMP const& x);
+    friend FloatMP asin_approx(FloatMP const& x);
+    friend FloatMP acos_approx(FloatMP const& x);
+    friend FloatMP atan_approx(FloatMP const& x);
+
+
+    friend FloatMP add_rnd(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP sub_rnd(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP mul_rnd(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP div_rnd(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP pow_rnd(FloatMP const& x, Int n);
+    friend FloatMP sqrt_rnd(FloatMP const& x);
+    friend FloatMP exp_rnd(FloatMP const& x);
+    friend FloatMP log_rnd(FloatMP const& x);
+    friend FloatMP sin_rnd(FloatMP const& x);
+    friend FloatMP cos_rnd(FloatMP const& x);
     friend FloatMP abs(FloatMP const& x, RoundingModeType);
 
     friend Comparison cmp(FloatMP const& x1, FloatMP const& x2);
@@ -144,13 +211,20 @@ class FloatMP {
     friend Bool operator> (FloatMP const& x1, double x2);
 
     template<class FE> FloatMP(const FltMPExpression<FE>&);
+    FloatMP& raw() { return *this; }
+    FloatMP const& raw() const { return *this; }
     friend OutputStream& operator<<(OutputStream& os, FloatMP const&);
+    friend InputStream& operator>>(InputStream& is, FloatMP&);
   public:
     FloatMP& operator=(double d);
     MpfrReference get_mpfr();
     MpfrReference get_mpfr() const;
     double get_d() const;
 };
+
+template<class R, class A> inline R integer_cast(const A& a);
+template<> inline Int integer_cast(const FloatMP& x) { return static_cast<Int>(x.get_d()); }
+template<> inline Nat integer_cast(const FloatMP& x) { return static_cast<Nat>(x.get_d()); }
 
 template<class N, EnableIf<IsIntegral<N>>> inline FloatMP& FloatMP::operator=(N n) { double x=n; return *this=x; }
 

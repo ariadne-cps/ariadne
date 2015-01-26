@@ -120,8 +120,8 @@ inline InputStream& operator>>(InputStream& is, ApproximateFloat& x) {
     Float a; is >> a; x=ApproximateFloat(a); return is; }
 
 template<class R, class A> inline R integer_cast(const A& a);
-template<> inline Int integer_cast(const ApproximateFloat& x) { return static_cast<Int>(x.a.dbl); }
-template<> inline Nat integer_cast(const ApproximateFloat& x) { return static_cast<Nat>(x.a.dbl); }
+template<> inline Int integer_cast(const ApproximateFloat& x) { return static_cast<Int>(x.a.get_d()); }
+template<> inline Nat integer_cast(const ApproximateFloat& x) { return static_cast<Nat>(x.a.get_d()); }
 
 // Discontinuous integer-valued functions
 //! \related ApproximateFloat \brief The next lowest integer, represented as a floating-point type.
@@ -209,13 +209,13 @@ inline ApproximateFloat operator/(ApproximateFloat x1, ApproximateFloat x2) { re
 //    inline ApproximateFloat operator/(const ApproximateFloat& x1, N n2) { return div(x1,ApproximateFloat(n2)); };
 
 //! \related ApproximateFloat \brief The in-place addition operator. Guaranteed to respect the current rounding mode.
-inline ApproximateFloat& operator+=(ApproximateFloat& x, const ApproximateFloat& y) { x.a.dbl+=y.a.dbl; return x; }
+inline ApproximateFloat& operator+=(ApproximateFloat& x, const ApproximateFloat& y) { x.a+=y.a; return x; }
 //! \related ApproximateFloat \brief The in-place subtraction operator. Guaranteed to respect the current rounding mode.
-inline ApproximateFloat& operator-=(ApproximateFloat& x, const ApproximateFloat& y) { x.a.dbl-=y.a.dbl; return x; }
+inline ApproximateFloat& operator-=(ApproximateFloat& x, const ApproximateFloat& y) { x.a-=y.a; return x; }
 //! \related ApproximateFloat \brief The in-place multiplication operator. Guaranteed to respect the current rounding mode.
-inline ApproximateFloat& operator*=(ApproximateFloat& x, const ApproximateFloat& y) { x.a.dbl*=y.a.dbl; return x; }
+inline ApproximateFloat& operator*=(ApproximateFloat& x, const ApproximateFloat& y) { x.a*=y.a; return x; }
 //! \related ApproximateFloat \brief The in-place division operator. Guaranteed to respect the current rounding mode.
-inline ApproximateFloat& operator/=(ApproximateFloat& x, const ApproximateFloat& y) { x.a.dbl/=y.a.dbl; return x; }
+inline ApproximateFloat& operator/=(ApproximateFloat& x, const ApproximateFloat& y) { x.a/=y.a; return x; }
 
 // Comparison operators
 //! \related ApproximateFloat \brief The equality operator.

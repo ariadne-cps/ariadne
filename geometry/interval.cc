@@ -50,8 +50,8 @@ Nat ExactInterval::output_precision = 6;
 ExactInterval widen(ExactInterval x)
 {
     rounding_mode_t rm=get_rounding_mode();
-    const double& xl=internal_cast<const double&>(x.lower().raw());
-    const double& xu=internal_cast<const double&>(x.upper().raw());
+    double xl=x.lower().get_d();
+    double xu=x.upper().get_d();
     const double m=std::numeric_limits<float>::min();
     set_rounding_upward();
     volatile double wu=xu+m;
@@ -65,8 +65,8 @@ ExactInterval widen(ExactInterval x)
 ExactInterval narrow(ExactInterval x)
 {
     rounding_mode_t rm=get_rounding_mode();
-    const double& xl=internal_cast<const double&>(x.lower().raw());
-    const double& xu=internal_cast<const double&>(x.upper().raw());
+    double xl=x.lower().get_d();
+    double xu=x.upper().get_d();
     const double m=std::numeric_limits<float>::min();
     set_rounding_upward();
     volatile double mnu=-xu+m;
@@ -81,8 +81,8 @@ ExactInterval trunc(ExactInterval x)
 {
 
     rounding_mode_t rm=get_rounding_mode();
-    const double& xl=internal_cast<const double&>(x.lower().raw());
-    const double& xu=internal_cast<const double&>(x.upper().raw());
+    double xl=x.lower().get_d();
+    double xu=x.upper().get_d();
     // Use machine epsilon instead of minimum to move away from zero
     const float fm=std::numeric_limits<float>::epsilon();
     volatile float tu=xu;

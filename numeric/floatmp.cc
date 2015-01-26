@@ -86,9 +86,9 @@ FloatMP::FloatMP(double d, PrecisionMP pr) {
     mpfr_set_d(_mpfr,d,current_rounding_mode);
 }
 
-FloatMP::FloatMP(const mpfr_t x) {
-    mpfr_init_set(_mpfr,x,current_rounding_mode);
-}
+//FloatMP::FloatMP(const mpfr_t x) {
+//    mpfr_init_set(_mpfr,x,current_rounding_mode);
+//}
 
 FloatMP::FloatMP(const FloatMP& x) {
     mpfr_init2(_mpfr,mpfr_get_prec(x._mpfr));

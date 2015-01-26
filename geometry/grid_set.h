@@ -1663,7 +1663,7 @@ inline Nat GridTreeSubset::compute_number_subdiv( Float theWidth, const Float th
     Nat result = 0;
     if ( theWidth > theMaxWidth ){
         //result = (Nat) ceil( div_approx( log_approx( div_approx( theWidth, theMaxWidth ) ) , log_approx( R(2.0) ) ) );
-        result = integer_cast<Nat>(ceil( Ariadne::div( Ariadne::log( Ariadne::div( theWidth, theMaxWidth ) ) , Ariadne::log( Float(2.0) ) ) ) );
+        result = integer_cast<Nat>(ceil( div( log( div( theWidth, theMaxWidth ) ) , log( Float(2.0) ) ) ) );
     }
     return result;
 }

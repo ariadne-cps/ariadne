@@ -59,25 +59,25 @@ LowerFloat::LowerFloat(Number<Lower> const& x) {
 
 LowerFloat operator+(LowerFloat x)
 {
-    volatile double xl=internal_cast<volatile double&>(x.raw());
-    volatile double rl=+xl;
+    Float xl=x.raw();
+    Float rl=+xl;
     return LowerFloat(rl);
 }
 
 LowerFloat operator-(UpperFloat x)
 {
-    volatile double xu=internal_cast<volatile double&>(x.raw());
-    volatile double rl=-xu;
+    Float xu=x.raw();
+    Float rl=-xu;
     return LowerFloat(rl);
 }
 
 LowerFloat operator+(LowerFloat x1, LowerFloat x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double x1l=internal_cast<volatile double&>(x1.raw());
-    volatile double x2l=internal_cast<volatile double&>(x2.raw());
+    Float x1l=x1.raw();
+    Float x2l=x2.raw();
     set_rounding_mode(downward);
-    volatile double rl=x1l+x2l;
+    Float rl=x1l+x2l;
     set_rounding_mode(rnd);
     return LowerFloat(rl);
 }
@@ -85,10 +85,10 @@ LowerFloat operator+(LowerFloat x1, LowerFloat x2)
 LowerFloat operator-(LowerFloat x1, UpperFloat x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double x1l=internal_cast<volatile double&>(x1.raw());
-    volatile double x2u=internal_cast<volatile double&>(x2.raw());
+    Float x1l=x1.raw();
+    Float x2u=x2.raw();
     set_rounding_mode(downward);
-    volatile double rl=x1l-x2u;
+    Float rl=x1l-x2u;
     set_rounding_mode(rnd);
     return LowerFloat(rl);
 }
@@ -97,10 +97,10 @@ LowerFloat operator*(LowerFloat x1, LowerFloat x2)
 {
     ARIADNE_PRECONDITION(x1.raw()>=0 && x2.raw()>=0);
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double x1l=internal_cast<volatile double&>(x1.raw());
-    volatile double x2l=internal_cast<volatile double&>(x2.raw());
+    Float x1l=x1.raw();
+    Float x2l=x2.raw();
     set_rounding_mode(downward);
-    volatile double rl=x1l*x2l;
+    Float rl=x1l*x2l;
     set_rounding_mode(rnd);
     return LowerFloat(rl);
 }
@@ -116,9 +116,9 @@ OutputStream& operator<<(OutputStream& os, LowerFloat x) {
 LowerFloat rec(UpperFloat x)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double xu=internal_cast<volatile double&>(x.raw());
+    Float xu=x.raw();
     set_rounding_mode(downward);
-    volatile double rl=1/xu;
+    Float rl=1/xu;
     set_rounding_mode(rnd);
     return LowerFloat(rl);
 }

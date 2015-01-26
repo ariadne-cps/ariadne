@@ -57,25 +57,21 @@ UpperFloat::UpperFloat(Number<Upper> const& x) {
 
 UpperFloat operator+(UpperFloat x)
 {
-    volatile double xu=internal_cast<volatile double&>(x.raw());
-    volatile double ru=+xu;
-    return UpperFloat(ru);
+    return UpperFloat(+x.raw());
 }
 
 UpperFloat operator-(LowerFloat x)
 {
-    volatile double xl=internal_cast<volatile double&>(x.raw());
-    volatile double ru=-xl;
-    return UpperFloat(ru);
+    return UpperFloat(-x.raw());
 }
 
 UpperFloat operator+(UpperFloat x1, UpperFloat x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double x1u=internal_cast<volatile double&>(x1.raw());
-    volatile double x2u=internal_cast<volatile double&>(x2.raw());
+    Float x1u=x1.raw();
+    Float x2u=x2.raw();
     set_rounding_mode(upward);
-    volatile double ru=x1u+x2u;
+    Float ru=x1u+x2u;
     set_rounding_mode(rnd);
     return UpperFloat(ru);
 }
@@ -83,10 +79,10 @@ UpperFloat operator+(UpperFloat x1, UpperFloat x2)
 UpperFloat operator-(UpperFloat x1, LowerFloat x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double x1u=internal_cast<volatile double&>(x1.raw());
-    volatile double x2l=internal_cast<volatile double&>(x2.raw());
+    Float x1u=x1.raw();
+    Float x2l=x2.raw();
     set_rounding_mode(upward);
-    volatile double ru=x1u-x2l;
+    Float ru=x1u-x2l;
     set_rounding_mode(rnd);
     return UpperFloat(ru);
 }
@@ -133,9 +129,9 @@ UpperFloat& operator*=(UpperFloat& x1, UpperFloat x2) {
 UpperFloat rec(LowerFloat x)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double xl=internal_cast<volatile double&>(x.raw());
+    Float xl=x.raw();
     set_rounding_mode(upward);
-    volatile double ru=1/xl;
+    Float ru=1/xl;
     set_rounding_mode(rnd);
     return UpperFloat(ru);
 }

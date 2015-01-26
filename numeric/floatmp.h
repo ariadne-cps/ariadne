@@ -40,7 +40,7 @@ namespace Ariadne {
 template<class F> struct NumberObject;
 template<class F> struct FltMPObject : NumberObject<F> { };
 
-/************ FltMP ********************************************************/
+/************ FloatMP ********************************************************/
 
 //enum class RoundingModeMP : mpfr_rnd_t { NEAREST=MPFR_RNDN, UPWARD=MPFR_RNDU, DOWNWARD=MPFR_RNDD };
 enum class RoundingModeMP : Nat { NEAREST=MPFR_RNDN, UPWARD=MPFR_RNDU, DOWNWARD=MPFR_RNDD };
@@ -61,7 +61,7 @@ struct NoInit { };
 //! \brief Multiple-precision floating-point numbers.
 //! Currently defined as _a wrapper around \c mpfr_t from the MPFE library.
 //! Default arithmetic operations are approximate, and comparisons are exact, so this class is \em unsafe.
-class FltMP {
+class FloatMP {
   private: public:
     mpfr_t _mpfr;
     typedef decltype(_mpfr[0]) MpfrReference;
@@ -73,86 +73,86 @@ class FltMP {
     static PrecisionMP get_default_precision();
     static mpfr_rnd_t current_rounding_mode;
   public:
-    ~FltMP();
-    explicit FltMP();
-    explicit FltMP(NoInit);
-    explicit FltMP(PrecisionMP);
-    explicit FltMP(PrecisionMP, NoInit);
-    explicit FltMP(Int32);
-    explicit FltMP(Int32, PrecisionMP);
-    explicit FltMP(Integer const&, PrecisionMP, RoundingModeType);
-    explicit FltMP(Rational const&, PrecisionMP, RoundingModeType);
-    FltMP(double);
-    FltMP(double, PrecisionMP);
-    FltMP(const mpfr_t);
-    FltMP(const FltMP&);
-    FltMP(FltMP&&);
-    template<class N, EnableIf<IsIntegral<N>> =dummy> FltMP& operator=(N n);
-    FltMP& operator=(const FltMP&);
-    FltMP& operator=(FltMP&&);
+    ~FloatMP();
+    explicit FloatMP();
+    explicit FloatMP(NoInit);
+    explicit FloatMP(PrecisionMP);
+    explicit FloatMP(PrecisionMP, NoInit);
+    explicit FloatMP(Int32);
+    explicit FloatMP(Int32, PrecisionMP);
+    explicit FloatMP(Integer const&, PrecisionMP, RoundingModeType);
+    explicit FloatMP(Rational const&, PrecisionMP, RoundingModeType);
+    FloatMP(double);
+    FloatMP(double, PrecisionMP);
+    FloatMP(const mpfr_t);
+    FloatMP(const FloatMP&);
+    FloatMP(FloatMP&&);
+    template<class N, EnableIf<IsIntegral<N>> =dummy> FloatMP& operator=(N n);
+    FloatMP& operator=(const FloatMP&);
+    FloatMP& operator=(FloatMP&&);
     explicit operator Rational() const;
 
     PrecisionMP precision() const;
     Void set_precision(PrecisionMP);
 
-    friend FltMP next_up(FltMP x);
-    friend FltMP next_down(FltMP x);
+    friend FloatMP next_up(FloatMP x);
+    friend FloatMP next_down(FloatMP x);
 
-    friend FltMP operator+(FltMP const& x);
-    friend FltMP operator-(FltMP const& x);
-    friend FltMP operator+(FltMP const& x1, FltMP const& x2);
-    friend FltMP operator-(FltMP const& x1, FltMP const& x2);
-    friend FltMP operator*(FltMP const& x1, FltMP const& x2);
-    friend FltMP operator/(FltMP const& x1, FltMP const& x2);
+    friend FloatMP operator+(FloatMP const& x);
+    friend FloatMP operator-(FloatMP const& x);
+    friend FloatMP operator+(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP operator-(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP operator*(FloatMP const& x1, FloatMP const& x2);
+    friend FloatMP operator/(FloatMP const& x1, FloatMP const& x2);
 
-    //friend Integer floor(FltMP const& x);
-    //friend Integer ceil(FltMP const& x);
-    friend FltMP floor(FltMP const& x);
-    friend FltMP ceil(FltMP const& x);
+    //friend Integer floor(FloatMP const& x);
+    //friend Integer ceil(FloatMP const& x);
+    friend FloatMP floor(FloatMP const& x);
+    friend FloatMP ceil(FloatMP const& x);
 
-    friend FltMP nul(FltMP const& x);
-    friend FltMP pos(FltMP const& x);
-    friend FltMP neg(FltMP const& x);
-    friend FltMP abs(FltMP const& x);
-    friend FltMP half(FltMP&& x);
+    friend FloatMP nul(FloatMP const& x);
+    friend FloatMP pos(FloatMP const& x);
+    friend FloatMP neg(FloatMP const& x);
+    friend FloatMP abs(FloatMP const& x);
+    friend FloatMP half(FloatMP&& x);
 
-    friend FltMP pos(FltMP const& x, RoundingModeType);
-    friend FltMP neg(FltMP const& x, RoundingModeType);
-    friend FltMP rec(FltMP const& x, RoundingModeType);
-    friend FltMP add(FltMP const& x1, FltMP const& x2, RoundingModeType);
-    friend FltMP sub(FltMP const& x1, FltMP const& x2, RoundingModeType);
-    friend FltMP mul(FltMP const& x1, FltMP const& x2, RoundingModeType);
-    friend FltMP div(FltMP const& x1, FltMP const& x2, RoundingModeType);
-    friend FltMP exp(FltMP const& x, RoundingModeType);
+    friend FloatMP pos(FloatMP const& x, RoundingModeType);
+    friend FloatMP neg(FloatMP const& x, RoundingModeType);
+    friend FloatMP rec(FloatMP const& x, RoundingModeType);
+    friend FloatMP add(FloatMP const& x1, FloatMP const& x2, RoundingModeType);
+    friend FloatMP sub(FloatMP const& x1, FloatMP const& x2, RoundingModeType);
+    friend FloatMP mul(FloatMP const& x1, FloatMP const& x2, RoundingModeType);
+    friend FloatMP div(FloatMP const& x1, FloatMP const& x2, RoundingModeType);
+    friend FloatMP exp(FloatMP const& x, RoundingModeType);
 
-    friend FltMP abs(FltMP const& x, RoundingModeType);
+    friend FloatMP abs(FloatMP const& x, RoundingModeType);
 
-    friend Comparison cmp(FltMP const& x1, FltMP const& x2);
-    friend Bool operator==(FltMP const& x1, FltMP const& x2);
-    friend Bool operator!=(FltMP const& x1, FltMP const& x2);
-    friend Bool operator<=(FltMP const& x1, FltMP const& x2);
-    friend Bool operator>=(FltMP const& x1, FltMP const& x2);
-    friend Bool operator< (FltMP const& x1, FltMP const& x2);
-    friend Bool operator> (FltMP const& x1, FltMP const& x2);
+    friend Comparison cmp(FloatMP const& x1, FloatMP const& x2);
+    friend Bool operator==(FloatMP const& x1, FloatMP const& x2);
+    friend Bool operator!=(FloatMP const& x1, FloatMP const& x2);
+    friend Bool operator<=(FloatMP const& x1, FloatMP const& x2);
+    friend Bool operator>=(FloatMP const& x1, FloatMP const& x2);
+    friend Bool operator< (FloatMP const& x1, FloatMP const& x2);
+    friend Bool operator> (FloatMP const& x1, FloatMP const& x2);
 
-    friend Comparison cmp(FltMP const& x1, double x2);
-    friend Bool operator==(FltMP const& x1, double x2);
-    friend Bool operator!=(FltMP const& x1, double x2);
-    friend Bool operator<=(FltMP const& x1, double x2);
-    friend Bool operator>=(FltMP const& x1, double x2);
-    friend Bool operator< (FltMP const& x1, double x2);
-    friend Bool operator> (FltMP const& x1, double x2);
+    friend Comparison cmp(FloatMP const& x1, double x2);
+    friend Bool operator==(FloatMP const& x1, double x2);
+    friend Bool operator!=(FloatMP const& x1, double x2);
+    friend Bool operator<=(FloatMP const& x1, double x2);
+    friend Bool operator>=(FloatMP const& x1, double x2);
+    friend Bool operator< (FloatMP const& x1, double x2);
+    friend Bool operator> (FloatMP const& x1, double x2);
 
-    template<class FE> FltMP(const FltMPExpression<FE>&);
-    friend OutputStream& operator<<(OutputStream& os, FltMP const&);
+    template<class FE> FloatMP(const FltMPExpression<FE>&);
+    friend OutputStream& operator<<(OutputStream& os, FloatMP const&);
   public:
-    FltMP& operator=(double d);
+    FloatMP& operator=(double d);
     MpfrReference get_mpfr();
     MpfrReference get_mpfr() const;
     double get_d() const;
 };
 
-template<class N, EnableIf<IsIntegral<N>>> inline FltMP& FltMP::operator=(N n) { double x=n; return *this=x; }
+template<class N, EnableIf<IsIntegral<N>>> inline FloatMP& FloatMP::operator=(N n) { double x=n; return *this=x; }
 
 template<class P> class FloatMPTemplate;
 using ApprxFloatMP = FloatMPTemplate<Apprx>;
@@ -166,14 +166,14 @@ using ErrorFloatMP = FloatMPTemplate<Error>;
 template<> class FloatMPTemplate<Error>
     : public NumberObject<ErrorFloatMP>
 {
-    FltMP _e;
+    FloatMP _e;
   public:
     typedef Error Paradigm;
     FloatMPTemplate<Error>(Nat);
     explicit FloatMPTemplate<Error>(double);
     explicit FloatMPTemplate<Error>(double,PrecisionMP);
-    explicit FloatMPTemplate<Error>(FltMP);
-    FltMP const& get_flt() const;
+    explicit FloatMPTemplate<Error>(FloatMP);
+    FloatMP const& get_flt() const;
     friend ErrorFloatMP operator+(ErrorFloatMP);
     friend ErrorFloatMP operator+(ErrorFloatMP x1, ErrorFloatMP x2);
     friend ErrorFloatMP operator*(ErrorFloatMP x1, ErrorFloatMP x2);
@@ -186,7 +186,7 @@ template<> class FloatMPTemplate<Exact>
     friend class FloatMPTemplate<Metrc>;
     friend class FloatMPTemplate<Bound>;
     friend class FloatMPTemplate<Apprx>;
-    FltMP _v;
+    FloatMP _v;
   public:
     typedef Exact Paradigm;
     template<class N, EnableIf<IsIntegral<N>> = dummy>
@@ -196,7 +196,7 @@ template<> class FloatMPTemplate<Exact>
     template<class N, EnableIf<IsIntegral<N>> = dummy>
         FloatMPTemplate<Exact>& operator=(N n) { _v=n; return *this; }
     explicit FloatMPTemplate<Exact>(double);
-    explicit FloatMPTemplate<Exact>(FltMP);
+    explicit FloatMPTemplate<Exact>(FloatMP);
     explicit FloatMPTemplate<Exact>(Integer const&, PrecisionMP);
     operator FloatMPTemplate<Metrc>() const;
     operator FloatMPTemplate<Bound>() const;
@@ -220,7 +220,7 @@ template<> class FloatMPTemplate<Exact>
     friend BoundFloatMP div(ExactFloatMP x1, ExactFloatMP x2);
     friend BoundFloatMP const& min(ExactFloatMP const& x1, ExactFloatMP const& x2);
     friend BoundFloatMP const& max(ExactFloatMP const& x1, ExactFloatMP const& x2);
-    FltMP const& get_flt() const;
+    FloatMP const& get_flt() const;
     friend OutputStream& operator<<(OutputStream& os, ExactFloatMP const&);
 };
 
@@ -230,7 +230,7 @@ template<> class FloatMPTemplate<Metrc> : public NumberObject<MetrcFloatMP>
     , public ProvideFieldOperators<MetrcFloatMP>
 {
     friend class FloatMPTemplate<Apprx>;
-    FltMP _v; FltMP _e;
+    FloatMP _v; FloatMP _e;
   public:
     typedef Metrc Paradigm;
     FloatMPTemplate<Metrc>();
@@ -240,8 +240,8 @@ template<> class FloatMPTemplate<Metrc> : public NumberObject<MetrcFloatMP>
     explicit FloatMPTemplate<Metrc>(Real const&, PrecisionMP);
 //    explicit FloatMPTemplate<Metrc>(double);
 //    explicit FloatMPTemplate<Metrc>(double,double);
-    explicit FloatMPTemplate<Metrc>(FltMP v);
-    explicit FloatMPTemplate<Metrc>(FltMP v, FltMP e);
+    explicit FloatMPTemplate<Metrc>(FloatMP v);
+    explicit FloatMPTemplate<Metrc>(FloatMP v, FloatMP e);
     explicit operator FloatMPTemplate<Bound> () const;
     operator FloatMPTemplate<Upper> () const;
     operator FloatMPTemplate<Lower> () const;
@@ -277,7 +277,7 @@ template<> class FloatMPTemplate<Bound>
     , public ProvideFieldOperators<BoundFloatMP>
 {
     friend class FloatMPTemplate<Apprx>;
-    FltMP _l; FltMP _u;
+    FloatMP _l; FloatMP _u;
   public:
     typedef Bound Paradigm;
     FloatMPTemplate<Bound>();
@@ -287,8 +287,8 @@ template<> class FloatMPTemplate<Bound>
     explicit FloatMPTemplate<Bound>(Integer const&, PrecisionMP);
     explicit FloatMPTemplate<Bound>(Rational const&, PrecisionMP);
     explicit FloatMPTemplate<Bound>(Real const&, PrecisionMP);
-    explicit FloatMPTemplate<Bound>(FltMP);
-    explicit FloatMPTemplate<Bound>(FltMP,FltMP);
+    explicit FloatMPTemplate<Bound>(FloatMP);
+    explicit FloatMPTemplate<Bound>(FloatMP,FloatMP);
     operator FloatMPTemplate<Metrc> () const;
     operator FloatMPTemplate<Upper> () const;
     operator FloatMPTemplate<Lower> () const;
@@ -330,12 +330,12 @@ template<> class FloatMPTemplate<Bound>
 template<> class FloatMPTemplate<Upper>
     : public NumberObject<UpperFloatMP>
 {
-    FltMP _u;
+    FloatMP _u;
   public:
     typedef Upper Paradigm;
     FloatMPTemplate<Upper>();
-    FloatMPTemplate<Upper>(FltMP);
-    FltMP const& get_flt() const;
+    FloatMPTemplate<Upper>(FloatMP);
+    FloatMP const& get_flt() const;
     explicit FloatMPTemplate<Upper>(Real const&, PrecisionMP);
     operator FloatMPTemplate<Apprx> () const;
     friend UpperFloatMP operator+(UpperFloatMP);
@@ -360,13 +360,13 @@ template<> class FloatMPTemplate<Upper>
 template<> class FloatMPTemplate<Lower>
     : public NumberObject<LowerFloatMP>
 {
-    FltMP _l;
+    FloatMP _l;
   public:
     typedef Lower Paradigm;
     FloatMPTemplate<Lower>();
-    FloatMPTemplate<Lower>(FltMP);
+    FloatMPTemplate<Lower>(FloatMP);
     explicit FloatMPTemplate<Lower>(Real const&, PrecisionMP);
-    FltMP const& get_flt() const;
+    FloatMP const& get_flt() const;
     operator FloatMPTemplate<Apprx> () const;
     friend LowerFloatMP operator+(LowerFloatMP);
     friend UpperFloatMP operator-(LowerFloatMP);
@@ -393,16 +393,16 @@ template<> class FloatMPTemplate<Apprx>
     , public DeclareOrderedOperations<ApprxFloatMP>
     , public ProvideFieldOperators<ApprxFloatMP>
 {
-    FltMP _a;
+    FloatMP _a;
   public:
     typedef Apprx Paradigm;
     FloatMPTemplate<Apprx>();
     FloatMPTemplate<Apprx>(double);
-    FloatMPTemplate<Apprx>(FltMP);
+    FloatMPTemplate<Apprx>(FloatMP);
     explicit FloatMPTemplate<Apprx>(Integer const&, PrecisionMP);
     explicit FloatMPTemplate<Apprx>(Rational const&, PrecisionMP);
     explicit FloatMPTemplate<Apprx>(Real const&, PrecisionMP);
-    FltMP const& get_flt() const;
+    FloatMP const& get_flt() const;
     Void set_precision(PrecisionMP pr);
     PrecisionMP precision() const;
     friend ApprxFloatMP nul(ApprxFloatMP);

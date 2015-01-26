@@ -34,23 +34,9 @@
 #include <algorithm> // For std::max, std::min
 #include <limits> // For std::numeric_limits<double>
 
-#include "numeric/rounding.h"
-#include "numeric/float.h"
+#include "numeric/float-raw.h"
 
 namespace Ariadne {
-
-class Real;
-class Dyadic;
-class Decimal;
-
-class Float;
-
-class ApproximateFloat;
-class LowerFloat;
-class UpperFloat;
-class ValidatedFloat;
-class ExactFloat;
-
 
 //! \ingroup NumericModule
 //! \brief Floating point numbers (double precision) using approxiamate arithmetic.
@@ -101,10 +87,8 @@ class ApproximateFloat {
     explicit ApproximateFloat(const Real& r);
     //! \brief Construct from a generic number.
     explicit ApproximateFloat(const Number<Approximate>& x);
-    //! \brief Assign from a generic number
-    template<class P> ApproximateFloat& operator=(const Number<P>& x);
-    template<class N, EnableIf<IsIntegral<N>> =dummy> ApproximateFloat& operator=(const N& n) { *this=ApproximateFloat(n); }
-    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> ApproximateFloat& operator=(const D& d) { *this=ApproximateFloat(d); }
+    //! \brief Assign from a generic number FIXME: Find good overloads
+    // ApproximateFloat& operator=(Number<Approximate> const& x);
     //! \brief Convert to generic number type.
     operator Number<Approximate> () const;
 

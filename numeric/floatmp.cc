@@ -33,91 +33,91 @@
 
 namespace Ariadne {
 
-mpfr_rnd_t FltMP::current_rounding_mode=MPFR_RNDU;
+mpfr_rnd_t FloatMP::current_rounding_mode=MPFR_RNDU;
 
-FltMP::~FltMP() {
+FloatMP::~FloatMP() {
     mpfr_clear(_mpfr);
 }
 
-FltMP::FltMP() {
+FloatMP::FloatMP() {
     mpfr_init_set_si(_mpfr,0l,current_rounding_mode);
 }
 
-FltMP::FltMP(NoInit) {
+FloatMP::FloatMP(NoInit) {
     mpfr_init(_mpfr);
 }
 
-FltMP::FltMP(PrecisionMP pr) {
+FloatMP::FloatMP(PrecisionMP pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_si(_mpfr,0l,current_rounding_mode);
 }
 
-FltMP::FltMP(PrecisionMP pr, NoInit) {
+FloatMP::FloatMP(PrecisionMP pr, NoInit) {
     mpfr_init2(_mpfr,pr);
 }
 
-FltMP::FltMP(Int32 n) {
+FloatMP::FloatMP(Int32 n) {
     mpfr_init_set_si(_mpfr,n.get_si(),current_rounding_mode);
 }
 
-FltMP::FltMP(Int32 n, PrecisionMP pr) {
+FloatMP::FloatMP(Int32 n, PrecisionMP pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_si(_mpfr,n.get_si(),current_rounding_mode);
 }
 
-FltMP::FltMP(Integer const& z, PrecisionMP pr, RoundingModeType rnd) {
+FloatMP::FloatMP(Integer const& z, PrecisionMP pr, RoundingModeType rnd) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_z(_mpfr,z.get_mpz(),rnd);
 }
 
-FltMP::FltMP(Rational const& q, PrecisionMP pr, RoundingModeType rnd) {
+FloatMP::FloatMP(Rational const& q, PrecisionMP pr, RoundingModeType rnd) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_q(_mpfr,q.get_mpq(),rnd);
 }
 
-FltMP::FltMP(double d) {
+FloatMP::FloatMP(double d) {
     mpfr_init(_mpfr);
     mpfr_set_d(_mpfr,d,current_rounding_mode);
 //    mpfr_init_set_d(_mpfr,d,current_rounding_mode);
 }
 
-FltMP::FltMP(double d, PrecisionMP pr) {
+FloatMP::FloatMP(double d, PrecisionMP pr) {
     mpfr_init2(_mpfr,pr);
     mpfr_set_d(_mpfr,d,current_rounding_mode);
 }
 
-FltMP::FltMP(const mpfr_t x) {
+FloatMP::FloatMP(const mpfr_t x) {
     mpfr_init_set(_mpfr,x,current_rounding_mode);
 }
 
-FltMP::FltMP(const FltMP& x) {
+FloatMP::FloatMP(const FloatMP& x) {
     mpfr_init2(_mpfr,mpfr_get_prec(x._mpfr));
     mpfr_set(_mpfr,x._mpfr,current_rounding_mode);
 }
 
-FltMP::FltMP(FltMP&& x) {
+FloatMP::FloatMP(FloatMP&& x) {
     mpfr_init(_mpfr);
     mpfr_swap(_mpfr,x._mpfr);
 }
 
-FltMP& FltMP::operator=(const FltMP& x) {
+FloatMP& FloatMP::operator=(const FloatMP& x) {
     // TOOD: Decide whether equality changes precision
     mpfr_set_prec(_mpfr,x.precision());
     mpfr_set(_mpfr,x._mpfr,current_rounding_mode);
     return *this;
 }
 
-FltMP& FltMP::operator=(FltMP&& x) {
+FloatMP& FloatMP::operator=(FloatMP&& x) {
     mpfr_swap(_mpfr,x._mpfr);
     return *this;
 }
 
-FltMP& FltMP::operator=(double d) {
+FloatMP& FloatMP::operator=(double d) {
     mpfr_set_d(_mpfr,d,current_rounding_mode);
     return *this;
 }
 
-FltMP::operator Rational() const {
+FloatMP::operator Rational() const {
     mpz_t num; mpz_init(num);
     mpfr_exp_t exp = mpfr_get_z_2exp (num, this->_mpfr);
     mpq_t res; mpq_init(res); mpq_set_z(res,num);
@@ -125,7 +125,7 @@ FltMP::operator Rational() const {
     return Rational(res);
 }
 
-Void FltMP::set_rounding_mode(RoundingModeMP rnd) {
+Void FloatMP::set_rounding_mode(RoundingModeMP rnd) {
     switch(rnd) {
         case RoundingModeMP::NEAREST: current_rounding_mode=MPFR_RNDN; break;
         case RoundingModeMP::DOWNWARD: current_rounding_mode=MPFR_RNDD; break;
@@ -134,288 +134,288 @@ Void FltMP::set_rounding_mode(RoundingModeMP rnd) {
     }
 }
 
-Void FltMP::set_default_precision(PrecisionType pr) {
+Void FloatMP::set_default_precision(PrecisionType pr) {
     mpfr_set_default_prec(pr);
 }
 
-FltMP::PrecisionType FltMP::get_default_precision() {
+FloatMP::PrecisionType FloatMP::get_default_precision() {
     return mpfr_get_default_prec();
 }
 
-Void FltMP::set_precision(PrecisionMP pr) {
+Void FloatMP::set_precision(PrecisionMP pr) {
     mpfr_t tmp;
     mpfr_init2(tmp,pr);
     mpfr_set(tmp,_mpfr,current_rounding_mode);
     mpfr_swap(_mpfr,tmp);
 }
 
-FltMP::PrecisionType FltMP::precision() const {
+FloatMP::PrecisionType FloatMP::precision() const {
     return mpfr_get_prec(this->_mpfr);
 }
 
-double FltMP::get_d() const {
+double FloatMP::get_d() const {
     return mpfr_get_d(this->_mpfr,current_rounding_mode);
 }
 
-FltMP operator+(FltMP const& x) {
+FloatMP operator+(FloatMP const& x) {
     return x;
 }
 
-FltMP operator-(FltMP const& x) {
-    return neg(x,FltMP::current_rounding_mode);
+FloatMP operator-(FloatMP const& x) {
+    return neg(x,FloatMP::current_rounding_mode);
 }
 
-FltMP operator+(FltMP const& x, FltMP const& y) {
-    return add(x,y,FltMP::current_rounding_mode);
+FloatMP operator+(FloatMP const& x, FloatMP const& y) {
+    return add(x,y,FloatMP::current_rounding_mode);
 }
 
-FltMP operator-(FltMP const& x, FltMP const& y) {
-    return sub(x,y,FltMP::current_rounding_mode);
+FloatMP operator-(FloatMP const& x, FloatMP const& y) {
+    return sub(x,y,FloatMP::current_rounding_mode);
 }
 
-FltMP operator*(FltMP const& x, FltMP const& y) {
-    return mul(x,y,FltMP::current_rounding_mode);
+FloatMP operator*(FloatMP const& x, FloatMP const& y) {
+    return mul(x,y,FloatMP::current_rounding_mode);
 }
 
-FltMP operator/(FltMP const& x, FltMP const& y) {
-    return div(x,y,FltMP::current_rounding_mode);
+FloatMP operator/(FloatMP const& x, FloatMP const& y) {
+    return div(x,y,FloatMP::current_rounding_mode);
 }
 
-String sprintf(FltMP const& x, RoundingModeMP rnd);
-String sprintf(FltMP const&, PrecisionMP, RoundingModeMP);
+String sprintf(FloatMP const& x, RoundingModeMP rnd);
+String sprintf(FloatMP const&, PrecisionMP, RoundingModeMP);
 
 //   mpfr_get_str (char *str, mpfr_exp_t *expptr, Int b, SizeType n, mpfr_t op, mpfr_rnd_t rnd)
 // If str is not _a null pointer, it should point to _a block of storage large enough for the significand,
 // i._e., at least max(n + 2, 7). The extra two bytes are for _a possible minus sign,
 // and for the terminating null character, and the value 7 accounts for -@Inf@ plus the terminating null character.
-OutputStream& operator<<(OutputStream& os, FltMP const& x) {
+OutputStream& operator<<(OutputStream& os, FloatMP const& x) {
     char str[1024];
 //    mpfr_snprintf (str, 1024, "%R*e", MPFR_RNDN, x._mpfr);
     mpfr_snprintf (str, 1024, "%.100R*f", MPFR_RNDN, x._mpfr);
     return os << str;
 }
 
-//Integer floor(FltMP const& x) {
+//Integer floor(FloatMP const& x) {
 //    Integer z; mpfr_get_z(z._mpz,x._mpfr,MPFR_RNDD); return std::move(z);
 //}
-//Integer ceil(FltMP const& x) {
+//Integer ceil(FloatMP const& x) {
 //    Integer z; mpfr_get_z(z._mpz,x._mpfr,MPFR_RNDU); return std::move(z);
 //}
 
-FltMP floor(FltMP const& x) {
-    FltMP r(x.precision()); mpfr_floor(r._mpfr,x._mpfr); return std::move(r);
+FloatMP floor(FloatMP const& x) {
+    FloatMP r(x.precision()); mpfr_floor(r._mpfr,x._mpfr); return std::move(r);
 };
-FltMP ceil(FltMP const& x) {
-    FltMP r(x.precision()); mpfr_ceil(r._mpfr,x._mpfr); return std::move(r);
+FloatMP ceil(FloatMP const& x) {
+    FloatMP r(x.precision()); mpfr_ceil(r._mpfr,x._mpfr); return std::move(r);
 };
 
-FltMP nul(FltMP const& x) {
-    FltMP r(x.precision(),NoInit()); mpfr_set_si(r._mpfr,0,MPFR_RNDN); return std::move(r);
+FloatMP nul(FloatMP const& x) {
+    FloatMP r(x.precision(),NoInit()); mpfr_set_si(r._mpfr,0,MPFR_RNDN); return std::move(r);
 }
 
-FltMP pos(FltMP const& x) {
-    FltMP r(x.precision(),NoInit()); mpfr_set(r._mpfr,x._mpfr,MPFR_RNDN); return std::move(r);
+FloatMP pos(FloatMP const& x) {
+    FloatMP r(x.precision(),NoInit()); mpfr_set(r._mpfr,x._mpfr,MPFR_RNDN); return std::move(r);
 }
 
-FltMP neg(FltMP const& x) {
-    FltMP r(x.precision(),NoInit()); mpfr_neg(r._mpfr,x._mpfr,MPFR_RNDN); return std::move(r);
+FloatMP neg(FloatMP const& x) {
+    FloatMP r(x.precision(),NoInit()); mpfr_neg(r._mpfr,x._mpfr,MPFR_RNDN); return std::move(r);
 }
 
-FltMP abs(FltMP const& x) {
-    FltMP r(x.precision(),NoInit()); mpfr_abs(r._mpfr,x._mpfr,MPFR_RNDN); return std::move(r);
+FloatMP abs(FloatMP const& x) {
+    FloatMP r(x.precision(),NoInit()); mpfr_abs(r._mpfr,x._mpfr,MPFR_RNDN); return std::move(r);
 }
 
-FltMP max(FltMP const& x, FltMP const& y) {
-    FltMP r(std::max(x.precision(),y.precision()),NoInit()); mpfr_max(r._mpfr,x._mpfr,y._mpfr,MPFR_RNDN); return std::move(r);
+FloatMP max(FloatMP const& x, FloatMP const& y) {
+    FloatMP r(std::max(x.precision(),y.precision()),NoInit()); mpfr_max(r._mpfr,x._mpfr,y._mpfr,MPFR_RNDN); return std::move(r);
 }
 
-FltMP min(FltMP const& x, FltMP const& y) {
-    FltMP r(std::max(x.precision(),y.precision()),NoInit()); mpfr_min(r._mpfr,x._mpfr,y._mpfr,MPFR_RNDN); return std::move(r);
+FloatMP min(FloatMP const& x, FloatMP const& y) {
+    FloatMP r(std::max(x.precision(),y.precision()),NoInit()); mpfr_min(r._mpfr,x._mpfr,y._mpfr,MPFR_RNDN); return std::move(r);
 }
 
-FltMP half(FltMP&& x) {
+FloatMP half(FloatMP&& x) {
     mpfr_div_si(x._mpfr,x._mpfr,2,MPFR_RNDU); return std::move(x);
 }
 
-FltMP pos(FltMP const& x, mpfr_rnd_t rnd) {
-    FltMP r(x.precision(),NoInit()); mpfr_set(r._mpfr,x._mpfr,rnd); return std::move(r);
+FloatMP pos(FloatMP const& x, mpfr_rnd_t rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_set(r._mpfr,x._mpfr,rnd); return std::move(r);
 }
 
-FltMP neg(FltMP const& x, mpfr_rnd_t rnd) {
-    FltMP r(x.precision(),NoInit()); mpfr_neg(r._mpfr,x._mpfr,rnd); return std::move(r);
+FloatMP neg(FloatMP const& x, mpfr_rnd_t rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_neg(r._mpfr,x._mpfr,rnd); return std::move(r);
 }
 
-FltMP rec(FltMP const& x, mpfr_rnd_t rnd) {
-    FltMP r(x.precision(),NoInit()); mpfr_ui_div(r._mpfr,1u,x._mpfr,rnd); return std::move(r);
+FloatMP rec(FloatMP const& x, mpfr_rnd_t rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_ui_div(r._mpfr,1u,x._mpfr,rnd); return std::move(r);
 }
 
-FltMP sqrt(FltMP const& x, mpfr_rnd_t rnd) {
-    FltMP r(x.precision(),NoInit()); mpfr_sqrt(r._mpfr,x._mpfr,rnd); return std::move(r);
+FloatMP sqrt(FloatMP const& x, mpfr_rnd_t rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_sqrt(r._mpfr,x._mpfr,rnd); return std::move(r);
 }
 
-FltMP exp(FltMP const& x, mpfr_rnd_t rnd) {
-    FltMP r(x.precision(),NoInit()); mpfr_exp(r._mpfr,x._mpfr,rnd); return std::move(r);
+FloatMP exp(FloatMP const& x, mpfr_rnd_t rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_exp(r._mpfr,x._mpfr,rnd); return std::move(r);
 }
 
-FltMP log(FltMP const& x, mpfr_rnd_t rnd) {
-    FltMP r(x.precision(),NoInit()); mpfr_log(r._mpfr,x._mpfr,rnd); return std::move(r);
+FloatMP log(FloatMP const& x, mpfr_rnd_t rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_log(r._mpfr,x._mpfr,rnd); return std::move(r);
 }
 
-FltMP sin(FltMP const& x, mpfr_rnd_t rnd) {
-    FltMP r(x.precision(),NoInit()); mpfr_sin(r._mpfr,x._mpfr,rnd); return std::move(r);
+FloatMP sin(FloatMP const& x, mpfr_rnd_t rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_sin(r._mpfr,x._mpfr,rnd); return std::move(r);
 }
 
-FltMP cos(FltMP const& x, mpfr_rnd_t rnd) {
-    FltMP r(x.precision(),NoInit()); mpfr_cos(r._mpfr,x._mpfr,rnd); return std::move(r);
+FloatMP cos(FloatMP const& x, mpfr_rnd_t rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_cos(r._mpfr,x._mpfr,rnd); return std::move(r);
 }
 
-FltMP tan(FltMP const& x, mpfr_rnd_t rnd) {
-    FltMP r(x.precision(),NoInit()); mpfr_tan(r._mpfr,x._mpfr,rnd); return std::move(r);
+FloatMP tan(FloatMP const& x, mpfr_rnd_t rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_tan(r._mpfr,x._mpfr,rnd); return std::move(r);
 }
 
-FltMP atan(FltMP const& x, mpfr_rnd_t rnd) {
-    FltMP r(x.precision(),NoInit()); mpfr_atan(r._mpfr,x._mpfr,rnd); return std::move(r);
+FloatMP atan(FloatMP const& x, mpfr_rnd_t rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_atan(r._mpfr,x._mpfr,rnd); return std::move(r);
 }
 
-FltMP abs(FltMP const& x, mpfr_rnd_t rnd) {
-    FltMP r(x.precision(),NoInit()); mpfr_abs(r._mpfr,x._mpfr,rnd); return std::move(r);
+FloatMP abs(FloatMP const& x, mpfr_rnd_t rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_abs(r._mpfr,x._mpfr,rnd); return std::move(r);
 }
 
-FltMP const_pi(PrecisionMP pr, mpfr_rnd_t rnd) {
-    FltMP r(pr); mpfr_const_pi(r._mpfr,rnd); return std::move(r);
+FloatMP const_pi(PrecisionMP pr, mpfr_rnd_t rnd) {
+    FloatMP r(pr); mpfr_const_pi(r._mpfr,rnd); return std::move(r);
 }
 
-FltMP add(FltMP const& x1, FltMP const& x2, mpfr_rnd_t rnd) {
-    FltMP r(std::min(x1.precision(),x2.precision()),NoInit()); mpfr_add(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
+FloatMP add(FloatMP const& x1, FloatMP const& x2, mpfr_rnd_t rnd) {
+    FloatMP r(std::min(x1.precision(),x2.precision()),NoInit()); mpfr_add(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
 }
 
-FltMP sub(FltMP const& x1, FltMP const& x2, mpfr_rnd_t rnd) {
-    FltMP r(std::min(x1.precision(),x2.precision()),NoInit()); mpfr_sub(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
+FloatMP sub(FloatMP const& x1, FloatMP const& x2, mpfr_rnd_t rnd) {
+    FloatMP r(std::min(x1.precision(),x2.precision()),NoInit()); mpfr_sub(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
 }
-FltMP mul(FltMP const& x1, FltMP const& x2, mpfr_rnd_t rnd) {
-    FltMP r(std::min(x1.precision(),x2.precision()),NoInit()); mpfr_mul(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
+FloatMP mul(FloatMP const& x1, FloatMP const& x2, mpfr_rnd_t rnd) {
+    FloatMP r(std::min(x1.precision(),x2.precision()),NoInit()); mpfr_mul(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
 }
-FltMP div(FltMP const& x1, FltMP const& x2, mpfr_rnd_t rnd) {
-    FltMP r(std::min(x1.precision(),x2.precision()),NoInit()); mpfr_div(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
+FloatMP div(FloatMP const& x1, FloatMP const& x2, mpfr_rnd_t rnd) {
+    FloatMP r(std::min(x1.precision(),x2.precision()),NoInit()); mpfr_div(r._mpfr,x1._mpfr,x2._mpfr,rnd); return std::move(r);
 }
-FltMP pow(FltMP const& x, Int n, mpfr_rnd_t rnd) {
-    FltMP r(x.precision(),NoInit()); mpfr_pow_si(r._mpfr,x._mpfr,n,rnd); return std::move(r);
+FloatMP pow(FloatMP const& x, Int n, mpfr_rnd_t rnd) {
+    FloatMP r(x.precision(),NoInit()); mpfr_pow_si(r._mpfr,x._mpfr,n,rnd); return std::move(r);
 }
 
-Comparison cmp(FltMP const& x1, FltMP const& x2) {
+Comparison cmp(FloatMP const& x1, FloatMP const& x2) {
     return Comparison(mpfr_cmp(x1._mpfr,x2._mpfr));
 }
 
-Comparison cmp(FltMP const& x1, long int n2) {
+Comparison cmp(FloatMP const& x1, long int n2) {
     return Comparison(mpfr_cmp_si(x1._mpfr,n2));
 }
 
-Comparison cmp(FltMP const& x1, double x2) {
+Comparison cmp(FloatMP const& x1, double x2) {
     return Comparison(mpfr_cmp_d(x1._mpfr,x2));
 }
 
-Bool operator==(FltMP const& x1, FltMP const& x2) {
+Bool operator==(FloatMP const& x1, FloatMP const& x2) {
     return cmp(x1,x2)==Comparison::EQUAL;
 }
-Bool operator!=(FltMP const& x1, FltMP const& x2) {
+Bool operator!=(FloatMP const& x1, FloatMP const& x2) {
     return cmp(x1,x2)!=Comparison::EQUAL;
 }
-Bool operator<=(FltMP const& x1, FltMP const& x2) {
+Bool operator<=(FloatMP const& x1, FloatMP const& x2) {
     return cmp(x1,x2)<=Comparison::EQUAL;
 }
-Bool operator>=(FltMP const& x1, FltMP const& x2) {
+Bool operator>=(FloatMP const& x1, FloatMP const& x2) {
     return cmp(x1,x2)>=Comparison::EQUAL;
 }
-Bool operator< (FltMP const& x1, FltMP const& x2) {
+Bool operator< (FloatMP const& x1, FloatMP const& x2) {
     return cmp(x1,x2)< Comparison::EQUAL;
 }
-Bool operator> (FltMP const& x1, FltMP const& x2) {
+Bool operator> (FloatMP const& x1, FloatMP const& x2) {
     return cmp(x1,x2)> Comparison::EQUAL;
 }
 
 
-Bool operator==(FltMP const& x1, double x2) {
+Bool operator==(FloatMP const& x1, double x2) {
     return cmp(x1,x2)==Comparison::EQUAL;
 }
-Bool operator!=(FltMP const& x1, double x2) {
+Bool operator!=(FloatMP const& x1, double x2) {
     return cmp(x1,x2)!=Comparison::EQUAL;
 }
-Bool operator<=(FltMP const& x1, double x2) {
+Bool operator<=(FloatMP const& x1, double x2) {
     return cmp(x1,x2)<=Comparison::EQUAL;
 }
-Bool operator>=(FltMP const& x1, double x2) {
+Bool operator>=(FloatMP const& x1, double x2) {
     return cmp(x1,x2)>=Comparison::EQUAL;
 }
-Bool operator< (FltMP const& x1, double x2) {
+Bool operator< (FloatMP const& x1, double x2) {
     return cmp(x1,x2)< Comparison::EQUAL;
 }
-Bool operator> (FltMP const& x1, double x2) {
+Bool operator> (FloatMP const& x1, double x2) {
     return cmp(x1,x2)> Comparison::EQUAL;
 }
 
 
-FltMP next_down(FltMP x) { ARIADNE_NOT_IMPLEMENTED; }
-FltMP next_up(FltMP x) { ARIADNE_NOT_IMPLEMENTED; }
+FloatMP next_down(FloatMP x) { ARIADNE_NOT_IMPLEMENTED; }
+FloatMP next_up(FloatMP x) { ARIADNE_NOT_IMPLEMENTED; }
 
-FltMP neg_up(FltMP const& x) { return neg(x,MPFR_RNDU); }
-FltMP rec_up(FltMP const& x) { return rec(x,MPFR_RNDU); }
-FltMP add_up(FltMP const& x1, FltMP const& x2) { return add(x1,x2,MPFR_RNDU); }
-FltMP sub_up(FltMP const& x1, FltMP const& x2) { return sub(x1,x2,MPFR_RNDU); }
-FltMP mul_up(FltMP const& x1, FltMP const& x2) { return mul(x1,x2,MPFR_RNDU); }
-FltMP div_up(FltMP const& x1, FltMP const& x2) { return div(x1,x2,MPFR_RNDU); }
+FloatMP neg_up(FloatMP const& x) { return neg(x,MPFR_RNDU); }
+FloatMP rec_up(FloatMP const& x) { return rec(x,MPFR_RNDU); }
+FloatMP add_up(FloatMP const& x1, FloatMP const& x2) { return add(x1,x2,MPFR_RNDU); }
+FloatMP sub_up(FloatMP const& x1, FloatMP const& x2) { return sub(x1,x2,MPFR_RNDU); }
+FloatMP mul_up(FloatMP const& x1, FloatMP const& x2) { return mul(x1,x2,MPFR_RNDU); }
+FloatMP div_up(FloatMP const& x1, FloatMP const& x2) { return div(x1,x2,MPFR_RNDU); }
 
-FltMP neg_down(FltMP const& x) { return neg(x,MPFR_RNDD); }
-FltMP rec_down(FltMP const& x) { return rec(x,MPFR_RNDD); }
-FltMP add_down(FltMP const& x1, FltMP const& x2) { return add(x1,x2,MPFR_RNDD); }
-FltMP sub_down(FltMP const& x1, FltMP const& x2) { return sub(x1,x2,MPFR_RNDD); }
-FltMP mul_down(FltMP const& x1, FltMP const& x2) { return mul(x1,x2,MPFR_RNDD); }
-FltMP div_down(FltMP const& x1, FltMP const& x2) { return div(x1,x2,MPFR_RNDD); }
+FloatMP neg_down(FloatMP const& x) { return neg(x,MPFR_RNDD); }
+FloatMP rec_down(FloatMP const& x) { return rec(x,MPFR_RNDD); }
+FloatMP add_down(FloatMP const& x1, FloatMP const& x2) { return add(x1,x2,MPFR_RNDD); }
+FloatMP sub_down(FloatMP const& x1, FloatMP const& x2) { return sub(x1,x2,MPFR_RNDD); }
+FloatMP mul_down(FloatMP const& x1, FloatMP const& x2) { return mul(x1,x2,MPFR_RNDD); }
+FloatMP div_down(FloatMP const& x1, FloatMP const& x2) { return div(x1,x2,MPFR_RNDD); }
 
-FltMP neg_near(FltMP const& x) { return neg(x,MPFR_RNDN); }
-FltMP rec_near(FltMP const& x) { return rec(x,MPFR_RNDN); }
-FltMP add_near(FltMP const& x1, FltMP const& x2) { return add(x1,x2,MPFR_RNDN); }
-FltMP sub_near(FltMP const& x1, FltMP const& x2) { return sub(x1,x2,MPFR_RNDN); }
-FltMP mul_near(FltMP const& x1, FltMP const& x2) { return mul(x1,x2,MPFR_RNDN); }
-FltMP div_near(FltMP const& x1, FltMP const& x2) { return div(x1,x2,MPFR_RNDN); }
-FltMP pow_near(FltMP const& x, Int n) { return pow(x,n,MPFR_RNDN); }
+FloatMP neg_near(FloatMP const& x) { return neg(x,MPFR_RNDN); }
+FloatMP rec_near(FloatMP const& x) { return rec(x,MPFR_RNDN); }
+FloatMP add_near(FloatMP const& x1, FloatMP const& x2) { return add(x1,x2,MPFR_RNDN); }
+FloatMP sub_near(FloatMP const& x1, FloatMP const& x2) { return sub(x1,x2,MPFR_RNDN); }
+FloatMP mul_near(FloatMP const& x1, FloatMP const& x2) { return mul(x1,x2,MPFR_RNDN); }
+FloatMP div_near(FloatMP const& x1, FloatMP const& x2) { return div(x1,x2,MPFR_RNDN); }
+FloatMP pow_near(FloatMP const& x, Int n) { return pow(x,n,MPFR_RNDN); }
 
 
-FltMP add_rnd(FltMP const& x, FltMP const& y) { return add(x,y,FltMP::current_rounding_mode); }
-FltMP sub_rnd(FltMP const& x, FltMP const& y) { return sub(x,y,FltMP::current_rounding_mode); }
-FltMP mul_rnd(FltMP const& x, FltMP const& y) { return mul(x,y,FltMP::current_rounding_mode); }
-FltMP div_rnd(FltMP const& x, FltMP const& y) { return div(x,y,FltMP::current_rounding_mode); }
-FltMP add_opp(FltMP const& x, FltMP const& y);
-FltMP sub_opp(FltMP const& x, FltMP const& y);
-FltMP mul_opp(FltMP const& x, FltMP const& y);
-FltMP div_opp(FltMP const& x, FltMP const& y);
+FloatMP add_rnd(FloatMP const& x, FloatMP const& y) { return add(x,y,FloatMP::current_rounding_mode); }
+FloatMP sub_rnd(FloatMP const& x, FloatMP const& y) { return sub(x,y,FloatMP::current_rounding_mode); }
+FloatMP mul_rnd(FloatMP const& x, FloatMP const& y) { return mul(x,y,FloatMP::current_rounding_mode); }
+FloatMP div_rnd(FloatMP const& x, FloatMP const& y) { return div(x,y,FloatMP::current_rounding_mode); }
+FloatMP add_opp(FloatMP const& x, FloatMP const& y);
+FloatMP sub_opp(FloatMP const& x, FloatMP const& y);
+FloatMP mul_opp(FloatMP const& x, FloatMP const& y);
+FloatMP div_opp(FloatMP const& x, FloatMP const& y);
 
-FltMP sqrt_near(FltMP const& x) { return sqrt(x,MPFR_RNDN); }
-FltMP exp_near(FltMP const& x) { return exp(x,MPFR_RNDN); }
-FltMP log_near(FltMP const& x) { return log(x,MPFR_RNDN); }
-FltMP sin_near(FltMP const& x) { return sin(x,MPFR_RNDN); }
-FltMP cos_near(FltMP const& x) { return cos(x,MPFR_RNDN); }
-FltMP tan_near(FltMP const& x) { return tan(x,MPFR_RNDN); }
-FltMP atan_near(FltMP const& x) { return atan(x,MPFR_RNDN); }
+FloatMP sqrt_near(FloatMP const& x) { return sqrt(x,MPFR_RNDN); }
+FloatMP exp_near(FloatMP const& x) { return exp(x,MPFR_RNDN); }
+FloatMP log_near(FloatMP const& x) { return log(x,MPFR_RNDN); }
+FloatMP sin_near(FloatMP const& x) { return sin(x,MPFR_RNDN); }
+FloatMP cos_near(FloatMP const& x) { return cos(x,MPFR_RNDN); }
+FloatMP tan_near(FloatMP const& x) { return tan(x,MPFR_RNDN); }
+FloatMP atan_near(FloatMP const& x) { return atan(x,MPFR_RNDN); }
 
-FltMP sqrt_up(FltMP const& x) { return sqrt(x,MPFR_RNDU); }
-FltMP exp_up(FltMP const& x) { return exp(x,MPFR_RNDU); }
-FltMP log_up(FltMP const& x) { return log(x,MPFR_RNDU); }
-FltMP sin_up(FltMP const& x) { return sin(x,MPFR_RNDU); }
-FltMP cos_up(FltMP const& x) { return cos(x,MPFR_RNDU); }
-FltMP tan_up(FltMP const& x) { return tan(x,MPFR_RNDU); }
-FltMP atan_up(FltMP const& x) { return atan(x,MPFR_RNDU); }
+FloatMP sqrt_up(FloatMP const& x) { return sqrt(x,MPFR_RNDU); }
+FloatMP exp_up(FloatMP const& x) { return exp(x,MPFR_RNDU); }
+FloatMP log_up(FloatMP const& x) { return log(x,MPFR_RNDU); }
+FloatMP sin_up(FloatMP const& x) { return sin(x,MPFR_RNDU); }
+FloatMP cos_up(FloatMP const& x) { return cos(x,MPFR_RNDU); }
+FloatMP tan_up(FloatMP const& x) { return tan(x,MPFR_RNDU); }
+FloatMP atan_up(FloatMP const& x) { return atan(x,MPFR_RNDU); }
 
-FltMP sqrt_down(FltMP const& x) { return sqrt(x,MPFR_RNDD); }
-FltMP exp_down(FltMP const& x) { return exp(x,MPFR_RNDD); }
-FltMP log_down(FltMP const& x) { return log(x,MPFR_RNDD); }
-FltMP sin_down(FltMP const& x) { return sin(x,MPFR_RNDD); }
-FltMP cos_down(FltMP const& x) { return cos(x,MPFR_RNDD); }
-FltMP tan_down(FltMP const& x) { return tan(x,MPFR_RNDD); }
-FltMP atan_down(FltMP const& x) { return atan(x,MPFR_RNDD); }
+FloatMP sqrt_down(FloatMP const& x) { return sqrt(x,MPFR_RNDD); }
+FloatMP exp_down(FloatMP const& x) { return exp(x,MPFR_RNDD); }
+FloatMP log_down(FloatMP const& x) { return log(x,MPFR_RNDD); }
+FloatMP sin_down(FloatMP const& x) { return sin(x,MPFR_RNDD); }
+FloatMP cos_down(FloatMP const& x) { return cos(x,MPFR_RNDD); }
+FloatMP tan_down(FloatMP const& x) { return tan(x,MPFR_RNDD); }
+FloatMP atan_down(FloatMP const& x) { return atan(x,MPFR_RNDD); }
 
-FltMP pi_near(PrecisionMP pr) { return const_pi(pr,MPFR_RNDN); }
-FltMP pi_down(PrecisionMP pr) { return const_pi(pr,MPFR_RNDD); }
-FltMP pi_up(PrecisionMP pr) { return const_pi(pr,MPFR_RNDU); }
+FloatMP pi_near(PrecisionMP pr) { return const_pi(pr,MPFR_RNDN); }
+FloatMP pi_down(PrecisionMP pr) { return const_pi(pr,MPFR_RNDD); }
+FloatMP pi_up(PrecisionMP pr) { return const_pi(pr,MPFR_RNDU); }
 
 /************ FloatMPTemplate<Error> ***************************************************/
 
@@ -425,9 +425,9 @@ FloatMPTemplate<Error>::FloatMPTemplate(double e) : _e(e) { }
 
 FloatMPTemplate<Error>::FloatMPTemplate(double e, PrecisionMP pr) : _e(pr) { _e=e; }
 
-FloatMPTemplate<Error>::FloatMPTemplate(FltMP e) : _e(e) { }
+FloatMPTemplate<Error>::FloatMPTemplate(FloatMP e) : _e(e) { }
 
-FltMP const& FloatMPTemplate<Error>::get_flt() const { return this->_e; }
+FloatMP const& FloatMPTemplate<Error>::get_flt() const { return this->_e; }
 
 FloatMPTemplate<Error> operator+(FloatMPTemplate<Error> x, FloatMPTemplate<Error> y) {
     return FloatMPTemplate<Error>(add_up(x._e,y._e));
@@ -448,7 +448,7 @@ OutputStream& operator<<(OutputStream& os, FloatMPTemplate<Error> const& x) {
 
 FloatMPTemplate<Exact>::FloatMPTemplate(double v) : _v(v) { }
 
-FloatMPTemplate<Exact>::FloatMPTemplate(FltMP v) : _v(v) { }
+FloatMPTemplate<Exact>::FloatMPTemplate(FloatMP v) : _v(v) { }
 
 FloatMPTemplate<Exact>::operator FloatMPTemplate<Metrc>() const {
     return FloatMPTemplate<Metrc>(_v);
@@ -468,7 +468,7 @@ PrecisionMP FloatMPTemplate<Exact>::precision() const {
     return _v.precision();
 }
 
-FltMP const& FloatMPTemplate<Exact>::get_flt() const {
+FloatMP const& FloatMPTemplate<Exact>::get_flt() const {
     return this->_v;
 }
 
@@ -501,7 +501,7 @@ FloatMPTemplate<Bound> div(FloatMPTemplate<Exact> x, FloatMPTemplate<Exact> y) {
 }
 
 FloatMPTemplate<Bound> rec(FloatMPTemplate<Exact> x) {
-    FltMP one(1,x.precision());
+    FloatMP one(1,x.precision());
     auto y=FloatMPTemplate<Bound>(div_down(one,x._v),div_up(one,x._v));
     std::cerr<<x.precision()<<" "<<one.precision()<<" "<<y.precision()<<"\n";
     return y;
@@ -526,10 +526,10 @@ FloatMPTemplate<Metrc>::FloatMPTemplate(Integer const& z, PrecisionMP pr) : Floa
 FloatMPTemplate<Metrc>::FloatMPTemplate(Rational const& q, PrecisionMP pr) : _v(q.get_d()), _e(Int32(0)) {
 }
 
-FloatMPTemplate<Metrc>::FloatMPTemplate(FltMP v) : _v(v), _e(v) {
+FloatMPTemplate<Metrc>::FloatMPTemplate(FloatMP v) : _v(v), _e(v) {
 }
 
-FloatMPTemplate<Metrc>::FloatMPTemplate(FltMP v, FltMP e) : _v(v), _e(e) {
+FloatMPTemplate<Metrc>::FloatMPTemplate(FloatMP v, FloatMP e) : _v(v), _e(e) {
 }
 
 FloatMPTemplate<Metrc>::operator FloatMPTemplate<Bound>() const {
@@ -656,7 +656,7 @@ FloatMPTemplate<Metrc> atan(FloatMPTemplate<Metrc> x) {
 
 FloatMPTemplate<Metrc> abs(FloatMPTemplate<Metrc> x) {
     if(x._e<abs(x._v)) { return x; }
-    else { FltMP rv=half(abs(x._v)+x._e); return MetrcFloatMP(rv,rv); }
+    else { FloatMP rv=half(abs(x._v)+x._e); return MetrcFloatMP(rv,rv); }
 }
 
 MetrcFloatMP max(MetrcFloatMP x1, MetrcFloatMP x2) {
@@ -675,8 +675,8 @@ OutputStream& operator<<(OutputStream& os, FloatMPTemplate<Metrc> const& x) {
 
 /************ FloatMPTemplate<Bound> ***************************************************/
 
-FltMP operator*(double d, FltMP x) { mpfr_mul_d(x._mpfr,x._mpfr,d,MPFR_RNDN); return std::move(x); }
-FltMP operator+(FltMP x, double d) { mpfr_add_d(x._mpfr,x._mpfr,d,MPFR_RNDN); return std::move(x); }
+FloatMP operator*(double d, FloatMP x) { mpfr_mul_d(x._mpfr,x._mpfr,d,MPFR_RNDN); return std::move(x); }
+FloatMP operator+(FloatMP x, double d) { mpfr_add_d(x._mpfr,x._mpfr,d,MPFR_RNDN); return std::move(x); }
 
 
 FloatMPTemplate<Bound>::FloatMPTemplate() : _l(0.0), _u(0.0) {
@@ -700,15 +700,15 @@ FloatMPTemplate<Bound>::FloatMPTemplate(const Rational& q, PrecisionMP pr) : _l(
 //FloatMPTemplate<Bound>::FloatMPTemplate(double l, double u) : _l(l), _u(u) {
 //}
 
-FloatMPTemplate<Bound>::FloatMPTemplate(FltMP _v) : _l(_v), _u(_v) {
+FloatMPTemplate<Bound>::FloatMPTemplate(FloatMP _v) : _l(_v), _u(_v) {
 }
 
-FloatMPTemplate<Bound>::FloatMPTemplate(FltMP l, FltMP u) : _l(l), _u(u) {
+FloatMPTemplate<Bound>::FloatMPTemplate(FloatMP l, FloatMP u) : _l(l), _u(u) {
 }
 
 FloatMPTemplate<Bound>::operator FloatMPTemplate<Metrc>() const {
-    FltMP v=half(add_near(_l,_u));
-    FltMP e=max(sub_up(v,_l),sub_up(_u,v));
+    FloatMP v=half(add_near(_l,_u));
+    FloatMP e=max(sub_up(v,_l),sub_up(_u,v));
     return FloatMPTemplate<Metrc>(v,e);
 }
 
@@ -758,11 +758,11 @@ BoundFloatMP neg(BoundFloatMP x) {
 }
 
 BoundFloatMP rec(BoundFloatMP x) {
-    FltMP one(1,x.precision());
+    FloatMP one(1,x.precision());
     if(x._l>0 or x._u<0) {
         return BoundFloatMP{div_down(one,x._u),div_up(one,x._l)};
     } else {
-        FltMP inf(1e300*1e300);
+        FloatMP inf(1e300*1e300);
         return BoundFloatMP{-inf,+inf};
     }
 }
@@ -773,7 +773,7 @@ BoundFloatMP sqr(BoundFloatMP x) {
     } else if(x._u<0) {
         return BoundFloatMP{mul_down(x._u,x._u),mul_up(x._l,x._l)};
     } else {
-        FltMP zero(0,x.precision());
+        FloatMP zero(0,x.precision());
         return BoundFloatMP{zero,std::max(mul_up(x._l,x._l),mul_up(x._u,x._u))};
     }
 }
@@ -818,14 +818,14 @@ BoundFloatMP cos(BoundFloatMP x) {
 
     ARIADNE_ASSERT(x._l<=x._u);
 
-    FltMP r_l(x.precision());
-    FltMP r_u(x.precision());
+    FloatMP r_l(x.precision());
+    FloatMP r_u(x.precision());
 
     if(x.error().get_flt()>2.0*pi_down) {
         r_l=-1.0; r_u=+1.0; return BoundedFloatMP(r_l,r_u);
     }
 
-    FltMP n=floor(x._l/(2*pi_approx)+0.5);
+    FloatMP n=floor(x._l/(2*pi_approx)+0.5);
     x=x-ExactFloatMP(2*n)*pi_bnd;
     ARIADNE_ASSERT(x._l<=x._u);
 
@@ -870,7 +870,7 @@ BoundFloatMP max(BoundFloatMP x, BoundFloatMP y) {
 
 BoundFloatMP abs(BoundFloatMP x) {
     using std::max;
-    FltMP zero(x.precision());
+    FloatMP zero(x.precision());
     return BoundFloatMP(max(max(x._l,-x._u),zero),max(-x._l,x._u));
 }
 
@@ -949,8 +949,8 @@ OutputStream& operator<<(OutputStream& os, FloatMPTemplate<Bound> const& x) {
 /************ FloatMPTemplate<Upper> ***************************************************/
 
 FloatMPTemplate<Upper>::FloatMPTemplate() : _u(0.0) { }
-FloatMPTemplate<Upper>::FloatMPTemplate(FltMP f) : _u(f) { }
-FltMP const& FloatMPTemplate<Upper>::get_flt() const { return this->_u; }
+FloatMPTemplate<Upper>::FloatMPTemplate(FloatMP f) : _u(f) { }
+FloatMP const& FloatMPTemplate<Upper>::get_flt() const { return this->_u; }
 
 FloatMPTemplate<Upper> pos(FloatMPTemplate<Upper> x) { return +x._u; }
 FloatMPTemplate<Lower> neg(FloatMPTemplate<Upper> x) { return -x._u; }
@@ -969,8 +969,8 @@ OutputStream& operator<<(OutputStream& os, FloatMPTemplate<Upper> const& x) {
 /************ FloatMPTemplate<Lower> ***************************************************/
 
 FloatMPTemplate<Lower>::FloatMPTemplate() : _l(0.0) { }
-FloatMPTemplate<Lower>::FloatMPTemplate(FltMP f) : _l(f) { }
-FltMP const& FloatMPTemplate<Lower>::get_flt() const { return this->_l; }
+FloatMPTemplate<Lower>::FloatMPTemplate(FloatMP f) : _l(f) { }
+FloatMP const& FloatMPTemplate<Lower>::get_flt() const { return this->_l; }
 
 FloatMPTemplate<Lower> pos(FloatMPTemplate<Lower> x) { return +x._l; }
 FloatMPTemplate<Upper> neg(FloatMPTemplate<Lower> x) { return -x._l; }
@@ -990,13 +990,13 @@ OutputStream& operator<<(OutputStream& os, FloatMPTemplate<Lower> const& x) {
 
 FloatMPTemplate<Apprx>::FloatMPTemplate() : _a(0.0) { }
 FloatMPTemplate<Apprx>::FloatMPTemplate(double d) : _a(d) { }
-FloatMPTemplate<Apprx>::FloatMPTemplate(FltMP f) : _a(f) { }
+FloatMPTemplate<Apprx>::FloatMPTemplate(FloatMP f) : _a(f) { }
 Void FloatMPTemplate<Apprx>::set_precision(PrecisionMP pr) { _a.set_precision(pr); }
 PrecisionMP FloatMPTemplate<Apprx>::precision() const { return _a.precision(); }
-FltMP const& FloatMPTemplate<Apprx>::get_flt() const { return this->_a; }
+FloatMP const& FloatMPTemplate<Apprx>::get_flt() const { return this->_a; }
 
 FloatMPTemplate<Apprx>::FloatMPTemplate(Integer const& z, PrecisionMP pr) : FloatMPTemplate(Rational(z),pr) { }
-FloatMPTemplate<Apprx>::FloatMPTemplate(Rational const& q, PrecisionMP pr) : FloatMPTemplate(FltMP(q,pr,MPFR_RNDN)) { }
+FloatMPTemplate<Apprx>::FloatMPTemplate(Rational const& q, PrecisionMP pr) : FloatMPTemplate(FloatMP(q,pr,MPFR_RNDN)) { }
 
 FloatMPTemplate<Apprx> nul(FloatMPTemplate<Apprx> x);
 FloatMPTemplate<Apprx> pos(FloatMPTemplate<Apprx> x) { return +x._a; }
@@ -1029,7 +1029,7 @@ OutputStream& operator<<(OutputStream& os, FloatMPTemplate<Apprx> const& x) {
 
 /************ Class name **********************************************/
 
-template<> String class_name<FltMP>() { return "FloatMPTemplate"; }
+template<> String class_name<FloatMP>() { return "FloatMPTemplate"; }
 template<> String class_name<ExactFloatMP>() { return "ExactFloatMP"; }
 template<> String class_name<ErrorFloatMP>() { return "ErrorFloatMP"; }
 template<> String class_name<MetrcFloatMP>() { return "MetrcatedFloatMP"; }

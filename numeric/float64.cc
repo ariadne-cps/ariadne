@@ -1,7 +1,7 @@
 /***************************************************************************
- *            float.cc
+ *            float64.cc
  *
- *  Copyright 2008-10  Pieter Collins
+ *  Copyright 2008-15  Pieter Collins
  *
  ****************************************************************************/
 
@@ -58,8 +58,7 @@
     #warning "No rounding mode defined."
 #endif
 
-#include "numeric/float.h"
-#include "numeric/float-exact.h"
+#include "numeric/float64.h"
 
 
 namespace Ariadne {
@@ -572,37 +571,37 @@ double tan_rnd_series(double x) {
     return r;
 }
 
-Float pow_rnd(Float x, Int n)
+Float64 pow_rnd(Float64 x, Int n)
 {
     return pow_rnd(x.dbl,n);
 }
 
-Float sqrt_rnd(Float x)
+Float64 sqrt_rnd(Float64 x)
 {
     return sqrt_rnd(x.dbl);
 }
 
-Float exp_rnd(Float x)
+Float64 exp_rnd(Float64 x)
 {
     return exp_rnd(x.dbl);
 }
 
-Float log_rnd(Float x)
+Float64 log_rnd(Float64 x)
 {
     return log_rnd(x.dbl);
 }
 
-Float sin_rnd(Float x)
+Float64 sin_rnd(Float64 x)
 {
     return sin_rnd(x.dbl);
 }
 
-Float cos_rnd(Float x)
+Float64 cos_rnd(Float64 x)
 {
     return cos_rnd(x.dbl);
 }
 
-Float tan_rnd(Float x)
+Float64 tan_rnd(Float64 x)
 {
     return tan_rnd(x.dbl);
 }
@@ -616,12 +615,12 @@ Float tan_rnd(Float x)
 
 namespace Ariadne {
 
-Void serialize(boost::archive::text_oarchive& a, Float& flt, const unsigned int v) {
+Void serialize(boost::archive::text_oarchive& a, Float64& flt, const unsigned int v) {
     const double x=flt.get_d();
     a << x;
 };
 
-Void serialize(boost::archive::text_iarchive& a, Float& flt, const unsigned int v) {
+Void serialize(boost::archive::text_iarchive& a, Float64& flt, const unsigned int v) {
     flt=std::numeric_limits<double>::quiet_NaN();
     double x;
     a >> x;

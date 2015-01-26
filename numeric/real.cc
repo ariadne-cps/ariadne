@@ -35,8 +35,6 @@
 #include "rational.h"
 
 #include "float.h"
-#include "float64.h"
-#include "floatmp.h"
 
 namespace Ariadne {
 
@@ -115,18 +113,6 @@ Real::Real(double x)
 
 Real::Real(Dyadic const& d) : Real(Rational(d)) { }
 Real::Real(Decimal const& d) : Real(Rational(d)) { }
-
-Float64Template<Metrc>::Float64Template(Real const& r) : Float64Template<Metrc>(r._ptr->_evaluate(Precision64())) { }
-Float64Template<Bound>::Float64Template(Real const& r) : Float64Template<Bound>(r._ptr->_evaluate(Precision64())) { }
-Float64Template<Upper>::Float64Template(Real const& r) : Float64Template<Upper>(r._ptr->_evaluate(Precision64())) { }
-Float64Template<Lower>::Float64Template(Real const& r) : Float64Template<Lower>(r._ptr->_evaluate(Precision64())) { }
-Float64Template<Apprx>::Float64Template(Real const& r) : Float64Template<Apprx>(r._ptr->_evaluate(Precision64())) { }
-
-FloatMPTemplate<Metrc>::FloatMPTemplate(Real const& r, PrecisionMP pr) : FloatMPTemplate<Metrc>(r._ptr->_evaluate(pr)) { }
-FloatMPTemplate<Bound>::FloatMPTemplate(Real const& r, PrecisionMP pr) : FloatMPTemplate<Bound>(r._ptr->_evaluate(pr)) { }
-FloatMPTemplate<Upper>::FloatMPTemplate(Real const& r, PrecisionMP pr) : FloatMPTemplate<Upper>(r._ptr->_evaluate(pr)) { }
-FloatMPTemplate<Lower>::FloatMPTemplate(Real const& r, PrecisionMP pr) : FloatMPTemplate<Lower>(r._ptr->_evaluate(pr)) { }
-FloatMPTemplate<Apprx>::FloatMPTemplate(Real const& r, PrecisionMP pr) : FloatMPTemplate<Apprx>(r._ptr->_evaluate(pr)) { }
 
 UpperFloat Real::upper() const { return this->_ptr->_value(); }
 LowerFloat Real::lower() const { return this->_ptr->_value(); }
@@ -231,11 +217,6 @@ BoundFloatMP Real::evaluate(Accuracy accuracy) const {
 }
 
 
-// FIXME: Should go in Float64
-Float64Template<Bounded>::operator Float64Template<Metric>() const { ARIADNE_NOT_IMPLEMENTED; }
-Float64Template<Bounded>::operator Float64Template<Upper>() const { ARIADNE_NOT_IMPLEMENTED; }
-Float64Template<Bounded>::operator Float64Template<Lower>() const { ARIADNE_NOT_IMPLEMENTED; }
-Float64Template<Bounded>::operator Float64Template<Approximate>() const { ARIADNE_NOT_IMPLEMENTED; }
 
 } // namespace Ariadne
 

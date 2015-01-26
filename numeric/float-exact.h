@@ -36,7 +36,7 @@
 
 #include "numeric/rounding.h"
 #include "numeric/rational.h"
-#include "numeric/float.h"
+#include "numeric/float-raw.h"
 
 #include "numeric/twoexp.h"
 
@@ -140,8 +140,11 @@ class ApproximateFloat;
 inline const ExactFloat& make_exact(const Float& x) { return reinterpret_cast<const ExactFloat&>(x); }
 inline const ExactFloat& make_exact(const ExactFloat& x) { return x; }
 inline const ExactFloat& make_exact(const ApproximateFloat& x) { return reinterpret_cast<const ExactFloat&>(x); }
-template<template<class>class T> inline const T<ExactFloat>& make_exact(const T<ApproximateFloat>& t) { return reinterpret_cast<const T<ExactFloat>&>(t); }
-template<template<class>class T> inline const T<ExactFloat>& make_exact(const T<Float>& t) { return reinterpret_cast<const T<ExactFloat>&>(t); }
+
+template<template<class>class T> inline const T<ExactFloat>& make_exact(const T<ApproximateFloat>& t) {
+    return reinterpret_cast<const T<ExactFloat>&>(t); }
+template<template<class>class T> inline const T<ExactFloat>& make_exact(const T<Float>& t) {
+    return reinterpret_cast<const T<ExactFloat>&>(t); }
 ExactFloat make_exact(const Real& x);
 
 //! \related Float \brief The constant infinity

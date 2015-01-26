@@ -9,12 +9,9 @@ HDR = \
 # ariadne.h
 
 LIB_NUMERIC_SRC = \
-	logging.cc operators.cc logical.cc integer.cc rational.cc decimal.cc \
-	float.cc float-approximate.cc float-lower.cc float-upper.cc float-validated.cc float-exact.cc \
-	floatmp.cc \
-	real.cc \
-
-#   float64.cc \
+	logging.cc operators.cc logical.cc integer.cc rational.cc decimal.cc real.cc \
+	float64.cc floatmp.cc \
+	float-approximate.cc float-lower.cc float-upper.cc float-validated.cc float-exact.cc \
 
 TEST_NUMERIC_SRC = \
 	check_numeric.cc \

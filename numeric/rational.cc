@@ -50,8 +50,8 @@ class InvalidRationalLiteralException {
 };
 
 // Shortened version of raw float classes sufficient for comparison operator
-struct Float { double dbl; };
-struct Flt64 { volatile double d; };
+struct Float64 { volatile double dbl; double get_d() const { return dbl; } };
+struct ExactFloat { Float64 _v; Float64 raw() const { return _v; } };
 
 Rational rec(Integer const& z) {
     return Rational(1,z);
@@ -103,16 +103,10 @@ Rational::Rational(double d, std::nullptr_t dummy) {
     mpq_canonicalize(_mpq);
 }
 
-Rational::Rational(Float const& x) : Rational(x.dbl,nullptr) {
+Rational::Rational(Float64 const& x) : Rational(x.get_d(),nullptr) {
 }
 
-Rational::Rational(Float64 const& x) : Rational(x.d,nullptr) {
-}
-
-Rational::Rational(ExactFloat const& x) : Rational(reinterpret_cast<Float const&>(x)) {
-}
-
-Rational::Rational(ExactFloat64 const& x) : Rational(reinterpret_cast<Float64 const&>(x)) {
+Rational::Rational(ExactFloat64 const& x) : Rational(x.raw()) {
 }
 
 Rational::Rational(const String& s) {
@@ -380,14 +374,12 @@ Boolean operator>=(Rational const& q1, Rational const& q2) { return cmp(q1,q2)!=
 Boolean operator< (Rational const& q1, Rational const& q2) { return cmp(q1,q2)==Comparison::LESS; }
 Boolean operator> (Rational const& q1, Rational const& q2) { return cmp(q1,q2)==Comparison::GREATER; }
 
-Boolean eq(Rational const& q1, Flt64 const& x2) {
-    assert(false);
-    //return eq(q1,Rational(x2.get_d()));
+Boolean eq(Rational const& q1, Float64 const& x2) {
+    return eq(q1,Rational(x2));
 }
 
-Comparison cmp(Rational const& q1, Flt64 const& x2) {
-    assert(false);
-    //return cmp(q1,Rational(x2.get_d()));
+Comparison cmp(Rational const& q1, Float64 const& x2) {
+    return cmp(q1,Rational(x2));
 }
 
 

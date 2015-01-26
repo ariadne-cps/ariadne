@@ -34,15 +34,9 @@
 #include "utility/declarations.h"
 
 #include "utility/tribool.h"
-#include "numeric/rounding.h"
-#include "numeric/float.h"
+#include "numeric/float-raw.h"
 
 namespace Ariadne {
-
-class Float;
-class ApproximateFloat;
-class LowerFloat;
-class UpperFloat;
 
 //! \ingroup NumericModule
 //! \brief Floating-point lower bounds for real numbers.
@@ -65,8 +59,8 @@ class LowerFloat {
     LowerFloat(const ExactFloat& x);
     //! \brief Construct from a generic number.
     explicit LowerFloat(const Number<Lower>& x);
-    //! \brief Assign from a generic number
-    LowerFloat& operator=(const Number<Lower>& x);
+    //! \brief Assign from a generic number FIXME: Find good overloads
+    // LowerFloat& operator=(Number<Lower> const& x);
     //! \brief Convert to generic number type.
     operator Number<Lower> () const;
     //! \brief Convert from a real number.

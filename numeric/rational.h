@@ -35,6 +35,7 @@
 #include "utility/metaprogramming.h"
 #include "utility/string.h"
 #include "numeric/integer.h"
+#include "numeric/float.decl.h"
 
 namespace Ariadne {
 
@@ -43,11 +44,10 @@ struct Exact;
 class Boolean;
 
 class Int64;
+class Float64;
 
 class Integer;
 template<class P> class Number;
-class Float;
-class ExactFloat;
 
 template<class X> struct IsNumber;
 
@@ -70,11 +70,9 @@ class Rational
     Rational(const Integer&, const Integer&);
     template<class N, EnableIf<IsIntegral<N>> = dummy> Rational(N n);
     Rational(Int64);
-    explicit Rational(Float const&);
     explicit Rational(Float64 const&);
     Rational(const Integer&);
     explicit Rational(const String&);
-    explicit Rational(const ExactFloat&);
     explicit Rational(const ExactFloat64&);
     explicit Rational(const mpq_t);
     Rational(const Rational&);

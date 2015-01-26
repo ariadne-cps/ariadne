@@ -43,9 +43,8 @@ class TwoExp {
     explicit TwoExp(Int n) : _n(n) { }
     Int exponent() const { return this->_n; }
     // NOTE: Use std::pow(2.0,_n) not (1<<_n) since latter does not handle very large exponents
-    Float raw() const { return Float(this->get_d()); }
+    Float64 raw() const { return Float64(this->get_d()); }
     double get_d() const { return std::pow(2.0,this->_n); }
-    operator ExactFloat () const;
     operator ExactFloat64 () const;
     operator ErrorFloat64 () const;
     operator MetricFloat64 () const;

@@ -35,77 +35,59 @@ namespace Ariadne {
 class Real;
 class TwoExp;
 
-class Flt64;
-class FltMP;
+class Float64;
+class FloatMP;
 class TwoExp;
 
 class Precision64;
 class PrecisionMP;
 
-template<class P> class Float64Template;
-using Float64 = Flt64;
-using RawFloat64 = Float64;
-using ExactFloat64 = Float64Template<Exact>;
-using ErrorFloat64 = Float64Template<Error>;
-using MetricFloat64 = Float64Template<Metric>;
-using BoundedFloat64 = Float64Template<Bounded>;
-using UpperFloat64 = Float64Template<Upper>;
-using LowerFloat64 = Float64Template<Lower>;
-using ApproximateFloat64 = Float64Template<Approximate>;
+typedef Float64 Float;
 
-using ValidatedFloat64 = BoundedFloat64;
-
-using MetrcFloat64 = MetricFloat64;
-using BoundFloat64 = BoundedFloat64;
-using ValidFloat64 = ValidatedFloat64;
-using ApprxFloat64 = ApproximateFloat64;
-
-template<class P> class FloatMPTemplate;
-using FloatMP = FltMP;
-using RawFloatMP = FltMP;
-using ExactFloatMP = FloatMPTemplate<Exact>;
-using ErrorFloatMP = FloatMPTemplate<Error>;
-using MetrcFloatMP = FloatMPTemplate<Metrc>;
-using BoundFloatMP = FloatMPTemplate<Bound>;
-using UpperFloatMP = FloatMPTemplate<Upper>;
-using LowerFloatMP = FloatMPTemplate<Lower>;
-using ApprxFloatMP = FloatMPTemplate<Apprx>;
-
-using ValidFloatMP = FloatMPTemplate<Bounded>;
-
-using MetricFloatMP = FloatMPTemplate<Metric>;
-using BoundedFloatMP = FloatMPTemplate<Bounded>;
-using ValidatedFloatMP = FloatMPTemplate<Bounded>;
-using ApproximateFloatMP = FloatMPTemplate<Approximate>;
-
-class Float;
 using RawFloat = Float;
 class ExactFloat;
 class ValidatedFloat;
 class UpperFloat;
 class LowerFloat;
 class ApproximateFloat;
+//class PositiveUpperFloat;
+typedef UpperFloat PositiveUpperFloat;
 using MetricFloat = ValidatedFloat;
 using BoundedFloat = ValidatedFloat;
-using PositiveUpperFloat = UpperFloat;
+using ErrorFloat = PositiveUpperFloat;
+using BoundFloat = BoundedFloat;
+using MetrcFloat = MetricFloat;
+using ApprxFloat = ApproximateFloat;
 
-typedef PositiveUpperFloat ErrorFloat;
+template<class P> class Float64Template;
 
-/*
-typedef RawFloat64 RawFloat;
-typedef ExactFloat64 ExactFloat;
-typedef ErrorFloat64 ErrorFloat;
-typedef MetrcFloat64 MetricFloat;
-typedef BoundFloat64 BoundedFloat;
-typedef UpperFloat64 UpperFloat;
-typedef LowerFloat64 LowerFloat;
-typedef ApprxFloat64 ApproximateFloat;
-*/
+typedef ExactFloat ExactFloat64;
+typedef ValidatedFloat ValidatedFloat64;
+typedef UpperFloat UpperFloat64;
+typedef LowerFloat LowerFloat64;
+typedef ApproximateFloat ApproximateFloat64;
+typedef PositiveUpperFloat PositiveUpperFloat64;
+using MetricFloat64 = ValidatedFloat;
+using BoundedFloat64 = ValidatedFloat;
+using ErrorFloat64 = PositiveUpperFloat64;
+using BoundFloat64 = BoundedFloat64;
+using MetrcFloat64 = MetricFloat64;
+using ApprxFloat64 = ApproximateFloat64;
 
-typedef MetricFloat MetrcFloat;
-typedef BoundedFloat BoundFloat;
-typedef ValidatedFloat ValidFloat;
-typedef ApproximateFloat ApprxFloat;
+
+template<class P> class FloatMPTemplate;
+using ApproximateFloatMP = FloatMPTemplate<Approximate>;
+using LowerFloatMP = FloatMPTemplate<Lower>;
+using UpperFloatMP = FloatMPTemplate<Upper>;
+using BoundedFloatMP = FloatMPTemplate<Bounded>;
+using MetricFloatMP = FloatMPTemplate<Metric>;
+using ExactFloatMP = FloatMPTemplate<Exact>;
+using ErrorFloatMP = FloatMPTemplate<Error>;
+using ValidatedFloatMP = BoundedFloatMP;
+using PositiveUpperFloatMP = ErrorFloatMP;
+using BoundFloatMP = BoundedFloatMP;
+using MetrcFloatMP = MetricFloatMP;
+using ApprxFloatMP = ApproximateFloatMP;
 
 template<> struct IsNumber<double> : True { };
 
@@ -116,32 +98,13 @@ template<> struct IsFloat<ValidatedFloat> : True { };
 template<> struct IsFloat<UpperFloat> : True { };
 template<> struct IsFloat<LowerFloat> : True { };
 template<> struct IsFloat<ApproximateFloat> : True { };
-template<class P> struct IsFloat<Float64Template<P>> : True { };
-template<class P> struct IsFloat<FloatMPTemplate<P>> : True { };
+
 template<class T> struct IsNumber;
 template<> struct IsNumber<ExactFloat> : True { };
 template<> struct IsNumber<ValidatedFloat> : True { };
 template<> struct IsNumber<UpperFloat> : True { };
 template<> struct IsNumber<LowerFloat> : True { };
 template<> struct IsNumber<ApproximateFloat> : True { };
-template<class P> struct IsNumber<FloatMPTemplate<P>> : True { };
-template<class P> struct IsNumber<Float64Template<P>> : True { };
-
-template<class P> struct Float64Typedef;
-template<> struct Float64Typedef<Exact> { typedef ExactFloat64 Type; };
-template<> struct Float64Typedef<Effective> { typedef ValidatedFloat64 Type; };
-template<> struct Float64Typedef<Validated> { typedef ValidatedFloat64 Type; };
-template<> struct Float64Typedef<Approximate> { typedef ApproximateFloat64 Type; };
-template<class P> using Float64Type = typename Float64Typedef<P>::Type;
-
-template<class P> struct FloatMPTypedef { typedef FloatMPTemplate<P> Type; };
-template<> struct FloatMPTypedef<Effective> { typedef FloatMPTemplate<Validated> Type; };
-template<class P> using FloatMPType = typename FloatMPTypedef<P>::Type;
-
-template<class P, class A> struct FloatTypedef;
-template<class P> struct FloatTypedef<P,Precision64> { typedef Float64Type<P> Type; };
-template<class P> struct FloatTypedef<P,PrecisionMP> { typedef FloatMPType<P> Type; };
-template<class P, class A=Precision64> using FloatType = typename FloatTypedef<P,A>::Type;
 
 } // namespace Ariadne
 

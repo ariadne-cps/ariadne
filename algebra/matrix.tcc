@@ -107,9 +107,10 @@ template<class X> InputStream& Matrix<X>::read(InputStream& is) {
 template<class X> decltype(mag(declval<X>())) sup_norm(const Matrix<X>& A)
 {
     typedef decltype(mag(declval<X>())+mag(declval<X>())) R;
-    R result=A.zero_element();
+    R zero=mag(A.zero_element());
+    R result=zero;
     for(SizeType i=0; i!=A.row_size(); ++i) {
-        R row_sum=A.zero_element();;
+        R row_sum=zero;
         for(SizeType j=0; j!=A.column_size(); ++j) {
             row_sum+=mag(A[i][j]);
         }

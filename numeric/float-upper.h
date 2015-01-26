@@ -35,16 +35,10 @@
 
 #include "utility/tribool.h"
 #include "numeric/rounding.h"
-#include "numeric/float.h"
+#include "numeric/float.decl.h"
+#include "numeric/float-raw.h"
 
 namespace Ariadne {
-
-class Float;
-class ApproximateFloat;
-class LowerFloat;
-class UpperFloat;
-
-using PositiveUpperFloat = UpperFloat;
 
 //! \ingroup NumericModule
 //! \brief Floating-point upper bounds for real numbers.
@@ -69,8 +63,8 @@ class UpperFloat {
     explicit UpperFloat(const Integer& x);
     //! \brief Construct from a generic number.
     explicit UpperFloat(const Number<Upper>& x);
-    //! \brief Assign from a generic number
-    UpperFloat& operator=(const Number<Upper>& x);
+    //! \brief Assign from a generic number FIXME: Find good overloads
+    // UpperFloat& operator=(Number<Upper> const& x);
     //! \brief Convert to generic number type.
     operator Number<Upper> () const;
     //! \brief Convert from a floating-point number with an exact representation.
@@ -108,6 +102,7 @@ class UpperFloat {
   private:
     Float u;
 };
+
 
 } // namespace Ariadne
 

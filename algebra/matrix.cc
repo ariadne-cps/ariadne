@@ -29,9 +29,6 @@
 
 #include "utility/exceptions.h"
 #include "numeric/float.h"
-#include "numeric/float-approximate.h"
-#include "numeric/float-validated.h"
-#include "numeric/float-exact.h"
 #include "numeric/rational.h"
 #include "algebra/vector.h"
 #include "algebra/covector.h"
@@ -899,10 +896,10 @@ template Vector<UpperInterval> solve(const Matrix<UpperInterval>&, const Vector<
 
 template class Matrix<Real>;
 
-template ErrorFloat sup_norm(const Matrix<BoundFloat>& A);
+template PositiveUpperFloat sup_norm(const Matrix<BoundFloat>& A);
 template UpperFloat log_norm(const Matrix<BoundFloat>& A);
 
-template Matrix<ExactFloat64> make_exact(const Matrix<ApprxFloat64>& mx);
+template Matrix<ExactFloat64>const& make_exact(const Matrix<ApprxFloat64>& mx);
 
 #ifdef HAVE_GMPXX_H
 template class Matrix<Rational>;

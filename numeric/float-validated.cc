@@ -42,9 +42,9 @@
 #include "numeric/number.h"
 #include "numeric/float.h"
 #include "numeric/float-exact.h"
-#include "numeric/float-validated.h"
 #include "numeric/float-approximate.h"
 
+#include "numeric/float-validated.h"
 
 namespace Ariadne {
 
@@ -59,6 +59,9 @@ ValidatedFloat::ValidatedFloat(Number<Validated> const& x) {
 }
 
 Nat ValidatedFloat::output_precision = 6;
+
+ValidatedFloat::ValidatedFloat(const ExactFloat& x) : ValidatedFloat(x.raw(),x.raw()) {
+}
 
 ValidatedFloat widen(ValidatedFloat x)
 {

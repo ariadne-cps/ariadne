@@ -35,28 +35,15 @@
 
 #include "utility/tribool.h"
 #include "numeric/rounding.h"
-#include "numeric/float.h"
+#include "numeric/number.decl.h"
+#include "numeric/float-raw.h"
+
 #include "numeric/float-exact.h"
 #include "numeric/float-lower.h"
 #include "numeric/float-upper.h"
+#include "numeric/float-approximate.h"
 
 namespace Ariadne {
-
-// Forward declarations
-class Float;
-class ApproximateFloat;
-class LowerFloat;
-class UpperFloat;
-class ValidatedFloat;
-class ExactFloat;
-
-class Real;
-
-class Integer;
-class Rational;
-class Dyadic;
-class Decimal;
-
 
 //! \ingroup NumericModule
 //! \brief Intervals with floating-point endpoints supporting outwardly-rounded arithmetic.
@@ -107,7 +94,7 @@ class ValidatedFloat {
     //! \brief Copy constructor.
     ValidatedFloat(const ValidatedFloat& i) : l(i.l), u(i.u) { }
     //! \brief Convert from a floating-point number with an exact representation.
-    ValidatedFloat(const ExactFloat& x) : l(x.raw()), u(x.raw()) { }
+    ValidatedFloat(const ExactFloat& x);
     //! \brief Convert from a dyadic number.
     explicit ValidatedFloat(const Dyadic& x);
     //! \brief Convert from a decimal number.
@@ -120,13 +107,13 @@ class ValidatedFloat {
     explicit ValidatedFloat(const Real& x);
     //! \brief Construct from a generic number.
     explicit ValidatedFloat(const Number<Validated>& x);
-    //! \brief Assign from a generic number
-    ValidatedFloat& operator=(const Number<Validated>& x);
+    //! \brief Assign from a generic number FIXME: Find good overloads
+    // ValidatedFloat& operator=(Number<Validated> const& x);
     //! \brief Convert to generic number type.
     operator Number<Validated> () const;
 
     //! \brief Convert to a floating-point approximation.
-    explicit operator Float () const { return static_cast<Float>(this->midpoint()); }
+    explicit operator Float () const { return half(add_near(l,u)); }
 
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     ValidatedFloat(double lower, double upper) : l(lower), u(upper) { }
@@ -138,9 +125,6 @@ class ValidatedFloat {
         // ARIADNE_ASSERT_MSG(lower<=upper, "lower = "<<lower<<", upper ="<<upper);
      ValidatedFloat(const Rational& lower, const Rational& upper);
 
-    template<class N, EnableIf<IsIntegral<N>> = dummy> ValidatedFloat& operator=(N n) { l=n; u=n; }
-    ValidatedFloat& operator=(const Real& x) { *this=ValidatedFloat(x); }
-    ValidatedFloat& operator=(const ExactFloat& x) { l=x.raw(); u=x.raw(); return *this; }
 
     //! \brief The lower bound of the interval.
     const Float& lower_raw() const { return l; }

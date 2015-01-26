@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float.h
+ *            float-raw.h
  *
  *  Copyright 2008-15  Pieter Collins
  *
@@ -21,23 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file float.h
- *  \brief Inclusion header for floating-point numbers.
+/*! \file float-raw.h
+ *  \brief Temporary header for raw floating-point type.
  */
 
-#ifndef ARIADNE_FLOAT_H
-#define ARIADNE_FLOAT_H
+#ifndef ARIADNE_FLOAT_RAW_H
+#define ARIADNE_FLOAT_RAW_H
 
-#include "number.decl.h"
-#include "float.decl.h"
 #include "float64.h"
-#include "floatmp.h"
 
-#include "float-raw.h"
-#include "float-exact.h"
-#include "float-upper.h"
-#include "float-lower.h"
-#include "float-approximate.h"
-#include "float-validated.h"
+namespace Ariadne {
 
-#endif /* ARIADNE_FLOAT_H */
+typedef Float64 Float;
+typedef Float RawFloat;
+
+} // namespace Ariadne
+
+#endif /* ARIADNE_FLOAT_RAW_H */

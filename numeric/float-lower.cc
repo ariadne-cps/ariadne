@@ -73,53 +73,53 @@ LowerFloat operator-(UpperFloat x)
 
 LowerFloat operator+(LowerFloat x1, LowerFloat x2)
 {
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     Float x1l=x1.raw();
     Float x2l=x2.raw();
-    set_rounding_mode(downward);
+    Float::set_rounding_downward();
     Float rl=x1l+x2l;
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return LowerFloat(rl);
 }
 
 LowerFloat operator-(LowerFloat x1, UpperFloat x2)
 {
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     Float x1l=x1.raw();
     Float x2u=x2.raw();
-    set_rounding_mode(downward);
+    Float::set_rounding_downward();
     Float rl=x1l-x2u;
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return LowerFloat(rl);
 }
 
 LowerFloat operator*(LowerFloat x1, LowerFloat x2)
 {
     ARIADNE_PRECONDITION(x1.raw()>=0 && x2.raw()>=0);
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     Float x1l=x1.raw();
     Float x2l=x2.raw();
-    set_rounding_mode(downward);
+    Float::set_rounding_downward();
     Float rl=x1l*x2l;
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return LowerFloat(rl);
 }
 
 OutputStream& operator<<(OutputStream& os, LowerFloat x) {
-    rounding_mode_t rnd=get_rounding_mode();
-    set_rounding_downward();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
+    Float::set_rounding_downward();
     os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << x.raw();
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return os;
 }
 
 LowerFloat rec(UpperFloat x)
 {
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     Float xu=x.raw();
-    set_rounding_mode(downward);
+    Float::set_rounding_downward();
     Float rl=1/xu;
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return LowerFloat(rl);
 }
 LowerFloat min(LowerFloat x1, LowerFloat x2) {

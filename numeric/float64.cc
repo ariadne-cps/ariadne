@@ -571,6 +571,33 @@ double tan_rnd_series(double x) {
     return r;
 }
 
+
+
+
+const Float64::RoundingModeType Float64::upward = Ariadne::upward;
+
+const Float64::RoundingModeType Float64::downward = Ariadne::downward;
+
+const Float64::RoundingModeType Float64::to_nearest = Ariadne::to_nearest;
+
+const Float64::RoundingModeType Float64::toward_zero = Ariadne::toward_zero;
+
+Float64::Float64(Rational const& q, RoundingModeType rnd)
+    : Float64(q.get_d())
+{
+    RoundingModeType old_rnd=get_rounding_mode();
+    if(rnd==upward) {
+        set_rounding_upward();
+        while (Rational(dbl)<q) { dbl+=std::numeric_limits<double>::min(); }
+        set_rounding_mode(old_rnd);
+    }
+    if(rnd==downward) {
+        set_rounding_downward();
+        while (Rational(dbl)>q) { dbl-=std::numeric_limits<double>::min(); }
+        set_rounding_mode(old_rnd);
+    }
+}
+
 Float64 pow_rnd(Float64 x, Int n)
 {
     return pow_rnd(x.dbl,n);

@@ -118,8 +118,8 @@ inline Void set_round_up() { fesetround(FE_UPWARD);  }
 inline Void set_round_down() { fesetround(FE_DOWNWARD);  }
 inline Void set_round_nearest() { fesetround(FE_TONEAREST);  }
 
-inline Void set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
-inline rounding_mode_t get_rounding_mode() { return fegetround(); }
+inline Void Float::set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
+inline rounding_mode_t Float::get_rounding_mode() { return fegetround(); }
 
 inline Void c_set_round_nearest() { fesetround(FE_TONEAREST); }
 
@@ -131,11 +131,11 @@ inline Void set_round_nearest() { asm volatile ("fldcw ROUND_NEAREST"); }
 
 inline Void c_set_round_nearest() { fesetround(FE_TONEAREST); }
 
-//inline Void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw (%0)" : : "r" (rnd) ); }
-//inline rounding_mode_t get_rounding_mode() { rounding_mode_t rnd asm volatile ("fldcw (%0)" : : "r" (rnd) ); return rnd; }
+//inline Void Float::set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw (%0)" : : "r" (rnd) ); }
+//inline rounding_mode_t Float::get_rounding_mode() { rounding_mode_t rnd asm volatile ("fldcw (%0)" : : "r" (rnd) ); return rnd; }
 
-inline rounding_mode_t get_rounding_mode() { rounding_mode_t grnd; asm volatile ("fstcw %0" : "=m" (grnd) ); return grnd; }
-inline Void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw %0" : : "m" (rnd) ); }
+inline rounding_mode_t Float::get_rounding_mode() { rounding_mode_t grnd; asm volatile ("fstcw %0" : "=m" (grnd) ); return grnd; }
+inline Void Float::set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw %0" : : "m" (rnd) ); }
 
 #elif defined ARIADNE_GCC_MACRO_ROUNDING
 
@@ -143,8 +143,8 @@ inline Void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw %0" : 
 #define set_round_down()         asm("fldcw ROUND_DOWN")
 #define set_round_nearest()      asm("fldcw ROUND_NEAREST")
 
-inline Void set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
-inline rounding_mode_t get_rounding_mode() { return fegetround(); }
+inline Void Float::set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
+inline rounding_mode_t Float::get_rounding_mode() { return fegetround(); }
 
 inline Void c_set_round_nearest() { fesetround(FE_TONEAREST); }
 
@@ -388,28 +388,28 @@ Void test_rounding(volatile double p, volatile double q)
     std::cout<<"Testing correct rounding\n";
     rounding_mode_t fcw=get_control_word();
     std::cout<<"Initial control word="<<fcw<<"\n";
-    rounding_mode_t rnd=get_rounding_mode();
+    rounding_mode_t rnd=Float::get_rounding_mode();
     std::cout<<"Initial rounding mode="<<rnd<<"\n";
 
     set_round_up();
-    std::cout<<"Up rounding mode="<<get_rounding_mode()<<"\n";
+    std::cout<<"Up rounding mode="<<Float::get_rounding_mode()<<"\n";
     volatile double xu=p/q;
     std::cout<<"  Computed "<<p<<"/"<<q<<"="<<xu<<std::endl;
 
     set_round_down();
-    std::cout<<"Down rounding mode="<<get_rounding_mode()<<"\n";
+    std::cout<<"Down rounding mode="<<Float::get_rounding_mode()<<"\n";
     volatile double xl=p/q;
     std::cout<<"  Computed "<<p<<"/"<<q<<"="<<xl<<std::endl;
 
     set_round_nearest();
-    std::cout<<"Nearest rounding mode="<<get_rounding_mode()<<"\n";
+    std::cout<<"Nearest rounding mode="<<Float::get_rounding_mode()<<"\n";
     volatile double xn=p/q;
     std::cout<<"  Computed "<<p<<"/"<<q<<"="<<xn<<std::endl;
 
     std::cout<<p<<"/"<<q<<" ~ "<<xn<<std::endl;
     std::cout<<xl<<" < "<<p<<"/"<<q<<" < "<<xu<<std::endl;
-    set_rounding_mode(rnd);
-    std::cout<<"Restored rounding mode="<<get_rounding_mode()<<"\n";
+    Float::set_rounding_mode(rnd);
+    std::cout<<"Restored rounding mode="<<Float::get_rounding_mode()<<"\n";
 }
 
 Int main(Int argc, const char* argv[]) {
@@ -451,26 +451,26 @@ Int main(Int argc, const char* argv[]) {
 
     Int nnn=std::min(n,4);
     for(Int i=0; i!=nnn; ++i) {
-        set_rounding_mode(round_down);
+        Float::set_rounding_mode(round_down);
         double r=add_rnd(x[i],y[i]);
         std::cerr<<"add_rnd_down: x="<<x[i]<<" y="<<y[i]<<" r="<<r<<"\n";
-        set_rounding_mode(round_up);
+        Float::set_rounding_mode(round_up);
         double o=add_opp(x[i],y[i]);
         std::cerr<<"add_opp_up:   x="<<x[i]<<" y="<<y[i]<<" r="<<o<<"\n";
         assert(r==o);
     }
-    set_rounding_mode(round_nearest);
+    Float::set_rounding_mode(round_nearest);
 
     for(Int i=0; i!=nnn; ++i) {
         std::cerr<<"x="<<x[i]<<" y="<<y[i]<<" z="<<z[i]<<"\n";
-        set_rounding_mode(round_down);
+        Float::set_rounding_mode(round_down);
         acc_rnd(z[i],x[i],y[i]);
-        set_rounding_mode(round_up);
+        Float::set_rounding_mode(round_up);
         acc_opp(w[i],x[i],y[i]);
         std::cerr<<" r="<<z[i]<<" o="<<w[i]<<"\n\n\n";
         assert(z[i]==w[i]);
     }
-    set_rounding_mode(round_nearest);
+    Float::set_rounding_mode(round_nearest);
 
 }
 
@@ -488,7 +488,7 @@ Int main(Int argc, const char* argv[]) {
 
 
 Void dot_lu_rat(double& l, double& u, SizeType n, const double* x, const double* y) {
-    set_rounding_mode(round_nearest);
+    Float::set_rounding_mode(round_nearest);
     assert(l==u);
     mpq_class r=l;
     for(SizeType i=0; i!=n; ++i) {

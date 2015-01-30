@@ -67,31 +67,31 @@ UpperFloat operator-(LowerFloat x)
 
 UpperFloat operator+(UpperFloat x1, UpperFloat x2)
 {
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     Float x1u=x1.raw();
     Float x2u=x2.raw();
-    set_rounding_mode(upward);
+    Float::set_rounding_upward();
     Float ru=x1u+x2u;
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return UpperFloat(ru);
 }
 
 UpperFloat operator-(UpperFloat x1, LowerFloat x2)
 {
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     Float x1u=x1.raw();
     Float x2l=x2.raw();
-    set_rounding_mode(upward);
+    Float::set_rounding_upward();
     Float ru=x1u-x2l;
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return UpperFloat(ru);
 }
 
 OutputStream& operator<<(OutputStream& os, UpperFloat x) {
-    rounding_mode_t rnd=get_rounding_mode();
-    set_rounding_upward();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
+    Float::set_rounding_upward();
     os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << x.raw();
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return os;
 }
 
@@ -128,11 +128,11 @@ UpperFloat& operator*=(UpperFloat& x1, UpperFloat x2) {
 
 UpperFloat rec(LowerFloat x)
 {
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     Float xl=x.raw();
-    set_rounding_mode(upward);
+    Float::set_rounding_upward();
     Float ru=1/xl;
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return UpperFloat(ru);
 }
 

@@ -78,6 +78,19 @@ class Float64 {
   public:
     typedef Raw Paradigm;
     typedef Float64 NumericType;
+    typedef rounding_mode_t RoundingModeType;
+  public:
+    static const RoundingModeType downward;
+    static const RoundingModeType upward;
+    static const RoundingModeType to_nearest;
+    static const RoundingModeType toward_zero;
+
+    static RoundingModeType get_rounding_mode();
+    static Void set_rounding_mode(RoundingModeType);
+    static Void set_rounding_downward();
+    static Void set_rounding_upward();
+    static Void set_rounding_to_nearest();
+    static Void set_rounding_toward_zero();
   public:
     //! \brief Default constructor creates an uninitialised number.
     Float64() : dbl() { }
@@ -85,6 +98,8 @@ class Float64 {
     Float64(double x) : dbl(x) { }
     //! \brief Copy constructor.
     Float64(const Float64& x) : dbl(x.dbl) { }
+    //! \brief Construct from a rational number with given rounding
+    explicit Float64(const Rational& q, RoundingModeType rnd);
     explicit operator volatile double& () { return const_cast<volatile double&>(dbl); }
     explicit operator const double& () const { return const_cast<const double&>(dbl); }
     Float64 const& raw() const { return *this; } // FIXME: Included for compatibility with user floats
@@ -110,6 +125,13 @@ template<> inline Nat integer_cast(const Float64& a) { return static_cast<Nat>(a
 
 inline OutputStream& operator<<(OutputStream& os, const Float64& x) { return os << x.dbl; }
 inline InputStream& operator>>(InputStream& is, Float64& x) { double dbl; is >> dbl; x=Float64(dbl); return is; }
+
+inline Float64::RoundingModeType Float64::get_rounding_mode() { return Ariadne::get_rounding_mode(); }
+inline Void Float64::set_rounding_mode(RoundingModeType rnd) { Ariadne::set_rounding_mode(rnd); }
+inline Void Float64::set_rounding_upward() { Ariadne::set_rounding_upward(); }
+inline Void Float64::set_rounding_downward() { Ariadne::set_rounding_downward(); }
+inline Void Float64::set_rounding_to_nearest() { Ariadne::set_rounding_to_nearest(); }
+inline Void Float64::set_rounding_toward_zero() { Ariadne::set_rounding_toward_zero(); }
 
 // Exact raw data operations
 inline Float64 operator+(Float64 x) { return +x.dbl; }
@@ -191,87 +213,92 @@ Float64 tan_rnd(Float64 x);
 
 
 inline Float64 next_down(Float64 x) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
-    Float64 r=add_rnd(x,Float64(-std::numeric_limits<double>::min())); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(downward);
+    Float64 r=add_rnd(x,Float64(-std::numeric_limits<double>::min())); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 next_up(Float64 x) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    Float64 r=add_rnd(x,Float64(std::numeric_limits<double>::min())); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(upward);
+    Float64 r=add_rnd(x,Float64(std::numeric_limits<double>::min())); Float64::set_rounding_mode(rounding_mode); return r; }
 
 inline Float64 add_near(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(to_nearest);
+    Float64 r=add_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 sub_near(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(to_nearest);
+    Float64 r=sub_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 mul_near(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(to_nearest);
+    Float64 r=mul_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 div_near(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(to_nearest);
+    Float64 r=div_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
+
 
 //! \related Float64 \brief The nearest floating-point approximation to the constant \a pi.
-static const Float64 pi_approx=Float64(3.1415926535897931);
-static const Float64 pi_near=Float64(3.1415926535897931);
-static const Float64 pi_down=Float64(3.1415926535897931);
-static const Float64 pi_up  =Float64(3.1415926535897936);
+static Float64 pi_approx(Precision64) { return Float64(3.1415926535897931); }
+static Float64 pi_near(Precision64) { return Float64(3.1415926535897931); }
+static Float64 pi_down(Precision64) { return Float64(3.1415926535897931); }
+static Float64 pi_up(Precision64) { return Float64(3.1415926535897936); }
+static Float64 pi_approx() { return Float64(3.1415926535897931); }
+static Float64 pi_near() { return Float64(3.1415926535897931); }
+static Float64 pi_down() { return Float64(3.1415926535897931); }
+static Float64 pi_up() { return Float64(3.1415926535897936); }
 
 inline Float64 add_approx(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(to_nearest);
+    Float64 r=add_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 sub_approx(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(to_nearest);
+    Float64 r=sub_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 mul_approx(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(to_nearest);
+    Float64 r=mul_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 div_approx(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(to_nearest);
+    Float64 r=div_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 pow_approx(Float64 x, Int n) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(to_nearest);
+    Float64 r=pow_rnd(x,n); Float64::set_rounding_mode(rounding_mode); return r; }
 
 inline Float64 add_up(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    Float64 r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(upward);
+    Float64 r=add_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 sub_up(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    Float64 r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(upward);
+    Float64 r=sub_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 mul_up(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    Float64 r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(upward);
+    Float64 r=mul_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 div_up(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    Float64 r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(upward);
+    Float64 r=div_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 pow_up(Float64 x, Int n) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    Float64 r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(upward);
+    Float64 r=pow_rnd(x,n); Float64::set_rounding_mode(rounding_mode); return r; }
 
 inline Float64 add_down(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
-    Float64 r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(downward);
+    Float64 r=add_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 sub_down(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
-    Float64 r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(downward);
+    Float64 r=sub_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 mul_down(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
-    Float64 r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(downward);
+    Float64 r=mul_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 div_down(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
-    Float64 r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(downward);
+    Float64 r=div_rnd(x,y); Float64::set_rounding_mode(rounding_mode); return r; }
 inline Float64 pow_down(Float64 x, Int n) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
-    Float64 r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(downward);
+    Float64 r=pow_rnd(x,n); Float64::set_rounding_mode(rounding_mode); return r; }
 
 //! \related Float64 \brief The average of two values, computed with nearest rounding. Also available with \c _ivl suffix.
 inline Float64 med_approx(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
-    Float64 r=half_exact(add_rnd(x,y)); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(to_nearest);
+    Float64 r=half_exact(add_rnd(x,y)); Float64::set_rounding_mode(rounding_mode); return r; }
 //! \related Float64 \brief Half of the difference of two values, computed with upward rounding. Also available with \c _ivl suffix.
 inline Float64 rad_up(Float64 x, Float64 y) {
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
-    Float64 r=half_exact(sub_rnd(y,x)); set_rounding_mode(rounding_mode); return r; }
+    rounding_mode_t rounding_mode=Float64::get_rounding_mode(); Float64::set_rounding_mode(upward);
+    Float64 r=half_exact(sub_rnd(y,x)); Float64::set_rounding_mode(rounding_mode); return r; }
 
 inline Float64 sqrt_approx(Float64 x) { return std::sqrt(x.dbl); }
 inline Float64 exp_approx(Float64 x) { return std::exp(x.dbl); }

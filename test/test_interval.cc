@@ -85,8 +85,8 @@ TestInterval::test_concept()
     double d=1;
     ExactFloat x=1;
     Float a,b;
-    ExactInterval i=1;
-    ExactInterval j=1;
+    ExactInterval i;
+    UpperInterval j;
 
 
     // Constructors
@@ -94,7 +94,7 @@ TestInterval::test_concept()
     j=I(n,n); j=I(m,m); j=I(d,d); j=I(a,b);
     j=I(n,m); j=I(m,d); j=I(d,n);
     // Assignment
-    j=n; j=m; j=d; j=x; j=i;
+    j=n; j=m; j=x; j=i;
 
     // Exact operations
     //j=abs(i); j=neg(i); j=rec(i);
@@ -263,8 +263,6 @@ TestInterval::test_exact_rounded_arithmetic()
 Void
 TestInterval::test_constructors()
 {
-    typedef ExactInterval I;
-
 
     Float zero=0;
 
@@ -280,28 +278,28 @@ TestInterval::test_constructors()
         ARIADNE_TEST_ASSERT((Bool)(ivld2==ExactInterval(zero,zero)));
     }
 
-    // Constructor with approximations
 #ifdef HAVE_GMPXX_H
-    ExactInterval ivld3(Rational(21,10),Rational(16,5));
+    // Constructor without approximations
+    ExactInterval ivld3(Rational(21,8),Rational(17,4));
     cout<<ivld3<<std::endl;
-    ARIADNE_TEST_COMPARE(make_exact(ivld3.lower()),<,Rational(21,10));
-    ARIADNE_TEST_COMPARE(make_exact(ivld3.upper()),>,Rational(16,5));
+    ARIADNE_TEST_COMPARE(make_exact(ivld3.lower()),==,Rational(21,8));
+    ARIADNE_TEST_COMPARE(make_exact(ivld3.upper()),==,Rational(17,4));
 #else
-    ExactInterval ivld3(2.1,3.2);
+    UpperInterval ivld3(2.1,3.2);
 #endif // HAVE_GMPXX_H
 
     // Constructor from approximate values
-    ExactInterval ivld4(2.1,3.2);
+    UpperInterval ivld4(2.1,3.2);
     ARIADNE_TEST_COMPARE(ivld4.lower(),<=,2.1);
     ARIADNE_TEST_COMPARE(ivld4.upper(),>=,3.2);
 
 #ifdef HAVE_GMPXX_H
     // Approximate constructor from a single value
-    ExactInterval ivld5(Rational(1,3));
+    UpperInterval ivld5(Rational(1,3));
     ARIADNE_TEST_COMPARE(make_exact(ivld5.lower()),<,Rational(1,3));
     ARIADNE_TEST_COMPARE(make_exact(ivld5.upper()),>,Rational(1,3));
 #else
-    ExactInterval ivld5(1./3.);
+    UpperInterval ivld5(1./3.);
 #endif // HAVE_GMPXX_H
 
     // Exact constructor from a single value

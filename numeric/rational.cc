@@ -341,10 +341,10 @@ Rational operator"" _q(long double x) {
 }
 
 OutputStream& write(OutputStream& os, mpz_t const z) {
-    char str[255];
-    str[254]='\0';
+    char str[512];
+    str[511]='\0';
     mpz_get_str (str, 10, z);
-    assert(str[254]=='\0');
+    assert(str[511]=='\0');
     return os << str;
 }
 

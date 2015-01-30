@@ -116,14 +116,14 @@ OutputStream& operator<<(OutputStream& os, const PythonRepresentation<UpperFloat
 }
 
 OutputStream& operator<<(OutputStream& os, const PythonRepresentation<ValidatedFloat>& x) {
-    rounding_mode_t rnd=get_rounding_mode();
+    rounding_mode_t rnd=Float::get_rounding_mode();
     os << '{';
-    set_rounding_downward();
+    Float::set_rounding_downward();
     os << std::showpoint << std::setprecision(18) << x.reference().lower().get_d();
     os << ':';
-    set_rounding_upward();
+    Float::set_rounding_upward();
     os << std::showpoint << std::setprecision(18) << x.reference().upper().get_d();
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     os << '}';
     return os;
 

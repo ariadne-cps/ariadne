@@ -104,17 +104,17 @@ Nat C1TaylorSeries::degree() const {
 #define ARIADNE_BOUNDS_INTERVAL_SUM
 #if defined ARIADNE_MIDPOINT_INTERVAL_SUM
 C1TaylorSeries& operator+=(C1TaylorSeries& f, ExactInterval ic) {
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float& fv=f._coefficients[0];
     Float c=ic.midpoint();
-    set_rounding_upward();
+    Float::set_rounding_upward();
     VOLATILE Float fvu=fv+c;
     VOLATILE Float mfvl=(-fv)-c;
     Float e=(fvu+mfvl)/2;
     e+=max(ic.upper()-c,c-ic.lower());
     f._zero_error+=(fvu+mfvl)/2;
     f._uniform_error+=(fvu+mfvl)/2;
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     fv+=c;
     ARIADNE_ASSERT_MSG(f._zero_error>=0,"f="<<f<<" c="<<c);
     return f;
@@ -122,15 +122,15 @@ C1TaylorSeries& operator+=(C1TaylorSeries& f, ExactInterval ic) {
 
 #elif defined ARIADNE_BOUNDS_INTERVAL_SUM
 C1TaylorSeries& operator+=(C1TaylorSeries& f, ValidatedNumber ic) {
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float& fv=f._coefficients[0];
-    set_rounding_upward();
+    Float::set_rounding_upward();
     VOLATILE Float fvu=fv+ic.upper().raw();
     VOLATILE Float mfvl=(-fv)-ic.lower().raw();
     Float e=(fvu+mfvl)/2;
     f._zero_error+=e;
     f._uniform_error+=e;
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     fv=(fvu-mfvl)/2;
     return f;
 }
@@ -143,7 +143,7 @@ C1TaylorSeries& operator*=(C1TaylorSeries& f, ValidatedNumber ic) {
     const Float c=ic.midpoint().raw();
     const Float ac=max(abs(ic.lower().raw()),abs(ic.upper().raw()));
 
-    set_rounding_upward();
+    Float::set_rounding_upward();
     const Float rc=(ic.upper().raw()-ic.lower().raw())/2;
 
     fze*=ac;
@@ -160,7 +160,7 @@ C1TaylorSeries& operator*=(C1TaylorSeries& f, ValidatedNumber ic) {
     }
 
     for(Nat i=1; i!=f._coefficients.size(); ++i) {
-        set_rounding_upward();
+        Float::set_rounding_upward();
         Float& fv=f._coefficients[i];
         VOLATILE Float fvu=fv*c;
         VOLATILE Float mfvl=(-fv)*c;
@@ -169,7 +169,7 @@ C1TaylorSeries& operator*=(C1TaylorSeries& f, ValidatedNumber ic) {
         fde+=i*e;
     };
 
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     for(Nat i=0; i!=f._coefficients.size(); ++i) {
         f._coefficients[i]*=c;
     }
@@ -186,7 +186,7 @@ C1TaylorSeries operator+(C1TaylorSeries f1, C1TaylorSeries f2) {
     const std::vector<Float>& f2a=f2._coefficients;
     std::vector<Float>& f0a=r._coefficients;
 
-    set_rounding_upward();
+    Float::set_rounding_upward();
     VOLATILE Float vu=f1a[0]+f2a[0];
     VOLATILE Float mvl=(-f1a[0])-f2a[0];
     r._zero_error=(vu+mvl)/2;
@@ -201,7 +201,7 @@ C1TaylorSeries operator+(C1TaylorSeries f1, C1TaylorSeries f2) {
     r._uniform_error+=f1._uniform_error+f2._uniform_error;
     r._derivative_error+=f1._derivative_error+f2._derivative_error;
 
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     for(Nat i=0; i!=min(f1a.size(),f2a.size()); ++i) {
         f0a[i]=f1a[i]+f2a[i];
     }
@@ -249,7 +249,7 @@ C1TaylorSeries operator*(C1TaylorSeries f1, C1TaylorSeries f2) {
     const Float& f2e1=f2._derivative_error;
     Float& fre1=fr._derivative_error;
 
-    set_rounding_upward();
+    Float::set_rounding_upward();
 
     Float f1sa0=abssum(f1a);
     Float f2sa0=abssum(f2a);
@@ -285,7 +285,7 @@ C1TaylorSeries operator*(C1TaylorSeries f1, C1TaylorSeries f2) {
     fre1 += ( (f1e1*f2sa0 + f1sa1*f2e0 + f1e1*f2e0)
              + (f1e0*f2sa1 + f1sa0*f2e1 + f1e0*f2e1) );
 
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     for(Nat i1=0; i1!=f1a.size(); ++i1) {
         for(Nat i2=0; i2!=f2a.size(); ++i2) {
             Nat i0=i1+i2;
@@ -306,11 +306,11 @@ C1TaylorSeries compose(C1TaylorSeries f, C1TaylorSeries g) {
         r+=ValidatedNumber(f._coefficients[i]);
     }
 
-    set_rounding_upward();
+    Float::set_rounding_upward();
     r._zero_error+=f._zero_error;
     r._uniform_error+=f._uniform_error;
     r._derivative_error+=f._derivative_error;
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
 
     return r;
 }
@@ -392,11 +392,11 @@ Void C1TaylorFunction::clear() {
 
 C1TaylorFunction& C1TaylorFunction::operator=(ExactInterval ic) {
     this->clear();
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float e=(ic.upper().raw()-ic.lower().raw())/2;
     this->_zero_error=e;
     this->_uniform_error=e;
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     this->_expansion.append(MultiIndex(this->argument_size()),ic.centre().raw());
     return *this;
 }
@@ -408,31 +408,31 @@ C1TaylorFunction& operator+=(C1TaylorFunction& f, Float ec) {
         return f;
     }
     //ARIADNE_DEBUG_ASSERT(f._expansion.back().key().degree()==0);
-    set_rounding_upward();
+    Float::set_rounding_upward();
     //Float& fv=f._expansion.back().data();
     Float& fv=(--f._expansion.end())->data();
     Float& fze=f._zero_error;
     Float& fe=f._uniform_error;
-    set_rounding_upward();
+    Float::set_rounding_upward();
     VOLATILE Float fvu=fv+c;
     VOLATILE Float mfvl=(-fv)-c;
     fze+=(fvu+mfvl)/2;
     fe+=(fvu+mfvl)/2;
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     fv+=c;
     ARIADNE_ASSERT_MSG(f._zero_error>=0,"f="<<f<<" c="<<c);
     return f;
 }
 
 C1TaylorFunction& operator*=(C1TaylorFunction& f, Float ec) {
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float& fze=f._zero_error;
     Float& fue=f._uniform_error;
     Array<Float>& fde=f._derivative_errors;
     const Float& c=ec;
     const Float ac=abs(c);
 
-    set_rounding_upward();
+    Float::set_rounding_upward();
     fze*=ac;
     fue*=ac;
     for(Nat j=0; j!=f.argument_size(); ++j) {
@@ -454,7 +454,7 @@ C1TaylorFunction& operator*=(C1TaylorFunction& f, Float ec) {
         }
     }
 
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     for(Expansion<Float>::Iterator iter=f._expansion.begin();
         iter!=f._expansion.end(); ++iter)
     {
@@ -480,7 +480,7 @@ C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2) {
     while(i1!=f1._expansion.end() && i2!=f2._expansion.end()) {
         if(i1->key()==i2->key()) {
             const MultiIndex& a = i1->key();
-            set_rounding_upward();
+            Float::set_rounding_upward();
             VOLATILE Float fvu=i1->data()+i2->data();
             VOLATILE Float mfvl=(-i1->data())-i2->data();
             const Float e=(fvu+mfvl)/2;
@@ -491,7 +491,7 @@ C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2) {
             for(Nat j=0; j!=n; ++j) {
                 f0._derivative_errors[j]+=a[j]*e;
             }
-            set_rounding_to_nearest();
+            Float::set_rounding_to_nearest();
             f0._expansion.append(a,i1->data()+i2->data());
             ++i1;
             ++i2;
@@ -512,13 +512,13 @@ C1TaylorFunction operator+(C1TaylorFunction f1, C1TaylorFunction f2) {
         ++i2;
     }
 
-    set_rounding_upward();
+    Float::set_rounding_upward();
     f0._zero_error+=(f1._zero_error+f2._zero_error);
     f0._uniform_error+=(f1._uniform_error+f2._uniform_error);
     for(Nat j=0; j!=n; ++j) {
         f0._derivative_errors[j]+=(f1._derivative_errors[j]+f2._derivative_errors[j]);
     }
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
 
     return f0;
 }
@@ -536,7 +536,7 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
     while(i1!=f1._expansion.end() && i2!=f2._expansion.end()) {
         if(i1->key()==i2->key()+a3) {
             const MultiIndex& a = i1->key();
-            set_rounding_upward();
+            Float::set_rounding_upward();
             VOLATILE Float fvu=i1->data()+i2->data()*c3;
             VOLATILE Float mfvl=(-i1->data())+i2->data()*(-c3);
             const Float e=(fvu+mfvl)/2;
@@ -547,7 +547,7 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
             for(Nat j=0; j!=n; ++j) {
                 f0._derivative_errors[j]+=a[j]*e;
             }
-            set_rounding_to_nearest();
+            Float::set_rounding_to_nearest();
             f0._expansion.append(a,i1->data()+i2->data()*c3);
             ++i1;
             ++i2;
@@ -556,7 +556,7 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
             ++i1;
         } else {
             a=i2->key()+a3;
-            set_rounding_upward();
+            Float::set_rounding_upward();
             VOLATILE Float fvu=i2->data()*c3;
             VOLATILE Float mfvl=i2->data()*(-c3);
             const Float e=(fvu+mfvl)/2;
@@ -567,7 +567,7 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
             for(Nat j=0; j!=n; ++j) {
                 f0._derivative_errors[j]+=a[j]*e;
             }
-            set_rounding_to_nearest();
+            Float::set_rounding_to_nearest();
             f0._expansion.append(a,i2->data()*c3);
             ++i2;
         }
@@ -577,7 +577,7 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
         ++i1;
     }
     while(i2!=f2._expansion.end()) {
-        set_rounding_upward();
+        Float::set_rounding_upward();
         VOLATILE Float fvu=i2->data()*c3;
         VOLATILE Float mfvl=i2->data()*(-c3);
         const Float e=(fvu+mfvl)/2;
@@ -588,18 +588,18 @@ Void fma(C1TaylorFunction& f0, const C1TaylorFunction& f1, const C1TaylorFunctio
         for(Nat j=0; j!=n; ++j) {
             f0._derivative_errors[j]+=a[j]*e;
         }
-        set_rounding_to_nearest();
+        Float::set_rounding_to_nearest();
         f0._expansion.append(i2->key()+a3,i2->data()*c3);
         ++i2;
     }
 
-    set_rounding_upward();
+    Float::set_rounding_upward();
     f0._zero_error+=(f1._zero_error+f2._zero_error*abs(c3));
     f0._uniform_error+=(f1._uniform_error+f2._uniform_error*abs(c3));
     for(Nat j=0; j!=n; ++j) {
         f0._derivative_errors[j]+=(f1._derivative_errors[j]+f2._derivative_errors[j]*abs(c3));
     }
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
 
 }
 

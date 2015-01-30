@@ -49,10 +49,10 @@
 namespace Ariadne {
 
 namespace {
-inline Float cos_down(Float x) { set_rounding_downward(); Float y=cos_rnd(x); set_default_rounding(); return y; }
-inline Float cos_up(Float x) { set_rounding_upward(); Float y=cos_rnd(x); set_default_rounding(); return y; }
+inline Float cos_down(Float x) { Float::set_rounding_downward(); Float y=cos_rnd(x); set_default_rounding(); return y; }
+inline Float cos_up(Float x) { Float::set_rounding_upward(); Float y=cos_rnd(x); set_default_rounding(); return y; }
 } // namespace
-const ValidatedFloat pi_val=ValidatedFloat(pi_down,pi_up);
+const ValidatedFloat pi_val=ValidatedFloat(pi_down(Precision64()),pi_up(Precision64()));
 
 ValidatedFloat::ValidatedFloat(Number<Validated> const& x) {
     ARIADNE_NOT_IMPLEMENTED;
@@ -65,30 +65,30 @@ ValidatedFloat::ValidatedFloat(const ExactFloat& x) : ValidatedFloat(x.raw(),x.r
 
 ValidatedFloat widen(ValidatedFloat x)
 {
-    rounding_mode_t rm=get_rounding_mode();
+    Float::RoundingModeType rm=Float::get_rounding_mode();
     const Float& xl=x.lower_raw();
     const Float& xu=x.upper_raw();
     const Float m=std::numeric_limits<float>::min();
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float wu=xu+m;
     Float mwl=-xl+m;
     Float wl=-mwl;
-    set_rounding_mode(rm);
+    Float::set_rounding_mode(rm);
     assert(wl<xl); assert(wu>xu);
     return ValidatedFloat(wl,wu);
 }
 
 ValidatedFloat narrow(ValidatedFloat x)
 {
-    rounding_mode_t rm=get_rounding_mode();
+    Float::RoundingModeType rm=Float::get_rounding_mode();
     const Float& xl=x.lower_raw();
     const Float& xu=x.upper_raw();
     const Float m=std::numeric_limits<float>::min();
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float mnu=-xu+m;
     Float nu=-mnu;
     Float nl=xl+m;
-    set_rounding_mode(rm);
+    Float::set_rounding_mode(rm);
     assert(xl<nl); assert(nu<xu);
     return ValidatedFloat(nl,nu);
 }
@@ -96,16 +96,16 @@ ValidatedFloat narrow(ValidatedFloat x)
 ValidatedFloat trunc(ValidatedFloat x)
 {
 
-    rounding_mode_t rm=get_rounding_mode();
+    Float::RoundingModeType rm=Float::get_rounding_mode();
     const double& xl=x.lower_raw().get_d();
     const double& xu=x.upper_raw().get_d();
     // Use machine epsilon instead of minimum to move away from zero
     const float fm=std::numeric_limits<float>::epsilon();
     volatile float tu=xu;
-    if(tu<xu) { set_rounding_upward(); tu+=fm; }
+    if(tu<xu) { Float::set_rounding_upward(); tu+=fm; }
     volatile float tl=xl;
-    if(tl>xl) { set_rounding_downward(); tl-=fm; }
-    set_rounding_mode(rm);
+    if(tl>xl) { Float::set_rounding_downward(); tl-=fm; }
+    Float::set_rounding_mode(rm);
     assert(tl<=xl); assert(tu>=xu);
     return ValidatedFloat(double(tl),double(tu));
 }
@@ -123,10 +123,10 @@ ValidatedFloat rec(ValidatedFloat i)
     const Float& iu=i.upper_raw();
     Float rl,ru;
     if(il>0 || iu<0) {
-        rounding_mode_t rnd=get_rounding_mode();
+        Float::RoundingModeType rnd=Float::get_rounding_mode();
         rl=div_down(1.0,iu);
         ru=div_up(1.0,il);
-        set_rounding_mode(rnd);
+        Float::set_rounding_mode(rnd);
     } else {
         rl=-inf;
         ru=+inf;
@@ -143,7 +143,7 @@ ValidatedFloat mul(ValidatedFloat i1, ValidatedFloat i2)
     const Float& i2l=i2.lower_raw();
     const Float& i2u=i2.upper_raw();
     Float rl,ru;
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     if(i1l>=0) {
         if(i2l>=0) {
             rl=mul_down(i1l,i2l); ru=mul_up(i1u,i2u);
@@ -167,20 +167,20 @@ ValidatedFloat mul(ValidatedFloat i1, ValidatedFloat i2)
         } else if(i2u<=0) {
             rl=mul_down(i1u,i2l); ru=mul_up(i1l,i2l);
         } else {
-            set_rounding_mode(downward);
-            rl=std::min(i1u*i2l,i1l*i2u);
-            set_rounding_mode(upward);
-            ru=std::max(i1l*i2l,i1u*i2u);
+            Float::set_rounding_downward();
+            rl=min(i1u*i2l,i1l*i2u);
+            Float::set_rounding_upward();
+            ru=max(i1l*i2l,i1u*i2u);
         }
     }
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
 
 
 ValidatedFloat mul(ValidatedFloat i1, ExactFloat x2)
 {
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     const Float& i1l=i1.lower_raw();
     const Float& i1u=i1.upper_raw();
     const Float& x2v=x2.raw();
@@ -190,7 +190,7 @@ ValidatedFloat mul(ValidatedFloat i1, ExactFloat x2)
     } else {
         rl=mul_down(i1u,x2v); ru=mul_up(i1l,x2v);
     }
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
 
@@ -203,7 +203,7 @@ ValidatedFloat mul(ExactFloat x1, ValidatedFloat i2)
 
 ValidatedFloat div(ValidatedFloat i1, ValidatedFloat i2)
 {
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     const Float& i1l=i1.lower_raw();
     const Float& i1u=i1.upper_raw();
     const Float& i2l=i2.lower_raw();
@@ -232,7 +232,7 @@ ValidatedFloat div(ValidatedFloat i1, ValidatedFloat i2)
         rl=-std::numeric_limits<double>::infinity();
         ru=+std::numeric_limits<double>::infinity();
     }
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
 
@@ -240,7 +240,7 @@ ValidatedFloat div(ValidatedFloat i1, ValidatedFloat i2)
 
 ValidatedFloat div(ValidatedFloat i1, ExactFloat x2)
 {
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     const Float& i1l=i1.lower_raw();
     const Float& i1u=i1.upper_raw();
     const Float& x2v=x2.raw();
@@ -253,14 +253,14 @@ ValidatedFloat div(ValidatedFloat i1, ExactFloat x2)
         rl=-std::numeric_limits<double>::infinity();
         ru=+std::numeric_limits<double>::infinity();
     }
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
 
 
 ValidatedFloat div(ExactFloat x1, ValidatedFloat i2)
 {
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     const Float& x1v=x1.raw();
     const Float& i2l=i2.lower_raw();
     const Float& i2u=i2.upper_raw();
@@ -274,34 +274,34 @@ ValidatedFloat div(ExactFloat x1, ValidatedFloat i2)
     } else {
         rl=div_down(x1v,i2l); ru=div_up(x1v,i2u);
     }
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
 
 ValidatedFloat sqr(ValidatedFloat i)
 {
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     const Float& il=i.lower_raw();
     const Float& iu=i.upper_raw();
     Float rl,ru;
     if(il>0.0) {
-        set_rounding_mode(downward);
+        Float::set_rounding_downward();
         rl=il*il;
-        set_rounding_mode(upward);
+        Float::set_rounding_upward();
         ru=iu*iu;
     } else if(iu<0.0) {
-        set_rounding_mode(downward);
+        Float::set_rounding_downward();
         rl=iu*iu;
-        set_rounding_mode(upward);
+        Float::set_rounding_upward();
         ru=il*il;
     } else {
         rl=0.0;
-        set_rounding_mode(upward);
+        Float::set_rounding_upward();
         Float ru1=il*il;
         Float ru2=iu*iu;
         ru=max(ru1,ru2);
     }
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
 
@@ -316,14 +316,14 @@ ValidatedFloat pow(ValidatedFloat i, Int n)
 
 ValidatedFloat pow(ValidatedFloat i, Nat m)
 {
-    rounding_mode_t rnd = get_rounding_mode();
+    Float::RoundingModeType rnd = Float::get_rounding_mode();
     const ValidatedFloat& nvi=i;
     if(m%2==0) { i=abs(nvi); }
-    set_rounding_mode(downward);
+    Float::set_rounding_downward();
     Float rl=pow_rnd(i.lower_raw(),m);
-    set_rounding_mode(upward);
+    Float::set_rounding_upward();
     Float ru=pow_rnd(i.upper_raw(),m);
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
 
@@ -331,34 +331,34 @@ ValidatedFloat pow(ValidatedFloat i, Nat m)
 
 ValidatedFloat sqrt(ValidatedFloat i)
 {
-    rounding_mode_t rnd = get_rounding_mode();
-    set_rounding_downward();
+    Float::RoundingModeType rnd = Float::get_rounding_mode();
+    Float::set_rounding_downward();
     Float rl=sqrt_rnd(i.lower_raw());
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float ru=sqrt_rnd(i.upper_raw());
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
 
 ValidatedFloat exp(ValidatedFloat i)
 {
-    rounding_mode_t rnd = get_rounding_mode();
-    set_rounding_downward();
+    Float::RoundingModeType rnd = Float::get_rounding_mode();
+    Float::set_rounding_downward();
     Float rl=exp_rnd(i.lower_raw());
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float ru=exp_rnd(i.upper_raw());
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
 
 ValidatedFloat log(ValidatedFloat i)
 {
-    rounding_mode_t rnd = get_rounding_mode();
-    set_rounding_downward();
+    Float::RoundingModeType rnd = Float::get_rounding_mode();
+    Float::set_rounding_downward();
     Float rl=log_rnd(i.lower_raw());
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float ru=log_rnd(i.upper_raw());
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
 
@@ -372,35 +372,35 @@ ValidatedFloat sin(ValidatedFloat i)
 ValidatedFloat cos(ValidatedFloat i)
 {
     ARIADNE_ASSERT(i.lower_raw()<=i.upper_raw());
-    rounding_mode_t rnd = get_rounding_mode();
+    Float::RoundingModeType rnd = Float::get_rounding_mode();
 
     static const ExactFloat two(2);
 
-    if(i.radius().raw()>2*pi_down) { return ValidatedFloat(-1.0,+1.0); }
+    if(i.radius().raw()>2*pi_down()) { return ValidatedFloat(-1.0,+1.0); }
 
-    Float n=floor(i.lower_raw()/(2*pi_approx)+0.5);
+    Float n=floor(i.lower_raw()/(2*pi_approx())+0.5);
     i=i-two*ExactFloat(n)*pi_val;
 
-    ARIADNE_ASSERT(i.lower_raw()<=pi_up);
-    ARIADNE_ASSERT(i.upper_raw()>=-pi_up);
+    ARIADNE_ASSERT(i.lower_raw()<=pi_up());
+    ARIADNE_ASSERT(i.upper_raw()>=-pi_up());
 
     Float rl,ru;
-    if(i.lower_raw()<=-pi_down) {
+    if(i.lower_raw()<=-pi_down()) {
         if(i.upper_raw()<=0.0) { rl=-1.0; ru=cos_up(i.upper_raw()); }
         else { rl=-1.0; ru=+1.0; }
     } else if(i.lower_raw()<=0.0) {
         if(i.upper_raw()<=0.0) { rl=cos_down(i.lower_raw()); ru=cos_up(i.upper_raw()); }
-        else if(i.upper_raw()<=pi_down) { rl=cos_down(max(-i.lower_raw(),i.upper_raw())); ru=+1.0; }
+        else if(i.upper_raw()<=pi_down()) { rl=cos_down(max(-i.lower_raw(),i.upper_raw())); ru=+1.0; }
         else { rl=-1.0; ru=+1.0; }
-    } else if(i.lower_raw()<=pi_up) {
-        if(i.upper_raw()<=pi_down) { rl=cos_down(i.upper_raw()); ru=cos_up(i.lower_raw()); }
-        else if(i.upper_raw()<=2*pi_down) { rl=-1.0; ru=cos_up(min(i.lower_raw(),sub_down(2*pi_down,i.upper_raw()))); }
+    } else if(i.lower_raw()<=pi_up()) {
+        if(i.upper_raw()<=pi_down()) { rl=cos_down(i.upper_raw()); ru=cos_up(i.lower_raw()); }
+        else if(i.upper_raw()<=2*pi_down()) { rl=-1.0; ru=cos_up(min(i.lower_raw(),sub_down(2*pi_down(),i.upper_raw()))); }
         else { rl=-1.0; ru=+1.0; }
     } else {
         assert(false);
     }
 
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
 
@@ -440,12 +440,12 @@ ValidatedFloat::ValidatedFloat(const Rational& q) : ValidatedFloat(q,q) {
 
 ValidatedFloat::ValidatedFloat(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu.get_d())  {
     static const double min_dbl=std::numeric_limits<double>::min();
-    rounding_mode_t rounding_mode=get_rounding_mode();
-    set_rounding_mode(downward);
+    Float::RoundingModeType rounding_mode=Float::get_rounding_mode();
+    Float::set_rounding_downward();
     while(Rational(l)>ql) { l=sub_rnd(l,min_dbl); }
-    set_rounding_mode(upward);
+    Float::set_rounding_upward();
     while(Rational(u)<qu) { u=add_rnd(u,min_dbl); }
-    set_rounding_mode(rounding_mode);
+    Float::set_rounding_mode(rounding_mode);
 }
 
 #endif // HAVE_GMPXX_H
@@ -458,14 +458,14 @@ OutputStream&
 operator<<(OutputStream& os, const ValidatedFloat& ivl)
 {
     //if(ivl.lower_raw()==ivl.upper_raw()) { return os << "{" << std::setprecision(ValidatedFloat::output_precision) << ivl.lower_raw().get_d() << ; }
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     os << '{';
-    set_rounding_downward();
+    Float::set_rounding_downward();
     os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << ivl.lower().get_d();
     os << ':';
-    set_rounding_upward();
+    Float::set_rounding_upward();
     os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << ivl.upper().get_d();
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     os << '}';
     return os;
 

@@ -145,18 +145,18 @@ TestFloat::test_concept()
     b=(x==x); b=(x!=x); b=(x<=x); b=(x>=x); b=(x<x); b=(x>x);
 
     // Rounding mode
-    set_rounding_to_nearest();
-    set_rounding_downward();
-    set_rounding_upward();
-    set_rounding_toward_zero();
+    Float::set_rounding_to_nearest();
+    Float::set_rounding_downward();
+    Float::set_rounding_upward();
+    Float::set_rounding_toward_zero();
 
-    set_rounding_mode(to_nearest);
-    set_rounding_mode(downward);
-    set_rounding_mode(upward);
-    set_rounding_mode(toward_zero);
+    Float::set_rounding_mode(Float::to_nearest);
+    Float::set_rounding_mode(Float::downward);
+    Float::set_rounding_mode(Float::upward);
+    Float::set_rounding_mode(Float::toward_zero);
 
-    rounding_mode_t rnd=get_rounding_mode();
-    set_rounding_mode(rnd);
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
+    Float::set_rounding_mode(rnd);
 }
 
 
@@ -201,32 +201,23 @@ TestFloat::test_conversion()
     n=std::numeric_limits<Nat>::max();
     ARIADNE_TEST_ASSERT(Float(n)==n);
 
-    // Conversion from long integers cannot be performed exactly, so is banned
-
-    /*
     // Convert to a rational
-    Rational q;
-    q=Rational(R(3));
-    ARIADNE_TEST_ASSERT(q==3);
-
-    // Assign to a rational
-    q=Rational(R(2.25));
-    ARIADNE_TEST_ASSERT(q==2.25);
+    ARIADNE_TEST_EQUAL(Rational(Float(1.0)),Rational(1));
+    ARIADNE_TEST_EQUAL(Rational(Float(2.25)),Rational(9,4));
 
     // Convert from a rational
-    q=Rational(1,3);
-    R f1=R(q,round_down);
-    R f2=R(q,round_up);
-    cout << f1 << " <= " << q << " <= " << f2 << endl;
-    ARIADNE_TEST_ASSERT(f1<=q); ARIADNE_TEST_ASSERT(f2>=q); ARIADNE_TEST_ASSERT(f1<f2);
+    Int num=1; Int den=3;
+    Rational q(1,3);
+    ARIADNE_TEST_COMPARE(Rational(Float(q,Float::downward)),<,q);
+    ARIADNE_TEST_COMPARE(Rational(Float(Rational(num,den),Float::upward)),>,q);
+    ARIADNE_TEST_COMPARE(Float(Rational(num,den),Float::downward),<,Float(Rational(num,den),Float::upward));
 
     // Convert from a negative rational
-    q=Rational(-2,5); cout << q << endl;
-    f1.set(q,round_down); cout << f1 << endl;
-    f2.set(q,round_up);
-    cout << f1 << " <= " << q << " <= " << f2 << endl;
-    ARIADNE_TEST_ASSERT(f1<=q); ARIADNE_TEST_ASSERT(f2>=q); ARIADNE_TEST_ASSERT(f1<f2);
-    */
+    num=-2; den=5;
+    ARIADNE_TEST_COMPARE(Rational(Float(q,Float::downward)),<,q);
+    ARIADNE_TEST_COMPARE(Rational(Float(q,Float::upward)),>,q);
+    ARIADNE_TEST_COMPARE(Float(q,Float::downward),<,Float(q,Float::upward));
+
 };
 
 
@@ -345,29 +336,29 @@ TestFloat::test_rounding()
     const double twofifthschop   = 0.39999999999999996669;
     const double twofifthsnearest= 0.40000000000000002220;
 
-    set_rounding_mode(downward);
+    Ariadne::set_rounding_mode(Ariadne::downward);
     double onethirdrounddown=one/three;
     ARIADNE_TEST_EQUAL(onethirdrounddown, onethirddown);
-    set_rounding_mode(upward);
+    Ariadne::set_rounding_mode(Ariadne::upward);
     double onethirdroundup=one/three;
     ARIADNE_TEST_EQUAL(onethirdroundup, onethirdup);
-    set_rounding_mode(toward_zero);
+    Ariadne::set_rounding_mode(Ariadne::toward_zero);
     double onethirdroundchop=one/three;
     ARIADNE_TEST_EQUAL(onethirdroundchop, onethirdchop);
-    set_rounding_mode(to_nearest);
+    Ariadne::set_rounding_mode(Ariadne::to_nearest);
     double onethirdroundnearest=one/three;
     ARIADNE_TEST_EQUAL(onethirdroundnearest, onethirdnearest);
 
-    set_rounding_downward();
+    Ariadne::set_rounding_downward();
     double twofifthsrounddown=two/five;
     ARIADNE_TEST_EQUAL(twofifthsrounddown, twofifthsdown);
-    set_rounding_upward();
+    Ariadne::set_rounding_upward();
     double twofifthsroundup=two/five;
     ARIADNE_TEST_EQUAL(twofifthsroundup, twofifthsup);
-    set_rounding_toward_zero();
+    Ariadne::set_rounding_toward_zero();
     double twofifthsroundchop=two/five;
     ARIADNE_TEST_EQUAL(twofifthsroundchop, twofifthschop);
-    set_rounding_to_nearest();
+    Ariadne::set_rounding_to_nearest();
     double twofifthsroundnearest=two/five;
     ARIADNE_TEST_EQUAL(twofifthsroundnearest, twofifthsnearest);
 }
@@ -465,14 +456,14 @@ TestFloat::test_arithmetic()
     Float nine = 9;
 
     Float expected_five_ninths_up=0.55555555555555558023;
-    set_rounding_downward();
+    Float::set_rounding_downward();
     ARIADNE_TEST_COMPARE(five/nine,<,expected_five_ninths_up);
     ARIADNE_TEST_COMPARE(div_rnd(five,nine),<,expected_five_ninths_up);
     Float five_divby_nine_down=five;
     five_divby_nine_down/=nine;
     ARIADNE_TEST_COMPARE(five_divby_nine_down,<,expected_five_ninths_up);
 
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     ARIADNE_TEST_COMPARE(div_down(Float(5.0),Float(9.0)),<,div_up(Float(5.0),Float(9.0)));
     ARIADNE_TEST_COMPARE(div_down(Float(5),Float(9)),<,div_up(Float(5),Float(9)));
     ARIADNE_TEST_COMPARE(div_down(five,nine),<,div_up(five,nine));
@@ -545,7 +536,7 @@ TestFloat::test_function()
     Float x; Float ra; Float rl; Float ru;
 
     x=1;
-    ra=Ariadne::exp(x);
+    ra=exp(x);
     rl=down(ra);
     ru=up(ra);
     ARIADNE_TEST_PRINT(rl);
@@ -571,22 +562,17 @@ TestFloat::test_cosine()
 
 {
     //3.14159265358979323846264338327950288419716939937510
-    static const double pi_down=3.1415926535897931;
+    static const Float pi_down=3.1415926535897931;
     //static const double pi_approx=3.1415926535897931;
-    static const double pi_up=3.1415926535897936;
+    static const Float pi_up=3.1415926535897936;
 
-    static const double third_pi_down=1.0471975511965976;
-    static const double third_pi_up=1.0471975511965979;
+    static const Float third_pi_down=1.0471975511965976;
+    static const Float third_pi_up=1.0471975511965979;
 
-    static const double sqrt_half_down=0.70710678118654746;
-    //static const double sqrt_half_approx=0.70710678118654757;
-    static const double sqrt_half_up=0.70710678118654757;
-
-    set_rounding_mode(upward);
-    ARIADNE_TEST_EQUAL(cos_rnd(0.0),1.0);
-    ARIADNE_TEST_EQUAL(cos_rnd(0.0),1.0);
+    Float::set_rounding_mode(Float::upward);
+    ARIADNE_TEST_EQUAL(cos_rnd(Float(0.0)),1.0);
     ARIADNE_TEST_COMPARE(cos_rnd(third_pi_down),>,0.5);
-    ARIADNE_TEST_COMPARE(cos_rnd(pi_down/4),>,sqrt_half_up);
+    ARIADNE_TEST_COMPARE(sqr_rnd(cos_rnd(pi_down/4)),>,0.5);
     ARIADNE_TEST_COMPARE(cos_rnd(pi_down/2),>,0.0);
     ARIADNE_TEST_COMPARE(cos_rnd(pi_up/2),<=,0.0);
     ARIADNE_TEST_COMPARE(cos_rnd(pi_down),>,-1.0);
@@ -596,11 +582,10 @@ TestFloat::test_cosine()
     ARIADNE_TEST_COMPARE(cos_rnd(3*pi_down),>,-1.0);
     ARIADNE_TEST_COMPARE(cos_rnd(3*pi_up),>,-1.0);
 
-    set_rounding_mode(downward);
-    ARIADNE_TEST_EQUAL(cos_rnd(0.0),1.0);
-    ARIADNE_TEST_EQUAL(cos_rnd(0.0),1.0);
+    Float::set_rounding_mode(Float::downward);
+    ARIADNE_TEST_EQUAL(cos_rnd(Float(0.0)),1.0);
     ARIADNE_TEST_COMPARE(cos_rnd(third_pi_up),<,0.5);
-    ARIADNE_TEST_COMPARE(cos_rnd(pi_up/4),<,sqrt_half_down);
+    ARIADNE_TEST_COMPARE(sqr_rnd(cos_rnd(pi_up/4)),<,0.5);
     ARIADNE_TEST_COMPARE(cos_rnd(pi_down/2),>=,0.0);
     ARIADNE_TEST_COMPARE(cos_rnd(pi_up/2),<,0.0);
     ARIADNE_TEST_COMPARE(cos_rnd(pi_down),==,-1.0);
@@ -610,9 +595,5 @@ TestFloat::test_cosine()
     ARIADNE_TEST_COMPARE(cos_rnd(3*pi_down),==,-1.0);
     ARIADNE_TEST_COMPARE(cos_rnd(3*pi_up),==,-1.0);
 
-    set_rounding_mode(to_nearest);
-
-    double x=1.23; double y=1.23;
-    ARIADNE_TEST_COMPARE(x,<=,y);
-
+    Float::set_rounding_mode(Float::to_nearest);
 }

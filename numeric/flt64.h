@@ -50,14 +50,14 @@ namespace Ariadne {
 
 Void set_default_rounding();
 
-Void set_rounding_to_nearest();
-Void set_rounding_downward();
-Void set_rounding_upward();
-Void set_rounding_toward_zero();
+Void Float::set_rounding_to_nearest();
+Void Float::set_rounding_downward();
+Void Float::set_rounding_upward();
+Void Float::set_rounding_toward_zero();
 
 typedef unsigned short RoundingModeType;
-RoundingModeType get_rounding_mode();
-Void set_rounding_mode(RoundingModeType);
+RoundingModeType Float::get_rounding_mode();
+Void Float::set_rounding_mode(RoundingModeType);
 
 extern const RoundingModeType ROUND_NEAR;
 extern const RoundingModeType ROUND_DOWN;
@@ -110,13 +110,13 @@ class Flt64 {
     static Flt64 eps();
     static Flt64 inf();
 
-    static Void set_rounding_mode(RoundingModeType);
-    static RoundingModeType get_rounding_mode();
+    static Void Float::set_rounding_mode(RoundingModeType);
+    static RoundingModeType Float::get_rounding_mode();
 
-    static Void set_rounding_to_nearest();
-    static Void set_rounding_downward();
-    static Void set_rounding_upward();
-    static Void set_rounding_toward_zero();
+    static Void Float::set_rounding_to_nearest();
+    static Void Float::set_rounding_downward();
+    static Void Float::set_rounding_upward();
+    static Void Float::set_rounding_toward_zero();
 
     friend inline Flt64 operator+(Flt64 x) { return Flt64{+x.d}; }
     friend inline Flt64 operator-(Flt64 x) { return Flt64{-x.d}; }

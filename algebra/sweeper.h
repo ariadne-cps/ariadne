@@ -109,7 +109,7 @@ Void SweeperBase<SWP>::_sweep(Expansion<Float>& p, Float& e) const
     Expansion<Float>::ConstIterator end=p.end();
     Expansion<Float>::ConstIterator adv=p.begin();
     Expansion<Float>::Iterator curr=p.begin();
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float te=0.0;
     while(adv!=end) {
         if(static_cast<const SWP*>(this)->SWP::discard(adv->key(),adv->data())) {
@@ -122,7 +122,7 @@ Void SweeperBase<SWP>::_sweep(Expansion<Float>& p, Float& e) const
     }
     e+=te;
     p.resize(curr-p.begin());
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
 }
 
 template<class SWP>

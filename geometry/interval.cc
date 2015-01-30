@@ -43,36 +43,36 @@
 namespace Ariadne {
 
 
-const UpperInterval pi_ivl=ExactInterval(pi_down,pi_up);
+const UpperInterval pi_ivl=ExactInterval(pi_down(),pi_up());
 
 Nat ExactInterval::output_precision = 6;
 
 ExactInterval widen(ExactInterval x)
 {
-    rounding_mode_t rm=get_rounding_mode();
+    Ariadne::RoundingModeType rm=Ariadne::get_rounding_mode();
     double xl=x.lower().get_d();
     double xu=x.upper().get_d();
     const double m=std::numeric_limits<float>::min();
-    set_rounding_upward();
+    Float::set_rounding_upward();
     volatile double wu=xu+m;
     volatile double mwl=-xl+m;
     volatile double wl=-mwl;
-    set_rounding_mode(rm);
+    Ariadne::set_rounding_mode(rm);
     assert(wl<xl); assert(wu>xu);
     return ExactInterval(wl,wu);
 }
 
 ExactInterval narrow(ExactInterval x)
 {
-    rounding_mode_t rm=get_rounding_mode();
+    Ariadne::RoundingModeType rm=Ariadne::get_rounding_mode();
     double xl=x.lower().get_d();
     double xu=x.upper().get_d();
     const double m=std::numeric_limits<float>::min();
-    set_rounding_upward();
+    Ariadne::set_rounding_upward();
     volatile double mnu=-xu+m;
     volatile double nu=-mnu;
     volatile double nl=xl+m;
-    set_rounding_mode(rm);
+    Ariadne::set_rounding_mode(rm);
     assert(xl<nl); assert(nu<xu);
     return ExactInterval(nl,nu);
 }
@@ -80,16 +80,16 @@ ExactInterval narrow(ExactInterval x)
 ExactInterval trunc(ExactInterval x)
 {
 
-    rounding_mode_t rm=get_rounding_mode();
+    Ariadne::RoundingModeType rm=Ariadne::get_rounding_mode();
     double xl=x.lower().get_d();
     double xu=x.upper().get_d();
     // Use machine epsilon instead of minimum to move away from zero
     const float fm=std::numeric_limits<float>::epsilon();
     volatile float tu=xu;
-    if(tu<xu) { set_rounding_upward(); tu+=fm; }
+    if(tu<xu) { Ariadne::set_rounding_upward(); tu+=fm; }
     volatile float tl=xl;
-    if(tl>xl) { set_rounding_downward(); tl-=fm; }
-    set_rounding_mode(rm);
+    if(tl>xl) { Ariadne::set_rounding_downward(); tl-=fm; }
+    Ariadne::set_rounding_mode(rm);
     assert(tl<=xl); assert(tu>=xu);
     return ExactInterval(double(tl),double(tu));
 }
@@ -120,39 +120,28 @@ ExactInterval::ExactInterval(const Rational& q) : ExactInterval(q,q) {
 }
 
 ExactInterval::ExactInterval(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu.get_d())  {
-    static const double min_dbl=std::numeric_limits<double>::min();
-    rounding_mode_t rounding_mode=get_rounding_mode();
-    set_rounding_mode(downward);
-    while(Rational(l)>ql) { l=sub_rnd(l,min_dbl); }
-    set_rounding_mode(upward);
-    while(Rational(u)<qu) { u=add_rnd(u,min_dbl); }
-    set_rounding_mode(rounding_mode);
+    ARIADNE_ASSERT(Rational(l)==ql);
+    ARIADNE_ASSERT(Rational(u)==qu);
 }
+
+#endif // HAVE_GMPXX_H
 
 ExactInterval::ExactInterval(const Real& lower, const Real& upper)
     : l(ValidatedFloat(lower).lower().raw()), u(ValidatedFloat(upper).upper().raw()) {
 }
 
-ExactInterval& ExactInterval::operator=(const Rational& q) {
-    return *this = ExactInterval(q);
-}
-
-
-#endif // HAVE_GMPXX_H
-
-
 OutputStream&
 operator<<(OutputStream& os, const ExactInterval& ivl)
 {
     //if(ivl.lower()==ivl.upper().raw()) { return os << "{" << std::setprecision(ExactInterval::output_precision) << ivl.lower().raw().get_d() << ; }
-    rounding_mode_t rnd=get_rounding_mode();
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
     os << '{';
-    set_rounding_downward();
+    Float::set_rounding_downward();
     os << std::showpoint << std::setprecision(ExactInterval::output_precision) << ivl.lower().raw().get_d();
     os << ':';
-    set_rounding_upward();
+    Float::set_rounding_upward();
     os << std::showpoint << std::setprecision(ExactInterval::output_precision) << ivl.upper().raw().get_d();
-    set_rounding_mode(rnd);
+    Float::set_rounding_mode(rnd);
     os << '}';
     return os;
 

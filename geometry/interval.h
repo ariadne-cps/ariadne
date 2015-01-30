@@ -126,20 +126,12 @@ class ExactInterval {
     //! \brief Convert from a floating-point number with an exact representation.
     ExactInterval(const ExactFloat& lower, const ExactFloat& upper) : l(lower.raw()), u(upper.raw()) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
-    explicit ExactInterval(const Real& lower, const Real& upper);
+    ExactInterval(const Real& lower, const Real& upper);
 #ifdef HAVE_GMPXX_H
-    ExactInterval(const Integer& z);
-    ExactInterval(const Rational& q);
-    ExactInterval& operator=(const Rational& q);
+    explicit ExactInterval(const Integer& z);
+    explicit ExactInterval(const Rational& q);
     ExactInterval(const Rational& lower, const Rational& upper);
 #endif // HAVE_GMPXX_H
-
-    ExactInterval& operator=(Nat m) { l=m; u=m; return *this; }
-    ExactInterval& operator=(Int n) { l=n; u=n; return *this; }
-    ExactInterval& operator=(double c) { l=c; u=c; return *this; }
-    ExactInterval& operator=(const Float& x) { l=x; u=x; return *this; }
-    ExactInterval& operator=(const Real& x);
-    ExactInterval& operator=(const ExactFloat& x) { l=x.raw(); u=x.raw(); return *this; };
 
     //! \brief The lower bound of the interval.
     const Float& lower_value() const { return l; }

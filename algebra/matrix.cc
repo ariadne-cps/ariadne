@@ -373,21 +373,21 @@ normalise_rows(const Matrix<X>& A)
     Matrix<X> R=A;
 
     Array<X> row_asums(m);
-    auto prev_rounding_mode=get_rounding_mode();
-    set_rounding_upward();
+    auto prev_rounding_mode=Float::get_rounding_mode();
+    Float::set_rounding_upward();
     for(SizeType i=0; i!=m; ++i) {
         row_asums[i]=0.0;
         for(SizeType j=0; j!=n; ++j) {
             row_asums[i]+=abs(A[i][j]);
         }
     }
-    set_rounding_toward_zero();
+    Float::set_rounding_toward_zero();
     for(SizeType i=0; i!=m; ++i) {
         for(SizeType j=0; j!=n; ++j) {
             R[i][j]/=row_asums[i];
         }
     }
-    set_rounding_mode(prev_rounding_mode);
+    Float::set_rounding_mode(prev_rounding_mode);
 
     return R;
 }
@@ -555,19 +555,19 @@ triangular_factor(const Matrix<ApproximateFloat>& A)
 
     // Scale the rows of R to have sum of absolute values equal to 1
 
-    RoundingModeType prev_rounding_mode=get_rounding_mode();
+    Float::RoundingModeType prev_rounding_mode=Float::get_rounding_mode();
     for(SizeType i=0; i!=m; ++i) {
-        set_rounding_upward();
+        Float::set_rounding_upward();
         X rsum=zero;
         for(SizeType j=i; j!=n; ++j) {
             rsum+=abs(R[i][j]);
         }
-        set_rounding_toward_zero();
+        Float::set_rounding_toward_zero();
         for(SizeType j=i; j!=n; ++j) {
             R[i][j]/=rsum;
         }
     }
-    set_rounding_mode(prev_rounding_mode);
+    Float::set_rounding_mode(prev_rounding_mode);
 
     return Tuple<Matrix<X>,PivotMatrix>{R,P};
 

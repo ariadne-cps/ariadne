@@ -137,9 +137,10 @@ class Operator {
 template<class X> struct Logic;
 
 template<class A> inline typename Logic<A>::Type compare(OperatorCode op, const A& x1, const A& x2) {
+    typedef typename Logic<A>::Type R;
     switch(op) {
-        case OperatorCode::EQ: return x1==x2;
-        case OperatorCode::NEQ: return x1!=x2;
+        case OperatorCode::EQ: return static_cast<R>(x1==x2);
+        case OperatorCode::NEQ: return static_cast<R>(x1!=x2);
         case OperatorCode::LEQ: return x1<=x2;
         case OperatorCode::GEQ: return x1>=x2;
         case OperatorCode::LT: return x1< x2;
@@ -264,7 +265,7 @@ template<class OP> inline OutputStream& operator<<(OutputStream& os, OperatorObj
     return os << op.upcast().code(); }
 template<class CMP> inline OutputStream& operator<<(OutputStream& os, ComparisonObject<CMP> const& cmp) {
     return os << cmp.upcast().code(); }
-    
+
 struct GtrZero {}; struct LessZero {};
 
 struct Gtr : ComparisonObject<Gtr> {

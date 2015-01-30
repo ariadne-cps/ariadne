@@ -219,7 +219,7 @@ template<class X> SizeType _convert(List<ProcedureInstruction>& p, List<X>& c, c
             p.append(ProcedureInstruction(f.op(),_convert(p,c,f.arg(),cache))); break;
         case OperatorKind::SCALAR:
             p.append(ProcedureInstruction(f.op(),_convert(p,c,f.arg(),cache),f.num())); break;
-        default: assert(false);
+        default: ARIADNE_FAIL_MSG("Unrecognised operator "<<f.op()<<" of kind "<<f.kind()<<" in formula "<<f);
     }
     const SizeType num=p.size()-1;
     cache.insert(f.node_ptr(),num);

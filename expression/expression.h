@@ -319,35 +319,10 @@ template<class T> OutputStream& operator<<(OutputStream& os, const Expression<T>
 
 
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
-template<class A>
-typename Logic<A>::Type
-evaluate(const Expression<typename Logic<A>::Type>& e, const Map<Identifier,A>& x)
-{
-    typedef typename Logic<A>::Type R;
-    A* aptr=0;
-    switch(e.kind()) {
-        case OperatorKind::NULLARY: return static_cast<R>(e.val());
-        case OperatorKind::UNARY: return compute(e.op(),evaluate(e.arg(),x));
-        case OperatorKind::BINARY: return compute(e.op(),evaluate(e.arg1(),x),evaluate(e.arg2(),x));
-        case OperatorKind::COMPARISON: return compare(e.op(),evaluate(e.cmp1(aptr),x),evaluate(e.cmp2(aptr),x));
-        default: ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" on "<<x<<"\n");
-    }
-}
+template<class A> typename Logic<A>::Type evaluate(const Expression<typename Logic<A>::Type>& e, const Map<Identifier,A>& x);
 
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
-template<class T>
-T
-evaluate(const Expression<T>& e, const Map<Identifier,T>& x)
-{
-    switch(e.kind()) {
-        case OperatorKind::VARIABLE: return x[e.var()];
-        case OperatorKind::NULLARY: return e.val();
-        case OperatorKind::UNARY: return compute(e.op(),evaluate(e.arg(),x));
-        case OperatorKind::BINARY: return compute(e.op(),evaluate(e.arg1(),x),evaluate(e.arg2(),x));
-        case OperatorKind::SCALAR: return compute(e.op(),evaluate(e.arg(),x),e.num());
-        default: ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" on "<<x<<"\n");
-    }
-}
+template<class T> T evaluate(const Expression<T>& e, const Map<Identifier,T>& x);
 
 
 
@@ -604,26 +579,26 @@ Expression<Real> min(Expression<Real> e1, Expression<Real> e2);
 //! \related Expression \brief %Real absolute value expression.
 Expression<Real> abs(Expression<Real> e);
 
+Expression<Real> operator+(Expression<Real> e, Real c);
+Expression<Real> operator-(Expression<Real> e, Real c);
+Expression<Real> operator*(Expression<Real> e, Real c);
+Expression<Real> operator/(Expression<Real> e, Real c);
+Expression<Real> operator+(Real c, Expression<Real> e);
+Expression<Real> operator-(Real c, Expression<Real> e);
+Expression<Real> operator*(Real c, Expression<Real> e);
+Expression<Real> operator/(Real c, Expression<Real> e);
+
+Expression<Tribool> operator<=(Expression<Real> e, Real c);
+Expression<Tribool> operator< (Expression<Real> e, Real c);
+Expression<Tribool> operator>=(Expression<Real> e, Real c);
+Expression<Tribool> operator> (Expression<Real> e, Real c);
+Expression<Tribool> operator<=(Real c, Expression<Real> e);
+Expression<Tribool> operator< (Real c, Expression<Real> e);
+Expression<Tribool> operator>=(Real c, Expression<Real> e);
+Expression<Tribool> operator> (Real c, Expression<Real> e);
+
+
 //@}
-
-inline Expression<Real> operator+(Expression<Real> e, Real c) { return e + Expression<Real>::constant(c); }
-inline Expression<Real> operator-(Expression<Real> e, Real c) { return e - Expression<Real>::constant(c); }
-inline Expression<Real> operator*(Expression<Real> e, Real c) { return e * Expression<Real>::constant(c); }
-inline Expression<Real> operator/(Expression<Real> e, Real c) { return e / Expression<Real>::constant(c); }
-inline Expression<Real> operator+(Real c, Expression<Real> e) { return Expression<Real>::constant(c) + e; }
-inline Expression<Real> operator-(Real c, Expression<Real> e) { return Expression<Real>::constant(c) - e; }
-inline Expression<Real> operator*(Real c, Expression<Real> e) { return Expression<Real>::constant(c) * e; }
-inline Expression<Real> operator/(Real c, Expression<Real> e) { return Expression<Real>::constant(c) / e; }
-
-inline Expression<Tribool> operator<=(Expression<Real> e, Real c) { return e <= Expression<Real>::constant(c); }
-inline Expression<Tribool> operator< (Expression<Real> e, Real c) { return e <  Expression<Real>::constant(c); }
-inline Expression<Tribool> operator>=(Expression<Real> e, Real c) { return e >= Expression<Real>::constant(c); }
-inline Expression<Tribool> operator> (Expression<Real> e, Real c) { return e >  Expression<Real>::constant(c); }
-inline Expression<Tribool> operator<=(Real c, Expression<Real> e) { return Expression<Real>::constant(c) <= e; }
-inline Expression<Tribool> operator< (Real c, Expression<Real> e) { return Expression<Real>::constant(c) <  e; }
-inline Expression<Tribool> operator>=(Real c, Expression<Real> e) { return Expression<Real>::constant(c) >= e; }
-inline Expression<Tribool> operator> (Real c, Expression<Real> e) { return Expression<Real>::constant(c) >  e; }
-
 
 } // namespace Ariadne
 

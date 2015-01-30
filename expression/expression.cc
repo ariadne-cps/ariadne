@@ -68,6 +68,146 @@ Formula<Real> formula(const Expression<Real>& e, const Map<Identifier,Nat>& v)
 
 
 
+inline Void _set_constant(Real& r, const Real& c) { r=c; }
+inline Void _set_constant(Formula<Real>& r, const Real& c) { r=c; }
+
+template<> Boolean compare(OperatorCode cmp, const String& s1, const String& s2) {
+    switch(cmp) {
+        case OperatorCode::EQ:  return s1==s2;
+        case OperatorCode::NEQ: return s1!=s2;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate comparison "<<cmp<<" on string arguments.");
+    }
+}
+
+template<> Boolean compare(OperatorCode cmp, const Integer& z1, const Integer& z2) {
+    switch(cmp) {
+        case OperatorCode::EQ:  return z1==z2;
+        case OperatorCode::NEQ: return z1!=z2;
+        case OperatorCode::LEQ: return z1<=z2;
+        case OperatorCode::GEQ: return z1>=z2;
+        case OperatorCode::LT:  return z1< z2;
+        case OperatorCode::GT:  return z1> z2;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate comparison "<<cmp<<" on integer arguments.");
+    }
+}
+
+template<class X> typename Logic<X>::Type compare(OperatorCode cmp, const X& x1, const X& x2) {
+    switch(cmp) {
+        case OperatorCode::GT: case OperatorCode::GEQ: return x1>x2;
+        case OperatorCode::LT: case OperatorCode::LEQ: return x1<x2;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate comparison "<<cmp<<" on real arguments.");
+    }
+}
+
+template<> Boolean compute(OperatorCode op, const Boolean& b) {
+    switch(op) {
+        case OperatorCode::NOT: return !b;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");
+    }
+}
+
+template<> Boolean compute(OperatorCode op, const Boolean& b1, const Boolean& b2) {
+    switch(op) {
+        case OperatorCode::AND: return b1 && b2;
+        case OperatorCode::OR: return b1 || b2;
+        case OperatorCode::XOR: return b1 ^ b2;
+        case OperatorCode::IMPL: return !b1 || b2;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");
+    }
+}
+
+template<> Tribool compute(OperatorCode op, const Tribool& b) {
+    switch(op) {
+        case OperatorCode::NOT: return !b;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");
+    }
+}
+
+template<> Tribool compute(OperatorCode op, const Tribool& b1, const Tribool& b2) {
+    switch(op) {
+        case OperatorCode::AND: return b1 && b2;
+        case OperatorCode::OR: return b1 || b2;
+        case OperatorCode::XOR: return b1 ^ b2;
+        case OperatorCode::IMPL: return !b1 || b2;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on two boolean arguments.");
+    }
+}
+
+template<> String compute(OperatorCode op, const String& s1, const String& s2) {
+    switch(op) {
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on two string arguments.");
+    }
+}
+
+template<> Integer compute(OperatorCode op, const Integer& x1, const Integer& x2) {
+    switch(op) {
+        case OperatorCode::ADD: return x1+x2;
+        case OperatorCode::SUB: return x1-x2;
+        case OperatorCode::MUL: return x1*x2;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on two integer arguments.");
+    }
+}
+
+template<class X> X compute(OperatorCode op, const X& x1, const X& x2) {
+    switch(op) {
+        case OperatorCode::ADD: return x1+x2;
+        case OperatorCode::SUB: return x1-x2;
+        case OperatorCode::MUL: return x1*x2;
+        case OperatorCode::DIV: return x1/x2;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on two real arguments.");
+    }
+}
+
+template<> String compute(OperatorCode op, const String& s) {
+    switch(op) {
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one string argument.");
+    }
+}
+
+template<> Integer compute(OperatorCode op, const Integer& z) {
+    switch(op) {
+        case OperatorCode::POS: return +z;
+        case OperatorCode::NEG: return -z;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one integer argument.");
+    }
+}
+
+template<class X>
+X compute(OperatorCode op, const X& x) {
+    switch(op) {
+        case OperatorCode::NEG: return neg(x);
+        case OperatorCode::REC: return rec(x);
+        case OperatorCode::EXP: return exp(x);
+        case OperatorCode::LOG: return log(x);
+        case OperatorCode::SIN: return sin(x);
+        case OperatorCode::COS: return cos(x);
+        case OperatorCode::TAN: return tan(x);
+        case OperatorCode::ATAN: return atan(x);
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one real argument.");
+    }
+}
+
+template<> String compute(OperatorCode op, const String& s, Int n) {
+    switch(op) {
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one string argument and an integer.");
+    }
+}
+
+template<> Integer compute(OperatorCode op, const Integer& z, Int n) {
+    switch(op) {
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one integer argument and a builtin.");
+    }
+}
+
+template<class X>
+X compute(OperatorCode op, const X& x, Int n) {
+    switch(op) {
+        case OperatorCode::POW: return pow(x,n);
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one real argument and an integer.");
+    }
+}
+
+
 /*
 template<class R, class A> inline
 Expression<R> make_expression(OperatorCode op, Expression<A> a);
@@ -187,114 +327,76 @@ Expression<Real> abs(Expression<Real> e) {
     return make_expression<Real>(Abs(),e); }
 
 
+Expression<Real> operator+(Expression<Real> e, Real c) { return e + Expression<Real>::constant(c); }
+Expression<Real> operator-(Expression<Real> e, Real c) { return e - Expression<Real>::constant(c); }
+Expression<Real> operator*(Expression<Real> e, Real c) { return e * Expression<Real>::constant(c); }
+Expression<Real> operator/(Expression<Real> e, Real c) { return e / Expression<Real>::constant(c); }
+Expression<Real> operator+(Real c, Expression<Real> e) { return Expression<Real>::constant(c) + e; }
+Expression<Real> operator-(Real c, Expression<Real> e) { return Expression<Real>::constant(c) - e; }
+Expression<Real> operator*(Real c, Expression<Real> e) { return Expression<Real>::constant(c) * e; }
+Expression<Real> operator/(Real c, Expression<Real> e) { return Expression<Real>::constant(c) / e; }
 
-inline Void _set_constant(Real& r, const Real& c) { r=c; }
-inline Void _set_constant(Formula<Real>& r, const Real& c) { r=c; }
+Expression<Tribool> operator<=(Expression<Real> e, Real c) { return e <= Expression<Real>::constant(c); }
+Expression<Tribool> operator< (Expression<Real> e, Real c) { return e <  Expression<Real>::constant(c); }
+Expression<Tribool> operator>=(Expression<Real> e, Real c) { return e >= Expression<Real>::constant(c); }
+Expression<Tribool> operator> (Expression<Real> e, Real c) { return e >  Expression<Real>::constant(c); }
+Expression<Tribool> operator<=(Real c, Expression<Real> e) { return Expression<Real>::constant(c) <= e; }
+Expression<Tribool> operator< (Real c, Expression<Real> e) { return Expression<Real>::constant(c) <  e; }
+Expression<Tribool> operator>=(Real c, Expression<Real> e) { return Expression<Real>::constant(c) >= e; }
+Expression<Tribool> operator> (Real c, Expression<Real> e) { return Expression<Real>::constant(c) >  e; }
 
-Boolean _compare(OperatorCode cmp, const String& s1, const String& s2) {
-    switch(cmp) {
-        case OperatorCode::EQ:  return s1==s2;
-        case OperatorCode::NEQ: return s1!=s2;
-        default: ARIADNE_FAIL_MSG("Cannot evaluate comparison "<<cmp<<" on string arguments.");
+
+
+
+template<class A>
+typename Logic<A>::Type
+evaluate(const Expression<typename Logic<A>::Type>& e, const Map<Identifier,A>& x)
+{
+    typedef typename Logic<A>::Type R;
+    A* aptr=0;
+    switch(e.kind()) {
+        case OperatorKind::NULLARY: return static_cast<R>(e.val());
+        case OperatorKind::UNARY: return compute(e.op(),evaluate(e.arg(),x));
+        case OperatorKind::BINARY: return compute(e.op(),evaluate(e.arg1(),x),evaluate(e.arg2(),x));
+        case OperatorKind::COMPARISON: return compare(e.op(),evaluate(e.cmp1(aptr),x),evaluate(e.cmp2(aptr),x));
+        default: ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" on "<<x<<"\n");
     }
 }
 
-Boolean _compare(OperatorCode cmp, const Integer& z1, const Integer& z2) {
-    switch(cmp) {
-        case OperatorCode::EQ:  return z1==z2;
-        case OperatorCode::NEQ: return z1!=z2;
-        case OperatorCode::LEQ: return z1<=z2;
-        case OperatorCode::GEQ: return z1>=z2;
-        case OperatorCode::LT:  return z1< z2;
-        case OperatorCode::GT:  return z1> z2;
-        default: ARIADNE_FAIL_MSG("Cannot evaluate comparison "<<cmp<<" on integer arguments.");
-    }
-}
-
-template<class X> Tribool _compare(OperatorCode cmp, const X& x1, const X& x2) {
-    switch(cmp) {
-        case OperatorCode::GT: case OperatorCode::GEQ: return x1>x2;
-        case OperatorCode::LT: case OperatorCode::LEQ: return x1<x2;
-        default: ARIADNE_FAIL_MSG("Cannot evaluate comparison "<<cmp<<" on real arguments.");
-    }
-}
-
-Boolean _compute(OperatorCode op, const Boolean& b) {
-    switch(op) {
-        case OperatorCode::NOT: return !b;
-        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");
-    }
-}
-
-Boolean _compute(OperatorCode op, const Boolean& b1, const Boolean& b2) {
-    switch(op) {
-        case OperatorCode::AND: return b1 && b2;
-        case OperatorCode::OR: return b1 || b2;
-        case OperatorCode::XOR: return b1 ^ b2;
-        case OperatorCode::IMPL: return !b1 || b2;
-        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");
-    }
-}
-
-Tribool _compute(OperatorCode op, const Tribool& b) {
-    switch(op) {
-        case OperatorCode::NOT: return !b;
-        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");
-    }
-}
-
-Tribool _compute(OperatorCode op, const Tribool& b1, const Tribool& b2) {
-    switch(op) {
-        case OperatorCode::AND: return b1 && b2;
-        case OperatorCode::OR: return b1 || b2;
-        case OperatorCode::XOR: return b1 ^ b2;
-        case OperatorCode::IMPL: return !b1 || b2;
-        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");
-    }
-}
-
-Integer _compute(OperatorCode op, const Integer& x1, const Integer& x2) {
-    switch(op) {
-        case OperatorCode::ADD: return x1+x2;
-        case OperatorCode::SUB: return x1-x2;
-        case OperatorCode::MUL: return x1*x2;
-        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on two integer arguments.");
-    }
-}
-
-template<class X> X _compute(OperatorCode op, const X& x1, const X& x2) {
-    switch(op) {
-        case OperatorCode::ADD: return x1+x2;
-        case OperatorCode::SUB: return x1-x2;
-        case OperatorCode::MUL: return x1*x2;
-        case OperatorCode::DIV: return x1/x2;
-        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on two real arguments.");
-    }
-}
-
-Integer _compute(OperatorCode op, const Integer& z) {
-    switch(op) {
-        case OperatorCode::POS: return +z;
-        case OperatorCode::NEG: return -z;
-        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one integer argument.");
-    }
-}
-
-template<class X>
-X _compute(OperatorCode op, const X& x) {
-    switch(op) {
-        case OperatorCode::NEG: return -x;
-        case OperatorCode::REC: return 1/x;
-        case OperatorCode::EXP: return exp(x);
-        case OperatorCode::LOG: return log(x);
-        case OperatorCode::SIN: return sin(x);
-        case OperatorCode::COS: return cos(x);
-        case OperatorCode::TAN: return cos(x);
-        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one real argument.");
+//! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
+template<class T>
+T
+evaluate(const Expression<T>& e, const Map<Identifier,T>& x)
+{
+    switch(e.kind()) {
+        case OperatorKind::VARIABLE: return x[e.var()];
+        case OperatorKind::NULLARY: return e.val();
+        case OperatorKind::UNARY: return compute(e.op(),evaluate(e.arg(),x));
+        case OperatorKind::BINARY: return compute(e.op(),evaluate(e.arg1(),x),evaluate(e.arg2(),x));
+        case OperatorKind::SCALAR: return compute(e.op(),evaluate(e.arg(),x),e.num());
+        default: ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" on "<<x<<"\n");
     }
 }
 
 
+
+
+/*
+Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& x) {
+    const ExpressionInterface<Boolean,Identifier>* eptr=e.raw_pointer();
+    const BinaryExpression<Boolean,Identifier>* bptr=dynamic_cast<const BinaryExpression<Boolean,OperatorCode>*>(eptr);
+    if(bptr) { return compute(bptr->op,evaluate(bptr->arg1,x),evaluate(bptr->arg2,x)); }
+    const UnaryExpression<Boolean,Identifier>* uptr=dynamic_cast<const UnaryExpression<Boolean>*>(eptr);
+    if(uptr) { return compute(uptr->op,evaluate(uptr->arg,x)); }
+    const ConstantExpression<Boolean,Identifier>* cptr=dynamic_cast<const ConstantExpression<Boolean>*>(eptr);
+    if(cptr) { return cptr->value(); }
+    const BinaryExpression<Boolean,OperatorCode,String>* bsptr=dynamic_cast<const BinaryExpression<Boolean,OperatorCode,String>*>(eptr);
+    if(bsptr) { return compare(bsptr->op,evaluate(bsptr->arg1,x),evaluate(bsptr->arg2,x)); }
+    const BinaryExpression<Boolean,OperatorCode,Integer>* bzptr=dynamic_cast<const BinaryExpression<Boolean,OperatorCode,Integer>*>(eptr);
+    if(bzptr) { return compare(bsptr->op,evaluate(bzptr->arg1,x),evaluate(bzptr->arg2,x)); }
+    ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" to a Boolean using variables "<<x);
+}
+*/
 
 String evaluate(const Expression<String>& e, const StringValuation& x) {
     switch(e.op()) {
@@ -311,25 +413,6 @@ Integer evaluate(const Expression<Integer>& e, const IntegerValuation& x) {
 Boolean evaluate(const Expression<Boolean>& e, const StringValuation& x) {
     return evaluate(e,x.values());
 }
-
-
-
-/*
-Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& x) {
-    const ExpressionInterface<Boolean,Identifier>* eptr=e.raw_pointer();
-    const BinaryExpression<Boolean,Identifier>* bptr=dynamic_cast<const BinaryExpression<Boolean,OperatorCode>*>(eptr);
-    if(bptr) { return compute(bptr->op,evaluate(bptr->arg1,x),evaluate(bptr->arg2,x)); }
-    const UnaryExpression<Boolean,Identifier>* uptr=dynamic_cast<const UnaryExpression<Boolean>*>(eptr);
-    if(uptr) { return compute(uptr->op,evaluate(uptr->arg,x)); }
-    const ConstantExpression<Boolean,Identifier>* cptr=dynamic_cast<const ConstantExpression<Boolean>*>(eptr);
-    if(cptr) { return cptr->value(); }
-    const BinaryExpression<Boolean,OperatorCode,String>* bsptr=dynamic_cast<const BinaryExpression<Boolean,OperatorCode,String>*>(eptr);
-    if(bsptr) { return _compare(bsptr->op,evaluate(bsptr->arg1,x),evaluate(bsptr->arg2,x)); }
-    const BinaryExpression<Boolean,OperatorCode,Integer>* bzptr=dynamic_cast<const BinaryExpression<Boolean,OperatorCode,Integer>*>(eptr);
-    if(bzptr) { return _compare(bsptr->op,evaluate(bzptr->arg1,x),evaluate(bzptr->arg2,x)); }
-    ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" to a Boolean using variables "<<x);
-}
-*/
 
 template<class X> Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<X>& x) {
     return evaluate(e,x.values());

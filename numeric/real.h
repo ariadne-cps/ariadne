@@ -162,6 +162,12 @@ Real cos(Real);
 Real tan(Real);
 Real atan(Real);
 
+} // namespace Ariadne
+
+#include "numeric/logical.h"
+
+namespace Ariadne {
+    
 template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator==(const Real& x1, N n2) { return x1==Real(n2); }
 template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator!=(const Real& x1, N n2) { return x1!=Real(n2); }
 template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator<=(const Real& x1, N n2) { return x1<=Real(n2); }

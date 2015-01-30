@@ -110,9 +110,6 @@ ExactInterval::ExactInterval(const Dyadic& b) : ExactInterval(b.operator Rationa
 
 ExactInterval::ExactInterval(const Decimal& d) : ExactInterval(d.operator Rational()) { }
 
-
-#ifdef HAVE_GMPXX_H
-
 ExactInterval::ExactInterval(const Integer& z) : ExactInterval(Rational(z)) {
 }
 
@@ -123,8 +120,6 @@ ExactInterval::ExactInterval(const Rational& ql, const Rational& qu) : l(ql.get_
     ARIADNE_ASSERT(Rational(l)==ql);
     ARIADNE_ASSERT(Rational(u)==qu);
 }
-
-#endif // HAVE_GMPXX_H
 
 ExactInterval::ExactInterval(const Real& lower, const Real& upper)
     : l(ValidatedFloat(lower).lower().raw()), u(ValidatedFloat(upper).upper().raw()) {

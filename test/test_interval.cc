@@ -278,29 +278,21 @@ TestInterval::test_constructors()
         ARIADNE_TEST_ASSERT((Bool)(ivld2==ExactInterval(zero,zero)));
     }
 
-#ifdef HAVE_GMPXX_H
     // Constructor without approximations
     ExactInterval ivld3(Rational(21,8),Rational(17,4));
     cout<<ivld3<<std::endl;
     ARIADNE_TEST_COMPARE(make_exact(ivld3.lower()),==,Rational(21,8));
     ARIADNE_TEST_COMPARE(make_exact(ivld3.upper()),==,Rational(17,4));
-#else
-    UpperInterval ivld3(2.1,3.2);
-#endif // HAVE_GMPXX_H
 
     // Constructor from approximate values
     UpperInterval ivld4(2.1,3.2);
     ARIADNE_TEST_COMPARE(ivld4.lower(),<=,2.1);
     ARIADNE_TEST_COMPARE(ivld4.upper(),>=,3.2);
 
-#ifdef HAVE_GMPXX_H
     // Approximate constructor from a single value
     UpperInterval ivld5(Rational(1,3));
     ARIADNE_TEST_COMPARE(make_exact(ivld5.lower()),<,Rational(1,3));
     ARIADNE_TEST_COMPARE(make_exact(ivld5.upper()),>,Rational(1,3));
-#else
-    UpperInterval ivld5(1./3.);
-#endif // HAVE_GMPXX_H
 
     // Exact constructor from a single value
     ExactInterval ivld6(Float(1.25));

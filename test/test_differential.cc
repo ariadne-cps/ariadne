@@ -328,9 +328,5 @@ class TestDifferentialVector {
 Int main() {
     TestDifferential< Differential<ApproximateFloat> > tf;
     TestDifferentialVector< Differential<ApproximateFloat> > tfv;
-//#if defined HAVE_GMPXX_H and not defined ARIADNE_USE_ARRAY_EXPANSION
-//    TestDifferential< Differential<Rational> > tq;
-//    TestDifferentialVector< Differential<Rational> > tqv;
-//#endif
     return ARIADNE_TEST_FAILURES;
 }

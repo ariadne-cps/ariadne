@@ -63,12 +63,10 @@ ApproximateFloat::ApproximateFloat(LowerFloat const& x) : ApproximateFloat(x.raw
 
 ApproximateFloat::ApproximateFloat(Number<Approximate> const& x) { ARIADNE_NOT_IMPLEMENTED; }
 
-#ifdef HAVE_GMPXX_H
 ExactFloat::operator Rational() const {
     return Rational(this->get_d());
 }
 ApproximateFloat::ApproximateFloat(Rational const& q) : ApproximateFloat(q.get_d()) {
 }
-#endif
 
 } // namespace Ariadne

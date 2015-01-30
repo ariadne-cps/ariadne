@@ -99,10 +99,8 @@ template<> struct IsNumeric<ValidatedFloat> { static const Bool value = true; };
 template<> struct IsNumeric<ApproximateFloat> { static const Bool value = true; };
 template<> struct IsNumeric<Real> { static const Bool value = true; };
 
-#ifdef HAVE_GMPXX_H
 template<> struct IsNumeric<Integer> { static const Bool value = true; };
 template<> struct IsNumeric<Rational> { static const Bool value = true; };
-#endif // HAVE_GMPXX_H
 
 template<class X, class T> using EnableIfNumeric = EnableIf<IsNumeric<X>,T>;
 
@@ -124,14 +122,14 @@ template<> struct IsSafelyConvertible<ExactFloat,UpperInterval> : True { };
 template<> struct IsSafelyConvertible<UpperInterval,UpperInterval> : True { };
 template<> struct IsSafelyConvertible<UpperInterval,Float> : True { };
 template<> struct IsSafelyConvertible<Float,Float> : True { };
-#ifdef HAVE_GMPXX_H
+
 template<> struct IsSafelyConvertible<Rational,Rational> : True { };
 template<> struct IsSafelyConvertible<Rational,Real> : True { };
 template<> struct IsSafelyConvertible<Rational,UpperInterval> : True { };
 template<> struct IsSafelyConvertible<Rational,Float> : True { };
 template<> struct IsSafelyConvertible<Nat,Rational> : True { };
 template<> struct IsSafelyConvertible<Int,Rational> : True { };
-#endif // HAVE_GMPXX_H
+
 template<> struct IsSafelyConvertible<Nat,Real> : True { };
 template<> struct IsSafelyConvertible<Nat,ExactFloat> : True { };
 template<> struct IsSafelyConvertible<Nat,UpperInterval> : True { };
@@ -179,13 +177,11 @@ template<> struct Arithmetic<double,UpperInterval> { typedef UpperInterval Resul
 template<> struct Arithmetic<Real,double> { typedef Real ResultType; };
 template<> struct Arithmetic<Float,double> { typedef Float ResultType; };
 template<> struct Arithmetic<UpperInterval,double> { typedef UpperInterval ResultType; };
-#ifdef HAVE_GMPXX_H
 template<> struct Arithmetic<Rational,Rational> { typedef Rational ResultType; };
 template<> struct Arithmetic<Rational,double> { typedef Rational ResultType; };
 template<> struct Arithmetic<double,Rational> { typedef Rational ResultType; };
 template<> struct Arithmetic<Rational,UpperInterval> { typedef UpperInterval ResultType; };
 template<> struct Arithmetic<UpperInterval,Rational> { typedef UpperInterval ResultType; };
-#endif // HAVE_GMPXX_H
 
 
 } // namespace Ariadne

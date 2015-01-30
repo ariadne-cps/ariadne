@@ -203,8 +203,6 @@ Void export_tribool() {
 }
 
 
-#ifdef HAVE_GMPXX_H
-
 Void export_integer()
 {
     class_<Integer> integer_class("Integer");
@@ -222,9 +220,7 @@ Void export_integer()
 
     implicitly_convertible<Int,Integer>();
 }
-#endif
 
-#ifdef HAVE_GMPXX_H
 
 namespace Ariadne {
 Rational sqr(Rational const&);
@@ -254,7 +250,6 @@ Void export_rational()
     implicitly_convertible<Integer,Rational>();
 
 }
-#endif
 
 Void export_dyadic()
 {
@@ -300,10 +295,8 @@ Void export_real()
 {
     class_<Real> real_class("Real",init<Real>());
     real_class.def(init<Int>());
-#ifdef HAVE_GMPXX_H
     real_class.def(init<Integer>());
     real_class.def(init<Rational>());
-#endif
     real_class.def(init<Dyadic>());
     real_class.def(init<Decimal>());
 
@@ -345,10 +338,8 @@ Void export_real()
     def("atan", (Real(*)(Real)) &atan);
 
     implicitly_convertible<Int,Real>();
-#ifdef HAVE_GMPXX_H
     implicitly_convertible<Integer,Real>();
     implicitly_convertible<Rational,Real>();
-#endif
     implicitly_convertible<Decimal,Real>();
     implicitly_convertible<Dyadic,Real>();
 }
@@ -395,9 +386,8 @@ Void export_validated_float()
     validated_float_class.def(init<Dyadic>());
     validated_float_class.def(init<ValidatedFloat>());
     validated_float_class.def(init<Float>());
-#ifdef HAVE_GMPXX_H
     validated_float_class.def(init<Rational>());
-#endif
+
     validated_float_class.def(+self);
     validated_float_class.def(-self);
     validated_float_class.def(self + self);
@@ -510,9 +500,8 @@ Void export_approximate_float()
     approximate_float_class.def(init<LowerFloat>());
     approximate_float_class.def(init<UpperFloat>());
     approximate_float_class.def(init<ValidatedFloat>());
-#ifdef HAVE_GMPXX_H
     approximate_float_class.def(init<Rational>());
-#endif
+
     approximate_float_class.def(+self);
     approximate_float_class.def(-self);
     approximate_float_class.def(self + self);
@@ -623,10 +612,8 @@ numeric_submodule()
     export_validated_float();
     export_exact_float();
     export_real();
-    export_dyadic();
-    export_decimal();
-#ifdef HAVE_GMPXX_H
-    export_integer();
     export_rational();
-#endif
+    export_decimal();
+    export_dyadic();
+    export_integer();
 }

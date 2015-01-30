@@ -24,8 +24,6 @@
 #include "utility/standard.h"
 #include "config.h"
 
-#undef HAVE_GMPXX_H
-
 #include "utility/macros.h"
 #include "utility/stlio.h"
 #include "numeric/numeric.h"

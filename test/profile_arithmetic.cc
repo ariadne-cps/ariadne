@@ -30,7 +30,7 @@
 #include <boost/timer.hpp>
 #include <boost/progress.hpp>
 
-#if defined HAVE_FENV_H && defined HAVE_GMPXX_H
+#if defined HAVE_FENV_H
 
 #include <fenv.h>
 #include <gmpxx.h>

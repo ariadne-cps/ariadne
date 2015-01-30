@@ -85,9 +85,6 @@ template<class T> struct from_python_dict;
 template<class T> struct from_python_set;
 
 
-#ifdef HAVE_GMPXX_H
-#endif
-
 
 
 template<class T1, class T2>

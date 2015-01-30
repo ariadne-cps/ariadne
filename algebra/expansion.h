@@ -373,11 +373,6 @@ template<class X, class CMP> inline const X& SortedExpansion<X,CMP>::operator[](
 template<class X, class CMP> inline SortedExpansionValueReference<X,CMP> SortedExpansion<X,CMP>::operator[](const MultiIndex& a) {
     return SortedExpansionValueReference<X,CMP>(*this,a); }
 
-// Disable construction of Expansion<Rational> since above implementation only
-// works for "plain old data" types
-#if defined HAVE_GMPXX_H and defined ARIADNE_NUMERIC_H
-template<> class Expansion<Rational>;
-#endif
 
 template<class X> inline Expansion<X> embed(SizeType before_size, Expansion<X> const& x, SizeType after_size) {
     return x._embed(before_size,after_size);

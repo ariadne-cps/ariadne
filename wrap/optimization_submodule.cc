@@ -142,9 +142,7 @@ Void optimization_submodule() {
     export_array<SizeType>("SizeArray");
     export_internal_array<Slackness>("SlacknessArray");
     export_simplex_solver<Float>();
-#ifdef HAVE_GMPXX_H
     export_simplex_solver<Rational>();
-#endif
     export_interior_point_solver();
     export_constraint_solver();
 }

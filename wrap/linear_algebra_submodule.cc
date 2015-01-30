@@ -418,10 +418,8 @@ template Void export_matrix<ValidatedFloat>();
 
 template Void export_diagonal_matrix<ApproximateFloat>();
 
-#ifdef HAVE_GMPXX_H
 template Void export_vector<Rational>();
 template Void export_matrix<Rational>();
-#endif
 
 
 Void linear_algebra_submodule() {
@@ -434,8 +432,6 @@ Void linear_algebra_submodule() {
     export_pivot_matrix();
     export_diagonal_matrix<ApproximateFloat>();
 
-#ifdef HAVE_GMPXX_H
     export_vector<Rational>();
     export_matrix<Rational>();
-#endif
 }

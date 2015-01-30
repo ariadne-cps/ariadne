@@ -47,10 +47,8 @@ class Decimal {
     explicit Decimal(double d);
     //! \brief Construct from a string representation.
     explicit Decimal(StringType);
-#ifdef HAVE_GMPXX_H
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
-#endif // HAVE_GMPXX_H
     friend OutputStream& operator<<(OutputStream& os, Decimal const& d);
     friend Decimal operator"" _dec (long double dbl);
 };

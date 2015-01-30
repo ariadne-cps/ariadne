@@ -60,10 +60,8 @@ class Dyadic {
     explicit Dyadic(double x) : _x(x) { }
     //! \brief Explicit construction from an approximate floating-point value.
     explicit Dyadic(const RawFloat& x) : _x(x) { }
-#ifdef HAVE_GMPXX_H
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
-#endif
     //! \brief The approximate floating-point number with the same value.
     RawFloat value() const { return _x; }
     //! \brief A double-precision approximateion.

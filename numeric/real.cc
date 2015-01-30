@@ -34,6 +34,9 @@
 #include "integer.h"
 #include "rational.h"
 
+#include "dyadic.h"
+#include "decimal.h"
+
 #include "float.h"
 
 namespace Ariadne {

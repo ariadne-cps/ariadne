@@ -430,8 +430,6 @@ ValidatedFloat::ValidatedFloat(const Dyadic& b) : ValidatedFloat(b.operator Rati
 ValidatedFloat::ValidatedFloat(const Decimal& d) : ValidatedFloat(d.operator Rational()) { }
 
 
-#ifdef HAVE_GMPXX_H
-
 ValidatedFloat::ValidatedFloat(const Integer& z) : ValidatedFloat(Rational(z)) {
 }
 
@@ -447,8 +445,6 @@ ValidatedFloat::ValidatedFloat(const Rational& ql, const Rational& qu) : l(ql.ge
     while(Rational(u)<qu) { u=add_rnd(u,min_dbl); }
     Float::set_rounding_mode(rounding_mode);
 }
-
-#endif // HAVE_GMPXX_H
 
 ValidatedFloat ExactFloat::pm(ErrorFloat e) const {
     ExactFloat const& v=*this; return ValidatedFloat(v-e,v+e);

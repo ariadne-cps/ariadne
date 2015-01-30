@@ -94,7 +94,6 @@ inline Bool operator< (const Dyadic& x1, double x2) { return x1.value()< x2; }
 inline Bool operator> (const Dyadic& x1, double x2) { return x1.value()> x2; }
 
 
-#ifdef HAVE_GMPXX_H
 inline Dyadic::operator Rational () const { return Rational(this->get_d(),nullptr); }
 
 inline Bool operator==(const Dyadic& x, const Rational& q) { return Rational(x)==q; }
@@ -110,7 +109,6 @@ inline Bool operator<=(const Rational& q, const Dyadic& x) { return q<=Rational(
 inline Bool operator>=(const Rational& q, const Dyadic& x) { return q>=Rational(x); }
 inline Bool operator< (const Rational& q, const Dyadic& x) { return q< Rational(x); }
 inline Bool operator> (const Rational& q, const Dyadic& x) { return q> Rational(x); }
-#endif // HAVE_GMPXX_H
 
 
 

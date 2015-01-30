@@ -1478,7 +1478,6 @@ SimplexSolver<X>::hotstarted_minimise(const Vector<X>& c, const Vector<X>& xl, c
 
 template class SimplexSolver<Float>;
 
-#ifdef HAVE_GMPXX_H
 //inline UpperInterval operator+(const UpperInterval& ivl, const Rational& q) { return ivl+UpperInterval(q); }
 //inline UpperInterval operator+(const Rational& q, const UpperInterval& ivl) { return UpperInterval(q)+ivl; }
 //inline UpperInterval operator-(const UpperInterval& ivl, const Rational& q) { return ivl-UpperInterval(q); }
@@ -1486,7 +1485,6 @@ template class SimplexSolver<Float>;
 //inline UpperInterval operator*(const UpperInterval& ivl, const Rational& q) { return ivl*UpperInterval(q); }
 //inline UpperInterval operator*(const Rational& q, const UpperInterval& ivl) { return UpperInterval(q)-ivl; }
 template class SimplexSolver<Rational>;
-#endif // HAVE_GMPXX_H
 
 
 } // namespace Ariadne

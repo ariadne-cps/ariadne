@@ -102,8 +102,6 @@ OutputStream& operator<<(OutputStream& os, Decimal const& d) {
     return os << d._str;
 }
 
-#ifdef HAVE_GMPXX_H
-
 Decimal::operator Rational() const {
     Rational q;
     Bool decimal_point=false;
@@ -141,8 +139,6 @@ Decimal::operator Rational() const {
     }
     return sign*q;
 }
-
-#endif // HAVE_GMPXX_H
 
 
 } // namespace Ariadne

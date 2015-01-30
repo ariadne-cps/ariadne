@@ -26,10 +26,4 @@
 
 namespace Ariadne {
 
-#ifdef HAVE_GMPXX_H
-
-
-#endif
-
-
 } // namespace Ariadne

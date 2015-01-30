@@ -282,10 +282,9 @@ Void export_interval()
     interval_class.def(init<Decimal>());
     interval_class.def(init<Dyadic>());
     interval_class.def(init<Float>());
-#ifdef HAVE_GMPXX_H
+
     interval_class.def(init<Rational>());
     interval_class.def(init<Rational,Rational>());
-#endif
 
     interval_class.def(self == self);
     interval_class.def(self != self);

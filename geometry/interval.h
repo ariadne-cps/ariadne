@@ -127,11 +127,10 @@ class ExactInterval {
     ExactInterval(const ExactFloat& lower, const ExactFloat& upper) : l(lower.raw()), u(upper.raw()) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     ExactInterval(const Real& lower, const Real& upper);
-#ifdef HAVE_GMPXX_H
+
     explicit ExactInterval(const Integer& z);
     explicit ExactInterval(const Rational& q);
     ExactInterval(const Rational& lower, const Rational& upper);
-#endif // HAVE_GMPXX_H
 
     //! \brief The lower bound of the interval.
     const Float& lower_value() const { return l; }

@@ -276,28 +276,20 @@ TestValidatedFloat::test_constructors()
     }
 
     // Constructor with approximations
-#ifdef HAVE_GMPXX_H
     ValidatedFloat ivld3(Rational(21,10),Rational(16,5));
     cout<<ivld3<<std::endl;
     ARIADNE_TEST_COMPARE(Rational(ivld3.lower_raw()),<,Rational(21,10));
     ARIADNE_TEST_COMPARE(Rational(ivld3.upper_raw()),>,Rational(16,5));
-#else
-    ValidatedFloat ivld3(2.1,3.2);
-#endif // HAVE_GMPXX_H
 
     // Constructor from approximate values
     ValidatedFloat ivld4(2.1,3.2);
     ARIADNE_TEST_COMPARE(ivld4.lower_raw(),<=,2.1);
     ARIADNE_TEST_COMPARE(ivld4.upper_raw(),>=,3.2);
 
-#ifdef HAVE_GMPXX_H
     // Approximate constructor from a single value
     ValidatedFloat ivld5(Rational(1,3));
     ARIADNE_TEST_COMPARE(Rational(ivld5.lower_raw()),<,Rational(1,3));
     ARIADNE_TEST_COMPARE(Rational(ivld5.upper_raw()),>,Rational(1,3));
-#else
-    ValidatedFloat ivld5(1./3.);
-#endif // HAVE_GMPXX_H
 
     // Exact constructor from a single value
     ValidatedFloat ivld6(Float(1.25));

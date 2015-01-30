@@ -62,12 +62,12 @@ class ExactFloat {
     template<class X, EnableIf<IsFloatingPoint<X>> =dummy> explicit ExactFloat(X x) : _v(x) { }
     //! \brief Explicit construction from an approximate floating-point value.
     explicit ExactFloat(const Float& x) : _v(x) { }
-#ifdef HAVE_GMPXX_H
+
     //! \brief Construct from an integer.
     explicit ExactFloat(const Integer& z);
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
-#endif
+
     //! \brief Explicit conversion to raw data type.
     explicit operator Float () const { return _v; }
     //! \brief Convert to generic number type.
@@ -170,7 +170,6 @@ inline ValidatedFloat log(ExactFloat x);
 inline ValidatedFloat sin(ExactFloat x);
 inline ValidatedFloat cos(ExactFloat x);
 
-#ifdef HAVE_GMPXX_H
 inline Bool operator==(const ExactFloat& x, const Rational& q) { return Rational(x)==q; }
 inline Bool operator!=(const ExactFloat& x, const Rational& q) { return Rational(x)!=q; }
 inline Bool operator<=(const ExactFloat& x, const Rational& q) { return Rational(x)<=q; }
@@ -184,7 +183,6 @@ inline Bool operator<=(const Rational& q, const ExactFloat& x) { return q<=Ratio
 inline Bool operator>=(const Rational& q, const ExactFloat& x) { return q>=Rational(x); }
 inline Bool operator< (const Rational& q, const ExactFloat& x) { return q< Rational(x); }
 inline Bool operator> (const Rational& q, const ExactFloat& x) { return q> Rational(x); }
-#endif // HAVE_GMPXX_H
 
 
 class PositiveExactFloat : public ExactFloat {

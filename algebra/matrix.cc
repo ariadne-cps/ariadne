@@ -901,14 +901,12 @@ template UpperFloat log_norm(const Matrix<BoundFloat>& A);
 
 template Matrix<ExactFloat64>const& make_exact(const Matrix<ApprxFloat64>& mx);
 
-#ifdef HAVE_GMPXX_H
 template class Matrix<Rational>;
 template Matrix<Rational> inverse(const Matrix<Rational>&);
 template Matrix<Rational> solve(const Matrix<Rational>&, const Matrix<Rational>&);
 template Vector<Rational> solve(const Matrix<Rational>&, const Vector<Rational>&);
 Rational midpoint(Rational);
 template<> Matrix<Rational> midpoint(Matrix<Rational> const& A) { return A; }
-#endif
 
 } // namespace Ariadne
 

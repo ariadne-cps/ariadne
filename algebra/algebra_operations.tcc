@@ -216,7 +216,7 @@ _compose(const AnalyticFunction& fn, const A& tm, Float eps)
 namespace {
 inline Int pow2(Nat k) { return 1<<k; }
 inline Int powm1(Nat k) { return (k%2) ? -1 : +1; }
-double rec_fac_up(Nat n) { set_rounding_upward(); double r=1; for(Nat i=1; i<=n; ++i) { r/=i; } return r; }
+double rec_fac_up(Nat n) { Float::set_rounding_upward(); double r=1; for(Nat i=1; i<=n; ++i) { r/=i; } return r; }
 }
 
 template<class A> EnableIfNormedAlgebra<A>
@@ -413,7 +413,7 @@ cos(const A& x)
     auto avg=x.average();
     auto rad=x.radius();
 
-    Float two_pi_approx=2*pi_approx;
+    Float two_pi_approx=2*pi_approx();
     Int n=integer_cast<Int>(floor( (avg/ApproximateFloat(pi)+1)/2 ));
 
     A y=x-(2*n)*X(pi);

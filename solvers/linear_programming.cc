@@ -203,7 +203,7 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
     // Evaluate lower bound for yb - max(z,0) xu + min(z,0) xl
     Vector<ValidatedNumber> z=transpose(make_exact(A)) * make_exact(y);
     Float mx = 0.0;
-    set_rounding_downward();
+    Float::set_rounding_downward();
     for(Nat i=0; i!=y.size(); ++i) {
         mx += (b[i]*y[i]).raw();
     }
@@ -212,7 +212,7 @@ validate_feasibility(const Vector<Float>& xl, const Vector<Float>& xu,
         if(z[i].upper()>0.0) { mx += z[i].upper().raw() * neg_xui; }
         if(z[i].lower()<0.0) { mx += z[i].lower().raw() * xl[i]; }
     }
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     if(mx>0.0) { return false; }
 
     return indeterminate;

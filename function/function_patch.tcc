@@ -47,8 +47,8 @@ namespace Ariadne {
 
 template<class M> Void _set_scaling(FunctionPatch<M>& x, const ExactInterval& ivl, SizeType j)
 {
-    rounding_mode_t rounding_mode=get_rounding_mode();
-    set_rounding_mode(upward);
+    Float::RoundingModeType rounding_mode=Float::get_rounding_mode();
+    Float::set_rounding_upward();
     const Float& l=ivl.lower().raw();
     const Float& u=ivl.upper().raw();
     VOLATILE Float pc=u; pc+=l;
@@ -56,12 +56,12 @@ template<class M> Void _set_scaling(FunctionPatch<M>& x, const ExactInterval& iv
     VOLATILE Float pg=u; pg-=l;
     VOLATILE Float ng=l; ng-=u;
     x.error()=ErrorType((pc+nc+pg+ng)/4);
-    set_rounding_mode(to_nearest);
+    Float::set_rounding_to_nearest();
     MultiIndex a(x.argument_size());
     x.expansion().raw().append(a,(l+u)/2);
     ++a[j];
     x.expansion().raw().append(a,(l+u)/2);
-    set_rounding_mode(rounding_mode);
+    Float::set_rounding_mode(rounding_mode);
 }
 
 

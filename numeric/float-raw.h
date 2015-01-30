@@ -33,7 +33,7 @@
 
 namespace Ariadne {
 
-typedef FloatMP Float;
+typedef Float64 Float;
 typedef Float RawFloat;
 
 } // namespace Ariadne

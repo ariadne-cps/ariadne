@@ -89,24 +89,24 @@ ExactInterval make_exact_interval(const Real& x) {
 }
 
 ExactInterval make_domain(const IntervalSet& ivl) {
-    rounding_mode_t rnd=get_rounding_mode();
+    Ariadne::RoundingModeType rnd=Ariadne::get_rounding_mode();
     ExactInterval dom_lower_ivl=make_exact_interval(ivl.lower());
     ExactInterval dom_upper_ivl=make_exact_interval(ivl.upper());
     Float dom_lower=dom_lower_ivl.lower().raw();
     Float dom_upper=dom_upper_ivl.upper().raw();
-    set_rounding_downward();
+    Ariadne::set_rounding_downward();
     float flt_dom_lower=numeric_cast<double>(dom_lower);
     while(double(flt_dom_lower)>dom_lower) {
         flt_dom_lower-=std::numeric_limits<float>::min();
     }
     dom_lower=flt_dom_lower;
-    set_rounding_upward();
+    Ariadne::set_rounding_upward();
     float flt_dom_upper=numeric_cast<double>(dom_upper);
     while(double(flt_dom_upper)<dom_upper) {
         flt_dom_upper+=std::numeric_limits<float>::min();
     }
     dom_upper=flt_dom_upper;
-    set_rounding_mode(rnd);
+    Ariadne::set_rounding_mode(rnd);
     return ExactInterval(dom_lower,dom_upper);
 }
 
@@ -120,10 +120,10 @@ ValidatedVectorFunctionModel make_identity(const BoxSet& bx, const ValidatedFunc
         // Convert to single-precision values
         Float dom_lower_flt=numeric_cast<float>(bx[i].lower());
         Float dom_upper_flt=numeric_cast<float>(bx[i].upper());
-        set_rounding_upward();
+        Float::set_rounding_upward();
         Float err=max( max(dom_upper_ivl.upper().raw()-dom_upper_flt,dom_upper_flt-dom_upper_ivl.lower().raw()),
                        max(dom_lower_ivl.upper().raw()-dom_lower_flt,dom_lower_flt-dom_lower_ivl.lower().raw()) );
-        set_rounding_to_nearest();
+        Float::set_rounding_to_nearest();
         dom[i]=ExactInterval(dom_lower_flt,dom_upper_flt);
         errs[i]=err;
     }
@@ -1109,7 +1109,7 @@ TaylorModel<Validated,Float> recondition(const TaylorModel<Validated,Float>& tm,
             r.expansion().append(ra,xv);
         }
     }
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
 
     return r;
 }
@@ -1430,7 +1430,7 @@ struct ValidatedAffineModel {
 
 ValidatedAffineModel _affine_model(const ValidatedTaylorModel& tm) {
     ValidatedAffineModel result(0.0,Vector<Float>(tm.argument_size(),0.0),tm.error());
-    set_rounding_upward();
+    Float::set_rounding_upward();
     for(ValidatedTaylorModel::ConstIterator iter=tm.begin(); iter!=tm.end(); ++iter) {
         if(iter->key().degree()>=2) { result._e+=abs(iter->data()); }
         else if(iter->key().degree()==0) {result. _c=iter->data(); }
@@ -1440,7 +1440,7 @@ ValidatedAffineModel _affine_model(const ValidatedTaylorModel& tm) {
             }
         }
     }
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     return result;
 }
 */

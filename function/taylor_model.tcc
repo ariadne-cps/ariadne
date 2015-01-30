@@ -164,9 +164,9 @@ struct ValidatedApproximateFloat {
 
 ExactFloat add_err(ExactFloat const& x1, ExactFloat const& x2, ErrorFloat& e) {
     ExactFloat mx1=-x1;
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     ExactFloat r(x1.raw() + x2.raw());
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float u=x1.raw()+x2.raw();
     Float ml=mx1.raw()-x2.raw();
     e.raw() += (u+ml)/2;
@@ -179,9 +179,9 @@ ExactFloat add_err(ExactFloat const& x, ValidatedApproximateFloat const& c, Erro
     Float const& cm=c.middle_raw();
     Float const& cu=c.upper_raw();
     Float& re=e.raw();
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     Float rv=xv+cm;
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float u=xv+cu;
     Float ml=(-xv)-cl;
     re += (u+ml)/2;
@@ -190,9 +190,9 @@ ExactFloat add_err(ExactFloat const& x, ValidatedApproximateFloat const& c, Erro
 
 ExactFloat sub_err(ExactFloat const& x1, ExactFloat const& x2, ErrorFloat& e) {
     ExactFloat mx1=-x1;
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     ExactFloat r(x1.raw() - x2.raw());
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float u=x1.raw()-x2.raw();
     Float ml=mx1.raw()+x2.raw();
     e.raw() += (u+ml)/2;
@@ -200,17 +200,17 @@ ExactFloat sub_err(ExactFloat const& x1, ExactFloat const& x2, ErrorFloat& e) {
 }
 
 ExactFloat mul_no_err(ExactFloat const& x1, ExactFloat const& x2) {
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     ExactFloat r(x1.raw() * x2.raw());
-    set_rounding_upward();
+    Float::set_rounding_upward();
     return r;
 }
 
 ExactFloat mul_err(ExactFloat const& x1, ExactFloat const& x2, ErrorFloat& e) {
     ExactFloat mx1=-x1;
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     ExactFloat r(x1.raw() * x2.raw());
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float u=x1.raw()*x2.raw();
     Float ml=mx1.raw()*x2.raw();
     e.raw() += (u+ml)/2;
@@ -223,9 +223,9 @@ ExactFloat mul_err(ExactFloat const& x, ValidatedApproximateFloat const& c, Erro
     Float const& cm=c.middle_raw();
     Float const& cl=c.lower_raw();
     Float& re=e.raw();
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     Float rv=xv*cm;
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float u,ml;
     if(xv>=0) {
         Float mcl=-cl;
@@ -247,9 +247,9 @@ ExactFloat fma_err(ExactFloat const& x, ValidatedApproximateFloat const& c, Exac
     Float const& cl=c.lower_raw();
     Float const& yv=y.raw();
     Float& re=e.raw();
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     Float rv=xv+cm*yv;
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float u,ml;
     if(yv>=0) {
         Float mcl=-cl;
@@ -266,9 +266,9 @@ ExactFloat fma_err(ExactFloat const& x, ValidatedApproximateFloat const& c, Exac
 
 ExactFloat div_err(ExactFloat const& x1, ExactFloat const& x2, ErrorFloat& e) {
     ExactFloat mx1=-x1;
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
     ExactFloat r(x1.raw() / x2.raw());
-    set_rounding_upward();
+    Float::set_rounding_upward();
     Float u=x1.raw()/x2.raw();
     Float ml=mx1.raw()/x2.raw();
     e.raw() += (u+ml)/2;
@@ -425,9 +425,9 @@ template<class F> inline Void _add(TaylorModel<Validated,F>& r, const TaylorMode
         ++yiter;
     }
 
-    set_rounding_upward();
+    Float::set_rounding_upward();
     r.error()=(x.error()+y.error())+e;
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
 
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 }
@@ -468,9 +468,9 @@ template<class F> inline Void _sub(TaylorModel<Validated,F>& r, const TaylorMode
         ++yiter;
     }
 
-    set_rounding_upward();
+    Float::set_rounding_upward();
     r.error()=(x.error()+y.error())+e;
-    set_rounding_to_nearest();
+    Float::set_rounding_to_nearest();
 
     ARIADNE_DEBUG_ASSERT(r.error().raw()>=0);
 }
@@ -488,7 +488,7 @@ template<class F> inline Void _sma(TaylorModel<Validated,F>& r, const TaylorMode
     ValidatedApproximateFloat clmu=c;
 
     // Compute r=x+y, assuming r is empty
-    set_rounding_upward();
+    Float::set_rounding_upward();
     typename TaylorModel<Validated,F>::ConstIterator xiter=x.begin();
     typename TaylorModel<Validated,F>::ConstIterator yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {

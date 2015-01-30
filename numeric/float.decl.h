@@ -42,7 +42,7 @@ class TwoExp;
 class Precision64;
 class PrecisionMP;
 
-typedef FloatMP Float;
+typedef Float64 Float;
 
 using RawFloat = Float;
 class ExactFloat;

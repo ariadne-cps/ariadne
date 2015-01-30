@@ -261,8 +261,8 @@ inline ScalarFunctionModel<ValidatedTag>& ScalarFunctionModel<ValidatedTag>::ope
 template<class F> F ScalarFunctionModelMixin<F,ValidatedTag>::apply(OperatorCode op) const {
     const F& f=static_cast<const F&>(*this);
     switch(op) {
-        case NEG: return neg(f);
-        case REC: return rec(f);
+        case OperatorCode::NEG: return neg(f);
+        case OperatorCode::REC: return rec(f);
         default: ARIADNE_FAIL_MSG("ScalarFunctionModel<ValidatedTag>::apply(OperatorCode op): Operator op="<<op<<" not implemented\n");
     }
 }

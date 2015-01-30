@@ -163,11 +163,11 @@ struct ExpressionNode {
 
 template<class T> struct ConstantExpressionNode : public ExpressionNode<T> {
     T val;
-    ConstantExpressionNode(const T& v) : ExpressionNode<T>(CNST,NULLARY), val(v) { }
+    ConstantExpressionNode(const T& v) : ExpressionNode<T>(OperatorCode::CNST,OperatorKind::NULLARY), val(v) { }
 };
 template<class T> struct VariableExpressionNode : public ExpressionNode<T> {
     Identifier var;
-    VariableExpressionNode(const Identifier& v) : ExpressionNode<T>(VAR,VARIABLE), var(v) { }
+    VariableExpressionNode(const Identifier& v) : ExpressionNode<T>(OperatorCode::VAR,OperatorKind::VARIABLE), var(v) { }
 };
 template<class T, class A=T> struct UnaryExpressionNode : public ExpressionNode<T> {
     Expression<A> arg;
@@ -276,36 +276,36 @@ template<> inline OutputStream& _write_comparison(OutputStream& os, const Expres
 //! \brief Write to an output stream
 template<class T> OutputStream& operator<<(OutputStream& os, const Expression<T>& f) {
     switch(f.op()) {
-        //case CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
-        case CNST:
+        //case OperatorCode::CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
+        case OperatorCode::CNST:
             os << f.val(); return os;
             //if(f.val()==0.0) { return os << 0.0; } if(abs(f.val())<1e-4) { os << std::fixed << f.val(); } else { os << f.val(); } return os;
-        case VAR:
+        case OperatorCode::VAR:
             return os << f.var();
-        case ADD:
+        case OperatorCode::ADD:
             return os << f.arg1() << '+' << f.arg2();
-        case SUB:
+        case OperatorCode::SUB:
             os << f.arg1() << '-';
-            switch(f.arg2().op()) { case ADD: case SUB: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
+            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
             return os;
-        case MUL:
-            switch(f.arg1().op()) { case ADD: case SUB: case DIV: os << '(' << f.arg1() << ')'; break; default: os << f.arg1(); }
+        case OperatorCode::MUL:
+            switch(f.arg1().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::DIV: os << '(' << f.arg1() << ')'; break; default: os << f.arg1(); }
             os << '*';
-            switch(f.arg2().op()) { case ADD: case SUB: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
+            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
             return os;
-        case DIV:
-            switch(f.arg1().op()) { case ADD: case SUB: case DIV: os << '(' << f.arg1() << ')'; break; default: os << f.arg1(); }
+        case OperatorCode::DIV:
+            switch(f.arg1().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::DIV: os << '(' << f.arg1() << ')'; break; default: os << f.arg1(); }
             os << '/';
-            switch(f.arg2().op()) { case ADD: case SUB: case MUL: case DIV: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
+            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::MUL: case OperatorCode::DIV: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
             return os;
-        case POW:
+        case OperatorCode::POW:
             return os << "pow" << '(' << f.arg() << ',' << f.num() << ')';
         default:
             switch(f.kind()) {
-                case UNARY: return os << f.op() << "(" << f.arg() << ")";
-                case BINARY: return os << f.op() << "(" << f.arg1() << "," << f.arg2() << ")";
+                case OperatorKind::UNARY: return os << f.op() << "(" << f.arg() << ")";
+                case OperatorKind::BINARY: return os << f.op() << "(" << f.arg1() << "," << f.arg2() << ")";
                 // FIXME: Type-cast comparison arguments correctly
-                case COMPARISON: return _write_comparison(os,f);
+                case OperatorKind::COMPARISON: return _write_comparison(os,f);
                 default: ARIADNE_FAIL_MSG("Cannot output expression with operator "<<f.op()<<" of kind "<<f.kind()<<"\n");
             }
     }
@@ -326,10 +326,10 @@ evaluate(const Expression<typename Logic<A>::Type>& e, const Map<Identifier,A>& 
     typedef typename Logic<A>::Type R;
     A* aptr=0;
     switch(e.kind()) {
-        case NULLARY: return static_cast<R>(e.val());
-        case UNARY: return compute(e.op(),evaluate(e.arg(),x));
-        case BINARY: return compute(e.op(),evaluate(e.arg1(),x),evaluate(e.arg2(),x));
-        case COMPARISON: return compare<R>(e.op(),evaluate(e.cmp1(aptr),x),evaluate(e.cmp2(aptr),x));
+        case OperatorKind::NULLARY: return static_cast<R>(e.val());
+        case OperatorKind::UNARY: return compute(e.op(),evaluate(e.arg(),x));
+        case OperatorKind::BINARY: return compute(e.op(),evaluate(e.arg1(),x),evaluate(e.arg2(),x));
+        case OperatorKind::COMPARISON: return compare<R>(e.op(),evaluate(e.cmp1(aptr),x),evaluate(e.cmp2(aptr),x));
         default: ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" on "<<x<<"\n");
     }
 }
@@ -340,11 +340,11 @@ T
 evaluate(const Expression<T>& e, const Map<Identifier,T>& x)
 {
     switch(e.kind()) {
-        case VARIABLE: return x[e.var()];
-        case NULLARY: return e.val();
-        case UNARY: return compute(e.op(),evaluate(e.arg(),x));
-        case BINARY: return compute(e.op(),evaluate(e.arg1(),x),evaluate(e.arg2(),x));
-        case SCALAR: return compute(e.op(),evaluate(e.arg(),x),e.num());
+        case OperatorKind::VARIABLE: return x[e.var()];
+        case OperatorKind::NULLARY: return e.val();
+        case OperatorKind::UNARY: return compute(e.op(),evaluate(e.arg(),x));
+        case OperatorKind::BINARY: return compute(e.op(),evaluate(e.arg1(),x),evaluate(e.arg2(),x));
+        case OperatorKind::SCALAR: return compute(e.op(),evaluate(e.arg(),x),e.num());
         default: ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" on "<<x<<"\n");
     }
 }
@@ -354,11 +354,11 @@ evaluate(const Expression<T>& e, const Map<Identifier,T>& x)
 template<class T> Set<UntypedVariable> Expression<T>::arguments() const {
     const Expression<T>& e=*this;
     switch(e.kind()) {
-        case VARIABLE: return Set<UntypedVariable>{Variable<T>(e.var())};
-        case NULLARY: return Set<UntypedVariable>();
-        case UNARY: return e.arg().arguments();
-        case BINARY: return join(e.arg1().arguments(),e.arg2().arguments());
-        case COMPARISON: {
+        case OperatorKind::VARIABLE: return Set<UntypedVariable>{Variable<T>(e.var())};
+        case OperatorKind::NULLARY: return Set<UntypedVariable>();
+        case OperatorKind::UNARY: return e.arg().arguments();
+        case OperatorKind::BINARY: return join(e.arg1().arguments(),e.arg2().arguments());
+        case OperatorKind::COMPARISON: {
             const BinaryExpressionNode<T,Real>* rlp = dynamic_cast<const BinaryExpressionNode<T,Real>*>(e.node_ptr());
             if(rlp) { return join(rlp->arg1.arguments(),rlp->arg2.arguments()); }
             const BinaryExpressionNode<T,String>* strp = dynamic_cast<const BinaryExpressionNode<T,String>*>(e.node_ptr());
@@ -372,11 +372,11 @@ template<class T> Set<UntypedVariable> Expression<T>::arguments() const {
 template<class T> Set<Identifier> arguments(const Expression<T>& e)
 {
     switch(e.kind()) {
-        case VARIABLE: return Set<Identifier>{e.var()};
-        case NULLARY: return Set<Identifier>();
-        case UNARY: return arguments(e.arg());
-        case BINARY: return join(arguments(e.arg1()),arguments(e.arg2()));
-        case COMPARISON: {
+        case OperatorKind::VARIABLE: return Set<Identifier>{e.var()};
+        case OperatorKind::NULLARY: return Set<Identifier>();
+        case OperatorKind::UNARY: return arguments(e.arg());
+        case OperatorKind::BINARY: return join(arguments(e.arg1()),arguments(e.arg2()));
+        case OperatorKind::COMPARISON: {
             const BinaryExpressionNode<T,Real>* rlp = dynamic_cast<const BinaryExpressionNode<T,Real>*>(e.node_ptr());
             if(rlp) { return join(arguments(rlp->arg1),arguments(rlp->arg2)); }
             const BinaryExpressionNode<T,String>* strp = dynamic_cast<const BinaryExpressionNode<T,String>*>(e.node_ptr());
@@ -390,7 +390,7 @@ template<class T> Set<Identifier> arguments(const Expression<T>& e)
 //! \brief Returns \a true if the expression\a e is syntactically equal to the constant \a c.
 template<class T> Bool is_constant(const Expression<T>& e, const T& c) {
     switch(e.op()) {
-        case CNST: return decide(e.val()==c);
+        case OperatorCode::CNST: return decide(e.val()==c);
         default: return false;
     }
 }
@@ -402,7 +402,7 @@ template<class T, class X> Bool is_constant(const Expression<T>& e, const X& c) 
 //! \brief Returns \a true if the expression \a e is syntactically equal to the variable with name \a vn.
 template<class T> Bool is_variable(const Expression<T>& e, const Identifier& vn) {
     switch(e.op()) {
-        case VAR: return e.var()==vn;
+        case OperatorCode::VAR: return e.var()==vn;
         default: return false;
     }
 }
@@ -410,7 +410,7 @@ template<class T> Bool is_variable(const Expression<T>& e, const Identifier& vn)
 //! \brief Returns \a true if the expression \a e is syntactically equal to the variable \a v.
 template<class T> Bool is_variable(const Expression<T>& e, const Variable<T>& v) {
     switch(e.op()) {
-        case VAR: return e.var()==v.name();
+        case OperatorCode::VAR: return e.var()==v.name();
         default: return false;
     }
 }

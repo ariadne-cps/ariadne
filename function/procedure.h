@@ -115,25 +115,25 @@ template<class X, class T> Void _execute(List<T>& v, const List<ProcedureInstruc
     for(SizeType i=0; i!=p.size(); ++i) {
         const ProcedureInstruction& instruction=p[i];
         switch(instruction.op) {
-            case CNST: v.append(z+static_cast<T>(c[instruction.arg])); break;
-            case IND:  v.append(x[instruction.arg]); break;
-            case ADD:  v.append(v[instruction.arg1]+v[instruction.arg2]); break;
-            case SUB:  v.append(v[instruction.arg1]-v[instruction.arg2]); break;
-            case MUL:  v.append(v[instruction.arg1]*v[instruction.arg2]); break;
-            case DIV:  v.append(v[instruction.arg1]/v[instruction.arg2]); break;
-            case POW:  v.append(pow(v[instruction.arg],instruction.np)); break;
-            case ABS:  v.append(abs(v[instruction.arg])); break;
-            case POS:  v.append(pos(v[instruction.arg])); break;
-            case NEG:  v.append(neg(v[instruction.arg])); break;
-            case REC:  v.append(rec(v[instruction.arg])); break;
-            case SQR:  v.append(sqr(v[instruction.arg])); break;
-            case SQRT: v.append(sqrt(v[instruction.arg])); break;
-            case EXP:  v.append(exp(v[instruction.arg])); break;
-            case LOG:  v.append(log(v[instruction.arg])); break;
-            case SIN:  v.append(sin(v[instruction.arg])); break;
-            case COS:  v.append(cos(v[instruction.arg])); break;
-            case TAN:  v.append(tan(v[instruction.arg])); break;
-            case ATAN:  v.append(atan(v[instruction.arg])); break;
+            case OperatorCode::CNST: v.append(z+static_cast<T>(c[instruction.arg])); break;
+            case OperatorCode::IND:  v.append(x[instruction.arg]); break;
+            case OperatorCode::ADD:  v.append(v[instruction.arg1]+v[instruction.arg2]); break;
+            case OperatorCode::SUB:  v.append(v[instruction.arg1]-v[instruction.arg2]); break;
+            case OperatorCode::MUL:  v.append(v[instruction.arg1]*v[instruction.arg2]); break;
+            case OperatorCode::DIV:  v.append(v[instruction.arg1]/v[instruction.arg2]); break;
+            case OperatorCode::POW:  v.append(pow(v[instruction.arg],instruction.np)); break;
+            case OperatorCode::ABS:  v.append(abs(v[instruction.arg])); break;
+            case OperatorCode::POS:  v.append(pos(v[instruction.arg])); break;
+            case OperatorCode::NEG:  v.append(neg(v[instruction.arg])); break;
+            case OperatorCode::REC:  v.append(rec(v[instruction.arg])); break;
+            case OperatorCode::SQR:  v.append(sqr(v[instruction.arg])); break;
+            case OperatorCode::SQRT: v.append(sqrt(v[instruction.arg])); break;
+            case OperatorCode::EXP:  v.append(exp(v[instruction.arg])); break;
+            case OperatorCode::LOG:  v.append(log(v[instruction.arg])); break;
+            case OperatorCode::SIN:  v.append(sin(v[instruction.arg])); break;
+            case OperatorCode::COS:  v.append(cos(v[instruction.arg])); break;
+            case OperatorCode::TAN:  v.append(tan(v[instruction.arg])); break;
+            case OperatorCode::ATAN:  v.append(atan(v[instruction.arg])); break;
             default:   ARIADNE_FAIL_MSG("Unrecognised operator "<<instruction.op);
         }
     }
@@ -147,25 +147,25 @@ template<class X, class T> Void _compute(List<T>& v, const List<ProcedureInstruc
     for(SizeType i=0; i!=p.size(); ++i) {
         const ProcedureInstruction& instruction=p[i];
         switch(instruction.op) {
-            case CNST: v[i]=(z+c[instruction.arg]); break;
-            case IND:  v[i]=(x[instruction.arg]); break;
-            case ADD:  v[i]=(v[instruction.arg1]+v[instruction.arg2]); break;
-            case SUB:  v[i]=(v[instruction.arg1]-v[instruction.arg2]); break;
-            case MUL:  v[i]=(v[instruction.arg1]*v[instruction.arg2]); break;
-            case DIV:  v[i]=(v[instruction.arg1]/v[instruction.arg2]); break;
-            case POW:  v[i]=(pow(v[instruction.arg],instruction.np)); break;
-            case ABS:  v[i]=(abs(v[instruction.arg])); break;
-            case POS:  v[i]=(pos(v[instruction.arg])); break;
-            case NEG:  v[i]=(neg(v[instruction.arg])); break;
-            case REC:  v[i]=(rec(v[instruction.arg])); break;
-            case SQR:  v[i]=(sqr(v[instruction.arg])); break;
-            case SQRT: v[i]=(sqrt(v[instruction.arg])); break;
-            case EXP:  v[i]=(exp(v[instruction.arg])); break;
-            case LOG:  v[i]=(log(v[instruction.arg])); break;
-            case SIN:  v[i]=(sin(v[instruction.arg])); break;
-            case COS:  v[i]=(cos(v[instruction.arg])); break;
-            case TAN:  v[i]=(tan(v[instruction.arg])); break;
-            case ATAN:  v[i]=(atan(v[instruction.arg])); break;
+            case OperatorCode::CNST: v[i]=(z+c[instruction.arg]); break;
+            case OperatorCode::IND:  v[i]=(x[instruction.arg]); break;
+            case OperatorCode::ADD:  v[i]=(v[instruction.arg1]+v[instruction.arg2]); break;
+            case OperatorCode::SUB:  v[i]=(v[instruction.arg1]-v[instruction.arg2]); break;
+            case OperatorCode::MUL:  v[i]=(v[instruction.arg1]*v[instruction.arg2]); break;
+            case OperatorCode::DIV:  v[i]=(v[instruction.arg1]/v[instruction.arg2]); break;
+            case OperatorCode::POW:  v[i]=(pow(v[instruction.arg],instruction.np)); break;
+            case OperatorCode::ABS:  v[i]=(abs(v[instruction.arg])); break;
+            case OperatorCode::POS:  v[i]=(pos(v[instruction.arg])); break;
+            case OperatorCode::NEG:  v[i]=(neg(v[instruction.arg])); break;
+            case OperatorCode::REC:  v[i]=(rec(v[instruction.arg])); break;
+            case OperatorCode::SQR:  v[i]=(sqr(v[instruction.arg])); break;
+            case OperatorCode::SQRT: v[i]=(sqrt(v[instruction.arg])); break;
+            case OperatorCode::EXP:  v[i]=(exp(v[instruction.arg])); break;
+            case OperatorCode::LOG:  v[i]=(log(v[instruction.arg])); break;
+            case OperatorCode::SIN:  v[i]=(sin(v[instruction.arg])); break;
+            case OperatorCode::COS:  v[i]=(cos(v[instruction.arg])); break;
+            case OperatorCode::TAN:  v[i]=(tan(v[instruction.arg])); break;
+            case OperatorCode::ATAN:  v[i]=(atan(v[instruction.arg])); break;
             default:   ARIADNE_FAIL_MSG("Unrecognised operator "<<instruction.op);
         }
     }
@@ -181,27 +181,27 @@ template<class T> Void _propagate(Vector<T>& x, List<T>& v, const List<Procedure
         --r;
         SizeType a=p[r].arg; SizeType a1=p[r].arg1; SizeType a2=p[r].arg2;
         switch(p[r].op) {
-            case CNST: break;
-            case IND: restrict(x[a],v[r]); break;
-            case ADD: restrict(v[a1],v[r]-v[a2]); restrict(v[a2],v[r]-v[a1]); break;
-            case SUB: restrict(v[a1],v[a2]+v[r]); restrict(v[a2],v[a1]-v[r]); break;
-            case MUL: restrict(v[a1],v[r]/v[a2]); restrict(v[a2],v[r]/v[a1]); break;
-            case DIV: restrict(v[a1],v[a2]*v[r]); restrict(v[a2],v[a1]/v[r]); break;
-            case MAX: restrict(v[a1],max(v[r],v[a2])); restrict(v[a2],max(v[r],v[a1])); break;
-            case POS: restrict(v[a],v[r]); break;
-            case NEG: restrict(v[a],neg(v[r])); break;
-            case REC: restrict(v[a],rec(v[r])); break;
-            case SQR: restrict(v[a],sqrt(v[r])); break;
-            case POW: restrict(v[a],exp(log(v[r])/p[r].np)); break;
-            case SQRT: restrict(v[a],sqr(v[r])); break;
-            case EXP: restrict(v[a],log(v[r])); break;
-            case LOG: restrict(v[a],exp(v[r])); break;
-            case SIN: restrict(v[a],asin(v[r])); break;
-            case COS: restrict(v[a],acos(v[r])); break;
-            case TAN: restrict(v[a],atan(v[r])); break;
-            case ATAN: restrict(v[a],tan(v[r])); break;
-            case EQ: restrict(v[a1],v[r]); restrict(v[a2],v[r]); break;
-            case LEQ: restrict(v[a1],T(-infty,v[a2].upper())); restrict(v[a1],T(v[a2].lower(),+infty)); break;
+            case OperatorCode::CNST: break;
+            case OperatorCode::IND: restrict(x[a],v[r]); break;
+            case OperatorCode::ADD: restrict(v[a1],v[r]-v[a2]); restrict(v[a2],v[r]-v[a1]); break;
+            case OperatorCode::SUB: restrict(v[a1],v[a2]+v[r]); restrict(v[a2],v[a1]-v[r]); break;
+            case OperatorCode::MUL: restrict(v[a1],v[r]/v[a2]); restrict(v[a2],v[r]/v[a1]); break;
+            case OperatorCode::DIV: restrict(v[a1],v[a2]*v[r]); restrict(v[a2],v[a1]/v[r]); break;
+            case OperatorCode::MAX: restrict(v[a1],max(v[r],v[a2])); restrict(v[a2],max(v[r],v[a1])); break;
+            case OperatorCode::POS: restrict(v[a],v[r]); break;
+            case OperatorCode::NEG: restrict(v[a],neg(v[r])); break;
+            case OperatorCode::REC: restrict(v[a],rec(v[r])); break;
+            case OperatorCode::SQR: restrict(v[a],sqrt(v[r])); break;
+            case OperatorCode::POW: restrict(v[a],exp(log(v[r])/p[r].np)); break;
+            case OperatorCode::SQRT: restrict(v[a],sqr(v[r])); break;
+            case OperatorCode::EXP: restrict(v[a],log(v[r])); break;
+            case OperatorCode::LOG: restrict(v[a],exp(v[r])); break;
+            case OperatorCode::SIN: restrict(v[a],asin(v[r])); break;
+            case OperatorCode::COS: restrict(v[a],acos(v[r])); break;
+            case OperatorCode::TAN: restrict(v[a],atan(v[r])); break;
+            case OperatorCode::ATAN: restrict(v[a],tan(v[r])); break;
+            case OperatorCode::EQ: restrict(v[a1],v[r]); restrict(v[a2],v[r]); break;
+            case OperatorCode::LEQ: restrict(v[a1],T(-infty,v[a2].upper())); restrict(v[a1],T(v[a2].lower(),+infty)); break;
             default: ARIADNE_THROW(std::runtime_error,"_propagate(Vector<T>,List<T>,List<ProcedureInstruction>)","Unhandled operator "<<p[r].op<<" at instruction "<<r<<"\n");
         }
     }
@@ -211,13 +211,13 @@ template<class T> Void _propagate(Vector<T>& x, List<T>& v, const List<Procedure
 template<class X> SizeType _convert(List<ProcedureInstruction>& p, List<X>& c, const Formula<X>& f, Map<const Void*,SizeType>& cache) {
     if(cache.has_key(f.node_ptr())) { return cache[f.node_ptr()]; }
     switch(f.kind()) { // Can't use simple evaluate (above) as we need to pass the cache to subformulae
-        case COORDINATE: p.append(ProcedureInstruction(IND,f.ind())); break;
-        case NULLARY: p.append(ProcedureInstruction(CNST,c.size())); c.append(f.val()); break;
-        case BINARY:
+        case OperatorKind::COORDINATE: p.append(ProcedureInstruction(IND,f.ind())); break;
+        case OperatorKind::NULLARY: p.append(ProcedureInstruction(CNST,c.size())); c.append(f.val()); break;
+        case OperatorKind::BINARY:
             p.append(ProcedureInstruction(f.op(),_convert(p,c,f.arg1(),cache),_convert(p,c,f.arg2(),cache))); break;
-        case UNARY:
+        case OperatorKind::UNARY:
             p.append(ProcedureInstruction(f.op(),_convert(p,c,f.arg(),cache))); break;
-        case SCALAR:
+        case OperatorKind::SCALAR:
             p.append(ProcedureInstruction(f.op(),_convert(p,c,f.arg(),cache),f.num())); break;
         default: assert(false);
     }
@@ -233,19 +233,19 @@ Void _write(OutputStream& os, const List<ProcedureInstruction>& p, const List<X>
         const ProcedureInstruction& instruction=p[i];
         os << "v[" << i << "]=";
         switch(instruction.op) {
-            case CNST:
+            case OperatorKind::CNST:
                 os << c[instruction.arg]; break;
-            case IND:
+            case OperatorKind::IND:
                 os << "x[" << instruction.arg << "]"; break;
-            case ADD: case SUB: case MUL: case DIV:
+            case OperatorKind::ADD: case OperatorKind::SUB: case OperatorKind::MUL: case OperatorKind::DIV:
                 os << "v[" << instruction.arg1 << "]" << symbol(instruction.op) << "v[" << instruction.arg2 << "]"; break;
-            case POW:
+            case OperatorKind::POW:
                 os<<"pow(v[" << instruction.arg << "],"<<instruction.np<<")"; break;
-            case POS: case NEG:
+            case OperatorKind::POS: case OperatorKind::NEG:
                 os << symbol(instruction.op) << "v[" << instruction.arg << "]"; break;
-            case ABS: case REC: case SQR: case SQRT:
-            case EXP: case LOG: case SIN: case COS: case TAN:
-            case ASIN: case ACOS: case ATAN:
+            case OperatorKind::ABS: case OperatorKind::REC: case OperatorKind::SQR: case OperatorKind::SQRT:
+            case OperatorKind::EXP: case OperatorKind::LOG: case OperatorKind::SIN: case OperatorKind::COS: case OperatorKind::TAN:
+            case OperatorKind::ASIN: case OperatorKind::ACOS: case OperatorKind::ATAN:
                 os << instruction.op << "(v[" << instruction.arg << "])"; break;
             default:   ARIADNE_FAIL_MSG("Unrecognised operator "<<instruction.op);
         }
@@ -285,8 +285,8 @@ template<class X, class T> inline T evaluate(const Procedure<X>& f, const Vector
 
 template<class X> Procedure<X>& operator+=(Procedure<X>& f, const X& c) {
     f._constants.append(c);
-    f.new_unary_instruction(CNST,f._constants.size()-1);
-    f.new_binary_instruction(ADD,f._instructions.size()-1,f._instructions.size()-2);
+    f.new_unary_instruction(OperatorCode::CNST,f._constants.size()-1);
+    f.new_binary_instruction(OperatorCode::ADD,f._instructions.size()-1,f._instructions.size()-2);
     return f;
 }
 

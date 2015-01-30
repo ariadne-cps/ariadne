@@ -159,15 +159,15 @@ struct UnaryFunction
 
     virtual ScalarFunction<P> derivative(SizeType j) const {
         switch(_op) {
-            case POS: return _arg.derivative(j);
-            case NEG: return -_arg.derivative(j);
-            case REC: return -_arg.derivative(j)/sqr(_arg);
-            case SQR: return 2*_arg.derivative(j)*_arg;
-            case SQRT: return _arg.derivative(j)/(2*sqrt(_arg));
-            case EXP: return _arg*_arg.derivative(j);
-            case LOG: return _arg.derivative(j)/_arg;
-            case SIN: return _arg.derivative(j)*cos(_arg);
-            case COS: return -_arg.derivative(j)*sin(_arg);
+            case OperatorCode::POS: return _arg.derivative(j);
+            case OperatorCode::NEG: return -_arg.derivative(j);
+            case OperatorCode::REC: return -_arg.derivative(j)/sqr(_arg);
+            case OperatorCode::SQR: return 2*_arg.derivative(j)*_arg;
+            case OperatorCode::SQRT: return _arg.derivative(j)/(2*sqrt(_arg));
+            case OperatorCode::EXP: return _arg*_arg.derivative(j);
+            case OperatorCode::LOG: return _arg.derivative(j)/_arg;
+            case OperatorCode::SIN: return _arg.derivative(j)*cos(_arg);
+            case OperatorCode::COS: return -_arg.derivative(j)*sin(_arg);
             default: ARIADNE_FAIL_MSG("Unknown unary function "<<this->_op);
         }
     }
@@ -186,13 +186,13 @@ struct UnaryFunction
 
 
 template<class P> ScalarFunction<P> sqr(const ScalarFunction<P>& f) {
-    return ScalarFunction<P>(new UnaryFunction<P>(SQR,f)); }
+    return ScalarFunction<P>(new UnaryFunction<P>(OperatorCode::SQR,f)); }
 template<class P> ScalarFunction<P> sqrt(const ScalarFunction<P>& f) {
-    return ScalarFunction<P>(new UnaryFunction<P>(SQRT,f)); }
+    return ScalarFunction<P>(new UnaryFunction<P>(OperatorCode::SQRT,f)); }
 template<class P> ScalarFunction<P> sin(const ScalarFunction<P>& f) {
-    return ScalarFunction<P>(new UnaryFunction<P>(SIN,f)); }
+    return ScalarFunction<P>(new UnaryFunction<P>(OperatorCode::SIN,f)); }
 template<class P> ScalarFunction<P> cos(const ScalarFunction<P>& f) {
-    return ScalarFunction<P>(new UnaryFunction<P>(COS,f)); }
+    return ScalarFunction<P>(new UnaryFunction<P>(OperatorCode::COS,f)); }
 
 template<class P>
 struct BinaryFunction
@@ -212,13 +212,13 @@ struct BinaryFunction
 
     virtual ScalarFunction<P> derivative(SizeType j) const {
         switch(_op) {
-            case ADD:
+            case OperatorCode::ADD:
                 return _arg1.derivative(j)+_arg2.derivative(j);
-            case SUB:
+            case OperatorCode::SUB:
                 return _arg1.derivative(j)-_arg2.derivative(j);
-            case MUL:
+            case OperatorCode::MUL:
                 return _arg1.derivative(j)*_arg2+_arg1*_arg2.derivative(j);
-            case DIV:
+            case OperatorCode::DIV:
                 if(dynamic_cast<const ConstantFunction<X>*>(_arg2.raw_pointer())) {
                     return _arg1.derivative(j)/_arg2;
                 } else {
@@ -231,7 +231,7 @@ struct BinaryFunction
     virtual OutputStream& repr(OutputStream& os) const {
         return os << "BF[R" << this->argument_size() << "](" << *this << ")"; }
     virtual OutputStream& write(OutputStream& os) const {
-        if(_op==ADD || _op==SUB) { return os << '(' << _arg1 << symbol(_op) << _arg2 << ')'; }
+        if(_op==OperatorCode::ADD || _op==OperatorCode::SUB) { return os << '(' << _arg1 << symbol(_op) << _arg2 << ')'; }
         else { return os << _arg1 << symbol(_op) << _arg2; } }
 
     template<class XX> inline Void _compute(XX& r, const Vector<XX>& x) const {

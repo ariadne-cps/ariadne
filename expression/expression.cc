@@ -13,7 +13,7 @@
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  MERCHANTABILITY or FITNESS FOperatorCode::OR A PARTICULAR PURPOSE.  See the
  *  GNU Library General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
@@ -50,11 +50,11 @@ const Formula<Real>& cached_formula(const Expression<Real>& e, const Map<Identif
     const ExpressionNode<Real>* eptr=e.node_ptr();
     if(cache.has_key(eptr)) { return cache.get(eptr); }
     switch(e.kind()) {
-        case VARIABLE: return insert( cache, eptr, make_formula<Real>(v[e.var()]) );
-        case NULLARY: return insert( cache, eptr, make_formula<Real>(e.val()) );
-        case UNARY: return insert( cache, eptr, make_formula<Real>(e.op(),cached_formula(e.arg(),v,cache)));
-        case BINARY: return insert( cache, eptr, make_formula<Real>(e.op(),cached_formula(e.arg1(),v,cache),cached_formula(e.arg2(),v,cache)) );
-        case SCALAR: return insert( cache, eptr, make_formula<Real>(e.op(),cached_formula(e.arg(),v,cache),e.num()) );
+        case OperatorKind::VARIABLE: return insert( cache, eptr, make_formula<Real>(v[e.var()]) );
+        case OperatorKind::NULLARY: return insert( cache, eptr, make_formula<Real>(e.val()) );
+        case OperatorKind::UNARY: return insert( cache, eptr, make_formula<Real>(e.op(),cached_formula(e.arg(),v,cache)));
+        case OperatorKind::BINARY: return insert( cache, eptr, make_formula<Real>(e.op(),cached_formula(e.arg1(),v,cache),cached_formula(e.arg2(),v,cache)) );
+        case OperatorKind::SCALAR: return insert( cache, eptr, make_formula<Real>(e.op(),cached_formula(e.arg(),v,cache),e.num()) );
         default: ARIADNE_FAIL_MSG("Cannot convert expression "<<e<<" to use variables "<<v<<"\n");
     }
 }
@@ -193,89 +193,89 @@ inline Void _set_constant(Formula<Real>& r, const Real& c) { r=c; }
 
 Boolean _compare(OperatorCode cmp, const String& s1, const String& s2) {
     switch(cmp) {
-        case EQ:  return s1==s2;
-        case NEQ: return s1!=s2;
+        case OperatorCode::EQ:  return s1==s2;
+        case OperatorCode::NEQ: return s1!=s2;
         default: ARIADNE_FAIL_MSG("Cannot evaluate comparison "<<cmp<<" on string arguments.");
     }
 }
 
 Boolean _compare(OperatorCode cmp, const Integer& z1, const Integer& z2) {
     switch(cmp) {
-        case EQ:  return z1==z2;
-        case NEQ: return z1!=z2;
-        case LEQ: return z1<=z2;
-        case GEQ: return z1>=z2;
-        case LT:  return z1< z2;
-        case GT:  return z1> z2;
+        case OperatorCode::EQ:  return z1==z2;
+        case OperatorCode::NEQ: return z1!=z2;
+        case OperatorCode::LEQ: return z1<=z2;
+        case OperatorCode::GEQ: return z1>=z2;
+        case OperatorCode::LT:  return z1< z2;
+        case OperatorCode::GT:  return z1> z2;
         default: ARIADNE_FAIL_MSG("Cannot evaluate comparison "<<cmp<<" on integer arguments.");
     }
 }
 
 template<class X> Tribool _compare(OperatorCode cmp, const X& x1, const X& x2) {
     switch(cmp) {
-        case GT: case GEQ: return x1>x2;
-        case LT: case LEQ: return x1<x2;
+        case OperatorCode::GT: case OperatorCode::GEQ: return x1>x2;
+        case OperatorCode::LT: case OperatorCode::LEQ: return x1<x2;
         default: ARIADNE_FAIL_MSG("Cannot evaluate comparison "<<cmp<<" on real arguments.");
     }
 }
 
 Boolean _compute(OperatorCode op, const Boolean& b) {
     switch(op) {
-        case NOT: return !b;
+        case OperatorCode::NOT: return !b;
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");
     }
 }
 
 Boolean _compute(OperatorCode op, const Boolean& b1, const Boolean& b2) {
     switch(op) {
-        case AND: return b1 && b2;
-        case OR: return b1 || b2;
-        case XOR: return b1 ^ b2;
-        case IMPL: return !b1 || b2;
+        case OperatorCode::AND: return b1 && b2;
+        case OperatorCode::OR: return b1 || b2;
+        case OperatorCode::XOR: return b1 ^ b2;
+        case OperatorCode::IMPL: return !b1 || b2;
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");
     }
 }
 
 Tribool _compute(OperatorCode op, const Tribool& b) {
     switch(op) {
-        case NOT: return !b;
+        case OperatorCode::NOT: return !b;
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");
     }
 }
 
 Tribool _compute(OperatorCode op, const Tribool& b1, const Tribool& b2) {
     switch(op) {
-        case AND: return b1 && b2;
-        case OR: return b1 || b2;
-        case XOR: return b1 ^ b2;
-        case IMPL: return !b1 || b2;
+        case OperatorCode::AND: return b1 && b2;
+        case OperatorCode::OR: return b1 || b2;
+        case OperatorCode::XOR: return b1 ^ b2;
+        case OperatorCode::IMPL: return !b1 || b2;
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");
     }
 }
 
 Integer _compute(OperatorCode op, const Integer& x1, const Integer& x2) {
     switch(op) {
-        case ADD: return x1+x2;
-        case SUB: return x1-x2;
-        case MUL: return x1*x2;
+        case OperatorCode::ADD: return x1+x2;
+        case OperatorCode::SUB: return x1-x2;
+        case OperatorCode::MUL: return x1*x2;
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on two integer arguments.");
     }
 }
 
 template<class X> X _compute(OperatorCode op, const X& x1, const X& x2) {
     switch(op) {
-        case ADD: return x1+x2;
-        case SUB: return x1-x2;
-        case MUL: return x1*x2;
-        case DIV: return x1/x2;
+        case OperatorCode::ADD: return x1+x2;
+        case OperatorCode::SUB: return x1-x2;
+        case OperatorCode::MUL: return x1*x2;
+        case OperatorCode::DIV: return x1/x2;
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on two real arguments.");
     }
 }
 
 Integer _compute(OperatorCode op, const Integer& z) {
     switch(op) {
-        case POS: return +z;
-        case NEG: return -z;
+        case OperatorCode::POS: return +z;
+        case OperatorCode::NEG: return -z;
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one integer argument.");
     }
 }
@@ -283,13 +283,13 @@ Integer _compute(OperatorCode op, const Integer& z) {
 template<class X>
 X _compute(OperatorCode op, const X& x) {
     switch(op) {
-        case NEG: return -x;
-        case REC: return 1/x;
-        case EXP: return exp(x);
-        case LOG: return log(x);
-        case SIN: return sin(x);
-        case COS: return cos(x);
-        case TAN: return cos(x);
+        case OperatorCode::NEG: return -x;
+        case OperatorCode::REC: return 1/x;
+        case OperatorCode::EXP: return exp(x);
+        case OperatorCode::LOG: return log(x);
+        case OperatorCode::SIN: return sin(x);
+        case OperatorCode::COS: return cos(x);
+        case OperatorCode::TAN: return cos(x);
         default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one real argument.");
     }
 }
@@ -298,8 +298,8 @@ X _compute(OperatorCode op, const X& x) {
 
 String evaluate(const Expression<String>& e, const StringValuation& x) {
     switch(e.op()) {
-        case CNST: return e.val();
-        case VAR: return x[e.var()];
+        case OperatorCode::CNST: return e.val();
+        case OperatorCode::VAR: return x[e.var()];
         default: ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" to a String using variables "<<x);
     }
 }
@@ -364,15 +364,15 @@ template<class I, class X> inline const Expression<X>& _substitute_variable(cons
 
 template<class X, class I, class Y> Expression<X> substitute(const Expression<X>& e, const I& v, const Expression<Y>& s) {
     switch(e.kind()) {
-        case COMPARISON: {
+        case OperatorKind::COMPARISON: {
             Y* yptr=0;
             const Expression<Y>& c1=e.cmp1(yptr);
             const Expression<Y>& c2=e.cmp2(yptr);
             return make_expression<X>(e.op(),substitute(c1,v,s),substitute(c2,v,s)); }
-        case BINARY: return make_expression<X>(e.op(),substitute(e.arg1(),v,s),substitute(e.arg2(),v,s));
-        case UNARY: return make_expression<X>(e.op(),substitute(e.arg(),v,s));
-        case NULLARY: return make_expression<X>(e.val());
-        case VARIABLE: return _substitute_variable(e.var(),v,e,s);
+        case OperatorKind::BINARY: return make_expression<X>(e.op(),substitute(e.arg1(),v,s),substitute(e.arg2(),v,s));
+        case OperatorKind::UNARY: return make_expression<X>(e.op(),substitute(e.arg(),v,s));
+        case OperatorKind::NULLARY: return make_expression<X>(e.val());
+        case OperatorKind::VARIABLE: return _substitute_variable(e.var(),v,e,s);
         default: ARIADNE_FAIL_MSG("Cannot substitute "<<s<<" for a named variable "<<v<<" in an unknown expression "<<e<<"\n");
     }
 }
@@ -410,37 +410,37 @@ template<class X> inline Expression<X> _simplify(const Expression<X>& e) {
 template<class I> inline Expression<Real> _simplify(const Expression<Real>& e) {
     typedef Real R;
 
-    if(e.kind() == UNARY) {
+    if(e.kind() == OperatorKind::UNARY) {
         Expression<R> sarg=simplify(e.arg());
-        if(sarg.op()==CNST) {
+        if(sarg.op()==OperatorCode::CNST) {
             return Expression<R>(compute(e.op(),sarg.val()));
         } else {
             return make_expression<R>(e.op(),sarg);
         }
     }
 
-    if(e.kind() != BINARY) { return e; }
+    if(e.kind() != OperatorKind::BINARY) { return e; }
 
     Expression<R> sarg1=simplify(e.arg1());
     Expression<R> sarg2=simplify(e.arg2());
     Expression<R> zero(static_cast<R>(0));
     Expression<R> one(static_cast<R>(1));
     switch(e.op()) {
-        case ADD:
+        case OperatorCode::ADD:
             if(identical(sarg2,zero)) { return sarg1; }
             if(identical(sarg1,zero)) { return sarg2; }
             break;
-        case SUB:
+        case OperatorCode::SUB:
             if(identical(sarg2,zero)) { return sarg1; }
             if(identical(sarg1,zero)) { return -sarg2; }
             break;
-        case MUL:
+        case OperatorCode::MUL:
             if(identical(sarg1,zero)) { return sarg1; }
             if(identical(sarg2,zero)) { return sarg2; }
             if(identical(sarg1,one)) { return sarg2; }
             if(identical(sarg2,one)) { return sarg1; }
             break;
-        case DIV:
+        case OperatorCode::DIV:
             if(identical(sarg1,zero)) { return sarg1; }
             if(identical(sarg1,one)) { return rec(sarg2); }
             if(identical(sarg2,one)) { return sarg1; }
@@ -454,36 +454,36 @@ template<class I> inline Expression<Real> _simplify(const Expression<Real>& e) {
 template<class I> inline Expression<Tribool> _simplify(const Expression<Tribool>& e) {
     typedef Tribool T;
 
-    if( e.kind()==UNARY ) {
+    if( e.kind()==OperatorKind::UNARY ) {
         Expression<T> sarg=simplify(e.arg());
-        if(e.op()==NOT) {
-            if( sarg.op()==NOT ) {
+        if(e.op()==OperatorCode::NOT) {
+            if( sarg.op()==OperatorCode::NOT ) {
                 return sarg.arg();
             }
-            if( sarg.op()==CNST ) {
+            if( sarg.op()==OperatorCode::CNST ) {
                 return Expression<T>(compute(e.op(),sarg.val()));
             }
         }
         return make_expression<T>(e.op(),sarg);
     }
 
-    if( e.kind()==BINARY ) {
+    if( e.kind()==OperatorKind::BINARY ) {
         Expression<T> sarg1=simplify(e.arg1());
         Expression<T> sarg2=simplify(e.arg2());
-        if( sarg1.op()==CNST && sarg2.op()==CNST ) {
-            if(e.op()==AND) { return Expression<T>(sarg1.val() && sarg2.val()); }
-            if(e.op()==OR) { return Expression<T>(sarg1.val() || sarg2.val()); }
+        if( sarg1.op()==OperatorCode::CNST && sarg2.op()==OperatorCode::CNST ) {
+            if(e.op()==OperatorCode::AND) { return Expression<T>(sarg1.val() && sarg2.val()); }
+            if(e.op()==OperatorCode::OR) { return Expression<T>(sarg1.val() || sarg2.val()); }
             return Expression<T>(compute(e.op(),sarg1.val(),sarg2.val()));
-        } else if(sarg1.op()==CNST) {
-            if(e.op()==AND && sarg1.val()==true) { return sarg2; }
-            if(e.op()==AND && sarg1.val()==false) { return sarg1; }
-            if(e.op()==OR && sarg1.val()==true) { return sarg1; }
-            if(e.op()==OR && sarg1.val()==false) { return sarg2; }
-        } else if(sarg2.op()==CNST) {
-            if(e.op()==AND && sarg2.val()==true) { return sarg1; }
-            if(e.op()==AND && sarg2.val()==false) { return sarg2; }
-            if(e.op()==OR && sarg2.val()==true) { return sarg2; }
-            if(e.op()==OR && sarg2.val()==false) { return sarg1; }
+        } else if(sarg1.op()==OperatorCode::CNST) {
+            if(e.op()==OperatorCode::AND && sarg1.val()==true) { return sarg2; }
+            if(e.op()==OperatorCode::AND && sarg1.val()==false) { return sarg1; }
+            if(e.op()==OperatorCode::OR && sarg1.val()==true) { return sarg1; }
+            if(e.op()==OperatorCode::OR && sarg1.val()==false) { return sarg2; }
+        } else if(sarg2.op()==OperatorCode::CNST) {
+            if(e.op()==OperatorCode::AND && sarg2.val()==true) { return sarg1; }
+            if(e.op()==OperatorCode::AND && sarg2.val()==false) { return sarg2; }
+            if(e.op()==OperatorCode::OR && sarg2.val()==true) { return sarg2; }
+            if(e.op()==OperatorCode::OR && sarg2.val()==false) { return sarg1; }
         } else {
             return make_expression<T>(e.op(),sarg1,sarg2);
         }
@@ -506,24 +506,24 @@ template Expression<Tribool> simplify(const Expression<Tribool>& e);
 Expression<Real> indicator(Expression<Tribool> e, Sign sign) {
     Tribool value;
     switch(e.op()) {
-        case CNST:
+        case OperatorCode::CNST:
             value=( sign==POSITIVE ? e.val() : Tribool(!e.val()) );
             if(definitely(value)) { return Expression<Real>(+1); }
             else if(not possibly(value)) {  return Expression<Real>(-1); }
             else { return Expression<Real>(0); }
-        case VAR:
+        case OperatorCode::VAR:
             return Expression<Real>(Variable<Real>(e.var()));
-        case GEQ: case GT:
+        case OperatorCode::GEQ: case OperatorCode::GT:
             if(sign==POSITIVE) { return e.cmp1<Real>()-e.cmp2<Real>(); }
             else { return e.cmp2<Real>()-e.cmp1<Real>(); }
-        case LEQ: case LT:
+        case OperatorCode::LEQ: case OperatorCode::LT:
             if(sign==POSITIVE) { return e.cmp2<Real>()-e.cmp1<Real>(); }
             else { return e.cmp1<Real>()-e.cmp2<Real>(); }
-        case AND:
+        case OperatorCode::AND:
             return min(indicator(e.arg1(),sign),indicator(e.arg2(),sign));
-        case OR:
+        case OperatorCode::OR:
             return max(indicator(e.arg1(),sign),indicator(e.arg2(),sign));
-        case NOT:
+        case OperatorCode::NOT:
             return neg(indicator(e.arg(),sign));
         default:
             ARIADNE_FAIL_MSG("Cannot compute indicator function of expression " << e);
@@ -535,14 +535,14 @@ template<class R> Bool identical(const Expression<R>& e1, const Expression<R>& e
 {
     if(e1.node_ptr()==e2.node_ptr()) { return true; }
     if(e1.op()!=e2.op()) { return false; }
-    switch(e1.op()) {
-        case VARIABLE:
+    switch(e1.kind()) {
+        case OperatorKind::VARIABLE:
             return e1.var()==e2.var();
-        case NULLARY:
+        case OperatorKind::NULLARY:
             return same(e1.val(),e2.val());
-        case UNARY:
+        case OperatorKind::UNARY:
             return identical(e1.arg(),e2.arg());
-        case BINARY:
+        case OperatorKind::BINARY:
             return identical(e1.arg1(),e2.arg1()) && identical(e1.arg2(),e2.arg2());
         default:
             return false;
@@ -556,13 +556,13 @@ Bool opposite(Expression<Tribool> e1, Expression<Tribool> e2) {
     OperatorCode e1op;
     OperatorCode e2op;
     switch(e1.op()) {
-        case GEQ: case GT: e1op=GEQ; break;
-        case LEQ: case LT: e1op=LEQ; break;
+        case OperatorCode::GEQ: case OperatorCode::GT: e1op=OperatorCode::GEQ; break;
+        case OperatorCode::LEQ: case OperatorCode::LT: e1op=OperatorCode::LEQ; break;
         default: return false;
     }
     switch(e2.op()) {
-        case GEQ: case GT: e2op=GEQ; break;
-        case LEQ: case LT: e2op=LEQ; break;
+        case OperatorCode::GEQ: case OperatorCode::GT: e2op=OperatorCode::GEQ; break;
+        case OperatorCode::LEQ: case OperatorCode::LT: e2op=OperatorCode::LEQ; break;
         default: return false;
     }
 
@@ -602,11 +602,11 @@ Formula<Real> formula(const Expression<Real>& e, const Space<Real>& spc)
     typedef Real X;
     typedef Identifier I;
     switch(e.kind()) {
-        case SCALAR: return make_formula(e.op(),formula(e.arg(),spc),e.num());
-        case BINARY: return make_formula(e.op(),formula(e.arg1(),spc),formula(e.arg2(),spc));
-        case UNARY: return make_formula(e.op(),formula(e.arg(),spc));
-        case NULLARY: return Formula<X>::constant(e.val());
-        case VARIABLE: return Formula<X>::coordinate(spc.index(e.var()));
+        case OperatorKind::SCALAR: return make_formula(e.op(),formula(e.arg(),spc),e.num());
+        case OperatorKind::BINARY: return make_formula(e.op(),formula(e.arg1(),spc),formula(e.arg2(),spc));
+        case OperatorKind::UNARY: return make_formula(e.op(),formula(e.arg(),spc));
+        case OperatorKind::NULLARY: return Formula<X>::constant(e.val());
+        case OperatorKind::VARIABLE: return Formula<X>::coordinate(spc.index(e.var()));
         default: ARIADNE_FAIL_MSG("Cannot compute formula for expression "<<e.op()<<"of kind "<<e.kind()<<" in space "<<spc);
     }
 }

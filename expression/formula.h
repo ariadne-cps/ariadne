@@ -123,12 +123,12 @@ struct FormulaNode {
 
 template<class X> struct ConstantFormulaNode : public FormulaNode<X> {
     X val;
-    ConstantFormulaNode(const X& v) : FormulaNode<X>(CNST,NULLARY), val(v) { }
+    ConstantFormulaNode(const X& v) : FormulaNode<X>(OperatorCode::CNST,OperatorKind::NULLARY), val(v) { }
 };
 template<class X> struct IndexFormulaNode : public FormulaNode<X> {
     Index ind;
-    IndexFormulaNode(Nat i) : FormulaNode<X>(IND,COORDINATE), ind(i) { }
-    IndexFormulaNode(const Index& i) : FormulaNode<X>(IND,COORDINATE), ind(i) { }
+    IndexFormulaNode(Nat i) : FormulaNode<X>(OperatorCode::IND,OperatorKind::COORDINATE), ind(i) { }
+    IndexFormulaNode(const Index& i) : FormulaNode<X>(OperatorCode::IND,OperatorKind::COORDINATE), ind(i) { }
 };
 template<class X, class A=X> struct UnaryFormulaNode : public FormulaNode<X> {
     Formula<X> arg;
@@ -254,11 +254,11 @@ template<class X, class T> inline Formula<T> make_constant(const X& c, const Vec
 
 template<class X, class T> T evaluate(const Formula<X>& f, const Vector<T>& x) {
     switch(f.kind()) {
-        case COORDINATE: return x[f.ind()];
-        case NULLARY: return make_constant(f.val(),x);
-        case UNARY: return compute(f.op(),evaluate(f.arg(),x));
-        case BINARY: return compute(f.op(),evaluate(f.arg1(),x),evaluate(f.arg2(),x));
-        case SCALAR: return compute(f.op(),evaluate(f.arg(),x),f.num());
+        case OperatorKind::COORDINATE: return x[f.ind()];
+        case OperatorKind::NULLARY: return make_constant(f.val(),x);
+        case OperatorKind::UNARY: return compute(f.op(),evaluate(f.arg(),x));
+        case OperatorKind::BINARY: return compute(f.op(),evaluate(f.arg1(),x),evaluate(f.arg2(),x));
+        case OperatorKind::SCALAR: return compute(f.op(),evaluate(f.arg(),x),f.num());
         default: ARIADNE_FAIL_MSG("Cannot evaluate formula "<<f<<" on "<<x<<"; unknown operator "<<f.op()<<" of kind "<<f.kind()<<"\n");
     }
 }
@@ -269,11 +269,11 @@ template<class X, class T> const T& cached_evaluate(const Formula<X>& f, const V
     const FormulaNode<X>* fptr=f.node_ptr();
     if(cache.has_key(fptr)) { return cache.get(fptr); }
     switch(f.kind()) {
-        case VARIABLE: return insert( cache, fptr, x[f.ind()] );
-        case NULLARY: return insert( cache, fptr, make_constant(f.val(),x) );
-        case UNARY: return insert( cache, fptr, compute(f.op(),cached_evaluate(f.arg(),x,cache)) );
-        case BINARY: return insert( cache, fptr, compute(f.op(),cached_evaluate(f.arg1(),x,cache),cached_evaluate(f.arg2(),x,cache)) );
-        case SCALAR: return insert( cache, fptr, compute(f.op(),cached_evaluate(f.arg(),x,cache),f.num()) );
+        case OperatorKind::VARIABLE: return insert( cache, fptr, x[f.ind()] );
+        case OperatorKind::NULLARY: return insert( cache, fptr, make_constant(f.val(),x) );
+        case OperatorKind::UNARY: return insert( cache, fptr, compute(f.op(),cached_evaluate(f.arg(),x,cache)) );
+        case OperatorKind::BINARY: return insert( cache, fptr, compute(f.op(),cached_evaluate(f.arg1(),x,cache),cached_evaluate(f.arg2(),x,cache)) );
+        case OperatorKind::SCALAR: return insert( cache, fptr, compute(f.op(),cached_evaluate(f.arg(),x,cache),f.num()) );
         default: ARIADNE_FAIL_MSG("Cannot evaluate formula "<<f<<" on "<<x<<"; unknown operator "<<f.op()<<" of kind "<<f.kind()<<"\n");
     }
 }
@@ -296,34 +296,34 @@ template<class X, class T> Vector<T> cached_evaluate(const Vector< Formula<X> >&
 template<class X> Formula<X> derivative(const Formula<X>& f, Nat j)
 {
     switch(f.op()) {
-        case CNST:
+        case OperatorCode::CNST:
             return Formula<X>::constant(0);
-        case IND:
+        case OperatorCode::IND:
             if(f.ind()==j) { return Formula<X>::constant(1); }
             else { return Formula<X>::constant(0); }
-        case ADD:
+        case OperatorCode::ADD:
             return derivative(f.arg1(),j)+derivative(f.arg2(),j);
-        case SUB:
+        case OperatorCode::SUB:
             return derivative(f.arg1(),j)-derivative(f.arg2(),j);
-        case MUL:
+        case OperatorCode::MUL:
             return f.arg1()*derivative(f.arg2(),j)+derivative(f.arg1(),j)*f.arg2();
-        case DIV:
+        case OperatorCode::DIV:
             return derivative(f.arg1() * rec(f.arg2()),j);
-        case NEG:
+        case OperatorCode::NEG:
             return  - derivative(f.arg(),j);
-        case REC:
+        case OperatorCode::REC:
             return  - derivative(f.arg(),j) * rec(sqr(f.arg()));
-        case SQR:
+        case OperatorCode::SQR:
             return static_cast<X>(2) * derivative(f.arg(),j) * f.arg();
-        case EXP:
+        case OperatorCode::EXP:
             return derivative(f.arg(),j) * f.arg();
-        case LOG:
+        case OperatorCode::LOG:
             return derivative(f.arg(),j) * rec(f.arg());
-        case SIN:
+        case OperatorCode::SIN:
             return derivative(f.arg(),j) * cos(f.arg());
-        case COS:
+        case OperatorCode::COS:
             return -derivative(f.arg(),j) * sin(f.arg());
-        case TAN:
+        case OperatorCode::TAN:
             return derivative(f.arg(),j) * (static_cast<X>(1)-sqr(f.arg()));
         default:
             ARIADNE_THROW(std::runtime_error,"derivative(Formual<X>)",
@@ -334,35 +334,35 @@ template<class X> Formula<X> derivative(const Formula<X>& f, Nat j)
 //! \brief Write to an output stream
 template<class X> OutputStream& operator<<(OutputStream& os, const Formula<X>& f) {
     switch(f.op()) {
-        //case CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
-        case CNST:
+        //case OperatorCode::CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
+        case OperatorCode::CNST:
             os << f.val(); return os;
             //if(f.val()==0.0) { return os << 0.0; } if(abs(f.val())<1e-4) { os << std::fixed << f.val(); } else { os << f.val(); } return os;
-        case IND:
+        case OperatorCode::IND:
             return os << "x" << f.ind();
-        case ADD:
+        case OperatorCode::ADD:
             return os << f.arg1() << '+' << f.arg2();
-        case SUB:
+        case OperatorCode::SUB:
             os << f.arg1() << '-';
-            switch(f.arg2().op()) { case ADD: case SUB: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
+            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
             return os;
-        case MUL:
-            switch(f.arg1().op()) { case ADD: case SUB: case DIV: os << '(' << f.arg1() << ')'; break; default: os << f.arg1(); }
+        case OperatorCode::MUL:
+            switch(f.arg1().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::DIV: os << '(' << f.arg1() << ')'; break; default: os << f.arg1(); }
             os << '*';
-            switch(f.arg2().op()) { case ADD: case SUB: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
+            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
             return os;
-        case DIV:
-            switch(f.arg1().op()) { case ADD: case SUB: case DIV: os << '(' << f.arg1() << ')'; break; default: os << f.arg1(); }
+        case OperatorCode::DIV:
+            switch(f.arg1().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::DIV: os << '(' << f.arg1() << ')'; break; default: os << f.arg1(); }
             os << '/';
-            switch(f.arg2().op()) { case ADD: case SUB: case MUL: case DIV: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
+            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::MUL: case OperatorCode::DIV: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
             return os;
-        case POW:
+        case OperatorCode::POW:
             return os << "pow" << '(' << f.arg() << ',' << f.num() << ')';
         default:
             switch(f.kind()) {
-                case UNARY: return os << f.op() << "(" << f.arg() << ")";
-                case BINARY: return os << f.op() << "(" << f.arg1() << "," << f.arg2() << ")";
-                case COMPARISON: return os << "(" << f.arg1() << symbol(f.op()) << f.arg2() << ")";
+                case OperatorKind::UNARY: return os << f.op() << "(" << f.arg() << ")";
+                case OperatorKind::BINARY: return os << f.op() << "(" << f.arg1() << "," << f.arg2() << ")";
+                case OperatorKind::COMPARISON: return os << "(" << f.arg1() << symbol(f.op()) << f.arg2() << ")";
                 default: ARIADNE_FAIL_MSG("Cannot output formula with operator "<<f.op()<<" of kind "<<f.kind()<<"\n");
             }
     }

@@ -665,7 +665,7 @@ ValidatedScalarFunction operator-(ValidatedScalarFunction const& f1, ValidatedSc
     if(f1p && f2p) {
         return ValidatedScalarFunctionModel(*f1p) - ValidatedScalarFunctionModel(*f2p);
     }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(SUB,f1,f2));
+    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(OperatorCode::SUB,f1,f2));
 }
 
 ValidatedScalarFunction operator-(ValidatedScalarFunction const& f, ValidatedNumber const& c) {
@@ -673,13 +673,13 @@ ValidatedScalarFunction operator-(ValidatedScalarFunction const& f, ValidatedNum
     if(fp) { return ValidatedScalarFunctionModel(*fp) - c; }
     std::shared_ptr<EffectiveScalarFunctionInterface const> rfp=std::dynamic_pointer_cast<EffectiveScalarFunctionInterface const>(f.managed_pointer());
     if(rfp && c.lower().raw()==c.upper().raw()) { return EffectiveScalarFunction(*rfp) - ExactFloat(c.lower().raw()); }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(SUB,f,ValidatedScalarFunction::constant(f.argument_size(),c)));
+    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(OperatorCode::SUB,f,ValidatedScalarFunction::constant(f.argument_size(),c)));
 }
 
 ValidatedScalarFunction operator-(ValidatedNumber const& c, ValidatedScalarFunction const& f) {
     std::shared_ptr<ValidatedScalarFunctionModelInterface const> fp=std::dynamic_pointer_cast<ValidatedScalarFunctionModelInterface const>(f.managed_pointer());
     if(fp) { return c - ValidatedScalarFunctionModel(*fp); }
-    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(SUB,ValidatedScalarFunction::constant(f.argument_size(),c),f));
+    return ValidatedScalarFunction(new BinaryFunction<ValidatedTag>(OperatorCode::SUB,ValidatedScalarFunction::constant(f.argument_size(),c),f));
 }
 
 ValidatedVectorFunction operator-(ValidatedVectorFunction const& f1, ValidatedVectorFunction const& f2) {

@@ -329,7 +329,7 @@ evaluate(const Expression<typename Logic<A>::Type>& e, const Map<Identifier,A>& 
         case OperatorKind::NULLARY: return static_cast<R>(e.val());
         case OperatorKind::UNARY: return compute(e.op(),evaluate(e.arg(),x));
         case OperatorKind::BINARY: return compute(e.op(),evaluate(e.arg1(),x),evaluate(e.arg2(),x));
-        case OperatorKind::COMPARISON: return compare<R>(e.op(),evaluate(e.cmp1(aptr),x),evaluate(e.cmp2(aptr),x));
+        case OperatorKind::COMPARISON: return compare(e.op(),evaluate(e.cmp1(aptr),x),evaluate(e.cmp2(aptr),x));
         default: ARIADNE_FAIL_MSG("Cannot evaluate expression "<<e<<" on "<<x<<"\n");
     }
 }

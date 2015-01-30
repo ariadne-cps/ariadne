@@ -94,11 +94,6 @@ template<class T, class U> struct IsExplicitlyConvertible : IsConstructible<U,T>
 template<class T, class U> struct IsNotExplicitlyConvertible : Not<IsConstructible<U,T>> { };
 template<class T, class U> struct IsStrictlyConvertible : And<IsConstructible<U,T>,IsNotConvertible<T,U>> { };
 
-struct Plus { template<class A1, class A2> auto operator() (A1 const& a1, A2 const& a2) -> decltype(a1+a2) { return a1+a2; } };
-struct Minus { template<class A1, class A2> auto operator() (A1 const& a1, A2 const& a2) -> decltype(a1-a2) { return a1-a2; } };
-struct Times { template<class A1, class A2> auto operator() (A1 const& a1, A2 const& a2) -> decltype(a1*a2) { return a1*a2; } };
-struct Divides { template<class A1, class A2> auto operator() (A1 const& a1, A2 const& a2) -> decltype(a1/a2) { return a1/a2; } };
-
 template<class OP> String op_name();
 template<> String op_name<Add>() { return "add"; }
 template<> String op_name<Sub>() { return "sub"; }

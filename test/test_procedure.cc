@@ -133,12 +133,12 @@ Void TestProcedure::test_construct_from_expansion()
 Void TestProcedure::test_evaluate()
 {
     ApproximateProcedure p;
-    p.new_unary_instruction(IND,0u);
-    p.new_unary_instruction(IND,1u);
-    p.new_power_instruction(POW,0u,2);
-    p.new_unary_instruction(SQR,1u);
-    p.new_binary_instruction(ADD,2ul,3ul);
-    p.new_unary_instruction(SQRT,4u);
+    p.new_unary_instruction(OperatorCode::IND,0u);
+    p.new_unary_instruction(OperatorCode::IND,1u);
+    p.new_power_instruction(OperatorCode::POW,0u,2);
+    p.new_unary_instruction(OperatorCode::SQR,1u);
+    p.new_binary_instruction(OperatorCode::ADD,2ul,3ul);
+    p.new_unary_instruction(OperatorCode::SQRT,4u);
     ARIADNE_TEST_PRINT(p);
 
     Vector<ApproximateFloat> x={3.0,4.0};
@@ -151,12 +151,12 @@ Void TestProcedure::test_propagate()
 {
     {
         ValidatedProcedure p;
-        p.new_unary_instruction(IND,0u);
-        p.new_unary_instruction(IND,1u);
-        p.new_unary_instruction(SQR,0u);
-        p.new_unary_instruction(SQR,1u);
-        p.new_binary_instruction(ADD,2u,3u);
-        p.new_unary_instruction(SQRT,4u);
+        p.new_unary_instruction(OperatorCode::IND,0u);
+        p.new_unary_instruction(OperatorCode::IND,1u);
+        p.new_unary_instruction(OperatorCode::SQR,0u);
+        p.new_unary_instruction(OperatorCode::SQR,1u);
+        p.new_binary_instruction(OperatorCode::ADD,2u,3u);
+        p.new_unary_instruction(OperatorCode::SQRT,4u);
         ARIADNE_TEST_PRINT(p);
 
         UpperBox x=ExactBox{ {0.25,2.0}, {0.5,3.0} };

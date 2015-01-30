@@ -211,8 +211,8 @@ template<class T> Void _propagate(Vector<T>& x, List<T>& v, const List<Procedure
 template<class X> SizeType _convert(List<ProcedureInstruction>& p, List<X>& c, const Formula<X>& f, Map<const Void*,SizeType>& cache) {
     if(cache.has_key(f.node_ptr())) { return cache[f.node_ptr()]; }
     switch(f.kind()) { // Can't use simple evaluate (above) as we need to pass the cache to subformulae
-        case OperatorKind::COORDINATE: p.append(ProcedureInstruction(IND,f.ind())); break;
-        case OperatorKind::NULLARY: p.append(ProcedureInstruction(CNST,c.size())); c.append(f.val()); break;
+        case OperatorKind::COORDINATE: p.append(ProcedureInstruction(OperatorCode::IND,f.ind())); break;
+        case OperatorKind::NULLARY: p.append(ProcedureInstruction(OperatorCode::CNST,c.size())); c.append(f.val()); break;
         case OperatorKind::BINARY:
             p.append(ProcedureInstruction(f.op(),_convert(p,c,f.arg1(),cache),_convert(p,c,f.arg2(),cache))); break;
         case OperatorKind::UNARY:
@@ -233,19 +233,19 @@ Void _write(OutputStream& os, const List<ProcedureInstruction>& p, const List<X>
         const ProcedureInstruction& instruction=p[i];
         os << "v[" << i << "]=";
         switch(instruction.op) {
-            case OperatorKind::CNST:
+            case OperatorCode::CNST:
                 os << c[instruction.arg]; break;
-            case OperatorKind::IND:
+            case OperatorCode::IND:
                 os << "x[" << instruction.arg << "]"; break;
-            case OperatorKind::ADD: case OperatorKind::SUB: case OperatorKind::MUL: case OperatorKind::DIV:
+            case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::MUL: case OperatorCode::DIV:
                 os << "v[" << instruction.arg1 << "]" << symbol(instruction.op) << "v[" << instruction.arg2 << "]"; break;
-            case OperatorKind::POW:
+            case OperatorCode::POW:
                 os<<"pow(v[" << instruction.arg << "],"<<instruction.np<<")"; break;
-            case OperatorKind::POS: case OperatorKind::NEG:
+            case OperatorCode::POS: case OperatorCode::NEG:
                 os << symbol(instruction.op) << "v[" << instruction.arg << "]"; break;
-            case OperatorKind::ABS: case OperatorKind::REC: case OperatorKind::SQR: case OperatorKind::SQRT:
-            case OperatorKind::EXP: case OperatorKind::LOG: case OperatorKind::SIN: case OperatorKind::COS: case OperatorKind::TAN:
-            case OperatorKind::ASIN: case OperatorKind::ACOS: case OperatorKind::ATAN:
+            case OperatorCode::ABS: case OperatorCode::REC: case OperatorCode::SQR: case OperatorCode::SQRT:
+            case OperatorCode::EXP: case OperatorCode::LOG: case OperatorCode::SIN: case OperatorCode::COS: case OperatorCode::TAN:
+            case OperatorCode::ASIN: case OperatorCode::ACOS: case OperatorCode::ATAN:
                 os << instruction.op << "(v[" << instruction.arg << "])"; break;
             default:   ARIADNE_FAIL_MSG("Unrecognised operator "<<instruction.op);
         }

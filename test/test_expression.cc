@@ -89,7 +89,7 @@ class TestExpression {
         Real uncertain_value = numeric_cast<Real>(ValidatedNumber(-1.0,1.0));
         valuation[x.name()] = uncertain_value;
 
-        ARIADNE_TEST_EQUALS(expr.kind(),VARIABLE);
+        ARIADNE_TEST_EQUALS(expr.kind(),OperatorKind::VARIABLE);
         ARIADNE_TEST_EQUALS(expr.var(),"x");
         ARIADNE_TEST_EQUALS(valuation[x.name()],uncertain_value);
 

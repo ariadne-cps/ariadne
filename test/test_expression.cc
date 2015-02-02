@@ -60,12 +60,10 @@ class TestExpression {
         Valuation<Real> v(ac);
 
         List< Assignment<Variable<Real>,Real> > lac;
-        lac = (x=z,y=o);
+        lac = {x=z,y=o};
         List< Assignment<Variable<Real>,Expression<Real> > > la;
-        la = (x=z,y=o);
-        ARIADNE_TEST_PRINT( la = ((x=z,y=o+x+y)) );
-        ARIADNE_TEST_PRINT( ((x=z,y=o+x+y)) );
-        ARIADNE_TEST_PRINT( ((x=z,y=o)) );
+        la = {x=z,y=o};
+        ARIADNE_TEST_PRINT( la );
         v = Valuation<Real>(lac);
         v = lac;
     }
@@ -106,30 +104,30 @@ class TestExpression {
         Real ty=Dyadic(2.375);
         Real tz=Dyadic(3.750);
 
-        Vector<Real> tv=Vector<Real>((tx,ty,tz));
+        Vector<Real> tv={tx,ty,tz};
 
-        RealConstant c("5",Dyadic(5.0));
+        RealConstant c("5",tc);
         RealVariable x("x");
         RealVariable y("y");
         RealVariable z("z");
 
         RealExpression e1=c;
-        EffectiveScalarFunction f1=make_function(e1,RealSpace((x,y,z)));
+        EffectiveScalarFunction f1=make_function(e1,RealSpace({x,y,z}));
         ARIADNE_TEST_PRINT(f1);
         ARIADNE_TEST_EQUAL(f1.evaluate(tv), tc);
 
         RealExpression e2=c+x;
-        EffectiveScalarFunction f2=make_function(e2,RealSpace((x,y,z)));
+        EffectiveScalarFunction f2=make_function(e2,RealSpace({x,y,z}));
         ARIADNE_TEST_PRINT(f2);
         ARIADNE_TEST_EQUAL(f2.evaluate(tv), tc+tx);
 
         RealExpression e3=c+x+c*y;
-        EffectiveScalarFunction f3=make_function(e3,(x,y,z));
+        EffectiveScalarFunction f3=make_function(e3,{x,y,z});
         ARIADNE_TEST_PRINT(f3);
         ARIADNE_TEST_EQUAL(f3.evaluate(tv), tc+tx+tc*ty);
 
         RealExpression e4=exp(c+x);
-        EffectiveScalarFunction f4=make_function(e4,(x,y,z));
+        EffectiveScalarFunction f4=make_function(e4,{x,y,z});
         ARIADNE_TEST_PRINT(f4);
         ARIADNE_TEST_EQUAL(f4.evaluate(tv), exp(tc+tx));
 

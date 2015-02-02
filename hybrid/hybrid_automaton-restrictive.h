@@ -73,6 +73,7 @@ template<class T> class FinitarySet
   public:
     FinitarySet() : _is_infinite(false), _set_or_complement() { }
     FinitarySet(const T& t) : _is_infinite(false), _set_or_complement() { _set_or_complement.insert(t); }
+    FinitarySet(const InitializerList<T>& s) : _is_infinite(false), _set_or_complement(s) { }
     FinitarySet(const Set<T>& s) : _is_infinite(false), _set_or_complement(s) { }
     FinitarySet(Bool c, const Set<T>& s) : _is_infinite(c), _set_or_complement(s) { }
     Bool is_finite() const { return !this->_is_infinite; }
@@ -82,8 +83,10 @@ template<class T> class FinitarySet
     Void adjoin(const FinitarySet<T>& set) { *this=join(*this,set); }
     Void restrict(const FinitarySet<T>& set) { *this=intersection(*this,set); }
 };
+template<class T> FinitarySet<T> complement(const InitializerList<T>& s) {
+    return complement(FinitarySet<T>(s)); }
 template<class T> FinitarySet<T> complement(const Set<T>& s) {
-    return FinitarySet<T>(true,s); }
+    return complement(FinitarySet<T>(s)); }
 template<class T> FinitarySet<T> complement(const FinitarySet<T>& s) {
     return FinitarySet<T>(!s.is_infinite(),s._underlying_set()); }
 template<class T> FinitarySet<T> difference(const FinitarySet<T>& s1,const FinitarySet<T>& s2) {
@@ -363,6 +366,7 @@ inline OutputStream& operator<<(OutputStream& os, const HybridSystem& hs) {
     return hs.write(os);
 }
 
+HybridSystem compose(const List<HybridSystem>& components);
 
 } // namespace Ariadne
 

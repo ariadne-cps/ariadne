@@ -150,6 +150,7 @@ class RealVariablesBox {
     Map<RealVariable,IntervalSet> _bounds;
   public:
     RealVariablesBox() : _bounds() { };
+    RealVariablesBox(const InitializerList<RealVariableInterval>& lst);
     RealVariablesBox(const List<RealVariableInterval>& lst);
     RealVariablesBox(const Map<RealVariable,IntervalSet>& bnds) : _bounds(bnds) { }
     RealVariablesBox(const RealSpace& spc, const BoxSet& bx);
@@ -212,6 +213,7 @@ class RealExpressionBoundedConstraintSet
     Map<RealVariable,IntervalSet> _bounds;
     List<ContinuousPredicate> _constraints;
   public:
+    RealExpressionBoundedConstraintSet(const InitializerList<RealVariableInterval>& domain);
     RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain);
     RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& domain, const List<ContinuousPredicate>& constraints);
     RealExpressionBoundedConstraintSet(const RealVariablesBox& box) : _bounds(box.bounds()) { }

@@ -129,16 +129,11 @@ template<class T> struct Space
             ARIADNE_ASSERT_MSG(_variables[i]!=v.name(),"Variable "<<v<<" is already a variable of the StateSpace "<<*this);
         }
         _variables.push_back(v.name()); return *this; }
-    //! \brief Append the named variable \a v to the variables defining the space.
-    Space<T>& operator,(const String& v) { return this->append(v); }
   private:
     List<Identifier> _variables;
 };
 
 template<class T> inline OutputStream& operator<<(OutputStream& os, const Space<T>& spc) { return os << spc.variables(); }
-
-template<class T> inline Space<T> operator,(const Identifier& v1, const Identifier& v2) {
-    Space<T> r; r,Variable<T>(v1),Variable<T>(v2); return r; }
 
 template<class T> inline Space<T> join(const Space<T>& spc1, const Space<T>& spc2) {
     Space<T> r(spc1); r.adjoin(spc2); return r; }

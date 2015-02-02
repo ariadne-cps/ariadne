@@ -157,11 +157,6 @@ class ConstrainedImageSet
     //! \brief Construct the image of \a dom under \a fn.
     ConstrainedImageSet(const BoxSet& dom, const EffectiveVectorFunction& fn) : _domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }
-    //! \brief Construct the image of \a dom under \a fn, using constraint \a c.
-    ConstrainedImageSet(const BoxSet& dom, const EffectiveVectorFunction& fn, const EffectiveConstraint& c) : _domain(dom), _function(fn), _constraints(1u,c) {
-        ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn);
-        ARIADNE_ASSERT_MSG(dom.size()==c.function().argument_size(),"dom="<<dom<<", c="<<c);
-    }
     //! \brief Construct the image of \a dom under \a fn, using constraints \a c.
     ConstrainedImageSet(const BoxSet& dom, const EffectiveVectorFunction& fn, const List<EffectiveConstraint>& c) : _domain(dom), _function(fn), _constraints(c) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }

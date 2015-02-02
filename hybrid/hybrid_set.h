@@ -141,11 +141,11 @@ class HybridBoundedConstraintSet
     HybridBoundedConstraintSet(const DiscreteLocation& loc,
                                    const RealVariablesBox& bx);
     HybridBoundedConstraintSet(const DiscreteLocation& loc,
-                                   const List<RealVariableInterval>& bnd);
+                                   const InitializerList<RealVariableInterval>& bnd);
     //! \brief Construct a set in a single \a location with a list of \a bounds on the variables and nonlinear \a constraints.
     HybridBoundedConstraintSet(const DiscreteLocation& location,
-                                   const List<RealVariableInterval>& bounds,
-                                   const List<ContinuousPredicate>& constraints);
+                                   const InitializerList<RealVariableInterval>& bounds,
+                                   const InitializerList<ContinuousPredicate>& constraints);
 
     DiscreteLocation location() const;
 
@@ -220,6 +220,7 @@ class HybridPoint
     HybridPoint(const DiscreteLocation& q, const Map<Identifier,ValueType>& val);
     HybridPoint(const DiscreteLocation& q, const Map<Identifier,Real>& val);
     HybridPoint(const DiscreteLocation& q, const List< Assignment<RealVariable,Real> >& val);
+    HybridPoint(const DiscreteLocation& q, const InitializerList< Assignment<RealVariable,Real> >& val);
     ExactPoint& point() { return this->continuous_set(); }
     const ExactPoint& point() const { return this->continuous_set(); }
     const ExactPoint& real_values() const { return this->continuous_set(); }

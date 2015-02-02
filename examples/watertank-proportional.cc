@@ -115,18 +115,18 @@ Int main(Int argc,char *argv[])
     DottedRealAssignment daperture_not( dot(aperture) = -aperture/r*(Kp*(Rif-water-error)-aperture) );
     DottedRealAssignment daperture_one( dot(aperture) = (1-aperture)/r );
 
-    DottedRealAssignments zero_saturated_dynamic((dwater,daperture_zero,dpressure,derror,dtime));
-    DottedRealAssignments not_saturated_dynamic((dwater,daperture_not,dpressure,derror,dtime));
-    DottedRealAssignments one_saturated_dynamic((dwater,daperture_one,dpressure,derror,dtime));
-    //RealVectorFunction notsaturated_d((-a*x+b*y,-y/r*(Kp*(Rif-x-delta)-y),zero,zero,one));
-    //RealVectorFunction onesaturated_d((-a*x+b*y,(1-y)/r,zero,zero,one));
+    DottedRealAssignments zero_saturated_dynamic({dwater,daperture_zero,dpressure,derror,dtime});
+    DottedRealAssignments not_saturated_dynamic({dwater,daperture_not,dpressure,derror,dtime});
+    DottedRealAssignments one_saturated_dynamic({dwater,daperture_one,dpressure,derror,dtime});
+    //RealVectorFunction notsaturated_d({-a*x+b*y,-y/r*(Kp*(Rif-x-delta)-y),zero,zero,one});
+    //RealVectorFunction onesaturated_d({-a*x+b*y,(1-y)/r,zero,zero,one});
 
     cout << "zero-saturated dynamic = " << zero_saturated_dynamic << "\n\n";
     cout << "not-saturated dynamic = " << not_saturated_dynamic << "\n\n";
     cout << "one-saturated dynamic = " << one_saturated_dynamic << "\n\n";
 
     /// Create the resets
-    PrimedRealAssignments reset_id((next(water)=water,next(aperture)=aperture,next(pressure)=pressure,next(error)=error,next(time)=time));
+    PrimedRealAssignments reset_id({next(water)=water,next(aperture)=aperture,next(pressure)=pressure,next(error)=error,next(time)=time});
     cout << "reset_id="<< reset_id << endl << endl;
 
     /// Create the guards.
@@ -184,7 +184,7 @@ Int main(Int argc,char *argv[])
     double skip_time = 35.0;
     HybridTime evolution_time(skip_time,6);
 
-    HybridScaling scaling( (water|0.25, aperture|1.0, pressure|1.0, error|1.0, time|1.0) );
+    HybridScaling scaling( {water|0.25, aperture|1.0, pressure|1.0, error|1.0, time|1.0} );
     HybridGrid hg(watertank_system.state_space(),scaling);
     HybridGridTreeSet hgts(hg);
     //Nat grid_depth = 9;
@@ -194,7 +194,7 @@ Int main(Int argc,char *argv[])
     for(double b=bmin ; b < bmax+bstep ; b += bstep) {
         for(double d=-Delta ; d < Delta+dstep ; d += dstep) {
             cout << "b = "<< b <<", Delta = "<<d<<std::endl;
-            RealVariablesBox initial_box((water==0, aperture==1, pressure==Real(b), error==Real(d), time==0));
+            RealVariablesBox initial_box({water==0, aperture==1, pressure==Real(b), error==Real(d), time==0});
             HybridSet initial_set(one_saturated,initial_box);
             OrbitType result = evolver.orbit(initial_set,evolution_time,UPPER_SEMANTICS);
             cout<<"Orbit.final=" << result.final() << endl;

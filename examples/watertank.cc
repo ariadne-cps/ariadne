@@ -109,18 +109,18 @@ Int main(Int argc, const char* argv[])
     cout << "start_opening_invariant=" << start_opening_invariant << endl << endl;
 
     /// Build the automaton
-    watertank_system.new_mode(opening,(tank_dynamic,valve_opening_dynamic));
-    watertank_system.new_mode(open,(tank_dynamic,valve_constant_dynamic));
-    watertank_system.new_mode(closing,(tank_dynamic,valve_closing_dynamic));
-    watertank_system.new_mode(closed,(tank_dynamic,valve_constant_dynamic));
+    watertank_system.new_mode(opening,{tank_dynamic,valve_opening_dynamic});
+    watertank_system.new_mode(open,{tank_dynamic,valve_constant_dynamic});
+    watertank_system.new_mode(closing,{tank_dynamic,valve_closing_dynamic});
+    watertank_system.new_mode(closed,{tank_dynamic,valve_constant_dynamic});
 
     watertank_system.new_invariant(open,start_closing_invariant,must_start_closing);
     watertank_system.new_invariant(closed,start_opening_invariant,must_start_opening);
 
-    watertank_system.new_transition(opening,finish_opening,open,(tank_reset,valve_open_reset),finish_opening_guard,urgent);
-    watertank_system.new_transition(open,start_closing,closing,(tank_reset,valve_reset),start_closing_guard,permissive);
-    watertank_system.new_transition(closing,finish_closing,closed,(tank_reset,valve_closed_reset),finish_closing_guard,urgent);
-    watertank_system.new_transition(closed,start_opening,opening,(tank_reset,valve_reset),start_opening_guard,permissive);
+    watertank_system.new_transition(opening,finish_opening,open,{tank_reset,valve_open_reset},finish_opening_guard,urgent);
+    watertank_system.new_transition(open,start_closing,closing,{tank_reset,valve_reset},start_closing_guard,permissive);
+    watertank_system.new_transition(closing,finish_closing,closed,{tank_reset,valve_closed_reset},finish_closing_guard,urgent);
+    watertank_system.new_transition(closed,start_opening,opening,{tank_reset,valve_reset},start_opening_guard,permissive);
 
     /// Finished building the automaton
 
@@ -145,7 +145,7 @@ Int main(Int argc, const char* argv[])
 
     //HybridSet initial_set(opening,(height==0.0, aperture==0.0));
     Dyadic eps(1.0/256);
-    HybridSet initial_set(opening,(0<=height<=eps, 0<=aperture<=eps));
+    HybridSet initial_set(opening,{0<=height<=eps, 0<=aperture<=eps});
     std::cout << "Initial set = " << initial_set << "\n" ;
     HybridTime evolution_time(80.0,10);
     std::cout << "Evolution time = "  << evolution_time << "\n" ;

@@ -48,13 +48,16 @@ class DiscreteLocation
     explicit DiscreteLocation(const Identifier& var, const String& val) : StringValuation() { this->insert(StringVariable(var),val); }
     explicit DiscreteLocation(const StringType& var, const StringType& val) : StringValuation() { this->insert(StringVariable(var),val); }
     explicit DiscreteLocation(const Int& num) : StringValuation() { this->insert(StringVariable("q"),to_str(num)); }
+    DiscreteLocation(const StringValuation& val) : StringValuation(val) { }
     DiscreteLocation(const DiscreteLocation&) = default;
     DiscreteLocation(const Map<Identifier,String>& sm) : StringValuation(sm) { }
+    DiscreteLocation(const Pair<StringVariable,String>& salst) : StringValuation({salst}) { }
+    DiscreteLocation(const InitializerList<Pair<StringVariable,String>>& salst) : StringValuation(salst) { }
     Void adjoin(const DiscreteLocation& loc) { this->_values.adjoin(loc._values); }
 };
 
 //! \relates DiscreteLocation \brief Combine the values of variables of two locations.
-DiscreteLocation operator,(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
+DiscreteLocation join(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
 Bool operator==(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
 Bool operator!=(const DiscreteLocation& loc1, const DiscreteLocation& loc2);
 Bool operator<(const DiscreteLocation& loc1, const DiscreteLocation& loc2);

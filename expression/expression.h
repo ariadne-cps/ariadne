@@ -144,30 +144,6 @@ class Expression {
 
 
 //@{
-//! \name List operations.
-//! \related Expression
-template<class T, class X> struct IsExpression;
-
-template<class T, class X> struct IsExpression : public False { };
-template<class T> struct IsExpression< T, T > : public True { };
-template<class T> struct IsExpression< T, Constant<T> > : public True { };
-template<class T> struct IsExpression< T, Variable<T> > : public True { };
-template<class T> struct IsExpression< T, Expression<T> > : public True { };
-
-template<class X1, class X2, EnableIf<And<IsExpression<Real,X1>,IsExpression<Real,X2>>> =dummy> inline
-List<Expression<Real>> operator,(const X1& e1, const X2& e2) {
-    List< Expression<Real> > r; r.append(e1); r.append(e2); return r; }
-
-template<class X, EnableIf<IsExpression<Real,X>> =dummy> inline
-List<Expression<Real>> operator,(Int c, const X& e) {
-    List< Expression<Real> > r; r.append(Expression<Real>::constant(c)); r.append(Expression<Real>(e)); return r; }
-
-template<class T, class X, EnableIf<IsExpression<T,X>> =dummy> inline
-List<Expression<T>> operator,(List<Expression<T>> l, const X& e) {
-    List< Expression<T> > r(l); r.append(Expression<T>(e)); return r; }
-//@}
-
-//@{
 //! \name Evaluation and related operations.
 //! \related Expression
 

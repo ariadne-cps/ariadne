@@ -202,6 +202,7 @@ template<class T> class Variable
     typedef Assignment< Variable<T>, T > ConstantAssignmentType;
   public:
     typedef Variable<T> BaseType;
+    typedef T ValueType;
     //! \brief Construct a variable with name \a nm.
     explicit Variable(const Identifier& nm) : ExtendedVariable<T>(nm) { }
     Variable<T> const& base() const { return *this; }
@@ -303,10 +304,6 @@ template<class T> inline PrimedVariable<T> prime(const Variable<T>& var) {
     return PrimedVariable<T>(var); }
 template<class T> inline PrimedVariable<T> next(const Variable<T>& var) {
     return prime(var); }
-
-template<class T> inline List< Variable<T> > operator,(const Variable<T>& v1, const Variable<T>& v2) {
-    List< Variable<T> > r; r.append(v1); r.append(v2); return r; }
-
 
 } // namespace Ariadne
 

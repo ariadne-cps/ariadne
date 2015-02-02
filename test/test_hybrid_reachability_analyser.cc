@@ -99,7 +99,7 @@ class TestHybridReachabilityAnalyser
         RealVariable x("x");
         RealVariable y("y");
         Real a(-0.5); Real b(1.0);
-        sys.new_mode(location,(dot(x)=-a*x-b*y,dot(y)=b*x+a*y) );
+        sys.new_mode(location,{dot(x)=-a*x-b*y,dot(y)=b*x+a*y} );
         cout << "Done building system\n";
         return sys;
     }
@@ -122,7 +122,7 @@ class TestHybridReachabilityAnalyser
           grid(2),
           bound(-4,4),
           reach_time(3.0,4),
-          axes(-1<=RealVariable("x")<=3,-2<=RealVariable("y")<=2)
+          axes({-1<=RealVariable("x")<=3,-2<=RealVariable("y")<=2})
     {
         analyser.verbosity=analyser_verbosity;
         DiscreteLocation location(StringVariable("q")|"1");
@@ -132,7 +132,7 @@ class TestHybridReachabilityAnalyser
 
         //ImageSet initial_box(make_box("[1.99,2.01]x[-0.01,0.01]"));
         Decimal x0l(2.01), x0u(2.02), y0l(0.01), y0u(0.02);
-        initial_set=HybridSet(location,(x.in(x0l,x0u),y.in(y0l,y0u)));
+        initial_set=HybridSet(location,{x.in(x0l,x0u),y.in(y0l,y0u)});
         cout << "Done creating initial set\n" << endl;
 
         cout << "system=" << system << endl;

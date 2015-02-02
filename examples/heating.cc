@@ -96,20 +96,20 @@ Int main(Int argc, const char* argv[])
     cerr<<"WARNING: Using different event labels for guard and invariant.\n";
     // Create the heater subsystem
     HybridAutomaton heater;
-    heater.new_mode( heating|on, (dot(T)=P+K*(Tav-Tamp*cos(2*pi*C)-T)) );
-    heater.new_mode( heating|off, (dot(T)=K*(Tav-Tamp*cos(2*pi*C)-T)) );
+    heater.new_mode( heating|on, {dot(T)=P+K*(Tav-Tamp*cos(2*pi*C)-T)} );
+    heater.new_mode( heating|off, {dot(T)=K*(Tav-Tamp*cos(2*pi*C)-T)} );
     heater.new_invariant( heating|off, T>=Ton_lower, must_switch_on );
-    heater.new_transition( heating|off, switch_on, heating|on, (next(T)=T), T<=Ton_upper, permissive );
+    heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, permissive );
     // Comment out above two lines and uncomment the line below to make the switch_on transition urgent
-    //heater.new_transition( heating|off, switch_on, heating|on, (next(T)=T), T<=Ton_upper, urgent );
-    heater.new_transition( heating|on, switch_off, heating|off, (next(T)=T), T>=Toff, urgent );
+    //heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, urgent );
+    heater.new_transition( heating|on, switch_off, heating|off, {next(T)=T}, T>=Toff, urgent );
 
     // Create the clock subsystem
     HybridAutomaton clock;
     clock.new_mode( (dot(C)=1) );
     clock.new_transition( midnight, next(C)=0, C>=1, urgent );
 
-    CompositeHybridAutomaton heating_system((clock,heater));
+    CompositeHybridAutomaton heating_system({clock,heater});
     cout << "heating_system=" << heating_system << "\n" << "\n";
 
     // Create the analyser classes
@@ -152,7 +152,7 @@ Int main(Int argc, const char* argv[])
     // Set the initial set.
     double r=1.0/1024; double Ti=16.25;
     Real Tinitmin(Ti+r); Real Tinitmax(Ti+3*r); Real Cinitmin(0+r); Real Cinitmax(0+3*r); // Tinit=16.0;
-    HybridSet initial_set(heating|off, (Tinitmin<=T<=Tinitmax,Cinitmin<=C<=Cinitmax) );
+    HybridSet initial_set(heating|off, {Tinitmin<=T<=Tinitmax,Cinitmin<=C<=Cinitmax} );
     cout << "initial_set=" << initial_set << endl;
     // Compute the initial set as a validated enclosure.
     HybridEnclosure initial_enclosure = evolver.enclosure(initial_set);
@@ -170,8 +170,8 @@ Int main(Int argc, const char* argv[])
 
     Real tmax=evolution_time.continuous_time();
     Real dTmin=Tmin.value(); Real dTmax=Tmax.value();
-    HybridBox guard(heating|off,(Ton_lower.value()<=T<=Ton_upper.value(),0<=C<=1,0<=t<=tmax));
-    HybridBox midnight_guard(heating|off,(dTmin<=T<=dTmax,0<=C<=1,1<=t<=2));
+    HybridBox guard(heating|off,{Ton_lower.value()<=T<=Ton_upper.value(),0<=C<=1,0<=t<=tmax});
+    HybridBox midnight_guard(heating|off,{dTmin<=T<=dTmax,0<=C<=1,1<=t<=2});
     cout << "\nPlotting time trace of orbit... " << flush;
     plot("heating-orbit-time.png",Axes2d(0<=t<=tmax,dTmin<=T<=dTmax), midnight_guard_colour, midnight_guard, guard_colour, guard, series_orbit_colour, series_orbit);
     cout << "done." << endl << endl;

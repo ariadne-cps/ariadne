@@ -903,7 +903,7 @@ Void CompositeHybridAutomaton::_cache_mode(DiscreteLocation location) const
             target_iter!=component_mode._targets.end(); ++target_iter)
         {
             DiscreteLocation& target=result._targets[target_iter->first];
-            target=(target,target_iter->second);
+            target=join(target,target_iter->second);
         }
 
         for(Map<DiscreteEvent,List<PrimedRealAssignment> >::ConstIterator reset_iter=component_mode._resets.begin();

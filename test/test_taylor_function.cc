@@ -255,7 +255,7 @@ Void TestScalarTaylorFunction::test_antiderivative()
     // We should have f(c,s)=0 for all x1
     ScalarTaylorFunction s = ScalarTaylorFunction::coordinate({dom[1]},0u,swp);
     ScalarTaylorFunction c = ScalarTaylorFunction::constant(s.domain(),2.0_exact,swp);
-    ScalarTaylorFunction h=compose(g,VectorTaylorFunction((c,s)));
+    ScalarTaylorFunction h=compose(g,VectorTaylorFunction({c,s}));
 
     Vector<ExactInterval> hdom=h.domain();
     Vector<ValidatedFloat> domv(reinterpret_cast<Vector<ValidatedFloat>const&>(hdom));
@@ -345,7 +345,7 @@ Void TestVectorTaylorFunction::test_constructors()
     ExactBox domain={{0.25,1.25},{0.5,1.0}};
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
     Real a(1.5); Real b(0.25);
-    EffectiveVectorFunction henon_function( (a-x[0]*x[0]+b*x[1], x[0]*1) );
+    EffectiveVectorFunction henon_function={a-x[0]*x[0]+b*x[1], x[0]*1};
     ARIADNE_TEST_CONSTRUCT(VectorTaylorFunction,henon_model,(domain,henon_function,swp));
     ARIADNE_TEST_EQUAL(henon_model.models()[0].expansion(),expansion[0])
     ARIADNE_TEST_EQUAL(henon_model.models()[1].expansion(),expansion[1])
@@ -396,7 +396,7 @@ Void TestVectorTaylorFunction::test_jacobian()
 {
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
     Real a(1.5); Real b(0.25);
-    EffectiveVectorFunction henon( (a-x[0]*x[0]+b*x[1], x[0]*1) );
+    EffectiveVectorFunction henon={a-x[0]*x[0]+b*x[1], x[0]*1};
     ExactBox domain1={{-1.0,+1.0},{-1.0,+1.0}};
     ExactBox domain2={{-0.5,+0.5},{-0.25,+0.25}};
     ExactBox domain3={{-0.25,+0.75},{0.0,+0.50}};
@@ -421,8 +421,7 @@ Void TestVectorTaylorFunction::test_compose()
     EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
     EffectiveVectorFunction henon_polynomial=(a-x*x+b*y)*e(2,0)+x*e(2,1);
     EffectiveVectorFunction henon_square_polynomial=
-        (a*(1-a)+b*x-2*a*b*y+2*a*x*x-b*b*y*y+2*b*x*x*y-x*x*x*x)*e(2,0)
-            + (a-x*x+b*y)*e(2,1);
+        {a*(1-a)+b*x-2*a*b*y+2*a*x*x-b*b*y*y+2*b*x*x*y-x*x*x*x, a-x*x+b*y};
     //    compose(henon_polynomial,henon_polynomial);
     ExactBox domain1={{0.25,1.25},{0.5,1.0}};
     ExactBox domain2={{-1.5,2.5},{0.25,1.25}};
@@ -516,7 +515,7 @@ Void TestVectorTaylorFunction::test_conversion()
     Vector<ApproximateFloat> apt(pt);
     EffectiveVectorFunction x=EffectiveVectorFunction::identity(2);
 
-    EffectiveVectorFunction h=EffectiveVectorFunction((1-x[0]*x[0]-x[1]/2,x[0]+Real(0)));
+    EffectiveVectorFunction h={1-x[0]*x[0]-x[1]/2,x[0]+Real(0)};
     VectorTaylorFunction th(D,h,swp);
 
     ARIADNE_TEST_PRINT(h);
@@ -539,7 +538,7 @@ Void TestVectorTaylorFunction::test_domain()
     EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(2,1);
 
     ExactBox D1={{-1.0,1.0},{-1.0,1.0}};
-    VectorTaylorFunction t1(D1, (o,x0+x1), swp);
+    VectorTaylorFunction t1(D1, {o,x0+x1}, swp);
     ARIADNE_TEST_PRINT(t1);
     ARIADNE_TEST_PRINT(t1.codomain());
     ExactBox D2={{1.0,1.0},{-2.0,2.0}};
@@ -579,7 +578,7 @@ Void TestVectorTaylorFunction::test_domain()
     ScalarTaylorFunction st41(D4, x1, swp);
     ARIADNE_TEST_PRINT(st40);
     ARIADNE_TEST_PRINT(st41);
-    VectorTaylorFunction t4(D4, (x0,x1), swp);
+    VectorTaylorFunction t4(D4, {x0,x1}, swp);
     ARIADNE_TEST_PRINT(t4);
 }
 

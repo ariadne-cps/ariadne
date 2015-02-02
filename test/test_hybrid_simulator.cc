@@ -70,10 +70,10 @@ TestHybridSimulator::system()
 
     HybridAutomaton automaton;
     Dyadic a(-0.5); Dyadic b(1.0); Dyadic cx1(3.0); Dyadic cx2(-1.0); Dyadic cz(1.0);
-    automaton.new_mode(location1,(dot(x)= a*x-b*y+cx1,dot(y)=b*x+a*y) );
-    automaton.new_mode(location2,(dot(x)= a*x-b*y+cx2,dot(y)=b*x+a*y,dot(z)=cz));
-    automaton.new_transition(location1,event3,location2,(next(x)=x,next(y)=y,next(z)=y),x>=1,urgent);
-    automaton.new_transition(location2,event4,location1,(next(x)=x,next(y)=y),x<=-1,urgent);
+    automaton.new_mode(location1,{dot(x)= a*x-b*y+cx1,dot(y)=b*x+a*y} );
+    automaton.new_mode(location2,{dot(x)= a*x-b*y+cx2,dot(y)=b*x+a*y,dot(z)=cz});
+    automaton.new_transition(location1,event3,location2,{next(x)=x,next(y)=y,next(z)=y},x>=1,urgent);
+    automaton.new_transition(location2,event4,location1,{next(x)=x,next(y)=y},x<=-1,urgent);
 
     cout << "Finished creating hybrid automaton." << endl;
 
@@ -106,7 +106,7 @@ Void TestHybridSimulator::test() const
     ARIADNE_TEST_PRINT(automaton);
 
     // Define the initial box
-    RealSpace space((x,y));
+    RealSpace space={x,y};
     ExactPoint initial_point = ExactPoint{-0.00, 0.50};
     cout << "initial_point=" << initial_point << endl;
     HybridPoint initial_hybrid_point(location1,space,initial_point);

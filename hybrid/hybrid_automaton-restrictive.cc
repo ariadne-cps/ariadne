@@ -193,9 +193,8 @@ Set<Var> duplicates(const List<Var>& variables) {
 
 
 
-DiscreteLocation operator,(const DiscreteLocation& loc1, const DiscreteLocation& loc2)
-{
-    return DiscreteLocation((loc1.values(),loc2.values()));
+DiscreteLocation join(const DiscreteLocation& loc1, const DiscreteLocation& loc2) {
+    return DiscreteLocation(join(loc1.values(),loc2.values()));
 }
 
 Bool operator==(const DiscreteLocation& q1, const DiscreteLocation& q2) {

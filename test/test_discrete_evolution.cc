@@ -78,7 +78,7 @@ Void TestMapEvolver::test() const
     {
         EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
         EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
-        henon = ( a-x*x+b*y, x );
+        henon = { a-x*x+b*y, x };
     }
     cout << "henon_function=" << henon << endl;
 

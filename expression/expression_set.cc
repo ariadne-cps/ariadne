@@ -101,6 +101,11 @@ OutputStream& operator<<(OutputStream& os, const RealVariableInterval& eivl) {
 }
 
 
+RealVariablesBox::RealVariablesBox(const InitializerList<RealVariableInterval>& lst)
+    : RealVariablesBox(List<RealVariableInterval>(lst))
+{
+}
+
 RealVariablesBox::RealVariablesBox(const List<RealVariableInterval>& lst)
 {
     for(Nat i=0; i!=lst.size(); ++i) {
@@ -190,6 +195,11 @@ OutputStream& operator<<(OutputStream& os, const RealExpressionConstraintSet& es
 }
 
 
+
+RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const InitializerList<RealVariableInterval>& bounds)
+    : RealExpressionBoundedConstraintSet(List<RealVariableInterval>(bounds))
+{
+}
 
 RealExpressionBoundedConstraintSet::RealExpressionBoundedConstraintSet(const List<RealVariableInterval>& bounds)
     : _bounds(make_key_value_map(bounds)), _constraints()

@@ -39,9 +39,6 @@
 using namespace Ariadne;
 using namespace std;
 
-inline Vector<ExactInterval> operator,(const ExactInterval& ivl1, const ExactInterval& ivl2) {
-    Vector<ExactInterval> r(2); r[0]=ivl1; r[1]=ivl2; return r; }
-
 inline EffectiveScalarFunction operator^(EffectiveScalarFunction f, Int m) { return pow(f,m); }
 //inline double operator^(double f, Nat m) { return pow(f,m); }
 
@@ -85,12 +82,12 @@ class TestIntegrator
     }
 
     Void test_constant_derivative() {
-        EffectiveVectorFunction f=(o*2,o*3);
+        EffectiveVectorFunction f={o*2,o*3};
         ARIADNE_TEST_PRINT(f);
-        ExactIntervalVector d=(ExactInterval(0.0,1.0),ExactInterval(-0.5,1.5));
+        ExactBox d={ExactInterval(0.0,1.0),ExactInterval(-0.5,1.5)};
         Float h=0.25;
         ValidatedVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
-        EffectiveVectorFunction expected_flow( (x0+2*t,y0+3*t) );
+        EffectiveVectorFunction expected_flow={x0+2*t,y0+3*t};
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
         ARIADNE_TEST_PRINT(flow.errors());
@@ -98,11 +95,11 @@ class TestIntegrator
     }
 
     Void test_quadratic_flow() {
-        EffectiveVectorFunction f=(o,x);
-        ExactIntervalVector d=(ExactInterval(0.0,1.0),ExactInterval(-0.5,1.5));
+        EffectiveVectorFunction f={o,x};
+        ExactBox d={ExactInterval(0.0,1.0),ExactInterval(-0.5,1.5)};
         Float h=0.25;
         ValidatedVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
-        EffectiveVectorFunction expected_flow( (x0+t,y0+x0*t+t*t/2) );
+        EffectiveVectorFunction expected_flow={x0+t,y0+x0*t+t*t/2};
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
@@ -111,11 +108,11 @@ class TestIntegrator
     }
 
     Void test_linear() {
-        EffectiveVectorFunction f=(x,-y);
-        ExactIntervalVector d=(ExactInterval(-0.25,0.25),ExactInterval(-0.25,0.25));
+        EffectiveVectorFunction f={x,-y};
+        ExactBox d={ExactInterval(-0.25,0.25),ExactInterval(-0.25,0.25)};
         Float h=0.25;
         ValidatedVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
-        EffectiveVectorFunction expected_flow( (x0*(1+t+t*t/2+t*t*t/6+t*t*t*t/24),y0*(1-t+t*t/2-t*t*t/6+t*t*t*t/24)) );
+        EffectiveVectorFunction expected_flow={x0*(1+t+t*t/2+t*t*t/6+t*t*t*t/24),y0*(1-t+t*t/2-t*t*t/6+t*t*t*t/24)};
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
@@ -125,11 +122,11 @@ class TestIntegrator
 
     Void test_spiral() {
         Real half(0.5);
-        EffectiveVectorFunction f=(-half*x-y,x-half*y);
-        ExactIntervalVector d=(ExactInterval(0.75,1.25),ExactInterval(-0.25,0.25));
+        EffectiveVectorFunction f={-half*x-y,x-half*y};
+        ExactBox d={ExactInterval(0.75,1.25),ExactInterval(-0.25,0.25)};
         Float h=0.25;
         ValidatedVectorFunctionModel flow=integrator_ptr->flow_step(f,d,h);
-        EffectiveVectorFunction expected_flow( (exp(-half*t)*(x0*cos(t)-y0*sin(t)),exp(-half*t)*(x0*sin(t)+y0*cos(t))) );
+        EffectiveVectorFunction expected_flow={exp(-half*t)*(x0*cos(t)-y0*sin(t)),exp(-half*t)*(x0*sin(t)+y0*cos(t))};
         ARIADNE_TEST_PRINT(f);
         ARIADNE_TEST_PRINT(flow);
         ARIADNE_TEST_PRINT(expected_flow);
@@ -159,9 +156,9 @@ class TestIntegrator
             +2*(x0^3)*(t^3)-1.16667*(x0^2)*(t^3)+0.166667*x0*(t^3)+(x0^3)*(t^2)-1.5*(x0^2)*(t^2)+0.5*x0*(t^2)-(x0^2)*t+x0*t+x0;
 
         //EffectiveVectorFunction f=(x*(o-x),o);
-        EffectiveVectorFunction f(1u,x*(o-x));
+        EffectiveVectorFunction f={x*(o-x)};
         //ExactIntervalVector d=(ExactInterval(0.25,0.5),ExactInterval(-0.25,0.25));
-        ExactIntervalVector d(1u,ExactInterval(0.25,0.5));
+        ExactBox d={ExactInterval(0.25,0.5)};
         Float h=0.5;
         //ExactIntervalVector d(1u,ExactInterval(-0.125,+0.125));
         //Float h=0.125;

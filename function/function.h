@@ -360,14 +360,6 @@ inline EffectiveScalarFunction VectorFunctionInterface<EffectiveTag>::operator[]
     return EffectiveScalarFunction(this->_get(i)); }
 
 
-inline List< EffectiveScalarFunction > operator,(const EffectiveNumber& c1, const EffectiveScalarFunction& sf2) {
-    return List< EffectiveScalarFunction >{EffectiveScalarFunction::constant(sf2.argument_size(),c1),sf2}; }
-inline List< EffectiveScalarFunction > operator,(const EffectiveScalarFunction& sf1, const EffectiveNumber& c2) {
-    return List< EffectiveScalarFunction >{sf1,EffectiveScalarFunction::constant(sf1.argument_size(),c2)}; }
-inline List< EffectiveScalarFunction > operator,(List< EffectiveScalarFunction > vf1, const EffectiveNumber& c2) {
-    vf1.append(EffectiveScalarFunction::constant(vf1.back().argument_size(),c2)); return std::move(vf1); }
-
-
 inline UpperInterval apply(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<UpperInterval>(f.evaluate(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
 inline UpperInterval evaluate(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {

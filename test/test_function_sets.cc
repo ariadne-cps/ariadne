@@ -56,10 +56,10 @@ class TestConstrainedImageSet
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
 
         BoxSet d(3,IntervalSet(-1,+2));
-        EffectiveConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
+        EffectiveConstrainedImageSet set(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
         set.new_space_constraint(x[0]+x[1]<=2);
-        set.apply((x[0]+x[1],x[0]-x[1]*x[1]));
+        set.apply({x[0]+x[1],x[0]-x[1]*x[1]});
     }
 
     Void test_geometry() {
@@ -74,21 +74,21 @@ class TestConstrainedImageSet
         Colour box_colour(1,0,1);
 
         // Test the polytope
-        EffectiveConstrainedImageSet polytope((IntervalSet(-2,+2),IntervalSet(-2,+2)),(x[0],x[1]));
+        EffectiveConstrainedImageSet polytope({{-2,+2},{-2,+2}},{x[0],x[1]});
         polytope.new_parameter_constraint(x[0]+Real(1.5)*+x[1]<=1);
-        box1=ExactBox( (ExactInterval(1.0,2.0),ExactInterval(0.5,1.0)) );
-        box2=ExactBox( (ExactInterval(0.0,1.0),ExactInterval(0.5,1.0)) );
+        box1=ExactBox( {ExactInterval(1.0,2.0),ExactInterval(0.5,1.0)} );
+        box2=ExactBox( {ExactInterval(0.0,1.0),ExactInterval(0.5,1.0)} );
         ARIADNE_TEST_ASSERT(polytope.separated(box1));
         //ARIADNE_TEST_ASSERT(polytope.overlaps(box2));
 
         plot("test_function_sets-geometry-polytope",widen(polytope.bounding_box(),0.5),set_colour,polytope,box_colour,box1,box_colour,box2);
 
         // Test the unit disc
-        EffectiveConstrainedImageSet disc((IntervalSet(-2,+2),IntervalSet(-2,+2)),(x[0],x[1]));
+        EffectiveConstrainedImageSet disc({IntervalSet(-2,+2),IntervalSet(-2,+2)},{x[0],x[1]});
         disc.new_parameter_constraint(x[0]*x[0]+x[1]*x[1]<=1);
-        box1=ExactBox( (ExactInterval(-0.5,0.5),ExactInterval(0.25,0.5)) );
-        box2=ExactBox( (ExactInterval(1,2),ExactInterval(0.5,1)) );
-        box3=ExactBox( (ExactInterval(0.75,2),ExactInterval(-1.0,-0.5)) );
+        box1=ExactBox( {ExactInterval(-0.5,0.5),ExactInterval(0.25,0.5)} );
+        box2=ExactBox( {ExactInterval(1,2),ExactInterval(0.5,1)} );
+        box3=ExactBox( {ExactInterval(0.75,2),ExactInterval(-1.0,-0.5)} );
         //ARIADNE_TEST_ASSERT(disc.overlaps(box1));
         ARIADNE_TEST_ASSERT(disc.separated(box2));
         //ARIADNE_TEST_ASSERT(disc.overlaps(box3));
@@ -96,9 +96,9 @@ class TestConstrainedImageSet
         plot("test_function_sets-geometry-disc",widen(disc.bounding_box(),0.5),set_colour,disc,box_colour,box1,box_colour,box2,box_colour,box3);
 
         // Test a one-dimensional parabolic set
-        EffectiveConstrainedImageSet parabola(BoxSet(1u,IntervalSet(-1,+1)),(p[0],p[0]*p[0]));
-        box1=ExactBox( (ExactInterval(0,0.5),ExactInterval(0.5,1)) );
-        box2=ExactBox( (ExactInterval(0.75,2),ExactInterval(0.5,1)) );
+        EffectiveConstrainedImageSet parabola({IntervalSet(-1,+1)},{p[0],p[0]*p[0]});
+        box1=ExactBox( {ExactInterval(0,0.5),ExactInterval(0.5,1)} );
+        box2=ExactBox( {ExactInterval(0.75,2),ExactInterval(0.5,1)} );
         ARIADNE_TEST_PRINT(parabola);
         ARIADNE_TEST_ASSERT(parabola.separated(box1));
         //ARIADNE_TEST_ASSERT(parabola.overlaps(box2));
@@ -109,7 +109,7 @@ class TestConstrainedImageSet
         Real half(0.5);
         BoxSet d(2,IntervalSet(-half,+half));
         Real a(1.5); Real b(0.375);
-        EffectiveVectorFunction h((a-x[0]*x[0]-b*x[1],x[0]));
+        EffectiveVectorFunction h={a-x[0]*x[0]-b*x[1],x[0]};
         EffectiveVectorFunction f=compose(h,h);
         EffectiveConstrainedImageSet set(d,f);
         set.new_parameter_constraint(0<=x[0]+x[1]<=1);
@@ -120,12 +120,12 @@ class TestConstrainedImageSet
         ARIADNE_TEST_PRINT(f(ExactPoint{0.375,-0.375}));
 
 
-        ValidatedConstrainedImageSet idisc(ExactBox({{-2.0,+2.0},{-2.0,+2.0}}),(x[0],x[1]));
+        ValidatedConstrainedImageSet idisc(ExactBox({{-2.0,+2.0},{-2.0,+2.0}}),{x[0],x[1]});
         idisc.new_parameter_constraint(x[0]*x[0]+x[1]*x[1]<=1);
-        box1=ExactBox( (ExactInterval(-0.5,0.5),ExactInterval(0.25,0.75)) );
-        box1=ExactBox( (ExactInterval(-0.5,0.75),ExactInterval(0.25,0.75)) );
-        box2=ExactBox( (ExactInterval(1,2),ExactInterval(0.5,1)) );
-        box3=ExactBox( (ExactInterval(0.75,2),ExactInterval(-1.0,-0.5)) );
+        box1=ExactBox( {ExactInterval(-0.5,0.5),ExactInterval(0.25,0.75)} );
+        box1=ExactBox( {ExactInterval(-0.5,0.75),ExactInterval(0.25,0.75)} );
+        box2=ExactBox( {ExactInterval(1,2),ExactInterval(0.5,1)} );
+        box3=ExactBox( {ExactInterval(0.75,2),ExactInterval(-1.0,-0.5)} );
         //ARIADNE_TEST_ASSERT(idisc.overlaps(box1));
         ARIADNE_TEST_ASSERT(idisc.separated(box2));
         //ARIADNE_TEST_ASSERT(idisc.overlaps(box3));
@@ -137,7 +137,7 @@ class TestConstrainedImageSet
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
 
         BoxSet d(3,IntervalSet(Decimal(-1.1),Decimal(+2.1)));
-        EffectiveConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
+        EffectiveConstrainedImageSet set(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
 
         Figure figure;
@@ -175,7 +175,7 @@ class TestConstrainedImageSet
         List<EffectiveScalarFunction> x=EffectiveScalarFunction::coordinates(2);
 
         BoxSet d(3,IntervalSet(-1,+2));
-        EffectiveConstrainedImageSet set(d,(s[0],s[0]*s[0]/4+s[1]+s[2]/2));
+        EffectiveConstrainedImageSet set(d,{s[0],s[0]*s[0]/4+s[1]+s[2]/2});
         set.new_parameter_constraint(0<=s[0]+s[1]<=1);
         set.new_space_constraint(x[0]+x[1]<=2.0);
         ARIADNE_TEST_PRINT(set);
@@ -194,8 +194,9 @@ class TestConstrainedImageSet
         EffectiveScalarFunction s2=EffectiveScalarFunction::coordinate(3,2);
         EffectiveScalarFunction x0=EffectiveScalarFunction::coordinate(2,0);
         EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(2,1);
+        EffectiveVectorFunction translation;
         BoxSet d(3,IntervalSet(-1,+1));
-        EffectiveConstrainedImageSet set(d,(s0,s1+s2*s2/2));
+        EffectiveConstrainedImageSet set(d,{s0,s1+s2*s2/2});
         set.new_parameter_constraint(s0+Real(0.75)*s1+s2<=Real(0));
 
         EffectiveConstrainedImageSet subset1,subset2;
@@ -209,10 +210,12 @@ class TestConstrainedImageSet
         make_lpair(subset11,subset12)=subset1.split(0);
         make_lpair(subset21,subset22)=subset2.split(0);
         ARIADNE_TEST_PRINT(subset11);
-        subset11.apply(EffectiveVectorFunction((x0+Real(2.5),x1)));
+        translation={x0-Real(2.5),x1};
+        subset11.apply(translation);
         ARIADNE_TEST_PRINT(subset11);
 
-        set.apply(EffectiveVectorFunction((x0-Real(2.5),x1)));
+        translation={x0-Real(2.5),x1};
+        set.apply(translation);
         Figure figure;
         figure.set_bounding_box(ExactBox({{-4.0,+4.0},{-4.0,+4.0}}));
         figure.set_fill_colour(1.0,1.0,1.0);
@@ -233,8 +236,8 @@ class TestConstrainedImageSet
     Void test_affine_approximation() {
         // Test conversionn is exact for the affine set -2<x<1; 0<y<2 3x+y<1
         List<EffectiveScalarFunction> s=EffectiveScalarFunction::coordinates(2);
-        BoxSet d( (IntervalSet(-2,1),IntervalSet(0,2)) );
-        EffectiveConstrainedImageSet set(d,(s[0],s[1]));
+        BoxSet d={IntervalSet(-2,1),IntervalSet(0,2)};
+        EffectiveConstrainedImageSet set(d,{s[0],s[1]});
         set.new_parameter_constraint(3*s[0]+s[1]<=1);
         ValidatedAffineConstrainedImageSet affine_set=set.affine_approximation();
         ARIADNE_TEST_PRINT(set);
@@ -301,8 +304,8 @@ class TestConstrainedImageSet
         EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
         Nat acc = 2u;
 
-        test_draw("ellipse",EffectiveConstrainedImageSet(BoxSet(2,IntervalSet(-1,1)),(2*s+t,s+t),(s*s+t*t<=0.75)),acc+1u);
-        //test_draw("concave",EffectiveConstrainedImageSet(ExactBox(2,-1.01,1.01,-1.01,1.01),(s,1.0*s*s+t),(2*s+0.25*s*s+t-2.0<=0)),acc);
+        test_draw("ellipse",EffectiveConstrainedImageSet(BoxSet(2,IntervalSet(-1,1)),{2*s+t,s+t},{s*s+t*t<=0.75}),acc+1u);
+        //test_draw("concave",EffectiveConstrainedImageSet(ExactBox(2,-1.01,1.01,-1.01,1.01),{s,1.0*s*s+t),(2*s+0.25*s*s+t-2.0<=0}),acc);
     }
 };
 

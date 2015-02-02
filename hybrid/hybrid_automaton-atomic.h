@@ -220,7 +220,7 @@ class AtomicHybridAutomaton
         return this->HybridAutomaton::write(os); }
 };
 
-inline DiscreteLocation operator|(const AtomicHybridAutomaton& ha, const AtomicDiscreteLocation& q) {
+inline Pair<StringVariable,String> operator|(const AtomicHybridAutomaton& ha, const AtomicDiscreteLocation& q) {
     return ha.variable() | q;
 }
 

@@ -56,9 +56,9 @@ Int main(Int argc, const char* argv[])
     cout << "event = " << bounce << endl << endl;
 
     /// Build the automaton
-    ball.new_mode(freefall,(dot(x)=v,dot(v)=-g));
+    ball.new_mode(freefall,{dot(x)=v,dot(v)=-g});
     ball.new_guard(freefall,bounce,x<=0,impact);
-    ball.new_update(freefall,bounce,freefall,(next(x)=x,next(v)=-a*v));
+    ball.new_update(freefall,bounce,freefall,{next(x)=x,next(v)=-a*v});
     /// Finished building the automaton
 
     cout << "Ball = " << ball << endl << endl;
@@ -84,7 +84,7 @@ Int main(Int argc, const char* argv[])
     // HybridSet initial_set(freefall,(2<=x<=2,v.in(0,0)));
     std::cout << "WARNING: Cannot compute on initial set with empty interior.";
     Real e(1.0/1024/1024);
-    HybridSet initial_set(freefall,(2-e<=x<=2+e,v.in(0-e,0+e)));
+    HybridSet initial_set(freefall,{2-e<=x<=2+e,v.in(0-e,0+e)});
     HybridTime evolution_time(1.5,4);
 
     std::cout << "Computing orbit... " << std::flush;

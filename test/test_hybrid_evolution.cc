@@ -103,8 +103,8 @@ Void TestHybridEvolution::test_bouncing_ball() const {
     RealVariable v("v");
 
     Real lambda(0.5);
-    bouncing_ball.new_mode(q,(dot(x)=v,dot(v)=-one));
-    bouncing_ball.new_transition(q,e,q,(next(x)=x,next(v)=-lambda*v),x<=0,impact);
+    bouncing_ball.new_mode(q,{dot(x)=v,dot(v)=-one});
+    bouncing_ball.new_transition(q,e,q,{next(x)=x,next(v)=-lambda*v},x<=0,impact);
     ARIADNE_TEST_PRINT(bouncing_ball);
 
     double height=2.0;
@@ -135,7 +135,7 @@ Void TestHybridEvolution::test_bouncing_ball() const {
     ARIADNE_TEST_PRINT(expected_orbit_final_bounding_box);
 
     Dyadic xl(-0.5), xu(+2.5), vl(-4.0), vu(+4.0);
-    Axes2d bounding_box(xl<=x<=xu,vl<=v<=vu);
+    Axes2d bounding_box={xl<=x<=xu,vl<=v<=vu};
     plot("test_hybrid_evolution-bouncing_ball",bounding_box,
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),
@@ -143,6 +143,7 @@ Void TestHybridEvolution::test_bouncing_ball() const {
          initial_set_colour,orbit.initial());
 }
 
+OutputStream& operator<<(OutputStream& os, Dot<Real> const& dv) { os << dv._lhs; }
 
 Void TestHybridEvolution::test_water_tank() const {
     // Declare some constants
@@ -171,21 +172,21 @@ Void TestHybridEvolution::test_water_tank() const {
     // Create the tank object
     HybridAutomaton watertank;
 
-    watertank.new_mode(open,dot((height,aperture))=(-lambda*height+rate*aperture,zero));
-    watertank.new_mode(closed,dot((height,aperture))=(-lambda*height+rate*aperture,zero));
-    watertank.new_mode(opening,dot((height,aperture))=(-lambda*height+rate*aperture,1/T));
-    watertank.new_mode(closing,dot((height,aperture))=(-lambda*height+rate*aperture,-1/T));
+    watertank.new_mode(open,dot({height,aperture})={-lambda*height+rate*aperture,zero});
+    watertank.new_mode(closed,dot({height,aperture})={-lambda*height+rate*aperture,zero});
+    watertank.new_mode(opening,dot({height,aperture})={-lambda*height+rate*aperture,1/T});
+    watertank.new_mode(closing,dot({height,aperture})={-lambda*height+rate*aperture,-1/T});
 
-    watertank.new_transition(closed,start_opening,opening,next((height,aperture))=(height,aperture),height<=hmin,urgent);
-    watertank.new_transition(open,start_closing,closing,next((height,aperture))=(height,aperture),height>=hmax,urgent);
-    watertank.new_transition(opening,finished_opening,open,next((height,aperture))=(height,aperture),aperture>=1,urgent);
-    watertank.new_transition(closing,finished_closing,closed,next((height,aperture))=(height,aperture),aperture<=0,urgent);
+    watertank.new_transition(closed,start_opening,opening,next({height,aperture})={height,aperture},height<=hmin,urgent);
+    watertank.new_transition(open,start_closing,closing,next({height,aperture})={height,aperture},height>=hmax,urgent);
+    watertank.new_transition(opening,finished_opening,open,next({height,aperture})={height,aperture},aperture>=1,urgent);
+    watertank.new_transition(closing,finished_closing,closed,next({height,aperture})={height,aperture},aperture<=0,urgent);
 
     ARIADNE_TEST_PRINT(watertank);
 
     DiscreteLocation initial_location=opening;
-    HybridBox initial_box(initial_location,(0<=height<=one/16,0<=aperture<=one/64));
-    HybridSet initial(initial_location,(0<=height<=one/16,0<=aperture<=one/64));
+    HybridBox initial_box(initial_location,{0<=height<=one/16,0<=aperture<=one/64});
+    HybridSet initial(initial_location,{0<=height<=one/16,0<=aperture<=one/64});
 
     //HybridTime evolution_time(80.0,5);
     HybridTime evolution_time(80.0,8);
@@ -193,7 +194,6 @@ Void TestHybridEvolution::test_water_tank() const {
     _set_evolver(watertank);
 
     evolver->configuration().set_maximum_step_size(1.0);
-
     Orbit<HybridEnclosure> orbit = evolver->orbit(initial,evolution_time,UPPER_SEMANTICS);
     if(orbit.final().size()!=1u) {
         ARIADNE_TEST_WARN("orbit.final().size()="<<orbit.final().size()<<"; expected 1. "
@@ -202,10 +202,10 @@ Void TestHybridEvolution::test_water_tank() const {
     HybridEnclosure final_enclosure=HybridEnclosure(*orbit.final().begin());
     ARIADNE_TEST_PRINT(final_enclosure.bounding_box());
     Dyadic ehl(7.6875), ehu(8.0); Decimal eal(0.999), eau(1.001); // Expected bounds
-    ARIADNE_TEST_BINARY_PREDICATE(inside,final_enclosure,HybridBox(open,(height.in(ehl,ehu),aperture.in(eal,eau))));
+    ARIADNE_TEST_BINARY_PREDICATE(inside,final_enclosure,HybridBox(open,{height.in(ehl,ehu),aperture.in(eal,eau)}));
 
     Decimal hl(-0.1), hu(+9.1), al(-0.3), au(+1.3);
-    Axes2d bounding_box(hl<=height<=hu, al<=aperture<=au);
+    Axes2d bounding_box={hl<=height<=hu, al<=aperture<=au};
     plot("test_hybrid_evolution-water_tank",bounding_box,
          reach_set_colour,orbit.reach(),
          intermediate_set_colour,orbit.intermediate(),

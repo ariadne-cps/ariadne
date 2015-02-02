@@ -206,11 +206,12 @@ DottedVariable<T>::operator=(D c) const {
 
 
 template<class T> struct Let {
-    const List< Variable<T> >& _lhs;
+    const List< Variable<T> > _lhs;
     Let(const List< Variable<T> >& lhs) : _lhs(lhs) { }
     List< Assignment<Variable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
 };
 template<class T> inline Let<T> let(const List<Variable<T> >& lhs) { return Let<T>(lhs); }
+template<class T> inline Let<T> let(const InitializerList<Variable<T> >& lhs) { return Let<T>(List<Variable<T>>(lhs)); }
 template<class T> inline List< Assignment<Variable<T>, Expression<T> > > Let<T>::operator=(const List<Expression<T> >& rhs) {
     assert(this->_lhs.size()==rhs.size());
     List< Assignment<Variable<T>,Expression<T> > > result;
@@ -219,11 +220,12 @@ template<class T> inline List< Assignment<Variable<T>, Expression<T> > > Let<T>:
 }
 
 template<class T> struct Dot {
-    const List< Variable<T> >& _lhs;
+    const List< Variable<T> > _lhs;
     Dot(const List< Variable<T> >& lhs) : _lhs(lhs) { }
     List< Assignment<DottedVariable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
 };
 template<class T> inline Dot<T> dot(const List<Variable<T> >& lhs) { return Dot<T>(lhs); }
+template<class T> inline Dot<T> dot(const InitializerList<Variable<T> >& lhs) { return Dot<T>(List<Variable<T>>(lhs)); }
 template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > Dot<T>::operator=(const List<Expression<T> >& rhs) {
     assert(this->_lhs.size()==rhs.size());
     List< Assignment<DottedVariable<T>,Expression<T> > > result;
@@ -232,11 +234,12 @@ template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > D
 }
 
 template<> struct Dot<Void> {
-    const List<Identifier>& _lhs;
+    const List<Identifier> _lhs;
     Dot(const List<Identifier>& lhs) : _lhs(lhs) { }
     template<class T> List< Assignment<DottedVariable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
 };
-inline Dot<Void> dot(const List<String>& lhs) { return Dot<Void>(lhs); }
+inline Dot<Void> dot(const List<Identifier>& lhs) { return Dot<Void>(lhs); }
+inline Dot<Void> dot(const InitializerList<Identifier>& lhs) { return Dot<Void>(lhs); }
 template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > Dot<Void>::operator=(const List<Expression<T> >& rhs) {
     List< Assignment<DottedVariable<T>,Expression<T> > > result;
     for(Nat i=0; i!=rhs.size(); ++i) { result.append(DottedVariable<T>(this->_lhs[i])=rhs[i]); }
@@ -244,20 +247,18 @@ template<class T> inline List< Assignment<DottedVariable<T>, Expression<T> > > D
 }
 
 template<class T> struct Primed {
-    const List< Variable<T> >& _lhs;
+    const List< Variable<T> > _lhs;
     Primed(const List< Variable<T> >& lhs) : _lhs(lhs) { }
     List< Assignment<PrimedVariable<T>, Expression<T> > > operator=(const List<Expression<T> >&);
-    List< Assignment<PrimedVariable<T>, Expression<T> > > operator=(const List<Variable<T> >&);
 };
 template<class T> inline Primed<T> next(const List<Variable<T> >& lhs) { return Primed<T>(lhs); }
+template<class T> inline Primed<T> next(const InitializerList<Variable<T> >& lhs) { return Primed<T>(List<Variable<T>>(lhs)); }
 template<class T> inline List< Assignment<PrimedVariable<T>, Expression<T> > > Primed<T>::operator=(const List<Expression<T> >& rhs) {
     assert(this->_lhs.size()==rhs.size());
     List< Assignment<PrimedVariable<T>,Expression<T> > > result;
     for(Nat i=0; i!=rhs.size(); ++i) { result.append(next(this->_lhs[i])=rhs[i]); }
     return result;
 }
-template<class T> inline List< Assignment<PrimedVariable<T>, Expression<T> > > Primed<T>::operator=(const List<Variable<T> >& rhs) {
-    return this->operator=(List<Expression<T> >(rhs)); }
 
 template<class LHS, class RHS> List<typename LHS::BaseType> left_hand_sides(const List<Assignment<LHS,RHS> >& assignments) {
     List<typename LHS::BaseType> result;
@@ -286,16 +287,6 @@ typedef List<DottedRealAssignment> DottedRealAssignments;
 typedef List<PrimedRealAssignment> PrimedRealAssignments;
 
 typedef Assignment<RealVariable,Real> RealConstantAssignment;
-
-inline List<RealAssignment> operator,(const List<RealAssignment>& la, const RealConstantAssignment& ac) { return operator,(la,RealAssignment(ac)); }
-inline List<RealAssignment> operator,(const List<RealConstantAssignment>& lac, const RealAssignment& a) { return operator,(List<RealAssignment>(lac),a); }
-inline List<RealAssignment> operator,(const RealConstantAssignment& ac, const RealAssignment& a) { return operator,(RealAssignment(ac),a); }
-inline List<RealAssignment> operator,(const RealAssignment& a, const RealConstantAssignment& ac) { return operator,(a,RealAssignment(ac)); }
-
-inline List<RealConstantAssignment> operator,(const List<RealConstantAssignment>& lac, const RealConstantAssignment& ac) {
-    List<RealConstantAssignment> r(lac); r.append(ac); return r; }
-inline List<RealConstantAssignment> operator,(const RealConstantAssignment& ac1, const RealConstantAssignment& ac2) {
-    List<RealConstantAssignment> r; r.append(ac1); r.append(ac2); return r; }
 
 } // namespace Ariadne
 

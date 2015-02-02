@@ -108,18 +108,18 @@ CompositeHybridAutomaton create_heating_system()
 
     // Create the heater subsystem
     HybridAutomaton heater;
-    heater.new_mode( heating|on, (dot(T)=P+K*(Tav-Tamp*cos(2*pi*C)-T)) );
-    heater.new_mode( heating|off, (dot(T)=K*(Tav-Tamp*cos(2*pi*C)-T)) );
+    heater.new_mode( heating|on, {dot(T)=P+K*(Tav-Tamp*cos(2*pi*C)-T)} );
+    heater.new_mode( heating|off, {dot(T)=K*(Tav-Tamp*cos(2*pi*C)-T)} );
     heater.new_invariant( heating|off, T>=Ton_lower, switch_on );
-    heater.new_transition( (heating|off), switch_on, (heating|on), (next(T)=T), T<=Ton_upper, permissive );
-    heater.new_transition( (heating|on), switch_off, heating|off, (next(T)=T), T>=Toff, urgent );
+    heater.new_transition( heating|off, switch_on, heating|on, {next(T)=T}, T<=Ton_upper, permissive );
+    heater.new_transition( heating|on, switch_off, heating|off, {next(T)=T}, T>=Toff, urgent );
 
     // Create the clock subsystem
     HybridAutomaton clock;
     clock.new_mode( (dot(C)=1.0) );
     clock.new_transition( midnight, next(C)=0, C>=1, urgent );
 
-    CompositeHybridAutomaton heating_system((clock,heater));
+    CompositeHybridAutomaton heating_system({clock,heater});
     std::cout << "heating_system=" << heating_system << "\n" << "\n";
 
     return heating_system;
@@ -157,7 +157,7 @@ Void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
     simulator.set_step_size(0.03125);
 
     // Set an initial point for the simulation
-    HybridPoint initial_point(heating_off, (C=0.0,T=18.0) );
+    HybridPoint initial_point(heating_off, {C=0.0,T=18.0} );
     cout << "initial_point=" << initial_point << endl;
     // Set the maximum simulation time
     HybridTime simulation_time(8.0,9);
@@ -178,7 +178,7 @@ Void compute_evolution(const CompositeHybridAutomaton& heating_system,const Gene
 
     // Set the initial set.
     Dyadic Tinit=17; Dyadic Cinit_max(1.0/1024);
-    HybridSet initial_set(heating_off, (T==Tinit,0<=C<=Cinit_max) );
+    HybridSet initial_set(heating_off, {T==Tinit,0<=C<=Cinit_max} );
     cout << "initial_set=" << initial_set << endl;
     // Compute the initial set as a validated enclosure.
     HybridEnclosure initial_enclosure = evolver.enclosure(initial_set);

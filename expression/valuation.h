@@ -49,11 +49,8 @@ namespace Ariadne {
 
 
 // Sequencing operators to make Valuation objects or objects convertible to Valuations.
-template<class X> inline Map<Identifier,X> operator|(const Variable<X>& v, const X& c) { Map<Identifier,X> r; r.insert(v.name(),c); return r; }
-template<class X> inline Map<Identifier,X> operator|(const Variable<X>& v, const Constant<X>& c) { Map<Identifier,X> r; r.insert(v.name(),c); return r; }
-template<class K, class V> inline  Map<K,V> operator,(const Map<K,V>& m1, const Map<K,V>& m2) {
-    Map<K,V> r=m1; for(typename Map<K,V>::ConstIterator iter=m2.begin(); iter!=m2.end(); ++iter) { r.insert(*iter); } return r; }
-Map<Identifier,String> inline operator|(const Variable<String>& v, const char* c) { return v|String(c); }
+template<class X> Pair<Variable<X>,X> operator|(const Variable<X>& v, const typename Variable<X>::ValueType& c) { return Pair<Variable<X>,X>(v,c); }
+template<class X> Pair<Variable<X>,X> operator|(const Variable<X>& v, const Constant<X>& c) { return Pair<Variable<X>,X>(v,c.value()); }
 
 template<class T, class X> class Valuation;
 typedef Valuation<Integer> IntegerValuation;
@@ -80,6 +77,7 @@ class Valuation
     Valuation(const Map<Identifier,ValueType>& m) : _values(m) { }
     Valuation(const Assignment<Variable<T>,X>& a);
     Valuation(const List<Assignment<Variable<T>,X> >& la);
+    Valuation(const InitializerList<Pair<Variable<T>,X> >& lst);
     Void insert(const Variable<Type>& v, const ValueType& s) { this->_values.insert(v.name(),s); }
     //! \brief Set the value associated with variable \a v to \a s.
     Void set(const Variable<Type>& v, const ValueType& s) { this->_values[v.name()]=s; }
@@ -213,6 +211,8 @@ template<class X> inline OutputStream& operator<<(OutputStream& os, const Valuat
 template<class V, class X> Valuation<V,X>::Valuation(const Assignment<Variable<V>,X>& a) { this->insert(a.lhs,a.rhs); }
 template<class V, class X> Valuation<V,X>::Valuation(const List<Assignment<Variable<V>,X> >& la) {
     for(Nat i=0; i!=la.size(); ++i) { this->insert(la[i].lhs,la[i].rhs); } }
+template<class V, class X> Valuation<V,X>::Valuation(const InitializerList<Pair<Variable<V>,X> >& la) {
+    for(auto iter=la.begin(); iter!=la.end(); ++iter) { this->insert(iter->first,iter->second); } }
 Boolean evaluate(const Expression<Boolean>&, const StringValuation&);
 String evaluate(const Expression<String>&, const StringValuation&);
 Integer evaluate(const Expression<Integer>&, const IntegerValuation&);

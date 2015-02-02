@@ -93,10 +93,7 @@ template<class T> inline List<T> catenate(const List<T>& l1, const T& t2) {
     r.append(t2);
     return r;
 }
-template<class T> inline List<T> operator,(const T& t1, const T& t2) {
-    List<T> v; v.push_back(t1); v.push_back(t2); return v; }
-template<class T> inline List<T> operator,(const std::vector<T>& v, const T& t) {
-    List<T> r(v); r.push_back(t); return r; }
+
 template<class T> OutputStream& operator<<(OutputStream& os, const std::vector<T>& v) {
     bool first=true;
     for(auto x : v) {
@@ -249,6 +246,8 @@ template<class K, class T> class Map : public std::map<K,T> {
         List<T> res; for(auto iter=this->begin(); iter!=this->end(); ++iter) {
             res.append(iter->second); } return res; }
 };
+template<class K, class T> inline Map<K,T> join(Map<K,T> m1, Map<K,T> const& m2) {
+    m1.adjoin(m2); return std::move(m1); }
 template<class I, class X, class J> inline X& insert(Map<I,X>& m, const J& k, const X& v) {
     return m.std::template map<I,X>::insert(std::make_pair(k,v)).first->second; }
 template<class K, class T> Map<K,T> restrict_keys(const std::map<K,T>& m, const std::set<K>& k) {

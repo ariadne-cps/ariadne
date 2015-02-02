@@ -38,12 +38,12 @@ using namespace Ariadne;
 Int main(Int argc, char **argv) {
     StringVariable q("q");
     RealVariable x("x"),y("y"),z("z");
-    DiscreteLocation location((q|"1"));
-    HybridBox hbx1(location,(0<=x<=1,2<=y<=3,5<=z<=7));
-    HybridBox hbx2(location,(x,y,z),ExactBox{{1.,2.},{3.,4.},{6.,8.}});
+    DiscreteLocation location({q|"1"});
+    HybridBox hbx1(location,{0<=x<=1,2<=y<=3,5<=z<=7});
+    HybridBox hbx2(location,{x,y,z},ExactBox{{1.,2.},{3.,4.},{6.,8.}});
 
     HybridFigure hfig;
-    hfig.set_locations((location));
+    hfig.set_locations({location});
     hfig.set_bounds(x,-8,8);
     hfig.set_bounds(y,-8,8);
     hfig.set_bounds(z,-8,8);

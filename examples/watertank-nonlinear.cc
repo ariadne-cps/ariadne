@@ -129,13 +129,13 @@ Int main()
     /// Create the dynamics
 
     /// The dynamic for an opening valve
-    DottedRealAssignments opening_dynamic = ( dot(height)=-a*sqrt(height)+b*aperture, dot(aperture)=1/T );
+    DottedRealAssignments opening_dynamic = { dot(height)=-a*sqrt(height)+b*aperture, dot(aperture)=1/T };
     /// The dynamic for a closing valve
-    DottedRealAssignments closing_dynamic = ( dot(height)=-a*sqrt(height)+b*aperture, dot(aperture)=-1/T );
+    DottedRealAssignments closing_dynamic = { dot(height)=-a*sqrt(height)+b*aperture, dot(aperture)=-1/T };
     /// The dynamic for an opened valve
-    DottedRealAssignments open_dynamic = ( dot(height)=-a*sqrt(height)+b, dot(aperture)=zero );
+    DottedRealAssignments open_dynamic = { dot(height)=-a*sqrt(height)+b, dot(aperture)=zero };
     /// The dynamic for an opened valve
-    DottedRealAssignments closed_dynamic = ( dot(height)=-a*sqrt(height), dot(aperture)=zero );
+    DottedRealAssignments closed_dynamic = { dot(height)=-a*sqrt(height), dot(aperture)=zero };
 
     cout << "opening dynamic = " << opening_dynamic << endl << endl;
     cout << "closing dynamic = " << closing_dynamic << endl << endl;
@@ -143,9 +143,9 @@ Int main()
     cout << "closed dynamic = " << closed_dynamic << endl << endl;
 
     /// Create the resets
-    PrimedRealAssignments reset_aperture_zero = ( next(height)=height, next(aperture)=0 );
+    PrimedRealAssignments reset_aperture_zero = { next(height)=height, next(aperture)=0 };
     cout << "reset_aperture_zero=" << reset_aperture_zero << endl << endl;
-    PrimedRealAssignments reset_aperture_one = ( next(height)=height, next(aperture)=1 );
+    PrimedRealAssignments reset_aperture_one = { next(height)=height, next(aperture)=1 };
     cout << "reset_aperture_one=" << reset_aperture_one << endl << endl;
 
     /// Create the guards.
@@ -234,7 +234,7 @@ Int main()
 
     std::cout << "Discretising orbit" << std::flush;
     Int depth = 3;
-    HybridScaling scaling( (height|1.0, aperture|0.125) );
+    HybridScaling scaling( {height|1.0, aperture|0.125} );
     HybridGrid grid(watertank_system.state_space(),scaling);
     HybridGridTreeSet hgts(grid);
     for (ListSet<HybridEnclosure>::ConstIterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)

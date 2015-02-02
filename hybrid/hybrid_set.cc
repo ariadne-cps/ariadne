@@ -216,6 +216,11 @@ HybridPoint::HybridPoint(const DiscreteLocation& q, const List<RealConstantAssig
     }
 }
 
+HybridPoint::HybridPoint(const DiscreteLocation& q, const InitializerList<RealConstantAssignment>& x)
+    : HybridPoint(q,List<RealConstantAssignment>(x))
+{
+}
+
 Map<RealVariable,ExactFloat> HybridPoint::values() const {
     Map<RealVariable,ExactFloat> r;
     for(Nat i=0; i!=this->space().dimension(); ++i) {
@@ -319,15 +324,15 @@ HybridBoundedConstraintSet::HybridBoundedConstraintSet()
 }
 
 HybridBoundedConstraintSet::HybridBoundedConstraintSet(const DiscreteLocation& loc,
-                                                               const List<RealVariableInterval>& bnd)
+                                                               const InitializerList<RealVariableInterval>& bnd)
     : _sets()
 {
     _sets.insert(loc,RealExpressionBoundedConstraintSet(bnd));
 }
 
 HybridBoundedConstraintSet::HybridBoundedConstraintSet(const DiscreteLocation& loc,
-                                                               const List<RealVariableInterval>& bnd,
-                                                               const List<ContinuousPredicate>& cnstr)
+                                                               const InitializerList<RealVariableInterval>& bnd,
+                                                               const InitializerList<ContinuousPredicate>& cnstr)
     : _sets()
 {
     _sets.insert(loc,RealExpressionBoundedConstraintSet(bnd,cnstr));

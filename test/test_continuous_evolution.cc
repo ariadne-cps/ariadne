@@ -118,7 +118,7 @@ Void TestContinuousEvolution::test() const
     Real mu=Dyadic(0.5);
     EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
     EffectiveScalarFunction xp=EffectiveScalarFunction::coordinate(2,1);
-    EffectiveVectorFunction vdp((x,mu*(1-x*x)*xp-x));
+    EffectiveVectorFunction vdp={x,mu*(1-x*x)*xp-x};
 
     VectorField vanderpol(vdp);
     ARIADNE_TEST_PRINT(vanderpol);
@@ -179,7 +179,7 @@ Void TestContinuousEvolution::failure_test() const
     EffectiveScalarFunction o=EffectiveScalarFunction::constant(2,1.0_q);
     EffectiveScalarFunction x=EffectiveScalarFunction::coordinate(2,0);
     EffectiveScalarFunction y=EffectiveScalarFunction::coordinate(2,1);
-    EffectiveVectorFunction failone=(o,-p*y+p);
+    EffectiveVectorFunction failone={o,-p*y+p};
     VectorField failone_vf(failone);
 
     VectorFieldEvolver evolverone(failone_vf,integrator);
@@ -219,7 +219,7 @@ Void TestContinuousEvolution::failure_test() const
     EffectiveScalarFunction x0=EffectiveScalarFunction::coordinate(3,0);
     EffectiveScalarFunction x1=EffectiveScalarFunction::coordinate(3,1);
     EffectiveScalarFunction x2=EffectiveScalarFunction::coordinate(3,1);
-    EffectiveVectorFunction failtwo=(o3,x1*x2/p,z3);
+    EffectiveVectorFunction failtwo={o3,x1*x2/p,z3};
     VectorField failtwo_vf(failtwo);
 
     VectorFieldEvolver evolvertwo(failtwo_vf,integrator);

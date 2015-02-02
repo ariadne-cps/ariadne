@@ -96,7 +96,7 @@ Void TestProcedure::test_construct_from_formula()
     ApproximateFormula xs=pow(x,2);
     ApproximateFormula ys=pow(y,2);
 
-    Vector< ApproximateFormula > f((sqrt(xs+ys), atan(y/x), xs-ys));
+    Vector< ApproximateFormula > f={sqrt(xs+ys), atan(y/x), xs-ys};
     ARIADNE_TEST_PRINT(f);
 
     ApproximateProcedure p0(f[0]);
@@ -171,7 +171,7 @@ Void TestProcedure::test_propagate()
     ValidatedFormula x(ValidatedFormula::coordinate(0));
     ValidatedFormula y(ValidatedFormula::coordinate(1));
 
-    Vector< ValidatedFormula > ff((sqrt(sqr(x)+sqr(y)),2*x-y));
+    Vector< ValidatedFormula > ff={sqrt(sqr(x)+sqr(y)),2*x-y};
     ARIADNE_TEST_PRINT(ff);
     Vector< ValidatedProcedure > pp(ff);
     ARIADNE_TEST_PRINT(pp);

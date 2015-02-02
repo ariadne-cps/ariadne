@@ -50,7 +50,7 @@ Int main()
     // The water level is always given by the same dynamic
     // The inflow is controlled by the valve aperture, the outflow depends on the
     // pressure, which is proportional to the water height.
-    tank.new_mode(draining,(dot(height)=-lambda*height+rate*aperture));
+    tank.new_mode(draining,{dot(height)=-lambda*height+rate*aperture});
 
     // Describe the valve model
 
@@ -70,11 +70,11 @@ Int main()
 
     // Since aperture is a known constant when the valve is open or closed,
     // specify aperture by an algebraic equation.
-    valve.new_mode(open,(aperture=+1.0));
-    valve.new_mode(closed,(aperture=-1.0));
+    valve.new_mode(open,{aperture=+1.0});
+    valve.new_mode(closed,{aperture=-1.0});
     // Specify the differential equation for how the valve opens/closes.
-    valve.new_mode(opening,(dot(aperture)=+1/T));
-    valve.new_mode(closing,(dot(aperture)=-1/T));
+    valve.new_mode(opening,{dot(aperture)=+1/T});
+    valve.new_mode(closing,{dot(aperture)=-1/T});
 
     // Specify the invariants valid in each mode. Note that every invariant
     // must have an action label. This is used internally, for example, to
@@ -86,10 +86,10 @@ Int main()
     //valve.new_invariant(closing,height>=hmin,start_opening);
     //valve.new_invariant(closing,aperture>=0.0,finished_closing);
 
-    valve.new_transition(closed,start_opening,opening,(next(aperture)=aperture),height<=hmin);
-    valve.new_transition(closing,start_opening,opening,(next(aperture)=aperture),height<=hmin);
-    valve.new_transition(open,start_closing,closing,(next(aperture)=aperture),height>=hmax);
-    valve.new_transition(opening,start_closing,closing,(next(aperture)=aperture),height>=hmax);
+    valve.new_transition(closed,start_opening,opening,{next(aperture)=aperture},height<=hmin);
+    valve.new_transition(closing,start_opening,opening,{next(aperture)=aperture},height<=hmin);
+    valve.new_transition(open,start_closing,closing,{next(aperture)=aperture},height>=hmax);
+    valve.new_transition(opening,start_closing,closing,{next(aperture)=aperture},height>=hmax);
 
     // Set the transitions for when the valve finished opening.
     // Since aperture is defined by an algebraic equation in the new mode,
@@ -97,7 +97,7 @@ Int main()
     valve.new_transition(opening,finished_opening,open,aperture>=1);
     valve.new_transition(closing,finished_closing,closed,aperture<=0);
 
-    CompositeHybridAutomaton watertank_system((tank,valve));
+    CompositeHybridAutomaton watertank_system({tank,valve});
     std::cout << "watertank_system:\n" << watertank_system << "\n";
 
     // Compute the system evolution
@@ -117,8 +117,8 @@ Int main()
     typedef GeneralHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 0.0" << std::endl;
-    DiscreteLocation initial_location=(tank|draining,valve|opening);
-    HybridSet initial_set((tank|draining,valve|opening),(height==0,aperture==0));
+    DiscreteLocation initial_location={tank|draining,valve|opening};
+    HybridSet initial_set({tank|draining,valve|opening},{height==0,aperture==0});
 
     HybridTime evolution_time(80.0,5);
 
@@ -141,6 +141,7 @@ Int main()
     std::cout << "Discretising orbit" << std::flush;
     HybridGrid grid(watertank_system.state_space());
     HybridGridTreeSet hgts(grid);
+
     for (ListSet<HybridEnclosure>::ConstIterator it = orbit.reach().begin(); it != orbit.reach().end(); it++)
     {
         std::cout<<"."<<std::flush;
@@ -148,6 +149,7 @@ Int main()
     }
     std::cout << "done." << std::endl;
 
+    // The following currently fails since auxiliary variables are not tracked
     plot("watertank_compositional-reach", height_aperture_axes, Colour(0.0,0.5,1.0), hgts);
 
 }

@@ -350,7 +350,7 @@ class HybridAutomaton
     }
 
     Void set_invariant(DiscreteLocation location,
-                       ContinuousPredicate const& invariant, 
+                       ContinuousPredicate const& invariant,
                        DiscreteEvent event) {
         DiscreteMode& mode=this->_modes.value(location);
         mode._invariants[event] = invariant;
@@ -366,9 +366,9 @@ class HybridAutomaton
         this->_new_guard_(location,event,guard,kind);
     }
 
-    Void set_guard(DiscreteLocation location, 
-                   DiscreteEvent event, 
-                   ContinuousPredicate const& guard, 
+    Void set_guard(DiscreteLocation location,
+                   DiscreteEvent event,
+                   ContinuousPredicate const& guard,
                    EventKind kind) {
         DiscreteMode& mode=this->_modes.value(location);
         mode._guards[event] = guard;
@@ -554,7 +554,7 @@ class HybridAutomaton
 
     //! \brief The function outputting the auxiliary variables \f$y=h(x)\f$ in the location.
     virtual EffectiveVectorFunction auxiliary_function(DiscreteLocation location) const;
-    //! \brief The function outputting the differential equations \f$\dot{x}=f(x)\f$ in the location.
+    //! \brief The function outputting the differential equations \f$\dt{x}=f(x)\f$ in the location.
     virtual EffectiveVectorFunction dynamic_function(DiscreteLocation location) const;
     //! \brief The invariant function \f$i(x)\leq 0\f$ corresponding to the given event.
     virtual EffectiveScalarFunction invariant_function(DiscreteLocation location, DiscreteEvent event) const;

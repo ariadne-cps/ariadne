@@ -132,6 +132,7 @@ class BoxSet {
     BoxSet() : _ary() { }
     explicit BoxSet(const Vector<ExactInterval>& iv);
     explicit BoxSet(Nat n) : _ary(n,IntervalSet()) { }
+    BoxSet(const InitializerList<IntervalSet>& t) : _ary(t.begin(),t.end()) { }
     BoxSet(const List<IntervalSet>& t) : _ary(t.begin(),t.end()) { }
     BoxSet(Nat n, const IntervalSet& ivl) : _ary(n,ivl) { }
     Nat size() const { return _ary.size(); }

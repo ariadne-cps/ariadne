@@ -41,6 +41,7 @@ typedef OutputStream OutputStream;
 
 namespace Ariadne {
 
+
 //! \ingroup HybridModule
 //! \brief A class which defines the state space grid to use in location \a loc given the continuous state variables \a spc.
 class HybridScalingInterface
@@ -66,6 +67,7 @@ class HybridScaling
     ExactFloat scaling(const DiscreteLocation& loc, const RealVariable& var) const { return this->_ptr->scaling(loc,var); }
   public:
     HybridScaling(const Map<Identifier,ExactFloat>& scalings);
+    HybridScaling(const InitializerList<Pair<RealVariable,Float>>& scalings);
 };
 
 class SimpleHybridScaling
@@ -75,6 +77,7 @@ class SimpleHybridScaling
   public:
     SimpleHybridScaling() : _scalings() { }
     SimpleHybridScaling(const Map<Identifier,ExactFloat>& scalings) : _scalings(scalings) { }
+    SimpleHybridScaling(const InitializerList<Pair<RealVariable,Float>>& scalings);
     Void set_scaling(const RealVariable& var, ExactFloat res) { ARIADNE_ASSERT(res>0.0); _scalings[var.name()]=res; }
     virtual SimpleHybridScaling* clone() const { return new SimpleHybridScaling(*this); }
     virtual ExactFloat scaling(const DiscreteLocation& loc, const RealVariable& var) const {
@@ -82,12 +85,20 @@ class SimpleHybridScaling
     virtual Void write(OutputStream& os) const { os << "HybridScaling( " << this->_scalings << " )"; }
 };
 
+inline Pair<RealVariable,Float> operator|(const RealVariable& var, Float scal) {
+    return Pair<RealVariable,Float>(var,scal); }
+
 inline HybridScaling::HybridScaling(const Map<Identifier,ExactFloat>& scalings)
     : _ptr(new SimpleHybridScaling(scalings)) { }
 
-inline Map<Identifier,ExactFloat> operator|(const RealVariable& var, double scal) {
-    Map<Identifier,ExactFloat> res; res.insert(var.name(),ExactFloat(scal)); return res; }
+inline HybridScaling::HybridScaling(const InitializerList<Pair<RealVariable,Float>>& scalings)
+    : _ptr(new SimpleHybridScaling(scalings)) { }
 
+inline SimpleHybridScaling::SimpleHybridScaling(const InitializerList<Pair<RealVariable,Float>>& scalings) {
+    for(auto iter=scalings.begin(); iter!=scalings.end(); ++iter) {
+        this->_scalings.insert(iter->first.name(),ExactFloat(iter->second));
+    }
+}
 
 }
 

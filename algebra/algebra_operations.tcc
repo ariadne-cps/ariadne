@@ -498,7 +498,7 @@ template<class A> int instantiate_transcendental() {
     auto sin_ptr  = (A(*)(A const&)) &sin;
     auto cos_ptr  = (A(*)(A const&)) &cos;
     auto tan_ptr  = (A(*)(A const&)) &tan;
-    auto atan_ptr  = (A(*)(A const&)) &tan;
+    auto atan_ptr  = (A(*)(A const&)) &atan;
 
     typedef std::size_t size_t;
     return (size_t)rec_ptr + (size_t)sqrt_ptr + (size_t)exp_ptr + (size_t)log_ptr

@@ -204,6 +204,7 @@ EffectiveScalarFunction log(const EffectiveScalarFunction&);
 EffectiveScalarFunction sin(const EffectiveScalarFunction&);
 EffectiveScalarFunction cos(const EffectiveScalarFunction&);
 EffectiveScalarFunction tan(const EffectiveScalarFunction&);
+EffectiveScalarFunction atan(const EffectiveScalarFunction&);
 
 
 

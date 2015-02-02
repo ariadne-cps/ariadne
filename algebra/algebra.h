@@ -185,6 +185,7 @@ template<class X> Algebra<X> log(const Algebra<X>& a) { return apply(Log(),a); }
 template<class X> Algebra<X> sin(const Algebra<X>& a) { return apply(Sin(),a); }
 template<class X> Algebra<X> cos(const Algebra<X>& a) { return apply(Cos(),a); }
 template<class X> Algebra<X> tan(const Algebra<X>& a) { return apply(Tan(),a); }
+template<class X> Algebra<X> atan(const Algebra<X>& a) { return apply(Atan(),a); }
 
 // FIXME: Eliminate use of clone with std::dynamic_pointer_cast
 template<class X, class OP> Algebra<X> apply(OP op, const Algebra<X>& a) {

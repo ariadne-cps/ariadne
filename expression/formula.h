@@ -213,6 +213,7 @@ template<class X> inline Formula<X> operator-(const Formula<X>& f1, const Formul
 template<class X> inline Formula<X> operator*(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(Mul(),f1,f2); }
 template<class X> inline Formula<X> operator/(const Formula<X>& f1, const Formula<X>& f2) { return make_formula(Div(),f1,f2); }
 
+template<class X> inline Formula<X> pos(const Formula<X>& f) { return make_formula(Pos(),f); }
 template<class X> inline Formula<X> neg(const Formula<X>& f) { return make_formula(Neg(),f); }
 template<class X> inline Formula<X> rec(const Formula<X>& f) { return make_formula(Rec(),f); }
 template<class X> inline Formula<X> sqr(const Formula<X>& f) { return make_formula(Sqr(),f); }

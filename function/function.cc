@@ -421,6 +421,9 @@ EffectiveScalarFunction cos(const EffectiveScalarFunction& f) {
 EffectiveScalarFunction tan(const EffectiveScalarFunction& f) {
     return make_unary_function(Tan(),f); }
 
+EffectiveScalarFunction atan(const EffectiveScalarFunction& f) {
+    return make_unary_function(Atan(),f); }
+
 
 
 

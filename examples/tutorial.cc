@@ -80,17 +80,17 @@ typedef GeneralHybridEvolver HybridEvolverType;
 CompositeHybridAutomaton create_heating_system()
 {
     // Set the system dynamic parameters
-    RealConstant P("P",4.0);
-    RealConstant K("K",1.0);
-    RealConstant Tav("Tav",16.0);
-    RealConstant Tamp("Tamp",8.0);
+    RealConstant P("P",4.0_decimal);
+    RealConstant K("K",1.0_decimal);
+    RealConstant Tav("Tav",16.0_decimal);
+    RealConstant Tamp("Tamp",8.0_decimal);
 
     // Set the system control parameters
-    RealConstant Tmax("Tmax",23.0);
-    RealConstant Tmin("Tmin",14.0);
-    RealConstant Toff("Toff",21.0);
-    RealConstant Ton_upper("Ton_upper",15.125);
-    RealConstant Ton_lower("Ton_lower",14.875);
+    RealConstant Tmax("Tmax",23.0_decimal);
+    RealConstant Tmin("Tmin",14.0_decimal);
+    RealConstant Toff("Toff",21.0_decimal);
+    RealConstant Ton_upper("Ton_upper",15.125_decimal);
+    RealConstant Ton_lower("Ton_lower",14.875_decimal);
 
     // Create the discrete states
     StringVariable heating("heating");

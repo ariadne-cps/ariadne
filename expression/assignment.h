@@ -107,7 +107,7 @@ template<class T>
 struct Assignment< Variable<T>, T>
 {
     Assignment(const Variable<T>& l, const T& r) : lhs(l), rhs(r) { }
-    operator Assignment< Variable<T>,Expression<T> > () const { return Assignment<Variable<T>,Expression<T> >(this->lhs,this->rhs); }
+    operator Assignment< Variable<T>,Expression<T> > () const { return Assignment<Variable<T>,Expression<T> >(this->lhs,Expression<T>::constant(this->rhs)); }
     operator List< Assignment<Variable<T>,T > >() const { return List< Assignment<Variable<T>,T > >(1u,*this); }
     operator List< Assignment<Variable<T>, Expression<T> > >() const { return List< Assignment<Variable<T>,Expression<T> > >(1u,*this); }
     const Variable<T>& variable() const { return this->lhs; }

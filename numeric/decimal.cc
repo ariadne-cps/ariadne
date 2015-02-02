@@ -31,9 +31,14 @@
 
 namespace Ariadne {
 
-Decimal operator"" _dec(long double x)
+Decimal operator"" _decimal(long double x)
 {
     return Decimal(static_cast<double>(x));
+}
+
+Decimal operator"" _dec(long double x)
+{
+    return operator"" _decimal(x);
 }
 
 Decimal::Decimal(double x)

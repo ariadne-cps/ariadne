@@ -42,7 +42,7 @@ class TestExpression {
     RealVariable x,y,z;
   public:
     TestExpression()
-        : o("1.0",1.0), x("x"), y("y"), z("z") {
+        : o("1.0",1.0_q), x("x"), y("y"), z("z") {
     }
 
     Void test_variables() {

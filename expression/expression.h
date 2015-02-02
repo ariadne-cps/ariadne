@@ -81,15 +81,7 @@ typedef Expression<Real> RealExpression;
 
 
 
-//@{
-//! \name Concrete expression classes.
-//! \related Expression
-
 template<class X> struct ExpressionNode;
-
-template<class D, class X, class T=Void> struct EnableIfDoubleReal { };
-template<class T> struct EnableIfDoubleReal<double,Real,T> { typedef T Type; };
-
 
 //! \ingroup ExpressionModule
 //! \brief A simple expression in named variables.
@@ -105,213 +97,85 @@ template<class T> struct EnableIfDoubleReal<double,Real,T> { typedef T Type; };
 //! \sa Variable \sa Assignment
 template<class T>
 class Expression {
-    typedef Identifier V;
+    typedef SharedPointer<const ExpressionNode<T>> Pointer;
   public:
-    typedef T ConstantType;
+    typedef T ValueType;
+    typedef Constant<T> ConstantType;
+    typedef Variable<T> VariableType;
   public:
-    explicit Expression(const ExpressionNode<T>* eptr) : _root(eptr) { }
-    explicit Expression(counted_pointer< const ExpressionNode<T> > eptr) : _root(eptr) { }
+    explicit Expression(SharedPointer<const ExpressionNode<T>> eptr) : _root(eptr) { }
   public:
-    //! \brief Construct the constant expression with the default value of \a T.
+    //! \brief Default expression is a constant with value \c 0.
     Expression();
-    //! \brief Construct a constant expression from a value.
+    //! \brief Construct an expression from a numerical value.
     Expression(const T& c);
-    //! \brief Construct an expression from a name.
-    Expression(const Identifier& v);
-    //! \brief Construct an expression from a constant.
+    //! \brief Construct an expression from a named constant.
     Expression(const Constant<T>& c);
     //! \brief Construct an expression from a variable.
     Expression(const Variable<T>& v);
     //! \brief Construct a constant expression from a value.
-    static Expression<T> constant(const T& v);
-
+    static Expression<T> constant(const ValueType& c);
+    //! \brief Construct an expression from a name.
+    static Expression<T> variable(const Identifier& c);
   public:
     const Operator& op() const;
     OperatorCode code() const;
     OperatorKind kind() const;
-    const T& val() const;
-    const V& var() const;
+    const ValueType& val() const;
+    const Identifier& var() const;
     const Expression<T>& arg() const;
     const Int& num() const;
     const Expression<T>& arg1() const;
     const Expression<T>& arg2() const;
     template<class A> const Expression<A>& cmp1(A* dummy=0) const;
     template<class A> const Expression<A>& cmp2(A* dummy=0) const;
+    friend OutputStream& operator<<(OutputStream& os, Expression<T> const& e) { return e._write(os); }
   public:
     //! \brief The variables needed to compute the expression.
     Set<UntypedVariable> arguments() const;
   public:
-    const ExpressionNode<T>* node_ptr() const { return _root.operator->(); }
+    SharedPointer<const ExpressionNode<T>> node_ptr() const { return _root; }
+    const ExpressionNode<T>* node_raw_ptr() const { return _root.operator->(); }
   private:
-    counted_pointer< const ExpressionNode<T> > _root;
+    OutputStream& _write(OutputStream& os) const;
+  private:
+    SharedPointer<const ExpressionNode<T>> _root;
 };
-
-
-template<class T>
-struct ExpressionNode {
-    mutable Nat count;
-    Operator op;
-    virtual ~ExpressionNode();
-    explicit ExpressionNode(const Operator& o) : count(0u), op(o) { }
-    explicit ExpressionNode(OperatorCode cd, OperatorKind knd) : count(0u), op(cd,knd) { }
-};
-
-template<class T> struct ConstantExpressionNode : public ExpressionNode<T> {
-    T val;
-    ConstantExpressionNode(const T& v) : ExpressionNode<T>(OperatorCode::CNST,OperatorKind::NULLARY), val(v) { }
-};
-template<class T> struct VariableExpressionNode : public ExpressionNode<T> {
-    Identifier var;
-    VariableExpressionNode(const Identifier& v) : ExpressionNode<T>(OperatorCode::VAR,OperatorKind::VARIABLE), var(v) { }
-};
-template<class T, class A=T> struct UnaryExpressionNode : public ExpressionNode<T> {
-    Expression<A> arg;
-    UnaryExpressionNode(const Operator& op, Expression<A> const& a) : ExpressionNode<T>(op), arg(a) { }
-};
-template<class T, class A1=T, class A2=A1> struct BinaryExpressionNode {
-    Expression<T> arg1; Expression<T> arg2;
-};
-template<class T> struct BinaryExpressionNode<T> : public ExpressionNode<T> {
-    Expression<T> arg1; Expression<T> arg2;
-    BinaryExpressionNode(const Operator& op, Expression<T> const& a1, Expression<T> const& a2)
-        : ExpressionNode<T>(op), arg1(a1), arg2(a2) { }
-};
-template<class T> struct BinaryExpressionNode<typename Logic<T>::Type,T,T> : public ExpressionNode<typename Logic<T>::Type> {
-    typedef typename Logic<T>::Type R; typedef T A;
-    Expression<A> arg1; Expression<A> arg2;
-    BinaryExpressionNode(const Operator& op, Expression<A> const& a1, Expression<A> const& a2)
-        : ExpressionNode<R>(op), arg1(a1), arg2(a2) { }
-};
-template<class R, class A=R, class N=Int> struct ScalarExpressionNode : public UnaryExpressionNode<R,A> {
-    N num;
-    ScalarExpressionNode(const Operator& op, Expression<R> const& a, N n)
-        : UnaryExpressionNode<R,A>(op,a), num(n) { }
-};
-
-template<class T> ExpressionNode<T>::~ExpressionNode() { }
-
-template<class T> const Operator& Expression<T>::op() const {
-    return node_ptr()->op; }
-template<class T> OperatorCode Expression<T>::code() const {
-    return node_ptr()->op.code(); }
-template<class T> OperatorKind Expression<T>::kind() const {
-    return node_ptr()->op.kind(); }
-template<class T> const T& Expression<T>::val() const {
-    return static_cast<const ConstantExpressionNode<T>*>(node_ptr())->val; }
-template<class T> const Identifier& Expression<T>::var() const {
-    return static_cast<const VariableExpressionNode<T>*>(node_ptr())->var; }
-template<class T> const Expression<T>& Expression<T>::arg() const {
-    return static_cast<const UnaryExpressionNode<T>*>(node_ptr())->arg; }
-template<class T> const Int& Expression<T>::num() const {
-    return static_cast<const ScalarExpressionNode<T>*>(node_ptr())->num; }
-template<class T> const Expression<T>& Expression<T>::arg1() const {
-    return static_cast<const BinaryExpressionNode<T>*>(node_ptr())->arg1; }
-template<class T> const Expression<T>& Expression<T>::arg2() const {
-    return static_cast<const BinaryExpressionNode<T>*>(node_ptr())->arg2; }
-template<class R> template<class A> const Expression<A>& Expression<R>::cmp1(A*) const {
-    return static_cast<const BinaryExpressionNode<R,A>*>(node_ptr())->arg1; }
-template<class R> template<class A> const Expression<A>& Expression<R>::cmp2(A*) const {
-    return static_cast<const BinaryExpressionNode<R,A>*>(node_ptr())->arg2; }
-
-
-template<class T> inline Expression<T>::Expression() : _root(new ConstantExpressionNode<T>(T())) { }
-template<class T> inline Expression<T>::Expression(const T& c) : _root(new ConstantExpressionNode<T>(c)) { }
-template<class T> inline Expression<T>::Expression(const Identifier& v) : _root(new VariableExpressionNode<T>(v)) { }
-template<class T> inline Expression<T>::Expression(const Constant<T>& c): _root(new ConstantExpressionNode<T>(c.value())) { };
-template<class T> inline Expression<T>::Expression(const Variable<T>& v) : _root(new VariableExpressionNode<T>(v.name())) { }
-template<class T> inline Expression<T> Expression<T>::constant(const T& c) { return Expression<T>(c); }
-
-template<class R> inline
-Expression<R> make_expression(const R& c) {
-    return Expression<R>(new ConstantExpressionNode<R>(c)); }
-template<class R, class A> inline
-Expression<R> make_expression(OperatorCode op, const Expression<A>& e) {
-    return Expression<R>(new UnaryExpressionNode<R,A>(op,e)); }
-template<class R, class A, class N> inline
-Expression<R> make_expression(OperatorCode op, const Expression<A>& e, N n) {
-    return Expression<R>(new ScalarExpressionNode<R,A,N>(op,e,n)); }
-template<class R, class A1, class A2> inline
-Expression<R> make_expression(OperatorCode op, const Expression<A1>& e1, Expression<A2> e2) {
-    return Expression<R>(new BinaryExpressionNode<R,A1,A2>(op,e1,e2)); }
-
-template<class R, class Op, class A> inline
-Expression<R> make_expression(Op op, const Expression<A> e) {
-    return make_expression<R,A>(op.code(),e); }
-template<class R, class Op, class A, class N> inline
-Expression<R> make_expression(Op op, const Expression<A>& e, N n) {
-    return make_expression<R>(op.code(),e,n); }
-template<class R, class Op, class A1, class A2> inline
-Expression<R> make_expression(Op op, const Expression<A1>& e1, Expression<A2> e2) {
-    return make_expression<R>(op.code(),e1,e2); }
-
-
-
-template<class T> inline OutputStream& operator<<(OutputStream& os, const ExpressionNode<T>* e) {
-    return os << (Void*)(e);
-}
-
-
-//@}
-
 
 
 //@{
-//! \name Input / output operations.
+//! \name List operations.
 //! \related Expression
+template<class T, class X> struct IsExpression;
 
-template<class T> OutputStream& operator<<(OutputStream& os, const Expression<T>& f);
-template<class T> inline OutputStream& _write_comparison(OutputStream& os, const Expression<T>& f) {
-    ARIADNE_FAIL_MSG("Comparison must return a logical type."); }
-template<> inline OutputStream& _write_comparison(OutputStream& os, const Expression<Tribool>& f) {
-    Real* real_ptr=0; return os << "(" << f.cmp1(real_ptr) << symbol(f.op()) << f.cmp2(real_ptr) << ")"; }
-template<> inline OutputStream& _write_comparison(OutputStream& os, const Expression<Boolean>& f) {
-    String* string_ptr=0; return os << "(" << f.cmp1(string_ptr) << symbol(f.op()) << f.cmp2(string_ptr) << ")"; }
-//FIXME: Distinguish String and Integer comparisons
+template<class T, class X> struct IsExpression : public False { };
+template<class T> struct IsExpression< T, T > : public True { };
+template<class T> struct IsExpression< T, Constant<T> > : public True { };
+template<class T> struct IsExpression< T, Variable<T> > : public True { };
+template<class T> struct IsExpression< T, Expression<T> > : public True { };
 
-//! \brief Write to an output stream
-template<class T> OutputStream& operator<<(OutputStream& os, const Expression<T>& f) {
-    switch(f.op()) {
-        //case OperatorCode::CNST: return os << std::fixed << std::setprecision(4) << fptr->val;
-        case OperatorCode::CNST:
-            os << f.val(); return os;
-            //if(f.val()==0.0) { return os << 0.0; } if(abs(f.val())<1e-4) { os << std::fixed << f.val(); } else { os << f.val(); } return os;
-        case OperatorCode::VAR:
-            return os << f.var();
-        case OperatorCode::ADD:
-            return os << f.arg1() << '+' << f.arg2();
-        case OperatorCode::SUB:
-            os << f.arg1() << '-';
-            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
-            return os;
-        case OperatorCode::MUL:
-            switch(f.arg1().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::DIV: os << '(' << f.arg1() << ')'; break; default: os << f.arg1(); }
-            os << '*';
-            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
-            return os;
-        case OperatorCode::DIV:
-            switch(f.arg1().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::DIV: os << '(' << f.arg1() << ')'; break; default: os << f.arg1(); }
-            os << '/';
-            switch(f.arg2().op()) { case OperatorCode::ADD: case OperatorCode::SUB: case OperatorCode::MUL: case OperatorCode::DIV: os << '(' << f.arg2() << ')'; break; default: os << f.arg2(); }
-            return os;
-        case OperatorCode::POW:
-            return os << "pow" << '(' << f.arg() << ',' << f.num() << ')';
-        default:
-            switch(f.kind()) {
-                case OperatorKind::UNARY: return os << f.op() << "(" << f.arg() << ")";
-                case OperatorKind::BINARY: return os << f.op() << "(" << f.arg1() << "," << f.arg2() << ")";
-                // FIXME: Type-cast comparison arguments correctly
-                case OperatorKind::COMPARISON: return _write_comparison(os,f);
-                default: ARIADNE_FAIL_MSG("Cannot output expression with operator "<<f.op()<<" of kind "<<f.kind()<<"\n");
-            }
-    }
-}
+template<class X1, class X2, EnableIf<And<IsExpression<Real,X1>,IsExpression<Real,X2>>> =dummy> inline
+List<Expression<Real>> operator,(const X1& e1, const X2& e2) {
+    List< Expression<Real> > r; r.append(e1); r.append(e2); return r; }
 
+template<class X, EnableIf<IsExpression<Real,X>> =dummy> inline
+List<Expression<Real>> operator,(Int c, const X& e) {
+    List< Expression<Real> > r; r.append(Expression<Real>::constant(c)); r.append(Expression<Real>(e)); return r; }
+
+template<class T, class X, EnableIf<IsExpression<T,X>> =dummy> inline
+List<Expression<T>> operator,(List<Expression<T>> l, const X& e) {
+    List< Expression<T> > r(l); r.append(Expression<T>(e)); return r; }
 //@}
 
 //@{
 //! \name Evaluation and related operations.
 //! \related Expression
 
+Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& q);
+String evaluate(const Expression<String>& e, const StringValuation& q);
+Integer evaluate(const Expression<Integer>& e, const IntegerValuation& q);
+Real evaluate(const Expression<Integer>& e, const ContinuousValuation<Real>& q);
+Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<Real>& q);
 
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
 template<class A> typename Logic<A>::Type evaluate(const Expression<typename Logic<A>::Type>& e, const Map<Identifier,A>& x);
@@ -319,71 +183,17 @@ template<class A> typename Logic<A>::Type evaluate(const Expression<typename Log
 //! \brief Evaluate expression \a e on argument \a x which is a map of variable identifiers to values of type \c A.
 template<class T> T evaluate(const Expression<T>& e, const Map<Identifier,T>& x);
 
-
-
-template<class T> Set<UntypedVariable> Expression<T>::arguments() const {
-    const Expression<T>& e=*this;
-    switch(e.kind()) {
-        case OperatorKind::VARIABLE: return Set<UntypedVariable>{Variable<T>(e.var())};
-        case OperatorKind::NULLARY: return Set<UntypedVariable>();
-        case OperatorKind::UNARY: return e.arg().arguments();
-        case OperatorKind::BINARY: return join(e.arg1().arguments(),e.arg2().arguments());
-        case OperatorKind::COMPARISON: {
-            const BinaryExpressionNode<T,Real>* rlp = dynamic_cast<const BinaryExpressionNode<T,Real>*>(e.node_ptr());
-            if(rlp) { return join(rlp->arg1.arguments(),rlp->arg2.arguments()); }
-            const BinaryExpressionNode<T,String>* strp = dynamic_cast<const BinaryExpressionNode<T,String>*>(e.node_ptr());
-            if(strp) { return join(strp->arg1.arguments(),strp->arg2.arguments()); }
-        }
-        default: ARIADNE_FAIL_MSG("Cannot compute arguments of expression "<<e<<" of kind "<<e.kind()<<"\n");
-    }
-}
-
 //! \brief Extract the arguments of expression \a e.
-template<class T> Set<Identifier> arguments(const Expression<T>& e)
-{
-    switch(e.kind()) {
-        case OperatorKind::VARIABLE: return Set<Identifier>{e.var()};
-        case OperatorKind::NULLARY: return Set<Identifier>();
-        case OperatorKind::UNARY: return arguments(e.arg());
-        case OperatorKind::BINARY: return join(arguments(e.arg1()),arguments(e.arg2()));
-        case OperatorKind::COMPARISON: {
-            const BinaryExpressionNode<T,Real>* rlp = dynamic_cast<const BinaryExpressionNode<T,Real>*>(e.node_ptr());
-            if(rlp) { return join(arguments(rlp->arg1),arguments(rlp->arg2)); }
-            const BinaryExpressionNode<T,String>* strp = dynamic_cast<const BinaryExpressionNode<T,String>*>(e.node_ptr());
-            if(strp) { return join(arguments(strp->arg1),arguments(strp->arg2)); }
-        }
-        default: ARIADNE_FAIL_MSG("Cannot compute arguments of expression "<<e<<" of kind "<<e.kind()<<"\n");
-    }
-}
-
+template<class T> Set<Identifier> arguments(const Expression<T>& e);
 
 //! \brief Returns \a true if the expression\a e is syntactically equal to the constant \a c.
-template<class T> Bool is_constant(const Expression<T>& e, const T& c) {
-    switch(e.op()) {
-        case OperatorCode::CNST: return decide(e.val()==c);
-        default: return false;
-    }
-}
-
-template<class T, class X> Bool is_constant(const Expression<T>& e, const X& c) {
-    return is_constant(e,static_cast<T>(c));
-}
+template<class T> Bool is_constant(const Expression<T>& e, const typename Expression<T>::ValueType& c);
 
 //! \brief Returns \a true if the expression \a e is syntactically equal to the variable with name \a vn.
-template<class T> Bool is_variable(const Expression<T>& e, const Identifier& vn) {
-    switch(e.op()) {
-        case OperatorCode::VAR: return e.var()==vn;
-        default: return false;
-    }
-}
+template<class T> Bool is_variable(const Expression<T>& e, const Identifier& vn);
 
 //! \brief Returns \a true if the expression \a e is syntactically equal to the variable \a v.
-template<class T> Bool is_variable(const Expression<T>& e, const Variable<T>& v) {
-    switch(e.op()) {
-        case OperatorCode::VAR: return e.var()==v.name();
-        default: return false;
-    }
-}
+template<class T> Bool is_variable(const Expression<T>& e, const Variable<T>& v);
 
 //! \brief Simplify the expression \a e.
 template<class T> Expression<T> simplify(const Expression<T>& e);
@@ -408,65 +218,17 @@ template<class T, class Y> Expression<T> substitute(const Expression<T>& e, cons
 
 template<class T, class Y> Expression<T> substitute(const Expression<T>& e, const List< Assignment< Variable<Y>,Expression<Y> > >& a);
 
-//! \brief Convert the expression in named variables to a formula in numbered coordinates.
-Formula<Real> formula(const Expression<Real>& e, const Map<Identifier,Nat>& v);
 
-
-//@}
-
-
-//@{
-//! \name Deprecated conversions and Expression/Formula operators.
-//! \related Expression
-
-Boolean evaluate(const Expression<Boolean>& e, const DiscreteValuation& q);
-String evaluate(const Expression<String>& e, const StringValuation& q);
-Integer evaluate(const Expression<Integer>& e, const IntegerValuation& q);
-
-template<class T> Tribool evaluate(const Expression<Tribool>& e, const ContinuousValuation<T>& x);
-template<class T> T evaluate(const Expression<Real>& e, const ContinuousValuation<T>& x);
-//template<class T> T evaluate(const Expression<Real>& e, const Map<ExtendedVariable<Real>,T>& x);
-
-Formula<Real> formula(const Expression<Real>& e, const List< Variable<Real> >& vars);
-Formula<Real> formula(const Expression<Real>& res, const List< Assignment< Variable<Real>, Expression<Real> > >& aux, const Space<Real> spc);
-List< Formula<Real> > formula(const List< Expression<Real> >& res, const List< Assignment< Variable<Real>, Expression<Real> > >& aux, const Space<Real> spc);
-
-
+//! \brief Make a function on a Euclidean domain given an ordered list including all argument variables.
 ScalarFunction<EffectiveTag> make_function(const Expression<Real>& e, const Space<Real>& s);
-
-
-//@}
-
-//@{
-//! \name Metaprogramming and sequencing operators for making lists
-//! \related Expression
-
-//! \brief Inherits from True type if class \a X is a constant, variable or expression in type \a T, otherwise inherits from False.
-template<class T, class X> struct IsExpression;
-
-template<class T, class X> struct IsExpression : public False { };
-template<class T> struct IsExpression< T, T > : public True { };
-template<class T> struct IsExpression< T, Constant<T> > : public True { };
-template<class T> struct IsExpression< T, Variable<T> > : public True { };
-template<class T> struct IsExpression< T, Expression<T> > : public True { };
-template<class T, class X1, class X2, class R=Dummy> using EnableIfExpressions = EnableIf< And<IsExpression<T,X1>,IsExpression<T,X2> >, R>;
-
-template<class X1, class X2> inline
-EnableIfExpressions< Real, X1, X2, List<Expression<Real> > >
-operator,(const X1& e1, const X2& e2) {
-    List< Expression<Real> > r; r.append(e1); r.append(e2); return r; }
-
-template<class X> inline
-EnableIf< IsExpression<Real,X>, List<Expression<Real> > >
-operator,(Int c, const X& e) {
-    List< Expression<Real> > r; r.append(Expression<Real>(c)); r.append(Expression<Real>(e)); return r; }
-
-template<class T, class X> inline
-EnableIf< IsExpression<T,X>, List<Expression<T> > >
-operator,(List<Expression<T> > l, const T& e) {
-    List< Expression<T> > r(l); r.append(Expression<Real>(e)); return r; }
+//! \brief Make a function on coordinates given a mapping from variable names to indices.
+Formula<Real> formula(const Expression<Real>& e, const Map<Identifier,Nat>& v);
+Formula<Real> formula(const Expression<Real>& e, const List<Variable<Real>>& vars);
+Formula<Real> formula(const Expression<Real>& res, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc);
+List< Formula<Real> > formula(const List<Expression<Real>>& res, const List<Assignment<Variable<Real>,Expression<Real>>>& aux, const Space<Real> spc);
 
 //@}
+
 
 //@{
 //! \name Methods for building expressions

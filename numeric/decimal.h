@@ -53,6 +53,7 @@ class Decimal {
     friend Decimal operator"" _dec (long double dbl);
 };
 Decimal operator"" _dec (long double dbl);
+Decimal operator"" _decimal (long double dbl);
 
 
 } // namespace Ariadne

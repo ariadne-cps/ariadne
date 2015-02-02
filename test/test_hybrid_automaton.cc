@@ -63,12 +63,12 @@ Void
 TestHybridSystem::test_build_hybrid_system()
 {
     // Declare some constants. Note that system parameters should be given as variables.
-    RealConstant T("T",4.0);
-    RealConstant hmin("hmin",5.5);
-    RealConstant hmax("hmax",8.0);
-    RealConstant delta("delta",0.05);
-    RealConstant lambda("lambda",0.02);
-    RealConstant rate("rate",0.3);
+    RealConstant T("T",4.0_dec);
+    RealConstant hmin("hmin",5.5_dec);
+    RealConstant hmax("hmax",8.0_dec);
+    RealConstant delta("delta",0.05_dec);
+    RealConstant lambda("lambda",0.02_dec);
+    RealConstant rate("rate",0.3_dec);
 
     // Declare the system variables
     RealVariable height("height");
@@ -409,12 +409,12 @@ Void
 TestHybridAutomaton::test_build_hybrid_system()
 {
     // Declare some constants. Note that system parameters should be given as variables.
-    RealConstant T("T",4.0);
-    RealConstant hmin("hmin",5.5);
-    RealConstant hmax("hmax",8.0);
-    RealConstant delta("delta",0.05);
-    RealConstant lambda("lambda",0.02);
-    RealConstant rate("rate",0.3);
+    RealConstant T("T",4.0_dec);
+    RealConstant hmin("hmin",5.5_dec);
+    RealConstant hmax("hmax",8.0_dec);
+    RealConstant delta("delta",0.05_dec);
+    RealConstant lambda("lambda",0.02_dec);
+    RealConstant rate("rate",0.3_dec);
 
     // Declare the system variables
     RealVariable height("height");
@@ -522,12 +522,12 @@ Void
 TestHybridAutomaton::test_build_atomic_hybrid_automaton()
 {
     // Declare some constants. Note that system parameters should be given as variables.
-    RealConstant T("T",4.0);
-    RealConstant hmin("hmin",5.5);
-    RealConstant hmax("hmax",8.0);
-    RealConstant delta("delta",0.05);
-    RealConstant lambda("lambda",0.02);
-    RealConstant rate("rate",0.3);
+    RealConstant T("T",4.0_dec);
+    RealConstant hmin("hmin",5.5_dec);
+    RealConstant hmax("hmax",8.0_dec);
+    RealConstant delta("delta",0.05_dec);
+    RealConstant lambda("lambda",0.02_dec);
+    RealConstant rate("rate",0.3_dec);
 
     // Declare the system variables
     RealVariable height("height");
@@ -590,12 +590,12 @@ Void
 TestHybridAutomaton::test_build_intensional_hybrid_automaton()
 {
     // Declare some constants. Note that system parameters should be given as variables.
-    RealConstant T("T",4.0);
-    RealConstant hmin("hmin",5.5);
-    RealConstant hmax("hmax",8.0);
-    RealConstant delta("delta",0.05);
-    RealConstant lambda("lambda",0.02);
-    RealConstant rate("rate",0.3);
+    RealConstant T("T",4.0_dec);
+    RealConstant hmin("hmin",5.5_dec);
+    RealConstant hmax("hmax",8.0_dec);
+    RealConstant delta("delta",0.05_dec);
+    RealConstant lambda("lambda",0.02_dec);
+    RealConstant rate("rate",0.3_dec);
 
     // Declare the system variables
     RealVariable height("height");

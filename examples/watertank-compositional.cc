@@ -31,12 +31,12 @@ using std::cout; using std::endl;
 Int main()
 {
     // Declare some constants. Note that system parameters should be given as variables.
-    RealConstant T("T",4.0);
-    RealConstant hmin("hmin",5.5);
-    RealConstant hmax("hmax",8.0);
-    RealConstant delta("delta",0.05);
-    RealConstant lambda("lambda",0.02);
-    RealConstant rate("rate",0.3);
+    RealConstant T("T",4.0_decimal);
+    RealConstant hmin("hmin",5.5_decimal);
+    RealConstant hmax("hmax",8.0_decimal);
+    RealConstant delta("delta",0.05_decimal);
+    RealConstant lambda("lambda",0.02_decimal);
+    RealConstant rate("rate",0.3_decimal);
 
     // Declare the system variables
     RealVariable height("height");

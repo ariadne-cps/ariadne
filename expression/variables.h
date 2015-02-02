@@ -92,32 +92,24 @@ typedef Constant<Real> RealConstant;
 //! \ingroup ExpressionModule
 //! A named constant of type \a T.
 template<class T> class Constant
+    : public T
 {
   public:
-    template<class X> explicit Constant(const String& str, const X& value)
-        : _name_ptr(new Identifier(str)), _value_ptr(new T(value)) { }
-    //explicit Constant(const String& str, const T& value)
-    //    : _name_ptr(new String(str)), _value_ptr(new T(value)) { }
-    const Identifier& name() const { return *_name_ptr; }
-    const T& value() const { return *_value_ptr; }
-    Bool operator==(const Constant<T>& other) const {
-        if(this->name()==other.name()) { assert(this->value()==other.value()); return true; } else { return false; } }
+    explicit Constant(const String& str, const T& value)
+        : T(value), _name(str) { }
+    const Identifier& name() const { return _name; }
+    const T& value() const { return *this; }
   private:
-    std::shared_ptr<Identifier> _name_ptr;
-    std::shared_ptr<T> _value_ptr;
+    Identifier _name;
 };
 
 template<> class Constant<String>
+    : public String
 {
   public:
-    explicit Constant(const String& value) : _value(value) { }
-    const Identifier& name() const { return static_cast<const Identifier&>(_value); }
-    const String& value() const { return _value; }
-    operator const String& () const { return _value; }
-    Bool operator==(const Constant<String>& other) const {
-        return (this->value()==other.value()); }
-  private:
-    String _value;
+    explicit Constant(const String& value) : String(value) { }
+    const Identifier& name() const { return static_cast<const Identifier&>(static_cast<const String&>(*this)); }
+    const String& value() const { return *this; }
 };
 
 enum VariableType { type_bool, type_tribool, type_enumerated, type_string, type_integer, type_real };

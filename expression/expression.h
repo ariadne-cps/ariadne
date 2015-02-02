@@ -80,11 +80,6 @@ typedef Expression<Integer> IntegerExpression;
 typedef Expression<Real> RealExpression;
 
 
-template<class X> struct Logic { };
-template<> struct Logic<String> { typedef Boolean Type; };
-template<> struct Logic<Integer> { typedef Boolean Type; };
-template<> struct Logic<Real> { typedef Tribool Type; };
-
 
 //@{
 //! \name Concrete expression classes.

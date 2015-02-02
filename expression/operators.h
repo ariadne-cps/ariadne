@@ -1,7 +1,7 @@
 /***************************************************************************
  *            operators.h
  *
- *  Copyright 2008-9  Pieter Collins
+ *  Copyright 2008-15  Pieter Collins
  *
  ****************************************************************************/
 
@@ -135,6 +135,10 @@ class Operator {
 };
 
 template<class X> struct Logic;
+template<> struct Logic<String> { typedef Boolean Type; };
+template<> struct Logic<Integer> { typedef Boolean Type; };
+template<> struct Logic<Real> { typedef Tribool Type; };
+
 template<class X> typename Logic<X>::Type compare(OperatorCode op, const X& x1, const X& x2);
 template<class X> X compute(OperatorCode op, const X& x);
 template<class X> X compute(OperatorCode op, const X& x1, const X& x2);

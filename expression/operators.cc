@@ -1,7 +1,7 @@
 /***************************************************************************
  *            operators.cc
  *
- *  Copyright 2008-11 Pieter Collins
+ *  Copyright 2008-15 Pieter Collins
  *
  ****************************************************************************/
 
@@ -143,6 +143,108 @@ OperatorKind kind(OperatorCode op) {
             ARIADNE_FAIL_MSG("Cannot deduce kind of operator "<<op<<"\n");;
     }
 }
+
+
+
+template<> Boolean compare(OperatorCode cmp, const String& s1, const String& s2) {
+    switch(cmp) {
+        case OperatorCode::EQ:  return s1==s2;
+        case OperatorCode::NEQ: return s1!=s2;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate comparison "<<cmp<<" on string arguments.");
+    }
+}
+
+template<> Boolean compare(OperatorCode cmp, const Integer& z1, const Integer& z2) {
+    switch(cmp) {
+        case OperatorCode::EQ:  return z1==z2;
+        case OperatorCode::NEQ: return z1!=z2;
+        case OperatorCode::LEQ: return z1<=z2;
+        case OperatorCode::GEQ: return z1>=z2;
+        case OperatorCode::LT:  return z1< z2;
+        case OperatorCode::GT:  return z1> z2;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate comparison "<<cmp<<" on integer arguments.");
+    }
+}
+
+
+template<> Boolean compute(OperatorCode op, const Boolean& b1, const Boolean& b2) {
+    switch(op) {
+        case OperatorCode::AND: return b1 && b2;
+        case OperatorCode::OR: return b1 || b2;
+        case OperatorCode::XOR: return b1 ^ b2;
+        case OperatorCode::IMPL: return !b1 || b2;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");
+    }
+}
+
+template<> Tribool compute(OperatorCode op, const Tribool& b1, const Tribool& b2) {
+    switch(op) {
+        case OperatorCode::AND: return b1 && b2;
+        case OperatorCode::OR: return b1 || b2;
+        case OperatorCode::XOR: return b1 ^ b2;
+        case OperatorCode::IMPL: return !b1 || b2;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on two boolean arguments.");
+    }
+}
+
+template<> String compute(OperatorCode op, const String& s1, const String& s2) {
+    switch(op) {
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on two string arguments.");
+    }
+}
+
+template<> Integer compute(OperatorCode op, const Integer& x1, const Integer& x2) {
+    switch(op) {
+        case OperatorCode::ADD: return x1+x2;
+        case OperatorCode::SUB: return x1-x2;
+        case OperatorCode::MUL: return x1*x2;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on two integer arguments.");
+    }
+}
+
+
+template<> Boolean compute(OperatorCode op, const Boolean& b) {
+    switch(op) {
+        case OperatorCode::NOT: return !b;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");
+    }
+}
+
+template<> Tribool compute(OperatorCode op, const Tribool& b) {
+    switch(op) {
+        case OperatorCode::NOT: return !b;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on a boolean arguments.");
+    }
+}
+
+template<> String compute(OperatorCode op, const String& s) {
+    switch(op) {
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one string argument.");
+    }
+}
+
+template<> Integer compute(OperatorCode op, const Integer& z) {
+    switch(op) {
+        case OperatorCode::POS: return +z;
+        case OperatorCode::NEG: return -z;
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one integer argument.");
+    }
+}
+
+
+template<> String compute(OperatorCode op, const String& s, Int n) {
+    switch(op) {
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one string argument and an integer.");
+    }
+}
+
+template<> Integer compute(OperatorCode op, const Integer& z, Int n) {
+    switch(op) {
+        default: ARIADNE_FAIL_MSG("Cannot evaluate operator "<<op<<" on one integer argument and a builtin.");
+    }
+}
+
+
 
 } // namespace Ariadne
 

@@ -60,7 +60,7 @@ inline T unscale(T x, const ExactInterval& d) {
 template<class T, EnableIf<IsStronger<Paradigm<T>,Validated>> =dummy>
 inline T unscale(T x, const ExactInterval& d) {
     ValidatedNumber c(med_val(d));
-    if(d.lower()==d.upper()) { return std::move(x)*0; }
+    if(d.lower()==d.upper()) { c=0; return std::move(x)*c; }
     ValidatedNumber r(rad_val(d));
     return (std::move(x)-c)/r;
 }

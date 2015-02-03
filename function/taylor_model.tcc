@@ -140,11 +140,11 @@ template<class F> DegreeType TaylorModel<Validated,F>::degree() const {
 
 template<class F> TaylorModel<Validated,F>& TaylorModel<Validated,F>::operator=(const ValidatedNumber& c) {
     this->_expansion.clear();
-    ExactFloat m=c.midpoint();
+    ExactFloat m=c.value();
     if(m!=0) {
         this->_expansion.append(MultiIndex::zero(this->argument_size()),m);
     }
-    this->_error=c.radius();
+    this->_error=c.error();
     return *this;
 }
 
@@ -368,7 +368,7 @@ template<class F> inline Void _acc(TaylorModel<Validated,F>& r, const ValidatedF
 
     if(c.lower().raw()==-inf || c.upper().raw()==+inf) {
         r.clear();
-        r.set_error(ErrorFloat(+infty));
+        r.set_error(mag(infty));
         return;
     }
 
@@ -752,34 +752,34 @@ template<class F> UpperInterval TaylorModel<Validated,F>::range() const {
 
 template<class F> UpperInterval TaylorModel<Validated,F>::gradient_range(SizeType j) const {
     SizeType as=this->argument_size();
-    UpperInterval g(0,0);
+    ValidatedFloat g(0,0);
     for(typename TaylorModel<Validated,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         MultiIndex const& a=iter->key();
         const Nat c=a[j];
         if(c>0) {
             const ExactFloat& x=iter->data();
-            if(a.degree()==1) { g+=UpperInterval(x); }
-            else { g+=UpperInterval(-1,1)*x*c; }
+            if(a.degree()==1) { g+=x; }
+            else { g+=ValidatedFloat(-1,1)*x*c; }
         }
     }
-    return g;
+    return UpperInterval(g);
 }
 
 template<class F> Covector<UpperInterval> TaylorModel<Validated,F>::gradient_range() const {
     SizeType as=this->argument_size();
-    Covector<UpperInterval> g(this->argument_size(),UpperInterval(0,0));
+    Covector<ValidatedFloat> g(this->argument_size(),ValidatedFloat(0,0));
     for(typename TaylorModel<Validated,F>::ConstIterator iter=this->begin(); iter!=this->end(); ++iter) {
         MultiIndex const& a=iter->key();
         const ExactFloat& x=iter->data();
         for(SizeType j=0; j!=this->argument_size(); ++j) {
             const Nat c=a[j];
             if(c>0) {
-                if(a.degree()==1) { g[j]+=UpperInterval(x); }
-                else { g[j]+=UpperInterval(-1,1)*x*c; }
+                if(a.degree()==1) { g[j]+=x; }
+                else { g[j]+=ValidatedFloat(-1,1)*x*c; }
             }
         }
     }
-    return g;
+    return Covector<UpperInterval>(g);
 }
 
 
@@ -1540,7 +1540,7 @@ template<class F> Matrix<UpperInterval>
 jacobian_range(const Vector<TaylorModel<Validated,F>>& f) {
     SizeType rs=f.size();
     SizeType as=f.zero_element().argument_size();
-    Matrix<UpperInterval> J(rs,as);
+    Matrix<ValidatedFloat> J(rs,as);
     for(SizeType i=0; i!=rs; ++i) {
         for(typename TaylorModel<Validated,F>::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             MultiIndex const& a=iter->key();
@@ -1548,13 +1548,13 @@ jacobian_range(const Vector<TaylorModel<Validated,F>>& f) {
                 const Nat c=a[k];
                 if(c>0) {
                     const ExactFloat& x=iter->data();
-                    if(a.degree()==1) { J[i][k]+=UpperInterval(x); }
-                    else { J[i][k]+=UpperInterval(-1,1)*x*c; }
+                    if(a.degree()==1) { J[i][k]+=x; }
+                    else { J[i][k]+=ValidatedFloat(-1,1)*x*c; }
                 }
             }
         }
     }
-    return J;
+    return Matrix<UpperInterval>(J);
 }
 
 // Compute the Jacobian over the unit domain, with respect to the variables p.
@@ -1563,7 +1563,7 @@ jacobian_range(const Vector<TaylorModel<Validated,F>>& f, const Array<SizeType>&
     SizeType rs=f.size();
     SizeType as=f.zero_element().argument_size();
     SizeType ps=p.size();
-    Matrix<UpperInterval> J(rs,ps);
+    Matrix<ValidatedFloat> J(rs,ps);
     for(SizeType i=0; i!=rs; ++i) {
         for(typename TaylorModel<Validated,F>::ConstIterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             MultiIndex const& a=iter->key();
@@ -1572,13 +1572,13 @@ jacobian_range(const Vector<TaylorModel<Validated,F>>& f, const Array<SizeType>&
                 const Nat c=a[j];
                 if(c>0) {
                     const ExactFloat& x=iter->data();
-                    if(a.degree()==1) { J[i][k]+=UpperInterval(x); }
-                    else { J[i][k]+=UpperInterval(-1,1)*x*c; }
+                    if(a.degree()==1) { J[i][k]+=x; }
+                    else { J[i][k]+=ValidatedFloat(-1,1)*x*c; }
                 }
             }
         }
     }
-    return J;
+    return Matrix<UpperInterval>(J);
 }
 
 

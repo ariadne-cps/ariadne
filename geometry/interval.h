@@ -38,9 +38,6 @@
 #include "numeric/rounding.h"
 #include "numeric/real.h"
 #include "numeric/float.h"
-#include "numeric/float-exact.h"
-#include "numeric/float-validated.h"
-#include "numeric/float-approximate.h"
 
 namespace Ariadne {
 
@@ -278,7 +275,7 @@ class UpperInterval {
     explicit UpperInterval() : l(0.0), u(0.0) { }
     //! \brief Construct a singleton interval.
     // FIXME: Should make explicit, but this interferes with role as a numeric type
-    UpperInterval(Float point) : l(point), u(point) { }
+    template<class F, EnableIf<IsSame<F,Float>> =dummy> UpperInterval(F point) : l(point), u(point) { }
     // FIXME: Should make explicit, but this interferes with role as a numeric type
     template<class N, EnableIf<IsIntegral<N>> = dummy> UpperInterval(N n) : l(n), u(n) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
@@ -313,7 +310,7 @@ class UpperInterval {
     const ApproximateFloat midpoint() const { return half(this->lower()+this->upper()); }
     const ExactFloat centre() const { return make_exact(half(this->lower()+this->upper())); }
     //! \brief An over-approximation to the width of the interval.
-    const PositiveUpperFloat width() const { return PositiveUpperFloat((this->upper()-this->lower())); }
+    const PositiveUpperFloat width() const { return PositiveUpperFloat((this->upper()-this->lower()).raw()); }
     //! \brief The radius of the interval.
     const PositiveUpperFloat radius() const { return half(this->width()); }
 
@@ -346,7 +343,7 @@ class UpperInterval {
     friend UpperInterval intersection(UpperInterval const& ivl1, UpperInterval const& ivl2) {
         return UpperInterval(max(ivl1.l,ivl2.l),min(ivl1.u,ivl2.u)); }
     friend UpperInterval widen(UpperInterval x) {
-        return UpperInterval(widen(ValidatedFloat(x.lower_raw(),x.upper_raw()))); }
+        return UpperInterval(sub_down(x.lower_raw(),Float::min()),add_up(x.upper_raw(),Float::max())); }
     friend OutputStream& operator<<(OutputStream& os, UpperInterval const& ivl) {
         return os << ExactInterval(ivl.lower_raw(),ivl.upper_raw()); }
   private:
@@ -354,7 +351,7 @@ class UpperInterval {
 };
 
 template<class R, class A> inline R numeric_cast(A const&);
-template<> inline UpperInterval numeric_cast(const Float& a) { return UpperInterval(a); }
+template<> inline UpperInterval numeric_cast(const Float& a) { return UpperInterval(a,a); }
 template<> inline Float numeric_cast(const UpperInterval& a) { return midpoint(a).raw(); }
 
 const ApproximateFloat midpoint(UpperInterval const& ivl);
@@ -442,6 +439,7 @@ UpperInterval acos(UpperInterval);
 UpperInterval atan(UpperInterval);
 
 inline ValidatedFloat make_singleton(UpperInterval const& ivl) { return ValidatedFloat(ivl.lower(),ivl.upper()); }
+inline UpperInterval make_interval(ValidatedFloat const& x) { return UpperInterval(x.lower(),x.upper()); }
 
 //! \related UpperInterval \brief The magnitude of the interval \a I. Yields \f$ \max\{ |x|\,\mid\,x\in I \}\f$.
 inline PositiveUpperFloat mag(UpperInterval i) { return PositiveUpperFloat(max(abs(i.lower_raw()),abs(i.upper_raw()))); }
@@ -449,70 +447,70 @@ inline PositiveUpperFloat mag(UpperInterval i) { return PositiveUpperFloat(max(a
 inline LowerFloat mig(UpperInterval i) { return LowerFloat(min(Float(0),min(abs(i.lower_raw()),abs(i.upper_raw())))); }
 
 inline UpperInterval max(UpperInterval i1, UpperInterval i2) {
-    return max(make_singleton(i1),make_singleton(i2)); }
+    return make_interval(max(make_singleton(i1),make_singleton(i2))); }
 
 inline UpperInterval min(UpperInterval i1, UpperInterval i2) {
-    return min(make_singleton(i1),make_singleton(i2)); }
+    return make_interval(min(make_singleton(i1),make_singleton(i2))); }
 
 inline UpperInterval abs(UpperInterval i) {
-    return abs(make_singleton(i)); }
+    return make_interval(abs(make_singleton(i))); }
 
 inline UpperInterval pos(UpperInterval i) {
-    return pos(make_singleton(i)); }
+    return make_interval(pos(make_singleton(i))); }
 
 inline UpperInterval neg(UpperInterval i) {
-    return neg(make_singleton(i)); }
+    return make_interval(neg(make_singleton(i))); }
 
 inline UpperInterval sqr(UpperInterval i) {
-    return sqr(make_singleton(i)); }
+    return make_interval(sqr(make_singleton(i))); }
 
 inline UpperInterval add(UpperInterval i1, UpperInterval i2) {
-    return add(make_singleton(i1),make_singleton(i2)); }
+    return make_interval(add(make_singleton(i1),make_singleton(i2))); }
 
 inline UpperInterval sub(UpperInterval i1, UpperInterval i2) {
-    return sub(make_singleton(i1),make_singleton(i2)); }
+    return make_interval(sub(make_singleton(i1),make_singleton(i2))); }
 
 inline UpperInterval mul(UpperInterval i1, UpperInterval i2) {
-    return mul(make_singleton(i1),make_singleton(i2)); }
+    return make_interval(mul(make_singleton(i1),make_singleton(i2))); }
 
 inline UpperInterval div(UpperInterval i1, UpperInterval i2) {
-    return div(make_singleton(i1),make_singleton(i2)); }
+    return make_interval(div(make_singleton(i1),make_singleton(i2))); }
 
 inline UpperInterval pow(UpperInterval i, Nat m) {
-    return pow(make_singleton(i),m); }
+    return make_interval(pow(make_singleton(i),m)); }
 
 inline UpperInterval pow(UpperInterval i, Int n) {
-    return pow(make_singleton(i),n); }
+    return make_interval(pow(make_singleton(i),n)); }
 
 inline UpperInterval rec(UpperInterval i) {
-    return rec(make_singleton(i)); }
+    return make_interval(rec(make_singleton(i))); }
 
 inline UpperInterval sqrt(UpperInterval i) {
-    return sqrt(make_singleton(i)); }
+    return make_interval(sqrt(make_singleton(i))); }
 
 inline UpperInterval exp(UpperInterval i) {
-    return exp(make_singleton(i)); }
+    return make_interval(exp(make_singleton(i))); }
 
 inline UpperInterval log(UpperInterval i) {
-    return log(make_singleton(i)); }
+    return make_interval(log(make_singleton(i))); }
 
 inline UpperInterval sin(UpperInterval i) {
-    return sin(make_singleton(i)); }
+    return make_interval(sin(make_singleton(i))); }
 
 inline UpperInterval cos(UpperInterval i) {
-    return cos(make_singleton(i)); }
+    return make_interval(cos(make_singleton(i))); }
 
 inline UpperInterval tan(UpperInterval i) {
-    return tan(make_singleton(i)); }
+    return make_interval(tan(make_singleton(i))); }
 
 inline UpperInterval asin(UpperInterval i) {
-    return asin(make_singleton(i)); }
+    return make_interval(asin(make_singleton(i))); }
 
 inline UpperInterval acos(UpperInterval i) {
-    return acos(make_singleton(i)); }
+    return make_interval(acos(make_singleton(i))); }
 
 inline UpperInterval atan(UpperInterval i) {
-    return atan(make_singleton(i)); }
+    return make_interval(atan(make_singleton(i))); }
 
 //! \related UpperInterval \brief Unary plus operator. Should be implemented exactly and yield \f$\{ +x \mid x\in I\}\f$.
 inline UpperInterval operator+(const UpperInterval& i) { return pos(i); }

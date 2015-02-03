@@ -74,17 +74,15 @@ typedef Vector<ExactFloat> ExactFloatVector;
 typedef Vector<UpperInterval> UpperIntervalVector;
 typedef Matrix<UpperInterval> UpperIntervalMatrix;
 
-inline RawFloat const& make_raw(ApproximateFloat const& v) {
-    return reinterpret_cast<RawFloat const&>(v);
+inline Vector<Differential<RawFloat>>const& make_raw(Vector<Differential<ApproximateFloat>>const& v) {
+    return reinterpret_cast<Vector<Differential<RawFloat>>const&>(v);
 }
-inline Vector<RawFloat>const& make_raw(Vector<ApproximateFloat>const& v) {
-    return reinterpret_cast<Vector<RawFloat>const&>(v);
-}
-inline Vector<ApproximateFloat>const& make_approximate(Vector<RawFloat>const& v) {
-    return reinterpret_cast<Vector<ApproximateFloat>const&>(v);
-}
+
 inline Vector<ApproximateFloat>& make_approximate(Vector<RawFloat>& v) {
     return reinterpret_cast<Vector<ApproximateFloat>&>(v);
+}
+inline Vector<Differential<ApproximateFloat>>const& make_approximate(Vector<Differential<RawFloat>>const& v) {
+    return reinterpret_cast<Vector<Differential<ApproximateFloat>>const&>(v);
 }
 
 inline UpperInterval dot(Vector<UpperInterval> const& bx1, Vector<ExactInterval> const& bx2) {
@@ -647,8 +645,8 @@ validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     for(Nat ii=0; ii!=12; ++ii) {
         mw=midpoint(w);
         x=x0+AT*w;
-        mx=make_exact(x0)+AT*mw;
-        nw = mw - solve(h.jacobian(x)*AT,Vector<ValidatedFloat>(h(mx)-make_exact(c)));
+        mx=x0+AT*mw;
+        nw = mw - solve(h.jacobian(x)*AT,Vector<ValidatedFloat>(h(mx)-c));
         ARIADNE_LOG(7,"w="<<w<<", h(x0+AT*w)="<<h(x)<<", nw="<<nw<<", refines="<<refines(nw,w)<<"\n");
 
         if(!found_solution) {
@@ -674,13 +672,13 @@ validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     if(!validated_solution) { return false; }
 
     // Compute x value
-    x=make_exact(x0)+AT*w;
+    x=x0+AT*w;
     ARIADNE_LOG(3,"x="<<x<<"\n");
     gx=g(x);
     ARIADNE_LOG(3,"g(x)="<<gx<<"\n");
 
     // Check that equality constraints are plausible
-    ARIADNE_DEBUG_ASSERT(models(h(x)-make_exact(c),ExactFloatVector(k)));
+    ARIADNE_DEBUG_ASSERT(models(h(x)-c,ExactFloatVector(k)));
 
     // Check inequality constraints once more
     for(Nat i=0; i!=C.size(); ++i) {
@@ -956,9 +954,9 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
 
     mu = mu * sigma;
 
-    FloatDifferential ddfx=f.evaluate(FloatDifferential::variables(2,x));
+    FloatDifferential ddfx=make_raw(f.evaluate(make_approximate(FloatDifferential::variables(2,x))));
     ARIADNE_LOG(9,"ddfx="<<ddfx<<"\n");
-    Vector<FloatDifferential> ddgx=g.evaluate(FloatDifferential::variables(2,x));
+    Vector<FloatDifferential> ddgx=make_raw(g.evaluate(make_approximate(FloatDifferential::variables(2,x))));
     ARIADNE_LOG(9,"ddgx="<<ddgx<<"\n");
 
     Float fx = ddfx.value();
@@ -2381,8 +2379,8 @@ feasibility_step(const ExactFloatVector& xl, const ExactFloatVector& xu, const V
         rx[j] += mmu*rec(xu[j]-mx[j]);
     }
     ValidatedFloatVector ry = dhmx.value();
-    ValidatedFloatVector rzl = esub(emul(ValidatedFloatVector(mx-make_exact(xl)),mzl),mmu);
-    ValidatedFloatVector rzu = esub(emul(ValidatedFloatVector(make_exact(xu)-mx),mzu),mmu);
+    ValidatedFloatVector rzl = esub(emul(ValidatedFloatVector(mx-xl),mzl),mmu);
+    ValidatedFloatVector rzu = esub(emul(ValidatedFloatVector(xu-mx),mzu),mmu);
     ARIADNE_LOG(5,"rx="<<rx<<" ry="<<ry<<" rzl="<<rzl<<" rzu="<<rzu<<"\n");
 
     ValidatedFloatMatrix H(n,n);

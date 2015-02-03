@@ -74,11 +74,11 @@ TaylorSeries<ValidatedFloat>::TaylorSeries(OP unary_operator, const ExactInterva
     Series<ValidatedNumber> centre_series=Series<ValidatedFloat>(unary_operator,ValidatedNumber(centre));
     Series<ValidatedNumber> range_series=Series<ValidatedFloat>(unary_operator,ValidatedNumber(domain));
     for(DegreeType i=0; i!=degree; ++i) {
-        this->_expansion[i]=centre_series[i].midpoint();
+        this->_expansion[i]=centre_series[i].value();
         this->_error+=mag(centre_series[i]-this->_expansion[i]);
     }
     DegreeType d=degree;
-    this->_expansion[d]=range_series[d].midpoint();
+    this->_expansion[d]=range_series[d].value();
     this->_error+=mag(range_series[d]-this->_expansion[d]);
 }
 

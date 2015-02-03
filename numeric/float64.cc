@@ -92,6 +92,8 @@ static const double _two_pi_approx=6.2831853071795862;
 static const double _sqrt2_approx=0.70710678118654757;
 static const double _log2_approx=0.6931471805599453094;
 
+static const double _pi_near=3.1415926535897931;
+
 
 
 static inline double next_rnd(double x) {
@@ -631,6 +633,14 @@ Float64 cos_rnd(Float64 x)
 Float64 tan_rnd(Float64 x)
 {
     return tan_rnd(x.dbl);
+}
+
+Float64 Float64::pi(Precision64 pr, RoundingModeType rnd) {
+    switch(rnd) {
+        case upward: return _pi_up;
+        case downward: return _pi_down;
+        case to_nearest: return _pi_near;
+    }
 }
 
 } // namespace Ariadne

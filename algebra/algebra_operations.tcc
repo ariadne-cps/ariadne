@@ -29,10 +29,6 @@
 
 namespace Ariadne {
 
-namespace {
-inline ApproximateFloat operator+(ApproximateFloat x1, Int n2) { return x1+ApproximateFloat(n2); }
-} // namespace
-
 struct Factorial {
     Nat _n;
     Factorial(Nat n) : _n(n) { }

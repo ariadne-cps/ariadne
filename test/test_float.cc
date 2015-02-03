@@ -102,24 +102,25 @@ TestFloat::test_concept()
     x=n; x=m; x=d; x=x;
 
     // Conversion
-    d=numeric_cast<double>(x);
+    d=x.get_d();
 
-    // Maximum and minimum
-    x=max(x,x); x=min(x,x);
+    // Maximum and minimum and absolute value
+    x=max(x,x); x=min(x,x); x=abs(x);
 
 
     // Exact operations
-    x=abs(x); x=neg(x); x=+x; x=-x;
+    x=nul(x); x=pos(x); x=neg(x); x=half(x);
 
     // Rounded arithmetic
-    x=add_approx(x,x); x=add_down(x,x); x=add_up(x,x); // x=add_chop(x,x);
-    x=sub_approx(x,x); x=sub_down(x,x); x=sub_up(x,x); // x=sub_chop(x,x);
-    x=mul_approx(x,x); x=mul_down(x,x); x=mul_up(x,x); // x=mul_chop(x,x);
-    x=div_approx(x,x); x=div_down(x,x); x=div_up(x,x); // x=div_chop(x,x);
-    pow_approx(x,n); x=pow_down(x,n); x=pow_up(x,n); // x=pow_chop(x,n);
-    pow_approx(x,m); x=pow_down(x,m); x=pow_up(x,m); // x=pow_chop(x,m);
+    x=add_near(x,x); x=add_approx(x,x); x=add_down(x,x); x=add_up(x,x); // x=add_chop(x,x);
+    x=sub_near(x,x); x=add_approx(x,x); x=sub_down(x,x); x=sub_up(x,x); // x=sub_chop(x,x);
+    x=mul_near(x,x); x=add_approx(x,x); x=mul_down(x,x); x=mul_up(x,x); // x=mul_chop(x,x);
+    x=div_near(x,x); x=add_approx(x,x); x=div_down(x,x); x=div_up(x,x); // x=div_chop(x,x);
+    x=fma_approx(x,x,x); x=fma_down(x,x,x); x=fma_up(x,x,x);
+    x=pow_approx(x,n); x=pow_down(x,n); x=pow_up(x,n); // x=pow_chop(x,n);
+    x=pow_approx(x,m); x=pow_down(x,m); x=pow_up(x,m); // x=pow_chop(x,m);
 
-    x=med_approx(x,x); x=rad_up(x,x);
+    x=med_near(x,x); x=rad_up(x,x);
 
     // Mixed Float/Int arithmetic
     x=mul_approx(n,x); x=mul_down(n,x); x=mul_up(n,x); // x=mul_chop(n,x);
@@ -134,6 +135,11 @@ TestFloat::test_concept()
 
     // Reset x to 1
     x=1; x=1.0;
+
+    // Operators in rounding mode
+    x=+x; x=-x;
+    x=x+x; x=x-x; x=x*x; x=x/x;
+    x+x; x-=x; x*=x; x/=x;
 
     // Comparisons
     b=(x==n); b=(x!=n); b=(x<=n); b=(x>=n); b=(x<n); b=(x>n);
@@ -157,6 +163,12 @@ TestFloat::test_concept()
 
     Float::RoundingModeType rnd=Float::get_rounding_mode();
     Float::set_rounding_mode(rnd);
+
+    // Precision
+    Float::PrecisionType pr=Float::get_default_precision();
+    pr=x.precision();
+    x.set_precision(pr);
+
 }
 
 
@@ -370,7 +382,7 @@ TestFloat::test_arithmetic()
 
     static const double eps = std::numeric_limits<double>::epsilon();
 
-    // Set up some variables
+    // Set next_up some variables
     Float f1(1.25); Float f2(2.25); Float f3(-3.25); Float f4; Float f5;
 
     // Minimum (this should always remain exact)
@@ -398,7 +410,7 @@ TestFloat::test_arithmetic()
     ARIADNE_TEST_ASSERT(f5==3.25);
 
     // Median (this should remain exact here)
-    f3=med_approx(f1,f2);
+    f3=med_near(f1,f2);
     cout << f1 << " <= med(" << f1 << "," << f2 << ")=" << f3 << " <= " << f2 << endl;
     ARIADNE_TEST_ASSERT(f1<=f3); ARIADNE_TEST_ASSERT(f3<=f2);
     ARIADNE_TEST_ASSERT(f3==1.75);
@@ -411,8 +423,8 @@ TestFloat::test_arithmetic()
     ARIADNE_TEST_ASSERT(f3==-1.25);
 
     // Rounding
-    f3=down(f1);
-    f4=up(f1);
+    f3=next_down(f1);
+    f4=next_up(f1);
     cout << f3 << " < " << f1 << " < " << f4 << endl;
     ARIADNE_TEST_ASSERT(f3<f1); ARIADNE_TEST_ASSERT(f4>f1);
 
@@ -515,7 +527,7 @@ TestFloat::test_arithmetic()
     cout << div_down(o,t) << " <= 1/3 <= " << div_up(o,t) << endl;
     ARIADNE_TEST_COMPARE(div_down(o,t),<,div_up(o,t));
 
-    ARIADNE_TEST_COMPARE(med_approx(Float(2),Float(3)),==,2.5);
+    ARIADNE_TEST_COMPARE(med_near(Float(2),Float(3)),==,2.5);
     ARIADNE_TEST_COMPARE(rad_up(Float(2),Float(3)),>=,0.5);
     ARIADNE_TEST_COMPARE(rad_up(Float(2),Float(3)),<=,0.5000000000000002);
 
@@ -537,8 +549,8 @@ TestFloat::test_function()
 
     x=1;
     ra=exp(x);
-    rl=down(ra);
-    ru=up(ra);
+    rl=next_down(ra);
+    ru=next_up(ra);
     ARIADNE_TEST_PRINT(rl);
     ARIADNE_TEST_PRINT(ru);
     ARIADNE_TEST_ASSERT(rl<ru);

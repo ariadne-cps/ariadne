@@ -324,7 +324,7 @@ SolverBase::zero(const ValidatedVectorFunction& f,
     if(!consistent(f.evaluate(r),Vector<ValidatedNumber>(f.result_size()))) {
         ARIADNE_THROW(NoSolutionException,"SolverBase::zero","No result found in "<<bx<<"; f("<<r<<") is inconsistent with zero");
     } else {
-        UpperFloat widen=ExactFloat(eps())*sup_error(r);
+        UpperFloat widen=ExactFloat(Float::eps())*sup_error(r);
         r+=Vector<ValidatedNumber>(r.size(),ValidatedNumber(-widen,+widen));
         nr=this->step(f,r);
         if(refines(nr,r)) {

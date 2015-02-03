@@ -34,10 +34,6 @@
 #include "floatmp.h"
 
 #include "float-raw.h"
-#include "float-exact.h"
-#include "float-upper.h"
-#include "float-lower.h"
-#include "float-approximate.h"
-#include "float-validated.h"
+#include "float-user.h"
 
-#endif /* ARIADNE_FLOAT_H */
+#endif

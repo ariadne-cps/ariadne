@@ -191,10 +191,10 @@ IntegratorBase::flow_to(const ValidatedVectorFunction& vf, const ExactBox& dx0, 
     ValidatedVectorFunctionModel step_function;
     while(possibly(t<tmax)) {
         ExactBox dx=flow_function.codomain();
-        RawFloat h_max=static_cast<RawFloat>(ValidatedFloat(tmax-Real(t)));
+        ExactFloat h_max=make_exact(tmax-Real(t));
         ExactFloat h;
         UpperBox bx;
-        make_lpair(h,bx) = this->flow_bounds(vf,dx,h_max);
+        make_lpair(h,bx) = this->flow_bounds(vf,dx,h_max.raw());
         Bool flow_successfully_computed=false;
         while(!flow_successfully_computed) {
             try {
@@ -424,7 +424,7 @@ Void flow_init(const Vector<ValidatedProcedure>& p,
     fy=Vector< GradedValidatedDifferential >(p.result_size(),null);
     t=List< GradedValidatedDifferential >(p.temporaries_size(),null);
     for(Nat i=0; i!=y.size(); ++i) {
-        y[i]=GradedValidatedDifferential(Differential<UpperInterval>::variable(y.size(),so,UpperInterval(0,0),i)*r[i]+x[i]);
+        y[i]=GradedValidatedDifferential(Differential<ValidatedNumber>::variable(y.size(),so,ValidatedNumber(0,0),i)*r[i]+x[i]);
     }
 }
 
@@ -495,7 +495,7 @@ VectorTaylorFunction flow_function(const Vector<ValidatedDifferential>& dphi, co
         while(iter!=dphi[i].end()) {
             MultiIndex const a=iter->key();
             ValidatedFloat coef=iter->data();
-            ExactFloat x=coef.midpoint();
+            ExactFloat x=coef.value();
             error+=coef.error();
             expansion.append(a,x);
             ++iter;
@@ -901,7 +901,7 @@ AffineIntegrator::flow_step(const ValidatedVectorFunction& f, const ExactBox& do
     Float::set_rounding_upward();
     Vector<ErrorFloat> rad(n+1,0u);
     for(Nat i=0; i!=n; ++i) {
-        rad[i] = ErrorFloat(max(dom[i].upper()-mid[i].lower(),mid[i].upper()-dom[i].lower()));
+        rad[i] = mag(max(dom[i].upper()-mid[i].lower(),mid[i].upper()-dom[i].lower()));
     }
     rad[n] = mag(h);
 

@@ -377,8 +377,8 @@ ValidatedAffineConstrainedImageSet::construct_linear_program(LinearProgram<Float
         lp.u[nx+i]=+1.0;
     }
     for(Nat i=0; i!=nc; ++i) {
-        lp.l[nx+np+i]=-this->_constraint_models[i].upper_bound().midpoint().raw();
-        lp.u[nx+np+i]=-this->_constraint_models[i].lower_bound().midpoint().raw();
+        lp.l[nx+np+i]=-this->_constraint_models[i].upper_bound().value().raw();
+        lp.u[nx+np+i]=-this->_constraint_models[i].lower_bound().value().raw();
     }
 
     // Make part of linear program dependent on cell be +/-infinity
@@ -646,8 +646,8 @@ ValidatedAffineConstrainedImageSet::boundary(Nat xind, Nat yind) const
         A[i][nx+i]=1.0;
         Float fb=this->_constraint_models[i].function().value().raw();
         Float fe=this->_constraint_models[i].function().error().raw();
-        Float cl=this->_constraint_models[i].lower_bound().midpoint().raw();
-        Float cu=this->_constraint_models[i].upper_bound().midpoint().raw();
+        Float cl=this->_constraint_models[i].lower_bound().value().raw();
+        Float cu=this->_constraint_models[i].upper_bound().value().raw();
         b[i]=fb;
         l[nx+i]=cl-fe;
         u[nx+i]=cu+fe;

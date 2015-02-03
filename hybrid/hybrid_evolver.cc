@@ -52,6 +52,11 @@ inline auto operator+(Int n, ValidatedFloat x) -> decltype(ExactFloat(n)+x) { re
 inline auto operator-(Int n, ValidatedFloat x) -> decltype(ExactFloat(n)-x) { return ExactFloat(n)-x; }
 inline auto operator/(ExactFloat x, Nat n) -> decltype(x/ExactFloat(n)) { return x/ExactFloat(n); }
 
+inline auto operator> (LowerFloat x, Real r) -> decltype(x> ValidatedFloat(r)) { return x> ValidatedFloat(r); }
+inline auto operator>=(LowerFloat x, Real r) -> decltype(x>=ValidatedFloat(r)) { return x>=ValidatedFloat(r); }
+inline auto operator> (UpperFloat x, Real r) -> decltype(x> ValidatedFloat(r)) { return x> ValidatedFloat(r); }
+inline auto operator<=(UpperFloat x, Real r) -> decltype(x<=ValidatedFloat(r)) { return x<=ValidatedFloat(r); }
+
 typedef Integer Natural;
 
 static const DiscreteEvent final_event("_tmax_");

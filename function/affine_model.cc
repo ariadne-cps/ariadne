@@ -66,7 +66,7 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a1, const ValidatedAf
 
 ValidatedAffineModel operator+(const ValidatedNumber& c, const ValidatedAffineModel& a) {
     ValidatedAffineModel r=a;
-    RawFloat cm=c.midpoint().raw();
+    RawFloat cm=c.value().raw();
     r.set_value( static_cast<ValidatedAffineModel::CoefficientType>( cm + a.value().raw() ) );
 
     Float::set_rounding_upward();
@@ -88,7 +88,7 @@ ValidatedAffineModel operator+(const ValidatedAffineModel& a, const ValidatedNum
 
 ValidatedAffineModel operator*(const ValidatedNumber& c, const ValidatedAffineModel& a) {
     Nat n=a.argument_size();
-    RawFloat cm=c.midpoint().raw();
+    RawFloat cm=c.value().raw();
     ValidatedAffineModel r(n);
     r=ValidatedAffineModel::CoefficientType(a.value().raw()*cm);
     for(Nat i=0; i!=n; ++i) {

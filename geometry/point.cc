@@ -54,7 +54,7 @@ template<class X> Point<X>* Point<X>::clone() const {
 
 template<class X> ExactBox Point<X>::bounding_box() const {
     ExactBox r(this->dimension());
-    UpperInterval e(-eps(),+eps());
+    UpperInterval e(-Float::eps(),+Float::eps());
     for(Nat i=0; i!=this->dimension(); ++i) {
         r[i]=make_exact_interval(make_exact((*this)[i])+e); }
     return r;

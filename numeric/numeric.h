@@ -40,9 +40,6 @@
 #include "numeric/decimal.h"
 #include "numeric/dyadic.h"
 #include "numeric/float.h"
-#include "numeric/float-exact.h"
-#include "numeric/float-validated.h"
-#include "numeric/float-approximate.h"
 #include "numeric/real.h"
 
 namespace Ariadne {
@@ -65,6 +62,7 @@ template<> inline double numeric_cast(const ApproximateFloat& a) { return a.get_
 template<> inline float numeric_cast(const double& a) { return a; }
 template<> inline float numeric_cast(const Float& a) { return a.get_d(); }
 template<> inline float numeric_cast(const Real& a) { return a.get_d(); }
+template<> inline Float numeric_cast(const ExactFloat& a) { return a.raw(); }
 
 template<> inline Real numeric_cast(const Float& a) { return Real(ExactFloat(a)); }
 template<> inline Real numeric_cast(const ExactFloat& a) { return Real(a); }

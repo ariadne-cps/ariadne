@@ -34,7 +34,6 @@
 #include "numeric/integer.h"
 #include "numeric/float.h"
 #include "numeric/rational.h"
-#include "numeric/float-exact.h"
 #include "numeric/decimal.h"
 #include "numeric/dyadic.h"
 #include "geometry/interval.h"

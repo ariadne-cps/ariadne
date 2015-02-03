@@ -29,17 +29,7 @@
 #ifndef ARIADNE_OPERATORS_H
 #define ARIADNE_OPERATORS_H
 
-#include <cstdarg>
-#include <cassert>
 #include <iostream>
-#include <string>
-
-#include "utility/pointer.h"
-
-#include "utility/tribool.h"
-#include "utility/string.h"
-#include "numeric/logical.h"
-#include "numeric/numeric.h"
 
 namespace Ariadne {
 
@@ -50,8 +40,11 @@ typedef int Int;
 
 typedef std::ostream OutputStream;
 
+class Integer;
 class String;
 class Boolean;
+
+class Real;
 class Tribool;
 
 enum class OperatorKind : char {
@@ -335,7 +328,7 @@ struct Abs : OperatorObject<Abs> {
 
 struct Sgn : ComparisonObject<Sgn> {
     OperatorCode code() const { return OperatorCode::SGN; }
-    Tribool operator()(const Real& a) const { if(definitely(a>0)) { return true; } else if(definitely(a<0)) { return false; } else { return indeterminate; } }
+    Tribool operator()(const Real& a) const;
 };
 
 

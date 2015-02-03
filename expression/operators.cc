@@ -23,9 +23,19 @@
 
 #include "utility/standard.h"
 
+#include "utility/string.h"
+#include "numeric/logical.h"
+#include "numeric/integer.h"
+#include "numeric/real.h"
 #include "expression/operators.h"
 
 namespace Ariadne {
+
+Tribool Sgn::operator()(const Real& a) const {
+    if(definitely(a>0)) { return true; }
+    else if(definitely(a<0)) { return false; }
+    else { return indeterminate; }
+}
 
 OutputStream& operator<<(OutputStream& os, const OperatorKind& knd) {
     switch(knd) {

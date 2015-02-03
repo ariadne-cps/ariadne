@@ -195,7 +195,7 @@ Tribool operator>=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 template<> String class_name<Real>() { return "Real"; }
 
 const Real pi = Real(3.1415926535897930, 3.141592653589793238, 3.1415926535897936);
-const Real infinity = Real(inf.get_d());
+const Real infinity = Real(std::numeric_limits<double>::infinity());
 
 BoundFloatMP Real::operator() (PrecisionMP pr) const {
     return this->_ptr->_evaluate(pr);
@@ -209,7 +209,7 @@ BoundFloatMP Real::evaluate(Accuracy accuracy) const {
         std::cerr << "  acc="<<acc<<" max_err=="<<error_bound<<"\n";
     ErrorFloatMP error=2*error_bound;
     BoundFloatMP res;
-    while (!(error.get_flt()<error_bound.get_flt())) {
+    while (!(error.raw()<error_bound.raw())) {
         res=(*this)(precision);
         error=res.error();
         std::cerr << "  eff="<<effort<<" prec="<<precision<<" err="<<error<<" res="<<res<<"\n";

@@ -36,7 +36,12 @@ typedef Void Void;
 
 class ParadigmError { };
 
-enum class ParadigmCode : char { ERROR, EXACT, EFFECTIVE, VALIDATED, METRIC, BOUNDED, UPPER, LOWER, APPROXIMATE, RAW };
+enum class ParadigmCode : char {
+    ERROR, EXACT,
+    EFFECTIVE, EFFECTIVE_UPPER, EFFECTIVE_LOWER,
+    VALIDATED, METRIC, BOUNDED, UPPER, LOWER,
+    APPROXIMATE, RAW
+};
 
 //! \defgroup ParadigmSubModule Computational Paradigms
 //!   \ingroup LogicModule
@@ -55,7 +60,7 @@ enum class ParadigmCode : char { ERROR, EXACT, EFFECTIVE, VALIDATED, METRIC, BOU
 
 //! \ingroup ParadigmSubModule
 //! \brief The <em>computational paradigm</em> supported by the object.
-//! User paradigms are Exact, Effective, Validated,Bounded, Upper, Lower or Approximate.
+//! User paradigms are Exact, Effective, Validated,ValidatedBounded, ValidatedUpper, ValidatedLower or Approximate.
 //! Internal paradigms are Builtin and Raw.
 template<class T> using Paradigm = typename T::Paradigm;
 
@@ -66,22 +71,34 @@ template<class T> using ParadigmTag = typename T::Paradigm;
 struct Exact;
 struct Error;
 struct Effective;
+struct EffectiveUpper;
+struct EffectiveLower;
 struct Validated;
-struct Metric;
-struct Bounded;
-struct Upper;
-struct Lower;
+struct ValidatedMetric;
+struct ValidatedBounded;
+struct ValidatedUpper;
+struct ValidatedLower;
 struct Approximate;
+using Metric=ValidatedMetric;
+using Bounded=ValidatedBounded;
+using Upper=ValidatedUpper;
+using Lower=ValidatedLower;
 
 using Valid=Validated;
-using Metrc=Metric;
-using Bound=Bounded;
+using Metrc=ValidatedMetric;
+using Bound=ValidatedBounded;
 using Apprx=Approximate;
 
 using ExactTag = Exact;
 using ErrorTag = Error;
 using EffectiveTag = Effective;
+using EffectiveUpperTag = EffectiveUpper;
+using EffectiveLowerTag = EffectiveLower;
 using ValidatedTag = Validated;
+using ValidatedMetricTag = ValidatedMetric;
+using ValidatedBoundedTag = ValidatedBounded;
+using ValidatedUpperTag = ValidatedUpper;
+using ValidatedLowerTag = ValidatedLower;
 using MetricTag = Metric;
 using BoundedTag = Bounded;
 using UpperTag = Upper;
@@ -110,7 +127,7 @@ struct Exact {
 struct Error {
     static const ParadigmCode code = ParadigmCode::ERROR;
     Error() { }
-    typedef Upper NextWeakerParadigm;
+    typedef ValidatedUpper NextWeakerParadigm;
 };
 
 //! \ingroup ParadigmSubModule
@@ -122,93 +139,116 @@ struct Effective {
 };
 
 //! \ingroup ParadigmSubModule
+//! \brief A tag meaning that the object represents upper bounds to a quantity arbitrarily accurately.
+struct EffectiveUpper {
+    static const ParadigmCode code = ParadigmCode::EFFECTIVE_UPPER;
+    EffectiveUpper() { } EffectiveUpper(Exact) { } EffectiveUpper(Effective) { }
+    typedef ValidatedUpper NextWeakerParadigm;
+};
+
+//! \ingroup ParadigmSubModule
+//! \brief A tag meaning that the object represents a quantity exactly, but equality is undecidable.
+struct EffectiveLower {
+    static const ParadigmCode code = ParadigmCode::EFFECTIVE_LOWER;
+    EffectiveLower() { } EffectiveLower(Exact) { } EffectiveLower(Effective) { }
+    typedef ValidatedLower NextWeakerParadigm;
+};
+
+//! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object represents an approximation to a quantity with a bound on the error in some metric, or lower and upper bounds on a quantity.
 struct Validated {
     static const ParadigmCode code = ParadigmCode::VALIDATED;
-    Validated() { } Validated(Exact) { } Validated(Effective) { } Validated(Metric); Validated(Bounded);
+    Validated() { } Validated(Exact) { } Validated(Effective) { } Validated(ValidatedMetric); Validated(ValidatedBounded);
     typedef Approximate NextWeakerParadigm;
 };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides an approximation with a bound on the metric error.
 //! For numbers, a specialisation of Validated.
-struct Metric {
+struct ValidatedMetric {
     static const ParadigmCode code = ParadigmCode::METRIC;
-    Metric() { } Metric(Exact) { } Metric(Effective) { } Metric(Validated) { } Metric(Bounded);
+    ValidatedMetric() { } ValidatedMetric(Exact) { } ValidatedMetric(Effective) { }
+    ValidatedMetric(Validated) { } ValidatedMetric(ValidatedBounded);
     typedef Approximate NextWeakerParadigm;
 };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides lower and upper bounds for a quantity.
 //! For numbers, is a specialisation of Validated.
-struct Bounded {
+struct ValidatedBounded {
     static const ParadigmCode code = ParadigmCode::BOUNDED;
-    Bounded() { } Bounded(Exact) { } Bounded(Effective) { } Bounded(Validated) { } Bounded(Metric);
+    ValidatedBounded() { } ValidatedBounded(Exact) { } ValidatedBounded(Effective) { }
+    ValidatedBounded(Validated) { } ValidatedBounded(ValidatedMetric);
     typedef Approximate NextWeakerParadigm;
 };
 
-inline Validated::Validated(Metric) { }
-inline Validated::Validated(Bounded) { }
-inline Metric::Metric(Bounded) { }
-inline Bounded::Bounded(Metric) { }
+inline Validated::Validated(ValidatedMetric) { }
+inline Validated::Validated(ValidatedBounded) { }
+inline ValidatedMetric::ValidatedMetric(ValidatedBounded) { }
+inline ValidatedBounded::ValidatedBounded(ValidatedMetric) { }
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides an upper bound for a quantity.
-struct Upper {
+struct ValidatedUpper {
     static const ParadigmCode code = ParadigmCode::UPPER;
-    Upper() { } Upper(Exact) { } Upper(Effective) { } Upper(Validated) { } Upper(Metric) { } Upper(Bounded) { }
+    ValidatedUpper() { } ValidatedUpper(Exact) { } ValidatedUpper(Effective) { } ValidatedUpper(EffectiveUpper) { }
+    ValidatedUpper(Validated) { } ValidatedUpper(ValidatedMetric) { } ValidatedUpper(ValidatedBounded) { }
 };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides a lower bound for a quantity.
-struct Lower {
+struct ValidatedLower {
     static const ParadigmCode code = ParadigmCode::LOWER;
-    Lower() { } Lower(Exact) { } Lower(Effective) { } Lower(Validated) { } Lower(Metric) { } Lower(Bounded) { }
+    ValidatedLower() { } ValidatedLower(Exact) { } ValidatedLower(Effective) { } ValidatedLower(EffectiveLower) { }
+    ValidatedLower(Validated) { } ValidatedLower(ValidatedMetric) { } ValidatedLower(ValidatedBounded) { }
 };
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides an approximation to a quantity with no guarantees on the error.
 struct Approximate {
     static const ParadigmCode code = ParadigmCode::APPROXIMATE;
-    Approximate() { } Approximate(Exact) { } Approximate(Effective) { } Approximate(Validated) { }
-    Approximate(Bounded) { } Approximate(Metric) { } Approximate(Upper) { } Approximate(Lower) { }
+    Approximate() { } Approximate(Exact) { }
+    Approximate(Effective) { } Approximate(EffectiveUpper) { } Approximate(EffectiveLower) { }
+    Approximate(Validated) { }Approximate(ValidatedBounded) { } Approximate(ValidatedMetric) { } Approximate(ValidatedUpper) { } Approximate(ValidatedLower) { }
     typedef Void NextWeakerParadigm;
 };
 
 namespace Detail {
 Exact weaker_paradigm(Exact,Exact);
 Effective weaker_paradigm(Effective,Effective);
+EffectiveUpper weaker_paradigm(EffectiveUpper,EffectiveUpper);
+EffectiveLower weaker_paradigm(EffectiveLower,EffectiveLower);
 Validated weaker_paradigm(Validated,Validated);
-Validated weaker_paradigm(Bounded,Bounded);
-Upper weaker_paradigm(Upper,Upper);
-Lower weaker_paradigm(Lower,Lower);
+Validated weaker_paradigm(ValidatedBounded,ValidatedBounded);
+ValidatedUpper weaker_paradigm(ValidatedUpper,ValidatedUpper);
+ValidatedLower weaker_paradigm(ValidatedLower,ValidatedLower);
 Approximate weaker_paradigm(Approximate,Approximate);
 
 Approximate equality_paradigm(Approximate,Approximate);
-Lower equality_paradigm(Lower,Upper);
-Lower equality_paradigm(Upper,Lower);
-Lower equality_paradigm(Validated,Validated);
-Lower equality_paradigm(Effective,Effective);
+ValidatedLower equality_paradigm(ValidatedLower,ValidatedUpper);
+ValidatedLower equality_paradigm(ValidatedUpper,ValidatedLower);
+ValidatedLower equality_paradigm(Validated,Validated);
+ValidatedLower equality_paradigm(Effective,Effective);
 Exact equality_paradigm(Exact,Exact);
 
 Exact negate_paradigm(Exact);
 Effective negate_paradigm(Effective);
 Validated negate_paradigm(Validated);
-Bounded negate_paradigm(Bounded);
-Lower negate_paradigm(Upper);
-Upper negate_paradigm(Lower);
+ValidatedBounded negate_paradigm(ValidatedBounded);
+ValidatedLower negate_paradigm(ValidatedUpper);
+ValidatedUpper negate_paradigm(ValidatedLower);
 Approximate negate_paradigm(Approximate);
 
-Upper error_paradigm(Exact);
-Upper error_paradigm(Effective);
-Upper error_paradigm(Validated);
-Upper error_paradigm(Bounded);
-Upper error_paradigm(Upper);
-Approximate error_paradigm(Lower);
+ValidatedUpper error_paradigm(Exact);
+ValidatedUpper error_paradigm(Effective);
+ValidatedUpper error_paradigm(Validated);
+ValidatedUpper error_paradigm(ValidatedBounded);
+ValidatedUpper error_paradigm(ValidatedUpper);
+Approximate error_paradigm(ValidatedLower);
 Approximate error_paradigm(Approximate);
 
 template<class T> T widen_paradigm(T);
-Bounded widen_paradigm(Exact);
+ValidatedBounded widen_paradigm(Exact);
 
 }
 
@@ -225,7 +265,7 @@ template<class P1, class P2> struct IsStronger : IsConvertible<P1,P2> { };
 template<class P1, class P2> using Weaker = decltype(Detail::weaker_paradigm(declval<P1>(),declval<P2>()));
 
 //! \ingroup ParadigmSubModule
-//! \brief The strongest paradigm which is strictly weaker than \a P. If \a P is \c Bounded, is defined as \c Approximate.
+//! \brief The strongest paradigm which is strictly weaker than \a P. If \a P is \c ValidatedBounded, is defined as \c Approximate.
 template<class P> using Weaken = typename P::NextWeakerParadigm;
 
 

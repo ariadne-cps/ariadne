@@ -60,15 +60,6 @@ class String;
 class Tribool;
 
 
-// Paradigm / information declarations
-struct Exact;
-struct Effective;
-struct Validated;
-struct Upper;
-struct Lower;
-struct Approximate;
-template<class PS, class PW> struct IsStronger;
-
 typedef ErrorFloat ValidatedNormType;
 typedef ApproximateFloat ApproximateNormType;
 

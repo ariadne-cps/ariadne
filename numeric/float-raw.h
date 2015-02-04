@@ -35,7 +35,7 @@
 
 namespace Ariadne {
 
-static const Float inf = Float::inf();
+static const Float inf = std::numeric_limits<double>::infinity();
 
 template<class OP> Float64 apply(OP op, Float64 const& x1, Float64 const& x2, RoundingMode64 rnd) {
     auto old_rnd=Float64::get_rounding_mode();
@@ -69,6 +69,7 @@ template<class OP> FloatMP apply(OP op, FloatMP const& x, Int n, RoundingModeMP 
     return std::move(r);
 }
 
+/*
 inline Float max_exact(Float const& x1, Float const& x2) { return max(x1,x2); }
 inline Float min_exact(Float const& x1, Float const& x2) { return min(x1,x2); }
 inline Float abs_exact(Float const& x) { return abs(x); }
@@ -131,7 +132,7 @@ inline Float64 tan_approx(Float64 x) { return std::tan(x.dbl); }
 inline Float64 asin_approx(Float64 x) { return std::asin(x.dbl); }
 inline Float64 acos_approx(Float64 x) { return std::acos(x.dbl); }
 inline Float64 atan_approx(Float64 x) { return std::atan(x.dbl); }
-
+*/
 inline FloatMP sqrt_approx(FloatMP const& x) { return sqrt(x,FloatMP::to_nearest); }
 inline FloatMP exp_approx(FloatMP const& x) { return exp(x,FloatMP::to_nearest); }
 inline FloatMP log_approx(FloatMP const& x) { return log(x,FloatMP::to_nearest); }

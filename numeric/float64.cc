@@ -244,7 +244,7 @@ double exp_rnd(double x)
 double log_rnd(double x) {
     static const long long int c[12]={ 1LL, 3LL, 5LL, 7LL, 9LL, 11LL, 13LL, 15LL, 17LL, 19LL, 21LL, 23LL };
 
-    ARIADNE_ASSERT(x>0.0);
+    ARIADNE_ASSERT_MSG(x>=0.0,"log(x): x="<<x);
     // Write x=2^ny with 1/sqrt(2) <= y <= sqrt(2)
     // Write log(y)=log(1+z)-log(1-z) where z=(y-1)/(y+1) and y=(1+z)/(1-z),
     // Note that y is monotone increasing in z (and vice-versa)
@@ -256,6 +256,7 @@ double log_rnd(double x) {
     // Note that if z<0 (corresponding to y<1) then we need to use
     // opposite rounding to compute s and w.
 
+    if(x==0.0) { return std::numeric_limits<double>::infinity(); }
     if(x==1.0) { return 0.0; }
 
     Int n;
@@ -600,31 +601,6 @@ Float64::Float64(Rational const& q, RoundingModeType rnd)
     }
 }
 
-Float64 sqr_rnd(Float64 x)
-{
-    return x.dbl*x.dbl;
-}
-
-Float64 add_rnd(Float64 x1, Float64 x2)
-{
-    return x1.dbl+x2.dbl;
-}
-
-Float64 sub_rnd(Float64 x1, Float64 x2)
-{
-    return x1.dbl-x2.dbl;
-}
-
-Float64 mul_rnd(Float64 x1, Float64 x2)
-{
-    return x1.dbl*x2.dbl;
-}
-
-Float64 div_rnd(Float64 x1, Float64 x2)
-{
-    return x1.dbl/x2.dbl;
-}
-
 Float64 pow_rnd(Float64 x, Int n)
 {
     return pow_rnd(x.dbl,n);
@@ -660,12 +636,65 @@ Float64 tan_rnd(Float64 x)
     return tan_rnd(x.dbl);
 }
 
+Float64 atan_rnd(Float64 x)
+{
+    return atan_rnd(x.dbl);
+}
+
 Float64 Float64::pi(Precision64 pr, RoundingModeType rnd) {
     switch(rnd) {
         case upward: return _pi_up;
         case downward: return _pi_down;
         case to_nearest: return _pi_near;
     }
+}
+
+Float64::RoundingModeType Float64::get_rounding_mode() { return Ariadne::get_rounding_mode(); }
+Void Float64::set_rounding_mode(RoundingModeType rnd) { Ariadne::set_rounding_mode(rnd); }
+Void Float64::set_rounding_downward() { Ariadne::set_rounding_downward(); }
+Void Float64::set_rounding_upward() { Ariadne::set_rounding_upward(); }
+Void Float64::set_rounding_to_nearest() { Ariadne::set_rounding_to_nearest(); }
+Void Float64::set_rounding_toward_zero() { Ariadne::set_rounding_toward_zero(); }
+
+Float64::PrecisionType Float64::get_default_precision() { return Float64::PrecisionType(); }
+Float64::PrecisionType Float64::precision() const { return Float64::PrecisionType(); }
+Void Float64::set_precision(Float64::PrecisionType) { }
+
+Float64 Float64::min() { return std::numeric_limits<double>::min(); }
+Float64 Float64::max() { return std::numeric_limits<double>::max(); }
+Float64 Float64::eps() { return std::numeric_limits<double>::epsilon(); }
+Float64 Float64::inf() { return std::numeric_limits<double>::infinity(); }
+
+template<> Nat integer_cast<Nat,Float64>(Float64 const& x) { return x.dbl; }
+template<> Int integer_cast<Int,Float64>(Float64 const& x) { return x.dbl; }
+
+Float64 max(Float64 x1, Float64 x2) { return std::max(x1.dbl,x2.dbl); }
+Float64 min(Float64 x1, Float64 x2) { return std::min(x1.dbl,x2.dbl); }
+Float64 abs(Float64 x) { return std::fabs(x.dbl); }
+Float64 mag(Float64 x) { return std::fabs(x.dbl); }
+
+Float64 nul(Float64 x) { return 0.0; }
+Float64 pos(Float64 x) { return +x.dbl; }
+Float64 neg(Float64 x) { return -x.dbl; }
+Float64 half(Float64 x) { return x.dbl/2; }
+
+Float64 operator+(Float64 x) { return +x.dbl; }
+Float64 operator-(Float64 x) { return -x.dbl; }
+Bool operator==(Float64 x1, Float64 x2) { return x1.dbl==x2.dbl; }
+Bool operator!=(Float64 x1, Float64 x2) { return x1.dbl!=x2.dbl; }
+Bool operator<=(Float64 x1, Float64 x2) { return x1.dbl<=x2.dbl; }
+Bool operator>=(Float64 x1, Float64 x2) { return x1.dbl>=x2.dbl; }
+Bool operator< (Float64 x1, Float64 x2) { return x1.dbl< x2.dbl; }
+Bool operator> (Float64 x1, Float64 x2) { return x1.dbl> x2.dbl; }
+
+Bool is_nan(Float64 x) { return std::isnan(x.dbl); }
+
+OutputStream& operator<<(OutputStream& os, Float64 const& x) {
+    return os << x.dbl;
+}
+
+InputStream& operator>>(InputStream& is, Float64& x) {
+    double r; is >> r; x.dbl=r; return is;
 }
 
 } // namespace Ariadne

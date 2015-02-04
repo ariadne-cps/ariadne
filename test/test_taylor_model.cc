@@ -105,9 +105,11 @@ TestTaylorModel::TestTaylorModel(Sweeper sweeper)
 
 Void TestTaylorModel::test()
 {
-    std::cerr<<std::setprecision(17);
-    std::cout<<std::setprecision(17);
-    std::clog<<std::setprecision(17);
+    std::cerr<<std::setprecision(18);
+    std::cout<<std::setprecision(18);
+    std::clog<<std::setprecision(18);
+    ExactFloat::set_output_precision(18);
+    ValidatedFloat::set_output_precision(18);
 
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_predicates());
@@ -428,7 +430,6 @@ Void TestTaylorModel::test_antiderivative()
     ARIADNE_TEST_EQUAL(antiderivative((x^2)*(y^4)*15/2,0),(x^3)*(y^4)*5/2);
     ARIADNE_TEST_EQUAL(antiderivative((x^2)*(y^4)*15/2,1),(x^2)*(y^5)*3/2);
 
-    // Test error control
     ValidatedTaylorModel x=ValidatedTaylorModel::coordinate(1,0,swp);
     ValidatedTaylorModel e=ValidatedTaylorModel::zero(1,swp)+ValidatedFloat(-1,+1);
     ARIADNE_TEST_EQUAL(antiderivative(2.0*x*x,0),0.66666666666666663*x*x*x+5.5511151231257827021e-17*e);

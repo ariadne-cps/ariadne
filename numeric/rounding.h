@@ -230,7 +230,7 @@ inline rounding_mode_t Float::get_rounding_mode() { return 0 }
 
 namespace Ariadne {
 
-//! \brief The uintegral type used to represent the rounding mode.
+//! \brief The integral type used to represent the rounding mode.
 typedef unsigned short RoundingModeType;
 
 //! \brief The floating-point environment value for rounding arithmetic to the nearest exactly-representable value.

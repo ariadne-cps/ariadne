@@ -35,11 +35,12 @@
 
 namespace Ariadne {
 
-const ExactFloat infty = ExactFloat(Float::inf());
-
 Nat ApproximateFloat::output_precision = 4;
 Nat ValidatedFloat::output_precision = 8;
 Nat ExactFloat::output_precision = 16;
+
+const ExactFloat infty = ExactFloat(Float::inf());
+
 
 ExactFloat::ExactFloat(Integer const& z)
     : v(z.get_si())
@@ -121,16 +122,12 @@ ValidatedFloat trunc(ValidatedFloat const& x, Nat n)
 
 ValidatedFloat rec(ValidatedFloat const& x)
 {
-    const Float& il=x.lower_raw();
-    const Float& iu=x.upper_raw();
+    const Float& xl=x.lower_raw();
+    const Float& xu=x.upper_raw();
     Float rl,ru;
-    if(il>0 || iu<0) {
-        Float::RoundingModeType rnd=Float::get_rounding_mode();
-        Float::set_rounding_downward();
-        rl=div(1.0,iu);
-        Float::set_rounding_upward();
-        ru=div(1.0,il);
-        Float::set_rounding_mode(rnd);
+    if(xl>0 || xu<0) {
+        rl=rec_down(xu);
+        ru=rec_up(xl);
     } else {
         rl=-inf;
         ru=+inf;
@@ -232,8 +229,8 @@ ValidatedFloat div(ValidatedFloat const& x1, ValidatedFloat const& x2)
     }
     else {
         // ARIADNE_THROW(DivideByZeroException,"ValidatedFloat div(ValidatedFloat ivl1, ValidatedFloat ivl2)","ivl1="<<x1<<", ivl2="<<x2);
-        rl=-std::numeric_limits<double>::infinity();
-        ru=+std::numeric_limits<double>::infinity();
+        rl=-Float::inf();
+        ru=+Float::inf();
     }
     Float::set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
@@ -253,8 +250,8 @@ ValidatedFloat div(ValidatedFloat const& x1, ExactFloat const& x2)
     } else if(x2v<0) {
         rl=div_down(x1u,x2v); ru=div_up(x1l,x2v);
     } else {
-        rl=-std::numeric_limits<double>::infinity();
-        ru=+std::numeric_limits<double>::infinity();
+        rl=-Float::inf();
+        ru=+Float::inf();
     }
     Float::set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
@@ -270,8 +267,8 @@ ValidatedFloat div(ExactFloat const& x1, ValidatedFloat const& x2)
     Float rl,ru;
     if(i2l<=0 && i2u>=0) {
         ARIADNE_THROW(DivideByZeroException,"ValidatedFloat div(Float const& x1, ValidatedFloat ivl2)","x1="<<x1<<", ivl2="<<x2);
-        rl=-std::numeric_limits<double>::infinity();
-        ru=+std::numeric_limits<double>::infinity();
+        rl=-Float::inf();
+        ru=+Float::inf();
     } else if(x1v>=0) {
         rl=div_down(x1v,i2u); ru=div_up(x1v,i2l);
     } else {
@@ -284,24 +281,19 @@ ValidatedFloat div(ExactFloat const& x1, ValidatedFloat const& x2)
 ValidatedFloat sqr(ValidatedFloat const& x)
 {
     Float::RoundingModeType rnd=Float::get_rounding_mode();
-    const Float& il=x.lower_raw();
-    const Float& iu=x.upper_raw();
+    const Float& xl=x.lower_raw();
+    const Float& xu=x.upper_raw();
     Float rl,ru;
-    if(il>0.0) {
-        Float::set_rounding_downward();
-        rl=il*il;
-        Float::set_rounding_upward();
-        ru=iu*iu;
-    } else if(iu<0.0) {
-        Float::set_rounding_downward();
-        rl=iu*iu;
-        Float::set_rounding_upward();
-        ru=il*il;
+    if(xl>0.0) {
+        rl=mul_down(xl,xl);
+        ru=mul_up(xu,xu);
+    } else if(xu<0.0) {
+        rl=mul_down(xu,xu);
+        ru=mul_up(xl,xl);
     } else {
-        rl=0.0;
-        Float::set_rounding_upward();
-        Float ru1=il*il;
-        Float ru2=iu*iu;
+        rl=nul(xl);
+        Float ru1=mul_up(xl,xl);
+        Float ru2=mul_up(xu,xu);
         ru=max(ru1,ru2);
     }
     Float::set_rounding_mode(rnd);
@@ -321,10 +313,8 @@ ValidatedFloat pow(ValidatedFloat const& x, Nat m)
     Float::RoundingModeType rnd = Float::get_rounding_mode();
     ValidatedFloat sx = x;
     if(m%2==0) { sx=abs(x); }
-    Float::set_rounding_downward();
-    Float rl=pow_rnd(sx.lower_raw(),m);
-    Float::set_rounding_upward();
-    Float ru=pow_rnd(sx.upper_raw(),m);
+    Float rl=pow_down(sx.lower_raw(),m);
+    Float ru=pow_up(sx.upper_raw(),m);
     Float::set_rounding_mode(rnd);
     return ValidatedFloat(rl,ru);
 }
@@ -365,9 +355,6 @@ ValidatedFloat log(ValidatedFloat const& x)
 }
 
 
-Float pi_approx() { return Float::pi(Float::get_default_precision(),Float::to_nearest); }
-Float pi_down() { return Float::pi(Float::get_default_precision(),Float::downward); }
-Float pi_up() { return Float::pi(Float::get_default_precision(),Float::downward); }
 ValidatedFloat pi_val() { return ValidatedFloat(pi_down(),pi_up()); }
 
 
@@ -485,17 +472,6 @@ operator>>(InputStream& is, ValidatedFloat& x)
 }
 
 
-ApproximateFloat create_float(Number<Approximate> x) { return ApproximateFloat(x); }
-LowerFloat create_float(Number<Lower> x) { return LowerFloat(x); }
-UpperFloat create_float(Number<Upper> x) { return UpperFloat(x); }
-ValidatedFloat create_float(Number<Validated> x) { return ValidatedFloat(x); }
-ValidatedFloat create_float(Number<Effective> x) { return ValidatedFloat(x); }
-ValidatedFloat create_float(Number<Exact> x) { return ValidatedFloat(x); }
-ValidatedFloat create_float(Real r) { return ValidatedFloat(r); }
-ValidatedFloat create_float(Rational q) { return ValidatedFloat(q); }
-ExactFloat create_float(Integer z) { return ExactFloat(z); }
-
-
 UpperFloat::UpperFloat(Number<Upper> const& x) {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -511,17 +487,17 @@ OutputStream& operator<<(OutputStream& os, UpperFloat const& x) {
 
 UpperFloat sqr(UpperFloat const& x) {
     ARIADNE_PRECONDITION(x.raw()>=0.0);
-    return UpperFloat(sqr(x.raw()));
+    return UpperFloat(mul_up(x.raw(),x.raw()));
 }
 
 UpperFloat mul(UpperFloat const& x1, UpperFloat const& x2) {
     ARIADNE_PRECONDITION(x1.raw()>=0.0 && x2.raw() >= 0.0);
-    return UpperFloat(x1.raw()*x2.raw());
+    return UpperFloat(mul_up(x1.raw(),x2.raw()));
 }
 
 UpperFloat div(UpperFloat const& x1, LowerFloat const& x2) {
     ARIADNE_PRECONDITION(x1.raw()>=0.0 && x2.raw() > 0.0);
-    return UpperFloat(x1.raw()/x2.raw());
+    return UpperFloat(div_up(x1.raw(),x2.raw()));
 }
 
 UpperFloat pow(UpperFloat const& x, Nat n) {
@@ -530,44 +506,20 @@ UpperFloat pow(UpperFloat const& x, Nat n) {
 }
 
 
-UpperFloat rec(LowerFloat const& x)
-{
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float const& xl=x.raw();
-    Float::set_rounding_upward();
-    Float ru=rec(xl);
-    Float::set_rounding_mode(rnd);
-    return UpperFloat(ru);
+UpperFloat rec(LowerFloat const& x) {
+    return UpperFloat(rec_up(x.raw()));
 }
 
-UpperFloat sqrt(UpperFloat const& x)
-{
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float const& xu=x.raw();
-    Float::set_rounding_upward();
-    Float ru=sqrt(xu);
-    Float::set_rounding_mode(rnd);
-    return UpperFloat(ru);
+UpperFloat sqrt(UpperFloat const& x) {
+    return UpperFloat(sqrt_up(x.raw()));
 }
 
-UpperFloat exp(UpperFloat const& x)
-{
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float const& xu=x.raw();
-    Float::set_rounding_upward();
-    Float ru=exp(xu);
-    Float::set_rounding_mode(rnd);
-    return UpperFloat(ru);
+UpperFloat exp(UpperFloat const& x) {
+    return UpperFloat(exp_up(x.raw()));
 }
 
-UpperFloat log(UpperFloat const& x)
-{
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float const& xu=x.raw();
-    Float::set_rounding_upward();
-    Float ru=log(xu);
-    Float::set_rounding_mode(rnd);
-    return UpperFloat(ru);
+UpperFloat log(UpperFloat const& x) {
+    return UpperFloat(log_up(x.raw()));
 }
 
 template<> Int integer_cast(UpperFloat const& x) { return static_cast<Int>(x.u.get_d()); }
@@ -609,60 +561,28 @@ LowerFloat::LowerFloat(Number<Lower> const& x) {
 
 LowerFloat mul(LowerFloat const& x1, LowerFloat const& x2) {
     ARIADNE_PRECONDITION(x1.raw()>=0 && x2.raw()>=0);
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float const& x1l=x1.raw();
-    Float const& x2l=x2.raw();
-    Float::set_rounding_downward();
-    Float rl=x1l*x2l;
-    Float::set_rounding_mode(rnd);
-    return LowerFloat(rl);
+    return LowerFloat(mul_down(x1.raw(),x2.raw()));
 }
 
 LowerFloat div(LowerFloat const& x1, UpperFloat const& x2) {
     //ARIADNE_PRECONDITION_MSG(x1.raw()>=0 && x2.raw()>=0,"x1="<<x1<<", x2="<<x2);
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float const& x1l=x1.raw();
-    Float const& x2l=x2.raw();
-    Float::set_rounding_downward();
-    Float rl=x1l/x2l;
-    Float::set_rounding_mode(rnd);
-    return LowerFloat(rl);
+    return LowerFloat(div_down(x1.raw(),x2.raw()));
 }
 
 LowerFloat rec(UpperFloat const& x) {
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float const& xu=x.raw();
-    Float::set_rounding_downward();
-    Float rl=rec(xu);
-    Float::set_rounding_mode(rnd);
-    return LowerFloat(rl);
+    return LowerFloat(rec_down(x.raw()));
 }
 
 LowerFloat sqrt(LowerFloat const& x) {
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float const& xl=x.raw();
-    Float::set_rounding_downward();
-    Float rl=sqrt(xl);
-    Float::set_rounding_mode(rnd);
-    return LowerFloat(rl);
+    return LowerFloat(sqrt_down(x.raw()));
 }
 
 LowerFloat exp(LowerFloat const& x) {
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float const& xl=x.raw();
-    Float::set_rounding_downward();
-    Float rl=exp(xl);
-    Float::set_rounding_mode(rnd);
-    return LowerFloat(rl);
+    return LowerFloat(exp_down(x.raw()));
 }
 
 LowerFloat log(LowerFloat const& x) {
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float const& xl=x.raw();
-    Float::set_rounding_downward();
-    Float rl=log(xl);
-    Float::set_rounding_mode(rnd);
-    return LowerFloat(rl);
+    return LowerFloat(log_down(x.raw()));
 }
 
 OutputStream& operator<<(OutputStream& os, LowerFloat const& x) {
@@ -677,6 +597,7 @@ template<> Int integer_cast(LowerFloat const& x) { return static_cast<Int>(x.l.g
 template<> Nat integer_cast(LowerFloat const& x) { return static_cast<Nat>(x.l.get_d()); }
 
 
+
 //ExactFloat inf = ExactFloat(std::numeric_limits< double >::infinity());
 ApproximateFloat::ApproximateFloat(Dyadic const& b) : ApproximateFloat(b.operator Rational()) { }
 ApproximateFloat::ApproximateFloat(Decimal const& d) : ApproximateFloat(d.operator Rational()) { }
@@ -686,16 +607,29 @@ ApproximateFloat::ApproximateFloat(Number<Approximate> const& x) { ARIADNE_NOT_I
 ExactFloat::operator Rational() const {
     return Rational(this->get_d());
 }
+
 ApproximateFloat::ApproximateFloat(Rational const& q) : ApproximateFloat(q.get_d()) {
 }
 
 OutputStream& operator<<(OutputStream& os, ApproximateFloat const& x) {
-    os << std::showpoint << std::setprecision(ApproximateFloat::output_precision) << x.raw();
-    return os;
+    return os << std::showpoint << std::setprecision(ApproximateFloat::output_precision) << x.raw();
 }
 
 template<> Int integer_cast(ApproximateFloat const& x) { return static_cast<Int>(x.a.get_d()); }
 template<> Nat integer_cast(ApproximateFloat const& x) { return static_cast<Nat>(x.a.get_d()); }
+
+
+
+
+ApproximateFloat create_float(Number<Approximate> x) { return ApproximateFloat(x); }
+LowerFloat create_float(Number<Lower> x) { return LowerFloat(x); }
+UpperFloat create_float(Number<Upper> x) { return UpperFloat(x); }
+ValidatedFloat create_float(Number<Validated> x) { return ValidatedFloat(x); }
+ValidatedFloat create_float(Number<Effective> x) { return ValidatedFloat(x); }
+ValidatedFloat create_float(Number<Exact> x) { return ValidatedFloat(x); }
+ValidatedFloat create_float(Real r) { return ValidatedFloat(r); }
+ValidatedFloat create_float(Rational q) { return ValidatedFloat(q); }
+ExactFloat create_float(Integer z) { return ExactFloat(z); }
 
 
 

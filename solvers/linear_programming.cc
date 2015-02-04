@@ -88,10 +88,6 @@ Vector<Float> erec(const Vector<Float>& v) {
     return r;
 }
 
-Bool is_nan(Float const& x) {
-    return std::isnan(x.get_d());
-}
-
 Bool is_nan(Vector<Float> const& v) {
     for(Nat i=0; i!=v.size(); ++i) {
         if(is_nan(v[i])) { return true; }

@@ -53,6 +53,9 @@ class TestSeries
         ARIADNE_TEST_EQUALS(series[127],-1.0);
         ARIADNE_TEST_EQUALS(series[255],-1.0);
 //        ARIADNE_TEST_EQUALS(series[32767],1.0);
+        std::cerr<<std::setprecision(18);
+        ExactFloat::set_output_precision(18);
+        ValidatedFloat::set_output_precision(18);
     }
     void test_rec() {
         ARIADNE_TEST_EQUALS( Series<Float>(Rec(),2.0).coefficients(5), (List<Float>{0.5,-0.25,0.125,-0.0625,0.03125,-0.015625}) );
@@ -85,8 +88,10 @@ class TestSeries
     }
 
     void test_sin() {
-        static const Float sin1=sin(1);
-        static const Float cos1=cos(1);
+        const Float one=1;
+        const Float sin1=sin(one);
+        const Float cos1=cos(one);
+
         ARIADNE_TEST_EQUALS( Series<Float>(Sin(),0.0).coefficients(5),
                              (List<Float>{0.0,1.0,0.0,-1.0/6,0.0,1.0/120}) );
         ARIADNE_TEST_EQUAL ( Series<Float>(Sin(),1.0).coefficients(5),
@@ -94,8 +99,9 @@ class TestSeries
     }
 
     void test_cos() {
-        static const Float sin1=sin(1);
-        static const Float cos1=cos(1);
+        const Float one=1;
+        const Float sin1=sin(one);
+        const Float cos1=cos(one);
         ARIADNE_TEST_EQUALS( Series<Float>(Cos(),0.0).coefficients(5),
                              (List<Float>{1.0,0.0,-1.0/2,0.0,1.0/24,0.0}) );
         ARIADNE_TEST_EQUAL ( Series<Float>(Cos(),1.0).coefficients(4),

@@ -426,7 +426,7 @@ TestFloat::test_arithmetic()
     f3=next_down(f1);
     f4=next_up(f1);
     cout << f3 << " < " << f1 << " < " << f4 << endl;
-    ARIADNE_TEST_ASSERT(f3<f1); ARIADNE_TEST_ASSERT(f4>f1);
+    ARIADNE_TEST_COMPARE(f3,<,f1); ARIADNE_TEST_COMPARE(f4,>,f1);
 
     // Addition (this should remain exact here)
     f3=add_down(f1,f2);
@@ -607,5 +607,14 @@ TestFloat::test_cosine()
     ARIADNE_TEST_COMPARE(cos_rnd(3*pi_down),==,-1.0);
     ARIADNE_TEST_COMPARE(cos_rnd(3*pi_up),==,-1.0);
 
+    static const Float one=1.0;
+    Float::set_rounding_mode(Float::upward);
+    Float sin_rnd_up_one=sin(one);
+    Float::set_rounding_mode(Float::downward);
+    Float sin_rnd_down_one=sin(one);
     Float::set_rounding_mode(Float::to_nearest);
+    Float sin_rnd_approx_one=sin(one);
+    ARIADNE_TEST_COMPARE(sin_rnd_down_one,<=,sin_rnd_approx_one);
+    ARIADNE_TEST_COMPARE(sin_rnd_approx_one,<=,sin_rnd_up_one);
+    ARIADNE_TEST_COMPARE(sin_rnd_down_one,< ,sin_rnd_up_one);
 }

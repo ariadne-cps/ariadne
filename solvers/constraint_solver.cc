@@ -233,8 +233,6 @@ Bool ConstraintSolver::reduce(UpperBox& domain, const ValidatedVectorFunction& f
     return false;
 }
 
-inline Bool is_nan(const Float& x) { return isnan(x.get_d()); }
-
 Bool has_nan(const ExactBox& domain) {
     for(Nat i=0; i!=domain.size(); ++i) {
         if(is_nan(domain[i].lower().raw()) || is_nan(domain[i].upper().raw())) { return true; }

@@ -289,8 +289,8 @@ inline UpperFloat half(UpperFloat const& x) { return UpperFloat(half_exact(x.u))
 UpperFloat sqr(UpperFloat const& x);
 UpperFloat rec(LowerFloat const& x);
 
-inline UpperFloat add(UpperFloat const& x1, UpperFloat const& x2) { return UpperFloat(add_down(x1.u,x2.u)); }
-inline UpperFloat sub(UpperFloat const& x1, LowerFloat const& x2) { return UpperFloat(sub_down(x1.u,x2.l)); }
+inline UpperFloat add(UpperFloat const& x1, UpperFloat const& x2) { return UpperFloat(add_up(x1.u,x2.u)); }
+inline UpperFloat sub(UpperFloat const& x1, LowerFloat const& x2) { return UpperFloat(sub_up(x1.u,x2.l)); }
 UpperFloat mul(UpperFloat const& x1, UpperFloat const& x2);
 UpperFloat div(UpperFloat const& x1, LowerFloat const& x2);
 UpperFloat pow(UpperFloat const& x, Nat m);

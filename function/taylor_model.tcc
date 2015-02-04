@@ -1064,7 +1064,6 @@ template<class F> Void TaylorModel<Validated,F>::antidifferentiate(SizeType k) {
         Nat c=xa[k];
         xv=div_err(xv,c,e);
     }
-
     x.error()+=e;
 }
 

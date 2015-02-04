@@ -66,6 +66,7 @@ LogicalValue equal(LogicalValue l1, LogicalValue l2);
 inline LogicalValue disjunction(LogicalValue l1, LogicalValue l2) { return (l1<l2 ? l1 : l2); }
 inline LogicalValue conjunction(LogicalValue l1, LogicalValue l2) { return (l1>l2 ? l1 : l2); }
 inline LogicalValue negation(LogicalValue l) { return static_cast<LogicalValue>(-static_cast<char>(l)); }
+inline LogicalValue check(LogicalValue l) { return l; }
 
 OutputStream& operator<<(OutputStream& os, LogicalValue b);
 
@@ -82,7 +83,7 @@ template<class P> class Logical
     explicit operator LogicalValue () const { return _v; }
   public:
     constexpr Logical() : Logical(LogicalValue::FALSE) { }
-    template<class PP, EnableIf<IsWeaker<P,PP>> =dummy> constexpr Logical(Logical<PP> l) : Logical(l._v) { }
+    template<class PP, EnableIf<IsWeaker<P,PP>> =dummy> constexpr Logical(Logical<PP> l) : Logical(check(l._v)) { }
     //! \brief Convert from a builtin boolean value.
     constexpr Logical(Bool b) : Logical(b?LogicalValue::TRUE:LogicalValue::FALSE) { }
 
@@ -135,7 +136,7 @@ template<> inline Logical<Lower>::Logical(LogicalValue v)
 template<> inline Logical<Approximate>::Logical(LogicalValue v)
     : _v(v==LogicalValue::TRUE?LogicalValue::LIKELY:v==LogicalValue::FALSE?LogicalValue::UNLIKELY:v) { }
 class LogicalHandle;
-LogicalValue check(LogicalHandle const& l, Effort e);
+LogicalValue check(LogicalHandle const& l, Effort e=Effort::get_default());
 
 class LogicalInterface {
     friend LogicalValue check(LogicalHandle const& l, Effort e);

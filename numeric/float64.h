@@ -183,6 +183,19 @@ template<class R, class A> R integer_cast(const A& a);
 template<> inline Int integer_cast(const Float64& x) { return static_cast<Int>(x.get_d()); }
 template<> inline Nat integer_cast(const Float64& x) { return static_cast<Nat>(x.get_d()); }
 
+Float64 sqr_rnd(Float64 x);
+Float64 add_rnd(Float64 x1, Float64 x2);
+Float64 sub_rnd(Float64 x1, Float64 x2);
+Float64 mul_rnd(Float64 x1, Float64 x2);
+Float64 div_rnd(Float64 x1, Float64 x2);
+Float64 pow_rnd(Float64 x, Int n);
+Float64 sqrt_rnd(Float64 x);
+Float64 exp_rnd(Float64 x);
+Float64 log_rnd(Float64 x);
+Float64 sin_rnd(Float64 x);
+Float64 cos_rnd(Float64 x);
+Float64 tan_rnd(Float64 x);
+Float64 atan_rnd(Float64 x);
 
 
 
@@ -197,6 +210,8 @@ inline Void Float64::set_rounding_to_nearest() { Ariadne::set_rounding_to_neares
 inline Void Float64::set_rounding_toward_zero() { Ariadne::set_rounding_toward_zero(); }
 
 inline Float64::PrecisionType Float64::get_default_precision() { return Float64::PrecisionType(); }
+inline Float64::PrecisionType Float64::precision() const { return Float64::PrecisionType(); }
+inline Void Float64::set_precision(Float64::PrecisionType) { }
 
 // Exact raw data operations
 inline Float64 nul(Float64 const& x) { return 0.0; }
@@ -221,7 +236,7 @@ inline Float64 sqrt(Float64 const& x) { return std::sqrt(x.dbl); }
 inline Float64 exp(Float64 const& x) { return std::exp(x.dbl); }
 inline Float64 log(Float64 const& x) { return std::log(x.dbl); }
 inline Float64 sin(Float64 const& x) { return std::sin(x.dbl); }
-inline Float64 cos(Float64 const& x) { return std::cos(x.dbl); }
+inline Float64 cos(Float64 const& x) { return cos_rnd(x); }
 inline Float64 tan(Float64 const& x) { return std::tan(x.dbl); }
 inline Float64 asin(Float64 const& x) { return std::asin(x.dbl); }
 inline Float64 acos(Float64 const& x) { return std::acos(x.dbl); }

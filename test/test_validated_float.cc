@@ -30,7 +30,7 @@
 
 #include "config.h"
 #include "numeric/rational.h"
-#include "numeric/float-validated.h"
+#include "numeric/float-user.h"
 
 #include "test.h"
 
@@ -264,42 +264,37 @@ TestValidatedFloat::test_constructors()
     Float zero=0;
 
     // Construct from pair
-    ValidatedFloat ivld1(Float(1.125),Float(2.25));
-    ARIADNE_TEST_ASSERT(ivld1.lower_raw()==1.125); ARIADNE_TEST_ASSERT(ivld1.upper_raw()==2.25);
+    ValidatedFloat xd1(Float(1.125),Float(2.25));
+    ARIADNE_TEST_ASSERT(xd1.lower_raw()==1.125); ARIADNE_TEST_ASSERT(xd1.upper_raw()==2.25);
 
     // Default constructor
-    ValidatedFloat ivld2;
-    if(ivld2.lower_raw()>ivld2.upper_raw()) {
+    ValidatedFloat xd2;
+    if(xd2.lower_raw()>xd2.upper_raw()) {
         ARIADNE_TEST_WARN("ValidatedFloat default constructor returns an empty set.");
     } else {
-        ARIADNE_TEST_ASSERT((Bool)(ivld2==ValidatedFloat(zero,zero)));
+        ARIADNE_TEST_ASSERT((Bool)(xd2==ValidatedFloat(zero,zero)));
     }
 
     // Constructor with approximations
-    ValidatedFloat ivld3(Rational(21,10),Rational(16,5));
-    cout<<ivld3<<std::endl;
-    ARIADNE_TEST_COMPARE(Rational(ivld3.lower_raw()),<,Rational(21,10));
-    ARIADNE_TEST_COMPARE(Rational(ivld3.upper_raw()),>,Rational(16,5));
+    ValidatedFloat xd3(Rational(21,10),Rational(16,5));
+    cout<<xd3<<std::endl;
+    ARIADNE_TEST_COMPARE(Rational(xd3.lower_raw()),<,Rational(21,10));
+    ARIADNE_TEST_COMPARE(Rational(xd3.upper_raw()),>,Rational(16,5));
 
     // Constructor from approximate values
-    ValidatedFloat ivld4(2.1,3.2);
-    ARIADNE_TEST_COMPARE(ivld4.lower_raw(),<=,2.1);
-    ARIADNE_TEST_COMPARE(ivld4.upper_raw(),>=,3.2);
+    ValidatedFloat xd4(2.1,3.2);
+    ARIADNE_TEST_COMPARE(xd4.lower_raw(),<=,2.1);
+    ARIADNE_TEST_COMPARE(xd4.upper_raw(),>=,3.2);
 
     // Approximate constructor from a single value
-    ValidatedFloat ivld5(Rational(1,3));
-    ARIADNE_TEST_COMPARE(Rational(ivld5.lower_raw()),<,Rational(1,3));
-    ARIADNE_TEST_COMPARE(Rational(ivld5.upper_raw()),>,Rational(1,3));
+    ValidatedFloat xd5(Rational(1,3));
+    ARIADNE_TEST_COMPARE(Rational(xd5.lower_raw()),<,Rational(1,3));
+    ARIADNE_TEST_COMPARE(Rational(xd5.upper_raw()),>,Rational(1,3));
 
     // Exact constructor from a single value
-    ValidatedFloat ivld6(Float(1.25));
-    ARIADNE_TEST_EQUAL(ivld6.lower_raw(),Float(1.25));
-    ARIADNE_TEST_EQUAL(ivld6.upper_raw(),Float(1.25));
-
-    // Empty interval
-    ValidatedFloat ivld7;
-    ARIADNE_TEST_EXECUTE(ivld7.set_empty());
-    ARIADNE_TEST_ASSERT(ivld7.lower_raw()==+inf); ARIADNE_TEST_ASSERT(ivld7.upper_raw()==-inf);
+    ValidatedFloat xd6(Float(1.25));
+    ARIADNE_TEST_EQUAL(xd6.lower_raw(),Float(1.25));
+    ARIADNE_TEST_EQUAL(xd6.upper_raw(),Float(1.25));
 }
 
 Void TestValidatedFloat::test_class()
@@ -309,42 +304,39 @@ Void TestValidatedFloat::test_class()
     // Tests for exact operations
     ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).lower().raw(),-0.25);
     ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).upper().raw(),0.5);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).midpoint().raw(),0.125);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).radius().raw(),0.375)
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).width().raw(),0.75);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).value().raw(),0.125);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-0.25,0.50).error().raw(),0.375)
 
     // Tests for inexact operations
     ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).lower().raw(),-0.33333333333333331483);
     ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).upper().raw(),0.66666666666666662966);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).midpoint().raw(),0.16666666666666665741);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).radius().raw(),0.5)
-    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).width().raw(),1.0);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).value().raw(),0.16666666666666665741);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(-1./3,2./3).error().raw(),0.5)
 
     // Tests for inexact operations
     ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).lower().raw(),-0.33333333333333337034);
     ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).upper().raw(),0.66666666666666674068);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).midpoint().raw(),0.16666666666666668517);
-    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).radius().raw(),0.50000000000000011102)
-    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).width().raw(),1.000000000000000222);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).value().raw(),0.16666666666666668517);
+    ARIADNE_TEST_EQUAL(ValidatedFloat(div_down(-1,3),div_up(2,3)).error().raw(),0.50000000000000011102)
 }
 
 Void TestValidatedFloat::test_input()
 {
-    ValidatedFloat ivl1,ivl2;
+    ValidatedFloat x1,x2;
     string input("[1.125,2.25] [0.4,0.6]");
     stringstream iss(input);
 
-    iss >> ivl1;
-    ivl2=ValidatedFloat(1.125,2.25);
+    iss >> x1;
+    x2=ValidatedFloat(1.125,2.25);
 
-    cout << "ivl1=" << ivl1 << "  ivl2=" << ivl2 << endl;
-    ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,ivl2);
-    ARIADNE_TEST_ASSERT(ivl1.lower_raw()==ivl2.lower_raw() && ivl1.upper_raw()==ivl2.upper_raw());
-    ARIADNE_TEST_ASSERT(equal(ivl1,ivl2));
+    cout << "x1=" << x1 << "  x2=" << x2 << endl;
+    ARIADNE_TEST_BINARY_PREDICATE(same,x1,x2);
+    ARIADNE_TEST_ASSERT(x1.lower_raw()==x2.lower_raw() && x1.upper_raw()==x2.upper_raw());
+    ARIADNE_TEST_ASSERT(same(x1,x2));
 
-    iss >> ivl1;
-    ivl2=ValidatedFloat(0.39999999999999997,0.60000000000000009);
-    if(!equal(ivl1,ivl2)) {
+    iss >> x1;
+    x2=ValidatedFloat(0.39999999999999997,0.60000000000000009);
+    if(!same(x1,x2)) {
         ARIADNE_TEST_WARN("ValidatedFloat string constructor returns an approximate interval, not an outwardly rounded interval.");
     }
 }
@@ -364,23 +356,22 @@ Void TestValidatedFloat::test_comparison() {
 }
 
 Void TestValidatedFloat::test_aliasing() {
+    ExactFloat ex2(1.5);
+    ExactFloat ex3(2.25);
 
-    ExactFloat x2(1.5);
-    ExactFloat x3(2.25);
-
-    ValidatedFloat ivl1;
-    ValidatedFloat ivl2(1.5,2.25);
-    ValidatedFloat ivl3(3.125,4.0625);
+    ValidatedFloat vx1;
+    ValidatedFloat vx2(1.5,2.25);
+    ValidatedFloat vx3(3.125,4.0625);
 
     // Check to make sure aliases are handled correctly
-    ivl1=ivl3; ivl1=ivl2-ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,ValidatedFloat(ivl2-ivl3));
-    ivl1=ivl3; ivl1=ivl2*ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,ValidatedFloat(ivl2*ivl3));
-    ivl1=ivl2; ivl1=ivl1*ivl3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,ValidatedFloat(ivl2*ivl3));
-    ivl1=ivl2; ivl1=ivl1*x3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,ValidatedFloat(ivl2*x3));
-    ivl1=ivl3; ivl1=x2*ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,ValidatedFloat(x2*ivl3));
-    ivl1=ivl2; ivl1=ivl1/ivl3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,ValidatedFloat(ivl2/ivl3));
-    ivl1=ivl2; ivl1=ivl1/x3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,ValidatedFloat(ivl2/x3));
-    ivl1=ivl3; ivl1=x2/ivl1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivl1,ValidatedFloat(x2/ivl3));
+    vx1=vx3; vx1=vx2-vx1; ARIADNE_TEST_BINARY_PREDICATE(same,vx1,ValidatedFloat(vx2-vx3));
+    vx1=vx3; vx1=vx2*vx1; ARIADNE_TEST_BINARY_PREDICATE(same,vx1,ValidatedFloat(vx2*vx3));
+    vx1=vx2; vx1=vx1*vx3; ARIADNE_TEST_BINARY_PREDICATE(same,vx1,ValidatedFloat(vx2*vx3));
+    vx1=vx2; vx1=vx1*ex3; ARIADNE_TEST_BINARY_PREDICATE(same,vx1,ValidatedFloat(vx2*ex3));
+    vx1=vx3; vx1=ex2*vx1; ARIADNE_TEST_BINARY_PREDICATE(same,vx1,ValidatedFloat(ex2*vx3));
+    vx1=vx2; vx1=vx1/vx3; ARIADNE_TEST_BINARY_PREDICATE(same,vx1,ValidatedFloat(vx2/vx3));
+    vx1=vx2; vx1=vx1/ex3; ARIADNE_TEST_BINARY_PREDICATE(same,vx1,ValidatedFloat(vx2/ex3));
+    vx1=vx3; vx1=ex2/vx1; ARIADNE_TEST_BINARY_PREDICATE(same,vx1,ValidatedFloat(ex2/vx3));
 }
 
 Void TestValidatedFloat::test_monotone_functions()

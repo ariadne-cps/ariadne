@@ -31,11 +31,26 @@
 #include "numeric/rational.h"
 
 #include "numeric/float.h"
-#include "numeric/float-approximate.h"
-#include "numeric/float-validated.h"
-#include "numeric/float-exact.h"
 
 #include "test.h"
+
+namespace Ariadne {
+
+template<class X> struct IsGenericNumber : And<IsNumber<X>,Not<IsFloat<X>>> { };
+
+ValidatedFloat make_float(Real const& r) { return ValidatedFloat(r); }
+
+template<class F, class X, EnableIf<And<IsFloat<F>,IsGenericNumber<X>>> =dummy>
+    auto operator+(F const& f, X const& x) -> decltype(f+make_float(x)) { return f+make_float(x); }
+template<class F, class X, EnableIf<And<IsFloat<F>,IsGenericNumber<X>>> =dummy>
+    auto operator+(X const& x, F const& f) -> decltype(make_float(x)+f) { return make_float(x)+f; }
+
+template<class F, class X, EnableIf<And<IsFloat<F>,IsGenericNumber<X>>> =dummy>
+    auto operator-(F const& f, X const& x) -> decltype(f-make_float(x)) { return f-make_float(x); }
+template<class F, class X, EnableIf<And<IsFloat<F>,IsGenericNumber<X>>> =dummy>
+    auto operator-(X const& x, F const& f) -> decltype(make_float(x)-f) { return make_float(x)-f; }
+
+} // namespace
 
 using namespace std;
 using namespace Ariadne;

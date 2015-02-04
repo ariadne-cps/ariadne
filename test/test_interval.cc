@@ -147,21 +147,22 @@ TestInterval::test_correct_rounded_arithmetic()
 Void
 TestInterval::test_accurate_rounded_arithmetic()
 {
-    const double min=std::numeric_limits<double>::min();
-    const double eps=std::numeric_limits<double>::epsilon();
+    const Float min=Float::min();
+    const Float eps=Float::eps();
+    const Float x=1.5;
 
-    ARIADNE_TEST_EQUAL(UpperInterval(1.5)+UpperInterval(min),UpperInterval(1.5,1.5+eps));
-    ARIADNE_TEST_EQUAL(UpperInterval(1.5)-UpperInterval(min),UpperInterval(1.5-eps,1.5));
+    ARIADNE_TEST_EQUAL(UpperInterval(x)+UpperInterval(min),UpperInterval(x,x+eps));
+    ARIADNE_TEST_EQUAL(UpperInterval(x)-UpperInterval(min),UpperInterval(x-eps,x));
     ARIADNE_TEST_EQUAL(UpperInterval(1+eps,1+2*eps)*UpperInterval(1+eps,1+3*eps),UpperInterval(1+2*eps,1+6*eps));
     ARIADNE_TEST_EQUAL(UpperInterval(1)/UpperInterval(3),UpperInterval(0.33333333333333331,0.33333333333333337));
     ARIADNE_TEST_EQUAL(UpperInterval(2)/UpperInterval(5),UpperInterval(0.39999999999999997,0.40000000000000002));
 
-    ARIADNE_TEST_EQUAL(UpperInterval(1.5)+Float(min),UpperInterval(1.5,1.5+eps));
-    ARIADNE_TEST_EQUAL(UpperInterval(1.5)-Float(min),UpperInterval(1.5-eps,1.5));
+    ARIADNE_TEST_EQUAL(UpperInterval(x)+Float(min),UpperInterval(x,x+eps));
+    ARIADNE_TEST_EQUAL(UpperInterval(x)-Float(min),UpperInterval(x-eps,x));
     ARIADNE_TEST_EQUAL(UpperInterval(1+eps,1+2*eps)*Float(1+eps),UpperInterval(1+2*eps,1+4*eps));
     ARIADNE_TEST_EQUAL(UpperInterval(1+3*eps,1+5*eps)/Float(1+eps),UpperInterval(1+eps,1+4*eps));
 
-    ARIADNE_TEST_EQUAL(Float(min)-UpperInterval(1.5),UpperInterval(-1.5,eps-1.5));
+    ARIADNE_TEST_EQUAL(Float(min)-UpperInterval(x),UpperInterval(-x,eps-x));
     ARIADNE_TEST_EQUAL(Float(1+5*eps)/UpperInterval(1+2*eps,1+3*eps),UpperInterval(1+eps,1+3*eps));
 
     ARIADNE_TEST_EQUAL(sqr(UpperInterval(1-eps,1+eps)),UpperInterval(1-4*eps/2,1+3*eps));
@@ -268,7 +269,7 @@ TestInterval::test_constructors()
 
     // Construct from pair
     ExactInterval ivld1(Float(1.125),Float(2.25));
-    ARIADNE_TEST_ASSERT(ivld1.lower()==1.125); ARIADNE_TEST_ASSERT(ivld1.upper()==2.25);
+    ARIADNE_TEST_ASSERT(ivld1.lower().raw()==1.125); ARIADNE_TEST_ASSERT(ivld1.upper().raw()==2.25);
 
     // Default constructor
     ExactInterval ivld2;

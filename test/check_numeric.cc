@@ -48,14 +48,14 @@ class Plus;
 
 namespace Detail {
 
-/*
 template<class OP, class X1, class X2, class = Fallback> struct SafeTypedef {
     typedef Fallback Type; };
 template<class OP, class X1, class X2> struct SafeTypedef<OP,X1,X2, EnableIf<IsConvertible<decltype(declval<OP>()(declval<X1>(),declval<X2>())),DontCare>,Fallback>> {
     typedef decltype(declval<OP>()(declval<X1>(),declval<X2>()) ) Type; };
-*/
 
+/*
 template<class OP, class X1, class X2> struct SafeTypedef { typedef decltype( OP()(declval<X1>(),declval<X2>()) ) Type; };
+*/
 
 template<class X, class = Fallback> struct SafeNegationTypedef { typedef Fallback Type; };
 template<class X> struct SafeNegationTypedef<X, EnableIf<IsConvertible<decltype(-declval<X>()),DontCare>,Fallback>> { typedef decltype(-declval<X>()) Type; };
@@ -194,9 +194,11 @@ ARIADNE_CLASS_NAME(Validated);
 ARIADNE_CLASS_NAME(Exact);
 
 ARIADNE_CLASS_NAME(Logical<Approximate>);
-ARIADNE_CLASS_NAME(Logical<Lower>);
-ARIADNE_CLASS_NAME(Logical<Upper>);
+ARIADNE_CLASS_NAME(Logical<ValidatedLower>);
+ARIADNE_CLASS_NAME(Logical<ValidatedUpper>);
 ARIADNE_CLASS_NAME(Logical<Validated>);
+ARIADNE_CLASS_NAME(Logical<EffectiveLower>);
+ARIADNE_CLASS_NAME(Logical<EffectiveUpper>);
 ARIADNE_CLASS_NAME(Logical<Effective>);
 ARIADNE_CLASS_NAME(Logical<Exact>);
 

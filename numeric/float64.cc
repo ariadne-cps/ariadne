@@ -600,6 +600,31 @@ Float64::Float64(Rational const& q, RoundingModeType rnd)
     }
 }
 
+Float64 sqr_rnd(Float64 x)
+{
+    return x.dbl*x.dbl;
+}
+
+Float64 add_rnd(Float64 x1, Float64 x2)
+{
+    return x1.dbl+x2.dbl;
+}
+
+Float64 sub_rnd(Float64 x1, Float64 x2)
+{
+    return x1.dbl-x2.dbl;
+}
+
+Float64 mul_rnd(Float64 x1, Float64 x2)
+{
+    return x1.dbl*x2.dbl;
+}
+
+Float64 div_rnd(Float64 x1, Float64 x2)
+{
+    return x1.dbl/x2.dbl;
+}
+
 Float64 pow_rnd(Float64 x, Int n)
 {
     return pow_rnd(x.dbl,n);

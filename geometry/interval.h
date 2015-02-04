@@ -278,6 +278,8 @@ class UpperInterval {
     template<class F, EnableIf<IsSame<F,Float>> =dummy> UpperInterval(F point) : l(point), u(point) { }
     // FIXME: Should make explicit, but this interferes with role as a numeric type
     template<class N, EnableIf<IsIntegral<N>> = dummy> UpperInterval(N n) : l(n), u(n) { }
+    // FIXME: Should make explicit, but this interferes with role as a numeric type
+    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> explicit UpperInterval(D point) : l(point), u(point) { }
     //! \brief Create from explicitly given lower and upper bounds. Yields the interval \a [lower,upper].
     explicit UpperInterval(Float lower, Float upper) : l(lower), u(upper) { }
     template<class N, EnableIf<IsIntegral<N>> = dummy> UpperInterval(N lower, N upper) : l(lower), u(upper) { }

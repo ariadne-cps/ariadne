@@ -104,9 +104,12 @@ inline Float div_down(Float const& x1, Float const& x2) { return div(x1,x2,Float
 inline Float div_near(Float const& x1, Float const& x2) { return div(x1,x2,Float::to_nearest); }
 inline Float div_approx(Float const& x1, Float const& x2) { return div(x1,x2,Float::to_nearest); }
 
-inline Float fma_up(Float const& x1, Float const& x2, Float const& y);
-inline Float fma_down(Float const& x1, Float const& x2, Float const& y);
-inline Float fma_approx(Float const& x1, Float const& x2, Float const& y);
+inline Float fma_up(Float const& x1, Float const& x2, Float const& y) { return add(mul(x1,x2,Float::upward),y,upward); }
+inline Float fma_down(Float const& x1, Float const& x2, Float const& y) { return add(mul(x1,x2,Float::downward),y,downward); }
+inline Float fma_approx(Float const& x1, Float const& x2, Float const& y) { return add(mul(x1,x2,Float::to_nearest),y,to_nearest); }
+
+inline Float next_up(Float const& x) { return add_up(x,Float::min()); }
+inline Float next_down(Float const& x) { return sub_down(x,Float::min()); }
 
 inline Float rad_up(Float const& x1, Float const& x2) { return half(sub_up(x2,x1)); }
 inline Float med_near(Float const& x1, Float const& x2) { return half(add_near(x2,x1)); }
@@ -138,17 +141,6 @@ inline FloatMP tan_approx(FloatMP const& x) { return tan(x,FloatMP::to_nearest);
 inline FloatMP asin_approx(FloatMP const& x) { return asin(x,FloatMP::to_nearest); }
 inline FloatMP acos_approx(FloatMP const& x) { return acos(x,FloatMP::to_nearest); }
 inline FloatMP atan_approx(FloatMP const& x) { return atan(x,FloatMP::to_nearest); }
-
-inline Float sqr_rnd(Float const& x) { return sqr(x); }
-inline Float add_rnd(Float const& x1, Float const& x2) { return add(x1,x2); }
-inline Float sub_rnd(Float const& x1, Float const& x2) { return sub(x1,x2); }
-inline Float mul_rnd(Float const& x1, Float const& x2) { return mul(x1,x2); }
-inline Float div_rnd(Float const& x1, Float const& x2) { return div(x1,x2); }
-inline Float pow_rnd(Float const& x, Nat m) { return pow(x,m); }
-inline Float sqrt_rnd(Float const& x) { return sqrt(x); }
-inline Float exp_rnd(Float const& x) { return exp(x); }
-inline Float log_rnd(Float const& x) { return log(x); }
-inline Float cos_rnd(Float const& x) { return cos(x); }
 
 } // namespace Ariadne
 

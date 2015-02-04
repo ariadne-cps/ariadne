@@ -96,21 +96,21 @@ template<> struct RealConstant<BoundFloat> : RealInterface, BoundFloat {
 };
 
 template<class O, class... A> inline Real make_real(O o, A... a) {
-    return Real(new RealWrapper<O,A...>(o,a...));
+    return Real(std::make_shared<RealWrapper<O,A...>>(o,a...));
 }
 
-inline Real::Real(RealInterface* p) : _ptr(p) { }
+inline Real::Real(SharedPointer<RealInterface> p) : _ptr(p) { }
 
 
 // FIXME: Is this necessary?
 Real::Real(double l, double a, double u)
-    : Real(new RealConstant<BoundFloat>(BoundFloat(l,u)))
+    : Real(std::make_shared<RealConstant<BoundFloat>>(BoundFloat(l,u)))
 {
 }
 
 // FIXME: Is this necessary?
 Real::Real(double x)
-    : Real(new RealConstant<BoundFloat>(BoundFloat(x)))
+    : Real(std::make_shared<RealConstant<BoundFloat>>(BoundFloat(x)))
 {
 }
 
@@ -128,13 +128,13 @@ UpperFloat::UpperFloat(Real const& x) : UpperFloat(x.upper()) { }
 LowerFloat::LowerFloat(Real const& x) : LowerFloat(x.lower()) { }
 ApproximateFloat::ApproximateFloat(Real const& x) : ApproximateFloat(x.approx()) { }
 
-Real::Real(std::uint64_t m, Void*) : Real(new RealConstant<Integer>(m)) { }
-Real::Real(std::int64_t n, Void*) : Real(new RealConstant<Integer>(n)) { }
+Real::Real(std::uint64_t m, Void*) : Real(std::make_shared<RealConstant<Integer>>(m)) { }
+Real::Real(std::int64_t n, Void*) : Real(std::make_shared<RealConstant<Integer>>(n)) { }
 
-Real::Real() : Real(new RealConstant<Integer>(0)) { }
-Real::Real(Integer const& x) : Real(new RealConstant<Integer>(x)) { }
-Real::Real(Rational const& x) : Real(new RealConstant<Rational>(x)) { }
-Real::Real(ExactFloat x) : Real(new RealConstant<ExactFloat>(x)) { }
+Real::Real() : Real(std::make_shared<RealConstant<Integer>>(0)) { }
+Real::Real(Integer const& x) : Real(std::make_shared<RealConstant<Integer>>(x)) { }
+Real::Real(Rational const& x) : Real(std::make_shared<RealConstant<Rational>>(x)) { }
+Real::Real(ExactFloat x) : Real(std::make_shared<RealConstant<ExactFloat>>(x)) { }
 
 Real add(Real x1, Real x2) { return make_real(Add(),x1,x2); }
 Real sub(Real x1, Real x2) { return make_real(Sub(),x1,x2); }
@@ -250,6 +250,25 @@ BoundFloatMP Real::evaluate(Accuracy accuracy) const {
     return res;
 }
 
+
+
+
+LowerFloat64 LowerReal::operator() (Precision64 pr) const {
+    return this->_ptr->_evaluate(pr);
+}
+
+LowerFloatMP LowerReal::operator() (PrecisionMP pr) const {
+    return this->_ptr->_evaluate(pr);
+}
+
+
+UpperFloat64 UpperReal::operator() (Precision64 pr) const {
+    return this->_ptr->_evaluate(pr);
+}
+
+UpperFloatMP UpperReal::operator() (PrecisionMP pr) const {
+    return this->_ptr->_evaluate(pr);
+}
 
 
 } // namespace Ariadne

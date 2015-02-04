@@ -173,6 +173,7 @@ template<> class Logical<Effective>
 template<> class Logical<EffectiveUpper>
 {
     LogicalHandle _v;
+    template<class P> friend class Logical;
   public:
     explicit Logical<EffectiveUpper>(SharedPointer<const LogicalInterface> p) : _v(p) { }
     Logical<EffectiveUpper>(Logical<Effective> l) : _v(l._v) { }
@@ -183,6 +184,7 @@ template<> class Logical<EffectiveUpper>
 template<> class Logical<EffectiveLower>
 {
     LogicalHandle _v;
+    template<class P> friend class Logical;
   public:
     Logical<EffectiveLower>(SharedPointer<const LogicalInterface> p) : _v(p) { }
     Logical<EffectiveLower>(Logical<Effective> l) : _v(l._v) { }

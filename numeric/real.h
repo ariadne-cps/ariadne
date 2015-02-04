@@ -57,7 +57,7 @@ class Real
   private: public:
     SharedPointer<Interface> _ptr;
   private: public:
-    explicit Real(Interface*);
+    explicit Real(SharedPointer<Interface>);
     explicit Real(double,double,double);
   public:
     typedef Effective Paradigm;
@@ -161,6 +161,40 @@ Real sin(Real);
 Real cos(Real);
 Real tan(Real);
 Real atan(Real);
+
+
+
+//! \ingroup UserNumberSubModule
+//! \brief Computable lower real numbers defined by conversion to concrete floats.
+class LowerReal
+{
+  private: public:
+    SharedPointer<Real::Interface> _ptr;
+  private: public:
+    explicit LowerReal(SharedPointer<Real::Interface>);
+  public:
+    typedef EffectiveLower Paradigm;
+    typedef LowerReal NumericType;
+  public:
+    LowerFloat64 operator() (Precision64 pr) const;
+    LowerFloatMP operator() (PrecisionMP pr) const;
+};
+
+//! \ingroup UserNumberSubModule
+//! \brief Computable lower real numbers defined by conversion to concrete floats.
+class UpperReal
+{
+  private: public:
+    SharedPointer<Real::Interface> _ptr;
+  private: public:
+    explicit UpperReal(SharedPointer<Real::Interface>);
+  public:
+    typedef EffectiveUpper Paradigm;
+    typedef UpperReal NumericType;
+  public:
+    UpperFloat64 operator() (Precision64 pr) const;
+    UpperFloatMP operator() (PrecisionMP pr) const;
+};
 
 } // namespace Ariadne
 

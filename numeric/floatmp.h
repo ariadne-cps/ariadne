@@ -177,27 +177,9 @@ class FloatMP {
     friend InputStream& operator>>(InputStream& is, FloatMP&);
 };
 
-template<class R, class A> inline R integer_cast(const A& a);
+template<class R, class A> R integer_cast(const A& a);
 template<> inline Int integer_cast(const FloatMP& x) { return static_cast<Int>(x.get_d()); }
 template<> inline Nat integer_cast(const FloatMP& x) { return static_cast<Nat>(x.get_d()); }
-
-
-
-template<class P> class FloatMPTemplate {
-  public:
-    template<class... ARGS> FloatMPTemplate(ARGS...) { }
-    typedef FloatMPTemplate<P> SelfType;
-    FloatMP raw() const { return FloatMP(); }
-    FloatMPTemplate<Upper> error() const { return FloatMPTemplate<Upper>(); }
-};
-template<class P> FloatMPTemplate<P> operator+(FloatMPTemplate<P>,FloatMPTemplate<P>) { return FloatMPTemplate<P>(); }
-template<class P> FloatMPTemplate<P> operator+(SelfType<FloatMPTemplate<P>>,FloatMPTemplate<P>) { return FloatMPTemplate<P>(); }
-template<class P> FloatMPTemplate<P> operator-(FloatMPTemplate<P>,FloatMPTemplate<P>) { return FloatMPTemplate<P>(); }
-template<class P> FloatMPTemplate<P> operator-(SelfType<FloatMPTemplate<P>>,FloatMPTemplate<P>) { return FloatMPTemplate<P>(); }
-template<class P> FloatMPTemplate<P> operator*(FloatMPTemplate<P>,FloatMPTemplate<P>) { return FloatMPTemplate<P>(); }
-template<class P> FloatMPTemplate<P> operator*(SelfType<FloatMPTemplate<P>>,FloatMPTemplate<P>) { return FloatMPTemplate<P>(); }
-template<class P> FloatMPTemplate<P> operator/(FloatMPTemplate<P>,FloatMPTemplate<P>) { return FloatMPTemplate<P>(); }
-template<class P> OutputStream& operator<<(OutputStream& os,FloatMPTemplate<P>) { return os; }
 
 
 } // namespace Ariadne

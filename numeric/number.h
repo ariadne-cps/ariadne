@@ -137,22 +137,15 @@ template<class P> class Number
 
     // Explicit conversions to floating-point types
     template<class PP, EnableIf<And<IsWeaker<PP,P>,Not<IsWeaker<Effective,PP>>>> = dummy>
-        explicit operator Float64Template<PP>() const { return this->get(PP()); }
+        explicit operator FloatTemplate<PP>() const { return this->get(PP()); }
 
     //! \brief Get the value of the number as a double-precision type
-    template<class PP> Float64Template<PP> get(PP par, Precision64 const& prec) const { return pointer()->_get(PP(),prec); }
-    //! \brief Get the value of the number as a multiple-precision type
-    template<class PP> FloatMPTemplate<PP> get(PP par, PrecisionMP const& prec) const { return pointer()->_get(PP(),prec); }
+    template<class PP> FloatTemplate<PP> get(PP par, Precision const& prec) const { return pointer()->_get(PP(),prec); }
 
     //! \brief Get the value of the number represented by \a X with the same precision paramters as \a p.
     template<class PP, EnableIf<IsWeaker<PP,P>> = dummy>
-        Float64Template<PP> get(PP p) const { return this->ref()._get(p); }
-    template<class PP, EnableIf<IsWeaker<PP,P>> = dummy>
-        Float64Template<PP> get(PP p, Precision64 const& pr) const { return this->ref()._get(p); }
+        FloatTemplate<PP> get(PP p, Precision const& pr) const { return this->ref()._get(p); }
 
-    //! \brief Get the value of the number represented by \a X with the same precision paramters as \a p.
-    template<class PP, EnableIf<IsWeaker<PP,P>> = dummy>
-        FloatMPTemplate<PP> get(PP p, PrecisionMP const& pr) const { return this->ref()._get(p,pr); }
 
     friend Number<P> operator+(Number<P> y) { return pos(y); }
     friend Number<NP> operator-(Number<P> y) { return neg(y); }

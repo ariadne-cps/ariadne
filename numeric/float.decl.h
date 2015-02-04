@@ -42,7 +42,8 @@ class TwoExp;
 class Precision64;
 class PrecisionMP;
 
-typedef FloatMP Float;
+typedef Float64 Float;
+typedef Precision64 Precision;
 
 using RawFloat = Float;
 class ExactFloat;
@@ -58,8 +59,9 @@ using BoundFloat = BoundedFloat;
 using MetrcFloat = MetricFloat;
 using ApprxFloat = ApproximateFloat;
 
-template<class P> class Float64Template;
+template<class P> class FloatTemplate;
 
+template<class P> class Float64Template;
 typedef ExactFloat ExactFloat64;
 typedef ValidatedFloat ValidatedFloat64;
 typedef UpperFloat UpperFloat64;
@@ -72,7 +74,6 @@ using ErrorFloat64 = PositiveUpperFloat64;
 using BoundFloat64 = BoundedFloat64;
 using MetrcFloat64 = MetricFloat64;
 using ApprxFloat64 = ApproximateFloat64;
-
 
 template<class P> class FloatMPTemplate;
 using ApproximateFloatMP = FloatMPTemplate<Approximate>;

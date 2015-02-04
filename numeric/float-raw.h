@@ -28,14 +28,12 @@
 #ifndef ARIADNE_FLOAT_RAW_H
 #define ARIADNE_FLOAT_RAW_H
 
+#include "float.decl.h"
 #include "float64.h"
 #include "floatmp.h"
 #include "expression/operators.h"
 
 namespace Ariadne {
-
-typedef FloatMP Float;
-typedef Float RawFloat;
 
 static const Float inf = Float::inf();
 
@@ -131,15 +129,15 @@ inline Float64 asin_approx(Float64 x) { return std::asin(x.dbl); }
 inline Float64 acos_approx(Float64 x) { return std::acos(x.dbl); }
 inline Float64 atan_approx(Float64 x) { return std::atan(x.dbl); }
 
-inline FloatMP sqrt_approx(FloatMP const& x) { return sqrt(x,Float::to_nearest); }
-inline FloatMP exp_approx(FloatMP const& x) { return exp(x,Float::to_nearest); }
-inline FloatMP log_approx(FloatMP const& x) { return log(x,Float::to_nearest); }
-inline FloatMP sin_approx(FloatMP const& x) { return sin(x,Float::to_nearest); }
-inline FloatMP cos_approx(FloatMP const& x) { return cos(x,Float::to_nearest); }
-inline FloatMP tan_approx(FloatMP const& x) { return tan(x,Float::to_nearest); }
-inline FloatMP asin_approx(FloatMP const& x) { return asin(x,Float::to_nearest); }
-inline FloatMP acos_approx(FloatMP const& x) { return acos(x,Float::to_nearest); }
-inline FloatMP atan_approx(FloatMP const& x) { return atan(x,Float::to_nearest); }
+inline FloatMP sqrt_approx(FloatMP const& x) { return sqrt(x,FloatMP::to_nearest); }
+inline FloatMP exp_approx(FloatMP const& x) { return exp(x,FloatMP::to_nearest); }
+inline FloatMP log_approx(FloatMP const& x) { return log(x,FloatMP::to_nearest); }
+inline FloatMP sin_approx(FloatMP const& x) { return sin(x,FloatMP::to_nearest); }
+inline FloatMP cos_approx(FloatMP const& x) { return cos(x,FloatMP::to_nearest); }
+inline FloatMP tan_approx(FloatMP const& x) { return tan(x,FloatMP::to_nearest); }
+inline FloatMP asin_approx(FloatMP const& x) { return asin(x,FloatMP::to_nearest); }
+inline FloatMP acos_approx(FloatMP const& x) { return acos(x,FloatMP::to_nearest); }
+inline FloatMP atan_approx(FloatMP const& x) { return atan(x,FloatMP::to_nearest); }
 
 inline Float sqr_rnd(Float const& x) { return sqr(x); }
 inline Float add_rnd(Float const& x1, Float const& x2) { return add(x1,x2); }

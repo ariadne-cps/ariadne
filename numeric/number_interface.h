@@ -76,16 +76,19 @@ class NumberInterface
     virtual NumberInterface* _max(NumberInterface const& y) const = 0;
     virtual NumberInterface* _min(NumberInterface const& y) const = 0;
     virtual NumberInterface* _apply(UnaryOperatorInterface const& o) const = 0;
+
     virtual MetricFloat64 _get(Metric) const = 0;
     virtual BoundedFloat64 _get(Bounded) const = 0;
     virtual UpperFloat64 _get(Upper) const = 0;
     virtual LowerFloat64 _get(Lower) const = 0;
     virtual ApproximateFloat64 _get(Approximate) const = 0;
+/*
     virtual MetricFloatMP _get(Metric, PrecisionMP) const = 0;
     virtual BoundedFloatMP _get(Bounded, PrecisionMP) const = 0;
     virtual UpperFloatMP _get(Upper, PrecisionMP) const = 0;
     virtual LowerFloatMP _get(Lower, PrecisionMP) const = 0;
     virtual ApproximateFloatMP _get(Approximate, PrecisionMP) const = 0;
+*/
     virtual ParadigmCode _paradigm() const = 0;
     virtual String _class_name() const = 0;
 

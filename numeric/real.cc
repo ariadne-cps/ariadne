@@ -41,6 +41,11 @@
 
 namespace Ariadne {
 
+template<> class FloatMPTemplate<Approximate> { };
+template<> class FloatMPTemplate<Lower> { };
+template<> class FloatMPTemplate<Upper> { };
+template<> class FloatMPTemplate<Bounded> { public: operator FloatMPTemplate<Upper>() { } operator FloatMPTemplate<Lower>() { } };
+
 typedef Real::Interface RealInterface;
 
 struct Real::Interface {
@@ -59,7 +64,7 @@ template<class O, class... AS> struct RealWrapper : virtual RealInterface, Expre
     virtual BoundFloat _value() const { return static_cast<BoundFloat const&>(*this); }
     //virtual BoundFloat64 _evaluate(Precision64 pr) const { ExpressionTemplate<O,AS...> const& self=*this; return self(pr); }
     //virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ExpressionTemplate<O,AS...> const& self=*this; return self(pr); }
-    virtual BoundFloat64 _evaluate(Precision64 pr) const {  ARIADNE_NOT_IMPLEMENTED; }
+    virtual BoundFloat64 _evaluate(Precision64 pr) const {  return static_cast<BoundFloat>(*this); }
     virtual BoundFloatMP _evaluate(PrecisionMP pr) const {  ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<ExpressionTemplate<O,AS...> const&>(*this); }
 };
@@ -69,7 +74,7 @@ template<class X> struct RealConstant : RealInterface, BoundFloat {
   public:
     RealConstant(X const& x) : BoundFloat(x), _c(x) { }
     virtual BoundFloat _value() const { return static_cast<BoundFloat const&>(*this); }
-    virtual BoundFloat64 _evaluate(Precision64 pr) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual BoundFloat64 _evaluate(Precision64 pr) const { return static_cast<BoundFloat>(*this); }
     virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
 };
@@ -80,7 +85,7 @@ template<> struct RealConstant<Integer> : RealInterface, BoundFloat {
   public:
     RealConstant(X const& x) : BoundFloat(x), _c(x) { }
     virtual BoundFloat _value() const { return static_cast<BoundFloat const&>(*this); }
-    virtual BoundFloat64 _evaluate(Precision64 pr) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual BoundFloat64 _evaluate(Precision64 pr) const { return static_cast<BoundFloat>(*this); }
     virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << this->_c; }
 };
@@ -90,7 +95,7 @@ template<> struct RealConstant<BoundFloat> : RealInterface, BoundFloat {
   public:
     RealConstant(X const& x) : BoundFloat(x) { }
     virtual BoundFloat _value() const { return static_cast<BoundFloat const&>(*this); }
-    virtual BoundFloat64 _evaluate(Precision64 pr) const { ARIADNE_NOT_IMPLEMENTED; }
+    virtual BoundFloat64 _evaluate(Precision64 pr) const { return static_cast<BoundFloat>(*this); }
     virtual BoundFloatMP _evaluate(PrecisionMP pr) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& _write(OutputStream& os) const { return os << static_cast<BoundFloat const&>(*this); }
 };
@@ -180,13 +185,6 @@ Tribool lt(Real x1, Real x2) { return BoundFloat(x1)< BoundFloat(x2); }
 
 template<class O, class... ARGS> struct LogicalWrapper;
 
-Logical<Validated> operator==(BoundFloatMP x1, BoundFloatMP x2);
-Logical<Validated> operator!=(BoundFloatMP x1, BoundFloatMP x2);
-Logical<Validated> operator<=(BoundFloatMP x1, BoundFloatMP x2);
-Logical<Validated> operator>=(BoundFloatMP x1, BoundFloatMP x2);
-Logical<Validated> operator< (BoundFloatMP x1, BoundFloatMP x2);
-Logical<Validated> operator> (BoundFloatMP x1, BoundFloatMP x2);
-
 template<class O> struct LogicalWrapper<O,Real,Real> : virtual LogicalInterface, ExpressionTemplate<O,Real,Real> {
     LogicalWrapper(O o, Real a1, Real a2)
         : ExpressionTemplate<O,Real,Real>(o,a1,a2) { }
@@ -197,7 +195,8 @@ template<class O> struct LogicalWrapper<O,Real,Real> : virtual LogicalInterface,
 
 template<class O> LogicalValue LogicalWrapper<O,Real,Real>::_check(Effort e) const {
     if(e==0u) { Precision64 p; return static_cast<LogicalValue>(this->_op(this->_arg1(p),this->_arg2(p))); }
-    else { PrecisionMP p=e*64; return static_cast<LogicalValue>(this->_op(this->_arg1(p),this->_arg2(p))); }
+    else { ARIADNE_NOT_IMPLEMENTED; }
+    // else { PrecisionMP p=e*64; return static_cast<LogicalValue>(this->_op(this->_arg1(p),this->_arg2(p))); }
 }
 
 template<class P, class O, class... ARGS> Logical<P> make_logical(O op, ARGS ...args) {
@@ -233,6 +232,8 @@ BoundFloatMP Real::operator() (PrecisionMP pr) const {
 }
 
 BoundFloatMP Real::evaluate(Accuracy accuracy) const {
+    ARIADNE_NOT_IMPLEMENTED;
+/*
     Nat effort=1;
     Nat acc=accuracy.bits();
     PrecisionMP precision=effort*64;
@@ -248,6 +249,7 @@ BoundFloatMP Real::evaluate(Accuracy accuracy) const {
         precision=effort*64;
     }
     return res;
+*/
 }
 
 

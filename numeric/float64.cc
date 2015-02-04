@@ -574,6 +574,9 @@ double tan_rnd_series(double x) {
     return r;
 }
 
+double atan_rnd(double x) {
+    ARIADNE_NOT_IMPLEMENTED;
+}
 
 
 
@@ -668,15 +671,8 @@ Float64 Float64::inf() { return std::numeric_limits<double>::infinity(); }
 template<> Nat integer_cast<Nat,Float64>(Float64 const& x) { return x.dbl; }
 template<> Int integer_cast<Int,Float64>(Float64 const& x) { return x.dbl; }
 
-Float64 max(Float64 x1, Float64 x2) { return std::max(x1.dbl,x2.dbl); }
-Float64 min(Float64 x1, Float64 x2) { return std::min(x1.dbl,x2.dbl); }
-Float64 abs(Float64 x) { return std::fabs(x.dbl); }
 Float64 mag(Float64 x) { return std::fabs(x.dbl); }
 
-Float64 nul(Float64 x) { return 0.0; }
-Float64 pos(Float64 x) { return +x.dbl; }
-Float64 neg(Float64 x) { return -x.dbl; }
-Float64 half(Float64 x) { return x.dbl/2; }
 
 Float64 operator+(Float64 x) { return +x.dbl; }
 Float64 operator-(Float64 x) { return -x.dbl; }

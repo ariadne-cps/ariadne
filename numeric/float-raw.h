@@ -37,37 +37,61 @@ namespace Ariadne {
 
 static const Float inf = std::numeric_limits<double>::infinity();
 
-template<class OP> Float64 apply(OP op, Float64 const& x1, Float64 const& x2, RoundingMode64 rnd) {
-    auto old_rnd=Float64::get_rounding_mode();
-    Float64::set_rounding_mode(rnd);
-    Float64 r=op(x1,x2);
-    Float64::set_rounding_mode(old_rnd);
-    return std::move(r);
-}
+inline Float nul_exact(Float x) { return nul(x); }
+inline Float pos_exact(Float x) { return pos(x); }
+inline Float neg_exact(Float x) { return neg(x); }
+inline Float half_exact(Float x) { return half(x); }
 
-template<class OP> Float64 apply(OP op, Float64 const& x, Int n, RoundingMode64 rnd) {
-    auto old_rnd=Float64::get_rounding_mode();
-    Float64::set_rounding_mode(rnd);
-    Float64 r=op(x,n);
-    Float64::set_rounding_mode(old_rnd);
-    return std::move(r);
-}
+inline Float max_exact(Float x1, Float x2) { return max(x1,x2); }
+inline Float min_exact(Float x1, Float x2) { return min(x1,x2); }
+inline Float abs_exact(Float x) { return abs(x); }
 
-template<class OP> FloatMP apply(OP op, FloatMP const& x1, FloatMP const& x2, RoundingModeMP rnd) {
-    auto old_rnd=FloatMP::get_rounding_mode();
-    FloatMP::set_rounding_mode(rnd);
-    FloatMP r=op(x1,x2);
-    FloatMP::set_rounding_mode(old_rnd);
-    return std::move(r);
-}
+inline Float add_approx(Float x1, Float x2) { return add(x1,x2,to_nearest); }
+inline Float add_near(Float x1, Float x2) { return add(x1,x2,to_nearest); }
+inline Float add_up(Float x1, Float x2) { return add(x1,x2,upward); }
+inline Float add_down(Float x1, Float x2) { return add(x1,x2,downward); }
 
-template<class OP> FloatMP apply(OP op, FloatMP const& x, Int n, RoundingModeMP rnd) {
-    auto old_rnd=FloatMP::get_rounding_mode();
-    FloatMP::set_rounding_mode(rnd);
-    FloatMP r=op(x,n);
-    FloatMP::set_rounding_mode(old_rnd);
-    return std::move(r);
-}
+inline Float sub_approx(Float x1, Float x2) { return sub(x1,x2,to_nearest); }
+inline Float sub_near(Float x1, Float x2) { return sub(x1,x2,to_nearest); }
+inline Float sub_up(Float x1, Float x2) { return sub(x1,x2,upward); }
+inline Float sub_down(Float x1, Float x2) { return sub(x1,x2,downward); }
+
+inline Float mul_approx(Float x1, Float x2) { return mul(x1,x2,to_nearest); }
+inline Float mul_near(Float x1, Float x2) { return mul(x1,x2,to_nearest); }
+inline Float mul_up(Float x1, Float x2) { return mul(x1,x2,upward); }
+inline Float mul_down(Float x1, Float x2) { return mul(x1,x2,downward); }
+
+inline Float div_approx(Float x1, Float x2) { return div(x1,x2,to_nearest); }
+inline Float div_near(Float x1, Float x2) { return div(x1,x2,to_nearest); }
+inline Float div_up(Float x1, Float x2) { return div(x1,x2,upward); }
+inline Float div_down(Float x1, Float x2) { return div(x1,x2,downward); }
+
+inline Float pow_approx(Float x, Int n) { return pow(x,n,to_nearest); }
+inline Float pow_up(Float x, Int n) { return pow(x,n,upward); }
+inline Float pow_down(Float x, Int n) { return pow(x,n,downward); }
+
+inline Float next_down(Float x) { return sub_down(x,Float::min()); }
+inline Float next_up(Float x) { return add_up(x,Float::min()); }
+
+inline Float rec_approx(Float x) { return rec(x,to_nearest); }
+inline Float rec_up(Float x) { return rec(x,upward); }
+inline Float rec_down(Float x) { return rec(x,downward); }
+
+inline Float sqrt_up(Float const& x) { return sqrt(x,upward); }
+inline Float sqrt_down(Float const& x) { return sqrt(x,downward); }
+
+inline Float exp_up(Float const& x) { return exp(x,upward); }
+inline Float exp_down(Float const& x) { return exp(x,downward); }
+
+inline Float log_up(Float const& x) { return log(x,upward); }
+inline Float log_down(Float const& x) { return log(x,downward); }
+
+inline Float sin_up(Float const& x) { return sin(x,upward); }
+inline Float sin_down(Float const& x) { return sin(x,downward); }
+
+inline Float cos_up(Float const& x) { return cos(x,upward); }
+inline Float cos_down(Float const& x) { return cos(x,downward); }
+
 
 /*
 inline Float max_exact(Float const& x1, Float const& x2) { return max(x1,x2); }

@@ -58,10 +58,6 @@ OutputStream& operator<<(OutputStream& os, ExactFloat const& x) {
     return os;
 }
 
-namespace {
-inline Float cos_down(Float const& x) { Float::set_rounding_downward(); Float y=cos_rnd(x); set_default_rounding(); return y; }
-inline Float cos_up(Float const& x) { Float::set_rounding_upward(); Float y=cos_rnd(x); set_default_rounding(); return y; }
-} // namespace
 
 ValidatedFloat::ValidatedFloat(Number<Validated> const& x) {
     ARIADNE_NOT_IMPLEMENTED;
@@ -308,50 +304,26 @@ ValidatedFloat pow(ValidatedFloat const& x, Int n) {
     else return pow(x,Nat(n));
 }
 
-ValidatedFloat pow(ValidatedFloat const& x, Nat m)
-{
-    Float::RoundingModeType rnd = Float::get_rounding_mode();
-    ValidatedFloat sx = x;
-    if(m%2==0) { sx=abs(x); }
-    Float rl=pow_down(sx.lower_raw(),m);
-    Float ru=pow_up(sx.upper_raw(),m);
-    Float::set_rounding_mode(rnd);
+ValidatedFloat pow(ValidatedFloat const& x, Nat m) {
+    ValidatedFloat y = x;
+    if(m%2==0) { y=abs(x); }
+    Float rl=pow_down(y.lower_raw(),m);
+    Float ru=pow_up(y.upper_raw(),m);
     return ValidatedFloat(rl,ru);
 }
 
 
 
-ValidatedFloat sqrt(ValidatedFloat const& x)
-{
-    Float::RoundingModeType rnd = Float::get_rounding_mode();
-    Float::set_rounding_downward();
-    Float rl=sqrt_rnd(x.lower_raw());
-    Float::set_rounding_upward();
-    Float ru=sqrt_rnd(x.upper_raw());
-    Float::set_rounding_mode(rnd);
-    return ValidatedFloat(rl,ru);
+ValidatedFloat sqrt(ValidatedFloat const& x) {
+    return ValidatedFloat(sqrt_down(x.lower_raw()),sqrt_up(x.upper_raw()));
 }
 
-ValidatedFloat exp(ValidatedFloat const& x)
-{
-    Float::RoundingModeType rnd = Float::get_rounding_mode();
-    Float::set_rounding_downward();
-    Float rl=exp_rnd(x.lower_raw());
-    Float::set_rounding_upward();
-    Float ru=exp_rnd(x.upper_raw());
-    Float::set_rounding_mode(rnd);
-    return ValidatedFloat(rl,ru);
+ValidatedFloat exp(ValidatedFloat const& x) {
+    return ValidatedFloat(exp_down(x.lower_raw()),exp_up(x.upper_raw()));
 }
 
-ValidatedFloat log(ValidatedFloat const& x)
-{
-    Float::RoundingModeType rnd = Float::get_rounding_mode();
-    Float::set_rounding_downward();
-    Float rl=log_rnd(x.lower_raw());
-    Float::set_rounding_upward();
-    Float ru=log_rnd(x.upper_raw());
-    Float::set_rounding_mode(rnd);
-    return ValidatedFloat(rl,ru);
+ValidatedFloat log(ValidatedFloat const& x) {
+    return ValidatedFloat(log_down(x.lower_raw()),log_up(x.upper_raw()));
 }
 
 
@@ -427,13 +399,8 @@ ValidatedFloat::ValidatedFloat(const Rational& q) : ValidatedFloat(q,q) {
 }
 
 ValidatedFloat::ValidatedFloat(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu.get_d())  {
-    static const double min_dbl=std::numeric_limits<double>::min();
-    Float::RoundingModeType rounding_mode=Float::get_rounding_mode();
-    Float::set_rounding_downward();
-    while(Rational(l)>ql) { l=sub_rnd(l,min_dbl); }
-    Float::set_rounding_upward();
-    while(Rational(u)<qu) { u=add_rnd(u,min_dbl); }
-    Float::set_rounding_mode(rounding_mode);
+    while(Rational(l)>ql) { l=next_down(l); }
+    while(Rational(u)<qu) { u=next_up(u); }
 }
 
 ValidatedFloat ExactFloat::pm(ErrorFloat e) const {

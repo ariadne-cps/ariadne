@@ -192,6 +192,8 @@ Real::operator ValidatedFloat() const { return this->_ptr->operator ValidatedFlo
 Real::operator ApproximateFloat() const { return this->_ptr->operator ApproximateFloat(); }
 
 ApproximateFloat::ApproximateFloat(const Real& x) : ApproximateFloat(x._ptr->operator ApproximateFloat()) { }
+LowerFloat::LowerFloat(const Real& x) : LowerFloat(ValidatedFloat(x)) { }
+UpperFloat::UpperFloat(const Real& x) : UpperFloat(ValidatedFloat(x)) { }
 ValidatedFloat::ValidatedFloat(const Real& x) : ValidatedFloat(x._ptr->operator ValidatedFloat()) { }
 
 ExactInterval::ExactInterval(const Real& x) : ExactInterval(ValidatedFloat(x)) { }

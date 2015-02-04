@@ -74,6 +74,8 @@ class LowerFloat {
     LowerFloat(double x) : l(x) { }
     //! \brief Explicitly construct from a raw floating-point value.
     explicit LowerFloat(Float x) : l(x) { }
+    //! \brief Convert from a general real number. Yields an upper bound for the exact value.
+    LowerFloat(const Real& x);
     //! \brief Convert from floating-point bounds on a number.
     inline LowerFloat(const ValidatedFloat& x);
     //! \brief Convert from a floating-point number with an exact representation.
@@ -110,6 +112,8 @@ class UpperFloat {
     UpperFloat(double x) : u(x) { }
     //! \brief Explicitly construct from a raw floating-point value.
     UpperFloat(Float x) : u(x) { }
+    //! \brief Convert from a general real number. Yields an upper bound for the exact value.
+    UpperFloat(const Real& x);
     //! \brief Convert from floating-point bounds on a number.
     inline UpperFloat(const ValidatedFloat& x);
     //! \brief Convert from a floating-point number with an exact representation.

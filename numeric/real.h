@@ -101,8 +101,9 @@ class Real {
     Real& operator=(const Real&);
 
     explicit operator ApproximateFloat() const;
+    explicit operator LowerFloat() const;
+    explicit operator UpperFloat() const;
     explicit operator ValidatedFloat() const;
-    operator UpperFloat() const;
   public:
     //! \brief Get an approximation as a builtin double-precision floating-point number.
     double get_d() const;

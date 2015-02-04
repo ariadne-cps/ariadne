@@ -178,12 +178,39 @@ Bool same(Real x1, Real x2) { ARIADNE_NOT_IMPLEMENTED; }
 NegSierpinski eq(Real x1, Real x2) { return BoundFloat(x1)==BoundFloat(x2); }
 Tribool lt(Real x1, Real x2) { return BoundFloat(x1)< BoundFloat(x2); }
 
-NegSierpinski operator==(Real x1, Real x2) { return BoundFloat(x1)==BoundFloat(x2); }
-Sierpinski operator!=(Real x1, Real x2) { return BoundFloat(x1)!=BoundFloat(x2); }
-Tribool operator< (Real x1, Real x2) { return BoundFloat(x1)< BoundFloat(x2); }
-Tribool operator> (Real x1, Real x2) { return BoundFloat(x1)> BoundFloat(x2); }
-Tribool operator<=(Real x1, Real x2) { return BoundFloat(x1)<=BoundFloat(x2); }
-Tribool operator>=(Real x1, Real x2) { return BoundFloat(x1)>=BoundFloat(x2); }
+template<class O, class... ARGS> struct LogicalWrapper;
+
+Logical<Validated> operator==(BoundFloatMP x1, BoundFloatMP x2);
+Logical<Validated> operator!=(BoundFloatMP x1, BoundFloatMP x2);
+Logical<Validated> operator<=(BoundFloatMP x1, BoundFloatMP x2);
+Logical<Validated> operator>=(BoundFloatMP x1, BoundFloatMP x2);
+Logical<Validated> operator< (BoundFloatMP x1, BoundFloatMP x2);
+Logical<Validated> operator> (BoundFloatMP x1, BoundFloatMP x2);
+
+template<class O> struct LogicalWrapper<O,Real,Real> : virtual LogicalInterface, ExpressionTemplate<O,Real,Real> {
+    LogicalWrapper(O o, Real a1, Real a2)
+        : ExpressionTemplate<O,Real,Real>(o,a1,a2) { }
+    virtual LogicalValue _check(Effort e) const;
+    virtual OutputStream& _write(OutputStream& os) const {
+        return os << static_cast<ExpressionTemplate<O,Real,Real> const&>(*this); }
+};
+
+template<class O> LogicalValue LogicalWrapper<O,Real,Real>::_check(Effort e) const {
+    if(e==0u) { Precision64 p; return static_cast<LogicalValue>(this->_op(this->_arg1(p),this->_arg2(p))); }
+    else { PrecisionMP p=e*64; return static_cast<LogicalValue>(this->_op(this->_arg1(p),this->_arg2(p))); }
+}
+
+template<class P, class O, class... ARGS> Logical<P> make_logical(O op, ARGS ...args) {
+    return Logical<P>(std::make_shared<LogicalWrapper<O,ARGS...>>(op,args...));
+}
+
+
+Falsifyable operator==(Real x1, Real x2) { return make_logical<EffectiveLower>(Equal(),x1,x2); }
+Verifyable operator!=(Real x1, Real x2) { return make_logical<EffectiveUpper>(Unequal(),x1,x2); }
+Quasidecidable operator< (Real x1, Real x2) { return make_logical<Effective>(Less(),x1,x2); }
+Quasidecidable operator> (Real x1, Real x2) { return make_logical<Effective>(Gtr(),x1,x2); }
+Quasidecidable operator<=(Real x1, Real x2) { return make_logical<Effective>(Leq(),x1,x2); }
+Quasidecidable operator>=(Real x1, Real x2) { return make_logical<Effective>(Geq(),x1,x2); }
 
 NegSierpinski operator==(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
 Sierpinski operator!=(Real x1, Int64 n2) { ARIADNE_NOT_IMPLEMENTED; }
@@ -196,6 +223,10 @@ template<> String class_name<Real>() { return "Real"; }
 
 const Real pi = Real(3.1415926535897930, 3.141592653589793238, 3.1415926535897936);
 const Real infinity = Real(std::numeric_limits<double>::infinity());
+
+BoundFloat64 Real::operator() (Precision64 pr) const {
+    return this->_ptr->_evaluate(pr);
+}
 
 BoundFloatMP Real::operator() (PrecisionMP pr) const {
     return this->_ptr->_evaluate(pr);

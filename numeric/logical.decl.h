@@ -57,6 +57,12 @@ using ValidatedLogic = Logical<Validated>;
 using UpperLogic = Logical<Upper>;
 using LowerLogic = Logical<Lower>;
 using ApproximateLogic = Logical<Approximate>;
+
+using Decidable = Logical<Exact>;
+using Quasidecidable = Logical<Effective>;
+using Verifyable = Logical<EffectiveUpper>;
+using Falsifyable = Logical<EffectiveLower>;
+
 }
 
 #endif

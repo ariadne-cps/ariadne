@@ -130,12 +130,12 @@ class Real
     friend Real operator*(Real,Real);
     friend Real operator/(Real,Real);
 
-    friend NegSierpinski operator==(Real,Real);
-    friend Sierpinski operator!=(Real,Real);
-    friend Tribool operator<=(Real,Real);
-    friend Tribool operator>=(Real,Real);
-    friend Tribool operator< (Real,Real);
-    friend Tribool operator> (Real,Real);
+    friend Falsifyable operator==(Real,Real);
+    friend Verifyable operator!=(Real,Real);
+    friend Quasidecidable operator<=(Real,Real);
+    friend Quasidecidable operator>=(Real,Real);
+    friend Quasidecidable operator< (Real,Real);
+    friend Quasidecidable operator> (Real,Real);
 
     friend Bool same(Real,Real);
 
@@ -167,7 +167,7 @@ Real atan(Real);
 #include "numeric/logical.h"
 
 namespace Ariadne {
-    
+
 template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator==(const Real& x1, N n2) { return x1==Real(n2); }
 template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator!=(const Real& x1, N n2) { return x1!=Real(n2); }
 template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator<=(const Real& x1, N n2) { return x1<=Real(n2); }

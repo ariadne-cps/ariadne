@@ -527,7 +527,7 @@ template class VectorFunction<EffectiveTag>;
 //------------------------ Vector function operators -------------------------------//
 
 EffectiveVectorFunction operator*(const EffectiveScalarFunction& f, const Vector<Real>& e) {
-    for(SizeType i=0; i!=e.size(); ++i) { ARIADNE_ASSERT(e[i]==Real(0) || e[i]==Real(1)); }
+    for(SizeType i=0; i!=e.size(); ++i) { ARIADNE_ASSERT(decide(e[i]==Real(0)) || decide(e[i]==Real(1))); }
     EffectiveVectorFunction r(e.size(),f.argument_size());
     for(SizeType i=0; i!=e.size(); ++i) {
         if(decide(e[i]==Real(1))) { r.set(i,f); }

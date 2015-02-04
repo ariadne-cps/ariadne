@@ -35,7 +35,16 @@
 
 namespace Ariadne {
 
+class Effort {
+    Nat _m;
+  public:
+    static Effort get_default() { return Effort(0u); }
+    explicit Effort(Nat m) : _m(m) { }
+    operator Nat() const { return _m; }
+};
+
 template<class P> class Logical;
+template<> class Logical<Effective>;
 
 
 
@@ -59,7 +68,6 @@ inline LogicalValue conjunction(LogicalValue l1, LogicalValue l2) { return (l1>l
 inline LogicalValue negation(LogicalValue l) { return static_cast<LogicalValue>(-static_cast<char>(l)); }
 
 OutputStream& operator<<(OutputStream& os, LogicalValue b);
-
 
 
 //!  \ingroup LogicalTypes
@@ -115,10 +123,9 @@ template<class P> class Logical
     friend class Tribool;
 };
 
+
 template<> inline Logical<Exact>::Logical(LogicalValue v)
      : _v(v) { assert(v==LogicalValue::FALSE || v==LogicalValue::TRUE); }
-template<> inline Logical<Effective>::Logical(LogicalValue v)
-    : _v(v) { }
 template<> inline Logical<Validated>::Logical(LogicalValue v)
     : _v(v) { }
 template<> inline Logical<Upper>::Logical(LogicalValue v)
@@ -127,6 +134,70 @@ template<> inline Logical<Lower>::Logical(LogicalValue v)
     : _v(v==LogicalValue::TRUE?LogicalValue::LIKELY:v) { }
 template<> inline Logical<Approximate>::Logical(LogicalValue v)
     : _v(v==LogicalValue::TRUE?LogicalValue::LIKELY:v==LogicalValue::FALSE?LogicalValue::UNLIKELY:v) { }
+class LogicalHandle;
+LogicalValue check(LogicalHandle const& l, Effort e);
+
+class LogicalInterface {
+    friend LogicalValue check(LogicalHandle const& l, Effort e);
+    friend OutputStream& operator<<(OutputStream& os, LogicalHandle const& l);
+  public:
+    virtual ~LogicalInterface() = default;
+  private:
+    virtual LogicalValue _check(Effort) const = 0;
+    virtual OutputStream& _write(OutputStream&) const = 0;
+};
+
+class LogicalHandle {
+    SharedPointer<const LogicalInterface> _ptr;
+  public:
+    explicit LogicalHandle(SharedPointer<const LogicalInterface> p) : _ptr(p) { }
+    explicit LogicalHandle(LogicalValue v);
+    friend LogicalValue check(LogicalHandle const& l, Effort e) { return l._ptr->_check(e); }
+    friend OutputStream& operator<<(OutputStream& os, LogicalHandle const& l) { return l._ptr->_write(os); }
+};
+
+template<> class Logical<Effective>
+{
+    LogicalHandle _v;
+    template<class P> friend class Logical;
+  public:
+    explicit Logical<Effective>(SharedPointer<const LogicalInterface> p) : _v(p) { }
+    template<class B, EnableIf<IsSame<B,Bool>> =dummy> Logical(B b) : Logical(Logical<Exact>(b)) { }
+    Logical<Effective>(Logical<Exact> l);
+    Logical<Validated> check(Effort e) const { return Logical<Validated>(Ariadne::check(_v,e)); }
+    friend Bool decide(Logical<Effective> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
+    friend Bool definitely(Logical<Effective> l, Effort e=Effort::get_default()) { return definitely(l.check(e)); }
+    friend Bool possibly(Logical<Effective> l, Effort e=Effort::get_default()) { return possibly(l.check(e)); }
+};
+
+template<> class Logical<EffectiveUpper>
+{
+    LogicalHandle _v;
+  public:
+    explicit Logical<EffectiveUpper>(SharedPointer<const LogicalInterface> p) : _v(p) { }
+    Logical<EffectiveUpper>(Logical<Effective> l) : _v(l._v) { }
+    Logical<ValidatedUpper> check(Effort e) const { return Logical<ValidatedUpper>(Ariadne::check(_v,e)); }
+    friend Bool decide(Logical<EffectiveUpper> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
+};
+
+template<> class Logical<EffectiveLower>
+{
+    LogicalHandle _v;
+  public:
+    Logical<EffectiveLower>(SharedPointer<const LogicalInterface> p) : _v(p) { }
+    Logical<EffectiveLower>(Logical<Effective> l) : _v(l._v) { }
+    Logical<ValidatedLower> check(Effort e) const { return Logical<ValidatedLower>(Ariadne::check(_v,e)); }
+    friend Bool decide(Logical<EffectiveLower> l, Effort e=Effort::get_default()) { return decide(l.check(e)); }
+};
+
+typedef Logical<Effective> Quasidecidable;
+typedef Logical<EffectiveUpper> Verifyable;
+typedef Logical<EffectiveLower> Falsifyable;
+
+inline Logical<EffectiveLower> operator&&(Logical<EffectiveLower> l1, Logical<Exact> l2) {
+    if(decide(l2)) { return l1; } else { return Logical<Effective>(false); } }
+inline Logical<EffectiveUpper> operator||(Logical<EffectiveUpper> l1, Logical<Exact> l2) {
+    if(decide(l2)) { return Logical<Effective>(true); } else { return l1; } }
 
 //! \ingroup LogicalTypes
 //! \brief The logical constant representing an unknown value.
@@ -168,6 +239,7 @@ class Tribool : public Logical<Validated> {
  public:
     using Logical<Validated>::Logical;
     Tribool() :  Logical<Validated>(LogicalValue::INDETERMINATE) { }
+    Tribool(Logical<Effective> l) : Logical<Validated>(l.check(Effort::get_default())) { }
     // FIXME: Currently needed for Real<Real comparison; Is there a better name?
     explicit Tribool(Logical<Lower> l) : Logical<Validated>(l._v) { }
     explicit Tribool(Logical<Upper> l) : Logical<Validated>(l._v) { }
@@ -178,11 +250,17 @@ class Tribool : public Logical<Validated> {
 //! \ingroup LogicalTypes
 //! \brief A logical variable representing the result of a verifyable proposition. May not take the value FALSE.
 class Sierpinski : public Logical<Upper> {
+  public:
     using Logical<Upper>::Logical;
+    Sierpinski(Logical<EffectiveUpper> l) : Logical<ValidatedUpper>(l.check(Effort::get_default())) { }
 };
 
 // TODO: Should this be a user class?
-class NegSierpinski : public Logical<Lower> { using Logical<Lower>::Logical; };
+class NegSierpinski : public Logical<Lower> {
+  public:
+    using Logical<Lower>::Logical;
+    NegSierpinski(Logical<EffectiveLower> l) : Logical<ValidatedLower>(l.check(Effort::get_default())) { }
+};
 
 //! \ingroup LogicalTypes
 //! \brief A logical variable representing the result of a proposition

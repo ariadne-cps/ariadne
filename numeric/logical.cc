@@ -32,6 +32,14 @@
 
 namespace Ariadne {
 
+class LogicalConstant : public LogicalInterface {
+    LogicalValue _v;
+  public:
+    LogicalConstant(LogicalValue v) : _v(v) { };
+    virtual LogicalValue _check(Effort e) const { return _v; }
+    virtual OutputStream& _write(OutputStream& os) const { return os << this->_v; }
+};
+
 LogicalValue equal(LogicalValue l1, LogicalValue l2) {
     switch (l1) {
         case LogicalValue::TRUE:

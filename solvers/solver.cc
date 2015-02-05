@@ -533,7 +533,7 @@ IntervalNewtonSolver::implicit_step(const ValidatedVectorFunction& f,
     ValidatedVectorFunctionModel mh=h; mh.clobber();
     ARIADNE_LOG(7,"midpoint(h)="<<mh<<"\n");
 
-    ValidatedScalarFunction zero_function(f.argument_size());
+    ValidatedScalarFunction zero_function(f.domain());
     Matrix<ValidatedScalarFunction> D2f(n,n,zero_function);
     for(Nat i=0; i!=n; ++i) {
         for(Nat j=0; j!=n; ++j) {

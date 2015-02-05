@@ -61,10 +61,10 @@ struct ScalarFormulaFunction
     ScalarFormulaFunction(SizeType as, const Formula<X>& f) : _argument_size(as), _formula(f) { }
     operator Formula<X>() const { return _formula; }
 
-    virtual SizeType argument_size() const { return _argument_size; }
-    virtual ScalarFunctionInterface<P>* _derivative(SizeType j) const { return new ScalarFormulaFunction<X>(_argument_size,Ariadne::derivative(_formula,j)); }
-    virtual OutputStream& write(OutputStream& os) const { return os << this->_formula; }
-    virtual OutputStream& repr(OutputStream& os) const { return os << "FormulaFunction("<<this->_argument_size<<","<<this->_formula<<")"; }
+    virtual SizeType argument_size() const final { return _argument_size; }
+    virtual ScalarFunctionInterface<P>* _derivative(SizeType j) const final { return new ScalarFormulaFunction<X>(_argument_size,Ariadne::derivative(_formula,j)); }
+    virtual OutputStream& write(OutputStream& os) const final { return os << this->_formula; }
+    virtual OutputStream& repr(OutputStream& os) const final { return os << "FormulaFunction("<<this->_argument_size<<","<<this->_formula<<")"; }
     template<class Y> Void _compute(Y& r, const Vector<Y>& x) const { r=Ariadne::evaluate(_formula,x); }
 };
 
@@ -318,7 +318,8 @@ struct VectorEmbeddedFunction
         : _as1(as1), _f2(f2), _as3(as3) { }
     virtual SizeType result_size() const { return _f2.result_size(); }
     virtual SizeType argument_size() const { return _as1+_f2.argument_size()+_as3; }
-    virtual ScalarFunctionInterface<P>* _get(SizeType j) const { return new ScalarEmbeddedFunction<P>(_as1,_f2.get(j),_as3); }
+    virtual ScalarFunctionInterface<P>* _get(SizeType i) const { return new ScalarEmbeddedFunction<P>(_as1,_f2.get(i),_as3); }
+    virtual VectorFunctionInterface<P>* _derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& write(OutputStream& os) const { return os << "VectorEmbeddedFunction( as1="<<_as1<<", f2="<<_f2<<", as3="<<_as3<<" )"; }
 
     template<class XX> inline Void _compute(Vector<XX>& r, const Vector<XX>& x) const {
@@ -357,6 +358,7 @@ struct VectorComposedFunction
     virtual SizeType result_size() const { return _f.result_size(); }
     virtual SizeType argument_size() const { return _g.argument_size(); }
     virtual ScalarFunctionInterface<P>* _get(SizeType i) const { return new ScalarComposedFunction<P>(_f[i],_g); }
+    virtual VectorFunctionInterface<P>* _derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& write(OutputStream& os) const { return os << "ComposedFunction( f="<<_f<<", g="<<_g<<" )"; }
 
     template<class XX> inline Void _compute(Vector<XX>& r, const Vector<XX>& x) const {
@@ -377,6 +379,7 @@ struct JoinedFunction
     virtual SizeType argument_size() const { return _f1.argument_size(); }
     virtual OutputStream& write(OutputStream& os) const { return os << "JoinedFunction( f1="<<_f1<<", f2="<<_f2<<" )"; }
     virtual ScalarFunctionInterface<P>* _get(SizeType i) const { return (i<_f1.result_size()) ? _f1.raw_pointer()->_get(i) : _f2.raw_pointer()->_get(i-_f1.result_size()); }
+    virtual VectorFunctionInterface<P>* _derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
     template<class XX> inline Void _compute(Vector<XX>& r, const Vector<XX>& x) const {
         r=join(_f1.evaluate(x),_f2.evaluate(x)); }
 
@@ -394,6 +397,8 @@ class CombinedFunction
     virtual SizeType result_size() const { return _f1.result_size()+_f2.result_size(); }
     virtual SizeType argument_size() const { return _f1.argument_size()+_f2.argument_size(); }
     virtual OutputStream& write(OutputStream& os) const { return os << "CombinedFunction( f1="<<_f1<<", f2="<<_f2<<" )"; }
+
+    virtual VectorFunctionInterface<P>* _derivative(SizeType j) const { ARIADNE_NOT_IMPLEMENTED; }
 
     template<class XX> inline Void _compute(Vector<XX>& r, const Vector<XX>& x) const {
         return r=combine(_f1.evaluate(project(x,range(0,_f1.argument_size()))),

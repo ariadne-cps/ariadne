@@ -32,12 +32,13 @@
 #include <iosfwd>
 #include <iostream>
 
-#include "function/function_interface.h"
-
+#include "utility/declarations.h"
 #include "utility/macros.h"
 #include "utility/pointer.h"
 #include "utility/container.h"
 #include "utility/metaprogramming.h"
+
+#include "function/function_interface.h"
 
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
@@ -49,99 +50,197 @@
 
 namespace Ariadne {
 
-template<class X> class VectorFunctionElementReference;
+template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
+
+template<class P, class D=BoxDomain> struct VectorFunctionElementReference;
+
+class RealDomain : public IntervalDomain {
+  public:
+    RealDomain() : IntervalDomain(-inf,+inf) { }
+};
+
+class EuclideanDomain : public BoxDomain {
+  public:
+    EuclideanDomain(SizeType n) : BoxDomain(n,RealDomain()) { }
+};
+
 
 //! \ingroup FunctionModule
 //! \brief A generic scalar function which can be evaluated over the number type \a X,  \f$f:\X^n\rightarrow\X\f$.
-template<class P>
-class ScalarFunction
-{
+template<class P, class D, class C>
+class Function {
     static_assert(IsStronger<P,ApproximateTag>::value,"P must be an information level/paradigm.");
-    typedef CanonicalNumberType<P> X;
-  private:
-    std::shared_ptr< const ScalarFunctionInterface<P> > _ptr;
+    typedef CanonicalNumberType<P> Y;
+  protected:
+    std::shared_ptr< const FunctionInterface<P,D,C> > _ptr;
   public:
     typedef P InformationTag;
     typedef P Paradigm;
-    typedef X NumericType;
-    typedef ExactBox DomainType;
-    typedef ExactInterval CodomainType;
+    typedef Y NumericType;
+    typedef D DomainType;
+    typedef C CodomainType;
 
-    static ScalarFunction<P> zero(SizeType m);
-    static ScalarFunction<P> constant(SizeType m, NumericType c);
-    static ScalarFunction<P> coordinate(SizeType m, SizeType j);
-    static List< ScalarFunction<P> > coordinates(SizeType n);
+    template<class Y> using Argument = typename ElementTraits<D>::template Type<Y>;
+    template<class Y> using Result = typename ElementTraits<C>::template Type<Y>;
+
+    explicit Function(DomainType dom);
+    explicit Function(DomainType dom, Result<Formula<Y>>const& e);
+    explicit Function(SizeType as, Result<Formula<Y>>const& e);
+    explicit Function(SizeType as, List<Formula<Y>>const& e);
+    explicit Function(SizeType rs, DomainType dom);
+    explicit Function(SizeType rs, ScalarFunction<P,D> sf);
+
+    Function(InitializerList<ScalarFunction<P,D>> const& lsf);
+    Function(List<ScalarFunction<P,D>> const& lsf);
+    Function(Vector<ScalarFunction<P,D>> const& lsf);
+
+    static ScalarFunction<P> zero(SizeType as);
+    static ScalarFunction<P> constant(SizeType as, NumericType c);
+    static ScalarFunction<P> coordinate(SizeType as, SizeType j);
+
+    static VectorFunction<P> zeros(SizeType rs, SizeType as);
+    static VectorFunction<P> identity(SizeType n);
 
     ScalarFunction<P> create_zero() const { return ScalarFunction<P>::zero(this->argument_size()); }
     ScalarFunction<P> create_constant(NumericType c) const { return ScalarFunction<P>::constant(this->argument_size(),c); }
     ScalarFunction<P> create_coordinate(SizeType j) const { return ScalarFunction<P>::coordinate(this->argument_size(),j); }
 
-    explicit ScalarFunction(SizeType as);
-    explicit ScalarFunction(SizeType as, Formula<NumericType> f);
+    Function();
+    explicit Function(FunctionInterface<P,D,C>* p) : _ptr(p) { }
+    explicit Function(SharedPointer<FunctionInterface<P,D,C>> p) : _ptr(p) { }
+    Function(const FunctionInterface<P,D,C>& t) : _ptr(t._clone()) { }
+    Function<P,D,C>& operator=(const FunctionInterface<P,D,C>& f) {
+        _ptr=std::shared_ptr< FunctionInterface<P,D,C> >(f._clone()); return *this; }
 
-    ScalarFunction();
-    explicit ScalarFunction(ScalarFunctionInterface<P>* p) : _ptr(p) { }
-    ScalarFunction(const ScalarFunctionInterface<P>& t) : _ptr(t._clone()) { }
-    ScalarFunction(std::shared_ptr< const ScalarFunctionInterface<P> > p) : _ptr(p) { }
-    ScalarFunction<P>& operator=(const ScalarFunctionInterface<P>& f) {
-        _ptr=std::shared_ptr< const ScalarFunctionInterface<P> >(f._clone()); return *this; }
+    template<class PP, EnableIf<IsStronger<PP,P>> =dummy>
+    Function(const Function<PP,D,C>& f)
+        : _ptr(std::dynamic_pointer_cast< const FunctionInterface<P,D,C> >(f.managed_pointer())) { }
+    template<class PP, EnableIf<IsStronger<PP,P>> =dummy>
+        Function<P,D,C>& operator=(Result<NumericType> const& c); // { return *this=this->create_constant(c); }
 
-    template<class PP> ScalarFunction(const ScalarFunction<PP>& f, EnableIf<IsStronger<PP,P>,Void>* = 0)
-        : _ptr(std::dynamic_pointer_cast< const ScalarFunctionInterface<P> >(f.managed_pointer())) { }
-    template<class PP> inline ScalarFunction(const VectorFunctionElementReference<PP>& vfe,
-                                             EnableIf<IsStronger<PP,P>,Void>* = 0);
+    shared_ptr< const FunctionInterface<P,D,C> > managed_pointer() const  { return _ptr; }
+    const FunctionInterface<P,D,C>* raw_pointer() const  { return _ptr.operator->(); }
+    const FunctionInterface<P,D,C>& reference() const  { return _ptr.operator*(); }
+    operator const FunctionInterface<P,D,C>& () const { return _ptr.operator*(); }
 
-    ScalarFunction<P>& operator=(NumericType const& c) { return *this=this->create_constant(c); }
+    DomainType domain() const {
+        return this->reference().domain(); }
+    CodomainType codomain() const {
+        return this->reference().codomain(); }
+    SizeType argument_size() const {
+        return this->reference().argument_size(); }
+    SizeType result_size() const {
+        return this->reference().result_size(); }
+    template<class X> auto operator() (const Argument<X>& x) const -> decltype(this->reference()._evaluate(x)) {
+        return this->reference()._evaluate(x); }
+    template<class X> auto evaluate(const Argument<X>& x) const -> decltype(this->reference()._evaluate(x)) {
+        return this->reference()._evaluate(x); }
+    template<class X> friend auto evaluate(const Function<P,D,C>& f, const Argument<X>& x) -> decltype(f(x)) {
+        return f(x); }
 
-    std::shared_ptr< const ScalarFunctionInterface<P> > managed_pointer() const  { return _ptr; }
-    const ScalarFunctionInterface<P>* raw_pointer() const  { return _ptr.operator->(); }
-    const ScalarFunctionInterface<P>& reference() const  { return _ptr.operator*(); }
-    operator const ScalarFunctionInterface<P>& () const { return _ptr.operator*(); }
+    Function<P,D,C> derivative(SizeType k) const {
+        return Function<P,D,C>(this->reference()._derivative(k)); }
+    friend Function<P,D,C> derivative(Function<P,D,C> const& f, SizeType k) {
+        return Function<P,D,C>(f.reference()._derivative(k)); }
 
-    DomainType domain() const;
-    CodomainType codomain() const;
-    SizeType argument_size() const { return this->reference().argument_size(); }
-    template<class XX> XX evaluate(const Vector<XX>& x) const { return this->reference().evaluate(x); }
-    template<class XX> XX operator() (const Vector<XX>& x) const { return this->reference().evaluate(x); }
+    template<class X> Result<Differential<ArithmeticType<X,Y>>> differential(const Argument<X>& x, DegreeType d) const {
+        return this->_ptr->_evaluate(Differential<X>::variables(x.size(),x.size(),d,x)); }
 
-    ScalarFunction<P> derivative(SizeType k) const { return this->reference().derivative(k); }
-    friend ScalarFunction<P> derivative(ScalarFunction<P> const& f, SizeType k) { return f.reference().derivative(k); }
-
-    template<class XX> Covector<XX> gradient(const Vector<XX>& x) const { return this->reference().gradient(x); }
-    template<class XX> Differential<XX> differential(const Vector<XX>& x, DegreeType d) const { return this->_ptr->differential(x,d); }
+    Void set(SizeType i, ScalarFunction<P,D>);
+    Function<P,D,IntervalDomain> get(SizeType i) const;
+    Function<P,D,IntervalDomain> operator[](SizeType i) const;
+    VectorFunctionElementReference<P,D> operator[](SizeType i);
+    template<class X> Matrix<ArithmeticType<X,Y>> jacobian(const Argument<X>& x) const;
 
     OutputStream& write(OutputStream& os) const { return this->_ptr->write(os); }
+
+    friend OutputStream& operator<<(OutputStream& os, Function<P,D,C> const& f) { return f._ptr->write(os); }
 };
 
-template<class P> template<class PP> inline
-ScalarFunction<P>::ScalarFunction(const VectorFunctionElementReference<PP>& vfe,
-                                  EnableIf<IsStronger<PP,P>,Void>*)
-    : _ptr(vfe._vf.raw_pointer()->_get(vfe._i))
-{
+template<class P, class D, class C> inline OutputStream&
+operator<<(OutputStream& os, const Function<P,D,C>& f) {
+    return f.write(os); }
+
+template<class P, class D, class C, class X> inline auto
+evaluate(const Function<P,D,C>& f, const ElementType<D,X>& x) -> decltype(f(x)) {
+    return f(x); }
+
+
+template<class P, class C, class X> inline auto
+differential(const Function<P,IntervalDomain,C>& f, const X& x, DegreeType d)
+    -> ElementType<C,Differential<ArithmeticType<Number<P>,X>>> {
+    auto dx=Differential<X>::variable(1u,d,x,0u); return f(dx);
 }
 
-template<class P> inline OutputStream& operator<<(OutputStream& os, const ScalarFunction<P>& f) { return f.write(os); }
-template<class P, class XX> inline XX evaluate(const ScalarFunction<P>& f, const Vector<XX>& x) { return f(x); }
-template<class P, class XX> inline Covector<XX> gradient(const ScalarFunction<P>& f, const Vector<XX>& x) { return f.gradient(x); }
-template<class P, class XX> inline Differential<XX> differential(const ScalarFunction<P>& f, const Vector<XX>& x, DegreeType d) { return f.differential(x,d); }
+template<class P, class C, class X> inline auto
+differential(const Function<P,BoxDomain,C>& f, const Vector<X>& x, DegreeType d)
+    -> ElementType<C,Differential<ArithmeticType<Number<P>,X>>> {
+    auto dx=Differential<X>::variables(d,x); return f(dx);
+}
 
-ApproximateScalarFunction ScalarFunctionInterface<ApproximateTag>::clone() const { return ApproximateScalarFunction(this->_clone()); }
-ValidatedScalarFunction ScalarFunctionInterface<ValidatedTag>::clone() const { return ValidatedScalarFunction(this->_clone()); }
-EffectiveScalarFunction ScalarFunctionInterface<EffectiveTag>::clone() const { return EffectiveScalarFunction(this->_clone()); }
-inline ValidatedNumber ScalarFunctionInterface<ValidatedTag>::evaluate(const Vector<ExactNumber>& x) const {
-    return this->evaluate(Vector<ValidatedNumber>(x)); }
-inline ApproximateNumber ScalarFunctionInterface<ApproximateTag>::operator() (const Vector<ApproximateNumber>& x) const {
-    return this->evaluate(x); }
-inline ValidatedNumber ScalarFunctionInterface<ValidatedTag>::operator() (const Vector<ValidatedNumber>& x) const {
-    return this->evaluate(x); }
-inline EffectiveNumber ScalarFunctionInterface<EffectiveTag>::operator() (const Vector<EffectiveNumber>& x) const {
-    return this->evaluate(x); }
-inline ApproximateScalarFunction ScalarFunctionInterface<ApproximateTag>::derivative(SizeType j) const {
-    return ApproximateScalarFunction(this->_derivative(j)); }
-inline ValidatedScalarFunction ScalarFunctionInterface<ValidatedTag>::derivative(SizeType j) const {
-    return ValidatedScalarFunction(this->_derivative(j)); }
-inline EffectiveScalarFunction ScalarFunctionInterface<EffectiveTag>::derivative(SizeType j) const {
-    return EffectiveScalarFunction(this->_derivative(j)); }
+/*
+template<class P, class D, class C, class X> inline auto
+differential(const Function<P,D,C>& f, const ElementType<D,X>& x, DegreeType d)
+    -> ElementType<C,Differential<ArithmeticType<Number<P>,X>>> {
+    auto dx=Differential<X>::create_identity(x,d); return f(dx);
+}
+*/
+
+
+template<class P, class X> ArithmeticType<Number<P>,X>
+derivative(const ScalarUnivariateFunction<P>& f, const X& x) {
+    return differential(f,x,1u).gradient(); }
+
+template<class P, class X> Vector<ArithmeticType<Number<P>,X>>
+tangent(const VectorUnivariateFunction<P>& f, const X& x) {
+    return column(differential(f,x,1u).jacobian(),0u); }
+
+template<class P, class X> Covector<ArithmeticType<Number<P>,X>>
+gradient(const ScalarMultivariateFunction<P>& f, const Vector<X>& x) {
+    return differential(f,x,1u).gradient(); }
+
+template<class P, class X> Matrix<ArithmeticType<Number<P>,X>>
+jacobian(const VectorMultivariateFunction<P>& f, const Vector<X>& x) {
+    return differential(f,x,1u).jacobian(); }
+
+/*
+template<class P, class D> class ScalarFunction : public Function<P,D,IntervalDomain> {
+    typedef IntervalDomain C;
+    typedef CanonicalNumberType<P> X;
+  public:
+    typedef D DomainType;
+    using Function<P,D,C>::Function;
+    ScalarFunction<P,D>() : ScalarFunction(D()) { }
+    ScalarFunction<P,D>(Function<P,D,C>const& f) : Function<P,D,C>(f) { }
+    explicit ScalarFunction<P,D>(SizeType as) : ScalarFunction(D(as)) { }
+    ScalarFunction<P,D>(SizeType as, Formula<X> const& e) : ScalarFunction(D(as),e) { }
+    explicit ScalarFunction<P,D>(D dom);
+    ScalarFunction<P,D>(D dom, Formula<X> const& e);
+};
+
+template<class P, class D> class VectorFunction : public Function<P,D,BoxDomain> {
+    typedef BoxDomain C;
+    typedef CanonicalNumberType<P> X;
+  public:
+    using Function<P,D,BoxDomain>::Function;
+    VectorFunction();
+    VectorFunction<P,D>(Function<P,D,C>const& f) : Function<P,D,C>(f) { }
+    VectorFunction(SizeType rs, SizeType as);
+    VectorFunction(InitializerList<ScalarFunction<P,D>> const& lsf);
+    VectorFunction(List<ScalarFunction<P,D>> const& lsf);
+    VectorFunction(Vector<ScalarFunction<P,D>> const& vsf);
+    VectorFunction(SizeType rs, ScalarFunction<P,D> const& sf);
+    VectorFunction(SizeType as, List<Formula<X>> const& le);
+
+    Void set(SizeType i, ScalarFunction<P,D> const& f);
+    ScalarFunction<P,D> get(SizeType i) const;
+
+    VectorFunctionElementReference<P,D> operator[](SizeType i);
+    ScalarFunction<P,D> operator[](SizeType i) const;
+
+    template<class XX> Matrix<XX> jacobian(const Vector<XX>& x) const;
+};
+*/
 
 /*
 template<class X> ScalarFunction<X> operator+(const ScalarFunction<X>&);
@@ -206,9 +305,13 @@ EffectiveScalarFunction cos(const EffectiveScalarFunction&);
 EffectiveScalarFunction tan(const EffectiveScalarFunction&);
 EffectiveScalarFunction atan(const EffectiveScalarFunction&);
 
+ValidatedScalarFunction operator+(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
+ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
+ValidatedScalarFunction operator*(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
+ValidatedScalarFunction operator/(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
 
 
-
+/*
 //! \ingroup FunctionModule
 //! \brief A generic vector function which can be evaluated over the number type \a X,  \f$f:\X^n\rightarrow\X^m\f$.
 template<class P>
@@ -273,6 +376,7 @@ template<class P, class XX> inline Matrix<XX> jacobian(const VectorFunction<P>& 
 
 inline Matrix<ValidatedNumber> VectorFunctionInterface<ValidatedTag>::jacobian(const Vector<ExactNumber>& x) const {
     return this->jacobian(Vector<ValidatedNumber>(x)); }
+*/
 
 /*
 template<class X> VectorFunction<P> operator*(const ScalarFunction<X>& sf, const Vector<X>& e);
@@ -318,9 +422,6 @@ EffectiveScalarFunction lie_derivative(const EffectiveScalarFunction& g, const E
 Formula<EffectiveNumber> formula(const EffectiveScalarFunction& f);
 Vector< Formula<EffectiveNumber> > formula(const EffectiveVectorFunction& f);
 
-inline Vector<ValidatedNumber> VectorFunctionInterface<ValidatedTag>::evaluate(const Vector<ExactNumber> & x) const {
-    return this->evaluate(Vector<ValidatedNumber>(x)); }
-
 
 ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedScalarFunction&);
 ValidatedScalarFunction operator-(const ValidatedScalarFunction&, const ValidatedNumber&);
@@ -330,59 +431,64 @@ ValidatedVectorFunction join(const ValidatedVectorFunction& f1, const ValidatedV
 ValidatedScalarFunction compose(const ValidatedScalarFunction& f, const ValidatedVectorFunction& g);
 ValidatedVectorFunction compose(const ValidatedVectorFunction& f, const ValidatedVectorFunction& g);
 
-template<class P>
+
+
+template<class P, class D>
 struct VectorFunctionElementReference {
-    VectorFunction<P>& _vf; SizeType _i;
-    VectorFunctionElementReference<P>(VectorFunction<P>& vf, SizeType i) : _vf(vf), _i(i) { }
-    Void operator=(const ScalarFunction<P>& sf);
-    VectorFunctionElementReference<P>& operator=(const VectorFunctionElementReference<P>& sfr);
+    typedef IntervalDomain SC; typedef BoxDomain VC;
+    Function<P,D,VC>& _vf; SizeType _i;
+    VectorFunctionElementReference<P,D>(Function<P,D,VC>& vf, SizeType i) : _vf(vf), _i(i) { }
+    template<class WP> operator Function<WP,D,SC> () const;
+    Void operator=(const Function<P,D,SC>& sf);
+    VectorFunctionElementReference<P,D>& operator=(const VectorFunctionElementReference<P,D>& sfr);
     template<class XX> XX evaluate(const Vector<XX> & x) const;
     template<class XX> XX operator()(const Vector<XX> & x) const;
 };
 
-template<class P> inline VectorFunctionElementReference<P> VectorFunction<P>::operator[](SizeType i) { return VectorFunctionElementReference<P>(*this,i); }
-template<class P> inline OutputStream& operator<<(OutputStream& os, const VectorFunctionElementReference<P>& vfe) {
-    return  os << static_cast< ScalarFunction<P> >(vfe); }
+template<class P, class D> template<class WP> inline
+VectorFunctionElementReference<P,D>::operator Function<WP,D,SC> () const {
+    return this->_vf.get(this->_i);
+}
 
-template<class P> inline Void VectorFunctionElementReference<P>::operator=(const ScalarFunction<P>& sf) { _vf.set(_i,sf); }
-template<class P> inline VectorFunctionElementReference<P>& VectorFunctionElementReference<P>::operator=(const VectorFunctionElementReference<P>& sfr) {
-    _vf.set(_i,static_cast< ScalarFunction<P> >(sfr)); return *this; }
-template<class P> template<class XX> inline XX VectorFunctionElementReference<P>::evaluate(const Vector<XX> & x) const {
-    return static_cast< ScalarFunction<P> >(*this).evaluate(x); }
-template<class P> template<class XX> inline XX VectorFunctionElementReference<P>::operator()(const Vector<XX> & x) const {
-    return static_cast< ScalarFunction<P> >(*this).evaluate(x); }
+template<class P, class D> inline VectorFunctionElementReference<P,D> make_element_reference(ScalarFunction<P,D>& sf, SizeType i) {
+    ARIADNE_ASSERT(false); }
+template<class P, class D> inline VectorFunctionElementReference<P,D> make_element_reference(VectorFunction<P,D>& vf, SizeType i) {
+    return VectorFunctionElementReference<P,D>(vf,i); }
 
-inline ApproximateScalarFunction VectorFunctionInterface<ApproximateTag>::operator[](SizeType i) const {
-    return ApproximateScalarFunction(this->_get(i)); }
-inline ValidatedScalarFunction VectorFunctionInterface<ValidatedTag>::operator[](SizeType i) const {
-    return ValidatedScalarFunction(this->_get(i)); }
-inline EffectiveScalarFunction VectorFunctionInterface<EffectiveTag>::operator[](SizeType i) const {
-    return EffectiveScalarFunction(this->_get(i)); }
+template<class P, class D, class C> inline VectorFunctionElementReference<P,D> Function<P,D,C>::operator[](SizeType i) {
+    return make_element_reference(*this,i); }
+
+template<class P, class D, class C> inline ScalarFunction<P,D> Function<P,D,C>::operator[](SizeType i) const {
+    return this->get(i); }
+
+template<class P, class D> inline OutputStream& operator<<(OutputStream& os, const VectorFunctionElementReference<P,D>& vfe) {
+    return  os << static_cast< Function<P,D,IntervalDomain> >(vfe); }
+
+template<class P, class D> inline Void VectorFunctionElementReference<P,D>::operator=(const Function<P,D,SC>& sf) {
+    _vf.set(_i,sf); }
+template<class P, class D> inline VectorFunctionElementReference<P,D>& VectorFunctionElementReference<P,D>::operator=(const VectorFunctionElementReference<P,D>& sfr) {
+    _vf.set(_i,static_cast<Function<P,D,SC>>(sfr)); return *this; }
+template<class P, class D> template<class XX> inline XX VectorFunctionElementReference<P,D>::evaluate(const Vector<XX> & x) const {
+    return static_cast<Function<P,D,SC>>(*this).evaluate(x); }
+template<class P, class D> template<class XX> inline XX VectorFunctionElementReference<P,D>::operator()(const Vector<XX> & x) const {
+    return static_cast<Function<P,D,SC>>(*this).evaluate(x); }
+
 
 
 inline UpperInterval apply(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<UpperInterval>(f.evaluate(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
-inline UpperInterval evaluate(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<UpperInterval>(f.evaluate(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
-inline Differential<UpperInterval> evaluate(ScalarFunction<ValidatedTag>const& f, const Vector<Differential<UpperInterval>>& x) {
-    return static_cast<Differential<UpperInterval>>(f.evaluate(reinterpret_cast<Vector<Differential<ValidatedFloat>>const&>(x))); }
-inline Differential<UpperInterval> differential(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x, SizeType d) {
-    return static_cast<Differential<UpperInterval>>(f.differential(reinterpret_cast<Vector<ValidatedFloat>const&>(x),d)); }
-inline Covector<UpperInterval> gradient(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Covector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
-inline Covector<UpperInterval> gradient(ScalarFunction<ValidatedTag>const& f, const Vector<ExactInterval>& x) {
-    return static_cast<Covector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
-inline Covector<UpperInterval> gradient_range(ScalarFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Covector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
+    return static_cast<UpperInterval>(f(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
+inline Box<UpperInterval> apply(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
+    return static_cast<Vector<UpperInterval>>(f(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
+inline Vector<Differential<UpperInterval>> apply_derivative(VectorFunction<ValidatedTag>const& f, const Vector<Differential<UpperInterval>>& x) {
+    return static_cast<Vector<Differential<UpperInterval>>>(f(reinterpret_cast<Vector<Differential<ValidatedNumber>>const&>(x))); }
 
-inline Vector<UpperInterval> apply(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Vector<UpperInterval>>(f.evaluate(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
-inline Vector<UpperInterval> evaluate(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Vector<UpperInterval>>(f.evaluate(reinterpret_cast<Vector<ValidatedNumber>const&>(x))); }
-inline Vector<Differential<UpperInterval>> evaluate(VectorFunction<ValidatedTag>const& f, const Vector<Differential<UpperInterval>>& x) {
-    return static_cast<Vector<Differential<UpperInterval>>>(f.evaluate(reinterpret_cast<Vector<Differential<ValidatedFloat>>const&>(x))); }
-inline Vector<Differential<UpperInterval>> differentials(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x, SizeType d) {
-    return static_cast<Vector<Differential<UpperInterval>>>(f.differentials(reinterpret_cast<Vector<ValidatedFloat>const&>(x),d)); }
+
+inline Covector<UpperInterval> gradient_range(ValidatedScalarFunction const& f, const Vector<UpperInterval>& x) {
+    return static_cast<Covector<UpperInterval>>(static_cast<Covector<ValidatedFloat>>(gradient(f,reinterpret_cast<Vector<ValidatedFloat>const&>(x)))); }
+inline Matrix<UpperInterval> jacobian_range(ValidatedVectorFunction const& f, const Vector<UpperInterval>& x) {
+    return static_cast<Matrix<UpperInterval>>(static_cast<Matrix<ValidatedFloat>>(jacobian(f,reinterpret_cast<Vector<ValidatedFloat>const&>(x)))); }
+
+/*
 inline Matrix<UpperInterval> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<ValidatedTag>const& f, const Vector<ExactInterval>& x) {
@@ -392,13 +498,14 @@ inline Matrix<UpperInterval> jacobian_range(VectorFunction<ValidatedTag>const& f
 
 // FIXME: Needed to override templated gradient and jacobian
 inline Covector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
-    return static_cast<Covector<UpperInterval>>(f.gradient(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
+    return static_cast<Covector<UpperInterval>>(gradient(f,reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
 inline Covector<UpperInterval> gradient(ScalarFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
     return gradient(f,static_cast<Vector<UpperInterval>>(x)); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<UpperInterval>& x) {
     return static_cast<Matrix<UpperInterval>>(f.jacobian(reinterpret_cast<Vector<ValidatedFloat>const&>(x))); }
 inline Matrix<UpperInterval> jacobian(VectorFunction<EffectiveTag>const& f, const Vector<ExactInterval>& x) {
     return jacobian(f,static_cast<Vector<UpperInterval>>(x)); }
+*/
 
 template<class P> class FunctionFactory;
 typedef FunctionFactory<ValidatedTag> ValidatedFunctionFactory;
@@ -419,13 +526,13 @@ class FunctionFactory<ValidatedTag>
 };
 
 inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const {
-    return ValidatedScalarFunction(this->_create(domain,function)); }
+    return ValidatedScalarFunction(SharedPointer<ValidatedScalarFunctionInterface>(this->_create(domain,function))); }
 inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create(const ExactBox& domain, const ValidatedVectorFunctionInterface& function) const {
-    return ValidatedVectorFunction(this->_create(domain,function)); }
+    return ValidatedVectorFunction(SharedPointer<ValidatedVectorFunctionInterface>(this->_create(domain,function))); }
 inline ValidatedScalarFunction FunctionFactoryInterface<ValidatedTag>::create_zero(const ExactBox& domain) const {
-    return ValidatedScalarFunction(this->_create(domain,EffectiveScalarFunction::zero(domain.size()))); }
+    return this->create(domain,EffectiveScalarFunction::zero(domain.dimension())); }
 inline ValidatedVectorFunction FunctionFactoryInterface<ValidatedTag>::create_identity(const ExactBox& domain) const {
-    return ValidatedVectorFunction(this->_create(domain,EffectiveVectorFunction::identity(domain.size()))); }
+    return this->create(domain,EffectiveVectorFunction::identity(domain.dimension())); }
 
 inline ValidatedScalarFunction FunctionFactory<ValidatedTag>::create(const ExactBox& domain, const ValidatedScalarFunctionInterface& function) const {
     return this->_ptr->create(domain,function); }

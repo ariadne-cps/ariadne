@@ -394,9 +394,6 @@ template<class X> Graded<X> make_graded(const X& val) {
 template<class X> Graded<X> create_graded(const X&) {
     return Graded<X>(); }
 
-struct Function {
-    template<class X> X operator()(const X& x) const { return x; }
-};
 
 
 template<class X, class A> Void compute(const Vector< Procedure<X> >& p, Vector< Graded<A> >& r, List< Graded<A> >& t, const Vector< Graded<A> >& a) {

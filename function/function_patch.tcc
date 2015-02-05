@@ -713,7 +713,7 @@ template<class M> Void VectorFunctionPatch<M>::set_sweeper(Sweeper swp)
     }
 }
 
-template<class M> const ExactBox& VectorFunctionPatch<M>::domain() const
+template<class M> const ExactBox VectorFunctionPatch<M>::domain() const
 {
     return this->_domain;
 }

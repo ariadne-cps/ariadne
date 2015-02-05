@@ -802,7 +802,7 @@ Enclosure::splitting_subdomains_zeroth_order() const
 Nat
 Enclosure::splitting_index_zeroth_order() const
 {
-    Matrix<UpperInterval> jacobian=Ariadne::jacobian(this->function(),this->reduced_domain());
+    Matrix<UpperInterval> jacobian=Ariadne::jacobian_range(this->function(),this->reduced_domain());
 
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)

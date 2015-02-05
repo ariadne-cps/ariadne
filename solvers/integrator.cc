@@ -43,9 +43,6 @@
 
 namespace Ariadne {
 
-Void foo() { UpperInterval x; Vector<UpperInterval> v;  x*x; x*v; v*x; }
-
-
 static const ExactFloat zero=0;
 
 inline UpperBox operator+(Vector<ExactInterval> bx, Vector<UpperInterval> const& ex) {
@@ -132,7 +129,7 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBox& d
         //bx=domx+INITIAL_MULTIPLIER*ih*evaluate(vf,domx)+delta;
         bx=domx+INITIAL_MULTIPLIER*vh*vf.evaluate(dx)+delta;
         for(Nat i=0; i!=EXPANSION_STEPS; ++i) {
-            df=evaluate(vf,bx);
+            df=apply(vf,bx);
             nbx=domx+delta+ih*df;
             if(refines(nbx,bx)) {
                 success=true;
@@ -150,11 +147,11 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBox& d
     ARIADNE_ASSERT(refines(nbx,bx));
 
     Vector<UpperInterval> vfbx;
-    vfbx=evaluate(vf,bx);
+    vfbx=apply(vf,bx);
 
     for(Nat i=0; i!=REFINEMENT_STEPS; ++i) {
         bx=nbx;
-        vfbx=evaluate(vf,bx);
+        vfbx=apply(vf,bx);
         nbx=domx+delta+ih*vfbx;
         ARIADNE_ASSERT_MSG(refines(nbx,bx),std::setprecision(20)<<"refinement "<<i<<": "<<nbx<<" is not a inside of "<<bx);
     }
@@ -170,7 +167,7 @@ IntegratorBase::flow_bounds(const ValidatedVectorFunction& vf, const ExactBox& d
     ARIADNE_ASSERT(refines(domx,bx));
 
     ARIADNE_ASSERT_MSG(refines(domx+ih*apply(vf,bx),bx),
-        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<evaluate(vf,bx)<<"\nd+hf(b)="<<(domx+ih*evaluate(vf,bx))<<"\nb="<<bx<<"\n");
+        "d="<<dx<<"\nh="<<h<<"\nf(b)="<<apply(vf,bx)<<"\nd+hf(b)="<<(domx+ih*apply(vf,bx))<<"\nb="<<bx<<"\n");
 
     return std::make_pair(ExactFloat(h),bx);
 }

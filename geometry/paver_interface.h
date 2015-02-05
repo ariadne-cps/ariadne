@@ -28,14 +28,10 @@
 #ifndef ARIADNE_PAVER_INTERFACE_H
 #define ARIADNE_PAVER_INTERFACE_H
 
+#include "utility/declarations.h"
+
 namespace Ariadne {
 
-typedef Void Void;
-typedef Int Int;
-class ExactInterval;
-template<class X> class Vector;
-template<class X> class VectorFunctionInterface;
-typedef VectorFunctionInterface<ValidatedTag> ValidatedVectorFunctionInterface;
 class PavingInterface;
 
 //! \brief A class for computing outer approximations to sets defined by functions.
@@ -45,8 +41,8 @@ class PaverInterface
     typedef ExactBox DomainType;
   public:
     virtual Void
-    adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunctionInterface& space_function,
-                               const ValidatedVectorFunctionInterface& constraint_function, const ExactBox& constraint_bounds, Int depth) const = 0;
+    adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
+                               const ValidatedVectorFunction& constraint_function, const ExactBox& constraint_bounds, Int depth) const = 0;
 
 };
 

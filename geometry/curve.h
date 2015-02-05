@@ -95,7 +95,7 @@ class Curve
     /*! \brief Destructor. */
     virtual ~Curve();
     /*! \brief Constructor. */
-    Curve(const EffectiveVectorFunction& f);
+    Curve(const Function<Effective,IntervalDomain,BoxDomain>& f);
     /*! \brief Copy constructor. */
     Curve(const Curve& c);
     /*! \brief Return a new dynamically-allocated copy of the constraint. */
@@ -113,7 +113,7 @@ class Curve
     /*! \brief Write to an output stream. */
     virtual OutputStream& write(OutputStream& os) const;
   private:
-    EffectiveVectorFunction _function;
+    Function<Effective,IntervalDomain,BoxDomain> _function;
 };
 
 

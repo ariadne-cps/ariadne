@@ -180,9 +180,9 @@ class NonlinearInfeasibleInteriorPointOptimiser
     Pair<Tribool,ApproximateFloatVector> feasible_hotstarted(ExactBox D, ValidatedVectorFunction g, ExactBox C,
                                                                 const PrimalDualData& wxy0) const;
 
-    Void setup_feasibility(const ExactBox& D, const ApproximateVectorFunctionInterface& g, const ExactBox& C,
+    Void setup_feasibility(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
                            StepData& stp) const;
-    Void step(const ApproximateScalarFunctionInterface& f, const ExactBox& D, const ApproximateVectorFunctionInterface& g, const ExactBox& C,
+    Void step(const ApproximateScalarFunction& f, const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
               StepData& stp) const;
 //    ApproximateFloat compute_mu(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
 //                     ApproximateFloatVector& w, ApproximateFloatVector& x, ApproximateFloatVector& y) const;

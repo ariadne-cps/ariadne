@@ -531,7 +531,7 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
 
     // Construct the function g_e(x) = g_{e_i}(x)
     ARIADNE_ASSERT(g.result_size()>0);
-    ValidatedVectorFunction ge(equality_constraints.size(),g.argument_size());
+    ValidatedVectorFunction ge(equality_constraints.size(),g.domain());
     ExactIntervalVector ce(equality_constraints.size());
     for(Nat i=0; i!=ge.result_size(); ++i) {
         ge[i]=g[equality_constraints[i]];
@@ -541,7 +541,7 @@ contains_feasible_point(ExactBox D, ValidatedVectorFunction g, ExactBox C, Valid
     ARIADNE_LOG(7,"ge="<<ge<<", ce="<<ce<<"\n");
 
     // FIXME: Carefully change this code!
-    UpperIntervalMatrix ivlA=ge.jacobian(X);
+    UpperIntervalMatrix ivlA=jacobian_range(ge,X);
     ARIADNE_LOG(7,"ivlA="<<ivlA<<"\n");
     ApproximateFloatVector fltD(X.size());
     for(Nat i=0; i!=X.size(); ++i) { fltD[i]=rec(sqr(X[i].error())); }
@@ -622,7 +622,7 @@ validate_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
 
     Nat k=equalities.size();
     Nat n=D.size();
-    ValidatedVectorFunction h(equalities.size(),g.argument_size());
+    ValidatedVectorFunction h(equalities.size(),g.domain());
     ExactFloatVector c(equalities.size());
     for(Nat i=0; i!=equalities.size(); ++i) {
         h[i] = g[equalities[i]];
@@ -716,7 +716,7 @@ validate_infeasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     for(Nat j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
     UpperInterval tygD = apply(tyg,D);
 
-    UpperIntervalMatrix dgD = jacobian(g,D);
+    UpperIntervalMatrix dgD = jacobian_range(g,D);
     UpperIntervalVector ydgD = transpose(dgD) * UpperIntervalVector(y);
 
     UpperInterval ygx = dot(UpperIntervalVector(y),apply(g,UpperIntervalVector(x)));
@@ -865,7 +865,7 @@ feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const
     ApproximateFloatVector& x=make_approximate(v.x);
     ApproximateFloatVector& y=make_approximate(v.y);
 
-    ApproximateScalarFunction f(D.size());
+    ApproximateScalarFunction f(D);
     ExactBox R=intersection(make_exact_box(apply(g,D)+UpperBox(C.size(),UpperInterval(-1,+1))),C);
     this->setup_feasibility(D,g,R,v);
 
@@ -895,7 +895,7 @@ feasible(ExactBox D, ValidatedVectorFunction g, ExactBox C) const
 }
 
 Void NonlinearInfeasibleInteriorPointOptimiser::
-setup_feasibility(const ExactBox& D, const ApproximateVectorFunctionInterface& g, const ExactBox& C,
+setup_feasibility(const ExactBox& D, const ApproximateVectorFunction& g, const ExactBox& C,
                   StepData& v) const
 {
     ExactInterval I(-1,+1);
@@ -921,7 +921,7 @@ setup_feasibility(const ExactBox& D, const ApproximateVectorFunctionInterface& g
 
 Void
 NonlinearInfeasibleInteriorPointOptimiser::step(
-    const ApproximateScalarFunctionInterface& f, const ExactBox& d, const ApproximateVectorFunctionInterface& g, const ExactBox& c,
+    const ApproximateScalarFunction& f, const ExactBox& d, const ApproximateVectorFunction& g, const ExactBox& c,
     StepData& v) const
 {
     RawFloatVector& w=v.w; RawFloatVector& x=v.x; RawFloatVector& y=v.y; Float& mu=v.mu;
@@ -954,9 +954,10 @@ NonlinearInfeasibleInteriorPointOptimiser::step(
 
     mu = mu * sigma;
 
-    FloatDifferential ddfx=make_raw(f.evaluate(make_approximate(FloatDifferential::variables(2,x))));
+    ApproximateFloatVector ax(x);
+    FloatDifferential ddfx=make_raw(f.differential(ax,2u));
     ARIADNE_LOG(9,"ddfx="<<ddfx<<"\n");
-    Vector<FloatDifferential> ddgx=make_raw(g.evaluate(make_approximate(FloatDifferential::variables(2,x))));
+    Vector<FloatDifferential> ddgx=make_raw(g.differential(ax,2u));
     ARIADNE_LOG(9,"ddgx="<<ddgx<<"\n");
 
     Float fx = ddfx.value();
@@ -1176,7 +1177,7 @@ minimise(ValidatedScalarFunction f, ExactBox D, ValidatedVectorFunction g, Exact
 {
     ARIADNE_LOG(2,"NonlinearInteriorPointOptimiser::minimise(f,D,g,C)\n");
     ARIADNE_LOG(3,"f="<<f<<" D="<<D<<" g="<<g<<" C="<<C<<"\n");
-    ValidatedVectorFunction h(0,D.size());
+    ValidatedVectorFunction h(0,D);
 
     UpperIntervalVector gD = apply(g,D);
     if(definitely(disjoint(gD,C))) { throw InfeasibleProblemException(); }
@@ -1748,7 +1749,7 @@ Void PenaltyFunctionOptimiser::
 feasibility_step(const ExactBox& X, const ApproximateVectorFunction& g, const ExactBox& W,
                  ApproximateFloatVector& x, ApproximateFloatVector& w, ApproximateFloat& mu) const
 {
-    ApproximateVectorFunction h(0u,X.size());
+    ApproximateVectorFunction h(0u,X);
     const Nat n=X.size();
     const Nat m=W.size();
     const Nat l=h.result_size();
@@ -2132,7 +2133,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     if(definitely(result)) {
         if(equalities.empty()) { ARIADNE_LOG(2,"feasible\n"); return true; }
 
-        ValidatedVectorFunction h(equalities.size(),g.argument_size());
+        ValidatedVectorFunction h(equalities.size(),g.domain());
         ValidatedFloatVector c(equalities.size());
         for(Nat i=0; i!=equalities.size(); ++i) {
             h[i] = g[equalities[i]];
@@ -2169,7 +2170,7 @@ check_feasibility(ExactBox D, ValidatedVectorFunction g, ExactBox C,
     for(Nat j=0; j!=y.size(); ++j) { tyg += y[j]*tg[j]; }
     UpperInterval tygD = UpperInterval(tyg(make_singleton(D)));
 
-    UpperIntervalMatrix dgD = jacobian(g,D);
+    UpperIntervalMatrix dgD = jacobian_range(g,D);
     UpperIntervalVector ydgD = transpose(dgD) * UpperIntervalVector(y);
 
     ValidatedFloat ygx = dot(y,gx);

@@ -68,7 +68,6 @@ typedef Valuation<Integer,Integer> IntegerValuation;
 class DiscreteValuation;
 template<class X> class ContinuousValuation;
 
-template<class X> class ScalarFunction;
 template<class X> class Vector;
 template<class X> class Formula;
 

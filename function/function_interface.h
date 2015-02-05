@@ -24,6 +24,7 @@
 /*! \file function_interface.h
  *  \brief Interface for functions for which derivatives can be computed.
  */
+
 #ifndef ARIADNE_FUNCTION_INTERFACE_H
 #define ARIADNE_FUNCTION_INTERFACE_H
 
@@ -34,265 +35,136 @@ namespace Ariadne {
 
 static const Int SMOOTH=255;
 
-template<>
-class ScalarFunctionInterface<Void>
+template<class S> struct ElementTraits;
+template<> struct ElementTraits<IntervalDomain> { template<class X> using Type=Scalar<X>; };
+template<> struct ElementTraits<BoxDomain> { template<class X> using Type=Vector<X>; };
+
+template<class P, class D, class C> class FunctionInterface;
+
+template<class D, class C>
+class FunctionInterface<Void,D,C>
 {
+    template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
+    template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    //! \brief The type used to describe the number of argument variables.
-    typedef Ariadne::SizeType SizeType;
+    typedef D DomainType;
+    typedef C CodomainType;
 
-    //! \brief Virtual destructor.
-    virtual ~ScalarFunctionInterface() { };
-    //! \brief The number of arguments to the expression.
+    virtual ~FunctionInterface() { };
     virtual SizeType argument_size() const = 0;
+    virtual SizeType result_size() const = 0;
+    virtual DomainType const domain() const = 0;
+    virtual CodomainType const codomain() const = 0;
 
-    //! \brief Write a full version to an output stream.
     virtual OutputStream& repr(OutputStream& os) const = 0;
-    //! \brief Write to an output stream.
     virtual OutputStream& write(OutputStream& os) const = 0;
   public:
-    virtual ScalarFunctionInterface<Void>* _clone() const = 0;
+    virtual FunctionInterface<Void,D,C>* _clone() const = 0;
 };
 
 //! \ingroup FunctionModule
 //! \brief Interface for scalar functions \f$\mathbb{F}^n\rightarrow\mathbb{F}\f$ which can only be evaluated approximately.
 //! \sa \ref VectorFunctionInterface.
-template<>
-class ScalarFunctionInterface<ApproximateTag>
-    : public ScalarFunctionInterface<Void>
+template<class D, class C>
+class FunctionInterface<ApproximateTag,D,C>
+    : public virtual FunctionInterface<Void,D,C>
 {
+    typedef ApproximateTag P;
   public:
-    //! \brief Return a copy of the function.
-    inline ScalarFunction<ApproximateTag> clone() const;
-    //! \brief Compute an approximation to the value of the function at the point \a x.
-    virtual ApproximateNumber evaluate(const Vector<ApproximateNumber>& x) const = 0;
-    inline ApproximateNumber operator() (const Vector<ApproximateNumber>& x) const;
-    //! \brief Evaluate the function over a vector of differentials.
-    virtual Differential<ApproximateNumber> evaluate(const Vector< Differential<ApproximateNumber> >& x) const = 0;
-    //! \brief Evaluate the function over a vector of approximate Taylor models.
-    virtual TaylorModel<Approximate,Float> evaluate(const Vector< TaylorModel<Approximate,Float> >& x) const = 0;
-    //! \brief Evaluate the function over a vector of formulae to create the composed function.
-    virtual Formula<ApproximateNumber> evaluate(const Vector< Formula<ApproximateNumber> >& x) const = 0;
-    //! \brief Evaluate the function over a vector of elements of an algebra.
-    virtual Algebra<ApproximateNumber> evaluate(const Vector< Algebra<ApproximateNumber> >& x) const = 0;
-
-    Covector<ApproximateNumber> gradient(const Vector<ApproximateNumber>& x) const;
-    Differential<ApproximateNumber> differential(const Vector<ApproximateNumber>& x, DegreeType d) const;
-
-    //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<ApproximateTag> derivative(SizeType i) const;
-  private:
-    virtual ScalarFunctionInterface<ApproximateTag>* _derivative(SizeType i) const = 0;
+    typedef D DomainType;
+    typedef C CodomainType;
+    template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
+    template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    virtual ScalarFunctionInterface<ApproximateTag>* _clone() const = 0;
+    virtual Result<ApproximateNumber> _evaluate(const Argument<ApproximateNumber>& x) const = 0;
+    virtual Result<Differential<ApproximateNumber>> _evaluate(const Argument< Differential<ApproximateNumber> >& x) const = 0;
+    virtual Result<TaylorModel<Approximate,Float>> _evaluate(const Argument< TaylorModel<Approximate,Float> >& x) const = 0;
+    virtual Result<Formula<ApproximateNumber>> _evaluate(const Argument< Formula<ApproximateNumber> >& x) const = 0;
+    virtual Result<Algebra<ApproximateNumber>> _evaluate(const Argument< Algebra<ApproximateNumber> >& x) const = 0;
+
+    virtual FunctionInterface<P,D,C>* _clone() const = 0;
+    virtual FunctionInterface<P,D,C>* _derivative(SizeType i) const = 0;
 };
 
 //! \ingroup FunctionModule
 //! \brief Interface for scalar functions \f$\mathbb{I}^n\rightarrow\mathbb{I}\f$ which can be evaluated over intervals.
 //! \sa \ref VectorFunctionInterface.
-template<>
-class ScalarFunctionInterface<ValidatedTag>
-    : public ScalarFunctionInterface<ApproximateTag>
+template<class D, class C>
+class FunctionInterface<ValidatedTag,D,C>
+    : public virtual FunctionInterface<ApproximateTag,D,C>
 {
+    typedef ValidatedTag P;
+    typedef ApproximateTag AP;
   public:
-
-    inline ScalarFunction<ValidatedTag> clone() const;
-
-    using ScalarFunctionInterface<ApproximateTag>::evaluate;
-
-    //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
-    virtual ValidatedNumber evaluate(const Vector<ValidatedNumber>& x) const = 0;
-    inline ValidatedNumber evaluate(const Vector<ExactNumber>& x) const;
-    inline ValidatedNumber operator() (const Vector<ValidatedNumber>& x) const;
-    //! \brief Evaluate the function over a vector of interval differentials.
-    virtual Differential<ValidatedNumber> evaluate(const Vector< Differential<ValidatedNumber> >& x) const = 0;
-    //! \brief Evaluate the function over a vector of Taylor models with interval error.
-    virtual TaylorModel<Validated,Float> evaluate(const Vector< TaylorModel<Validated,Float> >& x) const = 0;
-
-    //! \brief Apply the function to a formula. Can be used to obtain a tree structure from the function.
-    virtual Formula<ValidatedNumber> evaluate(const Vector< Formula<ValidatedNumber> >& x) const = 0;
-    //! \brief Apply the function to an algebra.
-    virtual Algebra<ValidatedNumber> evaluate(const Vector< Algebra<ValidatedNumber> >& x) const = 0;
-
-    using ScalarFunctionInterface<ApproximateTag>::gradient;
-    Covector<ValidatedNumber> gradient(const Vector<ValidatedNumber>& x) const;
-    using ScalarFunctionInterface<ApproximateTag>::differential;
-    Differential<ValidatedNumber> differential(const Vector<ValidatedNumber>& x, DegreeType d) const;
-
-    //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<ValidatedTag> derivative(SizeType i) const;
-  private:
-    //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    virtual ScalarFunctionInterface<ValidatedTag>* _derivative(SizeType i) const = 0;
+    typedef D DomainType;
+    typedef C CodomainType;
+    template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
+    template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    virtual ScalarFunctionInterface<ValidatedTag>* _clone() const = 0;
+    using FunctionInterface<AP,D,C>::_evaluate;
+    virtual Result<ValidatedNumber> _evaluate(const Argument<ValidatedNumber>& x) const = 0;
+    virtual Result<Differential<ValidatedNumber>> _evaluate(const Argument< Differential<ValidatedNumber> >& x) const = 0;
+    virtual Result<TaylorModel<Validated,Float>> _evaluate(const Argument< TaylorModel<Validated,Float> >& x) const = 0;
+    virtual Result<Formula<ValidatedNumber>> _evaluate(const Argument< Formula<ValidatedNumber> >& x) const = 0;
+    virtual Result<Algebra<ValidatedNumber>> _evaluate(const Argument< Algebra<ValidatedNumber> >& x) const = 0;
+
+    inline Result<ValidatedNumber> _evaluate(const Argument<ExactFloat>& x) const {
+        return this->_evaluate(Argument<ValidatedNumber>(x)); }
+    inline Result<Differential<ValidatedNumber>> _evaluate(const Argument<Differential<ExactFloat>>& x) const {
+        return this->_evaluate(Argument<Differential<ValidatedNumber>>(x)); }
+
+    virtual FunctionInterface<P,D,C>* _clone() const = 0;
+    virtual FunctionInterface<P,D,C>* _derivative(SizeType i) const = 0;
 };
 
 //! \ingroup FunctionModule
 //! \brief Interface for scalar functions \f$\R^n\rightarrow\R\f$ which can be evaluated exactly.
 //! \sa \ref VectorFunctionInterface.
-template<>
-class ScalarFunctionInterface<EffectiveTag>
-    : public ScalarFunctionInterface<ValidatedTag>
+template<class D, class C>
+class FunctionInterface<EffectiveTag,D,C>
+    : public virtual FunctionInterface<ValidatedTag,D,C>
 {
+    typedef ValidatedTag WP;
+    typedef EffectiveTag P;
   public:
-    inline ScalarFunction<EffectiveTag> clone() const;
-
-    using ScalarFunctionInterface<ValidatedTag>::evaluate;
-
-    //! \brief Evaluate over computable reals.
-    virtual EffectiveNumber evaluate(const Vector<EffectiveNumber>& x) const = 0;
-    inline EffectiveNumber operator() (const Vector<EffectiveNumber>& x) const;
-    //! \brief Apply the function to a formula. Can be used to obtain a tree structure from the function.
-    virtual Formula<EffectiveNumber> evaluate(const Vector< Formula<EffectiveNumber> >& x) const = 0;
-    //! \brief Apply the function to an algebra.
-    virtual Algebra<EffectiveNumber> evaluate(const Vector< Algebra<EffectiveNumber> >& x) const = 0;
-
-    //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    inline ScalarFunction<EffectiveTag> derivative(SizeType i) const;
-  private:
-    //! \brief The derivative with respect to the \a j<sup>th</sup> coordinate.
-    virtual ScalarFunctionInterface<EffectiveTag>* _derivative(SizeType i) const = 0;
+    typedef D DomainType;
+    typedef C CodomainType;
+    template<class X> using Argument = typename ElementTraits<D>::template Type<X>;
+    template<class X> using Result = typename ElementTraits<C>::template Type<X>;
   public:
-    virtual ScalarFunctionInterface<EffectiveTag>* _clone() const = 0;
+    using FunctionInterface<WP,D,C>::_evaluate;
+    virtual Result<EffectiveNumber> _evaluate(const Argument<EffectiveNumber>& x) const = 0;
+    virtual Result<Formula<EffectiveNumber>> _evaluate(const Argument<Formula<EffectiveNumber>>& x) const = 0;
+    virtual Result<Algebra<EffectiveNumber>> _evaluate(const Argument<Algebra<EffectiveNumber>>& x) const = 0;
+
+    virtual FunctionInterface<P,D,C>* _clone() const = 0;
+    virtual FunctionInterface<P,D,C>* _derivative(SizeType i) const = 0;
 };
 
-//! \relates ScalarFunctionInterface
-//! \brief Write to an output stream. Calls the write(OutputStream&) method to perform dynamic dispatching.
-inline OutputStream& operator<<(OutputStream& os, const ScalarFunctionInterface<Void>& f) {
+template<class D, class C> inline OutputStream& operator<<(OutputStream& os, const FunctionInterface<Void,D,C>& f) {
     return f.write(os);
 }
 
 
-//! \ingroup FunctionModule
-//! \brief Interface for vector functions \f$\F^n\rightarrow\F^m\f$ whose derivatives can be computed.
-//! \sa \ref ScalarFunctionInterface
-template<>
-class VectorFunctionInterface<Void>
-{
-  public:
-    //! \brief The type used to describe the number of argument variables.
-    typedef Ariadne::SizeType SizeType;
-
-    //! \brief Virtual destructor.
-    virtual ~VectorFunctionInterface() { };
-
-    //! \brief The number of arguments to the function.
-    virtual SizeType argument_size() const = 0;
-    //! \brief The number of result variables of the function.
-    virtual SizeType result_size() const = 0;
-
-    //! \brief Write a full version to an output stream.
-    virtual OutputStream& repr(OutputStream& os) const = 0;
-    //! \brief Write to an output stream.
-    virtual OutputStream& write(OutputStream& os) const = 0;
-  public:
-    virtual VectorFunctionInterface<Void>* _clone() const = 0;
+template<class I> class VectorInterface {
+    ~VectorInterface() = default;
+    virtual I* _get(SizeType i) const = 0;
 };
 
 //! \ingroup FunctionModule
 //! \brief Interface for vector functions \f$\F^n\rightarrow\F^m\f$ whose derivatives can be computed.
 //! \sa \ref ScalarFunctionInterface
-template<>
-class VectorFunctionInterface<ApproximateTag>
-    : public VectorFunctionInterface<Void>
+template<class P,class D>
+class VectorOfFunctionInterface
 {
   public:
-    //! \brief Compute an approximation to the value of the function at the point \a x.
-    virtual Vector<ApproximateNumber> evaluate(const Vector<ApproximateNumber>& x) const = 0;
-    //! \brief Evaluate the function over a vector of differentials.
-    virtual Vector< Differential<ApproximateNumber> > evaluate(const Vector< Differential<ApproximateNumber> >& x) const = 0;
-    //! \brief Evaluate the function over a vector of approximate Taylor models.
-    virtual Vector< TaylorModel<Approximate,Float> > evaluate(const Vector< TaylorModel<Approximate,Float> >& x) const = 0;
-    //! \brief Evaluate the function over a vector of formulae to create the composed function.
-    virtual Vector< Formula<ApproximateNumber> > evaluate(const Vector< Formula<ApproximateNumber> >& x) const = 0;
-    //! \brief Apply the function to an algebra.
-    virtual Vector< Algebra<ApproximateNumber> > evaluate(const Vector< Algebra<ApproximateNumber> >& x) const = 0;
-
-    Matrix<ApproximateNumber> jacobian(const Vector<ApproximateNumber>& x) const;
-    Vector< Differential<ApproximateNumber> > differentials(const Vector<ApproximateNumber>& x, DegreeType d) const;
-
-    //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<ApproximateTag> operator[](SizeType i) const;
+    inline ScalarFunction<P,D> operator[](SizeType i) const;
   public:
-    virtual ScalarFunctionInterface<ApproximateTag>* _get(SizeType i) const = 0;
-    virtual VectorFunctionInterface<ApproximateTag>* _clone() const = 0;
+    virtual ~VectorOfFunctionInterface<P,D>() = default;
+    virtual ScalarFunction<P,D> _get(SizeType i) const = 0;
+    virtual Void _set(SizeType i, ScalarFunction<P,D> p) const = 0;
 };
 
-//! \ingroup FunctionModule
-//! \brief Interface for vector functions \f$\I^n\rightarrow\I^m\f$ whose derivatives can be computed.
-//! \sa \ref ScalarFunctionInterface
-template<>
-class VectorFunctionInterface<ValidatedTag>
-    : public VectorFunctionInterface<ApproximateTag>
-{
-  public:
-    using VectorFunctionInterface<ApproximateTag>::evaluate;
-
-    //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
-    virtual Vector<ValidatedNumber> evaluate(const Vector<ValidatedNumber>& x) const = 0;
-    inline Vector<ValidatedNumber> evaluate(const Vector<ExactNumber>& x) const;
-    //! \brief Evaluate the function over a vector of interval differentials.
-    virtual Vector< Differential<ValidatedNumber> > evaluate(const Vector< Differential<ValidatedNumber> >& x) const = 0;
-    //! \brief Evaluate the function over a vector of Taylor models with interval error.
-    virtual Vector< TaylorModel<Validated,Float> > evaluate(const Vector< TaylorModel<Validated,Float> >& x) const = 0;
-
-    //! \brief Evaluate the function over a vector of formulae.
-    virtual Vector< Formula<ValidatedNumber> > evaluate(const Vector< Formula<ValidatedNumber> >& x) const = 0;
-    //! \brief Apply the function to an algebra.
-    virtual Vector< Algebra<ValidatedNumber> > evaluate(const Vector< Algebra<ValidatedNumber> >& x) const = 0;
-
-    using VectorFunctionInterface<ApproximateTag>::jacobian;
-    Matrix<ValidatedNumber> jacobian(const Vector<ValidatedNumber>& x) const;
-    Matrix<ValidatedNumber> jacobian(const Vector<ExactNumber>& x) const;
-    using VectorFunctionInterface<ApproximateTag>::differentials;
-    Vector< Differential<ValidatedNumber> > differentials(const Vector<ValidatedNumber>& x, DegreeType d) const;
-
-    //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<ValidatedTag> operator[](SizeType i) const;
-  public:
-    virtual ScalarFunctionInterface<ValidatedTag>* _get(SizeType i) const = 0;
-    virtual VectorFunctionInterface<ValidatedTag>* _clone() const = 0;
-
-};
-
-//! \ingroup FunctionModule
-//! \brief Interface for vector functions \f$\R^n\rightarrow\R^m\f$ whose derivatives can be computed.
-//! \sa \ref ScalarFunctionInterface
-template<>
-class VectorFunctionInterface<EffectiveTag>
-    : public VectorFunctionInterface<ValidatedTag>
-{
-  public:
-    using VectorFunctionInterface<ValidatedTag>::evaluate;
-
-    //! \brief Evaluate over computable reals.
-    virtual Vector<EffectiveNumber> evaluate(const Vector<EffectiveNumber>& x) const = 0;
-    //! \brief Evaluate the function over a vector of formulae.
-    virtual Vector< Formula<EffectiveNumber> > evaluate(const Vector< Formula<EffectiveNumber> >& x) const = 0;
-    //! \brief Apply the function to an algebra.
-    virtual Vector< Algebra<EffectiveNumber> > evaluate(const Vector< Algebra<EffectiveNumber> >& x) const = 0;
-
-    //! \brief Get the \a i<sup>th</sup> component function.
-    inline ScalarFunction<EffectiveTag> operator[](SizeType i) const;
-  public:
-    virtual ScalarFunctionInterface<EffectiveTag>* _get(SizeType i) const = 0;
-    virtual VectorFunctionInterface<EffectiveTag>* _clone() const = 0;
-};
-
-//! \relates VectorFunctionInterface
-//! \brief Write to an output stream. Calls the write(OutputStream&) method to perform dynamic dispatching.
-inline OutputStream& operator<<(OutputStream& os, const VectorFunctionInterface<Void>& f) {
-    return f.write(os);
-}
-
-
-
-//! \brief An interface for scalar function models on a restricted domain.
-class ScalarModelInterface {
-    virtual ExactBox domain() const = 0;
-    virtual ValidatedNumber evaluate(const Vector<ValidatedNumber>&) const = 0;
-};
 
 template<class X> class FunctionFactoryInterface;
 
@@ -302,10 +174,10 @@ template<> class FunctionFactoryInterface<ValidatedTag>
   public:
     virtual FunctionFactoryInterface<ValidatedTag>* clone() const = 0;
     virtual Void write(OutputStream& os) const = 0;
-    inline ScalarFunction<ValidatedTag> create(const ExactBox& domain, const ScalarFunctionInterface<ValidatedTag>& function) const;
-    inline VectorFunction<ValidatedTag> create(const ExactBox& domain, const VectorFunctionInterface<ValidatedTag>& function) const;
-    inline ScalarFunction<ValidatedTag> create_zero(const ExactBox& domain) const;
-    inline VectorFunction<ValidatedTag> create_identity(const ExactBox& domain) const;
+    inline ValidatedScalarFunction create(const ExactBox& domain, const ScalarFunctionInterface<ValidatedTag>& function) const;
+    inline ValidatedVectorFunction create(const ExactBox& domain, const VectorFunctionInterface<ValidatedTag>& function) const;
+    inline ValidatedScalarFunction create_zero(const ExactBox& domain) const;
+    inline ValidatedVectorFunction create_identity(const ExactBox& domain) const;
   private:
     virtual ScalarFunctionInterface<ValidatedTag>* _create(const ExactBox& domain, const ScalarFunctionInterface<ValidatedTag>& function) const = 0;
     virtual VectorFunctionInterface<ValidatedTag>* _create(const ExactBox& domain, const VectorFunctionInterface<ValidatedTag>& function) const = 0;

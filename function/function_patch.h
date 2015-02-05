@@ -31,6 +31,7 @@
 #include <iosfwd>
 #include "utility/container.h"
 #include "utility/exceptions.h"
+#include "utility/declarations.h"
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
 #include "function/taylor_model.h"
@@ -42,16 +43,7 @@
 
 namespace Ariadne {
 
-template<class X> class Vector;
-template<class X> class Matrix;
 template<class X> class Polynomial;
-
-template<class X> class ScalarFunction;
-typedef ScalarFunction<Validated> ValidatedScalarFunction;
-template<class X> class VectorFunction;
-typedef VectorFunction<Validated> ValidatedVectorFunction;
-
-class MultiIndex;
 
 template<class T> using NumericType = typename T::NumericType;
 template<class T> using FunctionType = typename T::FunctionType;
@@ -183,7 +175,7 @@ template<class M> class FunctionPatch
     //@{
     /*! \name Data access */
     //! \brief The domain of the quantity.
-    const DomainType& domain() const { return this->_domain; }
+    const DomainType domain() const { return this->_domain; }
     //! \brief The scaled expansion over a unit box with error bound.
     const ModelType& model() const { return this->_model; }
     //! \brief A reference to the scaled expansion over a unit box with error bound.
@@ -295,11 +287,13 @@ template<class M> class FunctionPatch
     friend class TaylorFunctionFactory;
     friend class ScalarFunctionMixin<FunctionPatch<M>, ValidatedTag>;
     friend class ScalarFunctionModelMixin<FunctionPatch<M>, ValidatedTag>;
+  public:
     template<class T> Void _compute(T& r, const Vector<T>& a) const {
         typedef typename T::NumericType R;
         r=Ariadne::horner_evaluate(this->_model.expansion(),Ariadne::unscale(a,this->_domain))
             + convert_error<R>(this->_model.error());
     }
+  private:
     FunctionPatch<M>* _derivative(SizeType j) const;
     FunctionPatch<M>* _clone() const;
     FunctionPatch<M>* _create() const;
@@ -451,7 +445,7 @@ template<class M> class VectorFunctionPatch
     /*! \brief Set the sweeper used to control approximation of the Taylor function. */
     Void set_sweeper(Sweeper swp);
     /*! \brief The data used to define the domain of the Taylor model. */
-    const ExactBox& domain() const;
+    const ExactBox domain() const;
     /*! \brief A rough bound for the range of the function. */
     const ExactBox codomain() const;
     /*! \brief The centre of the Taylor model. */
@@ -543,6 +537,7 @@ template<class M> class VectorFunctionPatch
   private:
     friend class VectorFunctionMixin<VectorFunctionPatch<M>,ValidatedTag>;
     friend class TaylorFunctionFactory;
+  public:
     template<class X> Void _compute(Vector<X>& r, const Vector<X>& a) const;
   private:
     /* Domain of definition. */

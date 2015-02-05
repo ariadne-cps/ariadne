@@ -243,7 +243,7 @@ class ValidatedConstrainedImageSet
     //! \brief Construct the box \a dom.
     ValidatedConstrainedImageSet(const ExactBox& dom)
         : _domain(dom), _reduced_domain(dom)
-        , _function(static_cast<ValidatedVectorFunctionInterface const&>(EffectiveVectorFunction::identity(dom.size()))) { }
+        , _function(static_cast<ValidatedVectorFunction const&>(EffectiveVectorFunction::identity(dom.size()))) { }
     //! \brief Construct the image of \a dom under \a fn.
     ValidatedConstrainedImageSet(const ExactBox& dom, const ValidatedVectorFunction& fn) : _domain(dom), _reduced_domain(dom), _function(fn) {
         ARIADNE_ASSERT_MSG(dom.size()==fn.argument_size(),"dom="<<dom<<", fn="<<fn); }

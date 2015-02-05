@@ -67,8 +67,8 @@ Void optimal_constraint_adjoin_outer_approximation(PavingInterface& paving, cons
 
 namespace {
 
-ValidatedProcedure make_procedure(const ValidatedScalarFunctionInterface& f) {
-    Formula<ValidatedNumber> e=f.evaluate(Formula<ValidatedNumber>::identity(f.argument_size()));
+ValidatedProcedure make_procedure(const ValidatedScalarFunction& f) {
+    Formula<ValidatedNumber> e=f(Formula<ValidatedNumber>::identity(f.argument_size()));
     return Procedure<ValidatedNumber>(e);
 }
 
@@ -126,29 +126,29 @@ Float average_scaled_width(const UpperBox& bx, const Vector<Float>& sf) {
 } // namespace
 
 Void SubdivisionPaver::
-adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunctionInterface& space_function,
-                           const ValidatedVectorFunctionInterface& constraint_function, const ExactBox& constraint_bounds, Int depth) const
+adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
+                           const ValidatedVectorFunction& constraint_function, const ExactBox& constraint_bounds, Int depth) const
 {
     return Ariadne::subdivision_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
 }
 
 Void AffinePaver::
-adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunctionInterface& space_function,
-                           const ValidatedVectorFunctionInterface& constraint_function, const ExactBox& constraint_bounds, Int depth) const
+adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
+                           const ValidatedVectorFunction& constraint_function, const ExactBox& constraint_bounds, Int depth) const
 {
     return Ariadne::affine_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
 }
 
 Void ConstraintPaver::
-adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunctionInterface& space_function,
-                           const ValidatedVectorFunctionInterface& constraint_function, const ExactBox& constraint_bounds, Int depth) const
+adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
+                           const ValidatedVectorFunction& constraint_function, const ExactBox& constraint_bounds, Int depth) const
 {
     return Ariadne::constraint_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
 }
 
 Void OptimalConstraintPaver::
-adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunctionInterface& space_function,
-                           const ValidatedVectorFunctionInterface& constraint_function, const ExactBox& constraint_bounds, Int depth) const
+adjoin_outer_approximation(PavingInterface& paving, const DomainType& domain, const ValidatedVectorFunction& space_function,
+                           const ValidatedVectorFunction& constraint_function, const ExactBox& constraint_bounds, Int depth) const
 {
     return Ariadne::optimal_constraint_adjoin_outer_approximation(paving,domain,space_function,constraint_function,constraint_bounds,depth);
 }

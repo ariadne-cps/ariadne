@@ -81,6 +81,7 @@ template<> struct InformationTypedef<ValidatedNumber> { typedef ValidatedTag Typ
 template<> struct InformationTypedef<ApproximateNumber> { typedef ApproximateTag Type; };
 template<class X> using InformationTag = typename InformationTypedef<X>::Type;
 
+template<class X> using Scalar = X;
 // Concrete class declarations
 template<class X> class Vector;
 template<class X> class Covector;
@@ -136,21 +137,22 @@ typedef Point<ValidatedNumber> ValidatedPoint;
 typedef Point<EffectiveNumber> EffectivePoint;
 typedef Point<ExactNumber> ExactPoint;
 
-// Function interface declarations
-template<class X> class ScalarFunctionInterface;
-template<class X> class VectorFunctionInterface;
 
-typedef ScalarFunctionInterface<ApproximateTag> ApproximateScalarFunctionInterface;
-typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;
-typedef ScalarFunctionInterface<EffectiveTag> EffectiveScalarFunctionInterface;
-
-typedef VectorFunctionInterface<ApproximateTag> ApproximateVectorFunctionInterface;
-typedef VectorFunctionInterface<ValidatedTag> ValidatedVectorFunctionInterface;
-typedef VectorFunctionInterface<EffectiveTag> EffectiveVectorFunctionInterface;
+// Domain declarations
+using IntervalDomain = ExactInterval;
+using BoxDomain = ExactBox;
 
 // Function declarations
-template<class X> class ScalarFunction;
-template<class X> class VectorFunction;
+template<class P, class D, class F> class Function;
+template<class P, class D=BoxDomain> using ScalarFunction = Function<P,D,IntervalDomain>;
+template<class P, class D=BoxDomain> using VectorFunction = Function<P,D,BoxDomain>;
+template<class P, class C> using UnivariateFunction = Function<P,IntervalDomain,C>;
+template<class P, class C> using MultivariateFunction = Function<P,BoxDomain,C>;
+
+template<class P> using ScalarUnivariateFunction = Function<P,IntervalDomain,IntervalDomain>;
+template<class P> using VectorUnivariateFunction = Function<P,IntervalDomain,BoxDomain>;
+template<class P> using ScalarMultivariateFunction = Function<P,BoxDomain,IntervalDomain>;
+template<class P> using VectorMultivariateFunction = Function<P,BoxDomain,BoxDomain>;
 
 typedef ScalarFunction<ApproximateTag> ApproximateScalarFunction;
 typedef ScalarFunction<ValidatedTag> ValidatedScalarFunction;
@@ -162,9 +164,22 @@ typedef VectorFunction<ValidatedTag> ValidatedVectorFunction;
 typedef VectorFunction<EffectiveTag> EffectiveVectorFunction;
 typedef EffectiveVectorFunction RealVectorFunction;
 
+// Function interface declarations
+template<class P, class D, class C> class FunctionInterface;
+template<class P, class D=BoxDomain> using ScalarFunctionInterface = FunctionInterface<P,BoxDomain,IntervalDomain>;
+template<class P, class D=BoxDomain> using VectorFunctionInterface = FunctionInterface<P,BoxDomain,BoxDomain>;
+
+typedef ScalarFunctionInterface<ApproximateTag> ApproximateScalarFunctionInterface;
+typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;
+typedef ScalarFunctionInterface<EffectiveTag> EffectiveScalarFunctionInterface;
+
+typedef VectorFunctionInterface<ApproximateTag> ApproximateVectorFunctionInterface;
+typedef VectorFunctionInterface<ValidatedTag> ValidatedVectorFunctionInterface;
+typedef VectorFunctionInterface<EffectiveTag> EffectiveVectorFunctionInterface;
+
 // Function model declarations
-template<class X> class ScalarFunctionModel;
-template<class X> class VectorFunctionModel;
+template<class P> class ScalarFunctionModel;
+template<class P> class VectorFunctionModel;
 
 typedef ScalarFunctionModel<ApproximateTag> ApproximateScalarFunctionModel;
 typedef ScalarFunctionModel<ValidatedTag> ValidatedScalarFunctionModel;

@@ -33,7 +33,8 @@
 #include <list>
 #include <iostream>
 
-#include <boost/smart_ptr.hpp>
+#include "utility/declarations.h"
+#include "utility/pointer.h"
 #include "hybrid/discrete_location.h"
 #include "hybrid/discrete_event.h"
 #include "geometry/enclosure.h"
@@ -52,16 +53,10 @@ typedef Box<ExactInterval> ExactBox;
 
 template<class X> class Vector;
 template<class X> class LinearProgram;
-template<class X> class ScalarFunction;
-typedef ValidatedScalarFunction ValidatedScalarFunction;
-template<class X> class VectorFunction;
-typedef ValidatedVectorFunction ValidatedVectorFunction;
-template<class X> class ScalarFunctionModel;
-typedef ScalarFunctionModel<ValidatedTag> ValidatedScalarFunctionModel;
-template<class X> class VectorFunctionModel;
-typedef VectorFunctionModel<ValidatedTag> ValidatedVectorFunctionModel;
+
 template<class X> class FunctionModelFactoryInterface;
 typedef FunctionModelFactoryInterface<ValidatedTag> IntervalFunctionModelFactoryInterface;
+
 class Enclosure;
 class Grid;
 class GridTreeSet;

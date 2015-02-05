@@ -32,78 +32,55 @@
 
 namespace Ariadne {
 
-template<class F> ApproximateNumber ScalarFunctionMixin<F,ApproximateTag>::evaluate(const Vector<ApproximateNumber>& x) const { return this->_base_evaluate(x); }
-template<class F> ApproximateDifferential ScalarFunctionMixin<F,ApproximateTag>::evaluate(const Vector<ApproximateDifferential>& x) const { return this->_base_evaluate(x); }
-template<class F> ApproximateTaylorModel ScalarFunctionMixin<F,ApproximateTag>::evaluate(const Vector<ApproximateTaylorModel>& x) const { return this->_base_evaluate(x); }
-template<class F> ApproximateFormula ScalarFunctionMixin<F,ApproximateTag>::evaluate(const Vector<ApproximateFormula>& x) const { return this->_base_evaluate(x); }
-template<class F> ApproximateAlgebra ScalarFunctionMixin<F,ApproximateTag>::evaluate(const Vector<ApproximateAlgebra>& x) const { return this->_base_evaluate(x); }
-template<class F> ApproximateScalarFunctionInterface* ScalarFunctionMixin<F,ApproximateTag>::_clone() const { return new F(static_cast<const F&>(*this)); }
+template<class F,class D, class C> FunctionInterface<ApproximateTag,D,C>* FunctionMixin<F,ApproximateTag,D,C>::_clone() const {
+    return new F(static_cast<const F&>(*this)); }
+template<class F,class D, class C> FunctionInterface<ValidatedTag,D,C>* FunctionMixin<F,ValidatedTag,D,C>::_clone() const {
+    return new F(static_cast<const F&>(*this)); }
+template<class F,class D, class C> FunctionInterface<EffectiveTag,D,C>* FunctionMixin<F,EffectiveTag,D,C>::_clone() const {
+    return new F(static_cast<const F&>(*this)); }
 
-template<class F> ApproximateNumber ScalarFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ApproximateNumber>& x) const { return this->_base_evaluate(x); }
-template<class F> ValidatedNumber ScalarFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ValidatedNumber>& x) const { return this->_base_evaluate(x); }
-template<class F> ApproximateDifferential ScalarFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ApproximateDifferential>& x) const { return this->_base_evaluate(x); }
-template<class F> ValidatedDifferential ScalarFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ValidatedDifferential>& x) const { return this->_base_evaluate(x); }
-template<class F> ApproximateTaylorModel ScalarFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ApproximateTaylorModel>& x) const { return this->_base_evaluate(x); }
-template<class F> ValidatedTaylorModel ScalarFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ValidatedTaylorModel>& x) const { return this->_base_evaluate(x); }
-template<class F> ApproximateFormula ScalarFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ApproximateFormula>& x) const { return this->_base_evaluate(x); }
-template<class F> ValidatedFormula ScalarFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ValidatedFormula>& x) const { return this->_base_evaluate(x); }
-template<class F> ApproximateAlgebra ScalarFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ApproximateAlgebra>& x) const { return this->_base_evaluate(x); }
-template<class F> ValidatedAlgebra ScalarFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ValidatedAlgebra>& x) const { return this->_base_evaluate(x); }
-template<class F> ValidatedScalarFunctionInterface* ScalarFunctionMixin<F,ValidatedTag>::_clone() const { return new F(static_cast<const F&>(*this)); }
+template<class F,class D, class C> auto
+FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<ApproximateNumber>& x) const -> Result<ApproximateNumber> {
+    return this->_base_evaluate(x); }
+template<class F,class D, class C> auto
+FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<ApproximateDifferential>& x) const -> Result<ApproximateDifferential> {
+    return this->_base_evaluate(x); }
+template<class F,class D, class C> auto
+FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<ApproximateTaylorModel>& x) const -> Result<ApproximateTaylorModel> {
+    return this->_base_evaluate(x); }
+template<class F,class D, class C> auto
+FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<ApproximateAlgebra>& x) const -> Result<ApproximateAlgebra> {
+    return this->_base_evaluate(x); }
+template<class F,class D, class C> auto
+FunctionMixin<F,ApproximateTag,D,C>::_evaluate(const Argument<ApproximateFormula>& x) const -> Result<ApproximateFormula> {
+    return this->_base_evaluate(x); }
 
-template<class F> ApproximateNumber ScalarFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ApproximateNumber>& x) const { return this->_base_evaluate(x); }
-template<class F> ValidatedNumber ScalarFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ValidatedNumber>& x) const { return this->_base_evaluate(x); }
-template<class F> EffectiveNumber ScalarFunctionMixin<F,EffectiveTag>::evaluate(const Vector<EffectiveNumber>& x) const { return this->_base_evaluate(x); }
-template<class F> ApproximateDifferential ScalarFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ApproximateDifferential>& x) const { return this->_base_evaluate(x); }
-template<class F> ValidatedDifferential ScalarFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ValidatedDifferential>& x) const { return this->_base_evaluate(x); }
-template<class F> ApproximateTaylorModel ScalarFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ApproximateTaylorModel>& x) const { return this->_base_evaluate(x); }
-template<class F> ValidatedTaylorModel ScalarFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ValidatedTaylorModel>& x) const { return this->_base_evaluate(x); }
-template<class F> ApproximateFormula ScalarFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ApproximateFormula>& x) const { return this->_base_evaluate(x); }
-template<class F> ValidatedFormula ScalarFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ValidatedFormula>& x) const { return this->_base_evaluate(x); }
-template<class F> EffectiveFormula ScalarFunctionMixin<F,EffectiveTag>::evaluate(const Vector<EffectiveFormula>& x) const { return this->_base_evaluate(x); }
-template<class F> ApproximateAlgebra ScalarFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ApproximateAlgebra>& x) const { return this->_base_evaluate(x); }
-template<class F> ValidatedAlgebra ScalarFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ValidatedAlgebra>& x) const { return this->_base_evaluate(x); }
-template<class F> EffectiveAlgebra ScalarFunctionMixin<F,EffectiveTag>::evaluate(const Vector<EffectiveAlgebra>& x) const { return this->_base_evaluate(x); }
-template<class F> EffectiveScalarFunctionInterface* ScalarFunctionMixin<F,EffectiveTag>::_clone() const { return new F(static_cast<const F&>(*this)); }
+template<class F,class D, class C> auto
+FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ValidatedNumber>& x) const -> Result<ValidatedNumber> {
+    return this->_base_evaluate(x); }
+template<class F,class D, class C> auto
+FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ValidatedDifferential>& x) const -> Result<ValidatedDifferential> {
+    return this->_base_evaluate(x); }
+template<class F,class D, class C> auto
+FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ValidatedTaylorModel>& x) const -> Result<ValidatedTaylorModel> {
+    return this->_base_evaluate(x); }
+template<class F,class D, class C> auto
+FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ValidatedAlgebra>& x) const -> Result<ValidatedAlgebra> {
+    return this->_base_evaluate(x); }
+template<class F,class D, class C> auto
+FunctionMixin<F,ValidatedTag,D,C>::_evaluate(const Argument<ValidatedFormula>& x) const -> Result<ValidatedFormula> {
+    return this->_base_evaluate(x); }
 
-template<class F> Covector<ApproximateNumber> ScalarFunctionMixin<F,EffectiveTag>::gradient(const Vector<ApproximateNumber>& x) const {
-    return this->_base_evaluate(ApproximateDifferential::variables(1u,x)).gradient(); }
-template<class F> Covector<ValidatedNumber> ScalarFunctionMixin<F,EffectiveTag>::gradient(const Vector<ValidatedNumber>& x) const {
-    return this->_base_evaluate(ValidatedDifferential::variables(1u,x)).gradient(); }
+template<class F,class D, class C> auto
+FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<EffectiveNumber>& x) const -> Result<EffectiveNumber> {
+    return this->_base_evaluate(x); }
+template<class F,class D, class C> auto
+FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<EffectiveAlgebra>& x) const -> Result<EffectiveAlgebra> {
+    return this->_base_evaluate(x); }
+template<class F,class D, class C> auto
+FunctionMixin<F,EffectiveTag,D,C>::_evaluate(const Argument<EffectiveFormula>& x) const -> Result<EffectiveFormula> {
+    return this->_base_evaluate(x); }
 
-template<class F> Vector<ApproximateNumber> VectorFunctionMixin<F,ApproximateTag>::evaluate(const Vector<ApproximateNumber>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ApproximateDifferential> VectorFunctionMixin<F,ApproximateTag>::evaluate(const Vector<ApproximateDifferential>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ApproximateTaylorModel> VectorFunctionMixin<F,ApproximateTag>::evaluate(const Vector<ApproximateTaylorModel>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ApproximateFormula> VectorFunctionMixin<F,ApproximateTag>::evaluate(const Vector<ApproximateFormula>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ApproximateAlgebra> VectorFunctionMixin<F,ApproximateTag>::evaluate(const Vector<ApproximateAlgebra>& x) const { return this->_base_evaluate(x); }
-template<class F> ApproximateVectorFunctionInterface* VectorFunctionMixin<F,ApproximateTag>::_clone() const { return new F(static_cast<const F&>(*this)); }
-
-template<class F> Vector<ApproximateNumber> VectorFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ApproximateNumber>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ValidatedNumber> VectorFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ValidatedNumber>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ApproximateDifferential> VectorFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ApproximateDifferential>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ValidatedDifferential> VectorFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ValidatedDifferential>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ApproximateTaylorModel> VectorFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ApproximateTaylorModel>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ValidatedTaylorModel> VectorFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ValidatedTaylorModel>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ApproximateFormula> VectorFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ApproximateFormula>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ValidatedFormula> VectorFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ValidatedFormula>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ApproximateAlgebra> VectorFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ApproximateAlgebra>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ValidatedAlgebra> VectorFunctionMixin<F,ValidatedTag>::evaluate(const Vector<ValidatedAlgebra>& x) const { return this->_base_evaluate(x); }
-template<class F> ValidatedVectorFunctionInterface* VectorFunctionMixin<F,ValidatedTag>::_clone() const { return new F(static_cast<const F&>(*this)); }
-
-template<class F> Vector<ApproximateNumber> VectorFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ApproximateNumber>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ValidatedNumber> VectorFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ValidatedNumber>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<EffectiveNumber> VectorFunctionMixin<F,EffectiveTag>::evaluate(const Vector<EffectiveNumber>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ApproximateDifferential> VectorFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ApproximateDifferential>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ValidatedDifferential> VectorFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ValidatedDifferential>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ApproximateTaylorModel> VectorFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ApproximateTaylorModel>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ValidatedTaylorModel> VectorFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ValidatedTaylorModel>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ApproximateFormula> VectorFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ApproximateFormula>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ValidatedFormula> VectorFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ValidatedFormula>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<EffectiveFormula> VectorFunctionMixin<F,EffectiveTag>::evaluate(const Vector<EffectiveFormula>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ApproximateAlgebra> VectorFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ApproximateAlgebra>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<ValidatedAlgebra> VectorFunctionMixin<F,EffectiveTag>::evaluate(const Vector<ValidatedAlgebra>& x) const { return this->_base_evaluate(x); }
-template<class F> Vector<EffectiveAlgebra> VectorFunctionMixin<F,EffectiveTag>::evaluate(const Vector<EffectiveAlgebra>& x) const { return this->_base_evaluate(x); }
-template<class F> EffectiveVectorFunctionInterface* VectorFunctionMixin<F,EffectiveTag>::_clone() const { return new F(static_cast<const F&>(*this)); }
 
 
 } // namespace Ariadne

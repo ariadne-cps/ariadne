@@ -69,6 +69,7 @@ template<class X> struct DeclareNumericOperators {
     X abs(X const& x);
 };
 
+
 //! \ingroup NumericModule
 //! \brief Floating point numbers (double precision) using approxiamate arithmetic.
 //! \details
@@ -1043,6 +1044,33 @@ PositiveUpperFloat half(PositiveUpperFloat const& x);
 
 inline ErrorFloat operator"" _error(long double lx) { double x=lx; assert(x==lx); return ErrorFloat(Float(x)); }
 
+inline ApproximateFloat create_float(Number<Approximate> const& x) { return ApproximateFloat(x); }
+inline LowerFloat create_float(LowerFloat const& x) { return LowerFloat(x); }
+inline UpperFloat create_float(Number<Upper> const& x) { return UpperFloat(x); }
+inline ValidatedFloat create_float(Number<Validated> const& x) { return ValidatedFloat(x); }
+inline ValidatedFloat create_float(Number<Effective> const& x) { return ValidatedFloat(x); }
+inline ValidatedFloat create_float(Number<Exact> const& x) { return ValidatedFloat(x); }
+
+template<class X> struct IsGenericNumber : IsConvertible<X,Real> { };
+template<class P> struct IsGenericNumber<Number<P>> : True { };
+
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator+(X const& x, Y const& y) -> decltype(x+create_float(y)) { return x+create_float(y); }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator-(X const& x, Y const& y) -> decltype(x-create_float(y)) { return x-create_float(y); }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator*(X const& x, Y const& y) -> decltype(x*create_float(y)) { return x*create_float(y); }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator/(X const& x, Y const& y) -> decltype(x/create_float(y)) { return x/create_float(y); }
+
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator+(Y const& y, X const& x) -> decltype(create_float(y,x.raw().precision())+x) { return create_float(y)+x; }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator-(Y const& y, X const& x) -> decltype(create_float(y)-x) { return create_float(y)-x; }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator*(Y const& y, X const& x) -> decltype(create_float(y)*x) { return create_float(y)*x; }
+template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto
+operator/(Y const& y, X const& x) -> decltype(create_float(y)/x) { return create_float(y)/x; }
 
 
 } // namespace Ariadne

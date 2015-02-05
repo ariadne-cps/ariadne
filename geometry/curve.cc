@@ -45,7 +45,7 @@ Curve::~Curve()
 
 
 
-Curve::Curve(const EffectiveVectorFunction& f)
+Curve::Curve(const Function<Effective,IntervalDomain,BoxDomain>& f)
     : _function(f)
 {
     assert(this->_function.argument_size()==1);
@@ -83,8 +83,7 @@ Curve::smoothness() const
 Curve::PointType
 Curve::value(const ParameterType& s) const
 {
-    Vector<ApproximateFloat> v(1,ApproximateFloat(s));
-    Vector<ApproximateFloat> fv=this->_function.evaluate(v);
+    Vector<ApproximateFloat> fv=this->_function.evaluate(s);
     return PointType(fv);
 }
 
@@ -92,9 +91,7 @@ Curve::value(const ParameterType& s) const
 Curve::TangentVectorType
 Curve::tangent(const ParameterType& s) const
 {
-    TangentVectorType v(1,s);
-    auto col=column(this->_function.jacobian(v),0);
-    return col;
+    return Ariadne::tangent(this->_function,s);
 }
 
 

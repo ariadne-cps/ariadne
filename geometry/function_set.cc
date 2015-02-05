@@ -95,7 +95,7 @@ Matrix<Float> nonlinearities_zeroth_order(const VectorTaylorFunction& f, const E
     return nonlinearities;
 }
 
-Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface& f, const ExactBox& dom)
+Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunction& f, const ExactBox& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -110,7 +110,7 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
-    Vector<UpperIntervalDifferential> df=evaluate(f,ivl_dx);
+    Vector<UpperIntervalDifferential> df=apply_derivative(f,ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
@@ -130,7 +130,7 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
     return nonlinearities;
 }
 
-Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface& f, const ExactBox& dom)
+Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunction& f, const ExactBox& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -145,7 +145,7 @@ Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface
         --a[i];
     }
     //std::cerr<<"dx="<<ivl_dx<<"\n";
-    Vector<UpperIntervalDifferential> df=evaluate(f,ivl_dx);
+    Vector<UpperIntervalDifferential> df=apply_derivative(f,ivl_dx);
     //std::cerr<<"df="<<df<<"\n";
 
     Matrix<Float> nonlinearities=Matrix<Float>::zero(m,n);
@@ -235,7 +235,7 @@ Nat get_argument_size(const List<EffectiveConstraint>& c) {
 }
 
 EffectiveVectorFunction constraint_function(Nat as, const List<EffectiveConstraint>& c) {
-    EffectiveVectorFunction f(c.size(),as);
+    EffectiveVectorFunction f(c.size(),EuclideanDomain(as));
     for(Nat i=0; i!=c.size(); ++i) {
         //f[i]=c[i].function();
         f.set(i,c[i].function());
@@ -451,7 +451,7 @@ ConstrainedImageSet::ConstrainedImageSet(const BoundedConstraintSet& set)
 
 const EffectiveVectorFunction ConstrainedImageSet::constraint_function() const
 {
-    EffectiveVectorFunction result(this->number_of_constraints(),this->number_of_parameters());
+    EffectiveVectorFunction result(this->number_of_constraints(),EuclideanDomain(this->number_of_parameters()));
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         result[i]=this->constraint(i).function();
     }
@@ -483,7 +483,7 @@ ConstrainedImageSet::affine_approximation() const
 {
     const Vector<ExactInterval> D=approximation(this->domain());
     Vector<ExactFloat> m=midpoint(D);
-    Matrix<ExactFloat> G=make_exact(this->_function.jacobian(m));
+    Matrix<ExactFloat> G=make_exact(jacobian(this->_function,m));
     Vector<ExactFloat> h=make_exact(this->_function.evaluate(m)-G*m);
     ValidatedAffineConstrainedImageSet result(D,G,h);
 
@@ -563,7 +563,7 @@ ConstrainedImageSet::adjoin_outer_approximation_to(PavingInterface& paving, Int 
     ARIADNE_ASSERT(paving.dimension()==this->dimension());
     const ExactBox domain=over_approximation(this->domain());
     const EffectiveVectorFunction& space_function=this->function();
-    EffectiveVectorFunction constraint_function(this->number_of_constraints(),domain.size());
+    EffectiveVectorFunction constraint_function(this->number_of_constraints(),domain);
     BoxSet codomain(this->number_of_constraints());
 
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
@@ -654,7 +654,7 @@ Matrix<Float> nonlinearities_zeroth_order(const ValidatedVectorFunction& f, cons
 }
 
 /*
-Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface& f, const ExactBox& dom)
+Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunction& f, const ExactBox& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -689,7 +689,7 @@ Matrix<Float> nonlinearities_first_order(const ValidatedVectorFunctionInterface&
     return nonlinearities;
 }
 
-Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface& f, const ExactBox& dom)
+Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunction& f, const ExactBox& dom)
 {
     //std::cerr<<"\n\nf="<<f<<"\n";
     //std::cerr<<"dom="<<dom<<"\n";
@@ -727,7 +727,7 @@ Matrix<Float> nonlinearities_second_order(const ValidatedVectorFunctionInterface
 
 Pair<Nat,double> lipschitz_index_and_error(const ValidatedVectorFunction& function, const ExactBox& domain)
 {
-    Matrix<UpperInterval> jacobian=Ariadne::jacobian(function,domain);
+    Matrix<UpperInterval> jacobian=Ariadne::jacobian_range(function,domain);
 
     // Compute the column of the matrix which has the norm
     // i.e. the highest sum of $mag(a_ij)$ where mag([l,u])=max(|l|,|u|)
@@ -818,7 +818,7 @@ template<class SF> class TemplatedConstrainedImageSet;
 
 ValidatedVectorFunction ValidatedConstrainedImageSet::constraint_function() const
 {
-    ValidatedVectorFunction result(this->number_of_constraints(),this->number_of_parameters());
+    ValidatedVectorFunction result(this->number_of_constraints(),EuclideanDomain(this->number_of_parameters()));
     for(Nat i=0; i!=this->number_of_constraints(); ++i) {
         result[i]=this->constraint(i).function();
     }
@@ -980,7 +980,7 @@ Tribool ValidatedConstrainedImageSet::inside(const ExactBox& bx) const
 Tribool ValidatedConstrainedImageSet::separated(const ExactBox& bx) const
 {
     ExactBox subdomain = this->_reduced_domain;
-    ValidatedVectorFunction function(this->dimension()+this->number_of_constraints(),this->number_of_parameters());
+    ValidatedVectorFunction function(this->dimension()+this->number_of_constraints(),EuclideanDomain(this->number_of_parameters()));
     for(Nat i=0; i!=this->dimension(); ++i) { function[i]=this->_function[i]; }
     for(Nat i=0; i!=this->number_of_constraints(); ++i) { function[i+this->dimension()]=this->_constraints[i].function(); }
     //ValidatedVectorFunction function = join(this->_function,this->constraint_function());

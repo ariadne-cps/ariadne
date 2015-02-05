@@ -77,7 +77,7 @@ Pair<Tribool,ExactPoint> ConstraintSolver::feasible(const ExactBox& domain, cons
 {
     if(constraints.empty()) { return make_pair(!domain.empty(),domain.centre()); }
 
-    ValidatedVectorFunction function(constraints.size(),constraints[0].function().argument_size());
+    ValidatedVectorFunction function(constraints.size(),constraints[0].function().domain());
     ExactBox bounds(constraints.size());
 
     for(Nat i=0; i!=constraints.size(); ++i) {
@@ -298,7 +298,7 @@ Bool ConstraintSolver::hull_reduce(UpperBox& domain, const Vector<ValidatedProce
     return definitely(domain.empty());
 }
 
-Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedScalarFunctionInterface& function, const ExactInterval& bounds) const
+Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedScalarFunction& function, const ExactInterval& bounds) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBox domain, ValidatedScalarFunction function, ExactInterval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
@@ -308,7 +308,7 @@ Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedScalarFuncti
     return this->hull_reduce(domain,procedure,bounds);
 }
 
-Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedVectorFunctionInterface& function, const ExactBox& bounds) const
+Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedVectorFunction& function, const ExactBox& bounds) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::hull_reduce(ExactBox domain, ValidatedScalarFunction function, ExactInterval bounds): "
                   "function="<<function<<", bounds="<<bounds<<", domain="<<domain<<"\n");
@@ -318,7 +318,7 @@ Bool ConstraintSolver::hull_reduce(UpperBox& domain, const ValidatedVectorFuncti
     return this->hull_reduce(domain,procedure,bounds);
 }
 
-Bool ConstraintSolver::monotone_reduce(UpperBox& domain, const ValidatedScalarFunctionInterface& function, const ExactInterval& bounds, Nat variable) const
+Bool ConstraintSolver::monotone_reduce(UpperBox& domain, const ValidatedScalarFunction& function, const ExactInterval& bounds, Nat variable) const
 {
     ValidatedScalarFunction derivative=function.derivative(variable);
 
@@ -373,7 +373,7 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBox& domain, const VectorTaylorFunct
         g += make_exact(multipliers[i]) * function[i];
         C += make_exact(multipliers[i]) * bounds[i];
     }
-    Covector<UpperInterval> dg = gradient(g,domain);
+    Covector<UpperInterval> dg = gradient_range(g,domain);
     C -= g(centre);
 
     UpperBox new_domain(domain);
@@ -396,7 +396,7 @@ Bool ConstraintSolver::lyapunov_reduce(UpperBox& domain, const VectorTaylorFunct
     return definitely(domain.empty());
 }
 
-Bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunctionInterface& function, const ExactInterval& bounds, Nat variable) const
+Bool ConstraintSolver::box_reduce(UpperBox& domain, const ValidatedScalarFunction& function, const ExactInterval& bounds, Nat variable) const
 {
     ARIADNE_LOG(2,"ConstraintSolver::box_reduce(ExactBox domain): function="<<function<<", bounds="<<bounds<<", domain="<<domain<<", variable="<<variable<<"\n");
 

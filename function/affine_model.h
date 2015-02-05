@@ -34,6 +34,7 @@
 
 #include "utility/macros.h"
 #include "utility/pointer.h"
+#include "utility/declarations.h"
 
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
@@ -53,7 +54,6 @@ typedef AffineModel<Float> FloatAffineModel;
 typedef AffineModel<ApproximateNumber> ApproximateAffineModel;
 typedef AffineModel<ValidatedNumber> ValidatedAffineModel;
 
-template<class X> class ScalarFunction;
 template<class P, class F> class TaylorModel;
 typedef TaylorModel<Approximate,Float> ApproximateTaylorModel;
 typedef TaylorModel<Validated,Float> ValidatedTaylorModel;

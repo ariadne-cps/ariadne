@@ -58,15 +58,6 @@ typedef Constraint<ValidatedScalarFunction,ValidatedNumber> ValidatedConstraint;
 template<class X> class Procedure;
 typedef Procedure<ValidatedNumber> ValidatedProcedure;
 
-template<class X> class ScalarFunctionInterface;
-typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;
-template<class X> class ScalarFunction;
-typedef ValidatedScalarFunction ValidatedScalarFunction;
-template<class X> class VectorFunctionInterface;
-typedef VectorFunctionInterface<ValidatedTag> ValidatedVectorFunctionInterface;
-template<class X> class VectorFunction;
-typedef ValidatedVectorFunction ValidatedVectorFunction;
-
 template<class P,class F> class TaylorModel;
 template<class M> class VectorFunctionPatch;
 typedef VectorFunctionPatch<TaylorModel<Validated,Float>> VectorTaylorFunction;
@@ -115,11 +106,11 @@ class ConstraintSolver
 
     //! \brief Try to enforce hull consistency by propagating several interval constraints at once.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    Bool hull_reduce(UpperBox& bx, const ValidatedVectorFunctionInterface& function, const ExactBox& codomain) const;
+    Bool hull_reduce(UpperBox& bx, const ValidatedVectorFunction& function, const ExactBox& codomain) const;
     Bool hull_reduce(UpperBox& bx, const Vector<ValidatedProcedure>& procedure, const ExactBox& codomain) const;
     //! \brief Try to enforce hull consistency by propagating an interval constraint.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    Bool hull_reduce(UpperBox& bx, const ValidatedScalarFunctionInterface& function, const ExactInterval& codomain) const;
+    Bool hull_reduce(UpperBox& bx, const ValidatedScalarFunction& function, const ExactInterval& codomain) const;
     Bool hull_reduce(UpperBox& bx, const ValidatedProcedure& procedure, const ExactInterval& codomain) const;
 
     //! \brief Reduce the \a domain by testing intersection of \a multipliers inner product \a function(\a domain)
@@ -130,10 +121,10 @@ class ConstraintSolver
     Bool lyapunov_reduce(UpperBox& domain, const VectorTaylorFunction& function, const ExactBox& codomain,
                          Vector<ApproximateNumber> centre, Vector<ApproximateNumber> multpliers) const;
     //! \brief Try to enforce hull consistency by reducing a constraint with respect to one variable.
-    Bool box_reduce(UpperBox& bx, const ValidatedScalarFunctionInterface& function, const ExactInterval&, Nat j) const;
+    Bool box_reduce(UpperBox& bx, const ValidatedScalarFunction& function, const ExactInterval&, Nat j) const;
     //! \brief Try to enforce hull consistency by reducing an a monotone dimension.
     //! This method is sharp if each variable occurs at most once in the constraint.
-    Bool monotone_reduce(UpperBox& bx, const ValidatedScalarFunctionInterface& function, const ExactInterval&, Nat j) const;
+    Bool monotone_reduce(UpperBox& bx, const ValidatedScalarFunction& function, const ExactInterval&, Nat j) const;
 
     //! Split the domain into two pieces to help try to solve the constraints.
     Pair<UpperBox,UpperBox> split(const UpperBox& domain, const ValidatedVectorFunction& function, const ExactBox& codomain) const;

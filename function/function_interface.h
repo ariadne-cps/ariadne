@@ -38,8 +38,30 @@ static const Int SMOOTH=255;
 template<class S> struct ElementTraits;
 template<> struct ElementTraits<IntervalDomain> { template<class X> using Type=Scalar<X>; };
 template<> struct ElementTraits<BoxDomain> { template<class X> using Type=Vector<X>; };
+template<class S, class X> using ElementType = typename ElementTraits<S>::template Type<X>;
 
 template<class P, class D, class C> class FunctionInterface;
+
+
+//! \ingroup FunctionModule
+//! \brief Interface for vector functions \f$\F^n\rightarrow\F^m\f$ whose derivatives can be computed.
+//! \sa \ref ScalarFunctionInterface
+template<class P,class D,class C=BoxDomain>
+class VectorOfFunctionInterface
+{
+};
+
+template<class P,class D>
+class VectorOfFunctionInterface<P,D,BoxDomain>
+{
+  public:
+    inline ScalarFunction<P,D> operator[](SizeType i) const;
+  public:
+    virtual ~VectorOfFunctionInterface<P,D>() = default;
+    virtual ScalarFunction<P,D> _get(SizeType i) const = 0;
+    virtual Void _set(SizeType i, ScalarFunction<P,D> p) = 0;
+};
+
 
 template<class D, class C>
 class FunctionInterface<Void,D,C>
@@ -150,21 +172,6 @@ template<class I> class VectorInterface {
     ~VectorInterface() = default;
     virtual I* _get(SizeType i) const = 0;
 };
-
-//! \ingroup FunctionModule
-//! \brief Interface for vector functions \f$\F^n\rightarrow\F^m\f$ whose derivatives can be computed.
-//! \sa \ref ScalarFunctionInterface
-template<class P,class D>
-class VectorOfFunctionInterface
-{
-  public:
-    inline ScalarFunction<P,D> operator[](SizeType i) const;
-  public:
-    virtual ~VectorOfFunctionInterface<P,D>() = default;
-    virtual ScalarFunction<P,D> _get(SizeType i) const = 0;
-    virtual Void _set(SizeType i, ScalarFunction<P,D> p) const = 0;
-};
-
 
 template<class X> class FunctionFactoryInterface;
 

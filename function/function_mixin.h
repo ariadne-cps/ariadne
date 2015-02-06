@@ -35,6 +35,8 @@ typedef ValidatedNumber ValidatedNumber;
 typedef EffectiveNumber EffectiveNumber;
 typedef Differential<ApproximateNumber> ApproximateDifferential;
 typedef Differential<ValidatedNumber> ValidatedDifferential;
+typedef UnivariateDifferential<ApproximateNumber> ApproximateUnivariateDifferential;
+typedef UnivariateDifferential<ValidatedNumber> ValidatedUnivariateDifferential;
 typedef TaylorModel<Approximate,Float> ApproximateTaylorModel;
 typedef TaylorModel<Validated,Float> ValidatedTaylorModel;
 typedef Formula<ApproximateNumber> ApproximateFormula;
@@ -50,6 +52,10 @@ template<class F, class P, class D=BoxDomain> class VectorFunctionMixin : public
 
 template<class T> T* heap_copy(const T& t) { return new T(t); }
 
+template<class D> D make_domain(SizeType d);
+template<> inline IntervalDomain make_domain(SizeType d) { assert(d==1u); return IntervalDomain(-inf,+inf); }
+template<> inline BoxDomain make_domain(SizeType d) { return BoxDomain(d,IntervalDomain(-inf,+inf)); }
+
 template<class F, class D, class C>
 class FunctionMixin<F,Void,D,C>
     : public virtual FunctionInterface<Void,D,C>
@@ -61,8 +67,8 @@ class FunctionMixin<F,Void,D,C>
     template<class X> ElementType<C,X> _base_evaluate(const ElementType<D,X>& x) const {
         ElementType<C,X> r; static_cast<const F*>(this)->_compute(r,x); return r;}
   public:
-    virtual DomainType const domain() const override { return BoxDomain(this->argument_size(),IntervalDomain(-inf,+inf)); }
-    virtual CodomainType const codomain() const override { return BoxDomain(this->result_size(),IntervalDomain(-inf,+inf)); }
+    virtual DomainType const domain() const { return make_domain<D>(this->argument_size()); }
+    virtual CodomainType const codomain() const override { return make_domain<C>(this->result_size()); }
     virtual SizeType argument_size() const override { return this->domain().dimension(); }
     virtual SizeType result_size() const override { return this->codomain().dimension(); }
 
@@ -82,9 +88,9 @@ class FunctionMixin<F,Void,D,IntervalDomain>
     template<class X> X _base_evaluate(const Vector<X>& x) const {
         X r; static_cast<const F*>(this)->_compute(r,x); return r;}
   public:
-    virtual DomainType const domain() const override { return BoxDomain(this->argument_size(),IntervalDomain(-inf,+inf)); }
+    virtual DomainType const domain() const { return make_domain<D>(this->argument_size()); }
+    virtual CodomainType const codomain() const override { return make_domain<C>(this->result_size()); }
     virtual SizeType argument_size() const override { return this->domain().dimension(); }
-    virtual CodomainType const codomain() const override { return IntervalDomain(-inf,+inf); }
     virtual SizeType result_size() const override { return 1u; }
 
     virtual OutputStream& repr(OutputStream& os) const { return this->write(os); }

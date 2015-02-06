@@ -50,13 +50,15 @@ s/Variable<String>/StringVariable/g
 s/Variable<Integer>/IntegerVariable/g
 s/Variable<Real>/RealVariable/g
 
+s/Box<\(\w*\)Interval>/\1Box/g
+
 s/\/usr\/lib\/gcc\/.*\/include\/c++\/.\..\..\///g
 s/\.\.\/include\///g
-" 
+"
 
 #s/\/usr\/lib\/gcc\/i386\-redhat\-linux\/4\.\1\.\1\/\.\.\/\.\.\/\.\.\/\.\.\/include\/c\+\+\/4\.1\.1\//c\+\+\//g
 # | cat > ariadne_filter.sed.tmp
 #echo $SED_COMMAND
 
-#sed -f ariadne_filter.sed.tmp $1 
+#sed -f ariadne_filter.sed.tmp $1
 sed -e "$SED_COMMAND" $1

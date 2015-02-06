@@ -169,7 +169,8 @@ EXAMPLES_OBJ = $(patsubst %.cc,$(EXAMPLES_OBJ_DIR)/%.o,$(EXAMPLES_SRC))
 EXAMPLES_BIN = $(patsubst %.cc,$(EXAMPLES_BIN_DIR)/%,$(EXAMPLES_SRC))
 
 CXX = g++
-CXXFLAGS = -std=c++11 -Wno-non-template-friend -fPIC -O1
+CXXWARNINGS=-Wall -Wno-reorder -Wno-unused-variable -Wno-unused-but-set-variable
+CXXFLAGS = -std=c++11  -Wno-non-template-friend -fPIC -O1
 #CXX = clang++
 #CXXFLAGS = -std=c++11 -fPIC
 

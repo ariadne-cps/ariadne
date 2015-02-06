@@ -40,7 +40,7 @@ using namespace Ariadne;
 typedef ExactInterval IntervalDomain;
 typedef ExactBox BoxDomain;
 template<class P> using Function = ScalarFunction<P>;
-typedef Function<Effective> EffectiveFunction;
+typedef ScalarFunction<Effective> EffectiveFunction;
 
 template<class F, class R=Return<DontCare>, class = Fallback> struct HasCodomainMethod : False { };
 template<class F, class R> struct HasCodomainMethod<F, R, EnableIf<IsDefined<decltype(declval<F>().codomain())>,Fallback>> : True { };
@@ -197,15 +197,15 @@ template<class F> void CheckFunctionConcept<F>::check_composable_concept()
     ARIADNE_TEST_STATIC_ASSERT(HasCompose<F,Vector<F>, Return<F>>);
 
     if(IsWeaker<P,Approximate>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCompose<Function<Approximate>,Vector<F>, Return<F>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCompose<ScalarFunction<Approximate>,Vector<F>, Return<F>>);
     }
 
     if(IsWeaker<P,Validated>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCompose<Function<Validated>,Vector<F>, Return<F>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCompose<ScalarFunction<Validated>,Vector<F>, Return<F>>);
     }
 
     if(IsWeaker<P,Effective>::value) {
-        ARIADNE_TEST_STATIC_ASSERT(HasCompose<Function<Effective>,Vector<F>, Return<F>>);
+        ARIADNE_TEST_STATIC_ASSERT(HasCompose<ScalarFunction<Effective>,Vector<F>, Return<F>>);
     }
 }
 

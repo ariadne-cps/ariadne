@@ -40,6 +40,7 @@
 #include "numeric/numeric.h"
 #include "algebra/vector.h"
 #include "algebra/matrix.h"
+#include "geometry/box.h"
 
 namespace Ariadne {
 

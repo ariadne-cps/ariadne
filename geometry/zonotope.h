@@ -30,6 +30,7 @@
 
 #include <iosfwd>
 
+#include "utility/declarations.h"
 #include "utility/tribool.h"
 
 #include "algebra/vector.h"
@@ -48,7 +49,6 @@ class Zonotope;
 template<class BS> class ListSet;
 
 template<class X> class Affine;
-template<class X> class VectorFunction;
 
 class Figure;
 

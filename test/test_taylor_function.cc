@@ -129,7 +129,7 @@ Void TestScalarTaylorFunction::test_concept()
 
     tr.sweep(); tr.clobber();
 
-    t.evaluate(vi); evaluate(t,vi);
+    t(vi); evaluate(t,vi);
     t.domain(); t.range(); t.expansion(); t.error();
 
 }
@@ -612,17 +612,18 @@ Void TestTaylorFunctionFactory::test_create()
     ScalarTaylorFunction stf=factory.create(dom, EffectiveScalarFunction::zero(dom.size()) );
     ARIADNE_TEST_PRINT(stf);
     ARIADNE_TEST_EQUALS(&stf.sweeper(),&sweeper);
-    ARIADNE_TEST_EQUALS(stf.evaluate(args),ValidatedFloat(0.0));
+    ARIADNE_TEST_EQUALS(stf(args),ValidatedFloat(0.0));
+    ARIADNE_TEST_EQUALS(evaluate(stf,args),ValidatedFloat(0.0));
 
     VectorTaylorFunction vtf=factory.create(dom, EffectiveVectorFunction::identity(dom.size()) );
     ARIADNE_TEST_PRINT(vtf);
 
     // Test evaluation gives a superset with small additional error
     Vector<ValidatedFloat> errs(2,ValidatedFloat(-1e-15,+1e-15));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,args,vtf.evaluate(args));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,vtf.evaluate(args),Vector<ValidatedFloat>(args+errs));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,args,vtf(args));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,vtf(args),Vector<ValidatedFloat>(args+errs));
     Vector<ValidatedFloat> pt(2); pt[0]=ValidatedFloat(0.2); pt[1]=ValidatedFloat(1.25);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,pt,vtf.evaluate(pt));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,pt,vtf(pt));
 }
 
 

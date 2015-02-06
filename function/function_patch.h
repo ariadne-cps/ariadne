@@ -98,7 +98,7 @@ template<class M> class FunctionPatch
 {
     typedef typename M::Paradigm P;
   public:
-    typedef ExactBox DomainType;
+    typedef BoxDomain DomainType;
     typedef M ModelType;
     typedef typename ModelType::CodomainType CodomainType;
     typedef typename ModelType::RangeType RangeType;
@@ -182,7 +182,7 @@ template<class M> class FunctionPatch
     ModelType& model() { return this->_model; }
 
     //! \brief An over-approximation to the range of the quantity; not necessarily tight.
-    const ExactInterval codomain() const { this->_model.codomain(); }
+    const CodomainType codomain() const { this->_model.codomain(); }
     //! \brief The scaled expansion over a unit box.
     const ExpansionType& expansion() const { return this->_model.expansion(); }
     //! \brief The error of the expansion over the domain.

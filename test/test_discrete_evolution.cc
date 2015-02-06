@@ -92,8 +92,8 @@ Void TestMapEvolver::test() const
 
 
     //VectorUserFunction evaluation sanity check
-    cout << "henon.evaluate(" << initial_box << ") " << flush; cout << " = " << apply(henon,initial_box) << endl;
-    cout << "henon.jacobian(" << initial_box << ") = " << jacobian(henon,initial_box) << endl;
+    cout << "apply(henon," << initial_box << ") " << flush; cout << " = " << apply(henon,initial_box) << endl;
+    cout << "jacobian_range(henon," << initial_box << ") = " << jacobian_range(henon,initial_box) << endl;
 
 
 

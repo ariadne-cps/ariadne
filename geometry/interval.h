@@ -59,6 +59,8 @@ typedef UpperInterval NumericInterval;
 
 class UnitInterval;
 
+struct SizeOne { operator SizeType() const { return 1u; } };
+
 //! \ingroup NumericModule
 //! \brief Intervals with floating-point endpoints supporting outwardly-rounded arithmetic.
 //! \details
@@ -128,6 +130,8 @@ class ExactInterval {
     explicit ExactInterval(const Integer& z);
     explicit ExactInterval(const Rational& q);
     ExactInterval(const Rational& lower, const Rational& upper);
+
+    SizeOne dimension() const { return SizeOne(); }
 
     //! \brief The lower bound of the interval.
     const Float& lower_value() const { return l; }

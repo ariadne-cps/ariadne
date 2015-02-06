@@ -192,6 +192,17 @@ template<class X> Vector<Differential<X>> Differential<X>::variables(DegreeType 
     return result;
 }
 
+//template<class X> UnivariateDifferential<X> Differential<X>::identity(DegreeType deg, const X& x) {
+//    return UnivariateDifferential<X>::variable(deg,x);
+//}
+
+template<class X> Differential<X> Differential<X>::identity(DegreeType deg, const X& x) {
+    return Differential<X>::variable(1u,deg,x,0u);
+}
+
+template<class X> Vector<Differential<X>> Differential<X>::identity(DegreeType deg, const Vector<X>& x) {
+    return Differential<X>::variables(deg,x);
+}
 
 template<class X> EqualityType<X> Differential<X>::operator==(const Differential<X>& other) const {
     Differential<X> const& self=*this;

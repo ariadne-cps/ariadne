@@ -1050,8 +1050,10 @@ inline UpperFloat create_float(Number<Upper> const& x) { return UpperFloat(x); }
 inline ValidatedFloat create_float(Number<Validated> const& x) { return ValidatedFloat(x); }
 inline ValidatedFloat create_float(Number<Effective> const& x) { return ValidatedFloat(x); }
 inline ValidatedFloat create_float(Number<Exact> const& x) { return ValidatedFloat(x); }
+inline ValidatedFloat create_float(Real const& x) { return ValidatedFloat(x); }
 
 template<class X> struct IsGenericNumber : IsConvertible<X,Real> { };
+template<> struct IsGenericNumber<Real> : True { };
 template<class P> struct IsGenericNumber<Number<P>> : True { };
 
 template<class X, class Y, EnableIf<IsFloat<X>> =dummy, EnableIf<IsGenericNumber<Y>> =dummy> auto

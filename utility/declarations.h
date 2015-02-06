@@ -87,6 +87,7 @@ template<class X> class Vector;
 template<class X> class Covector;
 template<class X> class Matrix;
 template<class X> class Differential;
+template<class X> class UnivariateDifferential;
 template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Differential;
@@ -166,8 +167,8 @@ typedef EffectiveVectorFunction RealVectorFunction;
 
 // Function interface declarations
 template<class P, class D, class C> class FunctionInterface;
-template<class P, class D=BoxDomain> using ScalarFunctionInterface = FunctionInterface<P,BoxDomain,IntervalDomain>;
-template<class P, class D=BoxDomain> using VectorFunctionInterface = FunctionInterface<P,BoxDomain,BoxDomain>;
+template<class P, class D=BoxDomain> using ScalarFunctionInterface = FunctionInterface<P,D,IntervalDomain>;
+template<class P, class D=BoxDomain> using VectorFunctionInterface = FunctionInterface<P,D,BoxDomain>;
 
 typedef ScalarFunctionInterface<ApproximateTag> ApproximateScalarFunctionInterface;
 typedef ScalarFunctionInterface<ValidatedTag> ValidatedScalarFunctionInterface;

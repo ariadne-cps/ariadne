@@ -86,6 +86,7 @@ struct VectorFormulaFunction
     virtual SizeType result_size() const { return this->_formulae.size(); }
     virtual SizeType argument_size() const { return this->_argument_size; }
     virtual ScalarFormulaFunction<X>* _get(SizeType i) const { return new ScalarFormulaFunction<X>(this->_argument_size,this->_formulae[i]); }
+    virtual VectorFormulaFunction<X>* _derivative(SizeType k) const { ARIADNE_NOT_IMPLEMENTED; }
     virtual OutputStream& write(OutputStream& os) const { return os << this->_formulae; }
     virtual OutputStream& repr(OutputStream& os) const { return os << "VectorFormulaFunction("<<this->result_size()<<","<<this->argument_size()<<","<<this->_formulae<<")"; }
     template<class Y> Void _compute(Vector<Y>& r, const Vector<Y>& x) const { r=Ariadne::cached_evaluate(this->_formulae,x); }

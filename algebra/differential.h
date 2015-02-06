@@ -196,6 +196,11 @@ class Differential
     //! \brief \brief A vector of differentials of degree \a deg in \a as arguments with values \f$c_i+x_i\f$.
     static Vector< Differential<X> > variables(DegreeType deg, const Vector<X>& x);
 
+    //TODO: Complete UnivariateDifferential
+    //static UnivariateDifferential<X> identity(DegreeType deg, const X& x);
+    static Differential<X> identity(DegreeType deg, const X& x);
+    static Vector< Differential<X> > identity(DegreeType deg, const Vector<X>& x);
+
     //! \brief Equality operator. Tests equality of representation, so comparing two differentials which are mathematically equal may return false if the structural zeros are different.
     EqualityType<X> operator==(const Differential<X>& other) const;
     //! \brief Inequality operator.

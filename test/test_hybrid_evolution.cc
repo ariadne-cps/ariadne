@@ -30,7 +30,6 @@
 #include "algebra/matrix.h"
 #include "function/function.h"
 #include "geometry/box.h"
-#include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "solvers/integrator.h"
 #include "dynamics/orbit.h"

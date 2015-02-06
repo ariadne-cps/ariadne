@@ -91,6 +91,7 @@ class Formula {
     static Formula<X> zero();
     static Formula<X> constant(const X& c);
     static Formula<X> coordinate(Nat i);
+    static Vector<Formula<X>> coordinates(Nat n);
     static Formula<X> unary(const Operator& op, Formula<X> const& a);
     static Formula<X> binary(const Operator& op, Formula<X> const& a1, Formula<X> const& a2);
     static Formula<X> scalar(const Operator& op, Formula<X> const& a1, Int n2);
@@ -181,6 +182,8 @@ template<class X> inline Formula<X> Formula<X>::constant(const X& c) {
     return Formula<X>(new ConstantFormulaNode<X>(c)); }
 template<class X> inline Formula<X> Formula<X>::coordinate(Nat j) {
     return Formula<X>(new IndexFormulaNode<X>(Index(j))); }
+template<class X> inline Vector<Formula<X>> Formula<X>::coordinates(Nat n) {
+    Vector<Formula<X>> r(n); for(SizeType i=0; i!=n; ++i) { r[i]=Formula<X>::coordinate(i); } return r; }
 template<class X> inline Formula<X> Formula<X>::unary(const Operator& op, Formula<X> const& a) {
     return Formula<X>(new UnaryFormulaNode<X>(op,a)); }
 template<class X> inline Formula<X> Formula<X>::binary(const Operator& op, Formula<X> const& a1, Formula<X> const& a2) {

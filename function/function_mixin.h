@@ -47,8 +47,8 @@ typedef Algebra<ValidatedNumber> ValidatedAlgebra;
 typedef Algebra<EffectiveNumber> EffectiveAlgebra;
 
 template<class F, class P, class D, class C> class FunctionMixin { };
-template<class F, class P, class D=BoxDomain> class ScalarFunctionMixin : public FunctionMixin<F,P,D,IntervalDomain> { };
-template<class F, class P, class D=BoxDomain> class VectorFunctionMixin : public FunctionMixin<F,P,D,BoxDomain> { };
+template<class F, class P, class D=BoxDomain> class ScalarFunctionMixin;
+template<class F, class P, class D=BoxDomain> class VectorFunctionMixin;
 
 template<class T> T* heap_copy(const T& t) { return new T(t); }
 
@@ -146,6 +146,15 @@ class FunctionMixin<F,EffectiveTag,D,C>
     virtual Result<EffectiveAlgebra> _evaluate(const Argument<EffectiveAlgebra>& x) const;
 };
 
+template<class F, class P, class D> class ScalarFunctionMixin
+    : public FunctionMixin<F,P,D,IntervalDomain> { };
+
+template<class F, class P, class D> class VectorFunctionMixin
+    : public FunctionMixin<F,P,D,BoxDomain>
+    , public virtual VectorOfFunctionInterface<P,D>
+{
+    virtual ScalarFunctionInterface<P,D>* _get(SizeType i) const override = 0;
+};
 
 
 } // namespace Ariadne

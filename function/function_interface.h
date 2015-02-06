@@ -51,15 +51,24 @@ class VectorOfFunctionInterface
 {
 };
 
-template<class P,class D>
-class VectorOfFunctionInterface<P,D,BoxDomain>
+template<class D> class VectorOfFunctionInterface<ApproximateTag,D,BoxDomain> {
+  public:
+    virtual ~VectorOfFunctionInterface<ApproximateTag,D>() = default;
+    virtual ScalarFunctionInterface<ApproximateTag,D>* _get(SizeType i) const = 0;
+};
+
+template<class D> class VectorOfFunctionInterface<ValidatedTag,D,BoxDomain>
+    : public virtual VectorOfFunctionInterface<ApproximateTag,D>
 {
   public:
-    inline ScalarFunction<P,D> operator[](SizeType i) const;
+    virtual ScalarFunctionInterface<ValidatedTag,D>* _get(SizeType i) const override = 0;
+};
+
+template<class D> class VectorOfFunctionInterface<EffectiveTag,D,BoxDomain>
+    : public virtual VectorOfFunctionInterface<ValidatedTag,D>
+{
   public:
-    virtual ~VectorOfFunctionInterface<P,D>() = default;
-    virtual ScalarFunction<P,D> _get(SizeType i) const = 0;
-    virtual Void _set(SizeType i, ScalarFunction<P,D> p) = 0;
+    virtual ScalarFunctionInterface<EffectiveTag,D>* _get(SizeType i) const override = 0;
 };
 
 

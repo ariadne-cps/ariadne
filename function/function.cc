@@ -45,6 +45,11 @@ namespace Ariadne {
 template<class T> inline StringType str(const T& t) {
     StringStream ss; ss << t; return ss.str(); }
 
+template<class T> T zero_element(Matrix<T> const& m) { return m.zero_element(); }
+template<class T> T zero_element(Covector<T> const& u) { return u.zero_element(); }
+template<class T> T zero_element(Vector<T> const& v) { return v.zero_element(); }
+template<class T> T zero_element(Scalar<T> const& s) { return create_zero(s); }
+
 
 // Functions for converting from Expression classes to Function classes via Formula
 template<class X> class Expression;
@@ -102,10 +107,10 @@ struct VectorOfScalarFunction
     virtual DomainType const domain() const final {
         return _dom; }
 
-    virtual ScalarFunction<P,D> _get(SizeType i) const final {
-        return this->_vec[i]; }
-    virtual Void _set(SizeType i, ScalarFunction<P,D> sf) final {
-        this->_vec[i]=sf; }
+    virtual ScalarFunctionInterface<P,D>* _get(SizeType i) const final {
+        return this->_vec[i].raw_pointer()->_clone(); }
+    virtual Void _set(SizeType i, const ScalarFunctionInterface<P,D>* sf) final {
+        this->_vec[i]=ScalarFunction<P,D>(sf->_clone()); }
     virtual VectorFunctionInterface<P,D>* _derivative(SizeType i) const {
         ARIADNE_NOT_IMPLEMENTED; }
 
@@ -131,15 +136,9 @@ struct VectorOfScalarFunction
         return os << "]"; }
 
     template<class X> inline Void _compute(Vector<X>& r, const ElementType<D,X>& x) const {
-        if(this->_vec.size()==0) { return; }
-        auto r0=_vec[0](x);
-        auto z=create_zero(r0);
-        r=Vector<X>(this->_vec.size(),z);
-        r[0]=r0;
-        for(SizeType i=1; i!=r.size(); ++i) {
-            r[i]=_vec[i].evaluate(x);
-        }
-    }
+        r=Vector<X>(this->_vec.size(),zero_element(x));
+        for(SizeType i=0; i!=r.size(); ++i) {
+            r[i]=_vec[i].evaluate(x); } }
 
     DomainType _dom;
     Vector< ScalarFunction<P,D> > _vec;
@@ -411,16 +410,15 @@ template<class P, class D> ScalarFunction<P,D>::ScalarFunction(DomainType dom, F
 template<class P, class D, class C> ScalarFunction<P,D> Function<P,D,C>::get(SizeType i) const {
     ARIADNE_ASSERT((IsSame<ResultSizeType,SizeType>::value));
     const VectorOfFunctionInterface<P,D>* vfp = dynamic_cast<const VectorOfFunctionInterface<P,D>*>(this->raw_pointer());
-    ARIADNE_ASSERT((vfp));
-    return vfp->_get(i);
+    if(!vfp) { std::cerr<<"\nCannot get element of "<<*this<<"\n  of type "<<typeid(this->raw_pointer()).name()<<":"<<typeid(this->reference()).name()<<"\n\n"; }
+    return ScalarFunction<P,D>(SharedPointer<ScalarFunctionInterface<P,D>>(vfp->_get(i)));
 }
 
 template<class P, class D, class C> Void Function<P,D,C>::set(SizeType i, ScalarFunction<P,D> sf) {
     ARIADNE_ASSERT((IsSame<ResultSizeType,SizeType>::value));
-    const VectorOfFunctionInterface<P,D>* cvfp = dynamic_cast<const VectorOfFunctionInterface<P,D>*>(this->raw_pointer());
-    VectorOfFunctionInterface<P,D>* vfp = const_cast<VectorOfFunctionInterface<P,D>*>(cvfp);
-    ARIADNE_ASSERT((vfp));
-    vfp->_set(i,sf);
+    const VectorOfScalarFunction<P,D>& cvf = dynamic_cast<const VectorOfScalarFunction<P,D>&>(this->_ptr.operator*());
+    VectorOfScalarFunction<P,D>& vf = const_cast<VectorOfScalarFunction<P,D>&>(cvf);
+    vf[i]=sf;
 }
 
 /*

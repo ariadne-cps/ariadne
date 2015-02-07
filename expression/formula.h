@@ -289,7 +289,7 @@ template<class X, class T> inline T cached_evaluate(const Formula<X>& f, const V
 
 template<class X, class T> Vector<T> cached_evaluate(const Vector< Formula<X> >& f, const Vector<T>& v) {
     assert(v.size()!=0);
-    Vector<T> r(f.size());
+    Vector<T> r(f.size(),zero_element(v));
     Map<const Void*,T> cache;
     for(Nat i=0; i!=r.size(); ++i) {
         r[i]=cached_evaluate(f[i],v,cache);

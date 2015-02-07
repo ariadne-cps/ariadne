@@ -163,7 +163,7 @@ class Differential
     typedef typename ExpansionType::ConstIterator ConstIterator;
 
     //! \brief Default constructor constructs a differential with degree zero in no variables.
-    explicit Differential();
+    Differential() = delete;
     //! \brief Constructs a differential with degree \a deg in \a as variables.
     explicit Differential(SizeType as, DegreeType deg);
     //! \brief Construct a differential from a mapping giving a coefficient for a finite number of multi-indices.
@@ -379,7 +379,8 @@ struct NonAssignableDifferential
     : public Differential<X>
 {
     NonAssignableDifferential<X>& operator=(const Differential<X>& other) {
-        ARIADNE_PRECONDITION( this->argument_size()==other.argument_size()  );
+        ARIADNE_PRECONDITION_MSG( this->argument_size()==other.argument_size(),
+                                  "\n  self="<<*this<<"\n  other="<<other<<"\n"<<std::flush  );
         ARIADNE_PRECONDITION( this->degree()==other.degree() );
         this->Differential<X>::operator=(other); return *this; }
     NonAssignableDifferential<X>& operator=(const X& c) {
@@ -417,19 +418,17 @@ class Vector< Differential<X> >
     // The type used for scalars.
     typedef X NumericType;
 
-    Vector() : _chars(), _ary(0) { }
-    Vector(SizeType rs) : _chars(), _ary(rs) { }
-    Vector(SizeType rs, SizeType as, DegreeType d) : _chars(as,d), _ary(rs) {
-        for(SizeType i=0; i!=rs; ++i) { this->_ary[i]=Differential<X>(as,d); } }
-    Vector(SizeType rs, const Differential<X>& sd) : _chars(sd), _ary(rs) {
-        for(SizeType i=0; i!=rs; ++i) { this->_ary[i]=sd; } }
-    Vector(SizeType rs, const Differential<X>* p) : _chars(), _ary(rs) {
-        ARIADNE_ASSERT(rs>0); _chars=DifferentialCharacteristics(p[0]); for(SizeType i=0; i!=rs; ++i) { this->_ary[i]=p[i]; } }
+    Vector() = delete;
+    Vector(SizeType rs) = delete;
+    Vector(SizeType rs, SizeType as, DegreeType d) : _chars(as,d), _ary(rs,Differential<X>(as,d)) { }
+    Vector(SizeType rs, const Differential<X>& sd) : _chars(sd), _ary(rs,sd) { }
+    Vector(SizeType rs, const Differential<X>* p) : _chars(), _ary(p,p+rs) {
+        ARIADNE_ASSERT(rs>0); _chars=DifferentialCharacteristics(p[0]); }
     template<class XX> Vector(const Vector< Differential<XX> > dv) : _chars(dv._chars), _ary(dv._ary) { }
     template<class XX> Vector(SizeType rs, SizeType as, DegreeType d, const XX* ptr);
     Vector(SizeType rs, SizeType as, DegreeType d,const Vector<X>& v, const Matrix<X>& A);
-    template<class E> Vector(const VectorExpression<E>& ve) : _ary(ve().size()) {
-        for(SizeType i=0; i!=_ary.size(); ++i) { static_cast<Differential<X>&>(_ary[i])=ve()[i]; }
+    template<class E> Vector(const VectorExpression<E>& ve) : _ary(ve().size(),Uninitialised()) {
+        for(SizeType i=0; i!=_ary.size(); ++i) { new (&_ary[i]) Differential<X>(ve()[i]); }
         ARIADNE_ASSERT(_ary.size()!=0); _chars=DifferentialCharacteristics(_ary[0]); }
     template<class E> Vector< Differential<X> >& operator=(const VectorExpression<E>& ve) {
         _ary.resize(ve().size()); for(SizeType i=0; i!=_ary.size(); ++i) { static_cast<Differential<X>&>(_ary[i])=ve()[i]; }

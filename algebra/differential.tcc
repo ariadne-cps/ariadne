@@ -119,7 +119,7 @@ const X Differential<X>::_zero=X(0);
 template<class X>
 const X Differential<X>::_one=X(1);
 
-template<class X> Differential<X>::Differential() : _expansion(0), _degree(0) { }
+//template<class X> Differential<X>::Differential() : _expansion(0), _degree(0) { }
 
 template<class X> Differential<X>::Differential(SizeType as, DegreeType deg) : _expansion(as),_degree(deg) { }
 
@@ -553,7 +553,7 @@ template<class X> Differential<X> _evaluate(const Differential<X>& x, const Vect
     Differential<X> one = zero.create_constant(X(1));
 
     // Use inefficient brute-force approach with lots of storage...
-    Array< Array< Differential<X> > > val(ms, Array< Differential<X> >(d+1));
+    Array< Array< Differential<X> > > val(ms, Array< Differential<X> >(d+1,zero));
     for(SizeType j=0; j!=ms; ++j) {
         val[j][0]=one;
         val[j][1]=a[j];
@@ -669,7 +669,7 @@ OutputStream& Differential<X>::_write(OutputStream& os) const
     Differential<X> const& x=*this;
     Expansion<X> e=x.expansion();
     //e.graded_sort();
-    os << "SD("<<x.argument_size()<<","<<x.degree()<<"){";
+    os << "SD("<<x.argument_size()<<","<<(uint)x.degree()<<"){";
     for(typename Expansion<X>::ConstIterator iter=e.begin(); iter!=e.end(); ++iter) {
         if(iter!=e.begin()) { os << ","; } os << " ";
         for(SizeType i=0; i!=e.argument_size(); ++i) {

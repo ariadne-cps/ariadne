@@ -52,13 +52,13 @@ Vector<ValidatedTaylorModel>& clobber(Vector<ValidatedTaylorModel>& h) {
 Matrix<ValidatedNumber>
 jacobian2(const Vector<ValidatedTaylorModel>& f, const Vector<ValidatedNumber>& x)
 {
-    Vector< Differential<ValidatedNumber> > dx(x.size());
+    Vector< Differential<ValidatedNumber> > dx(x.size(), f.size(), 1u);
     for(Nat i=0; i!=x.size()-f.size(); ++i) {
         dx[i]=Differential<ValidatedNumber>::constant(f.size(),1u,x[i]); }
     for(Nat i=0; i!=f.size(); ++i) {
         Nat j=i+(x.size()-f.size());
         dx[j]=Differential<ValidatedNumber>::variable(f.size(),1u,x[j],i); }
-    Vector< Differential<ValidatedNumber> > df(f.size());
+    Vector< Differential<ValidatedNumber> > df(f.size(), f.size(), 1u);
     for(Nat i=0; i!=f.size(); ++i) {
         df[i]=evaluate(f[i].expansion(),dx);
     }

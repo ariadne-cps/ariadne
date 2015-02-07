@@ -35,21 +35,13 @@
 #include "utility/metaprogramming.h"
 #include "utility/string.h"
 #include "numeric/integer.h"
+#include "numeric/number.decl.h"
 #include "numeric/float.decl.h"
 
 namespace Ariadne {
 
-struct Exact;
-
-class Boolean;
-
 class Int64;
 class Float64;
-
-class Integer;
-template<class P> class Number;
-
-template<class X> struct IsNumber;
 
 enum class Comparison : char;
 

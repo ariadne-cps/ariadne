@@ -677,8 +677,6 @@ template<class X> inline Vector<ExactType<X>> make_exact(const Vector<X>& v) {
     return std::move(r);
 }
 
-class ExactFloat;
-class ApproximateFloat;
 inline Vector<ExactFloat>const& make_exact(Vector<ApproximateFloat>const& v) {
     return reinterpret_cast<Vector<ExactFloat>const&>(v);
 }

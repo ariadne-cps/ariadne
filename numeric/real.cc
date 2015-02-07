@@ -41,11 +41,6 @@
 
 namespace Ariadne {
 
-template<> class FloatMPTemplate<Approximate> { };
-template<> class FloatMPTemplate<Lower> { };
-template<> class FloatMPTemplate<Upper> { };
-template<> class FloatMPTemplate<Bounded> { public: operator FloatMPTemplate<Upper>() { } operator FloatMPTemplate<Lower>() { } };
-
 typedef Real::Interface RealInterface;
 
 struct Real::Interface {
@@ -115,7 +110,7 @@ Real::Real(double l, double a, double u)
 
 // FIXME: Is this necessary?
 Real::Real(double x)
-    : Real(std::make_shared<RealConstant<BoundFloat>>(BoundFloat(x)))
+    : Real(std::make_shared<RealConstant<BoundFloat>>(BoundFloat(Float(x))))
 {
 }
 
@@ -126,12 +121,7 @@ UpperFloat Real::upper() const { return this->_ptr->_value(); }
 LowerFloat Real::lower() const { return this->_ptr->_value(); }
 ApproximateFloat Real::approx() const { return this->_ptr->_value(); }
 
-double Real::get_d() const { return this->approx().get_d(); }
-
-ValidatedFloat::ValidatedFloat(Real const& x) : ValidatedFloat(x.lower(),x.upper()) { }
-UpperFloat::UpperFloat(Real const& x) : UpperFloat(x.upper()) { }
-LowerFloat::LowerFloat(Real const& x) : LowerFloat(x.lower()) { }
-ApproximateFloat::ApproximateFloat(Real const& x) : ApproximateFloat(x.approx()) { }
+double Real::get_d() const { return this->approx().raw().get_d(); }
 
 Real::Real(std::uint64_t m, Void*) : Real(std::make_shared<RealConstant<Integer>>(m)) { }
 Real::Real(std::int64_t n, Void*) : Real(std::make_shared<RealConstant<Integer>>(n)) { }

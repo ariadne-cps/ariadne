@@ -35,13 +35,13 @@
 
 namespace Ariadne {
 
-Nat ApproximateFloat::output_precision = 4;
-Nat ValidatedFloat::output_precision = 8;
-Nat ExactFloat::output_precision = 16;
+//template<> Nat OutputPrecisionMixin<ApproximateFloat>::_output_precision = 4;
+//template<> Nat OutputPrecisionMixin<ValidatedFloat>::_output_precision = 8;
+//template<> Nat OutputPrecisionMixin<ExactFloat>::_output_precision = 16;
 
 const ExactFloat infty = ExactFloat(Float::inf());
 
-
+/*
 ExactFloat::ExactFloat(Integer const& z)
     : v(z.get_si())
 {
@@ -52,16 +52,50 @@ ExactFloat::ExactFloat(Integer const& z)
 ExactFloat make_exact(Real const& r) {
     ApproximateFloat a(r); return ExactFloat(a.raw());
 }
+*/
 
 OutputStream& operator<<(OutputStream& os, ExactFloat const& x) {
-    os << std::showpoint << std::setprecision(ExactFloat::output_precision) << x.raw();
+    os << std::showpoint << std::setprecision(ExactFloat::get_output_precision()) << x.raw();
     return os;
 }
 
+OutputStream&
+operator<<(OutputStream& os, const ValidatedFloat& ivl)
+{
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
+    os << '{';
+    Float::set_rounding_downward();
+    os << std::showpoint << std::setprecision(ValidatedFloat::get_output_precision()) << ivl.lower();
+    os << ':';
+    Float::set_rounding_upward();
+    os << std::showpoint << std::setprecision(ValidatedFloat::get_output_precision()) << ivl.upper();
+    Float::set_rounding_mode(rnd);
+    os << '}';
+    return os;
 
-ValidatedFloat::ValidatedFloat(Number<Validated> const& x) {
-    ARIADNE_NOT_IMPLEMENTED;
 }
+
+OutputStream& operator<<(OutputStream& os, UpperFloat const& x) {
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
+    Float::set_rounding_upward();
+    os << std::showpoint << std::setprecision(ValidatedFloat::get_output_precision()) << x.raw();
+    Float::set_rounding_mode(rnd);
+    return os;
+}
+
+OutputStream& operator<<(OutputStream& os, LowerFloat const& x) {
+    Float::RoundingModeType rnd=Float::get_rounding_mode();
+    Float::set_rounding_downward();
+    os << std::showpoint << std::setprecision(ValidatedFloat::get_output_precision()) << x.raw();
+    Float::set_rounding_mode(rnd);
+    return os;
+}
+
+OutputStream& operator<<(OutputStream& os, ApproximateFloat const& x) {
+    return os << std::showpoint << std::setprecision(ApproximateFloat::get_output_precision()) << x.raw();
+}
+
+
 
 ValidatedFloat widen(ValidatedFloat const& x)
 {
@@ -386,44 +420,18 @@ ValidatedFloat atan(ValidatedFloat const& x) {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-
-ValidatedFloat::ValidatedFloat(const Dyadic& b) : ValidatedFloat(b.operator Rational()) { }
-
-ValidatedFloat::ValidatedFloat(const Decimal& d) : ValidatedFloat(d.operator Rational()) { }
-
-
-ValidatedFloat::ValidatedFloat(const Integer& z) : ValidatedFloat(Rational(z)) {
-}
-
+/*
 ValidatedFloat::ValidatedFloat(const Rational& q) : ValidatedFloat(q,q) {
 }
 
-ValidatedFloat::ValidatedFloat(const Rational& ql, const Rational& qu) : l(ql.get_d()), u(qu.get_d())  {
-    while(Rational(l)>ql) { l=next_down(l); }
-    while(Rational(u)<qu) { u=next_up(u); }
-}
+ValidatedFloat::ValidatedFloat(const LowerFloat& xl, const UpperFloat& xu) : l(ql.raw()), u(qu.raw())  {
+
+ValidatedFloat::ValidatedFloat(const Rational& ql, const Rational& qu) : ValidatedFloat(LowerFloat(ql),UpperFloat(qu)) { }
 
 ValidatedFloat ExactFloat::pm(ErrorFloat e) const {
     ExactFloat const& v=*this; return ValidatedFloat(v-e,v+e);
 }
-
-OutputStream&
-operator<<(OutputStream& os, const ValidatedFloat& ivl)
-{
-    //if(ivl.lower_raw()==ivl.upper_raw()) { return os << "{" << std::setprecision(ValidatedFloat::output_precision) << ivl.lower_raw().get_d() << ; }
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    os << '{';
-    Float::set_rounding_downward();
-    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << ivl.lower().get_d();
-    os << ':';
-    Float::set_rounding_upward();
-    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << ivl.upper().get_d();
-    Float::set_rounding_mode(rnd);
-    os << '}';
-    return os;
-
-}
-
+*/
 InputStream&
 operator>>(InputStream& is, ValidatedFloat& x)
 {
@@ -434,23 +442,11 @@ operator>>(InputStream& is, ValidatedFloat& x)
     ARIADNE_ASSERT(cl=='[' || cl=='(');
     ARIADNE_ASSERT(cm==':' || cm==',' || cm==';');
     ARIADNE_ASSERT(cr==']' || cr==')');
-    x.l=l; x.u=u;
+    x._l=l; x._u=u;
     return is;
 }
 
 
-UpperFloat::UpperFloat(Number<Upper> const& x) {
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
-
-OutputStream& operator<<(OutputStream& os, UpperFloat const& x) {
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float::set_rounding_upward();
-    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << x.raw();
-    Float::set_rounding_mode(rnd);
-    return os;
-}
 
 UpperFloat sqr(UpperFloat const& x) {
     ARIADNE_PRECONDITION(x.raw()>=0.0);
@@ -489,8 +485,8 @@ UpperFloat log(UpperFloat const& x) {
     return UpperFloat(log_up(x.raw()));
 }
 
-template<> Int integer_cast(UpperFloat const& x) { return static_cast<Int>(x.u.get_d()); }
-template<> Nat integer_cast(UpperFloat const& x) { return static_cast<Nat>(x.u.get_d()); }
+template<> Int integer_cast(UpperFloat const& x) { return static_cast<Int>(x._u.get_d()); }
+template<> Nat integer_cast(UpperFloat const& x) { return static_cast<Nat>(x._u.get_d()); }
 
 
 
@@ -522,10 +518,6 @@ PositiveUpperFloat half(PositiveUpperFloat const& x) {
 }
 
 
-LowerFloat::LowerFloat(Number<Lower> const& x) {
-    ARIADNE_NOT_IMPLEMENTED;
-}
-
 LowerFloat mul(LowerFloat const& x1, LowerFloat const& x2) {
     ARIADNE_PRECONDITION(x1.raw()>=0 && x2.raw()>=0);
     return LowerFloat(mul_down(x1.raw(),x2.raw()));
@@ -552,38 +544,14 @@ LowerFloat log(LowerFloat const& x) {
     return LowerFloat(log_down(x.raw()));
 }
 
-OutputStream& operator<<(OutputStream& os, LowerFloat const& x) {
-    Float::RoundingModeType rnd=Float::get_rounding_mode();
-    Float::set_rounding_downward();
-    os << std::showpoint << std::setprecision(ValidatedFloat::output_precision) << x.raw();
-    Float::set_rounding_mode(rnd);
-    return os;
-}
-
-template<> Int integer_cast(LowerFloat const& x) { return static_cast<Int>(x.l.get_d()); }
-template<> Nat integer_cast(LowerFloat const& x) { return static_cast<Nat>(x.l.get_d()); }
+template<> Int integer_cast(LowerFloat const& x) { return integer_cast<Int>(x._l); }
+template<> Nat integer_cast(LowerFloat const& x) { return integer_cast<Nat>(x._l); }
 
 
 
-//ExactFloat inf = ExactFloat(std::numeric_limits< double >::infinity());
-ApproximateFloat::ApproximateFloat(Dyadic const& b) : ApproximateFloat(b.operator Rational()) { }
-ApproximateFloat::ApproximateFloat(Decimal const& d) : ApproximateFloat(d.operator Rational()) { }
 
-ApproximateFloat::ApproximateFloat(Number<Approximate> const& x) { ARIADNE_NOT_IMPLEMENTED; }
-
-ExactFloat::operator Rational() const {
-    return Rational(this->get_d());
-}
-
-ApproximateFloat::ApproximateFloat(Rational const& q) : ApproximateFloat(q.get_d()) {
-}
-
-OutputStream& operator<<(OutputStream& os, ApproximateFloat const& x) {
-    return os << std::showpoint << std::setprecision(ApproximateFloat::output_precision) << x.raw();
-}
-
-template<> Int integer_cast(ApproximateFloat const& x) { return static_cast<Int>(x.a.get_d()); }
-template<> Nat integer_cast(ApproximateFloat const& x) { return static_cast<Nat>(x.a.get_d()); }
+template<> Int integer_cast(ApproximateFloat const& x) { return integer_cast<Int>(x._a); }
+template<> Nat integer_cast(ApproximateFloat const& x) { return integer_cast<Nat>(x._a); }
 
 
 

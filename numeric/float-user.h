@@ -87,77 +87,270 @@ template<class X> struct DeclareNumericOperators {
 //! %Ariadne floating-point numbers can be constructed by conversion from built-in C++ types.
 //! Note that the value of a built-in floating-point value may differ from the mathematical value of the literal.
 //! For example, while <c>%Float(3.25)</c> is represented exactly, <c>%Float(3.3)</c> has a value of \f$3.2999999999999998224\ldots\f$.
-//! \note In the future, the construction of a \c %Float from a string literal may be supported.
+//! \note In the future, the construction of _a \c %Float from a string literal may be supported.
 //! \sa ExactInterval, Real, ExactFloat
-class ApproximateFloat {
+template<class PR> class FloatTemplate<Approximate,PR> {
+    typedef Approximate P; typedef FloatType<PR> FLT;
   public:
     typedef Approximate Paradigm;
     typedef ApproximateFloat NumericType;
   public:
-    ApproximateFloat() : a() { }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> ApproximateFloat(N n) : a(n) { }
-    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> ApproximateFloat(D x) : a(x) { }
-    explicit ApproximateFloat(Float const& x) : a(x) { }
-    explicit ApproximateFloat(const Dyadic& d);
-    explicit ApproximateFloat(const Decimal& d);
+    FloatTemplate<Approximate,PR>() : _a() { }
+    template<class N, EnableIf<IsIntegral<N>> =dummy> FloatTemplate<Approximate,PR>(N n) : _a(n) { }
+    template<class D, EnableIf<IsFloatingPoint<D>> =dummy> FloatTemplate<Approximate,PR>(D x) : _a(x) { }
+    explicit FloatTemplate<Approximate,PR>(Float const& x) : _a(x) { }
+    explicit FloatTemplate<Approximate,PR>(const Dyadic& d);
+    explicit FloatTemplate<Approximate,PR>(const Decimal& d);
 
-    explicit ApproximateFloat(const Integer& z);
-    explicit ApproximateFloat(const Rational& q);
-    explicit ApproximateFloat(const Real& r);
-    explicit ApproximateFloat(const Number<Approximate>& x);
+    explicit FloatTemplate<Approximate,PR>(const Integer& z);
+    explicit FloatTemplate<Approximate,PR>(const Rational& q);
+    explicit FloatTemplate<Approximate,PR>(const Real& r);
+    explicit FloatTemplate<Approximate,PR>(const Number<Approximate>& x);
     operator Number<Approximate> () const;
 
-    ApproximateFloat(ExactFloat const& x);
-    ApproximateFloat(ValidatedFloat const& x);
-    ApproximateFloat(UpperFloat const& x);
-    ApproximateFloat(LowerFloat const& x);
+    FloatTemplate<Approximate,PR>(FloatTemplate<Exact,PR> const& x);
+    FloatTemplate<Approximate,PR>(FloatTemplate<Validated,PR> const& x);
+    FloatTemplate<Approximate,PR>(FloatTemplate<Upper,PR> const& x);
+    FloatTemplate<Approximate,PR>(FloatTemplate<Lower,PR> const& x);
 
-    explicit operator Float () const { return this->a; }
-    Float const& raw() const { return this->a; }
-    Float& raw() { return this->a; }
-    double get_d() const { return this->a.get_d(); }
+    FloatTemplate<Approximate,PR> pm(FloatTemplate<Approximate,PR> e) { return *this; }
+
+    explicit operator Float () const { return this->_a; }
+    Float const& raw() const { return this->_a; }
+    Float& raw() { return this->_a; }
+    double get_d() const { return this->_a.get_d(); }
   public:
     static Void set_output_precision(Nat p) { output_precision=p; }
-    ApproximateFloat pm(ApproximateFloat e) { return *this; }
-  private: public:
+    static Nat get_output_precision() { return output_precision; }
     static Nat output_precision;
-    Float a;
+  private: public:
+    Float _a;
 };
 
-template<class R, class A> R integer_cast(const A& a);
 
 
-inline ApproximateFloat floor(ApproximateFloat const& x) { return ApproximateFloat(floor(x.a)); }
-inline ApproximateFloat ceil(ApproximateFloat const& x) { return ApproximateFloat(ceil(x.a)); }
 
-inline ApproximateFloat abs(ApproximateFloat const& x) { return ApproximateFloat(abs_exact(x.a)); }
-inline ApproximateFloat max(ApproximateFloat const& x, ApproximateFloat y) { return ApproximateFloat(max_exact(x.a,y.a)); }
-inline ApproximateFloat min(ApproximateFloat const& x, ApproximateFloat y) { return ApproximateFloat(min_exact(x.a,y.a)); }
+//! \ingroup NumericModule
+//! \brief Floating-point lower bounds for real numbers.
+template<class PR> class FloatTemplate<Lower,PR> {
+    typedef Lower P; typedef FloatType<PR> FLT;
+  public:
+    typedef Lower Paradigm;
+    typedef FloatTemplate<Lower,PR> NumericType;
+  public:
+    FloatTemplate<Lower,PR>() : _l(0.0) { }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatTemplate<Lower,PR>(N n) : _l(n) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit FloatTemplate<Lower,PR>(X x) : _l(x) { }
+    explicit FloatTemplate<Lower,PR>(Float const& x) : _l(x) { }
 
-inline ApproximateFloat nul(ApproximateFloat const& x) { return ApproximateFloat(nul_exact(x.a)); }
-inline ApproximateFloat pos(ApproximateFloat const& x) { return ApproximateFloat(pos_exact(x.a)); }
-inline ApproximateFloat neg(ApproximateFloat const& x) { return ApproximateFloat(neg_exact(x.a)); }
-inline ApproximateFloat half(ApproximateFloat const& x) { return ApproximateFloat(half_exact(x.a)); }
-inline ApproximateFloat sqr(ApproximateFloat const& x) { return ApproximateFloat(mul_near(x.a,x.a)); }
-inline ApproximateFloat rec(ApproximateFloat const& x) { return ApproximateFloat(div_near(1.0,x.a)); }
+    FloatTemplate<Lower,PR>(FloatTemplate<Validated,PR> const& x);
+    FloatTemplate<Lower,PR>(FloatTemplate<Exact,PR> const& x);
 
-inline ApproximateFloat add(ApproximateFloat const& x1, ApproximateFloat const& x2) { return ApproximateFloat(add_near(x1.a,x2.a)); }
-inline ApproximateFloat sub(ApproximateFloat const& x1, ApproximateFloat const& x2) { return ApproximateFloat(sub_near(x1.a,x2.a)); }
-inline ApproximateFloat mul(ApproximateFloat const& x1, ApproximateFloat const& x2) { return ApproximateFloat(mul_near(x1.a,x2.a)); }
-inline ApproximateFloat div(ApproximateFloat const& x1, ApproximateFloat const& x2) { return ApproximateFloat(div_near(x1.a,x2.a)); }
+    explicit FloatTemplate<Lower,PR>(const Number<Lower>& x);
+    operator Number<Lower> () const;
 
-inline ApproximateFloat pow(ApproximateFloat const& x, Nat m) { return ApproximateFloat(pow_approx(x.a,m)); }
-inline ApproximateFloat pow(ApproximateFloat const& x, Int n) { return ApproximateFloat(pow_approx(x.a,n)); }
+    explicit FloatTemplate<Lower,PR>(const Real& x);
+    explicit FloatTemplate<Lower,PR>(const Rational& x);
+    explicit FloatTemplate<Lower,PR>(const Integer& x);
 
-inline ApproximateFloat sqrt(ApproximateFloat const& x) { return ApproximateFloat(sqrt_approx(x.a)); }
-inline ApproximateFloat exp(ApproximateFloat const& x) { return ApproximateFloat(exp_approx(x.a)); }
-inline ApproximateFloat log(ApproximateFloat const& x) { return ApproximateFloat(log_approx(x.a)); }
-inline ApproximateFloat sin(ApproximateFloat const& x) { return ApproximateFloat(sin_approx(x.a)); }
-inline ApproximateFloat cos(ApproximateFloat const& x) { return ApproximateFloat(cos_approx(x.a)); }
-inline ApproximateFloat tan(ApproximateFloat const& x) { return ApproximateFloat(tan_approx(x.a)); }
-inline ApproximateFloat asin(ApproximateFloat const& x) { return ApproximateFloat(asin_approx(x.a)); }
-inline ApproximateFloat acos(ApproximateFloat const& x) { return ApproximateFloat(acos_approx(x.a)); }
-inline ApproximateFloat atan(ApproximateFloat const& x) { return ApproximateFloat(atan_approx(x.a)); }
+    Float const& raw() const { return _l; }
+    Float& raw() { return _l; }
+    double get_d() const { return _l.get_d(); }
+  private: public:
+    static Nat output_precision;
+    Float _l;
+};
+
+
+//! \ingroup NumericModule
+//! \brief Floating-point upper bounds for real numbers.
+template<class PR> class FloatTemplate<Upper,PR> {
+  public:
+    typedef Upper Paradigm;
+    typedef FloatTemplate<Upper,PR> NumericType;
+  public:
+    FloatTemplate<Upper,PR>() : _u(0.0) { }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatTemplate<Upper,PR>(N n) : _u(n) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit FloatTemplate<Upper,PR>(X x) : _u(x) { }
+
+    explicit FloatTemplate<Upper,PR>(Float const& x) : _u(x) { }
+
+    FloatTemplate<Upper,PR>(FloatTemplate<Validated,PR> const& x);
+    FloatTemplate<Upper,PR>(FloatTemplate<Exact,PR> const& x);
+
+    explicit FloatTemplate<Upper,PR>(const Real& x);
+    explicit FloatTemplate<Upper,PR>(const Rational& x);
+    explicit FloatTemplate<Upper,PR>(const Integer& x);
+    explicit FloatTemplate<Upper,PR>(const Number<Upper>& x);
+
+    operator Number<Upper> () const;
+
+    Float const& raw() const { return _u; }
+    Float& raw() { return _u; }
+    double get_d() const { return _u.get_d(); }
+  private: public:
+    static Nat output_precision;
+    Float _u;
+};
+
+
+template<class PR> class FloatTemplate<Validated,PR> {
+  public:
+    typedef Validated Paradigm;
+    typedef FloatTemplate<Validated,PR> NumericType;
+  public:
+    FloatTemplate<Validated,PR>() : _l(0.0), _u(0.0) { }
+    template<class N, EnableIf<IsIntegral<N>> = dummy> FloatTemplate<Validated,PR>(N n) : _l(n), _u(n) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit FloatTemplate<Validated,PR>(X x) : _l(x), _u(x) { }
+    explicit FloatTemplate<Validated,PR>(Float const& x) : _l(x), _u(x) { }
+
+    FloatTemplate<Validated,PR>(FloatTemplate<Exact,PR> const& x);
+
+    explicit FloatTemplate<Validated,PR>(const Dyadic& x);
+    explicit FloatTemplate<Validated,PR>(const Decimal& x);
+    explicit FloatTemplate<Validated,PR>(const Integer& z);
+    explicit FloatTemplate<Validated,PR>(const Rational& q);
+    explicit FloatTemplate<Validated,PR>(const Real& x);
+    explicit FloatTemplate<Validated,PR>(const Number<Validated>& x);
+    operator Number<Validated> () const;
+
+    template<class N1, class N2, EnableIf<And<IsIntegral<N1>,IsIntegral<N2>>> =dummy>
+        FloatTemplate<Validated,PR>(N1 lower, N2 upper) : _l(lower), _u(upper) { }
+    FloatTemplate<Validated,PR>(Float const& lower, Float const& upper) : _l(lower), _u(upper) { }
+    FloatTemplate<Validated,PR>(LowerFloat const& lower, UpperFloat const& upper) : _l(lower.raw()), _u(upper.raw()) { }
+    FloatTemplate<Validated,PR>(const Rational& lower, const Rational& upper);
+
+    Float const& lower_raw() const { return _l; }
+    Float const& upper_raw() const { return _u; }
+    Float const value_raw() const { return med_near(_l,_u); }
+    Float const error_raw() const { return rad_up(_l,_u); }
+    double get_d() const { return (_l.get_d()+_u.get_d())/2; }
+
+    FloatTemplate<Lower,PR> lower() const { return FloatTemplate<Lower,PR>(_l); }
+    FloatTemplate<Upper,PR> upper() const { return FloatTemplate<Upper,PR>(_u); }
+    const FloatTemplate<Exact,PR> value() const;
+    const FloatTemplate<PositiveUpper,PR> error() const;
+
+    // DEPRECATED
+    explicit operator Float () const { return (_l+_u)/2; }
+    friend ExactFloat midpoint(ValidatedFloat const& x);
+  public:
+    static Nat output_precision;
+    static Void set_output_precision(Nat p) { output_precision=p; }
+    static Nat get_output_precision() { return output_precision; }
+  private: public:
+    Float _l, _u;
+};
+
+
+//! \ingroup NumericModule
+//! \related Float, ValidatedFloat
+//! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
+template<class PR> class FloatTemplate<Exact,PR> {
+  public:
+    typedef Exact Paradigm;
+    typedef FloatTemplate<Exact,PR> NumericType;
+
+    FloatTemplate<Exact,PR>() : _v(0) { }
+    template<class N, EnableIf<IsIntegral<N>> =dummy> FloatTemplate<Exact,PR>(N n) : _v(n) { }
+    template<class X, EnableIf<IsFloatingPoint<X>> =dummy> explicit FloatTemplate<Exact,PR>(X x) : _v(x) { }
+
+    explicit FloatTemplate<Exact,PR>(Float const& x) : _v(x) { }
+
+    explicit FloatTemplate<Exact,PR>(const Integer& z);
+    explicit operator Rational () const;
+    operator Number<Exact> () const;
+    explicit operator Float () const { return _v; }
+
+    Float const& raw() const { return _v; }
+    Float& raw() { return _v; }
+    double get_d() const { return _v.get_d(); }
+
+    ValidatedFloat pm(ErrorFloat e) const;
+  public:
+    static Nat output_precision;
+    static Void set_output_precision(Nat p) { output_precision=p; }
+    static Nat get_output_precision() { return output_precision; }
+  private: public:
+    Float _v;
+};
+
+
+class PositiveExactFloat : public ExactFloat {
+  public:
+    PositiveExactFloat() : ExactFloat() { }
+    template<class M, EnableIf<IsIntegral<M>>, EnableIf<IsUnsigned<M>> =dummy>
+        PositiveExactFloat(M m) : ExactFloat(m) { }
+    explicit PositiveExactFloat(Float const& x) : ExactFloat(x) { }
+};
+
+template<class PR> class FloatTemplate<PositiveUpper,PR> : public FloatTemplate<Upper,PR> {
+    typedef FloatTemplate<Upper,PR> UpperFloat;
+  public:
+    FloatTemplate<PositiveUpper,PR>() : UpperFloat() { }
+    explicit FloatTemplate<PositiveUpper,PR>(Float const& x) : UpperFloat(x) { ARIADNE_PRECONDITION(x>=0); }
+    template<class M, EnableIf<IsUnsigned<M>> =dummy> FloatTemplate<PositiveUpper,PR>(M m) : UpperFloat(m) { }
+    template<class F, EnableIf<IsSame<F,UpperFloat>> =dummy>
+        explicit FloatTemplate<PositiveUpper,PR>(F const& x) : UpperFloat(x) { }
+    FloatTemplate<PositiveUpper,PR>(PositiveExactFloat const& x) : UpperFloat(x) { }
+};
+
+class PositiveLowerFloat : public LowerFloat {
+  public:
+    PositiveLowerFloat() : LowerFloat() { }
+    template<class M, EnableIf<IsSigned<M>> =dummy>
+        PositiveLowerFloat(M m) : LowerFloat(m) { }
+    explicit PositiveLowerFloat(Float const& x) : LowerFloat(x) { }
+    PositiveLowerFloat(PositiveExactFloat const& x) : LowerFloat(x) { }
+};
+
+class PositiveApproximateFloat : public ApproximateFloat {
+  public:
+    PositiveApproximateFloat() : ApproximateFloat() { }
+    template<class M, EnableIf<IsSigned<M>> =dummy>
+        PositiveApproximateFloat(M m) : ApproximateFloat(m) { }
+    explicit PositiveApproximateFloat(Float const& x) : ApproximateFloat(x) { }
+    PositiveApproximateFloat(PositiveLowerFloat const& x) : ApproximateFloat(x) { }
+    PositiveApproximateFloat(PositiveUpperFloat const& x) : ApproximateFloat(x) { }
+    PositiveApproximateFloat(PositiveExactFloat const& x) : ApproximateFloat(x) { }
+};
+
+
+
+template<class R, class A> R integer_cast(const A& _a);
+
+
+inline ApproximateFloat floor(ApproximateFloat const& x) { return ApproximateFloat(floor(x._a)); }
+inline ApproximateFloat ceil(ApproximateFloat const& x) { return ApproximateFloat(ceil(x._a)); }
+
+inline ApproximateFloat abs(ApproximateFloat const& x) { return ApproximateFloat(abs_exact(x._a)); }
+inline ApproximateFloat max(ApproximateFloat const& x, ApproximateFloat y) { return ApproximateFloat(max_exact(x._a,y._a)); }
+inline ApproximateFloat min(ApproximateFloat const& x, ApproximateFloat y) { return ApproximateFloat(min_exact(x._a,y._a)); }
+
+inline ApproximateFloat nul(ApproximateFloat const& x) { return ApproximateFloat(nul_exact(x._a)); }
+inline ApproximateFloat pos(ApproximateFloat const& x) { return ApproximateFloat(pos_exact(x._a)); }
+inline ApproximateFloat neg(ApproximateFloat const& x) { return ApproximateFloat(neg_exact(x._a)); }
+inline ApproximateFloat half(ApproximateFloat const& x) { return ApproximateFloat(half_exact(x._a)); }
+inline ApproximateFloat sqr(ApproximateFloat const& x) { return ApproximateFloat(mul_near(x._a,x._a)); }
+inline ApproximateFloat rec(ApproximateFloat const& x) { return ApproximateFloat(div_near(1.0,x._a)); }
+
+inline ApproximateFloat add(ApproximateFloat const& x1, ApproximateFloat const& x2) { return ApproximateFloat(add_near(x1._a,x2._a)); }
+inline ApproximateFloat sub(ApproximateFloat const& x1, ApproximateFloat const& x2) { return ApproximateFloat(sub_near(x1._a,x2._a)); }
+inline ApproximateFloat mul(ApproximateFloat const& x1, ApproximateFloat const& x2) { return ApproximateFloat(mul_near(x1._a,x2._a)); }
+inline ApproximateFloat div(ApproximateFloat const& x1, ApproximateFloat const& x2) { return ApproximateFloat(div_near(x1._a,x2._a)); }
+
+inline ApproximateFloat pow(ApproximateFloat const& x, Nat m) { return ApproximateFloat(pow_approx(x._a,m)); }
+inline ApproximateFloat pow(ApproximateFloat const& x, Int n) { return ApproximateFloat(pow_approx(x._a,n)); }
+
+inline ApproximateFloat sqrt(ApproximateFloat const& x) { return ApproximateFloat(sqrt_approx(x._a)); }
+inline ApproximateFloat exp(ApproximateFloat const& x) { return ApproximateFloat(exp_approx(x._a)); }
+inline ApproximateFloat log(ApproximateFloat const& x) { return ApproximateFloat(log_approx(x._a)); }
+inline ApproximateFloat sin(ApproximateFloat const& x) { return ApproximateFloat(sin_approx(x._a)); }
+inline ApproximateFloat cos(ApproximateFloat const& x) { return ApproximateFloat(cos_approx(x._a)); }
+inline ApproximateFloat tan(ApproximateFloat const& x) { return ApproximateFloat(tan_approx(x._a)); }
+inline ApproximateFloat asin(ApproximateFloat const& x) { return ApproximateFloat(asin_approx(x._a)); }
+inline ApproximateFloat acos(ApproximateFloat const& x) { return ApproximateFloat(acos_approx(x._a)); }
+inline ApproximateFloat atan(ApproximateFloat const& x) { return ApproximateFloat(atan_approx(x._a)); }
 
 inline ApproximateFloat operator+(ApproximateFloat const& x) { return pos(x); }
 inline ApproximateFloat operator-(ApproximateFloat const& x) { return neg(x); }
@@ -165,98 +358,35 @@ inline ApproximateFloat operator+(ApproximateFloat const& x1, ApproximateFloat c
 inline ApproximateFloat operator-(ApproximateFloat const& x1, ApproximateFloat const& x2) { return sub(x1,x2); }
 inline ApproximateFloat operator*(ApproximateFloat const& x1, ApproximateFloat const& x2) { return mul(x1,x2); }
 inline ApproximateFloat operator/(ApproximateFloat const& x1, ApproximateFloat const& x2) { return div(x1,x2); }
-inline ApproximateFloat& operator+=(ApproximateFloat& x1, ApproximateFloat const& x2) { x1.a+=x2.a; return x1; }
-inline ApproximateFloat& operator-=(ApproximateFloat& x1, ApproximateFloat const& x2) { x1.a-=x2.a; return x1; }
-inline ApproximateFloat& operator*=(ApproximateFloat& x1, ApproximateFloat const& x2) { x1.a*=x2.a; return x1; }
-inline ApproximateFloat& operator/=(ApproximateFloat& x1, ApproximateFloat const& x2) { x1.a/=x2.a; return x1; }
+inline ApproximateFloat& operator+=(ApproximateFloat& x1, ApproximateFloat const& x2) { x1._a+=x2._a; return x1; }
+inline ApproximateFloat& operator-=(ApproximateFloat& x1, ApproximateFloat const& x2) { x1._a-=x2._a; return x1; }
+inline ApproximateFloat& operator*=(ApproximateFloat& x1, ApproximateFloat const& x2) { x1._a*=x2._a; return x1; }
+inline ApproximateFloat& operator/=(ApproximateFloat& x1, ApproximateFloat const& x2) { x1._a/=x2._a; return x1; }
 
-inline Bool operator==(ApproximateFloat const& x1, ApproximateFloat const& x2) { return x1.a==x2.a; }
-inline Bool operator!=(ApproximateFloat const& x1, ApproximateFloat const& x2) { return x1.a!=x2.a; }
-inline Bool operator<=(ApproximateFloat const& x1, ApproximateFloat const& x2) { return x1.a<=x2.a; }
-inline Bool operator>=(ApproximateFloat const& x1, ApproximateFloat const& x2) { return x1.a>=x2.a; }
-inline Bool operator< (ApproximateFloat const& x1, ApproximateFloat const& x2) { return x1.a< x2.a; }
-inline Bool operator> (ApproximateFloat const& x1, ApproximateFloat const& x2) { return x1.a> x2.a; }
+inline Bool operator==(ApproximateFloat const& x1, ApproximateFloat const& x2) { return x1._a==x2._a; }
+inline Bool operator!=(ApproximateFloat const& x1, ApproximateFloat const& x2) { return x1._a!=x2._a; }
+inline Bool operator<=(ApproximateFloat const& x1, ApproximateFloat const& x2) { return x1._a<=x2._a; }
+inline Bool operator>=(ApproximateFloat const& x1, ApproximateFloat const& x2) { return x1._a>=x2._a; }
+inline Bool operator< (ApproximateFloat const& x1, ApproximateFloat const& x2) { return x1._a< x2._a; }
+inline Bool operator> (ApproximateFloat const& x1, ApproximateFloat const& x2) { return x1._a> x2._a; }
 
 OutputStream& operator<<(OutputStream& os, ApproximateFloat const& x);
 InputStream& operator>>(InputStream& is, ApproximateFloat& x);
 
 
 
-//! \ingroup NumericModule
-//! \brief Floating-point lower bounds for real numbers.
-class LowerFloat {
-  public:
-    typedef Lower Paradigm;
-    typedef LowerFloat NumericType;
-  public:
-    LowerFloat() : l(0.0) { }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> LowerFloat(N n) : l(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit LowerFloat(X x) : l(x) { }
-    explicit LowerFloat(Float const& x) : l(x) { }
+inline LowerFloat max(LowerFloat const& x1, LowerFloat const& x2) { return LowerFloat(max_exact(x1._l,x2._l)); }
+inline LowerFloat min(LowerFloat const& x1, LowerFloat const& x2) { return LowerFloat(min_exact(x1._l,x2._l)); }
 
-    LowerFloat(ValidatedFloat const& x);
-    LowerFloat(ExactFloat const& x);
-
-    explicit LowerFloat(const Number<Lower>& x);
-    operator Number<Lower> () const;
-
-    explicit LowerFloat(const Real& x);
-    explicit LowerFloat(const Rational& x);
-    explicit LowerFloat(const Integer& x);
-
-    Float const& raw() const { return l; }
-    Float& raw() { return l; }
-    double get_d() const { return l.get_d(); }
-  private: public:
-    static Nat output_precision;
-    Float l;
-};
-
-
-//! \ingroup NumericModule
-//! \brief Floating-point upper bounds for real numbers.
-class UpperFloat {
-  public:
-    typedef Upper Paradigm;
-    typedef UpperFloat NumericType;
-  public:
-    UpperFloat() : u(0.0) { }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> UpperFloat(N n) : u(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit UpperFloat(X x) : u(x) { }
-
-    explicit UpperFloat(Float const& x) : u(x) { }
-
-    UpperFloat(ValidatedFloat const& x);
-    UpperFloat(ExactFloat const& x);
-
-    explicit UpperFloat(const Real& x);
-    explicit UpperFloat(const Rational& x);
-    explicit UpperFloat(const Integer& x);
-    explicit UpperFloat(const Number<Upper>& x);
-
-    operator Number<Upper> () const;
-
-    Float const& raw() const { return u; }
-    Float& raw() { return u; }
-    double get_d() const { return u.get_d(); }
-  private: public:
-    static Nat output_precision;
-    Float u;
-};
-
-
-inline LowerFloat max(LowerFloat const& x1, LowerFloat const& x2) { return LowerFloat(max_exact(x1.l,x2.l)); }
-inline LowerFloat min(LowerFloat const& x1, LowerFloat const& x2) { return LowerFloat(min_exact(x1.l,x2.l)); }
-
-inline LowerFloat nul(LowerFloat const& x) { return LowerFloat(pos_exact(x.l)); }
-inline LowerFloat pos(LowerFloat const& x) { return LowerFloat(pos_exact(x.l)); }
-inline LowerFloat neg(UpperFloat const& x) { return LowerFloat(neg_exact(x.u)); }
-inline LowerFloat half(LowerFloat const& x) { return LowerFloat(half_exact(x.l)); }
+inline LowerFloat nul(LowerFloat const& x) { return LowerFloat(pos_exact(x._l)); }
+inline LowerFloat pos(LowerFloat const& x) { return LowerFloat(pos_exact(x._l)); }
+inline LowerFloat neg(UpperFloat const& x) { return LowerFloat(neg_exact(x._u)); }
+inline LowerFloat half(LowerFloat const& x) { return LowerFloat(half_exact(x._l)); }
 LowerFloat sqr(LowerFloat const& x);
 LowerFloat rec(UpperFloat const& x);
 
-inline LowerFloat add(LowerFloat const& x1, LowerFloat const& x2) { return LowerFloat(add_down(x1.l,x2.l)); }
-inline LowerFloat sub(LowerFloat const& x1, UpperFloat const& x2) { return LowerFloat(sub_down(x1.l,x2.u)); }
+inline LowerFloat add(LowerFloat const& x1, LowerFloat const& x2) { return LowerFloat(add_down(x1._l,x2._l)); }
+inline LowerFloat sub(LowerFloat const& x1, UpperFloat const& x2) { return LowerFloat(sub_down(x1._l,x2._u)); }
 LowerFloat mul(LowerFloat const& x1, LowerFloat const& x2);
 LowerFloat div(LowerFloat const& x1, UpperFloat const& x2);
 LowerFloat pow(LowerFloat const& x, Nat m);
@@ -280,18 +410,18 @@ inline LowerFloat& operator/=(LowerFloat& x1, UpperFloat const& x2) { return x1=
 OutputStream& operator<<(OutputStream& os, LowerFloat const& x);
 InputStream& operator>>(InputStream& is, LowerFloat& x);
 
-inline UpperFloat max(UpperFloat const& x1, UpperFloat const& x2) { return UpperFloat(max_exact(x1.u,x2.u)); }
-inline UpperFloat min(UpperFloat const& x1, UpperFloat const& x2) { return UpperFloat(min_exact(x1.u,x2.u)); }
+inline UpperFloat max(UpperFloat const& x1, UpperFloat const& x2) { return UpperFloat(max_exact(x1._u,x2._u)); }
+inline UpperFloat min(UpperFloat const& x1, UpperFloat const& x2) { return UpperFloat(min_exact(x1._u,x2._u)); }
 
-inline UpperFloat nul(UpperFloat const& x) { return UpperFloat(pos_exact(x.u)); }
-inline UpperFloat pos(UpperFloat const& x) { return UpperFloat(pos_exact(x.u)); }
-inline UpperFloat neg(LowerFloat const& x) { return UpperFloat(neg_exact(x.l)); }
-inline UpperFloat half(UpperFloat const& x) { return UpperFloat(half_exact(x.u)); }
+inline UpperFloat nul(UpperFloat const& x) { return UpperFloat(pos_exact(x._u)); }
+inline UpperFloat pos(UpperFloat const& x) { return UpperFloat(pos_exact(x._u)); }
+inline UpperFloat neg(LowerFloat const& x) { return UpperFloat(neg_exact(x._l)); }
+inline UpperFloat half(UpperFloat const& x) { return UpperFloat(half_exact(x._u)); }
 UpperFloat sqr(UpperFloat const& x);
 UpperFloat rec(LowerFloat const& x);
 
-inline UpperFloat add(UpperFloat const& x1, UpperFloat const& x2) { return UpperFloat(add_up(x1.u,x2.u)); }
-inline UpperFloat sub(UpperFloat const& x1, LowerFloat const& x2) { return UpperFloat(sub_up(x1.u,x2.l)); }
+inline UpperFloat add(UpperFloat const& x1, UpperFloat const& x2) { return UpperFloat(add_up(x1._u,x2._u)); }
+inline UpperFloat sub(UpperFloat const& x1, LowerFloat const& x2) { return UpperFloat(sub_up(x1._u,x2._l)); }
 UpperFloat mul(UpperFloat const& x1, UpperFloat const& x2);
 UpperFloat div(UpperFloat const& x1, LowerFloat const& x2);
 UpperFloat pow(UpperFloat const& x, Nat m);
@@ -319,82 +449,6 @@ InputStream& operator>>(InputStream& is, UpperFloat& x);
 
 
 
-//! \ingroup NumericModule
-//! \brief Validated bounds on a number with floating-point endpoints supporting outwardly-rounded arithmetic.
-//! \details
-//! Note that <c>%ValidatedFloat(3.3)</c> yields the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%ValidatedFloat("3.3")</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
-//!
-//! Comparison tests on \c ValidatedFloat use the idea that an interval represents a single number with an unknown value.
-//! Hence the result is of type \c Tribool, which can take values { \c True, \c False, \c Indeterminate }.
-//! Hence a test \f$[l_1,u_1]\leq [l_2,u_2]\f$ returns \c True if \f$u_1\leq u_2\f$, since in this case \f$x_1\leq x_2\f$ whenever \f$x_1\in[l_1,u_2]\f$ and \f$x_2\in[l_2,u_2]\f$, \c False if \f$l_1>u_2\f$, since in this case we know \f$x_1>x_2\f$, and \c Indeterminate otherwise, since in this case we can find \f$x_1,x_2\f$ making the result either true or false.
-//! In the case of equality, the comparison \f$[l_1,u_1]\f$==\f$[l_2,u_2]\f$ only returns \c True if both intervals are singletons, since otherwise we can find values making the result either true of false.
-//!
-//! To obtain the lower and upper bounds of an interval, use \c ivl.lower() and \c ivl.upper().
-//! To obtain the midpoint and radius, use \c ivl.midpoint() and \c ivl.radius().
-//! Alternatives \c midpoint(ivl) and \c radius(ivl) are also provided.
-//! Note that \c midpoint and \c radius return approximations to the true midpoint and radius of the interval. If \f$m\f$ and \f$r\f$ are the returned midpoint and radius of the interval \f$[l,u]\f$, the using exact arithmetic, we guarentee \f$m-r\leq l\f$ and \f$m+r\geq u\f$
-//!
-//! To test if an interval contains a point or another interval, use \c encloses(ValidatedFloat,Float) or \c encloses(ValidatedFloat,ValidatedFloat).
-//! The test \c refines(ValidatedFloat,ValidatedFloat) can also be used.
-//! \sa Float
-//!
-//! \par Python interface
-//!
-//! In the Python interface, %Ariadne intervals can be constructed from Python literals of the form \c {a:b} or (deprecated) \c [a,b] .
-//! The former is preferred, as it cannot be confused with literals for other classes such as Vector and Array types.
-//! Automatic conversion is used to convert ValidatedFloat literals of the form \c {a,b} to an ValidatedFloat in functions.
-//!
-//! Care must be taken when defining intervals using floating-point coefficients, since values are first converted to the nearest
-//! representable value by the Python interpreter. <br><br>
-//! \code
-//!   ValidatedFloat({1.1:2.3}) # Create the interval [1.1000000000000001, 2.2999999999999998]
-//!   ValidatedFloat({2.5:4.25}) # Create the interval [2.5, 4.25], which can be represented exactly
-//!   ValidatedFloat([2.5,4.25]) # Alternative syntax for creating the interval [2.5, 4.25]
-//! \endcode
-class ValidatedFloat {
-  public:
-    typedef Validated Paradigm;
-    typedef ValidatedFloat NumericType;
-  public:
-    ValidatedFloat() : l(0.0), u(0.0) { }
-    template<class N, EnableIf<IsIntegral<N>> = dummy> ValidatedFloat(N n) : l(n), u(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> = dummy> explicit ValidatedFloat(X x) : l(x), u(x) { }
-    explicit ValidatedFloat(Float const& x) : l(x), u(x) { }
-
-    ValidatedFloat(ExactFloat const& x);
-
-    explicit ValidatedFloat(const Dyadic& x);
-    explicit ValidatedFloat(const Decimal& x);
-    explicit ValidatedFloat(const Integer& z);
-    explicit ValidatedFloat(const Rational& q);
-    explicit ValidatedFloat(const Real& x);
-    explicit ValidatedFloat(const Number<Validated>& x);
-    operator Number<Validated> () const;
-
-    template<class N1, class N2, EnableIf<And<IsIntegral<N1>,IsIntegral<N2>>> =dummy>
-        ValidatedFloat(N1 lower, N2 upper) : l(lower), u(upper) { }
-    ValidatedFloat(Float const& lower, Float const& upper) : l(lower), u(upper) { }
-    ValidatedFloat(LowerFloat const& lower, UpperFloat const& upper) : l(lower.raw()), u(upper.raw()) { }
-    ValidatedFloat(const Rational& lower, const Rational& upper);
-
-    Float const& lower_raw() const { return l; }
-    Float const& upper_raw() const { return u; }
-    double get_d() const { return (l.get_d()+u.get_d())/2; }
-
-    LowerFloat lower() const { return LowerFloat(l); }
-    UpperFloat upper() const { return UpperFloat(u); }
-    const ExactFloat value() const;
-    const PositiveUpperFloat error() const;
-
-    // DEPRECATED
-    explicit operator Float () const { return (l+u)/2; }
-    friend ExactFloat midpoint(ValidatedFloat const& x);
-  public:
-    static Nat output_precision;
-    static Void set_output_precision(Nat p) { output_precision=p; }
-  private: public:
-    Float l, u;
-};
 
 ValidatedFloat max(ValidatedFloat const& x1, ValidatedFloat const& x2);
 ValidatedFloat min(ValidatedFloat const& x1, ValidatedFloat const& x2);
@@ -439,49 +493,19 @@ OutputStream& operator<<(OutputStream& os, ValidatedFloat const& x);
 InputStream& operator>>(InputStream& is, ValidatedFloat& x);
 
 
-//! \ingroup NumericModule
-//! \related Float, ValidatedFloat
-//! \brief A floating-point number, which is taken to represent the \em exact value of a real quantity.
-class ExactFloat {
-  public:
-    typedef Exact Paradigm;
-    typedef ExactFloat NumericType;
-
-    ExactFloat() : v(0) { }
-    template<class N, EnableIf<IsIntegral<N>> =dummy> ExactFloat(N n) : v(n) { }
-    template<class X, EnableIf<IsFloatingPoint<X>> =dummy> explicit ExactFloat(X x) : v(x) { }
-
-    explicit ExactFloat(Float const& x) : v(x) { }
-
-    explicit ExactFloat(const Integer& z);
-    explicit operator Rational () const;
-    operator Number<Exact> () const;
-    explicit operator Float () const { return v; }
-
-    Float const& raw() const { return v; }
-    Float& raw() { return v; }
-    double get_d() const { return v.get_d(); }
-
-    ValidatedFloat pm(ErrorFloat e) const;
-  public:
-    static Nat output_precision;
-    static Void set_output_precision(Nat p) { output_precision=p; }
-  private: public:
-    Float v;
-};
 
 extern const ExactFloat infty;
 inline ExactFloat operator"" _exact(long double lx) { double x=lx; assert(x==lx); return ExactFloat(x); }
 inline TwoExp::operator ExactFloat () const { return ExactFloat(this->get_d()); }
 
-inline ExactFloat max(ExactFloat const& x1,  ExactFloat const& x2) { return ExactFloat(max(x1.v,x2.v)); }
-inline ExactFloat min(ExactFloat const& x1,  ExactFloat const& x2) { return ExactFloat(min(x1.v,x2.v)); }
-inline ExactFloat abs(ExactFloat const& x) { return ExactFloat(abs(x.v)); }
+inline ExactFloat max(ExactFloat const& x1,  ExactFloat const& x2) { return ExactFloat(max(x1._v,x2._v)); }
+inline ExactFloat min(ExactFloat const& x1,  ExactFloat const& x2) { return ExactFloat(min(x1._v,x2._v)); }
+inline ExactFloat abs(ExactFloat const& x) { return ExactFloat(abs(x._v)); }
 
-inline ExactFloat nul(ExactFloat const& x) { return ExactFloat(nul(x.v)); }
-inline ExactFloat pos(ExactFloat const& x) { return ExactFloat(pos(x.v)); }
-inline ExactFloat neg(ExactFloat const& x) { return ExactFloat(neg(x.v)); }
-inline ExactFloat half(ExactFloat const& x) { return ExactFloat(half(x.v)); }
+inline ExactFloat nul(ExactFloat const& x) { return ExactFloat(nul(x._v)); }
+inline ExactFloat pos(ExactFloat const& x) { return ExactFloat(pos(x._v)); }
+inline ExactFloat neg(ExactFloat const& x) { return ExactFloat(neg(x._v)); }
+inline ExactFloat half(ExactFloat const& x) { return ExactFloat(half(x._v)); }
 
 inline ValidatedFloat sqr(ExactFloat const& x);
 inline ValidatedFloat rec(ExactFloat const& x);
@@ -592,43 +616,6 @@ inline Bool operator< (const Rational& q, ExactFloat const& x) { return q< Ratio
 inline Bool operator> (const Rational& q, ExactFloat const& x) { return q> Rational(x); }
 
 
-class PositiveExactFloat : public ExactFloat {
-  public:
-    PositiveExactFloat() : ExactFloat() { }
-    template<class M, EnableIf<IsIntegral<M>>, EnableIf<IsUnsigned<M>> =dummy>
-        PositiveExactFloat(M m) : ExactFloat(m) { }
-    explicit PositiveExactFloat(Float const& x) : ExactFloat(x) { }
-};
-
-class PositiveUpperFloat : public UpperFloat {
-  public:
-    PositiveUpperFloat() : UpperFloat() { }
-    explicit PositiveUpperFloat(Float const& x) : UpperFloat(x) { ARIADNE_PRECONDITION(x>=0); }
-    template<class M, EnableIf<IsUnsigned<M>> =dummy> PositiveUpperFloat(M m) : UpperFloat(m) { }
-    template<class F, EnableIf<IsSame<F,UpperFloat>> =dummy>
-        explicit PositiveUpperFloat(F const& x) : UpperFloat(x) { }
-    PositiveUpperFloat(PositiveExactFloat const& x) : UpperFloat(x) { }
-};
-
-class PositiveLowerFloat : public LowerFloat {
-  public:
-    PositiveLowerFloat() : LowerFloat() { }
-    template<class M, EnableIf<IsSigned<M>> =dummy>
-        PositiveLowerFloat(M m) : LowerFloat(m) { }
-    explicit PositiveLowerFloat(Float const& x) : LowerFloat(x) { }
-    PositiveLowerFloat(PositiveExactFloat const& x) : LowerFloat(x) { }
-};
-
-class PositiveApproximateFloat : public ApproximateFloat {
-  public:
-    PositiveApproximateFloat() : ApproximateFloat() { }
-    template<class M, EnableIf<IsSigned<M>> =dummy>
-        PositiveApproximateFloat(M m) : ApproximateFloat(m) { }
-    explicit PositiveApproximateFloat(Float const& x) : ApproximateFloat(x) { }
-    PositiveApproximateFloat(PositiveLowerFloat const& x) : ApproximateFloat(x) { }
-    PositiveApproximateFloat(PositiveUpperFloat const& x) : ApproximateFloat(x) { }
-    PositiveApproximateFloat(PositiveExactFloat const& x) : ApproximateFloat(x) { }
-};
 
 inline PositiveExactFloat mag(ExactFloat const& x) {
     return PositiveExactFloat(abs(x.raw())); }
@@ -658,31 +645,32 @@ inline PositiveUpperFloat error(ValidatedFloat const& x) {
 
 
 
-inline ApproximateFloat::ApproximateFloat(LowerFloat const& x) : a(x.raw()) {
+template<class PR> inline FloatTemplate<Approximate,PR>::FloatTemplate(FloatTemplate<Lower,PR> const& x) : _a(x.raw()) {
 }
 
-inline ApproximateFloat::ApproximateFloat(UpperFloat const& x) : a(x.raw()) {
+template<class PR> inline FloatTemplate<Approximate,PR>::FloatTemplate(FloatTemplate<Upper,PR> const& x) : _a(x.raw()) {
 }
 
-inline ApproximateFloat::ApproximateFloat(ValidatedFloat const& x) : a(half_exact(add_near(x.lower_raw(),x.upper_raw()))) {
+template<class PR> inline FloatTemplate<Approximate,PR>::FloatTemplate(FloatTemplate<Validated,PR> const& x)
+    : _a(half_exact(add_near(x.lower_raw(),x.upper_raw()))) {
 }
 
-inline ApproximateFloat::ApproximateFloat(ExactFloat const& x) : a(x.raw()) {
+template<class PR> inline FloatTemplate<Approximate,PR>::FloatTemplate(FloatTemplate<Exact,PR> const& x) : _a(x.raw()) {
 }
 
-inline LowerFloat::LowerFloat(ValidatedFloat const& x) : l(x.lower_raw()) {
+template<class PR> inline FloatTemplate<Lower,PR>::FloatTemplate(FloatTemplate<Validated,PR> const& x) : _l(x.lower_raw()) {
 }
 
-inline LowerFloat::LowerFloat(ExactFloat const& x) : l(x.raw()) {
+template<class PR> inline FloatTemplate<Lower,PR>::FloatTemplate(FloatTemplate<Exact,PR> const& x) : _l(x.raw()) {
 }
 
-inline UpperFloat::UpperFloat(ValidatedFloat const& x) : u(x.upper_raw()) {
+template<class PR> inline FloatTemplate<Upper,PR>::FloatTemplate(FloatTemplate<Validated,PR> const& x) : _u(x.upper_raw()) {
 }
 
-inline UpperFloat::UpperFloat(ExactFloat const& x) : u(x.raw()) {
+template<class PR> inline FloatTemplate<Upper,PR>::FloatTemplate(FloatTemplate<Exact,PR> const& x) : _u(x.raw()) {
 }
 
-inline ValidatedFloat::ValidatedFloat(ExactFloat const& x) : l(x.raw()), u(x.raw()) {
+template<class PR> inline FloatTemplate<Validated,PR>::FloatTemplate(FloatTemplate<Exact,PR> const& x) : _l(x.raw()), _u(x.raw()) {
 }
 
 
@@ -705,11 +693,11 @@ inline Bool same(ExactFloat const& x1, ExactFloat const& x2) {
 
 
 
-inline const ExactFloat ValidatedFloat::value() const {
-    return ExactFloat(med_near(this->l,this->u)); }
+template<class PR> inline const FloatTemplate<Exact,PR> FloatTemplate<Validated,PR>::value() const {
+    return FloatTemplate<Exact,PR>(med_near(this->_l,this->_u)); }
 
-inline const ErrorFloat ValidatedFloat::error() const {
-    Float v=med_near(this->l,this->u); return ErrorFloat(max(sub_up(this->u,v),sub_up(v,this->l))); }
+template<class PR> inline const FloatTemplate<PositiveUpper,PR> FloatTemplate<Validated,PR>::error() const {
+    FloatType<PR> _v=med_near(this->_l,this->_u); return FloatTemplate<PositiveUpper,PR>(max(sub_up(this->_u,_v),sub_up(_v,this->_l))); }
 
 inline ExactFloat midpoint(ValidatedFloat const& x) { return x.value(); }
 
@@ -1026,8 +1014,8 @@ template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator< (Vali
 template<class N, EnableIf<IsIntegral<N>> =dummy> inline Tribool operator> (ValidatedFloat const& x1, N n2) { return x1> ValidatedFloat(n2); }
 
 #ifdef ARIADNE_ENABLE_SERIALIZATION
-  template<class A> Void serialize(A& a, ValidatedFloat& ivl, const Nat version) {
-    a & ivl.lower_raw() & ivl.upper_raw(); }
+  template<class A> Void serialize(A& _a, ValidatedFloat& ivl, const Nat version) {
+    _a & ivl.lower_raw() & ivl.upper_raw(); }
 #endif
 
 OutputStream& operator<<(OutputStream&, ValidatedFloat const&);

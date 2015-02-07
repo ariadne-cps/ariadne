@@ -69,7 +69,6 @@ template<class T> using Paradigm = typename T::Paradigm;
 template<class T> using ParadigmTag = typename T::Paradigm;
 
 struct Exact;
-struct Error;
 struct Effective;
 struct EffectiveUpper;
 struct EffectiveLower;
@@ -79,13 +78,17 @@ struct ValidatedBounded;
 struct ValidatedUpper;
 struct ValidatedLower;
 struct Approximate;
+struct PositiveValidatedUpper;
 using Metric=ValidatedMetric;
+using Ordered=ValidatedBounded;
 using Bounded=ValidatedBounded;
 using Upper=ValidatedUpper;
 using Lower=ValidatedLower;
+using Error=PositiveValidatedUpper;
 
 using Valid=Validated;
-using Metrc=ValidatedMetric;
+using Metrc=Metric;
+using Order=Ordered;
 using Bound=ValidatedBounded;
 using Apprx=Approximate;
 
@@ -123,14 +126,6 @@ struct Exact {
 };
 
 //! \ingroup ParadigmSubModule
-//! \brief A tag meaning that the object represents an upper bound for a positive quantity.
-struct Error {
-    static const ParadigmCode code = ParadigmCode::ERROR;
-    Error() { }
-    typedef ValidatedUpper NextWeakerParadigm;
-};
-
-//! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object represents a quantity exactly, but equality is undecidable.
 struct Effective {
     static const ParadigmCode code = ParadigmCode::EFFECTIVE;
@@ -145,6 +140,7 @@ struct EffectiveUpper {
     EffectiveUpper() { } EffectiveUpper(Exact) { } EffectiveUpper(Effective) { }
     typedef ValidatedUpper NextWeakerParadigm;
 };
+
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object represents a quantity exactly, but equality is undecidable.
@@ -202,6 +198,13 @@ struct ValidatedLower {
     ValidatedLower() { } ValidatedLower(Exact) { } ValidatedLower(Effective) { } ValidatedLower(EffectiveLower) { }
     ValidatedLower(Validated) { } ValidatedLower(ValidatedMetric) { } ValidatedLower(ValidatedBounded) { }
 };
+
+
+//! \ingroup ParadigmSubModule
+//! \brief A tag meaning that the object provides an upper bound for a positive quantity.
+struct PositiveValidatedUpper : ValidatedUpper { };
+using PositiveUpper = PositiveValidatedUpper;
+using Error = PositiveUpper;
 
 //! \ingroup ParadigmSubModule
 //! \brief A tag meaning that the object provides an approximation to a quantity with no guarantees on the error.

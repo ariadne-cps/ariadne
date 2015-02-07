@@ -113,8 +113,6 @@ class Float64 {
     //! \brief Convert to a rational number.
     explicit operator Rational () const;
   public:
-//    explicit operator volatile double& () { return const_cast<volatile double&>(dbl); }
-//    explicit operator const double& () const { return const_cast<const double&>(dbl); }
     Float64 const& raw() const { return *this; }
     //! \brief An approximation by a built-in double-precision floating-point number.
     double get_d() const { return this->dbl; }

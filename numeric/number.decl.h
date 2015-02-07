@@ -42,7 +42,7 @@ class DivideByZeroError : public std::runtime_error {
 };
 
 template<class X> struct IsNumber;
-template<class P=Void> class Number;
+template<class P> class Number;
 
 class Nat32;
 class Nat64;
@@ -59,6 +59,9 @@ class Real;
 template<> struct IsNumber<Integer>;
 template<> struct IsNumber<Rational>;
 template<> struct IsNumber<Real>;
+
+template<class R, class A> R numeric_cast(const A& a);
+template<class R, class A> R integer_cast(const A& _a);
 
 /*
 using ExactNumber=Number<Exact>;

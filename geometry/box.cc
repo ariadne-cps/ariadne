@@ -37,6 +37,7 @@
 
 namespace Ariadne {
 
+
 Vector<ValidatedFloat>const& make_singleton(const Vector<ExactInterval>& ivlv) {
     return reinterpret_cast<Vector<ValidatedFloat>const&>(ivlv);
 }

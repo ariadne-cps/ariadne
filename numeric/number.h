@@ -61,7 +61,6 @@ template<class X> struct IsNumber;
 class NumberInterface;
 template<class X> class NumberWrapper;
 
-template<class P> class Number;
 template<class P> struct IsNumber<Number<P>> : True { };
 
 template<class N1, class N2, EnableIf<And<IsNumber<N1>,IsNumber<N2>>> =dummy> inline N1& operator+=(N1& n1, const N2& n2) { n1=n1+n2; return n1; }
@@ -127,24 +126,24 @@ template<class P> class Number
    // template<class PP, DisableIfWeaker<P,PP> =dummy> Number(const Number<PP>& y) = delete;
 
     // Construct from a builtin integer
-    template<class N, EnableIf<IsIntegral<N>> =dummy> Number(const N& n) : Number<P>(Integer(n)) { }
+    template<class N, EnableIf<IsIntegral<N>> =dummy>
+        Number(const N& n) : Number<P>(Integer(n)) { }
     // Construct from a builtin floating-point number
-    template<class X, EnableIf<And<IsSame<P,Approximate>,IsFloatingPoint<X>>> =dummy> Number(const X& x) : Number<P>(Float64Template<P>(x)) { }
+    template<class X, EnableIf<And<IsSame<P,Approximate>,IsFloatingPoint<X>>> =dummy>
+        Number(const X& x) : Number<P>(Float64Template<P>(x)) { }
 
     // Construct from a type which is convertible to another Number type.
     template<class X, EnableIf<IsWeaker<P,ParadigmTag<X>>> =dummy, EnableIf<IsConvertible<X,Number<ParadigmTag<X>>>> = dummy>
         Number<P>(X const & x) : Number<P>(x.operator Number<ParadigmTag<X>>()) { }
 
-    // Explicit conversions to floating-point types
-    template<class PP, EnableIf<And<IsWeaker<PP,P>,Not<IsWeaker<Effective,PP>>>> = dummy>
-        explicit operator FloatTemplate<PP>() const { return this->get(PP()); }
-
     //! \brief Get the value of the number as a double-precision type
-    template<class PP> FloatTemplate<PP> get(PP par, Precision const& prec) const { return pointer()->_get(PP(),prec); }
-
-    //! \brief Get the value of the number represented by \a X with the same precision paramters as \a p.
-    template<class PP, EnableIf<IsWeaker<PP,P>> = dummy>
-        FloatTemplate<PP> get(PP p, Precision const& pr) const { return this->ref()._get(p); }
+    template<class WP> FloatTemplate<WP,Precision64> get(WP par) const {
+        return pointer()->_get(WP(),Precision64()); }
+    template<class WP> FloatTemplate<WP,Precision64> get(WP par, Precision64 const& prec) const {
+        return pointer()->_get(WP(),prec); }
+    //! \brief Get the value of the number as a multiple-precision type
+    template<class WP> FloatTemplate<WP,PrecisionMP> get(WP par, PrecisionMP const& prec) const {
+        return pointer()->_get(WP(),prec); }
 
 
     friend Number<P> operator+(Number<P> y) { return pos(y); }

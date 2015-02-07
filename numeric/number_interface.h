@@ -33,6 +33,7 @@
 #include "utility/clonable.h"
 #include "utility/writable.h"
 
+#include "number.decl.h"
 #include "float.decl.h"
 
 namespace Ariadne {
@@ -48,7 +49,6 @@ class NumberInterface
     : public virtual WritableInterface
     , public virtual ClonableInterface
 {
-    template<class P> friend class Number;
     template<class N> friend class NumberWrapper;
     friend class Handle<NumberInterface>;
   public:

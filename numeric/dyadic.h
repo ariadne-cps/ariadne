@@ -86,14 +86,6 @@ inline Bool operator>=(const Dyadic& x1, const Dyadic& x2) { return x1.value()>=
 inline Bool operator< (const Dyadic& x1, const Dyadic& x2) { return x1.value()< x2.value(); }
 inline Bool operator> (const Dyadic& x1, const Dyadic& x2) { return x1.value()> x2.value(); }
 
-inline Bool operator==(const Dyadic& x1, double x2) { return x1.value()==x2; }
-inline Bool operator!=(const Dyadic& x1, double x2) { return x1.value()!=x2; }
-inline Bool operator<=(const Dyadic& x1, double x2) { return x1.value()<=x2; }
-inline Bool operator>=(const Dyadic& x1, double x2) { return x1.value()>=x2; }
-inline Bool operator< (const Dyadic& x1, double x2) { return x1.value()< x2; }
-inline Bool operator> (const Dyadic& x1, double x2) { return x1.value()> x2; }
-
-
 inline Dyadic::operator Rational () const { return Rational(this->get_d(),nullptr); }
 
 inline Bool operator==(const Dyadic& x, const Rational& q) { return Rational(x)==q; }

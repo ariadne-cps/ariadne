@@ -52,13 +52,14 @@ template<class X> inline X generic_pow(X p, Int n) {
 
 //! \ingroup NumericModule
 //! \brief Cast one %Ariadne numerical type or builtin numerical type to another.
-template<class R, class A> inline R numeric_cast(const A& a) { return R(a); }
+template<class R, class A> R numeric_cast(const A& a) { return R(a); }
+template<class R, class A> R integer_cast(const A& _a);
 template<> inline Int numeric_cast(const Float& a) { return Int(a.get_d()); }
 template<> inline double numeric_cast(const Float& a) { return a.get_d(); }
 template<> inline double numeric_cast(const Real& a) { return a.get_d(); }
-template<> inline double numeric_cast(const ExactFloat& a) { return a.get_d(); }
-template<> inline double numeric_cast(const ValidatedFloat& a) { return a.get_d(); }
-template<> inline double numeric_cast(const ApproximateFloat& a) { return a.get_d(); }
+template<> inline double numeric_cast(const ExactFloat& a) { return a.raw().get_d(); }
+template<> inline double numeric_cast(const ValidatedFloat& a) { return a.value_raw().get_d(); }
+template<> inline double numeric_cast(const ApproximateFloat& a) { return a.raw().get_d(); }
 template<> inline float numeric_cast(const double& a) { return a; }
 template<> inline float numeric_cast(const Float& a) { return a.get_d(); }
 template<> inline float numeric_cast(const Real& a) { return a.get_d(); }
@@ -66,11 +67,12 @@ template<> inline Float numeric_cast(const ExactFloat& a) { return a.raw(); }
 
 template<> inline Real numeric_cast(const Float& a) { return Real(ExactFloat(a)); }
 template<> inline Real numeric_cast(const ExactFloat& a) { return Real(a); }
-template<> inline Real numeric_cast(const ValidatedFloat& a) { return Real(make_exact(ApproximateFloat(a))); }
+template<> inline Real numeric_cast(const ValidatedFloat& a) {
+    return Real(a.lower_raw().get_d(),a.value_raw().get_d(),a.upper_raw().get_d()); }
 
-template<class R, class A> inline R approx_cast(const A& a);
-template<> inline double approx_cast(const Float& a) { return a.get_d(); }
-template<> inline double approx_cast(const ExactFloat& a) { return a.get_d(); }
+template<class R, class A> R approx_cast(A a);
+template<> inline double approx_cast(ExactFloat a) { return a.raw().get_d(); }
+template<> inline double approx_cast(ApproximateFloat a) { return a.raw().get_d(); }
 
 //! \ingroup NumericModule
 //! \related Float
@@ -102,6 +104,7 @@ template<> struct IsNumeric<Rational> { static const Bool value = true; };
 
 template<class X, class T> using EnableIfNumeric = EnableIf<IsNumeric<X>,T>;
 
+/*
 template<class F, class T> struct IsSafelyConvertible : False { };
 template<> struct IsSafelyConvertible<ExactFloat,ExactFloat> : True { };
 template<> struct IsSafelyConvertible<ExactFloat,Real> : True { };
@@ -180,7 +183,7 @@ template<> struct Arithmetic<Rational,double> { typedef Rational ResultType; };
 template<> struct Arithmetic<double,Rational> { typedef Rational ResultType; };
 template<> struct Arithmetic<Rational,UpperInterval> { typedef UpperInterval ResultType; };
 template<> struct Arithmetic<UpperInterval,Rational> { typedef UpperInterval ResultType; };
-
+*/
 
 } // namespace Ariadne
 

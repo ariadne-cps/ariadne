@@ -59,6 +59,7 @@ class TestScalarTaylorFunction
     Void test();
   private:
     Void test_concept();
+    Void test_create();
     Void test_constructors();
     Void test_predicates();
     Void test_approximation();
@@ -69,6 +70,7 @@ class TestScalarTaylorFunction
     Void test_compose();
     Void test_antiderivative();
     Void test_conversion();
+    Void test_generic();
   private:
     ExactBox d(SizeType n) { return Vector<ExactInterval>(n,ExactInterval(-1,+1)); }
     typedef Expansion<RawFloat> e;
@@ -87,6 +89,7 @@ Void TestScalarTaylorFunction::test()
     std::clog<<std::setprecision(17);
     std::cerr<<std::setprecision(17);
     ARIADNE_TEST_CALL(test_constructors());
+    ARIADNE_TEST_CALL(test_create());
     ARIADNE_TEST_CALL(test_predicates());
     ARIADNE_TEST_CALL(test_approximation());
     ARIADNE_TEST_CALL(test_arithmetic());
@@ -96,6 +99,7 @@ Void TestScalarTaylorFunction::test()
     ARIADNE_TEST_CALL(test_compose());
     ARIADNE_TEST_CALL(test_antiderivative());
     ARIADNE_TEST_CALL(test_conversion());
+    ARIADNE_TEST_CALL(test_generic());
 }
 
 
@@ -143,6 +147,23 @@ Void TestScalarTaylorFunction::test_constructors()
     ARIADNE_ASSERT_EQUAL(tv1.number_of_nonzeros(),10);
     ARIADNE_ASSERT_EQUAL(tv1.value().raw(),1.0);
     ARIADNE_ASSERT_EQUAL(tv1.error().raw(),0.25);
+}
+
+Void TestScalarTaylorFunction::test_create()
+{
+    ExactBox D={{-0.5,0.5},{-1.0,2.0}};
+    ExactFloat c1=1;
+    ExactFloat c2=2;
+    ScalarTaylorFunction pf1=ScalarTaylorFunction::constant(D,c1,swp);
+    ScalarTaylorFunction pf2=ScalarTaylorFunction::constant(D,c2,swp);
+    ValidatedScalarFunctionModel fm1=pf1;
+    ValidatedScalarFunctionModel fm2=pf2;
+    ValidatedScalarFunction f2=fm2;
+    ARIADNE_TEST_EQUAL(pf1.create(pf2).range(),c2);
+    ARIADNE_TEST_EQUAL(pf1.create(fm2).range(),c2);
+    ARIADNE_TEST_EQUAL(pf1.create(f2).range(),c2);
+    ARIADNE_TEST_EQUAL(fm1.create(fm2).range(),c2);
+    ARIADNE_TEST_EQUAL(fm1.create(f2).range(),c2);
 }
 
 Void TestScalarTaylorFunction::test_predicates()
@@ -281,6 +302,29 @@ Void TestScalarTaylorFunction::test_conversion() {
     ARIADNE_TEST_BINARY_PREDICATE(refines,tf(ipt),f(ipt)+ValidatedFloat(-1e-15,1e-15));
 }
 
+Void TestScalarTaylorFunction::test_generic() {
+    ExactBox D={{-0.5,0.5},{-1.0,2.0}};
+    ExactFloat c0=0;
+    ExactFloat c1=2;
+    ExactFloat c2=3;
+    ScalarTaylorFunction pf0=ScalarTaylorFunction::constant(D,c0,swp);
+    ScalarTaylorFunction pf1=ScalarTaylorFunction::constant(D,c1,swp);
+    ScalarTaylorFunction pf2=ScalarTaylorFunction::constant(D,c2,swp);
+    ValidatedScalarFunctionModel fm1=pf1;
+    ValidatedScalarFunctionModel fm2=pf2;
+    ValidatedScalarFunctionModel fm4=pf0;
+    ValidatedScalarFunction f1=fm1;
+    ValidatedScalarFunction f2=fm2;
+    ARIADNE_TEST_EQUAL((pf1+pf2).range(),c1+c2);
+//    ARIADNE_TEST_EQUAL((pf1+fm2).range(),c1+c2);
+    ARIADNE_TEST_EQUAL((pf1+ f2).range(),c1+c2);
+//    ARIADNE_TEST_EQUAL((fm1+pf2).range(),c1+c2);
+    ARIADNE_TEST_EQUAL((fm1+fm2).range(),c1+c2);
+    ARIADNE_TEST_EQUAL((fm1+ f2).range(),c1+c2);
+    ARIADNE_TEST_EQUAL(( f1+pf2).range(),c1+c2);
+    ARIADNE_TEST_EQUAL(( f1+fm2).range(),c1+c2);
+    ARIADNE_TEST_EQUAL(( f1+ f2)(D.centre()),c1+c2);
+}
 
 /*
 VectorTaylorFunction henon(const VectorTaylorFunction& x, const Vector<ExactFloat>& p)

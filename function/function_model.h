@@ -448,7 +448,7 @@ inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<Val
 inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f) {
     VectorFunctionModel<ValidatedTag> r=f; for(SizeType i=0; i!=r.size(); ++i) { r[i]=-f[i]; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
-    VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
+    VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]+f2[i]; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator-(const VectorFunctionModel<ValidatedTag>& f1, const VectorFunctionModel<ValidatedTag>& f2) {
     VectorFunctionModel<ValidatedTag> r=f1; for(SizeType i=0; i!=r.size(); ++i) { r[i]=f1[i]-f2[i]; } return r; }
 inline VectorFunctionModel<ValidatedTag> operator+(const VectorFunctionModel<ValidatedTag>& f1, const Vector<ValidatedNumber>& c2) {
@@ -537,7 +537,7 @@ template<class X> VectorFunctionModelElement<X>::operator const ScalarFunctionMo
 
 inline VectorFunctionModel<ValidatedTag> ScalarFunctionModel<ValidatedTag>::create_identity() const { return this->_ptr->_create_identity(); }
 inline ScalarFunctionModel<ValidatedTag> ScalarFunctionModel<ValidatedTag>::create(const ValidatedScalarFunction& g) const {
-    ScalarFunctionModel<ValidatedTag> const& f=*this; return compose(f,f.create_identity()); }
+    ScalarFunctionModel<ValidatedTag> const& f=*this; return compose(g,f.create_identity()); }
 
 
 

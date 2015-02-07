@@ -269,6 +269,11 @@ template<class M> FunctionPatch<M> FunctionPatch<M>::create_zero() const
     return FunctionPatch<M>(this->domain(),this->_model.sweeper());
 }
 
+template<class M> FunctionPatch<M> FunctionPatch<M>::create(GenericType const& f) const
+{
+    return FunctionPatch<M>(this->domain(),f,this->_model.sweeper());
+}
+
 template<class M> FunctionPatch<M>* FunctionPatch<M>::_clone() const
 {
     return new FunctionPatch<M>(*this);
@@ -561,7 +566,9 @@ template<class M> VectorFunctionPatch<M>::VectorFunctionPatch(const ExactBox& d,
     //ARIADNE_ASSERT_MSG(f.result_size()>0, "d="<<d<<", f="<<f<<", swp="<<swp);
     ARIADNE_ASSERT(d.size()==f.argument_size());
     Vector<ModelType> x=ModelType::scalings(d,swp);
-    this->_models=f.evaluate(x);
+    this->_models=f(x);
+    ARIADNE_DEBUG_ASSERT(this->argument_size()==f.argument_size());
+    ARIADNE_DEBUG_ASSERT_MSG(this->result_size()==f.result_size(),"  f="<<f<<"\n  r="<<*this<<"\n");
     this->sweep();
 }
 
@@ -783,7 +790,7 @@ template<class M> SizeType VectorFunctionPatch<M>::result_size() const
 }
 
 
-template<class M> FunctionPatch<M> VectorFunctionPatch<M>::operator[](SizeType i) const
+template<class M> FunctionPatch<M> const VectorFunctionPatch<M>::operator[](SizeType i) const
 {
     return this->get(i);
 }
@@ -826,6 +833,7 @@ template<class M> template<class T> Void VectorFunctionPatch<M>::_compute(Vector
 {
     typedef typename T::NumericType X;
     const VectorFunctionPatch<M>& f=*this;
+    ARIADNE_DEBUG_ASSERT_MSG(r.size()==f.result_size(),"\nr="<<r<<"\nf="<<f<<"\n");
     Vector<T> sx=Ariadne::unscale(a,f._domain);
     for(SizeType i=0; i!=r.size(); ++i) {
         T ri=Ariadne::evaluate(this->_models[i].expansion(),sx);

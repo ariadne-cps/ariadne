@@ -170,6 +170,7 @@ template<class M> class FunctionPatch
     FunctionPatch<M> create_zero() const;
     FunctionPatch<M> create_constant(NumericType const& c) const;
     FunctionPatch<M> create_coordinate(SizeType j) const;
+    FunctionPatch<M> create(GenericType const& f) const;
     //@}
 
     //@{
@@ -475,7 +476,7 @@ template<class M> class VectorFunctionPatch
     /*! \brief Set the \a ith Taylor variable */
     Void set(SizeType i, const FunctionPatch<M>& te);
     /*! \brief The \a ith Taylor variable */
-    FunctionPatch<M> operator[](SizeType i) const;
+    FunctionPatch<M> const operator[](SizeType i) const;
     /*! \brief The \a ith Taylor variable */
     VectorFunctionPatchElementReference<M> operator[](SizeType i);
 

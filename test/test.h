@@ -236,6 +236,22 @@ int test_case_counter = 0;
 
 
 /*! \brief Evaluates \a expression1 and expression2 and checks if the results are equal. */
+#define ARIADNE_TEST_SAME(expression1,expression2)                         \
+    {                                                                   \
+        std::cout << "same(" << #expression1 << "," << #expression2 << "): " << std::flush; \
+        Bool ok = same((expression1), (expression2));                       \
+        if(ok) {                                                        \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "\nERROR: " << #expression1 << ":\n           " << (expression1) \
+                      << "\n     : " << #expression2 << ":\n           " << (expression2) << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Identity `" << #expression1 << " === " << #expression2 << "' failed; " << #expression1 << "=" << (expression1) << "; " << #expression2 << "=" << (expression2) << std::endl; \
+        }                                                               \
+    }                                                                   \
+
+
+/*! \brief Evaluates \a expression1 and expression2 and checks if the results are equal. */
 #define ARIADNE_TEST_EQUAL(expression1,expression2)                         \
     {                                                                   \
         std::cout << #expression1 << " == " << #expression2 << ": " << std::flush; \

@@ -74,6 +74,12 @@ template<class X, EnableIf<HasCreateZero<X>> = dummy> X create_zero(const X& x) 
 // FIXME: Below should use a non-integral numeric type to prevent constructor of zero-sized object.
 template<class X, DisableIf<HasCreateZero<X>> = dummy> X create_zero(const X& x) { return static_cast<X>(0u); }
 
+template<class T> inline T zero_element(Matrix<T> const& m) { return m.zero_element(); }
+template<class T> inline T zero_element(Covector<T> const& u) { return u.zero_element(); }
+template<class T> inline T zero_element(Vector<T> const& v) { return v.zero_element(); }
+template<class T> inline T zero_element(Scalar<T> const& s) { return create_zero(s); }
+
+
 //! \ingroup LinearAlgebraSubModule
 //! \brief Vectors over some type \a X.
 //! Corresponds to elements of a \em module over a mathematical \em ring, or a <em>vector space</em> over a field.

@@ -32,6 +32,21 @@
 
 namespace Ariadne {
 
+template<class X> Scalar<X> create_result(SizeOne n, X z) { return z; }
+template<class X> Vector<X> create_result(SizeType n, X z) { return Vector<X>(n,z); }
+
+template<class F, class D, class C> template<class X> auto
+FunctionMixin<F,Void,D,C>::_base_evaluate(const ElementType<D,X>& x) const -> ElementType<C,X> {
+    ElementType<C,X> r=create_result<X>(this->codomain().dimension(),zero_element(x));
+    static_cast<const F*>(this)->_compute(r,x); return std::move(r);
+}
+
+template<class F, class D> template<class X> auto
+FunctionMixin<F,Void,D,IntervalDomain>::_base_evaluate(const ElementType<D,X>& x) const -> X {
+    ElementType<C,X> r=create_result<X>(this->codomain().dimension(),zero_element(x));
+    static_cast<const F*>(this)->_compute(r,x); return std::move(r);
+}
+
 template<class F,class D, class C> FunctionInterface<ApproximateTag,D,C>* FunctionMixin<F,ApproximateTag,D,C>::_clone() const {
     return new F(static_cast<const F&>(*this)); }
 template<class F,class D, class C> FunctionInterface<ValidatedTag,D,C>* FunctionMixin<F,ValidatedTag,D,C>::_clone() const {

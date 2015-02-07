@@ -193,7 +193,7 @@ class Function
 
     Void set(SizeType i, ScalarFunction<P,D>);
     Function<P,D,IntervalDomain> get(SizeType i) const;
-    Function<P,D,IntervalDomain> operator[](SizeType i) const;
+    const Function<P,D,IntervalDomain> operator[](SizeType i) const;
     VectorFunctionElementReference<P,D> operator[](SizeType i);
 
     friend OutputStream& operator<<(OutputStream& os, Function<P,D,C> const& f) { f._ptr->write(os); return os; }
@@ -517,7 +517,7 @@ template<class P, class D> inline VectorFunctionElementReference<P,D> make_eleme
 template<class P, class D, class C> inline VectorFunctionElementReference<P,D> Function<P,D,C>::operator[](SizeType i) {
     return make_element_reference(*this,i); }
 
-template<class P, class D, class C> inline ScalarFunction<P,D> Function<P,D,C>::operator[](SizeType i) const {
+template<class P, class D, class C> inline ScalarFunction<P,D> const Function<P,D,C>::operator[](SizeType i) const {
     return this->get(i); }
 
 template<class P, class D> inline OutputStream& operator<<(OutputStream& os, const VectorFunctionElementReference<P,D>& vfe) {

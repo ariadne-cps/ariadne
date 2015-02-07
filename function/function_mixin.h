@@ -64,8 +64,7 @@ class FunctionMixin<F,Void,D,C>
     typedef typename FunctionInterface<Void,D,C>::CodomainType CodomainType;
   protected:
     FunctionMixin() { }
-    template<class X> ElementType<C,X> _base_evaluate(const ElementType<D,X>& x) const {
-        ElementType<C,X> r; static_cast<const F*>(this)->_compute(r,x); return r;}
+    template<class X> ElementType<C,X> _base_evaluate(const ElementType<D,X>& x) const;
   public:
     virtual DomainType const domain() const { return make_domain<D>(this->argument_size()); }
     virtual CodomainType const codomain() const override { return make_domain<C>(this->result_size()); }
@@ -85,14 +84,14 @@ class FunctionMixin<F,Void,D,IntervalDomain>
     typedef typename FunctionInterface<Void,D,C>::CodomainType CodomainType;
   protected:
     FunctionMixin() { }
-    template<class X> X _base_evaluate(const Vector<X>& x) const {
-        X r; static_cast<const F*>(this)->_compute(r,x); return r;}
+    template<class X> X _base_evaluate(const ElementType<D,X>& x) const;
   public:
     virtual DomainType const domain() const { return make_domain<D>(this->argument_size()); }
     virtual CodomainType const codomain() const override { return make_domain<C>(this->result_size()); }
     virtual SizeType argument_size() const override { return this->domain().dimension(); }
     virtual SizeType result_size() const override { return 1u; }
 
+    virtual OutputStream& write(OutputStream& os) const = 0;
     virtual OutputStream& repr(OutputStream& os) const { return this->write(os); }
 };
 

@@ -42,14 +42,21 @@
 
 namespace Ariadne {
 
+template<class T> inline String class_name() { return "Unknown"; }
+
 template<class T> inline StringType str(const T& t) {
     StringStream ss; ss << t; return ss.str(); }
 
-template<class T> T zero_element(Matrix<T> const& m) { return m.zero_element(); }
-template<class T> T zero_element(Covector<T> const& u) { return u.zero_element(); }
-template<class T> T zero_element(Vector<T> const& v) { return v.zero_element(); }
-template<class T> T zero_element(Scalar<T> const& s) { return create_zero(s); }
-
+// Templated conversions dynamically checked at runtime
+template<class R, class A, EnableIf<IsSame<R,A>> =dummy> R const& checked_same(A const& a) { return a; }
+template<class R, class A, DisableIf<IsSame<R,A>> =dummy> R const& checked_same(A const& a) {
+    ARIADNE_THROW(std::runtime_error,"checked_same<R,A> with R="<<class_name<R>()<<", A="<<class_name<A>(),"argument "<<a<<" does not have the same type as result."); }
+template<class R, class A, EnableIf<IsConvertible<A,R>> =dummy> R checked_convert(A&& a) { return a; }
+template<class R, class A, DisableIf<IsConvertible<A,R>> =dummy> R checked_convert(A&& a) {
+    ARIADNE_THROW(std::runtime_error,"checked_convert<R,A> with R="<<class_name<R>()<<", A="<<class_name<A>(),"argument "<<a<<" is not convertible to result."); }
+template<class R, class A, EnableIf<IsConstructible<R,A>> =dummy> R checked_construct(A const& a) { return R(a); }
+template<class R, class A, DisableIf<IsConstructible<R,A>> =dummy> R checked_construct(A const& a) {
+    ARIADNE_THROW(std::runtime_error,"checked_construct<R,A> with R="<<class_name<R>()<<", A="<<class_name<A>(),"argument "<<a<<" is not explicitly convertible to result."); }
 
 // Functions for converting from Expression classes to Function classes via Formula
 template<class X> class Expression;
@@ -91,7 +98,7 @@ struct VectorOfScalarFunction
     VectorOfScalarFunction(SizeType rs, const ScalarFunction<P,D>& f)
         : _dom(f.domain()), _vec(rs,f) { }
     VectorOfScalarFunction(const Vector<ScalarFunction<P,D>>& vsf)
-        : _dom(), _vec(vsf) { if(vsf.size()!=0) { _dom=vsf[0].domain(); } }
+        : _dom(vsf.zero_element().domain()), _vec(vsf) { }
 
     Void set(SizeType i, ScalarFunction<P,D> f) {
         if(this->argument_size()==0u) { this->_dom=f.domain(); }
@@ -338,11 +345,11 @@ template<class P, class D, class C> Function<P,D,C>::Function(ResultSizeType rs,
 }
 
 template<class P, class Y> ScalarFunction<P,IntervalDomain> make_formula_function(IntervalDomain dom, Scalar<Formula<Y>> const& e) {
-    ARIADNE_NOT_IMPLEMENTED;
+    assert(false);
 }
 
 template<class P, class Y> VectorFunction<P,IntervalDomain> make_formula_function(IntervalDomain dom, Vector<Formula<Y>> const& e) {
-    ARIADNE_NOT_IMPLEMENTED;
+    assert(false);
 }
 
 template<class P, class Y> ScalarFunction<P,BoxDomain> make_formula_function(BoxDomain dom, Scalar<Formula<Y>> const& e) {
@@ -357,8 +364,8 @@ template<class P, class D, class C> Function<P,D,C>::Function(DomainType dom, Re
     *this = make_formula_function<P>(dom,e);
 }
 
-template<class P, class D, class C> Function<P,D,C>::Function(EuclideanDomain dom, List<Formula<Y>> const& e) {
-    ARIADNE_NOT_IMPLEMENTED;
+template<class P, class D, class C> Function<P,D,C>::Function(EuclideanDomain dom, List<Formula<Y>> const& e)
+    : Function(dom, checked_construct<Result<Formula<Y>>>(e)) {
 }
 
 template<class P, class D, class C> Function<P,D,C>::Function(ResultSizeType rs, ScalarFunction<P,D> sf)

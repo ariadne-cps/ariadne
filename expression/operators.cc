@@ -40,7 +40,7 @@ Tribool Sgn::operator()(const Real& a) const {
 OutputStream& operator<<(OutputStream& os, const OperatorKind& knd) {
     switch(knd) {
         case OperatorKind::VARIABLE: return os << "VARIABLE";
-        case OperatorKind::COORDINATE: return os << "VARIABLE";
+        case OperatorKind::COORDINATE: return os << "COORDINATE";
         case OperatorKind::NULLARY: return os << "NULLARY";
         case OperatorKind::UNARY: return os << "UNARY";
         case OperatorKind::BINARY: return os << "BINARY";

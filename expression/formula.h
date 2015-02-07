@@ -273,7 +273,7 @@ template<class X, class T> const T& cached_evaluate(const Formula<X>& f, const V
     const FormulaNode<X>* fptr=f.node_ptr();
     if(cache.has_key(fptr)) { return cache.get(fptr); }
     switch(f.kind()) {
-        case OperatorKind::VARIABLE: return insert( cache, fptr, x[f.ind()] );
+        case OperatorKind::COORDINATE: return insert( cache, fptr, x[f.ind()] );
         case OperatorKind::NULLARY: return insert( cache, fptr, make_constant(f.val(),x) );
         case OperatorKind::UNARY: return insert( cache, fptr, compute(f.op(),cached_evaluate(f.arg(),x,cache)) );
         case OperatorKind::BINARY: return insert( cache, fptr, compute(f.op(),cached_evaluate(f.arg1(),x,cache),cached_evaluate(f.arg2(),x,cache)) );
